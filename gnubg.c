@@ -69,6 +69,7 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 static int fReadingOther;
+static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
 #include "backgammon.h"
@@ -110,7 +111,7 @@ event evNextTurn;
 
 #if USE_GUI
 int fX = TRUE; /* use X display */
-int nDelay = 0;
+int nDelay = 300;
 int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
 int fReadingCommand;
@@ -125,10 +126,6 @@ int fReadline = TRUE;
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
-#ifndef HUGE_VALF
-#define HUGE_VALF 1e38
-#endif
-
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
@@ -137,7 +134,8 @@ matchstate ms = {
     {}, /* anBoard */
     {}, /* anDice */
     -1, /* fTurn */
-    FALSE, /* fResigned */
+    0, /* fResigned */
+    0, /* fResignationDeclined */
     FALSE, /* fDoubled */
     0, /* cGames */
     -1, /* fMove */
@@ -147,16 +145,16 @@ matchstate ms = {
     0, /* nMatchTo */
     { 0, 0 }, /* anScore */
     1, /* nCube */
+    0, /* cBeavers */
     GAME_NONE /* gs */
 };
 
 int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
-    fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = TRUE,
-    nRollouts = 36, nRolloutTruncate = 7, fNextTurn = FALSE,
+    fCubeUse = TRUE, fNackgammon = FALSE, fNextTurn = FALSE,
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
-    fBeavers = 1, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
+    nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
+    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE;
 
@@ -282,7 +280,10 @@ static char szDICE[] = "<die> <die>",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>";
 
-command acAnalyse[] = {
+command cFilename = {
+    /* dummy command used for filename parameters */
+    NULL, NULL, NULL, NULL, &cFilename
+}, acAnalyse[] = {
     { "game", CommandAnalyseGame, "Compute analysis and annotate current game",
       NULL, NULL },
     { "match", CommandAnalyseMatch, "Compute analysis and annotate every game "
@@ -290,10 +291,17 @@ command acAnalyse[] = {
     { "session", CommandAnalyseSession, "Compute analysis and annotate every "
       "game in the session", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acAnnotateClear[] = {
+    { "comment", CommandAnnotateClearComment, "Erase commentary about a move",
+      NULL, NULL },
+    { "luck", CommandAnnotateClearLuck, "Erase annotations for a dice roll",
+      NULL, NULL },
+    { "skill", CommandAnnotateClearSkill, "Erase skill annotations for a move",
+      NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotate[] = {
     { "bad", CommandAnnotateBad, "Mark a bad move", NULL, NULL },
-    { "clear", CommandAnnotateClear, "Remove annotations from a move",
-      NULL, NULL },
+    { "clear", NULL, "Remove annotations from a move", NULL, acAnnotateClear },
     { "doubtful", CommandAnnotateDoubtful, "Mark a doubtful move", NULL,
       NULL },
     { "good", CommandAnnotateGood, "Mark a good move", NULL, NULL },
@@ -318,7 +326,7 @@ command acAnalyse[] = {
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
       "self-play", szOPTVALUE, NULL },
     { "import", CommandDatabaseImport, "Merge positions into the database",
-      szFILENAME, NULL },
+      szFILENAME, &cFilename },
     { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
       "for future training", NULL, NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
@@ -328,40 +336,40 @@ command acAnalyse[] = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
     { "gam", CommandExportGameGam, "Records a log of the game in .gam "
-      "format", szFILENAME, NULL },
+      "format", szFILENAME, &cFilename },
     { "latex", CommandExportGameLaTeX, "Records a log of the game in LaTeX "
-      "format", szFILENAME, NULL },
+      "format", szFILENAME, &cFilename },
     { "pdf", CommandExportGamePDF, "Records a log of the game in the "
-      "Portable Document Format", szFILENAME, NULL },
+      "Portable Document Format", szFILENAME, &cFilename },
     { "postscript", CommandExportGamePostScript, "Records a log of the game "
-      "in PostScript format", szFILENAME, NULL },
-    { "ps", CommandExportGamePostScript, NULL, szFILENAME, NULL },
+      "in PostScript format", szFILENAME, &cFilename },
+    { "ps", CommandExportGamePostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
     { "mat", CommandExportMatchMat, "Records a log of the match in .mat "
-      "format", szFILENAME, NULL },
+      "format", szFILENAME, &cFilename },
     { "latex", CommandExportMatchLaTeX, "Records a log of the match in LaTeX "
-      "format", szFILENAME, NULL },
+      "format", szFILENAME, &cFilename },
     { "pdf", CommandExportMatchPDF, "Records a log of the match in the "
-      "Portable Document Format", szFILENAME, NULL },
+      "Portable Document Format", szFILENAME, &cFilename },
     { "postscript", CommandExportMatchPostScript, "Records a log of the match "
-      "in PostScript format", szFILENAME, NULL },
-    { "ps", CommandExportMatchPostScript, NULL, szFILENAME, NULL },
+      "in PostScript format", szFILENAME, &cFilename },
+    { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
     { "eps", CommandNotImplemented, "Save the current position in "
-      "Encapsulated PostScript format", szFILENAME, NULL },
+      "Encapsulated PostScript format", szFILENAME, &cFilename },
     { "pos", CommandNotImplemented, "Save the current position in .pos "
-      "format", szFILENAME, NULL },
+      "format", szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportSession[] = {
     { "latex", CommandExportMatchLaTeX, "Records a log of the session in "
-      "LaTeX format", szFILENAME, NULL },
+      "LaTeX format", szFILENAME, &cFilename },
     { "pdf", CommandExportMatchPDF, "Records a log of the session in the "
-      "Portable Document Format", szFILENAME, NULL },
+      "Portable Document Format", szFILENAME, &cFilename },
     { "postscript", CommandExportMatchPostScript, "Records a log of the "
-      "session in PostScript format", szFILENAME, NULL },
-    { "ps", CommandExportMatchPostScript, NULL, szFILENAME, NULL },
+      "session in PostScript format", szFILENAME, &cFilename },
+    { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExport[] = {
     { "database", CommandDatabaseExport, "Write the positions in the database "
@@ -377,13 +385,14 @@ command acAnalyse[] = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
     { "database", CommandDatabaseImport, "Merge positions into the database",
-      szFILENAME, NULL },
-    { "mat", CommandImportMat, "Import a Jellyfish match", szFILENAME, NULL },
+      szFILENAME, &cFilename },
+    { "mat", CommandImportMat, "Import a Jellyfish match", szFILENAME,
+      &cFilename },
     { "oldmoves", CommandImportOldmoves, "Import a FIBS oldmoves file",
-      szFILENAME, NULL },
+      szFILENAME, &cFilename },
     { "pos", CommandImportJF, "Import a Jellyfish position file", szFILENAME,
-      NULL },
-    { "sgg", CommandImportSGG, "Import an SGG match", szFILENAME, NULL },
+      &cFilename },
+    { "sgg", CommandImportSGG, "Import an SGG match", szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acList[] = {
     { "game", CommandListGame, "Show the moves made in this game", NULL,
@@ -395,13 +404,13 @@ command acAnalyse[] = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acLoad[] = {
     { "commands", CommandLoadCommands, "Read commands from a script file",
-      szFILENAME, NULL },
+      szFILENAME, &cFilename },
     { "game", CommandLoadGame, "Read a saved game from a file", szFILENAME,
-      NULL },
+      &cFilename },
     { "match", CommandLoadMatch, "Read a saved match from a file", szFILENAME,
-      NULL },
+      &cFilename },
     { "weights", CommandNotImplemented, "Read neural net weights from a file",
-      szOPTFILENAME, NULL },
+      szOPTFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acNew[] = {
     { "game", CommandNewGame, "Start a new game within the current match or "
@@ -415,13 +424,13 @@ command acAnalyse[] = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acSave[] = {
     { "game", CommandSaveGame, "Record a log of the game so far to a "
-      "file", szFILENAME, NULL },
+      "file", szFILENAME, &cFilename },
     { "match", CommandSaveMatch, "Record a log of the match so far to a file",
-      szFILENAME, NULL },
+      szFILENAME, &cFilename },
     { "settings", CommandSaveSettings, "Use the current settings in future "
       "sessions", NULL, NULL },
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
-      szOPTFILENAME, NULL },
+      szOPTFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysisThreshold[] = {
     { "bad", CommandSetAnalysisThresholdBad, "Specify the equity loss for a "
@@ -754,7 +763,7 @@ command acAnalyse[] = {
     { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
     { "export", NULL, "Write data for use by other programs", NULL, acExport },
     { "external", CommandExternal, "Make moves for an external controller",
-      szFILENAME, NULL },
+      szFILENAME, &cFilename },
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint,  "Give hints on cube action or best legal moves", 
       szOPTVALUE, NULL }, 
@@ -793,8 +802,6 @@ command acAnalyse[] = {
     { "?", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
-
-static char szCommandSeparators[] = " \t\n\r\v\f";
 
 int iProgressMax, iProgressValue;
 char *pcProgress;
@@ -868,11 +875,11 @@ extern double ParseReal( char **ppch ) {
     double r;
     
     if( !ppch || !( pchOrig = NextToken( ppch ) ) )
-	return -HUGE_VAL;
+	return ERR_VAL;
 
     r = strtod( pchOrig, &pch );
 
-    return *pch ? -HUGE_VAL : r;
+    return *pch ? ERR_VAL : r;
 }
 
 extern int ParseNumber( char **ppch ) {
@@ -1421,7 +1428,7 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
     return SetCubeInfo( pci, pms->nCube, pms->fCubeOwner, pms->fMove,
 			pms->nMatchTo, pms->anScore, pms->fCrawford,
-			fJacoby, fBeavers );
+			fJacoby, nBeavers );
 }
 
 static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
@@ -1470,7 +1477,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 
 	outputf( "Rolled %d%d", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 
-	if( pmr->n.rLuck != -HUGE_VALF )
+	if( pmr->n.rLuck != ERR_VAL )
 	    outputf( " (%s):\n", GetLuckAnalysis( &ms, pmr->n.rLuck ) );
 	else
 	    outputl( ":" );
@@ -1497,7 +1504,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 	
     case MOVE_SETDICE:
-	if( pmr->n.rLuck != -HUGE_VALF )
+	if( pmr->n.rLuck != ERR_VAL )
 	    outputf( "Rolled %d%d (%s):\n", pmr->sd.anDice[ 0 ],
 		     pmr->sd.anDice[ 1 ], GetLuckAnalysis( &ms,
 							   pmr->sd.rLuck ) );
@@ -1775,7 +1782,7 @@ extern void CommandEval( char *sz ) {
     else
 	SetCubeInfo( &ci, ms.nCube, ms.fCubeOwner, n ? !ms.fMove : ms.fMove,
 		     ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
-		     fBeavers );    
+		     nBeavers );    
     
     if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
                        fOutputMWC, fOutputWinPC, n ) ) {
@@ -1861,13 +1868,13 @@ extern void CommandHelp( char *sz ) {
     if( szHelp ) {
 	outputf( "%s- %s\n\nUsage: %s", szCommand, szHelp, szUsage );
 
-	if( pc->pc )
+	if( pc->pc && pc->pc->sz )
 	    outputl( "<subcommand>\n" );
 	else
 	    outputc( '\n' );
     }
 
-    if( pc->pc ) {
+    if( pc->pc && pc->pc->sz ) {
 	outputl( pc == &cTop ? "Available commands:" :
 		 "Available subcommands:" );
 
@@ -2107,7 +2114,7 @@ extern void CommandHint( char *sz ) {
 		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
 	}
 	
-	if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && fBeavers )
+	if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
 	    outputl ( "Your proper cube action: Beaver!\n" );
 	else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
 	    outputl ( "Your proper cube action: Take.\n" );
@@ -2167,7 +2174,7 @@ extern void CommandHint( char *sz ) {
 extern void PromptForExit( void ) {
 
     static int fExiting;
-    
+
     if( !fExiting && fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
 	fExiting = TRUE;
 	fInterrupt = FALSE;
@@ -2272,7 +2279,7 @@ CommandRollout( char *sz ) {
     }
     
     SetCubeInfo ( &ci, ms.nCube, ms.fCubeOwner, fOpponent ? !ms.fMove :
-		  ms.fMove, ms.nMatchTo, an, ms.fCrawford, fJacoby, fBeavers );
+		  ms.fMove, ms.nMatchTo, an, ms.fCrawford, fJacoby, nBeavers );
 
 #if USE_GTK
     if( fX )
@@ -2838,9 +2845,9 @@ extern void CommandSaveSettings( char *szParam ) {
 #elif HAVE_ALLOCA
     char *sz = alloca( strlen( szHomeDirectory ) + 14 );
 #else
-    char sz[ 4096 ];
+    char sz[ 16384 ];
 #endif
-    char szTemp[ 256 ];
+    char szTemp[ 1024 ];
     FILE *pf;
     int i, cCache;
     
@@ -2884,14 +2891,14 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set automatic game %s\n"
 	     "set automatic move %s\n"
 	     "set automatic roll %s\n"
-	     "set beavers %s\n",
+	     "set beavers %d\n",
 	     fAutoBearoff ? "on" : "off",
 	     fAutoCrawford ? "on" : "off",
 	     cAutoDoubles,
 	     fAutoGame ? "on" : "off",
 	     fAutoMove ? "on" : "off",
 	     fAutoRoll ? "on" : "off",
-	     fBeavers ? "on" : "off" );
+	     nBeavers );
 
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     fprintf( pf, "set cache %d\n", cCache );
@@ -2972,6 +2979,8 @@ extern void CommandSaveSettings( char *szParam ) {
 
     SaveRNGSettings ( pf, "set", rngCurrent );
 
+    SaveRolloutSettings( pf, "set rollout", &rcRollout );
+    
     fprintf( pf, "set training alpha %f\n"
 	     "set training anneal %f\n"
 	     "set training threshold %f\n",
@@ -3093,7 +3102,7 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     return NULL;
 }
 
-static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
+static command *FindContext( command *pc, char *sz, int ich ) {
 
     int i = 0, c;
 
@@ -3107,7 +3116,7 @@ static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
 
         c = strcspn( sz + i, szCommandSeparators );
 
-        if( i + c >= ich && !fDeep )
+        if( i + c >= ich )
             /* incomplete command */
             return pc;
 
@@ -3126,21 +3135,32 @@ static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
         }
     } while( pc && pc->sz );
 
+    if( pc && pc->pc )
+	/* dummy command for parameter completion */
+	return pc;
+    
     return NULL;
 }
 
 static char **CompleteKeyword( char *szText, int iStart, int iEnd ) {
 
-    pcCompleteContext = FindContext( acTop, rl_line_buffer, iStart, FALSE );
+    pcCompleteContext = FindContext( acTop, rl_line_buffer, iStart );
 
     if( !pcCompleteContext )
 	return NULL;
-
+    
 #if HAVE_RL_COMPLETION_MATCHES
-    return rl_completion_matches( szText, GenerateKeywords );
+    if( pcCompleteContext == &cFilename )
+	return rl_completion_matches( szText,
+				      rl_filename_completion_function );
+    else
+	return rl_completion_matches( szText, GenerateKeywords );
 #else
     /* assume obselete version of readline */
-    return completion_matches( szText, GenerateKeywords );
+    if( pcCompleteContext == &cFilename )
+	return completion_matches( szText, filename_completion_function );
+    else
+	return completion_matches( szText, GenerateKeywords );
 #endif
 }
 #endif
@@ -3470,24 +3490,25 @@ extern char *GetInput( char *szPrompt ) {
  ReadDirect:
 #endif
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */
-    
-    fgets( sz, 256, stdin );
-    
+
+    clearerr( stdin );
+    pch = fgets( sz, 256, stdin );
+
     if( fInterrupt ) {
 	free( sz );
 	return NULL;
     }
     
-    if( ( pch = strchr( sz, '\n' ) ) )
-	*pch = 0;
-    
-    while( feof( stdin ) && !*sz ) {
+    if( !pch ) {
 	if( !isatty( STDIN_FILENO ) )
 	    exit( EXIT_SUCCESS );
 	
 	outputc( '\n' );
 	PromptForExit();
     }
+    
+    if( ( pch = strchr( sz, '\n' ) ) )
+	*pch = 0;
     
     return sz;
 }
@@ -3865,7 +3886,7 @@ static void version( void ) {
 
 static void real_main( void *closure, int argc, char *argv[] ) {
 
-    char ch, *pch, *pchDataDir = NULL;
+    char ch, *pch, *pchCommands = NULL, *pchDataDir = NULL, *pchScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
@@ -3873,8 +3894,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	{ "no-rc", no_argument, NULL, 'r' },
 	{ "new-weights", optional_argument, NULL, 'n' },
 	{ "window-system-only", no_argument, NULL, 'w' },
-	/* `help', `tty' and `version' must come last -- see below. */
+	/* these options must come last -- see below. */
+	{ "commands", required_argument, NULL, 'c' },
         { "help", no_argument, NULL, 'h' },
+	{ "script", required_argument, NULL, 's' },
         { "tty", no_argument, NULL, 't' },
         { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -3896,20 +3919,22 @@ static void real_main( void *closure, int argc, char *argv[] ) {
        we have to check for -t before the other options to avoid connecting
        to the X server if it is specified.
 
-       We use the last three element of ao to get the "--help", "--tty" and
-       "--version" options only. */
+       We use the last five element of ao to get the "--help", "--tty",
+       "--commands", "--script" and "--version" options only. */
     
     opterr = 0;
     
-    while( ( ch = getopt_long( argc, argv, "htv", ao + sizeof( ao ) /
-			       sizeof( ao[ 0 ] ) - 4, NULL ) ) != (char) -1 )
+    while( ( ch = getopt_long( argc, argv, "chstv", ao + sizeof( ao ) /
+			       sizeof( ao[ 0 ] ) - 6, NULL ) ) != (char) -1 )
 	switch( ch ) {
-	case 'h': /* help */
-            usage( argv[ 0 ] );
-	    exit( EXIT_SUCCESS );
+	case 's': /* script */
+	case 'c': /* commands */
 	case 't': /* tty */
 	    fX = FALSE;
 	    break;
+	case 'h': /* help */
+            usage( argv[ 0 ] );
+	    exit( EXIT_SUCCESS );
 	case 'v': /* version */
 	    version();
 	    exit( EXIT_SUCCESS );
@@ -3969,11 +3994,15 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 		
-    while( ( ch = getopt_long( argc, argv, "bd:hn::rtvw", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::rs:tvw", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
 	    fNoBearoff = TRUE;
+	    break;
+	case 'c': /* commands */
+	    pchCommands = optarg;
+	    fInteractive = FALSE;
 	    break;
 	case 'd': /* datadir */
 	    pchDataDir = optarg;
@@ -3981,7 +4010,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'h': /* help */
             usage( argv[ 0 ] );
 	    exit( EXIT_SUCCESS );
-	case 'n':
+	case 'n': /* new-weights */
 	    if( optarg )
 		nNewWeights = atoi( optarg );
 
@@ -3989,8 +4018,16 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		nNewWeights = DEFAULT_NET_SIZE;
 
 	    break;
-	case 'r':
+	case 'r': /* no-rc */
 	    fNoRC = TRUE;
+	    break;
+	case 's': /* script */
+#if !USE_GUILE
+	    fprintf( stderr, "%s: option `-s' requires Guile\n", argv[ 0 ] );
+	    exit( EXIT_FAILURE );
+#endif
+	    pchScript = optarg;
+	    fInteractive = FALSE;
 	    break;
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
@@ -4027,8 +4064,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	      "details." );
     
     InitRNG( NULL, TRUE );
-    InitRNG( &nRolloutSeed, FALSE );
-    nRolloutSeed ^= 0x792A584B;
+    InitRNG( &rcRollout.nSeed, FALSE );
+    rcRollout.nSeed ^= 0x792A584B;
     
     InitMatchEquity ( metCurrent );
     
@@ -4071,24 +4108,26 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-	if( fInteractive )
+	if( fInteractive ) {
 	    PortableSignal( SIGINT, HandleInterrupt, NULL, FALSE );
+	    
+#if HAVE_LIBREADLINE
+	    rl_readline_name = "gnubg";
+	    rl_basic_word_break_characters = szCommandSeparators;
+	    rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
+#if HAVE_RL_COMPLETION_MATCHES
+	    /* assume readline 4.2 or later */
+	    rl_completion_entry_function = NullGenerator;
+#else
+	    /* assume old readline */
+	    rl_completion_entry_function = (Function *) NullGenerator;
+#endif
+#endif
+	}
     
 #if USE_GUI && defined(SIGIO)
-    PortableSignal( SIGIO, HandleIO, NULL, TRUE );
-#endif
-    
-#if HAVE_LIBREADLINE
-    rl_readline_name = "gnubg";
-    rl_basic_word_break_characters = szCommandSeparators;
-    rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
-#if HAVE_RL_COMPLETION_MATCHES
-    /* assume readline 4.2 or later */
-    rl_completion_entry_function = NullGenerator;
-#else
-    /* assume old readline */
-    rl_completion_entry_function = (Function *) NullGenerator;
-#endif
+    if( fX )
+	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
 #endif
 
     if( !fNoRC )
@@ -4099,6 +4138,18 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     fflush( stdout );
     fflush( stderr );
+
+    if( pchCommands ) {
+	CommandLoadCommands( pchCommands );
+	exit( EXIT_SUCCESS );
+    }
+
+#if USE_GUILE
+    if( pchScript ) {
+	scm_primitive_load( scm_makfrom0str( pchScript ) );
+	exit( EXIT_SUCCESS );
+    }
+#endif
     
 #if USE_GTK
     if( fX ) {
@@ -4140,6 +4191,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		
 		Prompt();
 		
+		clearerr( stdin );		    
 		/* FIXME shouldn't restart sys calls on signals during this
 		   fgets */
 		fgets( sz, sizeof( sz ), stdin );
@@ -4148,7 +4200,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		    *pch = 0;
 		
 		
-		while( feof( stdin ) ) {
+		if( feof( stdin ) ) {
 		    if( !isatty( STDIN_FILENO ) )
 			exit( EXIT_SUCCESS );
 		    
@@ -4212,7 +4264,7 @@ extern void CommandEq2MWC ( char *sz ) {
 
   rEq = ParseReal ( &sz );
 
-  if ( rEq == -HUGE_VAL ) rEq = 0.0;
+  if ( rEq == ERR_VAL ) rEq = 0.0;
 
   GetMatchStateCubeInfo( &ci, &ms );
 
@@ -4256,7 +4308,7 @@ extern void CommandMWC2Eq ( char *sz ) {
 
   rMwc = ParseReal ( &sz );
 
-  if ( rMwc == -HUGE_VAL ) rMwc = eq2mwc ( 0.0, &ci );
+  if ( rMwc == ERR_VAL ) rMwc = eq2mwc ( 0.0, &ci );
 
   if ( rMwc > 1.0 ) rMwc /= 100.0;
 
