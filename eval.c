@@ -1008,7 +1008,8 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     /* number of chequers this roll hits */
     int nChequers;
   } aRoll[ 21 ];
-    
+
+#if 0
   /* Men off */
   {
     int menOff = 15;
@@ -1031,7 +1032,8 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
       afInput[ I_OFF3 ] = 0.0;
     }
   }
-    
+#endif
+  
   for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
     if( anBoardOpp[nOppBack] ) {
       break;
@@ -1655,18 +1657,106 @@ baseInputs(int anBoard[2][25], float arInput[])
   }
 }
 
-/* Calculates neural net inputs from the board position.
-   Returns 0 for contact positions, 1 for races. */
 
 static void
-CalculateInputs(int anBoard[2][25], float arInput[])
+menOffAll(const int* anBoard, float* afInput)
+{
+  /* Men off */
+  int menOff = 15;
+  int i;
+  
+  for(i = 0; i < 25; i++ ) {
+    menOff -= anBoard[i];
+  }
+
+  if( menOff > 10 ) {
+    afInput[ 0 ] = 1.0;
+    afInput[ 1 ] = 1.0;
+    afInput[ 2 ] = ( menOff - 10 ) / 5.0;
+  } else if( menOff > 5 ) {
+    afInput[ 0 ] = 1.0;
+    afInput[ 1 ] = ( menOff - 5 ) / 5.0;
+    afInput[ 2 ] = 0.0;
+  } else {
+    afInput[ 0 ] = menOff ? menOff / 5.0 : 0.0;
+    afInput[ 1 ] = 0.0;
+    afInput[ 2 ] = 0.0;
+  }
+}
+
+static void
+menOffNonCrashed(const int* anBoard, float* afInput)
+{
+  int menOff = 15;
+  int i;
+  
+  for(i = 0; i < 25; ++i) {
+    menOff -= anBoard[i];
+  }
+  {                                                   assert( menOff <= 8 ); }
+    
+  if( menOff > 5 ) {
+    afInput[ 0 ] = 1.0;
+    afInput[ 1 ] = 1.0;
+    afInput[ 2 ] = ( menOff - 6 ) / 3.0;
+  } else if( menOff > 2 ) {
+    afInput[ 0 ] = 1.0;
+    afInput[ 1 ] = ( menOff - 3 ) / 3.0;
+    afInput[ 2 ] = 0.0;
+  } else {
+    afInput[ 0 ] = menOff ? menOff / 3.0 : 0.0;
+    afInput[ 1 ] = 0.0;
+    afInput[ 2 ] = 0.0;
+  }
+}
+
+/* Calculates contact neural net inputs from the board position. */
+
+static void
+CalculateContactInputs(int anBoard[2][25], float arInput[])
 {
   baseInputs(anBoard, arInput);
-  
-  CalculateHalfInputs( anBoard[ 1 ], anBoard[ 0 ], arInput + 4 * 25 * 2);
 
-  CalculateHalfInputs( anBoard[ 0 ], anBoard[ 1 ], arInput +
-		       (4 * 25 * 2 + MORE_INPUTS));
+  {
+    float* b = arInput + 4 * 25 * 2;
+    
+    /* I accidentally switched sides (0 and 1) when I trained the net */
+    menOffNonCrashed(anBoard[0], b + I_OFF1);
+  
+    CalculateHalfInputs(anBoard[1], anBoard[0], b);
+  }
+
+  {
+    float* b = arInput + (4 * 25 * 2 + MORE_INPUTS);
+
+    menOffNonCrashed(anBoard[1], b + I_OFF1);
+  
+    CalculateHalfInputs( anBoard[0], anBoard[1], b);
+  }
+}
+
+/* Calculates crashed neural net inputs from the board position. */
+
+static void
+CalculateCrashedInputs(int anBoard[2][25], float arInput[])
+{
+  baseInputs(anBoard, arInput);
+
+  {
+    float* b = arInput + 4 * 25 * 2;
+    
+    menOffAll(anBoard[1], b + I_OFF1);
+  
+    CalculateHalfInputs(anBoard[1], anBoard[0], b);
+  }
+
+  {
+    float* b = arInput + (4 * 25 * 2 + MORE_INPUTS);
+
+    menOffAll(anBoard[0], b + I_OFF1);
+  
+    CalculateHalfInputs( anBoard[0], anBoard[1], b);
+  }
 }
 
 extern void swap( int *p0, int *p1 ) {
@@ -2010,7 +2100,7 @@ enum {
 };
 
 /* separate context for race, crashed, contact
-   -1: regulare eval
+   -1: regular eval
     0: save base
     1: from base
  */
@@ -2224,7 +2314,7 @@ EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 {
   float arInput[ NUM_INPUTS ];
     
-  CalculateInputs( anBoard, arInput );
+  CalculateContactInputs( anBoard, arInput );
     
   NeuralNetEvaluate(&nnContact, arInput, arOutput,
 		    NNevalAction( CLASS_CONTACT ) );
@@ -2235,7 +2325,7 @@ EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
 {
   float arInput[ NUM_INPUTS ];
     
-  CalculateInputs( anBoard, arInput );
+  CalculateCrashedInputs( anBoard, arInput );
     
   NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
 		     NNevalAction( CLASS_CRASHED ) );
@@ -2723,43 +2813,45 @@ GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
 }
 
-extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
-			  float rAlpha, float rAnneal,
-                          const bgvariation bgv ) {
+extern int
+TrainPosition(int anBoard[ 2 ][ 25 ], float arDesired[],
+	      float rAlpha, float rAnneal,
+	      const bgvariation bgv )
+{
+  float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
 
-    float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
-
-    int pc = ClassifyPosition( anBoard, bgv );
+  int pc = ClassifyPosition( anBoard, bgv );
   
-    neuralnet* nn;
+  neuralnet* nn;
   
-    switch( pc ) {
-    case CLASS_CONTACT:
-	nn = &nnContact;
-	break;
-    case CLASS_RACE:
-	nn = &nnRace;
-	break;
-    case CLASS_CRASHED:
-	nn = &nnCrashed;
-	break;
-    default:
-	errno = EDOM;
-	return -1;
-    }
+  switch( pc ) {
+  case CLASS_CONTACT:
+  {
+    nn = &nnContact;
+    CalculateContactInputs(anBoard, arInput);
+    break;
+  }
+  case CLASS_RACE:
+  {
+    nn = &nnRace;
+    CalculateRaceInputs(anBoard, arInput);
+    break;
+  }
+  case CLASS_CRASHED:
+    CalculateCrashedInputs(anBoard, arInput);
+    nn = &nnCrashed;
+    break;
+  default:
+    errno = EDOM;
+    return -1;
+  }
 
-    SanityCheck( anBoard, arDesired );
+  SanityCheck(anBoard, arDesired);
 
-    if( pc == CLASS_RACE ) {
-      CalculateRaceInputs(anBoard, arInput);
-    } else {
-      CalculateInputs(anBoard, arInput);
-    }
-
-    NeuralNetTrain( nn, arInput, arOutput, arDesired, rAlpha /
-		    pow( nn->nTrained / 1000.0 + 1.0, rAnneal ) );
+  NeuralNetTrain( nn, arInput, arOutput, arDesired, rAlpha /
+		  pow( nn->nTrained / 1000.0 + 1.0, rAnneal ) );
     
-    return 0;
+  return 0;
 }
 
 /*
@@ -3681,15 +3773,16 @@ static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput,
   /* no-op -- nothing much we can say, really (pip count?) */
 }
 
-static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput,
+static void DumpContact( int anBoard[ 2 ][ 25 ], char* szOutput,
                          const bgvariation bgv ) {
 
   float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
     arDerivative[ NUM_INPUTS * NUM_OUTPUTS ],
     ardEdI[ NUM_INPUTS ], *p;
   int i, j;
-    
-  CalculateInputs( anBoard, arInput );
+
+  /* (FIXME) crashed?? */
+  CalculateContactInputs( anBoard, arInput );
     
   NeuralNetDifferentiate( &nnContact, arInput, arOutput, arDerivative );
 
