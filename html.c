@@ -48,6 +48,7 @@
 ".movemove { width: 20em; text-align: left }\n" \
 ".moveequity { width: 10em; text-align: left } \n" \
 ".movethemove { background-color: #ffffcc } \n" \
+".moveodd { background-color: #d0d0d0 } \n" \
 ".blunder { background-color: red; color: yellow } \n" \
 ".joker { background-color: red; color: yellow } \n" \
 ".stattable { text-align: left; width: 40em; background-color: #c7c7c7; border: 0px; padding: 0px } \n" \
@@ -59,7 +60,8 @@
 ".comment { background-color: #449911; width: 39.5em; padding: 0.5em } \n" \
 ".commentheader { background-color: #557711; font-weight: bold; text-align: center; width: 40em; padding: 0.25em } \n" \
 "td img {display: block;}\n" \
-".number { text-align: center; font-weight: bold; font-size: 60%% } \n" \
+".number { text-align: center; font-weight: bold; font-size: 60%% " \
+"          text-family: sans-serif } \n" \
 "</style>\n" 
 
 #define FORMATHTMLPROB(f) \
@@ -1423,6 +1425,8 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
               "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
               "%s</a>") ,
             ctime ( &t ), VERSION );
+
+  fputs ( " ", pf );
             
   fprintf ( pf,
             _("(HTML Export version %d.%d)"),
@@ -2092,8 +2096,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       if ( i >= exsExport.nMoves && i != pmr->n.iMove ) 
         continue;
 
-      fprintf ( pf, "<tr %s>\n",
-                ( i == pmr->n.iMove ) ? "class=\"movethemove\"" : "" );
+      if ( i == pmr->n.iMove )
+        fputs ( "<tr class=\"movethemove\">\n", pf );
+      else if ( i % 2 )
+        fputs ( "<tr class=\"moveodd\">\n", pf );
+      else
+        fputs ( "<tr>\n", pf );
 
       /* selected move or not */
       
@@ -2179,8 +2187,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         float *ar = pmr->n.ml.amMoves[ i ].arEvalMove;
 
-        fprintf ( pf, "<tr %s>\n",
-                  ( i == pmr->n.iMove ) ? "class=\"movethemove\"" : "" );
+        if ( i == pmr->n.iMove )
+          fputs ( "<tr class=\"movethemove\">\n", pf );
+        else if ( i % 2 )
+          fputs ( "<tr class=\"moveodd\">\n", pf );
+        else
+          fputs ( "<tr>\n", pf );
 
         fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
 
@@ -2213,8 +2225,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
 
-        fprintf ( pf, "<tr %s>\n",
-                  ( i == pmr->n.iMove ) ? "class=\"movethemove\"" : "" );
+        if ( i == pmr->n.iMove )
+          fputs ( "<tr class=\"movethemove\">\n", pf );
+        else if ( i % 2 )
+          fputs ( "<tr class=\"moveodd\">\n", pf );
+        else
+          fputs ( "<tr>\n", pf );
 
         fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
 
@@ -2518,8 +2534,8 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     
     printStatTableRow ( pf, 
                         _( "Chequer play rating"), "%s",
-                        gettext ( aszLuckRating[ rt[ 0 ] ] ), 
-                        gettext ( aszLuckRating[ rt[ 1 ] ] ) );
+                        gettext ( aszRating[ rt[ 0 ] ] ), 
+                        gettext ( aszRating[ rt[ 1 ] ] ) );
 
   }
 
