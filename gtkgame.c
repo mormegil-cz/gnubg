@@ -2787,7 +2787,7 @@ extern char* GTKGetInput(char* title, char* prompt)
 	GtkWidget *pwDialog, *pwHbox, *pwEntry;
 	pwEntry = gtk_entry_new();
 	inputString = NULL;
-	pwDialog = GTKCreateDialog(title, DT_QUESTION, GetInputOk, pwEntry );
+	pwDialog = GTKCreateDialog(title, DT_QUESTION, GTK_SIGNAL_FUNC(GetInputOk), pwEntry );
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
 		pwHbox = gtk_hbox_new(FALSE, 0));
