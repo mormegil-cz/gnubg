@@ -1214,7 +1214,7 @@ extern void CommandHint( char *sz ) {
     
 	for( i = 0; i < ml.cMoves; i++ ) {
 	  float *ar = ml.amMoves[ i ].pEval;
-	  float rMwc = Utility ( ar, &ci );
+
 	  outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%6.2f%%\t",
 		   ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
 		   100.0 * eq2mwc ( Utility ( ar, &ci ), &ci ) );

@@ -1574,19 +1574,18 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] )
   int n, nOpp;
 
   assert( pBearoff2 );
-    
+  
   nOpp = PositionBearoff( anBoard[ 0 ] );
   n = PositionBearoff( anBoard[ 1 ] );
-
+  
   arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] =
     arOutput[ OUTPUT_WINBACKGAMMON ] =
     arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
+  
   arOutput[ OUTPUT_WIN ] =
     ( pBearoff2[ ( n * 924 + nOpp ) << 1 ] |
       ( pBearoff2[ ( ( n * 924 + nOpp ) << 1 ) | 1 ] << 8 ) ) / 65535.0;
 }
-
 
 /* Fill aaProb with one sided bearoff probabilities for position with id n */
 
@@ -3487,6 +3486,7 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci ) {
 
   }
 
+  return 0;
 }
 
 
@@ -3666,6 +3666,7 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
   } /* match play */
 
+  return 0;
 }
 
 
@@ -4379,8 +4380,8 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   float rG0, rBG0, rG1, rBG1;
   float arCP[ 2 ];
 
-  float rMWCDead, rMWCLive, rMWCWin, rMWCWin2, rMWCLose;
-  float rMWCCash, rOppTP, rTG;
+  float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
+  float rMWCCash, rTG;
 
   /* I own cube */
 
@@ -4632,7 +4633,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
       /* FIXME: very important: use opponents inputs as well */
 
-      float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
+	float arInput[ NUM_INPUTS ] /* , arOutput[ NUM_OUTPUTS ] */;
 
       return 0.68;
 
@@ -4673,4 +4674,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
       }
     
     }
+
+  assert( FALSE );
+  return 0;
 }
