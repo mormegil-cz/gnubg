@@ -1173,7 +1173,7 @@ static void RenderGlyph( unsigned char *puch, int nStride, FT_Glyph pftg,
 
     FT_BitmapGlyph pftbg;
     FT_Bitmap *pb;
-    int x, y;
+    int x, y, x0 = 0, y0 = 0;
     
     assert( pftg->format == FT_GLYPH_FORMAT_BITMAP );
 
@@ -1182,14 +1182,24 @@ static void RenderGlyph( unsigned char *puch, int nStride, FT_Glyph pftg,
 
     xOff += pftbg->left;
     yOff -= pftbg->top;
+
+    if( xOff < 0 ) {
+	x0 = -xOff;
+	xOff = 0;
+    }
+
+    if( yOff < 0 ) {
+	y0 = -yOff;
+	yOff = 0;
+    }
     
     assert( pb->pixel_mode == FT_PIXEL_MODE_GRAY );
 
     puch += yOff * nStride + xOff * 3;
     nStride -= 3 * pb->width;
     
-    for( y = 0; y < pb->rows; y++ ) {
-	for( x = 0; x < pb->width; x++ ) {
+    for( y = y0; y < pb->rows; y++ ) {
+	for( x = x0; x < pb->width; x++ ) {
 	    *puch = ( *puch * ( pb->num_grays -
 				pb->buffer[ y * pb->pitch + x ] ) +
 		      r * pb->buffer[ y * pb->pitch + x ] ) /
@@ -2177,6 +2187,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
 
 extern void FreeImages( renderimages *pri ) {
 
+    free( pri->ach );
     free( pri->achChequer[ 0 ] );
     free( pri->achChequer[ 1 ] );
     free( pri->achChequerLabels );
