@@ -155,6 +155,12 @@ static inline guchar clamp( gint n ) {
 	return n;
 }
 
+static void Beep( BoardData *bd ) {
+
+    if( bd->beep_illegal )
+	gdk_beep();
+}
+
 static void board_label_chequers( GtkWidget *board, BoardData *bd,
 				  int x, int y, int c ) {
     int cx, cy0, cy1;
@@ -682,7 +688,7 @@ static void Confirm( BoardData *bd ) {
         UserCommand( move );
     } else
         /* Illegal move */
-	gdk_beep();
+	Beep( bd );
 }
 
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
@@ -728,7 +734,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
 	    /* Click on illegal area. */
-	    gdk_beep();
+	    Beep( bd );
 	    bd->drag_point = -1;
 	    
 	    return TRUE;
@@ -739,7 +745,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
-		gdk_beep();
+		Beep( bd );
 	    else
 		UserCommand( "double" );
 	    
@@ -751,7 +757,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
-		gdk_beep();
+		Beep( bd );
 	    else if( event->button.button == 1 )
 		Confirm( bd );
 	    else {
@@ -775,7 +781,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->dice[ 0 ] <= 0 ) {
 	    /* Don't let them move chequers unless the dice have been
 	       rolled, or they're editing the board. */
-	    gdk_beep();
+	    Beep( bd );
 	    bd->drag_point = -1;
 	    
 	    return TRUE;
@@ -858,7 +864,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		memcpy( bd->points, old_points, sizeof bd->points );
 	    }
 	    
-	    gdk_beep();
+	    Beep( bd );
 	    
 	finished:
 	    bd->drag_point = -1;
@@ -902,7 +908,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 					     dest == 25 ||
 					     bd->drag_point == 26 ||
 					     dest == 26 ) ) )
-		gdk_beep();
+		Beep( bd );
 	    else {
 		int points[ 2 ][ 25 ];
 		
@@ -922,7 +928,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	if( !bd->points[ bd->drag_point ] ) {
 	    /* click on empty bearoff tray */
-	    gdk_beep();
+	    Beep( bd );
 	    
 	    bd->drag_point = -1;
 	    return TRUE;
@@ -932,7 +938,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
 	if( event->button.button != 1 && bd->drag_colour != bd->turn ) {
 	    /* trying to move opponent's chequer */
-	    gdk_beep();
+	    Beep( bd );
 	    
 	    bd->drag_point = -1;
 	    return TRUE;
@@ -1094,7 +1100,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			     : bd->points[ dest ] > 1 ) || dest == bar ||
 	    dest > 27 ) {
 	    /* FIXME check move is legal */
-	    gdk_beep();
+	    Beep( bd );
 	    
 	    dest = bd->drag_point;
 	}
@@ -1124,7 +1130,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		board_expose_point( board, bd, bd->drag_point );
 		board_expose_point( board, bd, dest );
 		update_move( bd );
-		gdk_beep();
+		Beep( bd );
 	    }
 	
 	bd->drag_point = -1;
@@ -2892,6 +2898,7 @@ static void board_init( Board *board ) {
     bd->labels = FALSE;
     bd->usedicearea = TRUE;
     bd->permit_illegal = TRUE;
+    bd->beep_illegal = TRUE;
     bd->arLight[ 0 ] = -0.5;
     bd->arLight[ 1 ] = 0.5;
     bd->arLight[ 2 ] = 0.707;

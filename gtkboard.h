@@ -70,7 +70,7 @@ typedef struct _BoardData {
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
     gboolean translucent, labels, classical, usedicearea, permit_illegal,
-        playing;
+        beep_illegal, playing;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */
