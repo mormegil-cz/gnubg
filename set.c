@@ -511,7 +511,7 @@ extern void CommandSetAnnotation( char *sz ) {
     if( SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
 		   _("Move analysis and commentary will be displayed."),
 		   _("Move analysis and commentary will not be displayed.") )
-	>= 0 )
+	!= TRUE )
 	/* Force an update, even if the setting has not changed. */
 	UpdateSetting(&woPanel[WINDOW_ANNOTATION].showing);
 }
@@ -521,7 +521,7 @@ extern void CommandSetMessage( char *sz ) {
     if( SetToggle( "message", &woPanel[WINDOW_MESSAGE].showing, sz,
 		   _("Show window with messages"),
 		   _("Do not show window with message.") )
-	>= 0 )
+	!= TRUE )
 	/* Force an update, even if the setting has not changed. */
 	UpdateSetting(&woPanel[WINDOW_MESSAGE].showing);
 }
@@ -531,7 +531,7 @@ extern void CommandSetGameList( char *sz ) {
     if( SetToggle( "gamelist", &woPanel[WINDOW_GAME].showing, sz,
 		   _("Show game window with moves"),
 		   _("Do not show game window with moves.") )
-	>= 0 )
+	!= TRUE )
 	/* Force an update, even if the setting has not changed. */
 	UpdateSetting(&woPanel[WINDOW_GAME].showing);
 }
@@ -541,7 +541,7 @@ extern void CommandSetAnalysisWindows( char *sz ) {
     if( SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,
 		   _("Show window with analysis"),
 		   _("Do not show window with analysis.") )
-	>= 0 )
+	!= TRUE )
 	/* Force an update, even if the setting has not changed. */
 	UpdateSetting(&woPanel[WINDOW_ANALYSIS].showing);
 }
