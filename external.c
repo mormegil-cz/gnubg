@@ -604,7 +604,7 @@ extern void CommandExternal( char *sz ) {
 	return;
       }
       
-      while( ( hPeer = accept( h, &saRemote, &saLen ) ) < 0 ) {
+      while( ( hPeer = accept( h, (struct sockaddr*)&saRemote, &saLen ) ) < 0 ) {
 	if( errno == EINTR ) {
           if( fAction )
             fnAction();
