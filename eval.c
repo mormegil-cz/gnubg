@@ -879,12 +879,11 @@ extern int EvalSave( char *szWeights ) {
 }
 
 
-/* Calculates the inputs for one player only.  Returns 0 for contact
-   positions, 1 for races. */
-static void
-CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
-		     float afInput[] ) {
+/* Calculates inputs for any contact position, for one player only. */
 
+static void
+CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
+{
   int i, j, k, l, nOppBack, n, aHit[ 39 ], nBoard;
     
   /* aanCombination[n] -
@@ -1019,31 +1018,6 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     int nChequers;
   } aRoll[ 21 ];
 
-#if 0
-  /* Men off */
-  {
-    int menOff = 15;
-      
-    for(i = 0; i < 25; i++ ) {
-      menOff -= anBoard[i];
-    }
-
-    if( menOff > 10 ) {
-      afInput[ I_OFF1 ] = 1.0;
-      afInput[ I_OFF2 ] = 1.0;
-      afInput[ I_OFF3 ] = ( menOff - 10 ) / 5.0;
-    } else if( menOff > 5 ) {
-      afInput[ I_OFF1 ] = 1.0;
-      afInput[ I_OFF2 ] = ( menOff - 5 ) / 5.0;
-      afInput[ I_OFF3 ] = 0.0;
-    } else {
-      afInput[ I_OFF1 ] = menOff ? menOff / 5.0 : 0.0;
-      afInput[ I_OFF2 ] = 0.0;
-      afInput[ I_OFF3 ] = 0.0;
-    }
-  }
-#endif
-  
   for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
     if( anBoardOpp[nOppBack] ) {
       break;
@@ -2015,13 +1989,11 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
 }
 
 static void
-EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[],
-              const bgvariation bgv ) {
-
+EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+{
   assert ( pbc2 );
 
   BearoffEval ( pbc2, anBoard, arOutput );
-
 }
 
 /* An upper bound on the number of turns it can take to complete a bearoff
@@ -2331,7 +2303,7 @@ EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 }
 
 static void
-EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+EvalCrashed(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 {
   float arInput[ NUM_INPUTS ];
     
@@ -2342,81 +2314,81 @@ EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
 }
 
 extern void
-EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
+EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+{
+  int i, c;
+  int n = anChequers[ bgv ];
 
-    int i, c;
-    int n = anChequers[ bgv ];
+  for( i = 0; i < 25; i++ )
+    if( anBoard[ 0 ][ i ] )
+      break;
 
-    for( i = 0; i < 25; i++ )
-	if( anBoard[ 0 ][ i ] )
-	    break;
+  if( i == 25 ) {
+    /* opponent has no pieces on board; player has lost */
+    arOutput[ OUTPUT_WIN ] = arOutput[ OUTPUT_WINGAMMON ] =
+      arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
 
-    if( i == 25 ) {
-	/* opponent has no pieces on board; player has lost */
-	arOutput[ OUTPUT_WIN ] = arOutput[ OUTPUT_WINGAMMON ] =
-	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+    for( i = 0, c = 0; i < 25; i++ )
+      c += anBoard[ 1 ][ i ];
 
-	for( i = 0, c = 0; i < 25; i++ )
-	    c += anBoard[ 1 ][ i ];
+    if( c == n ) {
+      /* player still has all pieces on board; loses gammon */
+      arOutput[ OUTPUT_LOSEGAMMON ] = 1.0;
 
-	if( c == n ) {
-	    /* player still has all pieces on board; loses gammon */
-	    arOutput[ OUTPUT_LOSEGAMMON ] = 1.0;
+      for( i = 18; i < 25; i++ )
+	if( anBoard[ 1 ][ i ] ) {
+	  /* player still has pieces in opponent's home board;
+	     loses backgammon */
+	  arOutput[ OUTPUT_LOSEBACKGAMMON ] = 1.0;
 
-	    for( i = 18; i < 25; i++ )
-		if( anBoard[ 1 ][ i ] ) {
-		    /* player still has pieces in opponent's home board;
-		       loses backgammon */
-		    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 1.0;
-
-		    return;
-		}
-	    
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
-	    return;
+	  return;
 	}
+	    
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
 
-	arOutput[ OUTPUT_LOSEGAMMON ] =
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
-	return;
+      return;
     }
+
+    arOutput[ OUTPUT_LOSEGAMMON ] =
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+
+    return;
+  }
     
-    for( i = 0; i < 25; i++ )
-	if( anBoard[ 1 ][ i ] )
-	    break;
+  for( i = 0; i < 25; i++ )
+    if( anBoard[ 1 ][ i ] )
+      break;
 
-    if( i == 25 ) {
-	/* player has no pieces on board; wins */
-	arOutput[ OUTPUT_WIN ] = 1.0;
-	arOutput[ OUTPUT_LOSEGAMMON ] =
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+  if( i == 25 ) {
+    /* player has no pieces on board; wins */
+    arOutput[ OUTPUT_WIN ] = 1.0;
+    arOutput[ OUTPUT_LOSEGAMMON ] =
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
 
-	for( i = 0, c = 0; i < 25; i++ )
-	    c += anBoard[ 0 ][ i ];
+    for( i = 0, c = 0; i < 25; i++ )
+      c += anBoard[ 0 ][ i ];
 
-	if( c == n ) {
-	    /* opponent still has all pieces on board; win gammon */
-	    arOutput[ OUTPUT_WINGAMMON ] = 1.0;
+    if( c == n ) {
+      /* opponent still has all pieces on board; win gammon */
+      arOutput[ OUTPUT_WINGAMMON ] = 1.0;
 
-	    for( i = 18; i < 25; i++ )
-		if( anBoard[ 0 ][ i ] ) {
-		    /* opponent still has pieces in player's home board;
-		       win backgammon */
-		    arOutput[ OUTPUT_WINBACKGAMMON ] = 1.0;
+      for( i = 18; i < 25; i++ )
+	if( anBoard[ 0 ][ i ] ) {
+	  /* opponent still has pieces in player's home board;
+	     win backgammon */
+	  arOutput[ OUTPUT_WINBACKGAMMON ] = 1.0;
 
-		    return;
-		}
-	    
-	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
-
-	    return;
+	  return;
 	}
+	    
+      arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
 
-	arOutput[ OUTPUT_WINGAMMON ] =
-	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+      return;
     }
+
+    arOutput[ OUTPUT_WINGAMMON ] =
+      arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+  }
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
@@ -3761,6 +3733,10 @@ DumpAnyContact(int anBoard[ 2 ][ 25 ], char* szOutput,
     /* FIXME this is a bit grotty -- need to
        eliminate the constant 1 added by Utility */
   }
+
+  {
+    float* player = arInput + (25 * MINPPERPOINT + MORE_INPUTS);
+    float* dPlayer = ardEdI + (25 * MINPPERPOINT + MORE_INPUTS);
     
   sprintf( szOutput,
            "Input          \tValue             \t dE/dI\n"
@@ -3786,36 +3762,31 @@ DumpAnyContact(int anBoard[ 2 ][ 25 ], char* szOutput,
 	   "BACKGAME       \t%5.3f             \t%6.3f\n"
 	   "BACKGAME1      \t%5.3f             \t%6.3f\n"
 	   "FREEPIP        \t%5.3f             \t%6.3f\n",
-           arInput[ I_OFF1 << 1 ], ardEdI[ I_OFF1 << 1 ],
-           arInput[ I_OFF2 << 1 ], ardEdI[ I_OFF2 << 1 ],
-           arInput[ I_OFF3 << 1 ], ardEdI[ I_OFF3 << 1 ],
-           arInput[ I_BREAK_CONTACT << 1 ], ardEdI[ I_BREAK_CONTACT << 1 ],
-           arInput[ I_BACK_CHEQUER << 1 ], ardEdI[ I_BACK_CHEQUER << 1 ],
-           arInput[ I_BACK_ANCHOR << 1 ], ardEdI[ I_BACK_ANCHOR << 1 ],
-           arInput[ I_FORWARD_ANCHOR << 1 ], ardEdI[ I_FORWARD_ANCHOR << 1 ],
-           arInput[ I_PIPLOSS << 1 ], 
-           arInput[ I_P1 << 1 ] ? arInput[ I_PIPLOSS << 1 ] /
-	         arInput[ I_P1 << 1 ] * 12.0 : 0.0, ardEdI[ I_PIPLOSS << 1 ],
-           arInput[ I_P1 << 1 ], arInput[ I_P1 << 1 ] * 36.0,
-	         ardEdI[ I_P1 << 1 ],
-           arInput[ I_P2 << 1 ], arInput[ I_P2 << 1 ] * 36.0,
-	         ardEdI[ I_P2 << 1 ],
-           arInput[ I_BACKESCAPES << 1 ], arInput[ I_BACKESCAPES << 1 ] *
-	         36.0, ardEdI[ I_BACKESCAPES << 1 ],
-           arInput[ I_ACONTAIN << 1 ], arInput[ I_ACONTAIN << 1 ] * 36.0,
-	         ardEdI[ I_ACONTAIN << 1 ],
-           arInput[ I_CONTAIN << 1 ], arInput[ I_CONTAIN << 1 ] * 36.0,
-	         ardEdI[ I_CONTAIN << 1 ],
-           arInput[ I_MOBILITY << 1 ], ardEdI[ I_MOBILITY << 1 ],
-           arInput[ I_MOMENT2 << 1 ], ardEdI[ I_MOMENT2 << 1 ],
-           arInput[ I_ENTER << 1 ], arInput[ I_ENTER << 1 ] * 12.0,
-	         ardEdI[ I_ENTER << 1 ],
-	   arInput[ I_ENTER2 << 1 ], ardEdI[ I_ENTER2 << 1 ],
-	   arInput[ I_TIMING << 1 ], ardEdI[ I_TIMING << 1 ],
-	   arInput[ I_BACKBONE << 1 ], ardEdI[ I_BACKBONE << 1 ],
-	   arInput[ I_BACKG << 1 ], ardEdI[ I_BACKG << 1 ],
-	   arInput[ I_BACKG1 << 1 ], ardEdI[ I_BACKG1 << 1 ],
-	   arInput[ I_FREEPIP << 1 ], ardEdI[ I_FREEPIP << 1 ] );
+           player[ I_OFF1 ], dPlayer[ I_OFF1 ],
+           player[ I_OFF2 ], dPlayer[ I_OFF2 ],
+           player[ I_OFF3 ], dPlayer[ I_OFF3 ],
+           player[ I_BREAK_CONTACT ], dPlayer[ I_BREAK_CONTACT ],
+           player[ I_BACK_CHEQUER ], dPlayer[ I_BACK_CHEQUER ],
+           player[ I_BACK_ANCHOR ], dPlayer[ I_BACK_ANCHOR ],
+           player[ I_FORWARD_ANCHOR ], dPlayer[ I_FORWARD_ANCHOR ],
+           player[ I_PIPLOSS ], 
+           player[ I_P1 ] ? player[ I_PIPLOSS ] / player[ I_P1 ] * 12.0 : 0.0,
+	   dPlayer[ I_PIPLOSS ],
+           player[ I_P1 ], player[ I_P1 ] * 36.0, dPlayer[ I_P1 ],
+           player[ I_P2 ], player[ I_P2 ] * 36.0, dPlayer[ I_P2 ],
+           player[ I_BACKESCAPES ], player[I_BACKESCAPES] * 36.0, dPlayer[ I_BACKESCAPES ],
+           player[ I_ACONTAIN ], player[ I_ACONTAIN ] * 36.0, dPlayer[ I_ACONTAIN ],
+           player[ I_CONTAIN ], player[ I_CONTAIN ] * 36.0, dPlayer[ I_CONTAIN ],
+           player[ I_MOBILITY ], dPlayer[ I_MOBILITY ],
+           player[ I_MOMENT2 ], dPlayer[ I_MOMENT2 ],
+           player[ I_ENTER ], player[ I_ENTER ] * 12.0, dPlayer[ I_ENTER ],
+	   player[ I_ENTER2 ], dPlayer[ I_ENTER2 ],
+	   player[ I_TIMING ], dPlayer[ I_TIMING ],
+	   player[ I_BACKBONE ], dPlayer[ I_BACKBONE ],
+	   player[ I_BACKG ], dPlayer[ I_BACKG ],
+	   player[ I_BACKG1 ], dPlayer[ I_BACKG1 ],
+	   player[ I_FREEPIP ], dPlayer[ I_FREEPIP ] );
+  }
 }
 
 static void

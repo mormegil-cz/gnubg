@@ -1,3 +1,9 @@
+Mon Jun 23 09:07:38 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+u	* eval.c (DumpAnyContact): Fix incorrect indexing into inputs vector. (Broken for
+	a long time. Since no one really noticed, I guess this proves they are not very
+	useful).
+
 Sun Jun 22 12:42:10 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c (DumpContact): fix for crashed positions. 
