@@ -722,7 +722,7 @@ CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
 static void
 CubeAnalysisEvalSettings ( GtkWidget *pw, void *unused ) {
 
-  SetEvalCube ( NULL, 0, NULL );
+  SetEvaluation ( NULL, 0, NULL );
 
 }
 

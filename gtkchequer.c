@@ -360,7 +360,7 @@ MoveListEvalPly ( GtkWidget *pw, hintdata *phd ) {
 static void
 MoveListEvalSettings ( GtkWidget *pw, void *unused ) {
 
-  SetEvalChequer ( NULL, 0, NULL );
+  SetEvaluation ( NULL, 0, NULL );
 
 }
 

@@ -2291,11 +2291,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL },
 	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
 	  NULL },
-	{ N_("/_Settings/_Evaluation"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Settings/_Evaluation/Chequer play..."), 
-          NULL, SetEvalChequer, 0, NULL },
-	{ N_("/_Settings/_Evaluation/Cube decisions..."), NULL, SetEvalCube, 0,
-	  NULL },
+	{ N_("/_Settings/_Evaluation..."), NULL, SetEvaluation, 0, NULL },
         { N_("/_Settings/E_xport..."), NULL, Command, CMD_SHOW_EXPORT,
           NULL },
 	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL },
@@ -3924,25 +3920,72 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     outputresume();
 }
 
-extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
 
-    evalcontext ec;
-    GtkWidget *pwDialog, *pwEval;
-    int fOK;
+typedef struct _setevalwidget {
+  GtkWidget *pwCube, *pwChequer;
+  int *pfOK;
+} setevalwidget;
+
+
+static void
+EvaluationOK ( GtkWidget *pw, setevalwidget *psew ) {
+
+  evalwidget *pew;
+
+  if ( psew->pfOK )
+    *psew->pfOK = TRUE;
+
+  pew = gtk_object_get_user_data ( GTK_OBJECT ( psew->pwChequer ) );
+  EvalGetValues ( pew->pec, pew );
+
+  pew = gtk_object_get_user_data ( GTK_OBJECT ( psew->pwCube ) );
+  EvalGetValues ( pew->pec, pew );
+
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+}
+
+
+extern void
+SetEvaluation ( gpointer *p, guint n, GtkWidget *pw ) {
+
+
+    evalcontext ecChequer, ecCube;
+    GtkWidget *pwDialog, *pwEvalChequer, *pwEvalCube;
+    GtkWidget *pwhbox, *pwFrame;
+    GtkWidget *pwvbox;
+    int fOK = FALSE;
     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+    setevalwidget sew;
     
-    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+    memcpy( &ecChequer, &esEvalChequer.ec, sizeof ecChequer );
+    memcpy( &ecCube, &esEvalCube.ec, sizeof ecCube );
     memcpy( aamf, aamfEval, sizeof ( aamfEval ) );
 
     /* widgets */
 
-    pwEval = EvalWidget( &ec, (movefilter *) aamf, &fOK, TRUE );
+    sew.pwChequer = EvalWidget( &ecChequer, (movefilter *) aamf, NULL, TRUE );
+    sew.pwCube = EvalWidget( &ecCube, NULL, NULL, FALSE );
+    sew.pfOK = &fOK;
+
+    pwhbox = gtk_hbox_new ( FALSE, 4 );
+
+    pwFrame = gtk_frame_new ( _("Chequer play") );
+    gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwFrame, FALSE, FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), sew.pwChequer );
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Chequer play"), DT_QUESTION,
-                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
+    pwFrame = gtk_frame_new ( _("Cube decisions") );
+    gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwFrame, FALSE, FALSE, 0 );
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), sew.pwCube, FALSE, FALSE, 0 );
+    
+    pwDialog = CreateDialog( _("GNU Backgammon - Evaluation settings"), 
+                             DT_QUESTION,
+                             GTK_SIGNAL_FUNC( EvaluationOK ), &sew );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pwEval );
+                       pwhbox );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
@@ -3957,45 +4000,20 @@ extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
     GTKAllowStdin();
 
     if( fOK ) {
-        SetEvalCommands( "set evaluation chequer eval", &ec,
-                         &esEvalChequer.ec );
-        SetMovefilterCommands ( "set evaluation movefilter",
-                                aamf, aamfEval );
+
+      SetEvalCommands( "set evaluation chequer eval", &ecChequer,
+                       &esEvalChequer.ec );
+      SetEvalCommands( "set evaluation cubedecision eval", &ecCube,
+                       &esEvalCube.ec );
+      SetMovefilterCommands ( "set evaluation movefilter",
+                              aamf, aamfEval );
     }
+
+
+
 }
 
-extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
 
-    evalcontext ec;
-    GtkWidget *pwDialog, *pwEval;
-    int fOK;
-    
-    memcpy( &ec, &esEvalCube.ec, sizeof ec );
-
-    pwEval = EvalWidget( &ec, NULL, &fOK, FALSE );
-    
-    pwDialog = CreateDialog( _("GNU Backgammon - Cube decisions"), DT_QUESTION,
-                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pwEval );
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    if( fOK )
-        SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );
-}
- 
 typedef struct _playerswidget {
     int *pfOK;
     player *ap;
@@ -4027,6 +4045,7 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     static int aiRadioButton[ PLAYER_PUBEVAL + 1 ] = { 3, 0, 1, 2 };
     GtkWidget *pwHBox;
     GtkWidget *pwFrame;
+    GtkWidget *pwvbox;
 
     pwPage = gtk_vbox_new( FALSE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
@@ -4067,9 +4086,14 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     pwFrame = gtk_frame_new ( _("Cube decisions") );
     gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
-    gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalCube[ i ] =
-		       EvalWidget( &ppw->ap[ i ].esCube.ec, 
-                                   NULL, NULL, FALSE ) );
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
+    
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                         ppw->apwEvalCube[ i ] = 
+                            EvalWidget( &ppw->ap[ i ].esCube.ec, 
+                                        NULL, NULL, FALSE ),
+                         FALSE, FALSE, 0 );
     gtk_widget_set_sensitive( ppw->apwEvalCube[ i ],
 			      ap[ i ].pt == PLAYER_GNU );
 
@@ -4275,6 +4299,7 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 
   GtkWidget *pwPage, *pwFrame, *pwLabel, *pwSpin, *pwTable; 
   GtkWidget *hbox1, *vbox1, *vbox2, *hbox2;
+  GtkWidget *pwvbox;
 
   pwPage = gtk_vbox_new ( FALSE, 0 );
   gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
@@ -4392,9 +4417,13 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
   
-  gtk_container_add(GTK_CONTAINER (pwFrame ), 
-		  paw->pwEvalCube = EvalWidget( &paw->esCube.ec, NULL,
-                                                NULL, FALSE ));
+  pwvbox = gtk_vbox_new ( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
+    
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       paw->pwEvalCube = EvalWidget( &paw->esCube.ec, NULL,
+                                                     NULL, FALSE ),
+                       FALSE, FALSE, 0 );
 
   return pwPage;
 }
@@ -4645,6 +4674,7 @@ static GtkWidget *RolloutPage( rolloutpagewidget *prpw,
   GtkWidget *pwPage;
   GtkWidget *pwHBox;
   GtkWidget *pwFrame;
+  GtkWidget *pwvbox;
 
   pwPage = gtk_vbox_new( FALSE, 0 );
   gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
@@ -4655,16 +4685,26 @@ static GtkWidget *RolloutPage( rolloutpagewidget *prpw,
   pwFrame = gtk_frame_new ( _("Chequer play") );
   gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
-  gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCheq =
-                     EvalWidget( prpw->precCheq, 
-                                 prpw->pmf, NULL, fMoveFilter ) );
+  pwvbox = gtk_vbox_new ( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
     
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       prpw->arpwEvCheq =
+                       EvalWidget( prpw->precCheq, 
+                                   prpw->pmf, NULL, fMoveFilter ),
+                       FALSE, FALSE, 0 );
+
   pwFrame = gtk_frame_new ( _("Cube decisions") );
   gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
-  gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCube =
-                     EvalWidget( prpw->precCube, NULL, NULL, FALSE ) );
+  pwvbox = gtk_vbox_new ( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
     
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       prpw->arpwEvCube =
+                       EvalWidget( prpw->precCube, NULL, NULL, FALSE ),
+                       FALSE, FALSE, 0 );
+
   return pwPage;
 }
 
