@@ -90,6 +90,8 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 static float
 EvalEfficiency( int anBoard[2][25], positionclass pc );
 
+static int MaxTurns( int i );
+
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 typedef void ( *classstatusfunc )( char *szOutput );
@@ -1658,38 +1660,88 @@ extern void SwapSides( int anBoard[ 2 ][ 25 ] ) {
 
 extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
-    int i, j, ac[ 2 ], anBack[ 2 ], fContact;
+    int i, j, ac[ 2 ], anBack[ 2 ], anCross[ 2 ], anGammonCross[ 2 ],
+	anBackgammonCross[ 2 ], anMaxTurns[ 2 ], fContact;
 
     if( arOutput[ OUTPUT_WIN ] < 0.0f )
 	arOutput[ OUTPUT_WIN ] = 0.0f;
     else if( arOutput[ OUTPUT_WIN ] > 1.0f )
 	arOutput[ OUTPUT_WIN ] = 1.0f;
     
-    ac[ 0 ] = ac[ 1 ] = anBack[ 0 ] = anBack[ 1 ] = 0;
-    
-    for( i = 0; i < 25; i++ )
-	for( j = 0; j < 2; j++ )
+    ac[ 0 ] = ac[ 1 ] = anBack[ 0 ] = anBack[ 1 ] = anCross[ 0 ] =
+	anCross[ 1 ] = anBackgammonCross[ 0 ] = anBackgammonCross[ 1 ] = 0;
+    anGammonCross[ 0 ] = anGammonCross[ 1 ] = 1;
+	
+    for( j = 0; j < 2; j++ )
+	for( i = 0; i < 25; i++ )
 	    if( anBoard[ j ][ i ] ) {
 		anBack[ j ] = i;
 		ac[ j ] += anBoard[ j ][ i ];
+		anCross[ j ] += ( i / 6 + 1 ) * anBoard[ j ][ i ];
+		anGammonCross[ j ] += i / 6 * anBoard[ j ][ i ];
+		if( i >= 18 )
+		    anBackgammonCross[ j ] += ( i - 12 ) / 6 *
+			anBoard[ j ][ i ];
 	    }
 
     fContact = anBack[ 0 ] + anBack[ 1 ] >= 24;
+
+    if( !fContact ) {
+	for( i = 0; i < 2; i++ )
+	    if( anBack[ i ] < 6 )
+		anMaxTurns[ i ] = MaxTurns( PositionBearoff( anBoard[ i ] ) );
+	    else
+		anMaxTurns[ i ] = anCross[ i ] * 2;
+    }
+    
+    if( !fContact && anCross[ 0 ] > 4 * ( anMaxTurns[ 1 ] - 1 ) )
+	/* Certain win */
+	arOutput[ OUTPUT_WIN ] = 1.0f;
     
     if( ac[ 0 ] < 15 )
 	/* Opponent has borne off; no gammons or backgammons possible */
-	arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
-    else if( !fContact && anBack[ 0 ] < 18 )
-	/* Opponent is out of home board; no backgammons possible */
-	arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+	arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
+    else if( !fContact ) {
+	if( anCross[ 1 ] > 8 * anGammonCross[ 0 ] )
+	    /* Gammon impossible */
+	    arOutput[ OUTPUT_WINGAMMON ] = 0.0f;
+	else if( anGammonCross[ 0 ] > 4 * ( anMaxTurns[ 1 ] - 1 ) )
+	    /* Certain gammon */
+	    arOutput[ OUTPUT_WINGAMMON ] = 1.0f;
+	
+	if( anCross[ 1 ] > 8 * anBackgammonCross[ 0 ] )
+	    /* Backgammon impossible */
+	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
+	else if( anBackgammonCross[ 0 ] > 4 * ( anMaxTurns[ 1 ] - 1 ) )
+	    /* Certain backgammon */
+	    arOutput[ OUTPUT_WINGAMMON ] =
+		arOutput[ OUTPUT_WINBACKGAMMON ] = 1.0f;
+    }
 
+    if( !fContact && anCross[ 1 ] > 4 * anMaxTurns[ 0 ] )
+	/* Certain loss */
+	arOutput[ OUTPUT_WIN ] = 0.0f;
+    
     if( ac[ 1 ] < 15 )
-	/* Player has borne off; no gammons or backgammons possible */
+	/* Player has borne off; no gammon or backgammon losses possible */
 	arOutput[ OUTPUT_LOSEGAMMON ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] =
-	    0.0;
-    else if( !fContact && anBack[ 1 ] < 18 )
-	/* Player is out of home board; no backgammons possible */
-	arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+	    0.0f;
+    else if( !fContact ) {
+	if( anCross[ 0 ] > 8 * anGammonCross[ 1 ] - 4 )
+	    /* Gammon loss impossible */
+	    arOutput[ OUTPUT_LOSEGAMMON ] = 0.0f;
+	else if( anGammonCross[ 1 ] > 4 * anMaxTurns[ 0 ] )
+	    /* Certain gammon loss */
+	    arOutput[ OUTPUT_LOSEGAMMON ] = 1.0f;
+	
+	if( anCross[ 0 ] > 8 * anBackgammonCross[ 1 ] - 4 )
+	    /* Backgammon loss impossible */
+	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
+	else if( anBackgammonCross[ 1 ] > 4 * anMaxTurns[ 0 ] )
+	    /* Certain backgammon loss */
+	    arOutput[ OUTPUT_LOSEGAMMON ] =
+		arOutput[ OUTPUT_LOSEBACKGAMMON ] = 1.0f;
+    }
 
     /* gammons must be less than wins */    
     if( arOutput[ OUTPUT_WINGAMMON ] > arOutput[ OUTPUT_WIN ] ) {
@@ -1847,6 +1899,22 @@ getBearoffProbs(int n, unsigned int aaProb[32])
   for( i = 0; i < 32; i++ )
     aaProb[ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
       ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
+}
+
+/* An upper bound on the number of turns it can take to complete a bearoff
+   from bearoff position ID i. */
+static int MaxTurns( int id ) {
+
+    unsigned int an[ 32 ];
+    int i;
+    
+    getBearoffProbs( id, an );
+
+    for( i = 31; i >= 0; i-- )
+	if( an[ i ] )
+	    return i;
+
+    abort();
 }
 
 /* Probability to get 1 checker off in 1,2 and 3 turns, when just */
