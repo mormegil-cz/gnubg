@@ -1,3 +1,10 @@
+Thu Sep 11 18:10:28 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (CreateList, GTKDumpStatcontext): reestablish
+	the old copy-enabling of line-by-line in the statistics window.
+	Note: this only works for OSes with a primary selection, such
+	as *nix.
+
 Wed 10 Sep 21:30:14 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* insert limits.h before PATH_MAX use in backgammon.h

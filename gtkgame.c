@@ -7850,27 +7850,6 @@ static void CopyAll( GtkWidget *pwWidget, GtkWidget *pwNotebook )
 	CopyData(pwNotebook, FORMATGS_ALL);
 }
 
-static GtkWidget *CreateList()
-{
-	int i;
-        static char *aszEmpty[] = { NULL, NULL, NULL };
-	GtkWidget *pwList = gtk_clist_new_with_titles( 3, aszEmpty );
-
-	for( i = 0; i < 3; i++ )
-	{
-		gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i, TRUE );
-		gtk_clist_set_column_justification( GTK_CLIST( pwList ), i, GTK_JUSTIFY_RIGHT );
-	}
-	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
-  
-	gtk_clist_set_column_title( GTK_CLIST( pwList ), 1, (ap[0].szName));
-	gtk_clist_set_column_title( GTK_CLIST( pwList ), 2, (ap[1].szName));
-
-	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), GTK_SELECTION_SINGLE);
-
-	return pwList;
-}
-
 static void FillStats(const statcontext *psc, const matchstate *pms,
                       const enum _formatgs gs, GtkWidget* statList )
 {
@@ -8109,16 +8088,8 @@ static void
 StatcontextSelect ( GtkWidget *pw, int y, int x, GdkEventButton *peb,
                     GtkWidget *pwCopy ) {
 
-  int c;
-  GList *pl;
-
-  for ( c = 0, pl = GTK_CLIST ( pw )->selection; c < 2 && pl; pl = pl->next )
-    c++;
-
-  if ( c && peb )
-    gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, peb->time );
-
-  gtk_widget_set_sensitive ( GTK_WIDGET ( pwCopy ), c );
+  if ( g_list_length( GTK_CLIST( pw )->selection ) && peb )
+     gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, peb->time );
 
 }
 
@@ -8203,6 +8174,43 @@ StatcontextCopy ( GtkWidget *pw, void *unused ) {
 
 }
 
+
+static GtkWidget *CreateList()
+{
+	int i;
+        static char *aszEmpty[] = { NULL, NULL, NULL };
+	GtkWidget *pwList = gtk_clist_new_with_titles( 3, aszEmpty );
+
+	for( i = 0; i < 3; i++ ) {
+          gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i, TRUE );
+          gtk_clist_set_column_justification( GTK_CLIST( pwList ), 
+                                              i, GTK_JUSTIFY_RIGHT );
+	}
+
+	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
+  
+	gtk_clist_set_column_title( GTK_CLIST( pwList ), 1, (ap[0].szName));
+	gtk_clist_set_column_title( GTK_CLIST( pwList ), 2, (ap[1].szName));
+
+	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), 
+                                      GTK_SELECTION_EXTENDED );
+        
+        gtk_selection_add_target( pwList, GDK_SELECTION_PRIMARY,
+                                  GDK_SELECTION_TYPE_STRING, 0 );
+
+        gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+                            GTK_SIGNAL_FUNC( StatcontextSelect ), pwList );
+        gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
+                            GTK_SIGNAL_FUNC( StatcontextSelect ), pwList );
+	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_clear_event",
+                            GTK_SIGNAL_FUNC( StatcontextClearSelection ), 0 );
+	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_get",
+                            GTK_SIGNAL_FUNC( StatcontextGetSelection ), 0 );
+
+	return pwList;
+}
+
+
 extern void GTKDumpStatcontext( int game )
 {
 	GtkWidget *copyMenu, *menu_item, *pvbox;
@@ -8282,26 +8290,12 @@ extern void GTKDumpStatcontext( int game )
 	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( StatcontextCopy ), pwNotebook );
     gtk_widget_set_sensitive( menu_item, FALSE );
 
-	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
-					  GTK_SIGNAL_FUNC( StatcontextSelect ), menu_item );
-	gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
-					  GTK_SIGNAL_FUNC( StatcontextSelect ), menu_item );
-	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_clear_event",
-					  GTK_SIGNAL_FUNC( StatcontextClearSelection ), 0 );
-	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_get",
-					  GTK_SIGNAL_FUNC( StatcontextGetSelection ), 0 );
-
 	menu_item = gtk_menu_item_new_with_label ("Copy all");
 	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
 	gtk_widget_show (menu_item);
 	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( CopyAll ), pwNotebook );
 
 	gtk_signal_connect( GTK_OBJECT( pwList ), "button-press-event", GTK_SIGNAL_FUNC( ContextCopyMenu ), copyMenu );
-
-	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), GTK_SELECTION_EXTENDED );
-
-	gtk_selection_add_target( pwList, GDK_SELECTION_PRIMARY,
-							GDK_SELECTION_TYPE_STRING, 0 );
 
 	/* modality */
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwUsePanels ) ) )
