@@ -4823,6 +4823,7 @@ CommandLoadPython( char * sz ) {
   return;
 #else
   FILE *pf;
+  char *pch;
 
   sz = NextToken( &sz );
     
@@ -4831,12 +4832,17 @@ CommandLoadPython( char * sz ) {
                "python').") );
     return;
   }
+
+  pch = PathSearch( sz, NULL );
   
-  if( ( pf = fopen( sz, "r" ) ) ) {
-    PyRun_AnyFile( pf, sz );
+  if( ( pf = fopen( pch, "r" ) ) ) {
+    PyRun_AnyFile( pf, pch );
     fclose( pf );
   } else
     outputerr( sz );
+
+  free( pch );
+
 #endif
 }
 
