@@ -53,7 +53,7 @@
 #include "drawboard.h"
 
 #ifndef HUGE_VALF
-#define HUGE_VALF (-1e38)
+#define HUGE_VALF 1e38
 #endif
 
 #if defined(AF_UNIX) && !defined(AF_LOCAL)

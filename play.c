@@ -45,7 +45,7 @@
 #include "matchequity.h"
 
 #ifndef HUGE_VALF
-#define HUGE_VALF (-1e38)
+#define HUGE_VALF 1e38
 #endif
 
 char *aszGameResult[] = { "single game", "gammon", "backgammon" },

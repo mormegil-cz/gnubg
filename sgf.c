@@ -36,7 +36,7 @@
 #include "sgf.h"
 
 #ifndef HUGE_VALF
-#define HUGE_VALF (-1e38)
+#define HUGE_VALF 1e38
 #endif
 
 static char *szFile;
@@ -917,7 +917,7 @@ static void WriteDoubleAnalysis( FILE *pf, float ar[],
 	break;
 
     case EVAL_ROLLOUT:
-	/* FIXME */
+	/* FIXME save rollout analysis */
 
     default:
 	assert( FALSE );
