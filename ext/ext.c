@@ -11,7 +11,6 @@
 #include <event.h>
 #include <hash.h>
 #include <stdlib.h>
-#define XLIB_ILLEGAL_ACCESS
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
@@ -677,7 +676,9 @@ extern int ExtWndAttach( extwindow *pewnd, Display *pdsp, Window wnd ) {
     return ExtSendEventHandler( pewnd, &xev );
 }
 
+#if EXT_DEBUG
 static int acColour[ 2 ], acFont[ 2 ], acGC[ 2 ];
+#endif
 
 extern XColor *ExtWndLookupColour( extwindow *pewnd, char *szName ) {
     colournamehashdata cnhd, *pcnhd;
@@ -723,7 +724,9 @@ extern int ExtWndAttachColour( extwindow *pewnd, extquark *peqName,
 	pchd->xcol.pixel = pxcol->pixel;
 	pchd->cRef = 1;
 	HashAdd( &hColour, ColourHash( pchd ), pchd );
+#if EXT_DEBUG
 	acColour[ 1 ]++;
+#endif
     }
 
 #if EXT_DEBUG    
@@ -795,7 +798,8 @@ extern GC ExtWndAttachGC( extwindow *pewnd, unsigned long flValues,
 	*pgchd = gchd;
 	pgchd->gc = XCreateGC( pewnd->pdsp, pewnd->wnd, flValues, pxgcv );
 	pgchd->cRef = 1;
-	XSaveContext( pewnd->pdsp, pgchd->gc->gid, xc, (XPointer) pgchd );
+	XSaveContext( pewnd->pdsp, XGContextFromGC( pgchd->gc ), xc,
+		      (XPointer) pgchd );
 	HashAdd( &hGC, ngchdHash, pgchd );
 #if EXT_DEBUG    
 	printf( "%d GCs of %d\n", ++acGC[ 0 ], ++acGC[ 1 ] );
@@ -810,7 +814,9 @@ extern int ExtWndDetachColour( extwindow *pewnd, extcolour *pecol ) {
 	HashDelete( &hColour, ColourHash( pecol ), pecol );
 	XFreeColors( pewnd->pdsp, pewnd->cm, &pecol->xcol.pixel, 1, 0 );
 	free( pecol );
+#if EXT_DEBUG
 	acColour[ 1 ]--;
+#endif
     }
     
 #if EXT_DEBUG    
@@ -841,14 +847,17 @@ extern int ExtWndDetachGC( extwindow *pewnd, GC gc ) {
 
     gchashdata *pgchd;
 
-    if( XFindContext( pewnd->pdsp, gc->gid, xc, (XPointer *) &pgchd ) )
+    if( XFindContext( pewnd->pdsp, XGContextFromGC( gc ), xc,
+		      (XPointer *) &pgchd ) )
 	return -1;
 
     if( !--pgchd->cRef ) {
 	HashDelete( &hGC, GCHash( pgchd ), pgchd );
 	XFreeGC( pewnd->pdsp, pgchd->gc );
 	free( pgchd );
+#if EXT_DEBUG
 	acGC[ 1 ]--;
+#endif
     }
     
 #if EXT_DEBUG    
