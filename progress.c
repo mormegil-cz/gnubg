@@ -768,7 +768,8 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   *pp = prp;
   prp->prs = (rolloutstat *) aars;
   prp->n = n;
-    
+  fInterrupt = FALSE;
+
   prp->pwRolloutDialog = 
     GTKCreateDialog( _("GNU Backgammon - Rollout"), DT_INFO,
                      NULL, NULL );
