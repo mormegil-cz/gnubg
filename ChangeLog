@@ -1,3 +1,9 @@
+Fri Jul 18 23:02:40 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* gtkgame.c - add a stack to hold signals for grab so that
+	  closing a window with grab will not die when the signal
+	  can't be disconnected
+	
 Fri Jul 18 21:15:10 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* gnubg.c - missing call to RolloutProgressStart in CommandRollout

@@ -486,30 +486,53 @@ RefreshGeometries ( void ) {
 
 }
 
+typedef struct {
+  void *owner;
+  unsigned id;
+} grabstack;
+
+#define GRAB_STACK_SIZE 128
+grabstack GrabStack[GRAB_STACK_SIZE];
+int GrabStackPointer = 0;
+
 extern void GTKSuspendInput( monitor *pm ) {
     
-    /* Grab events so that the board window knows this is a re-entrant
-       call, and won't allow commands like roll, move or double. */
-    if( ( pm->fGrab = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) )
-	gtk_grab_add( pwGrab );
-
-    pm->idSignal = gtk_signal_connect_after( GTK_OBJECT( pwGrab ),
-					     "key-press-event",
-					     GTK_SIGNAL_FUNC( gtk_true ),
-					     NULL );
+  /* Grab events so that the board window knows this is a re-entrant
+     call, and won't allow commands like roll, move or double. */
+  if( ( pm->fGrab = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) ) {
+    assert ((GrabStackPointer >= 0) && 
+	    (GrabStackPointer < (GRAB_STACK_SIZE - 1 )));
     
-    /* Don't check stdin here; readline isn't ready yet. */
-    GTKDisallowStdin();
+    gtk_grab_add( pwGrab );
+    GrabStack[GrabStackPointer].owner = pm;
+    GrabStack[GrabStackPointer++].id =
+      pm->idSignal = gtk_signal_connect_after( GTK_OBJECT( pwGrab ),
+					       "key-press-event",
+					       GTK_SIGNAL_FUNC( gtk_true ),
+					       NULL );
+    
+  }
+  
+  /* Don't check stdin here; readline isn't ready yet. */
+  GTKDisallowStdin();
 }
 
 extern void GTKResumeInput( monitor *pm ) {
     
     GTKAllowStdin();
 
-    gtk_signal_disconnect( GTK_OBJECT( pwGrab ), pm->idSignal );
-    
+    if (GrabStackPointer > 0) {
+      if ((GrabStack[GrabStackPointer - 1 ].owner == pm) &&
+	  (GrabStack[GrabStackPointer - 1 ].id == pm->idSignal)) {
+
+	gtk_signal_disconnect( GTK_OBJECT( pwGrab ), pm->idSignal );
+	--GrabStackPointer;
+      }
+    }
+
     if( pm->fGrab )
-	gtk_grab_remove( pwGrab );
+      gtk_grab_remove( pwGrab );
+    
 }
 
 static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
