@@ -1,8 +1,7 @@
-
 /*
  * gtkprefs.c
  *
- * by Gary Wong <gtw@gnu.org>, 2000, 2001.
+ * by Gary Wong <gtw@gnu.org>, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -36,11 +35,13 @@
 #endif
 
 #include "backgammon.h"
+#include "drawboard.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
 #include "i18n.h"
 #include "path.h"
+#include "render.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -444,7 +445,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
         N_ ("Walnut"), 
         N_ ("Willow")
     };
-    BoardWood bw;
+    woodtype bw;
     GtkWidget *pwx;
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -709,67 +710,109 @@ extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
 
 /* functions for board design */
 
+static GdkPixmap *NoPicture( GdkWindow *pw ) {
+
+    GdkPixmap *ppm;
+    GdkGC *gc;
+
+    ppm = gdk_pixmap_new( pw, 108 * 3, 72 * 3, -1 );
+
+    gc = gdk_gc_new( ppm );
+
+    gdk_draw_rectangle( ppm, gc, TRUE, 0, 0, 108 * 3, 72 * 3 );
+
+    /* FIXME write "No preview image available" */
+
+    gdk_gc_unref( gc );
+    
+    return ppm;
+}
+
 static void
 DesignActivate ( GtkWidget *pw, boarddesign *pbde ) {
 
   gchar *sz;
   GdkPixmap *ppm;
-  GdkBitmap *mask;
-  char *szPath = NULL;
-
-#include "xpm/no_picture.xpm"
-
+  GdkGC *gc;
+  BoardData bd;
+  char *apch[ 2 ];
+  gchar *pch;
+  renderdata rd;
+  renderimages ri;
+  unsigned char auch[ 108 * 3 * 72 * 3 * 3 ];
+  int i, anBoard[ 2 ][ 25 ];
+  int anDice[ 2 ] = { 4, 3 };
+  int anDicePosition[ 2 ][ 2 ] = { { 70, 30 }, { 80, 32 } };
+  int anCubePosition[ 2 ] = { 50, 32 };
+  
   /* set title */
-
   gtk_label_set_text ( GTK_LABEL ( pwDesignTitle ),
                        pbde->szTitle );
 
   /* set author */
-
   sz = g_strdup_printf ( _("by %s" ), pbde->szAuthor );
   gtk_label_set_text ( GTK_LABEL ( pwDesignAuthor ), sz );
   g_free ( sz );
 
-  /* set picture */
+  /* set preview */
+  memset ( &bd, 0, sizeof ( BoardData ) );
 
-  if ( pbde->szFilePreview ) {
+  sz = pch = g_strdup ( pbde->szBoardDesign );
+  while( ParseKeyValue( &sz, apch ) ) 
+    BoardPreferencesParam( &bd, apch[ 0 ], apch[ 1 ] );
+  g_free ( pch );
 
-    szPath = PathSearch ( pbde->szFilePreview, szDataDirectory );
-    if ( szPath && access ( szPath, R_OK ) ) {
-      g_free ( szPath );
-      szPath = NULL;
-    }
+  rd.wt = bd.wood;
+  memcpy( rd.aarColour, bd.aarColour, sizeof( bd.aarColour ) );
+  memcpy( rd.aarDiceColour, bd.aarDiceColour, sizeof( bd.aarDiceColour ) );
+  rd.afDieColour[ 0 ] = bd.afDieColor[ 0 ];
+  rd.afDieColour[ 1 ] = bd.afDieColor[ 1 ];
+  memcpy( rd.aarDiceDotColour, bd.aarDiceDotColour,
+	  sizeof( bd.aarDiceDotColour ) );
+  memcpy( rd.arCubeColour, bd.arCubeColour, sizeof( bd.arCubeColour ) );
+  memcpy( rd.aanBoardColour, bd.aanBoardColour, sizeof( bd.aanBoardColour ) );
+  memcpy( rd.aSpeckle, bd.aSpeckle, sizeof( bd.aSpeckle ) );
+  memcpy( rd.arRefraction, bd.arRefraction, sizeof( bd.arRefraction ) );
+  rd.arCoefficient[ 0 ] = bd.arCoefficient[ 0 ];
+  rd.arCoefficient[ 1 ] = bd.arCoefficient[ 1 ];
+  rd.arExponent[ 0 ] = bd.arExponent[ 0 ];
+  rd.arExponent[ 1 ] = bd.arExponent[ 1 ];
+  rd.arDiceCoefficient[ 0 ] = bd.arDiceCoefficient[ 0 ];
+  rd.arDiceCoefficient[ 1 ] = bd.arDiceCoefficient[ 1 ];
+  rd.arDiceExponent[ 0 ] = bd.arDiceExponent[ 0 ];
+  rd.arDiceExponent[ 1 ] = bd.arDiceExponent[ 1 ];
+  memcpy( rd.arLight, bd.arLight, sizeof( bd.arLight ) );
+  rd.rRound = bd.round;
+  rd.nSize = 3;
+  rd.fHinges = bd.hinges;
+  rd.fLabels = bd.labels;
+  rd.fClockwise = fClockwise;
 
-  }
+  RenderImages( &rd, &ri );
+  
+  for( i = 0; i < 25; i++ )
+      anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
 
-  if ( pbde->szFilePreview && szPath ) {
+  anBoard[ 0 ][ 5 ] = anBoard[ 1 ][ 5 ] = 5;
+  anBoard[ 0 ][ 7 ] = anBoard[ 1 ][ 7 ] = 3;
+  anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = 5;
+  anBoard[ 0 ][ 23 ] = anBoard[ 1 ][ 23 ] = 2;
+  
+  CalculateArea( &rd, auch, 108 * 3 * 3, &ri, anBoard, anDice, anDicePosition,
+		 1, anCubePosition, 0, 0, 0, 0, 108 * 3, 72 * 3 );
+  FreeImages( &ri );
+  
+  ppm = gdk_pixmap_new( pw->window, 108 * 3, 72 * 3, -1 );
 
-    ppm = gdk_pixmap_colormap_create_from_xpm( NULL,
-                                               gtk_widget_get_colormap( pw ), 
-                                               &mask, NULL,
-                                               szPath );
+  gc = gdk_gc_new( ppm );
 
-    g_free ( szPath );
+  gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 72 * 3, GDK_RGB_DITHER_MAX,
+		      auch, 108 * 3 * 3 );
 
-    if ( ! ppm )
-      return;
-
-  }
-  else {
-
-    /* no picture available */
-
-    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
-                                                 gtk_widget_get_colormap( pw ), 
-                                                 &mask, NULL,
-                                                 no_picture_xpm );
-    if ( ! ppm )
-      return;
-
-  }
+  gdk_gc_unref( gc );
 
   gtk_pixmap_set ( GTK_PIXMAP ( pwDesignPixmap ),
-                   ppm, mask );
+                   ppm, NULL );
 
 }
 
@@ -1014,8 +1057,6 @@ DesignPage ( GList *plBoardDesigns, BoardData *bd ) {
   GtkWidget *pwScrolled;
   GtkWidget *pwPage;
 
-#include "xpm/no_picture.xpm"
-
   pwPage = gtk_hbox_new ( FALSE, 4 );
 
   /* CList with board designs */
@@ -1067,8 +1108,10 @@ DesignPage ( GList *plBoardDesigns, BoardData *bd ) {
 
   /* design preview */
 
-  pwDesignPixmap = image_from_xpm_d ( no_picture_xpm, 
-                                       pwvbox );
+  /* FIXME will we ever need to free this?  Eventually we'll move to GTK+
+     2.0 and replace it with a GtkImage, and it won't matter. */
+  pwDesignPixmap = gtk_pixmap_new( NoPicture( bd->drawing_area->window),
+				   NULL );
 
   gtk_box_pack_start ( GTK_BOX ( pwvbox ),
                        pwDesignPixmap,
@@ -1634,9 +1677,9 @@ static char *aszWoodName[] = {
     "oak", "pine", "redwood", "walnut", "willow", "paint"
 };
 
-static int SetWood( char *sz, BoardWood *pbw ) {
+static int SetWood( char *sz, woodtype *pbw ) {
 
-    BoardWood bw;
+    woodtype bw;
     int cch = strlen( sz );
     
     for( bw = 0; bw <= WOOD_PAINT; bw++ )

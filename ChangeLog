@@ -1,3 +1,10 @@
+Tue Dec 10 21:09:18 2002  Gary Wong  <gtw@gnu.org>
+
+	* render.c, render.h: New files.  GTK+ independent replacement for the
+	rendering functions in gtkboard.c.
+	* gtkprefs.c (DesignActivate): Render preview instead of reading
+	file.
+
 Mon Dec  9 21:24:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (LuckNormal, LuckFirst): fix bug in calculation of
@@ -82,7 +89,6 @@ Fri Dec  6 21:10:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* analysis.c (LuckAnalysis): use new luck evalcontext.
 	* analysis.c (LuckNormal, LuckFirst): use general evaluator.
 
-
 Fri Dec  6 18:58:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (UseDesign): apply chequer shape as well.
@@ -95,6 +101,7 @@ Fri Dec  6 11:05:07 2002  Gary Wong  <gtw@gnu.org>
 	
 	* gnubg.c (real_main): Call bind_textdomain_charset(), so that
 	gettext() strings are returned coded correctly.
+	* i18n.h: [!ENABLE_NLS] Define bind_textdomain_codeset.
 
 Thu Dec  5 22:20:56 2002  Gary Wong  <gtw@gnu.org>
 

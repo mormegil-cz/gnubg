@@ -24,7 +24,6 @@
       <about>
          <title>Default setting</title>
          <author>The GNU Backgammon Team</author>
-         <preview-file>boards/default.xpm</preview-file>
       </about>
  
       <design>
@@ -54,7 +53,6 @@
       <about>
          <title>Albert Silver 1</title>
          <author>Albert Silver</author>
-         <preview-file>boards/silver1.xpm</preview-file>
       </about>
  
       <design>
@@ -83,7 +81,6 @@
       <about>
          <title>Albert Silver 2</title>
          <author>Albert Silver</author>
-         <preview-file>boards/silver2.xpm</preview-file>
       </about>
  
       <design>
@@ -112,7 +109,6 @@
       <about>
          <title>Albert Silver 3</title>
          <author>Albert Silver</author>
-         <preview-file>boards/silver3.xpm</preview-file>
       </about>
  
       <design>
@@ -142,7 +138,6 @@
      <about> 
          <title>Red Green</title>  
          <author>Nardy Pillards</author>
-         <preview-file>boards/nardy.xpm</preview-file>
       </about>
   
       <design>
@@ -172,7 +167,6 @@
      <about> 
          <title>Red/Blue - Gold/Silver</title>  
          <author>Ian Shaw</author>
-         <preview-file>boards/ian.xpm</preview-file>
       </about>
   
       <design>
@@ -201,7 +195,6 @@
      <about> 
          <title>GamesGrid Classic</title>  
          <author>Ned Cross</author>
-         <preview-file>boards/ggclassic.xpm</preview-file>
       </about>
   
       <design>
@@ -230,7 +223,6 @@
      <about> 
          <title>GoL Blue and White</title>  
          <author>Ian Shaw</author>
-         <preview-file>boards/gol.xpm</preview-file>
       </about>
   
       <design>
@@ -259,7 +251,6 @@
      <about> 
          <title>Daily Gammon</title>
          <author>Nardy Pillards</author>
-         <preview-file>boards/dailygammon.xpm</preview-file>
       </about>
   
       <design>
@@ -288,7 +279,6 @@
      <about> 
          <title>Jellyfish</title>
          <author>Oeystein Johansen</author>
-         <preview-file>boards/jellyfish.xpm</preview-file>
       </about>
   
       <design>

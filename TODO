@@ -58,6 +58,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Extend ParsePosition() to handle some sort of syntax like
   [8/5 6/5] (meaning the position after that move).  FIBS boardstyle 3 output
   might be nice, too.
+** When rolling out multiple decisions, add p-values (a la the equity
+  difference).
 ** Importing and exporting:
 *** Add missing export formats (FIBS oldmoves, .sgg, .pos).
 *** Make the .mat format identical to Jellyfish (things to check:

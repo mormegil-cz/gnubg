@@ -2695,7 +2695,7 @@ static float wood_hash( float r ) {
 }
 
 static void wood_pixel( float x, float y, float z, unsigned char auch[ 3 ],
-			BoardWood wood ) {
+			woodtype wood ) {
 
     float r;
     int grain, figure;

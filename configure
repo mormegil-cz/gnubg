@@ -839,6 +839,8 @@ Optional Features:
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --disable-gtktest       Do not try to compile and run a test GTK program
   --enable-bearoff=TYPE   specify bearoff database (TYPE=no,external,static)
+  --disable-freetypetest  Do not try to compile and run
+                          a test FreeType program
   --disable-esdtest       Do not try to compile and run a test ESD program
   --disable-artsc-test      Do not compile and run a test ArtsC program.
   --enable-nas            Enable NAS (Network Audio System) support
@@ -857,6 +859,10 @@ Optional Packages:
   --with-x                use the X Window System
   --with-guile            use the Guile extensibility language
   --with-guile-prefix=PREFIX Prefix where Guile is installed (optional)
+  --with-ft-prefix=PREFIX
+                          Prefix where FreeType is installed (optional)
+  --with-ft-exec-prefix=PREFIX
+                          Exec prefix where FreeType is installed (optional)
   --with-sound            use sounds with GNU Backgammon
   --with-esd-prefix=PFX   Prefix where ESD is installed (optional)
   --with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
@@ -9367,6 +9373,222 @@ fi
 
 
 
+# Check whether --with-ft-prefix or --without-ft-prefix was given.
+if test "${with_ft_prefix+set}" = set; then
+  withval="$with_ft_prefix"
+  ft_config_prefix="$withval"
+else
+  ft_config_prefix=""
+fi;
+
+# Check whether --with-ft-exec-prefix or --without-ft-exec-prefix was given.
+if test "${with_ft_exec_prefix+set}" = set; then
+  withval="$with_ft_exec_prefix"
+  ft_config_exec_prefix="$withval"
+else
+  ft_config_exec_prefix=""
+fi;
+# Check whether --enable-freetypetest or --disable-freetypetest was given.
+if test "${enable_freetypetest+set}" = set; then
+  enableval="$enable_freetypetest"
+
+else
+  enable_fttest=yes
+fi;
+
+if test x$ft_config_exec_prefix != x ; then
+  ft_config_args="$ft_config_args --exec-prefix=$ft_config_exec_prefix"
+  if test x${FT2_CONFIG+set} != xset ; then
+    FT2_CONFIG=$ft_config_exec_prefix/bin/freetype-config
+  fi
+fi
+if test x$ft_config_prefix != x ; then
+  ft_config_args="$ft_config_args --prefix=$ft_config_prefix"
+  if test x${FT2_CONFIG+set} != xset ; then
+    FT2_CONFIG=$ft_config_prefix/bin/freetype-config
+  fi
+fi
+# Extract the first word of "freetype-config", so it can be a program name with args.
+set dummy freetype-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_FT2_CONFIG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $FT2_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_FT2_CONFIG="$FT2_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_FT2_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_path_FT2_CONFIG" && ac_cv_path_FT2_CONFIG="no"
+  ;;
+esac
+fi
+FT2_CONFIG=$ac_cv_path_FT2_CONFIG
+
+if test -n "$FT2_CONFIG"; then
+  echo "$as_me:$LINENO: result: $FT2_CONFIG" >&5
+echo "${ECHO_T}$FT2_CONFIG" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+
+min_ft_version=6.1.0
+echo "$as_me:$LINENO: checking for FreeType - version >= $min_ft_version" >&5
+echo $ECHO_N "checking for FreeType - version >= $min_ft_version... $ECHO_C" >&6
+no_ft=""
+if test "$FT2_CONFIG" = "no" ; then
+  no_ft=yes
+else
+  FT2_CFLAGS=`$FT2_CONFIG $ft_config_args --cflags`
+  FT2_LIBS=`$FT2_CONFIG $ft_config_args --libs`
+  ft_config_major_version=`$FT2_CONFIG $ft_config_args --version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+  ft_config_minor_version=`$FT2_CONFIG $ft_config_args --version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+  ft_config_micro_version=`$FT2_CONFIG $ft_config_args --version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+  ft_min_major_version=`echo $min_ft_version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+  ft_min_minor_version=`echo $min_ft_version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+  ft_min_micro_version=`echo $min_ft_version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+  if test x$enable_fttest = xyes ; then
+    ft_config_is_lt=""
+    if test $ft_config_major_version -lt $ft_min_major_version ; then
+      ft_config_is_lt=yes
+    else
+      if test $ft_config_major_version -eq $ft_min_major_version ; then
+        if test $ft_config_minor_version -lt $ft_min_minor_version ; then
+          ft_config_is_lt=yes
+        else
+          if test $ft_config_minor_version -eq $ft_min_minor_version ; then
+            if test $ft_config_micro_version -lt $ft_min_micro_version ; then
+              ft_config_is_lt=yes
+            fi
+          fi
+        fi
+      fi
+    fi
+    if test x$ft_config_is_lt = xyes ; then
+      no_ft=yes
+    else
+      ac_save_CFLAGS="$CFLAGS"
+      ac_save_LIBS="$LIBS"
+      CFLAGS="$CFLAGS $FT2_CFLAGS"
+      LIBS="$FT2_LIBS $LIBS"
+      if test "$cross_compiling" = yes; then
+  echo $ac_n "cross compiling; assumed OK... $ac_c"
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <stdio.h>
+#include <stdlib.h>
+
+int
+main()
+{
+  FT_Library library;
+  FT_Error error;
+
+  error = FT_Init_FreeType(&library);
+
+  if (error)
+    return 1;
+  else
+  {
+    FT_Done_FreeType(library);
+    return 0;
+  }
+}
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  :
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+no_ft=yes
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+      CFLAGS="$ac_save_CFLAGS"
+      LIBS="$ac_save_LIBS"
+    fi             # test $ft_config_version -lt $ft_min_version
+  fi               # test x$enable_fttest = xyes
+fi                 # test "$FT2_CONFIG" = "no"
+if test x$no_ft = x ; then
+   echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FREETYPE 1
+_ACEOF
+
+else
+   echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+   if test "$FT2_CONFIG" = "no" ; then
+     echo "*** The freetype-config script installed by FreeType 2 could not be found."
+     echo "*** If FreeType 2 was installed in PREFIX, make sure PREFIX/bin is in"
+     echo "*** your path, or set the FT2_CONFIG environment variable to the"
+     echo "*** full path to freetype-config."
+   else
+     if test x$ft_config_is_lt = xyes ; then
+       echo "*** Your installed version of the FreeType 2 library is too old."
+       echo "*** If you have different versions of FreeType 2, make sure that"
+       echo "*** correct values for --with-ft-prefix or --with-ft-exec-prefix"
+       echo "*** are used, or set the FT2_CONFIG environment variable to the"
+       echo "*** full path to freetype-config."
+     else
+       echo "*** The FreeType test program failed to run.  If your system uses"
+       echo "*** shared libraries and they are installed outside the normal"
+       echo "*** system library path, make sure the variable LD_LIBRARY_PATH"
+       echo "*** (or whatever is appropiate for your system) is correctly set."
+     fi
+   fi
+   FT2_CFLAGS=""
+   FT2_LIBS=""
+   :
+fi
+
+
+
+
+
 
 # Check whether --with-sound or --without-sound was given.
 if test "${with_sound+set}" = set; then
@@ -13064,6 +13286,9 @@ s,@CROSS_COMPILING_TRUE@,$CROSS_COMPILING_TRUE,;t t
 s,@CROSS_COMPILING_FALSE@,$CROSS_COMPILING_FALSE,;t t
 s,@XML_MANUAL_TRUE@,$XML_MANUAL_TRUE,;t t
 s,@XML_MANUAL_FALSE@,$XML_MANUAL_FALSE,;t t
+s,@FT2_CONFIG@,$FT2_CONFIG,;t t
+s,@FT2_CFLAGS@,$FT2_CFLAGS,;t t
+s,@FT2_LIBS@,$FT2_LIBS,;t t
 s,@USE_SOUND_TRUE@,$USE_SOUND_TRUE,;t t
 s,@USE_SOUND_FALSE@,$USE_SOUND_FALSE,;t t
 s,@ESD_CONFIG@,$ESD_CONFIG,;t t

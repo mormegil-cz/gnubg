@@ -6130,6 +6130,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GUILE
     GuileInitialise( szDataDirectory );
 #endif
+    RenderInitialise();
 
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );

@@ -68,6 +68,9 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
+/* Define if you have the FreeType rendering library */
+#undef HAVE_FREETYPE
+
 /* Define to 1 if you have the `fstat' function. */
 #undef HAVE_FSTAT
 

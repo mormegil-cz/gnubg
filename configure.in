@@ -286,6 +286,8 @@ fi
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
 AM_CONDITIONAL(XML_MANUAL, test "$no_libxml2" != "yes" -a "$gtk2" = "yes")
 
+AC_CHECK_FT2(,AC_DEFINE(HAVE_FREETYPE,1,[Define if you have the FreeType rendering library]))
+
 dnl Sounds
 
 AC_ARG_WITH(sound,[  --with-sound            use sounds with GNU Backgammon])
