@@ -33,6 +33,9 @@
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define if you have the isatty function.  */
+#undef HAVE_ISATTY
+
 /* Define if you have the rand_r function.  */
 #undef HAVE_RAND_R
 
@@ -53,6 +56,9 @@
 
 /* Define if you have the <pwd.h> header file.  */
 #undef HAVE_PWD_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
 
 /* Define if you have the <sys/mman.h> header file.  */
 #undef HAVE_SYS_MMAN_H
@@ -89,6 +95,3 @@
 #define FALSE 0
 #define TRUE 1
 #endif
-
-#undef PACKAGE
-#undef VERSION

@@ -179,7 +179,7 @@ static command acDatabase[] = {
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
     { "cache", CommandShowCache, "See statistics on the performance of "
       "the evaluation cache", NULL },
-    { "copying", CommandNotImplemented, "Conditions for redistributing copies "
+    { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
     /* FIXME show cube */
     { "crawford", CommandShowCrawford, 
@@ -199,7 +199,7 @@ static command acDatabase[] = {
     { "score", CommandShowScore, "View the match or session score ",
       NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL },
-    { "warranty", CommandNotImplemented, "Various kinds of warranty you do "
+    { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
       "not have", NULL },
     { NULL, NULL, NULL, NULL }    
 }, acTrain[] = {

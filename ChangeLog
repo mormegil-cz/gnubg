@@ -1,3 +1,9 @@
+Wed Jan 12 14:51:37 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* show.c (CommandShowCopying, CommandShowWarranty, ShowPaged): New
+	functions.
+	* copying.c: New file.
+
 Tue Jan 11 21:42:53 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* play.c (CommandTake): Fix bug when accepting beavers -- the owner

@@ -3,12 +3,32 @@
  *
  * by Gary Wong, 1999
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * $Id$
  */
 
 #include "config.h"
 
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 #include <stdio.h>
+#include <stdlib.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -18,6 +38,56 @@
 #if !X_DISPLAY_MISSING
 #include "xgame.h"
 #endif
+
+extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
+
+static void ShowPaged( char **ppch ) {
+
+    int i, nRows = 0, ch;
+    char *pchLines;
+#if TIOCGWINSZ
+    struct winsize ws;
+#endif
+
+#if HAVE_ISATTY
+    if( isatty( STDIN_FILENO ) ) {
+#endif
+#if TIOCGWINSZ
+	if( !( ioctl( STDIN_FILENO, TIOCGWINSZ, &ws ) ) )
+	    nRows = ws.ws_row;
+#endif
+	if( !nRows && ( pchLines = getenv( "LINES" ) ) )
+	    nRows = atoi( pchLines );
+
+	/* FIXME we could try termcap-style tgetnum( "li" ) here, but it
+	   hardly seems worth it */
+	
+	if( !nRows )
+	    nRows = 24;
+
+	i = 0;
+
+	while( *ppch ) {
+	    puts( *ppch++ );
+	    if( ++i >= nRows - 1 ) {
+		fputs( "-- Press <return> to continue --", stdout );
+		
+		/* FIXME use better input handling */
+		while( ( ch = getchar() ) != '\n' && ch != EOF )
+		    ;
+		
+		if( fInterrupt )
+		    return;
+		
+		i = 0;
+	    }
+	}
+#if HAVE_ISATTY
+    } else
+#endif
+	while( *ppch )
+	    puts( *ppch++ );
+}
 
 extern void CommandShowBoard( char *sz ) {
 
@@ -65,6 +135,24 @@ extern void CommandShowCache( char *sz ) {
     putchar( '\n' );
 }
 
+extern void CommandShowCopying( char *sz ) {
+
+    ShowPaged( aszCopying );
+}
+
+extern void CommandShowCrawford( char *sz ) {
+
+  if( nMatchTo > 0 ) 
+    puts( fCrawford ?
+	  "This game is the Crawford game." :
+	  "This game is not the Crawford game" );
+  else if ( ! nMatchTo )
+    puts( "Crawford rule is not used in money sessions." );
+  else
+    puts( "No match is being played." );
+
+}
+
 extern void CommandShowDice( char *sz ) {
 
     if( fTurn < 0 ) {
@@ -78,6 +166,15 @@ extern void CommandShowDice( char *sz ) {
     else
 	printf( "%s has rolled %d and %d.\n", ap[ fMove ].szName, anDice[ 0 ],
 		anDice[ 1 ] );
+}
+
+extern void CommandShowJacoby( char *sz ) {
+
+    if ( fJacoby ) 
+      puts( "Money sessions is played with the Jacoby rule." );
+    else
+      puts( "Money sessions is played without the Jacoby rule." );
+
 }
 
 extern void CommandShowPipCount( char *sz ) {
@@ -124,6 +221,31 @@ extern void CommandShowPlayer( char *sz ) {
     }
 }
 
+extern void CommandShowPostCrawford( char *sz ) {
+
+  if( nMatchTo > 0 ) 
+    puts( fPostCrawford ?
+	  "This is post-Crawford play." :
+	  "This is not post-Crawford play." );
+  else if ( ! nMatchTo )
+    puts( "Crawford rule is not used in money sessions." );
+  else
+    puts( "No match is being played." );
+
+}
+
+extern void CommandShowRNG( char *sz ) {
+
+  static char *aszRNG[] = {
+    "ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
+    "user supplied"
+  };
+
+  printf( "You are using the %s generator.\n",
+	  aszRNG[ rngCurrent ] );
+    
+}
+
 extern void CommandShowScore( char *sz ) {
 
     printf( "The score (after %d game%s) is: %s %d, %s %d",
@@ -165,53 +287,7 @@ extern void CommandShowTurn( char *sz ) {
 		aszGameResult[ fResigned - 1 ] );
 }
 
-extern void CommandShowRNG( char *sz ) {
+extern void CommandShowWarranty( char *sz ) {
 
-  static char *aszRNG[] = {
-    "ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
-    "user supplied"
-  };
-
-  printf( "You are using the %s generator.\n",
-	  aszRNG[ rngCurrent ] );
-    
+    ShowPaged( aszWarranty );
 }
-
-
-extern void CommandShowJacoby( char *sz ) {
-
-    if ( fJacoby ) 
-      puts( "Money sessions is played with the Jacoby rule." );
-    else
-      puts( "Money sessions is played without the Jacoby rule." );
-
-}
-
-
-extern void CommandShowCrawford( char *sz ) {
-
-  if( nMatchTo > 0 ) 
-    puts( fCrawford ?
-	  "This game is the Crawford game." :
-	  "This game is not the Crawford game" );
-  else if ( ! nMatchTo )
-    puts( "Crawford rule is not used in money sessions." );
-  else
-    puts( "No match is being played." );
-
-}
-
-
-extern void CommandShowPostCrawford( char *sz ) {
-
-  if( nMatchTo > 0 ) 
-    puts( fPostCrawford ?
-	  "This is post-Crawford play." :
-	  "This is not post-Crawford play." );
-  else if ( ! nMatchTo )
-    puts( "Crawford rule is not used in money sessions." );
-  else
-    puts( "No match is being played." );
-
-}
-
