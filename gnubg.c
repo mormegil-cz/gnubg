@@ -8473,7 +8473,7 @@ TextToClipboard( const char *sz ) {
 #if WIN32
 #if ENABLE_NLS
   /* dirty hack for Windows Japanese edition */
-  if ( !strncmp( "Japanese", setlocale(LC_ALL, NULL), 8 ) ) {
+  if ( !strncasecmp( "ja", setlocale(LC_ALL, NULL), 2 ) ) {
     char *pch = Convert( sz, "SHIFT_JIS", GNUBG_CHARSET );
     WinCopy( pch );
     free( pch );

@@ -1,3 +1,8 @@
+Fri Sep 12 17:56:18 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gnubg.c (TextToClipboard): Chanage Japanese locale detection
+	logic.
+
 Fri 13 Sep 17:07"54 GMT Jim Segrave <jes@jes-2.demon.nl>
 	
         * timecontrol.c play.c backgammon.h needed Unix include files, 
