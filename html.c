@@ -2050,8 +2050,9 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       /*
        * Write row with move parameters 
        */
-
-      if ( exsExport.afMovesParameters [ pmr->n.ml.amMoves[ i ].esMove.et ] ) {
+  
+      if ( exsExport.afMovesParameters 
+              [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
 
         evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
 
