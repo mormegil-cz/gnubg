@@ -325,15 +325,18 @@ extern void AddMoveRecord( void *pv ) {
     /* FIXME perform other elision (e.g. consecutive "set" records) */
 
 #if USE_GTK
-    if( fX ) {
+    if( fX )
 	GTKAddMoveRecord( pmr );
-	GTKSetMoveRecord( pmr );
-    }
 #endif
     
     ApplyMoveRecord( pmr );
     
     plLastMove = ListInsert( plGame, pmr );
+
+#if USE_GTK
+    if( fX )
+	GTKSetMoveRecord( pmr );
+#endif    
 }
 
 extern void SetMoveRecord( void *pv ) {
@@ -656,6 +659,9 @@ static int ComputerTurn( void ) {
       pmn->anRoll[ 0 ] = anDice[ 0 ];
       pmn->anRoll[ 1 ] = anDice[ 1 ];
       pmn->fPlayer = fTurn;
+      pmn->ml.cMoves = 0;
+      pmn->ml.amMoves = NULL;
+      pmn->etDouble = EVAL_NONE;
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
                         anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
@@ -704,6 +710,9 @@ static int ComputerTurn( void ) {
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
+    pmn->ml.cMoves = 0;
+    pmn->ml.amMoves = NULL;
+    pmn->etDouble = EVAL_NONE;
     
     FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
     
@@ -1284,6 +1293,9 @@ CommandMove( char *sz ) {
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
+	    pmn->ml.cMoves = 0;
+	    pmn->ml.amMoves = NULL;
+	    pmn->etDouble = EVAL_NONE;
 	    if( ml.cMoves )
 		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
 			sizeof( pmn->anMove ) );
@@ -1346,6 +1358,9 @@ CommandMove( char *sz ) {
         pmn->anRoll[ 0 ] = anDice[ 0 ];
         pmn->anRoll[ 1 ] = anDice[ 1 ];
         pmn->fPlayer = fTurn;
+	pmn->ml.cMoves = 0;
+	pmn->ml.amMoves = NULL;
+	pmn->etDouble = EVAL_NONE;
         memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
                 sizeof( pmn->anMove ) );
 		
@@ -1541,11 +1556,11 @@ extern void ChangeGame( list *plGameNew ) {
     }
 #endif
     
-    SetMoveRecord( plLastMove->p );
-
     CalculateBoard();
     
     UpdateGame();
+
+    SetMoveRecord( plLastMove->p );
 }
 
 static void CommandNextGame( char *sz ) {
@@ -1606,10 +1621,10 @@ extern void CommandNext( char *sz ) {
 	plLastMove = plLastMove->plNext;
 	ApplyMoveRecord( plLastMove->p );
     }
-
-    SetMoveRecord( plLastMove->p );
     
     UpdateGame();
+
+    SetMoveRecord( plLastMove->p );
 }
 
 extern void CommandPlay( char *sz ) {
@@ -1688,11 +1703,11 @@ extern void CommandPrevious( char *sz ) {
     while( n-- && plLastMove->plPrev->p )
 	plLastMove = plLastMove->plPrev;
 
-    SetMoveRecord( plLastMove->p );
-    
     CalculateBoard();
 
     UpdateGame();
+
+    SetMoveRecord( plLastMove->p );
 }
 
 extern void CommandRedouble( char *sz ) {
@@ -1734,6 +1749,7 @@ extern void CommandRedouble( char *sz ) {
     pmr = malloc( sizeof( pmr->d ) );
     pmr->mt = MOVE_DOUBLE;
     pmr->d.fPlayer = fTurn;
+    pmr->d.etDouble = EVAL_NONE;
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -1873,6 +1889,9 @@ CommandRoll( char *sz ) {
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
     pmn->anMove[ 0 ] = -1;
+    pmn->ml.cMoves = 0;
+    pmn->ml.amMoves = NULL;
+    pmn->etDouble = EVAL_NONE;
 	
     ShowAutoMove( anBoard, pmn->anMove );
 
@@ -1886,6 +1905,9 @@ CommandRoll( char *sz ) {
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
+    pmn->ml.cMoves = 0;
+    pmn->ml.amMoves = NULL;
+    pmn->etDouble = EVAL_NONE;
     memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
 
     ShowAutoMove( anBoard, pmn->anMove );

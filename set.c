@@ -132,6 +132,16 @@ static void SetRNG( rng rngNew, char *szSeed ) {
     }
 }
 
+extern void CommandSetAnnotation( char *sz ) {
+
+    if( SetToggle( "annotation", &fAnnotation, sz,
+		   "Move analysis and commentary will be displayed.",
+		   "Move analysis and commentary will not be displayed." )
+	>= 0 )
+	/* Force an update, even if the setting has not changed. */
+	UpdateSetting( &fAnnotation );
+}
+
 extern void CommandSetAutoBearoff( char *sz ) {
 
     SetToggle( "automatic bearoff", &fAutoBearoff, sz, "Will automatically "

@@ -78,6 +78,8 @@ duplication of effort and to make sure our changes merge easily.
   under the Analyse menu).
 ** Make "show marketwindow" say something for money games.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
+** If a resignation is rejected, don't allow further resignations for
+  that amount or below for the rest of the turn.
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -89,6 +91,7 @@ duplication of effort and to make sure our changes merge easily.
 * TTY interface:
 ** Display the score and match length in ShowBoard().
 ** Handle "list game" and "list match".
+** Handle annotations.
 
 * X interface:
 ** Does anybody still use the old Xlib (Ext) interface any more?  If so,
@@ -151,7 +154,6 @@ duplication of effort and to make sure our changes merge easily.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
-*** Matija Kejzar suggests making the hint dialog non-modal.
 
 ** MS Windows:
 *** The stop button has no effect.  One approach would be to define a
@@ -181,8 +183,6 @@ duplication of effort and to make sure our changes merge easily.
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
   see what the REPL in guile-gtk does.
-** Cosmetic bug when using the rollout button in the hint window (the
-  commands echoed to stdout and the prompts are in the wrong order).
 ** Changing a player's name doesn't affect the names in the drop-down
   menu in the game window.
 ** The SGF loading (saving?) routines and CommandLoadCommands use
@@ -198,6 +198,10 @@ duplication of effort and to make sure our changes merge easily.
   robust to add a parent to it (box or event box?), and give _that_
   the grab.  Unfortunately, grab add/remove calls must nest, and we
   can't guarantee that...
+** Occasionally there is a core dump in theme_image_unref() when
+  destroying the style for the chosen move in the analysis window.  This
+  might be a bug in the pixmap theme engine, since it doesn't seem to happen
+  with the default theme.  (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

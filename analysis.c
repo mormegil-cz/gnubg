@@ -192,18 +192,17 @@ AnalyzeGame ( list *plGame, int iGame ) {
                              anBoard, auch, &ci, &ecMove );
 
         if ( pmr->n.ml.cMoves ) {
-          j = -1;
-          do {
-            j++;
+	    pmr->n.iMove = -1;
+	    do {
+		pmr->n.iMove++;
 
-            printf ( "%i %s %7.3f\n",
-                     j, FormatMove ( sz, anBoard,
-                                     pmr->n.ml.amMoves[ j ].anMove ),
-                     pmr->n.ml.amMoves[ j ].rScore );
-          }
-          while ( ! EqualKeys ( auch, pmr->n.ml.amMoves[ j ].auch ) );
-        }
-        else {
+		printf( "%i %s %7.3f\n", pmr->n.iMove,
+			FormatMove( sz, anBoard,
+				    pmr->n.ml.amMoves[ pmr->n.iMove ].anMove ),
+			pmr->n.ml.amMoves[ pmr->n.iMove ].rScore );
+	    } while ( ! EqualKeys ( auch,
+				    pmr->n.ml.amMoves[ pmr->n.iMove ].auch ) );
+        } else {
           printf ("no legal moves..\n" );
         }
                                 

@@ -274,6 +274,7 @@ static void RestoreNode( list *pl ) {
 		pmr = malloc( sizeof( pmr->d ) );
 		pmr->mt = MOVE_DOUBLE;
 		pmr->d.fPlayer = fPlayer;
+		pmr->d.etDouble = EVAL_NONE;
 	    } else if( !strcmp( pch, "take" ) ) {
 		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_TAKE;
@@ -286,6 +287,9 @@ static void RestoreNode( list *pl ) {
 		pmr = malloc( sizeof( pmr->n ) );
 		pmr->n.mt = MOVE_NORMAL;
 		pmr->n.fPlayer = fPlayer;
+		pmr->n.ml.cMoves = 0;
+		pmr->n.ml.amMoves = NULL;
+		pmr->n.etDouble = EVAL_NONE;
 		
 		pmr->n.anRoll[ 1 ] = 0;
 		

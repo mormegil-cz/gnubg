@@ -1,3 +1,16 @@
+Mon Mar 26 10:31:04 2001  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetAnnotation): New function.
+	* analysis.c (AnalyzeGame): Record which move was actually made.
+	* gtkgame.c (SetAnalysis): New function.
+	* play.c (AddMoveRecord): Re-order GTK updates of move records,
+	so annotations appear correctly.
+	* sgf.c (RestoreNode): Initialise annotation fields.
+	
+	* gnubg.c (CommandCopy): New function (via e-mail from Øystein).
+
+	* gtkgame.c (GTKHint): Make the hint dialog non-modal.
+	
 Thu Mar 22 14:26:44 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_pointer): Ignore subsequent button presses
