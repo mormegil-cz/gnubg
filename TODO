@@ -86,6 +86,12 @@ duplication of effort and to make sure our changes merge easily.
   what happens when the user types half a command and then moves with
   the mouse which causes the manual dice prompt?  All this mess can
   probably wait for Gnome. (gary)
+** CommandRedouble does not work according to international backgammon
+   rules. See <URI:"http://www.bkgm.com/rules.html"> (search for Beaver).
+   If I beaver, I keep the cube and my opponent may drop the beaver 
+   (or even raccoon).
+   However, the program treats the beaver as an ordinary redouble and
+   I don't keep the cube.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
