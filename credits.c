@@ -19,6 +19,7 @@ char *aszCredits[] = {
     "Bill Davidson",
     "Michael Depreli",
     "Max Durbano",
+    "James F. Kibler",
     "Michel Grimminck",
     "Eric Groleau",
     "Jeff Haferman",

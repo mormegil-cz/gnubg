@@ -1,3 +1,8 @@
+Sat Jan 25 19:24:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* analysis.c (absoluteFibsRating): fix minor bug in interpolation
+	formula. (reported by James F. Kibler)
+
 Sat Jan 25 17:53:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Show distribution of rolls (sorry guys: only for GTK+ 2.x).

@@ -40,6 +40,7 @@ Alain Henry
 Jens Hoefkens
 Nis Jorgensen
 Matija Kejzar
+James F. Kibler
 Jonathan Kinsey
 Johnny Kirk
 Gerhard Knop
