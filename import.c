@@ -251,13 +251,10 @@ ParseJF( FILE *fp,
  
   if (nOnRoll == 0) *pfTurn = -1; 
 
-  if (nMovesLeft + nMovesRight > 1) {
-    anDice[0] = nDie1;
-    anDice[1] = nDie2;
-  } else {
-    anDice[0] = 0;
-    anDice[1] = 0;
-  } 
+  anDice[0] = nDie1;
+  anDice[1] = nDie2;
+
+  anBoard[1][24] = anNew[0];
 
   for( i = 0; i < 25; i++ ) {
     anBoard[ idx ][ i ] = ( anNew[ i + 1 ]  < 0 ) ?  -anNew[ i + 1 ]  : 0;
@@ -265,8 +262,9 @@ ParseJF( FILE *fp,
 	anNew[ 24 - i ]  : 0;
   }
 
-  anBoard[ ! idx ][ 24 ] =  anNew[0];
-  anBoard[ idx ][ 24 ] =  -anNew[25];
+  anBoard[0][ 24 ] =  -anNew[25];
+  
+  SwapSides (anBoard);
 
   return 0;
 

@@ -1,3 +1,7 @@
+Fri May  2 19:25:12 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * import.c (ParseJF): fix bugs!
+
 Thu May  1 16:15:12 2003  Oystein Johansen  <oystein@gnubg.org>
         
 	* export.c (CommandExportPositionJF): More corrections to export of
