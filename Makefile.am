@@ -31,7 +31,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h br1.c
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -66,19 +66,25 @@ endif
 endif
 
 
-pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
 man_MANS = gnubg.6
 
-noinst_PROGRAMS = makebearoff makeweights
+noinst_PROGRAMS = makebearoff makeweights makebearoff1
 check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
+
+
+makebearoff1_SOURCES = makebearoff1.c 
+makebearoff1_LDADD = 
+makebearoff1_DEPENDENCIES = 
+
 
 makeweights_SOURCES = makeweights.c i18n.c i18n.h
 makeweights_LDADD = -Llib -levent $(COMMON_LIBS)
@@ -88,11 +94,16 @@ erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
 distcheck-hook:
-	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
+	-cp $(srcdir)/gnubg_ts0.bd $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
 	ABOUT-NLS
+
+br1.c:	makebearoff makebearoff1
+	if [ ! -f br1.c ]; then \
+	   ./makebearoff -o 6 -s 7999999 | ./makebearoff1 -o br1.c; \
+	fi
 
 sgfp.c sgfp.h: sgf.y
 	$(BISON) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
@@ -109,16 +120,16 @@ copying.c: COPYING copying.awk
 # Create symlinks to all the necessary parts of $(srcdir), so that gnubg
 # can run happily in the build directory.
 all-local:
-	@for i in gnubg.bd gnubg.gtkrc gnubg.scm gnubg.weights; do \
+	@for i in gnubg_ts0.bd gnubg.gtkrc gnubg.scm gnubg.weights; do \
 	[ -s $$i ] || if [ -s $(srcdir)/$$i ]; then $(LN_S) $(srcdir)/$$i .; \
 	fi; done
 	@for i in gnubg.xml annealing.png rulfig1.png rulfig2.png rulfig3.png \
 	rulfig4.png rulfig5.png texinfo.dtd; do [ -s $$i ] || \
 	if [ -s $(srcdir)/doc/$$i ]; then $(LN_S) $(srcdir)/doc/$$i .; fi; done
 
-gnubg.bd:
+gnubg_ts0.bd:
 	@echo ' ** NOTE: For full strength in bearoff moves, GNU'
-	@echo ' ** Backgammon requires a "gnubg.bd" file containing a'
+	@echo ' ** Backgammon requires a "gnubg_ts0.bd" file containing a'
 	@echo ' ** database of endgame positions.  See the README'
 	@echo ' ** file for details.'
 
@@ -146,47 +157,14 @@ bearoff-database: makebearoff
 	@echo ' ** it is not possible to generate the bearoff database'
 	@echo ' ** on the build system.  To create this file manually,'
 	@echo ' ** use a command like:'
-	@echo ' **   makebearoff -t 6x6 -o 6 > gnubg.bd'
+	@echo ' **   makebearoff -t 6x6 > gnubg_ts0.bd'
 	@echo ' ** on the host system.'
-bearoff-database-7: bearoff-database
-bearoff-database-8: bearoff-database
-bearoff-database-9: bearoff-database
-bearoff-database-10: bearoff-database
-bearoff-database-11: bearoff-database
-bearoff-database-12: bearoff-database
-bearoff-database-13: bearoff-database
-bearoff-database-14: bearoff-database
-bearoff-database-15: bearoff-database
-bearoff-database-16: bearoff-database
-bearoff-database-17: bearoff-database
-bearoff-database-18: bearoff-database
 else
 bearoff-database: makebearoff
-	./makebearoff -t 6x6 -o 6 > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
-bearoff-database-7: makebearoff
-	./makebearoff -t 0x0 -o 7 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-8: makebearoff
-	./makebearoff -t 0x0 -o 8 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-9: makebearoff
-	./makebearoff -t 0x0 -o 9 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-10: makebearoff
-	./makebearoff -t 0x0 -o 10 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-11: makebearoff
-	./makebearoff -t 0x0 -o 11 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-12: makebearoff
-	./makebearoff -t 0x0 -o 12 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-13: makebearoff
-	./makebearoff -t 0x0 -o 13 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-14: makebearoff
-	./makebearoff -t 0x0 -o 14 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-15: makebearoff
-	./makebearoff -t 0x0 -o 15 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-16: makebearoff
-	./makebearoff -t 0x0 -o 16 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-17: makebearoff
-	./makebearoff -t 0x0 -o 17 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
-bearoff-database-18: makebearoff
-	./makebearoff -t 0x0 -o 18 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+	@echo ' ** NOTE: you can generate huge one sided and two sided'
+	@echo ' ** bearoff databases for usage with gnubg'
+	£echo ' ** See README for more details'
+	./makebearoff -t 6x6 > $(srcdir)/gnubg_ts0.bd; $(MAKE) gnubg.bd
 endif
 
 .PHONY: bearoff-database
