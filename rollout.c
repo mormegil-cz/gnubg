@@ -91,65 +91,52 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
                             const rng rngx,
                             const int fRotate ) {
 
-  if ( fInitial ) {
-    /* rollout of initial position: no doubles allowed */
-
-      /* FIXME implement proper quasi-random dice for initial positions */
-      
-    if( fRotate && !iTurn && !( cGames % 30 ) ) {
-      anDice[ 1 ] = ( ( iGame / 5 ) % 6 ) + 1;
-      anDice[ 0 ] = ( iGame % 5 ) + 1;
-      if ( anDice[ 0 ] >= anDice[ 1 ] ) 
-        anDice[ 0 ]++;
-      
-      return 0;
-    } 
-    else if( fRotate && iTurn == 1 && !( cGames % 1080 ) ) {
-      anDice[ 0 ] = ( ( iGame / 30 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 180 ) % 6 ) + 1;
-
-      return 0;
-    } 
-    else if( fRotate && iTurn == 2 && !( cGames % 38880 ) ) {
-      anDice[ 0 ] = ( ( iGame / 1080 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 6480 ) % 6 ) + 1;
-
-      return 0;
-    } 
-    else if( fRotate && iTurn == 3 && !( cGames % 1399680 ) ) {
-      anDice[ 0 ] = ( ( iGame / 38880 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 233280 ) % 6 ) + 1;
-
-      return 0;
-    } 
-    else {
-
-      int n;
-     
-    reroll:
-      if( ( n = RollDice( anDice, rngx ) ) )
-	  return n;
-
-      if ( fInitial && ! iTurn && anDice[ 0 ] == anDice[ 1 ] )
-        goto reroll;
-
-      return 0;
-    }
-  } else
+  if ( fInitial && !iTurn ) {
+      /* rollout of initial position: no doubles allowed */
       if( fRotate ) {
-	  int i, /* the "generation" of the permutation */
-	      j, /* the number we're permuting */
-	      k; /* 36**i */
-	  
-	  for( i = 0, j = 0, k = 1; i < 6 && i <= iTurn; i++, k *= 36 )
-	      j = aaanPermutation[ i ][ iTurn ][ ( iGame / k + j ) % 36 ];
+	  static int nSkip;
+	  int j;
+      
+	  if( !iGame )
+	      nSkip = 0;
 
-	  anDice[ 0 ] = j / 6 + 1;
-	  anDice[ 1 ] = j % 6 + 1;
+	  for( ; ; nSkip++ ) {
+	      j = aaanPermutation[ 0 ][ 0 ][ ( iGame + nSkip ) % 36 ];
+	      
+	      anDice[ 0 ] = j / 6 + 1;
+	      anDice[ 1 ] = j % 6 + 1;
+
+	      if( anDice[ 0 ] != anDice[ 1 ] )
+		  break;
+	  }
+	  
+	  return 0;
+      } else {
+	  int n;
+     
+      reroll:
+	  if( ( n = RollDice( anDice, rngx ) ) )
+	      return n;
+	  
+	  if ( fInitial && ! iTurn && anDice[ 0 ] == anDice[ 1 ] )
+	      goto reroll;
 
 	  return 0;
-      } else 
-	  return RollDice( anDice, rngx );
+      }
+  } else if( fRotate && iTurn < 128 ) {
+      int i, /* the "generation" of the permutation */
+	  j, /* the number we're permuting */
+	  k; /* 36**i */
+      
+      for( i = 0, j = 0, k = 1; i < 6 && i <= iTurn; i++, k *= 36 )
+	  j = aaanPermutation[ i ][ iTurn ][ ( iGame / k + j ) % 36 ];
+      
+      anDice[ 0 ] = j / 6 + 1;
+      anDice[ 1 ] = j % 6 + 1;
+      
+      return 0;
+  } else 
+      return RollDice( anDice, rngx );
 }
 
 /* Upon return, anBoard contains the board position after making the best

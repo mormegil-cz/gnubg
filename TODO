@@ -221,8 +221,7 @@ functions:
 ** make rollout as initial position work correctly. Currently, you have to perform
   two rollouts (one with player 0 on roll, and another with player 1 on roll)
   and average the two results. Instead gnubg should automagically perform both 
-  rollouts and do the averaging.  (Quasi-random dice don't work for initial
-  positions, either.)
+  rollouts and do the averaging.
 ** The board should be updated before automatic analysis starts.  (Currently,
   if you interrupt the automatic analysis, the move will go into effect, but
   the board shown will be out of date.)
