@@ -1,3 +1,7 @@
+Fri Aug  2 14:13:12 2002  Gary Wong  <gtw@gnu.org>
+
+	* eval.c (StatusNeuralNet): Correct output.
+
 Fri Aug  2 20:19:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Independent adjustment of dice and dice dot colors.
@@ -20,6 +24,7 @@ Fri Aug  2 20:19:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* gtkprefs.c (BoardPreferencesCommand): write dice and dice
 	dot colors.
 
+>>>>>>> 1.588
 Fri Aug  2 18:06:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Make tutor mode save cube decisions in game list.
