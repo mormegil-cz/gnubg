@@ -39,6 +39,11 @@
 #if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #endif
+
+#if HAVE_STROPTS_H
+#include <stropts.h>  /* I_SETSIG, S_RDNORM under solaris */
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

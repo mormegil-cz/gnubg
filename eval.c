@@ -92,8 +92,9 @@ EvalEfficiency( int anBoard[2][25], positionclass pc );
 
 static int MaxTurns( int i );
 
-typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[],
-		int nm);
+typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[]
+				 /* , int nm */);
+
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 typedef void ( *classstatusfunc )( char *szOutput );
 typedef int ( *cfunc )( const void *, const void * );
@@ -1867,63 +1868,6 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     }
 }
 
-#if 0
-static int
-barPrimeBackGame(int anBoard[ 2 ][ 25 ])
-{
-  int side, i, k;
-  
-  /* on bar */
-  if( anBoard[0][24] || anBoard[1][24] ) {
-    return 1;
-  }
-
-  /* two or more anchors in opponent home */
-  
-  for(side = 0; side < 2; ++side) {
-    unsigned int n = 0;
-    for(i = 18; i < 24; ++i) {
-      if( anBoard[side][i] > 1 ) {
-	++n;
-      }
-    }
-    if( n > 1 ) {
-      return 1;
-    }
-  }
-
-  for(side = 0; side < 2; ++side) {
-    int first;
-    
-    for(first = 23; first >= 0; --first) {
-      if( anBoard[side][first] > 0 ) {
-	break;
-      }
-    }
-    {                                                  assert( first >= 0 ); }
-
-    for(i = 24 - first; i < 20; ++i) {
-      unsigned int n = 0;
-      for(k = i; k <= i+3; ++k) {
-	if( anBoard[1-side][k] > 1 ) {
-	  ++n;
-	}
-      }
-
-      if( n == 4 ) {
-	/* 4 prime */
-	return 1;
-      }
-
-      if( n == 3 && i < 20 && anBoard[1-side][i+4] > 1 ) {
-	/* broken 5 prime */
-	return 1;
-      }
-    }
-  }
-  return 0;
-}
-#endif
 
 extern positionclass
 ClassifyPosition( int anBoard[ 2 ][ 25 ] )
@@ -1992,7 +1936,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
 }
 
 static void
-EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], int ignore )
+EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int ignore*/ )
 {
   int n, nOpp;
 
@@ -2304,7 +2248,7 @@ EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
 }
 
 extern void
-EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], int ignore )
+EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int ignore */ )
 {
   EvalBearoff1Full( anBoard, arOutput );
 }
@@ -2322,17 +2266,44 @@ enum {
   OBG_POSSIBLE = 0x8
 };
 
+/* A shameful HACK.
+   Instead of implementing an equivalent to FindBestMoveInEval, use a global
+   to control evaluation type.
+   When starting a series of 0ply evaluations, ScoreMoves sets 'moveNumber'
+   to -1. Each evaluation increments it, and at the end ScoreMoves sets it
+   back to -2 (default net evaluation, changes nothing).
+*/
+   
+static int moveNumber = -2;
+
+static
+#if __GNUC__
+inline
+#endif
+NNEvalType NNevalAction(void)
+{
+  switch( moveNumber ) {
+    /* default, no change */
+    case -2:  return NNEVAL_NONE;
+
+    /* start a series of evaluations */
+    case -1:  moveNumber = 0; return NNEVAL_SAVE;
+
+    /* middle of series */
+    default:  ++moveNumber; break;
+  }
+
+  return NNEVAL_FROMBASE;
+}
+
 static void
-EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], int nm )
+EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 {
   float arInput[ NUM_INPUTS ];
 
-  NNEvalType t = ((nm > 0) ? NNEVAL_FROMBASE :
-                   ((nm == 0) ? NNEVAL_SAVE : NNEVAL_NONE));
-
   CalculateRaceInputs( anBoard, arInput );
     
-  NeuralNetEvaluate( &nnRace, arInput, arOutput, t );
+  NeuralNetEvaluate( &nnRace, arInput, arOutput,  NNevalAction() );
 
   /* anBoard[1] is on roll */
   {
@@ -2429,11 +2400,11 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], int nm )
 
 	if( pBearoff2 && PositionBearoff( dummy[ 0 ] ) < 924 &&
 	    PositionBearoff( dummy[ 1 ] ) < 924 )
-	    EvalBearoff2( dummy, p, 0 );
+	    EvalBearoff2( dummy, p );
 	else if( pBearoff1 )
-	    EvalBearoff1( dummy, p, 0 );
+	    EvalBearoff1( dummy, p );
 	else
-	    EvalRace( dummy, p, 0 );
+	    EvalRace( dummy, p );
 
 	if( side == 1 ) {
 	  arOutput[OUTPUT_WINBACKGAMMON] = p[0];
@@ -2455,31 +2426,28 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], int nm )
 }
 
 
-static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[], int nm ) {
+static void
+EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm*/ ) {
     
     float arInput[ NUM_INPUTS ];
     
-    NNEvalType t = ((nm > 0) ? NNEVAL_FROMBASE :
-                   ((nm == 0) ? NNEVAL_SAVE : NNEVAL_NONE));
-
     CalculateInputs( anBoard, arInput );
     
-    NeuralNetEvaluate( &nnContact, arInput, arOutput, t );
+    NeuralNetEvaluate( &nnContact, arInput, arOutput, NNevalAction() );
 }
 
-static void EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], int nm ) {
+static void
+EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ ) {
     
     float arInput[ NUM_INPUTS ];
     
-    NNEvalType t = ((nm > 0) ? NNEVAL_FROMBASE :
-                   ((nm == 0) ? NNEVAL_SAVE : NNEVAL_NONE));
-
     CalculateInputs( anBoard, arInput );
     
-    NeuralNetEvaluate( &nnCrashed, arInput, arOutput, t );
+    NeuralNetEvaluate( &nnCrashed, arInput, arOutput, NNevalAction() );
 }
 
-static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], int nm ) {
+static void
+EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm*/ ) {
 
     int i, c;
     
@@ -2621,6 +2589,8 @@ static int
 FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
                    int anBoard[ 2 ][ 25 ], cubeinfo *pci, 
                    evalcontext *pec, int nPlies );
+
+
 
 static int 
 EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
@@ -2770,7 +2740,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   } else {
     /* at leaf node; use static evaluation */
       
-    acef[ pc ]( anBoard, arOutput, -1 );
+    acef[ pc ]( anBoard, arOutput );
 
     if( pec->rNoise )
 	for( i = 0; i < NUM_OUTPUTS; i++ )
@@ -2905,7 +2875,7 @@ extern int GameStatus( int anBoard[ 2 ][ 25 ] ) {
 	if( ClassifyPosition( anBoard ) != CLASS_OVER )
 		return 0;
 
-	EvalOver( anBoard, ar, 0 );
+	EvalOver( anBoard, ar );
 
 	if( ar[ OUTPUT_WINBACKGAMMON ] || ar[ OUTPUT_LOSEBACKGAMMON ] )
 		return 3;
@@ -3313,26 +3283,40 @@ static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
 }
 
 static int
-ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies ) {
-
-    int i;
+ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
+{
+  int i;
+  /* return value */
+  int r = 0;
     
-    pml->rBestScore = -99999.9;
+  pml->rBestScore = -99999.9;
 
-    for( i = 0; i < pml->cMoves; i++ ) {
-	if( ScoreMove( pml->amMoves + i, pci, pec, nPlies ) < 0 )
-	    return -1;
-
-	if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
-	    ( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
-	      && ( pml->amMoves[ i ].rScore2 > 
-		   pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
-	    pml->iMoveBest = i;
-	    pml->rBestScore = pml->amMoves[ i ].rScore;
-	};
+  if( nPlies == 0 ) {
+    /* start move count */
+    moveNumber = -1;
+  }
+    
+  for( i = 0; i < pml->cMoves; i++ ) {
+    if( ScoreMove( pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
+      r = -1;
+      break;
     }
+
+    if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
+	( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
+	  && ( pml->amMoves[ i ].rScore2 > 
+	       pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
+      pml->iMoveBest = i;
+      pml->rBestScore = pml->amMoves[ i ].rScore;
+    }
+  }
+
+  if( nPlies == 0 ) {
+    /* deactivate */
+    moveNumber = -2;
+  }
     
-    return 0;
+  return 0;
 }
 
 extern int 
@@ -3608,7 +3592,7 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 
     float ar[ NUM_OUTPUTS ];
     
-    EvalOver( anBoard, ar, 0 );
+    EvalOver( anBoard, ar );
 
     if( ar[ OUTPUT_WIN ] > 0.0 )
 	strcpy( pchOutput, "Win " );

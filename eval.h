@@ -313,7 +313,7 @@ extern void
 SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
 extern void 
-EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], int ignore );
+EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
 extern float 
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
