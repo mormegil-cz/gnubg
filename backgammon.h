@@ -115,6 +115,8 @@ typedef struct _movedouble {
     char *sz;
     int fPlayer;
     /* evaluation of cube action */
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float arDouble[ 4 ];
     evalsetup esDouble;
     skilltype st;
@@ -129,6 +131,8 @@ typedef struct _movenormal {
     /* evaluation setup for move analysis */
     evalsetup esChequer;
     /* evaluation of cube action before this move */
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float arDouble[ 4 ];
     evalsetup esDouble;
     /* evaluation of the moves */
