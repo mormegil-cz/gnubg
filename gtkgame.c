@@ -2269,9 +2269,9 @@ extern int InitGTK( int *argc, char ***argv ) {
     /* This is a kludge to work around an ugly bug in GTK: we don't want to
        show text in the progress bar yet, but we might later.  So we have to
        pretend we want text in order to be sized correctly, and then set the
-       format string to empty so we don't get the default text. */
+       format string to something so we don't get the default text. */
     gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
-    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), "" );
+    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
     
     gtk_signal_connect( GTK_OBJECT( pwMain ), "size-request",
 			GTK_SIGNAL_FUNC( MainSize ), NULL );
@@ -4620,7 +4620,6 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     }
 
     gtk_progress_configure( GTK_PROGRESS( pwRolloutProgress ), 0, 0, cGames );
-    gtk_progress_set_show_text( GTK_PROGRESS( pwRolloutProgress ), TRUE );
     gtk_progress_set_format_string( GTK_PROGRESS( pwRolloutProgress ),
 				    "%v/%u (%p%%)" );
     
@@ -5317,7 +5316,6 @@ GTKProgressStartValue( char *sz, int iMax ) {
   gtk_progress_set_activity_mode ( GTK_PROGRESS ( pwProgress ), FALSE );
   gtk_progress_configure ( GTK_PROGRESS ( pwProgress ),
                            0, 0, iMax );
-  gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
   gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
 				    "%v/%u (%p%%)" );
 
@@ -5355,7 +5353,7 @@ extern void GTKProgressEnd( void ) {
 
     gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), FALSE );
     gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
-    gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), FALSE );
+    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 }
 
