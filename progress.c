@@ -945,7 +945,7 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
   /* To avoid *.po include \r. */
   outputf( _("Rollout: %d/%d trials"), iGame, prc->nTrials );
-  outputl( "      \r" );
+  output( "      \r" );
   fflush( stdout );
 
 }
