@@ -33,11 +33,11 @@ duplication of effort and to make sure our changes merge easily.
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
 
-* Command interface:
+* Commands:
 ** Add more completions to readline.
 ** Allow timeouts for "train" (and others?).
 ** Add interactive rollouts.
-** Load, save and analyse games and matches.
+** Analyse games and matches.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -70,7 +70,8 @@ duplication of effort and to make sure our changes merge easily.
   playing itself at ply 0).  Wait until the server has finished the
   previous ShowBoard before sending a new one; boards in the meantime
   can be silently discarded.  What does xterm do to implement jump
-  scrolling?
+  scrolling?  (The Zvt widget in GNOME Terminal is faster and might be
+  a better example.)
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
 
@@ -112,6 +113,8 @@ duplication of effort and to make sure our changes merge easily.
   checker that cannot be moved with the left die, it should move the 
   checker with the right die if possible [this is analogous to the
   behaviour in Snowie].
+** When a player can't move, it prints (e.g.) "gnubg moves" in the status
+  bar.  It would be better to say "gnubg can't move".
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
@@ -139,9 +142,8 @@ duplication of effort and to make sure our changes merge easily.
 ** "set player <tab>" gives incorrect completions.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
-** In the Crawford game, "eval" gives different MWC for cubeless and cubeful.
-  The cubeful MWC can be negative or over 100%.  Example: new match 5;
-  set score 3 4; set board HwAAQAAAAAAAAA; set turn 1; eval.
+** For money, try "hint" on the position 1M6hAQZk38YBAA; it gives equities
+  D/P +1.000; D/T +1.420; ND +0.056 -- why is the "no double" equity so low?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -154,13 +156,8 @@ duplication of effort and to make sure our changes merge easily.
   entire game like Motif.
 ** Submit something to <http://www.distributed.net/nextgen/projects.html>.
 ** Allow loading and saving weights to specify binary or ASCII format.
-** Allow annotating moves in matches.  It would be nice to be compatible
-  with other formats (Snowie?  CBG?) but these are probably undocumented.
-  The SGF format (Smart Game Format -- see <http://www.red-bean.com/sgf/>)
-  can probably be extended to backgammon, instead.
-  The "native gnubg" format should, apart from moves, cube actions,
-  resigns etc, also include evaluations, rollouts etc. for each
-  position if the user had performed any analysis.
+** Allow annotating moves in matches (both human commentary and automatic
+  analysis).
 ** Export matches (and analysis) to ASCII, HTML, PostScript, etc.
 ** Import and export position databases to a portable format.
 ** Add option to flip the board.

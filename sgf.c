@@ -224,8 +224,13 @@ static void RestoreRootNode( list *pl ) {
 		continue;
 
 	    pmgi->nPoints = strtol( pch, &pch, 10 );
-
+	    if( pmgi->nPoints < 1 )
+		pmgi->nPoints = 1;
+	    
 	    pmgi->fResigned = toupper( *pch ) == 'R';
+
+	    /* adjust the score in advance */
+	    anScore[ pmgi->fWinner ] += pmgi->nPoints;
 	} else if( pp->ach[ 0 ] == 'R' && pp->ach[ 1 ] == 'U' ) { 
 	    /* RU - Rules property */
 
@@ -290,6 +295,8 @@ static void RestoreNode( list *pl ) {
     char *pch;
     int i;
     
+    outputoff();
+    
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) {
 	    /* B or W - Move property */
@@ -299,15 +306,27 @@ static void RestoreNode( list *pl ) {
 	    if( !strcmp( pch, "double" ) ) {
 		pmr = malloc( sizeof( pmr->mt ) );
 		pmr->mt = MOVE_DOUBLE;
-		/* FIXME handle cube action */
+		
+		if( fDoubled ) {
+		    nCube <<= 1;
+		    fCubeOwner = !fMove;
+		} else
+		    fDoubled = TRUE;
+
+		fTurn = !fTurn;
 	    } else if( !strcmp( pch, "take" ) ) {
 		pmr = malloc( sizeof( pmr->mt ) );
 		pmr->mt = MOVE_TAKE;
-		/* FIXME handle cube action */
+
+		nCube <<= 1;
+		fDoubled = FALSE;
+		fTurn = fCubeOwner = !fMove;
 	    } else if( !strcmp( pch, "drop" ) ) {
 		pmr = malloc( sizeof( pmr->mt ) );
 		pmr->mt = MOVE_DROP;
-		/* FIXME handle cube action */
+
+		fDoubled = FALSE;
+		fTurn = fMove = -1;
 	    } else {
 		pmr = malloc( sizeof( pmr->n ) );
 		pmr->n.mt = MOVE_NORMAL;
@@ -331,17 +350,25 @@ static void RestoreNode( list *pl ) {
 		if( pmr->n.anRoll[ 0 ] >= 1 && pmr->n.anRoll[ 0 ] <= 6 &&
 		    pmr->n.anRoll[ 1 ] >= 1 && pmr->n.anRoll[ 1 ] <= 6 ) {
 		    PlayMove( pmr->n.anMove, pmr->n.fPlayer );
-		    ListInsert( plGame, pmr );
-		} else
+		    fMove = fTurn = !pmr->n.fPlayer;
+
+		    if( GameStatus( anBoard ) )
+			/* Game over. */
+			fTurn = fMove = -1;
+		} else {
 		    /* illegal move -- ignore */
 		    free( pmr );
+		    pmr = NULL;
+		}
 	    }
-
-	    fMove = fTurn = !pmr->n.fPlayer;
+	    
+	    if( pmr )
+		ListInsert( plGame, pmr );
 	} else
 	    /* FIXME handle setup properties */
 	    ;
-    
+
+    outputon();
 }
 
 static void RestoreSequence( list *pl, int fRoot ) {
@@ -370,6 +397,8 @@ static void RestoreTree( list *pl, int fRoot ) {
 
 static void RestoreGame( list *pl ) {
 
+    moverecord *pmr, *pmrResign;
+    
     InitBoard( anBoard );
     
     plGame = malloc( sizeof( *plGame ) );
@@ -383,7 +412,21 @@ static void RestoreGame( list *pl ) {
 
     RestoreTree( pl, TRUE );
 
-    /* FIXME add "resign" node if necessary */
+    pmr = plGame->plNext->p;
+    assert( pmr->mt == MOVE_GAMEINFO );
+    if( pmr->g.fResigned ) {
+	fTurn = fMove = -1;
+	
+	pmrResign = malloc( sizeof( pmrResign ->r ) );
+	pmrResign->r.mt = MOVE_RESIGN;
+	pmrResign->r.fPlayer = !pmr->g.fWinner;
+	pmrResign->r.nResigned = pmr->g.nPoints / nCube;
+
+	if( pmrResign->r.nResigned < 1 )
+	    pmrResign->r.nResigned = 1;
+	else if( pmrResign->r.nResigned > 3 )
+	    pmrResign->r.nResigned = 3;
+    }
 }
 
 static void ClearMatch( void ) {
@@ -405,7 +448,7 @@ static void UpdateSettings( void ) {
     UpdateSetting( &nMatchTo );
     UpdateSetting( &fCrawford );
 
-    if( fTurn )
+    if( fMove )
 	SwapSides( anBoard );
     
     ShowBoard();
@@ -455,7 +498,8 @@ extern void CommandLoadMatch( char *sz ) {
     }
 
     if( ( pl = LoadCollection( sz ) ) ) {
-	/* FIXME make sure the root nodes have MI properties */
+	/* FIXME make sure the root nodes have MI properties; if not,
+	   we're loading a session. */
 	if( fTurn != -1 && fConfirm ) {
 	    if( fInterrupt )
 		return;
