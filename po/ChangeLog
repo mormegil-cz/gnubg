@@ -1,3 +1,8 @@
+Sun Sep  1 18:33:46 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* POTFILES.in: add sound.c
+	* gnubg.pot: update.
+
 2002-08-11  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* Makefile.in.in: Upgrade to gettext-0.11.2.
