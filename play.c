@@ -49,7 +49,9 @@
 #include "i18n.h"
 #include "sound.h"
 #include "renderprefs.h"
+#if USE_GTK
 #include "gtkboard.h"
+#endif
 
 char *aszGameResult[] = { 
   N_ ("single game"), 
@@ -102,7 +104,6 @@ static int
 CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest );
 
 #if USE_GTK
-#include "gtkboard.h"
 #include "gtkgame.h"
 
 static int anLastMove[ 8 ], fLastMove, fLastPlayer;
@@ -3002,6 +3003,7 @@ static void UpdateGame( int fShowBoard ) {
 #endif
 }
 
+#if USE_GTK
 static int GameIndex( list *plGame ) {
 
     list *pl;
@@ -3016,6 +3018,7 @@ static int GameIndex( list *plGame ) {
     else
 	return i;
 }
+#endif
 
 extern void ChangeGame( list *plGameNew ) {
 
@@ -3093,10 +3096,11 @@ CommandFirstGame( char *sz ) {
 static void CommandNextRoll( char *sz ) {
 
     moverecord *pmr;
+#if USE_GTK
 	BoardData *bd = BOARD( pwBoard )->board_data;
-
 	/* Make sure dice aren't rolled */
 	bd->diceShown = DICE_ON_BOARD;
+#endif
     
     if( !plLastMove || !plLastMove->plNext ||
 	!( pmr = plLastMove->plNext->p ) )
@@ -3117,8 +3121,10 @@ static void CommandNextRoll( char *sz ) {
     ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
     ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
 
+#if USE_GTK
 	/* Make sure dice are shown */
 	bd->diceRoll[0] = !ms.anDice[0];
+#endif
 
     if ( plLastMove->plNext && plLastMove->plNext->p )
       FixMatchState ( &ms, plLastMove->plNext->p );

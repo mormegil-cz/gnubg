@@ -34,7 +34,9 @@
 #include "i18n.h"
 #include "render.h"
 #include "renderprefs.h"
+#if USE_GTK
 #include "gtkboard.h"
+#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -47,6 +49,7 @@ char *aszWoodName[] = {
 
 renderdata rdAppearance;
 
+#if USE_GTK
 static char HexDigit( char ch ) {
 
     ch = toupper( ch );
@@ -103,7 +106,6 @@ static int SetColourSpeckle( char *sz, unsigned char anColour[],
     return -1;
 }
 
-#if USE_GTK
 /* Set colour (with floats) */
 static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
 
@@ -255,6 +257,7 @@ static int SetMaterialDice(Material* pMat, char *sz, int* flag)
 
 #endif
 
+#if USE_GTK
 /* Set colour, alpha, refraction, shine, specular. */
 static int SetColourARSS( double aarColour[ 2 ][ 4 ], 
                           float arRefraction[ 2 ],
@@ -267,7 +270,6 @@ static int SetColourARSS( double aarColour[ 2 ][ 4 ],
     if( ( pch = strchr( sz, ';' ) ) )
 	*pch++ = 0;
 
-#if	USE_GTK
     if( !SetColourX( aarColour[ i ], sz ) ) {
         PushLocale ( "C" );
 
@@ -312,12 +314,9 @@ static int SetColourARSS( double aarColour[ 2 ][ 4 ],
 	return 0;
     }
 
-#endif
-
     return -1;
 }
 
-#if USE_GTK
 /* Set colour, shine, specular, flag. */
 static int SetColourSSF( gdouble aarColour[ 2 ][ 4 ], 
                          gfloat arCoefficient[ 2 ],
@@ -367,7 +366,6 @@ static int SetColourSSF( gdouble aarColour[ 2 ][ 4 ],
 
     return -1;
 }
-#endif
 
 static int SetWood( char *sz, woodtype *pbw ) {
 
@@ -382,6 +380,7 @@ static int SetWood( char *sz, woodtype *pbw ) {
 
     return -1;
 }
+#endif
 
 extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 				    char *szValue ) {
