@@ -1663,7 +1663,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
       break;
     case 8:
       GTKFileCommand( _("Select file with dice"), NULL, 
-                      "set rng file", NULL, 0 );
+                      "set rng file", NULL, FDT_NONE_OPEN, PATH_NULL );
       break;
     default:
       break;

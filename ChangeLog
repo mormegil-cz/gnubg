@@ -1,3 +1,9 @@
+Thu Feb  17  16:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkfile.c (and a few others): First part of new
+		file dialogs (By Ingo Macherius)
+	* gtkpanels.c: Minor gtk 2 window fix
+
 Tue Feb  15  17:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkpanels.c: Remember maximised state of windows

@@ -49,7 +49,8 @@ typedef enum _dialogtype {
 } dialogtype;
 
 typedef enum _filedialogtype { 
-  FDT_NONE=0, FDT_SAVE, FDT_EXPORT, FDT_IMPORT, FDT_EXPORT_FULL
+  FDT_NONE=0, FDT_SAVE, FDT_EXPORT, FDT_IMPORT, FDT_EXPORT_FULL,
+  FDT_NONE_OPEN, FDT_NONE_SAVE
 } filedialogtype;
 
 typedef enum _warnings { 
@@ -93,7 +94,7 @@ extern GtkWidget *pwOldGrab;
 extern int lastImportType, lastExportType;
 extern int fEndDelay;
 
-extern void ShowGameWindow( void );
+extern gboolean ShowGameWindow( void );
 
 extern void GTKAddMoveRecord( moverecord *pmr );
 extern void GTKPopMoveRecord( moverecord *pmr );
@@ -216,7 +217,9 @@ GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
                int nMin, int nMax, int nInc );
 
 extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
-                            char *szPath, filedialogtype fdt );
+                            char *szPath, filedialogtype fdt, pathformat pathFormat );
+extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
+                              char *szPath, filedialogtype fdt, pathformat pathId);
 extern char 
 *SelectFile( char *szTitle, char *szDefault, char *szPath, 
              filedialogtype fdt );

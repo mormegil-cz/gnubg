@@ -2390,7 +2390,7 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 	renderdata rdNew;
 
 	if (!( pch = szFile = 
-         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE ) ) )
+         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE_SAVE ) ) )
 		return;
 
 	szFile = NextToken( &szFile );
@@ -2474,7 +2474,7 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 	gint num_added;
 
 	if ( !( pch = szFile = 
-         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE ) ) )
+         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE_OPEN ) ) )
 		return;
 
 	szFile = NextToken( &szFile );
