@@ -243,7 +243,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
 	formatgs.c formatgs.h boarddim.h timer.c $(LIBGEN_SOURCES) \
 	external_y.y external_l.l external_y.h openurl.c openurl.h \
-	mec.h mec.c
+	mec.h mec.c relational.h relational.c
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -361,7 +361,7 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	boardpos.$(OBJEXT) progress.$(OBJEXT) format.$(OBJEXT) \
 	formatgs.$(OBJEXT) timer.$(OBJEXT) $(am__objects_1) \
 	external_y.$(OBJEXT) external_l.$(OBJEXT) openurl.$(OBJEXT) \
-	mec.$(OBJEXT)
+	mec.$(OBJEXT) relational.$(OBJEXT)
 @COMPILE_BR1_TRUE@am__objects_3 = br1.$(OBJEXT)
 @COMPILE_BR1_FALSE@am__objects_3 =
 @USE_SOUND_TRUE@am__objects_4 = sound.$(OBJEXT)
@@ -459,14 +459,14 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/path.Po ./$(DEPDIR)/play.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/positionid.Po ./$(DEPDIR)/postscript.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/progress.Po ./$(DEPDIR)/pub_eval.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/render.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/renderprefs.Po ./$(DEPDIR)/rollout.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/set.Po ./$(DEPDIR)/sgf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgfl.Po ./$(DEPDIR)/sgfp.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/show.Po ./$(DEPDIR)/simplelibgen.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/speed.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/timecontrol.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/timer.Po
+@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/relational.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/render.Po ./$(DEPDIR)/renderprefs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/simplelibgen.Po ./$(DEPDIR)/sound.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/speed.Po ./$(DEPDIR)/text.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/timecontrol.Po ./$(DEPDIR)/timer.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -661,6 +661,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/progress.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pub_eval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/record.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relational.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/render.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/renderprefs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rollout.Po@am__quote@

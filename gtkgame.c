@@ -203,6 +203,9 @@ typedef enum _gnubgcommand {
     CMD_RECORD_ADD_MATCH,
     CMD_RECORD_ADD_SESSION,
     CMD_RECORD_SHOW,
+    CMD_RELATIONAL_ADD_MATCH,
+    CMD_RELATIONAL_TEST,
+    CMD_RELATIONAL_HELP,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
     CMD_RESIGN_G,
@@ -292,6 +295,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     "record add match",
     "record add session",
     "record show",
+    "relational add match",
+    "relational test",
+    "relational help",
     "redouble",
     "resign normal",
     "resign gammon",
@@ -2930,6 +2936,13 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
 	  Command, CMD_RECORD_ADD_SESSION, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+        { N_("/_Analyse/Relational database/Add match or session..."), NULL,
+          Command, CMD_RELATIONAL_ADD_MATCH, NULL },
+        { N_("/_Analyse/Relational database/Test..."), NULL,
+          Command, CMD_RELATIONAL_TEST, NULL },
+        { N_("/_Analyse/Relational database/Help..."), NULL,
+          Command, CMD_RELATIONAL_HELP, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
           NULL, Command, CMD_SHOW_KLEINMAN, NULL },
@@ -3159,6 +3172,7 @@ extern int InitGTK( int *argc, char ***argv ) {
                               FALSE
 #endif
                               );
+
    gtk_box_pack_start( GTK_BOX( pwVbox ),
                        pwHandle = gtk_handle_box_new(), FALSE, TRUE, 0 );
    gtk_container_add( GTK_CONTAINER( pwHandle ),
@@ -8634,7 +8648,26 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_ENGINE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
-	
+
+       gtk_widget_set_sensitive( 
+          gtk_item_factory_get_widget( pif,
+                                       "/Analyse/"
+                                       "Relational database/Test..." ), 
+          TRUE );
+       gtk_widget_set_sensitive( 
+          gtk_item_factory_get_widget( pif,
+                                       "/Analyse/"
+                                       "Relational database/Help..." ), 
+          TRUE );
+
+#if USE_PYTHON	
+    gtk_widget_set_sensitive( 
+       gtk_item_factory_get_widget( pif,
+                                    "/Analyse/Relational database/"
+                                    "Add match or session..." ), 
+       !ListEmpty( &lMatch ) );
+#endif /* USE_PYTHON */
+
 	fAutoCommand = FALSE;
     } else if( p == &ms.fCrawford )
 	ShowBoard(); /* this is overkill, but it works */

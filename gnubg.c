@@ -108,6 +108,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "osr.h"
 #include "format.h"
 #include "onechequer.h"
+#include "relational.h"
 
 #ifdef WIN32
 #ifdef HAVE_SOCKETS
@@ -529,6 +530,7 @@ static char szDICE[] = N_("<die> <die>"),
     szLANG[] = N_("system|<language code>"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
+    szOPTENV[] = N_("[env]"),
     szOPTDEPTH[] = N_("[depth]"),
     szOPTFILENAME[] = N_("[filename]"),
     szOPTGENERATOROPTSEED[] = N_("[generator] [seed]"),
@@ -890,6 +892,27 @@ command cER = {
       N_("Remove all player record statistics"), NULL, NULL },
     { "show", CommandRecordShow, N_("View the player records"), szOPTNAME,
       &cRecordName },
+    { NULL, NULL, NULL, NULL, NULL }    
+}, acRelationalAdd[] = {
+    { "match", CommandRelationalAddMatch, 
+      N_("Log the match to the external relational database"), 
+      szOPTENV, NULL },
+    { NULL, NULL, NULL, NULL, NULL }    
+}, acRelationalShow[] = {
+    { "environments", CommandRelationalShowEnvironments, 
+      N_("Show the environments where the match can be logged"), 
+      NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }    
+}, acRelational[] = {
+    { "add", NULL, N_("Log to the external relational database"), NULL,
+      acRelationalAdd },
+    { "help", CommandRelationalHelp, 
+      N_("Help and instructions for using and setting up "
+         "the external relational database"), NULL, NULL },
+    { "show", NULL, N_("Show information from the relational database"),
+      NULL, NULL },
+    { "test", CommandRelationalTest, 
+      N_("Test the external relational database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSave[] = {
     { "game", CommandSaveGame, N_("Record a log of the game so far to a "
@@ -2053,6 +2076,9 @@ command cER = {
       NULL, NULL },
     { "record", NULL, N_("Keep statistics on player histories"), NULL,
       acRecord },
+    { "relational", NULL, 
+      N_("Log matches to an external relational database"), NULL,
+      acRelational },
     { "resign", CommandResign, N_("Offer to end the current game"), szVALUE,
       NULL },
     { "roll", CommandRoll, N_("Roll the dice"), NULL, NULL },
@@ -9319,5 +9345,4 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
   return sz;
 
 }
-
 
