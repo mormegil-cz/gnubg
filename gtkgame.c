@@ -9827,7 +9827,11 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_show(pwToolbar);
 		gtk_widget_show(pwHandle);
 		gtk_widget_show(GTK_WIDGET(bd->table));
-		gtk_widget_show(GTK_WIDGET(bd->dice_area));
+#if USE_BOARD3D
+    // Only show 2d dice below board if in 2d
+  	if (rdAppearance.fDisplayType == DT_2D)
+#endif
+		  gtk_widget_show(GTK_WIDGET(bd->dice_area));
 		gtk_widget_show(pwStatus);
 		gtk_widget_show(pwProgress);
 
