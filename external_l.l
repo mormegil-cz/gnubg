@@ -37,20 +37,22 @@ void escapes(const char *cp, char *tp);
 %%
 
 \"[^\"]*\"	{
-			char buf[100];
+			char *buf = malloc( strlen( exttext ) + 1 );
 
 			exttext[strlen(exttext)-1] = '\0';
 			escapes(exttext+1, buf);
 			extlval.sval = (char *) strdup(buf);
+                        free( buf );
                         BEGIN(INITIAL);
 			return STRING;
 		}
 \'[^\']*\'	{
-			char buf[100];
+			char *buf = malloc( strlen( exttext ) + 1 );
 
 			exttext[strlen(exttext)-1] = '\0';
 			escapes(exttext+1, buf);
 			extlval.sval = (char *) strdup(buf);
+                        free( buf );
                         BEGIN(0);
 			return STRING;
 		}
@@ -70,10 +72,11 @@ no              { return OFF; }
 off             { return OFF; }
 
 board:[A-Za-z0-9]+:[A-Za-z0-9]+(:-?[0-9]+)+  { 
-			char buf[100];
+			char *buf = malloc( strlen( exttext ) + 1 );
 
 			escapes(exttext, buf);
 			extlval.sval = (char *) strdup(buf);
+                        free( buf );
                         return AFIBSBOARD; 
                 }
 

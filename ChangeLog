@@ -1,3 +1,7 @@
+Fri May  7 21:13:26 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* external_l.l: fix buffer overflow.
+
 Fri May  8 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* external.c, dice.c, set.c: Fix socket code for windows
