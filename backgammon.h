@@ -287,6 +287,7 @@ extern char *aszExtensions[ PATH_MET + 1 ];
 extern char *szCurrentFileName;
 
 extern evalcontext ecTD;
+extern evalcontext ecLuck;
 
 extern evalsetup esEvalCube, esEvalChequer;
 extern evalsetup esAnalysisCube, esAnalysisChequer;
@@ -614,6 +615,7 @@ extern void CommandAccept( char * ),
     CommandSetAnalysisCube( char * ),
     CommandSetAnalysisCubedecision( char * ),
     CommandSetAnalysisLimit( char * ),
+    CommandSetAnalysisLuckAnalysis( char * ),
     CommandSetAnalysisLuck( char * ),
     CommandSetAnalysisMoves( char * ),
     CommandSetAnalysisThresholdBad( char * ),

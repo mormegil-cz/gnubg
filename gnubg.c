@@ -735,6 +735,8 @@ command cER = {
       acSetEvalParam },
     { "limit", CommandSetAnalysisLimit, N_("Specify the maximum number of "
       "possible moves analysed"), szOPTLIMIT, NULL },
+    { "luckanalysis", CommandSetAnalysisLuckAnalysis,
+      N_("Specify parameters for the luck analysis"), NULL, acSetEvaluation },
     { "luck", CommandSetAnalysisLuck, N_("Select whether dice rolls will be "
       "analysed"), szONOFF, &cOnOff },
     { "moves", CommandSetAnalysisMoves, 
@@ -4299,6 +4301,8 @@ extern void CommandSaveSettings( char *szParam ) {
 			    &esAnalysisChequer );
     SaveEvalSetupSettings ( pf, "set analysis cubedecision",
 			    &esAnalysisCube );
+
+    SaveEvalSettings ( pf, "set analysis luckanalysis", &ecLuck );
     
     fprintf( pf, "set analysis limit %d\n", cAnalysisMoves );
 
