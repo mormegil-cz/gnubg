@@ -8382,6 +8382,7 @@ void DockPanels()
 			if (woPanel[i].dockable && woPanel[i].pwWin)
 			{
 				gtk_widget_destroy(woPanel[i].pwWin);
+				woPanel[i].pwWin = NULL;
 				woPanel[i].docked = FALSE;
 			}
 		}
@@ -10056,6 +10057,11 @@ PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
 
 extern void
 ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
+
+  /* Only valid if panels docked */
+  if (!fDockPanels)
+	  return;
+
   fDisplayPanels = 1;
   if (woPanel[WINDOW_ANNOTATION].showing)
     ShowAnnotation();
@@ -10082,6 +10088,11 @@ ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
 
 extern void
 HideAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
+
+  /* Only valid if panels docked */
+  if (!fDockPanels)
+	  return;
+
   fDisplayPanels = 0;
   if (woPanel[WINDOW_ANNOTATION].showing)
   {
