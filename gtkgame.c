@@ -8398,15 +8398,15 @@ static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
 
 	for (i = 0; i < pList->rows; i++ )
 	{
-		sprintf ( strchr ( pStr, 0 ), "%-37.37s ", 
+		sprintf ( strchr ( pStr, 0 ), "%-37s ", 
 			  ( gtk_clist_get_text ( pList, i, 0, &sz ) ) ?
 			  sz : "" );
 
-		sprintf ( strchr ( pStr, 0 ), "%-20.20s ", 
+		sprintf ( strchr ( pStr, 0 ), "%-20s ", 
 			  ( gtk_clist_get_text ( pList, i, 1, &sz ) ) ?
 			  sz : "" );
 
-		sprintf ( strchr ( pStr, 0 ), "%-20.20s\n", 
+		sprintf ( strchr ( pStr, 0 ), "%-20s\n", 
 			  ( gtk_clist_get_text ( pList, i, 2, &sz ) ) ?
 			  sz : "" );
 	}
@@ -8417,7 +8417,7 @@ static void CopyData(GtkWidget *pwNotebook, enum _formatgs page)
 {
 	char szOutput[4096];
 
-	sprintf(szOutput, "%-37.37s %-20.20s %-20.20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
+	sprintf(szOutput, "%-37s %-20s %-20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
 
 	if (page == FORMATGS_CHEQUER || page == FORMATGS_ALL)
 		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_CHEQUER]), aszStatHeading[FORMATGS_CHEQUER]);
@@ -8726,7 +8726,7 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
   gchar *sz;
 
   sprintf ( szOutput, 
-            "%-37.37s %-20.20s %-20.20s\n",
+            "%-37s %-20s %-20s\n",
             "", ap[ 0 ].szName, ap[ 1 ].szName );
 
   /* copy list (note that the integers in the list are NOT copied) */
@@ -8740,15 +8740,15 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
 
     i = GPOINTER_TO_INT( pl->data );
 
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-37.37s ", 
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-37s ", 
               ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 0, &sz ) ) ?
               sz : "" );
       
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s ", 
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20s ", 
               ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 1, &sz ) ) ?
               sz : "" );
       
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s\n", 
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20s\n", 
               ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
               sz : "" );
       

@@ -1,3 +1,8 @@
+Wed Feb 18 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Remove maximum column size of text copied to
+		clipboard from statistics view (Bug 4161).
+
 Mon Feb 16 21:57:18 CET 2004   Joern Thyssen  <jth@gnubg.org> 
 
 	* bearoff.c (HeuristicDatabase): align heuristic database
