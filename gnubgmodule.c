@@ -468,7 +468,7 @@ PythonLuckRating( PyObject* self IGNORE, PyObject *args ) {
   if ( ! PyArg_ParseTuple( args, "f", &r ) )
     return NULL;
 
-  return PyInt_FromLong( GetRating( r ) );
+  return PyInt_FromLong( getLuckRating( r ) );
 
 }
 
@@ -479,7 +479,7 @@ PythonErrorRating( PyObject* self IGNORE, PyObject *args ) {
   if ( ! PyArg_ParseTuple( args, "f", &r ) )
     return NULL;
 
-  return PyInt_FromLong( getLuckRating( r ) );
+  return PyInt_FromLong( GetRating( r ) );
 
 }
 
@@ -2244,46 +2244,176 @@ PythonNavigate(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 PyMethodDef gnubgMethods[] = {
 
   { "board", PythonBoard, METH_VARARGS,
-    "Get the current board" },
+    "Get the current board\n"
+    "    arguments: none\n"
+    "    returns: tuple of two lists of 25 ints:\n"
+    "        pieces on points 1..24 and the bar" },
   { "command", PythonCommand, METH_VARARGS,
-    "Execute a command" },
+    "Execute a command\n"
+    "    arguments: string containing command\n"
+    "    returns: nothing" },
   { "cfevaluate", PythonEvaluateCubeful, METH_VARARGS,
-    "Cubeful evaluation" },
+    "Cubeful evaluation\n"
+    "    arguments: [board] [cube-info] [eval-context]\n"
+    "       board = tuple ( see \"board\" )\n"
+    "       cube-info = dictionary: 'jacoby'=>0/1, 'crawford'=>0/1\n"
+    "           'move'=>0/1, 'beavers'=>0/1, 'cube'=>cube val (int)\n"
+    "           'matchto'=>length (0 for money), 'bgv'=>0..4\n"
+    "           'score'=>(int, int), 'gammonprice'=(float[4])\n"
+    "       eval-context = dictionary: 'cubeful'=>0/1, 'plies'=>int,\n"
+    "           'reduced'=>0/1, 'deterministic'=> 0/1, 'noise'->float\n"
+    "    returns: evaluation = tuple (floats optimal, nodouble, take, drop)" },
   { "evaluate", PythonEvaluate, METH_VARARGS,
-    "Cubeless evaluation" },
+    "Cubeless evaluation]n"
+    "    arguments: [board] [cube-info] [eval context]\n"
+    "         see 'cfevaluate'\n"
+    "    returns tuple(floats P(win), P(win gammon), P(win backgammnon)\n"
+    "         P(lose gammon), P(lose backgammon), cubeless equity)" },
   { "evalcontext", PythonEvalContext, METH_VARARGS,
-    "make a evalcontext" },
+    "make an evalcontext\n"
+    "    argument: tuple ( 4 int, float )\n"
+    "    returns:  eval-context ( see 'cfevaluate' )"   },
   { "eq2mwc", PythonEq2mwc, METH_VARARGS,
-    "convert equity to MWC" },
+    "convert equity to MWC\n"
+    "    argument: [float equity], [cube-info]\n"
+    "         defaults equity = 0.0, cube-info see 'cfevaluate'\n"
+    "    return float mwc" },
   { "findbestmove", PythonFindBestMove, METH_VARARGS,
-    "Find the best move" },
+    "Find the best move\n"
+    "    arguments: [board] [cube-info] [eval-context]\n"
+    "        see 'cfevaluate'\n"
+    "    returns: tuple( ints point from, point to, \n"
+    "        unused moves are set to zero" },
   { "mwc2eq", PythonMwc2eq, METH_VARARGS,
-    "convert MWC to equity" },
+    "convert MWC to equity\n"
+    "    argument: [float match-winning-chance], [cube-info]\n"
+    "         defaults mwc = 0.0, cube-info see 'cfevaluate'\n"
+    "    returns: float equity" },
   { "matchchecksum", PythonMatchChecksum, METH_VARARGS,
-    "Calculate checksum for current match" },
+    "Calculate checksum for current match\n"
+    "    arguments: none\n"
+    "    returns: MD5 digest as 32 char hex string" },
   { "cubeinfo", PythonCubeInfo, METH_VARARGS,
-    "Make a cubeinfo" },
+    "Make a cubeinfo\n"
+    "    arguments: [cube value, cube owner = 0/1, player on move = 0/1\n"
+    "        match length (0 = money), score (tuple int, int), \n"
+    "        is crawford = 0/1, bg variant = 0/5\n"
+    "    returns cube-info dictionary ( see 'cfevaluate' )" },
   { "met", PythonMET, METH_VARARGS,
-    "return the current match equity table" },
+    "return the current match equity table\n"
+    "   arguments: [max score]\n"
+    "    returns: list of list n of list n (rows of pre-crawford table\n"
+    "        list 2 of list n of post-crawford for player 0/player 1" },
   { "positionid", PythonPositionID, METH_VARARGS,
-    "return position ID from board" },
+    "return position ID from board\n"
+    "    arguments: [board] ( see 'cfevaluate' )\n"
+    "    returns: position ID as string" },
   { "positionfromid", PythonPositionFromID, METH_VARARGS,
-    "return board from position ID" },
+    "return board from position ID\n"
+    "    arguments: [position ID as string]\n"
+    "    returns: board ( see 'cfevaluate' )" },
   { "positionbearoff", PythonPositionBearoff, METH_VARARGS,
-    "return the bearoff id for the given position" },
+    "return the bearoff id for the given position\n"},
   { "positionfrombearoff", PythonPositionFromBearoff, METH_VARARGS,
-    "return the board from the given bearoff id" },
+    "return the board from the given bearoff id\n"
+    "    arguments: [bearoff id] [no. chequers] [no. points]\n"
+    "    returns: board ( see 'cfevaluate' )" },
   { "positionkey", PythonPositionKey, METH_VARARGS,
-    "return key for position" },
+    "return key for position\n"
+    "    arguments: [ board ] ( see 'cfevaluate' )\n"
+    "    returns: tuple (10 ints)" },
   { "positionfromkey", PythonPositionFromKey, METH_VARARGS,
-    "return position from key" },
+    "return position from key\n"
+    "    arguments: [ list of 10 ints] \n"
+    "    returns: board ( see 'cfevaluate' )" },
   { "match", (PyCFunction)PythonMatch, METH_VARARGS|METH_KEYWORDS,
-    "Get the current match" },
+    "Get the current match\n"
+    "    arguments: [ include-analysis = 0/1, include-boards = 0/1,\n"
+    "       include-statistics = 0/1, verbose = 0/1 ]\n"
+    "    returns: dictionary of match info:\n"
+    "       'games' => list of dictionaries, one per game\n"
+    "         'info' => dictionary\n"
+    "           'points-won'=>int, 'score-X'=> int, 'winner'=>'X'/'O'\n"
+    "           'resigned'=> 0/1, 'score-O'=> int\n"
+    "         'stats' => dictionary\n"
+    "           'X' => player 0 dictionary of stats\n"
+    "             'cube'=>dictionary\n"
+    "               'close-cube'=>int, 'err-missed-double-above-cp-cost'=>float\n"
+    "               'err-missed-double-above-cp-skill'=>float\n"
+    "               'err-missed-double-below-cp-cost'=>float\n"
+    "               'err-missed-double-below-cp-skill'=>float\n"
+    "               'err-wrong-double-above-tg-cost'=>float\n"
+    "               'err-wrong-double-above-tg-skill'=>float\n"
+    "               'err-wrong-double-below-dp-cost'=>float\n"
+    "               'err-wrong-double-below-dp-skill'=>float\n"
+    "               'err-wrong-drop-cost'=>float, 'err-wrong-drop-skill'=>float\n"
+    "               'err-wrong-take-cost'=>float, 'err-wrong-take-skill'=>float\n"
+    "               'error-cost'=>float, 'error-skill'=>float\n"
+    "               'missed-double-above-cp'=>int, 'missed-double-below-cp'=>int\n"
+    "               'n-doubles'=>int, 'n-drops'=>int, 'n-takes': =>int,\n"
+    "               'total-cube'=>int, 'wrong-double-above-tg'=>int\n"
+    "               'wrong-double-below-dp'=>int, 'wrong-drop'=>int,\n"
+    "               'wrong-take'=>int\n"
+    "             'moves'=>dictionary\n"
+    "               'marked'=>dictionarly\n"
+    "                  'good'=> int, 'unmarked'->int, 'doubtful'=>int,\n"
+    "                  'bad'=>int, 'very bad'=>int\n"
+    "               'total-moves'=>int, 'unforced-moves'=>int,\n"
+    "               'error-cost'=>float, 'error-skill'=>float\n"
+    "             'dice'=>dictionary\n"
+    "               'actual-result;=>float, 'cube'=>float, 'luck'=>float,\n"
+    "               'luck-cost'=>float, 'luck-adjusted-result'=>float\n"
+    "               'marked-rolls'=>dictionary\n"
+    "                 'verygood'=>int, 'good'=>int, 'unmarked'=>int,\n"
+    "                 'bad'=>int, 'verybad'=>int\n"
+    "              'time'=>dictionary\n"
+    "                'time-penalty'=>int, 'time-penalty-cost'=>float,\n"
+    "                'time-penalty-skill'=>float\n"
+    "            'O'=>  player 1 dicrtionary of stats - see 'X; above\n"
+    "         'game'=>list of dictionaries, one per move\n"
+    "            'dice'=>(int, int), move=>((int, int),[(int, int),...])\n"
+    "            'player'=>'X'/'O', 'board'=>board-id-string,\n"
+    "            'action'=>'move', 'double', 'take', 'drop', 'resign'\n"
+    "            'analysis'=>dictionary\n"
+    "              'imove'=>int index of move in list of analysed moves\n"
+    "              'moves'=>list of dictionaries, one per analysed move\n"
+    "                 'score'=>equity for move, 'type'=>'eval''rollout'\n"
+    "                 'move'=>((int, int),[(int, int),...])\n"
+    "                 'probs'=> tuple (5 floats - P(win),\n"
+    "                 P(win gammon)..P(lose bkgammon)\n"
+    "                 [ 'evalcontext' = dictionary describing eval context\n"
+    "                        if not default\n"
+    "        'match-info' = dictionary \n"
+    "          'X' => player-0 dictionary\n"
+    "            'rating' = rating if known\n"
+    "            'name'   = player name\n"
+    "          'O' => player-1 dictionary, as 'X', above\n" 
+    "          'date'=>(tuple dd, mm, yyyy)\n"
+    "          'default-eval-context' = dictionary\n"
+    "            'plies'=> int, 'deterministic'=>0/1, 'noise'=>float,\n"
+    "            'cubeful'=>0/1\n"
+    "          'match_length' = int\n"
+    "          'result' =>0/1\n"
+    "          'rules' = 'Crawford'/whatever\n"
+    "          'variation' => 'Standard' or whatever\n" },
   { "navigate", (PyCFunction)PythonNavigate, METH_VARARGS|METH_KEYWORDS,
-    "" },
-  { "nextturn", (PyCFunction) PythonNextTurn, METH_VARARGS, "" },
-  { "luckrating", (PyCFunction) PythonLuckRating, METH_VARARGS, "" },
-  { "errorrating", (PyCFunction) PythonErrorRating, METH_VARARGS, "" },
+    "go to a position in a match or session'n"
+    "    arguments: no args = go to start of match/session\n"
+    "         [ game=offset] go forward/backward n games\n"
+    "         [record=offset] go gorward/backward n moves'n"
+    "    returns: None if no change, tuple( games moved, records moved)" },
+  { "nextturn", (PyCFunction) PythonNextTurn, METH_VARARGS, 
+    "play one turn\n"
+    "    arguments: none\n"
+    "    returns: None" },
+  { "luckrating", (PyCFunction) PythonLuckRating, METH_VARARGS, 
+    "convert a luck per move amount into a rating 0..5 for very unlucky to very lucky\n"
+    "    arguments: float luck per move\n"
+    "    returns: int 0..5" },
+  { "errorrating", (PyCFunction) PythonErrorRating, METH_VARARGS, 
+    "convert an error per move amount to a rating 0 = awful..7=supernatural\n"
+    "    arguments: float error per move\n"
+    "    returns: int\n" },
   { NULL, NULL, 0, NULL }
 
 };

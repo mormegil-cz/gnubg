@@ -1,3 +1,7 @@
+Tue Jan  4 00:16:32 2005 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubgmodule.c - add detail to python doc strings
+
 Sun Jan  2 13:44:55 2005 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubgmodule.h - reinclude config.h to set HAVE_FSTAT (gcc
