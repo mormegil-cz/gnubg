@@ -1,0 +1,207 @@
+#
+# gnubg.gtkrc.in
+# by
+# Gary Wong <gtw@gnu.org>, 2001
+# Joern Thyssen <jth@gnubg.org>, 2002
+# Jon Kinsey <jon_kinsey@hotmail.com, 2004
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of version 2 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# $Id$
+#
+# style <name> [= <name>]
+# {
+#   <option>
+# }
+#
+# widget <widget_set> style <style_name>
+# widget_class <widget_class_set> style <style_name>
+
+@OS_WIN32_TRUE@module_path "C:/Program Files/gnubg/themes/engines"
+
+
+#
+# The default style used for all widgets in gnubg.
+#
+# Modify this style if you want to modify the font (e.g., font size or
+# font face) everywhere in gnubg.
+#
+# You can also use the style if you want to apply a certain engine.
+#
+
+style "default"
+{
+
+@OS_WIN32_TRUE@font = "-*-tahoma-normal-r-normal-*-*-100-*-*-*-*-*-*"
+
+# base, text, bg, fg are possible
+bg[SELECTED] = { 0.67, 0.67, 0.67 }
+bg[INSENSITIVE] = { 0.77, 0.77, 0.77 }
+bg[ACTIVE] = { 0.67, 0.67, 0.67 }
+bg[PRELIGHT] = { 0.80, 0.82, 0.84 }
+
+fg[NORMAL] = { 0.0, 0.0, 0.0 }
+fg[SELECTED] = { 0.9, 0.9, 0.9 }
+fg[ACTIVE] = { 0.0, 0.0, 0.0 }
+fg[PRELIGHT] = { 0.2, 0.1, 0.0 }
+
+@OS_WIN32_TRUE@  engine "engradient"
+@OS_WIN32_TRUE@  {
+@OS_WIN32_TRUE@    use_gradient = TRUE
+@OS_WIN32_TRUE@    handlebox_marks = TRUE
+@OS_WIN32_TRUE@    scrollbar_marks = TRUE
+@OS_WIN32_TRUE@  }
+
+}
+
+#
+# Style for the move list (e.g., the hint window) for highlighting the actual
+# move made.
+#
+
+style "movelabel" = "default"
+{
+  fg[ACTIVE] = { 0xffff, 0xffff, 0 }
+}
+
+widget "*Board.*move" style "movelabel"
+
+
+#
+# Styles for showing the graphical overview of the market windows.
+#
+# ACTIVE is used for showing the "double, take" window
+# PRELIGHT is used for showing the "double, pass" window
+# SELECTED is used for showing the "too good" window
+#
+
+style "doubling-window-graph" = "default"
+{
+  bg[ACTIVE] = { 0, 0xffff, 0 }
+  bg[PRELIGHT] = { 0xffff, 0, 0 }
+  bg[SELECTED] = { 0, 0, 0xffff }
+}
+
+widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
+
+widget_class "*" style "default"
+
+#
+# Styles for moves in game list
+#
+# Each gamelist style can have a foreground (fg[NORMAL]),
+# background (base[NORMAL]) and font (font_name for gtk 2) specified.
+# Note that multiple styles will be applied (E.g. if a move is
+# lucky and an error), if more than one style specifies the same
+# attribute then they will be shown in this order cube, chequer and luck
+# e.g. a fg luck setting will get overwritten by a fg chequer setting
+#
+# Examples:
+#
+# 1. To mark chequer blunders as blue on a red background
+# with a large italic font:
+#
+#	style "gamelist-chequer-blunder" = "default"
+#	{
+#	  fg[ NORMAL ] = { 0, 0, 0xffff }
+#	  base[ NORMAL ] = { 0xffff, 0, 0 }
+#	  font = "-*-tahoma-normal-i-normal-*-*-120-*-*-*-*-*-*"
+#	}
+#
+# 2. To not mark doubtful cube decisions:
+#
+#	style "gamelist-cube-doubtful" = "default"
+#	{
+#	}
+#
+#
+# If you want chequer and cube errors to appear the same just
+# set the styles to the same values (i.e. set the cube and chequer
+# styles the same for each of the 3 levels of error)
+
+style "gamelist-chequer-blunder" = "default"
+{
+  fg[ NORMAL ] = { 0xffff, 0, 0 }
+}
+style "gamelist-chequer-error" = "default"
+{
+  fg[ NORMAL ] = { 0, 0, 0xffff }
+}
+style "gamelist-chequer-doubtful" = "default"
+{
+  fg[ NORMAL ] = { 0x1100, 0xa000, 0x1100 }
+}
+
+style "gamelist-cube-blunder" = "default"
+{
+  base[ NORMAL ] = { 0xffff, 0xffff, 0 }
+}
+style "gamelist-cube-error" = "default"
+{
+  base[ NORMAL ] = { 0xff00, 0x8000, 0xff00 }
+}
+style "gamelist-cube-doubtful" = "default"
+{
+  base[ NORMAL ] = { 0xc000, 0xc000, 0xc000 }
+}
+
+style "gamelist-luck-bad" = "default"
+{
+@USE_GTK2_FALSE@#gtk1.3
+@USE_GTK2_FALSE@font = "-*-tahoma-normal-i-normal-*-*-100-*-*-*-*-*-*"
+@USE_GTK2_TRUE@#gtk2.x
+@USE_GTK2_TRUE@font_name = "Italic"
+}
+style "gamelist-luck-good" = "default"
+{
+@USE_GTK2_FALSE@#gtk1.3
+@USE_GTK2_FALSE@font = "-*-tahoma-bold-r-normal-*-*-100-*-*-*-*-*-*"
+@USE_GTK2_TRUE@#gtk2.x
+@USE_GTK2_TRUE@font_name = "Bold"
+}
+
+widget "*.gnubg-gamelist-chequer-blunder" style "gamelist-chequer-blunder"
+widget "*.gnubg-gamelist-chequer-error" style "gamelist-chequer-error"
+widget "*.gnubg-gamelist-chequer-doubtful" style "gamelist-chequer-doubtful"
+
+widget "*.gnubg-gamelist-cube-blunder" style "gamelist-cube-blunder"
+widget "*.gnubg-gamelist-cube-error" style "gamelist-cube-error"
+widget "*.gnubg-gamelist-cube-doubtful" style "gamelist-cube-doubtful"
+
+widget "*.gnubg-gamelist-luck-good" style "gamelist-luck-good"
+widget "*.gnubg-gamelist-luck-bad" style "gamelist-luck-bad"
+
+#
+# Styles for match equity table
+#
+# The style for "met-matching-score" is used for highlighting the row
+# and column that matches the current score. For example, if the score
+# is 4-away,7-away the row for 4-away and the column for 7-away is highlighted.
+# The style for "met-the-score" is used to highlight the exact score, e.g.,
+# in the example above, the entry at 4-away,7-away is highlighted.
+#
+
+style "met-matching-score" = "default"
+{
+  fg[NORMAL] = { 0xffff, 0, 0 }
+}
+
+style "met-the-score" = "met-matching-score"
+{
+  fg[NORMAL] = { 0, 0xffff, 0 }
+}
+
+widget "*.gnubg-met-matching-score" style "met-matching-score"
+widget "*.gnubg-met-the-score" style "met-the-score"
+
