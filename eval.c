@@ -69,6 +69,9 @@ extern float
 Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
 extern float
+Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
+
+extern float
 Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
 extern float
@@ -2864,7 +2867,8 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     pm->cMoves = cMoves;
     pm->cPips = cPip;
 
-    pm->pEval = NULL;
+    for ( i = 0; i < NUM_OUTPUTS; i++ )
+      pm->arEvalMove[ i ] = 0.0;
     
     pml->cMoves++;
 
@@ -2986,8 +2990,10 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies,
       
       InvertEvaluation( arEval );
       
-      if( pml->amMoves[ i ].pEval )
-        memcpy( pml->amMoves[ i ].pEval, arEval, sizeof( arEval ) );
+      memcpy( pml->amMoves[ i ].arEvalMove, arEval, sizeof( arEval ) );
+
+      pml->amMoves[ i ].esMove.ec = *pec;
+      pml->amMoves[ i ].esMove.ec.nPlies = nPlies;
       
       if( ( pml->amMoves[ i ].rScore = Utility( arEval, pci ) ) >
           pml->rBestScore ) {
@@ -3126,7 +3132,7 @@ int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
 }
 
 extern int 
-FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
+FindBestMoves( movelist *pml,
                int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
                int c, float d, cubeinfo *pci, evalcontext *pec ) {
 
@@ -3171,10 +3177,6 @@ FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
     memcpy( amCandidates, pml->amMoves, pml->cMoves * sizeof( move ) );    
     pml->amMoves = amCandidates;
 
-    /* Arrange for the full evaluations to be stored */
-    for( i = 0; i < pml->cMoves; i++ )
-	amCandidates[ i ].pEval = ar[ i ];
-
     /* Calculate the full evaluations at the search depth requested */
     if( ScoreMoves( pml, pci, pec, pec->nPlies, pc ) < 0 )
 	return -1;
@@ -3187,6 +3189,113 @@ FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
 
     return 0;
 }
+
+
+extern int 
+FindnSaveBestMoves( movelist *pml,
+                  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+                  unsigned char *auchMove,
+                  cubeinfo *pci, evalcontext *pec ) {
+
+  /* Find best moves. 
+     Ensure that auchMove is present in the list. */
+
+  int i, j, nMoves, iPly;
+  positionclass pc;
+  move *pm;
+#if __GNUC__
+  move amCandidates[ pec->nSearchCandidates ];
+#elif HAVE_ALLOCA
+  move* amCandidates = alloca( pec->nSearchCandidates * sizeof( move ) );
+#else
+  move amCandidates[ MAX_SEARCH_CANDIDATES ];
+#endif
+    
+  /* Find all moves -- note that pml contains internal pointers to static
+     data, so we can't call GenerateMoves again (or anything that calls
+     it, such as ScoreMoves at more than 0 plies) until we have saved
+     the moves we want to keep in amCandidates. */
+  
+  GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
+
+  /* Save moves */
+
+  pm = (move *) malloc ( pml->cMoves * sizeof ( move ) );
+  memcpy( pm, pml->amMoves, pml->cMoves * sizeof( move ) );    
+  pml->amMoves = pm;
+
+  nMoves = pml->cMoves;
+
+  if ( pml->cMoves == 0 ) 
+    /* no legal moves */
+    return 0;
+
+  /* Evaluate all moves at 0-ply */
+
+  if( ( pc = ScoreMoves( pml, pci, pec, 0, CLASS_ANY ) ) < 0 )
+    return -1;
+
+  for ( iPly = 0; iPly < pec->nPlies; iPly++ ) {
+
+    /* search tolerance at iPly */
+
+    float rTol = pec->rSearchTolerance / ( 1 << iPly );
+
+    /* larger threshold for 0-ply evaluations */
+
+    if ( pec->nPlies == 0 && rTol < 0.25 )
+      rTol = 0.25;
+
+    /* Eliminate moves whose scores are below the threshold from the
+       best except for auchMove */
+
+    for( i = 0, j = 0; i < pml->cMoves; i++ ) {
+
+      int fMustHave = 
+        ( auchMove && EqualKeys ( auchMove, pml->amMoves[ i ].auch ) );
+      
+      if( fMustHave ||
+          pml->amMoves[ i ].rScore >= pml->rBestScore - rTol ) {
+
+        if( i != j ) {
+          move m = pml->amMoves[ j ];
+          pml->amMoves[ j ] = pml->amMoves[ i ];
+          pml->amMoves[ i ] = m;
+        }
+        
+        j++;
+      }
+    }
+
+    /* Sort moves in descending order */
+    qsort( pml->amMoves, j, sizeof( move ), (cfunc) CompareMoves );
+
+    pml->iMoveBest = 0;
+
+    /* Consider only those better than the threshold or as many as were
+       requested, whichever is less */
+
+    pml->cMoves = ( j < ( pec->nSearchCandidates >> iPly ) ? j :
+                    ( pec->nSearchCandidates >> iPly ) );
+
+    /* Calculate the full evaluations at the search depth requested */
+    if( ScoreMoves( pml, pci, pec, iPly + 1, pc ) < 0 )
+	return -1;
+
+  }
+
+  /* Using a deeper search might change the order of the evaluations;
+     reorder them according to the latest evaluation */
+
+  pml->cMoves = nMoves;
+
+  if( pec->nPlies  )
+    qsort( pml->amMoves, pml->cMoves, sizeof( move ),
+           (cfunc) CompareMoves );
+
+    return 0;
+}
+
 
 extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] ) {
 
@@ -3447,6 +3556,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   }
 
   /* if cube is available, output cube action */
+
+  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
   if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
@@ -4211,6 +4322,8 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
       /* Do I have an automatic (re)double? */
 
+      /*
+
       if ( ( nMatchTo - anScore[ ! pci -> fMove ] - pci -> nCube <= 0 )
            && ( nMatchTo - anScore[ pci -> fMove ] - pci -> nCube > 0 )
            && ( pci -> fCubeOwner != ! pci -> fMove ) ) {
@@ -4219,13 +4332,14 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
                       ! pci -> fMove, pci -> fMove );
 
       }
+      */
 
     }
 
     EvaluatePosition ( anBoard, arOutput, pci, 0 );
 
     SanityCheck ( anBoard, arOutput );
-
+    //4NvBwQDg5+ABIQ
     rEq = Utility ( arOutput, pci );
 
     if ( pc == CLASS_OVER || ( nMatchTo && ! fDoCubeful( pci ) ) ) {
@@ -4577,12 +4691,7 @@ Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   if ( pci->fCubeOwner == -1 ) {
 
-    float rEqO, rEqU;
-
-    rEqO = mwc2eq ( Cl2CfMatchOwned ( arOutput, pci ), pci );
-    rEqU = mwc2eq ( Cl2CfMatchUnavailable ( arOutput, pci ), pci );
-
-    return eq2mwc ( 2.0 / ( 4.0 - rCubeX ) * ( rEqO + rEqU ), pci );
+    return Cl2CfMatchCentered ( arOutput, pci );
 
   } 
   else if ( pci->fCubeOwner == pci->fMove ) {
@@ -4663,8 +4772,11 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
       rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
 
-    rMWCLive = rMWCLose + 
-      ( rMWCCash - rMWCLose ) * arOutput[ 0 ] / rTG;
+    if ( rTG > 0.0 )
+      rMWCLive = rMWCLose + 
+        ( rMWCCash - rMWCLose ) * arOutput[ 0 ] / rTG;
+    else
+      rMWCLive = rMWCLose;
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
@@ -4688,9 +4800,13 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
       rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
       rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
+    
 
-    rMWCLive = rMWCCash + 
-      ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+    if ( rTG < 1.0 )
+      rMWCLive = rMWCCash + 
+        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+    else
+      rMWCLive = rMWCWin;
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
@@ -4767,8 +4883,12 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
       rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
 
-    rMWCLive = rMWCLose + 
-      ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+    if ( rOppTG > 0.0 ) 
+      /* avoid division by zero */
+      rMWCLive = rMWCLose + 
+        ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+    else
+      rMWCLive = rMWCLose;
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
@@ -4791,9 +4911,119 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
       rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
 
-    rMWCLive = rMWCOppCash + 
-      ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
-      / ( 1.0 - rOppTG );
+    if ( arOutput[ 0 ] != rOppTG )
+      rMWCLive = rMWCOppCash + 
+        ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
+        / ( 1.0 - rOppTG );
+    else
+      rMWCLive = rMWCWin;
+
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  } 
+
+}
+
+
+extern float
+Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
+
+  /* normalized score */
+
+  int nScore0 = nMatchTo - anScore[ pci->fMove ];
+  int nScore1 = nMatchTo - anScore[ ! pci->fMove ];
+
+  float rG0, rBG0, rG1, rBG1;
+  float arCP[ 2 ];
+
+  float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
+  float rMWCOppCash, rMWCCash, rOppTG, rTG;
+
+  /* Centered cube */
+
+  /* Calculate normal, gammon, and backgammon ratios */
+
+  if ( arOutput[ 0 ] > 0.0 ) {
+    rG0 = arOutput[ 1 ] / arOutput[ 0 ];
+    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  }
+  else {
+    rG0 = 0.0;
+    rBG0 = 0.0;
+  }
+
+  if ( arOutput[ 0 ] < 1.0 ) {
+    rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+  }
+  else {
+    rG1 = 0.0;
+    rBG1 = 0.0;
+  }
+
+  /* MWC(dead cube) = cubeless equity */
+
+  rMWCDead = eq2mwc ( Utility ( arOutput, pci ), pci );
+
+  /* Get live cube cash points */
+
+  GetPoints ( arOutput, anScore, nMatchTo, pci, arCP );
+
+  rMWCOppCash = GET_MET ( nScore0 - 1, nScore1 - pci -> nCube - 1, aafMET );
+  rMWCCash = GET_MET ( nScore0 - pci -> nCube - 1, nScore1 - 1, aafMET );
+
+  rOppTG = 1.0 - arCP[ ! pci->fMove ];
+  rTG = arCP[ pci->fMove ];
+
+  if ( arOutput[ 0 ] <= rOppTG ) {
+
+    /* Opp too good to double */
+
+    rMWCLose = 
+      ( 1.0 - rG1 - rBG1 ) * 
+      GET_MET ( nScore0 - 1, nScore1 - pci->nCube - 1, aafMET ) +
+      rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
+      rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
+
+    if ( rOppTG > 0.0 ) 
+      /* avoid division by zero */
+      rMWCLive = rMWCLose + 
+        ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+    else
+      rMWCLive = rMWCLose;
+      
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  }
+  else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] <= rTG ) {
+
+    /* In double window */
+
+    rMWCLive = 
+      rMWCOppCash + 
+      (rMWCCash - rMWCOppCash) * ( arOutput[ 0 ] - rOppTG ) / ( rTG - rOppTG); 
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  } else {
+
+    /* I'm too good to double */
+
+    rMWCWin = 
+      ( 1.0 - rG0 - rBG0 ) * 
+      GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
+      rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
+      rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
+
+    if ( arOutput[ 0 ] == rOppTG )
+      rMWCLive = rMWCOppCash + 
+        ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
+        / ( 1.0 - rOppTG );
+    else
+      rMWCLive = rMWCWin;
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
@@ -4908,3 +5138,20 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
   assert( FALSE );
   return 0;
 }
+
+
+extern char *FormatEval5 ( char *sz, evaltype et, evalsetup es ) {
+
+  switch ( et ) {
+  case EVAL_EVAL:
+    sprintf ( sz, "%1i-ply", es.ec.nPlies );
+    break;
+  case EVAL_ROLLOUT:
+    sprintf ( sz, "%5s", "R.   " );
+    break;
+  }
+
+  return sz;
+
+}
+
