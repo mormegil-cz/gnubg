@@ -3696,7 +3696,7 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->nTruncate,
             sz, prc->nTrials );
 
-//  SaveRNGSettings ( pf, sz, prc->rngRollout );
+  /* SaveRNGSettings ( pf, sz, prc->rngRollout ); */
 
   /* chequer play and cube decision evalcontexts */
 
