@@ -823,6 +823,9 @@ static int WaitForAllProcessingUnits (void)
     
     if (RPU_DEBUG) PrintProcessingUnitList ();
     
+    #if USE_GTK
+    if (IsMainThread ()) gdk_threads_leave ();
+    #endif
     while (ppu != NULL) {
         pthread_mutex_lock (&ppu->mutexStatusChanged);
         if (ppu->status != pu_stat_ready && ppu->status != pu_stat_deactivated) {
@@ -841,6 +844,9 @@ static int WaitForAllProcessingUnits (void)
         pthread_mutex_unlock (&ppu->mutexStatusChanged);
         ppu = ppu->next;
     } 
+    #if USE_GTK
+    if (IsMainThread ()) gdk_threads_enter ();
+    #endif
     
 
     if (RPU_DEBUG) outputerrf ("### All procunits ready or deactivated.\n");
@@ -2769,8 +2775,8 @@ static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char 
     err = pthread_cond_timedwait (cond, mutex, &ts);
     
     if (step != NULL) {
-        if (*step == 0) outputerrf (s);
-        if (*step > 0) outputerrf (".");
+        if (*step == 0) outputf (s);
+        if (*step > 0) outputf (".");
         fflush (stderr);
         ++ *step;
     }
@@ -2959,12 +2965,14 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
             } /* while (err == 0 && cJobTasks > 0 & !ppu->info.remote.fInterrupt) */
 
             if (err != 0) {
-                if (!ppu->info.remote.fInterrupt)
+                if (!ppu->info.remote.fInterrupt) {
+                    ppu->info.remote.fStop = TRUE;
                     outputerrf ("*** Remote processing unit id=%d error, deactivating.\n", 
                                 ppu->procunit_id);
+                }
+                else err = 0;
                 CancelProcessingUnitTasks (ppu);
                 ppu->info.remote.fInterrupt = TRUE;
-                ppu->info.remote.fStop = TRUE;
             }
                                     
         } /* if (cJobTasks != 0) */
@@ -4344,6 +4352,7 @@ static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer d
     int			fLocal = FALSE;
     int			fReady = FALSE;
     int			fNotReady = FALSE;
+    int			fStopped = FALSE;
 
     /* collect info about the selected procunits */
     if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(gplsProcunits), &iter)) {
@@ -4356,6 +4365,7 @@ static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer d
                 if (ppu->type == pu_type_local) fLocal = TRUE;
                 if (ppu->status == pu_stat_ready) fReady = TRUE;
                 if (ppu->status != pu_stat_ready) fNotReady = TRUE;
+                if (ppu->status == pu_stat_deactivated) fStopped = TRUE;
             }
         } while (gtk_tree_model_iter_next (GTK_TREE_MODEL(gplsProcunits), &iter));
     }
@@ -4363,7 +4373,7 @@ static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer d
     /* adjust button sensitivity */
     gtk_widget_set_sensitive (gpwMaster_Button_Remove, iSelected > 0);
     gtk_widget_set_sensitive (gpwMaster_Button_Start, fNotReady);
-    gtk_widget_set_sensitive (gpwMaster_Button_Stop, fReady);
+    gtk_widget_set_sensitive (gpwMaster_Button_Stop, !fStopped);
     gtk_widget_set_sensitive (gpwMaster_Button_Queue, fRemote);
     gtk_widget_set_sensitive (gpwMaster_Button_Stats, iSelected > 0);
 }
