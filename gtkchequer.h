@@ -29,6 +29,7 @@ typedef struct _hintdata {
   GtkWidget *pwMove; /* move button */
   GtkWidget *pwCopy; /* copy button */
   GtkWidget *pwEvalPly; /* predefined eval buttons */
+  GtkWidget *pwShow; /* button for showing moves */
   movelist *pml;
   int fButtonsValid;
   int fDestroyOnMove;

@@ -270,6 +270,44 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
 
 static void
+MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
+
+  move *pm;
+  char *sz;
+  int i;
+  GtkWidget *pwMoves = phd->pwMoves;
+  int anBoard[ 2 ][ 25 ];
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
+  
+  if ( f ) {
+
+    assert( GTK_CLIST( pwMoves )->selection );
+
+    /* the button is toggled */
+  
+    i = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
+    pm = (move * ) gtk_clist_get_row_data( GTK_CLIST( pwMoves ), i );
+
+    memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
+    ApplyMove ( anBoard, pm->anMove, FALSE );
+
+    sz = g_strdup_printf ( "show board %s", PositionID ( anBoard ) );
+    UserCommand( sz );
+    g_free ( sz );
+
+  }
+  else {
+    
+    sz = g_strdup_printf ( "show board %s", PositionID ( ms.anBoard ) );
+    UserCommand( sz );
+    g_free ( sz );
+
+  }
+
+}
+
+
+static void
 MoveListMWC ( GtkWidget *pw, hintdata *phd ) {
 
   char sz[ 80 ];
@@ -462,6 +500,7 @@ CreateMoveListTools ( hintdata *phd ) {
   GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
   GtkWidget *pwMove = gtk_button_new_with_label ( _("Move") );
+  GtkWidget *pwShow = gtk_toggle_button_new_with_label ( _("Show") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
   GtkWidget *pwply;
   int i;
@@ -474,11 +513,12 @@ CreateMoveListTools ( hintdata *phd ) {
   phd->pwEval = pwEval;
   phd->pwEvalSettings = pwEvalSettings;
   phd->pwMove = pwMove;
+  phd->pwShow = pwShow;
   phd->pwCopy = pwCopy;
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pwTools = gtk_table_new (6, 2, FALSE);
+  pwTools = gtk_table_new (7, 2, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -527,12 +567,17 @@ CreateMoveListTools ( hintdata *phd ) {
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 0, 2, 5, 6,
+  gtk_table_attach (GTK_TABLE (pwTools), pwShow, 0, 2, 5, 6,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 0, 2, 6, 7,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   gtk_widget_set_sensitive( pwMove, FALSE );
+  gtk_widget_set_sensitive( pwShow, FALSE );
   gtk_widget_set_sensitive( pwCopy, FALSE );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
@@ -552,6 +597,8 @@ CreateMoveListTools ( hintdata *phd ) {
                       GTK_SIGNAL_FUNC( MoveListMWC ), phd );
   gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
                       GTK_SIGNAL_FUNC( MoveListMove ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwShow ), "toggled",
+                      GTK_SIGNAL_FUNC( MoveListShowToggled ), phd );
   gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
                       GTK_SIGNAL_FUNC( MoveListCopy ), phd );
 
@@ -637,10 +684,13 @@ CheckHintButtons( hintdata *phd ) {
 	c++;
 
     gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwShow, c == 1 && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEvalPly, c && phd->fButtonsValid );
+
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( phd->pwShow ), FALSE );
 
     return c;
 }
