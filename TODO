@@ -6,7 +6,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow different settings (e.g. search ply, candidates, tolerance) for each
   position class. Also allow different settings for cube action.
 ** Add more evaluation classes.
-*** Write a better race evaluator.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
   positions, prime-vs-prime...
@@ -34,12 +33,6 @@ duplication of effort and to make sure our changes merge easily.
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
 
-* Game play:
-** Add cube handling for computer player.  See tag "thyssen-double-branch"
-  in the CVS repository for work on this [money game is now working in
-  main branch, although gnubg doesn't raccoon]. (thyssen)
-
-
 * Command interface:
 ** Add more completions to readline.
 ** Allow timeouts for "train" (and others?).
@@ -57,9 +50,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
   is not really necessary, since "set turn <player>" will let them roll
   again.)
-** Allow reading commands from scripts.  A .gnubgrc file would contain
-  startup commands.  This needs some thought to make sure it works well
-  with Guile scripts.
 ** Add ":" as a Guile escape, once it's here.
 ** Allow resuming interrupted rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
@@ -67,6 +57,9 @@ duplication of effort and to make sure our changes merge easily.
   with push/pop semantics for readline state. (gary)
 ** Change "set beavers" to allow a limit on the number of beavers
   permitted.
+** Add some kind of command to perform batch rollouts.
+*** Make "hint" label the moves it lists, and allow you to roll out
+  a choice of alternatives.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -97,8 +90,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add a "stop" button which sets fInterrupt; this should be the grab
   widget when gnubg is busy.
 ** Add optional point number labels on the board.
-** Position the "move" widget (that displays the move in progress) higher
-  up, to the left of the "roll dice" widget.
 ** Move the Crawford menu item to the name/score table.
 ** The "Set" position button is superfluous.
 ** Add a "Reset" button that restores the position, from
@@ -143,12 +134,11 @@ duplication of effort and to make sure our changes merge easily.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
 ** "set player <tab>" gives incorrect completions.
-** Make sure when one player is on roll and "set turn" is used to change
-  to the other, that the dice in the board window change colour.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
 ** In the Crawford game, "eval" gives different MWC for cubeless and cubeful.
-  (I'll include more information here soon.) (gary)
+  The cubeful MWC can be negative or over 100%.  Example: new match 5;
+  set score 3 4; set board HwAAQAAAAAAAAA; set turn 1; eval.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -156,10 +146,9 @@ duplication of effort and to make sure our changes merge easily.
 
 * Miscellaneous:
 ** Add internationalisation (gettext).
-** Add more to http://www.gnu.org/software/gnubg/... -- definitely the
-  HTML formatted manual, and perhaps pages to submit training data,
-  an online evaluator like Monte Carlo, maybe even an entire game like
-  Motif.
+** Add more to http://www.gnu.org/software/gnubg/... -- perhaps pages to
+  submit training data, an online evaluator like Monte Carlo, maybe even an
+  entire game like Motif.
 ** Submit something to <http://www.distributed.net/nextgen/projects.html>.
 ** Allow loading and saving weights to specify binary or ASCII format.
 ** Allow annotating moves in matches.  It would be nice to be compatible

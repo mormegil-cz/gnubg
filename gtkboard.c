@@ -42,9 +42,8 @@ static unsigned int nSeed = 1; /* for rand_r */
 #define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
 
 typedef struct _BoardData {
-    GtkWidget *drawing_area, *dice_area, *hbox_move, *table, *hbox_match,
-	*move, *position_id, *set, *edit, *name0, *name1, *score0, *score1,
-	*match;
+    GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
+	*position_id, *set, *edit, *name0, *name1, *score0, *score1, *match;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
@@ -568,6 +567,16 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
+	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    !bd->dice[ 0 ] ) {
+	    /* Don't let them move chequers unless the dice have been
+	       rolled, or they're editing the board. */
+	    gdk_beep();
+	    bd->drag_point = -1;
+	    
+	    return TRUE;
+	}
+	
 	/* FIXME if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
 	   then bear off as many chequers as possible, and return. */
 	
@@ -583,13 +592,6 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    
 	    memcpy( old_points, bd->points, sizeof old_points );
 	    
-	    if( !bd->dice[ 0 ] ) {
-		gdk_beep();
-		bd->drag_point = -1;
-	    
-		return TRUE;
-	    }
-
 	    bd->drag_colour = bd->turn;
 	    bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
 	    
@@ -1055,7 +1057,7 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
-    gtk_label_set_text( GTK_LABEL( bd->move ), NULL );
+    update_move( bd );
 
     if( bd->dice[ 0 ] || bd->dice_opponent[ 0 ] ) {
 	GenerateMoves( &bd->move_list, bd->old_board,
@@ -1173,6 +1175,21 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     return 0;
 }
 
+static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
+			     BoardData *bd ) {
+    
+    if( !bd->pm_board )
+	return TRUE;
+
+    /* FIXME only redraw if xexpose.count == 0 */
+
+    board_redraw_die( dice, bd, 0, 0, bd->turn, bd->dice_roll[ 0 ] );
+    board_redraw_die( dice, bd, 8 * bd->board_size, 0, bd->turn,
+		      bd->dice_roll[ 1 ] );
+
+    return TRUE;
+}
+
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 ) {
@@ -1227,8 +1244,10 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	gtk_widget_map( pbd->dice_area );
     else
 	;
-    /* FIXME what is this for? */
-    /* DiceRedraw( &pbd->ewndDice, pbd->ewndDice.pv ); */
+
+    /* FIXME it's overkill to do this every time, but if we don't do it,
+       then "set turn <player>" won't redraw the dice in the other colour. */
+    dice_expose( pbd->dice_area, NULL, pbd );
 
     return 0;
 }
@@ -1874,7 +1893,7 @@ static void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 static void board_size_allocate( GtkWidget *board,
 				 GtkAllocation *allocation ) {
     BoardData *bd = BOARD( board )->board_data;
-    gint old_size = bd->board_size;
+    gint old_size = bd->board_size, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
 
@@ -1896,16 +1915,29 @@ static void board_size_allocate( GtkWidget *board,
     child_allocation.height = requisition.height;
     gtk_widget_size_allocate( bd->table, &child_allocation );
     
-    gtk_widget_get_child_requisition( bd->hbox_move, &requisition );
+    gtk_widget_get_child_requisition( bd->hbox_pos, &requisition );
     allocation->height -= requisition.height;
     child_allocation.x = allocation->x;
     child_allocation.y = allocation->y + allocation->height;
     child_allocation.width = allocation->width;
     child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->hbox_move, &child_allocation );
+    gtk_widget_size_allocate( bd->hbox_pos, &child_allocation );
+    
+    gtk_widget_get_child_requisition( bd->move, &requisition );
+    /* ensure there is room for the dice area or the move, whichever is
+       bigger */
+    new_size = MIN( allocation->width / 108,
+		    MIN( ( allocation->height - requisition.height - 2 ) / 72,
+			 ( allocation->height - 2 ) / 79 ) );
+    child_allocation.x = allocation->x;
+    child_allocation.y = allocation->y + allocation->height -
+	requisition.height + 1;
+    child_allocation.width = allocation->width;
+    child_allocation.height = requisition.height;
+    allocation->height -= MAX( requisition.height, new_size * 7 ) + 2;
+    gtk_widget_size_allocate( bd->move, &child_allocation );
 
-    if( ( bd->board_size = MIN( allocation->width / 108,
-				allocation->height / 80 ) ) != old_size &&
+    if( ( bd->board_size = new_size ) != old_size &&
 	GTK_WIDGET_REALIZED( board ) )
 	board_create_pixmaps( board, bd );
 
@@ -1914,13 +1946,13 @@ static void board_size_allocate( GtkWidget *board,
 					     child_allocation.width ) >> 1 );
     child_allocation.height = 72 * bd->board_size;
     child_allocation.y = allocation->y + ( ( allocation->height -
-					     80 * bd->board_size ) >> 1 );
+					     72 * bd->board_size ) >> 1 );
     gtk_widget_size_allocate( bd->drawing_area, &child_allocation );
 
     child_allocation.width = 15 * bd->board_size;
     child_allocation.x += ( 108 - 15 ) * bd->board_size;
     child_allocation.height = 7 * bd->board_size;
-    child_allocation.y += 73 * bd->board_size;
+    child_allocation.y += 72 * bd->board_size + 1;
     gtk_widget_size_allocate( bd->dice_area, &child_allocation );
 }
 
@@ -1968,9 +2000,11 @@ static void board_set_score( GtkWidget *pw, BoardData *bd ) {
 
 static void board_edit( GtkWidget *pw, BoardData *bd ) {
 
+    int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+    
     update_move( bd );
 
-    if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) ) ) {
+    if( !f ) {
 	/* Editing complete; set board. */
 	int points[ 2 ][ 25 ];
 	char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
@@ -1980,21 +2014,6 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
     
 	UserCommand( sz );
     }
-}
-
-static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
-			     BoardData *bd ) {
-    
-    if( !bd->pm_board )
-	return TRUE;
-
-    /* FIXME only redraw if xexpose.count == 0 */
-
-    board_redraw_die( dice, bd, 0, 0, bd->turn, bd->dice_roll[ 0 ] );
-    board_redraw_die( dice, bd, 8 * bd->board_size, 0, bd->turn,
-		      bd->dice_roll[ 1 ] );
-
-    return TRUE;
 }
 
 static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
@@ -2049,7 +2068,8 @@ static void board_init( Board *board ) {
     board->board_data = bd;
     
     bd->drag_point = bd->board_size = -1;
-
+    bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
+    
     bd->all_moves = NULL;
     
     gcval.function = GDK_AND;
@@ -2078,14 +2098,17 @@ static void board_init( Board *board ) {
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area );
 
+    gtk_container_add( GTK_CONTAINER( board ),
+		       bd->move = gtk_label_new( NULL ) );
+
     bd->dice_area = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
     gtk_widget_set_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->dice_area );
-    
-    bd->hbox_move = gtk_hbox_new( FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX( board ), bd->hbox_move, FALSE, FALSE, 0 );
+
+    bd->hbox_pos = gtk_hbox_new( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( board ), bd->hbox_pos, FALSE, FALSE, 0 );
 
     bd->table = gtk_table_new( 3, 3, FALSE );
     gtk_box_pack_start( GTK_BOX( board ), bd->table, FALSE, FALSE, 0 );
@@ -2093,69 +2116,64 @@ static void board_init( Board *board ) {
     bd->hbox_match = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( board ), bd->hbox_match, FALSE, FALSE, 0 );
     
-    /* FIXME */ {
-	gtk_box_pack_start( GTK_BOX( bd->hbox_move ), bd->move =
-			    gtk_label_new( NULL ), TRUE, FALSE, 0 );
-
-	gtk_box_pack_end( GTK_BOX( bd->hbox_move ), bd->edit =
-			    gtk_toggle_button_new_with_label( "Edit" ),
-			    FALSE, FALSE, 8 );
-	gtk_box_pack_end( GTK_BOX( bd->hbox_move ), bd->set =
-			    gtk_button_new_with_label( "Set" ),
-			    FALSE, FALSE, 0 );
-	gtk_box_pack_end( GTK_BOX( bd->hbox_move ), bd->position_id =
-			    gtk_entry_new(), FALSE, FALSE, 8 );
-	gtk_entry_set_max_length( GTK_ENTRY( bd->position_id ), 14 );
-	gtk_box_pack_end( GTK_BOX( bd->hbox_move ),
-			  gtk_label_new( "Position:" ), FALSE, FALSE, 0 );
-	    
-	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Name" ),
-			  1, 2, 0, 1, 0, 0, 8, 0 );
-	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Score" ),
-			  2, 3, 0, 1, 0, 0, 8, 0 );
-
-	gtk_table_attach( GTK_TABLE( bd->table ), bd->name0 =
-			  gtk_entry_new_with_max_length( 32 ),
-			  1, 2, 1, 2, 0, 0, 4, 0 );
-	gtk_table_attach( GTK_TABLE( bd->table ), bd->name1 =
-			  gtk_entry_new_with_max_length( 32 ),
-			  1, 2, 2, 3, 0, 0, 4, 0 );
-	gtk_signal_connect( GTK_OBJECT( bd->name0 ), "activate",
-			    GTK_SIGNAL_FUNC( board_set_name ), bd );
-	gtk_signal_connect( GTK_OBJECT( bd->name1 ), "activate",
-			    GTK_SIGNAL_FUNC( board_set_name ), bd );
-	
-	gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 0, bd ),
-			  0, 1, 1, 2, 0, 0, 8, 1 );
-	gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 1, bd ),
-			  0, 1, 2, 3, 0, 0, 8, 0 );
-
-	gtk_table_attach( GTK_TABLE( bd->table ), bd->score0 =
-			  gtk_spin_button_new( GTK_ADJUSTMENT(
-			      gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
-					       1, 0 ),
-			  2, 3, 1, 2, 0, 0, 4, 0 );
-	gtk_table_attach( GTK_TABLE( bd->table ), bd->score1 =
-			  gtk_spin_button_new( GTK_ADJUSTMENT(
-			      gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
-					       1, 0 ),
-			  2, 3, 2, 3, 0, 0, 4, 0 );
-	gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
-	gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
-	gtk_signal_connect( GTK_OBJECT( bd->score0 ), "activate",
-			    GTK_SIGNAL_FUNC( board_set_score ), bd );
-	gtk_signal_connect( GTK_OBJECT( bd->score1 ), "activate",
-			    GTK_SIGNAL_FUNC( board_set_score ), bd );
-	
-	gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
-			    gtk_label_new( "Match:" ), FALSE, FALSE, 4 );
-	gtk_box_pack_start( GTK_BOX( bd->hbox_match ), bd->match =
-			    gtk_label_new( NULL ), FALSE, FALSE, 0 );
-    }
+    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->edit =
+		      gtk_toggle_button_new_with_label( "Edit" ),
+		      FALSE, FALSE, 8 );
+    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->set =
+		      gtk_button_new_with_label( "Set" ),
+		      FALSE, FALSE, 0 );
+    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->position_id =
+		      gtk_entry_new(), FALSE, FALSE, 8 );
+    gtk_entry_set_max_length( GTK_ENTRY( bd->position_id ), 14 );
+    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ),
+		      gtk_label_new( "Position:" ), FALSE, FALSE, 0 );
+    
+    gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Name" ),
+		      1, 2, 0, 1, 0, 0, 8, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Score" ),
+		      2, 3, 0, 1, 0, 0, 8, 0 );
+    
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->name0 =
+		      gtk_entry_new_with_max_length( 32 ),
+		      1, 2, 1, 2, 0, 0, 4, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->name1 =
+		      gtk_entry_new_with_max_length( 32 ),
+		      1, 2, 2, 3, 0, 0, 4, 0 );
+    gtk_signal_connect( GTK_OBJECT( bd->name0 ), "activate",
+			GTK_SIGNAL_FUNC( board_set_name ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->name1 ), "activate",
+			GTK_SIGNAL_FUNC( board_set_name ), bd );
+    
+    gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 0, bd ),
+		      0, 1, 1, 2, 0, 0, 8, 1 );
+    gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 1, bd ),
+		      0, 1, 2, 3, 0, 0, 8, 0 );
+    
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->score0 =
+		      gtk_spin_button_new( GTK_ADJUSTMENT(
+			  gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
+					   1, 0 ),
+		      2, 3, 1, 2, 0, 0, 4, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->score1 =
+		      gtk_spin_button_new( GTK_ADJUSTMENT(
+			  gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
+					   1, 0 ),
+		      2, 3, 2, 3, 0, 0, 4, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
+    gtk_signal_connect( GTK_OBJECT( bd->score0 ), "activate",
+			GTK_SIGNAL_FUNC( board_set_score ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->score1 ), "activate",
+			GTK_SIGNAL_FUNC( board_set_score ), bd );
+    
+    gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
+			gtk_label_new( "Match:" ), FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( bd->hbox_match ), bd->match =
+			gtk_label_new( NULL ), FALSE, FALSE, 0 );
 
     board_set( board, "board:::1:0:0:"
               "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
-              "1:3:1:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:2:0:0:3" );
+              "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0" );
     
     gtk_widget_show_all( GTK_WIDGET( board ) );
 

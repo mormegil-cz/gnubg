@@ -1,3 +1,28 @@
+Sun Oct 15 19:51:43 2000  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_pointer): Don't allow the user to move
+	chequers unless the dice have been rolled or they're in edit mode.
+	
+	* gtkboard.c (board_size_allocate): Move the "current move" output
+	in the board window up slightly, next to the off-board dice
+	(there's more room for it there).
+
+	* sgf.c, sgf.h, sgf.l, sgf.y: New files to parse SGF input.
+	
+	* gtkboard.c (game_set): Call dice_expose(), so that the off-board
+	dice will be drawn in the right colour.
+
+Fri Oct 13 18:07:49 2000  Gary Wong  <gtw@research.att.com>
+
+	* play.c (CancelCubeAction): New function.
+
+	* gnubg.c, play.c: Add a "MOVE_GAMEINFO" record to the beginning
+	of each game, specifying initial score, rules, game result, etc.
+	
+	* gnubg.c (main): New option `-w' (--window-system-only) used by GTK
+	port to disable TTY input.
+	* gtkgame.c: Do not set up any stdin handlers if fTTY is false.
+
 Fri Oct 13 13:41:00 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* show.c: (CommandShowGammonPrice): Bugfix. Code gave wrong ouput.
