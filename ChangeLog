@@ -1,3 +1,12 @@
+Sun Nov 24 13:56:29 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (GTKRecordShow): Improve GTK+ player record interface.
+
+	* record.c (CommandRecordErase, CommandRecordEraseAll): New functions.
+	
+	* record.c (RecordAddGame): Calculate the luck fields based on both
+	players' luck.
+
 Sun Nov 24 15:40:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New race widget with misc counts, one chequer bearoff,

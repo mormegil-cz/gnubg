@@ -235,6 +235,12 @@ functions:
 ** try to eliminate dependency on pstopng and friends
 ** settings analysis thresholds doesn't seem to work
    (see http://mail.gnu.org/pipermail/bug-gnubg/2002-October/001313.html)
+  (This is working as designed.  The navigation commands are based on the
+  annotations, which are not necessarily related to the analysis at all,
+  e.g. if they were marked by a human.  Perhaps we could add more navigation
+  commands which are derived directly from the analysis, which would give
+  the behaviour the user seems to want, and allow us to implement David
+  Montgomery's suggestion of allowing negative error thresholds.)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -293,9 +299,6 @@ functions:
 ** It would be nice if you could mark positions and moves for "Rollout later".
 One could then look through a game and mark all positions of interest, set
 the rollouts off and come back later.
-** Make GTKRecordShow() fancier (when selecting a user, show a detailed view
-  of that record including the cube error breakdowns and the ratings
-  corresponding to each error rate). (gary)
 
 * Bugs believed fixed:
 ** during tutor mode chequers are sometimes moved around and not

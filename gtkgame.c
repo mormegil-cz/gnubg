@@ -8716,42 +8716,207 @@ GTKGetMove ( int anMove[ 8 ] ) {
 
 }
 
+typedef struct _recordwindowinfo {
+    GtkWidget *pwList, *pwTable, *pwErase, *apwStats[ 22 ];
+    int nRow;
+} recordwindowinfo;
+
+static void RecordSelect( GtkCList *pw, gint nRow, gint nCol,
+			  GdkEventButton *pev, recordwindowinfo *prwi ) {
+    char *pch;
+    int i;
+    
+    gtk_widget_set_sensitive( prwi->pwErase, TRUE );
+
+    for( i = 0; i < 22; i++ ) {
+	gtk_clist_get_text( pw, nRow, i, &pch );
+	gtk_label_set_text( GTK_LABEL( prwi->apwStats[ i ] ), pch );
+    }
+
+    prwi->nRow = nRow;
+}
+
+static void RecordUnselect( GtkCList *pw, gint nRow, gint nCol,
+			    GdkEventButton *pev, recordwindowinfo *prwi ) {
+    int i;
+    
+    gtk_widget_set_sensitive( prwi->pwErase, FALSE );
+
+    for( i = 0; i < 22; i++ )
+	gtk_label_set_text( GTK_LABEL( prwi->apwStats[ i ] ), NULL );
+}
+
+static void RecordErase( GtkWidget *pw, recordwindowinfo *prwi ) {
+
+    char *pch;
+    char sz[ 64 ];
+    
+    gtk_clist_get_text( GTK_CLIST( prwi->pwList ), prwi->nRow, 0, &pch );
+    sprintf( sz, "record erase %s", pch );
+    UserCommand( sz );
+    gtk_clist_remove( GTK_CLIST( prwi->pwList ), prwi->nRow );
+}
+
+static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
+
+    FILE *pf;
+#if __GNUC__
+    char sz[ strlen( szHomeDirectory ) + 10 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( szHomeDirectory ) + 10 );
+#else
+    char sz[ 4096 ];
+#endif
+    
+    UserCommand( "record eraseall" );
+
+    /* FIXME this is a horrible hack to determine whether the records were
+       really erased */
+    
+    sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	fclose( pf );
+	return;
+    }
+
+    gtk_clist_clear( GTK_CLIST( prwi->pwList ) );
+}
+
+/* 0: name [visible]
+   1: chequer (20)
+   2: cube (20)
+   3: combined (20)
+   4: chequer (100)
+   5: cube (100)
+   6: combined (100)
+   7: chequer (500)
+   8: cube (500)
+   9: combined (500)
+   10: chequer (total) [visible]
+   11: cube (total) [visible]
+   12: combined (total) [visible]
+   13: luck (20)
+   14: luck (100)
+   15: luck (500)
+   16: luck (total) [visible]
+   17: games [visible]
+   18: chequer rating
+   19: cube rating
+   20: combined rating
+   21: luck rating */
+
 extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 
-    GtkWidget *pw = NULL, *pwList = NULL, *pwScrolled;
-    static char *aszTitles[ 14 ] = { N_("Name"), N_("Chequer (20)"),
-				     N_("Cube (20)"), N_("Chequer (100)"),
-				     N_("Cube (100)"), N_("Chequer (500)"),
-				     N_("Cube (500)"), N_("Chequer (total)"),
-				     N_("Cube (total)"), N_("Luck (20)"),
-				     N_("Luck (100)"), N_("Luck (500)"),
-				     N_("Luck (total)"), N_("Games") };
-    char *asz[ 14 ], sz[ 16 ];
+    GtkWidget *pw = NULL, *pwList = NULL, *pwScrolled, *pwHbox, *pwVbox,
+	*pwEraseAll;
+    static int ay[ 22 ] = { 0, 3, 5, 7, 3, 5, 7, 3, 5, 7, 3, 5, 7, 9, 9, 9, 9,
+			    1, 4, 6, 8, 10 };
+    static int ax[ 22 ] = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 1, 2, 3, 4,
+			    1, 1, 1, 1, 1 };
+    static int axEnd[ 22 ] = { 5, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 2, 3, 4,
+			       5, 5, 5, 5, 5, 5 };
+    char *asz[ 22 ], sz[ 16 ];
     int i, f = FALSE;
     playerrecord pr;
+    recordwindowinfo rwi;
     
     while( !RecordReadItem( pfIn, szFile, &pr ) ) {
 	if( !f ) {
 	    f = TRUE;
 	    pw = CreateDialog( _("GNU Backgammon - Player records"), DT_INFO,
 			       NULL, NULL );
-	    for( i = 0; i < 14; i++ )
-		asz[ i ] = gettext( aszTitles[ i ] );
 	    
-	    pwList = gtk_clist_new_with_titles( 14, asz );
+	    for( i = 0; i < 22; i++ )
+		asz[ i ] = "";
 	    
-	    for( i = 0; i < 14; i++ ) {
+	    rwi.pwList = pwList = gtk_clist_new_with_titles( 22, asz );
+
+	    for( i = 0; i < 22; i++ ) {
 		gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i,
 						  TRUE );
 		gtk_clist_set_column_justification( GTK_CLIST( pwList ), i,
 						    i ? GTK_JUSTIFY_RIGHT :
 						    GTK_JUSTIFY_LEFT );
+		gtk_clist_set_column_visibility( GTK_CLIST( pwList ), i,
+						 FALSE );
 	    }
+
+	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 0, _("Name") );
+	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 0, TRUE );
+	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 10,
+					_("Chequer") );
+	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 10, TRUE );
+	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 11, _("Cube") );
+	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 11, TRUE );
+	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 12,
+					_("Overall") );
+	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 12, TRUE );
+	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 16, _("Luck") );
+	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 16, TRUE );
+	    gtk_clist_set_column_title( GTK_CLIST( pwList ), 17, _("Games") );
+	    gtk_clist_set_column_visibility( GTK_CLIST( pwList ), 17, TRUE );
+	    
 	    gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
+	    gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+			GTK_SIGNAL_FUNC( RecordSelect ), &rwi );
+	    gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
+			GTK_SIGNAL_FUNC( RecordUnselect ), &rwi );
 	    pwScrolled = gtk_scrolled_window_new( NULL, NULL );
+	    pwHbox = gtk_hbox_new( FALSE, 0 );
+	    pwVbox = gtk_vbox_new( FALSE, 0 );
 	    gtk_container_add( GTK_CONTAINER( DialogArea( pw, DA_MAIN ) ),
-			       pwScrolled );
+			       pwHbox );
+	    gtk_container_add( GTK_CONTAINER( pwHbox ), pwScrolled );
 	    gtk_container_add( GTK_CONTAINER( pwScrolled ), pwList );
+	    gtk_container_add( GTK_CONTAINER( pwHbox ), pwVbox );
+	    rwi.pwTable = gtk_table_new( 11, 5, TRUE );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Name:") ), 0, 1,
+				       0, 1 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Games:") ), 0, 1,
+				       1, 2 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Chequer:") ), 0, 1,
+				       3, 5 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Cube:") ), 0, 1,
+				       5, 7 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Overall:") ), 0, 1,
+				       7, 9 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Luck:") ), 0, 1,
+				       9, 11 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("20") ), 1, 2,
+				       2, 3 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("100") ), 2, 3,
+				       2, 3 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("500") ), 3, 4,
+				       2, 3 );
+	    gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+				       gtk_label_new( _("Total") ), 4, 5,
+				       2, 3 );
+	    for( i = 0; i < 22; i++ )
+		gtk_table_attach_defaults( GTK_TABLE( rwi.pwTable ),
+					   rwi.apwStats[ i ] =
+					   gtk_label_new( NULL ),
+					   ax[ i ], axEnd[ i ],
+					   ay[ i ], ay[ i ] + 1 );
+	    gtk_container_add( GTK_CONTAINER( pwVbox ), rwi.pwTable );
+	    rwi.pwErase = gtk_button_new_with_label( _("Erase" ) );
+	    gtk_signal_connect( GTK_OBJECT( rwi.pwErase ), "clicked",
+				GTK_SIGNAL_FUNC( RecordErase ), &rwi );
+	    gtk_box_pack_start( GTK_BOX( pwVbox ), rwi.pwErase, FALSE, FALSE,
+				0 );
+	    pwEraseAll = gtk_button_new_with_label( _("Erase All" ) );
+	    gtk_signal_connect( GTK_OBJECT( pwEraseAll ), "clicked",
+			GTK_SIGNAL_FUNC( RecordEraseAll ), &rwi );
+	    gtk_box_pack_start( GTK_BOX( pwVbox ), pwEraseAll, FALSE, FALSE,
+				0 );
 	}
 
 	i = gtk_clist_append( GTK_CLIST( pwList ), asz );
@@ -8769,60 +8934,97 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 2, sz );
 	
-	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_100 ] );
+	if( pr.cGames >= 20 )
+	    sprintf( sz, "%.4f", pr.arErrorCombined[ EXPAVG_20 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 3, sz );
 	
 	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_100 ] );
+	    sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_100 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 4, sz );
+	
+	if( pr.cGames >= 100 )
+	    sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_100 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 5, sz );
+	
+	if( pr.cGames >= 100 )
+	    sprintf( sz, "%.4f", pr.arErrorCombined[ EXPAVG_100 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 6, sz );
 	
 	if( pr.cGames >= 500 )
 	    sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_500 ] );
 	else
 	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 5, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 7, sz );
 	
 	if( pr.cGames >= 500 )
 	    sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_500 ] );
 	else
 	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 6, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 8, sz );
+	
+	if( pr.cGames >= 500 )
+	    sprintf( sz, "%.4f", pr.arErrorCombined[ EXPAVG_500 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 9, sz );
 	
 	sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 7, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 10, sz );
 	
 	sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 8, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 11, sz );
+	
+	sprintf( sz, "%.4f", pr.arErrorCombined[ EXPAVG_TOTAL ] );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 12, sz );
 	
 	if( pr.cGames >= 20 )
 	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_20 ] );
 	else
 	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 9, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 13, sz );
 	
 	if( pr.cGames >= 100 )
 	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_100 ] );
 	else
 	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 10, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 14, sz );
 	
 	if( pr.cGames >= 500 )
 	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_500 ] );
 	else
 	    strcpy( sz, _("n/a") );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 11, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 15, sz );
 	
 	sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_TOTAL ] );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 12, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 16, sz );
 
 	sprintf( sz, "%d", pr.cGames );
-	gtk_clist_set_text( GTK_CLIST( pwList ), i, 13, sz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 17, sz );
 
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 18,
+			    aszRating[ GetRating( pr.arErrorChequerplay[
+				EXPAVG_TOTAL ] ) ] );
+	
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 19,
+			    aszRating[ GetRating( pr.arErrorCube[
+				EXPAVG_TOTAL ] ) ] );
+	
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 20,
+			    aszRating[ GetRating( pr.arErrorCombined[
+				EXPAVG_TOTAL ] ) ] );
+	
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 21,
+			    aszLuckRating[ getLuckRating( pr.arLuck[
+				EXPAVG_TOTAL ] ) ] );
+	
 	if( !CompareNames( pr.szName, szPlayer ) )
 	    gtk_clist_select_row( GTK_CLIST( pwList ), i, 0 );
     }
@@ -8835,7 +9037,7 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
     if( f ) {
 	gtk_clist_sort( GTK_CLIST( pwList ) );
 	
-	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
+	gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
 	gtk_window_set_modal( GTK_WINDOW( pw ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pw ), GTK_WINDOW( pwMain ) );
 

@@ -87,7 +87,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	} else
 	    if( ( nVersion = atoi( ach + 10 ) ) < 2 ) {
 		nVersion = 0;
-		outputerrf( "%s: invalid record file version", pch );
+		outputerrf( _("%s: invalid record file version"), pch );
 		return -1;
 	    }
 	goto reread;
@@ -98,7 +98,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
     do {
 	if( ch == EOF ) {
 	    if( feof( pf ) )
-		outputerrf( "%s: invalid record file", pch );
+		outputerrf( _("%s: invalid record file"), pch );
 	    else
 		outputerr( pch );
 
@@ -130,7 +130,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    if( ferror( pf ) )
 		outputerr( pch );
 	    else
-		outputerrf( "%s: invalid record file", pch );
+		outputerrf( _("%s: invalid record file"), pch );
 
 	    nVersion = 0;
 	    
@@ -151,6 +151,9 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
     char *pchName;
     expaverage ea;
 
+    if( !*ppr->szName )
+	return 0;
+    
     /* write escaped name */
     for( pchName = ppr->szName; *pchName; pchName++ )
 	if( isalnum( *pchName ) ? ( putc( *pchName, pf ) == EOF ) :
@@ -183,8 +186,7 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 
 static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 
-    int i, n;
-    expaverage ea;
+    int n;
     playerrecord pr;
     FILE *pfIn;
 #if __GNUC__
@@ -214,17 +216,6 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 	outputerr( *ppchOut );
 	free( *ppchOut );
 	return -1;
-    }
-    
-    for( i = 0; i < 2; i++ ) {
-	strcpy( apr[ i ].szName, ap[ i ].szName );
-	apr[ i ].cGames = 0;
-	for( ea = 0; ea < NUM_AVG; ea++ ) {
-	    apr[ i ].arErrorChequerplay[ ea ] = 0.0;
-	    apr[ i ].arErrorCube[ ea ] = 0.0;
-	    apr[ i ].arErrorCombined[ ea ] = 0.0;
-	    apr[ i ].arLuck[ ea ] = 0.0;
-	}
     }
     
     sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
@@ -334,7 +325,8 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
 	apr[ i ].arLuck[ EXPAVG_TOTAL ] =
 	    ( apr[ i ].arLuck[ EXPAVG_TOTAL ] *
 	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arLuck[ i ][ 0 ] ) / apr[ i ].cGames;
+	      ( pmgi->sc.arLuck[ i ][ 0 ] -
+		pmgi->sc.arLuck[ 1 - i ][ 0 ] ) ) / apr[ i ].cGames;
 
 	for( ea = EXPAVG_20; ea < NUM_AVG; ea++ )
 	    if( apr[ i ].cGames == anAvg[ ea - 1 ] ) {
@@ -361,12 +353,30 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
 		    ( 1.0 - arDecay[ ea - 1 ] );
 		apr[ i ].arLuck[ ea ] =
 		    apr[ i ].arLuck[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arLuck[ i ][ 0 ] *
+		    ( pmgi->sc.arLuck[ i ][ 0 ] -
+		      pmgi->sc.arLuck[ 1 - i ][ 0 ] ) *
 		    ( 1.0 - arDecay[ ea - 1 ] );
 	    }
     }
     
     return 0;
+}
+
+static void InitPlayerRecords( playerrecord *apr ) {
+
+    int i;
+    expaverage ea;
+    
+    for( i = 0; i < 2; i++ ) {
+	strcpy( apr[ i ].szName, ap[ i ].szName );
+	apr[ i ].cGames = 0;
+	for( ea = 0; ea < NUM_AVG; ea++ ) {
+	    apr[ i ].arErrorChequerplay[ ea ] = 0.0;
+	    apr[ i ].arErrorCube[ ea ] = 0.0;
+	    apr[ i ].arErrorCombined[ ea ] = 0.0;
+	    apr[ i ].arLuck[ ea ] = 0.0;
+	}
+    }
 }
 
 extern void CommandRecordAddGame( char *sz ) {
@@ -380,6 +390,8 @@ extern void CommandRecordAddGame( char *sz ) {
 	return;
     }
 
+    InitPlayerRecords( apr );
+    
     if( RecordRead( &pf, &pch, apr ) < 0 )
 	return;
     
@@ -403,6 +415,8 @@ extern void CommandRecordAddMatch( char *sz ) {
 	outputl( _("No match is being played.") );
 	return;
     }
+    
+    InitPlayerRecords( apr );
     
     if( RecordRead( &pf, &pch, apr ) < 0 )
 	return;
@@ -437,6 +451,64 @@ extern void CommandRecordAddSession( char *sz ) {
     CommandRecordAddMatch( sz );
 }
 
+extern void CommandRecordErase( char *szPlayer ) {
+
+    playerrecord apr[ 2 ];
+    char *pch, *pchFile;
+    FILE *pf;
+    
+    if( !( pch = NextToken( &szPlayer ) ) ) {
+	outputl( _("You must specify which player's record to erase.") );
+	return;
+    }
+
+    strcpy( apr[ 0 ].szName, pch );
+    apr[ 0 ].cGames = -1;
+    apr[ 1 ].szName[ 0 ] = 0;
+    
+    if( RecordRead( &pf, &pchFile, apr ) < 0 )
+	return;
+
+    if( apr[ 0 ].cGames < 0 ) {
+	outputf( _("No record exists for player %s.\n"), pch );
+	RecordAbort( pchFile );
+	return;
+    }
+    
+    apr[ 0 ].szName[ 0 ] = 0;
+    apr[ 1 ].szName[ 0 ] = 0;
+    
+    if( RecordWrite( pf, pchFile, apr ) )
+	return;
+
+    outputf( _("Record for player %s erased.\n"), pch );
+}
+
+extern void CommandRecordEraseAll( char *szIgnore ) {
+
+#if __GNUC__
+    char sz[ strlen( szHomeDirectory ) + 10 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( szHomeDirectory ) + 10 );
+#else
+    char sz[ 4096 ];
+#endif
+    
+    if( fConfirmSave && !GetInputYN( _("Are you sure you want to erase all "
+				       "player records?") ) )
+	return;
+
+    sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
+
+    if( unlink( sz ) && errno != ENOENT ) {
+	/* do not complain if file is not found */
+	outputerr( sz );
+	return;
+    }
+
+    outputl( _("All player records erased.") );
+}
+
 extern void CommandRecordShow( char *szPlayer ) {
 
     FILE *pfIn;
@@ -452,7 +524,10 @@ extern void CommandRecordShow( char *szPlayer ) {
     
     sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
     if( !( pfIn = fopen( sz, "r" ) ) ) {
-	outputerr( sz );
+	if( errno == ENOENT )
+	    outputl( _("No player records found.") );
+	else
+	    outputerr( sz );
 	return;
     }
 
