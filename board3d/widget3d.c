@@ -95,40 +95,6 @@ void Draw(BoardData* bd)
 		drawBoard(bd);
 }
 
-#define PREVIEW_WIDTH (108 * 3)
-#define PREVIEW_HEIGHT (72 * 3)
-
-void ReadBoard3d(BoardData* bd, GtkWidget *widget, unsigned char* buf)
-{
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
-	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
-
-	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
-		return;
-#else
-    if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return;
-#endif
-{
-	unsigned char revbuf[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
-	int i;
-preDraw3d(bd);
-	Draw(bd);
-
-	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, revbuf);
-
-	/* Reverse display as opengl is upside down */
-	for (i = 0; i < PREVIEW_HEIGHT; i++)
-		memcpy(&buf[i * PREVIEW_WIDTH * 3], &revbuf[sizeof(revbuf) - (i + 1) * PREVIEW_WIDTH * 3], PREVIEW_WIDTH * 3);
-}
-
-#if HAVE_GTKGLEXT
-	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
-#endif
-}
-
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, BoardData* bd)
 {
 	int width, height;
@@ -143,16 +109,9 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
 	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
 		return FALSE;
 #endif
-	if (bd->preview)
-	{
-		width = PREVIEW_WIDTH;
-		height = PREVIEW_HEIGHT;
-	}
-	else
-	{
-		width = widget->allocation.width;
-		height = widget->allocation.height;
-	}
+	width = widget->allocation.width;
+	height = widget->allocation.height;
+
 	glViewport(0, 0, width, height);
 	SetupViewingVolume3d(bd, &rdAppearance);
 
@@ -240,7 +199,7 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 	return TRUE;
 }
 
-void CreateGLWidget(BoardData* bd, GtkWidget **drawing_area, int createBoard)
+void CreateGLWidget(BoardData* bd, GtkWidget **drawing_area)
 {
 #if HAVE_GTKGLEXT
 	/* Drawing area for OpenGL */
@@ -257,29 +216,19 @@ void CreateGLWidget(BoardData* bd, GtkWidget **drawing_area, int createBoard)
 		return;
 	}
 
-	if (createBoard)
-	{
-		gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
-				GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
-		gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), bd);
-		gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), bd);
-		gtk_signal_connect(GTK_OBJECT(*drawing_area), "motion_notify_event", GTK_SIGNAL_FUNC(motion_notify_event), bd);
-	}
-	else
-	{
-			gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK);
-	}
-
+	gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
+			GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), bd);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), bd);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "motion_notify_event", GTK_SIGNAL_FUNC(motion_notify_event), bd);
 	gtk_signal_connect(GTK_OBJECT(*drawing_area), "realize", GTK_SIGNAL_FUNC(realize), bd);
 	gtk_signal_connect(GTK_OBJECT(*drawing_area), "configure_event", GTK_SIGNAL_FUNC(configure_event), bd);
 	gtk_signal_connect(GTK_OBJECT(*drawing_area), "expose_event", GTK_SIGNAL_FUNC(expose_event), bd);
-
-	bd->preview = !createBoard;
 }
 
 void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area)
 {
-	CreateGLWidget(bd, drawing_area, 1);
+	CreateGLWidget(bd, drawing_area);
 	InitBoard3d(bd);
 }
 
@@ -339,18 +288,18 @@ void getFormatDetails(HDC hdc, int* accl, int* dbl, int* col, int* depth, int* s
 	*accum = pfd.cAccumBits;
 }
 
-void DoAcceleratedCheck(GtkWidget* board)
+int CheckAccelerated(GtkWidget* board)
 {
 #if HAVE_GTKGLEXT
 	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(board);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(board)))
-		return;
+		return 1;
 #else
 	/* OpenGL functions can be called only if make_current returns true */
 	if (!gtk_gl_area_make_current(GTK_GL_AREA(board)))
-		return;
+		return 1;
 #endif
 {
 	int accl = 0, dbl, col, depth, stencil, accum;
@@ -386,24 +335,37 @@ void DoAcceleratedCheck(GtkWidget* board)
 	/*** OpenGL END ***/
 #endif
 
-	if (!accl)
+	return accl;
+}
+}
+
+#else
+
+void CheckAccelerated(GtkWidget* board)
+{
+	Display* display = glXGetCurrentDisplay();
+	GLXContext* context = glXGetCurrentContext();
+	if (!display || !context)
+	{
+		g_print("Unable to get current display information.\n");
+		return 1;
+	}
+	return glXIsDirect(display, context);
+}
+
+#endif
+
+void DoAcceleratedCheck(GtkWidget* board)
+{
+	if (!CheckAccelerated(board))
 	{	/* Display warning message as performance will be bad */
 		outputl("No hardware accelerated graphics card found, ");
 		outputl("performance may be slow.\n");
 		outputx();
 	}
 }
-}
 
-#else
-
-void DoAcceleratedCheck()
-{
-}
-
-#endif
-
-/* Drawing direct to pixmap... */
+/* Drawing direct to pixmap */
 
 GdkGLContext *glPixmapContext = NULL;
 
@@ -444,7 +406,6 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return 0;
 
-	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 	InitGL(bd);
 
 	gdk_gl_drawable_gl_end (gldrawable);
@@ -454,6 +415,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 
 void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
 {
+	GLint viewport[4];
 	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE((GdkGLPixmap *)glpixmap);
 
@@ -464,7 +426,8 @@ void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char
 
 	Draw(bd);
 
-	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
+	glGetIntegerv (GL_VIEWPORT, viewport);
+	glReadPixels(0, 0, viewport[2], viewport[3], GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
@@ -503,6 +466,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 
 void RenderBoard3d(BoardData* bd, renderdata* prd, void *ppm, unsigned char* buf)
 {
+	GLint viewport[4];
 	GdkGLPixmap *glpixmap;
 
 	glPixmapContext = gdk_gl_context_new(visual);
@@ -511,14 +475,14 @@ void RenderBoard3d(BoardData* bd, renderdata* prd, void *ppm, unsigned char* buf
 	if (!gdk_gl_pixmap_make_current(glpixmap, glPixmapContext))
 		return;
 
-	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 	InitGL(bd);
 
 	SetupPreview(bd, prd);
 
 	Draw(bd);
 
-	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
+	glGetIntegerv (GL_VIEWPORT, viewport);
+	glReadPixels(0, 0, viewport[2], viewport[3], GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 	gdk_gl_pixmap_unref(glpixmap);
 	gdk_gl_context_unref(glPixmapContext);

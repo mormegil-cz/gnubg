@@ -112,13 +112,13 @@ void draw_shadow_volume_to_stencil(BoardData* bd)
 	glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
 
 	for (i = 0; i < NUM_OCC; i++)
-		draw_shadow_volume_extruded_edges(&bd->Occluders[i], *bd->shadow_light_position, GL_QUADS);
+		draw_shadow_volume_extruded_edges(&bd->Occluders[i], bd->shadow_light_position, GL_QUADS);
 
 	glCullFace(GL_BACK);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
 	for (i = 0; i < NUM_OCC; i++)
-		draw_shadow_volume_extruded_edges(&bd->Occluders[i], *bd->shadow_light_position, GL_QUADS);
+		draw_shadow_volume_extruded_edges(&bd->Occluders[i], bd->shadow_light_position, GL_QUADS);
 
 	/* Enable colour buffer, lighting and depth buffer */
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -133,6 +133,7 @@ void shadowDisplay(void (*drawScene)(BoardData*), BoardData* bd)
 	float d1[4] = {bd->dim, bd->dim, bd->dim, bd->dim};
 	float specular[4];
 	float diffuse[4];
+
 	glGetLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, d1);
 	/* No specular light */

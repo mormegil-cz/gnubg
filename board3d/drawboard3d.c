@@ -114,7 +114,7 @@ void Free3d(float ***array, int x, int y);
 
 /* Other objects */
 
-#define DICE_SIZE (base_unit * 3.5f)
+#define DICE_SIZE (base_unit * 3)
 #define DOT_SIZE (DICE_SIZE / 14.0f)
 #define DOUBLECUBE_SIZE (base_unit * 4.0f)
 
@@ -2706,7 +2706,6 @@ void updatePieceOccPos(BoardData* bd)
 
 void updateFlagOccPos(BoardData* bd)
 {
-	int s;
 	if (bd->resigned)
 	{
 		freeOccluder(&bd->Occluders[OCC_FLAG]);
@@ -2722,22 +2721,23 @@ void updateFlagOccPos(BoardData* bd)
 
 		/* Flag surface (approximation) */
 		{
-		/* Change first ctlpoint to better match flag shape */
-		float p1x = bd->ctlpoints[1][0][2];
-		bd->ctlpoints[1][0][2] *= .7f;
+			int s;
+			/* Change first ctlpoint to better match flag shape */
+			float p1x = bd->ctlpoints[1][0][2];
+			bd->ctlpoints[1][0][2] *= .7f;
 
-		for (s = 0; s < S_NUMPOINTS - 1; s++)
-		{	/* Reduce shadow size a bit to remove artifacts */
-			float h = (bd->ctlpoints[s][1][1] - bd->ctlpoints[s][0][1]) * .92f - (FLAG_HEIGHT * .05f);
-			float y = bd->ctlpoints[s][0][1] + FLAG_HEIGHT * .05f;
-			float w = bd->ctlpoints[s + 1][0][0] - bd->ctlpoints[s][0][0];
-			if (s == 2)
-				w *= .95f;
-			addWonkyCube(&bd->Occluders[OCC_FLAG], bd->ctlpoints[s][0][0], y, bd->ctlpoints[s][0][2],
-				w, h, base_unit / 10.0f,
-				bd->ctlpoints[s + 1][0][2] - bd->ctlpoints[s][0][2], s);
-		}
-		bd->ctlpoints[1][0][2] = p1x;
+			for (s = 0; s < S_NUMPOINTS - 1; s++)
+			{	/* Reduce shadow size a bit to remove artifacts */
+				float h = (bd->ctlpoints[s][1][1] - bd->ctlpoints[s][0][1]) * .92f - (FLAG_HEIGHT * .05f);
+				float y = bd->ctlpoints[s][0][1] + FLAG_HEIGHT * .05f;
+				float w = bd->ctlpoints[s + 1][0][0] - bd->ctlpoints[s][0][0];
+				if (s == 2)
+					w *= .95f;
+				addWonkyCube(&bd->Occluders[OCC_FLAG], bd->ctlpoints[s][0][0], y, bd->ctlpoints[s][0][2],
+					w, h, base_unit / 10.0f,
+					bd->ctlpoints[s + 1][0][2] - bd->ctlpoints[s][0][2], s);
+			}
+			bd->ctlpoints[1][0][2] = p1x;
 		}
 	}
 	else
@@ -2761,7 +2761,6 @@ void updateOccPos(BoardData* bd)
 void MakeShadowModel(BoardData* bd)
 {
 	int i;
-
 	TidyShadows(bd);
 
 	initOccluder(&bd->Occluders[OCC_BOARD]);
@@ -2820,7 +2819,6 @@ void MakeShadowModel(BoardData* bd)
 	}
 
 	updatePieceOccPos(bd);
-
 	updateFlagOccPos(bd);
 }
 

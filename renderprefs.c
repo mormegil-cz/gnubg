@@ -488,10 +488,7 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     else if( !strncasecmp( szParam, "boardshadows", c ) )
 		prd->showShadows = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "shadowdarkness", c ) )
-	{
 		prd->shadowDarkness = atoi(szValue);
-		SetShadowDimness3d(BOARD(pwBoard)->board_data);
-	}
     else if( !strncasecmp( szParam, "animateroll", c ) )
 		prd->animateRoll = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "animateflag", c ) )

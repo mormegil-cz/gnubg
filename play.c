@@ -667,7 +667,12 @@ static int NewGame( void ) {
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
 
-	InitBoardData();
+#if USE_BOARD3D
+{
+	BoardData* bd = BOARD(pwBoard)->board_data;
+	InitBoardData(bd);
+}
+#endif
 
  reroll:
     fError = RollDice( ms.anDice, rngCurrent );
@@ -1268,8 +1273,7 @@ extern int ComputerTurn( void ) {
 	      return -1;
 	      
 	  DiceRolled();      
-      }
-
+	 }
       FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
 		 ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		 ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ], ms.nCube,

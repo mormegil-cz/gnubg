@@ -4,20 +4,11 @@ Todo
 
 _( before strings?
 
-Add check for unaccellerated graphics under linux
-	+ use glX functions - isDirect()?
-	- test
-
-+ Flag waving (change setting when displayed...)
-
-+ Remove testgtkboard.c file from lib build (and cvs)
-
-* export position png - and any other place that uses rendered board
-
 Bugs
 ====
 
-* Sound not always played on exit (2d/no hinges?)
+Show messages - shake garbled
+	+ Goes wrong when comp against comp playing
 
 In current version
 ------------------
@@ -30,7 +21,7 @@ Other things
 ============
 
 On close, remap background to a better shape?
-Show/hide 2d arrow with option
+Show/hide 2d arrow with option (after merge)
 
 ----------------------------------------------------------
 

@@ -72,7 +72,7 @@ static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
 static GList *plBoardDesigns;
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
-	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwMoveIndicator,
+	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource, *pwMoveIndicator,
 	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *pg3dOptions,
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
@@ -972,6 +972,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     GetPrefs ( &rdAppearance );
 	
 #if USE_BOARD3D
+	redrawChange = FALSE;
 	if (rdAppearance.fDisplayType == DT_3D)
 	{	/* Make sure main drawing area's context is current */
 		MakeCurrent3d(bd->drawing_area3d);
@@ -981,6 +982,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 		GetTextures(bd);
 		preDraw3d(bd);
 		SetupViewingVolume3d(bd, &rdAppearance);
+		ShowFlag3d(bd);
 	}
 	else
 	{
@@ -1326,10 +1328,10 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget *pwNotebook ) {
 	gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (rdAppearance.lightType == LT_POSITIONAL));
 	
-	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), "Directional");
-	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.lightType == LT_DIRECTIONAL));
-	gtk_signal_connect(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(option_changed), bd);
+	pwDirectionalSource = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), "Directional");
+	gtk_box_pack_start (GTK_BOX (vbox), pwDirectionalSource, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (rdAppearance.lightType == LT_DIRECTIONAL));
+	gtk_signal_connect(GTK_OBJECT(pwDirectionalSource), "toggled", GTK_SIGNAL_FUNC(option_changed), bd);
 
 	dtLightPositionFrame = gtk_frame_new("Light Position");
 	gtk_container_set_border_width (GTK_CONTAINER (dtLightPositionFrame), 4);
@@ -1488,8 +1490,9 @@ UseDesign ( void ) {
 if (rd.fDisplayType == DT_3D)
 {
 	testSet3dSetting(&bd3d, &rd);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), 
-                                (rd.lightType == LT_POSITIONAL));
+
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (rd.lightType == LT_POSITIONAL));
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (rd.lightType == LT_DIRECTIONAL));
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjLightPosX), rd.lightPos[0]);
 
@@ -1500,7 +1503,7 @@ if (rd.fDisplayType == DT_3D)
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjLightLevelDiffuse), rd.lightLevels[1]);
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjLightLevelSpecular), rd.lightLevels[2]);
 
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwMoveIndicator ),
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwMoveIndicator ),
                                 rd.showMoveIndicator );
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjBoardAngle), rd.boardAngle);

@@ -71,11 +71,8 @@ void SetupLight3d(BoardData *bd, renderdata* prd)
 {
 	/* Ugly - store shadow light position here... 
 		This is because this position needs to be adjusted (below) */
-	static float lp[4];
+	float lp[4];
 	float al[4], dl[4], sl[4];
-
-	/* Shadow light position */
-	bd->shadow_light_position = &lp;
 
 	copyPoint(lp, prd->lightPos);
 	lp[3] = (float)(prd->lightType == LT_POSITIONAL);
@@ -99,6 +96,9 @@ void SetupLight3d(BoardData *bd, renderdata* prd)
 	sl[0] = sl[1] = sl[2] = prd->lightLevels[2] / 100.0f;
 	sl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
+
+	/* Shadow light position */
+	memcpy(bd->shadow_light_position, lp, sizeof(float[4]));
 }
 
 void InitGL(BoardData *bd)
@@ -372,6 +372,7 @@ void testSet3dSetting(BoardData* bd, const renderdata *prd)
 	bd->showMoveIndicator = prd->showMoveIndicator;
 	bd->showShadows = prd->showShadows;
 	bd->shadowDarkness = prd->shadowDarkness;
+	SetShadowDimness3d(BOARD(pwBoard)->board_data);
 	bd->curveAccuracy = prd->curveAccuracy;
 	bd->testSkewFactor = prd->testSkewFactor;
 	bd->boardAngle = prd->boardAngle;
@@ -397,32 +398,8 @@ void testSet3dSetting(BoardData* bd, const renderdata *prd)
 }
 
 void CopySettings3d(BoardData* from, BoardData* to)
-{
-	memcpy(to->chequerMat, from->chequerMat, sizeof(Material[2]));
-
-	memcpy(to->diceMat, from->diceMat, sizeof(Material[2]));
-	memcpy(to->diceDotMat, from->diceDotMat, sizeof(Material[2]));
-
-	memcpy(&to->cubeMat, &from->cubeMat, sizeof(Material));
-	memcpy(&to->cubeNumberMat, &from->cubeNumberMat, sizeof(Material));
-
-	memcpy(&to->baseMat, &from->baseMat, sizeof(Material));
-	memcpy(&to->pointMat[0], &from->pointMat[0], sizeof(Material));
-	memcpy(&to->pointMat[1], &from->pointMat[1], sizeof(Material));
-
-	memcpy(&to->boxMat, &from->boxMat, sizeof(Material));
-	memcpy(&to->hingeMat, &from->hingeMat, sizeof(Material));
-	memcpy(&to->pointNumberMat, &from->pointNumberMat, sizeof(Material));
-	memcpy(&to->backGroundMat, &from->backGroundMat, sizeof(Material));
-
-	to->pieceType = from->pieceType;
-	to->showHinges = from->showHinges;
-	to->showMoveIndicator = from->showMoveIndicator;
-	to->showShadows = from->showShadows;
-	to->shadowDarkness = from->shadowDarkness;
-	to->curveAccuracy = from->curveAccuracy;
-	to->testSkewFactor = from->testSkewFactor;
-	to->boardAngle = from->boardAngle;
+{	/* Just copy the whole thing */
+	memcpy(to, from, sizeof(BoardData));
 }
 
 /* Return v position, d distance along path segment */
