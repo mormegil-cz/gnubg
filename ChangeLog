@@ -1,3 +1,14 @@
+Thu May 29 12:30:33 2003  Joern Thyssen  <jth@gnubg.org>
+
+	New toolbar button for changing direction of play.
+
+	* gtkboard.c (board_init): draw new button.
+	* gtkboard.c (toggle_clockwise): new function.
+	* gtkboard.c (toggle_button_from_images): new function.	
+
+	* gtkboard.c (game_set, board_set): move invalidation of arrow area 
+	into board_set to avoid gtk warning.
+
 Thu May 29 10:47:39 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Move position calculating routines to new file.

@@ -1,3 +1,8 @@
+Thu May 29 12:33:53 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: add new files.
+	* tb_clockwise.xpm, tb_anticlockwise.xpm_ new files.
+
 Fri Dec 27 16:14:35 2002  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add new file

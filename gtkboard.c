@@ -1928,6 +1928,7 @@ static gint board_set( Board *board, const gchar *board_text,
     int old_cube, old_doubled, old_crawford, old_xCube, old_yCube, editing;
     int old_resigned;
     int old_xResign, old_yResign;
+    int old_turn;
     GtkAdjustment *padj0, *padj1;
     
 #if __GNUC__
@@ -1975,6 +1976,7 @@ static gint board_set( Board *board, const gchar *board_text,
     old_dice[ 1 ] = bd->dice[ 1 ];
     old_dice[ 2 ] = bd->dice_opponent[ 0 ];
     old_dice[ 3 ] = bd->dice_opponent[ 1 ];
+    old_turn = bd->turn;
 #endif
     
     editing = bd->playing &&
@@ -2216,6 +2218,9 @@ static gint board_set( Board *board, const gchar *board_text,
     if( rdAppearance.nSize <= 0 )
 	return 0;
 
+    if( bd->turn != old_turn )
+      board_invalidate_arrow( bd );
+
     if( bd->doubled != old_doubled || 
         bd->cube != old_cube ||
 	bd->cube_owner != bd->opponent_can_double - bd->can_double ||
@@ -2266,6 +2271,10 @@ static gint board_set( Board *board, const gchar *board_text,
 	rdAppearance.fClockwise = fClockwise;
 	board_create_pixmaps( pwBoard, bd );
 	gtk_widget_queue_draw( bd->drawing_area );
+
+        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->button_clockwise ),
+                                      fClockwise );
+        
 	return 0;
     }
     
@@ -2533,6 +2542,7 @@ static void update_buttons( BoardData *pbd ) {
 
     enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE,
 		    C_PLAY } c;
+    int fEdit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) );
 
     c = C_NONE;
 
@@ -2548,8 +2558,7 @@ static void update_buttons( BoardData *pbd ) {
     if( pbd->computer_turn )
 	c = C_PLAY;
     
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) ||
-	!pbd->playing )
+    if( fEdit || !pbd->playing )
 	c = C_NONE;
     
 
@@ -2585,8 +2594,6 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     BoardData *pbd = board->board_data;
     int old_points[ 2 ][ 25 ];
     
-    board_invalidate_arrow( pbd );
-
     /* Treat a reset of the position to old_board as a no-op while
        in edit mode. */
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) &&
@@ -3135,6 +3142,50 @@ toggle_button_from_image ( GtkWidget *pwImage ) {
 }
   
 
+static GtkWidget *
+toggle_button_from_images( GtkWidget *pwImageOff,
+                           GtkWidget *pwImageOn ) {
+
+  GtkWidget **aapw;
+  GtkWidget *pwm = gtk_multiview_new();
+  GtkWidget *pw = gtk_toggle_button_new();
+
+  aapw = (GtkWidget **) g_malloc( 3 * sizeof ( GtkWidget *) );
+
+  aapw[ 0 ] = pwImageOff;
+  aapw[ 1 ] = pwImageOn;
+  aapw[ 2 ] = pwm;
+
+  gtk_container_add( GTK_CONTAINER( pw ), pwm );
+
+  gtk_container_add( GTK_CONTAINER( pwm ), pwImageOff );
+  gtk_container_add( GTK_CONTAINER( pwm ), pwImageOn );
+  
+  gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", aapw, g_free );
+
+  return pw;
+  
+}
+
+
+extern void 
+toggle_clockwise( GtkWidget *pw, BoardData *bd ) {
+
+  GtkWidget **aapw = 
+    (GtkWidget **) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+  
+  gtk_multiview_set_current( GTK_MULTIVIEW( aapw[ 2 ] ), aapw[ f ] );
+
+  if ( fClockwise != f ) {
+    gchar *sz = g_strdup_printf( "set clockwise %s", f ? "on" : "off" );
+    UserCommand( sz );
+    g_free( sz );
+  }
+
+
+}
+
 
 static void board_init( Board *board ) {
 
@@ -3150,6 +3201,8 @@ static void board_init( Board *board ) {
 #include "xpm/tb_double.xpm"
 #include "xpm/tb_redouble.xpm"
 #include "xpm/tb_edit.xpm"
+#include "xpm/tb_anticlockwise.xpm"
+#include "xpm/tb_clockwise.xpm"
 #ifndef USE_GTK2
 #include "xpm/tb_no.xpm"
 #include "xpm/tb_yes.xpm"
@@ -3350,6 +3403,25 @@ static void board_init( Board *board ) {
                                 bd->edit,
                                 _("Edit position"),
                                 _("private") );
+
+    /* direction of play */
+
+    bd->button_clockwise =
+      toggle_button_from_images( image_from_xpm_d( tb_anticlockwise_xpm,
+                                                   bd->toolbar ),
+                                 image_from_xpm_d( tb_clockwise_xpm,
+                                                   bd->toolbar ) );
+    gtk_signal_connect( GTK_OBJECT( bd->button_clockwise ), "toggled",
+                        GTK_SIGNAL_FUNC( toggle_clockwise ), bd );
+
+    gtk_toolbar_append_widget( GTK_TOOLBAR( bd->toolbar ),
+                               bd->button_clockwise,
+                               _("Reverse direction of play"),
+                               NULL );
+
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->button_clockwise ),
+                                  fClockwise );
+                                 
 
     /* stop button */
 
