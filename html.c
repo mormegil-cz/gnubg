@@ -4036,7 +4036,6 @@ extern void CommandExportPositionHtml( char *sz ) {
 extern void
 CommandExportPositionGammOnLine ( char *sz ) {
 
-
     FILE *pf;
     int fHistory;
     moverecord *pmr = getCurrentMoveRecord ( &fHistory );
@@ -4050,12 +4049,13 @@ CommandExportPositionGammOnLine ( char *sz ) {
 	return;
     }
     
+#if 0
     if( !sz || !*sz ) {
 	outputl( _("You must specify a file to export to (see `help export "
 		 "position html').") );
 	return;
     }
-
+    
     if ( ! confirmOverwrite ( sz, fConfirmSave ) )
       return;
 
@@ -4065,7 +4065,12 @@ CommandExportPositionGammOnLine ( char *sz ) {
 	outputerr( sz );
 	return;
     }
-
+#endif
+    if( !( pf = tmpfile() ) ) {
+	    outputerr("Temporary file");
+	    return;
+    }
+    
     fputs ( "\n<!-- Score -->\n\n", pf );
 
     if ( ms.nMatchTo )
@@ -4120,25 +4125,21 @@ CommandExportPositionGammOnLine ( char *sz ) {
     }
 
     HTMLEpilogueComment ( pf );
-    
+#if 0    
     if( pf != stdout )
 	fclose( pf );
-    
+#endif    
     /* copy contents onto clipboard */
 
-    if ( pf != stdout ) {
     
-       pf = fopen( sz, "r");  /* why doesn't rewind(pf) work? */
+    /*   pf = fopen( sz, "r"); */ /* why doesn't rewind(pf) work? */
     
-       while ( (szClipboard[i] = fgetc(pf)) != EOF )
-   	    i++;
-       szClipboard[i]= '\0';
+    rewind(pf);
+    
+    while ( (szClipboard[i] = fgetc(pf)) != EOF )
+       i++;
+    szClipboard[i]= '\0';
 
-       TextToClipboard(szClipboard);
-       fclose( pf );
-    
-    }
-
+    TextToClipboard(szClipboard);
+    fclose( pf );
 }
-
-  

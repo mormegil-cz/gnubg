@@ -1,3 +1,7 @@
+Sat Mar 29 16:08:43 2003  Oystein Johansen <oystein@gnubg.org>
+
+        * gnubg.c, gtkgame.c, html.c: GammOnLine export directly to clipboard.  
+	
 Sat Mar 29 13:46:23 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c, gtkrolls.c, gtkgame.c, dice.c: Pacify fussy compilers.

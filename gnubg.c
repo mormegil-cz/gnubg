@@ -628,8 +628,8 @@ command cER = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
     { "gammonline", CommandExportPositionGammOnLine,
-      N_("Save the current position in .html format "
-         "(special for GammonOnLine)"), 
+      N_("Copy the current position in .html format to clipboard"
+         "(special for GammOnLine)"), 
       szFILENAME, &cFilename },
     { "eps", CommandExportPositionEPS, N_("Save the current position in "
       "Encapsulated PostScript format"), szFILENAME, &cFilename },
