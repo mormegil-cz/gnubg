@@ -1,3 +1,8 @@
+Mon May 20 20:54:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (updateStatcontext): fix [D:0 0 0 0 1 0 0 0 0 0 -inf -inf
+	+0.000000 0.000000] bug.
+
 Mon May 20 19:52:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (SaveSettings): save confirm settings properly.

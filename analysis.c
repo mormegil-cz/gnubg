@@ -208,7 +208,7 @@ updateStatcontext ( statcontext *psc,
      * update luck statistics for roll
      */
 
-    if ( fAnalyseDice ) {
+    if ( fAnalyseDice && pmr->n.rLuck != ERR_VAL ) {
 
       psc->arLuck[ pmr->n.fPlayer ][ 0 ] += pmr->n.rLuck;
       psc->arLuck[ pmr->n.fPlayer ][ 1 ] += pms->nMatchTo ?
@@ -224,7 +224,7 @@ updateStatcontext ( statcontext *psc,
      * update chequerplay statistics 
      */
 
-    if ( fAnalyseMove ) {
+    if ( fAnalyseMove && pmr->n.esChequer.et != EVAL_NONE ) {
 
       /* find skill */
 
@@ -266,7 +266,7 @@ updateStatcontext ( statcontext *psc,
 
   case MOVE_DOUBLE:
 
-    if ( fAnalyseCube ) {
+    if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
 
       float *arDouble = pmr->d.arDouble;
 
