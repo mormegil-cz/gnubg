@@ -67,7 +67,7 @@ static GtkWidget *pwDesignAuthor;
 static GtkWidget *pwDesignPixmap;
 static GtkWidget *pwDesignList;
 static GtkWidget *pwDesignUse;
-static GtkWidget *pwDesignRemove;
+/* static GtkWidget *pwDesignRemove; */
 #endif /* HAVE_LIBXML2 */
 
 static GtkWidget *pwShowIDs;
@@ -82,6 +82,8 @@ static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
 static int fShowIDs;
 static int fShowPips;
 static animation anim;
+
+#if HAVE_LIBXML2
 
 static GList *
 ParseBoardDesigns ( const char *szFile );
@@ -131,7 +133,7 @@ free_board_designs ( GList *pl ) {
 }
 
 
-
+#endif /* HAVE_LIBXML2 */
 
 
 
@@ -766,6 +768,7 @@ DesignActivate ( GtkWidget *pw, boarddesign *pbde ) {
 }
 
 
+#if 0
 
 static void
 SaveDesigns ( GtkWidget *pw, gpointer unused ) {
@@ -797,6 +800,7 @@ RemoveDesign ( GtkWidget *pw, gpointer data ) {
 }
 
 
+#endif
 static void
 UseDesign ( GtkWidget *pw, gpointer unused ) {
 
@@ -939,7 +943,6 @@ AddDesignRow ( gpointer data, gpointer user_data ) {
 
   GtkWidget *pwList = user_data;
   boarddesign *pbde = data;
-  GtkWidget *pw;
   char *asz[ 1 ];
   gint i;
 
@@ -986,12 +989,10 @@ DesignPage ( GList *plBoardDesigns ) {
 
   GtkWidget *pwvbox;
   GtkWidget *pwhbox;
-  GtkWidget *pw;
   GtkWidget *pwFrame;
   GtkWidget *pwv;
   GtkWidget *pwScrolled;
   GtkWidget *pwPage;
-  char *asz[ 1 ];
 
 #include "xpm/no_picture.xpm"
 
@@ -1972,10 +1973,7 @@ static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
 static void ScanStartElement( void *pv, const xmlChar *pchName,
                               const xmlChar **ppchAttrs ) {
 
-  const xmlChar **psz;
   parsecontext *ppc = pv;
-  int f;
-
 
   if ( ! strcmp ( pchName, "board-designs" ) && ppc->ips == -1 ) {
 
@@ -2033,7 +2031,7 @@ static void ScanStartElement( void *pv, const xmlChar *pchName,
 }
 
 
-xmlSAXHandler xsaxScan = {
+static xmlSAXHandler xsaxScan = {
     NULL, /* internalSubset */
     NULL, /* isStandalone */
     NULL, /* hasInternalSubset */

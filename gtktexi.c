@@ -527,7 +527,7 @@ static void Err( void *pv, const char *msg, ... ) {
 #endif
 }
 
-xmlSAXHandler xsaxScan = {
+static xmlSAXHandler xsaxScan = {
     NULL, /* internalSubset */
     NULL, /* isStandalone */
     NULL, /* hasInternalSubset */

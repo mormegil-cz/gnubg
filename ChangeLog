@@ -1,3 +1,9 @@
+Sat Nov 30 17:13:18 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtktexi.c: declare xsaxScan static to avoid polution of namespace.
+	* gtkprefs.c: declare xsaxScan static to avoid polution of namespace;
+	"#if 0" some unused functions (to pacify fussy compilers).
+
 Sat Nov 30 12:31:12 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* makebearoff1.c (PrintCode, PrintPre): do md5 checksum
