@@ -22,20 +22,16 @@
 #ifndef _RELATIONAL_H_
 #define _RELATIONAL_H_
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#if USE_PYTHON
-#undef HAVE_FSTAT
-#endif
-#endif
+typedef struct _RowSet
+{
+	int cols, rows;
+	char ***data;
+	int *widths;
+} RowSet;
 
-#if USE_PYTHON
-#include <Python.h>
-#if HAVE_CONFIG_H
-#undef HAVE_FSTAT
-#include "config.h"
-#endif
-#endif
+extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
+										  const char* newNotes);
+extern int RunQuery(RowSet* pRow, char *sz);
+extern void FreeRowset(RowSet* pRow);
 
 #endif /* _RELATIONAL_H_ */
-

@@ -27,6 +27,16 @@
 
 import gnubg
 import sys
+import os
+import traceback
+import string
+
+# different database types
+DB_SQLITE = 1
+DB_POSTGRESQL = 2
+
+# Change this line to set the database type
+DB_TYPE = DB_SQLITE
 
 class relational:
 
@@ -49,9 +59,7 @@ class relational:
 
       c = self.conn.cursor()
       c.execute(q)
-
       row = c.fetchone()
-
       c.close()
 
       if row:
@@ -81,6 +89,22 @@ class relational:
       
       return next_id
 
+   # check if player exists
+   def __playerExists(self,name,env_id):
+      
+      query = "SELECT person_id FROM nick WHERE name = '%s' AND env_id = %d" % \
+         ( name, env_id )
+
+      cursor = self.conn.cursor()
+      cursor.execute(query)
+      row = cursor.fetchone()
+      cursor.close()
+
+      if row:
+         return row[0]
+      else:
+         return -1
+
    #
    # Add players to database
    #
@@ -88,44 +112,31 @@ class relational:
    #             name (the name of the player)
    #             env_id (the env. of the match)
    #
-   # Returns: 0 on success, non-zero otherwise
+   # Returns: player id or None on error
    #
    
    def __addPlayer(self,name,env_id):
       
       # check if player exists
-      
-      query = "SELECT per.person_id FROM player pla INNER JOIN person per ON pla.person_id = per.person_id  WHERE per.name = '%s'" % ( name )
-      
-      cursor = self.conn.cursor()
-      cursor.execute(query)
-      
-      row = cursor.fetchone()
-      cursor.close()
-      
-      if row:
-         # player already exists
-         return row[0]
-      else:
-         # player does not exist
-         
-         # Insert person
-         
+      person_id = self.__playerExists(name, env_id)
+      if (person_id == -1):
+         # player does not exist - Insert new player
          person_id = self.__next_id("person")
-         
-         query = "INSERT INTO person (person_id,name,notes) VALUES (%d,'%s','')" % ( person_id, name )
+
+         # first add a new person
+         query = ("INSERT INTO person(person_id,name,notes)" \
+            "VALUES (%d,'%s','')") % (person_id, name)
+         cursor = self.conn.cursor()
+         cursor.execute(query)
+         cursor.close()
+         # now add the nickname
+         query = ("INSERT INTO nick(env_id,person_id,name)" \
+            "VALUES (%d,'%d','%s')") % (env_id, person_id, name)
          cursor = self.conn.cursor()
          cursor.execute(query)
          cursor.close()
          
-         # Insert player
-         
-         query = "INSERT INTO player (person_id,env_id) VALUES (%d,%d)" % (person_id, env_id)
-         cursor = self.conn.cursor()
-         cursor.execute(query)
-         cursor.close()
-         
-         return person_id
+      return person_id
 
    #
    # getKey: return key if found in dict, otherwise return empty string
@@ -152,14 +163,16 @@ class relational:
    #
    # Add statistics
    # Parameters: conn (the database connection, DB API v2)
-   #             person_id (the person id for this statistics)
+   #             person_id (the player id for this statistics)
    #             gs (the game/match statistics)
    #
    
    def __addStat(self,match_id,person_id,gs,gs_other):
       
+      matchstat_id = self.__next_id("matchstat")
+
       # identification
-      s1 = "%d,%d," % (match_id, person_id )
+      s1 = "%d,%d,%d," % (matchstat_id, match_id, person_id)
       
       # chequer play statistics
       chs = gs[ 'moves' ]
@@ -327,12 +340,15 @@ class relational:
          date = "NULL"
 
       # CURRENT_TIMESTAMP - SQL99, may have different names in various databases
-      CURRENT_TIME = "CURRENT_TIMESTAMP"
+      if DB_TYPE == DB_SQLITE:
+         CURRENT_TIME = "datetime('now', 'localtime')"
+      elif DB_TYPE == DB_POSTGRESQL:
+         CURRENT_TIME = CURRENT_TIMESTAMP
 
-      query = ("INSERT INTO match( match_id, env_id0, person_id0, env_id1, person_id1, " \
+      query = ("INSERT INTO match(match_id, env_id, person_id0, person_id1, " \
               "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) " \
-              "VALUES (%d, %d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
-              (match_id, env_id, person_id0, env_id, person_id1, \
+              "VALUES (%d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
+              (match_id, env_id, person_id0, person_id1, \
                -1, mi[ 'match-length' ],
                self.__getKey( mi[ 'X' ], 'rating' )[0:80],
                self.__getKey( mi[ 'O' ], 'rating' )[0:80],
@@ -341,7 +357,6 @@ class relational:
                self.__getKey( mi, 'place' )[0:80],
                self.__getKey( mi, 'annotator' )[0:80],
                self.__getKey( mi, 'comment' )[0:80], date )
-      
       cursor = self.conn.cursor()
       cursor.execute(query)
       cursor.close()
@@ -375,21 +390,28 @@ class relational:
 
       mi = m[ 'match-info' ]
       
-      person_id0 = self.__addPlayer( mi[ 'X' ][ 'name' ], env_id)
-      if person_id0 == None:
+      player_id0 = self.__addPlayer( mi[ 'X' ][ 'name' ], env_id)
+      if player_id0 == None:
          return None
       
-      person_id1 = self.__addPlayer( mi[ 'O' ][ 'name' ], env_id)
-      if person_id1 == None:
+      player_id1 = self.__addPlayer( mi[ 'O' ][ 'name' ], env_id)
+      if player_id1 == None:
          return None
       
       # add match
 
-      match_id = self.__addMatch( env_id, person_id0, person_id1, m)
+      match_id = self.__addMatch( env_id, player_id0, player_id1, m)
       if match_id == None:
          return None
 
       return match_id
+
+   # Simply function to run a query
+   def __runquery(self,q):
+   
+      cursor = self.conn.cursor()
+      cursor.execute(q);
+      cursor.close()
 
    #
    # Check for existing match
@@ -404,18 +426,57 @@ class relational:
    # Main logic
    #
 
+   def createdatabase(self):
+
+      cursor = self.conn.cursor()
+      # Open file which has db create sql statments
+      sqlfile = open("gnubg.sql", "r")
+      done = False
+      stmt = ""
+      # Loop through file and run sql commands
+      while not done:
+        line = sqlfile.readline()
+        if len(line) > 0:
+           line = string.strip(line)
+           if (line[0:2] != '--'):
+              stmt = stmt + line
+              if (len(line) > 0 and line[-1] == ';'):
+                 cursor.execute(stmt)
+                 stmt = ""
+        else:
+           done = True
+
+      self.conn.commit()
+      sqlfile.close()
+
    def connect(self):
 
-      # Import the DB API v2 postgresql module
-      import pgdb
-      import _pg
+      if DB_TYPE == DB_SQLITE:
+         DBFILE = "data.db"
+         import sqlite
+      elif DB_TYPE == DB_POSTGRESQL:
+         # Import the DB API v2 postgresql module
+         import pgdb
+         import _pg
+
       try:
-         self.conn = pgdb.connect(dsn=':gnubg')
+         if DB_TYPE == DB_SQLITE:
+
+            dbfile = os.access(DBFILE, os.F_OK)
+            self.conn = sqlite.connect(DBFILE)
+            if (dbfile == 0):
+               self.createdatabase()
+
+         elif DB_TYPE == DB_POSTGRESQL:
+            self.conn = pgdb.connect(dsn=':gnubg')
+
          return self.conn
-      except _pg.error, e:
-         print e
+#if Postgresql
+#      except _pg.error, e:
+#         print e
       except:
-         print "Unhandled..."
+         print "Unhandled exception..."
+         traceback.print_exc()
 
       return None
 
@@ -451,14 +512,10 @@ class relational:
 
    def test(self):
 
-      # connection test 
-
-      self.connect()
       if self.conn == None:
          return -1
 
       # verify that the main table is present
-
       rc = 0
 
       cursor = self.conn.cursor()
@@ -469,28 +526,141 @@ class relational:
 
       cursor.close()
 
-      # disconnect
-
-      self.disconnect()
-
       return rc
 
-   def list_environments(self):
+   def list_details(self, player):
+
+      if self.conn == None:
+         return None
+
+      person_id = self.__playerExists(player, 0);
+      
+      if (person_id == -1):
+        return -1
+
+      stats = []
+
+      cursor = self.conn.cursor()
+      cursor.execute("SELECT count(*) FROM match WHERE person_id0 = %d OR person_id1 = %d" % \
+         (person_id, person_id));
+      row = cursor.fetchone()
+      cursor.close()
+      if row == None:
+         played = 0
+      else:
+         played = int(row[0])
+      stats.append(("Games played", played))
+
+      cursor = self.conn.cursor()
+      cursor.execute("SELECT * FROM match WHERE (person_id0 = %d and result = 1)" \
+        " OR (person_id1 = %d and result = -1)" % (person_id, person_id));
+      row = cursor.fetchone()
+      cursor.close()
+      if row == None:
+         wins = 0
+      else:
+         wins = int(row[0])
+      stats.append(("Games won", wins))
+
+      cursor = self.conn.cursor()
+      cursor.execute("SELECT AVG(overall_error_total) FROM matchstat" \
+         " WHERE person_id = %d" % (person_id));
+      row = cursor.fetchone()
+      cursor.close()
+      if row == None:
+         rate = 0
+      else:
+         rate = row[0]
+      stats.append(("Average error rate", rate))
+
+      return stats
+
+   def erase_player(self, player):
+
+      if self.conn == None:
+         return None
+
+      person_id = self.__playerExists(player, 0);
+      
+      if (person_id == -1):
+        return -1
+
+      # from query to select all matches involving player
+      mq = "FROM match WHERE person_id0 = %d OR person_id1 = %d" % \
+         (person_id, person_id)
+
+      # first remove any matchstats
+      self.__runquery("DELETE FROM matchstat WHERE match_id in " \
+         "(select match_id %s)" % (mq));
+
+      # then remove any matches
+      self.__runquery("DELETE " + mq);
+      
+      # then any nicks
+      self.__runquery("DELETE FROM nick WHERE person_id = %d" % \
+         (person_id));
+      
+      # finally remove the player record
+      self.__runquery("DELETE FROM person WHERE person_id = %d" % \
+         (person_id));
+
+      self.conn.commit()
+      
+      return 1
+
+   def erase_all(self):
+
+      if self.conn == None:
+         return None
+
+      # first remove all matchstats
+      self.__runquery("DELETE FROM matchstat");
+
+      # then remove all matches
+      self.__runquery("DELETE FROM match");
+      
+      # then all nicks
+      self.__runquery("DELETE FROM nick");
+      
+      # finally remove the players
+      self.__runquery("DELETE FROM person");
+
+      self.conn.commit()
+      
+      return 1
+
+   def select(self, str):
 
       if self.conn == None:
          return None
 
       cursor = self.conn.cursor()
       try:
-         cursor.execute( "SELECT env_id, place "
-                         "FROM env "
-                         "ORDER BY env_id" );
+         cursor.execute("SELECT " + str);
       except:
          cursor.close()
          return None
-         
+
       all = cursor.fetchall()
+      titles = [cursor.description[i][0] for i in range(len(cursor.description))]
+      all.insert(0, titles)
 
       cursor.close()
 
       return all
+
+   def update(self, str):
+
+      if self.conn == None:
+         return None
+
+      cursor = self.conn.cursor()
+      try:
+         cursor.execute("UPDATE " + str);
+      except:
+         cursor.close()
+         return None
+
+      self.conn.commit()
+
+      return 1

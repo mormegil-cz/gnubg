@@ -1791,7 +1791,7 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
   }
   
   pmr = firstGame->plNext->p;
-  {                                       assert( pmr->mt == MOVE_GAMEINFO ); }
+  assert( pmr->mt == MOVE_GAMEINFO );
   g = &pmr->g;
 
   if( !PyArg_ParseTupleAndKeywords(args, keywds, "|iiii", kwlist,

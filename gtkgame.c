@@ -203,6 +203,7 @@ typedef enum _gnubgcommand {
     CMD_RELATIONAL_ADD_MATCH,
     CMD_RELATIONAL_TEST,
     CMD_RELATIONAL_HELP,
+    CMD_RELATIONAL_SHOW_RECORDS,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
     CMD_RESIGN_G,
@@ -295,6 +296,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "relational add match",
     "relational test",
     "relational help",
+    "relational show records",
     "redouble",
     "resign normal",
     "resign gammon",
@@ -2197,6 +2199,8 @@ extern int InitGTK( int *argc, char ***argv ) {
           Command, CMD_RELATIONAL_TEST, NULL },
         { N_("/_Analyse/Relational database/Help..."), NULL,
           Command, CMD_RELATIONAL_HELP, NULL },
+        { N_("/_Analyse/Relational database/Show Records..."), NULL,
+          Command, CMD_RELATIONAL_SHOW_RECORDS, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -8003,6 +8007,12 @@ extern void GTKSet( void *p ) {
                                     "/Analyse/Relational database/"
                                     "Add match or session..." ), 
        !ListEmpty( &lMatch ) );
+
+    gtk_widget_set_sensitive( 
+          gtk_item_factory_get_widget( pif,
+                                       "/Analyse/"
+                                       "Relational database/Show Records..." ), 
+          TRUE );
 #endif /* USE_PYTHON */
 
 	fAutoCommand = FALSE;
@@ -9670,6 +9680,255 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
   if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
     gtk_window_set_default_size(GTK_WINDOW(pwMain), woPanel[WINDOW_MAIN].wg.nWidth, woPanel[WINDOW_MAIN].wg.nHeight);
 }
+
+#if USE_PYTHON
+static GtkWidget* GetRelList(RowSet* pRow)
+{
+	int i;
+	GtkWidget *pwList = gtk_clist_new(pRow->cols);
+	gtk_clist_column_titles_show(GTK_CLIST(pwList));
+	gtk_clist_column_titles_passive(GTK_CLIST(pwList));
+	for (i = 0; i < pRow->cols; i++)
+	{
+		char* widthStr = malloc(pRow->widths[i] + 1);
+		int width;
+		memset(widthStr, 'a', pRow->widths[i]);
+		widthStr[pRow->widths[i]] = '\0';
+		width = gdk_string_width(gtk_style_get_font( pwList->style ), widthStr);
+		gtk_clist_set_column_title(GTK_CLIST(pwList), i, pRow->data[0][i]);
+
+		gtk_clist_set_column_width( GTK_CLIST( pwList ), i, width);
+		gtk_clist_set_column_resizeable(GTK_CLIST(pwList), i, FALSE);
+	}
+	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
+
+	for (i = 1; i < pRow->rows; i++)
+	{
+		gtk_clist_append(GTK_CLIST(pwList), pRow->data[i]);
+	}
+	return pwList;
+}
+
+int curPlayerId, curRow;
+GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult;
+
+static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
+{
+	char* pName;
+	RowSet r;
+	char query[256];
+
+	gtk_clist_get_text(GTK_CLIST(pw), y, 0, &pName);
+
+	sprintf(query, "person.person_id, person.name, person.notes FROM nick INNER JOIN person"
+		" ON nick.person_id = person.person_id"
+		" WHERE nick.name = \"%s\" AND nick.env_id = %d",
+		pName, 0);
+
+	gtk_text_set_point(GTK_TEXT(pwPlayerNotes), 0);
+	gtk_text_freeze(GTK_TEXT(pwPlayerNotes));
+	gtk_text_forward_delete(GTK_TEXT(pwPlayerNotes), gtk_text_get_length(GTK_TEXT(pwPlayerNotes)));
+	gtk_text_thaw(GTK_TEXT(pwPlayerNotes));
+
+	if (!RunQuery(&r, query))
+	{
+		gtk_entry_set_text(GTK_ENTRY(pwPlayerName), "");
+		return;
+	}
+
+	assert(r.rows == 2);	/* Should be exactly one entry */
+
+	curRow = y;
+	curPlayerId = atoi(r.data[1][0]);
+	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), r.data[1][1]);
+	gtk_text_insert(GTK_TEXT(pwPlayerNotes), NULL, NULL, NULL, r.data[1][2], -1);
+
+	FreeRowset(&r);
+}
+
+static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
+{
+	RowSet r;
+	char *pch, *query;
+	pch = gtk_editable_get_chars( GTK_EDITABLE(pwQueryText), 0, -1 );
+	if (!strnicmp("select ", pch, strlen("select ")))
+		query = pch + strlen("select ");
+	else
+		query = pch;
+
+	if (RunQuery(&r, query))
+	{
+		gtk_widget_destroy(pwQueryResult);
+		pwQueryResult = GetRelList(&r);
+		gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryResult, TRUE, TRUE, 0);
+		gtk_widget_show(pwQueryResult);
+		FreeRowset(&r);
+	}
+
+	g_free(pch);
+}
+
+static void UpdatePlayerDetails(GtkWidget *pw, int *dummy)
+{
+	char *pch;
+	if (curPlayerId == -1)
+		return;
+	pch = gtk_editable_get_chars( GTK_EDITABLE(pwPlayerNotes), 0, -1 );
+	RelationalUpdatePlayerDetails(curPlayerId, gtk_entry_get_text(GTK_ENTRY(pwPlayerName)), pch);
+	g_free(pch);
+}
+
+static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
+{
+    char *pch;
+    char sz[100];
+
+	if (curPlayerId == -1)
+		return;
+
+	/* Get player name from id */
+	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &pch);
+
+    sprintf(sz, "relational erase %s", pch);
+    UserCommand(sz);
+
+	gtk_clist_remove(GTK_CLIST(pwList), curRow);
+}
+
+extern void GtkShowRelational()
+{
+	RowSet r;
+	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
+		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwn,
+		*pwLabel;
+
+	curPlayerId = -1;
+
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Relational Database"),
+					DT_INFO, NULL, NULL );
+
+	pwn = gtk_notebook_new();
+    gtk_container_set_border_width(GTK_CONTAINER(pwn), 8);
+
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwn);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwHbox = gtk_hbox_new(FALSE, 0),
+			      gtk_label_new(_("Players")));
+
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+
+	if (!RunQuery(&r, "name AS Nickname, place AS env FROM nick INNER JOIN env"
+		" ON nick.env_id = env.env_id"))
+		return;
+
+	pwList = GetRelList(&r);
+	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+							GTK_SIGNAL_FUNC( ShowRelationalSelect ), pwList );
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwList, TRUE, TRUE, 0);
+	FreeRowset(&r);
+	gtk_widget_set_usize(pwList, -1, 150);
+
+	pwErase = gtk_button_new_with_label( _("Erase" ) );
+	gtk_signal_connect(GTK_OBJECT(pwErase), "clicked",
+				GTK_SIGNAL_FUNC(RelationalErase), pwList);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwErase, FALSE, FALSE, 4);
+
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+
+	pwPlayerFrame = gtk_frame_new(_("Player"));
+	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame), 4);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwPlayerFrame, TRUE, TRUE, 0);
+
+	pwVbox2 = gtk_vbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (pwPlayerFrame), pwVbox2);
+
+	pwHbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox2), pwHbox2, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), gtk_label_new(_("Name")), FALSE, FALSE, 0);
+	pwPlayerName = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwPlayerName, FALSE, FALSE, 0);
+
+	pwHbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox2), pwHbox2, FALSE, FALSE, 0);
+
+	pwLabel = gtk_label_new(_("Notes"));
+	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwLabel, FALSE, FALSE, 0);
+
+	pwPlayerNotes = gtk_text_new(NULL, NULL);
+	gtk_text_set_editable(GTK_TEXT(pwPlayerNotes), TRUE);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwPlayerNotes, TRUE, TRUE, 0);
+
+	pwUpdate = gtk_button_new_with_label(_("Update Details"));
+	gtk_box_pack_start(GTK_BOX(pwVbox2), pwUpdate, FALSE, FALSE, 0);
+	gtk_signal_connect_object(GTK_OBJECT(pwUpdate), "clicked",
+					GTK_SIGNAL_FUNC(UpdatePlayerDetails), NULL);
+
+	/* Query sheet */
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwVbox = gtk_vbox_new(FALSE, 0),
+			      gtk_label_new(_("Query")));
+	pwLabel = gtk_label_new(_("Query text"));
+	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwLabel, FALSE, FALSE, 0);
+
+	pwQueryText = gtk_text_new(NULL, NULL);
+	gtk_text_set_editable(GTK_TEXT(pwQueryText), TRUE);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryText, FALSE, FALSE, 0);
+	gtk_widget_set_usize(pwQueryText, 250, 80);
+
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox = gtk_hbox_new(FALSE, 0), FALSE, FALSE, 0);
+	pwLabel = gtk_label_new(_("Result"));
+	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwLabel, TRUE, TRUE, 0);
+
+	pwRun = gtk_button_new_with_label( _("Run Query" ) );
+	gtk_signal_connect(GTK_OBJECT(pwRun), "clicked",
+				GTK_SIGNAL_FUNC(RelationalQuery), pwVbox);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwRun, FALSE, FALSE, 0);
+
+	pwQueryResult = gtk_clist_new(1);
+	gtk_clist_set_column_title(GTK_CLIST(pwQueryResult), 0, " ");
+	gtk_clist_column_titles_show(GTK_CLIST(pwQueryResult));
+	gtk_clist_column_titles_passive(GTK_CLIST(pwQueryResult));
+
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryResult, TRUE, TRUE, 0);
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	gtk_widget_show_all( pwDialog );
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+}
+
+extern void GtkShowQuery(RowSet* pRow)
+{
+	GtkWidget *pwDialog;
+
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Database Result"),
+					DT_INFO, NULL, NULL );
+	
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       GetRelList(pRow));
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+ 
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+}
+#endif
 
 #if USE_TIMECONTROL
 

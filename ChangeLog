@@ -1,3 +1,8 @@
+Wed Sep 29 18:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* database.py, relational.c, gtkgame.c: Added more relational
+	database code
+
 Wed Sep 29 15:10:45 2004  Oystein Johansen <oystein@gnubg.org>
 
 	* makebearoff.c: Display 'usage' on Windows.
