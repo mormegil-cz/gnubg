@@ -1,3 +1,7 @@
+Sun Jan 4 2004 00:51:45   Jim Segrave <jes@jes-2.demon.nl>
+
+	* makebearoff.c: va_start needs stdarg.h
+	
 Sat Jan  3 16:53:09 2004  Oystein Johansen <oystein@gnubg.org>
 
         * makebearoff.c: Add progress bar. (Win32 only)

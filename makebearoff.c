@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <errno.h>
-
+#include <stdarg.h>
 #include "eval.h"
 #include "positionid.h"
 #include "getopt.h"
