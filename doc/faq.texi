@@ -837,7 +837,7 @@ The @emph{Jacoby rule} is used in backgamon sessions or moneygame. This rule imp
 that a player can't win an undoubled gammon (meaning: when the cube is still in the middle).
 This rule was established to protect players from "boring" games while watching his opponent
 trying to win a gammon and getting doubled out if this doesn't succeed. For more information 
-see @uref{http://www.bkgm.com/glossary.htm,, Backgammon Galore}.
+see @uref{http://www.bkgm.com/glossary.html,, Backgammon Galore}.
     
 
 @node Crawford Rule
@@ -845,7 +845,7 @@ see @uref{http://www.bkgm.com/glossary.htm,, Backgammon Galore}.
 
 The @emph{Crawford rule} is only used in match play. It implies, that a player cannot
 double in the first game after his opponent has reached a score needing only 1
-point to win the match. See also @uref{http://www.bkgm.com/glossary.htm,, 
+point to win the match. See also @uref{http://www.bkgm.com/glossary.html,, 
 Backgammon Galore}.
 
 
