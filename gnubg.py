@@ -44,3 +44,56 @@ def pipcount(board):
     return sum;
 
     
+
+# Following code is intended as an example on the usage of the match command.
+# It illustrates how to iterate over matches and do something useful with the
+# navigate command.
+
+import os.path
+
+def skillBad(s) :
+  return s and (s == "very bad" or s == "bad" or s == "doubtful")
+
+def exportBad(baseName) :
+  """ For current analyzed match, export all moves/cube decisions marked
+  doubtful or bad"""
+
+  # Get current match
+  m = gnubg.match()
+
+  # Go to match start
+  gnubg.navigate()
+
+  # Skill of previous action, to avoid exporting double actions twice 
+  prevSkill = None
+
+  # Exported position number, used in file name
+  poscount = 0
+  
+  for game in m["games"] :
+    for action in game["game"] :
+      
+      analysis = action.get("analysis", None)
+      if analysis :
+        type = action["action"]
+        skill = analysis.get("skill", None)
+        bad = skillBad(skill)
+        
+        if type == "move" :
+          if skillBad(analysis.get("cube-skill", None)) :
+            bad = True
+        elif type == "take" or type == "drop" :
+          if badSkill(prevSkill) :
+            # Already exported
+            bad = False
+
+        if bad :
+          exportfile = "%s__%d.html" % (os.path.splitext(baseName)[0],poscount)
+          gnubg.command("export position html " + "\"" + exportfile + "\"")
+          poscount += 1
+
+      # Advance to next record
+      gnubg.navigate(1)
+      
+    # Advance to next game
+    gnubg.navigate(game=1)

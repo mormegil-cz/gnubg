@@ -97,15 +97,15 @@ typedef struct movefilter_s {
 #define MAX_FILTER_PLIES	4
 extern movefilter defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 
-typedef struct _evalcontext {
+typedef struct {
     /* FIXME expand this... e.g. different settings for different position
        classes */
     unsigned int fCubeful : 1; /* cubeful evaluation */
-    unsigned int nPlies : 3;
+    unsigned int nPlies   : 3;
     unsigned int nReduced : 3; /* this will need to be expanded if we add
 				  support for nReduced != 3 */
     unsigned int fDeterministic : 1;
-    float        rNoise; /* standard deviation */
+    float        rNoise;       /* standard deviation */
 } evalcontext;
 
 /* identifies the Rollout Context being written in sgf files. This should
@@ -115,35 +115,37 @@ typedef struct _evalcontext {
 
 #define SGF_ROLLOUT_VER 1
 
-typedef struct _rolloutcontext {
+typedef struct {
 
   evalcontext aecCube[ 2 ], aecChequer [ 2 ]; /* evaluation parameters */
   evalcontext aecCubeLate[ 2 ], aecChequerLate [ 2 ]; /* ... for later moves */
   evalcontext aecCubeTrunc, aecChequerTrunc; /* ... at truncation point */
   movefilter aaamfChequer[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   movefilter aaamfLate[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  
   unsigned int fCubeful : 1; /* Cubeful rollout */
   unsigned int fVarRedn : 1; /* variance reduction */
   unsigned int fInitial: 1;  /* roll out as opening position */
   unsigned int fRotate : 1;  /* quasi-random dice */
-  unsigned int fLateEvals; /* enable different evals for later moves */
-  unsigned int fDoTruncate; /* enable truncated rollouts */
-  unsigned short nTruncate; /* truncation */
-  unsigned int nTrials; /* number of rollouts */
   unsigned int fTruncBearoff2 : 1; /* cubeless rollout: trunc at BEAROFF2 */
   unsigned int fTruncBearoffOS: 1; /* cubeless rollout: trunc at BEAROFF_OS */
+  unsigned int fLateEvals : 1; /* enable different evals for later moves */
+  unsigned int fDoTruncate : 1; /* enable truncated rollouts */
+  unsigned int fStopOnSTD : 1;    /* stop when std's are small enough */
+  unsigned int fStopOnJsd : 1;
+  unsigned int fStopMoveOnJsd : 1;    /* stop multi-line rollout when jsd
+					 is small enough */
+  unsigned short nTruncate; /* truncation */
+  unsigned int   nTrials; /* number of rollouts */
   unsigned short nLate; /* switch evaluations on move nLate of game */
   rng rngRollout;
   int nSeed;
-  unsigned int fStopOnSTD;    /* stop when std's are small enough */
   unsigned int nMinimumGames; /* but always do at least this many */
   double       rStdLimit;     /* stop when abs( value / std ) < this */
-  unsigned int fStopMoveOnJsd;    /* stop multi-line rollout when jsd is small enough */
-  unsigned int fStopOnJsd;
   unsigned int nMinimumJsdGames;
   double       rJsdLimit;
-  int nGamesDone;
-  int nSkip;
+  int          nGamesDone;
+  int          nSkip;
 } rolloutcontext;
 
 
@@ -154,7 +156,7 @@ typedef struct {
   int	 nRank;
 } jsdinfo;
 
-typedef enum _evaltype {
+typedef enum {
   EVAL_NONE, EVAL_EVAL, EVAL_ROLLOUT
 } evaltype;
 
@@ -162,7 +164,7 @@ typedef enum _evaltype {
 /* enumeration of variations of backgammon
    (starting position and/or special rules) */
 
-typedef enum _bgvariation {
+typedef enum {
   VARIATION_STANDARD,      /* standard backgammon */
   VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
                             position */
@@ -185,7 +187,7 @@ extern char *aszVariationCommands[ NUM_VARIATIONS ];
  * These structs are placed here so that the move struct can be defined
  */
 
-typedef struct _cubeinfo {
+typedef struct {
     /*
      * nCube: the current value of the cube,
      * fCubeOwner: the owner of the cube,
@@ -206,14 +208,14 @@ typedef struct _cubeinfo {
 } cubeinfo;
 
 
-typedef struct _evalsetup {
+typedef struct {
   evaltype et;
   evalcontext ec;
   rolloutcontext rc;
 
 } evalsetup;
 
-typedef enum _cubedecision {
+typedef enum  {
   DOUBLE_TAKE, DOUBLE_PASS, NODOUBLE_TAKE, TOOGOOD_TAKE, TOOGOOD_PASS,
   DOUBLE_BEAVER, NODOUBLE_BEAVER,
   REDOUBLE_TAKE, REDOUBLE_PASS, NO_REDOUBLE_TAKE,
@@ -229,25 +231,24 @@ typedef enum _cubedecision {
   OPTIONAL_REDOUBLE_PASS
 } cubedecision;
 
-typedef enum _doubletype {
+typedef enum {
   DT_NORMAL,
   DT_BEAVER,
   DT_RACCOON,
   NUM_DOUBLE_TYPES
 } doubletype;
 
-typedef enum _taketype {
+typedef enum {
   TT_NA,
   TT_NORMAL,
   TT_BEAVER
 } taketype;
 
-extern char *aszDoubleTypes[ NUM_DOUBLE_TYPES ];
+extern char* aszDoubleTypes[ NUM_DOUBLE_TYPES ];
 
 
 /*
  * prefined settings
- *
  */
 
 #define NUM_SETTINGS            8
@@ -270,7 +271,7 @@ extern const char *aszSettings[ NUM_SETTINGS ];
 extern const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
 extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
-typedef struct _move {
+typedef struct {
   int anMove[ 8 ];
   unsigned char auch[ 10 ];
   int cMoves, cPips;
@@ -299,7 +300,7 @@ extern bearoffcontext *apbcHyper[ 3 ];
 extern bearoffcontext *pbc15x15;
 extern bearoffcontext *pbc15x15_dvd;
 
-typedef struct _movelist {
+typedef struct {
     int cMoves; /* and current move when building list */
     int cMaxMoves, cMaxPips;
     int iMoveBest;
@@ -319,7 +320,7 @@ extern float rContactX;
 
 /* position classes */
 
-typedef enum _positionclass {
+typedef enum  {
     CLASS_OVER = 0,     /* Game already finished */
     CLASS_HYPERGAMMON1, /* hypergammon with 1 chequers */
     CLASS_HYPERGAMMON2, /* hypergammon with 2 chequers */

@@ -44,9 +44,11 @@
 #include "path.h"
 #include "positionid.h"
 
+#define IGNORE __attribute__ ((unused))
 
 static PyObject *
-BoardToPy( int anBoard[ 2 ][ 25 ] ) {
+BoardToPy( int anBoard[ 2 ][ 25 ] )
+{
   PyObject* b = PyTuple_New(2);
   PyObject* b0 = PyTuple_New(25);
   PyObject* b1 = PyTuple_New(25);
@@ -77,7 +79,7 @@ Board1ToPy( int anBoard [ 25 ] ) {
 
 
 static int
-PyToBoard1( PyObject *p, int anBoard[ 25 ] )
+PyToBoard1( PyObject* p, int anBoard[ 25 ] )
 {
   if( PySequence_Check(p) && PySequence_Size(p) == 25 ) {
     int j;
@@ -319,7 +321,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
 
 
 static PyObject *
-PythonCubeInfo( PyObject *self, PyObject *args ) {
+PythonCubeInfo(PyObject* self IGNORE, PyObject* args) {
 
   cubeinfo ci;
   int nCube = ms.nCube;
@@ -349,7 +351,7 @@ PythonCubeInfo( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonEvalContext( PyObject *self, PyObject *args ) {
+PythonEvalContext( PyObject* self IGNORE, PyObject *args ) {
 
   evalcontext ec;
   int fCubeful = 0, nPlies = 0, nReduced = 0, fDeterministic = 1;
@@ -370,7 +372,7 @@ PythonEvalContext( PyObject *self, PyObject *args ) {
 }
 
 static PyObject *
-PythonCommand( PyObject *self, PyObject *args ) {
+PythonCommand( PyObject* self IGNORE, PyObject *args ) {
 
   char *pch;
   char *sz;
@@ -398,7 +400,7 @@ PythonCommand( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonBoard( PyObject *self, PyObject *args ) {
+PythonBoard( PyObject* self IGNORE, PyObject *args ) {
 
   if ( ! PyArg_ParseTuple( args, ":board" ) )
     return NULL;
@@ -414,7 +416,7 @@ PythonBoard( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonEvaluate( PyObject *self, PyObject *args ) {
+PythonEvaluate( PyObject* self IGNORE, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   PyObject *pyCubeInfo = NULL;
@@ -508,7 +510,7 @@ METPre( float aar[ MAXSCORE ][ MAXSCORE ], const int n ) {
 
 
 static PyObject *
-PythonMET( PyObject *self, PyObject *args ) {
+PythonMET( PyObject* self IGNORE, PyObject *args ) {
 
   int n = ms.nMatchTo ? ms.nMatchTo : MAXSCORE;
   int i;
@@ -552,7 +554,7 @@ PythonMET( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonEq2mwc( PyObject *self, PyObject *args ) {
+PythonEq2mwc( PyObject* self IGNORE, PyObject *args ) {
 
   PyObject *pyCubeInfo = NULL;
   float r = 0.0f;
@@ -571,7 +573,7 @@ PythonEq2mwc( PyObject *self, PyObject *args ) {
 }
 
 static PyObject *
-PythonMwc2eq( PyObject *self, PyObject *args ) {
+PythonMwc2eq( PyObject* self IGNORE, PyObject *args ) {
 
   PyObject *pyCubeInfo = NULL;
   float r = 0.0f;
@@ -590,7 +592,7 @@ PythonMwc2eq( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonPositionID( PyObject *self, PyObject *args ) {
+PythonPositionID( PyObject* self IGNORE, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   int anBoard[ 2 ][ 25 ];
@@ -608,7 +610,7 @@ PythonPositionID( PyObject *self, PyObject *args ) {
 }
 
 static PyObject *
-PythonPositionFromID( PyObject *self, PyObject *args )
+PythonPositionFromID( PyObject* self IGNORE, PyObject *args )
 {
   char* sz = NULL;
   int anBoard[ 2 ][ 25 ];
@@ -632,7 +634,7 @@ PythonPositionFromID( PyObject *self, PyObject *args )
 
 
 static PyObject *
-PythonPositionKey( PyObject *self, PyObject *args ) {
+PythonPositionKey( PyObject* self IGNORE, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   int anBoard[ 2 ][ 25 ];
@@ -659,7 +661,7 @@ PythonPositionKey( PyObject *self, PyObject *args ) {
 }
 
 static PyObject *
-PythonPositionFromKey( PyObject *self, PyObject *args ) {
+PythonPositionFromKey( PyObject* self IGNORE, PyObject *args ) {
 
   int anBoard[ 2 ][ 25 ];
   int i;
@@ -694,7 +696,7 @@ PythonPositionFromKey( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonPositionBearoff( PyObject *self, PyObject *args )
+PythonPositionBearoff( PyObject* self IGNORE, PyObject *args )
 {
   PyObject *pyBoard = NULL;
   int nChequers = 15;
@@ -714,7 +716,7 @@ PythonPositionBearoff( PyObject *self, PyObject *args )
 }
 
 static PyObject *
-PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
+PythonPositionFromBearoff( PyObject* self IGNORE, PyObject *args ) {
 
   int anBoard[ 25 ];
   int iPos = 0;
@@ -746,15 +748,22 @@ PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
   return Board1ToPy( anBoard );
 }
 
-#if PY_MAJOR_VERSION < 3
+#if PY_MAJOR_VERSION < 2 || (PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 3)
+
+/* Bool introduced in 2.3 */
 #define PyBool_FromLong PyInt_FromLong
+
+/* Fix incorrect prototype in early python */
+#define CHARP_HACK (char*)
+#else
+#define CHARP_HACK
 #endif
 
 static inline void
 DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
 {
-  int const s = PyDict_SetItemString(dict, (char *) key, val);  
-  assert( s == 0 );
+  int const s = PyDict_SetItemString(dict, CHARP_HACK key, val);  
+  {                                                         assert( s == 0 ); }
   Py_DECREF(val);
 }
 
@@ -851,10 +860,34 @@ diffRolloutContext(const rolloutcontext* c, PyMatchState* ms)
       DictSetItemSteal(context, "n-truncation", PyInt_FromLong(c->nTruncate));
     }
 
+    if( c->fTruncBearoff2 != s->fTruncBearoff2 ) {
+      DictSetItemSteal(context, "truncate-bearoff2",
+		       PyInt_FromLong(c->fTruncBearoff2));
+    }
+    
+    if( c->fTruncBearoffOS != s->fTruncBearoffOS ) {
+      DictSetItemSteal(context, "truncate-bearoffOS",
+		       PyInt_FromLong(c->fTruncBearoffOS));
+    }
+    
+    if( c->fStopOnSTD != s->fStopOnSTD ) {
+      DictSetItemSteal(context, "stop-on-std",
+		       PyInt_FromLong(c->fStopOnSTD));
+    }
+    
     if( c->nTrials != s->nTrials ) {
       DictSetItemSteal(context, "trials", PyInt_FromLong(c->nTrials));
     }
 
+    if( c->nSeed != s->nSeed ) {
+      DictSetItemSteal(context, "seed", PyInt_FromLong(c->nSeed));
+    }
+    
+    if( c->nMinimumGames != s->nMinimumGames ) {
+      DictSetItemSteal(context, "minimum-games",
+		       PyInt_FromLong(c->nMinimumGames));
+    }
+    
     if( PyDict_Size(context) == 0 ) {
       Py_DECREF(context);
       context = 0;
@@ -877,11 +910,11 @@ RolloutContextToPy(const rolloutcontext* rc)
 		  "late-eval", rc->fLateEvals,
 		  "truncated-rollouts", rc->fDoTruncate,
 		  "n-truncation", rc->nTruncate,
-		  "trials", rc->nTrials,
 		  "truncate-bearoff2", rc->fTruncBearoff2,
 		  "truncate-bearoffOS", rc->fTruncBearoffOS,
+		  "stop-on-std", rc->fStopOnSTD,
+		  "trials", rc->nTrials,
 		  "seed", rc->nSeed,
-		  "stopOnSTD", rc->fStopOnSTD,
 		  "minimum-games", rc->nMinimumGames);
   return dict;
 }
@@ -936,9 +969,6 @@ skillString(skilltype const st, int const ignoreNone)
     case SKILL_DOUBTFUL:    return "doubtful";
     case SKILL_NONE:        return ignoreNone ? 0 : "unmarked";
     case SKILL_GOOD:        return "good";
-/*     case SKILL_INTERESTING: return "interesting"; */
-/*     case SKILL_GOOD:        return "good";  */
-/*     case SKILL_VERYGOOD:    return "verygood"; */
   }
   assert(0);
   return 0;
@@ -1083,7 +1113,6 @@ PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
 
 static PyObject*
 PyDoubleAnalysis(const evalsetup* pes,
-		 const float ar[], 
 		 const float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 		 const float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 		 PyMatchState* ms,
@@ -1310,7 +1339,7 @@ PythonGame(const list*    plGame,
   PyObject* gameDict = PyDict_New();
   PyObject* gameInfoDict = PyDict_New();
 
-  assert( pmr->mt == MOVE_GAMEINFO );
+  {                                       assert( pmr->mt == MOVE_GAMEINFO ); }
 
   if( ! (gameDict && gameInfoDict) ) {
     PyErr_SetString(PyExc_MemoryError, "");
@@ -1342,18 +1371,22 @@ PythonGame(const list*    plGame,
     DictSetItemSteal(gameInfoDict, "winner", Py_None);
   }
 
+  if( g->nAutoDoubles ) {
+    DictSetItemSteal(gameInfoDict, "initial-cube",
+		     PyInt_FromLong(1 << g->nAutoDoubles) );
+  }
+
   DictSetItemSteal(gameDict, "info", gameInfoDict);
     
   if( includeStatistics ) {
     
-    PyObject *s;
+    updateStatisticsGame( plGame );
+    {
+      PyObject* s = PyGameStats(&g->sc);
 
-    updateStatisticsGame ( plGame );
-
-    s = PyGameStats(&g->sc);
-
-    if( s ) {
-      DictSetItemSteal(gameDict, "stats", s);
+      if( s ) {
+	DictSetItemSteal(gameDict, "stats", s);
+      }
     }
   }
   
@@ -1412,8 +1445,7 @@ PythonGame(const list*    plGame,
 	  if( analysis ) {
 	    if( n->esDouble.et != EVAL_NONE ) {
 	      PyObject* d =
-		PyDoubleAnalysis(&n->esDouble, n->arDouble,  
-				 n->aarOutput, n->aarStdDev,
+		PyDoubleAnalysis(&n->esDouble,   n->aarOutput, n->aarStdDev,
 				 ms, verbose);
 	      {
 		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
@@ -1453,9 +1485,8 @@ PythonGame(const list*    plGame,
 	  if( analysis ) {
 	    const cubedecisiondata* c = d->CubeDecPtr;
 	    if( c->esDouble.et != EVAL_NONE ) {
-	      PyObject* d = PyDoubleAnalysis(&c->esDouble, c->arDouble,
-					     c->aarOutput, c->aarStdDev,
-					     ms, verbose);
+	      PyObject* d = PyDoubleAnalysis(&c->esDouble, c->aarOutput,
+					     c->aarStdDev, ms, verbose);
 	      {
 		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
 	      }
@@ -1601,7 +1632,7 @@ addProperty(PyObject* dict, const char* name, const char* val)
 }
   
 static PyObject*
-PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
+PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 {
   /* take match info from first game */
   const list* firstGame = lMatch.plNext->p;
@@ -1752,7 +1783,7 @@ PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
 
 
 static PyObject*
-PythonNavigate(PyObject* self, PyObject* args, PyObject* keywds)
+PythonNavigate(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 {
   int nextRecord = INT_MIN;
   int nextGame = INT_MIN;
@@ -1814,10 +1845,22 @@ PythonNavigate(PyObject* self, PyObject* args, PyObject* keywds)
       recordsDiff = nextRecord - InternalCommandNext(0, nextRecord);
     }
 
+    /* (HACK)
+       If normal move, set global dice for export and such.
+     */
+    if ( plLastMove->plNext && plLastMove->plNext->p ) {
+      const moverecord* r = (const moverecord*)(plLastMove->plNext->p);
+      
+      if( r->mt == MOVE_NORMAL ) {
+	memcpy(ms.anDice, r->n.anRoll, sizeof(ms.anDice));
+      }
+    }
+    
     if( recordsDiff || gamesDif ) {
       r = Py_BuildValue("(ii)", recordsDiff, gamesDif);
     }
   }
+  
   /* (HACK) */
   if( ms.gs ==  GAME_NONE) {
     ms.gs = GAME_PLAYING;

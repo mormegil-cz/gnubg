@@ -1577,11 +1577,15 @@ extern void CommandSetRolloutLate ( char *sz ) {
 
 }
 
-extern void CommandSetRolloutLateEnable ( char *sz ) {
-
-  SetToggle( "separate evaluation for later plies", &prcSet->fLateEvals, sz,
+extern void
+CommandSetRolloutLateEnable ( char *sz )
+{
+  int l = prcSet->fLateEvals;
+  if( SetToggle( "separate evaluation for later plies", &l, sz,
 		 _("Use different evaluation for later moves of rollout."),
-		 _("Do not change evaluations during rollout.") );
+		 _("Do not change evaluations during rollout.") ) != -1 ) {
+    prcSet->fLateEvals = l;
+  }
 }
 
 extern void CommandSetRolloutLatePlies ( char *sz ) {
@@ -1616,11 +1620,15 @@ extern void CommandSetRolloutLimit ( char *sz ) {
 
 }
 
-extern void CommandSetRolloutLimitEnable ( char *sz ) {
-
-  SetToggle( "stop when the STD's are small enough", &prcSet->fStopOnSTD, sz,
+extern void
+CommandSetRolloutLimitEnable ( char *sz ) {
+  int s = prcSet->fStopOnSTD;
+  
+  if( SetToggle( "stop when the STD's are small enough", &s, sz,
 	     _("Stop rollout when STD's are small enough"),
-	     _("Do not stop rollout based on STDs"));
+		 _("Do not stop rollout based on STDs")) != -1 ) {
+    prcSet->fStopOnSTD = s;
+  }
 }
 
 extern void CommandSetRolloutLimitMinGames ( char *sz ) {
@@ -1663,22 +1671,27 @@ extern void CommandSetRolloutJsd ( char *sz ) {
 
 }
 
-extern void CommandSetRolloutJsdEnable ( char *sz ) {
-
-  SetToggle( "stop rollout when one move appears "
-   "to have a higher equity", &prcSet->fStopOnJsd, sz,
+extern void
+CommandSetRolloutJsdEnable ( char *sz )
+{
+  int s = prcSet->fStopOnJsd;
+  if( SetToggle( "stop rollout when one move appears "
+		 "to have a higher equity", &s, sz,
 	     _("Stop rollout based on J.S.D.s"),
-	     _("Do not stop rollout based on J.S.D.s"));
-
+		 _("Do not stop rollout based on J.S.D.s")) != -1 ) {
+    prcSet->fStopOnJsd = s;
+  }
 }
 
 extern void CommandSetRolloutJsdMoveEnable ( char *sz ) {
-
-  SetToggle( "stop rollout of moves which appear to  "
-   "to have a lowerer equity", &prcSet->fStopMoveOnJsd, sz,
-	     _("Stop rollout of moves based on J.S.D.s"),
-	     _("Do not stop rollout of moves based on J.S.D.s"));
-
+  int s = prcSet->fStopMoveOnJsd;
+  
+  if( SetToggle( "stop rollout of moves which appear to  "
+		 "to have a lowerer equity", &s, sz,
+		 _("Stop rollout of moves based on J.S.D.s"),
+		 _("Do not stop rollout of moves based on J.S.D.s")) != -1 ) {
+    prcSet->fStopMoveOnJsd = s;
+  }
 }
 
 extern void CommandSetRolloutJsdMinGames ( char *sz ) {
@@ -2009,10 +2022,15 @@ extern void CommandSetRolloutTrials( char *sz ) {
 }
 
 extern void CommandSetRolloutTruncationEnable ( char *sz ) {
-
-  SetToggle( "rollout truncation enable", &prcSet->fDoTruncate, sz,
-		 _("Games in rollouts will be stopped after a fixed number of moves."),
-		 _("Games in rollouts will be played out until the end.") );
+  int t = prcSet->fDoTruncate;
+  
+  if( SetToggle( "rollout truncation enable", &t, sz,
+		 _("Games in rollouts will be stopped after"
+		   " a fixed number of moves."),
+		 _("Games in rollouts will be played out"
+		   " until the end.")) != -1 ) {
+    prcSet->fDoTruncate = t;
+  }
 }
 
 extern void CommandSetRolloutCubeEqualChequer ( char *sz ) {

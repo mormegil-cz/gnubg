@@ -41,12 +41,8 @@
 #include <string.h>
 #include "positionid.h"
 
-static
-#if defined( __GNUC__ )
-inline
-#endif
-void
-addBits(unsigned char auchKey[10], int bitPos, int nBits)
+static inline void
+addBits(unsigned char auchKey[10], int const bitPos, int const nBits)
 {
   int const k = bitPos / 8;
   int const r = (bitPos & 0x7);
