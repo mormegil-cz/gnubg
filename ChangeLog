@@ -1,3 +1,8 @@
+Tue Jul 30 18:56:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        * gtkgame.c: Add sensitivity to Tutor options
+        * gtkexport.c: Add item menu for HTML board type.
+
 Tue Jul 30 18:36:14 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
  	Bugfixes for tutor mode.
@@ -12,7 +17,7 @@ Tue Jul 30 18:05:30 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 Tue Jul 30 17:15:13 2002  Øystein Johansen  <oeysteij@online.no>
 
-        gtkgame.c (OptionsPage): Fix typo (reported by Nardy Pillards
+        * gtkgame.c (OptionsPage): Fix typo (reported by Nardy Pillards
 
 Mon Jul 29 20:53:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 

@@ -71,6 +71,7 @@ typedef struct _exportwidget {
   /* other stuff */
 
   GtkWidget *pwHTMLPictureURL;
+  GtkWidget *pwHTMLType;
 
 } exportwidget;
 
@@ -81,7 +82,7 @@ static void
 ExportOK ( GtkWidget *pw, exportwidget *pew ) {
 
   exportsetup *pexs = pew->pexs;
-  int i;
+  int i, n;
 
   /* include */
   
@@ -148,6 +149,18 @@ ExportOK ( GtkWidget *pw, exportwidget *pew ) {
 
   pexs->szHTMLPictureURL = 
     strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
+ 
+  if ( pexs->szHTMLType )
+    free ( pexs->szHTMLType );
+
+  n = gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
+
+  /* FIXME !! This is bad! The command is sent if the option is changed or
+              not, and it pops up a annoying message dialog */
+
+  if ( n == 0 ) UserCommand("set export html type gnu");
+  if ( n == 1 ) UserCommand("set export html type fibs2html");
+  if ( n == 2 ) UserCommand("set export html type bbs");
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
@@ -216,6 +229,13 @@ ExportSet ( exportwidget *pew ) {
     gtk_entry_set_text( GTK_ENTRY( pew->pwHTMLPictureURL ), 
                         pexs->szHTMLPictureURL );
 
+  if ( !strcmp(pexs->szHTMLType , "gnu"))
+    gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 0);
+  if ( !strcmp(pexs->szHTMLType , "fibs2html"))
+    gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 1);
+  if ( !strcmp(pexs->szHTMLType , "bbs"))
+    gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 2);
+    
 
 }
 
@@ -229,6 +249,8 @@ GTKShowExport ( exportsetup *pexs ) {
   GtkWidget *pwFrame;
   GtkWidget *pwTable;
   GtkWidget *pwTableX;
+  GtkWidget *pwType_menu;
+  GtkWidget *glade_menuitem;
   
   GtkWidget *pw;
 
@@ -498,6 +520,22 @@ GTKShowExport ( exportsetup *pexs ) {
                        gtk_entry_new (),
                        TRUE, TRUE, 0 );
 
+  /* FIXME !! This looks ugly  */
+
+  pew->pwHTMLType = gtk_option_menu_new ();
+  gtk_box_pack_start (GTK_BOX (pwVBox), pew->pwHTMLType, FALSE, FALSE, 0);
+  pwType_menu = gtk_menu_new ();
+  glade_menuitem = gtk_menu_item_new_with_label (_("GNU Backgammon"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("fibs2html"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("BBS"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (pew->pwHTMLType), pwType_menu);
+  gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 0);
 
   /* show dialog */
 

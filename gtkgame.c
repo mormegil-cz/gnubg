@@ -6949,6 +6949,19 @@ static void ManualDiceToggled( GtkWidget *pw, optionswidget *pow){
 
 } 
 
+static void TutorToggled (GtkWidget *pw, optionswidget *pow){
+
+  gint n = 
+     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwTutor ) ); 
+
+  gtk_widget_set_sensitive( pow->pwTutorCube, n );
+  gtk_widget_set_sensitive( pow->pwTutorChequer, n );
+  gtk_widget_set_sensitive( pow->pwTutorSkill, n );
+  gtk_widget_set_sensitive( pow->pwTutorEvalHint, n );
+  gtk_widget_set_sensitive( pow->pwTutorEvalAnalysis, n );
+
+}
+  
 static GtkWidget* OptionsPage( optionswidget *pow)
 {
   /* Glade generated code, don't blame me */
@@ -6998,6 +7011,10 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   pow->pwTutor = gtk_check_button_new_with_label (_("Tutor Mode"));
   gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutor, FALSE, FALSE, 0);
 
+  gtk_signal_connect ( GTK_OBJECT ( pow->pwTutor ), "toggled",
+                       GTK_SIGNAL_FUNC ( TutorToggled ), pow );
+
+
   pow->pwTutorCube = gtk_check_button_new_with_label (_("Cube Decisions"));
   gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutorCube, FALSE, FALSE, 0);
 
@@ -7043,7 +7060,13 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   gtk_menu_append (GTK_MENU (pwSkill_menu), glade_menuitem);
   gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwTutorSkill), pwSkill_menu);
   gtk_option_menu_set_history (GTK_OPTION_MENU (pow->pwTutorSkill), 4);
-  gtk_widget_set_sensitive (pow->pwTutorSkill, TRUE);
+
+  gtk_widget_set_sensitive (pow->pwTutorSkill, fTutor);
+  gtk_widget_set_sensitive( pow->pwTutorCube, fTutor );
+  gtk_widget_set_sensitive( pow->pwTutorChequer, fTutor );
+  gtk_widget_set_sensitive( pow->pwTutorEvalHint, fTutor );
+  gtk_widget_set_sensitive( pow->pwTutorEvalAnalysis, fTutor );
+
   pwFrame = gtk_frame_new (_("Cube"));
   gtk_box_pack_start (GTK_BOX (pwHBoxMain), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
