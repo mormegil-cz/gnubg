@@ -118,7 +118,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
-	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c
+	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
+	export.c
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -189,7 +190,8 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_FALSE@@USE_EXT_TRUE@matchequity.o analysis.o sgf.o sgfp.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@sgfl.o guile.o import.o external.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@credits.o latex.o postscript.o html.o \
-@USE_GTK_FALSE@@USE_EXT_TRUE@matchid.o i18n.o text.o xboard.o xgame.o
+@USE_GTK_FALSE@@USE_EXT_TRUE@matchid.o i18n.o text.o export.o xboard.o \
+@USE_GTK_FALSE@@USE_EXT_TRUE@xgame.o
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@getopt1.o eval.o play.o positionid.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@drawboard.o pub_eval.o set.o show.o \
@@ -197,15 +199,15 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_FALSE@@USE_EXT_FALSE@kleinman.o matchequity.o analysis.o sgf.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@sgfp.o sgfl.o guile.o import.o external.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@credits.o latex.o postscript.o html.o \
-@USE_GTK_FALSE@@USE_EXT_FALSE@matchid.o i18n.o text.o
+@USE_GTK_FALSE@@USE_EXT_FALSE@matchid.o i18n.o text.o export.o
 @USE_GTK_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @USE_GTK_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_TRUE@database.o dice.o rollout.o copying.o kleinman.o \
 @USE_GTK_TRUE@matchequity.o analysis.o sgf.o sgfp.o sgfl.o guile.o \
 @USE_GTK_TRUE@import.o external.o credits.o latex.o postscript.o html.o \
-@USE_GTK_TRUE@matchid.o i18n.o text.o gtkboard.o gtkgame.o gdkgetrgb.o \
-@USE_GTK_TRUE@gtkprefs.o gtk-multiview.o gtktheory.o gtktexi.o \
-@USE_GTK_TRUE@gtkexport.o gtkcube.o gtkchequer.o
+@USE_GTK_TRUE@matchid.o i18n.o text.o export.o gtkboard.o gtkgame.o \
+@USE_GTK_TRUE@gdkgetrgb.o gtkprefs.o gtk-multiview.o gtktheory.o \
+@USE_GTK_TRUE@gtktexi.o gtkexport.o gtkcube.o gtkchequer.o
 gnubg_LDFLAGS = 
 erftest_OBJECTS =  erftest.o
 erftest_LDADD = $(LDADD)
@@ -239,16 +241,17 @@ GZIP_ENV = --best
 DIST_SUBDIRS =  intl lib doc ext met po intl lib doc met po
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
 .deps/database.P .deps/dice.P .deps/drawboard.P .deps/erf.P \
-.deps/erftest.P .deps/eval.P .deps/external.P .deps/gdkgetrgb.P \
-.deps/getopt.P .deps/getopt1.P .deps/gnubg.P .deps/gtk-multiview.P \
-.deps/gtkboard.P .deps/gtkchequer.P .deps/gtkcube.P .deps/gtkexport.P \
-.deps/gtkgame.P .deps/gtkprefs.P .deps/gtktexi.P .deps/gtktheory.P \
-.deps/guile.P .deps/html.P .deps/i18n.P .deps/import.P .deps/kleinman.P \
-.deps/latex.P .deps/makebearoff.P .deps/makeweights.P \
-.deps/matchequity.P .deps/matchid.P .deps/play.P .deps/positionid.P \
-.deps/postscript.P .deps/pub_eval.P .deps/rollout.P .deps/set.P \
-.deps/sgf.P .deps/sgfl.P .deps/sgfp.P .deps/show.P .deps/strdup.P \
-.deps/text.P .deps/xboard.P .deps/xgame.P
+.deps/erftest.P .deps/eval.P .deps/export.P .deps/external.P \
+.deps/gdkgetrgb.P .deps/getopt.P .deps/getopt1.P .deps/gnubg.P \
+.deps/gtk-multiview.P .deps/gtkboard.P .deps/gtkchequer.P \
+.deps/gtkcube.P .deps/gtkexport.P .deps/gtkgame.P .deps/gtkprefs.P \
+.deps/gtktexi.P .deps/gtktheory.P .deps/guile.P .deps/html.P \
+.deps/i18n.P .deps/import.P .deps/kleinman.P .deps/latex.P \
+.deps/makebearoff.P .deps/makeweights.P .deps/matchequity.P \
+.deps/matchid.P .deps/play.P .deps/positionid.P .deps/postscript.P \
+.deps/pub_eval.P .deps/rollout.P .deps/set.P .deps/sgf.P .deps/sgfl.P \
+.deps/sgfp.P .deps/show.P .deps/strdup.P .deps/text.P .deps/xboard.P \
+.deps/xgame.P
 SOURCES = $(gnubg_SOURCES) $(erftest_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(erftest_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 

@@ -1,3 +1,10 @@
+Mon Jul 22 17:29:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Experimental equity dump.
+
+	* gnubg.c: activate experimental code.
+	* export.c: new file.
+
 Sun Jul 21 21:49:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Misc. bug fixes and improvements.
