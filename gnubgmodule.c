@@ -1977,7 +1977,7 @@ PythonInitialise( const char *argv0, const char *szDir ) {
 
   FILE *pf;
   char *pch;
-  char scriptDir[_MAX_PATH];
+  char scriptDir[BIG_PATH];
   strcpy(scriptDir, szDir);
   strcat(scriptDir, "/scripts");
 
