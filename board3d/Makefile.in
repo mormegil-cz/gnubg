@@ -185,9 +185,9 @@ LIBRARIES = $(noinst_LIBRARIES)
 libboard3d_a_AR = $(AR) cru
 libboard3d_a_LIBADD =
 am_libboard3d_a_OBJECTS = drawboard3d.$(OBJEXT) mylist.$(OBJEXT) \
-	misc3d.$(OBJEXT) widget3d.$(OBJEXT) \
-	gtkcolour3d.$(OBJEXT) matrix.$(OBJEXT) model.$(OBJEXT) \
-	shadow.$(OBJEXT) texture3d.$(OBJEXT) font3d.$(OBJEXT) graph.$(OBJEXT)
+	misc3d.$(OBJEXT) widget3d.$(OBJEXT) gtkcolour3d.$(OBJEXT) \
+	matrix.$(OBJEXT) model.$(OBJEXT) shadow.$(OBJEXT) \
+	texture3d.$(OBJEXT) font3d.$(OBJEXT) graph.$(OBJEXT)
 libboard3d_a_OBJECTS = $(am_libboard3d_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -198,11 +198,11 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/drawboard3d.Po ./$(DEPDIR)/font3d.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkcolour3d.Po ./$(DEPDIR)/matrix.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/misc3d.Po ./$(DEPDIR)/model.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mylist.Po ./$(DEPDIR)/shadow.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/texture3d.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/widget3d.Po ./$(DEPDIR)/graph.Po
+@AMDEP_TRUE@	./$(DEPDIR)/graph.Po ./$(DEPDIR)/gtkcolour3d.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/matrix.Po ./$(DEPDIR)/misc3d.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/model.Po ./$(DEPDIR)/mylist.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/shadow.Po ./$(DEPDIR)/texture3d.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/widget3d.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -247,6 +247,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drawboard3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/font3d.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/graph.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkcolour3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc3d.Po@am__quote@
@@ -255,7 +256,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shadow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/texture3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/widget3d.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/graph.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)

@@ -288,9 +288,8 @@ dist-info: $(INFO_DEPS)
 	done
 
 mostlyclean-aminfo:
-	-rm -f gnubg.aux gnubg.cp gnubg.cps gnubg.dvi gnubg.fn gnubg.ky gnubg.kys \
-	  gnubg.log gnubg.pg gnubg.ps gnubg.tmp gnubg.toc gnubg.tp \
-	  gnubg.vr
+	-rm -f gnubg.aux gnubg.cp gnubg.cps gnubg.dvi gnubg.fn gnubg.ky gnubg.log \
+	  gnubg.pg gnubg.ps gnubg.tmp gnubg.toc gnubg.tp gnubg.vr
 
 maintainer-clean-aminfo:
 	cd $(srcdir) && \
