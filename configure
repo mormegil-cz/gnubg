@@ -14,7 +14,7 @@ ac_default_prefix=/usr/local
 ac_help="$ac_help
   --with-readline         support fancy command line editing"
 ac_help="$ac_help
-  --with-gdbm             use GNU gdm for position databases"
+  --with-gdbm             use GNU dbm for position databases"
 ac_help="$ac_help
   --with-guile            use the Guile extensibility language"
 ac_help="$ac_help

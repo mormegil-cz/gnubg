@@ -46,7 +46,7 @@ if test "$with_readline" != "no"; then
   done
   AC_CHECK_LIB(readline, readline)
 fi
-AC_ARG_WITH(gdbm,[  --with-gdbm             use GNU gdm for position databases])
+AC_ARG_WITH(gdbm,[  --with-gdbm             use GNU dbm for position databases])
 if test "$with_gdbm" != "no"; then
   AC_CHECK_LIB(gdbm, gdbm_open)
 fi
