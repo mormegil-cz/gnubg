@@ -1,3 +1,9 @@
+Fri Mar 16 10:18:26 2001  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetTrainingThreshold): New function.
+	* show.c (CommandShowTraining): New function.
+	* gtkgame.c (SetAlpha, SetAnneal, SetThreshold): New functions.
+
 Thu Mar 15 10:48:53 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (GTKShowMatchEquityTable): Use a GtkSheet (from

@@ -556,18 +556,15 @@ extern void CommandShowThorp( char *sz ) {
                 "chance\n", 74 + 2 * nDiff );
 }
 
-
 extern void CommandShowBeavers( char *sz ) {
 
-  if ( fBeavers )
-    puts( "Beavers, racoons, and other critters are allowed in"
-          " money sessions." );
-  else
-    puts( "Beavers, racoons, and other critters are not allowed in"
-          " money sessions." );
-
+    if ( fBeavers )
+	outputl( "Beavers, racoons, and other critters are allowed in"
+		 " money sessions." );
+    else
+	outputl( "Beavers, racoons, and other critters are not allowed in"
+		 " money sessions." );
 }
-
 
 extern void CommandShowGammonPrice ( char *sz ) {
 
@@ -645,24 +642,39 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
 
 extern void CommandShowOutput( char *sz ) {
 
-    printf( "Match equities will be shown as %s.\n", fOutputMatchPC ?
+    outputf( "Match equities will be shown as %s.\n", fOutputMatchPC ?
 	    "percentages" : "probabilities" );
 
     if ( fOutputMWC )
-	puts( "Output shown in MWC (match winning chance) "
+	outputl( "Output shown in MWC (match winning chance) "
 	      "(match play only)." ); 
     else
-	puts( "Output shown in EMG (normalized money game equity) "
+	outputl( "Output shown in EMG (normalized money game equity) "
 	      "(match play only)." ); 
 
-    printf( "Winning chances will be shown as %s.\n", fOutputWinPC ?
+    outputf( "Winning chances will be shown as %s.\n", fOutputWinPC ?
 	    "percentages" : "probabilities" );
 
 #if USE_GUI
     if( !fX )
 #endif
-	printf( "Boards will be shown in %s.\n", fOutputRawboard ?
-		"raw format" : "ASCII" );
+	outputf( "Boards will be shown in %s.\n", fOutputRawboard ?
+		 "raw format" : "ASCII" );
+}
+
+extern void CommandShowTraining( char *sz ) {
+
+    outputf( "Learning rate (alpha) %f,\n", rAlpha );
+
+    if( rAnneal )
+	outputf( "Annealing rate %f,\n", rAnneal );
+    else
+	outputl( "Annealing disabled," );
+
+    if( rThreshold )
+	outputf( "Error threshold %f.\n", rThreshold );
+    else
+	outputl( "Error threshold disabled." );
 }
 
 extern void CommandShowMarketWindow ( char * sz ) {

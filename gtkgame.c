@@ -38,6 +38,7 @@
 #if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #endif
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -241,12 +242,15 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
 static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
+static void SetAlpha( gpointer *p, guint n, GtkWidget *pw );
+static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
 static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
 static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
 static void SetEval( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
+static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
@@ -1008,8 +1012,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/_Cube/_Value/64", NULL, Command, CMD_SET_CUBE_VALUE_64,
 	  "/Game/Cube/Value/1" },
 	{ "/_Game/_Dice...", NULL, SetDice, 0, NULL },
-	{ "/_Game/_Score...", NULL, NULL, 0, NULL },
-	{ "/_Game/_Seed...", NULL, NULL, 0, NULL },
 	{ "/_Game/_Turn", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Turn/0", NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
 	{ "/_Game/_Turn/1", NULL, Command, CMD_SET_TURN_1,
@@ -1036,8 +1038,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ "/_Train/_Rollout database", NULL, Command, CMD_DATABASE_ROLLOUT,
 	  NULL },
-	{ "/_Train/_Import database", NULL, DatabaseImport, 0, NULL },
-	{ "/_Train/_Export database", NULL, DatabaseExport, 0, NULL },
+	{ "/_Train/_Import database...", NULL, DatabaseImport, 0, NULL },
+	{ "/_Train/_Export database...", NULL, DatabaseExport, 0, NULL },
 	{ "/_Train/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Train/Train from _database", NULL, Command, CMD_TRAIN_DATABASE,
 	  NULL },
@@ -1098,13 +1100,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/_Output/_Equity as MWC", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Output/_GWC as percentage", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Output/_MWC as percentage", NULL, NULL, 0, NULL },
-	{ "/_Settings/_Output/_Raw boards", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Players...", NULL, SetPlayers, 0, NULL },
 	{ "/_Settings/Prompt...", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Rollouts...", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Training", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Training/_Learning rate...", NULL, NULL, 0, NULL },
-	{ "/_Settings/_Training/_Annealing rate...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Training/_Learning rate...", NULL, SetAlpha, 0, NULL },
+	{ "/_Settings/_Training/_Annealing rate...", NULL, SetAnneal, 0,
+	  NULL },
+	{ "/_Settings/_Training/_Threshold...", NULL, SetThreshold, 0, NULL },
 	{ "/_Settings/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Settings/Save settings", NULL, Command, CMD_SAVE_SETTINGS, NULL },
 	{ "/_Windows", NULL, NULL, 0, "<Branch>" },
@@ -1480,6 +1483,49 @@ static int ReadNumber( char *szTitle, char *szPrompt, int nDefault,
     return n;
 }
 
+static void RealOK( GtkWidget *pw, float *pr ) {
+
+    *pr = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON( pwNumber ) );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
+			double rMin, double rMax, double rInc ) {
+
+    float r = -HUGE_VALF;
+    GtkObject *pa = gtk_adjustment_new( rDefault, rMin, rMax, rInc, rInc,
+					rInc );
+    GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
+					GTK_SIGNAL_FUNC( RealOK ), &r ),
+	*pwPrompt = gtk_label_new( szPrompt );
+
+    pwNumber = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), rInc, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwNumber ), TRUE );
+
+    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwPrompt );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwNumber );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_signal_connect_after( GTK_OBJECT( pwNumber ), "activate",
+			GTK_SIGNAL_FUNC( RealOK ), &r );
+    
+    gtk_widget_show_all( pwDialog );
+
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
+
+    return r;
+}
+
 static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
     int nLength = ReadNumber( "GNU Backgammon - New Match",
@@ -1502,6 +1548,32 @@ static void NewWeights( gpointer *p, guint n, GtkWidget *pw ) {
 	char sz[ 32 ];
 
 	sprintf( sz, "new weights %d", nSize );
+	UserCommand( sz );
+    }
+}
+
+static void SetAlpha( gpointer *p, guint k, GtkWidget *pw ) {
+
+    float r = ReadReal( "GNU Backgammon - Learning rate",
+			"Learning rate:", rAlpha, 0.0f, 1.0f, 0.01f );
+
+    if( r >= 0.0f ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set training alpha %f", r );
+	UserCommand( sz );
+    }
+}
+
+static void SetAnneal( gpointer *p, guint k, GtkWidget *pw ) {
+
+    float r = ReadReal( "GNU Backgammon - Annealing rate",
+			"Annealing rate:", rAnneal, -5.0f, 5.0f, 0.1f );
+
+    if( r >= -5.0f ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set training anneal %f", r );
 	UserCommand( sz );
     }
 }
@@ -1558,6 +1630,19 @@ static void SetSeed( gpointer *p, guint k, GtkWidget *pw ) {
 	char sz[ 32 ];
 
 	sprintf( sz, "set seed %d", n );
+	UserCommand( sz );
+    }
+}
+
+static void SetThreshold( gpointer *p, guint k, GtkWidget *pw ) {
+
+    float r = ReadReal( "GNU Backgammon - Error threshold",
+			"Error threshold:", rThreshold, 0.0f, 6.0f, 0.01f );
+
+    if( r >= 0.0f ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set training threshold %f", r );
 	UserCommand( sz );
     }
 }

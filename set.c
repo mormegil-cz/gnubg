@@ -1010,7 +1010,7 @@ extern void CommandSetTrainingAlpha( char *sz ) {
 
 extern void CommandSetTrainingAnneal( char *sz ) {
 
-    float r = ParseReal( &sz );
+    double r = ParseReal( &sz );
 
     if( r == -HUGE_VAL ) {
 	outputl( "You must specify a valid annealing rate." );
@@ -1019,6 +1019,23 @@ extern void CommandSetTrainingAnneal( char *sz ) {
 
     rAnneal = r;
     outputf( "Annealing rate set to %f.\n", r );
+}
+
+extern void CommandSetTrainingThreshold( char *sz ) {
+
+    float r = ParseReal( &sz );
+
+    if( r < 0.0f ) {
+	outputl( "You must specify a valid error threshold." );
+	return;
+    }
+
+    rThreshold = r;
+
+    if( rThreshold )
+	outputf( "Error threshold set to %f.\n", r );
+    else
+	outputl( "Error threshold disabled." );
 }
 
 extern void CommandSetTurn( char *sz ) {
