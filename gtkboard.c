@@ -252,14 +252,16 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
     if( cx <= 0 || cy <= 0 )
 	return TRUE;
     
-    puch = g_alloca( cx * cy * 3 );
+    puch = malloc( cx * cy * 3 );
 
     RenderArea( bd, puch, x, y, cx, cy );
 
     /* FIXME use dithalign */
     gdk_draw_rgb_image( drawing_area->window, bd->gc_copy, x, y, cx, cy,
 			GDK_RGB_DITHER_MAX, puch, cx * 3 );
-
+    
+    free(puch);
+    
     return TRUE;
 }
 

@@ -1,3 +1,7 @@
+Mon Dec 16 17:20:44 2002  Oystein Johansen  <oeysteij@online.no>
+
+        * gtkboard.c (board_expose): Change g_alloca() with malloc()
+
 Mon Dec 16 10:25:44 2002  Gary Wong  <gtw@gnu.org>
 
 	* render.c (RenderGlyph): Clip drawing at the x- and y-axes to
