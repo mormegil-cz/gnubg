@@ -5186,51 +5186,11 @@ static void board_init( Board *board ) {
                          FALSE, FALSE, 0 );
 
     /* 
-     * move string, match length, crawford flag, dice
-     */
-
-    pwFrame = gtk_frame_new ( NULL );
-    gtk_box_pack_start ( GTK_BOX ( bd->table ), pwFrame,
-                         TRUE, TRUE, 0 );
-
-    pwvbox = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
-
-    /* move string */
-
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         bd->move = gtk_label_new( NULL ),
-                         FALSE, FALSE, 0 );
-    gtk_widget_set_name( bd->move, "move" );
-
-    /* match length */
-
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
-                         pw = gtk_hbox_new ( FALSE, 0 ),
-                         FALSE, FALSE, 0 );
-    
-    gtk_box_pack_start( GTK_BOX( pw ),
-			gtk_label_new( _("Match:") ), FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pw ),
-                        bd->match = gtk_label_new( NULL ), 
-                        FALSE, FALSE, 0 );
-
-    /* crawford flag */
-
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
-                        bd->crawford =
-                        gtk_check_button_new_with_label( _("Crawford game") ),
-                        FALSE, FALSE, 0 );
-    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
-			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
-
-
-    /* 
      * player 1
      */
 
     pwFrame = gtk_frame_new ( NULL );
-    gtk_box_pack_end ( GTK_BOX ( bd->table ), pwFrame,
+    gtk_box_pack_start ( GTK_BOX ( bd->table ), pwFrame,
                        FALSE, FALSE, 0 );
 
     pwvbox = gtk_vbox_new ( FALSE, 0 );
@@ -5294,6 +5254,46 @@ static void board_init( Board *board ) {
     gtk_box_pack_start ( GTK_BOX ( pw ), 
                          bd->pipcount1 = gtk_label_new ( NULL ), 
                          FALSE, FALSE, 0 );
+
+
+    /* 
+     * move string, match length, crawford flag, dice
+     */
+
+    pwFrame = gtk_frame_new ( NULL );
+    gtk_box_pack_end ( GTK_BOX ( bd->table ), pwFrame,
+                         TRUE, TRUE, 0 );
+
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+
+    /* move string */
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                         bd->move = gtk_label_new( NULL ),
+                         FALSE, FALSE, 0 );
+    gtk_widget_set_name( bd->move, "move" );
+
+    /* match length */
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                         pw = gtk_hbox_new ( FALSE, 0 ),
+                         FALSE, FALSE, 0 );
+    
+    gtk_box_pack_start( GTK_BOX( pw ),
+			gtk_label_new( _("Match:") ), FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pw ),
+                        bd->match = gtk_label_new( NULL ), 
+                        FALSE, FALSE, 0 );
+
+    /* crawford flag */
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                        bd->crawford =
+                        gtk_check_button_new_with_label( _("Crawford game") ),
+                        FALSE, FALSE, 0 );
+    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
+			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
 
 
     /* dice drawing area */

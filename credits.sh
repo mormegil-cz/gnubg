@@ -63,6 +63,7 @@ Ian Shaw
 Albert Silver
 Peter Sochovsky
 Mark Spencer
+Scott Steiner
 Maik Stiebler
 W. Stroop (Rob)
 Jacques Thiriat
