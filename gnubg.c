@@ -3961,10 +3961,8 @@ HintChequer( char *sz ) {
   int i;
   char szBuf[ 1024 ];
   int n = ParseNumber ( &sz );
-#if USE_GTK
   int anMove[ 8 ];
   moverecord *pmr;
-#endif
   unsigned char auch[ 10 ];
   int fHasMoved;
   cubeinfo ci;
