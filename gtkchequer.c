@@ -895,7 +895,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
 
     gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
     gtk_box_pack_end ( GTK_BOX ( pwHBox ),
-                       CreateMoveListTools( phd, TRUE ),
+                       CreateMoveListTools( phd ),
                        FALSE, FALSE, 0 );
     
     gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
