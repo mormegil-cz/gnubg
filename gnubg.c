@@ -68,6 +68,10 @@
 static int fReadingOther;
 #endif
 
+#if USE_GUILE
+#include <libguile.h>
+#endif
+
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
@@ -732,7 +736,7 @@ void ShellEscape( char *pch ) {
 	while( !fChildDied ) {
 	    sigsuspend( &ssOld );
 	    if( fAction )
-	    HandleXAction();
+		HandleXAction();
 	}
 
 	fChildDied = FALSE;
@@ -741,7 +745,7 @@ void ShellEscape( char *pch ) {
 #elif HAVE_SIGBLOCK
     {
 	int n;
-
+	
 	n = sigblock( sigmask( SIGCHLD ) | sigmask( SIGIO ) );
 
 	while( !fChildDied ) {
@@ -798,9 +802,28 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    return;
 	} else if( *sz == ':' ) {
 	    /* Guile escape */
-	    outputl( "This installation of GNU Backgammon was compiled without "
-		  "Guile support." );
+#if USE_GUILE
+	    /* FIXME can we modify our SIGIO handler to handle X events
+	       directly (rather than setting fAction) while in Guile?
+	       If we do that, we have to reset the handler to the flag-setter
+	       when executing any callbacks from Guile.  It's probably
+	       a good idea to prohibit the execution of the ":" gnubg
+	       command from Guile... that's far too much reentrancy for
+	       good taste! */
+	    if( sz[ 1 ] )
+		/* Expression specified -- evaluate it */
+		scm_internal_catch( SCM_BOOL_T,
+				    (scm_catch_body_t) scm_eval_0str,
+				    sz + 1, scm_handle_by_message_noexit,
+				    NULL );
+	    else
+		/* No command -- start a Scheme shell */
+		scm_eval_0str( "(top-repl)" );
+#else
+	    outputl( "This installation of GNU Backgammon was compiled "
+		     "without Guile support." );
 	    outputx();
+#endif
 	    return;
 	}
     }
@@ -2355,7 +2378,7 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 
 static void usage( char *argv0 ) {
 
-    outputf(
+    printf(
 "Usage: %s [options]\n"
 "Options:\n"
 "  -b, --no-bearoff          Do not use bearoff database\n"
@@ -2375,7 +2398,7 @@ static void usage( char *argv0 ) {
 "Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
 }
 
-extern int main( int argc, char *argv[] ) {
+static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchDataDir = NULL;
     static int fNoWeights = FALSE, fNoBearoff = FALSE;
@@ -2445,7 +2468,7 @@ extern int main( int argc, char *argv[] ) {
 	    break;
 	case 'h': /* help */
             usage( argv[ 0 ] );
-            return EXIT_SUCCESS;
+	    exit( EXIT_SUCCESS );
 	case 'n':
 	    fNoWeights = TRUE;
 	    break;
@@ -2453,14 +2476,17 @@ extern int main( int argc, char *argv[] ) {
 	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
 	case 'v': /* version */
-	    outputl( "GNU Backgammon " VERSION );
-#if USE_GUI
-	    outputl( "Window system supported." );
+	    puts( "GNU Backgammon " VERSION );
+#if USE_GUILE
+	    puts( "Guile supported." );
 #endif
 #if HAVE_LIBGDBM
-	    outputl( "Position databases supported." );
+	    puts( "Position databases supported." );
 #endif
-	    return EXIT_SUCCESS;
+#if USE_GUI
+	    puts( "Window system supported." );
+#endif
+	    exit( EXIT_SUCCESS );
 	case 'w':
 #if USE_GTK
 	    if( fX )
@@ -2471,7 +2497,7 @@ extern int main( int argc, char *argv[] ) {
 	    break;
 	default:
 	    usage( argv[ 0 ] );
-	    return EXIT_FAILURE;
+	    exit( EXIT_FAILURE );
 	}
 
 #if USE_GTK
@@ -2496,7 +2522,7 @@ extern int main( int argc, char *argv[] ) {
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
 			fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
 			fShowProgress ) )
-	return EXIT_FAILURE;
+	exit( EXIT_FAILURE );
 
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
@@ -2538,7 +2564,7 @@ extern int main( int argc, char *argv[] ) {
     if( fX ) {
 	RunGTK();
 
-	return EXIT_SUCCESS;
+	exit( EXIT_SUCCESS );
     }
 #elif USE_EXT
     if( fX ) {
@@ -2597,4 +2623,16 @@ extern int main( int argc, char *argv[] ) {
 
 	ResetInterrupt();
     }
+}
+
+extern int main( int argc, char *argv[] ) {
+
+#if USE_GUILE
+    scm_boot_guile( argc, argv, real_main, NULL );
+#else
+    real_main( NULL, argc, argv );
+#endif
+    /* should never return */
+    
+    return EXIT_FAILURE;
 }

@@ -51,6 +51,15 @@ if test "$with_gdbm" != "no"; then
   AC_CHECK_LIB(gdbm, gdbm_open)
 fi
 AC_CHECK_LIB(dl, dlopen)
+AC_ARG_WITH(guile,[  --with-guile            use the Guile extensibility language])
+if test "$with_guile" = "no"; then
+  no_guile=yes
+else
+  AM_GUILE
+fi
+if test "$no_guile" != "yes"; then
+  AC_DEFINE(USE_GUILE,1,Define if you want to use the Guile extensibility language.)
+fi
 
 dnl Checks for header files.
 AC_HEADER_STDC

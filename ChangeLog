@@ -1,3 +1,8 @@
+Wed Oct 25 10:19:32 2000  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (HandleCommand): Process ":" as a Guile escape, if
+	available.
+
 Tue Oct 24 10:16:22 2000  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (FindnSaveBestMoves): Free the move list on error (e.g.

@@ -24,3 +24,24 @@ AC_DEFUN(AC_DEFINE_DIR, [
 	  AC_DEFINE_UNQUOTED($1, "$ac_expanded"),
 	  AC_DEFINE_UNQUOTED($1, "$ac_expanded", $3))
 ])
+
+dnl @synopsis AM_GUILE(ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl
+dnl Figure out how to use Guile (but unlike the guile.m4 macro, don't
+dnl abort if Guile isn't there at all).
+dnl
+dnl @author Gary Wong <gtw@gnu.org>
+
+AC_DEFUN(AM_GUILE,[
+  AC_PATH_PROG(GUILE_CONFIG, guile-config, no)
+  if test "$GUILE_CONFIG" = "no"; then
+    no_guile=yes
+    ifelse([$2], , :, [$2])
+  else
+    GUILE_CFLAGS="`guile-config compile`"
+    GUILE_LDFLAGS="`guile-config link`"
+    ifelse([$1], , :, [$1])
+  fi
+  AC_SUBST(GUILE_CFLAGS)
+  AC_SUBST(GUILE_LDFLAGS)
+])

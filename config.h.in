@@ -120,6 +120,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Define if you want to use the Guile extensibility language. */
+#undef USE_GUILE
+
 /* Define if you want to use the ext toolkit and widgets. */
 #undef USE_EXT
 

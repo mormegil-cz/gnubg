@@ -60,7 +60,6 @@ duplication of effort and to make sure our changes merge easily.
   multiple moves (e.g. "8/7(2) 6/5(2)").
 ** Allow "next game [n]" and "previous game [n]" for selecting other games
   in the match.
-** Add ":" as a Guile escape, once it's here.
 ** Allow resuming interrupted rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
@@ -76,6 +75,10 @@ duplication of effort and to make sure our changes merge easily.
   10,000 games vs. pubeval).
 ** Should there be a limit to the number of moves listed by "hint"?  For
   example, "set board 7HYbACDsdhsAIA", "set dice 11", "hint".
+
+* Guile:
+** Lots of things to do.  Define data types ("board", at the least) and
+add Scheme bindings for useful functions.
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().

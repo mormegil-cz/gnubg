@@ -64,6 +64,9 @@ FLEX = @FLEX@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
+GUILE_CFLAGS = @GUILE_CFLAGS@
+GUILE_CONFIG = @GUILE_CONFIG@
+GUILE_LDFLAGS = @GUILE_LDFLAGS@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
@@ -71,8 +74,8 @@ VERSION = @VERSION@
 @USE_EXT_TRUE@SUBDIRS = lib doc ext
 @USE_EXT_FALSE@SUBDIRS = lib doc
 
-COMMON_INCS = -I$(srcdir)/lib
-COMMON_LIBS = -Llib -levent
+COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
+COMMON_LIBS = -Llib -levent @GUILE_LDFLAGS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c
 
 COMMON_DEPS = lib/libevent.a
