@@ -42,6 +42,7 @@ command acSetEvaluation[] = {
       "for deep evaluation", szNUMBER, NULL },
     { "consistency", CommandSetEvalConsistency, "Use the same evaluator for "
       "all moves", szONOFF, NULL },
+    { "cubeful", CommandSetEvalCubeful, "Cubeful evaluations", szONOFF, NULL },
     { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
       "`hint' commands look ahead", szPLIES, NULL },
     { "reduced", CommandSetEvalReduced,
@@ -451,6 +452,16 @@ extern void CommandSetEvalCandidates( char *sz ) {
 	    "plies.\n", szSet, pecSet->nSearchCandidates,
 	    pecSet->nSearchCandidates == 1 ? "" : "s" );
 }
+
+
+extern void 
+CommandSetEvalCubeful( char *sz ) {
+
+  SetToggle( "cubeful", &pecSet->fCubeful, sz,
+             "Cubeful evaluation enabled.",
+             "Cubeful evaluation disabled." );
+}
+
 
 extern void CommandSetEvalConsistency( char *sz ) {
 
