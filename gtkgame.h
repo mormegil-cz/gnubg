@@ -54,6 +54,7 @@ extern int GTKGetInputYN( char *szPrompt );
 extern void GTKOutput( char *sz );
 extern void GTKOutputX( void );
 extern void GTKOutputNew( void );
+extern void GTKEval( char *szOutput );
 extern void GTKHint( movelist *pml );
 extern void GTKRollout( int c, char asz[][ 40 ], int cGames );
 extern void GTKRolloutRow( int i );

@@ -1033,8 +1033,6 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
     gtk_widget_set_default_visual( gdk_rgb_get_visual() );
 
-    pwGrab = gtk_widget_new( GTK_TYPE_WIDGET, NULL );
-    
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW( pwMain ), "GNU Backgammon" );
     /* FIXME add an icon */
@@ -1051,7 +1049,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 			FALSE, FALSE, 0 );
 		       
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
-
+    pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stop;
+    
     gtk_box_pack_end( GTK_BOX( pwVbox ), pwStatus = gtk_statusbar_new(),
 		      FALSE, FALSE, 0 );
     idOutput = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
@@ -1474,6 +1473,35 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
     }
 }
 
+extern void GTKEval( char *szOutput ) {
+
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Evaluation",
+					FALSE, NULL, NULL ),
+	*pwText = gtk_text_new( NULL, NULL );
+    GdkFont *pf;
+
+    pf = gdk_font_load( "fixed" );
+    
+    gtk_text_set_editable( GTK_TEXT( pwText ), FALSE );
+    gtk_text_insert( GTK_TEXT( pwText ), pf, NULL, NULL, szOutput, -1 );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwText );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 600 );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();    
+}
+
 static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
 
     move *pm;
@@ -1610,7 +1638,7 @@ extern void GTKHint( movelist *pml ) {
 
     static char *aszTitle[] = {
 	"Rank", "Type", "Win", "W g", "W bg", "Lose", "L g", "L bg",
-	"Equity", "Diff.", "Move"
+	"", "Diff.", "Move"
     }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 		       NULL, NULL };
     static int aanColumns[][ 2 ] = {
@@ -1631,6 +1659,10 @@ extern void GTKHint( movelist *pml ) {
     char sz[ 32 ];
     hintdata hd = { pwMove, pwRollout, pml };
     float rBest;
+    cubeinfo ci;
+    
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		  fCrawford, fJacoby, fBeavers );
     
     for( i = 0; i < 11; i++ ) {
 	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
@@ -1643,12 +1675,14 @@ extern void GTKHint( movelist *pml ) {
     gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
 				  GTK_SELECTION_MULTIPLE );
 
-    rBest = pml->amMoves[ 0 ].arEvalMove[ OUTPUT_WIN ] * 2.0f +
-	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_WINGAMMON ] +
-	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_WINBACKGAMMON ] -
-	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_LOSEGAMMON ] -
-	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_LOSEBACKGAMMON ] - 1.0f;
-	
+    if( fOutputMWC && nMatchTo ) {
+	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "MWC" );
+	rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
+    } else {
+	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "Equity" );
+	rBest = pml->amMoves[ 0 ].rScore;
+    }
+    
     for( i = 0; i < pml->cMoves; i++ ) {
 	float *ar = pml->amMoves[ i ].arEvalMove;
 
@@ -1678,14 +1712,20 @@ extern void GTKHint( movelist *pml ) {
 	    sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
 	    
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
-	
-	sprintf( sz, "%6.3f", ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] -
-		 ar[ 4 ] - 1.0 );
+
+	if( fOutputMWC && nMatchTo )
+	    sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
+						     &ci ) );
+	else
+	    sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
 
 	if( i ) {
-	    sprintf( sz, "%6.3f", ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] -
-		     ar[ 4 ] - 1.0 - rBest );
+	    if( fOutputMWC && nMatchTo )
+		sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
+			 * 100.0f - rBest );
+	    else
+		sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
 	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
 	}
 	
