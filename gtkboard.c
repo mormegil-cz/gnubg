@@ -3514,7 +3514,6 @@ static void board_init( Board *board ) {
 #if USE_BOARD3D
 	/* 3d board drawing area */
 	CreateBoard3d(bd, &bd->drawing_area3d);
-	InitBoardData(bd);
 	gtk_container_add(GTK_CONTAINER(board), bd->drawing_area3d);
 #endif
 
@@ -4011,19 +4010,20 @@ extern GtkWidget *board_dice_widget( Board *board ) {
 #if USE_BOARD3D
 void InitBoardData(BoardData* bd)
 {	/* Initialize some BoardData settings on new game start */
-	/* Move cube back to center */
-	bd->cube = 0;
-	bd->cube_owner = 0;
-	bd->doubled = 0;
-
-	bd->resigned = 0;
-
-	/* Set dice so 3d roll happens */
-	bd->diceShown = DICE_NOT_SHOWN;
-	bd->diceRoll[0] = bd->diceRoll[1] = -1;
 	/* Only needed for 3d board */
 	if (rdAppearance.fDisplayType == DT_3D)
 	{
+		/* Move cube back to center */
+		bd->cube = 0;
+		bd->cube_owner = 0;
+		bd->doubled = 0;
+
+		bd->resigned = 0;
+
+		/* Set dice so 3d roll happens */
+		bd->diceShown = DICE_NOT_SHOWN;
+		bd->diceRoll[0] = bd->diceRoll[1] = -1;
+
 		updateOccPos(bd);
 		updateFlagOccPos(bd);
 		SetupViewingVolume3d(bd, &rdAppearance);
