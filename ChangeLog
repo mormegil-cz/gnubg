@@ -1,3 +1,8 @@
+Tue Jan  5  8:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* relational.c: Add warning if adding unfinished or unanalyzed match
+	* gtkpanels.c: Fix for console build
+
 Tue Jan  4  9:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkpanels.c: Move remaining window/panel code to this file

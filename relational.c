@@ -31,6 +31,7 @@
 #include "i18n.h"
 #include "relational.h"
 #include "backgammon.h"
+#include "positionid.h"
 
 #if USE_PYTHON
 
@@ -155,6 +156,252 @@ extern int RelationalMatchExists()
   return ret;
 }
 
+int GameOver()
+{
+  	int anFinalScore[2];
+	int nMatch;
+	const list* firstGame = lMatch.plNext->p;
+	if (firstGame)
+	{
+		const moverecord* pmr = firstGame->plNext->p;
+		if (pmr)
+		{
+			assert(pmr->mt == MOVE_GAMEINFO);
+			nMatch = pmr->g.nMatch;
+			if (ms.nMatchTo)
+			{	/* Match - check someone has won */
+				return (getFinalScore(anFinalScore) && ((anFinalScore[0] >= nMatch)
+					|| (anFinalScore[1] >= nMatch)));
+			}
+			else
+			{	/* Session - check game over */
+				return (ms.gs == GAME_OVER);
+			}
+		}
+	}
+	return FALSE;
+}
+
+int MoveAnalysed(moverecord *pmr, matchstate *pms, list *plGame,
+              evalsetup *pesChequer, evalsetup *pesCube,
+              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ])
+{
+    static int anBoardMove[ 2 ][ 25 ];
+    static unsigned char auch[ 10 ];
+    static cubeinfo ci;
+    static float rSkill, rChequerSkill;
+    static evalsetup esDouble; /* shared between the
+				  double and subsequent take/drop */
+    doubletype dt;
+    taketype tt;
+    const xmovegameinfo* pmgi = &((moverecord *) plGame->plNext->p)->g;
+    int    is_initial_position = 1;
+
+    /* analyze this move */
+
+    FixMatchState ( pms, pmr );
+
+    /* check if it's the initial position: no cube analysis and special
+       luck analysis */
+
+    if (pmr->mt != MOVE_GAMEINFO)
+	{
+      InitBoard( anBoardMove, pms->bgv );
+      is_initial_position = !memcmp( anBoardMove, pms->anBoard, 2 * 25 * sizeof ( int ) );
+    }
+
+    switch( pmr->mt ) {
+    case MOVE_GAMEINFO:
+	break;
+
+    case MOVE_NORMAL:
+		if (pmr->fPlayer != pms->fMove)
+		{
+			SwapSides(pms->anBoard);
+		    pms->fMove = pmr->fPlayer;
+		}
+
+		rSkill = rChequerSkill = 0.0f;
+		GetMatchStateCubeInfo( &ci, pms );
+      
+		/* cube action? */
+      
+		if (!is_initial_position && pmgi->fCubeUse && GetDPEq ( NULL, NULL, &ci ) )
+		{
+			if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+				return FALSE;
+		}
+
+		/* luck analysis */
+		if (pmr->rLuck == ERR_VAL)
+			return FALSE;
+
+		/* evaluate move */
+      
+	    memcpy( anBoardMove, pms->anBoard,
+		    sizeof( anBoardMove ) );
+	    ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
+	    PositionKey ( anBoardMove, auch );
+	  
+		if (pmr->esChequer.et == EVAL_NONE && pmr->n.iMove != -1)
+			return FALSE;
+      
+	break;
+      
+    case MOVE_DOUBLE:
+
+      /* always analyse MOVE_DOUBLEs as they are shared with the subsequent
+         MOVE_TAKEs or MOVE_DROPs. */
+
+        dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+
+        if ( dt != DT_NORMAL )
+          break;
+
+	/* cube action */	    
+	if (pmgi->fCubeUse)
+	{
+	    GetMatchStateCubeInfo( &ci, pms );
+	  
+	    if ( GetDPEq ( NULL, NULL, &ci ) ||
+                 ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove )
+		{
+			if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+				return FALSE;
+	    }
+	}
+      
+	break;
+      
+    case MOVE_TAKE:
+
+        tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+        if ( tt != TT_NORMAL )
+          break;
+      
+		if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE )
+		{
+			GetMatchStateCubeInfo( &ci, pms );
+			if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+				return FALSE;
+		}
+
+	break;
+      
+    case MOVE_DROP:
+      
+        tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+        if ( tt != TT_NORMAL )
+          break;
+
+		if (pmr->CubeDecPtr->esDouble.et == EVAL_NONE)
+			return FALSE;
+
+		break;
+      
+    case MOVE_RESIGN:
+
+      /* swap board if player not on roll resigned */
+      if( pmr->fPlayer != pms->fMove ) {
+        SwapSides( pms->anBoard );
+        pms->fMove = pmr->fPlayer;
+      }
+      
+      if ( pesCube->et != EVAL_NONE ) {
+        
+        int nResign;
+        float rBefore, rAfter;
+
+        GetMatchStateCubeInfo ( &ci, pms );
+
+        if ( cmp_evalsetup ( pesCube, &pmr->r.esResign ) > 0 ) {
+          nResign =
+            getResignation ( pmr->r.arResign, pms->anBoard, 
+                             &ci, pesCube );
+          
+        }
+
+        getResignEquities ( pmr->r.arResign, &ci, pmr->r.nResigned,
+                            &rBefore, &rAfter );
+
+        pmr->r.esResign = *pesCube;
+
+        pmr->r.stResign = pmr->r.stAccept = SKILL_NONE;
+
+        if ( rAfter < rBefore ) {
+          /* wrong resign */
+          pmr->r.stResign = Skill ( rAfter - rBefore );
+          pmr->r.stAccept = SKILL_GOOD; //VERYGOOD;
+        }
+
+        if ( rBefore < rAfter ) {
+          /* wrong accept */
+          pmr->r.stAccept = Skill ( rBefore - rAfter );
+          pmr->r.stResign = SKILL_GOOD; // VERYGOOD;
+        }
+
+
+      }
+
+      break;
+      
+    case MOVE_SETDICE:
+	if( pmr->fPlayer != pms->fMove ) {
+	    SwapSides( pms->anBoard );
+	    pms->fMove = pmr->fPlayer;
+	}
+      
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+          /* we do not analyse this player */
+          break;
+      
+	GetMatchStateCubeInfo( &ci, pms );
+	break;
+
+    case MOVE_TIME: 
+    case MOVE_SETBOARD:	  
+    case MOVE_SETCUBEVAL:
+    case MOVE_SETCUBEPOS:
+      break;
+	default:
+		assert(0);
+    }
+
+	ApplyMoveRecord(pms, plGame, pmr);
+
+    return TRUE;
+}
+
+int GameAnalysed(list *plGame)
+{
+	list *pl;
+	moverecord *pmrx = (moverecord *) plGame->plNext->p; 
+	matchstate msAnalyse;
+
+	assert(pmrx->mt == MOVE_GAMEINFO);
+
+	for (pl = plGame->plNext; pl != plGame; pl = pl->plNext)
+	{
+		if (!MoveAnalysed(pl->p, &msAnalyse, plGame,
+								&esAnalysisChequer, &esAnalysisCube, aamfAnalysis))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+int MatchAnalysed()
+{
+	list *pl;
+
+	for (pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext)
+	{
+		if (!GameAnalysed(pl->p))
+			return FALSE;
+	}
+	return TRUE;
+}
+
 extern void
 CommandRelationalAddMatch( char *sz ) {
 
@@ -163,6 +410,27 @@ CommandRelationalAddMatch( char *sz ) {
   char* env;
   int force = FALSE;
   char *pch;
+  char warnings[1024];
+  *warnings = '\0';
+
+  if (ListEmpty(&lMatch))
+  {
+      outputl( _("No match is being played.") );
+      return;
+  }
+
+  /* Warn if match is not finished or fully analyzed */
+  if (!GameOver())
+	  strcat(warnings, _("The match is not finished\n"));
+  if (!MatchAnalysed())
+	  strcat(warnings, _("All of the match is not analyzed\n"));
+
+  if (*warnings)
+  {
+	strcat(warnings, _("\nAdd match anyway?"));
+	if (!GetInputYN(warnings))
+	    return;
+  }
 
   env = NextToken( &sz );
   if (!env)
