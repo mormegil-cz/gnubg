@@ -6709,7 +6709,6 @@ static RETSIGTYPE SoundChild ( int n ) {
 static char *
 ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
 
-  int implement_me = 0;
   char *pch;
   char *pchToken;
 
