@@ -63,8 +63,6 @@ CommandRelationalAddMatch( char *sz ) {
   int env_id = 0;
   int force = FALSE;
   char *pch;
-  PyObject *py_env_id;
-  PyObject *py_force;
 
   if (sz && *sz)
     env_id = ParseNumber( &sz );
@@ -115,14 +113,8 @@ CommandRelationalAddMatch( char *sz ) {
     
   /* add match to database */
 
-  py_env_id = PyInt_FromLong( env_id );
-  py_force = PyInt_FromLong( force );
-
-  if ( ! ( v = PyObject_CallMethod( r, "addmatch", "ii", 
-                                    py_env_id, py_force ) ) ) {
+  if ( ! ( v = PyObject_CallMethod( r, "addmatch", "ii", env_id, force)) ) {
     PyErr_Print();
-    Py_DECREF( py_env_id );
-    Py_DECREF( py_force );
     Py_DECREF( r );
     return;
   }
@@ -150,8 +142,6 @@ CommandRelationalAddMatch( char *sz ) {
     else {
       outputl( _("Hmm, addmatch return non-integer...") );
     }
-    Py_DECREF( py_env_id );
-    Py_DECREF( py_force );
     Py_DECREF( v );
   }
 

@@ -287,10 +287,13 @@ class relational:
          s7 = "NULL,NULL,NULL,NULL,"
 
       # time penalties
-      s8 = "%d,%f,%f" % \
+      if gs.has_key( 'time' ):
+         s8 = "%d,%f,%f" % \
            ( gs[ 'time' ][ 'time-penalty' ], \
              gs[ 'time' ][ 'time-penalty-skill' ], \
              gs[ 'time' ][ 'time-penalty-cost' ] )
+      else:
+         s8 = "0, 0, 0"
       
       query = "INSERT INTO matchstat VALUES (" + \
               s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + ");"
