@@ -113,6 +113,8 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
 extern void GTKSaveSettings( void );
 extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
+extern void 
+GTKShowPath( void );
 
 extern int fTTY;
 
