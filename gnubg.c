@@ -250,15 +250,8 @@ evalsetup esAnalysisCube = EVALSETUP;
 storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
 
 player ap[ 2 ] = {
-<<<<<<< gnubg.c
     { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP },
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP } 
-=======
-    { "gnubg", PLAYER_GNU, EVAL_EVAL, EVAL_EVAL, 
-      EVALSETUP, EVALSETUP },
-    { "user", PLAYER_HUMAN, EVAL_EVAL, EVAL_EVAL, 
-      EVALSETUP, EVALSETUP } 
->>>>>>> 1.137
 };
 
 /* Usage strings */
@@ -1417,10 +1410,6 @@ static gint UpdateBoard( gpointer p ) {
     return FALSE; /* remove idle handler */
 }
 #endif
-<<<<<<< gnubg.c
-
-static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
-=======
 
 extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
@@ -1429,9 +1418,8 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 			fJacoby, fBeavers );
 }
 
-static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
-				 evalsetup *pes ) {
->>>>>>> 1.137
+static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
+
     cubeinfo ci;
     char sz[ 1024 ];
 
@@ -2235,10 +2223,9 @@ CommandRollout( char *sz ) {
       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
-      SetCubeInfo ( &ci, nCube, fCubeOwner, fOpponent ? !fMove : fMove,
-                    nMatchTo, an, fCrawford, fJacoby, fBeavers );
+      GetMatchStateCubeInfo( &ci, &ms );
 
-      GeneralCubeDecisionR ( "", aarOutput, aarStdDev, anBoard, &ci,
+      GeneralCubeDecisionR ( "", aarOutput, aarStdDev, ms.anBoard, &ci,
                              &rcRollout );
       return;
 
