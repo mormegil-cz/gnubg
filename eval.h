@@ -419,6 +419,9 @@ SwapSides( int anBoard[ 2 ][ 25 ] );
 extern int 
 GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 
+extern void
+EvalCacheFlush(void);
+
 extern int 
 EvalCacheResize( int cNew );
 

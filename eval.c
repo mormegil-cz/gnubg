@@ -4156,6 +4156,11 @@ extern char
 
 }
 
+extern void
+EvalCacheFlush(void)
+{
+  CacheFlush( & cEval );
+}
 
 extern int EvalCacheResize( int cNew ) {
 
