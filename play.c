@@ -3895,15 +3895,103 @@ FixMatchState ( matchstate *pms, const moverecord *pmr ) {
 }
 
 
+static int
+cmp_matchstate ( const matchstate *pms1, const matchstate *pms2 ) {
+
+  /* check if the match state is for the same move */
+
+  return memcmp ( pms1, pms2, sizeof ( matchstate ) );
+
+}
+
+
 
 extern moverecord *
-getCurrentMoveRecord ( void ) {
+getCurrentMoveRecord ( int *pfHistory ) {
+
+  static moverecord mrHint;
+  cubeinfo ci;
 
   /* FIXME: introduce a mrHint that "Hint" and "Eval" fills */
 
-  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p )
+  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
+    *pfHistory = TRUE;
     return plLastMove->plNext->p;
-  else
-    return NULL;
+  }
+  else {
+    *pfHistory = FALSE;
+
+    if ( ! cmp_matchstate ( &ms, &sm.ms ) ) {
+
+      mrHint.n.mt = MOVE_NORMAL;
+      mrHint.n.sz = NULL;
+      mrHint.n.anRoll[ 0 ] = ms.anDice[ 0 ];
+      mrHint.n.anRoll[ 1 ] = ms.anDice[ 1 ];
+      mrHint.n.fPlayer = ms.fTurn;
+      mrHint.n.ml = sm.ml;
+      mrHint.n.lt = LUCK_NONE;
+      mrHint.n.rLuck = ERR_VAL;
+      mrHint.n.stMove = SKILL_NONE;
+
+      mrHint.n.iMove = -1;
+      mrHint.n.anMove[ 0 ] = -1;
+
+#if USE_GTK
+      if ( fX )
+        if ( GTKGetMove ( mrHint.n.anMove ) )
+          mrHint.n.iMove = locateMove ( ms.anBoard, mrHint.n.anMove, &sm.ml );
+#endif
+
+
+      /* add cube */
+
+      if ( ! memcmp ( &ms.anBoard, &sc.ms.anBoard, sizeof ( ms.anBoard ) ) &&
+           ms.fTurn == sc.ms.fTurn && 
+           ms.fMove == sc.ms.fMove &&
+           ms.fCubeOwner == sc.ms.fCubeOwner &&
+           ms.fCrawford == sc.ms.fCrawford &&
+           ms.fPostCrawford == sc.ms.fPostCrawford &&
+           ms.nCube == sc.ms.nCube &&
+           ms.nMatchTo == sc.ms.nMatchTo &&
+           ( ! ms.nMatchTo || ( ms.anScore[ 0 ] == sc.ms.anScore[ 0 ] &&
+                                ms.anScore[ 1 ] == sc.ms.anScore[ 1 ] ) ) ) {
+
+        mrHint.n.esDouble = sc.es;
+        mrHint.n.stCube = SKILL_NONE;
+        memcpy ( mrHint.n.aarOutput, sc.aarOutput, sizeof ( sc.aarOutput ) );
+        memcpy ( mrHint.n.aarStdDev, sc.aarStdDev, sizeof ( sc.aarStdDev ) );
+
+        GetMatchStateCubeInfo( &ci, &ms );
+        FindCubeDecision ( mrHint.n.arDouble, mrHint.n.aarOutput, &ci );
+
+      }
+      else {
+        mrHint.n.esDouble.et = EVAL_NONE;
+      }
+
+      printf ( "move\n" );
+      return &mrHint;
+
+    }
+    else if ( ! cmp_matchstate ( &ms, &sc.ms ) ) {
+
+      mrHint.d.mt = MOVE_DOUBLE;
+      mrHint.d.sz = NULL;
+      mrHint.d.fPlayer = ms.fTurn;
+      mrHint.d.esDouble = sc.es;
+      mrHint.d.st = SKILL_NONE;
+      memcpy ( mrHint.d.aarOutput, sc.aarOutput, sizeof ( sc.aarOutput ) );
+      memcpy ( mrHint.d.aarStdDev, sc.aarStdDev, sizeof ( sc.aarStdDev ) );
+      
+      GetMatchStateCubeInfo( &ci, &ms );
+      FindCubeDecision ( mrHint.d.arDouble, mrHint.d.aarOutput, &ci );
+
+      return &mrHint;
+
+    }
+    else
+      return NULL;
+
+  }
 
 }

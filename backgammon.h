@@ -481,7 +481,7 @@ getDefaultPath ( const pathformat f );
 extern char *GetLuckAnalysis( matchstate *pms, float rLuck );
 
 extern moverecord *
-getCurrentMoveRecord ( void );
+getCurrentMoveRecord ( int *pfHistory );
 
 extern void
 UpdateStoredMoves ( const movelist *pml, const matchstate *pms );

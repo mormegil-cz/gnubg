@@ -556,7 +556,8 @@ static void
 TextBoardHeader ( FILE *pf, const matchstate *pms, 
                   const int iGame, const int iMove ) {
 
-  fprintf ( pf, _("Move number %d: "), iMove + 1 );
+  if ( iMove >= 0 )
+    fprintf ( pf, _("Move number %d: "), iMove + 1 );
 
   if ( pms->fResigned ) 
     
@@ -1235,7 +1236,7 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
                 _("* %s moves %s"),
                 ap[ pmr->n.fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
-    else
+    else if ( ! pmr->n.ml.cMoves )
       fprintf ( pf,
                 _("* %s cannot move"),
                 ap[ pmr->n.fPlayer ].szName );
@@ -1625,7 +1626,9 @@ extern void CommandExportMatchText( char *sz ) {
 extern void CommandExportPositionText( char *sz ) {
 
     FILE *pf;
-    moverecord *pmr = getCurrentMoveRecord ();
+    int fHistory;
+    moverecord *pmr = getCurrentMoveRecord ( &fHistory );
+    int iMove;
 	
     sz = NextToken( &sz );
     
@@ -1656,9 +1659,15 @@ extern void CommandExportPositionText( char *sz ) {
     if ( exsExport.fIncludeMatchInfo )
       TextMatchInfo ( pf, &mi );
 
+    if ( fHistory )
+      iMove = getMoveNumber ( plGame, pmr ) - 1;
+    else if ( plLastMove )
+      iMove = getMoveNumber ( plGame, plLastMove->p );
+    else
+      iMove = -1;
+
     TextBoardHeader ( pf, &ms, 
-                      getGameNumber ( plGame ),
-                      getMoveNumber ( plGame, pmr ) - 1 );
+                      getGameNumber ( plGame ), iMove );
 
     printTextBoard( pf, &ms );
 
