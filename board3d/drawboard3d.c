@@ -169,7 +169,6 @@ void Tidy3dObjects(BoardData* bd)
 		freeEigthPoints(&bd->boardPoints, bd->rd->curveAccuracy);
 
 	TidyShadows(bd);
-
 	ClearTextures(bd);
 	ListDeleteAll(&textures);
 }
@@ -1559,6 +1558,12 @@ void showMoveIndicator(BoardData* bd)
 	glEnable(GL_DEPTH_TEST);
 }
 
+void ClearScreen(BoardData *bd)
+{
+	glClearColor(bd->rd->BackGroundMat.ambientColour[0], bd->rd->BackGroundMat.ambientColour[1], bd->rd->BackGroundMat.ambientColour[2], 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void RotateClosingBoard(BoardData* bd)
 {
 	float rotAngle = 90;
@@ -1567,8 +1572,7 @@ void RotateClosingBoard(BoardData* bd)
 
 	glPopMatrix();
 
-	glClearColor(bd->rd->BackGroundMat.ambientColour[0], bd->rd->BackGroundMat.ambientColour[1], bd->rd->BackGroundMat.ambientColour[2], 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	ClearScreen(bd);
 
 	if ((bd->State == BOARD_OPENING) || (bd->State == BOARD_CLOSING))
 	{
@@ -2023,7 +2027,7 @@ else
 
 	/* Bear-off edge */
 	drawBox(BOX_NOENDS | BOX_SPLITTOP, TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, bd->rd->BoxMat.pTexture);
-	drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->rd->BoxMat.pTexture);
+	drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->rd->BoxMat.pTexture);
 }
 
 	if (bd->rd->fLabels)
@@ -3106,12 +3110,14 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 		float zoom;
 
 		if (aspectRatio < .5f)
-		{
+		{	/* Viewing area to high - cut down so board rendered correctly */
 			int newHeight = viewport[2] * 2;
 			viewport[1] = (viewport[3] - newHeight) / 2;
 			viewport[3] = newHeight;
 			glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 			aspectRatio = .5f;
+			/* Clear screen so top + bottom outside board shown ok */
+			ClearScreen(bd);
 		}
 
 		/* Workout how big the board is (in 3d space) */
@@ -3204,9 +3210,9 @@ void setupFlag(BoardData* bd)
 		bd->ctlpoints[i][1][0] = width / (S_NUMPOINTS - 1) * i;
 		bd->ctlpoints[i][0][1] = 0;
 		bd->ctlpoints[i][1][1] = height;
+		bd->ctlpoints[i][0][2] = 0;
+		bd->ctlpoints[i][1][2] = 0;
 	}
-	for (i = 0; i < T_NUMPOINTS; i++)
-		bd->ctlpoints[0][i][2] = 0;
 }
 
 void renderFlag(BoardData* bd)

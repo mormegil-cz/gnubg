@@ -2144,7 +2144,7 @@ void SetupViewingVolume3d(BoardData *bd)
 {
 	GLint viewport[4];
 	float tempMatrix[16];
-	glGetIntegerv (GL_VIEWPORT, viewport);
+	glGetIntegerv(GL_VIEWPORT, viewport);
 
 	memcpy(tempMatrix, bd->modelMatrix, sizeof(float[16]));
 
@@ -2303,4 +2303,6 @@ void InitBoard3d(BoardData *bd)
 	bd->numTextures = 0;
 
 	bd->boardPoints = NULL;
+
+	memset(bd->modelMatrix, 0, sizeof(float[16]));
 }
