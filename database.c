@@ -251,7 +251,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 
 	    pev = (dbevaluation *) dValue.dptr;
 
-	    if( pev->c >= 72 /* FIXME */ ) {
+	    if( pev->c >= 36 /* FIXME */ ) {
         if( !( ++c % 100 ) && fShowProgress ) {
           outputf( "%6d\r", c );
           fflush( stdout );
