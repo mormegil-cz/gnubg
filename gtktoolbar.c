@@ -216,15 +216,37 @@ SaveClicked( GtkWidget *pw, gpointer unused ) {
 static void 
 ImportClicked( GtkWidget *pw, gpointer unused ) {
 
-  GTKFileCommand(_("Import match, session, game or position"), 
-		   NULL, "import", "N", FDT_IMPORT);
+	/* Order of import types in menu */
+	int impTypes[] = {PATH_BKG, PATH_MAT, PATH_POS, PATH_OLDMOVES, PATH_SGG,
+		PATH_TMG, PATH_MAT, PATH_SNOWIE_TXT};
+	char* sz = NULL;
+
+	if (lastImportType != -1)
+		sz = getDefaultPath(impTypes[lastImportType]);
+
+	GTKFileCommand(_("Import match, session, game or position"), 
+		   sz, "import", "N", FDT_IMPORT);
+
+	if (sz)
+		free(sz);
 }
 
 static void 
 ExportClicked( GtkWidget *pw, gpointer unused ) {
 
-  GTKFileCommand(_("Export match, session, game or position"), 
-		   NULL, "export", "N", FDT_EXPORT_FULL);
+	/* Order of export types in menu */
+	int expTypes[] = {PATH_HTML, PATH_GAM, PATH_POS, PATH_MAT, PATH_GAM, 
+		PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, -1, PATH_TEXT, -1, PATH_SNOWIE_TXT};
+	char* sz = NULL;
+
+	if (lastExportType != -1 && expTypes[lastExportType] != -1)
+		sz = getDefaultPath(expTypes[lastExportType]);
+
+	GTKFileCommand(_("Export match, session, game or position"), 
+		   sz, "export", "N", FDT_EXPORT_FULL);
+
+	if (sz)
+		free(sz);
 }
 
 
