@@ -361,7 +361,7 @@ msgstr ""
 #: bearoff.c:1288
 #, fuzzy
 msgid "Centered cube (Jacoby rule)"
-msgstr "Cubo al centro"
+msgstr "Cubo al centro (regola Jacoby)"
 
 #: bearoff.c:1321 eval.c:5205 html.c:333 progress.c:692 show.c:115
 msgid "Cubeless"
@@ -626,7 +626,7 @@ msgstr "Non ho potuto caricare gli oggetti condivisi %s."
 #: dice.c:1021
 #, c-format
 msgid "Rewinding dice file (%s)\n"
-msgstr ""
+msgstr "Rivedo il file dei dadi (%s)\n"
 
 #: drawboard.c:70
 msgid " GNU Backgammon  Position ID: "
@@ -674,15 +674,15 @@ msgstr "I nuovi game useranno la posizione di partenza Nackgammon."
 
 #: eval.c:300
 msgid "1-chequer hypergammon"
-msgstr ""
+msgstr "hypergammon a 1 pedina"
 
 #: eval.c:301
 msgid "2-chequer hypergammon"
-msgstr ""
+msgstr "hypergammon a 2 pedine"
 
 #: eval.c:302
 msgid "3-chequer hypergammon"
-msgstr ""
+msgstr "hypergammon a 3 pedine"
 
 #: eval.c:319
 msgid "No evaluation"
@@ -1034,7 +1034,7 @@ msgstr ""
 #: export.c:319
 msgid "You must specify a file to export to (see `help export position png')."
 msgstr ""
-"Devi specificare un file nel quale esportare (guarda 'aiuto esportazione "
+"Devi specificare un file da esportare a (guarda 'aiuto esportazione "
 "posizione png')."
 
 #: export.c:470
@@ -1341,7 +1341,7 @@ msgstr "Accettati"
 
 #: formatgs.c:220
 msgid "Passes"
-msgstr ""
+msgstr "Passati"
 
 #: formatgs.c:225
 msgid "Missed doubles around DP"
@@ -1430,11 +1430,11 @@ msgstr "Risultato corretto dalla fortuna"
 
 #: formatgs.c:476
 msgid "Luck based FIBS rating diff."
-msgstr ""
+msgstr "Fortuna basata dalla differenza di rating FIBS"
 
 #: formatgs.c:497
 msgid "Error based abs. FIBS rating"
-msgstr ""
+msgstr "Errore basato sul rating assoluto FIBS"
 
 #: formatgs.c:513
 #, fuzzy
@@ -1467,17 +1467,17 @@ msgstr "%s: l'ozione `%s' è ambigua\\n"
 #: getopt.c:697
 #, fuzzy, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr "%s: l'ozione `--%s' non prevede un argomento\\n"
+msgstr "%s: l'opzione `--%s' non prevede un argomento\\n"
 
 #: getopt.c:702
 #, fuzzy, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr "%s: l'ozione `%c%s' non prevede un argomento\\n"
+msgstr "%s: l'opzione `%c%s' non prevede un argomento\\n"
 
 #: getopt.c:720 getopt.c:893
 #, fuzzy, c-format
 msgid "%s: option `%s' requires an argument\n"
-msgstr "%s: l'ozione `%s' richiede un argomento\\n"
+msgstr "%s: l'opzione `%s' richiede un argomento\\n"
 
 #: getopt.c:749
 #, fuzzy, c-format
@@ -1568,7 +1568,7 @@ msgstr "<nome>"
 
 #: gnubg.c:469
 msgid "system|<language code>"
-msgstr ""
+msgstr "sistema|<codice lingua>"
 
 #: gnubg.c:470 set.c:96
 msgid "on|off"
@@ -1626,7 +1626,7 @@ msgstr "[valore]"
 #: gnubg.c:484
 #, fuzzy
 msgid "<path>"
-msgstr "<percentuale>"
+msgstr "<percorso>"
 
 #: gnubg.c:485
 msgid "<player>"
@@ -1687,7 +1687,7 @@ msgstr ""
 #: gnubg.c:499
 #, fuzzy
 msgid "<fraction>"
-msgstr "<percentuale>"
+msgstr "<frazione>"
 
 #: gnubg.c:500
 msgid "<minimum games to rollout>"
@@ -3131,15 +3131,15 @@ msgstr "scegli il colore medio per l'evidenziatore"
 
 #: gnubg.c:1565
 msgid "Play 1-chequer hypergammon"
-msgstr ""
+msgstr "Gioca hypergammon a 1-pedina"
 
 #: gnubg.c:1567
 msgid "Play 2-chequer hypergammon"
-msgstr ""
+msgstr "Gioca hypergammon a 2-pedine"
 
 #: gnubg.c:1569
 msgid "Play 3-chequer hypergammon"
-msgstr ""
+msgstr "Gioca hypergammon a 3-pedine"
 
 #: gnubg.c:1571
 #, fuzzy
@@ -3274,7 +3274,7 @@ msgstr "Setta se usare la regola Jacoby nei money games"
 
 #: gnubg.c:1635
 msgid "Set your language preference"
-msgstr ""
+msgstr "Setta il linguaggio preferito"
 
 #: gnubg.c:1638
 msgid "Read match equity table from XML file"
@@ -3496,7 +3496,7 @@ msgstr "Calcola il conto di Kleinman per la posizione"
 
 #: gnubg.c:1752
 msgid "Display your language preference"
-msgstr ""
+msgstr "Visualizza il tuo linguaggio preferito"
 
 #: gnubg.c:1755
 msgid "show market window for doubles"
@@ -3627,11 +3627,11 @@ msgstr "Apprendi la rete da TD(0) zero-conoscenze gioco-automatico"
 
 #: gnubg.c:1829
 msgid "Accept a cube or resignation"
-msgstr "Accetta il cubo o l'arresa"
+msgstr "Accetta il cubo o la resa"
 
 #: gnubg.c:1831
 msgid "Agree to a resignation"
-msgstr "Accetta l'arresa"
+msgstr "Accetta la resa"
 
 #: gnubg.c:1832
 msgid "Run analysis"
@@ -3663,7 +3663,7 @@ msgstr "Rifiuta un arresa"
 
 #: gnubg.c:1845
 msgid "Generate a list of rolls"
-msgstr ""
+msgstr "Genera una lista di lanci"
 
 #: gnubg.c:1847
 msgid "Offer a double"
@@ -4634,16 +4634,16 @@ msgstr ""
 
 #: gtkbearoff.c:314
 msgid "Two-sided (disk)"
-msgstr ""
+msgstr "Due-lati (disco)"
 
 #: gtkbearoff.c:321
 msgid "Two-sided (memory)"
-msgstr ""
+msgstr "Due lati (memoria)"
 
 #: gtkboard.c:528
 #, c-format
 msgid "(no hit: %d rolls)"
-msgstr ""
+msgstr "(non colpisce: %d lanci)"
 
 #: gtkboard.c:575
 msgid "Illegal move"
@@ -4656,7 +4656,7 @@ msgstr "(Sto editando)"
 #: gtkboard.c:614
 #, c-format
 msgid "Return hits: %s\n"
-msgstr ""
+msgstr "Colpi di ritorno: %s\n"
 
 #: gtkboard.c:2297
 msgid "unlimited"
@@ -4717,7 +4717,7 @@ msgstr ""
 
 #: gtkchequer.c:596
 msgid "Details"
-msgstr ""
+msgstr "Dettagli"
 
 #: gtkchequer.c:641 gtkcube.c:918
 #, c-format
@@ -5473,7 +5473,7 @@ msgstr "/_Game/_Accetta il rifiuto"
 
 #: gtkgame.c:2526
 msgid "/_Game/De_cline resignation"
-msgstr ""
+msgstr "/_Game/Declina il rifiuto"
 
 #: gtkgame.c:2529
 msgid "/_Game/Play computer turn"
@@ -5673,7 +5673,7 @@ msgstr "/_Analizza/Un lato di rollout"
 
 #: gtkgame.c:2618
 msgid "/_Analyse/Distribution of rolls"
-msgstr ""
+msgstr "/_Analizza/Distribuzione dei lanci"
 
 #: gtkgame.c:2621
 #, fuzzy
@@ -5764,7 +5764,7 @@ msgstr "/_Settaggi/_Valutazione..."
 
 #: gtkgame.c:2660
 msgid "/_Settings/E_xport..."
-msgstr ""
+msgstr "/_Settaggi/Esportazione..."
 
 #: gtkgame.c:2662
 msgid "/_Settings/_Players..."
@@ -5813,7 +5813,7 @@ msgstr "/_Finestra"
 
 #: gtkgame.c:2686
 msgid "/_Windows/Show all panels"
-msgstr ""
+msgstr "/_Windows/Mostra tutti i pannelli"
 
 #: gtkgame.c:2687
 #, fuzzy
@@ -5822,7 +5822,7 @@ msgstr "/_Finestra/_Messaggio"
 
 #: gtkgame.c:2689
 msgid "/_Windows/Full screen (Test only!)"
-msgstr ""
+msgstr "/_Windows/Tutto schermo (Solo testo!)"
 
 #: gtkgame.c:2691
 msgid "/_Windows/Gu_ile"
@@ -5855,7 +5855,7 @@ msgstr "/_Aiuto/_Domande Frequenti 'FAQ'"
 
 #: gtkgame.c:2699
 msgid "/_Help/Co_pying gnubg"
-msgstr ""
+msgstr "/_Aiuto/Copiare gnubg"
 
 #: gtkgame.c:2700
 msgid "/_Help/gnubg _Warranty"
@@ -5928,7 +5928,7 @@ msgstr "GNU Backgammon - Inserisci comando"
 
 #: gtkgame.c:3653
 msgid "Shortcut buttons"
-msgstr ""
+msgstr "Pulsanti diretti"
 
 #: gtkgame.c:3682
 #, fuzzy, c-format
@@ -6010,7 +6010,7 @@ msgstr "Numero dei nodi nascosti:"
 
 #: gtkgame.c:4110
 msgid "Set Default _Path"
-msgstr ""
+msgstr "Setta il percorso predefinito"
 
 #: gtkgame.c:4112
 msgid "Set Default Path"
@@ -6132,7 +6132,7 @@ msgstr "/_File/_Importa/._TrueMoneyGames .tmg match..."
 
 #: gtkgame.c:4252
 msgid "Snowie standard text format"
-msgstr ""
+msgstr "Formato standard di testo Snowie"
 
 #: gtkgame.c:4258
 #, fuzzy
@@ -6622,7 +6622,7 @@ msgstr "Prove:"
 
 #: gtkgame.c:6311
 msgid "Ratio |Standard Deviation/Value|:"
-msgstr ""
+msgstr "Rateo |Deviazione Standard/Valore|:"
 
 #: gtkgame.c:6321
 msgid "Stop Rollouts of multiple moves based on j.s.d."
@@ -6638,7 +6638,7 @@ msgstr "Ferma il rollout quando la mossa j.s.d. sembra la migliore"
 
 #: gtkgame.c:6360
 msgid "No of j.s.d.s from best move"
-msgstr ""
+msgstr "No j.s.d.s dalla moglior mossa"
 
 #: gtkgame.c:6378
 msgid "Bearoff Truncation"
@@ -6656,7 +6656,7 @@ msgstr "Tronca senza il cubo al esatto database uscita pedine di un solo lato"
 
 #: gtkgame.c:6400
 msgid "Variance reduction"
-msgstr ""
+msgstr "Riduzione della variazione"
 
 #: gtkgame.c:6406
 msgid "Use quasi-random dice"
@@ -6736,7 +6736,7 @@ msgstr "Dovresti respingere il rifiuto!"
 
 #: gtkgame.c:7077
 msgid "About GNU Backgammon"
-msgstr ""
+msgstr "Su GNU Backgammon"
 
 #: gtkgame.c:7127
 msgid "GNU Backgammon was written by:"
@@ -6865,7 +6865,7 @@ msgstr "In generale"
 
 #: gtkgame.c:8234
 msgid "Graph"
-msgstr ""
+msgstr "Grafico"
 
 #: gtkgame.c:8235
 msgid ""
@@ -6873,6 +6873,9 @@ msgid ""
 "are along the bottom and the error rates up the side. Chequer error in "
 "green, cube error in blue."
 msgstr ""
+"Questo grafico mostra i ratei d'errore totale per game di ogni giocatore. I games "
+"sono lungo le ascisse (orizzontale) e i ratei d'errore nelle ordinate (verticale). "
+"Gli errori di mossa in verde, errori di cubo in blu."
 
 #: gtkgame.c:8240
 #, fuzzy
@@ -7107,33 +7110,33 @@ msgstr "Setta come predefinito"
 
 #: gtkoptions.c:170
 msgid "Danish"
-msgstr ""
+msgstr "Danese"
 
 #: gtkoptions.c:171
 msgid "English (UK)"
-msgstr ""
+msgstr "Inglese (UK)"
 
 #: gtkoptions.c:172
 msgid "English (US)"
-msgstr ""
+msgstr "Inglese (US)"
 
 #: gtkoptions.c:173
 msgid "French"
-msgstr ""
+msgstr "Francese"
 
 #: gtkoptions.c:174
 #, fuzzy
 msgid "German"
-msgstr "Generale"
+msgstr "Tedesco"
 
 #: gtkoptions.c:175
 #, fuzzy
 msgid "Italian"
-msgstr "Inizializzo"
+msgstr "Italiano"
 
 #: gtkoptions.c:176
 msgid "Japanese"
-msgstr ""
+msgstr "Giapponese"
 
 #: gtkoptions.c:184
 msgid "random.org"
@@ -7916,7 +7919,7 @@ msgstr ""
 #: gtkoptions.c:1053
 #, fuzzy
 msgid "Seed: "
-msgstr "Velocità:"
+msgstr ""
 
 #: gtkoptions.c:1066
 msgid ""
@@ -7933,7 +7936,7 @@ msgstr "includi le annotazioni"
 
 #: gtkoptions.c:1102
 msgid "Always roll the "
-msgstr ""
+msgstr "Lancia sempre il "
 
 #: gtkoptions.c:1121
 #, fuzzy, c-format
@@ -8046,7 +8049,7 @@ msgstr "Setta il percorso dei file di bearoff, es. '/mnt/cdrom'"
 
 #: gtkoptions.c:1291
 msgid "Sconyers' Bearoff 15x15 (analysis and evaluations)"
-msgstr ""
+msgstr "Sconyers' Bearoff 15x15 (analisi e valutazioni)"
 
 #: gtkoptions.c:1299
 #, fuzzy
@@ -8301,11 +8304,11 @@ msgstr "Setta come predefinito"
 #: gtkprefs.c:92
 #, fuzzy
 msgid "Rounded disc"
-msgstr "Turno: %s"
+msgstr "Pedina arrotondata"
 
 #: gtkprefs.c:92
 msgid "Flat edged disc"
-msgstr ""
+msgstr "Pedina piatta"
 
 #: gtkprefs.c:352
 #, fuzzy
@@ -8319,7 +8322,7 @@ msgstr "Pedina:"
 
 #: gtkprefs.c:371
 msgid "Piece type:"
-msgstr ""
+msgstr "Pezzo tipo:"
 
 #: gtkprefs.c:405 gtkprefs.c:714
 msgid "Die colour same as chequer colour"
@@ -8478,7 +8481,7 @@ msgstr "Acero"
 
 #: gtkprefs.c:939
 msgid "Oak"
-msgstr "Quescia"
+msgstr "Quercia"
 
 #: gtkprefs.c:940
 msgid "Pine"
@@ -8506,7 +8509,7 @@ msgstr "Dipinto"
 
 #: gtkprefs.c:1141
 msgid "Save settings and test 3d performance for 3 seconds?"
-msgstr ""
+msgstr "Salvo i settaggi e testo le performance 3d per 3 secondi?"
 
 #: gtkprefs.c:1180
 msgid "Light azimuth"
@@ -8519,17 +8522,17 @@ msgstr "Elevazione della luce"
 #: gtkprefs.c:1377
 #, fuzzy
 msgid "Display Type"
-msgstr "Visualizza"
+msgstr "Visualizza Tipo"
 
 #: gtkprefs.c:1384
 #, fuzzy
 msgid "2d Board"
-msgstr "Tavola"
+msgstr "Tavola 2d"
 
 #: gtkprefs.c:1388
 #, fuzzy
 msgid "3d Board"
-msgstr "Tavola"
+msgstr "Tavola 3d"
 
 #: gtkprefs.c:1394
 msgid "Numbered point labels"
@@ -8552,84 +8555,84 @@ msgstr ""
 #: gtkprefs.c:1415
 #, fuzzy
 msgid "Show move indicator"
-msgstr "Mostra le varie teorie sulla corsa"
+msgstr "Mostra l' indicatore della mossa"
 
 #: gtkprefs.c:1416
 msgid "Show or hide arrow indicating who is moving"
-msgstr ""
+msgstr "Mostra o nasconde la freccia che indica chi muove"
 
 #: gtkprefs.c:1423
 #, fuzzy
 msgid "3d Options"
-msgstr "%d punti"
+msgstr "Opzioni 3d"
 
 #: gtkprefs.c:1430
 #, fuzzy
 msgid "Show shadows"
-msgstr "Mostra al massimo"
+msgstr "Mostra ombre"
 
 #: gtkprefs.c:1431
 msgid "Display shadows, this option requires a fast graphics card"
-msgstr ""
+msgstr "Mostra ombre, questa opzione richede una scheda grafica veloce"
 
 #: gtkprefs.c:1439
 #, fuzzy
 msgid "light"
-msgstr "più alto"
+msgstr "luce"
 
 #: gtkprefs.c:1447
 msgid "Vary the darkness of the shadows"
-msgstr ""
+msgstr "Varia lo scuro delle ombre"
 
 #: gtkprefs.c:1451
 #, fuzzy
 msgid "dark"
-msgstr "Cedro"
+msgstr "scuro"
 
 #: gtkprefs.c:1456
 #, fuzzy
 msgid "Animate dice rolls"
-msgstr "Inserisci i dadi:"
+msgstr "Animazione lancio dadi"
 
 #: gtkprefs.c:1457
 #, fuzzy
 msgid "Dice rolls will shake across board"
-msgstr "I lanci dei dadi saranno analizzati."
+msgstr "I lanci dei dadi saranno visualizzati sulla tavola"
 
 #: gtkprefs.c:1461
 #, fuzzy
 msgid "Animate resignation flag"
-msgstr "Equity dopo il rifiuto: "
+msgstr "Animazione della bandiera di rifiuto"
 
 #: gtkprefs.c:1462
 #, fuzzy
 msgid "Waves resignation flag"
-msgstr "MWC dopo il rifiuto"
+msgstr "Onde della bandiera di rifiuto"
 
 #: gtkprefs.c:1466
 msgid "Close board on exit"
-msgstr ""
+msgstr "Chiudi la tavola uscendo"
 
 #: gtkprefs.c:1467
 msgid "When you quit gnubg, the board will close"
-msgstr ""
+msgstr "Quando esci da gnubg, la tavola sarà chiusa"
 
 #: gtkprefs.c:1480
 #, fuzzy
 msgid "Board angle: "
-msgstr "Immagine della Tavola"
+msgstr "Angolo di visuale: "
 
 #: gtkprefs.c:1488
 msgid "Vary the angle the board is tilted at"
-msgstr ""
+msgstr "Varia l'angolo di visuale della tavola a"
 
 #: gtkprefs.c:1517
 msgid "Plan view"
-msgstr ""
+msgstr "Visione piatta"
 
 #: gtkprefs.c:1524
 msgid "Curve accuracy"
-msgstr ""
+msgstr "Accuratezza curve"
 
 #: gtkprefs.c:1530
 #, fuzzy
@@ -8641,25 +8644,27 @@ msgid ""
 "Change how accurately curves are drawn. If performance is slow try lowering "
 "this value. Increasing this value will only have an effect on large displays"
 msgstr ""
+"Cambia l'accuratezza di visualizzazione delle curve. Se il PC rallenta prova ad "
+"abbassare questo valore. Aumentarlo mostrerà l'effetto solo su monitor grandi"
 
 #: gtkprefs.c:1544
 #, fuzzy
 msgid "high"
-msgstr "più alto"
+msgstr "alto"
 
 #: gtkprefs.c:1548
 #, fuzzy
 msgid "Dice size"
-msgstr "Dimensione cache:"
+msgstr "Dimensione dadi"
 
 #: gtkprefs.c:1554
 msgid "small"
-msgstr ""
+msgstr "piccolo"
 
 #: gtkprefs.c:1562
 #, fuzzy
 msgid "Vary the size of the dice"
-msgstr "Setta la dimensione della cache di valutazione"
+msgstr "Setta la dimensione dei dadi"
 
 #: gtkprefs.c:1566
 #, fuzzy
@@ -8668,7 +8673,7 @@ msgstr "Largo"
 
 #: gtkprefs.c:1569
 msgid "Test performance"
-msgstr ""
+msgstr "Prova le performance"
 
 #: gtkprefs.c:1776
 #, c-format
@@ -8727,7 +8732,7 @@ msgstr "Disegni"
 #: gtkprefs.c:2564
 #, fuzzy
 msgid "Chequers"
-msgstr "Pedina"
+msgstr "Pedine"
 
 #: gtkprefs.c:2567 gtkprefs.c:2584
 msgid "Border"
@@ -8799,7 +8804,7 @@ msgstr "accetta"
 
 #: gtkrace.c:278
 msgid "Effective pip count"
-msgstr ""
+msgstr "Effettivo conteggio pip"
 
 #: gtkrace.c:288
 msgid "EPC"
@@ -8816,7 +8821,7 @@ msgstr ""
 
 #: gtkrace.c:401
 msgid "Pips"
-msgstr "Punte"
+msgstr ""
 
 #: gtkrace.c:405
 msgid "Avg. rolls"
@@ -8867,7 +8872,7 @@ msgstr ""
 #: gtkrolls.c:142
 #, fuzzy
 msgid "Average equity"
-msgstr "Media Pips persi"
+msgstr "Media equity"
 
 #: gtkrolls.c:200 gtktempmap.c:114
 #, fuzzy
@@ -8899,17 +8904,17 @@ msgstr "Sho Sengoku Temperature Map - Distribuzione dei lanci"
 #: gtktempmap.c:733 gtktheory.c:912
 #, fuzzy, c-format
 msgid "%d ply"
-msgstr "%d punte"
+msgstr ""
 
 #: gtktempmap.c:762
 #, fuzzy
 msgid "Show equities"
-msgstr "Mostra i cardini"
+msgstr "Mostra le equities"
 
 #: gtktempmap.c:769
 #, fuzzy
 msgid "Show best move"
-msgstr "mostra le mosse brutte"
+msgstr "Mostra la miglior mossa"
 
 #: gtktexi.c:84
 msgid "Next:"
@@ -9091,7 +9096,7 @@ msgstr "Importa match, game o posizioni da altri programmi"
 
 #: gtktoolbar.c:391
 msgid "New"
-msgstr ""
+msgstr "Nuovo"
 
 #: gtktoolbar.c:392
 #, fuzzy
@@ -9101,7 +9106,7 @@ msgstr "Inizia un nuovo game, match o sessione"
 #: gtktoolbar.c:398
 #, fuzzy
 msgid "Open"
-msgstr "Apri game"
+msgstr "Apri"
 
 #: gtktoolbar.c:399
 #, fuzzy
@@ -9111,7 +9116,7 @@ msgstr "Apri match o sessione"
 #: gtktoolbar.c:406
 #, fuzzy
 msgid "Import"
-msgstr "/_File/_Importa"
+msgstr "Importa"
 
 #: gtktoolbar.c:407
 #, fuzzy
@@ -9121,17 +9126,17 @@ msgstr "Inizia un nuovo game, match o sessione"
 #: gtktoolbar.c:443
 #, fuzzy
 msgid "Save"
-msgstr "Salva game"
+msgstr "Salva"
 
 #: gtktoolbar.c:450
 #, fuzzy
 msgid "Export"
-msgstr "Esperto"
+msgstr "Esporta"
 
 #: gtktoolbar.c:452
 #, fuzzy
 msgid "Export to another format"
-msgstr "Esporta match .mat"
+msgstr "Esporta in un altro formato"
 
 #: gtktoolbar.c:465
 msgid "Take the offered cube or accept the offered resignation"
@@ -9139,7 +9144,7 @@ msgstr "Prendi il cubo offerto o accetta l'offerta di rifiuto"
 
 #: gtktoolbar.c:469
 msgid "Decline"
-msgstr ""
+msgstr "Passa"
 
 #: gtktoolbar.c:471
 #, fuzzy
@@ -9157,21 +9162,21 @@ msgstr "Offri di terminare il game corrente"
 
 #: gtktoolbar.c:494
 msgid "Undo"
-msgstr ""
+msgstr "Annulla"
 
 #: gtktoolbar.c:496
 msgid "Undo moves"
-msgstr "Cancella la mossa"
+msgstr "Annulla le mosse"
 
 #: gtktoolbar.c:501
 #, fuzzy
 msgid "Show the best moves or cube action"
-msgstr "Mostra le probabilità dettagliate per le decisioni del cubo"
+msgstr "Mostra la miglior mossa o decisione di cubo"
 
 #: gtktoolbar.c:505
 #, fuzzy
 msgid "Edit"
-msgstr "/_Edita"
+msgstr "Edita"
 
 #: gtktoolbar.c:508
 msgid "Edit position"
@@ -9180,7 +9185,7 @@ msgstr "Edita la posizione"
 #: gtktoolbar.c:515
 #, fuzzy
 msgid "Direction"
-msgstr "Niente riduzione"
+msgstr "Direzione"
 
 #: gtktoolbar.c:521
 msgid "Reverse direction of play"
@@ -9192,7 +9197,7 @@ msgstr ""
 
 #: gtktoolbar.c:542
 msgid "Stop the current operation"
-msgstr "ferma l'operazione corrente"
+msgstr "Ferma l'operazione corrente"
 
 #: html.c:141
 msgid "in <head>"
@@ -9958,11 +9963,11 @@ msgstr "Errore generando il MET pre-Crawford\\n"
 #: openurl.c:70
 #, c-format
 msgid "Error launching browser: %s\n"
-msgstr ""
+msgstr "Errore lanciando il browser: %s\n"
 
 #: openurl.c:83
 msgid "Error launching browser\n"
-msgstr ""
+msgstr "Errore lanciando il browser\n"
 
 #: play.c:58
 msgid "single game"
@@ -10089,7 +10094,7 @@ msgstr ""
 
 #: play.c:1740 play.c:2057
 msgid "No resignation was offered."
-msgstr "Non è stata offerto alcun rifiuto."
+msgstr "Non è stato offerto alcun rifiuto."
 
 #: play.c:1746
 #, fuzzy, c-format
@@ -10594,31 +10599,31 @@ msgstr "Media Pips persi"
 
 #: progress.c:373
 msgid "Closed out statistics"
-msgstr ""
+msgstr "Statistiche decisioni ravvicinate"
 
 #: progress.c:406
 msgid "Number of close-outs"
-msgstr ""
+msgstr "Numero di decisioni ravvicinate"
 
 #: progress.c:411
 msgid "Average move number for close out"
-msgstr ""
+msgstr "Numero medio di mossa per decisioni ravvicinate"
 
 #: progress.c:450
 msgid "Hit statistics"
-msgstr ""
+msgstr "Statistiche sulle pedine mangiate"
 
 #: progress.c:483
 msgid "Number of games with hit(s)"
-msgstr ""
+msgstr "Numero di games con pedina mangiata(e)"
 
 #: progress.c:488
 msgid "Percent games with hits"
-msgstr ""
+msgstr "Percentuale di games con pedine mangiate"
 
 #: progress.c:495 progress.c:503
 msgid "Average move number for first hit"
-msgstr ""
+msgstr "Numero medio di mossa per la prima mangiata"
 
 #: progress.c:615
 msgid "Rollout statistics"
@@ -13055,16 +13060,16 @@ msgstr "Prima rispondi al rifiuto."
 #: set.c:4581
 #, c-format
 msgid "The rating offset for estimating absolute ratings is: %.1f\n"
-msgstr ""
+msgstr "L'offset rating per stimare ratings assoluti è: %.1f\n"
 
 #: set.c:4589
 msgid "You must give `system' or a language code as an argument."
-msgstr ""
+msgstr "Devi dare un 'sistema' o un codice di lingua come un argomento."
 
 #: set.c:4598
 #, c-format
 msgid "The current language preference is already set to %s."
-msgstr ""
+msgstr "Il corrente linguaggio preferito è già settato a %s."
 
 #: set.c:4605
 #, c-format
@@ -13073,6 +13078,9 @@ msgid ""
 "Please remember to save settings.\n"
 "The new setting will only take effect on the next start of gnubg."
 msgstr ""
+"La preferenza di linguaggio è settata a '%s'.\n"
+"Ricorda di salvare i settaggi.\n"
+"I nuovi settaggi avranno effetto solamente alla prossima partenza di gnubg."
 
 #: sgf.c:147
 msgid "warning: no backgammon games in SGF file"
@@ -13541,7 +13549,7 @@ msgstr "Le money sessions non sono giocate con la regola Jacoby."
 #: show.c:763
 #, c-format
 msgid "Your language preference is set to %s.\n"
-msgstr ""
+msgstr "Il tuo linguaggio preferito è settato a %s.\n"
 
 #: show.c:776
 #, c-format
@@ -14252,7 +14260,7 @@ msgstr "abilitata"
 #: show.c:2103
 #, fuzzy
 msgid "disabled"
-msgstr "abilitata"
+msgstr "disabilitata"
 
 #: show.c:2114
 #, c-format
@@ -14274,7 +14282,7 @@ msgstr ""
 #: show.c:2195
 #, fuzzy
 msgid "Position not in database"
-msgstr "Mischia le posizioni nel database"
+msgstr "Posizionenon presente nel database"
 
 #: show.c:2206
 #, fuzzy
@@ -14284,17 +14292,17 @@ msgstr "Non raddoppiare"
 #: show.c:2220
 #, fuzzy
 msgid "No legal moves!"
-msgstr "Mossa illegale"
+msgstr "Non hai mosse legali!"
 
 #: show.c:2238
 #, fuzzy
 msgid "Interrupted!"
-msgstr "(Interrotto)"
+msgstr "Interrotto!"
 
 #: show.c:2244
 #, fuzzy, c-format
 msgid "The position %s is not in the bearoff database"
-msgstr "Mischia le posizioni nel database"
+msgstr "La posizione %s non è presente nel database uscita pedine"
 
 #: show.c:2258
 #, c-format
@@ -14308,12 +14316,12 @@ msgstr ""
 #: show.c:2262
 #, fuzzy
 msgid "Cube Position"
-msgstr "Posizione corrente"
+msgstr "Posizione del cubo"
 
 #: show.c:2262
 #, fuzzy
 msgid "Best Move"
-msgstr "Muovi"
+msgstr "Miglior Mossa"
 
 #: show.c:2293
 #, c-format
@@ -14336,17 +14344,17 @@ msgstr "%d   informazione non disponibile\n"
 #: show.c:2334
 #, c-format
 msgid "Final  %8.2f%%   %8.2f%%\n"
-msgstr ""
+msgstr "Finale  %8.2f%%   %8.2f%%\n"
 
 #: show.c:2338
 #, c-format
 msgid "Sum    %+9.3f   %+9.3f\n"
-msgstr ""
+msgstr "Somma    %+9.3f   %+9.3f\n"
 
 #: show.c:2342
 #, c-format
 msgid "Ave.   %+9.3f   %+9.3f\n"
-msgstr ""
+msgstr "Media   %+9.3f   %+9.3f\n"
 
 #: show.c:2344
 #, c-format
@@ -14556,368 +14564,3 @@ msgstr ""
 "Devi specificare un file da esportare a (guarda 'aiuto esporta posizione "
 "testo')."
 
-#, fuzzy
-#~ msgid ""
-#~ "\n"
-#~ "/* CSS Stylesheet for GNU Backgammon "
-#~ msgstr "Avvio di GNU Backgammon"
-
-#~ msgid "Moves marked very good"
-#~ msgstr "Mosse segnate molto buone"
-
-#~ msgid "Moves marked interesting"
-#~ msgstr "Mosse segnate interessanti"
-
-#~ msgid "Moves unmarked"
-#~ msgstr "Mosse non segnate"
-
-#~ msgid "Cube decisions statistics:"
-#~ msgstr "Statistiche sulle dicisioni di cubo:"
-
-#~ msgid "Match winning chance"
-#~ msgstr "Probabilità di vittoria del match"
-
-#~ msgid "against opponent"
-#~ msgstr "contro l'avvesario"
-
-#~ msgid "Guestimated abs. rating"
-#~ msgstr "Stima del rating assoluto"
-
-#~ msgid ""
-#~ "\\n       \\tWin   \\tW(g)  \\tW(bg) \\tL(g)  \\tL(bg) \\tEquity  "
-#~ "(cubeful)\\n"
-#~ msgstr ""
-#~ "\\n       \\tVittoria   \\tV(g)  \\tV(bg) \\tP(g)  \\tP(bg) \\tEquity  "
-#~ "(cubo usabile)\\n"
-
-#~ msgid ""
-#~ "\\n       \\tWin   \\tW(g)  \\tW(bg) \\tL(g)  \\tL(bg) \\tMwc     "
-#~ "(cubeful)\\n"
-#~ msgstr ""
-#~ "\\n       \\tVittoria   \\tV(g)  \\tV(bg) \\tP(g)  \\tP(bg) \\tMwc  (cubo "
-#~ "usabile)\\n"
-
-#~ msgid "Unknown"
-#~ msgstr "Sconosciuto"
-
-#~ msgid "No redouble"
-#~ msgstr "Non riraddoppiare"
-
-#~ msgid "Correct cube action: %s\\n"
-#~ msgstr "Azione del cubo corretta: %s\\n"
-
-#~ msgid "Mark as interesting"
-#~ msgstr "Segna come interessante"
-
-#~ msgid "Mark as very good"
-#~ msgstr "Segna come molto buona"
-
-#~ msgid "Specify the equity gain for a good move"
-#~ msgstr "Specifica l'equity guadagnata per una mossa buona"
-
-#~ msgid "Specify the equity gain for an interesting move"
-#~ msgstr "Specifica l'equity guadagnata per una mossa interessante"
-
-#~ msgid "Specify the equity gain for a very good move"
-#~ msgstr "Specifica l'equity guadagnata per una mossa molto buona"
-
-#~ msgid "show interesting moves"
-#~ msgstr "mostra le mosse interessanti"
-
-#~ msgid "show very good moves"
-#~ msgstr "mostra le mosse molto buone"
-
-#~ msgid "show good cube decisions"
-#~ msgstr "mostra le buone decisioni di cubo"
-
-#~ msgid "show interesting cube decisions"
-#~ msgstr "mostra le interessanti decisioni di cubo"
-
-#~ msgid "Display which starting position will be used"
-#~ msgstr "Visualizza la posizione iniziale che verrà usata"
-
-#~ msgid ""
-#~ "                               Win  W(g) W(bg)  L(g) L(bg) Equity   Cube "
-#~ "E    n"
-#~ msgstr ""
-#~ "                               Vittoria  V(g) V(bg)  P(g) P(bg) Equity   "
-#~ "Cubo E    n"
-
-#~ msgid ""
-#~ "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %6.3f %4d\\n              "
-#~ "Standard error %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %6.3f\\n\\n"
-#~ msgstr ""
-#~ "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %6.3f %4d\\n              "
-#~ "Errore standard %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %6.3f\\n\\n"
-
-#~ msgid ""
-#~ "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    n/a %4d\\n              "
-#~ "Standard error %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    n/a\\n\\n"
-#~ msgstr ""
-#~ "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    n/a %4d\\n              "
-#~ "Errore standard %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    n/a\\n\\n"
-
-#~ msgid "There must be a game in progress to import a Jellyfish position."
-#~ msgstr ""
-#~ "Devi avere un game in corso per importare una posizione da Jellyfish."
-
-#~ msgid "Roll dice"
-#~ msgstr "Lancia i dadi"
-
-#~ msgid "private"
-#~ msgstr "privato"
-
-#~ msgid "Play"
-#~ msgstr "Gioca"
-
-#~ msgid "Force computer to play"
-#~ msgstr "Forza il computer a giocare"
-
-#~ msgid "Rolling out positions; position:"
-#~ msgstr "Rollout posizioni; posizione"
-
-#~ msgid "Show for moves marked 'interesting'"
-#~ msgstr "Mostra le mosse segnate 'interessanti'"
-
-#~ msgid "Show for moves marked 'good'"
-#~ msgstr "Mostra le mosse segnate 'buone'"
-
-#~ msgid "Show for moves marked 'very good'"
-#~ msgstr "Mostra le mosse segnate 'molto buone'"
-
-#~ msgid "Show for cube decisions marked 'interesting'"
-#~ msgstr "Mostra le decisioni di cubo segnate 'interessanti'"
-
-#~ msgid "Show for cube decisions marked 'good'"
-#~ msgstr "Mostra le decisioni di cubo segnate 'buone'"
-
-#~ msgid "Show for cube decisions marked 'very good'"
-#~ msgstr "Mostra le decisioni di cubo segnate 'molto buone'"
-
-#~ msgid "/_Game/Next roll"
-#~ msgstr "/_Game/Prossimo lancio"
-
-#~ msgid "/_Game/Previous roll"
-#~ msgstr "/_Game/Lancio precedente"
-
-#~ msgid "/_Game/Next move"
-#~ msgstr "/_Game/Prossima mossa"
-
-#~ msgid "/_Game/Next game"
-#~ msgstr "/_Game/Game successivo"
-
-#~ msgid "/_Game/Previous game"
-#~ msgstr "/_Game/Game precedente"
-
-#~ msgid "GNU Backgammon - New Match"
-#~ msgstr "GNU Backgammon - Nuovo Match"
-
-#~ msgid "Checkerplay statistics:"
-#~ msgstr "Statistiche di mossa:"
-
-#~ msgid "Error rate (pr. move)"
-#~ msgstr "Percentuale di errore (per mossa)"
-
-#~ msgid "Checker play rating"
-#~ msgstr "Stima sulle mosse"
-
-#~ msgid "Luck rate (pr. move)"
-#~ msgstr "Percentuale di fortuna (per mossa)"
-
-#~ msgid "Cube decision statistics:"
-#~ msgstr "Statistiche decisioni di cubo:"
-
-#~ msgid "Actual or close cube decisions"
-#~ msgstr "Decisioni di cubo attuali o vicine"
-
-#~ msgid "Overall error rate (total)"
-#~ msgstr "Percentuale di errore in generale (totale)"
-
-#~ msgid "Overall error rate (per decision)"
-#~ msgstr "Percentuale di errore in generale (per decisione)"
-
-#~ msgid "MWC against current opponent"
-#~ msgstr "MWC contro l'attuale avversario"
-
-#~ msgid "Save designs"
-#~ msgstr "Salva il disegno"
-
-#~ msgid "Gammon values at %d-away, %d-away (%d cube)"
-#~ msgstr "Valore del gammon a %d-away, %d-away (%d-cube)"
-
-#~ msgid "Live cube"
-#~ msgstr "Cubo vivo"
-
-#~ msgid "Gammon values at 0-away, 0-away for 0-cube"
-#~ msgstr "Valori del gammon a 0-away, 0-away per 0-cubo"
-
-#~ msgid "gammon value"
-#~ msgstr "valori del gammon"
-
-#~ msgid "Date: n/a<br />\\n"
-#~ msgstr "Data: n/a<br />\\n"
-
-#~ msgid "Event: %s<br />\\n"
-#~ msgstr "Evento: %s<br />\\n"
-
-#~ msgid "Round: %s<br />\\n"
-#~ msgstr "Turno: %s<br />\\n"
-
-#~ msgid "Place: %s<br />\\n"
-#~ msgstr "Luogo: %s<br />\\n"
-
-#~ msgid "Annotator: %s<br />\\n"
-#~ msgstr "Note di: %s<br />\\n"
-
-#~ msgid "Comments: %s<br />\\n"
-#~ msgstr "Commenti: %s<br />\\n"
-
-#~ msgid "interesting"
-#~ msgstr "interessante"
-
-#~ msgid "very good"
-#~ msgstr "molto buona"
-
-#~ msgid "New games will use the standard backgammon starting position."
-#~ msgstr ""
-#~ "I nuovi game useranno la posizione di partenza del backgammon standard."
-
-#~ msgid "rollout player 1 chequerplay"
-#~ msgstr "rollout del gioco delle pedine per il giocatore 1"
-
-#~ msgid "rollout player 0 chequerplay"
-#~ msgstr "rollout del gioco delle pedine per il giocatore 0"
-
-#~ msgid "rollout late player 1 chequerplay"
-#~ msgstr "rollout del gioco delle pedine successivo per il giocatore 1"
-
-#~ msgid "rollout late player 0 chequerplay"
-#~ msgstr "rollout del gioco delle pedine successivo per il giocatore 0"
-
-#~ msgid "Export moves marked 'interesting'."
-#~ msgstr "Esporta le mosse marcate 'interessante'."
-
-#~ msgid "Do not export moves marked 'interesting'."
-#~ msgstr "Non esportare le mosse marcate 'interessante'."
-
-#~ msgid "Export moves marked 'verygood'."
-#~ msgstr "Esporta le mosse marcate 'molto buona'."
-
-#~ msgid "Do not export moves marked 'verygood'."
-#~ msgstr "Non esportare le mosse marcate 'molto buona'."
-
-#~ msgid "Export cube decisions marked 'interesting'."
-#~ msgstr "Esporta le decisioni del cubo marcate 'interessante'."
-
-#~ msgid "Do not export cube decisions marked 'interesting'."
-#~ msgstr "Non esportare le decisioni del cubo marcate 'interessante'."
-
-#~ msgid "Export cube decisions marked 'good'."
-#~ msgstr "Esporta le decisioni del cubo marcate 'buona'."
-
-#~ msgid "Do not export cube decisions marked 'good'."
-#~ msgstr "Non esportare le decisioni del cubo marcate 'buona'."
-
-#~ msgid "Export cube decisions marked 'verygood'."
-#~ msgstr "Esporta le decisioni del cubo marcate 'molto buona'."
-
-#~ msgid "Do not export cube decisions marked 'verygood'."
-#~ msgstr "Non esportare le decisioni del cubo marcate 'molto buona'."
-
-#~ msgid "highlightcolour light"
-#~ msgstr "colore lampeggiante chiaro"
-
-#~ msgid "highlightcolour medium"
-#~ msgstr "colore lampeggiante medio"
-
-#~ msgid "highlightcolour dark"
-#~ msgstr "colore lampeggiante scuro"
-
-#~ msgid "Move filter:\\n"
-#~ msgstr "Filtro mossa:\\n"
-
-#~ msgid "Event: %s\\n"
-#~ msgstr "Evento: %s\\n"
-
-#~ msgid "Round: %s\\n"
-#~ msgstr "Turno: %s\\n"
-
-#~ msgid "Place: %s\\n"
-#~ msgstr "Luogo: %s\\n"
-
-#~ msgid "Annotator: %s\\n"
-#~ msgstr "Annotatore: %s\\n"
-
-#~ msgid "Match winning chances will be shown as percentages.\\n"
-#~ msgstr ""
-#~ "Le chances di vittoria del match saranno visualizzate come percentuale.\\n"
-
-#~ msgid "Match winning chances will be shown as probabilities.\\n"
-#~ msgstr ""
-#~ "Le chances di vittoria del match saranno visualizzate come probabilità.\\n"
-
-#~ msgid "Game winning chances will be shown as percentages.\\n"
-#~ msgstr "Le chances di vittoria saranno visualizzate in percentuale.\\n"
-
-#~ msgid "Game winning chances will be shown as probabilities.\\n"
-#~ msgstr "Le chances di vittoria saranno visualizzate come probabilità.\\n"
-
-#~ msgid "\\nOutput move analysis:\\n"
-#~ msgstr "\\nMostra le analisi di mossa:\\n"
-
-#~ msgid "\\nOutput cube decision analysis:\\n"
-#~ msgstr "\\nMostra le analisi delle decisioni di cubo:\\n"
-
-#~ msgid "quasi-random dice"
-#~ msgstr "dadi quasi-casuali"
-
-#~ msgid "Play and cube: "
-#~ msgstr "Gioco e cubo: "
-
-#~ msgid "%s resigns %d points\\n\\n"
-#~ msgstr "%s rifiuta %d punti\\n\\n"
-
-#~ msgid "%s to play %d%d\\n\\n"
-#~ msgstr "%s deve giocare %d%d\\n\\n"
-
-#~ msgid "%s doubles to %d\\n\\n"
-#~ msgstr "%s raddoppia a %d\\n\\n"
-
-#~ msgid "%s on roll, cube decision?\\n\\n"
-#~ msgstr "%s al lancio, decisione di cubo?\\n\\n"
-
-#~ msgid "\\nCube analysis\\n"
-#~ msgstr "\\nAnalisi di cubo\\n"
-
-#~ msgid "Rollout details:\\n"
-#~ msgstr "Dettagli dei rollout:\\n"
-
-#~ msgid "Game statistics for game %d\\n\\n"
-#~ msgstr "Statistiche del game %d\\n\\n"
-
-#~ msgid "Match statistics\\n\\n"
-#~ msgstr "Statistiche del match\\n\\n"
-
-#~ msgid "Session statistics\\n\\n"
-#~ msgstr "Statistiche della sessione \\n\\n"
-
-#~ msgid "Annotation:\\n"
-#~ msgstr "Annotazione:\\n"
-
-#~ msgid "Match Information:\\n\\n"
-#~ msgstr "Informazioni del match:\\n\\n"
-
-#~ msgid "Date: %s\\n"
-#~ msgstr "Data: %s\\n"
-
-#~ msgid "Date: n/a\\n"
-#~ msgstr "Data: n/a\\n"
-
-#~ msgid "Comments: %s\\n"
-#~ msgstr "Commenti: %s\\n"
-
-#~ msgid "Advantage (luck adj.) in ppg"
-#~ msgstr "Vantaggio (corretto dal luck) in ppg"
-
-#~ msgid "Relative FIBS rating"
-#~ msgstr "Rating relativo a FIBS"
