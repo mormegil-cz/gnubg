@@ -72,24 +72,32 @@ sgfl.c: sgf.l
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $< > $@
 
-gnubg.bd: makebearoff
-	[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
-	$(LN_S) $(srcdir)/gnubg.bd $@; else ./makebearoff > $@; fi
+gnubg.bd:
+	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
+	$(LN_S) $(srcdir)/gnubg.bd $@; else $(MAKE) bd.message; fi
+
+bd.message:
+	@echo ' ** NOTE: For full strength in bearoff moves, GNU'
+	@echo ' ** Backgammon requires a "gnubg.bd" file containing a'
+	@echo ' ** database of endgame positions.  See the README'
+	@echo ' ** file for details.'
+
+bearoff-database: makebearoff
+	./makebearoff > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
+
+.PHONY: bd.message bearoff-database
 
 weights.message:
 	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
 	@echo ' ** a "gnubg.weights" file containing neural net'
-	@echo ' ** parameters.  This file is not included in the'
-	@echo ' ** distribution, but you can obtain it from the GNU'
-	@echo ' ** Backgammon home page <http://www.gnu.org/software/gnubg/>'
-	@echo ' ** or generate one by training a neural net yourself.'
+	@echo ' ** parameters.  See the README file for details.'
 
 .PHONY: weights.message
 
 gnubg.weights:
-	[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
+	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
 
 gnubg.wd: gnubg.weights makeweights
-	[ -s $@ ] || ./makeweights < $< > $@
+	./makeweights < $< > $@
 
 .DELETE_ON_ERROR:
