@@ -1,3 +1,20 @@
+Tue Dec 31 12:52:44 2002  Gary Wong  <gtw@gnu.org>
+
+	* postscript.c (PostScriptEscape): Convert charset to ISO-8859-1.
+	* postscript.c (PrintPostScriptLineWithSkip): Convert charset to
+	ISO-8859-1, and escape non-ASCII characters.
+
+	* postscript.c (ExportGamePostScript): Ensure() before printing
+	the header, so that the header appears on the same page as the
+	board.
+
+	* postscript.c (PostScriptPositionID, PostScriptPipCounts): Fix
+	typo in format strings.
+
+	* postscript.c (PostScriptPositionID): Use multiple Tm operators
+	for PDF, since it doesn't remember the current position between
+	text objects.
+
 Tue Dec 31 18:30:13 2002  Øystein Johansen  <oeysteij@online.no>
 
 	* gnubg.c: Add some #ifdefs to compile without GUI

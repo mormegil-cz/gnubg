@@ -119,8 +119,12 @@ static void EndObject( FILE *pf ) {
     fputs( "endobj\n", pf );
 }
 
-static void PostScriptEscape( FILE *pf, char *pch ) {
+static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
 
+    unsigned char *pch, *sz;
+
+    pch = sz = Convert( pchIn, "ISO-8859-1", GNUBG_CHARSET );
+    
     while( *pch ) {
 	switch( *pch ) {
 	case '\\':
@@ -134,13 +138,15 @@ static void PostScriptEscape( FILE *pf, char *pch ) {
 	    break;
 	default:
 	    if( (unsigned char) *pch >= 0x80 )
-		fprintf( pf, "\\%030o", *pch );
+		fprintf( pf, "\\%03o", *pch );
 	    else
 		putc( *pch, pf );
 	    break;
 	}
 	pch++;
     }
+
+    free( sz );
 }
 
 static void StartPage( FILE *pf ) {
@@ -522,24 +528,27 @@ PostScriptPositionID ( FILE *pf, matchstate *pms ) {
     SwapSides ( anBoard );
 
   RequestFont ( pf, FONT_RM, 10 );
-  fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "%d %d moveto (", 
+  fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (" : "%d %d moveto (", 
            285 - 200 * nMag / 100, y );
   fputs ( _("Position ID:"), pf );
   fputc ( ' ', pf );
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
   RequestFont ( pf, FONT_TT, 10 );
-  fputc ( '(', pf );
+  fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (" : "%d %d moveto (", 
+           285 - 200 * nMag / 100 + 55, y );
   fputs ( PositionID ( anBoard ), pf );
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
   RequestFont ( pf, FONT_RM, 10 );
-  fputs ( "( ", pf );
+  fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (" : "%d %d moveto (", 
+           285 - 200 * nMag / 100 + 160, y );
   fputs ( _("Match ID:"), pf );
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
   RequestFont ( pf, FONT_TT, 10 );
-  fputs ( "( ", pf );
+  fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (" : "%d %d moveto (", 
+           285 - 200 * nMag / 100 + 205, y );
   fputs ( MatchIDFromMatchState ( pms ), pf );
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
@@ -560,7 +569,7 @@ PostScriptPipCounts ( FILE *pf, int anBoard[ 2 ][ 25 ], int fMove ) {
 
   Advance ( pf, 10 );
   RequestFont ( pf, FONT_RM, 10 );
-  fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "%d %d moveto (", 
+  fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (" : "%d %d moveto (", 
            285 - 200 * nMag / 100, y );
   fprintf ( pf, _("Pip counts: White %d, Black %d"), 
             anPips[ 0 ], anPips[ 1 ] );
@@ -730,11 +739,13 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
                                          font fn, int nSize ) {
 
     int x;
-    unsigned char *pchStart, *pchBreak;
+    unsigned char *sz, *pchStart, *pchBreak;
     
     if( !pch || !*pch )
 	return;
 
+    pch = sz = Convert( pch, "ISO-8859-1", GNUBG_CHARSET );
+    
     if ( nSkip )
       Skip( pf, nSkip );
 
@@ -775,7 +786,10 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
 		putc( '\\', pf );
 		/* fall through */
 	    default:
-		putc( *pchStart, pf );
+		if( (unsigned char) *pchStart >= 0x80 )
+		    fprintf( pf, "\\%03o", *pchStart );
+		else
+		    putc( *pchStart, pf );
 	    }
 	fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
@@ -784,6 +798,8 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
 	
 	pch = pchBreak + 1;
     }
+
+    free( sz );
 }
 
 static void
@@ -940,7 +956,7 @@ PostScriptBoardHeader ( FILE *pf, matchstate *pms, const int iMove ) {
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
   RequestFont ( pf, FONT_RM, 10 );
-  fputs ( "( ", pf );
+  fprintf( pf, fPDF ? "1 0 0 1 100 %d Tm (" : "100 %d moveto (", y );
 
   if ( pms->fResigned ) 
     
@@ -1010,7 +1026,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    RequestFont( pf, FONT_RM, 14 );
 	    if( pmr->g.nMatch )
 		sprintf( sz, _("%d point match (game %d)"), pmr->g.nMatch,
-			 pmr->g.i );
+			 pmr->g.i + 1 );
 	    else
 		sprintf( sz, _("Money session (game %d)"), pmr->g.i + 1 );
 	    
@@ -1046,13 +1062,13 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
             msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
             msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
-            PostScriptBoardHeader ( pf, &msExport, iMove );
 
 	    if( fTook )
 		/* no need to print board following a double/take */
 		fTook = FALSE;
 	    else {
-		Ensure( pf, 260 * nMag / 100 + 10 );
+		Ensure( pf, 260 * nMag / 100 + 30 );
+		PostScriptBoardHeader ( pf, &msExport, iMove );
 		PrintPostScriptBoard( pf, &msExport, pmr->n.fPlayer );
 	    }
 	    
