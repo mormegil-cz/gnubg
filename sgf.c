@@ -902,6 +902,9 @@ extern void CommandLoadGame( char *sz ) {
 	    GTKThaw();
 	    GTKSet(ap);
         }
+
+        setDefaultFileName ( sz, PATH_SGF );
+
 #endif
     }
 }
@@ -951,6 +954,9 @@ extern void CommandLoadMatch( char *sz ) {
 	    GTKSet(ap);
         }
 #endif
+
+        setDefaultFileName ( sz, PATH_SGF );
+
     }
 }
 
