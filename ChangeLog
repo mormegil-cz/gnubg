@@ -1,3 +1,11 @@
+Tue Feb  1 21:28:41 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (HandleInputRecursive, GetInput): Ask for confirmation
+	before exiting on EOF from stdin, when appropriate.
+	(PromptForExit): New function.
+	* database.c, gnubg.c, rollout.c: Don't show progress reports
+	if stdout isn't a TTY.
+
 Mon Jan 31 21:25:20 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (HandleCommand): Handle "!" as shell escape.

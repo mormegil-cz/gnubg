@@ -80,7 +80,8 @@ extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
     fAutoGame, fAutoMove, fResigned, fMove, fDoubled, anScore[ 2 ],
     cGames, nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
     fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon,
-    fVarRedn, nRollouts, nRolloutTruncate, fNextTurn, fConfirm;
+    fVarRedn, nRollouts, nRolloutTruncate, fNextTurn, fConfirm,
+    fShowProgress;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 

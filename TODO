@@ -17,8 +17,6 @@ duplication of effort and to make sure our changes merge easily.
 * Game play:
 ** Add cube handling for computer player.  See tag "thyssen-double-branch"
   in the CVS archive for work on this.
-** Make "new game" ask "are you sure?" if invoked while a game is in
-  progress.  To do it properly requires improved input routines. (gary)
 
 * Command interface:
 ** Check "show" exists for every "set"!
@@ -50,8 +48,6 @@ duplication of effort and to make sure our changes merge easily.
   the board window would be better.)
 ** Show rollout results while in progress, and allow resuming interrupted
   rollouts.
-** When a game is in progress, EOF is read from the terminal, and fConfirm
-  is set, ask if they're sure they want to exit.
 ** Save partial input when reading something below the top level, or when
   TTY input is overwritten by an X command.
 
@@ -74,9 +70,6 @@ duplication of effort and to make sure our changes merge easily.
   terminal window at all.
 
 * Bugs:
-** Rollout(), CommandTrainTD(), CommandDatabaseGenerate() and
-  CommandDatabaseTrain() shouldn't output progress reports to stdout
-  if it isn't a TTY. (gary)
 ** Think about what should happen with variance reduction in Rollout()
   when a probability turns out <0 or >1.
 ** Make sure as much as possible can happen during delays from

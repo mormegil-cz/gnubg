@@ -180,7 +180,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	InitBoard( anBoardGenerate );
 	
 	do {    
-	    if( !( ++c % 100 ) ) {
+	    if( !( ++c % 100 ) && fShowProgress ) {
 		printf( "%6d\r", c );
 		fflush( stdout );
 	    }
@@ -242,7 +242,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    pev = (dbevaluation *) dValue.dptr;
 
 	    if( pev->c >= 72 /* FIXME */ ) {
-		if( !( ++c % 100 ) ) {
+		if( !( ++c % 100 ) && fShowProgress ) {
 		    printf( "%6d\r", c );
 		    fflush( stdout );
 		}

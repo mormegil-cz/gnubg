@@ -658,7 +658,7 @@ extern void CommandNewGame( char *sz ) {
 	    if( pch && ( *pch == 'n' || *pch == 'N' ) )
 		return;
 
-	    puts( "Please answer 'y' or 'n'." );
+	    puts( "Please answer `y' or `n'." );
 	}
 
 	/* The last game of the match should always be the current one. */

@@ -25,6 +25,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "backgammon.h"
 #include "dice.h"
 #include "eval.h"
 #include "positionid.h"
@@ -336,9 +337,11 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 	
 	SanityCheck( anBoard, ar ); /* FIXME think about this... */
 	
-	printf( "%6d\r", i + 1 );
-	fflush( stdout );
-
+	if( fShowProgress ) {
+	    printf( "%6d\r", i + 1 );
+	    fflush( stdout );
+	}
+	
 	ar[ OUTPUT_EQUITY ] = ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
 	    ar[ OUTPUT_WINGAMMON ] +
 	    ar[ OUTPUT_WINBACKGAMMON ] -
