@@ -335,6 +335,7 @@ static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
 static void ShowManualWeb( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
+static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 GtkWidget *pwGrab;
@@ -2353,6 +2354,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Edit/_Enter command..."), NULL, EnterCommand, 0, NULL },
 	{ N_("/_Game"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL },
+	{ N_("/_Game/_Finish move"), "<control>F", FinishMove, 0, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL },
 	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE, NULL },
@@ -8293,5 +8295,20 @@ GTKChangeDisk( const char *szMsg, const int fChange,
     fInterrupt = TRUE;
   
   return NULL;
+
+}
+
+
+static void 
+FinishMove( gpointer *p, guint n, GtkWidget *pw ) {
+
+  int anMove[ 8 ];
+  char sz[ 65 ];
+
+  if ( ! GTKGetMove( anMove ) )
+    /* no valid move */
+    return;
+
+  UserCommand( FormatMove( sz, ms.anBoard, anMove ) );
 
 }

@@ -6,6 +6,7 @@ char *aszCredits[] = {
     "Kazuaki Asai",
     "Eric Augustine",
     "Steve Baedke",
+    "Erik Barfoed",
     "Ron Barry",
     "Hans Berliner",
     "Holger Bochnig",
