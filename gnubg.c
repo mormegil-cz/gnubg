@@ -4887,11 +4887,22 @@ CommandLoadPython( char * sz ) {
   }
 
   pch = PathSearch( sz, NULL );
-  
-  if( ( pf = fopen( pch, "r" ) ) ) {
+  pf = fopen( pch, "r" );
+  if (!pf)
+  {	/* Couldn't find file, have a look in the scripts dir */
+    char scriptDir[BIG_PATH];
+    strcpy(scriptDir, (szDataDirectory && *szDataDirectory) ? szDataDirectory: ".");
+    strcat(scriptDir, "/scripts");
+    pch = PathSearch( sz, scriptDir);
+    pf = fopen( pch, "r" );
+  }
+
+  if (pf)
+  {
     PyRun_AnyFile( pf, pch );
     fclose( pf );
-  } else
+  }
+  else
     outputerr( sz );
 
   free( pch );

@@ -2096,9 +2096,6 @@ PythonInitialise( const char *argv0, const char *szDir ) {
 
   FILE *pf;
   char *pch;
-  char scriptDir[BIG_PATH];
-  strcpy( scriptDir, ( szDir && *szDir ) ? szDir : "." );
-  strcat(scriptDir, "/scripts");
 
   Py_SetProgramName( (char *) argv0 );
   Py_Initialize();
@@ -2115,14 +2112,9 @@ PythonInitialise( const char *argv0, const char *szDir ) {
 #endif
 
   /* run gnubg.py start up script */
-
-  if ( ( pch = PathSearch( "gnubg.py", scriptDir ) ) &&
-       ( pf = fopen( pch, "r" ) ) ) {
-    PyRun_AnyFile( pf, pch );
-  }
-  if ( pch )
-    free( pch );
-
+  pch = g_strdup( "gnubg.py" );
+  CommandLoadPython( pch );
+  g_free( pch );
 }
 
 extern void

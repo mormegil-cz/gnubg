@@ -22,23 +22,25 @@
 #include <stdio.h>
 
 
-#if HAVE_CONFIG
+#if HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include <glib.h>
 
 #include "i18n.h"
 #include "relational.h"
 #include "backgammon.h"
 
 
-#if HAVE_PYTHON
+#if USE_PYTHON
 static int fPyLoaded = FALSE;
 #endif
 
 static void
 LoadDatabasePy( void ) {
 
-#if HAVE_PYTHON
+#if USE_PYTHON
   char *pch;
 
   if ( fPyLoaded )
@@ -49,24 +51,27 @@ LoadDatabasePy( void ) {
   pch = g_strdup( "database.py" );
   CommandLoadPython( pch );
   g_free( pch );
-#endif /* HAVE_PYTHON */
+#endif /* USE_PYTHON */
 
 }
 
 extern void
 CommandRelationalAddMatch( char *sz ) {
 
-#if HAVE_PYTHON
+#if USE_PYTHON
   PyObject *m, *d, *v, *r;
-  int env_id = ParseNumber( &sz );
-  int force = 0;
-  char *pch = NextToken( &sz );
+  int env_id = 0;
+  int force = FALSE;
+  char *pch;
   PyObject *py_env_id;
   PyObject *py_force;
 
+  if (sz && *sz)
+    env_id = ParseNumber( &sz );
   if ( env_id < 0 )
     env_id = 0;
 
+  pch = NextToken( &sz );
   force = pch && *pch && 
     ( !strcasecmp( "on", pch ) || !strcasecmp( "yes", pch ) ||
       !strcasecmp( "true", pch ) );
@@ -162,16 +167,16 @@ CommandRelationalAddMatch( char *sz ) {
 
    Py_DECREF( r );
 
-#else /* HAVE_PYTHON */
+#else /* USE_PYTHON */
    outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !HAVE_PYTHON */
+#endif /* !USE_PYTHON */
 
 }
 
 extern void
 CommandRelationalTest( char *sz ) {
 
-#if HAVE_PYTHON
+#if USE_PYTHON
   PyObject *m, *d, *v, *r;
 
   /* load database.py */
@@ -228,9 +233,9 @@ CommandRelationalTest( char *sz ) {
 
   Py_DECREF( r );
 
-#else /* HAVE_PYTHON */
+#else /* USE_PYTHON */
    outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !HAVE_PYTHON */
+#endif /* !USE_PYTHON */
     
 
 }
@@ -244,7 +249,7 @@ CommandRelationalHelp( char *sz ) {
 extern void
 CommandRelationalShowEnvironments( char *sz ) {
 
-#if HAVE_PYTHON
+#if USE_PYTHON
   PyObject *m, *d, *v, *r;
 
   /* load database.py */
@@ -346,8 +351,8 @@ CommandRelationalShowEnvironments( char *sz ) {
 
    Py_DECREF( r );
 
-#else /* HAVE_PYTHON */
+#else /* USE_PYTHON */
    outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !HAVE_PYTHON */
+#endif /* !USE_PYTHON */
 
 }
