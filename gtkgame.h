@@ -127,6 +127,8 @@ extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
 extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw );
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 
+extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves );
+
 extern int fTTY;
 
 #endif

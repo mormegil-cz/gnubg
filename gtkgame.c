@@ -1423,9 +1423,12 @@ static void SetAnnotation( moverecord *pmr ) {
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 
             fixOutput ( pmr->n.arDouble, pmr->n.aarOutput );
-	    
-	    if( ( pw = CreateCubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
-				     &pmr->n.esDouble, MOVE_NORMAL ) ) ) {
+
+	    if( ( pw = CreateCubeAnalysis( pmr->n.aarOutput, 
+                                           pmr->n.aarStdDev,
+                                           pmr->n.arDouble,
+                                           &pmr->n.esDouble, 
+                                           MOVE_NORMAL ) ) ) {
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
                 /* FIXME: add cube skill */
@@ -1488,6 +1491,7 @@ static void SetAnnotation( moverecord *pmr ) {
             
             if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
                                              pmr->d.aarStdDev,
+                                             pmr->d.arDouble,
                                              &pmr->d.esDouble,
                                              MOVE_DOUBLE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
@@ -1516,6 +1520,7 @@ static void SetAnnotation( moverecord *pmr ) {
 
             if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
                                              pmr->d.aarStdDev,
+                                             pmr->d.arDouble,
                                              &pmr->d.esDouble,
                                              pmr->mt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
@@ -4517,7 +4522,7 @@ extern void GTKDoubleHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
-    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
+    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, NULL, &es, MOVE_NORMAL );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pw );
@@ -4551,7 +4556,7 @@ extern void GTKTakeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
       *pw, *pwRollout = gtk_button_new_with_label( _("Rollout") );
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
-    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
+    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, NULL, &es, MOVE_NORMAL );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pw );
@@ -4704,7 +4709,7 @@ static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
 }
 
 
-static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
+extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
 
     move *pm;
     char move[ 40 ];
@@ -4743,7 +4748,7 @@ extern void GTKHint( movelist *pmlOrig ) {
 #endif
 	*pwMoves;
     GtkWidget *pwHBox;
-    static hintdata hd;
+    hintdata *phd;
     movelist *pml;
     
     if( pwHint )
@@ -4760,21 +4765,23 @@ extern void GTKHint( movelist *pmlOrig ) {
     /* create dialog */
     
     pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL, NULL );
-    gtk_object_set_user_data( GTK_OBJECT( pwHint ), 
-                              gtk_object_get_user_data ( 
-                                 GTK_OBJECT ( pwMoves ) ) );
+    phd = gtk_object_get_user_data ( GTK_OBJECT ( pwMoves ) );
+    phd->pwMove = pwMove;
+    gtk_object_set_user_data( GTK_OBJECT( pwHint ), phd );
     pwButtons = DialogArea( pwHint, DA_BUTTONS );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
 
     gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
-			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
+			GTK_SIGNAL_FUNC( HintMove ), phd->pw );
     gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
 			GTK_SIGNAL_FUNC( HintCopy ), pml );
 
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
+
+    gtk_widget_set_sensitive ( GTK_WIDGET ( pwMove ), FALSE );
 
     gtk_window_set_default_size( GTK_WINDOW( pwHint ), 0, 300 );
     
