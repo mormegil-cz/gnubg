@@ -390,10 +390,8 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
     if( fShowProgress ) {
 #if USE_GTK
 	if( fX ) {
-	    if( GTKRolloutUpdate( arMu, arSigma, i, cGames ) ) {
-		fInterrupt = TRUE;
+	    if( GTKRolloutUpdate( arMu, arSigma, i, cGames ) )
 		return -1;
-	    }
 	} else
 #endif
 	    {

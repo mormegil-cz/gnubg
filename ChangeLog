@@ -1,3 +1,21 @@
+Wed Feb  7 12:58:50 2001  Gary Wong  <gtw@research.att.com>
+
+	* rollout.c (Rollout): Don't set fInterrupt when GTKRolloutUpdate
+	returns an error (it could be for other reasons, e.g. database
+	rollouts don't have a GTK dialog at all).
+
+	* guile.c (gnubg_command): New function.
+
+	* gtkgame.c (StdinReadNotify): Handle "next turn" processing before
+	looking at input.
+
+	* gnubg.c (PortableSignal): Don't restart system calls on SIGINT.
+
+	* eval.c (FindBestMovePlied): Check fAction and fInterrupt.
+
+	* database.c (CommandDatabaseGenerate): Accept a parameter limiting
+	the number of positions to generate.
+
 Wed Jan 31 10:39:29 2001  Gary Wong  <gtw@research.att.com>
 
 	* show.c (ShowCommands): New function.
