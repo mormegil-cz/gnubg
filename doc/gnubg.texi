@@ -1018,7 +1018,8 @@ precise description of your rights and obligations, please use the
 @cindex playing commands
 @cindex commands, playing
 
-FIXME introduction
+This chapter introduces several more commands used while playing games
+and matches in @gnubg{}.
 
 @menu
 * The Game::                    Commands used during the game.
@@ -1090,7 +1091,7 @@ swap their positions.
 Whichever method you use to move the chequers, once you have made a legal
 move you can end your turn by clicking mouse button 1 on the dice.
 
-FIXME reference set automove and set autobearoff.
+FIXME reference set auto move and set auto bearoff.
 @kindex resign
 @kindex agree
 @kindex accept
@@ -1226,11 +1227,11 @@ The command @code{set turn @var{player}} (where @var{player} can be the
 player's name or number, as above) is used to control which player is on
 roll.  It will cancel the current dice roll and cube action (if any),
 and set the named player on roll.
-@kindex set autobearoff
-@kindex set automove
-@item set autobearoff
-@itemx set automove
-FIXME -- N.B. these are now subcommands of "set auto".
+@kindex set automatic bearoff
+@kindex set automatic move
+@item set automatic bearoff
+@itemx set automatic move
+FIXME
 @kindex set display
 @item set display @var{value}
 By default, @gnubg{} will update the display before and after every move,
@@ -1283,7 +1284,47 @@ turn @var{player}}.
 @kindex show rng
 @item set rng @var{generator} [@var{seed}]
 @itemx show rng
-FIXME
+@gnubg{} allows a variety of methods for generating dice rolls, including
+several built-in pseudo-random number generators and a facility for external
+libraries to be used.  It is also possible to enter a roll manually whenever
+required.
+
+The @code{set rng} command is used to select which generator will be used.
+The @var{generator} parameter must be one of the following:
+@table @code
+@item ansi
+The ANSI C standard @code{rand()} random number generator.  The
+behaviour of this generator will depend on the C library linked with
+@gnubg{}, but is typically a linear congruential pseudo-random number
+generator.  Such generators have fairly weak distribution properties,
+but are generally adequate for producing backgammon dice.  However, the
+ANSI generator is not recommended for performing rollouts, because any
+small biases in the dice could accumulate over hundreds or thousands of
+trials and distort the results.  Using a better generator would be
+safer for rollouts.
+@item bsd
+The 4.3BSD @code{random()} non-linear additive feedback random number
+generator.  This is a good quality generator, but is not available on
+all systems.  @gnubg{} will report an error if you attempt to use this
+generator if the C library used in your installation does not include
+the BSD @code{random} code.
+@item isaac
+Bob Jenkins' ISAAC random number generator.  This is believed to be a
+high quality generator.
+@item manual
+By setting the generator to @code{manual}, @gnubg{} will not generate
+the dice itself; rather, it will prompt for a roll to be entered whenever
+one is required.
+@item mersenne
+Choosing this option will enable the Mersenne Twister generator designed
+by Matsumoto and Nishimura.  This should be an excellent pseudo-random
+number generator.
+@item user
+Use the @code{user} generator to dynamically load a user library which
+will be used to produce the dice rolls.  See the file @file{userrng.c}
+in the @gnubg{} distribution for an example user generator, and instructions
+on how to write your own.
+@end table
 @end table
 
 @node Computer Player
@@ -1292,14 +1333,28 @@ FIXME
 @cindex @t{gnubg}, making moves
 
 @table @code
-@kindex play
 @kindex set player gnubg
+@item set player @var{name} gnubg
+This command will instruct @gnubg{} to choose moves (and make cube decisions
+FIXME not yet, but it will) for the specified player, using its evaluation
+engine.
 @kindex set player pubeval
-@kindex set player plies
+@item set player @var{name} pubeval
+An alternative computer player can be chosen by setting a player to
+@code{pubeval}.  This will cause moves for that player to be made by
+Gerry Tesauro's benchmark player.  @code{pubeval} is much weaker than
+@gnubg{}'s own evaluator, but provides a constant level of play which
+is useful for measuring different players against.
+
+@code{pubeval} is not capable of making cube or resignation decisions
+based on the position.  It will never accept resignations at less than
+triple (backgammon) stakes, and will take all cubes.  It nevers offers
+resignations or doubles of its own.
+@kindex set player evaluation
+@item set player @var{name} evaluation
+FIXME
+@kindex play
 @item play
-@itemx set player @var{name} gnubg
-@itemx set player @var{name} pubeval
-@itemx set player @var{name} plies @var{depth}
 FIXME
 @end table
 
@@ -1316,12 +1371,12 @@ called ``money'' play, regardless of whether any payment is involved).
 @table @code
 @kindex new match
 @kindex new session
-@kindex set autogame
+@kindex set automatic game
 @kindex set crawford
 @kindex set postcrawford
-@kindex set autocrawford
+@kindex set automatic crawford
 @kindex set jacoby
-@kindex set autodoubles
+@kindex set automatic doubles
 @kindex set score
 @kindex show crawford
 @kindex show postcrawford
@@ -1330,12 +1385,12 @@ called ``money'' play, regardless of whether any payment is involved).
 @kindex show score
 @item new match @var{length}
 @itemx new session
-@itemx set autogame
+@itemx set automatic game
 @itemx set crawford
 @itemx set postcrawford
-@itemx set autocrawford
+@itemx set automatic crawford
 @itemx set jacoby
-@itemx set autodoubles @var{limit}
+@itemx set automatic doubles @var{limit}
 @itemx set score @var{points} @var{points}
 @itemx show crawford
 @itemx show postcrawford
