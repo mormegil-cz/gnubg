@@ -957,12 +957,39 @@ extern void CommandShowTurn( char *sz ) {
 		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 }
 
+static void
+ShowAuthors( const credEntry ace[], const char *title ) {
+
+  int i;
+
+  outputf( title );
+  outputc( '\n' );
+  
+  for ( i = 0; ace[ i ].Name; ++i ) {
+    if ( !(i % 3) )
+      outputc( '\n' );
+    outputf( "   %-20.20s", ace[ i ].Name );
+  }
+  
+  outputc( '\n' );
+  outputc( '\n' );
+
+}
+
 extern void CommandShowBuildInfo( char *sz )
 {
+    char **ppch = aszVersion;
+
 #if USE_GTK
 	if( fX )
 		GTKShowBuildInfo(pwMain);
 #endif
+
+	ppch++;	/* Skip version line */
+	while (*ppch)
+		outputl( gettext ( *ppch++ ) );
+
+    outputc( '\n' );
 }
 
 extern void CommandShowScoreSheet( char *sz )
@@ -1054,26 +1081,6 @@ extern void CommandShowScoreSheet( char *sz )
 	output("\n");
 	outputx();
 }
-
-static void
-ShowAuthors( const credEntry ace[], const char *title ) {
-
-  int i;
-
-  outputf( title );
-  outputc( '\n' );
-  
-  for ( i = 0; ace[ i ].Name; ++i ) {
-    if ( !(i % 3) )
-      outputc( '\n' );
-    outputf( "   %-20.20s", ace[ i ].Name );
-  }
-  
-  outputc( '\n' );
-  outputc( '\n' );
-
-}
-
 
 extern void CommandShowCredits( char *sz )
 {
@@ -1454,24 +1461,19 @@ extern void CommandShowTraining( char *sz ) {
 	outputl( _("Error threshold disabled.") );
 }
 
-extern void CommandShowVersion( char *sz ) {
-
-    char **ppch = aszVersion;
-
+extern void CommandShowVersion( char *sz )
+{
 #if USE_GTK
-    if( fX ) {
-	GTKShowVersion();
-	return;
-    }
+	if (fX)
+	{
+		GTKShowVersion();
+		return;
+	}
 #endif
 
-    while( *ppch )
-	outputl( gettext ( *ppch++ ) );
-
-    outputc( '\n' );
-
-    ShowAuthors( ceAuthors, _("GNU Backgammon was written by:") );
-  
+	outputl( gettext ( *aszVersion ) );
+	outputc( '\n' );
+	ShowAuthors( ceAuthors, _("Written by:") );
 }
 
 extern void CommandShowMarketWindow ( char * sz ) {
