@@ -335,3 +335,225 @@ extern void PositionFromBearoff( int anBoard[ 6 ], unsigned short usID ) {
             anBoard[ j ]++;
     }
 }
+
+/*
+ * Calculate log2 of Cube value.
+ *
+ * Input:
+ *   n: cube value
+ *
+ * Returns:
+ *   log(n)/log(2)
+ *
+ */
+
+extern int 
+LogCube( const int n ) {
+
+    int i;
+
+    for( i = 0; ; i++ )
+	if( n <= ( 1 << i ) )
+	    return i;
+}
+
+
+static void
+dumpKey ( unsigned char *ac, int n ) {
+
+  int i;
+
+  for ( i = 0; i < n; i++ )
+    printf ( "%02x ", ac[ i ] );
+
+  printf ( "\n" );
+
+
+}
+
+
+static void
+SetBit ( unsigned char *pc, int bitPos, int iBit ) {
+
+  const int k = bitPos / 8;
+  const int r = bitPos % 8;
+
+  unsigned char c,d;
+
+  c = ( iBit << r );
+  d = 0xFF ^ ( 0x1 << r );
+  pc [ k ] = ( pc[ k ] & d ) | c;
+
+}
+
+static void
+SetBits ( unsigned char *pc, int bitPos, int nBits, int iContent ) {
+
+  int i, j;
+
+  unsigned char c, c2;
+
+  /* FIXME: rewrite SetBit, SetBits to be faster */
+
+
+  for ( i = 0, j = bitPos; i < nBits; i++, j++ ) {
+
+    SetBit ( pc, j, ( ( 0x1 << i ) & iContent ) != 0 );
+    
+  }
+
+}
+
+
+static int
+GetBits ( unsigned char *pc, int bitPos, int nBits, int *piContent ) {
+
+
+  int i, j;
+  int k, r;
+
+  unsigned char c[2];
+
+  /* FIXME: rewrite GetBits to be faster */
+
+  c[ 0 ] = 0;
+  c[ 1 ] = 0;
+
+  for ( i = 0, j = bitPos; i < nBits; i++, j++ ) {
+
+    k = j / 8;
+    r = j % 8;
+
+    SetBit ( c, i, ( pc [ k ] & ( 0x1 << r ) ) != 0 );
+
+  }
+
+  *piContent = c[ 0 ] | ( c[ 1 ] << 8 );
+    
+}
+
+
+extern char 
+*MatchIDFromKey( unsigned char auchKey[ 8 ] ) {
+
+    unsigned char *puch = auchKey;
+    static char szID[ 10 ];
+    char *pch = szID;
+    static char aszBase64[ 64 ] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    int i;
+    
+    for( i = 0; i < 2; i++ ) {
+        *pch++ = aszBase64[ puch[ 0 ] >> 2 ];
+        *pch++ = aszBase64[ ( ( puch[ 0 ] & 0x03 ) << 4 ) |
+                          ( puch[ 1 ] >> 4 ) ];
+        *pch++ = aszBase64[ ( ( puch[ 1 ] & 0x0F ) << 2 ) |
+                          ( puch[ 2 ] >> 6 ) ];
+        *pch++ = aszBase64[ puch[ 2 ] & 0x3F ];
+
+        puch += 3;
+    }
+
+    *pch++ = aszBase64[ *puch >> 2 ];
+    *pch++ = aszBase64[ ( *puch & 0x03 ) << 4 ];
+
+    *pch = 0;
+
+    return szID;
+}
+
+
+extern char*
+MatchID ( const int nCube, const int fCubeOwner, const int fMove,
+          const int nMatchTo, const int anScore[ 2 ], 
+          const int fCrawford, const int anDice[ 2 ] ) {
+
+  unsigned char auchKey[ 8 ];
+
+  memset ( auchKey, 0, 8 );
+
+  SetBits ( auchKey, 0, 4, LogCube ( nCube ) );
+  SetBits ( auchKey, 4, 2, fCubeOwner & 0x3 );
+  SetBits ( auchKey, 6, 1, fMove );
+  SetBits ( auchKey, 7, 1, fCrawford );
+  SetBits ( auchKey, 8, 3, anDice[ 0 ] & 0x7 );
+  SetBits ( auchKey, 11, 3, anDice[ 1 ] & 0x7 );
+  SetBits ( auchKey, 14, 15, nMatchTo & 0x8FFF );
+  SetBits ( auchKey, 29, 15, anScore[ 0 ] & 0x8FFF );
+  SetBits ( auchKey, 44, 15, anScore[ 1 ] & 0x8FFF );
+
+  dumpKey ( auchKey, 8 );
+
+  return MatchIDFromKey ( auchKey );
+
+
+}
+
+extern int
+MatchFromKey ( int *pnCube, int *pfCubeOwner, int *pfMove,
+               int *pnMatchTo, int anScore[ 2 ], 
+               int *pfCrawford, int anDice[ 2 ],
+               unsigned char *auchKey ) {
+
+  GetBits ( auchKey, 0, 4, pnCube );
+  *pnCube = 0x1 << *pnCube;
+
+  GetBits ( auchKey, 4, 2, pfCubeOwner );
+  if ( *pfCubeOwner && *pfCubeOwner != 1 )
+    *pfCubeOwner = -1;
+
+  GetBits ( auchKey, 6, 1, pfMove );
+  GetBits ( auchKey, 7, 1, pfCrawford );
+  GetBits ( auchKey, 8, 3, &anDice[ 0 ] );
+  GetBits ( auchKey, 11, 3, &anDice[ 1 ] );
+  GetBits ( auchKey, 14, 15, pnMatchTo );
+  GetBits ( auchKey, 29, 15, &anScore[ 0 ] );
+  GetBits ( auchKey, 44, 15, &anScore[ 1 ] );
+
+  /* FIXME: implement a consistency check */
+
+  return 0;
+
+}
+
+
+
+
+extern int
+MatchFromID ( int *pnCube, int *pfCubeOwner, int *pfMove,
+              int *pnMatchTo, int anScore[ 2 ], 
+              int *pfCrawford, int anDice[ 2 ],
+              char *szMatchID ) {
+
+  unsigned char auchKey[ 8 ];
+  unsigned char *puch = auchKey;
+  unsigned char ach[ 10 ];
+  unsigned char *pch = ach;
+  int i;
+
+  /* decode base64 into key */
+
+  for( i = 0; i < 10 && szMatchID[ i ]; i++ )
+    pch[ i ] = Base64( szMatchID[ i ] );
+
+  pch[ i ] = 0;
+
+  for( i = 0; i < 2; i++ ) {
+    *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
+    *puch++ = ( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
+    *puch++ = ( pch[ 2 ] << 6 ) | pch[ 3 ];
+
+    pch += 4;
+  }
+
+  *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
+  *puch = pch[ 1 ] << 4;
+
+  /* get matchstate info from the key */
+
+  return MatchFromKey ( pnCube, pfCubeOwner, pfMove,
+                        pnMatchTo, anScore, pfCrawford,
+                        anDice, auchKey );
+
+}
+

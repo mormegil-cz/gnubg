@@ -1,3 +1,16 @@
+Sun Mar 17 14:25:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	Introduce new Match ID.
+
+	* eval.c (LogCube): move to positionid.c
+	* positionid.c (LogCube): moved from eval.c
+
+	* positionid.c (SetBit, SetBits, GetBits): new auxiliary functions
+	for the match ID functions. These can/should be optimized.
+
+	* positionid.c (MatchIDFromKey, MatchID, MatchFromKey, MatchFromID):
+	new functions.
+
 Sat Mar 16 21:58:11 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (point_area): New function.
