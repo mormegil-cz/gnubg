@@ -1,3 +1,9 @@
+Mon Aug  5 19:59:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Save and load geometries even though USE_GTK = 0.
+
+	* gnubg.c, set.c, show.c: remove and reshuffle #if USE_GTK's.
+
 Mon Aug  5 19:51:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Gammon only scores 1 point with Jacoby rule.

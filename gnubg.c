@@ -308,7 +308,6 @@ player ap[ 2 ] = {
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP } 
 };
 
-#if USE_GTK
 
 windowgeometry awg[ NUM_WINDOWS ] =
   { 
@@ -318,7 +317,6 @@ windowgeometry awg[ NUM_WINDOWS ] =
     { 0, 0, -1, -1 }         /* hint */
   };
 
-#endif
 
 
 /* Usage strings */
@@ -689,7 +687,6 @@ command cER = {
       N_("Fix what the cube stake has been set to"),
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-#ifdef USE_GTK
 }, acSetGeometryValues[] = {
     { "width", CommandSetGeometryWidth, N_("set width of window"), 
       szVALUE, NULL },
@@ -710,7 +707,6 @@ command cER = {
     { "main", CommandSetGeometryMain,
       N_("set geometry of main window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
-#endif
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
       N_("Show match equities as percentages (on) or probabilities (off)"),
@@ -994,9 +990,7 @@ command cER = {
     { "egyptian", CommandSetEgyptian, 
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
-#ifdef USE_GTK
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
-#endif
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1083,10 +1077,8 @@ command cER = {
       N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
-#ifdef USE_GTK
     { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
       NULL, NULL },
-#endif
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
@@ -3497,7 +3489,7 @@ extern void CommandCopy (char *sz)
 extern void
 CommandXCopy ( char *sz ) {
 
-#ifdef USE_GTK
+#if USE_GTK
   if ( fX )
     GTKCopy ();
 #endif
@@ -4068,8 +4060,10 @@ extern void CommandSaveSettings( char *szParam ) {
                   acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
 
     /* geometries */
-#ifdef USE_GTK
-    RefreshGeometries ();
+#if USE_GTK
+    if ( fX )
+       RefreshGeometries ();
+#endif
 
     for ( i = 0; i < NUM_WINDOWS; ++i )
         fprintf ( pf, 
@@ -4081,7 +4075,6 @@ extern void CommandSaveSettings( char *szParam ) {
                   aszWindow[ i ], awg[ i ].nHeight,
                   aszWindow[ i ], awg[ i ].nPosX,
                   aszWindow[ i ], awg[ i ].nPosY );
-#endif
     /* the end */
 
     

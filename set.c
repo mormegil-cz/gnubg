@@ -2559,7 +2559,6 @@ extern void CommandSetTutorSkillVeryBad( char * sz) {
 }
 
 
-#ifdef USE_GTK
 static gnubgwindow gwSet;
 
 extern void
@@ -2700,5 +2699,4 @@ CommandSetGeometryPosY ( char *sz ) {
 
 
 }
-#endif
 
