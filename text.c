@@ -37,6 +37,7 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "record.h"
+#include "timecontrol.h"
 
 #include "i18n.h"
 
@@ -53,7 +54,12 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
   char szBoard[ 2048 ];
   char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ],
     szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
-  char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#if USE_TIMECONTROL
+    char szTime0[20], szTime1[20];
+    char *apch[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#else
+    char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#endif
   int anPips[ 2 ];
 
   memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
@@ -117,6 +123,15 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
     }
   }
     
+#if USE_TIMECONTROL
+  apch[7] = apch[8] = 0;
+  if (ms.gc.pc[0].tc.timing != TC_NONE)
+    apch[7] = FormatClock(&ms.tvTimeleft[0], szTime0);
+  if (ms.gc.pc[1].tc.timing != TC_NONE)
+    apch[8] = FormatClock(&ms.tvTimeleft[1], szTime1);
+#endif
+
+
   if( pms->fResigned )
     sprintf( strchr( sz, 0 ), _(", resigns %s"),
              gettext ( aszGameResult[ pms->fResigned - 1 ] ) );

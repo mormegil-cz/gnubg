@@ -1,3 +1,9 @@
+Thu Oct  2 19:57:56 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c (printTextBoard): assign asz[7] and asz[8] if
+	USE_TIMECONTROL
+	(reported by Jeff ???)
+
 Thu Oct  2 19:37:15 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktheory.c (TheoryUpdated): ensure that bg <= g.
