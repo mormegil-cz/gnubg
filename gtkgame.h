@@ -134,5 +134,10 @@ GtkTutor ( char *sz );
 extern void
 GTKCopy ( void );
 
+extern void
+UpdateGeometry ( const gnubgwindow gw );
+
+extern void
+RefreshGeometries ( void );
 
 #endif

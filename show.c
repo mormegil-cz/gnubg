@@ -1493,3 +1493,29 @@ outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
 }
 
 
+extern void
+CommandShowGeometry ( char *sz ) {
+
+  outputf ( _("Default geometries:\n\n"
+              "Main window       : size %dx%d, position (%d,%d)\n"
+              "Annotation window : size %dx%d, position (%d,%d)\n"
+              "Game list window  : size %dx%d, position (%d,%d)\n"
+              "Hint window       : size %dx%d, position (%d,%d)\n" ),
+            awg[ WINDOW_MAIN ].nWidth,
+            awg[ WINDOW_MAIN ].nHeight,
+            awg[ WINDOW_MAIN ].nPosX,
+            awg[ WINDOW_MAIN ].nPosY,
+            awg[ WINDOW_ANNOTATION ].nWidth,
+            awg[ WINDOW_ANNOTATION ].nHeight,
+            awg[ WINDOW_ANNOTATION ].nPosX,
+            awg[ WINDOW_ANNOTATION ].nPosY,
+            awg[ WINDOW_GAME ].nWidth,
+            awg[ WINDOW_GAME ].nHeight,
+            awg[ WINDOW_GAME ].nPosX,
+            awg[ WINDOW_GAME ].nPosY,
+            awg[ WINDOW_HINT ].nWidth,
+            awg[ WINDOW_HINT ].nHeight,
+            awg[ WINDOW_HINT ].nPosX,
+            awg[ WINDOW_HINT ].nPosY );
+
+}

@@ -1,3 +1,21 @@
+Sun Aug  4 12:28:33 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Experimental code for saving geometries.  Known bugs: The GTK 2.0
+	code is not testet.  The GTK 1.2 code does not handle the window
+	decorations when setting the position. 
+
+	Note that "CommandSaveSettings" must be called to save window
+	geometries.
+
+	* gnubg.c: new commands "set geometry
+	{main,annotation,hint,game}".
+	* gnubg.c (CommandSaveSettings): save geometry settings.
+	* show.c (CommandShowGeometry): new function.
+	* set.c: new commands "set geometry 
+	{main,annotation,hint,game}".
+	* gtkgame.c: save and restore geometries for main, annotation,
+	game list, and hint window.
+
 Sun Aug  4 12:02:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Implement optional (re)doubles, {pass,take}.

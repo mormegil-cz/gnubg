@@ -282,8 +282,11 @@ static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard, *pwMain, *pwMenuBar;
-static GtkWidget *pwStatus, *pwProgress, *pwGame, *pwGameList, *pom,
-    *pwAnnotation, *pwAnalysis, *pwCommentary, *pwHint, *pwSetCube;
+static GtkWidget *pwStatus, *pwProgress, *pwGameList, *pom,
+    *pwAnalysis, *pwCommentary, *pwSetCube;
+static GtkWidget *pwHint = NULL;
+static GtkWidget *pwAnnotation = NULL;
+static GtkWidget *pwGame = NULL;
 static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
 static GtkStyle *psGameList, *psCurrent;
@@ -320,27 +323,99 @@ static char *ToUTF8( unsigned char *sz ) {
 #define TRANS(x) (x)
 #endif
 
+
 static void
 setWindowGeometry ( GtkWidget *pw, const windowgeometry *pwg ) {
 
+  if ( ! pw )
+    return;
+
+#if GTK_CHECK_VERSION(2,0,0)
+
+  gtk_window_resize ( GTK_WINDOW ( pw ),
+                      ( pwg->nWidth > 0 ) ? pwg->nWidth : -1,
+                      ( pwg->nHeight > 0 ) ? pwg->nHeight : -1 );
+
+  gtk_window_move ( GTK_WINDOW ( pw ),
+                    ( pwg->nPosX >= 0 ) ? pwg->nPosX : 0, 
+                    ( pwg->nPosY >= 0 ) ? pwg->nPosY : 0 );
+
+#else
+
   gtk_window_set_default_size( GTK_WINDOW( pw ), 
-                               ( pwg->nWidth >= 0 ) ? pwg->nWidth : 0,
-                               ( pwg->nHeight >= 0 ) ? pwg->nHeight : 0 );
+                               ( pwg->nWidth > 0 ) ? pwg->nWidth : -1,
+                               ( pwg->nHeight > 0 ) ? pwg->nHeight : -1 );
   
   gtk_widget_set_uposition ( pw, 
                              ( pwg->nPosX >= 0 ) ? pwg->nPosX : 0, 
                              ( pwg->nPosY >= 0 ) ? pwg->nPosY : 0 );
+
+#endif /* ! GTK 2.0 */
 
 }
 
 static void
 getWindowGeometry ( windowgeometry *pwg, GtkWidget *pw ) {
 
+#if GTK_CHECK_VERSION(2,0,0)
+
+  if ( ! pw )
+    return;
+
+  gtk_window_get_position ( GTK_WINDOW ( pw ),
+                            &pwg->nPosX, &pwg->nPosY );
+
+  gtk_window_get_size ( GTK_WINDOW ( pw ),
+                        &pwg->nWidth, &pwg->nHeight );
+
+#else
+
+  if ( ! pw || ! pw->window )
+    return;
+
   gdk_window_get_position ( pw->window,
                             &pwg->nPosX, &pwg->nPosY );
 
   gdk_window_get_size ( pw->window,
                         &pwg->nWidth, &pwg->nHeight );
+
+#endif /* ! GTK 2.0 */
+
+}
+
+extern void
+UpdateGeometry ( const gnubgwindow gw ) {
+
+  GtkWidget *pw;
+
+  switch ( gw ) {
+  case WINDOW_MAIN:
+    pw = pwMain;
+    break;
+  case WINDOW_ANNOTATION:
+    pw = pwAnnotation;
+    break;
+  case WINDOW_HINT:
+    pw = pwHint;
+    break;
+  case WINDOW_GAME:
+    pw = pwGame;
+    break;
+  default:
+    assert ( FALSE );
+  }
+
+  setWindowGeometry ( pw, &awg[ gw ] );
+
+}
+
+extern void
+RefreshGeometries ( void ) {
+
+  getWindowGeometry ( &awg[ WINDOW_MAIN ], pwMain );
+  getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
+  getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint );
+  getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame );
 
 }
 
@@ -675,7 +750,7 @@ static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
 
 static void DeleteAnnotation( void ) {
 
-  getWindowGeometry ( &wgAnnotation, pwAnnotation );
+  getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
   fAnnotation = FALSE;
   UpdateSetting( &fAnnotation );
 
@@ -683,7 +758,7 @@ static void DeleteAnnotation( void ) {
 
 static void DeleteGame( void ) {
 
-  getWindowGeometry ( &wgGame, pwGame );
+  getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame );
   gtk_widget_hide ( pwGame );
 
 }
@@ -738,7 +813,7 @@ static void CreateAnnotationWindow( void ) {
     gtk_window_set_wmclass( GTK_WINDOW( pwAnnotation ), "annotation",
 			    "Annotation" );
 
-    setWindowGeometry ( pwAnnotation, &wgAnnotation );
+    setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] );
 
     gtk_container_add( GTK_CONTAINER( pwAnnotation ),
 		       pwPaned = gtk_vpaned_new() );
@@ -792,7 +867,7 @@ static void CreateGameWindow( void ) {
     gtk_window_set_wmclass( GTK_WINDOW( pwGame ), "gamerecord",
 			    "GameRecord" );
 
-    setWindowGeometry ( pwGame, &wgGame );
+    setWindowGeometry ( pwGame, &awg[ WINDOW_GAME ] );
     
     gtk_container_add( GTK_CONTAINER( pwGame ), pvbox );
 
@@ -888,7 +963,7 @@ static void CreateGameWindow( void ) {
 
 extern void ShowGameWindow( void ) {
 
-  setWindowGeometry ( pwGame, &wgGame );
+  setWindowGeometry ( pwGame, &awg[ WINDOW_GAME ] );
     gtk_widget_show_all( pwGame );
     if( pwGame->window )
 	gdk_window_raise( pwGame->window );
@@ -1760,7 +1835,7 @@ extern void GTKSaveSettings( void ) {
 
 static gboolean main_delete( GtkWidget *pw ) {
 
-  getWindowGeometry ( &wgMain, pw );
+  getWindowGeometry ( &awg[ WINDOW_MAIN ], pw );
     
     UserCommand( "quit" );
     
@@ -1785,6 +1860,10 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
     if( GTK_WIDGET_REALIZED( pw ) )
 	gtk_signal_disconnect_by_func( GTK_OBJECT( pw ),
 				       GTK_SIGNAL_FUNC( MainSize ), p );
+    else if ( awg[ WINDOW_MAIN ].nWidth && awg[ WINDOW_MAIN ].nHeight )
+	gtk_window_set_default_size( GTK_WINDOW( pw ),
+                                     awg[ WINDOW_MAIN ].nWidth,
+                                     awg[ WINDOW_MAIN ].nHeight );
     else
 	gtk_window_set_default_size( GTK_WINDOW( pw ),
 				     MAX( 480, preq->width ),
@@ -2069,7 +2148,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
-    setWindowGeometry ( pwMain, &wgMain );
+    setWindowGeometry ( pwMain, &awg[ WINDOW_MAIN ] );
 
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
     /* FIXME add an icon */
@@ -4426,36 +4505,42 @@ extern void GTKEval( char *szOutput ) {
     gdk_font_unref( pf );
 }
 
+static void
+HintOK ( GtkWidget *pw, void *unused ) {
+
+ getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint );
+ gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+ pwHint = NULL;
+ 
+}
+
 extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			  const evalsetup *pes ) {
     
-    evalsetup es;
+    static evalsetup es;
+    GtkWidget *pw;
 
-    GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL,
-					NULL ),
-      *pw;
+    if ( pwHint )
+	gtk_widget_destroy( pwHint );
+      
+    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, HintOK, NULL );
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
     pw = CreateCubeAnalysis ( aarOutput, aarStdDev, NULL, &es, MOVE_NORMAL );
 
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ),
                        pw );
 
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
-    gtk_widget_grab_focus( DialogArea( pwDialog, DA_OK ) );
+    gtk_widget_grab_focus( DialogArea( pwHint, DA_OK ) );
     
-    gtk_widget_show_all( pwDialog );
+    setWindowGeometry ( pwHint, &awg[ WINDOW_HINT ] );
+    
+    gtk_widget_show_all( pwHint );
 
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+
 }
 
 /*
@@ -4565,7 +4650,6 @@ static void DestroyHint( gpointer p ) {
 
 }
 
-
 extern void GTKHint( movelist *pmlOrig ) {
 
     GtkWidget *pwButtons, *pwMoves;
@@ -4580,20 +4664,20 @@ extern void GTKHint( movelist *pmlOrig ) {
     pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
     memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
 
-    pwMoves = CreateMoveList( pml, NULL, TRUE,TRUE );
+    pwMoves = CreateMoveList( pml, NULL, TRUE, TRUE );
 
     /* create dialog */
     
-    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL, NULL );
+    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, HintOK, NULL );
     pwButtons = DialogArea( pwHint, DA_BUTTONS );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
 
-    gtk_window_set_default_size( GTK_WINDOW( pwHint ), 0, 300 );
+    setWindowGeometry ( pwHint, &awg[ WINDOW_HINT ] );
     
     gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, pml );
-    
+
     gtk_widget_show_all( pwHint );
 }
 
@@ -6192,14 +6276,14 @@ extern void GTKSet( void *p ) {
 	ShowBoard(); /* this is overkill, but it works */
     else if( p == &fAnnotation ) {
 	if( fAnnotation ) {
-          setWindowGeometry ( pwAnnotation, &wgAnnotation );
+          setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] );
 	    gtk_widget_show_all( pwAnnotation );
 	    if( pwAnnotation->window )
 		gdk_window_raise( pwAnnotation->window );
 	} else {
 	    /* FIXME actually we should unmap the window, and send a synthetic
 	       UnmapNotify event to the window manager -- see the ICCCM */
-          getWindowGeometry ( &wgAnnotation, pwAnnotation );
+          getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
           gtk_widget_hide( pwAnnotation );
         }
     }

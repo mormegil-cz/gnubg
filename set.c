@@ -2560,3 +2560,144 @@ extern void CommandSetTutorSkillVeryBad( char * sz) {
 
 
 
+static gnubgwindow gwSet;
+
+extern void
+CommandSetGeometryAnnotation ( char *sz ) {
+
+  gwSet = WINDOW_ANNOTATION;
+  szSet = "annotation";
+  szSetCommand = "annotation";
+
+  HandleCommand ( sz, acSetGeometryValues );
+
+}
+
+
+extern void
+CommandSetGeometryHint ( char *sz ) {
+
+  gwSet = WINDOW_HINT;
+  szSet = "hint";
+  szSetCommand = "hint";
+
+  HandleCommand ( sz, acSetGeometryValues );
+
+}
+
+
+extern void
+CommandSetGeometryGame ( char *sz ) {
+
+  gwSet = WINDOW_GAME;
+  szSet = "game-list";
+  szSetCommand = "game";
+
+  HandleCommand ( sz, acSetGeometryValues );
+
+}
+
+
+extern void
+CommandSetGeometryMain ( char *sz ) {
+
+  gwSet = WINDOW_MAIN;
+  szSet = "main";
+  szSetCommand = "main";
+
+  HandleCommand ( sz, acSetGeometryValues );
+
+}
+
+
+extern void
+CommandSetGeometryWidth ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( "Illegal value. "
+              "See 'help set geometry %s width'.\n", szSetCommand );
+  else {
+
+    awg[ gwSet ].nWidth = n;
+    outputf ( "Width of %s window set to %d.\n", szSet, n );
+
+#if USE_GTK
+    if ( fX )
+      UpdateGeometry ( gwSet );
+#endif
+
+  }
+
+
+}
+extern void
+CommandSetGeometryHeight ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( "Illegal value. "
+              "See 'help set geometry %s height'.\n", szSetCommand );
+  else {
+
+    awg[ gwSet ].nHeight = n;
+    outputf ( "Height of %s window set to %d.\n", szSet, n );
+
+#if USE_GTK
+    if ( fX )
+      UpdateGeometry ( gwSet );
+#endif
+
+  }
+
+
+}
+
+extern void
+CommandSetGeometryPosX ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( "Illegal value. "
+              "See 'help set geometry %s xpos'.\n", szSetCommand );
+  else {
+
+    awg[ gwSet ].nPosX = n;
+    outputf ( "X-position of %s window set to %d.\n", szSet, n );
+
+#if USE_GTK
+    if ( fX )
+      UpdateGeometry ( gwSet );
+#endif
+
+  }
+
+
+}
+
+extern void
+CommandSetGeometryPosY ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( "Illegal value. "
+              "See 'help set geometry %s ypos'.\n", szSetCommand );
+  else {
+
+    awg[ gwSet ].nPosY = n;
+    outputf ( "Y-position of %s window set to %d.\n", szSet, n );
+
+#if USE_GTK
+    if ( fX )
+      UpdateGeometry ( gwSet );
+#endif
+
+  }
+
+
+}
+

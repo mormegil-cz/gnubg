@@ -310,9 +310,13 @@ player ap[ 2 ] = {
 
 #if USE_GTK
 
-windowgeometry wgMain = { 0, 0, -1, -1 };
-windowgeometry wgAnnotation = { 250, 200, -1, -1 };
-windowgeometry wgGame = { 0, 400, -1, -1 };
+windowgeometry awg[ NUM_WINDOWS ] =
+  { 
+    { 0, 0, -1, -1 },  /* main */
+    { 250, 200, -1, -1 },    /* game list */
+    { 0, 400, -1, -1 },      /* annotation */
+    { 0, 0, -1, -1 }         /* hint */
+  };
 
 #endif
 
@@ -685,6 +689,26 @@ command cER = {
       N_("Fix what the cube stake has been set to"),
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetGeometryValues[] = {
+    { "width", CommandSetGeometryWidth, N_("set width of window"), 
+      szVALUE, NULL },
+    { "height", CommandSetGeometryHeight, N_("set height of window"),
+      szVALUE, NULL },
+    { "xpos", CommandSetGeometryPosX, N_("set x-position of window"),
+      szVALUE, NULL },
+    { "ypos", CommandSetGeometryPosY, N_("set y-position of window"),
+      szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetGeometry[] = {
+    { "annotation", CommandSetGeometryAnnotation,
+      N_("set geometry of annotation window"), NULL, acSetGeometryValues },
+    { "game", CommandSetGeometryGame,
+      N_("set geometry of game-list window"), NULL, acSetGeometryValues },
+    { "hint", CommandSetGeometryHint,
+      N_("set geometry of game-list window"), NULL, acSetGeometryValues },
+    { "main", CommandSetGeometryMain,
+      N_("set geometry of main window"), NULL, acSetGeometryValues },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
       N_("Show match equities as percentages (on) or probabilities (off)"),
@@ -968,6 +992,7 @@ command cER = {
     { "egyptian", CommandSetEgyptian, 
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
+    { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1053,6 +1078,8 @@ command cER = {
     { "egyptian", CommandShowEgyptian,
       N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
+      NULL, NULL },
+    { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
       NULL, NULL },
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
@@ -3749,6 +3776,8 @@ extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache; 
     char *szFile;
+    static char *aszWindow[] =
+      { "main", "annotation", "game", "hint" };
 
     szParam = NextToken ( &szParam );
     
@@ -4031,6 +4060,21 @@ extern void CommandSaveSettings( char *szParam ) {
         fprintf ( pf,
                   "set path %s \"%s\"\n",
                   acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
+
+    /* geometries */
+
+    RefreshGeometries ();
+
+    for ( i = 0; i < NUM_WINDOWS; ++i )
+        fprintf ( pf, 
+                  "set geometry %s width %d\n"
+                  "set geometry %s height %d\n"
+                  "set geometry %s xpos %d\n" 
+                  "set geometry %s ypos %d\n", 
+                  aszWindow[ i ], awg[ i ].nWidth,
+                  aszWindow[ i ], awg[ i ].nHeight,
+                  aszWindow[ i ], awg[ i ].nPosX,
+                  aszWindow[ i ], awg[ i ].nPosY );
 
     /* the end */
 

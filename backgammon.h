@@ -70,12 +70,20 @@ typedef RETSIGTYPE (*psighandler)( int );
 
 /* position of windows: main window, game list, and annotation */
 
+typedef enum _gnubgwindow {
+  WINDOW_MAIN = 0,
+  WINDOW_GAME,
+  WINDOW_ANNOTATION,
+  WINDOW_HINT,
+  NUM_WINDOWS 
+} gnubgwindow;
+
 typedef struct _windowgeometry {
   gint nWidth, nHeight;
   gint nPosX, nPosY;
 } windowgeometry;
 
-extern windowgeometry wgMain, wgGame, wgAnnotation;
+extern windowgeometry awg[ NUM_WINDOWS ];
 
 #endif
 
@@ -467,6 +475,7 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetRolloutPlayer[], cOnOff, cFilename;
 extern command acAnnotateMove[];
 extern command acSetExportParameters[];
+extern command acSetGeometryValues[];
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
@@ -641,6 +650,14 @@ extern void CommandAccept( char * ),
     CommandSetExportHTMLType ( char * ),
     CommandSetExportParametersEvaluation ( char * ),
     CommandSetExportParametersRollout ( char * ),
+    CommandSetGeometryAnnotation ( char * ),
+    CommandSetGeometryGame ( char * ),
+    CommandSetGeometryHint ( char * ),
+    CommandSetGeometryMain ( char * ),
+    CommandSetGeometryWidth ( char * ),
+    CommandSetGeometryHeight ( char * ),
+    CommandSetGeometryPosX ( char * ),
+    CommandSetGeometryPosY ( char * ),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
     CommandSetMatchID ( char * ),
@@ -728,6 +745,7 @@ extern void CommandAccept( char * ),
     CommandShowEvaluation( char * ),
     CommandShowExport ( char * ),
     CommandShowGammonValues( char * ),
+    CommandShowGeometry ( char * ),
     CommandShowEgyptian( char * ),
     CommandShowJacoby( char * ),
     CommandShowKleinman( char * ),
