@@ -390,6 +390,8 @@ updateStatcontext ( statcontext *psc,
 
 extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
+              evalsetup *pesChequer,
+              evalsetup *pesCube,
               int fUpdateStatistics ) {
 
     static int anBoardMove[ 2 ][ 25 ];
@@ -431,18 +433,18 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	if ( fAnalyseCube && !fFirstMove &&
 	     GetDPEq ( NULL, NULL, &ci ) ) {
           
-          if ( cmp_evalsetup ( &esAnalysisCube, &pmr->n.esDouble ) > 0 ) {
+          if ( cmp_evalsetup ( pesCube, &pmr->n.esDouble ) > 0 ) {
             
 	    if ( GeneralCubeDecision ( "",
 				       aarOutput, aarStdDev, aarsStatistics, 
 				       pms->anBoard, &ci,
-				       &esAnalysisCube ) < 0 )
+				       pesCube ) < 0 )
               return -1;
             
             
 	    FindCubeDecision ( arDouble, aarOutput, &ci );
             
-	    pmr->n.esDouble = esAnalysisCube;
+	    pmr->n.esDouble = *pesCube;
 
             memcpy ( pmr->n.arDouble, arDouble, sizeof ( arDouble ) );
             memcpy ( pmr->n.aarOutput, aarOutput, sizeof ( aarOutput ) );
@@ -479,7 +481,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
 	    PositionKey ( anBoardMove, auch );
 	  
-            if ( cmp_evalsetup ( &esAnalysisChequer, 
+            if ( cmp_evalsetup ( pesChequer,
                                  &pmr->n.esChequer ) > 0 ) {
 
               if( pmr->n.ml.cMoves )
@@ -490,7 +492,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
               if( FindnSaveBestMoves ( &(pmr->n.ml), pmr->n.anRoll[ 0 ],
                                        pmr->n.anRoll[ 1 ],
                                        pms->anBoard, auch, &ci,
-                                       &esAnalysisChequer.ec ) < 0 )
+                                       &pesChequer->ec ) < 0 )
 		return -1;
 
             }
@@ -526,7 +528,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 		pmr->n.ml.cMoves = cAnalysisMoves;
 	    }
 
-            pmr->n.esChequer = esAnalysisChequer;
+            pmr->n.esChequer = *pesChequer;
             
 	}
       
@@ -550,12 +552,12 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    if ( GetDPEq ( NULL, NULL, &ci ) ||
                  ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove ) {
 	      
-              if ( cmp_evalsetup ( &esAnalysisCube, &pmr->d.esDouble ) > 0 ) {
+              if ( cmp_evalsetup ( pesCube, &pmr->d.esDouble ) > 0 ) {
 
 		if ( GeneralCubeDecision ( "",
 					   aarOutput, aarStdDev, aarsStatistics, 
 					   pms->anBoard, &ci,
-					   &esAnalysisCube ) < 0 )
+					   pesCube ) < 0 )
 		    return -1;
 
               }
@@ -566,7 +568,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	      
                 FindCubeDecision ( arDouble, aarOutput, &ci );
 	      
-		esDouble = pmr->d.esDouble = esAnalysisCube;
+		esDouble = pmr->d.esDouble = *pesCube;
 	      
                 memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
                 memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
@@ -644,24 +646,24 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
         pms->fMove = pmr->n.fPlayer;
       }
       
-      if ( esAnalysisCube.et != EVAL_NONE ) {
+      if ( pesCube->et != EVAL_NONE ) {
         
         int nResign;
         float rBefore, rAfter;
 
         GetMatchStateCubeInfo ( &ci, pms );
 
-        if ( cmp_evalsetup ( &esAnalysisCube, &pmr->r.esResign ) > 0 ) {
+        if ( cmp_evalsetup ( pesCube, &pmr->r.esResign ) > 0 ) {
           nResign =
             getResignation ( pmr->r.arResign, pms->anBoard, 
-                             &ci, &esAnalysisCube );
+                             &ci, pesCube );
           
         }
 
         getResignEquities ( pmr->r.arResign, &ci, pmr->r.nResigned,
                             &rBefore, &rAfter );
 
-        pmr->r.esResign = esAnalysisCube;
+        pmr->r.esResign = *pesCube;
 
         pmr->r.stResign = pmr->r.stAccept = SKILL_NONE;
 
@@ -733,7 +735,9 @@ AnalyzeGame ( list *plGame ) {
 
 	ProgressValueAdd( 1 );
 
-        if( AnalyzeMove ( pmr, &msAnalyse, &pmgi->sc, TRUE ) < 0 ) {
+        if( AnalyzeMove ( pmr, &msAnalyse, &pmgi->sc, 
+                          &esAnalysisChequer,
+                          &esAnalysisCube, TRUE ) < 0 ) {
 	    /* analysis incomplete; erase partial summary */
 	    IniStatcontext( &pmgi->sc );
  	    return -1;
@@ -1561,7 +1565,8 @@ extern void CommandAnalyseMove ( char *sz ) {
     /* analyse move */
 
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
-    AnalyzeMove ( plLastMove->plNext->p, &msx, NULL, FALSE );
+    AnalyzeMove ( plLastMove->plNext->p, &msx, NULL, 
+                  &esAnalysisChequer, &esAnalysisCube, FALSE );
 
 #if USE_GTK
   if( fX )

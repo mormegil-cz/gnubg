@@ -416,6 +416,8 @@ extern int fReadline;
 
 extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
+              evalsetup *pesChequer,
+              evalsetup *pesCube,
               int fUpdateStatistics );
 
 extern int

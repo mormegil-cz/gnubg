@@ -2068,7 +2068,7 @@ static skilltype ShouldDrop( moverecord *pmr ) {
 
 	fAnalyseCube = TRUE;
 	memcpy ( &msx, &ms, sizeof ( matchstate ) );
-	AnalyzeMove ( pmr, &msx, NULL, FALSE );
+	AnalyzeMove ( pmr, &msx, NULL, &esEvalChequer, &esEvalCube, FALSE );
 	fAnalyseCube = fAnalyseCubeSave;
 
 	return pmr->d.st;
@@ -2239,7 +2239,7 @@ static skilltype GoodMove (movenormal *p) {
 	 /* ensure we're analyzing moves */
 	 fAnalyseMove = 1;
 	 memcpy ( &msx, &ms, sizeof ( matchstate ) );
-	 AnalyzeMove ( pmr, &msx, NULL, FALSE );
+	 AnalyzeMove ( pmr, &msx, NULL, &esEvalChequer, &esEvalCube, FALSE );
 	 fAnalyseMove = fAnalyseMoveSaved;
 
      return pmr->n.stMove;
@@ -3229,7 +3229,7 @@ static skilltype ShouldTake ( moverecord *pmr ) {
 
 	fAnalyseCube = TRUE;
 	memcpy ( &msx, &ms, sizeof ( matchstate ) );
-	AnalyzeMove ( pmr, &msx, NULL, FALSE );
+	AnalyzeMove ( pmr, &msx, NULL, &esEvalChequer, &esEvalCube, FALSE );
 	fAnalyseCube = fAnalyseCubeSave;
 
 	return pmr->d.st;
