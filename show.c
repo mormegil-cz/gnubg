@@ -1401,6 +1401,7 @@ CommandShowPath ( char *sz ) {
     N_("Export of PostScript files"),
     N_("Load and save of SGF files"),
     N_("Import of GamesGrid SGG files"),
+    N_("Export of text files"),
     N_("Loading of match equity files (.xml)")
   };
 
@@ -1416,7 +1417,7 @@ CommandShowPath ( char *sz ) {
   outputl ( _("Default and current paths "
             "for load, save, import, and export: \n") );
 
-  for ( i = 0; i <= PATH_SGG; ++i ) {
+  for ( i = 0; i <= PATH_MET; ++i ) {
 
     outputf ( "%s:\n", gettext ( aszPathNames[ i ] ) );
     if ( ! strcmp ( aaszPaths[ i ][ 0 ], "" ) )
