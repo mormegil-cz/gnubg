@@ -1,3 +1,17 @@
+Sun Jun 16 19:36:10 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* gnubg.c (ProgressStartValue, ProgressValue, ProgressValueAdd):
+	new functions. Shows "x/y z%" in GTK progress-bar. 
+
+	* analysis.c (NumberMovesMatch, NumberMovesGame): new
+	functions. Calculate number of moves in match/game.
+
+	* analysis.c (CommandAnalyseMatch, CommandAnalyseGame,
+	AnalyseGame): use new progress function.
+
+	* gtkgame.c (GTKProgressValue, GTKProgress): new functions. Shows
+	"x/y z%" in GTK progress-bar.
+
 Fri Jun 15 18:44:19 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	* eval.c (InvertEvaluationR): invert rollout evaluation;

@@ -65,6 +65,10 @@ extern void GTKOutputNew( void );
 extern void GTKProgressStart( char *sz );
 extern void GTKProgress( void );
 extern void GTKProgressEnd( void );
+extern void
+GTKProgressStartValue( char *sz, int iMax );
+extern void
+GTKProgressValue ( int fValue );
 
 extern void GTKDumpStatcontext( statcontext *psc, char *szTitle );
 extern void GTKEval( char *szOutput );
