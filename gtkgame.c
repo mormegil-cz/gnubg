@@ -788,7 +788,7 @@ typedef struct _hintdata {
   GtkWidget *pwEval, *pwEvalSettings;       /* evaluation buttons */
   movelist *pml;
   int fButtonsValid;
-  int iHighlight;
+  int *piHighlight;
 } hintdata;
 
 static int CheckHintButtons( void ) {
@@ -832,7 +832,7 @@ UpdateMoveList ( const hintdata *phd ) {
   float rBest;
   cubeinfo ci;
   movelist *pml = phd->pml;
-  int iHighlight = phd->iHighlight;
+  int *piHighlight = phd->piHighlight;
 
   /* This function should only be called when the game state matches
      the move list. */
@@ -854,7 +854,7 @@ UpdateMoveList ( const hintdata *phd ) {
 
     gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
 
-    if( i && i == pml->cMoves - 1 && i == iHighlight )
+    if( i && i == pml->cMoves - 1 && piHighlight && i == *piHighlight )
       /* The move made is the last on the list.  Some moves might
          have been deleted to fit this one in, so its rank isn't
          known. */
@@ -904,6 +904,36 @@ UpdateMoveList ( const hintdata *phd ) {
                                     pml->amMoves[ i ].anMove ) );
   }
 
+  /* highlight row */
+
+  if( piHighlight && *piHighlight >= 0 ) {
+    GtkStyle *psblack, *ps;
+    
+    gtk_widget_ensure_style( pwMoves );
+    psblack = gtk_style_copy( pwMoves->style );
+    ps = gtk_style_copy( pwMoves->style );
+
+    /* 
+     * reset style 
+     * Necesary if we have reordered the list due to rollouts or evaluations
+     * and the highlighted move is shiftet 
+     */
+    
+    for ( i = 0; i < pml->cMoves; i++ )
+      gtk_clist_set_row_style( GTK_CLIST( pwMoves ), i, psblack );
+    
+    ps->fg[ GTK_STATE_NORMAL ].red = ps->fg[ GTK_STATE_ACTIVE ].red =
+      ps->fg[ GTK_STATE_SELECTED ].red = 0xFFFF;
+    ps->fg[ GTK_STATE_NORMAL ].green = ps->fg[ GTK_STATE_ACTIVE ].green =
+      ps->fg[ GTK_STATE_SELECTED ].green = 0;
+    ps->fg[ GTK_STATE_NORMAL ].blue = ps->fg[ GTK_STATE_ACTIVE ].blue =
+      ps->fg[ GTK_STATE_SELECTED ].blue = 0;
+    
+    gtk_clist_set_row_style( GTK_CLIST( pwMoves ), *piHighlight, ps );
+    
+    gtk_style_unref( ps );
+  }
+    
   /* update storedmoves global struct */
 
   UpdateStoredMoves ( pml, &ms );
@@ -925,6 +955,8 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 #endif
   int c;
   int i;
+
+  int *ai;
 
   if ( !  GTK_CLIST( pwMoves )->selection )
     return;
@@ -986,7 +1018,14 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
   gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
 
-  RefreshMoveList ( phd->pml );
+  ai = (int *) malloc ( phd->pml->cMoves * sizeof ( int ) );
+  RefreshMoveList ( phd->pml, ai );
+
+  if ( phd->pml->cMoves ) 
+    *phd->piHighlight = ai [ *phd->piHighlight ];
+
+  free ( ai );
+
 
   UpdateMoveList ( phd );
 
@@ -1014,6 +1053,7 @@ MoveListEval ( GtkWidget *pw, hintdata *phd ) {
   GList *pl;
   GtkWidget *pwMoves = phd->pw;
   cubeinfo ci;
+  int *ai;
 
   if ( !  GTK_CLIST( pwMoves )->selection )
     return;
@@ -1039,7 +1079,9 @@ MoveListEval ( GtkWidget *pw, hintdata *phd ) {
 
   gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
 
-  RefreshMoveList ( phd->pml );
+  ai = (int *) malloc ( phd->pml->cMoves * sizeof ( int ) );
+  RefreshMoveList ( phd->pml, ai );
+  free ( ai );
 
   UpdateMoveList ( phd );
 
@@ -1067,7 +1109,6 @@ static GtkWidget *
 CreateMoveListTools ( hintdata *phd ) {
 
   GtkWidget *pwTools;
-  GtkWidget *pwHBox;
   GtkWidget *pwEval = gtk_button_new_with_label ( _("Eval") );
   GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
@@ -1127,7 +1168,7 @@ CreateMoveListTools ( hintdata *phd ) {
 }
 
 
-static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
+static GtkWidget *CreateMoveList( hintdata *phd, int *piHighlight ) {
 
     static char *aszTitle[] = {
 	N_("Rank"), 
@@ -1150,7 +1191,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 
     /* set titles */
 
-    phd->iHighlight = iHighlight;
+    phd->piHighlight = piHighlight;
 
     for ( i = 0; i < 11; i++ )
      aszTemp[ i ] = gettext ( aszTitle[ i ] );
@@ -1180,24 +1221,6 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
     UpdateMoveList ( phd );
 
 
-    if( iHighlight >= 0 ) {
-	GtkStyle *ps;
-
-	gtk_widget_ensure_style( pwMoves );
-	ps = gtk_style_copy( pwMoves->style );
-
-	ps->fg[ GTK_STATE_NORMAL ].red = ps->fg[ GTK_STATE_ACTIVE ].red =
-	    ps->fg[ GTK_STATE_SELECTED ].red = 0xFFFF;
-	ps->fg[ GTK_STATE_NORMAL ].green = ps->fg[ GTK_STATE_ACTIVE ].green =
-	    ps->fg[ GTK_STATE_SELECTED ].green = 0;
-	ps->fg[ GTK_STATE_NORMAL ].blue = ps->fg[ GTK_STATE_ACTIVE ].blue =
-	    ps->fg[ GTK_STATE_SELECTED ].blue = 0;
-
-	gtk_clist_set_row_style( GTK_CLIST( pwMoves ), iHighlight, ps );
-
-	gtk_style_unref( ps );
-    }
-    
     return pwMoves;
 }
 
@@ -2382,7 +2405,7 @@ static void SetAnnotation( moverecord *pmr ) {
                                 GTK_SCROLLED_WINDOW( pw ),
                                 GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
               gtk_container_add( GTK_CONTAINER( pw ),
-                                 CreateMoveList( &hd, pmr->n.iMove ) );
+                                 CreateMoveList( &hd, &pmr->n.iMove ) );
 
               gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
               gtk_box_pack_end ( GTK_BOX ( pwHBox ),
@@ -5734,7 +5757,7 @@ extern void GTKHint( movelist *pmlOrig ) {
     hd.pwMove = pwMove;
     hd.fButtonsValid = TRUE;
     hd.pml = pml;
-    hd.pw = pwMoves = CreateMoveList( &hd, -1 /* FIXME change if they've
+    hd.pw = pwMoves = CreateMoveList( &hd, NULL /* FIXME change if they've
 						 already moved */ );
 
     /* create dialog */
