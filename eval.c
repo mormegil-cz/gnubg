@@ -767,7 +767,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    fprintf( stderr, _("%s: incorrect weights version (version %s "
                                " is required, but these weights "
                                "are %.2f)\n"), 
-                     WEIGHTS_VERSION, szWeightsBinary, r );
+                     szWeights, WEIGHTS_VERSION, r );
 	else {
 #if HAVE_MMAP
 	    struct stat st;
@@ -818,7 +818,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
                 fprintf( stderr, _("%s: incorrect weights version (version "
                                    "%s is required,\nbut these weights "
                                    "are %s)\n"), 
-                         WEIGHTS_VERSION, szWeights, szFileVersion );
+                         szWeights, WEIGHTS_VERSION, szFileVersion );
 	    else {
 
                 PushLocale ( "C" );
