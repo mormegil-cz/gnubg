@@ -1,3 +1,9 @@
+Sun Sep  7 15:23:01 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (NewSet): ensure that tutor mode flag follows
+	global setting.
+	* gtkexport.c: legend is not implemented yet.
+
 Sun Sep  7 15:11:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* external.c (CommandExternal), play.c (ComputerTurn): yet another

@@ -374,6 +374,10 @@ ExportSet ( exportwidget *pew ) {
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 4 ] ),
                                 pexs->fIncludeMatchInfo );
 
+  /* FIXME: legend is not implemented */
+
+  gtk_widget_set_sensitive( GTK_WIDGET( pew->apwInclude[ 3 ] ), FALSE );
+
   /* board */
 
   gtk_adjustment_set_value ( pew->padjDisplayBoard, pexs->fDisplayBoard );

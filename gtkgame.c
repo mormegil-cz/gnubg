@@ -3855,6 +3855,8 @@ static void NewOK( GtkWidget *pw, newwidget *pnw ) {
 
 static void NewSet( newwidget *pnw) {
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwM ), TRUE );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwTutorMode ),
+                                fTutor );
   gtk_adjustment_set_value( GTK_ADJUSTMENT( pnw->padjML ), nDefaultLength );
 }
 
