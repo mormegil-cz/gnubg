@@ -1,0 +1,65 @@
+Todo
+====
+
+* Edit board - piece setup not yet done - are there 2 different ways?
+	Look at board_quickedit() calls + normal press code
+
+* Right mouse button dragging not working
+	No events from gtk - don't know why
+
+* Move string no longer shown
+	Put back or move elsewhere...
+
+* Add animation effects
+	Animate flag
+	Interupt - sort out what happens here
+	Blink moves?
+
+* File tidy
+	changes - put in #if BOARD3D
+	Add if( fX && fDisplay ) where necessary
+	remove build warnings
+
+* Roll dice
+	* 1st shake of new game, does not work: board (dice) not initialized properly
+	Careful setting just dice[0], caused problems when double first shake...
+
+* Change display settings options to allow 3d skin settings
+	Merge in with existing 2d settings?
+* Add other 3d settings too (new page)
+
+* Swapping 2d<->3d at tricky moments
+	Eg. when animating (call stopanimate())
+	exit - newgame etc. call stopidle() (n.b. doesn't exit if flag waving :) )
+	flag still waves if settings shown when resigning - ok?
+
+* Move textures from data directory to boards or boards/3d
+
+Bugs
+====
+
+Strange crash:
+	gnubg's go, 
+		shake+no go, hangs *when dice area clicked* (just after gnus go)
+	(2 g_prints in roll code, seem to have stopped it going wrong...)
+
+Other things
+============
+
+1st skin - red pieces look a bit strange (transparancy)
+
+start next game - cube at top, seems to resize at wrong point (after dice roll)
+	Reset cube earlier/update viewing volume on update
+
+Merge button press code together
+
+Remove test files from lib build
+
+Remove g_prints/debug code
+
+FTGL uses C++
+
+Check performance
+	2d - unaccelerated + at work
+
+Remove initialization code (not needed from lib)
