@@ -3778,7 +3778,7 @@ CommandExportPositionGammOnline ( char *sz ) {
                       getMoveNumber ( plGame, pmr ) - 1, FALSE );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
-                    "http://www.gammonline.com/demo/Images/",
+                    "../Images/",
                     "gif", HTML_EXPORT_TYPE_BBS, 
                     HTML_EXPORT_CSS_INLINE );
 

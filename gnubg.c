@@ -518,8 +518,9 @@ command cER = {
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
-    { "bbshtml", CommandExportPositionBBSHtml,
-      N_("Save the current position in .html format (special for BBS)"), 
+    { "gammononline", CommandExportPositionGammOnline,
+      N_("Save the current position in .html format "
+         "(special for GammonOnline)"), 
       szFILENAME, &cFilename },
     { "eps", CommandExportPositionEPS, N_("Save the current position in "
       "Encapsulated PostScript format"), szFILENAME, &cFilename },
