@@ -2779,11 +2779,6 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
       case MOVE_TAKE:
       case MOVE_DROP:
 
-	if( pmr->d.fPlayer != msExport.fMove ) {
-	    SwapSides( msExport.anBoard );
-	    msExport.fMove = pmr->d.fPlayer;
-	}
-      
         HTMLBoardHeader ( pf,&msExport, aszColorName, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
