@@ -318,7 +318,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
     UpdateSetting( &cAutoDoubles );
     
     if( cAutoDoubles ) {
-	if( nMatchTo > 0 )
+	if( ms.nMatchTo > 0 )
 	    outputl( "(Note that automatic doubles will have no effect until you "
 		  "start session play.)" );
 	else if( !fCubeUse )
@@ -352,7 +352,7 @@ extern void CommandSetBoard( char *sz ) {
     int an[ 2 ][ 25 ];
     movesetboard *pmsb;
     
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set the board." );
 
 	return;
@@ -372,7 +372,7 @@ extern void CommandSetBoard( char *sz ) {
     pmsb->mt = MOVE_SETBOARD;
     pmsb->sz = NULL;
     
-    if( fMove )
+    if( ms.fMove )
 	SwapSides( an );
     PositionKey( an, pmsb->auchKey );
     
@@ -383,12 +383,12 @@ extern void CommandSetBoard( char *sz ) {
 
 static int CheckCubeAllowed( void ) {
     
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set the cube." );
 	return -1;
     }
 
-    if( fCrawford ) {
+    if( ms.fCrawford ) {
 	outputl( "The cube is disabled during the Crawford game." );
 	return -1;
     }
@@ -496,7 +496,7 @@ extern void CommandSetCubeOwner( char *sz ) {
     
     AddMoveRecord( pmscp );
     
-    outputf( "%s now owns the cube.\n", ap[ fCubeOwner ].szName );
+    outputf( "%s now owns the cube.\n", ap[ ms.fCubeOwner ].szName );
     
 #if USE_GUI
     if( fX )
@@ -511,21 +511,21 @@ extern void CommandSetCubeUse( char *sz ) {
 		   "Use of the doubling cube is disabled." ) < 0 )
 	return;
 
-    if( !nMatchTo && fJacoby && !fCubeUse )
+    if( !ms.nMatchTo && fJacoby && !fCubeUse )
 	outputl( "(Note that you'll have to disable the Jacoby rule if you want "
 	      "gammons and\nbackgammons to be scored -- see `help set "
 	      "jacoby')." );
     
-    if( fCrawford && fCubeUse )
+    if( ms.fCrawford && fCubeUse )
 	outputl( "(But the Crawford rule is in effect, so you won't be able to "
 	      "use it during\nthis game.)" );
-    else if( gs == GAME_PLAYING && !fCubeUse ) {
+    else if( ms.gs == GAME_PLAYING && !fCubeUse ) {
 	/* The cube was being used and now it isn't; reset it to 1,
 	   centred. */
-	nCube = 1;
-	fCubeOwner = -1;
-	UpdateSetting( &nCube );
-	UpdateSetting( &fCubeOwner );
+	ms.nCube = 1;
+	ms.fCubeOwner = -1;
+	UpdateSetting( &ms.nCube );
+	UpdateSetting( &ms.fCubeOwner );
 	
 #if USE_GUI
 	if( fX )
@@ -603,7 +603,7 @@ extern void CommandSetDice( char *sz ) {
     int n0, n1;
     movesetdice *pmsd;
     
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set the dice." );
 
 	return;
@@ -627,7 +627,7 @@ extern void CommandSetDice( char *sz ) {
     pmsd = malloc( sizeof( *pmsd ) );
     pmsd->mt = MOVE_SETDICE;
     pmsd->sz = NULL;
-    pmsd->fPlayer = fMove;
+    pmsd->fPlayer = ms.fMove;
     pmsd->anDice[ 0 ] = n0;
     pmsd->anDice[ 1 ] = n1;
     pmsd->lt = LUCK_NONE;
@@ -794,7 +794,7 @@ extern void CommandSetNackgammon( char *sz ) {
 	       "standard backgammon starting position." );
 
 #if USE_GUI
-    if( fX && gs == GAME_NONE )
+    if( fX && ms.gs == GAME_NONE )
 	ShowBoard();
 #endif
 }
@@ -1305,21 +1305,22 @@ extern void CommandSetScore( char *sz ) {
     n1 = ParseNumber( &sz );
 
     if( n0 < 0 ) /* -n means n-away */
-	n0 += nMatchTo;
+	n0 += ms.nMatchTo;
 
     if( n1 < 0 )
-	n1 += nMatchTo;
+	n1 += ms.nMatchTo;
     
     if( n0 < 0 || n1 < 0 ) {
-	outputf( "You must specify two scores between 0 and %d.\n", nMatchTo );
+	outputf( "You must specify two scores between 0 and %d.\n",
+		 ms.nMatchTo );
 	return;
     }
 
-    anScore[ 0 ] = n0;
-    anScore[ 1 ] = n1;
+    ms.anScore[ 0 ] = n0;
+    ms.anScore[ 1 ] = n1;
 
-    fCrawford = ( n0 == nMatchTo - 1 ) != ( n1 == nMatchTo - 1 );
-    fPostCrawford = ( n0 == nMatchTo - 1 ) && ( n1 == nMatchTo - 1 );
+    ms.fCrawford = ( n0 == ms.nMatchTo - 1 ) != ( n1 == ms.nMatchTo - 1 );
+    ms.fPostCrawford = ( n0 == ms.nMatchTo - 1 ) && ( n1 == ms.nMatchTo - 1 );
     
     CommandShowScore( NULL );
 
@@ -1404,13 +1405,13 @@ extern void CommandSetTurn( char *sz ) {
     char *pch = NextToken( &sz );
     int i;
 
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set a player on roll." );
 
 	return;
     }
     
-    if( fResigned ) {
+    if( ms.fResigned ) {
 	outputl( "Please resolve the resignation first." );
 
 	return;
@@ -1434,15 +1435,15 @@ extern void CommandSetTurn( char *sz ) {
 	return;
     }
 
-    if( fTurn != i )
-	SwapSides( anBoard );
+    if( ms.fTurn != i )
+	SwapSides( ms.anBoard );
     
-    fTurn = fMove = i;
+    ms.fTurn = ms.fMove = i;
     CancelCubeAction();
     fNextTurn = FALSE;
-    anDice[ 0 ] = anDice[ 1 ] = 0;
+    ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;
 
-    UpdateSetting( &fTurn );
+    UpdateSetting( &ms.fTurn );
 
 #if USE_GUI
     if( fX )
@@ -1467,26 +1468,26 @@ extern void CommandSetJacoby( char *sz ) {
 
 extern void CommandSetCrawford( char *sz ) {
 
-  if ( nMatchTo > 0 ) {
-    if ( ( nMatchTo - anScore[ 0 ] == 1 ) || 
-	 ( nMatchTo - anScore[ 1 ] == 1 ) ) {
+  if ( ms.nMatchTo > 0 ) {
+    if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
+	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
 
-      if( SetToggle( "crawford", &fCrawford, sz, 
+      if( SetToggle( "crawford", &ms.fCrawford, sz, 
 		 "This game is the Crawford game (no doubling allowed).",
 		 "This game is not the Crawford game." ) < 0 )
 	  return;
 
       /* sanity check */
-      fPostCrawford = !fCrawford;
+      ms.fPostCrawford = !ms.fCrawford;
 
-      if( fCrawford )
+      if( ms.fCrawford )
 	  CancelCubeAction();
     } else {
       outputl( "Cannot set whether this is the Crawford game\n"
 	    "as none of the players are 1-away from winning." );
     }
   }
-  else if ( ! nMatchTo ) 
+  else if ( !ms.nMatchTo ) 
       outputl( "Cannot set Crawford play for money sessions." );
   else
       outputl( "No match in progress (type `new match n' to start one)." );
@@ -1494,25 +1495,25 @@ extern void CommandSetCrawford( char *sz ) {
 
 extern void CommandSetPostCrawford( char *sz ) {
 
-  if ( nMatchTo > 0 ) {
-    if ( ( nMatchTo - anScore[ 0 ] == 1 ) || 
-	 ( nMatchTo - anScore[ 1 ] == 1 ) ) {
+  if ( ms.nMatchTo > 0 ) {
+    if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
+	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
 
-      SetToggle( "postcrawford", &fPostCrawford, sz, 
+      SetToggle( "postcrawford", &ms.fPostCrawford, sz, 
 		 "This is post-Crawford play (doubling allowed).",
 		 "This is not post-Crawford play." );
 
       /* sanity check */
-      fCrawford = !fPostCrawford;
+      ms.fCrawford = !ms.fPostCrawford;
 
-      if( fCrawford )
+      if( ms.fCrawford )
 	  CancelCubeAction();
     } else {
       outputl( "Cannot set whether this is post-Crawford play\n"
 	    "as none of the players are 1-away from winning." );
     }
   }
-  else if ( ! nMatchTo ) 
+  else if ( !ms.nMatchTo ) 
       outputl( "Cannot set post-Crawford play for money sessions." );
   else
       outputl( "No match in progress (type `new match n' to start one)." );

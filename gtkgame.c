@@ -626,10 +626,10 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     
     CalculateBoard();
 
-    UpdateSetting( &nCube );
-    UpdateSetting( &fCubeOwner );
-    UpdateSetting( &fTurn );
-    UpdateSetting( &gs );
+    UpdateSetting( &ms.nCube );
+    UpdateSetting( &ms.fCubeOwner );
+    UpdateSetting( &ms.fTurn );
+    UpdateSetting( &ms.gs );
     
     SetMoveRecord( pl->p );
     
@@ -711,7 +711,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 
     /* This function should only be called when the game state matches
        the move list. */
-    assert( fMove == 0 || fMove == 1 );
+    assert( ms.fMove == 0 || ms.fMove == 1 );
     
     for( i = 0; i < 11; i++ ) {
 	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
@@ -724,10 +724,9 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
     gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
 				  GTK_SELECTION_MULTIPLE );
 
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		  fCrawford, fJacoby, fBeavers );
+    GetMatchStateCubeInfo( &ci, &ms );
     
-    if( fOutputMWC && nMatchTo ) {
+    if( fOutputMWC && ms.nMatchTo ) {
 	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "MWC" );
 	rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
     } else {
@@ -771,7 +770,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 	    
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
 
-	if( fOutputMWC && nMatchTo )
+	if( fOutputMWC && ms.nMatchTo )
 	    sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
 						     &ci ) );
 	else
@@ -779,7 +778,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
 
 	if( i ) {
-	    if( fOutputMWC && nMatchTo )
+	    if( fOutputMWC && ms.nMatchTo )
 		sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
 			 * 100.0f - rBest );
 	    else
@@ -788,7 +787,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 	}
 	
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
-			    FormatMove( sz, anBoard,
+			    FormatMove( sz, ms.anBoard,
 					pml->amMoves[ i ].anMove ) );
     }
 
@@ -1049,7 +1048,7 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 	sz[ 1 ] = pmr->n.anRoll[ 1 ] + '0';
 	sz[ 2 ] = ':';
 	sz[ 3 ] = ' ';
-	FormatMove( sz + 4, anBoard, pmr->n.anMove );
+	FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );
 	strcat( sz, aszSkillTypeAbbr[ pmr->n.st ] );
 	break;
 
@@ -1057,10 +1056,10 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 	fPlayer = pmr->d.fPlayer;
 	pch = sz;
 	
-	if( fDoubled )
-	    sprintf( sz, "Redouble to %d", nCube << 2 );
+	if( ms.fDoubled )
+	    sprintf( sz, "Redouble to %d", ms.nCube << 2 );
 	else
-	    sprintf( sz, "Double to %d", nCube << 1 );
+	    sprintf( sz, "Double to %d", ms.nCube << 1 );
 	    
 	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
 	break;
@@ -1214,9 +1213,8 @@ static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
 
     if( et == EVAL_NONE )
 	return NULL;
-    
-    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		 fCrawford, fJacoby, fBeavers );
+
+    GetMatchStateCubeInfo( &ci, &ms );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
@@ -1260,9 +1258,8 @@ static GtkWidget *TakeAnalysis( movetype mt, float arDouble[], evaltype et,
     pch = ( mt == MOVE_TAKE && rError == 0.0f ) ||
 	( mt == MOVE_DROP && rError != 0.0f ) ? "Take" : "Pass";
 
-    if( fOutputMWC && nMatchTo ) {
-	SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		     fCrawford, fJacoby, fBeavers );
+    if( fOutputMWC && ms.nMatchTo ) {
+	GetMatchStateCubeInfo( &ci, &ms );
 	
 	sprintf( sz, "Correct response: %s (%+0.3f%%)", pch,
 		 100.0f * ( eq2mwc( rError, &ci ) - eq2mwc( 0.0f, &ci ) ) );
@@ -1295,9 +1292,8 @@ static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
     pch = sz + sprintf( sz, "Rolled %d%d", n0, n1 );
     
     if( rLuck != -HUGE_VALF ) {
-	if( fOutputMWC && nMatchTo ) {
-	    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-			 fCrawford, fJacoby, fBeavers );
+	if( fOutputMWC && ms.nMatchTo ) {
+	    GetMatchStateCubeInfo( &ci, &ms );
 	    
 	    pch += sprintf( pch, " (%+0.3f%%)",
 		     100.0f * ( eq2mwc( rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
@@ -1369,13 +1365,13 @@ static void SetAnnotation( moverecord *pmr ) {
 
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
-	    fMoveOld = fMove;
-	    fTurnOld = fTurn;
+	    fMoveOld = ms.fMove;
+	    fTurnOld = ms.fTurn;
 	    
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    
-	    fMove = fTurn = pmr->n.fPlayer;
+	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 	    
 	    if( ( pw = CubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
 				     &pmr->n.esDouble ) ) )
@@ -1394,7 +1390,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    gtk_box_pack_end( GTK_BOX( pwBox ), SkillMenu( pmr->n.st ),
 			      FALSE, FALSE, 4 );
 	    strcpy( sz, "Moved " );
-	    FormatMove( sz + 6, anBoard, pmr->n.anMove );
+	    FormatMove( sz + 6, ms.anBoard, pmr->n.anMove );
 	    gtk_box_pack_end( GTK_BOX( pwBox ),
 			      gtk_label_new( sz ), FALSE, FALSE, 0 );
 			      
@@ -1415,9 +1411,8 @@ static void SetAnnotation( moverecord *pmr ) {
 		pwAnalysis = NULL;
 	    }
 		
-	    
-	    fMove = fMoveOld;
-	    fTurn = fTurnOld;
+	    ms.fMove = fMoveOld;
+	    ms.fTurn = fTurnOld;
 	    break;
 
 	case MOVE_DOUBLE:
@@ -1589,19 +1584,19 @@ extern void GTKAddGame( char *sz ) {
     GtkWidget *pw = gtk_menu_item_new_with_label( sz ),
 	*pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
     
-    if( !cGames )
+    if( !ms.cGames )
 	/* Delete the "(no game)" item. */
 	gtk_container_foreach( GTK_CONTAINER( pwMenu ),
 			       (GtkCallback) MenuDelete, pwMenu );
 
     gtk_signal_connect( GTK_OBJECT( pw ), "activate",
 			GTK_SIGNAL_FUNC( SelectGame ),
-			GINT_TO_POINTER( cGames ) );
+			GINT_TO_POINTER( ms.cGames ) );
     
     gtk_widget_show( pw );
     gtk_menu_append( GTK_MENU( pwMenu ), pw );
     
-    GTKSetGame( cGames );
+    GTKSetGame( ms.cGames );
 }
 
 /* Delete i and subsequent games. */
@@ -1640,7 +1635,7 @@ extern void GTKUpdateAnnotations( void ) {
 
     for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
 	GTKAddMoveRecord( pl->p );
-	ApplyMoveRecord( pl->p );
+	ApplyMoveRecord( &ms, pl->p );
     }
 
     CalculateBoard();
@@ -1986,12 +1981,12 @@ extern void RunGTK( void ) {
     for( ptc = atc; ptc->p; ptc++ )
 	GTKSet( ptc->p );
     GTKSet( &rngCurrent );
-    GTKSet( &fCubeOwner );
-    GTKSet( &nCube );
+    GTKSet( &ms.fCubeOwner );
+    GTKSet( &ms.nCube );
     GTKSet( ap );
-    GTKSet( &fTurn );
+    GTKSet( &ms.fTurn );
     GTKSet( &metCurrent );
-    GTKSet( &gs );
+    GTKSet( &ms.gs );
     
     ShowBoard();
 
@@ -2661,7 +2656,7 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 
     char *pch;
     
-    if( gs == GAME_NONE ) {
+    if( ms.gs == GAME_NONE ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	outputx();
 	
@@ -2687,7 +2682,7 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
     char *pch;
     
-    if( gs == GAME_NONE ) {
+    if( ms.gs == GAME_NONE ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	outputx();
 	
@@ -2973,8 +2968,15 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     GTKAllowStdin();
 
-    if( fOK )
-	SetEvalCommands( "set evaluation", &ec, &esEvalChequer.ec );
+    if( fOK ) {
+	/* FIXME this is a temporary hack for compatibility with the
+	   old evalsetup... the interface should be extended to allow
+	   different settings for chequer and cube evaluations, and
+	   rollouts. */
+	SetEvalCommands( "set evaluation chequer eval", &ec,
+			 &esEvalChequer.ec );
+	SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );
+    }
 }
 
 typedef struct _playerswidget {
@@ -3149,9 +3151,15 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		    sprintf( sz, "set player %d gnubg", i );
 		    UserCommand( sz );
 		}
-		
-		sprintf( sz, "set player %d evaluation", i );
-		SetEvalCommands( sz, &apTemp[ i ].esChequer.ec, &ap[ i ].esChequer.ec );
+
+		/* FIXME another temporary hack (see comment in
+		   SetEval) */
+		sprintf( sz, "set player %d chequer evaluation", i );
+		SetEvalCommands( sz, &apTemp[ i ].esChequer.ec,
+				 &ap[ i ].esChequer.ec );
+		sprintf( sz, "set player %d cube evaluation", i );
+		SetEvalCommands( sz, &apTemp[ i ].esCube.ec,
+				 &ap[ i ].esCube.ec );
 		break;
 		
 	    case PLAYER_PUBEVAL:
@@ -3288,7 +3296,9 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 	    UserCommand( sz );
 	}
 
-	SetEvalCommands( "set rollout evaluation", &rw.ec, &ecRollout );
+	/* FIXME another temporary hack (see comment in SetEval) */
+	SetEvalCommands( "set rollout chequer", &rw.ec, &ecRollout );
+	SetEvalCommands( "set rollout cube", &rw.ec, &ecRollout );
 	
 	outputresume();
     }
@@ -3343,7 +3353,7 @@ static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
     i = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
     pm = gtk_clist_get_row_data( GTK_CLIST( pwMoves ), i );
 
-    FormatMove( move, anBoard, pm->anMove );
+    FormatMove( move, ms.anBoard, pm->anMove );
     UserCommand( move );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
@@ -3441,7 +3451,7 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
     qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
 
     for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
-	FormatMoveHint( pch, anBoard, phd->pml, an[ i ], TRUE );
+	FormatMoveHint( pch, ms.anBoard, phd->pml, an[ i ], TRUE );
         
     gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
 			    sz, strlen( sz ) );
@@ -3903,19 +3913,19 @@ extern void GTKSet( void *p ) {
 	    gtk_item_factory_get_widget_by_action( pif, agc[ metCurrent ] ) ),
 					TRUE );
 	fAutoCommand = FALSE;
-    } else if( p == &fCubeOwner ) {
+    } else if( p == &ms.fCubeOwner ) {
 	/* Handle the cube owner radio items. */
 	fAutoCommand = TRUE;
 	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_OWNER_0 +
-		fCubeOwner ) ), TRUE );
+		ms.fCubeOwner ) ), TRUE );
 	fAutoCommand = FALSE;
-    } else if( p == &nCube ) {
+    } else if( p == &ms.nCube ) {
 	/* Handle the cube value radio items. */
 	int i;
 
 	/* Find log_2 of the cube value. */
-	for( i = 0; nCube >> ( i + 1 ); i++ )
+	for( i = 0; ms.nCube >> ( i + 1 ); i++ )
 	    ;
 	
 	fAutoCommand = TRUE;
@@ -3943,26 +3953,26 @@ extern void GTKSet( void *p ) {
 				    TRANS(ap[ 0 ].szName) );
 	gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2,
 				    TRANS(ap[ 1 ].szName) );
-    } else if( p == &fTurn ) {
+    } else if( p == &ms.fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;
 	
-	if( fTurn >= 0 )
+	if( ms.fTurn >= 0 )
 	    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 		gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 +
-						       fTurn ) ), TRUE );
+						       ms.fTurn ) ), TRUE );
 	fAutoCommand = FALSE;
-    } else if( p == &gs ) {
+    } else if( p == &ms.gs ) {
 	/* Handle the game state. */
 	fAutoCommand = TRUE;
 
-	board_set_playing( BOARD( pwBoard ), gs == GAME_PLAYING );
+	board_set_playing( BOARD( pwBoard ), ms.gs == GAME_PLAYING );
 
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
-			 gs == GAME_PLAYING );
+			 ms.gs == GAME_PLAYING );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
-			 gs == GAME_PLAYING );
+			 ms.gs == GAME_PLAYING );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_GAME ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
@@ -3981,7 +3991,7 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_ENGINE ), TRUE );
 	
 	fAutoCommand = FALSE;
-    } else if( p == &fCrawford )
+    } else if( p == &ms.fCrawford )
 	ShowBoard(); /* this is overkill, but it works */
     else if( p == &fAnnotation ) {
 	if( fAnnotation ) {

@@ -71,7 +71,7 @@ typedef enum _playertype {
 typedef struct _player {
     char szName[ 32 ];
     playertype pt;
-		evaltype etChequer, etCube; /* PLAYER_GNU */
+    evaltype etChequer, etCube; /* PLAYER_GNU */
     evalsetup esChequer, esCube; /* PLAYER_GNU */
     int h; /* PLAYER_EXTERNAL */
 } player;
@@ -182,21 +182,21 @@ typedef enum _gamestate {
     GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
 } gamestate; 
 
-/* The game state is represented by the board position (anBoard),
+/* The match state is represented by the board position (anBoard),
    fTurn (indicating which player makes the next decision), fMove
    (which indicates which player is on roll: normally the same as
    fTurn, but occasionally different, e.g. if a double has been
    offered).  anDice indicate the roll to be played (0,0 indicates the
-   roll has not been made).
+   roll has not been made). */
+typedef struct _matchstate {
+    int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned, fDoubled,
+	cGames, fMove, fCubeOwner, fCrawford, fPostCrawford, nMatchTo,
+	anScore[ 2 ], nCube;
+    gamestate gs;
+} matchstate;
 
-   The game state should generally only be modified by play.c; this
-   isn't true at the moment, but other code should be (re)written to
-   create an appropriate moverecord and call AddMoveRecord on it, so
-   that the game record is kept consistent. */
-extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned, fDoubled,
-    cGames, fNextTurn, fMove, fCubeOwner, fCrawford, fPostCrawford, nMatchTo,
-    anScore[ 2 ], nCube;
-extern gamestate gs;
+extern matchstate ms;
+extern int fNextTurn;
 
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
@@ -251,7 +251,7 @@ extern char *NextToken( char **ppch );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
-extern void ApplyMoveRecord( moverecord *pmr );
+extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
 extern void AddGame( moverecord *pmr );
@@ -260,6 +260,7 @@ extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern int ComputerTurn( void );
 extern void FreeMatch( void );
+extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );

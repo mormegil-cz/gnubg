@@ -1,3 +1,15 @@
+Mon May 21 10:37:38 2001  Gary Wong  <gtw@research.att.com>
+
+	* backgammon.h (matchstate): New struct.
+	* analysis.c (AnalyzeGame), latex.c (ExportGameLaTeX): Use
+	matchstate struct.
+	* gnubg.c, gtkboard.c, gtkgame.c, guile.c, import.c, play.c,
+	set.c, sgf.c, show.c: Use ms instead of the old global variables.
+	
+	* gnubgtest: Adjusted to use the new evalsetup commands.
+
+	* rollout.c: Use variable length arrays or alloca() if available.
+	
 Thu May 17 23:46:11 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	This is a large commit. It includes the promised flexibility in

@@ -586,21 +586,21 @@ static void RestoreNode( list *pl ) {
 	    PointList( pp->pl->plNext, an );
 	    for( i = 0; i < 25; i++ )
 		if( an[ i ] ) {
-		    anBoard[ 0 ][ i == 24 ? i : 23 - i ] = 0;
-		    anBoard[ 1 ][ i ] = 0;
+		    ms.anBoard[ 0 ][ i == 24 ? i : 23 - i ] = 0;
+		    ms.anBoard[ 1 ][ i ] = 0;
 		}
 	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'B' ) {
 	    fSetBoard = TRUE;
 	    PointList( pp->pl->plNext, an );
 	    for( i = 0; i < 25; i++ )
-		anBoard[ 0 ][ i == 24 ? i : 23 - i ] += an[ i ];
+		ms.anBoard[ 0 ][ i == 24 ? i : 23 - i ] += an[ i ];
 	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'W' ) {
 	    fSetBoard = TRUE;
 	    PointList( pp->pl->plNext, an );
 	    for( i = 0; i < 25; i++ )
-		anBoard[ 1 ][ i ] += an[ i ];
+		ms.anBoard[ 1 ][ i ] += an[ i ];
 	} else if( pp->ach[ 0 ] == 'P' && pp->ach[ 1 ] == 'L' )
-	    fTurn = fMove = *( (char *) pp->pl->plNext->p ) == 'B';
+	    ms.fTurn = ms.fMove = *( (char *) pp->pl->plNext->p ) == 'B';
 	else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
 	    for( i = 1; i <= MAX_CUBE; i <<= 1 )
 		if( atoi( pp->pl->plNext->p ) == i ) {
@@ -645,7 +645,7 @@ static void RestoreNode( list *pl ) {
 		pmr = malloc( sizeof( pmr->sd ) );
 		pmr->mt = MOVE_SETDICE;
 		pmr->sd.sz = NULL;
-		pmr->sd.fPlayer = fMove;
+		pmr->sd.fPlayer = ms.fMove;
 		pmr->sd.anDice[ 0 ] = ach[ 0 ] - '0';
 		pmr->sd.anDice[ 1 ] = ach[ 1 ] - '0';
 	    }
@@ -684,7 +684,7 @@ static void RestoreNode( list *pl ) {
 	pmr = malloc( sizeof( pmr->sb ) );
 	pmr->mt = MOVE_SETBOARD;
 	pmr->sb.sz = NULL;
-	PositionKey( anBoard, pmr->sb.auchKey );
+	PositionKey( ms.anBoard, pmr->sb.auchKey );
     }
 
     if( pmr && ppC )
@@ -755,7 +755,7 @@ static void RestoreGame( list *pl ) {
 
     moverecord *pmr, *pmrResign;
     
-    InitBoard( anBoard );
+    InitBoard( ms.anBoard );
 
     /* FIXME should anything be done with the current game? */
     
@@ -763,11 +763,11 @@ static void RestoreGame( list *pl ) {
 
     ListInsert( &lMatch, plGame );
 
-    anDice[ 0 ] = anDice[ 1 ] = 0;
-    fResigned = fDoubled = FALSE;
-    nCube = 1;
-    fTurn = fMove = fCubeOwner = -1;
-    gs = GAME_NONE;
+    ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;
+    ms.fResigned = ms.fDoubled = FALSE;
+    ms.nCube = 1;
+    ms.fTurn = ms.fMove = ms.fCubeOwner = -1;
+    ms.gs = GAME_NONE;
     
     RestoreTree( pl, TRUE );
 
@@ -777,13 +777,13 @@ static void RestoreGame( list *pl ) {
     AddGame( pmr );
     
     if( pmr->g.fResigned ) {
-	fTurn = fMove = -1;
+	ms.fTurn = ms.fMove = -1;
 	
 	pmrResign = malloc( sizeof( pmrResign ->r ) );
 	pmrResign->mt = MOVE_RESIGN;
 	pmrResign->r.sz = NULL;
 	pmrResign->r.fPlayer = !pmr->g.fWinner;
-	pmrResign->r.nResigned = pmr->g.nPoints / nCube;
+	pmrResign->r.nResigned = pmr->g.nPoints / ms.nCube;
 
 	if( pmrResign->r.nResigned < 1 )
 	    pmrResign->r.nResigned = 1;
@@ -796,23 +796,23 @@ static void RestoreGame( list *pl ) {
 
 static void ClearMatch( void ) {
 
-    nMatchTo = 0;
+    ms.nMatchTo = 0;
 
-    cGames = anScore[ 0 ] = anScore[ 1 ] = 0;
-    fMove = fTurn = -1;
-    fCrawford = FALSE;
-    fPostCrawford = FALSE;
-    gs = GAME_NONE;
+    ms.cGames = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
+    ms.fMove = ms.fTurn = -1;
+    ms.fCrawford = FALSE;
+    ms.fPostCrawford = FALSE;
+    ms.gs = GAME_NONE;
     IniStatcontext( &scMatch );
 }
 
 static void UpdateSettings( void ) {
 
-    UpdateSetting( &nCube );
-    UpdateSetting( &fCubeOwner );
-    UpdateSetting( &fTurn );
-    UpdateSetting( &nMatchTo );
-    UpdateSetting( &fCrawford );
+    UpdateSetting( &ms.nCube );
+    UpdateSetting( &ms.fCubeOwner );
+    UpdateSetting( &ms.fTurn );
+    UpdateSetting( &ms.nMatchTo );
+    UpdateSetting( &ms.fCrawford );
 
     ShowBoard();
 }
@@ -828,7 +828,7 @@ extern void CommandLoadGame( char *sz ) {
     }
 
     if( ( pl = LoadCollection( sz ) ) ) {
-	if( gs == GAME_PLAYING && fConfirm ) {
+	if( ms.gs == GAME_PLAYING && fConfirm ) {
 	    if( fInterrupt )
 		return;
 	    
@@ -875,7 +875,7 @@ extern void CommandLoadMatch( char *sz ) {
     if( ( pl = LoadCollection( sz ) ) ) {
 	/* FIXME make sure the root nodes have MI properties; if not,
 	   we're loading a session. */
-	if( gs == GAME_PLAYING && fConfirm ) {
+	if( ms.gs == GAME_PLAYING && fConfirm ) {
 	    if( fInterrupt )
 		return;
 	    

@@ -22,6 +22,12 @@
 #ifndef _ROLLOUT_H_
 #define _ROLLOUT_H_
 
+#if __GNUC__ || HAVE_ALLOCA
+#define MAX_ROLLOUT_CUBEINFO (-1)
+#else
+#define MAX_ROLLOUT_CUBEINFO 16
+#endif
+
 extern int 
 Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[], float arStdDev[],
          int nTruncate, int cGames, int fVarRedn, cubeinfo *pci,

@@ -246,7 +246,7 @@ extern void CommandShowBoard( char *sz ) {
     char *ap[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     
     if( !*sz ) {
-	if( gs == GAME_NONE )
+	if( ms.gs == GAME_NONE )
 	    outputl( "No position specified and no game in progress." );
 	else
 	    ShowBoard();
@@ -350,11 +350,11 @@ extern void CommandShowCopying( char *sz ) {
 
 extern void CommandShowCrawford( char *sz ) {
 
-  if( nMatchTo > 0 ) 
-    outputl( fCrawford ?
+  if( ms.nMatchTo > 0 ) 
+    outputl( ms.fCrawford ?
 	  "This game is the Crawford game." :
 	  "This game is not the Crawford game" );
-  else if ( ! nMatchTo )
+  else if ( !ms.nMatchTo )
     outputl( "Crawford rule is not used in money sessions." );
   else
     outputl( "No match is being played." );
@@ -363,12 +363,12 @@ extern void CommandShowCrawford( char *sz ) {
 
 extern void CommandShowCube( char *sz ) {
 
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "There is no game in progress." );
 	return;
     }
 
-    if( fCrawford ) {
+    if( ms.fCrawford ) {
 	outputl( "The cube is disabled during the Crawford game." );
 	return;
     }
@@ -378,27 +378,27 @@ extern void CommandShowCube( char *sz ) {
 	return;
     }
 	
-    outputf( "The cube is at %d, ", nCube );
+    outputf( "The cube is at %d, ", ms.nCube );
 
-    if( fCubeOwner == -1 )
+    if( ms.fCubeOwner == -1 )
 	outputl( "and is centred." );
     else
-	outputf( "and is owned by %s.", ap[ fCubeOwner ].szName );
+	outputf( "and is owned by %s.", ap[ ms.fCubeOwner ].szName );
 }
 
 extern void CommandShowDice( char *sz ) {
 
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "The dice will not be rolled until a game is started." );
 
 	return;
     }
 
-    if( anDice[ 0 ] < 1 )
-	outputf( "%s has not yet rolled the dice.\n", ap[ fMove ].szName );
+    if( ms.anDice[ 0 ] < 1 )
+	outputf( "%s has not yet rolled the dice.\n", ap[ ms.fMove ].szName );
     else
-	outputf( "%s has rolled %d and %d.\n", ap[ fMove ].szName, anDice[ 0 ],
-		anDice[ 1 ] );
+	outputf( "%s has rolled %d and %d.\n", ap[ ms.fMove ].szName,
+		 ms.anDice[ 0 ], ms.anDice[ 1 ] );
 }
 
 extern void CommandShowDisplay( char *sz ) {
@@ -451,7 +451,7 @@ extern void CommandShowPipCount( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
 
-    if( !*sz && gs == GAME_NONE ) {
+    if( !*sz && ms.gs == GAME_NONE ) {
 	outputl( "No position specified and no game in progress." );
 	return;
     }
@@ -461,8 +461,8 @@ extern void CommandShowPipCount( char *sz ) {
     
     PipCount( an, anPips );
     
-    outputf( "The pip counts are: %s %d, %s %d.\n", ap[ fMove ].szName,
-	    anPips[ 1 ], ap[ !fMove ].szName, anPips[ 0 ] );
+    outputf( "The pip counts are: %s %d, %s %d.\n", ap[ ms.fMove ].szName,
+	    anPips[ 1 ], ap[ !ms.fMove ].szName, anPips[ 0 ] );
 }
 
 extern void CommandShowPlayer( char *sz ) {
@@ -497,11 +497,11 @@ extern void CommandShowPlayer( char *sz ) {
 
 extern void CommandShowPostCrawford( char *sz ) {
 
-  if( nMatchTo > 0 ) 
-    outputl( fPostCrawford ?
+  if( ms.nMatchTo > 0 ) 
+    outputl( ms.fPostCrawford ?
 	  "This is post-Crawford play." :
 	  "This is not post-Crawford play." );
-  else if ( ! nMatchTo )
+  else if ( !ms.nMatchTo )
     outputl( "Crawford rule is not used in money sessions." );
   else
     outputl( "No match is being played." );
@@ -537,17 +537,17 @@ extern void CommandShowScore( char *sz ) {
     /* FIXME this display will be wrong if the current game is not the
        last one */
     outputf( "The score (after %d game%s) is: %s %d, %s %d",
-	    cGames, cGames == 1 ? "" : "s",
-	    ap[ 0 ].szName, anScore[ 0 ],
-	    ap[ 1 ].szName, anScore[ 1 ] );
+	    ms.cGames, ms.cGames == 1 ? "" : "s",
+	    ap[ 0 ].szName, ms.anScore[ 0 ],
+	    ap[ 1 ].szName, ms.anScore[ 1 ] );
 
-    if ( nMatchTo > 0 ) {
-        outputf ( nMatchTo == 1 ? 
+    if ( ms.nMatchTo > 0 ) {
+        outputf ( ms.nMatchTo == 1 ? 
 	         " (match to %d point%s).\n" :
 	         " (match to %d points%s).\n",
-                 nMatchTo,
-		 fCrawford ? 
-		 ", Crawford game" : ( fPostCrawford ?
+                 ms.nMatchTo,
+		 ms.fCrawford ? 
+		 ", Crawford game" : ( ms.fPostCrawford ?
 					 ", post-Crawford play" : ""));
     } 
     else {
@@ -566,18 +566,18 @@ extern void CommandShowSeed( char *sz ) {
 
 extern void CommandShowTurn( char *sz ) {
 
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "No game is being played." );
 
 	return;
     }
     
-    outputf( "%s is on %s.\n", ap[ fMove ].szName,
-	    anDice[ 0 ] ? "move" : "roll" );
+    outputf( "%s is on %s.\n", ap[ ms.fMove ].szName,
+	    ms.anDice[ 0 ] ? "move" : "roll" );
 
-    if( fResigned )
-	outputf( "%s has offered to resign a %s.\n", ap[ fMove ].szName,
-		aszGameResult[ fResigned - 1 ] );
+    if( ms.fResigned )
+	outputf( "%s has offered to resign a %s.\n", ap[ ms.fMove ].szName,
+		aszGameResult[ ms.fResigned - 1 ] );
 }
 
 extern void CommandShowWarranty( char *sz ) {
@@ -595,7 +595,7 @@ extern void CommandShowKleinman( char *sz ) {
     int anPips[ 2 ], an[ 2 ][ 25 ];
     float fKC;
 
-    if( !*sz && gs == GAME_NONE ) {
+    if( !*sz && ms.gs == GAME_NONE ) {
         outputl( "No position specified and no game in progress." );
         return;
     }
@@ -618,7 +618,7 @@ extern void CommandShowThorp( char *sz ) {
     int nLeader, nTrailer, nDiff, anCovered[2], anMenLeft[2];
     int x;
 
-    if( !*sz && gs == GAME_NONE ) {
+    if( !*sz && ms.gs == GAME_NONE ) {
         outputl( "No position specified and no game in progress." );
         return;
     }
@@ -701,14 +701,13 @@ extern void CommandShowGammonPrice ( char *sz ) {
   cubeinfo ci;
   int i;
 
-  if( gs != GAME_PLAYING ) {
+  if( ms.gs != GAME_PLAYING ) {
     outputl( "No game in progress (type `new game' to start one)." );
 
     return;
   }
-      
-  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		fCrawford, fJacoby, fBeavers );
+
+  GetMatchStateCubeInfo( &ci, &ms );
 
   output ( "Player        Gammon price    Backgammon price\n" );
 
@@ -734,8 +733,8 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
      else write full table (may be HUGE!) */
 
   if ( ( n <= 0 ) || ( n > MAXSCORE ) ) {
-    if ( nMatchTo )
-      n = nMatchTo;
+    if ( ms.nMatchTo )
+      n = ms.nMatchTo;
     else
       n = MAXSCORE;
   }
@@ -855,7 +854,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
   int i, fAutoRedouble[ 2 ], afDead[ 2 ], anNormScore[ 2 ];
 
-  if( gs != GAME_PLAYING ) {
+  if( ms.gs != GAME_PLAYING ) {
     outputl( "No game in progress (type `new game' to start one)." );
 
     return;
@@ -864,9 +863,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
   /* Show market window */
 
   /* First, get gammon and backgammon percentages */
-
-  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		fCrawford, fJacoby, fBeavers );
+  GetMatchStateCubeInfo( &ci, &ms );
 
   /* see if ratios are given on command line */
 
@@ -911,41 +908,41 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     arOutput[ OUTPUT_WIN ] = 0.5;
     arOutput[ OUTPUT_WINGAMMON ] =
-      ( rG[ fMove ] + rBG[ fMove ] ) * 0.5;
+      ( rG[ ms.fMove ] + rBG[ ms.fMove ] ) * 0.5;
     arOutput[ OUTPUT_LOSEGAMMON ] =
-      ( rG[ ! fMove ] + rBG[ ! fMove ] ) * 0.5;
-    arOutput[ OUTPUT_WINBACKGAMMON ] = rBG[ fMove ] * 0.5;
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = rBG[ ! fMove ] * 0.5;
+      ( rG[ !ms.fMove ] + rBG[ !ms.fMove ] ) * 0.5;
+    arOutput[ OUTPUT_WINBACKGAMMON ] = rBG[ ms.fMove ] * 0.5;
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = rBG[ !ms.fMove ] * 0.5;
 
   } else {
 
     /* calculate them based on current position */
 
-    if( EvaluatePosition( anBoard, arOutput, &ci, &esEvalCube.ec ) < 0 )
+    if( EvaluatePosition( ms.anBoard, arOutput, &ci, &esEvalCube.ec ) < 0 )
       return;
 
     if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
-      rG[ fMove ] = ( arOutput[ OUTPUT_WINGAMMON ] -
+      rG[ ms.fMove ] = ( arOutput[ OUTPUT_WINGAMMON ] -
                       arOutput[ OUTPUT_WINBACKGAMMON ] ) /
         arOutput[ OUTPUT_WIN ];
-      rBG[ fMove ] = arOutput[ OUTPUT_WINBACKGAMMON ] /
+      rBG[ ms.fMove ] = arOutput[ OUTPUT_WINBACKGAMMON ] /
         arOutput[ OUTPUT_WIN ];
     }
     else {
-      rG[ fMove ] = 0.0;
-      rBG[ fMove ] = 0.0;
+      rG[ ms.fMove ] = 0.0;
+      rBG[ ms.fMove ] = 0.0;
     }
 
     if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
-      rG[ ! fMove ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+      rG[ !ms.fMove ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
                         arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
         ( 1.0 - arOutput[ OUTPUT_WIN ] );
-      rBG[ ! fMove ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+      rBG[ !ms.fMove ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
         ( 1.0 - arOutput[ OUTPUT_WIN ] );
     }
     else {
-      rG[ ! fMove ] = 0.0;
-      rBG[ ! fMove ] = 0.0;
+      rG[ !ms.fMove ] = 0.0;
+      rBG[ !ms.fMove ] = 0.0;
     }
 
   }
@@ -955,44 +952,44 @@ extern void CommandShowMarketWindow ( char * sz ) {
               ap[ i ].szName, rG[ i ] * 100.0, rBG[ i ] * 100.0);
 
 
-  if ( ! nMatchTo ) return; /* FIXME */
+  if ( !ms.nMatchTo ) return; /* FIXME */
 
-  if ( nMatchTo ) {
+  if ( ms.nMatchTo ) {
 
     for ( i = 0; i < 2; i++ )
-      anNormScore[ i ] = nMatchTo - anScore[ i ];
+      anNormScore[ i ] = ms.nMatchTo - ms.anScore[ i ];
 
     GetPoints ( arOutput, &ci, arCP2 );
 
     for ( i = 0; i < 2; i++ ) {
 
       fAutoRedouble [ i ] =
-        ( anNormScore[ i ] - 2 * nCube <= 0 ) &&
-        ( anNormScore[ ! i ] - 2 * nCube > 0 );
+        ( anNormScore[ i ] - 2 * ms.nCube <= 0 ) &&
+        ( anNormScore[ ! i ] - 2 * ms.nCube > 0 );
 
       afDead[ i ] =
-        ( anNormScore[ ! i ] - 2 * nCube <=0 );
+        ( anNormScore[ ! i ] - 2 * ms.nCube <=0 );
 
       /* MWC for "double, take; win" */
 
       rDTW =
         (1.0 - rG[ i ] - rBG[ i ]) *
-        GET_MET ( anNormScore[ i ] - 2 * nCube - 1,
+        GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
                   anNormScore[ !i ] - 1, aafMET )
-        + rG[ i ] * GET_MET ( anNormScore[ i ] - 4 * nCube - 1,
+        + rG[ i ] * GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
                               anNormScore[ ! i ] - 1, aafMET )
-        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 6 * nCube - 1,
+        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 6 * ms.nCube - 1,
                                anNormScore[ ! i ] - 1, aafMET );
 
       /* MWC for "no double, take; win" */
 
       rNDW =
         (1.0 - rG[ i ] - rBG[ i ]) *
-        GET_MET ( anNormScore[ i ] - nCube - 1,
+        GET_MET ( anNormScore[ i ] - ms.nCube - 1,
                   anNormScore[ !i ] - 1, aafMET )
-        + rG[ i ] * GET_MET ( anNormScore[ i ] - 2 * nCube - 1,
+        + rG[ i ] * GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
                               anNormScore[ ! i ] - 1, aafMET )
-        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 3 * nCube - 1,
+        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 3 * ms.nCube - 1,
                                anNormScore[ ! i ] - 1, aafMET );
 
       /* MWC for "Double, take; lose" */
@@ -1000,26 +997,26 @@ extern void CommandShowMarketWindow ( char * sz ) {
       rDTL =
         (1.0 - rG[ ! i ] - rBG[ ! i ]) *
         GET_MET ( anNormScore[ i ] - 1,
-                  anNormScore[ !i ] - 2 * nCube - 1, aafMET )
+                  anNormScore[ !i ] - 2 * ms.nCube - 1, aafMET )
         + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
-                              anNormScore[ ! i ] - 4 * nCube - 1, aafMET )
+                              anNormScore[ ! i ] - 4 * ms.nCube - 1, aafMET )
         + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
-                               anNormScore[ ! i ] - 6 * nCube - 1, aafMET );
+                               anNormScore[ ! i ] - 6 * ms.nCube - 1, aafMET );
 
       /* MWC for "No double; lose" */
 
       rNDL =
         (1.0 - rG[ ! i ] - rBG[ ! i ]) *
         GET_MET ( anNormScore[ i ] - 1,
-                  anNormScore[ !i ] - 1 * nCube - 1, aafMET )
+                  anNormScore[ !i ] - 1 * ms.nCube - 1, aafMET )
         + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
-                              anNormScore[ ! i ] - 2 * nCube - 1, aafMET )
+                              anNormScore[ ! i ] - 2 * ms.nCube - 1, aafMET )
         + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
-                               anNormScore[ ! i ] - 3 * nCube - 1, aafMET );
+                               anNormScore[ ! i ] - 3 * ms.nCube - 1, aafMET );
 
       /* MWC for "Double, pass" */
 
-      rDP = GET_MET( anNormScore[ i ] - nCube - 1,
+      rDP = GET_MET( anNormScore[ i ] - ms.nCube - 1,
                      anNormScore[ ! i ] - 1, aafMET );
 
       /* Double point */
@@ -1043,21 +1040,23 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
         rDTW =
           (1.0 - rG[ i ] - rBG[ i ]) *
-          GET_MET ( anNormScore[ i ] - 4 * nCube - 1,
+          GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
                     anNormScore[ !i ] - 1, aafMET )
-          + rG[ i ] * GET_MET ( anNormScore[ i ] - 8 * nCube - 1,
+          + rG[ i ] * GET_MET ( anNormScore[ i ] - 8 * ms.nCube - 1,
                                 anNormScore[ ! i ] - 1, aafMET )
-          + rBG[ i ] * GET_MET ( anNormScore[ i ] - 12 * nCube - 1,
+          + rBG[ i ] * GET_MET ( anNormScore[ i ] - 12 * ms.nCube - 1,
                                  anNormScore[ ! i ] - 1, aafMET );
 
         rDTL =
           (1.0 - rG[ ! i ] - rBG[ ! i ]) *
           GET_MET ( anNormScore[ i ] - 1,
-                    anNormScore[ !i ] - 4 * nCube - 1, aafMET )
+                    anNormScore[ !i ] - 4 * ms.nCube - 1, aafMET )
           + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
-                                  anNormScore[ ! i ] - 8 * nCube - 1, aafMET )
+                                  anNormScore[ ! i ] - 8 * ms.nCube - 1,
+				  aafMET )
           + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
-                                   anNormScore[ ! i ] - 12 * nCube - 1, aafMET );
+                                   anNormScore[ ! i ] - 12 * ms.nCube - 1,
+				   aafMET );
 
         rRisk = rDTW - rDP;
         rGain = rDP - rDTL;

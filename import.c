@@ -94,12 +94,12 @@ ImportJF( FILE * fp, char *szFileName) {
     */
   }
 
-  nCube = ReadInt16( fp );
+  ms.nCube = ReadInt16( fp );
   nCubeOwner = ReadInt16( fp );
   /* Owner: 1 or 2 is player 1 or 2, 
      respectively, 0 means cube in the middle */
 
-  fCubeOwner = nCubeOwner - 1;
+  ms.fCubeOwner = nCubeOwner - 1;
 
   nOnRoll = ReadInt16( fp );
   /* 0 means starting position. 
@@ -126,18 +126,18 @@ ImportJF( FILE * fp, char *szFileName) {
 
   nLevel = ReadInt16( fp );
 
-  nMatchTo = ReadInt16( fp );
+  ms.nMatchTo = ReadInt16( fp );
   /* 0 if single game  */
 
   if(nGameOrMatch == 3)
-      nMatchTo = 0;
+      ms.nMatchTo = 0;
 
   nScore1 = ReadInt16( fp );
   nScore2 = ReadInt16( fp );
   /* Can be whatever if match length = 0  */
 
-  anScore[0] = nScore1;
-  anScore[1] = nScore2;
+  ms.anScore[0] = nScore1;
+  ms.anScore[1] = nScore2;
 
   fread(&c, 1, 1 , fp);
   for (i = 0 ; i < c; i++) fread(&szPlayer1[i], 1, 1, fp);
@@ -154,21 +154,21 @@ ImportJF( FILE * fp, char *szFileName) {
 
   switch( ReadInt16( fp ) ) {
   case 2: /* Crawford */
-      fPostCrawford = FALSE;
-      fCrawford = TRUE;
+      ms.fPostCrawford = FALSE;
+      ms.fCrawford = TRUE;
       break;
       
   case 3: /* post-Crawford  */
-      fPostCrawford = TRUE;
-      fCrawford = FALSE;
+      ms.fPostCrawford = TRUE;
+      ms.fCrawford = FALSE;
       break;
 
   default:
-      fCrawford = fPostCrawford = FALSE;
+      ms.fCrawford = ms.fPostCrawford = FALSE;
       break;
   }
   
-  if(nGameOrMatch == 3) fCrawford = fPostCrawford = FALSE;
+  if(nGameOrMatch == 3) ms.fCrawford = ms.fPostCrawford = FALSE;
 
   fJFplayedLast = ReadInt16( fp );
 
@@ -208,25 +208,26 @@ ImportJF( FILE * fp, char *szFileName) {
   else
     idx = 1;
   
-  fTurn = idx;
+  ms.fTurn = idx;
  
-  if (nOnRoll == 0) fTurn = -1; 
+  if (nOnRoll == 0) ms.fTurn = -1; 
 
   if (nMovesLeft + nMovesRight > 1) {
-    anDice[0] = nDie1;
-    anDice[1] = nDie2;
+    ms.anDice[0] = nDie1;
+    ms.anDice[1] = nDie2;
   } else {
-    anDice[0] = 0;
-    anDice[1] = 0;
+    ms.anDice[0] = 0;
+    ms.anDice[1] = 0;
   } 
 
   for( i = 0; i < 25; i++ ) {
-    anBoard[ idx ][ i ] = ( anNew[ i + 1 ]  < 0 ) ?  -anNew[ i + 1 ]  : 0;
-    anBoard[ ! idx ][ i ] = ( anNew[ 24 - i ]  > 0 ) ?  anNew[ 24 - i ]  : 0;
+    ms.anBoard[ idx ][ i ] = ( anNew[ i + 1 ]  < 0 ) ?  -anNew[ i + 1 ]  : 0;
+    ms.anBoard[ ! idx ][ i ] = ( anNew[ 24 - i ]  > 0 ) ?
+	anNew[ 24 - i ]  : 0;
   }
 
-  anBoard[ ! idx ][ 24 ] =  anNew[0];
-  anBoard[ idx ][ 24 ] =  -anNew[25];
+  ms.anBoard[ ! idx ][ 24 ] =  anNew[0];
+  ms.anBoard[ idx ][ 24 ] =  -anNew[25];
  
   return;
 

@@ -1513,10 +1513,10 @@ static void update_buttons( BoardData *pbd ) {
     if( !pbd->dice[ 0 ] )
 	c = C_ROLLDOUBLE;
 
-    if( fDoubled )
+    if( ms.fDoubled )
 	c = C_TAKEDROP;
 
-    if( fResigned )
+    if( ms.fResigned )
 	c = C_AGREEDECLINE;
 
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) ||
@@ -1552,8 +1552,8 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     old_dice = pbd->dice[ 0 ];
 
     FIBSBoard( board_str, points, roll, name, opp_name, match, score,
-	       opp_score, die0, die1, nCube, fCubeOwner, fDoubled, fTurn,
-	       fCrawford );
+	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
+	       ms.fTurn, ms.fCrawford );
     
     board_set( board, board_str );
     
@@ -2744,13 +2744,13 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	    UserCommand( sz );
 	}
 	
-	if( anScoreNew[ 0 ] != anScore[ 0 ] ||
-	    anScoreNew[ 1 ] != anScore[ 1 ] ) {
+	if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
+	    anScoreNew[ 1 ] != ms.anScore[ 1 ] ) {
 	    sprintf( sz, "set score %d %d", anScoreNew[ 0 ], anScoreNew[ 1 ] );
 	    UserCommand( sz );
 	}
 	
-	if( !EqualBoards( anBoard, points ) ) {
+	if( !EqualBoards( ms.anBoard, points ) ) {
 	    sprintf( sz, "set board %s", PositionID( points ) );
 	    UserCommand( sz );
 	}

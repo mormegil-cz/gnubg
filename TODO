@@ -98,6 +98,8 @@ duplication of effort and to make sure our changes merge easily.
   suggestion is to maximise the chance of finding the right play for
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
+** Should CommandSetEvalParamType really allow setting EVAL_NONE?
+  What effect is that supposed to have?
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -183,6 +185,8 @@ duplication of effort and to make sure our changes merge easily.
   and only output the relevant statistics.
 ** There should be a way to edit the player names when no game is being
   played.
+** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
+  the new evalsetups. (gary)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -292,10 +296,6 @@ duplication of effort and to make sure our changes merge easily.
   bad move, or a costly missed double.
 ** Consider some kind of interface for recording live matches as quickly
   as possible.
-** Write a function IterateOverGame(), which generalises what AnalyzeGame,
-  ExportGameJF, ExportGameLaTeX and SaveGame do.  (It would maintain the
-  match state, call a user function before each moverecord, then apply that
-  moverecord, and so on to the end of the game.) (gary)
 
 Local Variables:
 mode: outline

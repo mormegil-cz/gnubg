@@ -155,7 +155,7 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 		SCM_INUMP( SCM_CDR( sScore ) ) ) || sScore == SCM_UNDEFINED,
 		sScore, SCM_ARG5, sz );
 
-    if( sCube == SCM_UNDEFINED && gs == GAME_NONE )
+    if( sCube == SCM_UNDEFINED && ms.gs == GAME_NONE )
 	/* no move specified, and no game in progress */
 	return SCM_BOOL_F;
 
@@ -166,13 +166,14 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 
     SCM_DEFER_INTS;
     
-    SetCubeInfo( &ci, sCube == SCM_UNDEFINED ? nCube : SCM_INUM( sCube ),
-		 sCubeOwner == SCM_UNDEFINED ? fCubeOwner :
+    SetCubeInfo( &ci, sCube == SCM_UNDEFINED ? ms.nCube : SCM_INUM( sCube ),
+		 sCubeOwner == SCM_UNDEFINED ? ms.fCubeOwner :
 		 SCM_INUM( sCubeOwner ),
-		 sMove == SCM_UNDEFINED ? fMove : SCM_INUM( sMove ),
-		 sMatchTo == SCM_UNDEFINED ? nMatchTo : SCM_INUM( sMatchTo ),
-		 sScore == SCM_UNDEFINED ? anScore : an,
-		 sCrawford == SCM_UNDEFINED ? fCrawford :
+		 sMove == SCM_UNDEFINED ? ms.fMove : SCM_INUM( sMove ),
+		 sMatchTo == SCM_UNDEFINED ? ms.nMatchTo :
+		 SCM_INUM( sMatchTo ),
+		 sScore == SCM_UNDEFINED ? ms.anScore : an,
+		 sCrawford == SCM_UNDEFINED ? ms.fCrawford :
 		 SCM_NFALSEP( sCrawford ),
 		 sJacoby == SCM_UNDEFINED ? fJacoby :
 		 SCM_NFALSEP( sJacoby ),
@@ -237,7 +238,7 @@ static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
 
 static SCM current_board( void ) {
 
-    return gs == GAME_NONE ? SCM_BOOL_F : BoardToSCM( anBoard );
+    return ms.gs == GAME_NONE ? SCM_BOOL_F : BoardToSCM( ms.anBoard );
 }
 
 static SCM current_score( void ) {
@@ -245,11 +246,11 @@ static SCM current_score( void ) {
     SCM s;
     
     s = scm_make_vector( SCM_MAKINUM( 4 ), SCM_UNSPECIFIED );
-    scm_vector_set_x( s, SCM_MAKINUM( 0 ), SCM_MAKINUM( anScore[ 0 ] ) );
-    scm_vector_set_x( s, SCM_MAKINUM( 1 ), SCM_MAKINUM( anScore[ 1 ] ) );
-    scm_vector_set_x( s, SCM_MAKINUM( 2 ), fCrawford ? SCM_BOOL_T :
+    scm_vector_set_x( s, SCM_MAKINUM( 0 ), SCM_MAKINUM( ms.anScore[ 0 ] ) );
+    scm_vector_set_x( s, SCM_MAKINUM( 1 ), SCM_MAKINUM( ms.anScore[ 1 ] ) );
+    scm_vector_set_x( s, SCM_MAKINUM( 2 ), ms.fCrawford ? SCM_BOOL_T :
 		      SCM_BOOL_F );
-    scm_vector_set_x( s, SCM_MAKINUM( 3 ), SCM_MAKINUM( cGames ) );
+    scm_vector_set_x( s, SCM_MAKINUM( 3 ), SCM_MAKINUM( ms.cGames ) );
 
     return s;
 }
@@ -326,7 +327,7 @@ static SCM evaluate_position_cubeful( SCM sBoard, SCM sCube,
 
 static SCM game_state( void ) {
 
-    return SCM_MAKINUM( gs );
+    return SCM_MAKINUM( ms.gs );
 }
 
 static SCM gnubg_command( SCM sCommand ) {

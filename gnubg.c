@@ -133,15 +133,29 @@ char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
-int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
-    fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
-    fResigned = FALSE, nPliesEval = 1, fAutoCrawford = 1,
-    fAutoRoll = TRUE, cGames = 0, fDoubled = FALSE, cAutoDoubles = 0,
+matchstate ms = {
+    {}, /* anBoard */
+    {}, /* anDice */
+    -1, /* fTurn */
+    FALSE, /* fResigned */
+    FALSE, /* fDoubled */
+    0, /* cGames */
+    -1, /* fMove */
+    -1, /* fCubeOwner */
+    FALSE, /* fCrawford */
+    FALSE, /* fPostCrawford */
+    0, /* nMatchTo */
+    { 0, 0 }, /* anScore */
+    1, /* nCube */
+    GAME_NONE /* gs */
+};
+
+int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
+    fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
     fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = TRUE,
     nRollouts = 36, nRolloutTruncate = 7, fNextTurn = FALSE,
-    fConfirm = TRUE, fShowProgress, fMove, fCubeOwner = -1, fJacoby = TRUE,
-    fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
-    fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
+    fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
+    fBeavers = 1, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE;
@@ -161,8 +175,6 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 	0.02f, /* SKILL_GOOD */
 	0.04f /* SKILL_VERYGOOD	*/
     };
-
-gamestate gs = GAME_NONE;
 
 evalcontext ecTD = { 0, 8, 0.16, 0, FALSE, 0.0, TRUE };
 evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE, 0.0, TRUE };
@@ -243,7 +255,7 @@ storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, EVAL_EVAL, EVAL_EVAL, 
       EVALSETUP, EVALSETUP },
-    { "user", PLAYER_HUMAN, EVAL_NONE, EVAL_NONE, 
+    { "user", PLAYER_HUMAN, EVAL_EVAL, EVAL_EVAL, 
       EVALSETUP, EVALSETUP } 
 };
 
@@ -874,7 +886,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
     /* FIXME allow more formats, e.g. FIBS "boardstyle 3" */
 
     if( !ppch || !( pch = NextToken( ppch ) ) ) { 
-	memcpy( an, anBoard, sizeof( anBoard ) );
+	memcpy( an, ms.anBoard, sizeof( ms.anBoard ) );
 
 	if( pchDesc )
 	    strcpy( pchDesc, "Current position" );
@@ -904,20 +916,20 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
           if ( i == 0 ) {
              /* my chequers on the bar */
-             an[ fMove ][ 24 ] = abs(n);
+             an[ 1 ][ 24 ] = abs(n);
           }
           else if ( i == 25 ) {
              /* opp chequers on the bar */
-             an[ ! fMove ][ 24 ] = abs(n);
+             an[ 0 ][ 24 ] = abs(n);
           } else {
 
-             an[ fMove ][ i - 1 ] = 0;
-             an[ ! fMove ][ 24 - i ] = 0;
+             an[ 1 ][ i - 1 ] = 0;
+             an[ 0 ][ 24 - i ] = 0;
 
              if ( n < 0 )
-                an[ ! fMove ][ 24 - i ] = -n;
+                an[ 0 ][ 24 - i ] = -n;
              else if ( n > 0 )
-                an[ fMove ][ i - 1 ] = n;
+                an[ 1 ][ i - 1 ] = n;
              
           }
       
@@ -937,10 +949,11 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	    return -1;
 	}
 
-	PositionKey( anBoard, auchKey );
+	PositionKey( ms.anBoard, auchKey );
 	
-	if( !anDice[ 0 ] || !EqualKeys( auchKey, sm.auchKey ) || 
-	    anDice[ 0 ] != sm.anDice[ 0 ] || anDice[ 1 ] != sm.anDice[ 1 ] ) {
+	if( !ms.anDice[ 0 ] || !EqualKeys( auchKey, sm.auchKey ) || 
+	    ms.anDice[ 0 ] != sm.anDice[ 0 ] ||
+	    ms.anDice[ 1 ] != sm.anDice[ 1 ] ) {
 	    outputl( "There is no valid move list." );
 	    return -1;
 	}
@@ -953,9 +966,9 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	PositionFromKey( an, sm.ml.amMoves[ i - 1 ].auch );
 
 	if( pchDesc )
-	    FormatMove( pchDesc, anBoard, sm.ml.amMoves[ i - 1 ].anMove );
+	    FormatMove( pchDesc, ms.anBoard, sm.ml.amMoves[ i - 1 ].anMove );
 	
-	if( !fMove )
+	if( !ms.fMove )
 	    SwapSides( an );
 	
 	return 1;
@@ -1387,6 +1400,13 @@ static gint UpdateBoard( gpointer p ) {
 }
 #endif
 
+extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
+
+    return SetCubeInfo( pci, pms->nCube, pms->fCubeOwner, pms->fMove,
+			pms->nMatchTo, pms->anScore, pms->fCrawford,
+			fJacoby, fBeavers );
+}
+
 static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
 				 evalsetup *pes ) {
     cubeinfo ci;
@@ -1394,9 +1414,8 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
 
     if( et == EVAL_NONE )
 	return;
-    
-    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		 fCrawford, fJacoby, fBeavers );
+
+    GetMatchStateCubeInfo( &ci, &ms );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
@@ -1407,14 +1426,13 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
     outputl( sz );
 }
 
-static char *GetLuckAnalysis( float rLuck ) {
+static char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
 
     static char sz[ 16 ];
     cubeinfo ci;
     
-    if( fOutputMWC && nMatchTo ) {
-	SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		     fCrawford, fJacoby, fBeavers );
+    if( fOutputMWC && pms->nMatchTo ) {
+	GetMatchStateCubeInfo( &ci, pms );
 	
 	sprintf( sz, "%+0.3f%%", 100.0f * ( eq2mwc( rLuck, &ci ) -
 					    eq2mwc( 0.0f, &ci ) ) );
@@ -1437,7 +1455,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	outputf( "Rolled %d%d", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 
 	if( pmr->n.rLuck != -HUGE_VALF )
-	    outputf( " (%s):\n", GetLuckAnalysis( pmr->n.rLuck ) );
+	    outputf( " (%s):\n", GetLuckAnalysis( &ms, pmr->n.rLuck ) );
 	else
 	    outputl( ":" );
 	
@@ -1446,7 +1464,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 		i != pmr->n.iMove )
 		continue;
 	    outputc( i == pmr->n.iMove ? '*' : ' ' );
-	    output( FormatMoveHint( szBuf, anBoard, &pmr->n.ml, i,
+	    output( FormatMoveHint( szBuf, ms.anBoard, &pmr->n.ml, i,
 				    i != pmr->n.iMove ||
 				    i != pmr->n.ml.cMoves - 1 ) );
 	}
@@ -1466,7 +1484,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
     case MOVE_SETDICE:
 	if( pmr->n.rLuck != -HUGE_VALF )
 	    outputf( "Rolled %d%d (%s):\n", pmr->sd.anDice[ 0 ],
-		     pmr->sd.anDice[ 1 ], GetLuckAnalysis( pmr->sd.rLuck ) );
+		     pmr->sd.anDice[ 1 ], GetLuckAnalysis( &ms,
+							   pmr->sd.rLuck ) );
 	break;
 	
     default:
@@ -1492,8 +1511,9 @@ extern void ShowBoard( void ) {
     if( fX && !nDelay ) {
 	/* Always let the board widget know about dice rolls, even if the
 	   board update is elided (see below). */
-	if( anDice[ 0 ] )
-	    game_set_old_dice( BOARD( pwBoard ), anDice[ 0 ], anDice[ 1 ] );
+	if( ms.anDice[ 0 ] )
+	    game_set_old_dice( BOARD( pwBoard ), ms.anDice[ 0 ],
+			       ms.anDice[ 1 ] );
 	
 	/* Is the server still processing our last request?  If so, don't
 	   give it more until it's finished what it has.  (Always update
@@ -1515,14 +1535,14 @@ extern void ShowBoard( void ) {
     }
 #endif
     
-    if( gs == GAME_NONE ) {
+    if( ms.gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
 	    InitBoard( anBoardTemp );
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
-		      ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
-		      -1, -1 );
+		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
+		      ms.anScore[ 0 ], -1, -1 );
 #if HAVE_GDK_GDKX_H
 	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #endif
@@ -1541,63 +1561,65 @@ extern void ShowBoard( void ) {
     if( !fX ) {
 #endif
 	if( fOutputRawboard ) {
-	    if( !fMove )
-		SwapSides( anBoard );
+	    if( !ms.fMove )
+		SwapSides( ms.anBoard );
 	    
-	    outputl( FIBSBoard( szBoard, anBoard, fMove, ap[ 1 ].szName,
-				ap[ 0 ].szName, nMatchTo, anScore[ 1 ],
-				anScore[ 0 ], anDice[ 0 ], anDice[ 1 ], nCube,
-				fCubeOwner, fDoubled, fTurn, fCrawford ) );
-	    if( !fMove )
-		SwapSides( anBoard );
+	    outputl( FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
+				ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
+				ms.anScore[ 0 ], ms.anDice[ 0 ],
+				ms.anDice[ 1 ], ms.nCube,
+				ms.fCubeOwner, ms.fDoubled, ms.fTurn,
+				ms.fCrawford ) );
+	    if( !ms.fMove )
+		SwapSides( ms.anBoard );
 	    
 	    return;
 	}
 	
-	if( fDoubled ) {
-	    apch[ fTurn ? 5 : 1 ] = szCube;
+	if( ms.fDoubled ) {
+	    apch[ ms.fTurn ? 5 : 1 ] = szCube;
 
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
 	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
-	    sprintf( szCube, "Cube offered at %d", nCube << 1 );
+	    sprintf( szCube, "Cube offered at %d", ms.nCube << 1 );
 	} else {
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
 	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
 
-	    apch[ fMove ? 5 : 1 ] = sz;
+	    apch[ ms.fMove ? 5 : 1 ] = sz;
 	
-	    if( anDice[ 0 ] )
-		sprintf( sz, "Rolled %d%d", anDice[ 0 ], anDice[ 1 ] );
-	    else if( !GameStatus( anBoard ) )
+	    if( ms.anDice[ 0 ] )
+		sprintf( sz, "Rolled %d%d", ms.anDice[ 0 ], ms.anDice[ 1 ] );
+	    else if( !GameStatus( ms.anBoard ) )
 		strcpy( sz, "On roll" );
 	    else
 		sz[ 0 ] = 0;
 	    
-	    if( fCubeOwner < 0 ) {
+	    if( ms.fCubeOwner < 0 ) {
 		apch[ 3 ] = szCube;
 		
-		sprintf( szCube, "(Cube: %d)", nCube );
+		sprintf( szCube, "(Cube: %d)", ms.nCube );
 	    } else {
-		int cch = strlen( ap[ fCubeOwner ].szName );
+		int cch = strlen( ap[ ms.fCubeOwner ].szName );
 		
 		if( cch > 20 )
 		    cch = 20;
 		
-		sprintf( szCube, "%c: %*s (Cube: %d)", fCubeOwner ? 'X' : 'O',
-			 cch, ap[ fCubeOwner ].szName, nCube );
+		sprintf( szCube, "%c: %*s (Cube: %d)", ms.fCubeOwner ? 'X' :
+			 'O', cch, ap[ ms.fCubeOwner ].szName, ms.nCube );
 
-		apch[ fCubeOwner ? 6 : 0 ] = szCube;
+		apch[ ms.fCubeOwner ? 6 : 0 ] = szCube;
 	    }
 	}
     
-	if( fResigned )
+	if( ms.fResigned )
 	    sprintf( strchr( sz, 0 ), ", resigns %s",
-		     aszGameResult[ fResigned - 1 ] );
+		     aszGameResult[ ms.fResigned - 1 ] );
 	
-	if( !fMove )
-	    SwapSides( anBoard );
+	if( !ms.fMove )
+	    SwapSides( ms.anBoard );
 	
-	outputl( DrawBoard( szBoard, anBoard, fMove, apch ) );
+	outputl( DrawBoard( szBoard, ms.anBoard, ms.fMove, apch ) );
 
 	if( fAnnotation && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
@@ -1605,27 +1627,27 @@ extern void ShowBoard( void ) {
 		outputl( pmr->a.sz ); /* FIXME word wrap */
 	}
 	
-	if( !fMove )
-	    SwapSides( anBoard );
+	if( !ms.fMove )
+	    SwapSides( ms.anBoard );
 #if USE_GUI
     } else {
-	if( !fMove )
-	    SwapSides( anBoard );
+	if( !ms.fMove )
+	    SwapSides( ms.anBoard );
 
 #if USE_GTK
-	game_set( BOARD( pwBoard ), anBoard, fMove, ap[ 1 ].szName,
-		  ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
-		  anDice[ 0 ], anDice[ 1 ] );
+	game_set( BOARD( pwBoard ), ms.anBoard, ms.fMove, ap[ 1 ].szName,
+		  ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
+		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ] );
 #if HAVE_GDK_GDKX_H
 	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #endif
 #else
-        GameSet( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
-                 nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
-                 anDice[ 1 ] );	
+        GameSet( &ewnd, ms.anBoard, ms.fMove, ap[ 1 ].szName, ap[ 0 ].szName,
+                 ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], ms.anDice[ 0 ],
+                 ms.anDice[ 1 ] );	
 #endif
-	if( !fMove )
-	    SwapSides( anBoard );
+	if( !ms.fMove )
+	    SwapSides( ms.anBoard );
 #if USE_GTK
 #if HAVE_GDK_GDKX_H	
 	XFlush( GDK_DISPLAY() );
@@ -1653,10 +1675,10 @@ extern char *FormatPrompt( void ) {
 	    case 'c':
 	    case 'C':
 		/* Pip count */
-		if( gs == GAME_NONE )
+		if( ms.gs == GAME_NONE )
 		    strcpy( pchDest, "No game" );
 		else {
-		    PipCount( anBoard, anPips );
+		    PipCount( ms.anBoard, anPips );
 		    sprintf( pchDest, "%d:%d", anPips[ 1 ], anPips[ 0 ] );
 		}
 		break;
@@ -1664,13 +1686,13 @@ extern char *FormatPrompt( void ) {
 	    case 'p':
 	    case 'P':
 		/* Player on roll */
-		switch( gs ) {
+		switch( ms.gs ) {
 		case GAME_NONE:
 		    strcpy( pchDest, "No game" );
 		    break;
 
 		case GAME_PLAYING:
-		    strcpy( pchDest, ap[ fTurn ].szName );
+		    strcpy( pchDest, ap[ ms.fTurn ].szName );
 		    break;
 
 		case GAME_OVER:
@@ -1684,7 +1706,7 @@ extern char *FormatPrompt( void ) {
 	    case 's':
 	    case 'S':
 		/* Match score */
-		sprintf( pchDest, "%d:%d", anScore[ 0 ], anScore[ 1 ] );
+		sprintf( pchDest, "%d:%d", ms.anScore[ 0 ], ms.anScore[ 1 ] );
 		break;
 
 	    case 'v':
@@ -1715,7 +1737,7 @@ extern void CommandEval( char *sz ) {
     int n, an[ 2 ][ 25 ];
     cubeinfo ci;
     
-    if( !*sz && gs == GAME_NONE ) {
+    if( !*sz && ms.gs == GAME_NONE ) {
 	outputl( "No position specified and no game in progress." );
 	return;
     }
@@ -1723,15 +1745,16 @@ extern void CommandEval( char *sz ) {
     if( ( n = ParsePosition( an, &sz, NULL ) ) < 0 )
 	return;
 
-    if( n && fMove )
+    if( n && ms.fMove )
 	/* =n notation used; the opponent is on roll in the position given. */
 	SwapSides( an );
 
-    if( gs == GAME_NONE )
+    if( ms.gs == GAME_NONE )
 	memcpy( &ci, &ciCubeless, sizeof( ci ) );
     else
-	SetCubeInfo( &ci, nCube, fCubeOwner, n ? !fMove : fMove, nMatchTo,
-		     anScore, fCrawford, fJacoby, fBeavers );    
+	SetCubeInfo( &ci, ms.nCube, ms.fCubeOwner, n ? !ms.fMove : ms.fMove,
+		     ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
+		     fBeavers );    
     
     if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
                        fOutputMWC, fOutputWinPC, n ) ) {
@@ -1840,11 +1863,10 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
     
     cubeinfo ci;
     char szTemp[ 1024 ], szMove[ 32 ];
+
+    GetMatchStateCubeInfo( &ci, &ms );
     
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		  fCrawford, fJacoby, fBeavers );
-    
-    if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) ) {
+    if ( !ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
 	/* output in equity */
         float *ar, rEq, rEqTop;
 
@@ -1991,142 +2013,136 @@ extern void CommandHint( char *sz ) {
     cubeinfo ci;
     int n = ParseNumber ( &sz );
     
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
       outputl( "You must set up a board first." );
       
       return;
     }
 
-    if( !anDice[ 0 ] && !fDoubled ) {
+    if( !ms.anDice[ 0 ] && !ms.fDoubled ) {
+	GetMatchStateCubeInfo( &ci, &ms );
 
-      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		    fCrawford, fJacoby, fBeavers );
+	if ( GetDPEq ( NULL, NULL, &ci ) ) {
+	    /* Give hint on cube action */
 
-      if ( GetDPEq ( NULL, NULL, &ci ) ) {
+	    if ( EvaluatePositionCubeful ( ms.anBoard, arDouble, arOutput,
+					   &ci, &esEvalCube.ec,
+					   esEvalCube.ec.nPlies ) < 0 )
+		return;
 
-        /* Give hint on cube action */
+	    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
 
-        if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput,
-                                       &ci, &esEvalCube.ec,
-                                       esEvalCube.ec.nPlies ) < 0 )
-          return;
+#if USE_GTK
+	    /*
+	      if ( fX ) {
+	      
+	      GTKHint( cube action );
+	      
+	      return;
+	      
+	      }
+	    */
+#endif
+	    outputl ( szBuf );
+	    
+	    return;
+	    
+	} else {
+	    
+	    outputl( "You cannot double." );
+	    
+	    return;
+	    
+	}
+	
+    }
 
-        GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
+    if ( ms.fDoubled ) {
+	/* Give hint on take decision */
+	GetMatchStateCubeInfo( &ci, &ms );
 
+	if ( EvaluatePositionCubeful ( ms.anBoard, arDouble, arOutput, &ci, 
+				       &esEvalCube.ec,
+				       esEvalCube.ec.nPlies ) < 0 )
+	    return;
+	
 #if USE_GTK
 	/*
 	  if ( fX ) {
 	  
-	  GTKHint( cube action );
-
+	  GTKHint( take decision );
+	  
 	  return;
 	  
 	  }
 	*/
 #endif
-	outputl ( szBuf );
+	
+	outputl ( "Take decision:\n" );
+	
+	if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+	    
+	    outputf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
+	    outputf ( "Equity for pass: %+6.3f\n\n", -arDouble[ 3 ] );
+	    
+	}
+	else {
+	    outputf ( "Mwc for take: %6.2f%%\n", 
+		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
+	    outputf ( "Mwc for pass: %6.2f%%\n", 
+		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
+	}
+	
+	if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && fBeavers )
+	    outputl ( "Your proper cube action: Beaver!\n" );
+	else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+	    outputl ( "Your proper cube action: Take.\n" );
+	else
+	    outputl ( "Your proper cube action: Pass.\n" );
 	
 	return;
-
-      }
-      else {
-
-        outputl( "You cannot double." );
-      
-        return;
-
-      }
-
+	
     }
+    
+    if ( ms.anDice[ 0 ] ) {
+	
+	/* Give hints on move */
+	
+	if ( n <= 0 )
+	    n = 10;
 
-    if ( fDoubled ) {
+	GetMatchStateCubeInfo( &ci, &ms );
 
-      /* Give hint on take decision */
+	if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
+				ms.anBoard, NULL, &ci,
+				&esEvalChequer.ec ) < 0 ||
+	    fInterrupt )
+	    return;
 
-	SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		      fCrawford, fJacoby, fBeavers );
+	n = ( ml.cMoves > n ) ? n : ml.cMoves;
 
-      if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci, 
-			                               &esEvalCube.ec,
-                                     esEvalCube.ec.nPlies ) < 0 )
-        return;
-
-#if USE_GTK
-      /*
-      if ( fX ) {
-
-        GTKHint( take decision );
-
-        return;
-
-      }
-      */
-#endif
-
-      outputl ( "Take decision:\n" );
-
-      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) ) {
-
-        outputf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
-        outputf ( "Equity for pass: %+6.3f\n\n", -arDouble[ 3 ] );
-
-      }
-      else {
-	outputf ( "Mwc for take: %6.2f%%\n", 
-		  100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-	outputf ( "Mwc for pass: %6.2f%%\n", 
-		  100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
-      }
-
-      if ( arDouble[ 2 ] < 0 && ! nMatchTo && fBeavers )
-        outputl ( "Your proper cube action: Beaver!\n" );
-      else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-        outputl ( "Your proper cube action: Take.\n" );
-      else
-        outputl ( "Your proper cube action: Pass.\n" );
-
-      return;
-
-    }
-
-    if ( anDice[ 0 ] ) {
-
-      /* Give hints on move */
-
-      if ( n <= 0 )
-        n = 10;
-
-      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		    fCrawford, fJacoby, fBeavers );
-
-      if( FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
-			      NULL, &ci, &esEvalChequer.ec ) < 0 || fInterrupt )
-	  return;
-
-      n = ( ml.cMoves > n ) ? n : ml.cMoves;
-
-      if( !ml.cMoves ) {
-	  outputl( "There are no legal moves." );
-	  return;
-      }
-
-      if( sm.ml.amMoves )
-	  free( sm.ml.amMoves );
-
-      memcpy( &sm.ml, &ml, sizeof( ml ) );
-      PositionKey( anBoard, sm.auchKey );
-      sm.anDice[ 0 ] = anDice[ 0 ];
-      sm.anDice[ 1 ] = anDice[ 1 ];
+	if( !ml.cMoves ) {
+	    outputl( "There are no legal moves." );
+	    return;
+	}
+	
+	if( sm.ml.amMoves )
+	    free( sm.ml.amMoves );
+	
+	memcpy( &sm.ml, &ml, sizeof( ml ) );
+	PositionKey( ms.anBoard, sm.auchKey );
+	sm.anDice[ 0 ] = ms.anDice[ 0 ];
+	sm.anDice[ 1 ] = ms.anDice[ 1 ];
       
 #if USE_GTK
-      if( fX ) {
-        GTKHint( &ml );
-        return;
-      }
+	if( fX ) {
+	    GTKHint( &ml );
+	    return;
+	}
 #endif
-
-      for( i = 0; i < n; i++ )
-	  output( FormatMoveHint( szBuf, anBoard, &ml, i, TRUE ) );
+	
+	for( i = 0; i < n; i++ )
+	    output( FormatMoveHint( szBuf, ms.anBoard, &ml, i, TRUE ) );
     }
 }
 
@@ -2138,7 +2154,7 @@ extern void PromptForExit( void ) {
 
     static int fExiting;
     
-    if( !fExiting && fInteractive && fConfirm && gs == GAME_PLAYING ) {
+    if( !fExiting && fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
 	fExiting = TRUE;
 	fInterrupt = FALSE;
 	
@@ -2178,7 +2194,7 @@ CommandRollout( char *sz ) {
 #endif
 
     if( !( c = CountTokens( sz ) ) ) {
-	if( gs == GAME_NONE ) {
+	if( ms.gs == GAME_NONE ) {
 	    outputl( "No position specified and no game in progress." );
 	    return;
 	} else
@@ -2197,22 +2213,22 @@ CommandRollout( char *sz ) {
 	if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
 	    return;
 	else if( n ) {
-	    if( fMove )
+	    if( ms.fMove )
 		SwapSides( aan[ i ] );
 	    
 	    fOpponent = TRUE;
 	}
 
     if( fOpponent ) {
-	an[ 0 ] = anScore[ 1 ];
-	an[ 1 ] = anScore[ 0 ];
+	an[ 0 ] = ms.anScore[ 1 ];
+	an[ 1 ] = ms.anScore[ 0 ];
     } else {
-	an[ 0 ] = anScore[ 0 ];
-	an[ 1 ] = anScore[ 1 ];
+	an[ 0 ] = ms.anScore[ 0 ];
+	an[ 1 ] = ms.anScore[ 1 ];
     }
     
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fOpponent ? !fMove : fMove,
-		  nMatchTo, an, fCrawford, fJacoby, fBeavers );
+    SetCubeInfo ( &ci, ms.nCube, ms.fCubeOwner, fOpponent ? !ms.fMove :
+		  ms.fMove, ms.nMatchTo, an, ms.fCrawford, fJacoby, fBeavers );
 
 #if USE_GTK
     if( fX )
@@ -2257,6 +2273,10 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
     char sz[ 40 ];
     int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
 
+    /* FIXME It would be nice if this function was updated to use the
+       new matchstate struct and ApplyMoveRecord()... but otherwise
+       it's not broken, so I won't fix it. */
+    
     if( iGame >= 0 )
 	fprintf( pf, " Game %d\n", iGame + 1 );
 
@@ -2397,7 +2417,7 @@ extern void CommandImportJF( char *sz ) {
 
     FILE *pf;
 
-    if( gs != GAME_PLAYING ) {
+    if( ms.gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to import a Jellyfish "
                  "position." );
 
@@ -2423,7 +2443,7 @@ extern void CommandCopy( char *sz ) {
   char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   char szOut[ 2048 ];
 #ifdef WIN32
-  DrawBoard( szOut, anBoard, 1, aps );
+  DrawBoard( szOut, ms.anBoard, 1, aps );
   strcat(szOut, "\n");
 
   if(OpenClipboard(0)) {
@@ -2444,7 +2464,7 @@ extern void CommandCopy( char *sz ) {
     outputl( "Can't open clipboard" ); 
   }
 #else
-  puts( DrawBoard( szOut, anBoard, 1, aps ) );
+  puts( DrawBoard( szOut, ms.anBoard, 1, aps ) );
 #endif
 }
 
@@ -2516,7 +2536,7 @@ extern void CommandExportMatchMat( char *sz ) {
 	return;
     }
 
-    fprintf( pf, " %d point match\n\n", nMatchTo );
+    fprintf( pf, " %d point match\n\n", ms.nMatchTo );
 
     anScore[ 0 ] = anScore[ 1 ] = 0;
     
