@@ -3334,6 +3334,107 @@ static command *FindHelpCommand( command *pcBase, char *sz,
 	return pc;
 }
 
+static char* CheckCommand(char *sz, command *ac)
+{
+	command *pc;
+	int cch;
+    char *pch = NextToken(&sz);
+	if (!pch)
+		return 0;
+
+    cch = strlen( pch );
+	for (pc = ac; pc->sz; pc++)
+		if (!strncasecmp(pch, pc->sz, cch))
+			break;
+    if (!pc->sz)
+		return pch;
+
+    if (pc->pf)
+	{
+		return 0;
+    }
+	else
+	{
+		return CheckCommand(sz, pc->pc);
+	}
+}
+
+/* Display help for command (pStr) in widget (pwText) */
+extern void ShowHelp(GtkWidget *pwText, char* pStr)
+{
+	command *pc, *pcFull;
+	char szCommand[ 128 ], szUsage[ 128 ], szBuf[255], *cc, *pTemp;
+
+	gtk_text_freeze(GTK_TEXT(pwText));
+	gtk_text_set_point(GTK_TEXT(pwText), 0);
+
+	/* Copy string as token striping corrupts string */
+	pTemp = malloc(strlen(pStr) + 1);
+	strcpy(pTemp, pStr);
+	cc = CheckCommand(pTemp, acTop);
+
+	if (cc)
+	{
+		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
+		gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
+		gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+	}
+	else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage)))
+	{
+		gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
+
+		if (!*pStr)
+		{
+			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, 
+				_("Available commands:\n"), -1);
+		}
+		else
+		{
+			if(!pc->szHelp )
+			{	/* The command is an abbreviation, search for the full version */
+				for( pcFull = acTop; pcFull->sz; pcFull++ )
+				{
+					if( pcFull->pf == pc->pf && pcFull->szHelp )
+					{
+						pc = pcFull;
+						strcpy(szCommand, pc->sz);
+						break;
+					}
+				}
+			}
+
+			sprintf(szBuf, "Command: %s\n", szCommand);
+			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, gettext ( pc->szHelp ), -1);
+			sprintf(szBuf, "\n\nUsage: %s", szUsage);
+			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+
+			if(!( pc->pc && pc->pc->sz ))
+				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, "\n", -1);
+			else
+			{
+				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, _("<subcommand>\n"), -1);
+				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, 
+					_("Available subcommands:\n"), -1);
+			}
+		}
+
+		pc = pc->pc;
+
+		while(pc && pc->sz)
+		{
+			if( pc->szHelp )
+			{
+				sprintf(szBuf, "%-15s\t%s\n", pc->sz, gettext ( pc->szHelp ) );
+				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+			}
+			pc++;
+		}
+	}
+	free(pTemp);
+	gtk_text_thaw(GTK_TEXT( pwText ));
+}
+
 extern void CommandHelp( char *sz ) {
 
     command *pc, *pcFull;
@@ -3976,7 +4077,6 @@ extern void PromptForExit( void ) {
 	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.closeBoardOnExit
 		&& rdAppearance.fHinges && fX)
 		CloseBoard3d(bd);
-	else
 #endif
 #if USE_GTK
     if( fX ) {
@@ -3998,10 +4098,9 @@ extern void PromptForExit( void ) {
     Shutdown();
     
 #if USE_BOARD3D
-    if (fX)
-	Tidy3dObjects(bd, TRUE);
+	if (fX)
+		Tidy3dObjects(bd, TRUE);
 #endif
-
     exit( EXIT_SUCCESS );
 }
 

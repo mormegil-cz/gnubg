@@ -1,3 +1,7 @@
+Tue Sep 16 17:42:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkgame.c: Add dynamic help to enter command.
+
 Mon Sep 15 12:55:45 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkboard.c, render.c: fix an oversight of my last commit

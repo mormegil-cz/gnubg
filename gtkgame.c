@@ -3521,21 +3521,84 @@ static void StringOK( GtkWidget *pw, char **ppch ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static char *ReadString( char *szTitle, char *szPrompt, char *szDefault ) {
+/* Show dynamic help as command entered */
+extern void ShowHelp(GtkWidget *pwText, char* pStr);
+GtkWidget *pwHelpText, *vscrollbar, *pwHelpbox;
+int showHelp = 0;
+
+static void CommandTextChange(GtkEntry *entry, gpointer user_data)
+{
+	if (showHelp)
+		ShowHelp(pwHelpText, gtk_editable_get_chars(GTK_EDITABLE(entry), 0, -1));
+}
+
+static void CreateHelpText()
+{
+	pwHelpText = gtk_text_new ( NULL, NULL );
+	gtk_widget_set_usize(pwHelpText, 400, 300);
+	vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwHelpText)->vadj);
+	gtk_box_pack_start(GTK_BOX(pwHelpbox), pwHelpText, TRUE, TRUE, 0);
+	gtk_box_pack_end(GTK_BOX(pwHelpbox), vscrollbar, FALSE, FALSE, 0);
+
+	CommandTextChange(GTK_ENTRY(pwEntry), 0);
+}
+
+static void ShowHelpToggled(GtkWidget *widget, gpointer data)
+{
+	if (!pwHelpText)
+		CreateHelpText();
+
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	{
+		showHelp = 1;
+		gtk_widget_show(pwHelpText);
+		gtk_widget_show(vscrollbar);
+		CommandTextChange(GTK_ENTRY(pwEntry), 0);
+	}
+	else
+	{
+		showHelp = 0;
+		gtk_widget_hide(pwHelpText);
+		gtk_widget_hide(vscrollbar);
+	}
+	gtk_widget_grab_focus(pwEntry);
+}
+
+static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 
     char *sz = NULL;
+	GtkWidget *pwVbox, *pwHbox, *pwShowHelp;
     GtkWidget *pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
 					GTK_SIGNAL_FUNC( StringOK ), &sz ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
     pwEntry = gtk_entry_new();
     gtk_entry_set_text( GTK_ENTRY( pwEntry ), szDefault );
+	gtk_signal_connect(GTK_OBJECT(pwEntry), "changed", GTK_SIGNAL_FUNC(CommandTextChange), 0);
+
+	pwVbox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwVbox );
+	pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, FALSE, 0);
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwPrompt );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwEntry );
+	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwPrompt, FALSE, FALSE, 0);
+	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwEntry, TRUE, TRUE, 0);
+
+	pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, FALSE, 0);
+	pwShowHelp = gtk_toggle_button_new_with_label( _("Show Help") );
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwShowHelp), showHelp);
+	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "toggled", GTK_SIGNAL_FUNC(ShowHelpToggled), 0);
+	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwShowHelp, FALSE, TRUE, 0);
+
+	pwHelpbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHelpbox, TRUE, TRUE, 0);
+
+	pwHelpText = NULL;
+	if (showHelp)
+		CreateHelpText();
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
@@ -3602,7 +3665,7 @@ static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
 #endif
 static void EnterCommand( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch = ReadString( _("GNU Backgammon - Enter command"), FormatPrompt(),
+    char *pch = ReadCommand( _("GNU Backgammon - Enter command"), FormatPrompt(),
 			    "" );
 
     if( pch ) {
