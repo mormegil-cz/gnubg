@@ -186,8 +186,6 @@ duplication of effort and to make sure our changes merge easily.
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
 *** Allow copy/paste from the "hint" cube output and statistics dialogs.
-*** Display "hint" output for cube decisions in some kind of table, and
-  include a "rollout" button (which performs a "rollout =cube"). (gary)
 
 ** MS Windows:
 *** The stop button has no effect.  One approach would be to define a

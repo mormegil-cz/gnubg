@@ -3621,6 +3621,167 @@ extern void GTKEval( char *szOutput ) {
     gdk_font_unref( pf );
 }
 
+static void HintCubeRollout( GtkWidget *pw, void *p ) {
+
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+    
+    UserCommand( "rollout =cube" );
+}
+
+extern void GTKDoubleHint( char *sz ) {
+
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
+					NULL ),
+	*pw, *pwTable = gtk_table_new( 3, 4, FALSE ),
+	*pwRollout = gtk_button_new_with_label( "Rollout" );
+    char *pch, *apch[ 3 ], *pchConclusion;
+    int i;
+
+    apch[ 0 ] = sz;
+    *( apch[ 1 ] = strchr( apch[ 0 ], '\n' ) ) = 0;
+    apch[ 1 ]++;
+    *( apch[ 2 ] = strchr( apch[ 1 ], '\n' ) ) = 0;
+    apch[ 2 ]++;
+    *( pchConclusion = strchr( apch[ 2 ], '\n' ) ) = 0;
+    pchConclusion += 2;
+    *( strchr( pchConclusion, '\n' ) ) = 0;
+    
+    for( i = 0; i < 3; i++ ) {
+	for( pch = apch[ i ] + 19; *pch == ' '; pch-- )
+	    *pch = 0;
+	
+	gtk_table_attach( GTK_TABLE( pwTable ),
+			  pw = gtk_label_new( apch[ i ] ),
+			  0, 1, i, i + 1, GTK_EXPAND | GTK_FILL,
+			  GTK_EXPAND | GTK_FILL, 4, 0 );
+	gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+	if( i )
+	    for( pch = apch[ i ] + 29; *pch == ' '; pch-- )
+		*pch = 0;
+	
+	gtk_table_attach( GTK_TABLE( pwTable ),
+			  pw = gtk_label_new( apch[ i ] + 22 ),
+			  1, 2, i, i + 1, GTK_EXPAND | GTK_FILL,
+			  GTK_EXPAND | GTK_FILL, 4, 0 );
+	gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+
+	if( i ) {
+	    gtk_table_attach( GTK_TABLE( pwTable ),
+			      pw = gtk_label_new( apch[ i ] + 31 ),
+			      2, 3, i, i + 1, GTK_EXPAND | GTK_FILL,
+			      GTK_EXPAND | GTK_FILL, 4, 0 );
+	    gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+	}
+    }
+    
+    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( pchConclusion ),
+		      0, 3, 3, 4, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 0, 8 );
+
+    gtk_container_set_border_width( GTK_CONTAINER( pwTable ), 8 );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwTable );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+		       pwRollout );
+    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
+			GTK_SIGNAL_FUNC( HintCubeRollout ), NULL );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+ 
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+}
+
+extern void GTKTakeHint( float arDouble[], int fMWC, int fBeaver,
+			 cubeinfo *pci ) {
+    
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
+					NULL ),
+	*pw, *pwTable = gtk_table_new( 2, 3, FALSE ),
+	*pwRollout = gtk_button_new_with_label( "Rollout" );
+    char *pch, sz[ 16 ];
+    
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
+	fMWC ? "MWC for take" : "Equity for take" ), 0, 1, 0, 1,
+		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+    if( fMWC )
+	sprintf( sz, "%6.2f%%",
+		 100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], pci ) ) );
+    else
+	sprintf( sz, "%+6.3f", -arDouble[ 2 ] );
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new( sz ),
+		      1, 2, 0, 1, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
+	fMWC ? "MWC for take" : "Equity for take" ), 0, 1, 0, 1,
+		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
+	fMWC ? "MWC for pass" : "Equity for pass" ), 0, 1, 1, 2,
+		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    
+    if( fMWC )
+	sprintf( sz, "%6.2f%%",
+		 100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], pci ) ) );
+    else
+	sprintf( sz, "%+6.3f", -arDouble[ 3 ] );
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new( sz ),
+		      1, 2, 1, 2, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+
+    if ( arDouble[ 2 ] < 0 && fBeaver )
+	pch = "Your proper cube action: Beaver!";
+    else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+	pch = "Your proper cube action: Take.";
+    else
+	pch = "Your proper cube action: Pass.";
+    
+    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( pch ),
+		      0, 2, 2, 3, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 0, 8 );
+
+    gtk_container_set_border_width( GTK_CONTAINER( pwTable ), 8 );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwTable );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+		       pwRollout );
+    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
+			GTK_SIGNAL_FUNC( HintCubeRollout ), NULL );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+ 
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+}
+
 #if WIN32
 extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
    WinCopy( (char *) data);

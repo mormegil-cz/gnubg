@@ -73,6 +73,9 @@ GTKProgressValue ( int fValue );
 extern void GTKDumpStatcontext( statcontext *psc, char *szTitle );
 extern void GTKEval( char *szOutput );
 extern void GTKHint( movelist *pml );
+extern void GTKDoubleHint( char *sz );
+extern void GTKTakeHint( float arDouble[], int fMWC, int fBeaver,
+			 cubeinfo *pci );
 extern void GTKRollout( int c, char asz[][ 40 ], int cGames );
 extern void GTKRolloutRow( int i );
 

@@ -1,3 +1,8 @@
+Wed Dec 19 17:15:56 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (GTKDoubleHint, GTKTakeHint): New functions.
+	* gnubg.c (CommandHint): Use GTK functions for cube hints.
+
 Mon Dec 17 14:01:07 2001  Gary Wong  <gtw@research.att.com>
 
 	* rollout.c (BasicCubefulRollout, RolloutGeneral): Don't compute or
