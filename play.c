@@ -41,6 +41,7 @@
 char *aszGameResult[] = { "single game", "gammon", "backgammon" };
 enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
 list lMatch, *plGame, *plLastMove;
+static int fComputerDecision = FALSE;
 
 #if USE_GTK
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
@@ -281,8 +282,11 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char sz[ 40 ];
 
-    outputf( "%s moves %s\n",
-             ap [ fTurn ].szName, FormatMove( sz, anBoard, anMove ) );
+    if( anMove[ 0 ] == -1 )
+	outputf( "%s cannot move.", ap[ fTurn ].szName );
+    else
+	outputf( "%s moves %s.\n", ap[ fTurn ].szName,
+		 FormatMove( sz, anBoard, anMove ) );
 }
 
 
@@ -291,7 +295,6 @@ static int ComputerTurn( void ) {
   movenormal *pmn;
   cubeinfo ci;
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
-  char sz [ 1024 ];
     
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
@@ -302,6 +305,8 @@ static int ComputerTurn( void ) {
       if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].ec ) )
         return -1;
 
+      fComputerDecision = TRUE;
+      
       if( -fResigned <= Utility ( arOutput, &ci ) ) {
         CommandAgree( NULL );
         return 0;
@@ -319,6 +324,8 @@ static int ComputerTurn( void ) {
                                      ap [ fTurn ].ec.nPlies ) < 0 )
         return -1;
 
+      fComputerDecision = TRUE;
+      
       if ( fBeavers && ! nMatchTo && arDouble[ 2 ] <= 0.0 ) {
         /* It's a beaver... beaver all night! */
         CommandRedouble ( NULL );
@@ -326,7 +333,7 @@ static int ComputerTurn( void ) {
       else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
         CommandTake ( NULL );
       else
-        CommandReject ( NULL );
+        CommandDrop ( NULL );
 
       return 0;
 
@@ -366,8 +373,9 @@ static int ComputerTurn( void ) {
 
           if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
                ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
-            CommandDouble ( NULL );
-            return 0;
+	      fComputerDecision = TRUE;
+	      CommandDouble ( NULL );
+	      return 0;
           }
         } /* market window */
       } /* access to cube */
@@ -384,7 +392,7 @@ static int ComputerTurn( void ) {
         if ( fX ) {
 
           outputnew ();
-          outputf ( "%s rolls %1i and %1i\n",
+          outputf ( "%s rolls %1i and %1i.\n",
                     ap [ fTurn ].szName, anDice[ 0 ], anDice[ 1 ] );
           outputx ();
 
@@ -417,9 +425,7 @@ static int ComputerTurn( void ) {
       if ( fX ) {
 	  
 	  outputnew ();
-	  outputf ( "%s moves %s\n",
-		    ap [ fTurn ].szName,
-		    FormatMove( sz, anBoardMove, pmn->anMove ) );
+	  ShowAutoMove( anBoardMove, pmn->anMove );
 	  outputx ();
       }
 #endif
@@ -430,12 +436,15 @@ static int ComputerTurn( void ) {
     
   case PLAYER_PUBEVAL:
     if( fResigned == 3 ) {
+      fComputerDecision = TRUE;
       CommandAgree( NULL );
       return 0;
     } else if( fResigned ) {
+      fComputerDecision = TRUE;
       CommandDecline( NULL );
       return 0;
     } else if( fDoubled ) {
+      fComputerDecision = TRUE;
       CommandTake( NULL );
       return 0;
     } else if( !anDice[ 0 ] ) {
@@ -682,6 +691,8 @@ extern void NextTurn( void ) {
 
 extern void TurnDone( void ) {
 
+    fComputerDecision = FALSE;
+    
 #if USE_GUI
     if( fX )
 #if USE_GTK
@@ -711,6 +722,12 @@ extern void CommandAgree( char *sz ) {
 
     moveresign *pmr;
     
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
+	return;
+    }
+
     if( !fResigned ) {
 	outputl( "No resignation was offered." );
 
@@ -733,6 +750,12 @@ extern void CommandAgree( char *sz ) {
 }
 
 extern void CommandDecline( char *sz ) {
+
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
+	return;
+    }
 
     if( !fResigned ) {
 	outputl( "No resignation was offered." );
@@ -757,7 +780,7 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
 	return;
@@ -826,7 +849,7 @@ extern void CommandDrop( char *sz ) {
 	return;
     }
 
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
 	return;
@@ -858,7 +881,6 @@ CommandMove( char *sz ) {
     an[ 8 ];
   movelist ml;
   movenormal *pmn;
-  char szTemp[ 1024 ];
     
   if( fTurn < 0 ) {
     outputl( "No game in progress (type `new' to start one)." );
@@ -895,19 +917,24 @@ CommandMove( char *sz ) {
   if( !*sz ) {
     GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
-    if( ml.cMoves == 1 ) {
+    if( ml.cMoves <= 1 ) {
 	    pmn = malloc( sizeof( *pmn ) );
 	    pmn->mt = MOVE_NORMAL;
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
-	    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
-              sizeof( pmn->anMove ) );
+	    if( ml.cMoves )
+		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
+			sizeof( pmn->anMove ) );
+	    else
+		pmn->anMove[ 0 ] = -1;
+	    
 	    AddMoveRecord( pmn );
 
 	    ShowAutoMove( anBoard, pmn->anMove );
-	    
-	    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
+
+	    if( ml.cMoves )
+		PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 
 	    TurnDone();
 
@@ -971,9 +998,7 @@ CommandMove( char *sz ) {
         if ( fX ) {
 
           outputnew ();
-          outputf ( "%s moves %s\n",
-                    ap [ fTurn ].szName,
-                    FormatMove( szTemp, anBoard, pmn->anMove ) );
+	  ShowAutoMove( anBoard, pmn->anMove );
           outputx ();
         
       }
@@ -1229,7 +1254,7 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
     
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
 	return;
@@ -1274,7 +1299,7 @@ extern void CommandResign( char *sz ) {
 	return;
     }
 
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
 	return;
@@ -1357,7 +1382,7 @@ CommandRoll( char *sz ) {
   if ( fX ) {
 
     outputnew ();
-    outputf ( "%s rolls %1i and %1i\n",
+    outputf ( "%s rolls %1i and %1i.\n",
               ap [ fTurn ].szName, anDice[ 0 ], anDice[ 1 ] );
     outputx ();
 
@@ -1375,7 +1400,7 @@ CommandRoll( char *sz ) {
     pmn->anMove[ 0 ] = -1;
     AddMoveRecord( pmn );
 	
-    outputl( "No legal moves." );
+    ShowAutoMove( anBoard, pmn->anMove );
 
     TurnDone();
   } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
@@ -1411,7 +1436,7 @@ extern void CommandTake( char *sz ) {
 	return;
     }
 
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
 	return;
