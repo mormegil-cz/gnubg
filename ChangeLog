@@ -1,3 +1,11 @@
+Thu Oct 25 22:05:23 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* gnubg.c (CommandEq2MWC, CommandMWC2Eq): new commands.
+
+	* show.c (CommandShowMarketwindow): output for money play.  The output
+	may need improvements, e.g. change layout, make GTK version, or
+	inclusion of values for intermediate values of X.
+
 Thu Oct 25 20:35:25 2001  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c (SetAnalysisEvalCube, SetEvalCube): Fix old typo.
