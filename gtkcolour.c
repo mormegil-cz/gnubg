@@ -29,10 +29,10 @@
 #include "i18n.h"
 
 #if !GTK_CHECK_VERSION(1,3,10)
-#define gtk_color_selection_set_has_opacity_control \
-    gtk_color_selection_set_opacity
-#define gtk_color_selection_get_has_opacity_control \
-    gtk_color_selection_get_opacity
+#define gtk_color_selection_set_has_opacity_control(p) \
+    gtk_color_selection_set_opacity(p)
+#define gtk_color_selection_get_has_opacity_control(p) \
+    ( (p)->use_opacity )
 #endif
 
 #define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( (pcp)->pwColourSel )
@@ -169,15 +169,16 @@ static void gtk_colour_picker_init( GtkColourPicker *pcp ) {
     pcp->pwDraw = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( pcp->pwDraw ), 32, 16 );
 
-    g_signal_connect( pcp->pwDraw, "realize", G_CALLBACK( realize ), pcp );    
+    g_signal_connect( pcp->pwDraw, "realize", GTK_SIGNAL_FUNC( realize ),
+		      pcp );    
     g_signal_connect( COLOUR_SEL( pcp ), "color-changed",
-		      G_CALLBACK( colour_changed ), pcp );    
+		      GTK_SIGNAL_FUNC( colour_changed ), pcp );    
     g_signal_connect( COLOUR_SEL_DIA( pcp ), "delete-event",
-		      G_CALLBACK( delete_event ), pcp );
+		      GTK_SIGNAL_FUNC( delete_event ), pcp );
     g_signal_connect( COLOUR_SEL_DIA( pcp )->ok_button, "clicked",
-		      G_CALLBACK( ok ), pcp );
+		      GTK_SIGNAL_FUNC( ok ), pcp );
     g_signal_connect( COLOUR_SEL_DIA( pcp )->cancel_button, "clicked",
-		      G_CALLBACK( cancel ), pcp );
+		      GTK_SIGNAL_FUNC( cancel ), pcp );
 		      
     gtk_container_add( GTK_CONTAINER( pcp ), pcp->pwDraw );
     gtk_widget_show( pcp->pwDraw );
