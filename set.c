@@ -541,14 +541,13 @@ extern void CommandSetCubeUse( char *sz ) {
 	ms.fCubeOwner = -1;
 	UpdateSetting( &ms.nCube );
 	UpdateSetting( &ms.fCubeOwner );
-	
-#if USE_GUI
-	if( fX )
-	    ShowBoard();
-#endif
-
 	CancelCubeAction();
     }
+	
+#if USE_GUI
+    if( fX )
+	ShowBoard();
+#endif
 }
 
 extern void CommandSetCubeValue( char *sz ) {

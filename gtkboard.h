@@ -80,7 +80,7 @@ typedef struct _BoardData {
 			diameter is 6 of these units (and is 2 units thick) */
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
 	dice_colour[ 2 ], cube_font_rotated, old_board[ 2 ][ 25 ],
-	drag_button, click_time,
+	drag_button, click_time, cube_use,
 	dice_roll[ 2 ]; /* roll showing on the off-board dice */
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
     gint clockwise; /* last drawn orientation */

@@ -158,8 +158,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Spin buttons with large values (e.g. the RNG seed settings) behave
   strangely.  This is GTK+'s fault (adjustments store their values as
   floats, which have less precision than ints).
-** Don't show a cube in the board window in the Crawford game, or if cube
-  use is disabled.
 ** During a rollout, the OK button should be the grab widget.  Can we
   fix that by temporarily modifying pwGrab?
 ** Enable and disable the take/drop/redouble/agree/decline etc. buttons

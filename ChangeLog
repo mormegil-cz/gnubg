@@ -1,3 +1,12 @@
+Tue Sep 25 11:07:59 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (cube_position, board_redraw_cube, board_set): Don't
+	show the cube if cube use is disabled or during the Crawford game.
+	* set.c (CommandSetCubeUse): Redisplay the board (with or without
+	the cube).
+
+	* import.c (ImportSGGGame): Handle cube drops in SGG files.
+	
 Fri Sep 21 11:10:27 2001  Gary Wong  <gtw@research.att.com>
 
 	* drawboard.c (ParseMove): Allow multiple move syntax (e.g.
@@ -639,7 +648,7 @@ Wed Mar 21 18:20:55 2001  Joseph Heled  <pepe@internet.co.nz>
 
 Wed Mar 21 10:20:08 2001  Gary Wong  <gtw@research.att.com>
 
-	* credits.sh, credits.sh: New files.
+	* credits.sh, credits.c: New files.
 	* show.c (CommandShowEngine, CommandShowVersion): New functions.
 	* gtkgame.c (GTKShowVersion): New function.
 

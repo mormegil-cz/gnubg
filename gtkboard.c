@@ -392,7 +392,12 @@ static void board_redraw_dice( GtkWidget *board, BoardData *bd, int i ) {
    the side, -1 = facing the bottom). */
 static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
 
-    if( bd->doubled ) {
+    if( bd->crawford_game || !bd->cube_use ) {
+	/* no cube */
+	if( px ) *px = -32768;
+	if( py ) *py = -32768;
+	if( porient ) *porient = -1;
+    } else if( bd->doubled ) {
 	if( px ) *px = 50 - 20 * bd->doubled;
 	if( py ) *py = 32;
 	if( porient ) *porient = bd->doubled;
@@ -408,7 +413,7 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
 	orient, n;
     char cube_text[ 3 ];
     
-    if( bd->board_size <= 0 )
+    if( bd->board_size <= 0 || bd->crawford_game || !bd->cube_use )
 	return;
 
     n = bd->doubled ? bd->cube << 1 : bd->cube;
@@ -1229,7 +1234,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
     gchar *dest, buf[ 32 ];
     gint i, *pn, **ppn;
     gint old_board[ 28 ];
-    int old_cube, old_doubled, old_xCube, old_yCube;
+    int old_cube, old_doubled, old_crawford, old_xCube, old_yCube;
     GdkEventExpose event;
     GtkAdjustment *padj0, *padj1;
     
@@ -1325,6 +1330,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
     old_cube = bd->cube;
     old_doubled = bd->doubled;
+    old_crawford = bd->crawford_game;
     
     cube_position( bd, &old_xCube, &old_yCube, NULL );
     
@@ -1448,11 +1454,13 @@ static gint board_set( Board *board, const gchar *board_text ) {
     }
 
     if( bd->doubled != old_doubled || bd->cube != old_cube ||
-	bd->cube_owner != bd->opponent_can_double - bd->can_double ) {
+	bd->cube_owner != bd->opponent_can_double - bd->can_double ||
+	fCubeUse != bd->cube_use || bd->crawford_game != old_crawford ) {
 	int xCube, yCube;
 
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
-	
+	bd->cube_use = fCubeUse;
+		
 	/* erase old cube */
 	event.count = 0;
 	event.area.x = old_xCube * bd->board_size;
@@ -2922,6 +2930,7 @@ static void board_init( Board *board ) {
     bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
     bd->crawford_game = FALSE;
     bd->playing = FALSE;
+    bd->cube_use = TRUE;
     
     bd->all_moves = NULL;
 
