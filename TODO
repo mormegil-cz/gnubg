@@ -107,7 +107,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Define Scheme "port"s for the gnubg output() functions.
 ** Use Guile keywords in cube-info.  Add a similar function for eval
   contexts.
-** Add Guile functions to access the current game state.
+** Add Guile functions to access and modify the current game state.
 ** Add whatever Guile functions are necessary for implementing Cam Trenor's
   suggestion (generating random positions which are initial doubles). (gary)
 

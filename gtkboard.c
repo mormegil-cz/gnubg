@@ -45,6 +45,10 @@
 #define POINT_DICE 28
 #define POINT_CUBE 29
 
+#define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
+			  same point is considered a real drag rather than a
+			  click */
+
 #if WIN32
 static int fWine; /* TRUE if we're running under Wine */
 /* The Win32 port of GDK wants clip masks to be inverted, for some reason... */
@@ -736,11 +740,13 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
 	    /* Click on illegal area. */
 	    board_beep( bd );
-	    bd->drag_point = -1;
 	    
 	    return TRUE;
 	}
 
+	bd->click_time = gdk_event_get_time( event );
+	bd->drag_button = event->button.button;
+	
 	if( bd->drag_point == POINT_CUBE ) {
 	    /* Clicked on cube; double. */
 	    bd->drag_point = -1;
@@ -792,7 +798,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	   then bear off as many chequers as possible, and return. */
 	
 	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
-	    bd->drag_point > 0 && bd->drag_point < 25 &&
+	    bd->drag_point > 0 && bd->drag_point <= 24 &&
 	    ( !bd->points[ bd->drag_point ] ||
 	    bd->points[ bd->drag_point ] == -bd->turn ) ) {
 	    /* Click on an empty point or opponent blot; try to make the
@@ -863,6 +869,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
 		/* the move to make the point wasn't legal; undo it. */
 		memcpy( bd->points, old_points, sizeof bd->points );
+		update_move( bd );
 	    }
 	    
 	    board_beep( bd );
@@ -875,7 +882,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
 	    event->button.button != 1 ) {
 	    /* Button 2 or more in edit mode; modify point directly. */
-	    if( event->button.button == 2 ) {
+	    if( bd->drag_button == 2 ) {
 		if( bd->points[ bd->drag_point ] >= 0 ) {
 		    /* Add player 1 */
 		    bd->drag_colour = 1;
@@ -922,11 +929,11 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		read_board( bd, points );
 		update_position_id( bd, points );
 	    }
-	    
+		
 	    bd->drag_point = -1;
 	    return TRUE;
 	}
-	
+
 	if( !bd->points[ bd->drag_point ] ) {
 	    /* click on empty bearoff tray */
 	    board_beep( bd );
@@ -937,8 +944,10 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	bd->drag_colour = bd->points[ bd->drag_point ] < 0 ? -1 : 1;
 
-	if( event->button.button != 1 && bd->drag_colour != bd->turn ) {
-	    /* trying to move opponent's chequer */
+	if( bd->drag_point > 0 && bd->drag_point < 25 &&
+	    bd->drag_colour != bd->turn ) {
+	    /* trying to move opponent's chequer (except off the bar, which
+	       is OK) */
 	    board_beep( bd );
 	    
 	    bd->drag_point = -1;
@@ -949,21 +958,6 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
 	board_expose_point( board, bd, bd->drag_point );
 
-	if( event->button.button != 1 ) {
-	    /* Automatically place chequer on destination point
-	       (as opposed to starting a drag). */
-
-	    dest = bd->drag_point - ( event->button.button == 2 ?
-					bd->dice[ 0 ] :
-					bd->dice[ 1 ] ) * bd->drag_colour;
-
-	    if( ( dest <= 0 ) || ( dest >= 25 ) )
-		/* bearing off */
-		dest = bd->drag_colour > 0 ? 26 : 27;
-	    
-	    goto place_chequer;
-	}
-	
 	bd->x_drag = x;
 	bd->y_drag = y;
 
@@ -1094,7 +1088,34 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			 6 * bd->board_size, 6 * bd->board_size );
 
 	dest = board_point( board, bd, x, y );
-    place_chequer:
+
+	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    dest == bd->drag_point && gdk_event_get_time( event ) -
+	    bd->click_time < CLICK_TIME ) {
+	    /* Automatically place chequer on destination point
+	       (as opposed to a full drag). */
+
+	    /* FIXME we should check to see if the chequer can move the
+	       die corresponding to the clicked button; if not, then use
+	       the other button instead.  There could also be an option
+	       to automatically swap the dice after making the move. */
+
+	    if( bd->drag_colour != bd->turn ) {
+		/* can't move the opponent's chequers */
+		board_beep( bd );
+
+		dest = bd->drag_point;
+	    } else {
+		dest = bd->drag_point - ( bd->drag_button == 1 ?
+					  bd->dice[ 0 ] :
+					  bd->dice[ 1 ] ) * bd->drag_colour;
+		
+		if( ( dest <= 0 ) || ( dest >= 25 ) )
+		    /* bearing off */
+		    dest = bd->drag_colour > 0 ? 26 : 27;
+	    }
+	}
+	
 	bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
 	    
 	if( dest == -1 || ( bd->drag_colour > 0 ? bd->points[ dest ] < -1

@@ -1,3 +1,10 @@
+Wed Sep 19 11:04:47 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_pointer): Move the single click move code to
+	the button release handling.  This means that the left die can be
+	moved from mouse button 1, in case the user has only a 2 button
+	mouse (contributed by Peter Orum).
+
 Mon Sep 10 12:49:54 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (CreateAnnotationWindow): Use gtk_paned_pack*() instead
