@@ -806,6 +806,8 @@ command cER = {
       &cFilename },
     { "position", CommandLoadPosition, 
       N_("Read a saved position from a file"), szFILENAME, &cFilename },
+    { "python", CommandLoadPython,
+      N_("Load a python script from a file"), szFILENAME, &cFilename },
     { "weights", CommandNotImplemented, 
       N_("Read neural net weights from a file"),
       szOPTFILENAME, &cFilename },
@@ -4738,6 +4740,29 @@ static void LoadCommands( FILE *pf, char *szFile ) {
     
     outputresume();
 }
+
+
+extern void
+CommandLoadPython( char * sz ) {
+
+  FILE *pf;
+
+  sz = NextToken( &sz );
+    
+  if( !sz || !*sz ) {
+    outputl( _("You must specify a file to load from (see `help load "
+               "python').") );
+    return;
+  }
+  
+  if( ( pf = fopen( sz, "r" ) ) ) {
+    PyRun_AnyFile( pf, sz );
+    fclose( pf );
+  } else
+    outputerr( sz );
+  
+}
+
 
 extern void CommandLoadCommands( char *sz ) {
 

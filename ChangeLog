@@ -1,3 +1,7 @@
+Sat Feb 14 20:32:24 CET 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c: new command "load python <filename>".
+
 Mon Feb  9 22:56:17 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ImportTMG): don't call SwapPlayers unless
