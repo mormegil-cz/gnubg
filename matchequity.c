@@ -365,17 +365,17 @@ GetCubePrimeValue ( int i, int j, int nCubeValue ) {
 
 int
 GetTakePoint ( float arOutput [ 5 ],
-	       int   nScore[ 2 ], int nMatchTo,
+	       int   anScore[ 2 ], int nMatchTo,
 	       int   nCube,
-	       float arTakePoint[ 2 ] ) {
+	       float arTakePoint[ 4 ] ) {
 
   /*
    * Input:
    * - arOutput: we need the gammon ratios (and in a more refined model
    *   we could include the backgammon ratios. We assume that arOutput
    *   is evaluated for player 0.
-   * - nScore: the current score.
-   * - nCubeValue: the current cube.
+   * - anScore: the current score.
+   * - nCube: the current cube.
    *
    * Output:
    * - return the take point's for both players assuming 
@@ -387,89 +387,121 @@ GetTakePoint ( float arOutput [ 5 ],
    *
    */
 
-  /* normalize score */
+  if ( ! nMatchTo ) {
 
-  int i = nMatchTo - nScore[ 0 ] - 1;
-  int j = nMatchTo - nScore[ 1 ] - 1;
-  int nDead, n, nMax, nCubeValue, nCubePrimeValue;
+    /* For money games use Rick Janowski's formulas.
+       Assume efficiency is 2/3
+       FIXME: get the formulas for this 
+              use current gammon rates */
 
-  float arD1bar[ MAXCUBELEVEL ], arD2bar[ MAXCUBELEVEL ];
-  float arD1[ MAXCUBELEVEL ], arD2[ MAXCUBELEVEL ];
-  float rG1 = arOutput[ 1 ];
-  float rG2 = arOutput[ 3 ];
+    arTakePoint[ 0 ] = arTakePoint[ 1 ] = 
+      arTakePoint[ 2 ] = arTakePoint[ 3 ] = 0.78;
 
-  /* Find out what value the cube has when you or your
+  }
+  else {
+
+    /* Match play */
+
+    /* normalize score */
+
+    int i = nMatchTo - anScore[ 0 ] - 1;
+    int j = nMatchTo - anScore[ 1 ] - 1;
+    int nDead, n, nMax, nCubeValue, nCubePrimeValue;
+
+    float arD1bar[ MAXCUBELEVEL ], arD2bar[ MAXCUBELEVEL ];
+    float arD1[ MAXCUBELEVEL ], arD2[ MAXCUBELEVEL ];
+    float rG1 = arOutput[ 1 ] / arOutput[ 0 ];
+    float rG2 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    //    float rG1 = arOutput[ 1 ];
+    //float rG2 = arOutput[ 3 ];
+
+    //printf ("g1,g2 %f %f\n", rG1, rG2 );
+
+    /* Find out what value the cube has when you or your
      opponent give a dead cube. */
 
-  nDead = nCube;
-  nMax = 0;
+    nDead = nCube;
+    nMax = 0;
 
 
-  while ( ( i >= 2 * nDead ) && ( j >= 2 * nDead ) ) {
-    nMax ++;
-    nDead *= 2;
-  }
+    while ( ( i >= 2 * nDead ) && ( j >= 2 * nDead ) ) {
+      nMax ++;
+      nDead *= 2;
+    }
 
 
-  for ( nCubeValue = nDead, n = nMax; 
-	nCubeValue >= nCube; 
-	nCubeValue >>= 1, n-- ) {
+    for ( nCubeValue = nDead, n = nMax; 
+	  nCubeValue >= nCube; 
+	  nCubeValue >>= 1, n-- ) {
 
     
-    /* Calculate D1bar */
+      /* Calculate D1bar */
 	
-    nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
+      nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
 
-    /* D1bar is winning chance a my opponents take point assuming 
+      /* D1bar is winning chance a my opponents take point assuming 
        a dead cube. */
 
-    arD1bar[ n ] = 
-      ( GET_A1 ( i - nCubeValue, j, aafA1 )
-	- rG2 * GET_A1 ( i, j - 4 * nCubePrimeValue, aafA1 )
-	- (1.0-rG2) * GET_A1 ( i, j - 2 * nCubePrimeValue, aafA1 ) )
-      /
-      ( rG1 * GET_A1( i - 4 * nCubePrimeValue, j, aafA1 )
-	+ (1.0-rG1) * GET_A1 ( i - 2 * nCubePrimeValue, j, aafA1 )
-	- rG2 * GET_A1 ( i, j - 4 * nCubePrimeValue, aafA1 )
-	- (1.0-rG2) * GET_A1 ( i, j - 2 * nCubePrimeValue, aafA1 ) );
+      arD1bar[ n ] = 
+	( GET_A1 ( i - nCubeValue, j, aafA1 )
+	  - rG2 * GET_A1 ( i, j - 4 * nCubePrimeValue, aafA1 )
+	  - (1.0-rG2) * GET_A1 ( i, j - 2 * nCubePrimeValue, aafA1 ) )
+	/
+	( rG1 * GET_A1( i - 4 * nCubePrimeValue, j, aafA1 )
+	  + (1.0-rG1) * GET_A1 ( i - 2 * nCubePrimeValue, j, aafA1 )
+	  - rG2 * GET_A1 ( i, j - 4 * nCubePrimeValue, aafA1 )
+	  - (1.0-rG2) * GET_A1 ( i, j - 2 * nCubePrimeValue, aafA1 ) );
 
+      /* Calculate D2bar */
 
-    /* Calculate D2bar */
-
-    nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
+      nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
   
-    arD2bar[ n ] =
-      ( GET_A2 ( i, j - nCubeValue, aafA2 )
-	- G2 * GET_A2 ( i - 4 * nCubePrimeValue, j, aafA2 )
-	- (1.0-G2) * GET_A2 ( i - 2 * nCubePrimeValue, j, aafA2 ) )
-      /
-      ( G1 * GET_A2( i, j - 4 * nCubePrimeValue, aafA2 )
-	+ (1.0-G1) * GET_A2 ( i, j - 2 * nCubePrimeValue, aafA2 )
-	- G2 * GET_A2 ( i - 4 * nCubePrimeValue, j, aafA2 )
-	- (1.0-G2) * GET_A2 ( i - 2 * nCubePrimeValue, j, aafA2 ) );
+      arD2bar[ n ] =
+	( GET_A2 ( i, j - nCubeValue, aafA2 )
+	  - rG1 * GET_A2 ( i - 4 * nCubePrimeValue, j, aafA2 )
+	  - (1.0-rG1) * GET_A2 ( i - 2 * nCubePrimeValue, j, aafA2 ) )
+	/
+	( rG2 * GET_A2( i, j - 4 * nCubePrimeValue, aafA2 )
+	  + (1.0-rG2) * GET_A2 ( i, j - 2 * nCubePrimeValue, aafA2 )
+	  - rG1 * GET_A2 ( i - 4 * nCubePrimeValue, j, aafA2 )
+	  - (1.0-rG1) * GET_A2 ( i - 2 * nCubePrimeValue, j, aafA2 ) );
   
-    /* Calculate D1 */
+      /* Calculate D1 */
 
-    if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
-      arD1[ n ] = arD1bar[n];
-    else
-      arD1[ n ] = 
-	1.0 + ( arD2[ n + 1 ] + DELTA ) * ( arD1bar[ n ] - 1.0 );
+      if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
+	arD1[ n ] = arD1bar[n];
+      else
+	arD1[ n ] = 
+	  1.0 + ( arD2[ n + 1 ] + DELTA ) * ( arD1bar[ n ] - 1.0 );
 
-    /* Calculate D2 */
+      /* Calculate D2 */
 
-    if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
-      arD2[ n ] = arD2bar[ n ];
-    else
-      arD2[ n ] =
-	1.0 + ( arD1[ n + 1 ] + DELTA ) * ( arD2bar[ n ] - 1.0 );
+      if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
+	arD2[ n ] = arD2bar[ n ];
+      else
+	arD2[ n ] =
+	  1.0 + ( arD1[ n + 1 ] + DELTA ) * ( arD2bar[ n ] - 1.0 );
 
-  }
+    }
 
-  arTakePoint[ 0 ] = arD1[ 0 ];
-  arTakePoint[ 1 ] = arD2[ 0 ];
+    /* Take points for current cube */
 
+    arTakePoint[ 0 ] = arD1[ 0 ];
+    arTakePoint[ 1 ] = arD2[ 0 ];
+
+  /* Take point for recubes */
+
+    if ( n ) {
+      arTakePoint[ 2 ] = arD1[ 1 ];
+      arTakePoint[ 3 ] = arD2[ 1 ];
+    }
+    else {
+      arTakePoint[ 2 ] = 0.0;
+      arTakePoint[ 3 ] = 0.0;
+    }
+  } /* endif-else ! nMatchTo */
 }
+
 
 
 #ifdef UNDEF
@@ -496,11 +528,11 @@ int main ()
 
   }
   {
-    float arOutput[ 5 ] = {0.0, 0.25, 0.0, 0.15, 0.0};
+    float arOutput[ 5 ] = {0.0, 0.0, 0.0, 0.0, 0.0};
     float arTP[ 2 ];
-    int   nScore[ 2 ] = {0,1};
+    int   anScore[ 2 ] = {0,1};
 
-    GetTakePoint ( arOutput, nScore, 8, 1, arTP );
+    GetTakePoint ( arOutput, anScore, 8, 1, arTP );
 
     printf ( "%9.6f %9.6f\n", arTP[ 0 ], arTP[ 1 ] );
   }

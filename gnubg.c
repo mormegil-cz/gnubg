@@ -60,6 +60,7 @@
 #if HAVE_LIBREADLINE
 #include <readline/history.h>
 #include <readline/readline.h>
+static int fReadingOther;
 #endif
 
 #include "backgammon.h"
@@ -84,7 +85,7 @@ int nDelay = 0;
 event evNextTurn;
 static int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
-static int fReadingCommand, fReadingOther;
+static int fReadingCommand;
 #endif
 #endif
 
@@ -1610,10 +1611,14 @@ extern char *GetInput( char *szPrompt ) {
     if( fInterrupt )
 	return NULL;
 
+    fReadingOther = TRUE;
+
     if( !( sz = readline( szPrompt ) ) ) {
 	putchar( '\n' );
 	exit( EXIT_SUCCESS );
     }
+
+    fReadingOther = FALSE;
     
     if( fInterrupt )
 	return NULL;
