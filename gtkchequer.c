@@ -406,12 +406,22 @@ MoveListEvalSettings ( GtkWidget *pw, void *unused ) {
 
   SetEvaluation ( NULL, 0, NULL );
 
+#if GTK_CHECK_VERSION(2,0,0)
+  /* bring the dialog holding this button to the top */
+  gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );
+#endif
+
 }
 
 static void
 MoveListRolloutSettings ( GtkWidget *pw, void *unused ) {
 
   SetRollouts ( NULL, 0, NULL );
+
+#if GTK_CHECK_VERSION(2,0,0)
+  /* bring the dialog holding this button to the top */
+  gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );
+#endif
 
 }
 
