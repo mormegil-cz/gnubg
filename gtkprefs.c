@@ -1191,7 +1191,6 @@ void toggle_quick_draw(GtkWidget *widget, int init)
 {
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(pwShowShadows, !set);
-	gtk_widget_set_sensitive(pwAnimateRoll, !set);
 	gtk_widget_set_sensitive(pwCloseBoard, !set);
 	gtk_widget_set_sensitive(pwAnimateFlag, !set);
 	gtk_widget_set_sensitive(pwDynamicLabels, !set);
@@ -1199,7 +1198,6 @@ void toggle_quick_draw(GtkWidget *widget, int init)
 	if (set)
 	{
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), 0);
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateFlag), 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDynamicLabels), 0);
