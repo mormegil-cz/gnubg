@@ -782,7 +782,7 @@ extern int ComputerTurn( void ) {
 
       fComputerDecision = TRUE;
 
-      if( rEqAfter <= ( rEqBefore - epsilon ) )
+      if( fabs(rEqAfter - rEqBefore) <= epsilon )
         CommandAgree( NULL );
       else
         CommandDecline( NULL );
