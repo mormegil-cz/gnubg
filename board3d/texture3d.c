@@ -55,6 +55,58 @@ typedef struct
 
 #pragma pack()
 
+#if __BIG_ENDIAN__
+#define TEXTURE_SWAP(x) for (i = 0; i < sizeof (x) / 2; i ++) { \
+                            char c = ((char *) &x)[i]; \
+                            ((char *) &x)[i] = ((char *) &x)[sizeof (x) - i - 1];\
+                            ((char *) &x)[sizeof (x) - i - 1] = c; \
+                        }
+#endif
+                            
+
+int MakeLittleEndian_BMPHeader (BITMAPFILEHEADER *ph)
+{
+#if __BIG_ENDIAN__
+
+    int i;
+    
+    /*TEXTURE_SWAP (ph->bfType);*/ /* do not swap this one! */
+    TEXTURE_SWAP (ph->bfSize);
+    TEXTURE_SWAP (ph->bfReserved1);
+    TEXTURE_SWAP (ph->bfReserved2);
+    TEXTURE_SWAP (ph->bfOffBits);
+
+#endif
+
+    return 0;
+}
+
+
+int MakeLittleEndian_BMPInfoHeader (BITMAPINFOHEADER *ph)
+{
+#if __BIG_ENDIAN__
+
+    int i;
+    
+    TEXTURE_SWAP (ph->biSize);
+    TEXTURE_SWAP (ph->biWidth);
+    TEXTURE_SWAP (ph->biHeight);
+    TEXTURE_SWAP (ph->biPlanes);
+    TEXTURE_SWAP (ph->biBitCount);
+    TEXTURE_SWAP (ph->biCompression);
+    TEXTURE_SWAP (ph->biSizeImage);
+    TEXTURE_SWAP (ph->biXPelsPerMeter);
+    TEXTURE_SWAP (ph->biYPelsPerMeter);
+    TEXTURE_SWAP (ph->biClrUsed);
+    TEXTURE_SWAP (ph->biClrImportant);
+
+#endif
+
+    return 0;
+}
+
+#include <assert.h>
+
 unsigned char *LoadDIBTexture(FILE *fp, int *width, int *height)
 {
 	unsigned char *bits;	/* Bitmap pixel bits */
@@ -63,11 +115,13 @@ unsigned char *LoadDIBTexture(FILE *fp, int *width, int *height)
 	BITMAPINFOHEADER infoheader;
 	unsigned int i;
 	unsigned char *ptr;
-
+        
 	/* Read in header info */
 	if ((fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) != 1) ||
+                MakeLittleEndian_BMPHeader (&header) ||
 		(memcmp(&header.bfType, "BM", 2) != 0) ||
 		(fread(&infoheader, sizeof(BITMAPINFOHEADER), 1, fp) != 1) ||
+                MakeLittleEndian_BMPInfoHeader (&infoheader) ||
 		(fseek(fp, header.bfOffBits, SEEK_SET)))	/* Skip colour map */
 	{
 		fclose(fp);
