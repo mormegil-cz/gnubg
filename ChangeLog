@@ -1,3 +1,9 @@
+Mon Aug  5 19:51:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Gammon only scores 1 point with Jacoby rule.
+
+	* play.c (ApplyMoveRecord): fix bug.
+
 Mon Aug  5 13:44:28 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (setWindowGeometry): [GTK_CHECK_VERSION(2,0,0)] Use
