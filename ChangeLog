@@ -1,3 +1,8 @@
+Mon Jan 26 07:31:03 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* htmlimages.c [!HAVE_LIBPNG] (CommandExportHTMLImages): Argument
+	synch with HAVE_LIBPNG version.
+
 Wed Jan 21 21:17:12 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* bearoff.c (GetDistCompressed): fix stupid stupid stupid bug. 

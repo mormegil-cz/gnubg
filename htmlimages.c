@@ -777,7 +777,7 @@ static void TidyObjects()
 		free(asRefract[i]);
 }
 
-extern void CommandExportHTMLImages(char *sz)
+extern void CommandExportHTMLImages( char *sz )
 {
 	szFile = GetFilenameBase(sz);
 	if (!szFile)
@@ -791,10 +791,10 @@ extern void CommandExportHTMLImages(char *sz)
 	TidyObjects();
 }
 
-#else
-extern void CommandExportHTMLImages( char * )
+#else /* not HAVE_LIBPNG */
+extern void CommandExportHTMLImages( char *sz )
 {
 	outputl( _("This installation of GNU Backgammon was compiled without\n"
 		"support for writing HTML images.") );
 }
-#endif
+#endif /* not HAVE_LIBPNG */
