@@ -500,6 +500,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           switch ( cd ) {
 
           case DOUBLE_TAKE:
+          case DOUBLE_BEAVER:
+          case REDOUBLE_TAKE:
+          case REDOUBLE_BEAVER:
 
             SetCubeInfo ( pci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
 			  pci->nMatchTo,
@@ -508,6 +511,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
             break;
         
           case DOUBLE_PASS:
+          case REDOUBLE_PASS:
 
             /* FIXME: we may check if all pfFinished are false,
                in which case we are finished */
@@ -531,6 +535,11 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           case NODOUBLE_TAKE:
           case TOOGOOD_TAKE:
           case TOOGOOD_PASS:
+          case NODOUBLE_BEAVER:
+          case NO_REDOUBLE_TAKE:
+          case TOOGOODRE_TAKE:
+          case TOOGOODRE_PASS:
+          case NO_REDOUBLE_BEAVER:
           default:
 
             /* no op */
@@ -630,6 +639,17 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           pci->nCube / aci [ ici ].nCube;
       
     }
+
+  printf ( "rollout %i %f %f %f %f %f %f %f\n",
+           iGame,
+           aarOutput[ 0 ][ 0 ],
+           aarOutput[ 0 ][ 1 ],
+           aarOutput[ 0 ][ 2 ],
+           aarOutput[ 0 ][ 3 ],
+           aarOutput[ 0 ][ 4 ],
+           aarOutput[ 0 ][ 5 ],
+           aarOutput[ 0 ][ 6 ] );
+           
 
     return 0;
 }

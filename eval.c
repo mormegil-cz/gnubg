@@ -3099,7 +3099,11 @@ static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
       return -1;
 
     InvertEvaluationR ( arEval, &ci );
-    
+
+    if ( ci.nMatchTo )
+      arEval[ OUTPUT_CUBEFUL_EQUITY ] =
+        mwc2eq ( arEval[ OUTPUT_CUBEFUL_EQUITY ], pci );
+
     /* Save evaluations */  
     memcpy( pm->arEvalMove, arEval, NUM_OUTPUTS * sizeof ( float ) );
     
@@ -6109,7 +6113,7 @@ GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                     arOutput, 
                                     &rCubeful,
                                     pci, 1,
-                                    pci, pec, nPlies, TRUE ) )
+                                    pci, pec, nPlies, FALSE ) )
       return -1;
 
     arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );

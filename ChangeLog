@@ -1,3 +1,10 @@
+Thu Oct 18 22:43:12 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* eval.c (ScoreMove): convert MWC to EMG for match play.
+	(Bug reported by Peter Orum)
+
+	* rollout.c (BasicCubefulRollout): handle new cube decisions.
+
 Wed Oct 17 19:13:08 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (InvertEvaluationR): New parameter to InvertEvaluationR which
