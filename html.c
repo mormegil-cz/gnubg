@@ -1728,11 +1728,12 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
             "<head>\n"
             "<meta name=\"generator\" content=\"GNU Backgammon %s\" />\n"
             "<meta http-equiv=\"Content-Type\" "
-            "content=\"text/html; charset=ISO-8859-1\" />\n" 
+            "content=\"text/html; charset=%s\" />\n" 
             "<meta name=\"keywords\" content=\"%s, %s, %s\" />\n"
             "<meta name=\"description\" "
             "content=\"",
             VERSION,
+            GNUBG_CHARSET,
             ap[ 0 ].szName, ap[ 1 ].szName,
             ( pms->nMatchTo ) ? _("match play") : _("money game") );
 

@@ -1,3 +1,9 @@
+Son Nov 30 12:50:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTMLPrologue): set Charset to GNUBG_CHARSET instead
+	of hardcoded ISO-8859-1.
+	(suggested by Petr Kadlec)
+
 Sun Nov 30 09:56:25 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkbearoff.c, gtkgame.c, gtktheory.c: subst. "iso8859-1" with "*"
