@@ -1,3 +1,9 @@
+Sun Jul 27 11:43:36 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTMLPrintMoveAnalysis): remove some colspans to
+	produce better output. Fix reentrancy problem.
+	(reported by Joseph)
+
 Sun Jul 27 11:11:33 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Avoid coredump when importing invalid SGG (and others) with

@@ -2440,6 +2440,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
   char sz[ 64 ];
   int i;
   float rEq, rEqTop;
+  char *pch;
 
   cubeinfo ci;
 
@@ -2499,25 +2500,29 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   /* table header */
 
+  pch = strdup( GetStyle ( CLASS_MOVEHEADER, hecss ) );
+
   fprintf ( pf,
             "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n"
             "<tr>\n",
             GetStyle ( CLASS_MOVETABLE, hecss ) );
   fprintf ( pf, "<th %s %s colspan=\"2\">%s</th>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
+            pch, 
             GetStyle ( CLASS_MOVENUMBER, hecss ), _("#") );
   fprintf ( pf, "<th %s %s>%s</th>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
+            pch, 
             GetStyle ( CLASS_MOVEPLY, hecss ), _("Ply") );
   fprintf ( pf, "<th %s %s>%s</th>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
+            pch, 
             GetStyle ( CLASS_MOVEMOVE, hecss ), _("Move") );
   fprintf ( pf,
             "<th %s %s>%s</th>\n" "</tr>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
+            pch, 
             GetStyle ( CLASS_MOVEEQUITY, hecss ),
             ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
             _("Equity") : _("MWC") );
+
+  free( pch );
             
 
   if ( pmr->n.ml.cMoves ) {
@@ -2624,7 +2629,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
         fputs ( "<td colspan=\"3\">&nbsp;</td>\n", pf );
 
 
-        fputs ( "<td colspan=\"2\">", pf );
+        fputs ( "<td>", pf );
 
 
         switch ( pmr->n.ml.amMoves[ i ].esMove.et ) {
@@ -2648,21 +2653,23 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         fputs ( "</td>\n", pf );
 
+        fputs( "<td>&nbsp;</td>\n", pf );
+
         fputs ( "</tr>\n", pf );
       }
 
       /*
        * Write row with move parameters 
        */
-  
+      
       if ( exsExport.afMovesParameters 
-              [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
-
+           [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
+        
         evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
-
+        
         switch ( pes->et ) {
         case EVAL_EVAL: 
-
+          
           if ( i == pmr->n.iMove )
             fprintf ( pf, "<tr %s>\n", 
                       GetStyle ( CLASS_MOVETHEMOVE, hecss ) );
@@ -2671,13 +2678,15 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                       GetStyle ( CLASS_MOVEODD, hecss ) );
           else
             fputs ( "<tr>\n", pf );
-
+          
           fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
-
-          fputs ( "<td colspan=\"2\">", pf );
+          
+          fputs ( "<td>", pf );
           fputs ( OutputEvalContext ( &pes->ec, TRUE ), pf );
           fputs ( "</td>\n", pf );
-
+            
+          fputs( "<td>&nbsp;</td>\n", pf );
+          
           fputs ( "</tr>\n", pf );
 
           break;
@@ -2702,10 +2711,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
             fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
             
-            fputs ( "<td colspan=\"2\">", pf );
+            fputs ( "<td>", pf );
             fputs ( pcS, pf );
             fputs ( "</td>\n", pf );
             
+            fputs( "<td>&nbsp;</td>\n", pf );
+
             fputs ( "</tr>\n", pf );
             
             pcS = pcE + 1;
