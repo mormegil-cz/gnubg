@@ -1,4 +1,8 @@
-Fri May 23 18:05:32  Holger Bochnig  <hbgg@gmx.net>
+Sat May 24 22:10:53 2003  Holger Bochnig  <hbgg@gmx.net>
+
+	* Makefile.am: add libart.m4
+
+Fri May 23 18:05:32 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	* libart.m4: new file
 
