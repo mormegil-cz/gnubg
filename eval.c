@@ -6938,4 +6938,334 @@ cmp_rolloutcontext ( const rolloutcontext *prc1, const rolloutcontext *prc2 ) {
 
 }
 
+/*
+ * Get current gammon rates
+ *
+ * Input:
+ *   anBoard: current board
+ *   pci: current cubeinfo
+ *   pec: eval context
+ *
+ * Output:
+ *   aarRates: gammon and backgammon rates (first index is player)
+ *
+ */
+
+extern int
+getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
+                        float arOutput[],
+                        int anBoard[ 2 ][ 25 ],
+                        cubeinfo *pci,
+                        evalcontext *pec ) {
+
+  if( EvaluatePosition( anBoard, arOutput, pci, pec ) < 0 )
+      return -1;
+
+  if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+    aarRates[ pci->fMove ][ 0 ] =
+      ( arOutput[ OUTPUT_WINGAMMON ] - arOutput[ OUTPUT_WINBACKGAMMON ] ) /
+      arOutput[ OUTPUT_WIN ];
+    aarRates[ pci->fMove ][ 1 ] =
+      arOutput[ OUTPUT_WINBACKGAMMON ] / arOutput[ OUTPUT_WIN ];
+  }
+  else {
+    aarRates[ pci->fMove ][ 0 ] = aarRates[ pci->fMove ][ 1 ] = 0;
+  }
+
+  if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+    aarRates[ ! pci->fMove ][ 0 ] =
+      ( arOutput[ OUTPUT_LOSEGAMMON ] -
+        arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
+      ( 1.0 - arOutput[ OUTPUT_WIN ] );
+    aarRates[ ! pci->fMove ][ 1 ] =
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+      ( 1.0 - arOutput[ OUTPUT_WIN ] );
+  }
+  else {
+    aarRates[ ! pci->fMove ][ 0 ] = aarRates[ ! pci->fMove ][ 1 ] = 0;
+  }
+
+  return 0;
+
+}
+
+/*
+ * Get take, double, beaver, etc points for money game using
+ * Rick Janowski's formulae:
+ *   http://www.msoworld.com/mindzine/news/classic/bg/cubeformulae.html
+ *
+ * Input:
+ *   fJacoby, fBeavers: flags for different flavours of money game
+ *   aarRates: gammon and backgammon rates (first index is player)
+ *
+ * Output:
+ *   aaarPoints: the points
+ *
+ */
+
+extern void
+getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
+                 const int fJacoby, const int fBeavers,
+                 float aarRates[ 2 ][ 2 ] ) {
+
+  float arCLV[ 2 ];/* average cubeless value of games won */
+  float rW, rL;
+  int i;
+
+  /* calculate average cubeless value of games won */
+
+  for ( i = 0; i < 2; i++ )
+    arCLV[ i ] = 1.0 + aarRates[ i ][ 0 ] + aarRates[ i ][ 1 ];
+
+    /* calculate points */
+    
+  for ( i = 0; i < 2; i++ ) {
+
+    /* Determine rW and rL from Rick's formulae */
+
+    rW = arCLV[ i ];
+    rL = arCLV[ ! i ];
+
+    /* Determine points */
+
+    /* take point */
+      
+    aaarPoints[ i ][ 0 ][ 0 ] = ( rL - 0.5 ) / ( rW + rL );
+    aaarPoints[ i ][ 0 ][ 1 ] = ( rL - 0.5 ) / ( rW + rL + 0.5 );
+
+    /* beaver point */
+
+    aaarPoints[ i ][ 1 ][ 0 ] = rL / ( rW + rL );
+    aaarPoints[ i ][ 1 ][ 1 ] = rL / ( rW + rL + 0.5 );
+
+    /* raccoon point */
+
+    aaarPoints[ i ][ 2 ][ 0 ] = rL / ( rW + rL );
+    aaarPoints[ i ][ 2 ][ 1 ] = ( rL + 0.5 ) / ( rW + rL + 0.5 );
+
+    /* initial double point */
+      
+    if ( ! fJacoby ) {
+      /* without Jacoby */
+      aaarPoints[ i ][ 3 ][ 0 ] = rL / ( rW + rL );
+    }
+    else {
+      /* with Jacoby */
+          
+      if ( fBeavers )
+        /* with beavers */
+        aaarPoints[ i ][ 3 ][ 0 ] = ( rL - 0.25 ) / ( rL + rW - 0.5 );
+      else
+        /* without beavers */
+        aaarPoints[ i ][ 3 ][ 0 ] = ( rL - 0.5 ) / ( rL + rW - 1.0 );
+        
+    }
+    aaarPoints[ i ][ 3 ][ 1 ] = ( rL + 1.0 ) / ( rL + rW + 0.5 );
+
+    /* redouble point */
+    aaarPoints[ i ][ 4 ][ 0 ] = rL / ( rW + rL );
+    aaarPoints[ i ][ 4 ][ 1 ] = ( rL + 1.0 ) / ( rL + rW + 0.5 );
+
+    /* cash point */
+
+    aaarPoints[ i ][ 5 ][ 0 ] = ( rL + 0.5 ) / ( rW + rL );
+    aaarPoints[ i ][ 5 ][ 1 ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
+
+    /* too good point */
+      
+    aaarPoints[ i ][ 6 ][ 0 ] = ( rL + 1.0 ) / ( rW + rL );
+    aaarPoints[ i ][ 6 ][ 1 ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
+
+  }
+
+}
+
+
+/*
+ * Get take, double, take, and too good points for match play.
+ *
+ * Input:
+ *   pci: cubeinfo 
+ *   aarRates: gammon and backgammon rates (first index is player)
+ *
+ * Output:
+ *   aaarPoints: the points
+ *
+ */
+
+extern void
+getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
+                 int afAutoRedouble[ 2 ],
+                 int afDead[ 2 ],
+                 cubeinfo *pci,
+                 float aarRates[ 2 ][ 2 ] ) {
+
+  float arOutput[ NUM_OUTPUTS ];
+  float arDP1[ 2 ], arDP2[ 2 ],arCP1[ 2 ], arCP2[ 2 ], arTG[ 2 ];
+  float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain, r;
+
+  int i, anNormScore[ 2 ];
+
+  for ( i = 0; i < 2; i++ )
+    anNormScore[ i ] = pci->nMatchTo - pci->anScore[ i ];
+
+  /* get cash points */
+
+  arOutput[ 0 ] = 0.5;
+  arOutput[ 1 ] = 0.5 * ( aarRates[ 0 ][ 0 ] + aarRates[ 0 ][ 1 ] );
+  arOutput[ 2 ] = 0.5 * aarRates[ 0 ][ 1 ];
+  arOutput[ 3 ] = 0.5 * ( aarRates[ 1 ][ 0 ] + aarRates[ 1 ][ 1 ] );
+  arOutput[ 4 ] = 0.5 * aarRates[ 1 ][ 1 ];
+
+  GetPoints ( arOutput, pci, arCP2 );
+
+  for ( i = 0; i < 2; i++ ) {
+
+    afAutoRedouble [ i ] =
+      ( anNormScore[ i ] - 2 * pci->nCube <= 0 ) &&
+      ( anNormScore[ ! i ] - 2 * pci->nCube > 0 );
+    
+    afDead[ i ] =
+      ( anNormScore[ ! i ] - 2 * pci->nCube <=0 );
+
+    /* MWC for "double, take; win" */
+
+    rDTW =
+      (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+      GET_MET ( anNormScore[ i ] - 2 * pci->nCube - 1,
+                anNormScore[ !i ] - 1, aafMET )
+      + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 4 * pci->nCube - 1,
+                                       anNormScore[ ! i ] - 1, aafMET )
+      + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 6 * pci->nCube - 1,
+                                       anNormScore[ ! i ] - 1, aafMET );
+
+    /* MWC for "no double, take; win" */
+
+    rNDW =
+      (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+      GET_MET ( anNormScore[ i ] - pci->nCube - 1,
+                anNormScore[ !i ] - 1, aafMET )
+      + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 2 * pci->nCube - 1,
+                                       anNormScore[ ! i ] - 1, aafMET )
+      + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 3 * pci->nCube - 1,
+                                       anNormScore[ ! i ] - 1, aafMET );
+    
+    /* MWC for "Double, take; lose" */
+    
+    rDTL =
+      (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+      GET_MET ( anNormScore[ i ] - 1,
+                anNormScore[ !i ] - 2 * pci->nCube - 1, aafMET )
+      + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
+                                         anNormScore[ ! i ] - 4 * pci->nCube - 1, aafMET )
+      + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
+                                         anNormScore[ ! i ] - 6 * pci->nCube - 1, aafMET );
+
+    /* MWC for "No double; lose" */
+
+    rNDL =
+      (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+      GET_MET ( anNormScore[ i ] - 1,
+                anNormScore[ !i ] - 1 * pci->nCube - 1, aafMET )
+      + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
+                                         anNormScore[ ! i ] - 2 * pci->nCube - 1, aafMET )
+      + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
+                                         anNormScore[ ! i ] - 3 * pci->nCube - 1, aafMET );
+    
+    /* MWC for "Double, pass" */
+
+    rDP = GET_MET( anNormScore[ i ] - pci->nCube - 1,
+                   anNormScore[ ! i ] - 1, aafMET );
+
+    /* Double point */
+
+    rRisk = rNDL - rDTL;
+    rGain = rDTW - rNDW;
+
+    arDP1 [ i ] = rRisk / ( rRisk + rGain );
+    arDP2 [ i ] = arDP1 [ i ];
+
+    /* Dead cube take point without redouble */
+
+    rRisk = rDTW - rDP;
+    rGain = rDP - rDTL;
+
+    arCP1 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+
+    /* find too good point */
+
+    rRisk = rNDW - rNDL;
+    rGain = rNDW - rDP;
+
+    arTG[ i ] = rRisk / ( rRisk + rGain );
+
+    if ( afAutoRedouble[ i ] ) {
+
+      /* With redouble */
+
+      rDTW =
+        (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+        GET_MET ( anNormScore[ i ] - 4 * pci->nCube - 1,
+                  anNormScore[ !i ] - 1, aafMET )
+        + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 8 * pci->nCube - 1,
+                                         anNormScore[ ! i ] - 1, aafMET )
+        + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 12 * pci->nCube - 1,
+                                         anNormScore[ ! i ] - 1, aafMET );
+
+      rDTL =
+        (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+        GET_MET ( anNormScore[ i ] - 1,
+                  anNormScore[ !i ] - 4 * pci->nCube - 1, aafMET )
+        + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
+                                           anNormScore[ ! i ] - 8 * pci->nCube - 1,
+                                           aafMET )
+        + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
+                                           anNormScore[ ! i ] - 12 * pci->nCube - 1,
+                                           aafMET );
+
+      rRisk = rDTW - rDP;
+      rGain = rDP - rDTL;
+        
+      arCP2 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+
+      /* Double point */
+
+      rRisk = rNDL - rDTL;
+      rGain = rDTW - rNDW;
+      
+      arDP2 [ i ] = rRisk / ( rRisk + rGain );
+
+    }
+
+  }
+
+  /* save points */
+
+  for ( i = 0; i < 2; i++ ) {
+
+    /* take point */
+
+    aaarPoints[ i ][ 0 ][ 0 ] = 1.0f - arCP1[ ! i ];
+    aaarPoints[ i ][ 0 ][ 1 ] = 1.0f - arCP2[ ! i ];
+
+    /* double point */
+
+    aaarPoints[ i ][ 1 ][ 0 ] = arDP1[ i ];
+    aaarPoints[ i ][ 1 ][ 1 ] = arDP2[ i ];
+
+    /* cash point */
+
+    aaarPoints[ i ][ 2 ][ 0 ] = arCP1[ i ];
+    aaarPoints[ i ][ 2 ][ 1 ] = arCP2[ i ];
+
+    /* too good point */
+
+    aaarPoints[ i ][ 3 ][ 0 ] = arTG[ i ];
+
+    if ( ! afDead[ i ] )
+      aaarPoints[ i ][ 3 ][ 1 ] = arCP2[ i ];
+
+  }
+
+}
 
