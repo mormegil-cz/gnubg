@@ -397,8 +397,9 @@ command acDatabase[] = {
     { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
     { "export", NULL, "Write data for use by other programs", NULL, acExport },
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
-    { "hint", CommandHint, "Show the best evaluations of legal "
-      "moves", NULL, NULL },
+    { "hint", CommandHint, 
+      "Give hints on cube action or best legal moves", 
+      szOPTVALUE, NULL }, 
     { "list", NULL, "Show a list of games or moves", NULL, acList },
     { "load", NULL, "Read data from a file", NULL, acLoad },
     { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
@@ -1188,6 +1189,7 @@ extern void CommandHint( char *sz ) {
     char szMove[ 32 ], szTemp[ 1024 ];
     float arDouble[ 4 ];
     cubeinfo ci;
+    int n = ParseNumber ( &sz );
     
     if( fTurn < 0 ) {
       outputl( "You must set up a board first." );
@@ -1287,11 +1289,16 @@ extern void CommandHint( char *sz ) {
 
       /* Give hints on move */
 
+      if ( n <= 0 )
+        n = 10;
+
       SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
       if( FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
 			      NULL, &ci, &ecEval ) < 0 || fInterrupt )
 	  return;
+
+      n = ( ml.cMoves > n ) ? n : ml.cMoves;
 
       if( !ml.cMoves ) {
 	  outputl( "There are no legal moves." );
@@ -1330,7 +1337,7 @@ extern void CommandHint( char *sz ) {
                    
         }
 
-	for( i = 1; i <  ml.cMoves; i++ ) {
+	for( i = 1; i < n; i++ ) {
 
 	  ar = ml.amMoves[ i ].arEvalMove;
           rEq = ml.amMoves[ i ].rScore;
@@ -1375,7 +1382,7 @@ extern void CommandHint( char *sz ) {
                    
         }
 
-	for( i = 1; i <  ml.cMoves; i++ ) {
+	for( i = 1; i < n; i++ ) {
 
 	  ar = ml.amMoves[ i ].arEvalMove;
           rMWC = 100.0 * eq2mwc ( ml.amMoves[ i ].rScore, &ci );

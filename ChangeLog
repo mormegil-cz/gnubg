@@ -1,3 +1,8 @@
+Thu Oct 26 11:27:39 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* gnubg.c (CommandHint): `hint' now takes a parameter specifying
+ 	how many moves to show. Default is 10.
+
 Wed Oct 25 17:45:55 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* play.c (ComputerTurn): resignations are now correct for 
