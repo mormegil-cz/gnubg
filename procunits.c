@@ -2774,10 +2774,19 @@ static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInte
     
     
     do {
+#ifdef WIN32
+        int nWSAError;
+        GTK_YIELDTIME;
+        n = send( (SOCKET) toSocket, (const char *) msg, msg->len, 0);
+        nWSAError = WSAGetLastError();
+        fError = (n == SOCKET_ERROR && !(nWSAError == WSAEWOULDBLOCK));
+        fShutdown = (nWSAError == WSAECONNRESET);
+#else
         GTK_YIELDTIME;
         n = send( (SOCKET) toSocket, (const char *) msg, msg->len, 0);
         fError = (n == -1 && !(errno == EAGAIN || errno == EWOULDBLOCK));
         fShutdown = (n == 0 || n == ECONNRESET);
+#endif
         if (fShutdown) { 
             if (RPU_DEBUG) outputerrf ("*** Connection closed by peer.\n");
             fError = FALSE; n = 0;
@@ -2838,13 +2847,18 @@ static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterru
 	n = WSARecv( (SOCKET) fromSocket, &Buffers, 1,
 		     (LPDWORD) &len, &dwFlags, NULL, NULL );
 	*/
+        int nWSAError;
 	n = recv( (SOCKET) fromSocket, (char*) &len, sizeof(len), MSG_PEEK );
+        nWSAError = WSAGetLastError();
+        fNoData = (n == SOCKET_ERROR && (nWSAError == WSAEWOULDBLOCK));
+        fError = (n == SOCKET_ERROR && !(nWSAError == WSAEWOULDBLOCK));
+        fShutdown = (nWSAError == WSAECONNRESET);
 #else
         n = recv (fromSocket, &len, sizeof (len), MSG_PEEK | MSG_WAITALL);
-#endif /* WIN32 */
         fNoData = (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK));
         fError = (n == -1 && !(errno == EAGAIN || errno == EWOULDBLOCK));
         fShutdown = (n == 0 || n == ECONNRESET);
+#endif /* WIN32 */
         if (fShutdown) { 
             if (RPU_DEBUG) outputerrf ("*** Connection closed by peer.\n");
             fError = FALSE; n = 0;
@@ -2865,10 +2879,19 @@ static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterru
         /* receive the whole message */
         do {
             GTK_YIELDTIME;
+#ifdef WIN32
+            int nWSAError;
+            n = recv( (SOCKET) fromSocket, (char*) &len, sizeof(len), 0 );
+            nWSAError = WSAGetLastError();
+            fNoData = (n == SOCKET_ERROR && (nWSAError == WSAEWOULDBLOCK));
+            fError = (n == SOCKET_ERROR && !(nWSAError == WSAEWOULDBLOCK));
+            fShutdown = (nWSAError == ECONNRESET);
+#else
 	    n = recv( (SOCKET) fromSocket, (char*) msg, len, 0 );
             fNoData = (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK));
             fError = (n == -1 && !(errno == EAGAIN || errno == EWOULDBLOCK));
             fShutdown = (n == 0 || n == ECONNRESET);
+#endif /* WIN32 */
             if (fShutdown) { 
                 if (RPU_DEBUG) outputerrf ("*** Connection closed by peer.\n");
                 fError = FALSE; n = 0;
@@ -3609,7 +3632,7 @@ static void Slave (void)
 					    &masterAddressLen );
 #ifdef WIN32
 			nWSAError = WSAGetLastError();
-                        if ( (rpuSocket == INVALID_SOCKET) && (errno != EAGAIN)
+                        if ( (rpuSocket == INVALID_SOCKET) && (nWSAError != WSAEAGAIN)
                              && (nWSAError != WSAEWOULDBLOCK) )
 #else
                         if (rpuSocket == -1 && errno != EAGAIN && errno != EWOULDBLOCK) 
