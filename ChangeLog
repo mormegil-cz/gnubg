@@ -1,3 +1,8 @@
+Sat Jan  3 16:53:09 2004  Oystein Johansen <oystein@gnubg.org>
+
+        * makebearoff.c: Add progress bar. (Win32 only)
+	* makebearoff.rc: New file.
+
 Sat Jan  3 14:32:46 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Some updates to EPCs:
