@@ -604,40 +604,53 @@ GetPoints ( float arOutput [ 5 ], int   anScore[ 2 ], int nMatchTo,
 
     /* arOutput evaluated for player 0 */
 
-    if ( arOutput[ 0 ] > 0.0 ) {
-      rG0 = arOutput[ 1 ] / arOutput[ 0 ];
-      rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+    if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+      rG0 = ( arOutput[ OUTPUT_WINGAMMON ] -
+              arOutput[ OUTPUT_WINBACKGAMMON ] ) /
+        arOutput[ OUTPUT_WIN ];
+      rBG0 = arOutput[ OUTPUT_WINBACKGAMMON ] /
+        arOutput[ OUTPUT_WIN ];
     }
     else {
       rG0 = 0.0;
       rBG0 = 0.0;
     }
 
-    if ( arOutput[ 0 ] < 1.0 ) {
-      rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
-      rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+    if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+      rG1 = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+              arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+      rBG1 = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
     }
     else {
       rG1 = 0.0;
       rBG1 = 0.0;
     }
+
   }
   else {
 
     /* arOutput evaluated for player 1 */
 
-    if ( arOutput[ 0 ] > 0.0 ) {
-      rG1 = arOutput[ 1 ] / arOutput[ 0 ];
-      rBG1 = arOutput[ 2 ] / arOutput[ 0 ];
+    if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+      rG1 = ( arOutput[ OUTPUT_WINGAMMON ] -
+              arOutput[ OUTPUT_WINBACKGAMMON ] ) /
+        arOutput[ OUTPUT_WIN ];
+      rBG1 = arOutput[ OUTPUT_WINBACKGAMMON ] /
+        arOutput[ OUTPUT_WIN ];
     }
     else {
       rG1 = 0.0;
       rBG1 = 0.0;
     }
 
-    if ( arOutput[ 0 ] < 1.0 ) {
-      rG0 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
-      rBG0 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+    if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+      rG0 = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+              arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+      rBG0 = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
     }
     else {
       rG0 = 0.0;
@@ -833,35 +846,61 @@ GetDoublePointDeadCube ( float arOutput [ 5 ],
     int j = nMatchTo - anScore[ ! pci->fMove ] - 1;
     int nCube = pci->nCube;
 
+    float rG1, rBG1, rG2, rBG2, rDTW, rNDW, rDTL, rNDL;
+    float rRisk, rGain;
+
     /* FIXME: avoid division by zero */
-    float rG1 = arOutput[ 1 ] / arOutput[ 0 ];
-    float rBG1 = arOutput[ 2 ] / arOutput[ 0 ];
-    float rG2 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
-    float rBG2 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+    if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+      rG1 = ( arOutput[ OUTPUT_WINGAMMON ] -
+              arOutput[ OUTPUT_WINBACKGAMMON ] ) /
+        arOutput[ OUTPUT_WIN ];
+      rBG1 = arOutput[ OUTPUT_WINBACKGAMMON ] /
+        arOutput[ OUTPUT_WIN ];
+    }
+    else {
+      rG1 = 0.0;
+      rBG1 = 0.0;
+    }
+
+    if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+      rG2 = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+              arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+      rBG2 = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+    }
+    else {
+      rG2 = 0.0;
+      rBG2 = 0.0;
+    }
 
     /* double point */
 
     /* FIXME: use the BG ratio */
     /* match equity for double, take; win */
-    float rDTW = (1.0 - rG1) * GET_MET ( i - 2 * nCube, j, aafMET ) +
+    rDTW = (1.0 - rG1 - rBG1) * GET_MET ( i - 2 * nCube, j, aafMET ) +
       rG1 * GET_MET ( i - 4 * nCube, j, aafMET );
+      rBG1 * GET_MET ( i - 6 * nCube, j, aafMET );
 
     /* match equity for no double; win */
-    float rNDW = (1.0 - rG1) * GET_MET ( i - nCube, j, aafMET ) +
+    rNDW = (1.0 - rG1 - rBG1) * GET_MET ( i - nCube, j, aafMET ) +
       rG1 * GET_MET ( i - 2 * nCube, j, aafMET );
+      rBG1 * GET_MET ( i - 3 * nCube, j, aafMET );
 
     /* match equity for double, take; loose */
-    float rDTL = (1.0 - rG2) * GET_MET ( i, j - 2 * nCube, aafMET ) +
+    rDTL = (1.0 - rG2 - rBG2) * GET_MET ( i, j - 2 * nCube, aafMET ) +
       rG2 * GET_MET ( i, j - 4 * nCube, aafMET );
+      rBG2 * GET_MET ( i, j - 6 * nCube, aafMET );
 
     /* match equity for double, take; loose */
-    float rNDL = (1.0 - rG2) * GET_MET ( i, j - nCube, aafMET ) +
+    rNDL = (1.0 - rG2 - rBG2) * GET_MET ( i, j - nCube, aafMET ) +
       rG2 * GET_MET ( i, j - 2 * nCube, aafMET );
+      rBG2 * GET_MET ( i, j - 3 * nCube, aafMET );
 
     /* risk & gain */
 
-    float rRisk = rNDL - rDTL;
-    float rGain = rDTW - rNDW;
+    rRisk = rNDL - rDTL;
+    rGain = rDTW - rNDW;
 
     return rRisk / ( rRisk +  rGain );
 
