@@ -19,6 +19,7 @@ char *aszCredits[] = {
     "Tim Laursen",
     "Kevin Maguire",
     "Dave Neary",
+    "Peter Orum",
     "Thomas Patrick",
     "Zvezdan Petkovic",
     "Petri Pitkänen",
