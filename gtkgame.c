@@ -1728,7 +1728,6 @@ static GtkWidget *TakeAnalysis( movetype mt,
       /* label */
 
       pw = gtk_label_new ( aszCube[ ai[ i ] ] );
-      printf ( "vla %s\n", aszCube[ ai [ i ] ] );
       gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
