@@ -677,11 +677,11 @@ msgstr "世界クラス"
 
 #: eval.c:446
 msgid "supremo"
-msgstr "師範"
+msgstr ""
 
 #: eval.c:447
 msgid "grandmaster"
-msgstr "名人"
+msgstr "グランドマスター"
 
 #: eval.c:478
 msgid "Tiny"
@@ -821,7 +821,7 @@ msgstr ""
 #: eval.c:3955 gtkchequer.c:836 gtkcube.c:335 gtkrace.c:531 html.c:327
 #: progress.c:687
 msgid "Win"
-msgstr "勝ち"
+msgstr ""
 
 #: eval.c:3955 gtkcube.c:335
 msgid "W(g)"
@@ -859,7 +859,7 @@ msgstr ""
 #: eval.c:3975
 #, c-format
 msgid "%2d ply"
-msgstr ""
+msgstr "%2d ply"
 
 #: eval.c:4066
 #, c-format
@@ -1031,7 +1031,7 @@ msgstr ""
 #: format.c:119
 #, c-format
 msgid "%d-ply %s"
-msgstr ""
+msgstr "%d-ply %s"
 
 #: format.c:121
 msgid "cubeful"
@@ -1069,7 +1069,7 @@ msgstr ""
 #: format.c:306
 #, c-format
 msgid "Play: %s "
-msgstr "プレイヤー: %s"
+msgstr ""
 
 #: format.c:316
 msgid "Play: "
@@ -1201,7 +1201,7 @@ msgstr ""
 #: format.c:1016
 #, c-format
 msgid "Centered %d-cube"
-msgstr "キューブはセンター %d-cube"
+msgstr "センターキューブ %d-cube"
 
 #: format.c:1018
 #, c-format
@@ -3141,7 +3141,7 @@ msgstr "マッチの外部情報を記録"
 
 #: gnubg.c:1643
 msgid "Specify the default length for new matches"
-msgstr "新規マッチのポイントの初期設定"
+msgstr "新規マッチのポイントの標準設定"
 
 #: gnubg.c:1644
 msgid "Display window with messages"
@@ -4605,11 +4605,11 @@ msgstr "正しいレスポンス: "
 
 #: gtkcube.c:308
 msgid "Beaver!"
-msgstr "ビーバー！"
+msgstr "ビーバー!"
 
 #: gtkcube.c:312
 msgid "Eat it!"
-msgstr "頂き！"
+msgstr "頂き!"
 
 #: gtkcube.c:336
 msgid "-"
@@ -4710,7 +4710,7 @@ msgstr "GNU Backgammon - エクスポート設定"
 
 #: gtkexport.c:485
 msgid "Include"
-msgstr ""
+msgstr "出力に含める"
 
 #: gtkexport.c:508 gtkexport.c:523 gtkgame.c:2929 gtkprefs.c:2565
 #: gtkprefs.c:2582
@@ -4731,7 +4731,7 @@ msgstr "ムーブ解析出力"
 
 #: gtkexport.c:594
 msgid "Show at most"
-msgstr "せいぜい"
+msgstr "たかだか"
 
 #: gtkexport.c:606
 msgid "move(s)"
@@ -4739,7 +4739,7 @@ msgstr "ムーブ"
 
 #: gtkexport.c:612 gtkexport.c:652
 msgid "Show detailed probabilities"
-msgstr "見込み詳細"
+msgstr ""
 
 #: gtkexport.c:618 gtkexport.c:658
 msgid "Show evaluation parameters"
@@ -4795,7 +4795,7 @@ msgstr "PNG エクスポートオプション"
 
 #: gtkexport.c:772
 msgid "Size of PNG images:"
-msgstr ""
+msgstr "PNG 画像のサイズ:"
 
 #: gtkgame.c:735
 msgid "GNU Backgammon - Dice"
@@ -5153,7 +5153,7 @@ msgstr "/編集(_E)"
 
 #: gtkgame.c:2498
 msgid "/_Edit/_Undo"
-msgstr "/編集(_E)/やり直し(_U)"
+msgstr "/編集(_E)/元に戻す(_U)"
 
 #: gtkgame.c:2499 gtkgame.c:2507
 msgid "/_Edit/-"
@@ -5443,7 +5443,7 @@ msgstr "/解析(_A)/Temperature Map"
 
 #: gtkgame.c:2623
 msgid "/_Analyse/Temperature Map (cube decision)"
-msgstr "/解析(_A)/Temperature Map (cube decision)"
+msgstr "/解析(_A)/Temperature Map (キューブアクション)"
 
 #: gtkgame.c:2626
 msgid "/_Analyse/Bearoff Databases"
@@ -5467,7 +5467,7 @@ msgstr "/解析(_A)/評価エンジン"
 
 #: gtkgame.c:2638
 msgid "/_Analyse/Evaluation speed"
-msgstr "/解析(_A)/Evaluation speed"
+msgstr "/解析(_A)/評価速度"
 
 #: gtkgame.c:2641
 msgid "/_Train"
@@ -5543,7 +5543,7 @@ msgstr "/設定(_S)/オプション..."
 
 #: gtkgame.c:2666
 msgid "/_Settings/Paths..."
-msgstr "/設定(_S)/ディレクトリ..."
+msgstr "/設定(_S)/フォルダ..."
 
 #: gtkgame.c:2668
 msgid "/_Settings/Save settings"
@@ -5683,7 +5683,7 @@ msgstr "GNU Backgammon - コマンド入力"
 
 #: gtkgame.c:3653
 msgid "Shortcut buttons"
-msgstr ""
+msgstr "ショートカットボタン"
 
 #: gtkgame.c:3682
 #, c-format
@@ -5732,7 +5732,7 @@ msgstr "人間 vs. 人間"
 
 #: gtkgame.c:3773
 msgid "Modify player settings..."
-msgstr "プレイヤー設定変更中..."
+msgstr "プレイヤー設定の変更..."
 
 #: gtkgame.c:3785 gtkoptions.c:1011
 msgid "Manual dice"
@@ -6359,7 +6359,7 @@ msgstr ""
 
 #: gtkgame.c:6406
 msgid "Use quasi-random dice"
-msgstr ""
+msgstr "準乱数ダイスを使用する"
 
 #: gtkgame.c:6412
 msgid "Rollout as initial position"
@@ -6572,7 +6572,7 @@ msgstr ""
 
 #: gtkgame.c:8240
 msgid "Split statistics into panels"
-msgstr ""
+msgstr "統計をパネルに分割して表示"
 
 #: gtkgame.c:8473
 msgid "GNU Backgammon - Player records"
@@ -6678,27 +6678,27 @@ msgstr ""
 
 #: gtkgame.c:8910
 msgid "GNU Backgammon - Speed estimate"
-msgstr ""
+msgstr "GNU Backgammon - 評価速度の推定"
 
 #: gtkgame.c:8920
 msgid "Speed recorded:"
-msgstr ""
+msgstr "評価速度:"
 
 #: gtkgame.c:8933 gtkgame.c:8980
 msgid "static evaluations/second"
-msgstr ""
+msgstr "評価/秒"
 
 #: gtkgame.c:8937
 msgid "Calibrate"
-msgstr ""
+msgstr "校正"
 
 #: gtkgame.c:8970
 msgid "GNU Backgammon - Calibration"
-msgstr ""
+msgstr "GNU Backgammon - 校正"
 
 #: gtkgame.c:8976
 msgid "Calibrating:"
-msgstr ""
+msgstr "校正中:"
 
 #: gtkgame.c:8978
 msgid "       (n/a)       "
@@ -6731,7 +6731,7 @@ msgstr "GNU Backgammon - マッチエクイティテーブル"
 
 #: gtkmet.c:263
 msgid "Load table..."
-msgstr "テーブル読み込み中..."
+msgstr "テーブルの読み込み..."
 
 #: gtkmet.c:266 gtkoptions.c:812
 msgid "Invert table"
@@ -6739,7 +6739,7 @@ msgstr "テーブルを反対にする"
 
 #: gtkmet.c:289
 msgid "Pre-Crawford"
-msgstr "クロフォードゲーム前"
+msgstr "プレクロフォード"
 
 #: gtkmet.c:293
 #, c-format
@@ -6780,7 +6780,7 @@ msgstr "Move filter"
 
 #: gtkmovefilter.c:584 gtkpath.c:205
 msgid "Modify..."
-msgstr "変更"
+msgstr "変更..."
 
 #: gtkoptions.c:105
 #, c-format
@@ -6788,16 +6788,16 @@ msgid ""
 "NOT IMPLEMENTED!\n"
 "Please use the command \"%s\" instead"
 msgstr ""
-"実装されていません!\n"
-"コマンドの代わりに \"%s\" を使って下さい!"
+"まだ実装されていません!\n"
+"代わりにコマンド \"%s\" を使って下さい"
 
 #: gtkoptions.c:169
 msgid "System default"
-msgstr "システム初期設定"
+msgstr "システム標準"
 
 #: gtkoptions.c:170
 msgid "Danish"
-msgstr "Danish (Dansk)"
+msgstr "Danish"
 
 #: gtkoptions.c:171
 msgid "English (UK)"
@@ -6809,19 +6809,19 @@ msgstr "English (US)"
 
 #: gtkoptions.c:173
 msgid "French"
-msgstr "French (Francais)"
+msgstr "French"
 
 #: gtkoptions.c:174
 msgid "German"
-msgstr "German (Deutsch)"
+msgstr "German"
 
 #: gtkoptions.c:175
 msgid "Italian"
-msgstr "Italian (Italiano)"
+msgstr "Italian"
 
 #: gtkoptions.c:176
 msgid "Japanese"
-msgstr "Japanese (日本語)"
+msgstr "Japanese"
 
 #: gtkoptions.c:184
 msgid "random.org"
@@ -6852,11 +6852,11 @@ msgstr "4.3BSD の ramdom() 関数(非線形加法フィードバック)"
 msgid ""
 "Bob Jenkin's Indirection, Shift, Accumulate, Add and Count cryptographic "
 "generator"
-msgstr ""
+msgstr "Bob Jenkin の開発した暗号用途向け乱数生成器"
 
 #: gtkoptions.c:194
 msgid "A generator based on the Message Digest 5 algorithm"
-msgstr "MD5 ベースの乱数生成器"
+msgstr "MD5 ハッシュを使用した乱数生成器"
 
 #: gtkoptions.c:195
 msgid "Makoto Matsumoto and Takuji Nishimura's generator"
@@ -6864,7 +6864,7 @@ msgstr "松本眞と西村拓士の開発した乱数生成器"
 
 #: gtkoptions.c:196
 msgid "The online non-deterministic generator from random.org"
-msgstr ""
+msgstr "random.org の提供する非決定的な乱数生成器"
 
 #: gtkoptions.c:197
 msgid "A user-provided external shared library"
@@ -6935,39 +6935,39 @@ msgstr "中央値"
 
 #: gtkoptions.c:214 set.c:4314
 msgid "10th worst"
-msgstr ""
+msgstr "10番目に悪い"
 
 #: gtkoptions.c:215 set.c:4315
 msgid "9th worst"
-msgstr ""
+msgstr "9番目に悪い"
 
 #: gtkoptions.c:215 set.c:4315
 msgid "8th worst"
-msgstr ""
+msgstr "8番目に悪い"
 
 #: gtkoptions.c:215 set.c:4315
 msgid "7th worst"
-msgstr ""
+msgstr "7番目に悪い"
 
 #: gtkoptions.c:216 set.c:4316
 msgid "6th worst"
-msgstr ""
+msgstr "6番目に悪い"
 
 #: gtkoptions.c:216 set.c:4316
 msgid "5th worst"
-msgstr ""
+msgstr "5番目に悪い"
 
 #: gtkoptions.c:216 set.c:4316
 msgid "4th worst"
-msgstr ""
+msgstr "4番目に悪い"
 
 #: gtkoptions.c:217 set.c:4317
 msgid "third worst"
-msgstr ""
+msgstr "3番目に悪い"
 
 #: gtkoptions.c:217 set.c:4317
 msgid "second worst"
-msgstr ""
+msgstr "2番目に悪い"
 
 #: gtkoptions.c:217 set.c:4317
 msgid "worst"
@@ -6975,24 +6975,24 @@ msgstr "最悪"
 
 #: gtkoptions.c:222
 msgid "Use standard backgammon starting position"
-msgstr "バックギャモンの初期配置"
+msgstr "バックギャモンの初期配置を使用する"
 
 #: gtkoptions.c:223
 msgid ""
 "Use Nick \"Nack\" Ballard's Nackgammon starting position with standard rules."
-msgstr "ナックギャモンの初期配置"
+msgstr "Nack Ballard のナックギャモンの初期配置を使用する。"
 
 #: gtkoptions.c:225
 msgid "Play 1-chequer hypergammon (i.e., gammon and backgammons possible)"
-msgstr ""
+msgstr "1チェッカーのハイパーギャモン (ギャモン・バックギャモンあり)"
 
 #: gtkoptions.c:226
 msgid "Play 2-chequer hypergammon (i.e., gammon and backgammons possible)"
-msgstr ""
+msgstr "2チェッカーのハイパーギャモン (ギャモン・バックギャモンあり)"
 
 #: gtkoptions.c:227
 msgid "Play 3-chequer hypergammon (i.e., gammon and backgammons possible)"
-msgstr ""
+msgstr "3チェッカーのハイパーギャモン (ギャモン・バックギャモンあり)"
 
 #: gtkoptions.c:252
 msgid "Start new games immediately"
@@ -7307,7 +7307,7 @@ msgstr ""
 
 #: gtkoptions.c:693
 msgid "Match equity as MWC"
-msgstr "マッチ勝率のマッチエクイティ"
+msgstr ""
 
 #: gtkoptions.c:697
 msgid ""
@@ -7354,7 +7354,7 @@ msgstr ""
 
 #: gtkoptions.c:772
 msgid "Default match length:"
-msgstr "マッチのポイント数の初期設定:"
+msgstr "マッチのポイント数の標準設定:"
 
 #: gtkoptions.c:781
 msgid "points"
@@ -7424,7 +7424,7 @@ msgstr "外部コマンド"
 
 #: gtkoptions.c:903
 msgid "Use an external program to play sounds."
-msgstr "外部コマンドによる音声再生使用"
+msgstr "外部コマンドによる音声再生"
 
 #: gtkoptions.c:906 sound.c:169
 msgid "ESD"
@@ -7432,7 +7432,7 @@ msgstr "ESD"
 
 #: gtkoptions.c:920
 msgid "Play sounds through the Enlightenment Sound Daemon."
-msgstr "ESD を使用して音声を再生"
+msgstr "Esound を使用して音声を再生"
 
 #: gtkoptions.c:924 sound.c:170
 msgid "NAS"
@@ -7818,7 +7818,7 @@ msgstr "適用"
 
 #: gtkpath.c:197
 msgid "Default: "
-msgstr "初期設定: "
+msgstr "標準設定: "
 
 #: gtkpath.c:221
 msgid "Current: "
@@ -7826,7 +7826,7 @@ msgstr "現在: "
 
 #: gtkpath.c:229
 msgid "Set as default"
-msgstr "初期設定に戻す"
+msgstr "標準設定に戻す"
 
 #: gtkprefs.c:92
 msgid "Rounded disc"
@@ -7966,55 +7966,55 @@ msgstr "斑点模様"
 
 #: gtkprefs.c:931
 msgid "Alder"
-msgstr ""
+msgstr "榛の木"
 
 #: gtkprefs.c:932
 msgid "Ash"
-msgstr ""
+msgstr "秦皮"
 
 #: gtkprefs.c:933
 msgid "Basswood"
-msgstr ""
+msgstr "菩提樹"
 
 #: gtkprefs.c:934
 msgid "Beech"
-msgstr ""
+msgstr "ブナ"
 
 #: gtkprefs.c:935
 msgid "Cedar"
-msgstr ""
+msgstr "杉"
 
 #: gtkprefs.c:936
 msgid "Ebony"
-msgstr ""
+msgstr "黒檀"
 
 #: gtkprefs.c:937
 msgid "Fir"
-msgstr ""
+msgstr "モミ"
 
 #: gtkprefs.c:938
 msgid "Maple"
-msgstr ""
+msgstr "楓"
 
 #: gtkprefs.c:939
 msgid "Oak"
-msgstr ""
+msgstr "オーク"
 
 #: gtkprefs.c:940
 msgid "Pine"
-msgstr ""
+msgstr "松"
 
 #: gtkprefs.c:941
 msgid "Redwood"
-msgstr ""
+msgstr "セコイア"
 
 #: gtkprefs.c:942
 msgid "Walnut"
-msgstr ""
+msgstr "胡桃"
 
 #: gtkprefs.c:943
 msgid "Willow"
-msgstr ""
+msgstr "柳"
 
 #: gtkprefs.c:955
 msgid "Wooden"
@@ -8022,7 +8022,7 @@ msgstr "木製"
 
 #: gtkprefs.c:984
 msgid "Painted"
-msgstr "塗装"
+msgstr "塗装済み"
 
 #: gtkprefs.c:1141
 msgid "Save settings and test 3d performance for 3 seconds?"
@@ -8389,7 +8389,7 @@ msgstr "%s のエクイティ計算中"
 
 #: gtktempmap.c:520
 msgid "Sho Sengoku Temperature Map - Distribution of rolls"
-msgstr "仙石祥一郎の温度マップ - Distribution of rolls"
+msgstr "仙石祥一郎の Temperature Map - Distribution of rolls"
 
 #: gtktempmap.c:733 gtktheory.c:912
 #, c-format
@@ -8636,7 +8636,7 @@ msgstr "現在のゲームを投了"
 
 #: gtktoolbar.c:494
 msgid "Undo"
-msgstr "やり直し"
+msgstr "元に戻す"
 
 #: gtktoolbar.c:496
 msgid "Undo moves"
@@ -9451,7 +9451,7 @@ msgstr ""
 
 #: play.c:1149 play.c:2562
 msgid "Considering move..."
-msgstr ""
+msgstr "ムーブ考慮中..."
 
 #: play.c:1280
 msgid "Warning: badly formed resignation response from external player"
