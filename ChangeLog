@@ -1,3 +1,9 @@
+Fri Jul 25 20:22:06 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* analysis.c (LuckFirst): fix bug in calculation of luck for
+	the first roll in match play with asymmetric scores.
+	(reported by Peter Eberhard)
+
 Fri Jul 25 16:51:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (printHTMLBoardBBS, printHTMLBoardGNU, printHTMLBoardF2H):

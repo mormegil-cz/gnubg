@@ -34,6 +34,7 @@ Bill Davidson
 Michael Depreli
 Ian Dunstan
 Max Durbano
+Peter Eberhard
 Robert Eberlein
 Fotis
 Ric Gerace

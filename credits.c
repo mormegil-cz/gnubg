@@ -21,6 +21,7 @@ char *aszCredits[] = {
     "Ian Dunstan",
     "Max Durbano",
     "Christopher D. Yep",
+    "Peter Eberhard",
     "Robert Eberlein",
     "James F. Kibler",
     "Ric Gerace",
