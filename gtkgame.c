@@ -7583,7 +7583,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
-  for (i = 0; i < (40 + ( pms->nMatchTo != 0 ) * 2 ); i++) {
+  for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) - ( pms->nMatchTo == 0 ) * 2 ); i++ ) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
     gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, gettext ( aszLabels[i] ) );
   }
