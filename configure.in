@@ -30,6 +30,7 @@ fi
 dnl Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
+AC_PROG_CC_IEEE
 AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_CHECK_PROG(BISON, bison, bison, true)

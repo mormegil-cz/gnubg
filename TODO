@@ -318,8 +318,7 @@ functions:
 ** Allow very large (128 bit+) seeds. (gary)
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
-** The note in the README file about compiling with Compaq's cc should
-  be automated in the configure script.
+** CommandSetRolloutRNG() in set.c needs to be finished. (gary)
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.

@@ -1,3 +1,8 @@
+Fri Nov  2 17:31:43 2001  Gary Wong  <gtw@research.att.com>
+
+	* configure.in: Automatically detect whether -ieee is required in
+	CFLAGS.
+
 Fri Nov  2 13:10:45 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (CommandRollout): Make sure a game is being played for
