@@ -2017,7 +2017,6 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
 
   PushLocale( "C" );
 
-	// Using sprintf as g_strdup_printf wasn't working...
 	sprintf(szTemp,
             "\n"
             "         board=#%02X%02X%02X;%0.2f\n"

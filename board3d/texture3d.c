@@ -107,7 +107,7 @@ unsigned char *LoadDIBTexture(FILE *fp, int *width, int *height)
 		}
 	}
 	else
-	{	// 8 bit bitmap, duplicate rgb values
+	{	/* 8 bit bitmap, duplicate rgb values */
 		if ((bits = malloc(bitsize * 3)) == NULL)
 		{
 			fclose(fp);

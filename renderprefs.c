@@ -122,6 +122,8 @@ static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
 
     return -1;
 }
+
+#if USE_BOARD3D
 static int SetColourF( float arColour[ 4 ], char *sz ) {
 
     char *pch;
@@ -139,7 +141,8 @@ static int SetColourF( float arColour[ 4 ], char *sz ) {
 
     return -1;
 }
-#endif
+#endif /* USE_BOARD3D */
+#endif /* USE_GTK */
 
 #if USE_BOARD3D
 static int SetMaterial(Material* pMat, char *sz)

@@ -43,8 +43,8 @@ typedef struct _plane
 
 typedef struct _winged_edge
 {
-	int e[2];  // vertex index
-	int w[2];  // plane index
+	int e[2];  /* vertex index */
+	int w[2];  /* plane index */
 } winged_edge;
 
 void initOccluder(Occluder* pOcc)
@@ -115,7 +115,7 @@ void CreatePlane(plane* p, position* p1, position* p2, position* p3)
 	cr[2] = v0[0] * v1[1] - v0[1] * v1[0];
 	
 	l = (float)sqrt(cr[0] * cr[0] + cr[1] * cr[1] + cr[2] * cr[2]);
-	if(l == 0) // degenerate triangle
+	if(l == 0) /* degenerate triangle */
 	{
 		p->a = p->b = p->c = p->d = 0;
 		return;
@@ -124,7 +124,7 @@ void CreatePlane(plane* p, position* p1, position* p2, position* p3)
 	p->b = cr[1] / l;
 	p->c = cr[2] / l;
 	
-	// signed distance of a point on the plane from the origin
+	/* signed distance of a point on the plane from the origin */
 	p->d = -(p->a * p1->x + p->b * p1->y + p->c * p1->z);
 }
 
@@ -228,10 +228,10 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 			position *pn0 = (position*)ListGet(&pOcc->handle->points, edgeOrder[0]);
 			position *pn1 = (position*)ListGet(&pOcc->handle->points, edgeOrder[1]);
 
-			// local segment
+			/* local segment */
 			glVertex3f(pn0->x, pn0->y, pn0->z);
 			glVertex3f(pn1->x, pn1->y, pn1->z);
-			// segment projected to infinity (NB. w == 0)
+			/* segment projected to infinity (NB. w == 0) */
 			glVertex4f(pn1->x * olight[3] - olight[0],
 				pn1->y * olight[3] - olight[1],
 				pn1->z * olight[3] - olight[2],
@@ -260,11 +260,11 @@ void AddEdge(OccModel* pMod, winged_edge* we)
 		{
 			assert((we0->w[1] == -1) && "triple edge! bad...");
 
-			we0->w[1] = we->w[0]; // pair the edge and return
+			we0->w[1] = we->w[0]; /* pair the edge and return */
 			return;
 		}
 	}
-	ListAdd(&pMod->edges, we);  // otherwise, add the new edge
+	ListAdd(&pMod->edges, we);  /* otherwise, add the new edge */
 }
 
 void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)
@@ -284,7 +284,7 @@ void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, flo
 	we.e[0] = p1;
 	we.e[1] = p2;
 	we.w[0] = plane;
-	we.w[1] = otherEdge;  // subsequent attempt to add this edge will replace w[1] 
+	we.w[1] = otherEdge;  /* subsequent attempt to add this edge will replace w[1] */
 	AddEdge(pOcc->handle, &we);
 }
 

@@ -43,7 +43,7 @@ void shadowInit(BoardData* bd)
 	for (i = 0; i < NUM_OCC; i++)
 		bd->Occluders[i].handle = 0;
 
-	// Check the stencil buffer is present
+	/* Check the stencil buffer is present */
 	glGetIntegerv(GL_STENCIL_BITS, &stencilBits);
 	if (!stencilBits)
 	{

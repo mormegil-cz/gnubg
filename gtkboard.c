@@ -3056,15 +3056,6 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
     }
 }
 
-static void board_stop( GtkWidget *pw, BoardData *bd ) {
-
-    fInterrupt = TRUE;
-#if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
-		StopIdle3d(bd);
-#endif
-}
-
 void board_edit( BoardData *bd ) {
 
     int f = ToolbarIsEditing( pwToolbar );

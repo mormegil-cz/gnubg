@@ -124,7 +124,7 @@ void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, floa
 	float sin_theta;
 	float q[4];
 
-	radRot *= 0.5f;	// ?
+	radRot *= 0.5f;
 	sin_theta = (float)sin(radRot);
 
 	if (sqnorm != 1) 

@@ -40,7 +40,7 @@ typedef struct _viewArea
 	float width;
 } viewArea;
 
-// My logcube - more than 32 then return 0 (show 64)
+/* My logcube - more than 32 then return 0 (show 64) */
 static int LogCube( const int n )
 {
 	int i;
@@ -345,10 +345,10 @@ void preDrawPiece(BoardData* bd, int transparent)
 
 void UnitNormal(float x, float y, float z)
 {
-	// Calculate the length of the vector		
+	/* Calculate the length of the vector */
 	float length = (float)sqrt((x * x) + (y * y) + (z * z));
 
-	// Dividing each element by the length will result in a unit normal vector.
+	/* Dividing each element by the length will result in a unit normal vector */
 	glNormal3f(x / length, y / length, z / length);
 }
 
@@ -3093,13 +3093,13 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 
 		if (aspectRatio > getBoardWidth() / getBoardHeight())
 		{
-			size = (getBoardHeight() / 2);// * 1.05f;
+			size = (getBoardHeight() / 2);
 			bd->horFrustrum = size * aspectRatio;
 			bd->vertFrustrum = size;
 		}
 		else
 		{
-			size = (getBoardWidth() / 2);// * 1.05f;
+			size = (getBoardWidth() / 2);
 			bd->horFrustrum = size;
 			bd->vertFrustrum = size / aspectRatio;
 		}

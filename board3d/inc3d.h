@@ -25,7 +25,7 @@
 #include "config.h"
 #include <stdio.h>
 
-//#define USE_MSDEV_TEST_HARNESS
+/*#define USE_MSDEV_TEST_HARNESS*/
 #ifdef USE_MSDEV_TEST_HARNESS
 	#undef USE_GTK
 	#define USE_GLUT
@@ -79,7 +79,7 @@ float getBoardWidth();
 float getBoardHeight();
 void calculateBackgroundSize(BoardData *bd, int viewport[4]);
 
-// Misc functions
+/* Misc functions */
 void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureFormat format);
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
 void SetupSimpleMat(Material* pMat, float r, float g, float b);

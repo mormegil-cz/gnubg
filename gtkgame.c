@@ -823,7 +823,9 @@ static moverecord *GameListLookupMove( int i ) {
 
 static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 			       GdkEventButton *pev, gpointer p ) {
+#if USE_BOARD3D
 	BoardData *bd = BOARD( pwBoard )->board_data;
+#endif
     gamelistrow *pglr;
     moverecord *pmr, *pmrPrev = NULL;
     list *pl;

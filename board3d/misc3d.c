@@ -99,11 +99,8 @@ void SetupLight3d(BoardData *bd, renderdata* prd)
 	memcpy(bd->shadow_light_position, lp, sizeof(float[4]));
 }
 
-/////////////////////////////////////
-// Determine if a particular extension is supported
-/////////////////////////////////////
-int 
-extensionSupported(const char *extension)
+/* Determine if a particular extension is supported */
+int extensionSupported(const char *extension)
 {
   static const GLubyte *extensions = NULL;
   const GLubyte *start;
@@ -1355,7 +1352,7 @@ int idleAnimate(BoardData* bd)
 			int moveDest = convert_point(animate_move_list[slide_move + 1], animate_player);
 
 			if ((abs(bd->points[moveDest]) == 1) && (bd->turn != SGN(bd->points[moveDest])))
-			{	// huff
+			{	/* huff */
 				if (bd->turn == 1)
 					bd->points[0]--;
 				else
