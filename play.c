@@ -2335,6 +2335,7 @@ extern void ChangeGame( list *plGameNew ) {
     
 #if USE_GTK
     if( fX ) {
+	GTKFreeze();
 	GTKClearMoveRecord();
 
 	for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
@@ -2343,6 +2344,7 @@ extern void ChangeGame( list *plGameNew ) {
 	}
 
 	GTKSetGame( GameIndex( plGame ) );
+	GTKThaw();
     }
 #endif
     
