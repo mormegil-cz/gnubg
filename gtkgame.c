@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -180,6 +181,7 @@ typedef enum _gnubgcommand {
     CMD_SHOW_MARKETWINDOW,
     CMD_SHOW_MATCHEQUITYTABLE,
     CMD_SHOW_KLEINMAN,
+    CMD_SHOW_PATH,
     CMD_SHOW_PIPCOUNT,
     CMD_SHOW_STATISTICS_GAME,
     CMD_SHOW_STATISTICS_MATCH,
@@ -298,6 +300,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show marketwindow",
     "show matchequitytable",
     "show kleinman",
+    "show path",
     "show pipcount",
     "show statistics game",
     "show statistics match",
@@ -405,7 +408,6 @@ static char *ToUTF8( unsigned char *sz ) {
 #else
 #define TRANS(x) (x)
 #endif
-
 
 static void
 setWindowGeometry ( GtkWidget *pw, const windowgeometry *pwg ) {
@@ -2710,6 +2712,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_OUTPUT_WINPC, "<CheckItem>" },
 	{ "/_Settings/_Output/_MWC as percentage", NULL, Command,
 	  CMD_SET_OUTPUT_MATCHPC, "<CheckItem>" },
+	{ "/_Settings/Paths...", NULL, Command, CMD_SHOW_PATH, NULL },
 	{ "/_Settings/_Players...", NULL, SetPlayers, 0, NULL },
 	{ "/_Settings/Prompt...", NULL, NULL, 0, NULL },
 	{ "/_Settings/Record all games", NULL, Command, CMD_SET_RECORD,
@@ -3520,143 +3523,255 @@ static void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
 
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Open game", NULL, "load game" );
+  char *sz = getDefaultPath ( PATH_SGF );
+  FileCommand( "Open game", sz, "load game" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Open match", NULL, "load match" );
+  char *sz = getDefaultPath ( PATH_SGF );
+  FileCommand( "Open match", sz, "load match" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import .mat match", NULL, "import mat" );
+  char *sz = getDefaultPath ( PATH_MAT );
+  FileCommand( "Import .mat match", sz, "import mat" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import .pos position", NULL, "import pos" );
+  char *sz = getDefaultPath ( PATH_POS );
+  FileCommand( "Import .pos position", sz, "import pos" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import FIBS oldmoves", NULL, "import oldmoves" );
+  char *sz = getDefaultPath ( PATH_OLDMOVES );
+  FileCommand( "Import FIBS oldmoves", sz, "import oldmoves" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import .sgg match", NULL, "import sgg" );
+  char *sz = getDefaultPath ( PATH_SGG );
+  FileCommand( "Import .sgg match", sz, "import sgg" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Save game", NULL, "save game" );
+  char *sz = getDefaultFileName ( PATH_SGF );
+  FileCommand( "Save game", sz, "save game" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Save match", NULL, "save match" );
+  char *sz = getDefaultFileName ( PATH_SGF );
+  FileCommand( "Save match", sz, "save match" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Save weights", NULL, "save weights" );
+  char *sz = strdup ( PKGDATADIR "/gnubg.weights" );
+  FileCommand( "Save weights", sz, "save weights" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export .gam game", NULL, "export game gam" );
+  char *sz = getDefaultFileName ( PATH_GAM );
+  FileCommand( "Export .gam game", sz, "export game gam" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML game", NULL, "export game html" );
+  char *sz = getDefaultFileName ( PATH_HTML );
+  FileCommand( "Export HTML game", sz, "export game html" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export LaTeX game", NULL, "export game latex" );
+  char *sz = getDefaultFileName ( PATH_LATEX );
+  FileCommand( "Export LaTeX game", sz, "export game latex" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PDF game", NULL, "export game pdf" );
+  char *sz = getDefaultFileName ( PATH_PDF );
+  FileCommand( "Export PDF game", sz, "export game pdf" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PostScript game", NULL, "export game postscript" );
+  char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
+  FileCommand( "Export PostScript game", sz, "export game postscript" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export LaTeX match", NULL, "export match latex" );
+  char *sz = getDefaultFileName ( PATH_LATEX );
+  FileCommand( "Export LaTeX match", sz, "export match latex" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML match", NULL, "export match html" );
+  char *sz = getDefaultFileName ( PATH_HTML );
+  FileCommand( "Export HTML match", sz, "export match html" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export .mat match", NULL, "export match mat" );
+  char *sz = getDefaultFileName ( PATH_MAT );
+  FileCommand( "Export .mat match", sz, "export match mat" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PDF match", NULL, "export match pdf" );
+  char *sz = getDefaultFileName ( PATH_PDF );
+  FileCommand( "Export PDF match", sz, "export match pdf" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PostScript match", NULL, "export match postscript" );
+  char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
+  FileCommand( "Export PostScript match", sz, "export match postscript" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export EPS position", NULL, "export position eps" );
+  char *sz = getDefaultFileName ( PATH_EPS );
+  FileCommand( "Export EPS position", sz, "export position eps" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML position", NULL, "export position html" );
+  char *sz = getDefaultFileName ( PATH_HTML );
+  FileCommand( "Export HTML position", sz, "export position html" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export .pos position", NULL, "export position pos" );
+  char *sz = getDefaultFileName ( PATH_POS );
+  FileCommand( "Export .pos position", sz, "export position pos" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export LaTeX session", NULL, "export session latex" );
+  char *sz = getDefaultFileName ( PATH_LATEX );
+  FileCommand( "Export LaTeX session", sz, "export session latex" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PDF session", NULL, "export session pdf" );
+  char *sz = getDefaultFileName ( PATH_PDF );
+  FileCommand( "Export PDF session", sz, "export session pdf" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML session", NULL, "export session html" );
+  char *sz = getDefaultFileName ( PATH_HTML );
+  FileCommand( "Export HTML session", sz, "export session html" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PostScript session", NULL,
-		 "export session postscript" );
+  char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
+  FileCommand( "Export PostScript session", sz,
+               "export session postscript" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export database", NULL, "database export" );
+  char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
+  FileCommand( "Export database", sz, "database export" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import database", NULL, "database import" );
+  char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
+  FileCommand( "Import database", sz, "database import" );
+  if ( sz ) 
+    free ( sz );
+
 }
 
 typedef struct _evalwidget {
@@ -7145,3 +7260,216 @@ static void SetCubeOwner( GtkWidget *wd, int i) {
 
 }
 
+
+typedef struct _pathdata {
+
+  GtkWidget *apwPath[ PATH_MET + 1 ];
+
+} pathdata;
+
+
+static void
+SetPathAsDefault ( GtkWidget *pw, pathdata *ppd ) {
+  
+  int *pi;
+
+  pi = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+
+  gtk_label_set_text ( GTK_LABEL ( ppd->apwPath[ *pi ] ), 
+                       aaszPaths[ *pi ][ 1 ] );
+
+}
+
+
+static void
+ModifyPath ( GtkWidget *pw, pathdata *ppd ) {
+
+  /*
+    
+    int *pi;
+    
+    pi = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+
+    FIXME: implement SelectPath 
+
+    gtk_label_set_text ( GTK_LABEL ( ppd->apwPath[ *pi ] ), 
+    pc = SelectPath ( "Select Path", 
+    aaszPaths[ *pi ][ 0 ] ) );
+  */
+
+  Message ( "NOT IMPLEMENTED!\n"
+            "Use the \"set path\" command instead!", FALSE );
+
+}
+
+
+static void 
+SetPath ( GtkWidget *pw, pathdata *ppd, int fOK ) {
+
+  int i;
+  gchar *pc;
+
+  for ( i = 0; i <= PATH_MET; i++ ) {
+    gtk_label_get ( GTK_LABEL ( ppd->apwPath[ i ] ), &pc );
+    strcpy ( aaszPaths[ i ][ 0 ], pc );
+  }
+
+
+  if( fOK )
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+}
+
+
+static void 
+PathOK ( GtkWidget *pw, void *p ) {
+  SetPath ( pw, p, TRUE );
+}
+
+
+static void 
+PathApply ( GtkWidget *pw, void *p ) {
+  SetPath ( pw, p, FALSE );
+}
+
+
+extern void
+GTKShowPath ( void ) {
+
+  GtkWidget *pwDialog;
+  GtkWidget *pwApply;
+  GtkWidget *pwVBox;
+  GtkWidget *pw;
+  GtkWidget *pwHBox;
+  GtkWidget *pwNotebook;
+
+  pathdata pd;
+
+  int i;
+  int *pi;
+
+  char *aaszPathNames[][ PATH_MET + 1 ] = {
+    { "Export of Encapsulated PostScript .eps files" , 
+      "Encapsulated PostScript" },
+    { "Import or export of Jellyfish .gam files" , 
+      "Jellyfish .gam" },
+    { "Export of HTML files" , 
+      "HTML" },
+    { "Export of LaTeX files" , 
+      "LaTeX" },
+    { "Import or export of Jellyfish .mat files" , 
+      "Jellyfish .mat" },
+    { "Import of FIBS oldmoves files" , 
+      "FIBS oldmoves" },
+    { "Export of PDF files" , 
+      "PDF" },
+    { "Import of Jellyfish .pos files" , 
+      "Jellyfish .pos" },
+    { "Export of PostScript files" , 
+      "PostScript" },
+    { "Load and save of SGF files" , 
+      "SGF (gnubg)" },
+    { "Import of GamesGrid SGG files" , 
+      "GamesGrid SGG" },
+    { "Loading of match equity files (.xml)", 
+      "Match Equity Tables" } };
+
+  
+  pwDialog = CreateDialog( "GNU Backgammon - Paths", TRUE, 
+                           GTK_SIGNAL_FUNC ( PathOK ), &pd );
+    
+  pwApply = gtk_button_new_with_label( "Apply" );
+
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+                     pwApply );
+  gtk_signal_connect( GTK_OBJECT( pwApply ), "clicked",
+                      GTK_SIGNAL_FUNC( PathApply ), &pd );
+
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                     pwNotebook = gtk_notebook_new() );
+  gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
+  gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
+
+  /* content of widget */
+
+  for ( i = 0; i <= PATH_MET; i++ ) {
+
+    pwVBox = gtk_vbox_new ( FALSE, 4 );
+
+    pw = gtk_label_new ( aaszPathNames[ i ][ 0 ] );
+    gtk_box_pack_start ( GTK_BOX ( pwVBox ), pw, FALSE, TRUE, 4 );
+
+    /* default */
+    
+    pi = malloc ( sizeof ( int ) );
+    *pi = i;
+
+    pwHBox = gtk_hbox_new ( FALSE, 4 );
+
+    pw = gtk_label_new ( "Default: " );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, FALSE, TRUE, 4 );
+
+    pw = pd.apwPath[ i ] = gtk_label_new ( aaszPaths[ i ][ 0 ] );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, FALSE, TRUE, 4 );
+
+    pw = gtk_button_new_with_label ( "Modify..." );
+    gtk_box_pack_end ( GTK_BOX ( pwHBox ), pw, FALSE, TRUE, 4 );
+    gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
+                         GTK_SIGNAL_FUNC ( ModifyPath ),
+                         &pd );
+    gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", pi, free );
+
+    gtk_box_pack_start ( GTK_BOX ( pwVBox ), pwHBox, FALSE, TRUE, 4 );
+
+    /* current */
+
+    pi = malloc ( sizeof ( int ) );
+    *pi = i;
+
+    pwHBox = gtk_hbox_new ( FALSE, 4 );
+
+    pw = gtk_label_new ( "Current: " );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, FALSE, TRUE, 4 );
+
+    pw = gtk_label_new ( aaszPaths[ i ][ 1 ] );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, FALSE, TRUE, 4 );
+
+    pw = gtk_button_new_with_label ( "Set as default" );
+    gtk_box_pack_end ( GTK_BOX ( pwHBox ), pw, FALSE, TRUE, 4 );
+
+    gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
+                         GTK_SIGNAL_FUNC ( SetPathAsDefault ),
+                         &pd );
+    gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", pi, free );
+
+
+    gtk_box_pack_start ( GTK_BOX ( pwVBox ), pwHBox, FALSE, TRUE, 4 );
+
+    /* add page */
+
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+                              pwVBox,
+			      gtk_label_new( aaszPathNames[ i ][ 1 ] ) );
+
+  }
+
+
+  /* signals, modality, etc */
+
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				GTK_WINDOW( pwMain ) );
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+		      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+  gtk_widget_show_all( pwDialog );
+
+  GTKDisallowStdin();
+  gtk_main();
+  GTKAllowStdin();
+
+}

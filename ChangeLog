@@ -1,3 +1,29 @@
+Wed May 22 19:41:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Save path and suggest filename.
+
+	* gnubg.c: new commands "set path xxx".
+	* gnubg.c (setDefaultFileName, setDefaultPath, getDefaultFileName,
+	getDefaultPath): new functions.
+	* set.c (CommandSetPathXXX, SetPath): new functions.
+	* show.c (CommandShowPath): new function.
+	* gtkgame.c (GTKShowPath, PathApply, PathOK, SetPath, ModifyPath,
+	SetPathAsDefault): new functions.
+	
+	* gnubg.c (CommandImportJF, CommandImportMat, CommandImportOldMoves,
+	CommandImportSGG): call setDefaultFileName.
+	* sgf.c (CommandSaveMatch, CommandSaveGame, CommandLoadGame,
+	CommandLoadMatch): ditto.
+	* html.c (CommandExportPositionHtml, CommandExportGameHtml,
+	CommandExportMatchHtml): ditto.
+	* set.c (CommandSetMET): ditto.
+	* latex.c (CommandExportMatchLaTeX, CommandExportGameLaTeX): ditto.
+	* latex.c (ExportMatchGeneral, ExportGameGeneral): ditto.
+	* gtkgame.c (ExportXXX, SaveXXX): call getDefaultFileName or
+	call getDefaultPath.
+
+	* gnubg.c (CommandSaveSettings): save default paths.
+
 Tue May 21 15:53:33 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (se_eq2mwc, se_mwc2eq): new functions. Translates between
