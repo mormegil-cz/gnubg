@@ -158,6 +158,21 @@ rollout
 EOF
 echo '--- Miscellaneous test succeeds.'
 
+# Make sure the example game in the manual works.
+./gnubg $dirparam -t -r << "EOF" | grep -q \
+   'refuses the cube and gives up 1 point.' || die \
+   '--- Manual example test fails.'
+set seed 15
+new game
+8 5 6 5
+roll
+13 10 6 1
+roll
+13 11 6 1
+double
+EOF
+echo '--- Manual example test succeeds.'
+
 # Test Guile.
 if [ "$GUILE" = "yes" ]; then
     ./gnubg $dirparam -t -r << "EOF" > /dev/null || die '--- Guile test fails.'
