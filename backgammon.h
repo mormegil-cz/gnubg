@@ -71,7 +71,10 @@ typedef enum _playertype {
 typedef struct _player {
     char szName[ 32 ];
     playertype pt;
+<<<<<<< backgammon.h
+=======
     evaltype etChequer, etCube; /* PLAYER_GNU */
+>>>>>>> 1.85
     evalsetup esChequer, esCube; /* PLAYER_GNU */
     int h; /* PLAYER_EXTERNAL */
 } player;
@@ -103,7 +106,6 @@ typedef struct _movedouble {
     int fPlayer;
     /* evaluation of cube action */
     float arDouble[ 4 ];
-    evaltype etDouble;
     evalsetup esDouble;
     skilltype st;
 } movedouble;
@@ -116,7 +118,6 @@ typedef struct _movenormal {
     int anMove[ 8 ];
     /* evaluation of cube action before this move */
     float arDouble[ 4 ];
-    evaltype etDouble;
     evalsetup esDouble;
     /* evaluation of the moves */
     movelist ml;
@@ -209,8 +210,6 @@ extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
 
 extern evalcontext ecRollout, ecTD;
 
-extern evaltype etEvalCube, etEvalChequer;
-extern evaltype etAnalysisCube, etAnalysisChequer;
 extern evalsetup esEvalCube, esEvalChequer;
 extern evalsetup esAnalysisCube, esAnalysisChequer;
 
@@ -269,6 +268,8 @@ extern int ParseKeyValue( char **ppch, char *apch[ 2 ] );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
+extern char*
+FormatCubePosition ( char *sz, cubeinfo *pci );
 extern char *FormatPrompt( void );
 extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			     int i, int fRankKnown );

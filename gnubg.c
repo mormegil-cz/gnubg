@@ -216,12 +216,9 @@ rolloutcontext rcRollout =
 
 /* parameters for `eval' and `hint' */
 
-evaltype etEvalChequer = EVAL_EVAL;
-evaltype etEvalCube = EVAL_EVAL;
-evaltype etAnalysisChequer = EVAL_EVAL;
-evaltype etAnalysisCube = EVAL_EVAL;
-
 #define EVALSETUP { \
+  /* evaltype */ \
+  EVAL_EVAL, \
   /* evalcontext */ \
   { 1, 8, 0.16, 0, FALSE, 0.0, TRUE }, \
   /* rolloutcontext */ \
@@ -253,10 +250,15 @@ evalsetup esAnalysisCube = EVALSETUP;
 storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
 
 player ap[ 2 ] = {
+<<<<<<< gnubg.c
+    { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP },
+    { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP } 
+=======
     { "gnubg", PLAYER_GNU, EVAL_EVAL, EVAL_EVAL, 
       EVALSETUP, EVALSETUP },
     { "user", PLAYER_HUMAN, EVAL_EVAL, EVAL_EVAL, 
       EVALSETUP, EVALSETUP } 
+>>>>>>> 1.137
 };
 
 /* Usage strings */
@@ -1415,6 +1417,10 @@ static gint UpdateBoard( gpointer p ) {
     return FALSE; /* remove idle handler */
 }
 #endif
+<<<<<<< gnubg.c
+
+static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
+=======
 
 extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
@@ -1425,10 +1431,11 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
 static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
 				 evalsetup *pes ) {
+>>>>>>> 1.137
     cubeinfo ci;
     char sz[ 1024 ];
 
-    if( et == EVAL_NONE )
+    if( pes->et == EVAL_NONE )
 	return;
 
     GetMatchStateCubeInfo( &ci, &ms );
@@ -1465,8 +1472,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-	DisplayCubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
-			     &pmr->n.esDouble );
+	DisplayCubeAnalysis( pmr->n.arDouble, &pmr->n.esDouble );
 
 	outputf( "Rolled %d%d", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 
@@ -1488,8 +1494,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 
     case MOVE_DOUBLE:
-	DisplayCubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
-			     &pmr->n.esDouble );
+	DisplayCubeAnalysis( pmr->d.arDouble, &pmr->n.esDouble );
 	break;
 
     case MOVE_TAKE:
@@ -1894,8 +1899,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
-			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
-					 pml->amMoves[ 0 ].esMove ), 
+			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rEqTop, 
@@ -1906,8 +1910,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
-			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
-					 pml->amMoves[ 0 ].esMove ), 
+			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rEqTop, 
@@ -1927,8 +1930,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz + 6, " %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
-			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
-					    pml->amMoves[ i ].esMove ), 
+			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rEq, rEq - rEqTop,
@@ -1939,8 +1941,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz + 6, " %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
-			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
-					    pml->amMoves[ i ].esMove ), 
+			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rEq, rEq - rEqTop,
@@ -1961,8 +1962,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%%\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
-			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
-					 pml->amMoves[ 0 ].esMove ), 
+			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rMWCTop, 
@@ -1973,8 +1973,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%%\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
-			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
-					 pml->amMoves[ 0 ].esMove ), 
+			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rMWCTop, 
@@ -1994,8 +1993,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz + 6, " %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
-			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
-					    pml->amMoves[ i ].esMove ), 
+			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rMWC, rMWC - rMWCTop,
@@ -2006,8 +2004,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 		sprintf( sz + 6, " %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
-			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
-					    pml->amMoves[ i ].esMove ), 
+			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rMWC, rMWC - rMWCTop,
@@ -2195,11 +2192,25 @@ extern void CommandQuit( char *sz ) {
     PromptForExit();
 }
 
+
+extern char *FormatCubePosition ( char *sz, cubeinfo *pci ) {
+
+  if ( pci->fCubeOwner == -1 )
+    sprintf ( sz, "Centered %d-cube", pci->nCube );
+  else 
+    sprintf ( sz, "Player %s owns %d-cube",
+              ap[ pci->fCubeOwner ].szName, pci->nCube );
+
+  return sz;
+
+}
+
+
 extern void 
 CommandRollout( char *sz ) {
     
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-    int i, c, n, fOpponent = FALSE, cGames, an[ 2 ];
+    int i, c, n, fOpponent = FALSE, cGames, an[ 2 ], fCubeDecTop = TRUE;
     cubeinfo ci;
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
@@ -2216,6 +2227,23 @@ CommandRollout( char *sz ) {
 	} else
 	    c = 1; /* current position */
     }
+
+    /* check for `rollout =cube' */
+    
+    if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
+
+      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fOpponent ? !fMove : fMove,
+                    nMatchTo, an, fCrawford, fJacoby, fBeavers );
+
+      GeneralCubeDecisionR ( "", aarOutput, aarStdDev, anBoard, &ci,
+                             &rcRollout );
+      return;
+
+    }
+
 
 #if HAVE_ALLOCA
     aan = alloca( 50 * c * sizeof( int ) );
@@ -2248,7 +2276,7 @@ CommandRollout( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	GTKRollout( c, asz, nRollouts );
+	GTKRollout( c, asz, rcRollout.nTrials );
     else
 #endif
 	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
@@ -2259,8 +2287,8 @@ CommandRollout( char *sz ) {
 	if( fX )
 	    GTKRolloutRow( i );
 #endif
-	if( ( cGames = RolloutGeneral( aan[ i ], asz[ i ], &ar, &arStdDev,
-                                       &rcRollout, &ci, 1, fOpponent ) ) <= 0 )
+	if( ( cGames = RolloutGeneral( aan[ i ], &asz[ i ], &ar, &arStdDev,
+                                       &rcRollout, &ci, &fCubeDecTop, 1, fOpponent ) ) <= 0 )
 	    return;
 
 #if USE_GTK
@@ -2670,11 +2698,11 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
 }
 
 static void 
-SaveEvalSetupSettings( FILE *pf, char *sz, evaltype *pet, evalsetup *pes ) {
+SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
   char szTemp[ 1024 ];
 
-  switch ( *pet ) {
+  switch ( pes->et ) {
   case EVAL_NONE:
     fprintf (pf, "%s type none\n", sz );
     break;
@@ -2760,17 +2788,16 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fDisplay ? "on" : "off" );
 
     sprintf( szTemp, "set evaluation chequerplay" );
-    SaveEvalSetupSettings ( pf, szTemp, &etEvalChequer, &esEvalChequer );
+    SaveEvalSetupSettings ( pf, szTemp, &esEvalChequer );
 
     sprintf( szTemp, "set evaluation cubedecision" );
-    SaveEvalSetupSettings ( pf, szTemp, &etEvalCube, &esEvalCube );
+    SaveEvalSetupSettings ( pf, szTemp, &esEvalCube );
 
     sprintf( szTemp, "set analysis chequerplay" );
-    SaveEvalSetupSettings ( pf, szTemp, 
-                            &etAnalysisChequer, &esAnalysisChequer );
+    SaveEvalSetupSettings ( pf, szTemp, &esAnalysisChequer );
 
     sprintf( szTemp, "set analysis cubedecision" );
-    SaveEvalSetupSettings ( pf, szTemp, &etAnalysisCube, &esAnalysisCube );
+    SaveEvalSetupSettings ( pf, szTemp, &esAnalysisCube );
 
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
@@ -2807,11 +2834,9 @@ extern void CommandSaveSettings( char *szParam ) {
 	case PLAYER_GNU:
 	    fprintf( pf, "set player %d gnubg\n", i );
 	    sprintf( szTemp, "set player %d chequerplay", i );
-	    SaveEvalSetupSettings( pf, szTemp, 
-                                   &ap[ i ].etChequer, &ap[ i ].esChequer );
+	    SaveEvalSetupSettings( pf, szTemp, &ap[ i ].esChequer );
 	    sprintf( szTemp, "set player %d cubedecisions", i );
-	    SaveEvalSetupSettings( pf, szTemp, 
-                                   &ap[ i ].etCube, &ap[ i ].esCube );
+	    SaveEvalSetupSettings( pf, szTemp, &ap[ i ].esCube );
 	    break;
 	    
 	case PLAYER_HUMAN:
