@@ -34,6 +34,23 @@
 #include "positionid.h"
 #include "i18n.h"
 
+static int
+IsValidMove ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
+
+  int anBoardTemp[ 2 ][ 25 ];
+  int anMoveTemp[ 8 ];
+
+  memcpy ( anBoardTemp, anBoard, 2 * 25 * sizeof ( int ) );
+  memcpy ( anMoveTemp, anMove, 8 * sizeof ( int ) );
+
+  if ( ! ApplyMove ( anBoardTemp, anMoveTemp, TRUE ) )
+    return 1;
+  else
+    return 0;
+
+}
+
+
 static int ReadInt16( FILE *pf ) {
 
     /* Read a little-endian, signed (2's complement) 16-bit integer.
@@ -314,6 +331,10 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 		pmr->n.anMove[ i ]--;
 	    if( c < 4 )
 		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+
+            if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) )
+              outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"),
+                        sz + 3 );
 	    
 	    AddMoveRecord( pmr );
 	} else
@@ -1120,3 +1141,5 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     }
 #endif
 }
+
+
