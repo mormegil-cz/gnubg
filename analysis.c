@@ -231,6 +231,7 @@ updateStatcontext ( statcontext *psc,
       memcpy( anBoardMove, pms->anBoard, sizeof( anBoardMove ) );
       ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
       PositionKey ( anBoardMove, auch );
+      rChequerSkill = 0.0f;
 	  
       for( i = 0; i < pmr->n.ml.cMoves; i++ ) 
 
@@ -370,39 +371,39 @@ updateStatcontext ( statcontext *psc,
 
 
 static int
-AnalyzeMove ( moverecord *pmr ) {
+AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
+              int fUpdateStatistics ) {
 
     static int i, anBoardMove[ 2 ][ 25 ];
     static int fFirstMove;
     static unsigned char auch[ 10 ];
     static cubeinfo ci;
-    static float rSkill, rChequerSkill, rCost;
+    static float rSkill, rChequerSkill;
     static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     static rolloutstat aarsStatistics[ 2 ][ 2 ];
     static evalsetup esDouble; /* shared between the
 				  double and subsequent take/drop */
     static float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
-    static statcontext *psc;
-    static matchstate msAnalyse;
 
     /* analyze this move */
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
-	psc = &pmr->g.sc;
 	fFirstMove = 1;
-	IniStatcontext( psc );
+
+        if ( fUpdateStatistics )
+          IniStatcontext( psc );
       
 	break;
       
     case MOVE_NORMAL:
-	if( pmr->n.fPlayer != msAnalyse.fMove ) {
-	    SwapSides( msAnalyse.anBoard );
-	    msAnalyse.fMove = pmr->n.fPlayer;
+	if( pmr->n.fPlayer != pms->fMove ) {
+	    SwapSides( pms->anBoard );
+	    pms->fMove = pmr->n.fPlayer;
 	}
       
 	rSkill = rChequerSkill = 0.0f;
-	GetMatchStateCubeInfo( &ci, &msAnalyse );
+	GetMatchStateCubeInfo( &ci, pms );
       
 	/* cube action? */
       
@@ -411,7 +412,7 @@ AnalyzeMove ( moverecord *pmr ) {
 
 	    if ( GeneralCubeDecision ( "",
 				       aarOutput, aarStdDev, aarsStatistics, 
-				       msAnalyse.anBoard, &ci,
+				       pms->anBoard, &ci,
 				       &esAnalysisCube ) < 0 )
 		return -1;
 	  
@@ -431,7 +432,7 @@ AnalyzeMove ( moverecord *pmr ) {
         /* luck analysis */
       
 	if( fAnalyseDice ) {
-	    pmr->n.rLuck = LuckAnalysis( msAnalyse.anBoard,
+	    pmr->n.rLuck = LuckAnalysis( pms->anBoard,
 					 pmr->n.anRoll[ 0 ],
 					 pmr->n.anRoll[ 1 ],
 					 &ci, fFirstMove );
@@ -444,7 +445,7 @@ AnalyzeMove ( moverecord *pmr ) {
 	if( fAnalyseMove ) {
 	    /* evaluate move */
 	  
-	    memcpy( anBoardMove, msAnalyse.anBoard,
+	    memcpy( anBoardMove, pms->anBoard,
 		    sizeof( anBoardMove ) );
 	    ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
 	    PositionKey ( anBoardMove, auch );
@@ -456,7 +457,7 @@ AnalyzeMove ( moverecord *pmr ) {
 	  
 	    if( FindnSaveBestMoves ( &(pmr->n.ml), pmr->n.anRoll[ 0 ],
 				     pmr->n.anRoll[ 1 ],
-				     msAnalyse.anBoard, auch, &ci,
+				     pms->anBoard, auch, &ci,
 				     &esAnalysisChequer.ec ) < 0 )
 		return -1;
 	  
@@ -495,27 +496,28 @@ AnalyzeMove ( moverecord *pmr ) {
 	  
 	}
       
-        updateStatcontext ( psc, pmr, &msAnalyse );
+        if ( fUpdateStatistics )
+          updateStatcontext ( psc, pmr, pms );
 	  
 	fFirstMove = 0;
       
 	break;
       
     case MOVE_DOUBLE:
-	if( pmr->d.fPlayer != msAnalyse.fMove ) {
-	    SwapSides( msAnalyse.anBoard );
-	    msAnalyse.fMove = pmr->d.fPlayer;
+	if( pmr->d.fPlayer != pms->fMove ) {
+	    SwapSides( pms->anBoard );
+	    pms->fMove = pmr->d.fPlayer;
 	}
       
 	/* cube action */	    
 	if( fAnalyseCube ) {
-	    GetMatchStateCubeInfo( &ci, &msAnalyse );
+	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    if ( GetDPEq ( NULL, NULL, &ci ) ) {
 	      
 		if ( GeneralCubeDecision ( "",
 					   aarOutput, aarStdDev, aarsStatistics, 
-					   msAnalyse.anBoard, &ci,
+					   pms->anBoard, &ci,
 					   &esAnalysisCube ) < 0 )
 		    return -1;
 	      
@@ -537,7 +539,8 @@ AnalyzeMove ( moverecord *pmr ) {
 		esDouble.et = EVAL_NONE;
 	}
       
-        updateStatcontext ( psc, pmr, &msAnalyse );
+        if ( fUpdateStatistics )
+          updateStatcontext ( psc, pmr, pms );
 
 	break;
       
@@ -545,7 +548,7 @@ AnalyzeMove ( moverecord *pmr ) {
       
 	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 
-	    GetMatchStateCubeInfo( &ci, &msAnalyse );
+	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    pmr->d.esDouble = esDouble;
 	    memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
@@ -557,14 +560,15 @@ AnalyzeMove ( moverecord *pmr ) {
         else
           pmr->d.esDouble.et = EVAL_NONE;
 
-        updateStatcontext ( psc, pmr, &msAnalyse );
+        if ( fUpdateStatistics )
+          updateStatcontext ( psc, pmr, pms );
 
 	break;
       
     case MOVE_DROP:
       
 	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
-	    GetMatchStateCubeInfo( &ci, &msAnalyse );
+	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    pmr->d.esDouble = esDouble;
 	    memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
@@ -576,7 +580,8 @@ AnalyzeMove ( moverecord *pmr ) {
         else
           pmr->d.esDouble.et = EVAL_NONE;
 
-        updateStatcontext ( psc, pmr, &msAnalyse );
+        if ( fUpdateStatistics )
+          updateStatcontext ( psc, pmr, pms );
 
 	break;
       
@@ -584,9 +589,9 @@ AnalyzeMove ( moverecord *pmr ) {
 
       /* swap board if player not on roll resigned */
 
-      if( pmr->r.fPlayer != msAnalyse.fMove ) {
-        SwapSides( msAnalyse.anBoard );
-        msAnalyse.fMove = pmr->n.fPlayer;
+      if( pmr->r.fPlayer != pms->fMove ) {
+        SwapSides( pms->anBoard );
+        pms->fMove = pmr->n.fPlayer;
       }
       
       if ( esAnalysisCube.et != EVAL_NONE ) {
@@ -594,7 +599,7 @@ AnalyzeMove ( moverecord *pmr ) {
         int nResign;
         float rBefore, rAfter;
 
-        GetMatchStateCubeInfo ( &ci, &msAnalyse );
+        GetMatchStateCubeInfo ( &ci, pms );
 
         nResign =
           getResignation ( pmr->r.arResign, ms.anBoard, &ci, &esAnalysisCube );
@@ -624,15 +629,15 @@ AnalyzeMove ( moverecord *pmr ) {
       break;
       
     case MOVE_SETDICE:
-	if( pmr->sd.fPlayer != msAnalyse.fMove ) {
-	    SwapSides( msAnalyse.anBoard );
-	    msAnalyse.fMove = pmr->sd.fPlayer;
+	if( pmr->sd.fPlayer != pms->fMove ) {
+	    SwapSides( pms->anBoard );
+	    pms->fMove = pmr->sd.fPlayer;
 	}
       
-	GetMatchStateCubeInfo( &ci, &msAnalyse );
+	GetMatchStateCubeInfo( &ci, pms );
       
 	if( fAnalyseDice ) {
-	    pmr->sd.rLuck = LuckAnalysis( msAnalyse.anBoard,
+	    pmr->sd.rLuck = LuckAnalysis( pms->anBoard,
 					  pmr->sd.anDice[ 0 ],
 					  pmr->sd.anDice[ 1 ],
 					  &ci, fFirstMove );
@@ -647,7 +652,7 @@ AnalyzeMove ( moverecord *pmr ) {
 	break;
     }
   
-    ApplyMoveRecord( &msAnalyse, pmr );
+    ApplyMoveRecord( pms, pmr );
   
     psc->fMoves = fAnalyseMove;
     psc->fCube = fAnalyseCube;
@@ -662,17 +667,18 @@ AnalyzeGame ( list *plGame ) {
 
     list *pl;
     moverecord *pmr;
-    movegameinfo *pmgi;
+    movegameinfo *pmgi = plGame->plNext->p;
+    matchstate msAnalyse;
+
+    assert( pmgi->mt == MOVE_GAMEINFO );
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 
 	ProgressValueAdd( 1 );
 
-        if( AnalyzeMove ( pmr ) < 0 ) {
+        if( AnalyzeMove ( pmr, &msAnalyse, &pmgi->sc, TRUE ) < 0 ) {
 	    /* analysis incomplete; erase partial summary */
-	    pmgi = plGame->plNext->p;
-	    assert( pmgi->mt == MOVE_GAMEINFO );
 	    IniStatcontext( &pmgi->sc );
  	    return -1;
 	}

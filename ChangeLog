@@ -1,3 +1,9 @@
+Mon Feb 11 20:28:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (AnalyzeMove): change prototype to include
+	matchstate, statcontext and a flag that indicates whether
+	the statcontext struct should be updated or not.
+
 Mon Feb 11 20:05:46 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	This check-in moves the update of statcontext into
