@@ -1,3 +1,22 @@
+Sun Mar 30 18:26:10 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Add bgvariation bgv to cubeinfo
+	(preparing for hypergammon)
+
+	Change a gazillion routines and their callers, and the callers
+	callers, and ...
+
+	* bearoff.c: handle hypergammon databases.
+	* eval.c (ClassifyPosition, GameStatus): new parameter bgv.
+	* eval.c (SetCubeInfo, SetCubeInfoMatch, SetCubeInfoMoney):
+	new parameter bgv.
+	* eval.c (EvaluatePositionCubeful4): calculate cubeful equities
+	for hypergammon (only money game so far; match play is FIXME)
+	* positionid.c (PositionFromBearoff, PositionBearoff): new parameter:
+	number of chequers (needed to avoid 32-bit overflow)
+
+	* import.c: add some calls to outputx just before any assertion.
+
 Sun Mar 30 14:30:30 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (HTMLDumpStatcontext): fix a few typos.

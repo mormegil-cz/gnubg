@@ -504,7 +504,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
     if( pms->anDice[ 0 ] )
       sprintf( sz, 
                _("Rolled %d%d"), pms->anDice[ 0 ], pms->anDice[ 1 ] );
-    else if( !GameStatus( anBoard ) )
+    else if( !GameStatus( anBoard, pms->bgv ) )
       strcpy( sz, _("On roll") );
     else
       sz[ 0 ] = 0;

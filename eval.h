@@ -209,6 +209,32 @@ typedef struct _move {
   evalsetup esMove;
 } move;
 
+/* enumeration of variations of backgammon
+   (starting position and/or special rules) */
+
+typedef enum _bgvariation {
+  VARIATION_STANDARD,      /* standard backgammon */
+  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
+                            position */
+  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
+  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
+  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
+  NUM_VARIATIONS
+} bgvariation;
+
+extern bgvariation bgvDefault;
+
+extern int anChequers[ NUM_VARIATIONS ];
+extern char *aszVariations[ NUM_VARIATIONS ];
+extern char *aszVariationCommands[ NUM_VARIATIONS ];
+
+
+/*
+ * Cubeinfo contains the information necesary for evaluation
+ * of a position.
+ *
+ */
+
 typedef struct _cubeinfo {
     /*
      * nCube: the current value of the cube,
@@ -226,6 +252,7 @@ typedef struct _cubeinfo {
     int nCube, fCubeOwner, fMove, nMatchTo, anScore[ 2 ], fCrawford, fJacoby,
 	fBeavers;
     float arGammonPrice[ 4 ];
+    bgvariation bgv;
 } cubeinfo;
 
 extern volatile int fInterrupt, fAction;
@@ -250,14 +277,17 @@ typedef struct _movelist {
 } movelist;
 
 typedef enum _positionclass {
-    CLASS_OVER = 0,   /* Game already finished */
-    CLASS_BEAROFF2,   /* Two-sided bearoff database (in memory) */
-    CLASS_BEAROFF_TS, /* Two-sided bearoff database (on disk) */
-    CLASS_BEAROFF1,   /* One-sided bearoff database (in memory) */
-    CLASS_BEAROFF_OS, /* One-sided bearoff database /on disk) */
-    CLASS_RACE,       /* Race neural network */
-    CLASS_CRASHED,    /* Contact, one side has less than 7 active checkers */
-    CLASS_CONTACT     /* Contact neural network */
+    CLASS_OVER = 0,     /* Game already finished */
+    CLASS_HYPERGAMMON1, /* hypergammon with 1 chequers */
+    CLASS_HYPERGAMMON2, /* hypergammon with 2 chequers */
+    CLASS_HYPERGAMMON3, /* hypergammon with 3 chequers */
+    CLASS_BEAROFF2,     /* Two-sided bearoff database (in memory) */
+    CLASS_BEAROFF_TS,   /* Two-sided bearoff database (on disk) */
+    CLASS_BEAROFF1,     /* One-sided bearoff database (in memory) */
+    CLASS_BEAROFF_OS,   /* One-sided bearoff database /on disk) */
+    CLASS_RACE,         /* Race neural network */
+    CLASS_CRASHED,      /* Contact, one side has less than 7 active checkers */
+    CLASS_CONTACT       /* Contact neural network */
 } positionclass;
 
 #define N_CLASSES (CLASS_CONTACT + 1)
@@ -268,26 +298,10 @@ typedef enum _positionclass {
    ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
    ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
 
-
-/* enumeration of variations of backgammon
-   (starting position and/or special rules) */
-
-typedef enum _bgvariation {
-  VARIATION_STANDARD,      /* standard backgammon */
-  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
-                            position */
-  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
-  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
-  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
-  NUM_VARIATIONS
-} bgvariation;
-
-extern bgvariation bgvDefault;
-
-extern int anChequers[ NUM_VARIATIONS ];
-extern char *aszVariations[ NUM_VARIATIONS ];
-extern char *aszVariationCommands[ NUM_VARIATIONS ];
-
+#define CFHYPER(arEquity,pci) \
+   ( ( (pci)->fCubeOwner == -1 ) ? \
+     ( ( (pci)->fJacoby ) ? arEquity[ 2 ] : arEquity[ 1 ] ) : \
+     ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 0 ] : arEquity[ 3 ] ) )
 
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
@@ -310,7 +324,8 @@ EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
                   cubeinfo *pci, evalcontext *pec );
 
 extern int
-EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[] );
+EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
+                         const bgvariation bgv );
 
 extern void
 InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS],
@@ -337,11 +352,11 @@ FindnSaveBestMoves( movelist *pml,
 
 extern int 
 FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-		 int anMove[ 8 ] );
+		 int anMove[ 8 ], const bgvariation bgv );
 
 extern int 
 TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[], float rAlpha,
-	       float rAnneal );
+	       float rAnneal, const bgvariation bgv );
 
 extern int 
 PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
@@ -358,7 +373,7 @@ extern void
 SwapSides( int anBoard[ 2 ][ 25 ] );
 
 extern int 
-GameStatus( int anBoard[ 2 ][ 25 ] );
+GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 
 extern int 
 EvalCacheResize( int cNew );
@@ -375,7 +390,7 @@ ApplyMove( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ],
            const int fCheckLegal );
 
 extern positionclass 
-ClassifyPosition( int anBoard[ 2 ][ 25 ] );
+ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 
 /* internal use only */
 extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
@@ -388,15 +403,21 @@ extern float
 UtilityME( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
 
 
-extern int SetCubeInfoMoney( cubeinfo *pci, int nCube, int fCubeOwner,
-			     int fMove, int fJacoby, int fBeavers );
-extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
-			     int fMove, int nMatchTo, int anScore[ 2 ],
-			     int fCrawford );
 extern int 
-SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
-	      int nMatchTo, int anScore[ 2 ], int fCrawford, int fJacoby,
-	      int fBeavers );
+SetCubeInfoMoney( cubeinfo *pci, const int nCube, const int fCubeOwner,
+                  const int fMove, const int fJacoby, const int fBeavers,
+                  const bgvariation bgv );
+
+extern int 
+SetCubeInfoMatch( cubeinfo *pci, const int nCube, const int fCubeOwner,
+                  const int fMove, const int nMatchTo, const int anScore[ 2 ],
+                  const int fCrawford, const bgvariation bgv );
+
+extern int 
+SetCubeInfo ( cubeinfo *pci, const int nCube, const int fCubeOwner, 
+              const int fMove, const int nMatchTo, const int anScore[ 2 ], 
+              const int fCrawford, const int fJacoby, const int fBeavers, 
+              const bgvariation bgv );
  
 extern void 
 swap( int *p0, int *p1 );
@@ -405,7 +426,8 @@ extern void
 SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
 extern void 
-EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
+EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
+              const bgvariation bgv );
 
 extern float 
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);

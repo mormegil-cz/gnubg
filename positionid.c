@@ -289,20 +289,23 @@ extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] ) {
     return 1;
 }
 
-static int anCombination[ 33 ][ 18 ], fCalculated = 0;
+#define MAX_N 40
+#define MAX_R 25
+
+static int anCombination[ MAX_N ][ MAX_R ], fCalculated = 0;
 
 static int InitCombination( void ) {
 
     int i, j;
 
-    for( i = 0; i < 33; i++ )
+    for( i = 0; i < MAX_N; i++ )
         anCombination[ i ][ 0 ] = i + 1;
     
-    for( j = 1; j < 18; j++ )
+    for( j = 1; j < MAX_R; j++ )
         anCombination[ 0 ][ j ] = 0;
 
-    for( i = 1; i < 33; i++ )
-        for( j = 1; j < 18; j++ )
+    for( i = 1; i < MAX_N; i++ )
+        for( j = 1; j < MAX_R; j++ )
             anCombination[ i ][ j ] = anCombination[ i - 1 ][ j - 1 ] +
                 anCombination[ i - 1 ][ j ];
 
@@ -311,12 +314,12 @@ static int InitCombination( void ) {
     return 0;
 }
 
-extern int Combination( int n, int r ) {
+extern int Combination( const int n, const int r ) {
 
     assert( n > 0 );
     assert( r > 0 );
-    assert( n <= 33 );
-    assert( r <= 18 );
+    assert( n <= MAX_N );
+    assert( r <= MAX_R );
 
     if( !fCalculated )
         InitCombination();
@@ -324,7 +327,7 @@ extern int Combination( int n, int r ) {
     return anCombination[ n - 1 ][ r - 1 ];
 }
 
-static int PositionF( int fBits, int n, int r ) {
+static int PositionF( const int fBits, const int n, const int r ) {
 
     if( n == r )
         return 0;
@@ -333,23 +336,25 @@ static int PositionF( int fBits, int n, int r ) {
         PositionF( fBits, n - 1, r - 1 ) : PositionF( fBits, n - 1, r );
 }
 
-extern unsigned int PositionBearoff( const int anBoard[],
-                                     const int n ) {
+extern 
+unsigned int PositionBearoff( const int anBoard[],
+                              const int nPoints,
+                              const int nChequers ) {
 
     int i, fBits, j;
 
-    for( j = n - 1, i = 0; i < n; i++ )
+    for( j = nPoints - 1, i = 0; i < nPoints; i++ )
         j += anBoard[ i ];
 
     fBits = 1 << j;
     
-    for( i = 0; i < n; i++ ) {
+    for( i = 0; i < nPoints; i++ ) {
         j -= anBoard[ i ] + 1;
         fBits |= ( 1 << j );
 
     }
 
-    return PositionF( fBits, 15 + n, n );
+    return PositionF( fBits, nChequers + nPoints, nPoints );
 }
 
 static int PositionInv( int nID, int n, int r ) {
@@ -368,15 +373,15 @@ static int PositionInv( int nID, int n, int r ) {
 }
 
 extern void PositionFromBearoff( int anBoard[], const unsigned int usID,
-                                 const int n ) {
+                                 const int nPoints, const int nChequers ) {
     
-    int fBits = PositionInv( usID, 15 + n, n );
+    int fBits = PositionInv( usID, nChequers + nPoints, nPoints );
     int i, j;
 
-    for( i = 0; i < n; i++ )
+    for( i = 0; i < nPoints; i++ )
         anBoard[ i ] = 0;
     
-    for( j = n - 1, i = 0; j >= 0 && i < (15 + n); i++ ) {
+    for( j = nPoints - 1, i = 0; j >= 0 && i < ( nChequers + nPoints ); i++ ) {
         if( fBits & ( 1 << i ) )
             j--;
         else
@@ -400,5 +405,7 @@ PositionIndex(int g, int anBoard[6])
     fBits |= ( 1 << j );
   }
 
+  /* FIXME: 15 should be replaced by nChequers, but the function is
+     only called from bearoffgammon, so this should be fine. */
   return PositionF( fBits, 15, g );
 }

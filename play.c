@@ -273,7 +273,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	PlayMove( pms, pmr->n.anMove, pmr->n.fPlayer );
 	pms->anDice[ 0 ] = pms->anDice[ 1 ] = 0;
 
-	if( ( n = GameStatus( pms->anBoard ) ) ) {
+	if( ( n = GameStatus( pms->anBoard, pms->bgv ) ) ) {
 
             if( pms->fJacoby && pms->fCubeOwner == -1 && ! pms->nMatchTo )
               /* gammons do not count on a centred cube during money
@@ -348,6 +348,7 @@ extern void CalculateBoard( void ) {
 
 	assert( pl->p );
 
+        printf( "CB: %d\n", ((moverecord *) (pl->p))->mt );
 	ApplyMoveRecord( &ms, plGame, pl->p );
 
         if ( pl->plNext && pl->plNext->p )
@@ -820,7 +821,7 @@ extern int ComputerTurn( void ) {
         SetCubeInfo ( &ci, ci.nCube,
                       ci.fMove, ci.fMove,
                       ci.nMatchTo, ci.anScore, ci.fCrawford,
-                      ci.fJacoby, ci.fBeavers );
+                      ci.fJacoby, ci.fBeavers, ci.bgv );
 
       }
       
@@ -831,7 +832,7 @@ extern int ComputerTurn( void ) {
         SetCubeInfo ( &ci, ci.nCube,
                       ci.fMove, ci.fMove,
                       ci.nMatchTo, ci.anScore, ci.fCrawford,
-                      ci.fJacoby, ci.fBeavers );
+                      ci.fJacoby, ci.fBeavers, ci.bgv );
 
       }
 
@@ -990,7 +991,7 @@ extern int ComputerTurn( void ) {
       /* Consider resigning -- no point wasting time over the decision,
          so only evaluate at 0 plies. */
 
-      if( ClassifyPosition( ms.anBoard ) <= CLASS_RACE ) {
+      if( ClassifyPosition( ms.anBoard, ms.bgv ) <= CLASS_RACE ) {
 
           evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
           evalsetup esResign;
@@ -1159,7 +1160,7 @@ extern int ComputerTurn( void ) {
       ProgressStart( _("Considering move...") );
       if( FindBestMove( pmn->anMove, ms.anDice[ 0 ], ms.anDice[ 1 ],
                         anBoardMove, &ci,
-			&ap[ ms.fTurn ].esChequer.ec,
+			&ap[ ms.fTurn ].esChequer.ec, 
                         ap[ ms.fTurn ].aamf ) < 0 ) {
 	  ProgressEnd();
 	  free( pmn );
@@ -1227,7 +1228,8 @@ extern int ComputerTurn( void ) {
     pmn->stMove = SKILL_NONE;
     pmn->stCube = SKILL_NONE;
     
-    FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, pmn->anMove );
+    FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, 
+                     pmn->anMove, ms.bgv );
     
     if( pmn->anMove[ 0 ] < 0 )
 	playSound ( SOUND_BOT_DANCE );
@@ -1430,7 +1432,7 @@ static int TryBearoff( void ) {
     int i, iMove, cMoves;
     movenormal *pmn;
     
-    if( ClassifyPosition( ms.anBoard ) > CLASS_RACE )
+    if( ClassifyPosition( ms.anBoard, ms.bgv ) > CLASS_RACE )
 	/* It's a contact position; don't automatically bear off */
 	return -1;
     
@@ -1581,7 +1583,7 @@ extern int NextTurn( int fPlayNext ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
     
-    if( ( n = GameStatus( ms.anBoard ) ) ||
+    if( ( n = GameStatus( ms.anBoard, ms.bgv ) ) ||
 	( ms.gs == GAME_DROP && ( ( n = 1 ) ) ) ||
 	( ms.gs == GAME_RESIGNED && ( ( n = ms.fResigned ) ) ) ) {
 	movegameinfo *pmgi = plGame->plNext->p;
@@ -2122,8 +2124,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
         SuspendInput ( &m );
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-								pec ) < 0 ) {
+	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
           ResumeInput ( &m );
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2301,8 +2302,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
         SuspendInput ( &m );
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-                                    pec ) < 0 ) {
+	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
 	  ProgressEnd();
           ResumeInput ( &m );
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2965,6 +2965,8 @@ static void UpdateGame( int fShowBoard ) {
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
+
+    printf ( "update game: %d %d\n", fShowBoard, fDisplay );
     
 #if USE_GUI
     if( fX || ( fShowBoard && fDisplay ) )
@@ -3597,8 +3599,7 @@ static skilltype ShouldDouble ( void ) {
 	/* Give hint on cube action */
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-								pec ) < 0 ) {
+	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);;
@@ -3738,7 +3739,8 @@ CommandRoll( char *sz ) {
     AddMoveRecord( pmn );
 
     TurnDone();
-  } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( ms.anBoard )
+  } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( ms.anBoard, 
+                                                                  ms.bgv )
                                                 <= CLASS_BEAROFF1 &&
                                                 fAutoBearoff ) ) ) {
 
@@ -4150,8 +4152,7 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
       
       /* FIXME should we use EvaluatePositionCubeful here? */
 
-      if ( GeneralEvaluationE( ar, anBoardTemp, &ciOpp, 
-                               (evalcontext *) pec ) )
+      if ( GeneralEvaluationE( ar, anBoardTemp, &ciOpp, (evalcontext *) pec ) )
         return;
 
       r = 

@@ -362,7 +362,7 @@ static void BearOff( int nId, int nPoints,
 
     /* get board for given position */
 
-    PositionFromBearoff( anBoard[ 1 ], nId, nPoints );
+    PositionFromBearoff( anBoard[ 1 ], nId, nPoints, 15 );
 
     /* initialise probabilities */
 
@@ -391,7 +391,8 @@ static void BearOff( int nId, int nPoints,
     /* look for position in existing bearoff file */
     
     if ( pbc && isBearoff ( pbc, anBoard ) ) {
-      unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+      unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], 
+                                              pbc->nPoints, pbc->nChequers );
       BearoffDist ( pbc, nPosID, NULL, NULL, NULL, aOutProb, aOutProb + 32 );
       return;
     }
@@ -409,7 +410,7 @@ static void BearOff( int nId, int nPoints,
 	    for( i = 0; i < ml.cMoves; i++ ) {
 		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
 
-		j = PositionBearoff( anBoardTemp[ 1 ], nPoints );
+		j = PositionBearoff( anBoardTemp[ 1 ], nPoints, 15 );
 
 		assert( j >= 0 );
 		assert( j < nId );
@@ -711,7 +712,7 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
   if ( ! iPos ) 
     return;
 
-  PositionFromBearoff( anBoard[ 1 ], iPos, nPoints );
+  PositionFromBearoff( anBoard[ 1 ], iPos, nPoints, 15 );
 
   for( i = nPoints; i < 25; i++ )
     anBoard[ 1 ][ i ] = 0;
@@ -725,7 +726,8 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
       ;
 
     if ( i < pbc->nPoints ) {
-      unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+      unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], 
+                                              pbc->nPoints, pbc->nChequers );
       BearoffDist ( pbc, nPosID, NULL, NULL, ar, NULL, NULL );
       return;
     }
@@ -755,7 +757,7 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
 
         PositionFromKey ( anBoardTemp, ml.amMoves[ i ].auch );
 
-        j = PositionBearoff ( anBoardTemp[ 1 ], nPoints );
+        j = PositionBearoff ( anBoardTemp[ 1 ], nPoints, 15 );
 
         if ( ! XhashLookup ( ph, j, (void **) &prj ) ) {
           NDBearoff ( j, nPoints, prj = arj, ph, pbc );
@@ -1006,8 +1008,8 @@ static void BearOff2( int nUs, int nThem,
 
     }
 
-    PositionFromBearoff( anBoard[ 0 ], nThem, nTSP );
-    PositionFromBearoff( anBoard[ 1 ], nUs, nTSP );
+    PositionFromBearoff( anBoard[ 0 ], nThem, nTSP, nTSC );
+    PositionFromBearoff( anBoard[ 1 ], nUs, nTSP, nTSC );
 
     for( i = nTSP; i < 25; i++ )
 	anBoard[ 1 ][ i ] = anBoard[ 0 ][ i ] = 0;
@@ -1016,9 +1018,9 @@ static void BearOff2( int nUs, int nThem,
 
     if ( pbc && isBearoff ( pbc, anBoard ) ) {
       unsigned short int nUsL = 
-        PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+        PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
       unsigned short int nThemL = 
-        PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+        PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
       int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
       unsigned int iPos = nUsL * nL + nThemL;
       unsigned short int aus[ 4 ];
@@ -1044,7 +1046,7 @@ static void BearOff2( int nUs, int nThem,
 	    for( i = 0; i < ml.cMoves; i++ ) {
 		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
 
-		j = PositionBearoff( anBoardTemp[ 1 ], nTSP );
+		j = PositionBearoff( anBoardTemp[ 1 ], nTSP, nTSC );
 
 		assert( j >= 0 );
 		assert( j < nUs ); 
@@ -1447,7 +1449,8 @@ extern int main( int argc, char **argv ) {
        database */
 
     if ( pbc && 
-         ( pbc->fTwoSided || pbc->fND != fND || pbc->fGammon < fGammon ) ) {
+         ( pbc->bt != BEAROFF_ONESIDED || pbc->fND != fND || 
+           pbc->fGammon < fGammon ) ) {
       fprintf ( stderr,
                 _("The old database is not of the same kind as the"
                   " requested database\n") );
@@ -1515,7 +1518,7 @@ extern int main( int argc, char **argv ) {
     /* bearoff database must be of the same kind as the request one-sided
        database */
     
-    if ( pbc && ( ! pbc->fTwoSided || pbc->fCubeful != fCubeful ) ) {
+    if ( pbc && ( pbc->bt != BEAROFF_TWOSIDED || pbc->fCubeful != fCubeful ) ) {
       fprintf ( stderr,
                 _("The old database is not of the same kind as the"
                   " requested database\n") );

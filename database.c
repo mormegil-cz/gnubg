@@ -392,7 +392,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
   ProgressStart( _("Generating database...") );
   
   while( ( !n || c <= n ) && !fInterrupt ) {
-    InitBoard( anBoardGenerate, bgvDefault );
+    InitBoard( anBoardGenerate, ciCubeless.bgv );
 	
     do {    
 	if( !( ++c % 10 ) )
@@ -457,7 +457,8 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	    return;	    
 	}
     } while( ( !n || c <= n ) && !fInterrupt &&
-	     ClassifyPosition( anBoardGenerate ) > CLASS_PERFECT );
+	     ClassifyPosition( anBoardGenerate, 
+                               ciCubeless.bgv ) > CLASS_PERFECT );
   }
 
   ProgressEnd();
@@ -517,7 +518,8 @@ extern void CommandDatabaseTrain( char *sz ) {
 		
 		PositionFromKey( anBoardTrain, (unsigned char *) dKey.dptr );
 		
-		TrainPosition( anBoardTrain, arDesired, rAlpha, rAnneal );
+		TrainPosition( anBoardTrain, arDesired, rAlpha, rAnneal,
+                               ciCubeless.bgv );
 	    }
 	    
 	    free( pev );

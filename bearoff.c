@@ -64,6 +64,15 @@ typedef struct _hashentrytwosided {
   unsigned char auch[ 8 ];
 } hashentrytwosided;
 
+typedef struct _hashentryhypergammon {
+  unsigned int nPosID;
+  unsigned char auch[ 18 ];
+} hashentryhypergammon;
+
+
+typedef int ( *hcmpfunc ) ( void *p1, void *p2 );
+
+static int anCacheSize[] = { 100000, 10000, 5000 };
 
 
 char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
@@ -143,8 +152,8 @@ static int
 hcmpTwoSided( void *p1, void *p2 ) {
 
 
-  hashentryonesided *ph1 = p1;
-  hashentryonesided *ph2 = p2;
+  hashentrytwosided *ph1 = p1;
+  hashentrytwosided *ph2 = p2;
 
   if ( ph1->nPosID < ph2->nPosID )
     return -1;
@@ -155,7 +164,22 @@ hcmpTwoSided( void *p1, void *p2 ) {
 
 }
 
+static int
+hcmpHypergammon ( void *p1, void *p2 ) {
 
+  hashentryhypergammon *ph1 = p1;
+  hashentryhypergammon *ph2 = p2;
+
+  if ( ph1->nPosID < ph2->nPosID )
+    return -1;
+  else if ( ph1->nPosID == ph2->nPosID )
+    return 0;
+  else
+    return 1;
+
+}
+
+static hcmpfunc ahcmp[] = { hcmpOneSided, hcmpTwoSided, hcmpHypergammon };
 
 
 
@@ -259,7 +283,7 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 	    anBoard[ n - anDice[ i ] ]++;
     }
 
-    return PositionBearoff( anBoard, 6 );
+    return PositionBearoff( anBoard, 6, 15 );
 }
 
 static void GenerateBearoff( unsigned char *p, int nId ) {
@@ -272,7 +296,7 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
     
     for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
 	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
-	    PositionFromBearoff( anBoard, nId, 6 );
+	    PositionFromBearoff( anBoard, nId, 6, 15 );
 	    iBest = HeuristicBearoff( anBoard, anRoll );
 
 	    assert( iBest >= 0 );
@@ -463,7 +487,7 @@ ReadExactBearoff ( bearoffcontext *pbc,
 
 #if 0
   for ( i = 0; i < 925; ++i ) {
-    PositionFromBearoff ( anBoard[ 0 ], i, pbc->nChequers );
+    PositionFromBearoff ( anBoard[ 0 ], i, pbc->nPoints, pbc->nChequers );
     nUs = boardNr ( anBoard[ 0 ], pbc->nPoints, pbc->nPoints,
                     pbc->nChequers );
     if ( nUs == 3 ) {
@@ -481,8 +505,8 @@ ReadExactBearoff ( bearoffcontext *pbc,
       
 
 
-  PositionFromBearoff ( anBoard[ 0 ], nThem, pbc->nChequers );
-  PositionFromBearoff ( anBoard[ 1 ], nUs, pbc->nChequers );
+  PositionFromBearoff ( anBoard[ 0 ], nThem, pbc->nPoints, pbc->nChequers );
+  PositionFromBearoff ( anBoard[ 1 ], nUs, pbc->nPoints, pbc->nChequers  );
 
   /* printf ( "gnu position %u %u\n", nUs, nThem ); */
 
@@ -522,7 +546,7 @@ BearoffCubeful ( bearoffcontext *pbc,
                  const unsigned int iPos,
                  float ar[ 4 ], unsigned short int aus[ 4 ] ) {
 
-  switch ( pbc->bt ) {
+  switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
 
     if ( ! pbc->fCubeful )
@@ -554,8 +578,8 @@ static int
 BearoffEvalTwoSided ( bearoffcontext *pbc, 
                       int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
-  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
-  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
   int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
   int iPos = nUs * n + nThem;
   float ar[ 4 ];
@@ -568,6 +592,46 @@ BearoffEvalTwoSided ( bearoffcontext *pbc,
   return ar [ 0 ] * 65535.0;
 
 }
+
+
+static void
+ReadHypergammon( bearoffcontext *pbc,
+                 const unsigned int iPos,
+                 float arOutput[ NUM_OUTPUTS ],
+                 float arEquity[ 4 ] ) {
+
+  unsigned char ac[ 28 ];
+  unsigned char *pc = NULL;
+  unsigned int us;
+  int i;
+  const int x = 28;
+
+  if ( pbc->fInMemory )
+    pc = ((char *) pbc->p)+ 40 + x * iPos;
+  else {
+    lseek ( pbc->h, 40 + x * iPos, SEEK_SET );
+    read ( pbc->h, ac, x );
+    pc = ac;
+  }
+
+  if ( arOutput )
+    for ( i = 0; i < NUM_OUTPUTS; ++i ) {
+      us = pc[ 3 * i ] | ( pc[ 3 * i + 1 ] ) << 8 | ( pc[ 3 * i + 2 ] ) << 16;
+      arOutput[ i ] = us / 16777215.0;
+    }
+
+  if ( arEquity )
+    for ( i = 0; i < 4; ++i ) {
+      us = pc[ 15 + 3 * i ] | 
+         ( pc[ 15 + 3 * i + 1 ] ) << 8 | 
+         ( pc[ 15 + 3 * i + 2 ] ) << 16;
+      arEquity[ i ] = ( us / 16777215.0f - 0.5f ) * 6.0f;
+    }
+
+  ++pbc->nReads;
+
+}
+
 
 static int
 BearoffEvalOneSided ( bearoffcontext *pbc, 
@@ -585,7 +649,7 @@ BearoffEvalOneSided ( bearoffcontext *pbc,
 
   for ( i = 0; i < 2; ++i ) {
 
-    an[ i ] = PositionBearoff ( anBoard[ i ], pbc->nPoints );
+    an[ i ] = PositionBearoff ( anBoard[ i ], pbc->nPoints, pbc->nChequers );
     BearoffDist ( pbc, an[ i ], aarProb[ i ], aarGammonProb[ i ], ar [ i ],
                   NULL, NULL );
 
@@ -655,24 +719,62 @@ BearoffEvalOneSided ( bearoffcontext *pbc,
 }
 
 
+extern int
+BearoffHyper( bearoffcontext *pbc,
+              const unsigned int iPos,
+              float arOutput[], float arEquity[] ) {
+
+  /* debug */
+
+  ReadHypergammon( pbc, iPos, arOutput, arEquity );
+
+  return 0;
+
+}
+
+
+static int
+BearoffEvalHypergammon ( bearoffcontext *pbc, 
+                         int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+
+  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
+  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  int iPos = nUs * n + nThem;
+
+  ReadHypergammon ( pbc, iPos, arOutput, NULL );
+
+  return 0;
+
+}
+
+
+
 
 extern int
 BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
-  switch ( pbc->bt ) {
+  switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
 
-    if ( pbc->fTwoSided ) 
+    switch ( pbc->bt ) {
+    case BEAROFF_TWOSIDED:
       BearoffEvalTwoSided ( pbc, anBoard, arOutput );
-    else 
+      break;
+    case BEAROFF_ONESIDED:
       BearoffEvalOneSided ( pbc, anBoard, arOutput );
+      break;
+    case BEAROFF_HYPERGAMMON:
+      BearoffEvalHypergammon ( pbc, anBoard, arOutput );
+      break;
+    }
 
     break;
 
 
   case BEAROFF_EXACT_BEAROFF:
 
-    assert ( pbc->fTwoSided );
+    assert ( pbc->bt == BEAROFF_TWOSIDED );
     BearoffEvalTwoSided ( pbc, anBoard, arOutput );
     break;
 
@@ -692,7 +794,8 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
   if ( ! pbc )
     return;
 
-  if ( pbc->fTwoSided ) {
+  switch ( pbc->bt ) {
+  case BEAROFF_TWOSIDED:
 
     sprintf ( sz, _(" * %s:\n"
                     "   - generated by %s\n"
@@ -703,16 +806,16 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
               pbc->fInMemory ?
               _("In memory 2-sided bearoff database evaluator") :
               _("On disk 2-sided bearoff database evaluator"),
-              gettext ( aszBearoffGenerator [ pbc->bt ] ),
+              gettext ( aszBearoffGenerator [ pbc->bc ] ),
               pbc->nChequers, pbc->nPoints, 
               Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
               pbc->fCubeful ?
               _("database includes both cubeful and cubeless equities") :
               _("cubeless database"),
               pbc->nReads );
+    break;
 
-  }
-  else {
+  case BEAROFF_ONESIDED:
 
     sprintf ( sz, _(" * %s:\n"
                     "   - generated by %s\n"
@@ -725,7 +828,7 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
               pbc->fInMemory ?
               _("In memory 1-sided bearoff database evaluator") :
               _("On disk 1-sided bearoff database evaluator"),
-              gettext ( aszBearoffGenerator [ pbc->bt ] ),
+              gettext ( aszBearoffGenerator [ pbc->bc ] ),
               pbc->nChequers, pbc->nPoints, 
               Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
               pbc->fND ?
@@ -738,6 +841,29 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
               _("database does not include gammon distributions"),
               pbc->nReads );
     
+    break;
+
+  case BEAROFF_HYPERGAMMON:
+
+    if ( pbc->fInMemory )
+      sprintf( sz, _(" * In memory 2-sided exact %d-chequer Hypergammon "
+                     "database evaluator\n"), pbc->nChequers );
+    else
+      sprintf( sz, _(" * On disk 2-sided exact %d-chequer Hypergammon "
+                     "database evaluator\n"), pbc->nChequers );
+
+    sprintf( strchr( sz, 0 ),
+             _("   - generated by %s\n"
+               "   - up to %d chequers on %d points (%d positions)"
+               " per player\n"
+               "   - number of reads: %lu\n"),
+             gettext ( aszBearoffGenerator [ pbc->bc ] ),
+             pbc->nChequers, pbc->nPoints, 
+             Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints ),
+             pbc->nReads );
+    
+    break;
+
   }
 
   if ( pbc->ph )
@@ -753,8 +879,8 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
 static void
 BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
-  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
-  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
   int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
   int iPos = nUs * n + nThem;
   float ar[ 4 ];
@@ -791,8 +917,8 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 static void
 BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
-  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
-  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
   float ar[ 2 ][ 4 ];
   int i;
   float aarProb[ 2 ][ 32 ], aarGammonProb[ 2 ][ 32 ];
@@ -896,16 +1022,55 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 }
 
 
+static void
+BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
+
+  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
+  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  int iPos = nUs * n + nThem;
+  float ar[ 4 ];
+  int i;
+  static char *aszEquity[] = {
+    N_("Owned cube"),
+    N_("Centered cube"),
+    N_("Centered cube (Jacoby rule)"),
+    N_("Opponent owns cube")
+  };
+
+  BearoffHyper ( pbc, iPos, NULL, ar );
+
+  sprintf ( strchr ( sz, 0 ),
+            "             Player       Opponent\n"
+            "Position %12d  %12d\n\n", 
+            nUs, nThem );
+
+  for ( i = 0; i < 4 ; ++i )
+    sprintf ( strchr ( sz, 0 ),
+              "%-30.30s: %+7.4f\n", 
+              gettext ( aszEquity[ i ] ), ar[ i ] );
+
+
+}
+
+
 extern void
 BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
-  switch ( pbc->bt ) {
+  switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
 
-    if ( pbc->fTwoSided ) 
+    switch ( pbc->bt ) {
+    case BEAROFF_TWOSIDED:
       BearoffDumpTwoSided ( pbc, anBoard, sz );
-    else
+      break;
+    case BEAROFF_ONESIDED:
       BearoffDumpOneSided ( pbc, anBoard, sz );
+      break;
+    case BEAROFF_HYPERGAMMON:
+      BearoffDumpHyper ( pbc, anBoard, sz );
+      break;
+    }
 
     break;
 
@@ -1034,12 +1199,12 @@ BearoffInit ( const char *szFilename, const char *szDir,
       return NULL;
     }
 
-    pbc->bt = BEAROFF_GNUBG;
+    pbc->bc = BEAROFF_GNUBG;
+    pbc->bt = BEAROFF_ONESIDED;
     pbc->fInMemory = TRUE;
     pbc->h = -1;
     pbc->nPoints = 6;
     pbc->nChequers = 6;
-    pbc->fTwoSided = FALSE;
     pbc->fCompressed = FALSE;
     pbc->fGammon = FALSE;
     pbc->fND = FALSE;
@@ -1102,22 +1267,24 @@ BearoffInit ( const char *szFilename, const char *szDir,
   /* detect bearoff program */
 
   if ( ! strncmp ( sz, "gnubg", 5 ) )
-    pbc->bt = BEAROFF_GNUBG;
+    pbc->bc = BEAROFF_GNUBG;
   else if ( isExactBearoff ( sz ) )
-    pbc->bt = BEAROFF_EXACT_BEAROFF;
+    pbc->bc = BEAROFF_EXACT_BEAROFF;
   else
-    pbc->bt = BEAROFF_UNKNOWN;
+    pbc->bc = BEAROFF_UNKNOWN;
 
-  switch ( pbc->bt ) {
+  switch ( pbc->bc ) {
 
   case BEAROFF_GNUBG:
 
     /* one sided or two sided? */
 
     if ( ! strncmp ( sz + 6, "TS", 2 ) ) 
-      pbc->fTwoSided = TRUE;
+      pbc->bt = BEAROFF_TWOSIDED;
     else if ( ! strncmp ( sz + 6, "OS", 2 ) )
-      pbc->fTwoSided = FALSE;
+      pbc->bt = BEAROFF_ONESIDED;
+    else if ( *(sz+6) == 'H' )
+      pbc->bt = BEAROFF_HYPERGAMMON;
     else {
       fprintf ( stderr,
                 _("%s: incomplete bearoff database\n"
@@ -1128,31 +1295,46 @@ BearoffInit ( const char *szFilename, const char *szDir,
       return NULL;
     }
 
-    /* number of points */
+    if ( pbc->bt == BEAROFF_TWOSIDED || pbc->bt == BEAROFF_ONESIDED ) {
 
-    pbc->nPoints = atoi ( sz + 9 );
-    if ( pbc->nPoints < 1 || pbc->nPoints >= 24 ) {
-      fprintf ( stderr, 
-                _("%s: incomplete bearoff database\n"
-                  "(illegal number of points is %d)"), 
-                szFilename, pbc->nPoints );
-      close ( pbc->h );
-      free ( pbc );
-      return NULL;
+      /* normal onesided or twosided bearoff database */
+
+      /* number of points */
+      
+      pbc->nPoints = atoi ( sz + 9 );
+      if ( pbc->nPoints < 1 || pbc->nPoints >= 24 ) {
+        fprintf ( stderr, 
+                  _("%s: incomplete bearoff database\n"
+                    "(illegal number of points is %d)"), 
+                  szFilename, pbc->nPoints );
+        close ( pbc->h );
+        free ( pbc );
+        return NULL;
+      }
+      
+      /* number of chequers */
+      
+      pbc->nChequers = atoi ( sz + 12 );
+      if ( pbc->nChequers < 1 || pbc->nChequers > 15 ) {
+        fprintf ( stderr, 
+                  _("%s: incomplete bearoff database\n"
+                    "(illegal number of chequers is %d)"), 
+                  szFilename, pbc->nChequers );
+        close ( pbc->h );
+        free ( pbc );
+        return NULL;
+      }
+
+    }
+    else {
+
+      /* hypergammon database */
+
+      pbc->nPoints = 25;
+      pbc->nChequers = atoi ( sz + 7 );
+
     }
 
-    /* number of chequers */
-
-    pbc->nChequers = atoi ( sz + 12 );
-    if ( pbc->nPoints < 1 || pbc->nPoints > 15 ) {
-      fprintf ( stderr, 
-                _("%s: incomplete bearoff database\n"
-                  "(illegal number of chequers is %d)"), 
-                szFilename, pbc->nChequers );
-      close ( pbc->h );
-      free ( pbc );
-      return NULL;
-    }
 
     pbc->fCompressed = FALSE;
     pbc->fGammon = FALSE;
@@ -1160,22 +1342,26 @@ BearoffInit ( const char *szFilename, const char *szDir,
     pbc->fND = FALSE;
     pbc->fHeuristic = FALSE;
 
-    if ( pbc->fTwoSided ) {
+    switch ( pbc->bt ) {
+    case BEAROFF_TWOSIDED:
       /* options for two-sided dbs */
       pbc->fCubeful = atoi ( sz + 15 );
-    }
-    else {
+      break;
+    case BEAROFF_ONESIDED:
       /* options for one-sided dbs */
       pbc->fGammon = atoi ( sz + 15 );
       pbc->fCompressed = atoi ( sz + 17 );
       pbc->fND = atoi ( sz + 19 );
+      break;
+    default:
+      break;
     }
 
     iOffset = 0;
     nSize = -1;
 
     /*
-    fprintf ( stderr, "Database:\n"
+      fprintf ( stderr, "Database:\n"
               "two-sided: %d\n"
               "points   : %d\n"
               "chequers : %d\n"
@@ -1184,10 +1370,10 @@ BearoffInit ( const char *szFilename, const char *szDir,
               "cubeful  : %d\n"
               "normaldis: %d\n"
               "in memory: %d\n",
-              pbc->fTwoSided,
+                pbc->bt,
               pbc->nPoints, pbc->nChequers,
               pbc->fCompressed, pbc->fGammon, pbc->fCubeful, pbc->fND,
-              pbc->fInMemory );*/
+                pbc->fInMemory );*/
     
     break;
 
@@ -1214,11 +1400,11 @@ BearoffInit ( const char *szFilename, const char *szDir,
         return NULL;
       }
 
-      pbc->bt = BEAROFF_EXACT_BEAROFF;
+      pbc->bc = BEAROFF_EXACT_BEAROFF;
       pbc->fInMemory = TRUE;
       pbc->nPoints = 6;
       pbc->nChequers = l;
-      pbc->fTwoSided = TRUE;
+      pbc->bt = BEAROFF_TWOSIDED;
       pbc->fCompressed = FALSE;
       pbc->fGammon = FALSE;
       pbc->fND = FALSE;
@@ -1280,8 +1466,7 @@ BearoffInit ( const char *szFilename, const char *szDir,
 
   if ( ! pbc->fInMemory ) {
     if ( ! ( pbc->ph = (hash *) malloc ( sizeof ( hash ) ) ) ||
-         HashCreate ( pbc->ph, ( pbc->fTwoSided ? 100000 : 10000 ), 
-                      ( pbc->fTwoSided ? hcmpTwoSided : hcmpOneSided ) ) < 0 )
+         HashCreate ( pbc->ph, anCacheSize[ pbc->bt ], ahcmp[ pbc->bt ] ) < 0 )
       pbc->ph = NULL;
   }
   else
@@ -1618,21 +1803,17 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
               unsigned short int ausProb[ 32 ], 
               unsigned short int ausGammonProb[ 32 ] ) {
 
-  switch ( pbc->bt ) {
+  switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
 
-    if ( pbc->fTwoSided ) {
-      assert ( FALSE );
-    }
-    else {
-      /* one-sided db */
-      if ( pbc->fND ) 
-        ReadBearoffOneSidedND ( pbc, nPosID, arProb, arGammonProb, ar,
-                                ausProb, ausGammonProb );
-      else
-        ReadBearoffOneSidedExact ( pbc, nPosID, arProb, arGammonProb, ar,
-                                   ausProb, ausGammonProb );
-    }
+    assert ( pbc->bt == BEAROFF_ONESIDED );
+
+    if ( pbc->fND ) 
+      ReadBearoffOneSidedND ( pbc, nPosID, arProb, arGammonProb, ar,
+                              ausProb, ausGammonProb );
+    else
+      ReadBearoffOneSidedExact ( pbc, nPosID, arProb, arGammonProb, ar,
+                                 ausProb, ausGammonProb );
     break;
 
   default:
@@ -1665,7 +1846,7 @@ isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] ) {
     /* the game is over */
     return FALSE;
 
-  if ( nBack + nOppBack > 22 )
+  if ( ( nBack + nOppBack > 22 ) && ! pbc->bt == BEAROFF_HYPERGAMMON )
     /* contact position */
     return FALSE;
 

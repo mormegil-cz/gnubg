@@ -24,21 +24,27 @@
 
 #include <hash.h>
 
-typedef enum _bearofftype {
+typedef enum _bearoffcreator {
   BEAROFF_GNUBG,
   BEAROFF_EXACT_BEAROFF,
   BEAROFF_UNKNOWN,
   NUM_BEAROFFS
+} bearoffcreator;
+
+typedef enum _bearofftype {
+  BEAROFF_ONESIDED,
+  BEAROFF_TWOSIDED,
+  BEAROFF_HYPERGAMMON
 } bearofftype;
 
 typedef struct _bearoffcontext {
 
   int h;          /* file handle */
   bearofftype bt; /* type of bearoff database */
+  bearoffcreator bc; /* creator of database */
   int nPoints;    /* number of points covered by database */
   int nChequers;  /* number of chequers for one-sided database */
   int fInMemory;  /* Is database entirely read into memory? */
-  int fTwoSided;  /* one sided or two sided db? */
   int fMalloc;    /* is data malloc'ed? */
 
   /* one sided dbs */
@@ -102,5 +108,10 @@ isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] );
 
 extern float
 fnd ( const float x, const float mu, const float sigma  );
+
+extern int
+BearoffHyper( bearoffcontext *pbc,
+              const unsigned int iPos,
+              float arOutput[], float arEquity[] );
 
 #endif /* _BEAROFF_H_ */

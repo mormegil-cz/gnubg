@@ -2523,7 +2523,7 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
     return SetCubeInfo( pci, pms->nCube, pms->fCubeOwner, pms->fMove,
 			pms->nMatchTo, pms->anScore, pms->fCrawford,
-			pms->fJacoby, nBeavers );
+			pms->fJacoby, nBeavers, pms->bgv );
 }
 
 static void DisplayCubeAnalysis( float arDouble[ 4 ], 
@@ -2663,7 +2663,7 @@ extern void ShowBoard( void ) {
     if( ms.gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
-	    InitBoard( anBoardTemp, bgvDefault );
+	    InitBoard( anBoardTemp, ms.bgv );
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
@@ -2730,7 +2730,7 @@ extern void ShowBoard( void ) {
 	    if( ms.anDice[ 0 ] )
 		sprintf( sz, 
                          _("Rolled %d%d"), ms.anDice[ 0 ], ms.anDice[ 1 ] );
-	    else if( !GameStatus( ms.anBoard ) )
+	    else if( !GameStatus( ms.anBoard, ms.bgv ) )
 		strcpy( sz, _("On roll") );
 	    else
 		sz[ 0 ] = 0;
@@ -2933,7 +2933,7 @@ extern void CommandEval( char *sz ) {
     else
 	SetCubeInfo( &ci, ms.nCube, ms.fCubeOwner, n ? !ms.fMove : ms.fMove,
 		     ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
-		     nBeavers );    
+		     nBeavers, ms.bgv );    
 
     ProgressStart( _("Evaluating position...") );
     if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
@@ -3720,7 +3720,7 @@ CommandRollout( char *sz ) {
     
     SetCubeInfo ( &ci, ms.nCube, ms.fCubeOwner, fOpponent ? !ms.fMove :
 		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
-                  nBeavers );
+                  nBeavers, ms.bgv );
 
 #if USE_GTK
     if( fX )
@@ -3736,8 +3736,8 @@ CommandRollout( char *sz ) {
 	    GTKRolloutRow( i );
 #endif
 	if( ( cGames = RolloutGeneral( aan[ i ], &asz[ i ], &ar, &arStdDev,
-                                       &aars[ i ], &rcRollout, &ci, &fCubeDecTop,
-                                       1, fOpponent ) ) <= 0 )
+                                       &aars[ i ], &rcRollout, &ci,
+                                       &fCubeDecTop, 1, fOpponent ) ) <= 0 )
 	    return;
 
         /* save in current movelist */
@@ -3907,7 +3907,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
             fputc( '\n', pf );
         }
 
-	if( ( n = GameStatus( anBoard ) ) ) {
+	if( ( n = GameStatus( anBoard, ms.bgv ) ) ) {
 	    fprintf( pf, "%sWins %d point%s%s\n\n",
 		   i & 1 ? "                                  " : "\n      ",
 		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
@@ -4230,7 +4230,7 @@ extern void CommandCopy (char *sz)
 
       if (ms.anDice[0])
 	sprintf (szRolled, _("Rolled %d%d"), ms.anDice[0], ms.anDice[1]);
-      else if (!GameStatus (ms.anBoard))
+      else if (!GameStatus (ms.anBoard, ms.bgv))
 	strcpy (szRolled, _("On roll"));
       else
 	szRolled[0] = 0;
@@ -5057,7 +5057,7 @@ extern void CommandTrainTD( char *sz ) {
     ProgressStart( _("Training...") );
     
     while( ( !n || c <= n ) && !fInterrupt ) {
-	InitBoard( anBoardTrain, bgvDefault );
+	InitBoard( anBoardTrain, ciCubeless.bgv );
 	
 	do {    
 	    if( !( ++c % 100 ) )
@@ -5085,12 +5085,13 @@ extern void CommandTrainTD( char *sz ) {
 	    EvaluatePosition( anBoardTrain, ar, &ciCubeless, &ecTD );
 	    
 	    InvertEvaluation( ar );
-	    if( TrainPosition( anBoardOld, ar, rAlpha, rAnneal ) )
+	    if( TrainPosition( anBoardOld, ar, rAlpha, rAnneal, 
+                               ciCubeless.bgv ) )
 		break;
 	    
 	    /* FIXME can stop as soon as perfect */
 	} while( ( !n || c <= n ) && !fInterrupt &&
-		 !GameStatus( anBoardTrain ) );
+		 !GameStatus( anBoardTrain, ciCubeless.bgv ) );
     }
 
     ProgressEnd();
@@ -5435,6 +5436,8 @@ extern void HandleInput( char *sz ) {
     ProcessInput( sz, TRUE );
 }
 
+#if USE_EXT
+
 static char *szInput;
 static int fInputAgain;
 
@@ -5452,6 +5455,9 @@ static void HandleInputRecursive( char *sz ) {
 
     rl_callback_handler_remove();
 }
+
+#endif /* USE_EXT */
+
 #endif
 
 /* Handle a command as if it had been typed by the user. */

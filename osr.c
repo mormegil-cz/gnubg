@@ -656,7 +656,7 @@ rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
     for ( i = 0; i < 6; ++i )
       antmp[ i ] = an[ 23 - i ];
 
-    getBearoffProbs ( PositionBearoff ( antmp, 6 ), anProb );
+    getBearoffProbs ( PositionBearoff ( antmp, 6, 15 ), anProb );
 
     for ( i = 0; i < 32; ++i )
       arProbs[ min ( n + i, nMaxProbs - 1 ) ] += anProb[ i ] / 65535.0f;
@@ -755,7 +755,7 @@ osp ( const int anBoard[ 25 ], const int nGames,
     for ( i = 0; i < MAX_PROBS; ++i )
       arProbs[ i ] = 0.0f;
 
-    getBearoffProbs ( PositionBearoff ( anBoard, 6 ), anProb );
+    getBearoffProbs ( PositionBearoff ( anBoard, 6, 15 ), anProb );
 
     for ( i = 0; i < 32; ++i ) {
       n = min ( i, MAX_PROBS - 1 );
@@ -805,7 +805,7 @@ bgProb ( const int anBoard[ 25 ],
       for ( i = 0; i < 6; ++i )
         antmp[ i ] = anBoard[ 5 - i ];
       
-      getBearoffProbs ( PositionBearoff ( antmp, 6 ), anProb );
+      getBearoffProbs ( PositionBearoff ( antmp, 6, 15 ), anProb );
 
       for ( i = 0; i < nMaxProbs; ++i ) {
 

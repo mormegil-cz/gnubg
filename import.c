@@ -1685,7 +1685,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
     if ( ! GetValue( sz, szTemp ) )
       break;
-    
+
     if ( ! strcmp( szTemp, "HyperGammon" ) )
       *pbgv = VARIATION_HYPERGAMMON_3;
     else if ( ! strcmp( szTemp, "Nackgammon" ) )
@@ -1693,8 +1693,9 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     else if ( ! strcmp( szTemp, "Backgammon" ) )
       *pbgv = VARIATION_STANDARD;
     else {
-      outputf ( "Unknown variat in SGG file\n"
+      outputf ( "Unknown variant in SGG file\n"
                 "Please send the SGG file to bug-gnubg@gnubg.org!\n" );
+      outputx();
       assert ( FALSE );
     }
 
@@ -1905,6 +1906,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     default:
       outputf ( "Unknown variation in TMG file\n"
                 "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
+      outputx();
       assert ( FALSE );
       return -1;
       break;
@@ -2178,6 +2180,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
         default:
 
           outputf ( "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
+          outputx();
           assert ( FALSE );
 
           break;

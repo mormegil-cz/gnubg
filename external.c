@@ -294,7 +294,7 @@ extern void CommandExternal( char *sz ) {
 	    /* FIXME could SwapSides( anBoard ) be necessary? */
 	    
 	    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
-			  fCrawford, fJacoby, nBeavers );
+			  fCrawford, fJacoby, nBeavers, bgvDefault );
 
 	    memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
 

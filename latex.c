@@ -356,7 +356,8 @@ PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
 	return;
     
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, fPlayer, pms->nMatchTo,
-		 pms->anScore, pms->fCrawford, pms->fJacoby, nBeavers );
+		 pms->anScore, pms->fCrawford, pms->fJacoby, nBeavers,
+                 pms->bgv );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
@@ -512,7 +513,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	ApplyMoveRecord( &msExport, plGame, pmr );
     }
     
-    if( ( GameStatus( msExport.anBoard ) ) )
+    if( ( GameStatus( msExport.anBoard, msExport.bgv ) ) )
 	/* FIXME print game result */
 	;
 }

@@ -148,7 +148,7 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
 
 static int 
 FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
-                 float ar[ NUM_OUTPUTS ] ) {
+                 float ar[ NUM_OUTPUTS ], const bgvariation bgv ) {
 
   int i, j, anBoardTemp[ 2 ][ 25 ], iMinRolls = 0;
   unsigned long cBestRolls;
@@ -182,7 +182,7 @@ FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 
   SwapSides( anBoardTemp );
     
-  EvalBearoff1( anBoardTemp, ar );
+  EvalBearoff1( anBoardTemp, ar, bgv );
     
   return 0;
 }
@@ -191,7 +191,8 @@ FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
    lookahead. */
 static int 
 BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
-                int nTruncate, int iTurn, int iGame, int cGames ) {
+                int nTruncate, int iTurn, int iGame, int cGames,
+                const bgvariation bgv ) {
 
   int anDice[ 2 ], i;
   float ar[ NUM_OUTPUTS ], arMean[ NUM_OUTPUTS ], arMin[ NUM_OUTPUTS ];
@@ -200,7 +201,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     arOutput[ i ] = 0.0f;
 
   while( ( !nTruncate || iTurn < nTruncate ) &&
-	 ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
+	 ClassifyPosition( anBoard, bgv ) > CLASS_PERFECT ) {
     if( RolloutDice( iTurn, iGame, cGames, FALSE, 
                          anDice, RNG_MERSENNE, TRUE ) < 0 )
 	    return -1;
@@ -208,14 +209,13 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     if( anDice[ 0 ]-- < anDice[ 1 ]-- )
 	    swap( anDice, anDice + 1 );
 
-    if( EvaluatePosition( anBoard, arMean, &ciCubeless, 0 ) < 0 )
+    if( EvaluatePosition( anBoard, arMean, &ciCubeless, NULL ) < 0 )
 	    return -1;
 	
     if( iTurn & 1 )
 	    InvertEvaluation( arMean );
 	    
-    FindBestBearoff( anBoard, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-                     arMin );
+    FindBestBearoff( anBoard, anDice[ 0 ] + 1, anDice[ 1 ] + 1, arMin, bgv );
 
     if( !( iTurn & 1 ) )
 	    InvertEvaluation( arMin );
@@ -234,7 +234,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     iTurn++;
   }
 
-  if( EvaluatePosition( anBoard, ar, &ciCubeless, 0 ) )
+  if( EvaluatePosition( anBoard, ar, &ciCubeless, NULL ) )
     return -1;
 
   if( iTurn & 1 )
@@ -379,7 +379,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       /* check for truncation at bearoff databases */
 
-      pc = ClassifyPosition ( aanBoard[ ici ] );
+      pc = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
       if ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT &&
            prc->fCubeful && *pf && ! pci->nMatchTo &&
            ! ( afCubeDecTop[ ici ] && ! prc->fInitial && ! iTurn ) ) {
@@ -388,7 +388,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         /* truncate at two sided bearoff if money game */
 
-        EvaluatePerfectCubeful ( aanBoard[ ici ], arEquity );
+        EvaluatePerfectCubeful ( aanBoard[ ici ], arEquity, pci->bgv );
 
         aarOutput[ ici ][ 0 ] = ( arEquity[ 0 ] + 1.0 ) / 2.0;
         aarOutput[ ici ][ 1 ] = aarOutput[ ici ][ 2 ] =
@@ -451,7 +451,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
             SetCubeInfo ( pci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
 			  pci->nMatchTo,
                           pci->anScore, pci->fCrawford, pci->fJacoby,
-                          pci->fBeavers);
+                          pci->fBeavers, pci->bgv );
 
             break;
         
@@ -530,7 +530,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	/* Save number of pips (for bearoff only) */
 
-	pcBefore = ClassifyPosition ( aanBoard[ ici ] );
+	pcBefore = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
 	if ( aarsStatistics && pcBefore <= CLASS_BEAROFF1 ) {
 	  PipCount ( aanBoard[ ici ], anPips );
 	  nPipsBefore = anPips[ 1 ];
@@ -662,7 +662,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	/* Calculate number of wasted pips */
 
-	pc = ClassifyPosition ( aanBoard[ ici ] );
+	pc = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
 
 	if ( aarsStatistics &&
 	     pc <= CLASS_BEAROFF1 && pcBefore <= CLASS_BEAROFF1 ) {
@@ -720,7 +720,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           /* update statistics */
 
 	  if( aarsStatistics )
-	      switch ( GameStatus ( aanBoard[ ici ] ) ) {
+	      switch ( GameStatus ( aanBoard[ ici ], pci->bgv ) ) {
 	      case 1:
 		  aarsStatistics[ ici ][ pci->fMove ].
 		      acWin[ LogCube ( pci->nCube )]++;
@@ -744,7 +744,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         SetCubeInfo ( pci, pci->nCube, pci->fCubeOwner,
                       ! pci->fMove, pci->nMatchTo,
                       pci->anScore, pci->fCrawford,
-                      pci->fJacoby, pci->fBeavers );
+                      pci->fJacoby, pci->fBeavers, pci->bgv );
 
         assert ( cUnfinished >= 0 );
 
@@ -771,9 +771,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       /* evaluation at truncation */
 
-      GeneralEvaluationE ( aarOutput[ ici ],
-                           aanBoard[ ici ],
-                           pci, &ec );
+      GeneralEvaluationE ( aarOutput[ ici ], aanBoard[ ici ], pci, &ec );
 
       if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
           
@@ -816,7 +814,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat aarsStatistics[][ 2 ],
                 rolloutcontext *prc,
-                cubeinfo aci[], int afCubeDecTop[], int cci, int fInvert ) {
+                cubeinfo aci[], 
+                int afCubeDecTop[], int cci, int fInvert ) {
 
 #if __GNUC__
   int aanBoardEval[ cci ][ 2 ][ 25 ];
@@ -869,7 +868,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
     return -1;
   }
 
-  if( ClassifyPosition( anBoard ) == CLASS_BEAROFF1 ) 
+  if( ClassifyPosition( anBoard, aci[ 0 ].bgv ) == CLASS_BEAROFF1 ) 
     rt = VARREDN; /* BEAROFF; */
   else if ( prc->fVarRedn )
     rt = VARREDN;
@@ -934,16 +933,16 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
       case BEAROFF:
         if ( ! prc->fCubeful )
 	  BearoffRollout( *aanBoardEval, *aar, prc->nTruncate,
-                          0, i, prc->nTrials );
+                          0, i, prc->nTrials, aci[ 0 ].bgv );
         else
 	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, afCubeDecTop, cci, prc,
+                               0, i, aci, afCubeDecTop, cci, prc, 
                                aarsStatistics );
         break;
       case BASIC:
       case VARREDN:
 	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, afCubeDecTop, cci, prc,
+                               0, i, aci, afCubeDecTop, cci, prc, 
                                aarsStatistics );
 	  break;
       }
@@ -1082,8 +1081,7 @@ GeneralEvaluation ( char *sz,
     for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
       arStdDev[ i ] = 0.0f;
 
-    return GeneralEvaluationE ( arOutput, anBoard,
-                                pci, &pes->ec );
+    return GeneralEvaluationE ( arOutput, anBoard, pci, &pes->ec );
     break;
 
   case EVAL_ROLLOUT:
@@ -1140,14 +1138,13 @@ GeneralCubeDecision ( char *sz,
       for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
         aarStdDev[ j ][ i ] = 0.0f;
 
-    return GeneralCubeDecisionE ( aarOutput, anBoard,
-                                  pci, &pes->ec );
+    return GeneralCubeDecisionE ( aarOutput, anBoard, pci, &pes->ec );
     break;
 
   case EVAL_ROLLOUT:
 
-    return GeneralCubeDecisionR ( sz, aarOutput, aarStdDev, aarsStatistics, anBoard, 
-                                  pci, &pes->rc );
+    return GeneralCubeDecisionR ( sz, aarOutput, aarStdDev, aarsStatistics, 
+                                  anBoard, pci, &pes->rc );
     break;
 
   case EVAL_NONE:
@@ -1180,12 +1177,14 @@ GeneralCubeDecisionR ( char *sz,
                                             iTurn = 0 */
 
   SetCubeInfo ( &aci[ 0 ], pci->nCube, pci->fCubeOwner, pci->fMove,
-                pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby, pci->fBeavers );
+                pci->nMatchTo, pci->anScore, pci->fCrawford, 
+                pci->fJacoby, pci->fBeavers, pci->bgv );
 
   FormatCubePosition ( aach[ 0 ], &aci[ 0 ] );
 
   SetCubeInfo ( &aci[ 1 ], 2 * pci->nCube, ! pci->fMove, pci->fMove,
-                pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby, pci->fBeavers );
+                pci->nMatchTo, pci->anScore, pci->fCrawford, 
+                pci->fJacoby, pci->fBeavers, pci->bgv );
 
   FormatCubePosition ( aach[ 1 ], &aci[ 1 ] );
 
@@ -1212,8 +1211,9 @@ GeneralCubeDecisionR ( char *sz,
   if( fX )
     GTKRolloutRow( 0 );
 #endif
-  if( ( cGames = RolloutGeneral( anBoard, aach, aarOutput, aarStdDev, aarsStatistics,
-                                 prc, aci, afCubeDecTop, 2, FALSE ) ) <= 0 )
+  if( ( cGames = RolloutGeneral( anBoard, aach, aarOutput, aarStdDev, 
+                                 aarsStatistics, prc, aci,
+                                 afCubeDecTop, 2, FALSE ) ) <= 0 )
     return -1;
 
 #if USE_GTK

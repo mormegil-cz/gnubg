@@ -261,7 +261,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   TheoryGetValues ( ptw, &ci, aarRates );
 
   SetCubeInfo ( &ci, ci.nCube, 0, 0, ci.nMatchTo,
-                ci.anScore, ci.fCrawford, ci.fJacoby, ci.fBeavers );
+                ci.anScore, ci.fCrawford, ci.fJacoby, ci.fBeavers, ci.bgv );
 
   /* hide show widgets */
 
@@ -445,8 +445,8 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
     for ( j = 0; j < 2; j++ ) {
 
-      SetCubeInfo ( &ci, 1, j ? 1 : -1, 0, ci.nMatchTo,
-                    ci.anScore, ci.fCrawford, ci.fJacoby, ci.fBeavers );
+      SetCubeInfo ( &ci, 1, j ? 1 : -1, 0, ci.nMatchTo, ci.anScore, 
+                    ci.fCrawford, ci.fJacoby, ci.fBeavers, ci.bgv );
 
       for ( i = 0; i < 2; i++ ) {
         

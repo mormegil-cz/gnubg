@@ -43,7 +43,7 @@ extern void CommandCalibrate( char *sz ) {
     clock_t c0, c1, c = 0;
     float ar[ NUM_OUTPUTS ];
 #if USE_GTK
-    void *pcc;
+    void *pcc = NULL;
 #endif
     
     if( sz && *sz ) {
@@ -95,7 +95,7 @@ extern void CommandCalibrate( char *sz ) {
 	}
 
 	for( i = 0; i < EVALS_PER_ITERATION; i++ ) {
-	    EvaluatePosition( aanBoard[ i ], ar, &ciCubeless, NULL );
+            EvaluatePosition( aanBoard[ i ], ar, &ciCubeless, NULL );
 	    if( fInterrupt )
 		break;
 	}
