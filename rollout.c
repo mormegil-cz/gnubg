@@ -499,7 +499,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           case DOUBLE_TAKE:
 
-            SetCubeInfo ( pci, 2 * pci->nCube, ! pci.fMove, pci.fMove,
+            SetCubeInfo ( pci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
 			  pci->nMatchTo,
                           pci->anScore, pci->fCrawford, pci->fJacoby,
                           pci->fBeavers);
