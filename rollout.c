@@ -307,7 +307,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
 		    float arStdDev[], int nTruncate, int cGames, int fVarRedn,
                     cubeinfo *pci, evalcontext *pec, int fInvert ) {
 
-  int i, j, anBoardEval[ 2 ][ 25 ];
+  int i, j, anBoardEval[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ];
   float ar[ NUM_ROLLOUT_OUTPUTS ];
   double arResult[ NUM_ROLLOUT_OUTPUTS ], arVariance[ NUM_ROLLOUT_OUTPUTS ];
   float arMu[ NUM_ROLLOUT_OUTPUTS ], arSigma[ NUM_ROLLOUT_OUTPUTS ];
@@ -328,6 +328,12 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
   for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
     arResult[ i ] = arVariance[ i ] = arMu[ i ] = 0.0f;
 
+  memcpy( &anBoardOrig[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+	  sizeof( anBoardOrig ) );
+
+  if( fInvert )
+      SwapSides( anBoardOrig );
+  
   for( i = 0; i < cGames; i++ ) {
     memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
             sizeof( anBoardEval ) );
@@ -357,29 +363,29 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
 	    ar[ OUTPUT_LOSEBACKGAMMON ];
 	
     for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
-	    float rMuNew, rDelta;
+	float rMuNew, rDelta;
 	    
-	    arResult[ j ] += ar[ j ];
-	    rMuNew = arResult[ j ] / ( i + 1 );
+	arResult[ j ] += ar[ j ];
+	rMuNew = arResult[ j ] / ( i + 1 );
 
-	    rDelta = rMuNew - arMu[ j ];
+	rDelta = rMuNew - arMu[ j ];
 	    
-	    arVariance[ j ] = arVariance[ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
-        ( i + 2 ) * rDelta * rDelta;
+	arVariance[ j ] = arVariance[ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
+	    ( i + 2 ) * rDelta * rDelta;
 
-	    arMu[ j ] = rMuNew;
+	arMu[ j ] = rMuNew;
 
-	    if( j < OUTPUT_EQUITY ) {
-        if( arMu[ j ] < 0.0f )
-          arMu[ j ] = 0.0f;
-        else if( arMu[ j ] > 1.0f )
-          arMu[ j ] = 1.0f;
-	    }
-
-	    arSigma[ j ] = sqrt( arVariance[ j ] / ( i + 1 ) );
+	if( j < OUTPUT_EQUITY ) {
+	    if( arMu[ j ] < 0.0f )
+		arMu[ j ] = 0.0f;
+	    else if( arMu[ j ] > 1.0f )
+		arMu[ j ] = 1.0f;
+	}
+	
+	arSigma[ j ] = sqrt( arVariance[ j ] / ( i + 1 ) );
     }
 
-    SanityCheck( anBoard, arMu );
+    SanityCheck( anBoardOrig, arMu );
 	
     if( fShowProgress ) {
 #if USE_GTK
