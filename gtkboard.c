@@ -2463,7 +2463,14 @@ static gint board_set( Board *board, const gchar *board_text,
 	return 0;
 
 	if( bd->turn != old_turn )
+	{
+#if USE_BOARD3D
+		/* Make sure flag shadow is correct if players are swapped when resigned */
+		if (bd->resigned)
+			updateFlagOccPos(bd);
+#endif
 	  redrawNeeded = 1;
+	}
 
     if( bd->doubled != old_doubled || 
         bd->cube != old_cube ||

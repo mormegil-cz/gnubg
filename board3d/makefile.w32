@@ -1,8 +1,5 @@
-BASEDIR=c:\copied\mingw
-GNUDIR=c:\gnu\gnubg
-LIBFLAGS=-mwindows
-#CFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
-CPPFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
+
+CPPFLAGS= -g -fnative-struct -Wall -Werror -Os $(INCLUDE)
 RM=del
 AR=ar cr
 RANLIB=ranlib
@@ -22,16 +19,11 @@ INCLUDE= \
 	-I$(GNUDIR) \
 	-I$(GNUDIR)/lib
 
-LIBS=-lftgl -lglib-2.0.dll -lgtk-win32-2.0 -lgobject-2.0.dll \
-	-lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll -lfreetype \
-	-lopengl32 -lglu32 -lglut32
-
 TARGET=board.a
 
 SOURCE=	drawboard3d misc3d texture3d font3d widget3d \
 	matrix model shadow mylist gtkcolour3d graph
-OBJECTS=$(patsubst %,%.o,$(SOURCE)) $(GNUDIR)/luxi.o
-HEADERS=../gnubg/gtkboard.h inc3d.h test/main.h
+OBJECTS=$(patsubst %,%.o,$(SOURCE))
 
 all: $(TARGET)
 	@echo done
@@ -42,5 +34,5 @@ $(TARGET): $(OBJECTS)
 	$(RANLIB) $(TARGET)
 	
 clean:
-	$(RM) $(OBJECTS)
+	$(RM) $(GNUDIR)\board3d\$(TARGET) $(GNUDIR)\board3d\*.o
 	@echo clean

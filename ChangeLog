@@ -1,3 +1,7 @@
+Thu Oct 2 10:59:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	play.c, gnubg.c: Added first move command
+
 Wed Oct 1 2003 16:37:22 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkboard.c - when changing the match length, update the limits
