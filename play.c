@@ -183,40 +183,43 @@ static int ComputerTurn( void ) {
 	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) 
 	       && ( nMatchTo - anScore [ fTurn ] > nCube ) ) {
 
-	    float arOutput [ NUM_OUTPUTS ], arTakePoint[ 2 ];
-	    float rThird;
-	    int fEvalFlag;
+	    float arOutput [ NUM_OUTPUTS ];
+	    float rDoublePoint;
+	    int fOptionalRedouble;
 	    evalcontext ecDH = {1, 8, 0.16 };
 
-	    /* Quick heuristics: only double if we are in top
-	       33% of market window */
+	    fOptionalRedouble =
+	      ( ( nMatchTo - anScore [ ! fTurn ] <= nCube ) &&
+		( nMatchTo - anScore [ fTurn ] > nCube ) );
 
-	    /* Determine market window */
+	    if ( ! fOptionalRedouble ) {
 
-	    if( EvaluatePosition( anBoard, arOutput, 
+	      /* Quick heuristics: only double if we are in top
+		 33% of market window */
+
+	      /* Determine market window */
+
+	      if( EvaluatePosition( anBoard, arOutput, 
 				  &ci, &ecDH ) )
 		return -1;
 
-	    GetTakePoint ( arOutput, anScore, nMatchTo, ci.nCube,
-			   arTakePoint );
+	      printf ( "My winning chance: %7.4f %7.4f %7.4f %7.4f %7.4f\n", 
+		       arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
+		       arOutput[ 3 ], arOutput[ 4 ] );
+	      GetDoublePointDeadCube ( arOutput, anScore, 
+				       nMatchTo, &ci, &rDoublePoint );
+	      
+	      printf ( "double point: %7.4f\n", rDoublePoint );
 
-	    printf ( "My winning chance: %7.4f\n", arOutput[ 0 ] );
-	    printf ( "market window: %7.4f - %7.4f\n",
-		     1.0 - arTakePoint[ ! ci.fMove ],
-		     arTakePoint[ ci.fMove ] );
+	    }
+	      
+	    /* If we have an optional/mandatory (re)double or
+	       we're in upper third and not
+	       too good to double then check cube action */
 
-	    /* Are we in upper third? */
+	    if ( fOptionalRedouble || ( arOutput[ 0 ] > rDoublePoint ) ) {
 
-	    rThird = ( 2.0 * arTakePoint[ ci.fMove ] +
-		       ( 1.0 - arTakePoint [ ! ci.fMove ] ) ) / 3.0;
-
-	    printf ( "upper third: %7.4f\n", rThird );
-
-	    /* If we're in upper third, and we're not
-	       too good to double check cube action */
-
-	    if ( ( arOutput[ 0 ] > rThird ) && 
-		 ( Utility ( arOutput, &ci ) < 1.1 ) ) {
+	      int fEvalFlag;
 
 	      gettimeofday ( &tv0, NULL );
 
@@ -224,11 +227,18 @@ static int ComputerTurn( void ) {
 		 to pass, so don't calculate DOUBLE branch
 		 in EvalCubeful */
 
+	      if ( Utility ( arOutput, &ci ) > 1.05 )
+		fEvalFlag = EVAL_NODOUBLE;
+	      else
+		fEvalFlag = EVAL_BOTH;
+
+	      printf ("fEvalFlag = %1i\n", fEvalFlag );
+
 	      if ( EvaluatePositionCubeful( anBoardMove,
 					    arDouble, &ci, 
 					    &ap [ fTurn ].ec,
 					    ap [ fTurn ].ec.nPlies,
-					    EVAL_BOTH ) < 0 )  
+					    fEvalFlag ) < 0 )  
 		return -1;
 
 	      gettimeofday ( &tv1, NULL );
