@@ -6996,9 +6996,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
             MessageBox (NULL,
               TEXT (_("Sorry, this build does not support the -tty option")),
               TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
-#else
+#else /* WIN32 */
 	    fX = FALSE;
-#endif
+#endif /* ! WIN32 */
 	    break;
 	case 'h': /* help */
             usage( argv[ 0 ] );
@@ -7010,7 +7010,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #ifdef WIN32
 	    _getcwd( szInvokingDirectory, _MAX_PATH );
 	    _chdir( szDataDirectory );
-#endif
+#endif /* WIN32 */
 
 	    break;
 
@@ -7025,6 +7025,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	  putenv (lang);
 	  }
 	}
+
+#endif /* USE_GUI */
     
 #if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
@@ -7070,6 +7072,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     szTerminalCharset = "ISO-8859-1"; /* best guess */
 #endif
 
+#if USE_GUI
+
     optind = 0;
     opterr = 1;
 
@@ -7079,7 +7083,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #else
         if( !getenv( "DISPLAY" ) )
 	    fX = FALSE;
-#endif
+#endif /* ! USE_GTK */
 
     if( fX ) {
 #if WIN32
@@ -7092,7 +7096,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	fReadline = isatty( STDIN_FILENO );
 #endif
     } else 
-#endif
+#endif /* USE_GUI */
 	{
 #if HAVE_LIBREADLINE
 	    fReadline =
@@ -7123,7 +7127,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    setvbuf( stderr, NULL, _IOLBF, 0 );
     }
 #endif
-		
+
+
     while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwSl:", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {

@@ -1,3 +1,9 @@
+Fri Aug 29 18:53:50 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (real_main): "move" initialisating of szTerminalCharset
+	and localisation stuff outside #if USE_GUI.
+	(reported by Nardy Pillards)
+
 Fri Aug 29 17:23:55 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c (Luck, Skill): modify inequalities.
