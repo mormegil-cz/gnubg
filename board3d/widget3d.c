@@ -31,7 +31,6 @@
 #include "shadow.h"
 #include "renderprefs.h"
 #include "backgammon.h"
-#include "boarddim.h"
 
 #if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
