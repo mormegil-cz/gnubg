@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.14\n"
 "POT-Creation-Date: 2004-07-10 23:57+0900\n"
-"PO-Revision-Date: 2003-08-11 14:24+0200\n"
+"PO-Revision-Date: 2004-07-16 15:26+0200\n"
 "Last-Translator: Renzo Campagna <renzo.camp@tin.it>, Giulio De Marco "
 "<polietilene@tiscalinet.it>\n"
 "Language-Team: Italiano\n"
@@ -10502,7 +10502,7 @@ msgstr "Errore standard"
 #: html.c:740 html.c:1115 html.c:1602
 #, fuzzy, c-format
 msgid "Pip counts: %s %d, %s %d<br />\n"
-msgstr "Conto delle punte: %s %d, %s %d<br />\n"
+msgstr "Conteggio pips: %s %d, %s %d<br />\n"
 
 #: html.c:749 html.c:1126 html.c:1611
 #, fuzzy, c-format
@@ -10641,9 +10641,9 @@ msgid "%s%s moves %s"
 msgstr "%s%s muove %s"
 
 #: html.c:2816
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s cannot move"
-msgstr "*%s non può muovere"
+msgstr "%s%s non può muovere"
 
 #: html.c:2850 text.c:596
 msgid "accepts"
@@ -13017,11 +13017,11 @@ msgstr "Il dado più alto verrà mostrato a sinistra."
 
 #: set.c:1207
 msgid "The pip counts will be shown below the board."
-msgstr "Il conto delle punte verrà mostrato sotto il board."
+msgstr "Il conto dei pips verrà mostrato sotto il board."
 
 #: set.c:1208
 msgid "The pip counts will not be shown."
-msgstr "Il conto delle punte non verrà mostrato."
+msgstr "Il conto dei pips non verrà mostrato."
 
 #: set.c:1215
 #, fuzzy
@@ -16087,7 +16087,7 @@ msgstr ""
 #: text.c:240
 #, fuzzy, c-format
 msgid " (match to %d points%s)"
-msgstr " (match a %d punti%s).\n"
+msgstr " (match a %d punto%s).\n"
 
 #: text.c:274
 #, c-format
