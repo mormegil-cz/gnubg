@@ -70,6 +70,8 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Training::				How to store databases abd train the neural nets.
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
 * GNU Free Documentation License::	Your rights regarding this manual.
+* Command Index::                       Index of available commands
+* Concept Index::                       Index
 @end menu
 @end ifnottex
 
@@ -211,17 +213,17 @@ posting to backgammon forums.
 The following sections describe how to import and export positions,
 matches, and sessions with @gnubg{}.
 
-* Importing positions matches and sessions::
-* Export positions::
-* Export games::
-* Export matches::
-* Export sessions::
+* Importing:: Importing positions, matches, and sessions
+* Exporting:: Exporting positions, matches, and sessions
 @end menu
 
-@node Importing positions matches and sessions
+@node Importing
 @section Importing positions, matches, and sessions
 
 @subsection Jellyfish .pos
+@cindex Jellyfish
+@cindex .pos
+@cindex pos
 
 @gnubg{} can import positions in 
 @uref{http://jelly.effect.no/,Jellyfish}
@@ -235,6 +237,10 @@ The .pos position format is documented at
 Format}. 
 
 @subsection Jellyfish .mat
+@cindex Jellyfish
+@cindex .mat
+@cindex mat
+@cindex BBGT
 
 @gnubg{} can also import matches and money sessions in the .mat
 format. This format is often used to move games between different
@@ -251,8 +257,11 @@ manually have to split the file into files containing the individual
 matches. 
 
 @subsection GamesGrid .sgg
+@cindex GamesGrid
+@cindex sgg
+@cindex .sgg
 
-@gnubg{} call import matches and money sessions played on GamesGrid if
+@gnubg{} can import matches and money sessions played on GamesGrid if
 saved in the SGG format. Currently, @gnubg{} doesn't support import of
 the native undocumented .cbg format.
 
@@ -260,8 +269,23 @@ To import an SGG file using the GUI select a file using the menu entry
 @code{File->Import->.sgg match}. 
 
 @subsection FIBS oldmoves
+@cindex FIBS
+@cindex oldmoves
+
+@gnubg{} can import matches and money sessions from FIBS
+in the oldmoves format. Most of the GUIs for playing on FIBS supports
+saving of matches either in the oldmoves format or in Jellyfish .mat
+format.
+
+To import an oldmoves file using the GUI select a file using the menu
+entry @code{File->Import->FIBS oldmoves}.
+
+Note that @gnubg{} will only read the first match in the file. If you
+wish to import all matches from a file containing more than more game,
+you'll manually have to split it.
 
 @subsection Batch import
+@cindex import, batch
 
 @gnubg{} doesn't support batch import and analysis using the GUI, but
 batch import is possible with the command line version of @gnubg{}.
@@ -276,7 +300,7 @@ example, if you use the build by Øystein Johansen you should execute
 @code{gnubg-no-gui.exe < @var{input-file} > @var{output-file}}
 
 The @var{input-file} must be carefully prepared. For example, it
-would typically look like:
+could look like:
 
 @verbatim
 import sgg file1.sgg
@@ -320,23 +344,133 @@ in the .mat format for importing into @gnubg{}.
 
 @subsection Tips and tricks
 
+@kindex swap players
+@cindex swap players
 If you want to exchange the playes, i.e., @gnubg{} has imported you as
 the top player rather than the bottom player, select them menu entry
 @code{Game->Swap Players}.
 
-@node Export positions
-@section Export positions
 
-@node Export games
-@section Export games
+@node Exporting
+@section Exporting positions, matches, and sessions
 
-@node Export matches
-@section Export matches
+@subsection Export game in Jellyfish .gam
+@cindex Jellyfish
+@cindex .gam
+@cindex gam
 
-@node Export sessions
-@section Export sessions
+You can export the current game in the Jellyfish .gam format. This is
+useful if you wish import a specific game into Jellyfish. Other
+programs may read the file as well, since the format is identical to
+the Jellyfish .mat format.
+
+@quotation
+@cartouche
+@kindex export game gam
+@strong{export game gam @var{filename}}:
+Export the current game in Jellyfish .gam format to @var{filename}.
+@end cartouche
+@end quotation
+
+@subsection Export positions, games, matches and sessions in HTML
+@cindex HTML
+@cindex .html
+
+@gnubg{} can export the current position, game, match or session
+in HTML if
+you wish to publish it on the web. A
+@uref{http://home.online.no/~oeysteij/wc2002/final.html,sample match}
+with the World Cup Final 2002 from Monte Carlo is available for
+viewing (FIXME: put a match on gnu.org or gnubg.org instead).
+
+@gnubg{} exports in validating 
+@uref{http://www.w3.org/TR/xhtml1/,XHTML 1.0} 
+with the use of 
+@uref{http://www.w3.org/TR/REC-CSS1,CSS}
+style sheets. You may add your own style sheet to the exported HTML
+files if you wish to override the default layout, e.g., change colors
+or fonts. 
+
+The board is made up from hundreds of pictures. Currently, you can
+choose between three different sets of pictures.
+
+If you export a match or session to HTML @gnubg{} will write the
+individual games to separate files. For example, if you export to file
+@file{foo.html} the first game is exported to @file{foo.html}, the
+second game to @file{foo_002.html}, the third game to
+@file{foo_003.html} and so forth. 
+
+The output from the HTML export can be customised. For example, it's
+possible to leave out the 
+analysis or parts of the analysis. Also, you may enter a specific URL
+to the pictures used to compose the board which is useful for posting
+positions on web-based discussion groups such as Kit Woolsey's
+@uref{http://www.GammOnLine.com,GammOnLine}
+or the 
+@uref{http://www.dbgf.dk/,Danish Backgammon Federation's} 
+@uref{http://www.dbgf.dk/Debat/,Debat Forum}. 
+
+@xref{Export}, for full details regarding the options available for
+HTML export.
 
 
+@quotation
+@cartouche
+@kindex export position html
+@kindex export game html
+@kindex export match html
+@kindex export session html
+@strong{export position html @var{filename}}:
+Export the current position in HTML to @var{filename}.
+
+@strong{export game html @var{filename}}: 
+Export the current game in HTML to @var{filename}.
+
+@strong{export match html @var{filename}}: 
+Export the current match in HTML to @var{filename}.
+
+@strong{export session html @var{filename}}: 
+Export the current session in HTML to @var{filename}.
+@end cartouche
+@end quotation
+
+@subsection Export games, matches, and sessions in LaTeX
+@cindex LaTeX
+writeme
+
+@subsection Export match or session in Jellyfish .mat
+@cindex Jellyfish
+@cindex .mat
+
+You can export an entire match or session into Jellyfish .mat
+format. This is very useful if you want to import a match or session
+into other programs as most other backgammon programs are
+able to read it. 
+
+@quotation
+@cartouche
+@kindex export match mat
+@strong{export match mat @var{filename}}: export the match in
+Jellyfish .mat format to @var{filename}.
+@end cartouche
+@end quotation
+
+@subsection Export games, matches, and sessions in PDF
+@cindex PDF
+writeme
+
+@subsection Export games, matches, and sessions in PostScript
+@cindex PostScript
+writeme
+
+@subsection Export position in Jellyfish .pos
+@cindex Jellyfish 
+@cindex .pos
+writeme
+
+@subsection Export positions, games, matches, and sessions in plain text
+@cindex text
+@cindex plain text
 
 
 
@@ -671,6 +805,15 @@ window, or by executing the command @code{set matchid QYkqASAAIAAA}.
 
 
 @include fdl.texi
+
+
+@node Command Index
+@unnumbered Command Index
+@printindex ky
+
+@node Concept Index
+@unnumbered Index
+@printindex cp
 
 
 @bye
