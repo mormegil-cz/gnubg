@@ -1292,7 +1292,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   
   for( i = 0, j = 0; i < cGames || j < cGames;  ) {
   
-    pu_task *pt;
+    pu_task *pt = NULL;
     
     while (i < cGames && !TaskEngine_Full () && !fInterrupt) {
         /* create new tasks with the games to rollout */

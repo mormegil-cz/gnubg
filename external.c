@@ -90,8 +90,10 @@
 #define EINVAL                  WSAEINVAL
 #define EINTR                   WSAEINTR
 
+/*
 #define inet_aton(ip,addr)  (addr)->s_addr = inet_addr(ip), 1
 #define inet_pton(fam,ip,addr) (addr)->s_addr = inet_addr(ip), 1
+*/
 
 #endif /* #ifndef WIN32 */
 
@@ -139,18 +141,20 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 	if( !*sz )
 	    /* no host specified */
 	    psin->sin_addr.s_addr = htonl( INADDR_ANY );
+	else {
 #ifdef WIN32
-	else if( !( (psin->sin_addr).s_addr = inet_addr(sz) ) ) {
+	    psin->sin_addr.s_addr = inet_addr( sz );
+	    if (psin->sin_addr.s_addr == INADDR_NONE) {
 #else
-	else if( !inet_aton( sz, &psin->sin_addr ) ) {
+	    if( !inet_aton( sz, &psin->sin_addr ) ) {
 #endif
-	    if( !( phe = gethostbyname( sz ) ) ) {
+		if( !( phe = gethostbyname( sz ) ) ) {
 		*pch = ':';
 		errno = EINVAL;
 		free( psin );
 		return -1;
+		}
 	    }
-
 	    psin->sin_addr = *(struct in_addr *) phe->h_addr;
 	}
 

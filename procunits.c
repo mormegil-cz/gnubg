@@ -39,14 +39,18 @@
 #endif /* #if HAVE_UNISTD_H */
 
 #ifndef WIN32
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif /* #if HAVE_SYS_SOCKET_H */
+
 #else /* WIN32 */
+
 #include <winsock.h>
+
 #define EWOULDBLOCK             WSAEWOULDBLOCK
 #define EINPROGRESS             WSAEINPROGRESS
 #define EALREADY                WSAEALREADY
@@ -86,6 +90,7 @@
 #define EDQUOT                  WSAEDQUOT
 #define ESTALE                  WSAESTALE
 #define EREMOTE                 WSAEREMOTE
+
 #endif /* WIN32 */
 
 #if TIME_WITH_SYS_TIME
@@ -2807,7 +2812,11 @@ static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterru
         /* receive the whole message */
         do {
             GTK_YIELDTIME;
+#ifdef WIN32
+	    n = recv( (SOCKET) fromSocket, (char*) msg, len, 0 );
+#else
             n = recv (fromSocket, msg, len, MSG_WAITALL);
+#endif /* WIN32 */
             fNoData = (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK));
             fError = (n == -1 && !(errno == EAGAIN || errno == EWOULDBLOCK));
             fShutdown = (n == 0 || n == ECONNRESET);
@@ -3065,9 +3074,9 @@ static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
                                     int defaultTCPPort)
 {
     char 		*szPort;
-    struct hostent 	*phe;
+    struct hostent 	*phe = NULL;
 
-    memset( &inAddress, 0, sizeof( sockaddr_in ));
+    memset( &inAddress, 0, sizeof( struct sockaddr_in ));
     inAddress->sin_family = AF_INET;
     
     /* scan for port, eg 192.168.0.1:1234 or host.gnu.org:1234 */
@@ -3090,9 +3099,14 @@ static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
     
     /* read the non-port part of the address */
     /* try the number version, eg 192.168.0.1 */
-#ifndef WIN32
-    if (inet_aton (sz, &inAddress->sin_addr) != 0) return 0;
-#endif /* ! WIN32 */
+#ifdef WIN32
+    inAddress->sin_addr.s_addr = inet_addr( sz );
+    if (inAddress->sin_addr.s_addr != INADDR_NONE) {
+#else
+    if (inet_aton (sz, &inAddress->sin_addr) != 0) {
+#endif /* WIN32 */
+	return 0;
+    }
 
     /* didn't work, it must be a host name, eg myhost.gnu.org */
     phe = gethostbyname (sz);
@@ -3340,7 +3354,7 @@ extern void Slave_UpdateStatus (void)
             gtk_label_set_text (GTK_LABEL(pwSlave_Label_Job), sz);
                         
             for (row = 1; row < 4; row ++) {
-                rpu_stats	*pps;
+                rpu_stats	*pps = NULL;
                 switch (row) {
                     case 1: pps = &gSlaveStats.rollout; break;
                     case 2: pps = &gSlaveStats.eval; break;
@@ -3479,7 +3493,7 @@ static void Slave (void)
     else {
         /* bind local address to socket */
         struct sockaddr_in listenAddress;
-        memset( &listenAddress, 0, sizeof( sockaddr_in ));
+        memset( &listenAddress, 0, sizeof( struct sockaddr_in ));
         listenAddress.sin_family	= AF_INET;
         listenAddress.sin_addr.s_addr 	= htonl(INADDR_ANY);
         listenAddress.sin_port 		= htons(gRPU_SlaveTCPPort);
@@ -4060,12 +4074,18 @@ extern void * Thread_RemoteProcessingUnit (void *data)
                 ChangeProcessingUnitStatus (ppu, !ppu->info.remote.fStop ? pu_stat_ready
                                                     : pu_stat_deactivated);
                                 
+#ifndef WIN32
                 shutdown (rpuSocket, SHUT_RDWR);
+#endif /* ! WIN32 */
                 
             } /* connect() */
-            
+
+#ifndef WIN32
             close (rpuSocket);
-            
+#else
+            closesocket (rpuSocket);
+#endif /* ! WIN32 */
+
         } /* socket() */
         
      } /* while (!ppu->info.remote.fStop) */
@@ -4109,7 +4129,7 @@ extern void *Thread_NotificationSender (void *data)
     if (notifySocket < 0) {
         outputerrf ("*** Could not create notification socket.\n");
         outputerr ("socket");
-        return 0;
+        return NULL;
     }
     
     option = 1;
@@ -4186,6 +4206,8 @@ extern void *Thread_NotificationSender (void *data)
     }
 
     close (notifySocket);
+
+    return NULL;
 }
 
 
@@ -4232,8 +4254,13 @@ extern void *Thread_NotificationListener (void *data)
                 struct sockaddr_in 	inOrgAddress;
                 int 			n, len = sizeof (inOrgAddress);
 
+#ifdef WIN32
+                n = recvfrom( (SOCKET) notifySocket, (char *) &msg,
+                	      sizeof( msg ), 0, (struct sockaddr *) &inOrgAddress, &len);
+#else
                 n = recvfrom (notifySocket, &msg, sizeof (msg), 0,
                                 (struct sockaddr *) &inOrgAddress, &len);
+#endif /* WIN32 */
                 if (n == -1) {
                     outputerrf ("*** Notification failure.\n");
                     outputerr ("recvfrom");
@@ -4271,7 +4298,8 @@ extern void *Thread_NotificationListener (void *data)
 
         close (notifySocket);
     }
-    
+
+    return NULL;
 }
 
 
@@ -4654,8 +4682,13 @@ extern void CommandSetProcunitsRemoteMask ( char *sz )
         outputf ( "IP mask not specified.\n");
         return;
     }
-    
+
+#ifdef WIN32
+    inMask.s_addr = inet_addr( sz );
+    if (inMask.s_addr == INADDR_NONE) {
+#else
     if (inet_aton (sz, &inMask) == 0) {
+#endif /* WIN32 */
         outputf ( "IP mask invalid.\n");
     }
     else {
@@ -4839,10 +4872,16 @@ static void GTK_SetOptions (_optionsWidgets *pw, _puOptions *po)
            sprintf (sz, (string), (n)); \
            UserCommand (sz); \
    }
-#define RADIO_UPDATE(button,val,n,string,arg) \
+
+#define RADIO_UPDATE_0(button,val,n,string) \
    if ((val)!=(n) && gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON((button[n])))) { \
-           if (arg != NULL) sprintf (sz, (string), (arg)); \
-           else sprintf (sz, (string)); \
+           sprintf (sz, string); \
+           UserCommand (sz); \
+   }
+
+#define RADIO_UPDATE_1(button,val,n,string,arg) \
+   if ((val)!=(n) && gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON((button[n])))) { \
+           sprintf (sz, string, arg); \
            UserCommand (sz); \
    }
 
@@ -4858,16 +4897,22 @@ static void GTK_Options_OK (GtkWidget *widget, gpointer data)
                     "set pu remote notification listen port %d");
     /*SPIN_UPDATE (po->w.pwOptions_Spin_QueueSize, po->iMinimumQueueSize,
                     "set pu remote notification listen port %s");*/
-    RADIO_UPDATE (po->w.pwOptions_Radio_Notif, po->iNotifMethod, rpu_method_none,
-                    "set pu remote notification send method none", NULL);
-    RADIO_UPDATE (po->w.pwOptions_Radio_Notif, po->iNotifMethod, rpu_method_broadcast,
-                    "set pu remote notification send method broadcast", NULL);
-    RADIO_UPDATE (po->w.pwOptions_Radio_Notif, po->iNotifMethod, rpu_method_host,
+    RADIO_UPDATE_0 (po->w.pwOptions_Radio_Notif, po->iNotifMethod, rpu_method_none,
+                    "set pu remote notification send method none");
+
+    RADIO_UPDATE_0 (po->w.pwOptions_Radio_Notif, po->iNotifMethod, rpu_method_broadcast,
+                    "set pu remote notification send method broadcast");
+    RADIO_UPDATE_1 (po->w.pwOptions_Radio_Notif, po->iNotifMethod, rpu_method_host,
                     "set pu remote notification send method host %s", 
                     gtk_entry_get_text (GTK_ENTRY(po->w.pwOptions_Entry_NotifSpecific)));
     SPIN_UPDATE (po->w.pwOptions_Spin_SlaveTCPPort, po->iSlaveTCPPort,
                     "set pu remote notification send port %d");
 }
+
+#undef CHECK_UPDATE
+#undef SPIN_UPDATE
+#undef RADIO_UPDATE_0
+#undef RADIO_UPDATE_1
 
 static void GTK_Options_ListenNotifs (GtkWidget *widget, gpointer data)
 {
@@ -4888,6 +4933,9 @@ static void GTK_Options_RadioNotif (GtkWidget *widget, gpointer data)
 
 GtkWidget *GTK_Options_Page (_puOptions *po)
 {
+    GtkWidget		*pwVBox = NULL;
+
+#if USE_GTK2
     GtkWidget		*pwOptions_Check_ListenNotifs;
     GtkWidget		*pwOptions_Label_MasterTCPPort;
     GtkWidget		*pwOptions_Spin_MasterTCPPort;
@@ -4909,8 +4957,7 @@ GtkWidget *GTK_Options_Page (_puOptions *po)
     GtkWidget		*pwVBox_Slave;
     GtkWidget		*pwFrame_Slave;
     GtkWidget		*pwHBox_Buttons;
-    GtkWidget		*pwVBox;
-        
+
     /* master options */
     pwOptions_Check_ListenNotifs = gtk_check_button_new_with_label (
                                             "Listen for slave availability notifications");
@@ -5001,6 +5048,7 @@ GtkWidget *GTK_Options_Page (_puOptions *po)
                                     po->szNotifSpecific);
     gtk_spin_button_set_value (GTK_SPIN_BUTTON(pwOptions_Spin_SlaveTCPPort), 
                                     po->iSlaveTCPPort);
+#endif /* #if USE_GTK2 */
     
     return pwVBox;
 }
@@ -5024,6 +5072,7 @@ static void GTK_Options (GtkWidget *widget, gpointer data)
     gtk_main();
     */
     
+#if USE_GTK2
     puOptions.w.pwWindow =
     pwDialog = gtk_dialog_new_with_buttons ("Processing Units Options...",
                                              NULL,
@@ -5040,6 +5089,7 @@ static void GTK_Options (GtkWidget *widget, gpointer data)
     }
     
     gtk_widget_destroy (pwDialog);
+#endif /* #if USE_GTK2 */
     GTK_YIELDTIME;
 }
 
@@ -5065,6 +5115,7 @@ static void GTK_Slave_Destroy (GtkWidget *widget, gpointer data)
 
 void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw)
 {
+#if USE_GTK2
     GtkWidget		*pwVBox;
 
     GtkWidget		*pwTextBuffer;
@@ -5131,6 +5182,7 @@ void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw)
 			GTK_SIGNAL_FUNC(GTK_Options), (gpointer) NULL);
 
     gtk_widget_show_all (gpwSlaveWindow);
+#endif /* #if USE_GTK2 */
 }
 
 enum {
@@ -5144,6 +5196,7 @@ enum {
 };
 
 /* *ppPath must be gtk_tree_path_free'd by caller */
+#if USE_GTK2
 static int Tree_Find_Procunit (int procunit_id, GtkTreePath **ppPath, GtkTreeIter *pIter)
 {
     int			fFound = FALSE;
@@ -5167,7 +5220,9 @@ static int Tree_Find_Procunit (int procunit_id, GtkTreePath **ppPath, GtkTreeIte
     
     return fFound;
 }
+#endif /* #if USE_GTK2 */
 
+#if USE_GTK2
 static void Tree_CellDataFunc_Procunit (GtkTreeViewColumn *tree_column,
                                     GtkCellRenderer *cell,
                                     GtkTreeModel *tree_model,
@@ -5207,6 +5262,7 @@ static void Tree_CellDataFunc_Procunit (GtkTreeViewColumn *tree_column,
             g_object_set (cell, "text", "???");
     }
 }
+#endif /* #if USE_GTK2 */
 
 static void GTK_Master_AddLocal (GtkWidget *widget, gpointer data)
 {
@@ -5215,6 +5271,7 @@ static void GTK_Master_AddLocal (GtkWidget *widget, gpointer data)
 
 static void GTK_Master_AddRemote (GtkWidget *widget, gpointer data)
 {
+#if USE_GTK2
     GtkWidget 	*pwDialog;
 
     GtkWidget 	*pwLabel_Address;
@@ -5246,10 +5303,14 @@ static void GTK_Master_AddRemote (GtkWidget *widget, gpointer data)
     }
     
     gtk_widget_destroy (pwDialog);
+
+#endif /* #if USE_GTK2 */
+
 }
 
 typedef void (*Command_Func) (char *);
 
+#if USE_GTK2
 static void GTK_Master_Command_ForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                                         gpointer data) /* data contains Commandxxx to execute */
 {
@@ -5261,9 +5322,11 @@ static void GTK_Master_Command_ForEach (GtkTreeModel *model, GtkTreePath *path, 
     sprintf (sz, "%d", ppu->procunit_id);
     ((Command_Func) data) (sz);
 }
+#endif /* #if USE_GTK2 */
 
 static void GTK_Master_Remove (GtkWidget *widget, gpointer data)
 {
+#if USE_GTK2
     /* can't use gtk_tree_selection_selected_foreach here: 
         the iterator fails when we remove the objects being
         iterated over... */
@@ -5292,20 +5355,26 @@ static void GTK_Master_Remove (GtkWidget *widget, gpointer data)
         iter = nextiter;
     }
     
+#endif /* #if USE_GTK2 */
 }
 
 static void GTK_Master_Start (GtkWidget *widget, gpointer data)
 {
+#if USE_GTK2
     gtk_tree_selection_selected_foreach ((GtkTreeSelection *) data, GTK_Master_Command_ForEach, 
                                             (gpointer) CommandProcunitsStart);    
+#endif /* #if USE_GTK2 */
 }
 
 static void GTK_Master_Stop (GtkWidget *widget, gpointer data)
 {
+#if USE_GTK2
     gtk_tree_selection_selected_foreach ((GtkTreeSelection *) data, GTK_Master_Command_ForEach, 
                                             (gpointer) CommandProcunitsStop);    
+#endif /* #if USE_GTK2 */
 }
 
+#if USE_GTK2
 static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer data)
 {
     GtkTreeIter 	iter;
@@ -5341,15 +5410,17 @@ static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer d
     gtk_widget_set_sensitive (gpwMaster_Button_Queue, fRemote);
     gtk_widget_set_sensitive (gpwMaster_Button_Stats, iSelected > 0);
 }
+#endif /* #if USE_GTK2 */
 
 static void GTK_TouchProcunit (procunit *ppu)
 {
+#if USE_GTK2
     GtkTreeIter 	iter;
     GtkTreePath		*pPath;
     
     
     if (!IsMainThread ()) gdk_threads_enter ();
-    
+
     if (Tree_Find_Procunit (ppu->procunit_id, &pPath, &iter)) {
         gtk_tree_model_row_changed (GTK_TREE_MODEL(gplsProcunits), pPath, &iter);
         gtk_tree_path_free (pPath);
@@ -5359,9 +5430,11 @@ static void GTK_TouchProcunit (procunit *ppu)
     }
     
     if (!IsMainThread ()) gdk_threads_leave ();
-    
+
+#endif /* #if USE_GTK2 */
 }
 
+#if USE_GTK2
 static void GTK_Master_Queue_ForEach_Preflight (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                                         gpointer data)	/* data contains ptr to max queue size */
 {
@@ -5373,7 +5446,9 @@ static void GTK_Master_Queue_ForEach_Preflight (GtkTreeModel *model, GtkTreePath
     if (ppu->maxTasks > *((int *) data))
         *((int *) data) = ppu->maxTasks;
 }
+#endif /* #if USE_GTK2 */
 
+#if USE_GTK2
 static void GTK_Master_Queue_ForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                                         gpointer data)	/* data contains ptr to queue size */
 {
@@ -5386,9 +5461,11 @@ static void GTK_Master_Queue_ForEach (GtkTreeModel *model, GtkTreePath *path, Gt
     CommandSetProcunitsRemoteQueue (sz);
     GTK_TouchProcunit (ppu);
 }
+#endif /* #if USE_GTK2 */
 
 static void GTK_Master_Queue (GtkWidget *widget, gpointer data)
 {
+#if USE_GTK2
     GtkWidget 	*pwDialog;
 
     GtkWidget 	*pwLabel_Queue;
@@ -5428,6 +5505,7 @@ static void GTK_Master_Queue (GtkWidget *widget, gpointer data)
     }
     
     gtk_widget_destroy (pwDialog);
+#endif /* #if USE_GTK2 */
 }
 
 static void GTK_Master_Destroy (GtkWidget *widget, gpointer data)
@@ -5437,6 +5515,7 @@ static void GTK_Master_Destroy (GtkWidget *widget, gpointer data)
 
 void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw)
 {
+#if USE_GTK2
     GtkTreeViewColumn 	*column;    
     GtkCellRenderer 	*renderer;
     GtkTreeSelection 	*selection;
@@ -5552,6 +5631,9 @@ void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw)
 			GTK_SIGNAL_FUNC(GTK_Options), (gpointer) NULL);
 
     gtk_widget_show_all (gpwMasterWindow);
+
+#endif /* #if USE_GTK2 */
+
 }
 
 #endif /* #if USE_GTK */
