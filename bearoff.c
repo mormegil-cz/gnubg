@@ -444,7 +444,6 @@ BearoffCubeful ( bearoffcontext *pbc,
     if ( ! pbc->fCubeful )
       return -1;
     else {
-      ReadExactBearoff ( pbc, iPos, ar, aus );
       return ReadTwoSidedBearoff ( pbc, iPos, ar, aus );
     }
 
