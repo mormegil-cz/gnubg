@@ -35,14 +35,12 @@
 extern GtkWidget *pwBoard;
 extern int fX, nDelay, fNeedPrompt;
 extern guint nNextTurn; /* GTK idle function */
-#define DISPLAY GDK_DISPLAY()
 #elif USE_EXT
 #include <ext.h>
 #include <event.h>
 extern extwindow ewnd;
 extern int fX, nDelay, fNeedPrompt;
 extern event evNextTurn;
-#define DISPLAY ewnd.pdsp
 #endif
 
 #if HAVE_SIGACTION
@@ -80,8 +78,18 @@ typedef enum _movetype {
     MOVE_SETBOARD, MOVE_SETDICE, MOVE_SETCUBEVAL, MOVE_SETCUBEPOS
 } movetype;
 
+typedef enum _lucktype {
+    LUCK_VERYBAD, LUCK_BAD, LUCK_NONE, LUCK_GOOD, LUCK_VERYGOOD
+} lucktype;
+
+typedef enum _skilltype {
+    SKILL_VERYBAD, SKILL_BAD, SKILL_DOUBTFUL, SKILL_NONE,
+    SKILL_INTERESTING, SKILL_GOOD, SKILL_VERYGOOD
+} skilltype;
+
 typedef struct _movegameinfo {
     movetype mt;
+    char *sz;
     int i, /* the number of the game within a match */
 	nMatch, /* match length */
 	anScore[ 2 ], /* match score BEFORE the game */
@@ -96,20 +104,25 @@ typedef struct _movegameinfo {
 
 typedef struct _movebasic {
     movetype mt;
+    char *sz;
     int fPlayer;
+    skilltype st;
 } movebasic;
 
 typedef struct _movedouble {
-  movetype mt;
-  int fPlayer;
-  /* evaluation of cube action */
-  float arDouble[ 4 ];
-  evaltype etDouble;
-  evalsetup esDouble;
+    movetype mt;
+    char *sz;
+    int fPlayer;
+    /* evaluation of cube action */
+    float arDouble[ 4 ];
+    evaltype etDouble;
+    evalsetup esDouble;
+    skilltype st;
 } movedouble;
 
 typedef struct _movenormal {
     movetype mt;
+    char *sz;
     int fPlayer;
     int anRoll[ 2 ];
     int anMove[ 8 ];
@@ -120,37 +133,49 @@ typedef struct _movenormal {
     /* evaluation of the moves */
     movelist ml;
     int iMove; /* index into the movelist of the move that was made */
+    lucktype lt;
+    skilltype st;
 } movenormal;
 
 typedef struct _moveresign {
     movetype mt;
+    char *sz;
     int fPlayer;
     int nResigned;
 } moveresign;
 
 typedef struct _movesetboard {
     movetype mt;
+    char *sz;
     unsigned char auchKey[ 10 ]; /* always stored as if player 0 was on roll */
 } movesetboard;
 
 typedef struct _movesetdice {
     movetype mt;
+    char *sz;
     int fPlayer;
     int anDice[ 2 ];
+    lucktype lt;
 } movesetdice;
 
 typedef struct _movesetcubeval {
     movetype mt;
+    char *sz;
     int nCube;
 } movesetcubeval;
 
 typedef struct _movesetcubepos {
     movetype mt;
+    char *sz;
     int fCubeOwner;
 } movesetcubepos;
 
 typedef union _moverecord {
     movetype mt;
+    struct _moverecordall {
+	movetype mt;
+	char *sz;
+    } a;
     movegameinfo g;
     movedouble d;
     movebasic t; /* take or drop */
@@ -302,6 +327,8 @@ extern int fReadline;
 
 extern char *aszVersion[];
 
+extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[];
+
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[];
@@ -309,6 +336,13 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
     CommandAnalysis ( char * ),
+    CommandAnnotateBad( char * ),
+    CommandAnnotateClear( char * ),
+    CommandAnnotateDoubtful( char * ),
+    CommandAnnotateGood( char * ),
+    CommandAnnotateInteresting( char * ),
+    CommandAnnotateLucky( char * ),
+    CommandAnnotateUnlucky( char * ),
     CommandCopy ( char * ),
     CommandDatabaseDump( char * ),
     CommandDatabaseExport( char * ),

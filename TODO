@@ -53,6 +53,7 @@ duplication of effort and to make sure our changes merge easily.
 *** Add luck analysis/variance reduction, error rates, etc.
 *** Allow re-evaluating analysis with different settings, and rollouts.
 *** Add "set automatic analysis".
+*** Automatically mark moves good/bad and lucky/unlucky.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -83,13 +84,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** If a resignation is rejected, don't allow further resignations for
   that amount or below for the rest of the turn.
-** Is the final sort in FindnSaveBestMoves really a good idea?  It will
-  put the moves in strictly numerical order, but if 0-ply systematically
-  overrates all moves compared to 1-ply, then it will rank some hopeless
-  0-ply move as best, and all the better moves (which it went on to
-  evaluate at deeper plies) as "errors".  It's not clear what behaviour
-  we really want...  (It would also be nice if it evaluated the selected
-  move at the deepest ply.)
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -140,8 +134,6 @@ duplication of effort and to make sure our changes merge easily.
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
-** Make load/save and prev game/next game freeze and thaw the game list;
-  load match shouldn't update the score between games, either. (gary)
 ** Animate the chequers when the computer moves.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
@@ -157,6 +149,10 @@ duplication of effort and to make sure our changes merge easily.
   fix that by temporarily modifying pwGrab?
 ** Enable and disable the take/drop/redouble/agree/decline etc. buttons
   and menu items when appropriate.
+** Use different styles for moves in the game window, depending on the
+  annotation.
+** Add the players' names in the drop-down menu in the game window.  (They
+  used to be there, but weren't updated if the names were changed.)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -187,14 +183,12 @@ duplication of effort and to make sure our changes merge easily.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
 ** "set player <tab>" gives incorrect completions.
-** Cosmetic problems when a "set board" is shown in the game list (the
-  wrong cell is highlighted).
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
   see what the REPL in guile-gtk does.
-** Changing a player's name doesn't affect the names in the drop-down
-  menu in the game window.
+** Analysing a game or annotating a move doesn't immediately affect the
+  game window or the annotation window.
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)
@@ -208,9 +202,6 @@ duplication of effort and to make sure our changes merge easily.
   robust to add a parent to it (box or event box?), and give _that_
   the grab.  Unfortunately, grab add/remove calls must nest, and we
   can't guarantee that...
-** gdk_get_rgb_image won't work if a window is partially off-screen.
-  A possible workaround is to XCopyArea it to a pixmap, and then
-  get the image from that. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -223,7 +214,6 @@ duplication of effort and to make sure our changes merge easily.
   entire game like Motif.
 ** Submit something to <http://www.distributed.net/nextgen/projects.html>.
 ** Allow loading and saving weights to specify binary or ASCII format.
-** Allow comments to be entered as move annotations.
 ** Import FIBS `oldmoves' games and matches.
 ** Export games, matches and analysis to ASCII, HTML, PostScript, etc.
   Examples: "export game html foo.html", "export match mat bar.mat".
@@ -242,9 +232,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Extend ParsePosition to cope with other formats, e.g. FIBS
   "boardstyle 3" and/or a human friendly position description,
   like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
-** Handle SGF setup properties when loading games.
 ** Handle SGF variations.
-** Add SGF properties to handle analysis data.
 ** Allow loading/saving of compressed games/matches with zlib.
 ** Make the external player handle cube and resignation decisions, and allow
   connection via TCP/IP.

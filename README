@@ -84,7 +84,7 @@ weight file at all (it will generate random weights), we recommend
 that you obtain pre-trained weights; a file compatible with this
 pre-release is available at:
 
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.10.gz
+        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.11.gz
 
 Make sure you decompress the file (with gunzip) and rename it to
 `gnubg.weights' in the same directory as this README file.

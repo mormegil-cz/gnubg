@@ -1,7 +1,7 @@
 /*
  * gtkgame.c
  *
- * by Gary Wong <gtw@gnu.org>, 2000.
+ * by Gary Wong <gtw@gnu.org>, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -274,6 +274,7 @@ static GtkWidget *pwGrab;
 GtkWidget *pwBoard, *pwMain;
 static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom, *pwAnnotation,
     *pwAnalysis, *pwCommentary, *pwHint;
+static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
@@ -519,13 +520,15 @@ typedef struct _gamelistrow {
    rows (e.g. "set board") will occupy TWO entries in the sequence space. */
 static moverecord *GameListLookupMove( int i ) {
 
-    gamelistrow *pglr = gtk_clist_get_row_data( GTK_CLIST( pwGameList ),
-						i >> 1 );
+    gamelistrow *pglr;
+    moverecord *pmr;
+    
+    for( ; ( pglr = gtk_clist_get_row_data( GTK_CLIST( pwGameList ),
+					    i >> 1 ) ); i++ )
+	if( ( pmr = pglr->apmr[ pglr->fCombined ? 0 : i & 1 ] ) )
+	    return pmr;
 
-    if( !pglr )
-	return NULL;
-
-    return pglr->apmr[ pglr->fCombined ? 0 : i & 1 ];
+    return NULL;
 }
 
 static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
@@ -543,7 +546,7 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     pmr = GameListLookupMove( i );
     
     for( iPrev = i - 1; iPrev >= 0; iPrev-- )
-	if( ( pmrPrev = GameListLookupMove( iPrev ) ) )
+	if( ( pmrPrev = GameListLookupMove( iPrev ) ) && pmrPrev != pmr )
 	    break;
 
     if( !pmr && !pmrPrev )
@@ -551,9 +554,9 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 
     for( pl = plGame->plPrev; pl != plGame; pl = pl->plPrev ) {
 	assert( pl->p );
-	if( pl->p == pmr && pmr->mt == MOVE_SETDICE )
+	if( pl == plGame->plPrev && pl->p == pmr && pmr->mt == MOVE_SETDICE )
 	    break;
-	if( pl->p == pmrPrev ) {
+	if( pl->p == pmrPrev && pmr != pmrPrev ) {
 	    pmr = pmrPrev;
 	    break;
 	} else if( pl->plNext->p == pmr ) {
@@ -575,7 +578,7 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     UpdateSetting( &fTurn );
     UpdateSetting( &gs );
     
-    SetMoveRecord( pmr );
+    SetMoveRecord( pl->p );
     
     ShowBoard();
 }
@@ -751,6 +754,39 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
     return pwMoves;
 }
 
+static int fAutoCommentaryChange;
+
+static void CommentaryChanged( GtkWidget *pw, void *p ) {
+
+    char *pch;
+    
+    if( fAutoCommentaryChange )
+	return;
+
+    assert( pmrAnnotation );
+
+    /* FIXME Copying the entire text every time it's changed is horribly
+       inefficient, but the only alternatives seem to be lazy copying
+       (which is much harder to get right) or requiring a specific command
+       to update the text (which is probably inconvenient for the user).
+
+       The GTK text widget is already so slow that copying makes no
+       noticable difference anyway... */
+
+    if( pmrAnnotation->a.sz )
+	free( pmrAnnotation->a.sz );
+    
+    if( gtk_text_get_length( GTK_TEXT( pw ) ) ) {
+	pch = gtk_editable_get_chars( GTK_EDITABLE( pw ), 0, -1 );
+	/* This copy is absolutely disgusting, but is necessary because GTK
+	   insists on giving us something allocated with g_malloc() instead
+	   of malloc(). */
+	pmrAnnotation->a.sz = strdup( pch );
+	g_free( pch );
+    } else
+	pmrAnnotation->a.sz = NULL;
+}
+
 static void CreateAnnotationWindow( void ) {
 
     GtkWidget *pwPaned;
@@ -772,13 +808,12 @@ static void CreateAnnotationWindow( void ) {
     gtk_paned_add2( GTK_PANED( pwPaned ),
 		    pwCommentary = gtk_text_new( NULL, NULL ) );
 
-    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL,
-		     "Once commentary is implemented, you will be able to "
-		     "make notes about moves here.", -1 );
-
     gtk_text_set_word_wrap( GTK_TEXT( pwCommentary ), TRUE );
-    gtk_text_set_editable( GTK_TEXT( pwCommentary ), FALSE );
-
+    gtk_text_set_editable( GTK_TEXT( pwCommentary ), TRUE );
+    gtk_widget_set_sensitive( pwCommentary, FALSE );
+    gtk_signal_connect( GTK_OBJECT( pwCommentary ), "changed",
+			GTK_SIGNAL_FUNC( CommentaryChanged ), NULL );
+    
     gtk_signal_connect( GTK_OBJECT( pwAnnotation ), "delete_event",
 			GTK_SIGNAL_FUNC( DeleteAnnotation ), NULL );
 }
@@ -932,21 +967,25 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 	sz[ 2 ] = ':';
 	sz[ 3 ] = ' ';
 	FormatMove( sz + 4, anBoard, pmr->n.anMove );
+	strcat( sz, aszSkillTypeAbbr[ pmr->n.st ] );
 	break;
 
     case MOVE_DOUBLE:
 	fPlayer = pmr->d.fPlayer;
-	pch = " Double"; /* FIXME show value */
+	sprintf( pch = sz, "Double to %d", nCube * 2 );
+	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
 	break;
 	
     case MOVE_TAKE:
 	fPlayer = pmr->t.fPlayer;
-	pch = " Take";
+	strcpy( pch = sz, "Take" );
+	strcat( sz, aszSkillTypeAbbr[ pmr->t.st ] );
 	break;
 	
     case MOVE_DROP:
 	fPlayer = pmr->t.fPlayer;
-	pch = " Drop";
+	strcpy( pch = sz, "Drop" );
+	strcat( sz, aszSkillTypeAbbr[ pmr->t.st ] );
 	break;
 	
     case MOVE_RESIGN:
@@ -987,7 +1026,7 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
     if( !GTK_CLIST( pwGameList )->rows || 
 	( pglr = gtk_clist_get_row_data( GTK_CLIST( pwGameList ),
 					 GTK_CLIST( pwGameList )->rows - 1 ) )
-	->fCombined || pglr->apmr[ 1 ] || ( !fPlayer && pglr->apmr[ 0 ] ) )
+	->fCombined || pglr->apmr[ 1 ] || ( fPlayer != 1 && pglr->apmr[ 0 ] ) )
 	i = AddMoveRecordRow();
     else
 	i = GTK_CLIST( pwGameList )->rows - 1;
@@ -1000,6 +1039,16 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
     pglr->apmr[ fPlayer ] = pmr;
     
     gtk_clist_set_text( GTK_CLIST( pwGameList ), i, fPlayer + 1, pch );
+}
+
+extern void GTKFreeze( void ) {
+
+    gtk_clist_freeze( GTK_CLIST( pwGameList ) );
+}
+
+extern void GTKThaw( void ) {
+
+    gtk_clist_thaw( GTK_CLIST( pwGameList ) );
 }
 
 extern void GTKPopMoveRecord( moverecord *pmr ) {
@@ -1052,7 +1101,7 @@ static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
     return gtk_label_new( sz );
 }
 
-static void SetAnalysis( moverecord *pmr ) {
+static void SetAnnotation( moverecord *pmr ) {
 
     GtkWidget *pwParent = pwAnalysis->parent, *pwCube, *pwList;
     static hintdata hd = { NULL, NULL, NULL, NULL, FALSE };
@@ -1067,6 +1116,8 @@ static void SetAnalysis( moverecord *pmr ) {
 
     if( pl == plGame )
 	pmr = NULL;
+
+    pmrAnnotation = pmr;
     
     /* FIXME optimise by ignoring set if pmr is unchanged */
     
@@ -1075,7 +1126,19 @@ static void SetAnalysis( moverecord *pmr ) {
 	pwAnalysis = NULL;
     }
 
+    gtk_widget_set_sensitive( pwCommentary, pmr != NULL );
+    fAutoCommentaryChange = TRUE;
+    gtk_editable_delete_text( GTK_EDITABLE( pwCommentary ), 0, -1 );
+    fAutoCommentaryChange = FALSE;
+    
     if( pmr ) {
+	if( pmr->a.sz ) {
+	    fAutoCommentaryChange = TRUE;
+	    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL,
+			     pmr->a.sz, -1 );
+	    fAutoCommentaryChange = FALSE;
+	}
+	
 	if( pmr->mt == MOVE_NORMAL ) {
 	    int fMoveOld = fMove, fTurnOld = fTurn;
 
@@ -1127,7 +1190,7 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
     gamelistrow *pglr;
     int i;
 
-    SetAnalysis( pmr );
+    SetAnnotation( pmr );
 
     if( pwHint ) {
 	hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
@@ -1170,11 +1233,16 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	
 	yCurrent = i;
 	
-	if( yCurrent >= 0 && pmr->mt != MOVE_SETDICE ) {
-	    if( ++xCurrent > 2 ) {
-		xCurrent = 1;
-		yCurrent++;
-	    }
+	if( yCurrent >= 0 && !( pmr->mt == MOVE_SETDICE &&
+				yCurrent == pcl->rows - 1 ) ) {
+	    do {
+		if( ++xCurrent > 2 ) {
+		    xCurrent = 1;
+		    yCurrent++;
+		}
+
+		pglr = gtk_clist_get_row_data( pcl, yCurrent );
+	    } while( yCurrent < pcl->rows - 1 && !pglr->apmr[ xCurrent - 1 ] );
 	    
 	    if( yCurrent >= pcl->rows )
 		AddMoveRecordRow();

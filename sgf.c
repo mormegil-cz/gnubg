@@ -1,7 +1,7 @@
 /*
  * sgf.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998, 1999, 2000.
+ * by Gary Wong <gtw@gnu.org>, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -28,6 +28,9 @@
 #include <string.h>
 
 #include "backgammon.h"
+#if USE_GTK
+#include "gtkgame.h"
+#endif
 #include "positionid.h"
 #include "sgf.h"
 
@@ -182,8 +185,10 @@ static void RestoreRootNode( list *pl ) {
     property *pp;
     movegameinfo *pmgi = malloc( sizeof( *pmgi ) );
     char *pch;
+    int i;
     
     pmgi->mt = MOVE_GAMEINFO;
+    pmgi->sz = NULL;
     pmgi->i = 0;
     pmgi->nMatch = 0;
     pmgi->anScore[ 0 ] = 0;
@@ -239,6 +244,13 @@ static void RestoreRootNode( list *pl ) {
 		pmgi->fCrawford = pmgi->fCrawfordGame = TRUE;
 	    else if( !strcmp( pch, "Jacoby" ) )
 		pmgi->fJacoby = TRUE;
+	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
+	    /* CV - Cube value (i.e. automatic doubles) */
+	    for( i = 0; ( 1 << i ) <= MAX_CUBE; i++ )
+		if( atoi( pp->pl->plNext->p ) == 1 << i ) {
+		    pmgi->nAutoDoubles = i;
+		    break;
+		}
 	}
 
     AddMoveRecord( pmgi );
@@ -254,38 +266,176 @@ static int Point( char ch, int f ) {
 	return -1; /* off */
 }
 
+static void RestoreDoubleAnalysis( property *pp, evaltype *pet,
+				   float ar[], evalsetup *pes ) {
+    char *pch = pp->pl->plNext->p, ch;
+
+    switch( *pch ) {
+    case 'E':
+	/* EVAL_EVAL */
+	*pet = EVAL_EVAL;
+	pes->ec.nSearchCandidates = 0;
+	pes->ec.rSearchTolerance = 0;
+	pes->ec.nReduced = 0;
+	
+	sscanf( pch + 1, "%f %f %f %f %d%c", &ar[ 0 ], &ar[ 1 ], &ar[ 2 ],
+		&ar[ 3 ], &pes->ec.nPlies, &ch );
+
+	pes->ec.fCubeful = ch == 'C';
+	break;
+
+    default:
+	/* FIXME */
+    }
+}
+
+static void RestoreMoveAnalysis( property *pp, int fPlayer,
+				 movelist *pml, int *piMove ) {
+    list *pl = pp->pl->plNext;
+    char *pch, ch;
+    move *pm;
+    int i;
+    
+    *piMove = atoi( pl->p );
+
+    for( pml->cMoves = 0, pl = pl->plNext; pl->p; pl = pl->plNext )
+	pml->cMoves++;
+
+    /* FIXME we could work these out, but it hardly seems worth it */
+    pml->cMaxMoves = pml->cMaxPips = pml->iMoveBest = 0;
+    pml->rBestScore = 0;
+    
+    pm = pml->amMoves = malloc( pml->cMoves * sizeof( move ) );
+
+    for( pl = pp->pl->plNext->plNext; pl->p; pl = pl->plNext, pm++ ) {
+	pch = pl->p;
+
+	/* FIXME we could work these out, but it hardly seems worth it */
+	pm->cMoves = pm->cPips = 0;
+	pm->rScore2 = 0;
+	
+	for( i = 0; i < 4 && pch[ 0 ] && pch[ 1 ] && pch[ 0 ] != ' ';
+	     pch += 2, i++ ) {
+	    pm->anMove[ i << 1 ] = Point( pch[ 0 ], fPlayer );
+	    pm->anMove[ ( i << 1 ) | 1 ] = Point( pch[ 1 ], fPlayer );
+	}
+	
+	if( i < 4 )
+	    pm->anMove[ i << 1 ] = -1;
+
+	sscanf( pch, " %c", &ch );
+	
+	switch( ch ) {
+	case 'E':
+	    /* EVAL_EVAL */
+	    pm->etMove = EVAL_EVAL;
+	    pm->esMove.ec.nSearchCandidates = 0;
+	    pm->esMove.ec.rSearchTolerance = 0;
+	    pm->esMove.ec.nReduced = 0;
+
+	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c",
+		    &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
+		    &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
+		    &pm->arEvalMove[ 4 ], &pm->rScore,
+		    &pm->esMove.ec.nPlies, &ch );
+	    pm->esMove.ec.fCubeful = ch == 'C';
+	    break;
+	    
+	default:
+	    /* FIXME */
+	}
+    }
+}
+
+static void PointList( list *pl, int an[] ) {
+
+    int i;
+    char *pch, ch0, ch1;
+    
+    for( i = 0; i < 25; i++ )
+	an[ i ] = 0;
+
+    for( ; pl->p; pl = pl->plNext ) {
+	pch = pl->p;
+
+	if( strchr( pch, ':' ) ) {
+	    ch0 = ch1 = 0;
+	    sscanf( pch, "%c:%c", &ch0, &ch1 );
+	    if( ch0 >= 'a' && ch1 <= 'y' && ch0 < ch1 )
+		for( i = ch0 - 'a'; i < ch1 - 'a'; i++ )
+		    an[ i ]++;
+	} else if( *pch >= 'a' && *pch <= 'y' )
+	    an[ *pch - 'a' ]++;
+    }
+}
+
+static char *CopyEscapedString( char *pchOrig ) {
+
+    char *sz, *pch;
+
+    for( pch = sz = malloc( strlen( pchOrig ) + 1 ); *pchOrig; pchOrig++ ) {
+	if( *pchOrig == '\\' ) {
+	    if( pchOrig[ 1 ] == '\\' ) {
+		*pch++ = '\\';
+		pchOrig++;
+	    }
+	    continue;
+	}
+
+	if( isspace( *pchOrig ) && *pchOrig != '\n' ) {
+	    *pch++ = ' ';
+	    continue;
+	}
+
+	*pch++ = *pchOrig;
+    }
+
+    *pch = 0;
+    
+    return sz;
+}
+
 static void RestoreNode( list *pl ) {
 
-    property *pp;
-    moverecord *pmr;
+    property *pp, *ppDA = NULL, *ppA = NULL, *ppC = NULL;
+    moverecord *pmr = NULL;
     char *pch;
-    int i, fPlayer, fSetBoard;
+    int i, fPlayer, fSetBoard = FALSE, an[ 25 ];
+    skilltype st = SKILL_NONE;
+    lucktype lt = LUCK_NONE;
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext ) {
-	fSetBoard = FALSE;
 	if( pp->ach[ 1 ] == 0 &&
 	    ( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) ) {
-	    /* B or W - Move property */
+	    /* B or W - Move property. */
+	    
+	    if( pmr )
+		/* Duplicate move -- ignore. */
+		continue;
+	    
 	    pch = pp->pl->plNext->p;
-	    pmr = NULL;
 	    fPlayer = pp->ach[ 0 ] == 'B';
 	    
 	    if( !strcmp( pch, "double" ) ) {
 		pmr = malloc( sizeof( pmr->d ) );
 		pmr->mt = MOVE_DOUBLE;
+		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
 		pmr->d.etDouble = EVAL_NONE;
 	    } else if( !strcmp( pch, "take" ) ) {
 		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_TAKE;
+		pmr->t.sz = NULL;
 		pmr->t.fPlayer = fPlayer;
 	    } else if( !strcmp( pch, "drop" ) ) {
 		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_DROP;
+		pmr->t.sz = NULL;
 		pmr->t.fPlayer = fPlayer;
 	    } else {
 		pmr = malloc( sizeof( pmr->n ) );
-		pmr->n.mt = MOVE_NORMAL;
+		pmr->mt = MOVE_NORMAL;
+		pmr->n.sz = NULL;
 		pmr->n.fPlayer = fPlayer;
 		pmr->n.ml.cMoves = 0;
 		pmr->n.ml.amMoves = NULL;
@@ -313,31 +463,141 @@ static void RestoreNode( list *pl ) {
 		    pmr = NULL;
 		}
 	    }
-	    
-	    if( pmr )
-		AddMoveRecord( pmr );
 	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'E' ) {
 	    fSetBoard = TRUE;
-	    /* FIXME add empty */
+	    PointList( pp->pl->plNext, an );
+	    for( i = 0; i < 25; i++ )
+		if( an[ i ] ) {
+		    anBoard[ 0 ][ i == 24 ? i : 23 - i ] = 0;
+		    anBoard[ 1 ][ i ] = 0;
+		}
 	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'B' ) {
 	    fSetBoard = TRUE;
-	    /* FIXME add black */
+	    PointList( pp->pl->plNext, an );
+	    for( i = 0; i < 25; i++ )
+		anBoard[ 0 ][ i == 24 ? i : 23 - i ] += an[ i ];
 	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'W' ) {
 	    fSetBoard = TRUE;
-	    /* FIXME add white */
+	    PointList( pp->pl->plNext, an );
+	    for( i = 0; i < 25; i++ )
+		anBoard[ 1 ][ i ] += an[ i ];
 	} else if( pp->ach[ 0 ] == 'P' && pp->ach[ 1 ] == 'L' )
 	    fTurn = fMove = *( (char *) pp->pl->plNext->p ) == 'B';
 	else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
-	    /* FIXME cube value */
+	    for( i = 1; i <= MAX_CUBE; i <<= 1 )
+		if( atoi( pp->pl->plNext->p ) == i ) {
+		    pmr = malloc( sizeof( pmr->scv ) );
+		    pmr->mt = MOVE_SETCUBEVAL;
+		    pmr->scv.sz = NULL;
+		    pmr->scv.nCube = i;
+		    AddMoveRecord( pmr );
+		    pmr = NULL;
+		    break;
+		}
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'P' ) {
-	    /* FIXME cube posn */
+	    pmr = malloc( sizeof( pmr->scp ) );
+	    pmr->mt = MOVE_SETCUBEPOS;
+	    pmr->scp.sz = NULL;
+	    switch( *( (char *) pp->pl->plNext->p ) ) {
+	    case 'c':
+		pmr->scp.fCubeOwner = -1;
+		break;
+	    case 'b':
+		pmr->scp.fCubeOwner = 1;
+		break;
+	    case 'w':
+		pmr->scp.fCubeOwner = 0;
+		break;
+	    default:
+		free( pmr );
+		pmr = NULL;
+	    }
+
+	    if( pmr ) {
+		AddMoveRecord( pmr );
+		pmr = NULL;
+	    }
 	} else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'I' ) {
-	    /* FIXME dice */
+	    char ach[ 2 ];
+	    
+	    sscanf( pp->pl->plNext->p, "%2c", ach );
+
+	    if( ach[ 0 ] >= '1' && ach[ 0 ] <= '6' && ach[ 1 ] >= '1' &&
+		ach[ 1 ] <= '6' ) {
+		pmr = malloc( sizeof( pmr->sd ) );
+		pmr->mt = MOVE_SETDICE;
+		pmr->sd.sz = NULL;
+		pmr->sd.fPlayer = fMove;
+		pmr->sd.anDice[ 0 ] = ach[ 0 ] - '0';
+		pmr->sd.anDice[ 1 ] = ach[ 1 ] - '0';
+	    }
+	} else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'A' )
+	    /* double analysis */
+	    ppDA = pp;
+	else if( pp->ach[ 0 ] == 'A' && !pp->ach[ 1 ] )
+	    /* move analysis */
+	    ppA = pp;
+	else if( pp->ach[ 0 ] == 'C' && !pp->ach[ 1 ] )
+	    /* comment */
+	    ppC = pp;
+	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'M' )
+	    st = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYBAD :
+	    SKILL_BAD;
+	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'O' )
+	    st = SKILL_DOUBTFUL;
+	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'T' )
+	    st = SKILL_INTERESTING;
+	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' )
+	    st = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
+	    SKILL_GOOD;
+	/* FIXME handle GB and GW */
+    }
+    
+    if( fSetBoard && !pmr ) {
+	pmr = malloc( sizeof( pmr->sb ) );
+	pmr->mt = MOVE_SETBOARD;
+	pmr->sb.sz = NULL;
+	PositionKey( anBoard, pmr->sb.auchKey );
+    }
+
+    if( pmr && ppC )
+	pmr->a.sz = CopyEscapedString( ppC->pl->plNext->p );
+    
+    if( pmr ) {
+	switch( pmr->mt ) {
+	case MOVE_NORMAL:
+	    if( ppDA )
+		RestoreDoubleAnalysis( ppDA, &pmr->n.etDouble,
+				       pmr->n.arDouble, &pmr->n.esDouble );
+	    if( ppA )
+		RestoreMoveAnalysis( ppA, pmr->n.fPlayer, &pmr->n.ml,
+				     &pmr->n.iMove );
+	    pmr->n.st = st;
+	    pmr->n.lt = lt;
+	    break;
+	    
+	case MOVE_DOUBLE:
+	    if( ppDA )
+		RestoreDoubleAnalysis( ppDA, &pmr->d.etDouble,
+				       pmr->d.arDouble, &pmr->d.esDouble );
+	    pmr->d.st = st;
+	    break;
+
+	case MOVE_TAKE:
+	case MOVE_DROP:
+	    pmr->t.st = st;
+	    break;
+	    
+	case MOVE_SETDICE:
+	    pmr->sd.lt = lt;
+	    break;
+	    
+	default:
+	    /* FIXME allow comments for all movetypes */
+	    break;
 	}
 
-	if( fSetBoard ) {
-	    /* FIXME add MOVE_SETBOARD mr */
-	}
+	AddMoveRecord( pmr );
     }
 }
 
@@ -394,7 +654,8 @@ static void RestoreGame( list *pl ) {
 	fTurn = fMove = -1;
 	
 	pmrResign = malloc( sizeof( pmrResign ->r ) );
-	pmrResign->r.mt = MOVE_RESIGN;
+	pmrResign->mt = MOVE_RESIGN;
+	pmrResign->r.sz = NULL;
 	pmrResign->r.fPlayer = !pmr->g.fWinner;
 	pmrResign->r.nResigned = pmr->g.nPoints / nCube;
 
@@ -449,6 +710,11 @@ extern void CommandLoadGame( char *sz ) {
 		return;
 	}
 
+#if USE_GTK
+	if( fX )
+	    GTKFreeze();
+#endif
+	
 	FreeMatch();
 	ClearMatch();
 	
@@ -459,6 +725,11 @@ extern void CommandLoadGame( char *sz ) {
 	FreeGameTreeSeq( pl );
 
 	UpdateSettings();
+	
+#if USE_GTK
+	if( fX )
+	    GTKThaw();
+#endif
     }
 }
 
@@ -484,6 +755,11 @@ extern void CommandLoadMatch( char *sz ) {
 		return;
 	}
 
+#if USE_GTK
+	if( fX )
+	    GTKFreeze();
+#endif
+	
 	FreeMatch();
 	ClearMatch();
 	
@@ -493,10 +769,15 @@ extern void CommandLoadMatch( char *sz ) {
 	FreeGameTreeSeq( pl );
 
 	UpdateSettings();
+	
+#if USE_GTK
+	if( fX )
+	    GTKThaw();
+#endif
     }
 }
 
-static void WriteEscapedString( FILE *pf, char *pch ) {
+static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 
     for( ; *pch; pch++ )
 	switch( *pch ) {
@@ -505,7 +786,8 @@ static void WriteEscapedString( FILE *pf, char *pch ) {
 	    putc( '\\', pf );
 	    break;
 	case ':':
-	    putc( '\\', pf );
+	    if( fEscapeColons )
+		putc( '\\', pf );
 	    putc( ':', pf );
 	    break;
 	case ']':
@@ -517,12 +799,30 @@ static void WriteEscapedString( FILE *pf, char *pch ) {
 	}
 }
 
-static void WriteMove( FILE *pf, movenormal *pmn ) {
+static void WriteDoubleAnalysis( FILE *pf, evaltype et, float ar[],
+				 evalsetup *pes ) {
+
+    switch( et ) {
+    case EVAL_EVAL:
+	fprintf( pf, "DA[E %7.4f %7.4f %7.4f %7.4f %d%s]", ar[ 0 ], ar[ 1 ],
+		 ar[ 2 ], ar[ 3 ], pes->ec.nPlies,
+		 pes->ec.fCubeful ? "C" : "" );
+	break;
+
+    case EVAL_ROLLOUT:
+	/* FIXME */
+
+    default:
+	assert( FALSE );
+    }
+}
+
+static void WriteMove( FILE *pf, int fPlayer, int anMove[] ) {
 
     int i;
 
     for( i = 0; i < 8; i++ )
-	switch( pmn->anMove[ i ] ) {
+	switch( anMove[ i ] ) {
 	case 24: /* bar */
 	    putc( 'y', pf );
 	    break;
@@ -532,9 +832,103 @@ static void WriteMove( FILE *pf, movenormal *pmn ) {
 	    putc( 'z', pf );
 	    break;
 	default:
-	    putc( pmn->fPlayer ? 'x' - pmn->anMove[ i ] :
-		  'a' + pmn->anMove[ i ], pf );
+	    putc( fPlayer ? 'x' - anMove[ i ] : 'a' + anMove[ i ], pf );
 	}
+}
+
+static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
+			       int iMove ) {
+
+    int i;
+
+    fprintf( pf, "A[%d]", iMove );
+
+    for( i = 0; i < pml->cMoves; i++ ) {
+	fputc( '[', pf );
+	WriteMove( pf, fPlayer, pml->amMoves[ i ].anMove );
+	fputc( ' ', pf );
+	
+	switch( pml->amMoves[ i ].etMove ) {
+	case EVAL_NONE:
+	    break;
+	    
+	case EVAL_EVAL:
+	    fprintf( pf, "E %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %d%s",
+		     pml->amMoves[ i ].arEvalMove[ 0 ],
+		     pml->amMoves[ i ].arEvalMove[ 1 ],
+		     pml->amMoves[ i ].arEvalMove[ 2 ],
+		     pml->amMoves[ i ].arEvalMove[ 3 ],
+		     pml->amMoves[ i ].arEvalMove[ 4 ],
+		     pml->amMoves[ i ].rScore,
+		     pml->amMoves[ i ].esMove.ec.nPlies,
+		     pml->amMoves[ i ].esMove.ec.fCubeful ? "C" : "" );
+	    break;
+	    
+	case EVAL_ROLLOUT:
+	    /* FIXME */
+
+	default:
+	    assert( FALSE );
+	}
+
+	fputc( ']', pf );
+    }
+}
+
+static void WriteLuck( FILE *pf, int fPlayer, lucktype lt ) {
+
+    switch( lt ) {
+    case LUCK_VERYBAD:
+	fprintf( pf, "G%c[2]", fPlayer ? 'W' : 'B' );
+	break;
+	
+    case LUCK_BAD:
+	fprintf( pf, "G%c[1]", fPlayer ? 'W' : 'B' );
+	break;
+	
+    case LUCK_NONE:
+	break;
+	
+    case LUCK_GOOD:
+	fprintf( pf, "G%c[1]", fPlayer ? 'B' : 'W' );
+	break;
+	
+    case LUCK_VERYGOOD:
+	fprintf( pf, "G%c[2]", fPlayer ? 'B' : 'W' );
+	break;	
+    }
+}
+
+static void WriteSkill( FILE *pf, skilltype st ) {
+
+    switch( st ) {
+    case SKILL_VERYBAD:
+	fputs( "BM[2]", pf );
+	break;
+	
+    case SKILL_BAD:
+	fputs( "BM[1]", pf );
+	break;
+	
+    case SKILL_DOUBTFUL:
+	fputs( "DO[]", pf );
+	break;
+	
+    case SKILL_NONE:
+	break;
+	
+    case SKILL_INTERESTING:
+	fputs( "IT[]", pf );
+	break;
+	
+    case SKILL_GOOD:
+	fputs( "TE[1]", pf );
+	break;
+	
+    case SKILL_VERYGOOD:
+	fputs( "TE[2]", pf );
+	break;
+    }
 }
 
 static void SaveGame( FILE *pf, list *plGame ) {
@@ -557,9 +951,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
     
     /* Names */
     fputs( "PW[", pf );
-    WriteEscapedString( pf, ap[ 0 ].szName );
+    WriteEscapedString( pf, ap[ 0 ].szName, FALSE );
     fputs( "]PB[", pf );
-    WriteEscapedString( pf, ap[ 1 ].szName );
+    WriteEscapedString( pf, ap[ 1 ].szName, FALSE );
     putc( ']', pf );
 
     if( pmr->g.fCrawford ) {
@@ -570,33 +964,58 @@ static void SaveGame( FILE *pf, list *plGame ) {
     } else if( pmr->g.fJacoby )
 	fputs( "RU[Jacoby]", pf );
 
+    if( pmr->g.nAutoDoubles )
+	fprintf( pf, "CV[%d]", 1 << pmr->g.nAutoDoubles );
+    
     if( pmr->g.fWinner >= 0 )
 	fprintf( pf, "RE[%c+%d%s]", pmr->g.fWinner ? 'B' : 'W',
 		 pmr->g.nPoints, pmr->g.fResigned ? "R" : "" );
-
-    putc( '\n', pf );
 
     for( pl = pl->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
-	    fprintf( pf, ";%c[%d%d", pmr->n.fPlayer ? 'B' : 'W',
+	    fprintf( pf, "\n;%c[%d%d", pmr->n.fPlayer ? 'B' : 'W',
 		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
-	    WriteMove( pf, &pmr->n );
+	    WriteMove( pf, pmr->n.fPlayer, pmr->n.anMove );
 	    putc( ']', pf );
+
+	    if( pmr->n.etDouble != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->n.etDouble, pmr->n.arDouble,
+				     &pmr->n.esDouble );
+
+	    if( pmr->n.ml.cMoves )
+		WriteMoveAnalysis( pf, pmr->n.fPlayer, &pmr->n.ml,
+				   pmr->n.iMove );
+
+	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.lt );
+	    WriteSkill( pf, pmr->n.st );
 	    
 	    break;
 	    
 	case MOVE_DOUBLE:
-	    fprintf( pf, ";%c[double]", pmr->t.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[double]", pmr->d.fPlayer ? 'B' : 'W' );
+
+	    if( pmr->d.etDouble != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.etDouble, pmr->d.arDouble,
+				     &pmr->d.esDouble );
+	    
+	    WriteSkill( pf, pmr->d.st );
+	    
 	    break;
 	    
 	case MOVE_TAKE:
-	    fprintf( pf, ";%c[take]", pmr->t.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[take]", pmr->t.fPlayer ? 'B' : 'W' );
+
+	    WriteSkill( pf, pmr->t.st );
+
 	    break;
 	    
 	case MOVE_DROP:
-	    fprintf( pf, ";%c[drop]", pmr->t.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[drop]", pmr->t.fPlayer ? 'B' : 'W' );
+
+	    WriteSkill( pf, pmr->t.st );
+
 	    break;
 	    
 	case MOVE_RESIGN:
@@ -605,33 +1024,42 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_SETBOARD:
 	    PositionFromKey( anBoard, pmr->sb.auchKey );
 
-	    fputs( ";AE[a:z];AW", pf );
-	    for( i = 0; i < 25; i++ )
-		for( j = 0; j < anBoard[ 0 ][ i ]; j++ )
-		    fprintf( pf, "[%c]", 'a' + i );
-
-	    fputs( ";AB", pf );
+	    fputs( "\n;AE[a:y]AW", pf );
 	    for( i = 0; i < 25; i++ )
 		for( j = 0; j < anBoard[ 1 ][ i ]; j++ )
+		    fprintf( pf, "[%c]", 'a' + i );
+
+	    fputs( "AB", pf );
+	    for( i = 0; i < 25; i++ )
+		for( j = 0; j < anBoard[ 0 ][ i ]; j++ )
 		    fprintf( pf, "[%c]", i == 24 ? 'y' : 'x' - i );
 
 	    break;
 	    
 	case MOVE_SETDICE:
-	    fprintf( pf, ";PL[%c]DI[%d%d]", pmr->sd.fPlayer ? 'B' : 'W',
+	    fprintf( pf, "\n;PL[%c]DI[%d%d]", pmr->sd.fPlayer ? 'B' : 'W',
 		     pmr->sd.anDice[ 0 ], pmr->sd.anDice[ 1 ] );
+	    
+	    WriteLuck( pf, pmr->sd.fPlayer, pmr->sd.lt );
+	    
 	    break;
 	    
 	case MOVE_SETCUBEVAL:
-	    fprintf( pf, ";CV[%d]", pmr->scv.nCube );
+	    fprintf( pf, "\n;CV[%d]", pmr->scv.nCube );
 	    break;
 	    
 	case MOVE_SETCUBEPOS:
-	    fprintf( pf, ";CP[%c]", "cwb"[ pmr->scp.fCubeOwner + 1 ] );
+	    fprintf( pf, "\n;CP[%c]", "cwb"[ pmr->scp.fCubeOwner + 1 ] );
 	    break;
 	    
 	default:
 	    assert( FALSE );
+	}
+
+	if( pmr->a.sz ) {
+	    fputs( "C[", pf );
+	    WriteEscapedString( pf, pmr->a.sz, FALSE );
+	    putc( ']', pf );
 	}
     }
 

@@ -44,6 +44,9 @@ extern void GTKAddGame( char *sz );
 extern void GTKPopGame( int c );
 extern void GTKSetGame( int i );
 
+extern void GTKFreeze( void );
+extern void GTKThaw( void );
+
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( void );
 extern void GTKAllowStdin( void );

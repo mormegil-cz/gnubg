@@ -1,3 +1,30 @@
+Mon Apr  2 15:17:25 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (CompareMoves): Include rScore2 in the comparision (for
+	cubeful evaluations).
+
+	* eval.c (ScoreMove: New function.
+	(FindBestMoves): Removed unused function.
+	(FindnSaveBestMoves): Modify sort order.
+
+	* gdkgetrgb.c (gdk_get_rgb_image): Handle X BadMatch errors.
+
+	* gnubg.c: [USE_GTK] Remove code which polled
+	ConnectionNumber( GDK_DISPLAY() ) -- this is redundant now, since
+	all input functions that used to call GetInput() (e.g. reading
+	manual dice) now have GTK dialogs.
+
+	* gtkgame.c (CommentaryChanged, GTKFreeze, GTKThaw): New functions.
+
+	* gtkprefs.c (ToggleTranslucent): Remember alpha when translucency
+	is turned off and then back on again.
+
+	* play.c (FreeMoveRecord, AnnotateMove): New functions.
+
+	* sgf.c (RestoreDoubleAnalysis, RestoreMoveAnalysis, 
+	WriteDoubleAnalysis, WriteMoveAnalysis, WriteLuck, WriteSkill): 
+	New functions.
+	
 Fri Mar 30 16:02:18 2001  Gary Wong  <gtw@research.att.com>
 
 	* gdkgetrgb.c (gdk_get_rgb_image): Handle errors in gdk_image_get().

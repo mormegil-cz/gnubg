@@ -241,6 +241,7 @@ extern void CommandSetBoard( char *sz ) {
 
     pmsb = malloc( sizeof( *pmsb ) );
     pmsb->mt = MOVE_SETBOARD;
+    pmsb->sz = NULL;
     
     if( fMove )
 	SwapSides( an );
@@ -321,6 +322,7 @@ extern void CommandSetCubeCentre( char *sz ) {
     
     pmscp = malloc( sizeof( *pmscp ) );
     pmscp->mt = MOVE_SETCUBEPOS;
+    pmscp->sz = NULL;
     pmscp->fCubeOwner = -1;
     
     AddMoveRecord( pmscp );
@@ -360,6 +362,7 @@ extern void CommandSetCubeOwner( char *sz ) {
 
     pmscp = malloc( sizeof( *pmscp ) );
     pmscp->mt = MOVE_SETCUBEPOS;
+    pmscp->sz = NULL;
     pmscp->fCubeOwner = i;
     
     AddMoveRecord( pmscp );
@@ -417,8 +420,8 @@ extern void CommandSetCubeValue( char *sz ) {
     for( i = MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
 	    pmscv = malloc( sizeof( *pmscv ) );
-
 	    pmscv->mt = MOVE_SETCUBEVAL;
+	    pmscv->sz = NULL;
 	    pmscv->nCube = n;
 
 	    AddMoveRecord( pmscv );
@@ -494,9 +497,11 @@ extern void CommandSetDice( char *sz ) {
 
     pmsd = malloc( sizeof( *pmsd ) );
     pmsd->mt = MOVE_SETDICE;
+    pmsd->sz = NULL;
     pmsd->fPlayer = fMove;
     pmsd->anDice[ 0 ] = n0;
     pmsd->anDice[ 1 ] = n1;
+    pmsd->lt = LUCK_NONE;
     
     AddMoveRecord( pmsd );
 

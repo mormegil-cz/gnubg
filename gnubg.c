@@ -90,7 +90,7 @@ static int fReadingOther;
 #if USE_GTK
 #include <gtk/gtk.h>
 #if HAVE_GDK_GDKX_H
-#include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+#include <gdk/gdkx.h>
 #endif
 #include "gtkboard.h"
 #include "gtkgame.h"
@@ -169,6 +169,7 @@ static char szDICE[] = "<die> <die>",
     szMOVE[] = "<from> <to> ...",
     szONOFF[] = "on|off",
     szOPTCOMMAND[] = "[command]",
+    szOPTEMPHASIS[] = "[emphasis]",
     szOPTFILENAME[] = "[filename]",
     szOPTPOSITION[] = "[position]",
     szOPTSEED[] = "[seed]",
@@ -184,7 +185,21 @@ static char szDICE[] = "<die> <die>",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>";
 
-command acDatabase[] = {
+command acAnnotate[] = {
+    { "bad", CommandAnnotateBad, "Mark a bad move", szOPTEMPHASIS, NULL },
+    { "clear", CommandAnnotateClear, "Remove annotations from a move",
+      NULL, NULL },
+    { "doubtful", CommandAnnotateDoubtful, "Mark a doubtful move", NULL,
+      NULL },
+    { "good", CommandAnnotateGood, "Mark a good move", szOPTEMPHASIS, NULL },
+    { "interesting", CommandAnnotateInteresting, "Mark an interesting move",
+      NULL, NULL },
+    { "lucky", CommandAnnotateLucky, "Mark a lucky dice roll", szOPTEMPHASIS,
+      NULL },
+    { "unlucky", CommandAnnotateUnlucky, "Mark an unlucky dice roll",
+      szOPTEMPHASIS, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
       NULL, NULL },
     { "export", CommandDatabaseExport, "Write the positions in the database "
@@ -471,6 +486,7 @@ command acDatabase[] = {
       NULL, NULL },
     { "agree", CommandAgree, "Agree to a resignation", NULL, NULL },
     { "analysis", CommandAnalysis, "Run analysis", szFILENAME, NULL },
+    { "annotate", NULL, "Record notes about a game", NULL, acAnnotate },
     { "beaver", CommandRedouble, "Synonym for `redouble'", NULL, NULL },
     { "copy", CommandCopy, "Copy current position to clipboard", NULL,
       NULL },
@@ -2624,15 +2640,14 @@ extern char *GetInput( char *szPrompt ) {
     
     char *sz;
     char *pch;
-#if USE_GUI
-#ifdef ConnectionNumber
-    fd_set fds;
-#endif
 
 #if USE_GTK
-    assert( fTTY );
+    assert( fTTY && !fX );
 #endif
-    
+
+#if USE_EXT
+    fd_set fds;
+
     if( fX ) {
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
@@ -2664,14 +2679,11 @@ extern char *GetInput( char *szPrompt ) {
 	    while( !szInput ) {
 		FD_ZERO( &fds );
 		FD_SET( STDIN_FILENO, &fds );
-#ifdef ConnectionNumber
-		FD_SET( ConnectionNumber( DISPLAY ), &fds );
+		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
 		
-		select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL, NULL,
+		select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
 			NULL );
-#else
-		select( STDIN_FILENO + 1, &fds, NULL, NULL, NULL );
-#endif
+
 		if( fInterrupt ) {
 		    outputc( '\n' );
 		    break;
@@ -2686,10 +2698,9 @@ extern char *GetInput( char *szPrompt ) {
 			fInputAgain = FALSE;
 		    }
 		}
-#ifdef ConnectionNumber
-		if( FD_ISSET( ConnectionNumber( DISPLAY ), &fds ) )
+
+		if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
 		    HandleXAction();
-#endif
 	    }
 
 	    if( fWasReadingCommand ) {
@@ -2709,7 +2720,7 @@ extern char *GetInput( char *szPrompt ) {
 	    
 	    return szInput;
 	}
-
+#endif
 	/* Using X, but not readline. */
 	if( fInterrupt )
 	    return NULL;
@@ -2721,27 +2732,21 @@ extern char *GetInput( char *szPrompt ) {
 	do {
 	    FD_ZERO( &fds );
 	    FD_SET( STDIN_FILENO, &fds );
-#ifdef ConnectionNumber
-	    FD_SET( ConnectionNumber( DISPLAY ), &fds );
+	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
 
-	    select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL, NULL,
+	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
 		    NULL );
-#else
-	    select( STDIN_FILENO + 1, &fds, NULL, NULL, NULL );
-#endif
+
 	    if( fInterrupt ) {
 		outputc( '\n' );
 		return NULL;
 	    }
 	    
-#ifdef ConnectionNumber
-	    if( FD_ISSET( ConnectionNumber( DISPLAY ), &fds ) )
+	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
 		HandleXAction();
-#endif
 	} while( !FD_ISSET( STDIN_FILENO, &fds ) );
 
 	goto ReadDirect;
-#endif
     }
 #endif
 #if HAVE_LIBREADLINE
@@ -2772,7 +2777,7 @@ extern char *GetInput( char *szPrompt ) {
     output( szPrompt );
     fflush( stdout );
 
-#if USE_GUI
+#if USE_EXT
  ReadDirect:
 #endif
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */

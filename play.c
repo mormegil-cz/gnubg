@@ -42,14 +42,16 @@
 #include "positionid.h"
 #include "matchequity.h"
 
-char *aszGameResult[] = { "single game", "gammon", "backgammon" };
+char *aszGameResult[] = { "single game", "gammon", "backgammon" },
+    *aszSkillType[] = { "very bad", "bad", "doubtful", NULL,
+			"interesting", "good", "very good" },
+    *aszSkillTypeAbbr[] = { "??", "?", "?!", "", "!?", "!", "!!" },
+    *aszLuckType[] = { "very unlucky", "unlucky", NULL, "lucky",
+		       "very lucky" };
 list lMatch, *plGame, *plLastMove;
 static int fComputerDecision = FALSE;
 
 #if USE_GTK
-#if HAVE_GDK_GDKX_H
-#include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
-#endif
 #include "gtkboard.h"
 #include "gtkgame.h"
 #endif
@@ -128,6 +130,9 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	break;
 	
     case MOVE_DOUBLE:
+	if( fMove < 0 )
+	    fMove = pmr->d.fPlayer;
+	
 	if( nCube >= MAX_CUBE )
 	    break;
 	
@@ -195,6 +200,9 @@ static void ApplyMoveRecord( moverecord *pmr ) {
     case MOVE_SETBOARD:
 	PositionFromKey( anBoard, pmr->sb.auchKey );
 
+	if( fMove < 0 )
+	    fTurn = fMove = 0;
+	
 	if( fMove )
 	    SwapSides( anBoard );
 
@@ -208,12 +216,18 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	break;
 	
     case MOVE_SETCUBEVAL:
+	if( fMove < 0 )
+	    fMove = 0;
+	
 	nCube = pmr->scv.nCube;
 	fDoubled = FALSE;
 	fTurn = fMove;
 	break;
 	
     case MOVE_SETCUBEPOS:
+	if( fMove < 0 )
+	    fMove = 0;
+	
 	fCubeOwner = pmr->scp.fCubeOwner;
 	fDoubled = FALSE;
 	fTurn = fMove;
@@ -235,10 +249,28 @@ extern void CalculateBoard( void ) {
     } while( pl != plLastMove );
 }
 
+static void FreeMoveRecord( moverecord *pmr ) {
+
+    switch( pmr->mt ) {
+    case MOVE_NORMAL:
+	if( pmr->n.ml.cMoves )
+	    free( pmr->n.ml.amMoves );
+	break;
+
+    default:
+	break;
+    }
+
+    if( pmr->a.sz )
+	free( pmr->a.sz );
+    
+    free( pmr );
+}
+
 static void FreeGame( list *pl ) {
 
     while( pl->plNext != pl ) {
-	free( pl->plNext->p );
+	FreeMoveRecord( pl->plNext->p );
 	ListDelete( pl->plNext );
     }
 
@@ -300,7 +332,7 @@ static int PopMoveRecord( list *plDelete ) {
     while( pl->plNext->p ) {
 	if( pl->plNext == plLastMove )
 	    plLastMove = pl;
-	free( pl->plNext->p );
+	FreeMoveRecord( pl->plNext->p );
 	ListDelete( pl->plNext );
     }
 
@@ -311,6 +343,63 @@ extern void AddMoveRecord( void *pv ) {
 
     moverecord *pmr = pv, *pmrOld;
 
+    switch( pmr->mt ) {
+    case MOVE_GAMEINFO:
+	assert( pmr->g.nMatch >= 0 );
+	assert( pmr->g.i >= 0 );
+	if( pmr->g.nMatch ) {
+	    assert( pmr->g.i <= pmr->g.nMatch * 2 + 1 );
+	    assert( pmr->g.anScore[ 0 ] < pmr->g.nMatch );
+	    assert( pmr->g.anScore[ 1 ] < pmr->g.nMatch );
+	}
+	if( !pmr->g.fCrawford )
+	    assert( !pmr->g.fCrawfordGame );
+	
+	break;
+	
+    case MOVE_NORMAL:
+	assert( pmr->n.fPlayer >= 0 && pmr->n.fPlayer <= 1 );
+	assert( pmr->n.etDouble >= EVAL_NONE &&
+		pmr->n.etDouble <= EVAL_ROLLOUT );
+	assert( pmr->n.ml.cMoves >= 0 && pmr->n.ml.cMoves < MAX_MOVES );
+	if( pmr->n.ml.cMoves )
+	    assert( pmr->n.iMove >= 0 && pmr->n.iMove < pmr->n.ml.cMoves );
+	assert( pmr->n.lt >= LUCK_VERYBAD && pmr->n.lt <= LUCK_VERYGOOD );
+	assert( pmr->n.st >= SKILL_VERYBAD && pmr->n.st <= SKILL_VERYGOOD );
+	break;
+	
+    case MOVE_DOUBLE:
+	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
+	assert( pmr->d.etDouble >= EVAL_NONE &&
+		pmr->d.etDouble <= EVAL_ROLLOUT );
+	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
+	break;
+	
+    case MOVE_TAKE:
+    case MOVE_DROP:
+	assert( pmr->t.fPlayer >= 0 && pmr->t.fPlayer <= 1 );
+	assert( pmr->t.st >= SKILL_VERYBAD && pmr->t.st <= SKILL_VERYGOOD );
+	break;
+	
+    case MOVE_RESIGN:
+	assert( pmr->r.fPlayer >= 0 && pmr->r.fPlayer <= 1 );
+	assert( pmr->r.nResigned >= 1 && pmr->r.nResigned <= 3 );
+	break;
+	
+    case MOVE_SETDICE:
+	assert( pmr->sd.fPlayer >= 0 && pmr->sd.fPlayer <= 1 );	
+	assert( pmr->sd.lt >= LUCK_VERYBAD && pmr->sd.lt <= LUCK_VERYGOOD );
+	break;
+	
+    case MOVE_SETBOARD:
+    case MOVE_SETCUBEVAL:
+    case MOVE_SETCUBEPOS:
+	break;
+	
+    default:
+	assert( FALSE );
+    }
+    
     /* Delete all games after plGame, and all records after plLastMove. */
     PopGame( plGame, FALSE );
     /* FIXME when we can handle variations, we should save the old moves
@@ -333,10 +422,7 @@ extern void AddMoveRecord( void *pv ) {
     
     plLastMove = ListInsert( plGame, pmr );
 
-#if USE_GTK
-    if( fX )
-	GTKSetMoveRecord( pmr );
-#endif    
+    SetMoveRecord( pmr );
 }
 
 extern void SetMoveRecord( void *pv ) {
@@ -395,11 +481,11 @@ static void ResetDelayTimer( void ) {
 extern void AddGame( moverecord *pmr ) {
     
 #if USE_GTK
-    char sz[ 90 ]; /* "Game 999: [32] 99999, [32] 99999" */
+    char sz[ 32 ];
     
     if( fX ) {
-	sprintf( sz, "Game %d: %s %d, %s %d", pmr->g.i + 1, ap[ 0 ].szName,
-		 pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
+	sprintf( sz, "Game %d: %d-%d", pmr->g.i + 1, pmr->g.anScore[ 0 ],
+		 pmr->g.anScore[ 1 ] );
 	GTKAddGame( sz );
     }
 #endif
@@ -421,6 +507,7 @@ static void NewGame( void ) {
 
     pmr = malloc( sizeof( movegameinfo ) );
     pmr->g.mt = MOVE_GAMEINFO;
+    pmr->g.sz = NULL;
     pmr->g.i = cGames;
     pmr->g.nMatch = nMatchTo;
     pmr->g.anScore[ 0 ] = anScore[ 0 ];
@@ -473,9 +560,11 @@ static void NewGame( void ) {
     
     pmr = malloc( sizeof( pmr->sd ) );
     pmr->mt = MOVE_SETDICE;
+    pmr->sd.sz = NULL;
     pmr->sd.anDice[ 0 ] = anDice[ 0 ];
     pmr->sd.anDice[ 1 ] = anDice[ 1 ];
     pmr->sd.fPlayer = anDice[ 1 ] > anDice[ 0 ];
+    pmr->sd.lt = LUCK_NONE;
     AddMoveRecord( pmr );
     UpdateSetting( &fTurn );
     UpdateSetting( &gs );
@@ -656,12 +745,15 @@ static int ComputerTurn( void ) {
 
       pmn = malloc( sizeof( *pmn ) );
       pmn->mt = MOVE_NORMAL;
+      pmn->sz = NULL;
       pmn->anRoll[ 0 ] = anDice[ 0 ];
       pmn->anRoll[ 1 ] = anDice[ 1 ];
       pmn->fPlayer = fTurn;
       pmn->ml.cMoves = 0;
       pmn->ml.amMoves = NULL;
       pmn->etDouble = EVAL_NONE;
+      pmn->lt = LUCK_NONE;
+      pmn->st = SKILL_NONE;
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
                         anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
@@ -707,12 +799,15 @@ static int ComputerTurn( void ) {
     
     pmn = malloc( sizeof( *pmn ) );
     pmn->mt = MOVE_NORMAL;
+    pmn->sz = NULL;
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
     pmn->ml.cMoves = 0;
     pmn->ml.amMoves = NULL;
     pmn->etDouble = EVAL_NONE;
+    pmn->lt = LUCK_NONE;
+    pmn->st = SKILL_NONE;
     
     FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
     
@@ -762,10 +857,16 @@ static int ComputerTurn( void ) {
       
       pmn = malloc( sizeof( *pmn ) );
       pmn->mt = MOVE_NORMAL;
+      pmn->sz = NULL;
       pmn->anRoll[ 0 ] = anDice[ 0 ];
       pmn->anRoll[ 1 ] = anDice[ 1 ];
       pmn->fPlayer = fTurn;
-
+      pmn->ml.cMoves = 0;
+      pmn->ml.amMoves = NULL;
+      pmn->etDouble = EVAL_NONE;
+      pmn->lt = LUCK_NONE;
+      pmn->st = SKILL_NONE;
+      
       if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
 	  pmn->anMove[ 0 ] = 0;
 	  outputl( "Warning: badly formed move from external player" );
@@ -835,9 +936,16 @@ static int TryBearoff( void ) {
 		/* All dice bear off */
 		pmn = malloc( sizeof( *pmn ) );
 		pmn->mt = MOVE_NORMAL;
+		pmn->sz = NULL;
 		pmn->anRoll[ 0 ] = anDice[ 0 ];
 		pmn->anRoll[ 1 ] = anDice[ 1 ];
 		pmn->fPlayer = fTurn;
+		pmn->ml.cMoves = 0;
+		pmn->ml.amMoves = NULL;
+		pmn->etDouble = EVAL_NONE;
+		pmn->lt = LUCK_NONE;
+		pmn->st = SKILL_NONE;
+		
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
 		
@@ -902,8 +1010,8 @@ extern void NextTurn( void ) {
 
 #ifdef ConnectionNumber /* FIXME use configure for this */
 		FD_ZERO( &fds );
-		FD_SET( ConnectionNumber( DISPLAY ), &fds );
-		if( select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL,
+		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+		if( select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL,
 			    NULL, &tv ) > 0 ) {
 		    HandleXAction();
 		    if( !fInterrupt )
@@ -1076,11 +1184,108 @@ extern void CommandAgree( char *sz ) {
 
     pmr = malloc( sizeof( *pmr ) );
     pmr->mt = MOVE_RESIGN;
+    pmr->sz = NULL;
     pmr->fPlayer = !fTurn;
     pmr->nResigned = fResigned;
     AddMoveRecord( pmr );
 
     TurnDone();
+}
+
+static void AnnotateMove( skilltype st ) {
+
+    moverecord *pmr;
+
+    if( !( pmr = plLastMove->plNext->p ) ) {
+	outputl( "You must select a move to annotate first." );
+	return;
+    }
+
+    switch( pmr->mt ) {
+    case MOVE_NORMAL:
+	pmr->n.st = st;
+	break;
+	
+    case MOVE_DOUBLE:
+	pmr->d.st = st;
+	break;
+	
+    case MOVE_TAKE:
+    case MOVE_DROP:
+	pmr->t.st = st;
+	break;
+	
+    default:
+	outputl( "You cannot annotate this move." );
+	return;
+    }
+
+    outputf( "Move marked as %s.\n", aszSkillType[ st ] );
+}
+
+static void AnnotateRoll( lucktype lt ) {
+
+    /* FIXME */
+}
+
+static int Emphasis( char *sz, char *szDescription ) {
+
+    return 0; /* FIXME */
+}
+
+extern void CommandAnnotateBad( char *sz ) {
+
+    int f;
+
+    if( ( f = Emphasis( sz, "bad" ) < 0 ) )
+	return;
+    
+    AnnotateMove( f ? SKILL_VERYBAD : SKILL_BAD );
+}
+
+extern void CommandAnnotateClear( char *sz ) {
+
+    /* FIXME */
+}
+
+extern void CommandAnnotateDoubtful( char *sz ) {
+
+    AnnotateMove( SKILL_DOUBTFUL );
+}
+
+extern void CommandAnnotateGood( char *sz ) {
+
+    int f;
+
+    if( ( f = Emphasis( sz, "good" ) < 0 ) )
+	return;
+    
+    AnnotateMove( f ? SKILL_VERYGOOD : SKILL_GOOD );
+}
+
+extern void CommandAnnotateInteresting( char *sz ) {
+
+    AnnotateMove( SKILL_INTERESTING );
+}
+
+extern void CommandAnnotateLucky( char *sz ) {
+
+    int f;
+
+    if( ( f = Emphasis( sz, "lucky" ) < 0 ) )
+	return;
+    
+    AnnotateRoll( f ? LUCK_VERYGOOD : LUCK_GOOD );
+}
+
+extern void CommandAnnotateUnlucky( char *sz ) {
+
+    int f;
+
+    if( ( f = Emphasis( sz, "unlucky" ) < 0 ) )
+	return;
+    
+    AnnotateRoll( f ? LUCK_VERYBAD : LUCK_BAD );
 }
 
 extern void CommandDecline( char *sz ) {
@@ -1189,7 +1394,10 @@ extern void CommandDouble( char *sz ) {
     
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_DOUBLE;
+    pmr->d.sz = NULL;
     pmr->d.fPlayer = fTurn;
+    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -1217,7 +1425,9 @@ extern void CommandDrop( char *sz ) {
     
     pmr = malloc( sizeof( pmr->t ) );
     pmr->mt = MOVE_DROP;
+    pmr->t.sz = NULL;
     pmr->t.fPlayer = fTurn;
+    pmr->t.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -1291,12 +1501,16 @@ CommandMove( char *sz ) {
     if( ml.cMoves <= 1 ) {
 	    pmn = malloc( sizeof( *pmn ) );
 	    pmn->mt = MOVE_NORMAL;
+	    pmn->sz = NULL;
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
 	    pmn->ml.cMoves = 0;
 	    pmn->ml.amMoves = NULL;
 	    pmn->etDouble = EVAL_NONE;
+	    pmn->lt = LUCK_NONE;
+	    pmn->st = SKILL_NONE;
+	    
 	    if( ml.cMoves )
 		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
 			sizeof( pmn->anMove ) );
@@ -1356,12 +1570,15 @@ CommandMove( char *sz ) {
         /* we have a legal move! */
         pmn = malloc( sizeof( *pmn ) );
         pmn->mt = MOVE_NORMAL;
+	pmn->sz = NULL;
         pmn->anRoll[ 0 ] = anDice[ 0 ];
         pmn->anRoll[ 1 ] = anDice[ 1 ];
         pmn->fPlayer = fTurn;
 	pmn->ml.cMoves = 0;
 	pmn->ml.amMoves = NULL;
 	pmn->etDouble = EVAL_NONE;
+	pmn->lt = LUCK_NONE;
+	pmn->st = SKILL_NONE;
         memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
                 sizeof( pmn->anMove ) );
 		
@@ -1751,8 +1968,10 @@ extern void CommandRedouble( char *sz ) {
     
     pmr = malloc( sizeof( pmr->d ) );
     pmr->mt = MOVE_DOUBLE;
+    pmr->d.sz = NULL;
     pmr->d.fPlayer = fTurn;
     pmr->d.etDouble = EVAL_NONE;
+    pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -1865,9 +2084,11 @@ CommandRoll( char *sz ) {
 
   pmr = malloc( sizeof( pmr->sd ) );
   pmr->mt = MOVE_SETDICE;
+  pmr->sd.sz = NULL;
   pmr->sd.anDice[ 0 ] = anDice[ 0 ];
   pmr->sd.anDice[ 1 ] = anDice[ 1 ];
   pmr->sd.fPlayer = fTurn;
+  pmr->sd.lt = LUCK_NONE;
   AddMoveRecord( pmr );
   
   ShowBoard();
@@ -1888,6 +2109,7 @@ CommandRoll( char *sz ) {
   if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
     pmn = malloc( sizeof( *pmn ) );
     pmn->mt = MOVE_NORMAL;
+    pmn->sz = NULL;
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
@@ -1895,7 +2117,9 @@ CommandRoll( char *sz ) {
     pmn->ml.cMoves = 0;
     pmn->ml.amMoves = NULL;
     pmn->etDouble = EVAL_NONE;
-	
+    pmn->lt = LUCK_NONE;
+    pmn->st = SKILL_NONE;
+    
     ShowAutoMove( anBoard, pmn->anMove );
 
     AddMoveRecord( pmn );
@@ -1905,12 +2129,15 @@ CommandRoll( char *sz ) {
                                                 fAutoBearoff ) ) ) {
     pmn = malloc( sizeof( *pmn ) );
     pmn->mt = MOVE_NORMAL;
+    pmn->sz = NULL;
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
     pmn->ml.cMoves = 0;
     pmn->ml.amMoves = NULL;
     pmn->etDouble = EVAL_NONE;
+    pmn->lt = LUCK_NONE;
+    pmn->st = SKILL_NONE;
     memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
 
     ShowAutoMove( anBoard, pmn->anMove );
@@ -1945,7 +2172,9 @@ extern void CommandTake( char *sz ) {
     
     pmr = malloc( sizeof( pmr->t ) );
     pmr->mt = MOVE_TAKE;
+    pmr->t.sz = NULL;
     pmr->t.fPlayer = fTurn;
+    pmr->t.st = SKILL_NONE;
     AddMoveRecord( pmr );
 
     UpdateSetting( &nCube );
