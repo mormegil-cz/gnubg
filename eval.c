@@ -5049,7 +5049,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
     return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
 
   }
-  else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] <= rTG ) {
+  else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] < rTG ) {
 
     /* In double window */
 
