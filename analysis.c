@@ -1010,7 +1010,10 @@ absoluteFibsRating ( const float r, const int n ) {
   if ( r < 0 )
     return 2200;
 
-  for ( i = 6; i >= 0; i-- ) {
+  /* use linear interpolation between 
+     (0.030,1500) and (0.0,2200) */
+
+  for ( i = 6; i >= 1; i-- ) {
 
     if ( r < arErrorRate[ i ] ) {
 
@@ -1023,7 +1026,10 @@ absoluteFibsRating ( const float r, const int n ) {
 
   }
 
-  return 500;
+  /* error rate above 0.030 */
+  /* use exponential interpolation */
+
+  return 500.0f + 1000.0f * exp ( 0.030f - r );
 
 }
 
