@@ -200,7 +200,7 @@ file @file{INSTALL}.
 @subsection  What software do I need for compiling under @emph{MS Windows}?
 
 Nardy Pillards has published a fine instruction guide at
-@uref{http://users.skynet.be/bk228456/gnubg_new_build.html,, Windows-Build}.
+@uref{http://users.skynet.be/bk228456/GNUBgW.htm,, Windows-Build}.
 Go to this page and follow the steps shown there.
 
 @node It does not compile.
