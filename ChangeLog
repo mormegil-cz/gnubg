@@ -1,3 +1,10 @@
+Fri May 30 17:41:42 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (board_set): move calculation of nchequers to
+	_after_ bd->points[26] and bd->points[27] has been calculated.
+	* gtkboard.c (write_points): fix sign bug.
+	(bug #3806 reported by Henrik Ravn)
+
 Fri May 30 12:58:27 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (ShowMove): fix bug #3809

@@ -149,8 +149,8 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
     anOff[ 1 ] -= anBoard[ 1 ][ i ];
   }
     
-  points[ 26 ] = anOff[ turn >= 0  ];
-  points[ 27 ] = anOff[ turn < 0 ];
+  points[ 26 ] = anOff[ turn >= 0  ] * turn;
+  points[ 27 ] = - anOff[ turn < 0 ] * turn;
 
 }
 
@@ -2032,15 +2032,6 @@ static gint board_set( Board *board, const gchar *board_text,
     old_board[ 26 ] = bd->points[ 26 ];
     old_board[ 27 ] = bd->points[ 27 ];
 
-    /* calculate number of chequers */
-    
-    bd->nchequers = 0;
-    for ( i = 0; i < 28; ++i )
-      if ( bd->points[ i ] > 0 )
-        bd->nchequers += bd->points[ i ];
-    
-
-
     old_cube = bd->cube;
     old_doubled = bd->doubled;
     old_crawford = bd->crawford_game;
@@ -2070,6 +2061,13 @@ static gint board_set( Board *board, const gchar *board_text,
 	bd->points[ 26 ] = bd->off_opponent;
 	bd->points[ 27 ] = bd->off;
     }
+
+    /* calculate number of chequers */
+    
+    bd->nchequers = 0;
+    for ( i = 0; i < 28; ++i )
+      if ( bd->points[ i ] > 0 )
+        bd->nchequers += bd->points[ i ];
 
     if( !editing ) {
 	gtk_entry_set_text( GTK_ENTRY( bd->name0 ), bd->name_opponent );
