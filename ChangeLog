@@ -1,3 +1,7 @@
+Fri Sep  5 19:23:04 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (TextToClipboard): fix small memory leak.
+
 Fri Sep  5 09:26:15 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.c (TextToClipboard): Deal with Japanese WIN32 clipboard

@@ -8371,9 +8371,11 @@ TextToClipboard( const char *sz ) {
 
 #if WIN32
 #if ENABLE_NLS
-  /* darty hack for Windows Japanese edition */
+  /* dirty hack for Windows Japanese edition */
   if ( !strncmp( "Japanese", setlocale(LC_ALL, NULL), 8 ) ) {
-    WinCopy( Convert( sz, "SHIFT_JIS", GNUBG_CHARSET ) );
+    char *pch = Convert( sz, "SHIFT_JIS", GNUBG_CHARSET );
+    WinCopy( pch );
+    free( pch );
   }
   else {
     WinCopy ( sz );
