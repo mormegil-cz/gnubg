@@ -3501,26 +3501,20 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _evalwidget {
     evalcontext *pec;
-    GtkWidget *pwCubeful, *pwReduced, *pwSearchCandidates, *pwSearchTolerance,
-	*pwDeterministic, *pwNoOnePlyPrune;
+    GtkWidget *pwCubeful, *pwReduced, *pwDeterministic;
     GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
 	*padjNoise;
     int *pfOK;
   GtkWidget *pwOptionMenu;
-  GtkWidget *pwSearchSpaceMenu;
 } evalwidget;
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 
     pec->nPlies = pew->padjPlies->value;
-    pec->nSearchCandidates = pew->padjSearchCandidates->value;
-    pec->rSearchTolerance = pew->padjSearchTolerance->value;
     pec->fCubeful = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
     pec->nReduced = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwReduced ) ) ? 7 : 0;
-    pec->fNoOnePlyPrune = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pew->pwNoOnePlyPrune ) ) ? TRUE : FALSE;
     pec->rNoise = pew->padjNoise->value;
     pec->fDeterministic = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
@@ -3557,31 +3551,6 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
     gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwOptionMenu ),
                                   NUM_SETTINGS );
 
-  /* update search space menu */
-
-  fFound = FALSE;
-
-  for ( i = 0; i < NUM_SEARCHSPACES; i++ )
-
-    if ( ecCurrent.nSearchCandidates == anSearchCandidates[ i ] &&
-         ecCurrent.rSearchTolerance == arSearchTolerances[ i ] ) {
-
-      /* current search spaces settings equal to a predefind setting */
-
-      gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwSearchSpaceMenu ),
-                                    i );
-      fFound = TRUE;
-      break;
-
-    }
-
-  /* user defined setting */
-
-  if ( ! fFound )
-    gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwSearchSpaceMenu ),
-                                  NUM_SEARCHSPACES );
-         
-
 }
 
 
@@ -3595,32 +3564,9 @@ static void EvalNoiseValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
 static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
-    gtk_widget_set_sensitive( pew->pwSearchCandidates, padj->value > 0 );
-    gtk_widget_set_sensitive( pew->pwSearchTolerance, padj->value > 0 );
-    gtk_widget_set_sensitive( pew->pwSearchSpaceMenu, padj->value > 0 );
     gtk_widget_set_sensitive( pew->pwReduced, padj->value == 2 );
-    gtk_widget_set_sensitive( pew->pwNoOnePlyPrune, padj->value > 1 );
 
     EvalChanged ( NULL, pew );
-
-}
-
-static void SearchSpaceMenuActivate ( GtkWidget *pwItem,
-                                      evalwidget *pew ) {
-
-  int *piSelected;
-
-  piSelected = gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
-
-  if ( *piSelected == NUM_SEARCHSPACES )
-    return; /* user defined */
-
-  /* set all widgets to predefined values */
-
-  gtk_adjustment_set_value ( pew->padjSearchCandidates,
-                             anSearchCandidates[ *piSelected ] );
-  gtk_adjustment_set_value ( pew->padjSearchTolerance,
-                             arSearchTolerances [ *piSelected ] );
 
 }
 
@@ -3641,16 +3587,10 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   pec = &aecSettings[ *piSelected ];
  
   gtk_adjustment_set_value ( pew->padjPlies, pec->nPlies );
-  gtk_adjustment_set_value ( pew->padjSearchCandidates,
-                             pec->nSearchCandidates );
-  gtk_adjustment_set_value ( pew->padjSearchTolerance,
-                             pec->rSearchTolerance );
   gtk_adjustment_set_value ( pew->padjNoise, pec->rNoise );
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwReduced ),
                                 pec->nReduced );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwNoOnePlyPrune ),
-                                pec->fNoOnePlyPrune );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
                                 pec->fCubeful );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
@@ -3761,86 +3701,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( pew->padjPlies, 1, 0 ) );
 
-
-    /*
-     * search space
-     */
-
-    pwFrame2 = gtk_frame_new ( _("Search space") );
-    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwFrame2 );
-
-    pw3 = gtk_vbox_new ( FALSE, 8 );
-    gtk_container_set_border_width( GTK_CONTAINER( pw3 ), 8 );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame2 ), pw3 );
-
-    /* predefined search spaces */
-
-    pwMenu = gtk_menu_new ();
-
-    for ( i = 0; i <= NUM_SEARCHSPACES; i++ ) {
-
-      if ( i < NUM_SEARCHSPACES )
-        gtk_menu_append ( GTK_MENU ( pwMenu ),
-                          pwItem = gtk_menu_item_new_with_label ( 
-                          gettext ( aszSearchSpaces[ i ] ) ) );
-      else
-        gtk_menu_append ( GTK_MENU ( pwMenu ),
-                          pwItem = gtk_menu_item_new_with_label (
-                          _("user defined") ) );
-
-      pi = malloc ( sizeof ( int ) );
-      *pi = i;
-      gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
-                                pi, free );
-
-      gtk_signal_connect ( GTK_OBJECT ( pwItem ), "activate",
-                           GTK_SIGNAL_FUNC ( SearchSpaceMenuActivate ),
-                           (void *) pew );
-
-    }
-
-    pew->pwSearchSpaceMenu = gtk_option_menu_new ();
-    gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pew->pwSearchSpaceMenu ), 
-                               pwMenu );
-
-    gtk_container_add ( GTK_CONTAINER ( pw3 ), pew->pwSearchSpaceMenu );
-
-                                                               
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pw3 ), pw );
-
-    pew->padjSearchCandidates = GTK_ADJUSTMENT( gtk_adjustment_new(
-	pec->nSearchCandidates, 2, MAX_SEARCH_CANDIDATES, 1, 1, 0 ) );
-
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Search candidates:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       pew->pwSearchCandidates = gtk_spin_button_new(
-			   pew->padjSearchCandidates, 1, 0 ) );
-
-
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pw3 ), pw );
-
-    pew->padjSearchTolerance = GTK_ADJUSTMENT( gtk_adjustment_new(
-	pec->rSearchTolerance, 0, 10, 0.01, 0.01, 0.0 ) );
-
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Search tolerance:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       pew->pwSearchTolerance = gtk_spin_button_new(
-			   pew->padjSearchTolerance, 0.01, 3 ) );
-
-
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pw3 ), pw );
-
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       pew->pwNoOnePlyPrune = gtk_check_button_new_with_label(
-			   _("No 1-ply pruning") ) );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwNoOnePlyPrune ),
-				  pec->fNoOnePlyPrune );
-
     /* reduced evaluation */
 
     /* FIXME if and when we support different values for nReduced, this
@@ -3905,14 +3765,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 			GTK_SIGNAL_FUNC( EvalNoiseValueChanged ), pew );
     EvalNoiseValueChanged( pew->padjNoise, pew );
 
-    gtk_signal_connect( GTK_OBJECT( pew->padjSearchCandidates ), 
-                        "value-changed",
-			GTK_SIGNAL_FUNC( EvalChanged ), pew );
-
-    gtk_signal_connect( GTK_OBJECT( pew->padjSearchTolerance ), 
-                        "value-changed",
-			GTK_SIGNAL_FUNC( EvalChanged ), pew );
-
     gtk_signal_connect ( GTK_OBJECT( pew->pwDeterministic ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
@@ -3922,8 +3774,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
-    gtk_signal_connect ( GTK_OBJECT( pew->pwNoOnePlyPrune ), "toggled",
-                         GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
     
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
@@ -3957,24 +3807,8 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
 	UserCommand( sz );
     }
 
-    if( pec->nSearchCandidates != pecOrig->nSearchCandidates ) {
-	sprintf( sz, "%s candidates %d", szPrefix, pec->nSearchCandidates );
-	UserCommand( sz );
-    }
-
-    if( pec->rSearchTolerance != pecOrig->rSearchTolerance ) {
-        lisprintf( sz, "%s tolerance %.3f", szPrefix, pec->rSearchTolerance );
-	UserCommand( sz );
-    }
-    
     if( pec->nReduced != pecOrig->nReduced ) {
 	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
-	UserCommand( sz );
-    }
-
-    if( pec->fNoOnePlyPrune != pecOrig->fNoOnePlyPrune ) {
-	sprintf( sz, "%s nooneplyprune %s", szPrefix,
-			pec->fNoOnePlyPrune ? "on" : "off" );
 	UserCommand( sz );
     }
 
