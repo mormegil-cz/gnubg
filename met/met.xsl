@@ -109,7 +109,7 @@
 
         <tr>
         <th><![CDATA[&nbsp;]]></th>
-        <xsl:for-each select="row/me[position()=1]">
+        <xsl:for-each select="row[position()=1]/me">
         <th><xsl:number value="position()" />-away</th>
         </xsl:for-each>
         </tr>
