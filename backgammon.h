@@ -223,6 +223,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     nBeavers, fOutputMWC, fEgyptian, fOutputWinPC, fOutputMatchPC, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord;
+extern int fAutoAnalysis;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
@@ -356,6 +357,10 @@ extern void HandleInput( char *sz );
 extern int fReadline;
 #endif
 
+extern int
+AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
+              int fUpdateStatistics );
+
 #ifdef WIN32
 extern void WinCopy( char *szOut );
 #endif
@@ -466,6 +471,7 @@ extern void CommandAccept( char * ),
     CommandSetAnalysisThresholdVeryUnlucky( char * ),
     CommandSetAnnotation( char * ),
     CommandSetAppearance( char * ),
+    CommandSetAutoAnalysis( char * ),
     CommandSetAutoBearoff( char * ),
     CommandSetAutoCrawford( char * ),
     CommandSetAutoDoubles( char * ),

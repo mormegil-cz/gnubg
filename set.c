@@ -285,6 +285,13 @@ extern void CommandSetAutoBearoff( char *sz ) {
 	       "automatically bear off chequers." );
 }
 
+extern void CommandSetAutoAnalysis( char *sz ) {
+
+    SetToggle( "automatic analysis", &fAutoAnalysis, sz, 
+               "Will analyse match during play", 
+               "Will not analyse match during play" );
+}
+
 extern void CommandSetAutoCrawford( char *sz ) {
 
     SetToggle( "automatic crawford", &fAutoCrawford, sz, "Will enable the "
