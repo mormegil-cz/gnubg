@@ -1,3 +1,10 @@
+Sun Aug 24 22:13:53 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * dice.xpm,  hint_alt.xpm, resign.xpm, resigns.xpm, stock_cancel.xpm,
+	  stock_edit.xpm, stock_export.xpm, stock_import.xpm, stock_new.xpm,
+	  stock_new_all.xpm stock_new_money.xpm, stock_open.xpm,
+	  stock_save.xpm, stock_ok.xpm, stock_undo.xpm: new files
+
 Thu May 29 12:33:53 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add new files.
