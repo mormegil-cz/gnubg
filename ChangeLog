@@ -1,3 +1,8 @@
+Fri Jul 18 10:12:40 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c (OutputMWC): strip some '+' signs from output of
+	standard error values.
+
 Thu Jul 17 21:59:37 2003  Holger Bochnig <hbgg@gmx.net>
 
 	Sockets support on Windows

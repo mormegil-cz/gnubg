@@ -611,14 +611,16 @@ OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
 
   if ( ! pci->nMatchTo ) {
     /* fmt: "%+7.3f" */
-    sprintf( fmt, "%%+%d.%df", fOutputDigits + 4, fOutputDigits );
+    sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
+             fOutputDigits + 4, fOutputDigits );
     sprintf ( sz, fmt, r );
   }
   else {
     
     if ( ! fOutputMWC ) {
       /* fmt: "%+7.3f" */
-      sprintf( fmt, "%%+%d.%df", fOutputDigits + 4, fOutputDigits );
+      sprintf( fmt, f ? "%%+%d.%df" : "%%%d.%df", 
+               fOutputDigits + 4, fOutputDigits );
       sprintf ( sz, fmt, 
                 f ? mwc2eq ( r, pci ) : se_mwc2eq ( r, pci ) );
     }
@@ -629,7 +631,8 @@ OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
     }
     else {
       /* fmt: "%6.4f" */
-      sprintf( fmt, "%%+%d.%df", fOutputDigits + 3, fOutputDigits + 1 );
+      sprintf( fmt, f? "%%+%d.%df" : "%%%d.%df", 
+               fOutputDigits + 3, fOutputDigits + 1 );
       sprintf ( sz, fmt, r );
     }
   }
