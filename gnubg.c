@@ -1992,9 +1992,11 @@ extern void CommandHelp( char *sz ) {
     command *pc, *pcFull;
     char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
     
-#if USE_GTK && GTK_CHECK_VERSION(2,0,0)
+#if USE_GTK 
+# if GTK_CHECK_VERSION(2,0,0)
     if( fX )
 	return GTKHelp( sz );
+# endif
 #endif
     
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
@@ -4588,7 +4590,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		 "directions for obtaining a pre-trained network." );
 	outputx();
     }
-
 #if USE_GUILE
     GuileInitialise( pchDataDir );
 #endif
