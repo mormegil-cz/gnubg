@@ -932,6 +932,18 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
     if ((pes->et != EVAL_ROLLOUT) || (prc->nGamesDone == 0)) {
 
+      /* later the saved context may to be stored with the move, so
+	 cubeful/cubeless must be made consistent */
+      rcRolloutSave.fCubeful = rcRolloutSave.aecCubeTrunc.fCubeful =
+	rcRolloutSave.aecChequerTrunc.fCubeful = 
+	(fCubeRollout || rcRolloutSave.fCubeful);
+      for (i = 0; i < 2; ++i)
+          rcRolloutSave.aecCube[ i ].fCubeful = 
+	    rcRolloutSave.aecChequer[ i ].fCubeful =
+	    rcRolloutSave.aecCubeLate[ i ].fCubeful =
+	    rcRolloutSave.aecChequerLate[ i] .fCubeful = 
+	    (fCubeRollout || rcRolloutSave.fCubeful);
+
       memcpy (prc, &rcRollout, sizeof (rolloutcontext));
       nGamesDone[ alt ] = prc->nGamesDone = 0;
       prc->nSkip = 0;
@@ -950,6 +962,15 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
     } else {
       int nGames = prc->nGamesDone;
       double r;
+
+      /* make sure the saved rollout contexts are consistent for
+	 cubeful/not cubeful */
+      prc->fCubeful = prc->aecCubeTrunc.fCubeful =
+	  prc->aecChequerTrunc.fCubeful = (prc->fCubeful || fCubeRollout);
+      for (i = 0; i < 2; ++i) 
+	prc->aecCube[ i ].fCubeful = prc->aecChequer[ i ].fCubeful =
+	  prc->aecCubeLate[ i ].fCubeful = 
+	  prc->aecChequerLate[ i] .fCubeful = (prc->fCubeful || fCubeRollout);
 
       if ((nGamesDone[ alt ] = nGames) < nFirstTrial) 
         nFirstTrial = nGames;

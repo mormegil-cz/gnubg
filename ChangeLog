@@ -1,3 +1,9 @@
+Sun Aug 17 17:41:58 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
+
+	* rollout.c - ensure the eval context stored with a rollut has
+	  the cubeful/cubeless flags consistent (some exports reported
+	  incorrectly that portions were cubeful when they weren't)
+
 Sun Aug 17 12:38:22 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c (DumpStatcontext): fix typo.
