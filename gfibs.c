@@ -1,3 +1,4 @@
+/*
  * gfibs.c
  *
  * by Gary Wong <gary@cs.arizona.edu>, 1998-1999.
@@ -548,11 +549,16 @@ static int FibsParse( fibs *pf, char *sz ) {
 
     }
 
+
     if(  sscanf( sz, "%s kibitzes: %s", szName, szTemp ) == 2 ) {
 
-      if ( strcmp ( szName, "mpgnu" ) )
+      if ( strcmp ( szName, "mpgnu" ) ) {
 
-	fprintf ( pfKibitz, "%s: %s\n", szName, szTemp );
+	fprintf ( pfKibitz, "%s\n", sz );
+	
+	fflush( pfKibitz );
+
+      }
 
       return 0;
 
@@ -593,7 +599,8 @@ static int FibsParse( fibs *pf, char *sz ) {
 	    switch( cIntro ) {
 	    case 0:
 		FibsCommand( pf, "k Hi!  I'm a computer player.  Please send "
-			     "comments to <joern@thyssen.nu>.  If I "
+			     "comments to <joern@thyssen.nu> or leave"
+			     " a message for dirac.  If I "
 			     "forget to move, type `kibitz move'," 
 			     "`kibitz roll', or `kibitz join'."
 			     "Technical details: checkerplay 1-ply"
@@ -784,67 +791,72 @@ static int FibsParse( fibs *pf, char *sz ) {
 
 	  if ( gd.anDice[ 0 ] ) {
 
-	  float arOutput[ NUM_OUTPUTS ];
+	    float arOutput[ NUM_OUTPUTS ];
 
-	  c = FindBestMove( anMove, gd.anDice[ 0 ], gd.anDice[ 1 ],
-			    anBoard, &ci, &ecMoves );
+	    c = FindBestMove( anMove, gd.anDice[ 0 ], gd.anDice[ 1 ],
+			      anBoard, &ci, &ecMoves );
 
-	  EvaluatePosition ( anBoard, arOutput, &ci, &ecMoves );
+	    SwapSides ( anBoard );
+	    ci.fMove = ! ci.fMove;
+	    EvaluatePosition ( anBoard, arOutput, &ci, &ecMoves );
+	    InvertEvaluation ( arOutput );
 
-	  printf("\tWin\tW(g)\tW(bg)\tL(g)\tL(bg)\tEquity\tmwc\n");
-	  printf("\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%+7.4f\t%6.4f\n",
-		 arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-		 arOutput[ 3 ], arOutput[ 4 ], 
-		 Utility ( arOutput, &ci ),
-		 UtilityMwc ( arOutput, &ci ) );
+	    ci.fMove = ! ci.fMove;
+	    printf("\tWin\tW(g)\tW(bg)\tL(g)\tL(bg)\tEquity\tmwc\n");
+	    printf("\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%+7.4f\t%6.4f\n",
+		   arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
+		   arOutput[ 3 ], arOutput[ 4 ], 
+		   Utility ( arOutput, &ci ),
+		   UtilityMwc ( arOutput, &ci ) );
 
 #if 1	
-	for( i = 0; i < c >> 1; i++ ) {
-	    if( anMove[ 2 * i ] == 24 )
+	    for( i = 0; i < c >> 1; i++ ) {
+	      if( anMove[ 2 * i ] == 24 )
 		printf( "bar " );
-	    else
+	      else
 		printf( "%d ", gd.fDirection < 0 ?
-			      anMove[ 2 * i ] + 1 : 24 - anMove[ 2 * i ] );
-
-	    if( anMove[ 2 * i + 1 ] < 0 )
+			anMove[ 2 * i ] + 1 : 24 - anMove[ 2 * i ] );
+	      
+	      if( anMove[ 2 * i + 1 ] < 0 )
 		printf( "off " );
-	    else
+	      else
 		printf( "%d ", gd.fDirection < 0 ?
-			      anMove[ 2 * i + 1 ] + 1 :
-			      24 - anMove[ 2 * i + 1 ] );
-	}
-	putchar( '\n' );
+			anMove[ 2 * i + 1 ] + 1 :
+			24 - anMove[ 2 * i + 1 ] );
+	    }
+	    putchar( '\n' );
 
 #endif
 
-	sleep ( 2 );
+	    sleep ( 2 );
 
-	  for( i = 0; i < c >> 1; i++ ) {
-	    if( anMove[ 2 * i ] == 24 )
-	      BufferWritef( &pf->b, "bar " );
-	    else
-	      BufferWritef( &pf->b, "%d ", gd.fDirection < 0 ?
-			    anMove[ 2 * i ] + 1 : 24 - anMove[ 2 * i ] );
+	    for( i = 0; i < c >> 1; i++ ) {
+	      if( anMove[ 2 * i ] == 24 )
+		BufferWritef( &pf->b, "bar " );
+	      else
+		BufferWritef( &pf->b, "%d ", gd.fDirection < 0 ?
+			      anMove[ 2 * i ] + 1 : 24 - anMove[ 2 * i ] );
+	      
+	      if( anMove[ 2 * i + 1 ] < 0 )
+		BufferWritef( &pf->b, "off " );
+	      else
+		BufferWritef( &pf->b, "%d ", gd.fDirection < 0 ?
+			      anMove[ 2 * i + 1 ] + 1 :
+			      24 - anMove[ 2 * i + 1 ] );
+	    }
+	    printf ("sending move command...\n");
 	    
-	    if( anMove[ 2 * i + 1 ] < 0 )
-	      BufferWritef( &pf->b, "off " );
-	    else
-	      BufferWritef( &pf->b, "%d ", gd.fDirection < 0 ?
-			    anMove[ 2 * i + 1 ] + 1 :
-			    24 - anMove[ 2 * i + 1 ] );
-	  }
-	  printf ("sending move command...\n");
-	
-	  FibsCommand( pf, "" );
-	
-	  return 0;
+	    FibsCommand( pf, "" );
+	    
+	    return 0;
 
-	}
+	  }
 	  else {
 	    printf ("board, but no dice\n" );
+	  }
 	}
     }
-    
+	
     return 0;
 }
 
