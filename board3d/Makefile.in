@@ -156,7 +156,7 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
 
 noinst_LIBRARIES = libboard3d.a
 libboard3d_a_SOURCES = drawboard3d.c matrix.h mylist.c \
-	timer.c misc3d.c  testgtkboard.c widget3d.c \
+	timer.c misc3d.c  widget3d.c gtkcolour3d.c \
         matrix.c model.c shadow.c texture3d.c  font3d.cpp
 
 
@@ -170,8 +170,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 libboard3d_a_AR = $(AR) cru
 libboard3d_a_LIBADD =
 am_libboard3d_a_OBJECTS = drawboard3d.$(OBJEXT) mylist.$(OBJEXT) \
-	timer.$(OBJEXT) misc3d.$(OBJEXT) testgtkboard.$(OBJEXT) \
-	widget3d.$(OBJEXT) matrix.$(OBJEXT) model.$(OBJEXT) \
+	timer.$(OBJEXT) misc3d.$(OBJEXT) widget3d.$(OBJEXT) \
+	gtkcolour3d.$(OBJEXT) matrix.$(OBJEXT) model.$(OBJEXT) \
 	shadow.$(OBJEXT) texture3d.$(OBJEXT) font3d.$(OBJEXT)
 libboard3d_a_OBJECTS = $(am_libboard3d_a_OBJECTS)
 
@@ -183,9 +183,9 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/drawboard3d.Po ./$(DEPDIR)/font3d.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/matrix.Po ./$(DEPDIR)/misc3d.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/model.Po ./$(DEPDIR)/mylist.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/shadow.Po ./$(DEPDIR)/testgtkboard.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkcolour3d.Po ./$(DEPDIR)/matrix.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/misc3d.Po ./$(DEPDIR)/model.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mylist.Po ./$(DEPDIR)/shadow.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/texture3d.Po ./$(DEPDIR)/timer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/widget3d.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
@@ -202,7 +202,7 @@ CXXFLAGS = @CXXFLAGS@
 DIST_SOURCES = $(libboard3d_a_SOURCES)
 HEADERS = $(noinst_HEADERS)
 
-DIST_COMMON = $(noinst_HEADERS) Makefile.am Makefile.in
+DIST_COMMON = $(noinst_HEADERS) ChangeLog Makefile.am Makefile.in
 SOURCES = $(libboard3d_a_SOURCES)
 
 all: all-am
@@ -232,12 +232,12 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drawboard3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/font3d.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkcolour3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/model.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mylist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shadow.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testgtkboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/texture3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/widget3d.Po@am__quote@
