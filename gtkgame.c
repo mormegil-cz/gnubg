@@ -50,6 +50,7 @@
 #include <readline/readline.h>
 #endif
 
+#include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
@@ -3859,4 +3860,306 @@ extern void GTKSet( void *p ) {
 	    gtk_widget_hide( pwAnnotation );
     }
 }
+
+extern void GTKDumpStatcontext( statcontext *psc, int fComplete,
+                                char *szTitle ) {
+  static char *aszEmpty[] = { NULL, NULL, NULL };
+  static char *aszLabels[] = { 
+         "Checkerplay statistics",
+         "Total moves",
+         "Unforced moves",
+         "Moves rated perfect",
+         "Moves rated very good",
+         "Moves rated good",
+         "Moves rated small error",
+         "Moves rated error",
+         "Moves rated blunder",
+         "Moves rated Zzz Zzz",
+         "Error rate (total)",
+         "Error rate (pr. move)",
+         "Super-jokers",
+         "Jokers",
+         "Average",
+         "Anti-jokers",
+         "Super anti-jokers",
+         "Luck rate (total)",
+         "Luck rate (pr. move)",
+         "Checker play rating",
+         "Cube decisions statistics",
+         "Total cube decisions",
+         "Doubles",
+         "Takes",
+         "Pass",
+         "Missed doubles around DP",
+         "Missed doubles around TG",
+         "Wrong doubles around DP",
+         "Wrong doubles around TG",
+         "Wrong takes",
+         "Wrong passes",
+         "Cube decision rating",
+         "Overall rating" };
+
+  GtkWidget *pwDialog = CreateDialog( szTitle,
+                                       FALSE, NULL, NULL ),
+      *psw = gtk_scrolled_window_new( NULL, NULL ),
+      *pwStats = gtk_clist_new_with_titles( 3, aszEmpty );
+  int i, j;
+  char sz[ 32 ];
+  ratingtype rt[ 2 ];
+
+  for( i = 0; i < 3; i++ ) {
+      gtk_clist_set_column_auto_resize( GTK_CLIST( pwStats ), i, TRUE );
+      gtk_clist_set_column_justification( GTK_CLIST( pwStats ), i,
+                                          GTK_JUSTIFY_RIGHT );
+  }
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStats ) );
+      
+  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, ap[0].szName);
+  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, ap[1].szName);
+
+  for (i = 0; i < 33; i++) {
+    gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
+
+
+    gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, aszLabels[i]);
+  }
+        
+  sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 1, 1, sz);
+  sprintf(sz,"%d", psc->anTotalMoves[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 1, 2, sz);
+  sprintf(sz,"%d", psc->anUnforcedMoves[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 2, 1, sz);
+  sprintf(sz,"%d", psc->anUnforcedMoves[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 2, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 3, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 3, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 4, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 4, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_INTERESTING ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 5, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_INTERESTING ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 5, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 6, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 6, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_DOUBTFUL ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 7, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_DOUBTFUL ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 7, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 8, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 8, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYBAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 9, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 9, 2, sz);
+
+  sprintf(sz, "%+6.3f (%+7.3f%%)",
+          psc->arErrorCheckerplay[ 0 ][ 0 ],
+          psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 1, sz);
+  sprintf(sz, "%+6.3f (%+7.3f%%)",
+          psc->arErrorCheckerplay[ 1 ][ 0 ],
+          psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 2, sz);
+  sprintf(sz, "%+6.3f (%+7.3f%%)",
+          psc->arErrorCheckerplay[ 0 ][ 0 ] /
+          psc->anUnforcedMoves[ 0 ],
+          psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
+          psc->anUnforcedMoves[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 1, sz);
+  sprintf(sz, "%+6.3f (%+7.3f%%)",
+          psc->arErrorCheckerplay[ 1 ][ 0 ] /
+          psc->anUnforcedMoves[ 1 ],
+          psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
+          psc->anUnforcedMoves[ 1 ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 2, sz);
+
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 12, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 12, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 13, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 13, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 14, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 14, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 15, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 15, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYBAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 16, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYBAD ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 16, 2, sz);
+
+  sprintf(sz,"%+6.3f (%+7.3f%%)",
+          psc->arLuck[ 0 ][ 0 ],
+          psc->arLuck[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 1, sz);
+  sprintf(sz,"%+6.3f (%+7.3f%%)",
+          psc->arLuck[ 1 ][ 0 ],
+          psc->arLuck[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 2, sz);
+  sprintf(sz,"%+6.3f (%+7.3f%%)",
+          psc->arLuck[ 0 ][ 0 ] /
+          psc->anTotalMoves[ 0 ],
+          psc->arLuck[ 0 ][ 1 ] * 100.0f /
+          psc->anTotalMoves[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 1, sz);
+  sprintf(sz,"%+6.3f (%+7.3f%%)",
+          psc->arLuck[ 1 ][ 0 ] /
+          psc->anTotalMoves[ 1 ],
+          psc->arLuck[ 1 ][ 1 ] * 100.0f /
+          psc->anTotalMoves[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 2, sz);
+
+
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
+                          psc->anUnforcedMoves[ i ] );
+
+  sprintf ( sz, "%-15s", aszRating[ rt [ 0 ] ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 19, 1, sz);
+  sprintf ( sz, "%-15s", aszRating[ rt [ 1 ] ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 19, 2, sz);
+
+  sprintf(sz,"%d", psc->anTotalCube[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 21, 1, sz);
+  sprintf(sz,"%d", psc->anTotalCube[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 21, 2, sz);
+  sprintf(sz,"%d", psc->anDouble[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 22, 1, sz);
+  sprintf(sz,"%d", psc->anDouble[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 22, 2, sz);
+  sprintf(sz,"%d", psc->anTake[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 23, 1, sz);
+  sprintf(sz,"%d", psc->anTake[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 23, 2, sz);
+  sprintf(sz,"%d", psc->anPass[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 24, 1, sz);
+  sprintf(sz,"%d", psc->anPass[ 1 ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 24, 2, sz);
+
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeMissedDoubleDP[ 0 ],
+            psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+            psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 25, 1, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeMissedDoubleDP[ 1 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 25, 2, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeMissedDoubleTG[ 0 ],
+            psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+            psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 26, 1, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeMissedDoubleTG[ 1 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 26, 2, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongDoubleDP[ 0 ],
+            psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+            psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 27, 1, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongDoubleDP[ 1 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 27, 2, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongDoubleTG[ 0 ],
+            psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+            psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 28, 1, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongDoubleTG[ 1 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 28, 2, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongTake[ 0 ],
+            psc->arErrorWrongTake[ 0 ][ 0 ],
+            psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 29, 1, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongTake[ 1 ],
+            psc->arErrorWrongTake[ 1 ][ 0 ],
+            psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 29, 2, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongPass[ 0 ],
+            psc->arErrorWrongPass[ 0 ][ 0 ],
+            psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 1, sz);
+  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
+            psc->anCubeWrongPass[ 1 ],
+            psc->arErrorWrongPass[ 1 ][ 0 ],
+            psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 2, sz);
+
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
+                            + psc->arErrorMissedDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleDP[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongTake[ i ][ 0 ]
+                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
+                          psc->anTotalCube[ i ] );
+
+  sprintf ( sz, "%-15s", aszRating[ rt [ 0 ] ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 31, 1, sz);
+  sprintf ( sz, "%-15s", aszRating[ rt [ 1 ] ] );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 31, 2, sz);
+
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
+                            + psc->arErrorMissedDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleDP[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongTake[ i ][ 0 ]
+                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
+                          psc->anTotalCube[ i ] +
+                          psc->arErrorCheckerplay[ i ][ 0 ] /
+                          psc->anUnforcedMoves[ i ] );
+
+  sprintf ( sz, "%-15s", aszRating[ rt [ 0 ] ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 1, sz);
+  sprintf ( sz, "%-15s", aszRating[ rt [ 1 ] ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 2, sz);
+
+  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+                                  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
+  gtk_container_add( GTK_CONTAINER( psw ), pwStats );
+
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), psw );
+
+  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                GTK_WINDOW( pwMain ) );
+
+  gtk_widget_show_all( pwDialog );
+
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+  GTKDisallowStdin();
+  gtk_main();
+  GTKAllowStdin();
+} 
 
