@@ -703,6 +703,13 @@ extern void CommandAccept( char * ),
     CommandSetTrainingAnneal( char * ),
     CommandSetTrainingThreshold( char * ),
     CommandSetTurn( char * ),
+    CommandSetTutorCube( char * ),
+    CommandSetTutorEval( char *sz ),
+    CommandSetTutorChequer( char * ),
+    CommandSetTutorMode( char * ),  
+    CommandSetTutorSkillDoubtful( char *sz ),
+    CommandSetTutorSkillBad( char *sz ), 
+    CommandSetTutorSkillVeryBad( char *sz ),
     CommandShowAnalysis( char * ),
     CommandShowAutomatic( char * ),
     CommandShowBoard( char * ),
@@ -743,6 +750,7 @@ extern void CommandAccept( char * ),
     CommandShowThorp( char * ),
     CommandShowTraining( char * ),
     CommandShowTurn( char * ),
+    CommandShowTutor( char * ), 
     CommandShowVersion( char * ),
     CommandShowWarranty( char * ),
     CommandSwapPlayers ( char * ),
@@ -751,10 +759,9 @@ extern void CommandAccept( char * ),
     CommandXCopy ( char * );
 
 
-extern int fTutor;
-extern void CommandSetTutor( char * ),
-  CommandShowTutor( char * );
+extern int fTutor, fTutorCube, fTutorChequer, nTutorSkillCurrent;
 
 extern int GiveAdvice ( skilltype Skill );
-
+extern skilltype TutorSkill;
+extern int fTutorAnalysis;
 #endif

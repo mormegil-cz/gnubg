@@ -174,7 +174,11 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE;
 int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
-int fTutor = FALSE;
+int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
+int fTutorAnalysis = FALSE;
+
+skilltype TutorSkill = SKILL_DOUBTFUL;
+int nTutorSkillCurrent = 0;
 
 char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
 char *szCurrentFileName = NULL;
@@ -907,6 +911,26 @@ command cER = {
     N_("Set default path for loading match equity files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetTutorSkill[] = {
+  { "doubtful", CommandSetTutorSkillDoubtful, N_("Warn about `doubtful' play"),
+    NULL, NULL },
+  { "bad", CommandSetTutorSkillBad, N_("Warn about `bad' play"),
+    NULL, NULL },
+  { "verybad", CommandSetTutorSkillVeryBad, N_("Warn about `very bad' play"),
+    NULL, NULL },
+}, acSetTutor[] = {
+  { "mode", CommandSetTutorMode, N_("Give advice on possible errors"),
+    szONOFF, &cOnOff },
+  { "cube", CommandSetTutorCube, N_("Include cube play in advice"),
+    szONOFF, &cOnOff },
+  { "chequer", CommandSetTutorChequer, 
+    N_("Include chequer play in advice"),
+    szONOFF, &cOnOff },
+  { "eval", CommandSetTutorEval, 
+    N_("Use Analysis settings for Tutor"), szONOFF, &cOnOff },
+  { "skill", NULL, N_("Set level for tutor warnings"), 
+    NULL, acSetTutorSkill },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "analysis", NULL, N_("Control parameters used when analysing moves"),
       NULL, acSetAnalysis },
@@ -977,8 +1001,7 @@ command cER = {
       N_("Control training parameters"), NULL, acSetTraining },
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
       &cPlayer },
-	{ "tutor", CommandSetTutor, N_("Give Advice on moves and cube play"),
-	  szONOFF, &cOnOff },
+    { "tutor", NULL, N_("Control tutor setup"), NULL, acSetTutor }, 
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
     { "game", CommandShowStatisticsGame, 
@@ -1070,10 +1093,9 @@ command cER = {
     { "turn", CommandShowTurn, 
       N_("Show which player is on roll"), NULL, NULL },
     { "version", CommandShowVersion, 
-      N_("Describe this version of GNU Backgammon"),
-      NULL, NULL },
-	{ "tutor", CommandShowTutor, N_("Give Advice on Moves"),
-      NULL, NULL },
+      N_("Describe this version of GNU Backgammon"), NULL, NULL },
+    { "tutor", CommandShowTutor, 
+      N_("Give warnings for possible errors in play"), NULL, NULL },
     { "warranty", CommandShowWarranty, 
       N_("Various kinds of warranty you do not have"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
@@ -3832,7 +3854,11 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set cache %d\n", cCache );
 
     fprintf( pf, "set clockwise %s\n"
-		 "set tutor %s\n"
+		 "set tutor mode %s\n"
+		 "set tutor cube %s\n"
+		 "set tutor chequer %s\n"
+		 "set tutor eval %s\n"
+		 "set tutor skill %s\n"
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
 	     "set cube use %s\n"
@@ -3843,6 +3869,11 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set egyptian %s\n",
 	     fClockwise ? "on" : "off", 
 			 fTutor ? "on" : "off",
+			 fTutorCube ? "on" : "off",
+			 fTutorChequer ? "on" : "off",
+			 fTutorAnalysis ? "on" : "off",
+             ((TutorSkill == SKILL_VERYBAD) ? "very bad" :
+             (TutorSkill == SKILL_BAD) ? "bad" : "doubtful"),
              fConfirm ? "on" : "off",
              fConfirmSave ? "on" : "off",
 	     fCubeUse ? "on" : "off",
@@ -6007,6 +6038,9 @@ extern int GiveAdvice( skilltype Skill ) {
 	default:
 	  return (TRUE);
 	}
+
+	if (Skill > TutorSkill)
+	  return (TRUE);
 
 	return GetAdviceAnswer( sz );
 }

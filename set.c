@@ -2508,11 +2508,55 @@ CommandSetPathText ( char *sz ) {
 }
 
 
-extern void CommandSetTutor( char *sz) {
+extern void CommandSetTutorMode( char *sz) {
 
-  SetToggle ("tutor", &fTutor, sz,
-			 _("Warnings are given for \'doubtful\', \'bad\', or "
-			   "\'very bad\' moves."),
-			 _("No warnings are given for \'doubtful\', \'bad\', or "
-			   "\'very bad\' moves.") );
+    SetToggle( "tutor-mode", &fTutor, sz, 
+               _("Warn about possibly bad play."),
+			   _("No warnings for possibly bad play.") );
 }
+
+extern void CommandSetTutorCube( char * sz) {
+
+  SetToggle ( "tutor-cube", &fTutorCube, sz,
+			  _("Include advice on cube decisions in tutor mode."),
+			  _("Exclude advice on cube decisions from tutor mode.") );
+}
+
+extern void CommandSetTutorChequer( char * sz) {
+
+  SetToggle ( "tutor-cube", &fTutorChequer, sz,
+			  _("Include advice on chequer play in tutor mode."),
+			  _("Exclude advice on chequer play from tutor mode.") );
+}
+
+extern void CommandSetTutorEval( char * sz) {
+
+  SetToggle ( "tutor-eval", &fTutorAnalysis, sz,
+			  _("Use Analysis settings to generate advice."),
+			  _("Use Evaluation settings to generate advice.") );
+}
+
+static void _set_tutor_skill (skilltype Skill, int skillno, char *skill) {
+
+  nTutorSkillCurrent = skillno;
+  TutorSkill = Skill;
+  outputf ( _("Tutor warnings will be give for play marked `%s'.\n"), skill);
+}
+
+extern void CommandSetTutorSkillDoubtful( char * sz) {
+
+  _set_tutor_skill (SKILL_DOUBTFUL, 0, _("doubtful") );
+}
+
+extern void CommandSetTutorSkillBad( char * sz) {
+
+  _set_tutor_skill (SKILL_BAD, 1, _("bad") );
+}
+
+extern void CommandSetTutorSkillVeryBad( char * sz) {
+
+  _set_tutor_skill (SKILL_VERYBAD, 2, _("very bad") );
+}
+
+
+

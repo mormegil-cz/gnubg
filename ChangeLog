@@ -1,3 +1,8 @@
+Mon Jul 29 20:53:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Updates to tutor mode: more detailed settings and
+	some bug fixes.
+
 Mon Jul 29 18:37:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Bugfixes for html and text export (reported by olivier croisille)

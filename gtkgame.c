@@ -6908,7 +6908,9 @@ GTKShowPath ( void ) {
 typedef struct _optionswidget {
 
   GtkWidget *pwAutoBearoff, *pwAutoCrawford, *pwAutoGame,
-            *pwAutoMove, *pwAutoRoll, *pwTutor;
+            *pwAutoMove, *pwAutoRoll;
+  GtkWidget *pwTutor, *pwTutorCube, *pwTutorChequer, *pwTutorSkill,
+            *pwTutorEvalHint, *pwTutorEvalAnalysis;
   GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic;
   GtkWidget *pwCubeUsecube, *pwCubeJacoby, *pwCubeInvert;
   GtkWidget *pwGameClockwise, *pwGameNackgammon, *pwGameEgyptian;
@@ -6953,8 +6955,10 @@ static GtkWidget* OptionsPage( optionswidget *pow)
 
   GtkWidget *pwHBoxMain, *pwHBox, *pwVBox, *pwVBox2, *pwFrame;
   GtkWidget *pwAdvbutton;
+  GSList *tutor_evals = NULL;
   GSList *dice_group = NULL;
   GtkWidget *pwPRNG_menu;
+  GtkWidget *pwSkill_menu;
   GtkWidget *glade_menuitem;
   GtkTooltips *tooltips;
 
@@ -6984,9 +6988,62 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   pow->pwAutoRoll = gtk_check_button_new_with_label (_("Roll"));
   gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwAutoRoll, FALSE, FALSE, 0);
 
-  pow->pwTutor = gtk_check_button_new_with_label (_("Tutor"));
+  pwFrame = gtk_frame_new (_("Tutoring"));
+  gtk_box_pack_start (GTK_BOX (pwHBoxMain), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  pwVBox = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwVBox);
+
+  pow->pwTutor = gtk_check_button_new_with_label (_("Tutor Mode"));
   gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutor, FALSE, FALSE, 0);
 
+  pow->pwTutorCube = gtk_check_button_new_with_label (_("Cube Decisions"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutorCube, FALSE, FALSE, 0);
+
+  pow->pwTutorChequer = gtk_check_button_new_with_label (_("Chequer Play"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutorChequer, FALSE, FALSE, 0);
+
+  pwFrame = gtk_frame_new (_("Tutor Decisions"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 2);
+  pwVBox = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwVBox);
+
+  pow->pwTutorEvalHint = gtk_radio_button_new_with_label (tutor_evals, 
+													 _("Same as Evaluation"));
+  tutor_evals = 
+	gtk_radio_button_group (GTK_RADIO_BUTTON (pow->pwTutorEvalHint));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutorEvalHint, FALSE, FALSE, 0);
+
+  pow->pwTutorEvalAnalysis = gtk_radio_button_new_with_label (tutor_evals,
+											_("Same as Analysis"));
+  tutor_evals =
+	gtk_radio_button_group (GTK_RADIO_BUTTON (pow->pwTutorEvalAnalysis));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutorEvalAnalysis,
+					  FALSE, FALSE, 0);
+
+  pwFrame = gtk_frame_new (_("Warning level"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 2);
+  pwVBox = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwVBox);
+
+  pow->pwTutorSkill = gtk_option_menu_new ();
+  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutorSkill, FALSE, FALSE, 0);
+  pwSkill_menu = gtk_menu_new ();
+  glade_menuitem = gtk_menu_item_new_with_label (_("Doubtful"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwSkill_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("Bad"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwSkill_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("Very Bad"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwSkill_menu), glade_menuitem);
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwTutorSkill), pwSkill_menu);
+  gtk_option_menu_set_history (GTK_OPTION_MENU (pow->pwTutorSkill), 4);
+  gtk_widget_set_sensitive (pow->pwTutorSkill, TRUE);
   pwFrame = gtk_frame_new (_("Cube"));
   gtk_box_pack_start (GTK_BOX (pwHBoxMain), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
@@ -7196,7 +7253,38 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwAutoGame,fAutoGame, "set automatic game %s")
   CHECKUPDATE(pow->pwAutoRoll,fAutoRoll, "set automatic roll %s")
   CHECKUPDATE(pow->pwAutoMove,fAutoMove, "set automatic move %s")
-  CHECKUPDATE(pow->pwTutor, fTutor, "set tutor %s")
+  CHECKUPDATE(pow->pwTutor, fTutor, "set tutor mode %s")
+  CHECKUPDATE(pow->pwTutorCube, fTutorCube, "set tutor cube %s")
+  CHECKUPDATE(pow->pwTutorChequer, fTutorChequer, "set tutor chequer %s")
+  if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON (pow->pwTutorEvalHint))) {
+	if (fTutorAnalysis)
+	  UserCommand( "set tutor eval off");
+  } else {
+	if (!fTutorAnalysis)
+	  UserCommand( "set tutor eval on");
+  }
+
+  n = gtk_option_menu_get_history(GTK_OPTION_MENU( pow->pwTutorSkill ));
+  switch ( n ) {
+  case 0:
+	if (TutorSkill != SKILL_DOUBTFUL)
+	  UserCommand ("set tutor skill doubtful");
+	break;
+
+  case 1:
+	if (TutorSkill != SKILL_BAD)
+	  UserCommand ("set tutor skill bad");
+	break;
+
+  case 2:
+	if (TutorSkill != SKILL_VERYBAD)
+	  UserCommand ("set tutor skill very bad");
+	break;
+
+  default:
+	UserCommand ("set tutor skill doubtful");
+  }
+  gtk_widget_set_sensitive( pow->pwTutorSkill, n );
 
   CHECKUPDATE(pow->pwCubeUsecube,fCubeUse, "set cube use %s")
   CHECKUPDATE(pow->pwCubeJacoby,fJacoby, "set jacoby %s")
@@ -7286,6 +7374,21 @@ OptionsSet( optionswidget *pow) {
                                 fAutoRoll );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutor ),
                                 fTutor );
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutorCube ),
+                                fTutorCube );
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutorChequer ),
+                                fTutorChequer );
+  if (!fTutorAnalysis)
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutorEvalHint ),
+								  TRUE );
+  else
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON( pow->pwTutorEvalAnalysis ),
+								 TRUE );
+
+  gtk_option_menu_set_history(GTK_OPTION_MENU( pow->pwTutorSkill ), 
+                                 nTutorSkillCurrent );
 
   gtk_adjustment_set_value ( pow->padjCubeBeaver, nBeavers );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwCubeUsecube ),
