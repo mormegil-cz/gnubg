@@ -1,3 +1,7 @@
+Wed May  2 14:41:27 2001  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetEvalReduced): Use an integer for the reduced speed.
+
 Mon Apr 30 15:23:42 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (DumpStatcontext): Only show statistics which have been

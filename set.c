@@ -745,7 +745,7 @@ extern void CommandSetEvalReduced( char *sz ) {
 
     outputf( "%s will use %d%% speed 2 ply evaluation.\n", 
 	     szSet, 
-	     pecSet->nReduced ? 100.0f / pecSet->nReduced : 100 );
+	     pecSet->nReduced ? 100 / pecSet->nReduced : 100 );
 
     if( pecSet->nPlies != 2 )
 	outputl( "(Note that this setting will have no effect until you "
