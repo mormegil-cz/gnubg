@@ -940,7 +940,7 @@ gnubg.weights:
 @CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the bearoff database'
 @CROSS_COMPILING_TRUE@	@echo ' ** on the build system.  To create this file manually,'
 @CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
-@CROSS_COMPILING_TRUE@	@echo ' **   makebearoff > gnubg.bd'
+@CROSS_COMPILING_TRUE@	@echo ' **   makebearoff -t 6x6 -o 6 > gnubg.bd'
 @CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
 @CROSS_COMPILING_TRUE@bearoff-database-7: bearoff-database
 @CROSS_COMPILING_TRUE@bearoff-database-8: bearoff-database
@@ -957,29 +957,29 @@ gnubg.weights:
 @CROSS_COMPILING_FALSE@bearoff-database: makebearoff
 @CROSS_COMPILING_FALSE@	./makebearoff -t 6x6 -o 6 > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
 @CROSS_COMPILING_FALSE@bearoff-database-7: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 7 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 7 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-8: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 8 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 8 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-9: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 9 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 9 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-10: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 10 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 10 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-11: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-12: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 12 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-13: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 13 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-14: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 14 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-15: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 15 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-16: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 16 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-17: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 17 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 @CROSS_COMPILING_FALSE@bearoff-database-18: makebearoff
-@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 0x0 -o 18 -m -g -c > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 
 .PHONY: bearoff-database
 
