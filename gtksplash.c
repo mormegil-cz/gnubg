@@ -104,7 +104,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
   if ( ! pwSplash )
     return;
   
-  sleep ( 3 );
+  usleep ( 1000 );
 
   gtk_widget_destroy ( pwSplash );
 
@@ -114,7 +114,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
 extern void
 PushSplash ( GtkWidget *pwSplash, 
              const gchar *szText0, const gchar *szText1,
-             const guint nSeconds ) {
+             const unsigned long nMuSec ) {
   
   gtksplash *pgs;
 
@@ -130,6 +130,6 @@ PushSplash ( GtkWidget *pwSplash,
   while( gtk_events_pending() )
     gtk_main_iteration();
 
-  sleep ( nSeconds );
+  usleep ( nMuSec );
 
 }

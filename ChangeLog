@@ -1,3 +1,14 @@
+Sat Dec 28 16:09:11 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (SetAnnotation): display chequer skill, cube skill,
+	and luck analysis on the same line instead of multiple lines.
+	(suggested by Albert Silbert)
+	* gtkgame.c (SetAnnotation): don't show cube skill for MOVE_NORMAL
+	if it's not possible to double.
+
+	* gtksplash.c (PushSplash): use usleep instead of sleep. Change all
+	callers.  
+
 Sat Dec 28 14:13:13 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	Highlight current score in match equity table

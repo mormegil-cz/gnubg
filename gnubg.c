@@ -6319,7 +6319,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #if USE_GTK
     PushSplash ( pwSplash, 
-                 _("Initialising"), _("Random number generator"), 1 );
+                 _("Initialising"), _("Random number generator"), 500 );
 #endif    
     
     InitRNG( NULL, TRUE, rngCurrent );
@@ -6346,14 +6346,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
 #if USE_GTK
     PushSplash ( pwSplash, 
-                 _("Initialising"), _("match equity table"), 1 );
+                 _("Initialising"), _("match equity table"), 500 );
 #endif    
 
     InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
     
 #if USE_GTK
     PushSplash ( pwSplash, 
-                 _("Initialising"), _("neural nets"), 1 );
+                 _("Initialising"), _("neural nets"), 500 );
 #endif    
 
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
@@ -6375,14 +6375,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GUILE
 #  if USE_GTK
     PushSplash ( pwSplash, 
-                 _("Initialising"), _("Guile"), 1 );
+                 _("Initialising"), _("Guile"), 500 );
 #  endif    
     GuileInitialise( szDataDirectory );
 #endif
 
 #if USE_GTK
     PushSplash ( pwSplash, 
-                 _("Initialising"), _("Board Images"), 1 );
+                 _("Initialising"), _("Board Images"), 500 );
 #endif    
 
     RenderInitialise();
@@ -6452,7 +6452,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #if USE_GTK
     PushSplash ( pwSplash, 
-                 _("Loading"), _("User Settings"), 1 );
+                 _("Loading"), _("User Settings"), 500 );
 #endif    
     if( !fNoRC )
 	LoadRCFiles();
@@ -6479,7 +6479,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( optind < argc && *argv[ optind ] ) {
 #if USE_GTK
       PushSplash ( pwSplash, 
-                   _("Loading"), _("Specified Match"), 1 );
+                   _("Loading"), _("Specified Match"), 500 );
 #endif    
 	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
 	    /* quote filename with whitespace so that function

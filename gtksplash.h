@@ -31,6 +31,6 @@ DestroySplash ( GtkWidget *pwSplash );
 extern void
 PushSplash ( GtkWidget *pwSplash, 
              const gchar *szText0, const gchar *szText1,
-             const guint nSeconds );
+             const unsigned long nMuSec );
 
 #endif /* _GTKSPLASH_H_ */
