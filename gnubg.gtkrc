@@ -1,5 +1,5 @@
 #
-# gnubg.gtkrc
+# gnubg.gtkrc.in
 # by
 # Gary Wong <gtw@gnu.org>, 2001
 # Joern Thyssen <jth@gnubg.org>, 2002
@@ -28,20 +28,24 @@
 # widget <widget_set> style <style_name>
 # widget_class <widget_class_set> style <style_name>
 
-module_path "C:/Program Files/gnubg/themes/engines"
-#pixmap_path "./Themes/brushed"
+#module_path "C:/Program Files/gnubg/themes/engines"
+
+
+#
+# The default style used for all widgets in gnubg.
+#
+# Modify this style if you want to modify the font (e.g., font size or
+# font face) everywhere in gnubg.
+#
+# You can also use the style if you want to apply a certain engine.
+#
 
 style "default"
 {
-#  font = "-*-lucida-small-r-normal-*-14-*-*-*-*-*-iso8859-1"
-font = "-*-tahoma-normal-r-normal-*-*-100-*-*-*-*-*-*"
-#bg_pixmap[NORMAL] = "brushed.xpm"
-#bg_pixmap[INSENSITIVE] = "brushed.xpm"
-#bg_pixmap[ACTIVE] = "brushed-dark.xpm"
-#bg_pixmap[PRELIGHT] = "brushed-light.xpm" 
+
+#font = "-*-tahoma-normal-r-normal-*-*-100-*-*-*-*-*-*"
 
 # base, text, bg, fg are possible
-#bg[NORMAL] = { 0.77, 0.77, 0.77 }
 bg[SELECTED] = { 0.67, 0.67, 0.67 }
 bg[INSENSITIVE] = { 0.77, 0.77, 0.77 }
 bg[ACTIVE] = { 0.67, 0.67, 0.67 }
@@ -52,26 +56,35 @@ fg[SELECTED] = { 0.9, 0.9, 0.9 }
 fg[ACTIVE] = { 0.0, 0.0, 0.0 }
 fg[PRELIGHT] = { 0.2, 0.1, 0.0 }
 
-#text[INSENSITIVE] = { 0.60, 0.65, 0.57 }
-
-  engine "engradient"
-  {
-    use_gradient = TRUE
-    handlebox_marks = TRUE
-    scrollbar_marks = TRUE
-  }
+#  engine "engradient"
+#  {
+#    use_gradient = TRUE
+#    handlebox_marks = TRUE
+#    scrollbar_marks = TRUE
+#  }
 
 }
 
-style "ruler" = "default"
-{
-  font = "-adobe-helvetica-medium-r-normal--*-80-*-*-*-*-*-*"
-}
+#
+# Style for the move list (e.g., the hint window) for highlighting the actual
+# move made.
+#
 
 style "movelabel" = "default"
 {
-  fg[ACTIVE] = { 0xffff, 0, 0 }
+  fg[ACTIVE] = { 0xffff, 0xffff, 0 }
 }
+
+widget "*Board.*move" style "movelabel"
+
+
+#
+# Styles for showing the graphical overview of the market windows.
+#
+# ACTIVE is used for showing the "double, take" window
+# PRELIGHT is used for showing the "double, pass" window
+# SELECTED is used for showing the "too good" window
+#
 
 style "doubling-window-graph" = "default"
 {
@@ -80,9 +93,8 @@ style "doubling-window-graph" = "default"
   bg[SELECTED] = { 0, 0, 0xffff }
 }
 
-widget "*Board.*move" style "movelabel"
 widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
-widget_class "*Ruler*" style "ruler"
+
 widget_class "*" style "default"
 
 #
@@ -146,17 +158,17 @@ style "gamelist-cube-doubtful" = "default"
 
 style "gamelist-luck-bad" = "default"
 {
-# gtk 1
-  font = "-*-tahoma-normal-i-normal-*-*-100-*-*-*-*-*-*"
-# gtk 2
-#  font_name = "Italic"
+##gtk1.3
+#font = "-*-tahoma-normal-i-normal-*-*-100-*-*-*-*-*-*"
+#gtk2.x
+font_name = "Italic"
 }
 style "gamelist-luck-good" = "default"
 {
-# gtk 1
-  font = "-*-tahoma-bold-r-normal-*-*-100-*-*-*-*-*-*"
-# gtk 2
-#  font_name = "Bold"
+##gtk1.3
+#font = "-*-tahoma-bold-r-normal-*-*-100-*-*-*-*-*-*"
+#gtk2.x
+font_name = "Bold"
 }
 
 widget "*.gnubg-gamelist-chequer-blunder" style "gamelist-chequer-blunder"
@@ -172,6 +184,12 @@ widget "*.gnubg-gamelist-luck-bad" style "gamelist-luck-bad"
 
 #
 # Styles for match equity table
+#
+# The style for "met-matching-score" is used for highlighting the row
+# and column that matches the current score. For example, if the score
+# is 4-away,7-away the row for 4-away and the column for 7-away is highlighted.
+# The style for "met-the-score" is used to highlight the exact score, e.g.,
+# in the example above, the entry at 4-away,7-away is highlighted.
 #
 
 style "met-matching-score" = "default"

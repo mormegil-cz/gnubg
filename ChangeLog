@@ -1,3 +1,7 @@
+Tue Jun 15 20:32:05 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.gtkrc.in: autogenerate gnubg.gtkrc
+
 Tue Jun 15 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: gtk_widget_destroy error message when opening
