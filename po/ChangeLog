@@ -1,3 +1,7 @@
+Wed Jan  8 22:00:20 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* ja.po: Add updates from TAKAHASHI Kaoru.
+
 Fri Dec 13 16:28:25 2002  Gary Wong  <gtw@gnu.org>
 
 	* POTFILES.in: add gtkmovefilter.c and gtkprefs.c; remove br1.c and
