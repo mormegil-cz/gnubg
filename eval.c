@@ -275,6 +275,33 @@ typedef struct _evalcache {
     float ar[ NUM_OUTPUTS ];
 } evalcache;
 
+static int bRecursingFor2ply = 0;
+static int nReductionGroup   = 0;
+
+static int third1_d1[] = { 2, 1, 6, 6, 5, 4, 4 };
+static int third1_d2[] = { 2, 1, 5, 3, 1, 3, 2 };
+static int third1_wt[] = { 1, 1, 2, 2, 2, 2, 2 };
+
+static int third2_d1[] = { 6, 3, 6, 5, 5, 4, 2 };
+static int third2_d2[] = { 6, 3, 4, 3, 2, 1, 1 };
+static int third2_wt[] = { 1, 1, 2, 2, 2, 2, 2 };
+
+static int third3_d1[] = { 5, 4, 6, 6, 5, 3, 3 };
+static int third3_d2[] = { 5, 4, 2, 1, 4, 2, 1 };
+static int third3_wt[] = { 1, 1, 2, 2, 2, 2, 2 };
+
+typedef struct {
+    int numRolls;
+    int *d1;
+    int *d2;
+    int *wt;
+} laRollList_t;
+
+static  laRollList_t thirdLists[3] = {
+                            {  7, third1_d1, third1_d2, third1_wt },
+                            {  7, third2_d1, third2_d2, third2_wt },
+                            {  7, third3_d1, third3_d2, third3_wt } };
+
 static void ComputeTable0( void )
 {
   int i, c, n0, n1;
@@ -2293,7 +2320,8 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
                       cubeinfo *pci, evalcontext *pec, int nPlies,
                       positionclass pc ) {
   int i, n0, n1;
-
+  int bUsingReduction;
+  
   if( pc > CLASS_PERFECT && nPlies > 0 ) {
     /* internal node; recurse */
 
@@ -2305,20 +2333,10 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
-
-    /* 
-     * If nPlies = 2 there are two branches:
-     * (1) Full 2-ply search: all 21 rolls evaluated.
-     * (2) Reduced 2-ply search: 
-     *     - evaluate all 21 rolls at 0-ply
-     *     - sort, take a reduced set, and evaluate only these at
-     *       1-ply.
-     */
-
-    if ( ! ( ( nPlies == 2 ) && ( pec->nReduced > 0 ) ) ) {
+    bUsingReduction = (pec->nReduced && nPlies == 1 && bRecursingFor2ply );
+    if ( !bUsingReduction ) {
 
       /* full search */
-	 
       for( n0 = 1; n0 <= 6; n0++ )
 	for( n1 = 1; n1 <= n0; n1++ ) {
 	  for( i = 0; i < 25; i++ ) {
@@ -2341,10 +2359,14 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	  SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, ! pci->fMove,
 		  pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby,
 		  pci->fBeavers );
-	      
+	  
+	  bRecursingFor2ply = (nPlies == 2);
+
 	  if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
 				     ClassifyPosition( anBoardNew ) ) )
 	    return -1;
+
+	  bRecursingFor2ply = FALSE; /* note, didn't restore it on error */
 	      
 	  if( n0 == n1 )
 	    for( i = 0; i < NUM_OUTPUTS; i++ )
@@ -2366,157 +2388,78 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
       arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
 
     } else {
-
       /* reduced search */
+        laRollList_t *rolls = NULL;
+        float arVariationOutput[ NUM_OUTPUTS ];
+        float rTemp;
+        int r, w, sumW;
+        int n0, n1;
 
-      /* 
-       * - Loop over all 21 dice rolls
-       * - evaluate at 0-ply
-       * - sort
-       * - do 1-ply on a subset
-       * - calculate corrected probabilities
-       */
+        /* set up reduction group */
+        pec->nReduced = 3;  /* hack: other support not added yet */
+        switch ( pec->nReduced ) {
+        case 3:
+                nReductionGroup = (nReductionGroup + 1) % 3;
+                rolls = &thirdLists[ nReductionGroup ];
+                break;
+        default:
+                assert( 0 );
+                break;
+        }
 
-      RedEvalData ad0ply[ 21 ];
-      int anRed7[ 7 ] = { 2, 5, 8, 10, 12, 15, 18 };
-      int anRed11[ 11 ] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 };
-      int anRed14[ 14 ] = 
-      { 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 19 }; 
-      int *pnRed;
-      int nRed;
-      int k;
-      float rDiff, arDiff[ NUM_OUTPUTS ];
+        /* do 0-ply eval for each roll */
+        sumW = 0;
+        for ( r=0; r <= rolls->numRolls; r++ ) {
+                n0 = rolls->d1[r];
+                n1 = rolls->d2[r];
+                w  = rolls->wt[r];
 
-      k = 0;
+                for( i = 0; i < 25; i++ ) {
+                        anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+                        anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+                }
 
-      /* Loop over all 21 dice rolls */
+                if( fAction )
+                        fnAction();
 
-      for( n0 = 1; n0 <= 6; n0++ )
-	for( n1 = 1; n1 <= n0; n1++ ) {
+                if( fInterrupt ) {
+                        errno = EINTR;
+                        return -1;
+                }
 
-	  for( i = 0; i < 25; i++ ) {
-	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-	  }
+                FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0 );
 
-	  if( fAction )
-	      fnAction();
-	  
-	  if( fInterrupt ) {
-	    errno = EINTR;
-	    return -1;
-	  }
-	      
-	  FindBestMovePlied( 0, n0, n1, anBoardNew, pci, pec, 0 );
-	      
-	  SwapSides( anBoardNew );
+                SwapSides( anBoardNew );
 
-	  SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, ! pci->fMove,
-			pci->nMatchTo, pci->anScore, pci->fCrawford,
-			pci->fJacoby, pci->fBeavers );
+                SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, !pci->fMove,
+                        pci->nMatchTo, pci->anScore, pci->fCrawford,
+                        pci->fJacoby, pci->fBeavers );
 
-	  /* Evaluate at 0-ply */
-	      
-	  if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
-				     &ciOpp, pec, 0, 
-				     ClassifyPosition( anBoardNew ) ) )
-	    return -1;
+                /* Evaluate at 0-ply */
+                if( EvaluatePositionCache( anBoardNew, arVariationOutput,
+                &ciOpp, pec, 0, ClassifyPosition( anBoardNew ) ) )
+                        return -1;
 
-	  ad0ply[ k ].rScore = Utility ( ad0ply[ k ].arOutput, &ciOpp );
-	  PositionKey ( anBoardNew, ad0ply[ k ].auch);
+                for( i = 0; i < NUM_OUTPUTS; i++ )
+                        arOutput[ i ] += w * arVariationOutput[ i ];
+                sumW += w;
+        }
 
-	  if( n0 == n1 ) {
+        /* normalize */
+        for ( i = 0; i < NUM_OUTPUTS; i++ )
+                arOutput[ i ] /= sumW;
 
-	    for( i = 0; i < NUM_OUTPUTS; i++ )
-	      arOutput[ i ] += ad0ply[ k ].arOutput[ i ];
+        /* flop eval */
+        arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ];
 
-	    ad0ply[ k ].rWeight = 1.0;
+        rTemp = arOutput[ OUTPUT_WINGAMMON ];
+        arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
+        arOutput[ OUTPUT_LOSEGAMMON ] = rTemp;
 
-	  } else {
-
-	    for( i = 0; i < NUM_OUTPUTS; i++ )
-	      arOutput[ i ] += 2.0 * ad0ply[ k ].arOutput[ i ];
-
-	    ad0ply[ k ].rWeight = 2.0;
-
-	  }
-
-	  k++;
-	      
-	}
-
-      /* sort */
-
-      qsort ( ad0ply, 21, sizeof ( RedEvalData ), 
-	      (cfunc) CompareRedEvalData );
-
-      for ( i = 0; i < NUM_OUTPUTS; i++ )
-	arDiff[ i ] = 0.0;
-      rDiff = 0.0;
-
-      /* do 1-ply on subset */
-
-      switch ( pec->nReduced ) {
-      case 7:
-	nRed = 7;
-	pnRed = anRed7;
-	break;
-
-      case 11:
-	nRed = 11;
-	pnRed = anRed11;
-	break;
-
-      case 14:
-	nRed = 14;
-	pnRed = anRed14;
-	break;
-
-      default:
-	assert ( FALSE );
-	break;
-
-      }
-
-      for ( k = 0; k < nRed; pnRed++, k++ ) {
-
-	PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
-
-	if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
-				   ClassifyPosition( anBoardNew ) ) )
-	  return -1;
-
-	for ( i = 0; i < NUM_OUTPUTS; i++ ) {
-
-	  arDiff[ i ] +=
-	    ad0ply[ *pnRed ].rWeight * 
-	    ( ar[ i ] - ad0ply[ *pnRed ].arOutput[ i ] );
-
-	}
-
-	rDiff += ad0ply[ *pnRed ].rWeight;
-
-      }
-	    
-	  
-      for ( i = 0; i < NUM_OUTPUTS; i++ )
-
-	arOutput[ i ] += 36. * arDiff[ i ] / rDiff;
-
-      arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
-	  
-      ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
-      arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
-      arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
-	  
-      ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
-      arOutput[ OUTPUT_WINBACKGAMMON ] =
-	arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
-      arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
-
+        rTemp = arOutput[ OUTPUT_WINBACKGAMMON ];
+        arOutput[ OUTPUT_WINBACKGAMMON ] = arOutput[ OUTPUT_LOSEBACKGAMMON ];
+        arOutput[ OUTPUT_LOSEBACKGAMMON ] = rTemp;
     }
-	     
-
   } else {
     /* at leaf node; use static evaluation */
       
