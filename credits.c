@@ -25,6 +25,7 @@ char *aszCredits[] = {
     "Robert Konigsberg",
     "Corrin Lakeland",
     "Tim Laursen",
+    "Eli Liang",
     "Kevin Maguire",
     "Thomas Meyer",
     "Achim Mueller",

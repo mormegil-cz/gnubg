@@ -37,6 +37,7 @@ Johnny Kirk
 Robert Konigsberg
 Corrin Lakeland
 Tim Laursen
+Eli Liang
 Kevin Maguire
 Thomas Meyer
 Achim Mueller
@@ -99,7 +100,7 @@ cat >> AUTHORS <<'EOF'
 
      Ulrich Drepper (an implementation of the public domain MD5 algorithm)
              Bob Jenkins (the ISAAC pseudo random number generator)
-     Takuji Nishimura (the Mersenne Twister pseudo random number generator)
+       Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)
                 Gerry Tesauro (the "pubeval" position evaluator)
 
 

@@ -6,22 +6,22 @@
 
         Contributors (of bug reports, suggestions, and patches) include:
 
-    Eric Augustine          Johnny Kirk             Jared Riley
-    Steve Baedke            Robert Konigsberg       Oliver Riordan
-    Chuck Bower             Corrin Lakeland         Hans-Jürgen Schäfer
-    Nick Bratby             Tim Laursen             Jim Segrave
-    Craig Campbell          Kevin Maguire           Ian Shaw
-    John Chuang             Thomas Meyer            Peter Sochovsky
-    Tristan Colgate         Achim Mueller           Maik Stiebler
-    Olivier Croisille       Dave Neary              W. Stroop (Rob)
-    Ned Cross               Mirori Orange           Jacques Thiriat
-    Bill Davidson           Peter Orum              Robert-Jan Veldhuizen
-    Max Durbano             Roy Passfield           JP White
-    Eric Groleau            Thomas Patrick          Kit Woolsey
-    Jeff Haferman           Zvezdan Petkovic        Frank Worrell
-    Alain Henry             Nardy Pillards          Anders Zachrison
-    Jens Hoefkens           Petri Pitkänen
-    Matija Kejzar           Sam Pottle
+    Eric Augustine          Johnny Kirk             Sam Pottle
+    Steve Baedke            Robert Konigsberg       Jared Riley
+    Chuck Bower             Corrin Lakeland         Oliver Riordan
+    Nick Bratby             Tim Laursen             Hans-Jürgen Schäfer
+    Craig Campbell          Eli Liang               Jim Segrave
+    John Chuang             Kevin Maguire           Ian Shaw
+    Tristan Colgate         Thomas Meyer            Peter Sochovsky
+    Olivier Croisille       Achim Mueller           Maik Stiebler
+    Ned Cross               Dave Neary              W. Stroop (Rob)
+    Bill Davidson           Mirori Orange           Jacques Thiriat
+    Max Durbano             Peter Orum              Robert-Jan Veldhuizen
+    Eric Groleau            Roy Passfield           JP White
+    Jeff Haferman           Thomas Patrick          Kit Woolsey
+    Alain Henry             Zvezdan Petkovic        Frank Worrell
+    Jens Hoefkens           Nardy Pillards          Anders Zachrison
+    Matija Kejzar           Petri Pitkänen
 
 
   Credit is also due to those who have published information about backgammon
@@ -41,7 +41,7 @@
 
      Ulrich Drepper (an implementation of the public domain MD5 algorithm)
              Bob Jenkins (the ISAAC pseudo random number generator)
-     Takuji Nishimura (the Mersenne Twister pseudo random number generator)
+       Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)
                 Gerry Tesauro (the "pubeval" position evaluator)
 
 
