@@ -1,4 +1,9 @@
-Thu Feb  7 23:00:28 2002 Jørn Thyssen  <jthyssen@dk.ibm.com>
+Fri Feb  8 00:01:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+	
+	* html.c (HTMLPrologue): html did not validate. Also, insert
+	links to html/css validators for convienience.
+
+Thu Feb  7 23:00:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* export.h: fix typo.
 
