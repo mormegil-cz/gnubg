@@ -203,6 +203,10 @@ static char *aszCommands[ NUM_CMDS ] = {
 };
 
 static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
+static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
+static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
+static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
+static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
@@ -418,14 +422,42 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     ShowBoard();
 }
 
+static void ButtonCommand( GtkWidget *pw, char *szCommand ) {
+
+    UserCommand( szCommand );
+}
+
+static GtkWidget *PixmapButton( GdkWindow *pwin, char **xpm,
+				char *szCommand ) {
+    
+    GdkPixmap *ppm;
+    GdkBitmap *pbm;
+    GtkWidget *pw, *pwButton;
+
+    ppm = gdk_pixmap_create_from_xpm_d( pwin, &pbm, NULL, xpm );
+    pw = gtk_pixmap_new( ppm, pbm );
+    pwButton = gtk_button_new();
+    gtk_container_add( GTK_CONTAINER( pwButton ), pw );
+
+    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonCommand ), szCommand );
+    
+    return pwButton;
+}
+
 static void CreateGameWindow( void ) {
 
     static char *asz[] = { "Move", NULL, NULL };
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pvbox = gtk_vbox_new( FALSE, 0 ),
-	*pa = gtk_alignment_new( 0.5, 0.5, 0.8, 1.0 ),
+	*phbox = gtk_hbox_new( FALSE, 0 ),
 	*pm = gtk_menu_new();
     GtkStyle *ps;
+
+#include "prevgame.xpm"
+#include "prevmove.xpm"
+#include "nextmove.xpm"
+#include "nextgame.xpm"
     
     pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW( pwGame ), "GNU Backgammon - "
@@ -433,17 +465,34 @@ static void CreateGameWindow( void ) {
     gtk_window_set_wmclass( GTK_WINDOW( pwGame ), "gamerecord",
 			    "GameRecord" );
     gtk_window_set_default_size( GTK_WINDOW( pwGame ), 0, 400 );
-
-    gtk_container_add( GTK_CONTAINER( pwGame ), pvbox );
+    /* realise the window immediately, so the colourmap is available for the
+       pixmap */
+    gtk_widget_realize( pwGame );
     
+    gtk_container_add( GTK_CONTAINER( pwGame ), pvbox );
+
+    gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( phbox ),
+			PixmapButton( pwGame->window, prevgame_xpm,
+				      "previous game" ), FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( phbox ),
+			PixmapButton( pwGame->window, prevmove_xpm,
+				      "previous" ), FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( phbox ),
+			PixmapButton( pwGame->window, nextmove_xpm,
+				      "next" ), FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( phbox ),
+			PixmapButton( pwGame->window, nextgame_xpm,
+				      "next game" ), FALSE, FALSE, 0 );
+        
     gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
 	"(no game)" ) );
     gtk_widget_show_all( pm );
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pom = gtk_option_menu_new() ),
 			      pm );
     gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), 0 );
-    gtk_box_pack_start( GTK_BOX( pvbox ), pa, FALSE, FALSE, 4 );
-    gtk_container_add( GTK_CONTAINER( pa ), pom );
+    gtk_box_pack_start( GTK_BOX( phbox ), pom, TRUE, TRUE, 4 );
     
     gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
@@ -686,20 +735,64 @@ extern void GTKClearMoveRecord( void ) {
     gtk_clist_clear( GTK_CLIST( pwGameList ) );
 }
 
-extern void GTKAddGame( char *sz ) {
+static void MenuDelete( GtkWidget *pwChild, GtkWidget *pwMenu ) {
 
-    GtkWidget *pw = gtk_menu_item_new_with_label( sz );
-
-    /* FIXME delete the "(no game)" item if necessary */
-
-    gtk_widget_show( pw );
-    gtk_menu_append( GTK_MENU( gtk_option_menu_get_menu(
-	GTK_OPTION_MENU( pom ) ) ), pw );
+    gtk_container_remove( GTK_CONTAINER( pwMenu ), pwChild );
 }
 
-extern void GTKPopGame( int c ) {
+static void SelectGame( GtkWidget *pw, void *p ) {
 
-    /* FIXME */
+    int i = GPOINTER_TO_INT( p );
+    list *pl;
+    
+    assert( plGame );
+
+    for( pl = lMatch.plNext; i && pl->plNext->p; i--, pl = pl->plNext )
+	;
+
+    if( pl->p == plGame )
+	return;
+
+    ChangeGame( pl->p );    
+}
+
+extern void GTKAddGame( char *sz ) {
+
+    GtkWidget *pw = gtk_menu_item_new_with_label( sz ),
+	*pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
+    
+    if( !cGames )
+	/* Delete the "(no game)" item. */
+	gtk_container_foreach( GTK_CONTAINER( pwMenu ),
+			       (GtkCallback) MenuDelete, pwMenu );
+
+    gtk_signal_connect( GTK_OBJECT( pw ), "activate",
+			GTK_SIGNAL_FUNC( SelectGame ),
+			GINT_TO_POINTER( cGames ) );
+    
+    gtk_widget_show( pw );
+    gtk_menu_append( GTK_MENU( pwMenu ), pw );
+    
+    GTKSetGame( cGames );
+}
+
+/* Delete i and subsequent games. */
+extern void GTKPopGame( int i ) {
+
+    GtkWidget *pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
+    GList *pl, *plOrig;
+
+    plOrig = pl = gtk_container_children( GTK_CONTAINER( pwMenu ) );
+
+    while( i-- )
+	pl = pl->next;
+
+    while( pl ) {
+	gtk_container_remove( GTK_CONTAINER( pwMenu ), pl->data );
+	pl = pl->next;
+    }
+
+    g_list_free( plOrig );
 }
 
 extern void GTKSetGame( int i ) {
@@ -731,14 +824,17 @@ extern int InitGTK( int *argc, char ***argv ) {
     static GtkItemFactoryEntry aife[] = {
 	{ "/_File", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_New", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_New/_Game", NULL, Command, CMD_NEW_GAME, NULL },
+	{ "/_File/_New/_Game", "<control>N", Command, CMD_NEW_GAME, NULL },
 	{ "/_File/_New/_Match...", NULL, NewMatch, 0, NULL },
 	{ "/_File/_New/_Session", NULL, Command, CMD_NEW_SESSION, NULL },
-	{ "/_File/_Open", NULL, NULL, 0, NULL },
+	{ "/_File/_Open", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Open/_Game...", NULL, LoadGame, 0, NULL },
+	{ "/_File/_Open/_Match...", NULL, LoadMatch, 0, NULL },
+	{ "/_File/_Open/_Session...", NULL, NULL, 0, NULL },
 	{ "/_File/_Save", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Save/_Game", NULL, Command, CMD_SAVE_GAME, NULL },
-	{ "/_File/_Save/_Match", NULL, Command, CMD_SAVE_MATCH, NULL },
-	{ "/_File/_Save/_Session", NULL, NULL, 0, NULL },
+	{ "/_File/_Save/_Game...", NULL, SaveGame, 0, NULL },
+	{ "/_File/_Save/_Match...", NULL, SaveMatch, 0, NULL },
+	{ "/_File/_Save/_Session...", NULL, NULL, 0, NULL },
 	{ "/_File/_Save/_Weights", NULL, Command, CMD_SAVE_WEIGHTS, NULL },
 	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_File/_Quit", "<control>Q", Command, CMD_QUIT, NULL },
@@ -751,8 +847,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/_Roll", "<control>R", Command, CMD_ROLL, NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Game/_Double", "<control>D", Command, CMD_DOUBLE, NULL },
-	{ "/_Game/_Take", NULL, Command, CMD_TAKE, NULL },
-	{ "/_Game/Dro_p", NULL, Command, CMD_DROP, NULL },
+	{ "/_Game/_Take", "<control>T", Command, CMD_TAKE, NULL },
+	{ "/_Game/Dro_p", "<control>P", Command, CMD_DROP, NULL },
 	{ "/_Game/R_edouble", NULL, Command, CMD_REDOUBLE, NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Game/Re_sign", NULL, NULL, 0, "<Branch>" },
@@ -1024,6 +1120,9 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 					fQuestion ? question_xpm : gnu_xpm );
     pwPixmap = gtk_pixmap_new( ppm, NULL );
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
+
+    gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
+			       GTK_BUTTONBOX_SPREAD );
     
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwPixmap, FALSE, FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ),
@@ -1051,6 +1150,31 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
     return pwDialog;
 }
 
+typedef enum _dialogarea {
+    DA_MAIN,
+    DA_BUTTONS
+} dialogarea;
+
+static GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
+
+    GList *pl;
+    GtkWidget *pwChild;
+    
+    switch( da ) {
+    case DA_MAIN:
+    case DA_BUTTONS:
+	pl = gtk_container_children( GTK_CONTAINER(
+	    da == DA_MAIN ? GTK_DIALOG( pw )->vbox :
+	    GTK_DIALOG( pw )->action_area ) );
+	pwChild = pl->data;
+	g_list_free( pl );
+	return pwChild;
+
+    default:
+	abort();
+    }
+}
+
 static int Message( char *sz, int fQuestion ) {
 
     int f = FALSE, fRestoreNextTurn;
@@ -1062,9 +1186,10 @@ static int Message( char *sz, int fQuestion ) {
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
     gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
-    gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
-	GTK_DIALOG( pwDialog )->vbox ) )->data ), pwPrompt );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwPrompt );
 
+    gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, FALSE, FALSE );
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
@@ -1174,10 +1299,10 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwLength ), TRUE );
     
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
-	GTK_DIALOG( pwDialog )->vbox ) )->data ), pwPrompt );
-    gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
-	GTK_DIALOG( pwDialog )->vbox ) )->data ), pwLength );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwPrompt );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwLength );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
@@ -1196,6 +1321,95 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
 	sprintf( sz, "new match %d", nLength );
 	UserCommand( sz );
+    }
+}
+
+static void FileOK( GtkWidget *pw, char **ppch ) {
+
+    GtkWidget *pwFile = gtk_widget_get_toplevel( pw );
+
+    *ppch = g_strdup( gtk_file_selection_get_filename(
+	GTK_FILE_SELECTION( pwFile ) ) );
+    gtk_widget_destroy( pwFile );
+}
+
+static char *SelectFile( char *szTitle ) {
+
+    char *pch = NULL;
+    GtkWidget *pw = gtk_file_selection_new( szTitle );
+
+    gtk_signal_connect( GTK_OBJECT( GTK_FILE_SELECTION( pw )->ok_button ),
+			"clicked", GTK_SIGNAL_FUNC( FileOK ), &pch );
+    gtk_signal_connect_object( GTK_OBJECT( GTK_FILE_SELECTION( pw )->
+					   cancel_button ), "clicked",
+			       GTK_SIGNAL_FUNC( gtk_widget_destroy ),
+			       GTK_OBJECT( pw ) );
+    
+    gtk_window_set_modal( GTK_WINDOW( pw ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pw ), GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pw ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show( pw );
+
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
+
+    return pch;
+}
+
+static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( ( pch = SelectFile( "Open game" ) ) ) {
+	CommandLoadGame( pch );
+	free( pch );
+    }
+}
+
+static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( ( pch = SelectFile( "Open match" ) ) ) {
+	CommandLoadMatch( pch );
+	free( pch );
+    }
+}
+
+static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( gs == GAME_NONE ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+
+	return;
+    }
+    
+    if( ( pch = SelectFile( "Save game" ) ) ) {
+	CommandSaveGame( pch );
+	free( pch );
+    }
+}
+
+static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( gs == GAME_NONE ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+
+	return;
+    }
+
+    /* FIXME what if nMatch == 0? */
+    
+    if( ( pch = SelectFile( "Save match" ) ) ) {
+	CommandSaveMatch( pch );
+	free( pch );
     }
 }
 
@@ -1265,6 +1479,10 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 
     gtk_widget_set_sensitive( phd->pwMove, c == 1 );
     gtk_widget_set_sensitive( phd->pwRollout, c );
+
+    /* Double clicking a row makes that move. */
+    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS )
+	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
 }
 
 extern void GTKHint( movelist *pml ) {
@@ -1276,12 +1494,10 @@ extern void GTKHint( movelist *pml ) {
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
 					NULL ),
 	*psw = gtk_scrolled_window_new( NULL, NULL ),
-	*pwButtons = gtk_container_children( GTK_CONTAINER( GTK_DIALOG(
-	    pwDialog )->action_area ) )->data,
+	*pwButtons = DialogArea( pwDialog, DA_BUTTONS ),
 	*pwMove = gtk_button_new_with_label( "Move" ),
 	*pwRollout = gtk_button_new_with_label( "Rollout" ),
 	*pwMoves = gtk_clist_new_with_titles( 7, aszTitle );
-    GtkRequisition r;
     int i, j;
     char sz[ 32 ];
     hintdata hd = { pwMove, pwRollout };
@@ -1317,13 +1533,11 @@ extern void GTKHint( movelist *pml ) {
 					pml->amMoves[ i ].anMove ) );
     }
 
-    gtk_widget_get_child_requisition( pwMoves, &r );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
 				    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
     gtk_container_add( GTK_CONTAINER( psw ), pwMoves );
     
-    gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
-	GTK_DIALOG( pwDialog )->vbox ) )->data ), psw );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), psw );
 
     gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
 			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
@@ -1407,8 +1621,8 @@ extern void GTKRollout( int c ) {
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
 				    "%v/%u (%p%%)" );
     
-    gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
-	GTK_DIALOG( pwRolloutDialog )->vbox ) )->data ), pwVbox );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwRolloutDialog, DA_MAIN ) ),
+		       pwVbox );
 
     gtk_window_set_modal( GTK_WINDOW( pwRolloutDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwRolloutDialog ),
