@@ -69,6 +69,9 @@ typedef RETSIGTYPE (*psighandler)( int );
 #include <stdlib.h>
 #define BIG_PATH _MAX_PATH
 #else
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #define BIG_PATH PATH_MAX
 #endif
 

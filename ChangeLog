@@ -1,3 +1,7 @@
+Wed 10 Sep 21:30:14 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* insert limits.h before PATH_MAX use in backgammon.h
+	
 Tue Sep 09 23:13:44 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c (GTKDumpStatcontext): make stats window only bigger,
