@@ -739,10 +739,10 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Consume( pf, 14 );
 	    RequestFont( pf, FONT_RM, 14 );
 	    if( pmr->g.nMatch )
-		sprintf( sz, "%d point match (game %d)", pmr->g.nMatch,
+		sprintf( sz, _("%d point match (game %d)"), pmr->g.nMatch,
 			 pmr->g.i );
 	    else
-		sprintf( sz, "Money session (game %d)", pmr->g.i + 1 );
+		sprintf( sz, _("Money session (game %d)"), pmr->g.i + 1 );
 	    
 	    fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (%s) Tj\n" :
 		     "0 %d moveto (%s) show\n", y, sz );
@@ -753,14 +753,14 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    fprintf( pf, fPDF ? "1 0 0 1 16 %d Tm (" : "16 %d moveto (",
 		     y );
 	    PostScriptEscape( pf, ap[ 0 ].szName );
-	    fprintf( pf, " (%d points)", pmr->g.anScore[ 0 ] );
+	    fprintf( pf, _(" (%d points)"), pmr->g.anScore[ 0 ] );
 	    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 	    
 	    PlayerSymbol( pf, 225, 1 );
 	    fprintf( pf, fPDF ? "1 0 0 1 233 %d Tm (" : "233 %d moveto (",
 		     y );
 	    PostScriptEscape( pf, ap[ 1 ].szName );
-	    fprintf( pf, " (%d points)", pmr->g.anScore[ 1 ] );
+	    fprintf( pf, _(" (%d points)"), pmr->g.anScore[ 1 ] );
 	    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 	    
 	    break;
@@ -842,8 +842,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Double) stringwidth = 29.439 */
 	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 29;
-	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Double%s) Tj\n" :
-		     "%d %d moveto (Double%s) show\n", 225 - cx / 2 + 6, y,
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s%s) Tj\n" :
+		     "%d %d moveto (%s%s) show\n", 225 - cx / 2 + 6, y,
+                     _("Double"),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 	    
 	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
@@ -861,8 +862,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Take) stringwidth = 19.9892 */
 	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 20;
-	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Take%s) Tj\n" :
-		     "%d %d moveto (Take%s) show\n", 225 - cx / 2 + 6, y,
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s%s) Tj\n" :
+		     "%d %d moveto (%s%s) show\n", 225 - cx / 2 + 6, y,
+                     _("Take"),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 	    
 	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
@@ -878,8 +880,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Drop) stringwidth = 20.5494 */
 	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 20;
-	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Drop%s) Tj\n" :
-		     "%d %d moveto (Drop%s) show\n", 225 - cx / 2 + 6, y,
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s%s) Tj\n" :
+		     "%d %d moveto (%s%s) show\n", 225 - cx / 2 + 6, y,
+                     _("Drop"),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 	    
 	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
@@ -894,10 +897,11 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Resigns ) stringwidth = 34.1685 */
-	    cx = StringWidth( aszGameResult[ pmr->r.nResigned - 1 ] ) + 34;
-	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Resigns %s) Tj\n" :
-		     "%d %d moveto (Resigns %s) show\n", 225 - cx / 2 + 6, y,
-		     aszGameResult[ pmr->r.nResigned - 1 ] );
+	    cx = StringWidth( gettext ( aszGameResult[ pmr->r.nResigned - 1 ]  ) ) + 34;
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s %s) Tj\n" :
+		     "%d %d moveto (%s %s) show\n", 225 - cx / 2 + 6, y,
+                     _("Resigns"),
+		     gettext ( aszGameResult[ pmr->r.nResigned - 1 ] ) );
 	    
 	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
 	    
@@ -981,13 +985,13 @@ static void ExportGameGeneral( int f, char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputf( "You must specify a file to export to (see `help export "
-		 "game %s').\n", f ? "pdf" : "postscript" );
+	outputf( _("You must specify a file to export to (see `help export "
+		 "game %s').\n"), f ? "pdf" : "postscript" );
 	return;
     }
 
@@ -996,8 +1000,8 @@ static void ExportGameGeneral( int f, char *sz ) {
 
     if( !strcmp( sz, "-" ) ) {
 	if( f ) {
-	    outputl( "PDF files may not be written to standard output ("
-		     "see `help export game pdf')." );
+	    outputl( _("PDF files may not be written to standard output ("
+		     "see `help export game pdf').") );
 	    return;
 	}
 	
@@ -1046,8 +1050,8 @@ static void ExportMatchGeneral( int f, char *sz ) {
     }
     
     if( !sz || !*sz ) {
-	outputf( "You must specify a file to export to (see `help export "
-		 "match %s').\n", f ? "pdf" : "postscript" );
+	outputf( _("You must specify a file to export to (see `help export "
+		 "match %s').\n"), f ? "pdf" : "postscript" );
 	return;
     }
 
@@ -1056,8 +1060,8 @@ static void ExportMatchGeneral( int f, char *sz ) {
 
     if( !strcmp( sz, "-" ) ) {
 	if( f ) {
-	    outputl( "PDF files may not be written to standard output ("
-		     "see `help export match pdf')." );
+	    outputl( _("PDF files may not be written to standard output ("
+		     "see `help export match pdf').") );
 	    return;
 	}
 	
@@ -1103,13 +1107,13 @@ extern void CommandExportPositionEPS( char *sz ) {
     sz = NextToken( &sz );
     
     if( ms.gs == GAME_NONE ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export "
-		 "position eps')." );
+	outputl( _("You must specify a file to export to (see `help export "
+		 "position eps').") );
 	return;
     }
 
@@ -1124,7 +1128,7 @@ extern void CommandExportPositionEPS( char *sz ) {
     }
 
     fPDF = FALSE;
-    sprintf( szTitle, "Position %s", PositionID( ms.anBoard ) );
+    sprintf( szTitle, _("Position %s"), PositionID( ms.anBoard ) );
     PostScriptPrologue( pf, TRUE, szTitle );
 
     PrintPostScriptBoard( pf, &ms, ms.fTurn );

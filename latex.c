@@ -27,6 +27,7 @@
 #include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
+#include "i18n.h"
 
 static char*aszLuckTypeLaTeXAbbr[] = { "$--$", "$-$", "", "$+$", "$++$" };
 
@@ -176,7 +177,7 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     
     fprintf( pf, "\\bigskip\\pagebreak[1]\\begin{center}\\begin{picture}"
 	     "(356,240)(22,10)\n"
-	     "\\%sboard\n", fPlayer ? "black" : "white" );
+	     "\\%sboard\n", fPlayer ? _("black") : _("white") );
 
     for( i = 0; i < 25; i++ ) {
 	anOff[ 0 ] -= pms->anBoard[ 0 ][ i ];
@@ -384,12 +385,15 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
+            fputs ( "\\noindent{\\Large ", pf );
 	    if( pmr->g.nMatch )
-		fprintf( pf, "\\noindent{\\Large %d point match "
-			 "(game %d)}\n\n", pmr->g.nMatch, pmr->g.i );
+		fprintf( pf, _("%d point match (game %d)"), 
+                         pmr->g.nMatch, pmr->g.i );
 	    else
-		fprintf( pf, "\\noindent{\\Large Money session "
-			 "(game %d)}\n\n", pmr->g.i + 1 );
+		fprintf( pf, _("Money session (game %d)"), 
+                         pmr->g.i + 1 );
+
+            fputs ( "}\n\n", pf );
 
 	    fprintf( pf, "\\noindent\n\\makebox[0.5\\textwidth][s]"
 		     "{\\large %s ", PlayerSymbol( 0 ) );
@@ -448,8 +452,9 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 				    pmr->d.arDouble, &pmr->d.esDouble );
 
 	    /* FIXME what about beavers? */
-	    fprintf( pf, "\\begin{center}%s Double%s\\end{center}\n\n",
+	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
 		     PlayerSymbol( pmr->d.fPlayer ),
+                     _("Double"),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 	    
 	    PrintLaTeXComment( pf, pmr->a.sz );
@@ -458,8 +463,9 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    
 	case MOVE_TAKE:
 	    fTook = TRUE;
-	    fprintf( pf, "\\begin{center}%s Take%s\\end{center}\n\n",
+	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
 		     PlayerSymbol( pmr->d.fPlayer ),
+                     _("Take"),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 
 	    PrintLaTeXComment( pf, pmr->a.sz );
@@ -467,8 +473,9 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_DROP:
-	    fprintf( pf, "\\begin{center}%s Drop%s\\end{center}\n\n",
+	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
 		     PlayerSymbol( pmr->d.fPlayer ),
+                     _("Drop"),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 
 	    PrintLaTeXComment( pf, pmr->a.sz );
@@ -476,9 +483,10 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_RESIGN:
-	    fprintf( pf, "\\begin{center}%s Resigns %s\\end{center}\n\n",
+	    fprintf( pf, "\\begin{center}%s %s %s\\end{center}\n\n",
 		     PlayerSymbol( pmr->r.fPlayer ),
-		     aszGameResult[ pmr->r.nResigned - 1 ] );
+                     _("Resigns"),
+		     gettext ( aszGameResult[ pmr->r.nResigned - 1 ]  ) );
 	    /* FIXME print resignation analysis, if available */
 	    PrintLaTeXComment( pf, pmr->a.sz );
 	    break;
@@ -509,7 +517,7 @@ extern void CommandExportGameLaTeX( char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
@@ -517,8 +525,8 @@ extern void CommandExportGameLaTeX( char *sz ) {
       return;
 
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export"
-		 "game latex')." );
+	outputl( _("You must specify a file to export to (see `help export"
+		 "game latex').") );
 	return;
     }
 
@@ -550,8 +558,8 @@ extern void CommandExportMatchLaTeX( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export "
-		 "match latex')." );
+	outputl( _("You must specify a file to export to (see `help export "
+		 "match latex').") );
 	return;
     }
 
