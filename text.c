@@ -433,10 +433,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
-      else
-        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
+      r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
 
       fprintf ( pf, " (%+7.3f)!", r );
       
@@ -448,12 +445,8 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     }
     else {
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-      else
-        r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
+      r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
+        eq2mwc ( arDouble[ OUTPUT_DROP ], pci );
 
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
@@ -478,10 +471,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
-      else
-        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
+      r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
 
       fprintf ( pf, " (%+7.3f)!", r );
       
@@ -493,12 +483,8 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     }
     else {
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-      else
-        r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
+      r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
+          eq2mwc ( arDouble[ OUTPUT_TAKE ], pci );
 
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
@@ -527,10 +513,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
-      else
-        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
+      r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
 
       fprintf ( pf, " (%+7.3f)!", r );
       
@@ -542,12 +525,8 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     }
     else {
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-      else
-        r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
+      r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
+        eq2mwc ( arDouble[ OUTPUT_DROP ], pci );
 
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
@@ -1084,7 +1063,7 @@ static void ExportGameText ( FILE *pf, list *plGame,
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 
       pmr = pl->p;
-      
+
       switch( pmr->mt ) {
 
       case MOVE_GAMEINFO:

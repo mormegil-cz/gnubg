@@ -1,3 +1,12 @@
+Thu Jul  4 19:52:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (printHTMLBoardGNU): fix typo.
+	* html.c (printPointGNU): we do have images for 11+ chequers.
+	* html.c (HTMLPrintCubeAnalysisTable): fix bug in calculation
+	of errors in wrong takes and passes.
+	* text.c (TextPrintCubeAnalysisTable): fix bug in calculation
+	of errors in wrong takes and passes.
+
 Thu Jul  4 19:20:01 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c: experimental fix for paths problems.
