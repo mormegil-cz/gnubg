@@ -451,7 +451,7 @@ static int ComputerTurn( void ) {
 
       /* Consider cube action */
 
-      if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci,
+      if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
                                      &ap [ fTurn ].ec,
                                      ap [ fTurn ].ec.nPlies ) < 0 )
         return -1;
@@ -498,7 +498,7 @@ static int ComputerTurn( void ) {
 
           /* We're in market window */
 
-          if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci,
+          if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
                                          &ap [ fTurn ].ec,
                                          ap [ fTurn ].ec.nPlies ) < 0 )
             return -1;

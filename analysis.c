@@ -77,7 +77,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
     evalcontext ecDouble = { 1, 0, 0, 0, TRUE };  
     evalcontext ecMove   = { 1, 8, 0.16, 0, FALSE };  
     cubeinfo ci;
-    float arDouble[ 4 ];
+    float arDouble[ 4 ], arOutput [ NUM_OUTPUTS ];
     int fWinner, nPoints;
 
 
@@ -146,7 +146,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
 
           if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
-            if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci,
+            if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
                                            &ecDouble,
                                            ecDouble.nPlies ) < 0 ) 
               return;
@@ -223,7 +223,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
 
         if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
-          if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci,
+          if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
                                          &ecDouble,
                                          ecDouble.nPlies ) < 0 ) 
             return;

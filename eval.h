@@ -265,6 +265,7 @@ KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
 
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
+                         float arClOutput[ NUM_OUTPUTS ],
                          cubeinfo *pci, evalcontext *pec, int nPlies );
 
 extern int

@@ -56,6 +56,7 @@ static int CompareRedEvalData( const void *p0, const void *p1 );
 
 extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
+                          float arClOutput[ NUM_OUTPUTS ],
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies, int fCheckAutoRedoubles);
 
@@ -2989,15 +2990,12 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies,
 
       if ( pec->fCubeful ) {
 
-        if ( EvaluatePositionCubeful ( anBoardTemp, arEvalCf, &ci,
+        if ( EvaluatePositionCubeful ( anBoardTemp, arEvalCf, arEval, &ci,
                                        pec, nPlies ) ) 
           return -1;
 
-        // InvertEvaluation ( arEval );
+        InvertEvaluation ( arEval );
         InvertEvaluationCf ( arEvalCf );
-        arEval[ 0 ] = arEval[ 1 ] = arEval[ 2 ] = arEval[ 3 ] =
-          arEval[ 4 ] = 0.0;
-                                       
 
       } else {
 
@@ -3326,9 +3324,8 @@ FindnSaveBestMoves( movelist *pml,
 
   pml->cMoves = nMoves;
 
-  if( pec->nPlies  )
-    qsort( pml->amMoves, pml->cMoves, sizeof( move ),
-           (cfunc) CompareMoves );
+  qsort( pml->amMoves, pml->cMoves, sizeof( move ),
+         (cfunc) CompareMoves );
 
     return 0;
 }
@@ -3342,10 +3339,10 @@ extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] ) {
     anPips[ 1 ] = 0;
     
     for( i = 0; i < 25; i++ ) {
-	anPips[ 0 ] += anBoard[ 0 ][ i ] * ( i + 1 );
-	anPips[ 1 ] += anBoard[ 1 ][ i ] * ( i + 1 );
+      anPips[ 0 ] += anBoard[ 0 ][ i ] * ( i + 1 );
+      anPips[ 1 ] += anBoard[ 1 ][ i ] * ( i + 1 );
     }
-
+    
     return 0;
 }
 
@@ -3507,6 +3504,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
                          evalcontext *pec ) {
 
   float arOutput[ NUM_OUTPUTS ], arCfOutput[ 4 ];
+  float arClOutput[ NUM_OUTPUTS ];
   positionclass pc = ClassifyPosition( anBoard );
   int i, nPlies;
   cubeinfo ci;
@@ -3561,7 +3559,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     if( EvaluatePositionCache( anBoard, arOutput, &ci, pec, i, pc ) < 0 )
 	    return -1;
 
-    if ( EvaluatePositionCubeful ( anBoard, arCfOutput, &ci, pec, i )
+    if ( EvaluatePositionCubeful ( anBoard, arCfOutput,
+                                   arClOutput, &ci, pec, i )
          < 0 )
       return -1;
 
@@ -3991,6 +3990,7 @@ SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove ) {
 
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
+                         float arClOutput[ NUM_OUTPUTS ],
                          cubeinfo *pci, evalcontext *pec, int nPlies ) {
 
   /* Calculate cubeful equity. 
@@ -3999,6 +3999,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
                 arCfOutput[ 1 ]: equity for no double,
                 arCfOutput[ 2 ]: equity for double, take,
                 arCfOutput[ 3 ]: equity for double, pass.
+
+                arClOutput [ ]: cubeless evaluation.
 
      This is the top-level routine. If it is a n-ply (n>1) evaluation
      we are going to do a "no double" evaluation and a "double
@@ -4013,6 +4015,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
   cubeinfo ciD, ciR;
   int fCube, n0, n1, anBoardNew[ 2 ][ 25 ], i;
   float r;
+  float arOutput[ NUM_OUTPUTS ], arOutputND[ NUM_OUTPUTS ];
+  float arOutputD[ NUM_OUTPUTS ];
   positionclass pc;
 
   pc = ClassifyPosition( anBoard );
@@ -4026,6 +4030,11 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
   arCfOutput[ 1 ] = 0.0;
   arCfOutput[ 2 ] = 0.0;
+
+  for ( i = 0; i < NUM_OUTPUTS; i++ ) {
+    arOutputND[ i ] =0.0;
+    arOutputD[ i ] = 0.0;
+  }
 
   if ( pc != CLASS_OVER && nPlies > 0 ) {
 
@@ -4046,13 +4055,29 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
         SwapSides ( anBoardNew );
 
-        if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
+        if ( EvaluatePositionCubeful1 ( anBoardNew, &r, arOutput, &ciR, pec,
                                         nPlies - 1, FALSE ) < 0 )
           return -1;
 
         arCfOutput[ 1 ] += ( n0 == n1 ) ? r : 2.0 * r;
 
+        for ( i = 0; i < NUM_OUTPUTS; i++ )
+          arOutputND[ i ] +=
+            ( n0 == n1 ) ? arOutput[ i ] : 2.0 * arOutput[ i ];
+
       }
+
+      arOutputND[ OUTPUT_WIN ] = 1.0 - arOutputND[ OUTPUT_WIN ] / 36.0;
+
+      r = arOutputND[ OUTPUT_WINGAMMON ] / 36.0;
+      arOutputND[ OUTPUT_WINGAMMON ] = arOutputND[ OUTPUT_LOSEGAMMON ] / 36.0;
+      arOutputND[ OUTPUT_LOSEGAMMON ] = r;
+
+      r = arOutputND[ OUTPUT_WINBACKGAMMON ] / 36.0;
+      arOutputND[ OUTPUT_WINBACKGAMMON ] =
+                    arOutputND[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+      arOutputND[ OUTPUT_LOSEBACKGAMMON ] = r;
+
 
     if ( ! nMatchTo ) {
       arCfOutput[ 1 ] /= -36.0;
@@ -4063,8 +4088,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
   }
   else {
     
-    EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 1 ], pci,
-                               pec, 0, FALSE );
+    EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 1 ], arOutputND, 
+                               pci, pec, 0, FALSE );
   }
 
   /* Double branch */
@@ -4095,13 +4120,29 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
           SwapSides ( anBoardNew );
 
-          if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
+          if ( EvaluatePositionCubeful1 ( anBoardNew, &r, arOutput, 
+                                          &ciR, pec,
                                           nPlies - 1, TRUE ) < 0 )
             return -1;
         
           arCfOutput[ 2 ] += ( n0 == n1 ) ? r : 2.0 * r;
 
-        }
+        for ( i = 0; i < NUM_OUTPUTS; i++ )
+          arOutputD[ i ] +=
+            ( n0 == n1 ) ? arOutput[ i ] : 2.0 * arOutput[ i ];
+
+      }
+
+      arOutputD[ OUTPUT_WIN ] = 1.0 - arOutputD[ OUTPUT_WIN ] / 36.0;
+
+      r = arOutputD[ OUTPUT_WINGAMMON ] / 36.0;
+      arOutputD[ OUTPUT_WINGAMMON ] = arOutputD[ OUTPUT_LOSEGAMMON ] / 36.0;
+      arOutputD[ OUTPUT_LOSEGAMMON ] = r;
+
+      r = arOutputD[ OUTPUT_WINBACKGAMMON ] / 36.0;
+      arOutputD[ OUTPUT_WINBACKGAMMON ] =
+                    arOutputD[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+      arOutputD[ OUTPUT_LOSEBACKGAMMON ] = r;
 
       if ( ! nMatchTo ) {
         arCfOutput[ 2 ] /= -18.0;
@@ -4112,8 +4153,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
     } 
     else {
 
-      EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 2 ], &ciD,
-                                 pec, 0, TRUE ); 
+      EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 2 ], arOutputD, 
+                                 &ciD, pec, 0, TRUE ); 
 
       if ( ! nMatchTo )
         arCfOutput[ 2 ] *= 2.0;
@@ -4127,6 +4168,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
       /* we have a double */
 
+      for ( i = 0; i < NUM_OUTPUTS; i++ ) 
+        arClOutput[ i ] = arOutputD[ i ];
+
       if ( arCfOutput[ 2 ] < arCfOutput[ 3 ] )
         /* ...take */
         arCfOutput[ 0 ] = arCfOutput[ 2 ];
@@ -4135,9 +4179,13 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
         arCfOutput[ 0 ] = arCfOutput[ 3 ];
 
     }
-    else
+    else {
       /* no double (either no double, take or too good, pass) */
       arCfOutput[ 0 ] = arCfOutput[ 1 ];
+
+      for ( i = 0; i < NUM_OUTPUTS; i++ ) 
+        arClOutput[ i ] = arOutputND[ i ];
+    }
 
   }
   else {
@@ -4145,6 +4193,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
     /* We can't or wont double */
 
     arCfOutput[ 0 ] = arCfOutput[ 1 ];
+
+    for ( i = 0; i < NUM_OUTPUTS; i++ ) 
+      arClOutput[ i ] = arOutputND[ i ];
 
   }
 
@@ -4185,6 +4236,7 @@ fDoCubeful ( cubeinfo *pci ) {
     
 extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
+                          float arClOutput[ NUM_OUTPUTS ],
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies, int fCheckAutoRedoubles) { 
 
@@ -4237,7 +4289,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     /* Do a 0-ply cube decision */
 
-    float rND, rDT, rDP, r;
+    float rND, rDT, rDP, r, arOutput [ NUM_OUTPUTS ];
     int fCube, n0, n1, i, fDoubleBranch;
     cubeinfo ciD, *pciE, ciND, ciR;
 
@@ -4248,18 +4300,21 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     fDoubleBranch = 0;
 
+    for ( i = 0; i < NUM_OUTPUTS; i++ )
+      arClOutput[ i ] = 0.0;
+
     if ( fCube ) {
 
       /* we have access a non-dead cube */
 
-      if ( EvaluatePositionCubeful1 ( anBoard, &rND, pci,
+      if ( EvaluatePositionCubeful1 ( anBoard, &rND, arOutput, pci,
                                       pec, 0, TRUE ) < 0 )
         return -1;
 
       SetCubeInfo ( &ciD, 2 * pci -> nCube, ! pci -> fMove, 
                     pci -> fMove );
 
-      if ( EvaluatePositionCubeful1 ( anBoard, &rDT, &ciD,
+      if ( EvaluatePositionCubeful1 ( anBoard, &rDT, arOutput, &ciD,
                                       pec, 0, TRUE ) 
            < 0 )
         return -1;
@@ -4270,31 +4325,34 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
       if ( ( rDT >= rND ) && ( rDP >= rND ) ) {
 
         /* we have a double */
+        
+        if ( rDT > rDP ) {
 
-	if ( rDT > rDP ) {
+          /* Double, pass:
+             No need to do recursion. Equity is just +1.0. */
 
-	  /* Double, pass:
-	     No need to do recursion. Equity is just +1.0. */
+          for ( i = 0; i < NUM_OUTPUTS; i++ )
+            arClOutput [ i ] = arOutput[ i ];
 
-	  *prOutput = rDP;
-	  return 0;
+          *prOutput = rDP;
+          return 0;
 
-	}
-	else {
+        }
+        else {
 
-	  /* Double, take:
-	     Take "double, take" branch in evaluation below. */
+          /* Double, take:
+             Take "double, take" branch in evaluation below. */
 
-	  pciE = &ciD;
-	  SetCubeInfo ( &ciR, 2 * pci -> nCube, 
-			! pci -> fMove, ! pci -> fMove );
-	  fDoubleBranch = 1;
+          pciE = &ciD;
+          SetCubeInfo ( &ciR, 2 * pci -> nCube, 
+                        ! pci -> fMove, ! pci -> fMove );
+          fDoubleBranch = 1;
 
-	}
+        }
       }
       else {
         /* no double:
-	   Take "no double" branch in the evaluation below. */
+           Take "no double" branch in the evaluation below. */
         pciE = &ciND;
         SetCubeInfo ( &ciR, pci -> nCube, 
                       pci -> fCubeOwner, ! pci -> fMove );
@@ -4331,13 +4389,28 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
         SwapSides ( anBoardNew );
 
-        if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
+        if ( EvaluatePositionCubeful1 ( anBoardNew, &r, arOutput, &ciR, pec,
                                         nPlies - 1, fDoubleBranch ) < 0 )
           return -1;
 
         *prOutput += ( n0 == n1 ) ? r : 2.0 * r;
 
+        for ( i = 0; i < NUM_OUTPUTS; i++ ) 
+          arClOutput[ i ] =
+            ( n0 == n1 ) ? arOutput[ i ] : 2.0 * arOutput[ i ];
+
       }
+
+    arClOutput[ OUTPUT_WIN ] = 1.0 - arClOutput[ OUTPUT_WIN ] / 36.0;
+    
+    r = arClOutput[ OUTPUT_WINGAMMON ] / 36.0;
+    arClOutput[ OUTPUT_WINGAMMON ] = arClOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
+    arClOutput[ OUTPUT_LOSEGAMMON ] = r;
+    
+    r = arClOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
+    arClOutput[ OUTPUT_WINBACKGAMMON ] =
+      arClOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+    arClOutput[ OUTPUT_LOSEBACKGAMMON ] = r;
 
     if ( ! nMatchTo ) {
       if ( fDoubleBranch ) 
@@ -4355,7 +4428,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
        Call EvaluatePostion to ensure that the evaluation
        is cached. */
 
-    float arOutput [ NUM_OUTPUTS ], rEq;
+    float rEq;
 
     /* check for automatic redouble */
 
@@ -4388,11 +4461,11 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     }
 
-    EvaluatePosition ( anBoard, arOutput, pci, 0 );
+    EvaluatePosition ( anBoard, arClOutput, pci, 0 );
 
-    SanityCheck ( anBoard, arOutput );
-    //4NvBwQDg5+ABIQ
-    rEq = Utility ( arOutput, pci );
+    SanityCheck ( anBoard, arClOutput );
+
+    rEq = Utility ( arClOutput, pci );
 
     if ( pc == CLASS_OVER || ( nMatchTo && ! fDoCubeful( pci ) ) ) {
 
@@ -4410,9 +4483,9 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
       rCubeX = EvalEfficiency ( anBoard, pc );
 
       if ( ! nMatchTo )
-	*prOutput = Cl2CfMoney ( arOutput, pci );
+        *prOutput = Cl2CfMoney ( arClOutput, pci );
       else
-	*prOutput = Cl2CfMatch ( arOutput, pci );
+        *prOutput = Cl2CfMatch ( arClOutput, pci );
 
     }/* CLASS_OVER */
       

@@ -1,3 +1,13 @@
+Thu Nov  2 20:26:19 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* eval.c (EvaluatePositionCubeful, EvaluatePositionCubeful1): Calculate
+	cubeless equities as well (for example, used in CommandHint).
+	* gnubg.c (CommandHint), play.c (ComputerTurn), eval.c (ScoreMoves,
+	DumpPosition), analysis.c (AnalyzeGame): EvaluatePositionCubeful now
+	takes an extra parameter where cubeless evaluation is stored. 
+	* eval.c (ScoreMoves): Save cubeless evaluation in move struct.
+	* eval.c (FindnSaveBestMoves): sort moves for 0-ply as well.
+
 Thu Nov  2 10:23:43 2000  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (CreateGameWindow, GTKHint): Add correct scroll bars to

@@ -1186,7 +1186,7 @@ extern void CommandHint( char *sz ) {
     movelist ml;
     int i;
     char szMove[ 32 ], szTemp[ 1024 ];
-    float arDouble[ 4 ];
+    float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ];
     cubeinfo ci;
     int n = ParseNumber ( &sz );
     
@@ -1202,11 +1202,12 @@ extern void CommandHint( char *sz ) {
 
       if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
-	/* Give hint on cube action */
+        /* Give hint on cube action */
 
-	if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci, &ecEval,
-				       ecEval.nPlies ) < 0 )
-	  return;
+        if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput,
+                                       &ci, &ecEval,
+                                       ecEval.nPlies ) < 0 )
+          return;
 
         GetCubeActionSz ( arDouble, szTemp, &ci );
 
@@ -1242,7 +1243,7 @@ extern void CommandHint( char *sz ) {
 
       SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
-      if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci, &ecEval,
+      if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci, &ecEval,
                                      ecEval.nPlies ) < 0 )
         return;
 
