@@ -1,4 +1,4 @@
-Thu Oct 24 22:52:23 GMT  Jim Segrave <jes@jes-2.demon.nl>
+Thu Oct 24 22:52:23 2003 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* set.c backgammon.h rollout.c gnubg.c - added text mode commands
 	  set rollout log on/off, set rollout logfile <template name>
