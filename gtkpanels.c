@@ -449,7 +449,7 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 	if (!woPanel[WINDOW_ANALYSIS].docked)
 	{
 	    gtk_signal_connect( GTK_OBJECT( woPanel[WINDOW_ANALYSIS].pwWin ), "delete_event",
-			woPanel[WINDOW_ANALYSIS].hideFun, NULL );
+			GTK_SIGNAL_FUNC(woPanel[WINDOW_ANALYSIS].hideFun), NULL );
 		return woPanel[WINDOW_ANALYSIS].pwWin;
 	}
 	else
@@ -572,7 +572,7 @@ static void CreateGameWindow( void ) {
 	if (!woPanel[WINDOW_GAME].docked)
 	{
 	    gtk_signal_connect( GTK_OBJECT( woPanel[WINDOW_GAME].pwWin ), "delete_event",
-			woPanel[WINDOW_GAME].hideFun, NULL );
+			GTK_SIGNAL_FUNC(woPanel[WINDOW_GAME].hideFun), NULL );
 	}
 	else
 		woPanel[WINDOW_GAME].pwWin = pvbox;
