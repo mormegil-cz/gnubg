@@ -142,17 +142,7 @@ typedef enum _gnubgcommand {
     CMD_SET_AUTO_ROLL,
     CMD_SET_CLOCKWISE,
     CMD_SET_CONFIRM,
-    CMD_SET_CUBE_CENTRE,
-    CMD_SET_CUBE_OWNER_0,
-    CMD_SET_CUBE_OWNER_1,
     CMD_SET_CUBE_USE,
-    CMD_SET_CUBE_VALUE_1,
-    CMD_SET_CUBE_VALUE_2,
-    CMD_SET_CUBE_VALUE_4,
-    CMD_SET_CUBE_VALUE_8,
-    CMD_SET_CUBE_VALUE_16,
-    CMD_SET_CUBE_VALUE_32,
-    CMD_SET_CUBE_VALUE_64,
     CMD_SET_DISPLAY,
     CMD_SET_EGYPTIAN,
     CMD_SET_JACOBY,
@@ -266,17 +256,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set automatic roll",
     "set clockwise",
     "set confirm",
-    "set cube centre",
-    NULL, /* set cube owner 0 */
-    NULL, /* set cube owner 1 */
     "set cube use",
-    "set cube value 1",
-    "set cube value 2",
-    "set cube value 4",
-    "set cube value 8",
-    "set cube value 16",
-    "set cube value 32",
-    "set cube value 64",
     "set display",
     "set egyptian",
     "set jacoby",
@@ -315,6 +295,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     "train database",
     "train td"
 };
+
+static char szSetCubeValue[20]; /* set cube value XX */
+static char szSetCubeOwner[20]; /* set cube owner X */
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
@@ -363,13 +346,18 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
+static void SetCube( gpointer *p, guint n, GtkWidget *pw );
+static void GTKSetCubeValue( GtkWidget *wd, int data);
+static void GTKSetCubeOwner( GtkWidget *wd, int i);
+static void SetCubeClickButton( GtkWidget *wd, int i);
+static GtkWidget* CreateSetCube( ); 
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard, *pwMain, *pwMenuBar;
 static GtkWidget *pwStatus, *pwProgress, *pwGame, *pwGameList, *pom,
-    *pwAnnotation, *pwAnalysis, *pwCommentary, *pwHint;
+    *pwAnnotation, *pwAnalysis, *pwCommentary, *pwHint, *pwSetCube;
 static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
 static GtkStyle *psGameList, *psCurrent;
@@ -564,12 +552,12 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
 	BoardPreferences( pwBoard );
 	return;
 	
-    case CMD_SET_CUBE_OWNER_0:
+/*    case CMD_SET_CUBE_OWNER_0:
     case CMD_SET_CUBE_OWNER_1:
 	sprintf( sz, "set cube owner %s",
 		 ap[ iCommand - CMD_SET_CUBE_OWNER_0 ].szName );
 	UserCommand( sz );
-	return;
+	return;  */
 
     case CMD_SET_TURN_0:
     case CMD_SET_TURN_1:
@@ -2053,7 +2041,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/Previous game", "<control>Page_Up", Command, CMD_PREV_GAME,
 	  NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Game/_Cube", NULL, NULL, 0, "<Branch>" },
+	{ "/_Game/Set cube...", NULL, SetCube, 0, NULL },
+/*	{ "/_Game/_Cube", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Cube/_Owner", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Cube/_Owner/Centred", NULL, Command,
 	  CMD_SET_CUBE_CENTRE, "<RadioItem>" },
@@ -2075,8 +2064,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/_Cube/_Value/32", NULL, Command, CMD_SET_CUBE_VALUE_32,
 	  "/Game/Cube/Value/1" },
 	{ "/_Game/_Cube/_Value/64", NULL, Command, CMD_SET_CUBE_VALUE_64,
-	  "/Game/Cube/Value/1" },
-	{ "/_Game/_Dice...", NULL, SetDice, 0, NULL },
+	  "/Game/Cube/Value/1" },  */
+	{ "/_Game/Set _dice...", NULL, SetDice, 0, NULL },
 	{ "/_Game/_Turn", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Turn/0", NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
 	{ "/_Game/_Turn/1", NULL, Command, CMD_SET_TURN_1,
@@ -5483,33 +5472,33 @@ extern void GTKSet( void *p ) {
 	fAutoCommand = FALSE;
     } else if( p == &ms.fCubeOwner ) {
 	/* Handle the cube owner radio items. */
-	fAutoCommand = TRUE;
+/*	fAutoCommand = TRUE;
 	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_OWNER_0 +
 		ms.fCubeOwner ) ), TRUE );
-	fAutoCommand = FALSE;
+	fAutoCommand = FALSE; */
     } else if( p == &ms.nCube ) {
 	/* Handle the cube value radio items. */
 	int i;
 
 	/* Find log_2 of the cube value. */
-	for( i = 0; ms.nCube >> ( i + 1 ); i++ )
+/*	for( i = 0; ms.nCube >> ( i + 1 ); i++ )
 	    ;
 	
 	fAutoCommand = TRUE;
 	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_VALUE_1 +
 		i) ), TRUE );
-	fAutoCommand = FALSE;
+	fAutoCommand = FALSE; */
     } else if( p == ap ) {
 	/* Handle the player names. */
-	gtk_label_set_text( GTK_LABEL( GTK_BIN(
+/*      gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_OWNER_0 )
 	    )->child ), (ap[ 0 ].szName) );
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_OWNER_1 )
 	    )->child ), (ap[ 1 ].szName) );
-	
+*/	
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 )
 	    )->child ), (ap[ 0 ].szName) );
@@ -5910,4 +5899,240 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   gtk_main();
   GTKAllowStdin();
 } 
+
+static GtkWidget* CreateSetCube ()
+{
+  /* This code was generated by glade */
+
+  GtkWidget *SetCubeWindow;
+  GtkWidget *hbox1;
+  GtkWidget *frame1;
+  GtkWidget *vbox2;
+  GSList *value_group = NULL;
+  GtkWidget *rbv0;
+  GtkWidget *rbv1;
+  GtkWidget *rbv2;
+  GtkWidget *rbv3;
+  GtkWidget *rbv4;
+  GtkWidget *rbv5;
+  GtkWidget *rbv6;
+  GtkWidget *vbox1;
+  GtkWidget *frame2;
+  GtkWidget *vbox3;
+  GSList *owner_group = NULL;
+  GtkWidget *rbo0;
+  GtkWidget *rbo1;
+  GtkWidget *rbo2;
+  GtkWidget *pwCancel;
+  GtkWidget *pwOK;
+
+  SetCubeWindow = gtk_window_new (GTK_WINDOW_DIALOG);
+  gtk_object_set_data (GTK_OBJECT (SetCubeWindow), "SetCubeWindow", SetCubeWindow);
+  gtk_window_set_title (GTK_WINDOW (SetCubeWindow), "Set cube");
+
+  hbox1 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_ref (hbox1);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "hbox1", hbox1,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (hbox1);
+  gtk_container_add (GTK_CONTAINER (SetCubeWindow), hbox1);
+
+  frame1 = gtk_frame_new ("Value");
+  gtk_widget_ref (frame1);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "frame1", frame1,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (frame1);
+  gtk_box_pack_start (GTK_BOX (hbox1), frame1, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame1), 3);
+
+  vbox2 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_ref (vbox2);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "vbox2", vbox2,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (vbox2);
+  gtk_container_add (GTK_CONTAINER (frame1), vbox2);
+
+  rbv0 = gtk_radio_button_new_with_label (value_group, "1");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv0));
+  gtk_widget_ref (rbv0);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv0", rbv0,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv0);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv0, FALSE, FALSE, 0);
+
+  rbv1 = gtk_radio_button_new_with_label (value_group, "2");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv1));
+  gtk_widget_ref (rbv1);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv1", rbv1,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv1);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv1, FALSE, FALSE, 0);
+
+  rbv2 = gtk_radio_button_new_with_label (value_group, "4");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv2));
+  gtk_widget_ref (rbv2);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv2", rbv2,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv2);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv2, FALSE, FALSE, 0);
+
+  rbv3 = gtk_radio_button_new_with_label (value_group, "8");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv3));
+  gtk_widget_ref (rbv3);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv3", rbv3,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv3);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv3, FALSE, FALSE, 0);
+
+  rbv4 = gtk_radio_button_new_with_label (value_group, "16");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv4));
+  gtk_widget_ref (rbv4);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv4", rbv4,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv4);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv4, FALSE, FALSE, 0);
+
+  rbv5 = gtk_radio_button_new_with_label (value_group, "32");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv5));
+  gtk_widget_ref (rbv5);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv5", rbv5,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv5);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv5, FALSE, FALSE, 0);
+
+  rbv6 = gtk_radio_button_new_with_label (value_group, "64");
+  value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbv6));
+  gtk_widget_ref (rbv6);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbv6", rbv6,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbv6);
+  gtk_box_pack_start (GTK_BOX (vbox2), rbv6, FALSE, FALSE, 0);
+
+  vbox1 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_ref (vbox1);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "vbox1", vbox1,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (vbox1);
+  gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
+
+  frame2 = gtk_frame_new ("Owner");
+  gtk_widget_ref (frame2);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "frame2", frame2,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (frame2);
+  gtk_box_pack_start (GTK_BOX (vbox1), frame2, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame2), 3);
+
+  vbox3 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_ref (vbox3);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "vbox3", vbox3,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (vbox3);
+  gtk_container_add (GTK_CONTAINER (frame2), vbox3);
+
+  rbo0 = gtk_radio_button_new_with_label (owner_group, "Centred");
+  owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbo0));
+  gtk_widget_ref (rbo0);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbo0", rbo0,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbo0);
+  gtk_box_pack_start (GTK_BOX (vbox3), rbo0, FALSE, FALSE, 0);
+
+  rbo1 = gtk_radio_button_new_with_label (owner_group, ap[0].szName);
+  owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbo1));
+  gtk_widget_ref (rbo1);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbo1", rbo1,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbo1);
+  gtk_box_pack_start (GTK_BOX (vbox3), rbo1, FALSE, FALSE, 0);
+
+  rbo2 = gtk_radio_button_new_with_label (owner_group, ap[1].szName);
+  owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rbo2));
+  gtk_widget_ref (rbo2);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "rbo2", rbo2,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (rbo2);
+  gtk_box_pack_start (GTK_BOX (vbox3), rbo2, FALSE, FALSE, 0);
+
+  pwCancel = gtk_button_new_with_label ("Cancel");
+  gtk_widget_ref (pwCancel);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "pwCancel", pwCancel,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (pwCancel);
+  gtk_box_pack_start (GTK_BOX (vbox1), pwCancel, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwCancel), 4);
+
+  pwOK = gtk_button_new_with_label ("OK");
+  gtk_widget_ref (pwOK);
+  gtk_object_set_data_full (GTK_OBJECT (SetCubeWindow), "pwOK", pwOK,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (pwOK);
+  gtk_box_pack_start (GTK_BOX (vbox1), pwOK, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwOK), 4);
+
+  gtk_signal_connect (GTK_OBJECT (pwCancel), "clicked",
+                      GTK_SIGNAL_FUNC (SetCubeClickButton), (int *) 0);
+  gtk_signal_connect (GTK_OBJECT (pwOK), "clicked",
+                      GTK_SIGNAL_FUNC (SetCubeClickButton), (int *) 1);
+
+  gtk_signal_connect (GTK_OBJECT (rbv0), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 1);
+  gtk_signal_connect (GTK_OBJECT (rbv1), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 2);
+  gtk_signal_connect (GTK_OBJECT (rbv2), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 4);
+  gtk_signal_connect (GTK_OBJECT (rbv3), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 8);
+  gtk_signal_connect (GTK_OBJECT (rbv4), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 16);
+  gtk_signal_connect (GTK_OBJECT (rbv5), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 32);
+  gtk_signal_connect (GTK_OBJECT (rbv6), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeValue), (int *) 64);
+
+  gtk_signal_connect (GTK_OBJECT (rbo0), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeOwner), (int *) -1);
+  gtk_signal_connect (GTK_OBJECT (rbo1), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeOwner), (int *)  0);
+  gtk_signal_connect (GTK_OBJECT (rbo2), "clicked",
+                      GTK_SIGNAL_FUNC (GTKSetCubeOwner), (int *)  1);
+    
+
+  return SetCubeWindow;
+}
+
+
+static void SetCube( gpointer *p, guint n, GtkWidget *pw ) {
+
+  pwSetCube = CreateSetCube();
+
+  gtk_widget_show_all( pwSetCube );
+
+}
+
+static void GTKSetCubeValue( GtkWidget *wd, int data) {
+
+  sprintf(szSetCubeValue, "set cube value %d", data);
+
+}
+
+static void GTKSetCubeOwner( GtkWidget *wd, int i) {
+
+  if ( i == -1 ) 
+    sprintf(szSetCubeOwner,"set cube centre");
+  else
+    sprintf(szSetCubeOwner,"set cube owner %d", i);
+
+}
+
+static void SetCubeClickButton( GtkWidget *wd, int i) {
+
+  if ( i ){ 
+     UserCommand(szSetCubeValue);
+     UserCommand(szSetCubeOwner);
+  }
+
+  gtk_widget_destroy( pwSetCube );
+
+}
 

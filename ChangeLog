@@ -1,3 +1,7 @@
+Thu Feb 28 22:38:19 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c: Started a 'Set cube...' dialog box
+  
 Thu Feb 28 21:13:36 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (GeneralRollout, BasicCubefulRollout): implement
