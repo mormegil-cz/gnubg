@@ -8160,7 +8160,7 @@ ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
 #endif /* HAVE_SYS_UTSNAME_H */
 
 	sprintf( sz, "http://savannah.gnu.org/bugs/?func=additem&group=gnubg"
-		     "&release_id="	"108"
+		     "&release_id="	"109"
 		     "&custom_tf1="	__DATE__
 		     "&platform_version_id=%s", pchOS );
  	OpenURL( sz );
