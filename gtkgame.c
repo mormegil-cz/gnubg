@@ -1247,6 +1247,104 @@ static GtkWidget *SkillMenu( skilltype stSelect ) {
     return pwOptionMenu;
 }
 
+
+static GtkWidget *
+ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
+                 int nResigned,
+                 evalsetup *pesResign ) {
+
+  cubeinfo ci;
+  GtkWidget *pwTable = gtk_table_new ( 3, 2, FALSE );
+  GtkWidget *pwLabel;
+
+  float rAfter, rBefore;
+
+  char sz [ 64 ];
+
+  if ( pesResign->et == EVAL_NONE ) 
+    return NULL;
+
+  GetMatchStateCubeInfo ( &ci, &ms );
+
+
+  /* First column with text */
+
+  pwLabel = gtk_label_new ( "Equity before resignation: " );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 1, 0, 1,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  pwLabel = gtk_label_new ( "Equity after resignation: " );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 1, 1, 2,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  pwLabel = gtk_label_new ( "Difference: " );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 1, 2, 3,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  /* Second column: equities/mwc */
+
+  getResignEquities ( arResign, &ci, nResigned, &rBefore, &rAfter );
+
+  if( fOutputMWC && ms.nMatchTo )
+    sprintf ( sz, "%6.2f%%", eq2mwc ( rBefore, &ci ) * 100.0f );
+  else
+    sprintf ( sz, "%+6.3f", rBefore );
+
+  pwLabel = gtk_label_new ( sz );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     1, 2, 0, 1,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+
+  if( fOutputMWC && ms.nMatchTo )
+    sprintf ( sz, "%6.2f%%", eq2mwc ( rAfter, &ci ) * 100.0f );
+  else
+    sprintf ( sz, "%+6.3f", rAfter );
+
+  pwLabel = gtk_label_new ( sz );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     1, 2, 1, 2,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+
+  if( fOutputMWC && ms.nMatchTo )
+    sprintf ( sz, "%+6.2f%%",
+              ( eq2mwc ( rAfter, &ci ) - eq2mwc ( rBefore, &ci ) ) * 100.0f );
+  else
+    sprintf ( sz, "%+6.3f", rAfter - rBefore );
+
+  pwLabel = gtk_label_new ( sz );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     1, 2, 2, 3,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+
+  return pwTable;
+
+}
+
+
 static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
     cubeinfo ci;
     char sz[ 1024 ];
@@ -1492,6 +1590,49 @@ static void SetAnnotation( moverecord *pmr ) {
 				    "Drop" ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->d.st ),
+				FALSE, FALSE, 2 );
+
+	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
+				0 );
+
+	    gtk_container_add( GTK_CONTAINER( pwAlign ), pwBox );
+	    
+	    break;
+	    
+	case MOVE_RESIGN:
+	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+
+            /* equities for resign */
+            
+	    if( ( pw = ResignAnalysis( pmr->r.arResign,
+                                       pmr->r.nResigned,
+                                       &pmr->r.esResign ) ) )
+              gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
+                                  FALSE, 0 );
+
+            /* skill for resignation */
+
+	    pwBox = gtk_hbox_new( FALSE, 0 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ),
+				gtk_label_new( "Resign" ),
+				FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->r.stResign ),
+				FALSE, FALSE, 2 );
+
+	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
+				0 );
+
+	    gtk_container_add( GTK_CONTAINER( pwAlign ), pwBox );
+
+            /* skill for accept */
+
+	    pwBox = gtk_hbox_new( FALSE, 0 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ),
+				gtk_label_new( "Accept" ),
+				FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->r.stAccept ),
 				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
