@@ -67,16 +67,16 @@ EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
 
 sgfp.h sgfp.c: sgf.y
-	$(BISON) -o $@ -p sgf -d $<
+	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
-	$(FLEX) -o$@ -Psgf $<
+	$(FLEX) -o$@ -Psgf $(srcdir)/sgf.l
 
 credits.c AUTHORS: credits.sh
 	cd $(srcdir) && $(SHELL) ./credits.sh
 
 copying.c: COPYING copying.awk
-	$(AWK) -f $(srcdir)/copying.awk < $< > $@
+	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
 
 gnubg.bd:
 	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
@@ -127,7 +127,7 @@ gnubg.wd: gnubg.weights makeweights
 	@echo ' ** on the host system.'
 else
 gnubg.wd: gnubg.weights makeweights
-	-./makeweights < $< > $@
+	-./makeweights < $(srcdir)/gnubg.weights > $@
 endif
 
 .DELETE_ON_ERROR:

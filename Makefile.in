@@ -692,16 +692,16 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 sgfp.h sgfp.c: sgf.y
-	$(BISON) -o $@ -p sgf -d $<
+	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
-	$(FLEX) -o$@ -Psgf $<
+	$(FLEX) -o$@ -Psgf $(srcdir)/sgf.l
 
 credits.c AUTHORS: credits.sh
 	cd $(srcdir) && $(SHELL) ./credits.sh
 
 copying.c: COPYING copying.awk
-	$(AWK) -f $(srcdir)/copying.awk < $< > $@
+	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
 
 gnubg.bd:
 	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
@@ -747,7 +747,7 @@ gnubg.weights:
 @CROSS_COMPILING_TRUE@	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
 @CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
 @CROSS_COMPILING_FALSE@gnubg.wd: gnubg.weights makeweights
-@CROSS_COMPILING_FALSE@	-./makeweights < $< > $@
+@CROSS_COMPILING_FALSE@	-./makeweights < $(srcdir)/gnubg.weights > $@
 
 .DELETE_ON_ERROR:
 
