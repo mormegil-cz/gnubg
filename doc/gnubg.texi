@@ -387,7 +387,7 @@ so the 10 byte key (in hex) is E0 73 F0 01 30 E0 73 F0 01 30.
 ID format
 
 The ID format is simply the 
-@uref{http://www.ietf.org/rfc/rfc2045.txt,,Base64}
+@uref{http://www.ietf.org/rfc/rfc2045.txt,Base64}
 encoding of the key. (Technically,
 a Base64 encoding of 80 binary bits should consist of 14 characters
 followed by two = padding characters, but this padding is omitted in
@@ -418,11 +418,11 @@ particular, there are lots of redundant representations of illegal
 positions where both players have chequers on the same
 point. Theoretically, it would be possible to get it down to 64 bits
 by using 
-@uref{http://www.bkgm.com/rgb/rgb.cgi?view+371,,Walter Trice's
+@uref{http://www.bkgm.com/rgb/rgb.cgi?view+371,Walter Trice's
 "D() expressions"}, but I think you'd have to 
 be a mathematical masochist to try it! 
 @item 
-@uref{http://savannah.gnu.org/cgi-bin/viewcvs/gnubg/gnubg/positionid.c?rev=HEAD&sortby=date&content-type=text/vnd.viewcvs-markup,,Example
+@uref{http://savannah.gnu.org/cgi-bin/viewcvs/gnubg/gnubg/positionid.c?rev=HEAD&sortby=date&content-type=text/vnd.viewcvs-markup,Example
 code} 
 to convert between a raw board encoding (the number of chequers on
 each point) and these keys/IDs is available licensed under GPL. 
