@@ -1,3 +1,11 @@
+Thu Oct 24 21:39:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	hmm, a bit more complicated than first assumed...
+
+	* html.c (printImage): new parameter. Changed all callers.
+	* html.c (CommandExportPositionGammOnLine): add some html
+	comments and more.
+
 Thu Oct 24 20:51:15 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c: remove class "block".

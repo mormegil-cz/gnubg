@@ -63,6 +63,7 @@ typedef enum _stylesheetclass {
   CLASS_COMMENTHEADER,
   CLASS_NUMBER,
   CLASS_FONT_FAMILY,
+  CLASS_BLOCK,
   CLASS_PERCENT,
   NUM_CLASSES 
 } stylesheetclass;
@@ -73,11 +74,13 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "movenumber", "width: 2em; text-align: right" },
   { "moveply", "width: 5em; text-align: center" },
   { "movemove", "width: 20em; text-align: left }" },
+
   { "moveequity", "width: 10em; text-align: left" },
   { "movethemove", "background-color: #ffffcc" },
   { "moveodd", "background-color: #d0d0d0" },
   { "blunder", "background-color: red; color: yellow" },
   { "joker", "background-color: red; color: yellow" },
+
   { "stattable", 
     "text-align: left; width: 40em; background-color: #c7c7c7; "
     "border: 0px; padding: 0px" },
@@ -87,6 +90,7 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
     "color: black; width: 40em; padding: 0.2em" },
   { "tiny", "font-size: 25%%" },
   { "cubedecision", "background-color: #ddddee; text-align: left" },
+
   { "cubedecisionheader", "background-color: #89d0e2; text-align: center} " },
   { "comment", "background-color: #449911; width: 39.5em; padding: 0.5em" },
   { "commentheader", 
@@ -95,6 +99,8 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "number", 
     "text-align: center; font-weight: bold; font-size: 60%; "
     "font-family: sans-serif" },
+  { "fontfamily", "font-family: sans-serif" },
+  { "block", "display: block" },
   { "percent", "text-align: right" }
 };
 
@@ -487,12 +493,14 @@ printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
 static void
 printImage ( FILE *pf, const char *szImageDir, const char *szImage,
              const char *szExtension, const char *szAlt,
-             const htmlexportcss hecss ) {
+             const htmlexportcss hecss, const htmlexporttype het ) {
 
-  fprintf ( pf, "<img src=\"%s%s%s.%s\" alt=\"%s\" />",
+  fprintf ( pf, "<img src=\"%s%s%s.%s\" %s alt=\"%s\" />",
             ( szImageDir ) ? szImageDir : "",
             ( ! szImageDir || szImageDir[ strlen ( szImageDir ) - 1 ] == '/' ) ? "" : "/",
             szImage, szExtension, 
+            ( het == HTML_EXPORT_TYPE_GNU ) ? 
+            GetStyle ( CLASS_BLOCK, hecss ) : "", 
             ( szAlt ) ? szAlt : "" );
 
 }
@@ -545,7 +553,8 @@ printPointBBS ( FILE *pf, const char *szImageDir, const char *szExtension,
     sprintf ( szAlt, "&nbsp;'" );
   }
 
-  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss,
+               HTML_EXPORT_TYPE_BBS );
 
 }
 
@@ -578,13 +587,14 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
    */
 
   printImage ( pf, szImageDir, fTurn ? "n_high" : "n_low", 
-               szExtension, NULL, hecss );
+               szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS );
   fputs ( "<br />\n", pf );
 
   /* chequers off */
 
   sprintf ( sz, "o_w_%d", acOff[ 1 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS );
 
   /* player 0's inner board */
 
@@ -597,7 +607,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* player 0's chequers on the bar */
 
   sprintf ( sz, "b_up_%d", anBoard[ 0 ][ 24 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS );
 
   /* player 0's outer board */
 
@@ -611,10 +622,12 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   if ( ! pms->fCubeOwner ) {
     sprintf ( sz, "c_up_%d", pms->nCube );
-    printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS );
   }    
   else
-    printImage ( pf, szImageDir, "c_up_0", szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, "c_up_0", szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS );
 
   fputs ( "<br />\n", pf );
 
@@ -634,19 +647,23 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
               ( pms->anDice[ 0 ] < pms->anDice[ 1 ] ) ? 
               pms->anDice[ 1 ] : pms->anDice[ 0 ], 
               pms->fMove ? "right" : "left" );
-    printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, NULL, 
+                hecss, HTML_EXPORT_TYPE_BBS );
 
   }
   else 
     /* no dice rolled */
-    printImage ( pf, szImageDir, "b_center", szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, "b_center", szExtension, NULL, 
+                hecss, HTML_EXPORT_TYPE_BBS );
 
   /* center cube */
 
   if ( pms->fCubeOwner == -1 )
-    printImage ( pf, szImageDir, "c_center", szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, "c_center", szExtension, NULL, 
+                hecss, HTML_EXPORT_TYPE_BBS );
   else
-    printImage ( pf, szImageDir, "c_blank", szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, "c_blank", szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS );
 
   fputs ( "<br />\n", pf );
 
@@ -659,7 +676,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* player 1's chequers off */
 
   sprintf ( sz, "o_b_%d", acOff[ 0 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS );
 
   /* player 1's inner board */
 
@@ -672,7 +690,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* player 1's chequers on the bar */
 
   sprintf ( sz, "b_dn_%d", anBoard[ 1 ][ 24 ] );
-  printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, NULL, 
+               hecss, HTML_EXPORT_TYPE_BBS );
 
   /* player 1's outer board */
 
@@ -686,17 +705,19 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   if ( pms->fCubeOwner == 1 ) {
     sprintf ( sz, "c_dn_%d", pms->nCube );
-    printImage ( pf, szImageDir, sz, szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS );
   }    
   else
-    printImage ( pf, szImageDir, "c_dn_0", szExtension, NULL, hecss );
+    printImage ( pf, szImageDir, "c_dn_0", szExtension, NULL, 
+                 hecss, HTML_EXPORT_TYPE_BBS );
 
   fputs ( "<br />\n", pf );
 
   /* point numbers */
 
   printImage ( pf, szImageDir, fTurn ? "n_low" : "n_high", 
-               szExtension, NULL, hecss );
+               szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS );
 
   fputs ( "<br />\n", pf );
 
@@ -767,7 +788,8 @@ printPointF2H ( FILE *pf, const char *szImageDir, const char *szExtension,
     sprintf ( szAlt, "&nbsp;'" );
   }
 
-  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
 }
 
@@ -797,11 +819,12 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
   /* top line with board numbers */
 
   fprintf ( pf, "<p>\n" );
-  printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
                fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+",
-               hecss );
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   fprintf ( pf, "<br />\n" );
 
   /* cube image */
@@ -812,11 +835,13 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
     if ( ! pms->fTurn ) {
       sprintf ( sz, "b-dup%d", 2 * pms->nCube );
-      printImage ( pf, szImageDir, sz, szExtension, "", hecss );
+      printImage ( pf, szImageDir, sz, szExtension, "", 
+                   hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
     }
     else 
-      printImage (pf, szImageDir, "b-indent", szExtension, "", hecss );
+      printImage (pf, szImageDir, "b-indent", szExtension, "", 
+                  hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   }
   else {
@@ -825,17 +850,19 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
     if ( pms->fCubeOwner == -1 || pms->fCubeOwner )
       printImage (pf, szImageDir, fTurn ? "b-topdn" : "b-topup",
-                  szExtension, "", hecss );
+                  szExtension, "", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     else {
       sprintf ( sz, "%s%d", fTurn ? "b-tdn" : "b-tup", pms->nCube );
-      printImage (pf, szImageDir, sz, szExtension, "", hecss );
+      printImage (pf, szImageDir, sz, szExtension, "", 
+                  hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     }
 
   }
 
   /* display left border */
 
-  printImage ( pf, szImageDir, "b-left", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-left", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   /* display player 0's outer quadrant */
 
@@ -846,7 +873,7 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
     printPointF2H ( pf, szImageDir, szExtension, 
                     anBoard[ 1 ][ 11 - i ],
                     anBoard[ 0 ][ 12 + i],
-                    fColor, TRUE, hecss );
+                    fColor, TRUE, hecss);
 
     fColor = ! fColor;
 
@@ -860,12 +887,14 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
               ( anBoard[ 0 ][ 24 ] > 4 ) ?
               4 : anBoard[ 0 ][ 24 ] );
     sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 0 ][ 24 ] );
-    printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   }
   else 
     printImage ( pf, szImageDir, "b-bar", 
-                 szExtension, "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 szExtension, "|&nbsp;&nbsp;&nbsp;|", 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   /* display player 0's home quadrant */
 
@@ -884,7 +913,8 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
   /* right border */
 
-  printImage ( pf, szImageDir, "b-right", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-right", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   fprintf ( pf, "<br />\n" );
 
@@ -892,35 +922,38 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
   if ( pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
 
-    printImage ( pf, szImageDir, "b-midin", szExtension, "", hecss );
-    printImage ( pf, szImageDir, "b-midl", szExtension, "|", hecss );
+    printImage ( pf, szImageDir, "b-midin", szExtension, "", 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
+    printImage ( pf, szImageDir, "b-midl", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   
     printImage ( pf, szImageDir,
                  fTurn ? "b-midg" : "b-midg2", szExtension,
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                 hecss );
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir,
                  fTurn ? "b-midc" : aszDieO [ pms->anDice[ 0 ] - 1 ],
                  szExtension,
-                 "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 "|&nbsp;&nbsp;&nbsp;|", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir,
                  fTurn ? "b-midg2" : aszDieO [ pms->anDice[ 1 ] - 1 ],
                  szExtension, 
-                 "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 "|&nbsp;&nbsp;&nbsp;|", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir,
                  fTurn ? aszDieX [ pms->anDice[ 0 ] - 1 ] : "b-midg2",
                  szExtension,
-                 "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 "|&nbsp;&nbsp;&nbsp;|", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir,
                  fTurn ? aszDieX [ pms->anDice[ 1 ] - 1 ] : "b-midc",
                  szExtension,
-                 "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 "|&nbsp;&nbsp;&nbsp;|", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir, fTurn ? "b-midg2" : "b-midg", szExtension,
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                 hecss );
-    printImage ( pf, szImageDir, "b-midr", szExtension, "|", hecss );
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
+    printImage ( pf, szImageDir, "b-midr", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
     fprintf ( pf, "<br />\n" );
 
@@ -928,22 +961,26 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
   else {
 
     if ( pms->fDoubled )
-      printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+      printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+                   hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     else
-      printImage ( pf, szImageDir, "b-midin", szExtension, "", hecss );
+      printImage ( pf, szImageDir, "b-midin", szExtension, "", 
+                   hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
-    printImage ( pf, szImageDir, "b-midl", szExtension, "|", hecss );
+    printImage ( pf, szImageDir, "b-midl", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir, "b-midg", szExtension,
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                 hecss );
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir, "b-midc", szExtension,
-                 "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 "|&nbsp;&nbsp;&nbsp;|", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     printImage ( pf, szImageDir, "b-midg", szExtension,
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                 hecss );
-    printImage ( pf, szImageDir, "b-midr", szExtension, "|", hecss );
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
+    printImage ( pf, szImageDir, "b-midr", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
     fprintf ( pf, "<br />\n" );
 
@@ -957,11 +994,13 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
     if ( pms->fTurn ) {
       sprintf ( sz, "b-ddn%d", 2 * pms->nCube );
-      printImage ( pf, szImageDir, sz, szExtension, "", hecss );
+      printImage ( pf, szImageDir, sz, szExtension, "", 
+                   hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
     }
     else 
-      printImage (pf, szImageDir, "b-indent", szExtension, "", hecss );
+      printImage (pf, szImageDir, "b-indent", szExtension, "", 
+                  hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   }
   else {
@@ -970,15 +1009,17 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
     if ( pms->fCubeOwner == -1 || ! pms->fCubeOwner )
       printImage (pf, szImageDir, fTurn ? "b-botdn" : "b-botup",
-                  szExtension, "", hecss );
+                  szExtension, "", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     else {
       sprintf ( sz, "%s%d", fTurn ? "b-bdn" : "b-bup", pms->nCube );
-      printImage (pf, szImageDir, sz, szExtension, "", hecss );
+      printImage (pf, szImageDir, sz, szExtension, "", 
+                  hecss, HTML_EXPORT_TYPE_FIBS2HTML );
     }
 
   }
 
-  printImage ( pf, szImageDir, "b-left", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-left", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   /* display player 1's outer quadrant */
 
@@ -1003,12 +1044,13 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
               ( anBoard[ 1 ][ 24 ] > 4 ) ?
               4 : anBoard[ 1 ][ 24 ] );
     sprintf ( szAlt, "|&nbsp;%1dO|", anBoard[ 1 ][ 24 ] );
-    printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+                 hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   }
   else 
     printImage ( pf, szImageDir, "b-bar", szExtension, 
-                 "|&nbsp;&nbsp;&nbsp;|", hecss );
+                 "|&nbsp;&nbsp;&nbsp;|", hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   /* display player 1's outer quadrant */
 
@@ -1027,30 +1069,35 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
   /* right border */
 
-  printImage ( pf, szImageDir, "b-right", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-right", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   fprintf ( pf, "<br />\n" );
 
   /* bottom */
 
   
 
-  printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension,
                fTurn ?
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
-               "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", hecss );
+               "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   fprintf ( pf, "<br />\n" );
 
   /* position ID */
 
-  printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
             PositionID ( pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
 
   /* pip counts */
 
-  printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: Red %d, White %d<br />\n"),
@@ -1110,7 +1157,8 @@ printPointGNU ( FILE *pf, const char *szImageDir, const char *szExtension,
     sprintf ( szAlt, "&nbsp;'" );
   }
 
-  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+               hecss, HTML_EXPORT_TYPE_GNU );
 
 }
 
@@ -1185,7 +1233,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
                fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+",
-               hecss );
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td></tr>\n", pf );
 
   /* display left bearoff tray */
@@ -1193,7 +1241,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<tr>", pf );
 
   fputs ( "<td rowspan=\"2\">", pf );
-  printImage ( pf, szImageDir, "b-roff", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-roff", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   /* display player 0's outer quadrant */
@@ -1216,7 +1265,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( sz, "b-ct-%d", pms->nCube );
   else
     strcpy ( sz, "b-ct" );
-  printImage ( pf, szImageDir, sz, szExtension, "", hecss );
+  printImage ( pf, szImageDir, sz, szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_GNU );
 
   fputs ( "</td>", pf );
 
@@ -1240,7 +1290,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( sz, "b-roff-x%d", acOff[ 1 ] );
   else
     strcpy ( sz, "b-roff" );
-  printImage ( pf, szImageDir, sz, szExtension, "|", hecss );
+  printImage ( pf, szImageDir, sz, szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   fputs ( "</tr>\n", pf );
@@ -1256,7 +1307,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 1 ][ 24 ] );
   else
     strcpy ( szAlt, "|&nbsp;&nbsp;&nbsp;|" );
-  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+               hecss, HTML_EXPORT_TYPE_GNU );
 
   fputs ( "</td>", pf );
   fputs ( "</tr>\n", pf );
@@ -1269,7 +1321,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* left part of bar */
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   /* center of board */
@@ -1284,7 +1337,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
     
-    printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+                 hecss, HTML_EXPORT_TYPE_GNU );
     
   }
   else if ( ! pms->fMove && pms->fDoubled ) {
@@ -1294,7 +1348,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( sz, "b-midl-c%d", 2 * pms->nCube );
     sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
     
-    printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+                 hecss, HTML_EXPORT_TYPE_GNU );
     
   }
   else {
@@ -1302,7 +1357,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     /* player 0 on roll */
     
     printImage ( pf, szImageDir, "b-midl", szExtension, 
-                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", hecss );
+                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", 
+                 hecss, HTML_EXPORT_TYPE_GNU );
     
   }
 
@@ -1316,7 +1372,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     strcpy ( sz, "b-midc" );
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, sz, szExtension, "|", hecss );
+  printImage ( pf, szImageDir, sz, szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   /* player 1 */
@@ -1331,7 +1388,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
     
-    printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+                 hecss, HTML_EXPORT_TYPE_GNU );
     
   }
   else if ( pms->fMove == 1 && pms->fDoubled ) {
@@ -1341,7 +1399,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( sz, "b-midr-c%d", 2 * pms->nCube );
     sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
     
-    printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+    printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+                 hecss, HTML_EXPORT_TYPE_GNU );
     
   }
   else {
@@ -1349,7 +1408,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     /* player 1 on roll */
     
     printImage ( pf, szImageDir, "b-midr", szExtension, 
-                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", hecss );
+                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", 
+                 hecss, HTML_EXPORT_TYPE_GNU );
     
   }
 
@@ -1358,7 +1418,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* right part of bar */
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   fputs ( "</tr>\n", pf );
@@ -1369,7 +1430,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<tr>", pf );
 
   fputs ( "<td rowspan=\"2\">", pf );
-  printImage ( pf, szImageDir, "b-roff", szExtension, "|", hecss );
+  printImage ( pf, szImageDir, "b-roff", szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
 
@@ -1394,7 +1456,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 0 ][ 24 ] );
   else
     strcpy ( szAlt, "|&nbsp;&nbsp;&nbsp;|" );
-  printImage ( pf, szImageDir, sz, szExtension, szAlt, hecss );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt, 
+               hecss, HTML_EXPORT_TYPE_GNU );
 
   fputs ( "</td>", pf );
 
@@ -1418,7 +1481,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( sz, "b-roff-o%d", acOff[ 0 ] );
   else
     strcpy ( sz, "b-roff" );
-  printImage ( pf, szImageDir, sz, szExtension, "|", hecss );
+  printImage ( pf, szImageDir, sz, szExtension, "|", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   fputs ( "</tr>\n", pf );
@@ -1433,7 +1497,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
     sprintf ( sz, "b-cb-%d", pms->nCube );
   else
     strcpy ( sz, "b-cb" );
-  printImage ( pf, szImageDir, sz, szExtension, "", hecss );
+  printImage ( pf, szImageDir, sz, szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_GNU );
 
   fputs ( "</td>", pf );
   fputs ( "</tr>\n", pf );
@@ -1446,7 +1511,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension,
                fTurn ?
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
-               "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", hecss );
+               "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", 
+               hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
   fputs ( "</tr>", pf );
 
@@ -1654,11 +1720,11 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
   if ( hecss == HTML_EXPORT_CSS_HEAD )
     WriteStyleSheet ( pf );
 
-  fputs ( "</head>\n"
-          "\n"
-          "<body>\n"
-          "<h1>", 
-          pf );
+  fprintf ( pf, "</head>\n"
+            "\n"
+            "<body %s>\n"
+            "<h1>",
+            GetStyle ( CLASS_FONT_FAMILY, hecss ) );
 
   fprintf ( pf,
             _("Game number %d"),
@@ -1791,17 +1857,21 @@ HTMLEpilogueComment ( FILE *pf ) {
 
   const char szVersion[] = "$Revision$";
   int iMajor, iMinor;
+  char *pc;
 
   iMajor = atoi ( strchr ( szVersion, ' ' ) );
   iMinor = atoi ( strchr ( szVersion, '.' ) + 1 );
 
   time ( &t );
 
+  pc = ctime ( &t );
+  if ( ( pc = strchr ( pc, '\n' ) ) )
+    *pc = 0;
+
   fprintf ( pf, 
-            _("<!-- Output generated %s by "
-              "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
-              "%s") ,
-            ctime ( &t ), VERSION );
+            _("<!-- Output generated %s by GNU Backgammon %s "
+              "(http://www.gnu.org/software/gnubg/) "),
+            pc, VERSION );
 
   fputs ( " ", pf );
             
@@ -1809,12 +1879,6 @@ HTMLEpilogueComment ( FILE *pf ) {
             _("(HTML Export version %d.%d)"),
             iMajor, iMinor );
 
-  fprintf ( pf,
-            "-->\n"
-            "<!-- %s and %s -->\n", 
-            _("Valid XHTML 1.0!"),
-            _("Valid CSS!") );
-         
 
 }
 
@@ -2605,7 +2669,8 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     fprintf ( pf, "<p>" );
 
     if ( het == HTML_EXPORT_TYPE_FIBS2HTML )
-         printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+         printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+                      hecss, het );
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
@@ -2636,7 +2701,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     fprintf ( pf, "<p>" );
 
     if ( het == HTML_EXPORT_TYPE_FIBS2HTML )
-      printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss );
+      printImage ( pf, szImageDir, "b-indent", szExtension, "", hecss, het );
 
     if ( pmr->mt == MOVE_DOUBLE )
       fprintf ( pf,
@@ -3769,22 +3834,35 @@ CommandExportPositionGammOnLine ( char *sz ) {
 	return;
     }
 
+    fprintf ( pf, "<div %s>\n", 
+              GetStyle ( CLASS_FONT_FAMILY, HTML_EXPORT_CSS_INLINE ) );
+
+    fputs ( "\n<!-- Header -->\n\n", pf );
+
     HTMLBoardHeader ( pf, &ms, exsExport.het, exsExport.hecss,
                       getGameNumber ( plGame ),
                       getMoveNumber ( plGame, pmr ) - 1, FALSE );
+
+    fputs ( "\n<!-- Board -->\n\n", pf );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
                     "../Images/",
                     "gif", HTML_EXPORT_TYPE_BBS, 
                     HTML_EXPORT_CSS_INLINE );
 
-    if( pmr )
+    if( pmr ) {
+      fputs ( "\n<!-- Analysis -->\n\n", pf );
       HTMLAnalysis ( pf, &ms, pmr,
                      "../Images/",
                      "gif", HTML_EXPORT_TYPE_BBS, 
                      HTML_EXPORT_CSS_INLINE );
+    }
     
+
+    fputs ( "\n<!-- Epilogue -->\n\n", pf );
     HTMLEpilogueComment ( pf );
+
+    fputs ( "</div>\n", pf );
 
     if( pf != stdout )
 	fclose( pf );
