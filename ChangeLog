@@ -1,3 +1,11 @@
+Mon May 27 21:36:14 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c: remove load and save session. Change text for 
+	"Load->Match" to "Load->Match or session". Analogous for 
+	"Save->Match".
+
+	* gtkgame.c (LoadMatch, LoadSession): modify dialog title.
+
 Mon May 27 21:32:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (CommandPreviousMove): forgot call to CommandPreviousRolled.

@@ -2497,12 +2497,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Open", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Open/_Commands...", NULL, LoadCommands, 0, NULL },
 	{ "/_File/_Open/_Game...", NULL, LoadGame, 0, NULL },
-	{ "/_File/_Open/_Match...", NULL, LoadMatch, 0, NULL },
-	{ "/_File/_Open/_Session...", NULL, NULL, 0, NULL },
+	{ "/_File/_Open/_Match or session...", NULL, LoadMatch, 0, NULL },
 	{ "/_File/_Save", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Save/_Game...", NULL, SaveGame, 0, NULL },
-	{ "/_File/_Save/_Match...", NULL, SaveMatch, 0, NULL },
-	{ "/_File/_Save/_Session...", NULL, NULL, 0, NULL },
+	{ "/_File/_Save/_Match or session...", NULL, SaveMatch, 0, NULL },
 	{ "/_File/_Save/_Weights...", NULL, SaveWeights, 0, NULL },
 	{ "/_File/-", NULL, NULL, 0, "<Separator>" },	
 	{ "/_File/_Import", NULL, NULL, 0, "<Branch>" },
@@ -3533,7 +3531,7 @@ static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGF );
-  FileCommand( "Open match", sz, "load match" );
+  FileCommand( "Open match or session", sz, "load match" );
   if ( sz ) 
     free ( sz );
 
@@ -3587,7 +3585,7 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_SGF );
-  FileCommand( "Save match", sz, "save match" );
+  FileCommand( "Save match or session", sz, "save match" );
   if ( sz ) 
     free ( sz );
 
