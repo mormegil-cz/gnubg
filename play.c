@@ -377,6 +377,8 @@ extern void AddMoveRecord( void *pv ) {
 	break;
 	
     case MOVE_NORMAL:
+        assert( pmr->n.esChequer.et >= EVAL_NONE &&
+                pmr->n.esChequer.et <= EVAL_ROLLOUT );
         assert( pmr->n.esDouble.et >= EVAL_NONE &&
                 pmr->n.esDouble.et <= EVAL_ROLLOUT );
 	assert( pmr->n.fPlayer >= 0 && pmr->n.fPlayer <= 1 );
