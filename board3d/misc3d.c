@@ -1695,15 +1695,16 @@ void RestrictiveDrawFrame(float pos[3], float width, float height, float depth)
 void RestrictiveRender(BoardData *bd)
 {
 	GLint viewport[4];
-
 	glGetIntegerv (GL_VIEWPORT, viewport);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
 
 	while (numRestrictFrames > 0)
 	{
 		RationalizeBox(&cb[numRestrictFrames]);
 
 		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
 		glLoadIdentity();
 		gluPickMatrix(BoxMidWidth(&cb[numRestrictFrames]), BoxMidHeight(&cb[numRestrictFrames]),
 			BoxWidth(&cb[numRestrictFrames]), BoxHeight(&cb[numRestrictFrames]), viewport);
@@ -1715,17 +1716,10 @@ void RestrictiveRender(BoardData *bd)
 			glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
 
 		glMatrixMode(GL_MODELVIEW);
-
 		glViewport((int)(cb[numRestrictFrames].x), (int)(cb[numRestrictFrames].y),
 				   (int)BoxWidth(&cb[numRestrictFrames]), (int)BoxHeight(&cb[numRestrictFrames]));
 
 		drawBoard(bd);
-
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix() ;
-		glMatrixMode(GL_MODELVIEW);
-
-		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
 		if (!freezeRestrict)
 			numRestrictFrames--;
@@ -1740,6 +1734,11 @@ void RestrictiveRender(BoardData *bd)
 			}
 		}
 	}
+	/* Restore matrixes */
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
 int MouseMove3d(BoardData *bd, int x, int y)
