@@ -12,6 +12,8 @@ Thu Mar 14 20:55:45 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c: read METs from XML.
 
+	* set.c (CommandSetMET): use NextToken on input string.
+
 Thu Mar 14 18:41:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.[ch] (GTKAddGame), play.c: Correct the fix from Feb 14.
