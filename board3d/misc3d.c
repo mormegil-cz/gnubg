@@ -942,64 +942,155 @@ void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture
 	glPopMatrix();
 }
 
-void QuarterCylinder(float radius, float len, int accuracy)
+void QuarterCylinder(float radius, float len, int accuracy, Texture* texture)
 {
 	int i;
 	float angle;
+	float d;
+	float sar, car;
+	float st, ct, dInc;
+
+	/* texture unit value */
+	float tuv;
+	if (texture)
+	{
+		st = (float)sin((2 * PI) / accuracy) * radius;
+		ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
+		dInc = (float)sqrt(st * st + (ct * ct));
+		tuv = (TEXTURE_SCALE) / texture->width;
+	}
+	else
+		tuv = 0;
+
+	d = 0;
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
 		angle = (i * 2 * PI) / accuracy;
 		glNormal3f((float)sin(angle), 0, (float)cos(angle));
-		glVertex3f((float)sin(angle) * radius, len, (float)cos(angle) * radius);
-		glVertex3f((float)sin(angle) * radius, 0, (float)cos(angle) * radius);
+
+		sar = (float)sin(angle) * radius;
+		car = (float)cos(angle) * radius;
+
+		if (tuv)
+			glTexCoord2f(len * tuv, d * tuv);
+		glVertex3f(sar, len, car);
+
+		if (tuv)
+		{
+			glTexCoord2f(0, d * tuv);
+			d -= dInc;
+		}
+		glVertex3f(sar, 0, car);
 	}
 	glEnd();
 }
 
-void QuarterCylinderSplayed(float radius, float len, int accuracy)
+void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture)
 {
 	int i;
-	float angle, z;
+	float angle;
+	float d;
+	float sar, car;
+
+float st = (float)sin((2 * PI) / accuracy) * radius;
+float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
+float dInc = (float)sqrt(st * st + (ct * ct));
+
+	/* texture unit value */
+	float tuv;
+	if (texture)
+		tuv = (TEXTURE_SCALE) / texture->width;
+	else
+		tuv = 0;
+
+	d = 0;
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
 		angle = (i * 2 * PI) / accuracy;
 		glNormal3f((float)sin(angle), 0, (float)cos(angle));
-		z = (float)cos(angle) * radius;
-		glVertex3f((float)sin(angle) * radius, len + z, z);
-		glVertex3f((float)sin(angle) * radius, -z, z);
+
+		sar = (float)sin(angle) * radius;
+		car = (float)cos(angle) * radius;
+
+		if (tuv)
+			glTexCoord2f((len + car) * tuv, d * tuv);
+		glVertex3f(sar, len + car, car);
+
+		if (tuv)
+		{
+			glTexCoord2f(-car * tuv, d * tuv);
+			d += dInc;
+		}
+		glVertex3f(sar, -car, car);
 	}
 	glEnd();
 }
 
-void InsideFillet(float x, float y, float z, float w, float h, float radius, int accuracy)
+void drawCornerEigth(float ***boardPoints, float radius, int accuracy)
 {
-	glPushMatrix();
+	int i, j, ns;
 
-	glTranslatef(x, y + radius, z - radius);
-	QuarterCylinderSplayed(radius, h, accuracy);
+	for (i = 0; i < accuracy / 4; i++)
+	{
+		ns = (accuracy / 4) - i - 1;
+		glBegin(GL_TRIANGLE_STRIP);
+			glNormal3f(boardPoints[i][ns + 1][0] / radius, boardPoints[i][ns + 1][1] / radius, boardPoints[i][ns + 1][2] / radius);
+			glVertex3f(boardPoints[i][ns + 1][0], boardPoints[i][ns + 1][1], boardPoints[i][ns + 1][2]);
+			for (j = ns; j >= 0; j--)
+			{
+				glNormal3f(boardPoints[i + 1][j][0] / radius, boardPoints[i + 1][j][1] / radius, boardPoints[i + 1][j][2] / radius);
+				glVertex3f(boardPoints[i + 1][j][0], boardPoints[i + 1][j][1], boardPoints[i + 1][j][2]);
+				glNormal3f(boardPoints[i][j][0] / radius, boardPoints[i][j][1] / radius, boardPoints[i][j][2] / radius);
+				glVertex3f(boardPoints[i][j][0], boardPoints[i][j][1], boardPoints[i][j][2]);
+			}
+		glEnd();
+	}
+}
 
-	glTranslatef(w + radius, -radius, 0);
-	glRotatef(90, 0, 0, 1);
-	QuarterCylinderSplayed(radius, w, accuracy);
+void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
+{
+	int i, j, ns;
 
-	glPopMatrix();
-	glPushMatrix();
+	float lat_angle;
+	float lat_step;
+	float latitude;
+	float new_radius;
+	float angle;
+	float step;
+	int corner_steps = (accuracy / 4) + 1;
+	*boardPoints = Alloc3d(corner_steps, corner_steps, 3);
 
-	glTranslatef(x + w + radius * 2, y + h + radius, z - radius);
-	glRotatef(-180, 0, 1, 0);
-	glRotatef(180, 1, 0, 0);
-	QuarterCylinderSplayed(radius, h, accuracy);
+	lat_angle = 0;
+	lat_step = (2 * PI) / accuracy;
 
-	glPopMatrix();
-	glPushMatrix();
+	/* Calculate corner 1/8th sphere points */
+	for (i = 0; i < (accuracy / 4) + 1; i++)
+	{
+		latitude = (float)sin(lat_angle) * radius;
+		angle = 0;
+		new_radius = (float)sqrt(radius * radius - (latitude * latitude) );
 
-	glTranslatef(x + radius, y + h + radius * 2, z - radius);
-	glRotatef(-90, 0, 0, 1);
-	QuarterCylinderSplayed(radius, w, accuracy);
+		ns = (accuracy / 4) - i;
+		step = (2 * PI) / (ns * 4);
 
-	glPopMatrix();
+		for (j = 0; j <= ns; j++)
+		{
+			(*boardPoints)[i][j][0] = (float)sin(angle) * new_radius;
+			(*boardPoints)[i][j][1] = latitude;
+			(*boardPoints)[i][j][2] = (float)cos(angle) * new_radius;
+
+			angle += step;
+		}
+		lat_angle += lat_step;
+	}
+}
+
+void freeEigthPoints(float ***boardPoints, int accuracy)
+{
+	int corner_steps = (accuracy / 4) + 1;
+	Free3d(boardPoints, corner_steps, corner_steps);
 }
 
 void SetColour(float r, float g, float b, float a)

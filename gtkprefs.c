@@ -1626,6 +1626,9 @@ if (rd.fDisplayType == DT_3D)
 	for(i = 0; i < 2; i++)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(apwDieColour[i]), rd.afDieColour[i]);
 
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwRoundedEdges ),
+                                rd.roundedEdges );
+
 	UpdateColPreviews();
 	redrawChange = FALSE;
 }
@@ -2434,8 +2437,6 @@ static void GetPrefs ( renderdata *prd ) {
 	else
 #endif
 {
-	prd->showMoveIndicator = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwMoveIndicator));
-
     for( i = 0; i < 2; i++ ) {
 	prd->arRefraction[ i ] = apadj[ i ]->value;
 	prd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
@@ -2500,9 +2501,10 @@ static void GetPrefs ( renderdata *prd ) {
     prd->rRound = 1.0 - padjRound->value;
 }
 
-    prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
+	prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
 	prd->fDynamicLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ) );
 	prd->fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+	prd->showMoveIndicator = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwMoveIndicator));
     
     prd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
     prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *

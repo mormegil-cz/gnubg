@@ -58,8 +58,11 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 void drawCube(float size);
 void drawRect(float x, float y, float z, float w, float h, Texture* texture);
 void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture);
-void QuarterCylinder(float radius, float len, int accuracy);
-void InsideFillet(float x, float y, float z, float w, float h, float radius, int accuracy);
+void QuarterCylinder(float radius, float len, int accuracy, Texture* texture);
+void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture);
+void drawCornerEigth(float ***boardPoints, float radius, int accuracy);
+void calculateEigthPoints(float ****boardPoints, float radius, int accuracy);
+void freeEigthPoints(float ***boardPoints, int accuracy);
 
 /* font functions */
 void glPrintPointNumbers(BoardData* bd, const char *text, int mode);
@@ -169,10 +172,7 @@ void Tidy3dObjects(BoardData* bd, int glValid)
 	}
 
 	if (bd->boardPoints)
-	{
-		int corner_steps = (bd->curveAccuracy / 4) + 1;
-		Free3d(bd->boardPoints, corner_steps, corner_steps);
-	}
+		freeEigthPoints(bd->boardPoints, bd->curveAccuracy);
 
 	TidyShadows(bd);
 
@@ -444,25 +444,11 @@ void renderDice(BoardData* bd, float size)
 
 void renderCube(BoardData* bd, float size)
 {
-	int ns;
-	int i, j;
-	int c;
-	float lat_angle;
-	float lat_step;
-	float latitude;
-	float new_radius;
-	float radius;
-	float angle, step;
-
+	int i, c;
+	float ***corner_points;
+	float radius = size / 7.0f;
 	float ds = (size * 5.0f / 7.0f);
 	float hds = (ds / 2);
-
-	int corner_steps = (bd->curveAccuracy / 4) + 1;
-	float ***corner_points = Alloc3d(corner_steps, corner_steps, 3);
-
-	radius = size / 7.0f;
-
-	step = (2 * PI) / bd->curveAccuracy;
 
 	glPushMatrix();
 
@@ -488,7 +474,7 @@ void renderCube(BoardData* bd, float size)
 			glRotatef((float)(i * 90), 0, 0, 1);
 
 			glTranslatef(hds, -hds, -radius);
-			QuarterCylinder(radius, ds, bd->curveAccuracy);
+			QuarterCylinder(radius, ds, bd->curveAccuracy, 0);
 			glPopMatrix();
 		}
 		glPopMatrix();
@@ -498,29 +484,7 @@ void renderCube(BoardData* bd, float size)
 			glRotatef(90, 1, 0, 0);
 	}
 
-	lat_angle = 0;
-	lat_step = (2 * PI) / bd->curveAccuracy;
-
-	/* Calculate corner 1/8th sphere points */
-	for (i = 0; i < (bd->curveAccuracy / 4) + 1; i++)
-	{
-		latitude = (float)sin(lat_angle) * radius;
-		angle = 0;
-		new_radius = (float)sqrt(radius * radius - (latitude * latitude) );
-
-		ns = (bd->curveAccuracy / 4) - i;
-		step = (2 * PI) / (ns * 4);
-
-		for (j = 0; j <= ns; j++)
-		{
-			corner_points[i][j][0] = (float)sin(angle) * new_radius;
-			corner_points[i][j][1] = latitude;
-			corner_points[i][j][2] = (float)cos(angle) * new_radius;
-
-			angle += step;
-		}
-		lat_angle += lat_step;
-	}
+	calculateEigthPoints(&corner_points, radius, bd->curveAccuracy);
 
 	/* Draw 8 corners */
 	for (c = 0; c < 8; c++)
@@ -533,21 +497,7 @@ void renderCube(BoardData* bd, float size)
 		glTranslatef(hds, -hds, -radius);
 		glRotatef(-90, 0, 0, 1);
 
-		for (i = 0; i < bd->curveAccuracy / 4; i++)
-		{
-			ns = (bd->curveAccuracy / 4) - i - 1;
-			glBegin(GL_TRIANGLE_STRIP);
-				glNormal3f(corner_points[i][ns + 1][0] / radius, corner_points[i][ns + 1][1] / radius, corner_points[i][ns + 1][2] / radius);
-				glVertex3f(corner_points[i][ns + 1][0], corner_points[i][ns + 1][1], corner_points[i][ns + 1][2]);
-				for (j = ns; j >= 0; j--)
-				{
-					glNormal3f(corner_points[i + 1][j][0] / radius, corner_points[i + 1][j][1] / radius, corner_points[i + 1][j][2] / radius);
-					glVertex3f(corner_points[i + 1][j][0], corner_points[i + 1][j][1], corner_points[i + 1][j][2]);
-					glNormal3f(corner_points[i][j][0] / radius, corner_points[i][j][1] / radius, corner_points[i][j][2] / radius);
-					glVertex3f(corner_points[i][j][0], corner_points[i][j][1], corner_points[i][j][2]);
-				}
-			glEnd();
-		}
+		drawCornerEigth(corner_points, radius, bd->curveAccuracy);
 
 		glPopMatrix();
 		if (c == 3)
@@ -555,7 +505,7 @@ void renderCube(BoardData* bd, float size)
 	}
 	glPopMatrix();
 
-	Free3d(corner_points, corner_steps, corner_steps);
+	freeEigthPoints(corner_points, bd->curveAccuracy);
 }
 
 void preDrawDice(BoardData* bd)
@@ -1579,29 +1529,90 @@ void RotateClosingBoard(BoardData* bd)
 	glTranslatef(-getBoardWidth() / 2.0f, -getBoardHeight() / 2.0f, 0);
 }
 
-void drawCornerEigth(float ***boardPoints, float radius, int accuracy)
-{
-	int i, j, ns;
+/* Macros to make texture specification easier */
+#define M_X(x, y, z) if (tuv) glTexCoord2f((z) * tuv, (y) * tuv); glVertex3f(x, y, z);
+#define M_Y(x, y, z) if (tuv) glTexCoord2f((x) * tuv, (z) * tuv); glVertex3f(x, y, z);
+#define M_Z(x, y, z) if (tuv) glTexCoord2f((x) * tuv, (y) * tuv); glVertex3f(x, y, z);
 
-	for (i = 0; i < accuracy / 4; i++)
-	{
-		ns = (accuracy / 4) - i - 1;
-		glBegin(GL_TRIANGLE_STRIP);
-			glNormal3f(boardPoints[i][ns + 1][0] / radius, boardPoints[i][ns + 1][1] / radius, boardPoints[i][ns + 1][2] / radius);
-			glVertex3f(boardPoints[i][ns + 1][0], boardPoints[i][ns + 1][1], boardPoints[i][ns + 1][2]);
-			for (j = ns; j >= 0; j--)
-			{
-				glNormal3f(boardPoints[i + 1][j][0] / radius, boardPoints[i + 1][j][1] / radius, boardPoints[i + 1][j][2] / radius);
-				glVertex3f(boardPoints[i + 1][j][0], boardPoints[i + 1][j][1], boardPoints[i + 1][j][2]);
-				glNormal3f(boardPoints[i][j][0] / radius, boardPoints[i][j][1] / radius, boardPoints[i][j][2] / radius);
-				glVertex3f(boardPoints[i][j][0], boardPoints[i][j][1], boardPoints[i][j][2]);
-			}
-		glEnd();
-	}
+/* texture unit value */
+float tuv;
+
+void InsideFillet(float x, float y, float z, float w, float h, float radius, int accuracy, Texture* texture)
+{
+	glBegin(GL_QUADS);
+		/* Left Face */
+		glNormal3f(1, 0, 0);
+		M_X(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH);
+		M_X(x + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH);
+		M_X(x + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		/* Top Face */
+		glNormal3f(0, -1, 0);
+		M_Y(x + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH);
+		M_Y(x + w + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH);
+		M_Y(x + w + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Y(x + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		/* Bottom Face */
+		glNormal3f(0, 1, 0);
+		M_Y(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH);
+		M_Y(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Y(x + w + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Y(x + w + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH);
+		/* Right face */
+		glNormal3f(-1, 0, 0);
+		M_X(x + w + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH);
+		M_X(x + w + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(x + w + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(x + w + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH);
+	glEnd();
+
+	glPushMatrix();
+
+	glTranslatef(x, y + radius, z - radius);
+	QuarterCylinderSplayed(radius, h, accuracy, texture);
+
+	glTranslatef(w + radius, -radius, 0);
+	glRotatef(90, 0, 0, 1);
+	QuarterCylinderSplayed(radius, w, accuracy, texture);
+
+	glPopMatrix();
+	glPushMatrix();
+
+	glTranslatef(x + w + radius * 2, y + h + radius, z - radius);
+	glRotatef(-180, 0, 1, 0);
+	glRotatef(180, 1, 0, 0);
+	QuarterCylinderSplayed(radius, h, accuracy, texture);
+
+	glPopMatrix();
+	glPushMatrix();
+
+	glTranslatef(x + radius, y + h + radius * 2, z - radius);
+	glRotatef(-90, 0, 0, 1);
+	QuarterCylinderSplayed(radius, w, accuracy, texture);
+
+	glPopMatrix();
+}
+
+#define TextureOffset(s, t) if (tuv)\
+{\
+	glMatrixMode(GL_TEXTURE);\
+	glPushMatrix();\
+	glTranslatef(s, t, 0);\
+	glMatrixMode(GL_MODELVIEW);\
+}
+
+#define TextureReset if (tuv)\
+{\
+	glMatrixMode(GL_TEXTURE);\
+	glPopMatrix();\
+	glMatrixMode(GL_MODELVIEW);\
 }
 
 void drawTable(BoardData* bd)
 {
+	float st, ct, dInc, curveTextOff = 0;
+	tuv = 0;
+
 	if (bd->State != BOARD_OPEN)
 		RotateClosingBoard(bd);
 
@@ -1622,49 +1633,53 @@ void drawTable(BoardData* bd)
 
 if (bd->roundedEdges)
 {
+	if (bd->boxMat.pTexture)
+	{
+		tuv = (TEXTURE_SCALE) / bd->boxMat.pTexture->width;
+		st = (float)sin((2 * PI) / bd->curveAccuracy) * BOARD_FILLET;
+		ct = ((float)cos((2 * PI) / bd->curveAccuracy) - 1) * BOARD_FILLET;
+		dInc = (float)sqrt(st * st + (ct * ct));
+		curveTextOff = (bd->curveAccuracy / 4) * dInc;
+	}
+
 	/* Right edge */
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		/* Right face */
 		glNormal3f(1, 0, 0);
-		glVertex3f(TOTAL_WIDTH, BOARD_FILLET, 0);
-		glVertex3f(TOTAL_WIDTH, TOTAL_HEIGHT - BOARD_FILLET, 0);
-		glVertex3f(TOTAL_WIDTH, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		/* Left Face */
-		glNormal3f(-1, 0, 0);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+		M_X(TOTAL_WIDTH, BOARD_FILLET, 0);
+		M_X(TOTAL_WIDTH, TOTAL_HEIGHT - BOARD_FILLET, 0);
+		M_X(TOTAL_WIDTH, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(TOTAL_WIDTH, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 	glEnd();
 
 	glPushMatrix();
 	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, 0);
 	glRotatef(90, 1, 0, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy);
+	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, 0);
 	glRotatef(90, 1, 0, 0);
 	glRotatef(90, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy);
+	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, bd->curveAccuracy);
+	QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, bd->curveAccuracy, bd->boxMat.pTexture);
 	glPopMatrix();
 
 	glPushMatrix();
@@ -1684,66 +1699,61 @@ if (bd->roundedEdges)
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 
-			glVertex3f(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			/* Top Face */
-			glNormal3f(0, 1, 0);
-			glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, 0);
-			glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, 0);
+			M_Z(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		glEnd();
+
+TextureOffset(0, (BOARD_FILLET - curveTextOff - (BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)) * tuv);
+		glBegin(GL_QUADS);
 			/* Bottom Face */
 			glNormal3f(0, -1, 0);
-			glVertex3f(BOARD_FILLET, 0, 0);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, 0, 0);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(BOARD_FILLET, 0, 0);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, 0, 0);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glEnd();
+TextureReset;
 
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 
-			glVertex3f(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 			/* Top Face */
 			glNormal3f(0, 1, 0);
-			glVertex3f(BOARD_FILLET, TOTAL_HEIGHT, 0);
-			glVertex3f(BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, 0);
-			/* Bottom Face */
-			glNormal3f(0, -1, 0);
-			glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(BOARD_FILLET, TOTAL_HEIGHT, 0);
+			M_Y(BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, 0);
 		glEnd();
 
+TextureOffset(BOARD_FILLET * tuv, BOARD_FILLET * tuv);
 		glPushMatrix();
 		glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, bd->curveAccuracy);
+		QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, bd->curveAccuracy, bd->boxMat.pTexture);
 		glPopMatrix();
+TextureReset
 
 		glPushMatrix();
 		glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 1, 0, 0);
 		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, bd->curveAccuracy);
+		QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, bd->curveAccuracy, bd->boxMat.pTexture);
 		glPopMatrix();
 	}
 	else
@@ -1751,101 +1761,89 @@ if (bd->roundedEdges)
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			/* Top Face */
-			glNormal3f(0, 1, 0);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, 0);
+			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		glEnd();
+
+TextureOffset(0, (BOARD_FILLET - curveTextOff - (BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)) * tuv);
+		glBegin(GL_QUADS);
 			/* Bottom Face */
 			glNormal3f(0, -1, 0);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, 0, 0);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y((TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, 0, 0);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y((TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glEnd();
+TextureReset;
 
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 			/* Top Face */
 			glNormal3f(0, 1, 0);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, 0);
-			/* Bottom Face */
-			glNormal3f(0, -1, 0);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-			glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
+			M_Y((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT, 0);
 
 			if (bd->State != BOARD_OPEN)
 			{
 				/* Cover up back when closing */
 				glNormal3f(-1, 0, 0);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, 0);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, 0);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0);
 
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
 			}
 		glEnd();
 
+TextureOffset(((TOTAL_WIDTH + HINGE_GAP) / 2.0f) * tuv, BOARD_FILLET * tuv);
 		glPushMatrix();
 		glTranslatef((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy);
+		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 		glPopMatrix();
+TextureReset
 
 		glPushMatrix();
 		glTranslatef((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 1, 0, 0);
 		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy);
+		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 		glPopMatrix();
 	}
 /* Bar */
-
 if (!bd->showHinges)
 {
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Right face */
-		glNormal3f(1, 0, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		/* Left Face */
 		glNormal3f(-1, 0, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
 	glEnd();
 }
 else
@@ -1853,81 +1851,51 @@ else
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Right face */
-		glNormal3f(1, 0, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		/* Left Face */
 		glNormal3f(-1, 0, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, 0);
 	glEnd();
 }
 	/* Bear-off edge */
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Right face */
-		glNormal3f(1, 0, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		/* Left Face */
-		glNormal3f(-1, 0, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 	glEnd();
 
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Top Face */
-		glNormal3f(0, 1, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH);
-		/* Bottom Face */
-		glNormal3f(0, -1, 0);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 	glEnd();
 
-	InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy);
-	InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET - LIFT_OFF, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy);
+	InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
+	InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 
-	InsideFillet(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, bd->curveAccuracy);
+	InsideFillet(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 }
 else
 {
@@ -2005,47 +1973,41 @@ if (bd->roundedEdges)
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Right face */
-		glNormal3f(1, 0, 0);
-		glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-		glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Z(BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		/* Left Face */
 		glNormal3f(-1, 0, 0);
-		glVertex3f(0, BOARD_FILLET, 0);
-		glVertex3f(0, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(0, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(0, TOTAL_HEIGHT - BOARD_FILLET, 0);
+		M_X(0, BOARD_FILLET, 0);
+		M_X(0, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(0, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_X(0, TOTAL_HEIGHT - BOARD_FILLET, 0);
 	glEnd();
 
 	glPushMatrix();
 	glTranslatef(BOARD_FILLET, BOARD_FILLET, 0);
 	glRotatef(90, 1, 0, 0);
 	glRotatef(-90, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy);
+	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, 0);
 	glRotatef(90, 1, 0, 0);
 	glRotatef(180, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy);
+	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 	glPopMatrix();
 
 	glPushMatrix();
 	glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 	glRotatef(-90, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, bd->curveAccuracy);
+	QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, bd->curveAccuracy, bd->boxMat.pTexture);
 	glPopMatrix();
 
 	glPushMatrix();
@@ -2065,71 +2027,65 @@ if (bd->roundedEdges)
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			/* Top Face */
-			glNormal3f(0, 1, 0);
-			glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, 0);
-			glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		glEnd();
+
+TextureOffset(0, (BOARD_FILLET - curveTextOff - (BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)) * tuv);
+		glBegin(GL_QUADS);
 			/* Bottom Face */
 			glNormal3f(0, -1, 0);
-			glVertex3f(BOARD_FILLET, 0, 0);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(BOARD_FILLET, 0, 0);
+			M_Y((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0);
+			M_Y((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y(BOARD_FILLET, 0, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glEnd();
+TextureReset;
 
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 			/* Top Face */
 			glNormal3f(0, 1, 0);
-			glVertex3f(BOARD_FILLET, TOTAL_HEIGHT, 0);
-			glVertex3f(BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
-			/* Bottom Face */
-			glNormal3f(0, -1, 0);
-			glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-			glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-			glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-
+			M_Y(BOARD_FILLET, TOTAL_HEIGHT, 0);
+			M_Y(BOARD_FILLET, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			M_Y((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
 			if (bd->State != BOARD_OPEN)
 			{
 				/* Cover up back when closing */
 				glNormal3f(1, 0, 0);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
 
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				glVertex3f((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 			}
 		glEnd();
 
+TextureOffset(BOARD_FILLET * tuv, BOARD_FILLET * tuv);
 		glPushMatrix();
 		glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy);
+		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 		glPopMatrix();
+TextureReset
 
 		glPushMatrix();
 		glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 1, 0, 0);
 		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy);
+		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 		glPopMatrix();
 	}
 
@@ -2138,27 +2094,21 @@ if (bd->showHinges)
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		/* Right face */
 		glNormal3f(1, 0, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Left Face */
-		glNormal3f(-1, 0, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, 0);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 	glEnd();
 }
 
@@ -2166,54 +2116,30 @@ if (bd->showHinges)
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Right face */
-		glNormal3f(1, 0, 0);
-		glVertex3f(TRAY_WIDTH, EDGE_WIDTH + BOARD_FILLET, 0);
-		glVertex3f(TRAY_WIDTH, TOTAL_HEIGHT - BOARD_FILLET, 0);
-		glVertex3f(TRAY_WIDTH, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH, EDGE_WIDTH + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		/* Left Face */
-		glNormal3f(-1, 0, 0);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, 0);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0);
+		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - BOARD_FILLET, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 	glEnd();
 
 	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, 1);
-		glVertex3f(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glVertex3f(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		/* Top Face */
-		glNormal3f(0, 1, 0);
-		glVertex3f(EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH);
-		glVertex3f(EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + LIFT_OFF * 2, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + LIFT_OFF * 2, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH);
-		/* Bottom Face */
-		glNormal3f(0, -1, 0);
-		glVertex3f(EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + LIFT_OFF * 2, TRAY_HEIGHT, BASE_DEPTH);
-		glVertex3f(TRAY_WIDTH - EDGE_WIDTH + LIFT_OFF * 2, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glVertex3f(EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		M_Z(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		M_Z(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 	glEnd();
 
-	InsideFillet(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy);
-	InsideFillet(EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy);
+	InsideFillet(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
+	InsideFillet(EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 
-	InsideFillet(TRAY_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, bd->curveAccuracy);
+	InsideFillet(TRAY_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, bd->curveAccuracy, bd->boxMat.pTexture);
 }
 else
 {
@@ -3476,45 +3402,6 @@ void MakeShadowModel(BoardData* bd)
 
 	updatePieceOccPos(bd);
 	updateFlagOccPos(bd);
-}
-
-
-void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
-{
-	int i, j, ns;
-
-	float lat_angle;
-	float lat_step;
-	float latitude;
-	float new_radius;
-	float angle;
-	float step;
-	int corner_steps = (accuracy / 4) + 1;
-	*boardPoints = Alloc3d(corner_steps, corner_steps, 3);
-
-	lat_angle = 0;
-	lat_step = (2 * PI) / accuracy;
-
-	/* Calculate corner 1/8th sphere points */
-	for (i = 0; i < (accuracy / 4) + 1; i++)
-	{
-		latitude = (float)sin(lat_angle) * radius;
-		angle = 0;
-		new_radius = (float)sqrt(radius * radius - (latitude * latitude) );
-
-		ns = (accuracy / 4) - i;
-		step = (2 * PI) / (ns * 4);
-
-		for (j = 0; j <= ns; j++)
-		{
-			(*boardPoints)[i][j][0] = (float)sin(angle) * new_radius;
-			(*boardPoints)[i][j][1] = latitude;
-			(*boardPoints)[i][j][2] = (float)cos(angle) * new_radius;
-
-			angle += step;
-		}
-		lat_angle += lat_step;
-	}
 }
 
 void preDraw3d(BoardData* bd)
