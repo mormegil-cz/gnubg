@@ -128,8 +128,10 @@ Further analysis was then performed in MATLAB.
 The results of the simulations are given in the figure below for all
 match lengths. 
 
+@html
 @image{rall}
 @strong{R} versus @strong{DEPD} for various match lengths
+@end html
   
 More detailed results are given in the figures below for each specific
 match length. The measured data points are indicated by the
@@ -138,6 +140,7 @@ data points. The black lines indicate the 90% confidence interval. The
 green line is a least square fit through the data points (minimizing
 the sum of squares of absolute rating differences) 
 
+@html
 @image{r3}
 3pt match 
 
@@ -155,7 +158,7 @@ the sum of squares of absolute rating differences)
   
 @image{r1}
 1pt match 
-  
+@end html
  
 
 
@@ -164,14 +167,18 @@ approximate the rating difference by @strong{R= a(N)*DEPD}, where
 @strong{N} is the match length. The function @strong{N*a(N)} is
 plotted in the figure below, along with a linear least square fit. 
 
+@html
 @image{lsqcoeff}
 Coefficient @strong{N*a(N)} versus match length 
+@end html
   
 The linear fit of @strong{N*a(N)} gives the following rating
 formula:@*@strong{R = (11971 + 23681/N) * DEPD}. @* In the figure
 below the formula is plotted along with the actual data points;  
 
+@html
 @image{rallfitted}
+@end html
   
 Rating versus @strong{DEPD} approximated by @strong{R = (11971 +
 23681/N) * DEPD}. The dotted lines are the prediction, the solid lines
@@ -278,11 +285,9 @@ the linear fit using the formula from Part I, and the blue &quot;X&quot;
 indicates the prediction from the bilinear fit with the coefficients a2 and b as
 indicated. 
 
+@html
 @image{d3}
 Measurements and fit for match length 3. 
-  
- 
-
 
 @image{d5}
 Measurements and fit for match length 5. 
@@ -295,17 +300,20 @@ Measurements and fit for match length 11.
 
 @image{d23}
 Measurements and fit for match length 23. 
+@end html
   
 The coefficients @strong{a2(N)} and @strong{b(N)} as a function of
 match length are well approximated by a linear function of
 @strong{1/N}. We show these coefficients and a linear fit in the two
 figures below.  
 
+@html
 @image{fita2}
 Fitting @strong{Na2(N)} with  a linear function. 
   
 @image{fitb}
 Fitting @strong{Nb(N)} with a linear function.  
+@end html
   
  
 
