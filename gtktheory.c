@@ -664,9 +664,9 @@ GTKShowTheory ( const int fActivePage ) {
   int *pi;
 
   static char *aszTitles[] = {
-    N_(""),
+    "",
     N_("Dead cube"),
-    N_("") /* N_("Live cube") */,
+    "" /* N_("Live cube") */,
     N_("Fully live")
   };
   gchar *asz[ 4 ];
