@@ -5659,10 +5659,24 @@ getDefaultFileName ( const pathformat f ) {
 extern char *
 getDefaultPath ( const pathformat f ) {
 
-  if ( strlen ( aaszPaths[ f ][ 1 ] ) )
-    return PathSearch ( strcat ( aaszPaths[ f ][ 1 ], "/" ), szDataDirectory );
-  else if ( strlen ( aaszPaths[ f ][ 0 ] ) )
-    return PathSearch ( strcat ( aaszPaths[ f ][ 0 ], "/" ), szDataDirectory );
+  char *pc;
+
+  if ( strlen ( aaszPaths[ f ][ 1 ] ) ) {
+    pc = strchr ( aaszPaths[ f ][ 1 ], 0 ) - 1;
+    if ( *pc == '/' )
+      return PathSearch ( aaszPaths[ f ][ 1 ], szDataDirectory );
+    else
+      return PathSearch ( strcat ( aaszPaths[ f ][ 1 ], "/" ), 
+                          szDataDirectory );
+  }
+  else if ( strlen ( aaszPaths[ f ][ 0 ] ) ) {
+    pc = strchr ( aaszPaths[ f ][ 0 ], 0 ) - 1;
+    if ( *pc == '/' )
+      return PathSearch ( aaszPaths[ f ][ 0 ], szDataDirectory );
+    else
+      return PathSearch ( strcat ( aaszPaths[ f ][ 0 ], "/" ), 
+                          szDataDirectory );
+  }
   else 
     return NULL;
 
