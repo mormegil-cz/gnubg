@@ -2439,9 +2439,13 @@ extern int InitGTK( int *argc, char ***argv ) {
        show text in the progress bar yet, but we might later.  So we have to
        pretend we want text in order to be sized correctly, and then set the
        format string to something so we don't get the default text. */
+#if USE_GTK2
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
+#else
     gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
-    
+#endif
+
     gtk_selection_add_target( pwMain, 
                               gdk_atom_intern ("CLIPBOARD", FALSE),
                               GDK_SELECTION_TYPE_STRING, 0 );
@@ -6970,10 +6974,12 @@ GTKHint( movelist *pmlOrig, const int iMove) {
 
 extern void GTKProgressStart( char *sz ) {
 
+#if !USE_GTK2
+    /* This is all deprecated in GTK 2.x */
     gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), TRUE );
     gtk_progress_bar_set_activity_step( GTK_PROGRESS_BAR( pwProgress ), 5 );
     gtk_progress_bar_set_activity_blocks( GTK_PROGRESS_BAR( pwProgress ), 5 );
-
+#endif
     if( sz )
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 }
@@ -6982,11 +6988,14 @@ extern void GTKProgressStart( char *sz ) {
 extern void
 GTKProgressStartValue( char *sz, int iMax ) {
 
+#if !USE_GTK2
+   /* This is all deprecated in GTK 2.x */
   gtk_progress_set_activity_mode ( GTK_PROGRESS ( pwProgress ), FALSE );
   gtk_progress_configure ( GTK_PROGRESS ( pwProgress ),
                            0, 0, iMax );
   gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
 				    "%v/%u (%p%%)" );
+#endif
 
   if( sz )
     gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
@@ -6994,9 +7003,18 @@ GTKProgressStartValue( char *sz, int iMax ) {
 }
 
 extern void
-GTKProgressValue ( int iValue ) {
+GTKProgressValue ( int iValue, int iMax ) {
 
+#if !USE_GTK2
     gtk_progress_set_value( GTK_PROGRESS ( pwProgress ), iValue );
+#else
+    gchar *gsz;
+    gdouble frac = 1.0 * iValue / (1.0 * iMax );
+    gsz = g_strdup_printf("%d/%d (%.0f%%)", iValue, iMax, 100 * frac);
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), gsz);
+    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), frac);
+    g_free(gsz);
+#endif
 
     SuspendInput();
 
@@ -7009,9 +7027,12 @@ GTKProgressValue ( int iValue ) {
 
 extern void GTKProgress( void ) {
 
+#if !USE_GTK2
     static int i;
-
     gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
+#else
+    gtk_progress_bar_pulse( GTK_PROGRESS_BAR( pwProgress ) );
+#endif
 
     SuspendInput();
 
@@ -7023,9 +7044,14 @@ extern void GTKProgress( void ) {
 
 extern void GTKProgressEnd( void ) {
 
+#if !USE_GTK2
     gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), FALSE );
     gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
+#else
+    gtk_progress_bar_set_fraction( GTK_PROGRESS( pwProgress ), 0.0 );
+    gtk_progress_bar_set_text( GTK_PROGRESS( pwProgress ), " " );
+#endif
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 }
 
@@ -7858,7 +7884,10 @@ static void GTKBearoffProgressCancel( void ) {
 extern void GTKBearoffProgress( int i ) {
 
     static GtkWidget *pwDialog, *pw, *pwAlign;
-
+#if USE_GTK2
+    gchar *gsz;
+#endif
+    
     if( !pwDialog ) {
 	pwDialog = GTKCreateDialog( _("GNU Backgammon"), DT_INFO, NULL, NULL );
 #if GTK_CHECK_VERSION(2,0,0)
@@ -7877,14 +7906,22 @@ extern void GTKBearoffProgress( int i ) {
 	gtk_container_add( GTK_CONTAINER( pwAlign ),
 			   pw = gtk_progress_bar_new() );
 	
+#if !USE_GTK2
 	gtk_progress_set_format_string( GTK_PROGRESS( pw ),
 					_("Generating bearoff database (%p%%)") );
 	gtk_progress_set_show_text( GTK_PROGRESS( pw ), TRUE );
-	
+#endif	
 	gtk_widget_show_all( pwDialog );
     }
 
+#if !USE_GTK2
     gtk_progress_set_percentage( GTK_PROGRESS( pw ), i / 54264.0 );
+#else
+    gsz = g_strdup_printf("Generating bearoff database (%.0f %%)", i / 542.64);
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pw ), gsz );
+    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pw ), i / 54264.0 );
+    g_free(gsz);
+#endif
 
     if( i >= 54000 ) {
 	gtk_signal_disconnect_by_func(

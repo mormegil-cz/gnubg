@@ -1,6 +1,11 @@
+Tue Feb 23   18:26:45 2005 Oystein Johansen <oystein@gnubg.org>
+
+	* gtkgame.c, progress.c: Make all progress bars with gtk_progress_bar
+	  instead of the deprecated gtk_progress_*, when compiled with GTK+2.
+	  
 Wed Feb 23   06:49:52 2005 GMT Jim Segrave
 
-	# gtkpanels.c use string.h rather than strings.h to get
+	* gtkpanels.c: use string.h rather than strings.h to get
 	  prototype for strcasecmp()
 	
 Tue Feb  22  19:26:45 2005 Oystein Johansen <oystein@gnubg.org>

@@ -138,7 +138,7 @@ extern void GTKProgressEnd( void );
 extern void
 GTKProgressStartValue( char *sz, int iMax );
 extern void
-GTKProgressValue ( int fValue );
+GTKProgressValue ( int fValue, int iMax );
 extern void GTKBearoffProgress( int i );
 
 extern void GTKDumpStatcontext( int game );

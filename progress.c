@@ -66,6 +66,7 @@ typedef struct _rolloutprogress {
   GtkWidget *pwElapsed;
   GtkWidget *pwLeft;
   GtkWidget *pwSE;
+  int nGamesDone;
 #endif
 
 } rolloutprogress;
@@ -660,7 +661,8 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
   
   rolloutprogress *prp = (rolloutprogress *) data;
   rolloutstat *prs = prp->prs;
-  int cGames = gtk_progress_get_value ( GTK_PROGRESS( prp->pwRolloutProgress ) );
+  // int cGames = gtk_progress_get_value ( GTK_PROGRESS( prp->pwRolloutProgress ) );
+  int cGames = prp->nGamesDone;
   int nRollouts = GTK_CLIST( prp->pwRolloutResult )->rows / 2;
   int i;
 
@@ -814,8 +816,10 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   gtk_clist_column_titles_passive( GTK_CLIST( prp->pwRolloutResult ) );
     
   prp->pwRolloutProgress = gtk_progress_bar_new();
+#if !USE_GTK2
   gtk_progress_set_show_text ( GTK_PROGRESS ( prp->pwRolloutProgress ), TRUE );
-
+#endif
+  
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutResult, TRUE, TRUE, 0 );
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutProgress, FALSE, FALSE,
                       0 );
@@ -837,11 +841,13 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                         _("Standard error") );
   }
 
+#if !USE_GTK2
   gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ), 0, 0, 
                           prc->nTrials );
   gtk_progress_set_format_string( GTK_PROGRESS( prp->pwRolloutProgress ),
                                   "%v/%u (%p%%)" );
-
+#endif
+  
   /* time elapsed and left */
 
   pwhbox = gtk_hbox_new( FALSE, 4 );
@@ -913,7 +919,9 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                     rolloutprogress *prp ) {
 
     char sz[ 32 ];
+    gchar *gsz;
     int i;
+    double frac;
 
     if( !prp ||  !prp->pwRolloutResult )
       return;
@@ -970,9 +978,22 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 						  iAlternative * 2, i + 1, "n/a");
 	}
 	  
+#if !USE_GTK2
     gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ),
                             iGame + 1, 0, prc->nTrials );
-
+#else
+    frac = (iGame + 1) * 1.0 / (prc->nTrials * 1.0); 
+    /* why doesn't type casting work? */
+    gsz = g_strdup_printf( "%d/%d (%.0f%%)" ,
+		    iGame + 1 , prc->nTrials, 100 * frac );
+    prp->nGamesDone = iGame + 1;
+     
+    gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR( prp->pwRolloutProgress),
+		    frac );
+    gtk_progress_bar_set_text(GTK_PROGRESS_BAR( prp->pwRolloutProgress), gsz );
+    g_free( gsz );
+#endif
+    
     /* calculate estimate time left */
 
     if ( iAlternative == ( prp->n - 1 ) ) {
@@ -1022,6 +1043,8 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 }
 
 static void GTKRolloutProgressEnd( void **pp ) {
+    
+    gchar *gsz;
 
     rolloutprogress *prp = *pp;
 
@@ -1040,8 +1063,15 @@ static void GTKRolloutProgressEnd( void **pp ) {
     gtk_widget_set_sensitive( prp->pwRolloutStop, FALSE );
     gtk_widget_set_sensitive( prp->pwRolloutViewStat, TRUE );
 
+#if !USE_GTK2
     gtk_progress_set_format_string( GTK_PROGRESS( prp->pwRolloutProgress ),
                                     _("Finished (%v trials)") );
+#else
+    gsz = g_strdup_printf( _("Finished (%d trials)") , prp->nGamesDone);
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( prp->pwRolloutProgress ),
+                                    gsz );
+    g_free( gsz );
+#endif
 
     gtk_signal_disconnect( GTK_OBJECT( prp->pwRolloutDialog ), 
                            prp->nRolloutSignal );

@@ -7210,7 +7210,7 @@ ProgressValue ( int iValue ) {
 #endif  
 #if USE_GTK
   if( fX ) {
-    GTKProgressValue( iValue );
+    GTKProgressValue( iValue, iProgressMax );
     return;
   }
 #endif
