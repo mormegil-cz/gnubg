@@ -65,7 +65,7 @@ static
 inline
 #endif
 void
-getBearoffProbs(const unsigned int n, unsigned int aaProb[32])
+getBearoffProbs(const unsigned int n, unsigned short int aaProb[32])
 {
 
   assert( pbc1 );
@@ -622,7 +622,7 @@ rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
   int anCounts [ nMaxGammonProbs ];
   int an[ 24 ];
   int antmp[ 6 ];
-  unsigned int anProb[ 32 ];
+  unsigned short int anProb[ 32 ];
   int i, n, m;
   int iGame;
   
@@ -667,7 +667,7 @@ rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
 
   for ( i = 0; i < nMaxProbs; ++i ) {
     arProbs[ i ] /= nGames;
-    printf ( "arProbs[%d]=%f\n", i, arProbs[ i ] );
+    /* printf ( "arProbs[%d]=%f\n", i, arProbs[ i ] ); */
   }
 
   /* calculate gammon probs. 
@@ -675,7 +675,7 @@ rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
 
   for ( i = 0; i < nMaxGammonProbs; ++i ) {
     arGammonProbs[ i ] = 1.0f * anCounts[ i ] / nGames;
-    printf ( "arGammonProbs[%d]=%f\n", i, arGammonProbs[ i ] );
+    /* printf ( "arGammonProbs[%d]=%f\n", i, arGammonProbs[ i ] ); */
   }
 
 }
@@ -704,7 +704,7 @@ osp ( const int anBoard[ 25 ], const int nGames,
 
   int i, n;
   int nTotal, nOut;
-  unsigned int anProb[ 32 ];
+  unsigned short int anProb[ 32 ];
 
   /* copy board into an, and find total number of chequers left,
      and number of chequers outside home */
@@ -781,7 +781,7 @@ bgProb ( const int anBoard[ 25 ],
   int i, j;
   float r, s;
   int antmp[ 6 ];
-  int anProb[ 32 ];
+  unsigned short int anProb[ 32 ];
 
   /* total pips before out of opponent's home quadrant */
 

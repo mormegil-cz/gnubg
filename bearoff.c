@@ -993,7 +993,7 @@ BearoffInit ( const char *szFilename, const char *szDir,
 }
 
 
-static float
+extern float
 fnd ( const float x, const float mu, const float sigma  ) {
 
    const float epsilon = 1.0e-7;

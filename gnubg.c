@@ -1372,6 +1372,10 @@ command cER = {
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon,
       N_("Display which starting position will be used"), NULL, NULL },
+    { "onechequer", CommandShowOneChequer, 
+      N_("Show misc race theory"), NULL, NULL },
+    { "onesidedrollout", CommandShowOneSidedRollout, 
+      N_("Show misc race theory"), NULL, NULL },
     { "output", CommandShowOutput, N_("Show how results will be formatted"),
       NULL, NULL },
     { "path", CommandShowPath, N_("Show default paths for save, load, export, "

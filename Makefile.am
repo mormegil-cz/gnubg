@@ -31,7 +31,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h br1.c
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h br1.c \
+  	onechequer.c onechequer.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -44,6 +45,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
+	gtkrace.c gtkrace.h \
 	$(SOUND_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)

@@ -155,7 +155,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h br1.c
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h br1.c \
+  	onechequer.c onechequer.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -173,6 +174,7 @@ bin_PROGRAMS = gnubg
 @USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
+@USE_GTK_TRUE@	gtkrace.c gtkrace.h \
 @USE_GTK_TRUE@	$(SOUND_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
@@ -242,7 +244,7 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
 	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT) \
 	osr.$(OBJEXT) bearoffgammon.$(OBJEXT) bearoff.$(OBJEXT) \
-	br1.$(OBJEXT)
+	br1.$(OBJEXT) onechequer.$(OBJEXT)
 @USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
 @USE_SOUND_FALSE@am__objects_2 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
@@ -255,7 +257,8 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkprefs.$(OBJEXT) gtk-multiview.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktheory.$(OBJEXT) gtktexi.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkexport.$(OBJEXT) gtkcube.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkchequer.$(OBJEXT) $(am__objects_2)
+@USE_GTK_TRUE@	gtkchequer.$(OBJEXT) gtkrace.$(OBJEXT) \
+@USE_GTK_TRUE@	$(am__objects_2)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -292,22 +295,23 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gtkboard.Po ./$(DEPDIR)/gtkchequer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkcube.Po ./$(DEPDIR)/gtkexport.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkprefs.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtktexi.Po ./$(DEPDIR)/gtktheory.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/guile.Po ./$(DEPDIR)/html.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/i18n.Po ./$(DEPDIR)/import.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/kleinman.Po ./$(DEPDIR)/latex.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/makebearoff.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkrace.Po ./$(DEPDIR)/gtktexi.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtktheory.Po ./$(DEPDIR)/guile.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/html.Po ./$(DEPDIR)/i18n.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/import.Po ./$(DEPDIR)/kleinman.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/latex.Po ./$(DEPDIR)/makebearoff.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makebearoff1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makeweights.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/matchequity.Po ./$(DEPDIR)/matchid.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/osr.Po ./$(DEPDIR)/play.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/positionid.Po ./$(DEPDIR)/postscript.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/pub_eval.Po ./$(DEPDIR)/record.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/text.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/xboard.Po ./$(DEPDIR)/xgame.Po
+@AMDEP_TRUE@	./$(DEPDIR)/onechequer.Po ./$(DEPDIR)/osr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/play.Po ./$(DEPDIR)/positionid.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/postscript.Po ./$(DEPDIR)/pub_eval.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/rollout.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/set.Po ./$(DEPDIR)/sgf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgfl.Po ./$(DEPDIR)/sgfp.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/show.Po ./$(DEPDIR)/sound.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/xboard.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/xgame.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -452,6 +456,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkexport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkgame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkprefs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkrace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtktexi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtktheory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/guile.Po@am__quote@
@@ -465,6 +470,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makeweights.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchequity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onechequer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/osr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/play.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/positionid.Po@am__quote@

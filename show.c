@@ -41,11 +41,14 @@
 #include "matchid.h"
 #include "i18n.h"
 #include "sound.h"
+#include "onechequer.h"
+#include "osr.h"
 
 #if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtktheory.h"
+#include "gtkrace.h"
 #include "gtkexport.h"
 #elif USE_EXT
 #include "xgame.h"
@@ -163,7 +166,6 @@ show_evals (char *text, evalcontext *early, evalcontext *late,
 extern void
 ShowRollout ( rolloutcontext *prc ) {
 
-  int i;
   int fDoTruncate = 0;
   int fLateEvals = 0;
   int nTruncate = prc->nTruncate;
@@ -175,7 +177,7 @@ ShowRollout ( rolloutcontext *prc ) {
     fDoTruncate = 1;
 
   if (prc->fLateEvals && 
-      (!fDoTruncate || (nTruncate > nLate) && (nLate > 2)))
+      (!fDoTruncate || ((nTruncate > nLate) && (nLate > 2))))
     fLateEvals = 1;
 
   if ( prc->nTrials == 1 )
@@ -827,6 +829,13 @@ extern void CommandShowKleinman( char *sz ) {
  
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
+
+#if USE_GTK
+    if ( fX ) {
+      GTKShowRace ( 0, an );
+      return;
+    }
+#endif
      
     PipCount( an, anPips );
  
@@ -839,9 +848,9 @@ extern void CommandShowKleinman( char *sz ) {
 
 extern void CommandShowThorp( char *sz ) {
 
-    int anPips[ 2 ], an[ 2 ][ 25 ];
-    int nLeader, nTrailer, nDiff, anCovered[2], anMenLeft[2];
-    int x;
+    int an[ 2 ][ 25 ];
+    int nLeader, nTrailer;
+    int nDiff;
 
     if( !*sz && ms.gs == GAME_NONE ) {
         outputl( _("No position specified and no game in progress.") );
@@ -851,66 +860,37 @@ extern void CommandShowThorp( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
-    PipCount( an, anPips );
-
-  anMenLeft[0] = 0;
-  anMenLeft[1] = 0;
-  for (x = 0; x < 25; x++)
-    {
-      anMenLeft[0] += an[0][x];
-      anMenLeft[1] += an[1][x];
+#if USE_GTK
+    if ( fX ) {
+      GTKShowRace ( 2, an );
+      return;
     }
+#endif
+     
+    ThorpCount ( an, &nLeader, &nTrailer );
 
-  anCovered[0] = 0;
-  anCovered[1] = 0;
-  for (x = 0; x < 6; x++)
-    {
-      if (an[0][x])
-        anCovered[0]++;
-      if (an[1][x])
-        anCovered[1]++;
-    }
+    outputf("L = %d  T = %d  -> ", nLeader, nTrailer);
 
-        nLeader = anPips[1];
-        nLeader += 2*anMenLeft[1];
-        nLeader += an[1][0];
-        nLeader -= anCovered[1];
+    if (nTrailer >= (nLeader - 1))
+      output(_("Redouble, "));
+    else if (nTrailer >= (nLeader - 2))
+      output(_("Double, "));
+    else
+      output(_("No double, "));
+    
+    if (nTrailer >= (nLeader + 2))
+      outputl(_("drop"));
+    else
+      outputl(_("take"));
+    
+    if( ( nDiff = nTrailer - nLeader ) > 13 )
+      nDiff = 13;
+    else if( nDiff < -37 )
+      nDiff = -37;
+    
+    outputf(_("Bower's interpolation: %d%% cubeless winning "
+              "chance\n"), 74 + 2 * nDiff );
 
-        if (nLeader > 30) {
-         if ((nLeader % 10) > 5)
-        {
-           nLeader *= 1.1;
-           nLeader += 1;
-        }
-         else
-          nLeader *= 1.1;
-        }
-        nTrailer = anPips[0];
-        nTrailer += 2*anMenLeft[0];
-        nTrailer += an[0][0];
-        nTrailer -= anCovered[0];
-
-        outputf("L = %d  T = %d  -> ", nLeader, nTrailer);
-
-        if (nTrailer >= (nLeader - 1))
-          output(_("Redouble, "));
-        else if (nTrailer >= (nLeader - 2))
-          output(_("Double, "));
-        else
-          output(_("No double, "));
-
-        if (nTrailer >= (nLeader + 2))
-          outputl(_("drop"));
-        else
-          outputl(_("take"));
-
-	if( ( nDiff = nTrailer - nLeader ) > 13 )
-	    nDiff = 13;
-	else if( nDiff < -37 )
-	    nDiff = -37;
-	
-        outputf(_("Bower's interpolation: %d%% cubeless winning "
-                "chance\n"), 74 + 2 * nDiff );
 }
 
 extern void CommandShowBeavers( char *sz ) {
@@ -977,6 +957,95 @@ writeMET ( float aafMET[][ MAXSCORE ],
     output ( "\n" );
   }
   output ( "\n" );
+
+}
+
+extern void
+CommandShowOneChequer ( char *sz ) {
+
+  int anBoard[ 2 ][ 25 ];
+  int anPips[ 2 ];
+  float arMu[ 2 ];
+  float arSigma[ 2 ];
+  int i, j;
+  float r;
+  float aarProb[ 2 ][ 100 ];
+
+  if( !*sz && ms.gs == GAME_NONE ) {
+    outputl( _("No position specified and no game in progress.") );
+    return;
+  }
+  
+  if( ParsePosition( anBoard, &sz, NULL ) < 0 )
+    return;
+     
+
+#if USE_GTK
+  if ( fX ) {
+    GTKShowRace ( 1, anBoard );
+    return;
+  }
+#endif
+
+  /* calculate one chequer bearoff */
+
+  PipCount ( anBoard, anPips );
+
+  for ( i = 0; i < 2; ++i )
+    OneChequer ( anPips[ i ], &arMu[ i ], &arSigma[ i ] );
+
+  for ( j = 0; j < 2; ++j )
+    for ( i = 0; i < 100; ++i ) 
+      aarProb[ j ][ i ] = fnd ( 1.0f * i, arMu[ j ], arSigma[ j ] );
+  
+  r = 0;
+  for ( i = 0; i < 100; ++i )
+    for ( j = i; j < 100; ++j )
+      r += aarProb[ 1 ][ i ] * aarProb[ 0 ][ j ];
+
+  outputl ( _("Number of rolls to bear off, assuming each player has one "
+              "chequer only." ) );
+  outputl ( _("                       "
+              "Pips     Avg. rolls   Std.dev.") );
+
+  for ( i = 0; i < 2; ++i )
+    outputf ( _("%-20.20s   %4d     %7.3f       %7.3f\n"),
+              ap[ ms.fMove ? i : !i ].szName,
+              anPips[ i ], arMu[ i ], arSigma[ i ] );
+
+  outputf ( _("Estimated cubeless gwc: %8.4f%%"), r * 100.0f );
+  outputl ( "" );
+
+}
+
+
+extern void
+CommandShowOneSidedRollout ( char *sz ) {
+
+  int anBoard[ 2 ][ 25 ];
+  int nTrials = 576;
+  float ar[ 5 ];
+
+  if( !*sz && ms.gs == GAME_NONE ) {
+    outputl( _("No position specified and no game in progress.") );
+    return;
+  }
+  
+  if( ParsePosition( anBoard, &sz, NULL ) < 0 )
+    return;
+     
+
+#if USE_GTK
+  if ( fX ) {
+    GTKShowRace ( 3, anBoard );
+    return;
+  }
+#endif
+
+  outputf ( _("One sided rollout with %d trials:\n"), nTrials );
+
+  raceProbs ( anBoard, nTrials, ar );
+  outputl ( OutputPercents ( ar, TRUE ) );
 
 }
 

@@ -90,4 +90,7 @@ BearoffClose ( bearoffcontext *pbc );
 extern int
 isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] );
 
+extern float
+fnd ( const float x, const float mu, const float sigma  );
+
 #endif /* _BEAROFF_H_ */
