@@ -1,4 +1,14 @@
-GNU Backgammon NEWS -- history of user-visible changes.  9 Dec 1999
+GNU Backgammon NEWS -- history of user-visible changes.  19 Feb 2000
+
+** Clicking on the cube in the board window is equivalent to the command
+"double".
+
+** The board window now gives better feedback about any move (if the move
+is a partial or complete legal move, it is displayed, otherwise "Illegal move"
+is shown).  Chequers may be moved around without restriction, and all legal
+moves will be recognised.
+
+** The player names now default to the user's login name and "gnubg".
 
 ** Added --no-weights option to disable reading weights files.  Generate
 and use binary weight files if available.
@@ -14,6 +24,8 @@ Crawford and Jacoby rules, and automatic doubles.
 buttons 2 and 3.
 
 ** Added support for other dice generators ("set rng").
+
+** Many miscellaneous commands implemented.
 
 ** More bug fixes.
 
