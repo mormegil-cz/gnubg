@@ -51,6 +51,10 @@ Thu Feb 17 20:10:10 2000  Gary Wong  <gary@cs.arizona.edu>
 
 Wed Feb 16 14:48:16 2000  Gary Wong  <gary@cs.arizona.edu>
 
+	* dice.c, set.c [!HAVE_LIBDL]: Add `#if HAVE_LIBDL' conditions to
+	some UserRNG calls that were causing problems if libdl was not
+	available.
+	
 	* gnubg.c (GenerateKeywords) [HAVE_LIBREADLINE, X_DISPLAY_MISSING]: Set
  	fReadingOther correctly when using readline but not X.
 
