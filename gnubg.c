@@ -4709,17 +4709,53 @@ CommandXCopy ( char *sz ) {
 }
 
 #ifdef WIN32
+
+int CountLines(const char* buf)
+{
+	int lines = 0;
+	while ((buf = strchr(buf, '\n')))
+	{
+		lines++;
+		buf++;
+	}
+	return lines;
+}
+
+void CopyAndAddLFs(char* to, const char* from)
+{
+	const char* pCR;
+	int len;
+	while ((pCR = strchr(from, '\n')))
+	{
+		len = pCR - from;
+		if (len)
+		{
+			strncpy(to, from, len);
+			to += len;
+			from += len;
+		}
+		*to++ = '\r';
+		*to++ = '\n';
+		from++;
+	}
+	/* Last bit */
+	strcpy(to, from);
+}
+
+/* Convert newline to cr/lf for windows */
 static void WinCopy( const char *szOut ){
 
   if(OpenClipboard(0)) {
 
     HGLOBAL clipbuffer;
     char * buf;
+	int numLines = CountLines(szOut);
+	int bufSize = strlen(szOut) + numLines + 1;
 
     EmptyClipboard();
-    clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(szOut)+1 );
+    clipbuffer = GlobalAlloc(GMEM_DDESHARE, bufSize );
     buf = (char*)GlobalLock(clipbuffer);
-    strcpy(buf, szOut);
+	CopyAndAddLFs(buf, szOut);
     GlobalUnlock(clipbuffer);
     SetClipboardData(CF_TEXT, clipbuffer);
     CloseClipboard();

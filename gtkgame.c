@@ -3386,6 +3386,11 @@ extern void GTKOutputErr( char *sz ) {
 			 sz, -1 );
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
 			 "\n", 1 );
+#if !USE_GTK2
+		/* Hack to make sure message is drawn correctly with gtk 1 */
+		gtk_text_freeze(GTK_TEXT( pwMessageText ));
+		gtk_text_thaw(GTK_TEXT( pwMessageText ));
+#endif
     }
 }
 
@@ -7759,30 +7764,12 @@ static gboolean ContextCopyMenu(GtkWidget *widget, GdkEventButton *event, GtkWid
 	return TRUE;
 }
 
-#if WIN32
-/* Convert newline to line feed + carriage return */
-void AddWinLF(const char* str)
-{
-	char* psz = strchr(str, 0);
-	if (psz[-1] == '\n')
-	{
-		psz[-1] = '\r';
-		psz[0] = '\n';
-		psz[1] = '\0';
-	}
-}
-#else
-/* Just remove function call */
-#define AddWinLF(x)
-#endif
-
 static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
 {
 	int i;
 	gchar *sz;
 
 	sprintf ( strchr ( pStr, 0 ), "%s\n", pTitle);
-	AddWinLF(pStr);
 
 	for (i = 0; i < pList->rows; i++ )
 	{
@@ -7797,10 +7784,8 @@ static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
 		sprintf ( strchr ( pStr, 0 ), "%-20.20s\n", 
 			  ( gtk_clist_get_text ( pList, i, 2, &sz ) ) ?
 			  sz : "" );
-		AddWinLF(pStr);
 	}
 	sprintf ( strchr ( pStr, 0 ), "\n");
-	AddWinLF(pStr);
 }
 
 static void CopyData(GtkWidget *pwNotebook, enum _formatgs page)
@@ -7808,7 +7793,6 @@ static void CopyData(GtkWidget *pwNotebook, enum _formatgs page)
 	char szOutput[4096];
 
 	sprintf(szOutput, "%-37.37s %-20.20s %-20.20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
-	AddWinLF(szOutput);
 
 	if (page == FORMATGS_CHEQUER || page == FORMATGS_ALL)
 		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_CHEQUER]), aszStatHeading[FORMATGS_CHEQUER]);
@@ -8139,7 +8123,6 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
   sprintf ( szOutput, 
             "%-37.37s %-20.20s %-20.20s\n",
             "", ap[ 0 ].szName, ap[ 1 ].szName );
-  AddWinLF(szOutput);
 
   /* copy list (note that the integers in the list are NOT copied) */
   plCopy = g_list_copy( GTK_CLIST ( pw )->selection );
@@ -8163,7 +8146,6 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
     sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s\n", 
               ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
               sz : "" );
-    AddWinLF(szOutput);
       
   }
 
