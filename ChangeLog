@@ -1,3 +1,9 @@
+Thu Mar 28 13:14:27 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (getGameNumber, getMoveNumber): new functions.
+	* html.c (CommandExportGameHTML, CommandExportPosHTML): use
+	correct game and move number instead of hardcoded values.
+
 Tue Mar 26 17:50:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * eval.c: Remove unused variables.
