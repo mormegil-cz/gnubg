@@ -1,3 +1,8 @@
+Fri Feb  1 10:48:10 2002  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (EvalInitialise): Use mmap() on the neural net weights,
+	if possible.
+
 Thu Jan 31 20:22:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 	
 	* eval.c (GetCubeRecommendation, FindBestCubeDecision,

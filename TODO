@@ -201,9 +201,6 @@ functions:
 *** GtkText
 
 * Bugs:
-** When using mmap()ed bearoff databases, add a signal handler for
-  SIGBUS/SIGSEGV to trap I/O errors.  Unfortunately, the semantics of
-  errors on mmap()ed regions are the most unportable that can be imagined...
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages.  szSetCommand is not always set correctly, which
   leads to other bad errors (e.g. "set player 0 cubedecision rollout").
@@ -252,7 +249,13 @@ functions:
   of both problems.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
-** "help next" (and "next <tab>" are incomplete.
+** "help next" (and "next <tab>") are incomplete.
+** Hit C-r (i.e. roll) repeatedly during animation, and the assertion
+  !fComputing at the start of NextTurn can fail.  This seems to be caused
+  by incorrect recursion from the call to fnAction() part way through
+  NextTurn.  Presumably the problem is that the main GTK loop at some
+  point is allowing input, when it shouldn't be (input should be
+  grabbed -- see HandleXAction and board_animate).
 ** Make sure that GTKSet() allows analysis after a move is imported. (gary)
 
 * Documentation:
@@ -326,6 +329,9 @@ functions:
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
+** When using mmap()ed bearoff databases, add a signal handler for
+  SIGBUS/SIGSEGV to trap I/O errors.  Unfortunately, the semantics of
+  errors on mmap()ed regions are the most unportable that can be imagined...
 
 
 Local Variables:

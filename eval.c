@@ -1,7 +1,7 @@
 /*
  * eval.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998-2001.
+ * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -635,7 +635,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     char szFileVersion[ 16 ];
     float r;
     static int fInitialised = FALSE;
-
+    
     if( !fInitialised ) {
 	if( CacheCreate( &cEval, cCache = 8192,
 			 (cachecomparefunc) EvalCacheCompare ) )
@@ -733,7 +733,33 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		     WEIGHTS_VERSION " is required, but these weights "
 		     "are %.2f)\n", szWeightsBinary, r );
 	else {
-	    if( !( fReadWeights =
+#if HAVE_MMAP
+	    struct stat st;
+	    void *p;
+
+	    /* Attempt to mmap() the weights file, instead of reading it,
+	       so that the virtual memory can be shared if there are
+	       multiple gnubg processes running concurrently.
+
+	       We don't bother making any arrangements to munmap() the
+	       region if the neural net is destroyed: technically this
+	       is a leak, but it doesn't really matter, because (a) this
+	       function is only ever called once, (b) in the normal
+	       case these nets will live for the lifetime of the
+	       process, and (c) normally the weights will never be
+	       changed, and so this region will remain clean and not
+	       waste any virtual memory. */
+	    if( !fstat( h, &st ) &&
+		( p = mmap( NULL, st.st_size, PROT_READ | PROT_WRITE,
+			    MAP_PRIVATE, h, 0 ) ) ) {
+		( (float *) p ) += 2; /* skip magic number and version */
+		fReadWeights =
+		    ( p = NeuralNetCreateDirect( &nnContact, p ) ) &&
+		    ( p = NeuralNetCreateDirect( &nnRace, p ) ) &&
+		    ( p = NeuralNetCreateDirect( &nnCrashed, p ) );
+	    }
+#endif
+	    if( !fReadWeights && !( fReadWeights =
 		   !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
 		   !NeuralNetLoadBinary(&nnRace, pfWeights ) &&
 		   !NeuralNetLoadBinary(&nnCrashed, pfWeights ) ) ) {
