@@ -459,6 +459,10 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 
   int i, j;
 
+  pscB->fMoves |= pscA->fMoves;
+  pscB->fDice |= pscA->fDice;
+  pscB->fCube |= pscA->fCube;
+  
   for ( i = 0; i < 2; i++ ) {
 
     pscB->anUnforcedMoves[ i ] += pscA->anUnforcedMoves[ i ];
@@ -805,11 +809,11 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
   }
 
   if( psc->fDice ) {
-      printf ( "Super-jokers\t\t\t%3d\t\t\t%3d\n"
-	       "Jokers\t\t\t\t%3d\t\t\t%3d\n"
-	       "Average\t\t\t\t%3d\t\t\t%3d\n"
-	       "Anti-jokers\t\t\t%3d\t\t\t%3d\n"
-	       "Super anti-jokers\t\t%3d\t\t\t%3d\n",
+      printf ( "Rolls marked very lucky\t\t%3d\t\t\t%3d\n"
+	       "Rolls marked lucky\t\t%3d\t\t\t%3d\n"
+	       "Rolls unmarked\t\t\t%3d\t\t\t%3d\n"
+	       "Rolls marked unlucky\t\t%3d\t\t\t%3d\n"
+	       "Rolls marked very unlucky\t%3d\t\t\t%3d\n",
 	       psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
 	       psc->anLuck[ 1 ][ LUCK_VERYGOOD ],
 	       psc->anLuck[ 0 ][ LUCK_GOOD ],
