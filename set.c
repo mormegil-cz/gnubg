@@ -798,7 +798,7 @@ extern void CommandSetCubeCentre( char *sz ) {
     
     AddMoveRecord( pmr );
     
-    outputl( _("The cube has been centred (either player may double).") );
+    outputl( _("The cube has been centred.") );
     
 #if USE_GUI
     if( fX )
