@@ -5775,7 +5775,11 @@ CreateGnubgDirectory ( void ) {
 
     /* create the directory */
 
-    if ( mkdir ( sz, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH ) < 0 ) {
+    if ( mkdir ( sz
+#ifndef WIN32
+                 , S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH 
+#endif
+                 ) < 0 ) {
       outputerr ( sz );
       free ( sz );
       return -1;

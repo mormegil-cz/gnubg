@@ -1,3 +1,9 @@
+Wed Dec 11 22:58:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CreateGnubgDirectory): mkdir has different prototype
+	on wintendo.
+	(reported by Nardy Pillards)
+
 Wed Dec 11 21:19:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	User defined board designs.
