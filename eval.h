@@ -349,4 +349,13 @@ GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  int anBoard[ 2 ][ 25 ],
                                  cubeinfo *pci, evalcontext *pec,
                                  int nPlies );
+extern int
+cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 );
+
+extern int
+cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 );
+
+extern int
+cmp_rolloutcontext ( const rolloutcontext *prc1, const rolloutcontext *prc2 );
+
 #endif

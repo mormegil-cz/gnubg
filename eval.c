@@ -6560,3 +6560,145 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 
 }
 
+
+/*
+ * Compare two evalsetups.
+ *
+ * Input:
+ *    - pes1, pes2: the two evalsetups to compare
+ *
+ * Output:
+ *    None.
+ *
+ * Returns:
+ *    -1 if  *pes1 "<" *pes2
+ *     0 if  *pes1 "=" *pes2
+ *    +1 if  *pes1 ">" *pes2
+ *
+ */
+
+extern int
+cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 ) {
+
+  /* Check for different evaltypes */
+
+  if ( pes1->et < pes2->et )
+    return -1;
+  else if ( pes1->et > pes2->et )
+    return +1;
+
+  /* The two evaltypes are identical */
+
+  switch ( pes1->et ) {
+  case EVAL_NONE:
+    return 0;
+    break;
+  case EVAL_EVAL:
+    return cmp_evalcontext ( &pes1->ec, &pes2->ec );
+    break;
+  case EVAL_ROLLOUT:
+    return cmp_rolloutcontext ( &pes1->rc, &pes2->rc );
+    break;
+  default:
+    assert ( FALSE );
+  }
+
+}
+
+
+/*
+ * Compare two evalcontexts.
+ *
+ * Input:
+ *    - pec1, pec2: the two evalcontexts to compare
+ *
+ * Output:
+ *    None.
+ *
+ * Returns:
+ *    -1 if  *pec1 "<" *pec2
+ *     0 if  *pec1 "=" *pec2
+ *    +1 if  *pec1 ">" *pec2
+ *
+ */
+
+extern int
+cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
+
+  /* Check if plies are different */
+
+  if ( pec1->nPlies < pec2->nPlies )
+    return -1;
+  else if ( pec1->nPlies > pec2->nPlies )
+    return +1;
+
+  /* Check for cubeful evals */
+
+  if ( pec1->fCubeful < pec2->fCubeful )
+    return -1;
+  else if ( pec1->fCubeful > pec2->fCubeful )
+    return +1;
+
+  /* Search candidates */
+
+  if ( pec1->nSearchCandidates < pec2->nSearchCandidates )
+    return -1;
+  else if ( pec1->nSearchCandidates > pec2->nSearchCandidates )
+    return +1;
+
+  /* Search tolerance */
+
+  if ( pec1->rSearchTolerance < pec2->rSearchTolerance )
+    return -1;
+  else if ( pec1->rSearchTolerance > pec2->rSearchTolerance )
+    return +1;
+
+  /* Noise  */
+
+  if ( pec1->rNoise > pec2->rNoise )
+    return -1;
+  else if ( pec1->rNoise < pec2->rNoise )
+    return +1;
+
+  if ( ! pec1->nPlies ) {
+
+    int n1 = ( pec1->nReduced != 21 ) ? pec1->nReduced : 0;
+    int n2 = ( pec2->nReduced != 21 ) ? pec2->nReduced : 0;
+    if ( n1 > n2 )
+      return -1;
+    else if ( n2 < n1 )
+      return +1;
+  }
+
+  return 0;
+
+}
+
+
+/*
+ * Compare two rolloutcontexts.
+ *
+ * Input:
+ *    - prc1, prc2: the two evalsetups to compare
+ *
+ * Output:
+ *    None.
+ *
+ * Returns:
+ *    -1 if  *prc1 "<" *prc2
+ *     0 if  *prc1 "=" *prc2
+ *    +1 if  *prc1 ">" *prc2
+ *
+ */
+
+extern int
+cmp_rolloutcontext ( const rolloutcontext *prc1, const rolloutcontext *prc2 ) {
+
+  /* FIXME: write me */
+
+  return 0;
+
+
+}
+
+
