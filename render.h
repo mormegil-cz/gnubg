@@ -171,7 +171,8 @@ extern void CopyAreaRotateClip( unsigned char *puchDest, int nDestStride,
 				unsigned char *puchSrc, int nSrcStride,
 				int xSrc, int ySrc, int cx, int cy,
 				int nTheta );
-extern void AlphaBlend( unsigned char *puchDest, int nDestStride,
+/* Changed from AlphaBlend as name clashes in windows */
+extern void AlphaBlendBase( unsigned char *puchDest, int nDestStride,
 			unsigned char *puchBack, int nBackStride,
 			unsigned char *puchFore, int nForeStride,
 			int cx, int cy );

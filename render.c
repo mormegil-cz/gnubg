@@ -375,7 +375,7 @@ static void FillArea( unsigned char *puchDest, int nDestStride,
     }
 }
 
-extern void AlphaBlend( unsigned char *puchDest, int nDestStride,
+extern void AlphaBlendBase( unsigned char *puchDest, int nDestStride,
 			unsigned char *puchBack, int nBackStride,
 			unsigned char *puchFore, int nForeStride,
 			int cx, int cy ) {
@@ -444,7 +444,7 @@ extern void AlphaBlendClip( unsigned char *puchDest, int nDestStride,
     if( cx <= 0 || cy <= 0 )
 	return;
 
-    AlphaBlend( puchDest + yDest * nDestStride + xDest * 3, nDestStride,
+    AlphaBlendBase( puchDest + yDest * nDestStride + xDest * 3, nDestStride,
 		puchBack + yBack * nBackStride + xBack * 3, nBackStride,
 		puchFore + yFore * nForeStride + xFore * 4, nForeStride,
 		cx, cy );
@@ -2046,7 +2046,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 #endif
     
     for( i = 0; i < 6; i++ ) {
-	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
+	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
 		    prd->nSize * nStrideCube, nStrideCube,
 		    CUBE_LABEL_WIDTH * prd->nSize, CUBE_LABEL_HEIGHT * prd->nSize );
 
@@ -2063,7 +2063,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     }
     
     for( ; i < 12; i++ ) {
-	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
+	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
  		    prd->nSize * nStrideCube, nStrideCube,
 		    CUBE_LABEL_WIDTH * prd->nSize, CUBE_LABEL_HEIGHT * prd->nSize );
 
@@ -2120,7 +2120,7 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
 #endif
     
     for( i = 0; i < 3; i++ ) {
-	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
+	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
 		    prd->nSize * nStrideCube, nStrideCube,
 		    RESIGN_LABEL_WIDTH * prd->nSize, RESIGN_LABEL_HEIGHT * prd->nSize );
 
