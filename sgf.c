@@ -1811,7 +1811,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
       fputs( "RU[", pf );
       
       if( pmr->g.fCrawford )
-	fputs( "RU[Crawford", pf );
+	fputs( "Crawford", pf );
       if( pmr->g.fCrawfordGame )
         fputs( ":CrawfordGame", pf );
       if( pmr->g.fJacoby )

@@ -74,6 +74,7 @@ char *aszCredits[] = {
     "Robert-Jan Veldhuizen",
     "Morten Wang",
     "JP White",
+    "Chris Wilson",
     "Kit Woolsey",
     "Frank Worrell",
     "Anders Zachrison",

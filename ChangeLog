@@ -1,3 +1,8 @@
+Wed Mar 19 19:07:08 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* sgf.c (SaveGame): fix typo.
+	(reported by Chris Wilson)
+
 Wed Mar 19 18:53:49 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (real_main): special initialisation for TMG and SGG paths.
