@@ -1,3 +1,7 @@
+Fri Oct 18 11:56:31 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* osr.c: new file. OSR code ported from fibs2html.
+
 Wed Oct 16 19:32:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c, set.c: more updates to the priority-stuff
