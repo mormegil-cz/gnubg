@@ -45,7 +45,7 @@ credEntry ceTranslations[] = {
   {"Achim Mueller", N_("German") },
   {"Hlynur Sigurgislason", N_("Icelandic") },
   {"Renzo Campagna", N_("Italian") },
-  {"Kaoru Takahashi", N_("Japanese") },
+  {"Yoshito Takeuchi", N_("Japanese") },
   {"Akif Dinc", N_("Turkish") },
   {"Dmitri I GOULIAEV", N_("Russian") },
   {0, 0}
@@ -69,13 +69,13 @@ credEntry ceCredits[] = {
   {"Tristan Colgate", 0},
   {"Olivier Croisille", 0},
   {"Ned Cross", 0},
+  {"Christopher D. Yep", 0},
   {"Bill Davidson", 0},
   {"Giulio De Marco", 0},
   {"Michael Depreli", 0},
   {"Alberta di Silvio", 0},
   {"Ian Dunstan", 0},
   {"Max Durbano", 0},
-  {"Christopher D. Yep", 0},
   {"Peter Eberhard", 0},
   {"Robert Eberlein", 0},
   {"James F. Kibler", 0},
@@ -150,8 +150,8 @@ credEntry ceCredits[] = {
   {"Sander van Rijnswou", 0},
   {"Robert-Jan Veldhuizen", 0},
   {"Morten Wang", 0},
-  {"Jeff White", 0},
   {"JP White", 0},
+  {"Jeff White", 0},
   {"Mike Whitton", 0},
   {"Chris Wilson", 0},
   {"Kit Woolsey", 0},
@@ -196,7 +196,7 @@ char aszAUTHORS[] =
 "     Achim Mueller (German)\n"
 "     Hlynur Sigurgislason (Icelandic)\n"
 "     Renzo Campagna (Italian)\n"
-"     Kaoru Takahashi (Japanese)\n"
+"     Yoshito Takeuchi (Japanese)\n"
 "     Akif Dinc (Turkish)\n"
 "     Dmitri I GOULIAEV (Russian)\n"
 "\n"

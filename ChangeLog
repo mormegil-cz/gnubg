@@ -1,3 +1,8 @@
+Tue Jun 15 05:58:34 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* credits.sh, credits.c, AUTHORS: Fix Japanese translations
+	credit.
+
 Sun Jun 13 22:32:09 CEST 2004 Jim Segrave <jes@jes-2.demon.nl>
 
 	* import.c - allow handling uncompleted matches in .mat files

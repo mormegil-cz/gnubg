@@ -64,7 +64,7 @@ Olivier Baur,French
 Achim Mueller,German
 Hlynur Sigurgislason,Icelandic
 Renzo Campagna,Italian
-Kaoru Takahashi,Japanese
+Yoshito Takeuchi,Japanese
 Akif Dinc,Turkish
 Dmitri I GOULIAEV,Russian
 EOF
