@@ -758,6 +758,19 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     else if( !fContact && anBack[ 1 ] < 18 )
 	/* Player is out of home board; no backgammons possible */
 	arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+
+    /* gammons must be less than wins */
+    
+    if( arOutput[ OUTPUT_WINGAMMON ] > arOutput[ OUTPUT_WIN ] ) {
+      arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_WIN ];
+    }
+
+    {
+      float lose = 1.0 - arOutput[ OUTPUT_WIN ];
+      if( arOutput[ OUTPUT_LOSEGAMMON ] > lose ) {
+	arOutput[ OUTPUT_LOSEGAMMON ] = lose;
+      }
+    }
 }
 
 extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
