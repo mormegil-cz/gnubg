@@ -19,7 +19,7 @@ SOUND_SOURCES = sound.c
 SOUND_INCS = @ESD_CFLAGS@ @NAS_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ \
 	@WINMMSND_CFLAGS@
 SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
-	@WINMMSND_LIBS@
+	@WINMMSND_LIBS@ @APPLE_QTIME_LIBS@
 else
 SOUND_INCS = 
 SOUND_SOURCES =
@@ -96,7 +96,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
 	formatgs.c formatgs.h boarddim.h timer.c $(LIBGEN_SOURCES) \
-	external_y.y external_l.l external_y.h
+	external_y.y external_l.l external_y.h openurl.c openurl.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper
@@ -114,7 +114,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkrace.c gtkrace.h \
 	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
-        openurl.c openurl.h gtktempmap.c gtktempmap.h \
+        gtktempmap.c gtktempmap.h \
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
