@@ -2660,8 +2660,8 @@ InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS] ) {
 
   /* invert equities */
 
-  ar [ OUTPUT_EQUITY ] = 1.0 - ar[ OUTPUT_EQUITY ];
-  ar [ OUTPUT_CUBEFUL_EQUITY ] = 1.0 - ar[ OUTPUT_CUBEFUL_EQUITY ];
+  ar [ OUTPUT_EQUITY ] = - ar[ OUTPUT_EQUITY ];
+  ar [ OUTPUT_CUBEFUL_EQUITY ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
 
 }
 
