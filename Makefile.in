@@ -162,7 +162,7 @@ mkinstalldirs texinfo.tex
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DIST_SUBDIRS =  lib doc ext lib doc
 DEP_FILES =  .deps/copying.P .deps/database.P .deps/dice.P \
@@ -415,8 +415,7 @@ distcheck: dist
 	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \
-	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook; \
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \

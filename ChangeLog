@@ -1,3 +1,8 @@
+Mon Jul 31 13:27:37 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (RunExt): If BSD FASYNC-style I/O notification is not
+	available, use System V SIGPOLL instead.
+	
 Mon Jul 31 10:49:18 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* rollout.c (Rollout) [USE_GTK]: Added graphical rollout output.

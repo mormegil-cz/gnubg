@@ -33,14 +33,14 @@
 #if USE_GTK
 #include <gtk/gtk.h>
 extern GtkWidget *pwMain, *pwBoard;
-extern int fX, nDelay;
+extern int fX, nDelay, fNeedPrompt;
 extern guint nNextTurn; /* GTK idle function */
 #define DISPLAY GDK_DISPLAY()
 #elif USE_EXT
 #include <ext.h>
 #include <event.h>
 extern extwindow ewnd;
-extern int fX, nDelay;
+extern int fX, nDelay, fNeedPrompt;
 extern event evNextTurn;
 #define DISPLAY ewnd.pdsp
 #endif
@@ -119,6 +119,9 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 extern void ShowBoard( void );
 extern char *FormatPrompt( void );
 extern void UpdateSetting( void *p );
+extern void ResetInterrupt( void );
+extern void PromptForExit( void );
+extern void Prompt( void );
 
 /* Write a string to stdout/status bar/popup window */
 extern void output( char *sz );

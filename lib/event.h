@@ -9,6 +9,8 @@
 #ifndef _EVENT_H_
 #define _EVENT_H_
 
+#include "config.h"
+
 #include <list.h>
 #if defined HAVE_SYS_TIME_H || !defined HAVE_CONFIG_H
 #include <sys/time.h>

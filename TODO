@@ -15,6 +15,9 @@ duplication of effort and to make sure our changes merge easily.
 ** Improve quasi-random dice generation for rollouts. (gary)
 ** Create multiple threads to parallelise rollouts (and evaluations?) on
   multiprocessors.  Perhaps start remote processes?
+** Add more statistics for rollouts (e.g. number of times each player hit,
+  number of turns on the bar, whether each player is closed out, average
+  number of pips wasted bearing off, etc.)
 
 * Game play:
 ** Add cube handling for computer player.  See tag "thyssen-double-branch"
@@ -138,3 +141,7 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Move the built-in RNGs into lib/; they can then be used instead of
   rand_r for better quality random numbers and improved portability.
+** Having recursive configure.in files isn't working very well.  It would
+  be better to move everything into the top level configure.in.  This makes
+  having standalone lib (event) and ext packages more difficult, but that
+  probably isn't critical any more.

@@ -29,6 +29,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_STROPTS_H
+#include <stropts.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -764,7 +767,6 @@ extern void RunExt( void ) {
     XSizeHints xsh;
     char *pch;
     event ev;
-    int n;
     
     XrmInitialize();
     
@@ -824,10 +826,21 @@ extern void RunExt( void ) {
 
     /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
     fnAction = HandleXAction;
-    if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
-        fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
-        fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
+
+#if FASYNC
+    /* BSD FASYNC-style I/O notification */
+    {
+	int n;
+	
+	if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
+	    fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
+	    fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
+	}
     }
+#else
+    /* System V SIGPOLL-style I/O notification */
+    ioctl( ConnectionNumber( pdsp ), I_SETSIG, S_RDNORM );
+#endif
     
 #if HAVE_LIBREADLINE
     fReadingCommand = TRUE;
