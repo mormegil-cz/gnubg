@@ -482,6 +482,9 @@
 /* Define if you want to use sounds with GNU Backgammon */
 #undef USE_SOUND
 
+/* Define if you want to use time controls (eg. clocks) with GNU Backgammon */
+#undef USE_TIMECONTROL
+
 /* Define if you wish to use the Win32 WINMM sound system */
 #undef USE_WINMMSND
 

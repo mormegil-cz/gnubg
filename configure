@@ -888,6 +888,7 @@ Optional Packages:
   --with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
   --with-audiofile-prefix=PFX   Prefix where Audio File Library is installed (optional)
   --with-audiofile-exec-prefix=PFX Exec prefix where Audio File Library is installed (optional)
+  --with-timecontrol	enable clocks
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix     don't search for libiconv in includedir and libdir
@@ -12234,6 +12235,31 @@ fi
 
 
 
+# Check whether --with-timecontrol or --without-timecontrol was given.
+if test "${with_timecontrol+set}" = set; then
+  withval="$with_timecontrol"
+
+fi;
+
+
+if test "$with_timecontrol" == "yes" ; then
+  USE_TIMECONTROL_TRUE=
+  USE_TIMECONTROL_FALSE='#'
+else
+  USE_TIMECONTROL_TRUE='#'
+  USE_TIMECONTROL_FALSE=
+fi
+
+if test "$with_timecontrol" == "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_TIMECONTROL 1
+_ACEOF
+
+fi
+
+
+
 echo "$as_me:$LINENO: checking for png_create_info_struct in -lpng" >&5
 echo $ECHO_N "checking for png_create_info_struct in -lpng... $ECHO_C" >&6
 if test "${ac_cv_lib_png_png_create_info_struct+set}" = set; then
@@ -15290,6 +15316,13 @@ echo "$as_me: error: conditional \"HAVE_WINMMSND\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${USE_TIMECONTROL_TRUE}" && test -z "${USE_TIMECONTROL_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"USE_TIMECONTROL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"USE_TIMECONTROL\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
@@ -15937,6 +15970,8 @@ s,@NAS_LIBS@,$NAS_LIBS,;t t
 s,@NAS_CFLAGS@,$NAS_CFLAGS,;t t
 s,@WINMMSND_LIBS@,$WINMMSND_LIBS,;t t
 s,@WINMMSND_CFLAGS@,$WINMMSND_CFLAGS,;t t
+s,@USE_TIMECONTROL_TRUE@,$USE_TIMECONTROL_TRUE,;t t
+s,@USE_TIMECONTROL_FALSE@,$USE_TIMECONTROL_FALSE,;t t
 s,@PNG_LIBS@,$PNG_LIBS,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@USE_NLS@,$USE_NLS,;t t
