@@ -1,3 +1,8 @@
+
+Wed Aug 13 22:02:30 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
+
+	* po/it.po more translations from Renzo Campagna
+
 Wed Aug 13 22:48:07 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (UpdateMoveList): ensure proper error 
