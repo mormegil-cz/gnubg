@@ -1,3 +1,16 @@
+Fri Jul 19 09:33:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (HTMLDumpStatContext), analysis.c (DumpStatContext),
+	gtkgame.c (GTKDumpStatContext): fix some typos.
+
+ 	Patch contributed by Jim Jesgrave.
+
+	Get rid of core dump if you type a command while gnubg is, say,
+	analysing.
+
+	* gnubg.c (HandleInputIgnore): new function.
+	* gnubg.c (GetInput): install HandleInputIgnore.
+
 Thu Jul 18 22:15:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c: New options dialog to clean up in the Settings menu
