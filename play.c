@@ -1045,8 +1045,6 @@ extern int ComputerTurn( void ) {
             fComputerDecision = FALSE;
             return 0;
             
-            break;
-
           case NODOUBLE_TAKE:
           case TOOGOOD_TAKE:
           case NO_REDOUBLE_TAKE:
@@ -1066,10 +1064,15 @@ extern int ComputerTurn( void ) {
           case OPTIONAL_REDOUBLE_PASS:
 
             if ( ap [ ms.fTurn ].esCube.et == EVAL_EVAL &&
-                 ap [ ms.fTurn ].esCube.ec.nPlies == 0 )
-              /* double if 0-ply */
-              CommandDouble ( NULL );
-
+                 ap [ ms.fTurn ].esCube.ec.nPlies == 0 ) {
+		/* double if 0-ply */
+		fComputerDecision = TRUE;
+		CommandDouble ( NULL );
+		fComputerDecision = FALSE;
+		return 0;
+	    }
+	    break;
+	    
           default:
 
             assert ( FALSE );

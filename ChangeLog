@@ -1,3 +1,8 @@
+Tue Aug 13 12:59:47 2002  Gary Wong  <gtw@gnu.org>
+
+	* play.c (ComputerTurn): Add "break" to avoid falling through to
+	default case in switch.
+
 Mon Aug 12 22:29:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* Makefile.am, Makefile.in: add COMMON_LIBS to 
