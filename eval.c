@@ -5223,7 +5223,7 @@ extern char *FormatEval ( char *sz, evaltype et, evalsetup es ) {
 
   switch ( et ) {
   case EVAL_NONE:
-    sz[ 0 ] = "\0";
+    strcpy ( sz, "" );
     break;
   case EVAL_EVAL:
     sprintf ( sz, "%s %1i-ply", 
