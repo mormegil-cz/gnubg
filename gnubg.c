@@ -3800,7 +3800,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
     /* number */
 
     if ( i && ! fRankKnown )
-      strcat( sz, "   ?? " );
+      strcat( sz, "   ??  " );
     else
       sprintf ( pc = strchr ( sz, 0 ),
                 " %4i. ", i + 1 );
