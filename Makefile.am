@@ -127,6 +127,8 @@ EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
 	ABOUT-NLS boards.xml
 
+DISTCLEANFILES=gnubg.wd
+
 br1.c:	makebearoff makebearoff1
 	if [ ! -f br1.c ]; then \
 	   ./makebearoff -o 6 -s 7999999 | ./makebearoff1 -o br1.c; \

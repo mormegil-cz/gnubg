@@ -1,4 +1,4 @@
-Fri Dec 13 16:07:18 2002  Gary Wong  <gtw@gnu.org>
+Fri Dec 13 16:57:13 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c, gtkprefs.c: Major changes to use the render.c board
 	drawing code instead of the old gtkboard.c equivalents.
@@ -6,6 +6,10 @@ Fri Dec 13 16:07:18 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkprefs.c (DesignPage): Default to a preview of the current board.
 	* gtkprefs.c (Preview): New function.
+
+	* Makefile.am (DISTCLEANFILES): Clean gnubg.wd, so "make distcheck"
+	is happy.
+	* configure.in: Try to cope without gnuplot and the PBM utilities.
 
 Fri Dec 13 07:05:20 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
