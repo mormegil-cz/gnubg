@@ -1268,7 +1268,7 @@ usage ( char *arg0 ) {
            "                      Reuse already generated bearoff database\n"
            "  -H, --no-header     Do not write header\n"
            "  -C, --no-cubeful    Do not calculate cubeful equities for\n"
-           "                      one-sided databases\n"
+           "                      two-sided databases\n"
            "  -c, --no-compress   Do not use compression scheme "
                                   "for one-sided databases\n"
            "  -g, --no-gammons    Include gammon distribution for one-sided"

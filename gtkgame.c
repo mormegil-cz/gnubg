@@ -5068,7 +5068,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                                  prw->rcRollout.fTruncBearoff2 );
 
   prpw->pwTruncBearoffOS = gtk_check_button_new_with_label (
-                                                            _( "Truncate cubeless at one-sided earoff database" ) );
+                                                            _( "Truncate cubeless at one-sided bearoff database" ) );
 
   gtk_container_add( GTK_CONTAINER( pw ), prpw->pwTruncBearoffOS );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON 
