@@ -754,7 +754,7 @@ static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, 
 		gtk_container_add(GTK_CONTAINER(woPanel[window].pwWin), pWidget);
 		gtk_window_add_accel_group(GTK_WINDOW(woPanel[window].pwWin), pagMain);
 
-		gtk_signal_connect(GTK_OBJECT(woPanel[window].pwWin), "delete_event", woPanel[window].hideFun, NULL);
+		gtk_signal_connect(GTK_OBJECT(woPanel[window].pwWin), "delete_event", GTK_SIGNAL_FUNC(woPanel[window].hideFun), NULL);
 	}
 	else
 		woPanel[window].pwWin = pWidget;
