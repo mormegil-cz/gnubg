@@ -1,3 +1,9 @@
+Thu Jul 19 09:59:28 2001  Gary Wong  <gtw@research.att.com>
+
+	* postscript.c (ExportGamePostScript): Fix bug (noted by Øystein)
+	where exporting analysed games violated an assertion if the cube
+	analysis didn't leave enough room on the page for the roll and move.
+
 Tue Jul 17 18:05:57 2001  Øystein Johansen <oeysteij@online.no>
 
         * analysis.c (AnalyzeGame)  Update fFirstMove when

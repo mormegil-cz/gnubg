@@ -704,7 +704,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
 					 pmr->n.arDouble, &pmr->n.esDouble );
 	    
-	    Consume( pf, 10 );
+	    Advance( pf, 10 );
 	    FormatMove( sz, msExport.anBoard, pmr->n.anMove );
 	    RequestFont( pf, FONT_RM, 10 );
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%d%d%s: %s%s) Tj\n" :
