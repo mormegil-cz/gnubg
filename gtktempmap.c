@@ -46,38 +46,49 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 
-#define SIZE_DIE 5
+#define SIZE_DIE 4
+#define SIZE_QUADRANT 40
 
 
-typedef struct _tempmapwidget {
-
+typedef struct _tempmap {
+  
   matchstate *pms;
-  cubeinfo ci;
   float aarEquity[ 6 ][ 6 ];
-  float rAverage, rMin, rMax;
+  float rAverage;
 
   GtkWidget *aapwDA[ 6 ][ 6 ];
   GtkWidget *aapwe[ 6 ][ 6 ];
   GtkWidget *pwAverage;
 
-  unsigned char *achDice[ 2 ];
-  unsigned char *achPips[ 2 ];
-
-  GtkWidget *apwGauge[ 2 ];
   GtkWidget *pweAverage;
 
+  int aaanMove[ 6 ][ 6 ][ 8 ];
+
+  gchar *szTitle;
+
+} tempmap;
+
+
+typedef struct _tempmapwidget {
+
+  unsigned char *achDice[ 2 ];
+  unsigned char *achPips[ 2 ];
   int fShowEquity;
   int fShowBestMove;
   int fInvert;
+  GtkWidget *apwGauge[ 2 ];
+  float rMin, rMax;
 
-  int aaanMove[ 6 ][ 6 ][ 8 ];
+  tempmap *atm;
+  int n;
 
 } tempmapwidget;
 
 
 static int
-CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
-                     float aarEquity[ 6 ][ 6 ], int aaanMove[ 6 ][ 6 ][ 8 ] ) {
+TempMapEquities( evalcontext *pec, matchstate *pms, 
+                 float aarEquity[ 6 ][ 6 ], int aaanMove[ 6 ][ 6 ][ 8 ],
+                 const gchar *szTitle ) {
 
 
   int i, j;
@@ -86,15 +97,24 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
   int aaan[ 6 ][ 6 ][ 8 ];
   float aar[ 6 ][ 6 ];
   cubeinfo ci;
+  cubeinfo cix;
 
   /* calculate equities */
 
-  ProgressStartValue ( _("Calculating equities" ), 21 );
+  GetMatchStateCubeInfo( &cix, pms );
+
+  if ( szTitle && *szTitle ) {
+    gchar *sz = g_strdup_printf( _("Calculating equities for %s"), szTitle );
+    ProgressStartValue ( sz, 21 );
+    g_free( sz );
+  }
+  else
+    ProgressStartValue ( _("Calculating equities" ), 21 );
 
   for ( i = 0; i < 6; ++i )
     for ( j = 0; j <= i; ++j ) {
 
-      memcpy( &ci, pci, sizeof ci );
+      memcpy( &ci, &cix, sizeof ci );
 
       /* find best move */
 
@@ -117,7 +137,7 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
       }
 
       
-      InvertEvaluationR( arOutput, pci );
+      InvertEvaluationR( arOutput, &cix );
 
       aar[ i ][ j ] = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
       aar[ j ][ i ] = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
@@ -141,6 +161,25 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
 }
 
 
+static int
+CalcTempMapEquities( evalcontext *pec, tempmapwidget *ptmw ) {
+
+  int i;
+
+  for ( i = 0; i < ptmw->n; ++i )
+    if ( TempMapEquities( pec, ptmw->atm[ i ].pms,
+                          ptmw->atm[ i ].aarEquity, 
+                          ptmw->atm[ i ].aaanMove,
+                          ptmw->atm[ i ].szTitle ) < 0 ) 
+      return -1;
+
+  return 0;
+
+}
+
+
+
+
 static void
 UpdateStyle( GtkWidget *pw, const float r ) {
 
@@ -156,59 +195,109 @@ UpdateStyle( GtkWidget *pw, const float r ) {
 
 
 static void
+SetStyle( GtkWidget *pw, const float rEquity, 
+          const float rMin, const float rMax, const int fInvert ) {
+
+  float r = ( rEquity - rMin ) / ( rMax - rMin );
+  UpdateStyle( pw, fInvert ? ( 1.0 - r ) : r );
+
+}
+
+
+static char *
+GetEquityString( const float rEquity, cubeinfo *pci, const int fInvert ) {
+
+  float r;
+
+  if ( fInvert ) {
+    /* invert equity */
+    if ( pci->nMatchTo )
+      r = 1.0 - rEquity;
+    else
+      r = -rEquity;
+  }
+  else
+    r = rEquity;
+
+  if ( fInvert ) {
+    cubeinfo ci;
+    memcpy( &ci, pci, sizeof ci );
+    ci.fMove = ! ci.fMove;
+
+    return OutputMWC( r, &ci, TRUE );
+  }
+  else
+    return OutputMWC( r, pci, TRUE );
+
+}
+
+
+static void
 UpdateTempMapEquities( tempmapwidget *ptmw ) {
 
   int i, j;
-  float rMax, rMin, rAverage, r;
-  cubeinfo *pci = &ptmw->ci;
+  float rMax, rMin, r;
+  cubeinfo ci;
+  int m;
 
   /* calc. min, max and average */
 
   rMax = -10000;
   rMin = +10000;
-  rAverage = 0.0f;
-  for ( i = 0; i < 6; ++i )
-    for ( j = 0; j < 6; ++j ) {
-      r = ptmw->aarEquity[ i ][ j ];
-      rAverage += r;
-      if ( r > rMax )
-        rMax = r;
-      if ( r < rMin ) 
-        rMin = r;
-    }
-  rAverage /= 36.0;
-
+  for ( m = 0; m < ptmw->n; ++m ) {
+    ptmw->atm[ m ].rAverage = 0.0f;
+    for ( i = 0; i < 6; ++i )
+      for ( j = 0; j < 6; ++j ) {
+        r = ptmw->atm[ m ].aarEquity[ i ][ j ];
+        ptmw->atm[ m ].rAverage += r;
+        if ( r > rMax )
+          rMax = r;
+        if ( r < rMin ) 
+          rMin = r;
+      }
+    ptmw->atm[ m ].rAverage /= 36.0;
+  }
 
   ptmw->rMax = rMax;
   ptmw->rMin = rMin;
-  ptmw->rAverage = rAverage;
 
   /* update styles */
 
-  for ( i = 0; i < 6; ++i )
-    for ( j = 0; j < 6; ++j ) {
-      r = ( ptmw->aarEquity[ i ][ j ] - rMin ) / ( rMax - rMin );
-      UpdateStyle( ptmw->aapwDA[ i ][ j ], r );
-      gtk_tooltips_set_tip( ptt, ptmw->aapwe[ i ][ j ], 
-                            OutputMWC( ptmw->aarEquity[ i ][ j ], 
-                                       pci, TRUE ), "" );
-      gtk_widget_queue_draw( ptmw->aapwDA[ i ][ j ] ); 
-    }
+  GetMatchStateCubeInfo ( &ci, ptmw->atm[ 0 ].pms );
 
 
-  r = ( ptmw->rAverage - rMin ) / ( rMax - rMin );
-  gtk_tooltips_set_tip( ptt, ptmw->pweAverage,
-                        OutputMWC( ptmw->rAverage, pci, TRUE ), "" );
-  UpdateStyle( ptmw->pwAverage, r );
-  gtk_widget_queue_draw( ptmw->pwAverage );
+  for ( m = 0; m < ptmw->n; ++m ) {
+    for ( i = 0; i < 6; ++i )
+      for ( j = 0; j < 6; ++j ) {
+        SetStyle( ptmw->atm[ m ].aapwDA[ i ][ j ],
+                  ptmw->atm[ m ].aarEquity[ i ][ j ], rMin, rMax, 
+                  ptmw->fInvert );
 
+        gtk_tooltips_set_tip( ptt, ptmw->atm[ m ].aapwe[ i ][ j ], 
+                              GetEquityString( ptmw->atm[ m ].aarEquity[ i ][ j ],
+                                               &ci, ptmw->fInvert ), 
+                              "" );
+        gtk_widget_queue_draw( ptmw->atm[ m ].aapwDA[ i ][ j ] ); 
+
+      }
+
+    SetStyle( ptmw->atm[ m ].pwAverage,
+              ptmw->atm[ m ].rAverage, rMin, rMax, ptmw->fInvert );
+
+    gtk_tooltips_set_tip( ptt, ptmw->atm[ m ].pweAverage,
+                          GetEquityString( ptmw->atm[ m ].rAverage, 
+                                           &ci, ptmw->fInvert ),
+                          "" );
+    gtk_widget_queue_draw( ptmw->atm[ m ].pwAverage );
+
+  }
 
   /* update labels on gauge */
 
-  gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ 0 ] ),
-                      OutputMWC( rMin, pci, TRUE ) );
-  gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ 1 ] ),
-                      OutputMWC( rMax, pci, TRUE ) );
+  gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ ptmw->fInvert ] ),
+                      GetEquityString( rMin, &ci, ptmw->fInvert ) );
+  gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ ! ptmw->fInvert ] ),
+                      GetEquityString( rMax, &ci, ptmw->fInvert ) );
 
 } 
 
@@ -216,34 +305,54 @@ static void
 ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
   
   int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
-  int i = *pi / 6;
-  int j = *pi % 6;
+  int i = 0;
+  int j = 0;
+  int m = 0;
   float r = 0.0f;
+  cubeinfo ci;
 
   gtk_draw_box( pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN,
                 0, 0, pw->allocation.width, pw->allocation.height );
 
-  /* this is very ugly! Use Pango instead... */
+  /* this is very ugly! Use Pango instead... 
+     Also: consider marking market losers with bold or other color */
 
-  if ( j >= 0 )
-    r = ptmw->aarEquity[ i ][ j ];
-  else if ( j == -1 ) 
-    r = ptmw->rAverage;
+  if ( pi ) {
+    if ( *pi >= 0 ) {
+      i = ( *pi % 100 ) / 6;
+      j = *pi % 6;
+      m = *pi / 100;
+    }
+    else {
+      m = -(*pi+1);
+      j = -1;
+    }
+  }
+  else 
+    m = -1;
+    
 
-  if ( j >= -1 && ptmw->fShowEquity ) {
+  if ( m >= 0 && ptmw->fShowEquity ) {
+    if ( j >= 0 )
+      r = ptmw->atm[ m ].aarEquity[ i ][ j ];
+    else if ( j == -1 ) 
+      r = ptmw->atm[ m ].rAverage;
+    
+    GetMatchStateCubeInfo( &ci, ptmw->atm[ m ].pms );
     gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
                      10, 15, 
-                     OutputMWC( r, &ptmw->ci, TRUE ) );
+                     GetEquityString( r, &ci, ptmw->fInvert ) );
   }
 
 
   /* move */
 
-  if ( j >= 0 && ptmw->fShowBestMove ) {
+  if ( m >= 0 && j >= 0 && ptmw->fShowBestMove ) {
 
     char szMove[ 100 ];
 
-    FormatMove( szMove, ptmw->pms->anBoard, ptmw->aaanMove[ i ][ j ] );
+    FormatMove( szMove, ptmw->atm[ m ].pms->anBoard, 
+                ptmw->atm[ m ].aaanMove[ i ][ j ] );
     gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
                      10, 30, szMove );
 
@@ -262,7 +371,7 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
   int y = ( pw->allocation.height - SIZE_DIE * 7 ) / 2;
 
   DrawDie( pw->window, ptmw->achDice, ptmw->achPips, SIZE_DIE,
-           gc, x, y, ptmw->pms->fMove, *pi + 1 );
+           gc, x, y, ptmw->atm[ 0 ].pms->fMove, *pi + 1 );
 
 }
 
@@ -279,8 +388,7 @@ TempMapPlyToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
 
     ec.nPlies = *pi;
 
-    if ( CalcTempMapEquities( &ec, ptmw->pms, &ptmw->ci,
-                              ptmw->aarEquity, ptmw->aaanMove ) )
+    if ( CalcTempMapEquities( &ec, ptmw ) )
       return;
     
     UpdateTempMapEquities( ptmw );
@@ -320,53 +428,63 @@ static void
 DestroyDialog( gpointer p ) {
 
   tempmapwidget *ptmw = (tempmapwidget *) p;
+  int i;
 
   /* garbage collect */
 
-  free( ptmw->achDice[ 0 ] );
-  free( ptmw->achDice[ 1 ] );
-  free( ptmw->achPips[ 0 ] );
-  free( ptmw->achPips[ 1 ] );
+  g_free( ptmw->achDice[ 0 ] );
+  g_free( ptmw->achDice[ 1 ] );
+  g_free( ptmw->achPips[ 0 ] );
+  g_free( ptmw->achPips[ 1 ] );
 
-  free( ptmw->pms );
+  for ( i = 0; i < ptmw->n; ++i ) {
+    g_free( ptmw->atm[ i ].pms );
+    g_free( ptmw->atm[ i ].szTitle );
+  }
 
-  free( ptmw );
+  g_free( ptmw->atm );
+
+  g_free( ptmw );
 
 }
 
-
-
 extern void
-GTKShowTempMap( const matchstate *pms, const gchar *szTitle,
-                const int fInvert ) {
+GTKShowTempMap( const matchstate ams[], const int n,
+                const gchar *aszTitle[], const int fInvert ) {
 
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
   tempmapwidget *ptmw;
   int *pi;
   int i, j;
   renderdata rd;
-  gchar *sz;
 
   GtkWidget *pwDialog;
-  GtkWidget *pwTable = gtk_table_new( 7, 7, TRUE );
+  GtkWidget *pwTable = NULL;
   GtkWidget *pwv;
   GtkWidget *pw;
   GtkWidget *pwh;
   GtkWidget *pwx = NULL;
+  GtkWidget *pwOuterTable;
+
+  int k, l, km, lm, m;
 
   /* dialog */
 
-  if ( szTitle && *szTitle )
-    sz = g_strdup_printf( _("Sho Sengoku Temperature Map - "
-                            "Distribution of rolls - %s"), szTitle );
-  else
-    sz = g_strdup( _("Sho Sengoku Temperature Map - "
-                     "Distribution of rolls") );
-
-  pwDialog = CreateDialog( sz, DT_INFO, NULL, NULL );
+  pwDialog = CreateDialog( _("Sho Sengoku Temperature Map - "
+                             "Distribution of rolls"), DT_INFO, NULL, NULL );
 
 
   ptmw = (tempmapwidget *) g_malloc( sizeof ( tempmapwidget ) );
+  ptmw->fShowBestMove = FALSE;
+  ptmw->fShowEquity = FALSE;
+  ptmw->fInvert = fInvert;
+  ptmw->n = n;
+
+  ptmw->atm = (tempmap *) g_malloc( n * sizeof ( tempmap ) );
+  for ( i = 0; i < n; ++i ) {
+    ptmw->atm[ i ].pms = (matchstate *) g_malloc( sizeof ( matchstate ) );
+    memcpy( ptmw->atm[ i ].pms, &ams[ i ], sizeof ( matchstate ) );
+  }
 
   /* vbox to hold tree widget and buttons */
 
@@ -374,7 +492,6 @@ GTKShowTempMap( const matchstate *pms, const gchar *szTitle,
   gtk_container_set_border_width ( GTK_CONTAINER ( pwv ), 8);
   gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
 
-  gtk_box_pack_start( GTK_BOX( pwv ), pwTable, FALSE, FALSE, 0 );
 
   /* render die */
 
@@ -389,106 +506,132 @@ GTKShowTempMap( const matchstate *pms, const gchar *szTitle,
   RenderDice( &rd, ptmw->achDice[ 0 ], ptmw->achDice[ 1 ], SIZE_DIE * 7 * 4 );
   RenderPips( &rd, ptmw->achPips[ 0 ], ptmw->achPips[ 1 ], SIZE_DIE * 3 );
 
-  /* drawing areas */
+  /* calculate number of rows and columns */
 
-  for ( i = 0; i < 6; ++i ) {
-    for ( j = 0; j < 6; ++j ) {
+  for ( lm = 1; /**/; ++lm )
+    if ( lm * lm >= n )
+      break;
 
-      ptmw->aapwDA[ i ][ j ] = gtk_drawing_area_new();
-      ptmw->aapwe[ i ][ j ] = gtk_event_box_new();
+  for ( km = 1; km * lm < n; ++km )
+    ;
 
-      gtk_container_add( GTK_CONTAINER( ptmw->aapwe[ i ][ j ] ),
-                         ptmw->aapwDA[ i ][ j ] );
+  pwOuterTable = gtk_table_new( km, lm, TRUE );
+  gtk_box_pack_start( GTK_BOX( pwv ), pwOuterTable, TRUE, TRUE, 0 );
 
-      gtk_drawing_area_size( GTK_DRAWING_AREA( ptmw->aapwDA[ i ][ j ] ),
-                             50, 50 );
+  for ( k = m = 0; k < km; ++k )
+    for ( l = 0; l < lm && m < n; ++l, ++m ) {
 
-      gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
-                                 ptmw->aapwe[ i ][ j ],
-                                 i + 1, i + 2,
-                                 j + 1, j + 2 );
+      tempmap *ptm = &ptmw->atm[ m ];
 
-      pi = (int *) g_malloc( sizeof ( int ) );
-      *pi = i * 6 + j;
+      ptm->szTitle = ( aszTitle &&  aszTitle[ m ] && *aszTitle[ m ] ) ?
+        g_strdup( aszTitle[ m ] ) : NULL;
       
-      gtk_object_set_data_full( GTK_OBJECT( ptmw->aapwDA[ i ][ j ] ),
-                                "user_data", pi, g_free );
+      pw = gtk_aspect_frame_new( ptm->szTitle, 0.5, 0.5, 1.0, FALSE );
+
+      gtk_table_attach_defaults( GTK_TABLE( pwOuterTable ),
+                                 pw, l, l + 1, k, k + 1 );
+
+      gtk_container_add( GTK_CONTAINER( pw ), 
+                         pwTable = gtk_table_new( 7, 7, TRUE ) );
+
+      /* drawing areas */
+
+      for ( i = 0; i < 6; ++i ) {
+        for ( j = 0; j < 6; ++j ) {
+          
+          ptm->aapwDA[ i ][ j ] = gtk_drawing_area_new();
+          ptm->aapwe[ i ][ j ] = gtk_event_box_new();
+          
+          gtk_container_add( GTK_CONTAINER( ptm->aapwe[ i ][ j ] ),
+                             ptm->aapwDA[ i ][ j ] );
+          
+          gtk_drawing_area_size( GTK_DRAWING_AREA( ptm->aapwDA[ i ][ j ] ),
+                                 SIZE_QUADRANT, SIZE_QUADRANT );
+          
+          gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
+                                     ptm->aapwe[ i ][ j ],
+                                     i + 1, i + 2,
+                                     j + 1, j + 2 );
+          
+          pi = (int *) g_malloc( sizeof ( int ) );
+          *pi = i * 6 + j + m * 100;
+          
+          gtk_object_set_data_full( GTK_OBJECT( ptm->aapwDA[ i ][ j ] ),
+                                    "user_data", pi, g_free );
+          
+          gtk_signal_connect( GTK_OBJECT( ptm->aapwDA[ i ][ j ] ),
+                              "expose_event",
+                              GTK_SIGNAL_FUNC( ExposeQuadrant ), ptmw );
+
+        }
+
+        /* die */
+
+        pw = gtk_drawing_area_new();
+        gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 
+                               SIZE_QUADRANT, SIZE_QUADRANT );
+        
+        gtk_table_attach_defaults( GTK_TABLE( pwTable ),
+                                   pw, 0, 1, i + 1, i + 2 );
+
+        pi = (int *) g_malloc( sizeof ( int ) );
+        *pi = i;
+        
+        gtk_object_set_data_full( GTK_OBJECT( pw ),
+                                  "user_data", pi, g_free );
+        
+        gtk_signal_connect( GTK_OBJECT( pw ),
+                            "expose_event",
+                            GTK_SIGNAL_FUNC( ExposeDie ),
+                            ptmw );
+        /* die */
     
-      gtk_signal_connect( GTK_OBJECT( ptmw->aapwDA[ i ][ j ] ),
+        pw = gtk_drawing_area_new();
+        gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 
+                               SIZE_QUADRANT, SIZE_QUADRANT );
+    
+        gtk_table_attach_defaults( GTK_TABLE( pwTable ),
+                                   pw, i + 1, i + 2, 0, 1 );
+        
+        pi = (int *) g_malloc( sizeof ( int ) );
+        *pi = i;
+        
+        gtk_object_set_data_full( GTK_OBJECT( pw ),
+                                  "user_data", pi, g_free );
+        
+        gtk_signal_connect( GTK_OBJECT( pw ),
+                            "expose_event",
+                            GTK_SIGNAL_FUNC( ExposeDie ),
+                            ptmw );
+    
+      }
+
+      /* drawing area for average */
+      
+      ptm->pwAverage = gtk_drawing_area_new();
+      ptm->pweAverage = gtk_event_box_new();
+
+      gtk_container_add( GTK_CONTAINER( ptm->pweAverage ), ptm->pwAverage );
+
+      gtk_drawing_area_size( GTK_DRAWING_AREA( ptm->pwAverage ),
+                             SIZE_QUADRANT, SIZE_QUADRANT );
+      
+      gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
+                                 ptm->pweAverage,
+                                 0, 1, 0, 1 );
+      
+      pi = (int *) g_malloc( sizeof ( int ) );
+      *pi = -m - 1;
+      
+      gtk_object_set_data_full( GTK_OBJECT( ptm->pwAverage ),
+                                "user_data", pi, g_free );
+      
+      gtk_signal_connect( GTK_OBJECT( ptm->pwAverage ),
                           "expose_event",
-                          GTK_SIGNAL_FUNC( ExposeQuadrant ), ptmw );
+                          GTK_SIGNAL_FUNC( ExposeQuadrant ),
+                          ptmw );
 
     }
-
-    /* die */
-
-    pw = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 50, 50 );
-
-    gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-                               pw, 0, 1, i + 1, i + 2 );
-
-    pi = (int *) g_malloc( sizeof ( int ) );
-    *pi = i;
-    
-    gtk_object_set_data_full( GTK_OBJECT( pw ),
-                              "user_data", pi, g_free );
-    
-    gtk_signal_connect( GTK_OBJECT( pw ),
-                          "expose_event",
-                        GTK_SIGNAL_FUNC( ExposeDie ),
-                        ptmw );
-    
-
-
-    /* die */
-    
-    pw = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 50, 50 );
-    
-    gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-                               pw, i + 1, i + 2, 0, 1 );
-
-    pi = (int *) g_malloc( sizeof ( int ) );
-    *pi = i;
-    
-    gtk_object_set_data_full( GTK_OBJECT( pw ),
-                              "user_data", pi, g_free );
-    
-    gtk_signal_connect( GTK_OBJECT( pw ),
-                          "expose_event",
-                        GTK_SIGNAL_FUNC( ExposeDie ),
-                        ptmw );
-    
-
-
-  }
-
-  /* drawing area for average */
-
-  ptmw->pwAverage = gtk_drawing_area_new();
-  ptmw->pweAverage = gtk_event_box_new();
-
-  gtk_container_add( GTK_CONTAINER( ptmw->pweAverage ), ptmw->pwAverage );
-
-  gtk_drawing_area_size( GTK_DRAWING_AREA( ptmw->pwAverage ),
-                         50, 50 );
-  
-  gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
-                             ptmw->pweAverage,
-                             0, 1, 0, 1 );
-  
-  pi = (int *) g_malloc( sizeof ( int ) );
-  *pi = -1;
-  
-  gtk_object_set_data_full( GTK_OBJECT( ptmw->pwAverage ),
-                            "user_data", pi, g_free );
-  
-  gtk_signal_connect( GTK_OBJECT( ptmw->pwAverage ),
-                      "expose_event",
-                      GTK_SIGNAL_FUNC( ExposeQuadrant ),
-                      ptmw );
-
 
   /* separator */
 
@@ -497,39 +640,34 @@ GTKShowTempMap( const matchstate *pms, const gchar *szTitle,
 
   /* gauge */
 
-  pwTable = gtk_table_new( 2, 16, TRUE );
+  pwTable = gtk_table_new( 2, 16, FALSE ); 
   gtk_box_pack_start( GTK_BOX( pwv ), pwTable, FALSE, FALSE, 0 );
 
   for ( i = 0; i < 16; ++i ) {
 
     pw = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 20, 20 );
-
-      gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
-                                 pw,
-                                 i, i + 1,
-                                 1, 2 );
-
-      pi = (int *) g_malloc( sizeof ( int ) );
-      *pi = -2;
-      
-      gtk_object_set_data_full( GTK_OBJECT( pw ),
-                                "user_data", pi, g_free );
+    gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 15, 20 );
     
-      gtk_signal_connect( GTK_OBJECT( pw ),
-                          "expose_event",
-                          GTK_SIGNAL_FUNC( ExposeQuadrant ), NULL );
-
-      UpdateStyle( pw, 1.0 * i / 15.0 );
-
-
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), 
+                               pw,
+                               i, i + 1,
+                               1, 2 );
+    
+    gtk_object_set_data( GTK_OBJECT( pw ), "user_data", NULL );
+    
+    gtk_signal_connect( GTK_OBJECT( pw ),
+                        "expose_event",
+                        GTK_SIGNAL_FUNC( ExposeQuadrant ), NULL );
+    
+    UpdateStyle( pw, 1.0 * i / 15.0 );
+    
+    
   }
 
   for ( i = 0; i < 2; ++i ) {
     ptmw->apwGauge[ i ] = gtk_label_new( "" );
-    gtk_table_attach_defaults( GTK_TABLE( pwTable ), ptmw->apwGauge[ i ],
-                               15 * i, 15 * i + 1,
-                               0, 1 );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), ptmw->apwGauge[ i ], 
+                               15 * i, 15 * i + 1, 0, 1 );
   }
 
   /* separator */
@@ -570,6 +708,9 @@ GTKShowTempMap( const matchstate *pms, const gchar *szTitle,
 
   /* show-buttons */
 
+  pwh = gtk_hbox_new( FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwv ), pwh, FALSE, FALSE, 0 );
+  
   pw = gtk_check_button_new_with_label( _("Show equities") );
   gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
   
@@ -586,19 +727,12 @@ GTKShowTempMap( const matchstate *pms, const gchar *szTitle,
 
   /* update */
 
-  ptmw->fShowBestMove = FALSE;
-  ptmw->fShowEquity = FALSE;
-  ptmw->fInvert = fInvert;
-  ptmw->pms = (matchstate *) g_malloc( sizeof ( matchstate ) );
-  memcpy( ptmw->pms, pms, sizeof ( matchstate ) );
-  GetMatchStateCubeInfo( &ptmw->ci, ptmw->pms );
-  CalcTempMapEquities( &ec, ptmw->pms, &ptmw->ci, 
-                       ptmw->aarEquity, ptmw->aaanMove );
+  CalcTempMapEquities( &ec, ptmw );
   UpdateTempMapEquities( ptmw );
 
   /* modality */
 
-  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 500 ); 
+  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 400, 500 ); 
   gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyDialog, ptmw );
 
   gtk_widget_show_all( pwDialog );

@@ -306,36 +306,49 @@ MoveListTempMapClicked( GtkWidget *pw, hintdata *phd ) {
   GList *pl;
   GtkWidget *pwMoves = phd->pwMoves;
   char szMove[ 100 ];
-  matchstate msx;
+  matchstate *ams;
+  int i, c;
+  gchar **asz;
 
   if ( !  GTK_CLIST( pwMoves )->selection )
     return;
 
-  memcpy( &msx, &ms, sizeof ( matchstate ) );
+  for( c = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next, ++c ) 
+    ;
 
-  for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
+  ams = (matchstate *) g_malloc( c * sizeof ( matchstate ) );
+  asz = (char **) g_malloc ( c * sizeof ( char * ) );
 
+  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next, ++i ) {
+  
     move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-    gchar *sz;
 
     /* Apply move to get board */
 
-    FormatMove( szMove, msx.anBoard, m->anMove );
-    ApplyMove( msx.anBoard, m->anMove, FALSE );
+    memcpy( &ams[ i ], &ms, sizeof ( matchstate ) );
+
+    FormatMove( szMove, ams[ i ].anBoard, m->anMove );
+    ApplyMove( ams[ i ].anBoard, m->anMove, FALSE );
 
     /* Swap sides */
 
-    SwapSides( msx.anBoard );
-    msx.fMove = ! msx.fMove;
-    msx.fTurn = ! msx.fTurn;
+    SwapSides( ams[ i ].anBoard );
+    ams[ i ].fMove = ! ams[ i ].fMove;
+    ams[ i ].fTurn = ! ams[ i ].fTurn;
 
     /* Show temp map dialog */
 
-    sz = g_strdup_printf( _("after %s"), szMove );
-    GTKShowTempMap( &msx, sz, TRUE );
-    g_free( sz );
+    asz[ i ] = g_strdup( szMove );
 
   }
+
+  GTKShowTempMap( ams, c, ( const gchar(*)[] ) asz, TRUE );
+
+  g_free( ams );
+  for ( i = 0; i < c; ++i )
+    g_free( asz[ i ] );
+  g_free( asz );
+
   
 }
 

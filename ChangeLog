@@ -1,3 +1,9 @@
+Sun Jun  1 22:39:24 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Several improvements to temp. maps.
+
+	* gtktempmap.c: several improvements.
+
 Sun Jun  1 13:04:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktempmap.c (CalTempMapEquities): invert fMove before

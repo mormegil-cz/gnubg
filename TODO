@@ -27,6 +27,9 @@ duplication of effort and to make sure our changes merge easily.
 ** Consider making EvalEfficiency() more sophisticated.
 ** Save rollouts and evaluations in moverecords, e.g., a cubeless rollout 
   for a position.
+** Movefilters:
+*** accept=0, extra=0 is an illegal value!
+*** Improve dialog
 
 * Commands:
 ** Add interactive rollouts.
@@ -190,6 +193,11 @@ details.
   come from?
 ** Extend the Race Theory window with the output from "eval" for bearoff
   databases.
+** Temperatur maps:
+*** save window geometry
+*** add Eval button/eval settings button (like in hint-dialog)
+*** show difference histogram
+*** export to html
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
