@@ -305,6 +305,8 @@ extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
 extern void AddGame( moverecord *pmr );
 extern void ChangeGame( list *plGameNew );
+extern void
+FixMatchState ( matchstate *pms, const moverecord *pmr );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern int ComputerTurn( void );
@@ -473,12 +475,14 @@ extern void CommandAccept( char * ),
     CommandExportGamePDF( char * ),
     CommandExportGamePostScript( char * ),
     CommandExportGameText( char * ),
+    CommandExportGameEquityEvolution ( char * ),
     CommandExportMatchMat( char * ),
     CommandExportMatchHtml( char * ),
     CommandExportMatchLaTeX( char * ),
     CommandExportMatchPDF( char * ),
     CommandExportMatchPostScript( char * ),
     CommandExportMatchText( char * ),
+    CommandExportMatchEquityEvolution ( char * ),
     CommandExportPositionEPS( char * ),
     CommandExportPositionHtml( char * ),
     CommandExportPositionText( char * ),
