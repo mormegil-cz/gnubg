@@ -1,3 +1,7 @@
+Thu Jan 23 17:36:02 2003  Gary Wong  <gtw@gnu.org>
+
+	* sound.c (play_file_child): [!USE_GTK] Don't use g_snprintf.
+
 Thu Jan 23 16:46:19 2003  Gary Wong  <gtw@gnu.org>
 
 	* eval.c (NNevalAction): Temporarily disable incremental
