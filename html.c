@@ -3795,6 +3795,8 @@ OpenCSS( const char *sz ) {
 
   if ( !access( pchCSS, R_OK ) ) {
     /* file exists */
+    outputf( _("gnubg.css is not written since it already exist in \"%s\"\n"),
+             pchBase );
     pf = NULL;
   }
   else if ( ! ( pf = fopen( pchCSS, "w" ) ) ) {
