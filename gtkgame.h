@@ -36,6 +36,6 @@ extern int GTKRolloutUpdate( float arMu[], float arSigma[], int i, int c );
 extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
 
-extern int fGTKOutput;
+extern int fGTKOutput, fTTY;
 
 #endif
