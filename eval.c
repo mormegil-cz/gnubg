@@ -4142,6 +4142,13 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   cd = FindBestCubeDecision ( arDouble, pci );
 
+  if ( cd == NOT_AVAILABLE ) {
+
+    strcpy ( szOutput, "Cube not available\n" );
+    return 0;
+
+  }
+
   /* write string with cube action */
 
   if( fOutputInvert )
@@ -4217,9 +4224,8 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   default:
 
-    iOptimal = OUTPUT_OPTIMAL;
-    iOptimal = OUTPUT_OPTIMAL;
-    iOptimal = OUTPUT_OPTIMAL;
+    /* code not reachable; NOT_AVAILABLE is handled outside switch */
+    assert ( FALSE );
 
     break;
 
