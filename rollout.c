@@ -87,13 +87,13 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
       int n;
      
     reroll:
-      n = RollDice( anDice, rngx );
+      if( ( n = RollDice( anDice, rngx ) ) )
+	  return n;
 
       if ( fInitial && ! iTurn && anDice[ 0 ] == anDice[ 1 ] )
         goto reroll;
 
-      return n;
-
+      return 0;
     }
 
   }
