@@ -375,10 +375,13 @@ static int Point( char ch, int f ) {
 }
 
 static void RestoreDoubleAnalysis( property *pp,
-				   float ar[], evalsetup *pes ) {
+				   float ar[], 
+                                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                                   float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                                   evalsetup *pes ) {
     
     char *pch = pp->pl->plNext->p, ch;
-    int nPlies;
+    int nPlies, nReduced, fDeterministic;
     
     switch( *pch ) {
     case 'E':
@@ -386,14 +389,31 @@ static void RestoreDoubleAnalysis( property *pp,
 	pes->et = EVAL_EVAL;
 	pes->ec.nSearchCandidates = 0;
 	pes->ec.rSearchTolerance = 0;
-	pes->ec.nReduced = 0;
+	nReduced = 0;
+        pes->ec.rNoise = 0.0f;
+        fDeterministic = TRUE;
 	
-	sscanf( pch + 1, "%f %f %f %f %d%c", &ar[ 0 ], &ar[ 1 ], &ar[ 2 ],
-		&ar[ 3 ], &nPlies, &ch );
+	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f"
+                "%f %f %f %f %f %f %f", 
+                &ar[ 0 ], &ar[ 1 ], &ar[ 2 ], &ar[ 3 ], 
+                &nPlies, &ch,
+                &nReduced, 
+                &fDeterministic,
+                &pes->ec.rNoise,
+                &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
+                &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
+                &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
+                &aarOutput[ 0 ][ 6 ] );
 
 	pes->ec.nPlies = nPlies;
-
+        pes->ec.nReduced = nReduced;
+        pes->ec.fDeterministic = fDeterministic;
 	pes->ec.fCubeful = ch == 'C';
+
+        memset ( aarOutput[ 1 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
+        aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = ar[ OUTPUT_TAKE ];
+        
 	break;
 
     default:
@@ -407,7 +427,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
     list *pl = pp->pl->plNext;
     char *pch, ch;
     move *pm;
-    int i, nPlies;
+    int i, nPlies, fDeterministic, nReduced, nSearchCandidates;
     
     *piMove = atoi( pl->p );
 
@@ -444,18 +464,27 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	case 'E':
 	    /* EVAL_EVAL */
 	    pm->esMove.et = EVAL_EVAL;
-	    pm->esMove.ec.nSearchCandidates = 0;
-	    pm->esMove.ec.rSearchTolerance = 0;
-	    pm->esMove.ec.nReduced = 0;
+	    nReduced = 0;
+            fDeterministic = 0;
+            nSearchCandidates = 0;
 
-	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c",
+	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d %f",
 		    &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
 		    &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
 		    &pm->arEvalMove[ 4 ], &pm->rScore,
-		    &nPlies, &ch );
+		    &nPlies, 
+                    &ch, 
+                    &nReduced, 
+                    &fDeterministic, 
+                    &pm->esMove.ec.rNoise, 
+                    &nSearchCandidates,
+                    &pm->esMove.ec.rSearchTolerance);
+
 	    pm->esMove.ec.fCubeful = ch == 'C';
 	    pm->esMove.ec.nPlies = nPlies;
-	    
+	    pm->esMove.ec.nReduced = nReduced;
+	    pm->esMove.ec.fDeterministic = fDeterministic;
+            pm->esMove.ec.nSearchCandidates = nSearchCandidates;
 	    break;
 	    
 	default:
@@ -706,7 +735,10 @@ static void RestoreNode( list *pl ) {
 	case MOVE_NORMAL:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-				       pmr->n.arDouble, &pmr->n.esDouble );
+				       pmr->n.arDouble, 
+                                       pmr->n.aarOutput,
+                                       pmr->n.aarStdDev,
+                                       &pmr->n.esDouble );
 	    if( ppA )
 		RestoreMoveAnalysis( ppA, pmr->n.fPlayer, &pmr->n.ml,
 				     &pmr->n.iMove, &pmr->n.esChequer );
@@ -722,7 +754,10 @@ static void RestoreNode( list *pl ) {
 	case MOVE_DROP:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-				       pmr->d.arDouble, &pmr->d.esDouble );
+				       pmr->d.arDouble, 
+                                       pmr->d.aarOutput,
+                                       pmr->d.aarStdDev,
+                                       &pmr->d.esDouble );
 	    pmr->d.st = st;
 	    break;
 	    
@@ -925,13 +960,24 @@ static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 	}
 }
 
-static void WriteDoubleAnalysis( FILE *pf, float ar[],
+static void WriteDoubleAnalysis( FILE *pf, float ar[], 
+                                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 				 evalsetup *pes ) {
     switch( pes->et ) {
     case EVAL_EVAL:
-	fprintf( pf, "DA[E %.4f %.4f %.4f %.4f %d%s]", ar[ 0 ], ar[ 1 ],
-		 ar[ 2 ], ar[ 3 ], pes->ec.nPlies,
-		 pes->ec.fCubeful ? "C" : "" );
+	fprintf( pf, "DA[E %.4f %.4f %.4f %.4f %d%s %d %d %.4f "
+                 "%.4f %.4f %.4f %.4f %.4f %.4f %.4f]", 
+                 ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], 
+                 pes->ec.nPlies,
+		 pes->ec.fCubeful ? "C" : "",
+                 pes->ec.nReduced,
+                 pes->ec.fDeterministic,
+                 pes->ec.rNoise,
+                 aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
+                 aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
+                 aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
+                 aarOutput[ 0 ][ 6 ] );
 	break;
 
     case EVAL_ROLLOUT:
@@ -978,7 +1024,8 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    break;
 	    
 	case EVAL_EVAL:
-	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s",
+	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s"
+                     "%d %d %.4f %d %.4f",
 		     pml->amMoves[ i ].arEvalMove[ 0 ],
 		     pml->amMoves[ i ].arEvalMove[ 1 ],
 		     pml->amMoves[ i ].arEvalMove[ 2 ],
@@ -986,7 +1033,12 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 		     pml->amMoves[ i ].arEvalMove[ 4 ],
 		     pml->amMoves[ i ].rScore,
 		     pml->amMoves[ i ].esMove.ec.nPlies,
-		     pml->amMoves[ i ].esMove.ec.fCubeful ? "C" : "" );
+		     pml->amMoves[ i ].esMove.ec.fCubeful ? "C" : "",
+                     pml->amMoves[ i ].esMove.ec.nReduced, 
+                     pml->amMoves[ i ].esMove.ec.fDeterministic, 
+                     pml->amMoves[ i ].esMove.ec.rNoise, 
+                     pml->amMoves[ i ].esMove.ec.nSearchCandidates,
+                     pml->amMoves[ i ].esMove.ec.rSearchTolerance );
 	    break;
 	    
 	case EVAL_ROLLOUT:
@@ -1187,7 +1239,8 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    putc( ']', pf );
 
 	    if( pmr->n.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->n.arDouble,
+		WriteDoubleAnalysis( pf, pmr->n.arDouble, 
+                                     pmr->n.aarOutput, pmr->n.aarStdDev,
 				     &pmr->n.esDouble );
 
 	    if( pmr->n.ml.cMoves )
@@ -1205,6 +1258,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
 	    if( pmr->d.esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, pmr->d.arDouble,
+                                     pmr->d.aarOutput, pmr->d.aarStdDev,
 				     &pmr->d.esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
@@ -1216,6 +1270,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
 	    if( pmr->d.esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, pmr->d.arDouble,
+                                     pmr->d.aarOutput, pmr->d.aarStdDev,
 				     &pmr->d.esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
@@ -1227,6 +1282,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
 	    if( pmr->d.esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, pmr->d.arDouble,
+                                     pmr->d.aarOutput, pmr->d.aarStdDev,
 				     &pmr->d.esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
