@@ -124,7 +124,7 @@ void UpdateColPreviews();
 int GetPreviewId();
 void UpdateColPreview(int ID);
 void SetPreviewLightLevel(int levels[3]);
-#endif;
+#endif
 
 #if HAVE_LIBXML2
 
@@ -1016,11 +1016,7 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	int i;
 	int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	int numPages = 
-#ifdef USE_GTK2
-		gtk_notebook_get_n_pages(GTK_NOTEBOOK(pwNotebook));
-#else
 		g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
-#endif
 	/* Show pages with correct 2d/3d settings */
 	for (i = numPages - 1; i >= NUM_NONPREVIEW_PAGES; i--)
 		gtk_notebook_remove_page(GTK_NOTEBOOK(pwNotebook), i);
