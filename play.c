@@ -1395,12 +1395,9 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
 
-    nCube <<= 1;
-    UpdateSetting( &nCube );    
-
     if( fDisplay )
 	outputf( "%s accepts and immediately redoubles to %d.\n",
-		ap[ fTurn ].szName, nCube << 1 );
+		ap[ fTurn ].szName, nCube << 2 );
     
     fCubeOwner = !fMove;
     UpdateSetting( &fCubeOwner );
@@ -1588,14 +1585,15 @@ extern void CommandTake( char *sz ) {
 	return;
     }
 
+    if( fDisplay )
+	outputf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName,
+		 nCube << 1 );
+    
     pmr = malloc( sizeof( pmr->t ) );
     pmr->mt = MOVE_TAKE;
     pmr->t.fPlayer = fTurn;
     AddMoveRecord( pmr );
 
-    if( fDisplay )
-	outputf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
-    
     UpdateSetting( &nCube );
     UpdateSetting( &fCubeOwner );
     
