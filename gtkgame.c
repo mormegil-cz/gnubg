@@ -2317,6 +2317,14 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
+    /* NB: the following call to gtk_object_set_user_data is needed
+       to work around a nasty bug in GTK+ (the problem is that calls to
+       gtk_object_get_user_data relies on a side effect from a previous
+       call to gtk_object_set_data).  Adding a call here guarantees that
+       gtk_object_get_user_data will work as we expect later.
+       FIXME: this can eventually be removed once GTK+ is fixed. */
+    gtk_object_set_user_data( GTK_OBJECT( pwMain ), NULL );
+    
     setWindowGeometry ( pwMain, &awg[ WINDOW_MAIN ] );
 
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
@@ -3801,8 +3809,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
-
-    
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
     return pwEval;

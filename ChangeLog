@@ -1,3 +1,9 @@
+Thu Dec 19 11:31:32 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (InitGTK): Add a gratuitous call to
+	gtk_object_set_user_data, because correct operation of
+	gtk_object_get_user_data requires at least one.
+
 Wed Dec 18 19:49:54 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	The Hint dialog is not modal, make sure that passed
