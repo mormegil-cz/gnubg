@@ -81,6 +81,7 @@
 #endif
 
 #if !GTK_CHECK_VERSION(1,3,10)
+#define gtk_widget_get_parent(w) ((w)->parent)
 #define gtk_style_get_font(s) ((s)->font)
 
 static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
@@ -3037,8 +3038,12 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath ) {
 	*pwButton;
 
     if( szPath ) {
+#if USE_GTK2
 	pwButton = gtk_button_new_with_mnemonic( _("Set Default _Path") );
-
+#else
+	pwButton = gtk_button_new_with_label( _("Set Default Path") );
+#endif
+	
 	gtk_widget_show( pwButton );
 	gtk_container_add( GTK_CONTAINER(
 			       gtk_widget_get_parent(

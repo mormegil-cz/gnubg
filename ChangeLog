@@ -1,3 +1,9 @@
+Wed Sep 25 11:31:27 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c [!USE_GTK2]: #define gtk_widget_get_parent for
+	compatibility, and use gtk_button_new_with_label() instead of
+	gtk_button_new_with_mnemonic().
+
 Tue Sep 24 23:03:05 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (GTKRollout): Add a "stop" button to the rollout
