@@ -5650,7 +5650,7 @@ static void NoManual( void ) {
 	     "GNU Backgammon.  You can view the manual on the WWW at:\n"
 	     "\n"
 	     "    http://www.gnu.org/manual/gnubg/" );
-    /* FIXME is that URL right? */
+
     outputx();
 }
 
@@ -5688,6 +5688,195 @@ static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
     NoManual();
 #endif
 }
+
+#if GTK_CHECK_VERSION(2,0,0)
+static GtkWidget *pwHelpTree, *pwHelpLabel;
+
+static void GTKHelpAdd( GtkTreeStore *pts, GtkTreeIter *ptiParent,
+			command *pc ) {
+    GtkTreeIter ti;
+    
+    for( ; pc->sz; pc++ )
+	if( pc->szHelp ) {
+	    gtk_tree_store_append( pts, &ti, ptiParent );
+	    gtk_tree_store_set( pts, &ti, 0, pc->sz, 1, pc->szHelp,
+				2, pc, -1 );
+	    if( pc->pc && pc->pc->sz )
+		GTKHelpAdd( pts, &ti, pc->pc );
+	}
+}
+
+static void GTKHelpSelect( GtkTreeSelection *pts, gpointer p ) {
+
+    GtkTreeModel *ptm;
+    GtkTreeIter ti;
+    GtkTreePath *ptp;
+    command **apc;
+    int i, c;
+    char szCommand[ 128 ], *pchCommand = szCommand,
+	szUsage[ 128 ], *pchUsage = szUsage, *pch;
+    
+    if( gtk_tree_selection_get_selected( pts, &ptm, &ti ) ) {
+	ptp = gtk_tree_model_get_path( ptm, &ti );
+	c = gtk_tree_path_get_depth( ptp );
+	apc = malloc( c * sizeof( command * ) );
+	for( i = c - 1; ; i-- ) {
+	    gtk_tree_model_get( ptm, &ti, 2, apc + i, -1 );
+	    if( !i )
+		break;
+	    gtk_tree_path_up( ptp );
+	    gtk_tree_model_get_iter( ptm, &ti, ptp );
+	}
+
+	for( i = 0; i < c; i++ ) {
+	    /* accumulate command and usage strings from path */
+	    /* FIXME use markup a la gtk_label_set_markup for this */
+	    pch = apc[ i ]->sz;
+	    while( *pch )
+		*pchCommand++ = *pchUsage++ = *pch++;
+	    *pchCommand++ = ' '; *pchCommand = 0;
+	    *pchUsage++ = ' '; *pchUsage = 0;
+
+	    if( ( pch = apc[ i ]->szUsage ) ) {
+		while( *pch )
+		    *pchUsage++ = *pch++;
+		*pchUsage++ = ' '; *pchUsage = 0;	
+	    }		
+	}
+
+	pch = g_strdup_printf( "%s- %s\n\nUsage: %s%s\n", szCommand,
+			       apc[ c - 1 ]->szHelp, szUsage,
+			       ( apc[ c - 1 ]->pc && apc[ c - 1 ]->pc->sz ) ?
+			       " <subcommand>" : "" );
+	gtk_label_set_text( GTK_LABEL( pwHelpLabel ), pch );
+	g_free( pch );
+	
+	free( apc );
+	gtk_tree_path_free( ptp );
+    } else
+	gtk_label_set_text( GTK_LABEL( pwHelpLabel ), NULL );
+}
+
+extern void GTKHelp( char *sz ) {
+
+    static GtkWidget *pw;
+    GtkWidget *pwPaned, *pwScrolled;
+    GtkTreeStore *pts;
+    GtkTreeIter ti, tiSearch;
+    GtkTreePath *ptp, *ptpExpand;
+    char *pch;
+    command *pc, *pcTest, *pcStart;
+    int cch, i, c, *pn;
+    void ( *pf )( char * );
+    
+    if( pw ) {
+	gtk_window_present( GTK_WINDOW( pw ) );
+	gtk_tree_view_collapse_all( GTK_TREE_VIEW( pwHelpTree ) );
+	pts = GTK_TREE_STORE( gtk_tree_view_get_model(
+	    GTK_TREE_VIEW( pwHelpTree ) ) );
+    } else {
+	pts = gtk_tree_store_new( 3, G_TYPE_STRING, G_TYPE_STRING,
+				  G_TYPE_POINTER );
+
+	GTKHelpAdd( pts, NULL, acTop );
+	
+	pw = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer *) &pw );
+	gtk_window_set_title( GTK_WINDOW( pw ), "GNU Backgammon - Help" );
+	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
+
+	gtk_container_add( GTK_CONTAINER( pw ), pwPaned = gtk_vpaned_new() );
+	gtk_paned_set_position( GTK_PANED( pwPaned ), 300 );
+	
+	gtk_paned_pack1( GTK_PANED( pwPaned ),
+			 pwScrolled = gtk_scrolled_window_new( NULL, NULL ),
+			 TRUE, FALSE );
+	gtk_scrolled_window_set_shadow_type( GTK_SCROLLED_WINDOW(
+	    pwScrolled ), GTK_SHADOW_IN );
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
+					GTK_POLICY_AUTOMATIC,
+					GTK_POLICY_AUTOMATIC );
+	gtk_container_add( GTK_CONTAINER( pwScrolled ),
+			   pwHelpTree = gtk_tree_view_new_with_model(
+			       GTK_TREE_MODEL( pts ) ) );
+	g_object_unref( G_OBJECT( pts ) );
+	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( pwHelpTree ),
+					   FALSE );
+	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW(
+	    pwHelpTree ), 0, NULL, gtk_cell_renderer_text_new(),
+						     "text", 0, NULL );
+	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW(
+	    pwHelpTree ), 1, NULL, gtk_cell_renderer_text_new(),
+						     "text", 1, NULL );
+	g_signal_connect( G_OBJECT( gtk_tree_view_get_selection(
+	    GTK_TREE_VIEW( pwHelpTree ) ) ), "changed",
+			  G_CALLBACK( GTKHelpSelect ), NULL );
+	
+	gtk_paned_pack2( GTK_PANED( pwPaned ),
+			 pwHelpLabel = gtk_label_new( NULL ), FALSE, FALSE );
+	gtk_label_set_selectable( GTK_LABEL( pwHelpLabel ), TRUE );
+	
+	gtk_widget_show_all( pw );
+    }
+
+    gtk_tree_model_get_iter_first( GTK_TREE_MODEL( pts ), &ti );
+    tiSearch = ti;
+    pc = acTop;
+    c = 0;
+    while( pc && sz && ( pch = NextToken( &sz ) ) ) {
+	pcStart = pc;
+	cch = strlen( pch );
+	for( ; pc->sz; pc++ )
+	    if( !strncasecmp( pch, pc->sz, cch ) )
+		break;
+
+	if( !pc->sz )
+	    break;
+
+	if( !pc->szHelp ) {
+	    /* they gave a synonym; find the canonical version */
+	    pf = pc->pf;
+	    for( pc = pcStart; pc->sz; pc++ )
+		if( pc->pf == pf && pc->szHelp )
+		    break;
+
+	    if( !pc->sz )
+		break;
+	}
+
+	do
+	    gtk_tree_model_get( GTK_TREE_MODEL( pts ), &tiSearch, 2,
+				&pcTest, -1 );
+	while( pcTest != pc &&
+	       gtk_tree_model_iter_next( GTK_TREE_MODEL( pts ), &tiSearch ) );
+
+	if( pcTest == pc ) {
+	    /* found!  now try the next level down... */
+	    c++;
+	    ti = tiSearch;
+	    pc = pc->pc;
+	    gtk_tree_model_iter_children( GTK_TREE_MODEL( pts ), &tiSearch,
+					  &ti );
+	} else
+	    break;
+    }
+    
+    ptp = gtk_tree_model_get_path( GTK_TREE_MODEL( pts ), &ti );
+    pn = gtk_tree_path_get_indices( ptp );
+    ptpExpand = gtk_tree_path_new();
+    for( i = 0; i < c; i++ ) {
+	gtk_tree_path_append_index( ptpExpand, pn[ i ] );
+	gtk_tree_view_expand_row( GTK_TREE_VIEW( pwHelpTree ), ptpExpand,
+				  FALSE );
+    }
+    gtk_tree_selection_select_iter(
+	gtk_tree_view_get_selection( GTK_TREE_VIEW( pwHelpTree ) ), &ti );
+    gtk_tree_view_scroll_to_cell( GTK_TREE_VIEW( pwHelpTree ), ptp,
+				  NULL, TRUE, 0.5, 0 );
+    gtk_tree_path_free( ptp );
+    gtk_tree_path_free( ptpExpand );
+}
+#endif
 
 static void GTKBearoffProgressCancel( void ) {
 

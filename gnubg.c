@@ -1989,6 +1989,11 @@ extern void CommandHelp( char *sz ) {
     command *pc, *pcFull;
     char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
     
+#if USE_GTK && GTK_CHECK_VERSION(2,0,0)
+    if( fX )
+	return GTKHelp( sz );
+#endif
+    
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
 	outputf( "No help available for topic `%s' -- try `help' for a list "
 		 "of topics.\n", sz );
@@ -2013,7 +2018,7 @@ extern void CommandHelp( char *sz ) {
 		break;
 	    }
     }
-	
+
     if( szHelp ) {
 	outputf( "%s- %s\n\nUsage: %s", szCommand, szHelp, szUsage );
 

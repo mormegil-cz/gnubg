@@ -1,3 +1,7 @@
+Thu Mar 14 10:30:04 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (GTKHelp): New function.
+
 Wed Mar 13 20:33:59 2002  Gary Wong  <gtw@research.att.com>
 
 	* import.c (ParseSGGGame): Handle money sessions in SGG files

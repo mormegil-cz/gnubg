@@ -178,8 +178,8 @@ duplication of effort and to make sure our changes merge easily.
   them somewhere and then use gdk_event_put() when we're ready. (gary)
 
 ** Dialogs:
-*** Make "help" show its output in a GtkTreeView.  The user must be able
-  to recurse through help for subcommands. (gary)
+*** Add buttons to the "help" window to look up the command in the manual,
+  or execute it.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
@@ -240,10 +240,17 @@ functions:
   shown as 13/12*/11 13/12* 10/9.
 ** ShowManual() should look in the directory given with -d.
 ** GtkTexi should try to load images from the same directory as the XML file.
+** GTK+ 2.0 wants strings in UTF-8. (gary)
+** The "rgb:" colour strings in the preferences seem to fail under
+  GTK+ 2.0. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
   unlikely to change should be documented.
+** The GNU coding standards say: "Don't just tell the reader what each
+  feature can do -- say what jobs it is good for, and show how to use it for
+  those jobs.  Explain what is recommended usage, and what kinds of usage
+  users should avoid."
 
 * Miscellaneous:
 ** Add internationalisation (gettext).
