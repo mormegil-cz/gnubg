@@ -847,7 +847,7 @@ extern void GTKHint( movelist *pml ) {
     }
     
     for( i = 0; i < pml->cMoves; i++ ) {
-	float *ar = pml->amMoves[ i ].pEval;
+	float *ar = pml->amMoves[ i ].arEvalMove;
 
 	gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
 	
