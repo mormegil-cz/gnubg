@@ -25,6 +25,9 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if !HAVE_GETPID
+#include <time.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -85,15 +88,11 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	ppr->cGames = 0;
     
     for( ea = 0; ea < NUM_AVG; ea++ )
-	if( fscanf( pf, "%g %g %g %g %g %g %g %g ",
-		    &ppr->arErrorCheckerplay[ ea ],
-		    &ppr->arErrorMissedDoubleDP[ ea ],
-		    &ppr->arErrorMissedDoubleTG[ ea ],
-		    &ppr->arErrorWrongDoubleDP[ ea ],
-		    &ppr->arErrorWrongDoubleTG[ ea ],
-		    &ppr->arErrorWrongTake[ ea ],
-		    &ppr->arErrorWrongPass[ ea ],
-		    &ppr->arLuck[ ea ] ) < 8 ) {
+	if( fscanf( pf, "%g %g %g %g ",
+		    &ppr->arErrorChequerplay[ ea ],
+		    &ppr->arErrorCube[ ea ],
+		    &ppr->arErrorCombined[ ea ],
+		    &ppr->arLuck[ ea ] ) < 4 ) {
 	    if( ferror( pf ) )
 		perror( pch );
 	    else
@@ -120,14 +119,10 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 
     fprintf( pf, " %d ", ppr->cGames );
     for( ea = 0; ea < NUM_AVG; ea++ )
-	fprintf( pf, "%g %g %g %g %g %g %g %g ",
-		 ppr->arErrorCheckerplay[ ea ],
-		 ppr->arErrorMissedDoubleDP[ ea ],
-		 ppr->arErrorMissedDoubleTG[ ea ],
-		 ppr->arErrorWrongDoubleDP[ ea ],
-		 ppr->arErrorWrongDoubleTG[ ea ],
-		 ppr->arErrorWrongTake[ ea ],
-		 ppr->arErrorWrongPass[ ea ],
+	fprintf( pf, "%g %g %g %g ",
+		 ppr->arErrorChequerplay[ ea ],
+		 ppr->arErrorCube[ ea ],
+		 ppr->arErrorCombined[ ea ],
 		 ppr->arLuck[ ea ] );
 
     putc( '\n', pf );
@@ -173,13 +168,9 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 	strcpy( apr[ i ].szName, ap[ i ].szName );
 	apr[ i ].cGames = 0;
 	for( ea = 0; ea < NUM_AVG; ea++ ) {
-	    apr[ i ].arErrorCheckerplay[ ea ] = 0.0;
-	    apr[ i ].arErrorMissedDoubleDP[ ea ] = 0.0;
-	    apr[ i ].arErrorMissedDoubleTG[ ea ] = 0.0;
-	    apr[ i ].arErrorWrongDoubleDP[ ea ] = 0.0;
-	    apr[ i ].arErrorWrongDoubleTG[ ea ] = 0.0;
-	    apr[ i ].arErrorWrongTake[ ea ] = 0.0;
-	    apr[ i ].arErrorWrongPass[ ea ] = 0.0;
+	    apr[ i ].arErrorChequerplay[ ea ] = 0.0;
+	    apr[ i ].arErrorCube[ ea ] = 0.0;
+	    apr[ i ].arErrorCombined[ ea ] = 0.0;
 	    apr[ i ].arLuck[ ea ] = 0.0;
 	}
     }
@@ -250,7 +241,8 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
     movegameinfo *pmgi = plGame->plNext->p;
     int i;
     expaverage ea;
-  
+    float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
+    
     assert( pmgi->mt == MOVE_GAMEINFO );
     
     if( !pmgi->sc.fMoves || !pmgi->sc.fCube || !pmgi->sc.fDice )
@@ -259,35 +251,24 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
 
     for( i = 0; i < 2; i++ ) {
 	apr[ i ].cGames++;
+
+	getMWCFromError( &pmgi->sc, aaaar );
 	
-	apr[ i ].arErrorCheckerplay[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorCheckerplay[ EXPAVG_TOTAL ] *
+	apr[ i ].arErrorChequerplay[ EXPAVG_TOTAL ] =
+	    ( apr[ i ].arErrorChequerplay[ EXPAVG_TOTAL ] *
 	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorCheckerplay[ i ][ 0 ] ) / apr[ i ].cGames;
-	apr[ i ].arErrorMissedDoubleDP[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorMissedDoubleDP[ EXPAVG_TOTAL ] *
+		aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] ) /
+	    apr[ i ].cGames;
+	apr[ i ].arErrorCube[ EXPAVG_TOTAL ] =
+	    ( apr[ i ].arErrorCube[ EXPAVG_TOTAL ] *
 	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorMissedDoubleDP[ i ][ 0 ] ) / apr[ i ].cGames;
-	apr[ i ].arErrorMissedDoubleTG[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorMissedDoubleTG[ EXPAVG_TOTAL ] *
+		aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] ) /
+	    apr[ i ].cGames;
+	apr[ i ].arErrorCombined[ EXPAVG_TOTAL ] =
+	    ( apr[ i ].arErrorCombined[ EXPAVG_TOTAL ] *
 	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorMissedDoubleTG[ i ][ 0 ] ) / apr[ i ].cGames;
-	apr[ i ].arErrorWrongDoubleDP[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorWrongDoubleDP[ EXPAVG_TOTAL ] *
-	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorWrongDoubleDP[ i ][ 0 ] ) / apr[ i ].cGames;
-	apr[ i ].arErrorWrongDoubleTG[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorWrongDoubleTG[ EXPAVG_TOTAL ] *
-	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorWrongDoubleTG[ i ][ 0 ] ) / apr[ i ].cGames;
-	apr[ i ].arErrorWrongTake[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorWrongTake[ EXPAVG_TOTAL ] *
-	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorWrongTake[ i ][ 0 ] ) / apr[ i ].cGames;
-	apr[ i ].arErrorWrongPass[ EXPAVG_TOTAL ] =
-	    ( apr[ i ].arErrorWrongPass[ EXPAVG_TOTAL ] *
-	      ( apr[ i ].cGames - 1 ) +
-	      pmgi->sc.arErrorWrongPass[ i ][ 0 ] ) / apr[ i ].cGames;
+		aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] ) /
+	    apr[ i ].cGames;
 	apr[ i ].arLuck[ EXPAVG_TOTAL ] =
 	    ( apr[ i ].arLuck[ EXPAVG_TOTAL ] *
 	      ( apr[ i ].cGames - 1 ) +
@@ -295,50 +276,26 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
 
 	for( ea = EXPAVG_20; ea < NUM_AVG; ea++ )
 	    if( apr[ i ].cGames == anAvg[ ea - 1 ] ) {
-		apr[ i ].arErrorCheckerplay[ ea ] =
-		    apr[ i ].arErrorCheckerplay[ EXPAVG_TOTAL ];
-		apr[ i ].arErrorMissedDoubleDP[ ea ] =
-		    apr[ i ].arErrorMissedDoubleDP[ EXPAVG_TOTAL ];
-		apr[ i ].arErrorMissedDoubleTG[ ea ] =
-		    apr[ i ].arErrorMissedDoubleTG[ EXPAVG_TOTAL ];
-		apr[ i ].arErrorWrongDoubleDP[ ea ] =
-		    apr[ i ].arErrorWrongDoubleDP[ EXPAVG_TOTAL ];
-		apr[ i ].arErrorWrongDoubleTG[ ea ] =
-		    apr[ i ].arErrorWrongDoubleTG[ EXPAVG_TOTAL ];
-		apr[ i ].arErrorWrongTake[ ea ] =
-		    apr[ i ].arErrorWrongTake[ EXPAVG_TOTAL ];
-		apr[ i ].arErrorWrongPass[ ea ] =
-		    apr[ i ].arErrorWrongPass[ EXPAVG_TOTAL ];
+		apr[ i ].arErrorChequerplay[ ea ] =
+		    apr[ i ].arErrorChequerplay[ EXPAVG_TOTAL ];
+		apr[ i ].arErrorCube[ ea ] =
+		    apr[ i ].arErrorCube[ EXPAVG_TOTAL ];
+		apr[ i ].arErrorCombined[ ea ] =
+		    apr[ i ].arErrorCombined[ EXPAVG_TOTAL ];
 		apr[ i ].arLuck[ ea ] =
 		    apr[ i ].arLuck[ EXPAVG_TOTAL ];
 	    } else if( apr[ i ].cGames > anAvg[ ea - 1 ] ) {
-		apr[ i ].arErrorCheckerplay[ ea ] =
-		    apr[ i ].arErrorCheckerplay[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorCheckerplay[ i ][ 0 ] *
+		apr[ i ].arErrorChequerplay[ ea ] =
+		    apr[ i ].arErrorChequerplay[ ea ] * arDecay[ ea - 1 ] +
+		    aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] *
 		    ( 1.0 - arDecay[ ea - 1 ] );
-		apr[ i ].arErrorMissedDoubleDP[ ea ] =
-		    apr[ i ].arErrorMissedDoubleDP[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorMissedDoubleDP[ i ][ 0 ] *
+		apr[ i ].arErrorCube[ ea ] =
+		    apr[ i ].arErrorCube[ ea ] * arDecay[ ea - 1 ] +
+		    aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] *
 		    ( 1.0 - arDecay[ ea - 1 ] );
-		apr[ i ].arErrorMissedDoubleTG[ ea ] =
-		    apr[ i ].arErrorMissedDoubleTG[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorMissedDoubleTG[ i ][ 0 ] *
-		    ( 1.0 - arDecay[ ea - 1 ] );
-		apr[ i ].arErrorWrongDoubleDP[ ea ] =
-		    apr[ i ].arErrorWrongDoubleDP[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorWrongDoubleDP[ i ][ 0 ] *
-		    ( 1.0 - arDecay[ ea - 1 ] );
-		apr[ i ].arErrorWrongDoubleTG[ ea ] =
-		    apr[ i ].arErrorWrongDoubleTG[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorWrongDoubleTG[ i ][ 0 ] *
-		    ( 1.0 - arDecay[ ea - 1 ] );
-		apr[ i ].arErrorWrongTake[ ea ] =
-		    apr[ i ].arErrorWrongTake[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorWrongTake[ i ][ 0 ] *
-		    ( 1.0 - arDecay[ ea - 1 ] );
-		apr[ i ].arErrorWrongPass[ ea ] =
-		    apr[ i ].arErrorWrongPass[ ea ] * arDecay[ ea - 1 ] +
-		    pmgi->sc.arErrorWrongPass[ i ][ 0 ] *
+		apr[ i ].arErrorCombined[ ea ] =
+		    apr[ i ].arErrorCombined[ ea ] * arDecay[ ea - 1 ] +
+		    aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] *
 		    ( 1.0 - arDecay[ ea - 1 ] );
 		apr[ i ].arLuck[ ea ] =
 		    apr[ i ].arLuck[ ea ] * arDecay[ ea - 1 ] +
@@ -454,27 +411,12 @@ extern void CommandRecordShow( char *szPlayer ) {
 		f = TRUE;
 	    }
 	    outputf( "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %4d\n",
-		     pr.szName, pr.arErrorCheckerplay[ EXPAVG_20 ],
-		     pr.arErrorMissedDoubleDP[ EXPAVG_20 ] +
-		     pr.arErrorMissedDoubleTG[ EXPAVG_20 ] +
-		     pr.arErrorWrongDoubleDP[ EXPAVG_20 ] +
-		     pr.arErrorWrongDoubleTG[ EXPAVG_20 ] +
-		     pr.arErrorWrongTake[ EXPAVG_20 ] +
-		     pr.arErrorWrongPass[ EXPAVG_20 ],
-		     pr.arErrorCheckerplay[ EXPAVG_100 ],
-		     pr.arErrorMissedDoubleDP[ EXPAVG_100 ] +
-		     pr.arErrorMissedDoubleTG[ EXPAVG_100 ] +
-		     pr.arErrorWrongDoubleDP[ EXPAVG_100 ] +
-		     pr.arErrorWrongDoubleTG[ EXPAVG_100 ] +
-		     pr.arErrorWrongTake[ EXPAVG_100 ] +
-		     pr.arErrorWrongPass[ EXPAVG_100 ],
-		     pr.arErrorCheckerplay[ EXPAVG_TOTAL ],
-		     pr.arErrorMissedDoubleDP[ EXPAVG_TOTAL ] +
-		     pr.arErrorMissedDoubleTG[ EXPAVG_TOTAL ] +
-		     pr.arErrorWrongDoubleDP[ EXPAVG_TOTAL ] +
-		     pr.arErrorWrongDoubleTG[ EXPAVG_TOTAL ] +
-		     pr.arErrorWrongTake[ EXPAVG_TOTAL ] +
-		     pr.arErrorWrongPass[ EXPAVG_TOTAL ],
+		     pr.szName, pr.arErrorChequerplay[ EXPAVG_20 ],
+		     pr.arErrorCube[ EXPAVG_20 ],
+		     pr.arErrorChequerplay[ EXPAVG_100 ],
+		     pr.arErrorCube[ EXPAVG_100 ],
+		     pr.arErrorChequerplay[ EXPAVG_TOTAL ],
+		     pr.arErrorCube[ EXPAVG_TOTAL ],
 		     pr.arLuck[ EXPAVG_TOTAL ], pr.cGames );
 	}
 

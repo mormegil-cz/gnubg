@@ -8134,65 +8134,45 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 0, pr.szName );
 	
 	if( pr.cGames >= 20 )
-	    sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_20 ] );
+	    sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_20 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 1, sz );
 	
 	if( pr.cGames >= 20 )
-	    sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_20 ] +
-		     pr.arErrorMissedDoubleTG[ EXPAVG_20 ] +
-		     pr.arErrorWrongDoubleDP[ EXPAVG_20 ] +
-		     pr.arErrorWrongDoubleTG[ EXPAVG_20 ] +
-		     pr.arErrorWrongTake[ EXPAVG_20 ] +
-		     pr.arErrorWrongPass[ EXPAVG_20 ] );
+	    sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_20 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 2, sz );
 	
 	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_100 ] );
+	    sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_100 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 3, sz );
 	
 	if( pr.cGames >= 100 )
-	    sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_100 ] +
-		     pr.arErrorMissedDoubleTG[ EXPAVG_100 ] +
-		     pr.arErrorWrongDoubleDP[ EXPAVG_100 ] +
-		     pr.arErrorWrongDoubleTG[ EXPAVG_100 ] +
-		     pr.arErrorWrongTake[ EXPAVG_100 ] +
-		     pr.arErrorWrongPass[ EXPAVG_100 ] );
+	    sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_100 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 4, sz );
 	
 	if( pr.cGames >= 500 )
-	    sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_500 ] );
+	    sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_500 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 5, sz );
 	
 	if( pr.cGames >= 500 )
-	    sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_500 ] +
-		     pr.arErrorMissedDoubleTG[ EXPAVG_500 ] +
-		     pr.arErrorWrongDoubleDP[ EXPAVG_500 ] +
-		     pr.arErrorWrongDoubleTG[ EXPAVG_500 ] +
-		     pr.arErrorWrongTake[ EXPAVG_500 ] +
-		     pr.arErrorWrongPass[ EXPAVG_500 ] );
+	    sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_500 ] );
 	else
 	    strcpy( sz, _("n/a") );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 6, sz );
 	
-	sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_TOTAL ] );
+	sprintf( sz, "%.4f", pr.arErrorChequerplay[ EXPAVG_TOTAL ] );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 7, sz );
 	
-	sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_TOTAL ] +
-		 pr.arErrorMissedDoubleTG[ EXPAVG_TOTAL ] +
-		 pr.arErrorWrongDoubleDP[ EXPAVG_TOTAL ] +
-		 pr.arErrorWrongDoubleTG[ EXPAVG_TOTAL ] +
-		 pr.arErrorWrongTake[ EXPAVG_TOTAL ] +
-		 pr.arErrorWrongPass[ EXPAVG_TOTAL ] );
+	sprintf( sz, "%.4f", pr.arErrorCube[ EXPAVG_TOTAL ] );
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 8, sz );
 	
 	if( pr.cGames >= 20 )

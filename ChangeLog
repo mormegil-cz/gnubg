@@ -1,3 +1,13 @@
+Wed Sep 18 14:42:33 2002  Gary Wong  <gtw@gnu.org>
+
+	* record.c: Record error rates per move, not per game.
+
+	* record.c: [!HAVE_GETPID] #include <time.h> (reported by Øystein).
+
+	* gtkboard.c (board_draw_labels): [USE_GTK2] Use Pango to render
+	point labels.
+	(board_set_cube_font): [USE_GTK2] Use Pango to render cube.
+
 Tue Sep 17 17:02:57 2002  Gary Wong  <gtw@gnu.org>
 
 	* record.c: New file.  Keep a record of per-player statistics.
