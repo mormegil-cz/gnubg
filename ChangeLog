@@ -1,3 +1,8 @@
+Sat Oct  4 16:40:25 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (UpdateMoveList): ensure that the selectec
+	move is highlighted.
+
 Fri Oct  3 20:49:58 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c: store analysis performed by computer player
