@@ -80,7 +80,7 @@ warranty" for details.
 @end example
 
 When you start a game, gnubg will (by default) show which player's move it
-is; it is displaying @code{(No game)} at the moment to indicate that it
+is; it is displaying @samp{(No game)} at the moment to indicate that it
 isn't anybody's turn.
 
 GNU Backgammon uses a pseudo-random number generator to produce dice
@@ -106,6 +106,7 @@ at its full strength.  Let's start a game.
 @example
 (No game) new game
 O rolls 1, X rolls 3.
+@group
  GNU Backgammon  Position ID: 4HPwATDgc/ABMA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O
  | X           O    |   | O              X |     
@@ -120,6 +121,7 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X              O |     
  | O           X    |   | X              O |     Rolled 13
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+@end group
 
 (X) 
 @end example
@@ -132,10 +134,10 @@ same information is available, either way.
 You have just won the opening roll (you have a 3, and gnubg has a 1) --- the
 dice roll is in the bottom right hand corner for the TTY board, and shown
 as graphical dice on the right hand side of the board window.  The
-position ID (the @code{4HPwATDgc/ABMA} in this example) is an encoded
+position ID (the @samp{4HPwATDgc/ABMA} in this example) is an encoded
 representation of the current position that comes in useful when using
 some of gnubg's advanced commands; you can safely ignore it for now.
-Notice that the prompt has changed to @code{(X)}, to indicate that it
+Notice that the prompt has changed to @samp{(X)}, to indicate that it
 is X's (your) turn.
 
 If you are familiar with backgammon, you will know that the best play
@@ -157,6 +159,7 @@ Once you have done that, gnubg will take its turn, rolling 63 and playing
 24/15.  It is now your move again:
 
 @example
+@group
  GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O
  | X           O    |   | O              X |     
@@ -171,16 +174,18 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X  X             |     
  | O     O     X    |   | X  X           O |     On roll
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+@end group
 
 (X) 
 @end example
 
 Since it is no longer the opening roll, you have the option of doubling
 before rolling your dice.  To roll without doubling, just enter the
-command @code{roll} (or @code{r} for short):
+command @kbd{roll} (or @kbd{r} for short):
 
 @example
 (X) roll
+@group
  GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O
  | X           O    |   | O              X |     
@@ -195,6 +200,7 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X  X             |     
  | O     O     X    |   | X  X           O |     Rolled 35
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+@end group
 
 (X)
 @end example
@@ -204,13 +210,14 @@ v|                  |BAR|                  |     (Cube: 1)
 window.)
 
 Let's play this roll by hitting twice: 13/10*, 6/1*.  You can enter this
-move with @code{13 10 6 1} --- note that you don't need to specify anything
+move with @kbd{13 10 6 1} --- note that you don't need to specify anything
 special to hit; gnubg will automatically move blots that are hit to the
 bar.  You can also make this move by dragging chequers in the board window,
 of course.
 
 @example
 (X) 13 10 6 1
+@group
  GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O
  | X           O    | O | O              X |     
@@ -225,6 +232,7 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X  X             |     
  | O     X     X    |   | X  X           X |     On roll
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+@end group
 
 (X) 
 @end example
@@ -234,6 +242,7 @@ roll:
 
 @example
 (X) roll
+@group
  GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O
  | X           O    | O | O              X |     
@@ -248,14 +257,16 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X  X             |     
  | O     X     X    |   | X  X           X |     Rolled 25
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+@end group
 
 (X)
 @end example
 
-Play this roll as @code{13 11 6 1}.  gnubg will now roll 16 --- and still
+Play this roll as @kbd{13 11 6 1}.  gnubg will now roll 16 --- and still
 can't move!
 
 @example
+@group
  GNU Backgammon  Position ID: 4HPwAWDDZsoBMA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O
  | X           O    | O | O              X |     
@@ -270,14 +281,15 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X  X           X |     
  | O  X  X     X    |   | X  X           X |     On roll
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+@end group
 
 (X) 
 @end example
 
 Our position is now strong.  Let's try doubling --- this can be done by
-entering the command @code{double} at the prompt, or by clicking the
+entering the command @kbd{double} at the prompt, or by clicking the
 doubling cube in the board window (FIXME not implemented yet).  When
-you are doubled, you should use the command @code{take} or @code{drop}
+you are doubled, you should use the command @kbd{take} or @kbd{drop}
 to accept or refuse the cube.  GNU Backgammon will drop this double
 (FIXME actually it doesn't, but it will once it knows how):
 
@@ -289,12 +301,12 @@ The score (after 1 game) is: O 0, X 1.
 @end example
 
 That concludes the example game.  You have seen most of the commands
-normally used while playing; others you will need include @code{bar}
-when re-entering a hit chequer (e.g.@: @code{bar 20 24 20}) and
-@code{off} to remove a chequer from the board when bearing off
-(e.g.@: @code{6 off 5 off}).
+normally used while playing; others you will need include @kbd{bar}
+when re-entering a hit chequer (e.g.@: @kbd{bar 20 24 20}) and
+@kbd{off} to remove a chequer from the board when bearing off
+(e.g.@: @kbd{6 off 5 off}).
 
-Type @code{help} from within gnubg for a summary of all commands, or
+Type @kbd{help} from within gnubg for a summary of all commands, or
 browse the rest of this manual to learn more.  Have fun playing
 GNU Backgammon!
 
@@ -303,73 +315,79 @@ GNU Backgammon!
 @cindex frequently asked questions
 @cindex FAQ
 
-@enumerate
-@item
-Where can I get GNU Backgammon?
+@menu
+* Where can I get GNU Backgammon?::
+* How do I play a game?::
+* gnubg.bd errors::
+* gnubg.weights errors::
+* Black and white board window::
+@end menu
+
+@node Where can I get GNU Backgammon?
+@section Where can I get GNU Backgammon?
 @cindex obtaining gnubg
 
 Pre-release snapshots of GNU Backgammon are periodically made available
-for FTP at @code{alpha.gnu.org}.  FIXME:complete URL.
+for FTP at @file{alpha.gnu.org}.  FIXME:complete URL.
 
 If you want to experiment with the very latest code, the development
-sources are kept in a CVS repository at @code{subversions.gnu.org}.
+sources are kept in a CVS repository at @file{subversions.gnu.org}.
 FIXME:complete URL.
 
-@item
-How do I play a game?
+@node How do I play a game?
+@section How do I play a game?
 @cindex playing a game
 @cindex moving chequers
 
-Once you are running gnubg, enter @code{new game} at the @code{(gnubg)}
+Once you are running gnubg, enter @kbd{new game} at the @samp{(gnubg)}
 prompt to start a game against the computer opponent.  You should now
 see a board (if an X display is available, gnubg will use a graphical
 board window; otherwise, it will display an ASCII board on your
 terminal).  If gnubg won the opening roll, it will have moved; you can
-now type @code{roll} (or click on the dice below the board if you are
+now type @kbd{roll} (or click on the dice below the board if you are
 using X) to roll the dice yourself.  In either case, it will now be your
 move; you should enter the moves for each chequer as pairs of numbers.
-For instance, if you have rolled 3 and 1, you could type @code{8 5 6 5}
+For instance, if you have rolled 3 and 1, you could type @kbd{8 5 6 5}
 to move one chequer from the 8 point to the 5 point and another from
-the 6 point to the 5 point.  Use @code{bar} to move from the bar, and
-@code{off} to bear off.  If you are using the X board window, you
+the 6 point to the 5 point.  Use @kbd{bar} to move from the bar, and
+@kbd{off} to bear off.  If you are using the X board window, you
 can also drag chequers around the board with mouse button 1.  Click on
 the dice when you have finished.
 
-@item
-When I run gnubg, it says @code{gnubg.bd: No such file or directory} and exits.
-What's wrong?
+@node gnubg.bd errors
+@section I only see @samp{gnubg.bd: No such file or directory}.  What's wrong?
 @vindex gnubg.bd
 @cindex errors starting gnubg
 
-The file @code{gnubg.bd} is the bearoff database that gnubg uses to
+The file @file{gnubg.bd} is the bearoff database that gnubg uses to
 evaluate endgame positions.  gnubg will look for it first in the current
-directory and then in the installed directory (@code{/usr/local/share/gnubg/}
+directory and then in the installed directory (@file{/usr/local/share/gnubg/}
 by default).
 
-The gnubg distribution is set up to create @code{gnubg.bd} by itself
+The gnubg distribution is set up to create @file{gnubg.bd} by itself
 during compilation, but it can be a slow process (taking half an hour
 or more, depending on the speed of your computer).  If you would rather
 not wait to generate the database yourself, you can obtain a copy
-via FTP from @code{alpha.gnu.org}. FIXME:complete URL.
+via FTP from @file{alpha.gnu.org}. FIXME:complete URL.
 
-@item
-Now I get @code{gnubg.weights: No such file or directory}.  What's that?
+@node gnubg.weights errors
+@section Now I get @samp{gnubg.weights: No such file or directory}.  What's that?
 @vindex gnubg.weights
 @cindex errors starting gnubg
 
-The file @code{gnubg.weights} contains the trained neural net weights
-for most of gnubg's position evaluators.  Like @code{gnubg.bd}, it should
+The file @file{gnubg.weights} contains the trained neural net weights
+for most of gnubg's position evaluators.  Like @file{gnubg.bd}, it should
 be kept in either the current directory or the installed directory.
 
 You should be able to obtain a copy from wherever you found the gnubg
 distribution.  Future releases of gnubg will allow you to start without
 any existing weights at all, if you want to train your own.
 
-@item
-The board window is shown in black and white and looks awful!  What's wrong?
+@node Black and white board window
+@section The board window is shown in black and white and looks awful!  What's wrong?
 
 If you see this problem, your X server is probably using a
-@code{PseudoColor} visual, and is dynamically allocating colours
+@dfn{PseudoColor} visual, and is dynamically allocating colours
 to clients from a limited colourmap.  On these types of displays, 
 gnubg tries to be a well-behaved client by using colours from the
 default standard colourmap.  This will allow it to share colours
@@ -383,21 +401,19 @@ then there may not be enough left for gnubg to allocate a standard
 colourmap.  If this happens, it will just take what it can get (which
 in the worst case might be black and white only).  You can try to
 avoid this problem by running gnubg before other colour-hungry clients,
-or by using the @code{xstdcmap} utility to install the default
+or by using the @file{xstdcmap} utility to install the default
 standard colourmap early in your session while colours are still
 available.  Depending on your hardware, you may be able to configure
-your display to allow more colours, or use a @code{DirectColor} or
-@code{TrueColor} visual which should resolve the problem.
+your display to allow more colours, or use a @dfn{DirectColor} or
+@dfn{TrueColor} visual which should resolve the problem.
 
 Of course, if your X server can only display black and white (not even
 shades of grey), then there's not much you can do!
 
-@end enumerate
-
 @ignore
 Hopefully nobody will ask this question, but I suppose it will happen...
 
-@item Are the dice fair?
+@node Are the dice fair?
 @end ignore
 
 @node Concept Index
