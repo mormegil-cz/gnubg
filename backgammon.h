@@ -22,6 +22,9 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
+#include <list.h>
+#include "eval.h"
+
 #if !X_DISPLAY_MISSING
 #include <ext.h>
 #include <event.h>
@@ -29,8 +32,6 @@ extern extwindow ewnd;
 extern int fX, nDelay;
 extern event evNextTurn;
 #endif
-
-#include "eval.h"
 
 #define MAX_CUBE ( 1 << 12 )
 
