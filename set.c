@@ -1774,71 +1774,26 @@ extern void CommandSetOutputWinPC( char *sz ) {
 	       "Game winning chances will be shown as probabilities." );
 }
 
-static void SetMET( met metNew ) {
+extern void CommandSetMET( char *sz ) {
 
-    static char *aszMET[] = {
-      "Zadeh", "Snowie", "Woolsey", "Jacobs"
-    };
+  InitMatchEquity ( sz );
 
-    int nMaxScore;
+  outputf( "GNU Backgammon will now use the %s match equity table.\n",
+           miCurrent.szName );
+
+  if ( miCurrent.nLength < MAXSCORE ) {
     
-    if( metCurrent == metNew ) {
-	outputf( "You are already using the %s match equity table.\n",
-		aszMET[ metNew ] );
-    } else {
-	outputf( "GNU Backgammon will now use the %s match equity table.\n",
-		aszMET[ metNew ] );
+    outputf ("\n"
+             "Note that this match equity table only supports "
+             "matches of length %i and below.\n"
+             "For scores above %i-away an extrapolation "
+             "scheme is used.\n",
+             miCurrent.nLength, miCurrent.nLength );
 
-        nMaxScore = GetMaxScore ( metNew );
-
-        if ( nMaxScore < MAXSCORE ) {
-
-          outputf ("\n"
-                   "Note that this match equity table only supports "
-                   "matches of length %i and below.\n"
-                   "For scores above %i-away an extrapolation "
-		   "scheme is used.\n",
-                   nMaxScore, nMaxScore );
-
-        }
-
-        InitMatchEquity ( metNew );
-
-	UpdateSetting( &metCurrent );
-    }
-}
-
-
-extern void
-CommandSetMETZadeh ( char *sz ) {
-
-  SetMET ( MET_ZADEH );
+  }
 
 }
 
-
-extern void
-CommandSetMETWoolsey ( char *sz ) {
-
-  SetMET ( MET_WOOLSEY );
-
-}
-
-
-extern void
-CommandSetMETSnowie ( char *sz ) {
-
-  SetMET ( MET_SNOWIE );
-
-}
-
-
-extern void
-CommandSetMETJacobs ( char *sz ) {
-
-  SetMET ( MET_JACOBS );
-
-}
 
 
 extern void
