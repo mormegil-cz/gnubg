@@ -1206,6 +1206,8 @@ command cER = {
       szVALUE, NULL },
     { "ypos", CommandSetGeometryPosY, N_("set y-position of window"),
       szVALUE, NULL },
+    { "max", CommandSetGeometryMax, N_("set maximised state of window"),
+      szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetGeometry[] = {
     { "analysis", CommandSetGeometryAnalysis,

@@ -1,3 +1,7 @@
+Tue Feb  15  17:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkpanels.c: Remember maximised state of windows
+
 Mon Feb  14  12:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 	Fixes from Philippe Michel:
 	rollout.c, format.c: Fix bugs in rollout output

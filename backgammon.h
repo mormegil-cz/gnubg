@@ -100,7 +100,7 @@ typedef enum _gnubgwindow {
 
 typedef struct _windowgeometry {
   int nWidth, nHeight;
-  int nPosX, nPosY;
+  int nPosX, nPosY, max;
 } windowgeometry;
 
 extern void SaveWindowSettings(FILE* pf);
@@ -1000,6 +1000,7 @@ extern void CommandAccept( char * ),
     CommandSetGeometryHeight ( char * ),
     CommandSetGeometryPosX ( char * ),
     CommandSetGeometryPosY ( char * ),
+    CommandSetGeometryMax ( char * ),
     CommandSetGotoFirstGame( char * ),
     CommandSetGUIAnimationBlink( char * ),
     CommandSetGUIAnimationNone( char * ),
