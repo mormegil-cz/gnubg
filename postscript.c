@@ -22,6 +22,8 @@
 #include "config.h"
 
 #include <assert.h>
+#include <ctype.h>
+#include <dynarray.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -37,8 +39,34 @@ static int cxPage = 595, cyPage = 842; /* A4 -- min (451,648) */
 static int nMag = 100; /* Board scale (percentage) -- min 1, max 127 */
 
 /* Current document state. */
-static int iPage, y, nFont;
+static int iPage, y, nFont, fPDF, idPages, idResources, idLength,
+    aidFont[ FONT_TT + 1 ];
+static long lStreamStart;
 static font fn;
+static dynarray daXRef, daPages;
+
+static int AllocateObject( void ) {
+
+    assert( fPDF );
+    
+    return DynArrayAdd( &daXRef, (void *) -1 );
+}
+
+static void StartObject( FILE *pf, int i ) {
+
+    assert( fPDF );
+
+    DynArraySet( &daXRef, i, (void *) ftell( pf ) );
+
+    fprintf( pf, "%d 0 obj\n", i );
+}
+
+static void EndObject( FILE *pf ) {
+
+    assert( fPDF );
+
+    fputs( "endobj\n", pf );
+}
 
 static void PostScriptEscape( FILE *pf, char *pch ) {
 
@@ -69,25 +97,69 @@ static void StartPage( FILE *pf ) {
     iPage++;
     fn = FONT_NONE;
     y = 648;
-    
-    fprintf( pf, "%%%%Page: %d %d\n"
-	     "%%%%BeginPageSetup\n"
-	     "/pageobj save def %d %d translate\n"
-	     "%%%%EndPageSetup\n", iPage, iPage,
-	     ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2 );
+
+    if( fPDF ) {
+	int id, idContents;
+	
+	StartObject( pf, id = AllocateObject() );
+	DynArrayAdd( &daPages, (void *) id );
+
+	idContents = AllocateObject();
+	fprintf( pf, "<<\n"
+		 "/Type /Page\n"
+		 "/Parent %d 0 R\n"
+		 "/Contents %d 0 R\n"
+		 "/Resources %d 0 R\n"
+		 ">>\n", idPages, idContents, idResources );
+	EndObject( pf );
+	
+	StartObject( pf, idContents );
+
+	fprintf( pf, "<< /Length %d 0 R >>\n"
+		 "stream\n", idLength = AllocateObject() );
+	lStreamStart = ftell( pf );
+	fprintf( pf, "1 0 0 1 %d %d cm\n", ( cxPage - 451 ) / 2,
+		 ( cyPage - 648 ) / 2 );
+    } else
+	fprintf( pf, "%%%%Page: %d %d\n"
+		 "%%%%BeginPageSetup\n"
+		 "/pageobj save def %d %d translate\n"
+		 "%%%%EndPageSetup\n", iPage, iPage,
+		 ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2 );
 }
 
 static void EndPage( FILE *pf ) {
 
-    fputs( "pageobj restore showpage\n", pf );
+    if( fPDF ) {
+	long cb;
+
+	if( fn != FONT_NONE )
+	    fputs( "ET\n", pf );
+	
+	cb = ftell( pf ) - lStreamStart;
+	fputs( "endstream\n", pf );
+	EndObject( pf );
+
+	StartObject( pf, idLength );
+	fprintf( pf, "%ld\n", cb );
+	EndObject( pf );
+    } else
+	fputs( "pageobj restore showpage\n", pf );
 }
 
 static void RequestFont( FILE *pf, font fnNew, int nFontNew ) {
 
     if( fnNew != fn || nFontNew != nFont ) {
+	if( fPDF && fn != FONT_NONE )
+	    fputs( "ET\n", pf );
+	
 	fn = fnNew;
 	nFont = nFontNew;
-	fprintf( pf, "%d %s\n", nFont, aszFont[ fn ] );
+
+	if( fPDF )
+	    fprintf( pf, "BT\n/%s %d Tf\n", aszFont[ fn ], nFont );
+	else
+	    fprintf( pf, "%d %s\n", nFont, aszFont[ fn ] );
     }
 }
 
@@ -232,27 +304,86 @@ static void PostScriptPrologue( FILE *pf ) {
 	"%%EndSetup\n";
     time_t t;
     char *sz, *pch;
+
+    if( fPDF ) {
+	fputs( "%PDF-1.3\n"
+	       /* binary rubbish */
+	       "%\307\361\374\r\n", pf );
+	
+	DynArrayCreate( &daXRef, 64, TRUE );
+	DynArrayCreate( &daPages, 32, TRUE );
+
+	AllocateObject(); /* object 0 is always free */
+	
+	StartObject( pf, AllocateObject() ); /* object 1 -- the root */
+	fprintf( pf, "<<\n"
+		 "/Type /Catalog\n"
+		 "/Pages %d 0 R\n"
+		 ">>\n",
+		 /* FIXME add outline object */
+		 idPages = AllocateObject() );
+	EndObject( pf );
+
+	StartObject( pf, aidFont[ FONT_RM ] = AllocateObject() );
+	fputs( "<<\n"
+	       "/Type /Font\n"
+	       "/Subtype /Type1\n"
+	       "/Name /rm\n"
+	       "/BaseFont /Times-Roman\n"
+	       "/Encoding /WinAnsiEncoding\n"
+	       ">>\n", pf );
+	EndObject( pf );
+	
+	StartObject( pf, aidFont[ FONT_SF ] = AllocateObject() );
+	fputs( "<<\n"
+	       "/Type /Font\n"
+	       "/Subtype /Type1\n"
+	       "/Name /sf\n"
+	       "/BaseFont /Helvetica\n"
+	       "/Encoding /WinAnsiEncoding\n"
+	       ">>\n", pf );
+	EndObject( pf );
+	
+	StartObject( pf, aidFont[ FONT_TT ] = AllocateObject() );
+	fputs( "<<\n"
+	       "/Type /Font\n"
+	       "/Subtype /Type1\n"
+	       "/Name /tt\n"
+	       "/BaseFont /Courier\n"
+	       "/Encoding /WinAnsiEncoding\n"
+	       ">>\n", pf );
+	EndObject( pf );
+	
+	StartObject( pf, idResources = AllocateObject() );
+	fprintf( pf, "<<\n"
+		 "/ProcSet [/PDF /Text]\n"
+		 "/Font << /rm %d 0 R /sf %d 0 R /tt %d 0 R >>\n"
+		 ">>\n", aidFont[ FONT_RM ], aidFont[ FONT_SF ],
+		 aidFont[ FONT_TT ] );
+	/* FIXME list xobject resources */
+	EndObject( pf );
+    } else {
+	fputs( "%!PS-Adobe-3.0\n", pf );
+
+	fprintf( pf, "%%%%BoundingBox: %d %d %d %d\n",
+		 ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2,
+		 ( cxPage + 451 ) / 2, ( cyPage + 648 ) / 2 );
+	
+	time( &t );
+	sz = ctime( &t );
+	if( ( pch = strchr( sz, '\n' ) ) )
+	    *pch = 0;
+	fprintf( pf, "%%%%CreationDate: (%s)\n", sz );
+	
+	fputs( "%%Title: (", pf );
+	PostScriptEscape( pf, ap[ 0 ].szName );
+	fputs( " vs. ", pf );
+	PostScriptEscape( pf, ap[ 1 ].szName );
+	fputs( ")\n", pf );
+	
+	fputs( szPrologue, pf );
+    }
     
-    fputs( "%!PS-Adobe-3.0\n", pf );
-
-    fprintf( pf, "%%%%BoundingBox: %d %d %d %d\n",
-	     ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2,
-	     ( cxPage + 451 ) / 2, ( cyPage + 648 ) / 2 );
-
-    time( &t );
-    sz = ctime( &t );
-    if( ( pch = strchr( sz, '\n' ) ) )
-	*pch = 0;
-    fprintf( pf, "%%%%CreationDate: (%s)\n", sz );
-
-    fputs( "%%Title: (", pf );
-    PostScriptEscape( pf, ap[ 0 ].szName );
-    fputs( " vs. ", pf );
-    PostScriptEscape( pf, ap[ 1 ].szName );
-    fputs( ")\n", pf );
-
-    fputs( szPrologue, pf );
-
     iPage = 0;
     
     StartPage( pf );
@@ -274,10 +405,16 @@ static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
 	x = 200;
     else /* off */
 	x = 365;
-    
+
     for( j = 0; j < c; j++ ) {
 	if( j == 5 || ( i == 24 && j == 3 ) ) {
-	    fprintf( pf, "%d %d %d label\n", x, y, c );
+	    if( fPDF ) {
+		fprintf( pf, "1 g %d %d 10 10 re b 0 g\n", x - 5, y - 5 );
+		fprintf( pf, "BT /sf 8 Tf 1 0 0 1 %d %d Tm (%d) Tj ET\n",
+			 x - ( c > 9 ? 5 : 2 ), y - 3, c );
+	    } else
+		fprintf( pf, "%d %d %d label\n", x, y, c );
+	    
 	    break;
 	}
 	
@@ -288,8 +425,20 @@ static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
 	    y = i < 12 || i == 25 ? 30 + 20 * j : 230 - 20 * j;
 	else
 	    y = i >= 12 && i != 25 ? 30 + 20 * j : 230 - 20 * j;
-	
-	fprintf( pf, "%d %d %ccheq\n", x, y, fPlayer ? 'b' : 'w' );
+
+	if( fPDF ) {
+	    fprintf( pf, "%d g ", fPlayer ? 0 : 1 );
+	    fprintf( pf, "%d %d m %d %d %d %d %d %d c\n",
+		     x - 10, y, x - 10, y + 5, x - 5, y + 10, x, y + 10 );
+	    fprintf( pf, "%d %d %d %d %d %d c\n",
+		     x + 5, y + 10, x + 10, y + 5, x + 10, y );
+	    fprintf( pf, "%d %d %d %d %d %d c\n",
+		     x + 10, y - 5, x + 5, y - 10, x, y - 10);
+	    fprintf( pf, "%d %d %d %d %d %d c %c\n",
+		     x - 5, y - 10, x - 10, y - 5, x - 10, y,
+		     fPlayer ? 'f' : 'b' );
+	} else
+	    fprintf( pf, "%d %d %ccheq\n", x, y, fPlayer ? 'b' : 'w' );
     }
 }
 
@@ -310,12 +459,54 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     
     Advance( pf, 260 * nMag / 100 );
 
-    fprintf( pf, "gsave\n"
-	     "%d %d translate %.2f %.2f scale\n"
-	     "0 0 moveto %s board\n"
-	     "%d %d %d cube\n", 225 - 200 * nMag / 100, y,
-	     nMag / 100.0, nMag / 100.0, fPlayer ? "true" : "false",
-	     pms->nCube == 1 ? 64 : pms->nCube, yCube, theta );
+    if( fPDF ) {
+	if( fn != FONT_NONE ) {
+	    fputs( "ET\n", pf );
+	    fn = FONT_NONE;
+	}
+
+	/* FIXME most of the following could be encapsulated into a PDF
+	   XObject to optimise the output file */
+	fprintf( pf, "q 1 0 0 1 %d %d cm %.2f 0 0 %.2f 0 0 cm 0.5 g\n",
+		 225 - 200 * nMag / 100, y, nMag / 100.0, nMag / 100.0 );
+	fputs( "60 10 280 240 re S\n", pf );
+	for( i = 0; i < 6; i++ ) {
+	    fprintf( pf, "%d %d m %d %d l %d %d l %c\n",
+		     70 + i * 20, 20, 80 + i * 20, 120, 90 + i * 20, 20,
+		     i & 1 ? 's' : 'b' );
+	    fprintf( pf, "%d %d m %d %d l %d %d l %c\n",
+		     210 + i * 20, 20, 220 + i * 20, 120, 230 + i * 20, 20,
+		     i & 1 ? 's' : 'b' );
+	    fprintf( pf, "%d %d m %d %d l %d %d l %c\n",
+		     70 + i * 20, 240, 80 + i * 20, 140, 90 + i * 20, 240,
+		     i & 1 ? 'b' : 's' );
+	    fprintf( pf, "%d %d m %d %d l %d %d l %c\n",
+		     210 + i * 20, 240, 220 + i * 20, 140, 230 + i * 20, 240,
+		     i & 1 ? 'b' : 's' );
+	}
+	fputs( "70 20 120 220 re 210 20 120 220 re S 0 g\n", pf );
+	
+	for( i = 1; i <= 12; i++ )
+	    fprintf( pf, "BT /sf 8 Tf 1 0 0 1 %d %d Tm (%d) Tj ET\n",
+		     340 - i * 20 - ( i > 6 ) * 20 - ( i > 9 ? 5 : 2 ),
+		     fPlayer ? 12 : 242, i );
+
+	for( i = 13; i <= 24; i++ )
+	    fprintf( pf, "BT /sf 8 Tf 1 0 0 1 %d %d Tm (%d) Tj ET\n",
+		     i * 20 - 185 + ( i > 18 ) * 20, fPlayer ? 242 : 12, i );
+
+	fprintf( pf, "q %d %d %d %d 35 %d cm -12 -12 24 24 re S\n"
+		 "BT /sf 18 Tf 1 0 0 1 %d -6 Tm (%d) Tj ET Q\n",
+		 1 - theta / 90, theta == 90, -( theta == 90 ), 1 - theta / 90,
+		 yCube, pms->nCube == 1 || pms->nCube > 8 ? -10 : -5,
+		 pms->nCube == 1 ? 64 : pms->nCube );
+    } else
+	fprintf( pf, "gsave\n"
+		 "%d %d translate %.2f %.2f scale\n"
+		 "0 0 moveto %s board\n"
+		 "%d %d %d cube\n", 225 - 200 * nMag / 100, y,
+		 nMag / 100.0, nMag / 100.0, fPlayer ? "true" : "false",
+		 pms->nCube == 1 ? 64 : pms->nCube, yCube, theta );
 
     for( i = 0; i < 25; i++ ) {
 	anOff[ 0 ] -= pms->anBoard[ 0 ][ i ];
@@ -327,49 +518,78 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 
     DrawPostScriptPoint( pf, 25, 0, anOff[ !fPlayer ] );
     DrawPostScriptPoint( pf, 25, 1, anOff[ fPlayer ] );    
+
+    if( fPDF )
+	fputs( "Q\n", pf );
+    else
+	fputs( "grestore\n", pf );
+}
+
+static short acxTimesRoman[ 256 ] = {
+    /* Width of Times-Roman font in ISO 8859-1 encoding. */
+    250, 250, 250, 250, 250, 250, 250, 250, /*   0 to   7 */
+    250, 250, 250, 250, 250, 250, 250, 250, /*   8 to  15 */
+    250, 250, 250, 250, 250, 250, 250, 250, /*  16 to  23 */
+    250, 250, 250, 250, 250, 250, 250, 250, /*  24 to  31 */
+    250, 333, 408, 500, 500, 833, 778, 333, /*  32 to  39 */
+    333, 333, 500, 564, 250, 333, 250, 278, /*  40 to  47 */
+    500, 500, 500, 500, 500, 500, 500, 500, /*  48 to  55 */
+    500, 500, 278, 278, 564, 564, 564, 444, /*  56 to  63 */
+    921, 722, 667, 667, 722, 611, 556, 722, /*  64 to  71 */
+    722, 333, 389, 722, 611, 889, 722, 722, /*  72 to  79 */
+    556, 722, 667, 556, 611, 722, 722, 944, /*  80 to  87 */
+    722, 722, 611, 333, 278, 333, 469, 500, /*  88 to  95 */
+    333, 444, 500, 444, 500, 444, 333, 500, /*  96 to 103 */
+    500, 278, 278, 500, 278, 778, 500, 500, /* 104 to 111 */
+    500, 500, 333, 389, 278, 500, 500, 722, /* 112 to 119 */
+    500, 500, 444, 480, 200, 480, 541, 250, /* 120 to 127 */
+    250, 250, 250, 250, 250, 250, 250, 250, /* 128 to 135 */
+    250, 250, 250, 250, 250, 250, 250, 250, /* 136 to 143 */
+    250, 250, 250, 250, 250, 250, 250, 250, /* 144 to 151 */
+    250, 250, 250, 250, 250, 250, 250, 250, /* 152 to 159 */
+    250, 333, 500, 500, 500, 500, 200, 500, /* 160 to 167 */
+    333, 760, 276, 500, 564, 333, 760, 333, /* 168 to 175 */
+    400, 564, 300, 300, 333, 500, 453, 250, /* 176 to 183 */
+    333, 300, 310, 500, 750, 750, 750, 444, /* 184 to 191 */
+    722, 722, 722, 722, 722, 722, 889, 667, /* 192 to 199 */
+    611, 611, 611, 611, 333, 333, 333, 333, /* 200 to 207 */
+    722, 722, 722, 722, 722, 722, 722, 564, /* 208 to 215 */
+    722, 722, 722, 722, 722, 722, 556, 500, /* 216 to 223 */
+    444, 444, 444, 444, 444, 444, 667, 444, /* 224 to 231 */
+    444, 444, 444, 444, 278, 278, 278, 278, /* 232 to 239 */
+    500, 500, 500, 500, 500, 500, 500, 564, /* 240 to 247 */
+    500, 500, 500, 500, 500, 500, 500, 500  /* 248 to 255 */
+};
+
+static int StringWidth( unsigned char *sz ) {
+
+    unsigned char *pch;
+    int c;
     
-    fputs( "grestore\n", pf );
+    switch( fn ) {
+    case FONT_RM:
+	for( c = 0, pch = sz; *pch; pch++ )
+	    if( isprint( *pch ) )
+		c += acxTimesRoman[ *pch ];
+	break;
+	
+    case FONT_TT:
+	for( c = 0, pch = sz; *pch; pch++ )
+	    if( isprint( *pch ) )
+		c += 600; /* fixed Courier character width */
+	break;
+	
+    default:
+	abort();
+    }
+
+    return c * nFont / 1000;
 }
 
 /* Typeset a line of text.  We're not TeX, so we don't do any kerning,
    hyphenation or justification.  Word wrapping will have to do. */
 static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 
-    static short acx[ 256 ] = {
-	/* Width of Times-Roman font in ISO 8859-1 encoding. */
-	250, 250, 250, 250, 250, 250, 250, 250, /*   0 to   7 */
-	250, 250, 250, 250, 250, 250, 250, 250, /*   8 to  15 */
-	250, 250, 250, 250, 250, 250, 250, 250, /*  16 to  23 */
-	250, 250, 250, 250, 250, 250, 250, 250, /*  24 to  31 */
-	250, 333, 408, 500, 500, 833, 778, 333, /*  32 to  39 */
-	333, 333, 500, 564, 250, 333, 250, 278, /*  40 to  47 */
-	500, 500, 500, 500, 500, 500, 500, 500, /*  48 to  55 */
-	500, 500, 278, 278, 564, 564, 564, 444, /*  56 to  63 */
-	921, 722, 667, 667, 722, 611, 556, 722, /*  64 to  71 */
-	722, 333, 389, 722, 611, 889, 722, 722, /*  72 to  79 */
-	556, 722, 667, 556, 611, 722, 722, 944, /*  80 to  87 */
-	722, 722, 611, 333, 278, 333, 469, 500, /*  88 to  95 */
-	333, 444, 500, 444, 500, 444, 333, 500, /*  96 to 103 */
-	500, 278, 278, 500, 278, 778, 500, 500, /* 104 to 111 */
-	500, 500, 333, 389, 278, 500, 500, 722, /* 112 to 119 */
-	500, 500, 444, 480, 200, 480, 541, 250, /* 120 to 127 */
-	250, 250, 250, 250, 250, 250, 250, 250, /* 128 to 135 */
-	250, 250, 250, 250, 250, 250, 250, 250, /* 136 to 143 */
-	250, 250, 250, 250, 250, 250, 250, 250, /* 144 to 151 */
-	250, 250, 250, 250, 250, 250, 250, 250, /* 152 to 159 */
-	250, 333, 500, 500, 500, 500, 200, 500, /* 160 to 167 */
-	333, 760, 276, 500, 564, 333, 760, 333, /* 168 to 175 */
-	400, 564, 300, 300, 333, 500, 453, 250, /* 176 to 183 */
-	333, 300, 310, 500, 750, 750, 750, 444, /* 184 to 191 */
-	722, 722, 722, 722, 722, 722, 889, 667, /* 192 to 199 */
-	611, 611, 611, 611, 333, 333, 333, 333, /* 200 to 207 */
-	722, 722, 722, 722, 722, 722, 722, 564, /* 208 to 215 */
-	722, 722, 722, 722, 722, 722, 556, 500, /* 216 to 223 */
-	444, 444, 444, 444, 444, 444, 667, 444, /* 224 to 231 */
-	444, 444, 444, 444, 278, 278, 278, 278, /* 232 to 239 */
-	500, 500, 500, 500, 500, 500, 500, 564, /* 240 to 247 */
-	500, 500, 500, 500, 500, 500, 500, 500  /* 248 to 255 */
-    };
     int x;
     unsigned char *pchStart, *pchBreak;
     
@@ -384,7 +604,7 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 	pchBreak = NULL;
 	pchStart = pch;
 	
-	for( x = 0; x < 451 * 1000 / 10; x += acx[ *pch++ ] )
+	for( x = 0; x < 451 * 1000 / 10; x += acxTimesRoman[ *pch++ ] )
 	    if( !*pch ) {
 		/* finished; break here */
 		pchBreak = pch;
@@ -401,7 +621,9 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 	    pchBreak = ( pch == pchStart ) ? pch : pch - 1;
 
 	RequestFont( pf, FONT_RM, 10 );
-	fprintf( pf, "0 %d moveto (", y );
+
+	fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "0 %d moveto (", y );
+	
 	for( ; pchStart <= pchBreak; pchStart++ )
 	    switch( *pchStart ) {
 	    case 0:
@@ -415,7 +637,7 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 	    default:
 		putc( *pchStart, pf );
 	    }
-	fputs( ") show\n", pf );
+	fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
 	if( !*pch )
 	    break;
@@ -446,11 +668,11 @@ static void PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
     for( pch = sz; pch && *pch; pch = pchNext ) {
 	Advance( pf, 8 );
 	RequestFont( pf, FONT_TT, 8 );
-	fprintf( pf, "144 %d moveto (", y );
+	fprintf( pf, fPDF ? "1 0 0 1 144 %d Tm (" : "144 %d moveto (", y );
 	if( ( pchNext = strchr( pch, '\n' ) ) )
 	    *pchNext++ = 0;
 	fputs( pch, pf );
-	fputs( ") show\n", pf );
+	fputs( fPDF ? ") Tj\n" : ") show\n", pf );
     }
     Skip( pf, 6 );
 }
@@ -485,7 +707,11 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Consume( pf, 10 );
 	    FormatMove( sz, msExport.anBoard, pmr->n.anMove );
 	    RequestFont( pf, FONT_RM, 10 );
-	    fprintf( pf, "225 %d moveto (%d%d%s: %s%s) cshow\n", y,
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%d%d%s: %s%s) Tj\n" :
+		     "%d %d moveto (%d%d%s: %s%s) show\n",
+		     225 - ( 10 + StringWidth( aszLuckTypeAbbr[ pmr->n.lt ] ) +
+			     StringWidth( aszSkillTypeAbbr[ pmr->n.st ] ) +
+			     StringWidth( sz ) ) / 2, y,
 		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeAbbr[ pmr->n.lt ], sz,
 		     aszSkillTypeAbbr[ pmr->n.st ] );
@@ -500,7 +726,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 		    Ensure( pf, 16 );
 		    Consume( pf, 8 );
 		    RequestFont( pf, FONT_TT, 8 );
-		    fprintf( pf, "46 %d moveto (", y );
+		    fprintf( pf, fPDF ? "1 0 0 1 46 %d Tm (" :
+			     "46 %d moveto (", y );
 		    putc( i == pmr->n.iMove ? '*' : ' ', pf );
 		    FormatMoveHint( sz, msExport.anBoard, &pmr->n.ml, i,
 				    i != pmr->n.iMove ||
@@ -508,13 +735,15 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 		    pch = strchr( sz, '\n' );
 		    *pch++ = 0;
 		    fputs( sz, pf );
-		    fputs( ") show\n", pf );
+		    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 		    
 		    Consume( pf, 8 );
-		    fprintf( pf, "46 %d moveto (", y );
+		    fprintf( pf, fPDF ? "1 0 0 1 46 %d Tm (" :
+			     "46 %d moveto (", y );
 		    putc( ' ', pf );
+		    *strchr( pch, '\n' ) = 0;
 		    fputs( pch, pf );
-		    fputs( ") show\n", pf );
+		    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 		}
 	    }
 
@@ -533,7 +762,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
-	    fprintf( pf, "225 %d moveto (Double) cshow\n", y );
+	    /* (Double) stringwidth = 29.439 */
+	    fprintf( pf, fPDF ? "1 0 0 1 210 %d Tm (Double) Tj\n" :
+		     "210 %d moveto (Double) show\n", y );
 
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
@@ -546,7 +777,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
-	    fprintf( pf, "225 %d moveto (Take) cshow\n", y );
+	    /* (Take) stringwidth = 19.9892 */
+	    fprintf( pf, fPDF ? "1 0 0 1 215 %d Tm (Take) Tj\n" :
+		     "215 %d moveto (Take) show\n", y );
 
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
@@ -557,7 +790,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	case MOVE_DROP:
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
-	    fprintf( pf, "225 %d moveto (Drop) cshow\n", y );
+	    /* (Drop) stringwidth = 20.5494 */
+	    fprintf( pf, fPDF ? "1 0 0 1 215 %d Tm (Drop) Tj\n" :
+		     "215 %d moveto (Drop) show\n", y );
 
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
@@ -597,30 +832,72 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
 static void PostScriptEpilogue( FILE *pf ) {
 
+    int i;
+    long lXRef;
+    
     EndPage( pf );
 
-    fprintf( pf, "%%%%Trailer\n"
-	     "%%%%Pages: %d\n"
-	     "%%%%EOF\n", iPage );
+    if( fPDF ) {
+	StartObject( pf, idPages );
+	fputs( "<<\n"
+	       "/Type /Pages\n"
+	       "/Kids [\n", pf );
+	for( i = 0; i < daPages.c; i++ )
+	    fprintf( pf, " %d 0 R\n", (int) daPages.ap[ i ] );
+	fprintf( pf, "]\n"
+		 "/Count %d\n"
+		 "/MediaBox [0 0 %d %d]\n"
+		 ">>\n", daPages.c, cxPage, cyPage );
+	EndObject( pf );
+	
+	lXRef = ftell( pf );
+	
+	fprintf( pf, "xref\n"
+		 "0 %d\n", daXRef.iFinish );
+	
+	fputs( "0000000000 65535 f \n", pf );
+	
+	for( i = 1; i < daXRef.iFinish; i++ ) {
+	    assert( daXRef.ap[ i ] );
+	    
+	    fprintf( pf, "%010ld 00000 n \n", (long) daXRef.ap[ i ] );
+	}
+
+	fprintf( pf, "trailer\n"
+		 "<< /Size %d /Root 1 0 R >>\n"
+		 "startxref\n"
+		 "%ld\n"
+		 "%%%%EOF\n", daXRef.iFinish, lXRef );
+    } else
+	fprintf( pf, "%%%%Trailer\n"
+		 "%%%%Pages: %d\n"
+		 "%%%%EOF\n", iPage );
 }
 
-extern void CommandExportGamePostScript( char *sz ) {
+static void ExportGameGeneral( int f, char *sz ) {
 
     FILE *pf;
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export"
-		 "game postscript')." );
+		 "game postscript')." ); /* FIXME not necessarily PS */
 	return;
     }
 
-    if( !strcmp( sz, "-" ) )
+    if( !strcmp( sz, "-" ) ) {
+	if( f ) {
+	    outputl( "PDF files may not be written to standard output ("
+		     "see `help export game pdf')." );
+	    return;
+	}
+	
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    } else if( !( pf = fopen( sz, f ? "wb" : "w" ) ) ) {
 	perror( sz );
 	return;
     }
 
+    fPDF = f;
     PostScriptPrologue( pf );
     
     ExportGamePostScript( pf, plGame );
@@ -631,24 +908,41 @@ extern void CommandExportGamePostScript( char *sz ) {
 	fclose( pf );
 }
 
-extern void CommandExportMatchPostScript( char *sz ) {
+extern void CommandExportGamePDF( char *sz ) {
+
+    ExportGameGeneral( TRUE, sz );
+}
+
+extern void CommandExportGamePostScript( char *sz ) {
+
+    ExportGameGeneral( FALSE, sz );
+}
+
+static void ExportMatchGeneral( int f, char *sz ) {
     
     FILE *pf;
     list *pl;
 
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export "
-		 "match postscript')." );
+		 "match postscript')." ); /* FIXME not necessarily PS */
 	return;
     }
 
-    if( !strcmp( sz, "-" ) )
+    if( !strcmp( sz, "-" ) ) {
+	if( f ) {
+	    outputl( "PDF files may not be written to standard output ("
+		     "see `help export match pdf')." );
+	    return;
+	}
+	
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
+    } else if( !( pf = fopen( sz, f ? "wb" : "w" ) ) ) {
 	perror( sz );
 	return;
     }
 
+    fPDF = f;
     PostScriptPrologue( pf );
 
     /* FIXME write match introduction? */
@@ -660,4 +954,14 @@ extern void CommandExportMatchPostScript( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+}
+
+extern void CommandExportMatchPDF( char *sz ) {
+
+    ExportMatchGeneral( TRUE, sz );
+}
+
+extern void CommandExportMatchPostScript( char *sz ) {
+
+    ExportMatchGeneral( FALSE, sz );
 }

@@ -182,17 +182,10 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     else
 	y = 230;
 
-#if 0
-    /* EEPIC ovals don't work very well */
-    fprintf( pf, "\\put(35,%d){\\setlength\\maxovaldiam {7pt} \\oval(24,24)}"
-	     "\\put(23,%d){\\makebox(24,24){%d}}\n", y, y - 12,
-	     pms->nCube == 1 ? 64 : pms->nCube );
-#else
     fprintf( pf, "\\path(23,%d)(47,%d)(47,%d)(23,%d)(23,%d)"
 	     "\\put(23,%d){\\makebox(24,24){\\textsf{\\LARGE %d}}}\n",
 	     y - 12, y - 12, y + 12, y + 12, y - 12, y - 12,
 	     pms->nCube == 1 ? 64 : pms->nCube );
-#endif
     
     fputs( "\\end{picture}\\end{center}\\vspace{-4mm}\n\n\\nopagebreak[4]\n",
 	   pf );
@@ -355,12 +348,11 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
     int fTook = FALSE, i;
     char sz[ 1024 ];
 
-    /* FIXME game introduction? */
-
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
+	    /* FIXME game introduction */
 	    break;
 	    
 	case MOVE_NORMAL:

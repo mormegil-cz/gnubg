@@ -330,6 +330,8 @@ command acAnalyse[] = {
       "format", szFILENAME, NULL },
     { "latex", CommandExportGameLaTeX, "Records a log of the game in LaTeX "
       "format", szFILENAME, NULL },
+    { "pdf", CommandExportGamePDF, "Records a log of the game in the"
+      "Portable Document Format", szFILENAME, NULL },
     { "postscript", CommandExportGamePostScript, "Records a log of the game "
       "in PostScript format", szFILENAME, NULL },
     { "ps", CommandExportGamePostScript, NULL, szFILENAME, NULL },
@@ -339,6 +341,8 @@ command acAnalyse[] = {
       "format", szFILENAME, NULL },
     { "latex", CommandExportMatchLaTeX, "Records a log of the match in LaTeX "
       "format", szFILENAME, NULL },
+    { "pdf", CommandExportMatchPDF, "Records a log of the match in the "
+      "Portable Document Format", szFILENAME, NULL },
     { "postscript", CommandExportMatchPostScript, "Records a log of the match "
       "in PostScript format", szFILENAME, NULL },
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, NULL },
