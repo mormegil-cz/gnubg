@@ -67,7 +67,7 @@ static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwLabels, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
-#if BOARD3D
+#if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwSpin;
 #endif
 
@@ -86,7 +86,7 @@ static GtkWidget *pwCubeColour;
 static GtkWidget *apwDiceDotColour[ 2 ];
 static GtkWidget *apwDieColour[ 2 ];
 static GtkWidget *apwDiceColourBox[ 2 ];
-int fLabels, fWood, fHinges;
+int fWood;
 
 static int fUpdate;
 
@@ -110,13 +110,6 @@ typedef struct _boarddesign {
   int fDeletable;       /* is the board design deletable */
 
 } boarddesign;
-
-void UpdateGlobalSetting()
-{
-	/* Make global values reflect loaded values */
-    fLabels = rdAppearance.fLabels;
-    fHinges = rdAppearance.fHinges;
-}
 
 static boarddesign *pbdeSelected = NULL;
 
@@ -625,7 +618,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), fHinges );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), rdAppearance.fHinges );
     gtk_box_pack_start( GTK_BOX( pw ), pwHinges, FALSE, FALSE, 0 );
     gtk_signal_connect_object( GTK_OBJECT( pwHinges ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
@@ -643,7 +636,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     return pwx;
 }
 
-#if BOARD3D
+#if USE_BOARD3D
 void toggle_display_type(GtkWidget *widget, gpointer data)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -656,7 +649,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     GtkWidget *pw, *pwTable, *pwBox, *pwScale;
     float rAzimuth, rElevation;
     GtkWidget *pwx;
-#if BOARD3D
+#if USE_BOARD3D
 	GtkWidget *dtBox, *button, *dtFrame, *pwev, *pwhbox, *lab;
 	GSList* group;
 	GtkAdjustment *adj;
@@ -667,7 +660,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     pw = gtk_vbox_new( FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
 
-#if BOARD3D
+#if USE_BOARD3D
 	dtFrame = gtk_frame_new("Display Type");
 	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
 	gtk_box_pack_start(GTK_BOX( pw ), dtFrame, FALSE, FALSE, 0);
@@ -720,7 +713,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 #endif
 
     pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), fLabels );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), rdAppearance.fLabels );
     gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
     gtk_signal_connect_object( GTK_OBJECT( pwLabels ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
@@ -1451,7 +1444,7 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
 	gtk_widget_queue_draw( bd->drawing_area );
 	gtk_widget_queue_draw( bd->dice_area );
 	gtk_widget_queue_draw( bd->table );
-#if BOARD3D
+#if USE_BOARD3D
 	DisplayCorrectBoardType();
 	if (rdAppearance.fDisplayType == DT_3D)
 		updateOccPos(bd);
@@ -1464,7 +1457,7 @@ static void GetPrefs ( renderdata *prd ) {
     int i, j;
     gdouble ar[ 4 ];
 
-#if BOARD3D
+#if USE_BOARD3D
 	BoardData *bd = BOARD( pwBoard )->board_data;
 
 	rdAppearance.fDisplayType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwBoardType ) ) ? DT_2D : DT_3D;
@@ -1476,8 +1469,8 @@ static void GetPrefs ( renderdata *prd ) {
 	if (rdAppearance.fDisplayType == DT_3D && bd->resigned)
 		ShowFlag3d();	/* Showing now - update */
 #endif
-    fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
-    fHinges = gtk_toggle_button_get_active(
+    rdAppearance.fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+    rdAppearance.fHinges = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwHinges ) );
     fWood = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwWood ) );
@@ -1553,10 +1546,8 @@ static void GetPrefs ( renderdata *prd ) {
     prd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
 	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 
-    prd->fLabels = fLabels;
     prd->wt = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
 	pwWoodType ) ) : WOOD_PAINT;
-    prd->fHinges = fHinges;
     prd->fClockwise = fClockwise; /* yuck */
 }
 
@@ -1608,9 +1599,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     BoardData *bd = BOARD( pwBoard )->board_data;
     GList *plBoardDesigns;
     
-    fLabels = rdAppearance.fLabels;
     fWood = rdAppearance.wt;
-    fHinges = rdAppearance.fHinges;
     
     pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );

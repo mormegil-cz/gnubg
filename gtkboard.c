@@ -2219,7 +2219,7 @@ static gint board_set( Board *board, const gchar *board_text,
 			    goto cocked;
 		    }
 	    }
-#if BOARD3D
+#if USE_BOARD3D
 			if (rdAppearance.fDisplayType == DT_3D)
 			{
 				/* Has been shaken, so roll dice */
@@ -2246,7 +2246,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
 	bd->cube_use = cube_use;
 
-#if BOARD3D
+#if USE_BOARD3D
 if (rdAppearance.fDisplayType == DT_3D)
 	SetupViewingVolume3d();	/* Cube may be out of top of screen */
 else
@@ -2282,7 +2282,7 @@ else
 			       yResign * rdAppearance.nSize, 
                                8 * rdAppearance.nSize,
 			       8 * rdAppearance.nSize, bd );
-#if BOARD3D
+#if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 		ShowFlag3d();
 #endif
@@ -2303,7 +2303,7 @@ else
 	return 0;
     }
 
-#if BOARD3D
+#if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 		ShowBoard3d(bd);
 	else
@@ -2533,7 +2533,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
     animation_finished = FALSE;
 
-#if BOARD3D
+#if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 		AnimateMove3d();
 	else
@@ -2602,7 +2602,7 @@ static void update_buttons( BoardData *pbd ) {
     
 
     if ( fGUIDiceArea 
-#if BOARD3D
+#if USE_BOARD3D
     && (rdAppearance.fDisplayType == DT_2D)
 #endif
      ) {
@@ -2669,7 +2669,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 
     update_buttons( pbd );
 
-#if BOARD3D
+#if USE_BOARD3D
 if (rdAppearance.fDisplayType == DT_3D)
 {
 	ShowBoard3d(pbd);
@@ -2727,7 +2727,7 @@ extern void board_free_pixmaps( BoardData *bd ) {
     FreeImages( &bd->ri );
 }
 
-#if BOARD3D
+#if USE_BOARD3D
 void DisplayCorrectBoardType()
 {
 	BoardData* bd = BOARD(pwBoard )->board_data;
@@ -2797,7 +2797,7 @@ static void board_size_allocate( GtkWidget *board,
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
     if ( fGUIDiceArea 
-#if BOARD3D
+#if USE_BOARD3D
     && (rdAppearance.fDisplayType == DT_2D)
 #endif
 	) {
@@ -2822,7 +2822,7 @@ static void board_size_allocate( GtkWidget *board,
 	board_create_pixmaps( board, bd );
     }
 
-#if BOARD3D
+#if USE_BOARD3D
 	child_allocation.width = allocation->width;
 	child_allocation.height = allocation->height;
 	child_allocation.x = allocation->x;
@@ -3581,7 +3581,7 @@ static void board_init( Board *board ) {
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area );
 
-#if BOARD3D
+#if USE_BOARD3D
 	/* 3d board drawing area */
 	CreateBoard3d(bd, &bd->drawing_area3d);
 	gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area3d );

@@ -2513,7 +2513,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     if( !gtk_init_check( argc, argv ) )
 	return FALSE;
 
-#if BOARD3D
+#if USE_BOARD3D
 	/* Initialize gtkglext */
 	InitGTK3d(argc, argv);
 #endif
@@ -2714,7 +2714,7 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     
     gtk_widget_show_all( pwMain );
 
-#if BOARD3D
+#if USE_BOARD3D
 	DisplayCorrectBoardType();
 #endif
     
@@ -7443,7 +7443,7 @@ extern void GTKSet( void *p ) {
 	    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
 		gtk_widget_show_all( bd->dice_area );
 
-#if BOARD3D
+#if USE_BOARD3D
 	/* If in 3d mode may need to update sizes */
     if (rdAppearance.fDisplayType == DT_3D)
 		SetupViewingVolume3d();

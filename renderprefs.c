@@ -278,7 +278,7 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     else if( !strncasecmp( szParam, "translucent", c ) )
 	/* deprecated option "translucent"; ignore */
 	;
-#ifdef BOARD3D
+#ifdef USE_BOARD3D
     else if( !strncasecmp( szParam, "boardshadows", c ) )
 		prd->showShadows = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "testskin", c ) )
@@ -428,7 +428,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
     sprintf( sz, 
              "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
-#if BOARD3D
+#if USE_BOARD3D
 		 "boardtype=%c "
 		 "boardshadows=%c "
 		 "testskin=%d "
@@ -452,7 +452,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
              /* border */
 	     prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
 	     prd->aanBoardColour[ 1 ][ 2 ],
-#if BOARD3D
+#if USE_BOARD3D
 		prd->fDisplayType == DT_2D ? '2' : '3',
 		prd->showShadows ? 'y' : 'n',
 		prd->skin3d,

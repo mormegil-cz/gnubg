@@ -6910,7 +6910,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fX ) {
       
-	UpdateGlobalSetting();
 	RunGTK( pwSplash );
 
         EvalShutdown();

@@ -74,7 +74,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player );
 extern GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw );
 
-#if BOARD3D
+#if USE_BOARD3D
 /* New 3d types */
 typedef struct _Texture
 {
@@ -159,7 +159,7 @@ typedef struct _BoardData {
     gint forced, crawford_game; /* unused, Crawford game flag */
     gint redoubles; /* number of instant redoubles allowed */
 
-#if BOARD3D
+#if USE_BOARD3D
 /* extra members for 3d board */
 	GtkWidget *drawing_area3d;	/* main 3d widget */
 
@@ -217,7 +217,7 @@ typedef struct _BoardData {
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd );
 extern void board_free_pixmaps( BoardData *bd );
 
-#if BOARD3D
+#if USE_BOARD3D
 /* Functions for 3d board */
 extern int InitGTK3d(int *argc, char ***argv);
 extern void SetupViewingVolume3d();

@@ -107,7 +107,7 @@ renderdata rdDefault = {
     TRUE, /* fHinges */
     TRUE, /* fLabels */
     FALSE /* fClockwise */
-#if BOARD3D
+#if USE_BOARD3D
 	, DT_3D,	/* Display type */
 	FALSE,	/* Show shadows */
 	1,	/* Test skin */
