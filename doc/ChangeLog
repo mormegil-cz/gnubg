@@ -1,3 +1,7 @@
+Wed Aug 14 23:39:43 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.texi: draft for the import and export sections.
+
 Wed Aug 14 21:21:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.texi: add section on match ID and position ID to the
