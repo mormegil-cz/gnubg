@@ -79,18 +79,21 @@ typedef enum _ratingtype {
 } ratingtype;
 
 const char *aszRating [ RAT_UNDEFINED + 1 ];
+const char *aszLuckRating[ 7 ];
 
 extern ratingtype GetRating ( const float rError );
 extern void IniStatcontext ( statcontext *psc );
 extern void AddStatcontext ( statcontext *pscA, statcontext *pscB );
 
 extern void
-DumpStatcontext ( char *szOutput, statcontext *psc, char * sz );
+DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz );
 
 extern void
 updateStatisticsGame ( list *plGame );
 
 extern void
 updateStatisticsMatch ( list *plMatch );
+
+extern int getLuckRating ( const float rLuck );
 
 #endif
