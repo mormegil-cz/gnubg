@@ -2668,7 +2668,8 @@ extern void InvertEvaluationCf( float ar[ 4 ] ) {
 
 
 extern void
-InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS] ) {
+InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS],
+                    cubeinfo *pci ) {
 
   /* invert win, gammon etc. */
 
@@ -2677,7 +2678,12 @@ InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS] ) {
   /* invert equities */
 
   ar [ OUTPUT_EQUITY ] = - ar[ OUTPUT_EQUITY ];
-  ar [ OUTPUT_CUBEFUL_EQUITY ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+
+  if ( pci->nMatchTo )
+    ar [ OUTPUT_CUBEFUL_EQUITY ] = 1.0 - ar[ OUTPUT_CUBEFUL_EQUITY ];
+  else
+    ar [ OUTPUT_CUBEFUL_EQUITY ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+
 
 }
 
@@ -3092,7 +3098,7 @@ static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
     if ( GeneralEvaluationEPlied ( arEval, anBoardTemp, &ci, pec, nPlies ) )
       return -1;
 
-    InvertEvaluationR ( arEval );
+    InvertEvaluationR ( arEval, &ci );
     
     /* Save evaluations */  
     memcpy( pm->arEvalMove, arEval, NUM_OUTPUTS * sizeof ( float ) );
@@ -3630,8 +3636,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     szOutput = strchr( szOutput, 0 );
 
     if( fOutputInvert ) {
-      InvertEvaluationR( aarOutput[ 0 ] );
-      InvertEvaluationR( aarOutput[ 1 ] );
+      InvertEvaluationR( aarOutput[ 0 ], pci );
+      InvertEvaluationR( aarOutput[ 1 ], pci );
       pci->fMove = !pci->fMove;
     }
 

@@ -1,3 +1,8 @@
+Wed Oct 17 19:13:08 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* eval.c (InvertEvaluationR): New parameter to InvertEvaluationR which
+	depends on nMatchTo. Change all callers.
+
 Wed Oct 17 18:41:20 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (DumpPosition): Skip call to cubeless evaluator.

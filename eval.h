@@ -202,7 +202,8 @@ EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
                   cubeinfo *pci, evalcontext *pec );
 
 extern void
-InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS] );
+InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS],
+                    cubeinfo *pci );
 
 extern void 
 InvertEvaluation( float ar[ NUM_OUTPUTS ] );
