@@ -12,7 +12,7 @@
                          Contributors of code include:
 
     Olivier Baur    Nis Joergensen  Stein Kulseth   Rod Roark
-    Holger Bochnig  TAKAHASHI Kaoru Mike Petch
+    Holger Bochnig  Kaoru Takahashi Mike Petch
 
                             Translations by:
 
@@ -22,48 +22,45 @@
      Achim Mueller (German)
      Hlynur Sigurgislason (Icelandic)
      Renzo Campagna (Italian)
-     Kaoru TAKAHASHI (Japanese)
+     Kaoru Takahashi (Japanese)
      Akif Dinc (Turkish)
 
              Contributors (of bug reports and suggestions) include:
 
-    Elias Kritikos          Petr Kadlec             Henrik Ravn
-    Misja Alma              Neil Kazaross           James Rech
-    Christian Anthon        Mathias Kegelmann       Jared Riley
-    Kazuaki Asai            Matija Kejzar           Klaus Rindholt
-    Eric Augustine          Bert Van Kerckhove      Oliver Riordan
-    Erik Barfoed            James F. Kibler         Rod Roark
-    Ron Barry               Jonathan Kinsey         Hans-Juergen Schaefer
-    Steve Baedke            Johnny Kirk             Steve Schreiber
-    Olivier Baur            Gerhard Knop            Hugh Sconyers
-    Stefan van den Berg     Robert Konigsberg       Martin Schrode
-    Holger Bochnig          Martin Krainer          Paul Selick
-    Chuck Bower             Corrin Lakeland         Sho Sengoku
-    Adrian Bunk             Tim Laursen             Ian Shaw
-    Nick Bratby             Eli Liang               Albert Silver
-    Renzo Campagna          Ege Lundgren            Alberta di Silvio
-    Craig Campbell          Kevin Maguire           Peter Sochovsky
-    John Chuang             Massimiliano Maini      Mark Spencer
-    Tristan Colgate         Giulio De Marco         Scott Steiner
-    Olivier Croisille       John Marttila           Maik Stiebler
-    Ned Cross               Alix Martin             W. Stroop (Rob)
-    Bill Davidson           William Maslen          Kaoru TAKAHASHI
-    Michael Depreli         Thomas Meyer            Yoshito Takeuchi
-    Ian Dunstan             Achim Mueller           Jacques Thiriat
-    Max Durbano             Daniel Murphy           Malene Thyssen
-    Peter Eberhard          Magnar Naustdalslid     Claes Tornberg
-    Robert Eberlein         Dave Neary              Sander van Rijnswou
-    Fotis                   Rolf Nielsen            Robert-Jan Veldhuizen
-    Kennedy Fraser          Mirori Orange           Morten Wang
-    Ric Gerace              Peter Orum              Jeff White
-    Michel Grimminck        Roy Passfield           JP White
-    Eric Groleau            Thomas Patrick          Mike Whitton
-    Jeff Haferman           Billie Patterson        Chris Wilson
-    Morten Juul Henriksen   Mike Petch              Kit Woolsey
-    Alain Henry             Zvezdan Petkovic        Frank Worrell
-    Jens Hoefkens           Nardy Pillards          Christopher D. Yep
-    Martin Janke            Petri Pitkanen          Anders Zachrison
-    Nis Jorgensen           Sam Pottle              Douglas Zare
+    Elias Kritikos          Neil Kazaross           Jared Riley
+    Misja Alma              Mathias Kegelmann       Klaus Rindholt
+    Christian Anthon        Matija Kejzar           Oliver Riordan
+    Kazuaki Asai            Bert Van Kerckhove      Hans-Juergen Schaefer
+    Eric Augustine          James F. Kibler         Steve Schreiber
+    Erik Barfoed            Johnny Kirk             Hugh Sconyers
+    Ron Barry               Gerhard Knop            Martin Schrode
+    Steve Baedke            Robert Konigsberg       Paul Selick
+    Stefan van den Berg     Martin Krainer          Sho Sengoku
+    Chuck Bower             Corrin Lakeland         Ian Shaw
+    Adrian Bunk             Tim Laursen             Alberta di Silvio
+    Nick Bratby             Eli Liang               Peter Sochovsky
+    Craig Campbell          Ege Lundgren            Mark Spencer
+    John Chuang             Kevin Maguire           Scott Steiner
+    Tristan Colgate         Massimiliano Maini      Maik Stiebler
+    Olivier Croisille       Giulio De Marco         W. Stroop (Rob)
+    Ned Cross               John Marttila           Yoshito Takeuchi
+    Bill Davidson           Alix Martin             Jacques Thiriat
+    Michael Depreli         William Maslen          Malene Thyssen
+    Ian Dunstan             Thomas Meyer            Claes Tornberg
+    Max Durbano             Daniel Murphy           Sander van Rijnswou
+    Peter Eberhard          Magnar Naustdalslid     Robert-Jan Veldhuizen
+    Robert Eberlein         Dave Neary              Morten Wang
+    Fotis                   Rolf Nielsen            Jeff White
+    Kennedy Fraser          Mirori Orange           JP White
+    Ric Gerace              Peter Orum              Mike Whitton
+    Michel Grimminck        Roy Passfield           Chris Wilson
+    Eric Groleau            Thomas Patrick          Kit Woolsey
+    Jeff Haferman           Billie Patterson        Frank Worrell
+    Morten Juul Henriksen   Zvezdan Petkovic        Christopher D. Yep
+    Alain Henry             Petri Pitkanen          Anders Zachrison
+    Jens Hoefkens           Sam Pottle              Douglas Zare
+    Martin Janke            Henrik Ravn
+    Nis Jorgensen           James Rech
 
 
   Credit is also due to those who have published information about backgammon
