@@ -164,6 +164,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE;
 int fAutoAnalysis = FALSE;
+int fInvertMET = FALSE;
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
@@ -742,6 +743,12 @@ command cER = {
   { "cube", NULL,
     "Control display of cube in exports", NULL, acSetExportCube },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetInvert[] = {
+  { "matchequitytable", CommandSetInvertMatchEquityTable,
+    "invert match equity table", szONOFF, &cOnOff },
+  { "met", CommandSetInvertMatchEquityTable,
+    "alias for 'set invert matchequitytable'", szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "analysis", NULL, "Control parameters used when analysing moves",
       NULL, acSetAnalysis },
@@ -777,6 +784,7 @@ command cER = {
       "parameters", NULL, acSetEval },
     { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, &cOnOff },
     { "export", NULL, "Set settings for export", NULL, acSetExport },
+    { "invert", NULL, "Invert match equity table", NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, &cOnOff },
     { "matchequitytable", CommandSetMET,
@@ -894,12 +902,6 @@ command cER = {
     { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
       "not have", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
-}, acInvert[] = {
-    { "matchequitytable", CommandInvertMatchEquityTable, 
-      "Invert match equity ", NULL, NULL },
-    { "met", CommandInvertMatchEquityTable, 
-      "alias for 'invert matchequitytable'", NULL, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
 }, acTrain[] = {
     { "database", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL, NULL },
@@ -933,7 +935,7 @@ command cER = {
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint,  "Give hints on cube action or best legal moves", 
       szOPTVALUE, NULL }, 
-    { "invert", NULL, "invert match equity tables, etc.", NULL, acInvert },
+    { "invert", NULL, "invert match equity tables, etc.", NULL, acSetInvert },
     { "import", NULL, "Import matches, games or positions from other programs",
       NULL, acImport },
     { "list", NULL, "Show a list of games or moves", NULL, acList },
@@ -3539,6 +3541,12 @@ extern void CommandSaveSettings( char *szParam ) {
               exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? "yes" : "no" );
     fprintf ( pf, "set export cube close %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
+
+    /* invert settings */
+
+    fprintf ( pf, 
+              "set invert matchequitytable %s\n",
+              fInvertMET ? "on" : "off" );
 
     /* the end */
 

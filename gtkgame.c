@@ -115,7 +115,6 @@ typedef enum _gnubgcommand {
     CMD_EVAL,
     CMD_HELP,
     CMD_HINT,
-    CMD_INVERT_MATCHEQUITYTABLE,
     CMD_LIST_GAME,
     CMD_NEW_GAME,
     CMD_NEW_SESSION,
@@ -151,6 +150,7 @@ typedef enum _gnubgcommand {
     CMD_SET_CUBE_USE,
     CMD_SET_DISPLAY,
     CMD_SET_EGYPTIAN,
+    CMD_SET_INVERT_MET,
     CMD_SET_JACOBY,
     CMD_SET_NACKGAMMON,
     CMD_SET_OUTPUT_MATCHPC,
@@ -211,6 +211,7 @@ static togglecommand atc[] = {
     { &fOutputMWC, CMD_SET_OUTPUT_MWC },
     { &fOutputWinPC, CMD_SET_OUTPUT_WINPC },
     { &fRecord, CMD_SET_RECORD },
+    { &fInvertMET, CMD_SET_INVERT_MET },
     { NULL }
 };
 
@@ -229,7 +230,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "eval",
     "help",
     "hint",
-    "invert matchequitytable",
     "list game",
     "new game",
     "new session",
@@ -265,6 +265,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set cube use",
     "set display",
     "set egyptian",
+    "set invert matchequitytable",
     "set jacoby",
     "set nackgammon",
     "set output matchpc",
@@ -2506,8 +2507,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ "/_Analyse/M_atch equity table", NULL, Command,
 	  CMD_SHOW_MATCHEQUITYTABLE, NULL },
-	{ "/_Analyse/Invert match equity table", NULL, Command,
-	  CMD_INVERT_MATCHEQUITYTABLE, NULL },
 	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Analyse/Evaluation engine", NULL, Command,
 	  CMD_SHOW_ENGINE, NULL },
@@ -2588,6 +2587,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
         { "/_Settings/_Egyptian rule", NULL, Command, CMD_SET_EGYPTIAN,
           "<CheckItem>" },
+	{ "/_Settings/_Invert/_Match equity table", NULL, Command, 
+          CMD_SET_INVERT_MET,
+	  "<CheckItem>" },
 	{ "/_Settings/_Jacoby rule", NULL, Command, CMD_SET_JACOBY,
 	  "<CheckItem>" },
 	{ "/_Settings/_Match equity table...", NULL, SetMET, 0, NULL },
@@ -6533,8 +6535,6 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_STATISTICS_SESSION ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_INVERT_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_ENGINE ), TRUE );
 	

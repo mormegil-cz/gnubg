@@ -1,3 +1,25 @@
+Fri Apr 19 17:55:54 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	"Rename" "invert met" to "set invert met [on|off]".
+
+	* set.c (CommandSetInvertMatchEquityTable): new function.
+	* matchequity.c (invertMET): new function.
+	* gnubg.c: new command "set invert met [on|off]"
+	* gnubg.c (CommandSaveSettings): save invert settings.
+	* gtkgame.c: new command "set invert met [on|off]"
+
+Fri Apr 19 17:13:53 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (HTMLPrintMoveAnalysis): do not print a move number, if 
+	player cannot move.
+	* html.c (HTMLAnalysis): print "cannot move" if player cannot move.
+	* html.c (ExportGameHTML): bugfix. Swap sides in case of missing moves.
+	(e.g., when importing sgg files where there are no moves for
+	player on the bar against closed board)
+	* html.c (HTMLEpilogue): modify how the version is written.
+
+	* import.c (ImportSGGGame): do not save comments in MOVE_SETDICE.
+
 Wed Apr 17 22:32:17 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportSGGGame): import kibitzing and whispering in SGG
