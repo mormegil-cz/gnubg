@@ -23,6 +23,7 @@ char *aszCredits[] = {
     "Nis Jorgensen",
     "Tom Keith",
     "Matija Kejzar",
+    "Jonathan Kinsey",
     "Johnny Kirk",
     "Robert Konigsberg",
     "Corrin Lakeland",

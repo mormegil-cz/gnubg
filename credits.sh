@@ -35,6 +35,7 @@ Alain Henry
 Jens Hoefkens
 Nis Jorgensen
 Matija Kejzar
+Jonathan Kinsey
 Johnny Kirk
 Robert Konigsberg
 Corrin Lakeland

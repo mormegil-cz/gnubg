@@ -31,7 +31,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -47,6 +46,10 @@
 
 #ifdef HAVE_NAS
 #include <audio/audiolib.h>
+#endif
+
+#ifdef WIN32
+#include "windoes.h" /* for PlaySound */
 #endif
 
 #include "glib.h"
@@ -409,6 +412,8 @@ play_file(const char *filename) {
 
   /* fork, so we don't have to wait for the sound to finish */
 
+#ifndef WIN32
+
   pid = fork();
 
   if (pid < 0)
@@ -419,6 +424,12 @@ play_file(const char *filename) {
           
     /* kill after 30 secs */
     alarm(30);
+
+#else
+
+    /* don't fork with windows as PlaySound can play async. */
+
+#endif
 	
     switch ( ssSoundSystem ) {
 
@@ -489,7 +500,7 @@ play_file(const char *filename) {
     case SOUND_SYSTEM_WINDOWS:
 
 #ifdef WIN32
-      PlaySound ( filename, NULL, SND_FILENAME );
+      PlaySound ( filename, NULL, SND_FILENAME | SND_ASYNC );
       _exit(0);
 #else
       assert ( FALSE );
@@ -502,9 +513,18 @@ play_file(const char *filename) {
 
     }
 
+#ifndef WIN32
+
     _exit(0);
 
   }
+
+#else
+
+  /* we didn't fork */
+
+#endif
+
 }
 
 

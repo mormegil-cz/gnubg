@@ -5323,6 +5323,7 @@ static void version( void ) {
 	puts( *ppch++ );
 }
 
+#ifdef HAVE_FORK
 
 static RETSIGTYPE SoundChild ( int n ) {
     
@@ -5333,6 +5334,8 @@ static RETSIGTYPE SoundChild ( int n ) {
       ;
 
 }
+
+#endif /* HAVE_FORK */
 
 static void real_main( void *closure, int argc, char *argv[] ) {
 
@@ -5640,8 +5643,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 
+#if HAVE_FORK
+
     /* make sure that forked children are terminated */
     PortableSignal( SIGCHLD, SoundChild, NULL, FALSE );
+
+#endif
    
     /* start-up sound */
     playSound ( SOUND_START );
