@@ -1,3 +1,9 @@
+Thu Dec 26 13:49:17 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (EvalWidget), gtkprefs.c (BorderPage): GtkOptionMenu
+	doesn't have a "changed" signal before GTK 2.0.
+	(reported by Nardy Pillards)
+
 Wed Dec 25 17:29:22 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	Commands for clearing analysis

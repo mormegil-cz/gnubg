@@ -3877,6 +3877,11 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     }
     
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_signal_connect ( GTK_OBJECT( pwMenu ), "selection-done",
+                         GTK_SIGNAL_FUNC( EvalChanged ), pew );
+#endif
+
     pew->pwReduced = gtk_option_menu_new ();
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pew->pwReduced ), pwMenu );
 
@@ -3950,8 +3955,10 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_signal_connect ( GTK_OBJECT( pew->pwCubeful ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
+#if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "changed",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
+#endif
 
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
