@@ -1,8 +1,18 @@
+Thu Nov 20 20:24:04 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* rollout.c - board setup in .sgf files of rollouts only worked if
+	  player 0 made first move, now appears to be correct for both
+	  players and double by both players
+
 Thu Nov 20 07:44:55 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gtkgame.c (EvalWidget): Add /* xgettext: no-c-format */ comment.
 
-Wed Nov 19 19:16:25 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+Wed Nov 19 19:52:16 2003 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c gtkprefs.c gtkrace.c add some more I18n strings
+
+Wed Nov 19 19:16:25 2003 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* play.c - always output moves to stdout/message window
 
