@@ -3769,9 +3769,9 @@ extern void CommandSaveSettings( char *szParam ) {
               "set export moves parameters evaluation %s\n"
               "set export moves parameters rollout %s\n"
               "set export moves probabilities %s\n",
-              exsExport.afMovesParameters[ 0 ],
-              exsExport.afMovesParameters[ 1 ],
-              exsExport.fMovesDetailProb );
+              exsExport.afMovesParameters[ 0 ] ? "yes" : "no",
+              exsExport.afMovesParameters[ 1 ] ? "yes" : "no",
+              exsExport.fMovesDetailProb  ? "yes" : "no" );
 
     for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
       if ( i == SKILL_NONE ) 
@@ -3787,9 +3787,9 @@ extern void CommandSaveSettings( char *szParam ) {
               "set export cube parameters evaluation %s\n"
               "set export cube parameters rollout %s\n"
               "set export cube probabilities %s\n",
-              exsExport.afCubeParameters[ 0 ],
-              exsExport.afCubeParameters[ 1 ],
-              exsExport.fCubeDetailProb );
+              exsExport.afCubeParameters[ 0 ] ? "yes" : "no",
+              exsExport.afCubeParameters[ 1 ] ? "yes" : "no",
+              exsExport.fCubeDetailProb ? "yes" : "no" );
 
     for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
       if ( i == SKILL_NONE )
