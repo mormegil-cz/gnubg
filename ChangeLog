@@ -1,3 +1,9 @@
+Mon May 19 19:59:38 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (Confirm): use FormatMovePlain to avoid translation
+	of "off" to, say, "af".
+	(reported by Klaus Rindholt)
+
 Sun May 18 13:35:40 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (outputx): revert previous fix.

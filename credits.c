@@ -55,6 +55,7 @@ char *aszCredits[] = {
     "Henrik Ravn",
     "James Rech",
     "Jared Riley",
+    "Klaus Rindholt",
     "Oliver Riordan",
     "Rod Roark",
     "Hans-Jürgen Schäfer",

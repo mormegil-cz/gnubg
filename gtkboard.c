@@ -595,7 +595,7 @@ static void Confirm( BoardData *bd ) {
     else if( bd->valid_move &&
 	     bd->valid_move->cMoves == bd->move_list.cMaxMoves &&
 	     bd->valid_move->cPips == bd->move_list.cMaxPips ) {
-        FormatMove( move, bd->old_board, bd->valid_move->anMove );
+        FormatMovePlain( move, bd->old_board, bd->valid_move->anMove );
     
         UserCommand( move );
     } else
