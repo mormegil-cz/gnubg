@@ -1,3 +1,9 @@
+Sat Mar  8 08:56:38 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (Convert): define Convert as strdup if libiconv
+	is not available.
+	(reported by Øystein Johansen)
+
 Sat Mar  8 08:31:48 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c, html.c: Fix problem with wrong alerts in export of positions.
