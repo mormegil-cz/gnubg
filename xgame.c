@@ -14,6 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef HAVE_RAND_R
+#include <rand_r.h>
+#endif
+
 #include "xboard.h"
 #include "xgame.h"
 #include "backgammon.h"
@@ -99,6 +103,9 @@ extwindowspec aewsStats[] = {
     { "move", &ewcText, aedStatsTextC, NULL, STATS_MOVE },
     { "board", &ewcText, aedStatsTextPlainC, NULL, STATS_BOARD }
 };
+
+static unsigned int nSeed = 1; /* for rand_r */
+#define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
 
 static int StatsRedraw( extwindow *pewnd, statsdata *psd, int fClear ) {
 
@@ -399,8 +406,8 @@ static int DiceRedraw( extwindow *pewnd, dicedata *pdd ) {
 
 static int DiceUnmapNotify( extwindow *pewnd, dicedata *pdd ) {
 
-    pdd->an[ 0 ] = ( random() % 6 ) + 1;
-    pdd->an[ 1 ] = ( random() % 6 ) + 1;
+    pdd->an[ 0 ] = ( RAND % 6 ) + 1;
+    pdd->an[ 1 ] = ( RAND % 6 ) + 1;
     
     return 0;
 }

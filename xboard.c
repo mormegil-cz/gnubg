@@ -16,6 +16,10 @@
 #include <string.h>
 #include <X11/Xutil.h>
 
+#ifndef HAVE_RAND_R
+#include <rand_r.h>
+#endif
+
 #include "xboard.h"
 #include "xgame.h"
 
@@ -600,6 +604,7 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
 	pgd->anDiceOpponent[ 0 ] != anDiceOld[ 2 ] ||
 	pgd->anDiceOpponent[ 1 ] != anDiceOld[ 3 ] ) {
 	if( pgd->xDice[ 0 ] > 0 ) {
+	    /* dice were visible before; now they're not */
 	    xeev.count = 0;
 	    xeev.x = pgd->xDice[ 0 ] * pgd->nBoardSize;
 	    xeev.y = pgd->yDice[ 0 ] * pgd->nBoardSize;
@@ -617,8 +622,9 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
 	    BoardRedraw( pewnd, pgd, &xeev );
 	}
 
-	if( !( pgd->fTurn == pgd->fColour ? pgd->anDice[ 0 ] :
-	       pgd->anDiceOpponent[ 0 ] ) )
+	if( ( pgd->fTurn == pgd->fColour ? pgd->anDice[ 0 ] :
+	       pgd->anDiceOpponent[ 0 ] ) <= 0 )
+	    /* dice have not been rolled */
 	    pgd->xDice[ 0 ] = pgd->xDice[ 1 ] = -10 * pgd->nBoardSize;
 	else {
 	    /* FIXME different dice for first turn */
@@ -1578,7 +1584,7 @@ static void BoardConfigure( extwindow *pewnd, gamedata *pgd,
 static void BoardCreate( extwindow *pewnd, gamedata *pgd ) {
 
     XGCValues xgcv;
-    int an[] = { 0, 0, 128 };
+    int anBlue[] = { 0, 0, 128 };
     pgd->nDragPoint = -1;
     
     pgd->nBoardSize = pewnd->cx / 108 < pewnd->cy / 72 ?
@@ -1600,8 +1606,10 @@ static void BoardCreate( extwindow *pewnd, gamedata *pgd ) {
     /* FIXME ExtWndAttachGC( pewnd, 0, NULL ) gives a bad GC, why? */
     pgd->gcCopy = XDefaultGC( pewnd->pdsp, 0 );
 
-    xgcv.foreground = MatchColour( pgd->pxscm, an );
+    xgcv.foreground = MatchColour( pgd->pxscm, anBlue );
     pgd->gcCube = ExtWndAttachGC( pewnd, GCForeground, &xgcv );
+    
+    pgd->xDice[ 0 ] = pgd->xDice[ 1 ] = -10 * pgd->nBoardSize;
     
     BoardDraw( pewnd, pgd );
     BoardDrawChequers( pewnd, pgd );
