@@ -1,3 +1,7 @@
+Wed Jan 15 10:40:22 2003  Gary Wong  <gtw@gnu.org>
+
+	* NEWS, README: Updated in preparation for a 0.13 pre-release.
+
 Mon Jan 13 18:54:09 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (GTKRolloutUpdate): honour fOutputWinPC.

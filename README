@@ -1,4 +1,4 @@
-GNU Backgammon 0.12
+GNU Backgammon 0.13
 ===================
 
 This is a pre-release version of GNU Backgammon (gnubg), a backgammon
@@ -35,8 +35,9 @@ Current features:
  - Position databases for supervised training (if GNU dbm is available).
  - Loading and saving .sgf games and matches (.sgf files are in the
    Smart Game Format).
- - Exporting games and matches to .mat, LaTeX, PostScript and PDF formats.
- - Importing .pos, .mat, .sgg and FIBS "oldmoves" files.
+ - Exporting games and matches to HTML, LaTeX, .mat, PDF, PNG and PostScript 
+   formats.
+ - Importing .bkg, .mat, .pos, .sgg, .tmg and FIBS "oldmoves" files.
  - Scripting ability (if GNU Guile is available).
  - Automatic and manual annotation (analysis and commentary) of games and
    matches.
@@ -130,7 +131,7 @@ weight file at all (it will generate random weights), we recommend
 that you obtain pre-trained weights; a file compatible with this
 pre-release is available at:
 
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.12a.gz
+        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.13a.gz
 
 Make sure you decompress the file (with gunzip) and rename it to
 `gnubg.weights' in the same directory as this README file.
