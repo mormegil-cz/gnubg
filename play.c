@@ -348,7 +348,6 @@ extern void CalculateBoard( void ) {
 
 	assert( pl->p );
 
-        printf( "CB: %d\n", ((moverecord *) (pl->p))->mt );
 	ApplyMoveRecord( &ms, plGame, pl->p );
 
         if ( pl->plNext && pl->plNext->p )
@@ -2966,8 +2965,6 @@ static void UpdateGame( int fShowBoard ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
 
-    printf ( "update game: %d %d\n", fShowBoard, fDisplay );
-    
 #if USE_GUI
     if( fX || ( fShowBoard && fDisplay ) )
 	ShowBoard();
