@@ -1,3 +1,8 @@
+Mon Sep  8 11:26:52 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gtkgame.c (GTKRecordShow): Use gettext to aszRating[] and
+	aszLuckRating[].
+
 Mon Sep  8 03:07:11 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gtkrace.c (OSRPage): Don't use gettext on empty strings.

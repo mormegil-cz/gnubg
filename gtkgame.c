@@ -7070,7 +7070,7 @@ extern void GTKShowVersion( void ) {
     static char *aszAuthors[] = { "Joseph Heled", "Øystein Johansen",
 				  "David Montgomery",
 				  "Jim Segrave",
-				  "Jørn Thyssen", "Gary Wong" };
+				  "Jrn Thyssen", "Gary Wong" };
     extern char *aszCredits[];
 
     if( pwDialog )
@@ -8670,20 +8670,20 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 17, sz );
 
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 18,
-			    aszRating[ GetRating( pr.arErrorChequerplay[
-				EXPAVG_TOTAL ] ) ] );
+			    gettext ( aszRating[ GetRating( pr.arErrorChequerplay[
+				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 19,
-			    aszRating[ GetRating( pr.arErrorCube[
-				EXPAVG_TOTAL ] ) ] );
+			    gettext ( aszRating[ GetRating( pr.arErrorCube[
+				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 20,
-			    aszRating[ GetRating( pr.arErrorCombined[
-				EXPAVG_TOTAL ] ) ] );
+			    gettext ( aszRating[ GetRating( pr.arErrorCombined[
+				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 21,
-			    aszLuckRating[ getLuckRating( pr.arLuck[
-				EXPAVG_TOTAL ] / 20 ) ] );
+			    gettext ( aszLuckRating[ getLuckRating( pr.arLuck[
+				EXPAVG_TOTAL ] / 20 ) ] ) );
 	
 	if( !CompareNames( pr.szName, szPlayer ) )
 	    gtk_clist_select_row( GTK_CLIST( pwList ), i, 0 );
