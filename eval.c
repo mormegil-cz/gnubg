@@ -2755,8 +2755,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 	/* fNoCube: calculate cubeful equity? */
 	
-	fNoCube = ( anScore[ fMove ] + nCube >= nMatchTo );
-	fNoCube = fNoCube || ( anScore[ ! fMove ] + nCube >= nMatchTo );
+	fNoCube = ( anScore[ fMove ] + 2 * nCube >= nMatchTo );
+	fNoCube = fNoCube || ( anScore[ ! fMove ] + 2 * nCube >= nMatchTo );
 	fNoCube = fNoCube ||  
 	  ( ( anScore[ fMove ] == nMatchTo - 2 ) &&
 	    ( anScore[ ! fMove ] == nMatchTo - 2 ) );
@@ -2889,7 +2889,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 	}
 	
-	prOutput[ 2 ] = eq2mwc ( rEq, ci );
+	prOutput[ 2 ] = eq2mwc ( rEq, &cix );
 
 
       } /* fCube */
