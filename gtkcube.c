@@ -327,6 +327,44 @@ TakeAnalysis( const movetype mt,
 
 }
 
+static GtkWidget *
+OutputPercentsTable( const float ar[] ) 
+{
+    GtkWidget *pwTable;
+    GtkWidget *pw;
+    int i;
+    static gchar *headings[] = { N_("Win"), N_("W(g)"), N_("W(bg)"),
+                                 N_("-"), N_("Lose"), N_("L(g)"), N_("L(bg)") };
+    pwTable = gtk_table_new ( 2, 7, FALSE );
+    
+    for (i = 0; i < 7; i++)
+    {
+      pw = gtk_label_new ( gettext( headings[i] ) );
+      gtk_table_attach(GTK_TABLE(pwTable), pw, i, i+1, 0, 1,
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       2, 0);
+    }
+
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WIN ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 0, 1, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WINGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 1, 2, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WINBACKGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 2, 3, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+
+    pw = gtk_label_new( " - " );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 3, 4, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+
+    pw = gtk_label_new( OutputPercent ( 1.0f - ar [ OUTPUT_WIN ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 4, 5, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_LOSEGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 5, 6, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_LOSEBACKGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 6, 7, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    
+    return pwTable;
+}
 
 
 /*
@@ -397,6 +435,7 @@ CubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* cubeless equity */
 
+    /* Define first row of text (in sz) */
     switch ( pes->et ) {
     case EVAL_EVAL:
       if ( ci.nMatchTo )
@@ -431,7 +470,7 @@ CubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
       sz = g_strdup ( "" );
 
     }
-                               
+
     pw = gtk_label_new ( sz );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
@@ -449,9 +488,8 @@ CubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     if ( pes->et == EVAL_EVAL ) {
 
-      pw = gtk_label_new ( OutputPercents ( aarOutput[ 0 ], TRUE ) );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0.5, 0.5 );
-      
+      pw = OutputPercentsTable(aarOutput[ 0 ] );
+
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          0, 4, iRow, iRow + 1, 
                          GTK_EXPAND | GTK_FILL, 
@@ -592,7 +630,6 @@ CubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     return pwFrame;
 }
-
 
 static void
 UpdateCubeAnalysis ( cubehintdata *pchd ) {

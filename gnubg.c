@@ -1580,7 +1580,7 @@ command cER = {
       NULL, acSetBearoff },
     { "beavers", CommandSetBeavers, 
       N_("Set whether beavers are allowed in money game or not"), 
-      szONOFF, &cOnOff },
+      szVALUE, NULL },
     { "board", CommandSetBoard, N_("Set up the board in a particular "
       "position"), szPOSITION, NULL },
     { "cache", CommandSetCache, N_("Set the size of the evaluation cache"),

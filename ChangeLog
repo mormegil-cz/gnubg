@@ -1,3 +1,11 @@
+Thu Aug 21 20:25:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkcube.c (OutputPercentsTable): show headers on 
+	gwc's.
+	(contributed by Rob Konigsberg)
+	* gnubg.c: fix typo in "set beavers" command
+	(reported by Chris D. Yep)
+
 Thu Aug 21 18:15:11 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* evalc. (DumpPosition): ensure "eval" reports cubeless money
