@@ -132,6 +132,7 @@ extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
 extern void 
 GTKShowPath( void );
+extern void GTKMatchInfo( void );
 
 extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
 extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw );

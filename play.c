@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -2751,6 +2752,11 @@ extern void CommandNewGame( char *sz ) {
 
 extern void ClearMatch( void ) {
 
+    char ***pppch;
+    static char **appch[] = { &mi.pchRating[ 0 ], &mi.pchRating[ 1 ],
+			      &mi.pchEvent, &mi.pchRound, &mi.pchPlace,
+			      &mi.pchAnnotator, &mi.pchComment, NULL };
+    
     ms.nMatchTo = 0;
 
     ms.cGames = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
@@ -2759,12 +2765,30 @@ extern void ClearMatch( void ) {
     ms.fPostCrawford = FALSE;
     ms.gs = GAME_NONE;
     IniStatcontext( &scMatch );
+
+    for( pppch = appch; *pppch; pppch++ )
+	if( **pppch ) {
+	    free( **pppch );
+	    **pppch = NULL;
+	}
+
+    mi.nYear = 0;
 }
 
 extern void FreeMatch( void ) {
 
     PopGame( lMatch.plNext->p, TRUE );
     IniStatcontext( &scMatch );
+}
+
+extern void SetMatchDate( matchinfo *pmi ) {
+
+    time_t t = time( NULL );
+    struct tm *ptm = localtime( &t );
+    
+    pmi->nYear = ptm->tm_year + 1900;;
+    pmi->nMonth = ptm->tm_mon + 1;
+    pmi->nDay = ptm->tm_mday;
 }
 
 extern void CommandNewMatch( char *sz ) {
@@ -2797,17 +2821,14 @@ extern void CommandNewMatch( char *sz ) {
     }
     
     FreeMatch();
-
+    ClearMatch();
+    
     plLastMove = NULL;
 
     ms.nMatchTo = n;
 
-    ms.cGames = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
-    ms.fTurn = -1;
-    ms.gs = GAME_NONE;
-    ms.fCrawford = FALSE;
-    ms.fPostCrawford = FALSE;
-
+    SetMatchDate( &mi );
+    
     UpdateSetting( &ms.nMatchTo );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.fCrawford );
@@ -2836,15 +2857,12 @@ extern void CommandNewSession( char *sz ) {
     }
     
     FreeMatch();
-
+    ClearMatch();
+    
     plLastMove = NULL;
 
-    ms.cGames = ms.nMatchTo = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
-    ms.fTurn = -1;
-    ms.gs = GAME_NONE;
-    ms.fCrawford = 0;
-    ms.fPostCrawford = 0;
-
+    SetMatchDate( &mi );
+    
     UpdateSetting( &ms.nMatchTo );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.fCrawford );

@@ -501,6 +501,41 @@ extern void CommandShowJacoby( char *sz ) {
 
 }
 
+extern void CommandShowMatchInfo( char *sz ) {
+
+#if USE_GTK
+    if( fX ) {
+	GTKMatchInfo();
+	return;
+    }
+#endif
+    
+    outputf( _("%s (%s) vs. %s (%s)"), ap[ 0 ].szName,
+	     mi.pchRating[ 0 ] ? mi.pchRating[ 0 ] : _("unknown rating"),
+	     ap[ 1 ].szName, mi.pchRating[ 1 ] ? mi.pchRating[ 1 ] :
+	     _("unknown rating") );
+
+    if( mi.nYear )
+	outputf( ", %04d-%02d-%02d\n", mi.nYear, mi.nMonth, mi.nDay );
+    else
+	outputc( '\n' );
+
+    if( mi.pchEvent )
+	outputf( _("Event: %s\n"), mi.pchEvent );
+
+    if( mi.pchRound )
+	outputf( _("Round: %s\n"), mi.pchRound );
+
+    if( mi.pchPlace )
+	outputf( _("Place: %s\n"), mi.pchPlace );
+
+    if( mi.pchAnnotator )
+	outputf( _("Annotator: %s\n"), mi.pchAnnotator );
+
+    if( mi.pchComment )
+	outputf( "\n%s\n", mi.pchComment );    
+}
+
 extern void CommandShowNackgammon( char *sz ) {
 
     if( fNackgammon )

@@ -2109,6 +2109,8 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
 	{ N_("/_Game/Set turn/1"), NULL, Command, CMD_SET_TURN_1,
 	  "/Game/Set turn/0" },
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/Match information"), NULL, GTKMatchInfo, 0, NULL },
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT, NULL },
@@ -6497,6 +6499,8 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_NEXT_GAME ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_PREV_GAME ), !ListEmpty( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+				      pif, "/Game/Match information" ), TRUE );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
 			 ms.gs == GAME_PLAYING );
@@ -8348,3 +8352,164 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
     
     fclose( pfIn );    
 }
+
+static void UpdateMatchinfo( const char *pch, char *szParam, char **ppch ) {
+
+    char *szCommand, *pchOld = *ppch ? *ppch : "";
+    
+    if( !strcmp( pch, pchOld ) )
+	/* no change */
+	return;
+
+    szCommand = g_strdup_printf( "set matchinfo %s %s", szParam, pch );
+    UserCommand( szCommand );
+    g_free( szCommand );
+}
+
+static void MatchInfoOK( GtkWidget *pw, int *pf ) {
+
+    *pf = TRUE;
+    gtk_main_quit();
+}
+
+extern void GTKMatchInfo( void ) {
+
+    int fOK = FALSE;
+    GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Match "
+					  "information"),
+					DT_QUESTION,
+					GTK_SIGNAL_FUNC( MatchInfoOK ), &fOK ),
+	*pwTable, *apwRating[ 2 ], *pwDate, *pwEvent, *pwRound, *pwPlace,
+	*pwAnnotator, *pwComment;
+    char sz[ 128 ], *pch;
+    gulong id;
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    id = gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			     GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+    pwTable = gtk_table_new( 2, 9, FALSE );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwTable );
+
+    sprintf( sz, _("%s's rating:"), ap[ 0 ].szName );
+    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( sz ),
+		      0, 1, 0, 1, 0, 0, 0, 0 );
+    sprintf( sz, _("%s's rating:"), ap[ 1 ].szName );
+    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( sz ),
+		      0, 1, 1, 2, 0, 0, 0, 0 );    
+    gtk_table_attach( GTK_TABLE( pwTable ),
+		      gtk_label_new( _("Date:") ),
+		      0, 1, 2, 3, 0, 0, 0, 0 );
+    gtk_table_attach( GTK_TABLE( pwTable ),
+		      gtk_label_new( _("Event:") ),
+		      0, 1, 3, 4, 0, 0, 0, 0 );
+    gtk_table_attach( GTK_TABLE( pwTable ),
+		      gtk_label_new( _("Round:") ),
+		      0, 1, 4, 5, 0, 0, 0, 0 );
+    gtk_table_attach( GTK_TABLE( pwTable ),
+		      gtk_label_new( _("Place:") ),
+		      0, 1, 5, 6, 0, 0, 0, 0 );
+    gtk_table_attach( GTK_TABLE( pwTable ),
+		      gtk_label_new( _("Annotator:") ),
+		      0, 1, 6, 7, 0, 0, 0, 0 );
+    gtk_table_attach( GTK_TABLE( pwTable ),
+		      gtk_label_new( _("Comments:") ),
+		      0, 1, 7, 8, 0, 0, 0, 0 );
+
+    apwRating[ 0 ] = gtk_entry_new();
+    if( mi.pchRating[ 0 ] )
+	gtk_entry_set_text( GTK_ENTRY( apwRating[ 0 ] ), mi.pchRating[ 0 ] );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), apwRating[ 0 ], 1, 2,
+			       0, 1 );
+    
+    apwRating[ 1 ] = gtk_entry_new();
+    if( mi.pchRating[ 1 ] )
+	gtk_entry_set_text( GTK_ENTRY( apwRating[ 1 ] ), mi.pchRating[ 1 ] );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), apwRating[ 1 ], 1, 2,
+			       1, 2 );
+    
+    pwDate = gtk_calendar_new();
+    if( mi.nYear ) {
+	gtk_calendar_select_month( GTK_CALENDAR( pwDate ), mi.nMonth - 1,
+				   mi.nYear );
+	gtk_calendar_select_day( GTK_CALENDAR( pwDate ), mi.nDay );
+    } else
+	gtk_calendar_select_day( GTK_CALENDAR( pwDate ), 0 );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwDate, 1, 2, 2, 3 );
+
+    pwEvent = gtk_entry_new();
+    if( mi.pchEvent )
+	gtk_entry_set_text( GTK_ENTRY( pwEvent ), mi.pchEvent );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwEvent, 1, 2, 3, 4 );
+    
+    pwRound = gtk_entry_new();
+    if( mi.pchRound )
+	gtk_entry_set_text( GTK_ENTRY( pwRound ), mi.pchRound );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwRound, 1, 2, 4, 5 );
+    
+    pwPlace = gtk_entry_new();
+    if( mi.pchPlace )
+	gtk_entry_set_text( GTK_ENTRY( pwPlace ), mi.pchPlace );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwPlace, 1, 2, 5, 6 );
+    
+    pwAnnotator = gtk_entry_new();
+    if( mi.pchAnnotator )
+	gtk_entry_set_text( GTK_ENTRY( pwAnnotator ), mi.pchAnnotator );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwAnnotator, 1, 2, 6, 7 );
+        
+    pwComment = gtk_text_new( NULL, NULL ) ;
+    gtk_text_set_word_wrap( GTK_TEXT( pwComment ), TRUE );
+    gtk_text_set_editable( GTK_TEXT( pwComment ), TRUE );
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwComment, 0, 2, 8, 9 );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( fOK ) {
+	int nYear, nMonth, nDay;
+	
+	gtk_signal_disconnect( GTK_OBJECT( pwDialog ), id );
+	
+	outputpostpone();
+
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 0 ] ) ),
+			 "rating 0", &mi.pchRating[ 0 ] );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 1 ] ) ),
+			 "rating 1", &mi.pchRating[ 1 ] );
+	
+	gtk_calendar_get_date( GTK_CALENDAR( pwDate ), &nYear, &nMonth,
+			       &nDay );
+	nMonth++;
+	if( mi.nYear && !nDay )
+	    UserCommand( "set matchinfo date" );
+	else if( nDay && ( !mi.nYear || mi.nYear != nYear ||
+			   mi.nMonth != nMonth || mi.nDay != nDay ) ) {
+	    char sz[ 64 ];
+	    sprintf( sz, "set matchinfo date %04d-%02d-%02d", nYear, nMonth,
+		     nDay );
+	    UserCommand( sz );
+	}
+	    
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwEvent ) ),
+			 "event", &mi.pchEvent );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwRound ) ),
+			 "round", &mi.pchRound );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwPlace ) ),
+			 "place", &mi.pchPlace );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwAnnotator ) ),
+			 "annotator", &mi.pchAnnotator );
+	pch = gtk_editable_get_chars( GTK_EDITABLE( pwComment ), 0, -1 );
+	UpdateMatchinfo( pch, "comment", &mi.pchComment );
+
+	gtk_widget_destroy( pwDialog );
+	
+	outputresume();
+    }
+}
+

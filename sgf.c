@@ -294,6 +294,43 @@ static void RestoreGS( list *pl, statcontext *psc ) {
     AddStatcontext( psc, &scMatch );
 }
 
+static char *CopyEscapedString( char *pchOrig ) {
+
+    char *sz, *pch;
+
+    for( pch = sz = malloc( strlen( pchOrig ) + 1 ); *pchOrig; pchOrig++ ) {
+	if( *pchOrig == '\\' ) {
+	    if( pchOrig[ 1 ] == '\\' ) {
+		*pch++ = '\\';
+		pchOrig++;
+	    }
+	    continue;
+	}
+
+	if( isspace( *pchOrig ) && *pchOrig != '\n' ) {
+	    *pch++ = ' ';
+	    continue;
+	}
+
+	*pch++ = *pchOrig;
+    }
+
+    *pch = 0;
+    
+    return sz;
+}
+
+static void RestoreText( char *sz, char **ppch ) {
+
+    if( !sz || !*sz )
+	return;
+    
+    if( *ppch )
+	free( *ppch );
+    
+    *ppch = CopyEscapedString( sz );
+}
+
 static void RestoreRootNode( list *pl ) {
 
     property *pp;
@@ -369,7 +406,39 @@ static void RestoreRootNode( list *pl ) {
 	} else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'S' )
 	    /* GS - Game statistics */
 	    RestoreGS( pp->pl, &pmgi->sc );
-
+	else if( pp->ach[ 0 ] == 'W' && pp->ach[ 1 ] == 'R' )
+	    /* WR - White rank */
+	    RestoreText( pp->pl->plNext->p, &mi.pchRating[ 0 ] );
+	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'R' )
+	    /* BR - Black rank */
+	    RestoreText( pp->pl->plNext->p, &mi.pchRating[ 1 ] );
+	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'T' ) {
+	    /* DT - Date */
+	    int nYear, nMonth, nDay;
+	    
+	    if( pp->pl->plNext->p &&
+		sscanf( pp->pl->plNext->p, "%d-%d-%d", &nYear, &nMonth,
+			&nDay ) == 3 ) {
+		mi.nYear = nYear;
+		mi.nMonth = nMonth;
+		mi.nDay = nDay;
+	    }
+	} else if( pp->ach[ 0 ] == 'E' && pp->ach[ 1 ] == 'V' )
+	    /* EV - Event */
+	    RestoreText( pp->pl->plNext->p, &mi.pchEvent );
+	else if( pp->ach[ 0 ] == 'R' && pp->ach[ 1 ] == 'O' )
+	    /* RO - Round */
+	    RestoreText( pp->pl->plNext->p, &mi.pchRound );
+	else if( pp->ach[ 0 ] == 'P' && pp->ach[ 1 ] == 'C' )
+	    /* PC - Place */
+	    RestoreText( pp->pl->plNext->p, &mi.pchPlace );
+	else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'N' )
+	    /* AN - Annotator */
+	    RestoreText( pp->pl->plNext->p, &mi.pchAnnotator );
+	else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'C' )
+	    /* GC - Game comment */
+	    RestoreText( pp->pl->plNext->p, &mi.pchComment );
+    
     AddMoveRecord( pmgi );
 }
 
@@ -777,32 +846,6 @@ static void PointList( list *pl, int an[] ) {
 	} else if( *pch >= 'a' && *pch <= 'y' )
 	    an[ *pch - 'a' ]++;
     }
-}
-
-static char *CopyEscapedString( char *pchOrig ) {
-
-    char *sz, *pch;
-
-    for( pch = sz = malloc( strlen( pchOrig ) + 1 ); *pchOrig; pchOrig++ ) {
-	if( *pchOrig == '\\' ) {
-	    if( pchOrig[ 1 ] == '\\' ) {
-		*pch++ = '\\';
-		pchOrig++;
-	    }
-	    continue;
-	}
-
-	if( isspace( *pchOrig ) && *pchOrig != '\n' ) {
-	    *pch++ = ' ';
-	    continue;
-	}
-
-	*pch++ = *pchOrig;
-    }
-
-    *pch = 0;
-    
-    return sz;
 }
 
 static void RestoreNode( list *pl ) {
@@ -1637,6 +1680,13 @@ static void WriteStatContext( FILE *pf, statcontext *psc ) {
     }
 }
 
+static void WriteProperty( FILE *pf, char *szName, char *szValue ) {
+
+    fputs( szName, pf );
+    putc( '[', pf );
+    WriteEscapedString( pf, szValue, FALSE );
+    putc( ']', pf );
+}
 
 static void SaveGame( FILE *pf, list *plGame ) {
 
@@ -1668,6 +1718,22 @@ static void SaveGame( FILE *pf, list *plGame ) {
     WriteEscapedString( pf, ap[ 1 ].szName, FALSE );
     putc( ']', pf );
 
+    if( !pmr->g.i ) {
+	char szDate[ 32 ];
+	
+	WriteProperty( pf, "WR", mi.pchRating[ 0 ] );
+	WriteProperty( pf, "BR", mi.pchRating[ 1 ] );
+	if( mi.nYear ) {
+	    sprintf( szDate, "%04d-%02d-%02d", mi.nYear, mi.nMonth, mi.nDay );
+	    WriteProperty( pf, "DT", szDate );
+	}
+	WriteProperty( pf, "EV", mi.pchEvent );
+	WriteProperty( pf, "RO", mi.pchRound );
+	WriteProperty( pf, "PC", mi.pchPlace );
+	WriteProperty( pf, "AN", mi.pchAnnotator );
+	WriteProperty( pf, "GC", mi.pchComment );
+    }
+    
     if( pmr->g.fCrawford ) {
 	fputs( "RU[Crawford", pf );
 	if( pmr->g.fCrawfordGame )

@@ -257,7 +257,14 @@ typedef struct _matchstate {
     gamestate gs;
 } matchstate;
 
+typedef struct _matchinfo { /* SGF match information */
+    char *pchRating[ 2 ], *pchEvent, *pchRound, *pchPlace, *pchAnnotator,
+	*pchComment; /* malloc()ed, or NULL if unknown */
+    int nYear, nMonth, nDay; /* 0 for nYear means date unknown */
+} matchinfo;
+
 extern matchstate ms;
+extern matchinfo mi;
 extern int fNextTurn, fComputing;
 
 /* User settings. */
@@ -348,6 +355,7 @@ extern void CancelCubeAction( void );
 extern int ComputerTurn( void );
 extern void ClearMatch( void );
 extern void FreeMatch( void );
+extern void SetMatchDate( matchinfo *pmi );
 extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
@@ -685,6 +693,13 @@ extern void CommandAccept( char * ),
     CommandSetGeometryPosY ( char * ),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
+    CommandSetMatchAnnotator( char * ),
+    CommandSetMatchComment( char * ),
+    CommandSetMatchDate( char * ),
+    CommandSetMatchEvent( char * ),
+    CommandSetMatchPlace( char * ),
+    CommandSetMatchRating( char * ),
+    CommandSetMatchRound( char * ),
     CommandSetMatchID ( char * ),
     CommandSetMessage ( char * ),
     CommandSetMET( char * ),
@@ -801,6 +816,7 @@ extern void CommandAccept( char * ),
     CommandShowJacoby( char * ),
     CommandShowKleinman( char * ),
     CommandShowMarketWindow( char * ),
+    CommandShowMatchInfo( char * ),
     CommandShowNackgammon( char * ),
     CommandShowMatchEquityTable( char * ),
     CommandShowOutput( char * ),

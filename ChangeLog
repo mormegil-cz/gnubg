@@ -1,3 +1,13 @@
+Wed Sep 25 17:21:31 2002  Gary Wong  <gtw@gnu.org>
+
+	* set.c (CommandSetMatchInfoAnnotator, CommandSetMatchInfoComment,
+	CommandSetMatchInfoDate, CommandSetMatchInfoEvent, 
+	CommandSetMatchInfoPlace, CommandSetMatchInfoRating,
+	CommandSetMatchInfoRound): New functions.
+	* gtkgame.c (GTKMatchInfo): New function.
+	* sgf.c (RestoreRootNode, SaveGame): Load and save extra SGF
+	properties.
+
 Wed Sep 25 11:31:27 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c [!USE_GTK2]: #define gtk_widget_get_parent for

@@ -2010,6 +2010,99 @@ CommandSetEvalCubedecision ( char *sz ) {
 
 }
 
+static void SetMatchInfo( char **ppch, char *sz, char *szMessage ) {
+
+    if( *ppch )
+	free( *ppch );
+
+    if( sz && *sz ) {
+	*ppch = strdup( sz );
+	outputf( _("%s set to: %s\n"), szMessage, sz );
+    } else {
+	*ppch = NULL;
+	outputf( _("%s cleared.\n"), szMessage );
+    }
+}
+
+extern void CommandSetMatchAnnotator( char *sz ) {
+
+    SetMatchInfo( &mi.pchAnnotator, sz, _("Match annotator") );
+}
+
+extern void CommandSetMatchComment( char *sz ) {
+    
+    SetMatchInfo( &mi.pchComment, sz, _("Match comment") );
+}
+
+static int DaysInMonth( int nYear, int nMonth ) {
+
+    static int an[ 12 ] = { 31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    
+    if( nMonth < 1 || nMonth > 12 )
+	return -1;
+    else if( nMonth != 2 )
+	return an[ nMonth - 1 ];
+    else if( nYear % 4 || ( !( nYear % 100 ) && nYear % 400 ) )
+	return 28;
+    else
+	return 29;
+}
+ 
+extern void CommandSetMatchDate( char *sz ) {
+
+    int nYear, nMonth, nDay;
+
+    if( !sz || !*sz ) {
+	mi.nYear = 0;
+	outputl( _("Match date cleared." ) );
+	return;
+    }
+    
+    if( sscanf( sz, "%d-%d-%d", &nYear, &nMonth, &nDay ) < 3 ||
+	nYear < 1753 || nYear > 9999 || nMonth < 1 || nMonth > 12 ||
+	nDay < 1 || nDay > DaysInMonth( nYear, nMonth ) ) {
+	outputf( _("%s is not a valid date (see `help set matchinfo "
+		   "date').\n"), sz );
+	return;
+    }
+
+    mi.nYear = nYear;
+    mi.nMonth = nMonth;
+    mi.nDay = nDay;
+
+    outputf( _("Match date set to %04d-%02d-%02d.\n"), nYear, nMonth, nDay );
+}
+
+extern void CommandSetMatchEvent( char *sz ) {
+
+    SetMatchInfo( &mi.pchEvent, sz, _("Match event") );
+}
+
+extern void CommandSetMatchPlace( char *sz ) {
+
+    SetMatchInfo( &mi.pchPlace, sz, _("Match place") );
+}
+
+extern void CommandSetMatchRating( char *sz ) {
+
+    int n;
+    char szMessage[ 64 ];
+    
+    if( ( n = ParsePlayer( NextToken( &sz ) ) ) < 0 ) {
+	outputl( _("You must specify which player's rating to set (see `help "
+		   "set matchinfo rating').") );
+	return;
+    }
+
+    sprintf( szMessage, _("Rating for %s"), ap[ n ].szName );
+    
+    SetMatchInfo( &mi.pchRating[ n ], sz, szMessage );
+}
+
+extern void CommandSetMatchRound( char *sz ) {
+
+    SetMatchInfo( &mi.pchRound, sz, _("Match round") );
+}
 
 extern void
 CommandSetMatchID ( char *sz ) {

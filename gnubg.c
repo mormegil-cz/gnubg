@@ -164,6 +164,7 @@ matchstate ms = {
     0, /* cBeavers */
     GAME_NONE /* gs */
 };
+matchinfo mi;
 
 int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
@@ -344,6 +345,7 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTSIZE[] = N_("[size]"),
     szOPTVALUE[] = N_("[value]"),
     szPLAYER[] = N_("<player>"),
+    szPLAYEROPTRATING[] = N_("<player> [rating]"),
     szPLIES[] = N_("<plies>"),
     szPOSITION[] = N_("<position>"),
     szPROMPT[] = N_("<prompt>"),
@@ -734,6 +736,22 @@ command cER = {
     { "message", CommandSetGeometryMessage,
       N_("set geometry of message window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetMatchInfo[] = {
+    { "annotator", CommandSetMatchAnnotator,
+      N_("Record the name of the match commentator"), szOPTNAME, NULL },
+    { "comment", CommandSetMatchComment,
+      N_("Record miscellaneous notes about the match"), szOPTVALUE, NULL },
+    { "date", CommandSetMatchDate,
+      N_("Record the date when the match was played"), szOPTVALUE, NULL },
+    { "event", CommandSetMatchEvent,
+      N_("Record the name of the event the match is from"), szOPTVALUE, NULL },
+    { "place", CommandSetMatchPlace,
+      N_("Record the location where the match was played"), szOPTVALUE, NULL },
+    { "rating", CommandSetMatchRating,
+      N_("Record the ratings of the players"), szPLAYEROPTRATING, &cPlayer },
+    { "round", CommandSetMatchRound,
+      N_("Record the round of the match within the event"), szOPTVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
       N_("Show match equities as percentages (on) or probabilities (off)"),
@@ -1091,6 +1109,8 @@ command cER = {
     { "matchequitytable", CommandSetMET,
       N_("Read match equity table from XML file"), szFILENAME, &cFilename },
     { "matchid", CommandSetMatchID, N_("set Match ID"), szMATCHID, NULL },
+    { "matchinfo", NULL, N_("Record auxiliary match information"), NULL,
+      acSetMatchInfo },
     { "message", CommandSetMessage, N_("Display window with messages"),
       szONOFF, &cOnOff },
     { "met", CommandSetMET,
@@ -1187,6 +1207,8 @@ command cER = {
       N_("show market window for doubles"), NULL, NULL },
     { "matchequitytable", CommandShowMatchEquityTable, 
       N_("Show match equity table"), szOPTVALUE, NULL },
+    { "matchinfo", CommandShowMatchInfo,
+      N_("Display auxiliary match information"), NULL, NULL },
     { "met", CommandShowMatchEquityTable, 
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon,
@@ -5676,6 +5698,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     exsExport.szHTMLPictureURL = strdup ( "html-images/" );
     exsExport.szHTMLExtension = strdup ( "png" );
 
+    SetMatchDate( &mi );
+    
     /* init met */
     
     InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
