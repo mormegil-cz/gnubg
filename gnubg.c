@@ -4339,7 +4339,7 @@ extern void PromptForExit( void ) {
 	PortableSignalRestore( SIGINT, &shInterruptOld );
     
 #if USE_GTK
-	if (fx)
+	if (fX)
 		board_free_pixmaps(bd);
 #if USE_BOARD3D
 	if (fX)
