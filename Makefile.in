@@ -203,6 +203,7 @@ bin_PROGRAMS = gnubg makebearoff makehyper
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
 @USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 @USE_GTK_TRUE@	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
+@USE_GTK_TRUE@        openurl.c openurl.h \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
@@ -307,8 +308,8 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkrace.$(OBJEXT) gtkmovefilter.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkmet.$(OBJEXT) gtkcolour.$(OBJEXT) \
 @USE_GTK_TRUE@	gtksplash.$(OBJEXT) gtkrolls.$(OBJEXT) \
-@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_3) \
-@USE_GTK_TRUE@	$(am__objects_4)
+@USE_GTK_TRUE@	openurl.$(OBJEXT) $(am__objects_2) \
+@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -365,17 +366,17 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/makebearoff1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makehyper.Po ./$(DEPDIR)/makeweights.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/matchequity.Po ./$(DEPDIR)/matchid.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/onechequer.Po ./$(DEPDIR)/osr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/path.Po ./$(DEPDIR)/play.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/positionid.Po ./$(DEPDIR)/postscript.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/pub_eval.Po ./$(DEPDIR)/record.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/render.Po ./$(DEPDIR)/renderprefs.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/speed.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/xboard.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/xgame.Po
+@AMDEP_TRUE@	./$(DEPDIR)/onechequer.Po ./$(DEPDIR)/openurl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/osr.Po ./$(DEPDIR)/path.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/play.Po ./$(DEPDIR)/positionid.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/postscript.Po ./$(DEPDIR)/pub_eval.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/render.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/renderprefs.Po ./$(DEPDIR)/rollout.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/set.Po ./$(DEPDIR)/sgf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgfl.Po ./$(DEPDIR)/sgfp.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/show.Po ./$(DEPDIR)/sound.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/speed.Po ./$(DEPDIR)/text.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/xboard.Po ./$(DEPDIR)/xgame.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -545,6 +546,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchequity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onechequer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/openurl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/osr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/play.Po@am__quote@

@@ -1,3 +1,9 @@
+Wed May 21 21:21:41 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (ShowManualWeb, ReportBug): new functions.
+
+	* openurl.c: new file. URL support for windows and *nix.
+
 Wed May 21 20:35:56 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseSnowieTxt): strsep is not ANSI. Use new
