@@ -106,6 +106,9 @@
 /* Define if you have the lrint function.  */
 #undef HAVE_LRINT
 
+/* Define if you have the memmove function.  */
+#undef HAVE_MEMMOVE
+
 /* Define if you have the random function.  */
 #undef HAVE_RANDOM
 
@@ -230,6 +233,10 @@
 
 /* The directory where the weights and databases will be stored. */
 #define PKGDATADIR DATADIR "/" PACKAGE
+
+#if !HAVE_MEMMOVE
+#define memmove(p0,p1,c) ( bcopy( (p1), (p0), (c) ) )
+#endif
 
 /* Define the obvious signbit() if the C library doesn't. */
 #if !HAVE_SIGNBIT

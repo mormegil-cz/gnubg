@@ -2753,7 +2753,7 @@ else
 fi
 done
 
-for ac_func in fork fstat getdtablesize getlogin getpwuid gettimeofday isatty random readv select setvbuf
+for ac_func in fork fstat getdtablesize getlogin getpwuid gettimeofday isatty memmove random readv select setvbuf
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:2760: checking for $ac_func" >&5

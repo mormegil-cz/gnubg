@@ -23,6 +23,10 @@
 /* The directory where the weights and databases will be stored. */
 #define PKGDATADIR DATADIR "/" PACKAGE
 
+#if !HAVE_MEMMOVE
+#define memmove(p0,p1,c) ( bcopy( (p1), (p0), (c) ) )
+#endif
+
 /* Define the obvious signbit() if the C library doesn't. */
 #if !HAVE_SIGNBIT
 #define signbit(x) ( (x) < 0.0 )
