@@ -2055,7 +2055,50 @@ highlightcolour *HighlightColour = &HighlightColourTable[12]; /* default red */
 int HighlightIntensity = 0;
 
 char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
+/*
+ * general token extraction
+   input: ppch pointer to pointer to command
+          szToekns - string of token separators
+   output: NULL if no token found
+           ptr to extracted token if found. Token is in original location
+               in input string, but null terminated if not quoted, token
+               will have been moved forward over quote character when quoted
+           ie: 
+           input:  '  abcd efgh'
+           output  '  abcd\0efgh'
+                   return value points to abcd, ppch points to efgh
+           input   '  "jklm" nopq'
+           output  ;  jklm\0 nopq'
+                   return value points to jklm, ppch points to space before 
+                   the 'n'
+          ppch points past null terminator
 
+   ignores leading whitespace, advances ppch over token and trailing
+          whitespace
+
+   matching single or double quotes are allowed, any character outside
+   of quotes or in doubly quoated strings can be escaped with a
+   backslash and will be taken as literal.  Backslashes within single
+   quoted strings are taken literally. Multiple quoted strins can be
+   concatentated.  
+
+   For example: input ' abc\"d"e f\"g h i"jk'l m n \" o p q'rst uvwzyz'
+   with the terminator list ' \t\r\n\v\f'
+   The returned token will be the string
+   <abc"de f"g h j ijkl m n \" o p qrst>
+   ppch will point to the 'u'
+   The \" between c and d is not in a single quoted string, so is reduced to 
+   a double quote and is *not* the start of a quoted string.
+   The " before the 'd' begins a double quoted string, so spaces and tabs are
+   not terminators. The \" between f and g is reduced to a double quote and 
+   does not teminate the quoted string. which ends with the double quote 
+   between i and j. The \" between n and o is taken as a pair of literal
+   characters because they are within the single quoted string beginning
+   before l and ending after q.
+   It is not possible to put a single quote within a single quoted string. 
+   You can have single quotes unescaped withing double quoted strings and
+   double quotes unescaped within single quoted strings.
+ */
 extern char *
 NextTokenGeneral( char **ppch, const char *szTokens ) {
 
@@ -2163,12 +2206,30 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 
 }
 
+/* extrace a token from a string. Tokens are terminated by tab, newline, 
+   carriage return, vertical tab or form feed.
+   Input:
+
+     ppch = pointer to pointer to input string. This will be updated
+        to point past any token found. If the string is exhausetd, 
+        the pointer at ppch will point to the terminating NULL, so it is
+        safe to call this function repeatedly after failure
+    
+   Output:
+       null terminated token if found or NULL if no tokens present.
+*/
 extern char *NextToken( char **ppch ) {
 
   return NextTokenGeneral( ppch, " \t\n\r\v\f" ); 
 
 }
 
+/* return a count of the number of separate runs of one or more
+   non-whitespace characters. This is the number of tokens that
+   NextToken() will return. It may not be the number of tokens
+   NextTokenGeneral() will return, as it does not count quoted strings
+   containing whitespace as single tokens
+*/
 static int CountTokens( char *pch ) {
 
     int c = 0;
@@ -2188,6 +2249,9 @@ static int CountTokens( char *pch ) {
     return c;
 }
 
+/* extract a token and convert to double. On error or no token, return 
+   ERR_VAL (a very large negative double.
+*/
 extern double ParseReal( char **ppch ) {
 
     char *pch, *pchOrig;
@@ -2203,6 +2267,11 @@ extern double ParseReal( char **ppch ) {
     return *pch ? ERR_VAL : r;
 }
 
+/* get the next token from the input and convert as an
+   integer. Returns INT_MIN on empty input or non-numerics found. Does
+   handle negative integers. On failure, one token (if any were available
+   will have been consumed, it is not pushed back into the input.
+*/
 extern int ParseNumber( char **ppch ) {
 
     char *pch, *pchOrig;
@@ -2217,6 +2286,11 @@ extern int ParseNumber( char **ppch ) {
     return atoi( pchOrig );
 }
 
+/* get a player either by name or as player 0 or 1 (indicated by the single
+   character '0' or '1'. Returns -1 on no input, 2 if not a recoginsed name
+   Note - this is not a token extracting routine, it expects to be handed
+   an already extracted token
+*/
 extern int ParsePlayer( char *sz ) {
 
     int i;
@@ -2237,6 +2311,9 @@ extern int ParsePlayer( char *sz ) {
     return -1;
 }
 
+/* look up a colour name and return its index in the HighlightColourTable or
+   -1 if not found
+*/
 extern int ParseHighlightColour( char *sz ) {
 
   int	i;
@@ -2253,7 +2330,6 @@ extern int ParseHighlightColour( char *sz ) {
   return -1;
 
 }
-
 
 
 /* Convert a string to a board array.  Currently allows the string to
@@ -2423,6 +2499,20 @@ extern void UpdateSettings( void ) {
     ShowBoard();
 }
 
+/* handle turning a setting on / off
+   inputs: szName - the setting being adjusted
+           pf = pointer to current on/off state (will be updated)
+           sz = pointer to command line - a token will be extracted, 
+                but furhter calls to NextToken will return only the on/off
+                value, so you can't have commands in the form
+                set something on <more tokens>
+           szOn - text to output when turning setting on
+           szOff - text to output when turning setting off
+    output: -1 on error
+             0 setting is now off
+             1 setting is now on
+    acceptable tokens are on/off yes/no true/false
+ */
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff ) {
 
