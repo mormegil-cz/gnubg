@@ -3271,7 +3271,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
                              int fDetailProb, int fShowParameters ) {
     
     cubeinfo ci;
-    char szTemp[ 1024 ], szMove[ 32 ];
+    char szTemp[ 2048 ], szMove[ 32 ];
     char *pc;
     float *ar, *arStdDev;
     float rEq, rEqTop;
@@ -5023,6 +5023,7 @@ extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache; 
     char *szFile;
+    char szTemp[ 1024 ];
     static char *aszWindow[] = {
 	"main", "game", "annotation", "hint", "message"
 #if USE_GTK

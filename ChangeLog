@@ -1,3 +1,11 @@
+Wed Aug 13 22:38:33 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* set.c (CommandSetTutorChequer): fix typo.
+	(contributed by Rob Konigsberg)
+	* gnubg.c (CommandSaveSettings): declare szTemp.
+	* gtkprefs.c: make szTemp local.	
+	(reported by Nardy)
+
 Wed Aug 13 21:32:37 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c (CommandNext): fix bug in "next marked" command.
@@ -13,7 +21,7 @@ Wed Aug 13 19:09:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (button_press_event): right clicks to 
 	drop double and reject resignation.
-	(contributed by Rob ...)
+	(contributed by Rob Konigsberg)
 
 Wed Aug 13 18:08:35 2003  Joern Thyssen  <jth@gnubg.org>
 

@@ -1022,7 +1022,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     return pwx;
 }
 
-char szTemp[2048];
+static char szTemp[2048];
 
 static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
