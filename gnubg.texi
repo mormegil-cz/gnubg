@@ -820,17 +820,21 @@ called ``money'' play, regardless of whether any money is involved).
 @kindex set postcrawford
 @kindex set autocrawford
 @kindex set jacoby
+@kindex set autodoubles
 @kindex set score
 @kindex show crawford
 @kindex show postcrawford
 @kindex show jacoby
+@kindex show autodoubles
 @kindex show score
 @item new match @var{length}
 @itemx new session
 @itemx set autogame
 @itemx set crawford
 @itemx set postcrawford
+@itemx set autocrawford
 @itemx set jacoby
+@itemx set autodoubles @var{limit}
 @itemx set score @var{points} @var{points}
 @itemx show crawford
 @itemx show postcrawford

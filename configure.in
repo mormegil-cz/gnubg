@@ -52,6 +52,7 @@ AC_FUNC_MMAP
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(gettimeofday)
 AC_CHECK_FUNCS(random)
+AC_REPLACE_FUNCS(rand_r)
 AC_TYPE_SIGNAL
 
 dnl Check for the X Window System.

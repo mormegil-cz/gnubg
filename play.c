@@ -37,12 +37,18 @@ static void NewGame( void ) {
     fCubeOwner = -1;
     go = GAME_NORMAL;
     
-    do {
-	RollDice( anDice );
-	if( fDisplay )
-	    printf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
-		    ap[ 1 ].szName, anDice[ 1 ] );
-    } while( anDice[ 0 ] == anDice[ 1 ] );
+ reroll:
+    RollDice( anDice );
+    if( fDisplay )
+	printf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
+		ap[ 1 ].szName, anDice[ 1 ] );
+
+    if( anDice[ 0 ] == anDice[ 1 ] ) {
+	if( nMatchTo <= 0 && nCube < ( 1 << cAutoDoubles ) && fCubeUse )
+	    printf( "The cube is now at %d.\n", nCube <<= 1 );
+
+	goto reroll;
+    }
 
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
 }
@@ -181,6 +187,11 @@ static void NextTurn( void ) {
 	    ( go == GAME_DROP && ( n = 1 ) ) ||
 	    ( go == GAME_RESIGNED && ( n = fResigned ) ) ) {
 	    fWinner = !fTurn;
+
+	    if( fJacoby && fCubeOwner == -1 && !nMatchTo )
+		/* gammons do not count on a centred cube during money
+		   sessions under the Jacoby rule */
+		n = 1;
 	    
 	    anScore[ fWinner ] += n * nCube;
 	    cGames++;
@@ -193,6 +204,11 @@ static void NextTurn( void ) {
 	    printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
 		    aszGameResult[ n - 1 ], n * nCube,
 		    n * nCube > 1 ? "s" : "" );
+
+#if !X_DISPLAY_MISSING
+	    if( fX )
+		ShowBoard();
+#endif
 	    
 	    if( nMatchTo && fAutoCrawford ) {
 		fCrawford = anScore[ fWinner ] == nMatchTo - 1 &&
@@ -223,7 +239,7 @@ static void NextTurn( void ) {
 	    break;
 
 	if( fAutoRoll && fCubeOwner >= 0 && fCubeOwner != fTurn &&
-	    !anDice[ 0 ] ) {
+	    !anDice[ 0 ] && !fDoubled ) {
 	    CommandRoll( NULL );
 
 	    if( fShouldRecurse )
@@ -297,6 +313,13 @@ extern void CommandDouble( char *sz ) {
     
     if( fTurn < 0 ) {
 	puts( "No game in progress (type `new' to start one)." );
+
+	return;
+    }
+
+    if( !fCubeUse ) {
+	puts( "The doubling cube has been disabled (see `help set cube "
+	      "use')." );
 
 	return;
     }
@@ -586,28 +609,34 @@ extern void CommandNewMatch( char *sz ) {
 
     nMatchTo = n;
 
-    anScore[ 0 ] = anScore[ 1 ] = 0;
+    cGames = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
-    fJacoby = 0;
     fCrawford = 0;
     fPostCrawford = 0;
 
     printf( "A new %d point match has been started.\n", n );
 
-    return;
+#if !X_DISPLAY_MISSING
+    if( fX )
+	ShowBoard();
+#endif
 }
 
 extern void CommandNewSession( char *sz ) {
 
     FreeMatch();
 
-    nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
+    cGames = nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
-    fJacoby = 0;
     fCrawford = 0;
     fPostCrawford = 0;
 
     puts( "A new session has been started." );
+    
+#if !X_DISPLAY_MISSING
+    if( fX )
+	ShowBoard();
+#endif
 }
 
 extern void CommandPlay( char *sz ) {
@@ -631,6 +660,12 @@ extern void CommandPlay( char *sz ) {
 extern void CommandRedouble( char *sz ) {
 
     movetype *pmt;
+
+    if( nMatchTo > 0 ) {
+	puts( "Redoubles are not permitted during match play." );
+
+	return;
+    }
     
     if( fTurn < 0 || !fDoubled ) {
 	puts( "The cube must have been offered before you can redouble it." );

@@ -24,6 +24,9 @@
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define if you have the rand_r function.  */
+#undef HAVE_RAND_R
+
 /* Define if you have the random function.  */
 #undef HAVE_RANDOM
 

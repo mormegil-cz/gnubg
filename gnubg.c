@@ -67,7 +67,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fResigned = FALSE, fMove = -1, nPliesEval = 1, anScore[ 2 ] = { 0, 0 },
     cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
     fAutoRoll = TRUE, nMatchTo = 0, fJacoby = TRUE, fCrawford = FALSE,
-    fPostCrawford = FALSE, fAutoCrawford = TRUE;
+    fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 0,
+    fCubeUse = TRUE;
 
 player ap[ 2 ] = {
     { "O", PLAYER_GNU, 0 },
@@ -106,6 +107,7 @@ static command acDatabase[] = {
       "cube", NULL },
     { "owner", CommandNotImplemented, "Allow only one player to double",
       NULL },
+    { "use", CommandSetCubeUse, "Enable use of the doubling cube", NULL },
     { "value", CommandNotImplemented, "Fix what the cube has been set to",
       NULL },
     { NULL, NULL, NULL, NULL }
@@ -125,6 +127,8 @@ static command acDatabase[] = {
       "chequers as possible", NULL },
     { "autocrawford", CommandSetAutoCrawford, "Enable the Crawford game "
       "based on match score", NULL },
+    { "autodoubles", CommandSetAutoDoubles, "Control automatic doubles "
+      "during (money) session play", NULL },
     { "autogame", CommandSetAutoGame, "Select whether to start new games "
       "after wins", NULL },
     { "automove", CommandSetAutoMove, "Select whether forced moves will be "
@@ -449,10 +453,18 @@ extern void ShowBoard( void ) {
 			ap[ 1 ].szName };
 
     if( fTurn == -1 ) {
-	puts( "No game in progress." );
+#if !X_DISPLAY_MISSING
+	if( fX ) {
+	    InitBoard( anBoard );
+	    GameSetBoard( &ewnd, anBoard, 0, ap[ 1 ].szName, ap[ 0 ].szName,
+			  nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
+	} else
+#endif
+	    puts( "No game in progress." );
+	
 	return;
     }
-
+    
 #if !X_DISPLAY_MISSING
     if( !fX ) {
 #endif
@@ -504,7 +516,7 @@ extern void ShowBoard( void ) {
 	    SwapSides( anBoard );
     
 	GameSetBoard( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
-		      0, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
+		      nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
 		      anDice[ 1 ] );
 	
 	if( !fMove )
@@ -1011,13 +1023,10 @@ void RunX( void ) {
     /* FIXME get colourmap here; specify it for the new window */
     
     ExtWndCreate( &ewnd, NULL, "game", &ewcGame, rdb, NULL, NULL );
-
-    GameSet( &ewnd, "board:::1:0:0:"
-              "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
-              "1:0:0:0:0:1:0:0:0:1:-1:0:25:0:0:0:0:2:0:0:3" );
-
     ExtWndRealise( &ewnd, pdsp, DefaultRootWindow( pdsp ),
                    "540x480+100+100", None, 0 );
+
+    ShowBoard();
 
     /* FIXME all this should be done in Ext somehow */
     XStoreName( pdsp, ewnd.wnd, "GNU Backgammon" );

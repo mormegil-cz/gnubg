@@ -1,3 +1,17 @@
+Wed Jan  5 22:20:09 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (NextTurn): ignore gammons when appropriate under the
+	Jacoby rule.
+	* gnubg.c (ShowBoard): when no game is in progress under X, display
+	an empty board window.
+	* set.c (CommandSetCubeUse): New function.
+	* gnubg.c (SetToggle): Add "enabled" and "disabled" (along with
+	yes/no, on/off, true/false).
+	* play.c (NextTurn): Don't autoroll if the opponent has just
+	doubled.
+	* set.c (CommandSetAutoDoubles): New function.
+	* play.c (NewGame): Apply automatic doubles when appropriate.
+
 Mon Jan  3 21:13:22 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* dice.c (InitRNG): Use /dev/random for initial seed if possible.

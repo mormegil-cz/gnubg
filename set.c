@@ -98,6 +98,37 @@ extern void CommandSetAutoCrawford( char *sz ) {
 	       "enable the Crawford game according to match score." );
 }
 
+extern void CommandSetAutoDoubles( char *sz ) {
+
+    int n;
+    
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	puts( "You must specify how many automatic doubles to use "
+	      "(try `help set autodouble')." );
+	return;
+    }
+
+    if( n > 16 ) {
+	puts( "Please specify a smaller limit (up to 16 automatic "
+	      "doubles." );
+	return;
+    }
+	
+    if( ( cAutoDoubles = n ) > 1 )
+	printf( "Automatic doubles will be used (up to a limit of %d).\n", n );
+    else
+	puts( "A single automatic double will be permitted." );
+
+    if( cAutoDoubles ) {
+	if( nMatchTo > 0 )
+	    puts( "(Note that automatic doubles will have no effect until you "
+		  "start session play.)" );
+	else if( !fCubeUse )
+	    puts( "(Note that automatic doubles will have no effect until you "
+		  "enable cube use --\nsee `help set cube use'.)" );
+    }
+}
+
 extern void CommandSetAutoGame( char *sz ) {
 
     SetToggle( "autogame", &fAutoGame, sz, "Will automatically start games "
@@ -156,6 +187,23 @@ extern void CommandSetCache( char *sz ) {
 		n == 1 ? "y" : "ies" );
 }
 
+extern void CommandSetCubeUse( char *sz ) {
+
+    SetToggle( "cube use", &fCubeUse, sz, "Use of the doubling cube is "
+	       "permitted.", "Use of the doubling cube is disabled." );
+
+    if( !fCubeUse ) {
+	nCube = 1;
+	fCubeOwner = -1;
+	fDoubled = FALSE;
+
+#if !X_DISPLAY_MISSING
+	if( fX )
+	    ShowBoard();
+#endif
+    }
+}
+
 extern void CommandSetDice( char *sz ) {
 
     int n0, n1;
@@ -176,8 +224,10 @@ extern void CommandSetDice( char *sz ) {
     printf( "The dice have been set to %d and %d.\n", anDice[ 0 ] = n0,
 	    anDice[ 1 ] = n1 );
 
+#if !X_DISPLAY_MISSING
     if( fX )
 	ShowBoard();
+#endif
 }
 
 extern void CommandSetDisplay( char *sz ) {

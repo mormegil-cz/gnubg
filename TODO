@@ -13,13 +13,9 @@ duplication of effort and to make sure our changes merge easily.
 
 * Game play:
 ** Add cube handling for computer player.
-** Add option for cubeless play.
-** Finish matches and money sessions.  (Should be done now I think -- anything
-  else I've forgotten?)
-** Don't allow beavers in match play.  Allow optional automatic doubles in
-  money play.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
   progress.
+** Finish the "set cube" subcommands.
 
 * Command interface:
 ** Check "show" exists for every "set"!
@@ -37,8 +33,6 @@ duplication of effort and to make sure our changes merge easily.
   stdin is a TTY or not).  Echo commands input with the mouse as if they had
   been typed (this is nontrivial if a partial TTY command has been entered).
   (gary)
-** Try to use some optimisation like XCheckIfEvent() to ignore all but
-  the most recent MotionNotify event in the queue when dragging chequers.
 ** Allow abbreviation of multiple moves (e.g. "8/7(2) 6/5(2)") and
   concatenation of moves (e.g. "24/18*/13").
 ** Finish "help" -- add detailed help for each command.
@@ -48,6 +42,8 @@ duplication of effort and to make sure our changes merge easily.
   with Guile scripts.
 ** Add "!" as a shell escape.
 ** Add ":" as a Guile escape, once it's here.
+** When "set board" is given with no parameters under X, set it to the
+  current position displayed in the board window.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -63,6 +59,8 @@ duplication of effort and to make sure our changes merge easily.
   so the user can tell whether the move is partial, complete, or illegal.
 ** Add a board edit mode.  What would be the best semantics for the
   interface?
+** Try to use some optimisation like XCheckIfEvent() to ignore all but
+  the most recent MotionNotify event in the queue when dragging chequers.
 ** Add Gnome support.  This may also allow us to fix the problem of being
   unresponsive to X events during long computations, which I don't think
   is worth fixing until then.  Better to wait until Gnome is rock solid,
@@ -74,6 +72,7 @@ duplication of effort and to make sure our changes merge easily.
 
 * Bugs:
 ** Evaluations bearing off against contact and in back games are poor.
+  Joseph Heled has improved performance here.
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
 ** Undoing a move that hit a blot in the X window doesn't restore the blot.
