@@ -3775,12 +3775,16 @@ static void
 Shutdown( void ) {
 
   EvalShutdown();
+
 #if USE_PYTHON
   PythonShutdown();
 #endif
 
-}
+#ifdef WIN32
+    WSACleanup();
+#endif
 
+}
 
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
    etc.  If stdin is not a TTY, this should always exit immediately (to
@@ -3820,8 +3824,7 @@ extern void PromptForExit( void ) {
     playSound ( SOUND_EXIT );
     SoundWait();
 
-    Shutdown ();
-    
+    Shutdown();
     exit( EXIT_SUCCESS );
 }
 
@@ -7109,9 +7112,23 @@ static void real_main( void *closure, int argc, char *argv[] ) {
                                   BO_SCONYERS_15x15 | BO_ON_DVDS, 
                                   (void *) ChangeDisk );
 
+#ifdef WIN32
 
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Windows sockets"), 500 );
+#endif /* USE_GTK */
 
-
+    /* init Winsock */
+    {
+	short wVersionRequested;
+	WSADATA wsaData;
+	wVersionRequested = MAKEWORD (1, 1);
+	if (WSAStartup (wVersionRequested, &wsaData) != 0) {
+	    outputerr( "Windows sockets initialisation" );
+	}
+    }
+#endif /* WIN32 */
 
 #if USE_GUILE
 #  if USE_GTK
@@ -7196,8 +7213,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     /* create gnubg directory if non-existing */
 
-    if ( CreateGnubgDirectory () )
-      exit ( EXIT_FAILURE );
+    if ( CreateGnubgDirectory () ) {
+	Shutdown();
+	exit( EXIT_FAILURE );
+    }
 
     /* move .gnubgpr into gnubg directory */
     /*  FIXME: this code can be removed when all users have had their
@@ -7279,6 +7298,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
       FILE *pf = fopen( pchPythonScript, "r" );
       if ( ! pf ) {
         outputerr( pchPythonScript );
+        Shutdown();
         exit( EXIT_FAILURE );
       }
       PyRun_AnyFile( pf, pchPythonScript );

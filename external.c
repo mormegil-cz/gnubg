@@ -111,7 +111,7 @@
 #if HAVE_SOCKETS
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 
-    int h, f;
+    int sock, f;
     struct sockaddr_un *psun;
     struct sockaddr_in *psin;
     struct hostent *phe;
@@ -119,31 +119,34 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
     
     if( ( pch = strchr( sz, ':' ) ) && !strchr( sz, '/' ) ) {
 	/* Internet domain socket. */
-	if( ( h = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
+	if( ( sock = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
 	    return -1;
 
 	f = TRUE;
+
 #ifdef WIN32
-	if( setsockopt( (SOCKET) h, SOL_SOCKET, SO_REUSEADDR, (const char*) &f, sizeof f ) )
+	if( setsockopt( (SOCKET) sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &f, sizeof f ) )
 #else
-	if( setsockopt( h, SOL_SOCKET, SO_REUSEADDR, &f, sizeof f ) )
-#endif
+	if( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &f, sizeof f ) )
+#endif /* WIN32 */
 	    return -1;
-	
+
 	psin = malloc( *pcb = sizeof (struct sockaddr_in) );
-	
+	memset( psin, 0, sizeof (*psin));
+
 	psin->sin_family = AF_INET;
 
+	/* split hostname and port */
 	*pch = 0;
-	
+
 	if( !*sz )
 	    /* no host specified */
 	    psin->sin_addr.s_addr = htonl( INADDR_ANY );
 #ifdef WIN32
-	else if( !( (psin->sin_addr).s_addr = inet_addr(sz) ) ) {
+	else {
 #else
 	else if( !inet_aton( sz, &psin->sin_addr ) ) {
-#endif
+#endif /* WIN32 */
 	    if( !( phe = gethostbyname( sz ) ) ) {
 		*pch = ':';
 		errno = EINVAL;
@@ -151,7 +154,12 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 		return -1;
 	    }
 
+#ifdef WIN32
+	    memcpy( &(psin->sin_addr), (struct in_addr *) (phe->h_addr), phe->h_length);
+#else
 	    psin->sin_addr = *(struct in_addr *) phe->h_addr;
+#endif /* WIN32 */
+
 	}
 
 	*pch++ = ':';
@@ -161,7 +169,7 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 	*ppsa = (struct sockaddr *) psin;
     } else {
 	/* Local domain socket. */
-	if( ( h = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 )
+	if( ( sock = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 )
 	    return -1;
 
 	/* yuck... there's no portable way to obtain the necessary
@@ -178,13 +186,15 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 
 	*ppsa = (struct sockaddr *) psun;
     }
-    
-    return h;
+
+    return sock;
+
 #if 0 
     assert( FALSE );
-#endif
+#endif /* 0 */
+
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
 static void ExternalUnbind( char *sz ) {
@@ -195,7 +205,7 @@ static void ExternalUnbind( char *sz ) {
 
     unlink( sz );
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
 extern int ExternalRead( int h, char *pch, int cch ) {
@@ -217,7 +227,13 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
 #endif
 
+#ifdef WIN32
+	/* reading from sockets doesn't work on Windows
+	   use recv instead */
+	n = recv( (SOCKET) h, p, cch, 0);
+#else
 	n = read( h, p, cch );
+#endif
 
 #ifndef WIN32
 	PortableSignalRestore( SIGPIPE, &sh );
@@ -230,7 +246,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    outputerr( _("external connection") );
+	    outputerr( _("reading from external connection") );
 	    return -1;
 	}
 	
@@ -250,7 +266,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
     assert( FALSE );
 #endif
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
 extern int ExternalWrite( int h, char *pch, int cch ) {
@@ -272,7 +288,13 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
 #endif
 
+#ifdef WIN32
+	/* writing to sockets doesn't work on Windows
+	   use send instead */
+	n = send( (SOCKET) h, (const char *) p, cch, 0);
+#else
 	n = write( h, p, cch );
+#endif
 
 #ifndef WIN32
 	PortableSignalRestore( SIGPIPE, &sh );
@@ -284,7 +306,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    outputerr( _("external connection") );
+	    outputerr( _("writing to external connection") );
 	    return -1;
 	}
 	
@@ -297,7 +319,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
     assert( FALSE );
 #endif
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 extern void CommandExternal( char *sz ) {
 

@@ -1,3 +1,13 @@
+Thu Jul 17 21:59:37 2003  Holger Bochnig <hbgg@gmx.net>
+
+	Sockets support on Windows
+	getting the dice from random.org now works on Windows, too
+
+	* gnubg.c (real_main, Shutdown): Winsock initialisation and cleanup
+	* dice.c (getDiceRandomDotOrg), external.c (ExternalSocket,
+	  ExternalRead, ExternalWrite):
+	  use send and recv, adjusting to different function definitions
+
 Thu Jul 17 14:46:45 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (UpdateMoveList): use Output* functions instead of
