@@ -427,6 +427,9 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
     while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
 
     do {
+
+        pchRight = pchLeft = NULL;
+
 	if( ( pch = strpbrk( sz, "\n\r" ) ) )
 	    *pch = 0;
 
