@@ -648,6 +648,7 @@ extern void CommandSetJacoby( char *sz ) {
   SetToggle( "jacoby", &fJacoby, sz, 
 	     "Will use the Jacoby rule for money sessions.",
 	     "Will not use the Jacoby rule for money sessions." );
+  CalcGammonPrice ();
 }
 
 

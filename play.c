@@ -19,6 +19,9 @@
 #include "eval.h"
 #include "positionid.h"
 
+#include <sys/time.h>
+#include <unistd.h>
+
 char *aszGameResult[] = { "single game", "gammon", "backgammon" };
 enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
 list lMatch, *plGame;
@@ -58,6 +61,10 @@ static int ComputerTurn( void ) {
 
     movenormal *pmn;
     float arDouble[ 4 ];
+
+    int i;
+    struct timeval tv0;
+    struct timeval tv1;
     
     switch( ap[ fTurn ].pt ) {
     case PLAYER_GNU:
@@ -77,7 +84,13 @@ static int ComputerTurn( void ) {
 	} else if( fDoubled ) {
 	  /* consider cube action */
 	  
+	  gettimeofday ( &tv0, NULL );
 	  EvaluateDouble ( ap [ fTurn ].nPlies, anBoard, arDouble );
+	  gettimeofday ( &tv1, NULL );
+
+	    printf ("Time for EvaluateDouble: %10.6f seconds\n",
+		    1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		    (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
 
 	  /* debug printf */
 	  printf ( "equity for take decision %+6.3f\n", arDouble[ 1 ]);
@@ -97,7 +110,14 @@ static int ComputerTurn( void ) {
 	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
 	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) ) {
 
+	    
+	    gettimeofday ( &tv0, NULL );
             EvaluateDouble ( ap [ fTurn ].nPlies, anBoard, arDouble );
+	    gettimeofday ( &tv1, NULL );
+
+	    printf ("Time for EvaluateDouble: %10.6f seconds\n",
+		    1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		    (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
 
 	    printf ( "equity for double decision %+6.3f and %+6.3f\n",
 		     arDouble[ 0 ], arDouble[ 1 ]);
@@ -121,8 +141,17 @@ static int ComputerTurn( void ) {
 	  pmn->anRoll[ 1 ] = anDice[ 1 ];
 	  pmn->fPlayer = fTurn;
 	  ListInsert( plGame, pmn );
-	  return FindBestMove( ap[ fTurn ].nPlies, pmn->anMove, anDice[ 0 ],
+
+	  gettimeofday ( &tv0, NULL );
+	  i = FindBestMove( ap[ fTurn ].nPlies, pmn->anMove, anDice[ 0 ],
 			       anDice[ 1 ], anBoard );
+	  gettimeofday ( &tv1, NULL );
+
+	  printf ("Time for FindBestMove: %10.6f seconds\n",
+		  1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		  (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
+	  return i;
+
 	}
 
     case PLAYER_PUBEVAL:
