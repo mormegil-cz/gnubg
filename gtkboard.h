@@ -271,6 +271,9 @@ extern void InitBoardPreview(BoardData *bd);
 /* Functions for 3d board */
 extern void InitGTK3d(int *argc, char ***argv);
 extern void Init3d();
+extern void InitBoard3d(BoardData *bd);
+extern void freeEigthPoints(float ****boardPoints, int accuracy);
+extern void SetupVisual();
 extern void SetupViewingVolume3d(BoardData *bd);
 extern void DisplayCorrectBoardType(BoardData* bd);
 extern void SetupLight3d(BoardData *bd, renderdata* prd);

@@ -92,6 +92,7 @@ typedef enum _PieceTextureType
 
 extern void FindTexture(TextureInfo** textureInfo, char* file);
 extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
+extern int MaterialCompare(Material* pMat1, Material* pMat2);
 
 #endif
 

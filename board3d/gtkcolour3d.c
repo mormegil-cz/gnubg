@@ -290,8 +290,7 @@ static void RenderPreview(Material* pMat, unsigned char* buf)
 	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 	gdk_gl_pixmap_unref(glpixmap);
-	/* Removed next line as causes OpenGL errors, (hope it's not needed...)
-	gdk_gl_context_unref(glPixmapContext);	*/
+	gdk_gl_context_unref(glPixmapContext);
 }
 
 #endif

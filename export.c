@@ -171,6 +171,7 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	CopyAppearance(&rd);
 	CopySettings3d(bd, &bdpw);
 	bdpw.rd = &rd;
+	rd.nSize = nSize;
 
 	if (!(puch = (unsigned char *) malloc (nSizeX * nSizeY * nSize * nSize * 3)))
 	{

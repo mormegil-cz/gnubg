@@ -84,7 +84,6 @@ typedef struct _diceTest
 } diceTest;
 
 /* Setup functions */
-void InitBoard3d(BoardData *bd);
 void InitGL(BoardData *bd);
 
 /* font functions */
@@ -142,7 +141,6 @@ void AddGameData(GraphData* pgd, int game, statcontext *psc);
 void TidyGraphData(GraphData* pgd);
 
 /* Misc functions */
-void SetupVisual();
 void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureFormat format);
 void GetTexture(BoardData* bd, Material* pMat);
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
@@ -167,7 +165,6 @@ float ***Alloc3d(int x, int y, int z);
 void Free3d(float ***array, int x, int y);
 int LoadTexture(Texture* texture, const char* Filename, TextureFormat format);
 void CheckOpenglError();
-void freeEigthPoints(float ****boardPoints, int accuracy);
 
 typedef int idleFunc(BoardData* bd);
 void setIdleFunc(BoardData* bd, idleFunc* pFun);
