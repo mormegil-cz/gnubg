@@ -770,6 +770,9 @@ command acAnalyse[] = {
 
 static char szCommandSeparators[] = " \t\n\r\v\f";
 
+int iProgressMax, iProgressValue;
+char *pcProgress;
+
 char *aszVersion[] = {
     "GNU Backgammon " VERSION,
 #if USE_GUILE
@@ -3537,6 +3540,58 @@ extern void ProgressStart( char *sz ) {
     }
 }
 
+
+extern void
+ProgressStartValue ( char *sz, int iMax ) {
+
+  if ( !fShowProgress )
+    return;
+
+  iProgressMax = iMax;
+  iProgressValue = 0;
+  pcProgress = sz;
+
+#if USE_GTK
+  if( fX ) {
+    GTKProgressStartValue( sz, iMax );
+    return;
+  }
+#endif
+
+  if( sz ) {
+    fputs( sz, stdout );
+    fflush( stdout );
+  }
+
+}
+
+
+extern void
+ProgressValue ( int iValue ) {
+
+  iProgressValue = iValue;
+
+#if USE_GTK
+  if( fX ) {
+    GTKProgressValue( iValue );
+    return;
+  }
+#endif
+
+  outputf ( "\r%s %d/%d\r", pcProgress, iProgressValue, iProgressMax );
+  fflush ( stdout );
+
+}
+
+
+extern void
+ProgressValueAdd ( int iValue ) {
+
+  ProgressValue ( iProgressValue + iValue );
+
+}
+
+
 extern void Progress( void ) {
 
     static int i = 0;
@@ -3564,6 +3619,10 @@ extern void ProgressEnd( void ) {
     
     if( !fShowProgress )
 	return;
+
+    iProgressMax = 0;
+    iProgressValue = 0;
+    pcProgress = NULL;
     
 #if USE_GTK
     if( fX ) {
@@ -3577,6 +3636,7 @@ extern void ProgressEnd( void ) {
 	putchar( ' ' );
     putchar( '\r' );
     fflush( stdout );
+
 }
 
 extern RETSIGTYPE HandleInterrupt( int idSignal ) {

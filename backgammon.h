@@ -307,7 +307,10 @@ extern void outputoff( void );
 extern void outputon( void );
 
 extern void ProgressStart( char *sz );
+extern void ProgressStartValue( char *sz, int iMax );
 extern void Progress( void );
+extern void ProgressValue ( int iValue );
+extern void ProgressValueAdd ( int iValue );
 extern void ProgressEnd( void );
 
 #if USE_GUI
@@ -327,6 +330,9 @@ extern void HandleInput( char *sz );
 #if HAVE_LIBREADLINE
 extern int fReadline;
 #endif
+
+extern int iProgressMax, iProgressValue;
+extern char *pcProgress;
 
 extern char *aszVersion[];
 
