@@ -299,6 +299,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
     int i, j, anBoardEval[ 2 ][ 25 ];
     float ar[ NUM_ROLLOUT_OUTPUTS ];
     double arResult[ NUM_ROLLOUT_OUTPUTS ], arVariance[ NUM_ROLLOUT_OUTPUTS ];
+    float arMu[ NUM_ROLLOUT_OUTPUTS ], arSigma[ NUM_ROLLOUT_OUTPUTS ];
     enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
     
     if( cGames < 1 ) {
@@ -335,13 +336,6 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 	if( fInterrupt )
 	    break;
 	
-	SanityCheck( anBoard, ar ); /* FIXME think about this... */
-	
-	if( fShowProgress ) {
-	    printf( "%6d\r", i + 1 );
-	    fflush( stdout );
-	}
-	
 	ar[ OUTPUT_EQUITY ] = ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
 	    ar[ OUTPUT_WINGAMMON ] +
 	    ar[ OUTPUT_WINBACKGAMMON ] -
@@ -351,35 +345,57 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 	for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
 	    arResult[ j ] += ar[ j ];
 	    arVariance[ j ] += ar[ j ] * ar[ j ];
+
+	    arMu[ j ] = arResult[ j ] / ( i + 1 );
+
+	    if( j < OUTPUT_EQUITY ) {
+		if( arMu[ j ] < 0.0f )
+		    arMu[ j ] = 0.0f;
+		else if( arMu[ j ] > 1.0f )
+		    arMu[ j ] = 1.0f;
+	    }
+	    
+	    if( i == 0 )
+		arSigma[ j ] = 0.0f;
+	    else {
+		arSigma[ j ] = arVariance[ j ] - ( i + 1 ) * arMu[ j ] *
+		    arMu[ j ];
+		if( arSigma[ j ] < 0.0f )
+		    arSigma[ j ] = 0.0f;
+		arSigma[ j ] = sqrt( arSigma[ j ] ) / i;
+	    }
+	}
+
+	SanityCheck( anBoard, arMu );
+	
+	if( fShowProgress ) {
+	    printf( "W=%5.3f Wg=%5.3f Wbg=%5.3f Lg=%5.3f Lbg=%5.3f Eq=%+6.3f"
+		    "+/-%5.3f n=%d\r", arMu[ OUTPUT_WIN ],
+		    arMu[ OUTPUT_WINGAMMON ], arMu[ OUTPUT_WINBACKGAMMON ],
+		    arMu[ OUTPUT_LOSEGAMMON ], arMu[ OUTPUT_LOSEBACKGAMMON ],
+		    arMu[ OUTPUT_EQUITY ], arSigma[ OUTPUT_EQUITY ], i + 1 );
+	    fflush( stdout );
 	}
     }
 
     if( !( cGames = i ) )
 	return -1;
 
-    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
-	if( arOutput ) {
-	    arOutput[ i ] = arResult[ i ] / cGames;
+    if( arOutput )
+	for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+	    arOutput[ i ] = arMu[ i ];
 
-	    if( i < OUTPUT_EQUITY ) {
-		if( arOutput[ i ] < 0.0f )
-		    arOutput[ i ] = 0.0f;
-		else if( arOutput[ i ] > 1.0f )
-		    arOutput[ i ] = 1.0f;
-	    }
-	}
-	
-	if( arStdDev ) {
-	    if( cGames == 1 )
-		arStdDev[ i ] = 0.0f;
-	    else {
-		arVariance[ i ] -= cGames * arOutput[ i ] * arOutput[ i ];
-		if( arVariance[ i ] < 0.0f )
-		    arVariance[ i ] = 0.0f;
-		arStdDev[ i ] = sqrt( arVariance[ i ] ) / ( cGames - 1 );
-	    }
-	}
+    if( arStdDev )
+	for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+	    arStdDev[ i ] = arSigma[ i ];	
+
+    if( fShowProgress ) {
+	for( i = 0; i < 72; i++ )
+	    putchar( ' ' );
+
+	putchar( '\r' );
+	fflush( stdout );
     }
-
+    
     return cGames;
 }
