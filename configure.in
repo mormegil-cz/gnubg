@@ -3,7 +3,7 @@ dnl To rebuild the `configure' script from this, execute the command
 dnl     autoconf
 dnl in the directory containing this script.
 dnl
-dnl by Gary Wong, 1999.
+dnl by Gary Wong <gtw@gnu.org>, 1999, 2000.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ fi
 dnl Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
-AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_CHECK_PROG(BISON, bison, bison, true)
@@ -85,10 +84,15 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
 AC_CHECK_FUNCS(getdtablesize getlogin getpwuid gettimeofday isatty random readv select)
-AC_MSG_CHECKING(for signbit)
-AC_EGREP_CPP(signbit,
+AC_CACHE_CHECK(for signbit, ac_cv_func_signbit,
+[AC_EGREP_CPP(signbit,
 [#define _GNU_SOURCE 1
-#include <math.h>], AC_DEFINE(HAVE_SIGNBIT,1,Define if you have a signbit() macro faster than a compare to 0.0.)  AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
+#include <math.h>],
+  eval "ac_cv_func_signbit=yes",
+  eval "ac_cv_func_signbit=no")])
+if test "$ac_cv_func_signbit" = "yes"; then
+  AC_DEFINE(HAVE_SIGNBIT,1,Define if you have a signbit() macro faster than a compare to 0.0.)
+fi
 
 dnl Check for GTK
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK library and widgets])
