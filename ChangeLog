@@ -1,3 +1,11 @@
+Sun Aug 13 11:44:20 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* eval.c: New function EvaluatePositionCubeful[1].
+	* play.c (ComputerTurn): Double strategy for money play.
+	* set.c, show.c: show/set beavers (for money game with or without
+	beavers, racoons, and other critters)
+	* gnubg.c, database.c, rollout.c: Changes related to the above.
+
 Wed Aug  2 13:29:02 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c: Create new race net. See race inputs in file.

@@ -119,80 +119,143 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
 static int ComputerTurn( void ) {
 
-    movenormal *pmn;
+  movenormal *pmn;
+  cubeinfo ci;
+  float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
     
-    if( !fDoubled && !fResigned && !anDice[ 0 ] ) {
-	/* FIXME if on roll, consider doubling/resigning */
-	if( RollDice( anDice ) < 0 )
-	    return -1;
-
-	if( fDisplay )
-	    ShowBoard();
-    }
+  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
     
-    switch( ap[ fTurn ].pt ) {
-    case PLAYER_GNU:
-	if( fResigned ) {
-	    float ar[ NUM_OUTPUTS ];
+  switch( ap[ fTurn ].pt ) {
+  case PLAYER_GNU:
+    if( fResigned ) {
 
-	    if( EvaluatePosition( anBoard, ar, &ap[ fTurn ].ec ) )
-		return -1;
+	    if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].ec ) )
+        return -1;
 
-	    if( -fResigned <= Utility ( ar ) ) {
-		CommandAgree( NULL );
-		return 0;
+	    if( -fResigned <= Utility ( arOutput, &ci ) ) {
+        CommandAgree( NULL );
+        return 0;
 	    } else {
-		CommandDecline( NULL );
-		return 0;
+        CommandDecline( NULL );
+        return 0;
 	    }
-	} else if( fDoubled ) {
-	    /* FIXME consider cube action */
-	    CommandTake( NULL );
-	    return 0;
-	} else {
+
+    } else if( fDoubled ) {
+
+	    /* Consider cube action */
+
+      if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci,
+                                     &ap [ fTurn ].ec,
+                                     ap [ fTurn ].ec.nPlies ) < 0 )
+        return -1;
+
+      if ( fBeavers && ! nMatchTo && arDouble[ 2 ] <= 0.0 ) {
+        /* It's a beaver... beaver all night! */
+        CommandRedouble ( NULL );
+      }
+      else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+        CommandTake ( NULL );
+      else
+        CommandReject ( NULL );
+
+      return 0;
+
+    } else {
 	    int anBoardMove[ 2 ][ 25 ];
 	    
-	    pmn = malloc( sizeof( *pmn ) );
-	    pmn->mt = MOVE_NORMAL;
-	    pmn->anRoll[ 0 ] = anDice[ 0 ];
-	    pmn->anRoll[ 1 ] = anDice[ 1 ];
-	    pmn->fPlayer = fTurn;
 
 	    /* Don't use the global board for this call, to avoid
 	       race conditions with updating the board and aborting the
 	       move with an interrupt. */
 	    memcpy( anBoardMove, anBoard, sizeof( anBoardMove ) );
-	    if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-			      anBoardMove, &ap[ fTurn ].ec ) < 0 ) {
-		free( pmn );
-		return -1;
-	    }
-	    
+
+      /* Consider doubling */
+
+      printf ( "cube access %2i %2i %2i %2i\n", 
+               ci.nCube, ci.fCubeOwner, ci.fMove,
+               GetDPEq ( NULL, NULL, &ci ) );
+
+      if ( ! anDice[ 0 ] && GetDPEq ( NULL, NULL, &ci ) ) {
+
+        static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE }; 
+        
+        /* We have access to the cube */
+
+        /* Determine market window */
+
+        if ( EvaluatePosition ( anBoardMove, arOutput, &ci, &ecDH ) )
+          return -1;
+
+        rDoublePoint = 
+          GetDoublePointDeadCube ( arOutput, anScore, nMatchTo, &ci );
+
+        printf ( "In market window? %6.3f > %6.3f?\n",
+                 arOutput[ 0 ], rDoublePoint );
+
+        if ( arOutput[ 0 ] >= rDoublePoint ) {
+
+          /* We're in market window */
+
+          if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci,
+                                         &ap [ fTurn ].ec,
+                                         ap [ fTurn ].ec.nPlies ) < 0 )
+            return -1;
+
+          printf ( "DOuble? %+6.3f %+6.3f %+6.3f...\n",
+                   arDouble[ 1 ], arDouble[2 ], arDouble[ 3 ] );
+
+          if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
+               ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
+            CommandDouble ( NULL );
+            return 0;
+          }
+        } /* market window */
+      } /* access to cube */
+
+      /* Roll dice and move */
+
+      if ( ! anDice[ 0 ] )
+        RollDice ( anDice );
+
+      if ( fDisplay )
+        ShowBoard();
+
+	    pmn = malloc( sizeof( *pmn ) );
+	    pmn->mt = MOVE_NORMAL;
+	    pmn->anRoll[ 0 ] = anDice[ 0 ];
+	    pmn->anRoll[ 1 ] = anDice[ 1 ];
+	    pmn->fPlayer = fTurn;
 	    ListInsert( plGame, pmn );
+      
+	    if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
+                        anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
+        free( pmn );
+        return -1;
+	    }
 	    
 	    memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
 	    
 	    return 0;
-	}
+    }
 
-    case PLAYER_PUBEVAL:
-	if( fResigned == 3 ) {
+  case PLAYER_PUBEVAL:
+    if( fResigned == 3 ) {
 	    CommandAgree( NULL );
 	    return 0;
-	} else if( fResigned ) {
+    } else if( fResigned ) {
 	    CommandDecline( NULL );
 	    return 0;
-	} else if( fDoubled ) {
+    } else if( fDoubled ) {
 	    CommandTake( NULL );
 	    return 0;
-	}
-	/* FIXME save move */
-	return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
-
-    default:
-	assert( FALSE );
-	return -1;
     }
+    /* FIXME save move */
+    return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
+
+  default:
+    assert( FALSE );
+    return -1;
+  }
 }
 
 /* Try to automatically bear off as many chequers as possible.  Only do it

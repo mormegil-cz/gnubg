@@ -90,7 +90,33 @@ typedef struct _move {
     float rScore, *pEval;
 } move;
 
+typedef struct _cubeinfo {
+
+	/*
+	 * nCube: the current value of the cube,
+	 * fCubeOwner: the owner of the cube,
+   * fMove: the player for which we are
+   *        calculating equity for,
+   * arGammonPrice: the gammon prices;
+   *   [ 0 ] = gammon price for player 0,
+   *   [ 1 ] = gammon price for player 1,
+   *   [ 2 ] = backgammon price for player 0,
+   *   [ 3 ] = backgammon price for player 1.
+	 *
+	 */
+
+  int nCube, fCubeOwner, fMove;
+  float arGammonPrice[ 4 ];
+
+} cubeinfo;
+
+
 extern volatile int fInterrupt, fAction;
+extern int fMove, fCubeOwner, fJacoby, fCrawford;
+extern int fPostCrawford, nMatchTo, anScore[ 2 ], fBeavers;
+extern int nCube;
+extern float rCubeX;
+
 extern void ( *fnAction )( void );
 
 typedef struct _movelist {
@@ -123,46 +149,101 @@ typedef struct _redevaldata {
   unsigned char auch[ 10 ];
 } RedEvalData;
 
-extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
-			   char *szDatabase, char *szDir );
-extern int EvalSave( char *szWeights );
+extern int 
+EvalInitialise( char *szWeights, char *szWeightsBinary,
+                char *szDatabase, char *szDir );
 
-extern void SetGammonPrice( float rGammon, float rLoseGammon,
-			    float rBackgammon, float rLoseBackgammon );
-extern int EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
-			     evalcontext *pec );
-extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] );
-extern int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
-			 int anBoard[ 2 ][ 25 ], evalcontext *pec );
-extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] );
+extern int 
+EvalSave( char *szWeights );
 
-extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] );
+extern void 
+SetGammonPrice( float rGammon, float rLoseGammon,
+                float rBackgammon, float rLoseBackgammon );
 
-extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
+extern int 
+EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
+                  cubeinfo *pci, evalcontext *pec );
 
-extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
-			 evalcontext *pec );
+extern void 
+InvertEvaluation( float ar[ NUM_OUTPUTS ] );
 
-extern void SwapSides( int anBoard[ 2 ][ 25 ] );
-extern int GameStatus( int anBoard[ 2 ][ 25 ] );
+extern int 
+FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
+              int anBoard[ 2 ][ 25 ], cubeinfo *pci, evalcontext *pec );
 
-extern int EvalCacheResize( int cNew );
-extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit );
+extern int 
+FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] );
 
-extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
-			  int n0, int n1, int fPartial );
-extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
-			  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-			  int c, float d, evalcontext *pec );
-extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
-extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] );
+extern int 
+TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] );
+
+extern int 
+PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
+
+extern int 
+DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
+              evalcontext *pec );
+
+extern void 
+SwapSides( int anBoard[ 2 ][ 25 ] );
+
+extern int 
+GameStatus( int anBoard[ 2 ][ 25 ] );
+
+extern int 
+EvalCacheResize( int cNew );
+
+extern int 
+EvalCacheStats( int *pc, int *pcLookup, int *pcHit );
+
+extern int 
+GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
+               int n0, int n1, int fPartial );
+extern int 
+FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
+               int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+               int c, float d, cubeinfo *pci, evalcontext *pec );
+
+extern int 
+ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
+
+extern positionclass 
+ClassifyPosition( int anBoard[ 2 ][ 25 ] );
 
 /* internal use only */
 extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
-				       float arOutput[] );
-extern float Utility( float ar[ NUM_OUTPUTS ] );
-extern void swap( int *p0, int *p1 );
-extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
-extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
-extern float KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
+                                       float arOutput[] );
+
+extern float
+Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
+
+
+extern int 
+SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
+							int fMove );
+ 
+extern void 
+swap( int *p0, int *p1 );
+
+extern void 
+SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
+
+extern void 
+EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
+
+extern float 
+KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
+
+extern int 
+EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
+                         cubeinfo *pci, evalcontext *pec, int nPlies );
+
+extern float
+GetDoublePointDeadCube ( float arOutput [ 5 ],
+                         int   anScore[ 2 ], int nMatchTo,
+                         cubeinfo *pci );
+
+extern int
+GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci );
+
 #endif

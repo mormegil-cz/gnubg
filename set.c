@@ -1002,3 +1002,15 @@ extern void CommandSetPostCrawford( char *sz ) {
 
 }
 
+
+extern void CommandSetBeavers( char *sz ) {
+
+  SetToggle( "beavers", &fBeavers, sz,
+             "Beavers/racoons allowed in money sessions.",
+             "Beavers/raccons allowed in money sessions." ); 
+
+}
+
+
+
+

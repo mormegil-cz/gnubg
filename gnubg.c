@@ -109,14 +109,12 @@ char szDefaultPrompt[] = "(\\p) ",
 static int fInteractive, cOutputDisabled;
 
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
-    fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
-    fResigned = FALSE, fMove = -1, nPliesEval = 1, anScore[ 2 ] = { 0, 0 },
-    cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
-    fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
-    fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 1,
-    fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
-    nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
-    fConfirm = TRUE, fShowProgress;
+  fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
+  fResigned = FALSE, nPliesEval = 1, fAutoCrawford = 1,
+  fAutoRoll = TRUE, cGames = 0, fDoubled = FALSE, cAutoDoubles = 0,
+  fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
+  nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
+  fConfirm = TRUE, fShowProgress;
 
 evalcontext ecTD = { 0, 8, 0.16, 0, FALSE }, ecEval = { 1, 8, 0.16, 0, FALSE },
     ecRollout = { 0, 8, 0.16, 0, FALSE };
@@ -240,6 +238,9 @@ command acDatabase[] = {
       NULL, acSetAutomatic },
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", szPOSITION, NULL },
+    { "beavers", CommandSetBeavers, 
+      "Set whether beavers are allowed in money game or not", 
+      szONOFF, NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache",
       szSIZE, NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
@@ -278,6 +279,9 @@ command acDatabase[] = {
       "performed without user input", NULL, NULL },
     { "board", CommandShowBoard, "Redisplay the board position", szOPTPOSITION,
       NULL },
+    { "beavers", CommandShowBeavers, 
+      "Show whether beavers are allowed in money game or not", 
+      NULL, NULL },
     { "cache", CommandShowCache, "Display statistics on the evaluation "
       "cache", NULL, NULL },
     { "confirm", CommandShowConfirm, "Show whether confirmation is required "
@@ -837,6 +841,8 @@ extern void ShowBoard( void ) {
 	if( fDoubled ) {
 	    apch[ fTurn ? 5 : 1 ] = szCube;
 
+	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
+	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
 	    sprintf( szCube, "Cube offered at %d", nCube << 1 );
 	} else {
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
@@ -1065,30 +1071,33 @@ extern void CommandHint( char *sz ) {
     int i;
     char szMove[ 32 ];
     float aar[ 32 ][ NUM_OUTPUTS ];
+    cubeinfo ci;
     
     if( fTurn < 0 ) {
-	outputl( "You must set up a board first." );
-
-	return;
+      outputl( "You must set up a board first." );
+      
+      return;
     }
 
     if( !anDice[ 0 ] ) {
-	outputl( "You must roll (or set) the dice first." );
+      outputl( "You must roll (or set) the dice first." );
 
-	return;
+      return;
     }
 
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
     FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
-		   ecEval.nSearchCandidates, ecEval.rSearchTolerance,
-		   &ecEval );
-
+                   ecEval.nSearchCandidates, ecEval.rSearchTolerance,
+                   &ci, &ecEval );
+    
     if( fInterrupt )
-	return;
-
+      return;
+    
 #if USE_GTK
     if( fX ) {
-	GTKHint( &ml );
-	return;
+      GTKHint( &ml );
+      return;
     }
 #endif
     
@@ -1136,43 +1145,47 @@ extern void CommandQuit( char *sz ) {
     PromptForExit();
 }
 
-extern void CommandRollout( char *sz ) {
+extern void 
+CommandRollout( char *sz ) {
     
-    float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-    int c, an[ 2 ][ 25 ];
+  float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
+  int c, an[ 2 ][ 25 ];
+  cubeinfo ci;
     
-    if( !*sz && fTurn == -1 ) {
-	outputl( "No position specified." );
-	return;
-    }
+  if( !*sz && fTurn == -1 ) {
+    outputl( "No position specified." );
+    return;
+  }
     
-    if( ParsePosition( an, sz ) ) {
-	outputl( "Illegal position." );
+  if( ParsePosition( an, sz ) ) {
+    outputl( "Illegal position." );
 
-	return;
-    }
+    return;
+  }
 
-    if( ( c = Rollout( an, ar, arStdDev, nRolloutTruncate, nRollouts,
-		       fVarRedn, &ecRollout ) ) < 0 )
-	return;
+  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+  if( ( c = Rollout( an, ar, arStdDev, nRolloutTruncate, nRollouts,
+                     fVarRedn, &ci, &ecRollout ) ) < 0 )
+    return;
 
 #if USE_GTK
-    if( fX ) {
-	GTKRolloutDone();
-	return;
-    }
+  if( fX ) {
+    GTKRolloutDone();
+    return;
+  }
 #endif
     
-    outputf( "Result (after %d trials):\n\n"
-	    "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
-	    "Equity\n"
-	    "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-	    "(%+6.3f)\n"
-	    "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-	    "(%6.3f)\n\n",
-	    c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
-	    arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-	    arStdDev[ 4 ], arStdDev[ 5 ] );
+  outputf( "Result (after %d trials):\n\n"
+           "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+           "Equity\n"
+           "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+           "(%+6.3f)\n"
+           "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+           "(%6.3f)\n\n",
+           c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
+           arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
+           arStdDev[ 4 ], arStdDev[ 5 ] );
 }
 
 static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
@@ -1430,51 +1443,57 @@ extern void CommandSaveSettings( char *szParam ) {
 
 extern void CommandSaveWeights( char *sz ) {
 
-    if( EvalSave( GNUBG_WEIGHTS /* FIXME accept file name parameter */ ) )
-	perror( GNUBG_WEIGHTS );
-    else
-	outputl( "Evaluator weights saved." );
+  if( EvalSave( GNUBG_WEIGHTS /* FIXME accept file name parameter */ ) )
+    perror( GNUBG_WEIGHTS );
+  else
+    outputl( "Evaluator weights saved." );
 }
 
 extern void CommandTrainTD( char *sz ) {
 
-    int c = 0, anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ],
-	anDiceTrain[ 2 ];
-    float ar[ NUM_OUTPUTS ];
+  int c = 0, i;
+  int anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ];
+  int anDiceTrain[ 2 ];
+  float ar[ NUM_OUTPUTS ];
+  cubeinfo ciTD;
     
-    while( !fInterrupt ) {
-	InitBoard( anBoardTrain );
+  while( !fInterrupt ) {
+    InitBoard( anBoardTrain );
 	
-	do {    
+    do {    
 	    if( !( ++c % 100 ) && fShowProgress ) {
-		outputf( "%6d\r", c );
-		fflush( stdout );
+        outputf( "%6d\r", c );
+        fflush( stdout );
 	    }
 	    
 	    RollDice( anDiceTrain );
 
 	    if( fInterrupt )
-		return;
+        return;
 	    
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
+
+      SetCubeInfo ( &ciTD, 0, 0, 0 );
+      for ( i = 0; i < 4; i++ )
+        ciTD.arGammonPrice[ i ] = 1.0;
 	    
 	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-			  anBoardTrain, &ecTD );
+                    anBoardTrain, &ciTD, &ecTD );
 
 	    if( fInterrupt )
-		return;
+        return;
 	    
 	    SwapSides( anBoardTrain );
 	    
-	    EvaluatePosition( anBoardTrain, ar, &ecTD );
+	    EvaluatePosition( anBoardTrain, ar, &ciTD, &ecTD );
 
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )
-		break;
+        break;
 	    
-	/* FIXME can stop as soon as perfect */
-	} while( !fInterrupt && !GameStatus( anBoardTrain ) );
-    }
+      /* FIXME can stop as soon as perfect */
+    } while( !fInterrupt && !GameStatus( anBoardTrain ) );
+  }
 }
 
 #if HAVE_LIBREADLINE
@@ -1482,7 +1501,7 @@ static command *pcCompleteContext;
 
 static char *NullGenerator( char *sz, int nState ) {
 
-    return NULL;
+  return NULL;
 }
 
 static char *GenerateKeywords( char *sz, int nState ) {
@@ -1492,28 +1511,28 @@ static char *GenerateKeywords( char *sz, int nState ) {
     char *szDup;
 
     if( fReadingOther )
-	return NULL;
+      return NULL;
     
     if( !nState ) {
-	cch = strlen( sz );
-	pc = pcCompleteContext;
+      cch = strlen( sz );
+      pc = pcCompleteContext;
     }
 
     while( pc && pc->sz ) {
-	if( !strncasecmp( sz, pc->sz, cch ) && pc->szHelp ) {
-	    if( !( szDup = malloc( strlen( pc->sz ) + 1 ) ) )
-		return NULL;
+      if( !strncasecmp( sz, pc->sz, cch ) && pc->szHelp ) {
+        if( !( szDup = malloc( strlen( pc->sz ) + 1 ) ) )
+          return NULL;
 
-	    strcpy( szDup, pc->sz );
-
-	    pc++;
+        strcpy( szDup, pc->sz );
+        
+        pc++;
 	    
-	    return szDup;
-	}
+        return szDup;
+      }
 	
-	pc++;
+      pc++;
     }
-
+    
     return NULL;
 }
 

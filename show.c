@@ -530,3 +530,17 @@ extern void CommandShowThorp( char *sz ) {
         outputf("Bower's interpolation: %d%% cubeless winning "
                 "chance\n", 74 + 2 * nDiff );
 }
+
+
+extern void CommandShowBeavers( char *sz ) {
+
+  if ( fBeavers )
+    puts( "Beavers, racoons, and other critters are allowed in"
+          " money sessions.." );
+  else
+    puts( "Beavers, racoons, and other critters are not allowed in"
+          " money sessions.." );
+
+}
+
+

@@ -36,86 +36,87 @@
 
 #if HAVE_LIBGDBM
 static char *szDatabase = "gnubg.gdbm"; /* FIXME */
+static cubeinfo ciBasic = { 1, 0, 0, { 1.0, 1.0, 1.0, 1.0 } };
 
 extern void CommandDatabaseDump( char *sz ) {
     
-    GDBM_FILE pdb;
-    datum dKey, dValue;
-    dbevaluation *pev;
-    int c = 0;
-    void *p;
+  GDBM_FILE pdb;
+  datum dKey, dValue;
+  dbevaluation *pev;
+  int c = 0;
+  void *p;
     
-    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-        fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+  if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
+    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
-        return;
-    }
+    return;
+  }
 
-    dKey = gdbm_firstkey( pdb );
+  dKey = gdbm_firstkey( pdb );
 
-    while( dKey.dptr ) {
-	dValue = gdbm_fetch( pdb, dKey );
+  while( dKey.dptr ) {
+    dValue = gdbm_fetch( pdb, dKey );
 
-	pev = (dbevaluation *) dValue.dptr;
-
-	if( !c )
-	    outputl( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
-		     "Date" );
-
-	outputf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
-		 PositionIDFromKey( (unsigned char *) dKey.dptr ),
-		 (float) pev->asEq[ OUTPUT_WIN ] / 0xFFFF,
-		 (float) pev->asEq[ OUTPUT_WINGAMMON ] / 0xFFFF,
-		 (float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
-		 (float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
-		 (float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
-		 pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
-	
-	c++;
-    
-	free( pev );
-
-	p = dKey.dptr;
-	
-	if( fInterrupt ) {
-	    free( p );
-	    break;
-	}
-    
-	dKey = gdbm_nextkey( pdb, dKey );
-	
-	free( p );
-    }
+    pev = (dbevaluation *) dValue.dptr;
 
     if( !c )
-	outputl( "The database is empty." );
+	    outputl( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
+               "Date" );
 
-    gdbm_close( pdb );
+    outputf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
+             PositionIDFromKey( (unsigned char *) dKey.dptr ),
+             (float) pev->asEq[ OUTPUT_WIN ] / 0xFFFF,
+             (float) pev->asEq[ OUTPUT_WINGAMMON ] / 0xFFFF,
+             (float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
+             (float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
+             (float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
+             pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
+	
+    c++;
+    
+    free( pev );
+
+    p = dKey.dptr;
+	
+    if( fInterrupt ) {
+	    free( p );
+	    break;
+    }
+    
+    dKey = gdbm_nextkey( pdb, dKey );
+	
+    free( p );
+  }
+
+  if( !c )
+    outputl( "The database is empty." );
+
+  gdbm_close( pdb );
 }
 
 extern void CommandDatabaseRollout( char *sz ) {
 
-    GDBM_FILE pdb;
-    datum dKey, dValue;
-    dbevaluation *pev;
-    int i, c = 0, anBoardEval[ 2 ][ 25 ];
-    float arOutput[ NUM_ROLLOUT_OUTPUTS ];
-    void *p;
+  GDBM_FILE pdb;
+  datum dKey, dValue;
+  dbevaluation *pev;
+  int i, c = 0, anBoardEval[ 2 ][ 25 ];
+  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+  void *p;
     
-    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRITER, 0, NULL ) ) ) {
-        fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+  if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRITER, 0, NULL ) ) ) {
+    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
-        return;
-    }
+    return;
+  }
 
-    dKey = gdbm_firstkey( pdb );
+  dKey = gdbm_firstkey( pdb );
 
-    while( dKey.dptr ) {
-	dValue = gdbm_fetch( pdb, dKey );
+  while( dKey.dptr ) {
+    dValue = gdbm_fetch( pdb, dKey );
 
-	pev = (dbevaluation *) dValue.dptr;
+    pev = (dbevaluation *) dValue.dptr;
 
-	if( pev->c < nRollouts /* FIXME */ ) {
+    if( pev->c < nRollouts /* FIXME */ ) {
 	    c++;
 	    
 	    PositionFromKey( anBoardEval, (unsigned char *) dKey.dptr );
@@ -124,77 +125,77 @@ extern void CommandDatabaseRollout( char *sz ) {
 	    
 	    /* FIXME allow user to change these parameters */
 	    if( ( pev->c = Rollout( anBoardEval, arOutput, NULL,
-				    nRolloutTruncate, nRollouts, fVarRedn,
-				    &ecRollout ) ) > 0 ) {
-		for( i = 0; i < NUM_OUTPUTS; i++ )
-		    pev->asEq[ i ] = arOutput[ i ] * 0xFFFF;
+                              nRolloutTruncate, nRollouts, fVarRedn,
+                              &ciBasic, &ecRollout ) ) > 0 ) {
+        for( i = 0; i < NUM_OUTPUTS; i++ )
+          pev->asEq[ i ] = arOutput[ i ] * 0xFFFF;
 
-		pev->t = time( NULL );
+        pev->t = time( NULL );
 	    } else {
-		for( i = 0; i < NUM_OUTPUTS; i++ )
-		    pev->asEq[ i ] = 0;
+        for( i = 0; i < NUM_OUTPUTS; i++ )
+          pev->asEq[ i ] = 0;
 
-		pev->c = 0;
-		pev->t = 0;
+        pev->c = 0;
+        pev->t = 0;
 	    }
 
 	    gdbm_store( pdb, dKey, dValue, GDBM_REPLACE );
-	}
-
-	free( pev );
-
-	p = dKey.dptr;
-
-	if( fInterrupt ) {
-	    free( p );
-	    break;
-	}
-
-	dKey = gdbm_nextkey( pdb, dKey );
-
-	free( p );
     }
 
-    if( !fInterrupt && !c )
-	outputl( "There are no unevaluated positions in the database to roll "
-	      "out." );
+    free( pev );
 
-    gdbm_close( pdb );
+    p = dKey.dptr;
+
+    if( fInterrupt ) {
+	    free( p );
+	    break;
+    }
+
+    dKey = gdbm_nextkey( pdb, dKey );
+
+    free( p );
+  }
+
+  if( !fInterrupt && !c )
+    outputl( "There are no unevaluated positions in the database to roll "
+             "out." );
+
+  gdbm_close( pdb );
 }
 
 extern void CommandDatabaseGenerate( char *sz ) {
 
-    GDBM_FILE pdb;
-    datum dKey, dValue;
-    dbevaluation ev;
-    int i, c = 0, anBoardGenerate[ 2 ][ 25 ], anDiceGenerate[ 2 ];
-    unsigned char auchKey[ 10 ];
+  GDBM_FILE pdb;
+  datum dKey, dValue;
+  dbevaluation ev;
+  int i, c = 0, anBoardGenerate[ 2 ][ 25 ], anDiceGenerate[ 2 ];
+  unsigned char auchKey[ 10 ];
     
-    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRCREAT, 0666, NULL ) ) ) {
-        fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+  if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRCREAT, 0666, NULL ) ) ) {
+    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
-        return;
-    }
+    return;
+  }
 
-    while( !fInterrupt ) {
-	InitBoard( anBoardGenerate );
+  while( !fInterrupt ) {
+    InitBoard( anBoardGenerate );
 	
-	do {    
+    do {    
 	    if( !( ++c % 100 ) && fShowProgress ) {
-		outputf( "%6d\r", c );
-		fflush( stdout );
+        outputf( "%6d\r", c );
+        fflush( stdout );
 	    }
 	    
 	    RollDice( anDiceGenerate );
 
 	    if( fInterrupt )
-		break;
+        break;
 	    
 	    FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
-			  anBoardGenerate, NULL );
+                    anBoardGenerate, &ciBasic, NULL );
 
 	    if( fInterrupt )
-		break;
+        break;
 	    
 	    SwapSides( anBoardGenerate );
 
@@ -205,54 +206,54 @@ extern void CommandDatabaseGenerate( char *sz ) {
 
 	    ev.t = ev.c = 0;
 	    for( i = 0; i < NUM_OUTPUTS; i++ )
-		ev.asEq[ i ] = 0;
+        ev.asEq[ i ] = 0;
 
 	    dValue.dptr = (char *) &ev;
 	    dValue.dsize = sizeof ev;
 
 	    gdbm_store( pdb, dKey, dValue, GDBM_INSERT );
-	} while( !fInterrupt && ClassifyPosition( anBoardGenerate ) >
-		 CLASS_PERFECT );
-    }
+    } while( !fInterrupt && ClassifyPosition( anBoardGenerate ) >
+             CLASS_PERFECT );
+  }
 
-    gdbm_close( pdb );
+  gdbm_close( pdb );
 }
 
 extern void CommandDatabaseTrain( char *sz ) {
 
-    GDBM_FILE pdb;
-    datum dKey, dValue;
-    dbevaluation *pev;
-    int c = 0, i, anBoardTrain[ 2 ][ 25 ];
-    float arDesired[ NUM_OUTPUTS ];
-    void *p;
+  GDBM_FILE pdb;
+  datum dKey, dValue;
+  dbevaluation *pev;
+  int c = 0, i, anBoardTrain[ 2 ][ 25 ];
+  float arDesired[ NUM_OUTPUTS ];
+  void *p;
     
-    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-        fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+  if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
+    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
-        return;
-    }
+    return;
+  }
 
-    while( !fInterrupt ) {
-	dKey = gdbm_firstkey( pdb );
+  while( !fInterrupt ) {
+    dKey = gdbm_firstkey( pdb );
 
-        while( dKey.dptr ) {
-            dValue = gdbm_fetch( pdb, dKey );
+    while( dKey.dptr ) {
+      dValue = gdbm_fetch( pdb, dKey );
 
 	    pev = (dbevaluation *) dValue.dptr;
 
 	    if( pev->c >= 72 /* FIXME */ ) {
-		if( !( ++c % 100 ) && fShowProgress ) {
-		    outputf( "%6d\r", c );
-		    fflush( stdout );
-		}
+        if( !( ++c % 100 ) && fShowProgress ) {
+          outputf( "%6d\r", c );
+          fflush( stdout );
+        }
 	    
-		for( i = 0; i < NUM_OUTPUTS; i++ )
-		    arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
+        for( i = 0; i < NUM_OUTPUTS; i++ )
+          arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
 
-		PositionFromKey( anBoardTrain, (unsigned char *) dKey.dptr );
+        PositionFromKey( anBoardTrain, (unsigned char *) dKey.dptr );
 
-		TrainPosition( anBoardTrain, arDesired );
+        TrainPosition( anBoardTrain, arDesired );
 	    }
 
 	    free( pev );
@@ -260,45 +261,46 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    p = dKey.dptr;
 
 	    if( fInterrupt ) {
-		free( p );
-		break;
+        free( p );
+        break;
 	    }
 
 	    dKey = gdbm_nextkey( pdb, dKey );
 
 	    free( p );
-	}
-
-	if( !c ) {
-	    outputl( "There are no target evaluations in the database to train "
-		  "from." );
-	    break;
-	}
     }
 
-    gdbm_close( pdb );
+    if( !c ) {
+	    outputl( "There are no target evaluations in the database to train "
+               "from." );
+	    break;
+    }
+  }
+
+  gdbm_close( pdb );
 }
 #else
 static void NoGDBM( void ) {
 
-    outputl( "This installation of GNU Backgammon was compiled without GDBM\n"
-	  "support, and does not implement position database operations." );
+  outputl( "This installation of GNU Backgammon was compiled without GDBM\n"
+           "support, and does not implement position database operations." );
 }
 
 extern void CommandDatabaseDump( char *sz ) {
-    NoGDBM();
+  NoGDBM();
 }
 
 extern void CommandDatabaseGenerate( char *sz ) {
-    NoGDBM();
+  NoGDBM();
 }
 
 extern void CommandDatabaseRollout( char *sz ) {
-    NoGDBM();
+  NoGDBM();
 }
 
 extern void CommandDatabaseTrain( char *sz ) {
-    NoGDBM();
+  NoGDBM();
 }
 #endif
+
 

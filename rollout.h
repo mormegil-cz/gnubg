@@ -22,8 +22,9 @@
 #ifndef _ROLLOUT_H_
 #define _ROLLOUT_H_
 
-extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
-		    int nTruncate, int cGames, int fVarRedn,
-		    evalcontext *pec );
+extern int 
+Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
+         int nTruncate, int cGames, int fVarRedn,
+         cubeinfo *pci, evalcontext *pec );
 
 #endif
