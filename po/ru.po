@@ -1,4 +1,4 @@
-# @(#) Russian translations for GNU Backgammon package.
+# @(#) Russian translation for GNU Backgammon package.
 #      Русский перевод программы GNU Backgammon (Короткие нарды).
 #
 # This file is distributed under the same license as the GNU Backgammon package.
@@ -49,7 +49,7 @@ msgstr "Мирового класса"
 
 #: analysis.c:55
 msgid "Supernatural"
-msgstr "Сверхестественный"
+msgstr "Сверхъестественный"
 
 #: analysis.c:56
 msgid "N/A"
@@ -4683,7 +4683,7 @@ msgstr "Матч #: "
 
 #: gtkboard.c:3596 gtkboard.c:3683
 msgid "Score:"
-msgstr "Счет:"
+msgstr "Счёт:"
 
 #: gtkboard.c:3618 gtkboard.c:3705
 msgid "Pips:"
@@ -4881,7 +4881,7 @@ msgstr "Анализ"
 
 #: gtkexport.c:47
 msgid "Statistics"
-msgstr "Статисткика"
+msgstr "Статистика"
 
 #: gtkexport.c:48
 msgid "Legend"
@@ -6183,7 +6183,7 @@ msgstr "Стандартный текстовый формат Snowie"
 
 #: gtkgame.c:4767
 msgid "Import from format: "
-msgstr "Импортирование из формата:"
+msgstr "Импорт из формата:"
 
 #: gtkgame.c:4841
 msgid "Open commands"
@@ -6283,7 +6283,7 @@ msgstr "Экспортировать матч в HTML"
 
 #: gtkgame.c:5075
 msgid "Export .mat match"
-msgstr "Экпортировать матч в .mat"
+msgstr "Экспортировать матч в .mat"
 
 #: gtkgame.c:5084
 msgid "Export PDF match"
@@ -6406,8 +6406,8 @@ msgid ""
 msgstr ""
 "Указание -- на сколько ходов вперёд GNU Backgammon должен производить "
 "оценку.  Каждый дополнительный ход (тур), увеличивает время оценки "
-"приблизительно в 20 раз.  Рассчёт на два хода вперёд эквивалентен "
-"рассчёту на 3 хода в Snowie."
+"приблизительно в 20 раз.  Расчёт на два хода вперёд эквивалентен "
+"расчёту на 3 хода в Snowie."
 
 #: gtkgame.c:5502
 msgid "Lookahead"
@@ -6461,7 +6461,7 @@ msgstr ""
 "GNU Backgammon всегда будет учитывать -- кому принадлежит куб, при принятии "
 "решений, касающихся куба. Запрещая эту опцию, GNU Backgammon не будет "
 "учитывать -- кому принадлежит куб при оценке на несколько ходов вперёд."
-"Рекомедуется разрешить эту опцию."
+"Рекомендуется разрешить эту опцию."
 
 #: gtkgame.c:5604
 msgid ""
@@ -6500,7 +6500,7 @@ msgid ""
 msgstr ""
 "GNU Backgammom оценивает все ходы на 1 ход вперёд.  Фильтр ходов "
 "контролирует -- сколько ходов должно быть оценено при дальнейшей оценке. "
-"\"Мешьший\" фильтр быстрее, но в этом случае GNU Backgammon может не найти "
+"\"Меньший\" фильтр быстрее, но в этом случае GNU Backgammon может не найти "
 "лучший ход.  Сильные игроки могут настроить свои собственные фильтры, "
 "нажав кнопку [Поменять]"
  
@@ -7230,7 +7230,7 @@ msgid ""
 "Please use the command \"%s\" instead"
 msgstr ""
 "НЕ РЕАЛИЗОВАНО!\n"
-"Пожалуйста, используйте коменду \"%s\""
+"Пожалуйста, используйте команду \"%s\""
 
 #: gtkoptions.c:169
 msgid "System default"
@@ -7478,7 +7478,7 @@ msgstr ""
 
 #: gtkoptions.c:271
 msgid "Play forced moves automatically"
-msgstr "Автоматичски делать вынужденные ходы"
+msgstr "Автоматически делать вынужденные ходы"
 
 #: gtkoptions.c:274
 msgid ""
@@ -7514,7 +7514,7 @@ msgid ""
 "must be legal when you pick up the dice, or it will not be accepted."
 msgstr ""
 "При выборе хода, можно временно ставить шашки на те позиции, которые не "
-"соответсвуют выброшенным костям.  Если эта опция запрещена, то можно "
+"соответствуют выброшенным очкам.  Если эта опция запрещена, то можно "
 "ставить шашки только на разрешённые позиции.  В любом случае, конечный "
 "ход должен быть сделан по правилам (иначе он не будет принят)."
 
@@ -7662,9 +7662,9 @@ msgid ""
 "player 0 moves anticlockwise).  Otherwise, player 1 moves anticlockwise and "
 "player 0 moves clockwise."
 msgstr ""
-"Ориентироваьт игральную доску таким образом, что шашки игрока 1 двигались "
+"Ориентировать игральную доску таким образом, что шашки игрока 1 двигались "
 "бы по часовой стрелке (шашки игрока 0 -- против).  В противном случае, "
-"игрок 1 ходит против часовой стрелки, а игрок 0 -- по часовй стрелке."
+"игрок 1 ходит против часовой стрелки, а игрок 0 -- по часовой стрелке."
 
 #: gtkoptions.c:538
 msgid "Move delay:"
@@ -13759,15 +13759,15 @@ msgstr "опции PNG:\n"
 #: show.c:1818
 #, c-format
 msgid "- size of exported PNG pictures: %dx%d\n"
-msgstr "- размер экпортируемых PNG картинок: %d x %d\n"
+msgstr "- размер экспортируемых PNG картинок: %d x %d\n"
 
 #: show.c:1845
 msgid "Import of TrueMoneyGames TMG files"
-msgstr "Импортирование TrueMoneyGames файлов"
+msgstr "Импорт TrueMoneyGames файлов"
 
 #: show.c:1846
 msgid "Import of Snowie .txt files"
-msgstr "Импортирование Snowie .txt файлов"
+msgstr "Импорт Snowie .txt файлов"
 
 #: show.c:1858
 msgid "Default and current paths for load, save, import, and export: \n"
