@@ -55,13 +55,11 @@ static char szTCPLAIN[] = N_("plain")
 	, szTCBRONSTEIN[] = N_("bronstein")
 	, szTCHOURGLASS[] = N_("hourglass")
 	, szTCNONE[] = N_("none")
-     	, szTCLOSS[] = N_("lose") 
 	, szTCTIME[] = N_("tctime")
 	, szTCPOINT[] = N_("tcpoint") /* time per point */
 	, szTCMOVE[] = N_("tcmove") /* time per move */
 	, szTCPENALTY[] = N_("tcpenalty")
 	, szTCMULT[] = N_("tcmult") /* time multiplier */
-        , szTCNEXT[] = N_("tcnext") /* secondary time control */
 	, szTCOFF[] = "Time control off"
 	;
 
@@ -102,7 +100,6 @@ int ginDecision(int fPlayer)
 {
     float arOutputs[NUM_ROLLOUT_OUTPUTS];
     int i;
-    int anBoardTemp[ 2 ][ 25 ];
 
     for (i=0;i<NUM_ROLLOUT_OUTPUTS;i++)
 	arOutputs[i] = 0.5; 
@@ -765,8 +762,7 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 {
     int pen=0;
     struct timeval ts;
-    playerclock *pgcPlayer;
-    playerclock *pgcOpp;
+    playerclock *pgcPlayer, *pgcOpp;
 
     if (0 == tvp)
     {
@@ -982,8 +978,8 @@ extern void SaveTimeControlSettings( FILE *pf )
 		pNode->ptc->nPointAllowance,
 		pNode->ptc->dMultiplier,
 		pNode->ptc->nMoveAllowance,
-		pNode->ptc->szNext || "" ,
-		pNode->ptc->szNextB || "",
+		(pNode->ptc->szNext)? pNode->ptc->szNext : "" ,
+		(pNode->ptc->szNext)? pNode->ptc->szNextB : "",
 		pNode->ptc->szName);
 	pNode = pNode->next;
     }
