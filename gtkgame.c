@@ -9041,7 +9041,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     pow->pwCheat = gtk_radio_button_new_with_label_from_widget(
 	GTK_RADIO_BUTTON( pow->pwDiceManual ),
-        _("Dice manupulation") );
+        _("Dice manipulation") );
 
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwCheat, FALSE, FALSE, 0 );
 
@@ -9059,7 +9059,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                           pwhbox, TRUE, TRUE, 0 );
 
       gtk_box_pack_start( GTK_BOX ( pwhbox ), 
-                          gtk_label_new( _("Always play the ") ),
+                          gtk_label_new( _("Always roll the ") ),
                           FALSE, FALSE, 0);
 
       pow->apwCheatRoll[ i ] = gtk_option_menu_new ();
@@ -9090,7 +9090,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     
 
-    gtk_tooltips_set_tip (ptt, pwev,
+    gtk_tooltips_set_tip (ptt, pow->pwCheat,
 			  _("Now it's proven! GNU Backgammon is able to "
                             "manipulate the dice. This is meant as a "
                             "learning tool. Examples of use: (a) learn "
