@@ -574,7 +574,10 @@ InitEvalContext ( evalcontext *pec ) {
 
   pec->nPlies = 0;
   pec->fCubeful = FALSE;
+#if defined( REDUCTION_CODE )
   pec->nReduced = 0;
+#endif
+  pec->fUsePrune = FALSE;
   pec->fDeterministic = FALSE;
   pec->rNoise = 0.0;
 
@@ -584,17 +587,30 @@ InitEvalContext ( evalcontext *pec ) {
 static void
 RestoreEvalContext ( evalcontext *pec, const char *sz ) {
 
-  int nPlies, nReduced, fDeterministic;
+  int nPlies, nReduced, fUsePrune = 0, fDeterministic;
   char ch;
 
   InitEvalContext ( pec );
 
-  sscanf ( sz, "%d%c %d %d %f",
-           &nPlies, &ch, &nReduced, &fDeterministic, &pec->rNoise );
+  // Still need to read reduced
+  sscanf ( sz, "%d%c"
+//#if defined( REDUCTION_CODE )
+	   " %d"
+//#endif
+	   " %d %f %d",
+           &nPlies, &ch,
+//#if defined( REDUCTION_CODE )
+	   &nReduced,
+//#endif
+	   &fDeterministic, &pec->rNoise,
+	   &fUsePrune);
 
   pec->nPlies = nPlies;
   pec->fCubeful = ch == 'C';
+#if defined( REDUCTION_CODE )
   pec->nReduced = nReduced;
+#endif
+  pec->fUsePrune = fUsePrune;
   pec->fDeterministic = fDeterministic;
 
 }
@@ -881,7 +897,7 @@ static void RestoreDoubleAnalysis( property *pp,
                                    evalsetup *pes ) {
     
     char *pch = pp->pl->plNext->p, ch;
-    int nPlies, nReduced, fDeterministic;
+    int nPlies, nReduced, fUsePrune = 0, fDeterministic;
     /* FIXME: removing arUnued will break existing SGF files */
     float arUnused[ 4 ];
     
@@ -897,7 +913,7 @@ static void RestoreDoubleAnalysis( property *pp,
         aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
         aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
 	
-	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f"
+	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f %d"
                 "%f %f %f %f %f %f %f" 
                 "%f %f %f %f %f %f %f", 
                 &arUnused[ 0 ], &arUnused[ 1 ], 
@@ -906,6 +922,7 @@ static void RestoreDoubleAnalysis( property *pp,
                 &nReduced, 
                 &fDeterministic,
                 &pes->ec.rNoise,
+                &fUsePrune, 
                 &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
                 &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
                 &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
@@ -916,7 +933,10 @@ static void RestoreDoubleAnalysis( property *pp,
                 &aarOutput[ 1 ][ 6 ] );
 
 	pes->ec.nPlies = nPlies;
+#if defined( REDUCTION_CODE )
         pes->ec.nReduced = nReduced;
+#endif
+        pes->ec.fUsePrune = fUsePrune;
         pes->ec.fDeterministic = fDeterministic;
 	pes->ec.fCubeful = ch == 'C';
 
@@ -948,7 +968,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
     list *pl = pp->pl->plNext;
     char *pch, ch;
     move *pm;
-    int i, nPlies, fDeterministic, nReduced;
+    int i, nPlies, fDeterministic, nReduced, fUsePrune = 0;
     int anBoardMove[ 2 ][ 25 ];
     
     *piMove = atoi( pl->p );
@@ -995,20 +1015,24 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	    nReduced = 0;
             fDeterministic = 0;
 
-	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f",
+	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d",
 		    &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
 		    &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
 		    &pm->arEvalMove[ 4 ], &pm->rScore,
 		    &nPlies, 
                     &ch, 
-                    &nReduced, 
+                    &nReduced,
                     &fDeterministic, 
-                    &pm->esMove.ec.rNoise );
+                    &pm->esMove.ec.rNoise,
+		    &fUsePrune);
 
 
 	    pm->esMove.ec.fCubeful = ch == 'C';
 	    pm->esMove.ec.nPlies = nPlies;
+#if defined( REDUCTION_CODE )
 	    pm->esMove.ec.nReduced = nReduced;
+#endif
+	    pm->esMove.ec.fUsePrune = fUsePrune;
 	    pm->esMove.ec.fDeterministic = fDeterministic;
 	    break;
 
@@ -1645,12 +1669,17 @@ static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 static void
 WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 
-  fprintf( pf, "%d%s %d %d %.4f",
+  fprintf( pf, "%d%s %d %d %.4f %d",
            pec->nPlies,
            pec->fCubeful ? "C" : "",
-           pec->nReduced, 
+#if defined( REDUCTION_CODE )
+           pec->nReduced,
+#else
+	   0,
+#endif
            pec->fDeterministic, 
-           pec->rNoise );
+           pec->rNoise,
+	   pec->fUsePrune);
 
 }
 
@@ -1780,15 +1809,20 @@ static void WriteDoubleAnalysis( FILE *pf,
 
   switch( pes->et ) {
   case EVAL_EVAL:
-    fprintf( pf, "E %.4f %.4f %.4f %.4f %d%s %d %d %.4f "
+    fprintf( pf, "E %.4f %.4f %.4f %.4f %d%s %d %d %.4f %d "
              "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
              "%.4f %.4f %.4f %.4f %.4f %.4f %.4f", 
              0.0f, 0.0f, 0.0f, 0.0f,
              pes->ec.nPlies,
              pes->ec.fCubeful ? "C" : "",
+#if defined( REDUCTION_CODE )
              pes->ec.nReduced,
+#else
+	     0,
+#endif
              pes->ec.fDeterministic,
              pes->ec.rNoise,
+	     pes->ec.fUsePrune,
              aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
              aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
              aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
@@ -1851,7 +1885,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    
 	case EVAL_EVAL:
 	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s "
-                     "%d %d %.4f",
+                     "%d %d %.4f %d",
 		     pml->amMoves[ i ].arEvalMove[ 0 ],
 		     pml->amMoves[ i ].arEvalMove[ 1 ],
 		     pml->amMoves[ i ].arEvalMove[ 2 ],
@@ -1860,9 +1894,14 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 		     pml->amMoves[ i ].rScore,
 		     pml->amMoves[ i ].esMove.ec.nPlies,
 		     pml->amMoves[ i ].esMove.ec.fCubeful ? "C" : "",
-                     pml->amMoves[ i ].esMove.ec.nReduced, 
+#if defined( REDUCTION_CODE )
+                     pml->amMoves[ i ].esMove.ec.nReduced,
+#else
+		     0,
+#endif
                      pml->amMoves[ i ].esMove.ec.fDeterministic, 
-                     pml->amMoves[ i ].esMove.ec.rNoise );
+                     pml->amMoves[ i ].esMove.ec.rNoise ,
+		     pml->amMoves[ i ].esMove.ec.fUsePrune);
 	    break;
 	    
 	case EVAL_ROLLOUT:

@@ -122,6 +122,8 @@ command acSetEvaluation[] = {
       szPLIES, NULL },
     { "reduced", CommandSetEvalReduced,
       N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
+    { "prune", CommandSetEvalPrune,
+      N_("use fast pruning networks"), szONOFF, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
     { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
@@ -1016,6 +1018,19 @@ CommandSetEvalCubeful( char *sz ) {
     pecSet->fCubeful = f;
 }
 
+extern void 
+CommandSetEvalPrune( char *sz ) {
+
+    char asz[ 2 ][ 128 ], szCommand[ 64 ];
+    int f = pecSet->fUsePrune;
+    
+    sprintf( asz[ 0 ], _("%s use prunning.\n"), szSet );
+    sprintf( asz[ 1 ], _("%s don't use prunning.\n"), szSet );
+    sprintf( szCommand, "%s prune", szSetCommand );
+    SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
+    pecSet->fUsePrune = f;
+}
+
 extern void CommandSetEvalDeterministic( char *sz ) {
 
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
@@ -1069,6 +1084,7 @@ extern void CommandSetEvalPlies( char *sz ) {
 }
 
 extern void CommandSetEvalReduced( char *sz ) {
+#if defined( REDUCTION_CODE )
 
     int n = ParseNumber( &sz );
 
@@ -1105,6 +1121,9 @@ extern void CommandSetEvalReduced( char *sz ) {
     if( !pecSet->nPlies )
 	outputl( _("(Note that this setting will have no effect until you "
 		 "choose evaluations with ply > 0.)") );
+#else
+    outputl( _("GNUBG compiled without support for reduced evaluations"));
+#endif
 }
 
 extern void CommandSetEvaluation( char *sz ) {
@@ -2193,9 +2212,9 @@ extern void CommandSetRolloutTruncationChequer ( char *sz ) {
     szSet = _("Chequer play evaluations at rollout truncation point");
     szSetCommand = "rollout truncation chequerplay";
 
-	pecSet = &prcSet->aecChequerTrunc;
+    pecSet = &prcSet->aecChequerTrunc;
 
-	HandleCommand ( sz, acSetEvaluation );
+    HandleCommand ( sz, acSetEvaluation );
 }
 
 extern void CommandSetRolloutTruncationCube ( char *sz ) {
@@ -2203,9 +2222,9 @@ extern void CommandSetRolloutTruncationCube ( char *sz ) {
     szSet = _("Cube decisions at rollout truncation point");
     szSetCommand = "rollout truncation cubedecision";
 
-	pecSet = &prcSet->aecCubeTrunc;
+    pecSet = &prcSet->aecCubeTrunc;
 
-	HandleCommand ( sz, acSetEvaluation );
+    HandleCommand ( sz, acSetEvaluation );
 }
 
 

@@ -4683,20 +4683,21 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
   GtkWidget *pwMenu, *pwItem;
   int *pi;
 
-    pec->nPlies = pew->padjPlies->value;
-    pec->fCubeful = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
+  pec->nPlies = pew->padjPlies->value;
+  pec->fCubeful =
+    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
 
-    /* reduced */
-    pwMenu = gtk_option_menu_get_menu ( GTK_OPTION_MENU ( pew->pwReduced ) );
-    pwItem = gtk_menu_get_active ( GTK_MENU ( pwMenu ) );
-    pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pwItem ) );
-    pec->nReduced = *pi;
+  /* reduced */
+  pwMenu = gtk_option_menu_get_menu ( GTK_OPTION_MENU ( pew->pwReduced ) );
+  pwItem = gtk_menu_get_active ( GTK_MENU ( pwMenu ) );
+  pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pwItem ) );
+#if defined( REDUCTION_CODE )
+  pec->nReduced = *pi;
+#endif
 
-    pec->rNoise = pew->padjNoise->value;
-    pec->fDeterministic = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
-
+  pec->rNoise = pew->padjNoise->value;
+  pec->fDeterministic =
+    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
 }
 
 
@@ -4782,7 +4783,12 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   gtk_adjustment_set_value ( pew->padjNoise, pec->rNoise );
 
   gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwReduced ), 
-                                pec->nReduced );
+#if defined( REDUCTION_CODE )
+                                pec->nReduced
+#else
+				0
+#endif
+				);
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
                                 pec->fCubeful );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
@@ -4977,8 +4983,13 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
      * 0, 2, 3, 4 
      */
 	gtk_option_menu_set_history( GTK_OPTION_MENU( pew->pwReduced ), 
+#if defined( REDUCTION_CODE )
                                  (pec->nReduced < 2) ? 0 : 
-                                  pec->nReduced - 1 );
+                                  pec->nReduced - 1
+#else
+				     0
+#endif
+				     );
 
     /* cubeful */
     
@@ -5129,10 +5140,12 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
 	UserCommand( sz );
     }
 
+#if defined( REDUCTION_CODE )
     if( pec->nReduced != pecOrig->nReduced ) {
 	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
 	UserCommand( sz );
     }
+#endif
 
     if( pec->fCubeful != pecOrig->fCubeful ) {
 	sprintf( sz, "%s cubeful %s", szPrefix, pec->fCubeful ? "on" : "off" );

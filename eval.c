@@ -269,6 +269,8 @@ static int anEscapes1[ 0x1000 ];
 
 static neuralnet nnContact, nnRace, nnCrashed;
 
+static neuralnet nnpContact, nnpRace, nnpCrashed;
+
 bearoffcontext *pbcOS = NULL;
 bearoffcontext *pbcTS = NULL;
 bearoffcontext *pbc1 = NULL;
@@ -278,6 +280,10 @@ bearoffcontext *pbc15x15 = NULL;
 bearoffcontext *pbc15x15_dvd = NULL;
 
 static cache cEval;
+#define PRUNE_CACHE
+#if defined( PRUNE_CACHE )
+static cache cpEval;
+#endif
 static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
@@ -285,6 +291,7 @@ static int iTick;
 static float rCubeX = 2.0/3.0;
 int fEgyptian = FALSE;
 int fUse15x15 = TRUE;
+
 
 /* variation of backgammon used by gnubg */
 
@@ -340,6 +347,7 @@ typedef struct _evalcache {
 } evalcache;
 #endif
 
+#if defined( REDUCTION_CODE )
 static int nReductionGroup   = 0;
 
 static int all_d1[] = { 1, 1, 1, 1, 1, 1, 
@@ -428,6 +436,8 @@ static  laRollList_t allLists[ 1 ] = {
 
 static laRollList_t *rollLists[] = {
   allLists, allLists, halfLists, thirdLists, quarterLists };
+
+#endif
 
 /* Random context, for generating non-deterministic noisy evaluations. */
 static randctx rc;
@@ -643,6 +653,10 @@ DestroyWeights( void )
   NeuralNetDestroy( &nnContact );
   NeuralNetDestroy( &nnCrashed );
   NeuralNetDestroy( &nnRace );
+
+  NeuralNetDestroy( &nnpContact );
+  NeuralNetDestroy( &nnpCrashed );
+  NeuralNetDestroy( &nnpRace );
 }
 
 extern int
@@ -678,6 +692,9 @@ EvalShutdown ( void ) {
   /* destroy cache */
 
   CacheDestroy( &cEval );
+#if defined( PRUNE_CACHE )
+  CacheDestroy( &cpEval );
+#endif
 
   return 0;
 
@@ -710,6 +727,13 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( CacheCreate( &cEval, cCache ) ) {
 	  return -1;
 	}
+
+#if defined( PRUNE_CACHE )
+	if( CacheCreate( &cpEval, 0x1 << 16) ) {
+	  return -1;
+	}
+#endif
+	
 #endif
 	    
 	ComputeTable();
@@ -800,15 +824,23 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 			    MAP_PRIVATE, h, 0 ) ) ) {
 		p = ( (float *) p ) + 2; /* skip magic number and version */
 		fReadWeights =
-		    ( p = NeuralNetCreateDirect( &nnContact, p ) ) &&
-		    ( p = NeuralNetCreateDirect( &nnRace, p ) ) &&
-		    ( p = NeuralNetCreateDirect( &nnCrashed, p ) );
+		  ( p = NeuralNetCreateDirect( &nnContact, p ) ) &&
+		  ( p = NeuralNetCreateDirect( &nnRace, p ) ) &&
+		  ( p = NeuralNetCreateDirect( &nnCrashed, p ) )  &&
+				    
+		  ( p = NeuralNetCreateDirect(&nnpContact, p) ) &&
+		  ( p = NeuralNetCreateDirect(&nnpRace, p ) ) &&
+		  ( p = NeuralNetCreateDirect(&nnpCrashed, p) );
 	    }
 #endif
 	    if( !fReadWeights && !( fReadWeights =
 		   !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
 		   !NeuralNetLoadBinary(&nnRace, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnCrashed, pfWeights ) ) ) {
+		   !NeuralNetLoadBinary(&nnCrashed, pfWeights ) &&
+				    
+		   !NeuralNetLoadBinary(&nnpContact, pfWeights ) &&
+		   !NeuralNetLoadBinary(&nnpRace, pfWeights ) &&
+		   !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) ) ) {
 		perror( szWeightsBinary );
 	    }
 	    
@@ -836,7 +868,12 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		if( !( fReadWeights =
 		       !NeuralNetLoad( &nnContact, pfWeights ) &&
 		       !NeuralNetLoad( &nnRace, pfWeights ) &&
-		       !NeuralNetLoad( &nnCrashed, pfWeights ) ) )
+		       !NeuralNetLoad( &nnCrashed, pfWeights ) &&
+		       
+		       !NeuralNetLoad( &nnpContact, pfWeights ) &&
+		       !NeuralNetLoad( &nnpRace, pfWeights ) &&
+		       !NeuralNetLoad( &nnpCrashed, pfWeights )
+		       ) )
 		    perror( szWeights );
 
                 PopLocale ();
@@ -882,7 +919,11 @@ extern int EvalSave( char *szWeights ) {
   NeuralNetSave( &nnContact, pfWeights );
   NeuralNetSave( &nnRace, pfWeights );
   NeuralNetSave( &nnCrashed, pfWeights );
-    
+
+  NeuralNetSave( &nnpContact, pfWeights );
+  NeuralNetSave( &nnpRace, pfWeights );
+  NeuralNetSave( &nnpCrashed, pfWeights );
+  
   fclose( pfWeights );
 
   return 0;
@@ -2500,17 +2541,166 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 
+int nPruneMoves = 10;
+
+static void
+FindBestMoveInEval(int nDice0, int nDice1, int anBoard[2][25], const cubeinfo* pci)
+{
+  unsigned int i;
+  movelist ml;
+  GenerateMoves(&ml, anBoard, nDice0, nDice1, FALSE);
+    
+  if( ml.cMoves == 0 ) {
+    /* no legal moves */
+    return;
+  }
+
+  if( ml.cMoves == 1 ) {
+    /* forced move */
+    ml.iMoveBest = 0;
+  } else {
+    int use = ml.cMoves > nPruneMoves;
+    int bmovesi[nPruneMoves];
+    float arOutput[5];
+    
+    ((cubeinfo*)pci)->fMove = !pci->fMove;
+    if( use ) {
+      positionclass evalClass;
+      float arInput[200];
+      
+      for(i = 0; (int)i < ml.cMoves; i++) {
+	move* const pm = &ml.amMoves[i];
+	
+	PositionFromKey(anBoard, pm->auch);
+	SwapSides(anBoard);
+
+	{
+	  positionclass pc = ClassifyPosition(anBoard, VARIATION_STANDARD);
+	  if( i == 0 ) {
+	    if( pc < CLASS_RACE ) {
+	      break;
+	    }
+	    evalClass = pc;
+	  } else {
+	    if( pc != evalClass ) {
+	      break;
+	    }
+	  }
+
+#if !defined(GARY_CACHE) && defined(PRUNE_CACHE)
+	  evalcache ec, *pec;
+	  long l;
+	  memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
+	  ec.nEvalContext = 0;
+	  if( ( pec = CacheLookup( &cpEval, &ec, &l ) ) ) {
+	    memcpy( arOutput, pec->ar, sizeof(float) * NUM_OUTPUTS );
+	  } else {
+    
+#endif
+	    baseInputs(anBoard, arInput);
+	    {
+	      neuralnet* n =
+		(neuralnet* []){&nnpRace, &nnpCrashed, &nnpContact}[pc - CLASS_RACE];
+	      NeuralNetEvaluate(n, arInput, arOutput,
+				(i == 0) ?  NNEVAL_SAVE : NNEVAL_FROMBASE);
+	      SanityCheck(anBoard, arOutput);
+	    }
+#if !defined(GARY_CACHE) && defined(PRUNE_CACHE)
+	    memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
+	    CacheAdd(&cpEval, &ec, l);
+	  }
+#endif
+	  pm->rScore = UtilityME(arOutput, pci);
+	  if( i < nPruneMoves ) {
+	    bmovesi[i] = i;
+	    if( pm->rScore > ml.amMoves[ bmovesi[0] ].rScore ) {
+	      bmovesi[i] = bmovesi[0];
+	      bmovesi[0] = i;
+	    }
+	  } else if( pm->rScore < ml.amMoves[ bmovesi[0] ].rScore ) {
+	    int m = 0, k;
+	    bmovesi[0] = i;
+	    for(k = 1; k < nPruneMoves; ++k) {
+	      if( ml.amMoves[ bmovesi[k] ].rScore >
+		  ml.amMoves[ bmovesi[m] ].rScore ) {
+		m = k;
+	      }
+	    }
+	    bmovesi[0] = bmovesi[m];
+	    bmovesi[m] = i;
+	  }
+	}
+      }
+
+      if( i == ml.cMoves ) {
+	ml.cMoves = nPruneMoves;
+      } else {
+	use  = 0;
+      }
+    }
+
+    nContext[0] = nContext[1] = nContext[2] = 0;
+    float rBestScore = 99999.9;
+    for(i = 0; (int)i < ml.cMoves; i++) {
+      int const j = use ? bmovesi[i] : i;
+      const move* const pm = &ml.amMoves[j];
+	
+      PositionFromKey(anBoard, pm->auch);
+      SwapSides(anBoard);
+#if !defined(GARY_CACHE)
+      {
+	evalcache ec, *pec;
+	long l;
+	memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
+	ec.nEvalContext =  pci->fMove << 14;
+	if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) {
+	  memcpy( arOutput, pec->ar, sizeof(float) * NUM_OUTPUTS );
+	} else {
+#endif
+	  positionclass pc = ClassifyPosition(anBoard, VARIATION_STANDARD);
+
+	  acef[pc](anBoard, arOutput, VARIATION_STANDARD);
+	  if ( pc > CLASS_PERFECT )
+	    SanityCheck(anBoard, arOutput);
+
+#if !defined(GARY_CACHE)
+	  memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
+	  CacheAdd(&cEval, &ec, l);
+	}
+#endif
+	float rScore = UtilityME(arOutput, pci);
+	if( rScore < rBestScore ) {
+	  rBestScore = rScore;
+	  ml.iMoveBest = j;
+	}
+      }
+    }
+    nContext[0] = nContext[1] = nContext[2] = -1;
+
+    ((cubeinfo*)pci)->fMove = !pci->fMove;
+  }
+
+  PositionFromKey(anBoard, ml.amMoves[ml.iMoveBest].auch);
+}
+
+
 static int 
 EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
                       const cubeinfo* pci, const evalcontext* pec, int nPlies,
                       positionclass pc ) {
   int i, n0, n1;
   int fUseReduction;
+#if defined( REDUCTION_CODE )
   laRollList_t *rolls = NULL;
   laRollList_t *rollList = NULL;
+#endif
   float arVariationOutput[ NUM_OUTPUTS ];
   float rTemp;
-  int r, w, sumW;
+  int r, w
+#if defined( REDUCTION_CODE )
+    , sumW
+#endif
+    ;
   
   if( pc > CLASS_PERFECT && nPlies > 0 ) {
     /* internal node; recurse */
@@ -2518,10 +2708,14 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     int anBoardNew[ 2 ][ 25 ];
     /* int anMove[ 8 ]; */
     cubeinfo ciOpp;
-
+    int const  usePrune =
+      pec->fUsePrune && !pec->rNoise && pci->bgv == VARIATION_STANDARD;
+    
+      
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
+#if defined( REDUCTION_CODE )
     /* reset reduction group */
 
     if ( pec->nReduced && ( nPlies == pec->nPlies ) )
@@ -2536,14 +2730,22 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     }
     else
       rolls = &allLists[ 0 ];
+#endif
     
     /* loop over rolls */
 
+    
+#if defined( REDUCTION_CODE )
     sumW = 0;
     for ( r=0; r < rolls->numRolls; r++ ) {
       n0 = rolls->d1[r];
       n1 = rolls->d2[r];
       w  = rolls->wt[r];
+#else
+      for( n0 = 1; n0 <= 6; n0++ ) {
+	for( n1 = 1; n1 <= n0; n1++ ) {
+	  w = (n0 == n1) ? 1 : 2;
+#endif
 
       for( i = 0; i < 25; i++ ) {
         anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
@@ -2558,8 +2760,12 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
         return -1;
       }
 
-      FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
-                         defaultFilters );
+      if( usePrune ) {
+	FindBestMoveInEval(n0, n1, anBoardNew, pci);
+      } else {
+	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
+			   defaultFilters );
+      }
 
       SwapSides( anBoardNew );
 
@@ -2575,18 +2781,30 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
       for( i = 0; i < NUM_OUTPUTS; i++ )
         arOutput[ i ] += w * arVariationOutput[ i ];
+#if defined( REDUCTION_CODE )
       sumW += w;
+#endif
     }
 
+#if defined( REDUCTION_CODE )
     /* reset reduction group */
 
     if ( pec->nReduced && ( nPlies == pec->nPlies ) )
       nReductionGroup = 0;
-
+#else
+      }
+#endif
+      
     /* normalize */
     for ( i = 0; i < NUM_OUTPUTS; i++ )
-      arOutput[ i ] /= sumW;
-
+      arOutput[ i ] /=
+#if defined( REDUCTION_CODE )
+	sumW
+#else
+	36
+#endif
+	;
+    
     /* flop eval */
     arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ];
 
@@ -2612,7 +2830,6 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     if ( pc > CLASS_PERFECT )
       /* no sanity check needed for exact evaluations */
       SanityCheck( anBoard, arOutput );
-
   }
 
   return 0;
@@ -2638,7 +2855,10 @@ EvalKey ( const evalcontext *pec, const int nPlies,
    */
 
   /* Record the signature of important evaluation settings. */
-  iKey = ( ( pec->nReduced ) | 
+  iKey = (
+#if defined( REDUCTION_CODE )
+	   ( pec->nReduced ) | 
+#endif
            ( nPlies << 3 ) |
            ( pec->fCubeful << 6 ) | 
            ( ( ( (int) ( pec->rNoise * 1000 ) ) && 0x00FF ) << 7 ) |
@@ -5756,10 +5976,17 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
   float arCfTemp[ 128 ];
   cubeinfo aci[ 128 ];
 #endif
+
+#if defined( REDUCTION_CODE )
   int fUseReduction;
   laRollList_t *rolls = NULL;
   laRollList_t *rollList = NULL;
-  int ir, w, sumW;
+#endif
+  int ir, w
+#if defined( REDUCTION_CODE )
+    , sumW
+#endif
+    ;
   int n0, n1;
 
   pc = ClassifyPosition ( anBoard, pciMove->bgv );
@@ -5770,6 +5997,9 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
     int anBoardNew[ 2 ][ 25 ];
 
+    int const  usePrune =
+      pec->fUsePrune && !pec->rNoise && pciMove->bgv == VARIATION_STANDARD;
+    
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
@@ -5780,6 +6010,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
     MakeCubePos ( aciCubePos, cci, fTop, aci, TRUE );
 
+#if defined( REDUCTION_CODE )
     /* speed reduction */
 
     /* make sure to reset nReductionGroup */
@@ -5797,13 +6028,21 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
     else
       rolls = &allLists[ 0 ];
     
+#endif
+
     /* loop over rolls */
 
+#if defined( REDUCTION_CODE )
     sumW = 0;
     for ( ir=0; ir < rolls->numRolls; ir++ ) {
       n0 = rolls->d1[ir];
       n1 = rolls->d2[ir];
       w  = rolls->wt[ir];
+#else
+    for( n0 = 1; n0 <= 6; n0++ ) {
+      for( n1 = 1; n1 <= n0; n1++ ) {
+	w = (n0 == n1) ? 1 : 2;
+#endif
 
       for( i = 0; i < 25; i++ ) {
         anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
@@ -5818,8 +6057,13 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
         return -1;
       }
 
-      FindBestMovePlied( NULL, n0, n1, anBoardNew,
+      if( usePrune ) {
+	FindBestMoveInEval(n0, n1, anBoardNew, pciMove);
+      } else {
+	FindBestMovePlied( NULL, n0, n1, anBoardNew,
                          pciMove, pec, 0, defaultFilters );
+      }
+      
 
       SwapSides( anBoardNew );
 
@@ -5846,17 +6090,26 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
       for ( i = 0; i < 2 * cci; i++ )
         arCf[ i ] += w * arCfTemp[ i ];
 
+#if defined( REDUCTION_CODE )
       sumW += w;
+#endif
 
     }
 
+#if defined( REDUCTION_CODE )
     /* reset reduction group */
 
     if ( pec->nReduced && ( nPlies == pec->nPlies ) )
       nReductionGroup = 0;
+#else
+    }
+#endif
 
     /* Flip evals */
-
+#if !defined( REDUCTION_CODE )
+#define sumW 36
+#endif
+    
     arOutput[ OUTPUT_WIN ] =
       1.0 - arOutput[ OUTPUT_WIN ] / sumW;
 	  
@@ -5875,7 +6128,8 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
         arCf[ i ] = 1.0 - arCf[ i ] / sumW;
       else
         arCf[ i ] = - arCf[ i ] / sumW;
-
+#undef sumW
+    
     /* invert fMove */
     /* Remember than fMove was inverted in the call to MakeCubePos */
 
@@ -6158,6 +6412,7 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
 
   }
 
+#if defined( REDUCTION_CODE )
   if ( pec1->nPlies > 0 ) {
 
     int n1 = ( pec1->nReduced != 21 ) ? pec1->nReduced : 0;
@@ -6167,6 +6422,7 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
     else if ( n1 < n2 )
       return +1;
   }
+#endif
 
   return 0;
 

@@ -114,10 +114,14 @@ static void
 ShowEvaluation( const evalcontext *pec ) {
   
   outputf( _("        %d-ply evaluation.\n"
+#if defined( REDUCTION_CODE )
              "        %d%% speed.\n"
+#endif
              "        %s evaluations.\n"),
            pec->nPlies, 
+#if defined( REDUCTION_CODE )
            (pec->nReduced) ? 100 / pec->nReduced : 100,
+#endif
            pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
   if( pec->rNoise )

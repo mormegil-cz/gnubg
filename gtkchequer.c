@@ -47,8 +47,6 @@
 #include "format.h"
 
 
-
-
 /*
  * Call UpdateMostList to update the movelist in the GTK hint window.
  * For example, after new evaluations, rollouts or toggle of MWC/Equity.

@@ -72,7 +72,7 @@ static char *Concatenate( list *pl ) {
     
     return sz;
 }
- 
+
 
 #line 90 "./sgf.y"
 #ifndef YYSTYPE
@@ -934,68 +934,68 @@ yyreduce:
 
 case 1:
 #line 108 "./sgf.y"
-{ yyval.pl = plCollection = yyvsp[0].pl; ;
-    break;}
+{ yyval.pl = plCollection = yyvsp[0].pl; }
+    break;
 case 2:
 #line 112 "./sgf.y"
-{ yyval.pl = NewList(); ;
-    break;}
+{ yyval.pl = NewList(); }
+    break;
 case 3:
 #line 114 "./sgf.y"
-{ ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; ;
-    break;}
+{ ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; }
+    break;
 case 5:
 #line 119 "./sgf.y"
-{ ListInsert( yyvsp[-1].pl->plNext, yyvsp[-2].pl ); yyval.pl = yyvsp[-1].pl; ;
-    break;}
+{ ListInsert( yyvsp[-1].pl->plNext, yyvsp[-2].pl ); yyval.pl = yyvsp[-1].pl; }
+    break;
 case 6:
 #line 123 "./sgf.y"
-{ yyval.pl = NewList(); ListInsert( yyval.pl, yyvsp[0].pl ); ;
-    break;}
+{ yyval.pl = NewList(); ListInsert( yyval.pl, yyvsp[0].pl ); }
+    break;
 case 7:
 #line 125 "./sgf.y"
-{ ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; ;
-    break;}
+{ ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; }
+    break;
 case 9:
 #line 130 "./sgf.y"
-{ yyval.pl = yyvsp[0].pl; ;
-    break;}
+{ yyval.pl = yyvsp[0].pl; }
+    break;
 case 10:
 #line 134 "./sgf.y"
-{ yyval.pl = NewList(); ;
-    break;}
+{ yyval.pl = NewList(); }
+    break;
 case 11:
 #line 136 "./sgf.y"
-{ ListInsert( yyvsp[-1].pl, yyvsp[0].pp ); yyval.pl = yyvsp[-1].pl; ;
-    break;}
+{ ListInsert( yyvsp[-1].pl, yyvsp[0].pp ); yyval.pl = yyvsp[-1].pl; }
+    break;
 case 13:
 #line 143 "./sgf.y"
 { 
 		    ListInsert( yyvsp[-1].pl, yyvsp[0].pch );
 		    yyval.pp = malloc( sizeof(property) ); yyval.pp->pl = yyvsp[-1].pl;
 		    yyval.pp->ach[ 0 ] = yyvsp[-2].ach[ 0 ]; yyval.pp->ach[ 1 ] = yyvsp[-2].ach[ 1 ];
-		;
-    break;}
+		}
+    break;
 case 14:
 #line 151 "./sgf.y"
-{ yyval.pl = NewList(); ;
-    break;}
+{ yyval.pl = NewList(); }
+    break;
 case 15:
 #line 153 "./sgf.y"
-{ ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; ;
-    break;}
+{ ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; }
+    break;
 case 16:
 #line 157 "./sgf.y"
-{ yyval.pch = Concatenate( yyvsp[-1].pl ); ;
-    break;}
+{ yyval.pch = Concatenate( yyvsp[-1].pl ); }
+    break;
 case 17:
 #line 161 "./sgf.y"
-{ yyval.pl = NewList(); ;
-    break;}
+{ yyval.pl = NewList(); }
+    break;
 case 18:
 #line 163 "./sgf.y"
-{ ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; ;
-    break;}
+{ ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; }
+    break;
 }
 
 #line 705 "/usr/share/bison/bison.simple"
@@ -1238,7 +1238,7 @@ extern list *SGFParse( FILE *pf ) {
     
     sgfin = pf;
     plCollection = NULL;
-    
+
     sgfparse();
 
     return plCollection;

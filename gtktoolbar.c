@@ -475,6 +475,7 @@ ToolbarNew ( void ) {
 
   
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+
 #if !USE_GTK2
   gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
 		  GTK_RELIEF_NONE);

@@ -1,4 +1,4 @@
-/* A Bison parser, made from /home/jth/prog/gnubg-head4/external_y.y
+/* A Bison parser, made from /home/joseph/src/gnubg/external_y.y
    by GNU bison 1.35.  */
 
 #define YYBISON 1  /* Identify Bison output.  */
@@ -19,10 +19,11 @@
 # define	CUBELESS	263
 # define	NOISE	264
 # define	REDUCED	265
-# define	FIBSBOARD	266
-# define	AFIBSBOARD	267
-# define	ON	268
-# define	OFF	269
+# define	PRUNE	266
+# define	FIBSBOARD	267
+# define	AFIBSBOARD	268
+# define	ON	269
+# define	OFF	270
 
 #line 1 "external_y.y"
 
@@ -51,11 +52,15 @@
 #include "config.h"
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
 
 #include "external.h"
+
+extern int extlex();
+extern int exterror(const char *s);
 
 extcmd ec; 
 
@@ -64,8 +69,8 @@ static void reset_command();
 void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 
-  
-#line 42 "external_y.y"
+
+#line 48 "external_y.y"
 #ifndef YYSTYPE
 typedef union {
   int number;
@@ -80,12 +85,12 @@ typedef union {
 
 
 
-#define	YYFINAL		30
+#define	YYFINAL		32
 #define	YYFLAG		-32768
-#define	YYNTBASE	16
+#define	YYNTBASE	17
 
 /* YYTRANSLATE(YYLEX) -- Bison token number corresponding to YYLEX. */
-#define YYTRANSLATE(x) ((unsigned)(x) <= 269 ? yytranslate[x] : 29)
+#define YYTRANSLATE(x) ((unsigned)(x) <= 270 ? yytranslate[x] : 31)
 
 /* YYTRANSLATE[YYLEX] -- Bison token number corresponding to YYLEX. */
 static const char yytranslate[] =
@@ -116,23 +121,25 @@ static const char yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     3,     4,     5,
-       6,     7,     8,     9,    10,    11,    12,    13,    14,    15
+       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
+      16
 };
 
 #if YYDEBUG
 static const short yyprhs[] =
 {
        0,     0,     1,     4,     6,     8,     9,    11,    13,    16,
-      17,    20,    23,    24,    26,    27,    29,    30,    33,    34,
-      37,    38,    45
+      17,    20,    23,    24,    26,    27,    29,    30,    32,    33,
+      36,    37,    40,    41,    49
 };
 static const short yyrhs[] =
 {
-      -1,    18,    17,     0,    28,     0,    19,     0,     0,    13,
-       0,    13,     0,     6,     4,     0,     0,     7,    14,     0,
-       7,    15,     0,     0,     8,     0,     0,     9,     0,     0,
-      10,     4,     0,     0,    11,     4,     0,     0,    21,    22,
-      23,    24,    25,    26,     0,     5,    12,    20,    27,     0
+      -1,    19,    18,     0,    30,     0,    20,     0,     0,    14,
+       0,    14,     0,     6,     4,     0,     0,     7,    15,     0,
+       7,    16,     0,     0,     8,     0,     0,    12,     0,     0,
+       9,     0,     0,    10,     4,     0,     0,    11,     4,     0,
+       0,    22,    23,    24,    25,    26,    27,    28,     0,     5,
+      13,    21,    29,     0
 };
 
 #endif
@@ -141,9 +148,9 @@ static const short yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined. */
 static const short yyrline[] =
 {
-       0,    60,    61,    64,    65,    68,    73,    80,    86,    87,
-      90,    91,    92,    95,    96,    99,   100,   103,   104,   107,
-     108,   111,   114
+       0,    63,    64,    67,    68,    71,    76,    83,    89,    90,
+      93,    94,    95,    98,    99,   102,   103,   106,   107,   110,
+     111,   114,   115,   118,   121
 };
 #endif
 
@@ -154,27 +161,28 @@ static const short yyrline[] =
 static const char *const yytname[] =
 {
   "$", "error", "$undefined.", "STRING", "NUMBER", "EVALUATION", "PLIES", 
-  "CUBE", "CUBEFUL", "CUBELESS", "NOISE", "REDUCED", "FIBSBOARD", 
+  "CUBE", "CUBEFUL", "CUBELESS", "NOISE", "REDUCED", "PRUNE", "FIBSBOARD", 
   "AFIBSBOARD", "ON", "OFF", "the_command", "command", "reset_command", 
   "cmdfibsboard", "fibsboard", "optplies", "optcube", "optcubeful", 
-  "optcubeless", "optnoise", "optreduced", "evalcontext", "evaluation", 0
+  "optprune", "optcubeless", "optnoise", "optreduced", "evalcontext", 
+  "evaluation", 0
 };
 #endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives. */
 static const short yyr1[] =
 {
-       0,    16,    16,    17,    17,    18,    19,    20,    21,    21,
-      22,    22,    22,    23,    23,    24,    24,    25,    25,    26,
-      26,    27,    28
+       0,    17,    17,    18,    18,    19,    20,    21,    22,    22,
+      23,    23,    23,    24,    24,    25,    25,    26,    26,    27,
+      27,    28,    28,    29,    30
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN. */
 static const short yyr2[] =
 {
        0,     0,     2,     1,     1,     0,     1,     1,     2,     0,
-       2,     2,     0,     1,     0,     1,     0,     2,     0,     2,
-       0,     6,     4
+       2,     2,     0,     1,     0,     1,     0,     1,     0,     2,
+       0,     2,     0,     7,     4
 };
 
 /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
@@ -183,45 +191,45 @@ static const short yyr2[] =
 static const short yydefact[] =
 {
        5,     0,     0,     6,     2,     4,     3,     0,     7,     9,
-       0,    12,    22,     8,     0,    14,    10,    11,    13,    16,
-      15,    18,     0,    20,    17,     0,    21,    19,     0,     0,
-       0
+       0,    12,    24,     8,     0,    14,    10,    11,    13,    16,
+      15,    18,    17,    20,     0,    22,    19,     0,    23,    21,
+       0,     0,     0
 };
 
 static const short yydefgoto[] =
 {
-      28,     4,     1,     5,     9,    11,    15,    19,    21,    23,
-      26,    12,     6
+      30,     4,     1,     5,     9,    11,    15,    19,    21,    23,
+      25,    28,    12,     6
 };
 
 static const short yypact[] =
 {
-       3,    -5,    -8,-32768,-32768,-32768,-32768,    -7,-32768,    -1,
-       5,     0,-32768,-32768,   -13,     2,-32768,-32768,-32768,     4,
-  -32768,     1,     8,     6,-32768,    10,-32768,-32768,    15,    16,
-  -32768
+       3,    -5,    -9,-32768,-32768,-32768,-32768,    -8,-32768,    -1,
+       4,     0,-32768,-32768,   -14,     2,-32768,-32768,-32768,     1,
+  -32768,     5,-32768,     6,     7,     8,-32768,    11,-32768,-32768,
+      12,    17,-32768
 };
 
 static const short yypgoto[] =
 {
   -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
-  -32768,-32768,-32768
+  -32768,-32768,-32768,-32768
 };
 
 
-#define	YYLAST		17
+#define	YYLAST		19
 
 
 static const short yytable[] =
 {
-       2,    16,    17,    -1,     7,    10,     8,    14,     3,    13,
-      18,    22,    24,    20,    27,    29,    30,    25
+       2,    16,    17,    -1,     7,    10,     8,    14,    13,     3,
+      18,    26,    31,    20,    22,    29,    24,    32,     0,    27
 };
 
 static const short yycheck[] =
 {
-       5,    14,    15,     0,    12,     6,    13,     7,    13,     4,
-       8,    10,     4,     9,     4,     0,     0,    11
+       5,    15,    16,     0,    13,     6,    14,     7,     4,    14,
+       8,     4,     0,    12,     9,     4,    10,     0,    -1,    11
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/share/bison/bison.simple"
@@ -931,13 +939,13 @@ yyreduce:
   switch (yyn) {
 
 case 5:
-#line 68 "external_y.y"
+#line 71 "external_y.y"
 {
   reset_command();
 }
     break;
 case 6:
-#line 73 "external_y.y"
+#line 76 "external_y.y"
 { 
   ec.ct = COMMAND_FIBSBOARD;
   free( ec.szFIBSBoard );
@@ -945,42 +953,46 @@ case 6:
 }
     break;
 case 7:
-#line 80 "external_y.y"
+#line 83 "external_y.y"
 { 
   free( ec.szFIBSBoard );
   ec.szFIBSBoard = yyvsp[0].sval;
 }
     break;
 case 8:
-#line 86 "external_y.y"
+#line 89 "external_y.y"
 { ec.nPlies = yyvsp[0].number; }
     break;
 case 10:
-#line 90 "external_y.y"
+#line 93 "external_y.y"
 { ec.fCubeful = TRUE; }
     break;
 case 11:
-#line 91 "external_y.y"
+#line 94 "external_y.y"
 { ec.fCubeful = FALSE; }
     break;
 case 13:
-#line 95 "external_y.y"
+#line 98 "external_y.y"
 { ec.fCubeful = TRUE; }
     break;
 case 15:
-#line 99 "external_y.y"
-{ ec.fCubeful = FALSE; }
+#line 102 "external_y.y"
+{ ec.fUsePrune = TRUE; }
     break;
 case 17:
-#line 103 "external_y.y"
-{ ec.rNoise = yyvsp[0].number; }
+#line 106 "external_y.y"
+{ ec.fCubeful = FALSE; }
     break;
 case 19:
-#line 107 "external_y.y"
+#line 110 "external_y.y"
+{ ec.rNoise = yyvsp[0].number; }
+    break;
+case 21:
+#line 114 "external_y.y"
 { ec.nReduced = yyvsp[0].number; }
     break;
-case 22:
-#line 114 "external_y.y"
+case 24:
+#line 121 "external_y.y"
 {
   ec.ct = COMMAND_EVALUATION;
 }
@@ -1218,7 +1230,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 119 "external_y.y"
+#line 126 "external_y.y"
 
 
 /* lexer interface */
@@ -1234,6 +1246,8 @@ exterror( const char *s ) {
   else
     fprintf( stderr, "Error: %s at %s\n", 
              s, exttext && exttext[ 0 ] ? exttext : "<EOT>" );
+
+  return 0;
 }
 
 static void
@@ -1245,6 +1259,7 @@ reset_command() {
   ec.fDeterministic = 1;
   ec.fCubeful = 0;
   ec.nReduced = 0;
+  ec.fUsePrune = 0;
   free(ec.szFIBSBoard);
   ec.szFIBSBoard = NULL;
 
@@ -1274,9 +1289,10 @@ main( int argc, char *argv[] ) {
           "deterministic %d\n"
           "cubeful %d\n"
           "reduced %d\n"
+          "prune %d\n"
           "fibsboard %s\n",
           ec.ct, ec.nPlies, ec.rNoise, ec.fDeterministic, ec.fCubeful,
-          ec.nReduced, ec.szFIBSBoard );
+          ec.nReduced, ec.fUsePrune, ec.szFIBSBoard );
 
   return 0;
 

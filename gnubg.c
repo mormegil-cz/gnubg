@@ -5502,11 +5502,17 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
     fprintf( pf, "%s plies %d\n"
 	     "%s reduced %d\n"
+	     "%s prune %s\n"
 	     "%s cubeful %s\n"
 	     "%s noise %.3f\n"
 	     "%s deterministic %s\n",
 	     sz, pec->nPlies, 
+#if defined( REDUCTION_CODE )
 	     sz, pec->nReduced,
+#else
+	     sz, 0,
+#endif
+	     sz, pec->fUsePrune ? "on" : "off",
 	     sz, pec->fCubeful ? "on" : "off",
 	     sz, pec->rNoise, 
              sz, pec->fDeterministic ? "on" : "off" );

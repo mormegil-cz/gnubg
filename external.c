@@ -402,7 +402,10 @@ ExtEvaluation( extcmd *pec ) {
 
     ec.fCubeful = pec->fCubeful;
     ec.nPlies = pec->nPlies;
+#if defined( REDUCTION_CODE )
     ec.nReduced = pec->nReduced;
+#endif
+    ec.fUsePrune = pec->fUsePrune;
     ec.fDeterministic = pec->fDeterministic;
     ec.rNoise = pec->rNoise;
     

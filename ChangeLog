@@ -1,3 +1,9 @@
+Tue Oct 12 21:36:00 2004  Joseph Heled  <joseph@gnubg.org>
+
+	* eval.c (FindBestMoveInEval): Add usage of prunning nets. This is
+	quite a large change, and since it adds a member to evalcontext,
+	possibly a destructive one.
+
 Sun Oct 10 23:04:14 GMT 2004 Jon Nall <backgame@gmail.com>
 
     * backgammon.h, gnubg.c, play.c: Added support for adding comments

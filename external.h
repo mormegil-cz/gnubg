@@ -53,6 +53,7 @@ typedef struct _extcmd {
   int fDeterministic;
   int fCubeful;
   int nReduced;
+  int fUsePrune;
 
   /* fibs board */
   char *szFIBSBoard;

@@ -29,7 +29,6 @@ extern int extparse();
 
 int prc_lineno = 1;
 void escapes(const char *cp, char *tp);
-
 %}
 
 %option noyywrap
@@ -57,6 +56,7 @@ cube            { return CUBE; }
 plies           { return PLIES; }
 noise           { return NOISE; }
 reduced         { return REDUCED; }
+prune           { return PRUNE; }
 yes             { return ON; }
 on              { return ON; }
 no              { return OFF; }

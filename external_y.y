@@ -41,7 +41,9 @@ static void reset_command();
 void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 
-  %}
+%}
+
+%name-prefix="ext"
 
 %union {
   int number;
@@ -50,7 +52,7 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 %token <sval> STRING
 %token <number> NUMBER
-%token EVALUATION PLIES CUBE CUBEFUL CUBELESS NOISE REDUCED
+%token EVALUATION PLIES CUBE CUBEFUL CUBELESS NOISE REDUCED PRUNE
 %token FIBSBOARD
 %token <sval> AFIBSBOARD
 %token ON
@@ -97,6 +99,10 @@ optcubeful     : CUBEFUL { ec.fCubeful = TRUE; }
                | /* empty */
                ;
 
+optprune     : PRUNE { ec.fUsePrune = TRUE; }
+               | /* empty */
+               ;
+
 optcubeless    : CUBELESS { ec.fCubeful = FALSE; }
                | /* empty */
                ;
@@ -109,7 +115,7 @@ optreduced     : REDUCED NUMBER { ec.nReduced = $2; }
                | /* empty */
                ;
 
-evalcontext    : optplies optcube optcubeful optcubeless optnoise optreduced
+evalcontext    : optplies optcube optcubeful optprune optcubeless optnoise optreduced
                ;
 
 evaluation     : EVALUATION FIBSBOARD fibsboard evalcontext {
@@ -145,6 +151,7 @@ reset_command() {
   ec.fDeterministic = 1;
   ec.fCubeful = 0;
   ec.nReduced = 0;
+  ec.fUsePrune = 0;
   free(ec.szFIBSBoard);
   ec.szFIBSBoard = NULL;
 
@@ -174,9 +181,10 @@ main( int argc, char *argv[] ) {
           "deterministic %d\n"
           "cubeful %d\n"
           "reduced %d\n"
+          "prune %d\n"
           "fibsboard %s\n",
           ec.ct, ec.nPlies, ec.rNoise, ec.fDeterministic, ec.fCubeful,
-          ec.nReduced, ec.szFIBSBoard );
+          ec.nReduced, ec.fUsePrune, ec.szFIBSBoard );
 
   return 0;
 

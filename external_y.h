@@ -18,10 +18,11 @@ typedef union {
 # define	CUBELESS	263
 # define	NOISE	264
 # define	REDUCED	265
-# define	FIBSBOARD	266
-# define	AFIBSBOARD	267
-# define	ON	268
-# define	OFF	269
+# define	PRUNE	266
+# define	FIBSBOARD	267
+# define	AFIBSBOARD	268
+# define	ON	269
+# define	OFF	270
 
 
 extern YYSTYPE extlval;

@@ -229,10 +229,16 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
 static PyObject*
 EvalContextToPy( const evalcontext* pec)
 {
-  return Py_BuildValue( "{s:i,s:i,s:i,s:i,s:f}",
+  return Py_BuildValue( "{s:i,s:i"
+#if defined( REDUCTION_CODE )
+			",s:i"
+#endif
+			",s:i,s:f}",
                         "cubeful", pec->fCubeful,
                         "plies", pec->nPlies,
+#if defined( REDUCTION_CODE )
                         "reduced", pec->nReduced,
+#endif
                         "deterministic", pec->fDeterministic,
                         "noise", pec->rNoise );
 }
@@ -288,9 +294,11 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
         pec->fCubeful = i ? 1 : 0;
       else if ( iKey == 1 )
         pec->nPlies = ( i < 8 ) ? i : 7;
-      else if ( iKey == 2 )
+      else if ( iKey == 2 ) {
+#if defined( REDUCTION_CODE )
         pec->nReduced = ( i < 8 ) ? i : 7;
-      else 
+#endif
+      } else 
         pec->fDeterministic = i ? 1 : 0;
 
       break;
@@ -381,7 +389,9 @@ PythonEvalContext( PyObject* self IGNORE, PyObject *args ) {
 
   ec.fCubeful = fCubeful ? 1 : 0;
   ec.nPlies = ( nPlies < 8 ) ? nPlies : 7;
+#if defined( REDUCTION_CODE )
   ec.nReduced = ( nReduced < 8 ) ? nReduced : 7;
+#endif
   ec.fDeterministic = fDeterministic ? 1 : 0;
   ec.rNoise = rNoise;
                            
@@ -403,7 +413,9 @@ PythonCommand( PyObject* self IGNORE, PyObject *args ) {
   PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
   HandleCommand( sz, acTop );
 
-  PythonNextTurn(0, 0);
+/*   if( ms.gs != GAME_NONE ) {  /\* HACK, no idea if this is right or not *\/ */
+  PythonNextTurn(0, 0); 
+/*   } */
 
   outputx();
   free( sz );
@@ -912,9 +924,11 @@ diffContext(const evalcontext* c, PyMatchState* ms)
       DictSetItemSteal(context, "plies", PyInt_FromLong(c->nPlies));
     }
 
+#if defined( REDUCTION_CODE )
     if( c->nReduced != s->nReduced ) {
       DictSetItemSteal(context, "reduced", PyInt_FromLong(c->nReduced));
     }
+#endif
 
     if( c->fDeterministic != s->fDeterministic ) {
       DictSetItemSteal(context, "deterministic",

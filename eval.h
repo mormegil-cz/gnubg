@@ -33,8 +33,8 @@
 #define TRUE 1
 #endif
 
-#define WEIGHTS_VERSION "0.14"
-#define WEIGHTS_VERSION_BINARY 0.14f
+#define WEIGHTS_VERSION "0.15"
+#define WEIGHTS_VERSION_BINARY 0.15f
 #define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5
@@ -102,9 +102,14 @@ typedef struct {
        classes */
     unsigned int fCubeful : 1; /* cubeful evaluation */
     unsigned int nPlies   : 3;
+#if defined( REDUCTION_CODE )
     unsigned int nReduced : 3; /* this will need to be expanded if we add
 				  support for nReduced != 3 */
+#else
+  unsigned int filler : 3;
+#endif
     unsigned int fDeterministic : 1;
+    unsigned int fUsePrune : 1;
     float        rNoise;       /* standard deviation */
 } evalcontext;
 

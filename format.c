@@ -121,11 +121,17 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
             pec->nPlies, 
             ( ! fChequer || pec->fCubeful ) ? _("cubeful") : _("cubeless") );
 
+#if defined( REDUCTION_CODE )
   if ( pec->nPlies == 2 ) 
     sprintf ( pc = strchr ( sz, 0 ),
               " %d%% speed",
               (pec->nReduced) ? 100 / pec->nReduced : 100 );
+#endif
 
+  if( pec->fUsePrune ) {
+    sprintf( pc = strchr ( sz, 0 ), " prune" );
+  }
+	    
   if ( fChequer && pec->nPlies ) {
     /* FIXME: movefilters!!! */
   }
