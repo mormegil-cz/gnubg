@@ -1,7 +1,16 @@
+Tue Jul 8 19:05 GMT 2003 Jim Segrave jes@jes-2.demon.nl
+
+	* undo change to rollout.c - it was a fix for a problem which
+	  was only in local development source
+	* gtkgame.c - turning off cubefull on the Rollout setting general
+	  page will turn off cubeful chequer play on all other pages
+	  Suggestion by Ian Dunstan
+
 Tue Jul  8 18:29:56 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c (OutputRolloutContext): display later evals.
 	(bug #4229, reported by Ian Dunstan)
+
 
 Tue Jul 8 11:15 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
