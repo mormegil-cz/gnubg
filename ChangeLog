@@ -1,3 +1,10 @@
+Mon Oct 29 17:07:32 2001  Gary Wong  <gtw@research.att.com>
+
+	* database.c (CommandDatabaseImport): Use GDBM_WRCREAT.
+
+	* import.c (ImportGame): Cope with longer lines, and ignore games
+	after the end of match (reported by Nick Bratby).
+
 Mon Oct 29 11:28:26 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c (CommandDatabaseVerify): Check for errors on gdbm_fetch()

@@ -362,13 +362,17 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
 static void ImportGame( FILE *pf, int iGame, int nLength ) {
 
-    char sz[ 80 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight;
+    char sz[ 128 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight;
     int n0, n1;
     moverecord *pmr;
     
     if( fscanf( pf, " %31[^:]:%d %31[^:]:%d%*[ ]", sz0, &n0, sz1, &n1 ) < 4 )
 	return;
 
+    if( nLength && ( n0 >= nLength || n1 >= nLength ) )
+	/* match is already over -- ignore extra games */
+	return;
+    
     InitBoard( ms.anBoard );
 
     ClearMoveRecord();
@@ -413,7 +417,7 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
     AddMoveRecord( pmr );
     
     do
-	if( !fgets( sz, 80, pf ) ) {
+	if( !fgets( sz, 128, pf ) ) {
 	    sz[ 0 ] = 0;
 	    break;
 	}
@@ -440,7 +444,7 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
 	if( pchRight )
 	    ParseMatMove( pchRight, 1 );
 	
-	if( !fgets( sz, 80, pf ) )
+	if( !fgets( sz, 128, pf ) )
 	    break;
     } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
 

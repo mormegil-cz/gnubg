@@ -20,6 +20,7 @@ cat > $contributors <<'EOF'
 Eric Augustine
 Steve Baedke
 Chuck Bower
+Nick Bratby
 Craig Campbell
 John Chuang
 Tristan Colgate
