@@ -1,3 +1,8 @@
+Mon Dec 29 23:14:35 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, configure.in: don't use old X code anymore.
+	(bug #7003, reported by Rod Roark)
+
 Thu Dec 18 23:35:16 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* configure.in: search for ATLAS libblas.

@@ -157,10 +157,6 @@ USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WINMMSND_CFLAGS = @WINMMSND_CFLAGS@
 WINMMSND_LIBS = @WINMMSND_LIBS@
-X_CFLAGS = @X_CFLAGS@
-X_EXTRA_LIBS = @X_EXTRA_LIBS@
-X_LIBS = @X_LIBS@
-X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
@@ -168,8 +164,6 @@ pkgpyexecdir = @pkgpyexecdir@
 pkgpythondir = @pkgpythondir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-@USE_EXT_TRUE@EXT_DIR = ext
-@USE_EXT_FALSE@EXT_DIR = 
 
 localedir = $(datadir)/locale
 
@@ -212,7 +206,7 @@ ACLOCAL_AMFLAGS = -I m4
 @USE_BOARD3D_TRUE@BOARD3DDATA = textures.txt 
 @USE_BOARD3D_FALSE@BOARD3DDATA = 
 
-SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
+SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) 
 
 @USE_PYTHON_TRUE@PYTHON_SOURCES = gnubgmodule.c gnubgmodule.h
 @USE_PYTHON_FALSE@PYTHON_SOURCES = 
@@ -245,17 +239,10 @@ bin_PROGRAMS = gnubg makebearoff makehyper
 
 gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 
-@USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
-@USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 @USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
 @USE_GTK_TRUE@           $(BOARD3D_INCS)
 
-@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(FONT_SOURCES)  $(PYTHON_SOURCES) $(TIME_SOURCES)
-
-@USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
-
+@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS) @LIBART_CFLAGS@
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gtkprefs.c gtkprefs.h gtk-multiview.c \
 @USE_GTK_TRUE@	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
@@ -268,17 +255,16 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 @USE_GTK_TRUE@	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 
-@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
-@USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
+@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
+@USE_GTK_FALSE@	$(FONT_SOURCES)  $(PYTHON_SOURCES) $(TIME_SOURCES)
 
 @USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
 @USE_GTK_TRUE@        @LIBART_LIBS@ $(BOARD3D_LIBS) @THREAD_LIBS@
 
+@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
 
-@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
-@USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
+@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
 pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ @GUILEDATA@ \
 	$(BR1DATA) $(BOARD3DDATA)
@@ -370,15 +356,6 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_PYTHON_FALSE@am__objects_6 =
 @USE_TIMECONTROL_TRUE@am__objects_7 = timecontrol.$(OBJEXT)
 @USE_TIMECONTROL_FALSE@am__objects_7 =
-@USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_2) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_3) $(am__objects_4) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_5) $(am__objects_6) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_7)
-@USE_EXT_TRUE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_2) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	xboard.$(OBJEXT) xgame.$(OBJEXT) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_3) $(am__objects_4) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_5) $(am__objects_6) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_7)
 @USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_2) gtkboard.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkgame.$(OBJEXT) gtkprefs.$(OBJEXT) \
 @USE_GTK_TRUE@	gtk-multiview.$(OBJEXT) gtktheory.$(OBJEXT) \
@@ -393,6 +370,9 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4) \
 @USE_GTK_TRUE@	$(am__objects_5) $(am__objects_6) \
 @USE_GTK_TRUE@	$(am__objects_7)
+@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_2) $(am__objects_3) \
+@USE_GTK_FALSE@	$(am__objects_4) $(am__objects_5) \
+@USE_GTK_FALSE@	$(am__objects_6) $(am__objects_7)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
@@ -468,8 +448,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/simplelibgen.Po ./$(DEPDIR)/sound.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/speed.Po ./$(DEPDIR)/text.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/timecontrol.Po ./$(DEPDIR)/timer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/xboard.Po ./$(DEPDIR)/xgame.Po
+@AMDEP_TRUE@	./$(DEPDIR)/timecontrol.Po ./$(DEPDIR)/timer.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -493,7 +472,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	py-compile strdup.c
-DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d textures ext
+DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d textures
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
 all: config.h
@@ -671,8 +650,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timecontrol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xboard.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xgame.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR) ./$(DEPDIR)

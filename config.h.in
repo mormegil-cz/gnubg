@@ -465,9 +465,6 @@
 /* Define if you have a bearoff database to link to GNU Backgammon */
 #undef USE_BUILTIN_BEAROFF
 
-/* Define if you want to use the ext toolkit and widgets. */
-#undef USE_EXT
-
 /* Define if you want to use the GTK+ toolkit and widgets. */
 #undef USE_GTK
 
@@ -478,7 +475,7 @@
    */
 #undef USE_GTKEXTRA
 
-#if USE_EXT || USE_GTK
+#if USE_GTK
 #define USE_GUI 1
 #endif
 
@@ -499,9 +496,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* Define to 1 if the X Window System is missing or not being used. */
-#undef X_DISPLAY_MISSING
 
 /* Installation directory (used to determine PKGDATADIR below). */
 #undef _DATADIR

@@ -1,9 +1,4 @@
 ## $Id$
-if USE_EXT
-EXT_DIR=ext
-else
-EXT_DIR=
-endif
 
 localedir = $(datadir)/locale
 
@@ -71,7 +66,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
+SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) 
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
@@ -123,24 +118,14 @@ gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
         @LIBART_LIBS@ $(BOARD3D_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
-if USE_EXT
-## --- EXT
-INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
-gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
-gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
-gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
-else
 ## --- Plain
-INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
+INCLUDES = $(COMMON_INCS) $(SOUND_INCS) @LIBART_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
 	$(FONT_SOURCES)  $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
 
 
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
-endif
 endif
 
 
