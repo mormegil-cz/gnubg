@@ -1443,6 +1443,9 @@ static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
     
     assert( GTK_CLIST( pwMoves )->selection );
 
+    /* FIXME selection is not in order... should we roll the moves out
+       in the same order they're listed? */
+    
     for( i = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
 	i++;
 
@@ -1574,6 +1577,7 @@ extern void GTKHint( movelist *pml ) {
 }
 
 static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwProgress;
+static int iRolloutRow;
 static guint nRolloutSignal;
 
 static void RolloutCancel( GtkObject *po, gpointer p ) {
@@ -1582,7 +1586,7 @@ static void RolloutCancel( GtkObject *po, gpointer p ) {
     fInterrupt = TRUE;
 }
 
-extern void GTKRollout( int c ) {
+extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
     
     static char *aszTitle[] = {
 	"", "Win", "Win (g)", "Win (bg)", "Lose (g)", "Lose (bg)", "Equity"
@@ -1615,13 +1619,17 @@ extern void GTKRollout( int c ) {
 					    GTK_JUSTIFY_RIGHT );
     }
 
-    gtk_clist_append( GTK_CLIST( pwRolloutResult ), aszEmpty );
-    gtk_clist_append( GTK_CLIST( pwRolloutResult ), aszEmpty );
+    for( i = 0; i < c; i++ ) {
+	gtk_clist_append( GTK_CLIST( pwRolloutResult ), aszEmpty );
+	gtk_clist_append( GTK_CLIST( pwRolloutResult ), aszEmpty );
 
-    gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), 0, 0, "Mean" );
-    gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), 1, 0, "Standard error" );
+	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), i << 1, 0,
+			    asz[ i ] );
+	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), ( i << 1 ) | 1, 0,
+			    "Standard error" );
+    }
 
-    gtk_progress_configure( GTK_PROGRESS( pwProgress ), 0, 0, c );
+    gtk_progress_configure( GTK_PROGRESS( pwProgress ), 0, 0, cGames );
     gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
 				    "%v/%u (%p%%)" );
@@ -1641,6 +1649,11 @@ extern void GTKRollout( int c ) {
     AllowStdin();
 }
 
+extern void GTKRolloutRow( int i ) {
+
+    iRolloutRow = i;
+}
+
 extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
 			      int cGames ) {
     char sz[ 32 ];
@@ -1651,10 +1664,12 @@ extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
     
     for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
 	sprintf( sz, i == OUTPUT_EQUITY ? "%+6.3f" : "%5.3f", arMu[ i ] );
-	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), 0, i + 1, sz );
+	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRolloutRow << 1,
+			    i + 1, sz );
 	
 	sprintf( sz, "%5.3f", arSigma[ i ] );
-	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), 1, i + 1, sz );
+	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), ( iRolloutRow << 1 )
+			    | 1, i + 1, sz );
     }
     
     gtk_progress_configure( GTK_PROGRESS( pwProgress ), iGame + 1, 0, cGames );

@@ -1,3 +1,17 @@
+Fri Nov 17 10:38:37 2000  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (DumpContact): Added remaining partial derivative outputs.
+
+	* gnubg.c (CommandRollout): Rollout more than one position at once.
+	* gtkgame.c (GTKRollout): Handle multiple rows in the rollout
+	dialog.
+	* guile.c (rollout_position): Add parameter for reporting result
+	from opponent's perspective.
+	* rollout.c (Rollout): Add `fInvert' parameter.
+
+	* gnubg.c (ParsePosition): Store a description of the position
+	parsed.  All callers changed.
+
 Wed Nov 15 13:00:36 2000  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (DumpPosition, GetCubeActionSz): Add fOutputInvert

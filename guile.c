@@ -58,7 +58,7 @@ static void SCMToBoard( SCM s, int anBoard[ 2 ][ 25 ] ) {
     int i;
     SCM n;
 
-    SCM_ASSERT( SCM_NIMP( s ) && SCM_CONSP( s ), s, SCM_ARGn, NULL );
+    SCM_ASSERT( SCM_CONSP( s ), s, SCM_ARGn, NULL );
     
     for( i = 0; i < 25; i++ ) {
 	n = scm_vector_ref( SCM_CAR( s ), SCM_MAKINUM( i ) );
@@ -259,7 +259,8 @@ static SCM position_id_to_board( SCM sPosID ) {
 }
 
 static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
-			     SCM sVarRedn, SCM sCube, SCM sEvalContext ) {
+			     SCM sVarRedn, SCM sCube, SCM sEvalContext,
+			     SCM sDesc, SCM sInvert ) {
     int i, anBoard[ 2 ][ 25 ];
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
     SCM s;
@@ -270,8 +271,12 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 		SCM_ARG2, sz );
     SCM_ASSERT( SCM_INUMP( sTruncate ) || sTruncate == SCM_UNDEFINED,
 		sTruncate, SCM_ARG3, sz );
-    SCM_ASSERT( SCM_BOOLP( sVarRedn ) || sVarRedn == SCM_UNDEFINED,
-		sVarRedn, SCM_ARG4, sz );
+    if( sVarRedn == SCM_UNDEFINED )
+	sVarRedn = SCM_BOOL_F;
+    SCM_ASSERT( SCM_STRINGP( sDesc ) || sDesc == SCM_UNDEFINED, sDesc,
+		SCM_ARG7, sz );
+    if( sInvert == SCM_UNDEFINED )
+	sInvert = SCM_BOOL_F;
     
     SCMToBoard( sBoard, anBoard );
 
@@ -282,11 +287,14 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 
     SCMToCubeInfo( sCube, &ci );
  
-    if( Rollout( anBoard, ar, arStdDev, sTruncate == SCM_UNDEFINED ?
+    if( Rollout( anBoard, sDesc == SCM_UNDEFINED ?
+		 PositionID( anBoard ) : SCM_CHARS( sDesc ),
+		 ar, arStdDev, sTruncate == SCM_UNDEFINED ?
 		 nRolloutTruncate : SCM_INUM( sTruncate ), sGames ==
 		 SCM_UNDEFINED ? nRollouts : SCM_INUM( sGames ),
 		 SCM_NFALSEP( sVarRedn ), &ci,
-		 &ecRollout /* FIXME use sEvalContext */ ) < 0 )
+		 &ecRollout /* FIXME use sEvalContext */,
+		 SCM_NFALSEP( sInvert ) ) < 0 )
 	return SCM_BOOL_F; /* FIXME throw error? */
 
     s = scm_cons( scm_make_vector( SCM_MAKINUM( NUM_ROLLOUT_OUTPUTS ),
@@ -321,7 +329,7 @@ extern int GuileInitialise( char *szDir ) {
     scm_make_gsubr( "current-board", 0, 0, 0, current_board );
     scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
-    scm_make_gsubr( "rollout-position", 1, 5, 0, rollout_position );
+    scm_make_gsubr( "rollout-position", 1, 7, 0, rollout_position );
     
     if( szDir ) {
 	sprintf( szPath, "%s/" GNUBG_SCM, szDir );

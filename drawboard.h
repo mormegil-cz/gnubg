@@ -24,6 +24,9 @@
 
 extern char *DrawBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
 			char *asz[] );
+/* Fill the buffer pch with a representation of the move anMove, assuming
+   the board looks like anBoard.  pch must have room for 28 characters plus
+   a trailing 0 (consider the move `bar/24* 23/22* 21/20* 19/18*'). */
 extern char *FormatMove( char *pch, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
 extern char *FormatMovePlain( char *pch, int anBoard[ 2 ][ 25 ],
 			      int anMove[ 8 ] );

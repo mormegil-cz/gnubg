@@ -534,9 +534,16 @@ extern int ParsePlayer( char *sz ) {
    be a position ID, "=n" notation, or empty (in which case the current
    board is used).
 
+   The input string should be specified in *ppch; this string must be
+   modifiable, and the pointer will be updated to point to the token
+   following a board specification if possible (see NextToken()).  The
+   board will be returned in an, and if pchDesc is non-NULL, then
+   descriptive text (the position ID, formatted move, or "Current
+   position", depending on the input) will be stored there.
+   
    Returns -1 on failure, 0 on success, or 1 on success if the position
    specified has the opponent on roll (e.g. because it used "=n" notation). */
-extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch ) {
+extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
     int i;
     char *pch;
@@ -547,6 +554,9 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch ) {
     if( !ppch || !( pch = NextToken( ppch ) ) ) { 
 	memcpy( an, anBoard, sizeof( anBoard ) );
 
+	if( pchDesc )
+	    strcpy( pchDesc, "Current position" );
+	
 	return 0;
     }
 
@@ -571,6 +581,9 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch ) {
 
 	PositionFromKey( an, sm.ml.amMoves[ i - 1 ].auch );
 
+	if( pchDesc )
+	    FormatMove( pchDesc, anBoard, sm.ml.amMoves[ i - 1 ].anMove );
+	
 	if( !fMove )
 	    SwapSides( an );
 	
@@ -582,6 +595,9 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch ) {
 	return -1;
     }
 
+    if( pchDesc )
+	strcpy( pchDesc, pch );
+    
     return 0;
 }
 
@@ -1176,7 +1192,7 @@ extern void CommandEval( char *sz ) {
 	return;
     }
 
-    if( ( n = ParsePosition( an, &sz ) ) < 0 )
+    if( ( n = ParsePosition( an, &sz, NULL ) ) < 0 )
 	return;
 
     if( n && fMove )
@@ -1416,7 +1432,7 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ 0 ].arEvalMove;
           rEqTop = ml.amMoves[ 0 ].rScore;
 
-          outputf ("    %2i. %-14s    %-24s Eq.: %+6.3f\n"
+          outputf (" %4i. %-14s   %-28s Eq.: %+6.3f\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
                    1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
@@ -1435,7 +1451,7 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ i ].arEvalMove;
           rEq = ml.amMoves[ i ].rScore;
 
-          outputf ("    %2i. %-14s    %-24s Eq.: %+6.3f (%+6.3f)\n"
+          outputf (" %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
                    i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
@@ -1461,7 +1477,7 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ 0 ].arEvalMove;
           rMWCTop = 100.0 * eq2mwc ( ml.amMoves[ 0 ].rScore, &ci );
 
-          outputf ("    %2i. %-14s    %-24s Mwc: %7.3f%%\n"
+          outputf (" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
                    1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
@@ -1480,7 +1496,7 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ i ].arEvalMove;
           rMWC = 100.0 * eq2mwc ( ml.amMoves[ i ].rScore, &ci );
 
-          outputf ("    %2i. %-14s    %-24s Mwc: %7.3f%% (%+7.3f%%)\n"
+          outputf (" %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
                    i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
@@ -1534,12 +1550,14 @@ extern void
 CommandRollout( char *sz ) {
     
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-    int i, c, n, fOpponent = FALSE, cGames;
+    int i, c, n, fOpponent = FALSE, cGames, an[ 2 ];
     cubeinfo ci;
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
+    char ( *asz )[ 40 ];
 #else
     int aan[ 10 ][ 2 ][ 25 ];
+    char asz[ 10 ][ 40 ];
 #endif
 
     if( !( c = CountTokens( sz ) ) ) {
@@ -1552,13 +1570,14 @@ CommandRollout( char *sz ) {
 
 #if HAVE_ALLOCA
     aan = alloca( 50 * c * sizeof( int ) );
+    asz = alloca( 40 * c );
 #else
     if( c > 10 )
 	c = 10;
 #endif
     
     for( i = 0; i < c; i++ )
-	if( ( n = ParsePosition( aan[ i ], &sz ) ) < 0 )
+	if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
 	    return;
 	else if( n ) {
 	    if( fMove )
@@ -1567,35 +1586,51 @@ CommandRollout( char *sz ) {
 	    fOpponent = TRUE;
 	}
 
-    /* FIXME this is wrong! */
+    if( fOpponent ) {
+	an[ 0 ] = anScore[ 1 ];
+	an[ 1 ] = anScore[ 0 ];
+    } else {
+	an[ 0 ] = anScore[ 0 ];
+	an[ 1 ] = anScore[ 1 ];
+    }
+    
     SetCubeInfo ( &ci, nCube, fCubeOwner, fOpponent ? !fMove : fMove,
-		  nMatchTo, anScore, fCrawford, fJacoby, fBeavers );
+		  nMatchTo, an, fCrawford, fJacoby, fBeavers );
 
-    for( i = 0; i < c; i++ ) {
-	/* FIXME show the move or board position in the output */
+#if USE_GTK
+    if( fX )
+	GTKRollout( c, asz, cGames );
+    else
+#endif
+	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
+		 "Equity        Trials" );
 	
-	if( ( cGames = Rollout( aan[ i ], ar, arStdDev, nRolloutTruncate,
-				nRollouts, fVarRedn, &ci, &ecRollout ) ) <= 0 )
+    for( i = 0; i < c; i++ ) {
+#if USE_GTK
+	if( fX )
+	    GTKRolloutRow( i );
+#endif
+	if( ( cGames = Rollout( aan[ i ], asz[ i ], ar, arStdDev,
+				nRolloutTruncate, nRollouts, fVarRedn, &ci,
+				&ecRollout, fOpponent ) ) <= 0 )
 	    return;
 
 #if USE_GTK
-	if( fX ) {
-	    GTKRolloutDone();
-	    continue;
-	}
+	if( !fX )
 #endif
-	
-	outputf( "Result (after %d trials):\n\n"
-		 "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
-		 "Equity\n"
-		 "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-		 "(%+6.3f)\n"
-		 "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-		 "(%6.3f)\n\n",
-		 cGames, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
-		 arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-		 arStdDev[ 4 ], arStdDev[ 5 ] );
+	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)%12d\n"
+		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
+		     " %5.3f (%6.3f)\n\n",
+		     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
+		     ar[ 5 ], cGames, arStdDev[ 0 ], arStdDev[ 1 ],
+		     arStdDev[ 2 ], arStdDev[ 3 ], arStdDev[ 4 ],
+		     arStdDev[ 5 ] ); 
     }
+    
+#if USE_GTK
+    if( fX )
+	GTKRolloutDone();
+#endif	
 }
 
 static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
