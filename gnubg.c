@@ -206,7 +206,9 @@ matchstate ms = {
     TRUE, /* fJacoby */
     GAME_NONE /* gs */
 #if USE_TIMECONTROL
-    , {0} /* gc */
+	, {{{{0}, {0}, {0}}, {{0}, {0}, {0}}}, {0}, 0}, /* gc */
+	{{0}, {0}}, /* timeleft */
+	{0, 0} /* timeouts */
 #endif
 };
 matchinfo mi;

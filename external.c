@@ -24,6 +24,7 @@
 #if HAVE_SOCKETS
 
 #include <signal.h>
+#include <glib.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
