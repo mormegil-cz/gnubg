@@ -1097,12 +1097,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   /* print alerts */
 
-  if ( pmr->n.st <= SKILL_BAD || pmr->n.st > SKILL_NONE ) {
+  if ( pmr->n.stMove <= SKILL_BAD || pmr->n.stMove > SKILL_NONE ) {
 
     /* blunder or error */
 
     fprintf ( pf, "<p><span class=\"blunder\">Alert: %s move",
-              aszSkillType[ pmr->n.st ] );
+              aszSkillType[ pmr->n.stMove ] );
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
       fprintf ( pf, " (%+7.3f)</span></p>\n",

@@ -779,15 +779,16 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    RequestFont( pf, FONT_RM, 10 );
 	    cx = 15 /* 2 digits + colon + space */ +
 		StringWidth( aszLuckTypeAbbr[ pmr->n.lt ] ) +
-		StringWidth( aszSkillTypeAbbr[ pmr->n.st ] ) +
+		StringWidth( aszSkillTypeAbbr[ pmr->n.stMove ] ) +
 		StringWidth( sz );
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%d%d%s: %s%s) Tj\n" :
 		     "%d %d moveto (%d%d%s: %s%s) show\n",
 		     225 - cx / 2 + 6, y,
 		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeAbbr[ pmr->n.lt ], sz,
-		     aszSkillTypeAbbr[ pmr->n.st ] );
+		     aszSkillTypeAbbr[ pmr->n.stMove ] );
 	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+            /* FIXME: output cube skill as well */
 
 	    if( pmr->n.ml.cMoves ) {
 		Skip( pf, 4 );

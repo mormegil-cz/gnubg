@@ -57,6 +57,15 @@ list lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
 
+typedef enum _annotatetype {
+  ANNOTATE_ACCEPT, ANNOTATE_CUBE, ANNOTATE_DOUBLE, ANNOTATE_DROP,
+  ANNOTATE_MOVE, ANNOTATE_ROLL, ANNOTATE_RESIGN, ANNOTATE_REJECT 
+} annotatetype;
+
+static annotatetype at;
+
+
+
 #if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
@@ -437,7 +446,10 @@ extern void AddMoveRecord( void *pv ) {
 	if( pmr->n.ml.cMoves )
 	    assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->n.ml.cMoves );
 	assert( pmr->n.lt >= LUCK_VERYBAD && pmr->n.lt <= LUCK_VERYGOOD );
-	assert( pmr->n.st >= SKILL_VERYBAD && pmr->n.st <= SKILL_VERYGOOD );
+	assert( pmr->n.stMove >= SKILL_VERYBAD && 
+                pmr->n.stMove <= SKILL_VERYGOOD );
+	assert( pmr->n.stCube >= SKILL_VERYBAD && 
+                pmr->n.stCube <= SKILL_VERYGOOD );
 	break;
 	
     case MOVE_DOUBLE:
@@ -1070,7 +1082,8 @@ extern int ComputerTurn( void ) {
       pmn->esChequer.et = EVAL_NONE;
       pmn->lt = LUCK_NONE;
       pmn->rLuck = ERR_VAL;
-      pmn->st = SKILL_NONE;
+      pmn->stMove = SKILL_NONE;
+      pmn->stCube = SKILL_NONE;
 
       ProgressStart( "Considering move..." );
       if( FindBestMove( pmn->anMove, ms.anDice[ 0 ], ms.anDice[ 1 ],
@@ -1133,7 +1146,8 @@ extern int ComputerTurn( void ) {
     pmn->esChequer.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
     pmn->rLuck = ERR_VAL;
-    pmn->st = SKILL_NONE;
+    pmn->stMove = SKILL_NONE;
+    pmn->stCube = SKILL_NONE;
     
     FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, pmn->anMove );
     
@@ -1270,7 +1284,8 @@ extern int ComputerTurn( void ) {
 	  pmn->esChequer.et = EVAL_NONE;
 	  pmn->lt = LUCK_NONE;
 	  pmn->rLuck = ERR_VAL;
-	  pmn->st = SKILL_NONE;
+	  pmn->stMove = SKILL_NONE;
+	  pmn->stCube = SKILL_NONE;
 	  
 	  if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
 	      pmn->anMove[ 0 ] = 0;
@@ -1354,7 +1369,8 @@ static int TryBearoff( void ) {
                 pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
 		pmn->rLuck = ERR_VAL;
-		pmn->st = SKILL_NONE;
+		pmn->stMove = SKILL_NONE;
+		pmn->stCube = SKILL_NONE;
 		
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
@@ -1653,15 +1669,82 @@ static void AnnotateMove( skilltype st ) {
 
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-	pmr->n.st = st;
+
+      switch ( at ) {
+      case ANNOTATE_MOVE:
+	pmr->n.stMove = st; /* fixme */
 	break;
+      case ANNOTATE_CUBE:
+      case ANNOTATE_DOUBLE:
+        pmr->n.stCube = st; /* fixme */
+        break;
+      default:
+        outputl ( "Invalid annotation." );
+        break;
+      }
+
+      break;
 	
     case MOVE_DOUBLE:
+
+      switch ( at ) {
+      case ANNOTATE_CUBE:
+      case ANNOTATE_DOUBLE:
+        pmr->d.st = st;
+        break;
+      default:
+        outputl ( "Invalid annotation" );
+        break;
+      }
+
+      break;
+
     case MOVE_TAKE:
+        
+      switch ( at ) {
+      case ANNOTATE_CUBE:
+      case ANNOTATE_ACCEPT:
+        pmr->d.st = st;
+        break;
+      default:
+        outputl ( "Invalid annotation" );
+        break;
+      }
+
+      break;
+
     case MOVE_DROP:
-	pmr->d.st = st;
-	break;
-	
+        
+      switch ( at ) {
+      case ANNOTATE_CUBE:
+      case ANNOTATE_REJECT:
+      case ANNOTATE_DROP:
+        pmr->d.st = st;
+        break;
+      default:
+        outputl ( "Invalid annotation" );
+        break;
+      }
+
+      break;
+
+    case MOVE_RESIGN:
+
+      switch ( at ) {
+      case ANNOTATE_RESIGN:
+        pmr->r.stResign = st;
+        break;
+      case ANNOTATE_ACCEPT:
+      case ANNOTATE_REJECT:
+        pmr->r.stAccept = st;
+        break;
+      default:
+        outputl ( "Invalid annotation" );
+        break;
+      }
+
+      break;
+
     default:
 	outputl( "You cannot annotate this move." );
 	return;
@@ -1671,6 +1754,12 @@ static void AnnotateMove( skilltype st ) {
 	outputl( "Skill annotation cleared." );
     else
 	outputf( "Move marked as %s.\n", aszSkillType[ st ] );
+    
+#if USE_GTK
+  if( fX )
+    GTKUpdateAnnotations();
+#endif
+
 }
 
 static void AnnotateRoll( lucktype lt ) {
@@ -1700,6 +1789,69 @@ static void AnnotateRoll( lucktype lt ) {
 	outputl( "Luck annotation cleared." );
     else
 	outputf( "Roll marked as %s.\n", aszLuckType[ lt ] );
+
+#if USE_GTK
+  if( fX )
+    GTKUpdateAnnotations();
+#endif
+
+}
+
+
+extern void
+CommandAnnotateAccept ( char *sz ) {
+
+  at = ANNOTATE_ACCEPT;
+  HandleCommand( sz, acAnnotateMove );
+
+}
+
+extern void
+CommandAnnotateCube ( char *sz ) {
+
+  at = ANNOTATE_CUBE;
+  HandleCommand( sz, acAnnotateMove );
+
+}
+
+extern void
+CommandAnnotateDouble ( char *sz ) {
+
+  at = ANNOTATE_DOUBLE;
+  HandleCommand( sz, acAnnotateMove );
+
+}
+
+extern void
+CommandAnnotateDrop ( char *sz ) {
+
+  at = ANNOTATE_DROP;
+  HandleCommand( sz, acAnnotateMove );
+
+}
+
+extern void
+CommandAnnotateMove ( char *sz ) {
+
+  at = ANNOTATE_MOVE;
+  HandleCommand( sz, acAnnotateMove );
+
+}
+
+extern void
+CommandAnnotateReject ( char *sz ) {
+
+  at = ANNOTATE_REJECT;
+  HandleCommand( sz, acAnnotateMove );
+
+}
+
+extern void
+CommandAnnotateResign ( char *sz ) {
+
+  at = ANNOTATE_RESIGN;
+  HandleCommand( sz, acAnnotateMove );
+
 }
 
 extern void CommandAnnotateBad( char *sz ) {
@@ -1722,6 +1874,12 @@ extern void CommandAnnotateClearComment( char *sz ) {
     pmr->a.sz = NULL;
     
     outputl( "Commentary for this move cleared." );
+
+#if USE_GTK
+  if( fX )
+    GTKUpdateAnnotations();
+#endif
+
 }
 
 extern void CommandAnnotateClearLuck( char *sz ) {
@@ -1948,7 +2106,8 @@ static void DumpGameList(char *szOut, list *plGame) {
                      aszLuckTypeAbbr[ pmr->n.lt ] );
 	    FormatMove( sz + 6, anBoard, pmr->n.anMove );
             strcat(sz, " ");
-            strcat(sz, aszSkillTypeAbbr[ pmr->n.st ]);
+            strcat(sz, aszSkillTypeAbbr[ pmr->n.stMove ]);
+            strcat(sz, aszSkillTypeAbbr[ pmr->n.stCube ]);
 	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    SwapSides( anBoard );
          /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
@@ -2091,7 +2250,8 @@ CommandMove( char *sz ) {
 	    pmn->esChequer.et = EVAL_NONE;
 	    pmn->lt = LUCK_NONE;
 	    pmn->rLuck = ERR_VAL;
-	    pmn->st = SKILL_NONE;
+	    pmn->stMove = SKILL_NONE;
+	    pmn->stCube = SKILL_NONE;
 	    
 	    if( ml.cMoves )
 		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
@@ -2163,7 +2323,8 @@ CommandMove( char *sz ) {
 		pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
 		pmn->rLuck = ERR_VAL;
-		pmn->st = SKILL_NONE;
+		pmn->stCube = SKILL_NONE;
+		pmn->stMove = SKILL_NONE;
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
 		
@@ -2842,7 +3003,8 @@ CommandRoll( char *sz ) {
     pmn->esChequer.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
     pmn->rLuck = ERR_VAL;
-    pmn->st = SKILL_NONE;
+    pmn->stCube = SKILL_NONE;
+    pmn->stMove = SKILL_NONE;
     
     ShowAutoMove( ms.anBoard, pmn->anMove );
 
@@ -2863,7 +3025,8 @@ CommandRoll( char *sz ) {
     pmn->esChequer.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
     pmn->rLuck = ERR_VAL;
-    pmn->st = SKILL_NONE;
+    pmn->stCube = SKILL_NONE;
+    pmn->stMove = SKILL_NONE;
     memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
 
     ShowAutoMove( ms.anBoard, pmn->anMove );

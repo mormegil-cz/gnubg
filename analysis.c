@@ -430,6 +430,8 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
           rSkill = pmr->n.arDouble[ OUTPUT_NODOUBLE ] -
             pmr->n.arDouble[ OUTPUT_OPTIMAL ];
 	      
+	    pmr->n.stCube = Skill( rSkill );
+
 	} else
           pmr->n.esDouble.et = EVAL_NONE;
 
@@ -477,13 +479,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 		    rChequerSkill = pmr->n.ml.amMoves[ pmr->n.iMove ].
 			rScore - pmr->n.ml.amMoves[ 0 ].rScore;
 		  
-		    if( rChequerSkill < rSkill )
-			rSkill = rChequerSkill;
-		  
 		    break;
 		}
 	  
-	    pmr->n.st = Skill( rSkill );
+	    pmr->n.stMove = Skill( rChequerSkill );
 	  
 	    if( cAnalysisMoves >= 2 &&
 		pmr->n.ml.cMoves > cAnalysisMoves ) {

@@ -710,7 +710,9 @@ static void RestoreNode( list *pl ) {
 	    if( ppA )
 		RestoreMoveAnalysis( ppA, pmr->n.fPlayer, &pmr->n.ml,
 				     &pmr->n.iMove, &pmr->n.esChequer );
-	    pmr->n.st = st;
+            /* FIXME: separate st's */
+	    pmr->n.stMove = st;
+	    pmr->n.stCube = st;
 	    pmr->n.lt = fPlayer ? lt : LUCK_VERYGOOD - lt;
 	    pmr->n.rLuck = rLuck;
 	    break;
@@ -1193,7 +1195,8 @@ static void SaveGame( FILE *pf, list *plGame ) {
 				   pmr->n.iMove );
 
 	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.rLuck, pmr->n.lt );
-	    WriteSkill( pf, pmr->n.st );
+            /* FIXME: separate skill for cube and move */
+	    WriteSkill( pf, pmr->n.stMove );
 	    
 	    break;
 	    

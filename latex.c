@@ -410,13 +410,14 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
 				    pmr->n.arDouble, &pmr->n.esDouble );
+            /* FIXME: output cube skill */
 
 	    sprintf( sz, "%s %d%d%s: ", PlayerSymbol( pmr->n.fPlayer ),
 		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeLaTeXAbbr[ pmr->n.lt ] );
 	    FormatMove( strchr( sz, 0 ), msExport.anBoard, pmr->n.anMove );
 	    fprintf( pf, "\\begin{center}%s%s\\end{center}\n\n", sz,
-		     aszSkillTypeAbbr[ pmr->n.st ] );
+		     aszSkillTypeAbbr[ pmr->n.stMove ] );
 
 	    /* FIXME use center and tabular environment instead of verbatim */
 	    fputs( "{\\footnotesize\\begin{verbatim}\n", pf );

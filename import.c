@@ -305,7 +305,8 @@ static void ParseMatMove( char *sz, int iPlayer ) {
         pmr->n.esChequer.et = EVAL_NONE;
 	pmr->n.lt = LUCK_NONE;
 	pmr->n.rLuck = ERR_VAL;
-	pmr->n.st = SKILL_NONE;
+	pmr->n.stMove = SKILL_NONE;
+	pmr->n.stCube = SKILL_NONE;
 	
 	if( ( c = ParseMove( sz + 3, pmr->n.anMove ) ) >= 0 ) {
 	    for( i = 0; i < ( c << 1 ); i++ )
@@ -541,7 +542,8 @@ static void ParseOldmove( char *sz, int fInvert ) {
         pmr->n.esChequer.et = EVAL_NONE;
 	pmr->n.lt = LUCK_NONE;
 	pmr->n.rLuck = ERR_VAL;
-	pmr->n.st = SKILL_NONE;
+	pmr->n.stCube = SKILL_NONE;
+	pmr->n.stMove = SKILL_NONE;
 
 	if( !strncasecmp( sz + 9, "can't move", 10 ) )
 	    c = 0;
@@ -852,7 +854,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 		    pmr->n.esChequer.et = EVAL_NONE;
 		    pmr->n.lt = LUCK_NONE;
 		    pmr->n.rLuck = ERR_VAL;
-		    pmr->n.st = SKILL_NONE;
+		    pmr->n.stCube = SKILL_NONE;
+		    pmr->n.stMove = SKILL_NONE;
 		    
 		    if( ( c = ParseMove( pch + 4, pmr->n.anMove ) ) >= 0 ) {
 			for( i = 0; i < ( c << 1 ); i++ )
@@ -890,7 +893,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->n.esChequer.et = EVAL_NONE;
 			    pmr->n.lt = LUCK_NONE;
 			    pmr->n.rLuck = ERR_VAL;
-			    pmr->n.st = SKILL_NONE;
+			    pmr->n.stMove = SKILL_NONE;
+			    pmr->n.stCube = SKILL_NONE;
 			    AddMoveRecord( pmr );
 			    anRoll[ 0 ] = 0;
 			} else {
