@@ -2397,6 +2397,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 
    gtk_paned_add1(GTK_PANED(hpaned), pwPanelGameBox = gtk_hbox_new(FALSE, 0));
    gtk_container_add(GTK_CONTAINER(pwPanelGameBox), pwEventBox = gtk_event_box_new());
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwEventBox), FALSE);
+#endif
 
    gtk_container_add(GTK_CONTAINER(pwEventBox), pwBoard = board_new(GetMainAppearance()));
    gtk_signal_connect(GTK_OBJECT(pwEventBox), "button-press-event", GTK_SIGNAL_FUNC(button_press_event),
@@ -4868,6 +4871,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
      */
 
     pwev = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+#endif
     gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev );
 
     pwFrame = gtk_frame_new ( _("Predefined settings") );
@@ -4933,6 +4939,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     /* lookahead */
 
     pwev = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+#endif
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
@@ -4962,6 +4971,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
        check button won't work */
 
     pwev = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+#endif
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
@@ -5057,6 +5069,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     /* noise */
 
     pwev = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+#endif
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
@@ -5107,6 +5122,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                                              pew );
 
       pwev = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+#endif
       gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev ); 
       gtk_container_add ( GTK_CONTAINER ( pwev ), pew->pwMoveFilter );
 
@@ -7049,8 +7067,8 @@ extern void GTKProgressEnd( void ) {
     gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
 #else
-    gtk_progress_bar_set_fraction( GTK_PROGRESS( pwProgress ), 0.0 );
-    gtk_progress_bar_set_text( GTK_PROGRESS( pwProgress ), " " );
+    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
 #endif
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 }
