@@ -225,7 +225,7 @@ FindBestMoves( movelist *pml,
                int c, float d, cubeinfo *pci, evalcontext *pec );
 
 extern int 
-ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
+ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int fCheckLegal );
 
 extern positionclass 
 ClassifyPosition( int anBoard[ 2 ][ 25 ] );

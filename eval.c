@@ -2754,14 +2754,19 @@ eq2mwc ( float rEq, cubeinfo *pci ) {
 }
 
 
-static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll ) {
+static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll,
+			 int fCheckLegal ) {
 
     int iDest = iSrc - nRoll;
 
-    if( nRoll < 1 || nRoll > 6 || iSrc < 0 || iSrc > 24 ||
-	anBoard[ 1 ][ iSrc ] < 1 ) {
-	/* Invalid dice roll, invalid point number, or source point is
-	   empty */
+    if( fCheckLegal && ( nRoll < 1 || nRoll > 6 ) ) {
+	/* Invalid dice roll */
+	errno = EINVAL;
+	return -1;
+    }
+    
+    if( iSrc < 0 || iSrc > 24 || iDest > 24 || anBoard[ 1 ][ iSrc ] < 1 ) {
+	/* Invalid point number, or source point is empty */
 	errno = EINVAL;
 	return -1;
     }
@@ -2786,13 +2791,13 @@ static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll ) {
     return 0;
 }
 
-extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
-
+extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ],
+		      int fCheckLegal ) {
     int i;
     
     for( i = 0; i < 8 && anMove[ i ] >= 0; i += 2 )
 	if( ApplySubMove( anBoard, anMove[ i ],
-			  anMove[ i ] - anMove[ i + 1 ] ) )
+			  anMove[ i ] - anMove[ i + 1 ], fCheckLegal ) )
 	    return -1;
     
     return 0;
@@ -2904,7 +2909,7 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
 	}
 	
-	ApplySubMove( anBoardNew, 24, anRoll[ nMoveDepth ] );
+	ApplySubMove( anBoardNew, 24, anRoll[ nMoveDepth ], TRUE );
 	
 	if( GenerateMovesSub( pml, anRoll, nMoveDepth + 1, 23, cPip +
 			      anRoll[ nMoveDepth ], anBoardNew, anMoves,
@@ -2926,7 +2931,7 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 		    anBoardNew[ 1 ][ iCopy ] = anBoard[ 1 ][ iCopy ];
 		}
     
-		ApplySubMove( anBoardNew, i, anRoll[ nMoveDepth ] );
+		ApplySubMove( anBoardNew, i, anRoll[ nMoveDepth ], TRUE );
 		
 		if( GenerateMovesSub( pml, anRoll, nMoveDepth + 1,
 				   anRoll[ 0 ] == anRoll[ 1 ] ? i : 23,

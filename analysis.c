@@ -180,7 +180,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
         /* find auch for move */
 
         memcpy( anBoardMove, anBoard, sizeof( anBoardMove ) );
-        ApplyMove( anBoardMove, pmr->n.anMove );
+        ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
         PositionKey ( anBoardMove, auch );
 
         /* find best moves */

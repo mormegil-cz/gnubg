@@ -1662,7 +1662,7 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	case MOVE_NORMAL:
 	    sprintf( sz, "%d%d: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
-	    ApplyMove( anBoard, pmr->n.anMove );
+	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    SwapSides( anBoard );
 	    break;
 	case MOVE_DOUBLE:

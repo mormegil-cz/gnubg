@@ -565,7 +565,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 		     pmr->n.anRoll[ 1 ] );
 	    WriteMove( pf, &pmr->n );
 	    putc( ']', pf );
-	    ApplyMove( anBoard, pmr->n.anMove );
+	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    
 	    nResult = GameStatus( anBoard );
 
