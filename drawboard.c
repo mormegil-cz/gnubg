@@ -530,10 +530,10 @@ static char *FormatPoint( char *pch, int n ) {
     
     if( !n ) {
         strcpy( pch, _("off") );
-        return pch + 3;
+        return pch + strlen(_("off") );
     } else if( n == 25 ) {
         strcpy( pch, _("bar") );
-        return pch + 3;
+        return pch + strlen(_("bar") );
     } else if( n > 9 )
         *pch++ = n / 10 + '0';
 
