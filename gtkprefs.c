@@ -78,7 +78,7 @@ static GList *plBoardDesigns;
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource, *pwQuickDraw,
 	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *textureTypeCombo, *frame3dOptions,
-	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab, *pwBgTrays,
+	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab, *pwBgTrays, *pwRoundPoints,
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame, *pwRoundedEdges;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
@@ -596,7 +596,7 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 	gtk_tooltips_set_tip(ptt, pwBgTrays, _("If unset the bear-off trays will be drawn with the board colour"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwBgTrays, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBgTrays), bd->rd->bgInTrays);
-	gtk_signal_connect(GTK_OBJECT(pwBgTrays), "toggled", GTK_SIGNAL_FUNC(option_changed),0);// (GtkObject*) ( pwPreview + PI_BOARD ));
+	gtk_signal_connect(GTK_OBJECT(pwBgTrays), "toggled", GTK_SIGNAL_FUNC(option_changed),0);
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -613,6 +613,12 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
 		gtk_colour_picker_new3d(&bd->rd->PointMat[1], DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+	pwRoundPoints = gtk_check_button_new_with_label (_("Rounded points"));
+	gtk_tooltips_set_tip(ptt, pwBgTrays, _("Display the points with a rounded end"), 0);
+	gtk_box_pack_start (GTK_BOX (pw), pwRoundPoints, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(pwRoundPoints), bd->rd->roundedPoints);
+	gtk_signal_connect(GTK_OBJECT(pwRoundPoints), "toggled", GTK_SIGNAL_FUNC(option_changed),0);
 
 	return pwx;
 }
@@ -639,7 +645,7 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 	gtk_tooltips_set_tip(ptt, pwRoundedEdges, _("Toggle rounded or square edges to the board"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwRoundedEdges, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwRoundedEdges), bd->rd->roundedEdges);
-	gtk_signal_connect(GTK_OBJECT(pwRoundedEdges), "toggled", GTK_SIGNAL_FUNC(option_changed), 0);//(GtkObject*) ( pwPreview + PI_BORDER ));
+	gtk_signal_connect(GTK_OBJECT(pwRoundedEdges), "toggled", GTK_SIGNAL_FUNC(option_changed), 0);
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), bd->rd->fHinges3d );
@@ -1809,6 +1815,8 @@ UseDesign ( void ) {
 									newPrefs.roundedEdges );
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwBgTrays ),
 									newPrefs.bgInTrays );
+		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwRoundPoints ),
+									newPrefs.roundedPoints );
 
 		for(i = 0; i < 2; i++)
 			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(apwDieColour[i]), newPrefs.afDieColour3d[i]);
@@ -2142,6 +2150,7 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
             "         piecetexturetype=%d\n"
 			"         roundededges=%c\n"
 			"         bgintrays=%c\n"
+			"         roundedpoints=%c\n"
             "         lighttype=%c\n"
             "         lightposx=%f lightposy=%f lightposz=%f\n"
             "         lightambient=%d lightdiffuse=%d lightspecular=%d\n"
@@ -2221,6 +2230,7 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 			prd->pieceTextureType,
 			prd->roundedEdges ? 'y' : 'n',
 			prd->bgInTrays ? 'y' : 'n',
+			prd->roundedPoints ? 'y' : 'n',
 			prd->lightType == LT_POSITIONAL ? 'p' : 'd',
 			prd->lightPos[0], prd->lightPos[1], prd->lightPos[2],
 			prd->lightLevels[0], prd->lightLevels[1], prd->lightLevels[2],
@@ -2626,6 +2636,7 @@ static void GetPrefs ( renderdata* prd ) {
 		prd->diceSize = padjDiceSize->value;
 		prd->roundedEdges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedEdges));
 		prd->bgInTrays = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwBgTrays));
+		prd->roundedPoints = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundPoints));
 		prd->planView = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwPlanView));
 
 		prd->fHinges3d = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
@@ -3009,6 +3020,7 @@ void Default3dSettings(BoardData* bd)
 				bd->rd->showShadows = rdNew.showShadows;
 				bd->rd->roundedEdges = rdNew.roundedEdges;
 				bd->rd->bgInTrays = rdNew.bgInTrays;
+				bd->rd->roundedPoints = rdNew.roundedPoints;
 				bd->rd->shadowDarkness = rdNew.shadowDarkness;
 				bd->rd->curveAccuracy = rdNew.curveAccuracy;
 				bd->rd->skewFactor = rdNew.skewFactor;

@@ -87,6 +87,8 @@ void initDT(diceTest* dt, int x, int y, int z);
 #define BAR_WIDTH (PIECE_HOLE * 1.7f)
 #define DICE_AREA_CLICK_WIDTH BOARD_WIDTH
 
+#define TAKI_WIDTH .9f
+
 #define TOTAL_WIDTH ((TRAY_WIDTH + BOARD_WIDTH) * 2.0f + BAR_WIDTH)
 
 /* Heights */
@@ -944,9 +946,9 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 				pos -= 10;
 
 			if (pos > 5)
-				v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - (PIECE_HOLE / 2.0f) - (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos - 5);
+				v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - (PIECE_HOLE / 2.0f) - PIECE_HOLE - (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos - 5 - 1);
 			else
-				v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - (PIECE_HOLE + PIECE_GAP_HEIGHT) * pos;
+				v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - PIECE_HOLE - (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos - 1);
 
 			v[0] = TRAY_WIDTH + PIECE_HOLE * (point - 13);
 			if (point > 18)
@@ -1195,7 +1197,7 @@ void drawNumbers(BoardData* bd, int sides)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void drawPoint(renderdata* prd, float tuv, int i, int p, GLenum mode)
+void drawPoint(renderdata* prd, float tuv, int i, int p, int outline)
 {	/* Draw point with correct texture co-ords */
 	float w = PIECE_HOLE;
 	float h = POINT_HEIGHT;
@@ -1223,7 +1225,48 @@ void drawPoint(renderdata* prd, float tuv, int i, int p, GLenum mode)
 		glTranslatef(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
 	}
 
-	glBegin(mode);
+	if (prd->roundedPoints)
+	{	/* Draw rounded point ends */
+		float xoff;
+
+		w = w * TAKI_WIDTH;
+		y += w / 2.0f;
+		h -= w / 2.0f;
+
+		if (p)
+			xoff = x + (PIECE_HOLE / 2.0f);
+		else
+			xoff = x - (PIECE_HOLE / 2.0f);
+
+		/* Draw rounded semi-circle end of point (with correct texture co-ords) */
+		{
+			int i;
+			float angle, step;
+			float radius = w / 2.0f;
+
+			step = (2 * PI) / prd->curveAccuracy;
+			angle = -step * (prd->curveAccuracy / 4);
+			glNormal3f(0, 0, 1);
+			glBegin(outline ? GL_LINE_STRIP : GL_TRIANGLE_FAN);
+			glTexCoord2f(xoff* tuv, y* tuv);
+			 
+			glVertex3f(xoff, y, 0);
+			for (i = 0; i <= prd->curveAccuracy / 2; i++)
+			{
+				glTexCoord2f((xoff + (float)sin(angle) * radius) * tuv, (y + (float)cos(angle) * radius) * tuv);
+				glVertex3f(xoff + (float)sin(angle) * radius, y + (float)cos(angle) * radius, 0);
+				angle -= step;
+			}
+			glEnd();
+		}
+		/* Move rest of point in slighlty */
+		if (p)
+			x -= -((PIECE_HOLE * (1 - TAKI_WIDTH)) / 2.0f);
+		else
+			x -= ((PIECE_HOLE * (1 - TAKI_WIDTH)) / 2.0f);
+	}
+
+	glBegin(outline ? GL_LINE_STRIP : GL_TRIANGLES);
 		glNormal3f(0, 0, 1);
 		glTexCoord2f((x + w) * tuv, y * tuv); 
 		glVertex3f(x + w, y, 0);
@@ -1250,28 +1293,31 @@ void drawPoints(renderdata* prd)
 	else
 		drawQuarterRect(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, prd->BaseMat.pTexture);
 
+	/* Ignore depth values when drawing points */
+	glDepthMask(GL_FALSE);
+
 	if (prd->PointMat[0].pTexture)
 		tuv = (TEXTURE_SCALE) / prd->PointMat[0].pTexture->width;
 	else
 		tuv = 0;
 	setMaterial(&prd->PointMat[0]);
-	drawPoint(prd, tuv, 0, 0, GL_TRIANGLES);
-	drawPoint(prd, tuv, 0, 1, GL_TRIANGLES);
-	drawPoint(prd, tuv, 2, 0, GL_TRIANGLES);
-	drawPoint(prd, tuv, 2, 1, GL_TRIANGLES);
-	drawPoint(prd, tuv, 4, 0, GL_TRIANGLES);
-	drawPoint(prd, tuv, 4, 1, GL_TRIANGLES);
+	drawPoint(prd, tuv, 0, 0, 0);
+	drawPoint(prd, tuv, 0, 1, 0);
+	drawPoint(prd, tuv, 2, 0, 0);
+	drawPoint(prd, tuv, 2, 1, 0);
+	drawPoint(prd, tuv, 4, 0, 0);
+	drawPoint(prd, tuv, 4, 1, 0);
 
 	glLineWidth(1);
  	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
-	drawPoint(prd, tuv, 0, 0, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 0, 1, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 2, 0, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 2, 1, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 4, 0, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 4, 1, GL_LINE_STRIP);
+	drawPoint(prd, tuv, 0, 0, 1);
+	drawPoint(prd, tuv, 0, 1, 1);
+	drawPoint(prd, tuv, 2, 0, 1);
+	drawPoint(prd, tuv, 2, 1, 1);
+	drawPoint(prd, tuv, 4, 0, 1);
+	drawPoint(prd, tuv, 4, 1, 1);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
@@ -1281,27 +1327,29 @@ void drawPoints(renderdata* prd)
 	else
 		tuv = 0;
 	setMaterial(&prd->PointMat[1]);
-	drawPoint(prd, tuv, 1, 0, GL_TRIANGLES);
-	drawPoint(prd, tuv, 1, 1, GL_TRIANGLES);
-	drawPoint(prd, tuv, 3, 0, GL_TRIANGLES);
-	drawPoint(prd, tuv, 3, 1, GL_TRIANGLES);
-	drawPoint(prd, tuv, 5, 0, GL_TRIANGLES);
-	drawPoint(prd, tuv, 5, 1, GL_TRIANGLES);
+	drawPoint(prd, tuv, 1, 0, 0);
+	drawPoint(prd, tuv, 1, 1, 0);
+	drawPoint(prd, tuv, 3, 0, 0);
+	drawPoint(prd, tuv, 3, 1, 0);
+	drawPoint(prd, tuv, 5, 0, 0);
+	drawPoint(prd, tuv, 5, 1, 0);
 
  	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
-	drawPoint(prd, tuv, 1, 0, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 1, 1, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 3, 0, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 3, 1, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 5, 0, GL_LINE_STRIP);
-	drawPoint(prd, tuv, 5, 1, GL_LINE_STRIP);
+	drawPoint(prd, tuv, 1, 0, 1);
+	drawPoint(prd, tuv, 1, 1, 1);
+	drawPoint(prd, tuv, 3, 0, 1);
+	drawPoint(prd, tuv, 3, 1, 1);
+	drawPoint(prd, tuv, 5, 0, 1);
+	drawPoint(prd, tuv, 5, 1, 1);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
 
+	/* Restore depth buffer settings */
 	glDepthFunc(GL_LEQUAL);
+	glDepthMask(GL_TRUE);
 }
 
 void drawBase(renderdata* prd, int sides)
@@ -1622,7 +1670,7 @@ void InsideFillet(float x, float y, float z, float w, float h, float radius, int
 	/* Left */
 	DrawRight(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH, h, EDGE_DEPTH - BOARD_FILLET);
 	/* Top */
-	DrawBottom(x + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH, w, EDGE_DEPTH - BOARD_FILLET);
+	DrawBottom(x + BOARD_FILLET, y + h + BOARD_FILLET, BASE_DEPTH, w, EDGE_DEPTH - BOARD_FILLET + LIFT_OFF);
 	/* Bottom */
 	DrawTop(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH, w, EDGE_DEPTH - BOARD_FILLET)
 	/* Right */

@@ -42,10 +42,12 @@
          cube=#D7D7D7
          points0=#FF5F5F;0.20
          points1=#BFBFBF;0.20
+		hinges3d=y
 		piecetype=0
 		piecetexturetype=1
 		roundededges=y
 		bgintray=n
+		roundedpoints=n
 		lighttype=p
 		lightposx=0.200000 lightposy=1.900000 lightposz=3.300000
 		lightambient=45 lightdiffuse=75 lightspecular=95
@@ -91,10 +93,12 @@
          cube=#D6D6C6
          points0=#4CA57F;0.09 
          points1=#4C4C4C;0.20
+         hinges3d=y
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=y
+         bgintray=y         
+         roundedpoints=n
          lighttype=p
          lightposx=0.400000 lightposy=1.600000 lightposz=3.400000
          lightambient=60 lightdiffuse=60 lightspecular=90
@@ -140,10 +144,12 @@
          cube=#D4D4C4 
          points0=#FF5F5F;0.20
          points1=#BFBFBF;0.20
+         hinges3d=y
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=n
+         bgintray=n
+         roundedpoints=y
          lighttype=d
          lightposx=3.000000 lightposy=0.000000 lightposz=3.500000
          lightambient=40 lightdiffuse=75 lightspecular=80
@@ -189,10 +195,12 @@
          cube=#D3D3C3 
          points0=#980000;0.09 
          points1=#000072;0.20      
+         hinges3d=y
          piecetype=0
          piecetexturetype=1
          roundededges=n
-		 bgintray=y
+         bgintray=y
+         roundedpoints=n
          lighttype=p
          lightposx=-1.100000 lightposy=-1.200000 lightposz=5.000000
          lightambient=50 lightdiffuse=70 lightspecular=100
@@ -239,10 +247,12 @@
          cube=#E5E5E5
          points0=#007F00;0.09
          points1=#FFFFFF;0.09
+         hinges3d=n
          piecetype=1
          piecetexturetype=1
          roundededges=y
-		 bgintray=n
+         bgintray=n
+         roundedpoints=n
          lighttype=p
          lightposx=0.500000 lightposy=2.100000 lightposz=2.500000
          lightambient=55 lightdiffuse=65 lightspecular=100
@@ -289,10 +299,12 @@
          cube=#E5E5E5
          points0=#D7DFDF;0.00
          points1=#878E8F;0.00
+         hinges3d=y
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=y
+         bgintray=y
+         roundedpoints=n
          lighttype=p
          lightposx=0.100000 lightposy=1.500000 lightposz=3.000000
          lightambient=50 lightdiffuse=65 lightspecular=90
@@ -339,10 +351,12 @@
          cube=#AFE5A8 
          points0=#49D441;0.00   
          points1=#0A6810;0.00   
+         hinges3d=n
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=n
+         bgintray=n
+         roundedpoints=n
          lighttype=p
          lightposx=1.000000 lightposy=1.000000 lightposz=1.500000
          lightambient=60 lightdiffuse=50 lightspecular=100
@@ -388,10 +402,12 @@
          cube=#F7C80A
          points0=#9A6750;0.09
          points1=#5F7287;0.09 
+         hinges3d=n
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=y
+         bgintray=y
+         roundedpoints=n
          lighttype=p
          lightposx=0.500000 lightposy=1.400000 lightposz=1.500000
          lightambient=30 lightdiffuse=80 lightspecular=80
@@ -437,10 +453,12 @@
          cube=#FBF7FF
          points0=#8B8C8E;0.09
          points1=#D4D4D4;0.09
+         hinges3d=n
          piecetype=0
          piecetexturetype=0
          roundededges=y
-		 bgintray=n
+         bgintray=n
+         roundedpoints=n
          lighttype=p
          lightposx=1.100000 lightposy=2.200000 lightposz=3.300000
          lightambient=55 lightdiffuse=60 lightspecular=70
@@ -487,10 +505,12 @@
          cube=#E5E5E5 
          points0=#FFFEFE;0.00 
          points1=#010101;0.09
+         hinges3d=n
          piecetype=1
          piecetexturetype=1
          roundededges=n
-		 bgintray=y
+         bgintray=y
+         roundedpoints=n
          lighttype=p
          lightposx=1.600000 lightposy=1.600000 lightposz=3.400000
          lightambient=45 lightdiffuse=70 lightspecular=100
@@ -536,10 +556,12 @@
          cube=#E5E5E5
          points0=#FF6060;0.20
          points1=#7EA9CA;0.20 
+         hinges3d=y
          piecetype=0
          piecetexturetype=0
          roundededges=y
-		 bgintray=n
+         bgintray=n
+         roundedpoints=n
          lighttype=p
          lightposx=2.900000 lightposy=1.400000 lightposz=4.500000
          lightambient=60 lightdiffuse=60 lightspecular=75
@@ -585,10 +607,12 @@
          cube=#D6BA00
          points0=#CAFDDB;0.00
          points1=#B52D3C;0.00   
+         hinges3d=n
          piecetype=0
          piecetexturetype=0
          roundededges=n
-		 bgintray=y
+         roundedpoints=n
+         bgintray=y
          lighttype=d
          lightposx=-0.700000 lightposy=3.500000 lightposz=4.300000
          lightambient=45 lightdiffuse=60 lightspecular=100
@@ -635,10 +659,12 @@
          cube=#E5E5E5
          points0=#E05454;0.09
          points1=#4B4B4B;0.09
+         hinges3d=y
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=n
+         bgintray=n
+         roundedpoints=n
          lighttype=p
          lightposx=1.000000 lightposy=1.700000 lightposz=5.000000
          lightambient=55 lightdiffuse=55 lightspecular=80
@@ -685,10 +711,12 @@
          cube=#D4D4C4
          points0=#CC7F00;0.09
          points1=#7F3F00;0.20
+         hinges3d=y
          piecetype=0
          piecetexturetype=0
          roundededges=y
-		 bgintray=y
+         bgintray=y
+         roundedpoints=y
          lighttype=p
          lightposx=1.600000 lightposy=1.200000 lightposz=1.500000
          lightambient=30 lightdiffuse=80 lightspecular=100
@@ -735,10 +763,12 @@
          cube=#D4D4C4
          points0=#010100;0.09
          points1=#F30A0A;0.20
+         hinges3d=y
          piecetype=0
          piecetexturetype=0
          roundededges=y
          bgintrays=y
+         roundedpoints=n
          lighttype=p
          lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
          lightambient=50 lightdiffuse=65 lightspecular=80
@@ -786,10 +816,12 @@
         cube=#E5C997
         points0=#AD2323;0.20 
         points1=#D4A527;0.09
+         hinges3d=y
          piecetype=0
          piecetexturetype=0
          roundededges=n
          bgintrays=n
+         roundedpoints=n
          lighttype=p
          lightposx=0.600000 lightposy=0.600000 lightposz=3.600000
          lightambient=35 lightdiffuse=80 lightspecular=90
@@ -835,10 +867,12 @@
          cube=#F3F12E
          points0=#309829;0.09
          points1=#FFFFFF;0.20
+         hinges3d=n
          piecetype=0
          piecetexturetype=0
          roundededges=y
          bgintrays=y
+         roundedpoints=n
          lighttype=p
          lightposx=0.700000 lightposy=0.700000 lightposz=3.800000
          lightambient=50 lightdiffuse=70 lightspecular=100
@@ -884,10 +918,12 @@
          cube=#B1C5CE
          points0=#E9CED1;0.00 
          points1=#A0ADD6;0.00 
+         hinges3d=y
          piecetype=0
          piecetexturetype=0
          roundededges=y
          bgintrays=n
+         roundedpoints=n
          lighttype=p
          lightposx=3.100000 lightposy=1.500000 lightposz=4.500000
          lightambient=50 lightdiffuse=75 lightspecular=70
@@ -933,10 +969,12 @@
          cube=#F7F7F7
          points0=#58BB58;0.20
          points1=#265126;0.20
+         hinges3d=y
          piecetype=0
          piecetexturetype=1
          roundededges=y
-		 bgintray=y
+         bgintray=y
+         roundedpoints=n
          lighttype=d
          lightposx=3.000000 lightposy=0.200000 lightposz=2.600000
          lightambient=55 lightdiffuse=70 lightspecular=70

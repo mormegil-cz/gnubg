@@ -143,6 +143,7 @@ typedef struct _renderdata {
 	float diceSize;	/* How big are the dice */
 	int roundedEdges;	/* Rounded board edges? */
 	int bgInTrays;	/* Rounded board edges? */
+	int roundedPoints;	/* Rounded points */
 	PieceType pieceType;	/* Different piece models */
 	PieceTextureType pieceTextureType;	/* Different piece texture types */
 	int afDieColour3d[ 2 ]; /* TRUE means same colour as chequers */

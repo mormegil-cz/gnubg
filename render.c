@@ -180,6 +180,7 @@ renderdata rdDefault = {
 	3,	/* Dice size */
 	0,	/* Rounded edges */
 	1,	/* Background in trays */
+	0,	/* Rounded points */
 	PT_ROUNDED,	/* Piece type */
 	PTT_ALL,	/* Piece texture type */
     { TRUE, TRUE }, /* afDieColour3d */
@@ -3014,6 +3015,7 @@ extern int PreferenceCompare(renderdata *prd1, renderdata *prd2)
 			prd1->pieceTextureType == prd2->pieceTextureType &&
 			prd1->roundedEdges == prd2->roundedEdges &&
 			prd1->bgInTrays == prd2->bgInTrays &&
+			prd1->roundedPoints == prd2->roundedPoints &&
 			prd1->lightType == prd2->lightType &&
 			(prd1->lightPos[0] == prd2->lightPos[0] &&
 			prd1->lightPos[1] == prd2->lightPos[1] &&

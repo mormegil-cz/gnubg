@@ -571,6 +571,7 @@ void Set3dSettings(renderdata *prdnew, const renderdata *prd)
 	prdnew->quickDraw = prd->quickDraw;
 	prdnew->roundedEdges = prd->roundedEdges;
 	prdnew->bgInTrays = prd->bgInTrays;
+	prdnew->roundedPoints = prd->roundedPoints;
 	prdnew->shadowDarkness = prd->shadowDarkness;
 	prdnew->curveAccuracy = prd->curveAccuracy;
 	prdnew->skewFactor = prd->skewFactor;
