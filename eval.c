@@ -696,6 +696,11 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     static int fInitialised = FALSE;
     
     if( !fInitialised ) {
+
+      /* initialise table for sigmoid */
+
+      ComputeSigTable();
+
 #if defined( GARY_CACHE )
 	if( CacheCreate( &cEval, cCache = 8192,
 			 (cachecomparefunc) EvalCacheCompare ) )
