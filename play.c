@@ -1179,13 +1179,17 @@ extern int ComputerTurn( void ) {
 	  
 	  fComputerDecision = FALSE;
 	  
-	  return ms.fTurn == fTurnOrig ? -1 : 0;
+	  return ms.fTurn != fTurnOrig || ms.gs >= GAME_OVER ? 0 : -1;
       } else if ( tolower( szResponse[0] ) == 'r' &&
-		  tolower( szResponse[1] ) == 'e' ) {
+		  tolower( szResponse[1] ) == 'e' ) { /* resign */
 	char* r = szResponse;
 	NextToken(&r);
+
+	fComputerDecision = TRUE;
 	CommandResign(r);
-	return 0;
+	fComputerDecision = FALSE;
+	
+	return ms.fTurn == fTurnOrig ? -1 : 0;
       } else if( !ms.anDice[ 0 ] ) {
 	  if( tolower( *szResponse ) == 'r' ) { /* roll */
 	      if( RollDice( ms.anDice ) < 0 )
@@ -1518,10 +1522,6 @@ extern int NextTurn( int fPlayNext ) {
 #endif
 	fNextTurn = !ComputerTurn();
 
-    if( ap[ ms.fTurn ].pt == PLAYER_EXTERNAL ) {
-      fNextTurn = TRUE;
-    }
-    
     fComputing = FALSE;
     return 0;
 }
@@ -2657,8 +2657,7 @@ extern void CommandResign( char *sz ) {
 	return;
     }
 
-    if( ap[ ms.fTurn ].pt != PLAYER_EXTERNAL &&
-	ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
+    if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
 	return;

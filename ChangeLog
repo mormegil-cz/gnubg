@@ -1,3 +1,7 @@
+Thu Feb  7 14:24:26 2002  Gary Wong  <gtw@research.att.com>
+
+	* play.c (ComputerTurn): Fix error checking bug after dropped cubes,
+	and check for errors handling resignations from external players.
 
 Thu Feb  7 10:44:28 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
