@@ -2670,13 +2670,22 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
     if( cubefullPrune ) {
       ((cubeinfo*)pci)->fMove = !pci->fMove;
       if( use ) {
-	move amMoves[ ml.cMoves ];
+#if __GNUC__
+          move amMoves[ ml.cMoves ];
+#elif HAVE_ALLOCA
+          move *amMoves = alloca( ml.cMoves * sizeof(move) );
+#else
+          move *amMoves = malloc( ml.cMoves * sizeof(move) );
+#endif
 	for(i = 0; (int)i < ml.cMoves; i++) {
 	  int const j = bmovesi[i];
 	  memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
 	  bmovesi[i] = i;
 	}
 	memcpy(&ml.amMoves[0], amMoves, ml.cMoves * sizeof(amMoves[0]));
+#if !__GNUC__ && !HAVE_ALLOCA
+        free(amMoves);
+#endif
       }
       ScoreMoves(&ml, pci, pec, 0);
 
