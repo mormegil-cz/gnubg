@@ -1906,3 +1906,10 @@ CommandSetEvalCubedecision ( char *sz ) {
 }
 
 
+extern void
+CommandSetMatchID ( char *sz ) {
+
+  SetMatchID ( sz );
+
+}
+
