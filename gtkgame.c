@@ -3823,6 +3823,9 @@ extern void GTKNew( void ){
  		        pwPage = NewWidget(&nw));
 
   gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
   
   gtk_widget_show_all( pwDialog );
 

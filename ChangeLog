@@ -1,3 +1,9 @@
+Mon Aug 25 23:39:47 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (GTKNew): add call to gtk_main_quit when dialog
+	is destroyed.
+	(reported by Joern Thyssen)
+
 Mon Aug 25 23:26:25 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c: ensure that TOGGLE_GAMELIST and friends to not
