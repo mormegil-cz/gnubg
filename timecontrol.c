@@ -765,6 +765,8 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 {
     int pen=0;
     struct timeval ts;
+    playerclock *pgcPlayer;
+    playerclock *pgcOpp;
 
     if (0 == tvp)
     {
@@ -778,9 +780,8 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 	 return 0;
     }
 
-    playerclock
-	    *pgcPlayer=&pms->gc.pc[pms->gc.fPlayer],
-	    *pgcOpp=&pms->gc.pc[!pms->gc.fPlayer];
+    pgcPlayer=&pms->gc.pc[pms->gc.fPlayer];
+    pgcOpp=&pms->gc.pc[!pms->gc.fPlayer];
 
 /* Check transitions */
    if (pms == &ms)
