@@ -2484,7 +2484,10 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
     new_length = g_list_length( plBoardDesigns );
 
     /* FIXME: show dialog instead */
-    outputf( _("%d designs added.\n"), new_length - old_length );
+    outputf( ngettext( "%d design added.\n",
+                       "%d designs added.\n",
+                       new_length - old_length ),
+             new_length - old_length );
     outputx();
 
   }

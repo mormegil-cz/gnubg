@@ -1,3 +1,8 @@
+Mon Jul 12 22:48:32 CEST 2004  Petr Kadlec  <mormegil@centrum.cz>
+
+        * gtkprefs.c (ImportDesign): Use ngettext.
+        * html.c (HTMLBoardHeader): Ditto.
+
 Sun Jul 11 16:37:02 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* eval.c (EvalInitialise): Suppress compiler warnings.

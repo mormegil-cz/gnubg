@@ -1684,7 +1684,9 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
     /* resignation */
 
     fprintf ( pf,
-              _(" %s resigns %d points"), 
+              ngettext( " %s resigns %d point",
+                        " %s resigns %d points",
+                        pms->fResigned * pms->nCube ), 
               ap[ pms->fTurn ].szName,
               pms->fResigned * pms->nCube
             );
