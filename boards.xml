@@ -27,18 +27,17 @@
       </about>
  
       <design>
-         board=#2F5F2F;0.20 
-         border=#003F00 
-         translucent=n 
-         wood=alder 
-         hinges=y 
-         light=150;50 
-         shape=0.5 
-         chequers0=#F12525;0.90;1.50;0.20;3.00 
-         chequers1=#00000B;0.50;1.50;1.00;30.00 
-         dice0=#F12525;0.20;3.00;y 
-         dice1=#00000B;1.00;30.00;y 
-         dot0=#A4A4A4 
+         board=#2F5F2F;0.20
+         border=#003F00
+         wood=alder
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#F12525;0.90;1.50;0.20;3.00
+         chequers1=#00000B;0.50;1.50;1.00;30.00
+         dice0=#F12525;0.20;3.00;y
+         dice1=#00000B;1.00;30.00;y
+         dot0=#A4A4A4
          dot1=#A4A4A4
          cube=#D7D7D7
          points0=#FF5F5F;0.20
@@ -58,7 +57,6 @@
       <design>
          board=#F2E5D8;0.09 
          border=#003F00 
-         translucent=n
          wood=ebony 
          hinges=y
          light=150;50 
@@ -86,7 +84,6 @@
       <design>
          board=#FFD872;0.09 
          border=#003F00 
-         translucent=n 
          wood=walnut 
          hinges=y 
          light=150;50 
@@ -114,7 +111,6 @@
       <design>
          board=#BFBFBF;0.09 
          border=#003F00 
-         translucent=n 
          wood=walnut 
          hinges=y 
          light=150;50 
@@ -143,12 +139,11 @@
       <design>
          board=#6C9856;0.0
          border=#004000
-         translucent=n 
          wood=walnut
          hinges=n
          light=51;60
          shape=0.2
-         chequers0=#98BFA5;0.85;3.10;1.00;51.00
+         chequers0=#98BFA5;1.00;3.10;1.00;51.00
          chequers1=#982533;1.00;3.00;1.00;41.00
          dice0=#B4E2B4;1.00;3.00;y 
          dice1=#5A2D31;1.00;30.00;y
@@ -172,13 +167,12 @@
       <design>
          board=#020532;0.20
          border=#004000
-         translucent=n
          wood=fir
          hinges=y
          light=150;50
          shape=0.5
-         chequers0=#B4B5CA;0.50;2.10;0.90;17.20
-         chequers1=#DCA52B;0.90;1.50;0.50;3.00
+         chequers0=#B4B5CA;1.00;2.10;0.90;17.20
+         chequers1=#DCA52B;1.00;1.50;0.50;3.00
          dice0=#C3C3C3;0.20;3.00;n
          dice1=#0C0C19;1.00;30.00;y
          dot0=#FEFFFE
@@ -200,13 +194,12 @@
       <design>
          board=#EFB43B;0.09
          border=#004000
-         translucent=n
          wood=walnut
          hinges=n
          light=150;50
          shape=0.5
-         chequers0=#94211A;0.90;1.50;0.20;3.00
-         chequers1=#E7EDEF;0.50;1.50;0.80;30.00
+         chequers0=#94211A;1.00;1.50;0.20;3.00
+         chequers1=#E7EDEF;1.00;1.50;0.80;30.00
          dice0=#D140B9;0.10;6.70;n
          dice1=#1C5FED;0.30;4.20;n
          dot0=#C7C7C7
@@ -232,8 +225,8 @@
          hinges=n
          light=150;50
          shape=0.5
-         chequers0=#F3EFF7;0.50;1.50;1.00;30.00
-         chequers1=#3F4FAF;0.90;1.50;0.20;3.00
+         chequers0=#F3EFF7;1.00;1.50;1.00;30.00
+         chequers1=#3F4FAF;1.00;1.50;0.20;3.00
          dice0=#FFFEFE;0.90;1.00;n
          dice1=#6464E5;1.00;30.00;n
          dot0=#000000
@@ -256,13 +249,12 @@
       <design>
          board=#FFFCC4;0,00
          border=#318567
-         translucent=n
          wood=paint
          hinges=n
          light=60;66
          shape=1.0 
          chequers0=#383BAD;1.00;2.00;0.00;17.00
-         chequers1=#D0BF24;0.63;1.00;0.00;3.00  
+         chequers1=#D0BF24;1.00;1.00;0.00;3.00  
          dice0=#C3C3C3;0.00;3.00;y 
          dice1=#DCD027;0.00;3.00;y 
          dot0=#FFFFFF
@@ -284,7 +276,6 @@
       <design>
          board=#A5ADAF;0.00 
          border=#2F3030
-         translucent=y
          wood=paint
          hinges=n
          light=-1;90 
@@ -302,8 +293,31 @@
   
    </board-design>
 
+   <board-design>
 
+     <about>
+         <title>Zox-Vegas</title>
+         <author>Greg Cattanach</author>
+      </about>
+  
+      <design>
+         board=#72CE70;0.09
+         border=#003F00
+         wood=walnut
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#F9F9F9;1.00;2.90;0.30;20.10
+         chequers1=#D21818;1.00;3.00;0.20;20.10
+         dice0=#FFFFFF;0.30;3.00;n
+         dice1=#000000;1.00;30.00;y
+         dot0=#010101
+         dot1=#FFFFFF
+         cube=#E5E5E5
+         points0=#E05454;0.09
+         points1=#4B4B4B;0.09
+      </design> 
+  
+   </board-design>
 
 </board-designs>
-
-
