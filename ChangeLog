@@ -1,3 +1,8 @@
+Mon Aug 11 22:10:08 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* po/LINGUAS po/fr.po: French translation.
+	* aclocal.m4, Makefile.in: finish upgrade to gettext 0.12.2
+
 Mon Aug 11 14:06:22 GMT 2003 Jim Segrave    <jes@jes-2.demon.nl>
 
 	* credits.sh, po/LINGUAS po/it.po - Italian translations by

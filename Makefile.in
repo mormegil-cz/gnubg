@@ -480,7 +480,7 @@ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 $(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/audiofile.m4 m4/esd.m4 m4/freetype2.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4 m4/libart.m4 m4/python.m4
+$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/audiofile.m4 m4/esd.m4 m4/freetype2.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4 m4/iconv.m4 m4/intdiv0.m4 m4/inttypes-pri.m4 m4/inttypes.m4 m4/inttypes_h.m4 m4/libart.m4 m4/nls.m4 m4/po.m4 m4/python.m4 m4/stdint_h.m4 m4/uintmax_t.m4 m4/ulonglong.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
