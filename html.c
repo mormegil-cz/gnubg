@@ -3404,7 +3404,8 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
           if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
             fprintf( pf, "%6.1f", 
-                     absoluteFibsRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ], 
+                     absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
+                                         aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
                                          pms->nMatchTo, rRatingOffset ) );
           else
             fputs( _("n/a"), pf );

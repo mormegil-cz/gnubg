@@ -1303,14 +1303,27 @@ relativeFibsRating ( const float r, const int n )
  * Calculate an estimated rating based Kees van den Doels work.
  * (see manual for details)
  *
- * absolute rating = R0 + (11971 + 23681/n) * error rate per move
+ * absolute rating = R0 + a2(N)*EPM+b(N)*EPC,
+ * where EPM is error rate per move, EPC is the error per cubedecision
+ * and a2(N) = 8798 + 2526/N and b(N) = 863 - 519/N.
  *
  */
 
 extern float
-absoluteFibsRating ( const float r, const int n, const float rOffset ) {
+absoluteFibsRating ( const float rChequer, const float rCube, 
+                     const int n, const float rOffset ) {
 
-  return rOffset - (11971.0f + 23681.0f/n) * r;
+#define _A2(n) (8798.0 + 25526.0/(n))
+#define _B(n)  (863.0 - 519.0/(n))
+
+  return rOffset - ( _A2( n ) * rChequer + _B( n ) * rCube );
+
+#if 0
+  return rOffset - (11971.0f + 23681.0f/n) * rCube;
+#endif
+
+#undef _A2
+#undef _B
 
 }
 
@@ -1850,7 +1863,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
         if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] ) {
           sprintf ( strchr ( szOutput, 0 ),
                     "%6.1f",
-                    absoluteFibsRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ], 
+                    absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
+                                        aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
                                         ms.nMatchTo, rRatingOffset ) );
 
           if ( ! i ) 

@@ -8070,7 +8070,8 @@ static void OverallStats(const statcontext *psc, const matchstate *pms)
         
           if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
             sprintf( sz, "%.1f", 
-                     absoluteFibsRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ], 
+                     absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
+                                         aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
                                          pms->nMatchTo, rRatingOffset ) );
           else
             strcpy( sz, _("n/a") );

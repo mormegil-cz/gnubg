@@ -128,7 +128,8 @@ extern float
 relativeFibsRating(float r, int n);
 
 extern float
-absoluteFibsRating ( const float r, const int n, const float rOffset );
+absoluteFibsRating ( const float rChequer, const float rCube, 
+                     const int n, const float rOffset );
 
 #define CHEQUERPLAY  0
 #define CUBEDECISION 1
