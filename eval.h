@@ -78,8 +78,10 @@ typedef struct _evalcontext {
     int nSearchCandidates;
     float rSearchTolerance;
     int nReduced;
-  /* cubeful evaluation */
-  int fCubeful;
+    /* cubeful evaluation */
+    int fCubeful;
+    float rNoise; /* standard deviation */
+    int fDeterministic;
 } evalcontext;
 
 typedef enum _evaltype {

@@ -959,7 +959,7 @@ ExtendMET ( int nMaxScore ) {
   static const float arStddevTable[] =
      { 0, 1.24, 1.27, 1.47, 1.50, 1.60, 1.61, 1.66, 1.68, 1.70, 1.72, 1.77 };
   
-  float rStddev0, rStddev1, rGames, rSigma, rProb;
+  float rStddev0, rStddev1, rGames, rSigma;
   int i,j;
   int nScore0, nScore1;
 

@@ -1,3 +1,11 @@
+Tue Apr 10 09:50:31 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (Noise): New function.
+	* set.c (CommandSetEvalDeterministic, CommandSetEvalNoise): New
+	functions.
+	
+	* gtkgame.c (SetAnalysis): New function.
+
 Mon Apr  9 13:31:51 2001  Gary Wong  <gtw@research.att.com>
 
 	* set.c (CommandSetAnalysisLimit): New function.

@@ -264,6 +264,7 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAlpha( gpointer *p, guint n, GtkWidget *pw );
+static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
 static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
 static void SetCache( gpointer *p, guint n, GtkWidget *pw );
@@ -1482,6 +1483,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ "/_Train/Train with _TD(0)", NULL, Command, CMD_TRAIN_TD, NULL },
 	{ "/_Settings", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/Analysis...", NULL, SetAnalysis, 0, NULL },
 	{ "/_Settings/Appearance...", NULL, Command, CMD_SET_APPEARANCE,
 	  NULL },
 	{ "/_Settings/_Automatic", NULL, NULL, 0, "<Branch>" },
@@ -2147,6 +2149,23 @@ static void SetAlpha( gpointer *p, guint k, GtkWidget *pw ) {
     }
 }
 
+static void SetAnalysis( gpointer *p, guint k, GtkWidget *pw ) {
+
+    /* FIXME make this into a proper dialog, with more settings, and
+     change the "limit" widget into a check button (whether there is a
+     limit at all) and a spin button (what the limit is) */
+    int n = ReadNumber( "GNU Backgammon - Analysis",
+			"Move limit:", cAnalysisMoves < 0 ? 0 : cAnalysisMoves,
+			0, 100, 1 );
+
+    if( n >= 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set analysis limit %d", n );
+	UserCommand( sz );
+    }
+}
+
 static void SetAnneal( gpointer *p, guint k, GtkWidget *pw ) {
 
     float r = ReadReal( "GNU Backgammon - Annealing rate",
@@ -2432,10 +2451,17 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _evalwidget {
     evalcontext *pec;
-    GtkWidget *pwCubeful, *pwReduced, *pwSearchCandidates, *pwSearchTolerance;
-    GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance;
+    GtkWidget *pwCubeful, *pwReduced, *pwSearchCandidates, *pwSearchTolerance,
+	*pwDeterministic;
+    GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
+	*padjNoise;
     int *pfOK;
 } evalwidget;
+
+static void EvalNoiseValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
+
+    gtk_widget_set_sensitive( pew->pwDeterministic, padj->value != 0.0f );
+}
 
 static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
@@ -2500,9 +2526,28 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
 				  pec->fCubeful );
 
+    pew->padjNoise = GTK_ADJUSTMENT( gtk_adjustment_new(
+	pec->rNoise, 0, 1, 0.001, 0.001, 0.001 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwEval ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Noise:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ), gtk_spin_button_new(
+	pew->padjNoise, 0.001, 3 ) );
+    
+    gtk_container_add( GTK_CONTAINER( pwEval ),
+		       pew->pwDeterministic = gtk_check_button_new_with_label(
+			   "Deterministic noise" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
+				  pec->fDeterministic );
+
     gtk_signal_connect( GTK_OBJECT( pew->padjPlies ), "value-changed",
 			GTK_SIGNAL_FUNC( EvalPliesValueChanged ), pew );
     EvalPliesValueChanged( pew->padjPlies, pew );
+    
+    gtk_signal_connect( GTK_OBJECT( pew->padjNoise ), "value-changed",
+			GTK_SIGNAL_FUNC( EvalNoiseValueChanged ), pew );
+    EvalNoiseValueChanged( pew->padjNoise, pew );
     
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
@@ -2527,7 +2572,10 @@ static void EvalOK( GtkWidget *pw, void *p ) {
 	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
     pew->pec->nReduced = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwReduced ) ) ? 7 : 0;
-
+    pew->pec->rNoise = pew->padjNoise->value;
+    pew->pec->fDeterministic = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
+	
     if( pew->pfOK )
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
@@ -2563,7 +2611,18 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
 	sprintf( sz, "%s cubeful %s", szPrefix, pec->fCubeful ? "on" : "off" );
 	UserCommand( sz );
     }
+
+    if( pec->rNoise != pecOrig->rNoise ) {
+	sprintf( sz, "%s noise %.3f", szPrefix, pec->rNoise );
+	UserCommand( sz );
+    }
     
+    if( pec->fDeterministic != pecOrig->fDeterministic ) {
+	sprintf( sz, "%s deterministic %s", szPrefix, pec->fDeterministic ?
+		 "on" : "off" );
+	UserCommand( sz );
+    }
+
     outputresume();
 }
 

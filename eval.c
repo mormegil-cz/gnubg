@@ -30,10 +30,12 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#include <isaac.h>
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #include <math.h>
+#include <md5.h>
 #if HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -266,7 +268,7 @@ static float rCubeX = 2.0/3.0;
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 			      { 1.0, 1.0, 1.0, 1.0 } };
 
-static evalcontext ecBasic = { 0, 0, 0, 0, FALSE };
+static evalcontext ecBasic = { 0, 0, 0, 0, FALSE, 0.0, TRUE };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -301,6 +303,9 @@ static  laRollList_t thirdLists[3] = {
                             {  7, third1_d1, third1_d2, third1_wt },
                             {  7, third2_d1, third2_d2, third2_wt },
                             {  7, third3_d1, third3_d2, third3_wt } };
+
+/* Random context, for generating non-deterministic noisy evaluations. */
+static randctx rc;
 
 static void ComputeTable0( void )
 {
@@ -613,6 +618,10 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    return -1;
 	    
 	ComputeTable();
+
+	irandinit( &rc, FALSE );
+	
+	fInitialised = TRUE;
     }
 
     pBearoff1 = NULL;
@@ -1606,6 +1615,11 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
     int i, j, ac[ 2 ], anBack[ 2 ], fContact;
 
+    if( arOutput[ OUTPUT_WIN ] < 0.0f )
+	arOutput[ OUTPUT_WIN ] = 0.0f;
+    else if( arOutput[ OUTPUT_WIN ] > 1.0f )
+	arOutput[ OUTPUT_WIN ] = 1.0f;
+    
     ac[ 0 ] = ac[ 1 ] = anBack[ 0 ] = anBack[ 1 ] = 0;
     
     for( i = 0; i < 25; i++ )
@@ -2305,6 +2319,59 @@ static int CompareRedEvalData( const void *p0, const void *p1 ) {
 
 }
 
+static float Noise( evalcontext *pec, int anBoard[ 2 ][ 25 ], int iOutput ) {
+
+    float r;
+    
+    if( pec->fDeterministic ) {
+	unsigned char auchBoard[ 50 ], auch[ 16 ];
+	int i;
+
+	for( i = 0; i < 25; i++ ) {
+	    auchBoard[ i << 1 ] = anBoard[ 0 ][ i ];
+	    auchBoard[ ( i << 1 ) + 1 ] = anBoard[ 1 ][ i ];
+	}
+
+	auchBoard[ 0 ] += iOutput;
+	
+	md5_buffer( auchBoard, 50, auch );
+
+	/* We can't use a Box-Muller transform here, because generating
+	   a point in the unit circle requires a potentially unbounded
+	   number of integers, and all we have is the board.  So we
+	   just take the sum of the bytes in the hash, which (by the
+	   central limit theorem) should have a normal-ish distribution. */
+
+	r = 0.0f;
+	for( i = 0; i < 16; i++ )
+	    r += auch[ i ];
+
+	r -= 2040.0f;
+	r /= 295.6f;
+    } else {
+	/* Box-Muller transform of a point in the unit circle. */
+	float x, y;
+	
+	do {
+	    x = (float) irand( &rc ) * 2.0f / UB4MAXVAL - 1.0f;
+	    y = (float) irand( &rc ) * 2.0f / UB4MAXVAL - 1.0f;
+	    r = x * x + y * y;
+	} while( r > 1.0f || r == 0.0f );
+
+	r = y * sqrt( -2.0f * log( r ) / r );
+    }
+
+    r *= pec->rNoise;
+
+    if( iOutput == OUTPUT_WINGAMMON || iOutput == OUTPUT_LOSEGAMMON )
+	r *= 0.25f;
+    else if( iOutput == OUTPUT_WINBACKGAMMON ||
+	     iOutput == OUTPUT_LOSEBACKGAMMON )
+	r *= 0.01f;
+
+    return r;
+}
+
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
                        cubeinfo *pci, evalcontext *pecx, int nPlies,
@@ -2464,7 +2531,11 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     /* at leaf node; use static evaluation */
       
     acef[ pc ]( anBoard, arOutput );
-       
+
+    if( pec->rNoise )
+	for( i = 0; i < NUM_OUTPUTS; i++ )
+	    arOutput[ i ] += Noise( pec, anBoard, i );
+    
     SanityCheck( anBoard, arOutput );
   }
 
@@ -2483,10 +2554,12 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
   PositionKey( anBoard, ec.auchKey );
   ec.nEvalContext = nPlies ^ ( pecx->nSearchCandidates << 2 ) ^
     ( ( (int) ( pecx->rSearchTolerance * 100 ) ) << 6 ) ^
-    ( pecx->nReduced << 12 );
+    ( pecx->nReduced << 12 ) ^
+    ( ( (int) ( pecx->rNoise * 1000 ) ) << 15 );
   ec.pc = pc;
 
-  if ( ! ( pci->nMatchTo && nPlies ) ) {
+  if ( ! ( pci->nMatchTo && nPlies ) && ( pecx->fDeterministic ||
+					  pecx->rNoise == 0.0f ) ) {
 
     /* only cache 0-ply evals for match play */
     /* FIXME: cache 0+ ply evals for match play */
@@ -2505,7 +2578,8 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 
   memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
 
-  if ( ! ( pci->nMatchTo && nPlies ) ) 
+  if ( ! ( pci->nMatchTo && nPlies ) && ( pecx->fDeterministic ||
+					  pecx->rNoise == 0.0f ) )
     return CacheAdd( &cEval, l, &ec, sizeof ec );
   else
     return 0;

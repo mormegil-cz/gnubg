@@ -144,9 +144,9 @@ float rAlpha = 0.1, rAnneal = 0.3, rThreshold = 0.1;
 
 gamestate gs = GAME_NONE;
 
-evalcontext ecTD = { 0, 8, 0.16, 7, FALSE };
-evalcontext ecEval = { 1, 8, 0.16, 7, FALSE };
-evalcontext ecRollout = { 0, 8, 0.16, 7, FALSE };
+evalcontext ecTD = { 0, 8, 0.16, 7, FALSE, 0.0, TRUE };
+evalcontext ecEval = { 1, 8, 0.16, 7, FALSE, 0.0, TRUE };
+evalcontext ecRollout = { 0, 8, 0.16, 7, FALSE, 0.0, TRUE };
 
 #define DEFAULT_NET_SIZE 128
 
@@ -155,8 +155,8 @@ storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0].
 		 NULL, if NULL is not filled with 0 bits? */
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 7, FALSE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 7, FALSE } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 7, FALSE, 0.0, TRUE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 7, FALSE, 0.0, TRUE } }
 };
 
 /* Usage strings */
@@ -2273,10 +2273,13 @@ static void SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 	     "%s candidates %d\n"
 	     "%s tolerance %.3f\n"
 	     "%s reduced %d\n"
-	     "%s cubeful %s\n",
+	     "%s cubeful %s\n"
+	     "%s noise %.3f\n"
+	     "%s deterministic %s\n",
 	     sz, pec->nPlies, sz, pec->nSearchCandidates,
 	     sz, pec->rSearchTolerance, sz, pec->nReduced,
-	     sz, pec->fCubeful ? "on" : "off" );
+	     sz, pec->fCubeful ? "on" : "off",
+	     sz, pec->rNoise, sz, pec->fDeterministic ? "on" : "off" );
 }
 
 extern void CommandSaveSettings( char *szParam ) {
@@ -2307,12 +2310,14 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "you should\n"
 	     "# use `.gnubgrc' instead.\n"
 	     "\n"
+	     "set analysis limit %d\n"
 	     "set automatic bearoff %s\n"
 	     "set automatic crawford %s\n"
 	     "set automatic doubles %d\n"
 	     "set automatic game %s\n"
 	     "set automatic move %s\n"
 	     "set automatic roll %s\n",
+	     cAnalysisMoves,
 	     fAutoBearoff ? "on" : "off",
 	     fAutoCrawford ? "on" : "off",
 	     cAutoDoubles,
