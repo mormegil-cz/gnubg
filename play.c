@@ -3910,12 +3910,6 @@ SetMatchID ( const char *szMatchID ) {
   ms.fResigned = fResigned;
   ms.fDoubled = fDoubled;
   
-  UpdateSetting( &ms.gs );
-  UpdateSetting( &ms.nCube );
-  UpdateSetting( &ms.fCubeOwner );
-  UpdateSetting( &ms.fTurn );
-  UpdateSetting( &ms.fCrawford );
-
   /* Set dice */
 
   if ( anDice[ 0 ] ) {
@@ -3951,6 +3945,20 @@ SetMatchID ( const char *szMatchID ) {
     CommandSetCubeValue ( sz );
 
   }
+
+  /* the following is needed to get resignations correct */
+
+  ms.gs = gs;
+  ms.fMove = fMove;
+  ms.fTurn = fTurn;
+  ms.fResigned = fResigned;
+  ms.fDoubled = fDoubled;
+  
+  UpdateSetting( &ms.gs );
+  UpdateSetting( &ms.nCube );
+  UpdateSetting( &ms.fCubeOwner );
+  UpdateSetting( &ms.fTurn );
+  UpdateSetting( &ms.fCrawford );
 
   /* set board to old value */
 
