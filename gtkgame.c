@@ -991,9 +991,9 @@ static void CreateGameWindow( void ) {
     gtk_clist_column_titles_passive( GTK_CLIST( pwGameList ) );
 
     gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 1, 
-                                TRANS( ap[0].szName ));
+                                ( ap[0].szName ));
     gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2, 
-                                TRANS( ap[1].szName ));
+                                ( ap[1].szName ));
 
     gtk_clist_set_column_justification( GTK_CLIST( pwGameList ), 0,
 					GTK_JUSTIFY_RIGHT );
@@ -1399,7 +1399,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	if( pmr->a.sz ) {
 	    fAutoCommentaryChange = TRUE;
 	    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL,
-			     TRANS(pmr->a.sz), -1 );
+			     (pmr->a.sz), -1 );
 	    fAutoCommentaryChange = FALSE;
 	}
 
@@ -3270,7 +3270,7 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       ppw->apwName[ i ] = gtk_entry_new() );
     gtk_entry_set_text( GTK_ENTRY( ppw->apwName[ i ] ),
-			TRANS(ppw->ap[ i ].szName) );
+			(ppw->ap[ i ].szName) );
     
     gtk_container_add( GTK_CONTAINER( pwPage ),
 		       ppw->apwRadio[ i ][ 0 ] =
@@ -5045,22 +5045,22 @@ extern void GTKSet( void *p ) {
 	/* Handle the player names. */
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_OWNER_0 )
-	    )->child ), TRANS(ap[ 0 ].szName) );
+	    )->child ), (ap[ 0 ].szName) );
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_CUBE_OWNER_1 )
-	    )->child ), TRANS(ap[ 1 ].szName) );
+	    )->child ), (ap[ 1 ].szName) );
 	
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 )
-	    )->child ), TRANS(ap[ 0 ].szName) );
+	    )->child ), (ap[ 0 ].szName) );
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_1 )
-	    )->child ), TRANS(ap[ 1 ].szName) );
+	    )->child ), (ap[ 1 ].szName) );
 
 	gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 1,
-				    TRANS(ap[ 0 ].szName) );
+				    (ap[ 0 ].szName) );
 	gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2,
-				    TRANS(ap[ 1 ].szName) );
+				    (ap[ 1 ].szName) );
     } else if( p == &ms.fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;
@@ -5202,8 +5202,8 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   }
   gtk_clist_column_titles_passive( GTK_CLIST( pwStats ) );
       
-  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, TRANS(ap[0].szName));
-  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, TRANS(ap[1].szName));
+  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
+  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
   for (i = 0; i < 33; i++) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
