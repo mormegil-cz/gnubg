@@ -71,6 +71,13 @@ duplication of effort and to make sure our changes merge easily.
   recorded (which implies that "save", "list" and the game list window
   won't work, but it will save memory for situations like playing
   10,000 games vs. pubeval).
+** Extend "rollout" to take a _list_ of positions to roll out, and not
+  just one.
+** Wherever a position ID or move is expected, also allow an expression
+  of the form "=123", where 123 is the move number listed by "hint".
+  This allows command sequences like "roll", "hint", "=1" (play the move
+  gnubg ranks highest), and "roll", "hint", "rollout =1 =2 =4" (roll out
+  3 of the top 4 choices).
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -159,8 +166,6 @@ duplication of effort and to make sure our changes merge easily.
 ** "set player <tab>" gives incorrect completions.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
-** When the game window is full, resizing it makes it MUCH bigger
-  than it should be.
 ** When ShowBoard() postpones an update, the off-board dice are not set.
   ("next" and "previous" don't change the dice, either -- it would be nice
   to add an external interface to change them.)

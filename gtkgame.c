@@ -417,8 +417,7 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 static void CreateGameWindow( void ) {
 
     static char *asz[] = { "Move", NULL, NULL };
-    GtkWidget *phbox = gtk_hbox_new( FALSE, 0 ),
-	*psb = gtk_vscrollbar_new( NULL );
+    GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL );
     GtkStyle *ps;
     
     pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
@@ -428,9 +427,11 @@ static void CreateGameWindow( void ) {
 			    "GameRecord" );
     gtk_window_set_default_size( GTK_WINDOW( pwGame ), 0, 400 );
 
-    gtk_container_add( GTK_CONTAINER( pwGame ), phbox );
-
-    gtk_container_add( GTK_CONTAINER( phbox ),
+    gtk_container_add( GTK_CONTAINER( pwGame ), psw );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+				    GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
+    
+    gtk_container_add( GTK_CONTAINER( psw ),
 		       pwGameList = gtk_clist_new_with_titles( 3, asz ) );
     gtk_clist_set_selection_mode( GTK_CLIST( pwGameList ),
 				  GTK_SELECTION_BROWSE );
@@ -444,6 +445,7 @@ static void CreateGameWindow( void ) {
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 1, FALSE );
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 2, FALSE );
 
+    gtk_widget_ensure_style( pwGameList );
     ps = gtk_style_new();
     ps->base[ GTK_STATE_SELECTED ] =
 	ps->base[ GTK_STATE_ACTIVE ] =
@@ -467,11 +469,6 @@ static void CreateGameWindow( void ) {
 	psGameList->fg[ GTK_STATE_NORMAL ];
     psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
 	psGameList->bg[ GTK_STATE_NORMAL ];
-    
-    gtk_clist_set_vadjustment( GTK_CLIST( pwGameList ),
-			       gtk_range_get_adjustment( GTK_RANGE( psb ) ) );
-
-    gtk_container_add( GTK_CONTAINER( phbox ), psb );
     
     gtk_signal_connect( GTK_OBJECT( pwGameList ), "select-row",
 			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
@@ -1174,7 +1171,9 @@ extern void GTKHint( movelist *pml ) {
     }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
 					NULL ),
+	*psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pwMoves = gtk_clist_new_with_titles( 7, aszTitle );
+    GtkRequisition r;
     int i, j;
     char sz[ 32 ];
 
@@ -1185,6 +1184,8 @@ extern void GTKHint( movelist *pml ) {
 					    GTK_JUSTIFY_RIGHT );
     }
     gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
+    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
+				  GTK_SELECTION_MULTIPLE );
     
     for( i = 0; i < pml->cMoves; i++ ) {
 	float *ar = pml->amMoves[ i ].arEvalMove;
@@ -1206,9 +1207,15 @@ extern void GTKHint( movelist *pml ) {
 					pml->amMoves[ i ].anMove ) );
     }
 
+    gtk_widget_get_child_requisition( pwMoves, &r );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+				    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
+    gtk_container_add( GTK_CONTAINER( psw ), pwMoves );
+    
     gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
-	GTK_DIALOG( pwDialog )->vbox ) )->data ), pwMoves );
+	GTK_DIALOG( pwDialog )->vbox ) )->data ), psw );
 
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     
