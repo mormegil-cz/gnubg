@@ -2265,3 +2265,20 @@ CommandSetExportCubeDisplayMissed ( char *sz ) {
 }
     
      
+extern void
+CommandSetInvertMatchEquityTable ( char *sz ) {
+
+  int fOldInvertMET = fInvertMET;
+
+  if( SetToggle( "invert matchequitytable", &fInvertMET, sz,
+                 "Match equity table will be used inverted.",
+                 "Match equity table will not be use inverted." ) >= 0 )
+    UpdateSetting( &fInvertMET );
+
+  if ( fOldInvertMET != fInvertMET )
+    invertMET ();
+
+
+}
+
+
