@@ -1,7 +1,7 @@
 /*
  * kleinman.c
  *
- * by Øystein Johansen <oeysteij@online.no> 2000
+ * by Øystein Johansen <oeysteij@online.no> 2000-2002
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -16,23 +16,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *
- *
+ * $Id$
  */
 
-/*
- * This function/program gives the Cubeless Winning Probability in race
- * position. It is based on the Kleinman Count.  */
-
-/* Compile like this if you want a standalone program:
-   
-   gcc -O2 -DSTANDALONE -o kleinman kleinman.c -lm
-
-   or if you just like the function as a object:
-
-   gcc -O2 -c kleinman.c 
-
-*/
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #ifdef STANDALONE
 #include <stdio.h>
@@ -40,32 +29,28 @@
 
 #include <math.h>
 
+#if !HAVE_ERF
+extern double erf( double x );
+#endif
+
+
 extern float
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
 {
   int nDiff, nSum;
-  float rK, rW;
+  double rK;
 
   nDiff = nPipNotOnRoll - nPipOnRoll;
   nSum = nPipNotOnRoll + nPipOnRoll;
 
-  /* Don't use this routine if player on roll is not the favorite.
-     And don't use it if the race is too short.  */
+  /* Don't use this routine if player on roll is not the favorite. */
 
-  if ((nDiff < -4) || (nSum < 100))
+  if (nDiff < -4) 
     return -1;
 
-  rK = (float) (nDiff + 4) * (nDiff + 4) / (nSum - 4);
+  rK = (double) (nDiff + 4) / (2 * sqrt( nSum - 4 ));
 
-  if (rK < 1.0)
-    rW = 0.5 + 0.267 * sqrt (rK);
-  else
-    rW = 0.76 + 0.114 * log (rK);
-
-  if (rW > 1.0)
-    return 1.0;
-  else
-    return rW;
+  return 0.5 * (1.0 + erf( rK ));
 }
 
 #ifdef STANDALONE
