@@ -174,10 +174,10 @@ renderdata rdDefault = {
 	LT_POSITIONAL, /* light source type */
 	{0, 2, 3.5f},	/* x,y,z pos of light source */
 	{50, 70, 100},	/* amibient/diffuse/specular light levels */
-	35,	/* Board angle */
+	15,	/* Board angle */
 	20,	/* FOV skew factor */
 	0,	/* Plan view */
-	3,	/* Dice size */
+	2.5f,	/* Dice size */
 	0,	/* Rounded edges */
 	1,	/* Background in trays */
 	0,	/* Rounded points */
