@@ -1,4 +1,9 @@
-Wed Mar 4  11:26:54 Jim Segrave <jes@jes-2.demon.nl>
+Wed Mar 4 14:24:58 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c - add Navigation next/previous chequer play, linked
+	  to alt page down/up
+
+Wed Mar 4 11:26:54 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c, backgammon.h, set.c, gnubg.c - save the options
 	  for players-are-same, cube-equal-chequer and
