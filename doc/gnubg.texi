@@ -69,6 +69,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Position and match IDs::		A brief technical explanation.
 * Cubeful equities::                    How do @gnubg{} calculate cubeful equities.
 * Training::				How to store databases and train the neural nets.
+* Scripting::                           How to use @gnubg{} builtin scripting.
 * Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
 * Additional documentation::            Links to other documentation regarding backgammon or GNU Backgammon 
@@ -347,7 +348,7 @@ example, if you use the build by Øystein Johansen you should execute
 The @var{input-file} must be carefully prepared. For example, it
 could look like:
 
-@verbatim
+@example
 import sgg file1.sgg
 analyse match
 save match file1.sgf
@@ -357,16 +358,16 @@ save match file1.sgf
 import mat file3.mat
 analyse match
 save match file3.sgf
-@end verbatim
+@end example
 
 If you wish to adjust your setting for the analysis you can include
 commands like:
 
-@verbatim
+@example
 set analysis chequerplay evaluation plies 2
 set analysis cubedecision evaluation plies 3
 [...]
-@end verbatim
+@end example
 
 See the command reference for further details regarding the commands
 available in @gnubg{}.
@@ -1251,6 +1252,8 @@ window, or by executing the command @code{set matchid QYkqASAAIAAA}.
 
 @node Training
 @chapter Training
+
+@include scripting.texi
 
 @include bearoff.texi
 

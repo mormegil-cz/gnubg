@@ -1,0 +1,53 @@
+@node Scripting
+@chapter Scripting
+
+@section Accessing @gnubg{} Python shell 
+
+To access the Python shell, either type @samp{>} from the command line
+or select @code{Windows->Python Shell(IDLE...)} from the GUI.
+
+@section gnubg module functions
+
+@table @code
+@item board()
+@item command(cmd)
+@item evaluate()
+@item evalcontext()
+@item eq2mwc()
+@item mwc2eq()
+@item cubeinfo()
+@item met()
+@item positionid()
+@item positionfromid()
+@item positionkey()
+@item positionfromkey()
+@item positionbearoff()
+@item positionfrombearoff()
+@item match([analysis=1/0, boards=1/0, statistics=0/1, verbose=0/1])
+
+Return the current match. Take the following optional keyword arguments
+
+@table @code
+@item analysis
+When 0, discard analysis data. default is 1.
+
+@item boards
+When 1, add current board to move/double records. Default is 1.
+
+@item statistics
+When 1, include game statistics. Default is 0.
+
+@item verbose
+When 1, include derived analysis values. Default is 0.
+
+@end table
+
+@end table
+
+
+@subsection Match description 
+
+@example
+> m = gnubg.match()
+@end example
+

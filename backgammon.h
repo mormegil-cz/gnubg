@@ -107,11 +107,18 @@ typedef struct _monitor {
 } monitor;
 
 typedef struct _command {
-    char *sz; /* Command name (NULL indicates end of list) */
-    void ( *pf )( char * ); /* Command handler; NULL to use default
-			       subcommand handler */
-    char *szHelp, *szUsage; /* Documentation; NULL for abbreviations */
-    struct _command *pc; /* List of subcommands (NULL if none) */
+  /* Command name (NULL indicates end of list) */
+  char* sz; 
+  
+  /* Command handler; NULL to use default subcommand handler */
+  void ( *pf )( char* ); 
+
+  /* Documentation; NULL for abbreviations */
+  char* szHelp;
+  char* szUsage; 
+
+  /* List of subcommands (NULL if none) */
+  struct _command *pc; 
 } command;
 
 typedef enum _playertype {
@@ -119,45 +126,82 @@ typedef enum _playertype {
 } playertype;
 
 typedef struct _player {
-    /* For all player types: */
-    char szName[ 32 ];
-    playertype pt;
-    /* For PLAYER_GNU: */
-    evalsetup esChequer, esCube;
-    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
-    int h;
-    /* For PLAYER_EXTERNAL: */
-    char *szSocket;
+  /* For all player types: */
+  char szName[ 32 ];
+
+  playertype pt;
+
+  /* For PLAYER_GNU: */
+  evalsetup esChequer, esCube;
+  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  int h;
+  /* For PLAYER_EXTERNAL: */
+  char* szSocket;
 } player;
 
 typedef enum _movetype {
-    MOVE_GAMEINFO, MOVE_NORMAL, MOVE_DOUBLE, MOVE_TAKE, MOVE_DROP, MOVE_RESIGN,
-    MOVE_SETBOARD, MOVE_SETDICE, MOVE_SETCUBEVAL, MOVE_SETCUBEPOS
+    MOVE_GAMEINFO,
+    MOVE_NORMAL,
+    MOVE_DOUBLE,
+    MOVE_TAKE,
+    MOVE_DROP,
+    MOVE_RESIGN,
+    MOVE_SETBOARD,
+    MOVE_SETDICE,
+    MOVE_SETCUBEVAL,
+    MOVE_SETCUBEPOS
 } movetype;
 
 typedef struct _movegameinfo {
-    movetype mt;
-    char *sz;
-    int i, /* the number of the game within a match */
-	nMatch, /* match length */
-	anScore[ 2 ], /* match score BEFORE the game */
-	fCrawford, /* the Crawford rule applies during this match */
-	fCrawfordGame, /* this is the Crawford game */
-	fJacoby,
-	fWinner, /* who won (-1 = unfinished) */
-	nPoints, /* how many points were scored by the winner */
-	fResigned, /* the game was ended by resignation */
-	nAutoDoubles; /* how many automatic doubles were rolled */
-    bgvariation bgv;
-    int fCubeUse;
-    statcontext sc;
+  /* "standard" header */
+  movetype mt;
+  char* sz;
+
+  /* ordinal number of the game within a match */
+  int i;
+
+  /* match length */  
+  int nMatch;
+
+  /* match score BEFORE the game */
+  int anScore[2];
+  
+  /* the Crawford rule applies during this match */
+  int fCrawford;
+
+  /* this is the Crawford game */
+  int fCrawfordGame;
+
+  int fJacoby;
+
+  /* who won (-1 = unfinished) */
+  int fWinner;
+
+  /* how many points were scored by the winner */
+  int nPoints;
+
+  /* the game was ended by resignation */
+  int fResigned;
+
+  /* how many automatic doubles were rolled */
+  int nAutoDoubles; 
+
+  /* Type of game */ 
+  bgvariation bgv;
+
+  /* Cube used in game */
+  int fCubeUse;
+
+  statcontext sc;
 } movegameinfo;
 
 typedef struct cubedecisiondata {
-    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    float arDouble[ 4 ];
-    evalsetup esDouble;
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  /* (FIXME) JTH The arDouble struct is redundant and should be removed from
+     cubedecisiondata. */
+  float arDouble[ N_CUBEFUL_OUTPUTS ];
+  evalsetup esDouble;
 } cubedecisiondata;
 
 typedef struct _movedouble {
@@ -172,25 +216,43 @@ typedef struct _movedouble {
 } movedouble;
 
 typedef struct _movenormal {
-    movetype mt;
-    char *sz;
-    int fPlayer;
-    int anRoll[ 2 ];
-    int anMove[ 8 ];
-    /* evaluation setup for move analysis */
-    evalsetup esChequer;
-    /* evaluation of cube action before this move */
-    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    float arDouble[ 4 ];
-    evalsetup esDouble;
-    /* evaluation of the moves */
-    movelist ml;
-    int iMove; /* index into the movelist of the move that was made */
-    lucktype lt;
-    float rLuck; /* ERR_VAL means unknown */
-    skilltype stMove;
-    skilltype stCube;
+  /* "standard" header */
+  movetype mt;
+  char *sz;
+
+  int fPlayer;
+
+  /* dice for move */ 
+  int anRoll[2];
+
+  /* Move made. */
+  int anMove[ 8 ];
+
+  /* evaluation setup for move analysis */
+  evalsetup esChequer;
+
+  /* evaluation of cube action before this move */
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+
+  /* (FIXME) JTH The arDouble struct is redundant and should be removed from
+     cubedecisiondata. */
+  float arDouble[ N_CUBEFUL_OUTPUTS ];
+  evalsetup esDouble;
+
+  /* evaluation of the moves */
+  movelist ml;
+
+  /* index into the movelist of the move that was made */
+  int iMove; 
+
+  lucktype lt;
+
+  /* ERR_VAL means unknown */
+  float rLuck; 
+
+  skilltype stMove;
+  skilltype stCube;
 } movenormal;
 
 typedef struct _moveresign {
@@ -386,7 +448,8 @@ extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
 extern moverecord *LinkToDouble( moverecord *pmr);
-extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr );
+extern void ApplyMoveRecord( matchstate *pms, const list* plGame,
+			     moverecord *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
 extern void AddGame( moverecord *pmr );

@@ -167,9 +167,9 @@ static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
     SwapSides( pms->anBoard );    
 }
 
-static void ApplyGameOver( matchstate *pms, list *plGame ) {
+static void ApplyGameOver(matchstate *pms, const list* plGame ) {
 
-    movegameinfo *pmgi = plGame->plNext->p;
+    movegameinfo* pmgi = plGame->plNext->p;
 
     assert( pmgi->mt == MOVE_GAMEINFO );
 
@@ -180,7 +180,7 @@ static void ApplyGameOver( matchstate *pms, list *plGame ) {
     pms->cGames++;
 }
 
-extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
+extern void ApplyMoveRecord( matchstate *pms, const list* plGame, moverecord *pmr ) {
 
     int n;
     movegameinfo *pmgi = plGame->plNext->p;

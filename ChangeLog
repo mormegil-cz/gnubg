@@ -1,3 +1,15 @@
+Tue Aug 12 10:53:49 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* gnubgmodule.c (PythonMatch): Initial version. Incomplete in some
+	ways. Documentation missing. Likely to change.
+
+Tue Aug 12 10:37:08 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* positionid.c (PositionFromID): constify some args.
+	change CheckPosition and PositionFromID return sane TRUE/FALSE
+	(1/0) for success/failure after even Joern was bitten by it in
+	PythonPositionFromID.
+
 Mon Aug 11 22:10:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* po/LINGUAS po/fr.po: French translation.

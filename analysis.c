@@ -1940,7 +1940,7 @@ extern void CommandAnalyseMove ( char *sz ) {
 
 
 static void
-updateStatisticsMove ( moverecord *pmr, matchstate *pms, list *plGame,
+updateStatisticsMove ( moverecord *pmr, matchstate *pms, const list* plGame,
                        statcontext *psc ) {
 
   FixMatchState ( pms, pmr );
@@ -1992,7 +1992,7 @@ updateStatisticsMove ( moverecord *pmr, matchstate *pms, list *plGame,
 
 
 extern void
-updateStatisticsGame ( list *plGame ) {
+updateStatisticsGame ( const list* plGame ) {
 
   list *pl;
   moverecord *pmr;

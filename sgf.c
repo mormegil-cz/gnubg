@@ -2139,9 +2139,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
-							 pmr->d.CubeDecPtr->aarOutput, 
-							 pmr->d.CubeDecPtr->aarStdDev,
-							 &pmr->d.CubeDecPtr->esDouble );
+				     pmr->d.CubeDecPtr->aarOutput, 
+				     pmr->d.CubeDecPtr->aarStdDev,
+				     &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -2152,9 +2152,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
-							 pmr->d.CubeDecPtr->aarOutput, 
-							 pmr->d.CubeDecPtr->aarStdDev,
-							 &pmr->d.CubeDecPtr->esDouble );
+				     pmr->d.CubeDecPtr->aarOutput, 
+				     pmr->d.CubeDecPtr->aarStdDev,
+				     &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -2165,9 +2165,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
-							 pmr->d.CubeDecPtr->aarOutput,
-							 pmr->d.CubeDecPtr->aarStdDev,
-							 &pmr->d.CubeDecPtr->esDouble );
+				     pmr->d.CubeDecPtr->aarOutput,
+				     pmr->d.CubeDecPtr->aarStdDev,
+				     &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    

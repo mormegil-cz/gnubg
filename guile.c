@@ -390,7 +390,7 @@ static SCM position_id_to_board( SCM sPosID ) {
     memcpy( sz, SCM_ROCHARS( sPosID ), c );
     sz[ 14 ] = 0;
 
-    if( PositionFromID( anBoard, sz ) )
+    if( !PositionFromID( anBoard, sz ) )
 	return SCM_BOOL_F;
     else
 	return BoardToSCM( anBoard );

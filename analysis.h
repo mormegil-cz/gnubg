@@ -100,7 +100,7 @@ extern void
 DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz );
 
 extern void
-updateStatisticsGame ( list *plGame );
+updateStatisticsGame ( const list* plGame );
 
 extern void
 updateStatisticsMatch ( list *plMatch );

@@ -6047,15 +6047,12 @@ cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 ) {
   /* The two evaltypes are identical */
 
   switch ( pes1->et ) {
-  case EVAL_NONE:
-    return 0;
-    break;
-  case EVAL_EVAL:
-    return cmp_evalcontext ( &pes1->ec, &pes2->ec );
-    break;
-  case EVAL_ROLLOUT:
-    return cmp_rolloutcontext ( &pes1->rc, &pes2->rc );
-    break;
+  case EVAL_NONE:    return 0;
+
+  case EVAL_EVAL:    return cmp_evalcontext ( &pes1->ec, &pes2->ec );
+
+  case EVAL_ROLLOUT: return cmp_rolloutcontext ( &pes1->rc, &pes2->rc );
+
   default:
     assert ( FALSE );
   }

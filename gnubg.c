@@ -2236,7 +2236,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
        *ppch = NULL;
        
-       return CheckPosition ( an );
+       return CheckPosition(an) ? 0 : -1;
     }
 
     if( *pch == '=' ) {
@@ -2266,7 +2266,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	return 1;
     }
 
-    if( PositionFromID( an, pch ) ) {
+    if( !PositionFromID( an, pch ) ) {
 	outputl( _("Illegal position.") );
 	return -1;
     }

@@ -1,5 +1,5 @@
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi movefilters.texi cubeful.texi
+gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi movefilters.texi cubeful.texi scripting.texi
 if XML_MANUAL
 pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 	rulfig4.png rulfig5.png annealing.png
@@ -9,8 +9,8 @@ EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
 	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd \
 	annealing.png annealing.eps \
- 	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
- 	mgtp.gp mgtp.png mgtp.eps mptp.txt
+	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
+	mgtp.gp mgtp.png mgtp.eps mptp.txt
 SUFFIXES = .png .eps .texi .html .txt .xml
 EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
 	annealing.eps
