@@ -92,7 +92,7 @@
          chequers1=#000000;1.00;3.00;0.90;14.80 
          dice0=#FBFBFB;0.90;19.90;y 
          dice1=#090909;0.90;14.80;y 
-         dot0=#EBEDF0 
+         dot0=#000000 
          dot1=#EBEDF0 
          cube=#D4D4C4 
          points0=#CC7F00;0.09 
