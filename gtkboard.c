@@ -4242,7 +4242,7 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
 
 static void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
 
-  char sz[ 23 ]; /* "set board XXXXXXXXXXXXXX" */
+  char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
 
   sprintf ( sz, "set matchid %s", 
             gtk_entry_get_text ( GTK_ENTRY ( bd->match_id ) ) );
@@ -4476,8 +4476,13 @@ static void board_init( Board *board ) {
     bd->cube_use = TRUE;
     
     bd->all_moves = NULL;
-
+#if WIN32
+    /* I've seen some Windows 95 systems give warnings with translucent
+       chequer, so let's turn translucent off by default on Win32 systems. */ 
+    bd->translucent = FALSE;
+#else
     bd->translucent = TRUE;
+#endif
     bd->wood = WOOD_ALDER;
     bd->hinges = TRUE;
     bd->labels = FALSE;
