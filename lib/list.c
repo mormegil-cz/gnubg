@@ -46,8 +46,11 @@ int ListDelete( list *pl ) {
 
 int ListDeleteAll( list *pl ) {
 
-    while( pl->plNext->p )
-	ListDelete( pl->plNext );
+	while( pl->plNext->p )
+	{
+		free(pl->plNext->p);
+		ListDelete( pl->plNext );
+	}
 
 	return 0;
 }
