@@ -1057,9 +1057,9 @@ static void DeleteMessage ( void )
 
 static void DeleteAnalysis( void )
 {
-	if (woPanel[WINDOW_ANNOTATION].showing)
+	if (woPanel[WINDOW_ANALYSIS].showing)
 	{
-		getWindowGeometry(&woPanel[WINDOW_ANNOTATION]);
+		getWindowGeometry(&woPanel[WINDOW_ANALYSIS]);
 		woPanel[WINDOW_ANALYSIS].showing = FALSE;
 		gtk_widget_hide(woPanel[WINDOW_ANALYSIS].pwWin);
 	}
@@ -1087,6 +1087,7 @@ static GtkWidget *CreateMessageWindow( void ) {
 
 		setWindowGeometry(&woPanel[WINDOW_MESSAGE]);
 		gtk_container_add( GTK_CONTAINER( woPanel[WINDOW_MESSAGE].pwWin ), pwvbox);
+		gtk_window_add_accel_group( GTK_WINDOW( woPanel[WINDOW_MESSAGE].pwWin ), pagMain );
 	}
 
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
@@ -1135,6 +1136,7 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 		setWindowGeometry(&woPanel[WINDOW_ANALYSIS]);
 
 		gtk_container_add( GTK_CONTAINER( woPanel[WINDOW_ANALYSIS].pwWin ), pwPaned); 
+		gtk_window_add_accel_group( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ), pagMain );
     
 		gtk_paned_pack1( GTK_PANED( pwPaned ),
 				 pwAnalysis = gtk_label_new( NULL ), TRUE, FALSE );
@@ -1212,6 +1214,7 @@ static void CreateGameWindow( void ) {
 		setWindowGeometry(&woPanel[WINDOW_GAME]);
     
 		gtk_container_add( GTK_CONTAINER( woPanel[WINDOW_GAME].pwWin ), pvbox );
+		gtk_window_add_accel_group( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ), pagMain );
 	}
     gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
 
