@@ -24,14 +24,13 @@
 
 #if USE_PYTHON
 
-/* Python.h definse HAVE_FSTAT so save and redefine here */
-#if HAVE_FSTAT
-#define _HAVE_FSTAT 1
-#else
-#define _HAVE_FSTAT 0
-#endif
+/* Python.h defines HAVE_FSTAT (2.3) and HAVE_SETVBUF (2.4) so ignore and redefine below */
+#undef HAVE_SETVBUF
+#undef HAVE_LIMITS_H
 #undef HAVE_FSTAT
 #include <Python.h>
+#undef HAVE_SETVBUF
+#undef HAVE_LIMITS_H
 #undef HAVE_FSTAT
 #include "config.h"
 

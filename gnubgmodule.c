@@ -538,6 +538,7 @@ PythonEvaluateCubeful( PyObject* self IGNORE, PyObject *args ) {
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arCube[ NUM_CUBEFUL_OUTPUTS ];
   cubeinfo ci;
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
+  int cp;
 
   memcpy( anBoard, ms.anBoard, sizeof anBoard );
   
@@ -562,14 +563,17 @@ PythonEvaluateCubeful( PyObject* self IGNORE, PyObject *args ) {
     return NULL;
   }
 
-  FindCubeDecision ( arCube, GCCCONSTAHACK aarOutput, &ci );
+  cp = FindCubeDecision ( arCube, GCCCONSTAHACK aarOutput, &ci );
 
   {
-    PyObject* p = PyTuple_New( NUM_CUBEFUL_OUTPUTS );
+    PyObject* p = PyTuple_New( NUM_CUBEFUL_OUTPUTS + 2 );
     int k;
     for(k = 0; k < NUM_CUBEFUL_OUTPUTS; ++k) {
       PyTuple_SET_ITEM(p, k, PyFloat_FromDouble(arCube[k]));
     }
+	PyTuple_SET_ITEM(p, NUM_CUBEFUL_OUTPUTS, PyInt_FromLong(cp));
+	PyTuple_SET_ITEM(p, NUM_CUBEFUL_OUTPUTS+1, PyString_FromString(GetCubeRecommendation(cp)));
+
     return p;
   }
 }
@@ -2267,7 +2271,7 @@ PyMethodDef gnubgMethods[] = {
     "           'score'=>(int, int), 'gammonprice'=(float[4])\n"
     "       eval-context = dictionary: 'cubeful'=>0/1, 'plies'=>int,\n"
     "           'reduced'=>0/1, 'deterministic'=> 0/1, 'noise'->float\n"
-    "    returns: evaluation = tuple (floats optimal, nodouble, take, drop)" },
+    "    returns: evaluation = tuple (floats optimal, nodouble, take, drop, int recommendation, String recommendationtext)" },
   { "evaluate", PythonEvaluate, METH_VARARGS,
     "Cubeless evaluation]n"
     "    arguments: [board] [cube-info] [eval context]\n"
