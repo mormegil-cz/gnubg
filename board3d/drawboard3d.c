@@ -3331,6 +3331,8 @@ void updatePieceOccPos(BoardData* bd)
 	{
 		for (j = 1; j <= abs(bd->points[i]); j++)
 		{
+			if (p > LAST_PIECE)
+				break;	/* Found all pieces */
 			getPiecePos(i, j, fClockwise, bd->Occluders[p].trans);
 
 			if (i == 26 || i == 27)
