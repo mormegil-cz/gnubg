@@ -33,12 +33,14 @@
 #include "FTFont.h"
 
 /* Avoid FTGLOutlineFont::render() as expensive to call repeatedly */
-/*
 class MyOutlineFont : public FTGLOutlineFont
 {
-	void render(const char* string) {FTFont::render(string);}
+public:
+	MyOutlineFont( const unsigned char *pBufferBytes, size_t bufferSizeInBytes) :
+		FTGLOutlineFont(pBufferBytes, bufferSizeInBytes) {}
+	void render(const char* string) {FTFont::Render(string);}
 };
-*/
+
 #define FONT_SIZE (base_unit / 20.0f)
 #define CUBE_FONT_SIZE (base_unit / 24.0f)
 
@@ -55,7 +57,7 @@ public:
 		fonts[0] = new FTGLPolygonFont(fd, fs);
 		fonts[0]->FaceSize(ptSize);
 	
-		fonts[1] = new FTGLOutlineFont(fd, fs);
+		fonts[1] = new MyOutlineFont(fd, fs);
 		fonts[1]->FaceSize(ptSize);
 
 		float sx, sy, sz, fx, fy, fz;
