@@ -1,3 +1,9 @@
+Mon Oct 21 19:27:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Last iteration of the "set priority" stuff.
+
+	* gnubg.c: fix some typos.
+
 Mon Oct 21 19:19:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Output cubeless equities independent of Jacoby rule:

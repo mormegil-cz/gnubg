@@ -1006,9 +1006,9 @@ command cER = {
     N_("Set priority to NORMAL_PRIORITY_CLASS"), NULL, NULL },
   { "abovenormal", CommandSetPriorityAboveNormal,
     N_("Set priority to ABOVE_NORMAL_PRIORITY_CLASS"), NULL, NULL },
-  { "high", CommandSetPriorityHighest, 
+  { "highest", CommandSetPriorityHighest, 
     N_("Set priority to HIGHEST_PRIORITY_CLASS"), NULL, NULL },
-  { "realtime", CommandSetPriorityTimeCritical,
+  { "timecritical", CommandSetPriorityTimeCritical,
     N_("Set priority to TIME_CRITICAL_PRIORITY_CLASS"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 #endif /* WIN32 */
