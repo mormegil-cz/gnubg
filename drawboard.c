@@ -274,6 +274,18 @@ static char *FormatPoint( char *pch, int n ) {
     return pch;
 }
 
+static char *FormatPointPlain( char *pch, int n ) {
+
+    assert( n >= 0 );
+    
+    if( n > 9 )
+	*pch++ = n / 10 + '0';
+
+    *pch++ = ( n % 10 ) + '0';
+
+    return pch;
+}
+
 extern char *FormatMovePlain( char *sz, int anBoard[ 2 ][ 25 ],
 			      int anMove[ 8 ] ) {
 
@@ -281,9 +293,9 @@ extern char *FormatMovePlain( char *sz, int anBoard[ 2 ][ 25 ],
     int i, j;
     
     for( i = 0; i < 8 && anMove[ i ] >= 0; i += 2 ) {
-	pch = FormatPoint( pch, anMove[ i ] + 1 );
+	pch = FormatPointPlain( pch, anMove[ i ] + 1 );
 	*pch++ = '/';
-	pch = FormatPoint( pch, anMove[ i + 1 ] + 1 );
+	pch = FormatPointPlain( pch, anMove[ i + 1 ] + 1 );
 
 	if( anBoard && anMove[ i + 1 ] >= 0 &&
 	    anBoard[ 0 ][ 23 - anMove[ i + 1 ] ] ) {
