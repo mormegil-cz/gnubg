@@ -3,14 +3,14 @@
 TEMP=/tmp/gnubgtest.$$
 
 if [ -n "$srcdir" ]; then
-  dirparam="--datadir=$srcdir"
+    dirparam="--datadir=$srcdir"
 else
-  dirparam=
+    dirparam=
 fi
 
 die () {
-  echo "$1"
-  exit 1
+    echo "$1"
+    exit 1
 }
 
 # Feature test
@@ -131,8 +131,7 @@ EOF
 echo '--- Beaver test succeeds.'
 
 # Test saving.
-./gnubg $dirparam -t << EOF | grep -q '163.*161' || die \
-    '--- Load test fails.'
+./gnubg $dirparam -t << EOF | grep -q '163.*161' || die '--- Load test fails.'
 set player both human
 load game $TEMP
 show pipcount
@@ -144,7 +143,6 @@ echo '--- Load test succeeds.'
 ./gnubg $dirparam -t << "EOF" > /dev/null || die \
     '--- Miscellaneous test fails.'
 help
-set player both human
 show player
 new game
 set evaluation plies 1
@@ -156,3 +154,30 @@ set rollout varredn no
 rollout
 EOF
 echo '--- Miscellaneous test succeeds.'
+
+# Test Guile.
+if [ "$GUILE" = "yes" ]; then
+    ./gnubg $dirparam -t << "EOF" > /dev/null || die '--- Guile test fails.'
+set rng manual
+set player both human
+set automatic game no
+new game
+31
+8/5 6/5
+:(define foo 123)
+:
+(catch #t (lambda ()
+	    (or (= foo 123)
+		(throw #t))
+	    (or (equal? (board->position-id (current-board)) "sGfwATDgc/ABMA")
+		(throw #t))
+	    (or (< (vector-ref (evaluate-position (current-board)) 0) 0.5)
+		(throw #t))
+	    (primitive-exit 0))
+       (lambda (tag . args)
+	 (primitive-exit 1)))
+EOF
+    echo '--- Guile test succeeds.'
+else
+    echo '--- Guile test not available.'
+fi
