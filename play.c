@@ -582,25 +582,27 @@ static int ComputerTurn( void ) {
 
       /* Roll dice and move */
       if ( ! anDice[ 0 ] ) {
-        RollDice ( anDice );
-	ResetDelayTimer(); /* Start the timer again -- otherwise the time
-			      we spent contemplating the cube could replace
-			      the delay. */
+	  if( RollDice ( anDice ) < 0 )
+	      return -1;
+	  
+	  ResetDelayTimer(); /* Start the timer again -- otherwise the time
+				we spent contemplating the cube could replace
+				the delay. */
 	
-        /* write line to status bar if using GTK */
+	  /* write line to status bar if using GTK */
 #ifdef USE_GTK        
-        if ( fX ) {
+	  if ( fX ) {
 
-          outputnew ();
-          outputf ( "%s rolls %1i and %1i.\n",
-                    ap [ fTurn ].szName, anDice[ 0 ], anDice[ 1 ] );
-          outputx ();
-
-        }
+	      outputnew ();
+	      outputf ( "%s rolls %1i and %1i.\n",
+			ap [ fTurn ].szName, anDice[ 0 ], anDice[ 1 ] );
+	      outputx ();
+	      
+	  }
 #endif
       }
 
-
+      
       if ( fDisplay )
 	  ShowBoard();
 
@@ -1047,8 +1049,8 @@ extern void CommandDrop( char *sz ) {
     }
 
     if( fDisplay )
-	outputf( "%s refuses the cube and gives up %d points.\n",
-		ap[ fTurn ].szName, nCube );
+	outputf( "%s refuses the cube and gives up %d point%s.\n",
+		ap[ fTurn ].szName, nCube, nCube == 1 ? "" : "s" );
     
     pmr = malloc( sizeof( pmr->t ) );
     pmr->mt = MOVE_DROP;
