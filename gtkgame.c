@@ -6831,29 +6831,45 @@ extern void GTKSet( void *p ) {
 	ShowBoard(); /* this is overkill, but it works */
 }
 
-static void FormatStatEquity( char *sz, float ar[ 2 ], int nDenominator,
-			      int nMatchTo, float rMult ) {
+static void
+FormatStatEquity(char* sz, float ar[2], int nDenominator,
+		 int nMatchTo, float rMult )
+{
+  if( !nDenominator ) {
+    strcpy( sz, "n/a" );
+    return;
+  }
 
-    if( !nDenominator ) {
-	strcpy( sz, "n/a" );
-	return;
+  if( ar[0] == 0.0 && ar[1] == 0.0 ) {
+    strcpy( sz, "0" );
+    return;
+  }
+  
+  {
+    float p = rMult * ar[ 1 ] / nDenominator;
+    if( nMatchTo ) {
+      p *= 100.0f;
     }
-
-    if( nMatchTo )
-	sprintf( sz, "%+.3f (%+.3f%%)", rMult * ar[ 0 ] / nDenominator,
-		 rMult * ar[ 1 ] * 100.0f / nDenominator );
-    else
-	sprintf( sz, "%+.3f (%+.3f)", rMult * ar[ 0 ] / nDenominator,
-		 rMult * ar[ 1 ] / nDenominator );
+    
+    sprintf( sz, "%+.3f (%+.3f%s)", rMult * ar[ 0 ] / nDenominator, p,
+	     nMatchTo ? "%" : "");
+  }
 }
 
-static void FormatStatCubeError( char *sz, int n, float ar[ 2 ],
-				 int nMatchTo ) {
-
-    if( nMatchTo )
-	sprintf( sz, "%d (%+.3f, %+.3f%%)", n, -ar[ 0 ], -ar[ 1 ] * 100.0f );
-    else
-	sprintf( sz, "%d (%+.3f, %+.3f)", n, -ar[ 0 ], -ar[ 1 ] );
+static void
+FormatStatCubeError(char* sz, int n, float ar[2], int nMatchTo)
+{
+  if( n == 0 ) {
+    {                                 assert( ar[0] == 0.0 && ar[1] == 0.0 ); }
+    strcpy(sz, "0");
+  } else {
+    float p = -ar[ 1 ];
+    if( nMatchTo ) {
+      p *= 100.0f;
+    }
+      
+    sprintf(sz, "%d (%+.3f, %+.3f%s)", n, -ar[ 0 ], p, nMatchTo ? "%" : "");
+  }
 }
 
 
@@ -7077,22 +7093,42 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anTotalMoves[ 1 ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  
   sprintf(sz,"%d", psc->anUnforcedMoves[ 0 ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anUnforcedMoves[ 1 ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+
+  {
+    int i[] = {SKILL_VERYGOOD, SKILL_GOOD, SKILL_INTERESTING,
+	       SKILL_NONE, SKILL_DOUBTFUL, SKILL_BAD, SKILL_VERYBAD};
+    unsigned int k;
+    
+    for(k = 0; k < sizeof(i)/sizeof(i[0]); ++k) {
+      ++irow;
+      sprintf(sz,"%d", psc->anMoves[ 0 ][ i[k] ]);
+      gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 1, sz);
+      
+      sprintf(sz,"%d", psc->anMoves[ 1 ][ i[k] ]);
+      gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+    }
+  }
+#if 0      
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYGOOD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYGOOD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_GOOD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_GOOD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_INTERESTING ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_INTERESTING ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	       
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_NONE ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_NONE ]);
@@ -7109,7 +7145,8 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-
+#endif
+  
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo, -1.0 );
@@ -7339,20 +7376,33 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   /* equivalent Snowie error rate */
 
-  if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) 
-    sprintf( sz, "%+.1f", 
-             -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ] / 
-             ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) );
-  else
+  if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) {
+    float v =
+      -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ] / 
+      ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] );
+    if( v != 0.0 ) {
+      sprintf( sz, "%+.1f", v );
+    } else {
+      strcpy(sz, "0");
+    }
+  } else {
     strcpy ( sz, _("n/a") );
+  }
+  
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
-  if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) 
-    sprintf( sz, "%+.1f", 
-             -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ] / 
-             ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) );
-  else
+  if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) {
+    float v = -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ] / 
+      ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] );
+    if( v != 0.0 ) {
+      sprintf( sz, "%+.1f", v );
+    } else {
+      strcpy(sz, "0");
+    }
+  } else {
     strcpy ( sz, _("n/a") );
+  }
+  
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   /* overall rating */
