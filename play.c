@@ -400,12 +400,34 @@ static int ComputerTurn( void ) {
   case PLAYER_GNU:
     if( fResigned ) {
 
+      float rEqBefore, rEqAfter;
+
       if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].ec ) )
         return -1;
 
-      fComputerDecision = TRUE;
+      rEqBefore = -Utility ( arOutput, &ci );
+
+      /* I win 100% if opponent resigns */
+      arOutput[ 0 ] = 1.0; 
+      arOutput[ 1 ] = arOutput[ 2 ] =
+        arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
+
+      /* I win 100% normal/gammons/backgammons */
+      arOutput[ fResigned - 1 ] = 1.0;
+
+      InvertEvaluation ( arOutput );
       
-      if( -fResigned <= Utility ( arOutput, &ci ) ) {
+      rEqAfter = -Utility ( arOutput, &ci );
+
+      /*
+      printf ("equity before resignation: %7.3f\n"
+              "equity after resignation : %7.3f\n",
+              rEqBefore, rEqAfter );
+      */
+
+      fComputerDecision = TRUE;
+
+      if( rEqAfter >= rEqBefore ) {
         CommandAgree( NULL );
         return 0;
       } else {
@@ -836,11 +858,11 @@ extern void CommandDecline( char *sz ) {
 	return;
     }
 
-    fResigned = FALSE;
-
     if( fDisplay )
 	outputf( "%s declines the %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
+
+    fResigned = FALSE;
 
     TurnDone();
 }

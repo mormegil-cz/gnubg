@@ -1,3 +1,10 @@
+Wed Oct 25 17:45:55 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* play.c (ComputerTurn): resignations are now correct for 
+	match play. 
+	* play.c (CommandDecline): move `fResigned  = FALSE' statement,
+        otherwise `outputf' will print junk (fResigned - 1 = -1).
+
 Wed Oct 25 10:19:32 2000  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (HandleCommand): Process ":" as a Guile escape, if
