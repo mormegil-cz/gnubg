@@ -1,3 +1,7 @@
+Wed Nov 03 20:07:45 2004   Oystein Johansen <oystein@gnubg.org>
+
+	* gtkchequer.c (CreateMoveList): Use NULL instead of ""
+
 Wed Nov 03 09:15:45 2004   Oystein Johansen <oystein@gnubg.org>
 
 	* i18n.h: reenter #include "config.h"

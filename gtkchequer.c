@@ -843,7 +843,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     static char *aszTitle[] = {
 	N_("Rank"), 
         N_("Type"), 
-	"", 
+	NULL, 
         N_("Diff."), 
         N_("Move")
     };
