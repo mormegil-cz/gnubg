@@ -1049,8 +1049,8 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
     return placed;
 }
 
-/* jsc: Special version :( of board_point which only looks for point
-   0-27 and also allows clicking on a small border and all bearoff trays */
+/* jsc: Special version :( of board_point which also allows clicking on a
+   small border and all bearoff trays */
 static int board_point_with_border( GtkWidget *board, BoardData *bd, 
 				    int x0, int y0 ) {
     int i, x, y, cx, cy, xCube, yCube;
@@ -1060,6 +1060,11 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
     
     /* Similar to board_point, but adds the nasty y-=3 cy+=3 border
        allowances */
+    
+    if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], 7, 7 ) ||
+	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
+	return POINT_DICE;
+    
     for( i = 0; i < 30; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
 
@@ -1200,6 +1205,9 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
         update_pipcount ( bd, points );
     } else if( !dragging && n == POINT_CUBE ) {
 	GTKSetCube( NULL, 0, NULL );
+	return;
+    } else if( !dragging && n == POINT_DICE ) {
+	GTKSetDice( NULL, 0, NULL );
 	return;
     }
     
@@ -1365,7 +1373,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
-		board_beep( bd );
+		GTKSetDice( NULL, 0, NULL );
 	    else if( event->button.button == 1 )
 		Confirm( bd );
 	    else {

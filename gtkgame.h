@@ -128,6 +128,7 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC );
 extern void GTKSaveSettings( void );
 extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw );
+extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
 extern void 
 GTKShowPath( void );

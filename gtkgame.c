@@ -652,7 +652,7 @@ extern int GTKGetManualDice( int an[ 2 ] ) {
     return an[ 0 ] ? 0 : -1;
 }
 
-static void SetDice( gpointer *p, guint n, GtkWidget *pw ) {
+extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw ) {
 
     int an[ 2 ];
     char sz[ 13 ]; /* "set dice x y" */
@@ -2103,7 +2103,7 @@ extern int InitGTK( int *argc, char ***argv ) {
           Command, CMD_PREV_GAME, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Set cube..."), NULL, GTKSetCube, 0, NULL },
-	{ N_("/_Game/Set _dice..."), NULL, SetDice, 0, NULL },
+	{ N_("/_Game/Set _dice..."), NULL, GTKSetDice, 0, NULL },
 	{ N_("/_Game/Set _turn"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Game/Set turn/0"), 
           NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
