@@ -493,6 +493,8 @@ extern void CommandExportHTMLImages( char *sz ) {
 		WRITE( auchMidBoard, 36 * s * 3, 36 * s, 6 * s );
 	    }
     }
+
+    ProgressEnd ();
     
 #else
     outputl( _("This installation of GNU Backgammon was compiled without\n"
