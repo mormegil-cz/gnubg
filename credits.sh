@@ -18,6 +18,7 @@ cat > AUTHORS <<'EOF'
 EOF
 
 cat > $contributors <<'EOF'
+Elias Kritikos
 Kazuaki Asai
 Eric Augustine
 Erik Barfoed
