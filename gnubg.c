@@ -3662,6 +3662,8 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 
 static void usage( char *argv0 ) {
 
+#if USE_GUI
+
     printf(
 "Usage: %s [options] [saved-game-file]\n"
 "Options:\n"
@@ -3671,16 +3673,29 @@ static void usage( char *argv0 ) {
 "  -h, --help                Display usage and exit\n"
 "  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
-#if USE_GUI
 "  -t, --tty                 Start on tty instead of using window system\n"
-#endif
 "  -v, --version             Show version information and exit\n"
-#if USE_GUI
 "  -w, --window-system-only  Ignore tty input when using window system\n"
-#endif
 "\n"
 "For more information, type `help' from within gnubg.\n"
 "Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
+#else
+
+    printf(
+"Usage: %s [options] [saved-game-file]\n"
+"Options:\n"
+"  -b, --no-bearoff          Do not use bearoff database\n"
+"  -d DIR, --datadir DIR     Read database and weight files from direcotry "
+"DIR\n"
+"  -h, --help                Display usage and exit\n"
+"  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
+"  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
+"  -v, --version             Show version information and exit\n"
+"\n"
+"For more information, type `help' from within gnubg.\n"
+"Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
+#endif
+
 }
 
 static void version( void ) {

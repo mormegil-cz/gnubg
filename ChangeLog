@@ -1,3 +1,8 @@
+Sun Jul 15 17:24:57 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gnubg.c (usage)  Bugfix for macro printf in gcc 3.0.
+        Reported by Corrin Lakeland.
+ 
 Mon Jun 18 10:54:57 2001  Gary Wong  <gtw@research.att.com>
 
 	* postscript.c (CommandExportGamePDF, CommandExportMatchPDF): New
