@@ -1,3 +1,7 @@
+Sun Mar 23 19:28:43 2003  Oystein Johansen <oystein@gnubg.org>
+
+        * gnubg.c: TextToClipboard: Fix bug from 14/03
+
 Fri Mar 21 11:12:58 2003  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c: Initialise new members in matchstate struct (otherwise

@@ -7537,19 +7537,19 @@ Convert ( const char *sz,
 extern void
 TextToClipboard( const char *sz ) {
 
+#if WIN32
+  WinCopy ( sz );
+#else
+  
 #if USE_GTK
   if ( fX ) {
     GTKTextToClipboard( sz );
     return;
   }
 #else
-#  if WIN32
-  WinCopy ( sz );
-#  else
   /* no clipboard: just write string */
   outputl( sz );
-#  endif
 #endif
-
+#endif
 
 }
