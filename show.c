@@ -35,6 +35,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
+#include "export.h"
 #include "dice.h"
 #include "matchequity.h"
 #include "matchid.h"
@@ -1221,3 +1222,79 @@ extern void CommandShowMarketWindow ( char * sz ) {
 }
 
 
+extern void
+CommandShowExport ( char *sz ) {
+
+  int i;
+
+#if USE_GTK && 0
+  if( fX ) {
+    GTKExportSettings(); 
+    return;
+  }
+#endif
+
+  outputf ( "\n" 
+            "Export settings: \n\n"
+            "WARNING: not all settings are honoured in the export!\n"
+            "         Do not expect to much!\n\n"
+            "Include: \n\n"
+            "- annotations\r\t\t\t\t: %s\n" 
+            "- analysis   \r\t\t\t\t: %s\n"
+            "- statistics \r\t\t\t\t: %s\n"
+            "- legend     \r\t\t\t\t: %s\n\n",
+            exsExport.fIncludeAnnotation ? "yes" : "no",
+            exsExport.fIncludeAnalysis ? "yes" : "no",
+            exsExport.fIncludeStatistics ? "yes" : "no",
+            exsExport.fIncludeLegend ? "yes" : "no" );
+
+  outputl ( "Show: \n" );
+  if ( ! exsExport.fDisplayBoard )
+    outputl ( "- board\r\t\t\t\t: never" );
+  else
+    outputf ( "- board\r\t\t\t\t: on every %d move\n", 
+              exsExport.fDisplayBoard );
+
+  if ( exsExport.fSide < 0 )
+    outputl ( "- players\r\t\t\t\t: both" );
+  else
+    outputf ( "- player\r\t\t\t\t: %s\n", 
+              ap[ exsExport.fSide ].szName );
+
+  outputl ( "\nOutput moves:\n" );
+
+  outputf ( "- show at most\r\t\t\t\t: %d moves\n", 
+            exsExport.nMoves );
+
+  for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+    if ( i == SKILL_NONE ) 
+      outputf ( "- unmarked moves\r\t\t\t\t: %s\n",
+                exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+    else
+      outputf ( "- marked '%s'\r\t\t\t\t: %s\n",
+                aszSkillType[ i ], 
+                exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+  }
+
+  outputl ( "\nOutput cube decisions:\n" );
+
+  for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+    if ( i == SKILL_NONE )
+      outputf ( "- unmarked cube decisions\r\t\t\t\t: %s\n",
+                exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+    else
+      outputf ( "- marked '%s'\r\t\t\t\t: %s\n",
+                aszSkillType[ i ], 
+                exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
+  }
+  
+  outputf ( "- actual cube decisions\r\t\t\t\t: %s\n",
+            exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ? "yes" : "no" );
+  outputf ( "- missed doubles\r\t\t\t\t: %s\n",
+            exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? "yes" : "no" );
+  outputf ( "- close cube decisions\r\t\t\t\t: %s\n",
+            exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
+
+  outputl ( "\n" );
+
+}
