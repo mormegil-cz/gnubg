@@ -1,3 +1,28 @@
+Wed May 23 17:01:03 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* analysis.c (AnalyzeGame): evaltype is now in evalsetup. Also,
+	use new routine for cube decisions.
+
+	* gnubg.c (FormatCubePosition): new function. Returns nicely
+	formatted string a la: "Player gnubg owns 47-cube". 
+
+	* eval.c: use the new better/faster EvaluatePositionCubeful2.
+
+	* eval.c (GeneralEvaluation, GeneralEvaluationE,
+	GeneralEvaluationR, GeneralCubeDecision, GeneralCubeDecisionE,
+	GeneralCubeDecisionR): new functions.
+
+	* gtkgame.c (GTKRolloutUpdate): can now handle cube decision
+	rollouts.
+	
+	* latex.c, gnubg.c, eval.c, set.c, show.c, sgf.c, gtkgame.c,
+	play.c: evaltype moved into evalsetup. 	
+
+	* rollout.c (Rollout): Changed call to GTKRolloutUpdate.
+	* rollout.c (BasicCubefulRollout): use new function
+	GeneralCubeDecisionE. And a few bugfixes.
+
+	
 Wed May 23 11:01:46 2001  Gary Wong  <gtw@research.att.com>
 
 	* postscript.c: New file.

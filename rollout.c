@@ -684,7 +684,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   double aarVariance[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
 #endif
   
->>>>>>> 1.32
   int i, j, ici;
   int anBoardOrig[ 2 ][ 25 ];
 
