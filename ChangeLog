@@ -1,3 +1,9 @@
+Mon Sep 23 22:39:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (printHTMLBoardBBS): use c_center.gif and c_blank.gif
+	for centered and non-centered cube, respectively
+	(report by Ian Shaw)
+
 Mon Sep 23 22:23:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix problem with color names in HTML export.

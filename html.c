@@ -526,12 +526,10 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   /* center cube */
 
-  if ( pms->fCubeOwner == -1 ) {
-    sprintf ( sz, "c_ce_%d", pms->nCube );
-    printImage ( pf, szImageDir, sz, szExtension, NULL );
-  }    
+  if ( pms->fCubeOwner == -1 )
+    printImage ( pf, szImageDir, "c_center", szExtension, NULL );
   else
-    printImage ( pf, szImageDir, "c_ce_0", szExtension, NULL );
+    printImage ( pf, szImageDir, "c_blank", szExtension, NULL );
 
   fputs ( "<br />\n", pf );
 
