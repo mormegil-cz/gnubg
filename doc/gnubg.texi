@@ -57,6 +57,8 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 
 GNU Backgammon (@gnubg{}) plays and analyses backgammon games and matches. 
 
+FIXME update this section (latest version is on web page).
+
 It is currently a work-in-progress.  So far it is able to play cubeless
 games and tournament matches, evaluate and roll out positions, tune its
 own evaluation functions using either TD or supervised training,

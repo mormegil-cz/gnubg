@@ -1373,6 +1373,9 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     
 		if( cMoves < 4 )
 		    pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;
+
+		pml->amMoves[ i ].cMoves = cMoves;
+		pml->amMoves[ i ].cPips = cPip;
 	    }
 	    
 	    return;

@@ -84,12 +84,6 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
-** The "partial move" code for the X board window doesn't quite work.
-  "set board IAAAgAAAAAAAAA" (one chequer on each 6 point), "set dice 6 1",
-  and try to bear off.  The move will be displayed as 6/off, but regarded
-  as incomplete (it doesn't realise the move is 6/5/off).
-** Bearing off in the X board window with a number more than is
-  necessary doesn't seem to work.
 ** Sam Pottle points out errors in the standard error calculation. (gary)
 
 * Documentation:

@@ -377,7 +377,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
 	    if( ( nDest <= 0 ) || ( nDest >= 25 ) )
 		/* bearing off */
-		nDest = pgd->fDragColour ? 26 : 27;
+		nDest = pgd->fDragColour > 0 ? 26 : 27;
 	    
 	    goto PlaceChequer;
 	}

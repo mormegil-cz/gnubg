@@ -52,7 +52,7 @@ static void ShowEvaluation( evalcontext *pec ) {
 
 static void ShowPaged( char **ppch ) {
 
-    int i, nRows = 0, ch;
+    int i, nRows = 0;
     char *pchLines;
 #if TIOCGWINSZ
     struct winsize ws;

@@ -1,3 +1,13 @@
+Thu Feb 17 20:10:10 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* xboard.c (BoardPointer): Fix test of pgd->fDragColour when using
+	button 2 or 3 to bear off (this didn't word for red).
+
+	* eval.c (SaveMoves): When fPartial is TRUE, and a later move using
+	more pips or moves is found to result in the same position as an
+	earlier one (which can happen bearing off the last chequer), update
+	the old move.
+
 Wed Feb 16 14:48:16 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (GenerateKeywords) [HAVE_LIBREADLINE, X_DISPLAY_MISSING]: Set
