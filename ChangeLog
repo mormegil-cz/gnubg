@@ -1,3 +1,10 @@
+Thu Aug  7 19:29:35 2003  Joern Thyssen  <jth@gnubg.org>
+
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): don't show relative fibs rating
+	for p>1 or p<0.
+	(reported by Kees Van Doel)
+
 Wed Aug  6 20:24:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* configure.in, configure: ensure $host is known by envoking

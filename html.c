@@ -3358,7 +3358,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     if ( pms->nMatchTo ) {
       float r = 0.5f + psc->arActualResult[ 0 ] - 
         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-      float rRating = relativeFibsRating( r, pms->nMatchTo );
 
       printStatTableRow( pf, 
                          _("Actual result"),
@@ -3375,10 +3374,19 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                          100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
                                    psc->arLuck[ 1 ][ 1 ] + 
                                    psc->arLuck[ 0 ][ 1 ] ) );
-      printStatTableRow( pf,
-                         _("Relative FIBS rating"),
-                         "%.2f",
-                         rRating / 2.0f, -rRating / 2.0f );
+
+      if ( r > 0.0f && r < 1.0f ) {
+        float rRating = relativeFibsRating( r, pms->nMatchTo );
+        printStatTableRow( pf,
+                           _("Relative FIBS rating"),
+                           "%.2f",
+                           rRating / 2.0f, -rRating / 2.0f );
+      }
+      else
+        printStatTableRow( pf,
+                           _("Relative FIBS rating"),
+                           "%s", _("n/a"), _("n/a") );
+
     }
     else {
 

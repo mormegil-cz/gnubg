@@ -1830,11 +1830,20 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 
     float r = 0.5f + psc->arActualResult[ 0 ] - 
       psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-    float rRating = relativeFibsRating( r, ms.nMatchTo );
 
-    sprintf ( strchr ( szOutput, 0 ),
-              "%-31s %7.2f                 %7.2f\n",
-              _("Relative FIBS rating"), rRating / 2.0f , -rRating / 2.0f );
+    if ( r > 0.0f && r < 1.0f ) {
+      float rRating = relativeFibsRating( r, ms.nMatchTo );
+
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s %7.2f                 %7.2f\n",
+                _("Relative FIBS rating"), rRating / 2.0f , -rRating / 2.0f );
+
+    }
+    else
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s %-7s                 %-7s\n",
+                _("Relative FIBS rating"), _("n/a"), _("n/a") );
+
 
   }
 
