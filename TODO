@@ -19,8 +19,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more statistics for rollouts (e.g. number of times each player hit,
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
-** Make cubeful rollouts work with variance reduction.  See Michael Zehr's
-  method for cube variance reduction in money games.
+** Make cubeful rollouts work with variance reduction.  (Also see Michael
+  Zehr's method for cube variance reduction in money games.)
 ** Add a cache for cubeful evaluations.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
