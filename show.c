@@ -210,9 +210,9 @@ extern void CommandShowAnalysis( char *sz ) {
 	     arLuckLevel[ LUCK_BAD ], arLuckLevel[ LUCK_VERYBAD ] );
 
     outputl( "\n"
-             "The analysis will be perform with the "
-             "following evaluation paremters:" );
-    outputl( "    Chequer play:" );
+               "Analysis will be performed with the "
+             "following evaluation parameters:" );
+  outputl( "    Chequer play:" );
     ShowEvalSetup ( &esAnalysisChequer );
     outputl( "    Cube decisions:" );
     ShowEvalSetup ( &esAnalysisCube );
