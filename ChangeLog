@@ -1,3 +1,8 @@
+Fri Oct 12 19:17:40 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gnubg.c (ExportGameJF): Bugfix / Further improvements for
+        resigned games.
+        
 Fri Oct 12 11:10:22 2001  Gary Wong  <gtw@research.att.com>
 
 	* drawboard.c (ParseMove): Sort the move into a sensible order

@@ -2367,8 +2367,8 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
 	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    SwapSides( anBoard );
-            if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
-              sz[ strlen(sz) - 1 ] = 0;
+         /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
+              sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
 	    break;
 	case MOVE_DOUBLE:
 	    sprintf( sz, " Doubles => %d", nFileCube <<= 1 );
@@ -2383,16 +2383,19 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	    if( anScore )
 		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
-	case MOVE_RESIGN:
-            sprintf( sz, "%sWins %d point%s\n", (i & 1) ? "\n      " :
-                     "                                  ",
-                     pmr->r.nResigned * nFileCube,
-                     ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : ""); 
-	    if( anScore )
-		anScore[ ( i + 1 ) & 1 ] += pmr->r.nResigned * nFileCube;
-	    /* FIXME how does JF do it? */
-	    /* FIXME adjust score */	    
-	    break;
+        case MOVE_RESIGN:
+            if (pmr->r.fPlayer)
+              sprintf( sz, "%s      Wins %d point%s\n", (i & 1) ? "\n" : "",
+                       pmr->r.nResigned * nFileCube,
+                       ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
+            else
+              sprintf( sz, "%sWins %d point%s\n", (i & 1) ? " " :
+                        "                                  ",
+                        pmr->r.nResigned * nFileCube,
+                        ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
+            if( anScore )
+                anScore[ !pmr->r.fPlayer ] += pmr->r.nResigned * nFileCube;
+            break;
 	case MOVE_SETDICE:
 	    /* ignore */
 	    break;
