@@ -84,6 +84,13 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
+** The "partial move" code for the X board window doesn't quite work.
+  "set board IAAAgAAAAAAAAA" (one chequer on each 6 point), "set dice 6 1",
+  and try to bear off.  The move will be displayed as 6/off, but regarded
+  as incomplete (it doesn't realise the move is 6/5/off).
+** Bearing off in the X board window with a number more than is
+  necessary doesn't seem to work.
+** Sam Pottle points out errors in the standard error calculation. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -97,6 +104,7 @@ duplication of effort and to make sure our changes merge easily.
   HTML formatted manual, and perhaps pages to submit training data,
   an online evaluator like Monte Carlo, maybe even an entire game like
   Motif.
+** Submit something to <http://www.distributed.net/nextgen/projects.html>.
 ** Allow loading and saving weights to specify binary or ASCII format.
 ** Allow annotating moves in matches.  It would be nice to be compatible
   with other formats (Snowie?  CBG?) but these are probably undocumented.
