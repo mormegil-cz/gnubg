@@ -187,7 +187,6 @@ static char szDICE[] = "<die> <die>",
     szMOVE[] = "<from> <to> ...",
     szONOFF[] = "on|off",
     szOPTCOMMAND[] = "[command]",
-    szOPTEMPHASIS[] = "[emphasis]",
     szOPTFILENAME[] = "[filename]",
     szOPTLIMIT[] = "[limit]",
     szOPTPOSITION[] = "[position]",
@@ -213,18 +212,24 @@ command acAnalyse[] = {
       "game in the session", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotate[] = {
-    { "bad", CommandAnnotateBad, "Mark a bad move", szOPTEMPHASIS, NULL },
+    { "bad", CommandAnnotateBad, "Mark a bad move", NULL, NULL },
     { "clear", CommandAnnotateClear, "Remove annotations from a move",
       NULL, NULL },
     { "doubtful", CommandAnnotateDoubtful, "Mark a doubtful move", NULL,
       NULL },
-    { "good", CommandAnnotateGood, "Mark a good move", szOPTEMPHASIS, NULL },
+    { "good", CommandAnnotateGood, "Mark a good move", NULL, NULL },
     { "interesting", CommandAnnotateInteresting, "Mark an interesting move",
       NULL, NULL },
-    { "lucky", CommandAnnotateLucky, "Mark a lucky dice roll", szOPTEMPHASIS,
-      NULL },
+    { "lucky", CommandAnnotateLucky, "Mark a lucky dice roll", NULL, NULL },
     { "unlucky", CommandAnnotateUnlucky, "Mark an unlucky dice roll",
-      szOPTEMPHASIS, NULL },
+      NULL, NULL },
+    { "verybad", CommandAnnotateVeryBad, "Mark a very bad move", NULL, NULL },
+    { "verygood", CommandAnnotateVeryGood, "Mark a very good move", NULL,
+      NULL },
+    { "verylucky", CommandAnnotateVeryLucky, "Mark a very lucky dice roll",
+      NULL, NULL },
+    { "veryunlucky", CommandAnnotateVeryUnlucky, "Mark an very unlucky dice "
+      "roll", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
@@ -2850,7 +2855,7 @@ extern int NextTurnNotify( event *pev, void *p )
 #endif
 {
 
-    NextTurn();
+    NextTurn( TRUE );
 
     ResetInterrupt();
 
@@ -3637,7 +3642,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    }
 
 	while( fNextTurn )
-	    NextTurn();
+	    NextTurn( TRUE );
 
 	ResetInterrupt();
     }

@@ -845,7 +845,7 @@ static void CreateAnnotationWindow( void ) {
 		       pwPaned = gtk_vpaned_new() );
     
     gtk_paned_add1( GTK_PANED( pwPaned ),
-		    pwAnalysis = gtk_label_new( "Analysis goes here" ) );
+		    pwAnalysis = gtk_label_new( NULL ) );
     
     gtk_paned_add2( GTK_PANED( pwPaned ),
 		    pwCommentary = gtk_text_new( NULL, NULL ) );
@@ -1134,6 +1134,43 @@ extern void GTKPopMoveRecord( moverecord *pmr ) {
     gtk_clist_thaw( pcl );
 }
 
+static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
+
+    static char *aszSkillCmd[ SKILL_VERYGOOD + 1 ] = {
+	"verybad", "bad", "doubtful", "clear", "interesting", "good",
+	"verygood"
+    };
+    char sz[ 64 ];
+    
+    sprintf( sz, "annotate %s", aszSkillCmd[ st ] );
+    UserCommand( sz );
+
+    GTKUpdateAnnotations();
+}
+
+static GtkWidget *SkillMenu( skilltype stSelect ) {
+
+    GtkWidget *pwMenu, *pwOptionMenu, *pwItem;
+    skilltype st;
+    
+    pwMenu = gtk_menu_new();
+    for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ ) {
+	gtk_menu_append( GTK_MENU( pwMenu ),
+			 pwItem = gtk_menu_item_new_with_label(
+			     aszSkillType[ st ] ? aszSkillType[ st ] : "" ) );
+	gtk_signal_connect( GTK_OBJECT( pwItem ), "activate",
+			    GTK_SIGNAL_FUNC( SkillMenuActivate ),
+			    GINT_TO_POINTER( st ) );
+    }
+    gtk_widget_show_all( pwMenu );
+    
+    pwOptionMenu = gtk_option_menu_new();
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), stSelect );
+
+    return pwOptionMenu;
+}
+
 static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
 				evalsetup *pes ) {
     cubeinfo ci;
@@ -1199,11 +1236,26 @@ static GtkWidget *TakeAnalysis( movetype mt, float arDouble[], evaltype et,
     return gtk_label_new( sz );
 }
 
-static GtkWidget *RollAnalysis( int n0, int n1, float rLuck, lucktype lt ) {
+static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
+
+    static char *aszLuckCmd[ LUCK_VERYGOOD + 1 ] = {
+	"veryunlucky", "unlucky", "clear", "lucky", "verylucky"
+    };
+    char sz[ 64 ];
+    
+    sprintf( sz, "annotate %s", aszLuckCmd[ lt ] );
+    UserCommand( sz );
+}
+
+static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
+				lucktype ltSelect ) {
 
     char sz[ 64 ], *pch;
     cubeinfo ci;
-
+    GtkWidget *pw = gtk_hbox_new( FALSE, 4 ), *pwMenu, *pwOptionMenu,
+	*pwItem;
+    lucktype lt;
+    
     pch = sz + sprintf( sz, "Rolled %d%d", n0, n1 );
     
     if( rLuck != -HUGE_VALF ) {
@@ -1217,18 +1269,35 @@ static GtkWidget *RollAnalysis( int n0, int n1, float rLuck, lucktype lt ) {
 	    pch += sprintf( pch, " (%+0.3f)", rLuck );
     }
 
-    if( aszLuckType[ lt ] )
-	sprintf( pch, " (%s)", aszLuckType[ lt ] );
+    gtk_box_pack_start( GTK_BOX( pw ), gtk_label_new( sz ), FALSE, FALSE, 4 );
+
+    pwMenu = gtk_menu_new();
+    for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
+	gtk_menu_append( GTK_MENU( pwMenu ),
+			 pwItem = gtk_menu_item_new_with_label(
+			     aszLuckType[ lt ] ? aszLuckType[ lt ] : "" ) );
+	gtk_signal_connect( GTK_OBJECT( pwItem ), "activate",
+			    GTK_SIGNAL_FUNC( LuckMenuActivate ),
+			    GINT_TO_POINTER( lt ) );
+    }
+    gtk_widget_show_all( pwMenu );
     
-    return gtk_label_new( sz );    
+    pwOptionMenu = gtk_option_menu_new();
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), ltSelect );
+    
+    gtk_box_pack_start( GTK_BOX( pw ), pwOptionMenu, FALSE, FALSE, 0 );
+
+    return pw;
 }
 
 static void SetAnnotation( moverecord *pmr ) {
 
-    GtkWidget *pwParent = pwAnalysis->parent, *pw;
+    GtkWidget *pwParent = pwAnalysis->parent, *pw, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
     static hintdata hd = { NULL, NULL, NULL, NULL, FALSE };
     list *pl;
+    char sz[ 64 ];
     
     /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext )
@@ -1268,6 +1337,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    fTurnOld = fTurn;
 	    
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    
 	    fMove = fTurn = pmr->n.fPlayer;
 	    
@@ -1275,12 +1345,23 @@ static void SetAnnotation( moverecord *pmr ) {
 				     &pmr->n.esDouble ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
+
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
+				0 );
 	    
-	    if( ( pw = RollAnalysis( pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
-				     pmr->n.rLuck, pmr->n.lt ) ) )
-		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
-				    4 );
-	    
+	    gtk_box_pack_start( GTK_BOX( pwBox ),
+				RollAnalysis( pmr->n.anRoll[ 0 ],
+					      pmr->n.anRoll[ 1 ],
+					      pmr->n.rLuck, pmr->n.lt ),
+				FALSE, FALSE, 4 );
+
+	    gtk_box_pack_end( GTK_BOX( pwBox ), SkillMenu( pmr->n.st ),
+			      FALSE, FALSE, 4 );
+	    strcpy( sz, "Moved " );
+	    FormatMove( sz + 6, anBoard, pmr->n.anMove );
+	    gtk_box_pack_end( GTK_BOX( pwBox ),
+			      gtk_label_new( sz ), FALSE, FALSE, 0 );
+			      
 	    if( pmr->n.ml.cMoves ) {
 		hd.pml = &pmr->n.ml;
 		hd.pw = pw = gtk_scrolled_window_new( NULL, NULL );
@@ -1304,14 +1385,50 @@ static void SetAnnotation( moverecord *pmr ) {
 	    break;
 
 	case MOVE_DOUBLE:
-	    pwAnalysis = CubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
-				       &pmr->d.esDouble );
+	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+	    
+	    if( ( pw = CubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
+				     &pmr->d.esDouble ) ) )
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
+				    FALSE, 0 );
+
+	    pwBox = gtk_hbox_new( FALSE, 0 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( "Double" ),
+				FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->d.st ),
+				FALSE, FALSE, 2 );
+
+	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
+				0 );
+
+	    gtk_container_add( GTK_CONTAINER( pwAlign ), pwBox );
+	    
 	    break;
 
 	case MOVE_TAKE:
 	case MOVE_DROP:
-	    pwAnalysis = TakeAnalysis( pmr->mt, pmr->d.arDouble,
-				       pmr->d.etDouble, &pmr->d.esDouble );
+	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+
+	    if( ( pw = TakeAnalysis( pmr->mt, pmr->d.arDouble,
+				     pmr->d.etDouble, &pmr->d.esDouble ) ) )
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
+				    FALSE, 0 );
+
+	    pwBox = gtk_hbox_new( FALSE, 0 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ),
+				gtk_label_new( pmr->mt == MOVE_TAKE ? "Take" :
+				    "Drop" ),
+				FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->d.st ),
+				FALSE, FALSE, 2 );
+
+	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
+				0 );
+
+	    gtk_container_add( GTK_CONTAINER( pwAlign ), pwBox );
+	    
 	    break;
 	    
 	case MOVE_SETDICE:
@@ -2510,7 +2627,8 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
     
     if( gs == GAME_NONE ) {
 	outputl( "No game in progress (type `new game' to start one)." );
-
+	outputx();
+	
 	return;
     }
     
@@ -2535,7 +2653,8 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
     
     if( gs == GAME_NONE ) {
 	outputl( "No game in progress (type `new game' to start one)." );
-
+	outputx();
+	
 	return;
     }
 
@@ -3305,11 +3424,6 @@ static void DestroyHint( gpointer p ) {
     free( phd->pml );
     
     pwHint = NULL;
-}
-
-static void SetHint( void ) {
-
-    /* FIXME enable/disable move/rollout buttons */
 }
 
 extern void GTKHint( movelist *pmlOrig ) {
