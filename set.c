@@ -820,12 +820,15 @@ CommandSetPlayerChequerplay( char *sz ) {
     szSetCommand = "player chequerplay ";
     pesSet = &ap[ iPlayerSet ].esChequer;
 
+    outputpostpone();
+    
     HandleCommand( sz, acSetEvalParam );
 
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	outputf( "(Note that this setting will have no effect until you "
 		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
 
+    outputresume();
 }
 
 
@@ -836,12 +839,15 @@ CommandSetPlayerCubedecision( char *sz ) {
     szSetCommand = "player cubedecision ";
     pesSet = &ap[ iPlayerSet ].esCube;
 
+    outputpostpone();
+    
     HandleCommand( sz, acSetEvalParam );
 
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	outputf( "(Note that this setting will have no effect until you "
 		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
 
+    outputresume();
 }
 
 
