@@ -268,7 +268,7 @@ static int BoardPoint( extwindow *pewnd, gamedata *pgd, int x0, int y0 ) {
 static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
     Pixmap pmSwap;
-    int nDest, xEvent, yEvent, nBar, fHit;
+    int n, nDest, xEvent, yEvent, nBar, fHit;
     
     switch( pxev->type ) {
     case ButtonPress:
@@ -286,7 +286,8 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
     switch( pxev->type ) {
     case ButtonPress:
 	if( ( pgd->nDragPoint = BoardPoint( pewnd, pgd, xEvent, yEvent ) ) < 0
-	    || !pgd->anBoard[ pgd->nDragPoint ] ) {
+	    || ( pgd->nDragPoint < 28 && !pgd->anBoard[ pgd->nDragPoint ] ) ) {
+	    /* Click on empty point, or not on a point at all */
 	    XBell( pewnd->pdsp, 100 );
 
 	    pgd->nDragPoint = -1;
@@ -295,17 +296,50 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	}
 
 	if( pgd->nDragPoint == 28 ) {
+	    /* Clicked on dice */
 	    pgd->nDragPoint = -1;
+	    
+	    if( pxev->xbutton.button == Button1 )
+		/* Button 1 on dice confirms move */
+		StatsConfirm( &pgd->ewndStats );
+	    else {
+		/* Other buttons on dice swaps positions */
+		n = pgd->anDice[ 0 ];
+		pgd->anDice[ 0 ] = pgd->anDice[ 1 ];
+		pgd->anDice[ 1 ] = n;
 
-	    StatsConfirm( &pgd->ewndStats );
+		n = pgd->anDiceOpponent[ 0 ];
+		pgd->anDiceOpponent[ 0 ] = pgd->anDiceOpponent[ 1 ];
+		pgd->anDiceOpponent[ 1 ] = n;
 
+		BoardRedrawDice( pewnd, pgd, 0 );
+		BoardRedrawDice( pewnd, pgd, 1 );
+		
+		pgd->nDragPoint = -1;
+	    }
+	    
 	    return;
 	}
 	
 	pgd->fDragColour = pgd->anBoard[ pgd->nDragPoint ] < 0 ? -1 : 1;
+	
 	pgd->anBoard[ pgd->nDragPoint ] -= pgd->fDragColour;
 
 	BoardExposePoint( pewnd, pgd, pgd->nDragPoint );
+
+	if( pxev->xbutton.button != Button1 ) {
+	    /* Automatically place chequer on destination point
+	       (as opposed to starting a drag) */
+	    nDest = pgd->nDragPoint - ( pxev->xbutton.button == Button2 ?
+					pgd->anDice[ 0 ] :
+					pgd->anDice[ 1 ] ) * pgd->fDragColour;
+
+	    if( ( nDest < 0 ) || ( nDest > 25 ) )
+		/* bearing off */
+		nDest = pgd->fDragColour ? 26 : 27;
+	    
+	    goto PlaceChequer;
+	}
 	
 	pgd->xDrag = xEvent;
 	pgd->yDrag = yEvent;
@@ -364,15 +398,15 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	if( pgd->nDragPoint < 0 )
 	    break;
 	
-	nBar = pgd->fDragColour == pgd->fColour ? 25 - pgd->nBar : pgd->nBar;
-	    
 	XCopyArea( pewnd->pdsp, pgd->pmSaved, pewnd->wnd, pgd->gcCopy,
 		   0, 0, 6 * pgd->nBoardSize, 6 * pgd->nBoardSize,
 		   pgd->xDrag - 3 * pgd->nBoardSize,
 		   pgd->yDrag - 3 * pgd->nBoardSize );
 
 	nDest = BoardPoint( pewnd, pgd, xEvent, yEvent );
-
+    PlaceChequer:
+	nBar = pgd->fDragColour == pgd->fColour ? 25 - pgd->nBar : pgd->nBar;
+	    
 	if( nDest == -1 || ( pgd->fDragColour > 0 ? pgd->anBoard[ nDest ] < -1 :
 			     pgd->anBoard[ nDest ] > 1 ) || nDest == nBar ||
 	    nDest > 27 ) {

@@ -1,3 +1,9 @@
+Wed Dec 15 19:48:10 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* xboard.c (BoardPointer): Allow clicking Button2 or Button3 on
+	chequers to move pieces the number of pips showing on the dice,
+	and clicking Button2 or Button3 on the dice to swap the dice.
+
 Wed Dec 15 15:25:23 1999  Joern Thyssen  <joern@thyssen.nu>
 
         * userrng.c: New file. Template for a user supplied RNG,
