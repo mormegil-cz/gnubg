@@ -57,7 +57,7 @@ static randctx rc;
 
 /* aaanPositions[Clockwise][x][point number][x, y. deltay] */
 int positions[ 2 ][ 30 ][ 3 ] = { {
-    { BAR_X, BAR_Y_0, CHEQUER_HEIGHT + 1 },      /* bar - player 0 */
+    { BAR_X, BAR_Y_0, CHEQUER_HEIGHT },      /* bar - player 0 */
     { POINT_X(1),  TOP_POINT_Y,  CHEQUER_HEIGHT }, 
     { POINT_X(2),  TOP_POINT_Y,  CHEQUER_HEIGHT }, 
     { POINT_X(3),  TOP_POINT_Y,  CHEQUER_HEIGHT }, 
@@ -82,13 +82,13 @@ int positions[ 2 ][ 30 ][ 3 ] = { {
     { POINT_X(22), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
     { POINT_X(23), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
     { POINT_X(24), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
-    { BAR_X, BAR_Y_1, -(CHEQUER_HEIGHT + 1) },        /* bar player 1 */
+    { BAR_X, BAR_Y_1, -(CHEQUER_HEIGHT) },        /* bar player 1 */
     { BEAROFF_RIGHT_X, TOP_POINT_Y,  CHEQUER_WIDTH }, /* player 0 tray right */
     { BEAROFF_RIGHT_X, BOT_POINT_Y, -CHEQUER_WIDTH }, /* player 0 tray right */
     { BEAROFF_LEFT_X, TOP_POINT_Y,  CHEQUER_WIDTH },  /* player 0 tray left */
     { BEAROFF_LEFT_X, BOT_POINT_Y, -CHEQUER_WIDTH }   /* player 1 tray left */
 }, {
-    { BAR_X, BAR_Y_0, CHEQUER_HEIGHT + 1 },      /* bar - player 0 */
+    { BAR_X, BAR_Y_0, CHEQUER_HEIGHT },      /* bar - player 0 */
     { POINT_X(12), TOP_POINT_Y,  CHEQUER_HEIGHT }, 
     { POINT_X(11), TOP_POINT_Y,  CHEQUER_HEIGHT }, 
     { POINT_X(10), TOP_POINT_Y,  CHEQUER_HEIGHT }, 
@@ -113,7 +113,7 @@ int positions[ 2 ][ 30 ][ 3 ] = { {
     { POINT_X(15), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
     { POINT_X(14), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
     { POINT_X(13), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
-    { BAR_X, BAR_Y_1, -(CHEQUER_HEIGHT + 1) },        /* bar player 1 */
+    { BAR_X, BAR_Y_1, -(CHEQUER_HEIGHT) },        /* bar player 1 */
     { BEAROFF_LEFT_X, TOP_POINT_Y,  CHEQUER_WIDTH },  /* player 0 tray left */
     { BEAROFF_LEFT_X, BOT_POINT_Y, -CHEQUER_WIDTH },  /* player 1 tray left */
     { BEAROFF_RIGHT_X, TOP_POINT_Y,  CHEQUER_WIDTH }, /* player 0 tray right */

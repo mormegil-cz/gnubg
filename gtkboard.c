@@ -1253,7 +1253,13 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 	cx /= rdAppearance.nSize;
 	cy /= rdAppearance.nSize;
 
-	if( y < 6 * CHEQUER_HEIGHT )
+	/* Adjusted bear-off y slightly (i == 0 and 25) */
+	if (y < 6 * CHEQUER_HEIGHT)
+	{
+		if (i > 0)
+			y -= (BORDER_HEIGHT);
+	}
+	if (i == 25)
 	  y -= (BORDER_HEIGHT);
 
 	cy += BORDER_HEIGHT;
@@ -1635,33 +1641,33 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	    /* Clicked on cube; double. */
 	    bd->drag_point = -1;
 	    
-            if(editing)
-              GTKSetCube(NULL, 0, NULL);
-            else if (bd->doubled) {
-              switch( event->button ) {
-              case 1:
-                /* left */
-                UserCommand( "take" );
-                break;
-              case 2:
-                /* center */
-                if ( ! bd->match_to )
-                  UserCommand( "redouble" );
-                else
-                  UserCommand( "take" );
-                break;
-              case 3:
-              default:
-                /* right */
-                UserCommand( "drop" );
-                break;
+		if(editing)
+		  GTKSetCube(NULL, 0, NULL);
+		else if (bd->doubled) {
+		  switch( event->button ) {
+		  case 1:
+			/* left */
+			UserCommand( "take" );
+			break;
+		  case 2:
+			/* center */
+			if ( ! bd->match_to )
+			  UserCommand( "redouble" );
+			else
+			  UserCommand( "take" );
+			break;
+		  case 3:
+		  default:
+			/* right */
+			UserCommand( "drop" );
+			break;
 
-              }
-            }
-            else
-              UserCommand("double");
-	    
-	    return TRUE;
+		  }
+		}
+		else
+		  UserCommand("double");
+
+		return TRUE;
 
 	case POINT_RESIGN:
 #if USE_BOARD3D
