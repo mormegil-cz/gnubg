@@ -1,7 +1,7 @@
 if USE_EXT
-SUBDIRS = lib doc ext
+SUBDIRS = lib doc ext met
 else
-SUBDIRS = lib doc
+SUBDIRS = lib doc met
 endif
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
@@ -13,7 +13,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h
-COMMON_DEPS = lib/libevent.a
+COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
 
@@ -43,9 +43,6 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
 
-if XML_MANUAL
-noinst_DATA = gnubg.xml texinfo.dtd
-endif
 pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
 man_MANS = gnubg.6
@@ -65,8 +62,6 @@ makeweights_DEPENDENCIES = lib/libevent.a
 erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
-distcheck-hook:
-	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
@@ -83,31 +78,39 @@ credits.c AUTHORS: credits.sh
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
 
+# Create symlinks to all the necessary parts of $(srcdir), so that gnubg
+# can run happily in the build directory.
+all-local:
+	@for i in gnubg.bd gnubg.gtkrc gnubg.scm gnubg.weights; do \
+	[ -s $$i ] || if [ -s $(srcdir)/$$i ]; then $(LN_S) $(srcdir)/$$i .; \
+	fi; done
+	@for i in gnubg.xml annealing.png rulfig1.png rulfig2.png rulfig3.png \
+	rulfig4.png rulfig5.png texinfo.dtd; do [ -s $$i ] || \
+	if [ -s $(srcdir)/doc/$$i ]; then $(LN_S) $(srcdir)/doc/$$i .; fi; done
+
 gnubg.bd:
-	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
-	$(LN_S) $(srcdir)/gnubg.bd $@; else $(MAKE) bd.message; fi
-
-gnubg.gtkrc:
-	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.gtkrc ]; then \
-	$(LN_S) $(srcdir)/gnubg.gtkrc $@; fi
-
-## doc/Makefile.am takes care of building the manual, but we want a symlink
-## to the XML version if we can get it, so that the online manual works
-## without "make install".
-gnubg.xml:
-	@[ -s $@ ] || if [ -s $(srcdir)/doc/gnubg.xml ]; then \
-	$(LN_S) $(srcdir)/doc/gnubg.xml $(srcdir)/doc/annealing.png \
-	$(srcdir)/doc/rulfig[1-5].png .; fi
-
-texinfo.dtd:
-	@[ -s $@ ] || if [ -s $(srcdir)/doc/texinfo.dtd ]; then \
-	$(LN_S) $(srcdir)/doc/texinfo.dtd $@; fi
-
-bd.message:
 	@echo ' ** NOTE: For full strength in bearoff moves, GNU'
 	@echo ' ** Backgammon requires a "gnubg.bd" file containing a'
 	@echo ' ** database of endgame positions.  See the README'
 	@echo ' ** file for details.'
+
+gnubg.weights:
+	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
+	@echo ' ** a "gnubg.weights" file containing neural net'
+	@echo ' ** parameters.  See the README file for details.'
+
+if CROSS_COMPILING
+gnubg.wd: gnubg.weights makeweights
+	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+	@echo ' ** it is not possible to generate the gnubg.wd file'
+	@echo ' ** on the build system.  To create this file manually,'
+	@echo ' ** use a command like:'
+	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
+	@echo ' ** on the host system.'
+else
+gnubg.wd: gnubg.weights makeweights
+	-./makeweights < $< > $@
+endif
 
 if CROSS_COMPILING
 bearoff-database: makebearoff
@@ -122,29 +125,6 @@ bearoff-database: makebearoff
 	./makebearoff > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
 endif
 
-.PHONY: bd.message bearoff-database
-
-weights.message:
-	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
-	@echo ' ** a "gnubg.weights" file containing neural net'
-	@echo ' ** parameters.  See the README file for details.'
-
-.PHONY: weights.message
-
-gnubg.weights:
-	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
-
-if CROSS_COMPILING
-gnubg.wd: gnubg.weights makeweights
-	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
-	@echo ' ** it is not possible to generate the gnubg.wd file'
-	@echo ' ** on the build system.  To create this file manually,'
-	@echo ' ** use a command like:'
-	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
-	@echo ' ** on the host system.'
-else
-gnubg.wd: gnubg.weights makeweights
-	-./makeweights < $(srcdir)/gnubg.weights > $@
-endif
+.PHONY: bearoff-database
 
 .DELETE_ON_ERROR:

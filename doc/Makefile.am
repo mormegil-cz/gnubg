@@ -7,7 +7,7 @@ endif
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
-	annealing.gp annealing.txt fdl.texi
+	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd
 SUFFIXES = .png .eps .texi .html .txt .xml
 EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
 	annealing.eps

@@ -244,8 +244,8 @@ functions:
 ** GtkTexi should try to load images from the same directory as the XML file.
 ** GTK+ 2.0 wants strings in UTF-8.  Unfortunately SGF files are specified
   to be ISO 8859-1, and the terminal is locale-dependent. (gary)
-** Should InitMatchEquity() look in PKGDATADIR as well as . if given a
-  relative file name?
+** Should InitMatchEquity() look in PKGDATADIR and/or PKGDATADIR/met/ as well
+  as . (and even ./met/) if given a relative file name?
 ** Under GTK+ 2.0, the status bar and/or progress bar request slightly
   different sizes when they have text in them, and the window rearranges
   itself to suit... yuck.

@@ -79,14 +79,14 @@ PNMTOPS = @PNMTOPS@
 RANLIB = @RANLIB@
 TR = @TR@
 VERSION = @VERSION@
-@USE_EXT_TRUE@SUBDIRS = lib doc ext
-@USE_EXT_FALSE@SUBDIRS = lib doc
+@USE_EXT_TRUE@SUBDIRS = lib doc ext met
+@USE_EXT_FALSE@SUBDIRS = lib doc met
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @LIBXML2_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c dice.c dice.h 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c         guile.h import.c import.h external.c external.h credits.c latex.c 	postscript.c html.c export.h
 
-COMMON_DEPS = lib/libevent.a
+COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
 @USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
@@ -102,7 +102,6 @@ bin_PROGRAMS = gnubg
 @USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
-@XML_MANUAL_TRUE@noinst_DATA = gnubg.xml texinfo.dtd
 pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
 man_MANS = gnubg.6
@@ -112,7 +111,7 @@ check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c 	pub_eval.c matchequity.c
 
-makebearoff_LDADD = -Llib -levent
+makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 makeweights_SOURCES = makeweights.c
@@ -180,7 +179,7 @@ man6dir = $(mandir)/man6
 MANS = $(man_MANS)
 
 NROFF = nroff
-DATA =  $(noinst_DATA) $(pkgdata_DATA)
+DATA =  $(pkgdata_DATA)
 
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
 Makefile.am Makefile.in NEWS TODO acconfig.h acinclude.m4 aclocal.m4 \
@@ -192,7 +191,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DIST_SUBDIRS =  lib doc ext lib doc
+DIST_SUBDIRS =  lib doc ext met lib doc met
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
 .deps/database.P .deps/dice.P .deps/drawboard.P .deps/erf.P \
 .deps/erftest.P .deps/eval.P .deps/external.P .deps/gdkgetrgb.P \
@@ -485,7 +484,7 @@ distcheck: dist
 	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
@@ -618,7 +617,7 @@ install-am: all-am
 install: install-recursive
 uninstall-am: uninstall-binPROGRAMS uninstall-man uninstall-pkgdataDATA
 uninstall: uninstall-recursive
-all-am: Makefile $(PROGRAMS) $(MANS) $(DATA) config.h
+all-am: Makefile $(PROGRAMS) $(MANS) $(DATA) config.h all-local
 all-redirect: all-recursive-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
@@ -689,12 +688,10 @@ mostlyclean-depend distclean-depend clean-depend \
 maintainer-clean-depend check-TESTS info-am info dvi-am dvi check \
 check-am installcheck-am installcheck all-recursive-am install-exec-am \
 install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs-am \
+uninstall-am uninstall all-local all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
-distcheck-hook:
-	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y
@@ -708,28 +705,36 @@ credits.c AUTHORS: credits.sh
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
 
+# Create symlinks to all the necessary parts of $(srcdir), so that gnubg
+# can run happily in the build directory.
+all-local:
+	@for i in gnubg.bd gnubg.gtkrc gnubg.scm gnubg.weights; do \
+	[ -s $$i ] || if [ -s $(srcdir)/$$i ]; then $(LN_S) $(srcdir)/$$i .; \
+	fi; done
+	@for i in gnubg.xml annealing.png rulfig1.png rulfig2.png rulfig3.png \
+	rulfig4.png rulfig5.png texinfo.dtd; do [ -s $$i ] || \
+	if [ -s $(srcdir)/doc/$$i ]; then $(LN_S) $(srcdir)/doc/$$i .; fi; done
+
 gnubg.bd:
-	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
-	$(LN_S) $(srcdir)/gnubg.bd $@; else $(MAKE) bd.message; fi
-
-gnubg.gtkrc:
-	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.gtkrc ]; then \
-	$(LN_S) $(srcdir)/gnubg.gtkrc $@; fi
-
-gnubg.xml:
-	@[ -s $@ ] || if [ -s $(srcdir)/doc/gnubg.xml ]; then \
-	$(LN_S) $(srcdir)/doc/gnubg.xml $(srcdir)/doc/annealing.png \
-	$(srcdir)/doc/rulfig[1-5].png .; fi
-
-texinfo.dtd:
-	@[ -s $@ ] || if [ -s $(srcdir)/doc/texinfo.dtd ]; then \
-	$(LN_S) $(srcdir)/doc/texinfo.dtd $@; fi
-
-bd.message:
 	@echo ' ** NOTE: For full strength in bearoff moves, GNU'
 	@echo ' ** Backgammon requires a "gnubg.bd" file containing a'
 	@echo ' ** database of endgame positions.  See the README'
 	@echo ' ** file for details.'
+
+gnubg.weights:
+	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
+	@echo ' ** a "gnubg.weights" file containing neural net'
+	@echo ' ** parameters.  See the README file for details.'
+
+@CROSS_COMPILING_TRUE@gnubg.wd: gnubg.weights makeweights
+@CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+@CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the gnubg.wd file'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the build system.  To create this file manually,'
+@CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
+@CROSS_COMPILING_TRUE@	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
+@CROSS_COMPILING_FALSE@gnubg.wd: gnubg.weights makeweights
+@CROSS_COMPILING_FALSE@	-./makeweights < $< > $@
 
 @CROSS_COMPILING_TRUE@bearoff-database: makebearoff
 @CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
@@ -741,27 +746,7 @@ bd.message:
 @CROSS_COMPILING_FALSE@bearoff-database: makebearoff
 @CROSS_COMPILING_FALSE@	./makebearoff > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
 
-.PHONY: bd.message bearoff-database
-
-weights.message:
-	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
-	@echo ' ** a "gnubg.weights" file containing neural net'
-	@echo ' ** parameters.  See the README file for details.'
-
-.PHONY: weights.message
-
-gnubg.weights:
-	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
-
-@CROSS_COMPILING_TRUE@gnubg.wd: gnubg.weights makeweights
-@CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
-@CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the gnubg.wd file'
-@CROSS_COMPILING_TRUE@	@echo ' ** on the build system.  To create this file manually,'
-@CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
-@CROSS_COMPILING_TRUE@	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
-@CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
-@CROSS_COMPILING_FALSE@gnubg.wd: gnubg.weights makeweights
-@CROSS_COMPILING_FALSE@	-./makeweights < $(srcdir)/gnubg.weights > $@
+.PHONY: bearoff-database
 
 .DELETE_ON_ERROR:
 
