@@ -10776,7 +10776,7 @@ msgid ""
 "value (win/gammon/backgammon/...equity\n"
 msgstr ""
 "Rollouts können abbrechen, wenn das Verhältnis Standardabweichung/Wert kleiner "
-"als %5 für jeden Wert ist (Gewinn/Gammon/Backgammon/...Gewinnerwartung)\n"
+"als %5.4f für jeden Wert ist (Gewinn/Gammon/Backgammon/...Gewinnerwartung)\n"
 
 #: set.c:1690
 msgid "Chequer play in rollouts"
