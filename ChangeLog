@@ -1,3 +1,8 @@
+Tue Jun 18 15:31:41 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (PlayersPage,SetPlayer): separate widgets for 
+	chequerplay and cubedecisions.
+
 Mon Jun 17 19:56:33 CEST 2002  Achim Mueller <acepoint@deltacity.net>
 	Added doc/faq.texi and doc/faq.html
 	Using a modified version of texi2html --> is it neccesary to

@@ -4529,7 +4529,7 @@ static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
 typedef struct _playerswidget {
     int *pfOK;
     player *ap;
-    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEval[ 2 ],
+    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEvalCube[ 2 ], *apwEvalChequer[ 2 ],
 	*apwSocket[ 2 ], *apwExternal[ 2 ];
     char aszSocket[ 2 ][ 128 ];
 } playerswidget;
@@ -4540,7 +4540,10 @@ static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
 
     for( i = 0; i < 2; i++ ) {
 	gtk_widget_set_sensitive(
-	    ppw->apwEval[ i ], gtk_toggle_button_get_active(
+	    ppw->apwEvalCube[ i ], gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
+	gtk_widget_set_sensitive(
+	    ppw->apwEvalChequer[ i ], gtk_toggle_button_get_active(
 		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
 	gtk_widget_set_sensitive(
 	    ppw->apwExternal[ i ], gtk_toggle_button_get_active(
@@ -4552,6 +4555,8 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 
     GtkWidget *pwPage, *pw;
     static int aiRadioButton[ PLAYER_PUBEVAL + 1 ] = { 3, 0, 1, 2 };
+    GtkWidget *pwHBox;
+    GtkWidget *pwFrame;
 
     pwPage = gtk_vbox_new( FALSE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
@@ -4575,10 +4580,26 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
 			   _("GNU Backgammon") ) );
 
-    gtk_container_add( GTK_CONTAINER( pwPage ), ppw->apwEval[ i ] =
+    pwHBox = gtk_hbox_new ( FALSE, 4 );
+    gtk_container_add ( GTK_CONTAINER ( pwPage ), pwHBox );
+
+    pwFrame = gtk_frame_new ( _("Chequer play") );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
+
+    gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalChequer[ i ] =
 		       EvalWidget( &ppw->ap[ i ].esChequer.ec, NULL ) );
-    gtk_widget_set_sensitive( ppw->apwEval[ i ],
+    gtk_widget_set_sensitive( ppw->apwEvalChequer[ i ],
 			      ap[ i ].pt == PLAYER_GNU );
+
+    
+    pwFrame = gtk_frame_new ( _("Cube decisions") );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
+
+    gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalCube[ i ] =
+		       EvalWidget( &ppw->ap[ i ].esCube.ec, NULL ) );
+    gtk_widget_set_sensitive( ppw->apwEvalCube[ i ],
+			      ap[ i ].pt == PLAYER_GNU );
+
     
     gtk_container_add( GTK_CONTAINER( pwPage ),
 		       ppw->apwRadio[ i ][ 2 ] =
@@ -4633,7 +4654,8 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
 	    }
 	assert( j < 4 );
 
-	EvalOK( pplw->apwEval[ i ], pplw->apwEval[ i ] );
+	EvalOK( pplw->apwEvalChequer[ i ], pplw->apwEvalChequer[ i ] );
+	EvalOK( pplw->apwEvalCube[ i ], pplw->apwEvalCube[ i ] );
 
 	strcpyn( pplw->aszSocket[ i ], gtk_entry_get_text(
 	    GTK_ENTRY( pplw->apwSocket[ i ] ) ), 128 );
