@@ -109,7 +109,8 @@ static int ComputerTurn( void ) {
 	    }
 	  }
 	  
-	  RollDice( anDice );
+	  if ( ! anDice[ 0 ] )
+	    RollDice( anDice );
 
 	  if( fDisplay )
 	    ShowBoard();
@@ -137,7 +138,8 @@ static int ComputerTurn( void ) {
 	}
 	/* FIXME save move */
 	
-	RollDice( anDice );
+	if ( ! anDice[ 0 ] )
+	  RollDice( anDice );
 
 	if( fDisplay )
 	  ShowBoard();
