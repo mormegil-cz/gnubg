@@ -1,3 +1,10 @@
+Fri Jan 17 12:52:49 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_quick_edit): Allow clicking on dice area to
+	set dice (suggested by Nardy Pillards).
+	(key_press): Make clicking on the label chequer set
+	the appropriate player on roll.
+
 Fri Jan 17 12:08:43 2003  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (OptionsPages): Bug fixes for Crawford rule sensitivity

@@ -46,6 +46,7 @@ typedef enum _dialogtype {
 } dialogtype;
 
 extern GtkWidget *pwMain, *pwMenuBar;
+extern GtkTooltips *ptt;
 
 extern int fEndDelay;
 

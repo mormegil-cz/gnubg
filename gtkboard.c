@@ -24,7 +24,6 @@
 #endif
 
 #include <assert.h>
-#define GDK_ENABLE_BROKEN /* for gdk_image_new_bitmap */
 #include <gtk/gtk.h>
 #include <isaac.h>
 #include <math.h>
@@ -693,6 +692,11 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
 	return POINT_DICE;
     
+    if( intersects( x0, y0, 0, 0, 60, 33, 36, 6 ) )
+	return POINT_RIGHT;
+    else if( intersects( x0, y0, 0, 0, 12, 33, 36, 6 ) )
+	return POINT_LEFT;
+    
     for( i = 0; i < 30; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
 
@@ -834,7 +838,8 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
     } else if( !dragging && n == POINT_CUBE ) {
 	GTKSetCube( NULL, 0, NULL );
 	return;
-    } else if( !dragging && n == POINT_DICE ) {
+    } else if( !dragging && ( n == POINT_DICE || n == POINT_LEFT ||
+			      n == POINT_RIGHT ) ) {
 	GTKSetDice( NULL, 0, NULL );
 	return;
     }
@@ -1023,22 +1028,21 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
-	/* jsc: If playing, but not editing, and dice not rolled yet,
-	   this code handles rolling the dice if bottom player clicks
-	   the right side of the board, or the top player clicks the
-	   left side of the board (his/her right side).  */
-	if( bd->playing && 
-	    ( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) 
-	    && bd->dice[ 0 ] <= 0 ) {
-	    if( ( bd->drag_point == POINT_RIGHT && bd->turn == 1 ) ||
-		( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) ) {
+	/* If playing and dice not rolled yet, this code handles
+	   rolling the dice if bottom player clicks the right side of
+	   the board, or the top player clicks the left side of the
+	   board (his/her right side).  In edit mode, set the roll
+	   instead. */
+	if( bd->playing && bd->dice[ 0 ] <= 0 &&
+	    ( ( bd->drag_point == POINT_RIGHT && bd->turn == 1 ) ||
+	      ( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) ) ) {
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+		GTKSetDice( NULL, 0, NULL );
+	    else {
 		/* NB: the UserCommand() call may cause reentrancies,
 		   so it is vital to reset bd->drag_point first! */
 		bd->drag_point = -1;
 		UserCommand( "roll" );
-	    } else {
-		bd->drag_point = -1;
-		board_beep( bd );
 	    }
 	    
 	    return TRUE;
@@ -1050,6 +1054,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( ( bd->drag_point == POINT_RIGHT || 
 	      bd->drag_point == POINT_LEFT ) ) {
 	    bd->drag_point = -1;
+	    board_beep( bd );
 	    return TRUE;
 	}
 
@@ -2401,9 +2406,9 @@ static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
 }
 
 static gboolean key_press( GtkWidget *pw, GdkEvent *event,
-			   BoardData *bd ) {
+			   void *p ) {
 
-    BoardPreferences( bd->widget );
+    UserCommand( p ? "set turn 1" : "set turn 0" );
     
     return TRUE;
 }
@@ -2415,6 +2420,7 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
     GtkWidget *pw = gtk_event_box_new(), *pwImage;
     BoardData *bd = board->board_data;
     GdkPixmap *ppm;
+    char sz[ 128 ];
     
     ppm = bd->appmKey[ iPlayer ] = gdk_pixmap_new(
 	NULL, 20, 20, gtk_widget_get_visual( GTK_WIDGET( board ) )->depth );
@@ -2426,7 +2432,10 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
     gtk_widget_add_events( pw, GDK_BUTTON_PRESS_MASK );
     
     gtk_signal_connect( GTK_OBJECT( pw ), "button_press_event",
-			GTK_SIGNAL_FUNC( key_press ), bd );
+			GTK_SIGNAL_FUNC( key_press ), iPlayer ? pw : NULL );
+
+    sprintf( sz, _("Set player %d on roll."), iPlayer );
+    gtk_tooltips_set_tip( ptt, pw, sz, NULL );
 
     return pw;
 }
