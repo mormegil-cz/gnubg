@@ -6372,7 +6372,7 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
               ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 1, &sz ) ) ?
               sz : "" );
       
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s ", 
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s\n", 
               ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
               sz : "" );
       

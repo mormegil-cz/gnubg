@@ -1,3 +1,7 @@
+Mon Aug 12 13:54:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (StatcontextGetSelection): add newline.
+
 Sun Aug 11 18:22:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c: put all notebook pages into a non-expanding
