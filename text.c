@@ -445,7 +445,7 @@ OutputEquity ( const float r, const cubeinfo *pci, const int f ) {
   static char sz[ 9 ];
 
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    sprintf ( sz, f ? "%+7.4f" : "%7.4f", r );
+    sprintf ( sz, f ? "%+7.3f" : "%7.3f", r );
   else {
     if ( fOutputMatchPC )
       sprintf ( sz, "%6.2f%%", 
@@ -465,7 +465,7 @@ OutputMoneyEquity ( const float ar[], const int f ) {
 
   static char sz[ 9 ];
 
-  sprintf ( sz, f ? "%+7.4f" : "%7.4f", 
+  sprintf ( sz, f ? "%+7.3f" : "%7.3f", 
             2.0 * ar[ OUTPUT_WIN ] - 1.0
             + ar[ OUTPUT_WINGAMMON ] + ar[ OUTPUT_WINBACKGAMMON] 
             - ar[ OUTPUT_LOSEGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON] );
@@ -496,7 +496,7 @@ OutputEquityScale ( const float r, const cubeinfo *pci,
   static char sz[ 9 ];
 
   if ( ! pci->nMatchTo ) 
-    sprintf ( sz, f ? "%+7.4f" : "%7.4f", pci->nCube / pciBase->nCube * r );
+    sprintf ( sz, f ? "%+7.3f" : "%7.3f", pci->nCube / pciBase->nCube * r );
   else {
 
     if ( fOutputMWC ) {
@@ -510,7 +510,7 @@ OutputEquityScale ( const float r, const cubeinfo *pci,
 
     }
     else
-      sprintf ( sz, f ? "%+7.4f" : "%7.4f", 
+      sprintf ( sz, f ? "%+7.3f" : "%7.3f", 
                 mwc2eq ( eq2mwc ( r, pci ), pciBase ) );
 
 
@@ -540,7 +540,7 @@ OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci ) {
   static char sz[ 9 ];
 
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    sprintf ( sz, "%+7.4f", r1 - r2 );
+    sprintf ( sz, "%+7.3f", r1 - r2 );
   else {
     if ( fOutputMatchPC )
       sprintf ( sz, "%+6.2f%%", 
@@ -570,11 +570,11 @@ OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
   static char sz[ 9 ];
 
   if ( ! pci->nMatchTo ) 
-    sprintf ( sz, "%+7.4f", r );
+    sprintf ( sz, "%+7.3f", r );
   else {
     
     if ( ! fOutputMWC ) 
-      sprintf ( sz, "%+7.4f", 
+      sprintf ( sz, "%+7.3f", 
                 f ? mwc2eq ( r, pci ) : se_mwc2eq ( r, pci ) );
     else if ( fOutputMatchPC )
       sprintf ( sz, "%6.2f%%", 100.0f * r );
@@ -593,9 +593,9 @@ OutputPercent ( const float r ) {
   static char sz[ 9 ];
 
   if ( fOutputWinPC )
-    sprintf ( sz, "%6.2f%%", 100.0 * r );
+    sprintf ( sz, "%5.1f%%", 100.0 * r );
   else
-    sprintf ( sz, "%6.4f", r );
+    sprintf ( sz, "%5.3f", r );
 
   return sz;
 
