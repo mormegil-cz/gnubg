@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#if HAVE_SOCKETS
 #include <assert.h>
 #include <errno.h>
 #include <signal.h>
@@ -37,6 +38,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#endif /* HAVE_SOCKETS */
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -48,9 +50,9 @@
 #define PF_LOCAL PF_UNIX
 #endif
 
+#if HAVE_SOCKETS
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 
-#if HAVE_SOCKETS
     int h, f;
     struct sockaddr_un *psun;
     struct sockaddr_in *psin;
@@ -107,11 +109,13 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
     }
     
     return h;
-#else
+#if 0 
     assert( FALSE );
 #endif
 }
+#endif
 
+#if HAVE_SOCKETS
 static void ExternalUnbind( char *sz ) {
 
     if( strchr( sz, ':' ) && !strchr( sz, '/' ) )
@@ -120,9 +124,11 @@ static void ExternalUnbind( char *sz ) {
 
     unlink( sz );
 }
+#endif
 
-extern int ExternalRead( int h, char *pch, int cch ) {
 #if HAVE_SOCKETS
+extern int ExternalRead( int h, char *pch, int cch ) {
+
     char *p = pch, *pEnd;
     int n;
     psighandler sh;
@@ -161,13 +167,15 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 
     p[ cch - 1 ] = 0;
     return 0;
-#else
+#if 0
     assert( FALSE );
 #endif
 }
+#endif
 
-extern int ExternalWrite( int h, char *pch, int cch ) {
 #if HAVE_SOCKETS
+extern int ExternalWrite( int h, char *pch, int cch ) {
+
     char *p = pch;
     int n;
     psighandler sh;
@@ -198,10 +206,11 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
     }
 
     return 0;
-#else
+#if 0
     assert( FALSE );
 #endif
 }
+#endif
 
 extern void CommandExternal( char *sz ) {
 

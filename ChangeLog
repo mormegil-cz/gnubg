@@ -1,3 +1,11 @@
+Thu Mar 21 20:45:19 2002  Øystein Johansen <oeysteij@online.no>
+
+        * external.c: Move preprocessor conditions outside functions.
+
+        * gtkboard.c: Set translucent chequers default off at Win32 systems.
+
+        * eval.c: Fix typo.
+    
 Sat Mar 23 18:19:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com> 
 
 	* matchid.c, matchid.h: new files. Move matchid stuff from
