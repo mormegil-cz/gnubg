@@ -80,7 +80,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat apStatistics[][2],
                 evalsetup (* apes[]),
-                cubeinfo (* apci[]), 
+                const cubeinfo (* apci[]), 
                 int (* apCubeDecTop[]), int alternatives, 
 		int fInvert, int fCubeRollout,
                 rolloutprogressfunc *pfRolloutProgress,
@@ -91,8 +91,8 @@ GeneralEvaluation ( float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                     float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
                     rolloutstat arsStatistics[ 2 ],
                     int anBoard[ 2 ][ 25 ],
-                    cubeinfo *pci, evalsetup *pes,
-                    rolloutprogressfunc *pfRolloutProgress,
+                    const cubeinfo* pci, const evalsetup* pes,
+                    rolloutprogressfunc* pfRolloutProgress,
                     void *pUserData );
 
 extern int
@@ -100,7 +100,7 @@ GeneralEvaluationR ( float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev[ NUM_ROLLOUT_OUTPUTS ],
                      rolloutstat arsStatistics[ 2 ],
                      int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, rolloutcontext *prc,
+                     const cubeinfo* pci, const rolloutcontext* prc,
                      rolloutprogressfunc *pfRolloutProgress,
                      void *pUserData );
 
@@ -134,8 +134,8 @@ printRolloutstat ( char *sz, const rolloutstat *prs,
 extern int
 getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                  int anBoard[ 2 ][ 25 ],
-                 cubeinfo *pci, 
-                 evalsetup *pesResign );
+                 const cubeinfo* pci, 
+                 const evalsetup* pesResign );
 
 extern void
 getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
@@ -144,13 +144,12 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                     float *prBefore, float *prAfter );
 
 extern int
-ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
+ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
                    rolloutprogressfunc *pfRolloutProgress,
                    void *pUserData );
 
 extern int
-ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes,
-                   rolloutprogressfunc *pfRolloutProgress,
-                   void *pUserData );
+ScoreMoveGeneral ( move *pm, const cubeinfo* pci, const evalsetup* pes,
+                   rolloutprogressfunc* pfRolloutProgress, void* pUserData );
 
 #endif

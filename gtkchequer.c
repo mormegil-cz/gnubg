@@ -190,13 +190,13 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
   {
 #if HAVE_ALLOCA
     move **ppm = alloca ( c * sizeof (move *));
-    cubeinfo **ppci = alloca ( c * sizeof (cubeinfo *));
+    const cubeinfo** ppci = alloca ( c * sizeof (cubeinfo *));
     asz = alloca( 40 * c );
 #else
     if( c > 10 )
 	c = 10;
     move *pm[10];
-    cubeinfo *pci[10];
+    const cubeinfo* pci[10];
 #endif
 
 

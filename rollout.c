@@ -185,7 +185,7 @@ static int
 BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], 
                       int iTurn, int iGame,
-                      cubeinfo aci[], int afCubeDecTop[], int cci,
+                      const cubeinfo aci[], int afCubeDecTop[], int cci,
                       rolloutcontext *prc,
                       rolloutstat aarsStatistics[][ 2 ],
 		      int nBasisCube) {
@@ -825,7 +825,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat aarsStatistics[][2],
                 evalsetup (* apes[]),
-                cubeinfo (* apci[]), 
+                const cubeinfo (* apci[]), 
                 int (* apCubeDecTop[]), int alternatives, 
                 int fInvert, int fCubeRollout,
                 rolloutprogressfunc *pfProgress, void *pUserData ) {   
@@ -1323,7 +1323,7 @@ GeneralEvaluation ( float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                     float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
                     rolloutstat arsStatistics[ 2 ],
                     int anBoard[ 2 ][ 25 ],
-                    cubeinfo *pci, evalsetup *pes,
+                    const cubeinfo* pci, const evalsetup* pes,
                     rolloutprogressfunc *pf, void *p ) {
 
   int i;
@@ -1359,7 +1359,7 @@ GeneralEvaluationR ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev [ NUM_ROLLOUT_OUTPUTS ],
                      rolloutstat arsStatistics[ 2 ],
                      int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, rolloutcontext *prc,
+                     const cubeinfo* pci, const rolloutcontext* prc,
                      rolloutprogressfunc *pf, void *p ) {
 
   int (* apBoard[1])[2][25];
@@ -1367,7 +1367,7 @@ GeneralEvaluationR ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
   float (*apStdDev[1])[NUM_ROLLOUT_OUTPUTS];
   evalsetup  es;
   evalsetup (* apes[1]);
-  cubeinfo (* apci[1]);
+  const cubeinfo (* apci[1]);
   int false = 0;
   int (* apCubeDecTop[1]);
 
@@ -1448,7 +1448,7 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 	   (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[1]};
   evalsetup (* apes[2]);
   cubeinfo aci[ 2 ];
-  cubeinfo (* apci[2]) = { &aci[ 0 ], &aci[ 1 ] };
+  const cubeinfo (* apci[2]) = { &aci[ 0 ], &aci[ 1 ] };
 
 
   int cGames;
@@ -1763,8 +1763,8 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 extern int
 getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                  int anBoard[ 2 ][ 25 ],
-                 cubeinfo *pci, 
-                 evalsetup *pesResign ) {
+                 const cubeinfo* pci, 
+                 const evalsetup* pesResign) {
 
   float arStdDev[ NUM_ROLLOUT_OUTPUTS ];
   rolloutstat arsStatistics[ 2 ];
@@ -1834,10 +1834,10 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 
 extern int
-ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
+ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
                    rolloutprogressfunc *pf, void *p ) {
 
-  cubeinfo *pci;
+  const cubeinfo *pci;
   int fCubeDecTop = TRUE;
   int	i;
   int nGamesDone;
@@ -1851,7 +1851,7 @@ ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
   float (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ] =
     alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
   evalsetup (** apes) = alloca (cMoves * sizeof (evalsetup *));
-  cubeinfo (** apci) = alloca (cMoves * sizeof (cubeinfo *));
+  const cubeinfo (** apci) = alloca (cMoves * sizeof (cubeinfo *));
   cubeinfo (* aci) = alloca (cMoves * sizeof (cubeinfo));
   int (** apCubeDecTop) = alloca (cMoves * sizeof (int *));
 #else
@@ -1860,7 +1860,8 @@ ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
   float       (*apOutput[10])[2][25];
   float       (*apStdDev[10])[2][25];
   evalsetup   (*apes[10]);
-  cubeinfo    (*apci[10]), aci[ 10 ];
+  const cubeinfo* apci[10];
+  cubeinfo    aci[ 10 ];
   int         (*apCubeDecTop[10]);
 
   if (cMoves > 10)
@@ -1921,13 +1922,13 @@ ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
   }
 
   return 0;
-
 }
 
 
 extern int
-ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes,
-                   rolloutprogressfunc *pf, void *p ) {
+ScoreMoveGeneral ( move *pm, const cubeinfo* pci, const evalsetup* pes,
+                   rolloutprogressfunc* pf, void *p )
+{
 
   switch ( pes->et ) {
   case EVAL_EVAL:

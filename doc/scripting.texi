@@ -23,6 +23,20 @@ or select @code{Windows->Python Shell(IDLE...)} from the GUI.
 @item positionfromkey()
 @item positionbearoff()
 @item positionfrombearoff()
+@item navigate([next=@var{N},[game=@var{N}]])
+Match navigation.
+
+Without any arguments, go to first move of first match.
+
+With next == @var{N}, move forward @var{N} game records.
+
+With game == @var{N}, move forward/backward @var{N} games.
+
+Navigate never wraps around.
+
+On success, returns @code{None}. If unable to complete the requsted
+number of moves, returns a pair of @code{(next-diff,game-diff)}.
+
 @item match([analysis=1/0, boards=1/0, statistics=0/1, verbose=0/1])
 
 Return the current match. For example,
@@ -85,7 +99,6 @@ Per player information. Each a dictionary containing @code{rating} and
 @item date
 Sequence of (Day,Month,Year).
 @item event
-@item sgf-rollout-version
 @item default-eval-context
 Default evaluation context. 
 @item default-rollout-context

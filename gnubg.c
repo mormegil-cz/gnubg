@@ -4037,7 +4037,7 @@ CommandRollout( char *sz ) {
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
       float       (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ];
       evalsetup   (** apes);
-      cubeinfo    (** apci);
+      const cubeinfo    (** apci);
       int         (** apCubeDecTop);
       move	  (** apMoves);
 
@@ -4054,7 +4054,7 @@ CommandRollout( char *sz ) {
       float       (*apOutput[10])[2][25];
       float       (*apStdDev[10])[2][25];
       evalsetup   (*apes[10]);
-      cubeinfo    (*apci[10]);
+      const cubeinfo    (*apci[10]);
       int         (*apCubeDecTop[10]);
       move        (*apMoves[10]);
 

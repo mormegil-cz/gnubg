@@ -315,7 +315,7 @@ typedef union _moverecord {
 
 extern char* aszGameResult[], szDefaultPrompt[], *szPrompt;
 
-typedef enum _gamestate {
+typedef enum {
     GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
 } gamestate; 
 
@@ -325,7 +325,7 @@ typedef enum _gamestate {
    fTurn, but occasionally different, e.g. if a double has been
    offered).  anDice indicate the roll to be played (0,0 indicates the
    roll has not been made). */
-typedef struct _matchstate {
+typedef struct {
     int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned,
 	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
 	fPostCrawford, nMatchTo, anScore[ 2 ], nCube, cBeavers;
@@ -615,6 +615,10 @@ extern command acAnnotateMove[];
 extern command acSetExportParameters[];
 extern command acSetGeometryValues[];
 extern command acSetHighlightIntensity[];
+
+
+extern int
+InternalCommandNext(int fMarkedMoves, int n);
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
