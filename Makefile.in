@@ -125,8 +125,8 @@ DATA =  $(pkgdata_DATA)
 
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
 Makefile.am Makefile.in NEWS TODO acconfig.h acinclude.m4 aclocal.m4 \
-config.h.in configure configure.in install-sh missing mkinstalldirs \
-stamp-vti version.texi
+config.h.in configure configure.in install-sh mdate-sh missing \
+mkinstalldirs stamp-vti texinfo.tex version.texi
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
