@@ -245,6 +245,7 @@ extern void CommandShowAutomatic( char *sz ) {
 	    "game    \t(Start a new game after each one is completed):\t%s\n"
 	    "move    \t(Play the forced move when there is no choice):\t%s\n"
 	    "roll    \t(Roll the dice if no double is possible):      \t%s\n",
+	    fAutoAnalysis ? szOn : szOff,
 	    fAutoBearoff ? szOn : szOff,
 	    fAutoCrawford ? szOn : szOff,
 	    cAutoDoubles,
