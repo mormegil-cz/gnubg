@@ -1,3 +1,7 @@
+Fri May  8 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* external.c, dice.c, set.c: Fix socket code for windows
+
 Fri May  7 16:17:09 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Change union moverecord into struct moverecord

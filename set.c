@@ -36,7 +36,10 @@
 #include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
 
+#if HAVE_SOCKETS
 #ifndef WIN32
+
+#define closesocket close
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
@@ -50,6 +53,7 @@
 #else /* #ifndef WIN32 */
 #include <winsock2.h>
 #endif /* #ifndef WIN32 */
+#endif /* #if HAVE_SOCKETS */
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -1328,7 +1332,10 @@ extern void CommandSetPlayerExternal( char *sz ) {
     int h, cb;
     struct sockaddr *psa;
     char *pch;
-    
+
+    if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
+	closesocket( ap[ iPlayerSet ].h );
+
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
@@ -1351,7 +1358,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 		fnAction();
 
 	    if( fInterrupt ) {
-		close( h );
+		closesocket( h );
 		free( psa );
 		free( pch );
 		return;
@@ -1361,7 +1368,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	}
 	
 	outputerr( pch );
-	close( h );
+	closesocket( h );
 	free( psa );
 	free( pch );
 	return;
@@ -1379,8 +1386,10 @@ extern void CommandSetPlayerExternal( char *sz ) {
 
 extern void CommandSetPlayerGNU( char *sz ) {
 
+#if HAVE_SOCKETS
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	close( ap[ iPlayerSet ].h );
+	closesocket( ap[ iPlayerSet ].h );
+#endif
     
     ap[ iPlayerSet ].pt = PLAYER_GNU;
 
@@ -1396,8 +1405,10 @@ extern void CommandSetPlayerGNU( char *sz ) {
 
 extern void CommandSetPlayerHuman( char *sz ) {
 
+#if HAVE_SOCKETS
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	close( ap[ iPlayerSet ].h );
+	closesocket( ap[ iPlayerSet ].h );
+#endif
     
     ap[ iPlayerSet ].pt = PLAYER_HUMAN;
 
@@ -1469,8 +1480,10 @@ extern void CommandSetPlayerPlies( char *sz ) {
 
 extern void CommandSetPlayerPubeval( char *sz ) {
 
+#if HAVE_SOCKETS
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	close( ap[ iPlayerSet ].h );
+	closesocket( ap[ iPlayerSet ].h );
+#endif
     
     ap[ iPlayerSet ].pt = PLAYER_PUBEVAL;
 

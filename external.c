@@ -30,6 +30,7 @@
 #endif /* #if HAVE_UNISTD_H */
 
 #ifndef WIN32
+#define closesocket close
 
 #include <assert.h>
 #include <errno.h>
@@ -118,6 +119,23 @@ extern void extparse();
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
 #define AF_LOCAL AF_UNIX
 #define PF_LOCAL PF_UNIX
+#endif
+
+#ifdef WIN32
+void OutputWin32SocketError(const char* action)
+{
+	LPVOID lpMsgBuf;
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
+		NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR) &lpMsgBuf, 0, NULL);
+
+	outputerrf(_("Windows socket error (%s):\n%s"), action, (LPCTSTR)lpMsgBuf);
+	LocalFree(lpMsgBuf);
+}
+#define SockErr OutputWin32SocketError
+#else
+#define SockErr outputerr
 #endif
 
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
@@ -257,7 +275,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    outputerr( _("reading from external connection") );
+	    SockErr( _("reading from external connection") );
 	    return -1;
 	}
 	
@@ -317,7 +335,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    outputerr( _("writing to external connection") );
+	    SockErr( _("writing to external connection") );
 	    return -1;
 	}
 	
@@ -584,13 +602,13 @@ extern void CommandExternal( char *sz ) {
     do {
 
       if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
-	outputerr( sz );
+	SockErr( sz );
 	return;
       }
       
       if( bind( h, psa, cb ) < 0 ) {
-	outputerr( sz );
-	close( h );
+	SockErr( sz );
+	closesocket( h );
 	free( psa );
 	return;
       }
@@ -598,19 +616,20 @@ extern void CommandExternal( char *sz ) {
       free( psa );
       
       if( listen( h, 1 ) < 0 ) {
-	outputerr( _("listen") );
-	close( h );
+	SockErr( _("listen") );
+	closesocket( h );
 	ExternalUnbind( sz );
 	return;
       }
-      
+      // Must set length when using windows
+      saLen = sizeof(struct sockaddr);
       while( ( hPeer = accept( h, (struct sockaddr*)&saRemote, &saLen ) ) < 0 ) {
 	if( errno == EINTR ) {
           if( fAction )
             fnAction();
 
           if( fInterrupt ) {
-            close( h );
+            closesocket( h );
             ExternalUnbind( sz );
             return;
           }
@@ -618,13 +637,13 @@ extern void CommandExternal( char *sz ) {
           continue;
 	}
 	
-	outputerr( _("accept") );
-	close( h );
+	SockErr( _("accept") );
+	closesocket( h );
 	ExternalUnbind( sz );
 	return;
       }
 
-      close( h );
+      closesocket( h );
       ExternalUnbind( sz );
 
       /* print info about remove client */
@@ -673,7 +692,7 @@ extern void CommandExternal( char *sz ) {
 
       PopLocale();
 
-      close( hPeer );
+      closesocket( hPeer );
 
     } while ( 1 );
 #endif
