@@ -2380,7 +2380,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 static int
 EvalKey ( const evalcontext *pec, const int nPlies,
-          const cubeinfo *pci ) {
+          const cubeinfo *pci, int fCubefulEquity ) {
 
   int iKey;
 
@@ -2404,6 +2404,9 @@ EvalKey ( const evalcontext *pec, const int nPlies,
     iKey ^=
       ( ( pci->fCubeOwner < 0 ? 2 :
           pci->fCubeOwner == pci->fMove ) << 29 );
+
+  if( fCubefulEquity )
+      iKey = ~iKey;
   
   return iKey;
 
@@ -2433,7 +2436,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     
     PositionKey( anBoard, ec.auchKey );
 
-    ec.nEvalContext = EvalKey ( pecx, nPlies, pci );
+    ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
 
 #if defined( GARY_CACHE )
     l = EvalCacheHash( &ec );
@@ -5669,19 +5672,22 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   int fAll = TRUE;
   evalcache ec, *pecx;
   unsigned long l;
+
+  if( pec->rNoise != 0.0f && !pec->fDeterministic )
+      /* non-deterministic evaluation; never cache */
+      return EvaluatePositionCubeful4( anBoard, arOutput, arCubeful,
+				       aciCubePos, cci, pciMove, pec,
+				       nPlies, fTop );
   
   PositionKey ( anBoard, ec.auchKey );
-    
+
   /* check cache for existence for earlier calculation */
-  
-  if ( pec->rNoise == 0.0f || pec->fDeterministic ) 
-    
-    for ( ici = 0; ici < cci && fAll; ++ici ) {
+  for ( ici = 0; ici < cci && fAll; ++ici ) {
 
       if ( aciCubePos[ ici ].nCube < 0 )
         continue;
 
-      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ] );
+      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
       
       if ( ( pecx = CacheLookup ( &cEval, &ec, &l ) ) ) {
         /* cache hit */
@@ -5691,9 +5697,8 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
       }
       else
         fAll = FALSE;
-      
-    }
-
+  }
+  
   /* get equities */
   
   if ( ! fAll ) {
@@ -5704,13 +5709,11 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
       return -1;
     
     /* add to cache */
-    
     for ( ici = 0; ici < cci; ++ici ) {
-
       if ( aciCubePos[ ici ].nCube < 0 )
         continue;
 
-      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ] );
+      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
       l = keyToLong ( ec.auchKey, ec.nEvalContext );
       l = (l & ((cEval.size >> 1)-1)) << 1;
       memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );

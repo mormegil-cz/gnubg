@@ -1,3 +1,9 @@
+Sun Jan 12 17:29:14 2003  Gary Wong  <gtw@gnu.org>
+
+	* eval.c (EvalKey): New parameter fCubefulEquity, so that cache
+	entries which set OUTPUT_CUBEFUL_EQUITY will not collide with
+	those which do not.  All callers changed.
+
 Sun Jan 12 13:23:44 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (ProgressValue): add missing "if ( ! fShowProgress )".
@@ -20,7 +26,7 @@ Sat Jan 11 10:58:54 2003  Joern Thyssen  <jth@gnubg.org>
 
 Fri Jan 10 22:56:30 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* eval.c (FindBestMovePlied, FindnSAveBestMoves):
+	* eval.c (FindBestMovePlied, FindnSaveBestMoves):
 	change algorithm for accept=0 according to Michael
 	Depreli's suggestions.
 
