@@ -1,4 +1,26 @@
-/* kleinman.c    Øystein Johansen 2000
+/*
+ * kleinman.c
+ *
+ * by Øystein Johansen <oeysteij@online.no> 2000
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *
+ */
+
+/*
  * This function/program gives the Cubeless Winning Probability in race
  * position. It is based on the Kleinman Count.  */
 
@@ -22,7 +44,7 @@ extern float
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
 {
   int nDiff, nSum;
-  float fK, fW;
+  float rK, rW;
 
   nDiff = nPipNotOnRoll - nPipOnRoll;
   nSum = nPipNotOnRoll + nPipOnRoll;
@@ -33,17 +55,17 @@ KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
   if ((nDiff < -4) || (nSum < 100))
     return -1;
 
-  fK = (float) (nDiff + 4) * (nDiff + 4) / (nSum - 4);
+  rK = (float) (nDiff + 4) * (nDiff + 4) / (nSum - 4);
 
-  if (fK < 1.0)
-    fW = 0.5 + 0.267 * sqrt (fK);
+  if (rK < 1.0)
+    rW = 0.5 + 0.267 * sqrt (rK);
   else
-    fW = 0.76 + 0.114 * log (fK);
+    rW = 0.76 + 0.114 * log (rK);
 
-  if (fW > 1.0)
+  if (rW > 1.0)
     return 1.0;
   else
-    return fW;
+    return rW;
 }
 
 #ifdef STANDALONE
@@ -51,17 +73,17 @@ int
 main (int argc, char *argv[])
 {
   int a, b;
-  float KC;
+  float rKC;
 
   if (argc == 3)
     {
       sscanf (argv[1], "%d", &a);
       sscanf (argv[2], "%d", &b);
-      KC = KleinmanCount (a, b);
-      if (KC == -1)
+      rKC = KleinmanCount (a, b);
+      if (rKC == -1)
 	printf ("Pipcount unsuitable for Kleinman Count.\n");
       else
-	printf ("Cubeless Winning Chance: %f\n", KC);
+	printf ("Cubeless Winning Chance: %f\n", rKC);
     }
   else
     {

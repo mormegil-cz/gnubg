@@ -3782,6 +3782,8 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
     }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     int i;
     GtkWidget *pwVbox;
+    GtkWidget *pwButtons,
+        *pwCopy = gtk_button_new_with_label( "Dump rollout results" );
     
     pwRolloutDialog = CreateDialog( "GNU Backgammon - Rollout", FALSE, NULL,
 				    NULL );
@@ -3790,6 +3792,12 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
 					 "destroy",
 					 GTK_SIGNAL_FUNC( RolloutCancel ),
 					 NULL );
+
+    pwButtons = DialogArea( pwRolloutDialog, DA_BUTTONS );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
+    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+			GTK_SIGNAL_FUNC( GTKDumpRolloutResults ), 
+                        GINT_TO_POINTER( c ) );
 
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
@@ -3836,6 +3844,30 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
     while( gtk_events_pending() )
         gtk_main_iteration();
     GTKAllowStdin();
+}
+
+extern void GTKDumpRolloutResults(GtkWidget *widget, int c) {
+
+    /* FIXME - Copy to Windows clipboard if compiled for win32
+               This function should also dump the rollout settings? Which?
+               At least the number of trials.  */
+               
+    gchar *szTemp;
+    int i, j;
+
+    g_print("                              Win    W(g)   W(bg)  L(g)   L(bg) "
+        "Equity Cubeful\n" );
+   
+    for ( j = 0; j < (c * 2) ; j++){
+       for ( i = 0; i < 8 ; i++) {
+           gtk_clist_get_text (GTK_CLIST( pwRolloutResult ), j, i, &szTemp);
+           if (i == 0) 
+              g_print( "%28.28s", szTemp);
+           else
+              g_print( "%7.7s", szTemp); 
+       }
+       g_print("\n");
+    }
 }
 
 extern void GTKRolloutRow( int i ) {

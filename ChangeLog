@@ -1,3 +1,11 @@
+Fri Oct 21 23:17:12 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c (GTKRollout): New button to dump rollout results
+
+        * gtkgame.c (GTKDumpRolloutResults): new function
+
+        * kleinman.c: Added GPL heading 
+
 Sun Oct 21 18:15:26 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (FindBestCubeDecision): Only beavers for beaver-enabled money
