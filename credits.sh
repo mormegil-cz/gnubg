@@ -12,7 +12,7 @@ cat > AUTHORS <<'EOF'
 
 
 
-         Contributors (of bug reports, comments, and patches) include:
+        Contributors (of bug reports, suggestions, and patches) include:
 
 EOF
 
