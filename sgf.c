@@ -903,7 +903,7 @@ static void RestoreNode( list *pl, char *szCharset ) {
     skilltype ast[ 2 ] = { SKILL_NONE, SKILL_NONE };
     lucktype lt = LUCK_NONE;
     float rLuck = ERR_VAL;
-    
+
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext ) {
 	if( pp->ach[ 1 ] == 0 &&
 	    ( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) ) {
@@ -1094,6 +1094,9 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	pmr->a.sz = CopyEscapedString( ppC->pl->plNext->p, szCharset );
 
     if( pmr ) {
+      
+        FixMatchState( &ms, pmr );
+
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
 	    if( ppDA )
@@ -1260,6 +1263,10 @@ extern void CommandLoadGame( char *sz ) {
         setDefaultFileName ( sz, PATH_SGF );
 
 #endif
+
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
+
     }
 }
 
@@ -1313,6 +1320,9 @@ extern void CommandLoadMatch( char *sz ) {
 #endif
 
         setDefaultFileName ( sz, PATH_SGF );
+
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
 
     }
 }
