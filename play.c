@@ -4273,8 +4273,6 @@ CommandRoll( char *sz ) {
                                                 <= CLASS_BEAROFF1 &&
                                                 fAutoBearoff ) ) ) {
 
-    playSound ( SOUND_MOVE );
-
     pmr = NewMoveRecord();
 
     pmr->mt = MOVE_NORMAL;
