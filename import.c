@@ -2719,7 +2719,7 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
                 pmr = NewMoveRecord();
 		pmr->mt = MOVE_DOUBLE;
 		pmr->fPlayer = fPlayer;
-		!LinkToDouble( pmr );
+		LinkToDouble( pmr );
 		AddMoveRecord( pmr );
 
                 pmr = NewMoveRecord();
