@@ -676,25 +676,6 @@ RestoreRollout ( move *pm, const char *sz ) {
 
 
 static void
-RestoreCubeRolloutEquities ( float ar[], const char *sz ) {
-
-  char *pc = strstr ( sz, "Eq" );
-
-  ar[ 0 ] = 0.0;
-  ar[ 1 ] = 0.0;
-  ar[ 2 ] = 0.0;
-  ar[ 3 ] = 0.0;
-
-  if ( ! pc )
-    return;
-
-  sscanf ( pc, "Eq %f %f %f %f",
-           ar, ar + 1, ar + 2, ar + 3 );
-
-}
-
-
-static void
 RestoreCubeRolloutOutput ( float arOutput[], float arStdDev[],
                            const char *sz, const char *szKeyword ) {
 
@@ -714,12 +695,10 @@ RestoreCubeRolloutOutput ( float arOutput[], float arStdDev[],
 
 static void
 RestoreCubeRollout ( const char *sz,
-                     float ar[],
                      float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                      float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes ) {
 
-  RestoreCubeRolloutEquities ( ar, sz );
   RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
   RestoreCubeRolloutOutput ( aarOutput[ 0 ], aarStdDev[ 0 ], sz, "NoDouble" );
   RestoreCubeRolloutOutput ( aarOutput[ 1 ], aarStdDev[ 1 ], 
@@ -837,7 +816,6 @@ RestoreExtendedRolloutContext (rolloutcontext *prc, const char *sz ) {
   
 static void
 RestoreExtendedCubeRollout ( const char *sz,
-                     float ar[],
                      float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                      float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes ) {
@@ -848,7 +826,6 @@ RestoreExtendedCubeRollout ( const char *sz,
      */
   is_current = CheckExtendedRolloutVersion (sz);
 
-  RestoreCubeRolloutEquities ( ar, sz );
   RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
   RestoreCubeRolloutOutput ( aarOutput[ 0 ], aarStdDev[ 0 ], sz, "NoDouble" );
   RestoreCubeRolloutOutput ( aarOutput[ 1 ], aarStdDev[ 1 ],
@@ -881,13 +858,14 @@ RestoreExtendedRollout ( move *pm, const char *sz) {
 }
 
 static void RestoreDoubleAnalysis( property *pp,
-				   float ar[], 
                                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                                    float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                                    evalsetup *pes ) {
     
     char *pch = pp->pl->plNext->p, ch;
     int nPlies, nReduced, fDeterministic;
+    /* FIXME: removing arUnued will break existing SGF files */
+    float arUnused[ 4 ];
     
     switch( *pch ) {
     case 'E':
@@ -904,7 +882,8 @@ static void RestoreDoubleAnalysis( property *pp,
 	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f"
                 "%f %f %f %f %f %f %f" 
                 "%f %f %f %f %f %f %f", 
-                &ar[ 0 ], &ar[ 1 ], &ar[ 2 ], &ar[ 3 ], 
+                &arUnused[ 0 ], &arUnused[ 1 ], 
+                &arUnused[ 2 ], &arUnused[ 3 ], 
                 &nPlies, &ch,
                 &nReduced, 
                 &fDeterministic,
@@ -928,13 +907,13 @@ static void RestoreDoubleAnalysis( property *pp,
     case 'R':
 
       pes->et = EVAL_ROLLOUT;
-      RestoreCubeRollout ( pch + 1, ar, aarOutput, aarStdDev, pes );
+      RestoreCubeRollout ( pch + 1, aarOutput, aarStdDev, pes );
       break;
 
     case 'X':
 
       pes->et = EVAL_ROLLOUT;
-      RestoreExtendedCubeRollout (pch + 1, ar, aarOutput, aarStdDev, pes );
+      RestoreExtendedCubeRollout (pch + 1, aarOutput, aarStdDev, pes );
       break;
 
     default:
@@ -1280,7 +1259,6 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	case MOVE_NORMAL:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-				       pmr->n.arDouble, 
                                        pmr->n.aarOutput,
                                        pmr->n.aarStdDev,
                                        &pmr->n.esDouble );
@@ -1300,7 +1278,6 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	case MOVE_DROP:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-							   pmr->d.CubeDecPtr->arDouble, 
 							   pmr->d.CubeDecPtr->aarOutput,
 							   pmr->d.CubeDecPtr->aarStdDev,
 							   &pmr->d.CubeDecPtr->esDouble );
@@ -1682,7 +1659,7 @@ WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
 
 }
 
-static void WriteRolloutAnalysis( FILE *pf, int fIsMove, float ar[],
+static void WriteRolloutAnalysis( FILE *pf, int fIsMove, 
 				  float rScore, float rScore2,
 				  float aarOutput0[ NUM_ROLLOUT_OUTPUTS ],
 				  float aarOutput1[ NUM_ROLLOUT_OUTPUTS ],
@@ -1700,8 +1677,6 @@ static void WriteRolloutAnalysis( FILE *pf, int fIsMove, float ar[],
 	      rScore, rScore2);
   } else {
     fprintf ( pf, "X ver %d Eq ", SGF_ROLLOUT_VER);
-    for (i = 0; i < 4; ++i) 
-      fprintf ( pf, "%.10g ", ar[ i ]);
   }
 
   fprintf ( pf, "Trials %d ", pes->rc.nGamesDone);
@@ -1730,10 +1705,12 @@ static void WriteRolloutAnalysis( FILE *pf, int fIsMove, float ar[],
   WriteRolloutContext ( pf, &pes->rc );
 }
 
-static void WriteDoubleAnalysis( FILE *pf, float ar[], 
+static void WriteDoubleAnalysis( FILE *pf, 
                                  float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                                  float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 				 evalsetup *pes ) {
+
+  /* FIXME: removing write of 0 0 0 0 will break existing SGF files */
 
   fputs ( "DA[", pf );
 
@@ -1742,7 +1719,7 @@ static void WriteDoubleAnalysis( FILE *pf, float ar[],
     fprintf( pf, "E %.4f %.4f %.4f %.4f %d%s %d %d %.4f "
              "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
              "%.4f %.4f %.4f %.4f %.4f %.4f %.4f", 
-             ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], 
+             0.0f, 0.0f, 0.0f, 0.0f,
              pes->ec.nPlies,
              pes->ec.fCubeful ? "C" : "",
              pes->ec.nReduced,
@@ -1760,7 +1737,7 @@ static void WriteDoubleAnalysis( FILE *pf, float ar[],
     
   case EVAL_ROLLOUT:
 
-    WriteRolloutAnalysis (pf, 0, ar, 0.0f, 0.0f, aarOutput[0], 
+    WriteRolloutAnalysis (pf, 0, 0.0f, 0.0f, aarOutput[0], 
 			  aarOutput[1], aarStdDev[0], aarStdDev[1], pes);
     break;
     
@@ -1825,7 +1802,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    break;
 	    
 	case EVAL_ROLLOUT:
-              WriteRolloutAnalysis (pf, 1, 0, pml->amMoves[ i ].rScore, 
+              WriteRolloutAnalysis (pf, 1, pml->amMoves[ i ].rScore, 
 				    pml->amMoves[ i ].rScore2, 
 				    pml->amMoves[ i ].arEvalMove, 0, 
 				    pml->amMoves[ i ].arEvalStdDev, 0,
@@ -2122,7 +2099,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    putc( ']', pf );
 
 	    if( pmr->n.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->n.arDouble, 
+		WriteDoubleAnalysis( pf, 
                                      pmr->n.aarOutput, pmr->n.aarStdDev,
 				     &pmr->n.esDouble );
 
@@ -2141,7 +2118,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;%c[double]", pmr->d.fPlayer ? 'B' : 'W' );
 
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+		WriteDoubleAnalysis( pf, 
 				     pmr->d.CubeDecPtr->aarOutput, 
 				     pmr->d.CubeDecPtr->aarStdDev,
 				     &pmr->d.CubeDecPtr->esDouble );
@@ -2154,7 +2131,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;%c[take]", pmr->d.fPlayer ? 'B' : 'W' );
 
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+		WriteDoubleAnalysis( pf, 
 				     pmr->d.CubeDecPtr->aarOutput, 
 				     pmr->d.CubeDecPtr->aarStdDev,
 				     &pmr->d.CubeDecPtr->esDouble );
@@ -2167,7 +2144,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;%c[drop]", pmr->d.fPlayer ? 'B' : 'W' );
 
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+		WriteDoubleAnalysis( pf, 
 				     pmr->d.CubeDecPtr->aarOutput,
 				     pmr->d.CubeDecPtr->aarStdDev,
 				     &pmr->d.CubeDecPtr->esDouble );

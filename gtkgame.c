@@ -1676,37 +1676,6 @@ static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
 }
 
 
-/*
- * temporary hack for files sgf files 
- */
-
-static void
-fixOutput ( float arDouble[], float aarOutput[][ NUM_ROLLOUT_OUTPUTS ] ) {
-  
-  cubeinfo ci;
-
-  GetMatchStateCubeInfo( &ci, &ms );
-
-  if ( aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] < -10000.0 ) {
-    if ( ci.nMatchTo )
-      aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = 
-        eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], &ci );
-    else
-      aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = arDouble[ OUTPUT_NODOUBLE ];
-  }
-
-
-  if ( aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] < -10000.0 ) {
-    if ( ci.nMatchTo )
-      aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = 
-        eq2mwc ( arDouble[ OUTPUT_TAKE ], &ci );
-    else
-      aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = arDouble[ OUTPUT_TAKE ];
-  }
-
-}
-
-
 #define ANALYSIS_HORIZONTAL 0
 
 static void SetAnnotation( moverecord *pmr ) {
@@ -1778,8 +1747,6 @@ static void SetAnnotation( moverecord *pmr ) {
 #endif
 
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
-
-            fixOutput ( pmr->n.arDouble, pmr->n.aarOutput );
 
             /* 
              * Skill and luck
@@ -1898,7 +1865,6 @@ static void SetAnnotation( moverecord *pmr ) {
 
             pwCubeAnalysis = CreateCubeAnalysis( pmr->n.aarOutput, 
                                                  pmr->n.aarStdDev,
-                                                 pmr->n.arDouble,
                                                  &pmr->n.esDouble, 
                                                  MOVE_NORMAL );
 
@@ -1951,12 +1917,8 @@ static void SetAnnotation( moverecord *pmr ) {
 
             if ( dt == DT_NORMAL ) {
 	    
-              fixOutput ( pmr->d.CubeDecPtr->arDouble, 
-						  pmr->d.CubeDecPtr->aarOutput );
-            
               if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
                                                pmr->d.CubeDecPtr->aarStdDev,
-                                               pmr->d.CubeDecPtr->arDouble,
                                                &pmr->d.CubeDecPtr->esDouble,
                                                MOVE_DOUBLE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
@@ -1997,12 +1959,8 @@ static void SetAnnotation( moverecord *pmr ) {
 
             if ( tt == TT_NORMAL ) {
 
-              fixOutput ( pmr->d.CubeDecPtr->arDouble, 
-						  pmr->d.CubeDecPtr->aarOutput );
-              
               if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
                                                pmr->d.CubeDecPtr->aarStdDev,
-                                               pmr->d.CubeDecPtr->arDouble,
                                                &pmr->d.CubeDecPtr->esDouble,
                                                pmr->mt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
@@ -6882,7 +6840,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
-    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, NULL, &es, MOVE_NORMAL );
+    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ),
                        pw );

@@ -1933,7 +1933,7 @@ HTMLEpilogueComment ( FILE *pf ) {
  */
 
 static void
-HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
+HTMLPrintCubeAnalysisTable ( FILE *pf, 
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              int fPlayer,
@@ -1948,6 +1948,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     N_("Double, take"), 
     N_("Double, pass") 
   };
+  float arDouble[ 4 ];
 
   int i;
   int ai[ 3 ];
@@ -1963,6 +1964,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
   if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
+
+  cd = FindBestCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
 
   fActual = fDouble > 0;
   fClose = isCloseCubedecision ( arDouble ); 
@@ -2221,8 +2224,6 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* cube decision */
 
-  cd = FindBestCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
-
   fprintf ( pf,
             "<tr><td colspan=\"2\">%s</td>"
             "<td colspan=\"2\" %s>%s",
@@ -2335,7 +2336,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from move */
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->n.arDouble, 
+    HTMLPrintCubeAnalysisTable ( pf, 
                                  pmr->n.aarOutput, pmr->n.aarStdDev,
                                  pmr->n.fPlayer,
                                  &pmr->n.esDouble, &ci, FALSE, -1,
@@ -2345,7 +2346,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   case MOVE_DOUBLE:
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+    HTMLPrintCubeAnalysisTable ( pf, 
                                  pmr->d.CubeDecPtr->aarOutput, 
 				 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
@@ -2360,7 +2361,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+    HTMLPrintCubeAnalysisTable ( pf, 
                                  pmr->d.CubeDecPtr->aarOutput, 
 				 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,

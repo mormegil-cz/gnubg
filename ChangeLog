@@ -1,3 +1,15 @@
+Sun Aug 31 15:13:40 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Remove arDouble from movenormal and movedouble.
+
+	We can't remove it from DA[ ... ] since it'll break existing
+	SGF files.
+
+	* backgammon.h, gtkcube.c, gtkgame.c, text.c, html.c, play.c,
+	sgf.c, analysis.c: remove arDouble from movenormal and movedouble.
+	* sgf.c: do not write arDouble for rollouts.
+	* export.c (ExportGameEquityEvolution): remove "dead" code.
+
 Sat Aug 30 20:24:57 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c: fix broken stylesheet.

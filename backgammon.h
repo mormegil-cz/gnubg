@@ -199,9 +199,6 @@ typedef struct _movegameinfo {
 typedef struct cubedecisiondata {
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  /* (FIXME) JTH The arDouble struct is redundant and should be removed from
-     cubedecisiondata. */
-  float arDouble[ N_CUBEFUL_OUTPUTS ];
   evalsetup esDouble;
 } cubedecisiondata;
 
@@ -236,9 +233,6 @@ typedef struct _movenormal {
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
-  /* (FIXME) JTH The arDouble struct is redundant and should be removed from
-     cubedecisiondata. */
-  float arDouble[ N_CUBEFUL_OUTPUTS ];
   evalsetup esDouble;
 
   /* evaluation of the moves */

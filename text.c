@@ -275,7 +275,7 @@ TextEpilogue ( FILE *pf, const matchstate *pms ) {
  */
 
 static void
-TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
+TextPrintCubeAnalysisTable ( FILE *pf, 
                              const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              int fPlayer,
@@ -286,7 +286,8 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   int fActual, fClose, fMissed;
   int fDisplay;
-
+  float arDouble[ 4 ];
+  
   /* check if cube analysis should be printed */
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
@@ -346,7 +347,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* cube analysis from move */
 
-    TextPrintCubeAnalysisTable ( pf, pmr->n.arDouble, 
+    TextPrintCubeAnalysisTable ( pf, 
                                  GCCCONSTAHACK pmr->n.aarOutput,
 				 GCCCONSTAHACK pmr->n.aarStdDev,
                                  pmr->n.fPlayer,
@@ -357,7 +358,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
   case MOVE_DOUBLE:
 
-    TextPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+    TextPrintCubeAnalysisTable ( pf, 
                                  GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
 				 GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
@@ -372,7 +373,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    TextPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+    TextPrintCubeAnalysisTable ( pf, 
                                  GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
 				 GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,

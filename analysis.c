@@ -305,6 +305,7 @@ updateStatcontext(statcontext*       psc,
   float rSkill, rChequerSkill, rCost;
   int i;
   int anBoardMove[ 2 ][ 25 ];
+  float arDouble[ 4 ];
 
   switch ( pmr->mt ) {
 
@@ -354,7 +355,7 @@ updateStatcontext(statcontext*       psc,
       
     if ( pmr->n.esDouble.et != EVAL_NONE && fAnalyseCube ) {
 
-      float *arDouble = pmr->n.arDouble;
+      FindCubeDecision( arDouble, pmr->n.aarOutput, &ci );
 
       psc->anTotalCube[ pmr->n.fPlayer ]++;
 
@@ -475,7 +476,8 @@ updateStatcontext(statcontext*       psc,
     GetMatchStateCubeInfo ( &ci, pms );
     if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
-      float *arDouble = pmr->d.CubeDecPtr->arDouble;
+      FindCubeDecision( arDouble, 
+                        GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, &ci );
 
       rSkill = arDouble[ OUTPUT_TAKE ] <
         arDouble[ OUTPUT_DROP ] ?
@@ -517,7 +519,8 @@ updateStatcontext(statcontext*       psc,
     GetMatchStateCubeInfo ( &ci, pms );
     if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
-      float *arDouble = pmr->d.CubeDecPtr->arDouble;
+      FindCubeDecision( arDouble, 
+                        GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, &ci );
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anTake[ pmr->d.fPlayer ]++;
@@ -547,7 +550,8 @@ updateStatcontext(statcontext*       psc,
     GetMatchStateCubeInfo ( &ci, pms );
     if( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	  
-      float *arDouble = pmr->d.CubeDecPtr->arDouble;
+      FindCubeDecision( arDouble, 
+                        GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, &ci );
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anPass[ pmr->d.fPlayer ]++;
@@ -669,20 +673,18 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
               return -1;
             
             
-	    FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
-            
 	    pmr->n.esDouble = *pesCube;
 
-            memcpy ( pmr->n.arDouble, arDouble, sizeof ( arDouble ) );
             memcpy ( pmr->n.aarOutput, aarOutput, sizeof ( aarOutput ) );
             memcpy ( pmr->n.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
             
           }
           
-          rSkill = pmr->n.arDouble[ OUTPUT_NODOUBLE ] -
-            pmr->n.arDouble[ OUTPUT_OPTIMAL ];
-	      
-	    pmr->n.stCube = Skill( rSkill );
+          FindCubeDecision( arDouble, 
+                            GCCCONSTAHACK pmr->n.aarOutput, &ci );
+          
+          rSkill = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_OPTIMAL ];
+          pmr->n.stCube = Skill( rSkill );
 
 	} else
           pmr->n.esDouble.et = EVAL_NONE;
@@ -806,8 +808,6 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	      
 		esDouble = pmr->d.CubeDecPtr->esDouble;
 	      
-                memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 
-						 sizeof ( arDouble ) );
                 memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
 						 sizeof ( aarOutput ) );
                 memcpy ( pmr->d.CubeDecPtr->aarStdDev, aarStdDev, 
