@@ -1639,9 +1639,10 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                 "%-31s ", 
                 _("Equiv. Snowie error rate    ") );
 
+      n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ];
       for ( i = 0; i < 2; ++i ) 
-        if ( ( n = psc->anTotalCube[ i ] + psc->anTotalMoves[ i ] ) ) {
-
+        if ( n ) {
+          
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
                     "%+6.2f           " :
@@ -1654,9 +1655,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         else
           sprintf ( strchr ( szOutput, 0 ),
                     "%-23.23s ", _("n/a") );
-
+      
       strcat ( szOutput, "\n" );
-
+      
   }
 
   for ( i = 0 ; i < 2; i++ )

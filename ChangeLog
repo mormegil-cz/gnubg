@@ -1,3 +1,9 @@
+Fri Jun  6 11:19:58 2003  Joern Thyssen  <jth@gnubg.org>
+
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): modify formulaes for snowie error
+	rate according to Chris Yep's email.
+
 Tue Jun  3 09:20:00 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c: fix compilation with -DGARY_CACHE

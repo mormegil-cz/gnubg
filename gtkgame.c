@@ -7893,18 +7893,18 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   /* equivalent Snowie error rate */
 
-  if ( psc->anTotalMoves[ 0 ] + psc->anTotalCube[ 0 ] ) 
+  if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) 
     sprintf( sz, "%+.1f", 
              -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ] / 
-             ( psc->anTotalMoves[ 0 ] + psc->anTotalCube[ 0 ] ) );
+             ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) );
   else
     strcpy ( sz, _("n/a") );
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
-  if ( psc->anTotalMoves[ 1 ] + psc->anTotalCube[ 1 ] ) 
+  if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) 
     sprintf( sz, "%+.1f", 
              -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ] / 
-             ( psc->anTotalMoves[ 1 ] + psc->anTotalCube[ 1 ] ) );
+             ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) );
   else
     strcpy ( sz, _("n/a") );
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);

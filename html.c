@@ -3302,7 +3302,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
         char asz[ 2 ][ 16 ];
 
         for ( i = 0; i < 2; ++i )
-          if ( ( j = psc->anTotalMoves[ i ] + psc->anTotalCube[ i ] ) )
+          if ( ( j = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
             sprintf( asz[ i ], "%.1f", 1000.0 * 
                      -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / j );
           else
