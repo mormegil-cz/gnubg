@@ -1006,6 +1006,8 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
   if( bd.rd.arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
 
+  PushLocale( "C" );
+
   pbde->szBoardDesign = g_strdup_printf (
             "\n"
             "         board=#%02X%02X%02X;%0.2f\n"
@@ -1076,6 +1078,8 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
              /* points1 */
 	     bd.rd.aanBoardColour[ 3 ][ 0 ], bd.rd.aanBoardColour[ 3 ][ 1 ], 
 	     bd.rd.aanBoardColour[ 3 ][ 2 ], bd.rd.aSpeckle[ 3 ] / 128.0f );
+
+  PopLocale();
 
   pbde->fDeletable = TRUE;
 

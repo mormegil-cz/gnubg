@@ -1,3 +1,8 @@
+Sun Dec 15 20:40:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (DesignAdd): save board designs in the "C" locale.
+	(reported by Nardy Pillards)
+
 Sun Dec 15 18:38:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (AnalysisOK): fix typo: "dice" -> "luck"
