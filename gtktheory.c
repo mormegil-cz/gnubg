@@ -268,7 +268,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   gtk_widget_show ( ptw->apwGammonPrice[ ! ci.nMatchTo ] );
   gtk_widget_hide ( ptw->apwGammonPrice[ ci.nMatchTo != 0 ] );
 
-  sprintf ( sz, "Gammon price at %d-away, %d-away (%d cube)",
+  sprintf ( sz, "Gammon values at %d-away, %d-away (%d cube)",
             ci.nMatchTo - ci.anScore[ 0 ],
             ci.nMatchTo - ci.anScore[ 1 ],
             ci.nCube );
@@ -812,7 +812,7 @@ GTKShowTheory ( const int fActivePage ) {
   pwVBox = gtk_vbox_new ( 0, FALSE );
 
   ptw->apwGammonPrice[ 0 ] = 
-    gtk_frame_new ( "Gammon price at 0-away, 0-away for 0-cube" );
+    gtk_frame_new ( "Gammon values at 0-away, 0-away for 0-cube" );
   gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwGammonPrice[ 0 ] );
 
   pwTable = gtk_table_new ( 3, 3, TRUE );
@@ -829,8 +829,8 @@ GTKShowTheory ( const int fActivePage ) {
     gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
 
     gtk_table_attach ( GTK_TABLE ( pwTable ),
-                       pwx = gtk_label_new ( i ? "backgammon price" : 
-                                             "gammon price" ), 
+                       pwx = gtk_label_new ( i ? "backgammon value" : 
+                                             "gammon value" ), 
                        1+ i, 2 + i, 0, 1, 
                        GTK_EXPAND | GTK_FILL,
                        GTK_EXPAND | GTK_FILL,
@@ -853,7 +853,7 @@ GTKShowTheory ( const int fActivePage ) {
   }
 
   ptw->apwGammonPrice[ 1 ] = 
-    gtk_frame_new ( "Gammon prices for money game" );
+    gtk_frame_new ( "Gammon values for money game" );
   gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwGammonPrice[ 1 ] );
 
   pw = gtk_vbox_new ( 0, FALSE );
@@ -880,8 +880,8 @@ GTKShowTheory ( const int fActivePage ) {
       gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
 
       gtk_table_attach ( GTK_TABLE ( pwTable ),
-                         pwx = gtk_label_new ( i ? "backgammon price" : 
-                                               "gammon price" ), 
+                         pwx = gtk_label_new ( i ? "backgammon value" : 
+                                               "gammon value" ), 
                          1+ i, 2 + i, 0, 1, 
                          GTK_EXPAND | GTK_FILL,
                          GTK_EXPAND | GTK_FILL,
@@ -908,7 +908,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,
-                             gtk_label_new ( "Gammon prices" ) );
+                             gtk_label_new ( "Gammon values" ) );
 
   /* show dialog */
 

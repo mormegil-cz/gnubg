@@ -1,3 +1,19 @@
+Sat Mar 16 20:04:33 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Change "gammon price" to "gammon values" in output. The internal
+	variable arGammonPrice has *not* been renamed.
+
+	* gnubg.c: rename CommandShowGammonPrice to
+	CommandShowGammonValue. 
+
+	* gtktheory.c (GtkShowTheory, TheoryUpdated): substitute gammon
+	price with gammon value.
+
+	* gtkgame.c: substitute GammonPrice with GammonValue.
+
+	* show.c (CommandShowGammonPrice): rename to
+	CommandShowGammonValue, and modify the output it produces.
+
 Sat Mar 16 16:25:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkprefs.c (BoardPreferences): Add a 'Apply' button to the dialog.
