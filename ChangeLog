@@ -1,4 +1,9 @@
-Fri Oct 21 23:17:12 2001  Øystein Johansen <oeysteij@online.no>
+Mon Oct 22 18:10:12 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c (GTKDumpRolloutResults): Simplify the call, and make 
+        Windows version copy to clipboard.
+
+Sun Oct 21 23:17:12 2001  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c (GTKRollout): New button to dump rollout results
 
