@@ -7349,7 +7349,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 	/* data directory: initialise to the path where gnubg is installed */
 	szDataDirectory = getInstallDir();
-	if (!strcmp(szHomeDirectory, "."))
+	if (!strcmp(szHomeDirectory, ".") && szDataDirectory)
 		szHomeDirectory = szDataDirectory;
 
 #endif /* WIN32 */
