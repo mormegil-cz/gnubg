@@ -313,6 +313,8 @@ if test "$with_sound" != "no"; then
 
   AM_PATH_ESD(,AC_DEFINE(HAVE_ESD,1,[Define if you have the ESD sound system]))
   AM_PATH_ARTSC(,AC_DEFINE(HAVE_ARTSC,1,[Define if you have ArtsC sound system]))
+  AM_PATH_AUDIOFILE(0.2.0,AC_DEFINE(HAVE_AUDIOFILE,1,
+                    [Define if you have the audiofile library]))
 
   AC_ARG_ENABLE(nas,     [  --enable-nas            Enable NAS (Network Audio System) support],,enable_nas=no)
 

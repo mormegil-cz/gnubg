@@ -848,6 +848,7 @@ Optional Features:
                           a test FreeType program
   --disable-esdtest       Do not try to compile and run a test ESD program
   --disable-artsc-test      Do not compile and run a test ArtsC program.
+  --disable-audiofiletest       Do not try to compile and run a test Audio File Library program
   --enable-nas            Enable NAS (Network Audio System) support
   --disable-nls           do not use Native Language Support
 
@@ -871,6 +872,8 @@ Optional Packages:
   --with-sound            use sounds with GNU Backgammon
   --with-esd-prefix=PFX   Prefix where ESD is installed (optional)
   --with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
+  --with-audiofile-prefix=PFX   Prefix where Audio File Library is installed (optional)
+  --with-audiofile-exec-prefix=PFX Exec prefix where Audio File Library is installed (optional)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libiconv-prefix=DIR  search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix     don't search for libiconv in includedir and libdir
@@ -10269,6 +10272,314 @@ rm -f conf.artsc
 
 
 
+# Check whether --with-audiofile-prefix or --without-audiofile-prefix was given.
+if test "${with_audiofile_prefix+set}" = set; then
+  withval="$with_audiofile_prefix"
+  audiofile_prefix="$withval"
+else
+  audiofile_prefix=""
+fi;
+
+# Check whether --with-audiofile-exec-prefix or --without-audiofile-exec-prefix was given.
+if test "${with_audiofile_exec_prefix+set}" = set; then
+  withval="$with_audiofile_exec_prefix"
+  audiofile_exec_prefix="$withval"
+else
+  audiofile_exec_prefix=""
+fi;
+# Check whether --enable-audiofiletest or --disable-audiofiletest was given.
+if test "${enable_audiofiletest+set}" = set; then
+  enableval="$enable_audiofiletest"
+
+else
+  enable_audiofiletest=yes
+fi;
+
+  if test x$audiofile_exec_prefix != x ; then
+     audiofile_args="$audiofile_args --exec-prefix=$audiofile_exec_prefix"
+     if test x${AUDIOFILE_CONFIG+set} != xset ; then
+        AUDIOFILE_CONFIG=$audiofile_exec_prefix/bin/audiofile-config
+     fi
+  fi
+  if test x$audiofile_prefix != x ; then
+     audiofile_args="$audiofile_args --prefix=$audiofile_prefix"
+     if test x${AUDIOFILE_CONFIG+set} != xset ; then
+        AUDIOFILE_CONFIG=$audiofile_prefix/bin/audiofile-config
+     fi
+  fi
+
+  # Extract the first word of "audiofile-config", so it can be a program name with args.
+set dummy audiofile-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_AUDIOFILE_CONFIG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $AUDIOFILE_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_AUDIOFILE_CONFIG="$AUDIOFILE_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_AUDIOFILE_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_path_AUDIOFILE_CONFIG" && ac_cv_path_AUDIOFILE_CONFIG="no"
+  ;;
+esac
+fi
+AUDIOFILE_CONFIG=$ac_cv_path_AUDIOFILE_CONFIG
+
+if test -n "$AUDIOFILE_CONFIG"; then
+  echo "$as_me:$LINENO: result: $AUDIOFILE_CONFIG" >&5
+echo "${ECHO_T}$AUDIOFILE_CONFIG" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  min_audiofile_version=0.2.0
+  echo "$as_me:$LINENO: checking for Audio File Library - version >= $min_audiofile_version" >&5
+echo $ECHO_N "checking for Audio File Library - version >= $min_audiofile_version... $ECHO_C" >&6
+  no_audiofile=""
+  if test "$AUDIOFILE_CONFIG" = "no" ; then
+    no_audiofile=yes
+  else
+    AUDIOFILE_LIBS=`$AUDIOFILE_CONFIG $audiofileconf_args --libs`
+    AUDIOFILE_CFLAGS=`$AUDIOFILE_CONFIG $audiofileconf_args --cflags`
+    audiofile_major_version=`$AUDIOFILE_CONFIG $audiofile_args --version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+    audiofile_minor_version=`$AUDIOFILE_CONFIG $audiofile_args --version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+    audiofile_micro_version=`$AUDIOFILE_CONFIG $audiofile_config_args --version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+    if test "x$enable_audiofiletest" = "xyes" ; then
+
+
+      ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+      ac_save_CFLAGS="$CFLAGS"
+      ac_save_LIBS="$LIBS"
+      CFLAGS="$CFLAGS $AUDIOFILE_CFLAGS"
+      LIBS="$LIBS $AUDIOFILE_LIBS"
+      rm -f conf.audiofiletest
+      if test "$cross_compiling" = yes; then
+  echo $ac_n "cross compiling; assumed OK... $ac_c"
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <audiofile.h>
+
+char*
+my_strdup (char *str)
+{
+  char *new_str;
+
+  if (str)
+    {
+      new_str = malloc ((strlen (str) + 1) * sizeof(char));
+      strcpy (new_str, str);
+    }
+  else
+    new_str = NULL;
+
+  return new_str;
+}
+
+int main ()
+{
+  int major, minor, micro;
+  char *tmp_version;
+
+  system ("touch conf.audiofiletest");
+
+  /* HP/UX 9 (%@#!) writes to sscanf strings */
+  tmp_version = my_strdup("$min_audiofile_version");
+  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
+     printf("%s, bad version string\n", "$min_audiofile_version");
+     exit(1);
+   }
+
+   if (($audiofile_major_version > major) ||
+      (($audiofile_major_version == major) && ($audiofile_minor_version > minor)) ||
+      (($audiofile_major_version == major) && ($audiofile_minor_version == minor) && ($audiofile_micro_version >= micro)))
+    {
+      return 0;
+    }
+  else
+    {
+      printf("\n*** 'audiofile-config --version' returned %d.%d.%d, but the minimum version\n", $audiofile_major_version, $audiofile_minor_version, $audiofile_micro_version);
+      printf("*** of the Audio File Library required is %d.%d.%d. If audiofile-config is correct, then it is\n", major, minor, micro);
+      printf("*** best to upgrade to the required version.\n");
+      printf("*** If audiofile-config was wrong, set the environment variable AUDIOFILE_CONFIG\n");
+      printf("*** to point to the correct copy of audiofile-config, and remove the file\n");
+      printf("*** config.cache before re-running configure\n");
+      return 1;
+    }
+}
+
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  :
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+no_audiofile=yes
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+       CFLAGS="$ac_save_CFLAGS"
+       LIBS="$ac_save_LIBS"
+       ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+     fi
+  fi
+  if test "x$no_audiofile" = x ; then
+     echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_AUDIOFILE 1
+_ACEOF
+
+  else
+     echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+     if test "$AUDIOFILE_CONFIG" = "no" ; then
+       cat <<END
+*** The audiofile-config script installed by the Audio File Library could
+*** not be found.  If the Audio File Library was installed in PREFIX, make
+*** sure PREFIX/bin is in your path, or set the AUDIOFILE_CONFIG
+*** environment variable to the full path to audiofile-config.
+END
+     else
+       if test -f conf.audiofiletest ; then
+        :
+       else
+          echo "*** Could not run Audio File Library test program; checking why..."
+
+
+          ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+          CFLAGS="$CFLAGS $AUDIOFILE_CFLAGS"
+          LIBS="$LIBS $AUDIOFILE_LIBS"
+          cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <audiofile.h>
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+ return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+   cat <<END
+*** The test program compiled, but did not run.  This usually means that
+*** the run-time linker is not finding Audio File Library or finding the
+*** wrong version of Audio File Library.
+***
+*** If it is not finding Audio File Library, you'll need to set your
+*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point
+*** to the installed location.  Also, make sure you have run ldconfig if
+*** that is required on your system.
+***
+*** If you have an old version installed, it is best to remove it, although
+*** you may also be able to get things to work by modifying
+*** LD_LIBRARY_PATH.
+END
+
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ echo "*** The test program failed to compile or link. See the file config.log"
+          echo "*** for the exact error that occured. This usually means the Audio File"
+          echo "*** Library was incorrectly installed or that you have moved the Audio"
+          echo "*** File Library since it was installed. In the latter case, you may want"
+          echo "*** to edit the audiofile-config script: $AUDIOFILE_CONFIG"
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+          CFLAGS="$ac_save_CFLAGS"
+          LIBS="$ac_save_LIBS"
+          ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+       fi
+     fi
+     AUDIOFILE_CFLAGS=""
+     AUDIOFILE_LIBS=""
+     :
+  fi
+
+
+  rm -f conf.audiofiletest
+
+
   # Check whether --enable-nas or --disable-nas was given.
 if test "${enable_nas+set}" = set; then
   enableval="$enable_nas"
@@ -13523,6 +13834,9 @@ s,@ESD_LIBS@,$ESD_LIBS,;t t
 s,@ARTSC_CONFIG@,$ARTSC_CONFIG,;t t
 s,@ARTSC_CFLAGS@,$ARTSC_CFLAGS,;t t
 s,@ARTSC_LIBS@,$ARTSC_LIBS,;t t
+s,@AUDIOFILE_CONFIG@,$AUDIOFILE_CONFIG,;t t
+s,@AUDIOFILE_CFLAGS@,$AUDIOFILE_CFLAGS,;t t
+s,@AUDIOFILE_LIBS@,$AUDIOFILE_LIBS,;t t
 s,@NAS_LIBS@,$NAS_LIBS,;t t
 s,@NAS_CFLAGS@,$NAS_CFLAGS,;t t
 s,@PNG_LIBS@,$PNG_LIBS,;t t
