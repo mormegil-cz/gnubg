@@ -5,7 +5,7 @@ set xlabel "Positions"
 set ylabel "Alpha"
 
 set terminal dumb
-set output "annealing.txt"
+set output "anneal.txt"
 plot anneal(0.5,0.5,x) title "Alpha 0.5, anneal 0.5", \
      anneal(0.1,0.1,x) title "Alpha 0.1, anneal 0.1"
 

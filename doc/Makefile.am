@@ -8,7 +8,7 @@ EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
 	annealing.eps
 TXTFILES = rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
 	annealing.txt
-CLEANFILES = $(EPSFILES)
+CLEANFILES = $(EPSFILES) anneal.txt
 
 txt: gnubg.txt
 
@@ -18,7 +18,7 @@ html: gnubg.html
 
 gnubg.dvi: $(EPSFILES) fdl.texi
 
-gnubg.html: $(TXTFILES) fdl.texi
+gnubg.html: $(TXTFILES) annealing.png fdl.texi
 
 gnubg.info: $(TXTFILES) fdl.texi
 
@@ -27,17 +27,20 @@ gnubg.ps: $(EPSFILES) fdl.texi
 gnubg.txt: $(TXTFILES) fdl.texi
 
 annealing.txt annealing.eps: annealing.gp
-	gnuplot $<
+	$(GNUPLOT) $< && \
+	$(TR) -d '\f' < anneal.txt > $(srcdir)/annealing.txt
 
 annealing.png: annealing.eps
 	pstopnm -portrait -xsize 1024 $<
-	pnmscale 0.5 < annealing001.ppm | pnmtopng > $@
+	pnmscale 0.5 < annealing.eps001.ppm | pnmtopng > \
+		$(srcdir)/annealing.png
 
 .png.eps:
 	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | $(PNMTOPS) -noturn > $@
 
 .texi.html:
-	$(MAKEINFO) --html -I $(srcdir) $<
+	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'`
 
 .texi.txt:
-	$(MAKEINFO) --no-split --no-headers -I $(srcdir) $< > $@
+	cd $(srcdir) && \
+	$(MAKEINFO) --no-split --no-headers `echo $< | sed 's,.*/,,'` > $@

@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year February, 2001
+@set month-year March, 2001
 
 @syncodeindex vr cp
 
