@@ -3418,6 +3418,7 @@ FindnSaveBestMoves( movelist *pml,
   move *pm;
   movefilter* mFilters;
   int nMaxPly = 0;
+  int cOldMoves;
     
   /* Find all moves -- note that pml contains internal pointers to static
      data, so we can't call GenerateMoves again (or anything that calls
@@ -3489,6 +3490,8 @@ FindnSaveBestMoves( movelist *pml,
     pml->amMoves = NULL;
     return -1;
   }
+
+  nMaxPly = pec->nPlies;
   
   /* Resort the moves, in case the new evaluation reordered them. */
   qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
@@ -3497,33 +3500,41 @@ FindnSaveBestMoves( movelist *pml,
   
  finished:
 
+  cOldMoves = pml->cMoves;
   pml->cMoves = nMoves;
 
   /* Make sure that auchMove was evaluated at the deepest ply. */
-  if( auchMove )
-      for( i = 0; i < pml->cMoves; i++ )
-	  if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
-	      if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
-		  ScoreMove( pml->amMoves + i, pci, pec, nMaxPly );
-		  
-		  for( j = 0; j < i; j++ )
-		      if( CompareMoves( pml->amMoves + i,
-					pml->amMoves + j ) < 0 ) {
-			  /* On closer inspection, the selected move ranks
-			     higher; reorder the relevant part of the list. */
-			  move m;
-			  
-			  memcpy( &m, pml->amMoves + i, sizeof m );
-			  memmove( pml->amMoves + j + 1, pml->amMoves + j,
-				   ( i - j ) * sizeof m );
-			  memcpy( pml->amMoves + j, &m, sizeof m );
-			  
-			  break;
-		      }
-	      }
-	      break;
-	  }
-  
+  if( auchMove ) {
+
+    for( i = 0; i < pml->cMoves; i++ )
+      if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
+
+        /* evaluate move on nMaxPly plies */
+
+        if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
+          ScoreMove( pml->amMoves + i, pci, pec, nMaxPly );
+
+          /* move it up to the other moves evaluated on nMaxPly */
+
+          if ( nMaxPly ) {
+            move m;
+            memcpy( &m, pml->amMoves + i, sizeof m );
+            memmove( pml->amMoves + cOldMoves,
+                     pml->amMoves + cOldMoves + 1,
+                     ( pml->cMoves - cOldMoves - 1 ) * sizeof m );
+            memcpy( pml->amMoves + cOldMoves, &m, sizeof ( m ) );
+                
+            /* reorder moves evaluated on nMaxPly */
+                
+            qsort( pml->amMoves, cOldMoves + 1, 
+                   sizeof( move ), (cfunc) CompareMoves );
+                
+          }
+        }
+        break;
+      }
+  }
+
   return 0;
 
 }

@@ -1,3 +1,10 @@
+Mon May 19 22:20:43 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (FindnSaveBestMoves): bugfix: missing update of nMaxPly.
+	* eval.c (FindnSaveBestMoves): bugfix: fix logic for evaluating
+	actual move on nMaxPly.
+	(reported by Ian Shaw)
+
 Mon May 19 22:02:52 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (FindnSaveBestMoves): force evaluation for accept=1 and 
