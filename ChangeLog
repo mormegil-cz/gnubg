@@ -1,3 +1,13 @@
+Wed Jan 22 11:07:38 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtksplash.c (CreateSplash): [!GTK_CHECK_VERSION(2,2,0)] Don't
+	use GDK_WINDOW_TYPE_HINT_SPLASHSCREEN (reported by Holger Bochnig).
+	* gtkgame.c: [!GTK_CHECK_VERSION(2,2,0)] Don't use 
+	GDK_WINDOW_TYPE_HINT_UTILITY.
+
+	* gtkgame.c (OptionsPages): [!USE_SOUND] Don't use fSound
+	(reported by Holger Bochnig).
+
 Tue Jan 21 16:52:35 2003  Gary Wong  <gtw@gnu.org>
 
 	* set.c (CommandSetGUIWindowPositions): New function.  Make restoring

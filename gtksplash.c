@@ -65,8 +65,10 @@ CreateSplash () {
 #if GTK_CHECK_VERSION(2,0,0)
   gtk_window_set_role( GTK_WINDOW( pgs->pwWindow ),
 		       "splash screen" );
+#if GTK_CHECK_VERSION(2,2,0)
   gtk_window_set_type_hint( GTK_WINDOW( pgs->pwWindow ),
 			    GDK_WINDOW_TYPE_HINT_SPLASHSCREEN );
+#endif
 #endif
   gtk_window_set_title ( GTK_WINDOW ( pgs->pwWindow ), 
                          _("Starting GNU Backgammon " VERSION ) );
