@@ -15,11 +15,15 @@ duplication of effort and to make sure our changes merge easily.
   cubeful evaluation.
 
 * Game play:
+** Add an option for Nackgammon.
 ** Add cube handling for computer player.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
   progress.  To do it properly requires improved input routines.
 
 * Command interface:
+** Put all the "set auto*" options under a new "set automatice" subcommand,
+  and "set plies", "set cache" under a new "set evaluation" one.  ("set
+  evaluation candidates" and "set evaluation tolerance" go in there, too.)
 ** Check "show" exists for every "set"!
 ** Add more completions to help and readline.
 ** Allow user to vary parameters for rollouts (trials, truncation,
