@@ -1,3 +1,7 @@
+Mon Jun 16 21:28:35 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, configure.in: autoconf magic for BOARD3D.
+
 Mon Jun  9 23:20:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Allow modifications of the match length during edit.
