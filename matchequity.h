@@ -48,10 +48,19 @@ typedef struct _metinfo {
 /* current match equity table used by gnubg */
 
 extern float aafMET [ MAXSCORE ][ MAXSCORE ];
-
 extern float aafMETPostCrawford[ 2 ][ MAXSCORE ];
 
+
 extern metinfo miCurrent;
+
+
+extern float
+getME ( const int nScore0, const int nScore1, const int nMatchTo,
+        const int fPlayer,
+        const int nPoints, const int fWhoWins,
+        const int fCrawford,
+        float aafMET[ MAXSCORE ][ MAXSCORE ],
+        float aafMETPostCrawford[ 2 ][ MAXSCORE ] );
 
 /* Initialise match equity table */
 

@@ -440,9 +440,11 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
   float arCPLive [ 2 ][ MAXCUBELEVEL ];
   float arCPDead [ 2 ][ MAXCUBELEVEL ];
-  float rG0, rG1, rBG0, rBG1;
+  float arG[ 2 ], arBG[ 2 ];
 
-  int nDead, n, nMax, nCubeValue, nCubePrimeValue;
+  float rDP, rRDP, rDTW, rDTL;
+
+  int nDead, n, nMax, nCubeValue, nCubePrimeValue, k;
 
   /* Gammon and backgammon ratio's. 
      Avoid division by zero in extreme cases. */
@@ -452,27 +454,27 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
     /* arOutput evaluated for player 0 */
 
     if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
-      rG0 = ( arOutput[ OUTPUT_WINGAMMON ] -
+      arG[ 0 ] = ( arOutput[ OUTPUT_WINGAMMON ] -
               arOutput[ OUTPUT_WINBACKGAMMON ] ) /
         arOutput[ OUTPUT_WIN ];
-      rBG0 = arOutput[ OUTPUT_WINBACKGAMMON ] /
+      arBG[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] /
         arOutput[ OUTPUT_WIN ];
     }
     else {
-      rG0 = 0.0;
-      rBG0 = 0.0;
+      arG[ 0 ] = 0.0;
+      arBG[ 0 ]= 0.0;
     }
 
     if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
-      rG1 = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+      arG[ 1 ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
               arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
         ( 1.0 - arOutput[ OUTPUT_WIN ] );
-      rBG1 = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+      arBG[ 1 ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
         ( 1.0 - arOutput[ OUTPUT_WIN ] );
     }
     else {
-      rG1 = 0.0;
-      rBG1 = 0.0;
+      arG[ 1 ] = 0.0;
+      arBG[ 1 ] = 0.0;
     }
 
   }
@@ -481,27 +483,27 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
     /* arOutput evaluated for player 1 */
 
     if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
-      rG1 = ( arOutput[ OUTPUT_WINGAMMON ] -
+      arG[ 1 ] = ( arOutput[ OUTPUT_WINGAMMON ] -
               arOutput[ OUTPUT_WINBACKGAMMON ] ) /
         arOutput[ OUTPUT_WIN ];
-      rBG1 = arOutput[ OUTPUT_WINBACKGAMMON ] /
+      arBG[ 1 ] = arOutput[ OUTPUT_WINBACKGAMMON ] /
         arOutput[ OUTPUT_WIN ];
     }
     else {
-      rG1 = 0.0;
-      rBG1 = 0.0;
+      arG[ 1 ] = 0.0;
+      arBG[ 1 ] = 0.0;
     }
 
     if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
-      rG0 = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+      arG[ 0 ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
               arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
         ( 1.0 - arOutput[ OUTPUT_WIN ] );
-      rBG0 = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+      arBG[ 0 ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
         ( 1.0 - arOutput[ OUTPUT_WIN ] );
     }
     else {
-      rG0 = 0.0;
-      rBG0 = 0.0;
+      arG[ 0 ] = 0.0;
+      arBG[ 0 ] = 0.0;
     }
   }
 
@@ -527,87 +529,95 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
     /* Even though it's a dead cube we take account of the opponents
        automatic redouble. */
 
-    nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
-
     /* Dead cube cash point for player 0 */
 
-    arCPDead[ 0 ][ n ] = 
-      ( ( 1.0 - rG1 - rBG1 ) * 
-        GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) 
-        + rG1 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET ) 
-        + rBG1 * GET_MET ( i, j - 6 * nCubePrimeValue, aafMET ) 
-        - GET_MET ( i - nCubeValue, j, aafMET ) )
-      /
-      ( ( 1.0 - rG1 - rBG1 ) * 
-        GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) 
-        + rG1 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET ) 
-        + rBG1 * GET_MET ( i, j - 6 * nCubePrimeValue, aafMET ) 
-        - ( 1.0 - rG0 - rBG0 ) *
-        GET_MET( i - 2 * nCubePrimeValue, j, aafMET )
-        - rG0 * GET_MET ( i - 4 * nCubePrimeValue, j, aafMET )
-        - rBG0 * GET_MET ( i - 6 * nCubePrimeValue, j, aafMET ) );
+    for ( k = 0; k < 2; k++ ) {
 
-    /* Dead cube cash point for player 1 */
+      if ( ! k )
+        nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
+      else
+        nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
 
-    nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
+      rDTL =
+        ( 1.0 - arG[ ! k ] - arBG[ ! k ] ) * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, 2 * nCubePrimeValue, ! k, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + arG[ ! k ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, 4 * nCubePrimeValue, ! k, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + arBG[ ! k ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, 6 * nCubePrimeValue, ! k, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-    arCPDead[ 1 ][ n ] = 
-      ( ( 1.0 - rG0 - rBG0 ) * 
-        GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) 
-        + rG0 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET ) 
-        + rBG0 * GET_MET ( j, i - 6 * nCubePrimeValue, aafMET ) 
-        - GET_MET ( j - nCubeValue, i, aafMET ) )
-      /
-      ( ( 1.0 - rG0 - rBG0 ) * 
-        GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) 
-        + rG0 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET ) 
-        + rBG0 * GET_MET ( j, i - 6 * nCubePrimeValue, aafMET ) 
-        - ( 1.0 - rG1 - rBG1 ) *
-        GET_MET( j - 2 * nCubePrimeValue, i, aafMET )
-        - rG1 * GET_MET ( j - 4 * nCubePrimeValue, i, aafMET )
-        - rBG1 * GET_MET ( j - 6 * nCubePrimeValue, i, aafMET ) );
+      rDP = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, nCubeValue, k, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-    /* Live cube cash point for player 0 and 1 */
+      rDTW = 
+        ( 1.0 - arG[ k ] - arBG[ k ] ) * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, 2 * nCubePrimeValue, k, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + arG[ k ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, 4 * nCubePrimeValue, k, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + arBG[ k ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                k, 6 * nCubePrimeValue, k, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-    if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) ) {
+      arCPDead[ k ][ n ] = ( rDTL - rDP ) / ( rDTL - rDTW );
 
-      /* The doubled cube is going to be dead */
+      /* Live cube cash point for player */
 
-      arCPLive[ 0 ][ n ] = arCPDead[ 0 ][ n ];
-      arCPLive[ 1 ][ n ] = arCPDead[ 1 ][ n ];
+      if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
+        /* The doubled cube is going to be dead */
+        arCPLive[ k ][ n ] = arCPDead[ k ][ n ];
+      else {
 
-    } 
-    else {
+        /* Doubled cube is alive */
 
-      /* Doubled cube is alive */
+        /* redouble, pass */
 
-      arCPLive[ 0 ][ n ] = 1.0 - arCPLive[ 1 ][ n + 1] *
-        ( GET_MET ( i - nCubeValue, j, aafMET )   
-          - ( 1.0 - rG0 - rBG0 ) *
-          GET_MET( i - 2 * nCubeValue, j, aafMET )
-          - rG0 * GET_MET ( i - 4 * nCubeValue, j, aafMET )
-          - rBG0 * GET_MET ( i - 6 * nCubeValue, j, aafMET ) )
-        /
-        ( GET_MET ( i, j - 2 * nCubeValue, aafMET )
-          - ( 1.0 - rG0 - rBG0 ) *
-          GET_MET( i - 2 * nCubeValue, j, aafMET )
-          - rG0 * GET_MET ( i - 4 * nCubeValue, j, aafMET )
-          - rBG0 * GET_MET ( i - 6 * nCubeValue, j, aafMET ) );
+        rRDP =
+          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                  k, 2 * nCubeValue, ! k, pci->fCrawford,
+                  aafMET, aafMETPostCrawford );
 
-      arCPLive[ 1 ][ n ] = 1.0 - arCPLive[ 0 ][ n + 1 ] *
-        ( GET_MET ( j - nCubeValue, i, aafMET )   
-          - ( 1.0 - rG1 - rBG1 ) *
-          GET_MET( j - 2 * nCubeValue, i, aafMET )
-          - rG1 * GET_MET ( j - 4 * nCubeValue, i, aafMET )
-          - rBG1 * GET_MET ( j - 6 * nCubeValue, i, aafMET ) )
-        /
-        ( GET_MET ( j, i - 2 * nCubeValue, aafMET )
-          - ( 1.0 - rG1 - rBG1 ) *
-          GET_MET( j - 2 * nCubeValue, i, aafMET )
-          - rG1 * GET_MET ( j - 4 * nCubeValue, i, aafMET )
-          - rBG1 * GET_MET ( j - 6 * nCubeValue, i, aafMET ) );
+        /* double, pass */
 
-    }
+        rDP = 
+          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                  k, nCubeValue, k, pci->fCrawford,
+                  aafMET, aafMETPostCrawford );
+
+        /* double, take win */
+
+        rDTW = 
+          ( 1.0 - arG[ k ] - arBG[ k ] ) * 
+          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                  k, 2 * nCubeValue, k, pci->fCrawford,
+                  aafMET, aafMETPostCrawford )
+          + arG[ k ] * 
+          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                  k, 4 * nCubeValue, k, pci->fCrawford,
+                  aafMET, aafMETPostCrawford )
+          + arBG[ k ] * 
+          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                  k, 6 * nCubeValue, k, pci->fCrawford,
+                  aafMET, aafMETPostCrawford );
+
+        arCPLive[ k ][ n ] = 
+          1.0 - arCPLive[ ! k ][ n + 1] * ( rDP - rDTW ) / ( rRDP - rDTW );
+
+      }
+      
+    } /* loop k */
 
   }
 
@@ -616,7 +626,7 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
   arCP[ 0 ] = arCPLive[ 0 ][ 0 ];
   arCP[ 1 ] = arCPLive[ 1 ][ 0 ];
 
-  /* debug output 
+  /* debug
      for ( n = nMax; n >= 0; n-- ) {
 
      printf ("Cube %i\n"
@@ -630,6 +640,7 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
      }
   */
+
 
   return 0;
 
@@ -686,10 +697,6 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
 
     /* normalize score */
 
-    int i = pci->nMatchTo - pci->anScore[ pci->fMove ] - 1;
-    int j = pci->nMatchTo - pci->anScore[ ! pci->fMove ] - 1;
-    int nCube = pci->nCube;
-
     float rG1, rBG1, rG2, rBG2, rDTW, rNDW, rDTL, rNDL;
     float rRisk, rGain;
 
@@ -720,26 +727,61 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
 
     /* double point */
 
-    /* FIXME: use the BG ratio */
-    /* match equity for double, take; win */
-    rDTW = (1.0 - rG1 - rBG1) * GET_MET ( i - 2 * nCube, j, aafMET ) +
-      rG1 * GET_MET ( i - 4 * nCube, j, aafMET );
-    rBG1 * GET_MET ( i - 6 * nCube, j, aafMET );
+    rDTW = 
+      ( 1.0 - rG1 - rBG1 ) * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 4 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 6 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
-    /* match equity for no double; win */
-    rNDW = (1.0 - rG1 - rBG1) * GET_MET ( i - nCube, j, aafMET ) +
-      rG1 * GET_MET ( i - 2 * nCube, j, aafMET );
-    rBG1 * GET_MET ( i - 3 * nCube, j, aafMET );
+    rNDW = 
+      ( 1.0 - rG1 - rBG1 ) * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 1 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
-    /* match equity for double, take; loose */
-    rDTL = (1.0 - rG2 - rBG2) * GET_MET ( i, j - 2 * nCube, aafMET ) +
-      rG2 * GET_MET ( i, j - 4 * nCube, aafMET );
-    rBG2 * GET_MET ( i, j - 6 * nCube, aafMET );
+    rDTL = 
+      ( 1.0 - rG2 - rBG2 ) * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG2 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 4 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG2 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 6 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
-    /* match equity for double, take; loose */
-    rNDL = (1.0 - rG2 - rBG2) * GET_MET ( i, j - nCube, aafMET ) +
-      rG2 * GET_MET ( i, j - 2 * nCube, aafMET );
-    rBG2 * GET_MET ( i, j - 3 * nCube, aafMET );
+    rNDL = 
+      ( 1.0 - rG2 - rBG2 ) * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 1 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG2 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG2 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     /* risk & gain */
 
@@ -1577,5 +1619,66 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
 }
 
 
+/*
+ * Return match equity (mwc) assuming player fWhoWins wins nPoints points.
+ *
+ * If fCrawford then afMETPostCrawford is used, otherwise
+ * aafMET is used.
+ *
+ * Input:
+ *    nAway0: points player 0 needs to win
+ *    nAway1: points player 1 needs to win
+ *    fPlayer: get mwc for this player
+ *    fCrawford: is this the Crawford game
+ *    aafMET: match equity table for player 0
+ *    afMETPostCrawford: post-Crawford match equity table for player 0
+ *
+ */
 
 
+extern float
+getME ( const int nScore0, const int nScore1, const int nMatchTo,
+        const int fPlayer,
+        const int nPoints, const int fWhoWins,
+        const int fCrawford,
+        float aafMET[ MAXSCORE ][ MAXSCORE ],
+        float aafMETPostCrawford[ 2 ][ MAXSCORE ] ) {
+
+  int n0 = nMatchTo - ( nScore0 + ( ! fWhoWins ) * nPoints ) - 1;
+  int n1 = nMatchTo - ( nScore1 + fWhoWins * nPoints ) - 1;
+
+  /* check if any player has won the match */
+
+  if ( n0 < 0 )
+    /* player 0 has won the game */
+    return ( fPlayer ) ? 0.0f : 1.0f;
+  else if ( n1 < 0 )
+    /* player 1 has won the game */
+    return ( fPlayer ) ? 1.0f : 0.0f;
+
+  /* the match is not finished */
+
+  if ( fCrawford || 
+       ( nMatchTo - nScore0 == 1 ) || ( nMatchTo - nScore1 == 1 ) ) {
+
+    /* the next game will be post-Crawford */
+
+    if ( ! n0 )
+      /* player 0 is leading match */
+      /* FIXME: use pc-MET for player 0 */
+      return ( fPlayer ) ? 
+        aafMETPostCrawford[ 1 ][ n1 ] : 1.0 - aafMETPostCrawford[ 1 ][ n1 ];
+    else
+      /* player 1 is leading the match */
+      return ( fPlayer ) ? 
+        1.0f - aafMETPostCrawford[ 0 ][ n0 ] : aafMETPostCrawford[ 0 ][ n0 ];
+
+  }
+  else 
+    /* non-post-Crawford games */
+    return ( fPlayer ) ? 1.0 - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
+
+  assert ( FALSE );
+  return 0.0f;
+
+}
