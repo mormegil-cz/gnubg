@@ -48,9 +48,24 @@ Current features:
  - Automatic and manual annotation (analysis and commentary) of games and
    matches.
  - Record keeping of statistics of players in games and matches.
- - Native language support for Danish, English, German, Japanese and
-   U.S. English.  (If you would like to add a translation from English to 
-   another language, please contact <bug-gnubg@gnu.org>.)
+ - Native language support; 10 languages (complete or in progress). See
+   table for status of your language:
+
+                  Completed in 0.14.1
+   Czech (cs_CZ)      100%
+   Danish (da_DK)     >10%
+   English (en_GB)    100%
+   English (en_US)    100%
+   French (fr_FR)     >50%
+   German (de_DE)     >90%
+   Icelandic (is_IS)  >25%
+   Italian (it_IT)    >90%
+   Japanese (ja_JP)   >50%
+   Turkish (tr_TR)    >25%
+   
+   If you would like to add a translation from English to 
+   another language or contribute to one of the current translations, 
+   please contact <bug-gnubg@gnu.org>.
 
 Bearoff databases:
 ------------------
