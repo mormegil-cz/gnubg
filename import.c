@@ -31,6 +31,7 @@
 #include "gtkgame.h"
 #endif
 #include "import.h"
+#include "positionid.h"
 
 #ifndef HUGE_VALF
 #define HUGE_VALF 1e38
@@ -63,15 +64,13 @@ ImportJF( FILE * fp, char *szFileName) {
   int nGameOrMatch, nOpponent, nLevel, nScore1, nScore2;
   int nDie1, nDie2; 
   int fCaution, fCubeUse, fJacoby, fBeavers, fSwapDice, fJFplayedLast;
-
   int i, idx, anNew[26], anOld[26];
-
   char szPlayer1[40];
   char szPlayer2[40];
   char szLastMove[25];
-
   unsigned char c;
-
+  moverecord *pmr;
+  
   nVersion = ReadInt16( fp );
 
   if ( nVersion < 124 || nVersion > 126 ){
@@ -241,9 +240,42 @@ ImportJF( FILE * fp, char *szFileName) {
 
   ms.anBoard[ ! idx ][ 24 ] =  anNew[0];
   ms.anBoard[ idx ][ 24 ] =  -anNew[25];
- 
-  return;
 
+  if( ms.anDice[ 0 ] ) {
+      pmr = malloc( sizeof( pmr->sd ) );
+      pmr->sd.mt = MOVE_SETDICE;
+      pmr->sd.sz = NULL;
+      pmr->sd.fPlayer = ms.fTurn;
+      pmr->sd.anDice[ 0 ] = ms.anDice[ 0 ];
+      pmr->sd.anDice[ 1 ] = ms.anDice[ 1 ];
+      pmr->sd.lt = LUCK_NONE;
+      pmr->sd.rLuck = -HUGE_VALF;
+      AddMoveRecord( pmr );
+  }
+
+  pmr = malloc( sizeof( pmr->sb ) );
+  pmr->sb.mt = MOVE_SETBOARD;
+  pmr->sb.sz = NULL;
+  if( ms.fTurn )
+      SwapSides( ms.anBoard );
+  PositionKey( ms.anBoard, pmr->sb.auchKey );
+  if( ms.fTurn )
+      SwapSides( ms.anBoard );
+  AddMoveRecord( pmr );
+
+  pmr = malloc( sizeof( pmr->scv ) );
+  pmr->scv.mt = MOVE_SETCUBEVAL;
+  pmr->scv.sz = NULL;
+  pmr->scv.nCube = ms.nCube;
+  AddMoveRecord( pmr );
+
+  pmr = malloc( sizeof( pmr->scp ) );
+  pmr->scp.mt = MOVE_SETCUBEPOS;
+  pmr->scp.sz = NULL;
+  pmr->scp.fCubeOwner = ms.fCubeOwner;
+  AddMoveRecord( pmr );
+  
+  return;
 }  
 
 static int fWarned, fPostCrawford;

@@ -1,3 +1,11 @@
+Mon Sep 10 12:49:54 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (CreateAnnotationWindow): Use gtk_paned_pack*() instead
+	of gtk_paned_add*(), for better geometry control.
+
+	* import.c (ImportJF): Add MOVE_SET* records when importing .pos
+	files.
+
 Thu Aug 30 10:05:52 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (LoadRCFiles, CommandSaveSettings), gtkgame.c (InitGTK): Use
