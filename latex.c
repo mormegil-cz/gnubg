@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
 
@@ -376,6 +377,8 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
     matchstate msExport;
     int fTook = FALSE, i;
     char sz[ 1024 ];
+
+    updateStatisticsGame ( plGame );
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
