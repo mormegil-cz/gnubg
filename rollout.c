@@ -389,10 +389,9 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
 	
     if( fShowProgress ) {
 #if USE_GTK
-	if( fX ) {
-	    if( GTKRolloutUpdate( arMu, arSigma, i, cGames ) )
-		return -1;
-	} else
+	if( fX )
+	    GTKRolloutUpdate( arMu, arSigma, i, cGames );
+	else
 #endif
 	    {
 		outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
