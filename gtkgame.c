@@ -6576,8 +6576,8 @@ extern void GTKShowVersion( void ) {
 
     ps = gtk_rc_style_new();
     gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
-			gtk_label_new( "Copyright 1999, 2000, 2001, 2002 "
-				       "Gary Wong" ), FALSE, FALSE, 4 );
+			gtk_label_new( "Copyright 1999, 2000, 2001, 2002, "
+				       "2003 Gary Wong" ), FALSE, FALSE, 4 );
 #if GTK_CHECK_VERSION(1,3,10)
     ps->font_desc = pango_font_description_new();
     pango_font_description_set_family_static( ps->font_desc, "sans" );
@@ -7129,7 +7129,26 @@ extern void GTKSet( void *p ) {
           getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
           gtk_widget_hide( pwMessage );
         }
-    }
+    } else if( p == &fGUIDiceArea ) {
+	BoardData *bd = BOARD( pwBoard )->board_data;
+    
+	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
+	    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
+		gtk_widget_hide( bd->dice_area );
+	    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
+		gtk_widget_show_all( bd->dice_area );
+	}
+    } else if( p == &fGUIShowIDs ) {
+	BoardData *bd = BOARD( pwBoard )->board_data;
+    
+	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
+	    if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !fGUIShowIDs )
+		gtk_widget_hide( bd->vbox_ids );
+	    else if( !GTK_WIDGET_VISIBLE( bd->vbox_ids ) && fGUIShowIDs )
+		gtk_widget_show_all( bd->vbox_ids );
+	}
+    } else if( p == &fGUIShowPips )
+	ShowBoard(); /* this is overkill, but it works */
 }
 
 static void FormatStatEquity( char *sz, float ar[ 2 ], int nDenominator,
@@ -7897,6 +7916,11 @@ typedef struct _optionswidget {
 
   GtkWidget *pwSound, *pwSoundArtsC, *pwSoundCommand, *pwSoundESD,
       *pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundSettings;
+
+  GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips,
+      *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide, *pwBeepIllegal,
+      *pwHigherDieFirst;
+  GtkAdjustment *padjSpeed;
 } optionswidget;   
 
 static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
@@ -7942,6 +7966,13 @@ static void SoundToggled( GtkWidget *pw, optionswidget *pow ) {
 				  GTK_TOGGLE_BUTTON( pow->pwSound ) ) );
 }
 
+static void ToggleAnimation( GtkWidget *pw, GtkWidget *pwSpeed ) {
+
+    gtk_widget_set_sensitive( pwSpeed,
+                              !gtk_toggle_button_get_active(
+                                  GTK_TOGGLE_BUTTON( pw ) ) );
+}
+
 static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     static char *aszRNG[] = {
@@ -7963,7 +7994,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	N_("Doubtful"), N_("Bad"), N_("Very bad")
     };
     char **ppch, **ppchTip;
-    GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb;
+    GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
+	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale;
     int cCache;
     
     pwn = gtk_notebook_new();
@@ -8009,6 +8041,20 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "bearoff, if there is an unambiguous move which "
 			    "bears off as many chequers as possible, then "
 			    "choose that move automatically."), NULL );
+
+    pow->pwIllegal = gtk_check_button_new_with_label(
+	_("Allow dragging to illegal points"));
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwIllegal ),
+				  fGUIIllegal );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwIllegal, FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pow->pwIllegal,
+			  _("If set, when considering your move you may "
+			    "temporarily move chequers onto points which "
+			    "cannot be reached with the current dice roll.  "
+			    "If unset, you may move chequers only onto "
+			    "legal points.  Either way, the resulting move "
+			    "must be legal when you pick up the dice, or it "
+			    "will not be accepted."), NULL );
     
     pow->pwGameNackgammon = gtk_check_button_new_with_label(
 	_("Use Nackgammon starting position"));
@@ -8234,6 +8280,113 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "will pause between each move, to give you a "
 			    "chance to see it."), NULL );
 
+    pow->pwUseDiceIcon = 
+	gtk_check_button_new_with_label( _("Show dice below board when human "
+					   "player on roll") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwUseDiceIcon ),
+				  fGUIDiceArea );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwUseDiceIcon, FALSE, FALSE,
+			0 );
+    gtk_tooltips_set_tip( ptt, pow->pwUseDiceIcon,
+			  _("When it is your turn to roll, a pair of dice "
+			    "will be shown below the board, and you can "
+			    "click on them to roll.  Even if you choose not "
+			    "to show the dice, you can always roll by "
+			    "clicking the area in the middle of the board "
+			    "where the dice will land."), NULL );
+    
+    pow->pwShowIDs = gtk_check_button_new_with_label(
+	_("Show Position ID and Match ID above board") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowIDs ),
+				  fGUIShowIDs );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowIDs, FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pow->pwShowIDs,
+			  _("Two entry fields will be shown above the board, "
+			    "which can be useful for recording, entering and "
+			    "exchanging board positions and match "
+			    "situations."), NULL );
+    
+    pow->pwShowPips = gtk_check_button_new_with_label(
+	_("Show pip count below board") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowPips ),
+				  fGUIShowPips );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowPips, FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pow->pwShowPips,
+			  _("The \"pip counts\" (number of points each player "
+			    "must advance all of their chequers to bear them "
+			    "all off) will be shown below the scores."),
+			  NULL );
+	
+    pwAnimBox = gtk_hbox_new( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwAnimBox, FALSE, FALSE, 0 );
+    
+    pwFrame = gtk_frame_new( _("Animation") );
+    gtk_box_pack_start( GTK_BOX( pwAnimBox ), pwFrame, FALSE, FALSE, 4 );
+
+    pwBox = gtk_vbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwFrame ), pwBox );
+
+    pow->pwAnimateNone = gtk_radio_button_new_with_label( NULL, _("None") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAnimateNone ),
+				  animGUI == ANIMATE_NONE );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pow->pwAnimateNone, FALSE, FALSE,
+			0 );
+    gtk_tooltips_set_tip( ptt, pow->pwAnimateNone,
+			  _("Do not display any kind of animation for "
+			    "automatically moved chequers."), NULL );
+    
+    pow->pwAnimateBlink = gtk_radio_button_new_with_label_from_widget(
+	GTK_RADIO_BUTTON( pow->pwAnimateNone ), _("Blink moving chequers") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAnimateBlink ),
+				  animGUI == ANIMATE_BLINK );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pow->pwAnimateBlink, FALSE, FALSE,
+			0 );
+    gtk_tooltips_set_tip( ptt, pow->pwAnimateBlink,
+			  _("When automatically moving chequers, flash "
+			    "them between the original and final points."),
+			  NULL );
+    
+    pow->pwAnimateSlide = gtk_radio_button_new_with_label_from_widget(
+	GTK_RADIO_BUTTON( pow->pwAnimateNone ), _("Slide moving chequers") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAnimateSlide ),
+				  animGUI == ANIMATE_SLIDE );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pow->pwAnimateSlide, FALSE, FALSE,
+			0 );
+    gtk_tooltips_set_tip( ptt, pow->pwAnimateSlide,
+			  _("Show automatically moved chequers moving across "
+			    "the board between the points."), NULL );
+
+    pwev = gtk_event_box_new();
+    gtk_box_pack_start( GTK_BOX( pwAnimBox ), pwev, FALSE, FALSE, 0 );    
+    pwSpeed = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwSpeed );
+    
+    pow->padjSpeed = GTK_ADJUSTMENT( gtk_adjustment_new( nGUIAnimSpeed, 0, 7,
+							 1, 1, 0 ) );
+    pwScale = gtk_hscale_new( pow->padjSpeed );
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_widget_set_size_request( pwScale, 100, -1 );
+#else
+    gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
+#endif
+    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
+    gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
+
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Speed:") ),
+			FALSE, FALSE, 8 );
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Slow") ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), pwScale, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Fast") ),
+			FALSE, FALSE, 4 );
+    gtk_tooltips_set_tip( ptt, pwev,
+			  _("Control the rate at which blinking or sliding "
+			    "chequers are displayed."), NULL );
+    
+    gtk_signal_connect( GTK_OBJECT( pow->pwAnimateNone ), "toggled",
+			GTK_SIGNAL_FUNC( ToggleAnimation ), pwSpeed );
+    ToggleAnimation( pow->pwAnimateNone, pwSpeed );
+
     pow->pwDisplay = gtk_check_button_new_with_label (
 	_("Display computer moves"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwDisplay, FALSE, FALSE, 0);
@@ -8341,6 +8494,16 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     pwvbox = gtk_vbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
+    pow->pwBeepIllegal = gtk_check_button_new_with_label(
+	_("Beep on invalid input") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwBeepIllegal ),
+				  fGUIBeep );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwBeepIllegal,
+			FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pow->pwBeepIllegal,
+			  _("Emit a warning beep if invalid moves "
+			    "are attempted."), NULL );
+    
     pow->pwSound = gtk_check_button_new_with_label (
 	_("Enable sound effects"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwSound, FALSE, FALSE, 0);
@@ -8476,6 +8639,16 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			      gtk_label_new( _("Dice") ) );
     pwvbox = gtk_vbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+
+    pow->pwHigherDieFirst = gtk_check_button_new_with_label(
+	_("Show higher die on left") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwHigherDieFirst ),
+				  fGUIHighDieFirst );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwHigherDieFirst, FALSE, FALSE,
+			0 );
+    gtk_tooltips_set_tip( ptt, pow->pwHigherDieFirst,
+			  _("Force the higher of the two dice to be shown "
+			    "on the left."), NULL );
     
     pow->pwDiceManual = gtk_radio_button_new_with_label( NULL,
 							 _("Manual dice") );
@@ -8852,6 +9025,31 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 	  UserCommand( "set sound system windows" );
   }
 #endif
+
+  CHECKUPDATE( pow->pwIllegal, fGUIIllegal, "set gui illegal %s" )
+  CHECKUPDATE( pow->pwUseDiceIcon, fGUIDiceArea, "set gui dicearea %s" )
+  CHECKUPDATE( pow->pwShowIDs, fGUIShowIDs, "set gui showids %s" )
+  CHECKUPDATE( pow->pwShowPips, fGUIShowPips, "set gui showpips %s" )
+  CHECKUPDATE( pow->pwBeepIllegal, fGUIBeep, "set gui beep %s" )
+  CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst,
+	       "set gui highdiefirst %s" )
+
+  if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAnimateNone ) )
+      && animGUI != ANIMATE_NONE )
+      UserCommand( "set gui animation none" );
+  else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+					     pow->pwAnimateBlink ) )
+      && animGUI != ANIMATE_BLINK )
+      UserCommand( "set gui animation blink" );
+  else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+					     pow->pwAnimateSlide ) )
+      && animGUI != ANIMATE_SLIDE )
+      UserCommand( "set gui animation slide" );
+
+  if( ( n = pow->padjSpeed->value ) != nGUIAnimSpeed ) {
+      sprintf( sz, "set gui animation speed %d", n );
+      UserCommand( sz );
+  }
       
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );

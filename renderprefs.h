@@ -1,7 +1,7 @@
 /*
- * gtkprefs.h
+ * renderprefs.h
  *
- * by Gary Wong <gtw@gnu.org>, 2000.
+ * by Gary Wong <gtw@gnu.org>, 2000, 2003
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -19,13 +19,18 @@
  * $Id$
  */
 
-#ifndef _GTKPREFS_H_
-#define _GTKPREFS_H_
+#ifndef _RENDERPREFS_H_
+#define _RENDERPREFS_H_
 
-#include "gtkboard.h"
+#ifndef _RENDER_H_
+#include "render.h"
+#endif
 
-extern void BoardPreferences( GtkWidget *pwBoard );
-extern void BoardPreferencesStart( GtkWidget *pwBoard );
-extern void BoardPreferencesDone( GtkWidget *pwBoard );
+extern char *aszWoodName[];
+extern renderdata rdAppearance;
+
+extern void RenderPreferencesParam( renderdata *prd, char *szParam,
+				   char *szValue );
+extern char *RenderPreferencesCommand( renderdata *prd, char *sz );
 
 #endif

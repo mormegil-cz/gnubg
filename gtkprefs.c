@@ -44,6 +44,7 @@
 #include "i18n.h"
 #include "path.h"
 #include "render.h"
+#include "renderprefs.h"
 
 #define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( GTK_COLOUR_PICKER( \
 	pcp )->pwColourSel )
@@ -61,12 +62,10 @@ typedef enum _pixmapindex {
 static GdkPixmap *ppm; /* preview pixmap */
 static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ],
-    *apadjBoard[ 4 ], *padjSpeed, *padjRound;
+    *apadjBoard[ 4 ], *padjRound;
 static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
-    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
-    *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
-    *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
+    *pwLabels, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
 
 #if HAVE_LIBXML2
@@ -79,27 +78,15 @@ static GtkWidget *pwDesignAddAuthor;
 static GtkWidget *pwDesignAddTitle;
 #endif /* HAVE_LIBXML2 */
 
-static GtkWidget *pwShowIDs;
-static GtkWidget *pwShowPips;
 static GtkWidget *apwDiceColour[ 2 ];
 static GtkWidget *pwCubeColour;
 static GtkWidget *apwDiceDotColour[ 2 ];
 static GtkWidget *apwDieColour[ 2 ];
 static GtkWidget *apwDiceColourBox[ 2 ];
-static int fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
-    fHigherDieFirst, fWood, fHinges;
-static int fShowIDs;
-static int fShowPips;
-static animation anim;
+static int fLabels, fWood, fHinges;
 static int fUpdate;
 
-static char *aszWoodName[] = {
-    "alder", "ash", "basswood", "beech", "cedar", "ebony", "fir", "maple",
-    "oak", "pine", "redwood", "walnut", "willow", "paint"
-};
-
-
-static void GetPrefs ( BoardData *bd );
+static void GetPrefs ( renderdata *bd );
 
 static void
 AddDesignRow ( gpointer data, gpointer user_data );
@@ -210,10 +197,10 @@ static void Preview( renderdata *prd ) {
 
 static void UpdatePreview( GtkWidget **ppw ) {
 
-    BoardData bd;
+    renderdata rd;
   
-    GetPrefs( &bd );
-    Preview( &bd.rd );
+    GetPrefs( &rd );
+    Preview( &rd );
     
     if( ppw )
 	gtk_widget_queue_draw( *ppw );
@@ -229,13 +216,13 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     pw = gtk_vbox_new( FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
 
-    apadj[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new( bd->rd.arRefraction[ f ],
+    apadj[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new( rdAppearance.arRefraction[ f ],
 						     1.0, 3.5, 0.1, 1.0,
 						     0.0 ) );
     apadjCoefficient[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new(
-	bd->rd.arCoefficient[ f ], 0.0, 1.0, 0.1, 0.1, 0.0 ) );
+	rdAppearance.arCoefficient[ f ], 0.0, 1.0, 0.1, 0.1, 0.0 ) );
     apadjExponent[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new(
-	bd->rd.arExponent[ f ], 1.0, 100.0, 1.0, 10.0, 0.0 ) );
+	rdAppearance.arExponent[ f ], 1.0, 100.0, 1.0, 10.0, 0.0 ) );
     
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -248,7 +235,7 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_colour_picker_set_has_opacity_control(
 	GTK_COLOUR_PICKER( apwColour[ f ] ), TRUE );
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwColour[ f ] ),
-				   bd->rd.aarColour[ f ] );
+				   rdAppearance.aarColour[ f ] );
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwColour[ f ] ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
@@ -331,7 +318,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pwvbox ),
 			apwDieColour[ f ], FALSE, FALSE, 0 );
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColour[ f ] ),
-                                   bd->rd.afDieColour[ f ] );
+                                   rdAppearance.afDieColour[ f ] );
 
 
     apwDiceColourBox[ f ] = gtk_vbox_new ( FALSE, 0 );
@@ -339,9 +326,9 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 			apwDiceColourBox[ f ], FALSE, FALSE, 0 );
 
     apadjDiceCoefficient[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new(
-	bd->rd.arDiceCoefficient[ f ], 0.0, 1.0, 0.1, 0.1, 0.0 ) );
+	rdAppearance.arDiceCoefficient[ f ], 0.0, 1.0, 0.1, 0.1, 0.0 ) );
     apadjDiceExponent[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new(
-	bd->rd.arDiceExponent[ f ], 1.0, 100.0, 1.0, 10.0, 0.0 ) );
+	rdAppearance.arDiceExponent[ f ], 1.0, 100.0, 1.0, 10.0, 0.0 ) );
     
     gtk_box_pack_start( GTK_BOX( apwDiceColourBox[ f ] ),
 			pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -355,7 +342,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_colour_picker_set_has_opacity_control(
 	GTK_COLOUR_PICKER( apwDiceColour[ f ] ), FALSE );
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwDiceColour[ f ] ),
-				   bd->rd.aarDiceColour[ f ] );
+				   rdAppearance.aarDiceColour[ f ] );
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwDiceColour[ f ] ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
@@ -403,7 +390,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 			       (GtkObject*) ( pwPreview + PI_DICE0 + f ) );
 
     gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ f ] ),
-                               ! bd->rd.afDieColour[ f ] );
+                               ! rdAppearance.afDieColour[ f ] );
 
     /* colour of dot on dice */
     
@@ -419,7 +406,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 	GTK_COLOUR_PICKER( apwDiceDotColour[ f ] ), FALSE );
     gtk_colour_picker_set_colour( 
         GTK_COLOUR_PICKER( apwDiceDotColour[ f ] ),
-        bd->rd.aarDiceDotColour[ f ] );
+        rdAppearance.aarDiceDotColour[ f ] );
     gtk_signal_connect_object( GTK_OBJECT(
 				   COLOUR_SEL( apwDiceDotColour[ f ] ) ),
 			       "color-changed",
@@ -459,7 +446,7 @@ static GtkWidget *CubePrefs( BoardData *bd ) {
     gtk_colour_picker_set_has_opacity_control(
 	GTK_COLOUR_PICKER( pwCubeColour ), FALSE );
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( pwCubeColour ),
-				   bd->rd.arCubeColour );
+				   rdAppearance.arCubeColour );
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( pwCubeColour ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
@@ -493,10 +480,10 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 	if( j == 1 )
 	    continue; /* colour 1 unused */
 	apadjBoard[ j ] = GTK_ADJUSTMENT( gtk_adjustment_new(
-            bd->rd.aSpeckle[ j ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
+            rdAppearance.aSpeckle[ j ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
 
 	for( i = 0; i < 3; i++ )
-	    ar[ i ] = bd->rd.aanBoardColour[ j ][ i ] / 255.0;
+	    ar[ i ] = rdAppearance.aanBoardColour[ j ][ i ] / 255.0;
     
 	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			    FALSE, FALSE, 0 );
@@ -585,9 +572,9 @@ static GtkWidget *BorderPage( BoardData *bd ) {
                                   gettext ( aszWood[ bw ] ) ) );
 
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pwWoodType ), pwWoodMenu );
-    if( bd->rd.wt != WOOD_PAINT )
+    if( rdAppearance.wt != WOOD_PAINT )
 	gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ),
-				     bd->rd.wt );
+				     rdAppearance.wt );
 
 #if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect_object( GTK_OBJECT( pwWoodType ), "changed",
@@ -604,12 +591,12 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 			    GTK_RADIO_BUTTON( pwWood ), _("Painted") ),
 			FALSE, FALSE, 0 );
 
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->rd.wt != WOOD_PAINT ?
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rdAppearance.wt != WOOD_PAINT ?
 						     pwWood : pwWoodF ),
 				  TRUE );
     
     for( i = 0; i < 3; i++ )
-	ar[ i ] = bd->rd.aanBoardColour[ 1 ][ i ] / 255.0;
+	ar[ i ] = rdAppearance.aanBoardColour[ 1 ][ i ] / 255.0;
     
     gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 1 ] =
 			gtk_colour_picker_new(), FALSE, FALSE, 0 );
@@ -636,22 +623,15 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
 			       (GtkObject*) ( pwPreview + PI_BORDER ) );
     
-    gtk_widget_set_sensitive( pwWoodType, bd->rd.wt != WOOD_PAINT );
-    gtk_widget_set_sensitive( apwBoard[ 1 ], bd->rd.wt == WOOD_PAINT);
+    gtk_widget_set_sensitive( pwWoodType, rdAppearance.wt != WOOD_PAINT );
+    gtk_widget_set_sensitive( apwBoard[ 1 ], rdAppearance.wt == WOOD_PAINT);
     
     return pwx;
 }
 
-static void ToggleAnimation( GtkWidget *pw, void *p ) {
-
-    gtk_widget_set_sensitive( pwSpeed,
-			      !gtk_toggle_button_get_active(
-				  GTK_TOGGLE_BUTTON( pw ) ) );
-}
-
 static GtkWidget *GeneralPage( BoardData *bd ) {
 
-    GtkWidget *pw, *pwTable, *pwBox, *pwAnimBox, *pwFrame, *pwScale;
+    GtkWidget *pw, *pwTable, *pwBox, *pwScale;
     float rAzimuth, rElevation;
     GtkWidget *pwx;
 
@@ -666,96 +646,6 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_signal_connect_object( GTK_OBJECT( pwLabels ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
     
-    pwUseDiceIcon = 
-      gtk_check_button_new_with_label( _("Show dice below board when human "
-                                         "player on roll") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwUseDiceIcon ),
-				  fUseDiceIcon );
-    gtk_box_pack_start( GTK_BOX( pw ), pwUseDiceIcon, FALSE, FALSE, 0 );
-    
-    pwPermitIllegal = gtk_check_button_new_with_label(
-	_("Allow dragging to illegal points") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwPermitIllegal ),
-				  fPermitIllegal );
-    gtk_box_pack_start( GTK_BOX( pw ), pwPermitIllegal, FALSE, FALSE, 0 );
-
-    pwBeepIllegal = gtk_check_button_new_with_label(
-	_("Beep on illegal input") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwBeepIllegal ),
-				  fBeepIllegal );
-    gtk_box_pack_start( GTK_BOX( pw ), pwBeepIllegal, FALSE, FALSE, 0 );
-
-    pwHigherDieFirst = gtk_check_button_new_with_label(
-	_("Show higher die on left") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHigherDieFirst ),
-				  fHigherDieFirst );
-    gtk_box_pack_start( GTK_BOX( pw ), pwHigherDieFirst, FALSE, FALSE, 0 );
-
-    pwShowIDs = gtk_check_button_new_with_label(
-	_("Show Position ID and Match ID") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwShowIDs ),
-				  fShowIDs );
-    gtk_box_pack_start( GTK_BOX( pw ), pwShowIDs, FALSE, FALSE, 0 );
-
-    pwShowPips = gtk_check_button_new_with_label(
-	_("Show pip count permanently") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwShowPips ),
-				  fShowPips );
-    gtk_box_pack_start( GTK_BOX( pw ), pwShowPips, FALSE, FALSE, 0 );
-
-    pwAnimBox = gtk_hbox_new( FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX( pw ), pwAnimBox, FALSE, FALSE, 0 );
-    
-    pwFrame = gtk_frame_new( _("Animation") );
-    gtk_box_pack_start( GTK_BOX( pwAnimBox ), pwFrame, FALSE, FALSE, 4 );
-
-    pwBox = gtk_vbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwFrame ), pwBox );
-
-    pwAnimateNone = gtk_radio_button_new_with_label( NULL, _("None") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateNone ),
-				  anim == ANIMATE_NONE );
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateNone, FALSE, FALSE, 0 );
-    
-    pwAnimateBlink = gtk_radio_button_new_with_label_from_widget(
-	GTK_RADIO_BUTTON( pwAnimateNone ), _("Blink moving chequers") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ),
-				  anim == ANIMATE_BLINK );
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateBlink, FALSE, FALSE, 0 );
-    
-    pwAnimateSlide = gtk_radio_button_new_with_label_from_widget(
-	GTK_RADIO_BUTTON( pwAnimateNone ), _("Slide moving chequers") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateSlide ),
-				  anim == ANIMATE_SLIDE );
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateSlide, FALSE, FALSE, 0 );
-
-    pwSpeed = gtk_hbox_new( FALSE, 0 );
-    
-    padjSpeed = GTK_ADJUSTMENT( gtk_adjustment_new( bd->animate_speed, 0, 7,
-						    1, 1, 0 ) );
-    pwScale = gtk_hscale_new( padjSpeed );
-#if GTK_CHECK_VERSION(2,0,0)
-    gtk_widget_set_size_request( pwScale, 100, -1 );
-#else
-    gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
-#endif
-    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
-    gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
-
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Speed:") ),
-			FALSE, FALSE, 8 );
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Slow") ),
-			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), pwScale, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Fast") ),
-			FALSE, FALSE, 4 );
-    
-    gtk_signal_connect( GTK_OBJECT( pwAnimateNone ), "toggled",
-			GTK_SIGNAL_FUNC( ToggleAnimation ), bd );
-    ToggleAnimation( pwAnimateNone, NULL );
-
-    gtk_container_add( GTK_CONTAINER( pwAnimBox ), pwSpeed );
-    
     pwTable = gtk_table_new( 2, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
@@ -764,14 +654,14 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( _("Light elevation") ),
 		      0, 1, 1, 2, 0, 0, 4, 2 );
 
-    rElevation = asinf( bd->rd.arLight[ 2 ] ) * 180 / M_PI;
-    if ( fabs ( bd->rd.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
+    rElevation = asinf( rdAppearance.arLight[ 2 ] ) * 180 / M_PI;
+    if ( fabs ( rdAppearance.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
       rAzimuth = 0.0;
     else
       rAzimuth = 
-        acosf( bd->rd.arLight[ 0 ] / sqrt( 1.0 - bd->rd.arLight[ 2 ] *
-                                        bd->rd.arLight[ 2 ] ) ) * 180 / M_PI;
-    if( bd->rd.arLight[ 1 ] < 0 )
+        acosf( rdAppearance.arLight[ 0 ] / sqrt( 1.0 - rdAppearance.arLight[ 2 ] *
+                                        rdAppearance.arLight[ 2 ] ) ) * 180 / M_PI;
+    if( rdAppearance.arLight[ 1 ] < 0 )
 	rAzimuth = 360 - rAzimuth;
     
     paAzimuth = GTK_ADJUSTMENT( gtk_adjustment_new( rAzimuth, 0.0, 360.0, 1.0,
@@ -790,7 +680,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     
     pwBox = gtk_hbox_new( FALSE, 0 );
     
-    padjRound = GTK_ADJUSTMENT( gtk_adjustment_new( 1.0 - bd->rd.rRound, 0, 1,
+    padjRound = GTK_ADJUSTMENT( gtk_adjustment_new( 1.0 - rdAppearance.rRound, 0, 1,
 						    0.1, 0.1, 0 ) );
     gtk_signal_connect_object( GTK_OBJECT( padjRound ), "value-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
@@ -832,18 +722,18 @@ extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
 static void
 UseDesign ( void ) {
 
-  BoardData bd;
+  renderdata rd;
   int i, j;
   gdouble ar[ 4 ];
   gfloat rAzimuth, rElevation;
   char *apch[ 2 ];
   gchar *sz, *pch;
 
-  GetPrefs( &bd );
+  GetPrefs( &rd );
 
   pch = sz = g_strdup ( pbdeSelected->szBoardDesign );
   while( ParseKeyValue( &sz, apch ) ) 
-    BoardPreferencesParam( &bd, apch[ 0 ], apch[ 1 ] );
+    RenderPreferencesParam( &rd, apch[ 0 ], apch[ 1 ] );
   g_free ( pch );
 
   fUpdate = FALSE;
@@ -852,16 +742,16 @@ UseDesign ( void ) {
 
   for ( i = 0; i < 2; ++i ) {
     gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwColour[ i ] ),
-                                    bd.rd.aarColour[ i ] );
+                                    rd.aarColour[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadj[ i ] ),
-                               bd.rd.arRefraction[ i ] );
+                               rd.arRefraction[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjCoefficient[ i ] ),
-                               bd.rd.arCoefficient[ i ] );
+                               rd.arCoefficient[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjExponent[ i ] ),
-                               bd.rd.arExponent[ i ] );
+                               rd.arExponent[ i ] );
 
 
   }
@@ -869,14 +759,14 @@ UseDesign ( void ) {
   /* board, border, and points */
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
-                                 bd.rd.fHinges );
-  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), bd.rd.wt );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd.rd.wt != WOOD_PAINT ?
+                                 rd.fHinges );
+  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), rd.wt );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rd.wt != WOOD_PAINT ?
                                                    pwWood : pwWoodF ),
                                 TRUE );
 
-  gtk_widget_set_sensitive( pwWoodType, bd.rd.wt != WOOD_PAINT );
-  gtk_widget_set_sensitive( apwBoard[ 1 ], bd.rd.wt == WOOD_PAINT);
+  gtk_widget_set_sensitive( pwWoodType, rd.wt != WOOD_PAINT );
+  gtk_widget_set_sensitive( apwBoard[ 1 ], rd.wt == WOOD_PAINT);
 
   /* board + points */
     
@@ -884,10 +774,10 @@ UseDesign ( void ) {
 
     if ( i != 1 ) 
       gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjBoard[ i ] ),
-                                 bd.rd.aSpeckle[ i ] / 128.0 );
+                                 rd.aSpeckle[ i ] / 128.0 );
 
     for ( j = 0; j < 3; j++ )
-      ar[ j ] = bd.rd.aanBoardColour[ i ][ j ] / 255.0;
+      ar[ j ] = rd.aanBoardColour[ i ][ j ] / 255.0;
 
     gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwBoard[ i ]),
                                     ar );
@@ -900,48 +790,48 @@ UseDesign ( void ) {
   for ( i = 0; i < 2; ++i ) {
 
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColour[ i ] ),
-                                   bd.rd.afDieColour[ i ] );
+                                   rd.afDieColour[ i ] );
     gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ i ] ),
-                               ! bd.rd.afDieColour[ i ] );
+                               ! rd.afDieColour[ i ] );
 
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwDiceColour[ i ] ),
-                                   bd.rd.afDieColour[ i ] ? 
-                                   bd.rd.aarColour[ i ] :
-                                   bd.rd.aarDiceColour[ i ] );
+                                   rd.afDieColour[ i ] ? 
+                                   rd.aarColour[ i ] :
+                                   rd.aarDiceColour[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjDiceExponent[ i ] ),
-                               bd.rd.afDieColour[ i ] ? 
-                               bd.rd.arExponent[ i ] :
-                               bd.rd.arDiceExponent[ i ] );
+                               rd.afDieColour[ i ] ? 
+                               rd.arExponent[ i ] :
+                               rd.arDiceExponent[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjDiceCoefficient[ i ] ),
-                               bd.rd.afDieColour[ i ] ?
-                               bd.rd.arCoefficient[ i ] :
-                               bd.rd.arDiceCoefficient[ i ] );
+                               rd.afDieColour[ i ] ?
+                               rd.arCoefficient[ i ] :
+                               rd.arDiceCoefficient[ i ] );
 
 
     /* die dot */
 
     gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwDiceDotColour[ i ] ), 
-                                    bd.rd.aarDiceDotColour[ i ] );
+                                    rd.aarDiceDotColour[ i ] );
 
   }
 
   /* cube colour */
   
   gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( pwCubeColour ), 
-                                  bd.rd.arCubeColour );
+                                  rd.arCubeColour );
 
   /* light */
 
-  rElevation = asinf( bd.rd.arLight[ 2 ] ) * 180 / M_PI;
-    if ( fabs ( bd.rd.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
+  rElevation = asinf( rd.arLight[ 2 ] ) * 180 / M_PI;
+    if ( fabs ( rd.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
       rAzimuth = 0.0;
     else
       rAzimuth = 
-        acosf( bd.rd.arLight[ 0 ] / sqrt( 1.0 - bd.rd.arLight[ 2 ] *
-                                        bd.rd.arLight[ 2 ] ) ) * 180 / M_PI;
-  if( bd.rd.arLight[ 1 ] < 0 )
+        acosf( rd.arLight[ 0 ] / sqrt( 1.0 - rd.arLight[ 2 ] *
+                                        rd.arLight[ 2 ] ) ) * 180 / M_PI;
+  if( rd.arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
     
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paAzimuth ),
@@ -952,7 +842,7 @@ UseDesign ( void ) {
   /* round */
 
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( padjRound ),
-                             1.0f - bd.rd.rRound );
+                             1.0f - rd.rRound );
 
   fUpdate = TRUE;
 }
@@ -961,7 +851,7 @@ static void
 DesignActivate ( boarddesign *pbde ) {
 
   gchar *sz;
-  BoardData bd;
+  renderdata rd;
   char *apch[ 2 ];
   gchar *pch;
   
@@ -982,14 +872,14 @@ DesignActivate ( boarddesign *pbde ) {
                        _("(predefined board design)" ) );
   
   /* set preview */
-  GetPrefs( &bd );
+  GetPrefs( &rd );
   
   sz = pch = g_strdup ( pbde->szBoardDesign );
   while( ParseKeyValue( &sz, apch ) ) 
-    BoardPreferencesParam( &bd, apch[ 0 ], apch[ 1 ] );
+    RenderPreferencesParam( &rd, apch[ 0 ], apch[ 1 ] );
   g_free ( pch );
 
-  Preview( &bd.rd );
+  Preview( &rd );
   gtk_widget_queue_draw( pwPreview[ PI_DESIGN ] );
 
   UseDesign();
@@ -1177,7 +1067,7 @@ DesignAddTitle ( boarddesign *pbde ) {
 static void
 DesignAdd ( GtkWidget *pw, gpointer data ) {
 
-  BoardData bd;
+  renderdata rd;
   float rElevation;
   float rAzimuth;
   boarddesign *pbde;
@@ -1200,13 +1090,13 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
 
   /* get board design */
 
-  GetPrefs ( &bd );
+  GetPrefs ( &rd );
 
-  rElevation = asinf( bd.rd.arLight[ 2 ] ) * 180 / M_PI;
-  rAzimuth = ( fabs ( bd.rd.arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
-    acosf( bd.rd.arLight[ 0 ] / sqrt( 1.0 - bd.rd.arLight[ 2 ] *
-                                    bd.rd.arLight[ 2 ] ) ) * 180 / M_PI;
-  if( bd.rd.arLight[ 1 ] < 0 )
+  rElevation = asinf( rd.arLight[ 2 ] ) * 180 / M_PI;
+  rAzimuth = ( fabs ( rd.arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
+    acosf( rd.arLight[ 0 ] / sqrt( 1.0 - rd.arLight[ 2 ] *
+                                    rd.arLight[ 2 ] ) ) * 180 / M_PI;
+  if( rd.arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
 
   PushLocale( "C" );
@@ -1230,57 +1120,57 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
             "         points1=#%02X%02X%02X;%0.2f\n"
             "\n",
             /* board */
-            bd.rd.aanBoardColour[ 0 ][ 0 ], bd.rd.aanBoardColour[ 0 ][ 1 ], 
-            bd.rd.aanBoardColour[ 0 ][ 2 ], bd.rd.aSpeckle[ 0 ] / 128.0f,
+            rd.aanBoardColour[ 0 ][ 0 ], rd.aanBoardColour[ 0 ][ 1 ], 
+            rd.aanBoardColour[ 0 ][ 2 ], rd.aSpeckle[ 0 ] / 128.0f,
             /* border */
-            bd.rd.aanBoardColour[ 1 ][ 0 ], bd.rd.aanBoardColour[ 1 ][ 1 ], 
-            bd.rd.aanBoardColour[ 1 ][ 2 ],
+            rd.aanBoardColour[ 1 ][ 0 ], rd.aanBoardColour[ 1 ][ 1 ], 
+            rd.aanBoardColour[ 1 ][ 2 ],
             /* wood ... */
-            aszWoodName[ bd.rd.wt ],
-            bd.rd.fHinges ? 'y' : 'n',
-            rAzimuth, rElevation, 1.0 - bd.rd.rRound,
+            aszWoodName[ rd.wt ],
+            rd.fHinges ? 'y' : 'n',
+            rAzimuth, rElevation, 1.0 - rd.rRound,
              /* chequers0 */
-             (int) ( bd.rd.aarColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( bd.rd.aarColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.aarColour[ 0 ][ 2 ] * 0xFF ), 
-             bd.rd.aarColour[ 0 ][ 3 ], bd.rd.arRefraction[ 0 ], 
-             bd.rd.arCoefficient[ 0 ], bd.rd.arExponent[ 0 ],
+             (int) ( rd.aarColour[ 0 ][ 0 ] * 0xFF ),
+	     (int) ( rd.aarColour[ 0 ][ 1 ] * 0xFF ), 
+	     (int) ( rd.aarColour[ 0 ][ 2 ] * 0xFF ), 
+             rd.aarColour[ 0 ][ 3 ], rd.arRefraction[ 0 ], 
+             rd.arCoefficient[ 0 ], rd.arExponent[ 0 ],
              /* chequers1 */
-	     (int) ( bd.rd.aarColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( bd.rd.aarColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.aarColour[ 1 ][ 2 ] * 0xFF ), 
-             bd.rd.aarColour[ 1 ][ 3 ], bd.rd.arRefraction[ 1 ], 
-             bd.rd.arCoefficient[ 1 ], bd.rd.arExponent[ 1 ],
+	     (int) ( rd.aarColour[ 1 ][ 0 ] * 0xFF ),
+	     (int) ( rd.aarColour[ 1 ][ 1 ] * 0xFF ), 
+	     (int) ( rd.aarColour[ 1 ][ 2 ] * 0xFF ), 
+             rd.aarColour[ 1 ][ 3 ], rd.arRefraction[ 1 ], 
+             rd.arCoefficient[ 1 ], rd.arExponent[ 1 ],
              /* dice0 */
-             (int) ( bd.rd.aarDiceColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( bd.rd.aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
-             bd.rd.arDiceCoefficient[ 0 ], bd.rd.arDiceExponent[ 0 ],
-             bd.rd.afDieColour[ 0 ] ? 'y' : 'n',
+             (int) ( rd.aarDiceColour[ 0 ][ 0 ] * 0xFF ),
+	     (int) ( rd.aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
+	     (int) ( rd.aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
+             rd.arDiceCoefficient[ 0 ], rd.arDiceExponent[ 0 ],
+             rd.afDieColour[ 0 ] ? 'y' : 'n',
              /* dice1 */
-	     (int) ( bd.rd.aarDiceColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( bd.rd.aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
-             bd.rd.arDiceCoefficient[ 1 ], bd.rd.arDiceExponent[ 1 ],
-             bd.rd.afDieColour[ 1 ] ? 'y' : 'n',
+	     (int) ( rd.aarDiceColour[ 1 ][ 0 ] * 0xFF ),
+	     (int) ( rd.aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
+	     (int) ( rd.aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
+             rd.arDiceCoefficient[ 1 ], rd.arDiceExponent[ 1 ],
+             rd.afDieColour[ 1 ] ? 'y' : 'n',
              /* dot0 */
-	     (int) ( bd.rd.aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( bd.rd.aarDiceDotColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.aarDiceDotColour[ 0 ][ 2 ] * 0xFF ), 
+	     (int) ( rd.aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
+	     (int) ( rd.aarDiceDotColour[ 0 ][ 1 ] * 0xFF ), 
+	     (int) ( rd.aarDiceDotColour[ 0 ][ 2 ] * 0xFF ), 
              /* dot1 */
-	     (int) ( bd.rd.aarDiceDotColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( bd.rd.aarDiceDotColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.aarDiceDotColour[ 1 ][ 2 ] * 0xFF ), 
+	     (int) ( rd.aarDiceDotColour[ 1 ][ 0 ] * 0xFF ),
+	     (int) ( rd.aarDiceDotColour[ 1 ][ 1 ] * 0xFF ), 
+	     (int) ( rd.aarDiceDotColour[ 1 ][ 2 ] * 0xFF ), 
              /* cube */
-	     (int) ( bd.rd.arCubeColour[ 0 ] * 0xFF ),
-	     (int) ( bd.rd.arCubeColour[ 1 ] * 0xFF ), 
-	     (int) ( bd.rd.arCubeColour[ 2 ] * 0xFF ), 
+	     (int) ( rd.arCubeColour[ 0 ] * 0xFF ),
+	     (int) ( rd.arCubeColour[ 1 ] * 0xFF ), 
+	     (int) ( rd.arCubeColour[ 2 ] * 0xFF ), 
              /* points0 */
-	     bd.rd.aanBoardColour[ 2 ][ 0 ], bd.rd.aanBoardColour[ 2 ][ 1 ], 
-	     bd.rd.aanBoardColour[ 2 ][ 2 ], bd.rd.aSpeckle[ 2 ] / 128.0f,
+	     rd.aanBoardColour[ 2 ][ 0 ], rd.aanBoardColour[ 2 ][ 1 ], 
+	     rd.aanBoardColour[ 2 ][ 2 ], rd.aSpeckle[ 2 ] / 128.0f,
              /* points1 */
-	     bd.rd.aanBoardColour[ 3 ][ 0 ], bd.rd.aanBoardColour[ 3 ][ 1 ], 
-	     bd.rd.aanBoardColour[ 3 ][ 2 ], bd.rd.aSpeckle[ 3 ] / 128.0f );
+	     rd.aanBoardColour[ 3 ][ 0 ], rd.aanBoardColour[ 3 ][ 1 ], 
+	     rd.aanBoardColour[ 3 ][ 2 ], rd.aSpeckle[ 3 ] / 128.0f );
 
   PopLocale();
 
@@ -1479,90 +1369,50 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
     if( GTK_WIDGET_REALIZED( pwBoard ) ) {
 	board_create_pixmaps( pwBoard, bd );
 
-        /* dice area */
-
-	if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->usedicearea ) {
-	    gtk_widget_hide( bd->dice_area );
-	}
-
-	if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && bd->usedicearea ) {
-	    gtk_widget_show_all( bd->dice_area );
-	}
-
-        /* Position ID and Match ID */
-        
-        if ( GTK_WIDGET_VISIBLE ( bd->vbox_ids ) != bd->show_ids ) {
-          if ( bd->show_ids )
-            gtk_widget_show_all ( bd->vbox_ids );
-          else
-            gtk_widget_hide ( bd->vbox_ids );
-        }
-
 	gtk_widget_queue_draw( bd->drawing_area );
 	gtk_widget_queue_draw( bd->dice_area );
 	gtk_widget_queue_draw( bd->table );
     }
 }
 
-static void GetPrefs ( BoardData *bd ) {
+static void GetPrefs ( renderdata *prd ) {
 
     int i, j;
     gdouble ar[ 4 ];
     
     fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
-    fUseDiceIcon = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwUseDiceIcon ) );
-    fPermitIllegal = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwPermitIllegal ) );
-    fBeepIllegal = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
-    fHigherDieFirst = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwHigherDieFirst ) );
     fHinges = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwHinges ) );
     fWood = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwWood ) );
-    fShowIDs = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwShowIDs ) );
-    fShowPips = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwShowPips ) );
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
-	anim = ANIMATE_BLINK;
-    else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
-	pwAnimateSlide ) ) )
-	anim = ANIMATE_SLIDE;
-    else
-	anim = ANIMATE_NONE;
-
-    bd->animate_speed = (int) ( padjSpeed->value + 0.5 );
-    bd->rd.rRound = 1.0 - padjRound->value;
+    prd->rRound = 1.0 - padjRound->value;
     
     for( i = 0; i < 2; i++ ) {
-	bd->rd.arRefraction[ i ] = apadj[ i ]->value;
-	bd->rd.arCoefficient[ i ] = apadjCoefficient[ i ]->value;
-	bd->rd.arExponent[ i ] = apadjExponent[ i ]->value;
+	prd->arRefraction[ i ] = apadj[ i ]->value;
+	prd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
+	prd->arExponent[ i ] = apadjExponent[ i ]->value;
 
-        bd->rd.arDiceCoefficient[ i ] = apadjDiceCoefficient[ i ]->value;
-	bd->rd.arDiceExponent[ i ] = apadjDiceExponent[ i ]->value;
+        prd->arDiceCoefficient[ i ] = apadjDiceCoefficient[ i ]->value;
+	prd->arDiceExponent[ i ] = apadjDiceExponent[ i ]->value;
     }
     
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 0 ] ), ar );
     for( i = 0; i < 4; i++ )
-	bd->rd.aarColour[ 0 ][ i ] = ar[ i ];
+	prd->aarColour[ 0 ][ i ] = ar[ i ];
 
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 1 ] ), ar );
     for( i = 0; i < 4; i++ )
-	bd->rd.aarColour[ 1 ][ i ] = ar[ i ];
+	prd->aarColour[ 1 ][ i ] = ar[ i ];
 
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwDiceColour[ 0 ] ), 
                                    ar );
     for( i = 0; i < 3; i++ )
-	bd->rd.aarDiceColour[ 0 ][ i ] = ar[ i ];
+	prd->aarDiceColour[ 0 ][ i ] = ar[ i ];
 
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwDiceColour[ 1 ] ), 
                                    ar );
     for( i = 0; i < 3; i++ )
-	bd->rd.aarDiceColour[ 1 ][ i ] = ar[ i ];
+	prd->aarDiceColour[ 1 ][ i ] = ar[ i ];
 
     for ( j = 0; j < 2; ++j ) {
 
@@ -1570,13 +1420,13 @@ static void GetPrefs ( BoardData *bd ) {
            GTK_COLOUR_PICKER( apwDiceDotColour[ j ] ), 
            ar );
       for( i = 0; i < 3; i++ )
-	bd->rd.aarDiceDotColour[ j ][ i ] = ar[ i ];
+	prd->aarDiceDotColour[ j ][ i ] = ar[ i ];
     }
 
     /* dice colour same as chequer colour */
 
     for ( i = 0; i < 2; ++i )
-      bd->rd.afDieColour[ i ] = 
+      prd->afDieColour[ i ] = 
         gtk_toggle_button_get_active ( 
            GTK_TOGGLE_BUTTON ( apwDieColour[ i ] ) );
 
@@ -1585,7 +1435,7 @@ static void GetPrefs ( BoardData *bd ) {
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( pwCubeColour ), 
                                    ar );
     for( i = 0; i < 3; i++ )
-	bd->rd.arCubeColour[ i ] = ar[ i ];
+	prd->arCubeColour[ i ] = ar[ i ];
 
     /* board colour */
 
@@ -1593,43 +1443,36 @@ static void GetPrefs ( BoardData *bd ) {
 	gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwBoard[ j ] ),
 				      ar );
 	for( i = 0; i < 3; i++ )
-	    bd->rd.aanBoardColour[ j ][ i ] = ar[ i ] * 0xFF;
+	    prd->aanBoardColour[ j ][ i ] = ar[ i ] * 0xFF;
     }
     
-    bd->rd.aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
-/*    bd->rd.aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80; */
-    bd->rd.aSpeckle[ 2 ] = apadjBoard[ 2 ]->value * 0x80;
-    bd->rd.aSpeckle[ 3 ] = apadjBoard[ 3 ]->value * 0x80;
+    prd->aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
+/*    prd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80; */
+    prd->aSpeckle[ 2 ] = apadjBoard[ 2 ]->value * 0x80;
+    prd->aSpeckle[ 3 ] = apadjBoard[ 3 ]->value * 0x80;
     
-    bd->rd.arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
-    bd->rd.arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
-	sqrt( 1.0 - bd->rd.arLight[ 2 ] * bd->rd.arLight[ 2 ] );
-    bd->rd.arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
-	sqrt( 1.0 - bd->rd.arLight[ 2 ] * bd->rd.arLight[ 2 ] );
+    prd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
+    prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
+	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
+    prd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
+	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 
-    bd->rd.fLabels = fLabels;
-    bd->usedicearea = fUseDiceIcon;
-    bd->show_ids = fShowIDs;
-    bd->show_pips = fShowPips;
-    bd->permit_illegal = fPermitIllegal;
-    bd->beep_illegal = fBeepIllegal;
-    bd->higher_die_first = fHigherDieFirst;
-    bd->rd.wt = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
+    prd->fLabels = fLabels;
+    prd->wt = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
 	pwWoodType ) ) : WOOD_PAINT;
-    bd->rd.fHinges = fHinges;
-    bd->animate_computer_moves = anim;
-    bd->rd.fClockwise = fClockwise; /* yuck */
+    prd->fHinges = fHinges;
+    prd->fClockwise = fClockwise; /* yuck */
 }
 
 static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
     char sz[ 512 ];
 
-    GetPrefs ( bd );
+    GetPrefs ( &rdAppearance );
 
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
-    BoardPreferencesCommand( bd->widget, sz );
+    RenderPreferencesCommand( &rdAppearance, sz );
 
     UserCommand( sz );
 }
@@ -1669,23 +1512,16 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     BoardData *bd = BOARD( pwBoard )->board_data;
     GList *plBoardDesigns;
     
-    fLabels = bd->rd.fLabels;
-    fUseDiceIcon = bd->usedicearea;
-    fShowIDs = bd->show_ids;
-    fShowPips = bd->show_pips;
-    fPermitIllegal = bd->permit_illegal;
-    fBeepIllegal = bd->beep_illegal;
-    fHigherDieFirst = bd->higher_die_first;
-    fWood = bd->rd.wt;
-    fHinges = bd->rd.fHinges;
-    anim = bd->animate_computer_moves;
+    fLabels = rdAppearance.fLabels;
+    fWood = rdAppearance.wt;
+    fHinges = rdAppearance.fHinges;
     
     pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
     ppm = gdk_pixmap_new( bd->drawing_area->window, 108 * 3, 72 * 3, -1 );
     fUpdate = TRUE;
-    Preview( &bd->rd );
+    Preview( &rdAppearance );
     fUpdate = FALSE;
     
     pwNotebook = gtk_notebook_new();
@@ -1756,438 +1592,6 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fUpdate = TRUE;
 
     gtk_main();
-}
-
-static int SetColour( char *sz, guchar anColour[] ) {
-    
-    GdkColor col;
-    
-    if( gdk_color_parse( sz, &col ) ) {
-	anColour[ 0 ] = col.red >> 8;
-	anColour[ 1 ] = col.green >> 8;
-	anColour[ 2 ] = col.blue >> 8;
-	
-	return 0;
-    }
-
-    return -1;
-}
-
-static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
-    
-    char *pch;
-    GdkColor col;
-    
-    if( ( pch = strchr( sz, ';' ) ) )
-	*pch++ = 0;
-
-    if( gdk_color_parse( sz, &col ) ) {
-	anColour[ 0 ] = col.red >> 8;
-	anColour[ 1 ] = col.green >> 8;
-	anColour[ 2 ] = col.blue >> 8;
-	
-	if( pch ) {
-            PushLocale ( "C" );
-	    *pnSpeckle = atof( pch ) * 128;
-            PopLocale ();
-	    
-	    if( *pnSpeckle < 0 )
-		*pnSpeckle = 0;
-	    else if( *pnSpeckle > 128 )
-		*pnSpeckle = 128;
-	}
-
-	return 0;
-    }
-
-    return -1;
-}
-
-/* Set colour, alpha, refraction, shine, specular. */
-static int SetColourARSS( gdouble aarColour[ 2 ][ 4 ], 
-                          gfloat arRefraction[ 2 ],
-                          gfloat arCoefficient[ 2 ],
-                          gfloat arExponent[ 2 ],
-                          char *sz, int i ) {
-
-    char *pch;
-    GdkColor col;
-
-    if( ( pch = strchr( sz, ';' ) ) )
-	*pch++ = 0;
-
-    if( gdk_color_parse( sz, &col ) ) {
-	aarColour[ i ][ 0 ] = col.red / 65535.0f;
-	aarColour[ i ][ 1 ] = col.green / 65535.0f;
-	aarColour[ i ][ 2 ] = col.blue / 65535.0f;
-
-        PushLocale ( "C" );
-
-	if( pch ) {
-	    /* alpha */
-	    aarColour[ i ][ 3 ] = atof( pch );
-
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-	    aarColour[ i ][ 3 ] = 1.0f; /* opaque */
-
-	if( pch ) {
-	    /* refraction */
-	    arRefraction[ i ] = atof( pch );
-	    
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-	    arRefraction[ i ] = 1.5f;
-
-	if( pch ) {
-	    /* shine */
-	    arCoefficient[ i ] = atof( pch );
-	    
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-	    arCoefficient[ i ] = 0.5f;
-
-	if( pch ) {
-	    /* specular */
-	    arExponent[ i ] = atof( pch );
-	    
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-	    arExponent[ i ] = 10.0f;	
-
-        PopLocale ();
-
-	return 0;
-    }
-
-    return -1;
-}
-
-/* Set colour, shine, specular, flag. */
-static int SetColourSSF( gdouble aarColour[ 2 ][ 4 ], 
-                         gfloat arCoefficient[ 2 ],
-                         gfloat arExponent[ 2 ],
-                         int afDieColour[ 2 ],
-                         char *sz, int i ) {
-
-    char *pch;
-    GdkColor col;
-
-    if( ( pch = strchr( sz, ';' ) ) )
-	*pch++ = 0;
-
-    if( gdk_color_parse( sz, &col ) ) {
-	aarColour[ i ][ 0 ] = col.red / 65535.0f;
-	aarColour[ i ][ 1 ] = col.green / 65535.0f;
-	aarColour[ i ][ 2 ] = col.blue / 65535.0f;
-
-        PushLocale ( "C" );
-
-	if( pch ) {
-	    /* shine */
-	    arCoefficient[ i ] = atof( pch );
-	    
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-	    arCoefficient[ i ] = 0.5f;
-
-	if( pch ) {
-	    /* specular */
-	    arExponent[ i ] = atof( pch );
-	    
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-	    arExponent[ i ] = 10.0f;	
-
-	if( pch ) {
-            /* die colour same as chequer colour */
-            afDieColour[ i ] = ( toupper ( *pch ) == 'Y' );
-	    
-	    if( ( pch = strchr( pch, ';' ) ) )
-		*pch++ = 0;
-	} else
-            afDieColour[ i ] = TRUE;
-
-        PopLocale ();
-
-	return 0;
-    }
-
-    return -1;
-}
-
-/* Set colour (with floats) */
-static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
-
-    char *pch;
-    GdkColor col;
-
-    if( ( pch = strchr( sz, ';' ) ) )
-	*pch++ = 0;
-
-    if( gdk_color_parse( sz, &col ) ) {
-	arColour[ 0 ] = col.red / 65535.0f;
-	arColour[ 1 ] = col.green / 65535.0f;
-	arColour[ 2 ] = col.blue / 65535.0f;
-	return 0;
-    }
-
-    return -1;
-}
-
-static int SetWood( char *sz, woodtype *pbw ) {
-
-    woodtype bw;
-    int cch = strlen( sz );
-    
-    for( bw = 0; bw <= WOOD_PAINT; bw++ )
-	if( !strncasecmp( sz, aszWoodName[ bw ], cch ) ) {
-	    *pbw = bw;
-	    return 0;
-	}
-
-    return -1;
-}
-
-extern void BoardPreferencesParam( BoardData *bd, char *szParam,
-				   char *szValue ) {
-
-    int c, fValueError = FALSE;
-    
-    if( !szParam || !*szParam )
-	return;
-
-    if( !szValue )
-	szValue = "";
-    
-    c = strlen( szParam );
-    
-    if( !g_strncasecmp( szParam, "board", c ) )
-	/* board=colour;speckle */
-	fValueError = SetColourSpeckle( szValue, bd->rd.aanBoardColour[ 0 ],
-					&bd->rd.aSpeckle[ 0 ] );
-    else if( !g_strncasecmp( szParam, "border", c ) )
-	/* border=colour */
-	fValueError = SetColour( szValue, bd->rd.aanBoardColour[ 1 ] );
-    else if( !g_strncasecmp( szParam, "cube", c ) )
-	/* cube=colour */
-        fValueError = SetColourX( bd->rd.arCubeColour, szValue );
-    else if( !g_strncasecmp( szParam, "translucent", c ) )
-	/* deprecated option "translucent"; ignore */
-	;
-    else if( !g_strncasecmp( szParam, "labels", c ) )
-	/* labels=bool */
-	bd->rd.fLabels = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "diceicon", c ) )
-	bd->usedicearea = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "show_ids", c ) )
-	bd->show_ids = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "show_pips", c ) )
-	bd->show_pips = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "illegal", c ) )
-	bd->permit_illegal = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "beep", c ) )
-	bd->beep_illegal = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "highdie", c ) )
-	bd->higher_die_first = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "wood", c ) )
-	fValueError = SetWood( szValue, &bd->rd.wt );
-    else if( !g_strncasecmp( szParam, "hinges", c ) )
-	bd->rd.fHinges = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "animate", c ) ) {
-	switch( toupper( *szValue ) ) {
-	case 'B':
-	    bd->animate_computer_moves = ANIMATE_BLINK;
-	    break;
-	case 'S':
-	    bd->animate_computer_moves = ANIMATE_SLIDE;
-	    break;
-	default:
-	    bd->animate_computer_moves = ANIMATE_NONE;
-	    break;
-	}
-    } else if( !g_strncasecmp( szParam, "speed", c ) ) {
-	int n= atoi( szValue );
-
-	if( n < 0 || n > 7 )
-	    fValueError = TRUE;
-	else
-	    bd->animate_speed = n;
-    } else if( !g_strncasecmp( szParam, "light", c ) ) {
-	/* light=azimuth;elevation */
-	float rAzimuth, rElevation;
-
-	PushLocale ( "C" );
-	if( sscanf( szValue, "%f;%f", &rAzimuth, &rElevation ) < 2 )
-	    fValueError = TRUE;
-	else {
-	    if( rElevation < 0.0f )
-		rElevation = 0.0f;
-	    else if( rElevation > 90.0f )
-		rElevation = 90.0f;
-	    
-	    bd->rd.arLight[ 2 ] = sinf( rElevation / 180 * M_PI );
-	    bd->rd.arLight[ 0 ] = cosf( rAzimuth / 180 * M_PI ) *
-		sqrt( 1.0 - bd->rd.arLight[ 2 ] * bd->rd.arLight[ 2 ] );
-	    bd->rd.arLight[ 1 ] = sinf( rAzimuth / 180 * M_PI ) *
-		sqrt( 1.0 - bd->rd.arLight[ 2 ] * bd->rd.arLight[ 2 ] );
-	}
-        PopLocale ();
-    } else if( !g_strncasecmp( szParam, "shape", c ) ) {
-	float rRound;
-
-	PushLocale ( "C" );
-	if( sscanf( szValue, "%f", &rRound ) < 1 )
-	    fValueError = TRUE;
-	else
-	    bd->rd.rRound = 1.0 - rRound;
-        PopLocale ();
-    } else if( c > 1 &&
-	       ( !g_strncasecmp( szParam, "chequers", c - 1 ) ||
-		 !g_strncasecmp( szParam, "checkers", c - 1 ) ) &&
-	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
-	/* chequers=colour;alpha;refrac;shine;spec */
-	fValueError = SetColourARSS( bd->rd.aarColour, 
-                                     bd->rd.arRefraction,
-                                     bd->rd.arCoefficient,
-                                     bd->rd.arExponent,
-                                     szValue, szParam[ c - 1 ] - '0' );
-    else if( c > 1 &&
-             ( !g_strncasecmp( szParam, "dice", c - 1 ) ||
-               !g_strncasecmp( szParam, "dice", c - 1 ) ) &&
-	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
-	/* dice=colour;shine;spec;flag */
-        fValueError = SetColourSSF( bd->rd.aarDiceColour, 
-                                    bd->rd.arDiceCoefficient,
-                                    bd->rd.arDiceExponent,
-                                    bd->rd.afDieColour,
-                                    szValue, szParam[ c - 1 ] - '0' );
-    else if( c > 1 &&
-             ( !g_strncasecmp( szParam, "dot", c - 1 ) ||
-               !g_strncasecmp( szParam, "dot", c - 1 ) ) &&
-	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
-        /* dot=colour */
-	fValueError = 
-          SetColourX( bd->rd.aarDiceDotColour [ szParam[ c - 1 ] - '0' ],
-                      szValue );
-    else if( c > 1 && !g_strncasecmp( szParam, "points", c - 1 ) &&
-	     ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
-	/* pointsn=colour;speckle */
-	fValueError = SetColourSpeckle( szValue,
-					bd->rd.aanBoardColour[
-					    szParam[ c - 1 ] - '0' + 2 ],
-					&bd->rd.aSpeckle[
-					    szParam[ c - 1 ] - '0' + 2 ] );
-    else
-	outputf( _("Unknown setting `%s'.\n"), szParam );
-
-    if( fValueError )
-	outputf( _("`%s' is not a legal value for parameter `%s'.\n"), szValue,
-		 szParam );
-
-}
-
-extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
-
-    BoardData *bd = BOARD( pwBoard )->board_data;
-    float rAzimuth, rElevation;
-    static char *aszAnim[ ANIMATE_SLIDE + 1 ] = { "none", "blink", "slide" };
-    rElevation = asinf( bd->rd.arLight[ 2 ] ) * 180 / M_PI;
-    rAzimuth = ( fabs ( bd->rd.arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
-      acosf( bd->rd.arLight[ 0 ] / sqrt( 1.0 - bd->rd.arLight[ 2 ] *
-                                      bd->rd.arLight[ 2 ] ) ) * 180 / M_PI;
-
-    if( bd->rd.arLight[ 1 ] < 0 )
-	rAzimuth = 360 - rAzimuth;
-
-    PushLocale ( "C" );
-    
-    sprintf( sz, 
-             "set appearance board=#%02X%02X%02X;%0.2f "
-	     "border=#%02X%02X%02X "
-	     "labels=%c diceicon=%c illegal=%c "
-	     "beep=%c highdie=%c wood=%s hinges=%c "
-             "show_ids=%c show_pips=%c "
-	     "animate=%s speed=%d light=%0.0f;%0.0f shape=%0.1f " 
-	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
-	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
-	     "dice0=#%02X%02X%02X;%0.2f;%0.2f;%c "
-	     "dice1=#%02X%02X%02X;%0.2f;%0.2f;%c "
-	     "dot0=#%02X%02X%02X "
-	     "dot1=#%02X%02X%02X "
-	     "cube=#%02X%02X%02X "
-	     "points0=#%02X%02X%02X;%0.2f "
-	     "points1=#%02X%02X%02X;%0.2f",
-             /* board */
-	     bd->rd.aanBoardColour[ 0 ][ 0 ], bd->rd.aanBoardColour[ 0 ][ 1 ], 
-	     bd->rd.aanBoardColour[ 0 ][ 2 ], bd->rd.aSpeckle[ 0 ] / 128.0f,
-             /* border */
-	     bd->rd.aanBoardColour[ 1 ][ 0 ], bd->rd.aanBoardColour[ 1 ][ 1 ], 
-	     bd->rd.aanBoardColour[ 1 ][ 2 ],
-             /* labels ... */
-             bd->rd.fLabels ? 'y' : 'n',
-	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
-             /* beep, highdie, .... */
-	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',
-	     aszWoodName[ bd->rd.wt ],
-	     bd->rd.fHinges ? 'y' : 'n',
-	     bd->show_ids ? 'y' : 'n',
-             bd->show_pips ? 'y' : 'n',
-             /* animate, speed, ... */
-	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
-	     rAzimuth, rElevation, 1.0 - bd->rd.rRound,
-             /* chequers0 */
-             (int) ( bd->rd.aarColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( bd->rd.aarColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.aarColour[ 0 ][ 2 ] * 0xFF ), 
-             bd->rd.aarColour[ 0 ][ 3 ], bd->rd.arRefraction[ 0 ], 
-             bd->rd.arCoefficient[ 0 ], bd->rd.arExponent[ 0 ],
-             /* chequers1 */
-	     (int) ( bd->rd.aarColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( bd->rd.aarColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.aarColour[ 1 ][ 2 ] * 0xFF ), 
-             bd->rd.aarColour[ 1 ][ 3 ], bd->rd.arRefraction[ 1 ], 
-             bd->rd.arCoefficient[ 1 ], bd->rd.arExponent[ 1 ],
-             /* dice0 */
-             (int) ( bd->rd.aarDiceColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( bd->rd.aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
-             bd->rd.arDiceCoefficient[ 0 ], bd->rd.arDiceExponent[ 0 ],
-             bd->rd.afDieColour[ 0 ] ? 'y' : 'n',
-             /* dice1 */
-	     (int) ( bd->rd.aarDiceColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( bd->rd.aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
-             bd->rd.arDiceCoefficient[ 1 ], bd->rd.arDiceExponent[ 1 ],
-             bd->rd.afDieColour[ 1 ] ? 'y' : 'n',
-             /* dot0 */
-	     (int) ( bd->rd.aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( bd->rd.aarDiceDotColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.aarDiceDotColour[ 0 ][ 2 ] * 0xFF ), 
-             /* dot1 */
-	     (int) ( bd->rd.aarDiceDotColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( bd->rd.aarDiceDotColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.aarDiceDotColour[ 1 ][ 2 ] * 0xFF ), 
-             /* cube */
-	     (int) ( bd->rd.arCubeColour[ 0 ] * 0xFF ),
-	     (int) ( bd->rd.arCubeColour[ 1 ] * 0xFF ), 
-	     (int) ( bd->rd.arCubeColour[ 2 ] * 0xFF ), 
-             /* points0 */
-	     bd->rd.aanBoardColour[ 2 ][ 0 ], bd->rd.aanBoardColour[ 2 ][ 1 ], 
-	     bd->rd.aanBoardColour[ 2 ][ 2 ], bd->rd.aSpeckle[ 2 ] / 128.0f,
-             /* points1 */
-	     bd->rd.aanBoardColour[ 3 ][ 0 ], bd->rd.aanBoardColour[ 3 ][ 1 ], 
-	     bd->rd.aanBoardColour[ 3 ][ 2 ], bd->rd.aSpeckle[ 3 ] / 128.0f );
-
-    PopLocale ();
-
-    return sz;
 }
 
 #if HAVE_LIBXML2

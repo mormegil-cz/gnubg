@@ -38,6 +38,8 @@
 #include "gtk-multiview.h"
 #include "gtkprefs.h"
 #include "positionid.h"
+#include "render.h"
+#include "renderprefs.h"
 #include "sound.h"
 #include "matchid.h"
 #include "i18n.h"
@@ -79,6 +81,10 @@ static int positions[ 2 ][ 30 ][ 3 ] = { {
     { 51, 41, -7 }, { 3, 63, 6 }, { 3, 3, -6 }, { 99, 63, 6 }, { 99, 3, -6 }
 } };
 
+animation animGUI = ANIMATE_SLIDE;
+int nGUIAnimSpeed = 4, fGUIBeep = TRUE, fGUIDiceArea = FALSE,
+    fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE, fGUIShowIDs = TRUE,
+    fGUIShowPips = TRUE;
 
 #if !GTK_CHECK_VERSION(1,3,0)
 #define g_alloca alloca
@@ -118,7 +124,7 @@ static inline guchar clamp( gint n ) {
 
 static void board_beep( BoardData *bd ) {
 
-    if( bd->beep_illegal )
+    if( fGUIIllegal )
 	gdk_beep();
 }
 
@@ -156,20 +162,20 @@ static void point_area( BoardData *bd, int n, int *px, int *py,
     
     int c_chequer = ( !n || n == 25 ) ? 3 : 5;
     
-    *px = positions[ fClockwise ][ n ][ 0 ] * bd->rd.nSize;
-    *py = positions[ fClockwise ][ n ][ 1 ] * bd->rd.nSize;
-    *pcx = 6 * bd->rd.nSize;
-    *pcy = positions[ fClockwise ][ n ][ 2 ] * bd->rd.nSize;
+    *px = positions[ fClockwise ][ n ][ 0 ] * rdAppearance.nSize;
+    *py = positions[ fClockwise ][ n ][ 1 ] * rdAppearance.nSize;
+    *pcx = 6 * rdAppearance.nSize;
+    *pcy = positions[ fClockwise ][ n ][ 2 ] * rdAppearance.nSize;
     
     if( *pcy > 0 ) {
-	*pcy = *pcy * ( c_chequer - 1 ) + 6 * bd->rd.nSize;
-	*py += 6 * bd->rd.nSize - *pcy;
+	*pcy = *pcy * ( c_chequer - 1 ) + 6 * rdAppearance.nSize;
+	*py += 6 * rdAppearance.nSize - *pcy;
     } else
-	*pcy = -*pcy * ( c_chequer - 1 ) + 6 * bd->rd.nSize;
+	*pcy = -*pcy * ( c_chequer - 1 ) + 6 * rdAppearance.nSize;
 }
 
 /* Determine the position and rotation of the cube; *px and *py return the
-   position (in board units -- multiply by bd->rd.nSize to get
+   position (in board units -- multiply by rdAppearance.nSize to get
    pixels) and *porient returns the rotation (1 = facing the top, 0 = facing
    the side, -1 = facing the bottom). */
 static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
@@ -210,10 +216,10 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
     anDicePosition[ 1 ][ 0 ] = bd->x_dice[ 1 ];
     anDicePosition[ 1 ][ 1 ] = bd->y_dice[ 1 ];
     cube_position( bd, anCubePosition, anCubePosition + 1, &nOrient );
-    CalculateArea( &bd->rd, puch, cx * 3, &bd->ri, anBoard, anOff, anDice,
-		   anDicePosition, bd->colour == bd->turn, anCubePosition,
-		   LogCube( bd->cube ) + ( bd->doubled != 0 ), nOrient, x, y,
-		   cx, cy );
+    CalculateArea( &rdAppearance, puch, cx * 3, &bd->ri, anBoard, anOff,
+		   anDice, anDicePosition, bd->colour == bd->turn,
+		   anCubePosition, LogCube( bd->cube ) + ( bd->doubled != 0 ),
+		   nOrient, x, y, cx, cy );
 }
 
 static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
@@ -224,7 +230,7 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 
     assert( GTK_IS_DRAWING_AREA( drawing_area ) );
     
-    if( bd->rd.nSize <= 0 )
+    if( rdAppearance.nSize <= 0 )
 	return TRUE;
 
     x = event->area.x;
@@ -242,11 +248,11 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 	y = 0;
     }
 
-    if( y + cy > 72 * bd->rd.nSize )
-	cy = 72 * bd->rd.nSize - y;
+    if( y + cy > 72 * rdAppearance.nSize )
+	cy = 72 * rdAppearance.nSize - y;
 
-    if( x + cx > 108 * bd->rd.nSize )
-	cx = 108 * bd->rd.nSize - x;
+    if( x + cx > 108 * rdAppearance.nSize )
+	cx = 108 * rdAppearance.nSize - x;
 
     if( cx <= 0 || cy <= 0 )
 	return TRUE;
@@ -299,7 +305,7 @@ static void board_invalidate_point( BoardData *bd, int n ) {
 
     int x, y, cx, cy;
 
-    if( bd->rd.nSize <= 0 )
+    if( rdAppearance.nSize <= 0 )
 	return;
 
     point_area( bd, n, &x, &y, &cx, &cy );
@@ -311,15 +317,15 @@ static void board_invalidate_dice( BoardData *bd ) {
 
     int x, y, cx, cy;
     
-    x = bd->x_dice[ 0 ] * bd->rd.nSize;
-    y = bd->y_dice[ 0 ] * bd->rd.nSize;
-    cx = 7 * bd->rd.nSize;
-    cy = 7 * bd->rd.nSize;
+    x = bd->x_dice[ 0 ] * rdAppearance.nSize;
+    y = bd->y_dice[ 0 ] * rdAppearance.nSize;
+    cx = 7 * rdAppearance.nSize;
+    cy = 7 * rdAppearance.nSize;
 
     board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
     
-    x = bd->x_dice[ 1 ] * bd->rd.nSize;
-    y = bd->y_dice[ 1 ] * bd->rd.nSize;
+    x = bd->x_dice[ 1 ] * rdAppearance.nSize;
+    y = bd->y_dice[ 1 ] * rdAppearance.nSize;
 
     board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
 }
@@ -330,17 +336,17 @@ static void board_invalidate_cube( BoardData *bd ) {
     
     cube_position( bd, &x, &y, &orient );
     
-    board_invalidate_rect( bd->drawing_area, x * bd->rd.nSize,
-			   y * bd->rd.nSize,
-			   8 * bd->rd.nSize, 8 * bd->rd.nSize, bd );
+    board_invalidate_rect( bd->drawing_area, x * rdAppearance.nSize,
+			   y * rdAppearance.nSize,
+			   8 * rdAppearance.nSize, 8 * rdAppearance.nSize, bd );
 }
 
 static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 
     int i, x, y, cx, cy, xCube, yCube;
 
-    x0 /= bd->rd.nSize;
-    y0 /= bd->rd.nSize;
+    x0 /= rdAppearance.nSize;
+    y0 /= rdAppearance.nSize;
 
     if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], 7, 7 ) ||
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
@@ -364,10 +370,10 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
     for( i = 0; i < 28; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
 
-	x /= bd->rd.nSize;
-	y /= bd->rd.nSize;
-	cx /= bd->rd.nSize;
-	cy /= bd->rd.nSize;
+	x /= rdAppearance.nSize;
+	y /= rdAppearance.nSize;
+	cx /= rdAppearance.nSize;
+	cy /= rdAppearance.nSize;
 	
 	if( intersects( x0, y0, 0, 0, x, y, cx, cy ) )
 	    return i;
@@ -423,7 +429,7 @@ update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
   char *pc;
   int f;
 
-  if ( bd->show_pips ) {
+  if ( fGUIShowPips ) {
 
     /* show pip count */
 
@@ -538,7 +544,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd,
 static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
 
     unsigned char *puch, *puchNew, *puchChequer;
-    int s = bd->rd.nSize;
+    int s = rdAppearance.nSize;
     
 #if GTK_CHECK_VERSION(2,0,0)
     gdk_window_process_updates( bd->drawing_area->window, FALSE );
@@ -597,7 +603,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
 static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
     
     unsigned char *puch;
-    int s = bd->rd.nSize;
+    int s = rdAppearance.nSize;
     
 #if GTK_CHECK_VERSION(2,0,0)
     gdk_window_process_updates( bd->drawing_area->window, FALSE );
@@ -657,7 +663,7 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
     board_invalidate_point( bd, dest );
     
     if( bd->drag_point != dest )
-	if( update_move( bd ) && !bd->permit_illegal ) {
+	if( update_move( bd ) && !fGUIIllegal ) {
 	    /* the move was illegal; undo it */
 	    bd->points[ dest ] -= bd->drag_colour;
 	    bd->points[ bd->drag_point ] += bd->drag_colour;
@@ -682,8 +688,8 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 				    int x0, int y0 ) {
     int i, x, y, cx, cy, xCube, yCube;
 
-    x0 /= bd->rd.nSize;
-    y0 /= bd->rd.nSize;
+    x0 /= rdAppearance.nSize;
+    y0 /= rdAppearance.nSize;
     
     /* Similar to board_point, but adds the nasty y-=3 cy+=3 border
        allowances */
@@ -700,10 +706,10 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
     for( i = 0; i < 30; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
 
-	x /= bd->rd.nSize;
-	y /= bd->rd.nSize;
-	cx /= bd->rd.nSize;
-	cy /= bd->rd.nSize;
+	x /= rdAppearance.nSize;
+	y /= rdAppearance.nSize;
+	cx /= rdAppearance.nSize;
+	cy /= rdAppearance.nSize;
 
 	if( y < 36 )
 	    y -= 3;
@@ -733,11 +739,11 @@ static int board_chequer_number( GtkWidget *board, BoardData *bd,
     if( point < 0 || point > 27 )
 	return -1;
 
-    if( bd->rd.nSize <= 0 )
+    if( rdAppearance.nSize <= 0 )
 	return -1;
 
-    x0 /= bd->rd.nSize;
-    y0 /= bd->rd.nSize;
+    x0 /= rdAppearance.nSize;
+    y0 /= rdAppearance.nSize;
 
     c_chequer = ( !point || point == 25 ) ? 3 : 5;
 
@@ -1545,10 +1551,10 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	bd->valid_move = NULL;
     }
 	
-    if( bd->rd.nSize <= 0 )
+    if( rdAppearance.nSize <= 0 )
 	return 0;
 
-    if( bd->higher_die_first ) {
+    if( fGUIHighDieFirst ) {
 	if( bd->dice[ 0 ] < bd->dice[ 1 ] )
 	    swap( bd->dice, bd->dice + 1 );
 	
@@ -1563,21 +1569,21 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	if( bd->x_dice[ 0 ] > 0 ) {
 	    /* dice were visible before; now they're not */
 	    int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
-	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * bd->rd.nSize;
+	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * rdAppearance.nSize;
 	    board_invalidate_rect( bd->drawing_area,
-				   ax[ 0 ] * bd->rd.nSize,
-				   bd->y_dice[ 0 ] * bd->rd.nSize,
-				   7 * bd->rd.nSize, 7 * bd->rd.nSize, bd );
+				   ax[ 0 ] * rdAppearance.nSize,
+				   bd->y_dice[ 0 ] * rdAppearance.nSize,
+				   7 * rdAppearance.nSize, 7 * rdAppearance.nSize, bd );
 	    board_invalidate_rect( bd->drawing_area,
-				   ax[ 1 ] * bd->rd.nSize,
-				   bd->y_dice[ 1 ] * bd->rd.nSize,
-				   7 * bd->rd.nSize, 7 * bd->rd.nSize, bd );
+				   ax[ 1 ] * rdAppearance.nSize,
+				   bd->y_dice[ 1 ] * rdAppearance.nSize,
+				   7 * rdAppearance.nSize, 7 * rdAppearance.nSize, bd );
 	}
 
 	if( ( bd->turn == bd->colour ? bd->dice[ 0 ] :
 	       bd->dice_opponent[ 0 ] ) <= 0 )
 	    /* dice have not been rolled */
-	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * bd->rd.nSize;
+	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * rdAppearance.nSize;
 	else {
 	    /* FIXME different dice for first turn */
 	    int iAttempt = 0, iPoint, x, y, cx, cy;
@@ -1598,10 +1604,10 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	    for( iPoint = 1; iPoint <= 24; iPoint++ )
 		if( abs( bd->points[ iPoint ] ) >= 5 ) {
 		    point_area( bd, iPoint, &x, &y, &cx, &cy );
-		    x /= bd->rd.nSize;
-		    y /= bd->rd.nSize;
-		    cx /= bd->rd.nSize;
-		    cy /= bd->rd.nSize;
+		    x /= rdAppearance.nSize;
+		    y /= rdAppearance.nSize;
+		    cx /= rdAppearance.nSize;
+		    cy /= rdAppearance.nSize;
 		    
 		    if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
 				      7, 7, x, y, cx, cy ) ||
@@ -1622,23 +1628,23 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	bd->cube_use = fCubeUse;
 		
 	/* erase old cube */
-	board_invalidate_rect( bd->drawing_area, old_xCube * bd->rd.nSize,
-			       old_yCube * bd->rd.nSize, 8 * bd->rd.nSize,
-			       8 * bd->rd.nSize, bd );
+	board_invalidate_rect( bd->drawing_area, old_xCube * rdAppearance.nSize,
+			       old_yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
+			       8 * rdAppearance.nSize, bd );
 	
 	cube_position( bd, &xCube, &yCube, NULL );
 	/* draw new cube */
-	board_invalidate_rect( bd->drawing_area, xCube * bd->rd.nSize,
-			       yCube * bd->rd.nSize, 8 * bd->rd.nSize,
-			       8 * bd->rd.nSize, bd );
+	board_invalidate_rect( bd->drawing_area, xCube * rdAppearance.nSize,
+			       yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
+			       8 * rdAppearance.nSize, bd );
     }
 
-    if( fClockwise != bd->rd.fClockwise ) {
+    if( fClockwise != rdAppearance.fClockwise ) {
 	/* This is complete overkill, but we need to recalculate the
 	   board pixmap if the points are numbered and the direction
 	   changes. */
 	board_free_pixmaps( bd );
-	bd->rd.fClockwise = fClockwise;
+	rdAppearance.fClockwise = fClockwise;
 	board_create_pixmaps( pwBoard, bd );
 	gtk_widget_queue_draw( bd->drawing_area );
 	return 0;
@@ -1764,8 +1770,8 @@ static gint board_slide_timeout( gpointer p ) {
 	x_dest += 3;
 	y_dest += 3;
 	x_mid = ( x + x_dest ) >> 1;
-	board_start_drag( pbd->drawing_area, pbd, src, x * pbd->rd.nSize,
-			  y * pbd->rd.nSize );
+	board_start_drag( pbd->drawing_area, pbd, src, x * rdAppearance.nSize,
+			  y * rdAppearance.nSize );
 	slide_phase++;
 	/* fall through */
     case 1:
@@ -1846,19 +1852,18 @@ static gint board_slide_timeout( gpointer p ) {
 	g_assert_not_reached();
     }
 
-    board_drag( pbd->drawing_area, pbd, x * pbd->rd.nSize,
-		y * pbd->rd.nSize );
+    board_drag( pbd->drawing_area, pbd, x * rdAppearance.nSize,
+		y * rdAppearance.nSize );
     
     return TRUE;
 }
 
 extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
-    BoardData *pbd = board->board_data;
     int n;
     monitor m;
 	
-    if( pbd->animate_computer_moves == ANIMATE_NONE )
+    if( animGUI == ANIMATE_NONE )
 	return;
 
     animate_move_list = move;
@@ -1866,11 +1871,11 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
     animation_finished = FALSE;
     
-    if( pbd->animate_computer_moves == ANIMATE_BLINK )
-	n = gtk_timeout_add( 0x300 >> pbd->animate_speed, board_blink_timeout,
+    if( animGUI == ANIMATE_BLINK )
+	n = gtk_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout,
 			     board );
     else /* ANIMATE_SLIDE */
-	n = gtk_timeout_add( 0x100 >> pbd->animate_speed, board_slide_timeout,
+	n = gtk_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout,
 			     board );
 
     while( !animation_finished ) {
@@ -1887,7 +1892,7 @@ extern gint game_set_old_dice( Board *board, gint die0, gint die1 ) {
     pbd->dice_roll[ 0 ] = die0;
     pbd->dice_roll[ 1 ] = die1;
 
-    if( pbd->higher_die_first && pbd->dice_roll[ 0 ] < pbd->dice_roll[ 1 ] )
+    if( fGUIHighDieFirst && pbd->dice_roll[ 0 ] < pbd->dice_roll[ 1 ] )
 	swap( pbd->dice_roll, pbd->dice_roll + 1 );
     
     return 0;
@@ -1927,7 +1932,7 @@ static void update_buttons( BoardData *pbd ) {
 	c = C_NONE;
     
 
-    if ( pbd->usedicearea ) {
+    if ( fGUIDiceArea ) {
 
       if ( c == C_ROLLDOUBLE ) 
 	gtk_widget_show_all( pbd->dice_area );
@@ -1977,13 +1982,13 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     board_set( board, board_str );
     
     /* FIXME update names, score, match length */
-    if( pbd->rd.nSize <= 0 )
+    if( rdAppearance.nSize <= 0 )
 	return 0;
 
     pbd->computer_turn = computer_turn;
     
     if( die0 ) {
-	if( pbd->higher_die_first && die0 < die1 )
+	if( fGUIHighDieFirst && die0 < die1 )
 	    swap( &die0, &die1 );
 	
 	pbd->dice_roll[ 0 ] = die0;
@@ -2007,13 +2012,13 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
     unsigned short asRefract[ 2 ][ 6 * 3 * 6 * 3 ];
     int i, nSizeReal;
 
-    RenderImages( &bd->rd, &bd->ri );
-    nSizeReal = bd->rd.nSize;
-    bd->rd.nSize = 3;
-    RenderBoard( &bd->rd, auchBoard, 108 * 3 );
-    RenderChequers( &bd->rd, auchChequers[ 0 ], auchChequers[ 1 ],
+    RenderImages( &rdAppearance, &bd->ri );
+    nSizeReal = rdAppearance.nSize;
+    rdAppearance.nSize = 3;
+    RenderBoard( &rdAppearance, auchBoard, 108 * 3 );
+    RenderChequers( &rdAppearance, auchChequers[ 0 ], auchChequers[ 1 ],
 		    asRefract[ 0 ], asRefract[ 1 ], 6 * 3 * 4 );
-    bd->rd.nSize = nSizeReal;
+    rdAppearance.nSize = nSizeReal;
 
     for( i = 0; i < 2; i++ ) {
 	CopyArea( auch, 20 * 3, auchBoard + 3 * 3 * 108 * 3 + 3 * 3 * 3,
@@ -2043,7 +2048,7 @@ extern void board_free_pixmaps( BoardData *bd ) {
 static void board_size_allocate( GtkWidget *board,
 				 GtkAllocation *allocation ) {
     BoardData *bd = BOARD( board )->board_data;
-    gint old_size = bd->rd.nSize, new_size;
+    gint old_size = rdAppearance.nSize, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
     int cx;
@@ -2063,7 +2068,7 @@ static void board_size_allocate( GtkWidget *board,
 
     /* position ID, match ID: just below toolbar */
 
-    if ( bd->show_ids ) {
+    if ( fGUIShowIDs ) {
 
       gtk_widget_get_child_requisition( bd->vbox_ids, &requisition );
       allocation->height -= requisition.height;
@@ -2088,7 +2093,7 @@ static void board_size_allocate( GtkWidget *board,
 
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
-    if ( bd->usedicearea ) {
+    if ( fGUIDiceArea ) {
 
       new_size = MIN( allocation->width / 108,
                       ( allocation->height - 2 ) / 79 );
@@ -2105,27 +2110,27 @@ static void board_size_allocate( GtkWidget *board,
     /* FIXME what should we do if new_size < 1?  If the window manager
        honours our minimum size this won't happen, but... */
     
-    if( ( bd->rd.nSize = new_size ) != old_size &&
+    if( ( rdAppearance.nSize = new_size ) != old_size &&
 	GTK_WIDGET_REALIZED( board ) ) {
 	board_free_pixmaps( bd );
 	board_create_pixmaps( board, bd );
     }
     
-    child_allocation.width = 108 * bd->rd.nSize;
+    child_allocation.width = 108 * rdAppearance.nSize;
     cx = child_allocation.x = allocation->x + ( ( allocation->width -
 					     child_allocation.width ) >> 1 );
-    child_allocation.height = 72 * bd->rd.nSize;
+    child_allocation.height = 72 * rdAppearance.nSize;
     child_allocation.y = allocation->y + ( ( allocation->height -
-					     72 * bd->rd.nSize ) >> 1 );
+					     72 * rdAppearance.nSize ) >> 1 );
     gtk_widget_size_allocate( bd->drawing_area, &child_allocation );
 
     /* allocation for dice area */
 
-    if ( bd->usedicearea ) {
-      child_allocation.width = 15 * bd->rd.nSize;
-      child_allocation.x += ( 108 - 15 ) * bd->rd.nSize;
-      child_allocation.height = 7 * bd->rd.nSize;
-      child_allocation.y += 72 * bd->rd.nSize + 1;
+    if ( fGUIDiceArea ) {
+      child_allocation.width = 15 * rdAppearance.nSize;
+      child_allocation.x += ( 108 - 15 ) * rdAppearance.nSize;
+      child_allocation.height = 7 * rdAppearance.nSize;
+      child_allocation.y += 72 * rdAppearance.nSize + 1;
       gtk_widget_size_allocate( bd->dice_area, &child_allocation );
     }
 
@@ -2156,12 +2161,12 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
 
     AddChild( bd->vbox_toolbar, pr );
 
-    if ( bd->show_ids )
+    if ( fGUIShowIDs )
       AddChild( bd->vbox_ids, pr );
 
     AddChild( bd->table, pr );
 
-    if ( bd->usedicearea )
+    if ( fGUIDiceArea )
       pr->height += 7;
 
     if( pr->width < 108 )
@@ -2362,7 +2367,7 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 static void DrawDie( GdkDrawable *pd, BoardData *pbd, int x, int y,
 		     int fColour, int n ) {
 
-    int s = pbd->rd.nSize;
+    int s = rdAppearance.nSize;
     int ix, iy, afPip[ 9 ];
 
     DrawAlphaImage( pd, x, y, pbd->ri.achDice[ fColour ], 7 * s * 4,
@@ -2387,11 +2392,11 @@ static void DrawDie( GdkDrawable *pd, BoardData *pbd, int x, int y,
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
                              BoardData *bd ) {
     
-    if( bd->rd.nSize <= 0 || event->count || !bd->dice_roll[ 0 ] )
+    if( rdAppearance.nSize <= 0 || event->count || !bd->dice_roll[ 0 ] )
 	return TRUE;
 
     DrawDie( dice->window, bd, 0, 0, bd->turn > 0, bd->dice_roll[ 0 ] );
-    DrawDie( dice->window, bd, 8 * bd->rd.nSize, 0, bd->turn > 0,
+    DrawDie( dice->window, bd, 8 * rdAppearance.nSize, 0, bd->turn > 0,
 	     bd->dice_roll[ 1 ] );
     
     return TRUE;
@@ -2526,23 +2531,13 @@ static void board_init( Board *board ) {
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
 	
-    bd->drag_point = bd->rd.nSize = -1;
+    bd->drag_point = rdAppearance.nSize = -1;
     bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
     bd->crawford_game = FALSE;
     bd->playing = FALSE;
     bd->cube_use = TRUE;    
     bd->all_moves = NULL;
-    bd->usedicearea = FALSE;
-    bd->permit_illegal = FALSE;
-    bd->beep_illegal = TRUE;
-    bd->higher_die_first = TRUE;
-    bd->animate_computer_moves = ANIMATE_SLIDE;
-    bd->animate_speed = 4;
-    bd->show_ids = TRUE;
-    bd->show_pips = TRUE;
 
-    memcpy( &bd->rd, &rdDefault, sizeof bd->rd );
-    
     gcval.function = GDK_AND;
     gcval.foreground.pixel = ~0L; /* AllPlanes */
     gcval.background.pixel = 0;
@@ -3066,19 +3061,19 @@ static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
     if( ( nValue = n % 13 - 1 ) == -1 )
 	nValue = 5; /* use 64 cube for 1 */
     
-    puch = g_alloca( 6 * bd->rd.nSize * 6 * bd->rd.nSize * 3 );
-    CopyAreaRotateClip( puch, 6 * bd->rd.nSize * 3, 0, 0,
-			6 * bd->rd.nSize, 6 * bd->rd.nSize,
-			bd->ri.achCubeFaces, 6 * bd->rd.nSize * 3, 0,
-			6 * bd->rd.nSize * nValue,
-			6 * bd->rd.nSize, 6 * bd->rd.nSize,
+    puch = g_alloca( 6 * rdAppearance.nSize * 6 * rdAppearance.nSize * 3 );
+    CopyAreaRotateClip( puch, 6 * rdAppearance.nSize * 3, 0, 0,
+			6 * rdAppearance.nSize, 6 * rdAppearance.nSize,
+			bd->ri.achCubeFaces, 6 * rdAppearance.nSize * 3, 0,
+			6 * rdAppearance.nSize * nValue,
+			6 * rdAppearance.nSize, 6 * rdAppearance.nSize,
 			2 - n / 13 );
     
-    DrawAlphaImage( cube->window, 0, 0, bd->ri.achCube, 8 * bd->rd.nSize * 4,
-		    8 * bd->rd.nSize, 8 * bd->rd.nSize );
-    gdk_draw_rgb_image( cube->window, bd->gc_copy, bd->rd.nSize, bd->rd.nSize,
-			6 * bd->rd.nSize, 6 * bd->rd.nSize, GDK_RGB_DITHER_MAX,
-			puch, 6 * bd->rd.nSize * 3 );
+    DrawAlphaImage( cube->window, 0, 0, bd->ri.achCube, 8 * rdAppearance.nSize * 4,
+		    8 * rdAppearance.nSize, 8 * rdAppearance.nSize );
+    gdk_draw_rgb_image( cube->window, bd->gc_copy, rdAppearance.nSize, rdAppearance.nSize,
+			6 * rdAppearance.nSize, 6 * rdAppearance.nSize, GDK_RGB_DITHER_MAX,
+			puch, 6 * rdAppearance.nSize * 3 );
     
     return TRUE;
 }
@@ -3115,7 +3110,7 @@ extern GtkWidget *board_cube_widget( Board *board ) {
 	    gtk_object_set_user_data( GTK_OBJECT( pwCube ),
 				      (gpointer) ( y * 13 + x ) );
 	    gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
-				   8 * bd->rd.nSize, 8 * bd->rd.nSize );
+				   8 * rdAppearance.nSize, 8 * rdAppearance.nSize );
 	    gtk_widget_add_events( pwCube, GDK_EXPOSURE_MASK |
 				   GDK_BUTTON_PRESS_MASK |
 				   GDK_STRUCTURE_MASK );
@@ -3127,9 +3122,9 @@ extern GtkWidget *board_cube_widget( Board *board ) {
 				       x, x + 1, y, y + 1 );
         }
 
-    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * bd->rd.nSize );
-    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * bd->rd.nSize );
-    gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->rd.nSize );
+    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * rdAppearance.nSize );
+    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * rdAppearance.nSize );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), rdAppearance.nSize );
     
     return pw;	    
 }
@@ -3143,7 +3138,7 @@ static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
 	return TRUE;
     
     DrawDie( dice->window, bd, 0, 0, bd->turn > 0, n % 6 + 1 );
-    DrawDie( dice->window, bd, 7 * bd->rd.nSize, 0, bd->turn > 0, n / 6 + 1 );
+    DrawDie( dice->window, bd, 7 * rdAppearance.nSize, 0, bd->turn > 0, n / 6 + 1 );
     
     return TRUE;
 }
@@ -3175,7 +3170,7 @@ extern GtkWidget *board_dice_widget( Board *board ) {
 	    gtk_object_set_user_data( GTK_OBJECT( pwDice ),
 				      (gpointer) ( y * 6 + x ) );
 	    gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
-				   14 * bd->rd.nSize, 7 * bd->rd.nSize );
+				   14 * rdAppearance.nSize, 7 * rdAppearance.nSize );
 	    gtk_widget_add_events( pwDice, GDK_EXPOSURE_MASK |
 				   GDK_BUTTON_PRESS_MASK |
 				   GDK_STRUCTURE_MASK );
@@ -3187,9 +3182,9 @@ extern GtkWidget *board_dice_widget( Board *board ) {
 				       x, x + 1, y, y + 1 );
         }
 
-    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * bd->rd.nSize );
-    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * bd->rd.nSize );
-    gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->rd.nSize );
+    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * rdAppearance.nSize );
+    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * rdAppearance.nSize );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), rdAppearance.nSize );
     
     return pw;	    
 }

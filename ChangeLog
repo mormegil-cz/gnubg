@@ -1,3 +1,25 @@
+Sat Jan 18 23:14:56 2003  Gary Wong  <gtw@gnu.org>
+
+	* renderprefs.c, renderprefs.h: New files.  Allow "set appearance"
+	commands when GTK+ is not present.
+	* gtkprefs.c: Modify rdAppearance settings.
+	* gtkboard.c: Use rdAppearance settings.
+	* gnubg.c (CommandSaveSettings): Save appearance settings when
+	GTK+ is not present.
+	* export.c (CommandExportPositionPNG): Allow user-defined renderdata.
+	* htmlimages.c (CommandExportHTMLImages): Allow user-defined
+	renderdata.
+	
+	* gtkgame.c (OptionsPages): Move some of the GUI-specific
+	preferences here.
+	* set.c (CommandSetGUIAnimationBlink, CommandSetGUIAnimationNone,
+	CommandSetGUIAnimationSlide, CommandSetGUIAnimationSpeed,
+	CommandSetGUIBeep, CommandSetGUIDiceArea, CommandSetGUIHighDieFirst,
+	CommandSetGUIIllegal, CommandSetGUIShowIDs, CommandSetGUIShowPips):
+	New functions.
+
+	* analysis.h: add "extern" to a couple of declarations.
+
 Sat Jan 18 16:18:39 2003  Gary Wong  <gtw@gnu.org>
 
 	* render.c (RenderDice, RenderPips): Don't calculate specular

@@ -80,8 +80,8 @@ typedef enum _ratingtype {
   RAT_EXPERT, RAT_WORLD_CLASS, RAT_SUPERNATURAL, RAT_UNDEFINED
 } ratingtype;
 
-const char *aszRating [ RAT_UNDEFINED + 1 ];
-const char *aszLuckRating[ 7 ];
+extern const char *aszRating [ RAT_UNDEFINED + 1 ];
+extern const char *aszLuckRating[ 7 ];
 
 extern ratingtype GetRating ( const float rError );
 extern void IniStatcontext ( statcontext *psc );

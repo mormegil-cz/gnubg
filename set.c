@@ -54,6 +54,7 @@
 #endif
 #include "matchequity.h"
 #include "positionid.h"
+#include "renderprefs.h"
 #include "export.h"
 #include "drawboard.h"
 
@@ -134,7 +135,7 @@ SetSeed ( const rng rngx, char *sz ) {
     if( *sz ) {
 #if HAVE_LIBGMP
 	if( InitRNGSeedLong( sz, rngx ) )
-	    outputl( _("You must specify a vaid seed -- try `help set "
+	    outputl( _("You must specify a valid seed -- try `help set "
 		       "seed'.") );
 	else
 	    outputf( _("Seed set to %s.\n"), sz );
@@ -144,7 +145,7 @@ SetSeed ( const rng rngx, char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    outputl( _("You must specify a vaid seed -- try `help set seed'.") );
+	    outputl( _("You must specify a valid seed -- try `help set seed'.") );
 
 	    return;
 	}
@@ -665,21 +666,20 @@ extern void CommandSetClockwise( char *sz ) {
 
 extern void CommandSetAppearance( char *sz ) {
     
+    char *apch[ 2 ];
+    
 #if USE_GTK
-    if( fX ) {
-	char *apch[ 2 ];
-        BoardData *bd = BOARD( pwBoard )->board_data;
-
+    if( fX )
 	BoardPreferencesStart( pwBoard );
-	    
-	while( ParseKeyValue( &sz, apch ) )
-          BoardPreferencesParam( bd, apch[ 0 ], apch[ 1 ] );
-
-	BoardPreferencesDone( pwBoard );	    
-    } else
 #endif
-	outputl( _("The appearance may not be changed when using this user "
-		 "interface.") );
+    
+    while( ParseKeyValue( &sz, apch ) )
+	RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
+
+#if USE_GTK
+    if( fX )
+	BoardPreferencesDone( pwBoard );	    
+#endif
 }
 
 extern void CommandSetConfirmNew( char *sz ) {
@@ -1020,6 +1020,142 @@ extern void CommandSetEvaluation( char *sz ) {
     HandleCommand( sz, acSetEvaluation );
 }
 
+#if USE_GUI
+extern void CommandSetGUIAnimationBlink( char *sz ) {
+
+    animGUI = ANIMATE_BLINK;
+}
+
+extern void CommandSetGUIAnimationNone( char *sz ) {
+
+    animGUI = ANIMATE_NONE;
+}
+
+extern void CommandSetGUIAnimationSlide( char *sz ) {
+
+    animGUI = ANIMATE_SLIDE;
+}
+
+extern void CommandSetGUIAnimationSpeed( char *sz ) {
+    
+    int n = ParseNumber( &sz );
+
+    if( n < 0 || n > 7 ) {
+	outputl( _("You must specify a speed between 0 and 7 -- try "
+		   "`help set seed'.") );
+
+	return;
+    }
+
+    nGUIAnimSpeed = n;
+
+    outputf( _("Animation speed set to %d.\n"), n );
+}
+
+extern void CommandSetGUIBeep( char *sz ) {
+
+    SetToggle( "gui beep", &fGUIBeep, sz,
+	       _("GNU Backgammon will beep on illegal input."),
+	       _("GNU Backgammon will not beep on illegal input.") );
+}
+
+extern void CommandSetGUIDiceArea( char *sz ) {
+
+    if( SetToggle( "gui dicearea", &fGUIDiceArea, sz,
+		   _("A dice icon will be shown below the board when a human "
+		     "player is on roll."),
+		   _("No dice icon will be shown.") ) >= 0 )
+	UpdateSetting( &fGUIDiceArea );
+}
+
+extern void CommandSetGUIHighDieFirst( char *sz ) {
+
+    SetToggle( "gui highdiefirst", &fGUIHighDieFirst, sz,
+	       _("The higher die will be shown on the left."),
+	       _("The dice will be shown in the order rolled.") );
+}
+
+extern void CommandSetGUIIllegal( char *sz ) {
+
+    SetToggle( "gui illegal", &fGUIIllegal, sz,
+	       _("Chequers may be dragged to illegal points."),
+	       _("Chequers may not be dragged to illegal points.") );
+}
+
+extern void CommandSetGUIShowIDs( char *sz ) {
+
+    if( SetToggle( "gui showids", &fGUIShowIDs, sz,
+		   _("The position and match IDs will be shown above the "
+		     "board."),
+		   _("The position and match IDs will not be shown.") ) )
+	UpdateSetting( &fGUIShowIDs );
+}
+
+extern void CommandSetGUIShowPips( char *sz ) {
+
+    if( SetToggle( "gui showpips", &fGUIShowPips, sz,
+		   _("The pip counts will be shown below the board."),
+		   _("The pip counts will not be shown.") ) )
+	UpdateSetting( &fGUIShowPips );
+}
+#else
+static void NoGUI( void ) {
+
+    outputl( _("This installation of GNU Backgammon was compiled without GUI "
+	       "support.") );
+}
+
+extern void CommandSetGUIAnimationBlink( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIAnimationNone( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIAnimationSlide( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIAnimationSpeed( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIBeep( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIDiceArea( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIHighDieFirst( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIIllegal( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIShowIDs( char *sz ) {
+
+    NoGUI();
+}
+
+extern void CommandSetGUIShowPips( char *sz ) {
+
+    NoGUI();
+}
+#endif
+
 extern void CommandSetNackgammon( char *sz ) {
     
     SetToggle( "nackgammon", &fNackgammon, sz, _("New games will use the "
@@ -1209,7 +1345,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	outputl( _("You must specify a vaid ply depth to look ahead -- try "
+	outputl( _("You must specify a valid ply depth to look ahead -- try "
 		 "`help set player plies'.") );
 
 	return;
@@ -1674,7 +1810,7 @@ extern void CommandSetRolloutSeed( char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    outputl( _("You must specify a vaid seed -- try `help set seed'.") );
+	    outputl( _("You must specify a valid seed -- try `help set seed'.") );
 
 	    return;
 	}

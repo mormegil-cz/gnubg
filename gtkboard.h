@@ -61,10 +61,6 @@ extern void board_animate( Board *board, int move[ 8 ], int player );
 extern GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw );
 
-typedef enum _animation {
-    ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
-} animation;
-    
 /* private data */
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *table, *move,
@@ -81,12 +77,7 @@ typedef struct _BoardData {
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *appmKey[ 2 ];
     
-    gboolean usedicearea, permit_illegal, beep_illegal, higher_die_first,
-	playing, computer_turn;
-    gboolean show_ids;
-    gboolean show_pips;
-    animation animate_computer_moves;
-    int animate_speed;
+    gboolean playing, computer_turn;
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
 	old_board[ 2 ][ 25 ], drag_button, click_time,
 	cube_use, dice_roll[ 2 ]; /* roll showing on the off-board dice */
@@ -95,7 +86,6 @@ typedef struct _BoardData {
     move *all_moves, *valid_move;
     movelist move_list;
 
-    renderdata rd;
     renderimages ri;
     
     /* remainder is from FIBS board: data */

@@ -77,22 +77,23 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #include <iconv.h>
 
+#include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
 #include "eval.h"
-#include "getopt.h"
-#include "positionid.h"
-#include "matchid.h"
-#include "rollout.h"
-#include "matchequity.h"
-#include "analysis.h"
-#include "import.h"
 #include "export.h"
+#include "getopt.h"
+#include "import.h"
 #include "i18n.h"
-#include "sound.h"
+#include "matchequity.h"
+#include "matchid.h"
 #include "path.h"
+#include "positionid.h"
 #include "render.h"
+#include "renderprefs.h"
+#include "rollout.h"
+#include "sound.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -851,6 +852,32 @@ command cER = {
     { "message", CommandSetGeometryMessage,
       N_("set geometry of message window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetGUIAnimation[] = {
+    { "blink", CommandSetGUIAnimationBlink,
+      N_("Blink chequers being moves"), NULL, NULL },
+    { "none", CommandSetGUIAnimationNone,
+      N_("Do not animate moving chequers"), NULL, NULL },
+    { "slide", CommandSetGUIAnimationSlide,
+      N_("Slide chequers across board when moved"), NULL, NULL },
+    { "speed", CommandSetGUIAnimationSpeed,
+      N_("Specify animation rate for moving chequers"), szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetGUI[] = {
+    { "animation", NULL, N_("Control how moving chequers are displayed"), NULL,
+      acSetGUIAnimation },
+    { "beep", CommandSetGUIBeep, N_("Enable beeping on illegal input"),
+      szONOFF, NULL },
+    { "dicearea", CommandSetGUIDiceArea,
+      N_("Show dice icon when human player on roll"), szONOFF, NULL },
+    { "highdiefirst", CommandSetGUIHighDieFirst,
+      N_("Show the higher die on the left"), szONOFF, NULL },
+    { "illegal", CommandSetGUIIllegal,
+      N_("Permit dragging chequers to illegal points"), szONOFF, NULL },
+    { "showids", CommandSetGUIShowIDs,
+      N_("Show the position and match IDs above the board"), szONOFF, NULL },
+    { "showpips", CommandSetGUIShowPips,
+      N_("Show the pip counts below the board"), szONOFF, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetMatchInfo[] = {
     { "annotator", CommandSetMatchAnnotator,
       N_("Record the name of the match commentator"), szOPTNAME, NULL },
@@ -1351,6 +1378,8 @@ command cER = {
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
+    { "gui", NULL, N_("Control parameters for the graphical interface"), NULL,
+      acSetGUI },
     { "highlightcolour", CommandSetHighlight, 
       N_("Set brightness and colour for highlighting lines"),
 	  NULL, acSetHighlightIntensity},
@@ -2501,8 +2530,7 @@ extern void ShowBoard( void ) {
     /* FIXME it's ugly to access ...->animate_computer_moves here, but
        postponing updates can lead to animating based on the wrong
        display */
-    if( fX && !nDelay && !( (BoardData *) BOARD( pwBoard )->board_data )->
-	animate_computer_moves ) {
+    if( fX && !nDelay && animGUI == ANIMATE_NONE ) {
 	/* Always let the board widget know about dice rolls, even if the
 	   board update is elided (see below). */
 	if( ms.anDice[ 0 ] )
@@ -4468,8 +4496,11 @@ extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache; 
     char *szFile;
-    static char *aszWindow[] =
-      { "main", "game", "annotation", "hint", "message" };
+    static char *aszWindow[] = {
+	"main", "game", "annotation", "hint", "message"
+    }, *aszAnimation[] = {
+	"none", "blink", "slide"
+    };
 
     szParam = NextToken ( &szParam );
     
@@ -4551,14 +4582,8 @@ extern void CommandSaveSettings( char *szParam ) {
               fAnalyseDice ? "on" : "off",
               fAnalyseMove ? "on" : "off" );
 
-
-#if USE_GTK
-    if ( fX ) {
-        fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
-        fputc( '\n', pf );
-    }  /* FIXME This will overwrite the gtk-preferences if you
-                save the settings in tty mode  */
-#endif
+    fputs( RenderPreferencesCommand( &rdAppearance, szTemp ), pf );
+    fputc( '\n', pf );
     
     fprintf( pf, 
              "set automatic bearoff %s\n"
@@ -4613,6 +4638,25 @@ extern void CommandSaveSettings( char *szParam ) {
     SaveMoveFilterSettings ( pf, "set evaluation movefilter", aamfEval );
 
     fprintf( pf, "set cheat %s\n", fCheat ? "on" : "off" );
+
+#if USE_GTK
+    fprintf( pf, "set gui animation %s\n"
+	     "set gui animation speed %d\n"
+	     "set gui beep %s\n"
+	     "set gui dicearea %s\n"
+	     "set gui highdiefirst %s\n"
+	     "set gui illegal %s\n"
+	     "set gui showids %s\n"
+	     "set gui showpips %s\n",
+	     aszAnimation[ animGUI ], nGUIAnimSpeed,
+	     fGUIBeep ? "on" : "off",
+	     fGUIDiceArea ? "on" : "off",
+	     fGUIHighDieFirst ? "on" : "off",
+	     fGUIIllegal ? "on" : "off",
+	     fGUIShowIDs ? "on" : "off",
+	     fGUIShowPips ? "on" : "off" );
+#endif
+    
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
     fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );
@@ -6465,6 +6509,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif    
 
     RenderInitialise();
+    memcpy( &rdAppearance, &rdDefault, sizeof rdAppearance );
 
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );

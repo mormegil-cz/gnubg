@@ -277,6 +277,17 @@ extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
 extern int nThreadPriority;
 extern int fCheat;
 
+/* GUI settings. */
+#if USE_GTK
+typedef enum _animation {
+    ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
+} animation;
+    
+extern animation animGUI;
+extern int nGUIAnimSpeed, fGUIBeep, fGUIDiceArea, fGUIHighDieFirst,
+    fGUIIllegal, fGUIShowIDs, fGUIShowPips;
+#endif
+
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
   PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
@@ -500,9 +511,6 @@ UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 #ifdef WIN32
 extern void WinCopy( char *szOut );
 #endif
-
-extern int iProgressMax, iProgressValue;
-extern char *pcProgress;
 
 extern char *aszVersion[], *szHomeDirectory, *szDataDirectory,
     *szTerminalCharset;
@@ -732,6 +740,16 @@ extern void CommandAccept( char * ),
     CommandSetGeometryHeight ( char * ),
     CommandSetGeometryPosX ( char * ),
     CommandSetGeometryPosY ( char * ),
+    CommandSetGUIAnimationBlink( char * ),
+    CommandSetGUIAnimationNone( char * ),
+    CommandSetGUIAnimationSlide( char * ),
+    CommandSetGUIAnimationSpeed( char * ),
+    CommandSetGUIBeep( char * ),
+    CommandSetGUIDiceArea( char * ),
+    CommandSetGUIHighDieFirst( char * ),
+    CommandSetGUIIllegal( char * ),
+    CommandSetGUIShowIDs( char * ),
+    CommandSetGUIShowPips( char * ),
     CommandSetHighlight ( char * ),
     CommandSetHighlightColour ( char * ),
     CommandSetHighlightDark ( char * ),

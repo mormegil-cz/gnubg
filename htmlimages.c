@@ -24,9 +24,6 @@
 #endif
 
 #include <errno.h>
-#if USE_GTK
-#include <gtk/gtk.h>
-#endif
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
@@ -41,12 +38,9 @@
 
 #include "backgammon.h"
 #include "export.h"
-#if USE_GTK
-#include "gtkboard.h"
-#include "gtkgame.h"
-#endif 
 #include "i18n.h"
 #include "render.h"
+#include "renderprefs.h"
 
 static void DrawPips( unsigned char *auchDest, int nStride,
 		      unsigned char *auchPip, int nPipStride,
@@ -73,9 +67,6 @@ extern void CommandExportHTMLImages( char *sz ) {
 
 #if HAVE_LIBPNG
 
-#if USE_GTK
-    BoardData *bd;
-#endif
 #if HAVE_ALLOCA
     char *szFile;
 #else
@@ -126,14 +117,7 @@ extern void CommandExportHTMLImages( char *sz ) {
 	strcat( szFile, "/" );
     pchFile = strchr( szFile, 0 );
 
-#if USE_GTK
-    if( fX ) {
-	bd = BOARD ( pwBoard )->board_data;
-
-	memcpy ( &rd, &bd->rd, sizeof ( renderdata ) );
-    } else
-#endif
-	memcpy( &rd, &rdDefault, sizeof( renderdata ) );
+    memcpy( &rd, &rdAppearance, sizeof( renderdata ) );
     
     rd.fLabels = FALSE; /* HTML export draws labels outside the image */
     rd.nSize = s;

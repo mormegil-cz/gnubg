@@ -79,8 +79,6 @@ details.
 ** Kit Woolsey suggests adding an option for truncated rollouts: when
   truncating at n plies, take the mean of the (n-1) and n ply results.
 ** Add a "go to start of match" command. (gary)
-** Use a single renderdata struct which is controlled by the
-  "set appearance" command, even when GTK+ isn't there. (gary)
 ** The "play" command is broken in "load command" scripts.  Add subcommands
   like "play game", "play match" for finer control. (gary)
 
@@ -219,8 +217,6 @@ functions:
   for -- we should calculate it based on the score.
 ** "help next" (and "next <tab>") are incomplete.
 ** GtkTexi should try to load images from the same directory as the XML file.
-** "save settings" when using the TTY interface will delete GTK settings
-  (e.g. "set appearance") that were there previously.
 ** It is possible to give some commands (e.g. "roll", "play") while in edit
   mode, which messes things up.
 ** make rollout as initial position work correctly. Currently, you have to perform
