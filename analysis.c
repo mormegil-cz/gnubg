@@ -64,6 +64,8 @@ const char *aszLuckRating[] = {
 static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
   1e38, 0.060, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 };
 
+int afAnalysePlayers[ 2 ] = { TRUE, TRUE };
+
 evalcontext ecLuck = { TRUE, 0, 0, TRUE, 0.0 };
 
 extern ratingtype
@@ -527,7 +529,7 @@ extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
               evalsetup *pesChequer, evalsetup *pesCube,
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
-	      int fUpdateStatistics ) {
+	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
 
     static int anBoardMove[ 2 ][ 25 ];
     static int fFirstMove;
@@ -561,6 +563,12 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    SwapSides( pms->anBoard );
 	    pms->fMove = pmr->n.fPlayer;
 	}
+
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->n.fPlayer ] ) {
+          /* we do not analyse this player */
+          fFirstMove = 0;
+          break;
+        }
       
 	rSkill = rChequerSkill = 0.0f;
 	GetMatchStateCubeInfo( &ci, pms );
@@ -678,6 +686,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
     case MOVE_DOUBLE:
 
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->d.fPlayer ] )
+          /* we do not analyse this player */
+          break;
+      
         dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
 
         if ( dt != DT_NORMAL )
@@ -730,6 +742,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
     case MOVE_TAKE:
 
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->d.fPlayer ] )
+          /* we do not analyse this player */
+          break;
+      
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
         if ( tt != TT_NORMAL )
           break;
@@ -757,6 +773,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	break;
       
     case MOVE_DROP:
+      
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->d.fPlayer ] )
+          /* we do not analyse this player */
+          break;
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
         if ( tt != TT_NORMAL )
@@ -791,6 +811,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
         SwapSides( pms->anBoard );
         pms->fMove = pmr->n.fPlayer;
       }
+      
+      if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->r.fPlayer ] )
+        /* we do not analyse this player */
+        break;
       
       if ( pesCube->et != EVAL_NONE ) {
         
@@ -835,6 +859,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    SwapSides( pms->anBoard );
 	    pms->fMove = pmr->sd.fPlayer;
 	}
+      
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->sd.fPlayer ] )
+          /* we do not analyse this player */
+          break;
       
 	GetMatchStateCubeInfo( &ci, pms );
       
@@ -883,7 +911,8 @@ AnalyzeGame ( list *plGame ) {
 
         if( AnalyzeMove ( pmr, &msAnalyse, plGame, &pmgi->sc, 
                           &esAnalysisChequer,
-                          &esAnalysisCube, aamfAnalysis, TRUE ) < 0 ) {
+                          &esAnalysisCube, aamfAnalysis, TRUE, 
+                          afAnalysePlayers ) < 0 ) {
 	    /* analysis incomplete; erase partial summary */
 	    IniStatcontext( &pmgi->sc );
  	    return -1;
@@ -1689,7 +1718,8 @@ extern void CommandAnalyseMove ( char *sz ) {
 
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
     AnalyzeMove ( plLastMove->plNext->p, &msx, plGame, NULL, 
-                  &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, FALSE );
+                  &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, 
+                  FALSE, NULL );
 
 #if USE_GTK
   if( fX )

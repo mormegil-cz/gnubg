@@ -372,6 +372,8 @@ static void ShowPaged( char **ppch ) {
 
 extern void CommandShowAnalysis( char *sz ) {
 
+    int i;
+
     outputl( fAnalyseCube ? _("Cube action will be analysed.") :
 	     _("Cube action will not be analysed.") );
 
@@ -386,6 +388,11 @@ extern void CommandShowAnalysis( char *sz ) {
 	    outputf( _("Up to %d moves will be analysed.\n"), cAnalysisMoves );
     } else
 	outputl( _("Chequer play will not be analysed.") );
+
+    outputl( "" );
+    for ( i = 0; i < 2; ++i )
+      outputf( _("Analyse %s's chequerplay and cube decisions: %s\n"),
+               ap[ i ].szName, afAnalysePlayers[ i ] ? _("yes") : _("no") );
 
     outputl( _("\nAnalysis thresholds:") );
     outputf( "  +%.3f %s\n"

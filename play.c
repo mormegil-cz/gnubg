@@ -2561,7 +2561,7 @@ static skilltype GoodMove (movenormal *p) {
   ProgressStart( _("Considering move...") );
   if (AnalyzeMove ( pmr, &msx, plGame, NULL, pesChequer, pesChequer,
                     fTutorAnalysis ? aamfAnalysis : aamfEval, 
-		    FALSE ) < 0) {
+		    FALSE, NULL ) < 0) {
     fAnalyseMove = fAnalyseMoveSaved;
     ProgressEnd();
     ResumeInput ( &m );
@@ -3056,6 +3056,13 @@ static void CommandNextGame( char *sz ) {
 	return;
 
     ChangeGame( pl->p );
+}
+
+extern void
+CommandFirstGame( char *sz ) {
+
+  ChangeGame( lMatch.plNext->p );
+
 }
 
 static void CommandNextRoll( char *sz ) {

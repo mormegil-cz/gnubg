@@ -199,6 +199,7 @@ int fMessage = FALSE;
 int nThreadPriority = 0;
 int fCheat = FALSE;
 int afCheatRoll[ 2 ] = { 0, 0 };
+int fGotoFirstGame = FALSE;
 
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
@@ -683,6 +684,10 @@ command cER = {
     { "session", NULL, N_("Record a log of the session so far to a file"), 
       NULL, acExportSession },
     { NULL, NULL, NULL, NULL, NULL }
+}, acFirst[] = {
+  { "game", CommandFirstGame, 
+    N_("Goto first game of the match or session"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
     { "bkg", CommandImportBKG, N_("Import from Hans Berliner's BKG format"),
       szFILENAME, &cFilename },
@@ -766,6 +771,10 @@ command cER = {
       N_("Write the neural net weights to a file"),
       szOPTFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetAnalysisPlayer[] = {
+    { "analyse", CommandSetAnalysisPlayerAnalyse, 
+      N_("Specify if this player is to be analysed"), szONOFF, &cOnOff },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysisThreshold[] = {
     { "bad", CommandSetAnalysisThresholdBad, 
       N_("Specify the equity loss for a bad move"), szVALUE, NULL },
@@ -824,6 +833,8 @@ command cER = {
     { "moves", CommandSetAnalysisMoves, 
       N_("Select whether chequer play will be "
       "analysed"), szONOFF, &cOnOff },
+    { "player", CommandSetAnalysisPlayer,
+      N_("Player specific options"), szPLAYER, acSetAnalysisPlayer },
     { "threshold", NULL, N_("Specify levels for marking moves"), NULL,
       acSetAnalysisThreshold },
     { NULL, NULL, NULL, NULL, NULL }    
@@ -1458,6 +1469,9 @@ command cER = {
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
+    { "gotofirstgame", CommandSetGotoFirstGame, 
+      N_("Control whether you want to go to the first or last game "
+         "when loading matches or sessions"), NULL, NULL },
     { "gui", NULL, N_("Control parameters for the graphical interface"), NULL,
       acSetGUI },
     { "highlightcolour", CommandSetHighlight, 
@@ -1671,6 +1685,8 @@ command cER = {
       NULL, acExport },
     { "external", CommandExternal, N_("Make moves for an external controller"),
       szFILENAME, &cFilename },
+    { "first", NULL, N_("Goto first move or game"),
+      NULL, acFirst },
     { "help", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
     { "hint", CommandHint,  
       N_("Give hints on cube action or best legal moves"), 
@@ -4064,6 +4080,8 @@ extern void CommandImportBKG( char *sz ) {
 	ImportBKG( pf, sz );
 	fclose( pf );
         setDefaultFileName ( sz, PATH_BKG );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
     } else
 	outputerr( sz );
 }
@@ -4113,6 +4131,8 @@ extern void CommandImportMat( char *sz ) {
 	ImportMat( pf, sz );
 	fclose( pf );
         setDefaultFileName ( sz, PATH_MAT );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
     } else
 	outputerr( sz );
 }
@@ -4133,6 +4153,8 @@ extern void CommandImportOldmoves( char *sz ) {
 	ImportOldmoves( pf, sz );
 	fclose( pf );
         setDefaultFileName ( sz, PATH_OLDMOVES );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
     } else
 	outputerr( sz );
 }
@@ -4154,6 +4176,8 @@ extern void CommandImportSGG( char *sz ) {
 	ImportSGG( pf, sz );
 	fclose( pf );
         setDefaultFileName ( sz, PATH_SGG );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
     } else
 	outputerr( sz );
 }
@@ -4174,6 +4198,8 @@ extern void CommandImportTMG( char *sz ) {
 	ImportTMG( pf, sz );
 	fclose( pf );
         setDefaultFileName ( sz, PATH_TMG );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
     } else
 	outputerr( sz );
 }
@@ -4685,6 +4711,8 @@ extern void CommandSaveSettings( char *szParam ) {
                  "\n"), 
               VERSION );
 
+    /* analysis settings */
+
     SaveEvalSetupSettings ( pf, "set analysis chequerplay",
 			    &esAnalysisChequer );
     SaveEvalSetupSettings ( pf, "set analysis cubedecision",
@@ -4723,6 +4751,12 @@ extern void CommandSaveSettings( char *szParam ) {
               fAnalyseCube ? "on" : "off",
               fAnalyseDice ? "on" : "off",
               fAnalyseMove ? "on" : "off" );
+
+    for ( i = 0; i < 2; ++i )
+      fprintf( pf, "set analysis player %d analyse %s\n",
+               i, afAnalysePlayers[ i ] ? "yes" : "no" );
+
+    /* Render preferences */
 
     fputs( RenderPreferencesCommand( &rdAppearance, szTemp ), pf );
     fputc( '\n', pf );
@@ -4805,6 +4839,7 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
     
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
+    fprintf( pf, "set gotofirstgame %s\n", fGotoFirstGame ? "on" : "off" );
 
     fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );
     fprintf( pf, "set matchlength %d\n", nDefaultLength );
@@ -5314,7 +5349,8 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
 		  break;
 		}
 		if( pc == acSetPlayer || pc == acSetRolloutPlayer || 
-			pc == acSetRolloutLatePlayer) {
+                    pc == acSetRolloutLatePlayer ||
+                    pc == acSetAnalysisPlayer || pc == acSetCheatPlayer ) {
 		    pcResume = pc;
 		    pc = &cPlayerBoth;
 		}

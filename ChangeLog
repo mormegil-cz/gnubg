@@ -1,3 +1,23 @@
+Sat Apr  5 15:28:28 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Option to skip analysis of one of the players.
+	Option to goto first game when loading matches or sessions.
+
+	* gnubg.c: new commands: "set analysis player ... analyse [yes|no],
+	"set gotofirstgame ...", and "first game".
+	* set.c (CommandSetAnalysisPlayer,
+	CommandSetAnalysisPlayerAnalyse, CommandSetGotoFirstGame):
+	new functions.
+	* show.c (CommandShowAnalysis): show new flags.
+	* gtkgame.c (AnalysisPage, AnalysisOK, AnalysisSet): gui widgets
+	for new command.
+	* gtkgame.c (OptionsPages, OptionSet, OptionsOK): new flags.
+	* analysis.c (AnalyzeMove): new parameter (change all callers),
+	use new flag.
+	* play.c (CommandFirstGame): new function.
+	* gnubg.c, sgf.c: call CommandFirstGame if fGotoFirstGame when
+	loading and importing matches, games, and sessions.
+
 Sat Apr  5 14:57:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	play.c (TryBearoff): no auto-bearoff for hypergammon positions

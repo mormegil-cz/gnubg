@@ -4642,6 +4642,7 @@ typedef struct _analysiswidget {
   GtkAdjustment *apadjSkill[5], *apadjLuck[4];
   GtkWidget *pwMoves, *pwCube, *pwLuck;
   GtkWidget *pwEvalCube, *pwEvalChequer;
+  GtkWidget *apwAnalysePlayers[ 2 ];
     
 } analysiswidget;
 
@@ -4699,6 +4700,16 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 
   paw->pwLuck = gtk_check_button_new_with_label (_("Luck"));
   gtk_box_pack_start (GTK_BOX (vbox2), paw->pwLuck, FALSE, FALSE, 0);
+
+  for ( i = 0; i < 2; ++i ) {
+
+    char *sz = g_strdup_printf( _("Analyse player %s"), ap[ i ].szName );
+
+    paw->apwAnalysePlayers[ i ] = gtk_check_button_new_with_label ( sz );
+    gtk_box_pack_start (GTK_BOX (vbox2), paw->apwAnalysePlayers[ i ], 
+                        FALSE, FALSE, 0);
+
+  }
 
   gtk_signal_connect ( GTK_OBJECT ( paw->pwMoves ), "toggled",
                        GTK_SIGNAL_FUNC ( AnalysisCheckToggled ), paw );
@@ -4833,6 +4844,10 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   CHECKUPDATE(paw->pwMoves,fAnalyseMove, "set analysis moves %s")
   CHECKUPDATE(paw->pwCube,fAnalyseCube, "set analysis cube %s")
   CHECKUPDATE(paw->pwLuck,fAnalyseDice, "set analysis luck %s")
+  CHECKUPDATE(paw->apwAnalysePlayers[ 0 ], afAnalysePlayers[ 0 ],
+              "set analysis player 0 analyse %s")
+  CHECKUPDATE(paw->apwAnalysePlayers[ 1 ], afAnalysePlayers[ 1 ],
+              "set analysis player 1 analyse %s")
 
   if((n = paw->padjMoves->value) != cAnalysisMoves) {
     sprintf(sz, "set analysis limit %d", n );
@@ -4868,12 +4883,20 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
 static void AnalysisSet( analysiswidget *paw) {
 
+  int i;
+
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwMoves ),
                                 fAnalyseMove );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwCube ),
                                 fAnalyseCube );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwLuck ),
                                 fAnalyseDice );
+
+  for ( i = 0; i < 2; ++i )
+    gtk_toggle_button_set_active( 
+        GTK_TOGGLE_BUTTON( paw->apwAnalysePlayers[ i ] ), 
+        afAnalysePlayers[ i ] );
+
   gtk_adjustment_set_value ( paw->padjMoves, cAnalysisMoves );
   
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ), 
@@ -8158,6 +8181,7 @@ typedef struct _optionswidget {
   GtkAdjustment *padjSpeed;
 
   GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
+  GtkWidget *pwGotoFirstGame;
 } optionswidget;   
 
 static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
@@ -9233,6 +9257,19 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "less memory.  Each entry uses around 50 bytes, "
 			    "depending on the platform." ), NULL );
 
+    /* goto first game upon loading option */
+
+    pow->pwGotoFirstGame = gtk_check_button_new_with_label (
+	_("Goto first game when loading matches or sessions"));
+    gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwGotoFirstGame,
+			FALSE, FALSE, 0);
+    gtk_tooltips_set_tip( ptt, pow->pwGotoFirstGame,
+			  _("This option controls whether GNU Backgammon "
+                            "shows the board after the last move in the "
+                            "match, game, or session or whether it should "
+                            "show the first move in the first game"),
+                          NULL );
+  
     /* return notebook */
 
     return pwn;    
@@ -9487,6 +9524,9 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
       UserCommand( sz );
     }
   }
+
+
+  CHECKUPDATE( pow->pwGotoFirstGame, fGotoFirstGame, "set gotofirstgame %s" )
       
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -9574,6 +9614,9 @@ OptionsSet( optionswidget *pow) {
                                 fConfirm );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwConfOverwrite ),
                                 fConfirmSave );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGotoFirstGame ),
+                                fGotoFirstGame );
+
 
 }
 

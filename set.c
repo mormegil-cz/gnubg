@@ -2590,6 +2590,74 @@ CommandSetEvalParamRollout ( char *sz ) {
 
 
 extern void
+CommandSetAnalysisPlayer( char *sz ) {
+
+  char *pch = NextToken( &sz ), *pchCopy;
+  int i;
+
+  if( !pch ) {
+    outputl( _("You must specify a player "
+               "-- try `help set analysis player'.") );
+    return;
+  }
+
+  if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+    iPlayerSet = i;
+
+    HandleCommand( sz, acSetAnalysisPlayer );
+	
+    return;
+  }
+
+  if( i == 2 ) {
+    if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+      outputl( _("Insufficient memory.") );
+      
+      return;
+	}
+    
+    strcpy( pchCopy, sz );
+    
+    outputpostpone();
+    
+    iPlayerSet = 0;
+    HandleCommand( sz, acSetAnalysisPlayer );
+    
+    iPlayerSet = 1;
+    HandleCommand( pchCopy, acSetAnalysisPlayer );
+    
+    outputresume();
+	
+    free( pchCopy );
+    
+    return;
+  }
+  
+  outputf( _("Unknown player `%s' -- try\n"
+             "`help set analysis player'.\n"), pch );
+
+}
+
+
+extern void
+CommandSetAnalysisPlayerAnalyse( char *sz ) {
+
+  char sz1[ 100 ];
+  char sz2[ 100 ];
+
+  sprintf( sz1, _("Analyse %s's chequerplay and cube decisions."),
+           ap[ iPlayerSet ].szName );
+
+  sprintf( sz2, _("Do not analyse %s's chequerplay and cube decisions."),
+           ap[ iPlayerSet ].szName );
+
+  SetToggle( "analysis player", &afAnalysePlayers[ iPlayerSet ], sz,
+             sz1, sz2 );
+
+}
+
+
+extern void
 CommandSetAnalysisChequerplay ( char *sz ) {
 
   pesSet = &esAnalysisChequer;
@@ -4157,3 +4225,12 @@ CommandSetVariationStandard( char *sz ) {
 
 }
 
+
+extern void
+CommandSetGotoFirstGame( char *sz ) {
+
+  SetToggle( "gotofirstgame", &fGotoFirstGame, sz, 
+             _("Goto first game when loading matches or sessions."),
+             _("Goto last game when loading matches or sessions.") );
+
+}

@@ -282,6 +282,7 @@ extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
 extern int nThreadPriority;
 extern int fCheat;
 extern int afCheatRoll[ 2 ];
+extern int fGotoFirstGame;
 
 /* GUI settings. */
 #if USE_GTK
@@ -486,7 +487,7 @@ extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
               evalsetup *pesChequer, evalsetup *pesCube,
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
-	      int fUpdateStatistics );
+	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] );
 
 extern int
 confirmOverwrite ( const char *sz, const int f );
@@ -533,6 +534,7 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename,
     cHighlightColour;
 extern command acSetCheatPlayer[];
+extern command acSetAnalysisPlayer[];
 
 extern command acAnnotateMove[];
 extern command acSetExportParameters[];
@@ -607,6 +609,7 @@ extern void CommandAccept( char * ),
     CommandExportPositionGOL2Clipboard ( char * ),
     CommandExportPositionSnowieTxt( char * ),
     CommandExternal( char * ),
+    CommandFirstGame( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
     CommandImportBKG( char * ),
@@ -656,6 +659,8 @@ extern void CommandAccept( char * ),
     CommandSetAnalysisLuck( char * ),
     CommandSetAnalysisMoveFilter( char * ),
     CommandSetAnalysisMoves( char * ),
+    CommandSetAnalysisPlayer( char * ),
+    CommandSetAnalysisPlayerAnalyse( char * ),
     CommandSetAnalysisThresholdBad( char * ),
     CommandSetAnalysisThresholdDoubtful( char * ),
     CommandSetAnalysisThresholdGood( char * ),
@@ -757,6 +762,7 @@ extern void CommandAccept( char * ),
     CommandSetGeometryHeight ( char * ),
     CommandSetGeometryPosX ( char * ),
     CommandSetGeometryPosY ( char * ),
+    CommandSetGotoFirstGame( char * ),
     CommandSetGUIAnimationBlink( char * ),
     CommandSetGUIAnimationNone( char * ),
     CommandSetGUIAnimationSlide( char * ),
