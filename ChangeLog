@@ -1,3 +1,12 @@
+Wed Feb  8  16:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* Various fixes for gtk 2.6:
+	eval.c : Increase poll time
+	gnubg.c : Fix ok click problem for gtk 2.6
+	gtkgame.c : Fix dock/undock problem for gtk 2.6
+	gtkoptions.c gtkbearoff.c gtktempmap.c : Fix dialog modality
+
+
 Tue Feb  7  17:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c: change get install dir to look at path to exe (windows)
