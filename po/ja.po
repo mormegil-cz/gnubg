@@ -5,6 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU Backgammon 0.14-devel\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2004-06-13 11:59+0200\n"
 "PO-Revision-Date: 2003-09-09 13:42+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
@@ -12,7 +13,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=EUC-JP\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Report-Msgid-Bugs-To: \n"
 
 #: analysis.c:48
 msgid "Awful!"
@@ -416,63 +416,21 @@ msgstr ""
 msgid "Unknown bearoff database\n"
 msgstr "ÉÔÌÀ¤Ê¥Ù¥¢¥ª¥Õ¥Ç¡¼¥¿¥Ù¡¼¥¹\n"
 
-#: board3d/gtkcolour3d.c:319
-msgid "Ambient colour:"
-msgstr ""
-
-#: board3d/gtkcolour3d.c:324
-msgid "Diffuse colour:"
-msgstr ""
-
-#: board3d/gtkcolour3d.c:329
-msgid "Specular colour:"
-msgstr ""
-
-#: board3d/gtkcolour3d.c:334
-msgid "Shine:"
-msgstr ""
-
-#: board3d/gtkcolour3d.c:345
-msgid "Opacity:"
-msgstr ""
-
-#: board3d/gtkcolour3d.c:356
-msgid "Texture:"
-msgstr "¥Æ¥¯¥¹¥Á¥ã:"
-
-#: board3d/gtkcolour3d.c:365
-msgid "Preview:"
-msgstr "¥×¥ì¥Ó¥å¡¼:"
-
-#: board3d/gtkcolour3d.c:429 gtkgame.c:2975 gtkgame.c:3023 gtkgame.c:7479
-msgid "OK"
-msgstr "OK"
-
-#: board3d/gtkcolour3d.c:431 gtkgame.c:3024 gtkgame.c:9865
-msgid "Cancel"
-msgstr "¥­¥ã¥ó¥»¥ë"
-
-#: board3d/gtkcolour3d.c:448
-msgid "3d Colour selection"
-msgstr ""
-
 #: credits.c:7
 msgid "Copyright 1999, 2000, 2001, 2002, 2003, 2004 by Gary Wong."
-msgstr ""
+msgstr "Copyright 1999, 2000, 2001, 2002, 2003, 2004 by Gary Wong."
 
 #: credits.c:34 credits.c:36
 msgid "Web Pages"
 msgstr ""
 
 #: credits.c:35
-#, fuzzy
 msgid "Manual"
-msgstr "¼êÆ°"
+msgstr "¥Þ¥Ë¥å¥¢¥ë"
 
 #: credits.c:37
-#, fuzzy
 msgid "Tutorial"
-msgstr "»ØÆ³"
+msgstr ""
 
 #: credits.c:42 gtkoptions.c:170
 msgid "Czech"
@@ -507,9 +465,8 @@ msgid "Turkish"
 msgstr "Turkish"
 
 #: credits.c:50
-#, fuzzy
 msgid "Russian"
-msgstr "ÅêÎ»"
+msgstr "Russian"
 
 #: credits.c:167
 msgid "Developers"
@@ -520,14 +477,12 @@ msgid "Code Contributors"
 msgstr ""
 
 #: credits.c:169
-#, fuzzy
 msgid "Translations"
-msgstr "¥Ð¥ê¥¨¡¼¥·¥ç¥ó"
+msgstr "ËÝÌõ¼Ô"
 
 #: credits.c:170
-#, fuzzy
 msgid "Support"
-msgstr "¥¤¥ó¥Ý¡¼¥È"
+msgstr ""
 
 #: database.c:79
 msgid "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials Date"
@@ -691,14 +646,14 @@ msgid "Number of dice read from current file: %lu.\n"
 msgstr ""
 
 #: dice.c:511
-#, fuzzy, c-format
+#, c-format
 msgid "The current seed is %s.\n"
-msgstr "¸½ºß¤Î¥·¡¼¥É¤Ï %u¡£\n"
+msgstr "¸½ºß¤Î¥·¡¼¥É¤Ï %s¡£\n"
 
 #: dice.c:521
-#, fuzzy, c-format
+#, c-format
 msgid "The current seed is %d.\n"
-msgstr "¸½ºß¤Î¥·¡¼¥É¤Ï %u¡£\n"
+msgstr "¸½ºß¤Î¥·¡¼¥É¤Ï %d¡£\n"
 
 #: dice.c:536
 #, c-format
@@ -983,30 +938,26 @@ msgstr "¥Þ¥Ã¥Á ID:\t"
 msgid "Evaluator: \t"
 msgstr "É¾²Á´ï: \t"
 
-#: eval.c:3974 gtkcube.c:67
-msgid "L(bg)"
-msgstr "Éé¤±(¥Ð¥Ã¥¯¥®¥ã¥â¥ó)"
-
-#: eval.c:3974 gtkcube.c:67
-msgid "L(g)"
-msgstr "Éé¤±(¥®¥ã¥â¥ó°Ê¾å)"
-
-#: eval.c:3974 gtkcube.c:66
-msgid "W(bg)"
-msgstr "¾¡¤Á(¥Ð¥Ã¥¯¥®¥ã¥â¥ó)"
-
-#: eval.c:3974 gtkcube.c:66
-msgid "W(g)"
-msgstr "¾¡¤Á(¥®¥ã¥â¥ó°Ê¾å)"
-
 #: eval.c:3974 gtkchequer.c:840 gtkcube.c:66 gtkrace.c:529 html.c:338
 #: progress.c:750
 msgid "Win"
 msgstr "¾¡¤Á"
 
-#: eval.c:3976 eval.c:5224 gtkgame.c:6621 html.c:347 progress.c:756 show.c:121
-msgid "Cubeful"
-msgstr "¥­¥å¡¼¥Ö¥Õ¥ë"
+#: eval.c:3974 gtkcube.c:66
+msgid "W(g)"
+msgstr "¾¡¤Á(¥®¥ã¥â¥ó°Ê¾å)"
+
+#: eval.c:3974 gtkcube.c:66
+msgid "W(bg)"
+msgstr "¾¡¤Á(¥Ð¥Ã¥¯¥®¥ã¥â¥ó)"
+
+#: eval.c:3974 gtkcube.c:67
+msgid "L(g)"
+msgstr "Éé¤±(¥®¥ã¥â¥ó°Ê¾å)"
+
+#: eval.c:3974 gtkcube.c:67
+msgid "L(bg)"
+msgstr "Éé¤±(¥Ð¥Ã¥¯¥®¥ã¥â¥ó)"
 
 #: eval.c:3976 gtkchequer.c:88 gtkrolls.c:227 html.c:2525 show.c:2369
 msgid "Equity"
@@ -1016,6 +967,10 @@ msgstr "¥¨¥¯¥¤¥Æ¥£"
 #: gtkcube.c:165 gtkcube.c:453 gtkcube.c:467 gtkcube.c:890 html.c:2525
 msgid "MWC"
 msgstr "¥Þ¥Ã¥Á¾¡Î¨"
+
+#: eval.c:3976 eval.c:5224 gtkgame.c:6621 html.c:347 progress.c:756 show.c:121
+msgid "Cubeful"
+msgstr "¥­¥å¡¼¥Ö¥Õ¥ë"
 
 #: eval.c:3992
 msgid "static"
@@ -1154,11 +1109,13 @@ msgid "You must specify a file to export to (see `help export position pos')."
 msgstr ""
 
 #: external.c:132
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Windows socket error (%s):\n"
 "%s"
-msgstr "Windows ¥½¥±¥Ã¥È"
+msgstr ""
+"Windows ¥½¥±¥Ã¥È¥¨¥é¡¼ (%s):\n"
+"%s"
 
 #: external.c:268
 msgid "External connection closed."
@@ -1359,12 +1316,12 @@ msgid "%d-ply"
 msgstr "%d-ply"
 
 #: format.c:941 html.c:2196
-msgid "cubeless MWC"
-msgstr "¥­¥å¡¼¥Ö¥ì¥¹¥Þ¥Ã¥Á¾¡Î¨"
-
-#: format.c:941 html.c:2196
 msgid "cubeless equity"
 msgstr "¥­¥å¡¼¥Ö¥ì¥¹¥¨¥¯¥¤¥Æ¥£"
+
+#: format.c:941 html.c:2196
+msgid "cubeless MWC"
+msgstr "¥­¥å¡¼¥Ö¥ì¥¹¥Þ¥Ã¥Á¾¡Î¨"
 
 #: format.c:943 html.c:2200
 msgid "Money"
@@ -1948,7 +1905,6 @@ msgid "Mark a very lucky dice roll"
 msgstr "Èó¾ï¤ËÎÉ¤¤½ÐÌÜ¤ò¥Þ¡¼¥¯¤¹¤ë"
 
 #: gnubg.c:686
-#, fuzzy
 msgid "Mark a very unlucky dice roll"
 msgstr "Èó¾ï¤Ë°­¤¤½ÐÌÜ¤ò¥Þ¡¼¥¯¤¹¤ë"
 
@@ -2097,8 +2053,8 @@ msgid ""
 "Copy the current position in .html format to clipboard(special for "
 "GammOnLine)"
 msgstr ""
-"¸½ºß¤Î¥Ý¥¸¥·¥ç¥ó¤ò¡¢.html ·Á¼°¤Ç¥¯¥ê¥Ã¥×¥Ü¡¼¥É¤Ë¥³¥Ô¡¼¤·¤Þ¤¹¡£(GammOnLine "
-"¸þ¤±)"
+"¸½ºß¤Î¥Ý¥¸¥·¥ç¥ó¤ò¡¢.html ·Á¼°¤Ç¥¯¥ê¥Ã¥×¥Ü¡¼¥É¤Ë¥³¥Ô¡¼¤·¤Þ¤¹¡£(GammOnLine ¸þ"
+"¤±)"
 
 #: gnubg.c:782
 msgid "Save the current position in Encapsulated PostScript format"
@@ -2229,9 +2185,8 @@ msgid "Read a saved position from a file"
 msgstr "¥Õ¥¡¥¤¥ë¤«¤é¥Ý¥¸¥·¥ç¥ó¤òÆÉ¤ß¹þ¤à"
 
 #: gnubg.c:876
-#, fuzzy
 msgid "Load a python script from a file"
-msgstr "¥Õ¥¡¥¤¥ë¤«¤é¥Ý¥¸¥·¥ç¥ó¤òÆÉ¤ß¹þ¤à"
+msgstr "¥Õ¥¡¥¤¥ë¤«¤é Python ¥¹¥¯¥ê¥×¥È¤òÆÉ¤ß¹þ¤à"
 
 #: gnubg.c:878
 msgid "Read neural net weights from a file"
@@ -4519,8 +4474,8 @@ msgid ""
 "Warning: this game was edited during play and cannot be recorded in this "
 "format."
 msgstr ""
-"·Ù¹ð: "
-"¤³¤Î¥²¡¼¥à¤Ï¥×¥ì¥¤Ãæ¤ËÊÔ½¸¤µ¤ì¤¿¤Î¤Ç¤³¤Î¥Õ¥©¡¼¥Þ¥Ã¥È¤Ç¤Ïµ­Ï¿½ÐÍè¤Þ¤»¤ó¡£"
+"·Ù¹ð: ¤³¤Î¥²¡¼¥à¤Ï¥×¥ì¥¤Ãæ¤ËÊÔ½¸¤µ¤ì¤¿¤Î¤Ç¤³¤Î¥Õ¥©¡¼¥Þ¥Ã¥È¤Ç¤Ïµ­Ï¿½ÐÍè¤Þ¤»"
+"¤ó¡£"
 
 #: gnubg.c:4877
 #, fuzzy
@@ -4620,8 +4575,8 @@ msgstr ""
 "# GNU Backgammon ¥³¥Þ¥ó¥É¥Õ¥¡¥¤¥ë\n"
 "#   generated by GNU Backgammon %s\n"
 "#\n"
-"# ·Ù¹ð: ¤³¤Î¥Õ¥¡¥¤¥ë¡¢`.gnubgautorc' ¤Ï `save settings' "
-"¥³¥Þ¥ó¥É¤Ë¤è¤ê¼«Æ°Åª¤Ë\n"
+"# ·Ù¹ð: ¤³¤Î¥Õ¥¡¥¤¥ë¡¢`.gnubgautorc' ¤Ï `save settings' ¥³¥Þ¥ó¥É¤Ë¤è¤ê¼«Æ°Åª"
+"¤Ë\n"
 "# ºîÀ®¤µ¤ì¤Þ¤¹¡£ ¤½¤·¤Æ¡¢¼¡¤Î¥»¥Ã¥Æ¥£¥ó¥°¤¬¥»¡¼¥Ö¤µ¤ì¤ë»þ¤Ë¾å½ñ¤­¤µ¤ì¤Þ¤¹¡£\n"
 "# ¤â¤·¡¢¼êÆ°¤ÇÊÑ¹¹¤·¤¿¤¤¾ì¹ç¤ÏÂå¤ï¤ê¤Ë`.gnubgrc' ¤ò»È¤Ã¤Æ²¼¤µ¤¤¡£\n"
 "\n"
@@ -4726,7 +4681,6 @@ msgid "GNU Backgammon %s\n"
 msgstr "GNU Backgammon"
 
 #: gnubg.c:7908
-#, fuzzy
 msgid ""
 "GNU Backgammon is free software, covered by the GNU General Public License\n"
 "version 2, and you are welcome to change it and/or distribute copies of it\n"
@@ -4735,9 +4689,12 @@ msgid ""
 "for\n"
 "details.\n"
 msgstr ""
-"GNU Backgammon ¤Ï¥Õ¥ê¡¼¥½¥Õ¥È¥¦¥§¥¢¤Ç¡¢GNU General Public License version 2 "
-"¤ÎÅ¬ÍÑ¤ò¼õ¤±¤Æ¤¤¤Þ¤¹¡£¤½¤·¤Æ¡¢²þÂ¤¤Ï´¿·Þ¤·¤Þ¤¹¤·¡¢¤Þ¤¿¤Ï¡¿¤½¤·¤Æ¤³¤Î¥³¥Ô¡¼¤ò°"
-"ìÄê¤Î¾ò·ï¤Î²¼¤Ç¼«Í³¤ËÇÛÉÛ¤Ç¤­¤Þ¤¹¡£ GNU Backgammon ¤Ï´°Á´¤ËÌµÊÝ¾Ú¤Ç¤¹¡£"
+"GNU Backgammon ¤Ï¼«Í³¤Ê¥½¥Õ¥È¥¦¥§¥¢¤Ç¡¢GNU General Public License ¤Î\n"
+"¥Ð¡¼¥¸¥ç¥ó2¤ÇÊÝ¸î¤µ¤ì¤Æ¤ª¤ê¡¢Äê¤á¤ë¾ò¹à¤Ë½¾¤Ã¤ÆËÜ¥×¥í¥°¥é¥à¤òºÆÈÒÉÛ\n"
+"¤Þ¤¿¤ÏÊÑ¹¹¤¹¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£\n"
+"¾ò¹à¤ò¸«¤ë¤Ë¤Ï \"show coping\" ¤È¥¿¥¤¥×¤·¤Æ¤¯¤À¤µ¤¤¡£\n"
+"GNU Backgammon ¤Ï´°Á´¤ËÌµÊÝ¾Ú¤Ç¤¹¡£¾ÜºÙ¤Ï \"show warranty\" \n"
+"¤È¥¿¥¤¥×¤·¤Æ¤¯¤À¤µ¤¤¡£\n"
 
 #: gnubg.c:7926 gnubg.c:7977 gnubg.c:7984 gnubg.c:8022 gnubg.c:8041
 #: gnubg.c:8050 gnubg.c:8057
@@ -6313,6 +6270,14 @@ msgstr ""
 msgid "Rendering"
 msgstr "ÉÁ²èÃæ"
 
+#: board3d/gtkcolour3d.c:429 gtkgame.c:2975 gtkgame.c:3023 gtkgame.c:7479
+msgid "OK"
+msgstr "OK"
+
+#: board3d/gtkcolour3d.c:431 gtkgame.c:3024 gtkgame.c:9865
+msgid "Cancel"
+msgstr "¥­¥ã¥ó¥»¥ë"
+
 #: gtkgame.c:3121
 msgid "GNU Backgammon - Message"
 msgstr "GNU Backgammon - ¥á¥Ã¥»¡¼¥¸"
@@ -6477,19 +6442,19 @@ msgid "HTML"
 msgstr "HTML"
 
 #: gtkgame.c:4412
-msgid ".pos"
-msgstr ""
-
-#: gtkgame.c:4412
 msgid "GammOnLine (HTML)"
 msgstr "GammOnLine (HTML)"
 
-#: gtkgame.c:4413
-msgid ".gam"
+#: gtkgame.c:4412
+msgid ".pos"
 msgstr ""
 
 #: gtkgame.c:4413
 msgid ".mat"
+msgstr ""
+
+#: gtkgame.c:4413
+msgid ".gam"
 msgstr ""
 
 #: gtkgame.c:4414 gtkpath.c:138
@@ -6833,8 +6798,8 @@ msgstr ""
 #: gtkgame.c:5338
 msgid ""
 "You can use this option to introduce noise or errors in the evaluations. "
-"This is useful for introducing levels below 0-ply. The lower rated bots "
-"(e.g., GGotter) on the GamesGrid backgammon server uses this technique. The "
+"This is useful for introducing levels below 0-ply. The lower rated bots (e."
+"g., GGotter) on the GamesGrid backgammon server uses this technique. The "
 "introduced noise can be deterministic, i.e., always the same noise for the "
 "same position, or it can be random"
 msgstr ""
@@ -6901,32 +6866,32 @@ msgid "Player 1"
 msgstr "¥×¥ì¥¤¥ä¡¼ 1"
 
 #: gtkgame.c:5854
-msgid "Good:"
-msgstr "ÎÉ¤¤"
-
-#: gtkgame.c:5854
 msgid "Very good:"
 msgstr "Èó¾ï¤ËÎÉ¤¤"
 
-#: gtkgame.c:5855
-msgid "Bad:"
-msgstr "°­¤¤"
+#: gtkgame.c:5854
+msgid "Good:"
+msgstr "ÎÉ¤¤"
 
 #: gtkgame.c:5855
 msgid "Doubtful:"
 msgstr "µ¿¤ï¤·¤¤"
 
 #: gtkgame.c:5855
+msgid "Bad:"
+msgstr "°­¤¤"
+
+#: gtkgame.c:5855
 msgid "Very bad:"
 msgstr "Èó¾ï¤Ë°­¤¤"
 
 #: gtkgame.c:5856
-msgid "Lucky:"
-msgstr "¹¬±¿"
-
-#: gtkgame.c:5856
 msgid "Very lucky:"
 msgstr "Èó¾ï¤Ë¹¬±¿"
+
+#: gtkgame.c:5856
+msgid "Lucky:"
+msgstr "¹¬±¿"
 
 #: gtkgame.c:5857
 msgid "Unlucky:"
@@ -6961,20 +6926,20 @@ msgstr "±¿¤ÎÉ¾²Á¤ÎïçÃÍ"
 msgid "GNU Backgammon - Analysis Settings"
 msgstr "GNU Backgammon - ²òÀÏÀßÄê"
 
-#: gtkgame.c:6444 gtkgame.c:6761
-msgid "First Play (0) "
-msgstr ""
-
 #: gtkgame.c:6444
 msgid "First Play Both"
 msgstr ""
 
-#: gtkgame.c:6448 gtkgame.c:6769
-msgid "Later Play (0) "
+#: gtkgame.c:6444 gtkgame.c:6761
+msgid "First Play (0) "
 msgstr ""
 
 #: gtkgame.c:6448
 msgid "Later Play Both"
+msgstr ""
+
+#: gtkgame.c:6448 gtkgame.c:6769
+msgid "Later Play (0) "
 msgstr ""
 
 #: gtkgame.c:6469 gtkrace.c:545
@@ -7106,20 +7071,20 @@ msgid "GNU Backgammon - Hint"
 msgstr "GNU Backgammon - ¥Ò¥ó¥È"
 
 #: gtkgame.c:7135
-msgid "Equity before resignation"
-msgstr "ÅêÎ»Á°¤Î¥¨¥¯¥¤¥Æ¥£"
-
-#: gtkgame.c:7135
 msgid "MWC before resignation"
 msgstr "ÅêÎ»Á°¤Î¥Þ¥Ã¥Á¾¡Î¨"
 
-#: gtkgame.c:7152
-msgid "Equity after resignation"
-msgstr "ÅêÎ»¸å¤Î¥¨¥¯¥¤¥Æ¥£"
+#: gtkgame.c:7135
+msgid "Equity before resignation"
+msgstr "ÅêÎ»Á°¤Î¥¨¥¯¥¤¥Æ¥£"
 
 #: gtkgame.c:7152
 msgid "MWC after resignation"
 msgstr "ÅêÎ»¸å¤Î¥Þ¥Ã¥Á¾¡Î¨"
+
+#: gtkgame.c:7152
+msgid "Equity after resignation"
+msgstr "ÅêÎ»¸å¤Î¥¨¥¯¥¤¥Æ¥£"
 
 #: gtkgame.c:7168
 msgid "You should accept the resignation!"
@@ -7180,9 +7145,9 @@ msgid ""
 "under certain conditions.  There is absolutely no warranty for GNU "
 "Backgammon."
 msgstr ""
-"GNU Backgammon ¤Ï¥Õ¥ê¡¼¥½¥Õ¥È¥¦¥§¥¢¤Ç¡¢GNU General Public License version 2 "
-"¤ÎÅ¬ÍÑ¤ò¼õ¤±¤Æ¤¤¤Þ¤¹¡£¤½¤·¤Æ¡¢²þÂ¤¤Ï´¿·Þ¤·¤Þ¤¹¤·¡¢¤Þ¤¿¤Ï¡¿¤½¤·¤Æ¤³¤Î¥³¥Ô¡¼¤ò°"
-"ìÄê¤Î¾ò·ï¤Î²¼¤Ç¼«Í³¤ËÇÛÉÛ¤Ç¤­¤Þ¤¹¡£ GNU Backgammon ¤Ï´°Á´¤ËÌµÊÝ¾Ú¤Ç¤¹¡£"
+"GNU Backgammon ¤Ï¼«Í³¤Ê¥½¥Õ¥È¥¦¥§¥¢¤Ç¡¢GNU General Public License ¤Î¥Ð¡¼¥¸¥ç"
+"¥ó2¤ÇÊÝ¸î¤µ¤ì¤Æ¤ª¤ê¡¢Äê¤á¤ë¾ò¹à¤Ë½¾¤Ã¤ÆËÜ¥×¥í¥°¥é¥à¤òºÆÈÒÉÛ¤Þ¤¿¤ÏÊÑ¹¹¤¹¤ë¤³¤È"
+"¤¬¤Ç¤­¤Þ¤¹¡£GNU Backgammon ¤Ï´°Á´¤ËÌµÊÝ¾Ú¤Ç¤¹¡£"
 
 #: gtkgame.c:7668
 #, fuzzy
@@ -7196,13 +7161,13 @@ msgstr "¼¡¤ÎÊý¡¹¤ËÆÃ¤Ë´¶¼Õ¤·¤Þ¤¹:"
 
 #: gtkgame.c:7771
 msgid ""
-"The online manual is not available with this installation of GNU Backgammon. "
-" You can view the manual on the WWW at:\n"
+"The online manual is not available with this installation of GNU "
+"Backgammon.  You can view the manual on the WWW at:\n"
 "\n"
 "    http://www.gnubg.org/win32/gnubg/gnubg.html"
 msgstr ""
-"¥¤¥ó¥¹¥È¡¼¥ë¤µ¤ì¤Æ¤¤¤ë GNU Backgammon "
-"¤Ç¤Ï¥ª¥ó¥é¥¤¥ó¥Þ¥Ë¥å¥¢¥ë¤Ï¤Þ¤À»ÈÍÑ¤Ç¤­¤Þ¤»¤ó¥Þ¥Ë¥å¥¢¥ë¤Ï\n"
+"¥¤¥ó¥¹¥È¡¼¥ë¤µ¤ì¤Æ¤¤¤ë GNU Backgammon ¤Ç¤Ï¥ª¥ó¥é¥¤¥ó¥Þ¥Ë¥å¥¢¥ë¤Ï¤Þ¤À»ÈÍÑ¤Ç¤­"
+"¤Þ¤»¤ó¥Þ¥Ë¥å¥¢¥ë¤Ï\n"
 "\n"
 "    http://www.gnubg.org/win32/gnubg/gnubg.html\n"
 "¤Ç¸«¤ë¤³¤È¤¬½ÐÍè¤Þ¤¹¡£"
@@ -7667,12 +7632,12 @@ msgid "English (US)"
 msgstr "English (US)"
 
 #: gtkoptions.c:187
-msgid "User"
-msgstr "¥æ¡¼¥¶¡¼"
-
-#: gtkoptions.c:187
 msgid "random.org"
 msgstr "random.org"
+
+#: gtkoptions.c:187
+msgid "User"
+msgstr "¥æ¡¼¥¶¡¼"
 
 #: gtkoptions.c:188
 msgid "File"
@@ -7721,12 +7686,12 @@ msgid ""
 msgstr ""
 
 #: gtkoptions.c:208
-msgid "Bad"
-msgstr "°­¤¤"
-
-#: gtkoptions.c:208
 msgid "Doubtful"
 msgstr "µ¿¤ï¤·¤¤"
+
+#: gtkoptions.c:208
+msgid "Bad"
+msgstr "°­¤¤"
 
 #: gtkoptions.c:208
 msgid "Very bad"
@@ -7781,36 +7746,36 @@ msgid "10th worst"
 msgstr "10ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:218 set.c:4534
-msgid "7th worst"
-msgstr "7ÈÖÌÜ¤Ë°­¤¤"
+msgid "9th worst"
+msgstr "9ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:218 set.c:4534
 msgid "8th worst"
 msgstr "8ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:218 set.c:4534
-msgid "9th worst"
-msgstr "9ÈÖÌÜ¤Ë°­¤¤"
+msgid "7th worst"
+msgstr "7ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:219 set.c:4535
-msgid "4th worst"
-msgstr "4ÈÖÌÜ¤Ë°­¤¤"
+msgid "6th worst"
+msgstr "6ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:219 set.c:4535
 msgid "5th worst"
 msgstr "5ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:219 set.c:4535
-msgid "6th worst"
-msgstr "6ÈÖÌÜ¤Ë°­¤¤"
-
-#: gtkoptions.c:220 set.c:4536
-msgid "second worst"
-msgstr "2ÈÖÌÜ¤Ë°­¤¤"
+msgid "4th worst"
+msgstr "4ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:220 set.c:4536
 msgid "third worst"
 msgstr "3ÈÖÌÜ¤Ë°­¤¤"
+
+#: gtkoptions.c:220 set.c:4536
+msgid "second worst"
+msgstr "2ÈÖÌÜ¤Ë°­¤¤"
 
 #: gtkoptions.c:220 set.c:4536
 msgid "worst"
@@ -8196,9 +8161,9 @@ msgstr "½ÐÎÏ¤Î·å¿ô:"
 #, c-format
 msgid ""
 "Control the number of digits to be shown after the decimal point in "
-"probabilities and equities. This value is used throughout GNU Backgammon, "
-"i.e., in exported files, hints, analysis etc.The default value of 3 results "
-"in equities output as +0.123. The equities and probabilities are internally "
+"probabilities and equities. This value is used throughout GNU Backgammon, i."
+"e., in exported files, hints, analysis etc.The default value of 3 results in "
+"equities output as +0.123. The equities and probabilities are internally "
 "stored with 7-8 digits, so it's possible to change the value after an "
 "analysis if you want more digits shown in the output. The output of match "
 "winning chances are derived from this value to produce numbers with "
@@ -8377,8 +8342,8 @@ msgid ""
 "meant as a learning tool. Examples of use: (a) learn how to double "
 "aggresively after a good opening sequence, (b) learn to control your temper "
 "while things are going bad, (c) learn to play very good or very bad rolls, "
-"or (d) just have fun. Oh, BTW, don't tell the trolls in rec.games.backgammon "
-":-)"
+"or (d) just have fun. Oh, BTW, don't tell the trolls in rec.games."
+"backgammon :-)"
 msgstr ""
 
 #: gtkoptions.c:1166
@@ -8431,9 +8396,9 @@ msgstr ""
 
 #: gtkoptions.c:1257
 msgid ""
-"Enable use of Hugh Sconyers' full 15x15 bearoff database via "
-"Analyse->Bearoff. This requires that you have the disks available on DVD or "
-"on your harddisk. "
+"Enable use of Hugh Sconyers' full 15x15 bearoff database via Analyse-"
+">Bearoff. This requires that you have the disks available on DVD or on your "
+"harddisk. "
 msgstr ""
 
 #: gtkoptions.c:1270 gtkoptions.c:1335
@@ -9934,11 +9899,11 @@ msgstr "Valid CSS!"
 #: html.c:1950
 #, c-format
 msgid ""
-"<!-- Output generated %s by GNU Backgammon %s "
-"(http://www.gnu.org/software/gnubg/) "
+"<!-- Output generated %s by GNU Backgammon %s (http://www.gnu.org/software/"
+"gnubg/) "
 msgstr ""
-"<!-- Output generated %s by GNU Backgammon %s "
-"(http://www.gnu.org/software/gnubg/) "
+"<!-- Output generated %s by GNU Backgammon %s (http://www.gnu.org/software/"
+"gnubg/) "
 
 #: html.c:1957
 #, c-format
@@ -11612,8 +11577,8 @@ msgstr ""
 #: set.c:358
 #, fuzzy, c-format
 msgid ""
-"You must set a count of extra moves and a search tolerance -- try help set "
-"%s movefilter"
+"You must set a count of extra moves and a search tolerance -- try help set %"
+"s movefilter"
 msgstr "Í­¸ú¤ÊÍð¿ô¥·¡¼¥É¤ò»ØÄê¤·¤Ê¤±¤ì¤Ð¤Ê¤ê¤Þ¤»¤ó -- try `help set seed'."
 
 #: set.c:375 show.c:393
@@ -12003,8 +11968,8 @@ msgstr ""
 
 #: set.c:1029
 msgid ""
-"(Note that this setting will have no effect unless you set noise to some "
-"non-zero value.)"
+"(Note that this setting will have no effect unless you set noise to some non-"
+"zero value.)"
 msgstr ""
 
 #: set.c:1038
@@ -13859,11 +13824,11 @@ msgid "    Luck analysis:"
 msgstr ""
 
 #: show.c:459
-msgid "Off"
+msgid "On"
 msgstr ""
 
 #: show.c:459
-msgid "On"
+msgid "Off"
 msgstr ""
 
 #: show.c:462
@@ -14645,11 +14610,11 @@ msgid "Manipulation with dice is %s.\n"
 msgstr ""
 
 #: show.c:2210
-msgid "disabled"
+msgid "enabled"
 msgstr ""
 
 #: show.c:2210
-msgid "enabled"
+msgid "disabled"
 msgstr ""
 
 #: show.c:2221
@@ -14692,12 +14657,12 @@ msgid ""
 msgstr ""
 
 #: show.c:2369
-msgid "Best Move"
-msgstr "¥Ù¥¹¥È¥à¡¼¥Ö"
-
-#: show.c:2369
 msgid "Cube Position"
 msgstr ""
+
+#: show.c:2369
+msgid "Best Move"
+msgstr "¥Ù¥¹¥È¥à¡¼¥Ö"
 
 #: show.c:2401
 #, c-format
@@ -15028,6 +14993,38 @@ msgstr ""
 
 #: timecontrol.c:641
 msgid "Defined time controls:\n"
+msgstr ""
+
+#: board3d/gtkcolour3d.c:319
+msgid "Ambient colour:"
+msgstr ""
+
+#: board3d/gtkcolour3d.c:324
+msgid "Diffuse colour:"
+msgstr ""
+
+#: board3d/gtkcolour3d.c:329
+msgid "Specular colour:"
+msgstr ""
+
+#: board3d/gtkcolour3d.c:334
+msgid "Shine:"
+msgstr ""
+
+#: board3d/gtkcolour3d.c:345
+msgid "Opacity:"
+msgstr ""
+
+#: board3d/gtkcolour3d.c:356
+msgid "Texture:"
+msgstr "¥Æ¥¯¥¹¥Á¥ã:"
+
+#: board3d/gtkcolour3d.c:365
+msgid "Preview:"
+msgstr "¥×¥ì¥Ó¥å¡¼:"
+
+#: board3d/gtkcolour3d.c:448
+msgid "3d Colour selection"
 msgstr ""
 
 #~ msgid "No texture"

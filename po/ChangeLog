@@ -1,8 +1,12 @@
+Tue Jun 15 05:16:55 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* ja.po: Fix invalid multibyte sequence.
+
 Thu Jun 13 13:16:09 CEST 2004  Petr Kadlec  <mormegil@centrum.cz>
 
-        * POTFILES.in: Add gtkgamelist.c, relational.c, relational.h
-        * gnubg.pot, *.po: merge & update
-        * cs.po, README.cs: updated
+	* POTFILES.in: Add gtkgamelist.c, relational.c, relational.h
+	* gnubg.pot, *.po: merge & update
+	* cs.po, README.cs: updated
 
 Mon Apr 26 10:46:50 CEST 2004  Dmitri I GOULIAEV  <dmitri.gouliaev@telkel.net>
 
@@ -14,7 +18,7 @@ Sun Apr 25 08:41:29 CEST 2004  Dmitri I GOULIAEV  <dmitri.gouliaev@telkel.net>
 
 Thu Apr 22 22:15:15 CEST 2004  Petr Kadlec  <mormegil@centrum.cz>
 
-        * cs.po, README.cs: update
+	* cs.po, README.cs: update
 
 Sat Feb 14 19:55:29 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
