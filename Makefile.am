@@ -57,7 +57,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
-bin_PROGRAMS = gnubg makebearoff
+bin_PROGRAMS = gnubg makebearoff makehyper
 
 if USE_GTK
 ## --- GTK
@@ -117,6 +117,14 @@ makebearoff1_DEPENDENCIES =
 makeweights_SOURCES = makeweights.c i18n.c i18n.h
 makeweights_LDADD = -Llib -levent $(COMMON_LIBS)
 makeweights_DEPENDENCIES = lib/libevent.a
+
+makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
+        pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+        i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
+        drawboard.c drawboard.h
+makehyper_LDADD = -Llib -levent $(COMMON_LIBS)
+makehyper_DEPENDENCIES = lib/libevent.a
 
 erftest_SOURCES = erftest.c
 

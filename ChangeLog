@@ -1,3 +1,8 @@
+Thu Apr  3 22:30:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* makehyper.c: new file
+	* Makefile.am: updated with the program.
+
 Thu Apr  3 22:06:56 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (OptionsPages): move dice manipulation options to the

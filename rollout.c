@@ -386,8 +386,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
            prc->fCubeful && *pf && ! pci->nMatchTo &&
            ( ( afCubeDecTop[ ici ] && ! prc->fInitial ) || iTurn > 0 ) ) {
 
-        float arEquity[ 4 ];
-
         /* truncate at two sided bearoff if money game */
 
         GeneralEvaluationE( aarOutput[ ici ], aanBoard[ ici ],

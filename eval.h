@@ -429,6 +429,9 @@ extern void
 EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
               const bgvariation bgv );
 
+extern void
+EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv );
+
 extern float 
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
 
