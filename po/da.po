@@ -1,0 +1,33 @@
+# Danish translation of GNU Backgammon.
+# Copyright (C) 2002 Free Software Foundation, Inc.
+# Jørn Thyssen <jthyssen@dk.ibm.com>, 2002.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnubg 0.12\n"
+"POT-Creation-Date: 2002-06-01 18:33+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Jørn Thyssen <jthyssen@dk.ibm.com>\n"
+"Language-Team: Danish <da@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: makeweights.c:59
+#, c-format
+msgid "%s: invalid weights file\n"
+msgstr "%s: ugyldig vægte-fil\n"
+
+#: makeweights.c:64
+#, c-format
+msgid ""
+"%s: incorrect weights version\n"
+"(version %s is required, but these weights are %s)\n"
+msgstr ""
+"%s: ukorrekt version af vægte\n"
+"(version %s er påkrævet, men disse vægte er %s)\n"
+
+#: makeweights.c:88
+#, c-format
+msgid "%d nets converted\n"
+msgstr "%d net blev konverteret\n"
