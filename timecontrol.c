@@ -173,7 +173,8 @@ static timecontrol *findOrDeleteTimeControl( char *sz, int del )
     {
     tcnode *next;
 #if USE_GTK
-	GTKRemoveTimeControl((*ppRefNode)->ptc->szName);
+    if ( fX )
+      GTKRemoveTimeControl((*ppRefNode)->ptc->szName);
 #endif
     next=(*ppRefNode)->next;
     free((*ppRefNode)->ptc->szName);
@@ -224,7 +225,7 @@ static void nameTimeControl( char *sz )
 	ptc = calloc(sizeof(timecontrol), 1);
     }
 #if USE_GTK
-    else
+    else if ( fX )
 	GTKRemoveTimeControl(ptc->szName);
 #endif
     if (ptc && (pNode = calloc(sizeof(tcnode), 1)))
@@ -236,7 +237,7 @@ static void nameTimeControl( char *sz )
 	pNode->ptc = ptc;
 	tcHead = pNode;
 #if USE_GTK
-	if ('.' != ptc->szName[0])
+	if ('.' != ptc->szName[0] && fX )
 	    GTKAddTimeControl(ptc->szName);
 #endif
     }
@@ -444,7 +445,8 @@ extern void CommandSetTimeControl( char *sz ) {
 	    outputf(_("Time control set to %s\n"), ptc->szName);
 	    tcCopy( &tc, ptc);
 #if USE_GTK
-	    GTKCheckTimeControl(ptc->szName);
+            if ( fX )
+              GTKCheckTimeControl(ptc->szName);
 #endif
 	}
 	else
@@ -461,7 +463,8 @@ extern void CommandSetTimeControl( char *sz ) {
 	outputl(_(szTCOFF));
 	tc.timing = TC_NONE;
 #if USE_GTK
-	    GTKCheckTimeControl("Off");
+        if ( fX )
+          GTKCheckTimeControl("Off");
 #endif
    }
     outputx();
