@@ -2500,6 +2500,8 @@ extern void CommandNewMatch( char *sz ) {
     
     FreeMatch();
 
+    plLastMove = NULL;
+
     ms.nMatchTo = n;
 
     ms.cGames = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
@@ -2536,6 +2538,8 @@ extern void CommandNewSession( char *sz ) {
     }
     
     FreeMatch();
+
+    plLastMove = NULL;
 
     ms.cGames = ms.nMatchTo = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
     ms.fTurn = -1;
