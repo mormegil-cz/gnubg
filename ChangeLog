@@ -22,6 +22,10 @@ Wed Sep 18 14:42:33 2002  Gary Wong  <gtw@gnu.org>
 	point labels.
 	(board_set_cube_font): [USE_GTK2] Use Pango to render cube.
 
+Tue Sep 17 17:20:27 2002  Gary Wong  <gtw@gnu.org>
+
+	* sound.c: #elif changed to #else (reported by Martin Schrode).
+
 Tue Sep 17 17:02:57 2002  Gary Wong  <gtw@gnu.org>
 
 	* record.c: New file.  Keep a record of per-player statistics.
