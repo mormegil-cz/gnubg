@@ -156,8 +156,8 @@ extern void CommandSetAutoDoubles( char *sz ) {
 	return;
     }
 
-    if( n > 16 ) {
-	outputl( "Please specify a smaller limit (up to 16 automatic "
+    if( n > 12 ) {
+	outputl( "Please specify a smaller limit (up to 12 automatic "
 	      "doubles." );
 	return;
     }
@@ -521,12 +521,12 @@ extern void CommandSetEvalCandidates( char *sz ) {
 extern void 
 CommandSetEvalCubeful( char *sz ) {
 
-    char asz[ 2 ][ 128 ];
-
+    char asz[ 2 ][ 128 ], szCommand[ 64 ];
+    
     sprintf( asz[ 0 ], "%s will use cubeful evaluation.\n", szSet );
     sprintf( asz[ 1 ], "%s will use cubeless evaluation.\n", szSet );
-
-    SetToggle( "cubeful", &pecSet->fCubeful, sz, asz[ 0 ], asz[ 1 ] );
+    sprintf( szCommand, "%sevaluation cubeful", szSetCommand );
+    SetToggle( szCommand, &pecSet->fCubeful, sz, asz[ 0 ], asz[ 1 ] );
 }
 
 extern void CommandSetEvalPlies( char *sz ) {
@@ -892,6 +892,33 @@ extern void CommandSetRolloutEvaluation( char *sz ) {
     HandleCommand( sz, acSetEvaluation );
 }
 
+extern void CommandSetRolloutSeed( char *sz ) {
+
+    int n;
+    
+    if( rngCurrent == RNG_MANUAL ) {
+	outputl( "You can't set a seed if you're using manual dice "
+		 "generation." );
+	return;
+    }
+
+    if( *sz ) {
+	n = ParseNumber( &sz );
+
+	if( n < 0 ) {
+	    outputl( "You must specify a vaid seed -- try `help set seed'." );
+
+	    return;
+	}
+
+	nRolloutSeed = n;
+	outputf( "Rollout seed set to %d.\n", n );
+    } else
+	outputl( InitRNG( &nRolloutSeed, FALSE ) ?
+		 "Rollout seed initialised from system random data." :
+		 "Rollout seed initialised by system clock." );    
+}
+
 extern void CommandSetRolloutTrials( char *sz ) {
     
     int n = ParseNumber( &sz );
@@ -1170,19 +1197,15 @@ extern void CommandSetBeavers( char *sz ) {
 extern void CommandSetOutputMatchPC( char *sz ) {
 
     SetToggle( "output matchpc", &fOutputMatchPC, sz,
-	       "Match equities will be shown as percentages.",
-	       "Match equities will be shown as probabilities." );
+	       "Match winning chances will be shown as percentages.",
+	       "Match winning chances will be shown as probabilities." );
 }
 
 extern void CommandSetOutputMWC( char *sz ) {
 
-  if ( nMatchTo )
     SetToggle( "output mwc", &fOutputMWC, sz,
-	       "Output shown in MWC (match winning chance).",
-	       "Output shown in equity." ); 
-  else
-    outputl( "Cannot set `outputmwc' for money play." );
-
+	       "Match evaluations will be shown as match winning chances.",
+	       "Match evaluations will be shown as equivalent money equity." );
 }
 
 extern void CommandSetOutputRawboard( char *sz ) {
@@ -1195,8 +1218,8 @@ extern void CommandSetOutputRawboard( char *sz ) {
 extern void CommandSetOutputWinPC( char *sz ) {
 
     SetToggle( "output winpc", &fOutputWinPC, sz,
-	       "Winning chances will be shown as percentages.",
-	       "Winning chances will be shown as probabilities." );
+	       "Game winning chances will be shown as percentages.",
+	       "Game winning chances will be shown as probabilities." );
 }
 
 static void SetMET( met metNew ) {

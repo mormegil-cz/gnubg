@@ -338,72 +338,75 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
       SwapSides( anBoardOrig );
   
   for( i = 0; i < cGames; i++ ) {
-    memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-            sizeof( anBoardEval ) );
+      if( rngCurrent != RNG_MANUAL )
+	  InitRNGSeed( nRolloutSeed + ( i << 8 ) );
+      
+      memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+	      sizeof( anBoardEval ) );
 
-    switch( rt ) {
-    case BEAROFF:
-	    BearoffRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
-	    break;
-    case BASIC:
-	    BasicRollout( anBoardEval, ar, nTruncate, 0, i, cGames, pci, pec ); 
-	    break;
-    case VARREDN:
-	    VarRednRollout( anBoardEval, ar, nTruncate, 0, i, cGames, pci, pec );
-	    break;
-    }
+      switch( rt ) {
+      case BEAROFF:
+	  BearoffRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
+	  break;
+      case BASIC:
+	  BasicRollout( anBoardEval, ar, nTruncate, 0, i, cGames, pci, pec ); 
+	  break;
+      case VARREDN:
+	  VarRednRollout( anBoardEval, ar, nTruncate, 0, i, cGames, pci, pec );
+	  break;
+      }
+      
+      if( fInterrupt )
+	  break;
+      
+      if( fInvert )
+	  InvertEvaluation( ar );
+      
+      ar[ OUTPUT_EQUITY ] = ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
+	  ar[ OUTPUT_WINGAMMON ] +
+	  ar[ OUTPUT_WINBACKGAMMON ] -
+	  ar[ OUTPUT_LOSEGAMMON ] -
+	  ar[ OUTPUT_LOSEBACKGAMMON ];
+      
+      for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
+	  float rMuNew, rDelta;
+	  
+	  arResult[ j ] += ar[ j ];
+	  rMuNew = arResult[ j ] / ( i + 1 );
+	  
+	  rDelta = rMuNew - arMu[ j ];
+	  
+	  arVariance[ j ] = arVariance[ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
+	      ( i + 2 ) * rDelta * rDelta;
+	  
+	  arMu[ j ] = rMuNew;
+	  
+	  if( j < OUTPUT_EQUITY ) {
+	      if( arMu[ j ] < 0.0f )
+		  arMu[ j ] = 0.0f;
+	      else if( arMu[ j ] > 1.0f )
+		  arMu[ j ] = 1.0f;
+	  }
+	  
+	  arSigma[ j ] = sqrt( arVariance[ j ] / ( i + 1 ) );
+      }
 
-    if( fInterrupt )
-	    break;
-
-    if( fInvert )
-	InvertEvaluation( ar );
-    
-    ar[ OUTPUT_EQUITY ] = ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
-	    ar[ OUTPUT_WINGAMMON ] +
-	    ar[ OUTPUT_WINBACKGAMMON ] -
-	    ar[ OUTPUT_LOSEGAMMON ] -
-	    ar[ OUTPUT_LOSEBACKGAMMON ];
-	
-    for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
-	float rMuNew, rDelta;
-	    
-	arResult[ j ] += ar[ j ];
-	rMuNew = arResult[ j ] / ( i + 1 );
-
-	rDelta = rMuNew - arMu[ j ];
-	    
-	arVariance[ j ] = arVariance[ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
-	    ( i + 2 ) * rDelta * rDelta;
-
-	arMu[ j ] = rMuNew;
-
-	if( j < OUTPUT_EQUITY ) {
-	    if( arMu[ j ] < 0.0f )
-		arMu[ j ] = 0.0f;
-	    else if( arMu[ j ] > 1.0f )
-		arMu[ j ] = 1.0f;
-	}
-	
-	arSigma[ j ] = sqrt( arVariance[ j ] / ( i + 1 ) );
-    }
-
-    SanityCheck( anBoardOrig, arMu );
-	
-    if( fShowProgress ) {
+      SanityCheck( anBoardOrig, arMu );
+      
+      if( fShowProgress ) {
 #if USE_GTK
-	if( fX )
-	    GTKRolloutUpdate( arMu, arSigma, i, cGames );
-	else
+	  if( fX )
+	      GTKRolloutUpdate( arMu, arSigma, i, cGames );
+	  else
 #endif
-	    {
-		outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-			 "%5d\r", sz, arMu[ 0 ], arMu[ 1 ], arMu[ 2 ],
-			 arMu[ 3 ], arMu[ 4 ], arMu[ 5 ], arSigma[ 5 ],
-			 i + 1 );
-		fflush( stdout );
-	    }
-    }
+	      {
+		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
+			   "%5d\r", sz, arMu[ 0 ], arMu[ 1 ], arMu[ 2 ],
+			   arMu[ 3 ], arMu[ 4 ], arMu[ 5 ], arSigma[ 5 ],
+			   i + 1 );
+		  fflush( stdout );
+	      }
+      }
   }
 
   if( !( cGames = i ) )

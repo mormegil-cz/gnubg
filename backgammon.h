@@ -187,7 +187,7 @@ extern gamestate gs;
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
     fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
-    fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard;
+    fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard, nRolloutSeed;
 extern float rAlpha, rAnneal, rThreshold;
 
 extern evalcontext ecEval, ecRollout, ecTD;
@@ -399,6 +399,7 @@ extern void CommandAccept( char * ),
     CommandSetRNGMersenne( char * ),
     CommandSetRNGUser( char * ),
     CommandSetRolloutEvaluation( char * ),
+    CommandSetRolloutSeed( char * ),
     CommandSetRolloutTrials( char * ),
     CommandSetRolloutTruncation( char * ),
     CommandSetRolloutVarRedn( char * ),
