@@ -662,8 +662,11 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
 
     /* Double clicking a row makes that move. */
-    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
+    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && 
+        phd->fButtonsValid ) {
       gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
+      return;
+    }
 
     /* show moves */
 

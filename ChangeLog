@@ -1,3 +1,9 @@
+Sun Jan 26 10:08:21 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (HintSelect): return after double-click 
+	as the board is changed or the dialog destroyed
+	(reported by Holger Bochnig)
+
 Sat Jan 25 19:24:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c (absoluteFibsRating): fix minor bug in interpolation
