@@ -571,6 +571,7 @@ player ap[ 2 ] = {
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
     szCOMMAND[] = N_("<command>"),
+    szCOMMENT[] = N_("<comment>"),
     szER[] = N_("evaluation|rollout"), 
     szFILENAME[] = N_("<filename>"),
     szKEYVALUE[] = N_("[<key>=<value> ...]"),
@@ -700,6 +701,7 @@ command cER = {
       NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateMove[] = {
+    { "comment", CommandAnnotateAddComment, N_("Add commentary about a move"), szCOMMENT, NULL },
     { "bad", CommandAnnotateBad, N_("Mark as bad"), NULL, NULL },
     { "clear", CommandAnnotateClearSkill, 
       N_("Remove annotations"), NULL, NULL },

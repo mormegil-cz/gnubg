@@ -1,3 +1,8 @@
+Sun Oct 10 23:04:14 GMT 2004 Jon Nall <backgame@gmail.com>
+
+    * backgammon.h, gnubg.c, play.c: Added support for adding comments
+    to moves from the command line. Closes bug #10638
+
 Tue Oct 5 16:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* database.py, relational.c, gtkgame.c (and others) : Added

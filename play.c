@@ -2316,6 +2316,30 @@ extern void CommandAnnotateBad( char *sz ) {
     AnnotateMove( SKILL_BAD );
 }
 
+extern void CommandAnnotateAddComment( char *sz ) {
+
+    moverecord *pmr;
+
+    if (!plLastMove || !plLastMove->plNext ||
+		(!( pmr = plLastMove->plNext->p))) {
+	outputl( _("You must select a move to which to add the comment.") );
+	return;
+    }
+
+    if( pmr->sz )
+	free( pmr->sz );
+
+    pmr->sz = strdup(sz);
+    
+    outputl( _("Commentary for this move added.") );
+
+#if USE_GTK
+  if( fX )
+    GTKUpdateAnnotations();
+#endif
+
+}
+
 extern void CommandAnnotateClearComment( char *sz ) {
 
     moverecord *pmr;
