@@ -2409,7 +2409,6 @@ extern int GTKGetInputYN( char *szPrompt ) {
  * returns TRUE if play it anyway
  */
 
-
 static void TutorEnd( GtkWidget *pw, int *pf ) {
 
     if( pf )
@@ -2431,8 +2430,8 @@ extern int GtkTutor ( char *sz ) {
 
     int f = FALSE, fRestoreNextTurn;
     GdkPixmap *ppm;
-    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor, *pwHbox, *pwButtons, 
-	  *pwPixmap, *pwPrompt;
+    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor, *pwHbox,
+          *pwButtons, *pwPixmap, *pwPrompt;
     GtkWidget *pwHint;
     GtkAccelGroup *pag;
 
@@ -5618,13 +5617,18 @@ static void invertMETlocal( GtkWidget *pw, gpointer data){
 
 extern void GTKShowMatchEquityTable( int n ) {
 
+    /* FIXME: Widget should update after 'Invert' or 'Load ...' */  
     int i;
     char sz[ 50 ];
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Match equity table"),
                                         FALSE, NULL, NULL );
     GtkWidget *pwNotebook = gtk_notebook_new ();
+    GtkWidget *pwLoad = gtk_button_new_with_label(_("Load table..."));
     
-    GtkWidget *pwInvertButton = gtk_button_new_with_label(_("Invert table")); 
+    GtkWidget *pwInvertButton = 
+                        gtk_toggle_button_new_with_label(_("Invert table")); 
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwInvertButton),
+                        fInvertMET); 
     
     gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
     
@@ -5632,6 +5636,8 @@ extern void GTKShowMatchEquityTable( int n ) {
                        pwNotebook );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
 		       pwInvertButton );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+		       pwLoad );
 
     gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                                GTKWriteMET ( aafMET, n, n, FALSE ),
@@ -5646,16 +5652,16 @@ extern void GTKShowMatchEquityTable( int n ) {
                                                aafMETPostCrawford[ i ], 
                                                n, 1, TRUE ),
                                  gtk_label_new ( sz ) );
-
     }
 
-    
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwInvertButton ), "clicked",
+    gtk_signal_connect( GTK_OBJECT( pwInvertButton ), "toggled",
 			GTK_SIGNAL_FUNC( invertMETlocal ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwLoad ), "clicked",
+                        GTK_SIGNAL_FUNC ( SetMET ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     

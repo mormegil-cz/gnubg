@@ -1,3 +1,8 @@
+Sun Jul 28 16:16:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        * gtkgame.c (GTKShowMatchEquityTable): Make *Invert' button a toggle
+        button. Add a 'Load table...' button.
+ 
 Sat Jul 27 19:10:13 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New command xcopy for moving primary selection to
