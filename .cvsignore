@@ -1,1 +1,14 @@
-Makefile gnubg.bd gnubg.wd gnubg.weights gnubg makebearoff makeweights
+.deps
+Makefile
+gnubg.bd
+gnubg.wd
+gnubg.weights
+gnubg
+makebearoff
+makeweights
+config.cache
+config.h
+config.log
+config.status
+stamp-h
+stamp-vti
