@@ -182,24 +182,6 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
     };
 
 evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 };
-evalcontext ecRollout = { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 };
-
-rolloutcontext rcTD = { 
-  {
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 cube decision */
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 cube decision */
-  }, 
-  {
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 chequerplay */
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 chequerplay */
-  }, 
-  FALSE, /* cubeful */
-  FALSE, /* variance reduction */
-  7, /* truncation */
-  36, /* number of trials */
-  RNG_MERSENNE, /* RNG */
-  0 /* seed */
-};
 
 rolloutcontext rcRollout =
 { 
@@ -519,7 +501,7 @@ command cER = {
     { "centre", CommandSetCubeCentre, "Allow both players access to the "
       "cube", NULL, NULL },
     { "owner", CommandSetCubeOwner, "Allow only one player to double",
-      szPLAYER, &cPlayer },
+      szPLAYER, &cPlayerBoth },
     { "use", CommandSetCubeUse, "Control use of the doubling cube", szONOFF,
       &cOnOff },
     { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
@@ -998,12 +980,15 @@ extern int ParseNumber( char **ppch ) {
 extern int ParsePlayer( char *sz ) {
 
     int i;
+
+    if( !sz )
+	return -1;
     
     if( ( *sz == '0' || *sz == '1' ) && !sz[ 1 ] )
 	return *sz - '0';
 
     for( i = 0; i < 2; i++ )
-	if( !strcasecmp( sz, ap[ i ].szName ) )
+	if( !CompareNames( sz, ap[ i ].szName ) )
 	    return i;
 
     if( !strncasecmp( sz, "both", strlen( sz ) ) )
@@ -1149,6 +1134,20 @@ extern int ParseKeyValue( char **ppch, char *apch[ 2 ] ) {
     *apch[ 1 ] = 0;
     apch[ 1 ]++;
     return 2;
+}
+
+/* Compare player names.  Performed case insensitively, and with all
+   whitespace characters and underscore considered identical. */
+extern int CompareNames( char *sz0, char *sz1 ) {
+
+    static char ach[] = " \t\r\n\f\v_";
+    
+    for( ; *sz0 || *sz1; sz0++, sz1++ )
+	if( toupper( *sz0 ) != toupper( *sz1 ) &&
+	    ( !strchr( ach, *sz0 ) || !strchr( ach, *sz1 ) ) )
+	    return toupper( *sz0 ) - toupper( *sz1 );
+    
+    return 0;
 }
 
 extern void UpdateSetting( void *p ) {
@@ -2391,7 +2390,7 @@ CommandRollout( char *sz ) {
     else
 #endif
 	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
-		 "Equity                    Trials" );
+		 "Equity   Cube E    n" );
 	
     for( i = 0; i < c; i++ ) {
 #if USE_GTK
@@ -2405,14 +2404,26 @@ CommandRollout( char *sz ) {
 #if USE_GTK
 	if( !fX )
 #endif
-	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
-                     "Cubeful: %6.3f %12d\n"
-		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
-		     " %5.3f (%6.3f)         %6.3f\n\n",
-		     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
-		     ar[ 5 ],ar[ 6 ], cGames, arStdDev[ 0 ], arStdDev[ 1 ],
-		     arStdDev[ 2 ], arStdDev[ 3 ], arStdDev[ 4 ],
-		     arStdDev[ 5 ], arStdDev[ 6 ] ); 
+	    {
+		if( rcRollout.fCubeful )
+		    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+			     "%6.3f %4d\n"
+			     "              Standard error %5.3f %5.3f %5.3f "
+			     "%5.3f %5.3f (%6.3f) %6.3f\n\n",
+			     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
+			     ar[ 4 ], ar[ 5 ],ar[ 6 ], cGames, arStdDev[ 0 ],
+			     arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
+			     arStdDev[ 4 ], arStdDev[ 5 ], arStdDev[ 6 ] );
+		else
+		    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    "
+			     "n/a %4d\n"
+			     "              Standard error %5.3f %5.3f %5.3f "
+			     "%5.3f %5.3f (%6.3f)    n/a\n\n",
+			     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
+			     ar[ 4 ], ar[ 5 ], cGames, arStdDev[ 0 ],
+			     arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
+			     arStdDev[ 4 ], arStdDev[ 5 ] );
+	    }
     }
     
 #if USE_GTK
@@ -2898,8 +2909,8 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
 
   fprintf ( pf,
             "%s cubeful %s\n"
-            "%s variancereduction %s\n"
-            "%s truncate %d\n"
+            "%s varredn %s\n"
+            "%s truncation %d\n"
             "%s trials %d\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
@@ -4335,6 +4346,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     InitRNG( NULL, TRUE );
     InitRNG( &rcRollout.nSeed, FALSE );
+    /* we don't want rollouts to use the same seed as normal dice (which
+       could happen if InitRNG had to use the current time as a seed) -- mix
+       it up a little bit */
     rcRollout.nSeed ^= 0x792A584B;
     
     InitMatchEquity ( metCurrent );

@@ -703,12 +703,17 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
     return -1;
   }
 
-
   if( cci < 1 ) {
     errno = EINVAL;
     return -1;
   }
 
+  if( prc->fVarRedn && prc->fCubeful ) {
+      /* FIXME */
+      outputl( "Cubeful rollouts with variance reduction are not yet "
+	       "supported." );
+      return -1;
+  }
 
   if( ClassifyPosition( anBoard ) == CLASS_BEAROFF1 ) 
     rt = BEAROFF;
@@ -830,21 +835,19 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	  else
 #endif
 	      {
-#if 0
-		  /* FIXME this output is too wide to fit in 80 columns */
-		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-			   "Cubeful: %6.3f %5.3f %5d\r", asz[ 0 ],
-                           aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
-			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ], aarMu[ 0 ][ 5 ],
-                           aarSigma[ 0 ][ 5 ],
-                           aarMu[ 0 ][ 6 ], aarSigma[ 0 ][ 6 ],
-			   i + 1 );
-#endif
-		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-			   "%5d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
-			   aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
-			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
-			   aarMu[ 0 ][ 5 ], aarSigma[ 0 ][ 5 ], i + 1 );
+		  if( prc->fCubeful )
+		      outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+			       "%6.3f %4d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
+			       aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
+			       aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
+			       aarMu[ 0 ][ 5 ], aarMu[ 0 ][ 6 ], i + 1 );
+		  else
+		      outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+			       "   n/a %4d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
+			       aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
+			       aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
+			       aarMu[ 0 ][ 5 ], i + 1 );
+		      
 		  fflush( stdout );
 	      }
       }
@@ -1020,7 +1023,7 @@ GeneralCubeDecisionR ( char *sz,
   else
 #endif
     outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
-             "Equity                    Trials" );
+             "Equity   Cube E    n" );
 	
 #if USE_GTK
   if( fX )
@@ -1033,21 +1036,36 @@ GeneralCubeDecisionR ( char *sz,
 #if USE_GTK
 	if( !fX )
 #endif
-          for ( i = 0; i < 2; i++ )
-	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
-                     "Cubeful: %6.3f %12d\n"
-		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
-		     " %5.3f (%6.3f)         %6.3f\n\n",
-		     aach[ i ],
-                     aarOutput[ i ][ 0 ], aarOutput[ i ][ 1 ],
-                     aarOutput[ i ][ 2 ], aarOutput[ i ][ 3 ],
-                     aarOutput[ i ][ 4 ], aarOutput[ i ][ 5 ],
-                     aarOutput[ i ][ 6 ],
-                     cGames,
-                     aarStdDev[ i ][ 0 ], aarStdDev[ i ][ 1 ],
-                     aarStdDev[ i ][ 2 ], aarStdDev[ i ][ 3 ],
-                     aarStdDev[ i ][ 4 ], aarStdDev[ i ][ 5 ],
-                     aarStdDev[ i ][ 6 ] ); 
+	    for ( i = 0; i < 2; i++ ) {
+	      if( prc->fCubeful )
+		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %6.3f "
+			   "%4d\n"
+			   "              Standard error %5.3f %5.3f %5.3f "
+			   "%5.3f %5.3f (%6.3f) %6.3f\n\n",
+			   aach[ i ],
+			   aarOutput[ i ][ 0 ], aarOutput[ i ][ 1 ],
+			   aarOutput[ i ][ 2 ], aarOutput[ i ][ 3 ],
+			   aarOutput[ i ][ 4 ], aarOutput[ i ][ 5 ],
+			   aarOutput[ i ][ 6 ],
+			   cGames,
+			   aarStdDev[ i ][ 0 ], aarStdDev[ i ][ 1 ],
+			   aarStdDev[ i ][ 2 ], aarStdDev[ i ][ 3 ],
+			   aarStdDev[ i ][ 4 ], aarStdDev[ i ][ 5 ],
+			   aarStdDev[ i ][ 6 ] );
+	      else
+		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    n/a "
+			   "%4d\n"
+			   "              Standard error %5.3f %5.3f %5.3f "
+			   "%5.3f %5.3f (%6.3f)    n/a\n\n",
+			   aach[ i ],
+			   aarOutput[ i ][ 0 ], aarOutput[ i ][ 1 ],
+			   aarOutput[ i ][ 2 ], aarOutput[ i ][ 3 ],
+			   aarOutput[ i ][ 4 ], aarOutput[ i ][ 5 ],
+			   cGames,
+			   aarStdDev[ i ][ 0 ], aarStdDev[ i ][ 1 ],
+			   aarStdDev[ i ][ 2 ], aarStdDev[ i ][ 3 ],
+			   aarStdDev[ i ][ 4 ], aarStdDev[ i ][ 5 ] );
+	    }
     
 #if USE_GTK
     if( fX )
