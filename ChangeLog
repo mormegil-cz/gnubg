@@ -1,3 +1,8 @@
+Thu May 23 23:38:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (getDefaultPath): add trailing slash, otherwise
+	GtkFileSel gets confused.
+
 Thu May 23 23:17:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New commands "next rolled" and "prev rolled" which will

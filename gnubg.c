@@ -5495,9 +5495,9 @@ extern char *
 getDefaultPath ( const pathformat f ) {
 
   if ( strlen ( aaszPaths[ f ][ 1 ] ) )
-    return PathSearch ( aaszPaths[ f ][ 1 ], szDataDirectory );
+    return PathSearch ( strcat ( aaszPaths[ f ][ 1 ], "/" ), szDataDirectory );
   else if ( strlen ( aaszPaths[ f ][ 0 ] ) )
-    return PathSearch ( aaszPaths[ f ][ 0 ], szDataDirectory );
+    return PathSearch ( strcat ( aaszPaths[ f ][ 0 ], "/" ), szDataDirectory );
   else 
     return NULL;
 
