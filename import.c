@@ -1759,6 +1759,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
       pmr->r.sz = szComment;
       pmr->r.fPlayer = fResigned;
       pmr->r.nResigned = atoi( pch ) / ms.nCube;
+      if ( pmr->r.nResigned > 3 )
+        pmr->r.nResigned = 3;
       pmr->r.esResign.et = EVAL_NONE;
 
       AddMoveRecord( pmr );

@@ -1,3 +1,9 @@
+Thu Oct  2 20:21:21 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ImportSGGGame): ensure that resignations are in the
+	range 1 (normal) to 3 (backgammon)
+	(bug #5641 reported by Bert Van Kerckhove)
+
 Thu Oct  2 19:57:56 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c (printTextBoard): assign asz[7] and asz[8] if

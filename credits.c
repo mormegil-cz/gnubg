@@ -95,6 +95,7 @@ char *aszCredits[] = {
     "Gerry Tesauro",
     "Jacques Thiriat",
     "Malene Thyssen",
+    "Bert Van Kerckhove",
     "Sander van Rijnswou",
     "Robert-Jan Veldhuizen",
     "Morten Wang",

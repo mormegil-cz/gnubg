@@ -50,6 +50,7 @@ Jens Hoefkens
 Martin Janke
 Nis Jorgensen
 Matija Kejzar
+Bert Van Kerckhove
 James F. Kibler
 Jonathan Kinsey
 Johnny Kirk
