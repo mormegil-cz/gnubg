@@ -1,3 +1,7 @@
+Sat Jul 12 19:58:53 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubgmodule.c: change board from typle to list.
+
 Sat Jul 12 15:27:04 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Add Python support for gnubg.

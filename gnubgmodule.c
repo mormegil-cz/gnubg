@@ -46,8 +46,8 @@ static PyObject *
 BoardToPy( int anBoard[ 2 ][ 25 ] ) {
 
   return 
-    Py_BuildValue( "((i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i),"
-                   " (i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i))",
+    Py_BuildValue( "[[i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i],"
+                   " [i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i]]",
                    anBoard[ 0 ][ 0 ],
                    anBoard[ 0 ][ 1 ],
                    anBoard[ 0 ][ 2 ],
@@ -104,64 +104,21 @@ BoardToPy( int anBoard[ 2 ][ 25 ] ) {
 static int
 PyToBoard( PyObject *p, int anBoard[ 2 ][ 25 ] ) {
 
-  if ( ! PyArg_ParseTuple( p, 
-                           "(iiiiiiiiiiiiiiiiiiiiiiiii)"
-                           "(iiiiiiiiiiiiiiiiiiiiiiiii):PyToBoard",
-                           &anBoard[ 0 ][ 0 ],
-                           &anBoard[ 0 ][ 1 ],
-                           &anBoard[ 0 ][ 2 ],
-                           &anBoard[ 0 ][ 3 ],
-                           &anBoard[ 0 ][ 4 ],
-                           &anBoard[ 0 ][ 5 ],
-                           &anBoard[ 0 ][ 6 ],
-                           &anBoard[ 0 ][ 7 ],
-                           &anBoard[ 0 ][ 8 ],
-                           &anBoard[ 0 ][ 9 ],
-                           &anBoard[ 0 ][ 10 ],
-                           &anBoard[ 0 ][ 11 ],
-                           &anBoard[ 0 ][ 12 ],
-                           &anBoard[ 0 ][ 13 ],
-                           &anBoard[ 0 ][ 14 ],
-                           &anBoard[ 0 ][ 15 ],
-                           &anBoard[ 0 ][ 16 ],
-                           &anBoard[ 0 ][ 17 ],
-                           &anBoard[ 0 ][ 18 ],
-                           &anBoard[ 0 ][ 19 ],
-                           &anBoard[ 0 ][ 20 ],
-                           &anBoard[ 0 ][ 21 ],
-                           &anBoard[ 0 ][ 22 ],
-                           &anBoard[ 0 ][ 23 ],
-                           &anBoard[ 0 ][ 24 ],
-                           &anBoard[ 1 ][ 0 ],
-                           &anBoard[ 1 ][ 1 ],
-                           &anBoard[ 1 ][ 2 ],
-                           &anBoard[ 1 ][ 3 ],
-                           &anBoard[ 1 ][ 4 ],
-                           &anBoard[ 1 ][ 5 ],
-                           &anBoard[ 1 ][ 6 ],
-                           &anBoard[ 1 ][ 7 ],
-                           &anBoard[ 1 ][ 8 ],
-                           &anBoard[ 1 ][ 9 ],
-                           &anBoard[ 1 ][ 10 ],
-                           &anBoard[ 1 ][ 11 ],
-                           &anBoard[ 1 ][ 12 ],
-                           &anBoard[ 1 ][ 13 ],
-                           &anBoard[ 1 ][ 14 ],
-                           &anBoard[ 1 ][ 15 ],
-                           &anBoard[ 1 ][ 16 ],
-                           &anBoard[ 1 ][ 17 ],
-                           &anBoard[ 1 ][ 18 ],
-                           &anBoard[ 1 ][ 19 ],
-                           &anBoard[ 1 ][ 20 ],
-                           &anBoard[ 1 ][ 21 ],
-                           &anBoard[ 1 ][ 22 ],
-                           &anBoard[ 1 ][ 23 ],
-                           &anBoard[ 1 ][ 24 ] ) ) {
-    /* error reading board */
-    PyErr_SetString( PyExc_ValueError, 
-                     _("invalid board (must be a "
-                       "2 dimensional typle of 25 integers each)") );
-    return -1;
+  PyObject *py;
+  PyObject *pi;
+  int i, j;
+
+  for ( i = 0; i < 2; ++i ) {
+    if ( ! ( py = PyList_GetItem( p, i ) ) )
+      return -1;
+
+    for ( j = 0; j < 25; ++j ) {
+      if ( ! ( pi = PyList_GetItem( py, j ) ) )
+        return -1;
+
+      anBoard[ i ][ j ] = (int) PyInt_AsLong( pi );
+      
+    }
   }
 
   return 0;
