@@ -20,6 +20,7 @@ cat > $contributors <<'EOF'
 Kazuaki Asai
 Eric Augustine
 Steve Baedke
+Holger Bochnig
 Chuck Bower
 Nick Bratby
 Craig Campbell
