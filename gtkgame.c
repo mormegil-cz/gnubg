@@ -80,7 +80,6 @@ typedef enum _gnubgcommand {
     CMD_SET_AUTO_MOVE,
     CMD_SET_AUTO_ROLL,
     CMD_SET_CONFIRM,
-    CMD_SET_CRAWFORD,
     CMD_SET_CUBE_CENTRE,
     CMD_SET_CUBE_OWNER_0,
     CMD_SET_CUBE_OWNER_1,
@@ -127,7 +126,6 @@ static togglecommand atc[] = {
     { &fAutoMove, CMD_SET_AUTO_MOVE },
     { &fAutoRoll, CMD_SET_AUTO_ROLL },
     { &fConfirm, CMD_SET_CONFIRM },
-    { &fCrawford, CMD_SET_CRAWFORD },
     { &fCubeUse, CMD_SET_CUBE_USE },
     { &fDisplay, CMD_SET_DISPLAY },
     { &fJacoby, CMD_SET_JACOBY },
@@ -166,7 +164,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set automatic move",
     "set automatic roll",
     "set confirm",
-    "set crawford",
     "set cube centre",
     NULL, /* set cube owner 0 */
     NULL, /* set cube owner 1 */
@@ -403,8 +400,6 @@ extern void RunGTK( void ) {
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Game/Play computer turn", NULL, Command, CMD_PLAY, NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Game/_Crawford", NULL, Command, CMD_SET_CRAWFORD,
-	  "<CheckItem>" },
 	{ "/_Game/_Cube", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Cube/_Owner", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Cube/_Owner/Centred", NULL, Command,
@@ -1074,5 +1069,6 @@ extern void GTKSet( void *p ) {
 		gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 +
 						       fTurn ) ), TRUE );
 	fAutoCommand = FALSE;
-    }
+    } else if( p == &fCrawford )
+	ShowBoard(); /* this is overkill, but it works */
 }

@@ -43,7 +43,8 @@ static unsigned int nSeed = 1; /* for rand_r */
 
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
-	*position_id, *set, *edit, *name0, *name1, *score0, *score1, *match;
+	*position_id, *set, *edit, *name0, *name1, *score0, *score1, *match,
+	*crawford;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
@@ -74,7 +75,7 @@ typedef struct _BoardData {
     gint off, off_opponent; /* number of men borne off */
     gint on_bar, on_bar_opponent; /* number of men on bar */
     gint to_move; /* 0 to 4 -- number of pieces to move */
-    gint forced, crawford; /* unused */
+    gint forced, crawford_game; /* unused, Crawford game flag */
     gint redoubles; /* number of instant redoubles allowed */
 } BoardData;
 
@@ -130,7 +131,13 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
 	cy = -cy;
     }
 
-    /* FIXME draw straight to screen and return if point is empty */
+    if( !bd->points[ n ] ) {
+	/* point is empty; draw straight to screen and return */
+	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_board, x, y, x, y,
+			 cx, cy );
+	return;
+    }
+    
     gdk_draw_pixmap( bd->pm_point, bd->gc_copy, bd->pm_board, x, y, 0, 0,
 		     cx, cy );
 
@@ -907,7 +914,7 @@ static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
     gdk_gc_set_font( bd->gc_cube, bd->cube_font );    
 }
 
-extern gint board_set( Board *board, const gchar *board_text ) {
+static gint board_set( Board *board, const gchar *board_text ) {
 
     BoardData *bd = board->board_data;
     gchar *dest, buf[ 32 ];
@@ -926,7 +933,7 @@ extern gint board_set( Board *board, const gchar *board_text ) {
 		       &bd->doubled, &bd->colour, &bd->direction,
 		       &bd->home, &bd->bar, &bd->off, &bd->off_opponent,
 		       &bd->on_bar, &bd->on_bar_opponent, &bd->to_move,
-		       &bd->forced, &bd->crawford, &bd->redoubles };
+		       &bd->forced, &bd->crawford_game, &bd->redoubles };
     int old_dice[] = { bd->dice[ 0 ], bd->dice[ 1 ],
 			bd->dice_opponent[ 0 ], bd->dice_opponent[ 1 ] };
 #else
@@ -955,7 +962,7 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     game_settings[ 16 ] = &bd->on_bar_opponent;
     game_settings[ 17 ] = &bd->to_move;
     game_settings[ 18 ] = &bd->forced;
-    game_settings[ 19 ] = &bd->crawford;
+    game_settings[ 19 ] = &bd->crawford_game;
     game_settings[ 20 ] = &bd->redoubles;
 
     old_dice[ 0 ] = bd->dice[ 0 ];
@@ -1049,11 +1056,13 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     gtk_adjustment_changed( padj0 );
     gtk_adjustment_changed( padj1 );
     
-    /* FIXME indicate Crawford in score */
     gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
 			       bd->score_opponent );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
 			       bd->score );
+
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
+				  bd->crawford_game );
     
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
@@ -1224,10 +1233,11 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	off[ 1 ] -= points[ 1 ][ i ];
     }
 
-    sprintf( strchr( board_str, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
-	     "0:0:0", die0, die1, die0, die1, fTurn < 0 ? 1 : nCube,
+    sprintf( strchr( board_str, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:"
+	     "%d:0:0:0:0:%d:0", die0, die1, die0, die1, fTurn < 0 ? 1 : nCube,
 	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,
-	     fDoubled ? ( fTurn ? -1 : 1 ) : 0, off[ 1 ], off[ 0 ] );    
+	     fDoubled ? ( fTurn ? -1 : 1 ) : 0, off[ 1 ], off[ 0 ],
+	     fCrawford );    
     board_set( board, board_str );
     
     /* FIXME update names, score, match length */
@@ -1977,6 +1987,21 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
     UserCommand( sz );
 }
 
+static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
+
+    char sz[ 17 ]; /* "set crawford off" */
+    int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
+
+    if( f != bd->crawford_game ) {
+	sprintf( sz, "set crawford %s", f ? "on" : "off" );
+
+	UserCommand( sz );
+
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
+				      bd->crawford_game );
+    }
+}
+
 static void board_set_name( GtkWidget *pw, BoardData *bd ) {
 
     char sz[ 82 ]; /* "set player ..32.. name ..32.." */
@@ -2069,6 +2094,7 @@ static void board_init( Board *board ) {
     
     bd->drag_point = bd->board_size = -1;
     bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
+    bd->crawford_game = FALSE;
     
     bd->all_moves = NULL;
     
@@ -2110,7 +2136,7 @@ static void board_init( Board *board ) {
     bd->hbox_pos = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( board ), bd->hbox_pos, FALSE, FALSE, 0 );
 
-    bd->table = gtk_table_new( 3, 3, FALSE );
+    bd->table = gtk_table_new( 3, 4, FALSE );
     gtk_box_pack_start( GTK_BOX( board ), bd->table, FALSE, FALSE, 0 );
     
     bd->hbox_match = gtk_hbox_new( FALSE, 0 );
@@ -2159,6 +2185,11 @@ static void board_init( Board *board ) {
 			  gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
 					   1, 0 ),
 		      2, 3, 2, 3, 0, 0, 4, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->crawford =
+		      gtk_check_button_new_with_label( "Crawford game" ),
+		      3, 4, 1, 3, 0, 0, 0, 0 );
+    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
+			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
     gtk_signal_connect( GTK_OBJECT( bd->score0 ), "activate",

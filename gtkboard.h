@@ -44,7 +44,6 @@ typedef struct _BoardClass {
 
 extern GtkType board_get_type( void );    
 extern GtkWidget *board_new( void );
-extern gint board_set( Board *board, const gchar *board_text );
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 );
