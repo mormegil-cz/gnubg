@@ -256,19 +256,14 @@ extern void CommandSetCache( char *sz ) {
 extern void CommandSetColours( char *sz ) {
 #if USE_GTK
     if( fX ) {
-	if( !sz || !*sz )
-	    /* modify colours interactively */
-	    BoardPreferences( pwBoard );
-	else {
-	    char *apch[ 2 ];
+	char *apch[ 2 ];
 
-	    BoardPreferencesStart( pwBoard );
+	BoardPreferencesStart( pwBoard );
 	    
-	    while( ParseKeyValue( &sz, apch ) )
-		BoardPreferencesParam( pwBoard, apch[ 0 ], apch[ 1 ] );
+	while( ParseKeyValue( &sz, apch ) )
+	    BoardPreferencesParam( pwBoard, apch[ 0 ], apch[ 1 ] );
 
-	    BoardPreferencesDone( pwBoard );	    
-	}
+	BoardPreferencesDone( pwBoard );	    
     } else
 #endif    
 	outputl( "The colours may not be changed when using this user "
@@ -1044,11 +1039,17 @@ extern void CommandSetBeavers( char *sz ) {
 
 }
 
+extern void CommandSetOutputMatchPC( char *sz ) {
+
+    SetToggle( "output matchpc", &fOutputMatchPC, sz,
+	       "Match equities will be shown as percentages.",
+	       "Match equities will be shown as probabilities." );
+}
 
 extern void CommandSetOutputMWC( char *sz ) {
 
   if ( nMatchTo )
-    SetToggle( "outputmwc", &fOutputMWC, sz,
+    SetToggle( "output mwc", &fOutputMWC, sz,
 	       "Output shown in MWC (match winning chance).",
 	       "Output shown in equity." ); 
   else
@@ -1056,6 +1057,12 @@ extern void CommandSetOutputMWC( char *sz ) {
 
 }
 
+extern void CommandSetOutputWinPC( char *sz ) {
+
+    SetToggle( "output winpc", &fOutputWinPC, sz,
+	       "Winning chances will be shown as percentages.",
+	       "Winning chances will be shown as probabilities." );
+}
 
 static void SetMET( met metNew ) {
 

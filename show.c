@@ -173,7 +173,10 @@ extern void CommandShowCache( char *sz ) {
     outputf( "%d cache entries have been used.  %d lookups, %d hits",
 	    c, cLookup, cHit );
 
-    if( cLookup )
+    if( cLookup > 0x01000000 ) /* calculate carefully to avoid overflow */
+	outputf( " (%d%%).", ( cHit + ( cLookup / 200 ) ) /
+		 ( cLookup / 100 ) );
+    else if( cLookup )
 	outputf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
     else
 	outputc( '.' );
@@ -271,9 +274,9 @@ extern void CommandShowEvaluation( char *sz ) {
 extern void CommandShowJacoby( char *sz ) {
 
     if ( fJacoby ) 
-      outputl( "Money sessions is played with the Jacoby rule." );
+      outputl( "Money sessions are played with the Jacoby rule." );
     else
-      outputl( "Money sessions is played without the Jacoby rule." );
+      outputl( "Money sessions are played without the Jacoby rule." );
 
 }
 
@@ -380,8 +383,8 @@ extern void CommandShowScore( char *sz ) {
 
     if ( nMatchTo > 0 ) {
         outputf ( nMatchTo == 1 ? 
-	         " (match to %d point%s)\n" :
-	         " (match to %d points%s)\n",
+	         " (match to %d point%s).\n" :
+	         " (match to %d points%s).\n",
                  nMatchTo,
 		 fCrawford ? 
 		 ", Crawford game" : ( fPostCrawford ?
@@ -389,9 +392,9 @@ extern void CommandShowScore( char *sz ) {
     } 
     else {
         if ( fJacoby )
-	    outputl ( " (money session, with Jacoby rule)\n" );
+	    outputl ( " (money session,\nwith Jacoby rule).\n" );
         else
-	    outputl ( " (money session, without Jacoby rule)\n" );
+	    outputl ( " (money session,\nwithout Jacoby rule).\n" );
     }
 
 }
@@ -616,18 +619,21 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
 
 }
 
+extern void CommandShowOutput( char *sz ) {
 
-extern void CommandShowOutputMWC( char *sz ) {
+    printf( "Match equities will be shown as %s.\n", fOutputMatchPC ?
+	    "percentages" : "probabilities" );
 
-  if ( fOutputMWC )
-    puts( "Output shown in MWC (match winning chance) "
-	  "(match play only)." ); 
-  else
-    puts( "Output shown in EMG (normalized money game equity) "
-	  "(match play only)." ); 
+    if ( fOutputMWC )
+	puts( "Output shown in MWC (match winning chance) "
+	      "(match play only)." ); 
+    else
+	puts( "Output shown in EMG (normalized money game equity) "
+	      "(match play only)." ); 
 
+    printf( "Winning chances will be shown as %s.\n", fOutputWinPC ?
+	    "percentages" : "probabilities" );
 }
-
 
 extern void CommandShowMarketWindow ( char * sz ) {
 

@@ -1,3 +1,33 @@
+Tue Jan 16 13:18:49 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (CommandHint): Display probabilities or percentages,
+	according to settings.
+	* set.c (CommandSetOutputWinPC, CommandSetOutputMatchPC): New
+	functions.
+	* show.c (CommandShowOutput): New function.
+
+	* gnubg.c (real_main): Add `-r' (--no-rc) option.
+	* gnubgtest: Use `-r' option in tests.
+
+	* gtkboard.c (board_pointer): Use the pm_saved pixmap even in
+	translucent mode, because using the RGB buffer to save the image
+	restored a dithered version rather than the original.
+	(board_dice_widget): New function.
+
+	* gtkgame.c (GTKGetManualDice): New function.
+	(PixmapButton): Use gdk_pixmap_colormap_create_from_xpm_d,
+	to avoid realising a window just to get its colourmap.
+	(GTKSetMoveRecord): Don't scroll window when the newly selected
+	move is already visible.
+	(InitGTK): Apply the main accelerators to the game window.
+	(GTKHint): Updated to match the new CommandHint.
+
+	* gtkprefs.c (BoardPreferencesCommand): New function.
+
+	* show.c (CommandShowCache): Avoid possible integer overflow.
+
+	* play.c (ComputerTurn): Avoid bugs when dice roll fails.
+	
 Thu Jan 11 16:17:46 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (EvalInitialise): Give better error messages about bad

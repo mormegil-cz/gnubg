@@ -73,9 +73,6 @@ duplication of effort and to make sure our changes merge easily.
   does, but without evaluating them.
 ** Also "add move", to add a specific move to the list (e.g.
   "add move 8/5 6/5").
-** Let the user choose whether probabilities are shown as probabilities
-  (0.123) or percentages (12.3%); match equities can be probabilities,
-  percentages or just numbers (-1.000 = 0%, 0.000 = 50%, 1.000 = 100%).
 ** Once we have cubeful rollouts, allow the command "rollout =cube"
   to perform a rollout to judge cube decisions (under GTK, there should
   be a "Rollout" button in the hint window for cube decisions, and something
@@ -136,21 +133,16 @@ duplication of effort and to make sure our changes merge easily.
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
-** Add a GTK interface to allow input for manual dice (J*llyf*sh does it
-  with a pop-up window with 21 buttons).
-** Try gdk_pixmap_colormap_create_from_xpm and gtk_widget_get_colormap,
-  to avoid realising windows just to create pixmaps.
 ** Make load/save and prev game/next game freeze and thaw the game list;
   load match shouldn't update the score between games, either. (gary)
 ** When the user is moving, show _complete_ moves differently from
   incomplete ones.
 ** Add commands to _hide_ the game window ("list game" shows it).
   Should we show it by default?
-** Make the board window accelerators apply to the game window, too.
 ** Animate the chequers when the computer moves.
 ** Show a preview of the chequers in the appearances dialog.
-** Finish "set colours"; add these to "save settings" so board colours, etc.
-  can be saved.
+** Allow the border colour to be changed, and honour the user's lighting
+  angle when rendering the border.
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
@@ -159,7 +151,6 @@ duplication of effort and to make sure our changes merge easily.
 *** Make "help" show its output in a CList (CTree?).  The user must be able
   to recurse through help for subcommands.
 *** Make "show matchequitytable" show output in a table.
-*** Update GTKHint to match the new TTY hint. (gary)
 *** Allow copy and paste from data presented in dialogs (at least the important
   ones like eval, hint, rollout).
 
@@ -188,17 +179,11 @@ duplication of effort and to make sure our changes merge easily.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
+  see what the REPL in guile-gtk does.
 ** Loading can't be interrupted (e.g. "load game /dev/zero" hangs).
 ** "set eval cubeful" gives a poor error message.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
-** When selecting a cell in the game record window with the mouse, the
-  window shouldn't scroll to centre the current record -- checking
-  gtk_clist_row_is_visible should fix this. (gary)
-** Dithering problems in GDK RGB (gary).
-** "set cache 16777216" makes evaluations fail. (gary)
-** Cache statistics are wrong once hundreds of millions of evaluations
-  are made (integer overflow in the percentage calculation).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -228,15 +213,14 @@ duplication of effort and to make sure our changes merge easily.
   progress") checks so that they _do_ ask when the game is over but the
   match is still in progress, and they _don't_ ask if a game has not been
   modified since it was last loaded/saved.
-** Add a command line option to bypass rc files, and supply this option
-  in gnubgtest so the tests aren't confused by user options.
 ** Change the `no-weights' option to `new-weights', and allow specification
-  of the net size (e.g. "gnubg -new-weights=128").
+  of the net size (e.g. "gnubg -new-weights=128").  Add an equivalent
+  command "new weights".
 ** Extend ParsePosition to cope with other formats, e.g. FIBS
   "boardstyle 3" and/or a human friendly position description,
   like "set board 0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0".
 ** Do more in CommandSaveSettings.
-** Handle setup properties when loading games.
+** Handle SGF setup properties when loading games.
 
 
 Local Variables:

@@ -89,6 +89,7 @@ static int fReadingOther;
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "gtkprefs.h"
 #elif USE_EXT
 #include <ext.h>
 #include <extwin.h>
@@ -123,7 +124,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
     fConfirm = TRUE, fShowProgress, fMove, fCubeOwner, fJacoby = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
-    fBeavers = 1, nCube, fOutputMWC = TRUE;
+    fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
+    fOutputMatchPC = TRUE;
 
 gamestate gs = GAME_NONE;
 
@@ -207,6 +209,8 @@ command acDatabase[] = {
       szLENGTH, NULL },
     { "session", CommandNewSession, "Start a new (money) session", NULL,
       NULL },
+    { "weights", CommandNotImplemented, "Create new (random) neural net "
+      "weights", szSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSave[] = {
     { "game", CommandSaveGame, "Record a log of the game so far to a "
@@ -244,6 +248,15 @@ command acDatabase[] = {
     { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL }
+}, acSetOutput[] = {
+    { "matchpc", CommandSetOutputMatchPC,
+      "Show match equities as percentages (on) or probabilities (off)",
+      szONOFF, NULL },
+    { "mwc", CommandSetOutputMWC, "Show output in MWC (on) or "
+      "equity (off) (match play only)", szONOFF, NULL },
+    { "winpc", CommandSetOutputWinPC,
+      "Show winning chances as percentages (on) or probabilities (off)",
+      szONOFF, NULL },
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
       "congruential) generator", szOPTSEED, NULL },
@@ -304,8 +317,8 @@ command acDatabase[] = {
       acSetMET },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
       szONOFF, NULL },
-    { "outputmwc", CommandSetOutputMWC, "Show output in MWC (on) or "
-      "equity (off) (match play only)", szONOFF, NULL },
+    { "output", NULL, "Modify options for formatting results", NULL,
+      acSetOutput },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
@@ -331,7 +344,7 @@ command acDatabase[] = {
     { "cache", CommandShowCache, "Display statistics on the evaluation "
       "cache", NULL, NULL },
     { "confirm", CommandShowConfirm, "Show whether confirmation is required "
-      "before aborting a game in progress", NULL, NULL },
+      "before aborting a game", NULL, NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL, NULL },
     { "crawford", CommandShowCrawford, 
@@ -358,8 +371,8 @@ command acDatabase[] = {
       "Show match equity table", szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon, "Display which starting position "
       "will be used", NULL, NULL },
-    { "outputmwc", CommandShowOutputMWC, "Show whether output is in MWC or "
-      "equity (match play only)", NULL, NULL },
+    { "output", CommandShowOutput, "Show how results will be formatted",
+      NULL, NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", szOPTPOSITION, NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL, NULL },
@@ -1459,18 +1472,30 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ 0 ].arEvalMove;
           rEqTop = ml.amMoves[ 0 ].rScore;
 
-          outputf (" %4i. %-14s   %-28s Eq.: %+6.3f\n"
-                   "       %5.1f%% %5.1f%% %5.1f%%  -"
-                   " %5.1f%% %5.1f%% %6.2f%%\n",
-                   1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
-                                    ml.amMoves[ 0 ].esMove ), 
-                   FormatMove( szMove, anBoard, 
-                               ml.amMoves[ 0 ].anMove ),
-                   rEqTop, 
-                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-                   100.0 * ar[ 4 ] );
-                   
+	  if( fOutputWinPC )
+	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f\n"
+		       "       %5.1f%% %5.1f%% %5.1f%%  -"
+		       " %5.1f%% %5.1f%% %5.1f%%\n",
+		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
+				       ml.amMoves[ 0 ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ 0 ].anMove ),
+		       rEqTop, 
+		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+		       100.0 * ar[ 4 ] );
+	  else
+	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f\n"
+		       "       %5.3f %5.3f %5.3f  -"
+		       " %5.3f %5.3f %5.3f\n",
+		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
+				       ml.amMoves[ 0 ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ 0 ].anMove ),
+		       rEqTop, 
+		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
+		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+		       ar[ 4 ] );
         }
 
 	for( i = 1; i < n; i++ ) {
@@ -1478,20 +1503,31 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ i ].arEvalMove;
           rEq = ml.amMoves[ i ].rScore;
 
-          outputf (" %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
-                   "       %5.1f%% %5.1f%% %5.1f%%  -"
-                   " %5.1f%% %5.1f%% %6.2f%%\n",
-                   i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
-                                    ml.amMoves[ i ].esMove ), 
-                   FormatMove( szMove, anBoard, 
-                               ml.amMoves[ i ].anMove ),
-                   rEq, rEq - rEqTop,
-                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-                   100.0 * ar[ 4 ] );
-                   
+	  if( fOutputWinPC )
+	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
+		       "       %5.1f%% %5.1f%% %5.1f%%  -"
+		       " %5.1f%% %5.1f%% %5.1f%%\n",
+		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
+					  ml.amMoves[ i ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ i ].anMove ),
+		       rEq, rEq - rEqTop,
+		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+		       100.0 * ar[ 4 ] );
+	  else
+	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
+		       "       %5.3f %5.3f %5.3f  -"
+		       " %5.3f %5.3f %5.3f\n",
+		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
+					  ml.amMoves[ i ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ i ].anMove ),
+		       rEq, rEq - rEqTop,
+		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
+		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+		       ar[ 4 ] );
 	}
-
       }
       else {
 
@@ -1504,17 +1540,30 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ 0 ].arEvalMove;
           rMWCTop = 100.0 * eq2mwc ( ml.amMoves[ 0 ].rScore, &ci );
 
-          outputf (" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
-                   "       %5.1f%% %5.1f%% %5.1f%%  -"
-                   " %5.1f%% %5.1f%% %6.2f%%\n",
-                   1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
-                                    ml.amMoves[ 0 ].esMove ), 
-                   FormatMove( szMove, anBoard, 
-                               ml.amMoves[ 0 ].anMove ),
-                   rMWCTop, 
-                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-                   100.0 * ar[ 4 ] );
+	  if( fOutputWinPC )
+	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		       "       %5.1f%% %5.1f%% %5.1f%%  -"
+		       " %5.1f%% %5.1f%% %5.1f%%\n",
+		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
+				       ml.amMoves[ 0 ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ 0 ].anMove ),
+		       rMWCTop, 
+		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+		       100.0 * ar[ 4 ] );
+	  else
+	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		       "       %5.3f %5.3f %5.3f  -"
+		       " %5.3f %5.3f %5.3f\n",
+		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
+				       ml.amMoves[ 0 ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ 0 ].anMove ),
+		       rMWCTop, 
+		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
+		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+		       ar[ 4 ] );
                    
         }
 
@@ -1523,18 +1572,30 @@ extern void CommandHint( char *sz ) {
 	  ar = ml.amMoves[ i ].arEvalMove;
           rMWC = 100.0 * eq2mwc ( ml.amMoves[ i ].rScore, &ci );
 
-          outputf (" %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
-                   "       %5.1f%% %5.1f%% %5.1f%%  -"
-                   " %5.1f%% %5.1f%% %6.2f%%\n",
-                   i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
-                                    ml.amMoves[ i ].esMove ), 
-                   FormatMove( szMove, anBoard, 
-                               ml.amMoves[ i ].anMove ),
-                   rMWC, rMWC - rMWCTop,
-                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-                   100.0 * ar[ 4 ] );
-                   
+	  if( fOutputWinPC )
+	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		       "       %5.1f%% %5.1f%% %5.1f%%  -"
+		       " %5.1f%% %5.1f%% %5.1f%%\n",
+		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
+					  ml.amMoves[ i ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ i ].anMove ),
+		       rMWC, rMWC - rMWCTop,
+		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+		       100.0 * ar[ 4 ] );
+	  else
+	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		       "       %5.3f %5.3f %5.3f  -"
+		       " %5.3f %5.3f %5.3f\n",
+		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
+					  ml.amMoves[ i ].esMove ), 
+		       FormatMove( szMove, anBoard, 
+				   ml.amMoves[ i ].anMove ),
+		       rMWC, rMWC - rMWCTop,
+		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
+		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+		       ar[ 4 ] );
 	}
       }
     }
@@ -1895,6 +1956,9 @@ extern void CommandExportMatch( char *sz ) {
 extern void CommandSaveSettings( char *szParam ) {
 
     char sz[ PATH_MAX ], *pch = getenv( "HOME" );
+#if USE_GTK
+    char szColours[ 256 ];
+#endif
     FILE *pf;
     
     sprintf( sz, "%s/.gnubgautorc", pch ? pch : "" ); /* FIXME accept param */
@@ -1929,6 +1993,10 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fAutoMove ? "on" : "off",
 	     fAutoRoll ? "on" : "off" );
     /* FIXME save cache settings */
+#if USE_GTK
+    fputs( BoardPreferencesCommand( pwBoard, szColours ), pf );
+    fputc( '\n', pf );
+#endif
     fprintf( pf, "set confirm %s\n"
 #if USE_GUI
 	     "set delay %d\n"
@@ -2589,6 +2657,7 @@ static void usage( char *argv0 ) {
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
 "  -n, --no-weights          Do not load existing neural net weights\n"
+"  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 #if USE_GUI
 "  -t, --tty                 Start on tty instead of using window system\n"
 #endif
@@ -2604,10 +2673,11 @@ static void usage( char *argv0 ) {
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchDataDir = NULL;
-    static int fNoWeights = FALSE, fNoBearoff = FALSE;
+    static int fNoWeights = FALSE, fNoRC = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
 	{ "no-bearoff", no_argument, NULL, 'b' },
+	{ "no-rc", no_argument, NULL, 'r' },
 	{ "no-weights", no_argument, NULL, 'n' },
 	{ "window-system-only", no_argument, NULL, 'w' },
 	/* `help', `tty' and `version' must come last -- see below. */
@@ -2677,7 +2747,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    fShowProgress = isatty( STDOUT_FILENO );
 	}
     
-    while( ( ch = getopt_long( argc, argv, "bd:hntvw", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bd:hnrtvw", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -2688,6 +2758,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    break;
 	case 'n':
 	    fNoWeights = TRUE;
+	    break;
+	case 'r':
+	    fNoRC = TRUE;
 	    break;
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
@@ -2756,7 +2829,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     rl_completion_entry_function = (Function *) NullGenerator;
 #endif
 
-    LoadRCFiles();
+    if( !fNoRC )
+	LoadRCFiles();
     
     if( optind < argc && *argv[ optind ] )
        CommandLoadMatch( argv[ optind ] );

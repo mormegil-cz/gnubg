@@ -177,7 +177,8 @@ extern gamestate gs;
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
-    fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC, fJacoby;
+    fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
+    fOutputWinPC, fOutputMatchPC, fJacoby;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
@@ -345,7 +346,9 @@ extern void CommandAccept( char * ),
     CommandSetMETJacobs( char * ),
     CommandSetJacoby( char * ),
     CommandSetNackgammon( char * ),
+    CommandSetOutputMatchPC( char * ),
     CommandSetOutputMWC ( char * ),
+    CommandSetOutputWinPC( char * ),
     CommandSetPlayerEvaluation( char * ),
     CommandSetPlayerGNU( char * ),
     CommandSetPlayerHuman( char * ),
@@ -386,7 +389,7 @@ extern void CommandAccept( char * ),
     CommandShowMarketWindow( char * ),
     CommandShowNackgammon( char * ),
     CommandShowMatchEquityTable( char * ),
-    CommandShowOutputMWC ( char * ),
+    CommandShowOutput( char * ),
     CommandShowPipCount( char * ),
     CommandShowPostCrawford( char * ),
     CommandShowPlayer( char * ),
