@@ -1485,7 +1485,6 @@ static int CompareRedEvalData( const void *p0, const void *p1 ) {
 
 }
 
-
 static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 				  evalcontext *pecx, int nPlies,
 				  positionclass pc );
@@ -1540,7 +1539,8 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	      SwapSides( anBoardNew );
 	      
 	      if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1,
-					 pc ) )
+					 pec->fRelativeAccuracy ? pc :
+					 ClassifyPosition( anBoardNew ) ) )
 		return -1;
 	      
 	      if( n0 == n1 )
@@ -1609,7 +1609,8 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	      /* Evaluate at 0-ply */
 	      
 	      if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
-					 pec, 0, pc ) )
+					 pec, 0, pec->fRelativeAccuracy ? pc :
+					 ClassifyPosition( anBoardNew ) ) )
 		return -1;
 
 	      ad0ply[ k ].rScore = Utility ( ad0ply[ k ].arOutput );
@@ -1672,7 +1673,9 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 	    PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
 
-	    if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1, pc ) )
+	    if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1,
+				       pec->fRelativeAccuracy ? pc :
+				       ClassifyPosition( anBoardNew ) ) )
 	      return -1;
 
 	    for ( i = 0; i < NUM_OUTPUTS; i++ ) {
@@ -1734,18 +1737,16 @@ static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     
     if( ( pec = CacheLookup( &cEval, l, &ec ) ) ) {
       memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
-      
+
       return 0;
     }
     
     if( EvaluatePositionFull( anBoard, arOutput, pecx, nPlies, pc ) )
 	return -1;
 
-
     memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
     
     return CacheAdd( &cEval, l, &ec, sizeof ec );
-
 }
 
 extern int EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
