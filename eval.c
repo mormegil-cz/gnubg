@@ -3918,8 +3918,6 @@ static char
     return "Too good to redouble, take";
   case TOOGOODRE_PASS:
     return "Too good to redouble, pass";
-  case REDOUBLE_BEAVER:
-    return "Redouble, beaver";
   case NO_REDOUBLE_BEAVER:
     return "No redouble, beaver";
   default:
@@ -3957,7 +3955,6 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
   case DOUBLE_TAKE:
   case DOUBLE_BEAVER:
   case REDOUBLE_TAKE:
-  case REDOUBLE_BEAVER:
 
     /*
      * Optimal     : Double, take
@@ -4382,7 +4379,7 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
            arDouble[ OUTPUT_TAKE ] <= 0.0 
            && pci->fBeavers )
         /* beaver (jacoby paradox) */
-        return ( pci->fCubeOwner == -1 ) ? DOUBLE_BEAVER : REDOUBLE_BEAVER;
+        return DOUBLE_BEAVER;
       else
         /* ...take */
         return ( pci->fCubeOwner == -1 ) ? DOUBLE_TAKE : REDOUBLE_TAKE;

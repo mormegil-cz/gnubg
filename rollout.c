@@ -572,7 +572,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           case DOUBLE_TAKE:
           case DOUBLE_BEAVER:
           case REDOUBLE_TAKE:
-          case REDOUBLE_BEAVER:
 
             /* update statistics */
 	    if( aarsStatistics )

@@ -781,7 +781,6 @@ extern int ComputerTurn( void ) {
 
         case DOUBLE_BEAVER:
         case NODOUBLE_BEAVER:
-        case REDOUBLE_BEAVER:
         case NO_REDOUBLE_BEAVER:
 
           /* opponent beaver was correct */
@@ -822,7 +821,6 @@ extern int ComputerTurn( void ) {
 
         case DOUBLE_BEAVER:
         case NODOUBLE_BEAVER:
-        case REDOUBLE_BEAVER:
         case NO_REDOUBLE_BEAVER:
 
           if ( ms.cBeavers < nBeavers && ! ms.nMatchTo &&
@@ -933,7 +931,6 @@ extern int ComputerTurn( void ) {
           case DOUBLE_PASS:
           case REDOUBLE_PASS:
           case DOUBLE_BEAVER:
-          case REDOUBLE_BEAVER:
 
             /* Double */
 
