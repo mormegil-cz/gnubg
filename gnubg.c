@@ -4284,6 +4284,27 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 }
 
 
+static void
+SaveMoveFilterSettings ( FILE *pf, 
+                         const char *sz,
+                         movefilter aamf [ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  int i, j;
+
+    for (i = 0; i < MAX_FILTER_PLIES; ++i) 
+      for (j = 0; j <= i; ++j) {
+	fprintf (pf, "%s %d  %d  %d %d %0.3g\n",
+                 sz, 
+		 i+1, j, 
+		 aamf[i][j].Accept,
+		 aamf[i][j].Extra,
+		 aamf[i][j].Threshold);
+      }
+}
+
+
+
+
 static void 
 SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
@@ -4349,6 +4370,9 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
     sprintf ( pch, "%s player %i cubedecision", sz, i );
     SaveEvalSettings ( pf, pch, &prc->aecCube[ i ] );
 
+    sprintf ( pch, "%s player %i movefilter", sz, i );
+    SaveMoveFilterSettings ( pf, pch, prc->aaamfChequer[ i ] );
+
   }
 
   for ( i = 0; i < 2; i++ ) {
@@ -4358,6 +4382,9 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
 
     sprintf ( pch, "%s later player %i cubedecision", sz, i );
     SaveEvalSettings ( pf, pch, &prc->aecCubeLate[ i ] );
+
+    sprintf ( pch, "%s later player %i movefilter", sz, i );
+    SaveMoveFilterSettings ( pf, pch, prc->aaamfLate[ i ] );
 
   }
 
@@ -4392,25 +4419,6 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
   strcpy ( szTemp, sz );
   SaveRolloutSettings (pf, strcat ( szTemp, " rollout" ), &pes->rc );
 
-}
-
-
-static void
-SaveMoveFilterSettings ( FILE *pf, 
-                         const char *sz,
-                         movefilter aamf [ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
-
-  int i, j;
-
-    for (i = 0; i < MAX_FILTER_PLIES; ++i) 
-      for (j = 0; j <= i; ++j) {
-	fprintf (pf, "%s %d  %d  %d %d %0.3g\n",
-                 sz, 
-		 i+1, j, 
-		 aamf[i][j].Accept,
-		 aamf[i][j].Extra,
-		 aamf[i][j].Threshold);
-      }
 }
 
 
