@@ -81,10 +81,13 @@ TR = @TR@
 VERSION = @VERSION@
 
 info_TEXINFOS = gnubg.texi
+gnubg_TEXINFOS = fdl.texi
+@XML_MANUAL_TRUE@pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png 	rulfig4.png rulfig5.png annealing.png
+@XML_MANUAL_FALSE@pkgdata_DATA = gnubg.xml texinfo.dtd
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt 	annealing.gp annealing.txt fdl.texi
 
-SUFFIXES = .png .eps .texi .html .txt
+SUFFIXES = .png .eps .texi .html .txt .xml
 EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps 	annealing.eps
 
 TXTFILES = rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt 	annealing.txt
@@ -101,8 +104,10 @@ TEXI2DVI = texi2dvi
 INFO_DEPS = gnubg.info
 DVIS = gnubg.dvi
 TEXINFOS = gnubg.texi
-DIST_COMMON =  README ChangeLog Makefile.am Makefile.in mdate-sh \
-stamp-vti texinfo.tex version.texi
+DATA =  $(pkgdata_DATA)
+
+DIST_COMMON =  README $(gnubg_TEXINFOS) ChangeLog Makefile.am \
+Makefile.in mdate-sh stamp-vti texinfo.tex version.texi
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -111,7 +116,7 @@ TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .dvi .eps .html .info .png .ps .texi .texinfo .txi .txt
+.SUFFIXES: .dvi .eps .html .info .png .ps .texi .texinfo .txi .txt .xml
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/Makefile
 
@@ -143,8 +148,8 @@ distclean-vti:
 maintainer-clean-vti:
 	-rm -f $(srcdir)/stamp-vti $(srcdir)/version.texi
 
-gnubg.info: gnubg.texi version.texi
-gnubg.dvi: gnubg.texi version.texi
+gnubg.info: gnubg.texi version.texi $(gnubg_TEXINFOS)
+gnubg.dvi: gnubg.texi version.texi $(gnubg_TEXINFOS)
 
 
 DVIPS = dvips
@@ -259,6 +264,25 @@ maintainer-clean-aminfo:
 	    rm -f $$i-[0-9]*; \
 	  fi; \
 	done
+
+install-pkgdataDATA: $(pkgdata_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
+	@list='$(pkgdata_DATA)'; for p in $$list; do \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkgdatadir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(pkgdatadir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(pkgdatadir)/$$p; \
+	  fi; fi; \
+	done
+
+uninstall-pkgdataDATA:
+	@$(NORMAL_UNINSTALL)
+	list='$(pkgdata_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(pkgdatadir)/$$p; \
+	done
 tags: TAGS
 TAGS:
 
@@ -295,20 +319,20 @@ installcheck: installcheck-am
 install-exec-am:
 install-exec: install-exec-am
 
-install-data-am: install-info-am
+install-data-am: install-info-am install-pkgdataDATA
 install-data: install-data-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am: uninstall-info
+uninstall-am: uninstall-info uninstall-pkgdataDATA
 uninstall: uninstall-am
-all-am: Makefile $(INFO_DEPS)
+all-am: Makefile $(INFO_DEPS) $(DATA)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(infodir)
+	$(mkinstalldirs)  $(DESTDIR)$(infodir) $(DESTDIR)$(pkgdatadir)
 
 
 mostlyclean-generic:
@@ -342,12 +366,13 @@ maintainer-clean: maintainer-clean-am
 
 .PHONY: mostlyclean-vti distclean-vti clean-vti maintainer-clean-vti \
 install-info-am uninstall-info mostlyclean-aminfo distclean-aminfo \
-clean-aminfo maintainer-clean-aminfo tags distdir info-am info dvi-am \
-dvi check check-am installcheck-am installcheck install-exec-am \
-install-exec install-data-am install-data install-am install \
-uninstall-am uninstall all-redirect all-am all installdirs \
-mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+clean-aminfo maintainer-clean-aminfo uninstall-pkgdataDATA \
+install-pkgdataDATA tags distdir info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
 
 txt: gnubg.txt
@@ -356,15 +381,19 @@ ps: gnubg.ps
 
 html: gnubg.html
 
-gnubg.dvi: $(EPSFILES) fdl.texi
+xml: gnubg.xml
 
-gnubg.html: $(TXTFILES) annealing.png fdl.texi
+gnubg.dvi: $(EPSFILES)
 
-gnubg.info: $(TXTFILES) fdl.texi
+gnubg.html: $(TXTFILES) annealing.png
 
-gnubg.ps: $(EPSFILES) fdl.texi
+gnubg.info: $(TXTFILES)
 
-gnubg.txt: $(TXTFILES) fdl.texi
+gnubg.ps: $(EPSFILES)
+
+gnubg.txt: $(TXTFILES)
+
+gnubg.xml: $(TXTFILES) annealing.png
 
 annealing.txt annealing.eps: annealing.gp
 	$(GNUPLOT) $< && \
@@ -379,11 +408,15 @@ annealing.png: annealing.eps
 	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | $(PNMTOPS) -noturn > $@
 
 .texi.html:
-	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'`
+	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'` -o $@
 
 .texi.txt:
 	cd $(srcdir) && \
-	$(MAKEINFO) --no-split --no-headers `echo $< | sed 's,.*/,,'` > $@
+	$(MAKEINFO) --no-split --no-headers `echo $< | sed 's,.*/,,'` -o $@
+
+.texi.xml:
+	-cd $(srcdir) && $(MAKEINFO) --xml `echo $< | sed 's,.*/,,'` > $@ 
+	-cp $(datadir)/texinfo/texinfo.dtd $(srcdir)/
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -4,8 +4,8 @@ else
 SUBDIRS = lib doc
 endif
 
-COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@
+COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @LIBXML2_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
@@ -23,7 +23,7 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
-	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h
+	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
@@ -43,6 +43,9 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
 
+if XML_MANUAL
+noinst_DATA = gnubg.xml texinfo.dtd
+endif
 pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
 man_MANS = gnubg.6
@@ -87,6 +90,18 @@ gnubg.bd:
 gnubg.gtkrc:
 	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.gtkrc ]; then \
 	$(LN_S) $(srcdir)/gnubg.gtkrc $@; fi
+
+## doc/Makefile.am takes care of building the manual, but we want a symlink
+## to the XML version if we can get it, so that the online manual works
+## without "make install".
+gnubg.xml:
+	@[ -s $@ ] || if [ -s $(srcdir)/doc/gnubg.xml ]; then \
+	$(LN_S) $(srcdir)/doc/gnubg.xml $(srcdir)/doc/annealing.png \
+	$(srcdir)/doc/rulfig[1-5].png .; fi
+
+texinfo.dtd:
+	@[ -s $@ ] || if [ -s $(srcdir)/doc/texinfo.dtd ]; then \
+	$(LN_S) $(srcdir)/doc/texinfo.dtd $@; fi
 
 bd.message:
 	@echo ' ** NOTE: For full strength in bearoff moves, GNU'

@@ -22,6 +22,18 @@
 #ifndef _GTKTEXI_H_
 #define _GTKTEXI_H_
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#else
+/* Compiling standalone; assume all dependencies are satisfied. */
+#define HAVE_LIBXML2 1
+#define USE_GTK2 1
+#endif
+
+#if HAVE_LIBXML2 && USE_GTK2
+
+#define HAVE_GTKTEXI 1
+
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
@@ -55,4 +67,5 @@ extern int gtk_texi_render_node( GtkTexi *pw, char *szTag );
 
 G_END_DECLS
 
+#endif
 #endif

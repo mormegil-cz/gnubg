@@ -1,9 +1,16 @@
 info_TEXINFOS = gnubg.texi
+gnubg_TEXINFOS = fdl.texi
+if XML_MANUAL
+pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
+	rulfig4.png rulfig5.png annealing.png
+else
+pkgdata_DATA = gnubg.xml texinfo.dtd
+endif
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
 	annealing.gp annealing.txt fdl.texi
-SUFFIXES = .png .eps .texi .html .txt
+SUFFIXES = .png .eps .texi .html .txt .xml
 EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
 	annealing.eps
 TXTFILES = rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
@@ -16,15 +23,19 @@ ps: gnubg.ps
 
 html: gnubg.html
 
-gnubg.dvi: $(EPSFILES) fdl.texi
+xml: gnubg.xml
 
-gnubg.html: $(TXTFILES) annealing.png fdl.texi
+gnubg.dvi: $(EPSFILES)
 
-gnubg.info: $(TXTFILES) fdl.texi
+gnubg.html: $(TXTFILES) annealing.png
 
-gnubg.ps: $(EPSFILES) fdl.texi
+gnubg.info: $(TXTFILES)
 
-gnubg.txt: $(TXTFILES) fdl.texi
+gnubg.ps: $(EPSFILES)
+
+gnubg.txt: $(TXTFILES)
+
+gnubg.xml: $(TXTFILES) annealing.png
 
 annealing.txt annealing.eps: annealing.gp
 	$(GNUPLOT) $< && \
@@ -39,8 +50,18 @@ annealing.png: annealing.eps
 	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | $(PNMTOPS) -noturn > $@
 
 .texi.html:
-	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'`
+	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'` -o $@
 
 .texi.txt:
 	cd $(srcdir) && \
-	$(MAKEINFO) --no-split --no-headers `echo $< | sed 's,.*/,,'` > $@
+	$(MAKEINFO) --no-split --no-headers `echo $< | sed 's,.*/,,'` -o $@
+
+## Old versions of makeinfo don't support --xml, and there's not much point
+## worrying about them, so we ignore failures.
+## There is a bug in Makeinfo (at least in version 4.0g) which generates
+## rubbish if the -o parameter is used, so we use redirection below... once
+## this bug is fixed, replace the > with -o so that Automake's "missing"
+## replacement for makeinfo will work.
+.texi.xml:
+	-cd $(srcdir) && $(MAKEINFO) --xml `echo $< | sed 's,.*/,,'` > $@ 
+	-cp $(datadir)/texinfo/texinfo.dtd $(srcdir)/

@@ -19,6 +19,16 @@
  * $Id$
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#else
+/* Compiling standalone; assume all dependencies are satisfied. */
+#define HAVE_LIBXML2 1
+#define USE_GTK2 1
+#endif
+
+#if HAVE_LIBXML2 && USE_GTK2
+
 #include <assert.h>
 #include <ctype.h>
 #include <hash.h>
@@ -1243,9 +1253,8 @@ static void gtk_texi_init( GtkTexi *pw ) {
 	{ "/Go/_Next", "N", MenuGoNext, 0 },
 	{ "/Go/_Previous", "P", MenuGoPrev, 0 },
 	{ "/Go/_Top", "T", MenuGoTop, 0, "<StockItem>", GTK_STOCK_GOTO_TOP },
-	{ "/Go/_Dir", "D", MenuGoDir, 0 },
-	{ "/_Help", NULL, NULL, 0, "<Branch>" },
-	{ "/Help/FIXME" }
+	{ "/Go/_Dir", "D", MenuGoDir, 0 }
+	/* FIXME add a help menu */
     };
     static void (*apfNav[ 3 ] )() = { GoNext, GoPrev, GoUp };
     int i;
@@ -1428,3 +1437,5 @@ extern GtkWidget *gtk_texi_new( void ) {
    - handle anchors and references to other files
    - whitespace ignoring is sometimes performed incorrectly
 */
+
+#endif

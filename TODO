@@ -146,9 +146,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?  (Wait for
   GTK+ 2.0.)
-** Spin buttons with large values (e.g. the RNG seed settings) behave
-  strangely.  This is GTK+'s fault (adjustments store their values as
-  floats, which have less precision than ints).  (Fixed in GTK+ 2.0.)
 ** During a rollout, the OK button should be the grab widget.  Can we
   fix that by temporarily modifying pwGrab?  (Or maybe we should allow
   the entire rollout dialog to be active, for copy/paste.)
@@ -181,10 +178,8 @@ duplication of effort and to make sure our changes merge easily.
   them somewhere and then use gdk_event_put() when we're ready. (gary)
 
 ** Dialogs:
-*** Make "help" show its output in a CList (CTree?).  The user must be able
-  to recurse through help for subcommands.  (Wait for GTK+ 2.0.)  The
-  current pre-release "makeinfo" converts Texinfo to XML, which is
-  probably the best format for an online manual widget to read.
+*** Make "help" show its output in a GtkTreeView.  The user must be able
+  to recurse through help for subcommands. (gary)
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
@@ -243,6 +238,8 @@ functions:
   it doesn't pay attention to which player is on roll.
 ** In position bN8ZBADYthUDIA and roll 11, the move 13/12*/11 13/12 10/9 is
   shown as 13/12*/11 13/12* 10/9.
+** ShowManual() should look in the directory given with -d.
+** GtkTexi should try to load images from the same directory as the XML file.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -301,6 +298,10 @@ functions:
   <http://sources.redhat.com/gsl/>).
 ** Rollout() and BasicRollout() appear to be obselete.  Should they be
   removed?
+** It looks as if the interface to expat is close enough to libxml2's
+  (they both approximate SAX) that we could write a wrapper to make use
+  of whichever library is available.  We could even include a bare-bones
+  XML parser to fall back to in case neither are present.
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.

@@ -1,3 +1,10 @@
+Wed Mar 13 11:13:16 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (ShowManual): New function.
+	
+	* Makefile.am: Add gtktexi.c.
+	* configure.in: Use pkg-config to look for libxml2.
+
 Tue Mar 12 17:24:31 2002  Gary Wong  <gtw@research.att.com>
 
 	* acinclude.m4 (AM_GTK2): Look for GTK+ 2.0.

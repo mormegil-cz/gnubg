@@ -1,0 +1,2465 @@
+<!DOCTYPE texinfo SYSTEM "texinfo.dtd">
+<texinfo>
+ <setfilename> gnubg.info</setfilename>
+ <settitle>GNU Backgammon</settitle>
+ <dircategory>Games</dircategory>
+ <para>
+This file documents GNU Backgammon, a program for playing and analysing
+backgammon games and matches.
+ </para>
+ <para>
+Copyright &copyright; 1999, 2000, 2001 Gary Wong.
+ </para>
+ <para>
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1; with
+no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled "GNU Free
+Documentation License".
+ </para>
+ <node>
+  <nodename>Top</nodename>
+  <nodenext>Introduction</nodenext>
+  <nodeup>(dir)</nodeup>
+  <unnumbered>
+   <title>GNU Backgammon</title>
+   <para>
+This manual describes how to use GNU Backgammon to play and analyse
+backgammon games and matches.  It corresponds to version 0.12
+(updated in April, 2001).
+   </para>
+   <menu>
+    <para>
+    </para>
+
+    <menuentry>
+     <menunode>Introduction</menunode>
+     <menutitle>Introduction</menutitle>
+     <menucomment>
+      <para>
+                   What GNU Backgammon does.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How to Play Backgammon</menunode>
+     <menutitle>How to Play Backgammon</menutitle>
+     <menucomment>
+      <para>
+         The rules of the game.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Sample Game</menunode>
+     <menutitle>Sample Game</menutitle>
+     <menucomment>
+      <para>
+                    An example of how to play against gnubg.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Invocation</menunode>
+     <menutitle>Invocation</menutitle>
+     <menucomment>
+      <para>
+                     Starting and leaving gnubg.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Basic Commands</menunode>
+     <menutitle>Basic Commands</menutitle>
+     <menucomment>
+      <para>
+                 Fundamental operations in gnubg.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Playing</menunode>
+     <menutitle>Playing</menutitle>
+     <menucomment>
+      <para>
+                        gnubg's game playing features.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>GTK</menunode>
+     <menutitle>GTK</menutitle>
+     <menucomment>
+      <para>
+                            gnubg's optional graphical interface.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Analysis</menunode>
+     <menutitle>Analysis</menutitle>
+     <menucomment>
+      <para>
+                       Using gnubg to evaluate positions.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Databases</menunode>
+     <menutitle>Databases</menutitle>
+     <menucomment>
+      <para>
+                      Storing information about positions.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Training</menunode>
+     <menutitle>Training</menutitle>
+     <menucomment>
+      <para>
+                       Modifying gnubg's neural nets.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Guile</menunode>
+     <menutitle>Guile</menutitle>
+     <menucomment>
+      <para>
+                          Extending GNU Backgammon with Guile.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Frequently Asked Questions</menunode>
+     <menutitle>Frequently Asked Questions</menutitle>
+     <menucomment>
+      <para>
+     Brief answers to things you might ask.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>GNU Free Documentation License</menunode>
+     <menutitle>GNU Free Documentation License</menutitle>
+     <menucomment>
+      <para>
+ Your rights regarding this manual.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Command Index</menunode>
+     <menutitle>Command Index</menutitle>
+     <menucomment>
+      <para>
+                  A summary of all the gnubg commands.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Concept Index</menunode>
+     <menutitle>Concept Index</menutitle>
+     <menucomment>
+      <para>
+                  Index of concepts described in this manual.
+      </para></menucomment></menuentry></menu>                    </unnumbered></node>
+ <node>
+  <nodename>Introduction</nodename>
+  <nodenext>How to Play Backgammon</nodenext>
+  <nodeprev>Top</nodeprev>
+  <nodeup>Top</nodeup>
+
+  <chapter>
+   <title>Introduction</title>
+   <para><indexterm index="cp">introduction</indexterm>
+GNU Backgammon (<tt>gnubg</tt>) plays and analyses backgammon games and matches.
+   </para>
+   <para>
+It is currently a work-in-progress.  So far it is able to play
+individual games and tournament matches, evaluate and roll out
+positions, tune its own evaluation functions using either
+<uref><urefurl>http://www.research.ibm.com/massdist/tdl.html</urefurl><urefreplacement>TD</urefreplacement></uref> or supervised
+training, maintain databases of positions for training and other
+purposes, and more.
+   </para>
+   <para>
+It is driven by a command-line interface, and displays an ASCII
+rendition of a board on text-only terminals, but also allows the user to
+play games and manipulate positions with a GTK+
+<uref><urefurl>http://www.gnu.org/software/gnubg/board.png</urefurl><urefreplacement>board window</urefreplacement></uref> where
+available.  It is extensible on platforms which support
+<uref><urefurl>http://www.gnu.org/software/guile/guile.html</urefurl><urefreplacement>Guile</urefreplacement></uref>.
+   </para>
+   <para>
+It currently plays at about the level of a championship flight
+tournament player (depending on its parameters and its luck in recent
+games, it rates from around 1900 to 2000 on
+<indexterm index="cp">FIBS</indexterm><uref><urefurl>http://www.fibs.com/</urefurl><urefreplacement>FIBS</urefreplacement></uref>, the First Internet Backgammon Server
+-- at its strongest, it ranks in the top 5 of over 6000 rated players
+there) and is gradually improving; it should be somewhat stronger than
+this when released.  Since almost all of the CPU time required during
+supervised training is spent performing rollouts, and rollouts can
+easily be performed in parallel, it is hoped that users will be able to
+pool rollout results and collectively train it to a level stronger than
+any individual could obtain.
+   </para>
+   <para>
+If you can tolerate the rough edges, periodic pre-releases of the source
+will be made on <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/</urefurl><urefdesc>the alpha.gnu.org FTP server</urefdesc></uref>.
+   </para>
+   <para>
+Anonymous CVS access to the very latest code is available: if you have a
+CVS client, set <code>CVSROOT</code> to
+<code>:pserver:anoncvs@subversions.gnu.org:/cvs</code> and check out module
+<code>gnubg</code>.  If not, daily snapshots of the CVS repository are made
+available by <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/snapshots/</urefurl><urefdesc>FTP</urefdesc></uref>, or you
+can browse the repository through the
+<uref><urefurl>http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/</urefurl><urefdesc>WWW gateway</urefdesc></uref>.  Do
+not expect this code to be stable; it will generally include both more
+features and more bugs than the main pre-release version.
+   </para>
+   <para>
+You can also compete against recent versions of <tt>gnubg</tt> on FIBS; it
+plays there under the names <code>gnu</code>, <code>mgnutest</code>, <code>mpgnu</code>
+and <code>gnu_one_ply</code>.
+   </para></chapter></node>
+ <node>
+  <nodename>How to Play Backgammon</nodename>
+  <nodenext>Sample Game</nodenext>
+  <nodeprev>Introduction</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>How to Play Backgammon</title>
+   <para><indexterm index="cp">backgammon</indexterm>
+The rules presented in this chapter were written by Tom Keith for the
+<uref><urefurl>http://www.bkgm.com/</urefurl><urefdesc>Backgammon Galore web site</urefdesc></uref>, and are included
+here with his permission.
+   </para>
+   <menu>
+    <para>
+    </para>
+
+    <menuentry>
+     <menunode>Rules of Backgammon</menunode>
+     <menutitle>Rules of Backgammon</menutitle>
+     <menucomment>
+      <para>
+         How to play the board game.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Match Play</menunode>
+     <menutitle>Match Play</menutitle>
+     <menucomment>
+      <para>
+                  Special rules used in tournament matches.
+      </para></menucomment></menuentry></menu>   </chapter></node>
+ <node>
+  <nodename>Rules of Backgammon</nodename>
+  <nodenext>Match Play</nodenext>
+  <nodeup>How to Play Backgammon</nodeup>
+
+  <section>
+   <title>Rules of Backgammon</title>
+   <para><indexterm index="cp">backgammon rules</indexterm>   </para>
+   <subsection>
+    <title>Setup</title>
+    <para><indexterm index="cp">board setup</indexterm>
+Backgammon is a game for two players, played on a board consisting of
+twenty-four narrow triangles called <indexterm index="cp">points</indexterm><dfn>points</dfn>.
+The triangles alternate in color and are grouped into four quadrants of
+six triangles each.
+The quadrants are referred to as a player's
+<indexterm index="cp">home board</indexterm><dfn>home board</dfn> and
+<indexterm index="cp">outer board</indexterm><dfn>outer board</dfn>, and the opponent's home board and outer board.
+The home and outer boards are separated from each other by a ridge down
+the center of the board called the
+<indexterm index="cp">bar</indexterm><dfn>bar</dfn>.
+    </para>
+    <multitable>
+     <columnfraction>48</columnfraction>
+     <columnfraction>24</columnfraction>
+     <row>
+      <entry><image>rulfig1</image></entry>
+      <entry><strong>Figure 1.</strong>  A board with the checkers
+in their initial position.
+
+An alternate arrangement is the reverse of the one shown here, with the
+home board on the left and the outer board on the right.
+
+   </entry></row></multitable>
+    <para>
+The points are numbered for either player starting in that player's home
+board.
+The outermost point is the twenty-four point, which is also the opponent's
+one point.
+Each player has fifteen checkers of his own color.
+The initial arrangement of checkers is:
+two on each player's twenty-four point, five on each player's thirteen point,
+three on each player's eight point, and five on each player's six point.
+    </para>
+    <para><indexterm index="cp">doubling cube</indexterm>Both players have their own pair of dice and a dice cup used for shaking.
+A <dfn>doubling cube</dfn>, with the numerals 2, 4, 8, 16, 32, and 64 on its
+faces, is used to keep track of the current stake of the game.
+    </para></subsection>
+   <subsection>
+    <title>Object of the Game</title>
+    <para><indexterm index="cp">object of the game</indexterm>
+The object of the game is for a player to move all of his checkers into
+his own home board and then bear them off.
+The first player to bear off all of his checkers wins the game.
+    </para>
+
+    <multitable>
+     <columnfraction>48</columnfraction>
+     <columnfraction>24</columnfraction>
+     <row>
+      <entry><image>rulfig2</image></entry>
+      <entry><strong>Figure 2.</strong>  Direction of movement of
+White's checkers.  Red's checkers move in the opposite direction.
+
+   </entry></row></multitable></subsection>
+   <subsection>
+    <title>Movement of the Checkers</title>
+    <para><indexterm index="cp">moving chequers, rules</indexterm>
+To start the game, each player throws a single die.
+This determines both the player to go first and the numbers to be played.
+If equal numbers come up, then both players roll again until they roll
+different numbers.
+The player throwing the higher number now moves his checkers according to
+the numbers showing on both dice.
+After the first roll, the players throw two dice and alternate turns.
+    </para>
+    <para><indexterm index="cp">pips</indexterm>The roll of the dice indicates how many points, or <dfn>pips</dfn>,
+the player is to move his checkers.
+The checkers are always moved forward, to a lower-numbered point.
+The following rules apply:
+    </para>
+
+    <enumerate first="1">
+     <item>
+      <para><indexterm index="cp">open point</indexterm>A checker may be moved only to an <dfn>open point</dfn>, one that is not
+occupied by two or more opposing checkers.
+      </para>
+</item>
+     <item>
+      <para>
+The numbers on the two dice constitute separate moves.
+For example, if a player rolls 5 and 3, he may move one checker five
+spaces to an open point and another checker three spaces to an open
+point, or he may move the one checker a total of eight spaces to an
+open point, but only if the intermediate point (either three or five
+spaces from the starting point) is also open.
+      </para>
+
+      <multitable>
+       <columnfraction>45</columnfraction>
+       <columnfraction>22</columnfraction>
+       <row>
+        <entry><image>rulfig3</image> </entry>
+        <entry><strong>Figure 3.</strong>  Two ways that White can
+play a roll of 53.
+
+     </entry></row></multitable>
+      <para>
+      </para>
+</item>
+     <item>
+      <para>
+A player who rolls doubles plays the numbers shown on the dice twice.
+A roll of 6 and 6 means that the player has four sixes to use, and he
+may move any combination of checkers he feels appropriate to complete
+this requirement.
+      </para>
+</item>
+     <item>
+      <para>
+A player must use both numbers of a roll if this is legally possible
+(or all four numbers of a double).
+When only one number can be played, the player must play that number.
+Or if either number can be played but not both, the player must play
+the larger one.
+When neither number can be used, the player loses his turn.
+In the case of doubles, when all four numbers cannot be played, the
+player must play as many numbers as he can.
+      </para></item></enumerate></subsection>
+   <subsection>
+    <title>Hitting and Entering</title>
+    <para><indexterm index="cp">hitting</indexterm><indexterm index="cp">entering</indexterm>
+A point occupied by a single checker of either color is called a
+<indexterm index="cp">blot</indexterm><dfn>blot</dfn>.  If an opposing checker lands on a blot, the blot is <dfn>hit</dfn>
+and placed on the bar.
+    </para>
+    <para>
+Any time a player has one or more checkers on the bar, his first obligation
+is to
+<indexterm index="cp">enter</indexterm><dfn>enter</dfn> those checker(s) into the opposing home board.
+A checker is entered by moving it to an open point corresponding to one of
+the numbers on the rolled dice.
+    </para>
+    <para>
+For example, if a player rolls 4 and 6, he may enter a checker
+onto either the opponent's four point or six point, so long as the
+prospective point is not occupied by two or more of the opponent's checkers.
+    </para>
+
+    <multitable>
+     <columnfraction>48</columnfraction>
+     <columnfraction>24</columnfraction>
+     <row>
+      <entry><image>rulfig4</image></entry>
+      <entry><strong>Figure 4.</strong>  If White rolls 64 with a
+checker on the bar, he must enter the checker onto Red's four point
+since Red's six point is not open.
+
+   </entry></row></multitable>
+    <para>
+If neither of the points is open, the player loses his turn.
+If a player is able to enter some but not all of his checkers, he must enter
+as many as he can and then forfeit the remainder of his turn.
+    </para>
+    <para>
+After the last of a player's checkers has been entered, any unused numbers
+on the dice must be played, by moving either the checker that was entered
+or a different checker.
+    </para></subsection>
+   <subsection>
+    <title>Bearing Off</title>
+    <para><indexterm index="cp">bearing off</indexterm>
+Once a player has moved all of his fifteen checkers into his home board,
+he may commence <dfn>bearing off</dfn>.
+A player bears off a checker by rolling a number that corresponds to the
+point on which the checker resides, and then removing that checker from
+the board.
+Thus, rolling a 6 permits the player to remove a checker from the six point.
+    </para>
+    <para>
+If there is no checker on the point indicated by the roll, the player
+must make a legal move using a checker on a higher-numbered point.
+If there are no checkers on higher-numbered points, the player is
+permitted (and required) to remove a checker from the highest point on
+which one of his checkers resides.
+A player is under no obligation to bear off if he can make an otherwise
+legal move.
+    </para>
+
+    <multitable>
+     <columnfraction>48</columnfraction>
+     <columnfraction>24</columnfraction>
+     <row>
+      <entry><image>rulfig5</image></entry>
+      <entry><strong>Figure 5.</strong>  White rolls 64 and bears
+off two checkers.
+
+   </entry></row></multitable>
+    <para>
+A player must have all of his active checkers in his home board in order
+to bear off.
+If a checker is hit during the bear-off process, the player must bring
+that checker back to his home board before continuing to bear off.
+The first player to bear off all fifteen checkers wins the game.
+    </para></subsection>
+   <subsection>
+    <title>Doubling</title>
+    <para><indexterm index="cp">doubling, rules</indexterm>
+Backgammon is played for an agreed stake per point.
+Each game starts at one point.
+During the course of the game, a player who feels he has a sufficient
+advantage may propose doubling the stakes.
+He may do this only at the start of his own turn and before he has rolled
+the dice.
+    </para>
+    <para>
+A player who is offered a double may <dfn>refuse</dfn>, in which case he
+concedes the game and pays one point.
+Otherwise, he must <dfn>accept</dfn> the double and play on for the new higher
+stakes.
+A player who accepts a double becomes the
+<indexterm index="cp">cube owner</indexterm><dfn>owner of the cube</dfn> and only he may make the next double.
+    </para>
+    <para>
+Subsequent doubles in the same game are called <dfn>redoubles</dfn>.
+If a player refuses a redouble, he must pay the number of points that were
+at stake prior to the redouble.
+Otherwise, he becomes the new owner of the cube and the game continues
+at twice the previous stakes.
+There is no limit to the number of redoubles in a game.
+    </para></subsection>
+   <subsection>
+    <title>Gammons and Backgammons</title>
+    <para><indexterm index="cp">gammons</indexterm><indexterm index="cp">backgammons</indexterm>
+At the end of the game, if the losing player has borne off at least one
+checker, he loses only the value showing on the doubling cube (one point,
+if there have been no doubles).
+However, if the loser has <emph>not</emph> borne off any of his checkers,
+he is <dfn>gammoned</dfn> and loses <emph>twice</emph> the value of the doubling cube.
+Or, worse, if the loser has not borne off any of his checkers and still has
+a checker on the bar or in the winner's home board, he is <dfn>backgammoned</dfn>
+and loses <emph>three times</emph> the value of the doubling cube.
+    </para></subsection>
+   <subsection>
+    <title>Optional Rules</title>
+    <para><indexterm index="cp">optional rules</indexterm><indexterm index="cp">rules, optional</indexterm>
+The following optional rules are in widespread use.
+    </para>
+
+    <table>
+     <tableitem>
+      <tableterm><dfn>Automatic doubles</dfn></tableterm>
+      <item>
+       <para><indexterm index="cp">automatic doubles</indexterm><indexterm index="cp">doubles, automatic</indexterm>If identical numbers are thrown on the first roll, the stakes are doubled.
+The doubling cube is turned to 2 and remains in the middle.
+Players usually agree to limit the number of automatic doubles to one per game.
+       </para>
+</item></tableitem>
+     <tableitem>
+      <tableterm><dfn>Beavers</dfn></tableterm>
+      <item>
+       <para><indexterm index="cp">beavers</indexterm>When a player is doubled, he may immediately redouble (beaver) while
+retaining possession of the cube.
+The original doubler has the option of accepting or refusing as with a
+normal double.
+       </para>
+</item></tableitem>
+     <tableitem>
+      <tableterm><dfn>The Jacoby Rule</dfn></tableterm>
+      <item>
+       <para><indexterm index="cp">Jacoby rule</indexterm>Gammons and backgammons count only as a single game if neither player has
+offered a double during the course of the game.
+This rule speeds up play by eliminating situations where a player avoids
+doubling so he can play on for a gammon.
+       </para></item></tableitem></table></subsection>
+   <subsection>
+    <title>Irregularities</title>
+    <para><indexterm index="cp">irregularities</indexterm>
+    </para>
+    <enumerate first="1">
+     <item>
+      <para>
+The dice must be rolled together and land flat on the surface of the
+right-hand section of the board.
+The player must reroll both dice if a die lands outside the right-hand
+board, or lands on a checker, or does not land flat.
+      </para>
+</item>
+     <item>
+      <para>
+A turn is completed when the player picks up his dice.
+If the play is incomplete or otherwise illegal, the opponent has the option
+of accepting the play as made or of requiring the player to make a legal play.
+A play is deemed to have been accepted as made when the opponent rolls his
+dice or offers a double to start his own turn.
+      </para>
+</item>
+     <item>
+      <para>
+If a player rolls before his opponent has completed his turn by picking up
+the dice, the player's roll is voided.
+This rule is generally waived any time a play is forced or when there is no
+further contact between the opposing forces.
+      </para></item></enumerate>        </subsection></section></node>
+ <node>
+  <nodename>Match Play</nodename>
+  <nodeprev>Rules of Backgammon</nodeprev>
+  <nodeup>How to Play Backgammon</nodeup>
+
+  <section>
+   <title>Rules for Match Play</title>
+   <para><indexterm index="cp">match rules</indexterm>
+When backgammon tournaments are held to determine an overall winner,
+the usual style of competition is <dfn>match play</dfn>.
+Competitors are paired off, and each pair plays a series of games to decide
+which player progresses to the next round of the tournament.
+This series of games is called a <dfn>match</dfn>.
+   </para>
+   <para>
+Matches are played to a specified number of points.
+The first player to accumulate the required points wins the match.
+Points are awarded in the usual manner:
+one for a single game, two for a gammon, and three for a backgammon.
+The doubling cube is used, so the winner receives the value of the game
+multiplied by the final value of the doubling cube.
+   </para>
+   <para>
+Matches are normally played using the
+<indexterm index="cp">Crawford rule</indexterm><dfn>Crawford rule</dfn>.
+The Crawford rule states that if one player reaches a score one point short
+of the match, neither player may offer a double in the immediately following
+game.
+This one game without doubling is called the Crawford game.
+Once the Crawford game has been played, if the match has not yet been decided, the doubling
+cube is active again.
+   </para>
+   <example>
+    <para>
+Match to 5                    White  Black
+--------------------------------------------------------------
+Game 1:  White wins 2 points    2      0  \
+Game 2:  Black wins 1 point     2      1   } Doubling Allowed
+Game 3:  White wins 2 points    4      1  /
+Game 4:  Black wins 1 point     4      2     Crawford Game
+Game 5:  Black wins 2 points    4      4  \
+Game 6:  White wins 2 points    6      4  /  Doubling Allowed
+    </para></example>   
+   <quotation>
+
+    <para>
+In this example, White and Black are playing a 5-point match.
+After three games White has 4 points, which is just one point
+short of what he needs.
+That triggers the Crawford rule which says there can be no
+doubling in next game, Game 4.
+    </para></quotation>   
+   <para>
+There is no bonus for winning more than the required number of points
+in match play.
+The sole goal is to win the match, and the size of the victory doesn't matter.
+   </para>
+   <para>
+Automatic doubles, beavers, and the Jacoby rule are not used in match play.
+   </para></section></node>
+ <node>
+  <nodename>Sample Game</nodename>
+  <nodenext>Invocation</nodenext>
+  <nodeprev>How to Play Backgammon</nodeprev>
+  <nodeup>Top</nodeup>
+
+  <chapter>
+   <title>Sample Game</title>
+   <para><indexterm index="cp">sample game</indexterm>
+Although GNU Backgammon has many commands and options, only a few of them
+are used during routine play.  This chapter demonstrates some of those
+most commonly used.
+   </para>
+   <para>
+If your <tt>gnubg</tt> installation is complete, you should be able to start it
+and see output similar to the following:
+   </para>
+   <example>
+    <para>
+GNU Backgammon 0.02  Copyright 1999, 2000, 2001 Gary Wong.
+GNU Backgammon is free software, covered by the GNU General Public
+License, and you are welcome to change it and/or distribute copies
+of it under certain conditions.  Type "show copying" to see the
+conditions.
+There is absolutely no warranty for GNU Backgammon.  Type "show
+warranty" for details.
+(No game)
+    </para></example>   
+   <para>
+When you start a game, <tt>gnubg</tt> will (by default) show which player's move it
+is; it is displaying <code>(No game)</code> at the moment to indicate that it
+isn't anybody's turn.
+   </para>
+   <para>
+GNU Backgammon uses a pseudo-random number generator to produce dice
+rolls.  It will normally initialise the state of the generator to
+some value based on the current time (and perhaps other system information,
+depending what features are available on your platform).  But for purposes
+of this example, it will be better to start the generator from a known
+state, so that the rolls it generates will be repeatable.  Enter the
+following command to change the generator state ("seed"):
+   </para>
+   <example>
+
+    <para>
+(No game) set seed 15
+Seed set to 15.
+(No game)
+    </para></example>   
+   <para>
+The default settings allow you to play X (the black pieces, if you have
+a graphical board window) and the computer will play O (red).  It will
+play with no lookahead by default; it is very fast at choosing moves
+in this mode (instantaneous, on most hardware) though it does not play
+at its full strength.  Let's start a game.
+   </para>
+   <example>
+
+    <para>
+(No game) new game
+gnubg rolls 1, user rolls 3.
+    </para>
+    <group> GNU Backgammon  Position ID: 4HPwATDgc/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    |   | O              X |
+ | X           O    |   | O              X |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ | X                |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   | X                |
+ | O                |   | X                |
+ | O           X    |   | X                |
+ | O           X    |   | X              O |
+ | O           X    |   | X              O |     Rolled 13
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+</group>     
+    <para>
+    </para>
+
+    <para>
+(user)
+    </para></example>
+   <para>
+This is the output you will see if a graphical board is unavailable or
+disabled; if your environment supports a graphical board, you will see a
+better representation of a backgammon board than this.  Exactly the
+same information is available, either way.
+   </para>
+   <para>
+You have just won the opening roll (you have a 3, and <tt>gnubg</tt> has a 1) -- the
+dice roll is in the bottom right hand corner for the TTY board, or shown
+as graphical dice on the right hand side of the board window.  The
+position ID (the <code>4HPwATDgc/ABMA</code> in this example) is an encoded
+representation of the current position.  It comes in useful when using
+some of <tt>gnubg</tt>'s advanced commands, but you can safely ignore it for now.
+Notice that the prompt has changed to <code>(user)</code>, to indicate that it
+is your turn; on systems where a login name is available, <tt>gnubg</tt> will
+use that instead.
+   </para>
+   <para>
+If you are familiar with backgammon, you will know that the best play
+for this roll is to make your 5 point.  The command to do that is:
+   </para>
+   <example>
+
+    <para>
+(user) 8 5 6 5
+    </para></example>   
+   <para>
+   </para>
+
+   <para>
+in the terminal window (i.e. move one chequer from your 8 point to
+your 5 point, and move another from your 6 to your 5 point); or by
+dragging each chequer to the destination point in the board window.
+Click mouse button 1 on the dice to indicate you have finished your move
+(just as you would pick up your dice to end your move if you were
+playing on a real board).
+   </para>
+
+   <para>
+Once you have done that, <tt>gnubg</tt> will take its turn, rolling 63 and playing
+24/15.  It is now your move again:
+   </para>
+
+   <example>
+
+    <group> GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    |   | O              X |
+ | X           O    |   | O              X |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ | X                |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |
+ | O                |   | X                |
+ | O                |   | X                |
+ | O           X    |   | X  X             |
+ | O     O     X    |   | X  X           O |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+</group>     
+    <para>
+    </para>
+
+    <para>
+(user)
+    </para></example>
+   <para>
+   </para>
+
+   <para>
+Since it is no longer the opening roll, you have the option of doubling
+before rolling your dice.  To roll without doubling, just enter the
+command <kbd>roll</kbd> (or <kbd>r</kbd> for short):
+   </para>
+
+   <example>
+
+    <para>
+(gnubg) roll
+    </para>
+    <group> GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    |   | O              X |
+ | X           O    |   | O              X |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ | X                |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |
+ | O                |   | X                |
+ | O                |   | X                |
+ | O           X    |   | X  X             |
+ | O     O     X    |   | X  X           O |     Rolled 35
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+</group>     
+    <para>
+    </para>
+
+    <para>
+(user)
+    </para></example>
+   <para>
+   </para>
+
+   <para>
+   </para>
+
+   <para>
+(You can also roll by clicking the dice just underneath the board
+window.)
+   </para>
+
+   <para>
+Let's play this roll by hitting twice: 13/10*, 6/1*.  You can enter this
+move with <kbd>13 10 6 1</kbd> -- note that you don't need to specify anything
+special to hit; <tt>gnubg</tt> will automatically move blots that are hit to the
+bar.  You can also make this move by dragging chequers in the board window,
+of course.
+   </para>
+
+   <example>
+
+    <para>
+(user) 13 10 6 1
+    </para>
+    <group> GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    | O | O              X |
+ | X           O    | O | O              X |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ |                  |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |
+ | O                |   |                  |
+ | O                |   | X                |
+ | O           X    |   | X  X             |
+ | O     X     X    |   | X  X           X |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+</group>     
+    <para>
+    </para>
+
+    <para>
+(user)
+    </para></example>
+   <para>
+   </para>
+
+   <para>
+GNU Backgammon has rolled 65 and been unable to move.  Let's take another
+roll:
+   </para>
+
+   <example>
+
+    <para>
+(user) roll
+    </para>
+    <group> GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    | O | O              X |
+ | X           O    | O | O              X |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ |                  |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |
+ | O                |   |                  |
+ | O                |   | X                |
+ | O           X    |   | X  X             |
+ | O     X     X    |   | X  X           X |     Rolled 25
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+</group>     
+    <para>
+    </para>
+
+    <para>
+(user)
+    </para></example>
+   <para>
+   </para>
+
+   <para>
+Play this roll as <kbd>13 11 6 1</kbd>.  <tt>gnubg</tt> will now roll 16 -- and still
+can't move!
+   </para>
+
+   <example>
+
+    <group> GNU Backgammon  Position ID: 4HPwAWDDZsoBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    | O | O              X |
+ | X           O    | O | O              X |
+ | X           O    |   | O                |
+ |                  |   | O                |
+ |                  |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |
+ | O                |   |                  |
+ | O                |   |                  |
+ | O           X    |   | X  X           X |
+ | O  X  X     X    |   | X  X           X |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+</group>     
+    <para>
+    </para>
+
+    <para>
+(user)
+    </para></example>
+   <para>
+   </para>
+
+   <para>
+Our position is now strong.  Let's try doubling -- this can be done by
+entering the command <kbd>double</kbd> at the prompt, or by clicking the
+doubling cube in the board window.  When you are doubled, you should use
+the command <kbd>take</kbd> or <kbd>drop</kbd> to accept or refuse the cube.  GNU
+Backgammon will drop this double:
+   </para>
+
+   <example>
+
+    <para>
+(user) double
+gnubg refuses the cube and gives up 1 point.
+user wins a single game and 1 points.
+The score (after 1 game) is: gnubg 0, user 1 (money session,
+without Jacoby rule).
+    </para></example>
+   <para>
+That concludes the example game.  You have seen most of the commands
+normally used while playing; others you will need include <kbd>bar</kbd>
+when re-entering a hit chequer (e.g. <kbd>bar 20 24 20</kbd>) and
+<kbd>off</kbd> to remove a chequer from the board when bearing off
+(e.g. <kbd>6 off 5 off</kbd>).
+   </para>
+   <para>
+Type <kbd>help</kbd> from within <tt>gnubg</tt> for a summary of all commands, or
+browse the rest of this manual to learn more.  Have fun playing
+GNU Backgammon!
+   </para></chapter></node>
+ <node>
+  <nodename>Invocation</nodename>
+  <nodenext>Basic Commands</nodenext>
+  <nodeprev>Sample Game</nodeprev>
+  <nodeup>Top</nodeup>
+
+  <chapter>
+   <title>Starting and Leaving <tt>gnubg</tt></title>
+   <para>
+This chapter describes how to run <tt>gnubg</tt>, and how to end it when you
+are finished.
+   </para>
+   <menu>
+    <para>
+    </para>
+
+    <menuentry>
+     <menunode>Invoking gnubg</menunode>
+     <menutitle>Invoking gnubg</menutitle>
+     <menucomment>
+      <para>
+              How to start gnubg.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Leaving gnubg</menunode>
+     <menutitle>Leaving gnubg</menutitle>
+     <menucomment>
+      <para>
+               How to end gnubg.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Shell Commands</menunode>
+     <menutitle>Shell Commands</menutitle>
+     <menucomment>
+      <para>
+              How to issue shell commands from within gnubg.
+      </para></menucomment></menuentry></menu>   </chapter></node>
+ <node>
+  <nodename>Invoking gnubg</nodename>
+  <nodenext>Leaving gnubg</nodenext>
+  <nodeup>Invocation</nodeup>
+
+  <section>
+   <title>Invoking <tt>gnubg</tt></title>
+   <para><indexterm index="cp">invoking <tt>gnubg</tt></indexterm><indexterm index="cp">starting <tt>gnubg</tt></indexterm><indexterm index="cp">running <tt>gnubg</tt></indexterm><indexterm index="cp">command line options</indexterm>
+Start GNU Backgammon by running the program <kbd>gnubg</kbd>.  Once started, it
+will process commands from the terminal.
+   </para>
+   <para>
+You can also instruct <tt>gnubg</tt> to read an existing game or match from a
+file, to play or analyse.  To read from <var>filename</var>, specify
+<kbd>gnubg <var>filename</var></kbd>.
+   </para>
+   <para><tt>gnubg</tt> will give you a short summary of how to invoke it if given the
+option <code>-help</code> (<code>-h</code> for short), and report its version
+with <code>-version</code> (<code>-v</code>).
+   </para>
+   <para>
+GNU Backgammon will normally use a graphical board window if a window
+system is available.  To prevent this behaviour and use standard
+terminal output instead, you can specify the <code>-tty</code> option (which
+can be abbreviated to <code>-t</code>).
+   </para>
+   <para>
+By default, <tt>gnubg</tt> will attempt to load pre-trained neural net
+weights; if you have no weights or wish to train a net from scratch,
+you can supply the <code>-no-weights</code> (<code>-n</code>) option, and
+new weights will be randomly generated.
+   </para>
+   <para>
+FIXME the previous command is out of date; -no-weights is now -new-weights.
+   </para>
+   <para>
+FIXME document -no-bearoff, -no-rc, -datadir and
+-window-system-only options.
+   </para></section></node>
+ <node>
+  <nodename>Leaving gnubg</nodename>
+  <nodenext>Shell Commands</nodenext>
+  <nodeprev>Invoking gnubg</nodeprev>
+  <nodeup>Invocation</nodeup>
+  <section>
+   <title>Leaving <tt>gnubg</tt></title>
+   <para><indexterm index="cp">leaving <tt>gnubg</tt></indexterm><indexterm index="cp">exiting <tt>gnubg</tt></indexterm><indexterm index="cp">quitting <tt>gnubg</tt></indexterm>
+   </para>
+   <table><indexterm index="ky">exit</indexterm><indexterm index="ky">quit</indexterm>
+    <tableitem>
+     <tableterm><code>exit</code></tableterm>
+     <tableterm><code>quit</code></tableterm>
+     <item>
+      <para>
+To exit <tt>gnubg</tt>, use the <kbd>exit</kbd> or <kbd>quit</kbd> commands (they are
+synonymous).  If you are currently playing a game, the match in progress
+will be lost, so <tt>gnubg</tt> will ask you if you are sure you want to exit
+in this case.
+      </para></item></tableitem></table>
+   <para><tt>gnubg</tt> will also exit upon end-of-file; you can therefore exit by typing
+an end-of-file character (usually <kbd>C-d</kbd>, i.e. hold the <key>CTRL</key>
+key and press D).
+   </para>
+   <para><indexterm index="cp">interrupting <tt>gnubg</tt></indexterm><indexterm index="cp">cancelling commands</indexterm>If you send an interrupt sequence (often by pressing <kbd>C-c</kbd>), the
+current <tt>gnubg</tt> command (if any) will be terminated.  This can be useful
+if you do not want to wait for a slow command to complete.
+   </para></section></node>
+ <node>
+  <nodename>Shell Commands</nodename>
+  <nodeprev>Leaving gnubg</nodeprev>
+  <nodeup>Invocation</nodeup>
+  <section>
+   <title>Shell Commands</title>
+   <para><indexterm index="cp">shell commands</indexterm><indexterm index="cp">escapes, shell</indexterm>
+You can execute shell commands from <tt>gnubg</tt> without leaving or suspending it.
+   </para>
+   <table><indexterm index="ky">!</indexterm>
+    <tableitem>
+     <tableterm><code>![<var>command</var>]</code></tableterm>
+     <item>
+      <para>
+Invoke a subshell to execute <var>command</var>.  If you do not give a
+command, a shell will be invoked (the shell is specified by the environment
+variable <code>SHELL</code> if it is set, or defaults to <code>/bin/sh</code> if not).
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>Basic Commands</nodename>
+  <nodenext>Playing</nodenext>
+  <nodeprev>Invocation</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Basic Commands</title>
+   <para><indexterm index="cp">basic commands</indexterm><indexterm index="cp">commands, basic</indexterm>
+There are a few simple commands you can use within GNU Backgammon to
+display information you might need to know:
+   </para>
+   <table><indexterm index="ky">help</indexterm><indexterm index="ky">?</indexterm>
+    <tableitem>
+     <tableterm><code>help [<var>command</var>]</code></tableterm>
+     <tableterm><code>? [<var>command</var>]</code></tableterm>
+     <item>
+      <para>
+Describe the commands that <tt>gnubg</tt> understands.  <code>help</code> by itself
+lists the main commands with a one-line description of each; when
+<var>command</var> is specified, that command is explained in more detail,
+and if it has any subcommands then they are listed in brief.
+      </para>
+
+      <para><code>?</code> is a synonym for <code>help</code>.
+<indexterm index="ky">show copying</indexterm><indexterm index="ky">show warranty</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>show copying</code></tableterm>
+     <tableterm><code>show warranty</code></tableterm>
+     <item>
+      <para>
+These commands are used to show the conditions GNU Backgammon is
+distributed under (the GNU General Public License).  Essentially, there
+is no warranty for <tt>gnubg</tt>, and everybody is free to use, inspect,
+copy, modify and distribute it.  You are permitted to do just about
+anything with <tt>gnubg</tt>, except deny these freedoms to others.  For a
+precise description of your rights and obligations, please use the
+<code>show copying</code> and <code>show warranty</code> commands, or see the file
+<code>COPYING</code> in the <tt>gnubg</tt> distribution (the contents are identical).
+      </para></item></tableitem></table></chapter></node>
+ <node>
+  <nodename>Playing</nodename>
+  <nodenext>GTK</nodenext>
+  <nodeprev>Basic Commands</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Playing Backgammon with <tt>gnubg</tt></title>
+   <para><indexterm index="cp">playing commands</indexterm><indexterm index="cp">commands, playing</indexterm>
+This chapter introduces several more commands used while playing games
+and matches in <tt>gnubg</tt>.
+   </para>
+   <menu>
+    <para>
+    </para>
+
+    <menuentry>
+     <menunode>The Game</menunode>
+     <menutitle>The Game</menutitle>
+     <menucomment>
+      <para>
+                    Commands used during the game.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Dice</menunode>
+     <menutitle>Dice</menutitle>
+     <menucomment>
+      <para>
+                        Controlling dice rolls.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Computer Player</menunode>
+     <menutitle>Computer Player</menutitle>
+     <menucomment>
+      <para>
+             Having gnubg make moves.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Matches and Sessions</menunode>
+     <menutitle>Matches and Sessions</menutitle>
+     <menucomment>
+      <para>
+        Playing series of games.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Cube</menunode>
+     <menutitle>Cube</menutitle>
+     <menucomment>
+      <para>
+                        Using the doubling cube.
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Recording</menunode>
+     <menutitle>Recording</menutitle>
+     <menucomment>
+      <para>
+                   Saving games and matches.
+      </para></menucomment></menuentry></menu>   </chapter></node>
+ <node>
+  <nodename>The Game</nodename>
+  <nodenext>Dice</nodenext>
+  <nodeup>Playing</nodeup>
+
+  <section>
+   <title>Commands Used During the Game</title>
+   <para><indexterm index="cp">game commands</indexterm>
+   </para>
+   <table><indexterm index="ky">new game</indexterm>
+    <tableitem>
+     <tableterm><code>new game</code></tableterm>
+     <item>
+      <para>
+This command is used to start a game within a match or session.  (Note
+that all games are played within matches or sessions; see
+<xref><xrefnodename>Matches and Sessions</xrefnodename></xref>.  To play a single game, use either a
+1 point match or a session lasting for one game, depending whether
+you want gammons and the doubling cube to be active.)  <code>new game</code>
+will set up the board in the starting position, and roll one die for
+each player for the opening move.
+      </para>
+
+      <para>
+If you are in the middle of a game, <code>new game</code> will ask you if
+you want to abort the game in progress.  If you do, a new game will
+replace the current one (i.e. the partially completed game will have
+no effect on the score).  If you want the current game to be scored
+for either player, you should use the <code>resign</code> command instead.
+<indexterm index="ky">move</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>move <var>from</var> <var>to</var> &dots;</code></tableterm>
+     <tableterm><code>move =<var>number</var></code></tableterm>
+     <tableterm><code><var>from</var> <var>to</var> &dots;</code></tableterm>
+     <tableterm><code>=<var>number</var></code></tableterm>
+     <item>
+      <para>
+
+The <code>move</code> command allows you to make chequer plays when it is your
+turn.  In its normal form, you should specify pairs of point numbers
+indicating the points you want to move a chequer from and to.  Specify
+one pair for each chequer you want to move.  (For instance, on an
+opening roll of 31, you might use <code>move 8 5 6 5</code> to move two
+chequers -- one from your 8 point to your 5 point, and the other from
+your 6 point to your 5 point.)  For several example moves, see
+<xref><xrefnodename>Sample Game</xrefnodename></xref>.
+      </para>
+
+      <para>
+You should use the words <code>bar</code> and <code>off</code> when moving a chequer
+from the bar or bearing it off the board, e.g. <code>move bar 20</code> or
+<code>move 3 off</code>.  These words can be abbreviated to <code>b</code> and
+<code>o</code> respectively.
+      </para>
+
+      <para>
+If there is only one legal move you can make, then the command <code>move</code>
+by itself will make it for you without requiring you to specify it in full.
+Similarly, if there is no play available at all, then <code>move</code> will
+end your turn without moving.
+      </para>
+
+      <para>
+As long as you specify at least one pair of points, then the word
+<code>move</code> is optional -- the command <code>bar 20 24 20</code> means exactly
+the same thing as <code>move bar 20 24 20</code>, for instance.
+      </para>
+
+      <para>
+FIXME document `=n' notation.
+      </para>
+
+      <para>
+If you are using a window system, you can also move chequers using the
+board window.  One way to do this is to use any mouse button to drag a
+chequer (that is, press the button when the pointer is over the chequer
+you wish to move; move the pointer to the point you wish to play it to,
+and then release the button).
+      </para>
+
+      <para>
+An alternative is to click a mouse button on the chequer; button 1 will
+move it by the number of pips showing on the left die, and any other
+button will move it according to the right die.  If you don't like the
+order the dice are displayed in, pressing either button 2 or 3 on the
+dice will swap their positions.
+      </para>
+
+      <para>
+Whichever method you use to move the chequers, once you have made a legal
+move you can end your turn by clicking mouse button 1 on the dice.
+      </para>
+
+      <para>
+FIXME reference set auto move and set auto bearoff.
+<indexterm index="ky">resign</indexterm><indexterm index="ky">agree</indexterm><indexterm index="ky">accept</indexterm><indexterm index="ky">decline</indexterm><indexterm index="ky">reject</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>resign [<var>type</var>]</code></tableterm>
+     <tableterm><code>agree</code></tableterm>
+     <tableterm><code>accept</code></tableterm>
+     <tableterm><code>decline</code></tableterm>
+     <tableterm><code>reject</code></tableterm>
+     <item>
+      <para>
+The <code>resign</code> command is used to give up a game without playing it to
+completion.  It is often useful during endgame play when the game reaches
+a position where it is impossible for one player to win.  If you do not
+specify a value <var>type</var>, then the player whose turn it is offers to
+give up one game (at the current cube value) to the opponent; you can
+also specify <code>1</code>, <code>2</code> or <code>3</code> to resign a single, double
+or triple game.  Specifying <code>normal</code>, <code>gammon</code> or
+<code>backgammon</code> is also legal, and is identical to expressing the
+number of points as a digit.  <code>single</code> is yet another synonym for
+one game.
+      </para>
+
+      <para>
+The opponent may accept the resignation with either the <code>agree</code> or
+<code>accept</code> commands, but is not obliged to.  To ignore the
+resignation and continue play normally, use either the <code>decline</code> or
+<code>reject</code> commands.  (<code>accept</code> and <code>reject</code> are also legal
+commands in response to a double; <xref><xrefnodename>Cube</xrefnodename></xref>.)
+<indexterm index="ky">set board</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set board <var>id</var>|=<var>number</var></code></tableterm>
+     <item>
+      <para>
+If you wish to directly set the chequers to a different position, you
+can use the <code>set board</code> command.  You need to know the
+<dfn>position ID</dfn> of the chequer arrangement you want; position IDs
+are always displayed when the board is shown.  (If you are playing
+on a text terminal, the position ID is in the upper right hand corner
+of the board diagram; when using the board window, the ID is shown
+below the board on the right hand side.)  For instance, to set the
+chequers to the starting position, use the command
+<code>set board 4HPwATDgc/ABMA</code>.
+      </para>
+
+      <para>
+FIXME reference =n notation and describe the GTK edit mode
+<indexterm index="ky">show board</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>show board [<var>id</var>|=<var>number</var>]</code></tableterm>
+     <item>
+      <para>
+The <code>show board</code> command is used to display a particular position --
+normally the board of the current game, but it is also possible to view
+unrelated layouts.  When specified without the optional <var>id</var> parameter,
+the current position is displayed.  (When using a text terminal, this
+is useful if subsequent output has caused the board diagram to scroll
+off the screen.  In the board window, the command can be used to undo
+erroneous chequer plays by resetting the window to the position at the
+start of the turn.)
+      </para>
+
+      <para>
+When a position ID <var>id</var> is given, the chequers are arranged into
+the position specified and that board is displayed.  Note that this
+command affects the display only; the current game is unchanged.  Use
+the <code>show board</code> command with no parameter if you want to see
+the current game again.
+<indexterm index="ky">hint</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>hint</code></tableterm>
+     <item>
+      <para>
+At any time during the game when the dice have been rolled, you can
+use the <code>hint</code> command to see the moves <tt>gnubg</tt> recommends.
+The output is of the following form:
+      </para>
+
+      <example>
+       <group>Win    W(g)   W(bg)  L(g)   L(bg)  Equity       Move
+0.542  0.142  0.008  0.113  0.008  (+0.114)     6/5 8/5
+0.505  0.120  0.008  0.122  0.007  (+0.009)     24/23 23/20
+0.498  0.126  0.008  0.123  0.007  (+0.000)     24/23 13/10
+0.499  0.113  0.008  0.121  0.007  (-0.011)     24/23 24/21
+0.486  0.125  0.008  0.120  0.009  (-0.024)     13/10 10/9
+0.481  0.116  0.008  0.129  0.008  (-0.051)     6/5 24/21
+0.472  0.122  0.008  0.129  0.009  (-0.064)     6/5 13/10
+</group>          </example>
+      <para>
+      </para>
+
+      <para>
+The moves are listed in descending order of preference, so in this case,
+<tt>gnubg</tt> recommends the move <code>6/5 8/5</code>.  The first five columns are
+its estimates of the probability of the player on roll winning
+(<code>Win</code>), winning a gammon (<code>W(g)</code>), winning a backgammon
+(<code>W(bg)</code>), losing a gammon (<code>L(g)</code>), and losing a backgammon
+(<code>L(bg)</code>) if the game is played to completion without use of the
+doubling cube, after the candidate move in that row is
+made<footnote><para>Note that the probability of winning includes the
+probability of winning a gammon or backgammon, and likewise the gammon
+probabilities include the backgammon probabilities.</para></footnote>.  The sixth column,
+<code>Equity</code>, is the estimated cubeless equity following the move --
+this is the expected number of points per game won by the player on
+roll.
+      </para>
+
+      <para>
+FIXME describe =n notation.
+      </para>
+
+      <para><tt>gnubg</tt> will `look ahead' a certain number of moves when evaluating
+the probabilities, according to the search depth set by the
+<code>set plies</code> command (<xref><xrefnodename>Analysis</xrefnodename></xref>).
+<indexterm index="ky">show pipcount</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>show pipcount [<var>id</var>|=<var>number</var>]</code></tableterm>
+     <item>
+      <para>
+Use <code>show pipcount</code> to automatically count the number of `pips'
+each player needs to bear off.  Depending on the position, the output
+will look something like:
+      </para>
+
+      <example>
+
+       <para>
+The pip counts are: X 103, O 112.
+       </para></example>     
+      <para><indexterm index="ky">set player human</indexterm><indexterm index="ky">set player name</indexterm><indexterm index="ky">show player</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>show player</code></tableterm>
+     <tableterm><code>set player <var>name</var> human</code></tableterm>
+     <tableterm><code>set player <var>old-name</var> name <var>new-name</var></code></tableterm>
+     <item>
+      <para>
+Both players have a certain amount of configuration information; use the
+command <code>show player</code> to summarise these settings.  By default,
+<tt>gnubg</tt> will play for player 0, whose name is initially <code>gnubg</code>.
+Player 1 defaults to a human (i.e. <tt>gnubg</tt> will prompt the user
+for a move when it is player 1's turn) whose name is the user's login
+name, on systems where this information is available; on single-user
+systems, the default name <code>user</code> applies.
+      </para>
+
+      <para>
+Either player can be set to a human with the command <code>set player
+<var>name</var> human</code>, where <var>name</var> is either the number of the player
+(0 or 1) or that player's name (initially <code>gnubg</code> and <code>user</code>
+or the user's login name).  You can also specify <code>both</code> which will
+set both players simultaneously.  There are also options for computer
+players (<xref><xrefnodename>Computer Player</xrefnodename></xref>).
+      </para>
+
+      <para>
+You can change the names of the players with the
+<code>set player <var>old-name</var> name <var>new-name</var></code> command.  Again,
+either the player numbers or names are valid for the <var>old-name</var>
+parameter.  Names may not contain whitespace characters, and may not
+be longer than 31 characters.  The names <code>0</code>, <code>1</code> and
+<code>both</code> are not permitted, to avoid ambiguities, and the players
+may not both share the same name.  Names are not case sensitive.
+<indexterm index="ky">set turn</indexterm><indexterm index="ky">show turn</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set turn <var>player</var></code></tableterm>
+     <tableterm><code>show turn</code></tableterm>
+     <item>
+      <para>
+The command <code>set turn <var>player</var></code> (where <var>player</var> can be the
+player's name or number, as above) is used to control which player is on
+roll.  It will cancel the current dice roll and cube action (if any),
+and set the named player on roll.
+<indexterm index="ky">set automatic bearoff</indexterm><indexterm index="ky">set automatic move</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set automatic bearoff</code></tableterm>
+     <tableterm><code>set automatic move</code></tableterm>
+     <item>
+      <para>
+FIXME
+<indexterm index="ky">set display</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set display <var>value</var></code></tableterm>
+     <item>
+      <para>
+By default, <tt>gnubg</tt> will update the display before and after every move,
+whether made by a human or automatically.  (When using the graphical board,
+the board window is redrawn to the current position; when using the ASCII
+board, a new diagram is displayed on the terminal.)  Information about
+cube actions and resignations offered will also appear as appropriate.
+      </para>
+
+      <para>
+The command <code>set display off</code> will suppress this output, which can
+speed up the display and reduce clutter (this might be useful when completing
+a game where both sides are played by the computer, for instance).
+<code>set display on</code> will restore the default behaviour.  The standard
+toggle synonyms may be substituted for <code>on</code> and <code>off</code>.
+      </para>
+
+      <para>
+The board will always be updated when it is a human player's turn to move,
+regardless of the <code>display</code> setting.
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>Dice</nodename>
+  <nodenext>Computer Player</nodenext>
+  <nodeprev>The Game</nodeprev>
+  <nodeup>Playing</nodeup>
+
+  <section>
+   <title>Controlling Dice Rolls</title>
+   <para><indexterm index="cp">dice</indexterm><indexterm index="cp">rolls, dice</indexterm>
+   </para>
+   <table><indexterm index="ky">roll</indexterm>
+    <tableitem>
+     <tableterm><code>roll</code></tableterm>
+     <item>
+      <para>
+This is the basic command used to roll the dice before each turn.  It will
+use the current random number generator to produce a dice roll, and then
+allow the player to move (if there is at least one legal play for the
+dice rolled).  By rolling the dice, the player gives up any opportunity
+to double this turn.
+<indexterm index="ky">set automatic roll</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set automatic roll <var>value</var></code></tableterm>
+     <item>
+      <para>
+When the cube is not being used, or is owned by the opponent, or at
+certain scores in a match, it is either illegal or pointless for a
+player to double.  Under these circumstances, the player might as well
+roll the dice immediately -- the <code>set automatic roll</code> command
+instructs <tt>gnubg</tt> to go ahead and roll the dice without waiting for the
+player to issue <code>roll</code>, whenever no doubling decision is necessary.
+The standard toggle commands may be used to turn this option on and off.
+<indexterm index="ky">set dice</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set dice <var>pips</var> <var>pips</var></code></tableterm>
+     <item>
+      <para>
+To set the dice to a particular roll (whether they have already been rolled
+or not), use the <code>set dice</code> command.  The player can then play a move
+according to the dice specified.  Like the <code>roll</code> command, this will
+also forego any opportunity to double; to disregard a dice roll and
+allow the player to roll again (or double, if permitted), use <code>set
+turn <var>player</var></code>.
+<indexterm index="ky">set rng</indexterm><indexterm index="ky">show rng</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set rng <var>generator</var> [<var>seed</var>]</code></tableterm>
+     <tableterm><code>show rng</code></tableterm>
+     <item>
+      <para><tt>gnubg</tt> allows a variety of methods for generating dice rolls, including
+several built-in pseudo-random number generators and a facility for external
+libraries to be used.  It is also possible to enter a roll manually whenever
+required.
+      </para>
+
+      <para>
+The <code>set rng</code> command is used to select which generator will be used.
+The <var>generator</var> parameter must be one of the following:
+      </para>
+      <table>
+       <tableitem>
+        <tableterm><code>ansi</code></tableterm>
+        <item>
+         <para>
+The ANSI C standard <code>rand()</code> random number generator.  The
+behaviour of this generator will depend on the C library linked with
+<tt>gnubg</tt>, but is typically a linear congruential pseudo-random number
+generator.  Such generators have fairly weak distribution properties,
+but are generally adequate for producing backgammon dice.  However, the
+ANSI generator is not recommended for performing rollouts, because any
+small biases in the dice could accumulate over hundreds or thousands of
+trials and distort the results.  Using a better generator would be
+safer for rollouts.
+         </para></item></tableitem>
+       <tableitem>
+        <tableterm><code>bsd</code></tableterm>
+        <item>
+         <para>
+The 4.3BSD <code>random()</code> non-linear additive feedback random number
+generator.  This is a good quality generator, but is not available on
+all systems.  <tt>gnubg</tt> will report an error if you attempt to use this
+generator if the C library used in your installation does not include
+the BSD <code>random</code> code.
+         </para></item></tableitem>
+       <tableitem>
+        <tableterm><code>isaac</code></tableterm>
+        <item>
+         <para>
+Bob Jenkins' ISAAC random number generator.  This is believed to be a
+high quality generator.
+         </para></item></tableitem>
+       <tableitem>
+        <tableterm><code>manual</code></tableterm>
+        <item>
+         <para>
+By setting the generator to <code>manual</code>, <tt>gnubg</tt> will not generate
+the dice itself; rather, it will prompt for a roll to be entered whenever
+one is required.
+         </para></item></tableitem>
+       <tableitem>
+        <tableterm><code>md5</code></tableterm>
+        <item>
+         <para>
+MD5 is a public domain message digest algorithm invented by Ron
+Rivest and documented in RFC 1321.  <tt>gnubg</tt> can use MD5 as a procedure
+for generating dice rolls -- this generator has the property that
+the seed increments by one each roll, and so the sequence generated
+by seed <code>n+1</code> will be identical to that generated by seed <code>n</code>,
+with the first roll omitted.  The command <code>show seed</code> is available
+when using the <var>md5</var> generator, for obtaining the current seed value.
+         </para></item></tableitem>
+       <tableitem>
+        <tableterm><code>mersenne</code></tableterm>
+        <item>
+         <para>
+Choosing this option will enable the Mersenne Twister generator designed
+by Matsumoto and Nishimura.  This should be an excellent pseudo-random
+number generator.
+         </para></item></tableitem>
+       <tableitem>
+        <tableterm><code>user</code></tableterm>
+        <item>
+         <para>
+Use the <code>user</code> generator to dynamically load a user library which
+will be used to produce the dice rolls.  See the file <code>userrng.c</code>
+in the <tt>gnubg</tt> distribution for an example user generator, and instructions
+on how to write your own.
+         </para></item></tableitem></table>
+      <para>
+FIXME explain optional seed parameter
+<indexterm index="ky">set seed</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set seed <var>seed</var></code></tableterm>
+     <item>
+      <para>
+You can change the random number generator seed at any time with the
+<code>set seed</code> command.  FIXME
+<indexterm index="ky">show seed</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>show seed</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>Computer Player</nodename>
+  <nodenext>Matches and Sessions</nodenext>
+  <nodeprev>Dice</nodeprev>
+  <nodeup>Playing</nodeup>
+  <section>
+   <title>Having <tt>gnubg</tt>Make Moves</title>
+   <para><indexterm index="cp">computer player</indexterm><indexterm index="cp"><tt>gnubg</tt>, making moves</indexterm>
+   </para>
+   <table><indexterm index="ky">set player gnubg</indexterm>
+    <tableitem>
+     <tableterm><code>set player <var>name</var> gnubg</code></tableterm>
+     <item>
+      <para>
+This command will instruct <tt>gnubg</tt> to choose moves (and make cube decisions)
+for the specified player, using its evaluation engine.
+<indexterm index="ky">set player pubeval</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set player <var>name</var> pubeval</code></tableterm>
+     <item>
+      <para>
+An alternative computer player can be chosen by setting a player to
+<code>pubeval</code>.  This will cause moves for that player to be made by
+Gerry Tesauro's benchmark player.  <code>pubeval</code> is much weaker than
+<tt>gnubg</tt>'s own evaluator, but provides a constant level of play which
+is useful for measuring different players against.
+      </para>
+
+      <para><code>pubeval</code> is not capable of making cube or resignation decisions
+based on the position.  It will never accept resignations at less than
+triple (backgammon) stakes, and will take all cubes.  It nevers offers
+resignations or doubles of its own.
+<indexterm index="ky">set player external</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set player <var>name</var> external</code></tableterm>
+     <item>
+      <para>
+FIXME
+<indexterm index="ky">set player evaluation</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set player <var>name</var> evaluation</code></tableterm>
+     <item>
+      <para>
+FIXME
+<indexterm index="ky">play</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>play</code></tableterm>
+     <item>
+      <para>
+FIXME
+<indexterm index="ky">external</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>external</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>Matches and Sessions</nodename>
+  <nodenext>Cube</nodenext>
+  <nodeprev>Computer Player</nodeprev>
+  <nodeup>Playing</nodeup>
+  <section>
+   <title>Matches and Sessions</title>
+   <para><indexterm index="cp">matches</indexterm><indexterm index="cp">sessions</indexterm>
+This section describes how to use GNU Backgammon to play series of
+games, whether those games are part of a match (as in tournament
+backgammon) or a session of independent games (conventionally
+called "money" play, regardless of whether any payment is involved).
+   </para>
+   <table><indexterm index="ky">new match</indexterm><indexterm index="ky">new session</indexterm><indexterm index="ky">set automatic game</indexterm><indexterm index="ky">set crawford</indexterm><indexterm index="ky">set postcrawford</indexterm><indexterm index="ky">set automatic crawford</indexterm><indexterm index="ky">set jacoby</indexterm><indexterm index="ky">set automatic doubles</indexterm><indexterm index="ky">set score</indexterm><indexterm index="ky">show crawford</indexterm><indexterm index="ky">show postcrawford</indexterm><indexterm index="ky">show jacoby</indexterm><indexterm index="ky">show score</indexterm>
+    <tableitem>
+     <tableterm><code>new match <var>length</var></code></tableterm>
+     <tableterm><code>new session</code></tableterm>
+     <tableterm><code>set automatic game</code></tableterm>
+     <tableterm><code>set crawford</code></tableterm>
+     <tableterm><code>set postcrawford</code></tableterm>
+     <tableterm><code>set automatic crawford</code></tableterm>
+     <tableterm><code>set jacoby</code></tableterm>
+     <tableterm><code>set automatic doubles <var>limit</var></code></tableterm>
+     <tableterm><code>set score <var>points</var> <var>points</var></code></tableterm>
+     <tableterm><code>show crawford</code></tableterm>
+     <tableterm><code>show postcrawford</code></tableterm>
+     <tableterm><code>show jacoby</code></tableterm>
+     <tableterm><code>show score</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>Cube</nodename>
+  <nodenext>Recording</nodenext>
+  <nodeprev>Matches and Sessions</nodeprev>
+  <nodeup>Playing</nodeup>
+  <section>
+   <title>The Doubling Cube</title>
+   <para><indexterm index="cp">cube, doubling</indexterm><indexterm index="cp">doubling, commands</indexterm>
+   </para>
+   <table><indexterm index="ky">double</indexterm><indexterm index="ky">redouble</indexterm><indexterm index="ky">beaver</indexterm><indexterm index="ky">take</indexterm><indexterm index="ky">accept</indexterm><indexterm index="ky">drop</indexterm><indexterm index="ky">pass</indexterm><indexterm index="ky">reject</indexterm><indexterm index="ky">set cube centre</indexterm><indexterm index="ky">set cube owner</indexterm><indexterm index="ky">set cube use</indexterm><indexterm index="ky">set cube value</indexterm>
+    <tableitem>
+     <tableterm><code>double</code></tableterm>
+     <tableterm><code>redouble</code></tableterm>
+     <tableterm><code>beaver</code></tableterm>
+     <tableterm><code>take</code></tableterm>
+     <tableterm><code>accept</code></tableterm>
+     <tableterm><code>drop</code></tableterm>
+     <tableterm><code>pass</code></tableterm>
+     <tableterm><code>reject</code></tableterm>
+     <tableterm><code>set cube centre</code></tableterm>
+     <tableterm><code>set cube owner <var>player</var></code></tableterm>
+     <tableterm><code>set cube use</code></tableterm>
+     <tableterm><code>set cube value <var>points</var></code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>Recording</nodename>
+  <nodeprev>Cube</nodeprev>
+  <nodeup>Playing</nodeup>
+  <section>
+   <title>Saving Games and Matches</title>
+   <para><indexterm index="cp">recording matches</indexterm><indexterm index="cp">saving matches</indexterm><indexterm index="cp">matches, saving</indexterm><indexterm index="cp">games, saving</indexterm>
+   </para>
+   <table><indexterm index="ky">save game</indexterm><indexterm index="ky">save match</indexterm><indexterm index="ky">load game</indexterm><indexterm index="ky">load match</indexterm>
+    <tableitem>
+     <tableterm><code>save game <var>file</var></code></tableterm>
+     <tableterm><code>save match <var>file</var></code></tableterm>
+     <tableterm><code>load game <var>file</var></code></tableterm>
+     <tableterm><code>load match <var>file</var></code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></section></node>
+ <node>
+  <nodename>GTK</nodename>
+  <nodenext>Analysis</nodenext>
+  <nodeprev>Playing</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>The Graphical Interface to <tt>gnubg</tt></title>
+   <para><indexterm index="cp">graphical interface</indexterm><indexterm index="cp">GTK+</indexterm>
+   </para>
+   <table><indexterm index="ky">set colours</indexterm><indexterm index="ky">set delay</indexterm><indexterm index="ky">show delay</indexterm>
+    <tableitem>
+     <tableterm><code>set colours</code></tableterm>
+     <tableterm><code>set delay</code></tableterm>
+     <tableterm><code>show delay</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></chapter></node>
+ <node>
+  <nodename>Analysis</nodename>
+  <nodenext>Databases</nodenext>
+  <nodeprev>GTK</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Using <tt>gnubg</tt>to Analyse Positions</title>
+   <para><indexterm index="cp">analysis of positions</indexterm><indexterm index="cp">position analysis</indexterm>
+   </para>
+   <table><indexterm index="ky">eval</indexterm><indexterm index="ky">rollout</indexterm><indexterm index="ky">set evaluation</indexterm><indexterm index="ky">set rollout</indexterm><indexterm index="ky">set cache</indexterm><indexterm index="ky">show cache</indexterm><indexterm index="ky">show gammonprice</indexterm><indexterm index="ky">show marketwindow</indexterm><indexterm index="ky">show matchequitytable</indexterm><indexterm index="ky">analysis</indexterm>
+    <tableitem>
+     <tableterm><code>eval [<var>id</var>|=<var>number</var>]</code></tableterm>
+     <tableterm><code>rollout [<var>id</var>|=<var>number</var> &dots;]</code></tableterm>
+     <tableterm><code>set evaluation</code></tableterm>
+     <tableterm><code>set rollout</code></tableterm>
+     <tableterm><code>set cache <var>size</var></code></tableterm>
+     <tableterm><code>show cache</code></tableterm>
+     <tableterm><code>show gammonprice</code></tableterm>
+     <tableterm><code>show marketwindow</code></tableterm>
+     <tableterm><code>show matchequitytable</code></tableterm>
+     <tableterm><code>analysis</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></chapter></node>
+ <node>
+  <nodename>Databases</nodename>
+  <nodenext>Training</nodenext>
+  <nodeprev>Analysis</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Position Databases</title>
+   <para><indexterm index="cp">databases</indexterm><indexterm index="cp">position databases</indexterm>
+   </para>
+   <table><indexterm index="ky">database dump</indexterm><indexterm index="ky">database export</indexterm><indexterm index="ky">export database</indexterm><indexterm index="ky">database generate</indexterm><indexterm index="ky">database import</indexterm><indexterm index="ky">import database</indexterm><indexterm index="ky">database rollout</indexterm><indexterm index="ky">database train</indexterm>
+    <tableitem>
+     <tableterm><code>database dump</code></tableterm>
+     <tableterm><code>database export</code></tableterm>
+     <tableterm><code>export database</code></tableterm>
+     <tableterm><code>database generate</code></tableterm>
+     <tableterm><code>database import</code></tableterm>
+     <tableterm><code>import database</code></tableterm>
+     <tableterm><code>database rollout</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>database train</code></tableterm>
+     <tableterm><code>train database</code></tableterm>
+     <item>
+      <para>
+FIXME pointer only
+      </para></item></tableitem></table></chapter></node>
+ <node>
+  <nodename>Training</nodename>
+  <nodenext>Guile</nodenext>
+  <nodeprev>Databases</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Modifying <tt>gnubg</tt>'s Neural Nets</title>
+   <para><indexterm index="cp">training</indexterm><indexterm index="cp">neural nets, training</indexterm>
+   </para>
+   <table><indexterm index="ky">new weights</indexterm><indexterm index="ky">save weights</indexterm><indexterm index="ky">load weights</indexterm><indexterm index="ky">database train</indexterm><indexterm index="ky">train database</indexterm><indexterm index="ky">train td</indexterm>
+    <tableitem>
+     <tableterm><code>new weights</code></tableterm>
+     <tableterm><code>save weights <var>file</var></code></tableterm>
+     <tableterm><code>load weights <var>file</var></code></tableterm>
+     <tableterm><code>database train</code></tableterm>
+     <tableterm><code>train database</code></tableterm>
+     <tableterm><code>train td</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table>
+   <para><image>annealing</image>
+   </para></chapter></node>
+ <node>
+  <nodename>Guile</nodename>
+  <nodenext>Frequently Asked Questions</nodenext>
+  <nodeprev>Training</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Extending <tt>gnubg</tt></title>
+   <para><indexterm index="cp">extending <tt>gnubg</tt></indexterm><indexterm index="cp">Guile</indexterm><indexterm index="cp">Scheme</indexterm>
+   </para>
+   <table><indexterm index="ky">:</indexterm>
+    <tableitem>
+     <tableterm><code>:</code></tableterm>
+     <item>
+      <para>
+FIXME
+      </para></item></tableitem></table></chapter></node>
+ <node>
+  <nodename>Frequently Asked Questions</nodename>
+  <nodenext>GNU Free Documentation License</nodenext>
+  <nodeprev>Guile</nodeprev>
+  <nodeup>Top</nodeup>
+  <chapter>
+   <title>Frequently Asked Questions</title>
+   <para><indexterm index="cp">frequently asked questions</indexterm><indexterm index="cp">FAQ</indexterm>
+   </para>
+   <menu>
+    <para>
+    </para>
+
+    <menuentry>
+     <menunode>Where can I get GNU Backgammon?</menunode>
+     <menutitle>Where can I get GNU Backgammon?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How do I play a game?</menunode>
+     <menutitle>How do I play a game?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>gnubg.bd errors</menunode>
+     <menutitle>gnubg.bd errors</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>gnubg.weights errors</menunode>
+     <menutitle>gnubg.weights errors</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Black and white board window</menunode>
+     <menutitle>Black and white board window</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </chapter></node>
+ <node>
+  <nodename>Where can I get GNU Backgammon?</nodename>
+  <nodenext>How do I play a game?</nodenext>
+  <nodeup>Frequently Asked Questions</nodeup>
+
+  <section>
+   <title>Where can I get GNU Backgammon?</title>
+   <para><indexterm index="cp">obtaining <tt>gnubg</tt></indexterm>
+Pre-release snapshots of GNU Backgammon are periodically made available
+for FTP at <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/</urefurl></uref>.
+   </para>
+   <para>
+If you want to experiment with the very latest code, the development
+sources are kept in a CVS repository at
+<uref><urefurl>http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/</urefurl></uref>; see the <tt>gnubg</tt>
+web page at <uref><urefurl>http://www.gnu.org/software/gnubg/gnubg.html</urefurl></uref> for
+instructions on checking out sources from the repository.  Daily snapshots of
+the main branch of the repository are automatically placed in the
+<code>snapshots</code> directory of the FTP area above, if you wish to retrieve
+this experimental code via FTP.
+   </para></section></node>
+ <node>
+  <nodename>How do I play a game?</nodename>
+  <nodenext>gnubg.bd errors</nodenext>
+  <nodeprev>Where can I get GNU Backgammon?</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>How do I play a game?</title>
+   <para><indexterm index="cp">playing a game</indexterm><indexterm index="cp">moving chequers, commands</indexterm>
+Once you are running <tt>gnubg</tt>, enter <kbd>new game</kbd> at the
+<code>(gnubg)</code> prompt to start a game against the computer opponent.
+You should now see a board (if a window system is available, <tt>gnubg</tt>
+will use a graphical board window; otherwise, it will display an ASCII
+board on your terminal).  If <tt>gnubg</tt> won the opening roll, it will have
+moved; you can now type <kbd>roll</kbd> (or click on the dice below the board
+window) to roll the dice yourself.  In either case, it will now be your
+move; you should enter the moves for each chequer as pairs of numbers.
+For instance, if you have rolled 3 and 1, you could type <kbd>8 5 6 5</kbd>
+to move one chequer from the 8 point to the 5 point and another from the
+6 point to the 5 point.  Use <kbd>bar</kbd> to move from the bar, and
+<kbd>off</kbd> to bear off.  If you are using the board window, you can also
+drag chequers around the board.  Click on the dice when you have
+finished.
+   </para></section></node>
+ <node>
+  <nodename>gnubg.bd errors</nodename>
+  <nodenext>gnubg.weights errors</nodenext>
+  <nodeprev>How do I play a game?</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>I only see <code>gnubg.bd: No such file or directory</code>.  What's wrong?</title>
+   <para><indexterm index="vr">gnubg.bd</indexterm><indexterm index="cp">errors starting <tt>gnubg</tt></indexterm>
+The file <code>gnubg.bd</code> is the bearoff database that <tt>gnubg</tt> uses to
+evaluate endgame positions.  <tt>gnubg</tt> will look for it first in the current
+directory and then in the installed directory (<code>/usr/local/share/gnubg/</code>
+by default).
+   </para>
+   <para>
+The <tt>gnubg</tt> distribution is set up to create <code>gnubg.bd</code> by itself
+during compilation, but it can be a slow process (taking half an hour
+or more, depending on the speed of your computer).  If you would rather
+not wait to generate the database yourself, you can obtain a copy
+via FTP from <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/gnubg.bd.gz</urefurl></uref>.
+   </para>
+   <para>
+FIXME this is out of date; gnubg can cope without gnubg.bd if it has to.
+   </para></section></node>
+ <node>
+  <nodename>gnubg.weights errors</nodename>
+  <nodenext>Black and white board window</nodenext>
+  <nodeprev>gnubg.bd errors</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>Now I get <code>gnubg.weights: No such file or directory</code>.  What's that?</title>
+   <para><indexterm index="vr">gnubg.weights</indexterm><indexterm index="cp">errors starting <tt>gnubg</tt></indexterm>
+The file <code>gnubg.weights</code> contains the trained neural net weights
+for most of <tt>gnubg</tt>'s position evaluators.  Like <code>gnubg.bd</code>, it should
+be kept in either the current directory or the installed directory.
+   </para>
+   <para>
+A binary variant of the weights file named <code>gnubg.wd</code> can also be
+used (this version can be loaded more quickly, but is not portable
+between different computer architectures).  It will automatically be
+built during the compilation process, and used in preference to
+<code>gnubg.weights</code> if found.
+   </para>
+   <para>
+You should be able to obtain a copy of the weights from wherever you
+found the <tt>gnubg</tt> distribution.  If you wish to start <tt>gnubg</tt> without
+any weights (and train your own), you can use the <code>-no-weights</code>
+option (see <xref><xrefnodename>Invoking gnubg</xrefnodename></xref>).
+   </para></section></node>
+ <node>
+  <nodename>Black and white board window</nodename>
+  <nodeprev>gnubg.weights errors</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>The board window is shown in black and white and looks awful!  What's wrong?</title>
+   <para>
+If you see this problem, your X server is probably using a
+<dfn>PseudoColor</dfn> visual, and is dynamically allocating colours
+to clients from a limited colourmap.  On these types of displays,
+<tt>gnubg</tt> tries to be a well-behaved client by using colours from the
+default standard colourmap.  This will allow it to share colours
+with other clients that use the same scheme, which will help them
+all to use as many colours as possible without exhausting the
+colourmap.
+   </para>
+   <para>
+Unfortunately, not all X clients use standard colourmaps.  If other
+clients have been run before <tt>gnubg</tt> and allocated most of the colours,
+then there may not be enough left for <tt>gnubg</tt> to allocate a standard
+colourmap.  If this happens, it will just take what it can get (which
+in the worst case might be black and white only).  You can try to
+avoid this problem by running <tt>gnubg</tt> before other colour-hungry clients,
+or by using the <code>xstdcmap</code> utility to install the default
+standard colourmap early in your session while colours are still
+available.  Depending on your hardware, you may be able to configure
+your display to allow more colours, or use a <dfn>DirectColor</dfn> or
+<dfn>TrueColor</dfn> visual which should resolve the problem.
+   </para>
+   <para>
+Of course, if your X server can only display black and white (not even
+shades of grey), then there's not much you can do!
+   </para></section></node>
+ <node>
+  <nodename>GNU Free Documentation License</nodename>
+  <nodenext>Command Index</nodenext>
+  <nodeprev>Frequently Asked Questions</nodeprev>
+  <nodeup>Top</nodeup>
+  <unnumbered>
+   <title>GNU Free Documentation License</title>
+   <center>
+    <para>
+Version 1.1, March 2000    </para></center>
+   <display>
+    <para>
+Copyright (C) 2000  Free Software Foundation, Inc.
+    59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+    </para></display>   
+   <unnumberedsec>
+    <title>Preamble</title>
+    <para>
+The purpose of this License is to make a manual, textbook, or other
+written document "free" in the sense of freedom: to assure everyone
+the effective freedom to copy and redistribute it, with or without
+modifying it, either commercially or noncommercially.  Secondarily,
+this License preserves for the author and publisher a way to get
+credit for their work, while not being considered responsible for
+modifications made by others.
+    </para>
+    <para>
+This License is a kind of "copyleft", which means that derivative
+works of the document must themselves be free in the same sense.  It
+complements the GNU General Public License, which is a copyleft
+license designed for free software.
+    </para>
+    <para>
+We have designed this License in order to use it for manuals for free
+software, because free software needs free documentation: a free
+program should come with manuals providing the same freedoms that the
+software does.  But this License is not limited to software manuals;
+it can be used for any textual work, regardless of subject matter or
+whether it is published as a printed book.  We recommend this License
+principally for works whose purpose is instruction or reference.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>APPLICABILITY AND DEFINITIONS</title>
+    <para>
+This License applies to any manual or other work that contains a
+notice placed by the copyright holder saying it can be distributed
+under the terms of this License.  The "Document", below, refers to any
+such manual or work.  Any member of the public is a licensee, and is
+addressed as "you".
+    </para>
+    <para>
+A "Modified Version" of the Document means any work containing the
+Document or a portion of it, either copied verbatim, or with
+modifications and/or translated into another language.
+    </para>
+    <para>
+A "Secondary Section" is a named appendix or a front-matter section of
+the Document that deals exclusively with the relationship of the
+publishers or authors of the Document to the Document's overall subject
+(or to related matters) and contains nothing that could fall directly
+within that overall subject.  (For example, if the Document is in part a
+textbook of mathematics, a Secondary Section may not explain any
+mathematics.)  The relationship could be a matter of historical
+connection with the subject or with related matters, or of legal,
+commercial, philosophical, ethical or political position regarding
+them.
+    </para>
+    <para>
+The "Invariant Sections" are certain Secondary Sections whose titles
+are designated, as being those of Invariant Sections, in the notice
+that says that the Document is released under this License.
+    </para>
+    <para>
+The "Cover Texts" are certain short passages of text that are listed,
+as Front-Cover Texts or Back-Cover Texts, in the notice that says that
+the Document is released under this License.
+    </para>
+    <para>
+A "Transparent" copy of the Document means a machine-readable copy,
+represented in a format whose specification is available to the
+general public, whose contents can be viewed and edited directly and
+straightforwardly with generic text editors or (for images composed of
+pixels) generic paint programs or (for drawings) some widely available
+drawing editor, and that is suitable for input to text formatters or
+for automatic translation to a variety of formats suitable for input
+to text formatters.  A copy made in an otherwise Transparent file
+format whose markup has been designed to thwart or discourage
+subsequent modification by readers is not Transparent.  A copy that is
+not "Transparent" is called "Opaque".
+    </para>
+    <para>
+Examples of suitable formats for Transparent copies include plain
+ASCII without markup, Texinfo input format, LaTeX input format, SGML
+or XML using a publicly available DTD, and standard-conforming simple
+HTML designed for human modification.  Opaque formats include
+PostScript, PDF, proprietary formats that can be read and edited only
+by proprietary word processors, SGML or XML for which the DTD and/or
+processing tools are not generally available, and the
+machine-generated HTML produced by some word processors for output
+purposes only.
+    </para>
+    <para>
+The "Title Page" means, for a printed book, the title page itself,
+plus such following pages as are needed to hold, legibly, the material
+this License requires to appear in the title page.  For works in
+formats which do not have any title page as such, "Title Page" means
+the text near the most prominent appearance of the work's title,
+preceding the beginning of the body of the text.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>VERBATIM COPYING</title>
+    <para>
+You may copy and distribute the Document in any medium, either
+commercially or noncommercially, provided that this License, the
+copyright notices, and the license notice saying this License applies
+to the Document are reproduced in all copies, and that you add no other
+conditions whatsoever to those of this License.  You may not use
+technical measures to obstruct or control the reading or further
+copying of the copies you make or distribute.  However, you may accept
+compensation in exchange for copies.  If you distribute a large enough
+number of copies you must also follow the conditions in section 3.
+    </para>
+    <para>
+You may also lend copies, under the same conditions stated above, and
+you may publicly display copies.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>COPYING IN QUANTITY</title>
+    <para>
+If you publish printed copies of the Document numbering more than 100,
+and the Document's license notice requires Cover Texts, you must enclose
+the copies in covers that carry, clearly and legibly, all these Cover
+Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+the back cover.  Both covers must also clearly and legibly identify
+you as the publisher of these copies.  The front cover must present
+the full title with all words of the title equally prominent and
+visible.  You may add other material on the covers in addition.
+Copying with changes limited to the covers, as long as they preserve
+the title of the Document and satisfy these conditions, can be treated
+as verbatim copying in other respects.
+    </para>
+    <para>
+If the required texts for either cover are too voluminous to fit
+legibly, you should put the first ones listed (as many as fit
+reasonably) on the actual cover, and continue the rest onto adjacent
+pages.
+    </para>
+    <para>
+If you publish or distribute Opaque copies of the Document numbering
+more than 100, you must either include a machine-readable Transparent
+copy along with each Opaque copy, or state in or with each Opaque copy
+a publicly-accessible computer-network location containing a complete
+Transparent copy of the Document, free of added material, which the
+general network-using public has access to download anonymously at no
+charge using public-standard network protocols.  If you use the latter
+option, you must take reasonably prudent steps, when you begin
+distribution of Opaque copies in quantity, to ensure that this
+Transparent copy will remain thus accessible at the stated location
+until at least one year after the last time you distribute an Opaque
+copy (directly or through your agents or retailers) of that edition to
+the public.
+    </para>
+    <para>
+It is requested, but not required, that you contact the authors of the
+Document well before redistributing any large number of copies, to give
+them a chance to provide you with an updated version of the Document.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>MODIFICATIONS</title>
+    <para>
+You may copy and distribute a Modified Version of the Document under
+the conditions of sections 2 and 3 above, provided that you release
+the Modified Version under precisely this License, with the Modified
+Version filling the role of the Document, thus licensing distribution
+and modification of the Modified Version to whoever possesses a copy
+of it.  In addition, you must do these things in the Modified Version:
+    </para>
+
+    <enumerate first="A">
+     <item>
+      <para>
+Use in the Title Page (and on the covers, if any) a title distinct
+from that of the Document, and from those of previous versions
+(which should, if there were any, be listed in the History section
+of the Document).  You may use the same title as a previous version
+if the original publisher of that version gives permission.
+      </para>
+</item>
+     <item>
+      <para>
+ List on the Title Page, as authors, one or more persons or entities
+responsible for authorship of the modifications in the Modified
+Version, together with at least five of the principal authors of the
+Document (all of its principal authors, if it has less than five).
+      </para>
+</item>
+     <item>
+      <para>
+State on the Title page the name of the publisher of the
+Modified Version, as the publisher.
+      </para>
+</item>
+     <item>
+      <para>
+ Preserve all the copyright notices of the Document.
+      </para>
+</item>
+     <item>
+      <para>
+Add an appropriate copyright notice for your modifications
+adjacent to the other copyright notices.
+      </para>
+</item>
+     <item>
+      <para>
+Include, immediately after the copyright notices, a license notice
+giving the public permission to use the Modified Version under the
+terms of this License, in the form shown in the Addendum below.
+      </para>
+</item>
+     <item>
+      <para>
+Preserve in that license notice the full lists of Invariant Sections
+and required Cover Texts given in the Document's license notice.
+      </para>
+</item>
+     <item>
+      <para>
+Include an unaltered copy of this License.
+      </para>
+</item>
+     <item>
+      <para>
+Preserve the section entitled "History", and its title, and add to
+it an item stating at least the title, year, new authors, and
+publisher of the Modified Version as given on the Title Page.  If
+there is no section entitled "History" in the Document, create one
+stating the title, year, authors, and publisher of the Document as
+given on its Title Page, then add an item describing the Modified
+Version as stated in the previous sentence.
+      </para>
+</item>
+     <item>
+      <para>
+Preserve the network location, if any, given in the Document for
+public access to a Transparent copy of the Document, and likewise
+the network locations given in the Document for previous versions
+it was based on.  These may be placed in the "History" section.
+You may omit a network location for a work that was published at
+least four years before the Document itself, or if the original
+publisher of the version it refers to gives permission.
+      </para>
+</item>
+     <item>
+      <para>
+In any section entitled "Acknowledgements" or "Dedications",
+preserve the section's title, and preserve in the section all the
+substance and tone of each of the contributor acknowledgements
+and/or dedications given therein.
+      </para>
+</item>
+     <item>
+      <para>
+Preserve all the Invariant Sections of the Document,
+unaltered in their text and in their titles.  Section numbers
+or the equivalent are not considered part of the section titles.
+      </para>
+</item>
+     <item>
+      <para>
+Delete any section entitled "Endorsements".  Such a section
+may not be included in the Modified Version.
+      </para>
+</item>
+     <item>
+      <para>
+Do not retitle any existing section as "Endorsements"
+or to conflict in title with any Invariant Section.
+      </para></item></enumerate>        
+    <para>
+If the Modified Version includes new front-matter sections or
+appendices that qualify as Secondary Sections and contain no material
+copied from the Document, you may at your option designate some or all
+of these sections as invariant.  To do this, add their titles to the
+list of Invariant Sections in the Modified Version's license notice.
+These titles must be distinct from any other section titles.
+    </para>
+    <para>
+You may add a section entitled "Endorsements", provided it contains
+nothing but endorsements of your Modified Version by various
+parties-for example, statements of peer review or that the text has
+been approved by an organization as the authoritative definition of a
+standard.
+    </para>
+    <para>
+You may add a passage of up to five words as a Front-Cover Text, and a
+passage of up to 25 words as a Back-Cover Text, to the end of the list
+of Cover Texts in the Modified Version.  Only one passage of
+Front-Cover Text and one of Back-Cover Text may be added by (or
+through arrangements made by) any one entity.  If the Document already
+includes a cover text for the same cover, previously added by you or
+by arrangement made by the same entity you are acting on behalf of,
+you may not add another; but you may replace the old one, on explicit
+permission from the previous publisher that added the old one.
+    </para>
+    <para>
+The author(s) and publisher(s) of the Document do not by this License
+give permission to use their names for publicity for or to assert or
+imply endorsement of any Modified Version.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>COMBINING DOCUMENTS</title>
+    <para>
+You may combine the Document with other documents released under this
+License, under the terms defined in section 4 above for modified
+versions, provided that you include in the combination all of the
+Invariant Sections of all of the original documents, unmodified, and
+list them all as Invariant Sections of your combined work in its
+license notice.
+    </para>
+    <para>
+The combined work need only contain one copy of this License, and
+multiple identical Invariant Sections may be replaced with a single
+copy.  If there are multiple Invariant Sections with the same name but
+different contents, make the title of each such section unique by
+adding at the end of it, in parentheses, the name of the original
+author or publisher of that section if known, or else a unique number.
+Make the same adjustment to the section titles in the list of
+Invariant Sections in the license notice of the combined work.
+    </para>
+    <para>
+In the combination, you must combine any sections entitled "History"
+in the various original documents, forming one section entitled
+"History"; likewise combine any sections entitled "Acknowledgements",
+and any sections entitled "Dedications".  You must delete all sections
+entitled "Endorsements."
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>COLLECTIONS OF DOCUMENTS</title>
+    <para>
+You may make a collection consisting of the Document and other documents
+released under this License, and replace the individual copies of this
+License in the various documents with a single copy that is included in
+the collection, provided that you follow the rules of this License for
+verbatim copying of each of the documents in all other respects.
+    </para>
+    <para>
+You may extract a single document from such a collection, and distribute
+it individually under this License, provided you insert a copy of this
+License into the extracted document, and follow this License in all
+other respects regarding verbatim copying of that document.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>AGGREGATION WITH INDEPENDENT WORKS</title>
+    <para>
+A compilation of the Document or its derivatives with other separate
+and independent documents or works, in or on a volume of a storage or
+distribution medium, does not as a whole count as a Modified Version
+of the Document, provided no compilation copyright is claimed for the
+compilation.  Such a compilation is called an "aggregate", and this
+License does not apply to the other self-contained works thus compiled
+with the Document, on account of their being thus compiled, if they
+are not themselves derivative works of the Document.
+    </para>
+    <para>
+If the Cover Text requirement of section 3 is applicable to these
+copies of the Document, then if the Document is less than one quarter
+of the entire aggregate, the Document's Cover Texts may be placed on
+covers that surround only the Document within the aggregate.
+Otherwise they must appear on covers around the whole aggregate.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>TRANSLATION</title>
+    <para>
+Translation is considered a kind of modification, so you may
+distribute translations of the Document under the terms of section 4.
+Replacing Invariant Sections with translations requires special
+permission from their copyright holders, but you may include
+translations of some or all Invariant Sections in addition to the
+original versions of these Invariant Sections.  You may include a
+translation of this License provided that you also include the
+original English version of this License.  In case of a disagreement
+between the translation and the original English version of this
+License, the original English version will prevail.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>TERMINATION</title>
+    <para>
+You may not copy, modify, sublicense, or distribute the Document except
+as expressly provided for under this License.  Any other attempt to
+copy, modify, sublicense or distribute the Document is void, and will
+automatically terminate your rights under this License.  However,
+parties who have received copies, or rights, from you under this
+License will not have their licenses terminated so long as such
+parties remain in full compliance.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>FUTURE REVISIONS OF THIS LICENSE</title>
+    <para>
+The Free Software Foundation may publish new, revised versions
+of the GNU Free Documentation License from time to time.  Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.  See
+http://www.gnu.org/copyleft/.
+    </para>
+    <para>
+Each version of the License is given a distinguishing version number.
+If the Document specifies that a particular numbered version of this
+License "or any later version" applies to it, you have the option of
+following the terms and conditions either of that specified version or
+of any later version that has been published (not as a draft) by the
+Free Software Foundation.  If the Document does not specify a version
+number of this License, you may choose any version ever published (not
+as a draft) by the Free Software Foundation.
+    </para></unnumberedsec>
+   <unnumberedsec>
+    <title>ADDENDUM: How to use this License for your documents</title>
+    <para>
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and
+license notices just after the title page:
+    </para>
+    <display>
+
+     <para>
+Copyright (c)  YEAR  YOUR NAME.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1
+or any later version published by the Free Software Foundation;
+with the Invariant Sections being LIST THEIR TITLES, with the
+Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
+A copy of the license is included in the section entitled "GNU
+Free Documentation License".
+     </para></display>   
+    <para>
+If you have no Invariant Sections, write "with no Invariant Sections"
+instead of saying which ones are invariant.  If you have no
+Front-Cover Texts, write "no Front-Cover Texts" instead of
+"Front-Cover Texts being LIST"; likewise for Back-Cover Texts.
+    </para>
+    <para>
+If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License,
+to permit their use in free software.
+    </para></unnumberedsec></unnumbered></node>
+ <node>
+  <nodename>Command Index</nodename>
+  <nodenext>Concept Index</nodenext>
+  <nodeprev>GNU Free Documentation License</nodeprev>
+  <nodeup>Top</nodeup>
+
+  <unnumbered>
+   <title>Command Index</title>
+   <printindex>ky</printindex></unnumbered></node>
+ <node>
+  <nodename>Concept Index</nodename>
+  <nodeprev>Command Index</nodeprev>
+  <nodeup>Top</nodeup>
+  <unnumbered>
+   <title>Index</title>
+   <printindex>cp</printindex></unnumbered></node></texinfo>
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: sgml
+sgml-indent-step:1
+sgml-indent-data:nil
+End:
+-->

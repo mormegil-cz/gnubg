@@ -111,8 +111,11 @@ if test "$with_gtk" = "no"; then
 else
   if test "$with_gtk2" != "no"; then
     AM_GTK2
+  else
+    no_gtk=yes
   fi
   if test "$no_gtk" = "yes"; then
+    no_gtk2=yes
     AM_PATH_GTK(1.2.0)
   fi
 fi
@@ -125,7 +128,10 @@ if test "$no_gtk" = "yes"; then
   fi
 else
   AM_CONDITIONAL(USE_EXT, false)
-  AC_DEFINE(USE_GTK,1,Define if you want to use the GTK toolkit and widgets.)
+  AC_DEFINE(USE_GTK,1,Define if you want to use the GTK+ toolkit and widgets.)
+  if test "$no_gtk2" != "yes"; then
+    AC_DEFINE(USE_GTK2,1,Define if you want to use GTK+ 2.0 or later.)
+  fi
   ac_save_CPPFLAGS="$CPPFLAGS"
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"
@@ -147,6 +153,7 @@ GTK_LIBS="-lgtkextra $GTK_LIBS"
   GTKDATA=gnubg.gtkrc
   AC_SUBST(GTKDATA)
 fi
+
 AC_ARG_WITH(guile,[  --with-guile            use the Guile extensibility language])
 if test "$with_guile" = "no"; then
   no_guile=yes
@@ -179,9 +186,10 @@ GUILE_LIBS="-lguilegtk-1.2 $GUILE_LIBS"
   AC_SUBST(GUILEDATA)
 fi
 
-AC_CHECK_LIB(xml2,xmlParseFile)
+PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you want to use libxml2 to parse XML.), no_libxml2=yes)
 
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
+AM_CONDITIONAL(XML_MANUAL, test "$no_libxml2" != "yes" -a "$gtk2" = "yes")
 
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)

@@ -214,9 +214,6 @@
 /* Define if you have the readline library (-lreadline).  */
 #undef HAVE_LIBREADLINE
 
-/* Define if you have the xml2 library (-lxml2).  */
-#undef HAVE_LIBXML2
-
 /* Name of package */
 #undef PACKAGE
 
@@ -238,11 +235,17 @@
 /* Define if you want to use the ext toolkit and widgets. */
 #undef USE_EXT
 
-/* Define if you want to use the GTK toolkit and widgets. */
+/* Define if you want to use the GTK+ toolkit and widgets. */
 #undef USE_GTK
+
+/* Define if you want to use GTK+ 2.0 or later. */
+#undef USE_GTK2
 
 /* Define if you want to use the Guile extensibility language. */
 #undef USE_GUILE
+
+/* Define if you want to use libxml2 to parse XML. */
+#undef HAVE_LIBXML2
 
 /* Are we using either GUI (ext or GTK)? */
 #if USE_EXT || USE_GTK

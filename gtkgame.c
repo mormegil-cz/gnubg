@@ -58,6 +58,7 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
+#include "gtktexi.h"
 #include "matchequity.h"
 #include "positionid.h"
 
@@ -350,6 +351,7 @@ static void SetCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetCubeValue( GtkWidget *wd, int data);
 static void SetCubeOwner( GtkWidget *wd, int i);
 static void SetCubeClickButton( GtkWidget *wd, int i);
+static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
@@ -2199,6 +2201,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Windows/Gu_ile", NULL, NULL, 0, NULL },
 	{ "/_Help", NULL, NULL, 0, "<Branch>" },
 	{ "/_Help/_Commands", NULL, Command, CMD_HELP, NULL },
+	{ "/_Help/gnubg _Manual", NULL, ShowManual, 0, NULL },
 	{ "/_Help/Co_pying gnubg", NULL, Command, CMD_SHOW_COPYING, NULL },
 	{ "/_Help/gnubg _Warranty", NULL, Command, CMD_SHOW_WARRANTY,
 	  NULL },
@@ -5639,6 +5642,51 @@ extern void GTKShowVersion( void ) {
 			GTK_SIGNAL_FUNC( CommandShowWarranty ), NULL );
     
     gtk_widget_show_all( pwDialog );
+}
+
+static void NoManual( void ) {
+    
+    outputl( "The online manual is not available with this installation of "
+	     "GNU Backgammon.  You can view the manual on the WWW at:\n"
+	     "\n"
+	     "    http://www.gnu.org/manual/gnubg/" );
+    /* FIXME is that URL right? */
+    outputx();
+}
+
+static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
+#if HAVE_GTKTEXI
+    static GtkWidget *pw;
+    static char szInstalledManual[] = PKGDATADIR "/gnubg.xml",
+	szUninstalledManual[] = "gnubg.xml";
+    char *pch;
+    
+    if( pw ) {
+	gtk_window_present( GTK_WINDOW( pw ) );
+	return;
+    }
+
+    if( !access( szUninstalledManual, R_OK ) )
+	pch = szUninstalledManual;
+    else if( !access( szInstalledManual, R_OK ) )
+	pch = szInstalledManual;
+    else {
+	perror( szUninstalledManual );
+	NoManual();
+	return;
+    }
+    
+    pw = gtk_texi_new();
+    g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer *) &pw );
+    gtk_window_set_title( GTK_WINDOW( pw ), "GNU Backgammon - Manual" );
+    gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
+    gtk_widget_show_all( pw );
+
+    gtk_texi_load( GTK_TEXI( pw ), pch );
+    gtk_texi_render_node( GTK_TEXI( pw ), "Top" );
+#else
+    NoManual();
+#endif
 }
 
 static void GTKBearoffProgressCancel( void ) {
