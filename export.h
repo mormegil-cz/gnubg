@@ -108,4 +108,15 @@ OutputRolloutResult ( const char *szIndent,
                       const int cci,
                       const int fCubeful );
 
+extern void
+TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
+                             float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             int fPlayer,
+                             evalsetup *pes, cubeinfo *pci,
+                             int fDouble, int fTake,
+                             skilltype stDouble,
+                             skilltype stTake );
+
+
 #endif

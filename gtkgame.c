@@ -4294,13 +4294,6 @@ extern void GTKEval( char *szOutput ) {
     gdk_font_unref( pf );
 }
 
-static void HintCubeRollout( GtkWidget *pw, void *p ) {
-
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-    
-    UserCommand( "rollout =cube" );
-}
-
 extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			  const evalsetup *pes ) {
@@ -4309,7 +4302,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL,
 					NULL ),
-      *pw, *pwRollout = gtk_button_new_with_label( _("Rollout") );
+      *pw;
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
@@ -4318,11 +4311,6 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pw );
 
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
-		       pwRollout );
-    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
-			GTK_SIGNAL_FUNC( HintCubeRollout ), NULL );
-    
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
@@ -4432,7 +4420,7 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
 
 static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
 
-   char szBuf[4096], szTemp[160];
+   char szBuf[4096], szTemp[4096];
    int n, i;
  
    movelist *pml;

@@ -2202,33 +2202,15 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       rEq = pmr->n.ml.amMoves[ i ].rScore;
       rEqTop = pmr->n.ml.amMoves[ 0 ].rScore;
 
-      if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) {
-
-        /* output in equity */
-
-        if ( i ) 
-          fprintf ( pf,
-                    "<td>%+7.3f (%7.3f)</td>\n", rEq, rEq - rEqTop );
-        else
-          fprintf ( pf,
-                    "<td>%+7.3f</td>\n", rEq );
-
-      }
-      else {
-
-        /* output in mwc */
-
-        rEq = 100.0f * eq2mwc ( rEq, &ci );
-        rEqTop = 100.0f * eq2mwc ( rEqTop, &ci );
-
-        if ( i ) 
-          fprintf ( pf,
-                    "<td>%7.3f%% (%7.3f%%)</td>\n", rEq, rEq - rEqTop );
-        else
-          fprintf ( pf,
-                    "<td>%7.3f%%</td>\n", rEq );
-
-      }
+      if ( i ) 
+        fprintf ( pf,
+                  "<td>%s (%s)</td>\n", 
+                  OutputEquity ( rEq, &ci, TRUE ), 
+                  OutputEquityDiff ( rEq, rEqTop, &ci ) );
+      else
+        fprintf ( pf,
+                  "<td>%s</td>\n", 
+                  OutputEquity ( rEq, &ci, TRUE ) );
 
       /* end row */
 

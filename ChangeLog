@@ -1,3 +1,14 @@
+Sun Jul 21 21:49:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Misc. bug fixes and improvements.
+
+	* text.c (OutputMWC): remove % if ! fOutputMatchPC.
+	* html.c (HTMLPrintMoveAnalysis): use new Output* functions.
+	* gtkcube.c, gtkchequer.c: use new Output* functions.
+	* gtkgame.c (HintCopy): enlarge buffer.
+	* gtkgame.c (GTKCubeHint): remove rollout button.
+	* gtkchequer.c (HintGetSelection): enlarge buffer.
+
 Sun Jul 21 22:22:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c: Add widget for advanced options + some cleaning.

@@ -391,7 +391,7 @@ OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
     else if ( fOutputMatchPC )
       sprintf ( sz, "%6.2f%%", 100.0f * r );
     else
-      sprintf ( sz, "%6.4f%%", r );
+      sprintf ( sz, "%6.4f", r );
   }
 
   return sz;
@@ -728,7 +728,7 @@ isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci ) {
  *
  */
 
-static void
+extern void
 TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],

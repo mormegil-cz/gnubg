@@ -36,6 +36,7 @@
 
 #include "backgammon.h"
 #include "eval.h"
+#include "export.h"
 #include "rollout.h"
 #include "gtkgame.h"
 #include "gtkcube.h"
@@ -100,46 +101,36 @@ static GtkWidget *TakeAnalysis( const movetype mt,
 
     iRow = 0;
 
+    if ( pes->et == EVAL_EVAL ) 
+      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
+                             _("Cubeless %d-ply equity: %s") :
+                             _("Cubeless %d-ply MWC: %s"), 
+                             pes->ec.nPlies,
+                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
+    else 
+      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
+                             _("Cubeless rollout equity: %s") :
+                             _("Cubeless rollout MWC: %s"), 
+                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
+
+    pw = gtk_label_new ( sz );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    g_free ( sz );
+    
+    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                       0, 4, iRow, iRow + 1,
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       8, 0 );
+    
+    iRow++;
+
     switch ( pes->et ) {
 
     case EVAL_EVAL:
 
-      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-        sz = g_strdup_printf ( _("Cubeless %d-ply equity: %+7.3f"), 
-                               pes->ec.nPlies, 
-                               - Utility ( aarOutput[ 0 ], &ci ) );
-      else
-        sz = g_strdup_printf ( _("Cubeless %d-ply MWC: %7.3f%%"), 
-                               pes->ec.nPlies,
-                               100.0f * 
-                               ( 1.0 - eq2mwc ( Utility ( aarOutput[ 0 ], 
-                                                          &ci ), &ci ) ) );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 4, iRow, iRow + 1,
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      iRow++;
-
-
-      sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
-                             "%6.2f%% %6.2f%% %6.2f%%",
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
-                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ] );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
+      pw = gtk_label_new ( OutputPercents ( aarOutput[ 0 ], TRUE ) );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0.5, 0.5 );
       
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          0, 4, iRow, iRow + 1, 
@@ -369,26 +360,17 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* cubeless equity */
 
-    if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) {
-      if ( pes->et == EVAL_EVAL ) 
-        sz = g_strdup_printf ( _("Cubeless %d-ply equity: %+7.3f"),
-                               pes->ec.nPlies, 
-                               Utility ( aarOutput[ 0 ], &ci ) );
-      else
-        sz = g_strdup_printf ( _("Cubeless rollout equity: %+7.3f"),
-                               Utility ( aarOutput[ 0 ], &ci ) );
-    }
-    else {
-      if ( pes->et == EVAL_EVAL )
-        sz = g_strdup_printf ( _("Cubeless %d-ply MWC: %7.3f%%"),
-                               pes->ec.nPlies,
-                               100.0f * eq2mwc ( Utility ( aarOutput[ 0 ], 
-                                                           &ci ), &ci ) );
-      else
-        sz = g_strdup_printf ( _("Cubeless rollout MWC: %7.3f%%"),
-                               100.0f * eq2mwc ( Utility ( aarOutput[ 0 ], 
-                                                           &ci ), &ci ) );
-    }
+    if ( pes->et == EVAL_EVAL ) 
+      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
+                             _("Cubeless %d-ply equity: %s") :
+                             _("Cubeless %d-ply MWC: %s"), 
+                             pes->ec.nPlies,
+                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
+    else 
+      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
+                             _("Cubeless rollout equity: %s") :
+                             _("Cubeless rollout MWC: %s"), 
+                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
     
     pw = gtk_label_new ( sz );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
@@ -407,17 +389,8 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     if ( pes->et == EVAL_EVAL ) {
 
-      sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
-                             "%6.2f%% %6.2f%% %6.2f%%",
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
-                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ] );
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
+      pw = gtk_label_new ( OutputPercents ( aarOutput[ 0 ], TRUE ) );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0.5, 0.5 );
       
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          0, 4, iRow, iRow + 1, 
@@ -459,15 +432,10 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
       /* equity */
 
-      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-        sz = g_strdup_printf ( "%+7.3f", arDouble[ ai [ i ] ] );
-      else
-        sz = g_strdup_printf ( "%+7.3f%%", 
-                               100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) );
+      sz = OutputEquity ( arDouble[ ai [ i ] ], &ci, TRUE );
 
       pw = gtk_label_new ( sz );
       gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
 
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          2, 3, iRow, iRow + 1, 
@@ -479,19 +447,9 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
       if ( i ) {
         
-        if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-          sz = g_strdup_printf ( "(%+7.3f)", 
-                                 arDouble[ ai [ i ] ] - 
-                                 arDouble[ OUTPUT_OPTIMAL ] );
-        else
-          sz = g_strdup_printf ( "(%+7.3f%%)", 
-                                 100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) -
-                                 100.0f * eq2mwc( arDouble[ OUTPUT_OPTIMAL ], 
-                                                  &ci ) );
-
-        pw = gtk_label_new ( sz );
+        pw = gtk_label_new ( OutputEquityDiff ( arDouble[ ai [ i ] ], 
+                                                arDouble[ OUTPUT_OPTIMAL ], &ci ) );
         gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-        g_free ( sz );
         
         gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                            3, 4, iRow, iRow + 1, 
@@ -511,22 +469,8 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
         /* FIXME: output cubeless euqities and percentages for rollout */
         /*        probably along with rollout details */
         
-        sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
-                               "%6.2f%% %6.2f%% %6.2f%%",
-                               100.0f * aarOutput[ ai [ i ] - 1 ]
-                                                 [ OUTPUT_WINBACKGAMMON ],
-                               100.0f * aarOutput[ ai[ i ] - 1 ]
-                                                 [ OUTPUT_WINGAMMON ],
-                               100.0f * aarOutput[ ai[ i ] - 1 ][ OUTPUT_WIN ],
-                               100.0f * ( 1.0 - aarOutput[ ai [ i ] - 1 ]
-                                                         [ OUTPUT_WIN ] ),
-                               100.0f * aarOutput[ ai [ i ] - 1 ]
-                                                 [ OUTPUT_LOSEGAMMON ],
-                               100.0f * aarOutput[ ai [ i ] - 1 ] 
-                                                 [ OUTPUT_LOSEBACKGAMMON ] );
-        pw = gtk_label_new ( sz );
-        gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-        g_free ( sz );
+        pw = gtk_label_new ( OutputPercents ( aarOutput[ ai [ i ] - 1 ], TRUE ) );
+        gtk_misc_set_alignment( GTK_MISC( pw ), 0.5, 0.5 );
         
         gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                            0, 4, iRow, iRow + 1, 
@@ -726,6 +670,31 @@ CubeAnalysisMWC ( GtkWidget *pw, cubehintdata *pchd ) {
 }
 
 
+static void
+CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
+
+  float arDouble[ 4 ];
+  cubeinfo ci;
+
+  printf ( "WORK IN PROGRESS\n" );
+
+  GetMatchStateCubeInfo ( &ci, &ms );
+
+  FindCubeDecision ( arDouble, pchd->aarOutput, &ci );
+
+  TextPrintCubeAnalysisTable ( stdout, 
+                               arDouble,
+                               pchd->aarOutput,
+                               pchd->aarStdDev,
+                               ms.fMove,
+                               pchd->pes,
+                               &ci,
+                               FALSE, FALSE,
+                               SKILL_NONE, SKILL_NONE );
+
+}
+
+
 static GtkWidget *
 CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
@@ -736,10 +705,13 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
   GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
+  GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
+
+  GtkTooltips *pt = gtk_tooltips_new ();
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pchd->pwTools = pwTools = gtk_table_new (3, 2, FALSE);
+  pchd->pwTools = pwTools = gtk_table_new (4, 2, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -761,6 +733,10 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 3, 4,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
@@ -778,7 +754,37 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                       GTK_SIGNAL_FUNC( CubeAnalysisRolloutSettings ), NULL );
   gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
                       GTK_SIGNAL_FUNC( CubeAnalysisMWC ), pchd );
+  gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+                      GTK_SIGNAL_FUNC( CubeAnalysisCopy ), pchd );
 
+  /* tool tips */
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRollout,
+                         _("Rollout cube decision"),
+                         _("Rollout cube decision") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwEval,
+                         _("Evaluate cube decision"),
+                         _("Evaluate cube decision") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRolloutSettings,
+                         _("Modify rollout settings"),
+                         _("Modify rollout settings") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwEvalSettings,
+                         _("Modify evaluation settings"),
+                         _("Modify evaluation settings") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwMWC,
+                         _("Toggle output as MWC or equity"),
+                         _("Toggle output as MWC or equity") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwCopy,
+                         _("Copy"),
+                         _("Copy") );
+
+  /* FIXME: work in progress */
+  gtk_widget_set_sensitive ( pwCopy, FALSE );
 
   return pwTools;
   

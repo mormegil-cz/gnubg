@@ -454,10 +454,10 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
 
 #if HAVE_ALLOCA
     an = alloca( c * sizeof( an[ 0 ] ) );
-    sz = alloca( c * 160 );
+    sz = alloca( c * 9 * 80 );
 #else
     an = malloc( c * sizeof( an[ 0 ] ) );
-    sz = malloc( c * 160 );
+    sz = malloc( c * 9 * 80 );
 #endif
 
     *sz = 0;
