@@ -1,3 +1,7 @@
+Fri Oct 11 20:08:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkboard.c (board_set): don't show negative relative scores.
+
 Thu Oct 10 23:03:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (printHTMLBoardBBS): fix some typos.

@@ -2003,11 +2003,18 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
         if ( bd->match_to ) {
 
-          sprintf( buf, "%d (%d-away)", bd->score_opponent,
-                   bd->match_to - bd->score_opponent );
+          if ( bd->score_opponent >= bd->match_to )
+            sprintf( buf, "%d (won match)", bd->score_opponent );
+          else
+            sprintf( buf, "%d (%d-away)", bd->score_opponent,
+                     bd->match_to - bd->score_opponent );
           gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
-          sprintf( buf, "%d (%d-away)", bd->score,
-                   bd->match_to - bd->score );
+
+          if ( bd->score >= bd->match_to )
+            sprintf( buf, "%d (won match)", bd->score );
+          else
+            sprintf( buf, "%d (%d-away)", bd->score,
+                     bd->match_to - bd->score );
           gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
 
         }
