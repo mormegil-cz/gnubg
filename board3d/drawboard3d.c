@@ -139,6 +139,8 @@ float getBoardWidth() {return TOTAL_WIDTH;}
 float getBoardHeight() {return TOTAL_HEIGHT;}
 float getDiceSize(BoardData* bd) {return DICE_SIZE;}
 
+extern list textures;
+
 void TidyShadows(BoardData* bd)
 {
 	freeOccluder(&bd->Occluders[OCC_BOARD]);
@@ -167,6 +169,7 @@ void Tidy3dObjects(BoardData* bd)
 	TidyShadows(bd);
 
 	ClearTextures(bd);
+	ListDeleteAll(&textures);
 }
 
 void preDrawPiece0(renderdata* prd)
