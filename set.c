@@ -2489,6 +2489,11 @@ extern void CommandSetTurn( char *sz ) {
     fNextTurn = FALSE;
     ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;
 
+#if USE_TIMECONTROL
+    CheckGameClock(&ms, 0);
+    HitGameClock(&ms);
+#endif
+
     UpdateSetting( &ms.fTurn );
 
 #if USE_GUI

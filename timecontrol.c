@@ -1,6 +1,7 @@
 /*
  * timecontrol.c
  *
+ * by Stein Kulseth <steink@opera.com>, 2003
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -18,7 +19,6 @@
  * $Id$
  */
 
-
 #include "config.h"
 
 #include <assert.h>
@@ -32,7 +32,11 @@
 #include "i18n.h"
 #include "sound.h"
 #include "timecontrol.h"
+
+#if USE_GTK
 #include "gtkgame.h"
+#endif
+
 
 #if WIN32
 #include "ctype.h"
@@ -167,6 +171,9 @@ static timecontrol *findOrDeleteTimeControl( char *sz, int del )
 
     if (del)
     {
+#if USE_GTK
+	GTKRemoveTimeControl((*ppRefNode)->ptc->szName);
+#endif
     tcnode *next=(*ppRefNode)->next;
     free((*ppRefNode)->ptc->szName);
     free((*ppRefNode)->ptc->szNext);
@@ -206,11 +213,18 @@ static void setNameModified( )
 static void nameTimeControl( char *sz )
 {
     tcnode *pNode;
+
+    if (!sz || !*sz) return;
+
     timecontrol *ptc = findTimeControl( sz );
     if (!ptc || strcmp(ptc->szName, sz))
     {
 	ptc = calloc(sizeof(timecontrol), 1);
     }
+#if USE_GTK
+    else
+	GTKRemoveTimeControl(ptc->szName);
+#endif
     if (ptc && (pNode = calloc(sizeof(tcnode), 1)))
     {
 	free (tc.szName);
@@ -219,6 +233,10 @@ static void nameTimeControl( char *sz )
 	pNode->next = tcHead;
 	pNode->ptc = ptc;
 	tcHead = pNode;
+#if USE_GTK
+	if ('.' != ptc->szName[0])
+	    GTKAddTimeControl(ptc->szName);
+#endif
     }
 }
 
@@ -423,6 +441,9 @@ extern void CommandSetTimeControl( char *sz ) {
 	{
 	    outputf(_("Time control set to %s\n"), ptc->szName);
 	    tcCopy( &tc, ptc);
+#if USE_GTK
+	    GTKCheckTimeControl(ptc->szName);
+#endif
 	}
 	else
 	{
@@ -437,6 +458,9 @@ extern void CommandSetTimeControl( char *sz ) {
    {
 	outputl(_(szTCOFF));
 	tc.timing = TC_NONE;
+#if USE_GTK
+	    GTKCheckTimeControl("Off");
+#endif
    }
     outputx();
 }
@@ -534,7 +558,9 @@ printf("HitGameClock: state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n",
 	pms->gc.pc[0].tvStamp.tv_sec %1000, pms->gc.pc[0].tvStamp.tv_usec / 1000, 
 	pms->gc.pc[1].tvStamp.tv_sec %1000, pms->gc.pc[1].tvStamp.tv_usec / 1000); 
 #endif
-	
+
+    pms->gc.fPlayer = pms->fTurn;
+
     if ( pms->gs != GAME_PLAYING ||  pms->fTurn < 0 )
     {
 	if timercmp(&pms->gc.pc[0].tvStamp, &pms->gc.pc[1].tvStamp, >)
@@ -543,22 +569,11 @@ printf("HitGameClock: state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n",
 	    pms->gc.pc[0].tvStamp = pms->gc.pc[1].tvStamp;
 	return;
     }
-/*
-    if (pms->gc.fPaused)
-    {
-	struct timeval pause;
-	pms->gc.fPaused = 0;
-	timersub(&pms->gc.pc[1].tvStamp, &pms->gc.pc[0].tvStamp, &pause);
-	timeradd(&pms->gc.pausedtime, &pause, &pms->gc.pausedtime);
-	pms->gc.pc[0].tvStamp = pms->gc.pc[1].tvStamp;
-    }
-    else
-*/
-    {
-	if (timercmp(&pms->gc.pc[!pms->fTurn].tvStamp, &pms->gc.pc[pms->fTurn].tvStamp, > ))
-		return; /* rehit for same player */
-        pms->gc.pc[!pms->fTurn].tvStamp = pms->gc.pc[pms->fTurn].tvStamp ;
-    }
+
+    if (timercmp(&pms->gc.pc[!pms->fTurn].tvStamp, &pms->gc.pc[pms->fTurn].tvStamp, > ))
+	return; /* rehit for same player */
+
+    pms->gc.pc[!pms->fTurn].tvStamp = pms->gc.pc[pms->fTurn].tvStamp ;
 
     switch ( pms->gc.pc[pms->fTurn].tc.timing ) {
     case TC_FISCHER:
@@ -609,17 +624,7 @@ printf("CheckGameClock (%d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n
 	pms->gc.pc[1].tvStamp.tv_sec %1000, pms->gc.pc[1].tvStamp.tv_usec / 1000); 
 #endif
 
-/*
-    if ( pms->gc.fPaused )
-    {
-	pms->gc.pc[1].tvStamp = *tvp;
-	if (! timerisset(&pms->gc.pc[0].tvStamp) )
-	    pms->gc.pc[0].tvStamp = *tvp;
-	return 0;
-    }
-*/
-
-    if ( pms->gs != GAME_PLAYING  || pms->fTurn < 0 )
+    if ( pms->gs != GAME_PLAYING  || pms->gc.fPlayer < 0 )
     {
 	 pms->gc.pc[0].tvStamp = pms->gc.pc[1].tvStamp = *tvp;
 	 return 0;
@@ -628,21 +633,18 @@ printf("CheckGameClock (%d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n
     {
 	struct timeval used;
 
-	/* Moverecords are not added for offering
-	 * and accepting/rejecting resignation, so
-	 * we don't get HitGameClock calls for these.
-	 * Thus when resignation is offered, the
-	 * ms.fTurn is out of sync with whose clock
-	 * is running */
-
 	playerclock
-	    *pgcPlayer=&pms->gc.pc[pms->fResigned ? 
-		! pms->fTurn : pms->fTurn],
-	    *pgcOpp=&pms->gc.pc[pms->fResigned ? 
-		pms->fTurn : ! pms->fTurn];
+	    *pgcPlayer=&pms->gc.pc[pms->gc.fPlayer],
+	    *pgcOpp=&pms->gc.pc[!pms->gc.fPlayer];
 
-	if  (TC_NONE == pgcPlayer->tc.timing ) 
+	if  (TC_NONE == pgcPlayer->tc.timing)
 	    return 0;
+	if (TC_UNKNOWN == pgcPlayer->tc.timing) 
+	{
+	    pms->gc.pc[0].tvTimeleft = pms->tvTimeleft[0];
+	    pms->gc.pc[1].tvTimeleft = pms->tvTimeleft[1];
+	    return 0;
+	}
 
 	/* Player's timestamp is reference for last hit.
 	 * Opp's timestamp is last update */
@@ -721,9 +723,9 @@ extern int UpdateClockNotify(event *pev, void *p)
 extern int UpdateClockNotify(void *p)
 #endif
 {
- /* I think, ie. not last move */
+ /* not last move - don't update */
     if (!plLastMove || plLastMove->plNext != plGame)
-	return 0;
+	return 1;
 
     if ( GAME_PLAYING != ms.gs ) return 0;
 
@@ -782,7 +784,17 @@ extern void SaveTimeControlSettings( FILE *pf )
 		pNode->ptc->szName);
 	pNode = pNode->next;
     }
+
+    if (TC_NONE == tc.timing)
+	fprintf(pf, "set tc off\n");
+    else
+	fprintf(pf, "set tc %s\n", tc.szName);
+	
 }
 
+extern void SetDefaultTC ()
+{
+	;
+}
 #endif
 

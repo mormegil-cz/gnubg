@@ -114,7 +114,7 @@ CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest );
 #if USE_GTK
 #include "gtkgame.h"
 
-static int anLastMove[ 8 ], fLastMove, fLastPlayer;
+int anLastMove[ 8 ], fLastMove, fLastPlayer;
 #endif
 
 static void
@@ -414,8 +414,6 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 #if USE_TIMECONTROL
 	pms->tvTimeleft[0] = pmr->a.tl[0];
 	pms->tvTimeleft[1] = pmr->a.tl[1];
-        /*  HitGameClock(pms); */
-
 #if USE_GTK
     if( fX )
 	GTKUpdateClock();
@@ -645,6 +643,7 @@ extern void AddMoveRecord( void *pv ) {
     SetMoveRecord( pmr );
 }
 
+
 extern void SetMoveRecord( void *pv ) {
 
 #if USE_GTK
@@ -780,7 +779,7 @@ static int NewGame( void ) {
 #endif
     AddMoveRecord( pmr );
 #if USE_TIMECONTROL
-    HitGameClock ( &ms );
+    HitGameClock ( &ms ); 
 #endif 
     
 
@@ -1310,7 +1309,7 @@ extern int ComputerTurn( void ) {
 #endif
       AddMoveRecord( pmn );      
 #if USE_TIMECONTROL
-    HitGameClock ( &ms );
+    if (!fLastMove) HitGameClock ( &ms ); 
 #endif 
       
       return 0;
@@ -1372,7 +1371,7 @@ extern int ComputerTurn( void ) {
 #endif
     AddMoveRecord( pmn );
 #if USE_TIMECONTROL
-    HitGameClock ( &ms );
+    if (!fLastMove) HitGameClock ( &ms ); 
 #endif 
     return 0;
 
@@ -1542,7 +1541,7 @@ extern int ComputerTurn( void ) {
 #endif
 	  AddMoveRecord( pmn );
 #if USE_TIMECONTROL
-    HitGameClock ( &ms );
+    if (!fLastMove) HitGameClock ( &ms ); 
 #endif 
 	  return 0;
       }
@@ -1841,6 +1840,7 @@ extern int NextTurn( int fPlayNext ) {
     if( fDisplay || ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
 
+    HitGameClock ( &ms );
     /* We have reached a safe point to check for interrupts.  Until now,
        the board could have been in an inconsistent state. */
     if( fAction )
@@ -2271,6 +2271,10 @@ extern void CommandDecline( char *sz ) {
     ms.fResignationDeclined = ms.fResigned;
     ms.fResigned = FALSE;
     ms.fTurn = !ms.fTurn;
+#if USE_TIMECONTROL
+    CheckGameClock(&ms,0);
+    HitGameClock(&ms);
+#endif
     
     TurnDone();
 }
@@ -3886,6 +3890,10 @@ extern void CommandResign( char *sz ) {
 		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 
     ms.fTurn = !ms.fTurn;
+#if USE_TIMECONTROL
+    CheckGameClock(&ms,0);
+    HitGameClock(&ms);
+#endif
 
     playSound ( SOUND_RESIGN );
     
@@ -4031,11 +4039,11 @@ CommandRoll( char *sz ) {
     pmr->sd.tl[1] = ms.gc.pc[1].tvTimeleft;
 #endif
   AddMoveRecord( pmr );
-
-  InvalidateStoredMoves();
 #if USE_TIMECONTROL
     HitGameClock ( &ms );
 #endif 
+
+  InvalidateStoredMoves();
   
   DiceRolled();      
 

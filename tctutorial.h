@@ -1,3 +1,23 @@
+/*
+ * tctutorial.h
+ *
+ * by Stein Kulseth <steink@opera.com>, 2003
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ */
 /* Time control tutorial */
 
 char *aszTcTutorial [] = {
@@ -11,12 +31,13 @@ char *aszTcTutorial [] = {
 "  set tc <name>",
 "where <name> is the name of the wanted time control setting, and you",
 "are ready to rock.",
+"Or if using the graphical user interface you find the defined",
+"Time Controls under 'Settings/Time Controls'",  
 "",
 "With the graphical user interface you should see the clock ticking ",
 "once you start play - with the terminal interface the clock will be",
-"updated in each new board, but also with each new prompt. ",
-"And you can include '\t' in your prompt to have the clock show ",
-"in your prompt.",
+"updated in each new board, and you can include '\\t' in your prompt",
+"to have the clock show in your prompt.",
 "",
 "You can use:",
 "  show tclist",
@@ -54,8 +75,9 @@ char *aszTcTutorial [] = {
 "",
 "3. Defining time controls",
 "",
-"The easy way is to just copy the examples below into your .gnubgrc",
-"file, and then you will have a few time control settings to play with.",
+"The easy way is to just open the example file 'tcexamples.txt' with the",
+"File/Open/Commands command, and then you will immediately have a few", 
+"sensible time control settings to play with.",
 "",
 "But you can also create or modify time control settings yourself with",
 "the commands:",
@@ -99,7 +121,7 @@ char *aszTcTutorial [] = {
 "",
 "Naming time controls allow for easy reference, for storage in your",
 ".gnuautorc file as well, and it is needed in order to implement",
-"clock straqtegies that have primary and secondary (and possibly tertiary and",
+"clock strategies that have primary and secondary (and possibly tertiary and",
 "quarternary ...) time controls. It is also needed to implement time",
 "controls that penalize different amounts of points, and add different",
 "amounts of time.",
@@ -116,7 +138,7 @@ char *aszTcTutorial [] = {
 "Secondary timecontrols can be given names starting with '.', then they",
 "won't show up in the tclist unless you specify 'set tclist all'",
 ""
-"4. Example commands",
+"4. Example commands (tcexamples.txt)",
 "",
 "# Chicago Bar Point rules",
 "set tcpenalty 1",
@@ -165,34 +187,24 @@ char *aszTcTutorial [] = {
 "set tcnext .m2 .m2",
 "set tcname Michigan",
 "",
+"# Gammonitis club Bronstein timing",
+"set tctype bronstein",
+"set tcpenalty lose",
+"set tctime 0",
+"set tcpointtime 1:00",
+"set tcmultiplier 1.000000",
+"set tcmovetime 12",
+"set tcnext ",
+"set tcname Gammonitis",
+"",
 "# Example hourglass timing",
 "set tcpenalty 1",
 "set tctype hourglass",
-"set tctime 15 ",
+"set tctime 2:00 ",
 "set tcpointtime 0",
 "set tcmultiplier 0.000000",
 "set tcmovetime 0",
 "set tcnext Hourglass Hourglass",
 "set tcname Hourglass",
 "",
-"# Example Fischer timing",
-"set tcpenalty lose",
-"set tctype fischer",
-"set tctime 300",
-"set tcpointtime 0",
-"set tcmultiplier 1.000000",
-"set tcmovetime 12",
-"set tcnext ",
-"set tcname Fischer-5m-12",
-"set tcpenalty lose",
-"",
-"# Example Bronstein timing",
-"set tctype bronstein",
-"set tctime 300",
-"set tcpointtime 0",
-"set tcmultiplier 1.000000",
-"set tcmovetime 12",
-"set tcnext ",
-"set tcname Bronstein-5m-12",
-"set tcpenalty 2",
 0 };

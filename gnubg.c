@@ -7610,6 +7610,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( !fNoRC )
 	LoadRCFiles();
 
+#if USE_TIMECONTROL
+    SetDefaultTC();
+#endif
 #if USE_BOARD3D
 	if (fX)
 		Default3dSettings();
@@ -7888,6 +7891,14 @@ swapGame ( list *plGame ) {
       
     pmr = pl->p;
 
+#if USE_TIMECONTROL
+    {
+	struct timeval tv;
+	tv = pmr->a.tl[0];
+	pmr->a.tl[0] = pmr->a.tl[1];
+	pmr->a.tl[1] = tv;
+    }
+#endif
     switch ( pmr->mt ) {
     case MOVE_GAMEINFO:
 
@@ -7992,6 +8003,24 @@ extern void CommandSwapPlayers ( char *sz ) {
   n = ms.anScore[ 0 ];
   ms.anScore[ 1 ] = ms.anScore[ 0 ];
   ms.anScore[ 0 ] = n;
+#if USE_TIMECONTROL
+  {
+  playerclock pc;
+  struct timeval tv;
+  
+    pc = ms.gc.pc[0];
+    ms.gc.pc[0] = ms.gc.pc[1];
+    ms.gc.pc[1] = pc;
+    if (ms.gc.fPlayer > -1)
+	ms.gc.fPlayer = ! ms.gc.fPlayer;
+    tv = ms.tvTimeleft[0];
+    ms.tvTimeleft[0] = ms.tvTimeleft[1];
+    ms.tvTimeleft[1] = tv;
+    n = ms.nTimeouts[0];
+    ms.nTimeouts[0] = ms.nTimeouts[1];
+    ms.nTimeouts[1] = n;
+  }
+#endif
   SwapSides ( ms.anBoard );
 
 

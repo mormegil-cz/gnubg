@@ -1,0 +1,68 @@
+
+# Chicago Bar Point rules
+set tcpenalty 1
+set tctype plain 
+set tctime 300
+set tcpointtime 0
+set tcmultiplier 1.000000
+set tcmovetime 0
+set tcnext .c1
+set tcname .c1
+
+set tcpenalty 2
+set tcnext .c1
+set tcname .c2
+
+set tcpointtime 180
+set tcnext .c1 .c2
+set tcname Chicago
+
+#Nordic Wide Open Rules
+set tcpenalty 2
+set tctype plain 
+set tctime 600
+set tcpointtime 150
+set tcmultiplier 1.000000
+set tcmovetime 0
+set tcnext .c1 .c2
+set tcname Nordic
+
+#Michigan rules
+set tcpenalty lose
+set tctype bronstein
+set tctime 180
+set tcpointtime 0
+set tcmultiplier 1.000000
+set tcmovetime 12
+set tcnext 
+set tcname .m2
+
+set tcpenalty 0
+set tctype plain 
+set tctime 600
+set tcpointtime 150
+set tcmovetime 0
+set tcmultiplier 1.000000
+set tcnext .m2 .m2
+set tcname Michigan
+
+# Gammonitis club Bronstein timing
+set tctype bronstein
+set tcpenalty lose
+set tctime 0
+set tcpointtime 1:00
+set tcmultiplier 1.000000
+set tcmovetime 12
+set tcnext 
+set tcname Gammonitis
+
+# Example hourglass timing
+set tcpenalty 1
+set tctype hourglass
+set tctime 2:00 
+set tcpointtime 0
+set tcmultiplier 0.000000
+set tcmovetime 0
+set tcnext Hourglass Hourglass
+set tcname Hourglass
+

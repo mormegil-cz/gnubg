@@ -212,6 +212,10 @@ typedef enum _gnubgcommand {
     CMD_TRAIN_DATABASE,
     CMD_TRAIN_TD,
     CMD_XCOPY,
+#if USE_TIMECONTROL
+    CMD_SET_TC_OFF,
+    CMD_SET_TC,
+#endif
     NUM_CMDS
 } gnubgcommand;
    
@@ -294,6 +298,10 @@ static char *aszCommands[ NUM_CMDS ] = {
     "train database",
     "train td",
     "xcopy"
+#if USE_TIMECONTROL
+    , "set tc off"
+    , "set tc"
+#endif
 };
 enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANNOTATION, TOGGLE_MESSAGE };
 
@@ -359,6 +367,9 @@ static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
 static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 static void TogglePanel ( gpointer *p, guint n, GtkWidget *pw );
 static void FullScreenMode( gpointer *p, guint n, GtkWidget *pw );
+#if USE_TIMECONTROL
+static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw );
+#endif
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 GtkWidget *pwGrab;
@@ -744,6 +755,13 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
 	UserCommand( sz );
 	return;	
 	
+#if USE_TIMECONTROL
+    case CMD_SET_TC:
+	sprintf( sz, "%s %s", aszCommands[ iCommand ], p);
+	UserCommand( sz );
+	break;
+#endif
+
     default:
 	UserCommand( aszCommands[ iCommand ] );
     }
@@ -2438,6 +2456,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     GtkWidget *pwVboxRight;
 #endif
     static GtkItemFactoryEntry aife[] = {
+	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_New"), "<control>N", NewDialog, 0, NULL },
 #if 0
@@ -2692,6 +2711,12 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL },
 	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL },
 	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL },
+#if USE_TIMECONTROL
+	{ N_("/_Settings/_Time Control"), NULL, NULL, 0, "<Branch>"},
+	{ N_("/_Settings/Time Control/_Define..."), NULL, DefineTimeControl, 0, NULL },
+	{ N_("/_Settings/Time Control/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Settings/Time Control/Off"), NULL, Command, CMD_SET_TC_OFF, "<RadioItem>"},
+#endif
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
 	{ N_("/_Settings/Paths..."), NULL, Command, CMD_SHOW_PATH, NULL },
@@ -2825,7 +2850,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 #else
     gtk_item_factory_parse_rc( sz );
 #endif
-    
+   
 #if ENABLE_TRAIN_MENU
 #if !HAVE_LIBGDBM
     gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
@@ -2883,6 +2908,8 @@ extern int InitGTK( int *argc, char ***argv ) {
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 	   gtk_item_factory_get_widget( pif, "/Windows/Game record")), TRUE);
 #endif
+
+
    /* Status bar */
 					
    gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
@@ -4106,6 +4133,7 @@ static GtkWidget *NewWidget( newwidget *pnw){
   return pwVbox;
   
 } 
+
 static void NewOK( GtkWidget *pw, newwidget *pnw ) {
   
   int G = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwG));
@@ -9535,3 +9563,171 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 #endif
 }
 
+#if USE_TIMECONTROL
+
+extern void GTKCheckTimeControl( char *szName) {
+   char path[128];
+   sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
+   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+	   gtk_item_factory_get_widget( pif, path)), TRUE);
+}
+
+extern void GTKAddTimeControl( char *szName) {
+    char path[128];
+    GtkItemFactoryEntry newEntry  = { NULL, NULL, Command, CMD_SET_TC, "/Settings/Time Control/Off"};
+    sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
+    newEntry.path = path;
+    gtk_item_factory_create_items(pif, 1, &newEntry, szName); 
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+	   gtk_item_factory_get_widget( pif, path)), TRUE);
+} 
+
+extern void GTKRemoveTimeControl( char *szName) {
+    char path[128];
+    sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
+    gtk_item_factory_delete_item(pif, path);
+} 
+
+typedef struct _definetcwidget {
+	GtkWidget *pwName, *pwType, *pwTime, *pwPoint,
+		*pwMove, *pwMult,  *pwPenalty,
+		*pwNext, *pwNextB ;
+} definetcwidget;
+
+static GtkWidget *DefineTCWidget( definetcwidget *pdtcw) 
+{
+  int i, j = 1 ;
+  GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwEntry;
+  GtkWidget *pwSpin, *pwFrame, *pwVbox2; 
+  GtkWidget *pwMenu, *pwOptionMenu;
+
+  pwVbox = gtk_vbox_new(FALSE, 0);
+  gtk_container_add( GTK_CONTAINER ( pwVbox ),
+	pwFrame = gtk_frame_new(_("Not implemented - work in progress") ));
+  gtk_container_add( GTK_CONTAINER ( pwFrame),
+  	pwVbox2 = gtk_vbox_new(FALSE, 0));
+  gtk_container_set_border_width( GTK_CONTAINER( pwVbox2 ), 8 );
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Time control name (tcname):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwName= gtk_entry_new() );
+
+  pwMenu = gtk_menu_new();
+  
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("None")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Plain")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Bronstein")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Fischer")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Hourglass")));
+  gtk_widget_show_all(pwMenu);
+  pdtcw->pwType = gtk_option_menu_new();
+  gtk_option_menu_set_menu( GTK_OPTION_MENU( pdtcw->pwType ), pwMenu );
+
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Time control type (tctype):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ), pdtcw->pwType );
+
+  pwMenu = gtk_menu_new();
+  
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Lose")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("1 point")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("2 points")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("3 points")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("4 points")));
+  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("5 points")));
+  gtk_widget_show_all(pwMenu);
+  pdtcw->pwPenalty = gtk_option_menu_new();
+  gtk_option_menu_set_menu( GTK_OPTION_MENU( pdtcw->pwPenalty ), pwMenu );
+
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Penalty type (tctype):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ), pdtcw->pwPenalty );
+
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Time to add (tctime):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwTime = gtk_entry_new() );
+
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Time to add (tctime):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwTime = gtk_entry_new() );
+
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Time to add / point (tcpoint):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwPoint = gtk_entry_new() );
+
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Time to add / move (tcmove):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwMove = gtk_entry_new() );
+  
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Scale old time by (tcmult):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwMult = gtk_entry_new() );
+  
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Next time control (tcnext):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwNext = gtk_entry_new() );
+  
+  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
+  	pwHbox = gtk_hbox_new(FALSE, 0));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pwLabel = gtk_label_new(_("Opponent's next time control (tcnext):")));
+  gtk_container_add( GTK_CONTAINER ( pwHbox ),
+	pdtcw->pwNextB = gtk_entry_new() );
+  
+  return pwVbox;
+}
+
+static void DefineTCOK( GtkWidget *pw, definetcwidget *pdtcw ) {
+printf("Name is: %s\n", gtk_entry_get_text(GTK_ENTRY(pdtcw->pwName) ) );
+     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw ) {
+    
+  GtkWidget *pwDialog, *pwPage;
+  definetcwidget dtcw;
+
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - Define Time Control"),
+                           DT_QUESTION, GTK_SIGNAL_FUNC( DefineTCOK ), &dtcw );
+
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                        pwPage = DefineTCWidget(&dtcw));
+
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+  gtk_widget_show_all( pwDialog );
+
+  GTKDisallowStdin();
+  gtk_main();
+  GTKAllowStdin();
+}
+
+
+#endif
