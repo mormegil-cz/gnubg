@@ -262,11 +262,20 @@ if test "$with_sound" != "no"; then
   AC_DEFINE(USE_SOUND,1,Define if you want to use sounds with GNU Backgammon)
 
   AM_PATH_ESD(,AC_DEFINE(HAVE_ESD,1,[Define if you have the ESD sound system]))
+  AM_PATH_ARTSC(,AC_DEFINE(HAVE_ARTSC,1,[Define if you have ArtsC sound system]))
 
-  dnl AC_ARG_ENABLE(nas,     [  --enable-nas            Enable NAS (Network Audio System) support],,enable_nas=no)
-  dnl AC_ARG_ENABLE(artsc,   [  --disable-artsc         Turn off ArtsC (default=auto)],,enable_artsc=yes)
+  AC_ARG_ENABLE(nas,     [  --enable-nas            Enable NAS (Network Audio System) support],,enable_nas=no)
+
+  if test "$enable_nas" != "no"; then
+     AC_DEFINE(HAVE_NAS,1,Define if you have the NAS sound system)
+     NAS_LIBS="-laudio -lXt"
+     NAS_CFLAGS=
+  fi
 
 fi
+
+AC_SUBST(NAS_LIBS)
+AC_SUBST(NAS_CFLAGS)
 
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
@@ -285,4 +294,4 @@ dnl check for TRUE/FALSE
 AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
 AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
-AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile )
+AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile )

@@ -1,17 +1,19 @@
 if USE_EXT
-SUBDIRS = intl lib doc ext met po
+SUBDIRS = intl lib doc ext met po m4
 else
-SUBDIRS = intl lib doc met po
+SUBDIRS = intl lib doc met po m4
 endif
 
 localedir = $(datadir)/locale
 
+ACLOCAL_AMFLAGS = -I m4
+
 ## sounds
 
 if USE_SOUND
-SOUND_INCS = @ESD_CFLAGS@
+SOUND_INCS = @ESD_CFLAGS@ @NAS_CFLAGS@ @ARTSC_CFLAGS@
 SOUND_SOURCES = sound.c
-SOUND_LIBS = @ESD_LIBS@
+SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@
 else
 SOUND_INCS = 
 SOUND_SOURCES =

@@ -41,11 +41,11 @@
 #include <esd.h>
 #endif
 
-#ifdef ARTSC_SOUND
+#ifdef HAVE_ARTSC
 #include <artsc.h>
 #endif
 
-#ifdef NAS_SOUND
+#ifdef HAVE_NAS
 #include <audio/audiolib.h>
 #endif
 
@@ -156,7 +156,7 @@ static int can_play_audio() {
 }
 
 
-#ifdef ARTSC_SOUND
+#ifdef HAVE_ARTSC
 
 static int play_artsc(unsigned char *data, int size)
 {
@@ -242,9 +242,9 @@ static int artsc_play_file(const char *file)
   return result;
 }
 
-#endif /* ARTSC_SOUND */
+#endif /* HAVE_ARTSC */
 
-#ifdef NAS_SOUND
+#ifdef HAVE_NAS
 
 char nas_server[] = "localhost";
 AuServer *nas_serv = NULL;
@@ -402,7 +402,7 @@ play_file(const char *filename) {
 
     case SOUND_OPTION_ARTSC:
 
-#ifdef ARTSC_SOUND
+#ifdef HAVE_ARTSC
 
       if (artsc_play_file(filename))
         _exit(0);
@@ -412,7 +412,7 @@ play_file(const char *filename) {
 
     case SOUND_OPTION_NAS:
 
-#ifdef NAS_SOUND
+#ifdef HAVE_NAS
     else if (sound_options & OPT_SOUND_NAS) {
       if (play_nas_file(filename))
         _exit(0);

@@ -66,6 +66,9 @@ EXEEXT = @EXEEXT@
 OBJEXT = @OBJEXT@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 AMTAR = @AMTAR@
+ARTSC_CFLAGS = @ARTSC_CFLAGS@
+ARTSC_CONFIG = @ARTSC_CONFIG@
+ARTSC_LIBS = @ARTSC_LIBS@
 AWK = @AWK@
 BISON = @BISON@
 BUILD_INCLUDED_LIBINTL = @BUILD_INCLUDED_LIBINTL@
@@ -104,6 +107,8 @@ LTLIB = @LTLIB@
 LTLIBICONV = @LTLIBICONV@
 LTLIBINTL = @LTLIBINTL@
 MKINSTALLDIRS = @MKINSTALLDIRS@
+NAS_CFLAGS = @NAS_CFLAGS@
+NAS_LIBS = @NAS_LIBS@
 PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
 PNGTOPNM = @PNGTOPNM@
@@ -122,16 +127,18 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po
-@USE_EXT_FALSE@SUBDIRS = intl lib doc met po
+@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4
+@USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4
 
 localedir = $(datadir)/locale
 
-@USE_SOUND_TRUE@SOUND_INCS = @ESD_CFLAGS@
+ACLOCAL_AMFLAGS = -I m4
+
+@USE_SOUND_TRUE@SOUND_INCS = @ESD_CFLAGS@ @NAS_CFLAGS@ @ARTSC_CFLAGS@
 @USE_SOUND_FALSE@SOUND_INCS = 
 @USE_SOUND_TRUE@SOUND_SOURCES = sound.c
 @USE_SOUND_FALSE@SOUND_SOURCES = 
-@USE_SOUND_TRUE@SOUND_LIBS = @ESD_LIBS@
+@USE_SOUND_TRUE@SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@
 @USE_SOUND_FALSE@SOUND_LIBS = 
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
@@ -304,7 +311,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	strdup.c
-DIST_SUBDIRS = intl lib doc ext met po
+DIST_SUBDIRS = intl lib doc ext met po m4
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 
 all: config.h
@@ -326,7 +333,7 @@ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 $(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.in acinclude.m4
+$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/esd.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1

@@ -839,6 +839,8 @@ Optional Features:
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --disable-gtktest       Do not try to compile and run a test GTK program
   --disable-esdtest       Do not try to compile and run a test ESD program
+  --disable-artsc-test      Do not compile and run a test ArtsC program.
+  --enable-nas            Enable NAS (Network Audio System) support
   --disable-nls           do not use Native Language Support
 
 Optional Packages:
@@ -9391,8 +9393,277 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   rm -f conf.esdtest
 
 
+# Check whether --enable-artsc-test or --disable-artsc-test was given.
+if test "${enable_artsc_test+set}" = set; then
+  enableval="$enable_artsc_test"
+  artsc_test="yes"
+else
+  artsc_test="no"
+fi;
+
+# Extract the first word of "artsc-config", so it can be a program name with args.
+set dummy artsc-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_ARTSC_CONFIG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ARTSC_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ARTSC_CONFIG="$ARTSC_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ARTSC_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_path_ARTSC_CONFIG" && ac_cv_path_ARTSC_CONFIG="no"
+  ;;
+esac
+fi
+ARTSC_CONFIG=$ac_cv_path_ARTSC_CONFIG
+
+if test -n "$ARTSC_CONFIG"; then
+  echo "$as_me:$LINENO: result: $ARTSC_CONFIG" >&5
+echo "${ECHO_T}$ARTSC_CONFIG" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+min_artsc_version=0.9.5
+echo "$as_me:$LINENO: checking for ArtsC - version >= $min_artsc_version" >&5
+echo $ECHO_N "checking for ArtsC - version >= $min_artsc_version... $ECHO_C" >&6
+
+no_artsc=""
+if test "x$ARTSC_CONFIG" != "xno"; then
+  ARTSC_CFLAGS=`$ARTSC_CONFIG --cflags`
+  ARTSC_LIBS=`$ARTSC_CONFIG --libs`
+
+  artsc_major_version=`$ARTSC_CONFIG $artsc_args --version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+  artsc_minor_version=`$ARTSC_CONFIG $artsc_args --version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+  artsc_micro_version=`$ARTSC_CONFIG $artsc_config_args --version | \
+         sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+
+  # Test if a simple ArtsC program can be created.
+  if test "x$artsc_test" = "xyes"; then
+    ac_save_CFLAGS="$CFLAGS"
+    ac_save_LIBS="$LIBS"
+    CFLAGS="$CFLAGS $ARTSC_CFLAGS"
+    LIBS="$LIBS $ARTSC_LIBS"
+
+    rm -f conf.artsc
+    if test "$cross_compiling" = yes; then
+  echo $ac_n "cross compiling; assumed OK... $ac_c"
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <artsc.h>
+
+char*
+my_strdup(char *str)
+{
+  char *new_str;
+
+  if (str) {
+    new_str = malloc((strlen(str) + 1) * sizeof(char));
+    strcpy(new_str, str);
+  } else {
+    new_str = NULL;
+  }
+
+  return new_str;
+}
+
+int main()
+{
+  int major, minor, micro;
+  char *tmp_version;
+
+  system ("touch conf.artsc");
+
+  /* HP/UX 9 writes to sscanf strings */
+  tmp_version = my_strdup("$min_artsc_version");
+  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
+     printf("%s, bad version string\n", "$min_artsc_version");
+     exit(1);
+  }
+
+  if (($artsc_major_version > major) ||
+     (($artsc_major_version == major) && ($artsc_minor_version > minor)) ||
+     (($artsc_major_version == major) && ($artsc_minor_version == minor)
+                                    && ($artsc_micro_version >= micro))) {
+    return 0;
+  } else {
+    printf("\n*** 'artsc-config --version' returned %d.%d.%d, but the minimum version\n", $artsc_major_version, $artsc_minor_version, $artsc_micro_version);
+    printf("*** of ARTSC required is %d.%d.%d. If artsc-config is correct, then it is\n", major, minor, micro);
+    printf("*** best to upgrade to the required version.\n");
+    printf("*** If artsc-config was wrong, set the environment variable ARTSC_CONFIG\n");
+    printf("*** to point to the correct copy of artsc-config, and remove the file\n");
+    printf("*** config.cache before re-running configure\n");
+    return 1;
+  }
+}
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  :
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+no_artsc=yes
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+   CFLAGS="$ac_save_CFLAGS"
+   LIBS="$ac_save_LIBS"
+  fi
+else
+  no_artsc=yes
+fi
+
+if test "x$no_artsc" != "xyes"; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_ARTSC 1
+_ACEOF
+
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+
+  if test "x$ARTSC_CONFIG" = "xno" ; then
+    echo "*** The artsc-config script installed by ArtsC could not be found"
+    echo "*** If ArtsC was installed in PREFIX, make sure PREFIX/bin is in"
+    echo "*** your path, or set the ARTSC_CONFIG environment variable to the"
+    echo "*** full path to artsc-config."
+  else
+    if test -f conf.artsc ; then
+      :
+    else
+      echo "*** Could not run ArtsC test program, checking why..."
+      CFLAGS="$CFLAGS $ARTSC_CFLAGS"
+      LIBS="$LIBS $ARTSC_LIBS"
+      cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <artsc.h>
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+   echo "*** The test program compiled, but did not run. This usually means"
+  echo "*** that the run-time linker is not finding ArtsC or finding the wrong"
+  echo "*** version of ArtsC. If it is not finding ArtsC, you'll need to set your"
+  echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
+  echo "*** to the installed location  Also, make sure you have run ldconfig if that"
+  echo "*** is required on your system"
+  echo "***"
+  echo "*** If you have an old version installed, it is best to remove it, although"
+  echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ echo "*** The test program failed to compile or link. See the file config.log for the"
+  echo "*** exact error that occured. This usually means ArtsC was incorrectly installed"
+  echo "*** or that you have moved ArtsC since it was installed. In the latter case, you"
+  echo "*** may want to edit the artsc-config script: $ARTSC_CONFIG"
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+      CFLAGS="$ac_save_CFLAGS"
+      LIBS="$ac_save_LIBS"
+    fi
+  fi
+  ARTSC_CFLAGS=""
+  ARTSC_LIBS=""
+  :
+fi
+
+
+
+rm -f conf.artsc
+
+
+
+  # Check whether --enable-nas or --disable-nas was given.
+if test "${enable_nas+set}" = set; then
+  enableval="$enable_nas"
+
+else
+  enable_nas=no
+fi;
+
+  if test "$enable_nas" != "no"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_NAS 1
+_ACEOF
+
+     NAS_LIBS="-laudio -lXt"
+     NAS_CFLAGS=
+  fi
 
 fi
+
+
+
 
 
 	ac_expanded=`(
@@ -11788,7 +12059,7 @@ _ACEOF
 fi
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -12334,6 +12605,7 @@ do
   "po/Makefile.in" ) CONFIG_FILES="$CONFIG_FILES po/Makefile.in" ;;
   "po/Makefile" ) CONFIG_FILES="$CONFIG_FILES po/Makefile" ;;
   "intl/Makefile" ) CONFIG_FILES="$CONFIG_FILES intl/Makefile" ;;
+  "m4/Makefile" ) CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "default-1" ) CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
@@ -12490,6 +12762,11 @@ s,@USE_SOUND_FALSE@,$USE_SOUND_FALSE,;t t
 s,@ESD_CONFIG@,$ESD_CONFIG,;t t
 s,@ESD_CFLAGS@,$ESD_CFLAGS,;t t
 s,@ESD_LIBS@,$ESD_LIBS,;t t
+s,@ARTSC_CONFIG@,$ARTSC_CONFIG,;t t
+s,@ARTSC_CFLAGS@,$ARTSC_CFLAGS,;t t
+s,@ARTSC_LIBS@,$ARTSC_LIBS,;t t
+s,@NAS_LIBS@,$NAS_LIBS,;t t
+s,@NAS_CFLAGS@,$NAS_CFLAGS,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@MSGFMT@,$MSGFMT,;t t
 s,@GMSGFMT@,$GMSGFMT,;t t
