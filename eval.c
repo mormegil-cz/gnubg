@@ -3983,8 +3983,12 @@ DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
                OutputPercent( aarOutput[ 0 ][ j ] ) );
     }
 
-    sprintf( strchr( szOutput, 0 ), "%-9s ",
-             OutputEquity( Utility( aarOutput[ 0 ], pci ), pci, TRUE ) );
+    if ( pci->nMatchTo )
+      sprintf( strchr( szOutput, 0 ), "%-9s ",
+               OutputEquity( Utility( aarOutput[ 0 ], pci ), pci, TRUE ) );
+    else
+      sprintf( strchr( szOutput, 0 ), "%-9s ",
+               OutputMoneyEquity( aarOutput[ 0 ], TRUE ) );
 
     sprintf( strchr( szOutput, 0 ), "%-9s ",
              OutputMWC( aarOutput[ 0 ][ 6 ], pci, TRUE ) );

@@ -1,3 +1,9 @@
+Thu Aug 21 18:15:11 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* evalc. (DumpPosition): ensure "eval" reports cubeless money
+	equituies rather than cubeless equity.
+	(reported by Chris D. Yep)
+
 Thu Aug 21 07:16:42 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gtkgame.c: Fix manually setting skill to 'good'.
