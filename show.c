@@ -748,7 +748,8 @@ extern void CommandShowVersion( char *sz ) {
     outputc( '\n' );
 
     outputl( "GNU Backgammon was written by Joseph Heled, Øystein Johansen, "
-	     "Jørn Thyssen\nand Gary Wong.\n\nSpecial thanks to:" );
+	     "David Montgomery,\nJørn Thyssen and Gary Wong.\n\n"
+	     "Special thanks to:" );
 
     cCol = 80;
 

@@ -17,7 +17,6 @@ char *aszCredits[] = {
     "Corrin Lakeland",
     "Tim Laursen",
     "Kevin Maguire",
-    "David Montgomery",
     "Dave Neary",
     "Zvezdan Petkovic",
     "Petri Pitkänen",

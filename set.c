@@ -1421,8 +1421,8 @@ static void SetMET( met metNew ) {
           outputf ("\n"
                    "Note that this match equity table only supports "
                    "matches of length %i and below.\n"
-                   "For scores above %i-away David Montgomery's "
-                   "extrapolation scheme is used.\n",
+                   "For scores above %i-away an extrapolation "
+		   "scheme is used.\n",
                    nMaxScore, nMaxScore );
 
         }

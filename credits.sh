@@ -8,7 +8,7 @@ credit=/tmp/cred.$$
 cat > AUTHORS <<'EOF'
                          GNU Backgammon was written by:
 
-  Joseph Heled         Øystein Johansen         Jørn Thyssen         Gary Wong
+ Joseph Heled   Øystein Johansen   David Montgomery   Jørn Thyssen   Gary Wong
 
 
 
@@ -28,7 +28,6 @@ Matija Kejzar
 Corrin Lakeland
 Tim Laursen
 Kevin Maguire
-David Montgomery
 Dave Neary
 Zvezdan Petkovic
 Petri Pitkänen
@@ -52,13 +51,12 @@ cat > $credit <<'EOF'
 Hans Berliner
 Chuck Bower
 Rick Janowski
-David Montgomery
 Brian Sheppard
 Gerry Tesauro
 Michael Zehr
 EOF
 
-column -c 72 < $credit | expand | sed 's/^/    /' >> AUTHORS
+column -c 72 < $credit | expand | sed 's/^/             /' >> AUTHORS
 
 cat >> AUTHORS <<'EOF'                            
 
