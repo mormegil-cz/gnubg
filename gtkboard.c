@@ -1815,6 +1815,8 @@ static void board_init( Board *board ) {
     
     bd->drag_point = bd->board_size = -1;
 
+    bd->all_moves = NULL;
+    
     gcval.function = GDK_AND;
     gcval.foreground.pixel = ~0L; /* AllPlanes */
     gcval.background.pixel = 0;

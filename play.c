@@ -82,12 +82,12 @@ static void NewGame( void ) {
     }
     
     if( fDisplay )
-	printf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
+	outputf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
 		ap[ 1 ].szName, anDice[ 1 ] );
 
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
 	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse )
-	    printf( "The cube is now at %d.\n", nCube <<= 1 );
+	    outputf( "The cube is now at %d.\n", nCube <<= 1 );
 
 	goto reroll;
     }
@@ -106,7 +106,7 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char sz[ 40 ];
 
-    printf( "Moving %s\n", FormatMove( sz, anBoard, anMove ) );
+    outputf( "Moving %s\n", FormatMove( sz, anBoard, anMove ) );
 }
 
 static int ComputerTurn( void ) {
@@ -324,7 +324,7 @@ extern void NextTurn( void ) {
 	
 	go = GAME_NORMAL;
 	
-	printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
+	outputf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
 		aszGameResult[ n - 1 ], n * nCube,
 		n * nCube > 1 ? "s" : "" );
 	
@@ -342,11 +342,13 @@ extern void NextTurn( void ) {
 	CommandShowScore( NULL );
 	
 	if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
-	    printf( "%s has won the match.\n", ap[ fWinner ].szName );
+	    outputf( "%s has won the match.\n", ap[ fWinner ].szName );
 	    return;
 	}
-	
+
 	if( fAutoGame ) {
+	    outputx();
+	
 	    NewGame();
 	    
 	    if( ap[ fTurn ].pt == PLAYER_HUMAN )
@@ -394,7 +396,9 @@ extern void TurnDone( void ) {
 #endif
     else
 #endif
-	fNextTurn = TRUE;	
+	fNextTurn = TRUE;
+
+    outputx();
 }
 
 extern void CommandAccept( char *sz ) {
@@ -404,8 +408,8 @@ extern void CommandAccept( char *sz ) {
     else if( fDoubled )
 	CommandTake( sz );
     else
-	puts( "You can only accept if the cube or a resignation has been "
-	      "offered." );
+	outputl( "You can only accept if the cube or a resignation has been "
+		 "offered." );
 }
 
 extern void CommandAgree( char *sz ) {
@@ -413,13 +417,13 @@ extern void CommandAgree( char *sz ) {
     moveresign *pmr;
     
     if( !fResigned ) {
-	puts( "No resignation was offered." );
+	outputl( "No resignation was offered." );
 
 	return;
     }
 
     if( fDisplay )
-	printf( "%s accepts and wins a %s.\n", ap[ fTurn ].szName,
+	outputf( "%s accepts and wins a %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
 
     go = GAME_RESIGNED;
@@ -436,13 +440,13 @@ extern void CommandAgree( char *sz ) {
 extern void CommandDecline( char *sz ) {
 
     if( !fResigned ) {
-	puts( "No resignation was offered." );
+	outputl( "No resignation was offered." );
 
 	return;
     }
 
     if( fDisplay )
-	printf( "%s declines the %s.\n", ap[ fTurn ].szName,
+	outputf( "%s declines the %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
 
     TurnDone();
@@ -453,48 +457,48 @@ extern void CommandDouble( char *sz ) {
     movetype *pmt;
     
     if( fTurn < 0 ) {
-	puts( "No game in progress (type `new game' to start one)." );
+	outputl( "No game in progress (type `new game' to start one)." );
 
 	return;
     }
 
     if( fCrawford ) {
-	puts( "Doubling is forbidden by the Crawford rule (see `help set "
+	outputl( "Doubling is forbidden by the Crawford rule (see `help set "
 	      "crawford')." );
 
 	return;
     }
 
     if( !fCubeUse ) {
-	puts( "The doubling cube has been disabled (see `help set cube "
+	outputl( "The doubling cube has been disabled (see `help set cube "
 	      "use')." );
 
 	return;
     }
 
     if( fDoubled ) {
-	puts( "The `double' command is for offering the cube, not accepting "
-	      "it.  Use\n`redouble' to immediately offer the cube back at a "
-	      "higher value." );
+	outputl( "The `double' command is for offering the cube, not "
+		 "accepting it.  Use\n`redouble' to immediately offer the "
+		 "cube back at a higher value." );
 
 	return;
     }
     
     if( fTurn != fMove ) {
-	puts( "You are only allowed to double if you are on roll." );
+	outputl( "You are only allowed to double if you are on roll." );
 
 	return;
     }
     
     if( anDice[ 0 ] ) {
-	puts( "You can't double after rolling the dice -- wait until your "
+	outputl( "You can't double after rolling the dice -- wait until your "
 	      "next turn." );
 
 	return;
     }
 
     if( fCubeOwner >= 0 && fCubeOwner != fTurn ) {
-	puts( "You do not own the cube." );
+	outputl( "You do not own the cube." );
 
 	return;
     }
@@ -502,7 +506,7 @@ extern void CommandDouble( char *sz ) {
     fDoubled = 1;
 
     if( fDisplay )
-	printf( "%s doubles.\n", ap[ fTurn ].szName );
+	outputf( "%s doubles.\n", ap[ fTurn ].szName );
     
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
@@ -516,13 +520,13 @@ extern void CommandDrop( char *sz ) {
     movetype *pmt;
     
     if( fTurn < 0 || !fDoubled ) {
-	puts( "The cube must have been offered before you can drop it." );
+	outputl( "The cube must have been offered before you can drop it." );
 
 	return;
     }
 
     if( fDisplay )
-	printf( "%s refuses the cube and gives up %d points.\n",
+	outputf( "%s refuses the cube and gives up %d points.\n",
 		ap[ fTurn ].szName, nCube );
     
     fDoubled = FALSE;
@@ -546,32 +550,32 @@ extern void CommandMove( char *sz ) {
     movenormal *pmn;
     
     if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	outputl( "No game in progress (type `new' to start one)." );
 
 	return;
     }
 
     if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
-	puts( "It is the computer's turn -- type `play' to force it to "
+	outputl( "It is the computer's turn -- type `play' to force it to "
 	      "move immediately." );
 	return;
     }
 
     if( !anDice[ 0 ] ) {
-	puts( "You must roll the dice before you can move." );
+	outputl( "You must roll the dice before you can move." );
 
 	return;
     }
 
     if( fResigned ) {
-	printf( "Please wait for %s to consider the resignation before "
+	outputf( "Please wait for %s to consider the resignation before "
 		"moving.\n", ap[ fTurn ].szName );
 
 	return;
     }
 
     if( fDoubled ) {
-	printf( "Please wait for %s to consider the cube before "
+	outputf( "Please wait for %s to consider the cube before "
 		"moving.\n", ap[ fTurn ].szName );
 
 	return;
@@ -605,7 +609,8 @@ extern void CommandMove( char *sz ) {
 	    return;
 	}
 	
-	puts( "You must specify a move (type `help move' for instructions)." );
+	outputl( "You must specify a move (type `help move' for "
+		 "instructions)." );
 
 	return;
     }
@@ -658,7 +663,7 @@ extern void CommandMove( char *sz ) {
 	}
     }
 
-    puts( "Illegal move." );
+    outputl( "Illegal move." );
 }
 
 static void FreeGame( list *pl ) {
@@ -673,33 +678,21 @@ static void FreeGame( list *pl ) {
 
 extern void CommandNewGame( char *sz ) {
 
-    char *pch;
-    
     if( nMatchTo && ( anScore[ 0 ] >= nMatchTo ||
 		      anScore[ 1 ] >= nMatchTo ) ) {
-	puts( "The match is already over." );
+	outputl( "The match is already over." );
 
 	return;
     }
 
     if( fTurn != -1 ) {
-	while( fConfirm ) {
+	if( fConfirm ) {
 	    if( fInterrupt )
 		return;
 	    
-	    pch = GetInput( "Are you sure you want to start a new game, "
-			    "and discard the one in progress? " );
-
-	    if( fInterrupt )
+	    if( !GetInputYN( "Are you sure you want to start a new game, "
+			     "and discard the one in progress? " ) )
 		return;
-
-	    if( pch && ( *pch == 'y' || *pch == 'Y' ) )
-		break;
-
-	    if( pch && ( *pch == 'n' || *pch == 'N' ) )
-		return;
-
-	    puts( "Please answer `y' or `n'." );
 	}
 
 	/* The last game of the match should always be the current one. */
@@ -737,7 +730,7 @@ extern void CommandNewMatch( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 1 ) {
-	puts( "You must specify a valid match length (1 or longer)." );
+	outputl( "You must specify a valid match length (1 or longer)." );
 
 	return;
     }
@@ -751,7 +744,7 @@ extern void CommandNewMatch( char *sz ) {
     fCrawford = 0;
     fPostCrawford = 0;
 
-    printf( "A new %d point match has been started.\n", n );
+    outputf( "A new %d point match has been started.\n", n );
 
 #if USE_GUI
     if( fX )
@@ -768,7 +761,7 @@ extern void CommandNewSession( char *sz ) {
     fCrawford = 0;
     fPostCrawford = 0;
 
-    puts( "A new session has been started." );
+    outputl( "A new session has been started." );
     
 #if USE_GUI
     if( fX )
@@ -779,13 +772,13 @@ extern void CommandNewSession( char *sz ) {
 extern void CommandPlay( char *sz ) {
 
     if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	outputl( "No game in progress (type `new' to start one)." );
 
 	return;
     }
 
     if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
-	puts( "It's not the computer's turn to play." );
+	outputl( "It's not the computer's turn to play." );
 
 	return;
     }
@@ -799,13 +792,14 @@ extern void CommandRedouble( char *sz ) {
     movetype *pmt;
 
     if( nMatchTo > 0 ) {
-	puts( "Redoubles are not permitted during match play." );
+	outputl( "Redoubles are not permitted during match play." );
 
 	return;
     }
     
     if( fTurn < 0 || !fDoubled ) {
-	puts( "The cube must have been offered before you can redouble it." );
+	outputl( "The cube must have been offered before you can redouble "
+		 "it." );
 
 	return;
     }
@@ -813,7 +807,7 @@ extern void CommandRedouble( char *sz ) {
     nCube <<= 1;
 
     if( fDisplay )
-	printf( "%s accepts and immediately redoubles to %d.\n",
+	outputf( "%s accepts and immediately redoubles to %d.\n",
 		ap[ fTurn ].szName, nCube << 1 );
     
     fCubeOwner = !fMove;
@@ -832,7 +826,7 @@ extern void CommandReject( char *sz ) {
     else if( fDoubled )
 	CommandDrop( sz );
     else
-	puts( "You can only reject if the cube or a resignation has been "
+	outputl( "You can only reject if the cube or a resignation has been "
 	      "offered." );
 }
 
@@ -842,7 +836,7 @@ extern void CommandResign( char *sz ) {
     int cch;
     
     if( fTurn < 0 ) {
-	puts( "You must be playing a game if you want to resign it." );
+	outputl( "You must be playing a game if you want to resign it." );
 
 	return;
     }
@@ -865,13 +859,13 @@ extern void CommandResign( char *sz ) {
     if( fResigned < 1 || fResigned > 3 ) {
 	fResigned = 0;
 
-	printf( "Unknown keyword `%s' -- try `help resign'.\n", pch );
+	outputf( "Unknown keyword `%s' -- try `help resign'.\n", pch );
 	
 	return;
     }
     
     if( fDisplay )
-	printf( "%s offers to resign a %s.\n", ap[ fTurn ].szName,
+	outputf( "%s offers to resign a %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
 
     TurnDone();
@@ -883,32 +877,32 @@ extern void CommandRoll( char *sz ) {
     movenormal *pmn;
     
     if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	outputl( "No game in progress (type `new' to start one)." );
 
 	return;
     }
     
     if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
-	puts( "It is the computer's turn -- type `play' to force it to "
+	outputl( "It is the computer's turn -- type `play' to force it to "
 	      "move immediately." );
 	return;
     }
 
     if( fDoubled ) {
-	printf( "Please wait for %s to consider the cube before "
+	outputf( "Please wait for %s to consider the cube before "
 		"moving.\n", ap[ fTurn ].szName );
 
 	return;
     }    
 
     if( fResigned ) {
-	puts( "Please resolve the resignation first." );
+	outputl( "Please resolve the resignation first." );
 
 	return;
     }
 
     if( anDice[ 0 ] ) {
-	puts( "You already did roll the dice." );
+	outputl( "You already did roll the dice." );
 
 	return;
     }
@@ -929,7 +923,7 @@ extern void CommandRoll( char *sz ) {
 	pmn->anMove[ 0 ] = -1;
 	ListInsert( plGame, pmn );
 	
-	puts( "No legal moves." );
+	outputl( "No legal moves." );
 
 	TurnDone();
     } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
@@ -959,7 +953,7 @@ extern void CommandTake( char *sz ) {
     movetype *pmt;
     
     if( fTurn < 0 || !fDoubled ) {
-	puts( "The cube must have been offered before you can take it." );
+	outputl( "The cube must have been offered before you can take it." );
 
 	return;
     }
@@ -967,7 +961,7 @@ extern void CommandTake( char *sz ) {
     nCube <<= 1;
 
     if( fDisplay )
-	printf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
+	outputf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
     
     fDoubled = FALSE;
 

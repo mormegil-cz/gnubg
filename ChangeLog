@@ -1,3 +1,22 @@
+Tue Jul 25 10:33:54 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (output, outputl, outputc, outputf, outputv, outputx): New
+	functions replacing stdout operations.  They display in the status
+	bar or a dialog box when using GTK, or to stdout otherwise.
+	Extensive related changes elsewhere.
+	
+Sat Jul 15 14:28:35 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (GetInputYN): New function.
+	* gtkgame.c (GTKGetInputYN): New function.
+
+Fri Jul 14 22:44:45 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkgame.c (ShowList): New function, to replace ShowPaged()
+	when GTK is in use (for "show copying" and "show warranty" commands).
+
+	* dice.c (PrintRNGSeed): New function, for "show seed" command.
+
 Fri Jul 14 10:12:48 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* md5.c: New file.  Add another dice generator (MD5 hash of the seed).

@@ -37,6 +37,7 @@
 
 #if USE_GTK
 #include "gtkboard.h"
+#include "gtkgame.h"
 #elif USE_EXT
 #include "xgame.h"
 #endif
@@ -45,7 +46,7 @@ extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
 static void ShowEvaluation( evalcontext *pec ) {
     
-    printf( "    %d-ply evaluation.\n"
+    outputf( "    %d-ply evaluation.\n"
 	    "    %d move search candidate%s.\n"
 	    "    %0.3g cubeless search tolerance.\n"
 	    "    %.0f%% speed.\n"
@@ -84,7 +85,7 @@ static void ShowPaged( char **ppch ) {
 	i = 0;
 
 	while( *ppch ) {
-	    puts( *ppch++ );
+	    outputl( *ppch++ );
 	    if( ++i >= nRows - 1 ) {
 		GetInput( "-- Press <return> to continue --" );
 		
@@ -98,14 +99,14 @@ static void ShowPaged( char **ppch ) {
     } else
 #endif
 	while( *ppch )
-	    puts( *ppch++ );
+	    outputl( *ppch++ );
 }
 
 extern void CommandShowAutomatic( char *sz ) {
 
     static char *szOn = "On", *szOff = "Off";
     
-    printf( "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
+    outputf( "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
 	    "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
 	    "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
 	    "game    \t(Start a new game after each one is completed):\t%s\n"
@@ -127,7 +128,7 @@ extern void CommandShowBoard( char *sz ) {
     
     if( !*sz ) {
 	if( fTurn < 0 )
-	    puts( "No position specified and no game in progress." );
+	    outputl( "No position specified and no game in progress." );
 	else
 	    ShowBoard();
 	
@@ -135,7 +136,7 @@ extern void CommandShowBoard( char *sz ) {
     }
     
     if( ParsePosition( an, sz ) ) {
-	puts( "Illegal position." );
+	outputl( "Illegal position." );
 
 	return;
     }
@@ -149,17 +150,17 @@ extern void CommandShowBoard( char *sz ) {
 #endif
     else
 #endif
-	puts( DrawBoard( szOut, an, TRUE, ap ) );
+	outputl( DrawBoard( szOut, an, TRUE, ap ) );
 }
 
 extern void CommandShowDelay( char *sz ) {
 #if USE_GUI
     if( nDelay )
-	printf( "The delay is set to %d ms.\n",nDelay);
+	outputf( "The delay is set to %d ms.\n",nDelay);
     else
-	puts( "No delay is being used." );
+	outputl( "No delay is being used." );
 #else
-    puts( "The `show delay' command applies only when using a window "
+    outputl( "The `show delay' command applies only when using a window "
 	  "system." );
 #endif
 }
@@ -170,114 +171,119 @@ extern void CommandShowCache( char *sz ) {
 
     EvalCacheStats( &c, &cLookup, &cHit );
 
-    printf( "%d cache entries have been used.  %d lookups, %d hits",
+    outputf( "%d cache entries have been used.  %d lookups, %d hits",
 	    c, cLookup, cHit );
 
     if( cLookup )
-	printf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
+	outputf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
     else
-	putchar( '.' );
+	outputc( '.' );
 
-    putchar( '\n' );
+    outputc( '\n' );
 }
 
 extern void CommandShowConfirm( char *sz ) {
 
     if( fConfirm )
-	puts( "GNU Backgammon will ask for confirmation before "
+	outputl( "GNU Backgammon will ask for confirmation before "
 	       "aborting games in progress." );
     else
-	puts( "GNU Backgammon will not ask for confirmation "
+	outputl( "GNU Backgammon will not ask for confirmation "
 	       "before aborting games in progress." );
 }
 
 extern void CommandShowCopying( char *sz ) {
 
-    ShowPaged( aszCopying );
+#if USE_GTK
+    if( fX )
+	ShowList( aszCopying, "Copying" );
+    else
+#endif
+	ShowPaged( aszCopying );
 }
 
 extern void CommandShowCrawford( char *sz ) {
 
   if( nMatchTo > 0 ) 
-    puts( fCrawford ?
+    outputl( fCrawford ?
 	  "This game is the Crawford game." :
 	  "This game is not the Crawford game" );
   else if ( ! nMatchTo )
-    puts( "Crawford rule is not used in money sessions." );
+    outputl( "Crawford rule is not used in money sessions." );
   else
-    puts( "No match is being played." );
+    outputl( "No match is being played." );
 
 }
 
 extern void CommandShowCube( char *sz ) {
 
     if( fTurn < 0 ) {
-	puts( "There is no game in progress." );
+	outputl( "There is no game in progress." );
 	return;
     }
 
     if( fCrawford ) {
-	puts( "The cube is disabled during the Crawford game." );
+	outputl( "The cube is disabled during the Crawford game." );
 	return;
     }
     
     if( !fCubeUse ) {
-	puts( "The doubling cube is disabled." );
+	outputl( "The doubling cube is disabled." );
 	return;
     }
 	
-    printf( "The cube is at %d, ", nCube );
+    outputf( "The cube is at %d, ", nCube );
 
     if( fCubeOwner == -1 )
-	puts( "and is centred." );
+	outputl( "and is centred." );
     else
-	printf( "and is owned by %s.", ap[ fCubeOwner ].szName );
+	outputf( "and is owned by %s.", ap[ fCubeOwner ].szName );
 }
 
 extern void CommandShowDice( char *sz ) {
 
     if( fTurn < 0 ) {
-	puts( "The dice will not be rolled until a game is started." );
+	outputl( "The dice will not be rolled until a game is started." );
 
 	return;
     }
 
     if( anDice[ 0 ] < 1 )
-	printf( "%s has not yet rolled the dice.\n", ap[ fMove ].szName );
+	outputf( "%s has not yet rolled the dice.\n", ap[ fMove ].szName );
     else
-	printf( "%s has rolled %d and %d.\n", ap[ fMove ].szName, anDice[ 0 ],
+	outputf( "%s has rolled %d and %d.\n", ap[ fMove ].szName, anDice[ 0 ],
 		anDice[ 1 ] );
 }
 
 extern void CommandShowDisplay( char *sz ) {
 
     if( fDisplay )
-	puts( "GNU Backgammon will display boards for computer moves." );
+	outputl( "GNU Backgammon will display boards for computer moves." );
     else
-	puts( "GNU Backgammon will not display boards for computer moves." );
+	outputl( "GNU Backgammon will not display boards for computer moves." );
 }
 
 extern void CommandShowEvaluation( char *sz ) {
 
-    puts( "`eval' and `hint' will use:" );
+    outputl( "`eval' and `hint' will use:" );
     ShowEvaluation( &ecEval );
 }
 
 extern void CommandShowJacoby( char *sz ) {
 
     if ( fJacoby ) 
-      puts( "Money sessions is played with the Jacoby rule." );
+      outputl( "Money sessions is played with the Jacoby rule." );
     else
-      puts( "Money sessions is played without the Jacoby rule." );
+      outputl( "Money sessions is played without the Jacoby rule." );
 
 }
 
 extern void CommandShowNackgammon( char *sz ) {
 
     if( fNackgammon )
-	puts( "New games will use the Nackgammon starting position." );
+	outputl( "New games will use the Nackgammon starting position." );
     else
-	puts( "New games will use the standard backgammon starting "
+	outputl( "New games will use the standard backgammon starting "
 	      "position." );
 }
 
@@ -286,19 +292,19 @@ extern void CommandShowPipCount( char *sz ) {
     int anPips[ 2 ], an[ 2 ][ 25 ];
 
     if( !*sz && fTurn == -1 ) {
-	puts( "No position specified and no game in progress." );
+	outputl( "No position specified and no game in progress." );
 	return;
     }
     
     if( ParsePosition( an, sz ) ) {
-	puts( "Illegal position." );
+	outputl( "Illegal position." );
 
 	return;
     }
     
     PipCount( an, anPips );
     
-    printf( "The pip counts are: %s %d, %s %d.\n", ap[ fMove ].szName,
+    outputf( "The pip counts are: %s %d, %s %d.\n", ap[ fMove ].szName,
 	    anPips[ 1 ], ap[ !fMove ].szName, anPips[ 0 ] );
 }
 
@@ -307,20 +313,20 @@ extern void CommandShowPlayer( char *sz ) {
     int i;
 
     for( i = 0; i < 2; i++ ) {
-	printf( "Player %d:\n"
+	outputf( "Player %d:\n"
 		"  Name: %s\n"
 		"  Type: ", i, ap[ i ].szName );
 
 	switch( ap[ i ].pt ) {
 	case PLAYER_GNU:
-	    printf( "gnubg:\n" );
+	    outputf( "gnubg:\n" );
 	    ShowEvaluation( &ap[ i ].ec );
 	    break;
 	case PLAYER_PUBEVAL:
-	    puts( "pubeval\n" );
+	    outputl( "pubeval\n" );
 	    break;
 	case PLAYER_HUMAN:
-	    puts( "human\n" );
+	    outputl( "human\n" );
 	    break;
 	}
     }
@@ -329,19 +335,19 @@ extern void CommandShowPlayer( char *sz ) {
 extern void CommandShowPostCrawford( char *sz ) {
 
   if( nMatchTo > 0 ) 
-    puts( fPostCrawford ?
+    outputl( fPostCrawford ?
 	  "This is post-Crawford play." :
 	  "This is not post-Crawford play." );
   else if ( ! nMatchTo )
-    puts( "Crawford rule is not used in money sessions." );
+    outputl( "Crawford rule is not used in money sessions." );
   else
-    puts( "No match is being played." );
+    outputl( "No match is being played." );
 
 }
 
 extern void CommandShowPrompt( char *sz ) {
 
-    printf( "The prompt is set to `%s'.\n", szPrompt );
+    outputf( "The prompt is set to `%s'.\n", szPrompt );
 }
 
 extern void CommandShowRNG( char *sz ) {
@@ -351,17 +357,17 @@ extern void CommandShowRNG( char *sz ) {
     "user supplied"
   };
 
-  printf( "You are using the %s generator.\n",
+  outputf( "You are using the %s generator.\n",
 	  aszRNG[ rngCurrent ] );
     
 }
 
 extern void CommandShowRollout( char *sz ) {
 
-    puts( "Rollouts will use:" );
+    outputl( "Rollouts will use:" );
     ShowEvaluation( &ecRollout );
 
-    printf( "%d game%s will be played per rollout, truncating after %d "
+    outputf( "%d game%s will be played per rollout, truncating after %d "
 	    "pl%s.\nLookahead variance reduction is %sabled.\n",
 	    nRollouts, nRollouts == 1 ? "" : "s", nRolloutTruncate,
 	    nRolloutTruncate == 1 ? "y" : "ies", fVarRedn ? "en" : "dis" );
@@ -369,13 +375,13 @@ extern void CommandShowRollout( char *sz ) {
 
 extern void CommandShowScore( char *sz ) {
 
-    printf( "The score (after %d game%s) is: %s %d, %s %d",
+    outputf( "The score (after %d game%s) is: %s %d, %s %d",
 	    cGames, cGames == 1 ? "" : "s",
 	    ap[ 0 ].szName, anScore[ 0 ],
 	    ap[ 1 ].szName, anScore[ 1 ] );
 
     if ( nMatchTo > 0 ) {
-        printf ( nMatchTo == 1 ? 
+        outputf ( nMatchTo == 1 ? 
 	         " (match to %d point%s)\n" :
 	         " (match to %d points%s)\n",
                  nMatchTo,
@@ -385,32 +391,42 @@ extern void CommandShowScore( char *sz ) {
     } 
     else {
         if ( fJacoby )
-	    puts ( " (money session (with Jacoby rule))\n" );
+	    outputl ( " (money session (with Jacoby rule))\n" );
         else
-	    puts ( " (money session (without Jacoby rule))\n" );
+	    outputl ( " (money session (without Jacoby rule))\n" );
     }
 
+}
+
+extern void CommandShowSeed( char *sz ) {
+
+    PrintRNGSeed();
 }
 
 extern void CommandShowTurn( char *sz ) {
 
     if( fTurn < 0 ) {
-	puts( "No game is being played." );
+	outputl( "No game is being played." );
 
 	return;
     }
     
-    printf( "%s is on %s.\n", ap[ fMove ].szName,
+    outputf( "%s is on %s.\n", ap[ fMove ].szName,
 	    anDice[ 0 ] ? "move" : "roll" );
 
     if( fResigned )
-	printf( "%s has offered to resign a %s.\n", ap[ fMove ].szName,
+	outputf( "%s has offered to resign a %s.\n", ap[ fMove ].szName,
 		aszGameResult[ fResigned - 1 ] );
 }
 
 extern void CommandShowWarranty( char *sz ) {
 
-    ShowPaged( aszWarranty );
+#if USE_GTK
+    if( fX )
+	ShowList( aszWarranty, "Warranty" );
+    else
+#endif
+	ShowPaged( aszWarranty );
 }
 
 extern void CommandShowKleinman( char *sz ) {
@@ -419,12 +435,12 @@ extern void CommandShowKleinman( char *sz ) {
     float fKC;
 
     if( !*sz && fTurn == -1 ) {
-        puts( "No position specified and no game in progress." );
+        outputl( "No position specified and no game in progress." );
         return;
     }
  
     if( ParsePosition( an, sz ) ) {
-        puts( "Illegal position." );
+        outputl( "Illegal position." );
 
         return;
     }
@@ -433,24 +449,24 @@ extern void CommandShowKleinman( char *sz ) {
  
     fKC = KleinmanCount (anPips[1], anPips[0]);
     if (fKC == -1.0)
-        printf ("Pipcount unsuitable for Kleinman Count.\n");
+        outputf ("Pipcount unsuitable for Kleinman Count.\n");
     else
-        printf ("Cubeless Winning Chance: %.4f\n", fKC);
+        outputf ("Cubeless Winning Chance: %.4f\n", fKC);
  }
 
 extern void CommandShowThorp( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
-    int nLeader, nTrailer, anCovered[2], anMenLeft[2];
+    int nLeader, nTrailer, nDiff, anCovered[2], anMenLeft[2];
     int x;
 
     if( !*sz && fTurn == -1 ) {
-        puts( "No position specified and no game in progress." );
+        outputl( "No position specified and no game in progress." );
         return;
     }
 
     if( ParsePosition( an, sz ) ) {
-        puts( "Illegal position." );
+        outputl( "Illegal position." );
 
         return;
     }
@@ -494,18 +510,23 @@ extern void CommandShowThorp( char *sz ) {
         nTrailer += an[0][0];
         nTrailer -= anCovered[0];
 
-        printf("L = %d  T = %d  -> ", nLeader, nTrailer);
+        outputf("L = %d  T = %d  -> ", nLeader, nTrailer);
         if (nTrailer >= (nLeader - 1))
-          printf("re");
+          output("re");
         if (nTrailer >= (nLeader - 2))
-          printf("double/");
+          output("double/");
         if (nTrailer < (nLeader - 2))
-          printf("no double/");
+          output("no double/");
         if (nTrailer >= (nLeader + 2))
-          printf("drop\n");
+          outputl("drop");
         else
-          printf("take\n");
+          outputl("take");
 
-        printf("Bower's interpolation: %d%% cubeless winning "
-                "chance\n", 74+2*(nTrailer-nLeader));
+	if( ( nDiff = nTrailer - nLeader ) > 13 )
+	    nDiff = 13;
+	else if( nDiff < -37 )
+	    nDiff = -37;
+	
+        outputf("Bower's interpolation: %d%% cubeless winning "
+                "chance\n", 74 + 2 * nDiff );
 }

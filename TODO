@@ -5,6 +5,8 @@ duplication of effort and to make sure our changes merge easily.
 * Evaluations:
 ** Allow different settings (e.g. search ply, candidates, tolerance) for each
   position class.
+** If the bearoff database is not found, use the race evaluator for bearoff
+  positions.
 ** Add more evaluation classes.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
@@ -29,8 +31,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish supervised training, and allow people to submit training data via
   web.
 ** Make sure input behaves correctly when stdin is not a TTY. (gary)
-** Write fancy output routines (to replace printf, puts, etc.) that wraps
-  words and pauses before scrolling (as in gdb).
+** Make output*() functions wrap words, and pause before scrolling (as in
+  gdb).  Make sure output to stderr is available when using GTK.
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
   multiple moves (e.g. "8/7(2) 6/5(2)").
 ** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
@@ -67,8 +69,17 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow copy/paste and drag & drop of the board ID in the board window.
 ** Add silly bells and whistles.  Things like colour selector for chequer
   colours, angle of light, surface of pieces, transparent background, etc.
-** Add menus and dialogs so that games can be played without the
-  terminal window at all.
+** Finish menus (settings, in particular).
+** Add a prompt and entry field to allow commands to be entered (replacing
+  stdin).
+** Allow the user to decide whether short messages appear in dialogs
+  instead of the status bar.
+** Dialogs:
+*** Make "eval" show its output in tables in a dialog.  This will need
+  changes in eval.c to give the information in a useful form; probably
+  a "DumpPositionRaw".
+*** Make "help" show its output in a CList.  There must be a button in
+  the dialog to allow the user to recurse through help for subcommands.
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -113,4 +124,3 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Move the built-in RNGs into lib/; they can then be used instead of
   rand_r for better quality random numbers and improved portability.
-** Add a "show seed" command for the MD5 and user generators.

@@ -22,6 +22,15 @@
 #ifndef _GTKGAME_H_
 #define _GTKGAME_H_
 
+#include "backgammon.h"
+
 extern void RunGTK( void );
+extern void ShowList( char *asz[], char *szTitle );
+extern int GTKGetInputYN( char *szPrompt );
+extern void GTKOutput( char *sz );
+extern void GTKOutputX( void );
+extern void GTKHint( movelist *pml );
+
+extern int fGTKOutput;
 
 #endif

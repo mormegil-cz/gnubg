@@ -63,6 +63,7 @@ static md5_uint32 nMD5; /* the current MD5 seed */
 
 #if HAVE_LIBDL
 static void (*pfUserRNGSeed) (unsigned long int);
+static void (*pfUserRNGShowSeed) (void);
 static long int (*pfUserRNGRandom) (void);
 static void *pvUserRNGHandle;
 
@@ -100,7 +101,7 @@ static int GetManualDice( int anDice[ 2 ] ) {
 	      pz++;
 
 	  if ( !*pz ) {
-	      puts( "You must enter two numbers between 1 and 6." );
+	      outputl( "You must enter two numbers between 1 and 6." );
 	      goto TryAgain;
 	  }
 	  
@@ -111,6 +112,30 @@ static int GetManualDice( int anDice[ 2 ] ) {
       free( sz );
       return 0;
   }
+}
+
+extern void PrintRNGSeed( void ) {
+
+    switch( rngCurrent ) {
+    case RNG_MD5:
+	outputf( "The current seed is %u.\n", nMD5 );
+	break;
+	
+    case RNG_USER:
+#if HAVE_LIBDL
+	if( pfUserRNGShowSeed ) {
+	    (*pfUserRNGShowSeed)();
+	    break;
+	}
+
+	/* otherwise fall through */
+#else
+	abort();
+#endif
+    default:
+	outputl( "You cannot show the seed with this random number "
+		 "generator." );
+    }
 }
 
 extern void InitRNGSeed( int n ) {
@@ -297,7 +322,7 @@ extern int  UserRNGOpen() {
      * Bugger! Can't load shared library
      */
 
-    printf ( "Could not load shared library %s.\n", szUserRNG );
+    outputf ( "Could not load shared library %s.\n", szUserRNG );
     
     return 0;
 
@@ -334,6 +359,10 @@ extern int  UserRNGOpen() {
 
   }
 
+  /* this one is allowed to fail */
+  pfUserRNGShowSeed = ( void (*)( void ) ) dlsym( pvUserRNGHandle,
+						  "showseed" );
+  
   /*
    * Everthing should be fine...
    */

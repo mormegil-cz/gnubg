@@ -37,6 +37,7 @@
 #include <pwd.h>
 #endif
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -79,9 +80,6 @@ static int fReadingOther;
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #include "gtkboard.h"
 #include "gtkgame.h"
-
-GtkWidget *pwMain, *pwBoard;
-guint nNextTurn = 0; /* GTK idle function */
 #elif USE_EXT
 #include <ext.h>
 #include <extwin.h>
@@ -305,6 +303,7 @@ command acDatabase[] = {
       "during rollouts", NULL, NULL },
     { "score", CommandShowScore, "View the match or session score ",
       NULL, NULL },
+    { "seed", CommandShowSeed, "Show the dice generator seed", NULL, NULL },
     { "thorp", CommandShowThorp, "Calculate Thorp Count for "
       "position", szOPTPOSITION, NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL, NULL },
@@ -448,7 +447,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
     int cch;
     
     if( !pch ) {
-	printf( "You must specify whether to set %s on or off (see `help set "
+	outputf( "You must specify whether to set %s on or off (see `help set "
 		"%s').\n", szName, szName );
 
 	return -1;
@@ -460,7 +459,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 	!strncasecmp( "true", pch, cch ) ) {
 	*pf = TRUE;
 
-	puts( szOn );
+	outputl( szOn );
 
 	return TRUE;
     }
@@ -469,12 +468,12 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 	!strncasecmp( "false", pch, cch ) ) {
 	*pf = FALSE;
 
-	puts( szOff );
+	outputl( szOff );
 
 	return FALSE;
     }
 
-    printf( "Illegal keyword `%s' -- try `help set %s'.\n", pch, szName );
+    outputf( "Illegal keyword `%s' -- try `help set %s'.\n", pch, szName );
 
     return -1;
 }
@@ -570,7 +569,7 @@ static void PortableSignalRestore( int nSignal, psighandler *p ) {
 static void ResetInterrupt( void ) {
     
     if( fInterrupt ) {
-	puts( "(Interrupted)" );
+	outputl( "(Interrupted)" );
 
 	fInterrupt = FALSE;
 	
@@ -705,19 +704,22 @@ extern void HandleCommand( char *sz, command *ac ) {
 		;
 
 	    ShellEscape( pch );
+	    outputx();
 	    return;
 	} else if( *sz == ':' ) {
 	    /* Guile escape */
-	    puts( "This installation of GNU Backgammon was compiled without "
+	    outputl( "This installation of GNU Backgammon was compiled without "
 		  "Guile support." );
+	    outputx();
 	    return;
 	}
     }
     
     if( !( pch = NextToken( &sz ) ) ) {
 	if( ac != acTop )
-	    puts( "Incomplete command -- try `help'." );
+	    outputl( "Incomplete command -- try `help'." );
 
+	outputx();
 	return;
     }
 
@@ -729,7 +731,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    pch[ cch ] = ' ';
 	
 	CommandMove( pch );
-	
+
+	outputx();
 	return;
     }
 
@@ -738,14 +741,17 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    break;
 
     if( !pc->sz ) {
-	printf( "Unknown keyword `%s' -- try `help'.\n", pch );
-	
+	outputf( "Unknown keyword `%s' -- try `help'.\n", pch );
+
+	outputx();
 	return;
     }
 
-    if( pc->pf )
+    if( pc->pf ) {
 	pc->pf( sz );
-    else
+	
+	outputx();
+    } else
 	HandleCommand( sz, pc->pc );
 }
 
@@ -785,7 +791,7 @@ extern void ShowBoard( void ) {
 #endif
 	} else
 #endif
-	    puts( "No game in progress." );
+	    outputl( "No game in progress." );
 	
 	return;
     }
@@ -834,7 +840,7 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
 	
-	puts( DrawBoard( szBoard, anBoard, fMove, apch ) );
+	outputl( DrawBoard( szBoard, anBoard, fMove, apch ) );
 	
 	if( !fMove )
 	    SwapSides( anBoard );
@@ -931,18 +937,18 @@ extern void CommandEval( char *sz ) {
     int an[ 2 ][ 25 ];
 
     if( !*sz && fTurn == -1 ) {
-	puts( "No position specified and no game in progress." );
+	outputl( "No position specified and no game in progress." );
 	return;
     }
     
     if( ParsePosition( an, sz ) ) {
-	puts( "Illegal position." );
+	outputl( "Illegal position." );
 
 	return;
     }
 
     if( !DumpPosition( an, szOutput, &ecEval ) )
-	puts( szOutput );
+	outputl( szOutput );
 }
 
 static command *FindHelpCommand( command *pcBase, char *sz,
@@ -991,30 +997,30 @@ extern void CommandHelp( char *sz ) {
     char szCommand[ 128 ], szUsage[ 128 ];
     
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
-	printf( "No help available for topic `%s' -- try `help' for a list of "
+	outputf( "No help available for topic `%s' -- try `help' for a list of "
 		"topics.\n", sz );
 
 	return;
     }
 
     if( pc->szHelp ) {
-	printf( "%s- %s\n\nUsage: %s", szCommand, pc->szHelp,
+	outputf( "%s- %s\n\nUsage: %s", szCommand, pc->szHelp,
 		szUsage );
 
 	if( pc->pc )
-	    puts( "<subcommand>\n" );
+	    outputl( "<subcommand>\n" );
 	else
-	    putchar( '\n' );
+	    outputc( '\n' );
     }
 
     if( pc->pc ) {
-	puts( pc == &cTop ? "Available commands:" : "Available subcommands:" );
+	outputl( pc == &cTop ? "Available commands:" : "Available subcommands:" );
 
 	pc = pc->pc;
 	
 	for( ; pc->sz; pc++ )
 	    if( pc->szHelp )
-		printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
+		outputf( "%-15s\t%s\n", pc->sz, pc->szHelp );
     }
 }
 
@@ -1026,13 +1032,13 @@ extern void CommandHint( char *sz ) {
     float aar[ 32 ][ NUM_OUTPUTS ];
     
     if( fTurn < 0 ) {
-	puts( "You must set up a board first." );
+	outputl( "You must set up a board first." );
 
 	return;
     }
 
     if( !anDice[ 0 ] ) {
-	puts( "You must roll (or set) the dice first." );
+	outputl( "You must roll (or set) the dice first." );
 
 	return;
     }
@@ -1043,15 +1049,22 @@ extern void CommandHint( char *sz ) {
 
     if( fInterrupt )
 	return;
+
+#if USE_GTK
+    if( fX ) {
+	GTKHint( &ml );
+	return;
+    }
+#endif
     
-    puts( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
+    outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
     
     for( i = 0; i < ml.cMoves; i++ ) {
 	float *ar = ml.amMoves[ i ].pEval;
-	printf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
+	outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
 		ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
 		ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] - ar[ 4 ] - 1.0 );
-	puts( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove ) );
+	outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove ) );
     }
 }
 
@@ -1062,27 +1075,17 @@ extern void CommandHint( char *sz ) {
 static void PromptForExit( void ) {
 
     static int fExiting;
-    char *sz;
     
-    while( !fExiting && fInteractive && fConfirm && fTurn != -1 ) {
+    if( !fExiting && fInteractive && fConfirm && fTurn != -1 ) {
 	fExiting = TRUE;
-
 	fInterrupt = FALSE;
 	
-	sz = GetInput( "Are you sure you want to exit and abort the game in "
-		       "progress? " );
-
-	fInterrupt = FALSE;
-	fExiting = FALSE;
-	
-	if( sz ) {
-	    if( *sz == 'y' || *sz == 'Y' )
-		break;
-	    else if( *sz == 'n' || *sz == 'N' )
-		return;
+	if( !GetInputYN( "Are you sure you want to exit and abort the game in "
+			 "progress? " ) ) {
+	    fInterrupt = FALSE;
+	    fExiting = FALSE;
+	    return;
 	}
-
-	puts( "Please answer `y' or `n'." );
     }
 
     exit( EXIT_SUCCESS );
@@ -1090,7 +1093,7 @@ static void PromptForExit( void ) {
 
 extern void CommandNotImplemented( char *sz ) {
 
-    puts( "That command is not yet implemented." );
+    outputl( "That command is not yet implemented." );
 }
 
 extern void CommandQuit( char *sz ) {
@@ -1104,12 +1107,12 @@ extern void CommandRollout( char *sz ) {
     int c, an[ 2 ][ 25 ];
     
     if( !*sz && fTurn == -1 ) {
-	puts( "No position specified." );
+	outputl( "No position specified." );
 	return;
     }
     
     if( ParsePosition( an, sz ) ) {
-	puts( "Illegal position." );
+	outputl( "Illegal position." );
 
 	return;
     }
@@ -1118,7 +1121,7 @@ extern void CommandRollout( char *sz ) {
 		       fVarRedn, &ecRollout ) ) < 0 )
 	return;
 
-    printf( "Result (after %d trials):\n\n"
+    outputf( "Result (after %d trials):\n\n"
 	    "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
 	    "Equity\n"
 	    "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
@@ -1197,7 +1200,7 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 
 extern void CommandLoad( char *sz ) {
 
-    puts( "Loading is not yet implemented." );
+    outputl( "Loading is not yet implemented." );
 }
 
 extern void CommandSaveGame( char *sz ) {
@@ -1205,7 +1208,7 @@ extern void CommandSaveGame( char *sz ) {
     FILE *pf;
     
     if( !sz || !*sz ) {
-	puts( "You must specify a file to save to (see `help save game')." );
+	outputl( "You must specify a file to save to (see `help save game')." );
 	return;
     }
 
@@ -1229,7 +1232,7 @@ extern void CommandSaveMatch( char *sz ) {
     list *pl;
     
     if( !sz || !*sz ) {
-	puts( "You must specify a file to save to (see `help save match')." );
+	outputl( "You must specify a file to save to (see `help save match')." );
 	return;
     }
 
@@ -1256,7 +1259,7 @@ extern void CommandSaveWeights( char *sz ) {
     if( EvalSave( GNUBG_WEIGHTS /* FIXME accept file name parameter */ ) )
 	perror( GNUBG_WEIGHTS );
     else
-	puts( "Evaluator weights saved." );
+	outputl( "Evaluator weights saved." );
 }
 
 extern void CommandTrainTD( char *sz ) {
@@ -1270,7 +1273,7 @@ extern void CommandTrainTD( char *sz ) {
 	
 	do {    
 	    if( !( ++c % 100 ) && fShowProgress ) {
-		printf( "%6d\r", c );
+		outputf( "%6d\r", c );
 		fflush( stdout );
 	    }
 	    
@@ -1355,7 +1358,7 @@ static void Prompt( void ) {
     if( !fInteractive )
 	return;
 
-    fputs( FormatPrompt(), stdout );
+    output( FormatPrompt() );
     fflush( stdout );    
 }
 #endif
@@ -1368,7 +1371,7 @@ static void ProcessInput( char *sz, int fFree ) {
     fReadingCommand = FALSE;
     
     if( !sz ) {
-	putchar( '\n' );
+	outputc( '\n' );
 	PromptForExit();
 	sz = "";
     }
@@ -1413,7 +1416,7 @@ static int fInputAgain;
 void HandleInputRecursive( char *sz ) {
 
     if( !sz ) {
-	putchar( '\n' );
+	outputc( '\n' );
 	PromptForExit();
 	szInput = NULL;
 	fInputAgain = TRUE;
@@ -1446,6 +1449,8 @@ extern void UserCommand( char *szCommand ) {
        read-only storage and HandleCommand might want to modify it. */
     strcpy( sz, szCommand );
 
+    /* Note that the command is always echoed to stdout; the output*()
+       functions are bypassed. */
 #if HAVE_LIBREADLINE
     nOldEnd = rl_end;
     rl_end = 0;
@@ -1538,7 +1543,7 @@ extern char *GetInput( char *szPrompt ) {
 	    nOldPoint = rl_point;
 	    fReadingCommand = FALSE;
 	    /* FIXME this is unnecessary when handling an X command! */
-	    putchar( '\n' );
+	    outputc( '\n' );
 	}
 
 	szInput = FALSE;
@@ -1557,7 +1562,7 @@ extern char *GetInput( char *szPrompt ) {
 	    select( STDIN_FILENO + 1, &fds, NULL, NULL, NULL );
 #endif
 	    if( fInterrupt ) {
-		putchar( '\n' );
+		outputc( '\n' );
 		break;
 	    }
 	    
@@ -1597,8 +1602,8 @@ extern char *GetInput( char *szPrompt ) {
 	if( fInterrupt )
 	    return NULL;
 
-	putchar( '\n' );
-	fputs( szPrompt, stdout );
+	outputc( '\n' );
+	output( szPrompt );
 	fflush( stdout );
 
 	do {
@@ -1613,7 +1618,7 @@ extern char *GetInput( char *szPrompt ) {
 	    select( STDIN_FILENO + 1, &fds, NULL, NULL, NULL );
 #endif
 	    if( fInterrupt ) {
-		putchar( '\n' );
+		outputc( '\n' );
 		return NULL;
 	    }
 	    
@@ -1635,7 +1640,7 @@ extern char *GetInput( char *szPrompt ) {
     fReadingOther = TRUE;
     
     while( !( sz = readline( szPrompt ) ) ) {
-	putchar( '\n' );
+	outputc( '\n' );
 	PromptForExit();
     }
 
@@ -1650,7 +1655,7 @@ extern char *GetInput( char *szPrompt ) {
     if( fInterrupt )
 	return NULL;
 
-    fputs( szPrompt, stdout );
+    output( szPrompt );
     fflush( stdout );
 
 #if USE_GUI
@@ -1669,11 +1674,129 @@ extern char *GetInput( char *szPrompt ) {
 	*pch = 0;
     
     while( feof( stdin ) && !*sz ) {
-	putchar( '\n' );
+	outputc( '\n' );
 	PromptForExit();
     }
     
     return sz;
+#endif
+}
+
+/* Ask a yes/no question.  Interrupting the question is considered a "no"
+   answer. */
+extern int GetInputYN( char *szPrompt ) {
+
+    char *pch;
+
+#if USE_GTK
+    if( fX )
+	return GTKGetInputYN( szPrompt );
+#endif
+    
+    if( fInterrupt )
+	return FALSE;
+
+    while( 1 ) {
+	pch = GetInput( szPrompt );
+
+	if( pch )
+	    switch( *pch ) {
+	    case 'y':
+	    case 'Y':
+		free( pch );
+		return TRUE;
+	    case 'n':
+	    case 'N':
+		free( pch );
+		return FALSE;
+	    default:
+		free( pch );
+	    }
+
+	if( fInterrupt )
+	    return FALSE;
+	
+	outputl( "Please answer `y' or `n'." );
+    }
+}
+
+/* Write a string to stdout/status bar/popup window */
+extern void output( char *sz ) {
+
+#if USE_GTK
+    if( fX && fGTKOutput) {
+	GTKOutput( g_strdup( sz ) );
+	return;
+    }
+#endif
+    fputs( sz, stdout );
+}
+
+/* Write a string to stdout/status bar/popup window, and append \n */
+extern void outputl( char *sz ) {
+
+#if USE_GTK
+    if( fX && fGTKOutput ) {
+	int cch;
+	char *pch;
+
+	cch = strlen( sz );
+	pch = g_malloc( cch + 2 );
+	strcpy( pch, sz );
+	pch[ cch ] = '\n';
+	pch[ cch + 1 ] = 0;
+	GTKOutput( pch );
+	return;
+    }
+#endif
+    puts( sz );
+}
+    
+/* Write a character to stdout/status bar/popup window */
+extern void outputc( char ch ) {
+
+#if USE_GTK
+    if( fX && fGTKOutput ) {
+	char *pch;
+
+	pch = g_malloc( 2 );
+	*pch = ch;
+	pch[ 1 ] = 0;
+	GTKOutput( pch );
+	return;
+    }
+#endif
+    putchar( ch );
+}
+    
+/* Write a string to stdout/status bar/popup window, printf style */
+extern void outputf( char *sz, ... ) {
+
+    va_list val;
+
+    va_start( val, sz );
+    outputv( sz, val );
+    va_end( val );
+}
+
+/* Write a string to stdout/status bar/popup window, vprintf style */
+extern void outputv( char *sz, va_list val ) {
+
+#if USE_GTK
+    if( fX && fGTKOutput ) {
+	GTKOutput( g_strdup_vprintf( sz, val ));
+	return;
+    }
+#endif
+    vprintf( sz, val );
+}
+
+/* Signifies that all output for the current command is complete */
+extern void outputx( void ) {
+    
+#if USE_GTK
+    if( fX && fGTKOutput )
+	GTKOutputX();
 #endif
 }
 
@@ -1696,7 +1819,7 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 
 static void usage( char *argv0 ) {
 
-    printf(
+    outputf(
 "Usage: %s [options]\n"
 "Options:\n"
 "  -d DIR, --datadir DIR     Read database and weight files from direcotry "
@@ -1780,12 +1903,12 @@ extern int main( int argc, char *argv[] ) {
 	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
 	case 'v': /* version */
-	    puts( "GNU Backgammon " VERSION );
+	    outputl( "GNU Backgammon " VERSION );
 #if USE_GUI
-	    puts( "X Window System supported." );
+	    outputl( "X Window System supported." );
 #endif
 #if HAVE_LIBGDBM
-	    puts( "Position databases supported." );
+	    outputl( "Position databases supported." );
 #endif
 	    return EXIT_SUCCESS;
 	default:
@@ -1793,7 +1916,7 @@ extern int main( int argc, char *argv[] ) {
 	    return EXIT_FAILURE;
 	}
 
-    puts( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong.\n"
+    outputl( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong.\n"
 	  "GNU Backgammon is free software, covered by the GNU "
 	  "General Public License\n"
 	  "version 2, and you are welcome to change it and/or distribute "
@@ -1853,7 +1976,7 @@ extern int main( int argc, char *argv[] ) {
     if( fX ) {
         RunExt();
 
-        fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
+	fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
         fX = FALSE;
     }
 #endif
@@ -1861,7 +1984,7 @@ extern int main( int argc, char *argv[] ) {
     for(;;) {
 #if HAVE_LIBREADLINE
 	while( !( sz = readline( FormatPrompt() ) ) ) {
-	    putchar( '\n' );
+	    outputc( '\n' );
 	    PromptForExit();
 	}
 	
@@ -1888,7 +2011,7 @@ extern int main( int argc, char *argv[] ) {
     
 	
 	while( feof( stdin ) ) {
-	    putchar( '\n' );
+	    outputc( '\n' );
 	    
 	    if( !sz[ 0 ] )
 		PromptForExit();

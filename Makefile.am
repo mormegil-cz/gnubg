@@ -18,7 +18,8 @@ bin_PROGRAMS = gnubg
 if USE_GTK
 ## --- GTK
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
-gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h
+gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
+	gnu.xpm question.xpm
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else

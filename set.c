@@ -71,12 +71,12 @@ static void SetRNG( rng rngNew, char *szSeed ) {
     /* FIXME: read name of file with user RNG */
 
     if( rngCurrent == rngNew ) {
-	printf( "You are already using the %s generator.\n",
+	outputf( "You are already using the %s generator.\n",
 		aszRNG[ rngNew ] );
 	if( szSeed )
 	    CommandSetSeed( szSeed );
     } else {
-	printf( "GNU Backgammon will now use the %s generator.\n",
+	outputf( "GNU Backgammon will now use the %s generator.\n",
 		aszRNG[ rngNew ] );
 
         /* Dispose dynamically linked user module if necesary */
@@ -93,8 +93,8 @@ static void SetRNG( rng rngNew, char *szSeed ) {
         if ( rngNew == RNG_USER ) {
 #if HAVE_LIBDL
 	  if ( !UserRNGOpen() ) {
-	    printf ( "Error loading shared library.\n" );
-	    printf ( "You are still using the %s generator.\n",
+	      outputl( "Error loading shared library." );
+	      outputf( "You are still using the %s generator.\n",
 		     aszRNG[ rngCurrent ] );
             return;
 	  }
@@ -127,30 +127,30 @@ extern void CommandSetAutoDoubles( char *sz ) {
     int n;
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	puts( "You must specify how many automatic doubles to use "
+	outputl( "You must specify how many automatic doubles to use "
 	      "(try `help set automatic double')." );
 	return;
     }
 
     if( n > 16 ) {
-	puts( "Please specify a smaller limit (up to 16 automatic "
+	outputl( "Please specify a smaller limit (up to 16 automatic "
 	      "doubles." );
 	return;
     }
 	
     if( ( cAutoDoubles = n ) > 1 )
-	printf( "Automatic doubles will be used (up to a limit of %d).\n", n );
+	outputf( "Automatic doubles will be used (up to a limit of %d).\n", n );
     else if( cAutoDoubles )
-	puts( "A single automatic double will be permitted." );
+	outputl( "A single automatic double will be permitted." );
     else
-	puts( "Automatic doubles will not be used." );
+	outputl( "Automatic doubles will not be used." );
 	
     if( cAutoDoubles ) {
 	if( nMatchTo > 0 )
-	    puts( "(Note that automatic doubles will have no effect until you "
+	    outputl( "(Note that automatic doubles will have no effect until you "
 		  "start session play.)" );
 	else if( !fCubeUse )
-	    puts( "(Note that automatic doubles will have no effect until you "
+	    outputl( "(Note that automatic doubles will have no effect until you "
 		  "enable cube use --\nsee `help set cube use'.)" );
     }
 }
@@ -180,19 +180,19 @@ extern void CommandSetBoard( char *sz ) {
     int an[ 2 ][ 25 ];
     
     if( fTurn < 0 ) {
-	puts( "There must be a game in progress to set the board." );
+	outputl( "There must be a game in progress to set the board." );
 
 	return;
     }
 
     if( !*sz ) {
-	puts( "You must specify a position -- see `help set board'." );
+	outputl( "You must specify a position -- see `help set board'." );
 
 	return;
     }
 
     if( ParsePosition( an, sz ) ) {
-	puts( "Illegal position." );
+	outputl( "Illegal position." );
 	return;
     }
 
@@ -204,17 +204,17 @@ extern void CommandSetBoard( char *sz ) {
 static int CheckCubeAllowed( void ) {
     
     if( fTurn < 0 ) {
-	puts( "There must be a game in progress to set the cube." );
+	outputl( "There must be a game in progress to set the cube." );
 	return -1;
     }
 
     if( fCrawford ) {
-	puts( "The cube is disabled during the Crawford game." );
+	outputl( "The cube is disabled during the Crawford game." );
 	return -1;
     }
     
     if( !fCubeUse ) {
-	puts( "The cube is disabled (see `help set cube use')." );
+	outputl( "The cube is disabled (see `help set cube use')." );
 	return -1;
     }
 
@@ -226,7 +226,7 @@ extern void CommandSetCache( char *sz ) {
     int n;
 
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	puts( "You must specify the number of cache entries to use." );
+	outputl( "You must specify the number of cache entries to use." );
 
 	return;
     }
@@ -234,7 +234,7 @@ extern void CommandSetCache( char *sz ) {
     if( EvalCacheResize( n ) )
 	perror( "EvalCacheResize" );
     else
-	printf( "The position cache has been sized to %d entr%s.\n", n,
+	outputf( "The position cache has been sized to %d entr%s.\n", n,
 		n == 1 ? "y" : "ies" );
 }
 
@@ -252,7 +252,7 @@ extern void CommandSetCubeCentre( char *sz ) {
     
     fCubeOwner = -1;
 
-    puts( "The cube has been centred (either player may double)." );
+    outputl( "The cube has been centred (either player may double)." );
     
 #if USE_GUI
     if( fX )
@@ -260,7 +260,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 #endif
 
     if( fDoubled ) {
-	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
 	fNextTurn = TRUE;
     }
@@ -285,12 +285,12 @@ extern void CommandSetCubeOwner( char *sz ) {
 	return;
 
     default:
-	puts( "You must specify which player owns the cube (see `help set "
+	outputl( "You must specify which player owns the cube (see `help set "
 	      "cube owner')." );
 	return;
     }
 
-    printf( "%s now owns the cube.\n", ap[ fCubeOwner ].szName );
+    outputf( "%s now owns the cube.\n", ap[ fCubeOwner ].szName );
 
 #if USE_GUI
     if( fX )
@@ -298,7 +298,7 @@ extern void CommandSetCubeOwner( char *sz ) {
 #endif    
     
     if( fDoubled ) {
-	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
 	fNextTurn = TRUE;
     }
@@ -312,12 +312,12 @@ extern void CommandSetCubeUse( char *sz ) {
 	return;
 
     if( !nMatchTo && fJacoby && !fCubeUse )
-	puts( "(Note that you'll have to disable the Jacoby rule if you want "
+	outputl( "(Note that you'll have to disable the Jacoby rule if you want "
 	      "gammons and\nbackgammons to be scored -- see `help set "
 	      "jacoby')." );
     
     if( fCrawford && fCubeUse )
-	puts( "(But the Crawford rule is in effect, so you won't be able to "
+	outputl( "(But the Crawford rule is in effect, so you won't be able to "
 	      "use it during\nthis game.)" );
     else if( fTurn >= 0 && !fCubeUse ) {
 	/* The cube was being used and now it isn't; reset it to 1,
@@ -331,7 +331,7 @@ extern void CommandSetCubeUse( char *sz ) {
 #endif
 
 	if( fDoubled ) {
-	    printf( "(%s's double has been cancelled.)\n",
+	    outputf( "(%s's double has been cancelled.)\n",
 		    ap[ fMove ].szName );
 	    fDoubled = FALSE;
 	    fNextTurn = TRUE;
@@ -350,7 +350,7 @@ extern void CommandSetCubeValue( char *sz ) {
 
     for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
-	    printf( "The cube has been set to %d.\n", nCube = n );
+	    outputf( "The cube has been set to %d.\n", nCube = n );
 	    
 #if USE_GUI
 	    if( fX )
@@ -359,7 +359,7 @@ extern void CommandSetCubeValue( char *sz ) {
 	    return;
 	}
 
-    puts( "You must specify a legal cube value (see `help set cube value')." );
+    outputl( "You must specify a legal cube value (see `help set cube value')." );
 }
 
 extern void CommandSetDelay( char *sz ) {
@@ -370,24 +370,24 @@ extern void CommandSetDelay( char *sz ) {
 	if( *sz && !strncasecmp( sz, "none", strlen( sz ) ) )
 	    n = 0;
 	else if( ( n = ParseNumber( &sz ) ) < 0 || n > 10000 ) {
-	    puts( "You must specify a legal move delay (see `help set "
+	    outputl( "You must specify a legal move delay (see `help set "
 		  "delay')." );
 	    return;
 	}
 
 	if( n ) {
-	    printf( "All moves will be shown for at least %d millisecond%s.\n",
+	    outputf( "All moves will be shown for at least %d millisecond%s.\n",
 		    n, n > 1 ? "s" : "" );
 	    if( !fDisplay )
-		puts( "(You will also need to use `set display' to turn "
+		outputl( "(You will also need to use `set display' to turn "
 		      "board updates on -- see `help set display'.)" );
 	} else
-	    puts( "Moves will not be delayed." );
+	    outputl( "Moves will not be delayed." );
 	
 	nDelay = n;
     } else
 #endif
-	puts( "The `set delay' command applies only when using a window "
+	outputl( "The `set delay' command applies only when using a window "
 	      "system." );
 }
 
@@ -396,7 +396,7 @@ extern void CommandSetDice( char *sz ) {
     int n0, n1;
     
     if( fTurn < 0 ) {
-	puts( "There must be a game in progress to set the dice." );
+	outputl( "There must be a game in progress to set the dice." );
 
 	return;
     }
@@ -411,12 +411,12 @@ extern void CommandSetDice( char *sz ) {
 	n1 = ParseNumber( &sz );
     
     if( n0  < 1 || n0 > 6 || n1 < 1 || n1 > 6 ) {
-	puts( "You must specify two numbers from 1 to 6 for the dice." );
+	outputl( "You must specify two numbers from 1 to 6 for the dice." );
 
 	return;
     }
 
-    printf( "The dice have been set to %d and %d.\n", anDice[ 0 ] = n0,
+    outputf( "The dice have been set to %d and %d.\n", anDice[ 0 ] = n0,
 	    anDice[ 1 ] = n1 );
 
 #if USE_GUI
@@ -439,7 +439,7 @@ extern void CommandSetEvalCandidates( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 || n > MAX_SEARCH_CANDIDATES ) {
-	printf( "You must specify a valid number of moves to consider -- try "
+	outputf( "You must specify a valid number of moves to consider -- try "
 	      "`help set %sevaluation candidates'.\n", szSetCommand );
 
 	return;
@@ -447,7 +447,7 @@ extern void CommandSetEvalCandidates( char *sz ) {
 
     pecSet->nSearchCandidates = n;
 
-    printf( "%s will consider up to %d move%s for evaluation at deeper "
+    outputf( "%s will consider up to %d move%s for evaluation at deeper "
 	    "plies.\n", szSet, pecSet->nSearchCandidates,
 	    pecSet->nSearchCandidates == 1 ? "" : "s" );
 }
@@ -463,7 +463,7 @@ extern void CommandSetEvalPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	printf( "You must specify a valid number of plies to look ahead -- "
+	outputf( "You must specify a valid number of plies to look ahead -- "
 		"try `help set %sevaluation plies'.\n", szSetCommand );
 
 	return;
@@ -471,7 +471,7 @@ extern void CommandSetEvalPlies( char *sz ) {
 
     pecSet->nPlies = n;
 
-    printf( "%s will use %d ply evaluation.\n", szSet, pecSet->nPlies );
+    outputf( "%s will use %d ply evaluation.\n", szSet, pecSet->nPlies );
 }
 
 extern void CommandSetEvalReduced( char *sz ) {
@@ -479,7 +479,7 @@ extern void CommandSetEvalReduced( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( ( n < 0 ) || ( n > 21 ) ) {
-	printf( "You must specify a valid number -- "
+	outputf( "You must specify a valid number -- "
 		"try `help set %sevaluation reduced'.\n", szSetCommand );
 
 	return;
@@ -487,7 +487,7 @@ extern void CommandSetEvalReduced( char *sz ) {
 
     if ( pecSet->nPlies < 2 ) {
 
-      puts ( "Command has no effect for 0 and 1 ply evaluations.\n" );
+	outputl( "Command has no effect for 0 and 1 ply evaluations.\n" );
       return;
 
     }
@@ -504,7 +504,7 @@ extern void CommandSetEvalReduced( char *sz ) {
     else
       pecSet->nReduced = 14;
 
-    printf( "%s will use %.0f%% speed %d ply evaluation.\n", 
+    outputf( "%s will use %.0f%% speed %d ply evaluation.\n", 
 	    szSet, 
 	    (pecSet->nReduced) ? 100. * pecSet->nReduced / 21.0 : 100.,
 	    pecSet->nPlies );
@@ -517,7 +517,7 @@ extern void CommandSetEvalTolerance( char *sz ) {
     double r = ParseReal( &sz );
 
     if( r < 0.0 ) {
-	printf( "You must specify a valid cubeless equity tolerance to use -- "
+	outputf( "You must specify a valid cubeless equity tolerance to use -- "
 		"try `help set\n%sevaluation tolerance'.\n", szSetCommand );
 
 	return;
@@ -525,7 +525,7 @@ extern void CommandSetEvalTolerance( char *sz ) {
 
     pecSet->rSearchTolerance = r;
 
-    printf( "%s will select moves within %0.3g cubeless equity for\n"
+    outputf( "%s will select moves within %0.3g cubeless equity for\n"
 	    "evaluation at deeper plies.\n", szSet, pecSet->rSearchTolerance );
 }
 
@@ -560,7 +560,7 @@ extern void CommandSetPlayerEvaluation( char *sz ) {
     HandleCommand( sz, acSetEvaluation );
 
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
-	printf( "(Note that this setting will have no effect until you "
+	outputf( "(Note that this setting will have no effect until you "
 		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
 }
 
@@ -568,7 +568,7 @@ extern void CommandSetPlayerGNU( char *sz ) {
 
     ap[ iPlayerSet ].pt = PLAYER_GNU;
 
-    printf( "Moves for %s will now be played by GNU Backgammon.\n",
+    outputf( "Moves for %s will now be played by GNU Backgammon.\n",
 	    ap[ iPlayerSet ].szName );
 }
 
@@ -576,7 +576,7 @@ extern void CommandSetPlayerHuman( char *sz ) {
 
     ap[ iPlayerSet ].pt = PLAYER_HUMAN;
 
-    printf( "Moves for %s must now be entered manually.\n",
+    outputf( "Moves for %s must now be entered manually.\n",
 	    ap[ iPlayerSet ].szName );
 }
 
@@ -585,26 +585,26 @@ extern void CommandSetPlayerName( char *sz ) {
     char *pch = NextToken( &sz );
     
     if( !pch ) {
-	puts( "You must specify a name to use." );
+	outputl( "You must specify a name to use." );
 
 	return;
     }
 
     if( ( *pch == '0' || *pch == '1' ) && !pch[ 1 ] ) {
-	printf( "`%c' is not a legal name.\n", *pch );
+	outputf( "`%c' is not a legal name.\n", *pch );
 
 	return;
     }
 
     if( !strncasecmp( pch, "both", strlen( pch ) ) ) {
-	puts( "`both' is a reserved word; you can't call a player that.\n" );
+	outputl( "`both' is a reserved word; you can't call a player that.\n" );
 
 	return;
     }
 
     if( !strncasecmp( pch, ap[ !iPlayerSet ].szName,
 		      sizeof( ap[ 0 ].szName ) ) ) {
-	puts( "That name is already in use by the other player." );
+	outputl( "That name is already in use by the other player." );
 
 	return;
     }
@@ -614,7 +614,7 @@ extern void CommandSetPlayerName( char *sz ) {
     
     strcpy( ap[ iPlayerSet ].szName, pch );
 
-    printf( "Player %d is now knwon as `%s'.\n", iPlayerSet, pch );
+    outputf( "Player %d is now knwon as `%s'.\n", iPlayerSet, pch );
 }
 
 extern void CommandSetPlayerPlies( char *sz ) {
@@ -622,7 +622,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	puts( "You must specify a vaid ply depth to look ahead -- try `help "
+	outputl( "You must specify a vaid ply depth to look ahead -- try `help "
 	      "set player plies'." );
 
 	return;
@@ -631,11 +631,11 @@ extern void CommandSetPlayerPlies( char *sz ) {
     ap[ iPlayerSet ].ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
-	printf( "Moves for %s will be played with %d ply lookahead (note that "
+	outputf( "Moves for %s will be played with %d ply lookahead (note that "
 		"this will\nhave no effect yet, because gnubg is not moving "
 		"for this player).\n", ap[ iPlayerSet ].szName, n );
     else
-	printf( "Moves for %s will be played with %d ply lookahead.\n",
+	outputf( "Moves for %s will be played with %d ply lookahead.\n",
 		ap[ iPlayerSet ].szName, n );
 }
 
@@ -643,7 +643,7 @@ extern void CommandSetPlayerPubeval( char *sz ) {
 
     ap[ iPlayerSet ].pt = PLAYER_PUBEVAL;
 
-    printf( "Moves for %s will now be played by pubeval.\n",
+    outputf( "Moves for %s will now be played by pubeval.\n",
 	    ap[ iPlayerSet ].szName );
 }
 
@@ -653,7 +653,7 @@ extern void CommandSetPlayer( char *sz ) {
     int i;
 
     if( !pch ) {
-	puts( "You must specify a player -- try `help set player'." );
+	outputl( "You must specify a player -- try `help set player'." );
 	
 	return;
     }
@@ -668,7 +668,7 @@ extern void CommandSetPlayer( char *sz ) {
 
     if( i == 2 ) {
 	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
-	    puts( "Insufficient memory." );
+	    outputl( "Insufficient memory." );
 		
 	    return;
 	}
@@ -686,7 +686,7 @@ extern void CommandSetPlayer( char *sz ) {
 	return;
     }
     
-    printf( "Unknown player `%s' -- try `help set player'.\n", pch );
+    outputf( "Unknown player `%s' -- try `help set player'.\n", pch );
 }
 
 extern void CommandSetPrompt( char *szParam ) {
@@ -696,7 +696,7 @@ extern void CommandSetPrompt( char *szParam ) {
     szPrompt = ( szParam && *szParam ) ? strcpy( sz, szParam ) :
 	szDefaultPrompt;
     
-    printf( "The prompt has been set to `%s'.\n", szPrompt );
+    outputf( "The prompt has been set to `%s'.\n", szPrompt );
 }
 
 extern void CommandSetRNGAnsi( char *sz ) {
@@ -708,8 +708,8 @@ extern void CommandSetRNGBsd( char *sz ) {
 #if HAVE_RANDOM
     SetRNG( RNG_BSD, sz );
 #else
-    puts( "This installation of GNU Backgammon was compiled without the" );
-    puts( "BSD generator." );
+    outputl( "This installation of GNU Backgammon was compiled without the" );
+    outputl( "BSD generator." );
 #endif
 }
 
@@ -738,8 +738,8 @@ extern void CommandSetRNGUser( char *sz ) {
 #if HAVE_LIBDL
     SetRNG( RNG_USER, sz );
 #else
-    puts( "This installation of GNU Backgammon was compiled without the" );
-    puts( "dynamic linking library needed for user RNG's." );
+    outputl( "This installation of GNU Backgammon was compiled without the" );
+    outputl( "dynamic linking library needed for user RNG's." );
 #endif
 
 }
@@ -757,7 +757,7 @@ extern void CommandSetRolloutTrials( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 1 ) {
-	puts( "You must specify a valid number of trials to make -- "
+	outputl( "You must specify a valid number of trials to make -- "
 		"try `help set rollout trials'." );
 
 	return;
@@ -765,7 +765,7 @@ extern void CommandSetRolloutTrials( char *sz ) {
 
     nRollouts = n;
 
-    printf( "%d game%s will be played per rollout.\n", nRollouts,
+    outputf( "%d game%s will be played per rollout.\n", nRollouts,
 	    nRollouts == 1 ? "" : "s" );
 }
 
@@ -774,7 +774,7 @@ extern void CommandSetRolloutTruncation( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 1 ) {
-	puts( "You must specify a valid ply at which to truncate  -- "
+	outputl( "You must specify a valid ply at which to truncate  -- "
 		"try `help set rollout truncation'." );
 
 	return;
@@ -782,7 +782,7 @@ extern void CommandSetRolloutTruncation( char *sz ) {
 
     nRolloutTruncate = n;
 
-    printf( "Rollouts will be truncated after %d pl%s.\n", nRolloutTruncate,
+    outputf( "Rollouts will be truncated after %d pl%s.\n", nRolloutTruncate,
 	    nRolloutTruncate == 1 ? "y" : "ies" );
 }
 
@@ -803,13 +803,13 @@ extern void CommandSetScore( char *sz ) {
     
     if( ( n0 = ParseNumber( &sz ) ) < 0 ||
 	( n1 = ParseNumber( &sz ) ) < 0 ) {
-	puts( "You must specify the score for both players -- try `help set "
+	outputl( "You must specify the score for both players -- try `help set "
 	      "score'." );
 	return;
     }
 
     if( nMatchTo && ( n0 >= nMatchTo || n1 >= nMatchTo ) ) {
-	printf( "Each player's score must be below %d point%s.\n", nMatchTo,
+	outputf( "Each player's score must be below %d point%s.\n", nMatchTo,
 		nMatchTo == 1 ? "" : "s" );
 	return;
     }
@@ -828,7 +828,7 @@ extern void CommandSetSeed( char *sz ) {
     int n;
     
     if( rngCurrent == RNG_MANUAL ) {
-	puts( "You can't set a seed if you're using manual dice generation." );
+	outputl( "You can't set a seed if you're using manual dice generation." );
 	return;
     }
 
@@ -836,15 +836,15 @@ extern void CommandSetSeed( char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    puts( "You must specify a vaid seed -- try `help set seed'." );
+	    outputl( "You must specify a vaid seed -- try `help set seed'." );
 
 	    return;
 	}
 
 	InitRNGSeed( n );
-	printf( "Seed set to %d.\n", n );
+	outputf( "Seed set to %d.\n", n );
     } else
-	puts( InitRNG() ? "Seed initialised from system random data." :
+	outputl( InitRNG() ? "Seed initialised from system random data." :
 	      "Seed initialised by system clock." );
 }
 
@@ -854,25 +854,25 @@ extern void CommandSetTurn( char *sz ) {
     int i;
 
     if( fResigned ) {
-	puts( "Please resolve the resignation first." );
+	outputl( "Please resolve the resignation first." );
 
 	return;
     }
     
     if( !pch ) {
-	puts( "Which player do you want to set on roll?" );
+	outputl( "Which player do you want to set on roll?" );
 
 	return;
     }
 
     if( ( i = ParsePlayer( pch ) ) < 0 ) {
-	printf( "Unknown player `%s' -- try `help set turn'.\n", pch );
+	outputf( "Unknown player `%s' -- try `help set turn'.\n", pch );
 
 	return;
     }
 
     if( i == 2 ) {
-	puts( "You can't set both players on roll." );
+	outputl( "You can't set both players on roll." );
 
 	return;
     }
@@ -890,7 +890,7 @@ extern void CommandSetTurn( char *sz ) {
 	ShowBoard();
 #endif
     
-    printf( "`%s' is now on roll.\n", ap[ i ].szName );
+    outputf( "`%s' is now on roll.\n", ap[ i ].szName );
 }
 
 
@@ -902,7 +902,7 @@ extern void CommandSetJacoby( char *sz ) {
 	return;
 
     if( fJacoby && !fCubeUse )
-	puts( "(Note that you'll have to enable the cube if you want gammons "
+	outputl( "(Note that you'll have to enable the cube if you want gammons "
 	      "and backgammons\nto be scored -- see `help set cube use'.)" );
 }
 
@@ -927,20 +927,20 @@ extern void CommandSetCrawford( char *sz ) {
 	CommandSetPostCrawford ( "on" );
 
       if( fCrawford && fDoubled ) {
-	  printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	  outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	  fDoubled = FALSE;
 	  fNextTurn = TRUE;
       }
     }
     else {
-      puts( "Cannot set whether this is the Crawford game\n"
+      outputl( "Cannot set whether this is the Crawford game\n"
 	    "as none of the players are 1-away from winning." );
     }
   }
   else if ( ! nMatchTo ) 
-    puts ( "Cannot set Crawford play for money sessions." );
+      outputl( "Cannot set Crawford play for money sessions." );
   else
-    puts ( "No match in progress (type `new match n' to start one)." );
+      outputl( "No match in progress (type `new match n' to start one)." );
 }
 
 extern void CommandSetPostCrawford( char *sz ) {
@@ -963,14 +963,14 @@ extern void CommandSetPostCrawford( char *sz ) {
 
     }
     else {
-      puts( "Cannot set whether this is post-Crawford play\n"
+      outputl( "Cannot set whether this is post-Crawford play\n"
 	    "as none of the players are 1-away from winning." );
     }
   }
   else if ( ! nMatchTo ) 
-    puts ( "Cannot set post-Crawford play for money sessions." );
+      outputl( "Cannot set post-Crawford play for money sessions." );
   else
-    puts ( "No match in progress (type `new match n' to start one)." );
+      outputl( "No match in progress (type `new match n' to start one)." );
 
 }
 

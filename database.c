@@ -59,17 +59,17 @@ extern void CommandDatabaseDump( char *sz ) {
 	pev = (dbevaluation *) dValue.dptr;
 
 	if( !c )
-	    puts( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
-		  "Date" );
+	    outputl( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
+		     "Date" );
 
-	printf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
-		PositionIDFromKey( (unsigned char *) dKey.dptr ),
-		(float) pev->asEq[ OUTPUT_WIN ] / 0xFFFF,
-		(float) pev->asEq[ OUTPUT_WINGAMMON ] / 0xFFFF,
-		(float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
-		(float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
-		(float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
-		pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
+	outputf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
+		 PositionIDFromKey( (unsigned char *) dKey.dptr ),
+		 (float) pev->asEq[ OUTPUT_WIN ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_WINGAMMON ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
+		 pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
 	
 	c++;
     
@@ -88,7 +88,7 @@ extern void CommandDatabaseDump( char *sz ) {
     }
 
     if( !c )
-	puts( "The database is empty." );
+	outputl( "The database is empty." );
 
     gdbm_close( pdb );
 }
@@ -156,7 +156,7 @@ extern void CommandDatabaseRollout( char *sz ) {
     }
 
     if( !fInterrupt && !c )
-	puts( "There are no unevaluated positions in the database to roll "
+	outputl( "There are no unevaluated positions in the database to roll "
 	      "out." );
 
     gdbm_close( pdb );
@@ -181,7 +181,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	
 	do {    
 	    if( !( ++c % 100 ) && fShowProgress ) {
-		printf( "%6d\r", c );
+		outputf( "%6d\r", c );
 		fflush( stdout );
 	    }
 	    
@@ -243,7 +243,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 
 	    if( pev->c >= 72 /* FIXME */ ) {
 		if( !( ++c % 100 ) && fShowProgress ) {
-		    printf( "%6d\r", c );
+		    outputf( "%6d\r", c );
 		    fflush( stdout );
 		}
 	    
@@ -270,7 +270,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 	}
 
 	if( !c ) {
-	    puts( "There are no target evaluations in the database to train "
+	    outputl( "There are no target evaluations in the database to train "
 		  "from." );
 	    break;
 	}
@@ -281,7 +281,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 #else
 static void NoGDBM( void ) {
 
-    puts( "This installation of GNU Backgammon was compiled without GDBM\n"
+    outputl( "This installation of GNU Backgammon was compiled without GDBM\n"
 	  "support, and does not implement position database operations." );
 }
 
