@@ -1,3 +1,8 @@
+Thu Mar  7 20:01:18 2002  Joern Thyssen  <jthyssen@dk.ibm.com> 
+
+	* rollout.c (RolloutGeneral): skip calculation of cubeless equity
+	as it is already calculate in BasicCubefulRollout.
+
 Wed Mar  6 18:38:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c: Rewrite and improve 'Set cube' dialog

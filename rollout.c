@@ -1107,7 +1107,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
       
       for ( ici = 0; ici < cci ; ici++ ) {
 
-        aar[ ici ][ OUTPUT_EQUITY ] = Utility ( aar[ ici ], &aci [ ici ]);
+        // aar[ ici ][ OUTPUT_EQUITY ] = Utility ( aar[ ici ], &aci [ ici ]);
 
 
         if( fInvert ) InvertEvaluationR( aar[ ici ], &aci[ ici ] );
