@@ -1091,6 +1091,8 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
 
     /* obtain parameters */
 
+    PushLocale ( "C" );
+
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
           pl = pl->plNext ) {
 

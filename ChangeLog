@@ -1,3 +1,9 @@
+Tue Apr 20 17:56:25 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* matchequity.c (initPostCrawfordMETFromParameters):
+	add missing call to PushLocale.
+	(reported by Joachim Matussek)
+
 Mon Apr 19 22:52:41 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (EPC): fix "same dice sequence for several games in a

@@ -65,13 +65,13 @@ credEntry ceCredits[] = {
   {"Tristan Colgate", 0},
   {"Olivier Croisille", 0},
   {"Ned Cross", 0},
+  {"Christopher D. Yep", 0},
   {"Bill Davidson", 0},
   {"Giulio De Marco", 0},
   {"Michael Depreli", 0},
   {"Alberta di Silvio", 0},
   {"Ian Dunstan", 0},
   {"Max Durbano", 0},
-  {"Christopher D. Yep", 0},
   {"Peter Eberhard", 0},
   {"Robert Eberlein", 0},
   {"James F. Kibler", 0},
@@ -103,6 +103,7 @@ credEntry ceCredits[] = {
   {"Alix Martin", 0},
   {"John Marttila", 0},
   {"William Maslen", 0},
+  {"Joachim Matussek", 0},
   {"Thomas Meyer", 0},
   {"Daniel Murphy", 0},
   {"Magnar Naustdalslid", 0},
@@ -195,40 +196,40 @@ char aszAUTHORS[] =
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"
-"    Elias Kritikos          Neil Kazaross           Jared Riley\n"
-"    Misja Alma              Mathias Kegelmann       Klaus Rindholt\n"
-"    Christian Anthon        Matija Kejzar           Oliver Riordan\n"
-"    Kazuaki Asai            Bert Van Kerckhove      Hans-Juergen Schaefer\n"
-"    Eric Augustine          James F. Kibler         Steve Schreiber\n"
-"    Erik Barfoed            Johnny Kirk             Hugh Sconyers\n"
-"    Ron Barry               Gerhard Knop            Martin Schrode\n"
-"    Steve Baedke            Robert Konigsberg       Paul Selick\n"
-"    Stefan van den Berg     Martin Krainer          Sho Sengoku\n"
-"    Chuck Bower             Corrin Lakeland         Ian Shaw\n"
-"    Adrian Bunk             Tim Laursen             Alberta di Silvio\n"
-"    Nick Bratby             Eli Liang               Peter Sochovsky\n"
-"    Craig Campbell          Ege Lundgren            Mark Spencer\n"
-"    John Chuang             Kevin Maguire           Scott Steiner\n"
-"    Tristan Colgate         Massimiliano Maini      Maik Stiebler\n"
-"    Olivier Croisille       Giulio De Marco         W. Stroop (Rob)\n"
-"    Ned Cross               John Marttila           Yoshito Takeuchi\n"
-"    Bill Davidson           Alix Martin             Jacques Thiriat\n"
-"    Michael Depreli         William Maslen          Malene Thyssen\n"
-"    Ian Dunstan             Thomas Meyer            Claes Tornberg\n"
-"    Max Durbano             Daniel Murphy           Sander van Rijnswou\n"
-"    Peter Eberhard          Magnar Naustdalslid     Robert-Jan Veldhuizen\n"
-"    Robert Eberlein         Dave Neary              Morten Wang\n"
-"    Fotis                   Rolf Nielsen            Jeff White\n"
-"    Kennedy Fraser          Mirori Orange           JP White\n"
-"    Ric Gerace              Peter Orum              Mike Whitton\n"
-"    Michel Grimminck        Roy Passfield           Chris Wilson\n"
-"    Eric Groleau            Thomas Patrick          Kit Woolsey\n"
-"    Jeff Haferman           Billie Patterson        Frank Worrell\n"
-"    Morten Juul Henriksen   Zvezdan Petkovic        Christopher D. Yep\n"
-"    Alain Henry             Petri Pitkanen          Anders Zachrison\n"
-"    Jens Hoefkens           Sam Pottle              Douglas Zare\n"
-"    Martin Janke            Henrik Ravn\n"
-"    Nis Jorgensen           James Rech\n"
+"    Elias Kritikos          Neil Kazaross           James Rech\n"
+"    Misja Alma              Mathias Kegelmann       Jared Riley\n"
+"    Christian Anthon        Matija Kejzar           Klaus Rindholt\n"
+"    Kazuaki Asai            Bert Van Kerckhove      Oliver Riordan\n"
+"    Eric Augustine          James F. Kibler         Hans-Juergen Schaefer\n"
+"    Erik Barfoed            Johnny Kirk             Steve Schreiber\n"
+"    Ron Barry               Gerhard Knop            Hugh Sconyers\n"
+"    Steve Baedke            Robert Konigsberg       Martin Schrode\n"
+"    Stefan van den Berg     Martin Krainer          Paul Selick\n"
+"    Chuck Bower             Corrin Lakeland         Sho Sengoku\n"
+"    Adrian Bunk             Tim Laursen             Ian Shaw\n"
+"    Nick Bratby             Eli Liang               Alberta di Silvio\n"
+"    Craig Campbell          Ege Lundgren            Peter Sochovsky\n"
+"    John Chuang             Kevin Maguire           Mark Spencer\n"
+"    Tristan Colgate         Massimiliano Maini      Scott Steiner\n"
+"    Olivier Croisille       Giulio De Marco         Maik Stiebler\n"
+"    Ned Cross               John Marttila           W. Stroop (Rob)\n"
+"    Bill Davidson           Alix Martin             Yoshito Takeuchi\n"
+"    Michael Depreli         William Maslen          Jacques Thiriat\n"
+"    Ian Dunstan             Joachim Matussek        Malene Thyssen\n"
+"    Max Durbano             Thomas Meyer            Claes Tornberg\n"
+"    Peter Eberhard          Daniel Murphy           Sander van Rijnswou\n"
+"    Robert Eberlein         Magnar Naustdalslid     Robert-Jan Veldhuizen\n"
+"    Fotis                   Dave Neary              Morten Wang\n"
+"    Kennedy Fraser          Rolf Nielsen            Jeff White\n"
+"    Ric Gerace              Mirori Orange           JP White\n"
+"    Michel Grimminck        Peter Orum              Mike Whitton\n"
+"    Eric Groleau            Roy Passfield           Chris Wilson\n"
+"    Jeff Haferman           Thomas Patrick          Kit Woolsey\n"
+"    Morten Juul Henriksen   Billie Patterson        Frank Worrell\n"
+"    Alain Henry             Zvezdan Petkovic        Christopher D. Yep\n"
+"    Jens Hoefkens           Petri Pitkanen          Anders Zachrison\n"
+"    Martin Janke            Sam Pottle              Douglas Zare\n"
+"    Nis Jorgensen           Henrik Ravn\n"
 "\n"
 "\n"
 "  Credit is also due to those who have published information about backgammon\n"
