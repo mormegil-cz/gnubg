@@ -827,6 +827,8 @@ static void RestoreTree( list *pl, int fRoot ) {
 static void RestoreGame( list *pl ) {
 
     moverecord *pmr, *pmrResign;
+
+    PushLocale ( "C" );
     
     InitBoard( ms.anBoard );
 
@@ -866,6 +868,9 @@ static void RestoreGame( list *pl ) {
 
 	AddMoveRecord( pmrResign );
     }
+
+    PopLocale ();
+
 }
 
 extern void CommandLoadGame( char *sz ) {
