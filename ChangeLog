@@ -1,3 +1,16 @@
+Sun Aug 11 17:56:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* acconfig.h: removed (stuff moved to configure.in)
+	* configure.in, config.h.in: another attempt on solving
+	the basename problem.
+
+2002-08-11  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.am (SUBDIRS): Add m4.
+	(ACLOCAL_AMFLAGS): New variable.
+	(EXTRA_DIST): Add config.rpath.
+	* configure.in (AC_OUTPUT): Add m4/Makefile.
+
 Sat Aug 10 13:38:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c, html.c, config.h.in, configure.in: more

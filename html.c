@@ -36,7 +36,7 @@
 #include "positionid.h"
 #include "matchid.h"
 
-#if ! defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
+#if defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
 #include "libgen.h"
 #endif
 
