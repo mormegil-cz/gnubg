@@ -192,7 +192,7 @@ ACLOCAL_AMFLAGS = -I m4
 @EXTERNAL_BR1_TRUE@BR1DATA = gnubg_os0.bd
 @EXTERNAL_BR1_FALSE@BR1DATA = 
 
-@USE_BOARD3D_TRUE@BOARD3D_DIR = board3d
+@USE_BOARD3D_TRUE@BOARD3D_DIR = board3d textures
 @USE_BOARD3D_FALSE@BOARD3D_DIR = 
 @USE_BOARD3D_TRUE@BOARD3D_DEPS = board3d/libboard3d.a
 @USE_BOARD3D_FALSE@BOARD3D_DEPS = 
@@ -477,7 +477,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	py-compile strdup.c
-DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d ext
+DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d textures ext
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
 all: config.h

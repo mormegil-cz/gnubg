@@ -50,7 +50,7 @@ BR1DATA =
 endif
 
 if USE_BOARD3D
-BOARD3D_DIR=board3d
+BOARD3D_DIR=board3d textures
 BOARD3D_DEPS=board3d/libboard3d.a
 BOARD3D_LIBS=-L$(srcdir)/board3d -lboard3d @GTKGLEXT_LIBS@ @FTGL_LIBS@
 BOARD3D_INCS=@GTKGLEXT_CFLAGS@
