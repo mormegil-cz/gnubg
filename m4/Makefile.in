@@ -110,6 +110,9 @@ INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
 INTL_LIBTOOL_SUFFIX_PREFIX = @INTL_LIBTOOL_SUFFIX_PREFIX@
 LIB = @LIB@
+LIBART_CFLAGS = @LIBART_CFLAGS@
+LIBART_CONFIG = @LIBART_CONFIG@
+LIBART_LIBS = @LIBART_LIBS@
 LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LN_S = @LN_S@
@@ -143,7 +146,9 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 
-EXTRA_DIST = artsc.m4 esd.m4 freetype2.m4 gettext.m4 gtk-2.0.m4 gtk.m4
+EXTRA_DIST = artsc.m4 esd.m4 freetype2.m4 gettext.m4 gtk-2.0.m4 gtk.m4 \
+            audiofile.m4 libart.m4
+
 subdir = m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
