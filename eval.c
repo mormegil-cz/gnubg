@@ -2079,7 +2079,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	
 	if( EvaluatePositionCache( anBoard, arOutput, &ci, pec, i ) < 0 )
 	    return -1;
-	if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, pec, i ) < 0 )
+	if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, pec, i ,
+				      EVAL_DOUBLE | EVAL_NODOUBLE ) < 0 )
 	  return -1;
 
 	if( !i )
@@ -2263,7 +2264,7 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] ) {
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], 
 			 float prOutput[ 3 ], cubeinfo *ci,
-			 evalcontext *pec, int nPlies ) {
+			 evalcontext *pec, int nPlies, int fEvalFlag ) {
 
   /* 
    * Input: 
@@ -2370,39 +2371,43 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
      *
      */
 
-    SetCubeInfo ( &cix, nCube, fCubeOwner, ! fMove );
+    if ( fEvalFlag & EVAL_NODOUBLE ) {
 
-    prOutput[ 1 ] = 0.0;
+      SetCubeInfo ( &cix, nCube, fCubeOwner, ! fMove );
 
-    for( n0 = 1; n0 <= 6; n0++ )
-      for( n1 = 1; n1 <= n0; n1++ ) {
+      prOutput[ 1 ] = 0.0;
 
-	for( i = 0; i < 25; i++ ) {
-	  anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-	  anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-	}
+      for( n0 = 1; n0 <= 6; n0++ )
+	for( n1 = 1; n1 <= n0; n1++ ) {
 
-	if( fInterrupt ) {
-	  errno = EINTR;
-	  return -1;
-	}
+	  for( i = 0; i < 25; i++ ) {
+	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	  }
+
+	  if( fInterrupt ) {
+	    errno = EINTR;
+	    return -1;
+	  }
 	
-	FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
+	  FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
 	
-	SwapSides( anBoardNew );
+	  SwapSides( anBoardNew );
 
-	if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
-				     nPlies - 1 ) ) 
-	  return -1;
+	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
+				       nPlies - 1, EVAL_BOTH ) ) 
+	    return -1;
 
-	prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
+	  prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
-      }
+	}
     
-    if ( ! nMatchTo )
-      prOutput[ 1 ] /= -36.0;
-    else
-      prOutput[ 1 ] = 1.0 - prOutput[ 1 ] / 36.0;
+      if ( ! nMatchTo )
+	prOutput[ 1 ] /= -36.0;
+      else
+	prOutput[ 1 ] = 1.0 - prOutput[ 1 ] / 36.0;
+      
+    }
 
     /* 
      * Double!
@@ -2418,7 +2423,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
     //printf ("Cubeful: use cube? %1i\n", fCube );
 
-    if ( fCube ) {
+    if ( fCube && ( fEvalFlag & EVAL_DOUBLE ) ) {
 
       /*
        * Set new cube info:
@@ -2448,7 +2453,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	  SwapSides( anBoardNew );
 
 	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec,
-				       nPlies - 1 ) ) 
+				       nPlies - 1, EVAL_BOTH ) ) 
 	    return -1;
 
 	  prOutput[ 2 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
@@ -2621,17 +2626,17 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 	/* calculate my equity at opp takepoint */
 
-	arTemp[ 0 ] = 1.0 - arTakePoint[ ci->fMove ];
+	arTemp[ 0 ] = 1.0 - arTakePoint[ ! ci->fMove ];
         arTemp[ 1 ] = 
-	  arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ci->fMove ] );
+	  arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
         arTemp[ 2 ] = 
-	  arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ci->fMove ] );
+	  arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
 	arTemp[ 3 ] = 
 	  ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	  arTakePoint[ ci->fMove ];
+	  arTakePoint[ ! ci->fMove ];
 	arTemp[ 4 ] = 
 	  ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	  arTakePoint[ ci->fMove ];
+	  arTakePoint[ ! ci->fMove ];
 
 	rEq1 = Utility ( arTemp, ci );
 
@@ -2824,17 +2829,17 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 	  /* calculate my equity at opp takepoint */
 
-	  arTemp[ 0 ] = 1.0 - arTakePoint[ cix.fMove ];
+	  arTemp[ 0 ] = 1.0 - arTakePoint[ ! cix.fMove ];
 	  arTemp[ 1 ] = 
-	    arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ cix.fMove ] );
+	    arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
 	  arTemp[ 2 ] = 
-	    arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ cix.fMove ] );
+	    arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
 	  arTemp[ 3 ] = 
 	    ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	    arTakePoint[ cix.fMove ];
+	    arTakePoint[ ! cix.fMove ];
 	  arTemp[ 4 ] = 
 	    ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	    arTakePoint[ cix.fMove ];
+	    arTakePoint[ ! cix.fMove ];
 
 	  rEq1 = Utility ( arTemp, &cix );
 

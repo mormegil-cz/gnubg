@@ -934,7 +934,8 @@ extern void CommandHint( char *sz ) {
       SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
       EvaluatePositionCubeful( anBoard, arDouble, &ci, &ecEval,
-			       ecEval.nPlies ); 
+			       ecEval.nPlies, 
+			       EVAL_DOUBLE | EVAL_NODOUBLE ); 
       
       if ( fInterrupt )
 	return;

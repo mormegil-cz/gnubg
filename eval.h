@@ -77,6 +77,12 @@
 
 #define NORM_SCORE(n) ( nMatchTo - ( n ) )
 
+/* Flags for EvaluatePositionCubeful */
+
+#define EVAL_NODOUBLE  1
+#define EVAL_DOUBLE    2
+#define EVAL_BOTH      ( EVAL_NODOUBLE | EVAL_DOUBLE )
+
 typedef struct _evalcontext {
     /* FIXME expand this... e.g. different settings for different position
        classes */
@@ -181,7 +187,8 @@ extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], 
 			 float prOutput[ 3 ], cubeinfo *ci,
-			 evalcontext *pec, int nPlies );
+			 evalcontext *pec, int nPlies,
+			 int fEvalFlag);
 
 /* internal use only */
 extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],

@@ -138,7 +138,8 @@ static int ComputerTurn( void ) {
 	  gettimeofday ( &tv0, NULL );
 	  if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, 
 					&ap [ fTurn ].ec,
-					ap [ fTurn ].ec.nPlies ) < 0 ) 
+					ap [ fTurn ].ec.nPlies,
+					EVAL_DOUBLE ) < 0 )
 	    return -1;
 	  gettimeofday ( &tv1, NULL );
 	  printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
@@ -176,33 +177,76 @@ static int ComputerTurn( void ) {
 
 	  /* consider doubling */
 	  
+	  /* First decide whether we can double or not */
+
 	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
 	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) 
 	       && ( nMatchTo - anScore [ fTurn ] > nCube ) ) {
 
-	    gettimeofday ( &tv0, NULL );
+	    float arOutput [ NUM_OUTPUTS ], arTakePoint[ 2 ];
+	    float rThird;
+	    int fEvalFlag;
+	    evalcontext ecDH = {1, 8, 0.16 };
 
-	    if ( EvaluatePositionCubeful( anBoardMove,
-					  arDouble, &ci, 
-					  &ap [ fTurn ].ec,
-					  ap [ fTurn ].ec.nPlies ) 
-		 < 0 )  
-	      return -1;
-	    gettimeofday ( &tv1, NULL );
-	    printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
-		    1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
-		    (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
-	    printf ( "equity(new code) for take decision"
-		     " %+6.3f %+6.3f %+6.3f %+6.3f\n",  
-		     arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ],
-		     arDouble[ 3 ]);
+	    /* Quick heuristics: only double if we are in top
+	       33% of market window */
 
-	    if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) && 
-		 ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
-	      CommandDouble ( NULL );
-	      return 0;
+	    /* Determine market window */
+
+	    if( EvaluatePosition( anBoard, arOutput, 
+				  &ci, &ecDH ) )
+		return -1;
+
+	    GetTakePoint ( arOutput, anScore, nMatchTo, ci.nCube,
+			   arTakePoint );
+
+	    printf ( "My winning chance: %7.4f\n", arOutput[ 0 ] );
+	    printf ( "market window: %7.4f - %7.4f\n",
+		     1.0 - arTakePoint[ ! ci.fMove ],
+		     arTakePoint[ ci.fMove ] );
+
+	    /* Are we in upper third? */
+
+	    rThird = ( 2.0 * arTakePoint[ ci.fMove ] +
+		       ( 1.0 - arTakePoint [ ! ci.fMove ] ) ) / 3.0;
+
+	    printf ( "upper third: %7.4f\n", rThird );
+
+	    /* If we're in upper third, and we're not
+	       too good to double check cube action */
+
+	    if ( ( arOutput[ 0 ] > rThird ) && 
+		 ( Utility ( arOutput, &ci ) < 1.1 ) ) {
+
+	      gettimeofday ( &tv0, NULL );
+
+	      /* If it's too good we know opponent is going
+		 to pass, so don't calculate DOUBLE branch
+		 in EvalCubeful */
+
+	      if ( EvaluatePositionCubeful( anBoardMove,
+					    arDouble, &ci, 
+					    &ap [ fTurn ].ec,
+					    ap [ fTurn ].ec.nPlies,
+					    EVAL_BOTH ) < 0 )  
+		return -1;
+
+	      gettimeofday ( &tv1, NULL );
+	      printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
+		      1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		      (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
+	      printf ( "equity(new code) for take decision"
+		       " %+6.3f %+6.3f %+6.3f %+6.3f\n",  
+		       arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ],
+		       arDouble[ 3 ]);
+
+	      if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) && 
+		   ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
+		CommandDouble ( NULL );
+		return 0;
+	      }
+
 	    }
-
 	  }
 
 	  /* roll dice and move */
