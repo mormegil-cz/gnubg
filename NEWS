@@ -5,6 +5,9 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 ** Rollouts
  - extendable rollouts
 
+** Bearoff
+ - support for Hugh Sconyers' 15x15 full bearoff database
+
 * Changes in GNU Backgammon 0.14
 
 ** general
