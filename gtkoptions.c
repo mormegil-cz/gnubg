@@ -77,6 +77,7 @@ typedef struct _optionswidget {
 
   GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
   GtkWidget *pwGotoFirstGame;
+  GtkWidget *pwLangMenu;
 
   GtkWidget *pwSconyers15x15DVD;
   GtkWidget *pwSconyers15x15Disk;
@@ -163,6 +164,18 @@ static void ToggleAnimation( GtkWidget *pw, GtkWidget *pwSpeed ) {
                               !gtk_toggle_button_get_active(
                                   GTK_TOGGLE_BUTTON( pw ) ) );
 }
+
+static char *aaszLang[][ 2 ] = {
+    { N_("System default"), "system" },
+    { N_("Danish"),	    "da_DA" },
+    { N_("English (UK)"),   "en_UK" },
+    { N_("English (US)"),   "en_US" },
+    { N_("French"),	    "fr_FR" },
+    { N_("German"),	    "de_DE" },
+    { N_("Italian"),	    "it_IT" },
+    { N_("Japanese"),	    "ja_JA" },
+    { NULL, NULL }
+};
 
 static GtkWidget *OptionsPages( optionswidget *pow ) {
 
@@ -1411,7 +1424,40 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                             "match, game, or session or whether it should "
                             "show the first move in the first game"),
                           NULL );
-  
+
+    /* language preference */
+
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwhbox, FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Language:") ),
+			FALSE, FALSE, 0 );
+    pow->pwLangMenu = gtk_option_menu_new();
+    gtk_box_pack_start( GTK_BOX( pwhbox ), pow->pwLangMenu, FALSE, FALSE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pow->pwLangMenu ), 1 );
+    pwm = gtk_menu_new();
+
+    {
+	int iCurrentSettingPredifined = FALSE;
+
+	for ( i = 0; aaszLang[ i ][ 0 ]; ++i ) {
+	    gtk_menu_append( GTK_MENU( pwm ),
+			     pw = gtk_menu_item_new_with_label( 
+				    gettext( aaszLang[ i ][ 0 ] ) ) );
+	    if ( ! strcmp( szLang, aaszLang[ i ][ 1 ] ) )
+		iCurrentSettingPredifined = TRUE;
+	}
+	if ( ! iCurrentSettingPredifined ) {
+	    char* sz = NULL;
+	    sz = g_strdup_printf( _("User defined: %s"), szLang );
+	    gtk_menu_append( GTK_MENU( pwm ),
+			     pw = gtk_menu_item_new_with_label( 
+				    sz ) );
+	    g_free( sz );
+	}
+    }
+    gtk_widget_show_all( pwm );
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( pow->pwLangMenu ), pwm );
+
     /* return notebook */
 
     return pwn;    
@@ -1727,9 +1773,18 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
     }
   }
 
-
   CHECKUPDATE( pow->pwGotoFirstGame, fGotoFirstGame, "set gotofirstgame %s" )
       
+  /* language preference */
+
+  n = gtk_option_menu_get_history( GTK_OPTION_MENU( pow->pwLangMenu ) );
+  if ( n >= 0 && ( n < sizeof( aaszLang ) / sizeof( aaszLang[0] ) ) ) {
+    if ( strcmp( szLang, aaszLang[ n ][ 1 ] ) ) {
+      sprintf( sz, "set lang %s", aaszLang[ n ][ 1 ] );
+      UserCommand( sz );
+    }
+  }
+
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   
@@ -1821,6 +1876,13 @@ OptionsSet( optionswidget *pow) {
                                 fConfirmSave );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGotoFirstGame ),
                                 fGotoFirstGame );
+
+  /* language preference */
+
+  for ( i = 0; aaszLang[ i ][ 0 ]; ++i )
+    if ( ! strcmp( szLang, aaszLang[ i ][ 1 ] ) )
+      break;
+  gtk_option_menu_set_history( GTK_OPTION_MENU( pow->pwLangMenu ), i );
 
   /* bearoff options */
 

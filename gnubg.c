@@ -166,6 +166,8 @@ int fReadline = TRUE;
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
+char szLang[] = "system";
+
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
@@ -463,6 +465,7 @@ static char szDICE[] = N_("<die> <die>"),
     szFILTER[] = N_ ( "<ply> <num.xjoin to accept (0 = skip)> "
                       "[<num. of extra moves to accept> <tolerance>]"),
     szNAME[] = N_("<name>"),
+    szLANG[] = N_("system|<language code>"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
     szOPTDEPTH[] = N_("[depth]"),
@@ -1626,6 +1629,8 @@ command cER = {
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
+    { "lang", CommandSetLang, N_("Set your language preference"),
+      szLANG, NULL },
     { "matchequitytable", CommandSetMET,
       N_("Read match equity table from XML file"), szFILENAME, &cFilename },
     { "matchid", CommandSetMatchID, N_("set Match ID"), szMATCHID, NULL },
@@ -1741,6 +1746,8 @@ command cER = {
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
       "position"), szOPTPOSITION, NULL },
+    { "lang", CommandShowLang, N_("Display your language preference"),
+      NULL, NULL },
     { "marketwindow", CommandShowMarketWindow, 
       N_("show market window for doubles"), NULL, NULL },
     { "matchequitytable", CommandShowMatchEquityTable, 
@@ -5091,6 +5098,10 @@ extern void CommandSaveSettings( char *szParam ) {
                  "\n"), 
               VERSION );
 
+    /* language preference */
+
+    fprintf( pf, "set lang %s\n", szLang );
+
     /* analysis settings */
 
     SaveEvalSetupSettings ( pf, "set analysis chequerplay",
@@ -6901,6 +6912,58 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     GtkWidget *pwSplash = NULL;
 #endif
 
+    if( !( szHomeDirectory = getenv( "HOME" ) ) )
+	/* FIXME what should non-POSIX systems do? */
+	szHomeDirectory = ".";
+
+
+    {
+	/* set language */
+
+	char szFile[ 4096 ], szTemp[ 4096 ], *pch;
+	FILE *pf;
+
+	outputoff();
+    
+	sprintf( szFile, "%s/.gnubgautorc", szHomeDirectory );
+
+	if( ( pf = fopen( szFile, "r" ) ) ) {
+
+	    for (;;) {
+
+		szTemp[ 0 ] = 0;
+		fgets( szTemp, sizeof( szTemp ), pf );
+
+		if( ( pch = strchr( szTemp, '\n' ) ) )
+		    *pch = 0;
+
+		if ( ferror( pf ) ) {
+		    outputerr( szFile );
+		    break;
+		}
+
+		if ( feof( pf ) ) {
+		    break;
+		}
+
+		if ( ! strncmp( "set lang", szTemp, 8 ) ) {
+		    HandleCommand( szTemp, acTop );
+		    break;
+		}
+	    }
+
+	    fclose( pf );
+	}
+    
+
+	if ( szLang && *szLang && strcmp( "system", szLang ) ) {
+	    sprintf( szTemp, "LANG=%s", szLang );
+	    putenv( szTemp );
+	}
+
+	outputon();
+    }
+
 #if USE_GUI
     /* The GTK interface is fairly grotty; it makes it impossible to
        separate argv handling from attempting to open the display, so
@@ -6962,10 +7025,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     textdomain (PACKAGE);
     bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );
 			     
-    if( !( szHomeDirectory = getenv( "HOME" ) ) )
-	/* FIXME what should non-POSIX systems do? */
-	szHomeDirectory = ".";
-
 #if HAVE_NL_LANGINFO
  {
    char *cs = nl_langinfo( CODESET );

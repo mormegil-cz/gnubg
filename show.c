@@ -758,6 +758,12 @@ extern void CommandShowJacoby( char *sz ) {
 
 }
 
+extern void CommandShowLang( char *sz ) {
+
+  outputf( _("Your language preference is set to %s.\n"), szLang );
+    
+}
+
 extern void CommandShowMatchInfo( char *sz ) {
 
 #if USE_GTK

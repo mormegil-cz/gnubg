@@ -1,3 +1,15 @@
+Tue Aug 26 16:59:33 GMT 2003  Holger Bochnig <hbgg@gmx.net>
+
+	add commands and GUI option to set the language
+
+	* backgammon.h, gnubg.c: add commands
+	* gnubg.c (CommandSaveSettings): save language setting
+	* gnubg.c (real_main): read language setting from .gnubgautorc,
+	  set language
+	* gtkoptions.c (OptionsPages, OptionsOK, OptionsSet):
+	  GUI language setting
+	* set.c, show.c: new functions CommandSetLang, CommandShowLang
+
 TueAug 26 16:17:05  GMT 2003  Jim Segrave jes@jes-2.dmeon.nl
 
 	* gtkexport.c - make number of options a compile time calculation

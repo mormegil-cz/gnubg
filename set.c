@@ -4575,3 +4575,29 @@ CommandSetRatingOffset( char *sz ) {
            rRatingOffset );
 
 }
+
+extern void CommandSetLang( char *sz ) {
+
+    if( !sz || !*sz ) {
+	outputl( _( "You must give `system' or a language code "
+		    "as an argument." ) );
+	return;
+    }
+
+    if( strlen( sz ) > 31 )
+	sz[ 31 ] = 0;
+
+    if( ! strcmp( sz, szLang ) ) {
+	outputf( _("The current language preference is already set to "
+		   "%s."), sz );
+	return;
+    }
+
+    strcpy( szLang, sz );
+
+    outputf( _( "The language preference has been set to `%s'.\n"
+		"Please remember to save settings.\n"
+		"The new setting will only take effect on the next start "
+		"of gnubg." ), sz );
+
+}

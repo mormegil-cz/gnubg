@@ -363,6 +363,7 @@ extern int fSconyers15x15DVD;
 extern char szPathSconyers15x15DVD[ BIG_PATH ];      
 extern int fSconyers15x15Disk;
 extern char szPathSconyers15x15Disk[ BIG_PATH ];      
+extern char szLang[ 32 ];      
 
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
@@ -877,6 +878,7 @@ extern void CommandAccept( char * ),
     CommandSetHighlightMedium ( char * ),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
+    CommandSetLang( char * ),
     CommandSetMatchAnnotator( char * ),
     CommandSetMatchComment( char * ),
     CommandSetMatchDate( char * ),
@@ -1056,6 +1058,7 @@ extern void CommandAccept( char * ),
     CommandShowEgyptian( char * ),
     CommandShowJacoby( char * ),
     CommandShowKleinman( char * ),
+    CommandShowLang( char * ),
     CommandShowMarketWindow( char * ),
     CommandShowMatchInfo( char * ),
     CommandShowMatchLength( char * ),
