@@ -151,10 +151,10 @@ static void CopyName( int i, char *sz ) {
     strcpy( ap[ i ].szName, sz );
 }
 
-static void SetScore( int fBlack, int n ) {
+static void SetScore( movegameinfo *pmgi, int fBlack, int n ) {
 
-    if( n >= 0 && ( !nMatchTo || n < nMatchTo ) )
-	anScore[ fBlack ] = n;
+    if( n >= 0 && ( !pmgi->nMatch || n < pmgi->nMatch ) )
+	pmgi->anScore[ fBlack ] = n;
 }
 
 static void RestoreMI( list *pl, movegameinfo *pmgi ) {
@@ -163,17 +163,17 @@ static void RestoreMI( list *pl, movegameinfo *pmgi ) {
 
     for( pl = pl->plNext; ( pch = pl->p ); pl = pl->plNext )
 	if( !strncmp( pch, "length:", 7 ) ) {
-	    nMatchTo = atoi( pch + 7 );
+	    pmgi->nMatch = atoi( pch + 7 );
 
-	    if( nMatchTo < 0 )
-		nMatchTo = 0;
+	    if( pmgi->nMatch < 0 )
+		pmgi->nMatch = 0;
 	} else if( !strncmp( pch, "game:", 5 ) ) {
-	    cGames = atoi( pch + 5 );
+	    pmgi->i = atoi( pch + 5 );
 
-	    if( cGames < 0 )
-		cGames = 0;
+	    if( pmgi->i < 0 )
+		pmgi->i = 0;
 	} else if( !strncmp( pch, "ws:", 3 ) || !strncmp( pch, "bs:", 3 ) )
-	    SetScore( *pch == 'b', atoi( pch + 3 ) );
+	    SetScore( pmgi, *pch == 'b', atoi( pch + 3 ) );
 }
 
 static void RestoreRootNode( list *pl ) {
@@ -344,6 +344,8 @@ static void RestoreGame( list *pl ) {
     
     InitBoard( anBoard );
 
+    /* FIXME should anything be done with the current game? */
+    
     ClearMoveRecord();
 
     ListInsert( &lMatch, plGame );
@@ -357,6 +359,9 @@ static void RestoreGame( list *pl ) {
 
     pmr = plGame->plNext->p;
     assert( pmr->mt == MOVE_GAMEINFO );
+
+    AddGame( pmr );
+    
     if( pmr->g.fResigned ) {
 	fTurn = fMove = -1;
 	

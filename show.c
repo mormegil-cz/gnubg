@@ -376,6 +376,8 @@ extern void CommandShowRollout( char *sz ) {
 
 extern void CommandShowScore( char *sz ) {
 
+    /* FIXME this display will be wrong if the current game is not the
+       last one */
     outputf( "The score (after %d game%s) is: %s %d, %s %d",
 	    cGames, cGames == 1 ? "" : "s",
 	    ap[ 0 ].szName, anScore[ 0 ],

@@ -181,6 +181,7 @@ extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
+extern void AddGame( moverecord *pmr );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern void FreeMatch( void );

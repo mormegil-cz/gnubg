@@ -25,10 +25,16 @@
 #include "backgammon.h"
 
 extern void ShowGameWindow( void );
+
 extern void GTKAddMoveRecord( moverecord *pmr );
 extern void GTKPopMoveRecord( moverecord *pmr );
 extern void GTKSetMoveRecord( moverecord *pmr );
 extern void GTKClearMoveRecord( void );
+
+extern void GTKAddGame( char *sz );
+extern void GTKPopGame( int c );
+extern void GTKSetGame( int i );
+
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( void );
 extern void ShowList( char *asz[], char *szTitle );

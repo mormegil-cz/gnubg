@@ -23,6 +23,9 @@
 #include <config.h>
 #endif
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #include <assert.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
@@ -205,7 +208,7 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
 static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard;
-static GtkWidget *pwStatus, *pwMain, *pwGame, *pwGameList;
+static GtkWidget *pwStatus, *pwMain, *pwGame, *pwGameList, *pom;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
@@ -217,6 +220,7 @@ int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
 
 void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
+    
 #if HAVE_LIBREADLINE
     rl_callback_read_char();
 #else
@@ -417,7 +421,10 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 static void CreateGameWindow( void ) {
 
     static char *asz[] = { "Move", NULL, NULL };
-    GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL );
+    GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
+	*pvbox = gtk_vbox_new( FALSE, 0 ),
+	*pa = gtk_alignment_new( 0.5, 0.5, 0.8, 1.0 ),
+	*pm = gtk_menu_new();
     GtkStyle *ps;
     
     pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
@@ -427,7 +434,18 @@ static void CreateGameWindow( void ) {
 			    "GameRecord" );
     gtk_window_set_default_size( GTK_WINDOW( pwGame ), 0, 400 );
 
-    gtk_container_add( GTK_CONTAINER( pwGame ), psw );
+    gtk_container_add( GTK_CONTAINER( pwGame ), pvbox );
+    
+    gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
+	"(no game)" ) );
+    gtk_widget_show_all( pm );
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( pom = gtk_option_menu_new() ),
+			      pm );
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), 0 );
+    gtk_box_pack_start( GTK_BOX( pvbox ), pa, FALSE, FALSE, 4 );
+    gtk_container_add( GTK_CONTAINER( pa ), pom );
+    
+    gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
 				    GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
     
@@ -666,6 +684,27 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 extern void GTKClearMoveRecord( void ) {
 
     gtk_clist_clear( GTK_CLIST( pwGameList ) );
+}
+
+extern void GTKAddGame( char *sz ) {
+
+    GtkWidget *pw = gtk_menu_item_new_with_label( sz );
+
+    /* FIXME delete the "(no game)" item if necessary */
+
+    gtk_widget_show( pw );
+    gtk_menu_append( GTK_MENU( gtk_option_menu_get_menu(
+	GTK_OPTION_MENU( pom ) ) ), pw );
+}
+
+extern void GTKPopGame( int c ) {
+
+    /* FIXME */
+}
+
+extern void GTKSetGame( int i ) {
+
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), i );
 }
 
 static gboolean main_delete( GtkWidget *pw ) {
@@ -970,7 +1009,6 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 #include "question.xpm"
 
     GdkPixmap *ppm;
-    GtkStyle *ps;
     GtkWidget *pwDialog = gtk_dialog_new(),
 	*pwOK = gtk_button_new_with_label( "OK" ),
 	*pwCancel,
@@ -982,9 +1020,7 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
        pixmap */
     gtk_widget_realize( pwDialog );
     
-    ps = gtk_widget_get_style( pwDialog );
-    ppm = gdk_pixmap_create_from_xpm_d( pwDialog->window, NULL,
-					&ps->bg[ GTK_STATE_NORMAL ],
+    ppm = gdk_pixmap_create_from_xpm_d( pwDialog->window, NULL, NULL,
 					fQuestion ? question_xpm : gnu_xpm );
     pwPixmap = gtk_pixmap_new( ppm, NULL );
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
@@ -1163,6 +1199,74 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
     }
 }
 
+static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
+
+    move *pm;
+    char move[ 40 ];
+    int i;
+    
+    assert( GTK_CLIST( pwMoves )->selection );
+
+    i = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
+    pm = gtk_clist_get_row_data( GTK_CLIST( pwMoves ), i );
+
+    FormatMove( move, anBoard, pm->anMove );
+    UserCommand( move );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
+}
+
+static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
+
+    int i;
+    GList *pl;
+    char *sz, *pch;
+    
+    assert( GTK_CLIST( pwMoves )->selection );
+
+    for( i = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
+	i++;
+
+#if HAVE_ALLOCA
+    sz = alloca( i * 6 + 9 ); /* "rollout " plus c * "=9999 " plus \0 */
+#else
+    sz = malloc( i * 6 + 9 );
+#endif
+
+    strcpy( sz, "rollout " );
+    pch = sz + 8;
+
+    for( i = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
+	sprintf( pch, "=%d ", GPOINTER_TO_INT( pl->data ) + 1 );
+	pch = strchr( pch, 0 );
+    }
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
+    
+    UserCommand( sz );
+    
+#if !HAVE_ALLOCA
+    free( sz );
+#endif        
+}
+
+typedef struct _hintdata {
+    GtkWidget *pwMove, *pwRollout;
+} hintdata;
+
+static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
+			hintdata *phd ) {
+
+    int c;
+    GList *pl;
+    
+    for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
+	c++;
+
+    gtk_widget_set_sensitive( phd->pwMove, c == 1 );
+    gtk_widget_set_sensitive( phd->pwRollout, c );
+}
+
 extern void GTKHint( movelist *pml ) {
 
     static char *aszTitle[] = {
@@ -1172,11 +1276,16 @@ extern void GTKHint( movelist *pml ) {
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
 					NULL ),
 	*psw = gtk_scrolled_window_new( NULL, NULL ),
+	*pwButtons = gtk_container_children( GTK_CONTAINER( GTK_DIALOG(
+	    pwDialog )->action_area ) )->data,
+	*pwMove = gtk_button_new_with_label( "Move" ),
+	*pwRollout = gtk_button_new_with_label( "Rollout" ),
 	*pwMoves = gtk_clist_new_with_titles( 7, aszTitle );
     GtkRequisition r;
     int i, j;
     char sz[ 32 ];
-
+    hintdata hd = { pwMove, pwRollout };
+    
     for( i = 0; i < 7; i++ ) {
 	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
 	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
@@ -1191,6 +1300,8 @@ extern void GTKHint( movelist *pml ) {
 	float *ar = pml->amMoves[ i ].arEvalMove;
 
 	gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
+
+	gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
 	
 	for( j = 0; j < 5; j++ ) {
 	    sprintf( sz, "%5.3f", ar[ j ] );
@@ -1200,7 +1311,6 @@ extern void GTKHint( movelist *pml ) {
 	sprintf( sz, "%6.3f", ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] -
 		 ar[ 4 ] - 1.0 );
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
-
 	
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 6,
 			    FormatMove( sz, anBoard,
@@ -1215,11 +1325,31 @@ extern void GTKHint( movelist *pml ) {
     gtk_container_add( GTK_CONTAINER( gtk_container_children( GTK_CONTAINER(
 	GTK_DIALOG( pwDialog )->vbox ) )->data ), psw );
 
+    gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
+			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
+    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
+			GTK_SIGNAL_FUNC( HintRollout ), pwMoves );
+
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwRollout );
+
+    HintSelect( pwMoves, 0, 0, NULL, &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
+			GTK_SIGNAL_FUNC( HintSelect ), &hd );
+    
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     
     gtk_widget_show_all( pwDialog );
+    
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
 }
 
 static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwProgress;

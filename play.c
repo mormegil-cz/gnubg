@@ -307,12 +307,25 @@ static void ResetDelayTimer( void ) {
 #define ResetDelayTimer()
 #endif
 
+extern void AddGame( moverecord *pmr ) {
+    
+#if USE_GTK
+    char sz[ 90 ]; /* "Game 999: [32] 99999, [32] 99999" */
+    
+    if( fX ) {
+	sprintf( sz, "Game %d: %s %d, %s %d", pmr->g.i, ap[ 0 ].szName,
+		 pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
+	GTKAddGame( sz );
+    }
+#endif
+    
+    assert( pmr->mt == MOVE_GAMEINFO );    
+}
+
 static void NewGame( void ) {
 
     moverecord *pmr;
     
-    /* FIXME delete all games in the match after the current one */
-
     InitBoard( anBoard );
 
     ClearMoveRecord();
@@ -321,7 +334,7 @@ static void NewGame( void ) {
 
     pmr = malloc( sizeof( movegameinfo ) );
     pmr->g.mt = MOVE_GAMEINFO;
-    pmr->g.i = cGames; /* FIXME recalculate cGames */
+    pmr->g.i = cGames;
     pmr->g.nMatch = nMatchTo;
     pmr->g.anScore[ 0 ] = anScore[ 0 ];
     pmr->g.anScore[ 1 ] = anScore[ 1 ];
@@ -367,6 +380,8 @@ static void NewGame( void ) {
 	goto reroll;
     }
 
+    AddGame( pmr );
+    
     pmr = malloc( sizeof( pmr->sd ) );
     pmr->mt = MOVE_SETDICE;
     pmr->sd.anDice[ 0 ] = anDice[ 0 ];
@@ -1158,6 +1173,8 @@ static void FreeGame( list *pl ) {
 
 extern void CommandNewGame( char *sz ) {
 
+    list *pl;
+    
     if( nMatchTo && ( anScore[ 0 ] >= nMatchTo ||
 		      anScore[ 1 ] >= nMatchTo ) ) {
 	outputl( "The match is already over." );
@@ -1175,13 +1192,14 @@ extern void CommandNewGame( char *sz ) {
 		return;
 	}
 
-	/* The last game of the match should always be the current one. */
-	/* FIXME once we can navigate moves, this will no longer be true. */
-	assert( lMatch.plPrev->p == plGame );
-
-	ListDelete( lMatch.plPrev );
-	
-	FreeGame( plGame );
+	/* Delete all games at the _end_ of the match, back to and including
+	   the current one. */
+	do {
+	    pl = lMatch.plPrev->p;
+	    ListDelete( lMatch.plPrev );
+	    FreeGame( pl );
+	    cGames--;
+	} while( pl != plGame );
     }
     
     NewGame();
@@ -1301,14 +1319,76 @@ static void UpdateGame( void ) {
     ShowBoard();
 }
 
+static void ChangeGame( list *plGameNew ) {
+
+    list *pl;
+    
+    plLastMove = ( plGame = plGameNew )->plNext;
+    
+#if USE_GTK
+    if( fX ) {
+	GTKClearMoveRecord();
+
+	for( pl = plGame->plNext; pl->p; pl = pl->plNext )
+	    GTKAddMoveRecord( pl->p );
+
+	GTKSetGame( ( (moverecord *) plGame->plNext->p )->g.i );
+    }
+#endif
+    
+    SetMoveRecord( plLastMove->p );
+    
+    CalculateBoard();
+
+    UpdateGame();
+}
+
+static void CommandNextGame( char *sz ) {
+
+    int n;
+    char *pch;
+    list *pl;
+    
+    if( ( pch = NextToken( &sz ) ) )
+	n = ParseNumber( &pch );
+    else
+	n = 1;
+
+    if( n < 1 ) {
+	outputl( "If you specify a parameter to the `next game' command, it "
+		 "must be a positive number (the count of games to step "
+		 "ahead)." );
+	return;
+    }
+
+    if( !plGame ) {
+	outputl( "No games have been started yet." );
+	return;
+    }
+    
+    for( pl = lMatch.plNext; pl->p != plGame; pl = pl->plNext )
+	;
+    
+    for( ; n && pl->plNext->p; n--, pl = pl->plNext )
+	;
+
+    if( pl->p == plGame )
+	return;
+
+    ChangeGame( pl->p );
+}
+
 extern void CommandNext( char *sz ) {
 
     int n;
     char *pch;
     
-    if( ( pch = NextToken( &sz ) ) )
-	n = ParseNumber( &pch );
-    else
+    if( ( pch = NextToken( &sz ) ) ) {
+	if( !strncasecmp( pch, "game", strlen( pch ) ) )
+	    return CommandNextGame( sz );
+	else
+	    n = ParseNumber( &pch );
+    } else
 	n = 1;
     
     if( n < 1 ) {
@@ -1345,14 +1425,52 @@ extern void CommandPlay( char *sz ) {
 	TurnDone();
 }
 
+static void CommandPreviousGame( char *sz ) {
+
+    int n;
+    char *pch;
+    list *pl;
+    
+    if( ( pch = NextToken( &sz ) ) )
+	n = ParseNumber( &pch );
+    else
+	n = 1;
+
+    if( n < 1 ) {
+	outputl( "If you specify a parameter to the `previous game' command, "
+		 "it must be a positive number (the count of games to step "
+		 "back)." );
+	return;
+    }
+    
+    if( !plGame ) {
+	outputl( "No games have been started yet." );
+	return;
+    }
+    
+    for( pl = lMatch.plNext; pl->p != plGame; pl = pl->plNext )
+	;
+    
+    for( ; n && pl->plPrev->p; n--, pl = pl->plPrev )
+	;
+
+    if( pl->p == plGame )
+	return;
+
+    ChangeGame( pl->p );
+}
+
 extern void CommandPrevious( char *sz ) {
 
     int n;
     char *pch;
     
-    if( ( pch = NextToken( &sz ) ) )
-	n = ParseNumber( &pch );
-    else
+    if( ( pch = NextToken( &sz ) ) ) {
+	if( !strncasecmp( pch, "game", strlen( pch ) ) )
+	    return CommandPreviousGame( sz );
+	else
+	    n = ParseNumber( &pch );
+    } else
 	n = 1;
     
     if( n < 1 ) {
