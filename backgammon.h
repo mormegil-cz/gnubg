@@ -194,6 +194,17 @@ typedef enum _tcpenalty {
 TC_POINT, TC_LOSS
 } tcpenalty;
 
+typedef struct _tctransition {
+   char *szName; 
+   int (*pfDecision)(int);
+} tctransition;
+
+typedef struct _tctransitionnode {
+   tctransition *ptrans;
+   char *szNext;
+   struct _tctransitionnode *next;
+} tctransitionnode;
+
 typedef struct _timecontrol {
     char *szName;
     tctiming timing;
@@ -213,6 +224,7 @@ typedef struct _timecontrol {
 	/* The other guy's next time control
 	   NULL means no change to his time control*/
     char *szNextB; 
+    tctransitionnode *pTransitions;
 } timecontrol;
    
 typedef struct _tcnode {
@@ -1170,6 +1182,7 @@ extern void CommandAccept( char * ),
     CommandSetTCPenalty( char * ),
     CommandSetTCPoint( char * ),
     CommandSetTCTime( char * ),
+    CommandSetTCTransition( char * ),
     CommandSetTCType( char * ),
     CommandSetTCUnname( char * ),
     CommandSetTimeControl( char * ),

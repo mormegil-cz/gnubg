@@ -592,7 +592,14 @@ static int PopMoveRecord( list *plDelete ) {
     return 0;
 }
 
+#ifdef TCDEBUG
+int fAddingMoveRecord=0;
+#endif
+
 extern void AddMoveRecord( void *pv ) {
+#ifdef TCDEBUG
+fAddingMoveRecord=1;
+#endif
 
     moverecord *pmr = pv, *pmrOld;
 
@@ -702,6 +709,9 @@ extern void AddMoveRecord( void *pv ) {
     plLastMove = ListInsert( plGame, pmr );
 
     SetMoveRecord( pmr );
+#ifdef TCDEBUG
+fAddingMoveRecord=0;
+#endif
 }
 
 

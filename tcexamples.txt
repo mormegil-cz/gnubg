@@ -1,5 +1,11 @@
 
 # Chicago Bar Point rules
+set tctype none
+set tcpointtime 0
+set tcmovetime 0
+set tcmultiplier 1.000000
+set tcname notime
+
 set tcpenalty 1
 set tctype plain 
 set tctime 300
@@ -8,12 +14,15 @@ set tcmultiplier 1.000000
 set tcmovetime 0
 set tcnext .c1
 set tcname .c1
+set tctransition gin notime
 
 set tcpenalty 2
 set tcnext .c1
 set tcname .c2
 
 set tcpointtime 180
+set tctime 0
+set tcmultiplier 0.000000
 set tcnext .c1 .c2
 set tcname Chicago
 
@@ -22,7 +31,7 @@ set tcpenalty 2
 set tctype plain 
 set tctime 600
 set tcpointtime 150
-set tcmultiplier 1.000000
+set tcmultiplier 0.000000
 set tcmovetime 0
 set tcnext .c1 .c2
 set tcname Nordic
@@ -42,7 +51,7 @@ set tctype plain
 set tctime 600
 set tcpointtime 150
 set tcmovetime 0
-set tcmultiplier 1.000000
+set tcmultiplier 0.000000
 set tcnext .m2 .m2
 set tcname Michigan
 
@@ -51,7 +60,7 @@ set tctype bronstein
 set tcpenalty lose
 set tctime 0
 set tcpointtime 1:00
-set tcmultiplier 1.000000
+set tcmultiplier 0.000000
 set tcmovetime 12
 set tcnext 
 set tcname Gammonitis
