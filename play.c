@@ -844,7 +844,7 @@ extern int ComputerTurn( void ) {
       if ( GeneralCubeDecision ( _("Computer player"),
                                  aarOutput, aarStdDev, aarsStatistics,
                                  ms.anBoard,
-                                 &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
+                                 &ci, &ap [ ms.fTurn ].esCube) < 0 ) {
 	  ProgressEnd();
 	  return -1;
       }
@@ -1053,7 +1053,7 @@ extern int ComputerTurn( void ) {
           if ( GeneralCubeDecision ( _("Computer player"),
                                      aarOutput, aarStdDev, aarsStatistics,
                                      ms.anBoard,
-                                     &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
+                                     &ci, &ap [ ms.fTurn ].esCube) < 0 ) {
 	      ProgressEnd();
 	      return -1;
 	  }
@@ -2096,6 +2096,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
+	evalsetup   *pes;
     monitor m;
     evalsetup es;
 
@@ -2110,10 +2111,13 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
       return (SKILL_NONE);
     }
 
-	if (fTutorAnalysis)
-	  pec = &esAnalysisCube.ec;
-	else 
-	  pec = &esEvalCube.ec;
+    if (fTutorAnalysis) {
+      pes = &esAnalysisCube;
+    } else {
+      pes = &esEvalCube;
+    }
+
+     pec = &pes->ec;
 
 
 	GetMatchStateCubeInfo( &ci, &ms );
@@ -2130,7 +2134,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
         SuspendInput ( &m );
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
+	if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
           ResumeInput ( &m );
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2151,6 +2155,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
         ec2es ( &pmr->d.esDouble, pec );
         memcpy ( pmr->d.aarOutput, aarOutput, 
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
         memset ( pmr->d.aarStdDev, 0,
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
         memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
@@ -2278,6 +2283,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
+	evalsetup   *pes;
     monitor m;
     evalsetup es;
 
@@ -2292,9 +2298,11 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
     }
 
 	if (fTutorAnalysis)
-	  pec = &esAnalysisCube.ec;
+	  pes = &esAnalysisCube;
 	else 
-	  pec = &esEvalCube.ec;
+	  pes = &esEvalCube;
+
+	pec = &pes->ec;
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
@@ -2308,7 +2316,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
         SuspendInput ( &m );
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
+	if ( GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0) {
 	  ProgressEnd();
           ResumeInput ( &m );
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -3581,7 +3589,7 @@ static skilltype ShouldDouble ( void ) {
     float rDeltaEquity;
     int      fAnalyseCubeSave = fAnalyseCube;
     evalcontext *pec;
-    evalsetup es;
+    evalsetup es, *pes;
 
     /* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -3595,9 +3603,11 @@ static skilltype ShouldDouble ( void ) {
     }
 
 	if (fTutorAnalysis)
-	  pec = &esAnalysisCube.ec;
+	  pes = &esAnalysisCube;
 	else 
-	  pec = &esEvalCube.ec;
+	  pes = &esEvalCube;
+	
+	pec = &pes->ec;
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
@@ -3610,7 +3620,7 @@ static skilltype ShouldDouble ( void ) {
 	/* Give hint on cube action */
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
+	if ( GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0) {
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);;

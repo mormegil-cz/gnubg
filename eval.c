@@ -1,4 +1,3 @@
-
 /*
  * eval.c
  *
@@ -3953,7 +3952,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
     ec.nPlies = i;
 
-    if ( GeneralCubeDecisionE ( aarOutput, anBoard, pci, &ec ) < 0 )
+    if ( GeneralCubeDecisionE ( aarOutput, anBoard, pci, &ec, 0 ) < 0 )
       return -1;
 
     if( !i )
@@ -5580,7 +5579,7 @@ CalcCubefulEquity ( positionclass pc,
 extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, evalcontext *pec ) {
+                       cubeinfo *pci, evalcontext *pec, evalsetup *pes ) {
 
   float arOutput[ NUM_OUTPUTS ];
   cubeinfo aciCubePos[ 2 ];

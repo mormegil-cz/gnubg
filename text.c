@@ -257,7 +257,6 @@ OutputMoveFilterPly( const char *szIndent,
 
 }
                                  
-
 static void
 OutputEvalContextsForRollout( char *sz, const char *szIndent,
                               const evalcontext aecCube[ 2 ],
@@ -318,8 +317,9 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
 
 
 extern char *
-OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
+OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
 
+  const rolloutcontext *prc = &pes->rc;
   static char sz[ 1024 ];
 
   strcpy ( sz, "" );
@@ -354,7 +354,7 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
 
   sprintf ( strchr ( sz, 0 ),
             "%d games",
-            prc->nTrials );
+            prc->nGamesDone );
 
   if ( prc->fInitial )
     strcat ( sz, ", rollout as initial position" );
@@ -405,7 +405,6 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
   return sz;
 
 }
-
 
 /*
  * Return formatted string with equity or MWC.
@@ -1106,7 +1105,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   }
 
   if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] )
-    strcat ( sz, OutputRolloutContext ( NULL, &pes->rc ) );
+    strcat ( sz, OutputRolloutContext ( NULL, pes ) );
     
   return sz;
 

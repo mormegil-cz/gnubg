@@ -184,7 +184,7 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 #endif
   int c;
   int i;
-
+  move *m;
   int *ai;
 
   if ( !  GTK_CLIST( pwMoves )->selection )
@@ -196,20 +196,24 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
     c++;
 
   /* setup rollout dialog */
-
+  {
 #if HAVE_ALLOCA
+    move **ppm = alloca ( c * sizeof (move *));
+    cubeinfo **ppci = alloca ( c * sizeof (cubeinfo *));
     asz = alloca( 40 * c );
 #else
     if( c > 10 )
 	c = 10;
+    move *pm[10];
+    cubeinfo *pci[10];
 #endif
 
 
-  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
+  for( i =  0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
        pl = pl->next, i++ ) {
 
-    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-
+    m = ppm[ i ] = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+    ppci[ i ] = &ci;
     FormatMove ( asz[ i ], ms.anBoard, m->anMove );
 
   }
@@ -219,22 +223,15 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
     GTKRollout( c, asz, rcRollout.nTrials, NULL ); 
 #endif
 
-  ProgressStartValue( _("Rolling out positions; position:"), c );
+    GTKRolloutRow ( 0 );
+    ProgressStartValue( _("Rolling out positions"), 0 );
 
-  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
-       pl = pl->next, i++ ) {
-
-    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-
-    GTKRolloutRow ( i );
-
-    if ( ScoreMoveRollout ( m, &ci, &rcRollout ) < 0 ) {
+    if ( ScoreMoveRollout ( ppm, ppci, c ) < 0 ) {
       GTKRolloutDone ();
       ProgressEnd ();
       return;
     }
     
-    ProgressValueAdd ( 1 );
 
     /* Calling RefreshMoveList here requires some extra work, as
        it may reorder moves */
@@ -259,7 +256,6 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
   UpdateMoveList ( phd );
 
   ProgressEnd ();
-
 }
 
 

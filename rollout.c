@@ -85,22 +85,22 @@ static void QuasiRandomSeed( int n ) {
     nPermutationSeed = n;
 }
 
+static int nSkip;
+
 static int RolloutDice( int iTurn, int iGame, int cGames,
                             int fInitial,
                             int anDice[ 2 ],
                             const rng rngx,
                             const int fRotate ) {
 
-  static int nSkip;
-
-  if( !iGame )
-    nSkip = 0;
-
   if ( fInitial && !iTurn ) {
       /* rollout of initial position: no doubles allowed */
       if( fRotate ) {
 	  int j;
       
+	  if( !iGame )
+	      nSkip = 0;
+
 	  for( ; ; nSkip++ ) {
 	      j = aaanPermutation[ 0 ][ 0 ][ ( iGame + nSkip ) % 36 ];
 	      
@@ -110,7 +110,7 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
 	      if( anDice[ 0 ] != anDice[ 1 ] )
 		  break;
 	  }
-
+	  
 	  return 0;
       } else {
 	  int n;
@@ -130,11 +130,11 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
 	  k; /* 36**i */
       
       for( i = 0, j = 0, k = 1; i < 6 && i <= iTurn; i++, k *= 36 )
-	  j = aaanPermutation[ i ][ iTurn ][ ( ( iGame + nSkip ) / k + j ) % 36 ];
+	  j = aaanPermutation[ i ][ iTurn ][ ( iGame / k + j ) % 36 ];
       
       anDice[ 0 ] = j / 6 + 1;
       anDice[ 1 ] = j % 6 + 1;
-      
+
       return 0;
   } else 
       return RollDice( anDice, rngx );
@@ -146,7 +146,7 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
    The move used for anBoard and ar will usually (but not always) be the
    same.  Returning both values is necessary for performing variance
    reduction. */
-
+#if 0
 static int 
 FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
                  float ar[ NUM_OUTPUTS ], const bgvariation bgv ) {
@@ -165,8 +165,6 @@ FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 
     SwapSides( anBoardTemp );
 
-    assert( FALSE ); /* EvalBearoff1Full doesn't return number of rolls
-                        anymore */
     if( ( j = EvalBearoff1Full( anBoardTemp, ar ) ) < cBestRolls ) {
 	    iMinRolls = i;
 	    cBestRolls = j;
@@ -248,6 +246,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 
   return 0;
 }
+#endif
 
 static void
 ClosedBoard ( int afClosedBoard[ 2 ], int anBoard[ 2 ][ 25 ] ) {
@@ -265,6 +264,24 @@ ClosedBoard ( int afClosedBoard[ 2 ], int anBoard[ 2 ][ 25 ] ) {
   }
 
 }
+
+/* called with 
+               cube decision                  move rollout
+aanBoard       2 copies of same board         1 board
+aarOutput      2 arrays for eval              1 array
+iTurn          player on roll                 same
+iGame          game number                    same
+cubeinfo       2 structs for double/nodouble  1 cubeinfo
+               or take/pass
+CubeDecTop     array of 2 boolean             1 boolean
+               (TRUE if a cube decision is valid on turn 0)
+cci            2 (number of rollouts to do)   1
+prc            1 rollout context              same
+aarsStatistics 2 arrays of stats
+
+returns -1 on error/interrupt, fInterrupt TRUE if stopped by user
+aarOutput array(s) contain results
+*/
 
 static int
 BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
@@ -427,7 +444,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           if ( GeneralCubeDecisionE ( aar, aanBoard[ ici ],
                                       pci,
-                                      pecCube[ pci->fMove ] ) < 0 ) 
+                                      pecCube[ pci->fMove ], 0 ) < 0 ) 
             return -1;
 
           cd = FindCubeDecision ( arDouble, aar, pci );
@@ -828,39 +845,71 @@ isHyperGammon( const bgvariation bgv ) {
 
 }
 
+/* called with a collection of moves or a cube decision to be rolled out.
+   when called with a cube decision, the number of alternatives is always 2
+   (nodouble/double or take/drop). Otherwise the number of moves is
+   a parameter supplied (alternatives)
+
+anBoard - an array[alternatives] of explicit pointers to Boards - the
+    individual boards are not in and of themselves a contiguous set of
+    arrays and can't be treated as int x[alternative][2][25]. 2 copies
+    of the same board for cube decisions, 1 per move for move rollouts
+asz an array of pointers to strings. These will be a contiguous array of
+    text labels for displaying results. 2 pointers for cube decisions, 
+    1 per move for move rollouts
+aarOutput - an array[alternatives] of explicit pointers to arrays for the
+    results of the rollout. Again, these may not be contiguous. 2 arrays for 
+    cube decisions, 1 per move for move rollouts
+aarStdDev - as above for std's of rollout
+aarsStatistics - as above for statistics structs
+pprc - an array of explicit pointers to rollout contexts. There will be
+    2 pointers to the same context for cube decisions, 1 per move for move 
+    rollouts 
+aci  - an array of explicit pointers cubeinfo's. 2 for cube decisions, one
+    per move for move rollouts
+alternatives - a count of the number of things to be rolled out. 2 for 
+    cube decisions, number of different moves for move rollouts
+fInvert - flag if equities should be inverted (used when doing take/drop
+    decisions, we evaluate the double/nodouble and invert the equities
+    to get take/drop
+
+returns:
+-1 on error or if no games were rolled out
+no of games rolled out otherwise. aarOutput, aarStdDev aarsStatistic arrays
+   will contain results.
+pprc rollout contexts will be updated with the number of games rolled out for 
+that position.
+*/
 
 extern int
-RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
-                float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                rolloutstat aarsStatistics[][ 2 ],
-                rolloutcontext *prc,
-                cubeinfo aci[], 
-                int afCubeDecTop[], int cci, int fInvert ) {
+RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], char asz[][ 40 ],
+                float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
+                float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
+                rolloutstat (* apStatistics[])[2],
+                evalsetup (* apes[]),
+                cubeinfo (* apci[]), 
+                int (* apCubeDecTop[]), int alternatives, 
+		int fInvert) {
   
-#if __GNUC__
-  int aanBoardEval[ cci ][ 2 ][ 25 ];
-  float aar[ cci ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarMu[ cci ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarSigma[ cci ][ NUM_ROLLOUT_OUTPUTS ];
-  double aarResult[ cci ][ NUM_ROLLOUT_OUTPUTS ];
-  double aarVariance[ cci ][ NUM_ROLLOUT_OUTPUTS ];
-  cubeinfo aciLocal[ cci ];
-#elif HAVE_ALLOCA
-  int ( *aanBoardEval )[ 2 ][ 25 ] = alloca( cci * 50 * sizeof int );
-  float ( *aar )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
-						  sizeof float );
-  float ( *aarMu )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
-						    sizeof float );
-  float ( *aarSigma )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci *
+#if HAVE_ALLOCA
+  int (* aanBoardEval )[ 2 ][ 25 ] = 
+    alloca( alternatives * 50 * sizeof( int ) );
+  float (* aar )[ NUM_ROLLOUT_OUTPUTS ] = alloca( alternatives * 
+						  NUM_ROLLOUT_OUTPUTS *
+						  sizeof ( float ) );
+  float (* aarMu )[ NUM_ROLLOUT_OUTPUTS ] = alloca( alternatives * 
+						    NUM_ROLLOUT_OUTPUTS *
+						    sizeof ( float ) );
+  float (* aarSigma )[ NUM_ROLLOUT_OUTPUTS ] = alloca( alternatives *
 						       NUM_ROLLOUT_OUTPUTS *
-						       sizeof float );
-  double ( *aarResult )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci *
+						       sizeof ( float ) );
+  double (* aarResult )[ NUM_ROLLOUT_OUTPUTS ] = alloca( alternatives *
 							 NUM_ROLLOUT_OUTPUTS *
-							 sizeof double );
-  double ( *aarVariance )[ NUM_ROLLOUT_OUTPUTS ] = alloca(
-							  cci * NUM_ROLLOUT_OUTPUTS * sizeof double );
-  cubeinfo *aciLocal = alloca ( cci * sizeof ( cubeinfo ) );
+							 sizeof ( double ) );
+  double (* aarVariance )[ NUM_ROLLOUT_OUTPUTS ] = alloca( alternatives * 
+						   NUM_ROLLOUT_OUTPUTS * 
+							   sizeof ( double ) );
+  cubeinfo *aciLocal = alloca ( alternatives * sizeof ( cubeinfo ) );
 #else
   int aanBoardEval[ MAX_ROLLOUT_CUBEINFO ][ 2 ][ 25 ];
   float aar[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
@@ -871,166 +920,173 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   cubeinfo aciLocal[ MAX_ROLLOUT_CUBEINFO ];
 #endif
   
-  int i, j, ici;
+  int i, j, alt;
   int anBoardOrig[ 2 ][ 25 ];
-  int		ii, jj;
+  int		ii;
   int     err_too_big;
   double	v, s;
+  int nFirstTrial;
+  evalsetup *pes;
+  rolloutcontext *prc;
+  rolloutstat *prs;
+  int	cGames;
 
-  enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
+#if !(__GNUC__ || HAVE_ALLOCA)
+  if (alternatives > MAX_ROLLOUT_CUBEINFO) {
+    errno = EINVAL;
+    return -1;
+  }
+#endif
 
-  int cGames = prc->nTrials;
-    
-  if( cGames < 1 ) {
+  if( alternatives < 1 ) {
     errno = EINVAL;
     return -1;
   }
 
+  /* initialise internal variables and figure out what the first 
+     trial will be */
 
-  if( cci < 1 ) {
-    errno = EINVAL;
-    return -1;
-  }
+  cGames = rcRollout.nTrials;
+  nFirstTrial = ~0 ;
 
-  if( ClassifyPosition( anBoard, aci[ 0 ].bgv ) == CLASS_BEAROFF1 ) 
-    rt = VARREDN; /* BEAROFF; */
-  else if ( prc->fVarRedn )
-    rt = VARREDN;
-  else
-    rt = BASIC;
-    
-  for ( ici = 0; ici < cci; ici++ ) {
-
-    /* initialise result matrices */
-
-    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-      aarResult[ ici ][ i ] =
-        aarVariance[ ici ][ i ] =
-        aarMu[ ici ][ i ] = 0.0f;
-
-    /* Initialise statistics */
-
-    if( aarsStatistics ) {
-      initRolloutstat ( &aarsStatistics[ ici ][ 0 ] );
-      initRolloutstat ( &aarsStatistics[ ici ][ 1 ] );
-    }
+  for ( i = 0; i < alternatives; ++i) {
+    pes = apes[ i ];
+    prc = &pes->rc;
 
     /* save input cubeinfo */
-
-    memcpy ( &aciLocal[ ici ], &aci[ ici ], sizeof ( cubeinfo ) );
+    memcpy ( &aciLocal[ i ], apci [ i ], sizeof ( cubeinfo ) );
 
     /* Invert cubeinfo */
 
     if ( fInvert )
-      aciLocal[ ici ].fMove = ! aciLocal[ ici ].fMove;
+      aciLocal[ i ].fMove = ! aciLocal[ i ].fMove;
+
+    if ((pes->et != EVAL_ROLLOUT) || (prc->nGamesDone == 0)) {
+
+      memcpy (prc, &rcRollout, sizeof (rolloutcontext));
+      prc->nGamesDone = 0;
+      prc->nSkip = 0;
+      nFirstTrial = 0;
+      pes->et = EVAL_ROLLOUT;
+
+      if ((prs = &(* apStatistics[ i ])[0] ) != 0)
+	initRolloutstat (prs);
+
+      /* initialise internal variables */
+      for (j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
+	aarResult[ i ][ j ] = aarVariance[ i ][ j ] =
+	  aarMu[ i ][ j ] = 0.0f;
+      }
+    } else {
+      int nGames = prc->nGamesDone;
+      double r;
+
+      if (prc->nGamesDone < nFirstTrial) 
+	nFirstTrial = prc->nGamesDone;
+      /* restore internal variables from input values */
+      for ( j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
+	r = aarMu[ i ][ j ] = (*apOutput[ i ])[ j ];
+	aarResult[ i ][ j ] = r * nGames;
+	r = aarSigma[ i ][ j ] = (*apStdDev[ i ])[ j ];
+	aarVariance[ i ][ j ] = r * r * nGames;
+      }
+    }
+
+    /* force all moves/cube decisions to be considered 
+       and reset the upper bound on trials */
+    prc->fNoMore = 0;
+    prc->nTrials = cGames;
+
   }
 
+  /* ============ begin rollout loop ============= */
 
-  memcpy( &anBoardOrig[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-	  sizeof( anBoardOrig ) );
+  for( i = nFirstTrial; i < cGames; i++ ) {
+    for (alt = 0; alt < alternatives; ++alt) {
+      pes = apes[ alt ];
+      prc = &pes->rc;
 
+      /* skip this one if it's already been done this far */
+      if ((prc->nGamesDone > i) || prc->fNoMore)
+	continue;
 
-  if( fInvert )
-    SwapSides( anBoardOrig );
+      /* save the board we're working on */
+      memcpy (anBoardOrig, apBoard[ alt ], sizeof (anBoardOrig));
+      if ( fInvert )
+	SwapSides( anBoardOrig );
 
-  if( prc->fRotate )
-    QuasiRandomSeed( rcRollout.nSeed );
-  
-  for( i = 0; i < cGames; i++ ) {
+      /* get the dice generator set up... */
+      if( prc->fRotate ) 
+	QuasiRandomSeed( prc->nSeed );
 
-    if( prc->rngRollout != RNG_MANUAL )
-      InitRNGSeed( rcRollout.nSeed + ( i << 8 ), prc->rngRollout );
-      
-    for ( ici = 0; ici < cci; ici++ )
-      memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-	       sizeof ( anBoardOrig ) );
-    /*  memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoardOrig[ 0 ][ 0 ],
-	sizeof ( anBoardOrig ) ); */
+      nSkip = prc->nSkip;
 
-    /* FIXME: old code was:
-         
-       memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-       sizeof( anBoardEval ) );
+      /* ... and the RNG */
+      if( prc->rngRollout != RNG_MANUAL )
+	InitRNGSeed( prc->nSeed + ( i << 8 ), prc->rngRollout );
 
-       should it be anBoardOrig? */
+      memcpy ( &aanBoardEval[alt][0][0], apBoard[ alt ], 
+	       sizeof( anBoardOrig ));
 
-    switch( rt ) {
-    case BEAROFF:
-      if ( ! prc->fCubeful )
-	BearoffRollout( *aanBoardEval, *aar, prc->nTruncate,
-			0, i, prc->nTrials, aci[ 0 ].bgv );
-      else
-	BasicCubefulRollout( aanBoardEval, aar, 
-			     0, i, aci, afCubeDecTop, cci, prc, 
-			     aarsStatistics );
-      break;
-    case BASIC:
-    case VARREDN:
-      BasicCubefulRollout( aanBoardEval, aar, 
-			   0, i, aci, afCubeDecTop, cci, prc, 
-			   aarsStatistics );
-      break;
-    }
-      
-    if( fInterrupt )
-      break;
-      
-    for ( ici = 0; ici < cci ; ici++ ) {
-      if( fInvert ) InvertEvaluationR( aar[ ici ], &aci[ ici ] );
+      if (fInvert)
+	SwapSides( anBoardOrig );
 
-      
+      /* roll something out */
+      BasicCubefulRollout( aanBoardEval + alt, aar + alt, 0, i, apci[ alt ], 
+			   apCubeDecTop[ alt ], 1, prc, apStatistics[ alt ] );
+      if( fInterrupt )
+	break;
+
+      pes->rc.nGamesDone = i;
+
+      if( fInvert ) 
+	InvertEvaluationR( aar[ alt ], apci[ alt ] );
+    
+      /* apply the results */
       for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
 	float rMuNew, rDelta;
 	  
-	aarResult[ ici ][ j ] += aar[ ici ][ j ];
-	rMuNew = aarResult[ ici ][ j ] / ( i + 1 );
+	aarResult[ alt ][ j ] += aar[ alt ][ j ];
+	rMuNew = aarResult[ alt ][ j ] / ( i + 1 );
 	  
 	if ( i ) {
+	  /* for i == 0 aarVariance is not defined */
 
-	  /* for i=0 aarVariance is not defined */
-
-	  rDelta = rMuNew - aarMu[ ici ][ j ];
+	  rDelta = rMuNew - aarMu[ alt ][ j ];
 	  
-	  aarVariance[ ici ][ j ] =
-	    aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / i ) +
+	  aarVariance[ alt ][ j ] =
+	    aarVariance[ alt ][ j ] * ( 1.0 - 1.0 / i ) +
 	    ( i + 1 ) * rDelta * rDelta;
 	}
-
-	aarMu[ ici ][ j ] = rMuNew;
+	  
+	aarMu[ alt ][ j ] = rMuNew;
 	  
 	if( j < OUTPUT_EQUITY ) {
-	  if( aarMu[ ici ][ j ] < 0.0f )
-	    aarMu[ ici ][ j ] = 0.0f;
-	  else if( aarMu[ ici ][ j ] > 1.0f )
-	    aarMu[ ici ][ j ] = 1.0f;
+	  if( aarMu[ alt ][ j ] < 0.0f )
+	    aarMu[ alt ][ j ] = 0.0f;
+	  else if( aarMu[ alt ][ j ] > 1.0f )
+	    aarMu[ alt ][ j ] = 1.0f;
 	}
 	  
-	aarSigma[ ici ][ j ] = sqrt( aarVariance[ ici ][ j ] / ( i + 1 ) );
+	aarSigma[ alt ][ j ] = sqrt( aarVariance[ alt ][ j ] / ( i + 1 ) );
       }
 
-      if ( ! isHyperGammon( aci[ ici ].bgv ) )
-	SanityCheck( anBoardOrig, aarMu[ ici ] );
+      if ( ! isHyperGammon( apci[ alt ]->bgv ) )
+	SanityCheck( anBoardOrig, aarMu[ alt ] );
 
     }
+
+    if( fInterrupt )
+	break;
       
     if( fShowProgress ) {
 #if USE_GTK
       if( fX ) 
 	GTKRolloutUpdate( aarMu, aarSigma, i, cGames,
-			  prc->fCubeful, cci, aciLocal );
+			  prc->fCubeful, alternatives, aciLocal );
       else
 #endif
 	{
-#if 0
-	  /* FIXME this output is too wide to fit in 80 columns */
-	  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-		   "Cubeful: %6.3f %5.3f %5d\r", asz[ 0 ],
-		   aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
-		   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ], aarMu[ 0 ][ 5 ],
-		   aarSigma[ 0 ][ 5 ],
-		   aarMu[ 0 ][ 6 ], aarSigma[ 0 ][ 6 ],
-		   i + 1 );
-#endif
 	  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
 		   "%5d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
 		   aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
@@ -1045,34 +1101,32 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
     if (prc->fStopOnSTD && (i >= prc->nMinimumGames)) {
       err_too_big = 0;
 
-      for (jj = 0; jj < cci; jj++) {
-	if (err_too_big)
-	  break;
+      for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) {
+	if ( ii < OUTPUT_EQUITY ) {
+	  v = fabs (aarMu[ alt ][ ii ]);
+	  s = fabs (aarSigma[ alt ][ ii ]);
+	} else if ( ii == OUTPUT_EQUITY ) {
+	  if ( ! ms.nMatchTo ) { /* money game */
+	    v = fabs (aarMu[ alt ][ ii ] * apci[ alt ]->nCube / 
+		      apci[ 0 ]->nCube );
+	    s = fabs (aarSigma[ alt ][ ii ] * apci[ alt ]->nCube / 
+		      apci[ 0 ]->nCube);
+	  } else { /* match play */
+	    v = fabs (mwc2eq ( eq2mwc ( aarMu[ alt ][ ii ], apci[ alt ] ), 
+			       apci[ 0 ] ));
+	    s = fabs (se_mwc2eq ( se_eq2mwc ( aarSigma[ alt ][ ii ], 
+					      apci[ alt ] ), apci[ 0 ] ));
+	  }
+	} else {
+	  if (!prc->fCubeful) 
+	    continue;
 
-	for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) {
-	  if ( ii < OUTPUT_EQUITY ) {
-	    v = fabs (aarMu[ jj ][ ii ]);
-	    s = fabs (aarSigma[ jj ][ ii ]);
-	  } else if ( ii == OUTPUT_EQUITY ) {
-	    if ( ! ms.nMatchTo ) { /* money game */
-	      v = fabs (aarMu[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube );
-	      s = fabs (aarSigma[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube);
-	    } else { /* match play */
-	      v = fabs (mwc2eq ( eq2mwc ( aarMu[ jj ][ ii ], &aci[ jj ] ), 
-				&aci[ 0 ] ));
-	      s = fabs (se_mwc2eq ( se_eq2mwc ( aarSigma[ jj ][ ii ], 
-					       &aci[ jj ] ), &aci[ 0 ] ));
-	    }
-	  }	else {
-	    if (!prc->fCubeful) 
-	      continue;
-
-	    if ( ! ms.nMatchTo ) { /* money game */
-	      v = fabs (aarMu[ jj ][ ii ]);
-	      s = fabs (aarSigma[ jj ][ ii ]); 
+	  if ( ! ms.nMatchTo ) { /* money game */
+	    v = fabs (aarMu[ alt ][ ii ]);
+	    s = fabs (aarSigma[ alt ][ ii ]); 
 	    } else {
-	      v = fabs (mwc2eq ( aarMu[ jj ][ ii ], &aci[ 0 ] ));
-	      s = fabs (se_mwc2eq ( aarSigma[ jj ][ ii ], &aci[ 0 ] ) );
+	      v = fabs (mwc2eq ( aarMu[ alt ][ ii ], apci[ 0 ] ));
+	      s = fabs(se_mwc2eq ( aarSigma[ alt ][ ii ], apci[ 0 ] ) );
 	    }
 	  } /* else if ( ii == OUTPUT_EQUITY) ... else ) */
 
@@ -1081,32 +1135,32 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	    break;
 	  }
 	} /* for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) */
-      } /* for (jj = 0; jj < cci; jj++) */
+
       if (!err_too_big) {
-	break;
+	prc->nGamesDone = i + 1;
+	prc->fNoMore = 1;
       }
     } /* if (prc->fStopOnSTD && (i >= prc->nMinimumGames)) */
   }
-  
-  /* re-init the RNG so dice rolled in games played after this rollout won't
-     be dependent on the rollout RNG seed and on the number of rollouts just
-     performed */
-  InitRNG( NULL, TRUE, rngCurrent );
 
   cGames = i;
   /* return -1 if no games rolled out */
   if( ! cGames)
     return -1;
 
-  if( aarOutput )
-    for ( ici = 0; ici < cci; ici++ )
-      for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-        aarOutput[ ici ][ i ] = aarMu[ ici ][ i ];
+  /* store results */
+  for (alt = 0; alt < alternatives; alt++) {
+    if (!apes[alt]->rc.fNoMore && apes[alt]->rc.nGamesDone <= cGames)
+      apes[alt]->rc.nGamesDone = cGames;
+    
+    if( apOutput[alt] )
+      for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        (*apOutput[ alt ])[ i ] = aarMu[ alt ][ i ];
 
-  if( aarStdDev )
-    for ( ici = 0; ici < cci; ici++ )
+    if( apStdDev[alt] )
       for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-        aarStdDev[ ici ][ i ] = aarSigma[ ici ][ i ];	
+        (*apStdDev[ alt ])[ i ] = aarSigma[ alt ][ i ];	
+  }
 
   if( fShowProgress
 #if USE_GTK
@@ -1122,24 +1176,9 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
   /* print statistics */
 
-#if 0
-  /* FIXME: make output prettier -- and move to GTKRollout*. */
-
-  if( aarsStatistics )
-    for ( ici = 0; ici < cci; ici++ ) {
-      outputf ( "\n\n rollout no %d\n", ici );
-      for ( i = 0; i < 2; i++ ) {
-	outputf ( "\n\nplayer %d\n\n", i );
-	      
-	printRolloutstat ( NULL, &aarsStatistics[ ici ][ i ], cGames );
-	      
-      }
-	  
-    }
-#endif
-
   return cGames;
 }
+
 
 /*
  * General evaluation functions.
@@ -1189,15 +1228,32 @@ GeneralEvaluationR ( char *sz,
                      int anBoard[ 2 ][ 25 ],
                      cubeinfo *pci, rolloutcontext *prc ) {
 
-  int fCubeDecTop = TRUE;
-  
-  if ( RolloutGeneral ( anBoard, ( char (*)[ 40 ] ) sz,
-			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arOutput,
-			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arStdDev,
-                        ( rolloutstat (*)[ 2 ]) arsStatistics,
-                        prc, pci, &fCubeDecTop, 1, FALSE ) < 0 )
-    return -1;
+  int (* apBoard[1])[2][25];
+  float (*apOutput[1])[NUM_ROLLOUT_OUTPUTS];
+  float (*apStdDev[1])[NUM_ROLLOUT_OUTPUTS];
+  rolloutstat (* apStatistics[1])[2];
+  evalsetup  es;
+  evalsetup (* apes[1]);
+  cubeinfo (* apci[1]);
+  int false = 0;
+  int (* apCubeDecTop[1]);
 
+  apBoard[0] =  (int (*)[2][25]) anBoard;
+  apOutput[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) arOutput;
+  apStdDev[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) arStdDev;
+  apStatistics[0] = (rolloutstat (*)[2]) arsStatistics;
+  apes[0] = &es;
+  apci[0] = pci;
+  apCubeDecTop[0] = &false;
+
+  es.et = EVAL_NONE;
+  memcpy (&es.rc, prc, sizeof (rolloutcontext));
+  
+  if ( RolloutGeneral ( apBoard, ( char (*)[ 40 ] ) sz,
+			apOutput, apStdDev, apStatistics, apes, apci,
+			apCubeDecTop, 1, FALSE) < 0 )
+    return -1;
+  
   return 0;
 }
 
@@ -1218,13 +1274,13 @@ GeneralCubeDecision ( char *sz,
       for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
         aarStdDev[ j ][ i ] = 0.0f;
 
-    return GeneralCubeDecisionE ( aarOutput, anBoard, pci, &pes->ec );
+    return GeneralCubeDecisionE ( aarOutput, anBoard, pci, &pes->ec, pes );
     break;
 
   case EVAL_ROLLOUT:
 
     return GeneralCubeDecisionR ( sz, aarOutput, aarStdDev, aarsStatistics, 
-                                  anBoard, pci, &pes->rc );
+                                  anBoard, pci, &pes->rc, pes );
     break;
 
   case EVAL_NONE:
@@ -1246,7 +1302,22 @@ GeneralCubeDecisionR ( char *sz,
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        rolloutstat aarsStatistics[ 2 ][ 2 ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, rolloutcontext *prc ) {
+                       cubeinfo *pci, rolloutcontext *prc, evalsetup *pes ) {
+
+  evalsetup esLocal;
+  int (* apBoard[2])[2][25] = { (int (*)[2][25]) anBoard, 
+				(int (*)[2][25]) anBoard};
+  float (* apOutput[2])[ NUM_ROLLOUT_OUTPUTS ] = 
+	 { (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput, 
+	   (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput + 1};
+  float (* apStdDev[2])[ NUM_ROLLOUT_OUTPUTS ] = 
+	 { (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[0], 
+	   (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[1]};
+  rolloutstat (* apStatistics[2])[2] = 
+  { (rolloutstat (*)[2]) aarsStatistics[0], 
+    (rolloutstat (*)[2]) aarsStatistics[1] };
+  evalsetup (* apes[2]);
+  cubeinfo (* apci[2]) = { pci, pci };
 
   cubeinfo aci[ 2 ];
 
@@ -1255,6 +1326,17 @@ GeneralCubeDecisionR ( char *sz,
   int i, cGames;
   int afCubeDecTop[] = { FALSE, FALSE }; /* no cube decision in 
                                             iTurn = 0 */
+  int (* apCubeDecTop[2]) = { afCubeDecTop, afCubeDecTop};
+
+  if (pes == 0) {
+    /* force rollout from sratch */
+    pes = &esLocal;
+    memcpy (&pes->rc, &rcRollout, sizeof (rcRollout));
+    pes->et = EVAL_NONE;
+    pes->rc.nGamesDone=0;
+  }
+
+  apes[ 0 ] = apes[ 1 ] = pes;
 
   SetCubeInfo ( &aci[ 0 ], pci->nCube, pci->fCubeOwner, pci->fMove,
                 pci->nMatchTo, pci->anScore, pci->fCrawford, 
@@ -1291,10 +1373,14 @@ GeneralCubeDecisionR ( char *sz,
   if( fX )
     GTKRolloutRow( 0 );
 #endif
-  if( ( cGames = RolloutGeneral( anBoard, aach, aarOutput, aarStdDev, 
-                                 aarsStatistics, prc, aci,
-                                 afCubeDecTop, 2, FALSE ) ) <= 0 )
+
+  if( ( cGames = RolloutGeneral( apBoard, aach, apOutput, apStdDev, 
+                                 apStatistics, apes, apci,
+                                 apCubeDecTop, 2, FALSE)) <= 0 )
     return -1;
+
+  pes->rc.nGamesDone = cGames;
+  pes->rc.nSkip = nSkip;
 
 #if USE_GTK
 	if( !fX )
@@ -1660,60 +1746,97 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 
 extern int
-ScoreMoveRollout ( move *pm, cubeinfo *pci, rolloutcontext *prc ) {
+ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves ) {
 
-  int anBoardTemp[ 2 ][ 25 ];
-  cubeinfo ci;
-  rolloutstat arsStatistics[ 2 ];
+  cubeinfo *pci;
   int fCubeDecTop = TRUE;
-  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
-  float arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-    
-  PositionFromKey( anBoardTemp, pm->auch );
+  int	i;
+  int nGamesDone;
+  rolloutcontext *prc;
+
+#if HAVE_ALLOCA
+  int (* anBoard)[ 2 ][ 25 ] = alloca (cMoves * 2 * 25 * sizeof (int));
+  int (** apBoard)[2][25] = alloca (cMoves * sizeof (float));
+  float (** apOutput)[ NUM_ROLLOUT_OUTPUTS ] = 
+    alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
+  float (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ] =
+    alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
+  rolloutstat (** apStatistics)[2] = 
+    alloca (cMoves * 2 * sizeof (rolloutstat *));
+  evalsetup (** apes) = alloca (cMoves * sizeof (evalsetup *));
+  cubeinfo (** apci) = alloca (cMoves * sizeof (cubeinfo *));
+  cubeinfo (* aci) = alloca (cMoves * sizeof (cubeinfo));
+  int (** apCubeDecTop) = alloca (cMoves * sizeof (int *));
+#else
+  int 	      anBoard[10][2][25];
+  int         (*apBoard[10])[2][25];
+  float       (*apOutput[10])[2][25];
+  float       (*apStdDev[10])[2][25];
+  rolloutstat (*apStatistics[10])[2];
+  evalsetup   (*apes[10]);
+  cubeinfo    (*apci[10]), aci[ 10 ];
+  int         (*apCubeDecTop[10]);
+
+  if (cMoves > 10)
+    cMoves = 10;
+
+#endif
+  
+  /* initialise the arrays we'll need */
+  for (i = 0; i < cMoves; ++i) {
+    apBoard[ i ] = anBoard + i;
+    apOutput[ i ] = &ppm[i]->arEvalMove;
+    apStdDev[ i ] = &ppm[i]->arEvalStdDev;
+    apStatistics[ i ] = 0;
+    apes[ i ] = &ppm[i]->esMove;
+    apci[ i ] = aci + i;
+    memcpy (aci + i, ppci[ i ], sizeof (cubeinfo));
+    apCubeDecTop[ i ] = &fCubeDecTop;
+
+    PositionFromKey( anBoard[ i ], ppm[ i ]->auch );
       
-  SwapSides( anBoardTemp );
+    SwapSides( anBoard[ i ] );
 
-  /* swap fMove in cubeinfo */
-  memcpy ( &ci, pci, sizeof (ci) );
-  ci.fMove = ! ci.fMove;
+    /* swap fMove in cubeinfo */
+    aci[ i ].fMove = ! aci[ i ].fMove;
+  
+  }
 
-  if ( RolloutGeneral ( anBoardTemp, NULL,
-			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arOutput,
-			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arStdDev,
-                        ( rolloutstat (*)[ 2 ]) arsStatistics,
-                        prc, &ci, &fCubeDecTop, 1, TRUE ) < 0 )
+  nGamesDone = RolloutGeneral ( apBoard, NULL, 
+				apOutput, apStdDev, apStatistics,
+				apes, apci, apCubeDecTop, cMoves, TRUE);
+  /* put fMove back again */
+  for ( i = 0; i < cMoves; ++i) {
+    aci[ i ].fMove = ! aci[ i ].fMove;
+  }
+
+  if (nGamesDone < 0)
     return -1;
 
-  /* copy results */
+  for ( i = 0; i < cMoves; ++i) {
 
-  memcpy ( pm->arEvalMove, arOutput, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-  memcpy ( pm->arEvalStdDev, arStdDev, 
-           NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+    /* Score for move:
+       rScore is the primary score (cubeful/cubeless)
+       rScore2 is the secondary score (cubeless) */
+    prc = &apes[ i ]->rc;
+    pci = apci[ i ];
 
-  /* Save evaluation setup */
-  pm->esMove.et = EVAL_ROLLOUT;
-  pm->esMove.rc = *prc;
-    
-  /* Score for move:
-     rScore is the primary score (cubeful/cubeless)
-     rScore2 is the secondary score (cubeless) */
-
-  if ( prc->fCubeful ) {
-    if ( pci->nMatchTo )
-      pm->rScore = mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], pci );
+    if ( prc->fCubeful ) {
+      if ( pci->nMatchTo )
+	ppm[i]->rScore = 
+	  mwc2eq ( ppm[ i ]->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], pci );
+      else
+	ppm[ i ]->rScore = ppm[ i ]->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
+    }
     else
-      pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
-  }
-  else
-    pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
+      ppm[ i ]->rScore = ppm[ i ]->arEvalMove[ OUTPUT_EQUITY ];
 
-  pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
+    ppm[ i ]->rScore2 = ppm[ i ]->arEvalMove[ OUTPUT_EQUITY ];
+  }
 
   return 0;
 
-
 }
-
 
 
 extern int
@@ -1724,7 +1847,7 @@ ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes ) {
     return ScoreMove ( pm, pci, &pes->ec, pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    return ScoreMoveRollout ( pm, pci, &pes->rc );
+    return ScoreMoveRollout ( &pm, &pci, 1);
     break;
   default:
     return -1;

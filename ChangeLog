@@ -1,3 +1,10 @@
+Sun Jul 13 02:17:05 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* eval.c, eval.h, export.h, gnubg.c, gtkchequer.c, gtkcube.c
+	  gtkgame.c, guile.c, html.c, play.c, rollout.c, rollout.h, sgf.c
+	  text.c - change rollout handling to support extending rollouts
+	  and 'parallel' rollouts of multiple moves
+	
 Sat Jul 12 19:58:53 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubgmodule.c: change board from typle to list.

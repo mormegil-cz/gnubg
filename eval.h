@@ -38,8 +38,9 @@
 #define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5
-#define NUM_ROLLOUT_OUTPUTS 7
 #define NUM_CUBEFUL_OUTPUTS 4
+#define MAX_ROLLOUT_CUBEINFO 16
+#define NUM_ROLLOUT_OUTPUTS 7
 
 #define BETA_HIDDEN 0.1
 #define BETA_OUTPUT 1.0
@@ -103,6 +104,12 @@ typedef struct _evalcontext {
     float        rNoise; /* standard deviation */
 } evalcontext;
 
+/* identifies the Rollout Context being written in sgf files. This should
+   be changed if the rollout context changes such that previous .sgf files
+   can't have their rollouts extended
+*/
+
+#define SGF_ROLLOUT_VER 1
 
 typedef struct _rolloutcontext {
 
@@ -127,7 +134,9 @@ typedef struct _rolloutcontext {
   unsigned int fStopOnSTD;    /* stop when std's are small enough */
   unsigned int nMinimumGames; /* but always do at least this many */
   double       rStdLimit;     /* stop when abs( value / std ) < this */
-
+  int nGamesDone;
+  int nSkip;
+  int fNoMore;
 } rolloutcontext;
 
 
@@ -135,10 +144,59 @@ typedef enum _evaltype {
   EVAL_NONE, EVAL_EVAL, EVAL_ROLLOUT
 } evaltype;
 
+
+/* enumeration of variations of backgammon
+   (starting position and/or special rules) */
+
+typedef enum _bgvariation {
+  VARIATION_STANDARD,      /* standard backgammon */
+  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
+                            position */
+  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
+  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
+  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
+  NUM_VARIATIONS
+} bgvariation;
+
+extern bgvariation bgvDefault;
+
+extern int anChequers[ NUM_VARIATIONS ];
+extern char *aszVariations[ NUM_VARIATIONS ];
+extern char *aszVariationCommands[ NUM_VARIATIONS ];
+
+
+/*
+ * Cubeinfo contains the information necesary for evaluation
+ * of a position.
+ * These structs are placed here so that the move struct can be defined
+ */
+
+typedef struct _cubeinfo {
+    /*
+     * nCube: the current value of the cube,
+     * fCubeOwner: the owner of the cube,
+     * fMove: the player for which we are
+     *        calculating equity for,
+     * fCrawford, fJacoby, fBeavers: optional rules in effect,
+     * arGammonPrice: the gammon prices;
+     *   [ 0 ] = gammon price for player 0,
+     *   [ 1 ] = gammon price for player 1,
+     *   [ 2 ] = backgammon price for player 0,
+     *   [ 3 ] = backgammon price for player 1.
+     *
+     */
+    int nCube, fCubeOwner, fMove, nMatchTo, anScore[ 2 ], fCrawford, fJacoby,
+	fBeavers;
+    float arGammonPrice[ 4 ];
+    bgvariation bgv;
+} cubeinfo;
+
+
 typedef struct _evalsetup {
   evaltype et;
   evalcontext ec;
   rolloutcontext rc;
+
 } evalsetup;
 
 typedef enum _cubedecision {
@@ -198,8 +256,6 @@ extern const char *aszSettings[ NUM_SETTINGS ];
 extern const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
 extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
-
-
 typedef struct _move {
   int anMove[ 8 ];
   unsigned char auch[ 10 ];
@@ -212,51 +268,6 @@ typedef struct _move {
   evalsetup esMove;
 } move;
 
-/* enumeration of variations of backgammon
-   (starting position and/or special rules) */
-
-typedef enum _bgvariation {
-  VARIATION_STANDARD,      /* standard backgammon */
-  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
-                            position */
-  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
-  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
-  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
-  NUM_VARIATIONS
-} bgvariation;
-
-extern bgvariation bgvDefault;
-
-extern int anChequers[ NUM_VARIATIONS ];
-extern char *aszVariations[ NUM_VARIATIONS ];
-extern char *aszVariationCommands[ NUM_VARIATIONS ];
-
-
-/*
- * Cubeinfo contains the information necesary for evaluation
- * of a position.
- *
- */
-
-typedef struct _cubeinfo {
-    /*
-     * nCube: the current value of the cube,
-     * fCubeOwner: the owner of the cube,
-     * fMove: the player for which we are
-     *        calculating equity for,
-     * fCrawford, fJacoby, fBeavers: optional rules in effect,
-     * arGammonPrice: the gammon prices;
-     *   [ 0 ] = gammon price for player 0,
-     *   [ 1 ] = gammon price for player 1,
-     *   [ 2 ] = backgammon price for player 0,
-     *   [ 3 ] = backgammon price for player 1.
-     *
-     */
-    int nCube, fCubeOwner, fMove, nMatchTo, anScore[ 2 ], fCrawford, fJacoby,
-	fBeavers;
-    float arGammonPrice[ 4 ];
-    bgvariation bgv;
-} cubeinfo;
 
 extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
@@ -490,7 +501,7 @@ FindCubeDecision ( float arDouble[],
 extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, evalcontext *pec );
+                       cubeinfo *pci, evalcontext *pec, evalsetup *pes );
 
 extern int
 GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],

@@ -2307,7 +2307,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] ) {
 
-    char *sz = strdup ( OutputRolloutContext ( NULL, &pes->rc ) );
+    char *sz = strdup ( OutputRolloutContext ( NULL, pes ) );
     char *pcS = sz, *pcE;
 
     while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
@@ -2673,7 +2673,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         case EVAL_ROLLOUT: {
 
-          char *sz = strdup ( OutputRolloutContext ( NULL, &pes->rc ) );
+          char *sz = strdup ( OutputRolloutContext ( NULL, pes ) );
           char *pcS = sz, *pcE;
           
           while ( ( pcE = strstr ( pcS, "\n" ) ) ) {

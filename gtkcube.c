@@ -411,7 +411,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     case EVAL_ROLLOUT:
       if ( ci.nMatchTo )
-        sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
+         sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
                                fOutputMWC ? _("MWC") : _("equity"),
                                OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
                                               &ci, TRUE ),
@@ -651,11 +651,24 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   rolloutstat aarsStatistics[ 2 ][ 2 ];
+  evalsetup *pes = pchd->pes;
+
+  if (pes->et != EVAL_ROLLOUT) {
+    pes->rc = rcRollout;
+    pes->rc.nGamesDone = 0;
+  }
+  else {
+    pes->rc.nTrials = rcRollout.nTrials;
+    pes->rc.fStopOnSTD = rcRollout.fStopOnSTD;
+    pes->rc.nMinimumGames = rcRollout.nMinimumGames;
+    pes->rc.rStdLimit = rcRollout.rStdLimit;
+  }
 
   GetMatchStateCubeInfo( &ci, &pchd->ms );
 
   if ( GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
-                              pchd->ms.anBoard, &ci, &rcRollout ) < 0 ) {
+                              pchd->ms.anBoard, &ci, 
+			      &pes->rc, pes ) < 0 ) {
     return;
   }
   
@@ -685,7 +698,7 @@ EvalCube ( cubehintdata *pchd, evalcontext *pec ) {
   ProgressStart( _("Considering cube action...") );
 
   if ( GeneralCubeDecisionE ( aarOutput, pchd->ms.anBoard, &ci, 
-                              pec ) < 0 ) {
+                              pec, 0 ) < 0 ) {
     ProgressEnd();
     return;
   }
@@ -956,7 +969,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   pchd->pes = pes;
   pchd->mt = mt;
   pchd->ms = ms;
-
+  
   pchd->pw = pw = gtk_hbox_new ( 4, FALSE );
 
   switch ( mt ) {

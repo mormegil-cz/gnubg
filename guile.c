@@ -317,7 +317,7 @@ static SCM evaluate_position_cubeful( SCM sBoard, SCM sCube,
     SCMToCubeInfo( sCube, &ci );
 
     PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
-    n = GeneralCubeDecisionE ( aarOutput, anBoard, &ci, &ec );
+    n = GeneralCubeDecisionE ( aarOutput, anBoard, &ci, &ec, 0 );
     PortableSignalRestore( SIGINT, &sh );
     if( fInterrupt ) {
 	raise( SIGINT );
