@@ -11,12 +11,6 @@
 #include "eval.h"
 
 #define MAXSCORE      64
-#define MAXCUBELEVEL  7
-#define DELTA         0.08
-#define DELTABAR      0.06
-#define G1            0.25
-#define G2            0.15
-#define GAMMONRATE    0.25
 
 #define GET_MET(i,j,aafMET) ( ( (i) < 0 ) ? 1.0 : ( ( (j) < 0 ) ? 0.0 : \
 						 (aafMET [ i ][ j ]) ) )
