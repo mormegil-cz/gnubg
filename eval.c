@@ -1463,6 +1463,21 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
     return 0;
 }
 
+extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] ) {
+
+    int i;
+    
+    anPips[ 0 ] = 0;
+    anPips[ 1 ] = 0;
+    
+    for( i = 0; i < 25; i++ ) {
+	anPips[ 0 ] += anBoard[ 0 ][ i ] * ( i + 1 );
+	anPips[ 1 ] += anBoard[ 1 ][ i ] * ( i + 1 );
+    }
+
+    return 0;
+}
+
 static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 
     float ar[ NUM_OUTPUTS ];

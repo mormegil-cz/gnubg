@@ -36,6 +36,8 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 makebearoff_LDADD = -Llib -levent
 makebearoff_DEPENDENCIES = lib/libevent.a
 
+info_TEXINFOS = gnubg.texi
+
 gnubg.bd: makebearoff
 	[ -s gnubg.bd ] || ./makebearoff > gnubg.bd
 

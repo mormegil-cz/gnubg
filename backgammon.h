@@ -55,7 +55,7 @@ typedef union _moverecord {
     moveresign r;
 } moverecord;
 
-extern char *aszGameResult[];
+extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
 
 extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoGame,
     fAutoMove, fResigned, fMove, fDoubled, nPliesEval, anScore[ 2 ], cGames,
@@ -114,6 +114,7 @@ extern void CommandAccept( char * ),
     CommandSetPlayerPubeval( char * ),
     CommandSetPlayer( char * ),
     CommandSetPlies( char * ),
+    CommandSetPrompt( char * ),
     CommandSetRNGAnsi( char * ),
     CommandSetRNGBsd( char * ),
     CommandSetRNGIsaac( char * ),

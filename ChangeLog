@@ -1,3 +1,14 @@
+Sat Dec 18 20:37:32 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c (CommandSetPrompt): New function.
+	* gnubg.c (FormatPrompt): New function.
+	* eval.c (PipCount): New function.
+
+Sat Dec 18 15:02:32 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (StatsUpdateBoardID): New function.  Display board
+	ID in window.
+
 Fri Dec 17 09:14:13 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (usage): "--help" option now mentions "help" command

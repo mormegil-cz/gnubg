@@ -87,6 +87,8 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] );
 
 extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] );
 
+extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
+
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput, int nPlies );
 
 extern void SwapSides( int anBoard[ 2 ][ 25 ] );

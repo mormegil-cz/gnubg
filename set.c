@@ -123,6 +123,9 @@ extern void CommandSetDice( char *sz ) {
 
     printf( "The dice have been set to %d and %d.\n", anDice[ 0 ] = n0,
 	    anDice[ 1 ] = n1 );
+
+    if( fX )
+	ShowBoard();
 }
 
 extern void CommandSetDisplay( char *sz ) {
@@ -272,6 +275,16 @@ extern void CommandSetPlies( char *sz ) {
     nPliesEval = n;
 
     printf( "`eval' and `hint' will use %d ply evaluation.\n", nPliesEval );
+}
+
+extern void CommandSetPrompt( char *szParam ) {
+
+    static char sz[ 128 ]; /* FIXME check overflow */
+
+    szPrompt = ( szParam && *szParam ) ? strcpy( sz, szParam ) :
+	szDefaultPrompt;
+    
+    printf( "The prompt has been set to `%s'.\n", szPrompt );
 }
 
 extern void CommandSetRNGAnsi( char *sz ) {

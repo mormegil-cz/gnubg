@@ -92,15 +92,9 @@ extern void CommandShowPipCount( char *sz ) {
 
 	return;
     }
-    
-    an[ 0 ] = 0;
-    an[ 1 ] = 0;
-    
-    for( i = 0; i < 25; i++ ) {
-	an[ 0 ] += anBoard[ 0 ][ i ] * ( i + 1 );
-	an[ 1 ] += anBoard[ 1 ][ i ] * ( i + 1 );
-    }
 
+    PipCount( anBoard, an );
+    
     printf( "The pip counts are: %s %d, %s %d.\n", ap[ fMove ].szName,
 	    an[ 1 ], ap[ !fMove ].szName, an[ 0 ] );
 }

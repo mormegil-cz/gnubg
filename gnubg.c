@@ -58,7 +58,8 @@ extwindow ewnd;
 int fX = TRUE; /* use X display */
 #endif
 
-static char *szPrompt = "(gnubg) ";
+char szDefaultPrompt[] = "(\\p) ",
+    *szPrompt = szDefaultPrompt;
 static int fInteractive;
 
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
@@ -137,6 +138,8 @@ static command acDatabase[] = {
       "players", NULL },
     { "plies", CommandSetPlies, "Choose how many plies the `eval' and `hint' "
       "commands look ahead", NULL },
+    { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
+      "ready for commands", NULL },
     { "rng", NULL, "Select the random number generator algorithm", acSetRNG },
     { "score", CommandNotImplemented, "Set the match or session score ",
       NULL },
@@ -487,6 +490,68 @@ extern void ShowBoard( void ) {
 #endif    
 }
 
+static char *FormatPrompt( void ) {
+
+    static char sz[ 128 ]; /* FIXME check for overflow in rest of function */
+    char *pch = szPrompt, *pchDest = sz;
+    int anPips[ 2 ];
+
+    while( *pch )
+	if( *pch == '\\' ) {
+	    pch++;
+	    switch( *pch ) {
+	    case 0:
+		goto done;
+		
+	    case 'c':
+	    case 'C':
+		/* Pip count */
+		if( fTurn < 0 )
+		    strcpy( pchDest, "No game" );
+		else {
+		    PipCount( anBoard, anPips );
+		    sprintf( pchDest, "%d:%d", anPips[ 1 ], anPips[ 0 ] );
+		}
+		break;
+
+	    case 'p':
+	    case 'P':
+		/* Player on roll */
+		strcpy( pchDest, fTurn < 0 ? "No game" : ap[ fTurn ].szName );
+		break;
+		
+	    case 's':
+	    case 'S':
+		/* Match score */
+		if( fTurn < 0 )
+		    strcpy( pchDest, "No game" );
+		else
+		    sprintf( pchDest, "%d:%d", anScore[ fTurn ],
+			     anScore[ !fTurn ] );
+		break;
+
+	    case 'v':
+	    case 'V':
+		/* Version */
+		strcpy( pchDest, VERSION );
+		break;
+		
+	    default:
+		*pchDest++ = *pch;
+		*pchDest = 0;
+	    }
+
+	    pchDest = strchr( pchDest, 0 );
+	    pch++;
+	} else
+	    *pchDest++ = *pch++;
+    
+ done:
+    *pchDest = 0;
+
+    return sz;
+}
+
 extern void CommandEval( char *sz ) {
 
     char szOutput[ 2048 ];
@@ -798,7 +863,7 @@ static void Prompt( void ) {
     if( !fInteractive )
 	return;
 
-    fputs( szPrompt, stdout );
+    fputs( FormatPrompt(), stdout );
     fflush( stdout );    
 }
 #endif
@@ -827,6 +892,9 @@ void HandleInput( char *sz ) {
     }
     
     free( sz );
+
+    /* Need to reinstall handler in case the prompt has changed */
+    rl_callback_handler_install( FormatPrompt(), HandleInput );
 }
 #endif
 
@@ -943,7 +1011,7 @@ void RunX( void ) {
     EventHandlerReady( &ev, TRUE, -1 );
     
 #if HAVE_LIBREADLINE
-    rl_callback_handler_install( szPrompt, HandleInput );
+    rl_callback_handler_install( FormatPrompt(), HandleInput );
 #else
     Prompt();
 #endif
@@ -1064,18 +1132,19 @@ extern int main( int argc, char *argv[] ) {
 #endif
     
 #if !X_DISPLAY_MISSING
-    if( fX )
+    if( fX ) {
 	RunX();
 
-    fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
-    fX = FALSE;
+	fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
+	fX = FALSE;
+    }
 #endif
     
     for(;;) {
 #if HAVE_LIBREADLINE
 	char *sz;
 	
-	if( !( sz = readline( szPrompt ) ) )
+	if( !( sz = readline( FormatPrompt() ) ) )
 	    return EXIT_SUCCESS;
 	
 	fInterrupt = FALSE;
