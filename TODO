@@ -178,8 +178,6 @@ duplication of effort and to make sure our changes merge easily.
    in /home/jth/gnubg/sgf.
 ** Extended navigation in the game list window, some gui analog to 
    "next move for player 0 marked doubtful".
-** The rollout progress bar does not include the number of games played anymore.
-   (it must have disappeared somewhere)
 ** Problem with auto-analysis
    (X events must be disabled whilst analysing)
 
@@ -315,6 +313,11 @@ or should they just be linked to Save and Load Match?
   (they both approximate SAX) that we could write a wrapper to make use
   of whichever library is available.  We could even include a bare-bones
   XML parser to fall back to in case neither are present.
+** It would be nice if you could mark positions and moves for "Rollout later".
+One could then look through a game and mark all positions of interest, set
+the rollouts off and come back later.
+** Save the results of rollouts/evaluations performed with hint during playing
+
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.
