@@ -384,18 +384,19 @@ static void ParseMatMove( char *sz, int iPlayer ) {
     }
 }
 
-static void ImportGame( FILE *pf, int iGame, int nLength ) {
+static int 
+ImportGame( FILE *pf, int iGame, int nLength ) {
 
     char sz[ 128 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight = NULL;
     int n0, n1;
     moverecord *pmr;
     
     if( fscanf( pf, " %31[^:]:%d %31[^:]:%d%*[ ]", sz0, &n0, sz1, &n1 ) < 4 )
-	return;
+        return 0;
 
     if( nLength && ( n0 >= nLength || n1 >= nLength ) )
 	/* match is already over -- ignore extra games */
-	return;
+	return 1;
     
     InitBoard( ms.anBoard );
 
@@ -476,6 +477,11 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
     } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
 
     AddGame( pmr );
+
+    return ( ms.nMatchTo && 
+             ( ms.anScore[ 0 ] >= ms.nMatchTo || 
+               ms.anScore[ 1 ] >= ms.nMatchTo ) );
+
 }
 
 extern void ImportMat( FILE *pf, char *szFilename ) {
@@ -516,8 +522,11 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
     ClearMatch();
 
     while( 1 ) {
-	if( ( n = fscanf( pf, " Game %d\n", &i ) ) == 1 )
-	    ImportGame( pf, i - 1, nLength );
+        if( ( n = fscanf( pf, " Game %d\n", &i ) ) == 1 ) {
+          if ( ImportGame( pf, i - 1, nLength ) ) 
+            /* match is over; avoid multiple matches in same .mat file */
+            break;
+        }
 	else if( n == EOF )
 	    break;
 	else

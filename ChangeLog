@@ -1,3 +1,8 @@
+Mon Jul 15 21:47:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c (ImportGame, ImportMat): read only first match
+	in .mat file.
+
 Mon Jul 15 16:35:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c (CreateMoveListTools): Put buttons in a table
