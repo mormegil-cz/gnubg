@@ -845,8 +845,8 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		  ( p = NeuralNetCreateDirect( &nnCrashed, p ) )  &&
 				    
 		  ( p = NeuralNetCreateDirect(&nnpContact, p) ) &&
-		  ( p = NeuralNetCreateDirect(&nnpRace, p ) ) &&
-		  ( p = NeuralNetCreateDirect(&nnpCrashed, p) );
+		  ( p = NeuralNetCreateDirect(&nnpCrashed, p) ) &&
+		  ( p = NeuralNetCreateDirect(&nnpRace, p ) );
 	    }
 #endif
 	    if( !fReadWeights && !( fReadWeights =
@@ -855,8 +855,8 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		   !NeuralNetLoadBinary(&nnCrashed, pfWeights ) &&
 				    
 		   !NeuralNetLoadBinary(&nnpContact, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnpRace, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) ) ) {
+		   !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) &&
+		   !NeuralNetLoadBinary(&nnpRace, pfWeights ) ) ) { 
 		perror( szWeightsBinary );
 	    }
 	    
@@ -887,8 +887,8 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		       !NeuralNetLoad( &nnCrashed, pfWeights ) &&
 		       
 		       !NeuralNetLoad( &nnpContact, pfWeights ) &&
-		       !NeuralNetLoad( &nnpRace, pfWeights ) &&
-		       !NeuralNetLoad( &nnpCrashed, pfWeights )
+		       !NeuralNetLoad( &nnpCrashed, pfWeights ) &&
+		       !NeuralNetLoad( &nnpRace, pfWeights ) 
 		       ) )
 		    perror( szWeights );
 
@@ -937,8 +937,8 @@ extern int EvalSave( char *szWeights ) {
   NeuralNetSave( &nnCrashed, pfWeights );
 
   NeuralNetSave( &nnpContact, pfWeights );
-  NeuralNetSave( &nnpRace, pfWeights );
   NeuralNetSave( &nnpCrashed, pfWeights );
+  NeuralNetSave( &nnpRace, pfWeights );
   
   fclose( pfWeights );
 
@@ -6037,7 +6037,8 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   
 }
 
-
+#include "drawboard.h"
+  
 static int 
 EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
@@ -6158,6 +6159,27 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 #if !defined( REDUCTION_CODE )
       if( usePrune ) {
 	FindBestMoveInEval(n0, n1, anBoardNew, pciMove, pec);
+#if 0
+	int anBoardSave[ 2 ][ 25 ];
+        memcpy(anBoardSave[ 0 ] , anBoardNew[ 0 ], 25 * sizeof(int));
+        memcpy(anBoardSave[ 1 ] , anBoardNew[ 1 ], 25 * sizeof(int));
+
+        memcpy(anBoardNew[ 0 ] , anBoard[ 0 ], 25 * sizeof(int));
+        memcpy(anBoardNew[ 1 ] , anBoard[ 1 ], 25 * sizeof(int));
+	FindBestMovePlied( NULL, n0, n1, anBoardNew,
+			   pciMove, pec, 0, defaultFilters );
+        if( memcmp(anBoardNew[ 0 ] , anBoardSave[ 0 ], 25 * sizeof(int)) != 0 ||
+	    memcmp(anBoardNew[ 1 ] , anBoardSave[ 1 ], 25 * sizeof(int)) != 0 ) {
+	  char szBoard[ 2048 ];
+	  char *asz[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,NULL };
+	  char* matchd = "AQHgARAAKAAA";
+	  outputl( DrawBoard(szBoard, anBoard, 0, asz, matchd, 0) );
+	  printf("Dice %d %d\n", n0, n1);
+	  outputl( DrawBoard(szBoard, anBoardSave, 0, asz, matchd, 0) );
+	  outputl( DrawBoard(szBoard, anBoardNew, 0, asz, matchd, 0) );
+	}
+#endif
+	
       } else {
 #endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew,
