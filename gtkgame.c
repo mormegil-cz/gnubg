@@ -4360,7 +4360,7 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     }
 
     if( pec->rSearchTolerance != pecOrig->rSearchTolerance ) {
-	sprintf( sz, "%s tolerance %.3f", szPrefix, pec->rSearchTolerance );
+        lisprintf( sz, "%s tolerance %.3f", szPrefix, pec->rSearchTolerance );
 	UserCommand( sz );
     }
     
@@ -4381,7 +4381,7 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     }
 
     if( pec->rNoise != pecOrig->rNoise ) {
-	sprintf( sz, "%s noise %.3f", szPrefix, pec->rNoise );
+	lisprintf( sz, "%s noise %.3f", szPrefix, pec->rNoise );
 	UserCommand( sz );
     }
     
