@@ -1,3 +1,8 @@
+Sat Jun 14 13:18:34 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* osr.c: Small rewrite of one sided rollout to handle chequers on the
+	bar.
+
 Sat Jun 14 12:35:47 2003  Joern Thyssen  <jth@gnubg.org>
 
   	New commands to allow modification of cube efficiency
