@@ -767,12 +767,15 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 
     /* 2nd moment of inertia -- presented by Berliner as a measure of how
        "stranded" the rear chequers are. */
+    /* Find the "centre of mass" of the player's chequers. */
     for( n = 0, i = 0; i < 25; i++ )
 	if( anBoard[ i ] )
 	    n += i * anBoard[ i ];
 
     n /= 15;
 
+    /* Accumulate the squares of the distances of chequers behind that
+       centre. */
     for( j = 0, k = 0, i = n + 1; i < 25; i++ )
 	if( anBoard[ i ] ) {
 	    j += anBoard[ i ];
@@ -782,6 +785,8 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     if( j )
 	k /= j;
 
+    /* Normalise by dividing by 400 (i.e. 20 squared -- chequers will
+       generally be in the range 0 to 20 pips behind the centre). */
     afInput[ I_MOMENT2 ] = k / 400.0;
 
     for( n = 0, i = 0; i < 6; i++ )
