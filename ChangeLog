@@ -1,3 +1,12 @@
+Thu Jan  2 22:51:47 2003  Joern Thyssen  <jth@gnubg.org>
+
+	First iteration of .tmg (TrueMoneyGames) import.
+
+	* import.c (ImportTMG, ParseTMGOptions, ImportTMGGame, 
+	ParseTMGGame): new functions.
+
+	* gnubg.c. new commands "import tmg <file>" and "set path tmg ...".
+
 Thu Jan  2 20:09:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	New button "Show" in the chequer play dialog

@@ -7260,3 +7260,4 @@ Convert ( const char *sz,
   return pchDest;
 
 }
+

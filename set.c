@@ -2423,17 +2423,20 @@ extern void CommandSetAnalysisMoveFilter( char *sz ) {
 
   
 
-static void SetMatchInfo( char **ppch, char *sz, char *szMessage ) {
+extern void 
+SetMatchInfo( char **ppch, char *sz, char *szMessage ) {
 
     if( *ppch )
 	free( *ppch );
 
     if( sz && *sz ) {
 	*ppch = strdup( sz );
-	outputf( _("%s set to: %s\n"), szMessage, sz );
+        if ( szMessage )
+   	   outputf( _("%s set to: %s\n"), szMessage, sz );
     } else {
 	*ppch = NULL;
-	outputf( _("%s cleared.\n"), szMessage );
+        if ( szMessage )
+	   outputf( _("%s cleared.\n"), szMessage );
     }
 }
 
@@ -3086,6 +3089,13 @@ extern void
 CommandSetPathMET ( char *sz ) {
 
   SetPath ( sz, PATH_MET );
+
+}
+
+extern void
+CommandSetPathTMG ( char *sz ) {
+
+  SetPath ( sz, PATH_TMG );
 
 }
 

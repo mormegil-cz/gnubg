@@ -288,6 +288,7 @@ static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw );
 static void ImportSGG( gpointer *p, guint n, GtkWidget *pw );
+static void ImportTMG( gpointer *p, guint n, GtkWidget *pw );
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
@@ -2182,7 +2183,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Import/._pos position..."), NULL, ImportPos, 0, NULL },
 	{ N_("/_File/_Import/FIBS _oldmoves..."), 
           NULL, ImportOldmoves, 0, NULL },
-	{ N_("/_File/_Import/._sgg match..."), NULL, ImportSGG, 0, NULL },
+	{ N_("/_File/_Import/._GamesGrid .sgg match..."), 
+          NULL, ImportSGG, 0, NULL },
+	{ N_("/_File/_Import/._TrueMoneyGames .tmg match..."), 
+          NULL, ImportTMG, 0, NULL },
 	{ N_("/_File/_Export"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Game"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Game/.gam..."), NULL, ExportGameGam, 0, NULL },
@@ -3369,6 +3373,15 @@ static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGG );
   FileCommand( _("Import .sgg match"), sz, "import sgg", "sgg" );
+  if ( sz ) 
+    free ( sz );
+
+}
+
+static void ImportTMG( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultPath ( PATH_TMG );
+  FileCommand( _("Import .tmg match"), sz, "import tmg", "tmg" );
   if ( sz ) 
     free ( sz );
 
@@ -5346,6 +5359,21 @@ extern void GTKEval( char *szOutput ) {
     gdk_font_unref( pf );
 }
 
+static void DestroyHint( gpointer p ) {
+
+  movelist *pml = p;
+
+  if ( pml ) {
+    if ( pml->amMoves )
+      free ( pml->amMoves );
+    
+    free ( pml );
+  }
+
+  pwHint = NULL;
+
+}
+
 static void
 HintOK ( GtkWidget *pw, void *unused ) {
 
@@ -5380,6 +5408,8 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     
     setWindowGeometry ( pwHint, &awg[ WINDOW_HINT ] );
     
+    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, NULL );
+
     gtk_widget_show_all( pwHint );
 
 
@@ -5476,21 +5506,6 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
    WinCopy( (char *) data);
 }
 #endif
-
-static void DestroyHint( gpointer p ) {
-
-  movelist *pml = p;
-
-  if ( pml ) {
-    if ( pml->amMoves )
-      free ( pml->amMoves );
-    
-    free ( pml );
-  }
-
-  pwHint = NULL;
-
-}
 
 extern void 
 GTKHint( movelist *pmlOrig, const int iMove ) {
@@ -7581,7 +7596,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
 typedef struct _pathdata {
 
-  GtkWidget *apwPath[ PATH_MET + 1 ];
+  GtkWidget *apwPath[ NUM_PATHS ];
 
 } pathdata;
 
@@ -7627,7 +7642,7 @@ SetPath ( GtkWidget *pw, pathdata *ppd, int fOK ) {
   int i;
   gchar *pc;
 
-  for ( i = 0; i <= PATH_MET; i++ ) {
+  for ( i = 0; i < NUM_PATHS; i++ ) {
     gtk_label_get ( GTK_LABEL ( ppd->apwPath[ i ] ), &pc );
     strcpy ( aaszPaths[ i ][ 0 ], pc );
   }
@@ -7666,7 +7681,7 @@ GTKShowPath ( void ) {
   int i;
   int *pi;
 
-  char *aaszPathNames[][ PATH_MET + 1 ] = {
+  char *aaszPathNames[][ NUM_PATHS ] = {
     { N_("Export of Encapsulated PostScript .eps files") , 
       N_("Encapsulated PostScript") },
     { N_("Import or export of Jellyfish .gam files") , 
@@ -7692,7 +7707,10 @@ GTKShowPath ( void ) {
     { N_("Export of text files"), 
       N_("Text") },
     { N_("Loading of match equity files (.xml)"), 
-      N_("Match Equity Tables") } };
+      N_("Match Equity Tables") },
+    { N_("Loading of TrueMoneyGames files (.tmg)"), 
+      N_("TrueMoneyGames TMG") } 
+  };
 
   
   pwDialog = CreateDialog( _("GNU Backgammon - Paths"), DT_QUESTION,
@@ -7712,7 +7730,7 @@ GTKShowPath ( void ) {
 
   /* content of widget */
 
-  for ( i = 0; i <= PATH_MET; i++ ) {
+  for ( i = 0; i < NUM_PATHS; i++ ) {
 
     pwVBox = gtk_vbox_new ( FALSE, 4 );
 

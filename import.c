@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
 #include "backgammon.h"
 #include "drawboard.h"
 #if USE_GTK
@@ -1613,4 +1615,451 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
 #endif
 }
 
+
+/*
+ * Parse TMG files 
+ *
+ */
+
+static int
+ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
+                  int *pfAutoDoubles, int *pfJacobyRule,
+                  int *pnLength ) {
+
+  char szTemp[ 80 ];
+  int i, j;
+  static char *aszOptions[] = {
+    "MatchID:", "Player1:", "Player2:", "Stake:", "RakePct:",
+    "MaxRakeAbs:", "Startdate:", "Jacoby:", "AutoDistrib:", "Beavers:", 
+    "Raccoons:", "Crawford:", "Cube:", "MaxCube:", "Length:", "MaxGames:",
+    "Variant:", "PlayMoney:", NULL };
+  double arRating[ 2 ];
+  int anExp[ 2 ];
+  char *pc;
+  char szName[ 80 ];
+
+  for ( i = 0, pc = aszOptions[ i ]; pc; ++i, pc = aszOptions[ i ] ) 
+    if ( ! strncmp ( sz, pc, strlen ( pc ) ) )
+      break;
+  
+  switch ( i ) {
+  case 0: /* MatchID */
+    pc = strchr ( sz, ':' ) + 2;
+    sprintf( szTemp, _("TMG MatchID: %s"), pc );
+    if ( ( pc = strchr ( szTemp, '\n' ) ) )
+      *pc = 0;
+    pmi->pchComment = strdup ( szTemp );
+    return 0;
+    break;
+
+  case 1: /* Player1: */
+  case 2: /* Player2: */
+    if ( sscanf ( sz, "Player%d: %*d %s %*f", &j, szName ) == 2 ) 
+      if ( ( j == 1 || j == 2 ) && *szName )
+        strcpy ( ap[ j - 1 ].szName, szName );
+    return 0;
+    break;
+
+  case 3: /* Stake: */
+    /* ignore, however, we could read into pmi->szComment, but I guess 
+       people do not want to see their stakes in, say, html export */
+    break;
+
+  case 4: /* RakePct: */
+  case 5: /* MaxRakeAbs: */
+  case 8: /* AutoDistrib */
+  case 13: /* MaxCube */
+  case 15: /* MaxGames */
+  case 16: /* Variant */
+    /* ignore */
+    return 0;
+    break;
+
+  case 6: /* Startdate */
+
+    if ( ( sscanf ( sz, "Startdate: %d-%d-%d", 
+                    &pmi->nYear, &pmi->nMonth, &pmi->nDay ) ) != 3 ) 
+      pmi->nYear = pmi->nMonth = pmi->nDay = 0;
+    return 0;
+    break;
+
+  case 7: /* Jacoby */
+    if ( ! ( pc = strchr( sz, ':' ) ) )
+      return 0;
+    *pfJacobyRule = atoi ( pc + 2 );
+    return 0;
+    break;
+
+  case 9: /* Beavers */
+    break;
+
+  case 10: /* Raccoons */
+    break;
+
+  case 11: /* Crawford */
+    /* ignore. Possible FIXME: use it? */
+    break;
+
+  case 12: /* Cube */
+    break;
+
+  case 14: /* Length */
+    if ( ! ( pc = strchr( sz, ':' ) ) )
+      return 0;
+    *pnLength = atoi ( pc + 2 );
+    return 0;
+    break;
+
+  case 17: /* PlayMoney */
+    break;
+
+  }
+
+  /* code not reachable */
+
+  return -1;
+
+}
+
+
+static int
+ParseTMGGame ( const char *sz,
+               int *piGame, int *pn0, int *pn1, int *pfCrawford,
+               const int nLength ) {
+
+  int i = sscanf ( sz, "Game %d: %d-%d", piGame, pn0, pn1 ) == 3;
+
+  if ( !i )
+    return FALSE;
+
+  if ( nLength ) {
+    if ( ! *pfCrawford ) 
+      *pfCrawford = ( *pn0 == ( nLength - 1 ) ) || ( *pn1 == ( nLength - 1 ) );
+    else
+      *pfCrawford = FALSE;
+  }
+
+  return TRUE;
+
+}
+               
+static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
+			   int fCrawford,
+                           int fCrawfordRule, int fAutoDoubles, 
+                           int fJacobyRule ) {
+
+
+    char sz[ 1024 ];
+    char *pch;
+    int c, fPlayer = 0, anRoll[ 2 ];
+    moverecord *pmgi, *pmr;
+    char *szComment = NULL;
+    int fBeaver = FALSE;
+
+    int fPlayerOld, nMoveOld; 
+    int nMove = -1;
+    int iMove;
+    int j;
+    int fRecordType;
+
+    typedef enum _tmgrecordtype {
+      TMG_ROLL = 1,
+      TMG_AUTO_DOUBLE = 2,
+      TMG_MOVE = 4,
+      TMG_DOUBLE = 5,
+      TMG_TAKE = 7,
+      TMG_PASS = 10,
+      TMG_WIN_SINGLE = 14,
+      TMG_WIN_GAMMON = 15,
+      TMG_WIN_BACKGAMMON = 16,
+      TMG_TABLE_STAKE = 19 } tmgrecordtype;
+    tmgrecordtype trt;
+    
+    InitBoard( ms.anBoard );
+
+    ClearMoveRecord();
+
+    ListInsert( &lMatch, plGame );
+
+    pmgi = malloc( sizeof( movegameinfo ) );
+    pmgi->g.mt = MOVE_GAMEINFO;
+    pmgi->g.sz = NULL;
+    pmgi->g.i = i - 1;
+    pmgi->g.nMatch = nLength;
+    pmgi->g.anScore[ 0 ] = n0;
+    pmgi->g.anScore[ 1 ] = n1;
+    pmgi->g.fCrawford = fCrawfordRule && nLength;
+    pmgi->g.fCrawfordGame = fCrawford;
+    pmgi->g.fJacoby = fJacobyRule && ! nLength;
+    pmgi->g.fWinner = -1;
+    pmgi->g.nPoints = 0;
+    pmgi->g.fResigned = FALSE;
+    pmgi->g.nAutoDoubles = 0; /* we check for automatic doubles later */
+    IniStatcontext( &pmgi->g.sc );
+    AddMoveRecord( pmgi );
+
+    anRoll[ 0 ] = 0;
+    
+    while( fgets( sz, 1024, pf ) ) {
+
+      /* skip white space */
+
+      for ( pch = sz; isspace ( *pch ); ++pch )
+        ;
+
+      /* 
+       * is it:
+       *   -1 4 13/11 24/23
+       * or
+       * Beavers: 0
+       */
+
+      if ( isdigit ( *pch ) || *pch == '-' ) {
+
+        iMove = abs ( atoi ( pch ) ); /* move number */
+        fPlayer = ( *pch == '-' );    /* player: +n for player 0,
+                                                 -n for player 1 */
+        
+        /* step over move number */
+
+        for ( ; ! isspace ( *pch ); ++pch )
+          ;
+        for ( ; isspace ( *pch ); ++pch )
+          ;
+
+        /* determine record type */
+
+        trt = (tmgrecordtype) atoi ( pch );
+
+        /* step over record type */
+
+        for ( ; ! isspace ( *pch ); ++pch )
+          ;
+        for ( ; isspace ( *pch ); ++pch )
+          ;
+
+        switch ( trt ) {
+        case TMG_ROLL: /* roll:    1 1 21: */
+          anRoll[ 0 ] = *pch - '0';
+          anRoll[ 1 ] = *(pch+1) - '0';
+
+          pmr = malloc( sizeof( pmr->sd ) );
+          pmr->sd.mt = MOVE_SETDICE;
+          pmr->sd.sz = NULL;
+          pmr->sd.fPlayer = fPlayer;
+          pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
+          pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
+          pmr->sd.lt = LUCK_NONE;
+          pmr->sd.rLuck = ERR_VAL;
+
+          AddMoveRecord( pmr );
+
+          break;
+
+        case TMG_AUTO_DOUBLE: /* automatic double:  0 2 Automatic to 2 */
+
+          ++pmgi->g.nAutoDoubles;
+          /* we've already called AddMoveRecord for pmgi, 
+             so we manually update the cube value */
+          ms.nCube *= 2;
+
+          break;
+
+        case TMG_MOVE: /* move:    1 4 24/18 13/10 */
+
+          pmr = malloc( sizeof( pmr->n ) );
+          pmr->n.mt = MOVE_NORMAL;
+          pmr->n.sz = NULL;
+          pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
+          pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
+          pmr->n.fPlayer = fPlayer;
+          pmr->n.ml.cMoves = 0;
+          pmr->n.ml.amMoves = NULL;
+          pmr->n.anMove[ 0 ] = -1;
+          pmr->n.esDouble.et = EVAL_NONE;
+          pmr->n.esChequer.et = EVAL_NONE;
+          pmr->n.lt = LUCK_NONE;
+          pmr->n.rLuck = ERR_VAL;
+          pmr->n.stMove = SKILL_NONE;
+          pmr->n.stCube = SKILL_NONE;
+
+          if ( ! strncmp ( pch, "0/0", 3 ) ) {
+            /* fans */
+            AddMoveRecord ( pmr );
+          }
+          else if( ( c = ParseMove( pch, pmr->n.anMove ) ) >= 0 ) {
+            for( i = 0; i < ( c << 1 ); i++ )
+              pmr->n.anMove[ i ]--;
+            if( c < 4 )
+              pmr->n.anMove[ c << 1 ] =
+                pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+            
+            AddMoveRecord( pmr );
+          } else
+            free( pmr );
+		    
+          break;
+
+        case TMG_DOUBLE: /* double:   -7 5 Double to 2 */
+
+          pmr = malloc( sizeof( pmr->d ) );
+          pmr->d.mt = MOVE_DOUBLE;
+          pmr->d.sz = NULL;
+          pmr->d.fPlayer = fPlayer;
+          pmr->d.esDouble.et = EVAL_NONE;
+          pmr->d.st = SKILL_NONE;
+          
+          AddMoveRecord( pmr );
+
+          break;
+
+        case TMG_TAKE: /* take:   -6 7 Take */
+
+          pmr = malloc( sizeof( pmr->d ) );
+          pmr->d.mt = MOVE_TAKE;
+          pmr->d.sz = NULL;
+          pmr->d.fPlayer = fPlayer;
+          pmr->d.esDouble.et = EVAL_NONE;
+          pmr->d.st = SKILL_NONE;
+          
+          AddMoveRecord( pmr );
+
+          break;
+                            
+        case TMG_PASS: /* pass:    5 10 Pass */
+
+          pmr = malloc( sizeof( pmr->d ) );
+          pmr->d.mt = MOVE_DROP;
+          pmr->d.sz = NULL;
+          pmr->d.fPlayer = fPlayer;
+          pmr->d.esDouble.et = EVAL_NONE;
+          pmr->d.st = SKILL_NONE;
+          
+          AddMoveRecord( pmr );
+
+          break;
+                            
+        case TMG_WIN_SINGLE: /* win single:    4 14 1 thj wins 1 point */
+        case TMG_WIN_GAMMON: /* resign:  -30 15 2 Saltyzoo7 wins 2 points */
+        case TMG_WIN_BACKGAMMON: /* win backgammon: ??? */
+
+          if ( ! GameStatus ( ms.anBoard ) ) {
+            /* game is in progress: the opponent resigned */
+            pmr = malloc( sizeof( *pmr ) );
+            pmr->r.mt = MOVE_RESIGN;
+            pmr->r.sz = NULL;
+            pmr->r.fPlayer = ! fPlayer;
+            pmr->r.nResigned = atoi ( pch ) / ms.nCube;
+            pmr->r.esResign.et = EVAL_NONE;
+            
+            AddMoveRecord( pmr );
+
+          }
+
+          goto finished;
+
+          break;
+
+        case TMG_TABLE_STAKE: 
+          /* Table stake:   0 19 57.68 0.00 43.57 0.00 Settlement */
+
+          /* ignore: FIXME: this should be stored in order to analyse
+             tables stakes correctly */
+
+          break;
+
+        default:
+
+          outputf ( "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
+          assert ( FALSE );
+
+          break;
+
+        } 
+
+
+      }
+      else {
+
+        /* it's most likely an option: the players may enable or
+           disable beavers and auto doubles during play */
+
+        ParseTMGOptions ( sz, &mi, &pmgi->g.fCrawford,
+                           &j, &pmgi->g.fJacoby, &j );
+
+      }
+
+    }
+
+ finished:
+    AddGame( pmgi );
+
+
+
+}
+
+extern void
+ImportTMG ( FILE *pf, const char *szFilename ) {
+
+  int fCrawfordRule = TRUE;
+  int fJacobyRule = TRUE;
+  int fAutoDoubles = 0;
+  int nLength = 0;
+  int fCrawford = FALSE;
+  int n0, n1;
+  int i, j;
+  char sz[ 80 ];
+
+  FreeMatch();
+  ClearMatch();
+
+  /* clear matchinfo */
+
+  for ( j = 0; j < 2; ++j )
+    SetMatchInfo ( &mi.pchRating[ j ], NULL, NULL );
+  SetMatchInfo ( &mi.pchPlace, 
+                 _("TrueMoneyGames (http://www.truemoneygames.com)"), NULL );
+  SetMatchInfo ( &mi.pchEvent, NULL, NULL );
+  SetMatchInfo ( &mi.pchRound, NULL, NULL );
+  SetMatchInfo ( &mi.pchAnnotator, NULL, NULL );
+  SetMatchInfo ( &mi.pchComment, NULL, NULL );
+  mi.nYear = mi.nMonth = mi.nDay = 0;
+
+  /* search for options (until first game is found) */
+
+  while ( fgets ( sz, 80, pf ) ) {
+    if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, nLength ) )
+      break;
+      
+    ParseTMGOptions ( sz, &mi, &fCrawfordRule, 
+                      &fAutoDoubles, &fJacobyRule, &nLength );
+
+  }
+
+  /* set remainder of match info */
+
+  while( !feof( pf ) ) {
+
+    ImportTMGGame( pf, i, nLength, n0, n1, fCrawford,
+                   fCrawfordRule, fAutoDoubles, fJacobyRule );
+	
+    while( fgets( sz, 80, pf ) )
+      if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, nLength ) )
+        break;
+
+  }
+  
+  UpdateSettings();
+  
+  /* swap players */
+  
+  CommandSwapPlayers ( NULL );
+  
+#if USE_GTK
+  if( fX ){
+    GTKThaw();
+    GTKSet(ap);
+  }
+#endif
+}
 
