@@ -380,6 +380,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_NORMAL:
+	    msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
 	    if( fTook )
 		/* no need to print board following a double/take */
 		fTook = FALSE;
@@ -404,7 +405,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		    continue;
 
 		putc( i == pmr->n.iMove ? '*' : ' ', pf );
-		FormatMoveHint( sz, msExport.anBoard, &pmr->n.ml, i,
+		FormatMoveHint( sz, &msExport, &pmr->n.ml, i,
 				i != pmr->n.iMove ||
 				i != pmr->n.ml.cMoves - 1 );
 		fputs( sz, pf );
