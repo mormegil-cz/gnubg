@@ -4124,7 +4124,7 @@ msgid "Time penalty: %s loses %d point\n"
 msgid_plural "Time penalty: %s loses %d points\n"
 msgstr[0] "Штрафное время: %s проигрывает %d очко\n"
 msgstr[1] "Штрафное время: %s проигрывает %d очка\n"
-msgstr[2] "Штрафное время: %s проигрывает %d очка\n"
+msgstr[2] "Штрафное время: %s проигрывает %d очков\n"
 
 #: gnubg.c:3048 gnubg.c:3053 gnubg.c:3058
 #, c-format
