@@ -53,7 +53,6 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 %token OFF
 
 %name-prefix="ext"
-%output="external_y.c"
 %defines
 
 %%

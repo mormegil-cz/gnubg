@@ -1,3 +1,7 @@
+Wed Aug 11 23:39:41 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* external_y.y: remove %output to stop ylwrap complaining.
+
 Thu Aug 12 07:46:18 2004  Joseph Heled  <joseph@gnubg.org>
 
 	* gnubg.c: Add search in "scripts/gnubg.py" if all else fails in
