@@ -4399,8 +4399,6 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
         SetCubeInfo ( pci, pci -> nCube * 2, 
                       pci -> fMove, pci -> fMove );
 
-        printf ("auto redouble...\n" );
-
       }
 
       /* Do I have an automatic (re)double? */
