@@ -1058,6 +1058,12 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
       if ( ! isHyperGammon( apci[ alt ]->bgv ) )
         SanityCheck( anBoardOrig, aarMu[ alt ] );
 
+      if( fShowProgress && pfProgress ) {
+        (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
+                       i, alt, ajiJSD[ alt ].nRank + 1,
+		       ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
+		       pUserData );
+      }
 	  
     } /* for (alt = 0; alt < alternatives; ++alt) */
 
@@ -1244,7 +1250,6 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         } /* for (output = 0; output < NUM_ROLLOUT_OUTPUTS; output++) */
 
         if (!err_too_big) {
-          nGamesDone[ alt ] = prc->nGamesDone = i + 1;
           fNoMore[ alt ] = 1;
         }
 
@@ -1267,8 +1272,6 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
   /* store results */
   for (alt = 0; alt < alternatives; alt++) {
-    if (fNoMore[ alt ] && nGamesDone[ alt ] <= cGames)
-      nGamesDone[ alt ]  = apes[alt]->rc.nGamesDone = cGames;
     
     if( apOutput[alt] )
       for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
