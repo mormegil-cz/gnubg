@@ -178,6 +178,9 @@ duplication of effort and to make sure our changes merge easily.
   commands echoed to stdout and the prompts are in the wrong order).
 ** When selecting a cell in the game record window with the mouse, the
   window shouldn't scroll to centre the current record.
+** "eval" and "rollout" give equities from the opponent's point of view
+  when using =n notation. (gary)
+** "rollout" needs to show the move or board position in the output. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

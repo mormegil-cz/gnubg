@@ -144,7 +144,8 @@ AnalyzeGame ( list *plGame, int iGame ) {
 
           float arDouble[ 4 ];
 
-          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer );
+          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchTo,
+			anScore, fCrawford, fJacoby, fBeavers );
 
           if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
@@ -158,7 +159,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
             for ( j = 0; j < 4; j++ ) 
               pmr->n.arDouble[ j ] = arDouble[ j ];
 
-            GetCubeActionSz ( arDouble, sz, &ci );
+            GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC );
 
             puts ( sz );
 
@@ -184,7 +185,8 @@ AnalyzeGame ( list *plGame, int iGame ) {
 
         /* find best moves */
 
-        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer );
+        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchTo,
+		      anScore, fCrawford, fJacoby, fBeavers );
 
         FindnSaveBestMoves ( &(pmr->n.ml), anDice[ 0 ], anDice[ 1 ],
                              anBoard, auch, &ci, &ecMove );
@@ -221,7 +223,8 @@ AnalyzeGame ( list *plGame, int iGame ) {
 
         /* cube action */
 
-        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer );
+        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchTo, anScore,
+		      fCrawford, fJacoby, fBeavers );
 
         if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
@@ -235,7 +238,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
           for ( j = 0; j < 4; j++ ) 
             pmr->d.arDouble[ j ] = arDouble[ j ];
 
-          GetCubeActionSz ( arDouble, sz, &ci );
+          GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC );
 
           puts ( sz );
 

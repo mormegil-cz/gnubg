@@ -121,10 +121,12 @@ static SCM board_to_position_id( SCM sBoard ) {
     return scm_makfrom0str( PositionID( anBoard ) );
 }
 
-static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove ) {
+static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
+		      SCM sScore, SCM sCrawford, SCM sJacoby, SCM sBeavers ) {
 
     cubeinfo ci;
     static char sz[] = "cube-info";
+    int an[ 2 ];
     
     SCM_ASSERT( SCM_INUMP( sCube ) || sCube == SCM_UNDEFINED, sCube,
 		SCM_ARG1, sz );
@@ -132,21 +134,39 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove ) {
 		sCubeOwner, SCM_ARG2, sz );
     SCM_ASSERT( SCM_INUMP( sMove ) || sMove == SCM_UNDEFINED, sMove,
 		SCM_ARG3, sz );
+    SCM_ASSERT( SCM_INUMP( sMatchTo ) || sMatchTo == SCM_UNDEFINED,
+		sMatchTo, SCM_ARG4, sz );
+    SCM_ASSERT( ( SCM_CONSP( sScore ) && SCM_INUMP( SCM_CAR( sScore ) ) &&
+		SCM_INUMP( SCM_CDR( sScore ) ) ) || sScore == SCM_UNDEFINED,
+		sScore, SCM_ARG5, sz );
 
-    if( sMove == SCM_UNDEFINED && gs == GAME_NONE )
+    if( sCube == SCM_UNDEFINED && gs == GAME_NONE )
 	/* no move specified, and no game in progress */
 	return SCM_BOOL_F;
+
+    if( sScore != SCM_UNDEFINED ) {
+	an[ 0 ] = SCM_INUM( SCM_CAR( sScore ) );
+	an[ 1 ] = SCM_INUM( SCM_CDR( sScore ) );
+    }
     
     SetCubeInfo( &ci, sCube == SCM_UNDEFINED ? nCube : SCM_INUM( sCube ),
 		 sCubeOwner == SCM_UNDEFINED ? fCubeOwner :
 		 SCM_INUM( sCubeOwner ),
-		 sMove == SCM_UNDEFINED ? fMove : SCM_INUM( sMove ) );
+		 sMove == SCM_UNDEFINED ? fMove : SCM_INUM( sMove ),
+		 sMatchTo == SCM_UNDEFINED ? nMatchTo : SCM_INUM( sMatchTo ),
+		 sScore == SCM_UNDEFINED ? anScore : an,
+		 sCrawford == SCM_UNDEFINED ? fCrawford :
+		 SCM_NFALSEP( sCrawford ),
+		 sJacoby == SCM_UNDEFINED ? fJacoby :
+		 SCM_NFALSEP( sJacoby ),
+		 sBeavers == SCM_UNDEFINED ? fBeavers :
+		 SCM_NFALSEP( sBeavers ) );
 
     return CubeInfoToSCM( &ci );
 }
 
 static SCM cube_info_match( SCM sCube, SCM sCubeOwner, SCM sMove,
-			    SCM sMatchTo, SCM sScore ) {
+			    SCM sMatchTo, SCM sScore, SCM sCrawford ) {
     cubeinfo ci;
     static char sz[] = "cube-info-match";
     int an[ 2 ];
@@ -163,13 +183,14 @@ static SCM cube_info_match( SCM sCube, SCM sCubeOwner, SCM sMove,
     an[ 1 ] = SCM_INUM( SCM_CDR( sScore ) );
     
     SetCubeInfoMatch( &ci, SCM_INUM( sCube ), SCM_INUM( sCubeOwner ),
-		      SCM_INUM( sMove ), SCM_INUM( sMatchTo ), an );
+		      SCM_INUM( sMove ), SCM_INUM( sMatchTo ), an,
+		      SCM_NFALSEP( sCrawford ) );
 
     return CubeInfoToSCM( &ci );
 }
 
 static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
-			    SCM sJacoby ) {
+			    SCM sJacoby, SCM sBeavers ) {
 
     cubeinfo ci;
     static char sz[] = "cube-info-money";
@@ -180,7 +201,9 @@ static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
 
     SetCubeInfoMoney( &ci, SCM_INUM( sCube ), SCM_INUM( sCubeOwner ),
 		      SCM_INUM( sMove ), sJacoby == SCM_UNDEFINED ?
-		      fJacoby : SCM_NFALSEP( sJacoby ) );
+		      fJacoby : SCM_NFALSEP( sJacoby ),
+		      sBeavers == SCM_UNDEFINED ? fBeavers :
+		      SCM_NFALSEP( sBeavers ) );
 		      
     return CubeInfoToSCM( &ci );
 }
@@ -200,7 +223,9 @@ static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
     SCMToBoard( sBoard, anBoard );
     
     if( sCube == SCM_UNDEFINED )
-	sCube = cube_info( SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED );
+	sCube = cube_info( SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED,
+			   SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED,
+			   SCM_UNDEFINED, SCM_UNDEFINED );
 
     SCMToCubeInfo( sCube, &ci );
  
@@ -251,7 +276,9 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
     SCMToBoard( sBoard, anBoard );
 
     if( sCube == SCM_UNDEFINED )
-	sCube = cube_info( SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED );
+	sCube = cube_info( SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED,
+			   SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED,
+			   SCM_UNDEFINED, SCM_UNDEFINED );
 
     SCMToCubeInfo( sCube, &ci );
  
@@ -288,9 +315,9 @@ extern int GuileInitialise( char *szDir ) {
     char szPath[ PATH_MAX ];
 
     scm_make_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
-    scm_make_gsubr( "cube-info", 0, 3, 0, cube_info );
-    scm_make_gsubr( "cube-info-match", 5, 0, 0, cube_info_match );
-    scm_make_gsubr( "cube-info-money", 3, 1, 0, cube_info_money );
+    scm_make_gsubr( "cube-info", 0, 8, 0, cube_info );
+    scm_make_gsubr( "cube-info-match", 6, 0, 0, cube_info_match );
+    scm_make_gsubr( "cube-info-money", 3, 2, 0, cube_info_money );
     scm_make_gsubr( "current-board", 0, 0, 0, current_board );
     scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );

@@ -36,7 +36,6 @@
 
 #if HAVE_LIBGDBM
 static char *szDatabase = "gnubg.gdbm"; /* FIXME */
-static cubeinfo ciBasic = { 1, 0, 0, { 1.0, 1.0, 1.0, 1.0 } };
 
 extern void CommandDatabaseDump( char *sz ) {
     
@@ -126,7 +125,7 @@ extern void CommandDatabaseRollout( char *sz ) {
 	    /* FIXME allow user to change these parameters */
 	    if( ( pev->c = Rollout( anBoardEval, arOutput, NULL,
                               nRolloutTruncate, nRollouts, fVarRedn,
-                              &ciBasic, &ecRollout ) ) > 0 ) {
+                              &ciCubeless, &ecRollout ) ) > 0 ) {
         for( i = 0; i < NUM_OUTPUTS; i++ )
           pev->asEq[ i ] = arOutput[ i ] * 0xFFFF;
 
@@ -192,7 +191,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
         break;
 	    
 	    FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
-                    anBoardGenerate, &ciBasic, NULL );
+                    anBoardGenerate, &ciCubeless, NULL );
 
 	    if( fInterrupt )
         break;

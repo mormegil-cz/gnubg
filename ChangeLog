@@ -1,3 +1,9 @@
+Tue Nov 14 10:25:54 2000  Gary Wong  <gtw@research.att.com>
+
+	* eval.c: Global game state (e.g. nCube, fCubeOwner, anScore)
+	removed from eval.c; this information must now be given as part
+	of the cubeinfo parameter.  All callers changed.
+
 Mon Nov 13 18:21:57 2000  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (LoadGame, LoadMatch, SaveGame, SaveMatch): use

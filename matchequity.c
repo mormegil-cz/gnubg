@@ -560,11 +560,9 @@ GetCubePrimeValue ( int i, int j, int nCubeValue ) {
 
 
 extern int
-GetPoints ( float arOutput [ 5 ], int   anScore[ 2 ], int nMatchTo,
-	    cubeinfo *pci, float arCP[ 2 ] ) {
+GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
   /*
-
    * Input:
    * - arOutput: we need the gammon and backgammon ratios
    *   (we assume arOutput is evaluate for pci -> fMove)
@@ -584,8 +582,8 @@ GetPoints ( float arOutput [ 5 ], int   anScore[ 2 ], int nMatchTo,
 
   /* normalize score */
 
-  int i = nMatchTo - anScore[ 0 ] - 1;
-  int j = nMatchTo - anScore[ 1 ] - 1;
+  int i = pci->nMatchTo - pci->anScore[ 0 ] - 1;
+  int j = pci->nMatchTo - pci->anScore[ 1 ] - 1;
 
 
 
@@ -791,15 +789,12 @@ GetPoints ( float arOutput [ 5 ], int   anScore[ 2 ], int nMatchTo,
 
 
 extern float
-GetDoublePointDeadCube ( float arOutput [ 5 ],
-                         int   anScore[ 2 ], int nMatchTo,
-                         cubeinfo *pci ) {
-
+GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
   /*
    * Calculate double point for dead cubes
    */
 
-  if ( ! nMatchTo ) {
+  if ( ! pci->nMatchTo ) {
 
     /* Use Rick Janowski's formulas
        [insert proper reference here] */
@@ -817,11 +812,11 @@ GetDoublePointDeadCube ( float arOutput [ 5 ],
     else
       rL = 1.0;
 
-    if ( pci->fCubeOwner == -1 && fJacoby) {
+    if ( pci->fCubeOwner == -1 && pci->fJacoby) {
 
       /* centered cube */
 
-      if ( fBeavers ) {
+      if ( pci->fBeavers ) {
         return ( rL - 0.25 ) / ( rW + rL - 0.5 );
       }
       else {
@@ -842,8 +837,8 @@ GetDoublePointDeadCube ( float arOutput [ 5 ],
 
     /* normalize score */
 
-    int i = nMatchTo - anScore[ pci->fMove ] - 1;
-    int j = nMatchTo - anScore[ ! pci->fMove ] - 1;
+    int i = pci->nMatchTo - pci->anScore[ pci->fMove ] - 1;
+    int j = pci->nMatchTo - pci->anScore[ ! pci->fMove ] - 1;
     int nCube = pci->nCube;
 
     float rG1, rBG1, rG2, rBG2, rDTW, rNDW, rDTL, rNDL;

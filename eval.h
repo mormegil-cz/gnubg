@@ -105,35 +105,30 @@ typedef struct _move {
 } move;
 
 typedef struct _cubeinfo {
-
-  /*
-   * nCube: the current value of the cube,
-   * fCubeOwner: the owner of the cube,
-   * fMove: the player for which we are
-   *        calculating equity for,
-   * arGammonPrice: the gammon prices;
-   *   [ 0 ] = gammon price for player 0,
-   *   [ 1 ] = gammon price for player 1,
-   *   [ 2 ] = backgammon price for player 0,
-   *   [ 3 ] = backgammon price for player 1.
-   *
-   */
-
-  int nCube, fCubeOwner, fMove;
-  float arGammonPrice[ 4 ];
-
+    /*
+     * nCube: the current value of the cube,
+     * fCubeOwner: the owner of the cube,
+     * fMove: the player for which we are
+     *        calculating equity for,
+     * fCrawford, fJacoby, fBeavers: optional rules in effect,
+     * arGammonPrice: the gammon prices;
+     *   [ 0 ] = gammon price for player 0,
+     *   [ 1 ] = gammon price for player 1,
+     *   [ 2 ] = backgammon price for player 0,
+     *   [ 3 ] = backgammon price for player 1.
+     *
+     */
+    int nCube, fCubeOwner, fMove, nMatchTo, anScore[ 2 ], fCrawford, fJacoby,
+	fBeavers;
+    float arGammonPrice[ 4 ];
 } cubeinfo;
 
 #define NORM_SCORE(n) ( nMatchTo - ( n ) ) 
 
 
 extern volatile int fInterrupt, fAction;
-extern int fMove, fCubeOwner, fJacoby, fCrawford;
-extern int fPostCrawford, nMatchTo, anScore[ 2 ], fBeavers;
-extern int nCube, fOutputMWC;
-extern float rCubeX;
-
 extern void ( *fnAction )( void );
+extern cubeinfo ciCubeless;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -155,8 +150,6 @@ typedef enum _positionclass {
 #define N_CLASSES (CLASS_CONTACT + 1)
 
 #define CLASS_PERFECT CLASS_BEAROFF2
-#define CLASS_ANY CLASS_OVER /* no class restrictions (for rel. accuracy) */
-#define CLASS_GLOBAL CLASS_CONTACT /* class containing all positions */
 				      
 typedef struct _redevaldata {
   float arOutput[ NUM_OUTPUTS ];
@@ -208,7 +201,7 @@ PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
 
 extern int 
 DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
-              evalcontext *pec );
+              evalcontext *pec, cubeinfo *pci, int fOutputMWC );
 
 extern void 
 SwapSides( int anBoard[ 2 ][ 25 ] );
@@ -245,11 +238,14 @@ Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
 
 
 extern int SetCubeInfoMoney( cubeinfo *pci, int nCube, int fCubeOwner,
-			     int fMove, int fJacoby );
+			     int fMove, int fJacoby, int fBeavers );
 extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
-			     int fMove, int nMatchTo, int anScore[ 2 ] );
+			     int fMove, int nMatchTo, int anScore[ 2 ],
+			     int fCrawford );
 extern int 
-SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner, int fMove );
+SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
+	      int nMatchTo, int anScore[ 2 ], int fCrawford, int fJacoby,
+	      int fBeavers );
  
 extern void 
 swap( int *p0, int *p1 );
@@ -272,7 +268,8 @@ extern int
 GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci );
 
 extern int 
-GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci );
+GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
+		  int fOutputMWC );
 
 extern float
 mwc2eq ( float rMwc, cubeinfo *ci );

@@ -39,12 +39,9 @@ void
 InitMatchEquity ( met metInit );
 
 extern int
-GetPoints ( float arOutput [ 5 ], int   anScore[ 2 ], int nMatchTo,
-	    cubeinfo *pci, float arCP[ 2 ] );
+GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] );
 
 extern float
-GetDoublePointDeadCube ( float arOutput [ 5 ],
-                         int   anScore[ 2 ], int nMatchTo,
-                         cubeinfo *pci );
+GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci );
 
 #endif

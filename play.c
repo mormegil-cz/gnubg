@@ -464,7 +464,8 @@ static int ComputerTurn( void ) {
   cubeinfo ci;
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
     
-  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		fCrawford, fJacoby, fBeavers );
 
   switch( ap[ fTurn ].pt ) {
   case PLAYER_GNU:
@@ -557,7 +558,7 @@ static int ComputerTurn( void ) {
           return -1;
 
         rDoublePoint = 
-          GetDoublePointDeadCube ( arOutput, anScore, nMatchTo, &ci );
+          GetDoublePointDeadCube ( arOutput, &ci );
 
         if ( arOutput[ 0 ] >= rDoublePoint ) {
 

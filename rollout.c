@@ -35,9 +35,6 @@
 #include "positionid.h"
 #include "rollout.h"
 
-/* cubeinfo struct for cubeless bearoff */
-static cubeinfo ciClBearoff = { 1, 0, 0, { 1.0, 1.0, 1.0, 1.0 } };
-
 static int QuasiRandomDice( int iTurn, int iGame, int cGames,
                             int anDice[ 2 ] ) {
   if( !iTurn && !( cGames % 36 ) ) {
@@ -82,7 +79,7 @@ FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 	    cBestRolls = j;
     }
 	
-    if( ( ml.amMoves[ i ].rScore = -Utility( ar, &ciClBearoff ) ) >
+    if( ( ml.amMoves[ i ].rScore = -Utility( ar, &ciCubeless ) ) >
         ml.rBestScore ) {
 	    ml.iMoveBest = i;
 	    ml.rBestScore = ml.amMoves[ i ].rScore;
@@ -119,7 +116,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     if( anDice[ 0 ]-- < anDice[ 1 ]-- )
 	    swap( anDice, anDice + 1 );
 
-    if( EvaluatePosition( anBoard, arMean, &ciClBearoff, 0 ) < 0 )
+    if( EvaluatePosition( anBoard, arMean, &ciCubeless, 0 ) < 0 )
 	    return -1;
 	
     if( iTurn & 1 )
@@ -144,7 +141,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     iTurn++;
   }
 
-  if( EvaluatePosition( anBoard, ar, &ciClBearoff, 0 ) )
+  if( EvaluatePosition( anBoard, ar, &ciCubeless, 0 ) )
     return -1;
 
   if( iTurn & 1 )

@@ -116,12 +116,14 @@ char szDefaultPrompt[] = "(\\p) ",
 static int fInteractive, cOutputDisabled;
 
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
-  fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
-  fResigned = FALSE, nPliesEval = 1, fAutoCrawford = 1,
-  fAutoRoll = TRUE, cGames = 0, fDoubled = FALSE, cAutoDoubles = 0,
-  fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
-  nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
-  fConfirm = TRUE, fShowProgress;
+    fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
+    fResigned = FALSE, nPliesEval = 1, fAutoCrawford = 1,
+    fAutoRoll = TRUE, cGames = 0, fDoubled = FALSE, cAutoDoubles = 0,
+    fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
+    nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
+    fConfirm = TRUE, fShowProgress, fMove, fCubeOwner, fJacoby = TRUE,
+    fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
+    fBeavers = 1, nCube, fOutputMWC = TRUE;
 
 gamestate gs = GAME_NONE;
 
@@ -463,6 +465,25 @@ extern char *NextToken( char **ppch ) {
 	( *ppch )++;
 
     return pch;
+}
+
+static int CountTokens( char *pch ) {
+
+    int c = 0;
+
+    do {
+	while( isspace( *pch ) )
+	    pch++;
+
+	if( *pch ) {
+	    c++;
+
+	    while( *pch && !isspace( *pch ) )
+		pch++;
+	}
+    } while( *pch );
+    
+    return c;
 }
 
 extern double ParseReal( char **ppch ) {
@@ -1148,6 +1169,7 @@ extern void CommandEval( char *sz ) {
 
     char szOutput[ 2048 ];
     int n, an[ 2 ][ 25 ];
+    cubeinfo ci;
     
     if( !*sz && gs == GAME_NONE ) {
 	outputl( "No position specified and no game in progress." );
@@ -1164,8 +1186,11 @@ extern void CommandEval( char *sz ) {
 	
 	fMove = !fMove;
     }
+
+    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		 fCrawford, fJacoby, fBeavers );    
     
-    if( !DumpPosition( an, szOutput, &ecEval ) )
+    if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC ) )
 	outputl( szOutput );
 
     if( n )
@@ -1262,7 +1287,8 @@ extern void CommandHint( char *sz ) {
 
     if( !anDice[ 0 ] && !fDoubled ) {
 
-      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		    fCrawford, fJacoby, fBeavers );
 
       if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
@@ -1273,7 +1299,7 @@ extern void CommandHint( char *sz ) {
                                        ecEval.nPlies ) < 0 )
           return;
 
-        GetCubeActionSz ( arDouble, szTemp, &ci );
+        GetCubeActionSz ( arDouble, szTemp, &ci, fOutputMWC );
 
 #if USE_GTK
 	/*
@@ -1305,7 +1331,8 @@ extern void CommandHint( char *sz ) {
 
       /* Give hint on take decision */
 
-      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+	SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		      fCrawford, fJacoby, fBeavers );
 
       if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci, &ecEval,
                                      ecEval.nPlies ) < 0 )
@@ -1356,7 +1383,8 @@ extern void CommandHint( char *sz ) {
       if ( n <= 0 )
         n = 10;
 
-      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		    fCrawford, fJacoby, fBeavers );
 
       if( FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
 			      NULL, &ci, &ecEval ) < 0 || fInterrupt )
@@ -1512,42 +1540,69 @@ extern void CommandQuit( char *sz ) {
 extern void 
 CommandRollout( char *sz ) {
     
-  float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-  int c, an[ 2 ][ 25 ];
-  cubeinfo ci;
-    
-  if( !*sz && gs == GAME_NONE ) {
-    outputl( "No position specified." );
-    return;
-  }
+    float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
+    int i, c, n, fOpponent = FALSE, cGames;
+    cubeinfo ci;
+#if HAVE_ALLOCA
+    int ( *aan )[ 2 ][ 25 ];
+#else
+    int aan[ 10 ][ 2 ][ 25 ];
+#endif
 
-  /* FIXME cope with multiple positions, and =n notation */
-  if( ParsePosition( an, &sz ) < 0 )
-      return;
+    if( !( c = CountTokens( sz ) ) ) {
+	if( gs == GAME_NONE ) {
+	    outputl( "No position specified and no game in progress." );
+	    return;
+	} else
+	    c = 1; /* current position */
+    }
 
-  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
-
-  if( ( c = Rollout( an, ar, arStdDev, nRolloutTruncate, nRollouts,
-                     fVarRedn, &ci, &ecRollout ) ) < 0 )
-    return;
-
-#if USE_GTK
-  if( fX ) {
-    GTKRolloutDone();
-    return;
-  }
+#if HAVE_ALLOCA
+    aan = alloca( 50 * c * sizeof( int ) );
+#else
+    if( c > 10 )
+	c = 10;
 #endif
     
-  outputf( "Result (after %d trials):\n\n"
-           "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
-           "Equity\n"
-           "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-           "(%+6.3f)\n"
-           "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-           "(%6.3f)\n\n",
-           c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
-           arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-           arStdDev[ 4 ], arStdDev[ 5 ] );
+    for( i = 0; i < c; i++ )
+	if( ( n = ParsePosition( aan[ i ], &sz ) ) < 0 )
+	    return;
+	else if( n ) {
+	    if( fMove )
+		SwapSides( aan[ i ] );
+	    
+	    fOpponent = TRUE;
+	}
+
+    /* FIXME this is wrong! */
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fOpponent ? !fMove : fMove,
+		  nMatchTo, anScore, fCrawford, fJacoby, fBeavers );
+
+    for( i = 0; i < c; i++ ) {
+	/* FIXME show the move or board position in the output */
+	
+	if( ( cGames = Rollout( aan[ i ], ar, arStdDev, nRolloutTruncate,
+				nRollouts, fVarRedn, &ci, &ecRollout ) ) <= 0 )
+	    return;
+
+#if USE_GTK
+	if( fX ) {
+	    GTKRolloutDone();
+	    continue;
+	}
+#endif
+	
+	outputf( "Result (after %d trials):\n\n"
+		 "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+		 "Equity\n"
+		 "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+		 "(%+6.3f)\n"
+		 "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+		 "(%6.3f)\n\n",
+		 cGames, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
+		 arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
+		 arStdDev[ 4 ], arStdDev[ 5 ] );
+    }
 }
 
 static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
@@ -1830,11 +1885,10 @@ extern void CommandSaveWeights( char *sz ) {
 
 extern void CommandTrainTD( char *sz ) {
 
-  int c = 0, i;
+  int c = 0;
   int anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ];
   int anDiceTrain[ 2 ];
   float ar[ NUM_OUTPUTS ];
-  cubeinfo ciTD;
     
   while( !fInterrupt ) {
     InitBoard( anBoardTrain );
@@ -1852,19 +1906,15 @@ extern void CommandTrainTD( char *sz ) {
 	    
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 
-      SetCubeInfo ( &ciTD, 0, 0, 0 );
-      for ( i = 0; i < 4; i++ )
-        ciTD.arGammonPrice[ i ] = 1.0;
-	    
 	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-                    anBoardTrain, &ciTD, &ecTD );
+                    anBoardTrain, &ciCubeless, &ecTD );
 
 	    if( fInterrupt )
         return;
 	    
 	    SwapSides( anBoardTrain );
 	    
-	    EvaluatePosition( anBoardTrain, ar, &ciTD, &ecTD );
+	    EvaluatePosition( anBoardTrain, ar, &ciCubeless, &ecTD );
 
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )
