@@ -1,3 +1,8 @@
+Mon May 27 22:45:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (isCloseCubeDecision): fix typo. Bug reported by
+	Olivier Croisille.
+
 Mon May 27 21:36:14 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c: remove load and save session. Change text for 

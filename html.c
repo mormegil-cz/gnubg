@@ -1338,12 +1338,12 @@ isCloseCubedecision ( const float arDouble[] ) {
 
   /* almost a double */
 
-  if ( abs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ] ) < rThr )
+  if ( fabs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ] ) < rThr )
     return 1;
 
   /* almost a pass */
 
-  if ( abs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ] ) < rThr )
+  if ( fabs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ] ) < rThr )
     return 1;
 
   return 0;
