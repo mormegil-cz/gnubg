@@ -752,7 +752,8 @@ int gettimeofday (struct timeval *tv, void * arg)
 	double ms = get_time();
 
 	tv->tv_sec = (long) ms / 1000;
-	tv->tv_usec = (long) ms - (tv->tv_sec * 1000);
+	/* micro seconds */
+	tv->tv_usec = (long) ((ms - (tv->tv_sec * 1000)) / 1000);
 
 	return 0;
 }

@@ -1,4 +1,8 @@
 
+Mon Jan 19 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* timer.c timecontrol.c: Small timing changes
+
 Mon Jan 19 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkboard.c, gtkchequer.c, gtkgame.c, gtkgame.h,
