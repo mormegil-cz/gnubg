@@ -42,7 +42,7 @@
 
 #include "threadglobals.h"
 
-#define PU_DEBUG 0
+#define PU_DEBUG 1
 
 #define RPU_MSG_VERSION 0x0100
 

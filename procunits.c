@@ -3112,6 +3112,11 @@ static int RPU_CheckClose (int s)
     if (RPU_DEBUG_NOTIF) outputerrf ("[checking close]");
 
     n = recv( (SOCKET) s, (char *) &msg, sizeof( msg ), MSG_PEEK );
+
+#ifdef WIN32
+    if ( n == INVALID_SOCKET )
+        outputerrf ( "*** RPU connection (err=%d).\n", WSAGetLastError() );
+#endif /* WIN32 */
     
     if (n > 0 && msg.type == mmClose) {
         if (RPU_DEBUG_NOTIF) outputerrf (">>> Connection closed by slave.\n");
@@ -4419,7 +4424,12 @@ extern void *Thread_NotificationListener (void *data)
                 n = recvfrom( (SOCKET) notifySocket, (char *) &msg,
                 	      sizeof( msg ), 0, (struct sockaddr *) &inOrgAddress, &len);
 
-                if (n == -1) {
+#ifndef WIN32
+                if ( n == SOCKET_ERROR )
+#else
+                if ( n == -1 )
+#endif /* ! WIN32 */
+		{
                     outputerrf ("*** Notification failure.\n");
                     outputerr ("recvfrom");
                     done = TRUE;

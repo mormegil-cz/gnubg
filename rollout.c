@@ -1023,8 +1023,8 @@ void * Threaded_BasicCubefulRollout (void *data)
     
     CreateThreadGlobalStorage ();
 
-    /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
-                           (int) pthread_self ());*/
+    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
+                           (int) pthread_self ());
 
     /* FIXME ??? */
     /*
@@ -1046,15 +1046,15 @@ void * Threaded_BasicCubefulRollout (void *data)
                                 &prd->rc,
                                 ( rolloutstat (*)[ 2 ] ) psd->aaarStatistics);
     
-    if (0) {
+    if (1) {
         float *pf = (float *) prd->aar;
         fprintf (stderr, "   %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %d\n", 
             pf[0], pf[1], pf[2], pf[3], pf[4], pf[5],
             prd->seed);
     }
 
-    /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
-                           (int) pthread_self ());*/
+    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
+                           (int) pthread_self ());
 
     pthread_mutex_lock (&mutexTaskListAccess);
     MarkTaskDone (pt, NULL);
