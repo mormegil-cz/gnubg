@@ -1,3 +1,8 @@
+Sat Nov 23 12:16:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* configure.in: rename DATADIR to _DATADIR to avoid overlap
+	with mingw/include/objidl.h
+
 Sat Nov 23 12:09:30 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (DumpStatContext): fix typos.

@@ -8,9 +8,6 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Installation directory (used to determine PKGDATADIR below). */
-#undef DATADIR
-
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS
@@ -430,6 +427,9 @@
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING
+
+/* Installation directory (used to determine PKGDATADIR below). */
+#undef _DATADIR
 
 /* Enable GNU extensions on systems that have them. */
 #undef _GNU_SOURCE

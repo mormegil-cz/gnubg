@@ -281,10 +281,10 @@ AC_SUBST(NAS_LIBS)
 AC_SUBST(NAS_CFLAGS)
 
 dnl Record installation paths.
-AC_DEFINE_DIR(DATADIR, datadir)
-AC_DEFINE([DATADIR], datadir,
+AC_DEFINE_DIR(_DATADIR, datadir)
+AC_DEFINE([_DATADIR], datadir,
           [Installation directory (used to determine PKGDATADIR below).])
-AC_DEFINE([PKGDATADIR],[DATADIR "/" PACKAGE],
+AC_DEFINE([PKGDATADIR],[_DATADIR "/" PACKAGE],
           [The directory where the weights and databases will be stored.])
 
 dnl Set of available languages

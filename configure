@@ -9752,18 +9752,18 @@ fi
 	    eval echo \""$datadir"\"
         )`
 	cat >>confdefs.h <<_ACEOF
-#define DATADIR "$ac_expanded"
+#define _DATADIR "$ac_expanded"
 _ACEOF
 
 
 
 cat >>confdefs.h <<\_ACEOF
-#define DATADIR datadir
+#define _DATADIR datadir
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PKGDATADIR DATADIR "/" PACKAGE
+#define PKGDATADIR _DATADIR "/" PACKAGE
 _ACEOF
 
 
