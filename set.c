@@ -63,6 +63,13 @@ static void SetRNG( rng rngNew, char *szSeed ) {
     }
 }
 
+extern void CommandSetAutoBearoff( char *sz ) {
+
+    SetToggle( "autobearoff", &fAutoBearoff, sz, "Will automatically bear "
+	       "off as many chequers as possible.", "Will not automatically "
+	       "bear off chequers." );
+}
+
 extern void CommandSetAutoGame( char *sz ) {
 
     SetToggle( "autogame", &fAutoGame, sz, "Will automatically start games "

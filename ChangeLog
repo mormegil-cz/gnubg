@@ -1,3 +1,8 @@
+Mon Dec 20 17:33:06 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (TryBearoff): New function.
+	* set.c (CommandSetAutoBearoff): New function.
+
 Sun Dec 19 22:57:49 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (SaveGame, CommandSaveMatch): finished saving.

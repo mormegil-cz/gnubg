@@ -109,6 +109,47 @@ static int ComputerTurn( void ) {
     }
 }
 
+/* Try to automatically bear off as many chequers as possible.  Only do it
+   if it's a non-contact position, and each die can be used to bear off
+   a chequer. */
+static int TryBearoff( void ) {
+
+    movelist ml;
+    int i, iMove, cMoves;
+    movenormal *pmn;
+    
+    if( ClassifyPosition( anBoard ) > CLASS_RACE )
+	/* It's a contact position; don't automatically bear off */
+	return -1;
+    
+    GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ] );
+
+    cMoves = ( anDice[ 0 ] == anDice[ 1 ] ) ? 4 : 2;
+    
+    for( i = 0; i < ml.cMoves; i++ )
+	for( iMove = 0; iMove < cMoves; iMove++ )
+	    if( ( ml.amMoves[ i ].anMove[ iMove << 1 ] < 0 ) ||
+		( ml.amMoves[ i ].anMove[ ( iMove << 1 ) + 1 ] != -1 ) )
+		break;
+	    else if( iMove == cMoves - 1 ) {
+		/* All dice bear off */
+		pmn = malloc( sizeof( *pmn ) );
+		pmn->mt = MOVE_NORMAL;
+		pmn->anRoll[ 0 ] = anDice[ 0 ];
+		pmn->anRoll[ 1 ] = anDice[ 1 ];
+		pmn->fPlayer = fTurn;
+		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
+			sizeof( pmn->anMove ) );
+		ListInsert( plGame, pmn );
+		
+		PositionFromKey( anBoard, ml.amMoves[ i ].auch );
+		
+		return 0;
+	    }
+
+    return -1;
+}
+
 static void NextTurn( void ) {
 
     int n, fWinner;
@@ -185,7 +226,7 @@ static void NextTurn( void ) {
 	
 	if( ap[ fTurn ].pt == PLAYER_HUMAN )
 	    break;
-
+	
 	if( ComputerTurn() < 0 )
 	    break;
     }
@@ -369,6 +410,12 @@ extern void CommandMove( char *sz ) {
 	    
 	    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 
+	    NextTurn();
+
+	    return;
+	}
+
+	if( fAutoBearoff && !TryBearoff() ) {
 	    NextTurn();
 
 	    return;
@@ -698,7 +745,9 @@ extern void CommandRoll( char *sz ) {
 	puts( "No legal moves." );
 
 	NextTurn();
-    } else if( ml.cMoves == 1 && fAutoMove ) {
+    } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
+						  <= CLASS_RACE &&
+						  fAutoBearoff ) ) ) {
 	pmn = malloc( sizeof( *pmn ) );
 	pmn->mt = MOVE_NORMAL;
 	pmn->anRoll[ 0 ] = anDice[ 0 ];
@@ -710,7 +759,8 @@ extern void CommandRoll( char *sz ) {
 	PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 	
 	NextTurn();
-    }
+    } else if( fAutoBearoff && !TryBearoff() )
+	NextTurn();
 }
 
 extern void CommandTake( char *sz ) {

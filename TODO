@@ -43,6 +43,8 @@
 ** Keyboard input (or at least some of it) to the board window could
   be redirected to $WINDOWID.
 ** Allow doubling by clicking the cube in the board window.
+** Add an option to slow down display if moves happen too quickly (e.g.
+  computer move, unable to move, auto bearoff, etc.)
 ** Perform better move checking in the X window; provide visual feedback
   so the user can tell whether the move is partial, complete, or illegal.
 ** Add Gnome support.
