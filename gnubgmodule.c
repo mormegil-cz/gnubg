@@ -337,7 +337,7 @@ PythonCubeInfo(PyObject* self IGNORE, PyObject* args) {
   int anScore[ 2 ] = { ms.anScore[ 0 ], ms.anScore[ 1 ] };
   int fCrawford = ms.fCrawford;
   int fJacoby = ms.fJacoby;
-  int fBeavers = fBeavers;
+  int fBeavers = ms.cBeavers;
   bgvariation bgv = ms.bgv;
 
   if ( ! PyArg_ParseTuple( args, "|iiii(ii)iiii:cubeinfo", 
