@@ -91,8 +91,10 @@ player ap[ 2 ] = {
 static command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
       NULL },
+#if HAVE_LIBGDBM
     { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
       "for future training", NULL },
+#endif
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
       "self-play", NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "

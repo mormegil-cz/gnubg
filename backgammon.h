@@ -101,7 +101,9 @@ extern void ShowBoard( void );
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
     CommandDatabaseDump( char * ),
+#if HAVE_LIBGDBM
     CommandDatabaseRollout( char * ),
+#endif
     CommandDatabaseGenerate( char * ),
     CommandDatabaseTrain( char * ),
     CommandDecline( char * ),
