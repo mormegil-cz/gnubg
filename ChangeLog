@@ -1,3 +1,16 @@
+Sun Sep  1 01:14:16 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	First attempt to integrate sounds into gnubg.
+	Works only for unix, and no support in configure yet:
+
+	On my box I define ESD_SOUND, set soSoundOption to SOUND_OPTION_ESD,
+	and add "-lesd" to COMMON_LIBS in Makefile.
+
+	* sound.c: new file. Based on sound.c from GAIM by
+	Mark Spencer.
+	* gnubg.c (PromptForExit, real_main): play sound.
+	* play.c: play sound.
+
 Sat Aug 31 19:59:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* drawboard.c (CanonicalMoveOrder): fix bug for
