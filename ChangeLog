@@ -1,3 +1,25 @@
+Sat Dec 13 21:15:52 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkrace.c (OneChequerPage): remove call to SwapSides
+	(reported by Ned Cross and Petr Kadlec)
+	* gnubg.c (HintChequer): compile error: move "moverecord *pmr" 
+	outside USE_GTK.
+	(reported by Nardy)
+	* gtkgame.c (ReportBug): remove extra slash in path
+	(bug #6898 by Kennedy Fraser)
+	* analysis.c (AnalyzeMove): generalise calculation of
+	is_initial_position. Use is_initial_position for calculation of luck.
+	(reported by Mathias Kegelmann)
+	* progress.c: print time elapsed, estimated time left, and 
+	estimated final standard error.
+	* show.c (CommandShowVariation): 
+	* bearoff.c, format.c, gtktheory.c: add some gettexts.
+	* import.c (isAscending): fix off-by-one bug.
+	(reported by Joseph Heled)
+	* set.c (CommandSetVariation): add some extra output to
+	emphasize that the new setting won't be effective until
+	a new match or session has been started.
+
 Mon Dec 29 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* htmlimages.c, html.c: Small fixes and variable size html image generation
