@@ -1,3 +1,7 @@
+Sun Jul 11 14:42:51 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* dice.h: Added extern UserRNGOpen();
+
 Sun Jul 11 13:30:11 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* htmlimages.c: include <malloc.h>.

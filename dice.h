@@ -56,6 +56,12 @@ extern int InitRNGBBSModulus( char *sz, void *rngctx );
 extern int InitRNGBBSFactors( char *sz0, char *sz1, void *rngctx );
 #endif
 
+
+#if HAVE_LIBDL
+extern int
+UserRNGOpen( void *p, char *sz );
+#endif /* HAVE_LIBDL */
+
 extern int
 OpenDiceFile( void *rngctx, const char *sz );
 
