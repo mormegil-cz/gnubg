@@ -1,3 +1,11 @@
+Sun Jan  4 11:05:03 2004  Joern Thyssen  <jth@gnubg.org>
+
+	The hint dialog will now always show the w/g/bg's whereas the panelled
+	analysis only shows the equity/MWC. Pressing the "details" button 
+	will pop up the hint dialog.
+
+	* gtkchequer.c: restore some of the old non-panel code
+
 Sun Jan 4 2004 00:51:45   Jim Segrave <jes@jes-2.demon.nl>
 
 	* makebearoff.c: va_start needs stdarg.h
