@@ -38,7 +38,7 @@
    </pre-crawford-table>      
  
 
-   <post-crawford-table type="zadeh">
+   <post-crawford-table type="zadeh" player="both">
 
       <parameters>
          <parameter name="gammon-rate-trailer">0.25</parameter>
