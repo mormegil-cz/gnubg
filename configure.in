@@ -87,7 +87,7 @@ AC_FUNC_MMAP
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpwuid gettimeofday isatty memmove random readv select setvbuf basename)
+AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr)
 AC_CHECK_FUNCS(acosf asinf atanf cosf lrint sinf tanf)
 AC_CACHE_CHECK(for signbit macro, ac_cv_func_signbit,
 [AC_TRY_LINK([#define _GNU_SOURCE 1
