@@ -1,3 +1,21 @@
+Tue Oct 24 12:45:59 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* set.c (CommandSetEvalCubeful): new function. Controls whether
+	checkerplay is cubeful or cubeless.
+	* show.c (ShowEvaluation): print cubeful/cubeless.
+	* eval.c (FormatEval): FormatEval5 renamed to FormatEval; now
+	returns a variable string describing the evaluation type - and not
+	some junk text :-)
+	* gnubg.c, play.c, analysis.c, eval.c: set the new fCubeful
+	parameter in evalcontexts. 
+	* gnubg.c (CommandHint): use new function FormatEval; use rScore
+	in output instead of calling Utility.
+	* eval.c (EvaluatePositionCubeful1): add new parameter that
+	controls whether we should check for automatic redoubles or not.
+	* eval.c (ScoresMoves): Bugfix: invert fMove in cubeinfo. Also,
+	implement cubeful checkerplay. Save cubeful evaluation in rScore
+	and cubeless in rScore2 (and rScore1 if cubeless evaluation).
+
 Mon Oct 23 12:31:30 2000  Gary Wong  <gtw@research.att.com>
 
 	* backgammon.h: New `setdice' record.
