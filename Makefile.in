@@ -106,6 +106,7 @@ pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 man_MANS = gnubg.6
 
 noinst_PROGRAMS = makebearoff makeweights
+check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c 	pub_eval.c matchequity.c
 
@@ -116,7 +117,9 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-TESTS = gnubgtest
+erftest_SOURCES = erftest.c
+
+TESTS = gnubgtest erftest
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm 	gnubg.gtkrc credits.sh erf.c
 
@@ -156,6 +159,10 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_FALSE@@USE_EXT_FALSE@sgfp.o sgfl.o guile.o import.o external.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@credits.o
 gnubg_LDFLAGS = 
+erftest_OBJECTS =  erftest.o
+erftest_LDADD = $(LDADD)
+erftest_DEPENDENCIES = 
+erftest_LDFLAGS = 
 makebearoff_OBJECTS =  makebearoff.o eval.o positionid.o pub_eval.o \
 matchequity.o
 makebearoff_LDFLAGS = 
@@ -184,15 +191,15 @@ GZIP_ENV = --best
 DIST_SUBDIRS =  lib doc ext lib doc
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
 .deps/database.P .deps/dice.P .deps/drawboard.P .deps/erf.P \
-.deps/eval.P .deps/external.P .deps/gdkgetrgb.P .deps/getopt.P \
-.deps/getopt1.P .deps/gnubg.P .deps/gtkboard.P .deps/gtkgame.P \
-.deps/gtkprefs.P .deps/guile.P .deps/import.P .deps/kleinman.P \
-.deps/makebearoff.P .deps/makeweights.P .deps/matchequity.P \
-.deps/play.P .deps/positionid.P .deps/pub_eval.P .deps/rollout.P \
-.deps/set.P .deps/sgf.P .deps/sgfl.P .deps/sgfp.P .deps/show.P \
-.deps/xboard.P .deps/xgame.P
-SOURCES = $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
-OBJECTS = $(gnubg_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
+.deps/erftest.P .deps/eval.P .deps/external.P .deps/gdkgetrgb.P \
+.deps/getopt.P .deps/getopt1.P .deps/gnubg.P .deps/gtkboard.P \
+.deps/gtkgame.P .deps/gtkprefs.P .deps/guile.P .deps/import.P \
+.deps/kleinman.P .deps/makebearoff.P .deps/makeweights.P \
+.deps/matchequity.P .deps/play.P .deps/positionid.P .deps/pub_eval.P \
+.deps/rollout.P .deps/set.P .deps/sgf.P .deps/sgfl.P .deps/sgfp.P \
+.deps/show.P .deps/xboard.P .deps/xgame.P
+SOURCES = $(gnubg_SOURCES) $(erftest_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
+OBJECTS = $(gnubg_OBJECTS) $(erftest_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -265,6 +272,15 @@ uninstall-binPROGRAMS:
 	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
+mostlyclean-checkPROGRAMS:
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+distclean-checkPROGRAMS:
+
+maintainer-clean-checkPROGRAMS:
+
 mostlyclean-noinstPROGRAMS:
 
 clean-noinstPROGRAMS:
@@ -293,6 +309,10 @@ maintainer-clean-compile:
 gnubg: $(gnubg_OBJECTS) $(gnubg_DEPENDENCIES)
 	@rm -f gnubg
 	$(LINK) $(gnubg_LDFLAGS) $(gnubg_OBJECTS) $(gnubg_LDADD) $(LIBS)
+
+erftest: $(erftest_OBJECTS) $(erftest_DEPENDENCIES)
+	@rm -f erftest
+	$(LINK) $(erftest_LDFLAGS) $(erftest_OBJECTS) $(erftest_LDADD) $(LIBS)
 
 makebearoff: $(makebearoff_OBJECTS) $(makebearoff_DEPENDENCIES)
 	@rm -f makebearoff
@@ -574,6 +594,7 @@ info: info-recursive
 dvi-am:
 dvi: dvi-recursive
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 installcheck-am:
@@ -612,26 +633,28 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-hdr mostlyclean-binPROGRAMS \
-		mostlyclean-noinstPROGRAMS mostlyclean-compile \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+		mostlyclean-checkPROGRAMS mostlyclean-noinstPROGRAMS \
+		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-recursive
 
-clean-am:  clean-hdr clean-binPROGRAMS clean-noinstPROGRAMS \
-		clean-compile clean-tags clean-depend clean-generic \
-		mostlyclean-am
+clean-am:  clean-hdr clean-binPROGRAMS clean-checkPROGRAMS \
+		clean-noinstPROGRAMS clean-compile clean-tags \
+		clean-depend clean-generic mostlyclean-am
 
 clean: clean-recursive
 
 distclean-am:  distclean-hdr distclean-binPROGRAMS \
-		distclean-noinstPROGRAMS distclean-compile \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+		distclean-checkPROGRAMS distclean-noinstPROGRAMS \
+		distclean-compile distclean-tags distclean-depend \
+		distclean-generic clean-am
 
 distclean: distclean-recursive
 	-rm -f config.status
 
 maintainer-clean-am:  maintainer-clean-hdr maintainer-clean-binPROGRAMS \
+		maintainer-clean-checkPROGRAMS \
 		maintainer-clean-noinstPROGRAMS \
 		maintainer-clean-compile maintainer-clean-tags \
 		maintainer-clean-depend maintainer-clean-generic \
@@ -645,11 +668,12 @@ maintainer-clean: maintainer-clean-recursive
 .PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
 mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
-mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
-clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile install-man6 uninstall-man6 install-man \
-uninstall-man uninstall-pkgdataDATA install-pkgdataDATA \
+mostlyclean-checkPROGRAMS distclean-checkPROGRAMS clean-checkPROGRAMS \
+maintainer-clean-checkPROGRAMS mostlyclean-noinstPROGRAMS \
+distclean-noinstPROGRAMS clean-noinstPROGRAMS \
+maintainer-clean-noinstPROGRAMS mostlyclean-compile distclean-compile \
+clean-compile maintainer-clean-compile install-man6 uninstall-man6 \
+install-man uninstall-man uninstall-pkgdataDATA install-pkgdataDATA \
 install-data-recursive uninstall-data-recursive install-exec-recursive \
 uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
 all-recursive check-recursive installcheck-recursive info-recursive \

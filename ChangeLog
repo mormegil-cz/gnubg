@@ -1,4 +1,7 @@
-Thu Apr 12 12:37:15 2001  Gary Wong  <gtw@research.att.com>
+Thu Apr 12 12:44:06 2001  Gary Wong  <gtw@research.att.com>
+
+	* erftest.c: New file.
+	* Makefile.am: Use erftest.c to test erf.c.
 
 	* analysis.c (LuckAnalysis): New function.
 	* gnubg.c (GetLuckAnalysis): New function.

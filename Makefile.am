@@ -46,6 +46,7 @@ pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 man_MANS = gnubg.6
 
 noinst_PROGRAMS = makebearoff makeweights
+check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c
@@ -56,7 +57,9 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-TESTS = gnubgtest
+erftest_SOURCES = erftest.c
+
+TESTS = gnubgtest erftest
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
