@@ -70,9 +70,6 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies, int fCheckAutoRedoubles);
 
-static cubedecision
-FindBestCubeDecision ( float arDouble[], cubeinfo *pci );
-
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
@@ -3925,7 +3922,7 @@ extern void EvalStatus( char *szOutput ) {
 }
 
 
-static char 
+extern char 
 *GetCubeRecommendation ( const cubedecision cd ) {
 
   switch ( cd ) {
@@ -4360,8 +4357,8 @@ SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
 	SetCubeInfoMoney( pci, nCube, fCubeOwner, fMove, fJacoby, fBeavers );
 }
 
-
-static cubedecision
+ 
+extern cubedecision
 FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
 
 /*

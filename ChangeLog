@@ -1,3 +1,8 @@
+Wed Feb 13 21:03:19 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (GetCubeRecommendation, FindBestCubeDecision):
+	make functions external.
+
 Mon Feb 11 20:28:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (AnalyzeMove): change prototype to include

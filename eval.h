@@ -360,4 +360,10 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 );
 extern int
 cmp_rolloutcontext ( const rolloutcontext *prc1, const rolloutcontext *prc2 );
 
+extern char 
+*GetCubeRecommendation ( const cubedecision cd );
+
+extern cubedecision
+FindBestCubeDecision ( float arDouble[], cubeinfo *pci );
+
 #endif
