@@ -2558,7 +2558,7 @@ static gint board_set( Board *board, const gchar *board_text,
 		{	/* Dice not on board */
 			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -DIE_WIDTH - 3;
 
-			if (bd->diceRoll[ 0 ] == 0)
+			if (bd->diceRoll[ 0 ] == 0 && old_dice[0] > 0)
 			{
 				bd->diceShown = DICE_BELOW_BOARD;
 				/* Keep showing shaken values */
@@ -3658,6 +3658,7 @@ static void board_init( Board *board ) {
     bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    
+    bd->diceRoll[0] = bd->diceRoll[1] = 0;
 
     /* horizontal separator */
 
