@@ -123,9 +123,13 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
   nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
   fConfirm = TRUE, fShowProgress;
 
+gamestate gs = GAME_NONE;
+
 evalcontext ecTD = { 0, 8, 0.16, 0, FALSE };
 evalcontext ecEval = { 1, 8, 0.16, 0, FALSE };
 evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE };
+
+storedmoves sm = {}; /* sm.ml.amMoves is NULL, sm.anDice is [0,0]. */
 
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
@@ -505,18 +509,59 @@ extern int ParsePlayer( char *sz ) {
     return -1;
 }
 
-extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
- 
-    /* FIXME allow more formats */
+/* Convert a string to a board array.  Currently allows the string to
+   be a position ID, "=n" notation, or empty (in which case the current
+   board is used).
 
-    if( !sz || !*sz || *sz == '=' ) {
-	/* FIXME '=' should use the board after a move given from "hint" */
+   Returns -1 on failure, 0 on success, or 1 on success if the position
+   specified has the opponent on roll (e.g. because it used "=n" notation). */
+extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch ) {
+
+    int i;
+    char *pch;
+    unsigned char auchKey[ 10 ];
+    
+    /* FIXME allow more formats, e.g. FIBS "boardstyle 3" */
+
+    if( !ppch || !( pch = NextToken( ppch ) ) ) { 
 	memcpy( an, anBoard, sizeof( anBoard ) );
 
 	return 0;
     }
 
-    return PositionFromID( an, sz );
+    if( *pch == '=' ) {
+	if( !( i = atoi( pch + 1 ) ) ) {
+	    outputl( "You must specify the number of the move to apply." );
+	    return -1;
+	}
+
+	PositionKey( anBoard, auchKey );
+	
+	if( !anDice[ 0 ] || !EqualKeys( auchKey, sm.auchKey ) || 
+	    anDice[ 0 ] != sm.anDice[ 0 ] || anDice[ 1 ] != sm.anDice[ 1 ] ) {
+	    outputl( "There is no valid move list." );
+	    return -1;
+	}
+
+	if( i > sm.ml.cMoves ) {
+	    outputf( "Move =%d is out of range.\n", i );
+	    return -1;
+	}
+
+	PositionFromKey( an, sm.ml.amMoves[ i - 1 ].auch );
+
+	if( !fMove )
+	    SwapSides( an );
+	
+	return 1;
+    }
+
+    if( PositionFromID( an, pch ) ) {
+	outputl( "Illegal position." );
+	return -1;
+    }
+
+    return 0;
 }
 
 extern void UpdateSetting( void *p ) {
@@ -931,7 +976,7 @@ extern void ShowBoard( void ) {
     }
 #endif
     
-    if( fTurn == -1 ) {
+    if( gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
 	    InitBoard( anBoardTemp );
@@ -1043,7 +1088,7 @@ extern char *FormatPrompt( void ) {
 	    case 'c':
 	    case 'C':
 		/* Pip count */
-		if( fTurn < 0 )
+		if( gs == GAME_NONE )
 		    strcpy( pchDest, "No game" );
 		else {
 		    PipCount( anBoard, anPips );
@@ -1054,17 +1099,27 @@ extern char *FormatPrompt( void ) {
 	    case 'p':
 	    case 'P':
 		/* Player on roll */
-		strcpy( pchDest, fTurn < 0 ? "No game" : ap[ fTurn ].szName );
+		switch( gs ) {
+		case GAME_NONE:
+		    strcpy( pchDest, "No game" );
+		    break;
+
+		case GAME_PLAYING:
+		    strcpy( pchDest, ap[ fTurn ].szName );
+		    break;
+
+		case GAME_OVER:
+		case GAME_RESIGNED:
+		case GAME_DROP:
+		    strcpy( pchDest, "Game over" );
+		    break;
+		}
 		break;
 		
 	    case 's':
 	    case 'S':
 		/* Match score */
-		if( fTurn < 0 )
-		    strcpy( pchDest, "No game" );
-		else
-		    sprintf( pchDest, "%d:%d", anScore[ fTurn ],
-			     anScore[ !fTurn ] );
+		sprintf( pchDest, "%d:%d", anScore[ 0 ], anScore[ 1 ] );
 		break;
 
 	    case 'v':
@@ -1092,21 +1147,29 @@ extern char *FormatPrompt( void ) {
 extern void CommandEval( char *sz ) {
 
     char szOutput[ 2048 ];
-    int an[ 2 ][ 25 ];
-
-    if( !*sz && fTurn == -1 ) {
+    int n, an[ 2 ][ 25 ];
+    
+    if( !*sz && gs == GAME_NONE ) {
 	outputl( "No position specified and no game in progress." );
 	return;
     }
-    
-    if( ParsePosition( an, sz ) ) {
-	outputl( "Illegal position." );
 
+    if( ( n = ParsePosition( an, &sz ) ) < 0 )
 	return;
-    }
 
+    if( n ) {
+	/* =n notation used; the opponent is on roll in the position given. */
+	if( fMove )
+	    SwapSides( an );
+	
+	fMove = !fMove;
+    }
+    
     if( !DumpPosition( an, szOutput, &ecEval ) )
 	outputl( szOutput );
+
+    if( n )
+	fMove = !fMove;	
 }
 
 static command *FindHelpCommand( command *pcBase, char *sz,
@@ -1191,7 +1254,7 @@ extern void CommandHint( char *sz ) {
     cubeinfo ci;
     int n = ParseNumber ( &sz );
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
       outputl( "You must set up a board first." );
       
       return;
@@ -1305,11 +1368,18 @@ extern void CommandHint( char *sz ) {
 	  outputl( "There are no legal moves." );
 	  return;
       }
+
+      if( sm.ml.amMoves )
+	  free( sm.ml.amMoves );
+
+      memcpy( &sm.ml, &ml, sizeof( ml ) );
+      PositionKey( anBoard, sm.auchKey );
+      sm.anDice[ 0 ] = anDice[ 0 ];
+      sm.anDice[ 1 ] = anDice[ 1 ];
       
 #if USE_GTK
       if( fX ) {
         GTKHint( &ml );
-	free( ml.amMoves );
         return;
       }
 #endif
@@ -1403,11 +1473,6 @@ extern void CommandHint( char *sz ) {
                    
 	}
       }
-
-      /* dealloc saved moves */
-
-      free ( ml.amMoves );
-
     }
 }
 
@@ -1419,7 +1484,7 @@ extern void PromptForExit( void ) {
 
     static int fExiting;
     
-    if( !fExiting && fInteractive && fConfirm && fTurn != -1 ) {
+    if( !fExiting && fInteractive && fConfirm && gs == GAME_PLAYING ) {
 	fExiting = TRUE;
 	fInterrupt = FALSE;
 	
@@ -1451,16 +1516,14 @@ CommandRollout( char *sz ) {
   int c, an[ 2 ][ 25 ];
   cubeinfo ci;
     
-  if( !*sz && fTurn == -1 ) {
+  if( !*sz && gs == GAME_NONE ) {
     outputl( "No position specified." );
     return;
   }
-    
-  if( ParsePosition( an, sz ) ) {
-    outputl( "Illegal position." );
 
-    return;
-  }
+  /* FIXME cope with multiple positions, and =n notation */
+  if( ParsePosition( an, &sz ) < 0 )
+      return;
 
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
@@ -2528,7 +2591,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	exit( EXIT_FAILURE );
 
 #if USE_GUILE
-    GuileInitialise();
+    GuileInitialise( pchDataDir );
 #endif
     
     if( ( pch = getenv( "LOGNAME" ) ) )

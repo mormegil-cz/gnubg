@@ -39,7 +39,6 @@
 #include "matchequity.h"
 
 char *aszGameResult[] = { "single game", "gammon", "backgammon" };
-enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
 list lMatch, *plGame, *plLastMove;
 static int fComputerDecision = FALSE;
 
@@ -91,7 +90,6 @@ static void ApplyGameOver( void ) {
 	return;
     
     anScore[ pmgi->fWinner ] += pmgi->nPoints;
-    fMove = fTurn = -1;
 }
 
 static void ApplyMoveRecord( moverecord *pmr ) {
@@ -102,15 +100,17 @@ static void ApplyMoveRecord( moverecord *pmr ) {
     assert( pmr->mt == MOVE_GAMEINFO || pmgi->mt == MOVE_GAMEINFO );
     
     fResigned = FALSE;
-
+    gs = GAME_PLAYING;
+    
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
 	InitBoard( anBoard );
-	
+
+	nMatchTo = pmr->g.nMatch;
 	anScore[ 0 ] = pmr->g.anScore[ 0 ];
 	anScore[ 1 ] = pmr->g.anScore[ 1 ];
 	
-	go = GAME_NORMAL;
+	gs = GAME_NONE;
 	fMove = fTurn = fCubeOwner = -1;
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 	fResigned = fDoubled = FALSE;
@@ -119,6 +119,9 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	break;
 	
     case MOVE_DOUBLE:
+	if( nCube >= MAX_CUBE )
+	    break;
+	
 	if( fDoubled ) {
 	    nCube <<= 1;
 	    fCubeOwner = !fMove;
@@ -143,7 +146,7 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	    break;
 	
 	fDoubled = FALSE;
-	go = GAME_DROP;
+	gs = GAME_DROP;
 	pmgi->nPoints = nCube;
 	pmgi->fWinner = !pmr->d.fPlayer;
 	pmgi->fResigned = FALSE;
@@ -157,7 +160,7 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 
 	if( ( n = GameStatus( anBoard ) ) ) {
-	    go = GAME_NORMAL;
+	    gs = GAME_OVER;
 	    pmgi->nPoints = nCube * n;
 	    pmgi->fWinner = pmr->n.fPlayer;
 	    pmgi->fResigned = FALSE;
@@ -167,7 +170,7 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	break;
 
     case MOVE_RESIGN:
-	go = GAME_RESIGNED;
+	gs = GAME_RESIGNED;
 	pmgi->nPoints = nCube * ( fResigned = pmr->r.nResigned );
 	pmgi->fWinner = !pmr->r.fPlayer;
 	pmgi->fResigned = TRUE;
@@ -218,6 +221,48 @@ extern void CalculateBoard( void ) {
     } while( pl != plLastMove );
 }
 
+static void FreeGame( list *pl ) {
+
+    while( pl->plNext != pl ) {
+	free( pl->plNext->p );
+	ListDelete( pl->plNext );
+    }
+
+    free( pl );
+}
+
+static int PopGame( list *plDelete, int fInclusive ) {
+
+    list *pl;
+    int i;
+    
+    for( i = 0, pl = lMatch.plNext; pl != &lMatch && pl->p != plDelete;
+	 pl = pl->plNext, i++ )
+	;
+
+    if( pl->p && !fInclusive ) {
+	pl = pl->plNext;
+	i++;
+    }
+    
+    if( !pl->p )
+	/* couldn't find node to delete to */
+	return -1;
+
+#if USE_GTK
+    if( fX )
+	GTKPopGame( i );
+#endif
+
+    do {
+	pl = pl->plNext;
+	FreeGame( pl->plPrev->p );
+	ListDelete( pl->plPrev );
+    } while( pl->p );
+
+    return 0;
+}
+
 static int PopMoveRecord( list *plDelete ) {
 
     list *pl;
@@ -251,9 +296,10 @@ static int PopMoveRecord( list *plDelete ) {
 extern void AddMoveRecord( void *pv ) {
 
     moverecord *pmr = pv, *pmrOld;
-    
-    /* Delete all records after plLastMove. */
-    /* FIXME when we can handle variations, we should save the old move
+
+    /* Delete all games after plGame, and all records after plLastMove. */
+    PopGame( plGame, FALSE );
+    /* FIXME when we can handle variations, we should save the old moves
        as an alternate variation. */
     PopMoveRecord( plLastMove->plNext );
 
@@ -313,13 +359,15 @@ extern void AddGame( moverecord *pmr ) {
     char sz[ 90 ]; /* "Game 999: [32] 99999, [32] 99999" */
     
     if( fX ) {
-	sprintf( sz, "Game %d: %s %d, %s %d", pmr->g.i, ap[ 0 ].szName,
+	sprintf( sz, "Game %d: %s %d, %s %d", pmr->g.i + 1, ap[ 0 ].szName,
 		 pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
 	GTKAddGame( sz );
     }
 #endif
     
-    assert( pmr->mt == MOVE_GAMEINFO );    
+    assert( pmr->mt == MOVE_GAMEINFO );
+    
+    cGames++;
 }
 
 static void NewGame( void ) {
@@ -473,7 +521,8 @@ static int ComputerTurn( void ) {
 
       fComputerDecision = TRUE;
       
-      if ( fBeavers && ! nMatchTo && arDouble[ 2 ] <= 0.0 ) {
+      if ( fBeavers && ! nMatchTo && arDouble[ 2 ] <= 0.0 &&
+	  nCube < ( MAX_CUBE >> 1 ) ) {
         /* It's a beaver... beaver all night! */
         CommandRedouble ( NULL );
       }
@@ -495,7 +544,8 @@ static int ComputerTurn( void ) {
 
       /* Consider doubling */
 
-      if ( fCubeUse && ! anDice[ 0 ] && GetDPEq ( NULL, NULL, &ci ) ) {
+      if ( fCubeUse && ! anDice[ 0 ] && nCube < MAX_CUBE &&
+	   GetDPEq ( NULL, NULL, &ci ) ) {
 
         static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE }; 
         
@@ -736,20 +786,15 @@ extern void NextTurn( void ) {
     }
 #endif
     
-    /* FIXME FIXME FIXME... is this used any more? */
     if( ( n = GameStatus( anBoard ) ) ||
-	( go == GAME_DROP && ( ( n = 1 ) ) ) ||
-	( go == GAME_RESIGNED && ( ( n = fResigned ) ) ) ) {
+	( gs == GAME_DROP && ( ( n = 1 ) ) ) ||
+	( gs == GAME_RESIGNED && ( ( n = fResigned ) ) ) ) {
 	movegameinfo *pmgi = plGame->plNext->p;
 	
 	if( fJacoby && fCubeOwner == -1 && !nMatchTo )
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
-	
-	cGames++;
-	
-	go = GAME_NORMAL;
 	
 	outputf( "%s wins a %s and %d point%s.\n", ap[ pmgi->fWinner ].szName,
 		 aszGameResult[ n - 1 ], pmgi->nPoints,
@@ -763,7 +808,8 @@ extern void NextTurn( void ) {
 	if( nMatchTo && fAutoCrawford ) {
 	    fPostCrawford = fCrawford && anScore[ pmgi->fWinner ] < nMatchTo;
 	    fCrawford = !fPostCrawford && !fCrawford &&
-		anScore[ pmgi->fWinner ] == nMatchTo - 1;
+		anScore[ pmgi->fWinner ] == nMatchTo - 1 &&
+		anScore[ !pmgi->fWinner ] == nMatchTo - 1;
 	}
 	
 	CommandShowScore( NULL );
@@ -785,8 +831,7 @@ extern void NextTurn( void ) {
 	    return;
     }
     
-    if( go == GAME_NORMAL && ( fDisplay ||
-			       ap[ fTurn ].pt == PLAYER_HUMAN ) )
+    if( fDisplay || ap[ fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
 
     /* We have reached a safe point to check for interrupts.  Until now,
@@ -847,7 +892,7 @@ extern void CommandAgree( char *sz ) {
 
     moveresign *pmr;
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 
 	return;
@@ -880,7 +925,7 @@ extern void CommandAgree( char *sz ) {
 
 extern void CommandDecline( char *sz ) {
 
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 
 	return;
@@ -912,7 +957,7 @@ extern void CommandDouble( char *sz ) {
 
     moverecord *pmr;
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 
 	return;
@@ -964,6 +1009,12 @@ extern void CommandDouble( char *sz ) {
 
 	return;
     }
+
+    if( nCube >= MAX_CUBE ) {
+	outputl( "The cube is already at " MAX_CUBE_STR "; you can't double "
+		 "any more." );
+	return;
+    }
     
     if( fDisplay )
 	outputf( "%s doubles.\n", ap[ fTurn ].szName );
@@ -980,7 +1031,7 @@ extern void CommandDrop( char *sz ) {
 
     moverecord *pmr;
     
-    if( fTurn < 0 || !fDoubled ) {
+    if( gs != GAME_PLAYING || !fDoubled ) {
 	outputl( "The cube must have been offered before you can drop it." );
 
 	return;
@@ -1034,8 +1085,8 @@ CommandMove( char *sz ) {
   movelist ml;
   movenormal *pmn;
     
-  if( fTurn < 0 ) {
-    outputl( "No game in progress (type `new' to start one)." );
+  if( gs != GAME_PLAYING ) {
+    outputl( "No game in progress (type `new game' to start one)." );
 
     return;
   }
@@ -1160,17 +1211,6 @@ CommandMove( char *sz ) {
   outputl( "Illegal move." );
 }
 
-
-static void FreeGame( list *pl ) {
-
-    while( pl->plNext != pl ) {
-	free( pl->plNext->p );
-	ListDelete( pl->plNext );
-    }
-
-    free( pl );
-}
-
 extern void CommandNewGame( char *sz ) {
 
     list *pl;
@@ -1182,7 +1222,7 @@ extern void CommandNewGame( char *sz ) {
 	return;
     }
 
-    if( fTurn != -1 ) {
+    if( gs == GAME_PLAYING ) {
 	if( fConfirm ) {
 	    if( fInterrupt )
 		return;
@@ -1244,7 +1284,7 @@ extern void CommandNewMatch( char *sz ) {
       return;
     }
 
-    if( fTurn != -1 && fConfirm ) {
+    if( gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
 	    return;
 	    
@@ -1259,6 +1299,7 @@ extern void CommandNewMatch( char *sz ) {
 
     cGames = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
+    gs = GAME_NONE;
     fCrawford = FALSE;
     fPostCrawford = FALSE;
 
@@ -1279,7 +1320,7 @@ extern void CommandNewMatch( char *sz ) {
 
 extern void CommandNewSession( char *sz ) {
 
-    if( fTurn != -1 && fConfirm ) {
+    if( gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
 	    return;
 	    
@@ -1292,6 +1333,7 @@ extern void CommandNewSession( char *sz ) {
 
     cGames = nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
+    gs = GAME_NONE;
     fCrawford = 0;
     fPostCrawford = 0;
 
@@ -1319,7 +1361,7 @@ static void UpdateGame( void ) {
     ShowBoard();
 }
 
-static void ChangeGame( list *plGameNew ) {
+extern void ChangeGame( list *plGameNew ) {
 
     list *pl;
     
@@ -1329,17 +1371,19 @@ static void ChangeGame( list *plGameNew ) {
     if( fX ) {
 	GTKClearMoveRecord();
 
-	for( pl = plGame->plNext; pl->p; pl = pl->plNext )
+	for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
 	    GTKAddMoveRecord( pl->p );
+	    ApplyMoveRecord( pl->p );
+	}
 
 	GTKSetGame( ( (moverecord *) plGame->plNext->p )->g.i );
     }
 #endif
     
     SetMoveRecord( plLastMove->p );
-    
-    CalculateBoard();
 
+    CalculateBoard();
+    
     UpdateGame();
 }
 
@@ -1361,11 +1405,6 @@ static void CommandNextGame( char *sz ) {
 	return;
     }
 
-    if( !plGame ) {
-	outputl( "No games have been started yet." );
-	return;
-    }
-    
     for( pl = lMatch.plNext; pl->p != plGame; pl = pl->plNext )
 	;
     
@@ -1382,6 +1421,11 @@ extern void CommandNext( char *sz ) {
 
     int n;
     char *pch;
+    
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( ( pch = NextToken( &sz ) ) ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) )
@@ -1409,8 +1453,8 @@ extern void CommandNext( char *sz ) {
 
 extern void CommandPlay( char *sz ) {
 
-    if( fTurn < 0 ) {
-	outputl( "No game in progress (type `new' to start one)." );
+    if( gs != GAME_PLAYING ) {
+	outputl( "No game in progress (type `new game' to start one)." );
 
 	return;
     }
@@ -1443,11 +1487,6 @@ static void CommandPreviousGame( char *sz ) {
 	return;
     }
     
-    if( !plGame ) {
-	outputl( "No games have been started yet." );
-	return;
-    }
-    
     for( pl = lMatch.plNext; pl->p != plGame; pl = pl->plNext )
 	;
     
@@ -1464,6 +1503,11 @@ extern void CommandPrevious( char *sz ) {
 
     int n;
     char *pch;
+    
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( ( pch = NextToken( &sz ) ) ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) )
@@ -1500,7 +1544,7 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
     
-    if( fTurn < 0 || !fDoubled ) {
+    if( gs != GAME_PLAYING || !fDoubled ) {
 	outputl( "The cube must have been offered before you can redouble "
 		 "it." );
 
@@ -1513,6 +1557,12 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
 
+    if( nCube >= ( MAX_CUBE >> 1 ) ) {
+	outputl( "The cube is already at " MAX_CUBE_STR "; you can't double "
+		 "any more." );
+	return;
+    }
+    
     if( fDisplay )
 	outputf( "%s accepts and immediately redoubles to %d.\n",
 		ap[ fTurn ].szName, nCube << 2 );
@@ -1544,7 +1594,7 @@ extern void CommandResign( char *sz ) {
     char *pch;
     int cch;
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "You must be playing a game if you want to resign it." );
 
 	return;
@@ -1599,8 +1649,8 @@ CommandRoll( char *sz ) {
   movenormal *pmn;
   moverecord *pmr;
   
-  if( fTurn < 0 ) {
-    outputl( "No game in progress (type `new' to start one)." );
+  if( gs != GAME_PLAYING ) {
+    outputl( "No game in progress (type `new game' to start one)." );
 
     return;
   }
@@ -1691,7 +1741,7 @@ extern void CommandTake( char *sz ) {
 
     moverecord *pmr;
     
-    if( fTurn < 0 || !fDoubled ) {
+    if( gs != GAME_PLAYING || !fDoubled ) {
 	outputl( "The cube must have been offered before you can take it." );
 
 	return;

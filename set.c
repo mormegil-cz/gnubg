@@ -185,7 +185,7 @@ extern void CommandSetBoard( char *sz ) {
     int an[ 2 ][ 25 ];
     movesetboard *pmsb;
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set the board." );
 
 	return;
@@ -197,10 +197,9 @@ extern void CommandSetBoard( char *sz ) {
 	return;
     }
 
-    if( ParsePosition( an, sz ) ) {
-	outputl( "Illegal position." );
+    /* FIXME how should =n notation be handled? */
+    if( ParsePosition( an, &sz ) < 0 )
 	return;
-    }
 
     pmsb = malloc( sizeof( *pmsb ) );
     pmsb->mt = MOVE_SETBOARD;
@@ -216,7 +215,7 @@ extern void CommandSetBoard( char *sz ) {
 
 static int CheckCubeAllowed( void ) {
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set the cube." );
 	return -1;
     }
@@ -333,7 +332,7 @@ extern void CommandSetCubeUse( char *sz ) {
     if( fCrawford && fCubeUse )
 	outputl( "(But the Crawford rule is in effect, so you won't be able to "
 	      "use it during\nthis game.)" );
-    else if( fTurn >= 0 && !fCubeUse ) {
+    else if( gs == GAME_PLAYING && !fCubeUse ) {
 	/* The cube was being used and now it isn't; reset it to 1,
 	   centred. */
 	nCube = 1;
@@ -360,7 +359,7 @@ extern void CommandSetCubeValue( char *sz ) {
     
     n = ParseNumber( &sz );
 
-    for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
+    for( i = MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
 	    pmscv = malloc( sizeof( *pmscv ) );
 
@@ -378,7 +377,8 @@ extern void CommandSetCubeValue( char *sz ) {
 	    return;
 	}
 
-    outputl( "You must specify a legal cube value (see `help set cube value')." );
+    outputl( "You must specify a legal cube value (see `help set cube "
+	     "value')." );
 }
 
 extern void CommandSetDelay( char *sz ) {
@@ -414,8 +414,9 @@ extern void CommandSetDelay( char *sz ) {
 extern void CommandSetDice( char *sz ) {
 
     int n0, n1;
+    movesetdice *pmsd;
     
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set the dice." );
 
 	return;
@@ -436,8 +437,15 @@ extern void CommandSetDice( char *sz ) {
 	return;
     }
 
-    outputf( "The dice have been set to %d and %d.\n", anDice[ 0 ] = n0,
-	    anDice[ 1 ] = n1 );
+    pmsd = malloc( sizeof( *pmsd ) );
+    pmsd->mt = MOVE_SETDICE;
+    pmsd->fPlayer = fMove;
+    pmsd->anDice[ 0 ] = n0;
+    pmsd->anDice[ 1 ] = n1;
+    
+    AddMoveRecord( pmsd );
+
+    outputf( "The dice have been set to %d and %d.\n", n0, n1 );
 
 #if USE_GUI
     if( fX )
@@ -564,7 +572,7 @@ extern void CommandSetNackgammon( char *sz ) {
 	       "standard backgammon starting position." );
 
 #if USE_GUI
-    if( fX && fTurn == -1 )
+    if( fX && gs == GAME_NONE )
 	ShowBoard();
 #endif
 }
@@ -887,7 +895,7 @@ extern void CommandSetTurn( char *sz ) {
     char *pch = NextToken( &sz );
     int i;
 
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "There must be a game in progress to set a player on roll." );
 
 	return;

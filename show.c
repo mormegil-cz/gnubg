@@ -128,19 +128,17 @@ extern void CommandShowBoard( char *sz ) {
     char *ap[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     
     if( !*sz ) {
-	if( fTurn < 0 )
+	if( gs == GAME_NONE )
 	    outputl( "No position specified and no game in progress." );
 	else
 	    ShowBoard();
 	
 	return;
     }
-    
-    if( ParsePosition( an, sz ) ) {
-	outputl( "Illegal position." );
 
+    /* FIXME handle =n notation */
+    if( ParsePosition( an, &sz ) < 0 )
 	return;
-    }
 
 #if USE_GUI
     if( fX )
@@ -218,7 +216,7 @@ extern void CommandShowCrawford( char *sz ) {
 
 extern void CommandShowCube( char *sz ) {
 
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "There is no game in progress." );
 	return;
     }
@@ -243,7 +241,7 @@ extern void CommandShowCube( char *sz ) {
 
 extern void CommandShowDice( char *sz ) {
 
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "The dice will not be rolled until a game is started." );
 
 	return;
@@ -292,16 +290,13 @@ extern void CommandShowPipCount( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
 
-    if( !*sz && fTurn == -1 ) {
+    if( !*sz && gs == GAME_NONE ) {
 	outputl( "No position specified and no game in progress." );
 	return;
     }
     
-    if( ParsePosition( an, sz ) ) {
-	outputl( "Illegal position." );
-
+    if( ParsePosition( an, &sz ) < 0 )
 	return;
-    }
     
     PipCount( an, anPips );
     
@@ -408,7 +403,7 @@ extern void CommandShowSeed( char *sz ) {
 
 extern void CommandShowTurn( char *sz ) {
 
-    if( fTurn < 0 ) {
+    if( gs != GAME_PLAYING ) {
 	outputl( "No game is being played." );
 
 	return;
@@ -437,16 +432,13 @@ extern void CommandShowKleinman( char *sz ) {
     int anPips[ 2 ], an[ 2 ][ 25 ];
     float fKC;
 
-    if( !*sz && fTurn == -1 ) {
+    if( !*sz && gs == GAME_NONE ) {
         outputl( "No position specified and no game in progress." );
         return;
     }
  
-    if( ParsePosition( an, sz ) ) {
-        outputl( "Illegal position." );
-
-        return;
-    }
+    if( ParsePosition( an, &sz ) < 0 )
+	return;
      
     PipCount( an, anPips );
  
@@ -463,16 +455,13 @@ extern void CommandShowThorp( char *sz ) {
     int nLeader, nTrailer, nDiff, anCovered[2], anMenLeft[2];
     int x;
 
-    if( !*sz && fTurn == -1 ) {
+    if( !*sz && gs == GAME_NONE ) {
         outputl( "No position specified and no game in progress." );
         return;
     }
 
-    if( ParsePosition( an, sz ) ) {
-        outputl( "Illegal position." );
-
-        return;
-    }
+    if( ParsePosition( an, &sz ) < 0 )
+	return;
 
     PipCount( an, anPips );
 

@@ -354,7 +354,8 @@ static void RestoreGame( list *pl ) {
     fResigned = fDoubled = FALSE;
     nCube = 1;
     fTurn = fMove = fCubeOwner = -1;
-
+    gs = GAME_NONE;
+    
     RestoreTree( pl, TRUE );
 
     pmr = plGame->plNext->p;
@@ -387,7 +388,7 @@ static void ClearMatch( void ) {
     fMove = fTurn = -1;
     fCrawford = FALSE;
     fPostCrawford = FALSE;
-    
+    gs = GAME_NONE;
 }
 
 static void UpdateSettings( void ) {
@@ -412,7 +413,7 @@ extern void CommandLoadGame( char *sz ) {
     }
 
     if( ( pl = LoadCollection( sz ) ) ) {
-	if( fTurn != -1 && fConfirm ) {
+	if( gs == GAME_PLAYING && fConfirm ) {
 	    if( fInterrupt )
 		return;
 	    
@@ -447,7 +448,7 @@ extern void CommandLoadMatch( char *sz ) {
     if( ( pl = LoadCollection( sz ) ) ) {
 	/* FIXME make sure the root nodes have MI properties; if not,
 	   we're loading a session. */
-	if( fTurn != -1 && fConfirm ) {
+	if( gs == GAME_PLAYING && fConfirm ) {
 	    if( fInterrupt )
 		return;
 	    
@@ -609,6 +610,8 @@ static void SaveGame( FILE *pf, list *plGame ) {
 extern void CommandSaveGame( char *sz ) {
 
     FILE *pf;
+
+    /* FIXME give error if no game in progress */
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to save to (see `help save"
@@ -634,6 +637,8 @@ extern void CommandSaveMatch( char *sz ) {
     FILE *pf;
     list *pl;
 
+    /* FIXME give error if no game in progress */
+    
     /* FIXME what should be done if nMatchTo == 0? */
     
     if( !sz || !*sz ) {

@@ -46,6 +46,7 @@ extern event evNextTurn;
 #endif
 
 #define MAX_CUBE ( 1 << 12 )
+#define MAX_CUBE_STR "4096"
 
 typedef struct _command {
     char *sz; /* Command name (NULL indicates end of list) */
@@ -153,21 +154,57 @@ typedef union _moverecord {
 
 extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
 
-extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
-    fAutoGame, fAutoMove, fResigned, fDoubled, 
-    cGames, fAutoRoll,
-    fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon,
-    fVarRedn, nRollouts, nRolloutTruncate, fNextTurn, fConfirm,
-    fShowProgress;
+typedef enum _gamestate {
+    GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
+} gamestate; 
+
+/* The game state is represented by the board position (anBoard),
+   fTurn (indicating which player makes the next decision), fMove
+   (which indicates which player is on roll: normally the same as
+   fTurn, but occasionally different, e.g. if a double has been
+   offered).  anDice indicate the roll to be played (0,0 indicates the
+   roll has not been made).  Other variables representing the game
+   state are fCubeOwner, fCrawford/fPostCrawford, nMatchTo, anScore
+   and nCube, from eval.h.
+
+   The game state should generally only be modified by play.c; this
+   isn't true at the moment, but other code should be (re)written to
+   create an appropriate moverecord and call AddMoveRecord on it, so
+   that the game record is kept consistent. */
+extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned, fDoubled,
+    cGames, fNextTurn;
+extern gamestate gs;
+
+/* User settings (see eval.h for others). */
+extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
+    fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
+    fDisplay, fAutoBearoff, fShowProgress;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
-extern list lMatch, *plGame, *plLastMove;
 /* plGame is the list of moverecords representing the current game;
    plLastMove points to a move within it (typically the most recently
    one played, but "previous" and "next" commands navigate back and forth).
    lMatch is a list of games (i.e. a list of list of moverecords),
    and plGame points to a game within it (again, typically the last). */
+extern list lMatch, *plGame, *plLastMove;
+
+/* There is a global storedmoves struct to maintain the list of moves
+   for "=n" notation (e.g. "hint", "rollout =1 =2 =4").
+
+   Anything that _writes_ stored moves ("hint", "show moves", "add move")
+   should free the old dynamic move list first (sm.ml.amMoves), if it is
+   non-NULL.
+
+   Anything that _reads_ stored moves should check that the move is still
+   valid (i.e. auchKey matches the current board and anDice matches the
+   current dice). */
+typedef struct _storedmoves {
+    movelist ml;
+    unsigned char auchKey[ 10 ];
+    int anDice[ 2 ];
+} storedmoves;
+extern storedmoves sm;
 
 extern player ap[ 2 ];
 
@@ -182,12 +219,13 @@ extern void AddMoveRecord( void *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
 extern void AddGame( moverecord *pmr );
+extern void ChangeGame( list *plGameNew );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern void FreeMatch( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
-extern int ParsePosition( int an[ 2 ][ 25 ], char *sz );
+extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch );
 extern double ParseReal( char **ppch );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
