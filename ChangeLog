@@ -1,3 +1,20 @@
+Tue Nov  7 10:14:08 2000  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ParsePosition): Allow "=n" notation for boards (not
+	finished yet).
+	
+	* play.c (AddGame, ChangeGame, CommandNextGame, CommandPreviousGame):
+	New functions.
+	* gtkgame.c (CreateGameWindow): Add option menu for selecting a
+	game within a match/session.
+	(GTKAddGame, GTKPopGame, GTKSetGame): New functions.
+	
+	* gtkgame.c (GTKHint): Add "move" and "rollout" buttons.
+	
+	* configure.in: Use AC_FUNC_ALLOCA.
+
+	* gnubgtest: Test beavers, loading and saving.
+	
 Thu Nov  2 20:26:19 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* eval.c (EvaluatePositionCubeful, EvaluatePositionCubeful1): Calculate

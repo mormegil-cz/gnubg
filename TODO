@@ -56,17 +56,12 @@ duplication of effort and to make sure our changes merge easily.
   calls will have to be replaced, for instance.
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
   multiple moves (e.g. "8/7(2) 6/5(2)").
-** Allow "next game [n]" and "previous game [n]" for selecting other games
-  in the match.
 ** Allow resuming interrupted rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
 ** Change "set beavers" to allow a limit on the number of beavers
   permitted.
-** Add some kind of command to perform batch rollouts.
-*** Make "hint" label the moves it lists, and allow you to roll out
-  a choice of alternatives.
 ** Add a "set record" command; when "record" is off, no moves are
   recorded (which implies that "save", "list" and the game list window
   won't work, but it will save memory for situations like playing
@@ -78,6 +73,11 @@ duplication of effort and to make sure our changes merge easily.
   This allows command sequences like "roll", "hint", "=1" (play the move
   gnubg ranks highest), and "roll", "hint", "rollout =1 =2 =4" (roll out
   3 of the top 4 choices).
+** Add a command "show moves" which shows a list of legal moves, like hint
+  does, but without evaluating them.
+** Let the user choose whether probabilities are shown as probabilities
+  (0.123) or percentages (12.3%); match equities can be probabilities,
+  percentages or just numbers (-1.000 = 0%, 0.000 = 50%, 1.000 = 100%).
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -132,22 +132,22 @@ duplication of effort and to make sure our changes merge easily.
   behaviour in Snowie].
 ** Add progress indicators for everything that checks fShowProgress.
   A function that generates a progress bar/ASCII to stdout would help.
-** Add a pop-up menu in the game list window to allow selection of old games.
+** Finish the option menu in the game list window for selecting games.
 ** Show "take" and "drop" buttons in the off-board dice window when
   a double is offered; also "agree" and "decline" for resignations.
 ** Make sure we apply GTK styles correctly: create a GtkRcStyle; set the
   background colour in the style and the flag indicating the background is
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
   style will survive across theme changes.
+** Make usage() show the GDK and GTK options, if appropriate.
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
   changes in eval.c to give the information in a useful form; probably
   a "DumpPositionRaw".
-*** Make "help" show its output in a CList.  There must be a button in
-  the dialog to allow the user to recurse through help for subcommands.
-*** Update GTKHint to match the new TTY hint, and add a scrollbar to
-  the hint window. (gary)
+*** Make "help" show its output in a CList (CTree?).  The user must be able
+  to recurse through help for subcommands.
+*** Update GTKHint to match the new TTY hint. (gary)
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -176,6 +176,18 @@ duplication of effort and to make sure our changes merge easily.
   readline, its readline state and ours get completely confused...
 ** Not everything pays attention to MAX_CUBE.
 ** Loading can't be interrupted (e.g. "load game /dev/zero" hangs).
+** "set eval cubeful" gives a poor error message.
+** Cosmetic bug when using the rollout button in the hint window (the
+  commands echoed to stdout and the prompts are in the wrong order).
+** When using the TTY interface and loading a game/match that has
+  finished, the ShowBoard() in UpdateSettings() will display
+  "No game in progress."
+** When selecting a cell in the game record window with the mouse, the
+  window shouldn't scroll to centre the current record.
+** Many commands test "fTurn == -1" to determine if a game is in progress.
+  Some of these tests would be better off testing other conditions (so that
+  they can cope with the beginning or end of a game) -- seeing whether
+  plGame is NULL might work.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -203,7 +215,7 @@ duplication of effort and to make sure our changes merge easily.
   having standalone lib (event) and ext packages more difficult, but that
   probably isn't critical any more.
 ** Add optional time rules, for tournament play when clocks are used.
-** Add more tests to "make check"; beavers, loading and saving.
+** Add optional feature tests to "make check" -- Guile, databases, X?
 
 
 Local Variables:

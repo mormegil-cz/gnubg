@@ -509,7 +509,8 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
  
     /* FIXME allow more formats */
 
-    if( !sz || !*sz ) {
+    if( !sz || !*sz || *sz == '=' ) {
+	/* FIXME '=' should use the board after a move given from "hint" */
 	memcpy( an, anBoard, sizeof( anBoard ) );
 
 	return 0;
