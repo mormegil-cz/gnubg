@@ -1,3 +1,8 @@
+Sat Mar 16 16:25:19 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkprefs.c (BoardPreferences): Add a 'Apply' button to the dialog.
+        (BoardPrefsApply): New static function
+    
 Fri Mar 15 16:34:57 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_draw, board_draw_dice, board_draw_pips,

@@ -439,9 +439,110 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     UserCommand( sz );
 }
 
+static void BoardPrefsApply( GtkWidget *pw, BoardData *bd ) {
+
+    /* Simply a copy of BoardPrefsOK, but without gtk_widget_destroy */
+
+    int i, fTranslucentSaved;
+    gdouble ar[ 4 ];
+    char sz[ 256 ];
+    
+    fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+    fUseDiceIcon = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwUseDiceIcon ) );
+    fPermitIllegal = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwPermitIllegal ) );
+    fBeepIllegal = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
+    fHigherDieFirst = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwHigherDieFirst ) );
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
+	anim = ANIMATE_BLINK;
+    else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+	pwAnimateSlide ) ) )
+	anim = ANIMATE_SLIDE;
+    else
+	anim = ANIMATE_NONE;
+
+    bd->animate_speed = (int) ( padjSpeed->value + 0.5 );
+    
+    for( i = 0; i < 2; i++ ) {
+	bd->arRefraction[ i ] = apadj[ i ]->value;
+	bd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
+	bd->arExponent[ i ] = apadjExponent[ i ]->value;
+    }
+    
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ), ar );
+    for( i = 0; i < 3; i++ )
+	bd->aarColour[ 0 ][ i ] = ar[ i ];
+    if( fTranslucent )
+	bd->aarColour[ 0 ][ 3 ] = ar[ 3 ];
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ), ar );
+    for( i = 0; i < 3; i++ )
+	bd->aarColour[ 1 ][ i ] = ar[ i ];
+    if( fTranslucent )
+	bd->aarColour[ 1 ][ 3 ] = ar[ 3 ];
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 0 ] ),
+				   ar );
+    for( i = 0; i < 3; i++ )
+	bd->aanBoardColour[ 0 ][ i ] = ar[ i ] * 0xFF;
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
+				   ar );
+    for( i = 0; i < 3; i++ )
+	bd->aanBoardColour[ 1 ][ i ] = ar[ i ] * 0xFF;
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwPoint[ 0 ] ),
+				   ar );
+    for( i = 0; i < 3; i++ )
+	bd->aanBoardColour[ 2 ][ i ] = ar[ i ] * 0xFF;
+    
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwPoint[ 1 ] ),
+				   ar );
+    for( i = 0; i < 3; i++ )
+	bd->aanBoardColour[ 3 ][ i ] = ar[ i ] * 0xFF;
+
+    bd->aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
+    bd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80;
+    bd->aSpeckle[ 2 ] = apadjPoint[ 0 ]->value * 0x80;
+    bd->aSpeckle[ 3 ] = apadjPoint[ 1 ]->value * 0x80;
+    
+    bd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
+    bd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
+	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
+    bd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
+	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
+
+    bd->labels = fLabels;
+    bd->usedicearea = fUseDiceIcon;
+    bd->permit_illegal = fPermitIllegal;
+    bd->beep_illegal = fBeepIllegal;
+    bd->higher_die_first = fHigherDieFirst;
+    bd->animate_computer_moves = anim;
+    
+    /* This is a horrible hack, but we need translucency set to the new
+       value to call BoardPreferencesCommand(), so we get the correct
+       output; but then we reset it to the _old_ value before we change,
+       so the old pixmaps can be deallocated. */
+    fTranslucentSaved = bd->translucent;
+    
+    bd->translucent = fTranslucent;
+    
+//    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+    BoardPreferencesCommand( bd->widget, sz );
+
+    bd->translucent = fTranslucentSaved;
+    
+    UserCommand( sz );
+}
+
 extern void BoardPreferences( GtkWidget *pwBoard ) {
 
-    GtkWidget *pwDialog, *pwNotebook;
+    GtkWidget *pwDialog, *pwNotebook,
+        *pwApply = gtk_button_new_with_label( "Apply" );
     BoardData *bd = BOARD( pwBoard )->board_data;
     
     fTranslucent = bd->translucent;
@@ -455,7 +556,13 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+                       pwApply );
+    gtk_signal_connect( GTK_OBJECT( pwApply ), "clicked",
+			GTK_SIGNAL_FUNC( BoardPrefsApply ), bd );
+
     pwNotebook = gtk_notebook_new();
+
     gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
