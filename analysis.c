@@ -1026,8 +1026,12 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
       /* chequer play */
 
       aaaar[ CHEQUERPLAY ][ TOTAL ][ i ][ j ] = psc->arErrorCheckerplay[ i ][ j ];
-      aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ j ] = 
-        aaaar[ 0 ][ 0 ][ i ][ j ] / psc->anUnforcedMoves[ i ];
+
+      if ( psc->anUnforcedMoves[ i ] )
+        aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ j ] = 
+          aaaar[ 0 ][ 0 ][ i ][ j ] / psc->anUnforcedMoves[ i ];
+      else
+        aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ j ] = 0.0f;
 
       /* cube decisions */
 
@@ -1039,8 +1043,11 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
         + psc->arErrorWrongTake[ i ][ j ]
         + psc->arErrorWrongPass[ i ][ j ];
       
-      aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ j ] =
-        aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ] / psc->anTotalCube[ i ];
+      if ( psc->anTotalCube[ i ] )
+        aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ j ] =
+          aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ] / psc->anTotalCube[ i ];
+      else
+        aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ j ] = 0.0f;
 
       /* sum chequer play and cube decisions */
       /* FIXME: what average should be used? */
@@ -1048,9 +1055,13 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
       aaaar[ COMBINED ][ TOTAL ][ i ][ j ] =
         aaaar[ CHEQUERPLAY ][ TOTAL ][ i ][ j ] + aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ];
 
-      aaaar[ COMBINED ][ PERMOVE ][ i ][ j ] =
-        aaaar[ COMBINED ][ TOTAL ][ i ][ j ] / 
-        ( psc->anUnforcedMoves[ i ] + psc->anTotalCube[ i ] );
+
+      if ( psc->anUnforcedMoves[ i ] + psc->anTotalCube[ i ] )
+        aaaar[ COMBINED ][ PERMOVE ][ i ][ j ] =
+          aaaar[ COMBINED ][ TOTAL ][ i ][ j ] / 
+          ( psc->anUnforcedMoves[ i ] + psc->anTotalCube[ i ] );
+      else
+        aaaar[ COMBINED ][ PERMOVE ][ i ][ j ] = 0.0f;
 
     }
 

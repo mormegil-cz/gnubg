@@ -1,3 +1,7 @@
+Thu Jul 25 20:01:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (getMWCFromError): avoid division by zero.
+
 Thu Jul 25 19:47:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Memory dealloc bug. Patch contributed by Jim Segrave.
