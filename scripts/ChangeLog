@@ -1,3 +1,7 @@
+Sun May 16 12:30:23 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* matchseries.py: new file
+
 Mon Apr  5 08:28:23 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: make sure files are installed
