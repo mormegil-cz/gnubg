@@ -323,10 +323,10 @@ static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
 /* defaults for the filters  - 0 ply uses no filters */
 movefilter
 defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
- { { 8, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
- { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
- { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } },
- { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } ,
+  { { 0,  8, 0.16 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+  { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+  { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, {  0, 0, 0 } }, 
+  { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, { -1, 0, 0 } },
 };
 
 #if defined( GARY_CACHE )
@@ -3414,7 +3414,7 @@ FindnSaveBestMoves( movelist *pml,
   /* Find best moves. 
      Ensure that auchMove is evaluated at the deepest ply. */
 
-  int i, j = 0, nMoves, iPly;
+  int i, nMoves, iPly;
   move *pm;
   movefilter* mFilters;
   int nMaxPly = 0;

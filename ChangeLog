@@ -1,3 +1,10 @@
+Sun Jun  1 13:04:08 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktempmap.c (CalTempMapEquities): invert fMove before
+	call to evaluation.
+	* eval.c: replace "default" move filter with "normal" movefilter.
+	(bugs reported by Ned Cross)
+
 Sat May 31 18:54:34 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Add ply-buttons to theory widget

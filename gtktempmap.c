@@ -85,6 +85,7 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
   int anBoard[ 2 ][ 25 ];
   int aaan[ 6 ][ 6 ][ 8 ];
   float aar[ 6 ][ 6 ];
+  cubeinfo ci;
 
   /* calculate equities */
 
@@ -93,11 +94,13 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
   for ( i = 0; i < 6; ++i )
     for ( j = 0; j <= i; ++j ) {
 
+      memcpy( &ci, pci, sizeof ci );
+
       /* find best move */
 
       memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
 
-      if ( FindBestMove ( aaan[ i ][ j ], i + 1, j + 1, anBoard, pci, pec,
+      if ( FindBestMove ( aaan[ i ][ j ], i + 1, j + 1, anBoard, &ci, pec,
                           defaultFilters ) < 0 ) {
         ProgressEnd();
         return -1;
@@ -106,8 +109,9 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
       /* evaluate resulting position */
 
       SwapSides ( anBoard );
+      ci.fMove = ! ci.fMove;
 
-      if ( GeneralEvaluationE ( arOutput, anBoard, pci, pec ) < 0 ) {
+      if ( GeneralEvaluationE ( arOutput, anBoard, &ci, pec ) < 0 ) {
         ProgressEnd();
         return -1;
       }
