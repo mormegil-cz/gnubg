@@ -1,3 +1,13 @@
+Sat Jul 26 17:18:40 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (board_set): oops, get rid of button_clockwise.
+	* gtktoolbar.c (ToolbarSetClockwise): new function.
+
+	* gtkboard.c (ReturnHits): new function.
+	* gtkboard.c (update_move): first attempt on showing number
+	of rolls that hit blots.
+	(suggested by Morten Juul)
+
 Sat Jul 26 13:53:07 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (HTMLPrintCubeAnalysisTable): bold fontface for essential

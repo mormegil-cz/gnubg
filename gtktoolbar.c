@@ -154,6 +154,17 @@ ToolbarSetPlaying( GtkWidget *pwToolbar, const int f ) {
 }
 
 
+extern void
+ToolbarSetClockwise( GtkWidget *pwToolbar, const int f ) {
+
+  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwButtonClockwise ),
+                                f );
+
+}
+
+
 static void
 ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
 

@@ -72,7 +72,6 @@ typedef struct _BoardData {
     GtkWidget *pipcount0, *pipcount1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *appmKey[ 2 ];
-    GtkWidget *button_clockwise;
     
     gboolean playing, computer_turn;
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],

@@ -464,6 +464,71 @@ static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 }
 
 
+static char *
+ReturnHits( int anBoard[ 2 ][ 25 ] ) {
+
+  int aiHit[ 15 ];
+  int i, j, k, l, m, n, c;
+  movelist ml;
+  int aiDiceHit[ 6 ][ 6 ];
+
+  memset( aiHit, 0, sizeof ( aiHit ) );
+  memset( aiDiceHit, 0, sizeof ( aiDiceHit ) );
+
+  SwapSides( anBoard );
+
+  /* find blots */
+
+  for ( i = 0; i < 6; ++i )
+    for ( j = 0; j <= i; ++j ) {
+
+      if ( ! ( c = GenerateMoves( &ml, anBoard, i + 1, j + 1, FALSE ) ) )
+        /* no legal moves */
+        continue;
+      
+      k = 0;
+      for ( l = 0; l < 24; ++l )
+        if ( anBoard[ 0 ][ l ] == 1 ) {
+          for ( m = 0; m < c; ++m ) {
+            move *pm = &ml.amMoves[ m ];
+            for ( n = 0; n < 4 && pm->anMove[ 2 * n ] > -1; ++n )
+              if ( pm->anMove[ 2 * n + 1 ] == ( 23 - l ) ) {
+                /* hit */
+                aiHit[ k ] += 2 - ( i == j );
+                ++aiDiceHit[ i ][ j ];
+                /* next point */
+                goto nextpoint;
+              }
+          }
+        nextpoint:
+          ++k;
+        }
+
+    }
+
+  for ( j = 14; j >= 0; --j )
+    if ( aiHit[ j ] )
+      break;
+
+  if ( j >= 0 ) {
+    char *pch = g_malloc( 3 * j + 20 );
+    strcpy( pch, "" );
+    for ( i = 0; i <= j; ++i )
+      if ( aiHit[ i ] )
+        sprintf( strchr( pch, 0 ), "%d ", aiHit[ i ] );
+
+    for ( n = 0, i = 0; i < 6; ++i )
+      for ( j = 0; j <= i; ++j )
+        n += ( aiDiceHit[ i ][ j ] > 0 ) * ( 2 - ( i == j ) );
+
+    sprintf( strchr( pch, 0 ), _("(no hit: %d rolls)"), 36 - n );
+    return pch;
+  }
+
+  return NULL;
+
+}
+
 static void
 update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
@@ -535,6 +600,24 @@ static int update_move( BoardData *bd ) {
 			    bd->valid_move->anMove );
                 break;
             }
+
+        /* show number of return hits */
+
+        if ( bd->valid_move ) {
+          int anBoard[ 2 ][ 25 ];
+          char *pch;
+          PositionFromKey( anBoard, bd->valid_move->auch );
+          if ( ( pch = ReturnHits( anBoard ) ) ) {
+            outputf( _("Return hits: %s\n"), pch );
+            outputx();
+            g_free( pch );
+          }
+          else {
+            outputl( "" ); 
+            outputx();
+          }
+        }
+
     }
 
     gtk_widget_set_state( bd->move, fIncomplete ? GTK_STATE_ACTIVE :
@@ -2293,8 +2376,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	board_create_pixmaps( pwBoard, bd );
 	gtk_widget_queue_draw( bd->drawing_area );
 
-        gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->button_clockwise ),
-                                      fClockwise );
+        ToolbarSetClockwise( pwToolbar, fClockwise );
         
 	return 0;
     }
