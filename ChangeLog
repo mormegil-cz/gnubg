@@ -1,3 +1,9 @@
+Mon Feb 16 21:57:18 CET 2004   Joern Thyssen  <jth@gnubg.org> 
+
+	* bearoff.c (HeuristicDatabase): align heuristic database
+	with GetBearoffDistUncompressed (a.k.a. the 40 byte offset).
+	(reported by Daniel Murhpy)
+
 Mon Feb 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* html.c: Tidy text version of html export

@@ -282,10 +282,11 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
 
 static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
 
-    unsigned char *p = malloc( 54264 * 64 );
+    unsigned char *pm = malloc( 40 + 54264 * 64 );
+    unsigned char *p = pm ? pm + 40 : NULL;
     int i;
     
-    if( !p )
+    if( !pm )
 	return NULL;
 
     p[ 0 ] = p[ 1 ] = 0xFF;
@@ -298,7 +299,7 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
 	    pfProgress( i );
     }
 
-    return p;
+    return pm;
 }
 
 
