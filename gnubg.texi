@@ -1,0 +1,152 @@
+\input texinfo
+@setfilename gnubg.info
+@settitle GNU Backgammon
+@include version.texi
+
+@set month-year December, 1999
+
+@syncodeindex vr cp
+
+@ifinfo
+This file documents GNU Backgammon, a program for playing and analysing
+backgammon games and matches.
+
+Copyright @copyright{} 1999 Gary Wong.
+@end ifinfo
+
+@titlepage
+@sp 10
+@title GNU Backgammon
+@subtitle version @value{VERSION}
+@subtitle @value{month-year}
+@author Gary Wong
+@end titlepage
+
+@ifinfo
+@node Top
+@top GNU Backgammon
+
+This manual describes how to use GNU Backgammon to play and analyse
+backgammon games and matches.  It corresponds to version @value{VERSION}
+(updated in @value{month-year}).
+
+@menu
+* Introduction::
+* Frequently Asked Questions::
+* Concept Index::		  Index of concepts described in this manual.
+@end menu
+@end ifinfo
+
+@node Introduction
+@chapter Introduction
+@cindex introduction
+
+FIXME general introduction.
+
+@node Frequently Asked Questions
+@chapter Frequently Asked Questions
+@cindex frequently asked questions
+@cindex FAQ
+
+@enumerate
+@item
+Where can I get GNU Backgammon?
+@cindex obtaining gnubg
+
+Pre-release snapshots of GNU Backgammon are periodically made available
+for FTP at @code{alpha.gnu.org}.  FIXME:complete URL.
+
+If you want to experiment with the very latest code, the development
+sources are kept in a CVS repository at @code{subversions.gnu.org}.
+FIXME:complete URL.
+
+@item
+How do I play a game?
+@cindex playing a game
+@cindex moving chequers
+
+Once you are running gnubg, enter @code{new game} at the @code{(gnubg)}
+prompt to start a game against the computer opponent.  You should now
+see a board (if an X display is available, gnubg will use a graphical
+board window; otherwise, it will display an ASCII board on your
+terminal).  If gnubg won the opening roll, it will have moved; you can
+now type @code{roll} (or click on the dice below the board if you are
+using X) to roll the dice yourself.  In either case, it will now be your
+move; you should enter the moves for each chequer as pairs of numbers.
+For instance, if you have rolled 3 and 1, you could type @code{8 5 6 5}
+to move one chequer from the 8 point to the 5 point and another from
+the 6 point to the 5 point.  If you are using the X board window, you
+can also drag chequers around the board with mouse button 1.  Click on
+the dice when you have finished.
+
+@item
+When I run gnubg, it says @code{gnubg.bd: No such file or directory} and exits.
+What's wrong?
+@vindex gnubg.bd
+@cindex errors starting gnubg
+
+The file @code{gnubg.bd} is the bearoff database that gnubg uses to
+evaluate endgame positions.  gnubg will look for it first in the current
+directory and then in the installed directory (@code{/usr/local/share/gnubg/}
+by default).
+
+The gnubg distribution is set up to create @code{gnubg.bd} by itself
+during compilation, but it can be a slow process (taking half an hour
+or more, depending on the speed of your computer).  If you would rather
+not wait to generate the database yourself, you can obtain a copy
+via FTP from @code{alpha.gnu.org}. FIXME:complete URL.
+
+@item
+Now I get @code{gnubg.weights: No such file or directory}.  What's that?
+@vindex gnubg.weights
+@cindex errors starting gnubg
+
+The file @code{gnubg.weights} contains the trained neural net weights
+for most of gnubg's position evaluators.  Like @code{gnubg.bd}, it should
+be kept in either the current directory or the installed directory.
+
+You should be able to obtain a copy from wherever you found the gnubg
+distribution.  Future releases of gnubg will allow you to start without
+any existing weights at all, if you want to train your own.
+
+@item
+The board window is shown in black and white and looks awful!  What's wrong?
+
+If you see this problem, your X server is probably using a
+@code{PseudoColor} visual, and is dynamically allocating colours
+to clients from a limited colourmap.  On these types of displays, 
+gnubg tries to be a well-behaved client by using colours from the
+default standard colourmap.  This will allow it to share colours
+with other clients that use the same scheme, which will help them
+all to use as many colours as possible without exhausting the
+colourmap.
+
+Unfortunately, not all X clients use standard colourmaps.  If other
+clients have been run before gnubg and allocated most of the colours,
+then there may not be enough left for gnubg to allocate a standard
+colourmap.  If this happens, it will just take what it can get (which
+in the worst case might be black and white only).  You can try to
+avoid this problem by running gnubg before other colour-hungry clients,
+or by using the @code{xstdcmap} utility to install the default
+standard colourmap early in your session which colours are still
+available.  Depending on your hardware, you may be able to configure
+your display to allow more colours, or use a @code{DirectColor} or
+@code{TrueColor} visual which should resolve the problem.
+
+Of course, if your X server can only display black and white (not even
+shades of grey), then there's not much you can do!
+
+@end enumerate
+
+@ignore
+Hopefully nobody will ask this question, but I suppose it will happen...
+
+@item Are the dice fair?
+@end ignore
+
+@node Concept Index
+@unnumbered Index
+@printindex cp
+
+@contents
+@bye
