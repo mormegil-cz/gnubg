@@ -229,11 +229,11 @@ msgstr ""
 
 #: bearoff.c:1009
 msgid "   - distributions are approximated with a normal distribution\n"
-msgstr ""
+msgstr "   - распределение считается нормальным\n"
 
 #: bearoff.c:1012
 msgid "   - with heuristic moves "
-msgstr ""
+msgstr "   - с эвристикой "
 
 #: bearoff.c:1014
 msgid "database includes gammon distributions"
@@ -469,7 +469,7 @@ msgstr "Русский"
 
 #: credits.c:167
 msgid "Developers"
-msgstr ""
+msgstr "Разработчики"
 
 #: credits.c:168
 msgid "Code Contributors"
@@ -494,7 +494,7 @@ msgstr ""
 
 #: database.c:111
 msgid "The database is empty."
-msgstr ""
+msgstr "База данных пуста."
 
 #: database.c:133
 msgid "You must specify a file to export to (see `help database export')."
@@ -507,7 +507,7 @@ msgstr ""
 #: database.c:277
 #, c-format
 msgid "%s: malformed position data"
-msgstr ""
+msgstr "%s: неправильные данные о позиции"
 
 #: database.c:362
 msgid "There are no unevaluated positions in the database to roll out."
@@ -521,7 +521,7 @@ msgstr ""
 
 #: database.c:391
 msgid "Generating database..."
-msgstr ""
+msgstr "Генерация базы данных..."
 
 #: database.c:479
 msgid ""
@@ -529,9 +529,10 @@ msgid ""
 "must be a number of positions to train on."
 msgstr ""
 
+# DIG: или "Обучение на базе данных..."?
 #: database.c:492
 msgid "Training from database..."
-msgstr ""
+msgstr "Обучение по базе данных..."
 
 #: database.c:542
 msgid "There are no target evaluations in the database to train from."
@@ -596,11 +597,11 @@ msgstr "предоставлено пользователем"
 
 #: dice.c:136
 msgid "read-from-file"
-msgstr "read-from-file"
+msgstr ""
 
 #: dice.c:217
 msgid "Enter dice: "
-msgstr "Enter dice: "
+msgstr "Выберите значения на кубиках: "
 
 #: dice.c:234
 msgid "You must enter two numbers between 1 and 6."
@@ -679,7 +680,7 @@ msgstr ""
 
 #: dice.c:954
 msgid "Done."
-msgstr ""
+msgstr "Готово."
 
 #: dice.c:990
 msgid ""
@@ -695,7 +696,7 @@ msgstr ""
 #: dice.c:1232
 #, c-format
 msgid "Rewinding dice file (%s)\n"
-msgstr ""
+msgstr "Перемотка файла со значениями кубика (%s) назад\n"
 
 #: drawboard.c:70
 msgid " GNU Backgammon  Position ID: "
@@ -849,11 +850,11 @@ msgstr ""
 
 #: eval.c:3713
 msgid "Win "
-msgstr ""
+msgstr "Выигрыш "
 
 #: eval.c:3715
 msgid "Loss "
-msgstr ""
+msgstr "Проигрыш "
 
 #: eval.c:3719
 msgid "(backgammon)\n"
@@ -917,11 +918,11 @@ msgstr ""
 
 #: eval.c:3955
 msgid "Position ID:\t"
-msgstr ""
+msgstr "Идентификатор позиции:\t"
 
 #: eval.c:3959
 msgid "Match ID:\t"
-msgstr ""
+msgstr "Идентификатор матча:\t"
 
 #: eval.c:3965
 msgid "Evaluator: \t"
@@ -932,21 +933,22 @@ msgstr ""
 msgid "Win"
 msgstr ""
 
+# DIG: I presume, W=win, L=loss, g=gammon, bg=backgammon.
 #: eval.c:3974 gtkcube.c:66
 msgid "W(g)"
-msgstr ""
+msgstr "В(г)"
 
 #: eval.c:3974 gtkcube.c:66
 msgid "W(bg)"
-msgstr ""
+msgstr "В(бг)"
 
 #: eval.c:3974 gtkcube.c:67
 msgid "L(g)"
-msgstr ""
+msgstr "П(г)"
 
 #: eval.c:3974 gtkcube.c:67
 msgid "L(bg)"
-msgstr ""
+msgstr "П(бг)"
 
 #: eval.c:3976 gtkchequer.c:88 gtkrolls.c:227 html.c:2528 show.c:2360
 msgid "Equity"
