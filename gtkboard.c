@@ -3423,6 +3423,8 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	
 	outputpostpone();
 
+	/* NB: these comparisons are case-sensitive, and do not use
+	   CompareNames(), so that the user can modify the case of names. */
 	if( strcmp( pch0, ap[ 0 ].szName ) ) {
 	    sprintf( sz, "set player 0 name %s", pch0 );
 	    UserCommand( sz );

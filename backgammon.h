@@ -216,12 +216,12 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
-extern evalcontext ecRollout, ecTD;
+extern evalcontext ecTD;
 
 extern evalsetup esEvalCube, esEvalChequer;
 extern evalsetup esAnalysisCube, esAnalysisChequer;
 
-extern rolloutcontext rcRollout, rcTD;
+extern rolloutcontext rcRollout;
 
 /* plGame is the list of moverecords representing the current game;
    plLastMove points to a move within it (typically the most recently
@@ -274,6 +274,7 @@ extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );
 extern double ParseReal( char **ppch );
 extern int ParseKeyValue( char **ppch, char *apch[ 2 ] );
+extern int CompareNames( char *sz0, char *sz1 );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
