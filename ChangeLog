@@ -1,3 +1,10 @@
+Sat Jul 26 13:53:07 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTMLPrintCubeAnalysisTable): bold fontface for essential
+	cube decision numbers.
+	* html.c (printHTMLBoardBBS): surround BBS board with paragraph
+	which has the "page-break-inside: avoid" style.
+
 Sat Jul 26 13:37:53 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* htmlimages.c (CommandExportHTMLImages): draw labels on picture.

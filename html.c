@@ -70,6 +70,8 @@ typedef enum _stylesheetclass {
   CLASS_BLOCK,
   CLASS_PERCENT,
   CLASS_POSITIONID,
+  CLASS_CUBENUMBER,
+  CLASS_CUBEACTIONTEXT,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -107,7 +109,9 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "fontfamily", "font-family: sans-serif" },
   { "block", "display: block" },
   { "percent", "text-align: right" },
-  { "positionid", "font-size: 75%; color: #787878" }
+  { "positionid", "font-size: 75%; color: #787878" },
+  { "cubenumbers", "font-weight: bold" },
+  { "cubeactiontext", "color: red" }
 };
 
 
@@ -607,6 +611,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
       acOff[ i ] -= anBoard[ i ][ j ];
   }
 
+  /* avoid page break when printing */
+  fputs( "<p style=\"page-break-inside: avoid\">", pf );
     
   /* 
    * Top row
@@ -745,11 +751,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   printImage ( pf, szImageDir, fTurn ? "n_low" : "n_high", 
                szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS );
 
-  fputs ( "<br />\n", pf );
-
-  /* end of bottom row */
-
-  fputs ( "</table>\n\n", pf );
+  fputs( "</p>\n", pf );
 
   /* pip counts */
 
@@ -2180,8 +2182,10 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( exsExport.fCubeDetailProb && pes->et == EVAL_EVAL ) {
 
-    fputs ( "<tr><td>&nbsp;</td>"
-            "<td colspan=\"3\">", pf );
+    fprintf( pf, 
+             "<tr><td>&nbsp;</td>"
+             "<td colspan=\"3\" %s>", 
+             GetStyle( CLASS_CUBENUMBER, hecss ) );
 
     fputs ( OutputPercents ( aarOutput[ 0 ], TRUE ), pf );
 
@@ -2215,7 +2219,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
               gettext ( aszCube[ ai[ i ] ] ) );
 
     fprintf ( pf,
-              "<td>%s</td>",
+              "<td %s>%s</td>",
+              GetStyle( CLASS_CUBENUMBER, hecss ),
               OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ) );
 
     if ( i )
@@ -2236,8 +2241,9 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fprintf ( pf,
             "<tr><td colspan=\"2\">%s</td>"
-            "<td colspan=\"2\">%s",
+            "<td colspan=\"2\" %s>%s",
             _("Proper cube action:"),
+            GetStyle( CLASS_CUBEACTIONTEXT, hecss ),
             GetCubeRecommendation ( cd ) );
 
   if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
