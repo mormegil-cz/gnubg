@@ -1,3 +1,7 @@
+Thu Mar 14 20:46:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* catalog: new file (DTD catalog).
+
 Mon Mar 11 22:25:25 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* woolsey.xml, jacobs.xml, snowie.xml, zadeh.xml: changed

@@ -1,0 +1,17 @@
+<!--
+
+     catalog   
+
+     by Joern Thyssen <jthyssen@dk.ibm.com>, 2002
+
+     This file is distributed as a part of the GNU Backgammon program.
+
+     Copying and distribution of verbatim and modified versions of this file
+     is permitted in any medium provided the copyright notice and this
+     permission notice are preserved.
+
+     $Id$
+
+ -->
+
+SYSTEM "met.dtd" "met.dtd"
