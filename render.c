@@ -136,13 +136,13 @@ extern unsigned int cbLuxiRB, cbLuxiSB, cbLuxiSR;
 
 renderdata rdDefault = {
     WOOD_ALDER, /* wt */
-    { { 1.0, 0.2, 0.2, 0.9 }, { 0.05, 0.05, 0.1, 0.5 } }, /* aarColour */
-    { { 1.0, 0.2, 0.2, 0.9 }, { 0.05, 0.05, 0.1, 0.5 } }, /* aarDiceColour */
+    { { 0xF1 / 255.0, 0x25 / 255.0, 0x25 / 255.0, 0.9 }, { 0, 0, 0xB / 255.0, 0.5 } }, /* aarColour */
+    { { 0xF1 / 255.0, 0x25 / 255.0, 0x25 / 255.0, 0.9 }, { 0, 0, 0xB / 255.0, 0.5 } }, /* aarDiceColour */
     { TRUE, TRUE }, /* afDieColour */
-    { { 0.7, 0.7, 0.7, 1.0 }, { 0.7, 0.7, 0.7, 1.0 } }, /* aarDiceDotColour */
-    { 0.9, 0.9, 0.9, 1.0 }, /* arCubeColour */
-    { { 0x30, 0x60, 0x30, 0xFF }, { 0x00, 0x40, 0x00, 0xFF },
-      { 0xFF, 0x60, 0x60, 0xFF }, { 0xC0, 0xC0, 0xC0, 0xFF } }, /* aanBoardC */
+    { { 0xA4 / 255.0, 0xA4 / 255.0, 0xA4 / 255.0, 1.0 }, { 0xA4 / 255.0, 0xA4 / 255.0, 0xA4 / 255.0, 1.0 } }, /* aarDiceDotColour */
+    { 0xD7 / 255.0, 0xD7 / 255.0, 0xD7 / 255.0, 1.0 }, /* arCubeColour */
+    { { 0x2F, 0x5F, 0x2F, 0xFF }, { 0x00, 0x3F, 0x00, 0xFF },
+      { 0xFF, 0x5F, 0x5F, 0xFF }, { 0xBF, 0xBF, 0xBF, 0xFF } }, /* aanBoardC */
     { 25, 25, 25, 25 }, /* aSpeckle */
     { 1.5, 1.5 }, /* arRefraction */
     { 0.2, 1.0 }, /* arCoefficient */
@@ -3060,9 +3060,9 @@ extern int PreferenceCompare(renderdata *prd1, renderdata *prd2)
 			ColourCompare(prd1->aarDiceDotColour[0], prd2->aarDiceDotColour[0]) &&
 			ColourCompare(prd1->aarDiceDotColour[1], prd2->aarDiceDotColour[1]) &&
 			ColourCompare(prd1->arCubeColour, prd2->arCubeColour) &&
-			(prd1->arLight[0] == prd2->arLight[0] &&
-			prd1->arLight[1] == prd2->arLight[1] &&
-			prd1->arLight[2] == prd2->arLight[2]) &&
+			(TolComp(prd1->arLight[0], prd2->arLight[0]) &&
+			TolComp(prd1->arLight[1], prd2->arLight[1]) &&
+			TolComp(prd1->arLight[2], prd2->arLight[2])) &&
 			!memcmp(prd1->aanBoardColour[0], prd2->aanBoardColour[0], sizeof(prd1->aanBoardColour[0])) &&
 			!memcmp(prd1->aanBoardColour[1], prd2->aanBoardColour[1], sizeof(prd1->aanBoardColour[1])) &&
 			!memcmp(prd1->aanBoardColour[2], prd2->aanBoardColour[2], sizeof(prd1->aanBoardColour[2])) &&
