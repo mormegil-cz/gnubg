@@ -1,0 +1,6 @@
+Sun Sep  1 11:50:27 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	m4 macros for ESD and ArtsC.
+
+	* esd.m4, artsc.m4: new files
+
