@@ -103,8 +103,7 @@ extern void
 GTKProgressValue ( int fValue );
 extern void GTKBearoffProgress( int i );
 
-extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
-				const char *szTitle, const int fIsMatch );
+extern void GTKDumpStatcontext( int game );
 extern void GTKEval( char *szOutput );
 extern void 
 GTKHint( movelist *pmlOrig, const int iMove );

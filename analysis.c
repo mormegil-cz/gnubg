@@ -39,6 +39,7 @@
 #include "analysis.h"
 #include "sound.h"
 #include "matchequity.h"
+#include "export.h"
 
 #include "i18n.h"
 
@@ -1881,8 +1882,7 @@ CommandShowStatisticsMatch ( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-	GTKDumpStatcontext ( &scMatch, &ms, 
-                             _("Statistics for all games"), TRUE );
+	GTKDumpStatcontext ( 0 );
 	return;
     }
 #endif
@@ -1921,8 +1921,7 @@ CommandShowStatisticsGame ( char *sz )
     
 #if USE_GTK
   if ( fX ) {
-    GTKDumpStatcontext ( &pmgi->sc, &ms, 
-                         _("Statistics for current game"), FALSE );
+    GTKDumpStatcontext ( getGameNumber (plGame) + 1 );
     return;
   }
 #endif

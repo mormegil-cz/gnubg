@@ -7752,10 +7752,14 @@ FormatStatCubeError( char* sz, const int n, const float ar[2],
   }
 }
 
+/* Match stats variables */
 static char *aszEmpty[] = { NULL, NULL, NULL };
 static float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
 static ratingtype rt[ 2 ];
 static GtkWidget* statLists[4];
+static int numStatGames, curStatGame;
+static GtkWidget* statPom;
+GtkWidget *pwStatDialog;
 
 typedef enum _cdPageType {CD_ALL, CD_OVERALL, CD_CHEQUER, CD_CUBE, CD_LUCK} cdPageType;
 
@@ -7872,7 +7876,7 @@ static GtkWidget *CreateList()
 	return pwList;
 }
 
-static GtkWidget *OverallStats(const statcontext *psc, const matchstate *pms, const int fIsMatch)
+static void OverallStats(const statcontext *psc, const matchstate *pms)
 {
 	static char *aszLabels[] = { 
 		N_("Overall error rate (total)"),
@@ -7899,8 +7903,7 @@ static GtkWidget *OverallStats(const statcontext *psc, const matchstate *pms, co
 	int i, j, fCalc;
 	int irow = 0;
 	char sz[ 32 ];
-
-	statLists[0] = CreateList();
+	int fIsMatch = (curStatGame == 0);
 
 	j = 0;
 	for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
@@ -8107,11 +8110,9 @@ static GtkWidget *OverallStats(const statcontext *psc, const matchstate *pms, co
     }
 
   }
-
-return statLists[0];
 }
 
-static GtkWidget *ChequerStats(const statcontext *psc, const matchstate *pms)
+static void ChequerStats(const statcontext *psc, const matchstate *pms)
 {
 	static char *aszLabels[] = { 
 		N_("Total moves"),
@@ -8134,14 +8135,11 @@ static GtkWidget *ChequerStats(const statcontext *psc, const matchstate *pms)
 	int irow = 0;
 	char sz[ 32 ];
 
-	statLists[1] = CreateList();
-
-j = 0;
-for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
-gtk_clist_append( GTK_CLIST( statLists[1] ), aszEmpty );
-gtk_clist_set_text( GTK_CLIST( statLists[1] ), j, 0, gettext ( aszLabels[i] ) );
-}
-
+	j = 0;
+	for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+		gtk_clist_append( GTK_CLIST( statLists[1] ), aszEmpty );
+		gtk_clist_set_text( GTK_CLIST( statLists[1] ), j, 0, gettext ( aszLabels[i] ) );
+	}
 
   sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
   gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 1, sz);
@@ -8201,7 +8199,7 @@ gtk_clist_set_text( GTK_CLIST( statLists[1] ), j, 0, gettext ( aszLabels[i] ) );
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
   gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
 #endif
-  
+
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo, -1.0 );
@@ -8234,11 +8232,9 @@ gtk_clist_set_text( GTK_CLIST( statLists[1] ), j, 0, gettext ( aszLabels[i] ) );
   else
     strcpy ( sz, _("n/a" ) );
   gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
-
-  return statLists[1];
 }
 
-static GtkWidget *CubeStats(const statcontext *psc, const matchstate *pms)
+static void CubeStats(const statcontext *psc, const matchstate *pms)
 {
 	static char *aszLabels[] = { 
          N_("Total cube decisions"),
@@ -8261,13 +8257,11 @@ static GtkWidget *CubeStats(const statcontext *psc, const matchstate *pms)
 	int irow = 0;
 	char sz[ 32 ];
 
-statLists[2] = CreateList();
-
-j = 0;
-for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
-gtk_clist_append( GTK_CLIST( statLists[2] ), aszEmpty );
-gtk_clist_set_text( GTK_CLIST( statLists[2] ), j, 0, gettext ( aszLabels[i] ) );
-}
+	j = 0;
+	for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+		gtk_clist_append( GTK_CLIST( statLists[2] ), aszEmpty );
+		gtk_clist_set_text( GTK_CLIST( statLists[2] ), j, 0, gettext ( aszLabels[i] ) );
+	}
 
   sprintf(sz,"%d", psc->anTotalCube[ 0 ]);
   gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 1, sz);
@@ -8362,11 +8356,9 @@ gtk_clist_set_text( GTK_CLIST( statLists[2] ), j, 0, gettext ( aszLabels[i] ) );
   else
     strcpy ( sz, _("n/a" ) );
   gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
-
-  return statLists[2];
 }
 
-static GtkWidget *LuckStats(const statcontext *psc, const matchstate *pms)
+static void LuckStats(const statcontext *psc, const matchstate *pms)
 {
 	static char *aszLabels[] = { 
          N_("Rolls marked very lucky"),
@@ -8383,13 +8375,11 @@ static GtkWidget *LuckStats(const statcontext *psc, const matchstate *pms)
 	int irow = 0;
 	char sz[ 32 ];
 
-statLists[3] = CreateList();
-
-j = 0;
-for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
-gtk_clist_append( GTK_CLIST( statLists[3] ), aszEmpty );
-gtk_clist_set_text( GTK_CLIST( statLists[3] ), j, 0, gettext ( aszLabels[i] ) );
-}
+	j = 0;
+	for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+		gtk_clist_append( GTK_CLIST( statLists[3] ), aszEmpty );
+		gtk_clist_set_text( GTK_CLIST( statLists[3] ), j, 0, gettext ( aszLabels[i] ) );
+	}
 
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
   gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 1, sz);
@@ -8447,17 +8437,179 @@ gtk_clist_set_text( GTK_CLIST( statLists[3] ), j, 0, gettext ( aszLabels[i] ) );
   else
     strcpy ( sz, _("n/a" ) );
   gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
-
-  return statLists[3];
 }
 
-extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
-				const char *szTitle, const int fIsMatch ) {
-    
-	GtkWidget *pwDialog, *pwNotebook, *copyMenu, *menu_item;
-	int i;
+static void SetStats(const statcontext *psc)
+{
+	/* Clear old stats */
+	gtk_clist_clear(GTK_CLIST(statLists[0]));
+	gtk_clist_clear(GTK_CLIST(statLists[1]));
+	gtk_clist_clear(GTK_CLIST(statLists[2]));
+	gtk_clist_clear(GTK_CLIST(statLists[3]));
 
-	pwDialog = GTKCreateDialog( szTitle, DT_INFO, NULL, NULL );
+	getMWCFromError ( psc, aaaar );
+
+	OverallStats(psc, &ms);
+	ChequerStats(psc, &ms);
+	CubeStats(psc, &ms);
+	LuckStats(psc, &ms);
+}
+
+static void StatsSelectGame(GtkWidget *pw, int i)
+{
+	movegameinfo *pmgi;
+	curStatGame = i;
+
+    gtk_option_menu_set_history( GTK_OPTION_MENU( statPom ), curStatGame );
+
+	if (!curStatGame)
+	{
+		gtk_window_set_title(GTK_WINDOW(pwStatDialog), _("Statistics for all games"));
+		SetStats(&scMatch);
+	}
+	else
+	{
+		char sz[100];
+		list *pl = lMatch.plNext;
+		for (i = 1; i < curStatGame; i++)
+			pl = pl->plNext;
+
+		pl = pl->p;
+		pmgi = pl->plNext->p;
+
+		strcpy(sz, _("Statistics for game "));
+		sprintf(sz + strlen(sz), "%d", curStatGame);
+		gtk_window_set_title(GTK_WINDOW(pwStatDialog), sz);
+		SetStats(&pmgi->sc);
+	}
+}
+
+static void StatsAllGames( GtkWidget *pw, char *szCommand )
+{
+	if (curStatGame != 0)
+		StatsSelectGame(pw, 0);
+}
+
+static void StatsFirstGame( GtkWidget *pw, char *szCommand )
+{
+	if (curStatGame != 1)
+		StatsSelectGame(pw, 1);
+}
+
+static void StatsLastGame( GtkWidget *pw, char *szCommand )
+{
+	if (curStatGame != numStatGames)
+		StatsSelectGame(pw, numStatGames);
+}
+
+static void StatsPreviousGame( GtkWidget *pw, char *szCommand )
+{
+	if (curStatGame > 1)
+		StatsSelectGame(pw, curStatGame - 1);
+}
+
+static void StatsNextGame( GtkWidget *pw, char *szCommand )
+{
+	if (curStatGame < numStatGames)
+		StatsSelectGame(pw, curStatGame + 1);
+}
+
+static GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm,
+				void *fn )
+{
+    GdkPixmap *ppm;
+    GdkBitmap *pbm;
+    GtkWidget *pw, *pwButton;
+
+    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL, pcmap, &pbm, NULL,
+						 xpm );
+    pw = gtk_pixmap_new( ppm, pbm );
+    pwButton = gtk_button_new();
+    gtk_container_add( GTK_CONTAINER( pwButton ), pw );
+    
+    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+			GTK_SIGNAL_FUNC( fn ), 0 );
+    
+    return pwButton;
+}
+
+static void AddNavigation(GtkWidget* pvbox)
+{
+	GtkWidget *phbox, *pm, *pw;
+	GdkColormap *pcmap;
+    char sz[128];
+    list *pl;
+
+#include "prevgame.xpm"
+#include "prevmove.xpm"
+#include "nextmove.xpm"
+#include "nextgame.xpm"
+#include "nextmarked.xpm"
+
+	pcmap = gtk_widget_get_colormap( pwMain );
+
+	phbox = gtk_hbox_new( FALSE, 0 ),
+	gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
+
+	gtk_box_pack_start( GTK_BOX( phbox ),
+			pw = StatsPixmapButton(pcmap, nextmarked_xpm, StatsAllGames),
+			FALSE, FALSE, 4 );
+	gtk_tooltips_set_tip( ptt, pw, _("Show all games"), "" );
+	gtk_box_pack_start( GTK_BOX( phbox ),
+			pw = StatsPixmapButton(pcmap, prevgame_xpm, StatsFirstGame),
+			FALSE, FALSE, 4 );
+	gtk_tooltips_set_tip( ptt, pw, _("Move to first game"), "" );
+	gtk_box_pack_start( GTK_BOX( phbox ),
+			pw = StatsPixmapButton(pcmap, prevmove_xpm, StatsPreviousGame),
+			FALSE, FALSE, 0 );
+	gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous game"), "" );
+	gtk_box_pack_start( GTK_BOX( phbox ),
+			pw = StatsPixmapButton(pcmap, nextmove_xpm, StatsNextGame),
+			FALSE, FALSE, 4 );
+	gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next game"), "" );
+	gtk_box_pack_start( GTK_BOX( phbox ),
+			pw = StatsPixmapButton(pcmap, nextgame_xpm, StatsLastGame),
+			FALSE, FALSE, 0 );
+	gtk_tooltips_set_tip( ptt, pw, _("Move ahead to last game"), "" );
+
+	pm = gtk_menu_new();
+
+	pw = gtk_menu_item_new_with_label(_("All games"));
+	gtk_menu_append(GTK_MENU(pm), pw);
+	gtk_signal_connect( GTK_OBJECT( pw ), "activate",
+			GTK_SIGNAL_FUNC(StatsSelectGame), 0);
+
+	numStatGames = 0;
+	curStatGame = 0;
+	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
+	{
+		list *plGame = pl->p;
+		moverecord *pmr = plGame->plNext->p;
+		numStatGames++;
+
+		sprintf(sz, _("Game %d: %s %d, %s %d"), pmr->g.i + 1, ap[ 0 ].szName,
+			 pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
+		pw = gtk_menu_item_new_with_label(sz);
+
+		gtk_signal_connect( GTK_OBJECT( pw ), "activate",
+				GTK_SIGNAL_FUNC(StatsSelectGame), GINT_TO_POINTER(numStatGames));
+
+		gtk_widget_show( pw );
+		gtk_menu_append( GTK_MENU( pm ), pw );
+	}
+
+    gtk_widget_show_all( pm );
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( statPom = gtk_option_menu_new() ), pm );
+    gtk_option_menu_set_history( GTK_OPTION_MENU( statPom ), 0 );
+
+    gtk_box_pack_start( GTK_BOX( phbox ), statPom, TRUE, TRUE, 4 );
+}
+
+extern void GTKDumpStatcontext( int game )
+{
+	GtkWidget *pwNotebook, *copyMenu, *menu_item, *pvbox;
+
+	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, NULL );
 
 	pwNotebook = gtk_notebook_new();
 	gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
@@ -8465,28 +8617,27 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
 
 	gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
 
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwNotebook );
+	pvbox = gtk_vbox_new( FALSE, 0 ),
+    gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, FALSE, FALSE, 4 );
+	AddNavigation(pvbox);
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwStatDialog, DA_MAIN ) ), pvbox );
 
-	getMWCFromError ( psc, aaaar );
-	for ( i = 0 ; i < 2; i++ )
-		rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
-
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), OverallStats(psc, pms, fIsMatch),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[0] = CreateList(),
 					  gtk_label_new(_("Overall")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), ChequerStats(psc, pms),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[1] = CreateList(),
 					  gtk_label_new(_("Chequer play")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), CubeStats(psc, pms),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[2] = CreateList(),
 					  gtk_label_new(_("Cube decisions")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), LuckStats(psc, pms),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[3] = CreateList(),
 					  gtk_label_new(_("Luck")));
 
 	/* modality */
-	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+	gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 300 );
+	gtk_window_set_modal( GTK_WINDOW( pwStatDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwStatDialog ),
 								GTK_WINDOW( pwMain ) );
 
 	copyMenu = gtk_menu_new ();
@@ -8503,10 +8654,12 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
 
 	gtk_signal_connect( GTK_OBJECT( pwNotebook ), "button-press-event", GTK_SIGNAL_FUNC( ContextCopyMenu ), copyMenu );
 
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+	gtk_signal_connect( GTK_OBJECT( pwStatDialog ), "destroy",
 					  GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
-	gtk_widget_show_all( pwDialog );
+	gtk_widget_show_all( pwStatDialog );
+
+	StatsSelectGame(0, game);
 
 	GTKDisallowStdin();
 	gtk_main();
