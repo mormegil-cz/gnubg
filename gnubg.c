@@ -2682,7 +2682,9 @@ static guint nUpdate;
 
 static gint UpdateBoard( gpointer p ) {
 
-    gdk_threads_enter ();
+#if PROCESSING_UNITS
+    gdk_threads_enter();
+#endif
     
     /* we've waited long enough -- force this update */
     nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
@@ -2691,10 +2693,13 @@ static gint UpdateBoard( gpointer p ) {
 
     nUpdate = 0;
 
-    gdk_threads_leave ();
+#if PROCESSING_UNITS
+    gdk_threads_leave();
+#endif
+
     return FALSE; /* remove idle handler */
 }
-#endif
+#endif /* USE_GTK && HAVE_GDK_GDKX_H */
 
 extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
@@ -5739,8 +5744,10 @@ extern gint NextTurnNotify( gpointer p )
 extern int NextTurnNotify( event *pev, void *p )
 #endif
 {
-    gdk_threads_enter ();
-    
+#if PROCESSING_UNITS
+    gdk_threads_enter();
+#endif
+
     NextTurn( TRUE );
 
     ResetInterrupt();
@@ -5762,8 +5769,11 @@ extern int NextTurnNotify( event *pev, void *p )
 	
 	fNeedPrompt = FALSE;
     }
-    
-    gdk_threads_leave ();
+
+#if PROCESSING_UNITS
+    gdk_threads_leave();
+#endif
+
     return FALSE; /* remove idle handler, if GTK */
 }
 #endif
@@ -6016,20 +6026,22 @@ extern void output( const char *sz ) {
     
     if( cOutputDisabled )
 	return;
-        
-    
+
 #if USE_GTK
+
 #if PROCESSING_UNITS
     if (!IsMainThread ()) {
         outputerrf (sz);
         return;
     }
 #endif
+
     if( fX ) {
 	GTKOutput( g_strdup( sz ) );
 	return;
     }
 #endif
+
     pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
     fputs( pch, stdout );
 
@@ -6400,26 +6412,24 @@ static void CallbackProgress( void ) {
 #if USE_GTK
     if( fX ) {
 	monitor m;
-        
-        #if PROCESSING_UNITS
+
+#if PROCESSING_UNITS
         /* don't dispatch events from secondary thread! */
         if (IsMainThread ()) {
-        #endif
-        
-            gdk_threads_enter ();
+	    gdk_threads_enter();
+#endif
             SuspendInput( &m );
         
             while( gtk_events_pending() )
                 gtk_main_iteration();
             
             ResumeInput( &m );
+#if PROCESSING_UNITS
             gdk_threads_leave ();
-
-        #if PROCESSING_UNITS
         }
-        #endif
-    }
 #endif
+    }
+#endif /* USE_GTK */
     
     if( fInProgress && !iProgressMax )
 	Progress();
@@ -6868,9 +6878,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #if USE_GTK
     if ( fX && fSplash ) {
-        gdk_threads_enter ();
+//        gdk_threads_enter ();
         pwSplash = CreateSplash ();
-        gdk_threads_leave ();
+//        gdk_threads_leave ();
     }
 #endif
 
@@ -6879,10 +6889,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #ifdef HAVE_SOCKETS
 
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Windows sockets"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif /* USE_GTK */
 
     /* init Winsock */
@@ -6901,10 +6911,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #if PROCESSING_UNITS
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Processing units"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
 
     InitProcessingUnits ();
@@ -6912,10 +6922,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Random number generator"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
     
     InitRNG( NULL, TRUE, rngCurrent );
@@ -6957,20 +6967,20 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     /* init met */
     
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("match equity table"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
 
     InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
     
     
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("neural nets"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
 
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
@@ -6980,31 +6990,37 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 			      fShowProgress ? BearoffProgress : NULL ) ) < 0 )
 	exit( EXIT_FAILURE );
     else if( n > 0 && !nNewWeights ) {
-      outputl( _("WARNING: No neural net weights were found.  "
-                 "GNU Backgammon will create an\n"
-		 "initial random network, but this will be unsuitable for "
-		 "use until training\n"
-		 "is complete.  Please consult the manual for information "
-		 "about training, or\n"
-		 "directions for obtaining a pre-trained network.") );
+#if USE_GTK
+//	gdk_threads_enter ();
+#endif    
+	outputl( _("WARNING: No neural net weights were found.  "
+		   "GNU Backgammon will create an\n"
+		   "initial random network, but this will be unsuitable for "
+		   "use until training\n"
+		   "is complete.  Please consult the manual for information "
+		   "about training, or\n"
+		   "directions for obtaining a pre-trained network.") );
 	outputx();
+#if USE_GTK
+//	gdk_threads_leave ();
+#endif    
     }
 
 #if USE_GUILE
 #  if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Guile"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #  endif    
     GuileInitialise( szDataDirectory );
 #endif
 
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Board Images"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
 
     RenderInitialise();
@@ -7080,19 +7096,19 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     /* load rc files */
 
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Loading"), _("User Settings"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
     if( !fNoRC )
 	LoadRCFiles();
 
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
       PushSplash ( pwSplash, 
                    _("Doing"), _("nothing in particular"), 0 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
 
 #if USE_SOUND
@@ -7111,10 +7127,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     if( optind < argc && *argv[ optind ] ) {
 #if USE_GTK
-    gdk_threads_enter ();
+//    gdk_threads_enter ();
       PushSplash ( pwSplash, 
                    _("Loading"), _("Specified Match"), 500 );
-    gdk_threads_leave ();
+//    gdk_threads_leave ();
 #endif    
 	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
 	    /* quote filename with whitespace so that function
@@ -7137,9 +7153,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     if( pchCommands ) {
 #if USE_GTK
-        gdk_threads_enter ();
+//        gdk_threads_enter ();
         DestroySplash ( pwSplash );
-        gdk_threads_leave ();
+//        gdk_threads_leave ();
 #endif
 	CommandLoadCommands( pchCommands );
         EvalShutdown();

@@ -2683,9 +2683,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 
 extern void RunGTK( GtkWidget *pwSplash ) {
 
-    #if PROCESSING_UNITS
-    gdk_threads_enter ();
-    #endif
+#if PROCESSING_UNITS
+    gdk_threads_enter();
+#endif
 
     GTKSet( &ms.fCubeOwner );
     GTKSet( &ms.nCube );
@@ -2739,9 +2739,9 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 
     gtk_main();
     
-    #if PROCESSING_UNITS
-    gdk_threads_leave ();
-    #endif
+#if PROCESSING_UNITS
+    gdk_threads_leave();
+#endif
 }
 
 static void DestroyList( gpointer p ) {
@@ -2905,9 +2905,15 @@ static int Message( char *sz, dialogtype dt ) {
 	N_("GNU Backgammon - Warning"),
 	N_("GNU Backgammon - Error"),
     };
-    GtkWidget *pwDialog = GTKCreateDialog( gettext( aszTitle[ dt ] ), dt, NULL,
-					&f ),
-	*pwPrompt = gtk_label_new( sz );
+    GtkWidget *pwDialog = NULL, *pwPrompt = NULL;
+
+#if PROCESSING_UNITS
+    gdk_threads_enter();
+#endif
+
+    pwDialog = GTKCreateDialog( gettext( aszTitle[ dt ] ),
+				dt, NULL, &f );
+    pwPrompt = gtk_label_new( sz );
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
@@ -2924,13 +2930,21 @@ static int Message( char *sz, dialogtype dt ) {
     
     gtk_widget_show_all( pwDialog );
 
-    #if PROCESSING_UNITS
-        /* we don't want messages from threads (other than the main
-           thread) to be modal, to avoid user interface and deadlock 
-           problems; and we certainly don't want to have two gtk_main()
-           loops running at the same time! */
-        if (!IsMainThread ()) return f;
-    #endif
+#if PROCESSING_UNITS
+    gdk_threads_leave();
+#endif
+
+#if PROCESSING_UNITS
+    /* we don't want messages from threads (other than the main
+       thread) to be modal, to avoid user interface and deadlock 
+       problems; and we certainly don't want to have two gtk_main()
+       loops running at the same time! */
+    if (!IsMainThread ()) return f;
+#endif
+
+#if PROCESSING_UNITS
+    gdk_threads_enter();
+#endif
     
     /* This dialog should be REALLY modal -- disable "next turn" idle
        processing and stdin handler, to avoid reentrancy problems. */
@@ -2943,6 +2957,10 @@ static int Message( char *sz, dialogtype dt ) {
 
     if( fRestoreNextTurn )
 	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+
+#if PROCESSING_UNITS
+    gdk_threads_leave();
+#endif
     
     return f;
 }
@@ -3132,15 +3150,27 @@ extern void GTKOutputX( void ) {
       if ( ! fMessage )
         Message( sz, DT_INFO );
     }
-    else
+    else {
       /* Short message; display in status bar. */
+#if PROCESSING_UNITS
+      gdk_threads_enter();
+#endif
       gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
+#if PROCESSING_UNITS
+      gdk_threads_leave();
+#endif
+    }
     
     if ( fMessage ) {
       strcat ( sz, "\n" );
+#if PROCESSING_UNITS
+      gdk_threads_enter();
+#endif
       gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
                        sz, -1 );
-
+#if PROCESSING_UNITS
+      gdk_threads_leave();
+#endif
     }
 
       
@@ -3152,12 +3182,18 @@ extern void GTKOutputX( void ) {
 extern void GTKOutputErr( char *sz ) {
 
     Message( sz, DT_ERROR );
-    
+
     if( fMessage ) {
+#if PROCESSING_UNITS
+	gdk_threads_enter();
+#endif
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
 			 sz, -1 );
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
 			 "\n", 1 );
+#if PROCESSING_UNITS
+	gdk_threads_leave();
+#endif
     }
 }
 
@@ -3166,6 +3202,9 @@ extern void GTKOutputNew( void ) {
     /* This is horribly ugly, but fFinishedPopping will never be set if
        the progress bar leaves a message in the status stack.  There should
        be at most one message, so we get rid of it here. */
+#if PROCESSING_UNITS
+    gdk_threads_enter();
+#endif
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
     
     fFinishedPopping = FALSE;
@@ -3173,6 +3212,10 @@ extern void GTKOutputNew( void ) {
     do
 	gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idOutput );
     while( !fFinishedPopping );
+
+#if PROCESSING_UNITS
+    gdk_threads_leave();
+#endif
 }
 
 static GtkWidget *pwEntry;

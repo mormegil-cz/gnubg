@@ -1,3 +1,8 @@
+Thu Jul 24 21:11:43 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gnubg.c gtkgame.c gtksplash.c: fix thread issues with GTK+
+	  surround gtk functions with gdk_threads_enter and gdk_threads_leave
+
 Wed Jul 23 20:50:09 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* gnubg.c: add Winsock initilisation and cleanup

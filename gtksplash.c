@@ -61,6 +61,10 @@ CreateSplash () {
 
   pgs = (gtksplash *) g_malloc ( sizeof ( gtksplash ) );
 
+#if PROCESSING_UNITS
+  gdk_threads_enter();
+#endif
+
   pgs->pwWindow = gtk_window_new ( GTK_WINDOW_TOPLEVEL );
 #if GTK_CHECK_VERSION(2,0,0)
   gtk_window_set_role( GTK_WINDOW( pgs->pwWindow ),
@@ -114,6 +118,10 @@ CreateSplash () {
   while( gtk_events_pending() )
     gtk_main_iteration();
 
+#if PROCESSING_UNITS
+  gdk_threads_leave();
+#endif
+
   return pgs->pwWindow;
 
 }
@@ -127,7 +135,15 @@ DestroySplash ( GtkWidget *pwSplash ) {
   
   USLEEP( 1000 );
 
+#if PROCESSING_UNITS
+  gdk_threads_enter();
+#endif
+
   gtk_widget_destroy ( pwSplash );
+
+#if PROCESSING_UNITS
+  gdk_threads_leave();
+#endif
 
 }
 
@@ -141,7 +157,11 @@ PushSplash ( GtkWidget *pwSplash,
 
   if ( ! pwSplash )
     return;
-  
+
+#if PROCESSING_UNITS
+  gdk_threads_enter();
+#endif
+
   pgs = gtk_object_get_data ( GTK_OBJECT ( pwSplash ),
                                          "user_data" );
 
@@ -150,6 +170,10 @@ PushSplash ( GtkWidget *pwSplash,
 
   while( gtk_events_pending() )
     gtk_main_iteration();
+
+#if PROCESSING_UNITS
+  gdk_threads_leave();
+#endif
 
   USLEEP( nMuSec );
 
