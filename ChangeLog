@@ -1,3 +1,7 @@
+Sun Jun 27 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.c: Fixed bug - 2d chequers disappearing if dragged off board
+
 Sat Jun 26 16:49:31 CEST 2004  Nis Joergensen  <nis@superlativ.dk>
 
 	* speed.c (CommandCalibrate): Speed Calibration" now avoids using the

@@ -1402,9 +1402,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
 	}
 /*    } */
 
-
-    if (placed)
-	board_invalidate_point( bd, dest );
+	board_invalidate_point( bd, placed ? dest : bd->drag_point );
 
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)
