@@ -1596,6 +1596,8 @@ static int RPU_SetSocketOptions (int s)
     tv.tv_sec = 1;
     tv.tv_usec = 0;
     
+#if __APPLE__
+    /* and possibly other platforms other than linux */
     err = setsockopt (s, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv));
     if (err != 0) {
         perror ("setsockopt(SO_RCVTIMEO)");
@@ -1607,6 +1609,8 @@ static int RPU_SetSocketOptions (int s)
         perror ("setsockopt(SO_SNDTIMEO)");
         assert (FALSE);
     }
+
+#endif /* __APPLE__ */
 
     err = setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &fReuseAddr, sizeof (fReuseAddr));
     if (err != 0) {
@@ -2345,7 +2349,7 @@ extern void * Thread_RemoteProcessingUnit (void *data)
             struct sockaddr_in remoteAddress;
             bzero((char *) &remoteAddress, sizeof (struct sockaddr_in));
             remoteAddress.sin_family= AF_INET;
-            remoteAddress.sin_addr.s_addr = htonl(ppu->info.remote.inAddress.s_addr);
+            remoteAddress.sin_addr.s_addr = ppu->info.remote.inAddress.s_addr;
             remoteAddress.sin_port = htons(gRPU_TCPPort);
     
             if (connect (rpuSocket, (const struct sockaddr *) &remoteAddress, sizeof(remoteAddress)) < 0) {

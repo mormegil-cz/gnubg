@@ -1,3 +1,10 @@
+Sat May 31 12:55:28 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* procunits.c (Thrad_RemoteProcessingUnit): remove call to htons, since
+	inAddress is already in network byte order.
+	* procunits.c (RPU_SetSocketOptions): no SO_RCVTIME0 and SO_SNDTIME0
+	on linux.
+
 Sat May 31 12:24:49 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* rollout.c: pacify fussy compilers.
