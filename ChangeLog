@@ -17,9 +17,9 @@ Mon Nov 13 10:42:29 2000  Gary Wong  <gtw@research.att.com>
 	accelerator keys.  Added file selection dialogs for loading and
 	saving.
 
-	* guile.c: evaluate "gnubg.scm" at startup.
+	* guile.c: Evaluate "gnubg.scm" at startup.
 
-	* set.c (CommandSetDice): add a MOVE_SETDICE moverecord.
+	* set.c (CommandSetDice): Add a MOVE_SETDICE moverecord.
 	
 Fri Nov 10 14:14:35 2000  Gary Wong  <gtw@research.att.com>
 
