@@ -45,6 +45,7 @@
 #include "drawboard.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "positionid.h"
 
 /* Enumeration to be used as index to the table of command strings below
    (since GTK will only let us put integers into a GtkItemFactoryEntry,
@@ -347,27 +348,60 @@ typedef struct _gamelistrow {
     int fCombined; /* this message's row is combined across both columns */
 } gamelistrow;
 
+/* Find a moverecord, given an index into the game (0 = player 0's first
+   move, 1 = player 1's first move, 2 = player 0's first move, etc.).
+   This function maps based on what's in the list window, so "combined"
+   rows (e.g. "set board") will occupy TWO entries in the sequence space. */
+static moverecord *GameListLookupMove( int i ) {
+
+    gamelistrow *pglr = gtk_clist_get_row_data( GTK_CLIST( pwGameList ),
+						i >> 1 );
+
+    if( !pglr )
+	return NULL;
+
+    return pglr->apmr[ pglr->fCombined ? 0 : i & 1 ];
+}
+
 static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 			       GdkEventButton *pev, gpointer p ) {
     gamelistrow *pglr;
-    moverecord *pmr;
+    moverecord *pmr, *pmrPrev;
     list *pl;
+    int i, iPrev;
     
-    if( x < 1 || x > 2 || !( pglr = gtk_clist_get_row_data( pcl, y ) ) ||
-	!( pmr = pglr->apmr[ x - 1 ] ) )
+    if( x < 1 || x > 2 )
 	return;
 
-    if( pmr->mt == MOVE_SETDICE )
-	/* For "set dice" records, we want to set plLastMove _there_... */
-	for( pl = plGame->plNext; pl->p != pmr; pl = pl->plNext )
-	    assert( pl->p );
-    else
-	/* ...for everything else, we want the move _before_. */
-	for( pl = plGame->plNext; pl->plNext->p != pmr; pl = pl->plNext )
-	    assert( pl->plNext->p );
+    pglr = gtk_clist_get_row_data( pcl, y );
+    i = ( pglr && pglr->fCombined ) ? y << 1 : ( y << 1 ) | ( x - 1 );
+    pmr = GameListLookupMove( i );
+    
+    for( iPrev = i - 1; iPrev >= 0; iPrev-- )
+	if( ( pmrPrev = GameListLookupMove( iPrev ) ) )
+	    break;
 
+    if( !pmr && !pmrPrev )
+	return;
+
+    for( pl = plGame->plPrev; pl != plGame; pl = pl->plPrev ) {
+	assert( pl->p );
+	if( pl->p == pmr && pmr->mt == MOVE_SETDICE )
+	    break;
+	if( pl->p == pmrPrev ) {
+	    pmr = pmrPrev;
+	    break;
+	} else if( pl->plNext->p == pmr ) {
+	    pmr = pl->p;
+	    break;
+	}
+    }
+
+    if( pl == plGame )
+	/* couldn't find the moverecord they selected */
+	return;
+    
     plLastMove = pl;
-    pmr = pl->p;
     
     SetMoveRecord( pmr );
     
@@ -515,6 +549,12 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 		 pmr->sd.anDice[ 1 ] );
 	break;
 
+    case MOVE_SETBOARD:
+	fPlayer = -1;
+	sprintf( pch = sz, " (set board %s)",
+		 PositionIDFromKey( pmr->sb.auchKey ) );
+	break;
+	
     default:
 	fPlayer = -1;
 	pch = "FIXME";
@@ -576,27 +616,37 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
     
     gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psGameList );
 
-    for( i = pcl->rows - 1; i >= 0; i-- ) {
-	pglr = gtk_clist_get_row_data( pcl, i );
-	if( pglr->apmr[ 1 ] == pmr ) {
-	    xCurrent = 2;
-	    break;
-	} else if( pglr->apmr[ 0 ] == pmr ) {
-	    xCurrent = 1;
-	    break;
-	}
-    }
+    yCurrent = xCurrent = -1;
 
-    yCurrent = i;
+    if( !pmr )
+	return;
     
-    if( yCurrent >= 0 && pmr->mt != MOVE_SETDICE ) {
-	if( ++xCurrent > 2 ) {
-	    xCurrent = 1;
-	    yCurrent++;
+    if( pmr == plGame->plNext->p ) {
+	yCurrent = 0;
+	xCurrent = 1;
+    } else {
+	for( i = pcl->rows - 1; i >= 0; i-- ) {
+	    pglr = gtk_clist_get_row_data( pcl, i );
+	    if( pglr->apmr[ 1 ] == pmr ) {
+		xCurrent = 2;
+		break;
+	    } else if( pglr->apmr[ 0 ] == pmr ) {
+		xCurrent = 1;
+		break;
+	    }
 	}
-
-	if( yCurrent >= pcl->rows )
-	    AddMoveRecordRow();
+	
+	yCurrent = i;
+	
+	if( yCurrent >= 0 && pmr->mt != MOVE_SETDICE ) {
+	    if( ++xCurrent > 2 ) {
+		xCurrent = 1;
+		yCurrent++;
+	    }
+	    
+	    if( yCurrent >= pcl->rows )
+		AddMoveRecordRow();
+	}
     }
 
     gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psCurrent );
