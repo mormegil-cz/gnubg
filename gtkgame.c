@@ -104,7 +104,6 @@ typedef enum _gnubgcommand {
     CMD_SET_AUTO_GAME,
     CMD_SET_AUTO_MOVE,
     CMD_SET_AUTO_ROLL,
-    CMD_SET_BEAVERS,
     CMD_SET_CLOCKWISE,
     CMD_SET_CONFIRM,
     CMD_SET_CUBE_CENTRE,
@@ -171,7 +170,6 @@ static togglecommand atc[] = {
     { &fAutoGame, CMD_SET_AUTO_GAME },
     { &fAutoMove, CMD_SET_AUTO_MOVE },
     { &fAutoRoll, CMD_SET_AUTO_ROLL },
-    { &fBeavers, CMD_SET_BEAVERS },
     { &fConfirm, CMD_SET_CONFIRM },
     { &fCubeUse, CMD_SET_CUBE_USE },
     { &fDisplay, CMD_SET_DISPLAY },
@@ -224,7 +222,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set automatic game",
     "set automatic move",
     "set automatic roll",
-    "set beavers",
     "set clockwise",
     "set confirm",
     "set cube centre",
@@ -310,6 +307,7 @@ static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
 static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
+static void SetBeavers( gpointer *p, guint n, GtkWidget *pw );
 static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
 static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
@@ -336,10 +334,6 @@ static guint idOutput, idProgress;
 static list lOutput;
 int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
-
-#ifndef HUGE_VALF
-#define HUGE_VALF 1e38
-#endif
 
 #if WIN32
 static char *ToUTF8( unsigned char *sz ) {
@@ -851,10 +845,7 @@ static void CommentaryChanged( GtkWidget *pw, void *p ) {
     /* FIXME Copying the entire text every time it's changed is horribly
        inefficient, but the only alternatives seem to be lazy copying
        (which is much harder to get right) or requiring a specific command
-       to update the text (which is probably inconvenient for the user).
-
-       The GTK text widget is already so slow that copying makes no
-       noticable difference anyway... */
+       to update the text (which is probably inconvenient for the user). */
 
     if( pmrAnnotation->a.sz )
 	free( pmrAnnotation->a.sz );
@@ -1198,7 +1189,7 @@ extern void GTKPopMoveRecord( moverecord *pmr ) {
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
 
     static char *aszSkillCmd[ SKILL_VERYGOOD + 1 ] = {
-	"verybad", "bad", "doubtful", "clear", "interesting", "good",
+	"verybad", "bad", "doubtful", "clear skill", "interesting", "good",
 	"verygood"
     };
     char sz[ 64 ];
@@ -1297,7 +1288,7 @@ static GtkWidget *TakeAnalysis( movetype mt, float arDouble[],
 static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
 
     static char *aszLuckCmd[ LUCK_VERYGOOD + 1 ] = {
-	"veryunlucky", "unlucky", "clear", "lucky", "verylucky"
+	"veryunlucky", "unlucky", "clear luck", "lucky", "verylucky"
     };
     char sz[ 64 ];
     
@@ -1316,7 +1307,7 @@ static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
     
     pch = sz + sprintf( sz, "Rolled %d%d", n0, n1 );
     
-    if( rLuck != -HUGE_VALF ) {
+    if( rLuck != ERR_VAL ) {
 	if( fOutputMWC && ms.nMatchTo ) {
 	    GetMatchStateCubeInfo( &ci, &ms );
 	    
@@ -1866,8 +1857,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Roll", NULL, Command, CMD_SET_AUTO_ROLL,
 	  "<CheckItem>" },
-	{ "/_Settings/_Beavers", NULL, Command, CMD_SET_BEAVERS,
-	  "<CheckItem>" },
+	{ "/_Settings/_Beavers...", NULL, SetBeavers, 0, NULL },
 	{ "/_Settings/Cache...", NULL, SetCache, 0, NULL },
 	{ "/_Settings/Clockwise movement", NULL, Command, CMD_SET_CLOCKWISE,
 	  "<CheckItem>" },
@@ -2035,7 +2025,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), "" );
     /* Make sure the window is reasonably big, but will fit on a 640x480
        screen. */
-    gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 465 );
+    gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 470 );
     
     gtk_signal_connect( GTK_OBJECT( pwMain ), "delete_event",
 			GTK_SIGNAL_FUNC( main_delete ), NULL );
@@ -2490,7 +2480,7 @@ static void RealOK( GtkWidget *pw, float *pr ) {
 static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
 			double rMin, double rMax, double rInc ) {
 
-    float r = -HUGE_VALF;
+    float r = ERR_VAL;
     GtkObject *pa = gtk_adjustment_new( rDefault, rMin, rMax, rInc, rInc,
 					rInc );
     GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
@@ -2614,6 +2604,20 @@ static void SetAutoDoubles( gpointer *p, guint k, GtkWidget *pw ) {
 	char sz[ 32 ];
 
 	sprintf( sz, "set automatic doubles %d", n );
+	UserCommand( sz );
+    }
+}
+
+static void SetBeavers( gpointer *p, guint k, GtkWidget *pw ) {
+    
+    int n = ReadNumber( "GNU Backgammon - Beavers",
+			"Number of beavers permitted:",
+			nBeavers, 0, 6, 1 );
+
+    if( n >= 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set beavers %d", n );
 	UserCommand( sz );
     }
 }
@@ -3432,7 +3436,7 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 		       pwBox = gtk_vbox_new( FALSE, 0 ) );
     gtk_container_set_border_width( GTK_CONTAINER( pwBox ), 8 );
 
-    rw.padjTrials = GTK_ADJUSTMENT( gtk_adjustment_new( nRollouts, 1,
+    rw.padjTrials = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTrials, 1,
 							1296 * 1296,
 							36, 36, 36 ) );
     pw = gtk_hbox_new( FALSE, 0 );
@@ -3442,7 +3446,7 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( rw.padjTrials, 36, 0 ) );
     
-    rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( nRolloutTruncate, 1,
+    rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTruncate, 0,
 						       1000, 1, 1, 1 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwBox ), pw );
@@ -3455,10 +3459,10 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 		       rw.pwVarRedn = gtk_check_button_new_with_label(
 			   "Variance reduction" ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwVarRedn ),
-				  fVarRedn );
+				  rcRollout.fVarRedn );
 
-    rw.padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new( abs( nRolloutSeed ), 0,
-						       INT_MAX, 1, 1, 1 ) );
+    rw.padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new( abs( rcRollout.nSeed ),
+						      0, INT_MAX, 1, 1, 1 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -3486,23 +3490,23 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     if( fOK ) {
 	outputpostpone();
 
-	if( rw.nTrials != nRollouts ) {
+	if( rw.nTrials != rcRollout.nTrials ) {
 	    sprintf( sz, "set rollout trials %d", rw.nTrials );
 	    UserCommand( sz );
 	}
 
-	if( rw.nTruncate != nRolloutTruncate ) {
+	if( rw.nTruncate != rcRollout.nTruncate ) {
 	    sprintf( sz, "set rollout truncation %d", rw.nTruncate );
 	    UserCommand( sz );
 	}
 
-	if( rw.fVarRedn != fVarRedn ) {
+	if( rw.fVarRedn != rcRollout.fVarRedn ) {
 	    sprintf( sz, "set rollout varredn %s",
 		     rw.fVarRedn ? "on" : "off" );
 	    UserCommand( sz );
 	}
 
-	if( rw.nSeed != nRolloutSeed ) {
+	if( rw.nSeed != rcRollout.nSeed ) {
 	    sprintf( sz, "set rollout seed %d", rw.nSeed );
 	    UserCommand( sz );
 	}

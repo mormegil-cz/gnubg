@@ -53,10 +53,6 @@
 #include "positionid.h"
 #include "drawboard.h"
 
-#ifndef HUGE_VALF
-#define HUGE_VALF 1e38
-#endif
-
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
 #define AF_LOCAL AF_UNIX
 #define PF_LOCAL PF_UNIX
@@ -649,7 +645,7 @@ extern void CommandSetDice( char *sz ) {
     pmsd->anDice[ 0 ] = n0;
     pmsd->anDice[ 1 ] = n1;
     pmsd->lt = LUCK_NONE;
-    pmsd->rLuck = -HUGE_VALF;
+    pmsd->rLuck = ERR_VAL;
     
     AddMoveRecord( pmsd );
 
@@ -1231,7 +1227,7 @@ extern void CommandSetRolloutTruncation( char *sz ) {
     
     int n = ParseNumber( &sz );
 
-    if( n < 1 ) {
+    if( n < 0 ) {
 	outputl( "You must specify a valid ply at which to truncate  -- "
 		"try `help set rollout truncation'." );
 
@@ -1240,8 +1236,11 @@ extern void CommandSetRolloutTruncation( char *sz ) {
 
     prcSet->nTruncate = n;
 
-    outputf( "Rollouts will be truncated after %d pl%s.\n", n,
-	    n == 1 ? "y" : "ies" );
+    if( !n )
+	outputl( "Rollouts will not be truncated." );
+    else
+	outputf( "Rollouts will be truncated after %d pl%s.\n", n,
+		 n == 1 ? "y" : "ies" );
 }
 
 extern void CommandSetRolloutVarRedn( char *sz ) {
@@ -1399,7 +1398,7 @@ extern void CommandSetTrainingAnneal( char *sz ) {
 
     double r = ParseReal( &sz );
 
-    if( r == -HUGE_VAL ) {
+    if( r == ERR_VAL ) {
 	outputl( "You must specify a valid annealing rate." );
 	return;
     }
@@ -1574,10 +1573,22 @@ extern void CommandSetPostCrawford( char *sz ) {
 
 extern void CommandSetBeavers( char *sz ) {
 
-  SetToggle( "beavers", &fBeavers, sz,
-             "Beavers/racoons allowed in money sessions.",
-             "Beavers/raccons not allowed in money sessions." ); 
+    int n;
 
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	outputl( "You must specify the number of beavers to allow." );
+
+	return;
+    }
+
+    nBeavers = n;
+
+    if( nBeavers > 1 )
+	outputf( "%d beavers/racoons allowed in money sessions.\n", nBeavers );
+    else if( nBeavers == 1 )
+	outputl( "1 beaver allowed in money sessions." );
+    else
+	outputl( "No beavers allowed in money sessions." );
 }
 
 extern void CommandSetOutputMatchPC( char *sz ) {
