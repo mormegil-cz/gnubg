@@ -1271,7 +1271,7 @@ CommandShowStatisticsMatch ( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-	GTKDumpStatcontext ( &scMatch, "Statistics for all games" );
+	GTKDumpStatcontext ( &scMatch, &ms, "Statistics for all games" );
 	return;
     }
 #endif
@@ -1306,7 +1306,7 @@ CommandShowStatisticsGame ( char *sz ) {
     
 #if USE_GTK
     if ( fX ) {
-	GTKDumpStatcontext ( &pmgi->sc, "Statistics for current game" );
+	GTKDumpStatcontext ( &pmgi->sc, &ms, "Statistics for current game" );
 	return;
     }
 #endif

@@ -1,3 +1,13 @@
+Fri Mar 22 10:23:22 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (FormatStatEquity, FormatStatCubeError): New functions.
+	(GTKDumpStatcontext): Accept matchstate parameter, and handle money
+	games.  All callers changed.
+	
+	* gtkboard.c (board_init): Initialise bd->hinges.
+
+	* play.c (ChangeGame): Use GTKFreeze()/GTKThaw().
+	
 Thu Mar 21 17:55:35 2002  Gary Wong  <gtw@research.att.com>
 
 	* drawboard.c (FormatMove): Update fl when hitting blot on

@@ -6037,7 +6037,33 @@ extern void GTKSet( void *p ) {
     }
 }
 
-extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
+static void FormatStatEquity( char *sz, float ar[ 2 ], int nDenominator,
+			      int nMatchTo ) {
+
+    if( !nDenominator ) {
+	strcpy( sz, "n/a" );
+	return;
+    }
+
+    if( nMatchTo )
+	sprintf( sz, "%+.3f (%+.3f%%)", ar[ 0 ] / nDenominator,
+		 ar[ 1 ] * 100.0f / nDenominator );
+    else
+	sprintf( sz, "%+.3f (%+.3f)", ar[ 0 ] / nDenominator,
+		 ar[ 1 ] / nDenominator );
+}
+
+static void FormatStatCubeError( char *sz, int n, float ar[ 2 ],
+				 int nMatchTo ) {
+
+    if( nMatchTo )
+	sprintf( sz, "%d (%+.3f, %+.3f%%)", n, ar[ 0 ], ar[ 1 ] * 100.0f );
+    else
+	sprintf( sz, "%d (%+.3f, %+.3f)", n, ar[ 0 ], ar[ 1 ] );
+}
+
+extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
+				char *szTitle ) {
     
   static char *aszEmpty[] = { NULL, NULL, NULL };
   static char *aszLabels[] = { 
@@ -6149,27 +6175,18 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 9, 2, sz);
 
-  sprintf(sz, "%+6.3f (%+7.3f%%)",
-          psc->arErrorCheckerplay[ 0 ][ 0 ],
-          psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f);
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 1, sz);
-  sprintf(sz, "%+6.3f (%+7.3f%%)",
-          psc->arErrorCheckerplay[ 1 ][ 0 ],
-          psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f);
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 2, sz);
-  sprintf(sz, "%+6.3f (%+7.3f%%)",
-          psc->arErrorCheckerplay[ 0 ][ 0 ] /
-          psc->anUnforcedMoves[ 0 ],
-          psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
-          psc->anUnforcedMoves[ 0 ]);
+  
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ],
+		    psc->anUnforcedMoves[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 1, sz);
-  sprintf(sz, "%+6.3f (%+7.3f%%)",
-          psc->arErrorCheckerplay[ 1 ][ 0 ] /
-          psc->anUnforcedMoves[ 1 ],
-          psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
-          psc->anUnforcedMoves[ 1 ] );
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ],
+		    psc->anUnforcedMoves[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 2, sz);
-
+  
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), 12, 1, sz);
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYGOOD ]);
@@ -6191,28 +6208,18 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYBAD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), 16, 2, sz);
 
-  sprintf(sz,"%+6.3f (%+7.3f%%)",
-          psc->arLuck[ 0 ][ 0 ],
-          psc->arLuck[ 0 ][ 1 ] * 100.0f);
+  FormatStatEquity( sz, psc->arLuck[ 0 ], 1, pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 1, sz);
-  sprintf(sz,"%+6.3f (%+7.3f%%)",
-          psc->arLuck[ 1 ][ 0 ],
-          psc->arLuck[ 1 ][ 1 ] * 100.0f);
+  FormatStatEquity( sz, psc->arLuck[ 1 ], 1, pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 2, sz);
-  sprintf(sz,"%+6.3f (%+7.3f%%)",
-          psc->arLuck[ 0 ][ 0 ] /
-          psc->anTotalMoves[ 0 ],
-          psc->arLuck[ 0 ][ 1 ] * 100.0f /
-          psc->anTotalMoves[ 0 ]);
+  
+  FormatStatEquity( sz, psc->arLuck[ 0 ], psc->anTotalMoves[ 0 ],
+		    pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 1, sz);
-  sprintf(sz,"%+6.3f (%+7.3f%%)",
-          psc->arLuck[ 1 ][ 0 ] /
-          psc->anTotalMoves[ 1 ],
-          psc->arLuck[ 1 ][ 1 ] * 100.0f /
-          psc->anTotalMoves[ 1 ]);
+  FormatStatEquity( sz, psc->arLuck[ 1 ], psc->anTotalMoves[ 1 ],
+		    pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 2, sz);
-
-
+  
   for ( i = 0 ; i < 2; i++ )
     rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
                           psc->anUnforcedMoves[ i ] );
@@ -6239,67 +6246,48 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   sprintf(sz,"%d", psc->anPass[ 1 ] );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 24, 2, sz);
 
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeMissedDoubleDP[ 0 ],
-            psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-            psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 0 ],
+		       psc->arErrorMissedDoubleDP[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 25, 1, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeMissedDoubleDP[ 1 ],
-            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-            psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 1 ],
+		       psc->arErrorMissedDoubleDP[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 25, 2, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeMissedDoubleTG[ 0 ],
-            psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-            psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f);
+  
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 0 ],
+		       psc->arErrorMissedDoubleTG[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 26, 1, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeMissedDoubleTG[ 1 ],
-            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-            psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 1 ],
+		       psc->arErrorMissedDoubleTG[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 26, 2, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongDoubleDP[ 0 ],
-            psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-            psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 0 ],
+		       psc->arErrorWrongDoubleDP[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 27, 1, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongDoubleDP[ 1 ],
-            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-            psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 1 ],
+		       psc->arErrorWrongDoubleDP[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 27, 2, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongDoubleTG[ 0 ],
-            psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-            psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 0 ],
+		       psc->arErrorWrongDoubleTG[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 28, 1, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongDoubleTG[ 1 ],
-            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-            psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 1 ],
+		       psc->arErrorWrongDoubleTG[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 28, 2, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongTake[ 0 ],
-            psc->arErrorWrongTake[ 0 ][ 0 ],
-            psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongTake[ 0 ],
+		       psc->arErrorWrongTake[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 29, 1, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongTake[ 1 ],
-            psc->arErrorWrongTake[ 1 ][ 0 ],
-            psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeWrongTake[ 1 ],
+		       psc->arErrorWrongTake[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 29, 2, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongPass[ 0 ],
-            psc->arErrorWrongPass[ 0 ][ 0 ],
-            psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongPass[ 0 ],
+		       psc->arErrorWrongPass[ 0 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 1, sz);
-  sprintf(sz, "%3d (%+6.3f (%+7.3f%%))",
-            psc->anCubeWrongPass[ 1 ],
-            psc->arErrorWrongPass[ 1 ][ 0 ],
-            psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f);
+  FormatStatCubeError( sz, psc->anCubeWrongPass[ 1 ],
+		       psc->arErrorWrongPass[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 2, sz);
-
+  
   for ( i = 0 ; i < 2; i++ )
     rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
                             + psc->arErrorMissedDoubleTG[ i ][ 0 ]

@@ -47,8 +47,6 @@ duplication of effort and to make sure our changes merge easily.
 *** Should luck be evaluated cubefully?  (An option, perhaps?)
 *** Use the fComputed field in statcontext (make "show statistics ..."
   complain if not computed, disable the GTK menu items if not available).
-*** Make DumpStatcontext and GTKDumpStatcontext work for money sessions.
-  (HTMLDumpStatcontext is probably a good example to copy.)
 *** Make sure analysis works with resignations.
 *** Consider a way for analysis to mark _good_ moves (e.g. moves which are
   flagged as errors at 0-ply but turn out to be correct at higher plies).
@@ -117,6 +115,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Handle "list game" and "list match".  (oysteijo)
 ** Allow setting/editing commentary.
 ** Show take/drop analysis.
+** Make DumpStatcontext work for money sessions.
 
 * X interface:
 ** Does anybody still use the old Xlib (Ext) interface any more?  If so,

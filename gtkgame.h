@@ -76,7 +76,8 @@ extern void
 GTKProgressValue ( int fValue );
 extern void GTKBearoffProgress( int i );
 
-extern void GTKDumpStatcontext( statcontext *psc, char *szTitle );
+extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
+				char *szTitle );
 extern void GTKEval( char *szOutput );
 extern void GTKHint( movelist *pml );
 extern void GTKDoubleHint( char *sz );
