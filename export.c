@@ -410,7 +410,8 @@ GenerateImage ( renderimages *pri, renderdata *prd,
                 const int nSize, const int nSizeX, const int nSizeY,
                 const int nOffsetX, const int nOffsetY,
                 const int fMove, const int fTurn, const int fCube,
-                const int anDice[ 2 ], const int nCube, const int fDoubled ) {
+                const int anDice[ 2 ], const int nCube, const int fDoubled,
+                const int fCubeOwner ) {
 
   unsigned char *puch;
   int anCubePosition[ 2 ];
@@ -436,10 +437,19 @@ GenerateImage ( renderimages *pri, renderdata *prd,
   else
     doubled = 0;
 
+  
+
   if ( fCube ) {
-    anCubePosition[ 0 ] = 50 - 24 * doubled;
-    anCubePosition[ 1 ] = 32;
-    nOrient = doubled;
+    if ( doubled || fCubeOwner == -1 ) {
+      anCubePosition[ 0 ] = 50 - 24 * doubled;
+      anCubePosition[ 1 ] = 32;
+      nOrient = doubled;
+    }
+    else {
+      nOrient = fCubeOwner ? -1 : +1;
+      anCubePosition[ 0 ] = 50;
+      anCubePosition[ 1 ] = 32 - nOrient * 29;
+    }
   }
   else {
     nOrient = -1;
@@ -546,7 +556,7 @@ CommandExportPositionPNG ( char *sz ) {
   GenerateImage ( &ri, &rd, ms.anBoard, sz, 
                   exsExport.nPNGSize, 108, 72, 0, 0, 
                   ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
-                  ms.fDoubled );
+                  ms.fDoubled, ms.fCubeOwner );
 
   FreeImages ( &ri );
 
