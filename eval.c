@@ -6834,16 +6834,77 @@ getPercent ( const cubedecision cd,
 }
 
 
+/*
+ * Resort movelist and recalculate best score.
+ *
+ * Input:
+ *   pml: movelist
+ *
+ * Output:
+ *   pml: update movelist
+ *   ai : the new ordering. Caller must allocate ai.
+ *
+ * FIXME: the construction of the ai-array is *very* ugly.
+ *        We should probably write a substitute for qsort that
+ *        updates ai on the fly.
+ *
+ */
 
 extern void
-RefreshMoveList ( movelist *pml ) {
+RefreshMoveList ( movelist *pml, int *ai ) {
+
+  int i, j;
+  movelist ml;
 
   if ( ! pml->cMoves )
     return;
+
+  if ( ai )
+    CopyMoveList ( &ml, pml );
 
   qsort( pml->amMoves, pml->cMoves, 
          sizeof( move ), (cfunc) CompareMovesGeneral );
 
   pml->rBestScore = pml->amMoves[ 0 ].rScore;
+
+  if ( ai ) {
+    for ( i = 0; i < pml->cMoves; i++ ) {
+
+      for ( j = 0; j < pml->cMoves; j++ ) {
+
+        if ( ! memcmp ( ml.amMoves[ j ].anMove, pml->amMoves[ i ].anMove,
+                        8 * sizeof ( int ) ) )
+          ai[ j ] = i;
+        
+      }
+    }
+
+    free ( ml.amMoves );
+
+  }
+
+
+}
+
+
+extern void
+CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
+
+  if ( pmlDest == pmlSrc )
+    return;
+
+  pmlDest->cMoves = pmlSrc->cMoves;
+  pmlDest->cMaxMoves = pmlSrc->cMaxMoves;
+  pmlDest->cMaxPips = pmlSrc->cMaxPips;
+  pmlDest->iMoveBest = pmlSrc->iMoveBest;
+  pmlDest->rBestScore = pmlSrc->rBestScore;
+
+  if ( pmlSrc->cMoves ) {
+    pmlDest->amMoves = (move *) malloc ( pmlSrc->cMoves * sizeof ( move ) );
+    memcpy ( pmlDest->amMoves, pmlSrc->amMoves,
+             pmlSrc->cMoves * sizeof ( move ) );
+  }
+  else
+    pmlDest->amMoves = NULL;
 
 }

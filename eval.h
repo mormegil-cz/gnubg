@@ -422,9 +422,13 @@ getPercent ( const cubedecision cd,
              const float arDouble[] );
 
 extern void
-RefreshMoveList ( movelist *pml );
+RefreshMoveList ( movelist *pml, int *ai );
 
 extern int 
 ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies );
+
+extern void
+CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );
+
 
 #endif
