@@ -1,3 +1,11 @@
+Wed Jul 09 20:57:01 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* boardpos.c gtkexport.c gtkgame.c gtkgame.h gtkmet.c 
+	  gtkmovefilter.c gtkprefs.c gtkrace.c gtkrolls.c gtktempmap.c 
+	  gtktheory.c procunits.c procunits.h:
+	  changed CreateDialog to GTKCreateDialog to avoid name clash on Windows,
+	  added some #includes for Windows
+
 Mon Jun  9 19:21:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* procunits.c: various small fixes.

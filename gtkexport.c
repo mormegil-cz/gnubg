@@ -465,7 +465,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( _("GNU Backgammon - Export Settings"),
+  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Export Settings"),
 			    DT_QUESTION, GTK_SIGNAL_FUNC ( ExportOK ), pew );
 
   pwTable = gtk_table_new ( 3, 2, FALSE );

@@ -76,7 +76,7 @@ extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle );
 
-extern GtkWidget *CreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
+extern GtkWidget *GTKCreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
 				void *p );
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
     

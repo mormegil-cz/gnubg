@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * $Id$
  */
 
 #if HAVE_CONFIG_H
@@ -4036,7 +4037,7 @@ static void GTK_Options (GtkWidget *widget, gpointer data)
     GetOptions (&puOptions);
     
     /*
-    puOptions.w.pwWindow = pwDialog = CreateDialog ("Processing Units Options",
+    puOptions.w.pwWindow = pwDialog = GTKCreateDialog ("Processing Units Options",
                             DT_QUESTION, GTK_SIGNAL_FUNC(GTK_Options_OK), &puOptions);
     gtk_container_add (GTK_CONTAINER(DialogArea (pwDialog, DA_MAIN)),
                             pwOptions = GTK_Options_Page (&puOptions));

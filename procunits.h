@@ -16,13 +16,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * $Id$
  */
 
 #ifndef _PROCUNITS_H_
 #define _PROCUNITS_H_ 1
 
 #include <pthread.h>
+
+#if WIN32
+#include <windows.h>
+#else
 #include <netinet/in.h>
+#endif  /* #if WIN32 */
+
+#if USE_GTK
+#include <glib.h>
+#include <gdk/gdk.h>
+#include <gtk/gtk.h>
+#endif  /* #if USE_GTK */
+
 #include "lib/hash.h"
 #include "eval.h"
 #include "rollout.h"
@@ -170,7 +183,6 @@ typedef struct _procunit {
     
 } procunit;
 
-
 /*  --------------------------------------------------
     messages definitions 
     --------------------------------------------------
@@ -244,8 +256,6 @@ typedef struct {
     rpu_stats	analysis;
 } rpu_slavestats;
 
-
-
 /*  --------------------------------------------------
     shared globals 
     --------------------------------------------------
@@ -287,8 +297,6 @@ extern pu_task * TaskEngine_GetCompletedTask (void);
 
 extern void Slave_UpdateStatus (void);
 
-
-
 extern void CommandProcunitsAddLocal( char *sz ) ;
 extern void CommandProcunitsAddRemote( char *sz ) ;
 extern void CommandProcunitsRemove ( char *sz ) ;
@@ -320,18 +328,10 @@ extern void CommandSetProcunitsRemoteNotifSendMethodHost ( char *sz );
 extern void CommandSetProcunitsRemoteNotifSendPort ( char *sz );
 extern void CommandSetProcunitsRemoteNotifSendDelay ( char *sz );
 
-
-
 #if USE_GTK
-
 void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw);
 void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw);
 void GTK_Procunit_Options (gpointer *p, guint n, GtkWidget *pw);
+#endif  /* #if USE_GTK */
 
-#endif
-
-
-
-#endif
-
-
+#endif  /* #ifndef _PROCUNITS_H_ */

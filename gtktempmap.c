@@ -254,7 +254,7 @@ GTKShowTempMap( matchstate *pms ) {
   int i, j;
   renderdata rd;
 
-  GtkWidget *pwDialog = CreateDialog( _("Sho Sengoku Temperature Map - "
+  GtkWidget *pwDialog = GTKCreateDialog( _("Sho Sengoku Temperature Map - "
                                         "Distribution of rolls"),
                                       DT_INFO, NULL, NULL );
 
