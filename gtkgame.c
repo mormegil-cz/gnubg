@@ -4908,7 +4908,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                                 prw->rcRollout.fVarRedn );
 
   prpw->pwRotate = gtk_check_button_new_with_label ( 
-                                                    _("Rotate first two rolls") );
+                                                    _("Use quasi-random dice") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwRotate );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwRotate ),
                                 prw->rcRollout.fRotate );
@@ -5103,7 +5103,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     }
 
     if( rw.rcRollout.fRotate != rcRollout.fRotate ) {
-      sprintf( sz, "set rollout rotate %s",
+      sprintf( sz, "set rollout quasirandom %s",
                rw.rcRollout.fRotate ? "on" : "off" );
       UserCommand( sz );
     }

@@ -15,7 +15,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add another "eval"-like command that show the distribution of
   equities n rolls ahead.  SW does bar graphs of this stuff; Cam Trenor
   suggests alternative output.
-** Improve quasi-random dice generation for rollouts. (gary)
 ** Create multiple threads to parallelise rollouts (and evaluations?) on
   multiprocessors.  Perhaps start remote processes?
 ** Add more statistics for rollouts, e.g.
@@ -55,18 +54,10 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
-** Make output*() functions wrap words, and pause before scrolling (as in
-  gdb).
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
 ** Extend ParsePosition() to handle some sort of syntax like
   [8/5 6/5] (meaning the position after that move).  FIBS boardstyle 3 output
   might be nice, too.
-** Kit suggests that it's more important to get early plays right in
-  rollouts.  Should we consider options that allow larger search space/
-  search depth/etc. for early moves in rollouts than later ones?  (Kit's
-  suggestion is to maximise the chance of finding the right play for
-  the initial roll and response, and whatever speeds things along while
-  still finding reasonable plays after that.)
 ** Importing and exporting:
 *** Add missing export formats (FIBS oldmoves, .sgg, .pos).
 *** Make the .mat format identical to Jellyfish (things to check:
@@ -116,6 +107,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow setting/editing commentary.
 ** Show take/drop analysis.
 ** Make DumpStatcontext work for money sessions.
+** Make output*() functions wrap words, and pause before scrolling (as in
+  gdb).
 
 * X interface:
 ** Does anybody still use the old Xlib (Ext) interface any more?  If so,
@@ -217,8 +210,6 @@ functions:
   of both problems.
 ** "help next" (and "next <tab>") are incomplete.
 ** GtkTexi should try to load images from the same directory as the XML file.
-** GTK+ 2.0 wants strings in UTF-8.  Unfortunately SGF files are specified
-  to be ISO 8859-1, and the terminal is locale-dependent. (gary)
 ** "save settings" when using the TTY interface will delete GTK settings
   (e.g. "set appearance") that were there previously.
 ** It is possible to give some commands (e.g. "roll", "play") while in edit
@@ -226,7 +217,8 @@ functions:
 ** make rollout as initial position work correctly. Currently, you have to perform
   two rollouts (one with player 0 on roll, and another with player 1 on roll)
   and average the two results. Instead gnubg should automagically perform both 
-  rollouts and do the averaging.
+  rollouts and do the averaging.  (Quasi-random dice don't work for initial
+  positions, either.)
 ** The board should be updated before automatic analysis starts.  (Currently,
   if you interrupt the automatic analysis, the move will go into effect, but
   the board shown will be out of date.)
@@ -274,7 +266,14 @@ functions:
 ** Allow ~ and $ escapes in filenames (use wordexp()).
 ** Allow printing positions/games/matches/etc.  (More or less the same
   as exporting to PostScript, but piped to a printing process.) (gary)
-** Add statistics of won/lost games/matches to the player records.
+*** Consider adding optional Ghostscript support -- Ghostscript can be
+  built as a shared library/DLL (see doc/API.htm in the Ghostscript
+  distribution).  This would allow us to print to any device that
+  Ghostscript supports, although the user would still have to figure out
+  the Ghostscript configuration.  Under MS Windows, the "mswinpr2" device
+  (see doc/Devices.htm) outputs to MS Windows printer drivers, which could
+  be useful.
+** Add statistics of won/lost games/matches to the player records. (gary)
 ** Make sure the Nackgammon option works properly: record when loading/saving,
   make sure that InitBoard during analysis gets it right, etc.  Similarly
   for Egyptian and Jacoby.

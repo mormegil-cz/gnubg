@@ -210,8 +210,8 @@ ShowRollout ( rolloutcontext *prc ) {
             _("Lookahead variance reduction is enabled.") :
             _("Lookahead variance reduction is disabled.") );
   outputl ( prc->fRotate ? 
-            _("Rotating of first two rolls is enabled.") :
-            _("Rotating of first two rolls is disabled.") );
+            _("Quasi-random dice are enabled.") :
+            _("Quasi-random dice are disabled.") );
   outputl ( prc->fCubeful ?
             _("Cubeful rollout.") :
             _("Cubeless rollout.") );

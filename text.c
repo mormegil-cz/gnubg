@@ -196,9 +196,6 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
   sprintf ( pc = strchr ( sz, 0 ),
             prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );
 
-  if ( prc->fRotate )
-    strcat ( sz, _(", with rotate rolls") );
-
   strcat ( sz, "\n" );
   
   if ( szIndent && *szIndent )
@@ -214,6 +211,7 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
   sprintf ( pc = strchr ( sz, 0 ),
             ", seed %d using %s\n",
             prc->nSeed,
+	    prc->fRotate ? _("quasi-random dice") :
             gettext ( aszRNG[ prc->rngRollout ] ) );
 
   for ( i = 0; i < 1 + ! fIdentical; i++ ) {

@@ -25,6 +25,7 @@
 #include <alloca.h>
 #endif
 #include <errno.h>
+#include <isaac.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,16 +47,55 @@
 static void
 initRolloutstat ( rolloutstat *prs );
 
-static int QuasiRandomDice( int iTurn, int iGame, int cGames,
+/* Quasi-random permutation array: the first index is the "generation" of the
+   permutation (0 permutes each set of 36 rolls, 1 permutes those sets of 36
+   into 1296, etc.); the second is the roll within the game (limited to 128,
+   so we use pseudo-random dice after that); the last is the permutation
+   itself.  6 generations are enough for 36^6 > 2^31 trials. */
+static unsigned char aaanPermutation[ 6 ][ 128 ][ 36 ];
+static int nPermutationSeed = -1;
+
+static void QuasiRandomSeed( int n ) {
+
+    int i, j, k, r, t;
+    randctx rc;
+    
+    if( nPermutationSeed == n )
+	return;
+
+    for( i = 0; i < RANDSIZ; i++ )
+	rc.randrsl[ i ] = n;
+
+    irandinit( &rc, TRUE );
+    
+    for( i = 0; i < 6; i++ )
+	for( j = i /* no need for permutations below the diagonal */; j < 128;
+	     j++ ) {
+	    for( k = 0; k < 36; k++ )
+		aaanPermutation[ i ][ j ][ k ] = k;
+	    for( k = 0; k < 35; k++ ) {
+		r = irand( &rc ) % ( 36 - k );
+		t = aaanPermutation[ i ][ j ][ k + r ];
+		aaanPermutation[ i ][ j ][ k + r ] =
+		    aaanPermutation[ i ][ j ][ k ];
+		aaanPermutation[ i ][ j ][ k ] = t;
+	    }
+	}
+
+    nPermutationSeed = n;
+}
+
+static int RolloutDice( int iTurn, int iGame, int cGames,
                             int fInitial,
                             int anDice[ 2 ],
                             const rng rngx,
                             const int fRotate ) {
 
   if ( fInitial ) {
-
     /* rollout of initial position: no doubles allowed */
 
+      /* FIXME implement proper quasi-random dice for initial positions */
+      
     if( fRotate && !iTurn && !( cGames % 30 ) ) {
       anDice[ 1 ] = ( ( iGame / 5 ) % 6 ) + 1;
       anDice[ 0 ] = ( iGame % 5 ) + 1;
@@ -95,33 +135,21 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
 
       return 0;
     }
+  } else
+      if( fRotate ) {
+	  int i, /* the "generation" of the permutation */
+	      j, /* the number we're permuting */
+	      k; /* 36**i */
+	  
+	  for( i = 0, j = 0, k = 1; i < 6 && i <= iTurn; i++, k *= 36 )
+	      j = aaanPermutation[ i ][ iTurn ][ ( iGame / k + j ) % 36 ];
 
-  }
-  else {
+	  anDice[ 0 ] = j / 6 + 1;
+	  anDice[ 1 ] = j % 6 + 1;
 
-    /* normal rollout: doubles allow on first roll */
-
-    if( fRotate && !iTurn && !( cGames % 36 ) ) {
-      anDice[ 0 ] = ( iGame % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 6 ) % 6 ) + 1;
-      return 0;
-    } else if( fRotate && iTurn == 1 && !( cGames % 1296 ) ) {
-      anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
-      return 0;
-    } else if( fRotate && iTurn == 2 && !( cGames % 46656 ) ) {
-      anDice[ 0 ] = ( ( iGame / 1296 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 7776 ) % 6 ) + 1;
-      return 0;
-    } else if( fRotate && iTurn == 3 && !( cGames % 1679616 ) ) {
-      anDice[ 0 ] = ( ( iGame / 46656 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 279936 ) % 6 ) + 1;
-      return 0;
-    } else
-      return RollDice( anDice, rngx );
-
-  }
-
+	  return 0;
+      } else 
+	  return RollDice( anDice, rngx );
 }
 
 /* Upon return, anBoard contains the board position after making the best
@@ -186,7 +214,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 
   while( ( !nTruncate || iTurn < nTruncate ) &&
 	 ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
-    if( QuasiRandomDice( iTurn, iGame, cGames, FALSE, 
+    if( RolloutDice( iTurn, iGame, cGames, FALSE, 
                          anDice, RNG_MERSENNE, TRUE ) < 0 )
 	    return -1;
 	
@@ -449,7 +477,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
     /* Chequer play */
 
-    if( QuasiRandomDice( iTurn, iGame, cGames, prc->fInitial, anDice,
+    if( RolloutDice( iTurn, iGame, cGames, prc->fInitial, anDice,
                          prc->rngRollout, prc->fRotate ) < 0 )
       return -1;
 
@@ -861,6 +889,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   if( fInvert )
       SwapSides( anBoardOrig );
 
+  if( prc->fRotate )
+      QuasiRandomSeed( rcRollout.nSeed );
   
   for( i = 0; i < cGames; i++ ) {
       if( prc->rngRollout != RNG_MANUAL )

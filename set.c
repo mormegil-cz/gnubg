@@ -1602,9 +1602,9 @@ CommandSetRolloutRotate ( char *sz ) {
 
   int f = prcSet->fRotate;
 
-  SetToggle ( "rollout rotate", &f, sz,
-              _("Use rotation for the first rolls"),
-              _("Do not use rotation for the first rolls") );
+  SetToggle ( "rollout quasirandom", &f, sz,
+              _("Use quasi-random dice in rollouts"),
+              _("Do not use quasi-random dice in rollouts") );
 
   prcSet->fRotate = f;
 

@@ -1,3 +1,11 @@
+Tue Nov 26 11:09:52 2002  Gary Wong  <gtw@gnu.org>
+
+	* rollout.c (RolloutDice): Implement quasi-random dice using
+	pseudorandom permutations (rather than simple rotation).
+	
+	* gnubg.c: Add "set rollout quasirandom" as a synonym for "set
+	rollout rotate".
+
 Tue Nov 26 12:22:30 2002 GMT jsegrave <jsegrave@jes2.demon.nl>
 
 	* text.c - check fDoTruncate in reporting rollout results
