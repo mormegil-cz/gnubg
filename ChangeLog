@@ -1,3 +1,14 @@
+Sun Jun  8 21:41:09 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Fix bug: gnubg crashes when saving or analysing a match
+	where the manual dice dialog was cancelled on the first move of 
+	the match.
+        (reported by Michael Depreli)
+
+        * play.c (NewGame): initialise plGame and plLastMove to
+        avoid crashes.
+	* play.c (ApplyGameOver): pass correct game.
+
 Sun Jun  8 21:43:40 2003  Joern Thyssen  <jth@gnubg.org>
 
         Fix bug: analysis on 0-ply does not stop when interrupted.

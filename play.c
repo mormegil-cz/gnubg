@@ -167,7 +167,7 @@ static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
     SwapSides( pms->anBoard );    
 }
 
-static void ApplyGameOver( matchstate *pms ) {
+static void ApplyGameOver( matchstate *pms, list *plGame ) {
 
     movegameinfo *pmgi = plGame->plNext->p;
 
@@ -259,7 +259,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	pmgi->fWinner = !pmr->d.fPlayer;
 	pmgi->fResigned = FALSE;
 	
-	ApplyGameOver( pms );
+	ApplyGameOver( pms, plGame );
 	break;
 
     case MOVE_NORMAL:
@@ -284,7 +284,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	    pmgi->nPoints = pms->nCube * n;
 	    pmgi->fWinner = pmr->n.fPlayer;
 	    pmgi->fResigned = FALSE;
-	    ApplyGameOver( pms );
+	    ApplyGameOver( pms, plGame );
 	}
 	
 	break;
@@ -295,7 +295,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	pmgi->fWinner = !pmr->r.fPlayer;
 	pmgi->fResigned = TRUE;
 	
-	ApplyGameOver( pms );
+	ApplyGameOver( pms, plGame );
 	break;
 	
     case MOVE_SETBOARD:
@@ -609,6 +609,7 @@ static int NewGame( void ) {
 
     moverecord *pmr;
     int fError;
+    list *pl;
     
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
@@ -665,7 +666,10 @@ static int NewGame( void ) {
 	free( plGame );
 	ListDelete( lMatch.plPrev );
 
-        plLastMove = NULL;
+        for ( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext )
+          plGame = pl->p;
+
+        plLastMove = plGame->plPrev;
 
 	return -1;
     }
