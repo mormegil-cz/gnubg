@@ -133,10 +133,11 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, int points[2][25])
 			PipCount(points, anPip);
 
 			diff = anPip[0] - anPip[1];
-			if (diff != 0)
-    			pc = g_strdup_printf("%c%d", (diff > 0) ? '+' : '-', abs(anPip[0] - anPip[1]));
+			if (diff == 0)
+    			pc = g_strdup_printf(_("equal"));
 			else
-    			pc = g_strdup_printf("%d", abs(anPip[0] - anPip[1]));
+    			pc = g_strdup_printf("%d %s", abs(anPip[0] - anPip[1]),
+    				(diff > 0) ? _("ahead") : _("behind"));
 
 			gtk_clist_set_text(GTK_CLIST(pwTheoryList), 0, 1, pc);
 
