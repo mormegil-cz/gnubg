@@ -893,12 +893,12 @@ static void CreateAnnotationWindow( void ) {
     gtk_container_add( GTK_CONTAINER( pwAnnotation ),
 		       pwPaned = gtk_vpaned_new() );
     
-    gtk_paned_add1( GTK_PANED( pwPaned ),
-		    pwAnalysis = gtk_label_new( NULL ) );
+    gtk_paned_pack1( GTK_PANED( pwPaned ),
+		     pwAnalysis = gtk_label_new( NULL ), TRUE, FALSE );
     
-    gtk_paned_add2( GTK_PANED( pwPaned ),
-                    pHbox = gtk_hbox_new(FALSE, 0));
-
+    gtk_paned_pack2( GTK_PANED( pwPaned ),
+		     pHbox = gtk_hbox_new( FALSE, 0 ), FALSE, TRUE );
+    
     pwCommentary = gtk_text_new( NULL, NULL ) ;
 
     gtk_text_set_word_wrap( GTK_TEXT( pwCommentary ), TRUE );
@@ -1499,7 +1499,7 @@ static void SetAnnotation( moverecord *pmr ) {
     if( !pwAnalysis )
 	pwAnalysis = gtk_label_new( "No analysis available." );
     
-    gtk_paned_add1( GTK_PANED( pwParent ), pwAnalysis );
+    gtk_paned_pack1( GTK_PANED( pwParent ), pwAnalysis, TRUE, FALSE );
     gtk_widget_show_all( pwAnalysis );
 }
 
