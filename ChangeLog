@@ -1,3 +1,11 @@
+Sun Nov 30 09:10:46 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (HintCube): improve logic for determining whether a move
+	has been made: (a) by having moved something in the GUI (old logic)
+        (b) by going back in the match and doing a hint on an already
+	stored move
+	(suggested by Michael Depreli)
+
 Sun Nov 30 08:47:01 2003  Joern Thyssen  <jth@gnubg.org>
 
 	New command "clear hint" to allow CLI users to force

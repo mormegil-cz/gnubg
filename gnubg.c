@@ -3963,6 +3963,7 @@ HintChequer( char *sz ) {
   int n = ParseNumber ( &sz );
 #if USE_GTK
   int anMove[ 8 ];
+  moverecord *pmr;
 #endif
   unsigned char auch[ 10 ];
   int fHasMoved;
@@ -3973,18 +3974,34 @@ HintChequer( char *sz ) {
 
   GetMatchStateCubeInfo( &ci, &ms );
 
-#if USE_GTK
-  if ( fX ) {
-    fHasMoved = GTKGetMove ( anMove );
-    if ( fHasMoved )
-      MoveKey ( ms.anBoard, anMove, auch );
-  }
-  else
-    fHasMoved = FALSE;
-#else
+  /* 
+   * Find out if a move has been made:
+   * (a) by having moved something in the GUI
+   * (b) by going back in the match and doing a hint on an already
+   *     stored move
+   *
+   */
+     
   fHasMoved = FALSE;
+
+#if USE_GTK
+
+  if ( fX && GTKGetMove( anMove ) ) {
+    /* we have a legal move in the GUI */
+    /* Note that we override the move from the movelist */
+    MoveKey ( ms.anBoard, anMove, auch );
+    fHasMoved = TRUE;
+  }
 #endif /* ! USE_GTK */
 
+  if ( !fHasMoved && plLastMove && ( pmr = plLastMove->plNext->p ) && 
+       pmr->mt == MOVE_NORMAL ) {
+    /* we have an old stored move */
+    memcpy( anMove, pmr->n.anMove, sizeof anMove );
+    MoveKey( ms.anBoard, anMove, auch );
+    fHasMoved = TRUE;
+  }
+  
   if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
 
     ProgressStart( _("Considering move...") );
