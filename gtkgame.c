@@ -8705,7 +8705,7 @@ static void RecordErase( GtkWidget *pw, recordwindowinfo *prwi ) {
     char sz[ 64 ];
     
     gtk_clist_get_text( GTK_CLIST( prwi->pwList ), prwi->nRow, 0, &pch );
-    sprintf( sz, "record erase %s", pch );
+    sprintf( sz, "record erase \"%s\"", pch );
     UserCommand( sz );
     gtk_clist_remove( GTK_CLIST( prwi->pwList ), prwi->nRow );
 }

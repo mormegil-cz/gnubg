@@ -1,3 +1,8 @@
+Sat Jan 11 17:03:37 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (RecordErase): Quote player name parameter.  (Reported by
+	Nardy Pillards.)
+
 Sat Jan 11 11:29:01 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktexi.c, gtkmovefilter.c, import.c, show.c, gtkgame.c, eval.c:
@@ -20,7 +25,7 @@ Fri Jan 10 19:48:24 2003  Joern Thyssen  <jth@gnubg.org>
 
 Fri Jan 10 19:42:38 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtkgame.c (EvalCHanged): fix bug when comparing to
+	* gtkgame.c (EvalChanged): fix bug when comparing to
 	predefined settings.
 	(reported by Scott Steiner)
 
