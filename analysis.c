@@ -499,8 +499,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 		    pmr->n.iMove = cAnalysisMoves - 1;
 		}
 	      
-		realloc( pmr->n.ml.amMoves,
-			 cAnalysisMoves * sizeof( move ) );
+                pmr->n.ml.amMoves = (move *)
+                  realloc( pmr->n.ml.amMoves,
+                           cAnalysisMoves * sizeof( move ) );
 		pmr->n.ml.cMoves = cAnalysisMoves;
 	    }
 

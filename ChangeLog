@@ -1,7 +1,12 @@
+Thu May 30 12:36:27 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (AnalyzeMove): must use pointer returned from
+	realloc. Bug reported and solved by Jim Segrave.
+
 Wed May 29 22:12:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
-	* gtkgame.c (EvalWidget): move "No 1-ply pruning" from "reduced evaluations"
-	to "search space".
+	* gtkgame.c (EvalWidget): move "No 1-ply pruning" from 
+	"reduced evaluations" to "search space".
 
 	* eval.c: add a new prefined setting plus an additional two predefined
 	search spaces.

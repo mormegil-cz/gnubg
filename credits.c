@@ -36,6 +36,7 @@ char *aszCredits[] = {
     "Sam Pottle",
     "Jared Riley",
     "Oliver Riordan",
+    "Jim Segrave",
     "Ian Shaw",
     "Brian Sheppard",
     "Peter Sochovsky",

@@ -48,6 +48,7 @@ Petri Pitkänen
 Sam Pottle
 Jared Riley
 Oliver Riordan
+Jim Segrave
 Ian Shaw
 Peter Sochovsky
 Maik Stiebler
