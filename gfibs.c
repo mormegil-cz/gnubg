@@ -22,6 +22,7 @@
 #include "matchequity.h"
 #include "buffer.h"
 #include "eval.h"
+#include "drawboard.h"
 
 typedef struct _fibs {
     buffer b;
@@ -84,7 +85,10 @@ static int FibsReadNotify( event *pev, fibs *pf ) {
 	   but it's too hard to do elsewhere. */
 
 	if( !strcmp( sz, "login: " ) ) {
-	    BufferWritef( &pf->b, "connect %s chinchilla\r\n", szBot );
+	  /*
+	  	    BufferWritef( &pf->b, "connect %s chinchilla\r\n", szBot );
+	  */
+	    BufferWritef( &pf->b, "connect %s mgnutestop\r\n", szBot );
 	    BufferConsume( &pf->b, 7 );
 	    
 	    return 0;
@@ -464,10 +468,8 @@ static int FibsParse( fibs *pf, char *sz ) {
                 szTemp ) == 3 ) {
 	if( ( n>=3 ) && ( n <= 17 ) ) {
 	    if( fJoining )
-	      /*
-	      // if( fJoining && ( strcmp( "dirac", szName ) == 0 ) )
-	      */
-	      BufferWritef( &pf->b, "invite %s\r\n", szName );
+	      if( fJoining && ( strcmp( "dirac", szName ) == 0 ) )
+		BufferWritef( &pf->b, "invite %s\r\n", szName );
 
 	    return 0;
 	} else{
@@ -741,6 +743,70 @@ static int FibsParse( fibs *pf, char *sz ) {
 		 ci.arGammonPrice[ 0 ], ci.arGammonPrice[ 1 ],
 		 ci.arGammonPrice[ 2 ], ci.arGammonPrice[ 3 ] );
 
+	/* draw board */
+
+	{
+
+	  char szBoard[ 2048 ];
+	  char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
+	  char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+
+
+	  sprintf( szPlayer0, "O: %s", gd.szNameOpponent ); 
+	  sprintf( szPlayer1, "X: %s", szBot ); 
+	  apch[ 0 ] = szPlayer0;	  
+	  apch[ 6 ] = szPlayer1;
+
+	  if( gd.fDoubled ) {
+	    apch[ gd.fTurn == gd.fColour ? 5 : 1 ] = szCube;
+	    sprintf( szCube, "Cube offered at %d", nCube << 1 );
+	  } else {
+
+	    if ( gd.fTurn == gd.fColour ) {
+	      apch [ 5 ] = sz;
+	      if ( gd.anDice[ 0 ] )
+		sprintf( sz, "Rolled %d%d", gd.anDice[ 0 ], gd.anDice[ 1 ] );
+	      else 
+		strcpy( sz, "On roll" );
+	    } else {
+	      apch [ 1 ] = sz;
+	      if ( gd.anDiceOpponent[ 0 ] )
+		sprintf( sz, "Rolled %d%d", 
+			 gd.anDiceOpponent[ 0 ], gd.anDiceOpponent[ 1 ] );
+	      else 
+		strcpy( sz, "On roll" );
+	    }
+
+	    
+	    if( fCubeOwner < 0 ) {
+	      apch[ 3 ] = szCube;
+		
+	      sprintf( szCube, "(Cube: %d)", nCube );
+	    } else {
+	      int cch = ( fCubeOwner) ? strlen ( szBot) : strlen( szName );
+	    
+	      if( cch > 20 )
+		cch = 20;
+		
+	      sprintf( szCube, "%1s: %*s (Cube: %d)", 
+		       ( ! fCubeOwner ) ? "O" : "X", cch,
+		       fCubeOwner ? szBot : szName, nCube );
+
+	      apch[ fCubeOwner ? 6 : 0 ] = szCube;
+	    }
+	  }
+
+	  if( fResigned )
+	    sprintf( strchr( sz, 0 ), ", resigns %i points",
+		     fResigned );
+	
+	  puts( DrawBoard( szBoard, anBoard, 
+			   gd.fTurn == gd.fColour, apch ) );
+
+
+
+	}
+
 
 	if ( fResigned ) {
 
@@ -752,7 +818,7 @@ static int FibsParse( fibs *pf, char *sz ) {
           gettimeofday ( &tv0, NULL );
 
 	  EvaluatePositionCubeful ( anBoard, arDouble, &ci,
-				    &ecDouble, ecDouble.nPlies );
+				    &ecDouble, ecDouble.nPlies, EVAL_BOTH );
 
           gettimeofday ( &tv1, NULL );
           rTime = 1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
@@ -806,7 +872,7 @@ static int FibsParse( fibs *pf, char *sz ) {
           gettimeofday ( &tv0, NULL );
 
 	  EvaluatePositionCubeful( anBoard, arDouble, &ci,
-				   &ecDouble, ecDouble.nPlies );
+				   &ecDouble, ecDouble.nPlies, EVAL_BOTH );
 
           gettimeofday ( &tv1, NULL );
           rTime = 1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
@@ -875,33 +941,77 @@ static int FibsParse( fibs *pf, char *sz ) {
 	  if ( fUseCube ) {
 
             struct timeval tv0, tv1;
-            float rTime;
+            float rTime, rDoublePoint, arOutput[ NUM_OUTPUTS ];
+	    int fOptionalRedouble;
+	    evalcontext ecDH = { 1, 8, 0.16 };
 
 	    /* I'm allowed to double */
 
-            gettimeofday ( &tv0, NULL );
+	    fOptionalRedouble =
+	      ( ( nMatchTo - gd.nScore <= gd.nCube ) &&
+		( nMatchTo - gd.nScoreOpponent > nCube ) );
 
-	    EvaluatePositionCubeful( anBoard, arDouble, &ci,
-				     &ecDouble, ecDouble.nPlies );
+	    if ( ! fOptionalRedouble ) {
 
-            gettimeofday ( &tv1, NULL );
-          rTime = 1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
-                  (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec );
-	  esCubeful.nCalls++;
-	  esCubeful.rTotal += rTime;
-          printf ("Time for EvaluatePositionCubeful: %10.6f (%10.6f) seconds\n",
-		rTime, esCubeful.rTotal / esCubeful.nCalls );
+	      if( EvaluatePosition( anBoard, arOutput, 
+				    &ci, &ecDH ) )
+		return -1;
 
-	    printf ("no double:    mwc %6.3f\n", arDouble[ 1 ] );
-	    printf ("double, take: mwc %6.3f\n", arDouble[ 2 ] );
-	    printf ("double, pass: mwc %6.3f\n", arDouble[ 3 ] );
+	      printf ( "My winning chance: %7.4f %7.4f %7.4f %7.4f %7.4f\n", 
+		       arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
+		       arOutput[ 3 ], arOutput[ 4 ] );
 
-	    if ( ( arDouble[ 2 ] >= arDouble[ 1 ] ) &&
-		 ( arDouble[ 3 ] >= arDouble[ 1 ] ) ) {
-	      FibsCommand ( pf, "double" );
-	      fIDoubled = 1;
+	      GetDoublePointDeadCube ( arOutput, anScore, 
+				       nMatchTo, &ci, &rDoublePoint );
+	      
+	      printf ( "double point: %7.4f\n", rDoublePoint );
+
 	    }
-	    else
+	      
+	    if ( fOptionalRedouble || ( arOutput[ 0 ] > rDoublePoint ) ) {
+
+	      int fEvalFlag;
+
+	      gettimeofday ( &tv0, NULL );
+
+	      /* If it's too good we know opponent is going
+		 to pass, so don't calculate DOUBLE branch
+		 in EvalCubeful */
+
+	      if ( Utility ( arOutput, &ci ) > 1.05 )
+		fEvalFlag = EVAL_NODOUBLE;
+	      else
+		fEvalFlag = EVAL_BOTH;
+
+	      printf ("fEvalFlag = %1i\n", fEvalFlag );
+
+	      gettimeofday ( &tv0, NULL );
+	    
+	      EvaluatePositionCubeful( anBoard, arDouble, &ci,
+				       &ecDouble, ecDouble.nPlies,
+				       fEvalFlag);
+
+	      gettimeofday ( &tv1, NULL );
+	      rTime = 1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		(1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec );
+	      esCubeful.nCalls++;
+	      esCubeful.rTotal += rTime;
+	      printf ("Time for EvaluatePositionCubeful: %10.6f (%10.6f) seconds\n",
+		      rTime, esCubeful.rTotal / esCubeful.nCalls );
+	      
+	      printf ("no double:    mwc %6.3f\n", arDouble[ 1 ] );
+	      printf ("double, take: mwc %6.3f\n", arDouble[ 2 ] );
+	      printf ("double, pass: mwc %6.3f\n", arDouble[ 3 ] );
+	      
+	      if ( ( arDouble[ 2 ] >= arDouble[ 1 ] ) &&
+		   ( arDouble[ 3 ] >= arDouble[ 1 ] ) ) {
+		FibsCommand ( pf, "double" );
+		fIDoubled = 1;
+	      }
+	      else
+		FibsCommand ( pf, "roll" );
+
+	    } else
 	      FibsCommand ( pf, "roll" );
 
 
