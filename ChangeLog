@@ -1,3 +1,9 @@
+Sun Sep 22 20:45:02 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtktheory.c (TheoryUpdated): show live cube take point
+	if redouble possible. Don't show anything if current cube
+	is dead. (reported by Ian Shaw).
+
 Thu Sep 19 21:46:10 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (GTKRecordShow): Sort the player record list.

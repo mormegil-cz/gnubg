@@ -323,13 +323,9 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
       if ( afAutoRedouble[ i ] )
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
                              _("Opp. redoubles") );
-      else if ( ! afDead[ i ] )
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             _("Live cube") );
       else
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             "" );
-        
+                             _("Live cube") );
 
       for ( j = 0; j < 4; j++ ) {
 
@@ -343,6 +339,11 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
           int f = ( ( ! k ) || ( ! afDead[ i ] ) ) &&
             ! ( k && afAutoRedouble[ i ] && ! j ) &&
             ! ( k && afAutoRedouble[ i ] && j == 3 );
+
+          f = f || ( k && afAutoRedouble[ !i ] && ! j );
+
+          f = f && 
+            ( ! ci.nMatchTo || ( ci.anScore[ i ] + ci.nCube < ci.nMatchTo ) );
 
           if ( f ) {
             sprintf ( sz, "%7.3f%%", 100.0f * aaarPointsMatch[ i ][ j ][ k ] );
