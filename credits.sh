@@ -24,7 +24,7 @@ Erik Barfoed
 Ron Barry
 Steve Baedke
 Olivier Baur
-Stefan van der Berg
+Stefan van den Berg
 Holger Bochnig
 Chuck Bower
 Nick Bratby
