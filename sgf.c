@@ -40,16 +40,47 @@ static void ErrorHandler( char *sz, int fParseError ) {
     }
 }
 
-static void FreeCollection( list *pl ) {
+static void FreeList( list *pl, int nLevel ) {
+    /* Levels are:
+     *  0 - GameTreeSeq
+     *  1 - GameTree
+     *  2 - Sequence
+     *  3 - Node
+     *  4 - Property
+     */
 
-    /* FIXME what a mess to clean up... */
+    if( nLevel == 1 ) {
+	FreeList( pl->plNext->p, 2 ); /* initial sequence */
+	ListDelete( pl->plNext );
+	nLevel = 0; /* remainder of list is more GameTreeSeqs */
+    }
+    
+    while( pl->plNext != pl ) {
+	if( nLevel == 3 ) {
+	    FreeList( ( (property *) pl->plNext->p )->pl, 4 );
+	    free( pl->plNext->p );
+	} else if( nLevel == 4 )
+	    free( pl->plNext->p );
+	else
+	    FreeList( pl->plNext->p, nLevel + 1 );
+	
+	ListDelete( pl->plNext );
+    }
+
+    if( nLevel != 4 )
+	free( pl );
+}
+
+static void FreeGameTreeSeq( list *pl ) {
+
+    FreeList( pl, 0 );
 }
 
 static list *LoadCollection( char *sz ) {
 
     list *plCollection, *pl, *plRoot, *plProp;
     FILE *pf;
-    int c;
+    int fBackgammon;
     property *pp;
     
     fError = FALSE;
@@ -74,36 +105,39 @@ static list *LoadCollection( char *sz ) {
 
     /* Traverse collection, looking for backgammon games. */
     if( plCollection ) {
-	c = 0;
-
-	/* FIXME aaaargh!!! */
-	for( pl = plCollection->plNext; pl != plCollection; pl = pl->plNext )
-	    if( ( plRoot = ( (list *) pl->p )->plNext->p ) ) {
-		for( plProp = plRoot->plNext; plProp != plRoot;
-		     plProp = plProp->plNext ) {
-		    pp = plProp->p;
-
-putchar( pp->ach[ 0 ] );
-putchar( pp->ach[ 1 ] );
-putchar( '\n' );
-		    
-		    if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'M' &&
-			pp->pl->plNext->p && atoi( (char *)
-						   pp->pl->plNext->p ) == 6 ) {
-			c++;
-			break;
-		    }
+	pl = plCollection->plNext;
+	while( pl != plCollection ) {
+	    plRoot = ( (list *) ( (list *) pl->p )->plNext->p )->plNext->p;
+	    fBackgammon = FALSE;
+	    for( plProp = plRoot->plNext; plProp != plRoot;
+		 plProp = plProp->plNext ) {
+		pp = plProp->p;
+		
+		if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'M' &&
+		    pp->pl->plNext->p && atoi( (char *)
+					       pp->pl->plNext->p ) == 6 ) {
+		    fBackgammon = TRUE;
+		    break;
 		}
+	    }
+
+	    pl = pl->plNext;
+		
+	    if( !fBackgammon ) {
+		FreeList( pl->plPrev->p, 1 );
+		ListDelete( pl->plPrev );
+	    }
 	}
 	    
-	if( !c ) {
+	if( ListEmpty( plCollection ) ) {
+	    fError = FALSE; /* we always want to see this one */
 	    ErrorHandler( "warning: no backgammon games in SGF file", TRUE );
-	    FreeCollection( plCollection );
+	    free( plCollection );
 	    return NULL;
 	}
     }
     
-    return pl;
+    return plCollection;
 }
 
 extern void CommandLoadGame( char *sz ) {
@@ -122,7 +156,7 @@ extern void CommandLoadGame( char *sz ) {
 
 	/* FIXME parse file */
 
-	FreeCollection( pl );
+	FreeGameTreeSeq( pl );
     }
 }
 
@@ -142,7 +176,7 @@ extern void CommandLoadMatch( char *sz ) {
 
 	/* FIXME parse file */
 
-	FreeCollection( pl );
+	FreeGameTreeSeq( pl );
     }
 }
 
@@ -214,9 +248,10 @@ static void SaveGame( FILE *pf, list *plGame ) {
     putc( ']', pf );
 
     if( pmr->g.fCrawford ) {
-	fputs( "RU[Crawford]", pf );
+	fputs( "RU[Crawford", pf );
 	if( pmr->g.fCrawfordGame )
-	    fputs( "[CrawfordGame]", pf );
+	    fputs( ":CrawfordGame", pf );
+	putc( ']', pf );
     } else if( pmr->g.fJacoby )
 	fputs( "RU[Jacoby]", pf );
 

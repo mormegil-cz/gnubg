@@ -45,6 +45,7 @@ static int error( char *s ) {
 #define YY_FATAL_ERROR(m) error(m)
 %}
 
+%option 8bit
 %option nodefault
 %option ecs
 %option fast
@@ -60,7 +61,6 @@ static int error( char *s ) {
 %x value
 
 %%
-
 [[:space:]]+		/* ignore */
 "("|")"|";"		return *yytext;
 [[:lower:]]*[[:upper:]][[:lower:]]*[[:upper:]]?[[:lower:]]* {
@@ -86,10 +86,11 @@ static int error( char *s ) {
 "["			BEGIN(value); return '[';
 .			{ error( "illegal character in SGF file" ); }
 
+<value>\0		/* ignore -- we want value strings null-terminated */
 <value>"\\]"		{ sgflval.pch = strdup( "]" ); return VALUETEXT; }
 <value>"\\\n"		/* ignore */
 <value>"]"		BEGIN(INITIAL); return ']';
-<value>([^]\\])+	{ sgflval.pch = strdup( yytext ); return VALUETEXT; }
+<value>[^]\0\\]+	{ sgflval.pch = strdup( yytext ); return VALUETEXT; }
 <value>\\.?		{ sgflval.pch = strdup( yytext ); return VALUETEXT; }
 
 %%

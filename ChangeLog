@@ -1,3 +1,9 @@
+Tue Oct 17 11:11:24 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (main): Better support for `-w' option.
+
+	* sgf.c: More work parsing SGF input.
+
 Tue Oct 17 16:04:32 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* eval.c (EvaluatePositionCubeful1): Don't calculate cubeful
