@@ -633,6 +633,7 @@ static int NewGame( void ) {
     
  reroll:
     RollDice( ms.anDice, rngCurrent );
+    playSound ( SOUND_ROLL );
 
     if( fInterrupt ) {
 	PopMoveRecord( plGame->plNext );
@@ -1088,6 +1089,8 @@ extern int ComputerTurn( void ) {
 	  if( RollDice ( ms.anDice, rngCurrent ) < 0 )
 	      return -1;
 	  
+	  playSound ( SOUND_ROLL );
+	  
 	  ResetDelayTimer(); /* Start the timer again -- otherwise the time
 				we spent contemplating the cube could replace
 				the delay. */
@@ -1145,7 +1148,8 @@ extern int ComputerTurn( void ) {
       }
 #endif
 
-      /* FIXME: if dance: playSound ( SOUND_BOT_DANCE ); */
+      if( pmn->anMove[ 0 ] < 0 )
+	  playSound ( SOUND_BOT_DANCE );
       
       AddMoveRecord( pmn );      
       
@@ -1172,6 +1176,8 @@ extern int ComputerTurn( void ) {
       if( RollDice( ms.anDice, rngCurrent ) < 0 )
 	    return -1;
       
+      playSound ( SOUND_ROLL );
+      
       if( fDisplay )
         ShowBoard();
     }
@@ -1193,6 +1199,9 @@ extern int ComputerTurn( void ) {
     
     FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, pmn->anMove );
     
+    if( pmn->anMove[ 0 ] < 0 )
+	playSound ( SOUND_BOT_DANCE );
+      
     AddMoveRecord( pmn );
     return 0;
 
@@ -1222,6 +1231,8 @@ extern int ComputerTurn( void ) {
 	  if( RollDice( ms.anDice, rngCurrent ) < 0 )
 	      return -1;
 	      
+	  playSound ( SOUND_ROLL );
+	  
 	  if( fDisplay )
 	      ShowBoard();
       }
@@ -1301,6 +1312,8 @@ extern int ComputerTurn( void ) {
 	      if( RollDice( ms.anDice, rngCurrent ) < 0 )
 		  return -1;
 	      
+	      playSound ( SOUND_ROLL );
+	      
 	      if( fDisplay )
 		  ShowBoard();
 
@@ -1342,6 +1355,9 @@ extern int ComputerTurn( void ) {
 		      pmn->anMove[ i << 1 ] = -1;
 		      pmn->anMove[ ( i << 1 ) + 1 ] = -1;
 		  }
+      
+	  if( pmn->anMove[ 0 ] < 0 )
+	      playSound ( SOUND_BOT_DANCE );
       
 	  AddMoveRecord( pmn );
 	  return 0;
@@ -1472,6 +1488,7 @@ extern int NextTurn( int fPlayNext ) {
 	if( fLastMove ) {
 	    GTKDisallowStdin();
 	    board_animate( BOARD( pwBoard ), anLastMove, fLastPlayer );
+	    playSound ( SOUND_MOVE );
 	    GTKAllowStdin();
 	    fLastMove = FALSE;
 	}

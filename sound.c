@@ -25,17 +25,24 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <assert.h>
+#if HAVE_SYS_AUDIOIO_H
+#include <sys/audioio.h>
+#endif
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 #include <signal.h>
+#if HAVE_SYS_SOUNDCARD_H
+#include <sys/soundcard.h>
+#endif
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <assert.h>
+#include <unistd.h>
 
 #ifdef HAVE_ESD
 #include <esd.h>
@@ -53,10 +60,16 @@
 #include "windows.h" /* for PlaySound */
 #endif
 
-#include "glib.h"
+/* #include "glib.h"  - is this really necessary? */
 
+#include "backgammon.h"
+#include "eval.h"
 #include "i18n.h"
 #include "sound.h"
+
+#if !defined(SIGIO) && defined(SIGPOLL)
+#define SIGIO SIGPOLL /* The System V equivalent */
+#endif
 
 char *aszSoundDesc[ NUM_SOUNDS ] = {
   N_("Starting GNU Backgammon"),
@@ -98,24 +111,24 @@ char *aszSoundCommand[ NUM_SOUNDS ] = {
 
 char aszSound[ NUM_SOUNDS ][ 80 ] = {
   /* start and exit */
-  "woohoo.wav",
-  "t2-hasta_la_vista.wav",
+  "sounds/fanfare.wav",
+  "sounds/haere-ra.wav",
   /* commands */
-  "idiot.wav",
+  "sounds/drop.wav",
   "sounds/double.wav",
   "sounds/drop.wav",
   "sounds/move.wav",
   "sounds/double.wav",
-  "terminater.wav",
+  "sounds/resign.wav",
   "sounds/roll.wav",
   "sounds/take.wav",
   /* events */
-  "haha.wav",
-  "haha.wav",
-  "haha.wav",
-  "bulwnk50.wav",
-  "bulwnk50.wav",
-  "bulwnk50.wav"
+  "sounds/dance.wav",
+  "sounds/gameover.wav",
+  "sounds/matchover.wav",
+  "sounds/dance.wav",
+  "sounds/gameover.wav",
+  "sounds/matchover.wav"
 };
 
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";
@@ -161,22 +174,59 @@ static int hSound = -1; /* file descriptor of dsp/audio device */
 static char *pSound, *pSoundCurrent;
 static size_t cbSound; /* bytes remaining */
 
-extern void SoundSIGIO( void ) {
+#ifdef ITIMER_REAL
+static int fHandler;
+#endif
+
+extern RETSIGTYPE SoundSIGIO( int idSignal ) {
 
     int cch;
+    sigset_t ss;
 
+    sigemptyset( &ss );
+    sigaddset( &ss, SIGIO );
+    sigaddset( &ss, SIGALRM );
+    sigprocmask( SIG_BLOCK, &ss, NULL );
+  
     if( cbSound ) {
-	if( ( ( cch = write( hSound, pSoundCurrent, cbSound ) ) < 0 ) ||
-	    !( cbSound -= cch ) ) {
+	cch = write( hSound, pSoundCurrent, cbSound );
+	if( cch < 0 && errno == EAGAIN )
+	    return;
+	else if( cch < 0 || !( cbSound -= cch ) ) {
 	    cbSound = 0;
+#ifdef SNDCTL_DSP_POST
+	    ioctl( hSound, SNDCTL_DSP_POST, 0 );
+#endif
+#ifndef SNDCTL_DSP_GETODELAY
 	    close( hSound );
 	    hSound = -1;
+#endif
 	    /* We would like to free( pSound ) here, but it's not safe to
 	       call free() from a signal handler, so we leave that job to
 	       somebody else. */
 	} else
 	    pSoundCurrent += cch;
     }
+
+#ifdef SNDCTL_DSP_GETODELAY
+    if( hSound >= 0 && !cbSound ) {
+	/* we're waiting for the buffer to drain */
+	int n;
+	
+	ioctl( hSound, SNDCTL_DSP_GETODELAY, &n );
+	if( !n ) {
+	    close( hSound );
+	    hSound = -1;
+	}
+    }
+#endif
+	    
+#ifdef ITIMER_REAL
+    if( idSignal == SIGALRM && hSound < 0 ) {
+	struct itimerval itv = {}; /* disable timer */
+	setitimer( ITIMER_REAL, &itv, NULL );
+    }
+#endif
 }
 
 #endif
@@ -210,27 +260,73 @@ static int check_dev(char *dev) {
 
 }
 
+static void MonoToStereo( int nBitDepth, int fSigned, unsigned char **pbuf,
+			  int *pcb ) {
+
+    unsigned char *bufNew = malloc( *pcb << 1 );
+    unsigned char *pDest = bufNew, *pSrc = *pbuf;
+    int i;
+
+    nBitDepth /= 8;
+    
+    for( i = 0; i < *pcb / nBitDepth; i++ ) {
+	memcpy( pDest, pSrc, nBitDepth );
+	pDest += nBitDepth;
+	memcpy( pDest, pSrc, nBitDepth );
+	pDest += nBitDepth;
+	pSrc += nBitDepth;
+    }
+    
+    free( *pbuf );
+    *pbuf = bufNew;
+    *pcb <<= 1;
+}
+
+static void StereoToMono( int nBitDepth, int fSigned, unsigned char **pbuf,
+			  int *pcb ) {
+
+    unsigned char *pDest = *pbuf, *pSrc = *pbuf;
+    int i;
+
+    nBitDepth /= 8;
+    
+    for( i = 0; i < *pcb / nBitDepth; i++ ) {
+	/* FIXME this code merely keeps the left channel and discards the
+	   right... it would be better to mix them, but then we have to
+	   worry about endianness and signedness -- yuck. */
+	memcpy( pDest, pSrc, nBitDepth );
+	pDest += nBitDepth;
+	pSrc += nBitDepth << 1;
+    }
+    
+    *pbuf = realloc( *pbuf, *pcb >>= 1 );
+}
 
 static void play_audio_file(const char *file, const char *device) {
 
     /* here we can assume that we can write to /dev/audio */
-    char *buf, tmp[ 256 ];
+    unsigned char *buf, tmp[ 256 ];
     struct stat info;
-    int fd, n, cb, nSampleRate, nChannels;
-  
+    int fd, n, cb, nSampleRate, nChannels, nBitDepth, fBigEndian;
+    int fSigned; /* 0 = unsigned, 1 = signed, -1 = mu-law */
+    int fMonoToStereo = FALSE, fStereoToMono = FALSE;
+    
 #ifdef SIGIO
     sigset_t ss, ssOld;
 
     sigemptyset( &ss );
     sigaddset( &ss, SIGIO );
+    sigaddset( &ss, SIGALRM );
     sigprocmask( SIG_BLOCK, &ss, &ssOld );
   
     if( pSound ) {
 	free( pSound );
+	pSound = NULL;
 	cbSound = 0;
 	if( hSound >= 0 ) {
-	    /* FIXME it's a bit silly to close this when we're going to reopen
-	       it in a moment */
+#ifdef SNDCTL_DSP_RESET
+	    ioctl( hSound, SNDCTL_DSP_RESET, 0 );
+#endif
 	    close( hSound );
 	    hSound = -1;
 	}
@@ -263,7 +359,43 @@ static void play_audio_file(const char *file, const char *device) {
 	nSampleRate = ( tmp[ 16 ] << 24 ) | ( tmp[ 17 ] << 16 ) |
 	    ( tmp[ 18 ] << 8 ) | tmp[ 19 ];
 	nChannels = tmp[ 23 ];
-	/* FIXME get encoding */
+	fBigEndian = TRUE;
+	switch( tmp[ 15 ] ) {
+	case 1:
+	    /* 8 bit mu-law */
+	    nBitDepth = 8;
+	    fSigned = -1;
+	    break;
+	    
+	case 2:
+	    /* 8 bit linear */
+	    nBitDepth = 8;
+	    fSigned = 1;
+	    break;
+	    
+	case 3:
+	    /* 16 bit linear */
+	    nBitDepth = 16;
+	    fSigned = 1;
+	    break;
+	    
+	case 4:
+	    /* 24 bit linear */
+	    nBitDepth = 24;
+	    fSigned = 1;
+	    break;
+	    
+	case 5:
+	    /* 32 bit linear */
+	    nBitDepth = 32;
+	    fSigned = 1;
+	    break;
+	    
+	default:
+	    /* unknown encoding */
+	    close( fd );
+	    return;
+	}
 
 	if( nOffset != 24 )
 	    lseek( fd, nOffset, SEEK_SET );
@@ -275,7 +407,7 @@ static void play_audio_file(const char *file, const char *device) {
 	    return;
 	}
     } else if( !memcmp( tmp, "RIFF", 4 ) ) {
-	unsigned long nLength;
+	long nLength;
 	
 	/* .wav format */
 	if( read( fd, tmp, 8 ) < 8 ) {
@@ -290,7 +422,13 @@ static void play_audio_file(const char *file, const char *device) {
 	}
 
 	while( 1 ) {
-	    if( read( fd, tmp, 4 ) < 4 ) {
+	    if( read( fd, tmp, 8 ) < 8 ) {
+		close( fd );
+		return;
+	    }
+
+	    if( ( nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		  ( tmp[ 5 ] << 8 ) | tmp[ 4 ] ) < 0 ) {
 		close( fd );
 		return;
 	    }
@@ -298,16 +436,37 @@ static void play_audio_file(const char *file, const char *device) {
 	    if( !memcmp( tmp, "fmt ", 4 ) )
 		break;
 
-	    nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
-		( tmp[ 5 ] << 8 ) | tmp[ 4 ];
+	    lseek( fd, nLength, SEEK_CUR );
+	}
 
-	    lseek( fd, nOffset, SEEK_CUR );
+	if( read( fd, tmp, 16 ) < 16 ) {
+	    close( fd );
+	    return;
+	}
+
+	if( tmp[ 0 ] != 1 ) {
+	    /* unknown encoding */
+	    close( fd );
+	    return;
 	}
 	
-	/* FIXME read format chunk */
+	nSampleRate = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+	    ( tmp[ 5 ] << 8 ) | tmp[ 4 ];
+	nChannels = tmp[ 2 ];
+	nBitDepth = tmp[ 14 ];
+	fSigned = nBitDepth > 8;
+	fBigEndian = FALSE;
+	
+	lseek( fd, nLength - 16, SEEK_CUR );
 	
 	while( 1 ) {
-	    if( read( fd, tmp, 4 ) < 4 ) {
+	    if( read( fd, tmp, 8 ) < 8 ) {
+		close( fd );
+		return;
+	    }
+
+	    if( ( nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		  ( tmp[ 5 ] << 8 ) | tmp[ 4 ] ) < 0 ) {
 		close( fd );
 		return;
 	    }
@@ -315,13 +474,16 @@ static void play_audio_file(const char *file, const char *device) {
 	    if( !memcmp( tmp, "data", 4 ) )
 		break;
 
-	    nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
-		( tmp[ 5 ] << 8 ) | tmp[ 4 ];
-
-	    lseek( fd, nOffset, SEEK_CUR );
+	    lseek( fd, nLength, SEEK_CUR );
 	}
 	
-	/* FIXME read data chunk */
+	buf = malloc( cb = nLength );
+	cb = nLength;
+	if( ( cb = read( fd, buf, cb ) ) < 0 ) {
+	    free( buf );
+	    close( fd );
+	    return;
+	}
     } else {
 	/* unknown format -- ignore */
 	close( fd );
@@ -333,11 +495,62 @@ static void play_audio_file(const char *file, const char *device) {
 	return;
     }
 
-    /* FIXME match output device to file encoding, convert if necessary */
+#if defined( SNDCTL_DSP_SETFMT )
+    {
+	int n, nDesired;
+	
+	if( fSigned < 0 )
+	    n = AFMT_MU_LAW;
+	else if( fSigned ) {
+	    if( nBitDepth == 8 )
+		n = AFMT_S8;
+	    else if( fBigEndian )
+		n = AFMT_S16_BE;
+	    else
+		n = AFMT_S16_LE;
+	} else {
+	    if( nBitDepth == 8 )
+		n = AFMT_U8;
+	    else if( fBigEndian )
+		n = AFMT_U16_BE;
+	    else
+		n = AFMT_U16_LE;
+	}
+
+	ioctl( fd, SNDCTL_DSP_SETFMT, &n );
+	/* FIXME check for re-encoding */
+	nDesired = nChannels;
+	ioctl( fd, SNDCTL_DSP_CHANNELS, &nChannels );
+	fMonoToStereo = nChannels == 2 && nDesired == 1;
+	fStereoToMono = nChannels == 1 && nDesired == 2;
+	ioctl( fd, SNDCTL_DSP_SPEED, &nSampleRate );
+	/* FIXME check for resampling */
+    }
+#elif defined( AUDIO_SETINFO )
+    {
+	struct audio_info_t ait;
+
+	AUDIO_INITINFO( &ait );
+	ait.play.sample_rate = nSampleRate;
+	ait.play.channels = nChannels;
+	ait.play.precision = nBitDepth;
+	ait.play.encoding = fSigned < 0 ? AUDIO_ENCODING_ULAW :
+	    AUDIO_ENCODING_LINEAR;
+	ioctl( fd, AUDIO_SETINFO, &ait );
+	/* FIXME check for re-encoding or resampling */
+    }
+#endif
+
+    if( fMonoToStereo )
+	MonoToStereo( nBitDepth, fSigned, &buf, &cb );
     
+    if( fStereoToMono )
+	StereoToMono( nBitDepth, fSigned, &buf, &cb );
+
 #ifdef SIGIO
     sigemptyset( &ss );
     sigaddset( &ss, SIGIO );
+    sigaddset( &ss, SIGALRM );
     sigprocmask( SIG_BLOCK, &ss, &ssOld );
     
     pSound = pSoundCurrent = buf;
@@ -357,10 +570,28 @@ static void play_audio_file(const char *file, const char *device) {
     ioctl( fd, I_SETSIG, S_OUTPUT );
 #endif
     
-    sigprocmask( SIG_SETMASK, &ssOld, NULL );
+#ifdef ITIMER_REAL
+    {
+	/* Unfortunately we can't rely on a SIGIO being generated for the
+	   audio device on all systems (e.g. GNU/Linux does not), so we
+	   also add an interval timer to make sure we keep the buffer full. */
+	struct itimerval itv;
 
-    /* the sound will be played asynchronously, and the buffer will be
-       freed later */
+	if( !fHandler ) {
+	    fHandler = TRUE;
+	    PortableSignal( SIGALRM, SoundSIGIO, NULL, TRUE );
+	}
+	itv.it_interval.tv_sec = 0;
+	itv.it_interval.tv_usec = 20000; /* 50Hz */
+	itv.it_value.tv_sec = 0;
+	itv.it_value.tv_usec = 20000; /* 50Hz */
+	setitimer( ITIMER_REAL, &itv, NULL );
+    }
+#endif
+
+    SoundSIGIO( -1 );
+    
+    sigprocmask( SIG_SETMASK, &ssOld, NULL );
 #else
     write(fd, buf, cb);
     free(buf);
@@ -635,7 +866,9 @@ play_file_child(const char *filename) {
 	char *pch;
 	if( ( pch = can_play_audio() ) ) {
 	    play_audio_file(filename, pch);
+#ifndef SIGIO
 	    _exit(0);
+#endif
 	}
     }
 #else
@@ -712,16 +945,44 @@ play_file(const char *filename) {
 extern void
 playSound ( const gnubgsound gs ) {
 
-  if ( ! fSound )
-    /* no sounds for this user */
-    return;
+    char *szFile;
+    
+    if ( ! fSound )
+	/* no sounds for this user */
+	return;
+    
+    if ( ! *aszSound[ gs ] )
+	/* no sound defined for event */
+	return;
 
-  if ( ! *aszSound[ gs ] )
-    /* no sound defined for event */
-    return;
-
-  play_file ( aszSound[ gs ] );
-
+    szFile = PathSearch( aszSound[ gs ], szDataDirectory );
+    play_file( szFile );
+    free( szFile );
 }
 
 
+extern void SoundWait( void ) {
+
+    switch( ssSoundSystem ) {
+#ifdef SIGIO
+    case SOUND_SYSTEM_NORMAL:
+    {
+	sigset_t ss, ssOld;
+
+	sigemptyset( &ss );
+	sigaddset( &ss, SIGIO );
+	sigaddset( &ss, SIGALRM );
+	sigprocmask( SIG_BLOCK, &ss, &ssOld );
+	
+	while( hSound >= 0 )
+	    sigsuspend( &ssOld );
+	
+	sigprocmask( SIG_SETMASK, &ss, &ssOld );
+	
+	return;
+    }
+#endif
+    default:
+	return;
+    }
+}

@@ -1,6 +1,9 @@
-pkgdata_DATA = double.wav drop.wav move.wav roll.wav take.wav
+soundsdir = $(pkgdatadir)/sounds
+sounds_DATA = dance.wav double.wav drop.wav fanfare.wav gameover.wav \
+	haere-ra.wav matchover.wav move.wav resign.wav roll.wav take.wav
 
-EXTRA_DIST = gnubg.orc
+EXTRA_DIST = gnubg.orc music.orc
 
-%.wav: %.sco gnubg.orc
-	$(CSOUND) gnubg.orc $< -W -o $@
+%.wav: %.sco music.orc gnubg.orc
+	if [ $< = haere-ra.sco -o $< = fanfare.sco ]; then orc=music.orc; \
+	else orc=gnubg.orc; fi; $(CSOUND) $$orc $< -W -o $@

@@ -5978,6 +5978,8 @@ static int ShowManualSection( char *szTitle, char *szNode ) {
     gtk_texi_load( GTK_TEXI( pw ), pch );
     free( pch );
     gtk_texi_render_node( GTK_TEXI( pw ), szNode );
+
+    return 0;
 }
 #endif
 

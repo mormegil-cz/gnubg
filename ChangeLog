@@ -1,3 +1,10 @@
+Fri Sep 13 18:30:06 2002  Gary Wong  <gtw@gnu.org>
+
+	* play.c (ComputerTurn): Add a few more sounds.
+
+	* sound.c (play_audio_file): Play output to /dev/dsp or /dev/audio
+	asynchronously, if possible.  (This is now the default sound system.)
+
 Wed Sep 11 22:42:04 2002  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (real_main): Add option `--quiet' (-q).
