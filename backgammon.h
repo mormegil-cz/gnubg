@@ -650,6 +650,7 @@ extern void CommandAccept( char * ),
     CommandShowTurn( char * ),
     CommandShowVersion( char * ),
     CommandShowWarranty( char * ),
+    CommandSwapPlayers ( char * ),
     CommandTake( char * ),
     CommandTrainTD( char * );
 #endif

@@ -908,6 +908,9 @@ command cER = {
     { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
       "not have", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
+}, acSwap[] = {
+    { "players", CommandSwapPlayers, "Swap players", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acTrain[] = {
     { "database", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL, NULL },
@@ -971,6 +974,7 @@ command cER = {
     { "save", NULL, "Write data to a file", NULL, acSave },
     { "set", NULL, "Modify program parameters", NULL, acSet },
     { "show", NULL, "View program parameters", NULL, acShow },
+    { "swap", NULL, "Swap players", NULL, acSwap },
     { "take", CommandTake, "Agree to an offered double", NULL, NULL },
     { "train", NULL, "Update gnubg's weights from training data", NULL,
       acTrain },
@@ -5077,5 +5081,126 @@ extern void CommandMWC2Eq ( char *sz ) {
 
 }
 
+static void 
+swapGame ( list *plGame ) {
+
+  list *pl;
+  moverecord *pmr;
+  int n;
+
+  for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+      
+    pmr = pl->p;
+
+    switch ( pmr->mt ) {
+    case MOVE_GAMEINFO:
+
+      /* swap score */
+
+      n = pmr->g.anScore[ 0 ];
+      pmr->g.anScore[ 0 ] = pmr->g.anScore[ 1 ];
+      pmr->g.anScore[ 1 ] = n;
+
+      /* swap winner */
+
+      if ( pmr->g.fWinner > -1 )
+        pmr->g.fWinner = ! pmr->g.fWinner;
+
+      /* swap statcontext */
+
+      /* recalculate statcontext later ... */
+
+      break;
+
+    case MOVE_DOUBLE:
+    case MOVE_TAKE:
+    case MOVE_DROP:
+
+      pmr->d.fPlayer = ! pmr->d.fPlayer;
+      break;
+
+    case MOVE_NORMAL:
+
+      pmr->d.fPlayer = ! pmr->d.fPlayer;
+      break;
 
 
+    case MOVE_RESIGN:
+      
+      pmr->r.fPlayer = ! pmr->r.fPlayer;
+      break;
+
+    case MOVE_SETBOARD:
+
+      /*no op */
+      break;
+
+    case MOVE_SETDICE:
+      
+      pmr->sd.fPlayer = ! pmr->sd.fPlayer;
+      break;
+
+    case MOVE_SETCUBEVAL:
+
+      /* no-op */
+      break;
+
+    case MOVE_SETCUBEPOS:
+
+      if ( pmr->scp.fCubeOwner > -1 )
+        pmr->scp.fCubeOwner = ! pmr->scp.fCubeOwner;
+      break;
+
+    }
+
+  }
+
+}
+
+
+
+extern void CommandSwapPlayers ( char *sz ) {
+
+  list *pl;
+  char *pc;
+  int n;
+
+  /* swap individual move records */
+
+  for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
+
+    swapGame ( pl->p );
+
+  }
+
+  /* swap player names */
+
+  pc = strdup ( ap[ 0 ].szName );
+  strcpy ( ap[ 0 ].szName, ap[ 1 ].szName );
+  strcpy ( ap[ 1 ].szName, pc );
+  free ( pc );
+
+  /* swap current matchstate */
+
+  if ( ms.fTurn > -1 )
+    ms.fTurn = ! ms.fTurn;
+  if ( ms.fMove > -1 )
+    ms.fMove = ! ms.fMove;
+  if ( ms.fCubeOwner > -1 )
+    ms.fCubeOwner = ! ms.fCubeOwner;
+  n = ms.anScore[ 0 ];
+  ms.anScore[ 1 ] = ms.anScore[ 0 ];
+  ms.anScore[ 0 ] = n;
+  SwapSides ( ms.anBoard );
+
+
+#if USE_GTK
+  if ( fX ) {
+    GTKRegenerateGames();
+    GTKUpdateAnnotations();
+  }
+#endif
+
+  ShowBoard();
+
+}
