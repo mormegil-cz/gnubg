@@ -5,18 +5,19 @@
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
 ** Add partial searching.
+** Merge Joseph Heled's faster evaluation code.
 
 * Game play:
 ** Add cube handling for computer player.
 ** Add option for cubeless play.
-** Finish matches and money sessions.
+** Finish matches and money sessions.  (Should be done now I think -- anything
+  else I've forgotten?)
 
 * Command interface:
 ** Check "show" exists for every "set"!
 ** Allow setting long seeds for dice generators that support them.  Support
   /dev/random for seed generation where available.
 ** Add more completions to help and readline.
-** Add "set autobearoff".
 ** Allow user to vary parameters for rollouts.
 ** Allow timeouts for "train" (and others?).
 ** Load, save and analyse games and matches.
@@ -47,6 +48,8 @@
   computer move, unable to move, auto bearoff, etc.)
 ** Perform better move checking in the X window; provide visual feedback
   so the user can tell whether the move is partial, complete, or illegal.
+** Add a board edit mode.  What would be the best semantics for the
+  interface?
 ** Add Gnome support.
   Better to wait until Gnome is rock solid, I think.
 *** Add silly bells and whistles.
@@ -61,7 +64,6 @@
 ** Rolling out a perfect evaluation gives SD NaN, rather than 0.
 ** Evaluations bearing off against contact and in back games are poor.
 ** Equity SD should be SD(sum(probabilities)), not sum(SD(probabilities)).
-** When more than 5 men are on a point, they can get drawn badly.
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
 ** The board window, and NeuralNetCreate() and NeuralNetResize, use
@@ -78,5 +80,5 @@
   Motif.
 ** Complete the Texinfo manual, which is barely started.  Perhaps for now,
   only things that are unlikely to change should be documented.
-** When getpwnam() or equivalent is available, set the player name to the
-  user's name.
+** When $USER, $LOGNAME, getlogin(), getpwnam() or equivalent is available,
+  set the player name to the user's name.  (Maybe this isn't a good idea.)
