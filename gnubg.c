@@ -131,10 +131,10 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoRoll = TRUE, cGames = 0, fDoubled = FALSE, cAutoDoubles = 0,
     fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = TRUE,
     nRollouts = 36, nRolloutTruncate = 7, fNextTurn = FALSE,
-    fConfirm = TRUE, fShowProgress, fMove, fCubeOwner, fJacoby = TRUE,
+    fConfirm = TRUE, fShowProgress, fMove, fCubeOwner = -1, fJacoby = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
     fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE;
+    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed;
 float rAlpha = 0.1, rAnneal = 0.3, rThreshold = 0.1;
 
 gamestate gs = GAME_NONE;
@@ -173,7 +173,6 @@ static char szDICE[] = "<die> <die>",
     szPROMPT[] = "<prompt>",
     szRATE[] = "<rate>",
     szSCORE[] = "<score>",
-    szSEED[] = "<seed>",
     szSIZE[] = "<size>",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>";
@@ -304,8 +303,8 @@ command acDatabase[] = {
 }, acSetRollout[] = {
     { "evaluation", CommandSetRolloutEvaluation, "Specify parameters "
       "for evaluation during rollouts", NULL, acSetEvaluation },
-    { "seed", CommandNotImplemented, "Specify the base pseudo-random seed "
-      "to use for rollouts", szSEED, NULL },
+    { "seed", CommandSetRolloutSeed, "Specify the base pseudo-random seed "
+      "to use for rollouts", szOPTSEED, NULL },
     { "trials", CommandSetRolloutTrials, "Control how many rollouts to "
       "perform", szTRIALS, NULL },
     { "truncation", CommandSetRolloutTruncation, "End rollouts at a "
@@ -367,7 +366,7 @@ command acDatabase[] = {
     { "rollout", NULL, "Control rollout parameters", NULL, acSetRollout },
     { "score", CommandSetScore, "Set the match or session score ",
       szSCORE, NULL },
-    { "seed", CommandSetSeed, "Set the dice generator seed", szSEED, NULL },
+    { "seed", CommandSetSeed, "Set the dice generator seed", szOPTSEED, NULL },
     { "training", NULL, "Control training parameters", NULL, acSetTraining },
     { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER, NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -969,6 +968,10 @@ extern void HandleCommand( char *sz, command *ac ) {
 	       a good idea to prohibit the execution of the ":" gnubg
 	       command from Guile... that's far too much reentrancy for
 	       good taste! */
+#if USE_GTK
+	    if( fX )
+		GTKDisallowStdin();
+#endif
 	    if( sz[ 1 ] ) {
 		/* Expression specified -- evaluate it */
 		SCM sResult;
@@ -989,6 +992,10 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    } else
 		/* No command -- start a Scheme shell */
 		scm_eval_0str( "(top-repl)" );
+#if USE_GTK
+	    if( fX )
+		GTKAllowStdin();
+#endif
 #else
 	    outputl( "This installation of GNU Backgammon was compiled "
 		     "without Guile support." );
@@ -2074,13 +2081,24 @@ extern void CommandNewWeights( char *sz ) {
     outputf( "A new neural net with %d hidden nodes has been created.\n", n );
 }
 
+static void SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
+
+    fprintf( pf, "%s plies %d\n"
+	     "%s candidates %d\n"
+	     "%s tolerance %.3f\n"
+	     "%s reduced %d\n"
+	     "%s cubeful %s\n",
+	     sz, pec->nPlies, sz, pec->nSearchCandidates,
+	     sz, pec->rSearchTolerance, sz, pec->nReduced,
+	     sz, pec->fCubeful ? "on" : "off" );
+}
+
 extern void CommandSaveSettings( char *szParam ) {
 
     char sz[ PATH_MAX ], *pch = getenv( "HOME" );
-#if USE_GTK
-    char szColours[ 256 ];
-#endif
+    char szTemp[ 256 ];
     FILE *pf;
+    int i, cCache;
     
     sprintf( sz, "%s/.gnubgautorc", pch ? pch : "" ); /* FIXME accept param */
 
@@ -2105,38 +2123,128 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "\n"
 	     "set automatic bearoff %s\n"
 	     "set automatic crawford %s\n"
+	     "set automatic doubles %d\n"
 	     "set automatic game %s\n"
 	     "set automatic move %s\n"
 	     "set automatic roll %s\n",
 	     fAutoBearoff ? "on" : "off",
 	     fAutoCrawford ? "on" : "off",
+	     cAutoDoubles,
 	     fAutoGame ? "on" : "off",
 	     fAutoMove ? "on" : "off",
 	     fAutoRoll ? "on" : "off" );
-    /* FIXME save cache settings */
+
+    EvalCacheStats( NULL, &cCache, NULL, NULL );
+    fprintf( pf, "set cache %d\n", cCache );
+    
 #if USE_GTK
-    fputs( BoardPreferencesCommand( pwBoard, szColours ), pf );
+    fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
     fputc( '\n', pf );
 #endif
     fprintf( pf, "set confirm %s\n"
+	     "set cube use %s\n"
 #if USE_GUI
 	     "set delay %d\n"
 #endif
 	     "set display %s\n",
-	     fConfirm ? "on" : "off",
+	     fConfirm ? "on" : "off", fCubeUse ? "on" : "off",
 #if USE_GUI
 	     nDelay,
 #endif
 	     fDisplay ? "on" : "off" );
-    /* FIXME save eval settings */
-    fprintf( pf, "set jacoby %s\n"
-	     "set nackgammon %s\n",
-	     fJacoby ? "on" : "off",
-	     fNackgammon ? "on" : "off" );
-    /* FIXME save player settings */
-    fprintf( pf, "set prompt %s\n", szPrompt );
-    /* FIXME save rollout settings */
 
+    SaveEvalSettings( pf, "set evaluation", &ecEval );
+
+    fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
+
+    switch( metCurrent ) {
+    case MET_ZADEH:
+	fputs( "set matchequitytable zadeh\n", pf );
+	break;
+    case MET_SNOWIE:
+	fputs( "set matchequitytable snowie\n", pf );
+	break;
+    case MET_WOOLSEY:
+	fputs( "set matchequitytable woolsey\n", pf );
+	break;
+    case MET_JACOBS:
+	fputs( "set matchequitytable jacobs\n", pf );
+	break;
+    }
+    
+    fprintf( pf, "set nackgammon %s\n", fNackgammon ? "on" : "off" );
+
+    fprintf( pf, "set output matchpc %s\n"
+	     "set output mwc %s\n"
+	     "set output rawboard %s\n"
+	     "set output winpc %s\n",
+	     fOutputMatchPC ? "on" : "off",
+	     fOutputMWC ? "on" : "off",
+	     fOutputRawboard ? "on" : "off",
+	     fOutputWinPC ? "on" : "off" );
+    
+    for( i = 0; i < 2; i++ ) {
+	fprintf( pf, "set player %d name %s\n", i, ap[ i ].szName );
+	
+	switch( ap[ i ].pt ) {
+	case PLAYER_GNU:
+	    fprintf( pf, "set player %d gnubg\n", i );
+	    sprintf( szTemp, "set player %d evaluation", i );
+	    SaveEvalSettings( pf, szTemp, &ap[ i ].ec );
+	    break;
+	    
+	case PLAYER_HUMAN:
+	    fprintf( pf, "set player %d human\n", i );
+	    break;
+	    
+	case PLAYER_PUBEVAL:
+	    fprintf( pf, "set player %d pubeval\n", i );
+	    break;
+	    
+	case PLAYER_EXTERNAL:
+	    /* don't save external players */
+	    break;
+	}
+    }
+
+    fprintf( pf, "set prompt %s\n", szPrompt );
+
+    switch( rngCurrent ) {
+    case RNG_ANSI:
+	fputs( "set rng ansi\n", pf );
+	break;
+    case RNG_BSD:
+	fputs( "set rng bsd\n", pf );
+	break;
+    case RNG_ISAAC:
+	fputs( "set rng isaac\n", pf );
+	break;
+    case RNG_MANUAL:
+	fputs( "set rng manual\n", pf );
+	break;
+    case RNG_MD5:
+	fputs( "set rng md5\n", pf );
+	break;
+    case RNG_MERSENNE:
+	fputs( "set rng mersenne\n", pf );
+	break;
+    case RNG_USER:
+	/* don't save user RNGs */
+	break;
+    }
+    
+    fprintf( pf, "set rollout trials %d\n"
+	     "set rollout truncation %d\n"
+	     "set rollout varredn %s\n",
+	     nRollouts, nRolloutTruncate, fVarRedn ? "on" : "off" );
+
+    SaveEvalSettings( pf, "set rollout evaluation", &ecRollout );
+
+    fprintf( pf, "set training alpha %f\n"
+	     "set training anneal %f\n"
+	     "set training threshold %f\n",
+	     rAlpha, rAnneal, rThreshold );
+    
     fclose( pf );
     
     if( errno )
@@ -3032,7 +3140,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	      "details." );
     
     InitRNG( NULL, TRUE );
-
+    InitRNG( &nRolloutSeed, FALSE );
+    nRolloutSeed ^= 0x792A584B;
+    
     InitMatchEquity ( metCurrent );
     
     if( EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
