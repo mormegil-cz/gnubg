@@ -1445,7 +1445,7 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 
     case MOVE_SETDICE:
 	fPlayer = pmr->sd.fPlayer;
-	sprintf( pch = sz, "Rolled %d%d", pmr->sd.anDice[ 0 ],
+	sprintf( pch = sz, _("Rolled %d%d"), pmr->sd.anDice[ 0 ],
 		 pmr->sd.anDice[ 1 ] );
 	break;
 

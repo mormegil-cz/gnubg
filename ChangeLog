@@ -1,3 +1,8 @@
+Mon Oct 13 12:40:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkboard.c: Add _() translations to a few strings.
+	(reported by Hlynur Sigurgíslason)
+
 Sun Oct 12 15:13:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* sgf.c (RestoreGame): setting fTurn = fMove = -1 results in the board

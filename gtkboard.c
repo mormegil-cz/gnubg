@@ -587,16 +587,16 @@ extern void board_set_scores(Board *board,int s0, int s1)
     BoardData *bd = (BoardData *) board->board_data;
     if ( bd->match_to ) {
 	if ( (bd->score_opponent=s0) >= bd->match_to )
-	    sprintf( buf, "%d (won match)", bd->score_opponent );
+	    sprintf( buf, _("%d (won match)"), bd->score_opponent );
 	else
-	    sprintf( buf, "%d (%d-away)", bd->score_opponent,
+	    sprintf( buf, _("%d (%d-away)"), bd->score_opponent,
 		bd->match_to - bd->score_opponent );
 	gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
 
 	if ( (bd->score=s1) >= bd->match_to )
-	    sprintf( buf, "%d (won match)", bd->score );
+	    sprintf( buf, _("%d (won match)"), bd->score );
 	else
-	    sprintf( buf, "%d (%d-away)", bd->score,
+	    sprintf( buf, _("%d (%d-away)"), bd->score,
 		bd->match_to - bd->score );
 	gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
     } else {
@@ -2122,16 +2122,16 @@ score_changed( GtkAdjustment *adj, BoardData *bd ) {
   if ( nMatchLen ) {
 
     if ( bd->score_opponent >= nMatchLen )
-      sprintf( buf, "%d (won match)", bd->score_opponent );
+      sprintf( buf, _("%d (won match)"), bd->score_opponent );
     else
-      sprintf( buf, "%d (%d-away)", bd->score_opponent,
+      sprintf( buf, _("%d (%d-away)"), bd->score_opponent,
                nMatchLen - bd->score_opponent );
     gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
 
     if ( bd->score >= nMatchLen )
-      sprintf( buf, "%d (won match)", bd->score );
+      sprintf( buf, _("%d (won match)"), bd->score );
     else
-      sprintf( buf, "%d (%d-away)", bd->score,
+      sprintf( buf, _("%d (%d-away)"), bd->score,
                nMatchLen - bd->score );
     gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
 
