@@ -2797,7 +2797,7 @@ void MakeShadowModel(BoardData* bd)
 		float lip = radius - discradius;
 		float height = PIECE_DEPTH - 2 * lip;
 
-		addCylinder(&bd->Occluders[OCC_PIECE], 0, 0, lip, PIECE_HOLE / 2.0f, height, rdAppearance.curveAccuracy);
+		addCylinder(&bd->Occluders[OCC_PIECE], 0, 0, lip, PIECE_HOLE / 2.0f - LIFT_OFF, height, rdAppearance.curveAccuracy);
 	}
 	for (i = OCC_PIECE; i < OCC_PIECE + 30; i++)
 	{

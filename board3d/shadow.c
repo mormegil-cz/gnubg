@@ -100,7 +100,7 @@ void draw_shadow_volume_to_stencil(BoardData* bd)
 	/* First clear the stencil buffer */
 	glClear(GL_STENCIL_BUFFER_BIT);
 
-	/* Disable colour buffer lighting and don't update depth buffer */
+	/* Disable drawing to colour buffer, lighting and don't update depth buffer */
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 	glDisable(GL_LIGHTING);
 	glDepthMask(GL_FALSE);
@@ -121,9 +121,9 @@ void draw_shadow_volume_to_stencil(BoardData* bd)
 		draw_shadow_volume_extruded_edges(&bd->Occluders[i], *bd->shadow_light_position, GL_QUADS);
 
 	/* Enable colour buffer, lighting and depth buffer */
-	glDepthMask(GL_TRUE);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glEnable(GL_LIGHTING);
+	glDepthMask(GL_TRUE);
 }
 
 void shadowDisplay(void (*drawScene)(BoardData*), BoardData* bd)

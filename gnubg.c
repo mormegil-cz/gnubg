@@ -3585,8 +3585,10 @@ extern void PromptForExit( void ) {
     }
 
 #if USE_BOARD3D
-	/* Stop any 3d animations */
-	StopIdle3d(bd);
+	if (rdAppearance.fDisplayType == DT_3D)
+	{	/* Stop any 3d animations */
+		StopIdle3d(bd);
+	}
 #endif
 
     playSound ( SOUND_EXIT );

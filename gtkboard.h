@@ -297,7 +297,7 @@ extern int InitGTK3d(int *argc, char ***argv);
 extern void SetupViewingVolume3d(BoardData *bd);
 extern void DisplayCorrectBoardType();
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
-extern void CreatePreviewBoard3d(BoardData* bd, GtkWidget* widget);
+extern void CreatePreviewBoard3d(BoardData* bd, GtkWidget** drawing_area);
 extern void RollDice3d(BoardData *bd);
 extern void AnimateMove3d(BoardData *bd);
 extern void ShowFlag3d(BoardData *bd);
@@ -312,6 +312,7 @@ extern void Tidy3dObjects(BoardData* bd);
 extern int TestPerformance3d(BoardData* bd);
 extern void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow);
 extern void CopySettings3d(BoardData* from, BoardData* to);
+extern void MakeCurrent3d(GtkWidget *widget);
 
 extern void PlaceMovingPieceRotation(BoardData* bd, int dest, int src);
 extern void SetMovingPieceRotation(BoardData* bd, int pt);

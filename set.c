@@ -709,8 +709,8 @@ extern void CommandSetAppearance( char *sz ) {
 	RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
 
 #if USE_GTK
-    if( fX )
-	BoardPreferencesDone( pwBoard );	    
+	if( fX )
+		BoardPreferencesDone( pwBoard );	    
 #endif
 }
 

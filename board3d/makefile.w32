@@ -4,8 +4,8 @@ LIBFLAGS=-mwindows
 #CFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
 CPPFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
 RM=del
-AR      = ar cr
-RANLIB  = ranlib
+AR=ar cr
+RANLIB=ranlib
 CC=gcc
 
 INCLUDE= \
@@ -18,7 +18,7 @@ INCLUDE= \
 	-I$(BASEDIR)/include/gtkglext-1.0 \
 	-I$(BASEDIR)/lib/gtkglext-1.0/include \
 	-I$(BASEDIR)/include/freetype2 \
-	-Ic:/ftp/FTGL/include \
+	-I$(BASEDIR)/FTGL/include \
 	-I$(GNUDIR) \
 	-I$(GNUDIR)/lib
 

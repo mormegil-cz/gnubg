@@ -66,7 +66,6 @@ typedef struct _renderdata {
 	displaytype fDisplayType;	/* 2d or 3d display */
 	int showShadows;	/* Show 3d shadows */
 	int shadowDarkness;	/* How dark are shadows */
-	int skin3d;	/* Test skin number */
 	int animateRoll;	/* Animate dice rolls */
 	int animateFlag;	/* Animate resignation flag */
 	int closeBoardOnExit;	/* Animate board close on quit */

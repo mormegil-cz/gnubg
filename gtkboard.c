@@ -2781,6 +2781,7 @@ extern void board_free_pixmaps( BoardData *bd ) {
 }
 
 #if USE_BOARD3D
+
 void DisplayCorrectBoardType()
 {
 	BoardData* bd = BOARD(pwBoard )->board_data;

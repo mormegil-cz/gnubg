@@ -1,11 +1,9 @@
+
 Todo
 ====
 
 Display settings
 ----------------
-* Remove rdAppearance from notebook pages - pass in correct ones
-	+ So settings saved when switching 3d<->2d
-
 * Add material settings to appearnce dialog (see selmat.c)
 	+ Save/restore in designs
 	+ Display texture preview in a small box/rectangle
@@ -15,6 +13,8 @@ Display settings
 + Move texture location from data directory to boards or boards/3d or boards/textures
 	+ Add them to cvs (as binary files)
 * Get all options working...
+* Remove rdAppearance from notebook pages - pass in correct ones
+	+ So settings saved when switching 3d<->2d
 + Remove testgtkboard.c file from lib build (and cvs)
 * Only enable 2d/3d skin options when selected
 * Move non-skin settings to new display option page
@@ -22,26 +22,20 @@ Display settings
 Bugs
 ====
 
-* Switch to 2d view - couple of gtk errors...
-* Switch to 2d and back to 3d, test performance -> lots of errors...
+* Gtk 1, change colour of design element but cancel colour dialog - change not removed until next screen update
+	+ Doesn't work in 2d or 3d - have I broken this?
+* Show a colour selection box in appearances, strange gtk (General delete case) error on settings exit
 
-* In 3d mode change settings - little pieces don't get invalidated
-	+ draw in BoardPreferencesDone() 3d bit
-
-* Show colour selection box in appearances, strange (gtk) error on settings exit
-	+ General delete case...?
+* Switch from 2d->3d, shadows on pages except design look wrong (stencil buffer/widget/gtk problem)
+	- ok when design page shown...
 
 Other things
 ============
 
 Add tooltips for new options
 
-Add gtk 1.3 option (via other gtk widget)
-	+ Check compiles on windows
-		* Check running on linux box with BOARD3D set
-	* Get preview working (list sharing with gtkglarea) too
 Add check for unaccellerated graphics under linux
-	+ use glX functions
+	+ use glX functions - isDirect()?
 
 ----------------------------------------------------------
 

@@ -253,7 +253,6 @@ void CopyTexture(BoardData* from, BoardData* to, Material* fromMat, Material* to
 		i++;
 
 	sprintf(textureFile, TEXTURE_PATH"%s", from->textureName[i]);
-
 	SetTexture(to, toMat, textureFile);
 }
 
