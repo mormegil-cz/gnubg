@@ -1,3 +1,4 @@
+b 0.005
 ; Finish move: pick up dice
 i 2 0.00 1 5000 4000 6000
 ; drop in cup

@@ -128,17 +128,20 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-pkgdata_DATA = double.wav drop.wav move.wav roll.wav take.wav
+soundsdir = $(pkgdatadir)/sounds
+sounds_DATA = dance.wav double.wav drop.wav fanfare.wav gameover.wav \
+	haere-ra.wav matchover.wav move.wav resign.wav roll.wav take.wav
 
-EXTRA_DIST = gnubg.orc
+
+EXTRA_DIST = gnubg.orc music.orc
 subdir = sounds
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 DIST_SOURCES =
-DATA = $(pkgdata_DATA)
+DATA = $(sounds_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in
+DIST_COMMON = ChangeLog Makefile.am Makefile.in
 all: all-am
 
 .SUFFIXES:
@@ -148,23 +151,23 @@ $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 uninstall-info-am:
-pkgdataDATA_INSTALL = $(INSTALL_DATA)
-install-pkgdataDATA: $(pkgdata_DATA)
+soundsDATA_INSTALL = $(INSTALL_DATA)
+install-soundsDATA: $(sounds_DATA)
 	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
+	$(mkinstalldirs) $(DESTDIR)$(soundsdir)
+	@list='$(sounds_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " $(pkgdataDATA_INSTALL) $$d$$p $(DESTDIR)$(pkgdatadir)/$$f"; \
-	  $(pkgdataDATA_INSTALL) $$d$$p $(DESTDIR)$(pkgdatadir)/$$f; \
+	  echo " $(soundsDATA_INSTALL) $$d$$p $(DESTDIR)$(soundsdir)/$$f"; \
+	  $(soundsDATA_INSTALL) $$d$$p $(DESTDIR)$(soundsdir)/$$f; \
 	done
 
-uninstall-pkgdataDATA:
+uninstall-soundsDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
+	@list='$(sounds_DATA)'; for p in $$list; do \
 	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " rm -f $(DESTDIR)$(pkgdatadir)/$$f"; \
-	  rm -f $(DESTDIR)$(pkgdatadir)/$$f; \
+	  echo " rm -f $(DESTDIR)$(soundsdir)/$$f"; \
+	  rm -f $(DESTDIR)$(soundsdir)/$$f; \
 	done
 tags: TAGS
 TAGS:
@@ -200,7 +203,7 @@ check: check-am
 all-am: Makefile $(DATA)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
+	$(mkinstalldirs) $(DESTDIR)$(soundsdir)
 
 install: install-am
 install-exec: install-exec-am
@@ -242,7 +245,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-pkgdataDATA
+install-data-am: install-soundsDATA
 
 install-exec-am:
 
@@ -260,20 +263,21 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-generic
 
-uninstall-am: uninstall-info-am uninstall-pkgdataDATA
+uninstall-am: uninstall-info-am uninstall-soundsDATA
 
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am install-man \
-	install-pkgdataDATA install-strip installcheck installcheck-am \
+	install-soundsDATA install-strip installcheck installcheck-am \
 	installdirs maintainer-clean maintainer-clean-generic \
 	mostlyclean mostlyclean-generic uninstall uninstall-am \
-	uninstall-info-am uninstall-pkgdataDATA
+	uninstall-info-am uninstall-soundsDATA
 
 
-%.wav: %.sco gnubg.orc
-	$(CSOUND) gnubg.orc $< -W -o $@
+%.wav: %.sco music.orc gnubg.orc
+	if [ $< = haere-ra.sco -o $< = fanfare.sco ]; then orc=music.orc; \
+	else orc=gnubg.orc; fi; $(CSOUND) $$orc $< -W -o $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

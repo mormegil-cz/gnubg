@@ -334,7 +334,7 @@ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 $(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/esd.m4 m4/gettext.m4 m4/gtk.m4
+$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/esd.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
