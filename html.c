@@ -59,6 +59,7 @@
 ".comment { background-color: #449911; width: 39.5em; padding: 0.5em } \n" \
 ".commentheader { background-color: #557711; font-weight: bold; text-align: center; width: 40em; padding: 0.25em } \n" \
 "td img {display: block;}\n" \
+".number { text-align: center; font-weight: bold; font-size: 60%% } \n" \
 "</style>\n" 
 
 #define FORMATHTMLPROB(f) \
@@ -734,6 +735,8 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
   /* bottom */
 
+  
+
   printImage ( pf, szImageDir, "b-indent", szExtension, "" );
   printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension,
                fTurn ?
@@ -815,6 +818,36 @@ printPointGNU ( FILE *pf, const char *szImageDir, const char *szExtension,
 }
 
 
+static void
+printNumbers ( FILE *pf, const int fTop ) {
+
+  int i;
+
+  if ( fTop ) {
+
+    fputs ( "<tr><td>&nbsp;</td>", pf );
+    for ( i = 13; i <= 18; i++ )
+      fprintf ( pf, "<td class=\"number\">%d</td>", i );
+    fputs ( "<td>&nbsp;</td>", pf );
+    for ( i = 19; i <= 24; i++ )
+      fprintf ( pf, "<td class=\"number\">%d</td>", i );
+    fputs ( "</tr>\n", pf );
+
+  }
+  else {
+
+    fputs ( "<tr><td>&nbsp;</td>", pf );
+    for ( i = 12; i >= 7; i-- )
+      fprintf ( pf, "<td class=\"number\">%d</td>", i );
+    fputs ( "<td>&nbsp;</td>", pf );
+    for ( i = 6; i >= 1; i-- )
+      fprintf ( pf, "<td class=\"number\">%d</td>", i );
+    fputs ( "</tr>\n", pf );
+
+  }
+
+}
+
 
 
 static void
@@ -845,6 +878,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<table cellpadding=\"0\" border=\"0\" cellspacing=\"0\""
           " style=\"margin: 0; padding: 0; border: 0\">\n", pf );
   fputs ( "<tr>", pf );
+
+  printNumbers ( pf, fTurn );
 
   fputs ( "<td colspan=\"15\">", pf );
   printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
@@ -1112,6 +1147,9 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
                "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" );
   fputs ( "</td>", pf );
+
+  printNumbers ( pf, ! fTurn );
+
   fputs ( "</tr>", pf );
 
   /* position ID */
