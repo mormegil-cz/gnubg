@@ -4604,6 +4604,9 @@ static void board_init( Board *board ) {
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
 
+#include "xpm/tb_roll.xpm"
+#include "xpm/tb_double.xpm"
+#include "xpm/tb_redouble.xpm"
 #include "xpm/tb_edit.xpm"
 #ifndef USE_GTK2
 #include "xpm/tb_no.xpm"
@@ -4746,26 +4749,28 @@ static void board_init( Board *board ) {
 
     /* roll button */
 
-    bd->roll = gtk_button_new_with_label( _("Roll") );
+    bd->roll = button_from_image( image_from_xpm_d ( tb_roll_xpm,
+						     bd->toolbar ) );
     gtk_signal_connect( GTK_OBJECT( bd->roll ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
     gtk_widget_set_sensitive ( GTK_WIDGET ( bd->roll ), FALSE );
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->roll,
-                                _("roll dice"),
+                                _("Roll dice"),
                                 _("private") );
 
     /* double button */
 
-    bd->doub = gtk_button_new_with_label( _("Double") );
+    bd->doub = button_from_image( image_from_xpm_d ( tb_double_xpm,
+						     bd->toolbar ) );
     gtk_signal_connect( GTK_OBJECT( bd->doub ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
     gtk_widget_set_sensitive ( GTK_WIDGET ( bd->doub ), FALSE );
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->doub,
-                                _("double"),
+                                _("Double"),
                                 _("private") );
 
     /* take button */
@@ -4816,7 +4821,8 @@ static void board_init( Board *board ) {
 
     /* redouble button */
 
-    bd->redouble = gtk_button_new_with_label( _("Redouble") );
+    bd->redouble = button_from_image( image_from_xpm_d ( tb_redouble_xpm,
+							 bd->toolbar ) );
     gtk_signal_connect( GTK_OBJECT( bd->redouble ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
     gtk_widget_set_sensitive ( GTK_WIDGET ( bd->redouble ), FALSE );
@@ -4830,14 +4836,21 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
 
+#if USE_GTK2
+    bd->play = 
+      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_EXECUTE, 
+                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
+#else
     bd->play = gtk_button_new_with_label ( _("Play" ) );
+                                             bd->toolbar ) );
+#endif
     gtk_signal_connect( GTK_OBJECT( bd->play ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
     gtk_widget_set_sensitive ( GTK_WIDGET ( bd->play ), FALSE );
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->play,
-                                _("force computer to play"),
+                                _("Force computer to play"),
                                 _("private") );
 
     /* reset button */
