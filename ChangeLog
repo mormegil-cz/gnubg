@@ -1,3 +1,21 @@
+Sun Mar 31 14:36:09 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	Finish implemention of rollout of initial position.
+
+	* rollout.c (BasicCubefulRollout): do not consider cube action
+	for first roll if fInitial.
+	* rollout.c (QuasiRandomDice): make special code for fInitial. 
+	All callers changed.
+
+	* gnubg.c (CommandRollout): take care that it is not possible to
+	rollout cube decisions for fInitial (should allow this anyway?)
+
+	* gtkgame.c (SetRolloutsOK): get fInitial from rollout widget.
+	* gtkgame.c (SetRollouts): make button for fInitial and 
+	set fInitial if changed.
+
+	* gtkgame.c (GTKPopMoveRecord): make annoying warning to away.
+
 Sun Mar 31 00:51:07 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	Modify and setup settings for export. So far only the HTML export

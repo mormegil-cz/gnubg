@@ -36,6 +36,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #endif
+#include "matchid.h"
 #include "positionid.h"
 #include "rollout.h"
 
@@ -43,54 +44,60 @@
 static void
 initRolloutstat ( rolloutstat *prs );
 
-
-
-
-/*
- * Get number of cube turns for cube to reach value of nCube.
- *
- * Input: 
- *    - nCube: current value of cube
- *
- * Output:
- *    None.
- *
- * Returns:
- *   number of cube turns for cube to reach value of nCube.
- * 
- */
-
-static int getCubeTurns ( const int nCube ) {
-
-  int i;
-  int n;
-
-  /* return log ( nCube ) / log ( 2 ) */
-
-  if ( nCube < 1 ) return -1;
-
-  i = 0; 
-  n = 1;
-  while ( n < nCube ) { i++; n *= 2; }
-
-  return i;
-
-
-}
-
-
 static int QuasiRandomDice( int iTurn, int iGame, int cGames,
+                            int fInitial,
                             int anDice[ 2 ] ) {
-  if( !iTurn && !( cGames % 36 ) ) {
-    anDice[ 0 ] = ( iGame % 6 ) + 1;
-    anDice[ 1 ] = ( ( iGame / 6 ) % 6 ) + 1;
-    return 0;
-  } else if( iTurn == 1 && !( cGames % 1296 ) ) {
-    anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
-    anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
-    return 0;
-  } else
-    return RollDice( anDice );
+
+  if ( fInitial ) {
+
+    /* rollout of initial position: no doubles allowed */
+
+    if( !iTurn && !( cGames % 30 ) ) {
+      anDice[ 1 ] = ( ( iGame / 5 ) % 6 ) + 1;
+      anDice[ 0 ] = ( iGame % 5 ) + 1;
+      if ( anDice[ 0 ] >= anDice[ 1 ] ) 
+        anDice[ 0 ]++;
+      
+      return 0;
+    } 
+    else if( iTurn == 1 && !( cGames % 1080 ) ) {
+      anDice[ 0 ] = ( ( iGame / 30 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 180 ) % 6 ) + 1;
+
+      return 0;
+    } 
+    else {
+
+      int n;
+     
+    reroll:
+      n = RollDice( anDice );
+
+      if ( fInitial && ! iTurn && anDice[ 0 ] == anDice[ 1 ] )
+        goto reroll;
+
+      return n;
+
+    }
+
+  }
+  else {
+
+    /* normal rollout: doubles allow on first roll */
+
+    if( !iTurn && !( cGames % 36 ) ) {
+      anDice[ 0 ] = ( iGame % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 6 ) % 6 ) + 1;
+      return 0;
+    } else if( iTurn == 1 && !( cGames % 1296 ) ) {
+      anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
+      return 0;
+    } else
+      return RollDice( anDice );
+
+  }
+
 }
 
 /* Upon return, anBoard contains the board position after making the best
@@ -155,7 +162,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 
   while( ( !nTruncate || iTurn < nTruncate ) &&
 	 ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
-    if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
+    if( QuasiRandomDice( iTurn, iGame, cGames, FALSE, anDice ) < 0 )
 	    return -1;
 	
     if( anDice[ 0 ]-- < anDice[ 1 ]-- )
@@ -314,7 +321,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       if ( *pf ) {
 
         if ( prc->fCubeful && GetDPEq ( NULL, &rDP, pci ) &&
-             ( iTurn > 0 || afCubeDecTop[ ici ] ) ) {
+             ( iTurn > 0 || ( afCubeDecTop[ ici ] && ! prc->fInitial ) ) ) {
 
           if ( GeneralCubeDecisionE ( aar, aanBoard[ ici ],
                                       pci,
@@ -332,7 +339,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
             /* update statistics */
 	    if( aarsStatistics )
 		aarsStatistics[ ici ]
-		    [ pci->fMove ].acDoubleTake[ getCubeTurns ( pci->nCube ) ]++; 
+		    [ pci->fMove ].acDoubleTake[ LogCube ( pci->nCube ) ]++; 
 
             SetCubeInfo ( pci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
 			  pci->nMatchTo,
@@ -367,7 +374,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	    if( aarsStatistics )
 		aarsStatistics[ ici ]
-		    [ pci->fMove ].acDoubleDrop[ getCubeTurns ( pci->nCube ) ]++; 
+		    [ pci->fMove ].acDoubleDrop[ LogCube ( pci->nCube ) ]++; 
 
             break;
 
@@ -391,7 +398,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
     /* Chequer play */
 
-    if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
+    if( QuasiRandomDice( iTurn, iGame, cGames, prc->fInitial, anDice ) < 0 )
       return -1;
 
     if( anDice[ 0 ] < anDice[ 1 ] )
@@ -582,15 +589,15 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 	      switch ( GameStatus ( aanBoard[ ici ] ) ) {
 	      case 1:
 		  aarsStatistics[ ici ][ pci->fMove ].
-		      acWin[ getCubeTurns ( pci->nCube )]++;
+		      acWin[ LogCube ( pci->nCube )]++;
 		  break;
 	      case 2:
 		  aarsStatistics[ ici ][ pci->fMove ].
-		      acWinGammon[ getCubeTurns ( pci->nCube )]++;
+		      acWinGammon[ LogCube ( pci->nCube )]++;
 		  break;
 	      case 3:
 		  aarsStatistics[ ici ][ pci->fMove ].
-		      acWinBackgammon[ getCubeTurns ( pci->nCube )]++;
+		      acWinBackgammon[ LogCube ( pci->nCube )]++;
 		  break;
 	      }
 

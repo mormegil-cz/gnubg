@@ -24,9 +24,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
   speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
-** Add an option for rollouts of "opening" positions: neither player on
-  roll, and no doubles permitted (suggested by Ian Shaw).  (A
-  "set rollout initial" command has been added, but it has no effect yet.)
 ** Consider making EvalEfficiency() more sophisticated.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
