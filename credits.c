@@ -1,121 +1,258 @@
 /* Do not modify this file!  It is created automatically by credits.sh.
    Modify credits.sh instead. */
 
-char *aszCredits[] = {
-    "Fotis",
-    "Misja Alma",
-    "Kazuaki Asai",
-    "Eric Augustine",
-    "Steve Baedke",
-    "Erik Barfoed",
-    "Ron Barry",
-    "Olivier Baur",
-    "Hans Berliner",
-    "Holger Bochnig",
-    "Chuck Bower",
-    "Nick Bratby",
-    "Adrian Bunk",
-    "Renzo Campagna",
-    "Craig Campbell",
-    "John Chuang",
-    "Tristan Colgate",
-    "Olivier Croisille",
-    "Ned Cross",
-    "Bill Davidson",
-    "Giulio De Marco",
-    "Michael Depreli",
-    "Alberta di Silvio",
-    "Ian Dunstan",
-    "Max Durbano",
-    "Christopher D. Yep",
-    "Peter Eberhard",
-    "Robert Eberlein",
-    "James F. Kibler",
-    "Kennedy Fraser",
-    "Ric Gerace",
-    "Michel Grimminck",
-    "Eric Groleau",
-    "Jeff Haferman",
-    "Alain Henry",
-    "Jens Hoefkens",
-    "Martin Janke",
-    "Rick Janowski",
-    "Nis Jorgensen",
-    "Morten Juul Henriksen",
-    "Petr Kadlec",
-    "Neil Kazaross",
-    "Mathias Kegelmann",
-    "Tom Keith",
-    "Matija Kejzar",
-    "Jonathan Kinsey",
-    "Johnny Kirk",
-    "Gerhard Knop",
-    "Robert Konigsberg",
-    "Martin Krainer",
-    "Elias Kritikos",
-    "Corrin Lakeland",
-    "Tim Laursen",
-    "Eli Liang",
-    "Ege Lundgren",
-    "Kevin Maguire",
-    "Massimiliano Maini",
-    "Alix Martin",
-    "John Marttila",
-    "William Maslen",
-    "Thomas Meyer",
-    "Achim Mueller",
-    "Daniel Murphy",
-    "Magnar Naustdalslid",
-    "Dave Neary",
-    "Rolf Nielsen",
-    "Mirori Orange",
-    "Peter Orum",
-    "Roy Passfield",
-    "Thomas Patrick",
-    "Billie Patterson",
-    "Mike Petch",
-    "Zvezdan Petkovic",
-    "Nardy Pillards",
-    "Petri Pitkänen",
-    "Sam Pottle",
-    "Henrik Ravn",
-    "James Rech",
-    "Jared Riley",
-    "Klaus Rindholt",
-    "Oliver Riordan",
-    "Rod Roark",
-    "Hans-Jürgen Schäfer",
-    "Steve Schreiber",
-    "Martin Schrode",
-    "Hugh Sconyers",
-    "Paul Selick",
-    "Sho Sengoku",
-    "Ian Shaw",
-    "Brian Sheppard",
-    "Albert Silver",
-    "Peter Sochovsky",
-    "Mark Spencer",
-    "Scott Steiner",
-    "Maik Stiebler",
-    "W. Stroop (Rob)",
-    "Kaoru TAKAHASHI",
-    "Yoshito Takeuchi",
-    "Gerry Tesauro",
-    "Jacques Thiriat",
-    "Malene Thyssen",
-    "Claes Tornberg",
-    "Stefan van den Berg",
-    "Bert Van Kerckhove",
-    "Sander van Rijnswou",
-    "Robert-Jan Veldhuizen",
-    "Morten Wang",
-    "Jeff White",
-    "JP White",
-    "Chris Wilson",
-    "Kit Woolsey",
-    "Frank Worrell",
-    "Anders Zachrison",
-    "Douglas Zare",
-    "Michael Zehr",
-    0
+#include "i18n.h"
+#include "credits.h"
+
+credEntry ceAuthors[] = {
+  {"Joseph Heled", 0},
+  {"Oeystein Johansen", 0},
+  {"Johanthan Kinsey", 0},
+  {"David Montgomery", 0},
+  {"Jim Segrave", 0},
+  {"Joern Thyssen", 0},
+  {"Gary Wong", 0},
+  {0, 0}
 };
+
+credEntry ceContrib[] = {
+  {"Olivier Baur", 0},
+  {"Holger Bochnig", 0},
+  {"Nis Joergensen", 0},
+  {"TAKAHASHI Kaoru", 0},
+  {"Stein Kulseth", 0},
+  {"Mike Petch", 0},
+  {"Rod Roark", 0},
+  {0, 0}
+};
+
+credEntry ceSupport[] = {
+  {"Oeystein Johansen", N_("Web Pages") },
+  {"Achim Mueller", N_("Manual") },
+  {"Nardy Pillards", N_("Web Pages") },
+  {"Albert Silver", N_("Tutorial") },
+  {0, 0}
+};
+
+credEntry ceTranslations[] = {
+  {"Petr Kadlec", N_("Czech") },
+  {"Joern Thyssen", N_("Danish") },
+  {"Olivier Baur", N_("French") },
+  {"Achim Mueller", N_("German") },
+  {"Hlynur Sigurgislason", N_("Icelandic") },
+  {"Renzo Campagna", N_("Italian") },
+  {"Kaoru TAKAHASHI", N_("Japanese") },
+  {"Akif Dinc", N_("Turkish") },
+  {0, 0}
+};
+
+credEntry ceCredits[] = {
+  {"Fotis", 0},
+  {"Misja Alma", 0},
+  {"Kazuaki Asai", 0},
+  {"Eric Augustine", 0},
+  {"Steve Baedke", 0},
+  {"Erik Barfoed", 0},
+  {"Ron Barry", 0},
+  {"Olivier Baur", 0},
+  {"Hans Berliner", 0},
+  {"Holger Bochnig", 0},
+  {"Chuck Bower", 0},
+  {"Nick Bratby", 0},
+  {"Adrian Bunk", 0},
+  {"Renzo Campagna", 0},
+  {"Craig Campbell", 0},
+  {"John Chuang", 0},
+  {"Tristan Colgate", 0},
+  {"Olivier Croisille", 0},
+  {"Ned Cross", 0},
+  {"Bill Davidson", 0},
+  {"Giulio De Marco", 0},
+  {"Michael Depreli", 0},
+  {"Alberta di Silvio", 0},
+  {"Ian Dunstan", 0},
+  {"Max Durbano", 0},
+  {"Christopher D. Yep", 0},
+  {"Peter Eberhard", 0},
+  {"Robert Eberlein", 0},
+  {"James F. Kibler", 0},
+  {"Kennedy Fraser", 0},
+  {"Ric Gerace", 0},
+  {"Michel Grimminck", 0},
+  {"Eric Groleau", 0},
+  {"Jeff Haferman", 0},
+  {"Alain Henry", 0},
+  {"Jens Hoefkens", 0},
+  {"Martin Janke", 0},
+  {"Rick Janowski", 0},
+  {"Nis Jorgensen", 0},
+  {"Morten Juul Henriksen", 0},
+  {"Petr Kadlec", 0},
+  {"Neil Kazaross", 0},
+  {"Mathias Kegelmann", 0},
+  {"Matija Kejzar", 0},
+  {"Jonathan Kinsey", 0},
+  {"Johnny Kirk", 0},
+  {"Gerhard Knop", 0},
+  {"Robert Konigsberg", 0},
+  {"Martin Krainer", 0},
+  {"Elias Kritikos", 0},
+  {"Corrin Lakeland", 0},
+  {"Tim Laursen", 0},
+  {"Eli Liang", 0},
+  {"Ege Lundgren", 0},
+  {"Kevin Maguire", 0},
+  {"Massimiliano Maini", 0},
+  {"Alix Martin", 0},
+  {"John Marttila", 0},
+  {"William Maslen", 0},
+  {"Thomas Meyer", 0},
+  {"Achim Mueller", 0},
+  {"Daniel Murphy", 0},
+  {"Magnar Naustdalslid", 0},
+  {"Dave Neary", 0},
+  {"Rolf Nielsen", 0},
+  {"Mirori Orange", 0},
+  {"Peter Orum", 0},
+  {"Roy Passfield", 0},
+  {"Thomas Patrick", 0},
+  {"Billie Patterson", 0},
+  {"Mike Petch", 0},
+  {"Zvezdan Petkovic", 0},
+  {"Nardy Pillards", 0},
+  {"Petri Pitkänen", 0},
+  {"Sam Pottle", 0},
+  {"Henrik Ravn", 0},
+  {"James Rech", 0},
+  {"Jared Riley", 0},
+  {"Klaus Rindholt", 0},
+  {"Oliver Riordan", 0},
+  {"Rod Roark", 0},
+  {"Hans-Jürgen Schäfer", 0},
+  {"Steve Schreiber", 0},
+  {"Martin Schrode", 0},
+  {"Hugh Sconyers", 0},
+  {"Paul Selick", 0},
+  {"Sho Sengoku", 0},
+  {"Ian Shaw", 0},
+  {"Brian Sheppard", 0},
+  {"Albert Silver", 0},
+  {"Peter Sochovsky", 0},
+  {"Mark Spencer", 0},
+  {"Scott Steiner", 0},
+  {"Maik Stiebler", 0},
+  {"W. Stroop (Rob)", 0},
+  {"Kaoru TAKAHASHI", 0},
+  {"Yoshito Takeuchi", 0},
+  {"Gerry Tesauro", 0},
+  {"Jacques Thiriat", 0},
+  {"Malene Thyssen", 0},
+  {"Claes Tornberg", 0},
+  {"Stefan van den Berg", 0},
+  {"Bert Van Kerckhove", 0},
+  {"Sander van Rijnswou", 0},
+  {"Robert-Jan Veldhuizen", 0},
+  {"Morten Wang", 0},
+  {"Jeff White", 0},
+  {"JP White", 0},
+  {"Chris Wilson", 0},
+  {"Kit Woolsey", 0},
+  {"Frank Worrell", 0},
+  {"Anders Zachrison", 0},
+  {"Douglas Zare", 0},
+  {"Michael Zehr", 0},
+  {0, 0}
+};
+
+credits creditList[] =
+{
+	{N_("Developers"), ceAuthors},
+	{N_("Code Contributors"), ceContrib},
+	{N_("Translations"), ceTranslations},
+	{N_("Support"), ceSupport},
+	{0, 0}
+};
+
+char aszAUTHORS[] =
+"                         GNU Backgammon was written by:\n"
+"\n"
+"    Joseph Heled            David Montgomery        Gary Wong\n"
+"    Oeystein Johansen       Jim Segrave\n"
+"    Johanthan Kinsey        Joern Thyssen\n"
+" \n"
+"                                   Support by:\n"
+"\n"
+"     Oeystein Johansen (Web Pages)   Nardy Pillards (Web Pages)\n"
+"     Achim Mueller (Manual)          Albert Silver (Tutorial)\n"
+"\n"
+"                         Contributors of code include:\n"
+"\n"
+"    Olivier Baur    Nis Joergensen  Stein Kulseth   Rod Roark\n"
+"    Holger Bochnig  TAKAHASHI Kaoru Mike Petch\n"
+"\n"
+"                            Translations by:\n"
+"\n"
+"     Petr Kadlec (Czech)\n"
+"     Joern Thyssen (Danish)\n"
+"     Olivier Baur (French)\n"
+"     Achim Mueller (German)\n"
+"     Hlynur Sigurgislason (Icelandic)\n"
+"     Renzo Campagna (Italian)\n"
+"     Kaoru TAKAHASHI (Japanese)\n"
+"     Akif Dinc (Turkish)\n"
+"\n"
+"             Contributors (of bug reports and suggestions) include:\n"
+"\n"
+"    Elias Kritikos          Robert Eberlein         Tim Laursen\n"
+"    Misja Alma              Fotis                   Eli Liang\n"
+"    Kazuaki Asai            Kennedy Fraser          Ege Lundgren\n"
+"    Eric Augustine          Ric Gerace              Kevin Maguire\n"
+"    Erik Barfoed            Michel Grimminck        Massimiliano Maini\n"
+"    Ron Barry               Eric Groleau            Giulio De Marco\n"
+"    Steve Baedke            Jeff Haferman           John Marttila\n"
+"    Olivier Baur            Morten Juul Henriksen   Alix Martin\n"
+"    Stefan van den Berg     Alain Henry             William Maslen\n"
+"    Holger Bochnig          Jens Hoefkens           Thomas Meyer\n"
+"    Chuck Bower             Martin Janke            Achim Mueller\n"
+"    Adrian Bunk             Nis Jorgensen           Daniel Murphy\n"
+"    Nick Bratby             Petr Kadlec             Magnar Naustdalslid\n"
+"    Renzo Campagna          Neil Kazaross           Dave Neary\n"
+"    Craig Campbell          Mathias Kegelmann       Rolf Nielsen\n"
+"    John Chuang             Matija Kejzar           Mirori Orange\n"
+"    Tristan Colgate         Bert Van Kerckhove      Peter Orum\n"
+"    Olivier Croisille       James F. Kibler         Roy Passfield\n"
+"    Ned Cross               Jonathan Kinsey         Thomas Patrick\n"
+"    Bill Davidson           Johnny Kirk             Billie Patterson\n"
+"    Michael Depreli         Gerhard Knop            Mike Petch\n"
+"    Ian Dunstan             Robert Konigsberg       Zvezdan Petkovic\n"
+"    Max Durbano             Martin Krainer          Nardy Pillards\n"
+"    Peter Eberhard          Corrin Lakeland\n"
+"\n"
+"\n"
+"  Credit is also due to those who have published information about backgammon\n"
+"   playing programs (references will appear here later).  GNU Backgammon has\n"
+"                              borrowed ideas from:\n"
+"\n"
+"    Hans Berliner   Rick Janowski   Gerry Tesauro   Douglas Zare\n"
+"    Chuck Bower     Brian Sheppard  Morten Wang     Michael Zehr\n"
+"\n"
+"       \n"
+"    The manual for GNU Backgammon includes a chapter describing the rules of\n"
+"      backgammon, written by Tom Keith for his Backgammon Galore web site\n"
+"                             <http://www.bkgm.com/>.\n"
+"\n"
+"\n"
+"  Library code from the following authors has been included in GNU Backgammon:\n"
+"\n"
+"     Ulrich Drepper (an implementation of the public domain MD5 algorithm)\n"
+"             Bob Jenkins (the ISAAC pseudo random number generator)\n"
+"       Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)\n"
+"                Gerry Tesauro (the \"pubeval\" position evaluator)\n"
+"\n"
+"\n"
+"      If you feel that you're not given credits for your contributions to\n"
+"         GNU Backgammon please write to one of the developers.\n"
+"\n"
+"\n"
+"       Please send bug reports for GNU Backgammon to: <bug-gnubg@gnu.org>\n"
+;
