@@ -183,10 +183,11 @@ static void Preview( renderdata *prd ) {
     anBoard[ 0 ][ 7 ] = anBoard[ 1 ][ 7 ] = 3;
     anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = 5;
     anBoard[ 0 ][ 23 ] = anBoard[ 1 ][ 23 ] = 2;
-    
+
     CalculateArea( &rd, auch, 108 * 3 * 3, &ri, anBoard, NULL, anDice,
 		   anDicePosition, 1, anCubePosition, 0, 0, 
                    anResignPosition, fResign, nResignOrientation,
+		   NULL, 0, 0,
                    0, 0, 108 * 3, 72 * 3 );
     FreeImages( &ri );
   

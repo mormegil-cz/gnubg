@@ -256,11 +256,34 @@ static void resign_position( BoardData *bd, int *px, int *py, int *porient ) {
 
 }
 
+#define ARROW_SIZE 5
+
+static void Arrow_Position( BoardData *bd, int *px, int *py ) {
+/* calculate the position of the arrow to indicate
+   player on turn and direction of play;  *px and *py
+   return the position of the upper left corner in pixels,
+   NOT board units */
+
+    int Point28_x, Point28_y, Point28_dx, Point28_dy;
+    int Point29_x, Point29_y, Point29_dx, Point29_dy;
+    point_area( bd, POINT_UNUSED0, &Point28_x, &Point28_y, &Point28_dx, &Point28_dy );
+    point_area( bd, POINT_UNUSED1, &Point29_x, &Point29_y, &Point29_dx, &Point29_dy );
+
+    assert( Point28_x == Point29_x );
+    assert( Point28_dx == Point29_dx );
+    assert( Point28_dy == Point29_dy );
+
+    if ( px ) *px = Point29_x + Point29_dx / 2
+			- rdAppearance.nSize * ARROW_SIZE / 2;
+    if ( py ) *py = Point29_y + Point29_dy + Point29_dx / 2
+			- rdAppearance.nSize * ARROW_SIZE / 2;
+}
+
 static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
 			int cx, int cy ) {
     
     int anBoard[ 2 ][ 25 ], anOff[ 2 ], anDice[ 2 ], anDicePosition[ 2 ][ 2 ],
-	anCubePosition[ 2 ], nOrient;
+	anCubePosition[ 2 ], anArrowPosition[ 2 ], nOrient;
     int anResignPosition[ 2 ], nResignOrientation;
 
     read_board( bd, anBoard );
@@ -279,11 +302,13 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
     cube_position( bd, anCubePosition, anCubePosition + 1, &nOrient );
     resign_position( bd, anResignPosition, anResignPosition + 1, 
                      &nResignOrientation );
+    Arrow_Position( bd, &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
     CalculateArea( &rdAppearance, puch, cx * 3, &bd->ri, anBoard, anOff,
 		   anDice, anDicePosition, bd->colour == bd->turn,
 		   anCubePosition, LogCube( bd->cube ) + ( bd->doubled != 0 ),
-		   nOrient, 
-                   anResignPosition, abs(bd->resigned), nResignOrientation,
+		   nOrient, anResignPosition,
+		   abs(bd->resigned), nResignOrientation,
+		   anArrowPosition, bd->playing, bd->turn == 1,
                    x, y, cx, cy );
 }
 
@@ -416,6 +441,18 @@ static void board_invalidate_resign( BoardData *bd ) {
 			   y * rdAppearance.nSize,
 			   8 * rdAppearance.nSize, 8 * rdAppearance.nSize, bd );
 }
+
+static void board_invalidate_arrow( BoardData *bd ) {
+
+    int x, y;
+    
+    Arrow_Position( bd, &x, &y );
+
+    board_invalidate_rect( bd->drawing_area, x, y,
+			   ARROW_SIZE * rdAppearance.nSize, ARROW_SIZE * rdAppearance.nSize, bd );
+}
+
+#undef ARROW_SIZE
 
 static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 
@@ -2299,7 +2336,8 @@ static gint board_set( Board *board, const gchar *board_text,
     /* FIXME only redraw dice/cube if changed */
     board_invalidate_dice( bd );
     board_invalidate_cube( bd );
-    board_invalidate_resign ( bd );
+    board_invalidate_resign( bd );
+    board_invalidate_arrow( bd );
 
     return 0;
 }
@@ -2607,6 +2645,8 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     BoardData *pbd = board->board_data;
     int old_points[ 2 ][ 25 ];
     
+    board_invalidate_arrow( pbd );
+
     /* Treat a reset of the position to old_board as a no-op while
        in edit mode. */
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) &&

@@ -1,3 +1,7 @@
+Fri May 23 18:05:32  Holger Bochnig  <hbgg@gmx.net>
+
+	* libart.m4: new file
+
 Fri May 16 10:06:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* audiofile.m4, Makefile.am: add audiofile.m4

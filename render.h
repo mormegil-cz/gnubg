@@ -60,6 +60,7 @@ typedef struct _renderimages {
     unsigned char *achResign;
     unsigned char *achResignFaces;
     unsigned short *asRefract[ 2 ];
+    unsigned char *auchArrow[ 2 ];
 } renderimages;
 
 extern renderdata rdDefault;
@@ -116,6 +117,8 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			   int nLogCube, int nCubeOrientation,
                            int anResignPosition[ 2 ],
                            int fResign, int fResignOrientation,
+                           int anArrowPosition[ 2 ],
+			   int fPlaying, int nPlayer,
 			   int x, int y, int cx, int cy );
     
 #ifdef __cplusplus

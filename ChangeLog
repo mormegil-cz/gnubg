@@ -1,3 +1,22 @@
+Fri May 23 18:05:32 2003  Holger Bochnig  <hbgg@gmx.net>
+
+	draw arrow to indicate direction of play and who is on turn:
+		anti-aliased vector graphic in colour of player on turn
+		on board frame between the two unused bearoff-points
+	new dependency introduced: LibArt
+
+	* export.c (GenerateImage), gtkprefs.c (Preview): call to CalculateArea changed
+	* gtkboard.c (Arrow_Position, board_invalidate_arrow): new functions
+	* gtkboard.c (RenderArea): call Arrow_Position, call to CalculateArea changed
+	* gtkboard.c (board_set, game_set??): call board_invalidate_arrow
+	* render.c: new #includes added
+	* render.c (AlphaBlend2, AlphaBlendClip2, Copy_RGB_to_RGBA, InsertAlpha,
+		    Make_Path_Arrow, Render_Path, RenderArrows): new functions
+	* render.c (CalculateArea): draw arrow
+	* render.c (RenderImages): render arrow images
+	* render.c (FreeImages): free arrow images
+	* render.h: struct renderimages and declaration of CalculateArea extended
+
 Thu May 22 15:18:44 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	* gtkgame.c: #include added
