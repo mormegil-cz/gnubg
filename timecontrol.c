@@ -37,6 +37,29 @@ static char szTCPLAIN[] = N_("plain")
 	, szTCOFF[] = "Time control off"
 	;
 
+#ifndef timeradd
+#define timeradd(tvp, uvp, vvp)						\
+	do {								\
+		(vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;		\
+		(vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;	\
+		if ((vvp)->tv_usec >= 1000000) {			\
+			(vvp)->tv_sec++;				\
+			(vvp)->tv_usec -= 1000000;			\
+		}							\
+	} while (0)
+#endif
+#ifndef timersub
+#define timersub(a, b, result)						      \
+  do {									      \
+    (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;			      \
+    (result)->tv_usec = (a)->tv_usec - (b)->tv_usec;			      \
+    if ((result)->tv_usec < 0) {					      \
+      --(result)->tv_sec;						      \
+      (result)->tv_usec += 1000000;					      \
+    }									      \
+  } while (0)
+#endif
+
 static tcnode *tcHead = 0;
 
 static int str2time( char *sz ) {
@@ -592,9 +615,7 @@ printf("CheckGameClock (%d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n
 	assert (timerisset(&pgcPlayer->tvStamp) &&  
 	   ! timercmp(&pgcOpp->tvStamp, &pgcPlayer->tvStamp, <) );
 
-#if !WIN32
     timersub(tvp, & pgcOpp->tvStamp, &used);
-#endif
     switch ( pgcPlayer->tc.timing ) {
     case TC_BRONSTEIN:
 	{
@@ -603,25 +624,19 @@ printf("CheckGameClock (%d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n
 	if ( timercmp(tvp, &ref, <) ) {
 		timerclear(&used);
 	} else if ( timercmp(&pgcOpp->tvStamp, &ref, <) ) {
-#if !WIN32
 	    timersub(tvp, &ref, &used);
-#endif
 	}
 	}
 	break;
     case TC_HOURGLASS:
-#if !WIN32
 	timeradd(&pgcOpp->tvTimeleft, &used, &pgcOpp->tvTimeleft);
-#endif
 	break;
     case TC_FISCHER:
     case TC_PLAIN:
     default:
 	break;
     }
-#if !WIN32
     timersub(&pgcPlayer->tvTimeleft, &used, &pgcPlayer->tvTimeleft);
-#endif
     while ( pgcPlayer->tvTimeleft.tv_sec < 0 )
 	pen += applyPenalty(pms);
 
