@@ -133,7 +133,7 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 
 void board_beep( BoardData *bd )
 {
-    if( fGUIIllegal )
+    if( fGUIIllegal && fGUIBeep)
 	gdk_beep();
 }
 
