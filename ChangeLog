@@ -1,3 +1,18 @@
+Sat Oct 27 15:06:46 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* backgammon.h: Save evaluation setup for chequerplay analysis in
+	movenormal.  
+	
+	* import.c, play.c: Change all places where movenormal is initialised.
+	* sgf.c (RestoreMoveAnalysis): Restore evaluation setup for
+	chequerplay. So far esChequer is initialised to "best" analysis used in
+	evaluation of moves. It would be better to save it in the sgf file
+	explicitly instead.
+
+	* eval.c (cmp_evalsetup, cmp_evalcontext, cmp_rolloutcontext): New
+	functions. Compare evalsetups, evalcontexts and rolloutcontexts. To be
+	used in analysis to avoid redoing the same analysis.
+
 Fri Oct 26 10:42:05 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (ShowBoard): Don't postpone updates if moves are animated.
