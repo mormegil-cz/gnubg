@@ -1,0 +1,64 @@
+Making your own branch of the GNU Backgammon code
+=================================================
+
+Create the branch
+-----------------
+
+On a clean copy of the gnubg sources:
+
+cvs rtag -b branch-xxx gnubg
+cvs rtag branch-point-xxx gnubg
+cvs rtab branch-xxx-merged gnubg
+
+The first creates the branch. The second and third are symbolic tags
+needed for merging later on.
+
+
+You can now switch your working copy onto the branch-xxx with
+ 
+cvs update -r branch-xxx
+
+You're now working on the branch.
+CHeck with "cvs status gnubg.c". It should say something like:
+ 
+===================================================================
+File: gnubg.c           Status: Locally Modified
+
+   Working revision:    1.417
+   Repository revision: 1.417           /cvsroot/gnubg/gnubg/gnubg.c,v
+   Sticky Tag:          branch-xxx (branch: 1.417.x)
+   Sticky Date:         (none)
+   Sticky Options:      (none)
+
+You can now commit your patches with
+
+cvs add <the files you've added>
+cvs ci <the files you've updated and added>
+
+
+Merge changes from main trunk into your branch
+----------------------------------------------
+
+It's basically doing a
+
+cvs update -jbranch-xxx-merged -jHEAD file1 file2 ...
+
+or just
+
+cvs update -jbranch-xxx-merged -jHEAD 
+
+when positioned in your xxx-tree.
+
+After a successful merge you should move the branch-xxx-merged tag to
+the HEAD by issuing:
+
+cvs rtag -F branch-xxx-merged
+
+By moving the tag you can do a merge as often as you like. The "cvs
+rtag" command is substantially faster when issuing it per file.
+
+
+Merge your branch into the main trunk
+-------------------------------------
+
+write me
