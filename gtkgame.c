@@ -1278,6 +1278,8 @@ static void CreateGameWindow( void ) {
     asz[ 0 ] = _( "#" );
     gtk_container_add( GTK_CONTAINER( psw ),
 		       pwGameList = gtk_clist_new_with_titles( 3, asz ) );
+    /* Stop list getting keyboard focus */
+	GTK_WIDGET_UNSET_FLAGS(pwGameList, GTK_CAN_FOCUS);
 
     gtk_clist_set_selection_mode( GTK_CLIST( pwGameList ),
 				  GTK_SELECTION_BROWSE );
@@ -3175,9 +3177,9 @@ extern int InitGTK( int *argc, char ***argv ) {
     
    pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
 
-   gtk_container_add(GTK_CONTAINER(pwVbox), pwEventBox = gtk_event_box_new());
-   gtk_container_add(GTK_CONTAINER(pwEventBox), pwHbox = gtk_hbox_new(FALSE, 0));
-   gtk_box_pack_start(GTK_BOX(pwHbox), pwBoard = board_new(GetMainAppearance()), TRUE, TRUE, 0);
+   gtk_container_add( GTK_CONTAINER( pwVbox ), pwHbox = gtk_hbox_new(FALSE, 0));
+   gtk_box_pack_start( GTK_BOX(pwHbox), pwEventBox = gtk_event_box_new(), TRUE, TRUE, 0 );
+   gtk_container_add(GTK_CONTAINER(pwEventBox), pwBoard = board_new(GetMainAppearance()));
    gtk_signal_connect(GTK_OBJECT(pwEventBox), "button-press-event", GTK_SIGNAL_FUNC(button_press_event),
 	   BOARD(pwBoard)->board_data);
 
@@ -3275,6 +3277,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 
 extern void RunGTK( GtkWidget *pwSplash ) {
 
+    int anBoardTemp[ 2 ][ 25 ];
     int i;
     GTKSet( &ms.fCubeOwner );
     GTKSet( &ms.nCube );
@@ -3357,6 +3360,11 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	/* force update of board; needed to display board correctly if user
 		has special settings, e.g., clockwise or nackgammon */
 	ShowBoard();
+
+	/* Clear board at startup */
+	for( i = 0; i < 25; i++ )
+		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
+	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, -1, -1, FALSE, anChequers[ms.bgv]);
 
 	gtk_main();
 }

@@ -3268,15 +3268,11 @@ extern void ShowBoard( void ) {
 #endif
     }
 #endif
-    
     if( ms.gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
-	    /* Start with an empty board, so it's obvious no game is in progress */
 	    int anBoardTemp[ 2 ][ 25 ];
-	    int i;
-	    for( i = 0; i < 25; i++ )
-	      anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
+	    InitBoard( anBoardTemp, ms.bgv );
 
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
