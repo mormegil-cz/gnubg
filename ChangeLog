@@ -1,3 +1,7 @@
+Sun Jul 11 16:37:02 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* eval.c (EvalInitialise): Suppress compiler warnings.
+
 Sun Jul 11 14:47:30 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gtkgame.c: include <ctype.h> for isspace().
