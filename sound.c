@@ -150,7 +150,7 @@ soundsystem ssSoundSystem = SOUND_SYSTEM_ARTSC;
 soundsystem ssSoundSystem = SOUND_SYSTEM_NAS;
 #  elif defined (WIN32)
 soundsystem ssSoundSystem = SOUND_SYSTEM_WINDOWS;
-#  elif 
+#  else
 soundsystem ssSoundSystem = SOUND_SYSTEM_NORMAL;
 #  endif
 
