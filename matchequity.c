@@ -37,11 +37,34 @@ float aafA2 [ MAXSCORE ][ MAXSCORE ];
 
 float afBtilde [ MAXSCORE ];
 
+met metCurrent = MET_ZADEH;
+int nMaxScore = MAXSCORE;
+
 int 
 GetCubePrimeValue ( int i, int j, int nCubeValue );
 
 void
-InitMatchEquity () {
+InitMatchEquityZadeh ();
+
+
+void
+InitMatchEquity ( met metInit ) {
+
+  metCurrent = metInit;
+  nMaxScore = MAXSCORE;
+
+  switch ( metInit ) {
+  case MET_ZADEH:
+    InitMatchEquityZadeh ();
+    break;
+  default:
+    break;
+  }
+
+}
+
+void
+InitMatchEquityZadeh () {
 
   int i,j,k;
   int nCube;

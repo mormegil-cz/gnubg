@@ -2,6 +2,8 @@ Tue Oct 17 16:04:32 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* eval.c (EvaluatePositionCubeful1): Don't calculate cubeful
 	equity when cube is dead (or score is -2, -2).
+	* gnubg.c, set.c, show.c, matchequity.c: Implement different match
+	equity tables.
 
 Sun Oct 15 19:51:43 2000  Gary Wong  <gtw@research.att.com>
 

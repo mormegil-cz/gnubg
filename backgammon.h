@@ -194,7 +194,7 @@ extern void HandleInput( char *sz );
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
-    acSet[], acShow[], acTrain[], acTop[];
+    acSet[], acShow[], acTrain[], acTop[], acSetMET[];
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
@@ -254,6 +254,8 @@ extern void CommandAccept( char * ),
     CommandSetEvalReduced ( char * ),
     CommandSetEvalTolerance( char * ),
     CommandSetEvaluation( char * ),
+    CommandSetJacoby( char * ),
+    CommandSetMETZadeh( char * ),
     CommandSetJacoby( char * ),
     CommandSetNackgammon( char * ),
     CommandSetOutputMWC ( char * ),

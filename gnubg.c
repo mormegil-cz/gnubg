@@ -273,6 +273,8 @@ command acDatabase[] = {
       "parameters", NULL, acSetEvaluation },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, NULL },
+    { "matchequitytable", NULL, "Select match equity table", NULL,
+      acSetMET },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
       szONOFF, NULL },
     { "outputmwc", CommandSetOutputMWC, "Show output in MWC (on) or "
@@ -355,6 +357,14 @@ command acDatabase[] = {
     { "td", CommandTrainTD, "Train the network by TD(0) zero-knowledge "
       "self-play", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetMET[] = {
+  {"zadeh", CommandSetMETZadeh, "Use Zadeh's match equity table",
+   NULL, NULL },
+  {"snowie", CommandNotImplemented, "Use Snowie's match equity table",
+   NULL, NULL },
+  {"woolsey", CommandNotImplemented, "Use Woolsey's match equity table",
+   NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acTop[] = {
     { "accept", CommandAccept, "Accept a cube or resignation",
       NULL, NULL },
@@ -2340,7 +2350,7 @@ extern int main( int argc, char *argv[] ) {
 
     InitRNG();
 
-    InitMatchEquity ();
+    InitMatchEquity ( metCurrent );
     
     if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,

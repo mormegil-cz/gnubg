@@ -29,6 +29,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <assert.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -575,14 +576,28 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
      else if match write nMatchTo x nMatchTo table,
      else write full table (may be HUGE!) */
 
-  if ( ( n <= 0 ) || ( n > MAXSCORE ) ) {
+  if ( ( n <= 0 ) || ( n > nMaxScore ) ) {
     if ( nMatchTo )
       n = nMatchTo;
     else
-      n = MAXSCORE;
+      n = nMaxScore;
   }
 
   /* FIXME: for GTK write out to table */
+
+  output ( "Match equity table: " );
+
+  switch ( metCurrent ) {
+  case MET_ZADEH:
+    output ( "N. Zadeh, Management Science 23, 986 (1977)\n\n" );
+    break;
+  case MET_SNOWIE:
+    output ( "Snowie xx, Oasya, 2000\n\n" );
+  case MET_WOOLSEY:
+    output ( "Kit Woolsey\n\n" );
+  default:
+    assert ( FALSE );
+  }
 
   /* Write column headers */
 

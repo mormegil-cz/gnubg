@@ -29,14 +29,21 @@
  * Btilde is the post-crawford match equities.
  */
 
+typedef enum _met {
+  MET_ZADEH, MET_SNOWIE, MET_WOOLSEY
+} met;
+
+
 extern float aafA1 [ MAXSCORE ][ MAXSCORE ];
 extern float aafA2 [ MAXSCORE ][ MAXSCORE ];
 
 extern float afBtilde [ MAXSCORE ];
 
-void
-InitMatchEquity ();
+extern met metCurrent;
+extern int nMaxScore;
 
+void
+InitMatchEquity ( met metInit );
 
 extern int
 GetPoints ( float arOutput [ 5 ], int   anScore[ 2 ], int nMatchTo,
