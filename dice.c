@@ -836,8 +836,10 @@ extern void *InitRNG( int *pnSeed, int *pfInitFrom,
     /* Mersenne-Twister */
     rngctx->mti = N + 1;
 
+#if HAVE_LIBGMP
     /* BBS */
     rngctx->fZInit = FALSE;
+#endif /* HAVE_LIBGMP */
 
     /* common */
     rngctx->c = 0;
