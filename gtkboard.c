@@ -1679,7 +1679,11 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	    bd->drag_point = -1;
 	    
 		if(editing)
+		{
 		  GTKSetCube(NULL, 0, NULL);
+		  /* Avoid dragging after selection causing pieces to appear */
+		  bd->drag_point = -2;
+		}
 		else if (bd->doubled) {
 		  switch( event->button ) {
 		  case 1:
