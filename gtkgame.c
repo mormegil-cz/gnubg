@@ -3151,7 +3151,7 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		}
 		
 		sprintf( sz, "set player %d evaluation", i );
-		SetEvalCommands( sz, &apTemp[ i ].ec, &ap[ i ].esChequer.ec );
+		SetEvalCommands( sz, &apTemp[ i ].esChequer.ec, &ap[ i ].esChequer.ec );
 		break;
 		
 	    case PLAYER_PUBEVAL:
