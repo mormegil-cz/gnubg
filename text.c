@@ -1291,10 +1291,12 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
   case MOVE_DOUBLE:
 
-    TextPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
-                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+    TextPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+                                 pmr->d.CubeDecPtr->aarOutput, 
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, -1,
+                                 &pmr->d.CubeDecPtr->esDouble, 
+								 &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE );
 
     break;
@@ -1304,10 +1306,12 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    TextPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
-                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+    TextPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+                                 pmr->d.CubeDecPtr->aarOutput, 
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, 
+                                 &pmr->d.CubeDecPtr->esDouble, 
+								 &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
                                  pmr->d.st );

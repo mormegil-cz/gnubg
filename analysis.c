@@ -453,9 +453,9 @@ updateStatcontext ( statcontext *psc,
  
 
     GetMatchStateCubeInfo ( &ci, pms );
-    if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
+    if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
-      float *arDouble = pmr->d.arDouble;
+      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
       rSkill = arDouble[ OUTPUT_TAKE ] <
         arDouble[ OUTPUT_DROP ] ?
@@ -495,9 +495,9 @@ updateStatcontext ( statcontext *psc,
   case MOVE_TAKE:
 
     GetMatchStateCubeInfo ( &ci, pms );
-    if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
+    if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
-      float *arDouble = pmr->d.arDouble;
+      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anTake[ pmr->d.fPlayer ]++;
@@ -525,9 +525,9 @@ updateStatcontext ( statcontext *psc,
   case MOVE_DROP:
 
     GetMatchStateCubeInfo ( &ci, pms );
-    if( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
+    if( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	  
-      float *arDouble = pmr->d.arDouble;
+      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anPass[ pmr->d.fPlayer ]++;
@@ -740,7 +740,8 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    if ( GetDPEq ( NULL, NULL, &ci ) ||
                  ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove ) {
 	      
-              if ( cmp_evalsetup ( pesCube, &pmr->d.esDouble ) > 0 ) {
+              if ( cmp_evalsetup ( pesCube, 
+								   &pmr->d.CubeDecPtr->esDouble ) > 0 ) {
 
 		if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
                                            aarsStatistics, pms->anBoard, &ci,
@@ -749,17 +750,22 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
               }
               else {
-                memcpy ( aarOutput, pmr->d.aarOutput, sizeof ( aarOutput ) );
-                memcpy ( aarStdDev, pmr->d.aarStdDev, sizeof ( aarStdDev ) );
+                memcpy ( aarOutput, pmr->d.CubeDecPtr->aarOutput, 
+						 sizeof ( aarOutput ) );
+                memcpy ( aarStdDev, pmr->d.CubeDecPtr->aarStdDev, 
+						 sizeof ( aarStdDev ) );
               }
 	      
                 FindCubeDecision ( arDouble, aarOutput, &ci );
 	      
-		esDouble = pmr->d.esDouble = *pesCube;
+		esDouble = pmr->d.CubeDecPtr->esDouble = *pesCube;
 	      
-                memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
-                memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
-                memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
+                memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 
+						 sizeof ( arDouble ) );
+                memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
+						 sizeof ( aarOutput ) );
+                memcpy ( pmr->d.CubeDecPtr->aarStdDev, aarStdDev, 
+						 sizeof ( aarStdDev ) );
 	      
 		rSkill = arDouble[ OUTPUT_TAKE ] <
 		    arDouble[ OUTPUT_DROP ] ?
@@ -791,18 +797,21 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
-	    pmr->d.esDouble = esDouble;
+	    pmr->d.CubeDecPtr->esDouble = esDouble;
 
-            memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
-            memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
-            memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
+            memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 
+					 sizeof ( arDouble ) );
+            memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
+					 sizeof ( aarOutput ) );
+            memcpy ( pmr->d.CubeDecPtr->aarStdDev, aarStdDev, 
+					 sizeof ( aarStdDev ) );
 	  
             pmr->d.st = Skill ( -arDouble[ OUTPUT_TAKE ] - 
                                 -arDouble[ OUTPUT_DROP ] );
 	      
 	}
         else
-          pmr->d.esDouble.et = EVAL_NONE;
+          pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
 
         if ( fUpdateStatistics )
           updateStatcontext ( psc, pmr, pms );
@@ -822,18 +831,21 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
-	    pmr->d.esDouble = esDouble;
+	    pmr->d.CubeDecPtr->esDouble = esDouble;
 
-	    memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
-            memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
-            memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
+	    memcpy( pmr->d.CubeDecPtr->arDouble, arDouble, 
+				sizeof( arDouble ) );
+	    memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
+				 sizeof ( aarOutput ) );
+	    memcpy ( pmr->d.CubeDecPtr->aarStdDev, aarStdDev, 
+				 sizeof ( aarStdDev ) );
 	  
-            pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
+	    pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
                                -arDouble[ OUTPUT_TAKE ] );
 	      
 	}
         else
-          pmr->d.esDouble.et = EVAL_NONE;
+          pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
 
         if ( fUpdateStatistics )
           updateStatcontext ( psc, pmr, pms );
@@ -2075,7 +2087,7 @@ AnalyseClearMove ( moverecord *pmr ) {
   case MOVE_TAKE:
   case MOVE_DROP:
 
-    pmr->d.esDouble.et = EVAL_NONE;
+    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
     break;
       

@@ -1750,12 +1750,13 @@ static void SetAnnotation( moverecord *pmr ) {
 
             if ( dt == DT_NORMAL ) {
 	    
-              fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
+              fixOutput ( pmr->d.CubeDecPtr->arDouble, 
+						  pmr->d.CubeDecPtr->aarOutput );
             
-              if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
-                                               pmr->d.aarStdDev,
-                                               pmr->d.arDouble,
-                                               &pmr->d.esDouble,
+              if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
+                                               pmr->d.CubeDecPtr->aarStdDev,
+                                               pmr->d.CubeDecPtr->arDouble,
+                                               &pmr->d.CubeDecPtr->esDouble,
                                                MOVE_DOUBLE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
@@ -1795,12 +1796,13 @@ static void SetAnnotation( moverecord *pmr ) {
 
             if ( tt == TT_NORMAL ) {
 
-              fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
+              fixOutput ( pmr->d.CubeDecPtr->arDouble, 
+						  pmr->d.CubeDecPtr->aarOutput );
               
-              if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
-                                               pmr->d.aarStdDev,
-                                               pmr->d.arDouble,
-                                               &pmr->d.esDouble,
+              if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
+                                               pmr->d.CubeDecPtr->aarStdDev,
+                                               pmr->d.CubeDecPtr->arDouble,
+                                               &pmr->d.CubeDecPtr->esDouble,
                                                pmr->mt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );

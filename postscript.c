@@ -1132,8 +1132,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptBoard( pf, &msExport, pmr->d.fPlayer );
 
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-					 pmr->d.arDouble, 
-                                         pmr->d.aarOutput, &pmr->d.esDouble );
+									 pmr->d.CubeDecPtr->arDouble, 
+									 pmr->d.CubeDecPtr->aarOutput, 
+									 &pmr->d.CubeDecPtr->esDouble );
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );

@@ -2811,7 +2811,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 
     case MOVE_DOUBLE:
-      DisplayCubeAnalysis( pmr->d.arDouble, pmr->d.aarOutput,
+      DisplayCubeAnalysis( pmr->d.CubeDecPtr->arDouble, 
+						   pmr->d.CubeDecPtr->aarOutput,
                              &pmr->n.esDouble );
 	break;
 

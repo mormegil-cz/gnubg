@@ -1087,19 +1087,34 @@ static void RestoreNode( list *pl, char *szCharset ) {
 		pmr->mt = MOVE_DOUBLE;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
-		pmr->d.esDouble.et = EVAL_NONE;
+		pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+		pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
 	    } else if( !strcmp( pch, "take" ) ) {
+		moverecord *pmrDouble;
+
 		pmr = calloc( 1, sizeof( pmr->d ) );
 		pmr->mt = MOVE_TAKE;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
-		pmr->d.esDouble.et = EVAL_NONE;
+		if ((pmrDouble = FindTheDouble()) == 0) {
+		  free (pmr);
+		  continue;
+		}
+		pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
+		pmr->d.st = SKILL_NONE;
 	    } else if( !strcmp( pch, "drop" ) ) {
+		moverecord *pmrDouble;
+
 		pmr = calloc( 1, sizeof( pmr->d ) );
 		pmr->mt = MOVE_DROP;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
-		pmr->d.esDouble.et = EVAL_NONE;
+		if ((pmrDouble = FindTheDouble()) == 0) {
+		  free (pmr);
+		  continue;
+		}
+		pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
+		pmr->d.st = SKILL_NONE;
 	    } else {
 		pmr = calloc( 1, sizeof( pmr->n ) );
 		pmr->mt = MOVE_NORMAL;
@@ -1287,10 +1302,10 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	case MOVE_DROP:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-				       pmr->d.arDouble, 
-                                       pmr->d.aarOutput,
-                                       pmr->d.aarStdDev,
-                                       &pmr->d.esDouble );
+							   pmr->d.CubeDecPtr->arDouble, 
+							   pmr->d.CubeDecPtr->aarOutput,
+							   pmr->d.CubeDecPtr->aarStdDev,
+							   &pmr->d.CubeDecPtr->esDouble );
 	    pmr->d.st = ast[ 0 ];
 	    break;
 	    
@@ -2123,10 +2138,11 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_DOUBLE:
 	    fprintf( pf, "\n;%c[double]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    if( pmr->d.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.arDouble,
-                                     pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble );
+	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+							 pmr->d.CubeDecPtr->aarOutput, 
+							 pmr->d.CubeDecPtr->aarStdDev,
+							 &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -2135,10 +2151,11 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_TAKE:
 	    fprintf( pf, "\n;%c[take]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    if( pmr->d.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.arDouble,
-                                     pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble );
+	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+							 pmr->d.CubeDecPtr->aarOutput, 
+							 pmr->d.CubeDecPtr->aarStdDev,
+							 &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -2147,10 +2164,11 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_DROP:
 	    fprintf( pf, "\n;%c[drop]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    if( pmr->d.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.arDouble,
-                                     pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble );
+	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+							 pmr->d.CubeDecPtr->aarOutput,
+							 pmr->d.CubeDecPtr->aarStdDev,
+							 &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    

@@ -488,8 +488,8 @@ extern void AddMoveRecord( void *pv ) {
     case MOVE_DOUBLE:
     case MOVE_TAKE:
     case MOVE_DROP:
-        assert( pmr->d.esDouble.et >= EVAL_NONE &&
-                pmr->d.esDouble.et <= EVAL_ROLLOUT );
+        assert( pmr->d.CubeDecPtr->esDouble.et >= EVAL_NONE &&
+                pmr->d.CubeDecPtr->esDouble.et <= EVAL_ROLLOUT );
 	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
 	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
 	break;
@@ -2150,13 +2150,13 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
 	    
         /* store cube decision for annotation */
 
-        ec2es ( &pmr->d.esDouble, pec );
-        memcpy ( pmr->d.aarOutput, aarOutput, 
+        ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
+        memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
-        memset ( pmr->d.aarStdDev, 0,
+        memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
+        memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
         pmr->d.st = SKILL_NONE;
 
         /* find skill */
@@ -2251,7 +2251,8 @@ extern void CommandDouble( char *sz ) {
     pmr->d.mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE, pmr ) ))
@@ -2333,12 +2334,12 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	    
         /* store cube decision for annotation */
 
-        ec2es ( &pmr->d.esDouble, pec );
-        memcpy ( pmr->d.aarOutput, aarOutput, 
+        ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
+        memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memset ( pmr->d.aarStdDev, 0,
+        memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
+        memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
         pmr->d.st = SKILL_NONE;
 
 	    
@@ -2389,7 +2390,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
 extern void CommandDrop( char *sz ) {
 
-    moverecord *pmr;
+    moverecord *pmr, *pmrDouble;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can drop it.") );
@@ -2409,7 +2410,11 @@ extern void CommandDrop( char *sz ) {
     pmr->d.mt = MOVE_DROP;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    if ((pmrDouble = FindTheDouble()) == 0) {
+      free (pmr);
+      return;
+    }
+    pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( TRUE, pmr ) )) {
@@ -3495,7 +3500,7 @@ extern void CommandRedouble( char *sz ) {
     pmr->mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
@@ -3794,7 +3799,7 @@ CommandRoll( char *sz ) {
 
 extern void CommandTake( char *sz ) {
 
-    moverecord *pmr;
+    moverecord *pmr, *pmrDouble;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can take it.") );
@@ -3814,7 +3819,11 @@ extern void CommandTake( char *sz ) {
     pmr->d.mt = MOVE_TAKE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    if ((pmrDouble = FindTheDouble()) == 0) {
+      free (pmr);
+      return;
+    }
+    pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( FALSE, pmr ) )) {
@@ -4097,13 +4106,17 @@ getCurrentMoveRecord ( int *pfHistory ) {
       mrHint.d.mt = MOVE_DOUBLE;
       mrHint.d.sz = NULL;
       mrHint.d.fPlayer = ms.fTurn;
-      mrHint.d.esDouble = sc.es;
+      mrHint.d.CubeDecPtr = &mrHint.d.CubeDec;
+      mrHint.d.CubeDecPtr->esDouble = sc.es;
       mrHint.d.st = SKILL_NONE;
-      memcpy ( mrHint.d.aarOutput, sc.aarOutput, sizeof ( sc.aarOutput ) );
-      memcpy ( mrHint.d.aarStdDev, sc.aarStdDev, sizeof ( sc.aarStdDev ) );
+      memcpy ( mrHint.d.CubeDecPtr->aarOutput, sc.aarOutput, 
+               sizeof ( sc.aarOutput ) );
+      memcpy ( mrHint.d.CubeDecPtr->aarStdDev, sc.aarStdDev, 
+               sizeof ( sc.aarStdDev ) );
       
       GetMatchStateCubeInfo( &ci, &ms );
-      FindCubeDecision ( mrHint.d.arDouble, mrHint.d.aarOutput, &ci );
+      FindCubeDecision ( mrHint.d.CubeDecPtr->arDouble, 
+                         mrHint.d.CubeDecPtr->aarOutput, &ci );
 
       return &mrHint;
 
@@ -4212,3 +4225,21 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
 
 }
 
+
+/* a routine to find the most recent double record in the current 
+   game list being built
+   Used to allow take/drop records to point their analysis data at the
+   corresponding analysis of the double
+   returns NULL if it can't find one or if it's not a MOVE_DOUBLE
+*/
+
+moverecord *FindTheDouble (void) {
+  
+  moverecord *pmr;
+
+  if (!plLastMove || ((pmr = plLastMove->p) == 0) ||
+	  pmr->mt != MOVE_DOUBLE)
+	return 0;
+
+  return pmr;
+}

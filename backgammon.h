@@ -153,15 +153,19 @@ typedef struct _movegameinfo {
     statcontext sc;
 } movegameinfo;
 
-typedef struct _movedouble {
-    movetype mt;
-    char *sz;
-    int fPlayer;
-    /* evaluation of cube action */
+typedef struct cubedecisiondata {
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float arDouble[ 4 ];
     evalsetup esDouble;
+} cubedecisiondata;
+
+typedef struct _movedouble {
+    movetype mt;
+    char *sz;
+    int fPlayer;
+    cubedecisiondata *CubeDecPtr;
+    cubedecisiondata  CubeDec;
     skilltype st;
 } movedouble;
 
@@ -379,6 +383,7 @@ extern char *NextTokenGeneral( char **ppch, const char *szTokens );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
+extern moverecord *FindTheDouble( void );
 extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );

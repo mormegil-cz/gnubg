@@ -2375,10 +2375,12 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   case MOVE_DOUBLE:
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
-                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+                                 pmr->d.CubeDecPtr->aarOutput, 
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, -1,
+                                 &pmr->d.CubeDecPtr->esDouble, 
+								 &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE, hecss );
 
     break;
@@ -2388,10 +2390,11 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
-                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+                                 pmr->d.CubeDecPtr->aarOutput, 
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, 
+                                 &pmr->d.CubeDecPtr->esDouble, &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
                                  pmr->d.st, hecss );

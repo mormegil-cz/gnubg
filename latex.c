@@ -456,8 +456,9 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    PrintLaTeXBoard( pf, &msExport, pmr->d.fPlayer );
 
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-				    pmr->d.arDouble, 
-                                    pmr->d.aarOutput, &pmr->d.esDouble );
+								pmr->d.CubeDecPtr->arDouble, 
+								pmr->d.CubeDecPtr->aarOutput, 
+								&pmr->d.CubeDecPtr->esDouble );
 
 	    /* FIXME what about beavers? */
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
