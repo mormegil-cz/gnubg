@@ -288,7 +288,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 			/* Add entry for unknown texture */
 			TextureInfo text;
 			strcpy(text.file, file);
-			if (len > 4 && !stricmp(&file[len - 4], ".png"))
+			if (len > 4 && !strcasecmp(&file[len - 4], ".png"))
 				text.format = TF_PNG;
 			else
 				text.format = TF_BMP;
