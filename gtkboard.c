@@ -2294,55 +2294,74 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
     }
 }
 
+static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
+			    unsigned char *puchSrc, int nStride,
+			    int cx, int cy ) {
+    
+#if USE_GTK2
+    unsigned char *puch, *puchDest, *auch = g_alloca( cx * cy * 4 );
+    int ix, iy;
+    GdkPixbuf *ppb;
+
+    puchDest = auch;
+    puch = puchSrc;
+    nStride -= cx * 4;
+    
+    for( iy = 0; iy < cy; iy++ ) {
+	for( ix = 0; ix < cx; ix++ ) {
+	    puchDest[ 0 ] = puch[ 0 ] * 0x100 / ( 0x100 - puch[ 3 ] );
+	    puchDest[ 1 ] = puch[ 2 ] * 0x100 / ( 0x100 - puch[ 3 ] );
+	    puchDest[ 2 ] = puch[ 2 ] * 0x100 / ( 0x100 - puch[ 3 ] );
+	    puchDest[ 3 ] = 0xFF - puch[ 3 ];
+
+	    puch += 4;
+	    puchDest += 4;
+	}
+	puch += nStride;
+    }
+	
+    ppb = gdk_pixbuf_new_from_data( auch, GDK_COLORSPACE_RGB, TRUE, 8,
+				    cx, cy, cx * 4, NULL, NULL );
+    
+    gdk_pixbuf_render_to_drawable_alpha( ppb, pd, 0, 0, x, y, cx, cy,
+					 GDK_PIXBUF_ALPHA_FULL, 128,
+					 GDK_RGB_DITHER_MAX, 0, 0 );
+    g_object_unref( G_OBJECT( ppb ) );
+#else
+    guchar *mask = malloc( ( cy ) * ( cx + 7 ) >> 3 );
+    GdkImage *pi = gdk_image_new_bitmap( gdk_window_get_visual( pd ),
+					  mask, cx, cy );
+    GdkBitmap *pbm = gdk_pixmap_new( NULL, cx, cy, 1 );
+    GdkGC *gc;
+    int ix, iy;
+    
+    for( iy = 0; iy < cy; iy++ )
+	for( ix = 0; ix < cx; ix++ )
+	    gdk_image_put_pixel( pi, ix, iy, puchSrc[ iy * nStride +
+						      ix * 4 + 3 ] & 0x80 ?
+				 MASK_INVISIBLE : MASK_VISIBLE );
+    gc = gdk_gc_new( pbm );
+    gdk_draw_image( pbm, gc, pi, 0, 0, 0, 0, cx, cy );
+    gdk_gc_unref( gc );
+    gc = gdk_gc_new( pd );
+    gdk_gc_set_clip_mask( gc, pbm );
+    gdk_gc_set_clip_origin( gc, x, y );
+    gdk_draw_rgb_32_image( pd, gc, x, y, cx, cy, GDK_RGB_DITHER_MAX, puchSrc,
+			   nStride );
+    gdk_gc_unref( gc );
+    gdk_image_destroy( pi );
+    gdk_pixmap_unref( pbm );
+#endif
+}    
+
 static void DrawDie( GdkDrawable *pd, BoardData *pbd, int x, int y,
 		     int fColour, int n ) {
 
     int s = pbd->rd.nSize;
     int ix, iy, afPip[ 9 ];
-#if USE_GTK2
-    unsigned char *puch, *puchDest, *auch = g_alloca( 7 * s * 7 * s * 4 );
-    int i;
-    GdkPixbuf *ppb;
-    
-    for( i = 0, puchDest = auch, puch = pbd->ri.achDice[ fColour ];
-	 i < 7 * s * 7 * s; i++, puch += 4, puchDest += 4 ) {
-	puchDest[ 0 ] = puch[ 0 ] * 0x100 / ( 0x100 - puch[ 3 ] );
-	puchDest[ 1 ] = puch[ 2 ] * 0x100 / ( 0x100 - puch[ 3 ] );
-	puchDest[ 2 ] = puch[ 2 ] * 0x100 / ( 0x100 - puch[ 3 ] );
-	puchDest[ 3 ] = 0xFF - puch[ 3 ];
-    }
-	
-    ppb = gdk_pixbuf_new_from_data( auch, GDK_COLORSPACE_RGB, TRUE, 8,
-				    7 * s, 7 * s, 7 * s * 4, NULL, NULL );
-    
-    gdk_pixbuf_render_to_drawable_alpha( ppb, pd, 0, 0, x, y, 7 * s, 7 * s,
-					 GDK_PIXBUF_ALPHA_FULL, 128,
-					 GDK_RGB_DITHER_MAX, 0, 0 );
-    g_object_unref( G_OBJECT( ppb ) );
-#else
-    guchar *mask = malloc( ( 7 * s ) * ( 7 * s + 7 ) >> 3 );
-    GdkImage *pi = gdk_image_new_bitmap( gdk_window_get_visual( pd ),
-					  mask, 7 * s, 7 * s );
-    GdkBitmap *pbm = gdk_pixmap_new( NULL, 7 * s, 7 * s, 1 );
-    GdkGC *gc;
 
-    for( iy = 0; iy < 7 * s; iy++ )
-	for( ix = 0; ix < 7 * s; ix++ )
-	    gdk_image_put_pixel( pi, ix, iy, pbd->ri.achDice[ fColour ]
-				 [ iy * s * 7 * 4 + ix * 4 + 3 ] & 0x80 ?
-				 MASK_INVISIBLE : MASK_VISIBLE );
-    gc = gdk_gc_new( pbm );
-    gdk_draw_image( pbm, gc, pi, 0, 0, 0, 0, 7 * s, 7 * s );
-    gdk_gc_unref( gc );
-    gdk_gc_set_clip_mask( pbd->gc_copy, pbm );
-    gdk_gc_set_clip_origin( pbd->gc_copy, x, y );
-    gdk_draw_rgb_32_image( pd, pbd->gc_copy, x, y, 7 * s, 7 * s,
-			   GDK_RGB_DITHER_MAX, pbd->ri.achDice[ fColour ],
-			   7 * s * 4 );
-    gdk_gc_set_clip_mask( pbd->gc_copy, NULL );
-    gdk_image_destroy( pi );
-    gdk_pixmap_unref( pbm );
-#endif
+    DrawAlphaImage( pd, x, y, pbd->ri.achDice[ fColour ], 7 * s * 4,
+		    7 * s, 7 * s );
     
     afPip[ 0 ] = afPip[ 8 ] = ( n == 2 ) || ( n == 3 ) || ( n == 4 ) ||
 	( n == 5 ) || ( n == 6 );
@@ -3023,6 +3042,87 @@ extern GtkType board_get_type( void ) {
     }
     
     return board_type;
+}
+
+static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
+				    BoardData *bd ) {
+
+    int n, nValue;
+    unsigned char *puch;
+    
+    if( event->count )
+	return TRUE;
+
+    n = (int) gtk_object_get_user_data( GTK_OBJECT( cube ) );
+    if( ( nValue = n % 13 - 1 ) == -1 )
+	nValue = 5; /* use 64 cube for 1 */
+    
+    puch = g_alloca( 6 * bd->rd.nSize * 6 * bd->rd.nSize * 3 );
+    CopyAreaRotateClip( puch, 6 * bd->rd.nSize * 3, 0, 0,
+			6 * bd->rd.nSize, 6 * bd->rd.nSize,
+			bd->ri.achCubeFaces, 6 * bd->rd.nSize * 3, 0,
+			6 * bd->rd.nSize * nValue,
+			6 * bd->rd.nSize, 6 * bd->rd.nSize,
+			2 - n / 13 );
+    
+    DrawAlphaImage( cube->window, 0, 0, bd->ri.achCube, 8 * bd->rd.nSize * 4,
+		    8 * bd->rd.nSize, 8 * bd->rd.nSize );
+    gdk_draw_rgb_image( cube->window, bd->gc_copy, bd->rd.nSize, bd->rd.nSize,
+			6 * bd->rd.nSize, 6 * bd->rd.nSize, GDK_RGB_DITHER_MAX,
+			puch, 6 * bd->rd.nSize * 3 );
+    
+    return TRUE;
+}
+
+static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
+				   BoardData *bd ) {
+
+    GtkWidget *pwTable = cube->parent;
+    int n = (int) gtk_object_get_user_data( GTK_OBJECT( cube ) );
+    int *an = gtk_object_get_user_data( GTK_OBJECT( pwTable ) );
+
+    an[ 0 ] = n % 13; /* value */
+    if( n < 13 )
+	an[ 1 ] = 0; /* top player */
+    else if( n < 26 )
+	an[ 1 ] = -1; /* centred */
+    else
+	an[ 1 ] = 1; /* bottom player */
+
+    gtk_widget_destroy( pwTable );
+    
+    return TRUE;
+}
+
+extern GtkWidget *board_cube_widget( Board *board ) {
+
+    GtkWidget *pw = gtk_table_new( 3, 13, TRUE ), *pwCube;
+    BoardData *bd = board->board_data;    
+    int x, y;
+
+    for( y = 0; y < 3; y++ )
+	for( x = 0; x < 13; x++ ) {
+	    pwCube = gtk_drawing_area_new();
+	    gtk_object_set_user_data( GTK_OBJECT( pwCube ),
+				      (gpointer) ( y * 13 + x ) );
+	    gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
+				   8 * bd->rd.nSize, 8 * bd->rd.nSize );
+	    gtk_widget_add_events( pwCube, GDK_EXPOSURE_MASK |
+				   GDK_BUTTON_PRESS_MASK |
+				   GDK_STRUCTURE_MASK );
+	    gtk_signal_connect( GTK_OBJECT( pwCube ), "expose_event",
+				GTK_SIGNAL_FUNC( cube_widget_expose ), bd );
+	    gtk_signal_connect( GTK_OBJECT( pwCube ), "button_press_event",
+				GTK_SIGNAL_FUNC( cube_widget_press ), bd );
+	    gtk_table_attach_defaults( GTK_TABLE( pw ), pwCube,
+				       x, x + 1, y, y + 1 );
+        }
+
+    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * bd->rd.nSize );
+    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * bd->rd.nSize );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->rd.nSize );
+    
+    return pw;	    
 }
 
 static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,

@@ -250,9 +250,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "xcopy"
 };
 
-static char szSetCubeValue[20]; /* set cube value XX */
-static char szSetCubeOwner[20]; /* set cube owner X */
-
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
 static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
@@ -299,8 +296,6 @@ static void SetMET( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
-static void SetCubeValue( GtkWidget *wd, int data);
-static void SetCubeOwner( GtkWidget *wd, int i);
 static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 
@@ -309,7 +304,7 @@ static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard, *pwMain, *pwMenuBar;
 static GtkWidget *pwStatus, *pwProgress, *pwGameList, *pom,
-    *pwAnalysis, *pwCommentary, *pwSetCube;
+    *pwAnalysis, *pwCommentary;
 static GtkWidget *pwHint = NULL;
 static GtkWidget *pwAnnotation = NULL;
 static GtkWidget *pwMessage = NULL, *pwMessageText;
@@ -671,6 +666,60 @@ extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw ) {
 	sprintf( sz, "set dice %d %d", an[ 0 ], an[ 1 ] );
 	UserCommand( sz );
     }
+}
+
+extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
+
+    int an[ 2 ];
+    char sz[ 20 ]; /* "set cube value 4096" */
+    GtkWidget *pwDialog, *pwCube;
+
+    if( ms.gs != GAME_PLAYING || ms.fCrawford || !fCubeUse )
+	return;
+	
+    pwDialog = CreateDialog( _("GNU Backgammon - Cube"),
+			     DT_QUESTION, NULL, NULL );
+    pwCube = board_cube_widget( BOARD( pwBoard ) );
+
+    an[ 0 ] = -1;
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwCube );
+    gtk_object_set_user_data( GTK_OBJECT( pwCube ), an );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwCube ), "destroy",
+			GTK_SIGNAL_FUNC( DestroySetDice ), pwDialog );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( an[ 0 ] < 0 )
+	return;
+
+    outputpostpone();
+    
+    if( 1 << an[ 0 ] != ms.nCube ) {
+	sprintf( sz, "set cube value %d", 1 << an[ 0 ] );
+	UserCommand( sz );
+    }
+
+    if( an[ 1 ] != ms.fCubeOwner ) {
+	if( an[ 1 ] >= 0 ) {
+	    sprintf( sz, "set cube owner %d", an[ 1 ] );
+	    UserCommand( sz );
+	} else
+	    UserCommand( "set cube centre" );
+    }
+    
+    outputresume();
 }
 
 typedef struct _gamelistrow {
@@ -7527,121 +7576,6 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_main();
   GTKAllowStdin();
 } 
-
-static GtkWidget* CreateSetCubeDialog ( int *pfOK )
-{
-
-  GtkWidget *SetCubeWindow, *hbox1, *frame1, *vbox1, *vbox2,
-    *pwRBValue[7], *pwRBOwner[3];
-  GSList *value_group = NULL, *owner_group = NULL;
-  int i, nCubeTurns;
-
-  for( nCubeTurns = 0; ms.nCube >> ( nCubeTurns + 1 ); nCubeTurns++ )
-       ;
-
-  *pfOK = FALSE;
-  SetCubeWindow = CreateDialog( _("GNU Backgammon - Cube"), DT_QUESTION, NULL,
-				pfOK );
-
-  hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (DialogArea( SetCubeWindow, DA_MAIN )),
-		     hbox1);
-
-  frame1 = gtk_frame_new (_("Value"));
-  gtk_box_pack_start (GTK_BOX (hbox1), frame1, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame1), 3);
-
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (frame1), vbox1);
-
-  for (i = 0; i < 7; i++){
-    char szNum[3];
-
-    sprintf(szNum, "%d", 1 << i);
-    pwRBValue[i] = gtk_radio_button_new_with_label (value_group, szNum);
-    value_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBValue[i]));
-    gtk_box_pack_start (GTK_BOX (vbox1), pwRBValue[i], FALSE, FALSE, 0);
-  }
-
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
-
-  frame1 = gtk_frame_new (_("Owner"));
-  gtk_box_pack_start (GTK_BOX (vbox1), frame1, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame1), 3);
-
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_container_add (GTK_CONTAINER (frame1), vbox2);
-
-  pwRBOwner[0] = gtk_radio_button_new_with_label (owner_group, _("Centred"));
-  owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBOwner[0]));
-  gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[0], FALSE, FALSE, 0);
-
-  pwRBOwner[1] = gtk_radio_button_new_with_label (owner_group, ap[0].szName);
-  owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBOwner[1]));
-  gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[1], FALSE, FALSE, 0);
-
-  pwRBOwner[2] = gtk_radio_button_new_with_label (owner_group, ap[1].szName);
-  owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBOwner[2]));
-  gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[2], FALSE, FALSE, 0);
-
-  for (i = 0; i < 7 ; i++) {
-    gtk_signal_connect (GTK_OBJECT (pwRBValue[i]), "clicked",
-                        GTK_SIGNAL_FUNC (SetCubeValue),
-               (unsigned int *) (1 << i) );
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON( pwRBValue[i] ),
-                  ( i == nCubeTurns) );
-  }
-
-  for (i = -1; i < 2; i++){
-    gtk_signal_connect (GTK_OBJECT (pwRBOwner[i+1]), "clicked",
-                        GTK_SIGNAL_FUNC (SetCubeOwner), (int *) i);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON( pwRBOwner[i+1] ),
-                        ( i == ms.fCubeOwner ) );
-  }
-
-  return SetCubeWindow;
-}
-
-extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
-
-  int fOK;
-    
-  pwSetCube = CreateSetCubeDialog( &fOK );
-
-  gtk_window_set_modal( GTK_WINDOW( pwSetCube ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwSetCube ),
-				GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwSetCube ), "destroy",
-		      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-  gtk_widget_show_all( pwSetCube );
-
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
-
-  if( fOK ) {
-      UserCommand(szSetCubeValue);
-      UserCommand(szSetCubeOwner);
-  }
-}
-
-static void SetCubeValue( GtkWidget *wd, int data) {
-
-  sprintf(szSetCubeValue, "set cube value %d", data);
-
-}
-
-static void SetCubeOwner( GtkWidget *wd, int i) {
-
-  if ( i == -1 ) 
-    sprintf(szSetCubeOwner,"set cube centre");
-  else
-    sprintf(szSetCubeOwner,"set cube owner %d", i);
-
-}
-
 
 typedef struct _pathdata {
 

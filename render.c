@@ -1725,7 +1725,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 	    FT_Get_Glyph( ftf->glyph, aftg + i );
 	}
 	
-	FT_Set_Pixel_Sizes( ftf, 0, 22 * prd->nSize / 8 );
+	FT_Set_Pixel_Sizes( ftf, 0, 21 * prd->nSize / 8 );
 	
 	for( i = 0; i < 10; i++ ) {
 	    FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );

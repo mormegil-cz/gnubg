@@ -1,3 +1,12 @@
+Fri Dec 20 14:48:44 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_cube_widget): New function.  Allow selection of
+	cube values up to 4096.
+	* gtkgame.c (GTKSetCube): Rewritten in terms of board_cube_widget.
+
+	* render.c (RenderCubeFaces): Reduce the size of the small cube face
+	font (it looked bad at size 4).
+
 Fri Dec 20 12:00:36 2002  Gary Wong  <gtw@gnu.org>
 
 	* htmlimages.c: New file.  Add "export htmlimages" command.
