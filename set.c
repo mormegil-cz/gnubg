@@ -319,6 +319,8 @@ SetMoveFilter(char* sz,
   int		  extras;
   float 	  tolerance;
 
+  outputf( _("Temporary debug: '%s' '%s'\n"), szSetCommand, sz );
+
   if (ply < 0) {
 	outputl ( N_("You must specify for which ply you want to set a filter") );
 	return;
@@ -340,7 +342,7 @@ SetMoveFilter(char* sz,
 
   if ((accept = ParseNumber( &sz ) ) == INT_MIN ) {
 	outputf (N_ ("You must specify a number of moves to accept (or a negative number to skip "
-			 "this level -- try help set %s movefilter "), szSetCommand);
+			 "this level -- try help set %s movefilter"), szSetCommand);
 	return;
   }
 
@@ -354,7 +356,7 @@ SetMoveFilter(char* sz,
   if ( ( ( extras = ParseNumber( &sz ) ) < 0 )  || 
 	   ( ( tolerance = ParseReal( &sz ) ) < 0.0 )) {
 	outputf (N_ ("You must set a count of extra moves and a search tolerance "
-				 "-- try help set %s movefilter plies level accept"), 
+				 "-- try help set %s movefilter"), 
 			 szSetCommand);
 	return;
   }
@@ -1489,6 +1491,7 @@ extern void CommandSetPlayer( char *sz ) {
 
     char *pch = NextToken( &sz ), *pchCopy;
     int i;
+    char szTemp[ 32 ];
 
     if( !pch ) {
 	outputl( _("You must specify a player -- try `help set player'.") );
@@ -1496,8 +1499,11 @@ extern void CommandSetPlayer( char *sz ) {
 	return;
     }
 
+    szSetCommand = szTemp;
+
     if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
-	iPlayerSet = i;
+        iPlayerSet = i;
+        sprintf( szTemp, "player %d", i );
 
 	HandleCommand( sz, acSetPlayer );
 	UpdateSetting( ap );
@@ -1517,9 +1523,11 @@ extern void CommandSetPlayer( char *sz ) {
 	outputpostpone();
 	
 	iPlayerSet = 0;
+        szSetCommand = "player 0";
 	HandleCommand( sz, acSetPlayer );
 
 	iPlayerSet = 1;
+        szSetCommand = "player 1";
 	HandleCommand( pchCopy, acSetPlayer );
 
 	outputresume();
@@ -1859,6 +1867,7 @@ CommandSetRolloutChequerplay ( char *sz ) {
 extern void
 CommandSetRolloutMoveFilter ( char *sz ) {
 
+  szSetCommand = "rollout";
   SetMoveFilter ( sz, prcSet->aaamfChequer[ 0 ] );
   SetMoveFilter ( sz, prcSet->aaamfChequer[ 1 ] );
 
@@ -1867,6 +1876,7 @@ CommandSetRolloutMoveFilter ( char *sz ) {
 extern void
 CommandSetRolloutLateMoveFilter ( char *sz ) {
 
+  szSetCommand = "rollout late";
   SetMoveFilter ( sz, prcSet->aaamfLate[ 0 ] );
   SetMoveFilter ( sz, prcSet->aaamfLate[ 1 ] );
 
@@ -1875,6 +1885,7 @@ CommandSetRolloutLateMoveFilter ( char *sz ) {
 extern void
 CommandSetRolloutPlayerMoveFilter ( char *sz ) {
 
+  szSetCommand = "rollout player";
   SetMoveFilter ( sz, prcSet->aaamfChequer[ iPlayerSet ] );
 
 }  
@@ -1882,6 +1893,7 @@ CommandSetRolloutPlayerMoveFilter ( char *sz ) {
 extern void
 CommandSetRolloutPlayerLateMoveFilter ( char *sz ) {
 
+  szSetCommand = "rollout player late";
   SetMoveFilter ( sz, prcSet->aaamfLate[ iPlayerLateSet ] );
 
 }  
@@ -3056,12 +3068,14 @@ CommandSetEvalCubedecision ( char *sz ) {
 
 extern void CommandSetEvalMoveFilter( char *sz ) {
 
+  szSetCommand = "evaluation";
   SetMoveFilter ( sz, aamfEval );
 
 }
 
 extern void CommandSetAnalysisMoveFilter( char *sz ) {
 
+  szSetCommand = "analysis";
   SetMoveFilter ( sz, aamfAnalysis );
 
 }

@@ -1,3 +1,8 @@
+Wed Apr 14 22:41:23 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* set.c (SetMoveFilter): insert some debug code.
+	* set.c: set szSetCommand a few places.
+
 Wed 14 Apr 2004 16:39:45 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* play.c - turn off Crawford on one point matches
