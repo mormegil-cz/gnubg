@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year November, 2000
+@set month-year February, 2001
 
 @syncodeindex vr cp
 
@@ -20,7 +20,7 @@
 This file documents GNU Backgammon, a program for playing and analysing
 backgammon games and matches.
 
-Copyright @copyright{} 1999, 2000 Gary Wong.
+Copyright @copyright{} 1999, 2000, 2001 Gary Wong.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1; with
@@ -37,7 +37,7 @@ Documentation License".
 @author Gary Wong
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1999, 2000 Gary Wong.
+Copyright @copyright{} 1999, 2000, 2001 Gary Wong.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1; with
@@ -61,6 +61,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Invocation::                     Starting and leaving gnubg.
 * Basic Commands::                 Fundamental operations in gnubg.
 * Playing::                        gnubg's game playing features.
+* GTK::                            gnubg's optional graphical interface.
 * Analysis::                       Using gnubg to evaluate positions.
 * Databases::                      Storing information about positions.
 * Training::                       Modifying gnubg's neural nets.
@@ -79,29 +80,29 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 
 GNU Backgammon (@gnubg{}) plays and analyses backgammon games and matches. 
 
-It is currently a work-in-progress.  So far it is able to play cubeless
-games and tournament matches, evaluate and roll out positions, tune its
-own evaluation functions using either
+It is currently a work-in-progress.  So far it is able to play
+individual games and tournament matches, evaluate and roll out
+positions, tune its own evaluation functions using either
 @uref{http://www.research.ibm.com/massdist/tdl.html,,TD} or supervised
 training, maintain databases of positions for training and other
 purposes, and more.
 
 It is driven by a command-line interface, and displays an ASCII
 rendition of a board on text-only terminals, but also allows the user to
-play games and manipulate positions with an X11
+play games and manipulate positions with a GTK+
 @uref{http://www.gnu.org/software/gnubg/board.jpg,,board window} where
-available.
+available.  It is extensible on platforms which support
+@uref{http://www.gnu.org/software/guile/guile.html,,Guile}.
 
-Plans for the future include completing its ability to play and analyse
-cubeful games and matches, and making it extensible on platforms where
-@uref{http://www.gnu.org/software/guile/guile.html,,Guile} is available,
-so that the user can program it to answer sophisticated questions like
-``How many chequers must Black have borne off in positions like this one
-to be able to accept a double?''@: and automate complicated rollout
-tasks.
+Plans for the future include completing its ability to analyse games and
+matches, and completing the Guile support, so that the user can program
+it to answer sophisticated questions like ``How many chequers must Black
+have borne off in positions like this one to be able to accept a
+double?''@: and automate complicated rollout tasks.
 
-It currently plays at about the level of an advanced flight tournament
-player (depending what parameters are used, it rates in the 1800s to 2000s on
+It currently plays at about the level of an advanced to open flight
+tournament player (depending what parameters are used, it rates in the
+1800s to 2000s on
 @cindex FIBS
 @uref{http://www.fibs.com/,,FIBS}, the First Internet Backgammon Server
 --- at its strongest, it ranks in the top 10 of over 6000 rated players
@@ -127,8 +128,8 @@ not expect this code to be stable; it will generally include both more
 features and more bugs than the main pre-release version.
 
 You can also compete against recent versions of @gnubg{} on FIBS; it
-plays there under the names @samp{gnu}, @samp{mgnutest} and
-@samp{mpgnu}.
+plays there under the names @samp{gnu}, @samp{mgnutest}, @samp{mpgnu}
+and @samp{gnu_one_ply}.
 
 @node How to Play Backgammon
 @chapter How to Play Backgammon
@@ -580,7 +581,7 @@ If your @gnubg{} installation is complete, you should be able to start it
 and see output similar to the following:
 
 @example
-GNU Backgammon 0.02  Copyright 1999, 2000 Gary Wong.
+GNU Backgammon 0.02  Copyright 1999, 2000, 2001 Gary Wong.
 GNU Backgammon is free software, covered by the GNU General Public
 License, and you are welcome to change it and/or distribute copies
 of it under certain conditions.  Type "show copying" to see the
@@ -828,24 +829,28 @@ that appropriate commands are documented together.  We can easily make
 a table or summary later to group commands by name; for the rest of
 the manual it is better to group them by purpose.
 
-accept                  playing
-agree                   playing
+accept                  playing		/ the game, cube
+agree                   playing         / the game
 analysis                analysis
 beaver                  playing         / cube
 database dump           databases
+database export		databases
 database generate       databases
+database import         databases
 database rollout        databases
 database train          databases
-decline                 playing
+decline                 playing		/ the game
 double                  playing         / cube
 drop                    playing         / cube
 eval                    analysis
 exit                    invocation
+export database         databases
 export game
 export match
 export pos
+external
 help                    basic
-hint                    playing?
+hint                    playing		/ the game
 list game
 list match
 list session
@@ -853,15 +858,15 @@ load commands
 load game               playing         / recording
 load match              playing         / recording
 load weights            training
-move                    playing
+move                    playing		/ the game
 new game                playing
 new match               playing         / matches and sessions
 new session             playing         / matches and sessions
-new weights
-next    		playing
+new weights		training
+next
 pass			playing
 play                    playing         / computer player
-previous		playing
+previous
 quit                    invocation
 redouble                playing         / cube
 reject                  playing
@@ -872,40 +877,40 @@ save game               playing         / recording
 save match              playing         / recording
 save settings
 save weights            training
-set auto bearoff        playing
+set auto bearoff        playing		/ the game
 set auto crawford       playing         / matches and sessions
-set auto doubles        playing         / cube
+set auto doubles        playing         / matches and sessions
 set auto game           playing         / matches and sessions
-set auto move           playing
+set auto move           playing		/ the game
 set auto roll           playing         / dice
-set beavers		playing
-set board               playing
-set cache               analysis?
-set colours
-set confirm		playing
+set beavers
+set board               playing		/ the game
+set cache               analysis
+set colours		gtk
+set confirm
 set crawford            playing         / matches and sessions
 set cube centre         playing         / cube
 set cube owner          playing         / cube
 set cube use            playing         / cube
 set cube value          playing         / cube
-set delay               playing
+set delay		gtk
 set dice                playing         / dice
-set display             playing
-set evaluation *        analysis?
+set display             playing		/ the game
+set evaluation *        analysis
 set jacoby              playing         / matches and sessions
-set matchequitytable *	analysis?
-set nackgammon          playing
-set output matchpc	playing
-set output mwc  	playing
-set output winpc        playing
+set matchequitytable *
+set nackgammon
+set output matchpc
+set output mwc
+set output winpc
 set player eval *       playing		/ computer player
+set player external	playing		/ computer player
 set player gnubg        playing         / computer player
 set player human        playing         
 set player name         playing         
-set player plies        playing         / computer player
 set player pubeval      playing         / computer player
 set postcrawford        playing         / matches and sessions
-set prompt              playing?
+set prompt
 set rng ansi            playing         / dice
 set rng bsd             playing         / dice
 set rng isaac           playing         / dice
@@ -917,39 +922,39 @@ set rollout *           analysis
 set score               playing         / matches and sessions
 set seed                playing         / dice
 set turn                playing
-show automatic          playing?
-show beavers		playing		/ matches and sessions
+show automatic
+show beavers
 show board              playing
-show cache              analysis?
+show cache              analysis
 show commands
 show confirm            playing?
 show copying            basic
 show crawford           playing         / matches and sessions
-show cube               playing         / cube
-show delay              playing
-show dice               playing         / dice
+show cube
+show delay		gtk
+show dice
 show display
 show evaluation
 show gammonprice	analysis
 show jacoby             playing         / matches and sessions
-show kleinman           analysis
+show kleinman
 show marketwindow	analysis
 show matchequitytable	analysis
-show nackgammon		playing
-show output		playing
+show nackgammon
+show output
 show pipcount           playing
 show player             playing
 show postcrawford       playing         / matches and sessions
 show prompt
 show rng                playing         / dice
-show rollout            analysis
+show rollout
 show score              playing         / matches and sessions
 show seed		playing		/ dice
-show thorp		analysis
+show thorp
 show turn               playing
 show warranty           basic
 take                    playing         / cube
-train database          databases
+train database          training
 train td                training
 ! (shell)
 : (Guile)
@@ -995,7 +1000,10 @@ weights; if you have no weights or wish to train a net from scratch,
 you can supply the @option{--no-weights} (@option{-n}) option, and
 new weights will be randomly generated.
 
-FIXME document --no-bearoff, --datadir and --window-system-only options.
+FIXME the previous command is out of date; --no-weights is now --new-weights.
+
+FIXME document --no-bearoff, --no-rc, --datadir and
+--window-system-only options.
 
 @node Leaving gnubg
 @section Leaving @gnubg
@@ -1400,6 +1408,14 @@ will be used to produce the dice rolls.  See the file @file{userrng.c}
 in the @gnubg{} distribution for an example user generator, and instructions
 on how to write your own.
 @end table
+FIXME explain optional seed parameter
+@kindex set seed
+@item set seed @var{seed}
+You can change the random number generator seed at any time with the
+@code{set seed} command.  FIXME
+@kindex show seed
+@item show seed
+FIXME
 @end table
 
 @node Computer Player
@@ -1424,6 +1440,9 @@ is useful for measuring different players against.
 based on the position.  It will never accept resignations at less than
 triple (backgammon) stakes, and will take all cubes.  It nevers offers
 resignations or doubles of its own.
+@kindex set player external
+@item set player @var{name} external
+FIXME
 @kindex set player evaluation
 @item set player @var{name} evaluation
 FIXME
@@ -1455,7 +1474,6 @@ called ``money'' play, regardless of whether any payment is involved).
 @kindex show crawford
 @kindex show postcrawford
 @kindex show jacoby
-@kindex show autodoubles
 @kindex show score
 @item new match @var{length}
 @itemx new session
@@ -1485,9 +1503,11 @@ FIXME
 @kindex take
 @kindex accept
 @kindex drop
+@kindex pass
 @kindex reject
 @kindex set cube centre
 @kindex set cube owner
+@kindex set cube use
 @kindex set cube value
 @item double
 @itemx redouble
@@ -1495,9 +1515,11 @@ FIXME
 @itemx take
 @itemx accept
 @itemx drop
+@itemx pass
 @itemx reject
 @itemx set cube centre
 @itemx set cube owner @var{player}
+@itemx set cube use
 @itemx set cube value @var{points}
 FIXME
 @end table
@@ -1521,6 +1543,21 @@ FIXME
 FIXME
 @end table
 
+@node GTK
+@chapter The Graphical Interface to @gnubg{}
+@cindex graphical interface
+@cindex GTK+
+
+@table @code
+@kindex set colours
+@kindex set delay
+@kindex show delay
+@item set colours
+@itemx set delay
+@itemx show delay
+FIXME
+@end table
+
 @node Analysis
 @chapter Using @gnubg{} to Analyse Positions
 @cindex analysis of positions
@@ -1529,15 +1566,24 @@ FIXME
 @table @code
 @kindex eval
 @kindex rollout
-@kindex set plies
+@kindex set evaluation
+@kindex set rollout
 @kindex set cache
 @kindex show cache
+@kindex show gammonprice
+@kindex show marketwindow
+@kindex show matchequitytable
+@kindex analysis
 @item eval [@var{id}|=@var{number}]
 @itemx rollout [@var{id}|=@var{number} @dots{}]
 @itemx set evaluation
 @itemx set rollout
 @itemx set cache @var{size}
 @itemx show cache
+@itemx show gammonprice
+@itemx show marketwindow
+@itemx show matchequitytable
+@itemx analysis
 FIXME
 @end table
 
@@ -1548,11 +1594,20 @@ FIXME
 
 @table @code
 @kindex database dump
-@kindex database evaluate
+@kindex database export
+@kindex export database
 @kindex database generate
+@kindex database import
+@kindex import database
+@kindex database rollout
+@kindex database train
 @item database dump
-@itemx database evaluate
+@itemx database export
+@itemx export database
 @itemx database generate
+@itemx database import
+@itemx import database
+@itemx database rollout
 FIXME
 @item database train
 @itemx train database
@@ -1565,14 +1620,18 @@ FIXME pointer only
 @cindex neural nets, training
 
 @table @code
+@kindex new weights
 @kindex save weights
 @kindex load weights
 @kindex database train
 @kindex train database
+@kindex train td
+@item new weights
 @item save weights @var{file}
 @itemx load weights @var{file}
 @itemx database train
 @itemx train database
+@itemx train td
 FIXME
 @end table
 
@@ -1581,7 +1640,12 @@ FIXME
 @cindex extending @t{gnubg}
 @cindex Guile
 @cindex Scheme
+
+@table @code
+@kindex :
+@item :
 FIXME
+@end table
 
 @node Frequently Asked Questions
 @chapter Frequently Asked Questions
@@ -1647,6 +1711,8 @@ during compilation, but it can be a slow process (taking half an hour
 or more, depending on the speed of your computer).  If you would rather
 not wait to generate the database yourself, you can obtain a copy
 via FTP from @uref{ftp://alpha.gnu.org/gnu/gnubg/gnubg.bd.gz}.
+
+FIXME this is out of date; gnubg can cope without gnubg.bd if it has to.
 
 @node gnubg.weights errors
 @section Now I get @samp{gnubg.weights: No such file or directory}.  What's that?
