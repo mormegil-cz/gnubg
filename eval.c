@@ -1160,11 +1160,13 @@ extern void SetGammonPrice( float rGammon, float rLoseGammon,
   arGammonPrice[ 1 ] = rLoseGammon;
   arGammonPrice[ 2 ] = rBackgammon;
   arGammonPrice[ 3 ] = rLoseBackgammon;
-  
+
+  /*
   printf ( "SetGammonPrice: %6.3f %6.3f %6.3f %6.3f\n",
 	   arGammonPrice[ 0 ], arGammonPrice[ 1 ],
 	   arGammonPrice[ 2 ], arGammonPrice[ 3 ] );
- 
+  */
+
 }
 
 extern float Utility( float ar[ NUM_OUTPUTS ] ) {
@@ -2391,88 +2393,60 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
     else {
 
       float rEq = Utility ( arOutput );
+      float rEqbck = rEq;
 
-      if ( fCubeOwner == -1 ) {
+      /*
+       * My value of holding the cube in case
+       * the cube is centered or I own it.
+       *
+       * If match play check for automatic redoubles
+       * and dead cubes etc.
+       *
+       * Cube ownership values:
+       *
+       * (1) rEq > 1.0: too good to double
+       *     My ownership: nil
+       * (2) 0.5 < rEq <= 1.0: no double
+       *     My ownership  : 1 - rEq;
+       * (3) rEq > -1: 
+       *     My ownership  : 0.25 * rEq + 0.25
+       * (4) rEq <= -1:
+       *     My ownership  : 0
+       */
 
-	/*
-	 * centered cube
-	 * (1) rEq > 1.0: too good to double
-	 *     Neither me nor opponent has value of
-	 *     owning cube.
-	 * (2) 0.5 < rEq <= 1.0: double, drop
-	 *     Opp. ownership: 0.
-	 *     My ownership  : 1.0 - rEq 
-	 *     My total equity is 1.0.
-	 * (3) -0.5 < rEq < 0.5: no double
-	 *     Opp. ownership: 0.25 * -rEq + 0.25
-	 *     My ownership  : 0.25 *  rEq + 0.25
-	 *     My total equity: rEq + 0.5 rEq
-	 * (4) -1.0 <= rEq <= -0.5: double, drop
-	 *     My equity is -1.-0.251
-	 * (5) rEq < -1: too good to double
-	 *     Ownership is worth nil.
-	 */
+      if ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove ) ) {
 
-	if ( rEq > 1.0 )
-	  prOutput[ 0 ] = rEq;
-	else if ( rEq > 0.5 )
-	  prOutput[ 0 ] = 1.0;
-	else if ( rEq > -0.5 )
-	  prOutput[ 0 ] = 1.5 * rEq;
-	else if ( rEq > -1.0 )
-	  prOutput[ 0 ] = -1;
-	else
-	  prOutput[ 0 ] = rEq;
+	/* FIXME: match play: check for dead cube, auto double */
 
-      } 
-      else if ( fCubeOwner == fMove ) {
-
-	/*
-	 * I own cube:
-	 * (1) rEq > 1.0: too good to double
-	 *     My ownership: nil
-	 * (2) 0.5 < rEq <= 1.0: no double
-	 *     My ownership  : 1 - rEq;
-	 * (3) rEq > -1: 
-	 *     My ownership  : 0.25 * rEq + 0.25
-	 * (4) rEq <= -1:
-	 *     My ownership  : 0
-	 */
-
-	if ( rEq > 1.0 )
-	  prOutput[ 0 ] = rEq;
-	else if ( rEq > 0.5 )
-	  prOutput[ 0 ] = 1.0;
-	else if ( rEq > -1.0 )
-	  prOutput[ 0 ] = 1.25 * rEq + 0.25;
-	else
-	  prOutput[ 0 ] = rEq;
+	if ( rEq > 0.5 ) {
+	  if ( rEq < 1.0 )
+	    rEq = 1.0; /* I double, opponent pass */
+	}
+	else {
+	  if ( rEq > -1.0 )
+	    rEq += 0.25 * rEq + 0.25;
+	}
 
       }
-      else { /* fCubeOwner != fMove */
 
-	/*
-	 * Opp own cube:
-	 * (1) rEq > 1.0: too good to double
-	 *     Opp ownership: nil
-	 * (2) -0.5 < rEq <= 1.0: no double
-	 *     Opp ownership : 0.25 *  -rEq + 0.25
-	 * (3) rEq > -1: 
-	 *     Opp ownership : -1 - rEq
-	 * (4) rEq <= -1:
-	 *     Opp ownership : 0
-	 */
+      if ( ( fCubeOwner == -1 ) || ( fCubeOwner != fMove ) ) {
 
-	if ( rEq > 1.0 )
-	  prOutput[ 0 ] = rEq;
-	else if ( rEq > -0.5 )
-	  prOutput[ 0 ] = 1.25 * rEq - 0.25;
-	else if ( rEq > -1.0 )
-	  prOutput[ 0 ] = -1.0;
-	else
-	  prOutput[ 0 ] = rEq;
+	/* FIXME: match play: check for dead cube, auto double */
+
+	/* Use rEqbck since rEq might have been changed above */
+
+	if ( rEqbck > -0.5 ) {
+	  if ( rEqbck < 1.0 )
+	    rEq += 0.25 * rEqbck - 0.25;
+	}
+	else {
+	  if ( rEqbck > -1.0 )
+	    rEq = -1.0; /* opponent double, I pass */
+	}
 
       }
+
+      prOutput[ 0 ] = rEq;
 
     }
 
