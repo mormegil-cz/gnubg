@@ -6308,6 +6308,11 @@ extern void GTKSet( void *p ) {
 	    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 		gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 +
 						       ms.fTurn ) ), TRUE );
+
+        enable_menu ( gtk_item_factory_get_widget ( pif, "/Game/Roll" ),
+                      ms.fMove == ms.fTurn && 
+                      ap[ ms.fMove ].pt == PLAYER_HUMAN );
+
 	fAutoCommand = FALSE;
     } else if( p == &ms.gs ) {
 	/* Handle the game state. */
@@ -6327,6 +6332,11 @@ extern void GTKSet( void *p ) {
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
 			 ms.gs == GAME_PLAYING );
+
+        enable_menu ( gtk_item_factory_get_widget ( pif, "/Game/Roll" ),
+                      ms.fMove == ms.fTurn && 
+                      ap[ ms.fMove ].pt == PLAYER_HUMAN );
+
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_NEXT_ROLL ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
