@@ -2598,7 +2598,6 @@ ImportSnowieTxt( FILE *pf ) {
 
   char sz[ 2048 ];
   char *pc;
-  char ch;
   int c;
   moverecord *pmr;
   movegameinfo *pmgi;
@@ -2630,8 +2629,7 @@ ImportSnowieTxt( FILE *pf ) {
 
   pc = sz;
   while ( ( c = fgetc ( pf ) ) > -1 ) {
-    if ( ! isspace ( ( ch = (char) c ) ) )
-      *pc++ = ch;
+    *pc++ = (char) c;
     if ( ( pc - sz ) == ( sizeof ( sz ) - 2 ) )
       break;
   }
