@@ -145,16 +145,19 @@ static int ComputerTurn( void ) {
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
-	    ListInsert( plGame, pmn );
 
 	    /* Don't use the global board for this call, to avoid
 	       race conditions with updating the board and aborting the
 	       move with an interrupt. */
 	    memcpy( anBoardMove, anBoard, sizeof( anBoardMove ) );
 	    if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-			      anBoardMove, &ap[ fTurn ].ec ) < 0 )
+			      anBoardMove, &ap[ fTurn ].ec ) < 0 ) {
+		free( pmn );
 		return -1;
-
+	    }
+	    
+	    ListInsert( plGame, pmn );
+	    
 	    memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
 	    
 	    return 0;
