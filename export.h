@@ -56,6 +56,8 @@ typedef struct _exportsetup {
 
   /* For example, frames/non frames for HTML. */
 
+  char *szHTMLPictureURL;
+
 
 } exportsetup;
 
