@@ -84,7 +84,7 @@ typedef u_int32_t md5_uint32;
 # define __P(x) ()
 #endif
 
-#ifndef __GNUC__
+#if !defined (__GNUC__) && !defined (__attribute__)
 #define __attribute__(x)
 #endif
      

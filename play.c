@@ -1605,9 +1605,10 @@ extern void CommandNext( char *sz ) {
     }
     
     if( ( pch = NextToken( &sz ) ) ) {
-	if( !strncasecmp( pch, "game", strlen( pch ) ) )
-	    return CommandNextGame( sz );
-	else
+	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
+	    CommandNextGame( sz );
+	    return;
+	} else
 	    n = ParseNumber( &pch );
     } else
 	n = 1;
@@ -1687,9 +1688,10 @@ extern void CommandPrevious( char *sz ) {
     }
     
     if( ( pch = NextToken( &sz ) ) ) {
-	if( !strncasecmp( pch, "game", strlen( pch ) ) )
-	    return CommandPreviousGame( sz );
-	else
+	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
+	    CommandPreviousGame( sz );
+	    return;
+	} else
 	    n = ParseNumber( &pch );
     } else
 	n = 1;

@@ -313,7 +313,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	    
 	    if( !XQueryPointer( pewnd->pdsp, pewnd->wnd, &wIgnore, &wIgnore,
 				&nIgnore, &nIgnore, &xEvent, &yEvent,
-				&nIgnore ) )
+				(unsigned int *) &nIgnore ) )
 		return;
 	} else {
 	    xEvent = pxev->xmotion.x;

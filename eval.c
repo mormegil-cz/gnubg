@@ -1071,7 +1071,8 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 	    /* enter this shot as available */
 	      
 	    aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
-	    cannot_hit:
+	  cannot_hit:
+	    ;
 	  }
 
   for( i = 0; i < 21; i++ )

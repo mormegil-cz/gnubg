@@ -3,7 +3,7 @@
  *
  * by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
  *
- * Modified by Gary Wong, 2000.
+ * Modified by Gary Wong, 2000, 2001.
  *
  * Functions to compute MD5 message digest of files or memory blocks.
  * according to the definition of MD5 in RFC 1321 from April 1992.
@@ -217,7 +217,7 @@ md5_process_bytes (buffer, len, ctx)
      size_t len;
      struct md5_ctx *ctx;
 {
-  //const void aligned_buffer = buffer;
+  /* const void aligned_buffer = buffer; */
 
   /* When we already have some bits in our internal buffer concatenate
      both inputs first.  */
@@ -227,7 +227,7 @@ md5_process_bytes (buffer, len, ctx)
       size_t add = 128 - left_over > len ? len : 128 - left_over;
 
       /* Only put full words in the buffer.  */
-      add -= add % __alignof__ (md5_uint32);
+      add -= add % sizeof (md5_uint32);
 
       memcpy (&ctx->buffer[left_over], buffer, add);
       ctx->buflen += add;
