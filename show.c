@@ -1321,6 +1321,9 @@ CommandShowExport ( char *sz ) {
   output ( _("- legend") );
   outputf ( "\r\t\t\t\t\t\t: %s\n\n",
             exsExport.fIncludeLegend ? _("yes") : _("no") );
+  output ( _("- match information") );
+  outputf ( "\r\t\t\t\t\t\t: %s\n\n",
+            exsExport.fIncludeMatchInfo ? _("yes") : _("no") );
 
   outputl ( _("Show: \n") );
   output ( _("- board" ) );

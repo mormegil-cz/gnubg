@@ -48,7 +48,7 @@ typedef struct _exportwidget {
 
   /* include */
 
-  GtkWidget *apwInclude[ 4 ];
+  GtkWidget *apwInclude[ 5 ];
 
   /* board */
 
@@ -93,6 +93,9 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
 
   pexs->fIncludeLegend = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 3 ] ) );
+
+  pexs->fIncludeMatchInfo = 
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 4 ] ) );
 
 
   /* board */
@@ -189,6 +192,7 @@ SetExportCommands ( const exportsetup *pexsOrig,
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeAnalysis, "include analysis" );
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeStatistics, "include statistics" );
   CHECKFLAG ( pexsOrig, pexsNew, fIncludeLegend, "include legend" );
+  CHECKFLAG ( pexsOrig, pexsNew, fIncludeMatchInfo, "include matchinfo" );
 
   /* board */
 
@@ -305,6 +309,8 @@ ExportSet ( exportwidget *pew ) {
                                 pexs->fIncludeStatistics );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 3 ] ),
                                 pexs->fIncludeLegend );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->apwInclude[ 4 ] ),
+                                pexs->fIncludeMatchInfo );
 
   /* board */
 
@@ -374,7 +380,8 @@ GTKShowExport ( exportsetup *pexs ) {
     N_("Annotations"), 
     N_("Analysis"), 
     N_("Statistics"), 
-    N_("Legend") };
+    N_("Legend"),
+    N_("Match Information") };
 
   char *aszMovesDisplay[] = {
     N_("Show for moves marked 'very bad'"),
@@ -428,7 +435,7 @@ GTKShowExport ( exportsetup *pexs ) {
   pwVBox = gtk_vbox_new ( FALSE, 0 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwVBox );
 
-  for ( i = 0; i < 4; i++ ) {
+  for ( i = 0; i < 5; i++ ) {
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwInclude[ i ] =

@@ -1410,7 +1410,8 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
         TextPrologue( pf, &msExport, iGame );
 
-        TextMatchInfo ( pf, &mi );
+        if ( exsExport.fIncludeMatchInfo )
+          TextMatchInfo ( pf, &mi );
 
         msOrig = msExport;
         pmgi = &pmr->g;
@@ -1627,7 +1628,8 @@ extern void CommandExportPositionText( char *sz ) {
 
     TextPrologue ( pf, &ms, getGameNumber ( plGame ) );
 
-    TextMatchInfo ( pf, &mi );
+    if ( exsExport.fIncludeMatchInfo )
+      TextMatchInfo ( pf, &mi );
 
     TextBoardHeader ( pf, &ms, 
                       getGameNumber ( plGame ),

@@ -1,3 +1,18 @@
+Sat Oct 12 14:37:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Make match information optional in exports (text/html).
+	(suggested by Ned Cross)
+	
+	* html.c (CommandExportPositionHTML, ExportGameHTML): match information 
+	is now optional.
+	* text.c (CommandExportPositionText, ExportGameText): match information 
+	is now optional.
+	* gnubg.c (CommandSaveSettings): save new flag.
+	* gnubg.c: new command "set export include matchinfo yes|no".
+	* set.c (CommandSetExportIncludeMatchInfo): new function.
+	* show.c (CommandShowExport): show new flag.
+	* gtkexport.c: new flag.
+
 Sat Oct 12 14:29:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Player's colors wrong in html header.

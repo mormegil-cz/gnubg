@@ -2149,6 +2149,15 @@ CommandSetExportIncludeLegend ( char *sz ) {
 }
 
 extern void
+CommandSetExportIncludeMatchInfo ( char *sz ) {
+
+  SetToggle( "matchinfo", &exsExport.fIncludeMatchInfo, sz,
+             _("Include match information in exports"),
+             _("Do not include match information in exports") );
+
+}
+
+extern void
 CommandSetExportShowBoard ( char *sz ) {
 
   int n;

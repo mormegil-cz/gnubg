@@ -42,6 +42,7 @@ typedef struct _exportsetup {
   int fIncludeAnalysis;
   int fIncludeStatistics;
   int fIncludeLegend;
+  int fIncludeMatchInfo;
 
   /* display board: 0 (never), 1 (every move), 2 (every second move) etc */
 

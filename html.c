@@ -3116,7 +3116,8 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
         HTMLPrologue( pf, &msExport, iGame, aszLinks, het );
 
-        HTMLMatchInfo ( pf, &mi );
+        if ( exsExport.fIncludeMatchInfo )
+          HTMLMatchInfo ( pf, &mi );
 
         msOrig = msExport;
         pmgi = &pmr->g;
@@ -3476,7 +3477,8 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL, exsExport.het );
 
-    HTMLMatchInfo ( pf, &mi );
+    if ( exsExport.fIncludeMatchInfo )
+      HTMLMatchInfo ( pf, &mi );
 
     HTMLBoardHeader ( pf, &ms, exsExport.het,
                       getGameNumber ( plGame ),
