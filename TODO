@@ -229,8 +229,9 @@ duplication of effort and to make sure our changes merge easily.
   in gnubgtest so the tests aren't confused by user options.
 ** Change the `no-weights' option to `new-weights', and allow specification
   of the net size (e.g. "gnubg -new-weights=128").
-** Extend ParsePosition to cope with other formats (e.g. FIBS
-  "boardstyle 3").
+** Extend ParsePosition to cope with other formats, e.g. FIBS
+  "boardstyle 3" and/or a human friendly position description,
+  like "set board 0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0".
 ** Do more in CommandSaveSettings.
 ** Handle setup properties when loading games.
 
