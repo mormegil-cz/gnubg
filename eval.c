@@ -3862,14 +3862,19 @@ static void StatusRace( char *sz ) {
     StatusNeuralNet( &nnRace, "Race", sz );
 }
 
+static void StatusCrashed( char *sz ) {
+
+    StatusNeuralNet( &nnContact, "Crashed", sz );
+}
+
 static void StatusContact( char *sz ) {
 
     StatusNeuralNet( &nnContact, "Contact", sz );
 }
 
 static classstatusfunc acsf[ N_CLASSES ] = {
-  NULL, StatusBearoff2, StatusBearoff1, StatusRace,
-  StatusContact, StatusContact
+  NULL, StatusBearoff2, StatusBearoff1, StatusRace, StatusCrashed,
+  StatusContact
 };
 
 extern void EvalStatus( char *szOutput ) {
