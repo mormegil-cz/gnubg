@@ -1,3 +1,21 @@
+Sat Jun  1 13:14:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Denmark 2 - Uruguay 1 !!!
+
+	New command "set export html pictureurl xxx" and new
+	export widget.
+
+	* gnubg.c: New command "set export html pictureurl xxx".
+	* set.c (CommandSetExportHTMLPictureURL): new function.
+	* set.c (CommandSetExportShowPlayer): new logic for fSide. Bit 1
+	is player 0 and bit 2 is player 1.
+	* show.c (CommandShowExport): call new GTK widget. Display all
+	parameters. 
+	* html.c (CommandExportMatchHTML, CommandExportGameHTML,
+	CommandExportPositionHTML): use new parameter szHTMLPictureURL.
+	* gtkexport.c: new file. GTK Widget for the command "show export".
+	* gtkgame.c: new command "show export" in settings menu.
+	
 Thu May 30 21:33:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Modify game list such that the board is shown with dice rolled as
