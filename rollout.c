@@ -252,7 +252,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   int afHit[ 2 ] = { FALSE, FALSE };
 
   float rDP;
-
+  float r;
+  
   int nTruncate = prc->nTruncate;
   int cGames = prc->nTrials;
 
@@ -495,9 +496,21 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           /* Accumulate variance reduction terms */
 
-          for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-            aarVarRedn[ ici ][ i ] += arMean[ i ] -
-              aaar[ anDice[ 0 ] - 1 ][ anDice[ 1 ] - 1 ][ i ];
+          if ( pci->nMatchTo )
+            for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) 
+              aarVarRedn[ ici ][ i ] += arMean[ i ] -
+                aaar[ anDice[ 0 ] - 1 ][ anDice[ 1 ] - 1 ][ i ];
+          else {
+            for ( i = 0; i <= OUTPUT_EQUITY; i++ ) 
+              aarVarRedn[ ici ][ i ] += arMean[ i ] -
+                aaar[ anDice[ 0 ] - 1 ][ anDice[ 1 ] - 1 ][ i ];
+
+            r = arMean[ OUTPUT_CUBEFUL_EQUITY ] -
+              aaar[ anDice[ 0 ] - 1 ][ anDice[ 1 ] - 1 ]
+              [ OUTPUT_CUBEFUL_EQUITY ];
+            aarVarRedn[ ici ][ OUTPUT_CUBEFUL_EQUITY ] += 
+              r * pci->nCube / aci[ ici ].nCube;
+          }
 
         }
         else {
@@ -649,6 +662,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
     /* the final output is the sum of the resulting evaluation and
        all variance reduction terms */
 
+    if ( ! pci->nMatchTo ) 
+      aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *=
+        pci->nCube / aci [ ici ].nCube;
+    
     if ( prc->fVarRedn )
       for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
         aarOutput[ ici ][ i ] += aarVarRedn[ ici ][ i ];
@@ -661,9 +678,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 /*        else */
 /*          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= */
 /*            pci->nCube / aci [ ici ].nCube; */
-      if ( ! pci->nMatchTo ) 
-        aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *=
-          pci->nCube / aci [ ici ].nCube;
       
     }
 
