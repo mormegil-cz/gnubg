@@ -1,3 +1,7 @@
+Tue Feb  22  19:06:45 2005 Oystein Johansen <oystein@gnubg.org>
+
+	* gtkgame.c (GTKFileCommand): Apply a fix from Ingo
+	
 Fri Feb  18  16:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* matchequity.c : Fix met xml files met/catalog (By Ingo Macherius)

@@ -4222,16 +4222,19 @@ extern char *SelectFile( char *szTitle, char *szDefault, char *szPath,
 }
 
 extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
-                            char *szPath, filedialogtype fdt, pathformat pathId ) {
+                       char *szPath, filedialogtype fdt, pathformat pathId ) {
 
-    char *pch;
+  char *pch;
 
 #if GTK_CHECK_VERSION(2,4,0)
-	if (fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE) {
-		GTKFileCommand24(szPrompt, szDefault, szCommand, szPath, fdt, pathId);
-		return;
-	}
+  if (fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE) {
+    GTKFileCommand24(szPrompt, szDefault, szCommand, szPath, fdt, pathId);
+    return;
+  }
 #endif
+
+  if (pathId == PATH_NULL || fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE)
+                     fdt = FDT_NONE;
 
     if( ( pch = SelectFile( szPrompt, szDefault, szPath, fdt ) ) ) {
 #if __GNUC__
