@@ -610,6 +610,7 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 
 char *WriteMaterial(Material* pMat)
 {
+	/* Bit of a hack to remove memory allocation worries */
 #define NUM_MATS 20
 	static int cur = 0;
 	static char buf[NUM_MATS][100];
@@ -633,6 +634,14 @@ char *WriteMaterial(Material* pMat)
 		strcat(buf[cur], pMat->textureInfo->file);
 	}
 	return buf[cur];
+}
+
+char* WriteMaterialDice(renderdata* prd, int num)
+{
+	char* buf = WriteMaterial(&prd->rdDiceMat[num]);
+	strcat(buf, ";");
+	strcat(buf, prd->afDieColour[num] ? "y":"n");
+	return buf;
 }
 
 #endif
@@ -724,8 +733,8 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->pieceType,
 		WriteMaterial(&prd->rdChequerMat[0]),
 		WriteMaterial(&prd->rdChequerMat[1]),
-		WriteMaterial(&prd->rdDiceMat[0]),
-		WriteMaterial(&prd->rdDiceMat[1]),
+		WriteMaterialDice(prd, 0),
+		WriteMaterialDice(prd, 1),
 		WriteMaterial(&prd->rdDiceDotMat[0]),
 		WriteMaterial(&prd->rdDiceDotMat[1]),
 		WriteMaterial(&prd->rdCubeMat),

@@ -35,6 +35,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz );
 
 #if USE_BOARD3D
 char *WriteMaterial(Material* pMat);
+char* WriteMaterialDice(renderdata* prd, int num);
 #endif
 
 #endif

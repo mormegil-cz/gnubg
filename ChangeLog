@@ -1,3 +1,8 @@
+Mon Sep  1 10:16:46 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c (bug 4875) Simplified saving new board designs
+	* small 3d board fixes and some default designs (boards.xml)
+
 Mon Sep  1 02:48:46 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.c (real_main): Fix typo.
