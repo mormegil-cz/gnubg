@@ -1,3 +1,8 @@
+Tue Oct 1 9:38:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c: Fixed 2d board chequer shape setting.
+	* gtkpboard.c, render.c: Fixed single chequer removal from bar in edit mode
+
 Mon Sep 29 8:33:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktoolbar.c: Remeber last used import/export type+directory.
