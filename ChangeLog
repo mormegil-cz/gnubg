@@ -1,3 +1,9 @@
+Tue Aug  5 22:59:25 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, configure.in: changes needed for win32 cross
+	compilation.
+	(contributed by Mike Petch)
+
 Tue Aug  5 14:46:18 GMT 2003 Jim Segrave    <jes@jes-2.demon.nl>
 
 	* gnubg.c - fix for lost aarOuput in Hint window, fixes for

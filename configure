@@ -1646,6 +1646,7 @@ then
   . ./config.options
 fi
 
+
 for ac_prog in gawk mawk nawk awk
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -3297,6 +3298,69 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+
+
+echo "$as_me:$LINENO: checking for native Win32" >&5
+echo $ECHO_N "checking for native Win32... $ECHO_C" >&6
+case "$host" in
+  *-*-mingw*)
+    win32=yes
+    ;;
+  *)
+    win32=no
+    ;;
+esac
+echo "$as_me:$LINENO: result: $win32" >&5
+echo "${ECHO_T}$win32" >&6
+
+
+if test "$win32" = yes; then
+  OS_WIN32_TRUE=
+  OS_WIN32_FALSE='#'
+else
+  OS_WIN32_TRUE='#'
+  OS_WIN32_FALSE=
+fi
+
+
+# Ensure MSVC-compatible struct packing convention is used when
+# compiling for Win32 with gcc. GTK+ uses this convention, so we must, too.
+# What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
+# gcc2 uses "-fnative-struct".
+if test x"$win32" = xyes; then
+  if test x"$GCC" = xyes; then
+    msnative_struct=''
+    echo "$as_me:$LINENO: checking how to get MSVC-compatible struct packing" >&5
+echo $ECHO_N "checking how to get MSVC-compatible struct packing... $ECHO_C" >&6
+    if test -z "$ac_cv_prog_CC"; then
+      our_gcc="$CC"
+    else
+      our_gcc="$ac_cv_prog_CC"
+    fi
+    case `$our_gcc --version | sed -e 's,\..*,.,' -e q` in
+      2.)
+	if $our_gcc -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
+	  msnative_struct='-fnative-struct'
+	fi
+	;;
+      *)
+	if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+	  msnative_struct='-mms-bitfields'
+	fi
+	;;
+    esac
+    if test x"$msnative_struct" = x ; then
+      echo "$as_me:$LINENO: result: no way" >&5
+echo "${ECHO_T}no way" >&6
+      { echo "$as_me:$LINENO: WARNING: produced libraries will be incompatible with prebuilt GTK+ DLLs" >&5
+echo "$as_me: WARNING: produced libraries will be incompatible with prebuilt GTK+ DLLs" >&2;}
+    else
+      CFLAGS="$CFLAGS $msnative_struct"
+      echo "$as_me:$LINENO: result: ${msnative_struct}" >&5
+echo "${ECHO_T}${msnative_struct}" >&6
+    fi
+  fi
+fi
 
 
 
@@ -5946,6 +6010,7 @@ fi
 
 done
 
+      libgen=yes
    fi
 fi
 if test "$ac_cv_func_dirname" = yes; then
@@ -6113,8 +6178,20 @@ fi
 
 done
 
+      libgen=yes
    fi
 fi
+
+
+if test "$libgen" = yes; then
+  HAVE_LIBGEN_TRUE=
+  HAVE_LIBGEN_FALSE='#'
+else
+  HAVE_LIBGEN_TRUE='#'
+  HAVE_LIBGEN_FALSE=
+fi
+
+
 
 
 
@@ -10401,7 +10478,7 @@ cat >>confdefs.h <<\_ACEOF
 #define USE_SOUND 1
 _ACEOF
 
-
+  if test "$win32" != "yes"; then
 
 # Check whether --with-esd-prefix or --without-esd-prefix was given.
 if test "${with_esd_prefix+set}" = set; then
@@ -11232,7 +11309,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   rm -f conf.audiofiletest
 
 
-  # Check whether --enable-nas or --disable-nas was given.
+     # Check whether --enable-nas or --disable-nas was given.
 if test "${enable_nas+set}" = set; then
   enableval="$enable_nas"
 
@@ -11240,17 +11317,37 @@ else
   enable_nas=no
 fi;
 
-  if test "$enable_nas" != "no"; then
+     if test "$enable_nas" != "no"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_NAS 1
 _ACEOF
 
-     NAS_LIBS="-laudio -lXt"
-     NAS_CFLAGS=
-  fi
+        NAS_LIBS="-laudio -lXt"
+        NAS_CFLAGS=
+     fi
+  else
 
+cat >>confdefs.h <<\_ACEOF
+#define USE_WINMMSND 1
+_ACEOF
+
+     WINMMSND_LIBS="-lwinmm"
+     WINMMSND_CFLAGS=
+  fi
 fi
+
+
+
+if test "$win32" != "no" ; then
+  HAVE_WINMMSND_TRUE=
+  HAVE_WINMMSND_FALSE='#'
+else
+  HAVE_WINMMSND_TRUE='#'
+  HAVE_WINMMSND_FALSE=
+fi
+
+
 
 
 
@@ -13614,6 +13711,7 @@ fi
 
 
 
+
 echo "$as_me:$LINENO: checking whether FALSE is declared" >&5
 echo $ECHO_N "checking whether FALSE is declared... $ECHO_C" >&6
 if test "${ac_cv_have_decl_FALSE+set}" = set; then
@@ -13732,15 +13830,6 @@ fi
 
 
 
-os=`config.guess | sed 's/.*-//'`
-if test "$os" = "mingw32"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define WIN32 1
-_ACEOF
-
-fi
-
 ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13825,6 +13914,20 @@ echo "$as_me: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${OS_WIN32_TRUE}" && test -z "${OS_WIN32_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"OS_WIN32\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"OS_WIN32\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_LIBGEN_TRUE}" && test -z "${HAVE_LIBGEN_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"HAVE_LIBGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"HAVE_LIBGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${USE_GTK_TRUE}" && test -z "${USE_GTK_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"USE_GTK\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -13892,6 +13995,13 @@ if test -z "${USE_SOUND_TRUE}" && test -z "${USE_SOUND_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"USE_SOUND\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"USE_SOUND\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_WINMMSND_TRUE}" && test -z "${HAVE_WINMMSND_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"HAVE_WINMMSND\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"HAVE_WINMMSND\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -14449,7 +14559,11 @@ s,@PNMTOPS@,$PNMTOPS,;t t
 s,@PSTOPNM@,$PSTOPNM,;t t
 s,@SRCONV@,$SRCONV,;t t
 s,@TR@,$TR,;t t
+s,@OS_WIN32_TRUE@,$OS_WIN32_TRUE,;t t
+s,@OS_WIN32_FALSE@,$OS_WIN32_FALSE,;t t
 s,@ALLOCA@,$ALLOCA,;t t
+s,@HAVE_LIBGEN_TRUE@,$HAVE_LIBGEN_TRUE,;t t
+s,@HAVE_LIBGEN_FALSE@,$HAVE_LIBGEN_FALSE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@PKG_CONFIG@,$PKG_CONFIG,;t t
 s,@GTK_CFLAGS@,$GTK_CFLAGS,;t t
@@ -14513,8 +14627,12 @@ s,@ARTSC_LIBS@,$ARTSC_LIBS,;t t
 s,@AUDIOFILE_CONFIG@,$AUDIOFILE_CONFIG,;t t
 s,@AUDIOFILE_CFLAGS@,$AUDIOFILE_CFLAGS,;t t
 s,@AUDIOFILE_LIBS@,$AUDIOFILE_LIBS,;t t
+s,@HAVE_WINMMSND_TRUE@,$HAVE_WINMMSND_TRUE,;t t
+s,@HAVE_WINMMSND_FALSE@,$HAVE_WINMMSND_FALSE,;t t
 s,@NAS_LIBS@,$NAS_LIBS,;t t
 s,@NAS_CFLAGS@,$NAS_CFLAGS,;t t
+s,@WINMMSND_LIBS@,$WINMMSND_LIBS,;t t
+s,@WINMMSND_CFLAGS@,$WINMMSND_CFLAGS,;t t
 s,@PNG_LIBS@,$PNG_LIBS,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@MSGFMT@,$MSGFMT,;t t
@@ -14546,6 +14664,7 @@ s,@INTLLIBS@,$INTLLIBS,;t t
 s,@LIBINTL@,$LIBINTL,;t t
 s,@LTLIBINTL@,$LTLIBINTL,;t t
 s,@POSUB@,$POSUB,;t t
+s,@THREAD_LIBS@,$THREAD_LIBS,;t t
 CEOF
 
 _ACEOF

@@ -9,12 +9,22 @@ localedir = $(datadir)/locale
 
 ACLOCAL_AMFLAGS = -I m4
 
+## libgen
+
+if  HAVE_LIBGEN
+LIBGEN_SOURCES = 
+else
+LIBGEN_SOURCES = simplelibgen.c simplelibgen.h
+endif
+
 ## sounds
 
-if USE_SOUND
-SOUND_INCS = @ESD_CFLAGS@ @NAS_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@
+if  USE_SOUND 
 SOUND_SOURCES = sound.c
-SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@
+SOUND_INCS = @ESD_CFLAGS@ @NAS_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ \
+	@WINMMSND_CFLAGS@
+SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
+	@WINMMSND_LIBS@
 else
 SOUND_INCS = 
 SOUND_SOURCES =
@@ -61,7 +71,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h \
-	boardpos.c boardpos.h progress.c progress.h format.c format.h
+	boardpos.c boardpos.h progress.c progress.h format.c format.h \
+	$(LIBGEN_SOURCES)
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper
@@ -91,7 +102,7 @@ if USE_EXT
 ## --- EXT
 INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) 
 gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
 	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
@@ -101,6 +112,7 @@ INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
 	$(FONT_SOURCES)  $(PYTHON_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
+
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
@@ -118,26 +130,28 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h
-makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
+	format.c format.h $(LIBGEN_SOURCES) 
+makebearoff_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 
-makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
-makebearoff1_LDADD = 
+makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c \
+	$(LIBGEN_SOURCES)
+makebearoff1_LDADD = @GTK_LIBS@ 
 makebearoff1_DEPENDENCIES = 
 
 
-makeweights_SOURCES = makeweights.c i18n.c i18n.h
-makeweights_LDADD = -Llib -levent $(COMMON_LIBS)
+makeweights_SOURCES = makeweights.c i18n.c i18n.h $(LIBGEN_SOURCES)
+makeweights_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makeweights_DEPENDENCIES = lib/libevent.a
 
 makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-        drawboard.c drawboard.h format.c format.h
-makehyper_LDADD = -Llib -levent $(COMMON_LIBS)
+        drawboard.c drawboard.h format.c format.h $(LIBGEN_SOURCES)
+
+makehyper_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makehyper_DEPENDENCIES = lib/libevent.a
 
 erftest_SOURCES = erftest.c
@@ -193,7 +207,7 @@ gnubg.weights:
 	@echo ' ** parameters.  See the README file for details.'
 
 if CROSS_COMPILING
-gnubg.wd: gnubg.weights makeweights
+gnubg.wd: gnubg.weights makeweights$(EXEEXT)
 	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
 	@echo ' ** it is not possible to generate the gnubg.wd file'
 	@echo ' ** on the build system.  To create this file manually,'
@@ -201,7 +215,7 @@ gnubg.wd: gnubg.weights makeweights
 	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
 	@echo ' ** on the host system.'
 else
-gnubg.wd: gnubg.weights makeweights
+gnubg.wd: gnubg.weights makeweights$(EXEEXT)
 	-./makeweights < $< > $@
 endif
 
@@ -214,7 +228,7 @@ gnubg_os0.bd:
 	@echo ' **   makebearoff -o 6 -s 7999999 > gnubg_os0.bd'
 	@echo ' ** on the host system.'
 
-bearoff-database: makebearoff
+bearoff-database: makebearoff$(EXEEXT)
 	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
 	@echo ' ** it is not possible to generate the bearoff database'
 	@echo ' ** on the build system.  To create this file manually,'
@@ -222,11 +236,11 @@ bearoff-database: makebearoff
 	@echo ' **   makebearoff -t 6x6 > gnubg_ts0.bd'
 	@echo ' ** on the host system.'
 else
-gnubg_os0.bd: makebearoff
+gnubg_os0.bd: makebearoff$(EXEEXT)
 	[ -s $(srcdir)/gnubg_os0.bd ] || \
 	./makebearoff -o 6 -s 7999999 -f $(srcdir)/gnubg_os0.bd
 
-bearoff-database: makebearoff
+bearoff-database: makebearoff$(EXEEXT)
 	@echo ' ** NOTE: you can generate huge one sided and two sided'
 	@echo ' ** bearoff databases for usage with gnubg'
 	@echo ' ** See README for more details'
