@@ -3064,6 +3064,14 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
   move amCandidates[ MAX_SEARCH_CANDIDATES ];
 #endif
 
+  if( fAction )
+      fnAction();
+	  
+  if( fInterrupt ) {
+      errno = EINTR;
+      return -1;
+  }
+	  
   if( anMove ) {
     for( i = 0; i < 8; i++ ) {
       anMove[ i ] = -1;
