@@ -2397,7 +2397,7 @@ static int ReadNumber( char *szTitle, char *szPrompt, int nDefault,
 
     int n = INT_MIN;
     GtkObject *pa = gtk_adjustment_new( nDefault, nMin, nMax, nInc, nInc,
-					nInc );
+					0 );
     GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
 					GTK_SIGNAL_FUNC( NumberOK ), &n ),
 	*pwPrompt = gtk_label_new( szPrompt );
@@ -2482,7 +2482,7 @@ static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
 
     float r = ERR_VAL;
     GtkObject *pa = gtk_adjustment_new( rDefault, rMin, rMax, rInc, rInc,
-					rInc );
+					0 );
     GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
 					GTK_SIGNAL_FUNC( RealOK ), &r ),
 	*pwPrompt = gtk_label_new( szPrompt );
@@ -2890,8 +2890,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     
     pew = malloc( sizeof *pew );
 
-    pew->padjPlies = GTK_ADJUSTMENT( gtk_adjustment_new( pec->nPlies, 0, 10,
-							 1, 1, 1 ) );
+    pew->padjPlies = GTK_ADJUSTMENT( gtk_adjustment_new( pec->nPlies, 0, 7,
+							 1, 1, 0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwEval ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -2900,7 +2900,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 		       gtk_spin_button_new( pew->padjPlies, 1, 0 ) );
 
     pew->padjSearchCandidates = GTK_ADJUSTMENT( gtk_adjustment_new(
-	pec->nSearchCandidates, 2, MAX_SEARCH_CANDIDATES, 1, 1, 1 ) );
+	pec->nSearchCandidates, 2, MAX_SEARCH_CANDIDATES, 1, 1, 0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwEval ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -2910,7 +2910,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 			   pew->padjSearchCandidates, 1, 0 ) );
     
     pew->padjSearchTolerance = GTK_ADJUSTMENT( gtk_adjustment_new(
-	pec->rSearchTolerance, 0, 1, 0.01, 0.01, 0.01 ) );
+	pec->rSearchTolerance, 0, 1, 0.01, 0.01, 0.0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwEval ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -2934,7 +2934,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 				  pec->fCubeful );
 
     pew->padjNoise = GTK_ADJUSTMENT( gtk_adjustment_new(
-	pec->rNoise, 0, 1, 0.001, 0.001, 0.001 ) );
+	pec->rNoise, 0, 1, 0.001, 0.001, 0.0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwEval ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -3438,7 +3438,7 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
     rw.padjTrials = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTrials, 1,
 							1296 * 1296,
-							36, 36, 36 ) );
+							36, 36, 0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -3447,7 +3447,7 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 		       gtk_spin_button_new( rw.padjTrials, 36, 0 ) );
     
     rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTruncate, 0,
-						       1000, 1, 1, 1 ) );
+						       1000, 1, 1, 0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
@@ -3462,7 +3462,7 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 				  rcRollout.fVarRedn );
 
     rw.padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new( abs( rcRollout.nSeed ),
-						      0, INT_MAX, 1, 1, 1 ) );
+						      0, INT_MAX, 1, 1, 0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwBox ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
