@@ -1266,7 +1266,26 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			}
 		    }
 		}
-	    }
+	    } /* *pch++ == '\t' */
+            else {
+
+              /* check for automatic doubles:
+
+                 11: Automatic double
+              
+              */
+
+              if ( strstr ( pch, "Automatic double" ) ) {
+                ++pmgi->g.nAutoDoubles;
+                /* we've already called AddMoveRecord for pmgi, 
+                   so we manually update the cube value */
+                ms.nCube *= 2;
+              }
+
+
+            }
+            
+
 	} /* isdigit */
         else {
 
