@@ -13,6 +13,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
+#include "dice.h"
 
 #if !X_DISPLAY_MISSING
 #include "xgame.h"
@@ -149,4 +150,16 @@ extern void CommandShowTurn( char *sz ) {
     if( fResigned )
 	printf( "%s has offered to resign a %s.\n", ap[ fMove ].szName,
 		aszGameResult[ fResigned - 1 ] );
+}
+
+extern void CommandShowRNG( char *sz ) {
+
+  static char *aszRNG[] = {
+    "ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
+    "user supplied"
+  };
+
+  printf( "You are using the %s generator.\n",
+	  aszRNG[ rngCurrent ] );
+    
 }
