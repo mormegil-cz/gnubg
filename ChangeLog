@@ -1,3 +1,10 @@
+Sun Apr  4 15:50:55 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	First implementation of gnubg-rel.database interface.
+
+	* gnubg.sql: DDLs for gnubg database.
+	* scripts/database.py: python script for adding match to database.
+
 Sun Apr  4 15:11:10 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubgmodule.c (PyGameStats): add missing statistics.
