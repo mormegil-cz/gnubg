@@ -1,3 +1,9 @@
+Sun Aug 31 22:53:12 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubg.c conditionals around StartPythonHandleX/StopPythonHandleX
+	  for non GUI environments
+	* play.c remove dead variable
+
 Sun Aug 31 21:35:16 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (DumpPosition): add position ID and match ID to

@@ -4076,7 +4076,6 @@ extern moverecord *
 getCurrentMoveRecord ( int *pfHistory ) {
 
   static moverecord mrHint;
-  cubeinfo ci;
 
   /* FIXME: introduce a mrHint that "Hint" and "Eval" fills */
 
