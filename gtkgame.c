@@ -23,6 +23,8 @@
 #include <config.h>
 #endif
 
+#define  USES_badSkill
+
 #if USE_BOARD3D
 #include "board3d/inc3d.h"
 #endif

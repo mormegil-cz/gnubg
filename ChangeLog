@@ -1,3 +1,10 @@
+Fri Aut 30 20:34:25 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* lots of fiddling with include files etc. to suppress compiler
+          warnings board3d/inc3d.h analysis.h play.c html.c
+	  text.c format.c gtkgame.c board3d/mylist.c gtktoolbar.c 
+	  board3d/gtkcolour3d.c gnubg.c gnubgmodule.h gnubgmodule.c
+	
 Fri Aug 29 18:53:50 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (real_main): "move" initialisating of szTerminalCharset

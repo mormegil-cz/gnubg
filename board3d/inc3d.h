@@ -24,6 +24,14 @@
 #define _INC3D_H_
 
 #include <gtk/gtk.h>
+
+#ifdef TRUE
+#undef TRUE
+#endif
+#ifdef FALSE
+#undef FALSE
+#endif
+
 #include "config.h"
 #include <stdio.h>
 #include "i18n.h"

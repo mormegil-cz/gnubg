@@ -80,10 +80,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <iconv.h>
 #endif
 
-#if USE_PYTHON
-#include <Python.h>
-#include <gnubgmodule.h>
-#endif
 
 #if HAVE_LIBGEN_H
 #include <libgen.h>
@@ -111,6 +107,10 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "record.h"
 #include "progress.h"
 #include "format.h"
+
+#if USE_PYTHON
+#include <gnubgmodule.h>
+#endif
 
 #if USE_GUILE
 #include <libguile.h>

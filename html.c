@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#define USES_badSkill
 #include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"

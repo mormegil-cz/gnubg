@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <stdarg.h>
 
+#define USES_badSkill
 #include "backgammon.h"
 #include "drawboard.h"
 #include "export.h"

@@ -294,7 +294,7 @@ void RenderPreview(Material* pMat, unsigned char* buf)
 
 void TextureChange(GtkList *list, gpointer user_data)
 {
-	char* current = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
+	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
 
 	if (current && *current && *lastTextureStr && (strcmp(current, lastTextureStr)))
 	{
@@ -539,7 +539,7 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	
 		if (useTexture)
 		{
-			texStr = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
+			texStr = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
 
 			if (!strcmp(texStr, NO_TEXTURE_STRING))
 				col3d->textureInfo = 0;

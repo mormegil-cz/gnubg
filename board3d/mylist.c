@@ -21,7 +21,7 @@
 * $Id$
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <memory.h>
 #include "mylist.h"
 

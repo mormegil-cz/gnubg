@@ -37,11 +37,13 @@ typedef enum _skilltype {
 } skilltype;
 
 #if defined(__GNUC__)
+#ifdef USES_badSkill
 static inline int
 badSkill(skilltype const st)
 {
   return st != SKILL_NONE && st != SKILL_GOOD;
 }
+#endif
 #else
 #define badSkill(st)  ((st) != SKILL_NONE && (st) != SKILL_GOOD)
 #endif
