@@ -3523,7 +3523,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
       if ( i < NUM_SEARCHSPACES )
         gtk_menu_append ( GTK_MENU ( pwMenu ),
                           pwItem = gtk_menu_item_new_with_label ( 
-                          gettext ( aszSearchSpaces[ i ] ) ) ),
+                          gettext ( aszSearchSpaces[ i ] ) ) );
       else
         gtk_menu_append ( GTK_MENU ( pwMenu ),
                           pwItem = gtk_menu_item_new_with_label (

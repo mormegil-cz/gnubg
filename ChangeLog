@@ -1,3 +1,12 @@
+Mon Aug 12 18:13:34 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (EvalWidget, AnalysisPage): add a few missing gettexts.
+	* gnubg.c (CommandHint): #ifdef USE_GTK around MoveKey.
+	* eval.c (MoveKey): pacify fussy compiler.
+	* export.c (ExportGameEquityEvolution): pacify fussy compiler.
+	* sgf.c (RestoreGS): pacify fussy compiler.
+	* text.c (OutputRolloutContext): pacify fussy compiler.
+
 Mon Aug 12 14:13:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c: change default location for windows to (20,20), 

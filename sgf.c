@@ -288,6 +288,7 @@ static void RestoreGS( list *pl, statcontext *psc ) {
 	    
 	default:
 	    /* ignore */
+          break;
 	}
 
     AddStatcontext( psc, &scMatch );

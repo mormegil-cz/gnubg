@@ -7115,4 +7115,6 @@ MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ],
   ApplyMove ( anBoardMove, anMove, FALSE );
   PositionKey ( anBoardMove, auch );
 
+  return 0;
+
 }

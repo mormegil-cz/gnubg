@@ -2866,9 +2866,13 @@ extern void CommandHint( char *sz ) {
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
+#if USE_GTK
         fHasMoved = GTKGetMove ( anMove );
         if ( fHasMoved )
           MoveKey ( ms.anBoard, anMove, auch );
+#else
+        fHasMoved = FALSE;
+#endif /* ! USE_GTK */
 
         if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
 

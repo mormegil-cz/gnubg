@@ -186,8 +186,7 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
     sprintf ( pc = strchr ( sz, 0 ),
               prc->fCubeful ? 
               _("Full cubeful rollout") :
-              _("Full cubeless rollout"), 
-              prc->nTruncate );
+              _("Full cubeless rollout") );
 
   sprintf ( pc = strchr ( sz, 0 ),
             prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );

@@ -58,7 +58,7 @@ ExportGameEquityEvolution ( FILE *pf, list *plGame,
   unsigned char auch[ 10 ];
   cubeinfo ci;
   int i;
-  int fEquity, fError, fLuck;
+  int fEquity = FALSE, fError = FALSE, fLuck = FALSE;
 
   PushLocale ( "C" );
 
@@ -243,6 +243,7 @@ ExportGameEquityEvolution ( FILE *pf, list *plGame,
       break;
 
     default:
+      break;
       
 
     }
