@@ -76,8 +76,6 @@ typedef struct _hashentryhypergammon {
 
 typedef int ( *hcmpfunc ) ( void *p1, void *p2 );
 
-static int anCacheSize[] = { 100000, 10000, 5000 };
-
 
 char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
   N_("GNU Backgammon"),
@@ -142,56 +140,6 @@ setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
 	   + (prob[3]/65535.0) * (1-make[2]));
   }
 }  
-
-
-static int
-hcmpOneSided( void *p1, void *p2 ) {
-
-  hashentryonesided *ph1 = p1;
-  hashentryonesided *ph2 = p2;
-
-  if ( ph1->nPosID < ph2->nPosID )
-    return -1;
-  else if ( ph1->nPosID == ph2->nPosID )
-    return 0;
-  else
-    return 1;
-
-}
-
-static int
-hcmpTwoSided( void *p1, void *p2 ) {
-
-
-  hashentrytwosided *ph1 = p1;
-  hashentrytwosided *ph2 = p2;
-
-  if ( ph1->nPosID < ph2->nPosID )
-    return -1;
-  else if ( ph1->nPosID == ph2->nPosID )
-    return 0;
-  else
-    return 1;
-
-}
-
-static int
-hcmpHypergammon ( void *p1, void *p2 ) {
-
-  hashentryhypergammon *ph1 = p1;
-  hashentryhypergammon *ph2 = p2;
-
-  if ( ph1->nPosID < ph2->nPosID )
-    return -1;
-  else if ( ph1->nPosID == ph2->nPosID )
-    return 0;
-  else
-    return 1;
-
-}
-
-static hcmpfunc ahcmp[] = { hcmpOneSided, hcmpTwoSided, hcmpHypergammon };
-
 
 
 static void 

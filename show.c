@@ -1131,7 +1131,6 @@ CommandShowOneChequer ( char *sz ) {
   float arSigma[ 2 ];
   int i, j;
   float r;
-  float aarProb[ 2 ][ 100 ];
 
   if( !*sz && ms.gs == GAME_NONE ) {
     outputl( _("No position specified and no game in progress.") );
