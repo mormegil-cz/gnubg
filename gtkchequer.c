@@ -342,7 +342,7 @@ MoveListTempMapClicked( GtkWidget *pw, hintdata *phd ) {
 
   }
 
-  GTKShowTempMap( ams, c, ( const gchar(*)[] ) asz, TRUE );
+  GTKShowTempMap( ams, c, ( const gchar** ) asz, TRUE );
 
   g_free( ams );
   for ( i = 0; i < c; ++i )

@@ -6696,7 +6696,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #if WIN32
 
-    if ( pc = getenv( "ProgramFiles" ) ) {
+    if ( ( pc = getenv( "ProgramFiles" ) ) ) {
 
       strcpy( aaszPaths[ PATH_SGG ][ 0 ], pc );
       strcat( aaszPaths[ PATH_SGG ][ 0 ], "\\GamesGrid\\SaveGame\\" );

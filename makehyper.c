@@ -603,7 +603,7 @@ main ( int argc, char **argv ) {
   int nPos;
   float rNorm;
   float rEpsilon = 1.0e-5;
-  bearoffcontext *pbc;
+  bearoffcontext *pbc = NULL;
   int it;
   char szFilename[ 20 ];
   float arNorm[ 10 ];

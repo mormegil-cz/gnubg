@@ -24,6 +24,7 @@
 #endif
 
 #include <assert.h>
+#include <stdlib.h>
 
 #include "boardpos.h"
 #include "i18n.h"
