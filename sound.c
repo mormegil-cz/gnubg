@@ -1247,6 +1247,9 @@ extern void SoundFlushCache( const gnubgsound gs ) {
 
 extern void SoundWait( void ) {
 
+    if (!fSound)
+        return;
+
     switch( ssSoundSystem ) {
 #ifdef SIGIO
     case SOUND_SYSTEM_NORMAL:
