@@ -1,9 +1,24 @@
+Sun Nov 24 15:40:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New race widget with misc counts, one chequer bearoff,
+	and one sided rollout.
+
+	* show.c (CommandShowOneChequer, CommandShowOneSidedRollout):
+	new functions.
+	* show.c (CommandShowThorp): move calculation into sub routine.
+	* gnubg.c: new commands "show onechequer" and "show onesidedrollout".
+        * onechequer.c: new file.
+        * gtkrace.c: new file.
+	* gtkgame.c: new menu items.
+
+	* osr.c (getBearoffProbs): fix wrong prototype (change all callers).
+	* show.c (ShowROllout): pacify fussy compilers.
+
 Sun Nov 24 12:15:00 2002 GMT  jsegrave <jsegrave@jes2.demon.nl>
 
 	* set.c - fix text of truncation enable message
 	* gtkgame.c - remove excess space from Id header
 	
-
 Sun Nov 24 12:21:00 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix some bugs in bearoff code.
@@ -34,7 +49,6 @@ Sat Nov 23 22:12:37 2002  Gary Wong  <gtw@gnu.org>
 	* record.c (RecordReadItem, RecordWriteItem): Add locale-independent
 	formatting and file format versioning to the player record file.
 
->>>>>>> 1.788
 Sat Nov 23 12:16:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* configure.in: rename DATADIR to _DATADIR to avoid overlap

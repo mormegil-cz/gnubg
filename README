@@ -15,10 +15,10 @@ the GNU Backgammon manual in the `doc' directory.
 Current features:
 -----------------
 
- - A 2-sided bearoff database which gives perfect cubeless evaluations
-   for all positions where both players have 6 chequers or less remaining
- - A 1-sided bearoff database which gives accurate cubeless evaluations
-   for all other bearoff positions
+ - Support for both 1-sided and 2-sided bearoff databases: built-in 1-sided
+   bearoff databases for 15 chequers on the first 6 points is kept in 
+   memory. Optional 2-sided databases to be kept in memory, as well
+   as optional larger 1-sided and 2-sided databases stored on disk.
  - Neural net functions for giving cubeless evaluations of all other
    contact and race positions
  - Functions to generate legal moves and evaluate positions at varying
@@ -41,20 +41,19 @@ Current features:
  - Automatic and manual annotation (analysis and commentary) of games and
    matches
 
-The file `gnubg.bd':
---------------------
+Bearoff databases:
+------------------
 
-  GNU Backgammon is designed to work with a file containing a database
-of endgame positions, to evaluate moves during the bearoff.  This file
-is several megabytes large, and is slow to generate, so is not
-included with the distribution.  The "make" process will warn you if
-the database is not found during compilation.  If you see this
-warning, you have three options:
+  GNU Backgammon is designed to work with files containing databases
+of endgame positions, to evaluate moves and cube decisions during the bearoff.  These files may be several megabytes large, and are generally slow to generate,
+so they are not included in the distribution.
 
-  1) Ignore the database file.  You can run gnubg without the full
-     database, and it will generate a small approximate bearoff table
-     in-memory when you run it.  However, its evaluation of bearoff
-     moves will be slightly weaker.
+The "make" process will warn you if do not have "gnubg_ts1.bd", which is the
+2-sided database that is read into memory when GNU Backgammon starts.
+If you see this warning, you have three options:
+
+  1) Ignore the database file.  You can run gnubg without the 2-sided
+     database.
 
   2) Generate the file yourself.  You can do this with the command
      "make bearoff-database".  This procedure might take half an hour
@@ -63,11 +62,36 @@ warning, you have three options:
   3) Obtain a copy of the database from the Internet.  It is available
      by FTP from:
 
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg.bd.gz
+        ftp://alpha.gnu.org/gnu/gnubg/gnubg_ts1.bd.gz
 
      Make sure you decompress the file (with gunzip) once you have
      retrieved it, and move it to the directory containing this README
      file.
+
+You may also generate larger 1-sided and 2-sided bearoff databases that are
+stored on disk and not read into memory. If present, GNU Backgammon will
+read a 2-sided bearoff databases from the file "gnubg_ts.bd". You can 
+generate such a 2-sided database with "makebearoff", for example, up to 
+8 chequers on 6 points:
+
+   makebearoff -t 6x8 > gnubg_ts.bd
+
+Note that this database is 72 megabytes and may take up to several hours to
+generate (depending on the speed of your computer). 
+
+Also, if present GNU Backgammon will use a 1-sided database from the file
+"gnubg_os.bd". You can generate a one-sided databases with 15 chequers on
+10 points with
+
+   makebearoff -o 10 > gnubg_os.bd
+
+Note that this database is 118 megabtes and may take up to several hours
+to generate (depending on the speed of your computer).
+
+Huge bearoff databases may be made available for download for time in
+the future. Watch for announcements in <URL:nntp:/rec.games.backgammon> or on
+the mailing list bug-gnubg@gnu.org.
+
 
 The files `gnubg.weights' and `gnubg.wd':
 -----------------------------------------
