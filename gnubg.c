@@ -148,8 +148,8 @@ evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE };
 storedmoves sm = {}; /* sm.ml.amMoves is NULL, sm.anDice is [0,0]. */
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { { 0, 8, 0.16, 0, FALSE } } },
-    { "user", PLAYER_HUMAN, { { 0, 8, 0.16, 0, FALSE } } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE } }
 };
 
 /* Usage strings */
@@ -805,7 +805,7 @@ extern void PortableSignalRestore( int nSignal, psighandler *p ) {
 #elif HAVE_SIGVEC
     sigvec( nSignal, p, NULL );
 #else
-    signal( nSignal, p );
+    signal( nSignal, (RETSIGTYPE (*)(int)) p );
 #endif
 }
 
@@ -2650,6 +2650,23 @@ extern int GetInputYN( char *szPrompt ) {
 	
 	outputl( "Please answer `y' or `n'." );
     }
+}
+
+/* Like strncpy, except it does the right thing */
+extern char *strcpyn( char *szDest, char *szSrc, int cch ) {
+
+    char *pchDest = szDest, *pchSrc = szSrc;
+
+    if( cch-- < 1 )
+	return szDest;
+    
+    while( cch-- )
+	if( !( *pchDest++ = *pchSrc++ ) )
+	    return szDest;
+
+    *pchDest = 0;
+
+    return szDest;
 }
 
 /* Write a string to stdout/status bar/popup window */

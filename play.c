@@ -483,7 +483,7 @@ static int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
 
-      if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].pd.ec ) )
+      if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].ec ) )
         return -1;
 
       rEqBefore = -Utility ( arOutput, &ci );
@@ -526,8 +526,8 @@ static int ComputerTurn( void ) {
       /* Consider cube action */
 
       if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                     &ap [ fTurn ].pd.ec,
-                                     ap [ fTurn ].pd.ec.nPlies ) < 0 )
+                                     &ap [ fTurn ].ec,
+                                     ap [ fTurn ].ec.nPlies ) < 0 )
         return -1;
 
       fComputerDecision = TRUE;
@@ -575,8 +575,8 @@ static int ComputerTurn( void ) {
           /* We're in market window */
 
           if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                         &ap [ fTurn ].pd.ec,
-                                         ap [ fTurn ].pd.ec.nPlies ) < 0 )
+                                         &ap [ fTurn ].ec,
+                                         ap [ fTurn ].ec.nPlies ) < 0 )
             return -1;
 
           if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
@@ -621,7 +621,7 @@ static int ComputerTurn( void ) {
       pmn->fPlayer = fTurn;
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-                        anBoardMove, &ci, &ap[ fTurn ].pd.ec ) < 0 ) {
+                        anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
         free( pmn );
         return -1;
       }
@@ -706,11 +706,11 @@ static int ComputerTurn( void ) {
 		 fCubeOwner, fDoubled, fTurn, fCrawford );
       strcat( szBoard, "\n" );
       
-      if( ExternalWrite( ap[ fTurn ].pd.h, szBoard,
+      if( ExternalWrite( ap[ fTurn ].h, szBoard,
 			 strlen( szBoard ) + 1 ) < 0 )
 	  return -1;
 
-      if( ExternalRead( ap[ fTurn ].pd.h, szResponse,
+      if( ExternalRead( ap[ fTurn ].h, szResponse,
 			sizeof( szResponse ) ) < 0 )
 	  return -1;
       

@@ -349,7 +349,7 @@ extern void CommandShowPlayer( char *sz ) {
 	    break;
 	case PLAYER_GNU:
 	    outputf( "gnubg:\n" );
-	    ShowEvaluation( &ap[ i ].pd.ec );
+	    ShowEvaluation( &ap[ i ].ec );
 	    break;
 	case PLAYER_PUBEVAL:
 	    outputl( "pubeval\n" );

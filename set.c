@@ -521,9 +521,12 @@ extern void CommandSetEvalCandidates( char *sz ) {
 extern void 
 CommandSetEvalCubeful( char *sz ) {
 
-  SetToggle( "cubeful", &pecSet->fCubeful, sz,
-             "Cubeful evaluation enabled.",
-             "Cubeful evaluation disabled." );
+    char asz[ 2 ][ 128 ];
+
+    sprintf( asz[ 0 ], "%s will use cubeful evaluation.\n", szSet );
+    sprintf( asz[ 1 ], "%s will use cubeless evaluation.\n", szSet );
+
+    SetToggle( "cubeful", &pecSet->fCubeful, sz, asz[ 0 ], asz[ 1 ] );
 }
 
 extern void CommandSetEvalPlies( char *sz ) {
@@ -620,7 +623,7 @@ extern void CommandSetPlayerEvaluation( char *sz ) {
 
     szSet = ap[ iPlayerSet ].szName;
     szSetCommand = "player ";
-    pecSet = &ap[ iPlayerSet ].pd.ec;
+    pecSet = &ap[ iPlayerSet ].ec;
 
     HandleCommand( sz, acSetEvaluation );
 
@@ -675,14 +678,14 @@ extern void CommandSetPlayerExternal( char *sz ) {
     }
     
     ap[ iPlayerSet ].pt = PLAYER_EXTERNAL;
-    ap[ iPlayerSet ].pd.h = h;
+    ap[ iPlayerSet ].h = h;
 #endif
 }
 
 extern void CommandSetPlayerGNU( char *sz ) {
 
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	close( ap[ iPlayerSet ].pd.h );
+	close( ap[ iPlayerSet ].h );
     
     ap[ iPlayerSet ].pt = PLAYER_GNU;
 
@@ -693,7 +696,7 @@ extern void CommandSetPlayerGNU( char *sz ) {
 extern void CommandSetPlayerHuman( char *sz ) {
 
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	close( ap[ iPlayerSet ].pd.h );
+	close( ap[ iPlayerSet ].h );
     
     ap[ iPlayerSet ].pt = PLAYER_HUMAN;
 
@@ -755,7 +758,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
 	return;
     }
 
-    ap[ iPlayerSet ].pd.ec.nPlies = n;
+    ap[ iPlayerSet ].ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	outputf( "Moves for %s will be played with %d ply lookahead (note that "
@@ -769,7 +772,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
 extern void CommandSetPlayerPubeval( char *sz ) {
 
     if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	close( ap[ iPlayerSet ].pd.h );
+	close( ap[ iPlayerSet ].h );
     
     ap[ iPlayerSet ].pt = PLAYER_PUBEVAL;
 
