@@ -81,6 +81,27 @@ show pipcount
 EOF
 echo '--- Game navigation succeeds.'
 
+# Test resignation.
+./gnubg $dirparam -t << "EOF" | grep -q 'a 0, b 4' || die \
+    '--- Resignation test fails.'
+set rng manual
+set player both human
+set player 0 name a
+set player 1 name b
+set automatic game no
+new game
+31
+8/5 6/5
+double
+take
+roll
+42
+8/4 6/4
+resign gammon
+accept
+EOF
+echo '--- Resignation test succeeds.'
+
 # Test miscellaneous commands.
 ./gnubg $dirparam -t << "EOF" > /dev/null || die \
     '--- Miscellaneous test fails.'
