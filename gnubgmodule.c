@@ -44,6 +44,7 @@
 #endif
 
 #include <stdio.h>
+#include <glib.h>
 #include "i18n.h"
 #include "backgammon.h"
 #include "eval.h"
@@ -52,6 +53,7 @@
 #include "positionid.h"
 #include "analysis.h"
 
+#undef IGNORE	// Ignore msdev define
 #define IGNORE __attribute__ ((unused))
 
 static PyObject *
@@ -2094,7 +2096,6 @@ PythonReadline( char *p ) {
 extern void
 PythonInitialise( const char *argv0, const char *szDir ) {
 
-  FILE *pf;
   char *pch;
 
   Py_SetProgramName( (char *) argv0 );
