@@ -2,6 +2,10 @@ Thu Jun 17 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkchequer.c, gtkgamelist.c: Fixes for styles in gamelist
 
+Wed Jun 16 20:50:46 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.gtkrc.in: backport changes to gnubg.gtkrc
+
 Wed Jun 16 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkchequer.c, gtkboard.c, gnubg.gtkrc: separate styles for current
