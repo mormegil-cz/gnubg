@@ -57,7 +57,7 @@ static int CompareRedEvalData( const void *p0, const void *p1 );
 extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
                           cubeinfo *pci, evalcontext *pec, 
-                          int nPlies);
+                          int nPlies, int fCheckAutoRedoubles);
 
 extern float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
@@ -258,7 +258,7 @@ static cubeinfo ciBasic = { 1, 0, 0, { 1.0, 1.0, 1.0, 1.0 } };
 
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
 
-static evalcontext ecBasic = { 0, 0, 0, 0, FALSE };
+static evalcontext ecBasic = { 0, 0, 0, 0, FALSE, FALSE };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -2566,6 +2566,20 @@ extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] ) {
 	ar[ OUTPUT_LOSEBACKGAMMON ] = r;
 }
 
+
+extern void InvertEvaluationCf( float ar[ 4 ] ) {		
+
+  int i;
+
+  for ( i = 0; i < 4; i++ ) {
+
+    ar[ i ] = -ar[ i ];
+
+  }
+  
+}
+
+
 extern int GameStatus( int anBoard[ 2 ][ 25 ] ) {
 
 	float ar[ NUM_OUTPUTS ];
@@ -2962,6 +2976,8 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies,
 
     int i, anBoardTemp[ 2 ][ 25 ];
     float arEval[ NUM_OUTPUTS ];
+    float arEvalCf[ 4 ];
+    cubeinfo ci;
     
     pml->rBestScore = -99999.9;
 
@@ -2983,23 +2999,61 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies,
       
       SwapSides( anBoardTemp );
 
-      if( EvaluatePositionCache( anBoardTemp, arEval, pci, pec, nPlies,
-                                 pec->fRelativeAccuracy ? pcGeneral :
-                                 ClassifyPosition( anBoardTemp ) ) )
-        return -1;
-      
-      InvertEvaluation( arEval );
-      
-      memcpy( pml->amMoves[ i ].arEvalMove, arEval, sizeof( arEval ) );
+      /* swap fMove in cubeinfo */
 
+      memcpy ( &ci, pci, sizeof (ci) );
+      ci.fMove = ! ci.fMove;
+
+      if ( pec->fCubeful ) {
+
+        if ( EvaluatePositionCubeful ( anBoardTemp, arEvalCf, &ci,
+                                       pec, nPlies ) ) 
+          return -1;
+
+        // InvertEvaluation ( arEval );
+        InvertEvaluationCf ( arEvalCf );
+        arEval[ 0 ] = arEval[ 1 ] = arEval[ 2 ] = arEval[ 3 ] =
+          arEval[ 4 ] = 0.0;
+                                       
+
+      } else {
+
+        if( EvaluatePositionCache( anBoardTemp, arEval, &ci, pec, nPlies,
+                                   pec->fRelativeAccuracy ? pcGeneral :
+                                   ClassifyPosition( anBoardTemp ) ) )
+          return -1;
+
+        InvertEvaluation( arEval );
+        arEvalCf[ 0 ] = 0.0;
+
+      }
+
+      /* Save evaluations */
+      
+      memcpy( pml->amMoves[ i ].arEvalMove, arEval,
+              sizeof( arEval ) );
+
+      /* Save evaluation setup */
+
+      pml->amMoves[ i ].etMove = EVAL_EVAL;
       pml->amMoves[ i ].esMove.ec = *pec;
       pml->amMoves[ i ].esMove.ec.nPlies = nPlies;
+
+      /* Score for move:
+         rScore is the primary score (cubeful/cubeless)
+         rScore2 is the secondary score (cubeless) */
       
-      if( ( pml->amMoves[ i ].rScore = Utility( arEval, pci ) ) >
-          pml->rBestScore ) {
+      pml->amMoves[ i ].rScore = 
+        (pec->fCubeful) ? arEvalCf[ 0 ] : Utility ( arEval, pci );
+      pml->amMoves[ i ].rScore2 = Utility ( arEval, pci );
+
+      if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
+          ( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
+            && ( pml->amMoves[ i ].rScore2 > 
+                 pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
         pml->iMoveBest = i;
         pml->rBestScore = pml->amMoves[ i ].rScore;
-      }
+      };
     }
     
     return pcGeneral;
@@ -3121,15 +3175,17 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
   return ml.cMaxMoves * 2;
 }
 
+
 extern 
 int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
-									int anBoard[ 2 ][ 25 ], cubeinfo *pci,
-									evalcontext *pec ) {
+                  int anBoard[ 2 ][ 25 ], cubeinfo *pci,
+                  evalcontext *pec ) {
 
-    return FindBestMovePlied( anMove, nDice0, nDice1, anBoard, 
-															pci, pec ? pec :
-                              &ecBasic, pec ? pec->nPlies : 0 );
+  return FindBestMovePlied( anMove, nDice0, nDice1, anBoard, 
+                            pci, pec ? pec :
+                            &ecBasic, pec ? pec->nPlies : 0 );
 }
+
 
 extern int 
 FindBestMoves( movelist *pml,
@@ -3932,6 +3988,11 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
   } /* match play */
 
+  assert ( ci->arGammonPrice[ 0 ] >= 0 );
+  assert ( ci->arGammonPrice[ 1 ] >= 0 );
+  assert ( ci->arGammonPrice[ 2 ] >= 0 );
+  assert ( ci->arGammonPrice[ 3 ] >= 0 );
+
   return 0;
 }
 
@@ -3994,7 +4055,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
         SwapSides ( anBoardNew );
 
         if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
-                                        nPlies - 1 ) < 0 )
+                                        nPlies - 1, FALSE ) < 0 )
           return -1;
 
         arCfOutput[ 1 ] += ( n0 == n1 ) ? r : 2.0 * r;
@@ -4010,8 +4071,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
   }
   else {
     
-    EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 1 ], pci, pec, 0
-                              );
+    EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 1 ], pci,
+                               pec, 0, FALSE );
   }
 
   /* Double branch */
@@ -4043,7 +4104,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
           SwapSides ( anBoardNew );
 
           if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
-                                          nPlies - 1 ) < 0 )
+                                          nPlies - 1, TRUE ) < 0 )
             return -1;
         
           arCfOutput[ 2 ] += ( n0 == n1 ) ? r : 2.0 * r;
@@ -4060,7 +4121,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
     else {
 
       EvaluatePositionCubeful1 ( anBoard, &arCfOutput[ 2 ], &ciD,
-                                 pec, 0 ); 
+                                 pec, 0, TRUE ); 
 
       if ( ! nMatchTo )
         arCfOutput[ 2 ] *= 2.0;
@@ -4133,7 +4194,7 @@ fDoCubeful ( cubeinfo *pci ) {
 extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
                           cubeinfo *pci, evalcontext *pec, 
-                          int nPlies) { 
+                          int nPlies, int fCheckAutoRedoubles) { 
 
   /* Calculate cubeful equity.
 
@@ -4199,14 +4260,15 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
       /* we have access a non-dead cube */
 
-      if ( EvaluatePositionCubeful1 ( anBoard, &rND, pci, pec, 0 ) 
-           < 0 )
+      if ( EvaluatePositionCubeful1 ( anBoard, &rND, pci,
+                                      pec, 0, TRUE ) < 0 )
         return -1;
 
       SetCubeInfo ( &ciD, 2 * pci -> nCube, ! pci -> fMove, 
                     pci -> fMove );
 
-      if ( EvaluatePositionCubeful1 ( anBoard, &rDT, &ciD, pec, 0 ) 
+      if ( EvaluatePositionCubeful1 ( anBoard, &rDT, &ciD,
+                                      pec, 0, TRUE ) 
            < 0 )
         return -1;
 
@@ -4278,7 +4340,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
         SwapSides ( anBoardNew );
 
         if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
-                                        nPlies - 1 ) < 0 )
+                                        nPlies - 1, fDoubleBranch ) < 0 )
           return -1;
 
         *prOutput += ( n0 == n1 ) ? r : 2.0 * r;
@@ -4305,7 +4367,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     /* check for automatic redouble */
 
-    if ( nMatchTo ) {
+    if ( nMatchTo && ! fCrawford && fCheckAutoRedoubles ) {
 
       /* Does the opponent has an automatic (re)double? */
 
@@ -4315,6 +4377,8 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
         SetCubeInfo ( pci, pci -> nCube * 2, 
                       pci -> fMove, pci -> fMove );
+
+        printf ("auto redouble...\n" );
 
       }
 
@@ -5136,14 +5200,23 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
 }
 
 
-extern char *FormatEval5 ( char *sz, evaltype et, evalsetup es ) {
+extern char *FormatEval ( char *sz, evaltype et, evalsetup es ) {
 
   switch ( et ) {
+  case EVAL_NONE:
+    sz[ 0 ] = "\0";
+    break;
   case EVAL_EVAL:
-    sprintf ( sz, "%1i-ply", es.ec.nPlies );
+    sprintf ( sz, "%s %1i-ply", 
+              es.ec.fCubeful ? "Cubeful" : "Cubeless",
+              es.ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    sprintf ( sz, "%5s", "R.   " );
+    sprintf ( sz, "%s", "Rollout" );
+    break;
+  default:
+    printf ("et: %i\n", et );
+    assert (FALSE);
     break;
   }
 

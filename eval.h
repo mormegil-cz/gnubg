@@ -81,6 +81,8 @@ typedef struct _evalcontext {
     int fRelativeAccuracy; /* evaluate all positions according to the most
 			      general positionclass, to decrease relative
 			      error */
+  /* cubeful evaluation */
+  int fCubeful;
 } evalcontext;
 
 typedef enum _evaltype {
@@ -184,6 +186,9 @@ EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
 extern void 
 InvertEvaluation( float ar[ NUM_OUTPUTS ] );
 
+extern void 
+InvertEvaluationCf( float ar[ 4 ] );
+
 extern int 
 FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
               int anBoard[ 2 ][ 25 ], cubeinfo *pci, evalcontext *pec );
@@ -275,6 +280,6 @@ extern float
 eq2mwc ( float rEq, cubeinfo *ci );
  
 extern char 
-*FormatEval5 ( char *sz, evaltype et, evalsetup es );
+*FormatEval ( char *sz, evaltype et, evalsetup es );
 
 #endif
