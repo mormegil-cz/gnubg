@@ -333,8 +333,8 @@ static void ShowCommands( command *pc, char *szPrefix ) {
 
 	strcpy( pch, pc->sz );
 
-	if( pc->pc && pc->pc != pc ) {
-	    strcat( sz, " " );
+	if( pc->pc && pc->pc->pc != pc->pc ) {
+	    strcat( pch, " " );
 	    ShowCommands( pc->pc, sz );
 	} else
 	    outputl( sz );
