@@ -842,6 +842,7 @@ Optional Features:
   --disable-dependency-tracking Speeds up one-time builds
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --disable-gtktest       Do not try to compile and run a test GTK program
+  --enable-train-menu     show GTK+ neural network training options
   --enable-bearoff=TYPE   specify bearoff database (TYPE=no,external,static)
   --disable-freetypetest  Do not try to compile and run
                           a test FreeType program
@@ -8555,6 +8556,15 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
   fi
+  # Check whether --enable-train-menu or --disable-train-menu was given.
+if test "${enable_train_menu+set}" = set; then
+  enableval="$enable_train_menu"
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_TRAIN_MENU 1
+_ACEOF
+
+fi;
   ac_save_CPPFLAGS="$CPPFLAGS"
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"
