@@ -3025,7 +3025,7 @@ static void SetDefaultPath( GtkWidget *pw, char *sz ) {
 
     char *pch;
 
-    pch = g_strdup_printf( "set path %s %s", sz,
+    pch = g_strdup_printf( "set path %s \"%s\"", sz,
 			   gtk_file_selection_get_filename(
 			       GTK_FILE_SELECTION( gtk_widget_get_ancestor(
 			       pw, GTK_TYPE_FILE_SELECTION ) ) ) );
