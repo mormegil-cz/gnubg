@@ -135,7 +135,7 @@ as graphical dice on the right hand side of the board window.  The
 position ID (the @code{4HPwATDgc/ABMA} in this example) is an encoded
 representation of the current position that comes in useful when using
 some of gnubg's advanced commands; you can safely ignore it for now.
-Notice that the prompt has changed to @code{X}, to indicate that it
+Notice that the prompt has changed to @code{(X)}, to indicate that it
 is X's (your) turn.
 
 If you are familiar with backgammon, you will know that the best play
@@ -146,7 +146,7 @@ for this roll is to make your 5 point.  The command to do that is:
 @end example
 
 @noindent
-in the terminal window (move one chequer from your 8 point to your 5
+in the terminal window (i.e.@: move one chequer from your 8 point to your 5
 point, and move another from your 6 to your 5 point); or by dragging
 each chequer to the destination point with mouse button 1 in the board
 window.  Click mouse button 1 on the dice to indicate you have finished
@@ -384,7 +384,7 @@ colourmap.  If this happens, it will just take what it can get (which
 in the worst case might be black and white only).  You can try to
 avoid this problem by running gnubg before other colour-hungry clients,
 or by using the @code{xstdcmap} utility to install the default
-standard colourmap early in your session which colours are still
+standard colourmap early in your session while colours are still
 available.  Depending on your hardware, you may be able to configure
 your display to allow more colours, or use a @code{DirectColor} or
 @code{TrueColor} visual which should resolve the problem.
