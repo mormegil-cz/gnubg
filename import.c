@@ -1336,29 +1336,46 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 
 }
 
+#define MAXLINE 1024
+static char *FindScoreIs( FILE *pf, char *buffer ) {
 
+  char *p;
+
+  while( 1 ) {
+    if( ! fgets( buffer, MAXLINE, pf ) )
+      break;
+
+    if( ( p = strstr( buffer, "Score is " ) ) != 0 ) 
+      return p;
+  }
+	
+  return 0;
+}
+    
 extern int ImportOldmoves( FILE *pf, char *szFilename ) {
-
+    char buffer[1024];
+    char *p;
     int n, n0, n1, nLength, i;
 
     fWarned = fPostCrawford = FALSE;
     
-    while( 1 ) {
-	if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
-			  &nLength ) ) == EOF ) {
+    p = FindScoreIs( pf, buffer );
+    if( p == 0 ) {
+      outputerrf( _("%s: not a valid oldmoves file"), szFilename );
+      return -1;
+    }
+	
+    if( ( n = sscanf( p, "Score is %d-%d in a %d", &n0, &n1,
+			  &nLength ) ) < 2 ) {
 	    outputerrf( _("%s: not a valid oldmoves file"), szFilename );
 	    return -1;
-	} else if( n == 2 ) {
-	    /* assume a money game */
-	    nLength = 0;
-	    break;
-	} else if( n == 3 )
-	    break;
-	
-	/* discard line */
-	while( ( n = getc( pf ) ) != '\n' && n != EOF )
-	    ;
     }
+
+    if( n == 2 ) {
+      /* assume a money game */
+      nLength = 0;
+      
+    } 
     
     if( ms.gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
@@ -1383,26 +1400,17 @@ extern int ImportOldmoves( FILE *pf, char *szFilename ) {
     i = 0;
     
     while( 1 ) {
-	/* discard line */
-	while( ( n = getc( pf ) ) != '\n' && n != EOF )
-	    ;
-	
         if ( ImportOldmovesGame( pf, i++, nLength, n0, n1 ) )
           /* new match */
           break;
 
-	do {
-	    if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
-			      &nLength ) ) >= 2 )
-		break;
+	p = FindScoreIs( pf, buffer );
+	if( p == 0 ) 
+	  break;
 
-	    /* discard line */
-	    while( ( n = getc( pf ) ) != '\n' && n != EOF )
-		;
-	} while( n != EOF );
-
-	if( n == EOF )
-	    break;
+	n = sscanf( p, "Score is %d-%d in a %d", &n0, &n1, &nLength );
+	if( n < 2 )
+	  break;
     }
 
     UpdateSettings();

@@ -1,3 +1,7 @@
+Sun 28 Nov 01:04:30 GMT 2004 Jim Segrave <jes@jes-2.demon.nl>
+
+	* import.c - patch Fibs code to ignore non-game lines in input
+	
 Wed Nov  23 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* play.c: Fix wrong resign acceptance
