@@ -7572,7 +7572,7 @@ Convert ( const char *sz,
 
   while ( lIn && ! fError ) {
 
-    rc = iconv ( id, (char **) &pchIn, &lIn, &pchOut, &l );
+    rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
 
     if ( rc == -1 ) 
       switch ( errno ) {
