@@ -1695,8 +1695,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	
 	sprintf( szOutput, ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\n",
 	     arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ], arOutput[ 3 ],
-	     arOutput[ 4 ], arOutput[ 0 ] * 2.0 - 1.0 + arOutput[ 1 ] +
-	     arOutput[ 2 ] - arOutput[ 3 ] - arOutput[ 4 ] );
+	     arOutput[ 4 ], Utility ( arOutput ) );
     }
 
     return 0;

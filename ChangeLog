@@ -1,3 +1,7 @@
+2000-01-09  Joern Thyssen  <jth@localhost.localdomain>
+
+	* eval.c (DumpPosition): Call Utility for calculation of equity. 
+
 Sat Jan  8 14:16:08 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* xgame.c (StatsMove, StatsConfirm): Keep a list of legal
