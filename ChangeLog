@@ -1,3 +1,7 @@
+Sun Mar  2 15:51:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* boards.xml: add new board by JP White.
+
 Sun Mar  2 15:28:50 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (RunGTK): force update of board

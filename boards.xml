@@ -466,4 +466,32 @@
 
   </board-design>
 
+   <board-design>
+
+      <about>
+         <title>30's Board</title>
+         <author>JP White</author>
+      </about>
+
+      <design>
+         board=#DEBC63;0.09
+         border=#B0F1A6
+         wood=paint
+         hinges=n
+         light=150;50
+         shape=0.5
+         chequers0=#E9E16E;1.00;3.00;0.90;19.90
+         chequers1=#164919;1.00;3.00;0.90;14.80
+         dice0=#E9E16E;0.90;19.90;y
+         dice1=#164919;0.90;14.80;y
+         dot0=#000000
+         dot1=#EBEDF0
+         cube=#F3F12E
+         points0=#309829;0.09
+         points1=#FFFFFF;0.20
+
+   </design>
+
+   </board-design>
+
 </board-designs>
