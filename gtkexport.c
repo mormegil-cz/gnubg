@@ -79,7 +79,7 @@ static void
 ExportOK ( GtkWidget *pw, exportwidget *pew ) {
 
   exportsetup *pexs = pew->pexs;
-  int i, n;
+  int i;
 
   /* include */
   
@@ -147,26 +147,10 @@ ExportOK ( GtkWidget *pw, exportwidget *pew ) {
   pexs->szHTMLPictureURL = 
     strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
 
-  if ( pexs->szHTMLType )
-    free ( pexs->szHTMLType );
-  
   if ( pexs->szHTMLExtension )
     free ( pexs->szHTMLExtension );
 
-  n = gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
-
-  if ( n == 0 ){
-	  pexs->szHTMLType = strdup( "gnu" );
-	  pexs->szHTMLExtension = strdup( "png" );
-  }
-  if ( n == 1 ){
-	  pexs->szHTMLType = strdup( "fibs2html" );
-	  pexs->szHTMLExtension = strdup( "gif" );
-  }
-  if ( n == 2 ){
-	  pexs->szHTMLType = strdup( "bbs" );
-	  pexs->szHTMLExtension = strdup( "gif" );
-  }
+  pexs->het = gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
@@ -233,13 +217,8 @@ ExportSet ( exportwidget *pew ) {
     gtk_entry_set_text( GTK_ENTRY( pew->pwHTMLPictureURL ), 
                         pexs->szHTMLPictureURL );
 
-  if ( !strcmp(pexs->szHTMLType , "gnu"))
-    gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 0);
-  if ( !strcmp(pexs->szHTMLType , "fibs2html"))
-    gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 1);
-  if ( !strcmp(pexs->szHTMLType , "bbs"))
-    gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 2);
-    
+  gtk_option_menu_set_history ( GTK_OPTION_MENU (pew->pwHTMLType), 
+                                pexs->het );
 
 }
 

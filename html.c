@@ -75,6 +75,11 @@
 ( f ) * 100.0f
    
 
+char *aszHTMLExportType[ NUM_HTML_EXPORT_TYPES ] = {
+  "gnu",
+  "bbs",
+  "fibs2html" };
+
 
 
 /* text for links on html page */
@@ -87,10 +92,11 @@ static char *aszLinkText[] = {
 
 /* Color of chequers */
 
-/* static char *aszColorNameBBS[] = { N_ ("white"), N_ ("blue") }; */
-/* static char *aszColorNameF2H[] = { N_ ("white"), N_ ("red") }; */
-static char *aszColorNameGNU[] = { N_ ("red"), N_ ("black") };
-
+static char *aaszColorName[ NUM_HTML_EXPORT_TYPES ][ 2 ] = {
+  { N_("red"), N_("black") },
+  { N_("white"), N_("blue") },
+  { N_("white"), N_("red") }
+};
 
 
 static void
@@ -431,8 +437,7 @@ printPointBBS ( FILE *pf, const char *szImageDir, const char *szExtension,
 
 static void
 printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
-                    const char *szImageDir, const char *szExtension,
-                    const char *szType ) {
+                    const char *szImageDir, const char *szExtension ) {
 
   int anBoard[ 2 ][ 25 ];
   int anPips[ 2 ];
@@ -652,8 +657,7 @@ printPointF2H ( FILE *pf, const char *szImageDir, const char *szExtension,
 
 static void
 printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
-                    const char *szImageDir, const char *szExtension,
-                    const char *szType ) {
+                    const char *szImageDir, const char *szExtension ) {
 
   char sz[ 100 ];
   char szAlt[ 100 ];
@@ -1019,8 +1023,7 @@ printNumbers ( FILE *pf, const int fTop ) {
 
 static void
 printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
-                    const char *szImageDir, const char *szExtension,
-                    const char *szType ) {
+                    const char *szImageDir, const char *szExtension ) {
 
   char sz[ 100 ];
   char szAlt[ 100 ];
@@ -1345,17 +1348,22 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 static void
 printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
                  const char *szImageDir, const char *szExtension,
-                 const char *szType ) {
+                 const htmlexporttype het ) {
 
-
-  if ( ! strcmp ( szType, "fibs2html" ) )
-    printHTMLBoardF2H ( pf, pms, fTurn, szImageDir, szExtension, szType );
-  else if ( ! strcmp ( szType, "bbs" ) )
-    printHTMLBoardBBS ( pf, pms, fTurn, szImageDir, szExtension, szType );
-  else if ( ! strcmp ( szType, "gnu" ) )
-    printHTMLBoardGNU ( pf, pms, fTurn, szImageDir, szExtension, szType );
-  else
+  switch ( het ) {
+  case HTML_EXPORT_TYPE_FIBS2HTML:
+    printHTMLBoardF2H ( pf, pms, fTurn, szImageDir, szExtension );
+    break;
+  case HTML_EXPORT_TYPE_BBS:
+    printHTMLBoardBBS ( pf, pms, fTurn, szImageDir, szExtension );
+    break;
+  case HTML_EXPORT_TYPE_GNU:
+    printHTMLBoardGNU ( pf, pms, fTurn, szImageDir, szExtension );
+    break;
+  default:
     printf ( _("unknown board type\n") );
+    break;
+  }
 
 
 }
@@ -1373,7 +1381,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
 static void 
 HTMLBoardHeader ( FILE *pf, const matchstate *pms, 
-                  char *aszColorName[],
+                  const htmlexporttype het,
                   const int iGame, const int iMove ) {
 
   fprintf ( pf,
@@ -1390,7 +1398,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s resigns %d points"), 
-              gettext ( aszColorName[ pms->fTurn ] ),
+              gettext ( aaszColorName[ het ][ pms->fTurn ] ),
               pms->fResigned * pms->nCube
             );
   
@@ -1400,7 +1408,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s to play %d%d"),
-              gettext ( aszColorName[ pms->fTurn ] ),
+              gettext ( aaszColorName[ het ][ pms->fTurn ] ),
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -1410,7 +1418,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s doubles to %d"),
-              gettext ( aszColorName[ pms->fMove ] ),
+              gettext ( aaszColorName[ het ][ pms->fTurn ] ),
               pms->nCube * 2
             );
 
@@ -1420,8 +1428,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s onroll, cube decision?"),
-              gettext ( aszColorName[ pms->fTurn ] )
-            );
+              gettext ( aaszColorName[ het ][ pms->fTurn ] ) );
 
 
   fputs ( "</p>\n", pf );
@@ -1970,7 +1977,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 static void
 HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                         const char *szImageDir, const char *szExtension,
-                        const char *szType ) {
+                        const htmlexporttype het ) {
 
   cubeinfo ci;
 
@@ -2042,7 +2049,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 static void
 HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                         const char *szImageDir, const char *szExtension,
-                        const char *szType ) {
+                        const htmlexporttype het ) {
 
   char sz[ 64 ];
   int i;
@@ -2357,7 +2364,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 static void
 HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                const char *szImageDir, const char *szExtension,
-               const char *szType ) {
+               const htmlexporttype het ) {
 
   char sz[ 1024 ];
 
@@ -2367,7 +2374,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     fprintf ( pf, "<p>" );
 
-    if ( ! strcmp ( szType, "fibs2html" ) )
+    if ( het == HTML_EXPORT_TYPE_FIBS2HTML )
          printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
@@ -2384,9 +2391,9 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     // HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension );
 
-    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
+    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, het );
 
-    HTMLPrintMoveAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
+    HTMLPrintMoveAnalysis ( pf, pms, pmr, szImageDir, szExtension, het );
 
     break;
 
@@ -2401,7 +2408,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     fprintf ( pf, "<p>" );
 
-    if ( ! strcmp ( szType, "fibs2html" ) )
+    if ( het == HTML_EXPORT_TYPE_FIBS2HTML )
       printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
     fprintf ( pf,
@@ -2409,7 +2416,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
               ap[ pmr->d.fPlayer ].szName,
               ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
-    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
+    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, het );
 
     break;
 
@@ -3025,8 +3032,8 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr ) {
  */
 
 static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
-                             const char *szExtension, const char *szType,
-                             char *aszColorName[], 
+                             const char *szExtension, 
+                             const htmlexporttype het,
                              const int iGame, const int fLastGame,
                              char *aszLinks[ 4 ] ) {
 
@@ -3079,11 +3086,11 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
         msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
         msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
 
-        HTMLBoardHeader ( pf, &msExport, aszColorName, iGame, iMove );
+        HTMLBoardHeader ( pf, &msExport, het, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
-                        szImageDir, szExtension, szType );
-        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension, szType );
+                        szImageDir, szExtension, het );
+        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension, het );
         
         iMove++;
 
@@ -3092,12 +3099,12 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
       case MOVE_TAKE:
       case MOVE_DROP:
 
-        HTMLBoardHeader ( pf,&msExport, aszColorName, iGame, iMove );
+        HTMLBoardHeader ( pf,&msExport, het, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
-                        szImageDir, szExtension, szType );
+                        szImageDir, szExtension, het );
         
-        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension, szType );
+        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension, het );
         
         iMove++;
 
@@ -3234,9 +3241,8 @@ extern void CommandExportGameHtml( char *sz ) {
     }
 
     ExportGameHTML( pf, plGame,
-                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension, 
-                    exsExport.szHTMLType, 
-                    aszColorNameGNU,
+                    exsExport.szHTMLPictureURL, exsExport.szHTMLExtension, 
+                    exsExport.het,
                     getGameNumber ( plGame ), FALSE, 
                     NULL );
     
@@ -3370,8 +3376,7 @@ extern void CommandExportMatchHtml( char *sz ) {
 
       ExportGameHTML ( pf, pl->p, 
                        exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
-                       exsExport.szHTMLType, 
-                       aszColorNameGNU,
+                       exsExport.het, 
                        i, i == nGames - 1,
                        aszLinks );
 
@@ -3418,18 +3423,18 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL );
 
-    HTMLBoardHeader ( pf, &ms, aszColorNameGNU,
+    HTMLBoardHeader ( pf, &ms, exsExport.het,
                       getGameNumber ( plGame ),
                       getMoveNumber ( plGame, pmr ) - 1 );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
-                    exsExport.szHTMLType );
+                    exsExport.het );
 
     if( pmr )
       HTMLAnalysis ( pf, &ms, pmr,
                      exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
-                     exsExport.szHTMLType );
+                     exsExport.het );
     
     HTMLEpilogue ( pf, &ms, NULL );
 

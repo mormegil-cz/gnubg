@@ -1378,8 +1378,8 @@ CommandShowExport ( char *sz ) {
 
   outputf ( _("- HTML export type used in export\n"
             "\t%s\n"),
-            exsExport.szHTMLType ? exsExport.szHTMLType :
-            _("not defined") );
+            aszHTMLExportType[ exsExport.het ] );
+
 
   outputf ( _("- URL to pictures used in export\n"
             "\t%s\n"),

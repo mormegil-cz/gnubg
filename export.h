@@ -26,6 +26,16 @@
 #define EXPORT_CUBE_MISSED   8
 #define EXPORT_CUBE_CLOSE    9
 
+
+typedef enum _htmlexporttype {
+  HTML_EXPORT_TYPE_GNU,
+  HTML_EXPORT_TYPE_BBS,
+  HTML_EXPORT_TYPE_FIBS2HTML,
+  NUM_HTML_EXPORT_TYPES
+} htmlexporttype;
+
+extern char *aszHTMLExportType[];
+
 typedef struct _exportsetup {
 
   int fIncludeAnnotation;
@@ -57,7 +67,7 @@ typedef struct _exportsetup {
   /* For example, frames/non frames for HTML. */
 
   char *szHTMLPictureURL;
-  char *szHTMLType;
+  htmlexporttype het;
   char *szHTMLExtension;
 
 } exportsetup;

@@ -2347,44 +2347,40 @@ CommandSetExportCubeDisplayMissed ( char *sz ) {
 
 }
 
-extern void 
-CommandSetExportHTMLType ( char *sz ) {
+static void
+SetExportHTMLType ( const htmlexporttype het,
+                    const char *szExtension ) {
 
-  if ( ! sz || ! *sz ) {
-    outputl ( _("You must specify a HTML type. "
-              "See 'help set export html type'.") );
-    return;
-  }
+  if ( exsExport.szHTMLExtension )
+    free ( exsExport.szHTMLExtension );
 
-  if ( exsExport.szHTMLType )       /* FIXME Should not free intil we know  */
-    free ( exsExport.szHTMLType );  /* it's a valid string */ 
-
-  sz = NextToken ( &sz );
-
-  if ( ! strcmp ( sz, "fibs2html" ) )
-    {
-     exsExport.szHTMLType = strdup ( sz );
-     exsExport.szHTMLExtension = "gif";
-    } 
-  else if ( ! strcmp ( sz, "bbs" ) )
-    {
-     exsExport.szHTMLType = strdup ( sz );
-     exsExport.szHTMLExtension = "gif";
-    } 
-  else if ( ! strcmp ( sz, "gnu" ) )
-    {
-     exsExport.szHTMLType = strdup ( sz );
-     exsExport.szHTMLExtension = "png";
-    } 
-  else
-    {
-     outputf ( _("unknown board type\n") );
-     return;
-    }
+  exsExport.het = het;
+  exsExport.szHTMLExtension = strdup ( szExtension );
 
   outputf ( _("HTML export type is now: \n"
-            "%s\n"), 
-            exsExport.szHTMLType );
+              "%s\n"), 
+            aszHTMLExportType[ exsExport.het ] );
+
+}
+
+extern void 
+CommandSetExportHTMLTypeBBS ( char *sz ) {
+
+  SetExportHTMLType ( HTML_EXPORT_TYPE_BBS, "gif" );
+
+}
+
+extern void 
+CommandSetExportHTMLTypeFibs2html ( char *sz ) {
+
+  SetExportHTMLType ( HTML_EXPORT_TYPE_FIBS2HTML, "gif" );
+
+}
+
+extern void 
+CommandSetExportHTMLTypeGNU ( char *sz ) {
+
+  SetExportHTMLType ( HTML_EXPORT_TYPE_GNU, "png" );
 
 }
 

@@ -294,7 +294,7 @@ exportsetup exsExport = {
   { TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE },
 
   NULL, /* HTML url to pictures */
-  NULL, /* HTML type */
+  HTML_EXPORT_TYPE_GNU,
   NULL  /* HTML extension */
 
 };
@@ -352,8 +352,7 @@ static char szDICE[] = N_("<die> <die>"),
     szTRIALS[] = N_("<trials>"),
     szVALUE[] = N_("<value>"),
     szMATCHID[] = N_("<matchid>"),
-    szURL[] = N_("<URL>"),
-    szType[] = N_("<type>");
+    szURL[] = N_("<URL>");
 
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
@@ -823,11 +822,20 @@ command cER = {
   { "rollout", CommandSetExportParametersRollout,
     N_("show detailed parameters for rollouts"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportHTMLType[] = {
+  { "bbs", CommandSetExportHTMLTypeBBS,
+    N_("Use BBS-type images for posting to, e.g., GammOnLine"), NULL, NULL },
+  { "fibs2html", CommandSetExportHTMLTypeFibs2html,
+    N_("Use fibs2html-type pictures"), NULL, NULL },
+  { "gnu", CommandSetExportHTMLTypeGNU,
+    N_("Default images"), NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportHTML[] = {
   { "pictureurl", CommandSetExportHTMLPictureURL,
     N_("set URL to pictures used in HTML export"), szURL, NULL },
-  { "type", CommandSetExportHTMLType,
-    N_("set type of HTML boards used in HTML export"), szType, NULL },
+  { "type", NULL,
+    N_("set type of HTML boards used in HTML export"), NULL, 
+    acSetExportHTMLType },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportMovesDisplay[] = {
   { "verybad", CommandSetExportMovesDisplayVeryBad,
@@ -4215,13 +4223,8 @@ extern void CommandSaveSettings( char *szParam ) {
       fprintf ( pf, "set export html pictureurl  %s\n",
                 exsExport.szHTMLPictureURL );
 
-    if ( *exsExport.szHTMLType != '"' &&
-       strchr ( exsExport.szHTMLType, ' ' ) )
-       fprintf ( pf, "set export html type \"%s\"\n",
-                  exsExport.szHTMLType );
-    else
-      fprintf ( pf, "set export html type  %s\n",
-                exsExport.szHTMLType );
+    fprintf ( pf, "set export html type \"%s\"\n",
+              aszHTMLExportType[ exsExport.het ] );
 
     /* invert settings */
 
@@ -5666,7 +5669,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     /* initalize some html export options */
 
     exsExport.szHTMLPictureURL = strdup ( "html-images/" );
-    exsExport.szHTMLType = strdup ( "gnu" );
     exsExport.szHTMLExtension = strdup ( "png" );
 
     /* init met */
