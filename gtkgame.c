@@ -5265,15 +5265,17 @@ extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data) {
     int i, j;
 
     sprintf( sz, "                              Win    W(g)   W(bg)  L(g)"
-        "   L(bg) Equity Cubeful\n" );
+        "   L(bg) Equity  Cubeful\n" );
    
     for ( j = 0; j < GTK_CLIST(pwRolloutResult)->rows ; j++){
        for ( i = 0; i < 8 ; i++) {
            gtk_clist_get_text (GTK_CLIST( pwRolloutResult ), j, i, &szTemp);
            if (i == 0) 
               sprintf( szL, "%28.28s", szTemp);
-           else
+           else if ( i < OUTPUT_EQUITY + 1 )
               sprintf( szL, "%7.7s", szTemp); 
+           else 
+              sprintf( szL, "%8.8s", szTemp); 
 
            strcat(sz , szL);
        }
@@ -5837,18 +5839,18 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
       for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
         
         if ( i < OUTPUT_EQUITY )
-          sprintf( sz, "%5.3f", aarMu[ j ][ i ] );
+          sprintf( sz, "%6.4f", aarMu[ j ][ i ] );
         else if ( i == OUTPUT_EQUITY ) {
 
           if ( ! ms.nMatchTo )
             /* money game */
-            sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
+            sprintf( sz, "%+7.4f", aarMu[ j ][ i ] );
           else if ( fOutputMWC )
             /* match play (mwc) */
-            sprintf( sz, "%6.2f%%", 100.0f * eq2mwc ( aarMu[ j ][ i ], &aci[ j ] ) );
+            sprintf( sz, "%7.3f%%", 100.0f * eq2mwc ( aarMu[ j ][ i ], &aci[ j ] ) );
           else 
             /* match play (equity) */
-            sprintf( sz, "%+6.3f",
+            sprintf( sz, "%+7.4f",
                      mwc2eq ( eq2mwc ( aarMu[ j ][ i ], &aci[ j ] ), &aci[ 0 ] ) );
 
         }
@@ -5856,13 +5858,13 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
           if ( fCubeful ) {
             if ( ! ms.nMatchTo ) 
               /* money game */
-              sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
+              sprintf( sz, "%+7.4f", aarMu[ j ][ i ] );
             else if ( fOutputMWC )
               /* match play (mwc) */
-              sprintf( sz, "%6.2f%%", 100.0f * aarMu[ j ][ i ] );
+              sprintf( sz, "%7.3f%%", 100.0f * aarMu[ j ][ i ] );
             else
               /* match play (equity) */
-              sprintf( sz, "%+6.3f", mwc2eq ( aarMu[ j ][ i ], &aci[ 0 ] ) );
+              sprintf( sz, "%+7.4f", mwc2eq ( aarMu[ j ][ i ], &aci[ 0 ] ) );
           }
           else {
             strcpy ( sz, "n/a" );
@@ -5872,8 +5874,43 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRow << 1,
 			    i + 1, sz );
 	
-        if ( i != OUTPUT_CUBEFUL_EQUITY || fCubeful )
-          sprintf( sz, "%5.3f", aarSigma[ j ][ i ] );
+        if ( i < OUTPUT_EQUITY )
+          /* standard error on winning chance etc. */
+          sprintf( sz, "%6.4f", aarSigma[ j ][ i ] );
+        else if ( i == OUTPUT_EQUITY ) {
+
+          /* standard error for equity */
+
+          if ( ! ms.nMatchTo )
+            /* money game */
+            sprintf( sz, "%7.4f", aarSigma[ j ][ i ] );
+          else if ( fOutputMWC )
+            /* match play (mwc) */
+            sprintf( sz, "%7.3f%%", 
+                     100.0f * se_eq2mwc ( aarSigma[ j ][ i ], &aci[ j ] ) );
+          else 
+            /* match play (equity) */
+            sprintf( sz, "%7.4f",
+                     se_mwc2eq ( se_eq2mwc ( aarSigma[ j ][ i ], &aci[ j ] ), 
+                              &aci[ 0 ] ) );
+
+        }
+        else if ( fCubeful ) {
+
+          /* standard error in cubeful equity */
+
+          if ( ! ms.nMatchTo ) 
+            /* money game */
+            sprintf( sz, "%+6.3f", aarSigma[ j ][ i ] );
+          else if ( fOutputMWC )
+            /* match play (mwc) */
+            sprintf( sz, "%7.3f%%", 100.0f * aarSigma[ j ][ i ] );
+          else
+            /* match play (equity) */
+            sprintf( sz, "%7.4f", se_mwc2eq ( aarSigma[ j ][ i ], 
+                                              &aci[ 0 ] ) );
+
+        }
         else
             strcpy ( sz, "n/a" );
 

@@ -1,3 +1,12 @@
+Tue May 21 15:53:33 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (se_eq2mwc, se_mwc2eq): new functions. Translates between
+	standard errors in MWC and equity.
+
+	* gtkgame.c (GTKDumpRolloutResults): add one digit to all fields.
+	* gtkgame.c (GTKRolloutUpdate): output standard errors in correct 
+	metric (mwc or equity).
+
 Tue May 21 13:27:19 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (RolloutGeneral): fix bug for calculating standard error.
