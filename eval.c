@@ -5933,8 +5933,13 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
         continue;
 
       ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-      
+#if defined( GARY_CACHE )
+      l = EvalCacheHash( &ec );
+    
+      if( ( pecx = CacheLookup( &cEval, l, &ec ) ) ) {
+#else      
       if ( ( pecx = CacheLookup ( &cEval, &ec, &l ) ) ) {
+#endif
         /* cache hit */
         memcpy ( arOutput, pecx->ar, sizeof ( float ) * NUM_OUTPUTS );
         arCubeful[ ici ] = pecx->ar[ OUTPUT_CUBEFUL_EQUITY ];
@@ -5963,11 +5968,17 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
         
         ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
         l = keyToLong ( ec.auchKey, ec.nEvalContext );
+#if !defined( GARY_CACHE )
         l = (l & ((cEval.size >> 1)-1)) << 1;
+#endif
         memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
         ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
         
-        CacheAdd ( &cEval, &ec, l );
+#if defined( GARY_CACHE )
+	CacheAdd( &cEval, l, &ec, sizeof ec );
+#else
+	CacheAdd ( &cEval, &ec, l );
+#endif
 
       }
     }

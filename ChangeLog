@@ -1,3 +1,7 @@
+Tue Jun  3 09:20:00 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c: fix compilation with -DGARY_CACHE
+
 Mon Jun  2 23:19:22 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktempmap.c (GTKShowTempMap): remove gtk_aspect_frame for now.
