@@ -162,6 +162,7 @@ int fReadingCommand;
 #endif
 #endif
 
+#define GNUBG_HISTORY_FILE ".gnubg/history"
 #if HAVE_LIBREADLINE
 int fReadline = TRUE;
 #endif
@@ -1936,7 +1937,10 @@ command cER = {
     { "help", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
     { "hint", CommandHint,  
       N_("Give hints on cube action or best legal moves"), 
-      szOPTVALUE, NULL }, 
+      szOPTVALUE, NULL },
+#if HAVE_LIBREADLINE
+    { "history", CommandHistory, N_("Display current history"), NULL, NULL },
+#endif /* HAVE_LIBREADLINE */
     { "invert", NULL, N_("invert match equity tables, etc."), 
       NULL, acSetInvert },
     { "import", NULL, 
@@ -2844,6 +2848,7 @@ extern void HandleCommand( char *sz, command *ac ) {
 #endif
             return;
         }
+
     }
     
     if( !( pch = NextToken( &sz ) ) ) {
@@ -4138,6 +4143,18 @@ extern void PromptForExit( void ) {
 	if (fX)
 		Tidy3dObjects(bd, TRUE);
 #endif
+
+#if HAVE_LIBREADLINE
+        {
+          char temp[ BIG_PATH ];
+          strcpy( temp, szHomeDirectory );
+          strcat( temp, DIR_SEPARATOR_S );
+          strcat( temp, GNUBG_HISTORY_FILE );
+          using_history ();
+          write_history( temp );
+        }
+#endif /* HAVE_READLINE */
+
     exit( EXIT_SUCCESS );
 }
 
@@ -6136,7 +6153,8 @@ extern void Prompt( void ) {
 static void ProcessInput( char *sz, int fFree ) {
 
     char *szConverted;
-    
+    char *pchExpanded;
+
     rl_callback_handler_remove();
     fReadingCommand = FALSE;
     
@@ -6147,16 +6165,21 @@ static void ProcessInput( char *sz, int fFree ) {
     }
     
     fInterrupt = FALSE;
+
+    /* expand history */
+
+    history_expand( sz, &pchExpanded );
     
-    if( *sz )
-	add_history( sz );
+    if( *pchExpanded )
+	add_history( pchExpanded );
 	
 #if USE_GTK
     if( fX )
 	GTKDisallowStdin();
 #endif
 
-    szConverted = Convert( sz, GNUBG_CHARSET, szTerminalCharset );
+    szConverted = Convert( pchExpanded, GNUBG_CHARSET, szTerminalCharset );
+    free( pchExpanded );
     HandleCommand( szConverted, acTop );
     free( szConverted );
     
@@ -6166,6 +6189,7 @@ static void ProcessInput( char *sz, int fFree ) {
 #endif
 
     ResetInterrupt();
+
 
     if( fFree )
 	free( sz );
@@ -7245,7 +7269,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	/* FIXME what should non-POSIX systems do? */
 	szHomeDirectory = ".";
 
-
 #if WIN32
 
     /* data directory: initialise to the path where gnubg is installed */
@@ -7328,7 +7351,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #ifdef WIN32
          /* Bad hack */
             fX = TRUE;
-            MessageBox (NULL,
+            MessageBox (NULL,Co
               TEXT (_("Sorry, this build does not support the -tty option")),
               TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
 #else /* WIN32 */
@@ -7727,6 +7750,15 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    rl_completion_entry_function = (Function *) NullGenerator;
 	    rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
 #endif
+            /* setup history */
+            {
+              char temp[ BIG_PATH ];
+              strcpy( temp, szHomeDirectory );
+              strcat( temp, DIR_SEPARATOR_S );
+              strcat( temp, GNUBG_HISTORY_FILE );
+              read_history( temp );
+              using_history();
+            }
 #endif
 	}
     
@@ -7879,18 +7911,24 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     for(;;) {
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
+
+          char *pchExpanded;
+
 	    while( !( sz = readline( FormatPromptConvert() ) ) ) {
 		outputc( '\n' );
 		PromptForExit();
 	    }
 	    
 	    fInterrupt = FALSE;
+
+            history_expand( sz, &pchExpanded );
 	    
-	    if( *sz )
-		add_history( sz );
+	    if( *pchExpanded )
+		add_history( pchExpanded );
 	    
-	    HandleCommand( sz, acTop );
+	    HandleCommand( pchExpanded, acTop );
 	    
+            free( pchExpanded );
 	    free( sz );
 	} else
 #endif
@@ -8735,3 +8773,23 @@ CommandDiceRolls (char *sz) {
 
   }
 }
+
+
+#if HAVE_LIBREADLINE
+extern void
+CommandHistory( char *sz ) {
+
+  int c = history_length;
+  int s = ( ( c - 50 ) > -1 ) ? ( c - 50 ) : 0;
+  int i;
+  HIST_ENTRY *phe;
+
+  for ( i = s; i < c; ++i ) {
+    phe = history_get( i + 1 );
+    outputf( "%6d %s\n", i + 1, phe->line );
+  }
+  
+
+}
+
+#endif /* HAVE_LIBREADLINE */

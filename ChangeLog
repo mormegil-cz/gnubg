@@ -1,3 +1,11 @@
+Sat Nov 29 21:22:13 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Implement history
+
+	* gnubg.c (real_main, PromptForExit, ProcessInput): implement
+	history
+	* gnubg.c (CommandHistory): new command "history".
+
 Sat Nov 29 11:02:50 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubgmodule.c: new python command "nextturn" to
