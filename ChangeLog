@@ -1,3 +1,8 @@
+Sun Mar 14 08:55:39 2004  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* gtkcolour.h: Change broken type for GtkColourPicker::func and
+	prototype.
+
 Fri Mar 12 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkprefs.c, gtkgame.c: Removed texture load errors when in 2d mode

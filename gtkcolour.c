@@ -53,7 +53,7 @@ static void set_gc_colour( GdkGC *gc, GdkColormap *pcm, GdkColor *col ) {
 #endif
 }
 
-extern GtkWidget *gtk_colour_picker_new(GtkSignalFunc	func, void *data) {
+extern GtkWidget *gtk_colour_picker_new(ColorPickerFunc	func, void *data) {
 
     GtkColourPicker *pcp;
 

@@ -61,29 +61,40 @@ GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind
 typedef struct _GtkColourPicker GtkColourPicker;
 typedef struct _GtkColourPickerClass GtkColourPickerClass;
 
+/*  Previous broken type  (YH)
+    typedef GtkSignalFunc ColorPickerFunc;
+*/
+typedef void  (*ColorPickerFunc)(GtkWidget **);
+
 struct _GtkColourPicker {
-    GtkButton parent_instance;
-    GtkWidget *pwColourSel, *pwDraw;
-    GdkPixmap *ppm;
-    gdouble arOrig[ 4 ];
-    gdouble arColour[ 4 ];
-    int hasOpacity;
-    GtkSignalFunc func;
-    void *data;
+  GtkButton parent_instance;
+  GtkWidget *pwColourSel, *pwDraw;
+  GdkPixmap *ppm;
+  gdouble arOrig[ 4 ];
+  gdouble arColour[ 4 ];
+  int hasOpacity;
+  ColorPickerFunc  func;
+  void *data;
 };
 
 struct _GtkColourPickerClass {
-    GtkButtonClass parent_class;
+  GtkButtonClass parent_class;
 };
 
-extern GtkType gtk_colour_picker_get_type( void );
-extern GtkWidget *gtk_colour_picker_new(GtkSignalFunc func, void *data);
-extern void gtk_colour_picker_set_has_opacity_control(
-    GtkColourPicker *pcp, gboolean f );
-extern void gtk_colour_picker_set_colour( GtkColourPicker *pcp,
-					  gdouble *ar );
-extern void gtk_colour_picker_get_colour( GtkColourPicker *pcp,
-					  gdouble *ar );
+extern GtkType
+gtk_colour_picker_get_type( void );
+
+extern GtkWidget*
+gtk_colour_picker_new(ColorPickerFunc func, void *data);
+
+extern void
+gtk_colour_picker_set_has_opacity_control(GtkColourPicker *pcp, gboolean f );
+
+extern void
+gtk_colour_picker_set_colour( GtkColourPicker *pcp, gdouble *ar );
+
+extern void
+gtk_colour_picker_get_colour( GtkColourPicker *pcp, gdouble *ar );
     
 #ifdef __cplusplus
 }
