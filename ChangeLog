@@ -1,3 +1,7 @@
+Fri Jul 11 20:42:23 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* external.c: ignore SIGPIPE on Windows
+
 Fri Jul 11 19:04:01 2003  Holger Bochnig <hbgg@gmx.net>
 
 	trying to use sockets on Windows (SIGPIPE still missing)
