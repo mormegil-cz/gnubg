@@ -1,3 +1,8 @@
+Mon Aug 12 15:46:05 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkprefs.c (SetColourARSS, SetColourSSF, SetColourX): Change scale
+	factor to avoid overflow on some versions of GTK+.
+
 Mon Aug 12 19:13:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Make theory widget show correct notebook page.
