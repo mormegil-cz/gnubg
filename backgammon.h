@@ -336,7 +336,7 @@ extern int fReadline;
 extern int iProgressMax, iProgressValue;
 extern char *pcProgress;
 
-extern char *aszVersion[];
+extern char *aszVersion[], *szHomeDirectory;
 
 extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[];

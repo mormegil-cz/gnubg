@@ -326,6 +326,8 @@ duplication of effort and to make sure our changes merge easily.
   underscores.  This isn't really necessary; it would be OK to use names
   verbatim, and equate whitespace and underscores in the command parsing
   code instead. (gary)
+** $HOME might not exist on non-POSIX settings.  What are better alternatives
+  for finding a place to save per-user settings?
 
 Local Variables:
 mode: outline

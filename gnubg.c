@@ -807,6 +807,8 @@ char *aszVersion[] = {
     NULL
 };
 
+char *szHomeDirectory;
+
 extern char *NextToken( char **ppch ) {
 
     char *pch;
@@ -2576,11 +2578,10 @@ extern void CommandCopy( char *sz ) {
 
 static void LoadRCFiles( void ) {
 
-    char *pch = getenv( "HOME" );
 #if __GNUC__
-    char sz[ strlen( pch ) + 14 ];
+    char sz[ strlen( szHomeDirectory ) + 14 ];
 #elif HAVE_ALLOCA
-    char *sz = alloca( strlen( pch ) + 14 );
+    char *sz = alloca( strlen( szHomeDirectory ) + 14 );
 #else
     char sz[ 4096 ];
 #endif
@@ -2588,14 +2589,14 @@ static void LoadRCFiles( void ) {
 
     outputoff();
     
-    sprintf( sz, "%s/.gnubgautorc", pch ? pch : "" );
+    sprintf( sz, "%s/.gnubgautorc", szHomeDirectory );
 
     if( ( pf = fopen( sz, "r" ) ) ) {
 	LoadCommands( pf, sz );
 	fclose( pf );
     }
     
-    sprintf( sz, "%s/.gnubgrc", pch ? pch : "" );
+    sprintf( sz, "%s/.gnubgrc", szHomeDirectory );
 
     if( ( pf = fopen( sz, "r" ) ) ) {
 	LoadCommands( pf, sz );
@@ -2806,11 +2807,10 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 extern void CommandSaveSettings( char *szParam ) {
 
-    char *pch = getenv( "HOME" );
 #if __GNUC__
-    char sz[ strlen( pch ) + 14 ];
+    char sz[ strlen( szHomeDirectory ) + 14 ];
 #elif HAVE_ALLOCA
-    char *sz = alloca( strlen( pch ) + 14 );
+    char *sz = alloca( strlen( szHomeDirectory ) + 14 );
 #else
     char sz[ 4096 ];
 #endif
@@ -2818,7 +2818,7 @@ extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache;
     
-    sprintf( sz, "%s/.gnubgautorc", pch ? pch : "" ); /* FIXME accept param */
+    sprintf( sz, "%s/.gnubgautorc", szHomeDirectory ); /* FIXME accept param */
 
     if( !( pf = fopen( sz, "w" ) ) ) {
 	perror( sz );
@@ -3825,6 +3825,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if HAVE_LIBREADLINE
     char *sz;
 #endif
+
+    if( !( szHomeDirectory = getenv( "HOME" ) ) )
+	/* FIXME what should non-POSIX systems do? */
+	szHomeDirectory = "";
     
 #if USE_GUI
     /* The GTK interface is fairly grotty; it makes it impossible to

@@ -1,3 +1,8 @@
+Thu Aug 30 10:05:52 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (LoadRCFiles, CommandSaveSettings), gtkgame.c (InitGTK): Use
+	szHomeDirectory instead of getenv( "HOME" ).
+
 Wed Aug 29 11:14:05 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (LuckAnalysis): Correct luck analysis for first roll
