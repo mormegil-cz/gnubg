@@ -42,9 +42,15 @@ extern int main( int argc, char *argv[] ) {
 #define output stdout
 #endif
     
-    if( scanf( "GNU Backgammon %15s\n", szFileVersion ) != 1 ||
-	strcmp( szFileVersion, WEIGHTS_VERSION ) ) {
-	fprintf( stderr, "%s: Invalid weights file\n", argv[ 0 ] );
+    if( scanf( "GNU Backgammon %15s\n", szFileVersion ) != 1 ) {
+	fprintf( stderr, "%s: invalid weights file\n", argv[ 0 ] );
+	return EXIT_FAILURE;
+    }
+
+    if( strcmp( szFileVersion, WEIGHTS_VERSION ) ) {
+	fprintf( stderr, "%s: incorrect weights version (version "
+		 WEIGHTS_VERSION " is required,\nbut these weights are "
+		 "%s)\n", argv[ 0 ], szFileVersion );
 	return EXIT_FAILURE;
     }
 

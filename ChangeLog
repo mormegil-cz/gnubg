@@ -1,3 +1,9 @@
+Thu Jan 11 16:17:46 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (EvalInitialise): Give better error messages about bad
+	weights files.
+	* makeweights.c (main): Likewise.
+
 Wed Jan 10 19:34:57 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkprefs.c (BoardPreferencesParam): More work on parameters to

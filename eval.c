@@ -587,12 +587,16 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
     if( szWeightsBinary &&
 	( h = PathOpen( szWeightsBinary, szDir ) ) >= 0 &&
 	( pfWeights = fdopen( h, "rb" ) ) ) {
-	if( fread( &r, sizeof r, 1, pfWeights ) < 1 ||
-	    r != WEIGHTS_MAGIC_BINARY ||
-	    fread( &r, sizeof r, 1, pfWeights ) < 1 ||
-	    r != WEIGHTS_VERSION_BINARY )
-	    fprintf( stderr, "%s: Invalid weights file\n",
-		     szWeightsBinary );
+	if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
+	    perror( szWeightsBinary );
+	else if( r != WEIGHTS_MAGIC_BINARY )
+	    fprintf( stderr, "%s: not a weights file\n", szWeightsBinary );
+	else if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
+	    perror( szWeightsBinary );
+	else if( r != WEIGHTS_VERSION_BINARY )
+	    fprintf( stderr, "%s: incorrect weights version (version "
+		     WEIGHTS_VERSION " is required, but these weights "
+		     "are %.2f)\n", szWeightsBinary, r );
 	else {
 	    if( !( fReadWeights =
 		   !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
@@ -617,9 +621,12 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    perror( szWeights );
 	else {
 	    if( fscanf( pfWeights, "GNU Backgammon %15s\n",
-			szFileVersion ) != 1 ||
-		strcmp( szFileVersion, WEIGHTS_VERSION ) )
-		fprintf( stderr, "%s: Invalid weights file\n", szWeights );
+			szFileVersion ) != 1 )
+		fprintf( stderr, "%s: not a weights file\n", szWeights );
+	    else if( strcmp( szFileVersion, WEIGHTS_VERSION ) )
+		fprintf( stderr, "%s: incorrect weights version (version "
+			 WEIGHTS_VERSION " is required,\nbut these weights "
+			 "are %s)\n", szWeights, szFileVersion );
 	    else {
 		if( !( fReadWeights = !NeuralNetLoad( &nnContact,
 						      pfWeights ) &&
