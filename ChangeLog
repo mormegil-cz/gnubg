@@ -9,6 +9,7 @@ Sun Apr 11 19:20:52 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	* Makefile.am: move openurl.c to common files (it's now
 	being used by CommandShowManualWeb)
 	* configure.in: various checks for Mac.
+	* set.c (CommandSetGUIShowEPCs): define a NO_GUI variant of function
 
 Thu Apr  8 16:03:09 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
