@@ -2286,7 +2286,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Game/Set turn/1"), NULL, Command, CMD_SET_TURN_1,
 	  "/Game/Set turn/0" },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/Match information"), NULL, GTKMatchInfo, 0, NULL },
+	{ N_("/_Game/Match information..."), NULL, GTKMatchInfo, 0, NULL },
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT, NULL },

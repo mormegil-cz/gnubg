@@ -1,3 +1,8 @@
+Wed Jan 15 15:32:39 2003  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (ExportGameJF): Revert previous patch; JF .mat format
+	shouldn't be internationalised.
+
 Wed Jan 15 14:44:05 2003  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c, set.c, show.c: I18N plural patches from TAKAHASHI Kaoru.

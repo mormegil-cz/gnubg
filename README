@@ -35,12 +35,13 @@ Current features:
  - Position databases for supervised training (if GNU dbm is available).
  - Loading and saving .sgf games and matches (.sgf files are in the
    Smart Game Format).
- - Exporting games and matches to HTML, LaTeX, .mat, PDF, PNG and PostScript 
-   formats.
+ - Exporting games and matches to HTML, LaTeX, .mat, PDF, PNG, PostScript 
+   and plain text formats.
  - Importing .bkg, .mat, .pos, .sgg, .tmg and FIBS "oldmoves" files.
  - Scripting ability (if GNU Guile is available).
  - Automatic and manual annotation (analysis and commentary) of games and
    matches.
+ - Record keeping of statistics of players in games and matches.
 
 Bearoff databases:
 ------------------
