@@ -55,6 +55,7 @@
 ".cubedecision th { background-color: #89d0e2; text-align: center} \n" \
 ".comment { background-color: #449911; width: 39.5em; padding: 0.5em } \n" \
 ".commentheader { background-color: #557711; font-weight: bold; text-align: center; width: 40em; padding: 0.25em } \n" \
+"td img {display: block;}\n" \
 "</style>\n" 
 
 #define FORMATHTMLPROB(f) \
@@ -95,7 +96,11 @@ a "</th>\n" \
 static char *aszLinkText[] = {
   "[First Game]", "[Previous Game]", "[Next Game]", "[Last Game]" };
 
+/* Color of chequers */
 
+static char *aszColorNameBBS[] = { "white", "blue" };
+static char *aszColorNameF2H[] = { "white", "red" };
+static char *aszColorNameGNU[] = { "red", "black" };
 
 
 /*
@@ -137,9 +142,229 @@ printImage ( FILE *pf, const char *szImageDir, const char *szImage,
  */
 
 static void
-printPoint ( FILE *pf, const char *szImageDir, const char *szExtension,
-             int iPoint0, int iPoint1, 
-             const int fColor, const int fUp ) {
+printPointBBS ( FILE *pf, const char *szImageDir, const char *szExtension,
+                int iPoint0, int iPoint1, 
+                const int fColor, const int fUp ) {
+
+  char sz[ 100 ];
+  char szAlt[ 100 ];
+  char *aasz[ 2 ][ 2 ] = { { "dd", "dn" },
+                           { "ud", "up" } };
+
+  if ( iPoint0 ) {
+
+    /* player 0 owns the point */
+
+    sprintf ( sz, "p_%s_w_%d", aasz[ fUp ][ fColor ], iPoint0 );
+    sprintf ( szAlt, "%1xX", iPoint0 );
+    
+  }
+  else if ( iPoint1 ) {
+
+    /* player 1 owns the point */
+
+    sprintf ( sz, "p_%s_b_%d", aasz[ fUp ][ fColor ], iPoint1 );
+    sprintf ( szAlt, "%1xO", iPoint1 );
+
+  }
+  else {
+    /* empty point */
+    sprintf ( sz, "p_%s_0", aasz[ fUp ][ fColor ] );
+    sprintf ( szAlt, "&nbsp;'" );
+  }
+
+  printImage ( pf, szImageDir, sz, szExtension, szAlt );
+
+}
+
+
+static void
+printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
+                    const char *szImageDir, const char *szExtension,
+                    const char *szType ) {
+
+  int anBoard[ 2 ][ 25 ];
+  int anPips[ 2 ];
+  int acOff[ 2 ];
+  int i, j;
+  char sz[ 1024 ];
+
+  memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
+
+  if ( pms->fMove ) SwapSides ( anBoard );
+  PipCount ( anBoard, anPips );
+
+  for( i = 0; i < 2; i++ ) {
+    acOff[ i ] = 15;
+    for ( j = 0; j < 25; j++ )
+      acOff[ i ] -= anBoard[ i ][ j ];
+  }
+
+    
+  /* 
+   * Top row
+   */
+
+  printImage ( pf, szImageDir, fTurn ? "n_high" : "n_low", szExtension, NULL );
+  fputs ( "<br />\n", pf );
+
+  /* chequers off */
+
+  sprintf ( sz, "o_w_%d", acOff[ 0 ] );
+  printImage ( pf, szImageDir, sz, szExtension, NULL );
+
+  /* player 0's inner board */
+
+  for ( i = 0; i < 6; i++ )
+    printPointBBS ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ i ],
+                    anBoard[ 0 ][ 23 - i ],
+                    ! ( i % 2 ), TRUE );
+
+  /* player 1's chequers on the bar */
+
+  sprintf ( sz, "b_up_%d", anBoard[ 0 ][ 24 ] );
+  printImage ( pf, szImageDir, sz, szExtension, NULL );
+
+  /* player 0's outer board */
+
+  for ( i = 0; i < 6; i++ )
+    printPointBBS ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ i + 6 ],
+                    anBoard[ 0 ][ 17 - i ],
+                    ! ( i % 2 ), TRUE );
+
+  /* player 0 owning cube */
+
+  if ( ! pms->fCubeOwner ) {
+    sprintf ( sz, "c_up_%d", pms->nCube );
+    printImage ( pf, szImageDir, sz, szExtension, NULL );
+  }    
+  else
+    printImage ( pf, szImageDir, "c_up_0", szExtension, NULL );
+
+  fputs ( "<br />\n", pf );
+
+  /* end of first row */
+
+  /*
+   * center row (dice)
+   */
+
+  if ( pms->anDice[ 0 ] ) {
+
+    /* dice rolled */
+
+    sprintf ( sz, "b_center%d%d%s", 
+              ( pms->anDice[ 0 ] < pms->anDice[ 1 ] ) ? 
+              pms->anDice[ 0 ] : pms->anDice[ 1 ], 
+              ( pms->anDice[ 0 ] < pms->anDice[ 1 ] ) ? 
+              pms->anDice[ 1 ] : pms->anDice[ 0 ], 
+              pms->fMove ? "right" : "left" );
+    printImage ( pf, szImageDir, sz, szExtension, NULL );
+
+  }
+  else 
+    /* no dice rolled */
+    printImage ( pf, szImageDir, "b_center", szExtension, NULL );
+
+  /* center cube */
+
+  if ( pms->fCubeOwner == -1 ) {
+    sprintf ( sz, "c_ce_%d", pms->nCube );
+    printImage ( pf, szImageDir, sz, szExtension, NULL );
+  }    
+  else
+    printImage ( pf, szImageDir, "c_ce_0", szExtension, NULL );
+
+  fputs ( "<br />\n", pf );
+
+  /* end of center row */
+
+  /*
+   * Bottom row
+   */
+
+  /* player 1's chequers off */
+
+  sprintf ( sz, "o_b_%d", acOff[ 0 ] );
+  printImage ( pf, szImageDir, sz, szExtension, NULL );
+
+  /* player 1's inner board */
+
+  for ( i = 0; i < 6; i++ )
+    printPointBBS ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 23 - i ],
+                    anBoard[ 0 ][ i ],
+                    ! ( i % 2 ), FALSE );
+
+  /* player 0's chequers on the bar */
+
+  sprintf ( sz, "b_dn_%d", anBoard[ 0 ][ 24 ] );
+  printImage ( pf, szImageDir, sz, szExtension, NULL );
+
+  /* player 1's outer board */
+
+  for ( i = 0; i < 6; i++ )
+    printPointBBS ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 17 - i ],
+                    anBoard[ 0 ][ i + 6 ],
+                    ! ( i % 2 ), FALSE );
+
+  /* player 1 owning cube */
+
+  if ( pms->fCubeOwner == 1 ) {
+    sprintf ( sz, "c_dn_%d", pms->nCube );
+    printImage ( pf, szImageDir, sz, szExtension, NULL );
+  }    
+  else
+    printImage ( pf, szImageDir, "c_dn_0", szExtension, NULL );
+
+  fputs ( "<br />\n", pf );
+
+  /* point numbers */
+
+  printImage ( pf, szImageDir, fTurn ? "n_low" : "n_high", szExtension, NULL );
+
+  fputs ( "<br />\n", pf );
+
+  /* end of bottom row */
+
+  /* position ID */
+
+  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  /* pip counts */
+
+  PipCount ( anBoard, anPips );
+  fprintf ( pf, "Pip counts: Blue %d, White %d<br />\n",
+            anPips[ 0 ], anPips[ 1 ] );
+  
+
+}
+
+
+/*
+ * print image for a point
+ *
+ * Input:
+ *    pf : write to file
+ *    szImageDir: path (URI) to images
+ *    szImage: the image to print
+ *    szExtension: extension of the image (e.g. gif or png)
+ *    anBoard: the board
+ *    iPoint: the point to draw
+ *    fColor: color
+ *    fUp: upper half or lower half of board
+ *
+ */
+
+static void
+printPointF2H ( FILE *pf, const char *szImageDir, const char *szExtension,
+                int iPoint0, int iPoint1, 
+                const int fColor, const int fUp ) {
 
   char sz[ 100 ];
   char szAlt[ 100 ];
@@ -175,8 +400,9 @@ printPoint ( FILE *pf, const char *szImageDir, const char *szExtension,
 
 
 static void
-printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
-                 const char *szImageDir, const char *szExtension ) {
+printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
+                    const char *szImageDir, const char *szExtension,
+                    const char *szType ) {
 
   char sz[ 100 ];
   char szAlt[ 100 ];
@@ -243,10 +469,10 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
 
-      printPoint ( pf, szImageDir, szExtension, 
-                   anBoard[ 1 ][ 11 - i ],
-                   anBoard[ 0 ][ 12 + i],
-                   fColor, TRUE );
+    printPointF2H ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 11 - i ],
+                    anBoard[ 0 ][ 12 + i],
+                    fColor, TRUE );
 
     fColor = ! fColor;
 
@@ -272,10 +498,10 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
 
-      printPoint ( pf, szImageDir, szExtension, 
-                   anBoard[ 1 ][ 5 - i ],
-                   anBoard[ 0 ][ 18 + i],
-                   fColor, TRUE );
+    printPointF2H ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 5 - i ],
+                    anBoard[ 0 ][ 18 + i],
+                    fColor, TRUE );
 
     fColor = ! fColor;
 
@@ -381,10 +607,10 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
 
-      printPoint ( pf, szImageDir, szExtension, 
-                   anBoard[ 1 ][ 12 + i ],
-                   anBoard[ 0 ][ 11 - i],
-                   fColor, FALSE );
+    printPointF2H ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 12 + i ],
+                    anBoard[ 0 ][ 11 - i],
+                    fColor, FALSE );
 
     fColor = ! fColor;
 
@@ -410,10 +636,10 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
 
-      printPoint ( pf, szImageDir, szExtension, 
-                   anBoard[ 1 ][ 18 + i ],
-                   anBoard[ 0 ][ 5 - i],
-                   fColor, FALSE );
+    printPointF2H ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 18 + i ],
+                    anBoard[ 0 ][ 5 - i],
+                    fColor, FALSE );
 
     fColor = ! fColor;
 
@@ -453,6 +679,403 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 }
 
 
+
+/*
+ * print image for a point
+ *
+ * Input:
+ *    pf : write to file
+ *    szImageDir: path (URI) to images
+ *    szImage: the image to print
+ *    szExtension: extension of the image (e.g. gif or png)
+ *    anBoard: the board
+ *    iPoint: the point to draw
+ *    fColor: color
+ *    fUp: upper half or lower half of board
+ *
+ */
+
+static void
+printPointGNU ( FILE *pf, const char *szImageDir, const char *szExtension,
+                int iPoint0, int iPoint1, 
+                const int fColor, const int fUp ) {
+
+  char sz[ 100 ];
+  char szAlt[ 100 ];
+
+  if ( iPoint0 ) {
+
+    /* player 0 owns the point */
+
+    sprintf ( sz, "b-%c%c-x%d", fColor ? 'g' : 'r', fUp ? 'd' : 'u',
+              ( iPoint0 >= 11 ) ? 11 : iPoint0 );
+    sprintf ( szAlt, "%1xX", iPoint0 );
+    
+  }
+  else if ( iPoint1 ) {
+
+    /* player 1 owns the point */
+
+    sprintf ( sz, "b-%c%c-o%d", fColor ? 'g' : 'r', fUp ? 'd' : 'u',
+              ( iPoint1 >= 11 ) ?
+              11 : iPoint1 );
+    sprintf ( szAlt, "%1xO", iPoint1 );
+
+  }
+  else {
+    /* empty point */
+    sprintf ( sz, "b-%c%c", fColor ? 'g' : 'r', fUp ? 'd' : 'u' );
+    sprintf ( szAlt, "&nbsp;'" );
+  }
+
+  printImage ( pf, szImageDir, sz, szExtension, szAlt );
+
+}
+
+
+
+
+static void
+printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
+                    const char *szImageDir, const char *szExtension,
+                    const char *szType ) {
+
+  char sz[ 100 ];
+  char szAlt[ 100 ];
+  int i, j;
+
+  int anBoard[ 2 ][ 25 ];
+  int anPips[ 2 ];
+  int acOff[ 2 ];
+
+  memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
+
+  if ( pms->fMove ) SwapSides ( anBoard );
+
+  for( i = 0; i < 2; i++ ) {
+    acOff[ i ] = 15;
+    for ( j = 0; j < 25; j++ )
+      acOff[ i ] -= anBoard[ i ][ j ];
+  }
+
+  /* top line with board numbers */
+
+  fputs ( "<table cellpadding=\"0\" border=\"0\" cellspacing=\"0\""
+          " style=\"margin: 0; padding: 0; border: 0\">\n", pf );
+  fputs ( "<tr>", pf );
+
+  fputs ( "<td colspan=\"15\">", pf );
+  printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
+               fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
+               "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" );
+  fputs ( "</td></tr>\n", pf );
+
+  /* display left bearoff tray */
+
+  fputs ( "<tr>", pf );
+
+  fputs ( "<td rowspan=\"2\">", pf );
+  printImage ( pf, szImageDir, "b-roff", szExtension, "|" );
+  fputs ( "</td>", pf );
+
+  /* display player 0's outer quadrant */
+
+  for ( i = 0; i < 6; i++ ) {
+    fputs ( "<td rowspan=\"2\">", pf );
+    printPointGNU ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 11 - i ],
+                    anBoard[ 0 ][ 12 + i],
+                    ! (i % 2), TRUE );
+    fputs ( "</td>", pf );
+  }
+
+
+  /* display cube */
+
+  fputs ( "<td>", pf );
+
+  if ( ! pms->fCubeOwner )
+    sprintf ( sz, "b-ct-%d", pms->nCube );
+  else
+    strcpy ( sz, "b-ct" );
+  printImage ( pf, szImageDir, sz, szExtension, "" );
+
+  fputs ( "</td>", pf );
+
+
+  /* display player 0's home quadrant */
+
+  for ( i = 0; i < 6; i++ ) {
+    fputs ( "<td rowspan=\"2\">", pf );
+    printPointGNU ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 5 - i ],
+                    anBoard[ 0 ][ 18 + i],
+                    ! ( i % 2 ), TRUE );
+    fputs ( "</td>", pf );
+  }
+
+
+  /* right bearoff tray */
+
+  fputs ( "<td rowspan=\"2\">", pf );
+  if ( acOff[ 0 ] ) 
+    sprintf ( sz, "b-roff-x%d", acOff[ 0 ] );
+  else
+    strcpy ( sz, "b-roff" );
+  printImage ( pf, szImageDir, sz, szExtension, "|" );
+  fputs ( "</td>", pf );
+
+  fputs ( "</tr>\n", pf );
+
+
+  /* display bar */
+
+  fputs ( "<tr>", pf );
+  fputs ( "<td>", pf );
+
+  sprintf ( sz, "b-bar-x%d", anBoard[ 0 ][ 24 ] );
+  if ( anBoard[ 0 ][ 24 ] )
+    sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 0 ][ 24 ] );
+  else
+    strcpy ( szAlt, "|&nbsp;&nbsp;&nbsp;|" );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt );
+
+  fputs ( "</td>", pf );
+  fputs ( "</tr>\n", pf );
+
+  
+  /* center of board */
+
+  fputs ( "<tr>", pf );
+
+  /* left part of bar */
+
+  fputs ( "<td>", pf );
+  printImage ( pf, szImageDir, "b-midlb", szExtension, "|" );
+  fputs ( "</td>", pf );
+
+  /* center of board */
+
+  fputs ( "<td colspan=\"6\">", pf );
+
+  if ( ! pms->fMove && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
+
+    /* player 0 has rolled the dice */
+    
+    sprintf ( sz, "b-midl-x%d%d", pms->anDice[ 0 ], pms->anDice[ 1 ] );
+    sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
+              pms->anDice[ 0 ], pms->anDice[ 1 ] );
+    
+    printImage ( pf, szImageDir, sz, szExtension, szAlt );
+    
+  }
+  else if ( ! pms->fMove && pms->fDoubled ) {
+    
+    /* player 0 has doubled */
+    
+    sprintf ( sz, "b-midl-c%d", 2 * pms->nCube );
+    sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
+    
+    printImage ( pf, szImageDir, sz, szExtension, szAlt );
+    
+  }
+  else {
+    
+    /* player 0 on roll */
+    
+    printImage ( pf, szImageDir, "b-midl", szExtension, 
+                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" );
+    
+  }
+
+  fputs ( "</td>", pf );
+
+  /* centered cube */
+
+  if ( pms->fCubeOwner == -1 && ! pms->fDoubled )
+    sprintf ( sz, "b-midc-%d", pms->nCube );
+  else
+    strcpy ( sz, "b-midc" );
+
+  fputs ( "<td>", pf );
+  printImage ( pf, szImageDir, sz, szExtension, "|" );
+  fputs ( "</td>", pf );
+
+  /* player 1 */
+
+  fputs ( "<td colspan=\"6\">", pf );
+
+  if ( pms->fMove == 1 && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
+
+    /* player 1 has rolled the dice */
+    
+    sprintf ( sz, "b-midr-o%d%d", pms->anDice[ 0 ], pms->anDice[ 1 ] );
+    sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
+              pms->anDice[ 0 ], pms->anDice[ 1 ] );
+    
+    printImage ( pf, szImageDir, sz, szExtension, szAlt );
+    
+  }
+  else if ( pms->fMove == 1 && pms->fDoubled ) {
+    
+    /* player 1 has doubled */
+    
+    sprintf ( sz, "b-midr-c%d", 2 * pms->nCube );
+    sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
+    
+    printImage ( pf, szImageDir, sz, szExtension, szAlt );
+    
+  }
+  else {
+    
+    /* player 1 on roll */
+    
+    printImage ( pf, szImageDir, "b-midr", szExtension, 
+                 "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" );
+    
+  }
+
+  fputs ( "</td>", pf );
+
+  /* right part of bar */
+
+  fputs ( "<td>", pf );
+  printImage ( pf, szImageDir, "b-midlb", szExtension, "|" );
+  fputs ( "</td>", pf );
+
+  fputs ( "</tr>\n", pf );
+
+
+  /* display left bearoff tray */
+
+  fputs ( "<tr>", pf );
+
+  fputs ( "<td rowspan=\"2\">", pf );
+  printImage ( pf, szImageDir, "b-roff", szExtension, "|" );
+  fputs ( "</td>", pf );
+
+
+  /* display player 1's outer quadrant */
+
+  for ( i = 0; i < 6; i++ ) {
+    fputs ( "<td rowspan=\"2\">", pf );
+    printPointGNU ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 12 + i ],
+                    anBoard[ 0 ][ 11 - i],
+                    i % 2, FALSE );
+    fputs ( "</td>", pf );
+  }
+
+
+  /* display bar */
+
+  fputs ( "<td>", pf );
+
+  sprintf ( sz, "b-bar-o%d", anBoard[ 1 ][ 24 ] );
+  if ( anBoard[ 1 ][ 24 ] )
+    sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 1 ][ 24 ] );
+  else
+    strcpy ( szAlt, "|&nbsp;&nbsp;&nbsp;|" );
+  printImage ( pf, szImageDir, sz, szExtension, szAlt );
+
+  fputs ( "</td>", pf );
+
+
+  /* display player 1's outer quadrant */
+
+  for ( i = 0; i < 6; i++ ) {
+    fputs ( "<td rowspan=\"2\">", pf );
+    printPointGNU ( pf, szImageDir, szExtension, 
+                    anBoard[ 1 ][ 18 + i ],
+                    anBoard[ 0 ][ 5 - i],
+                    i % 2, FALSE );
+    fputs ( "</td>", pf );
+  }
+
+
+  /* right bearoff tray */
+
+  fputs ( "<td rowspan=\"2\">", pf );
+  if ( acOff[ 0 ] ) 
+    sprintf ( sz, "b-roff-o%d", acOff[ 0 ] );
+  else
+    strcpy ( sz, "b-roff" );
+  printImage ( pf, szImageDir, sz, szExtension, "|" );
+  fputs ( "</td>", pf );
+
+  fputs ( "</tr>\n", pf );
+
+
+  /* display cube */
+  
+  fputs ( "<tr>", pf );
+  fputs ( "<td>", pf );
+
+  if ( pms->fCubeOwner == 1 )
+    sprintf ( sz, "b-cb-%d", pms->nCube );
+  else
+    strcpy ( sz, "b-cb" );
+  printImage ( pf, szImageDir, sz, szExtension, "" );
+
+  fputs ( "</td>", pf );
+  fputs ( "</tr>\n", pf );
+
+
+  /* bottom */
+
+  fputs ( "<tr>", pf );
+  fputs ( "<td colspan=\"15\">", pf );
+  printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension,
+               fTurn ?
+               "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
+               "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" );
+  fputs ( "</td>", pf );
+  fputs ( "</tr>", pf );
+
+  /* position ID */
+
+  fputs ( "<tr>", pf );
+  fputs ( "<td colspan=\"15\">", pf );
+  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+  fputs ( "</td>", pf );
+  fputs ( "</tr>\n", pf );
+
+  /* pip counts */
+
+  PipCount ( anBoard, anPips );
+  fputs ( "<tr>", pf );
+  fputs ( "<td colspan=\"15\">", pf );
+  fprintf ( pf, "Pip counts: Black %d, Red %d<br />\n",
+            anPips[ 0 ], anPips[ 1 ] );
+  fputs ( "</td>", pf );
+  fputs ( "</tr>\n", pf );
+
+  fputs ( "</table>\n\n", pf );
+
+}
+
+
+static void
+printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
+                 const char *szImageDir, const char *szExtension,
+                 const char *szType ) {
+
+
+  if ( ! strcmp ( szType, "fibs2html" ) )
+    printHTMLBoardF2H ( pf, pms, fTurn, szImageDir, szExtension, szType );
+  else if ( ! strcmp ( szType, "bbs" ) )
+    printHTMLBoardBBS ( pf, pms, fTurn, szImageDir, szExtension, szType );
+  else if ( ! strcmp ( szType, "gnu" ) )
+    printHTMLBoardGNU ( pf, pms, fTurn, szImageDir, szExtension, szType );
+  else
+    printf ( "unknown board type\n" );
+
+
+}
+
+
 /*
  * Print html header for board: move or cube decision 
  *
@@ -465,6 +1088,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
 static void 
 HTMLBoardHeader ( FILE *pf, const matchstate *pms, 
+                  char *aszColorName[],
                   const int iGame, const int iMove ) {
 
   if ( pms->fResigned ) 
@@ -478,7 +1102,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
               "</b>"
               " %s resigns %d points</p>\n",
               iGame + 1, iMove + 1, iMove + 1,
-              pms->fTurn ? "red" : "white", 
+              aszColorName[ pms->fTurn ],
               pms->fResigned * pms->nCube
             );
   
@@ -493,7 +1117,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
               "</b>"
               " %s to play %d%d</p>\n",
               iGame + 1, iMove + 1, iMove + 1,
-              pms->fMove ? "red" : "white", 
+              aszColorName[ pms->fTurn ],
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -508,7 +1132,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
               "</b>"
               " %s doubles to %d</p>\n",
               iGame + 1, iMove + 1, iMove + 1,
-              pms->fMove ? "red" : "white",
+              aszColorName[ ! pms->fMove ],
               pms->nCube * 2
             );
 
@@ -523,7 +1147,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
               "</b>"
               " %s onroll, cube decision?</p>\n",
               iGame + 1, iMove + 1, iMove + 1,
-              pms->fMove ? "red" : "white"
+              aszColorName[ pms->fTurn ]
             );
 
 
@@ -614,11 +1238,15 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
     if ( aszLinks && aszLinks[ i ] ) {
       if ( fFirst ) {
         fprintf ( pf, "<hr />\n" );
+        fputs ( "<p>\n", pf );
         fFirst = FALSE;
       }
       fprintf ( pf, "<a href=\"%s\">%s</a>\n",
                 aszLinks[ i ], aszLinkText[ i ] );
     }
+
+  if ( ! fFirst )
+    fputs ( "</p>\n", pf );
 
 }
 
@@ -653,11 +1281,15 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
     if ( aszLinks && aszLinks[ i ] ) {
       if ( fFirst ) {
         fprintf ( pf, "<hr />\n" );
+        fputs ( "<p>\n", pf );
         fFirst = FALSE;
       }
       fprintf ( pf, "<a href=\"%s\">%s</a>\n",
                 aszLinks[ i ], aszLinkText[ i ] );
     }
+
+  if ( ! fFirst )
+    fputs ( "</p>\n", pf );
 
   time ( &t );
 
@@ -666,13 +1298,24 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
             "<address>Output generated %s by "
             "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
             VERSION "</a> (HTML Export version %d.%d)</address>\n"
-            "<p class=\"tiny\">Validate "
-            "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">CSS</a> or "
-            "<a href=\"http://validator.w3.org/check/referer\">XHTML</a>.</p>\n"
+            "<p>\n"
+            "<a href=\"http://validator.w3.org/check/referer\">"
+            "<img style=\"border:0;width:88px;height:31px\" "
+            "src=\"http://www.w3.org/Icons/valid-xhtml10\" "
+            "alt=\"Valid XHTML 1.0!\" /></a>\n"
+            "<a href=\"http://jigsaw.w3.org/css-validator/\">"
+            "<img style=\"border:0;width:88px;height:31px\" "
+            "src=\"http://jigsaw.w3.org/css-validator/images/vcss\" "
+            "alt=\"Valid CSS!\" />"
+            "</a>\n"
+            "</p>\n"
             "</body>\n"
             "</html>\n",
             ctime ( &t ),
             iMajor, iMinor );
+#ifdef UNDEF
+#endif
+
 
 }
 
@@ -1143,7 +1786,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
 static void
 HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
-                        const char *szImageDir, const char *szExtension ) {
+                        const char *szImageDir, const char *szExtension,
+                        const char *szType ) {
 
   cubeinfo ci;
 
@@ -1214,7 +1858,8 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
 static void
 HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
-                        const char *szImageDir, const char *szExtension ) {
+                        const char *szImageDir, const char *szExtension,
+                        const char *szType ) {
 
   char sz[ 64 ];
   int i;
@@ -1451,13 +2096,18 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
   }
   else {
 
-    /* no legal moves */
-
-    /* FIXME: output equity?? */
-
-    fprintf ( pf,
-              "<tr class=\"movethemove\"><td>&nbsp;</td><td>&nbsp;</td>"
-              "<td>&nbsp;</td><td>Cannot move</td><td>&nbsp;</td></tr>\n" );
+    if ( pmr->n.anMove[ 0 ] >= 0 )
+      /* no movelist saved */
+      fprintf ( pf,
+                "<tr class=\"movethemove\"><td>&nbsp;</td><td>&nbsp;</td>"
+                "<td>&nbsp;</td><td>%s</td><td>&nbsp;</td></tr>\n",
+                FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
+    else 
+      /* no legal moves */
+      /* FIXME: output equity?? */
+      fprintf ( pf,
+                "<tr class=\"movethemove\"><td>&nbsp;</td><td>&nbsp;</td>"
+                "<td>&nbsp;</td><td>Cannot move</td><td>&nbsp;</td></tr>\n" );
 
   }
 
@@ -1487,7 +2137,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
 static void
 HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
-               const char *szImageDir, const char *szExtension ) {
+               const char *szImageDir, const char *szExtension,
+               const char *szType ) {
 
   char sz[ 1024 ];
 
@@ -1497,9 +2148,10 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     fprintf ( pf, "<p>" );
 
-    printImage ( pf, szImageDir, "b-indent", szExtension, "" );
+    if ( ! strcmp ( szType, "fibs2html" ) )
+         printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
-    if ( pmr->n.ml.cMoves )
+    if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
                 "*%s moves %s</p>\n",
                 ap[ pmr->n.fPlayer ].szName,
@@ -1511,9 +2163,9 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     // HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension );
 
-    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension );
+    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
 
-    HTMLPrintMoveAnalysis ( pf, pms, pmr, szImageDir, szExtension );
+    HTMLPrintMoveAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
 
     break;
 
@@ -1528,14 +2180,15 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     fprintf ( pf, "<p>" );
 
-    printImage ( pf, szImageDir, "b-indent", szExtension, "" );
+    if ( ! strcmp ( szType, "fibs2html" ) )
+      printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
     fprintf ( pf,
               "*%s %s</p>\n",
               ap[ pmr->d.fPlayer ].szName,
               ( pmr->mt == MOVE_TAKE ) ? "accepts" : "rejects" );
 
-    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension );
+    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
 
     break;
 
@@ -2061,7 +2714,8 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr ) {
  */
 
 static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
-                             const char *szExtension,
+                             const char *szExtension, const char *szType,
+                             char *aszColorName[], 
                              const int iGame, const int fLastGame,
                              char *aszLinks[ 4 ] ) {
 
@@ -2112,11 +2766,11 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
         msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
         msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
 
-        HTMLBoardHeader ( pf, &msExport, iGame, iMove );
+        HTMLBoardHeader ( pf, &msExport, aszColorName, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
-                        szImageDir, szExtension );
-        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension );
+                        szImageDir, szExtension, szType );
+        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension, szType );
         
         iMove++;
 
@@ -2130,12 +2784,12 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 	    msExport.fMove = pmr->d.fPlayer;
 	}
       
-        HTMLBoardHeader ( pf,&msExport, iGame, iMove );
+        HTMLBoardHeader ( pf,&msExport, aszColorName, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
-                        szImageDir, szExtension );
+                        szImageDir, szExtension, szType );
         
-        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension );
+        HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension, szType );
         
         iMove++;
 
@@ -2259,10 +2913,27 @@ extern void CommandExportGameHtml( char *sz ) {
 	return;
     }
 
+    /*
     ExportGameHTML( pf, plGame,
-                    "http://fibs2html.sourceforge.net/images/", "gif",
+                    "http://fibs2html.sourceforge.net/images/", "gif", 
+                    "fibs2html", 
+                    aszColorNameF2H,
                     getGameNumber ( plGame ), FALSE, 
                     NULL );
+    ExportGameHTML( pf, plGame,
+                    "http://www.dbgf.dk/bbs/images/", "png", 
+                    "bbs", 
+                    aszColorNameBBS,
+                    getGameNumber ( plGame ), FALSE, 
+                    NULL );
+    */
+    ExportGameHTML( pf, plGame,
+                    "./html-images", "png", 
+                    "gnu", 
+                    aszColorNameBBS,
+                    getGameNumber ( plGame ), FALSE, 
+                    NULL );
+    
 
     if( pf != stdout )
 	fclose( pf );
@@ -2357,8 +3028,19 @@ extern void CommandExportMatchHtml( char *sz ) {
 	return;
       }
 
+#ifdef UNDEF
       ExportGameHTML ( pf, pl->p, 
                        "http://fibs2html.sourceforge.net/images/", "gif",
+                       "fibs2html", 
+                       aszColorNameF2H,
+                       i, i == nGames - 1,
+                       aszLinks );
+#endif
+
+      ExportGameHTML ( pf, pl->p, 
+                       "./html-images/", "png",
+                       "gnu", 
+                       aszColorNameGNU,
                        i, i == nGames - 1,
                        aszLinks );
 
@@ -2401,16 +3083,18 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL );
 
-    HTMLBoardHeader ( pf, &ms, 
+    HTMLBoardHeader ( pf, &ms, aszColorNameF2H,
                       getGameNumber ( plGame ),
                       getMoveNumber ( plGame, plLastMove->plNext->p ) - 1 );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
-                    "http://fibs2html.sourceforge.net/images/", "gif" );
+                    "./html-images/", "png",
+                    "gnu" );
 
     if( plLastMove->plNext->p != NULL)
         HTMLAnalysis ( pf, &ms, plLastMove->plNext->p,
-                       "http://fibs2html.sourceforge.net/images/", "gif" );
+                       "./html-images/", "png",
+                       "gnu" );
     
     HTMLEpilogue ( pf, &ms, NULL );
 

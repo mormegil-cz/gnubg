@@ -1,3 +1,9 @@
+Sun Apr 28 21:56:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c: numerous cosmetic improvements. Compile-time support
+	for several classes of images. Default is identical to gnubg
+	screenshots.
+
 Fri Apr 26 19:21:49 2002  Øystein Johansen <oeysteij@online.no>
 
         * eval.c, eval.h, rollout.c: Add neural net speedup from fibs2html.
