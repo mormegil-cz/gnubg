@@ -922,7 +922,8 @@ extern void CommandShowScore( char *sz ) {
 
 extern void CommandShowSeed( char *sz ) {
 
-    PrintRNGSeed( rngCurrent );
+    PrintRNGSeed( rngCurrent, rngctxCurrent );
+    PrintRNGCounter( rngCurrent, rngctxCurrent );
 }
 
 extern void CommandShowTurn( char *sz ) {

@@ -110,7 +110,7 @@
 #include "backgammon.h"
 #include "dice.h"
 #include "md5.h"
-#include "mt19937int.h"
+#include "mt19937ar.h"
 #include "isaac.h"
 #include "i18n.h"
 #include "external.h"
@@ -136,25 +136,58 @@ char *aszRNG[ NUM_RNGS ] = {
 
 
 rng rngCurrent = RNG_MERSENNE;
+void *rngctxCurrent = NULL;
 
-static randctx rc;
 
-static md5_uint32 nMD5; /* the current MD5 seed */
 
+
+
+typedef struct _rngcontext {
+
+  /* RNG_USER */
 #if HAVE_LIBDL
-static void (*pfUserRNGSeed) (unsigned long int);
-static void (*pfUserRNGShowSeed) (void);
-static long int (*pfUserRNGRandom) (void);
-static void *pvUserRNGHandle;
+  void *pvUserRNGHandle;
+  void (*pfUserRNGSeed) (unsigned long int);
+  void (*pfUserRNGShowSeed) (void);
+  long int (*pfUserRNGRandom) (void);
+  char szUserRNGSeed[ 32 ];
+  char szUserRNGRandom[ 32 ];
+#endif /* HAVE_LIBDL */
 
-static char szUserRNGSeed[ 32 ];
-static char szUserRNGRandom[ 32 ];
+  /* RNG_FILE */
+  int hDice;
+  char szDiceFilename[ BIG_PATH ];
+
+  /* RNG_ISAAC */
+  randctx rc;
+
+  /* RNG_MD5 */
+  md5_uint32 nMD5; /* the current MD5 seed */
+
+  /* RNG_MERSENNE */
+  int mti;
+  unsigned long mt[ N ];
+
+  /* RNG_BBS */
+
+#if HAVE_LIBGMP
+  mpz_t zModulus, zSeed, zZero, zOne;
+  int fZInit;
+#endif /* HAVE_LIBGMP */
+
+
+  /* common */
+  unsigned long c; /* counter */
+#if HAVE_LIBGMP
+  mpz_t nz; /* seed */
 #endif
+  int n; /* seed */
 
-char szDiceFilename[ BIG_PATH ];
+} rngcontext;
+  
 
 static int
-ReadDiceFile( void );
+ReadDiceFile( rngcontext *rngctx );
 
 
 static int GetManualDice( int anDice[ 2 ] ) {
@@ -211,28 +244,28 @@ static int GetManualDice( int anDice[ 2 ] ) {
 
 #if HAVE_LIBGMP
 
-static mpz_t zModulus, zSeed, zZero, zOne;
-static int fZInit;
-
-static void InitRNGBBS( void ) {
+static void InitRNGBBS( rngcontext *rngctx ) {
         
-    if( !fZInit ) {
-	mpz_init( zModulus );
-	mpz_init( zSeed );
-	mpz_init_set_ui( zZero, 0 );
-	mpz_init_set_ui( zOne, 1 );
-	fZInit = TRUE;
+    if( !rngctx->fZInit ) {
+	mpz_init( rngctx->zModulus );
+	mpz_init( rngctx->zSeed );
+	mpz_init_set_ui( rngctx->zZero, 0 );
+	mpz_init_set_ui( rngctx->zOne, 1 );
+	rngctx->fZInit = TRUE;
     }
 }
 
-extern int InitRNGBBSModulus( char *sz ) {
+extern int InitRNGBBSModulus( char *sz, void *p ) {
+
+    rngcontext *rngctx = (rngcontext *) p;
 
     if( !sz )
 	return -1;
     
-    InitRNGBBS();
+    InitRNGBBS( rngctx );
     
-    if( mpz_set_str( zModulus, sz, 10 ) || mpz_sgn( zModulus ) < 1 )
+    if( mpz_set_str( rngctx->zModulus, sz, 10 ) || 
+        mpz_sgn( rngctx->zModulus ) < 1 )
 	return -1;
 
     return 0;
@@ -261,10 +294,11 @@ static int BBSFindGood( mpz_t x ) {
     return 0;
 }
 
-extern int InitRNGBBSFactors( char *sz0, char *sz1 ) {
+extern int InitRNGBBSFactors( char *sz0, char *sz1, void *x ) {
 
     mpz_t p, q;
     char *pch;
+    rngcontext *rngctx = (rngcontext *) x;
     
     if( !sz0 || !sz1 )
 	return -1;
@@ -301,9 +335,9 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1 ) {
 	free( pch );
     }
 	
-    InitRNGBBS();
+    InitRNGBBS( rngctx );
     
-    mpz_mul( zModulus, p, q );
+    mpz_mul( rngctx->zModulus, p, q );
 
     mpz_clear( p );
     mpz_clear( q );
@@ -311,13 +345,13 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1 ) {
     return 0;
 }
 
-static int BBSGetBit( void ) {
+static int BBSGetBit( rngcontext *rngctx ) {
 
-    mpz_powm_ui( zSeed, zSeed, 2, zModulus );
-    return ( mpz_get_ui( zSeed ) & 1 );
+    mpz_powm_ui( rngctx->zSeed, rngctx->zSeed, 2, rngctx->zModulus );
+    return ( mpz_get_ui( rngctx->zSeed ) & 1 );
 }
 
-static int BBSGetTrit( void ) {
+static int BBSGetTrit( rngcontext *rngctx ) {
 
     /* Return a trinary digit from a uniform distribution, given binary
        digits as inputs.  This function is perfectly distributed and
@@ -328,32 +362,32 @@ static int BBSGetTrit( void ) {
     while( 1 ) {
 	switch( state ) {
 	case 0:
-	    state = BBSGetBit() + 1;
+	    state = BBSGetBit( rngctx ) + 1;
 	    break;
 	    
 	case 1:
-	    if( BBSGetBit() )
+	    if( BBSGetBit( rngctx ) )
 		state = 3;
 	    else
 		return 0;
 	    break;
 	    
 	case 2:
-	    if( BBSGetBit() )
+	    if( BBSGetBit( rngctx ) )
 		return 2;
 	    else
 		state = 4;
 	    break;
 	    
 	case 3:
-	    if( BBSGetBit() )
+	    if( BBSGetBit( rngctx ) )
 		return 1;
 	    else
 		state = 1;
 	    break;
 	    
 	case 4:
-	    if( BBSGetBit() )
+	    if( BBSGetBit( rngctx ) )
 		state = 2;
 	    else
 		return 1;
@@ -362,39 +396,40 @@ static int BBSGetTrit( void ) {
     }
 }
 
-static int BBSCheck( void ) {
+static int BBSCheck( rngcontext *rngctx ) {
 
-    return ( mpz_cmp( zSeed, zZero ) && mpz_cmp( zSeed, zOne ) ) ? 0 : -1;
+    return ( mpz_cmp( rngctx->zSeed, rngctx->zZero ) && 
+             mpz_cmp( rngctx->zSeed, rngctx->zOne ) ) ? 0 : -1;
 }
 
-static int BBSInitialSeedFailure( void ) {
+static int BBSInitialSeedFailure( rngcontext *rngctx ) {
 
     outputl( _("That is not a valid initial state for the Blum, Blum and Shub "
 	       "generator.\n"
 	       "Please choose a different seed and/or modulus." ) );
-    mpz_set( zSeed, zZero ); /* so that BBSCheck will fail */
+    mpz_set( rngctx->zSeed, rngctx->zZero ); /* so that BBSCheck will fail */
     
     return -1;
 }
 
-static int BBSCheckInitialSeed( void ) {
+static int BBSCheckInitialSeed( rngcontext *rngctx ) {
 
     mpz_t z, zCycle;
     int i, iAttempt;
     
-    if( mpz_sgn( zSeed ) < 1 )
-	return BBSInitialSeedFailure();
+    if( mpz_sgn( rngctx->zSeed ) < 1 )
+	return BBSInitialSeedFailure( rngctx );
 
     for( iAttempt = 0; iAttempt < 32; iAttempt++ ) {
-	mpz_init_set( z, zSeed );
+	mpz_init_set( z, rngctx->zSeed );
     
 	for( i = 0; i < 8; i++ )
-	    mpz_powm_ui( z, z, 2, zModulus );
+	    mpz_powm_ui( z, z, 2, rngctx->zModulus );
 
 	mpz_init_set( zCycle, z );
 
 	for( i = 0; i < 16; i++ ) {
-	    mpz_powm_ui( z, z, 2, zModulus );
+	    mpz_powm_ui( z, z, 2, rngctx->zModulus );
 	    if( !mpz_cmp( z, zCycle ) )
 		/* short cycle detected */
 		break;
@@ -404,12 +439,12 @@ static int BBSCheckInitialSeed( void ) {
 	    /* we found a cycle that meets the minimum length */
 	    break;
 
-	mpz_add_ui( zSeed, zSeed, 1 );
+	mpz_add_ui( rngctx->zSeed, rngctx->zSeed, 1 );
     }
 
     if( iAttempt == 32 )
 	/* we couldn't find any good seeds */
-	BBSInitialSeedFailure();    
+	BBSInitialSeedFailure( rngctx );    
 
     /* FIXME print some sort of warning if we had to modify the seed */
     
@@ -420,7 +455,74 @@ static int BBSCheckInitialSeed( void ) {
 }
 #endif
 
-extern void PrintRNGSeed( const rng rngx ) {
+extern void
+PrintRNGWarning( void ) {
+
+  outputl( _("WARNING: this number may not be correct if the same \n"
+             "RNG is used for, say, both rollouts and interactive play.") );
+
+}
+
+extern void
+PrintRNGCounter( const rng rngx, void *p ) {
+
+    rngcontext *rngctx = (rngcontext *) p;
+
+    switch( rngx ) {
+    case RNG_ANSI:
+    case RNG_BSD:
+    case RNG_USER:
+      outputf( _("Number of calls since last seed: %lu.\n"), rngctx->c );
+      PrintRNGWarning();
+      break;
+
+    case RNG_BBS:
+    case RNG_ISAAC:
+    case RNG_MD5:
+      outputf( _("Number of calls since last seed: %lu.\n"), rngctx->c );
+      
+      break;
+      
+    case RNG_RANDOM_DOT_ORG:
+      outputf( _("Number of dice used in current batch: %lu.\n"), rngctx->c );
+      break;
+
+    case RNG_FILE:
+      outputf( _("Number of dice read from current file: %lu.\n"), rngctx->c );
+      break;
+      
+    default:
+      break;
+
+    }
+
+}
+
+
+#if HAVE_LIBGMP
+
+static void
+PrintRNGSeedMP( mpz_t n ) {
+
+  char *pch;
+  pch = mpz_get_str( NULL, 10, n );
+  outputf( _("The current seed is %s.\n"), pch );
+  free( pch );
+
+}
+
+#endif /* HAVE_LIBGMP */
+
+static void
+PrintRNGSeedNormal( int n ) {
+
+  outputf( _("The current seed is %d.\n"), n );
+
+}
+
+extern void PrintRNGSeed( const rng rngx, void *p ) {
+
+    rngcontext *rngctx = (rngcontext *) p;
 
     switch( rngx ) {
     case RNG_BBS:
@@ -428,11 +530,11 @@ extern void PrintRNGSeed( const rng rngx ) {
     {
 	char *pch;
 
-	pch = mpz_get_str( NULL, 10, zSeed );
+	pch = mpz_get_str( NULL, 10, rngctx->zSeed );
 	outputf( _("The current seed is %s, "), pch );
 	free( pch );
 	
-	pch = mpz_get_str( NULL, 10, zModulus );
+	pch = mpz_get_str( NULL, 10, rngctx->zModulus );
 	outputf( _("and the modulus is %s.\n"), pch );
 	free( pch );
 	
@@ -443,18 +545,18 @@ extern void PrintRNGSeed( const rng rngx ) {
 #endif
 	
     case RNG_MD5:
-	outputf( _("The current seed is %u.\n"), nMD5 );
+	outputf( _("The current seed is %u.\n"), rngctx->nMD5 );
 	break;
 
     case RNG_FILE:
         outputf( _("GNU Backgammon is reading dice from file: %s\n"), 
-                 szDiceFilename );
+                 rngctx->szDiceFilename );
         break;
 	
     case RNG_USER:
 #if HAVE_LIBDL
-	if( pfUserRNGShowSeed ) {
-	    (*pfUserRNGShowSeed)();
+	if( rngctx->pfUserRNGShowSeed ) {
+	    (*rngctx->pfUserRNGShowSeed)();
 	    return;
 	}
 
@@ -462,6 +564,28 @@ extern void PrintRNGSeed( const rng rngx ) {
 #else
 	abort();
 #endif
+
+    case RNG_ISAAC:
+    case RNG_MERSENNE:
+#if HAVE_LIBGMP
+      PrintRNGSeedMP( rngctx->nz );
+#else
+      PrintRNGSeedNormal( rngctx->n );
+#endif
+      return;
+      break;
+
+    case RNG_BSD:
+    case RNG_ANSI:
+#if HAVE_LIBGMP
+      PrintRNGSeedMP( rngctx->nz );
+#else
+      PrintRNGSeedNormal( rngctx->n );
+#endif
+      PrintRNGWarning();
+      return;
+      break;
+
     default:
 	break;
     }
@@ -470,7 +594,12 @@ extern void PrintRNGSeed( const rng rngx ) {
 	       "generator.") );
 }
 
-extern void InitRNGSeed( int n, const rng rngx ) {
+extern void InitRNGSeed( int n, const rng rngx, void *p ) {
+
+    rngcontext *rngctx = (rngcontext *) p;
+
+    rngctx->n = n;
+    rngctx->c = 0;
     
     switch( rngx ) {
     case RNG_ANSI:
@@ -479,9 +608,9 @@ extern void InitRNGSeed( int n, const rng rngx ) {
 
     case RNG_BBS:
 #if HAVE_LIBGMP
-	assert( fZInit );
-	mpz_set_ui( zSeed, n );
-	BBSCheckInitialSeed();
+	assert( rngctx->fZInit );
+	mpz_set_ui( rngctx->zSeed, n );
+	BBSCheckInitialSeed( rngctx );
 	break;
 #else
 	abort();
@@ -499,24 +628,24 @@ extern void InitRNGSeed( int n, const rng rngx ) {
 	int i;
 
 	for( i = 0; i < RANDSIZ; i++ )
-	    rc.randrsl[ i ] = n;
-
-	irandinit( &rc, TRUE );
+          rngctx->rc.randrsl[ i ] = n;
+        
+	irandinit( &rngctx->rc, TRUE );
 	
 	break;
     }
 
     case RNG_MD5:
-	nMD5 = n;
+        rngctx->nMD5 = n;
 	break;
     
     case RNG_MERSENNE:
-	sgenrand( n );
+	init_genrand( n, rngctx->mt );
 	break;
 
     case RNG_USER:
 #if HAVE_LIBDL
-	(*pfUserRNGSeed) ( n );
+	(*rngctx->pfUserRNGSeed) ( n );
 	break;
 #else
 	abort();
@@ -535,7 +664,12 @@ extern void InitRNGSeed( int n, const rng rngx ) {
 }
 
 #if HAVE_LIBGMP
-static void InitRNGSeedMP( mpz_t n, rng rng ) {
+static void InitRNGSeedMP( mpz_t n, rng rng, void *p ) {
+
+    rngcontext *rngctx = (rngcontext *) p;
+
+    mpz_set( rngctx->nz, n );
+    rngctx->c = 0;
 
     switch( rng ) {
     case RNG_ANSI:
@@ -543,13 +677,13 @@ static void InitRNGSeedMP( mpz_t n, rng rng ) {
     case RNG_MERSENNE:
     case RNG_MD5: /* FIXME MD5 seed can be extended to 128 bits */
     case RNG_USER: /* FIXME add a pfUserRNGSeedMP */
-	InitRNGSeed( mpz_get_ui( n ), rng );
+	InitRNGSeed( mpz_get_ui( n ), rng, rngctx );
 	break;
 	    
     case RNG_BBS:
-	assert( fZInit );
-	mpz_set( zSeed, n );
-	BBSCheckInitialSeed();
+	assert( rngctx->fZInit );
+	mpz_set( rngctx->zSeed, n );
+	BBSCheckInitialSeed( rngctx );
 	break;
 	
     case RNG_ISAAC: {
@@ -560,12 +694,12 @@ static void InitRNGSeedMP( mpz_t n, rng rng ) {
 	achState = mpz_export( NULL, &cb, -1, sizeof( ub4 ), 0, 0, n );
 	
 	for( i = 0; i < RANDSIZ && i < cb; i++ )
-	    rc.randrsl[ i ] = achState[ i ];
+	    rngctx->rc.randrsl[ i ] = achState[ i ];
 
 	for( ; i < RANDSIZ; i++ )
-	    rc.randrsl[ i ] = 0;
+	    rngctx->rc.randrsl[ i ] = 0;
 	
-	irandinit( &rc, TRUE );
+	irandinit( &rngctx->rc, TRUE );
 
 	free( achState );
 	
@@ -584,7 +718,7 @@ static void InitRNGSeedMP( mpz_t n, rng rng ) {
     }
 }
     
-extern int InitRNGSeedLong( char *sz, rng rng ) {
+extern int InitRNGSeedLong( char *sz, rng rng, void *rngctx ) {
 
     mpz_t n;
     
@@ -593,7 +727,7 @@ extern int InitRNGSeedLong( char *sz, rng rng ) {
 	return -1;
     }
 
-    InitRNGSeedMP( n, rng );
+    InitRNGSeedMP( n, rng, rngctx );
 
     mpz_clear( n );
     
@@ -601,14 +735,43 @@ extern int InitRNGSeedLong( char *sz, rng rng ) {
 }
 #endif
 
-/* Returns TRUE if /dev/urandom was available, or FALSE if system clock was
-   used. */
-extern int InitRNG( int *pnSeed, int fSet, const rng rngx ) {
+extern void
+CloseRNG( const rng rngx, void *p ) {
 
-    int n, h, f = FALSE;
+  rngcontext *rngctx = (rngcontext *) p;
+
+  switch ( rngx ) {
+  case RNG_USER:
+    /* Dispose dynamically linked user module if necesary */
+#if HAVE_LIBDL
+    dlclose(rngctx->pvUserRNGHandle);
+#else
+    abort();
+#endif /* HAVE_LIBDL */
+    break;
+  case RNG_FILE:
+    /* close file */
+    CloseDiceFile( rngctx );
+
+  default:
+    /* no-op */
+    ;
+
+  }
+
+}
+
+
+extern int
+RNGSystemSeed( const rng rngx, void *p, int *pnSeed ) {
+
+  int h;
+  int f = FALSE;
+  rngcontext *rngctx = (rngcontext *) p;
+  int n;
 
 #if HAVE_LIBGMP
-    if( !pnSeed && fSet ) {
+    if( !pnSeed ) {
 	/* We can use long seeds and don't have to save the seed anywhere,
 	   so try 512 bits of state instead of 32. */
 	if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
@@ -621,15 +784,15 @@ extern int InitRNG( int *pnSeed, int fSet, const rng rngx ) {
 
 		mpz_init( n );
 		mpz_import( n, 16, -1, 4, 0, 0, achState );
-		InitRNGSeedMP( n, rngx );
+		InitRNGSeedMP( n, rngx, rngctx );
 		mpz_clear( n );
-		
+                
 		return TRUE;
 	    } else
 		close( h );
 	}
     }
-#endif
+#endif /* HAVE_LIBGMP */
     
     if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
 	f = read( h, &n, sizeof n ) == sizeof n;
@@ -648,13 +811,47 @@ extern int InitRNG( int *pnSeed, int fSet, const rng rngx ) {
 	    n = time( NULL );
     }
 
-    if( pnSeed )
-	*pnSeed = n;
+    InitRNGSeed( n, rngx, rngctx );
 
-    if( fSet )
-	InitRNGSeed( n, rngx );
+    if ( pnSeed )
+      *pnSeed = n;
 
     return f;
+
+}
+
+/* Returns TRUE if /dev/urandom was available, or FALSE if system clock was
+   used. */
+extern void *InitRNG( int *pnSeed, int *pfInitFrom,
+                      const int fSet, const rng rngx ) {
+
+    int f = FALSE;
+    rngcontext *rngctx;
+
+    if ( ! ( rngctx = malloc( sizeof *rngctx ) ) )
+      return NULL;
+
+    /* misc. initialisation */
+
+    /* Mersenne-Twister */
+    rngctx->mti = N + 1;
+
+    /* BBS */
+    rngctx->fZInit = FALSE;
+
+    /* common */
+    rngctx->c = 0;
+
+    /* */
+
+    if ( fSet )
+      f = RNGSystemSeed( rngx, rngctx, pnSeed );
+
+    if( pfInitFrom )
+      *pfInitFrom = f;
+
+    return rngctx;
+
 }
 
 
@@ -673,7 +870,7 @@ getDiceRandomDotOrg ( void ) {
   static int nCurrent = -1;
   static int anBuf [ BUFLENGTH ]; 
   static int nRead;
- 
+  
 
   int h;
   int cb;
@@ -777,25 +974,29 @@ getDiceRandomDotOrg ( void ) {
 #endif /* HAVE_SOCKETS */
 
 
-extern int RollDice( int anDice[ 2 ], const rng rngx ) {
+extern int RollDice( int anDice[ 2 ], const rng rngx, void *p ) {
+
+    rngcontext *rngctx = (rngcontext *) p;
 
     switch( rngx ) {
     case RNG_ANSI:
 	anDice[ 0 ] = 1+(int) (6.0*rand()/(RAND_MAX+1.0));
 	anDice[ 1 ] = 1+(int) (6.0*rand()/(RAND_MAX+1.0));
+        rngctx->c += 2;
 	return 0;
 	
     case RNG_BBS:
 #if HAVE_LIBGMP
-	if( BBSCheck() ) {
+	if( BBSCheck( rngctx ) ) {
 	    outputl( _( "The Blum, Blum and Shub generator is in an illegal "
 			"state.  Please reset the\n"
 			"seed and/or modulus before continuing." ) );
 	    return -1;
 	}
 	
-	anDice[ 0 ] = BBSGetTrit() + BBSGetBit() * 3 + 1;
-	anDice[ 1 ] = BBSGetTrit() + BBSGetBit() * 3 + 1;
+	anDice[ 0 ] = BBSGetTrit( rngctx ) + BBSGetBit( rngctx ) * 3 + 1;
+	anDice[ 1 ] = BBSGetTrit( rngctx ) + BBSGetBit( rngctx ) * 3 + 1;
+        rngctx->c += 2;
 	return 0;
 #else
 	abort();
@@ -805,14 +1006,16 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 #if HAVE_RANDOM
 	anDice[ 0 ] = 1+(int) (6.0*random()/(RAND_MAX+1.0));
 	anDice[ 1 ] = 1+(int) (6.0*random()/(RAND_MAX+1.0));
+        rngctx->c += 2;
 	return 0;
 #else
 	abort();
 #endif
 	
     case RNG_ISAAC:
-	anDice[ 0 ] = 1+(int) (6.0*irand( &rc )/(0xFFFFFFFF+1.0));
-	anDice[ 1 ] = 1+(int) (6.0*irand( &rc )/(0xFFFFFFFF+1.0));
+	anDice[ 0 ] = 1+(int) (6.0*irand( &rngctx->rc )/(0xFFFFFFFF+1.0));
+	anDice[ 1 ] = 1+(int) (6.0*irand( &rngctx->rc )/(0xFFFFFFFF+1.0));
+        rngctx->c += 2;
 	return 0;
 	
     case RNG_MANUAL:
@@ -824,31 +1027,41 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 	    md5_uint32 an[ 2 ];
 	} h;
 	
-	md5_buffer( (char *) &nMD5, sizeof nMD5, &h );
+	md5_buffer( (char *) &rngctx->nMD5, sizeof rngctx->nMD5, &h );
 
 	anDice[ 0 ] = h.an[ 0 ] / 715827882 + 1;
 	anDice[ 1 ] = h.an[ 1 ] / 715827882 + 1;
 
-	nMD5++;
+	rngctx->nMD5++;
+        rngctx->c += 2;
 	
 	return 0;
     }
 	
 	
     case RNG_MERSENNE:
-	anDice[ 0 ] = 1+(int) (6.0*genrand()/(0xFFFFFFFF+1.0));
-	anDice[ 1 ] = 1+(int) (6.0*genrand()/(0xFFFFFFFF+1.0));
+	anDice[ 0 ] = 
+          1+(int) (6.0*genrand_int32(&rngctx->mti, 
+                                     rngctx->mt)/(0xFFFFFFFF+1.0));
+	anDice[ 1 ] = 
+          1+(int) (6.0*genrand_int32(&rngctx->mti,
+                                     rngctx->mt)/(0xFFFFFFFF+1.0));
+        rngctx->c += 2;
 	return 0;
 	
     case RNG_USER:
 #if HAVE_LIBDL
-	if( ( anDice[ 0 ] = 
-              ( 1 + (int) (6.0*pfUserRNGRandom()/(0x7FFFFFFL+1.0))) <= 0 ) ||
-            ( anDice[ 1 ] = 
-              ( 1 + (int) (6.0*pfUserRNGRandom()/(0x7FFFFFFL+1.0))) <= 0 ) )
-	    return -1;
-	else
-	    return 0;
+      anDice[ 0 ] = 1 + (int) (6.0*rngctx->pfUserRNGRandom()/(0x7FFFFFFL+1.0));
+      ++rngctx->c;
+      if ( anDice[ 0 ] <= 0 )
+        return -1;
+
+      anDice[ 1 ] = 1 + (int) (6.0*rngctx->pfUserRNGRandom()/(0x7FFFFFFL+1.0));
+      ++rngctx->c;
+      if ( anDice[ 1 ] <= 0 )
+        return -1;
+
+      return 0;
 #else
 	abort();
 #endif
@@ -874,8 +1087,9 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 
     case RNG_FILE:
 
-      anDice[ 0 ] = ReadDiceFile();
-      anDice[ 1 ] = ReadDiceFile();
+      anDice[ 0 ] = ReadDiceFile( rngctx );
+      anDice[ 1 ] = ReadDiceFile( rngctx );
+      rngctx->c += 2;
 
       if ( anDice[ 0 ] <= 0 || anDice[ 1 ] <= 0 )
         return -1;
@@ -900,7 +1114,7 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
  *   from user input
  */
 
-extern int UserRNGOpen( char *sz ) {
+extern int UserRNGOpen( void *p, char *sz ) {
 
   char *error;
 #if __GNUC__
@@ -910,6 +1124,7 @@ extern int UserRNGOpen( char *sz ) {
 #else
   char szCWD[ 4096 ];
 #endif
+  rngcontext *rngctx = (rngcontext *) p;
 
   /* 
    * (1)
@@ -917,18 +1132,18 @@ extern int UserRNGOpen( char *sz ) {
    * LD_LIBRARY_PATH paths. 
    */
 
-  pvUserRNGHandle = dlopen( sz, RTLD_LAZY );
+  rngctx->pvUserRNGHandle = dlopen( sz, RTLD_LAZY );
 
-  if (!pvUserRNGHandle ) {
+  if (!rngctx->pvUserRNGHandle ) {
     /*
      * (2)
      * Try opening shared object from current directory
      */
       sprintf( szCWD, "./%s", sz );
-      pvUserRNGHandle = dlopen( szCWD, RTLD_LAZY );
+      rngctx->pvUserRNGHandle = dlopen( szCWD, RTLD_LAZY );
   }
   
-  if (!pvUserRNGHandle ) {
+  if (!rngctx->pvUserRNGHandle ) {
       /* 
        * Bugger! Can't load shared library
        */
@@ -945,28 +1160,29 @@ extern int UserRNGOpen( char *sz ) {
    * Get addresses for seed and random in user's RNG 
    */
 
-  strcpy( szUserRNGSeed , "setseed" );
-  strcpy( szUserRNGRandom , "getrandom" );
+  strcpy( rngctx->szUserRNGSeed , "setseed" );
+  strcpy( rngctx->szUserRNGRandom , "getrandom" );
 
-  pfUserRNGSeed = (void (*)(unsigned long int))
-      dlsym( pvUserRNGHandle, szUserRNGSeed );
+  rngctx->pfUserRNGSeed = (void (*)(unsigned long int))
+    dlsym( rngctx->pvUserRNGHandle, rngctx->szUserRNGSeed );
 
   if ((error = dlerror()) != NULL)  {
-      outputerrf( "%s: %s", szUserRNGSeed, error );
+      outputerrf( "%s: %s", rngctx->szUserRNGSeed, error );
       return 0;
   }
   
-  pfUserRNGRandom = (long int (*)(void)) dlsym( pvUserRNGHandle,
-						szUserRNGRandom );
+  rngctx->pfUserRNGRandom = 
+    (long int (*)(void)) dlsym( rngctx->pvUserRNGHandle, 
+                                rngctx->szUserRNGRandom );
 
   if ((error = dlerror()) != NULL)  {
-      outputerrf( "%s: %s", szUserRNGRandom, error );
+      outputerrf( "%s: %s", rngctx->szUserRNGRandom, error );
       return 0;
   }
 
   /* this one is allowed to fail */
-  pfUserRNGShowSeed = ( void (*)( void ) ) dlsym( pvUserRNGHandle,
-						  "showseed" );
+  rngctx->pfUserRNGShowSeed = 
+    ( void (*)( void ) ) dlsym( rngctx->pvUserRNGHandle, "showseed" );
   
   /*
    * Everthing should be fine...
@@ -977,52 +1193,48 @@ extern int UserRNGOpen( char *sz ) {
   
 }
 
-extern void UserRNGClose( void ) {
-
-  dlclose(pvUserRNGHandle);
-
-}
-
 #endif /* HAVE_LIBDL */
 
 
-static int hDice = -1;
-
 extern int
-OpenDiceFile( const char *sz ) {
+OpenDiceFile( void *p, const char *sz ) {
 
-  strcpy( szDiceFilename, sz );
+  rngcontext *rngctx = (rngcontext *) p;
 
-  return ( hDice = PathOpen( sz, NULL, 0 ) );
+  strcpy( rngctx->szDiceFilename, sz );
+
+  return ( rngctx->hDice = PathOpen( sz, NULL, 0 ) );
 
 }
 
 extern void
-CloseDiceFile ( void ) {
+CloseDiceFile ( void *p ) {
 
-  if ( hDice >= 0 )
-    close( hDice );
+  rngcontext *rngctx = (rngcontext *) p;
+
+  if ( rngctx->hDice >= 0 )
+    close( rngctx->hDice );
 
 }
 
 
 static int
-ReadDiceFile( void ) {
+ReadDiceFile( rngcontext *rngctx ) {
 
   unsigned char uch;
   int n;
 
   while ( 1 ) {
   
-    n = read( hDice, &uch, 1 );
+    n = read( rngctx->hDice, &uch, 1 );
 
     if ( !n ) {
       /* end of file */
-      outputf( _("Rewinding dice file (%s)\n"), szDiceFilename );
-      lseek( hDice, 0, SEEK_SET );
+      outputf( _("Rewinding dice file (%s)\n"), rngctx->szDiceFilename );
+      lseek( rngctx->hDice, 0, SEEK_SET );
     }
     else if ( n < 0 ) {
-      outputerr(szDiceFilename);
+      outputerr(rngctx->szDiceFilename);
       return -1;
     }
     else if ( uch >= '1' && uch <= '6' )
@@ -1031,5 +1243,14 @@ ReadDiceFile( void ) {
   }
 
   return -1;
+
+}
+
+extern char *
+GetDiceFileName( void *p ) {
+
+  rngcontext *rngctx = (rngcontext *) p;
+
+  return rngctx->szDiceFilename;
 
 }

@@ -302,6 +302,7 @@ evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
  { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } , \
 }
 
+void *rngctxRollout = NULL;
 rolloutcontext rcRollout =
 { 
   {
@@ -5362,7 +5363,7 @@ extern void CommandNewWeights( char *sz ) {
 
 
 static void
-SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
+SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent, void *rngctx ) {
 
     switch( rngCurrent ) {
     case RNG_ANSI:
@@ -5393,7 +5394,7 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 	/* don't save user RNGs */
 	break;
     case RNG_FILE:
-        fprintf( pf, "%s rng file \"%s\"\n", sz, szDiceFilename );
+        fprintf( pf, "%s rng file \"%s\"\n", sz, GetDiceFileName( rngctx ) );
 	break;
     default:
         break;
@@ -5492,7 +5493,7 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->rJsdLimit
             );
   
-  SaveRNGSettings ( pf, sz, prc->rngRollout );
+  SaveRNGSettings ( pf, sz, prc->rngRollout, rngctxRollout );
 
   /* chequer play and cube decision evalcontexts */
 
@@ -5819,7 +5820,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set prompt %s\n", szPrompt );
 
-    SaveRNGSettings ( pf, "set", rngCurrent );
+    SaveRNGSettings ( pf, "set", rngCurrent, rngctxCurrent );
 
     SaveRolloutSettings( pf, "set rollout", &rcRollout );
     
@@ -6072,7 +6073,7 @@ extern void CommandTrainTD( char *sz ) {
 	    if( !( ++c % 100 ) )
 		Progress();
 	    
-	    RollDice( anDiceTrain, rngCurrent );
+	    RollDice( anDiceTrain, rngCurrent, rngctxCurrent );
 	    
 	    if( fInterrupt )
 		break;
@@ -7884,8 +7885,16 @@ static void real_main( void *closure, int argc, char *argv[] ) {
                  _("Initialising"), _("Random number generator"), 500 );
 #endif    
     
-    InitRNG( NULL, TRUE, rngCurrent );
-    InitRNG( &rcRollout.nSeed, FALSE, rcRollout.rngRollout );
+    if ( ! ( rngctxCurrent = InitRNG( NULL, NULL, TRUE, rngCurrent ) ) ) {
+      printf( _("Failure setting up RNG\n") );
+      exit( EXIT_FAILURE );
+    }
+    if ( ! ( rngctxRollout = InitRNG( &rcRollout.nSeed, NULL, 
+                                      FALSE, rcRollout.rngRollout ) ) ) {
+      printf( _("Failure setting up RNG for rollout.\n" ) );
+      exit( EXIT_FAILURE );
+    }
+
     /* we don't want rollouts to use the same seed as normal dice (which
        could happen if InitRNG had to use the current time as a seed) -- mix
        it up a little bit */
@@ -9084,7 +9093,7 @@ CommandDiceRolls (char *sz) {
     n = ParseNumber( &pch );
 
     while (n-- > 0) {
-      RollDice( anDice, rngCurrent );
+      RollDice( anDice, rngCurrent, rngctxCurrent );
 
       printf( "%d %d\n", anDice[ 0 ], anDice[ 1 ] );
 

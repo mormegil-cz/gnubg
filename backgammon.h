@@ -541,6 +541,7 @@ extern evalsetup esAnalysisCube, esAnalysisChequer;
 extern movefilter aamfEval[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 extern movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
+extern void *rngctxRollout;
 extern rolloutcontext rcRollout;
 
 extern int fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;

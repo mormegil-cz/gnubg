@@ -91,6 +91,7 @@ static rolloutcontext *prcSet;
 static evalsetup *pesSet;
 
 static rng *rngSet;
+static void *rngctxSet;
 
 movefilter *aamfSet[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
@@ -139,7 +140,7 @@ command acSetEvaluation[] = {
 };
 
 static void
-SetSeed ( const rng rngx, char *sz ) {
+SetSeed ( const rng rngx, void *rngctx, char *sz ) {
     
     if( rngx == RNG_MANUAL || rngx == RNG_RANDOM_DOT_ORG ) {
 	outputl( _("You can't set a seed "
@@ -149,7 +150,7 @@ SetSeed ( const rng rngx, char *sz ) {
 
     if( *sz ) {
 #if HAVE_LIBGMP
-	if( InitRNGSeedLong( sz, rngx ) )
+	if( InitRNGSeedLong( sz, rngx, rngctx ) )
 	    outputl( _("You must specify a valid seed -- try `help set "
 		       "seed'.") );
 	else
@@ -168,33 +169,24 @@ SetSeed ( const rng rngx, char *sz ) {
 	InitRNGSeed( n, rngx );
 	outputf( _("Seed set to %d.\n"), n );
 #endif /* HAVE_LIBGMP */
-    } else
-	outputl( InitRNG( NULL, TRUE, rngx ) ?
-		 _("Seed initialised from system random data.") :
-		 _("Seed initialised by system clock.") );
+    } else 
+      outputl( RNGSystemSeed( rngx, rngctx, NULL ) ?
+               _("Seed initialised from system random data.") :
+               _("Seed initialised by system clock.") );
 }
 
-static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
+static void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 
     if( *prng == rngNew && !*szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
 		gettext ( aszRNG[ rngNew ] ) );
 	return;
     }
-    
-    /* Dispose dynamically linked user module if necesary */
-    if ( *prng == RNG_USER )
-#if HAVE_LIBDL
-	UserRNGClose();
-#else
-        abort();
-#endif /* HAVE_LIBDL */
-    
-    /* close file if necesary */    
-    if ( *prng == RNG_FILE )
-      CloseDiceFile();
 
-    /* check for RNG-dependent pre-initialisation */
+    /* Dispose internal paremeters for RNG */
+
+    CloseRNG( *prng, *rngctx );
+    
     switch( rngNew ) {
     case RNG_BBS:
 #if HAVE_LIBGMP
@@ -208,7 +200,8 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 		  if( !strncasecmp( szSeed, "modulus", strcspn( szSeed,
 												" \t\n\r\v\f" ) ) ) {
 			NextToken( &szSeed ); /* skip "modulus" keyword */
-			if( InitRNGBBSModulus( NextToken( &szSeed ) ) ) {
+			if( InitRNGBBSModulus( NextToken( &szSeed ), 
+                                               *rngctx ) ) {
 			  outputf( _("You must specify a valid modulus (see `help "
 						 "set rng bbs').") );
 			  return;
@@ -219,7 +212,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 			NextToken( &szSeed ); /* skip "modulus" keyword */
 			sz = NextToken( &szSeed );
 			sz1 = NextToken( &szSeed );
-			if( InitRNGBBSFactors( sz, sz1 ) ) {
+			if( InitRNGBBSFactors( sz, sz1, *rngctx ) ) {
 			  outputf( _("You must specify two valid factors (see `help "
 						 "set rng bbs').") );
 			  return;
@@ -233,7 +226,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 			 148028650191182616877187862194899201391 and
 			 315270837425234199477225845240496832591. */
 		  InitRNGBBSModulus( "46669116508701198206463178178218347698370"
-							 "262771368237383789001446050921334081" );
+							 "262771368237383789001446050921334081", *rngctx );
 		break;
 	  }
 #else
@@ -257,7 +250,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 			sz = NextToken( &szSeed );
 		}
 	
-		if ( !UserRNGOpen( sz ? sz : "userrng.so" ) ) {
+		if ( !UserRNGOpen( rngctx, sz ? sz : "userrng.so" ) ) {
 		  outputf( _("You are still using the %s generator.\n"),
 				   gettext ( aszRNG[ *prng ] ) );
 		  return;
@@ -277,7 +270,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
           return;
         }
 
-        if ( OpenDiceFile( sz ) < 0 ) {
+        if ( OpenDiceFile( *rngctx, sz ) < 0 ) {
           outputf( _("File %s does not exist or is not readable"), sz );
           return;
         }
@@ -301,7 +294,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
       break;
 
     default:
-      SetSeed( *prng, szSeed );
+      SetSeed( *prng, *rngctx, szSeed );
       break;
     }
 
@@ -1562,23 +1555,24 @@ extern void CommandSetRecord( char *sz ) {
 extern void CommandSetRNG ( char *sz ) {
 
   rngSet = &rngCurrent;
+  rngctxSet = &rngctxCurrent;
   HandleCommand ( sz, acSetRNG );
 
 }
 
 extern void CommandSetRNGAnsi( char *sz ) {
 
-    SetRNG( rngSet, RNG_ANSI, sz );
+    SetRNG( rngSet, rngctxSet, RNG_ANSI, sz );
 }
 
 extern void CommandSetRNGFile( char *sz ) {
 
-    SetRNG( rngSet, RNG_FILE, sz );
+    SetRNG( rngSet, rngctxSet, RNG_FILE, sz );
 }
 
 extern void CommandSetRNGBBS( char *sz ) {
 #if HAVE_LIBGMP
-    SetRNG( rngSet, RNG_BBS, sz );
+    SetRNG( rngSet, rngctxSet, RNG_BBS, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the "
                "Blum, Blum and Shub generator.") );
@@ -1587,7 +1581,7 @@ extern void CommandSetRNGBBS( char *sz ) {
 
 extern void CommandSetRNGBsd( char *sz ) {
 #if HAVE_RANDOM
-    SetRNG( rngSet, RNG_BSD, sz );
+    SetRNG( rngSet, rngctxSet, RNG_BSD, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the "
                "BSD generator.") );
@@ -1596,28 +1590,28 @@ extern void CommandSetRNGBsd( char *sz ) {
 
 extern void CommandSetRNGIsaac( char *sz ) {
 
-    SetRNG( rngSet, RNG_ISAAC, sz );
+    SetRNG( rngSet, rngctxSet, RNG_ISAAC, sz );
 }
 
 extern void CommandSetRNGManual( char *sz ) {
 
-    SetRNG ( rngSet, RNG_MANUAL, sz );
+    SetRNG ( rngSet, rngctxSet, RNG_MANUAL, sz );
 }
 
 extern void CommandSetRNGMD5( char *sz ) {
 
-    SetRNG ( rngSet, RNG_MD5, sz );
+    SetRNG ( rngSet, rngctxSet, RNG_MD5, sz );
 }
 
 extern void CommandSetRNGMersenne( char *sz ) {
 
-    SetRNG( rngSet, RNG_MERSENNE, sz );
+    SetRNG( rngSet, rngctxSet, RNG_MERSENNE, sz );
 }
 
 extern void CommandSetRNGRandomDotOrg( char *sz ) {
 
 #if HAVE_SOCKETS
-    SetRNG( rngSet, RNG_RANDOM_DOT_ORG, sz );
+    SetRNG( rngSet, rngctxSet, RNG_RANDOM_DOT_ORG, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without "
                "support for sockets needed for fetching\n"
@@ -1629,7 +1623,7 @@ extern void CommandSetRNGRandomDotOrg( char *sz ) {
 extern void CommandSetRNGUser( char *sz ) {
 
 #if HAVE_LIBDL
-    SetRNG( rngSet, RNG_USER, sz );
+    SetRNG( rngSet, rngctxSet, RNG_USER, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "dynamic linking library needed for user RNG's.") );
@@ -1827,7 +1821,7 @@ extern void
 CommandSetRolloutRNG ( char *sz ) {
 
   rngSet = &prcSet->rngRollout;
-
+  rngctxSet = &rngctxRollout;
   HandleCommand ( sz, acSetRNG );
 
 }
@@ -2085,9 +2079,10 @@ extern void CommandSetRolloutSeed( char *sz ) {
 	prcSet->nSeed = n;
 	outputf( _("Rollout seed set to %d.\n"), n );
     } else
-        outputl( InitRNG( &prcSet->nSeed, FALSE, prcSet->rngRollout ) ?
-		 _("Rollout seed initialised from system random data.") :
-		 _("Rollout seed initialised by system clock.") );    
+      outputl( RNGSystemSeed( prcSet->rngRollout, rngctxRollout, NULL ) ?
+               _("Seed initialised from system random data.") :
+               _("Seed initialised by system clock.") );
+
 }
 
 extern void CommandSetRolloutTrials( char *sz ) {
@@ -2479,7 +2474,7 @@ extern void CommandSetScore( char *sz ) {
 
 extern void CommandSetSeed( char *sz ) {
 
-    SetSeed ( rngCurrent, sz );
+    SetSeed ( rngCurrent, rngctxCurrent, sz );
 
 }
 

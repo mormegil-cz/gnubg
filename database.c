@@ -397,7 +397,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	if( !( ++c % 10 ) )
 	    Progress();
 	    
-	RollDice( anDiceGenerate, rngCurrent );
+	RollDice( anDiceGenerate, rngCurrent, rngctxCurrent );
 
 	if( fInterrupt )
 	    break;

@@ -225,6 +225,7 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
                             int fInitial,
                             int anDice[ 2 ],
                             const rng rngx,
+                            void *rngctx,
                             const int fRotate ) {
 
   if ( fInitial && !iTurn ) {
@@ -250,7 +251,7 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
 	  int n;
      
       reroll:
-	  if( ( n = RollDice( anDice, rngx ) ) )
+	  if( ( n = RollDice( anDice, rngx, rngctx ) ) )
 	      return n;
 	  
 	  if ( fInitial && ! iTurn && anDice[ 0 ] == anDice[ 1 ] )
@@ -273,7 +274,7 @@ static int RolloutDice( int iTurn, int iGame, int cGames,
 #endif
       return 0;
   } else 
-      return RollDice( anDice, rngx );
+      return RollDice( anDice, rngx, rngctx );
 }
 
 
@@ -565,7 +566,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
     /* Chequer play */
 
     if( RolloutDice( iTurn, iGame, cGames, prc->fInitial, anDice,
-                         prc->rngRollout, prc->fRotate ) < 0 )
+                         prc->rngRollout, rngctxRollout, prc->fRotate ) < 0 )
       return -1;
 
     if( anDice[ 0 ] < anDice[ 1 ] )
@@ -1176,7 +1177,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
       /* ... and the RNG */
       if( prc->rngRollout != RNG_MANUAL )
-        InitRNGSeed( prc->nSeed + ( i << 8 ), prc->rngRollout );
+        InitRNGSeed( prc->nSeed + ( i << 8 ), prc->rngRollout, rngctxRollout );
 
       memcpy ( &aanBoardEval[alt][0][0], apBoard[ alt ], 
                sizeof( anBoardOrig ));
