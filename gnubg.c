@@ -1105,42 +1105,6 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
     return -1;
 }
 
-static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
-
-    int i = 0, c;
-
-    do {
-        while( i < ich && isspace( sz[ i ] ) )
-            i++;
-
-        if( i == ich )
-            /* no command */
-            return pc;
-
-        c = strcspn( sz + i, szCommandSeparators );
-
-        if( i + c >= ich && !fDeep )
-            /* incomplete command */
-            return pc;
-
-        while( pc && pc->sz ) {
-            if( !strncasecmp( sz + i, pc->sz, c ) ) {
-                pc = pc->pc;
-
-                if( i + c >= ich )
-                    return pc;
-                
-                i += c;
-                break;
-            }
-
-            pc++;
-        }
-    } while( pc && pc->sz );
-
-    return NULL;
-}
-
 extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
 			    psighandler *pOld, int fRestart ) {
 #if HAVE_SIGACTION
@@ -1547,7 +1511,9 @@ extern void ShowBoard( void ) {
     char szBoard[ 2048 ];
     char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#if USE_GUI
     int anBoardTemp[ 2 ][ 25 ];
+#endif
     moverecord *pmr;
     
     if( cOutputDisabled )
@@ -1557,7 +1523,11 @@ extern void ShowBoard( void ) {
     apch[ 6 ] = szPlayer1;
     
 #if USE_GTK
-    if( fX && !nDelay ) {
+    /* FIXME it's ugly to access ...->animate_computer_moves here, but
+       postponing updates can lead to animating based on the wrong
+       display */
+    if( fX && !nDelay && !( (BoardData *) BOARD( pwBoard )->board_data )->
+	animate_computer_moves ) {
 	/* Always let the board widget know about dice rolls, even if the
 	   board update is elided (see below). */
 	if( ms.anDice[ 0 ] )
@@ -2534,11 +2504,6 @@ extern void CommandImportMat( char *sz ) {
 	return;
     }
 
-    if( ms.gs == GAME_PLAYING && fConfirm &&
-	!GetInputYN( "Are you sure you want to load a saved match, "
-		     "and discard the game in progress? " ) )
-	return;
-    
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportMat( pf, sz );
 	fclose( pf );
@@ -2556,11 +2521,6 @@ extern void CommandImportOldmoves( char *sz ) {
 	return;
     }
 
-    if( ms.gs == GAME_PLAYING && fConfirm &&
-	!GetInputYN( "Are you sure you want to load a saved match, "
-		     "and discard the game in progress? " ) )
-	return;
-    
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportOldmoves( pf, sz );
 	fclose( pf );
@@ -2578,11 +2538,6 @@ extern void CommandImportSGG( char *sz ) {
 	return;
     }
 
-    if( ms.gs == GAME_PLAYING && fConfirm &&
-	!GetInputYN( "Are you sure you want to load a saved match, "
-		     "and discard the game in progress? " ) )
-	return;
-    
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportSGG( pf, sz );
 	fclose( pf );
@@ -3133,6 +3088,42 @@ static char *GenerateKeywords( const char *sz, int nState ) {
       pc++;
     }
     
+    return NULL;
+}
+
+static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
+
+    int i = 0, c;
+
+    do {
+        while( i < ich && isspace( sz[ i ] ) )
+            i++;
+
+        if( i == ich )
+            /* no command */
+            return pc;
+
+        c = strcspn( sz + i, szCommandSeparators );
+
+        if( i + c >= ich && !fDeep )
+            /* incomplete command */
+            return pc;
+
+        while( pc && pc->sz ) {
+            if( !strncasecmp( sz + i, pc->sz, c ) ) {
+                pc = pc->pc;
+
+                if( i + c >= ich )
+                    return pc;
+                
+                i += c;
+                break;
+            }
+
+            pc++;
+        }
+    } while( pc && pc->sz );
+
     return NULL;
 }
 

@@ -1,3 +1,13 @@
+Fri Oct 26 10:42:05 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ShowBoard): Don't postpone updates if moves are animated.
+	* play.c (NextTurn): Animate chequers even if nDelay is 0.
+	
+	* gnubg.c (CommandImportMat, CommandImportOldmoves, CommandImportSGG):
+	Elimanate duplicate confirmations.
+
+	* postscript.c (ExportMatchGeneral): Fix error message.
+
 Thu Oct 25 17:56:43 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c: Use (*_imp__gdbm_errno) on systems where it is

@@ -243,8 +243,6 @@ duplication of effort and to make sure our changes merge easily.
   many points a resignation was for.  See Little_Sister match
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
-** Trying to import a match when fConfirm is set and a match in
-  progress asks for confirmation twice. (gary)
 ** Does "save settings" save the rollout parameters? (gary)
 ** When compiled without readline, an EOF from the terminal seems to ask
   for confirmation for exiting indefinitely. (gary)
