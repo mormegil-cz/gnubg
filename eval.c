@@ -267,6 +267,7 @@ static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL;
 static float rCubeX = 2.0/3.0;
+int fEgyptian = FALSE;
 
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 			      { 1.0, 1.0, 1.0, 1.0 } };
@@ -2972,8 +2973,16 @@ static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
 
     int i, nBack = 0, iDest = iSrc - nPips;
 
-    if( iDest >= 0 )
-	return ( anBoard[ 0 ][ 23 - iDest ] < 2 );
+    if( iDest >= 0 ) { /* Here we can do the Chris rule check */
+        if( fEgyptian ) {
+            if( anBoard[ 0 ][ 23 - iDest ] < 2 ) {
+                return ( anBoard[ 1 ][ iDest ] < 5 );
+            };
+            return ( 0 );
+        } else {
+            return ( anBoard[ 0 ][ 23 - iDest ] < 2 );
+        }
+    }
 
     /* otherwise, attempting to bear off */
 

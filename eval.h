@@ -158,6 +158,8 @@ extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
 extern cubeinfo ciCubeless;
 extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
+extern int fEgyptian;
+
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
