@@ -2726,8 +2726,10 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 
 	gtk_widget_set_sensitive(frame3dOptions, rdPrefs.fDisplayType == DT_3D);
 
+#if !HAVE_GTKGLEXT
 	if (rdPrefs.fDisplayType == DT_3D)
 		SetupVisual();
+#endif
 #endif
 
 #if HAVE_LIBXML2
