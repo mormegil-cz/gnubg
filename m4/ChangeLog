@@ -1,3 +1,7 @@
+Fri May 16 10:06:18 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* audiofile.m4, Makefile.am: add audiofile.m4
+
 Fri Dec 13 15:14:54 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am (EXTRA_DIST): Add freetype2.m4.
