@@ -55,10 +55,9 @@ duplication of effort and to make sure our changes merge easily.
 ** Make output*() functions wrap words, and pause before scrolling (as in
   gdb).
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
-** Add a command "show moves" which shows a list of legal moves, like hint
-  does, but without evaluating them.
-** Also "add move", to add a specific move to the list (e.g.
-  "add move 8/5 6/5").
+** Extend ParsePosition() to handle some sort of syntax like
+  [8/5 6/5] (meaning the position after that move).  FIBS boardstyle 3 output
+  might be nice, too.
 ** Kit suggests that it's more important to get early plays right in
   rollouts.  Should we consider options that allow larger search space/
   search depth/etc. for early moves in rollouts than later ones?  (Kit's
@@ -66,7 +65,7 @@ duplication of effort and to make sure our changes merge easily.
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
 ** Importing and exporting:
-*** Add missing export formats (FIBS, SGG).
+*** Add missing export formats (FIBS oldmoves, .sgg, .pos).
 *** Make the .mat format identical to Jellyfish (things to check:
   beavers, resignations, "and the match"...)
 *** Check drops, beavers, resignations, implement Crawford and Jacoby etc. in
@@ -133,9 +132,8 @@ duplication of effort and to make sure our changes merge easily.
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
-** Show a preview of the chequers in the appearances dialog.
-** Allow the cube and dice pip colours and the border specular/shiny
-  parameters to be changed.
+** Allow the cube text colour and the border specular/shiny parameters to be 
+  changed.
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?  (Wait for
   GTK+ 2.0.)
@@ -158,20 +156,15 @@ duplication of effort and to make sure our changes merge easily.
   might be able to fix this.  (Fixed under GTK+ 2.0.)
 ** Make GTKDumpStatcontext check psc->fMoves, psc->fDice and psc->fCube,
   and only output the relevant statistics.
-** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
-  the new evalsetups. (gary)
 ** Make sure copy/paste works correctly everywhere.  See
   <http://www.freedesktop.org/standards/clipboards.txt>.  (Wait for GTK+ 2.0.)
 ** The edges of the board should cast shadows.  Getting shadows on the
   board surface is fairly easy... getting shadows on the chequers is not.
 ** Update match equity dialog after pressing "Invert" or "Load"
-** Extended navigation in the game list window, some gui analog to 
-   "next move for player 0 marked doubtful".
 ** chequer movement
 *** right-blick bearoff tray for bearing off 4 men
     Also, if "allow dragging to illegal points" is disabled right clicking
     on the bearoff tray will hit the chequer in the home board.
-** add sounds (look at sound.c from GAIM for inspiration)
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -204,8 +197,6 @@ functions:
   fixed to detect invalid saved games.
 ** CommandCopy() should complain (or copy a board initialised to the
   starting position) if no game is being played.
-** Problems importing JF positions (see David's e-mail).
-   (Update: untested bugfix commited)
 ** If "set turn" has been used during a game (so a player has two
   consecutive moves), then export to .mat format saves it incorrectly.
 ** Analysis with rollouts crashes under GTK.  (There are problems with the
@@ -228,8 +219,6 @@ functions:
   two rollouts (one with player 0 on roll, and another with player 1 on roll)
   and average the two results. Instead gnubg should automagically perform both 
   rollouts and do the averaging.
-** When 'Allow dragging to illegal input' is selected, Two consecutive Button 1
-click will both use the 'first' dice.
 ** The board should be updated before automatic analysis starts.  (Currently,
   if you interrupt the automatic analysis, the move will go into effect, but
   the board shown will be out of date.)
@@ -268,7 +257,7 @@ click will both use the 'first' dice.
 ** Allow ~ and $ escapes in filenames (use wordexp()).
 ** Allow printing positions/games/matches/etc.  (More or less the same
   as exporting to PostScript, but piped to a printing process.) (gary)
-** Keep statistics of won/lost games/matches.
+** Add statistics of won/lost games/matches to the player records.
 ** Make sure the Nackgammon option works properly: record when loading/saving,
   make sure that InitBoard during analysis gets it right, etc.  Similarly
   for Egyptian and Jacoby.
@@ -276,8 +265,6 @@ click will both use the 'first' dice.
   bad move, or a costly missed double.
 ** Consider some kind of interface for recording live matches as quickly
   as possible.
-** $HOME might not exist on non-POSIX settings.  What are better alternatives
-  for finding a place to save per-user settings?
 ** Think about adding features which attempt to predict the time and
   standard error of rollouts in advance (see Chuck's work). (gary)
 ** Allow very large (128 bit+) seeds. (gary)
@@ -295,13 +282,16 @@ click will both use the 'first' dice.
 ** It would be nice if you could mark positions and moves for "Rollout later".
 One could then look through a game and mark all positions of interest, set
 the rollouts off and come back later.
-** Save the results of rollouts/evaluations performed with hint during playing
-** during tutor mode chequers are sometimes moved around and not
-  fully drawn, a.k.a. the "half-chequer" problem reported by Ian Shaw.
-  (Hopefully fixed as of 2002-09-15.)
 ** Make GTKRecordShow() fancier (when selecting a user, show a detailed view
   of that record including the cube error breakdowns and the ratings
   corresponding to each error rate). (gary)
+
+* Bugs believed fixed:
+** during tutor mode chequers are sometimes moved around and not
+  fully drawn, a.k.a. the "half-chequer" problem reported by Ian Shaw.
+** Save the results of rollouts/evaluations performed with hint during playing
+** $HOME might not exist on non-POSIX settings.  What are better alternatives
+  for finding a place to save per-user settings?
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.
@@ -320,6 +310,18 @@ the rollouts off and come back later.
   errors on mmap()ed regions are the most unportable that can be imagined...
 ** Think about ways to improve event handling while "busy".  We could save
   them somewhere and then use gdk_event_put() when we're ready. (gary)
+** The following two items are probably redundant once ParsePosition is
+  extended (see above).
+*** Add a command "show moves" which shows a list of legal moves, like hint
+  does, but without evaluating them.
+*** Also "add move", to add a specific move to the list (e.g.
+  "add move 8/5 6/5").
+** Show a preview of the chequers in the appearances dialog.  (Not really
+  required now we have the "Apply" button.)
+** When 'Allow dragging to illegal input' is selected, Two consecutive Button 1
+  click will both use the 'first' dice.  (This is working as intended -- to
+  implement the opposite behaviour, see the item about exchanging dice under
+  "GTK interface".)
 
 
 Local Variables:
