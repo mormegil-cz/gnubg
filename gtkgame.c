@@ -7096,6 +7096,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     gtk_widget_grab_focus( DialogArea( woPanel[WINDOW_HINT].pwWin, DA_OK ) );
     
     setWindowGeometry(&woPanel[WINDOW_HINT]);
+    gtk_object_weakref( GTK_OBJECT( woPanel[WINDOW_HINT].pwWin ), DestroyHint, NULL );
     
     gtk_window_set_default_size(GTK_WINDOW(woPanel[WINDOW_HINT].pwWin), 400, 300);
     
