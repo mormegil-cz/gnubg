@@ -1033,8 +1033,8 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   sprintf( strchr( sz, 0 ), _("EPC\t%7.3f\t%7.3f\n"
                               "Wastage\t%7.3f\t%7.3f\n\n" ),
            ar[ 0 ][ 0 ] * x, ar[ 1 ][ 0 ] * x,
-           ar[ 0 ][ 0 ] * x - anPips[ 0 ],
-           ar[ 1 ][ 0 ] * x - anPips[ 1 ] );
+           ar[ 0 ][ 0 ] * x - anPips[ 1 ],
+           ar[ 1 ][ 0 ] * x - anPips[ 0 ] );
 
   sprintf( strchr( sz, 0 ),
           _("EPC = %5.3f * Average rolls\n"
