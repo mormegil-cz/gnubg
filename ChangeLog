@@ -1,3 +1,15 @@
+Thu Oct 31 21:57:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New improved rollout settings widget 
+	(contributed by Jim Segrave)
+
+	* gnubg.c: new commands "set rollout late ..."
+	* gnubg.c (SaveRolloutSettings): save new settings.	
+	* set.c: many new functions.
+	* show.c: improve output from ShowRollout.
+	* gtkgame.c: new rollout dialog.
+	* rollout.c (BasicCubefulRollout): use new settings.
+
 Thu Oct 31 21:47:16 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkchequer.c (CreateMoveListTools): fix typo:

@@ -278,8 +278,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   float rDP;
   float r;
   
-  int nTruncate = prc->nTruncate;
+  int nTruncate = prc->fDoTruncate ? prc->nTruncate: 0x7fffffff;
   int cGames = prc->nTrials;
+
+  int nLateEvals = prc->fLateEvals ? prc->nLate : 0x7fffffff;
 
   /* Make local copy of cubeinfo struct, since it
      may be modified */
@@ -306,6 +308,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   float aaar[ 6 ][ 6 ][ NUM_ROLLOUT_OUTPUTS ];
 
   evalcontext ecCubeless0ply = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0f, 0.0f };
+
+  /* local pointers to the eval contexts to use */
+  evalcontext *pecCube[2], *pecChequer[2];
 
   if ( prc->fVarRedn ) {
 
@@ -342,6 +347,18 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   memcpy ( pciLocal, aci, cci * sizeof (cubeinfo) );
   
   while ( ( !nTruncate || iTurn < nTruncate ) && cUnfinished ) {
+	if (iTurn < nLateEvals) {
+	  pecCube[0] = prc->aecCube;
+	  pecCube[1] = prc->aecCube + 1;
+	  pecChequer[0] = prc->aecChequer;
+	  pecChequer[1] = prc->aecChequer + 1;
+	} else {
+	  pecCube[0] = prc->aecCubeLate;
+	  pecCube[1] = prc->aecCubeLate + 1;
+	  pecChequer[0] = prc->aecChequerLate;
+	  pecChequer[1] = prc->aecChequerLate + 1;
+	}
+
     /* Cube decision */
 
     for ( ici = 0, pci = pciLocal, pf = pfFinished;
@@ -354,7 +371,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           if ( GeneralCubeDecisionE ( aar, aanBoard[ ici ],
                                       pci,
-                                      &prc->aecCube[ pci->fMove ] ) < 0 ) 
+                                      pecCube[ pci->fMove ] ) < 0 ) 
             return -1;
 
           cd = FindCubeDecision ( arDouble, aar, pci );
@@ -503,15 +520,15 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           /* Find best move */
 
-          if ( prc->aecChequer[ pci->fMove ].nPlies &&
-               prc->fCubeful == prc->aecChequer[ pci->fMove ].fCubeful )
+          if ( pecChequer[ pci->fMove ]->nPlies &&
+               prc->fCubeful == pecChequer[ pci->fMove ]->fCubeful )
 
             /* the user requested n-ply (n>0). Another call to
                FindBestMove is required */
 
             FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
                           aanBoard[ ici ], pci,
-                          &prc->aecChequer [ pci->fMove ] );
+                          pecChequer [ pci->fMove ] );
 
           else {
 
@@ -551,7 +568,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
               
           FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
                         aanBoard[ ici ], pci,
-                        &prc->aecChequer [ pci->fMove ] );
+                        pecChequer [ pci->fMove ] );
 
         }
 
@@ -617,7 +634,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           GeneralEvaluationE ( aarOutput[ ici ],
                                aanBoard[ ici ],
-                               pci, &prc->aecCube[ pci->fMove ] );
+                               pci, pecCube[ pci->fMove ] );
 
           /* Since the game is over: cubeless equity = cubeful equity
              (convert to mwc for match play) */
@@ -700,7 +717,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       /* ensure cubeful evaluation at truncation */
 
-      memcpy ( &ec, &prc->aecCube[ pci->fMove ], sizeof ( ec ) );
+      memcpy ( &ec, &prc->aecCubeTrunc, sizeof ( ec ) );
       ec.fCubeful = prc->fCubeful;
 
       /* evaluation at truncation */

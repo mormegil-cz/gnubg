@@ -4542,242 +4542,580 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
+
+typedef struct _rolloutpagewidget {
+  int *pfOK;
+  GtkWidget *arpwEvCube, *arpwEvCheq;
+  evalcontext *precCube, *precCheq;
+} rolloutpagewidget;
+
+typedef struct _rolloutpagegeneral {
+  int *pfOK;
+  int nTrials, nSeed, nLatePlies, nTruncPlies;
+  int fCubeful, fVarRedn, fInitial, fRotate, fDoLate, fDoTrunc;
+  int fCubeEqualChequer, fPlayersAreSame;
+  int fTruncBearoff2, fTruncBearoffOS;
+  GtkWidget *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate, *pwDoLate;
+  GtkWidget *pwDoTrunc, *pwCubeEqualChequer, *pwPlayersAreSame;
+  GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS, *pwTruncBearoffOpts;
+  GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies;
+  GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies, *padjSeed;
+  GtkWidget *arpwGeneral;
+} rolloutpagegeneral;
+
 typedef struct _rolloutwidget {
-    evalcontext ec;
-    int nTrials, nTruncate, fCubeful, fVarRedn, nSeed, fInitial, fRotate;
-    int fTruncBearoff2, fTruncBearoffOS;
-    GtkWidget *pwEval, *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate;
-    GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS;
-    GtkAdjustment *padjTrials, *padjTrunc, *padjSeed;
-    int *pfOK;
+  rolloutcontext  rcRollout;
+  rolloutpagegeneral  *prwGeneral;
+  rolloutpagewidget *prpwPages[4], *prpwTrunc;
+  GtkWidget *RolloutNotebook;    
+  int *pfOK;
 } rolloutwidget;
 
 static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
+  int   p0, p1, i;
+  int fCubeEqualChequer, fPlayersAreSame, nTruncPlies;
+  *prw->pfOK = TRUE;
 
-    *prw->pfOK = TRUE;
+  prw->rcRollout.nTrials = prw->prwGeneral->padjTrials->value;
+  nTruncPlies = prw->rcRollout.nTruncate = 
+    prw->prwGeneral->padjTruncPlies->value;
 
-    prw->nTrials = prw->padjTrials->value;
-    prw->nTruncate = prw->padjTrunc->value;
-    prw->nSeed = prw->padjSeed->value;
-    prw->fCubeful = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( prw->pwCubeful ) );
-    prw->fVarRedn = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( prw->pwVarRedn ) );
-    prw->fRotate = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( prw->pwRotate ) );
-    prw->fInitial = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( prw->pwInitial ) );
-    prw->fTruncBearoff2 = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( prw->pwTruncBearoff2 ) );
-    prw->fTruncBearoffOS = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( prw->pwTruncBearoffOS ) );
-    
-    EvalOK( prw->pwEval, prw->pwEval );
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+  prw->rcRollout.nSeed = prw->prwGeneral->padjSeed->value;
+
+  prw->rcRollout.fCubeful = gtk_toggle_button_get_active(
+                                                         GTK_TOGGLE_BUTTON( prw->prwGeneral->pwCubeful ) );
+
+  prw->rcRollout.fVarRedn = gtk_toggle_button_get_active(
+                                                         GTK_TOGGLE_BUTTON( prw->prwGeneral->pwVarRedn ) );
+
+  prw->rcRollout.fRotate = gtk_toggle_button_get_active(
+                                                        GTK_TOGGLE_BUTTON( prw->prwGeneral->pwRotate ) );
+
+  prw->rcRollout.fInitial = gtk_toggle_button_get_active(
+                                                         GTK_TOGGLE_BUTTON( prw->prwGeneral->pwInitial ) );
+
+  prw->rcRollout.fDoTruncate = gtk_toggle_button_get_active(
+                                                            GTK_TOGGLE_BUTTON( prw->prwGeneral->pwDoTrunc ) );
+
+  prw->rcRollout.fTruncBearoff2 = gtk_toggle_button_get_active(
+                                                               GTK_TOGGLE_BUTTON( prw->prwGeneral->pwTruncBearoff2 ) );
+
+  prw->rcRollout.fTruncBearoffOS = gtk_toggle_button_get_active(
+                                                                GTK_TOGGLE_BUTTON( prw->prwGeneral->pwTruncBearoffOS ) );
+
+  if (nTruncPlies == 0) 
+    prw->rcRollout.fDoTruncate = FALSE;
+
+  prw->rcRollout.fLateEvals = gtk_toggle_button_get_active(
+                                                           GTK_TOGGLE_BUTTON( prw->prwGeneral->pwDoLate ) );
+
+  fCubeEqualChequer = prw->prwGeneral->fCubeEqualChequer = 
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
+                                                    prw->prwGeneral->pwCubeEqualChequer ) );
+
+  fPlayersAreSame = prw->prwGeneral->fPlayersAreSame =
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
+                                                    prw->prwGeneral->pwPlayersAreSame ) );
+
+  /* get all the evaluations out of the widgets */
+  for (i = 0; i < 4; ++i) {
+    EvalOK(prw->prpwPages[i]->arpwEvCube, prw->prpwPages[i]->arpwEvCube);
+    EvalOK(prw->prpwPages[i]->arpwEvCheq, prw->prpwPages[i]->arpwEvCheq);
+  }
+
+  EvalOK(prw->prpwTrunc->arpwEvCube, prw->prpwTrunc->arpwEvCube);
+  EvalOK(prw->prpwTrunc->arpwEvCheq, prw->prpwTrunc->arpwEvCheq);
+
+  /* if the players are the same, copy player 0 settings to player 1 */
+  if (fPlayersAreSame) {
+    for (p0 = 0, p1 = 1; p0 < 4; p0 += 2, p1 += 2) {
+      memcpy (prw->prpwPages[p1]->precCheq, prw->prpwPages[p0]->precCheq, 
+              sizeof (evalcontext));
+      memcpy (prw->prpwPages[p1]->precCube, prw->prpwPages[p0]->precCube, 
+              sizeof (evalcontext));
+    }
+  }
+
+  /* if cube is same as chequer, copy the chequer settings to the
+     cube settings */
+
+  if (fCubeEqualChequer) {
+    for (i = 0; i < 4; ++i) {
+      memcpy (prw->prpwPages[i]->precCube, prw->prpwPages[i]->precCheq,
+              sizeof (evalcontext));
+    }
+	  
+    memcpy (prw->prpwTrunc->precCube, prw->prpwTrunc->precCheq,
+            sizeof (evalcontext));
+  }
+
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
 }
 
+/* create one page for rollout settings  for playes & truncation */
+
+static GtkWidget *RolloutPage( rolloutpagewidget *prpw) {
+
+  GtkWidget *pwPage, *pw;
+  GtkWidget *pwHBox;
+  GtkWidget *pwFrame;
+
+  pwPage = gtk_vbox_new( FALSE, 0 );
+  gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
+    
+  pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwPage ), pwHBox );
+    
+  pwFrame = gtk_frame_new ( _("Chequer play") );
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
+
+  gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCheq =
+                     EvalWidget( prpw->precCheq, NULL ) );
+    
+  pwFrame = gtk_frame_new ( _("Cube decisions") );
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
+
+  gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCube =
+                     EvalWidget( prpw->precCube, NULL ) );
+    
+  return pwPage;
+}
+
+typedef enum _rolloutpages { 
+  ROLL_GENERAL = 0, ROLL_P0, ROLL_P1, ROLL_P0_LATE, ROLL_P1_LATE, ROLL_TRUNC
+} rolloutpages;
+
+static void LateEvalToggled( GtkWidget *pw, rolloutwidget *prw) {
+
+  int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                                                                  prw->prwGeneral->pwDoLate ) );
+  int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                                                                     prw->prwGeneral->pwPlayersAreSame ) );
+
+  /* turn on/off the late pages */
+  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK 
+                                                        (prw->RolloutNotebook), ROLL_P0_LATE), do_late);
+  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK 
+                                                        (prw->RolloutNotebook), ROLL_P1_LATE), do_late && !are_same);
+
+  /* turn on/off the ply setting in the general page */
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjLatePlies),
+                            do_late);
+}
+
+static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
+ 
+  int do_trunc = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                                                                   prw->prwGeneral->pwDoTrunc ) );
+
+  /* turn on/off the truncation page */
+  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
+                                                        (prw->RolloutNotebook), ROLL_TRUNC), do_trunc);
+
+  /* turn on/off the truncation ply setting */
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjTruncPlies ),
+                            do_trunc);
+
+}
+
+static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw) {
+
+  int  i;
+  int are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                                                                   prw->prwGeneral->pwCubeEqualChequer ) );
+
+  /* turn the cube evals on/off in the rollout pages */
+  for (i = 0; i < 4; ++i) {
+    gtk_widget_set_sensitive (prw->prpwPages[i]->arpwEvCube, !are_same);
+  }
+
+  gtk_widget_set_sensitive (prw->prpwTrunc->arpwEvCube, !are_same);
+}
 
 static void
-InvertRolloutCubeful ( GtkWidget *pw, gpointer data ) {
+CubefulToggled ( GtkWidget *pw, rolloutwidget *prw ) {
 
-  rolloutwidget *prw = (rolloutwidget *) data;
-  int f = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( pw ) );
+  int f = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( 
+                                                            prw->prwGeneral->pwCubeful ) );
   
-  gtk_widget_set_sensitive ( GTK_WIDGET ( prw->pwTruncBearoff2 ), ! f );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( prw->pwTruncBearoffOS ), ! f );
+  gtk_widget_set_sensitive ( GTK_WIDGET ( 
+                                         prw->prwGeneral->pwTruncBearoffOpts ), ! f );
 
+}
+
+static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw) {
+
+  int   i;
+  int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                                                                     prw->prwGeneral->pwPlayersAreSame ) );
+  int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                                                                  prw->prwGeneral->pwDoLate ) );
+
+  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
+                                                        (prw->RolloutNotebook), ROLL_P1), !are_same);
+
+  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
+                                                        (prw->RolloutNotebook), ROLL_P1_LATE), !are_same && do_late);
+
+  gtk_notebook_set_tab_label_text (GTK_NOTEBOOK (prw->RolloutNotebook),
+                                   gtk_notebook_get_nth_page (GTK_NOTEBOOK (prw->RolloutNotebook),
+                                                              ROLL_P0), are_same ? _("First Play Both") : _("First Play (0) ") );
+
+  gtk_notebook_set_tab_label_text (GTK_NOTEBOOK (prw->RolloutNotebook),
+                                   gtk_notebook_get_nth_page (GTK_NOTEBOOK (prw->RolloutNotebook),
+                                                              ROLL_P0_LATE), are_same ? _("Later Play Both") : _("Later Play (0) ") );
+
+}  
+
+/* create the General page for rollouts */
+
+static GtkWidget *
+RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
+  GtkWidget *pwPage, *pw;
+  GtkWidget *pwHBox;
+  GtkWidget *pwFrame;
+
+  pwPage = gtk_vbox_new( FALSE, 0 );
+  gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
+
+  prpw->padjTrials = GTK_ADJUSTMENT(gtk_adjustment_new(
+                                                       prw->rcRollout.nTrials, 1,
+                                                       1296 * 1296, 36, 36, 0 ) );
+  pw = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwPage), pw );
+  gtk_container_add( GTK_CONTAINER( pw ),
+                     gtk_label_new( _("Trials:") ) );
+  gtk_container_add( GTK_CONTAINER( pw ),
+                     gtk_spin_button_new( prpw->padjTrials, 36, 0 ) );
+
+  pwFrame = gtk_frame_new ( _("Evaluation for later plies") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
+
+  pw = gtk_vbox_new( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
+   
+  prpw->pwDoLate = gtk_check_button_new_with_label (
+                                                    _( "Enable separate evaluations " ) );
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoLate );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( 
+                                                    prw->prwGeneral->pwDoLate ), prw->rcRollout.fLateEvals);
+  gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoLate ), 
+                      "toggled", GTK_SIGNAL_FUNC (LateEvalToggled), prw);
+
+  prpw->pwAdjLatePlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+                     gtk_label_new( _("Change eval after ply:" ) ) );
+
+  prpw->padjLatePlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
+                                                           prw->rcRollout.nLate, 0, 1000, 1, 1, 0 ) );
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
+                                                                  prpw->padjLatePlies, 1, 0 ) );
+
+  pwFrame = gtk_frame_new ( _("Truncation") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
+
+  pw = gtk_vbox_new( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
+   
+  prpw->pwDoTrunc = gtk_check_button_new_with_label (
+                                                     _( "Truncate Rollouts" ) );
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoTrunc );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prpw->pwDoTrunc ),
+                                 prw->rcRollout.fDoTruncate);
+  gtk_signal_connect( GTK_OBJECT( prpw->pwDoTrunc ), "toggled",
+                      GTK_SIGNAL_FUNC (TruncEnableToggled), prw);
+
+  prpw->pwAdjTruncPlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+                     gtk_label_new( _("Truncate at ply:" ) ) );
+
+  prpw->padjTruncPlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
+                                                            prw->rcRollout.nTruncate, 0, 1000, 1, 1, 0 ) );
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
+                                                                  prpw->padjTruncPlies, 1, 0 ) );
+
+  prpw->pwCubeful = gtk_check_button_new_with_label ( _("Cubeful") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwCubeful );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwCubeful ),
+                                prw->rcRollout.fCubeful );
+
+  gtk_signal_connect( GTK_OBJECT( prpw->pwCubeful ), "toggled",
+                      GTK_SIGNAL_FUNC( CubefulToggled ), prw );
+
+  pwFrame = gtk_frame_new ( _("Cubeless Truncation") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
+  prpw->pwTruncBearoffOpts = pw = gtk_vbox_new( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
+
+  prpw->pwTruncBearoff2 = gtk_check_button_new_with_label (
+                                                           _( "Truncate cubeless at exact bearoff database" ) );
+
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwTruncBearoff2 );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prpw->pwTruncBearoff2 ),
+                                 prw->rcRollout.fTruncBearoff2 );
+
+  prpw->pwTruncBearoffOS = gtk_check_button_new_with_label (
+                                                            _( "Truncate cubeless at one-sided earoff database" ) );
+
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwTruncBearoffOS );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON 
+                                 (prpw->pwTruncBearoffOS ),
+                                 prw->rcRollout.fTruncBearoff2 );
+
+  prpw->pwVarRedn = gtk_check_button_new_with_label ( 
+                                                     _("Variance reduction") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwVarRedn );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwVarRedn ),
+                                prw->rcRollout.fVarRedn );
+
+  prpw->pwRotate = gtk_check_button_new_with_label ( 
+                                                    _("Rotate first two rolls") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwRotate );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwRotate ),
+                                prw->rcRollout.fRotate );
+
+  prpw->pwInitial = gtk_check_button_new_with_label ( 
+                                                     _("Rollout as initial position") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwInitial );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwInitial ),
+                                prw->rcRollout.fInitial );
+
+  pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwPage ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ),
+                     gtk_label_new( _("Seed:") ) );
+  prpw->padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new(
+                                                      abs( prw->rcRollout.nSeed ), 0, INT_MAX, 1, 1, 0 ) );
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new(
+                                                                  prpw->padjSeed, 1, 0 ) );
+ 
+  prpw->pwCubeEqualChequer = gtk_check_button_new_with_label (
+                                                              _("Cube decisions use same settings as Chequer play") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwCubeEqualChequer );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwCubeEqualChequer),
+                                1);
+  gtk_signal_connect( GTK_OBJECT( prpw->pwCubeEqualChequer ), "toggled",
+                      GTK_SIGNAL_FUNC ( CubeEqCheqToggled ), prw);
+
+  prpw->pwPlayersAreSame = gtk_check_button_new_with_label (
+                                                            _("Use same settings for both players") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwPlayersAreSame );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwPlayersAreSame),
+                                0);
+  gtk_signal_connect( GTK_OBJECT( prpw->pwPlayersAreSame ), "toggled",
+                      GTK_SIGNAL_FUNC ( PlayersSameToggled ), prw);
+
+  return pwPage;
 }
 
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
-    GtkWidget *pwDialog, *pwBox, *pw;
-    GtkWidget *pwFrame;
-    GtkWidget *pwvbox;
-    int fOK = FALSE;
-    rolloutwidget rw;
-    char sz[ 256 ];
+  GtkWidget *pwDialog, *pwNotebook, *pw;
+  int fOK = FALSE;
+  rolloutwidget rw;
+  rolloutpagegeneral RPGeneral;
+  rolloutpagewidget  RPPlayer0, RPPlayer1, RPPlayer0Late, RPPlayer1Late,
+    RPTrunc;
+  char sz[ 256 ];
+  int  i;
+
+  memcpy (&rw.rcRollout, &rcRollout, sizeof (rcRollout));
+  rw.prwGeneral = &RPGeneral;
+  rw.prpwPages[0] = &RPPlayer0;
+  rw.prpwPages[1] = &RPPlayer1;
+  rw.prpwPages[2] = &RPPlayer0Late;
+  rw.prpwPages[3] = &RPPlayer1Late;
+  rw.prpwTrunc = &RPTrunc;
+  rw.pfOK = &fOK;
+
+  RPPlayer0.precCube = &rw.rcRollout.aecCube[0];
+  RPPlayer0.precCheq = &rw.rcRollout.aecChequer[0];
+  RPPlayer0Late.precCube = &rw.rcRollout.aecCubeLate[0];
+  RPPlayer0Late.precCheq = &rw.rcRollout.aecChequerLate[0];
+
+  RPPlayer1.precCube = &rw.rcRollout.aecCube[1];
+  RPPlayer1.precCheq = &rw.rcRollout.aecChequer[1];
+  RPPlayer1Late.precCube = &rw.rcRollout.aecCubeLate[1];
+  RPPlayer1Late.precCheq = &rw.rcRollout.aecChequerLate[1];
+
+  RPTrunc.precCube = &rw.rcRollout.aecCubeTrunc;
+  RPTrunc.precCheq = &rw.rcRollout.aecChequerTrunc;
+
+  pwDialog = CreateDialog( _("GNU Backgammon - Rollouts"), DT_QUESTION,
+                           GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
+
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                     rw.RolloutNotebook = gtk_notebook_new() );
+  gtk_container_set_border_width( GTK_CONTAINER( rw.RolloutNotebook ), 4 );
+
+
+  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
+                            RolloutPageGeneral (rw.prwGeneral, &rw),
+                            gtk_label_new ( _("General Settings" ) ) );
+
+  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
+                            RolloutPage (rw.prpwPages[0]),
+                            gtk_label_new ( _("First Play (0) ") ) );
+
+  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
+                            RolloutPage (rw.prpwPages[1]),
+                            gtk_label_new ( _("First Play (1) ") ) );
+
+  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
+                            RolloutPage (rw.prpwPages[2]),
+                            gtk_label_new ( _("Later Play (0) ") ) );
+
+  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
+                            RolloutPage (rw.prpwPages[3]),
+                            gtk_label_new ( _("Later Play (1) ") ) );
+
+  gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
+                            RolloutPage (rw.prpwTrunc),
+                            gtk_label_new ( _("Truncation Pt.") ) );
+
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                GTK_WINDOW( pwMain ) );
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
-    memcpy( &rw.ec, &rcRollout.aecChequer[ 0 ], sizeof( rw.ec ) );
-    rw.pfOK = &fOK;
-    
-    pwDialog = CreateDialog( _("GNU Backgammon - Rollouts"), DT_QUESTION,
-			     GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
+  gtk_widget_show_all( pwDialog );
+   
+  GTKDisallowStdin();
 
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwBox = gtk_vbox_new( FALSE, 0 ) );
-    gtk_container_set_border_width( GTK_CONTAINER( pwBox ), 8 );
+  /* cheap and nasty way to get things set correctly */
+  LateEvalToggled (NULL, &rw);
+  TruncEnableToggled (NULL, &rw);
+  CubeEqCheqToggled (NULL, &rw);
+  PlayersSameToggled (NULL, &rw);
+  CubefulToggled (NULL, &rw);
 
-    rw.padjTrials = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTrials, 1,
-							1296 * 1296,
-							36, 36, 0 ) );
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwBox ), pw );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Trials:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_spin_button_new( rw.padjTrials, 36, 0 ) );
-    
-    gtk_container_add( GTK_CONTAINER( pwBox ),
-		       rw.pwCubeful = gtk_check_button_new_with_label(
-			   _("Cubeful") ) );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwCubeful ),
-				  rcRollout.fCubeful );
+  gtk_main();
 
-    gtk_signal_connect ( GTK_OBJECT ( rw.pwCubeful ), "toggled",
-                         GTK_SIGNAL_FUNC ( InvertRolloutCubeful ), &rw );
-                         
-    /* variance reduction */
+  GTKAllowStdin();
 
-    gtk_container_add( GTK_CONTAINER( pwBox ),
-		       rw.pwVarRedn = gtk_check_button_new_with_label(
-			   _("Variance reduction") ) );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwVarRedn ),
-				  rcRollout.fVarRedn );
+  if( fOK ) {
+    outputpostpone();
 
-    gtk_container_add( GTK_CONTAINER( pwBox ),
-		       rw.pwRotate = gtk_check_button_new_with_label(
-			   _("Use rotation for first rolls") ) );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwRotate ),
-				  rcRollout.fRotate );
+    for (i = 0; i < 2; ++i) {
+      if (EvalCmp (&rw.rcRollout.aecCube[i], &rcRollout.aecCube[i], 1) ) {
+        sprintf (sz, "set rollout player %d cubedecision", i);
+        SetEvalCommands( sz, &rw.rcRollout.aecCube[i], 
+                         &rcRollout.aecCube[ i ] );
+      }
+      if (EvalCmp (&rw.rcRollout.aecChequer[i], 
+                   &rcRollout.aecChequer[i], 1)) {
+        sprintf (sz, "set rollout player %d chequer", i);
+        SetEvalCommands( sz, &rw.rcRollout.aecChequer[i], 
+                         &rcRollout.aecChequer[ i ] );
+      }
 
-    gtk_container_add( GTK_CONTAINER( pwBox ),
-		       rw.pwInitial = gtk_check_button_new_with_label(
-			   _("Rollout as initial position") ) );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwInitial ),
-				  rcRollout.fInitial );
+      if (EvalCmp (&rw.rcRollout.aecCubeLate[i], 
+                   &rcRollout.aecCubeLate[i], 1 ) ) {
+        sprintf (sz, "set rollout late player %d cube", i);
+        SetEvalCommands( sz, &rw.rcRollout.aecCubeLate[i], 
+                         &rcRollout.aecCubeLate[ i ] );
+      }
 
-    rw.padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new( abs( rcRollout.nSeed ),
-						      0, INT_MAX, 1, 1, 0 ) );
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwBox ), pw );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Seed:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_spin_button_new( rw.padjSeed, 1, 0 ) );
-
-    /* 
-     * Truncation 
-     */
-
-    pwFrame = gtk_frame_new ( _("Truncation") );
-    gtk_container_add ( GTK_CONTAINER ( pwBox ), pwFrame );
-
-    pwvbox = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
-
-    /* truncation at plies */
-
-    rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTruncate, 0,
-						       1000, 1, 1, 0 ) );
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwvbox ), pw );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Truncation:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_spin_button_new( rw.padjTrunc, 1, 0 ) );
-
-    /* truncation at BEAROFF2 */
-
-    rw.pwTruncBearoff2 = 
-      gtk_check_button_new_with_label ( _("Truncate at exact bearoff" ) );
-    gtk_container_add ( GTK_CONTAINER ( pwvbox ), rw.pwTruncBearoff2 );
-    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( rw.pwTruncBearoff2 ),
-                                   rcRollout.fTruncBearoff2 );
-
-    /* truncation at BEAROFF_OS */
-
-    rw.pwTruncBearoffOS = 
-      gtk_check_button_new_with_label ( _("Truncate at one-sided bearoff" ) );
-    gtk_container_add ( GTK_CONTAINER ( pwvbox ), rw.pwTruncBearoffOS );
-    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( rw.pwTruncBearoffOS ),
-                                   rcRollout.fTruncBearoffOS );
-
-    /* eval context */
-
-    gtk_container_add( GTK_CONTAINER( pwBox ), pw =
-		       gtk_frame_new( _("Evaluation") ) );
-    gtk_container_add( GTK_CONTAINER( pw ), rw.pwEval =
-		       EvalWidget( &rw.ec, NULL ) );
-	
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
-    InvertRolloutCubeful ( rw.pwCubeful, &rw );
-    
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    if( fOK ) {
-	outputpostpone();
-
-	if( rw.nTrials != rcRollout.nTrials ) {
-	    sprintf( sz, "set rollout trials %d", rw.nTrials );
-	    UserCommand( sz );
-	}
-
-	if( rw.nTruncate != rcRollout.nTruncate ) {
-	    sprintf( sz, "set rollout truncation %d", rw.nTruncate );
-	    UserCommand( sz );
-	}
-
-	if( rw.fTruncBearoff2 != rcRollout.fTruncBearoff2 ) {
-	    sprintf( sz, "set rollout bearofftruncation exact %s", 
-                     rw.fTruncBearoff2 ? "on" : "off" );
-	    UserCommand( sz );
-	}
-
-	if( rw.fTruncBearoffOS != rcRollout.fTruncBearoffOS ) {
-	    sprintf( sz, "set rollout bearofftruncation onesided %s", 
-                     rw.fTruncBearoffOS ? "on" : "off" );
-	    UserCommand( sz );
-	}
-
-	if( rw.fCubeful != rcRollout.fCubeful ) {
-	    sprintf( sz, "set rollout cubeful %s",
-		     rw.fCubeful ? "on" : "off" );
-	    UserCommand( sz );
-	}
-
-	if( rw.fVarRedn != rcRollout.fVarRedn ) {
-	    sprintf( sz, "set rollout varredn %s",
-		     rw.fVarRedn ? "on" : "off" );
-	    UserCommand( sz );
-	}
-
-	if( rw.fRotate != rcRollout.fRotate ) {
-	    sprintf( sz, "set rollout rotate %s",
-		     rw.fRotate ? "on" : "off" );
-	    UserCommand( sz );
-	}
-
-	if( rw.fInitial != rcRollout.fInitial ) {
-	    sprintf( sz, "set rollout initial %s",
-		     rw.fInitial ? "on" : "off" );
-	    UserCommand( sz );
-	}
-
-	if( rw.nSeed != rcRollout.nSeed ) {
-	    sprintf( sz, "set rollout seed %d", rw.nSeed );
-	    UserCommand( sz );
-	}
-
-	/* FIXME another temporary hack (should be able to set chequer and
-	   cube parameters independently) */
-	SetEvalCommands( "set rollout chequer", &rw.ec,
-			 &rcRollout.aecChequer[ 0 ] );
-	SetEvalCommands( "set rollout cube", &rw.ec,
-			 &rcRollout.aecCube[ 0 ] );
-	
-	outputresume();
+      if (EvalCmp (&rw.rcRollout.aecChequerLate[i], 
+                   &rcRollout.aecChequerLate[i], 1 ) ) {
+        sprintf (sz, "set rollout late player %d chequer", i);
+        SetEvalCommands( sz, &rw.rcRollout.aecChequerLate[i], 
+                         &rcRollout.aecChequerLate[ i ] );
+      }
     }
+
+    if (EvalCmp (&rw.rcRollout.aecCubeTrunc, &rcRollout.aecCubeTrunc, 1) ) {
+      SetEvalCommands( "set rollout truncation cube", 
+                       &rw.rcRollout.aecCubeTrunc, &rcRollout.aecCubeTrunc );
+    }
+
+    if (EvalCmp (&rw.rcRollout.aecChequerTrunc, 
+                 &rcRollout.aecChequerTrunc, 1) ) {
+      SetEvalCommands( "set rollout truncation chequer", 
+                       &rw.rcRollout.aecChequerTrunc, 
+                       &rcRollout.aecChequerTrunc );
+    }
+
+    if( rw.rcRollout.fCubeful != rcRollout.fCubeful ) {
+      sprintf( sz, "set rollout cubeful %s",
+               rw.rcRollout.fCubeful ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fVarRedn != rcRollout.fVarRedn ) {
+      sprintf( sz, "set rollout varredn %s",
+               rw.rcRollout.fVarRedn ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fInitial != rcRollout.fInitial ) {
+      sprintf( sz, "set rollout initial %s",
+               rw.rcRollout.fVarRedn ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fRotate != rcRollout.fRotate ) {
+      sprintf( sz, "set rollout rotate %s",
+               rw.rcRollout.fRotate ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fLateEvals != rcRollout.fLateEvals ) {
+      sprintf( sz, "set rollout late enable  %s",
+               rw.rcRollout.fLateEvals ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fDoTruncate != rcRollout.fDoTruncate ) {
+      sprintf( sz, "set rollout truncation enable  %s",
+               rw.rcRollout.fDoTruncate ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.nTruncate != rcRollout.nTruncate ) {
+      sprintf( sz, "set rollout truncation plies %d", 
+               rw.rcRollout.nTruncate );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.nTrials != rcRollout.nTrials ) {
+      sprintf( sz, "set rollout trials %d", rw.rcRollout.nTrials );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.nLate != rcRollout.nLate ) {
+      sprintf( sz, "set rollout late plies %d", rw.rcRollout.nLate );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.nSeed != rcRollout.nSeed ) {
+      sprintf( sz, "set rollout seed %d", rw.rcRollout.nSeed );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fTruncBearoff2 != rcRollout.fTruncBearoff2 ) {
+      sprintf( sz, "set rollout bearofftruncation exact %s", 
+               rw.rcRollout.fTruncBearoff2 ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fTruncBearoffOS != rcRollout.fTruncBearoffOS ) {
+      sprintf( sz, "set rollout bearofftruncation onesided %s", 
+               rw.rcRollout.fTruncBearoffOS ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    outputresume();
+  }	
 }
+
 
 extern void GTKEval( char *szOutput ) {
 
