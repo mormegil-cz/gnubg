@@ -565,11 +565,12 @@ extern void CommandSetAppearance( char *sz ) {
 #if USE_GTK
     if( fX ) {
 	char *apch[ 2 ];
+        BoardData *bd = BOARD( pwBoard )->board_data;
 
 	BoardPreferencesStart( pwBoard );
 	    
 	while( ParseKeyValue( &sz, apch ) )
-	    BoardPreferencesParam( pwBoard, apch[ 0 ], apch[ 1 ] );
+	    BoardPreferencesParam( bd, apch[ 0 ], apch[ 1 ] );
 
 	BoardPreferencesDone( pwBoard );	    
     } else
