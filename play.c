@@ -3059,8 +3059,8 @@ extern void CommandNext( char *sz ) {
     int n;
     char *pch;
     int fMarkedMoves = FALSE;
-	list *p;
-	moverecord *pmr;
+    list *p;
+    moverecord *pmr = NULL;
     matchstate SaveMs;
     
     if( !plGame ) {

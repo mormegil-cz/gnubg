@@ -2338,7 +2338,6 @@ EvalBearoffOSFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
   unsigned short int aaProb[ 2 ][ 32 ];
   unsigned long x;
 
-  int an[ 2 ][ 25 ];
   unsigned short int aaGammonProb[ 2 ][ 32 ];
 
   assert ( fBearoffOS >= 0 );

@@ -136,7 +136,7 @@ static GtkWidget *TakeAnalysis( const movetype mt,
 
     default:
 
-      sz = g_strdup_printf ( "" );
+      sz = g_strdup ( "" );
 
     }
                                
@@ -429,7 +429,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     default:
 
-      sz = g_strdup_printf ( "" );
+      sz = g_strdup ( "" );
 
     }
                                

@@ -1,3 +1,7 @@
+Sat Oct 26 13:12:00 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c, gtkcube.c, play.c, eval.c, html.c: pacify fussy compilers.
+
 Sat Oct 26 12:50:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Updates to html/text export of positions.

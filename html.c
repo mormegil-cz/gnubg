@@ -179,7 +179,7 @@ GetStyle ( const stylesheetclass ssc,
               aaszStyleSheetClasses[ ssc ][ 0 ] );
     break;
   default:
-    sprintf ( sz, "" );
+    strcpy ( sz, "" );
     break;
   }
 
@@ -188,7 +188,7 @@ GetStyle ( const stylesheetclass ssc,
 }
 
   
-
+#if 0
 static void
 WriteStyle ( FILE *pf, const stylesheetclass ssc, 
              const htmlexportcss hecss ) {
@@ -196,6 +196,7 @@ WriteStyle ( FILE *pf, const stylesheetclass ssc,
   fputs ( GetStyle ( ssc, hecss ), pf );
 
 }
+#endif
 
 
 static void
@@ -1865,8 +1866,6 @@ static void
 HTMLEpilogueComment ( FILE *pf ) {
 
   time_t t;
-  int fFirst;
-  int i;
 
   const char szVersion[] = "$Revision$";
   int iMajor, iMinor;

@@ -1436,7 +1436,7 @@ fixOutput ( float arDouble[], float aarOutput[][ NUM_ROLLOUT_OUTPUTS ] ) {
 
 static void SetAnnotation( moverecord *pmr ) {
 
-    GtkWidget *pwParent = pwAnalysis->parent, *pw, *pwBox, *pwAlign;
+    GtkWidget *pwParent = pwAnalysis->parent, *pw = NULL, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
     list *pl;
     char sz[ 64 ];
