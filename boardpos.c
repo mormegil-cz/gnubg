@@ -94,8 +94,8 @@ PointArea( const int fClockwise, const int nSize,
 
 extern void
 CubePosition( const int crawford_game, const int cube_use,
-              const int doubled, const int turn, 
-              const int cube_owner, int *px, int *py, int *porient ) {
+              const int doubled, const int cube_owner,
+              int *px, int *py, int *porient ) {
 
     if( crawford_game || !cube_use ) {
 	/* no cube */
@@ -103,14 +103,13 @@ CubePosition( const int crawford_game, const int cube_use,
 	if( py ) *py = -32768;
 	if( porient ) *porient = -1;
     } else if( doubled ) {
-      int fac = ( ! cube_owner || cube_owner == turn ) ? -1 : +1;
-      if( px ) *px = 50 + fac * turn  * 25;
-      if( py ) *py = 37;
-      if( porient ) *porient = - fac * turn;
+	if( px ) *px = 50 - 25 * doubled;
+	if( py ) *py = 37;
+	if( porient ) *porient = doubled;
     } else {
 	if( px ) *px = 50;
-	if( py ) *py = 37 + 34 * cube_owner;
-	if( porient ) *porient = - cube_owner;
+	if( py ) *py = 37 - 34 * cube_owner;
+	if( porient ) *porient = cube_owner;
     }
 
 }
