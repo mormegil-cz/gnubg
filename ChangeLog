@@ -1,3 +1,7 @@
+Mon Feb 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* html.c: Tidy text version of html export
+
 Sat Feb 14 20:32:24 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c: new command "load python <filename>".
