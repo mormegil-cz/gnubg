@@ -66,8 +66,23 @@ typedef struct _player {
 } player;
 
 typedef enum _movetype {
-    MOVE_NORMAL, MOVE_DOUBLE, MOVE_TAKE, MOVE_DROP, MOVE_RESIGN
+    MOVE_GAMEINFO, MOVE_NORMAL, MOVE_DOUBLE, MOVE_TAKE, MOVE_DROP, MOVE_RESIGN,
+    MOVE_SETBOARD, MOVE_SETCUBEVAL, MOVE_SETCUBEPOS
 } movetype;
+
+typedef struct _movegameinfo {
+    movetype mt;
+    int i, /* the number of the game within a match */
+	nMatch, /* match length */
+	anScore[ 2 ], /* match score BEFORE the game */
+	fCrawford, /* the Crawford rule applies during this match */
+	fCrawfordGame, /* this is the Crawford game */
+	fJacoby,
+	fWinner, /* who won (-1 = unfinished) */
+	nPoints, /* how many points were scored by the winner */
+	fResigned, /* the game was ended by resignation */
+	nAutoDoubles; /* how many automatic doubles were rolled */
+} movegameinfo;
 
 typedef struct _movenormal {
     movetype mt;
@@ -82,10 +97,29 @@ typedef struct _moveresign {
     int nResigned;
 } moveresign;
 
+typedef struct _movesetboard {
+    movetype mt;
+    unsigned char auchKey[ 10 ]; /* always stored as if player 0 was on roll */
+} movesetboard;
+
+typedef struct _movesetcubeval {
+    movetype mt;
+    int nCube;
+} movesetcubeval;
+
+typedef struct _movesetcubepos {
+    movetype mt;
+    int fCubeOwner;
+} movesetcubepos;
+
 typedef union _moverecord {
     movetype mt;
+    movegameinfo g;
     movenormal n;
     moveresign r;
+    movesetboard sb;
+    movesetcubeval scv;
+    movesetcubepos scp;
 } moverecord;
 
 extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
@@ -110,6 +144,7 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
 extern void NextTurn( void );
 extern void TurnDone( void );
+extern void CancelCubeAction( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char *sz );
@@ -177,6 +212,8 @@ extern void CommandAccept( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
     CommandLoadCommands( char * ),
+    CommandLoadGame( char * ),
+    CommandLoadMatch( char * ),
     CommandMove( char * ),
     CommandNewGame( char * ),
     CommandNewMatch( char * ),
