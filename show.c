@@ -2049,30 +2049,6 @@ outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
 
 }
 
-static void GetGeometryString(char* buf, windowobject* pwo)
-{
-	char dispName[50];
-	sprintf(dispName, "%c%s %s", toupper(pwo->winName[0]), &pwo->winName[1], _("window"));
-
-	sprintf(buf, "%-17s : size %dx%d, position (%d,%d)\n",
-		dispName, pwo->wg.nWidth, pwo->wg.nHeight, pwo->wg.nPosX, pwo->wg.nPosY);
-}
-
-extern void
-CommandShowGeometry ( char *sz )
-{
-	int i;
-	char szBuf[1024];
-	output(_("Default geometries:\n\n"));
-
-	for (i = 0; i < NUM_WINDOWS; i++)
-	{
-		GetGeometryString(szBuf, &woPanel[i]);
-		output(szBuf);
-	}
-}
-
-
 #if USE_SOUND
 
 extern void
@@ -2480,17 +2456,6 @@ extern void CommandShowTCTutorial( char *sz ) {
 	ShowPaged(aszTcTutorial);
 }
 #endif
-
-
-extern void CommandShowDisplayPanels( char *sz ) {
-	if (fDisplayPanels)
-	  outputf( _("Game list, Annotation and Message panels/windows "
-		        "will be displayed."));
-	else
-	  outputf( _("Game list, Annotation and Message panels/windows "
-		        "will not be displayed."));
-}
-
 
 
 extern void

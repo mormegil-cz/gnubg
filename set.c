@@ -516,48 +516,6 @@ extern void CommandSetAnalysisThresholdVeryUnlucky( char *sz ) {
     SetLuckThreshold( LUCK_VERYBAD, sz );
 }
 
-extern void CommandSetAnnotation( char *sz ) {
-
-    SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
-		   _("Move analysis and commentary will be displayed."),
-		   _("Move analysis and commentary will not be displayed."));
-}
-
-extern void CommandSetMessage( char *sz ) {
-
-	SetToggle("message", &woPanel[WINDOW_MESSAGE].showing, sz,
-		_("Show window with messages"),
-		_("Do not show window with message."));
-}
-
-extern void CommandSetTheoryWindow( char *sz ) {
-
-	SetToggle("theorywindow", &woPanel[WINDOW_THEORY].showing, sz,
-		_("Show window with theory"),
-		_("Do not show window with theory."));
-}
-
-extern void CommandSetCommandWindow( char *sz ) {
-
-	SetToggle("commandwindow", &woPanel[WINDOW_COMMAND].showing, sz,
-		_("Show window to enter commands"),
-		_("Do not show window to enter commands."));
-}
-
-extern void CommandSetGameList( char *sz ) {
-
-    SetToggle( "gamelist", &woPanel[WINDOW_GAME].showing, sz,
-		   _("Show game window with moves"),
-		   _("Do not show game window with moves.") );
-}
-
-extern void CommandSetAnalysisWindows( char *sz ) {
-
-    SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,
-		   _("Show window with analysis"),
-		   _("Do not show window with analysis.") );
-}
-
 extern void CommandSetStyledGameList( char *sz ) {
 
     SetToggle( "styledgamelist", &fStyledGamelist, sz,
@@ -1015,12 +973,6 @@ extern void CommandSetDice( char *sz ) {
     if( fX )
 	ShowBoard();
 #endif
-}
-
-extern void CommandSetDockPanels( char *sz ) {
-
-    SetToggle( "dockdisplay", &fDockPanels, sz, _("Windows will be docked."),
-		_("Windows will be detached.") );
 }
 
 extern void CommandSetDisplay( char *sz ) {
@@ -3938,147 +3890,6 @@ extern void CommandSetTutorSkillVeryBad( char * sz) {
   _set_tutor_skill (SKILL_VERYBAD, 2, _("very bad") );
 }
 
-
-static windowobject* pwoSet;
-
-extern void
-CommandSetGeometryAnalysis ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_ANALYSIS];
-	HandleCommand ( sz, acSetGeometryValues );
-}
-
-extern void
-CommandSetGeometryHint ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_HINT];
-	HandleCommand ( sz, acSetGeometryValues );
-}
-
-extern void
-CommandSetGeometryGame ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_GAME];
-	HandleCommand ( sz, acSetGeometryValues );
-}
-
-extern void
-CommandSetGeometryMain ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_MAIN];
-	HandleCommand ( sz, acSetGeometryValues );
-}
-
-extern void
-CommandSetGeometryMessage ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_MESSAGE];
-	HandleCommand(sz, acSetGeometryValues);
-}
-
-extern void
-CommandSetGeometryCommand ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_COMMAND];
-	HandleCommand(sz, acSetGeometryValues);
-}
-
-extern void
-CommandSetGeometryTheory ( char *sz )
-{
-	pwoSet = &woPanel[WINDOW_THEORY];
-	HandleCommand(sz, acSetGeometryValues);
-}
-
-extern void
-CommandSetGeometryWidth ( char *sz ) {
-
-  int n;
-
-  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( _("Illegal value. "
-                "See 'help set geometry %s width'.\n"), pwoSet->winName );
-  else {
-
-    pwoSet->wg.nWidth = n;
-    outputf ( _("Width of %s window set to %d.\n"), pwoSet->winName, n );
-
-#if USE_GTK
-    if ( fX )
-		setWindowGeometry(pwoSet);
-#endif
-
-  }
-
-}
-
-extern void
-CommandSetGeometryHeight ( char *sz ) {
-
-  int n;
-
-  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( _("Illegal value. "
-                "See 'help set geometry %s height'.\n"), pwoSet->winName );
-  else {
-
-    pwoSet->wg.nHeight = n;
-    outputf ( _("Height of %s window set to %d.\n"), pwoSet->winName, n );
-
-#if USE_GTK
-    if ( fX )
-		setWindowGeometry(pwoSet);
-#endif
-
-  }
-
-}
-
-extern void
-CommandSetGeometryPosX ( char *sz ) {
-
-  int n;
-
-  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( _("Illegal value. "
-                "See 'help set geometry %s xpos'.\n"), pwoSet->winName );
-  else {
-
-    pwoSet->wg.nPosX = n;
-    outputf ( _("X-position of %s window set to %d.\n"), pwoSet->winName, n );
-
-#if USE_GTK
-    if ( fX )
-		setWindowGeometry(pwoSet);
-#endif
-
-  }
-
-}
-
-extern void
-CommandSetGeometryPosY ( char *sz ) {
-
-  int n;
-
-  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( _("Illegal value. "
-                "See 'help set geometry %s ypos'.\n"), pwoSet->winName );
-  else {
-
-    pwoSet->wg.nPosY = n;
-    outputf ( _("Y-position of %s window set to %d.\n"), pwoSet->winName, n );
-
-#if USE_GTK
-    if ( fX )
-		setWindowGeometry(pwoSet);
-#endif
-
-  }
-
-}
-
-
 /*
  * Sounds
  */
@@ -4858,25 +4669,6 @@ extern void CommandSetPanelWidth( char *sz )
 	  SetPanelWidth(n);
 #endif
 }
-
-extern void CommandSetDisplayPanels( char *sz ) {
-
-  SetToggle ("panels", &fDisplayPanels, sz, 
-  _("Game list, Annotation and Message panels/windows will be displayed."),
-  _("Game list, Annotation and Message panels/windows will not be displayed.")
-	     );
-
-#if USE_GUI && USE_GTK
-  if (fX) {
-    if (fDisplayPanels) 
-      ShowAllPanels (0, 0, 0);
-    else
-      HideAllPanels (0, 0, 0);
-  }
-#endif
-    
-}
-
 
 extern void
 CommandSetOutputErrorRateFactor( char *sz ) {

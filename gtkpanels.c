@@ -38,9 +38,126 @@ extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm, void *fn);
 
 static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, char* windowRole);
 
+int fDisplayPanels = TRUE;
+int fDockPanels = TRUE;
+
+extern void ShowAnalysis();
+extern void DeleteAnalysis();
+extern void ShowAnnotation();
+extern void DeleteAnnotation();
+extern void ShowGameWindow();
+extern void DeleteGame();
+extern void ShowMessage();
+extern void DeleteMessage();
+extern void ShowTheoryWindow();
+extern void DeleteTheoryWindow();
+extern void ShowCommandWindow();
+extern void DeleteCommandWindow();
+
+typedef void (*panelFun)();
+
+typedef struct _windowobject {
+	char* winName;
+	int showing;
+	int docked;
+	int dockable;
+	int undockable;
+#if USE_GTK
+	panelFun showFun;
+	panelFun hideFun;
+	GtkWidget* pwWin;
+#endif
+	windowgeometry wg;
+} windowobject;
+
+/* Set up window and panel details */
+windowobject woPanel[NUM_WINDOWS] =
+{
+	/* main window */
+	{
+		"main",
+		TRUE, FALSE, FALSE, FALSE,
+#if USE_GTK
+		NULL, NULL,
+		0,
+#endif
+		{0, 0, 20, 20}
+	},
+	/* game list */
+	{
+		"game",
+		TRUE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowGameWindow, DeleteGame,
+		0,
+#endif
+		{ 250, 200, 20, 20 }
+	},
+	/* analysis */
+	{
+		"analysis",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowAnalysis, DeleteAnalysis,
+		0,
+#endif
+		{ 0, 400, 20, 20 }
+	},
+	/* annotation */
+	{
+		"annotation",
+		FALSE, TRUE, TRUE, FALSE,
+#if USE_GTK
+		ShowAnnotation, DeleteAnnotation,
+		0,
+#endif
+		{ 0, 400, 20, 20 }
+	},
+	/* hint */
+	{
+		"hint",
+		FALSE, FALSE, FALSE, FALSE,
+#if USE_GTK
+		NULL, NULL,
+		0,
+#endif
+		{ 0, 450, 20, 20 }
+	},
+	/* message */
+	{
+		"message",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowMessage, DeleteMessage,
+		0,
+#endif
+		{ 0, 500, 20, 20 }
+	},
+	/* command */
+	{
+		"command",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowCommandWindow, DeleteCommandWindow,
+		0,
+#endif
+		{ 0, 0, 20, 20 }
+	}, 
+	/* theory */
+	{
+		"theory",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowTheoryWindow, DeleteTheoryWindow,
+		0,
+#endif
+		{ 0, 0, 20, 20 }
+	}
+};
+
 extern void ShowPanel(gnubgwindow window)
 {
-	setWindowGeometry(&woPanel[window]);
+	setWindowGeometry(window);
 	if (!woPanel[window].docked && woPanel[window].pwWin->window)
 		gdk_window_raise(woPanel[window].pwWin->window);
 
@@ -287,7 +404,7 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 #endif
 #endif
 
-		setWindowGeometry(&woPanel[WINDOW_ANALYSIS]);
+		setWindowGeometry(WINDOW_ANALYSIS);
 
 		gtk_container_add( GTK_CONTAINER( woPanel[WINDOW_ANALYSIS].pwWin ), pwPaned); 
 		gtk_window_add_accel_group( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ), pagMain );
@@ -386,7 +503,7 @@ static void CreateGameWindow( void ) {
 #endif
 #endif
 
-		setWindowGeometry(&woPanel[WINDOW_GAME]);
+		setWindowGeometry(WINDOW_GAME);
     
 		gtk_container_add( GTK_CONTAINER( woPanel[WINDOW_GAME].pwWin ), pvbox );
 		gtk_window_add_accel_group( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ), pagMain );
@@ -543,23 +660,17 @@ static void GetGeometryString(char* buf, windowobject* pwo)
 
 extern void SaveWindowSettings(FILE* pf)
 {
-    char szTemp[1024];
+	char szTemp[1024];
 	int i;
 
-    if (woPanel[WINDOW_ANNOTATION].showing)
-      fputs("set annotation yes\n", pf);
-    if (woPanel[WINDOW_MESSAGE].showing)
-      fputs("set message yes\n", pf);
-    if (woPanel[WINDOW_GAME].showing)
-      fputs("set gamelist yes\n", pf);
-    if (woPanel[WINDOW_ANALYSIS].showing)
-      fputs("set analysis window yes\n", pf);
-    if (woPanel[WINDOW_THEORY].showing)
-      fputs("set theorywindow yes\n", pf);
-    if (woPanel[WINDOW_COMMAND].showing)
-      fputs("set commandwindow yes\n", pf);
+	fprintf(pf, "set annotation %s\n", woPanel[WINDOW_ANNOTATION].showing ? "yes" : "no");
+	fprintf(pf, "set message %s\n", woPanel[WINDOW_MESSAGE].showing ? "yes" : "no");
+	fprintf(pf, "set gamelist %s\n", woPanel[WINDOW_GAME].showing ? "yes" : "no");
+	fprintf(pf, "set analysis window %s\n", woPanel[WINDOW_ANALYSIS].showing ? "yes" : "no");
+	fprintf(pf, "set theorywindow %s\n", woPanel[WINDOW_THEORY].showing ? "yes" : "no");
+	fprintf(pf, "set commandwindow %s\n", woPanel[WINDOW_COMMAND].showing ? "yes" : "no");
 
-    fprintf( pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
+	fprintf(pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
 
 	for (i = 0; i < NUM_WINDOWS; i++)
 	{
@@ -628,7 +739,7 @@ static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, 
 #endif
 #endif
 
-		setWindowGeometry(&woPanel[window]);
+		setWindowGeometry(window);
 		gtk_container_add(GTK_CONTAINER(woPanel[window].pwWin), pWidget);
 		gtk_window_add_accel_group(GTK_WINDOW(woPanel[window].pwWin), pagMain);
 
@@ -699,6 +810,8 @@ void DockPanels()
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/Windows/Game record"), !fDockPanels || fDisplayPanels);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/Windows/Commentary"), !fDockPanels || fDisplayPanels);
 	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/Windows/Analysis"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/Windows/Command"), !fDockPanels || fDisplayPanels);
+	gtk_widget_set_sensitive(gtk_item_factory_get_widget(pif, "/Windows/Theory"), !fDockPanels || fDisplayPanels);
 
 	if (!fDockPanels || fDisplayPanels)
 	{
@@ -717,9 +830,8 @@ void DockPanels()
 	/* Make sure check item is correct */
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/Windows/Dock panels")), fDockPanels);
 
-	/* Resize board */
-    if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
-		gtk_window_set_default_size(GTK_WINDOW(pwMain), woPanel[WINDOW_MAIN].wg.nWidth, woPanel[WINDOW_MAIN].wg.nHeight);
+	/* Resize screen */
+	SetMainWindowSize();
 }
 
 
@@ -783,8 +895,8 @@ HideAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 
 	SwapBoardToPanel(FALSE);
 
-	if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
-		gtk_window_set_default_size(GTK_WINDOW(pwMain), woPanel[WINDOW_MAIN].wg.nWidth, woPanel[WINDOW_MAIN].wg.nHeight);
+	/* Resize screen */
+	SetMainWindowSize();
 }
 
 extern void ToggleDockPanels( gpointer *p, guint n, GtkWidget *pw )
@@ -793,6 +905,384 @@ extern void ToggleDockPanels( gpointer *p, guint n, GtkWidget *pw )
 	if (fDockPanels != newValue)
 	{
 		fDockPanels = newValue;
-		UpdateSetting(&fDockPanels);
+		DockPanels();
 	}
+}
+
+extern void CommandSetAnnotation( char *sz ) {
+
+    SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
+		   _("Move analysis and commentary will be displayed."),
+		   _("Move analysis and commentary will not be displayed."));
+}
+
+extern void CommandSetMessage( char *sz ) {
+
+	SetToggle("message", &woPanel[WINDOW_MESSAGE].showing, sz,
+		_("Show window with messages"),
+		_("Do not show window with message."));
+}
+
+extern void CommandSetTheoryWindow( char *sz ) {
+
+	SetToggle("theorywindow", &woPanel[WINDOW_THEORY].showing, sz,
+		_("Show window with theory"),
+		_("Do not show window with theory."));
+}
+
+extern void CommandSetCommandWindow( char *sz ) {
+
+	SetToggle("commandwindow", &woPanel[WINDOW_COMMAND].showing, sz,
+		_("Show window to enter commands"),
+		_("Do not show window to enter commands."));
+}
+
+extern void CommandSetGameList( char *sz ) {
+
+    SetToggle( "gamelist", &woPanel[WINDOW_GAME].showing, sz,
+		   _("Show game window with moves"),
+		   _("Do not show game window with moves.") );
+}
+
+extern void CommandSetAnalysisWindows( char *sz ) {
+
+    SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,
+		   _("Show window with analysis"),
+		   _("Do not show window with analysis.") );
+}
+
+gnubgwindow pwoSetPanel;
+
+extern void
+CommandSetGeometryAnalysis ( char *sz )
+{
+	pwoSetPanel = WINDOW_ANALYSIS;
+	HandleCommand ( sz, acSetGeometryValues );
+}
+
+extern void
+CommandSetGeometryHint ( char *sz )
+{
+	pwoSetPanel = WINDOW_HINT;
+	HandleCommand ( sz, acSetGeometryValues );
+}
+
+extern void
+CommandSetGeometryGame ( char *sz )
+{
+	pwoSetPanel = WINDOW_GAME;
+	HandleCommand ( sz, acSetGeometryValues );
+}
+
+extern void
+CommandSetGeometryMain ( char *sz )
+{
+	pwoSetPanel = WINDOW_MAIN;
+	HandleCommand ( sz, acSetGeometryValues );
+}
+
+extern void
+CommandSetGeometryMessage ( char *sz )
+{
+	pwoSetPanel = WINDOW_MESSAGE;
+	HandleCommand(sz, acSetGeometryValues);
+}
+
+extern void
+CommandSetGeometryCommand ( char *sz )
+{
+	pwoSetPanel = WINDOW_COMMAND;
+	HandleCommand(sz, acSetGeometryValues);
+}
+
+extern void
+CommandSetGeometryTheory ( char *sz )
+{
+	pwoSetPanel = WINDOW_THEORY;
+	HandleCommand(sz, acSetGeometryValues);
+}
+
+extern void
+CommandSetGeometryWidth ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s width'.\n"), woPanel[pwoSetPanel].winName );
+  else {
+
+    woPanel[pwoSetPanel].wg.nWidth = n;
+    outputf ( _("Width of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
+
+#if USE_GTK
+    if ( fX )
+		setWindowGeometry(pwoSetPanel);
+#endif
+
+  }
+
+}
+
+extern void
+CommandSetGeometryHeight ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s height'.\n"), woPanel[pwoSetPanel].winName );
+  else {
+
+    woPanel[pwoSetPanel].wg.nHeight = n;
+    outputf ( _("Height of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
+
+#if USE_GTK
+    if ( fX )
+		setWindowGeometry(pwoSetPanel);
+#endif
+
+  }
+
+}
+
+extern void
+CommandSetGeometryPosX ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s xpos'.\n"), woPanel[pwoSetPanel].winName );
+  else {
+
+    woPanel[pwoSetPanel].wg.nPosX = n;
+    outputf ( _("X-position of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
+
+#if USE_GTK
+    if ( fX )
+		setWindowGeometry(pwoSetPanel);
+#endif
+
+  }
+
+}
+
+extern void
+CommandSetGeometryPosY ( char *sz ) {
+
+  int n;
+
+  if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s ypos'.\n"), woPanel[pwoSetPanel].winName );
+  else {
+
+    woPanel[pwoSetPanel].wg.nPosY = n;
+    outputf ( _("Y-position of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
+
+#if USE_GTK
+    if ( fX )
+		setWindowGeometry(pwoSetPanel);
+#endif
+
+  }
+
+}
+
+extern void CommandSetDisplayPanels( char *sz ) {
+
+  SetToggle ("panels", &fDisplayPanels, sz, 
+  _("Game list, Annotation and Message panels/windows will be displayed."),
+  _("Game list, Annotation and Message panels/windows will not be displayed.")
+	     );
+
+#if USE_GUI && USE_GTK
+  if (fX) {
+    if (fDisplayPanels)
+      ShowAllPanels (0, 0, 0);
+    else
+      HideAllPanels (0, 0, 0);
+  }
+#endif
+    
+}
+
+extern void CommandShowDisplayPanels( char *sz ) {
+	if (fDisplayPanels)
+	  outputf( _("Game list, Annotation and Message panels/windows "
+		        "will be displayed."));
+	else
+	  outputf( _("Game list, Annotation and Message panels/windows "
+		        "will not be displayed."));
+}
+
+extern void CommandSetDockPanels( char *sz ) {
+
+    SetToggle( "dockdisplay", &fDockPanels, sz, _("Windows will be docked."),
+		_("Windows will be detached.") );
+	DockPanels();
+}
+
+static void GetGeometryDisplayString(char* buf, windowobject* pwo)
+{
+	char dispName[50];
+	sprintf(dispName, "%c%s %s", toupper(pwo->winName[0]), &pwo->winName[1], _("window"));
+
+	sprintf(buf, "%-17s : size %dx%d, position (%d,%d)\n",
+		dispName, pwo->wg.nWidth, pwo->wg.nHeight, pwo->wg.nPosX, pwo->wg.nPosY);
+}
+
+extern void
+CommandShowGeometry ( char *sz )
+{
+	int i;
+	char szBuf[1024];
+	output(_("Default geometries:\n\n"));
+
+	for (i = 0; i < NUM_WINDOWS; i++)
+	{
+		GetGeometryDisplayString(szBuf, &woPanel[i]);
+		output(szBuf);
+	}
+}
+
+void DisplayWindows()
+{
+	int i;
+	/* Display any other windows now */
+	for (i = 0; i < NUM_WINDOWS; i++)
+	{
+		if (woPanel[i].pwWin && woPanel[i].dockable)
+		{
+			if (woPanel[i].showing)
+				gtk_widget_show_all(woPanel[i].pwWin);
+			else
+				gtk_widget_hide(woPanel[i].pwWin);
+		}
+	}
+	if (!fDisplayPanels)
+		HideAllPanels (0, 0, 0);
+}
+
+int DockedPanelsShowing()
+{
+	return fDockPanels && fDisplayPanels;
+}
+
+void DestroyPanel(gnubgwindow window)
+{
+	if (woPanel[window].pwWin)
+	{
+		gtk_widget_destroy(woPanel[window].pwWin);
+		woPanel[window].pwWin = NULL;
+		woPanel[window].showing = FALSE;
+	}
+}
+
+GtkWidget* GetPanelWidget(gnubgwindow window)
+{
+    return woPanel[window].pwWin;
+}
+
+void SetPanelWidget(gnubgwindow window, GtkWidget* pWin)
+{
+	woPanel[window].pwWin = pWin;
+	woPanel[WINDOW_HINT].showing = pWin ? TRUE : FALSE;
+}
+
+int ArePanelsShowing()
+{
+	return fDisplayPanels;
+}
+
+int ArePanelsDocked()
+{
+	return fDockPanels;
+}
+
+int IsPanelDocked(gnubgwindow window)
+{
+	return woPanel[window].docked;
+}
+
+extern void
+setWindowGeometry(gnubgwindow window)
+{
+	windowobject* pwo = &woPanel[window];
+
+	if (pwo->docked || !pwo->pwWin || !fGUISetWindowPos)
+		return;
+
+#if GTK_CHECK_VERSION(2,0,0)
+
+  gtk_window_set_default_size ( GTK_WINDOW ( pwo->pwWin ),
+                      ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
+                      ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
+
+  gtk_window_move ( GTK_WINDOW ( pwo->pwWin ),
+                    ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
+                    ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
+
+#else
+
+  gtk_window_set_default_size( GTK_WINDOW( pwo->pwWin ), 
+                               ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
+                               ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
+  
+  gtk_widget_set_uposition ( pwo->pwWin, 
+                             ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
+                             ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
+
+#endif /* ! GTK 2.0 */
+
+}
+
+extern void
+RefreshGeometries ( void )
+{
+	int i;
+	for (i = 0; i < NUM_WINDOWS; i++)
+		getWindowGeometry(i);
+}
+
+void ShowHidePanel(gnubgwindow panel)
+{
+	if (woPanel[panel].showing)
+		woPanel[panel].showFun();
+	else
+		woPanel[panel].hideFun();
+}
+
+int SetMainWindowSize()
+{
+	if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
+	{
+		gtk_window_set_default_size(GTK_WINDOW(pwMain),
+                                     woPanel[WINDOW_MAIN].wg.nWidth,
+                                     woPanel[WINDOW_MAIN].wg.nHeight);
+		return 1;
+	}
+	else
+		return 0;
+}
+
+int GetPanelWidth(gnubgwindow panel)
+{
+	return woPanel[panel].wg.nWidth;
+}
+
+void PanelShow(gnubgwindow panel)
+{
+	woPanel[panel].showFun();
+}
+
+void PanelHide(gnubgwindow panel)
+{
+	woPanel[panel].hideFun();
+}
+
+int IsPanelShowVar(gnubgwindow panel, void *p)
+{
+	return (p == &woPanel[panel].showing);
 }

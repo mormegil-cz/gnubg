@@ -3560,11 +3560,7 @@ void board_edit( BoardData *bd ) {
     
     if( f ) {
 	/* Close hint window */
-    if( woPanel[WINDOW_HINT].pwWin )
-	{
-	  gtk_widget_destroy( woPanel[WINDOW_HINT].pwWin );
-	  woPanel[WINDOW_HINT].pwWin = NULL;
-	}
+	DestroyPanel(WINDOW_HINT);
 
 	/* Entering edit mode: enable entry fields for names and scores */
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname0 ), bd->name0 );

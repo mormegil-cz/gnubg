@@ -1,3 +1,8 @@
+Tue Jan  4  9:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkpanels.c: Move remaining window/panel code to this file
+	and fix a couple of small bugs
+
 Tue Jan  4 00:16:32 2005 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubgmodule.c - add detail to python doc strings

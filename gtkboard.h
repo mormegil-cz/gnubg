@@ -344,6 +344,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event, Boar
 extern gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, BoardData* bd);
 extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
 extern void RollDice2d(BoardData* bd);
+extern void DestroyPanel(gnubgwindow window);
 
 extern void
 DrawDie( GdkDrawable *pd, 

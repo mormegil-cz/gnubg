@@ -185,115 +185,12 @@ char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
-int fDisplayPanels = TRUE;
-int fDockPanels = TRUE;
-
-#if USE_GTK
-extern void ShowAnalysis();
-extern void DeleteAnalysis();
-extern void ShowAnnotation();
-extern void DeleteAnnotation();
-extern void ShowGameWindow();
-extern void DeleteGame();
-extern void ShowMessage();
-extern void DeleteMessage();
-extern void ShowTheoryWindow();
-extern void DeleteTheoryWindow();
-extern void ShowCommandWindow();
-extern void DeleteCommandWindow();
-#endif
-
 static char *aszExportTypes[] = {"html", "gol", "pos", "mat", "gam",
 	"latex", "pdf", "postscript", "eps", "png", "text",
         "equity", "snowietxt", ""};
 
 static char *aszImportTypes[] = {"bkg", "mat", "pos", "oldmoves", "sgg",
 	"tmg", "snowiemat", "snowietext", ""};
-
-/* Set up window and panel details */
-windowobject woPanel[NUM_WINDOWS] =
-{
-	/* main window */
-	{
-		"main",
-		TRUE, FALSE, FALSE, FALSE,
-#if USE_GTK
-		NULL, NULL,
-		0,
-#endif
-		{0, 0, 20, 20}
-	},
-	/* game list */
-	{
-		"game",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		ShowGameWindow, DeleteGame,
-		0,
-#endif
-		{ 250, 200, 20, 20 }
-	},
-	/* analysis */
-	{
-		"analysis",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		ShowAnalysis, DeleteAnalysis,
-		0,
-#endif
-		{ 0, 400, 20, 20 }
-	},
-	/* annotation */
-	{
-		"annotation",
-		FALSE, TRUE, TRUE, FALSE,
-#if USE_GTK
-		ShowAnnotation, DeleteAnnotation,
-		0,
-#endif
-		{ 0, 400, 20, 20 }
-	},
-	/* hint */
-	{
-		"hint",
-		FALSE, FALSE, FALSE, FALSE,
-#if USE_GTK
-		NULL, NULL,
-		0,
-#endif
-		{ 0, 450, 20, 20 }
-	},
-	/* message */
-	{
-		"message",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		ShowMessage, DeleteMessage,
-		0,
-#endif
-		{ 0, 500, 20, 20 }
-	},
-	/* command */
-	{
-		"command",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		ShowCommandWindow, DeleteCommandWindow,
-		0,
-#endif
-		{ 0, 0, 20, 20 }
-	}, 
-	/* theory */
-	{
-		"theory",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		ShowTheoryWindow, DeleteTheoryWindow,
-		0,
-#endif
-		{ 0, 0, 20, 20 }
-	}
-};
 
 matchstate ms = {
     {{0}, {0}}, /* anBoard */
@@ -3535,9 +3432,9 @@ extern void ShowBoard( void )
 
 	if (
 #if USE_GTK
-		woPanel[WINDOW_ANALYSIS].showing
+		PanelShowing(WINDOW_ANALYSIS)
 #else
-		woPanel[WINDOW_ANNOTATION].showing
+		PanelShowing(WINDOW_ANNOTATION)
 #endif
 		&& plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
@@ -6194,10 +6091,6 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
 	/* Save toolbar style */
 	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
-
-	/* Save panel dock state (if not docked - default is docked) */
-	if (!fDockPanels)
-		fputs("set dockpanels off\n", pf);
 
 	/* Save gamelist style on/off (if not set - default is set) */
 	if (!fStyledGamelist)

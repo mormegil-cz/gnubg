@@ -487,44 +487,6 @@ extern void GTKUpdateScores(void)
 }
 #endif
 
-extern void
-setWindowGeometry(windowobject* pwo)
-{
-	if (pwo->docked || !pwo->pwWin || !fGUISetWindowPos)
-		return;
-
-#if GTK_CHECK_VERSION(2,0,0)
-
-  gtk_window_set_default_size ( GTK_WINDOW ( pwo->pwWin ),
-                      ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
-                      ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
-
-  gtk_window_move ( GTK_WINDOW ( pwo->pwWin ),
-                    ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
-                    ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
-
-#else
-
-  gtk_window_set_default_size( GTK_WINDOW( pwo->pwWin ), 
-                               ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
-                               ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
-  
-  gtk_widget_set_uposition ( pwo->pwWin, 
-                             ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
-                             ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
-
-#endif /* ! GTK 2.0 */
-
-}
-
-extern void
-RefreshGeometries ( void )
-{
-	int i;
-	for (i = 0; i < NUM_WINDOWS; i++)
-		getWindowGeometry(i);
-}
-
 int grabIdSignal;
 int suspendCount = 0;
 GtkWidget* grabbedWidget;	/* for testing */
@@ -1379,7 +1341,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 			      
 	    if( pmr->ml.cMoves ) 
               pwMoveAnalysis = CreateMoveList( &pmr->ml, &pmr->n.iMove,
-                                               TRUE, FALSE, !woPanel[WINDOW_ANALYSIS].docked);
+                                               TRUE, FALSE, !IsPanelDocked(WINDOW_ANALYSIS));
 
             if ( pwMoveAnalysis && pwCubeAnalysis ) {
               /* notebook with analysis */
@@ -1399,7 +1361,7 @@ extern void SetAnnotation( moverecord *pmr ) {
             }
             else if ( pwMoveAnalysis )
 			{
-				if (woPanel[WINDOW_ANALYSIS].docked)
+				if (IsPanelDocked(WINDOW_ANALYSIS))
 					gtk_widget_set_usize(GTK_WIDGET(pwMoveAnalysis), 0, 200);
 
 				gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
@@ -1560,7 +1522,7 @@ extern void SetAnnotation( moverecord *pmr ) {
     if( !pwAnalysis )
 	pwAnalysis = gtk_label_new( _("No analysis available.") );
     
-	if (!woPanel[WINDOW_ANALYSIS].docked)
+	if (!IsPanelDocked(WINDOW_ANALYSIS))
 		gtk_paned_pack1( GTK_PANED( pwParent ), pwAnalysis, TRUE, FALSE );
 	else
 		gtk_box_pack_start( GTK_BOX( pwParent ), pwAnalysis, TRUE, TRUE, 0 );
@@ -1813,21 +1775,20 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
     /* Give the main window a size big enough that the board widget gets
        board_size=4, if it will fit on the screen. */
     
+	int width;
+
     if( GTK_WIDGET_REALIZED( pw ) )
 	gtk_signal_disconnect_by_func( GTK_OBJECT( pw ),
 				       GTK_SIGNAL_FUNC( MainSize ), p );
-    else if ( woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight )
-	gtk_window_set_default_size( GTK_WINDOW( pw ),
-                                     woPanel[WINDOW_MAIN].wg.nWidth,
-                                     woPanel[WINDOW_MAIN].wg.nHeight );
-    else
-	gtk_window_set_default_size( GTK_WINDOW( pw ),
+    else if (!SetMainWindowSize())
+		gtk_window_set_default_size( GTK_WINDOW( pw ),
 				     MAX( 480, preq->width ),
 				     MIN( preq->height + 79 * 3,
 					  gdk_screen_height() - 20 ) );
 
-	if (woPanel[WINDOW_MAIN].wg.nWidth)
-		gtk_paned_set_position(GTK_PANED(hpaned), woPanel[WINDOW_MAIN].wg.nWidth - panelSize);
+	width = GetPanelWidth(WINDOW_MAIN);
+	if (width)
+		gtk_paned_set_position(GTK_PANED(hpaned), width - panelSize);
 	else
 		gtk_paned_set_position(GTK_PANED(hpaned), preq->width - panelSize);
 }
@@ -1958,7 +1919,7 @@ GTKTextToClipboard( const char *sz ) {
 
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void* null)
 {	/* Maintain panel size */
-	if (fDockPanels && fDisplayPanels)
+	if (DockedPanelsShowing())
 		gtk_paned_set_position(GTK_PANED(hpaned), eCon->width - GetPanelSize());
 
 	return FALSE;
@@ -2342,7 +2303,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     ptt = gtk_tooltips_new();
     
-    woPanel[WINDOW_MAIN].pwWin = pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	SetPanelWidget(WINDOW_MAIN, pwMain);
 #if GTK_CHECK_VERSION(2,0,0)
     gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
     gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
@@ -2356,8 +2318,6 @@ extern int InitGTK( int *argc, char ***argv ) {
        FIXME: this can eventually be removed once GTK+ is fixed. */
     gtk_object_set_user_data( GTK_OBJECT( pwMain ), NULL );
     
-    setWindowGeometry(&woPanel[WINDOW_MAIN]);
-
     gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
     /* FIXME add an icon */
     gtk_container_add( GTK_CONTAINER( pwMain ),
@@ -2567,28 +2527,19 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	DestroySplash ( pwSplash );
 
 	/* Display any other windows now */
-	for (i = 0; i < NUM_WINDOWS; i++)
-	{
-		if (woPanel[i].pwWin && woPanel[i].dockable)
-		{
-			if (woPanel[i].showing)
-				gtk_widget_show_all(woPanel[i].pwWin);
-			else
-				gtk_widget_hide(woPanel[i].pwWin);
-		}
-	}
-	if (!fDisplayPanels)
-		HideAllPanels (0, 0, 0);
+	DisplayWindows();
 
-	if (!fDockPanels)
-	{	/* Make sure some things stay hidden */
+	/* Make sure some things stay hidden */
+	if (!ArePanelsDocked())
+	{
 		gtk_widget_hide(hpaned);
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Commentary"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Hide panels"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Restore panels"));
 	}
-	else
+	else if (ArePanelsShowing())
 		gtk_widget_hide(pwGameBox);
+
 	/* Make sure main window is on top */
 	gdk_window_raise(pwMain->window);
 
@@ -3064,7 +3015,7 @@ extern void GTKOutputErr( char *sz ) {
 
     GTKMessage( sz, DT_ERROR );
     
-    if (woPanel[WINDOW_MESSAGE].showing) {
+    if (PanelShowing(WINDOW_MESSAGE)) {
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
 			 sz, -1 );
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
@@ -3294,7 +3245,7 @@ extern void CommandTextChange(GtkEntry *entry, struct CommandEntryData_T *pData)
 		if (!pData->modal)
 		{	/* Make sure the message window is showing */
 			if (!PanelShowing(WINDOW_MESSAGE))
-				woPanel[WINDOW_MESSAGE].showFun();
+				PanelShow(WINDOW_MESSAGE);
 		}
 		ShowHelp(pData->pwHelpText, gtk_editable_get_chars(GTK_EDITABLE(entry), 0, -1));
 	}
@@ -6801,17 +6752,14 @@ static void DestroyHint( gpointer p ) {
     free ( pml );
   }
 
-  woPanel[WINDOW_HINT].pwWin = NULL;
-
+  SetPanelWidget(WINDOW_HINT, NULL);
 }
 
 static void
 HintOK ( GtkWidget *pw, void *unused )
 {
 	getWindowGeometry(WINDOW_HINT);
-	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-	woPanel[WINDOW_HINT].pwWin = NULL;
-	woPanel[WINDOW_HINT].showing = FALSE;
+	DestroyPanel(WINDOW_HINT);
 }
 
 extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
@@ -6819,30 +6767,30 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 			  const evalsetup *pes ) {
     
     static evalsetup es;
-    GtkWidget *pw;
+    GtkWidget *pw, *pwHint;
 
-    if ( woPanel[WINDOW_HINT].pwWin )
-	gtk_widget_destroy( woPanel[WINDOW_HINT].pwWin );
-      
-    woPanel[WINDOW_HINT].pwWin = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
+    if (GetPanelWidget(WINDOW_HINT))
+	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
+
+	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
 			   GTK_SIGNAL_FUNC( HintOK ), NULL );
-	woPanel[WINDOW_HINT].showing = TRUE;
+	SetPanelWidget(WINDOW_HINT, pwHint);
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
     pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
 
-    gtk_container_add( GTK_CONTAINER( DialogArea( woPanel[WINDOW_HINT].pwWin, DA_MAIN ) ),
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ),
                        pw );
 
-    gtk_widget_grab_focus( DialogArea( woPanel[WINDOW_HINT].pwWin, DA_OK ) );
+    gtk_widget_grab_focus( DialogArea( pwHint, DA_OK ) );
     
-    setWindowGeometry(&woPanel[WINDOW_HINT]);
-    gtk_object_weakref( GTK_OBJECT( woPanel[WINDOW_HINT].pwWin ), DestroyHint, NULL );
+    setWindowGeometry(WINDOW_HINT);
+    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, NULL );
     
-    gtk_window_set_default_size(GTK_WINDOW(woPanel[WINDOW_HINT].pwWin), 400, 300);
+    gtk_window_set_default_size(GTK_WINDOW(pwHint), 400, 300);
     
-    gtk_widget_show_all( woPanel[WINDOW_HINT].pwWin );
+    gtk_widget_show_all( pwHint );
 
 
 }
@@ -6940,12 +6888,12 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
 extern void 
 GTKHint( movelist *pmlOrig, const int iMove) {
 
-    GtkWidget *pwButtons, *pwMoves;
+    GtkWidget *pwButtons, *pwMoves, *pwHint;
     movelist *pml;
     static int n;
     
-    if( woPanel[WINDOW_HINT].pwWin )
-	gtk_widget_destroy( woPanel[WINDOW_HINT].pwWin );
+    if (GetPanelWidget(WINDOW_HINT))
+	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
 
     pml = malloc( sizeof( *pml ) );
     memcpy( pml, pmlOrig, sizeof( *pml ) );
@@ -6957,22 +6905,22 @@ GTKHint( movelist *pmlOrig, const int iMove) {
     pwMoves = CreateMoveList( pml, ( n < 0 ) ? NULL : &n, TRUE, TRUE, TRUE );
 
     /* create dialog */
-    
-    woPanel[WINDOW_HINT].pwWin = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
+
+	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
 			   GTK_SIGNAL_FUNC( HintOK ), NULL );
-	woPanel[WINDOW_HINT].showing = TRUE;
-    pwButtons = DialogArea( woPanel[WINDOW_HINT].pwWin, DA_BUTTONS );
+	SetPanelWidget(WINDOW_HINT, pwHint);
+    pwButtons = DialogArea(pwHint, DA_BUTTONS );
     
-    gtk_container_add( GTK_CONTAINER( DialogArea( woPanel[WINDOW_HINT].pwWin, DA_MAIN ) ), 
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
 
-    setWindowGeometry(&woPanel[WINDOW_HINT]);
-    gtk_object_weakref( GTK_OBJECT( woPanel[WINDOW_HINT].pwWin ), DestroyHint, pml );
+    setWindowGeometry(WINDOW_HINT);
+    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, pml );
 
-	if (!woPanel[WINDOW_HINT].docked)
-		gtk_window_set_default_size(GTK_WINDOW(woPanel[WINDOW_HINT].pwWin), 400, 300);
+	if (!IsPanelDocked(WINDOW_HINT))
+		gtk_window_set_default_size(GTK_WINDOW(pwHint), 400, 300);
 
-    gtk_widget_show_all( woPanel[WINDOW_HINT].pwWin );
+    gtk_widget_show_all( pwHint );
 }
 
 
@@ -7919,14 +7867,6 @@ static void enable_menu( GtkWidget *pw, int f ) {
 	gtk_widget_set_sensitive( pw, f );
 }
 
-void ShowHidePanel(gnubgwindow panel)
-{
-	if (woPanel[panel].showing)
-		woPanel[panel].showFun();
-	else
-		woPanel[panel].hideFun();
-}
-
 /* A global setting has changed; update entry in Settings menu if necessary. */
 extern void GTKSet( void *p ) {
 	
@@ -8084,22 +8024,20 @@ extern void GTKSet( void *p ) {
 	fAutoCommand = FALSE;
     } else if( p == &ms.fCrawford )
 	ShowBoard(); /* this is overkill, but it works */
-    else if (p == &woPanel[WINDOW_ANNOTATION].showing) {
-	if (woPanel[WINDOW_ANNOTATION].showing)
+    else if (IsPanelShowVar(WINDOW_ANNOTATION, p)) {
+	if (PanelShowing(WINDOW_ANNOTATION))
 		ShowHidePanel(WINDOW_ANNOTATION);
-    } else if (p == &woPanel[WINDOW_GAME].showing) {
+    } else if (IsPanelShowVar(WINDOW_GAME, p)) {
 		ShowHidePanel(WINDOW_GAME);
-	} else if (p == &woPanel[WINDOW_ANALYSIS].showing) {
+    } else if (IsPanelShowVar(WINDOW_ANALYSIS, p)) {
 		ShowHidePanel(WINDOW_ANALYSIS);
-    } else if (p == &woPanel[WINDOW_MESSAGE].showing) {
+    } else if (IsPanelShowVar(WINDOW_MESSAGE, p)) {
 		ShowHidePanel(WINDOW_MESSAGE);
-    } else if (p == &woPanel[WINDOW_THEORY].showing) {
+    } else if (IsPanelShowVar(WINDOW_THEORY, p)) {
 		ShowHidePanel(WINDOW_THEORY);
-    } else if (p == &woPanel[WINDOW_COMMAND].showing) {
+    } else if (IsPanelShowVar(WINDOW_COMMAND, p)) {
 		ShowHidePanel(WINDOW_COMMAND);
-    } else if (p == &fDockPanels)
-		DockPanels();
-	else if( p == &bd->rd->fDiceArea ) {
+	} else if( p == &bd->rd->fDiceArea ) {
 	if( GTK_WIDGET_REALIZED( pwBoard ) )
 	{
 #if USE_BOARD3D
@@ -9571,7 +9509,7 @@ static void
 WarningOK ( GtkWidget *pw, warnings warning )
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwTick)))
-	{	// if tick set, disable warning
+	{	/* if tick set, disable warning */
 		char cmd[200];
 		sprintf(cmd, "set warning %s off", warningNames[warning]);
 		UserCommand(cmd);
@@ -9646,7 +9584,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_hide(pwStatus);
 		gtk_widget_hide(pwProgress);
 
-		showingPanels = fDisplayPanels;
+		showingPanels = ArePanelsShowing();
 		HideAllPanels(NULL, 0, NULL);
 
 		showIDs = bd->rd->fShowIDs;
@@ -9738,12 +9676,12 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
 		  assert(FALSE);
   }
   if (f)
-    woPanel[panel].showFun();
+	PanelShow(panel);
   else
-    woPanel[panel].hideFun();
+	PanelHide(panel);
 
-  if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
-    gtk_window_set_default_size(GTK_WINDOW(pwMain), woPanel[WINDOW_MAIN].wg.nWidth, woPanel[WINDOW_MAIN].wg.nHeight);
+  /* Resize screen */
+  SetMainWindowSize();
 }
 
 #if USE_PYTHON

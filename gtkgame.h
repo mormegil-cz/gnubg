@@ -191,10 +191,10 @@ extern void
 GTKNew ( void );
 
 extern void
-setWindowGeometry(windowobject* pwo);
+RefreshGeometries ( void );
 
 extern void
-RefreshGeometries ( void );
+setWindowGeometry(gnubgwindow window);
 
 extern int
 GTKGetMove ( int anMove[ 8 ] );
@@ -240,3 +240,14 @@ extern void GtkShowQuery(RowSet* pRow);
 
 extern void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase);
 extern void ToggleDockPanels( gpointer *p, guint n, GtkWidget *pw );
+extern void DisplayWindows();
+extern int DockedPanelsShowing();
+extern int ArePanelsShowing();
+extern int ArePanelsDocked();
+extern int IsPanelDocked(gnubgwindow window);
+extern int GetPanelWidth(gnubgwindow panel);
+extern void SetPanelWidget(gnubgwindow window, GtkWidget* pWin);
+extern GtkWidget* GetPanelWidget(gnubgwindow window);
+extern void PanelShow(gnubgwindow panel);
+extern void PanelHide(gnubgwindow panel);
+extern int IsPanelShowVar(gnubgwindow panel, void *p);

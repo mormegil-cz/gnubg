@@ -418,15 +418,17 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	if (!frozen)
 		SetAnnotation( pmr );
 
-    if( woPanel[WINDOW_HINT].pwWin ) {
-
 #ifdef UNDEF
-	hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( woPanel[WINDOW_HINT].pwWin ) );
-
-	phd->fButtonsValid = FALSE;
-	CheckHintButtons( phd );
+{
+	GtkWidget* pwWin = GetPanelWidget(WINDOW_HINT);
+    if (pwWin)
+	{
+		hintdata *phd = gtk_object_get_user_data(GTK_OBJECT(pwWin));
+		phd->fButtonsValid = FALSE;
+		CheckHintButtons(phd);
+	}
+}
 #endif
-    }
     
 	if (yCurrent != -1 && xCurrent != -1)
 	{
