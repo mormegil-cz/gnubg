@@ -165,6 +165,7 @@ typedef enum _gnubgcommand {
     CMD_TAKE,
     CMD_TRAIN_DATABASE,
     CMD_TRAIN_TD,
+    CMD_XCOPY,
     NUM_CMDS
 } gnubgcommand;
    
@@ -223,7 +224,8 @@ static char *aszCommands[ NUM_CMDS ] = {
     "swap players",
     "take",
     "train database",
-    "train td"
+    "train td",
+    "xcopy"
 };
 
 static char szSetCubeValue[20]; /* set cube value XX */
@@ -293,6 +295,8 @@ static guint idOutput, idProgress;
 static list lOutput;
 int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
+
+static char *szCopied; /* buffer holding copied data */
 
 #if GTK_CHECK_VERSION(1,3,0)
 static char *ToUTF8( unsigned char *sz ) {
@@ -1527,10 +1531,13 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
     SetAnnotation( pmr );
 
     if( pwHint ) {
+
+#ifdef UNDEF
 	hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
 
 	phd->fButtonsValid = FALSE;
 	CheckHintButtons( phd );
+#endif
     }
     
     gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psGameList );
@@ -1793,6 +1800,48 @@ gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 }
 
 
+static void
+MainGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
+                   guint n, guint t, void *unused ) {
+
+#ifdef WIN32
+
+  if ( szCopied )
+    WinCopy ( szCopied );
+
+#else /* WIN32 */
+
+  if ( szCopied )
+    gtk_selection_data_set ( psd, GDK_SELECTION_TYPE_STRING, 8,
+                             szCopied, strlen ( szCopied ) );
+
+#endif /* WIN32 */
+ 
+}
+
+static void
+MainSelectionReceived ( GtkWidget *pw, GtkSelectionData *data,
+                        guint time, gpointer user_data ) {
+
+
+  if ( data->length < 0 ) 
+    /* no data */
+    return;
+
+  if ( data->type != GDK_SELECTION_TYPE_STRING )
+    /* no of type string */
+    return;
+
+  if ( szCopied )
+    free ( szCopied );
+
+  szCopied = strdup ( data->data );
+
+  printf ( "data \"%s\"\n", szCopied );
+  
+}
+
+
 extern int InitGTK( int *argc, char ***argv ) {
     
     GtkWidget *pwVbox, *pwHbox;
@@ -1864,7 +1913,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Edit/_Undo"), "<control>Z", ShowBoard, 0, NULL },
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Edit/_Copy"), "<control>C", NULL, 0, NULL },
+	{ N_("/_Edit/_Copy"), "<control>C", Command, CMD_XCOPY, NULL },
 	{ N_("/_Edit/_Paste"), "<control>V", NULL, 0, NULL },
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Edit/_Enter command..."), NULL, EnterCommand, 0, NULL },
@@ -2101,12 +2150,20 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
     
+    gtk_selection_add_target( pwMain, 
+                              gdk_atom_intern ("CLIPBOARD", FALSE),
+                              GDK_SELECTION_TYPE_STRING, 0 );
+
     gtk_signal_connect( GTK_OBJECT( pwMain ), "size-request",
 			GTK_SIGNAL_FUNC( MainSize ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwMain ), "delete_event",
 			GTK_SIGNAL_FUNC( main_delete ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwMain ), "destroy_event",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwMain ), "selection_get", 
+			GTK_SIGNAL_FUNC( MainGetSelection ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwMain ), "selection_received", 
+			GTK_SIGNAL_FUNC( MainSelectionReceived ), NULL );
 
     CreateGameWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwGame ), pagMain );
@@ -2355,7 +2412,6 @@ extern int GTKGetInputYN( char *szPrompt ) {
  */
 
 
-
 static void TutorEnd( GtkWidget *pw, int *pf ) {
 
     if( pf )
@@ -2391,14 +2447,15 @@ extern int GtkTutor ( char *sz ) {
 	pwHint = gtk_button_new_with_label ( _("Hint") );
 	pwHbox = gtk_hbox_new( FALSE, 0 );
 	pwButtons = gtk_hbutton_box_new();
-    pag = gtk_accel_group_new();
 
+    pag = gtk_accel_group_new();
+    
     ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
-	 gtk_widget_get_colormap( pwTutorDialog ), NULL, NULL,
-	 question_xpm);
+                   gtk_widget_get_colormap( pwTutorDialog ), NULL, NULL,
+                   question_xpm);
     pwPixmap = gtk_pixmap_new( ppm, NULL );
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
-
+    
     gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
 			       GTK_BUTTONBOX_SPREAD );
     
@@ -2407,11 +2464,10 @@ extern int GtkTutor ( char *sz ) {
 		       pwHbox );
     gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwTutorDialog )->action_area ),
 		       pwButtons );
-
+    
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwOK );
     gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", 
 			GTK_SIGNAL_FUNC( OK ), (void *) &f );
-
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
 	gtk_signal_connect_object( GTK_OBJECT( pwCancel ), "clicked",
 				   GTK_SIGNAL_FUNC( gtk_widget_destroy ),
@@ -2432,47 +2488,47 @@ extern int GtkTutor ( char *sz ) {
 #endif
     gtk_widget_add_accelerator( pwCancel, "clicked", pag,
 				GDK_Escape, 0, 0 );
-
+    
     gtk_window_set_title( GTK_WINDOW( pwTutorDialog ), 
-						  _("GNU Backgammon - Tutor") );
+                          _("GNU Backgammon - Tutor") );
 
     GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
     gtk_widget_grab_default( pwOK );
-
-	pwPrompt = gtk_label_new( sz );
+    
+    pwPrompt = gtk_label_new( sz );
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
     gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwTutorDialog, DA_MAIN ) ),
 		       pwPrompt );
-
+    
     gtk_window_set_policy( GTK_WINDOW( pwTutorDialog ), FALSE, FALSE, FALSE );
     gtk_window_set_modal( GTK_WINDOW( pwTutorDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwTutorDialog ),
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwTutorDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show_all( pwTutorDialog );
 
+    gtk_widget_show_all( pwTutorDialog );
+    
     /* This dialog should be REALLY modal -- disable "next turn" idle
        processing and stdin handler, to avoid reentrancy problems. */
     if( ( fRestoreNextTurn = nNextTurn ) )
-	gtk_idle_remove( nNextTurn );
-	    
+      gtk_idle_remove( nNextTurn );
+    
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
-
+    
     if( fRestoreNextTurn )
-	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
-
+      nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+    
     /* if tutor mode was disabled, update the checklist */
-	if ( !fTutor) {
-	  GTKSet ( (void *) &fTutor);
-	}
-
+    if ( !fTutor) {
+      GTKSet ( (void *) &fTutor);
+    }
+    
     return f;
 }
 
@@ -4524,49 +4580,25 @@ static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
 }
 
 
-extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
-
-    move *pm;
-    char move[ 40 ];
-    int i;
-    
-    assert( GTK_CLIST( pwMoves )->selection );
-
-    i = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
-    pm = gtk_clist_get_row_data( GTK_CLIST( pwMoves ), i );
-
-    FormatMove( move, ms.anBoard, pm->anMove );
-    UserCommand( move );
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
-}
-
 static void DestroyHint( gpointer p ) {
 
-    hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
+  movelist *pml = p;
 
-    if ( phd->pml ) {
-      if ( phd->pml->amMoves )
-        free ( phd->pml->amMoves );
-
-      free( phd->pml );
-
-    }
+  if ( pml ) {
+    if ( pml->amMoves )
+      free ( pml->amMoves );
     
-    pwHint = NULL;
+    free ( pml );
+  }
+
+  pwHint = NULL;
+
 }
+
 
 extern void GTKHint( movelist *pmlOrig ) {
 
-    GtkWidget *pwButtons,
-	*pwMove = gtk_button_new_with_label( _("Move") ),
-#ifdef WIN32
-  	*pwCopy = gtk_button_new_with_label( _("Copy") ),
-#else 
-  	*pwCopy = gtk_button_new_with_label( _("Dump") ),
-#endif
-	*pwMoves;
-    hintdata *phd;
+    GtkWidget *pwButtons, *pwMoves;
     movelist *pml;
     
     if( pwHint )
@@ -4583,27 +4615,14 @@ extern void GTKHint( movelist *pmlOrig ) {
     /* create dialog */
     
     pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL, NULL );
-    phd = gtk_object_get_user_data ( GTK_OBJECT ( pwMoves ) );
-    phd->pwMove = pwMove;
-    gtk_object_set_user_data( GTK_OBJECT( pwHint ), phd );
     pwButtons = DialogArea( pwHint, DA_BUTTONS );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
 
-    gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
-			GTK_SIGNAL_FUNC( HintMove ), phd->pw );
-    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
-			GTK_SIGNAL_FUNC( HintCopy ), pml );
-
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
-
-    gtk_widget_set_sensitive ( GTK_WIDGET ( pwMove ), FALSE );
-
     gtk_window_set_default_size( GTK_WINDOW( pwHint ), 0, 300 );
     
-    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, &pwHint );
+    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, pml );
     
     gtk_widget_show_all( pwHint );
 }
@@ -5696,7 +5715,12 @@ extern void GTKShowVersion( void ) {
     gtk_rc_style_unref( ps );
     
     gtk_box_pack_start( GTK_BOX( pwBox ),
-			gtk_label_new( "version " VERSION ), FALSE, FALSE, 0 );
+			gtk_label_new( "version " VERSION 
+#ifdef WIN32
+                                       " (build " __DATE__ ")"
+#endif
+                                       ), 
+                        FALSE, FALSE, 0 );
 
     ps = gtk_rc_style_new();
     gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
@@ -7513,3 +7537,25 @@ static void SetAdvOptions( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
+
+/*
+ * Copy
+ * 
+ * - Obtain the contents of the primary selection
+ * - claim the clipboard
+ *
+ */
+
+extern void
+GTKCopy ( void ) {
+
+  gtk_selection_owner_set ( pwMain, gdk_atom_intern ("CLIPBOARD", FALSE), 
+                            GDK_CURRENT_TIME );
+
+  /* get contents of primary selection */
+
+  gtk_selection_convert ( pwMain, GDK_SELECTION_PRIMARY, 
+                          GDK_SELECTION_TYPE_STRING, 
+                          GDK_CURRENT_TIME );
+
+}

@@ -23,10 +23,11 @@
 #define _GTKCHEQUER_H_
 
 typedef struct _hintdata {
-  GtkWidget *pwMove; /* the entire dialog */
-  GtkWidget *pw;     /* the movelist */
+  GtkWidget *pwMoves;     /* the movelist */
   GtkWidget *pwRollout, *pwRolloutSettings; /* rollout buttons */
   GtkWidget *pwEval, *pwEvalSettings;       /* evaluation buttons */
+  GtkWidget *pwMove; /* move button */
+  GtkWidget *pwCopy; /* copy button */
   movelist *pml;
   int fButtonsValid;
   int *piHighlight;

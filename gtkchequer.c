@@ -62,7 +62,7 @@ UpdateMoveList ( const hintdata *phd ) {
     { 7, OUTPUT_LOSEBACKGAMMON }
   };
 
-  GtkWidget *pwMoves = phd->pw;
+  GtkWidget *pwMoves = phd->pwMoves;
   int i, j;
   char sz[ 32 ];
   float rBest;
@@ -182,7 +182,7 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
 
   GList *pl;
-  GtkWidget *pwMoves = phd->pw;
+  GtkWidget *pwMoves = phd->pwMoves;
   cubeinfo ci;
 #if HAVE_ALLOCA
   char ( *asz )[ 40 ];
@@ -292,7 +292,7 @@ static void
 MoveListEval ( GtkWidget *pw, hintdata *phd ) {
 
   GList *pl;
-  GtkWidget *pwMoves = phd->pw;
+  GtkWidget *pwMoves = phd->pwMoves;
   cubeinfo ci;
   int *ai;
 
@@ -349,6 +349,91 @@ MoveListRolloutSettings ( GtkWidget *pw, void *unused ) {
 }
 
 
+typedef int ( *cfunc )( const void *, const void * );
+
+static int CompareInts( int *p0, int *p1 ) {
+
+    return *p0 - *p1;
+}
+
+
+static char *
+MoveListCopyData ( hintdata *phd ) {
+
+  GtkWidget *pw = phd->pwMoves;
+  int c, i;
+  GList *pl;
+  char *sz, *pch;
+  int *an;
+
+  for( c = 0, pl = GTK_CLIST( pw )->selection; pl; pl = pl->next )
+    c++;
+  
+#if HAVE_ALLOCA
+  an = alloca( c * sizeof( an[ 0 ] ) );
+#else
+  an = malloc( c * sizeof( an[ 0 ] ) );
+#endif
+  sz = malloc( c * 9 * 80 );
+    
+  *sz = 0;
+    
+  for( i = 0, pl = GTK_CLIST( pw )->selection; pl;
+       pl = pl->next, i++ )
+    an[ i ] = GPOINTER_TO_INT( pl->data );
+  
+  qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
+  
+  for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
+    FormatMoveHint( pch, &ms, phd->pml, an[ i ], TRUE, TRUE, TRUE );
+  
+#if !HAVE_ALLOCA
+  free( an );
+#endif        
+
+  return sz;
+
+}
+
+
+static void
+MoveListMove ( GtkWidget *pw, hintdata *phd ) {
+
+  move *pm;
+  char move[ 40 ];
+  int i;
+  GtkWidget *pwMoves = phd->pwMoves;
+  
+  assert( GTK_CLIST( pwMoves )->selection );
+  
+  i = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
+  pm = gtk_clist_get_row_data( GTK_CLIST( pwMoves ), i );
+  
+  FormatMove( move, ms.anBoard, pm->anMove );
+  UserCommand( move );
+  
+}
+
+
+static void
+MoveListCopy ( GtkWidget *pw, hintdata *phd ) {
+
+#ifdef WIN32
+
+  char *pc = NULL; /* write me */
+
+  if ( pc )
+    WinCopy ( pc );
+
+#else /* WIN32 */
+
+  UserCommand ( "xcopy" );
+
+#endif /* ! WIN32 */
+
+}
+
+
 
 static GtkWidget *
 CreateMoveListTools ( hintdata *phd ) {
@@ -359,15 +444,19 @@ CreateMoveListTools ( hintdata *phd ) {
   GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
   GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
+  GtkWidget *pwMove = gtk_button_new_with_label ( _("Move") );
+  GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
 
   phd->pwRollout = pwRollout;
   phd->pwRolloutSettings = pwRolloutSettings;
   phd->pwEval = pwEval;
   phd->pwEvalSettings = pwEvalSettings;
+  phd->pwMove = pwMove;
+  phd->pwCopy = pwCopy;
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pwTools = gtk_table_new (3, 2, FALSE);
+  pwTools = gtk_table_new (5, 2, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -388,8 +477,18 @@ CreateMoveListTools ( hintdata *phd ) {
   gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 3, 4,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 0, 2, 4, 5,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
   
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
+  gtk_widget_set_sensitive( pwMove, FALSE );
+  gtk_widget_set_sensitive( pwCopy, FALSE );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
@@ -406,6 +505,10 @@ CreateMoveListTools ( hintdata *phd ) {
                       GTK_SIGNAL_FUNC( MoveListRolloutSettings ), NULL );
   gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
                       GTK_SIGNAL_FUNC( MoveListMWC ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListMove ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListCopy ), phd );
 
 
   return pwTools;
@@ -423,7 +526,7 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 
     /* Double clicking a row makes that move. */
     if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
-      HintMove ( NULL, phd->pw );
+      gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
     
 }
 
@@ -435,63 +538,31 @@ static gint HintClearSelection( GtkWidget *pw, GdkEventSelection *pes,
     return TRUE;
 }
 
-typedef int ( *cfunc )( const void *, const void * );
-
-static int CompareInts( int *p0, int *p1 ) {
-
-    return *p0 - *p1;
-}
 
 static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
 			      guint n, guint t, hintdata *phd ) {
-    int c, i;
-    GList *pl;
-    char *sz, *pch;
-    int *an;
+  char *pc = MoveListCopyData ( phd );
     
-    for( c = 0, pl = GTK_CLIST( pw )->selection; pl; pl = pl->next )
-	c++;
+  gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
+                          pc, strlen( pc ) );
+  
+  free ( pc );
 
-#if HAVE_ALLOCA
-    an = alloca( c * sizeof( an[ 0 ] ) );
-    sz = alloca( c * 9 * 80 );
-#else
-    an = malloc( c * sizeof( an[ 0 ] ) );
-    sz = malloc( c * 9 * 80 );
-#endif
-
-    *sz = 0;
-    
-    for( i = 0, pl = GTK_CLIST( pw )->selection; pl;
-	 pl = pl->next, i++ )
-	an[ i ] = GPOINTER_TO_INT( pl->data );
-
-    qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
-
-    for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
-	FormatMoveHint( pch, &ms, phd->pml, an[ i ], TRUE, TRUE, TRUE );
-        
-    gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
-			    sz, strlen( sz ) );
-    
-#if !HAVE_ALLOCA
-    free( an );
-    free( sz );
-#endif        
 }
+
 
 extern int 
 CheckHintButtons( hintdata *phd ) {
 
     int c;
     GList *pl;
-    GtkWidget *pw = phd->pw;
+    GtkWidget *pw = phd->pwMoves;
 
     for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
 	c++;
 
-    if ( phd->pwMove )
-      gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
 
@@ -556,7 +627,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid ) {
       gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
 
 
-    phd->pw = pwMoves;
+    phd->pwMoves = pwMoves;
     UpdateMoveList ( phd );
 
     pw = gtk_scrolled_window_new( NULL, NULL );
@@ -573,9 +644,6 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid ) {
                        CreateMoveListTools( phd ),
                        FALSE, FALSE, 0 );
     
-    gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data",
-                              phd, free );
-
     gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
 			      GDK_SELECTION_TYPE_STRING, 0 );
     
@@ -590,5 +658,6 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid ) {
 			GTK_SIGNAL_FUNC( HintGetSelection ), phd );
     
     return pwHBox;
+
 }
 

@@ -131,5 +131,8 @@ extern int fTTY;
 extern int 
 GtkTutor ( char *sz );
 
+extern void
+GTKCopy ( void );
+
 
 #endif
