@@ -104,21 +104,13 @@ enum {
   /* 23*4 (92) are needed */
 
   /* (0 <= k < 14), RI_OFF + k = */
-  /*                       1 if more than k checkers are off, 0 otherwise */
+  /*                       1 if exactly k checkers are off, 0 otherwise */
 
   RI_OFF = 92,
 
   /* Number of cross-overs by outside checkers */
   
   RI_NCROSS = 92 + 14,
-
-  /* Pip-count of checkers outside homeboard */
-  
-  RI_OPIP,
-
-  /* total Pip-count */
-
-  RI_PIP,
   
   HALF_RACE_INPUTS
 };
@@ -1509,71 +1501,48 @@ CalculateRaceInputs(int anBoard[2][25], float inputs[])
   unsigned int side;
   
   for(side = 0; side < 2; ++side) {
+    unsigned int i, k;
+
     const int* const board = anBoard[side];
     float* const afInput = inputs + side * HALF_RACE_INPUTS;
-    int i;
+
+    unsigned int menOff = 15;
+    
+    {                             assert( board[23] == 0 && board[24] == 0 ); }
     
     /* Points */
     for(i = 0; i < 23; ++i) {
-      unsigned int const nc = board[ i ];
+      unsigned int const nc = board[i];
 
-      unsigned int k = i * 4;
+      k = i * 4;
+
+      menOff -= nc;
       
       afInput[ k++ ] = nc == 1;
-      afInput[ k++ ] = nc >= 2;
+      afInput[ k++ ] = nc == 2;
       afInput[ k++ ] = nc >= 3;
       afInput[ k ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
     }
 
     /* Men off */
-    {
-      int menOff = 15;
-      int i;
-      
-      for(i = 0; i < 25; ++i) {
-	menOff -= board[i];
-      }
-
-      {
-	int k;
-	for(k = 0; k < 14; ++k) {
-	  afInput[ RI_OFF + k ] = menOff > k ? 1.0 : 0.0;
-	}
-      }
+    for(k = 0; k < 14; ++k) {
+      afInput[ RI_OFF + k ] = (menOff == (k+1)) ? 1.0 : 0.0;
     }
-
+    
     {
       unsigned int nCross = 0;
-      unsigned int np = 0;
-      unsigned int k;
-      unsigned int i;
       
       for(k = 1; k < 4; ++k) {
-      
 	for(i = 6*k; i < 6*k + 6; ++i) {
 	  unsigned int const nc = board[i];
 
 	  if( nc ) {
 	    nCross += nc * k;
-
-	    np += nc * (i+1);
 	  }
 	}
       }
       
       afInput[RI_NCROSS] = nCross / 10.0;
-      
-      afInput[RI_OPIP] = np / 50.0;
-
-      for(i = 0; i < 6; ++i) {
-	unsigned int const nc = board[i];
-
-	if( nc ) {
-	  np += nc * (i+1);
-	}
-      }
-      
-      afInput[RI_PIP] = np / 100.0;
     }
   }
 }
