@@ -1,3 +1,19 @@
+Sat Mar 23 18:19:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com> 
+
+	* matchid.c, matchid.h: new files. Move matchid stuff from
+	positionid.[ch] to matchid.[ch].
+	* matchid.c (MatchIDFromMatchState): new function. Wrapper
+	for MatchID.
+
+	* position.c (Base64): make extern.
+
+	* drawboard.c (DrawBoardCls, DrawBoardStd): add output of match id.
+	All callers changed.	
+
+	* html.c (PrintHTMLBoard): add output of match id.
+	* html.c (ExportMatchHTML): export of matches/sessions now works.
+	* html.c: numerous improvements of HTML export.
+
 Sat Mar 23 15:46:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Support for skewed match equity tables.

@@ -88,6 +88,10 @@ a "</th>\n" \
 "<td>" b " (" c "(" d ")) </td>\n" \
 "</tr>\n"
 
+/* text for links on html page */
+
+static char *aszLinkText[] = {
+  "[First Game]", "[Previous Game]", "[Next Game]", "[Last Game]" };
 
 
 
@@ -458,7 +462,8 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
  */
 
 static void 
-HTMLBoardHeader ( FILE *pf, const matchstate *pms, const int iMove ) {
+HTMLBoardHeader ( FILE *pf, const matchstate *pms, 
+                  const int iGame, const int iMove ) {
 
   if ( pms->fResigned ) 
     
@@ -470,7 +475,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms, const int iMove ) {
               "<a name=\"game%d.move%d\">Move number %d:</a>"
               "</b>"
               " %s resigns %d points</p>\n",
-              pms->cGames, iMove, iMove,
+              iGame + 1, iMove + 1, iMove + 1,
               pms->fTurn ? "red" : "white", 
               pms->fResigned * pms->nCube
             );
@@ -485,7 +490,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms, const int iMove ) {
               "<a name=\"game%d.move%d\">Move number %d:</a>"
               "</b>"
               " %s to play %d%d</p>\n",
-              pms->cGames, iMove, iMove,
+              iGame + 1, iMove + 1, iMove + 1,
               pms->fMove ? "red" : "white", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
@@ -500,7 +505,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms, const int iMove ) {
               "<a name=\"game%d.move%d\">Move number %d:</a>"
               "</b>"
               " %s doubles to %d</p>\n",
-              pms->cGames, iMove, iMove,
+              iGame + 1, iMove + 1, iMove + 1,
               pms->fMove ? "red" : "white",
               pms->nCube * 2
             );
@@ -515,7 +520,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms, const int iMove ) {
               "<a name=\"game%d.move%d\">Move number %d:</a>"
               "</b>"
               " %s onroll, cube decision?</p>\n",
-              pms->cGames, iMove, iMove,
+              iGame + 1, iMove + 1, iMove + 1,
               pms->fMove ? "red" : "white"
             );
 
@@ -534,10 +539,15 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms, const int iMove ) {
  */
 
 static void 
-HTMLPrologue ( FILE *pf, const matchstate *pms ) {
+HTMLPrologue ( FILE *pf, const matchstate *pms,
+               const int iGame,
+               char *aszLinks[ 4 ] ) {
 
   char szTitle[ 100 ];
   char szHeader[ 100 ];
+
+  int i;
+  int fFirst;
 
   /* DTD */
 
@@ -546,13 +556,13 @@ HTMLPrologue ( FILE *pf, const matchstate *pms ) {
               "%s versus %s, score is %d-%d in %d points match (game %d)",
               ap [ 1 ].szName, ap[ 0 ].szName,
               pms->anScore[ 1 ], pms->anScore[ 0 ], pms->nMatchTo,
-              pms->cGames );
+              iGame + 1 );
   else
     sprintf ( szTitle,
               "%s versus %s, score is %d-%d in money game (game %d)",
               ap [ 1 ].szName, ap[ 0 ].szName,
               pms->anScore[ 1 ], pms->anScore[ 0 ], 
-              pms->cGames );
+              iGame + 1 );
 
   if ( pms->nMatchTo )
     sprintf ( szHeader,
@@ -575,7 +585,7 @@ HTMLPrologue ( FILE *pf, const matchstate *pms ) {
             "<head>\n"
             "<meta name=\"generator\" content=\"GNU Backgammon %s\" />\n"
             "<meta http-equiv=\"Content-Type\" "
-            "content=\"text/html; charset=us-ascii\" />\n" 
+            "content=\"text/html; charset=ISO-8859-1\" />\n" 
             "<meta name=\"keywords\" content=\"%s, %s, %s\" />\n"
             "<meta name=\"description\" "
             "content=\"%s (analysed by GNU Backgammon %s)\" />\n"
@@ -592,7 +602,21 @@ HTMLPrologue ( FILE *pf, const matchstate *pms ) {
             ( pms->nMatchTo ) ? "match play" : "money game",
             szTitle, 
             VERSION,
-            szTitle, pms->cGames, szHeader );
+            szTitle, iGame + 1, szHeader );
+
+  /* add links to other games */
+
+  fFirst = TRUE;
+
+  for ( i = 0; i < 4; i++ )
+    if ( aszLinks && aszLinks[ i ] ) {
+      if ( fFirst ) {
+        fprintf ( pf, "<hr />\n" );
+        fFirst = FALSE;
+      }
+      fprintf ( pf, "<a href=\"%s\">%s</a>\n",
+                aszLinks[ i ], aszLinkText[ i ] );
+    }
 
 }
 
@@ -607,11 +631,27 @@ HTMLPrologue ( FILE *pf, const matchstate *pms ) {
  */
 
 static void 
-HTMLEpilogue ( FILE *pf, const matchstate *pms ) {
+HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
 
   time_t t;
+  int fFirst;
+  int i;
 
   const char szID[] = "$Id$";
+
+  /* add links to other games */
+
+  fFirst = TRUE;
+
+  for ( i = 0; i < 4; i++ )
+    if ( aszLinks && aszLinks[ i ] ) {
+      if ( fFirst ) {
+        fprintf ( pf, "<hr />\n" );
+        fFirst = FALSE;
+      }
+      fprintf ( pf, "<a href=\"%s\">%s</a>\n",
+                aszLinks[ i ], aszLinkText[ i ] );
+    }
 
   time ( &t );
 
@@ -1399,7 +1439,7 @@ static int getLuckRating ( const float rLuck ) {
  */
 
 extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
-                                  matchstate *pms ) {
+                                  matchstate *pms, const int iGame ) {
 
   int i;
   ratingtype rt[ 2 ];
@@ -1415,13 +1455,24 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     "Go to Las Vegas immediately",
     "Cheater :-)" };
 
-  fprintf ( pf,
-            "<table class=\"stattable\">\n"
-            STATTABLEHEADER ( "Game statistics" )
-            "<tr class=\"stattableheader\">\n"
-            "<th>Player</th><th>%s</th><th>%s</th>\n"
-            "</tr>\n",
-            ap[ 0 ].szName, ap[ 1 ].szName );
+  if ( iGame >= 0 )
+    fprintf ( pf,
+              "<table class=\"stattable\">\n"
+              STATTABLEHEADER ( "Game statistics for game %d" )
+              "<tr class=\"stattableheader\">\n"
+              "<th>Player</th><th>%s</th><th>%s</th>\n"
+              "</tr>\n",
+              iGame,
+              ap[ 0 ].szName, ap[ 1 ].szName );
+  else
+    fprintf ( pf,
+              "<table class=\"stattable\">\n"
+              STATTABLEHEADER ( "%s statistics" )
+              "<tr class=\"stattableheader\">\n"
+              "<th>Player</th><th>%s</th><th>%s</th>\n"
+              "</tr>\n",
+              pms->nMatchTo ? "Match" : "Session",
+              ap[ 0 ].szName, ap[ 1 ].szName );
 
   /* checker play */
 
@@ -1811,8 +1862,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
  *
  */
 
-extern void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
-                             const char *szExtension ) {
+static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
+                             const char *szExtension,
+                             const int iGame, const int fLastGame,
+                             char *aszLinks[ 4 ] ) {
 
     list *pl;
     moverecord *pmr;
@@ -1820,7 +1873,11 @@ extern void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
     matchstate msOrig;
     int iMove = 0;
     statcontext *psc = NULL;
+    static statcontext scTotal;
     movegameinfo *pmgi = NULL;
+
+    if ( ! iGame )
+      IniStatcontext ( &scTotal );
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 
@@ -1832,45 +1889,46 @@ extern void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
         ApplyMoveRecord ( &msExport, pmr );
 
-        HTMLPrologue( pf, &msExport );
+        HTMLPrologue( pf, &msExport, iGame, aszLinks );
 
         msOrig = msExport;
         pmgi = &pmr->g;
 
         psc = &pmr->g.sc;
+
+        AddStatcontext ( psc, &scTotal );
     
         /* FIXME: game introduction */
         break;
 
       case MOVE_NORMAL:
 
-        iMove++;
-
         msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
         msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
         msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
 
-        HTMLBoardHeader ( pf, &msExport, iMove );
+        HTMLBoardHeader ( pf, &msExport, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
                         szImageDir, szExtension );
-
         HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension );
         
+        iMove++;
+
         break;
 
       case MOVE_TAKE:
       case MOVE_DROP:
 
-        iMove++;
-
-        HTMLBoardHeader ( pf,&msExport, iMove );
+        HTMLBoardHeader ( pf,&msExport, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
                         szImageDir, szExtension );
         
         HTMLAnalysis ( pf, &msExport, pmr, szImageDir, szExtension );
         
+        iMove++;
+
         break;
 
 
@@ -1897,9 +1955,18 @@ extern void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
     }
 
     if ( psc )
-      HTMLDumpStatcontext ( pf, psc, &msOrig );
+      HTMLDumpStatcontext ( pf, psc, &msOrig, iGame );
 
-    HTMLEpilogue( pf, &ms );
+
+    if ( fLastGame ) {
+
+      fprintf ( pf, "<hr />\n" );
+      HTMLDumpStatcontext ( pf, &scTotal, &msOrig, -1 );
+
+    }
+
+
+    HTMLEpilogue( pf, &ms, aszLinks );
     
 }
 
@@ -1929,17 +1996,73 @@ extern void CommandExportGameHtml( char *sz ) {
     }
 
     ExportGameHTML( pf, plGame,
-                    "http://fibs2html.sourceforge.net/images/", "gif"  );
+                    "http://fibs2html.sourceforge.net/images/", "gif",
+                    0, FALSE, 
+                    NULL );
 
     if( pf != stdout )
 	fclose( pf );
 
 }
 
+/*
+ * Get filename for html file:
+ *
+ * Number 0 gets the value of szBase.
+ * Assume szBase is "blah.html", then number 1 will be
+ * "blah_001.html", and so forth.
+ *
+ * Input:
+ *   szBase: base filename
+ *   iGame: game number
+ *
+ * Garbage collect:
+ *   Caller must free returned pointer if not NULL
+ * 
+ */
+
+static char *
+HTMLFilename ( const char *szBase, const int iGame ) {
+
+  if ( ! iGame )
+    return strdup ( szBase );
+  else {
+
+    char *sz = malloc ( strlen ( szBase ) + 5 );
+    char *szExtension = strrchr ( szBase, '.' );
+    char *pc;
+
+    if ( ! szExtension ) {
+
+      sprintf ( sz, "%s_%03d", szBase, iGame );
+      return sz;
+
+    }
+    else {
+
+      strcpy ( sz, szBase );
+      pc = strrchr ( sz, '.' );
+      
+      sprintf ( pc, "_%03d%s", iGame, szExtension );
+
+      return sz;
+
+    }
+
+  }
+
+}
+
+
+
 extern void CommandExportMatchHtml( char *sz ) {
     
     FILE *pf;
     list *pl;
+    int nGames;
+    char *aszLinks[ 4 ];
+    char *szCurrent;
+    int i, j;
 
     sz = NextToken( &sz );
     
@@ -1949,24 +2072,42 @@ extern void CommandExportMatchHtml( char *sz ) {
 	return;
     }
 
-    if( !strcmp( sz, "-" ) )
+    /* Find number of games in match */
+
+    for( pl = lMatch.plNext, nGames = 0; pl != &lMatch; 
+         pl = pl->plNext, nGames++ )
+      ;
+
+    for( pl = lMatch.plNext, i = 0; pl != &lMatch; pl = pl->plNext, i++ ) {
+
+      szCurrent = HTMLFilename ( sz, i );
+      aszLinks[ 0 ] = HTMLFilename ( sz, 0 );
+      aszLinks[ 1 ] = ( i > 0 ) ? HTMLFilename ( sz, i - 1 ) : NULL;
+      aszLinks[ 2 ] = ( i < nGames - 1 ) ? HTMLFilename ( sz, i + 1 ) : NULL;
+      aszLinks[ 3 ] = HTMLFilename ( sz, nGames - 1 );
+
+      if( !strcmp( szCurrent, "-" ) )
 	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+      else if( !( pf = fopen( szCurrent, "w" ) ) ) {
+	perror( szCurrent );
 	return;
+      }
+
+      ExportGameHTML ( pf, pl->p, 
+                       "http://fibs2html.sourceforge.net/images/", "gif",
+                       i, i == nGames - 1,
+                       aszLinks );
+
+      for ( j = 0; j < 4; j++ )
+        if ( aszLinks[ j ] )
+          free ( aszLinks[ j ] );
+      free ( szCurrent );
+
+      if( pf != stdout )
+        fclose( pf );
+
     }
-
-    /* LaTeXPrologue( pf ); */
-
-    /* FIXME write match introduction? */
     
-    for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext )
-      /* ExportGameLaTeX( pf, pl->p ) */; 
-    
-    /* LaTeXEpilogue( pf ); */
-    
-    if( pf != stdout )
-	fclose( pf );
 }
 
 
@@ -1994,9 +2135,9 @@ extern void CommandExportPositionHtml( char *sz ) {
 	return;
     }
 
-    HTMLPrologue ( pf, &ms );
+    HTMLPrologue ( pf, &ms, 0, NULL );
 
-    HTMLBoardHeader ( pf, &ms, 1 );
+    HTMLBoardHeader ( pf, &ms, 0, 0 );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
                     "http://fibs2html.sourceforge.net/images/", "gif" );
@@ -2005,7 +2146,7 @@ extern void CommandExportPositionHtml( char *sz ) {
         HTMLAnalysis ( pf, &ms, plLastMove->plNext->p,
                        "http://fibs2html.sourceforge.net/images/", "gif" );
     
-    HTMLEpilogue ( pf, &ms );
+    HTMLEpilogue ( pf, &ms, NULL );
 
     if( pf != stdout )
 	fclose( pf );
