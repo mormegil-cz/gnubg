@@ -2597,25 +2597,37 @@ EvalKey ( const evalcontext *pec, const int nPlies,
       ( pec->fCubeful << 6 ) | ( ( (int) ( pec->rNoise * 1000 ) ) << 7 ) |
       ( pci->fMove << 16 );
 
-  /* In match play, the score and cube value and position are important. */
-  if( pci->nMatchTo )
-    iKey ^=
-      ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 17 ) ^
-      ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 21 ) ^
-      ( LogCube( pci->nCube ) << 25 ) ^
-      ( ( pci->fCubeOwner < 0 ? 2 :
-          pci->fCubeOwner == pci->fMove ) << 29 ) ^
-      ( pci->fCrawford << 31 );
-  else if( pec->fCubeful || fCubefulEquity )
-      /* in cubeful money games the cube position and rules are important. */
-    iKey ^=
-	( ( pci->fCubeOwner < 0 ? 2 :
-	    pci->fCubeOwner == pci->fMove ) << 29 ) ^
-	( pci->fJacoby << 31 ) ^ ( pci->fBeavers << 28 );
+  if ( nPlies || fCubefulEquity ) {
 
-  if( fCubefulEquity )
+    /* 
+     * match score is only interesting for cubeful evaluations or
+     * for higher plies.
+     *
+     * Similarly for money play.
+     *
+     */
+
+    /* In match play, the score and cube value and position are important. */
+    if( pci->nMatchTo )
+      iKey ^=
+        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 17 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 21 ) ^
+        ( LogCube( pci->nCube ) << 25 ) ^
+        ( ( pci->fCubeOwner < 0 ? 2 :
+            pci->fCubeOwner == pci->fMove ) << 29 ) ^
+        ( pci->fCrawford << 31 );
+    else if( pec->fCubeful || fCubefulEquity )
+      /* in cubeful money games the cube position and rules are important. */
+      iKey ^=
+        ( ( pci->fCubeOwner < 0 ? 2 :
+            pci->fCubeOwner == pci->fMove ) << 29 ) ^
+	( pci->fJacoby << 31 ) ^ ( pci->fBeavers << 28 );
+    
+    if( fCubefulEquity )
       iKey ^= 0x6a47b47e;
-  
+
+  }
+    
   return iKey;
 
 }
