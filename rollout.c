@@ -1089,7 +1089,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
        with the best move in the list. 
     */
     if (show_jsds) {
-      float v, s;
+      float v, s, denominator;
       int  reset_to = i;
 
       for (alt = 0; alt < alternatives; ++alt) {
@@ -1149,6 +1149,11 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         ajiJSD[ alt ].nRank = alt;
         ajiJSD[ alt ].rEquity = v - ajiJSD[ alt ].rEquity;
         
+	denominator = sqrt (s + ajiJSD[ alt ].rJSD * ajiJSD[ alt ].rJSD);
+
+	if (denominator < 1e-8)
+	  denominator = 1e-8;
+
         ajiJSD[ alt ].rJSD = ajiJSD[ alt ].rEquity /
           sqrt (s + ajiJSD[ alt ].rJSD * ajiJSD[ alt ].rJSD);
         
