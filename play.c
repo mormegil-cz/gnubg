@@ -43,6 +43,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "matchequity.h"
+#include "rollout.h"
 
 #ifndef HUGE_VALF
 #define HUGE_VALF 1e38
@@ -658,23 +659,137 @@ extern int ComputerTurn( void ) {
       return 0;
     } else if( ms.fDoubled ) {
 
+      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+      cubedecision cd;
+
       /* Consider cube action */
 
+      if ( GeneralCubeDecision ( "Computer player",
+                                 aarOutput, aarStdDev,
+                                 ms.anBoard,
+                                 &ci, &ap [ ms.fTurn ].esCube ) < 0 )
+        return -1;
+
+      cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+
+#ifdef OLDCODE
       if ( EvaluatePositionCubeful ( ms.anBoard, arDouble, arOutput, &ci,
                                      &ap [ ms.fTurn ].esCube.ec,
                                      ap [ ms.fTurn ].esCube.ec.nPlies ) < 0 )
         return -1;
+#endif
 
       fComputerDecision = TRUE;
-      
-      if ( fBeavers && ! ms.nMatchTo && arDouble[ 2 ] <= 0.0 &&
-	   ms.nCube < ( MAX_CUBE >> 1 ) ) 
-        /* It's a beaver... beaver all night! */
-        CommandRedouble ( NULL );
-      else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-        CommandTake ( NULL );
-      else
-        CommandDrop ( NULL );
+
+      if ( ms.fTurn == ms.fMove ) {
+
+        /* opponent has beavered */
+
+        switch ( cd ) {
+
+        case DOUBLE_TAKE:
+        case REDOUBLE_TAKE:
+        case TOOGOOD_TAKE:
+        case TOOGOODRE_TAKE:
+        case DOUBLE_PASS:
+        case TOOGOOD_PASS:
+        case REDOUBLE_PASS:
+        case TOOGOODRE_PASS:
+
+          /* Opponent out of his right mind: Raccoon if possible */
+
+          if ( fBeavers && ! ms.nMatchTo && ms.nCube < ( MAX_CUBE >> 1 ) ) 
+            /* he he: raccoon */
+            CommandRedouble ( NULL );
+          else
+            /* Damn, no raccoons allowed */
+            CommandTake ( NULL );
+
+          break;
+
+          
+        case NODOUBLE_TAKE:
+        case NO_REDOUBLE_TAKE:
+
+          /* hmm, oops: opponent beavered us:
+             consider dropping the beaver */
+
+          /* Note, this should not happen as the computer plays
+             "perfectly"!! */
+
+          if ( arOutput[ OUTPUT_TAKE ] <= -1.0 )
+            /* drop beaver */
+            CommandDrop ( NULL );
+          else
+            /* take */
+            CommandTake ( NULL );
+          
+          break;
+
+
+        case DOUBLE_BEAVER:
+        case NODOUBLE_BEAVER:
+        case REDOUBLE_BEAVER:
+        case NO_REDOUBLE_BEAVER:
+
+          /* opponent beaver was correct */
+
+          CommandTake ( NULL );
+          break;
+
+        default:
+
+          assert ( FALSE );
+          
+        } /* switch cubedecision */
+
+      } /* consider beaver */
+      else {
+
+        /* normal double by opponent */
+
+        switch ( cd ) {
+        
+        case DOUBLE_TAKE:
+        case NODOUBLE_TAKE:
+        case TOOGOOD_TAKE:
+        case REDOUBLE_TAKE:
+        case NO_REDOUBLE_TAKE:
+        case TOOGOODRE_TAKE:
+
+          CommandTake ( NULL );
+          break;
+
+        case DOUBLE_PASS:
+        case TOOGOOD_PASS:
+        case REDOUBLE_PASS:
+        case TOOGOODRE_PASS:
+
+          CommandDrop ( NULL );
+          break;
+
+        case DOUBLE_BEAVER:
+        case NODOUBLE_BEAVER:
+        case REDOUBLE_BEAVER:
+        case NO_REDOUBLE_BEAVER:
+
+          if ( fBeavers && ! ms.nMatchTo && ms.nCube < ( MAX_CUBE >> 1 ) ) 
+            /* Beaver all night! */
+            CommandRedouble ( NULL );
+          else
+            /* Damn, no beavers allowed */
+            CommandTake ( NULL );
+
+          break;
+
+        default:
+
+          assert ( FALSE );
+
+        } /* switch cubedecision */
+
+      } /* normal cube */
       
       fComputerDecision = FALSE;
       
