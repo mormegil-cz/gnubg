@@ -1,3 +1,14 @@
+Tue Jan 21 14:49:29 2003  Gary Wong  <gtw@gnu.org>
+
+	* eval.c (EvalKey): Bug fixes for cubeful equity caching: always
+	perform cubeful key consideration for cube decisions (even if
+	the evalcontext says it's cubeless), and don't take the one's
+	complement for cubeful equities, since that gives -1 in trivial
+	cases (which apparently means something special to lib/hash.c).
+
+	* eval.c (EvaluatePositionCache, EvaluatePositionCubeful3): Don't
+	try a cache lookup if the cache size is 0.
+
 Sun Jan 19 10:20:32 2003  Gary Wong  <gtw@gnu.org>
 
 	* renderprefs.c: #define M_PI, if necessary (reported by Nardy
