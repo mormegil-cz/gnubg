@@ -1235,18 +1235,16 @@ PyGameStats(const statcontext* sc)
     int side;
     for(side = 0; side < 2; ++side) {
       PyObject* d =
-	Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i"
-		      "s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
+	Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i"
+		      "s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
 		      "total-cube",sc->anTotalCube[side],
 		      "n-doubles",sc->anDouble[side],
 		      "n-takes", sc->anTake[side],
 		      "n-drops", sc->anPass[side],
 
 		      "missed-double-dp",sc->anCubeMissedDoubleDP[side],
-		      "missed-double-cp",sc->anCubeMissedDoubleCP[side],
 		      "missed-double-tg", sc->anCubeMissedDoubleTG[side],
 		      "wrong-double-dp", sc->anCubeWrongDoubleDP[side],
-		      "wrong-double-cp", sc->anCubeWrongDoubleCP[side],
 		      "wrong-double-tg",sc->anCubeWrongDoubleTG[side],
 		      "wrong-take", sc->anCubeWrongTake[side],
 		      "wrong-drop", sc->anCubeWrongPass[side],
@@ -1255,11 +1253,6 @@ PyGameStats(const statcontext* sc)
 		      sc->arErrorMissedDoubleDP[side][0],
 		      "err-missed-double-dp-cost",
 		      sc->arErrorMissedDoubleDP[side][1],
-
-		      "err-missed-double-cp-skill",
-		      sc->arErrorMissedDoubleCP[side][0],
-		      "err-missed-double-cp-cost",
-		      sc->arErrorMissedDoubleCP[side][1],
 
 		      "err-missed-double-tg-skill",
 		      sc->arErrorMissedDoubleTG[side][ 0 ],
@@ -1270,11 +1263,6 @@ PyGameStats(const statcontext* sc)
 		      sc->arErrorWrongDoubleDP[side][ 0 ],
 		      "err-wrong-double-dp-cost",
 		      sc->arErrorWrongDoubleDP[side][ 1 ],
-
-		      "err-wrong-double-cp-skill",
-		      sc->arErrorWrongDoubleCP[side][ 0 ],
-		      "err-wrong-double-cp-cost",
-		      sc->arErrorWrongDoubleCP[side][ 1 ],
 
 		      "err-wrong-double-tg-skill",
 		      sc->arErrorWrongDoubleTG[side][ 0 ],

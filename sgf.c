@@ -239,7 +239,7 @@ static void RestoreGS( list *pl, statcontext *psc ) {
 	    
 	case 'C': /* cube */
 	    psc->fCube = TRUE;
-	    
+
 	    psc->anTotalCube[ 0 ] = strtol( pch + 2, &pch, 10 );
 	    psc->anTotalCube[ 1 ] = strtol( pch, &pch, 10 );
 	    psc->anDouble[ 0 ] = strtol( pch, &pch, 10 );
@@ -251,14 +251,10 @@ static void RestoreGS( list *pl, statcontext *psc ) {
 
 	    psc->anCubeMissedDoubleDP[ 0 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeMissedDoubleDP[ 1 ] = strtol( pch, &pch, 10 );
-	    psc->anCubeMissedDoubleCP[ 0 ] = strtol( pch, &pch, 10 );
-	    psc->anCubeMissedDoubleCP[ 1 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeMissedDoubleTG[ 0 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeMissedDoubleTG[ 1 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeWrongDoubleDP[ 0 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeWrongDoubleDP[ 1 ] = strtol( pch, &pch, 10 );
-	    psc->anCubeWrongDoubleCP[ 0 ] = strtol( pch, &pch, 10 );
-	    psc->anCubeWrongDoubleCP[ 1 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeWrongDoubleTG[ 0 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeWrongDoubleTG[ 1 ] = strtol( pch, &pch, 10 );
 	    psc->anCubeWrongTake[ 0 ] = strtol( pch, &pch, 10 );
@@ -268,14 +264,10 @@ static void RestoreGS( list *pl, statcontext *psc ) {
 	    
 	    psc->arErrorMissedDoubleDP[ 0 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleDP[ 0 ][ 1 ] = strtod( pch, &pch );
-	    psc->arErrorMissedDoubleCP[ 0 ][ 0 ] = strtod( pch, &pch );
-	    psc->arErrorMissedDoubleCP[ 0 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleTG[ 0 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleTG[ 0 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleDP[ 0 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleDP[ 0 ][ 1 ] = strtod( pch, &pch );
-	    psc->arErrorWrongDoubleCP[ 0 ][ 0 ] = strtod( pch, &pch );
-	    psc->arErrorWrongDoubleCP[ 0 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleTG[ 0 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleTG[ 0 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorWrongTake[ 0 ][ 0 ] = strtod( pch, &pch );
@@ -284,14 +276,10 @@ static void RestoreGS( list *pl, statcontext *psc ) {
 	    psc->arErrorWrongPass[ 0 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleDP[ 1 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleDP[ 1 ][ 1 ] = strtod( pch, &pch );
-	    psc->arErrorMissedDoubleCP[ 1 ][ 0 ] = strtod( pch, &pch );
-	    psc->arErrorMissedDoubleCP[ 1 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleTG[ 1 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorMissedDoubleTG[ 1 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleDP[ 1 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleDP[ 1 ][ 1 ] = strtod( pch, &pch );
-	    psc->arErrorWrongDoubleCP[ 1 ][ 0 ] = strtod( pch, &pch );
-	    psc->arErrorWrongDoubleCP[ 1 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleTG[ 1 ][ 0 ] = strtod( pch, &pch );
 	    psc->arErrorWrongDoubleTG[ 1 ][ 1 ] = strtod( pch, &pch );
 	    psc->arErrorWrongTake[ 1 ][ 0 ] = strtod( pch, &pch );
@@ -2008,48 +1996,37 @@ static void WriteStatContext( FILE *pf, statcontext *psc ) {
 		 psc->anTotalCube[ 1 ], psc->anDouble[ 0 ], psc->anDouble[ 1 ],
 		 psc->anTake[ 0 ], psc->anTake[ 1 ], psc->anPass[ 0 ],
 		 psc->anPass[ 1 ] );
-	fprintf( pf, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d ",
+	fprintf( pf, "%d %d %d %d %d %d %d %d %d %d %d %d ",
 		 psc->anCubeMissedDoubleDP[ 0 ],
 		 psc->anCubeMissedDoubleDP[ 1 ],
-		 psc->anCubeMissedDoubleCP[ 0 ],
-		 psc->anCubeMissedDoubleCP[ 1 ],
 		 psc->anCubeMissedDoubleTG[ 0 ],
 		 psc->anCubeMissedDoubleTG[ 1 ],
 		 psc->anCubeWrongDoubleDP[ 0 ], psc->anCubeWrongDoubleDP[ 1 ],
-		 psc->anCubeWrongDoubleCP[ 0 ], psc->anCubeWrongDoubleCP[ 1 ],
 		 psc->anCubeWrongDoubleTG[ 0 ], psc->anCubeWrongDoubleTG[ 1 ],
 		 psc->anCubeWrongTake[ 0 ], psc->anCubeWrongTake[ 1 ],
 		 psc->anCubeWrongPass[ 0 ], psc->anCubeWrongPass[ 1 ] );
-	fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
-		 "%.6f %.6f %.6f %.6f %.6f ",
+	fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+		     "%.6f %.6f %.6f %.6f ",
 		 psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
 		 psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
-		 psc->arErrorMissedDoubleCP[ 0 ][ 0 ],
-		 psc->arErrorMissedDoubleCP[ 0 ][ 1 ],
 		 psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
 		 psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
 		 psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
 		 psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
-		 psc->arErrorWrongDoubleCP[ 0 ][ 0 ],
-		 psc->arErrorWrongDoubleCP[ 0 ][ 1 ],
 		 psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
 		 psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
 		 psc->arErrorWrongTake[ 0 ][ 0 ],
 		 psc->arErrorWrongTake[ 0 ][ 1 ],
 		 psc->arErrorWrongPass[ 0 ][ 0 ],
 		 psc->arErrorWrongPass[ 0 ][ 1 ] );
-	fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
-		 "%.6f %.6f %.6f %.6f %.6f]",
+	fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+		     "%.6f %.6f %.6f %.6f]",
 		 psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
 		 psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
-		 psc->arErrorMissedDoubleCP[ 1 ][ 0 ],
-		 psc->arErrorMissedDoubleCP[ 1 ][ 1 ],
 		 psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
 		 psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
 		 psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
 		 psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
-		 psc->arErrorWrongDoubleCP[ 1 ][ 0 ],
-		 psc->arErrorWrongDoubleCP[ 1 ][ 1 ],
 		 psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
 		 psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
 		 psc->arErrorWrongTake[ 1 ][ 0 ],

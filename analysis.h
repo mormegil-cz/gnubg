@@ -67,10 +67,8 @@ typedef struct {
   int anLuck[ 2 ][ LUCK_VERYGOOD + 1 ];
 
   int anCubeMissedDoubleDP[ 2 ];
-  int anCubeMissedDoubleCP[ 2 ];
   int anCubeMissedDoubleTG[ 2 ];
   int anCubeWrongDoubleDP [ 2 ];
-  int anCubeWrongDoubleCP [ 2 ];
   int anCubeWrongDoubleTG [ 2 ];
   int anCubeWrongTake [ 2 ];
   int anCubeWrongPass [ 2 ];
@@ -84,10 +82,8 @@ typedef struct {
 
   float arErrorCheckerplay[ 2 ][ 2 ];
   float arErrorMissedDoubleDP [ 2 ][ 2 ];
-  float arErrorMissedDoubleCP [ 2 ][ 2 ];
   float arErrorMissedDoubleTG [ 2 ][ 2 ];
   float arErrorWrongDoubleDP [ 2 ][ 2 ];
-  float arErrorWrongDoubleCP [ 2 ][ 2 ];
   float arErrorWrongDoubleTG [ 2 ][ 2 ];
   float arErrorWrongTake [ 2 ][ 2 ];
   float arErrorWrongPass [ 2 ][ 2 ];

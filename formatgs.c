@@ -231,37 +231,29 @@ formatGS( const statcontext *psc, const matchstate *pms,
                              psc->anDouble, psc->anTake, psc->anPass };
 
       static char *asz2[] = {
-        N_("Missed doubles around DP"),
-        N_("Missed doubles around CP"),
-        N_("Missed doubles around TG"),
-        N_("Wrong doubles around DP"),
-        N_("Wrong doubles around CP"),
-        N_("Wrong doubles around TG"),
+        N_("Missed doubles (below CP)"),
+        N_("Missed doubles (above CP)"),
+        N_("Wrong doubles (below DP)"),
+        N_("Wrong doubles (above TG)"),
         N_("Wrong takes"),
         N_("Wrong passes") };
 
-      const int *ai2[ 8 ] = { psc->anCubeMissedDoubleDP,
-                              psc->anCubeMissedDoubleCP,
+      const int *ai2[ 6 ] = { psc->anCubeMissedDoubleDP,
                               psc->anCubeMissedDoubleTG,
                               psc->anCubeWrongDoubleDP,
-                              psc->anCubeWrongDoubleCP,
                               psc->anCubeWrongDoubleTG,
                               psc->anCubeWrongTake,
                               psc->anCubeWrongPass };
-      const float *af2[ 2 ][ 8 ] = {
+      const float *af2[ 2 ][ 6 ] = {
         { psc->arErrorMissedDoubleDP[ 0 ],
-          psc->arErrorMissedDoubleCP[ 0 ],
           psc->arErrorMissedDoubleTG[ 0 ],
           psc->arErrorWrongDoubleDP[ 0 ],
-          psc->arErrorWrongDoubleCP[ 0 ],
           psc->arErrorWrongDoubleTG[ 0 ],
           psc->arErrorWrongTake[ 0 ],
           psc->arErrorWrongPass[ 0 ] },
         { psc->arErrorMissedDoubleDP[ 1 ],
-          psc->arErrorMissedDoubleCP[ 1 ],
           psc->arErrorMissedDoubleTG[ 1 ],
           psc->arErrorWrongDoubleDP[ 1 ],
-          psc->arErrorWrongDoubleCP[ 1 ],
           psc->arErrorWrongDoubleTG[ 1 ],
           psc->arErrorWrongTake[ 1 ],
           psc->arErrorWrongPass[ 1 ] } };
@@ -273,7 +265,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
                               numberEntry( gettext( asz[ i ] ),
                                            ai[ i ][ 0 ],
                                            ai[ i ][ 1 ] ) );
-      for ( i = 0; i < 8; ++i ) {
+      for ( i = 0; i < 6; ++i ) {
         aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
         aasz[ 0 ] = g_strdup( gettext( asz2[ i ] ) );

@@ -1,3 +1,9 @@
+Mon Oct 06 19:37:17 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* analysis.c, analysis.h, formatgs.c, gnubgmodule.c, sgf.c:
+	  change categorization of doubles (2 categories each for missed and
+	  wrong doubles, separator is cash point)
+
 Mon Oct 06 18:34:47 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtktheory.c: fix typo (bg rate value range in theory window)
