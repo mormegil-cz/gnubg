@@ -2541,13 +2541,16 @@ GtkWidget* firstChild(GtkWidget* widget)
 	return g_list_nth_data(gtk_container_children(GTK_CONTAINER(widget)), 0);
 }
 
-static void SetToolbarItemStyle(GtkWidget* widget, gpointer data)
+static void SetToolbarItemStyle(gpointer data, gpointer user_data)
 {
-	int style = (int)data;
+	GtkWidget* widget = GTK_WIDGET(data);
+	int style = (int)user_data;
 	/* Find icon and text widgets from parent object */
 	GList* buttonParts;
 	GtkWidget *icon, *text;
 	GtkWidget* buttonParent;
+	if (!GTK_IS_CONTAINER(widget))
+		return;
 	/* Stop button has event box parent - skip */
 	if (GTK_IS_EVENT_BOX(widget))
 		widget = firstChild(widget);
@@ -2573,7 +2576,11 @@ static void SetToolbarItemStyle(GtkWidget* widget, gpointer data)
 extern void SetToolbarStyle(int value)
 {
 	GtkWidget* pwMainToolbar = firstChild(pwToolbar);
-	gtk_container_foreach(GTK_CONTAINER(pwMainToolbar), SetToolbarItemStyle, (gpointer)value);
+	/* Set each toolbar item separately */
+	GList* toolbarItems = gtk_container_children(GTK_CONTAINER(pwMainToolbar));
+	g_list_foreach(toolbarItems, SetToolbarItemStyle, (gpointer)value);
+	g_list_free(toolbarItems);
+
 	/* Resize handle box parent */
 	gtk_widget_queue_resize(gtk_widget_get_parent(pwToolbar));
 	nToolbarStyle = value;
