@@ -756,8 +756,10 @@ command cER = {
       NULL, acExportSession },
     { NULL, NULL, NULL, NULL, NULL }
 }, acFirst[] = {
-  { "game", CommandFirstGame, 
+  { "game", CommandFirstGame,
     N_("Goto first game of the match or session"), NULL, NULL },
+  { "move", CommandFirstMove,
+    N_("Goto first move of the current game"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
     { "bkg", CommandImportBKG, N_("Import from Hans Berliner's BKG format"),

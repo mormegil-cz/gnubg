@@ -1970,7 +1970,8 @@ static void AnnotateMove( skilltype st ) {
 
     moverecord *pmr;
 
-    if( !( pmr = plLastMove->plNext->p ) ) {
+    if (!plLastMove || !plLastMove->plNext ||
+		(!( pmr = plLastMove->plNext->p))) {
 	outputl( _("You must select a move to annotate first.") );
 	return;
     }
@@ -2074,7 +2075,8 @@ static void AnnotateRoll( lucktype lt ) {
 
     moverecord *pmr;
 
-    if( !( pmr = plLastMove->plNext->p ) ) {
+    if (!plLastMove || !plLastMove->plNext ||
+		(!( pmr = plLastMove->plNext->p))) {
 	outputl( _("You must select a move to annotate first.") );
 	return;
     }
@@ -2171,7 +2173,8 @@ extern void CommandAnnotateClearComment( char *sz ) {
 
     moverecord *pmr;
 
-    if( !( pmr = plLastMove->plNext->p ) ) {
+    if (!plLastMove || !plLastMove->plNext ||
+		(!( pmr = plLastMove->plNext->p))) {
 	outputl( _("You must select a move to clear the comment from.") );
 	return;
     }
@@ -3268,8 +3271,14 @@ extern void ChangeGame( list *plGameNew ) {
 #if USE_GTK
     list *pl;
 #endif
+
+	if (!plGame)
+	{
+		outputl( _("No game in progress (type `new game' to start one).") );
+		return;
+	}
     
-    plLastMove = ( plGame = plGameNew )->plNext;
+	plLastMove = ( plGame = plGameNew )->plNext;
     
 #if USE_GTK
     if( fX ) {
@@ -3327,6 +3336,12 @@ static void CommandNextGame( char *sz ) {
 	return;
 
     ChangeGame( pl->p );
+}
+
+extern void
+CommandFirstMove( char *sz ) {
+
+  ChangeGame( plGame );
 }
 
 extern void
