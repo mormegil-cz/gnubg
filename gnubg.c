@@ -6003,6 +6003,9 @@ extern void outputx( void ) {
     
     if( cOutputDisabled || cOutputPostponed )
 	return;
+
+    if( fTTY )
+       fflush( stdout );
     
 #if USE_GTK
     if( fX )
