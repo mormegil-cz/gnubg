@@ -1,3 +1,9 @@
+Fri Jul 25 20:49:07 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (CommandSaveSettings): add some qoutes around %s in
+	'set rng file %s'. This is a possible fix for bug #4393.
+	(bug #4393 reported by William Maslen)
+
 Fri Jul 25 20:22:06 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c (LuckFirst): fix bug in calculation of luck for

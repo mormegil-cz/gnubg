@@ -4819,7 +4819,7 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 	/* don't save user RNGs */
 	break;
     case RNG_FILE:
-        fprintf( pf, "%s rng file %s\n", sz, szDiceFilename );
+        fprintf( pf, "%s rng file \"%s\"\n", sz, szDiceFilename );
 	break;
     default:
         break;
