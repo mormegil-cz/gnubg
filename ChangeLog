@@ -1,3 +1,8 @@
+Sun Jan 12 13:23:44 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (ProgressValue): add missing "if ( ! fShowProgress )".
+	(contributed by O.M. Riordan)
+
 Sat Jan 11 17:03:37 2003  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (RecordErase): Quote player name parameter.  (Reported by

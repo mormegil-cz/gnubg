@@ -5893,6 +5893,9 @@ ProgressStartValue ( char *sz, int iMax ) {
 extern void
 ProgressValue ( int iValue ) {
 
+  if ( !fShowProgress )
+    return;
+
   iProgressValue = iValue;
 
 #if HAVE_GETTIMEOFDAY
