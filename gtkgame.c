@@ -3854,11 +3854,10 @@ static void NewOK( GtkWidget *pw, newwidget *pnw ) {
 }
 
 static void NewSet( newwidget *pnw) {
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwG ),
-                                TRUE );
-  gtk_adjustment_set_value ( GTK_ADJUSTMENT( pnw->padjML ), 
-		 nDefaultLength );
-};
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwM ), TRUE );
+  gtk_adjustment_set_value( GTK_ADJUSTMENT( pnw->padjML ), nDefaultLength );
+}
+
 static void NewDialog( gpointer *p, guint n, GtkWidget *pw ) {
   GTKNew();
 }
@@ -8275,7 +8274,10 @@ extern void GTKDumpStatcontext( int game )
 							GDK_SELECTION_TYPE_STRING, 0 );
 
 	/* modality */
-	gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 300 );
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwUsePanels ) ) )
+	    gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 300 );
+	else
+	    gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 600 );
 	gtk_window_set_modal( GTK_WINDOW( pwStatDialog ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pwStatDialog ),
 								GTK_WINDOW( pwMain ) );

@@ -1,3 +1,8 @@
+Thu Sep 04 16:34:03 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.c: resize stats window if no-panels selected,
+	  make New dialogue default to match
+
 Thu Sep 04 11:12:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gnubg.c: Added CR/LF for copy to clipboard under windows
