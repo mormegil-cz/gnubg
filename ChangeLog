@@ -1,3 +1,11 @@
+Wed Dec 18 18:33:37 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Don't use 64 bits longs, as some systems can't print them
+
+	* bearoff.h: s/long long/long/g
+	* makebearoff.c: use "double" instead of "long long" to avoid 
+	rounding errors.
+
 Wed Dec 18 17:55:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkmovefilter.c (SetMoveFilterCommands): write command	

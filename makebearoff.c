@@ -1308,7 +1308,7 @@ extern int main( int argc, char **argv ) {
   bearoffcontext *pbc = NULL;
   FILE *output = stdout;
   char *szOutput = NULL;
-  long long l;
+  double r;
 
   static struct option ao[] = {
     { "two-sided", required_argument, NULL, 't' },
@@ -1418,24 +1418,21 @@ extern int main( int argc, char **argv ) {
               szOldBearoff ? szOldBearoff : "" );
 
     if ( fND ) {
-      l = Combination ( nOS + 15, nOS );
-      l <<= 4;
+      r = Combination ( nOS + 15, nOS ) * 16.0;
       fprintf ( stderr, 
-                _("Size of database                  : %12lld (%lld MB)\n"), 
-                l, l >> 20 );
+                _("Size of database                  : %.0f (%.1f MB)\n"), 
+                r, r / 1048576.0 );
     }
     else {
-      l = Combination ( nOS + 15, nOS );
-      l <<= ( fGammon ? 7 : 6 );
+      r = Combination ( nOS + 15, nOS ) * ( fGammon ? 128.0f : 64.0f );
       fprintf ( stderr, 
-                _("Size of database (uncompressed)   : %12lld (%lld MB)\n"), 
-                l, l >> 20 );
+                _("Size of database (uncompressed)   : %.0f (%.1f MB)\n"), 
+                r, r / 1048576.0 );
       if ( fCompress ) {
-        l = Combination ( nOS + 15, nOS );
-        l <<= ( fGammon ? 5 : 4 );
+        r = Combination ( nOS + 15, nOS ) * ( fGammon ? 32.0f : 16.0f );
         fprintf ( stderr, 
-                  _("Estimated size of compressed db   : %12lld (%lld MB)\n"), 
-                  l, l >> 20 );
+                  _("Estimated size of compressed db   : %.0f (%.1f MB)\n"), 
+                  r, r / 1048576.0 );
       }
     }
 
@@ -1483,9 +1480,8 @@ extern int main( int argc, char **argv ) {
 
     int n = Combination ( nTSP + nTSC, nTSC );
 
-    l = n;
-    l *= l;
-    l *= ( fCubeful ? 8 : 2 );
+    r = n;
+    r = r * r * ( fCubeful ? 8.0 : 2.0 );
     fprintf ( stderr,
               _("Two-sided database:\n"
                 "Number of points             : %12d\n"
@@ -1494,7 +1490,7 @@ extern int main( int argc, char **argv ) {
                 "Write header                 : %s\n"
                 "Number of one-sided positions: %12d\n"
                 "Total number of positions    : %12d\n"
-                "Size of resulting file       : %12lld bytes (%lld MB)\n"
+                "Size of resulting file       : %.0f bytes (%.1f MB)\n"
                 "Size of hash                 : %12d bytes\n"
                 "Reuse old bearoff database   : %s %s\n"),
               nTSP, nTSC,
@@ -1502,7 +1498,7 @@ extern int main( int argc, char **argv ) {
               fHeader ? _("yes") : ("no"),
               n,
               n * n,
-              l,l >> 20,
+              r, r / 1048576.0,
               nHashSize,
               szOldBearoff ? "yes" : "no",
               szOldBearoff ? szOldBearoff : "" );

@@ -50,7 +50,7 @@ typedef struct _bearoffcontext {
 
   void *p;        /* pointer to data */
 
-  unsigned long long int nReads; /* number of reads */
+  unsigned long int nReads; /* number of reads */
 
 } bearoffcontext;
 
