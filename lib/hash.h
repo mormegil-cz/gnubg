@@ -19,6 +19,7 @@ typedef struct _hash {
     hashnode **aphn;
     int c, icp;
     hashcomparefunc phcf;
+    unsigned long int cSize, cHits, cMisses, cLookups;
 } hash;
 
 extern int HashCreate( hash *ph, int c, hashcomparefunc phcf );

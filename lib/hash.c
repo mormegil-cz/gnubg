@@ -32,6 +32,8 @@ extern int HashCreate( hash *ph, int c, hashcomparefunc phcf ) {
     ph->c = 0;
     ph->icp = i;
     ph->phcf = phcf;
+    ph->cSize = ac[ i ];
+    ph->cHits = ph->cMisses = ph->cLookups = 0;
 
     return 0;
 }
@@ -101,12 +103,17 @@ extern void *HashLookup( hash *ph, unsigned long l, void *p ) {
 
     hashnode **pphn;
 
+    ++ph->cLookups;
+
     for( pphn = ph->aphn + l % ac[ ph->icp ]; *pphn;
 	 pphn = &( ( *pphn )->phnNext ) )
 	if( ( ( *pphn )->l == l ) && ( !ph->phcf ||
-	    !( ph->phcf )( p, ( *pphn )->p ) ) )
+            !( ph->phcf )( p, ( *pphn )->p ) ) ) {
+            ++ph->cHits;
 	    return ( *pphn )->p;
+        }
     
+    ++ph->cMisses;
     return NULL;
 }
 

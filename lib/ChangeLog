@@ -1,3 +1,7 @@
+Thu Dec 19 22:53:52 2002  Joern Thyssen  <jth@freeshell.org>
+
+	* hash.h: add new fields (statistics) to hash.
+
 Mon Aug  5 13:48:34 2002  Gary Wong  <gtw@gnu.org>
 
 	* mt19937int.c (sgenrand): Fudge the seed so that it fits the
