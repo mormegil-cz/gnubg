@@ -60,7 +60,10 @@ void PopLocale ( void ) {
 #if ENABLE_NLS
 
   if ( iLocale < 0 )
+  {
+    printf("PopLocale() called without a PushLocale()!\n");
     return;
+  }
 
   setlocale ( LC_ALL, aszLocaleStack[ iLocale ] );
 
