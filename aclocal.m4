@@ -115,15 +115,18 @@ dnl Determine if the C compiler requires the -ieee flag.
 dnl
 dnl @author Gary Wong <gtw@gnu.org>
 
+dnl FIXME it would be better to have a more robust check than looking for
+dnl __DECC, but I don't have a system to test it on.
+
 AC_DEFUN(AC_PROG_CC_IEEE,[
   AC_CACHE_CHECK(whether ${CC-cc} requires -ieee option, ac_cv_c_ieee,
 [AC_EGREP_CPP(yes,
-[#ifdef __GNUC__
+[#ifdef __DECC
   yes
 #endif
 ], eval "ac_cv_c_ieee=yes", eval "ac_cv_c_ieee=no")])
   if test "$ac_cv_c_ieee" = "yes"; then
-    CFLAGS="$CFLAGS -Wunused"
+    CFLAGS="$CFLAGS -ieee"
   fi
 ])
 
