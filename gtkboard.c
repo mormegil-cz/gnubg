@@ -3126,7 +3126,6 @@ static gint board_slide_timeout( gpointer p ) {
 extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
     int n;
-    monitor m;
 #if USE_BOARD3D
     BoardData *bd = board->board_data;
 #endif
@@ -3159,9 +3158,9 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 			     board );
 
     while( !animation_finished ) {
-	SuspendInput( &m );
+	SuspendInput();
 	gtk_main_iteration();
-	ResumeInput( &m );
+	ResumeInput();
     }
 }
 }

@@ -1236,7 +1236,6 @@ void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 	char str[255];
 	char *msg;
 	float fps;
-	monitor m;
 
 	if (!GetInputYN(_("Save settings and test 3d performance for 3 seconds?")))
 		return;
@@ -1246,9 +1245,9 @@ void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 	while (gtk_events_pending())
 	    gtk_main_iteration();
 
-	SuspendInput(&m);
+	SuspendInput();
 	fps = TestPerformance3d(bd);
-	ResumeInput(&m);
+	ResumeInput();
 
 	if (fps >= 30)
 		msg = _("3d Performance is very fast.\n");

@@ -7192,20 +7192,20 @@ extern void outputresume( void ) {
 }
 
 /* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput( monitor *pm ) {
+extern void SuspendInput() {
 
 #if USE_GTK
     if ( fX )
-       GTKSuspendInput( pm );
+       GTKSuspendInput();
 #endif
 }
 
 /* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput( monitor *pm ) {
+extern void ResumeInput() {
 
 #if USE_GTK
     if ( fX )
-       GTKResumeInput( pm );
+       GTKResumeInput();
 #endif
 }
 
@@ -7345,14 +7345,13 @@ static void CallbackProgress( void ) {
 
 #if USE_GTK
     if( fX ) {
-	monitor m;
-    
-	SuspendInput( &m );
+
+	SuspendInput();
     
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
 	
-	ResumeInput( &m );
+	ResumeInput();
     }
 #endif
 

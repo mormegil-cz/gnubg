@@ -525,60 +525,38 @@ RefreshGeometries ( void )
 		getWindowGeometry(i);
 }
 
-typedef struct {
-  void *owner;
-  unsigned id;
-} grabstack;
+int grabIdSignal;
+int suspendCount = 0;
+GtkWidget* grabbedWidget;	/* for testing */
 
-#define GRAB_STACK_SIZE 128
-grabstack GrabStack[GRAB_STACK_SIZE];
-int GrabStackPointer = 0;
-
-extern void GTKSuspendInput( monitor *pm ) {
-    
-  /* Grab events so that the board window knows this is a re-entrant
-     call, and won't allow commands like roll, move or double. */
-  if( ( pm->fGrab = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) ) {
-    assert ((GrabStackPointer >= 0) && 
-	    (GrabStackPointer < (GRAB_STACK_SIZE - 1 )));
-    
-    gtk_grab_add( pwGrab );
-    GrabStack[GrabStackPointer].owner = pm;
-    GrabStack[GrabStackPointer++].id =
-      pm->idSignal = gtk_signal_connect_after( GTK_OBJECT( pwGrab ),
-					       "key-press-event",
-					       GTK_SIGNAL_FUNC( gtk_true ),
-					       NULL );
-
-  }
-  
-  /* Don't check stdin here; readline isn't ready yet. */
-  GTKDisallowStdin();
+extern void GTKSuspendInput()
+{
+	if (suspendCount == 0)
+	{	/* Grab events so that the board window knows this is a re-entrant
+		call, and won't allow commands like roll, move or double. */
+		grabbedWidget = pwGrab;
+		gtk_grab_add(pwGrab);
+		grabIdSignal = gtk_signal_connect_after(GTK_OBJECT(pwGrab),
+				"key-press-event", GTK_SIGNAL_FUNC(gtk_true), NULL);
+	}
+	/* Don't check stdin here; readline isn't ready yet. */
+	GTKDisallowStdin();
+	suspendCount++;
 }
 
-extern void GTKResumeInput( monitor *pm ) {
-    
-  int i;
+extern void GTKResumeInput()
+{
+	assert(suspendCount > 0);
+	suspendCount--;
+	if (suspendCount == 0)
+	{
+		gtk_signal_disconnect(GTK_OBJECT(pwGrab), grabIdSignal);
+		gtk_grab_remove(grabbedWidget);
+		if (pwGrab != grabbedWidget)
+			g_print("** Problem in widget grabbing! **\n");
+	}
 
-  GTKAllowStdin();
-
-  /* go backwards down the stack looking for this signal's entry 
-     if found, disconnect the signal and trim the stack back
-     this should cope with grab owners who disappear without 
-     cleaning up
-     */
-  for (i = GrabStackPointer - 1; i >= 0; --i) {
-    if ((GrabStack[ i ].owner == pm) &&
-	  (GrabStack[ i ].id == pm->idSignal)) {
-
-      gtk_signal_disconnect( GTK_OBJECT( pwGrab ), pm->idSignal );
-      GrabStackPointer = i;
-    }
-  }
-
-  if( pm->fGrab )
-    gtk_grab_remove( pwGrab );
-    
+	GTKAllowStdin();
 }
 
 static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
@@ -657,22 +635,18 @@ int fEndDelay;
 
 extern void GTKDelay( void ) {
 
-    monitor m;
-    
-    SuspendInput( &m );
+    SuspendInput();
     
     while( !fInterrupt && !fEndDelay )
 	gtk_main_iteration();
     
     fEndDelay = FALSE;
     
-    ResumeInput( &m );
+    ResumeInput();
 }
 
 extern void HandleXAction( void ) {
 
-    monitor m;
-    
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
        us to will be processed anyway.  If one occurs after fAction is reset,
@@ -680,7 +654,7 @@ extern void HandleXAction( void ) {
        still process its I/O. */
     fAction = FALSE;
 
-    SuspendInput( &m );
+    SuspendInput();
     
     /* Process incoming X events.  It's important to handle all of them,
        because we won't get another SIGIO for events that are buffered
@@ -688,7 +662,7 @@ extern void HandleXAction( void ) {
     while( gtk_events_pending() )
 	gtk_main_iteration();
 
-    ResumeInput( &m );
+    ResumeInput();
 }
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
@@ -7022,32 +6996,29 @@ GTKProgressStartValue( char *sz, int iMax ) {
 extern void
 GTKProgressValue ( int iValue ) {
 
-    monitor m;
-
     gtk_progress_set_value( GTK_PROGRESS ( pwProgress ), iValue );
 
-    SuspendInput( &m );
+    SuspendInput();
 
     while( gtk_events_pending() )
 	gtk_main_iteration();
 
-    ResumeInput( &m );
+    ResumeInput();
 }
 
 
 extern void GTKProgress( void ) {
 
     static int i;
-    monitor m;
 
     gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
 
-    SuspendInput( &m );
+    SuspendInput();
 
     while( gtk_events_pending() )
         gtk_main_iteration();
 
-    ResumeInput( &m );
+    ResumeInput();
 }
 
 extern void GTKProgressEnd( void ) {
@@ -10229,6 +10200,16 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
 		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwn,
 		*pwLabel, *pwLink;
+	int multipleEnv;
+
+	/* See if there's more than one environment */
+	if (!RunQuery(&r, "env_id FROM env"))
+	{
+		GTKMessage(_("Database error"), DT_ERROR);
+		return;
+	}
+	multipleEnv = (r.rows > 2);
+	FreeRowset(&r);
 
 	curPlayerId = -1;
 
@@ -10272,8 +10253,10 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame), 4);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwPlayerFrame, TRUE, TRUE, 0);
 
+	pwHbox = gtk_hbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (pwPlayerFrame), pwHbox);
 	pwVbox2 = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (pwPlayerFrame), pwVbox2);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox2, FALSE, FALSE, 0);
 
 	pwHbox2 = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwVbox2), pwHbox2, FALSE, FALSE, 0);
@@ -10298,15 +10281,11 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 					GTK_SIGNAL_FUNC(UpdatePlayerDetails), NULL);
 
 	/* If more than one environment, show linked nicknames */
-	if (!RunQuery(&r, "env_id FROM env"))
-	{
-		GTKMessage(_("Database error"), DT_ERROR);
-		return;
-	}
-	if (r.rows > 2)
+	if (multipleEnv)
 	{	/* Multiple environments */
 		gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
 		aliases = gtk_label_new(NULL);
+		gtk_misc_set_alignment(GTK_MISC(aliases), 0, 0);
 		gtk_box_pack_start(GTK_BOX(pwVbox), aliases, FALSE, FALSE, 0);
 
 		pwAliasList = gtk_text_new(NULL, NULL);
@@ -10318,7 +10297,6 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 			GTK_SIGNAL_FUNC(RelationalLinkPlayers), pwList);
 		gtk_box_pack_start(GTK_BOX(pwVbox), pwLink, FALSE, TRUE, 0);
 	}
-	FreeRowset(&r);
 
 	/* Query sheet */
 	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwVbox = gtk_vbox_new(FALSE, 0),

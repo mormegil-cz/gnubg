@@ -105,7 +105,9 @@ movefilter *aamfSet[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
 static char szFILENAME[] = N_ ("<filename>"),
     szNAME[] = N_ ("<name>"),
+#if defined(REDUCTION_CODE)
     szNUMBER[] = N_ ("<number>"),
+#endif
     szONOFF[] = N_ ("on|off"),
     szPLIES[] = N_ ("<plies>"),
     szSTDDEV[] = N_ ("<std dev>"),

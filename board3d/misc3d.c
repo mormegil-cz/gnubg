@@ -1983,8 +1983,7 @@ void RollDice3d(BoardData *bd)
 
 	if (bd->rd->animateRoll)
 	{
-		monitor m;
-		SuspendInput( &m );
+		SuspendInput();
 		animStartTime = get_time();
 
 		bd->shakingDice = 1;
@@ -2002,14 +2001,13 @@ void RollDice3d(BoardData *bd)
 				firstFrame = 1;
 		}
 		gtk_main();
-		ResumeInput( &m );
+		ResumeInput();
 	}
 }
 
 void AnimateMove3d(BoardData *bd)
 {
-	monitor m;
-	SuspendInput( &m );
+	SuspendInput();
 	slide_move = 0;
 	bd->moving = 1;
 
@@ -2018,7 +2016,7 @@ void AnimateMove3d(BoardData *bd)
 	stopNextTime = 0;
 	setIdleFunc(bd, idleAnimate);
 	gtk_main();
-	ResumeInput( &m );
+	ResumeInput();
 }
 
 int idleWaveFlag(BoardData* bd)

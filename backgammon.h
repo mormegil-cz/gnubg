@@ -130,15 +130,6 @@ extern int PanelShowing(gnubgwindow window);
 extern int GetPanelSize();
 extern void SetPanelWidth(int size);
 
-typedef struct _monitor {
-#if USE_GTK
-    int fGrab;
-    int idSignal;
-#else
-	int dummy;
-#endif
-} monitor;
-
 typedef struct _command {
   /* Command name (NULL indicates end of list) */
   char* sz; 
@@ -660,9 +651,9 @@ extern void outputoff( void );
 extern void outputon( void );
 
 /* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput( monitor* pm );
+extern void SuspendInput();
 /* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput( monitor* pm );
+extern void ResumeInput();
 
 extern void ProgressStart( char* sz );
 extern void ProgressStartValue( char* sz, int iMax );

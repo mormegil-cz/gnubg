@@ -107,8 +107,8 @@ extern void GTKRegenerateGames( void );
 extern void GTKFreeze( void );
 extern void GTKThaw( void );
 
-extern void GTKSuspendInput( monitor *pm );
-extern void GTKResumeInput( monitor *pm );
+extern void GTKSuspendInput();
+extern void GTKResumeInput();
 
 #if USE_TIMECONTROL
 extern void GTKUpdateClock();

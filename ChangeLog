@@ -1,3 +1,8 @@
+Mon Nov  15 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c (and others) : Simplify widget grabbing, hopefully
+	fixing multiple "can't move" bug
+
 Mon Nov  8 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c : Fixed bug with credits
