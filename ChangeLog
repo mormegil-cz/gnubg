@@ -1,3 +1,11 @@
+Sat Oct 26 15:42:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix some in LuckAnalysis for match play with asymmetric scores.
+	Also, change luck analysis to be cubeful
+
+	* analysis.c (LuckFirst, LuckNormal): new functions.
+	* analysis.c (LuckAnalysis): call LuckFirst or LuckNormal
+
 Sat Oct 26 13:50:29 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.h: change nTrials from "unsigned short int" to

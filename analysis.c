@@ -75,48 +75,121 @@ GetRating ( const float rError ) {
   return RAT_UNDEFINED;
 }
 
+static float
+LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
+            const cubeinfo *pci, const evalcontext *pec ) {
+
+  int anBoardTemp[ 2 ][ 25 ], i, j;
+  float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
+  cubeinfo ciOpp;
+  
+  /* first with player pci->fMove on roll */
+
+  memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
+  ciOpp.fMove = ! pci->fMove;
+  
+  for( i = 0; i < 6; i++ )
+    for( j = 0; j < i; j++ ) {
+      memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+              2 * 25 * sizeof( int ) );
+      
+      /* Find the best move for each roll at ply 0 only. */
+      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
+                        (cubeinfo *) pci, NULL ) < 0 )
+        return ERR_VAL;
+      
+      SwapSides( anBoardTemp );
+      
+      /* FIXME should we use EvaluatePositionCubeful here? */
+      if( EvaluatePosition( anBoardTemp, ar, &ciOpp, (evalcontext *) pec ) )
+        return ERR_VAL;
+      
+      aar[ i ][ j ] = - Utility ( ar, &ciOpp );
+      rMean += aar[ i ][ j ];
+
+    }
+
+  /* with other player on roll */
+  
+  for( i = 0; i < 6; i++ )
+    for( j = i + 1; j < 6; j++ ) {
+      memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+              2 * 25 * sizeof( int ) );
+      SwapSides ( anBoardTemp );
+      
+      /* Find the best move for each roll at ply 0 only. */
+      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, &ciOpp, NULL ) < 0 )
+        return ERR_VAL;
+      
+      SwapSides( anBoardTemp );
+      
+      /* FIXME should we use EvaluatePositionCubeful here? */
+      if( EvaluatePosition( anBoardTemp, ar, 
+                            (cubeinfo *) pci, (evalcontext *) pec ) )
+        return ERR_VAL;
+      
+      aar[ i ][ j ] = Utility ( ar, &ciOpp );
+      rMean += aar[ i ][ j ];
+
+    }
+
+  return aar[ n0 ][ n1 ] - rMean / 30.0f;
+
+}
+
+static float
+LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
+             const cubeinfo *pci, const evalcontext *pec ) {
+  
+  int anBoardTemp[ 2 ][ 25 ], i, j;
+  float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
+  cubeinfo ciOpp;
+
+  memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
+  ciOpp.fMove = ! pci->fMove;
+  
+  for( i = 0; i < 6; i++ )
+    for( j = 0; j <= i; j++ ) {
+      memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+              2 * 25 * sizeof( int ) );
+      
+      /* Find the best move for each roll at ply 0 only. */
+      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
+                        (cubeinfo *) pci, NULL ) < 0 )
+        return ERR_VAL;
+      
+      SwapSides( anBoardTemp );
+      
+      /* FIXME should we use EvaluatePositionCubeful here? */
+      if( EvaluatePosition( anBoardTemp, ar, &ciOpp, (evalcontext *) pec ) )
+        return ERR_VAL;
+      
+      aar[ i ][ j ] = -Utility ( ar, &ciOpp );
+      rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][j ] * 2.0f;
+
+    }
+
+  return aar[ n0 ][ n1 ] - rMean / 36.0f;
+
+}
+
 static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
 
-    int anBoardTemp[ 2 ][ 25 ], i, j;
-    float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
+  evalcontext ecLuck = { 0, TRUE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
 
-    if( fFirstMove && n0 == n1 )
-	fFirstMove = FALSE; /* games shouldn't start with a double */
-
-    if( n0-- < n1-- )
-	swap( &n0, &n1 );
+  if( n0-- < n1-- )
+    swap( &n0, &n1 );
     
-    for( i = 0; i < 6; i++ )
-	for( j = 0; fFirstMove ? j < i : j <= i; j++ ) {
-	    memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-		    2 * 25 * sizeof( int ) );
-	    
-	    /* Find the best move for each roll at ply 0 only. */
-	    if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, pci,
-			      NULL ) < 0 )
-		return ERR_VAL;
-	    
-	    SwapSides( anBoardTemp );
+  if ( fFirstMove && n0 != n1 )
+    return LuckFirst ( anBoard, n0, n1, pci, &ecLuck );
+  else
+    return LuckNormal ( anBoard, n0, n1, pci, &ecLuck );
 
-	    /* FIXME should we use EvaluatePositionCubeful here? */
-	    if( EvaluatePosition( anBoardTemp, ar, pci, NULL ) )
-		return ERR_VAL;
-
-	    if( fFirstMove ) {
-		rMean += Utility( ar, pci );
-		InvertEvaluation( ar );
-		rMean += aar[ i ][ j ] = Utility( ar, pci );
-	    } else {
-		InvertEvaluation( ar );
-		aar[ i ][ j ] = Utility( ar, pci );
-		
-		rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][ j ] * 2.0f;
-	    }
-	}
-
-    return aar[ n0 ][ n1 ] - rMean / ( fFirstMove ? 30.0f : 36.0f );
 }
+  
+
+
 
 static lucktype Luck( float r ) {
 
