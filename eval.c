@@ -3396,100 +3396,32 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
                    evalcontext *pec, 
                    int nPlies,
                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
-  int i, iPly;
+
+  evalcontext ec;
   movelist ml;
-  move amCandidates[ MAX_SEARCH_CANDIDATES ];
+  int i;
 
-  if( fAction )
-      fnAction();
-	  
-  if( fInterrupt ) {
-      errno = EINTR;
-      return -1;
-  }
-	  
-  if( anMove ) {
-    for( i = 0; i < 8; i++ ) {
+  memcpy( &ec, pec, sizeof ( evalcontext ) );
+  ec.nPlies = nPlies;
+
+  if ( anMove )
+    for ( i = 0; i < 8; ++i )
       anMove[ i ] = -1;
-    }
-  }
 
-  GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
-    
-  if( !ml.cMoves )
-    /* no legal moves */
-    return 0;
-  else if( ml.cMoves == 1 )
-    /* forced move */
-    ml.iMoveBest = 0;
-  else {
-    /* choice of moves */
-
-    /* for ply higher than given filters, use the highest entry */
-    
-    movefilter* mFilters = (nPlies > 0 && nPlies <= MAX_FILTER_PLIES) ?
-      aamf[nPlies-1] : aamf[MAX_FILTER_PLIES-1];
-
-    for( iPly = 0; iPly < nPlies; ++iPly ) {
-      movefilter* mFilter =
-	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &NullFilter;
-	 
-      unsigned int k;
-
-      if( mFilter->Accept < 0 ) {
-	continue;
-      }
-
-      if( ScoreMoves( &ml, pci, pec, iPly ) < 0 ) {
-	return -1;
-      }
-
-      qsort(ml.amMoves, ml.cMoves, sizeof(move), (cfunc)CompareMoves);
-      ml.iMoveBest = 0;
-      
-      k = ml.cMoves;
-      ml.cMoves = min(mFilter->Accept, ml.cMoves);
-
-      {
-	unsigned int limit = min(k, ml.cMoves + mFilter->Extra);
-      
-	for( /**/ ; ml.cMoves < limit; ++ml.cMoves) {
-	  if( ml.amMoves[ml.cMoves].rScore <
-	      ml.amMoves[0].rScore - mFilter->Threshold ) {
-	    break;
-	  }
-	}
-      }
-	
-      if( ml.amMoves != amCandidates ) {
-	memcpy(amCandidates, ml.amMoves, ml.cMoves * sizeof(move));
-	    
-	ml.amMoves = amCandidates;
-      }
-    }
-
-    if ( ml.cMoves == 1 )
-      /* if there is only one move to evaluate there is no need to continue */
-      /* no test for accept=1 as in FindnSaveBestMoves as the moves are not
-         stored, so there is really no need to do a pointless 2-ply evaluation
-         of the move even though accept=1 forces us to do so */
-      goto finished;
-
-    if( ScoreMoves( &ml, pci, pec, nPlies ) < 0 ) {
-      return -1;
-    }
-
-  }
-
- finished:
+  if( FindnSaveBestMoves( &ml, nDice0, nDice1, anBoard, NULL, 0.0f,
+                          pci, &ec, aamf ) < 0 )
+    return -1;
 
   if( anMove ) {
-    for( i = 0; i < ml.cMaxMoves * 2; i++ ) {
+    for( i = 0; i < ml.cMaxMoves * 2; i++ ) 
       anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
-    }
   }
 	
-  PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
+  if ( ml.cMoves )
+    PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
+
+  if ( ml.amMoves )
+    free( ml.amMoves );
 
   return ml.cMaxMoves * 2;
 }
@@ -3509,7 +3441,7 @@ int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
 extern int 
 FindnSaveBestMoves( movelist *pml,
                     int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-                    unsigned char *auchMove,
+                    unsigned char *auchMove, const float rThr,
                     cubeinfo *pci, evalcontext *pec,
                     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
@@ -3597,6 +3529,7 @@ FindnSaveBestMoves( movelist *pml,
   
   /* Resort the moves, in case the new evaluation reordered them. */
   qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
+  pml->iMoveBest = 0;
   
   /* set the proper size of the movelist */
   
@@ -3605,33 +3538,53 @@ FindnSaveBestMoves( movelist *pml,
   cOldMoves = pml->cMoves;
   pml->cMoves = nMoves;
 
-  /* Make sure that auchMove was evaluated at the deepest ply. */
+  /* Make sure that auchMove and top move are both  
+     evaluated at the deepest ply. */
   if( auchMove ) {
+
+    int fResort = FALSE;
 
     for( i = 0; i < pml->cMoves; i++ )
       if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
 
-        /* evaluate move on nMaxPly plies */
+        /* ensure top move is evaluted at deepest ply */
 
         if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
           ScoreMove( pml->amMoves + i, pci, pec, nMaxPly );
+          fResort = TRUE;
+        }
 
-          /* move it up to the other moves evaluated on nMaxPly */
+        if ( ( fabs( pml->amMoves[ i ].rScore - 
+                     pml->amMoves[ 0 ].rScore ) > rThr ) &&
+             ( nMaxPly < pec->nPlies ) ) {
 
-          if ( nMaxPly ) {
-            move m;
-            memcpy( &m, pml->amMoves + i, sizeof m );
-            memmove( pml->amMoves + cOldMoves,
-                     pml->amMoves + cOldMoves + 1,
-                     ( pml->cMoves - cOldMoves - 1 ) * sizeof m );
-            memcpy( pml->amMoves + cOldMoves, &m, sizeof ( m ) );
-                
+          /* this is en error/blunder: re-analyse at top-ply */
+          
+          ScoreMove( pml->amMoves, pci, pec, pec->nPlies );
+          ScoreMove( pml->amMoves + i, pci, pec, pec->nPlies );
+          cOldMoves = 1; /* only one move scored at deepest ply */
+          fResort = TRUE;
+          
+        }
+
+        /* move it up to the other moves evaluated on nMaxPly */
+        
+        if ( fResort && pec->nPlies ) {
+          move m;
+          int j;
+
+          memcpy( &m, pml->amMoves + i, sizeof m );
+
+          for ( j = i - 1; j >= cOldMoves; --j )
+            memcpy( pml->amMoves+j+1, pml->amMoves+j, sizeof( move ) );
+
+          memcpy( pml->amMoves + cOldMoves, &m, sizeof ( m ) );
+          
             /* reorder moves evaluated on nMaxPly */
-                
-            qsort( pml->amMoves, cOldMoves + 1, 
-                   sizeof( move ), (cfunc) CompareMoves );
-                
-          }
+          
+          qsort( pml->amMoves, cOldMoves + 1, 
+                 sizeof( move ), (cfunc) CompareMoves );
+          
         }
         break;
       }

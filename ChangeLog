@@ -1,3 +1,13 @@
+Thu Jun 12 20:58:18 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (FindnSaveBestMoves): evaluate top move and actual move
+	on the highest ply if their difference in equity exceeds the
+	given threshold.
+	(change all callers)
+	* eval.c (FindnSaveBestMoves): fix bug leading to duplicate
+	moves in the movelist.
+	(reported/suggested by Michael Depreli)
+
 Mon Jun  9 23:20:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Allow modifications of the match length during edit.

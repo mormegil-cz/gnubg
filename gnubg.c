@@ -3534,8 +3534,9 @@ extern void CommandHint( char *sz ) {
           ProgressStart( _("Considering moves...") );
           if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
                                   ms.anBoard, 
-                                  fHasMoved ? auch : NULL, &ci,
-                                  &esEvalChequer.ec,
+                                  fHasMoved ? auch : NULL, 
+                                  arSkillLevel[ SKILL_DOUBTFUL ],
+                                  &ci, &esEvalChequer.ec,
                                   aamfEval ) < 0 || fInterrupt ) {
 	    ProgressEnd();
 	    return;
