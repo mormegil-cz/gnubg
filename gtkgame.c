@@ -9729,6 +9729,8 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
     else if( !f )
 	outputl( _("No player records found.") );
 
+    fclose( pfIn );    
+
     if( f ) {
 	gtk_clist_sort( GTK_CLIST( pwList ) );
 	
@@ -9746,7 +9748,6 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	GTKAllowStdin();
     }
     
-    fclose( pfIn );    
 }
 
 static void UpdateMatchinfo( const char *pch, char *szParam, char **ppch ) {
