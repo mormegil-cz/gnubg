@@ -1,5 +1,5 @@
 /*
- * html.c
+ * text.c
  *
  * by Joern Thyssen  <jthyssen@dk.ibm.com>, 2002
  *
@@ -153,65 +153,74 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
 
 }
 
-extern int
-GetPredefinedEvalContext( const evalcontext *pec ) {
-
-  int i;
-
-  for ( i = 0; i < NUM_SETTINGS; ++i )
-    if ( ! cmp_evalcontext( &aecSettings[ i ], pec ) )
-      return i;
-
-  return -1;
-
-}
 
 
-extern int
-GetPredefinedMoveFilter( const int nPlies,
-                         movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
-
-  int i;
-  
-  if ( ! nPlies )
-    return -1;
-
-  for ( i = 0; i < NUM_MOVEFILTER_SETTINGS; ++i )
-    if ( equal_movefilter( nPlies - 1, 
-                           aamf[ nPlies - 1 ],
-                           aaamfMoveFilterSettings[ i ][ nPlies - 1 ] ) )
-      return i;
-
-  return -1;
-
-}
-
-
+/* return -1 if this isn't a predefined setting
+           n = index of predefined setting if it's a match or
+               if the eval context matches and it's 0 ply
+ */
 extern int
 GetPredefinedChequerplaySetting( const evalcontext *pec,
                                  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
-  int i = GetPredefinedEvalContext( pec );
-  int j = GetPredefinedMoveFilter( pec->nPlies, aamf );
-  int k;
+  int nEval;
+  int nFilter;
+  int nPlies = pec->nPlies;
+  int i;
+  int fSame;
+  int nPreset;
+  int Accept;
 
-  if ( i < 0 )
-    return -1;
+  for (nEval = 0; nEval < NUM_SETTINGS; ++nEval) {
+    if (cmp_evalcontext( aecSettings + nEval, pec) == 0) {
+      /* eval matches and it's 0 ply, we have a predefined one */
+      if (nPlies == 0)
+	return nEval;
 
-  if ( j < 0 ) {
-    if (pec->nPlies )
-      return -1;
-    else
-      return i;
+      /* see if there's a filter set which matches and uses the
+	 same eval context (world class and supremo use the same
+         eval context and different filters) */
+      for (nFilter = 0; nFilter < NUM_SETTINGS; ++nFilter) {
+	/* see what filter set goes with the predefined settings */
+	if ((nPreset = aiSettingsMoveFilter[nFilter]) < 0)
+	  continue;
+
+	/* nPreset = 0/tiny, 1/normal, 2/large, 3/huge */
+	fSame = 1;
+	for (i = 0; i < nPlies - 1; ++i) {
+	  if ((Accept = aamf[ nPlies - 1 ][ i ].Accept) !=
+	      aaamfMoveFilterSettings[nPreset][nPlies - 1 ][ i ].Accept) {
+	    fSame = 0;
+	    break;
+	  }
+
+	  /* if they are both ignore this level, don't check 
+	     the extra and threshold */
+	  if (Accept < 0)
+	    continue;
+
+	  if (aamf[ nPlies - 1 ][ i ].Extra !=
+	      aaamfMoveFilterSettings[nPreset][nPlies - 1 ][ i ].Extra) {
+	    fSame = 0;
+	    break;
+	  }
+
+	  if (fabs (aamf[ nPlies - 1 ][ i ].Threshold - 
+	   aaamfMoveFilterSettings[nPreset][nPlies - 1 ][ i ].Threshold)
+	      > 0.1e-6) {
+	    fSame = 0;
+	    break;
+	  }
+	}
+	/* the filters match (for this nPlies, so we may have a 
+	   preset */
+	if (fSame && (nFilter == nEval))
+	  return nEval;
+      }
+    }
   }
 
-  for ( k = 0; k < NUM_SETTINGS; ++k )
-    if ( j == aiSettingsMoveFilter[ k ] && i == k )
-      return i;
-
-
   return -1;
-
 }
 
 extern char *
@@ -271,7 +280,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
   int fCube = ! cmp_evalcontext ( &aecCube[ 0 ], &aecCube[ 1 ] );
   int fChequer = ! cmp_evalcontext ( &aecChequer[ 0 ], &aecChequer[ 1 ] );
   int fMovefilter = fChequer && 
-    ( aecChequer[ 0 ].nPlies || 
+    ( !aecChequer[ 0 ].nPlies || 
       equal_movefilter( aecChequer[ 0 ].nPlies - 1,
                         aaamf[ 0 ][ aecChequer[ 0 ].nPlies - 1 ],
                         aaamf[ 1 ][ aecChequer[ 0 ].nPlies - 1 ] ) );
@@ -299,7 +308,7 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
     if ( aecChequer[ i ].nPlies ) {
 
       sprintf( strchr( sz, 0 ),
-               _("Play: %s\n"), 
+               _("Play: %s "), 
                ( j < 0 ) ? "" : gettext ( aszSettings[ j ] ) );
 
       strcat( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );

@@ -749,6 +749,29 @@ CheckExtendedRolloutVersion ( const char *sz ) {
   return (n == SGF_ROLLOUT_VER);
 }
 
+static void
+RestoreRolloutMoveFilter (const char *sz, char *name, 
+		movefilter mf[MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+			  int nPlies) {
+
+  char *pc = strstr (sz, name);
+  int  i;
+  int  consumed;
+
+  if (pc == 0)
+    return;
+
+  pc += strlen (name);
+  for (i = 0; i < nPlies; ++i) {
+    if (sscanf (pc, "%d %d %f%n", &mf[ nPlies - 1 ][ i ].Accept,
+		&mf[ nPlies - 1 ][ i ].Extra,
+		&mf[ nPlies - 1][ i ].Threshold,
+		&consumed) != 3)
+      return;
+    pc += consumed;
+  }
+}
+
 static void 
 RestoreExtendedRolloutContext (rolloutcontext *prc, const char *sz ) {
 
@@ -790,15 +813,25 @@ RestoreExtendedRolloutContext (rolloutcontext *prc, const char *sz ) {
   prc->rStdLimit = 0.1;
 
   for (i = 0; i < 2; ++i) {
-    sprintf (szTemp, "latecube%d", i);
+    sprintf (szTemp, "latecube%d ", i);
     RestoreRolloutContextEvalContext ( &prc->aecCube[ i ], sz, szTemp + 4 );
     RestoreRolloutContextEvalContext ( &prc->aecCubeLate[ i ], sz, szTemp );
     sprintf (szTemp, "latecheq%d", i);
     RestoreRolloutContextEvalContext ( &prc->aecChequer[ i ], sz, szTemp + 4 );
     RestoreRolloutContextEvalContext ( &prc->aecChequerLate[ i ], sz, szTemp );
+    sprintf (szTemp, "latefilt%d ", i );
+    if (prc->aecChequer[ i ].nPlies) {
+      RestoreRolloutMoveFilter ( sz, szTemp + 4, prc->aaamfChequer[ i ],
+				 prc->aecChequer[ i ].nPlies);
+    }
+    if (prc->aecChequerLate[ i ].nPlies) {
+      RestoreRolloutMoveFilter ( sz, szTemp, prc->aaamfLate[ i ],
+				 prc->aecChequerLate[ i ].nPlies);
+    }
   }
   RestoreRolloutContextEvalContext ( &prc->aecCubeTrunc, sz, "cubetrunc");
   RestoreRolloutContextEvalContext ( &prc->aecCubeTrunc, sz, "cheqtrunc");
+
 
 }
   
@@ -1570,6 +1603,19 @@ WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 }
 
 static void
+WriteMoveFilters (FILE *pf, 
+		  const movefilter mf[MAX_FILTER_PLIES][MAX_FILTER_PLIES], 
+		  int nPlies ) {
+  int   i;
+
+  for (i = 0; i < nPlies; ++i) {
+    fprintf (pf, "%d %d %.5f ", mf[ nPlies - 1 ][ i ].Accept,
+	     mf[ nPlies - 1 ][ i ].Extra,
+	     mf[ nPlies - 1 ][ i ].Threshold);
+  }
+}
+
+static void
 WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
   
   int i;
@@ -1589,28 +1635,36 @@ WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
             prc->nSeed);
 
     for ( i = 0; i < 2; i++ ) {
-      fprintf ( pf, "cube%d ", i );
+      fprintf ( pf, " cube%d ", i );
       WriteEvalContext ( pf, &prc->aecCube[ i ] );
       fputc ( ' ', pf );
 
-      fprintf ( pf, "cheq%d ", i );
+      fprintf ( pf, " cheq%d ", i );
       WriteEvalContext ( pf, &prc->aecChequer[ i ] );
-      fputc ( ' ', pf );
+      if (prc->aecChequer[ i ].nPlies) {
+	fprintf (pf, " filt%d ", i);
+	WriteMoveFilters (pf, prc->aaamfChequer[ i ], 
+			prc->aecChequer[ i ].nPlies );
+      }
   }
 
   for ( i = 0; i < 2; i++ ) {
-    fprintf ( pf, "latecube%d ", i );
+    fprintf ( pf, " latecube%d ", i );
     WriteEvalContext ( pf, &prc->aecCubeLate[ i ] );
     fputc ( ' ', pf );
 
-    fprintf ( pf, "latecheq%d ", i );
+    fprintf ( pf, " latecheq%d ", i );
     WriteEvalContext ( pf, &prc->aecChequerLate[ i ] );
-    fputc ( ' ', pf );
+    if (prc->aecChequerLate[ i ].nPlies) {
+      fprintf (pf, " latefilt%d ", i);
+      WriteMoveFilters (pf, prc->aaamfLate[i], 
+		      prc->aecChequerLate[ i ].nPlies );
+    }
   }
 
-  fprintf ( pf, "cubetrunc ");
+  fprintf ( pf, " cubetrunc ");
   WriteEvalContext ( pf, &prc->aecCubeTrunc);
-  fprintf ( pf, "cheqtrunc ");
+  fprintf ( pf, " cheqtrunc ");
   WriteEvalContext ( pf, &prc->aecChequerTrunc);
 
 }
