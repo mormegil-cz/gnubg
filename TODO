@@ -197,6 +197,8 @@ duplication of effort and to make sure our changes merge easily.
   gtk_clist_row_is_visible should fix this. (gary)
 ** Dithering problems in GDK RGB (gary).
 ** "set cache 16777216" makes evaluations fail. (gary)
+** Cache statistics are wrong once hundreds of millions of evaluations
+  are made (integer overflow in the percentage calculation).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
