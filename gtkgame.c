@@ -85,6 +85,11 @@
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_widget_get_parent(w) ((w)->parent)
+
+#if PROCESSING_UNITS
+#include "procunits.h"
+#endif
+
 #define gtk_style_get_font(s) ((s)->font)
 
 static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
@@ -598,6 +603,11 @@ extern void HandleXAction( void ) {
 
     monitor m;
     
+    #if PROCESSING_UNITS
+    /* we don't wan't to dispatch events from a secondary thread! */
+    if (!IsMainThread ()) return;
+    #endif
+    
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
        us to will be processed anyway.  If one occurs after fAction is reset,
@@ -605,8 +615,6 @@ extern void HandleXAction( void ) {
        still process its I/O. */
     fAction = FALSE;
     
-    gdk_threads_enter ();
-
     SuspendInput( &m );
     
     /* Process incoming X events.  It's important to handle all of them,
@@ -616,8 +624,6 @@ extern void HandleXAction( void ) {
 	gtk_main_iteration();
 
     ResumeInput( &m );
-
-    gdk_threads_leave ();
 }
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
@@ -2217,6 +2223,12 @@ GTKTextToClipboard( const char *sz ) {
 }
 
 
+#if PROCESSING_UNITS
+void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw);
+void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw);
+void GTK_Procunit_Options (gpointer *p, guint n, GtkWidget *pw);
+#endif
+
 extern int InitGTK( int *argc, char ***argv ) {
     
     GtkWidget *pwVbox, *pwHbox;
@@ -2318,6 +2330,13 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Edit/_Paste"), "<control>V", NULL, 0, NULL },
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Edit/_Enter command..."), NULL, EnterCommand, 0, NULL },
+#if PROCESSING_UNITS
+	{ N_("/_Edit/_Processing units"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Edit/_Processing units/Master window..."), NULL, GTK_Procunit_Master, 0, NULL },
+	{ N_("/_Edit/_Processing units/Switch to Slave mode..."), NULL, GTK_Procunit_Slave, 0, NULL },
+	{ N_("/_Edit/_Processing units/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Edit/_Processing units/Options..."), NULL, GTK_Procunit_Options, 0, NULL },
+#endif
 	{ N_("/_Game"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
@@ -2664,6 +2683,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 
 extern void RunGTK( GtkWidget *pwSplash ) {
 
+    #if PROCESSING_UNITS
+    gdk_threads_enter ();
+    #endif
+
     GTKSet( &ms.fCubeOwner );
     GTKSet( &ms.nCube );
     GTKSet( ap );
@@ -2714,10 +2737,8 @@ extern void RunGTK( GtkWidget *pwSplash ) {
        has special settings, e.g., clockwise or nackgammon */
     ShowBoard();
 
-    #if PROCESSING_UNITS
-    gdk_threads_enter ();
-    #endif
     gtk_main();
+    
     #if PROCESSING_UNITS
     gdk_threads_leave ();
     #endif
@@ -2903,6 +2924,14 @@ static int Message( char *sz, dialogtype dt ) {
     
     gtk_widget_show_all( pwDialog );
 
+    #if PROCESSING_UNITS
+        /* we don't want messages from threads (other than the main
+           thread) to be modal, to avoid user interface and deadlock 
+           problems; and we certainly don't want to have two gtk_main()
+           loops running at the same time! */
+        if (!IsMainThread ()) return f;
+    #endif
+    
     /* This dialog should be REALLY modal -- disable "next turn" idle
        processing and stdin handler, to avoid reentrancy problems. */
     if( ( fRestoreNextTurn = nNextTurn ) )
@@ -3115,6 +3144,7 @@ extern void GTKOutputX( void ) {
     }
 
       
+
     cchOutput = 0;
     g_free( sz );
 }
@@ -5981,12 +6011,14 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     gtk_container_add( GTK_CONTAINER( DialogArea( pwRolloutDialog, DA_MAIN ) ),
 		       pwVbox );
 
+#if !PROCESSING_UNITS
     gtk_window_set_modal( GTK_WINDOW( pwRolloutDialog ), TRUE );
+#endif
     gtk_window_set_transient_for( GTK_WINDOW( pwRolloutDialog ),
 				  GTK_WINDOW( pwMain ) );
     
     gtk_widget_show_all( pwRolloutDialog );
-#if 0
+#if 1
     GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
@@ -6643,7 +6675,7 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
           }
         }
 
-	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRow << 1,
+        gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRow << 1,
 			    i + 1, sz );
 	
         if ( i < OUTPUT_EQUITY )
@@ -6687,7 +6719,7 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
         else
             strcpy ( sz, "n/a" );
 
-	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), ( iRow << 1 )
+        gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), ( iRow << 1 )
 			    | 1, i + 1, sz );
       }
 
@@ -6695,12 +6727,13 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
     
     gtk_progress_configure( GTK_PROGRESS( pwRolloutProgress ),
 			    iGame + 1, 0, cGames );
-#if 1
+#if 1 /* FIXME: multithread */
     GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
     GTKAllowStdin();
 #endif
+
     return 0;
 }
 

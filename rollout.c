@@ -928,6 +928,7 @@ CreateTask_BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                     /* new args specific to processing units */
                       int gameSeed)
 {
+    gdk_threads_init ();
     pu_task *pt = CreateTask (pu_task_rollout, FALSE);
     
     if (pt != NULL) {
@@ -987,15 +988,17 @@ void * Threaded_BearoffRollout (void *data)
     /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
                            (int) pthread_self ());*/
     
-    pthread_mutex_lock (&mutexTaskListAccess);
-    MarkTaskDone (pt, NULL);
-    pthread_mutex_unlock (&mutexTaskListAccess);
-
     if (GetProcessingUnitsMode () == pu_mode_slave) {
         if (err == 0) gSlaveStats.rollout.done ++;
         else gSlaveStats.rollout.failed ++;
-        Slave_UpdateStatus ();
+        #if USE_GTK
+        if (fX) Slave_UpdateStatus ();
+        #endif
     }
+
+    pthread_mutex_lock (&mutexTaskListAccess);
+    MarkTaskDone (pt, NULL);
+    pthread_mutex_unlock (&mutexTaskListAccess);
 
     FreeThreadSavedBases ();
 
@@ -1010,16 +1013,19 @@ void * Threaded_BasicCubefulRollout (void *data)
     pu_task_rollout_data 		*prd = (pu_task_rollout_data *) &pt->taskdata.rollout;
     pu_task_rollout_basiccubeful_data 	*psd = (pu_task_rollout_basiccubeful_data *) &prd->specificdata.basiccubeful;
     
+    CreateThreadGlobalStorage ();
+
     /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
                            (int) pthread_self ());*/
 
+    /* FIXME ??? */
+    /*
     sigset_t	sig;
     sigemptyset (&sig);
     sigaddset (&sig, SIGIO);
     assert (pthread_sigmask (SIG_BLOCK, &sig, NULL) == 0);
-
-    CreateThreadGlobalStorage ();
-
+    */
+    
     if( prd->rc.fRotate )
         QuasiRandomSeed( prd->rc.nSeed );
 
@@ -1049,7 +1055,9 @@ void * Threaded_BasicCubefulRollout (void *data)
     if (GetProcessingUnitsMode () == pu_mode_slave) {
         if (err == 0) gSlaveStats.rollout.done ++;
         else gSlaveStats.rollout.failed ++;
-        Slave_UpdateStatus ();
+        #if USE_GTK
+        if (fX) Slave_UpdateStatus ();
+        #endif
     }
                     
     FreeThreadSavedBases ();
@@ -1271,7 +1279,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
       QuasiRandomSeed( rcRollout.nSeed );
   
 #if PROCESSING_UNITS
-  
+          
   TaskEngine_Init ();
   
   for( i = 0, j = 0; i < cGames || j < cGames;  ) {
@@ -1318,7 +1326,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                                   ( float(*) [ NUM_ROLLOUT_OUTPUTS ] ) prd->aar, 
                                   aarResult,
                                   aarMu, aarSigma, aarVariance, aci, cci, fInvert, j);
-                                    
         Rollout_ShowProgress (fShowProgress, asz, j, cGames, prc,
                                 aarMu, aarSigma, cci, aciLocal);
         
@@ -1333,6 +1340,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   
   TaskEngine_Shutdown ();
 
+
+        
 #else /* PROCESSING_UNITS */
 
   for( i = 0; i < cGames; i++ ) {

@@ -241,6 +241,7 @@ typedef struct {
 typedef struct {
     rpu_stats	rollout;
     rpu_stats	eval;
+    rpu_stats	analysis;
 } rpu_slavestats;
 
 
@@ -267,6 +268,7 @@ extern rpu_slavestats 	gSlaveStats;
 */
 
 extern void InitProcessingUnits (void);
+extern int IsMainThread (void);
 extern pu_mode GetProcessingUnitsMode (void);
 extern void PrintProcessingUnitList (void);
 
@@ -299,12 +301,35 @@ extern void CommandShowProcunitsInfo ( char *sz ) ;
 extern void CommandShowProcunitsStats ( char *sz ) ;
 extern void CommandShowProcunitsRemoteMask ( char *sz ) ;
 extern void CommandShowProcunitsRemotePort ( char *sz ) ;
+extern void CommandShowProcunitsRemoteNotifListenEnabled (char *sz);
+extern void CommandShowProcunitsRemoteNotifListenPort (char *sz);
+extern void CommandShowProcunitsRemoteNotifSendMethod (char *sz);
+extern void CommandShowProcunitsRemoteNotifSendPort (char *sz);
+extern void CommandShowProcunitsRemoteNotifSendDelay (char *sz);
 
 extern void CommandSetProcunitsEnabled ( char *sz ) ;
 extern void CommandSetProcunitsRemoteMask ( char *sz ) ;
 extern void CommandSetProcunitsRemotePort ( char *sz ) ;
 extern void CommandSetProcunitsRemoteMode ( char *sz ) ;
 extern void CommandSetProcunitsRemoteQueue ( char *sz ) ;
+extern void CommandSetProcunitsRemoteNotifListenEnabled ( char *sz );
+extern void CommandSetProcunitsRemoteNotifListenPort ( char *sz );
+extern void CommandSetProcunitsRemoteNotifSendMethodNone ( char *sz );
+extern void CommandSetProcunitsRemoteNotifSendMethodBroadcast ( char *sz );
+extern void CommandSetProcunitsRemoteNotifSendMethodHost ( char *sz );
+extern void CommandSetProcunitsRemoteNotifSendPort ( char *sz );
+extern void CommandSetProcunitsRemoteNotifSendDelay ( char *sz );
+
+
+
+#if USE_GTK
+
+void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw);
+void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw);
+void GTK_Procunit_Options (gpointer *p, guint n, GtkWidget *pw);
+
+#endif
+
 
 
 #endif

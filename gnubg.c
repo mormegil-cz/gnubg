@@ -995,6 +995,34 @@ command cER = {
       szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 #if PROCESSING_UNITS
+}, acSetProcunitsRemoteNotifSendMethod[] = {
+    { "none", CommandSetProcunitsRemoteNotifSendMethodNone,
+        N_("Slave won't send any notifications"), NULL, NULL },
+    { "broadcast", CommandSetProcunitsRemoteNotifSendMethodBroadcast,
+        N_("Slave will send notifications to all masters on local network"), NULL, NULL },
+    { "host", CommandSetProcunitsRemoteNotifSendMethodHost,
+        N_("Slave will send notifications to specificied master"), szADDRESS, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetProcunitsRemoteNotifSend[] = {
+    { "method", NULL,
+        N_("Choose how slave should notify its availability"), NULL, acSetProcunitsRemoteNotifSendMethod },
+    { "port", CommandSetProcunitsRemoteNotifSendPort,
+        N_("Set TCP port on which slave should send its notifications"), szVALUE, NULL },
+    { "delay", CommandSetProcunitsRemoteNotifSendDelay,
+        N_("Set frequency of notifications (in seconds)"), szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetProcunitsRemoteNotifListen[] = {
+    { "enabled", CommandSetProcunitsRemoteNotifListenEnabled,
+        N_("Set whether master should listen to slave availability notifications"), szONOFF, &cOnOff },
+    { "port", CommandSetProcunitsRemoteNotifListenPort,
+        N_("Set TCP port on which master should listen to notifications"), szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetProcunitsRemoteNotif[] = {
+    { "listen", NULL,
+        N_("Set notification listen parameters"), NULL, acSetProcunitsRemoteNotifListen },
+    { "send", NULL,
+        N_("Set notification send parameters"), NULL, acSetProcunitsRemoteNotifSend },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetProcunitsRemote[] = {
     { "mode", CommandSetProcunitsRemoteMode,
         N_("Set host in master or slave remote mode"), szSLAVEMASTER, &cSlaveMaster },
@@ -1004,6 +1032,8 @@ command cER = {
         N_("Set remote processing TCP port"), szVALUE, NULL },
     { "queue", CommandSetProcunitsRemoteQueue, 
         N_("Set remote processing unit queue size"), szPROCUNITIDVALUE, NULL },
+    { "notification", NULL, 
+        N_("Set remote processing units notification parameters"), NULL, acSetProcunitsRemoteNotif },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetProcunits[] = {
     { "enabled", CommandSetProcunitsEnabled,
@@ -1597,11 +1627,33 @@ command cER = {
       N_("Compute statistics for every game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 #if PROCESSING_UNITS
+}, acShowProcunitsRemoteNotifSend[] = {
+    { "method", CommandShowProcunitsRemoteNotifSendMethod,
+        N_("Show how slave should notify its availability"), NULL, NULL },
+    { "port", CommandShowProcunitsRemoteNotifSendPort,
+        N_("Show TCP port on which slave should send its notifications"), NULL, NULL },
+    { "delay", CommandShowProcunitsRemoteNotifSendDelay,
+        N_("Show frequency of notifications (in seconds)"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acShowProcunitsRemoteNotifListen[] = {
+    { "enabled", CommandShowProcunitsRemoteNotifListenEnabled,
+        N_("Show whether master should listen to slave availability notifications"), NULL, NULL },
+    { "port", CommandShowProcunitsRemoteNotifListenPort,
+        N_("Show TCP port on which master should listen to notifications"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acShowProcunitsRemoteNotif[] = {
+    { "listen", NULL,
+        N_("Show notification listen parameters"), NULL, acShowProcunitsRemoteNotifListen },
+    { "send", NULL,
+        N_("Show notification send parameters"), NULL, acShowProcunitsRemoteNotifSend },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acShowProcunitsRemote[] = {
     { "mask", CommandShowProcunitsRemoteMask, 
       N_("Show remote processing IP address mask"), NULL, NULL },
     { "port", CommandShowProcunitsRemotePort, 
       N_("Show remote processing TCP port"), NULL, NULL },
+    { "notifications", NULL, 
+      N_("Show remote processing units notification parameters"), NULL, acShowProcunitsRemoteNotif },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowProcunits[] = {
     { "info", CommandShowProcunitsInfo, 
@@ -5958,8 +6010,15 @@ extern void output( const char *sz ) {
     
     if( cOutputDisabled )
 	return;
+        
     
 #if USE_GTK
+#if PROCESSING_UNITS
+    if (!IsMainThread ()) {
+        outputerrf (sz);
+        return;
+    }
+#endif
     if( fX ) {
 	GTKOutput( g_strdup( sz ) );
 	return;
@@ -6094,8 +6153,16 @@ extern void outputerrv( const char *sz, va_list val ) {
     putc( '\n', stderr );
 
 #if USE_GTK
-    if( fX )
-	GTKOutputErr( szFormatted );
+    if( fX ) {
+        #if PROCESSING_UNITS
+            if (IsMainThread ())
+                GTKOutputErr( szFormatted );
+            /*else
+                vfprintf( stderr, sz, val );*/
+        #else
+            GTKOutputErr( szFormatted );
+        #endif
+    }
 #endif
     
 #if __GLIBC__
@@ -6113,6 +6180,9 @@ extern void outputx( void ) {
 	return;
 
 #if USE_GTK
+#if PROCESSING_UNITS
+    if (!IsMainThread ()) return;
+#endif
     if( fX )
 	GTKOutputX();
 #endif
@@ -6162,6 +6232,12 @@ extern void outputresume( void ) {
 /* Temporarily ignore TTY/GUI input. */
 extern void SuspendInput( monitor *pm ) {
 
+#if PROCESSING_UNITS
+    /* avoid deadlock between this thread the main thread running 
+        gtk_main, waiting for GUI input */
+    if (!IsMainThread ()) return;
+#endif
+
 #if USE_GTK
     if ( fX )
        GTKSuspendInput( pm );
@@ -6170,6 +6246,10 @@ extern void SuspendInput( monitor *pm ) {
 
 /* Resume input (must match a previous SuspendInput). */
 extern void ResumeInput( monitor *pm ) {
+
+#if PROCESSING_UNITS
+    if (!IsMainThread ()) return;
+#endif
 
 #if USE_GTK
     if ( fX )
@@ -6314,13 +6394,24 @@ static void CallbackProgress( void ) {
 #if USE_GTK
     if( fX ) {
 	monitor m;
-    
-	SuspendInput( &m );
-    
-	while( gtk_events_pending() )
-	    gtk_main_iteration();
-	
-	ResumeInput( &m );
+        
+        #if PROCESSING_UNITS
+        /* don't dispatch events from secondary thread! */
+        if (IsMainThread ()) {
+        #endif
+        
+            gdk_threads_enter ();
+            SuspendInput( &m );
+        
+            while( gtk_events_pending() )
+                gtk_main_iteration();
+            
+            ResumeInput( &m );
+            gdk_threads_leave ();
+
+        #if PROCESSING_UNITS
+        }
+        #endif
     }
 #endif
     
@@ -6564,13 +6655,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 
 #if PROCESSING_UNITS
-    #if USE_GTK
-        g_thread_init (NULL);
-    #endif
     InitThreadGlobalStorage ();
     CreateThreadGlobalStorage ();
-    InitProcessingUnits ();
+    #if USE_GTK
+        g_thread_init (NULL);
+        gdk_threads_init ();
+    #endif
 #endif
+
 
 #if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
@@ -6767,13 +6859,32 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 
 #if USE_GTK
-    if ( fX && fSplash )
-      pwSplash = CreateSplash ();
+    if ( fX && fSplash ) {
+        gdk_threads_enter ();
+        pwSplash = CreateSplash ();
+        gdk_threads_leave ();
+    }
 #endif
 
+
+
+#if PROCESSING_UNITS
 #if USE_GTK
+    gdk_threads_enter ();
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Processing units"), 500 );
+    gdk_threads_leave ();
+#endif    
+
+    InitProcessingUnits ();
+#endif
+
+
+#if USE_GTK
+    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Random number generator"), 500 );
+    gdk_threads_leave ();
 #endif    
     
     InitRNG( NULL, TRUE, rngCurrent );
@@ -6815,15 +6926,20 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     /* init met */
     
 #if USE_GTK
+    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("match equity table"), 500 );
+    gdk_threads_leave ();
 #endif    
 
     InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
     
+    
 #if USE_GTK
+    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("neural nets"), 500 );
+    gdk_threads_leave ();
 #endif    
 
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
@@ -6844,15 +6960,19 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #if USE_GUILE
 #  if USE_GTK
+    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Guile"), 500 );
+    gdk_threads_leave ();
 #  endif    
     GuileInitialise( szDataDirectory );
 #endif
 
 #if USE_GTK
+    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Board Images"), 500 );
+    gdk_threads_leave ();
 #endif    
 
     RenderInitialise();
@@ -6898,7 +7018,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 #endif
 	}
-    
+            
 #ifdef SIGIO
 # if USE_GUI
     if( fX )
@@ -6913,7 +7033,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 
     fnTick = CallbackProgress;
-    
+        
     /* create gnubg directory if non-existing */
 
     if ( CreateGnubgDirectory () )
@@ -6928,15 +7048,19 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     /* load rc files */
 
 #if USE_GTK
+    gdk_threads_enter ();
     PushSplash ( pwSplash, 
                  _("Loading"), _("User Settings"), 500 );
+    gdk_threads_leave ();
 #endif    
     if( !fNoRC )
 	LoadRCFiles();
 
 #if USE_GTK
+    gdk_threads_enter ();
       PushSplash ( pwSplash, 
                    _("Doing"), _("nothing in particular"), 0 );
+    gdk_threads_leave ();
 #endif    
 
 #if USE_SOUND
@@ -6955,8 +7079,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     if( optind < argc && *argv[ optind ] ) {
 #if USE_GTK
+    gdk_threads_enter ();
       PushSplash ( pwSplash, 
                    _("Loading"), _("Specified Match"), 500 );
+    gdk_threads_leave ();
 #endif    
 	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
 	    /* quote filename with whitespace so that function
@@ -6979,7 +7105,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     if( pchCommands ) {
 #if USE_GTK
+        gdk_threads_enter ();
         DestroySplash ( pwSplash );
+        gdk_threads_leave ();
 #endif
 	CommandLoadCommands( pchCommands );
         EvalShutdown();
@@ -7004,9 +7132,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     /* start-up sound */
     playSound ( SOUND_START );
     
-#if PROCESSSING_UNITS
-    StartNotificationListener ();
-#endif
+    
     
 #if USE_GTK
     if( fX ) {
