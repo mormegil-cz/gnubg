@@ -1,3 +1,8 @@
+Wed Jul  3 13:56:25 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* New cache code. Faster, and higher hit %. You can revert by
+	compiling with '-DGARY_CACHE'
+
 Sat May  4 13:33:14 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* neuralnet.c (NeuralNetCreateDirect): add initialization for

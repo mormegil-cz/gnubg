@@ -121,6 +121,8 @@ extern long StringHash( char *sz ) {
     return l;
 }
 
+#if defined( GARY_CACHE )
+
 extern int CacheCreate( cache *pc, int c, cachecomparefunc pccf ) {
 
     int i;
@@ -241,3 +243,177 @@ extern int CacheStats( cache *pc, int *pcLookup, int *pcHit ) {
 
     return 0;
 }
+
+
+#else
+
+/* Adapted from
+   http://burtleburtle.net/bob/c/lookup2.c
+   
+--------------------------------------------------------------------
+lookup2.c, by Bob Jenkins, December 1996, Public Domain.
+hash(), hash2(), hash3, and mix() are externally useful functions.
+Routines to test the hash are included if SELF_TEST is defined.
+You can use this free for any purpose.  It has no warranty.
+--------------------------------------------------------------------
+
+*/
+
+typedef  unsigned long   ub4;
+
+#define mix(a,b,c) \
+{ \
+  a -= b; a -= c; a ^= (c>>13); \
+  b -= c; b -= a; b ^= (a<<8); \
+  c -= a; c -= b; c ^= (b>>13); \
+  a -= b; a -= c; a ^= (c>>12);  \
+  b -= c; b -= a; b ^= (a<<16); \
+  c -= a; c -= b; c ^= (b>>5); \
+  a -= b; a -= c; a ^= (c>>3);  \
+  b -= c; b -= a; b ^= (a<<10); \
+  c -= a; c -= b; c ^= (b>>15); \
+}
+
+static unsigned long
+keyToLong(char k[10], int np)
+{
+  ub4 a = 0x9e3779b9;  /* the golden ratio; an arbitrary value */
+  ub4 b = a;
+  ub4 c = 11+np;
+
+  c += ((ub4)k[9]<<16);
+  c += ((ub4)k[8]<<8);
+
+  b += ((ub4)k[7]<<24);
+  b += ((ub4)k[6]<<16);
+  b += ((ub4)k[5]<<8);
+  b += k[4];
+
+  a += ((ub4)k[3]<<24);
+  a += ((ub4)k[2]<<16);
+  a += ((ub4)k[1]<<8);
+  a += k[0];
+
+  mix(a,b,c);
+
+  return c;
+}
+
+
+int
+CacheCreate(cache* pc, unsigned int s)
+{
+  pc->cLookup = 0;
+  pc->cHit = 0;
+  pc->nAdds = 0;
+
+  /* adjust size ot smallest power of 2 GE to s */
+  pc->size = s;
+
+  while( (s & (s-1)) != 0 ) {
+    s &= (s-1);
+  }
+
+  pc->size = ( s < pc->size ) ? 2*s : s;
+  
+  pc->m = malloc(pc->size * sizeof(*pc->m));
+
+  if( pc->m == 0 ) {
+    return -1;
+  }
+  
+  CacheFlush(pc);
+
+  return 0;
+}
+
+cacheNode*
+CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
+{
+  unsigned int size = pc->size;
+  unsigned long l = keyToLong(e->auchKey, e->nEvalContext);
+  
+  l = (l & ((size >> 1)-1)) << 1;
+
+  if( m ) {
+    *m = l;
+  }
+
+  ++pc->cLookup;
+
+  {
+  cacheNode* ck1 = pc->m + l;
+  if( (ck1->nEvalContext == e->nEvalContext
+       && memcmp(e->auchKey, ck1->auchKey, sizeof(e->auchKey)) == 0) ) {
+    // found at first slot
+    ++pc->cHit;
+    return ck1;
+  }
+
+  if( ck1->nEvalContext != (unsigned int)-1 ) {
+    cacheNode* ck2 = pc->m + (l+1);
+    if( (ck2->nEvalContext == e->nEvalContext &&
+	 memcmp(e->auchKey, ck2->auchKey, sizeof(e->auchKey)) == 0) ) {
+      // found at second slot. Make it primary
+      cacheNode tmp = *ck1;
+      *ck1 = *ck2;
+      *ck2 = tmp;
+
+      ++pc->cHit;
+      return ck1;
+    }
+  }
+  }
+  
+  return 0;
+}
+
+void
+CacheAdd(cache* pc, cacheNode* e, unsigned long l)
+{
+  cacheNode* ck1 = pc->m + l;
+
+  ++pc->nAdds;
+  
+  if( ck1->nEvalContext != (unsigned int)-1 ) {
+    pc->m[l+1] = *ck1;
+  }
+  *ck1 = *e;
+}
+
+
+void
+CacheDestroy(cache* pc)
+{
+  free(pc->m);
+}
+
+void
+CacheFlush(cache* pc)
+{
+  int k;
+  for(k = 0; k < pc->size; ++k) {
+    pc->m[k].nEvalContext = (unsigned int)-1;
+  }
+}
+
+int
+CacheResize( cache *pc, int cNew )
+{
+  if( cNew == pc->size ) {
+    return 0;
+  }
+  
+  CacheDestroy(pc);
+  return CacheCreate(pc, cNew);
+}
+
+void
+CacheStats(cache* pc, int* pcLookup, int* pcHit)
+{
+  *pcLookup = pc->cLookup;
+  *pcHit = pc->cHit;
+}
+
+
+#endif

@@ -284,11 +284,13 @@ char *aszEvalType[] =
 
 static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
 
+#if defined( GARY_CACHE )
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
     int nEvalContext;
     float ar[ NUM_OUTPUTS ];
 } evalcache;
+#endif
 
 static int bRecursingFor2ply = 0;
 static int nReductionGroup   = 0;
@@ -439,6 +441,7 @@ static void ComputeTable( void )
   ComputeTable1();
 }
 
+#if defined( GARY_CACHE )
 static int EvalCacheCompare( evalcache *p0, evalcache *p1 ) {
 
     return !EqualKeys( p0->auchKey, p1->auchKey ) ||
@@ -457,6 +460,7 @@ static long EvalCacheHash( evalcache *pec ) {
 
     return l;    
 }
+#endif
 
 /* Search for a readable file in szDir, ., and PKGDATADIR.  The
    return string is malloc()ed. */
@@ -719,9 +723,16 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     static int fInitialised = FALSE;
     
     if( !fInitialised ) {
+#if defined( GARY_CACHE )
 	if( CacheCreate( &cEval, cCache = 8192,
 			 (cachecomparefunc) EvalCacheCompare ) )
 	    return -1;
+#else
+	cCache = 0x1 << 16;
+	if( CacheCreate( &cEval, cCache ) ) {
+	  return -1;
+	}
+#endif
 	    
 	ComputeTable();
 
@@ -2812,9 +2823,14 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 		pci->fCubeOwner == pci->fMove ) << 28 ) ^
 	    ( pci->fCrawford << 30 );
     
+#if defined( GARY_CACHE )
     l = EvalCacheHash( &ec );
     
-    if( ( pec = CacheLookup( &cEval, l, &ec ) ) ) {
+    if( ( pec = CacheLookup( &cEval, l, &ec ) ) )
+#else
+    if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) 
+#endif
+      {
 	memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
 	
 	return 0;
@@ -2824,7 +2840,12 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 	return -1;
     
     memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
+#if defined( GARY_CACHE )
     return CacheAdd( &cEval, l, &ec, sizeof ec );
+#else
+    CacheAdd(&cEval, &ec, l);
+    return 0;
+#endif
 }
 
 
@@ -4280,12 +4301,23 @@ extern int EvalCacheResize( int cNew ) {
 extern int EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup,
 			   int *pcHit ) {
     if( pcUsed )
-	*pcUsed = cEval.c;
+      *pcUsed = 
+#if defined( GARY_CACHE )
+	cEval.c
+#else
+	cEval.nAdds
+#endif
+	;
 
     if( pcSize )
 	*pcSize = cCache;
 	    
+#if defined( GARY_CACHE )
     return CacheStats( &cEval, pcLookup, pcHit );
+#else
+    CacheStats( &cEval, pcLookup, pcHit );
+    return 0;
+#endif
 }
 
 extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],

@@ -1,3 +1,7 @@
+Wed Jul  3 13:58:03 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* New cache code. Change default cache size to a more reasonable 2^16.
+
 Wed Jul  3 19:32:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (SetEvalCommands): fix locale bug.

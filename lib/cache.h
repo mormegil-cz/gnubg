@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 
+#if defined( GARY_CACHE )
 typedef int ( *cachecomparefunc )( void *p0, void *p1 );
 
 typedef struct _cachenode {
@@ -29,5 +30,44 @@ extern void *CacheLookup( cache *pc, unsigned long l, void *p );
 extern int CacheFlush( cache *pc );
 extern int CacheResize( cache *pc, int cNew );
 extern int CacheStats( cache *pc, int *pcLookup, int *pcHit );
+
+#else
+
+typedef struct _cacheNode {
+  unsigned char auchKey[10];
+  int nEvalContext;
+  float ar[5 /*NUM_OUTPUTS*/];
+} cacheNode;
+
+/* name used in eval.c */
+typedef cacheNode evalcache;
+
+typedef struct _cache {
+  cacheNode*	m;
+  
+  unsigned int size;
+  unsigned int nAdds;
+  unsigned int cLookup;
+  unsigned int cHit;
+} cache;
+
+/* Cache size will be adjusted to a power of 2 */
+int
+CacheCreate(cache* pc, unsigned int size);
+
+int
+CacheResize(cache *pc, int cNew);
+
+/* l is filled with a value which is passed to CacheAdd */
+cacheNode*
+CacheLookup(cache* pc, cacheNode* e, unsigned long* l);
+
+void CacheAdd(cache* pc, cacheNode* e, unsigned long l);
+void CacheFlush(cache* pc);
+void CacheDestroy(cache* pc);
+void CacheStats(cache* pc, int* pcLookup, int* pcHit);
+
+#endif
+
 
 #endif
