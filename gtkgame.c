@@ -328,18 +328,22 @@ static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw );
+static void ExportGameText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw );
+static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw );
+static void ExportPositionText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
+static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw );
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw );
@@ -2563,6 +2567,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Export/_Game/PDF..."), NULL, ExportGamePDF, 0, NULL },
 	{ N_("/_File/_Export/_Game/PostScript..."), 
           NULL, ExportGamePostScript, 0, NULL },
+	{ N_("/_File/_Export/_Game/Text..."), 
+          NULL, ExportGameText, 0, NULL },
 	{ N_("/_File/_Export/_Match"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Match/HTML..."), 
           NULL, ExportMatchHtml, 0, NULL },
@@ -2572,12 +2578,16 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Export/_Match/PDF..."), NULL, ExportMatchPDF, 0, NULL },
 	{ N_("/_File/_Export/_Match/PostScript..."), 
           NULL, ExportMatchPostScript, 0, NULL },
+	{ N_("/_File/_Export/_Match/Text..."), 
+          NULL, ExportMatchText, 0, NULL },
 	{ N_("/_File/_Export/_Position"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Position/HTML..."), NULL,
 	  ExportPositionHtml, 0, NULL },
 	{ N_("/_File/_Export/_Position/Encapsulated PostScript..."), NULL,
 	  ExportPositionEPS, 0, NULL },
 	{ N_("/_File/_Export/_Position/.pos..."), NULL, ExportPositionPos, 0,
+	  NULL },
+	{ N_("/_File/_Export/_Position/Text..."), NULL, ExportPositionText, 0,
 	  NULL },
 	{ N_("/_File/_Export/_Session"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Session/HTML..."), NULL, ExportSessionHtml, 0,
@@ -2588,6 +2598,8 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, ExportSessionPDF, 0, NULL },
 	{ N_("/_File/_Export/_Session/PostScript..."), NULL,
 	  ExportSessionPostScript, 0, NULL },
+	{ N_("/_File/_Export/_Session/Text..."), NULL,
+	  ExportSessionText, 0, NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT, NULL },
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
@@ -3716,6 +3728,15 @@ static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
+static void ExportGameText( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultFileName ( PATH_TEXT );
+  FileCommand( _("Export text game"), sz, "export game text" );
+  if ( sz ) 
+    free ( sz );
+
+}
+
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_LATEX );
@@ -3761,6 +3782,15 @@ static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
+static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultFileName ( PATH_TEXT );
+  FileCommand( _("Export text match"), sz, "export match text" );
+  if ( sz ) 
+    free ( sz );
+
+}
+
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_EPS );
@@ -3783,6 +3813,15 @@ static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_POS );
   FileCommand( _("Export .pos position"), sz, "export position pos" );
+  if ( sz ) 
+    free ( sz );
+
+}
+
+static void ExportPositionText( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultFileName ( PATH_TEXT );
+  FileCommand( _("Export text position"), sz, "export position text" );
   if ( sz ) 
     free ( sz );
 
@@ -3820,6 +3859,15 @@ static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
   char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
   FileCommand( _("Export PostScript session"), sz,
                "export session postscript" );
+  if ( sz ) 
+    free ( sz );
+
+}
+
+static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultFileName ( PATH_TEXT );
+  FileCommand( _("Export text session"), sz, "export session text" );
   if ( sz ) 
     free ( sz );
 
@@ -7428,6 +7476,8 @@ GTKShowPath ( void ) {
       N_("SGF (gnubg)") },
     { N_("Import of GamesGrid SGG files") , 
       N_("GamesGrid SGG") },
+    { N_("Export of text files"), 
+      N_("Text") },
     { N_("Loading of match equity files (.xml)"), 
       N_("Match Equity Tables") } };
 
