@@ -96,4 +96,11 @@ updateStatisticsMatch ( list *plMatch );
 
 extern int getLuckRating ( const float rLuck );
 
+extern float
+relativeFibsRating ( const float r, const int n );
+
+extern void
+getMWCFromError ( const statcontext *psc,
+                  float aar[ 2 ][ 2 ] );
+
 #endif

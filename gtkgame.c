@@ -7053,7 +7053,12 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Wrong takes"),
          N_("Wrong passes"),
          N_("Cube decision rating"),
-         N_("Overall rating") };
+         N_("Overall rating"),
+         N_("MWC against current opponent"),
+         N_("Relative rating"),
+         N_("MWC against perfect opponent"),
+         N_("Relative rating"),
+  };
 
   GtkWidget *pwDialog = CreateDialog( szTitle,
                                        FALSE, NULL, NULL ),
@@ -7062,6 +7067,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   int i;
   char sz[ 32 ];
   ratingtype rt[ 2 ];
+  float aar[ 2 ][ 2 ];
 #if WIN32
   char szOutput[4096];
     GtkWidget *pwButtons,
@@ -7087,7 +7093,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
-  for (i = 0; i < 33; i++) {
+  for (i = 0; i < (33 + ( pms->nMatchTo != 0 ) * 4 ); i++) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
     gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, gettext ( aszLabels[i] ) );
   }
@@ -7271,6 +7277,32 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 1, sz);
   sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 2, sz);
+
+  if ( pms->nMatchTo ) {
+
+    getMWCFromError ( psc, aar );
+
+    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 0 ][ 0 ] );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 1, sz);
+    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 1 ][ 0 ] );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 2, sz);
+
+    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 0 ][ 0 ], ms.nMatchTo ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 1, sz);
+    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 1 ][ 0 ], ms.nMatchTo ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 2, sz);
+
+    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 0 ][ 1 ] );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 1, sz);
+    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 1 ][ 1 ] );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 2, sz);
+
+    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 0 ][ 1 ], ms.nMatchTo ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 1, sz);
+    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 1 ][ 1 ], ms.nMatchTo ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 2, sz);
+
+  }
 
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );

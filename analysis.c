@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -961,6 +962,54 @@ IniStatcontext ( statcontext *psc ) {
 
 }
 
+
+
+extern float
+relativeFibsRating ( const float r, const int n ) {
+
+  float p, D;
+
+  p = ( r > 0.5 ) ? 1.0 -r : r;
+  D = 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / p - 1.0 );
+  return ( r > 0.5 ) ? D : -D;
+
+} 
+
+
+extern void
+getMWCFromError ( const statcontext *psc,
+                  float aar[ 2 ][ 2 ] ) {
+
+  float ar[ 2 ];
+  int i;
+  float r1, r2;
+
+
+  for ( i = 0; i < 2; i++ ) 
+    ar[ i ] = psc->arErrorMissedDoubleDP[ i ][ 1 ]
+      + psc->arErrorMissedDoubleTG[ i ][ 1 ]
+      + psc->arErrorWrongDoubleDP[ i ][ 1 ]
+      + psc->arErrorWrongDoubleTG[ i ][ 1 ]
+      + psc->arErrorWrongTake[ i ][ 1 ]
+      + psc->arErrorWrongPass[ i ][ 1 ]
+      + psc->arErrorCheckerplay[ i ][ 1 ];
+
+  r1 = 0.5 + ar[ 0 ];
+  r2 = 0.5 + ar[ 1 ];
+
+  /* mwc against current opponent */
+
+  aar[ 0 ][ 0 ] = r2 / ( r1 + r2 );
+  aar[ 1 ][ 0 ] = r1 / ( r1 + r2 );
+
+  /* mwc against player with error = 0 */
+
+  aar[ 0 ][ 1 ] = 0.5 / ( r1 + 0.5 );
+  aar[ 1 ][ 1 ] = 0.5 / ( r2 + 0.5 );
+
+}
+
+
 extern void
 DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 
@@ -975,8 +1024,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   /* FIXME: honour fOutputMWC etc. */
   /* FIXME: calculate ratings (ET, World class, etc.) */
   /* FIXME: use output*() functions, not printf */
-  
-  sprintf ( szTemp, _("Player\t\t\t\t%-15s\t\t%-15s\n\n"),
+
+  sprintf ( szTemp, "Player\t\t\t\t%-15s\t\t%-15s\n\n",
            ap[ 0 ].szName, ap [ 1 ].szName );
   strcpy ( szOutput, szTemp);
  
@@ -1279,6 +1328,42 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                 gettext ( aszRating[ rt [ 1 ] ] ) );
       strcat ( szOutput, szTemp);
   }
+
+  /* calculate total error */
+
+  if ( ms.nMatchTo ) {
+
+    float aar[ 2 ][ 2 ];
+
+    getMWCFromError ( psc, aar );
+
+    sprintf ( szTemp, _("Match winning chance\nagainst opponent:\t\t%7.2f%%\t\t%7.2f%%\n"),
+              100.0 * aar[ 0 ][ 0 ],
+              100.0 * aar[ 1 ][ 0 ] );
+    strcat ( szOutput, szTemp);
+
+    sprintf ( szTemp, _("Relative rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
+              relativeFibsRating ( aar[ 0 ][ 0 ], ms.nMatchTo ),
+              relativeFibsRating ( aar[ 1 ][ 0 ], ms.nMatchTo ) );
+    strcat ( szOutput, szTemp);
+
+    
+
+    sprintf ( szTemp, _("Match winning chance\nagainst perfect opponent:\t%7.2f%%\t\t%7.2f%%\n"),
+              100.0 * aar[ 0 ][ 1 ],
+              100.0 * aar[ 1 ][ 1 ] );
+    strcat ( szOutput, szTemp);
+
+    sprintf ( szTemp, _("Relative rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
+              relativeFibsRating ( aar[ 0 ][ 1 ], ms.nMatchTo ),
+              relativeFibsRating ( aar[ 1 ][ 1 ], ms.nMatchTo ) );
+    strcat ( szOutput, szTemp);
+
+
+
+  }
+  
+
 }
 
 
