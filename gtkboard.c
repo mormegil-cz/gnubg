@@ -658,6 +658,35 @@ static void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
     points[ bd->turn > 0 ][ 24 ] = abs( bd->points[ 25 ] );
 }
 
+static void update_match_id( BoardData *bd ) {
+  
+  int anScore[ 2 ];
+  int fCubeOwner;
+
+  anScore[ 0 ] = bd->score_opponent;
+  anScore[ 1 ] = bd->score;
+
+  if ( bd->can_double ) {
+    if ( bd->opponent_can_double )
+      fCubeOwner = -1;
+    else
+      fCubeOwner = 1;
+  }
+  else 
+    fCubeOwner = 0;
+
+  gtk_entry_set_text( GTK_ENTRY( bd->match_id ), 
+                      MatchID( bd->cube, 
+                               fCubeOwner, 
+                               ( bd->turn == 1 ) ? 1 : 0, 
+                               bd->match_to,
+                               anScore,
+                               bd->crawford_game, 
+                               ( bd->turn == 1 ) ? bd->dice : 
+                               bd->dice_opponent ) );
+}
+
+
 static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
@@ -1781,6 +1810,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
 				  
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
+    update_match_id ( bd );
     update_move( bd );
 
     if( bd->dice[ 0 ] || bd->dice_opponent[ 0 ] ) {
@@ -2167,6 +2197,7 @@ extern void board_set_playing( Board *board, gboolean f ) {
     pbd->playing = f;
     gtk_widget_set_sensitive( pbd->position_id, f );
     gtk_widget_set_sensitive( pbd->reset, f );
+    gtk_widget_set_sensitive( pbd->match_id, f );
 }
 
 static void update_buttons( BoardData *pbd ) {
@@ -3745,6 +3776,17 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
     UserCommand( sz );
 }
 
+static void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
+
+  char sz[ 23 ]; /* "set board XXXXXXXXXXXXXX" */
+
+  sprintf ( sz, "set matchid %s", 
+            gtk_entry_get_text ( GTK_ENTRY ( bd->match_id ) ) );
+
+  UserCommand ( sz );
+
+}
+
 static void board_show_child( GtkWidget *pwChild, BoardData *pbd ) {
 
     if( pwChild != pbd->dice_area && !GTK_IS_HBUTTON_BOX( pwChild ) )
@@ -4105,17 +4147,41 @@ static void board_init( Board *board ) {
     gtk_box_pack_start( GTK_BOX( bd->hbox_pos ), bd->stop =
 			gtk_button_new_with_label( "Stop" ),
 			FALSE, FALSE, 8 );
-    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->edit =
-		      gtk_toggle_button_new_with_label( "Edit" ),
-		      FALSE, FALSE, 8 );
-    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->reset =
-		      gtk_button_new_with_label( "Reset" ),
-		      FALSE, FALSE, 0 );
-    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->position_id =
-		      gtk_entry_new(), FALSE, FALSE, 8 );
+
+    bd->pos_table = gtk_table_new( 2, 4, FALSE );
+    gtk_box_pack_end( GTK_BOX ( bd->hbox_pos), bd->pos_table, 
+                      FALSE, FALSE, 4 );
+
+    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
+                       pw = gtk_label_new ( "Position: " ),
+                       0, 1, 0, 1, GTK_FILL, 0, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    
+    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
+                       pw = gtk_label_new ( "Match ID: " ),
+                       0, 1, 1, 2, GTK_FILL, 0, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
+                       bd->position_id = gtk_entry_new(),
+                       1, 2, 0, 1, GTK_FILL, 0, 4, 0 );
     gtk_entry_set_max_length( GTK_ENTRY( bd->position_id ), 14 );
-    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ),
-		      gtk_label_new( "Position:" ), FALSE, FALSE, 0 );
+
+    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
+                       bd->match_id = gtk_entry_new(),
+                       1, 2, 1, 2, GTK_FILL, 0, 4, 0 );
+    gtk_entry_set_max_length( GTK_ENTRY( bd->match_id ), 10 );
+
+    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
+                       bd->edit = gtk_toggle_button_new_with_label( "Edit" ),
+                       2, 3, 0, 1, GTK_FILL, 0, 4, 0 );
+
+    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
+                       bd->reset = gtk_button_new_with_label( "Reset" ),
+                       3, 4, 0, 1, GTK_FILL, 0, 4, 0 );
+
+
+
     
     gtk_table_attach( GTK_TABLE( bd->table ), pw = gtk_label_new( "Name" ),
 		      1, 2, 0, 1, GTK_FILL, 0, 4, 0 );
@@ -4179,6 +4245,8 @@ static void board_init( Board *board ) {
 	
     gtk_signal_connect( GTK_OBJECT( bd->position_id ), "activate",
 			GTK_SIGNAL_FUNC( board_set_position ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->match_id ), "activate",
+			GTK_SIGNAL_FUNC( board_set_matchid ), bd );
     gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
 			GTK_SIGNAL_FUNC( ShowBoard ), NULL );
 

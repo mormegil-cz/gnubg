@@ -1,3 +1,17 @@
+Sun Mar 17 17:09:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* set.c (CommandSetMatchID): new function.
+
+	* gnubg.c: new command 'set matchid'.
+
+	* play.c (SetMatchID): new function. 
+
+	* gtkboard.c (update_match_id): new function. Set text string for
+	gtk_entry with match ID.
+	* gtkboard.c (board_set_match_id): new function. Called when user
+	changes match ID.
+	* gtkboard.c (board_init): setup widgets for match ID.
+
 Sun Mar 17 14:25:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	Introduce new Match ID.
