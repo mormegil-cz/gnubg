@@ -86,7 +86,7 @@ enum {
 
      Break Contact : (sum over x of C(x)) / 152
 
-     152 is degree of contact of start position.
+     152 is dgree of contact of start position.
   */
   I_BREAK_CONTACT = HALF_RACE_INPUTS,
 
@@ -150,18 +150,6 @@ enum {
   /* Above squared */
   I_CONTAIN2,
 
-  /* Number of builders for the next empty slot in importance.
-     Order of importance (in anPoint) is (5, 4, 3, 6, 2, 7).
-     Normailed to [01]
-  */
-  I_BUILDERS,
-
-  /* Next empty slot in importance (see above) is slotted.
-     value (6-k)/6 if k is the ordinal number, so 1 for most impotant, 5/6
-     for next etc.
-  */
-  I_SLOTTED,
-
   /* For all checkers out of home, 
      sum (Number of rolls that let x escape * distance from home)
 
@@ -189,22 +177,12 @@ enum {
    */
   I_ENTER2,
 
-  /* 1 if last location has an even number of checkers (0,2 ...), 0 otherwise
-   */
-  I_TOP_EVEN,
+  I_TIMING,
   
-  /* 1 if total of last 2 location has an even number of checkers (0,2 ...),
-     0 otherwise
-   */
-  I_TOP2_EVEN,
-
-  /* Number of rolls that create at least 1 new anchor somewhere. */
-  I_COVER,
-
-  /* Number of rolls that create at least 2 new anchors. */
-  I_COVER2,
+  I_BACKBONE,
 
   HALF_INPUTS };
+
 
 #define NUM_INPUTS ( HALF_INPUTS * 2 )
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
@@ -453,7 +431,8 @@ static int Escapes( int anBoard[ 25 ], int n ) {
 /* Calculates the inputs for one player only.  Returns 0 for contact
    positions, 1 for races. */
 static int
-CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
+CalculateHalfInputs( int anBoard[ 25 ],
+		     int anBoardOpp[ 25 ],
 		     float afInput[] ) {
 
   int i, j, k, l, nOppBack, n, aHit[ 39 ], nBoard;
@@ -595,7 +574,10 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
   } aRoll[ 21 ];
     
   /* FIXME consider -1.0 instead of 0.0, since null inputs do not
-       contribute to learning! */
+       contribute to learning!
+
+       Tried that (Joseph). Does not work well.
+  */
     
   /* Points */
   for( i = 0; i < 25; i++ ) {
@@ -637,7 +619,6 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     if( anBoardOpp[nOppBack] ) {
       break;
     }
-
   }
     
   nOppBack = 23 - nOppBack;
@@ -645,7 +626,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
   n = 0;
   for( i = nOppBack + 1; i < 25; i++ )
     if( anBoard[ i ] )
-      n += ( i - nOppBack ) * anBoard[ i ];
+      n += ( i + 1 - nOppBack ) * anBoard[ i ];
 
   if( !n ) {
     /* No contact */
@@ -653,7 +634,52 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     return 1;
   }
     
-  afInput[ I_BREAK_CONTACT ] = n / 152.0;
+  afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
+
+  {
+    int t = 0;
+    int no = 0;
+      
+    t += 24 * anBoard[24];
+    no += anBoard[24];
+      
+    for( i = 23;  i >= 18; --i ) {
+      if( anBoard[i] != 2 ) {
+	int n = ((anBoard[i] > 2) ? (anBoard[i] - 2) : 1);
+	no += n;
+	t += i * n;
+      }
+    }
+
+    for( i = 17;  i >= 6; --i ) {
+      if( anBoard[i] > 2 ) {
+	no += (anBoard[i] - 2);
+	  
+	t += i * (anBoard[i] - 2);
+      }
+    }
+
+    for( i = 5;  i >= 0; --i ) {
+      if( anBoard[i] > 2 ) {
+	t += i * (anBoard[i] - 2);
+	no += (anBoard[i] - 2);
+      } else if( anBoard[i] < 2 ) {
+	int n = (2 - anBoard[i]);
+
+	if( no >= n ) {
+	  t -= i * n;
+	  no -= n;
+	}
+      }
+    }
+
+    if( t < 0 ) {
+      t = 0;
+    }
+
+    afInput[ I_TIMING ] = t / 200.0;
+  }
+
 
   /* Back chequer */
 
@@ -668,20 +694,6 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     
     afInput[ I_BACK_CHEQUER ] = nBack / 24.0;
 
-    afInput[ I_TOP_EVEN ] = ( anBoard[ nBack ] & 1 ) ? 0.0 : 1.0;
-
-    for( i = nBack - 1; i >= 0; i-- ) {
-      if( anBoard[ i ] ) {
-	afInput[ I_TOP2_EVEN ] = ( ( anBoard[ nBack ] +
-				     anBoard[ i ] ) & 1 ) ? 0.0 : 1.0;
-	break;
-      }
-    }
-
-    if( i < 0 ) {
-      afInput[ I_TOP2_EVEN ] = afInput[ I_TOP_EVEN ];
-    }
-    
     /* Back anchor */
 
     for( i = nBack == 24 ? 23 : nBack; i >= 0; --i ) {
@@ -988,29 +1000,6 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
   afInput[ I_CONTAIN ] = ( 36 - n ) / 36.0;
   afInput[ I_CONTAIN2 ] = afInput[ I_CONTAIN ] * afInput[ I_CONTAIN ];
     
-  for( n = 0, i = 0; i < 6; i++ ) {
-    j = anPoint[i];
-      
-    if( anBoard[j] < 2 && anBoardOpp[ 23 - j ] < 2 ) {
-      /* we want to make point j */
-	
-      for( k = 1; k < 7; k++ ) {
-	int nkj = anBoard[ j + k ];
-	  
-	if( nkj == 1 || nkj > 2 || (j + k > 7 && nkj == 2) ) {
-	  n++;
-	}
-      }
-	    
-      break;
-    }
-  }
-    
-  afInput[ I_BUILDERS ] = n / 6.0;
-
-  afInput[ I_SLOTTED ] =
-    ( i < 6 && anBoard[ j ] == 1 ) ? ( 6 - i ) / 6.0 : 0.0;
-    
   for( n = 0, i = 6; i < 25; i++ )
     if( anBoard[ i ] )
       n += ( i - 5 ) * anBoard[ i ] * Escapes( anBoardOpp, i );
@@ -1032,10 +1021,12 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     n = (n + j - 1) / j;
   }
 
+  j = 0;
   for(k = 0, i = n + 1; i < 25; i++ ) {
     int ni = anBoard[ i ];
 
     if( ni ) {
+      j += ni;
       k += ni * ( i - n ) * ( i - n );
     }
   }
@@ -1089,160 +1080,41 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
   afInput[ I_ENTER2 ] = ( 36 - ( n - 6 ) * ( n - 6 ) ) / 36.0; 
 
   {
-    int aCover[25];
-    memset(aCover, 0, sizeof(aCover));
-
-    for(i = 0; i < 24; ++i) {
-      if( anBoard[i] == 1 ) {
-	for(j = i+1; j < 25; ++j) {
-	  if( anBoard[j] == 1 || anBoard[j] > 2 ) {
-	    aCover[j-i] |= (0x1 << i);
-	  }
-	}
-      }
-    }
-
-    n = 0;
-
-    for(i = 0; i < 21; ++i) {
-      int* ar = aaRoll[i];
-
-      int has = 0;
-	
-      for(j = 0; j < 4; ++j) {
-	if( ar[j] >= 0 ) {
-	  pi = aIntermediate + ar[j];
-
-	  {
-	    int c = aCover[pi->nPips];
-	    
-	    if( c ) {
-	      if( pi->nFaces == 1 ) {
-		has = 1;
-		break;
-	      } else {
-		int b;
-		for(b = 1; c != 0 && b < 25; ++b) {
-		  if( c & (0x1 << b) ) {
-		    for(k = 0; k < 3 && pi->anIntermediate[k] > 0; ++k) {
-		      int it = 23 - (b + pi->anIntermediate[k]);
-		      assert( it >= 0 );
-			
-		      if( anBoardOpp[it] < 2 ) {
-			if( ! pi->fAll ) {
-			  has = 1;
-			  c = 0;
-			  break;
-			}
-		      } else {
-			if( pi->fAll ) {
-			  /* all intermediates needed, one blocked */
-
-			  c = 0;
-			  break;
-			}
-		      }
-		    }
-
-		    /* c == 0 means unsuccessful break */
-		      
-		    if( c && pi->fAll ) {
-		      has = 1;
-		      c = 0;
-		      break;
-		    }
-
-		    c &= ~(0x1 << b);
-		  }
-		}
-		  
-		if( has ) {
-		  break;
-		}
-	      }
-	    }
-	  }
-	}
-      }
-
-      if( has ) {
-	n += ar[3] > 0 ? 1 : 2;
-      }
-    }
-
-    afInput[ I_COVER ] = n / 36.0;
-
-    n = 0;
-      
-    for(i = 1; i < 7; ++i) {
-      if( aCover[i] ) {
-	for(j = i+1; j < 7; ++j) {
-	  if( aCover[j] ) {
-	    int b = aCover[i] | aCover[j];
-	      
-	    if( (b & (b-1)) != 0 ) {
-	      /* more than 1 */
-	      n += 2;
-	    }
-	  }
-	}
-      }
-    }
-
-    for(i = 1; i < 7; ++i) {
-      static int p[] = {1, 1, 1, 2, 1, 3, 2, 2};
-
-      int has = 0;
-	
-      for(j = 0; j < 4; ++j) {
-	int i1 = i * p[2*j];
-	int i2 = i * p[2*j+1];
-	  
-	if( aCover[i1] && aCover[i2] ) {
-	  if( i1 == i2 ) {
-	    if( (aCover[i1] & (aCover[i1] - 1)) != 0 ) {
-	      has = 1;
-	      break;
-	    }
-	  } else {
-	    int c = aCover[i2];
-	    int b;
-
-	    for(b = 1; c != 0 && b < 25; ++b) {
-	      if( c & (0x1 << b) ) {
-		has = 1;
-		  
-		for(k = i; k < i2; k += i) {
-		  int it = 23 - (b + k);
-		  assert( it >= 0 );
-		    
-		  if( anBoardOpp[it] >= 2 ) {
-		    has = 0;
-		    break;
-		  }
-		}
-
-		if( has ) {
-		  c = 0;
-		  break;
-		}
-
-		c &= ~(0x1 << b);
-	      }
-	    }
-	  }
-	}
-
-	if( has ) {
-	  n += 1;
-	  break;
-	}
-      }
-    }
-
-    afInput[ I_COVER2 ] = n / 36.0;
-  }
+    int pa = -1;
+    int w = 0;
+    int tot = 0;
+    int np;
     
+    for(np = 23; np > 0; --np) {
+      if( anBoard[np] >= 2 ) {
+	if( pa == -1 ) {
+	  pa = np;
+	  continue;
+	}
+
+	{
+	  int d = pa - np;
+	  int c = 0;
+	
+	  if( d <= 6 ) {
+	    c = 11;
+	  } else if( d <= 11 ) {
+	    c = 13 - d;
+	  }
+
+	  w += c * anBoard[pa];
+	  tot += anBoard[pa];
+	}
+      }
+    }
+
+    if( tot ) {
+      afInput[I_BACKBONE] = 1 - (w / (tot * 11.0));
+    } else {
+      afInput[I_BACKBONE] = 0;
+    }
+  }
+ 
   return 0;
 }
 
@@ -2464,13 +2336,14 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 	     "BACKESCAPES    \t%5.3f (%5.3f/36) \t%6.3f\n"
 	     "ACONTAIN       \t%5.3f (%5.3f/36) \t%6.3f\n"
 	     "CONTAIN        \t%5.3f (%5.3f/36) \t%6.3f\n"
-	     "BUILDERS       \t%5.3f (%5.3f/6)  \t%6.3f\n"
-	     "SLOTTED        \t%5.3f (%5.3f/6)  \t%6.3f\n"
+	     // "BUILDERS       \t%5.3f (%5.3f/6)  \t%6.3f\n"
+	     //"SLOTTED        \t%5.3f (%5.3f/6)  \t%6.3f\n"
 	     "MOBILITY       \t%5.3f             \t%6.3f\n"
 	     "MOMENT2        \t%5.3f             \t%6.3f\n"
 	     "ENTER          \t%5.3f (%5.3f/12) \t%6.3f\n"
-	     "TOP_EVEN       \t%5.3f             \t%6.3f\n"
-	     "TOP2_EVEN      \t%5.3f             \t%6.3f\n",
+	     //"TOP_EVEN       \t%5.3f             \t%6.3f\n"
+	     //"TOP2_EVEN      \t%5.3f             \t%6.3f\n"
+	     ,
 	     arInput[ I_OFF1 << 1 ], ardEdI[ I_OFF1 << 1 ],
 	     arInput[ I_OFF2 << 1 ], ardEdI[ I_OFF2 << 1 ],
 	     arInput[ I_OFF3 << 1 ], ardEdI[ I_OFF3 << 1 ],
@@ -2491,16 +2364,17 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 	         ardEdI[ I_ACONTAIN << 1 ],
 	     arInput[ I_CONTAIN << 1 ], arInput[ I_CONTAIN << 1 ] * 36.0,
 	         ardEdI[ I_CONTAIN << 1 ],
-	     arInput[ I_BUILDERS << 1 ], arInput[ I_BUILDERS << 1 ] * 6.0,
-	         ardEdI[ I_BUILDERS << 1 ],
-	     arInput[ I_SLOTTED << 1 ], arInput[ I_SLOTTED << 1 ] * 6.0,
-	         ardEdI[ I_SLOTTED << 1 ],
+/*  	     arInput[ I_BUILDERS << 1 ], arInput[ I_BUILDERS << 1 ] * 6.0, */
+/*  	         ardEdI[ I_BUILDERS << 1 ], */
+/*  	     arInput[ I_SLOTTED << 1 ], arInput[ I_SLOTTED << 1 ] * 6.0, */
+/*  	         ardEdI[ I_SLOTTED << 1 ], */
 	     arInput[ I_MOBILITY << 1 ], ardEdI[ I_MOBILITY << 1 ],
 	     arInput[ I_MOMENT2 << 1 ], ardEdI[ I_MOMENT2 << 1 ],
 	     arInput[ I_ENTER << 1 ], arInput[ I_ENTER << 1 ] * 12.0,
-	         ardEdI[ I_ENTER << 1 ],
-	     arInput[ I_TOP_EVEN << 1 ], ardEdI[ I_TOP_EVEN << 1 ],
-	     arInput[ I_TOP2_EVEN << 1 ], ardEdI[ I_TOP2_EVEN << 1 ] );
+	         ardEdI[ I_ENTER << 1 ]
+/*  	     ,arInput[ I_TOP_EVEN << 1 ], ardEdI[ I_TOP_EVEN << 1 ], */
+/*  	     arInput[ I_TOP2_EVEN << 1 ], ardEdI[ I_TOP2_EVEN << 1 ]  */
+	     );
 }
 
 static classdumpfunc acdf[ N_CLASSES ] = {

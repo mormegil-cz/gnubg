@@ -1,3 +1,8 @@
+Thu May  4 14:05:33 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c: Changed net inputs. Removed uncontributing ones, added
+	2 new ones (I_TIMING and I_BACKBONE). New weights as well. 
+
 Thu May 4 14:25:00 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* backgammon.h, eval.c, eval.h, set.c, show.c: implementation of
