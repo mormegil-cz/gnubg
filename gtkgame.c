@@ -2192,15 +2192,15 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
 	  Command, CMD_RECORD_ADD_SESSION, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-        { N_("/_Analyse/Relational database/Add match or session..."), NULL,
+        { N_("/_Analyse/Relational database/Add match or session"), NULL,
           GtkRelationalAddMatch, 0, NULL },
-        { N_("/_Analyse/Relational database/Show Records..."), NULL,
+        { N_("/_Analyse/Relational database/Show Records"), NULL,
           GtkShowRelational, 0, NULL },
-        { N_("/_Analyse/Relational database/Manage Environments..."), NULL,
+        { N_("/_Analyse/Relational database/Manage Environments"), NULL,
           GtkManageRelationalEnvs, 0, NULL },
-        { N_("/_Analyse/Relational database/Test..."), NULL,
+        { N_("/_Analyse/Relational database/Test"), NULL,
           Command, CMD_RELATIONAL_TEST, NULL },
-        { N_("/_Analyse/Relational database/Help..."), NULL,
+        { N_("/_Analyse/Relational database/Help"), NULL,
           Command, CMD_RELATIONAL_HELP, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
@@ -4723,9 +4723,6 @@ typedef struct _evalwidget {
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 
-  GtkWidget *pwMenu, *pwItem;
-  int *pi;
-
   pec->nPlies = pew->padjPlies->value;
   pec->fCubeful =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
@@ -4861,7 +4858,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     GtkWidget *pwEval, *pw;
 
     GtkWidget *pwFrame, *pwFrame2;
-    GtkWidget *pw2, *pw3, *pw4;
+    GtkWidget *pw2, *pw3;
 
     GtkWidget *pwMenu;
     GtkWidget *pwItem;
@@ -4876,7 +4873,6 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       N_("25%% speed") 
     };
 #endif
-    gchar *pch;
 
     int i;
     int *pi;
@@ -8077,30 +8073,30 @@ extern void GTKSet( void *p ) {
        gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
-                                       "Relational database/Test..." ), 
+                                       "Relational database/Test" ), 
           TRUE );
        gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
-                                       "Relational database/Help..." ), 
+                                       "Relational database/Help" ), 
           TRUE );
 
 #if USE_PYTHON	
     gtk_widget_set_sensitive( 
        gtk_item_factory_get_widget( pif,
                                     "/Analyse/Relational database/"
-                                    "Add match or session..." ), 
+                                    "Add match or session" ), 
        !ListEmpty( &lMatch ) );
 
     gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
-                                       "Relational database/Show Records..." ), 
+                                       "Relational database/Show Records" ), 
           TRUE );
     gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
-                                       "Relational database/Manage Environments..." ), 
+                                       "Relational database/Manage Environments" ), 
           TRUE );
 #endif /* USE_PYTHON */
 
