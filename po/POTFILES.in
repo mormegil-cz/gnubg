@@ -76,6 +76,8 @@ matchid.c
 matchid.h
 onechequer.c
 onechequer.h
+openurl.c
+openurl.h
 osr.c
 osr.h
 path.c
