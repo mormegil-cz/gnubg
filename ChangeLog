@@ -1,3 +1,10 @@
+Thu Aug  8 13:37:16 2002  Gary Wong  <gtw@gnu.org>
+
+	* postscript.c (ExportGamePostScript): Request player name font
+	_after_ drawing player symbol, because the player symbol released
+	the font, therefore ending the text object when producing PDF output.
+	Reported by Nardy Pillards.
+
 Wed Aug  7 22:15:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Implement copy from match/game/session analysis.

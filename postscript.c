@@ -750,9 +750,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (%s) Tj\n" :
 		     "0 %d moveto (%s) show\n", y, sz );
 
-	    RequestFont( pf, FONT_RM, 12 );
 	    Consume( pf, 12 );
 	    PlayerSymbol( pf, 8, 0 );
+	    RequestFont( pf, FONT_RM, 12 );
 	    fprintf( pf, fPDF ? "1 0 0 1 16 %d Tm (" : "16 %d moveto (",
 		     y );
 	    PostScriptEscape( pf, ap[ 0 ].szName );
@@ -760,6 +760,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 	    
 	    PlayerSymbol( pf, 225, 1 );
+	    RequestFont( pf, FONT_RM, 12 );
 	    fprintf( pf, fPDF ? "1 0 0 1 233 %d Tm (" : "233 %d moveto (",
 		     y );
 	    PostScriptEscape( pf, ap[ 1 ].szName );
