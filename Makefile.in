@@ -130,7 +130,7 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 @USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds boards
-@USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds
+@USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds boards
 
 localedir = $(datadir)/locale
 

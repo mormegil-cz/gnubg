@@ -1,3 +1,12 @@
+Fri Nov 29 23:55:00 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Rudimentary support for board designs.
+
+	* gnubg.c (PromptForExit, real_main): don't read board designs 
+	on start up.
+	* gtkprefs.c: code for reading and showing board designs.
+	* Makefile.am, configure.in: new dir "boards".
+
 Fre Nov 29 12:56:20 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* makebearoff.c - add -f output file option (to ensure that
