@@ -2265,7 +2265,7 @@ static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
-    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalBPG, EvalContact
+    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact
 };
 
 static int CompareRedEvalData( const void *p0, const void *p1 ) {
@@ -2642,16 +2642,19 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
     case CLASS_RACE:
 	nn = &nnRace;
 	break;
-    case CLASS_BPG:
-	nn = &nnBPG;
-	break;
     default:
 	errno = EDOM;
 	return -1;
     }
 
     SanityCheck( anBoard, arDesired );
-    
+
+    if( pc == CLASS_RACE ) {
+      CalculateRaceInputs(anBoard, arInput);
+    } else {
+      CalculateInputs(anBoard, arInput);
+    }
+
     NeuralNetTrain( nn, arInput, arOutput, arDesired, rAlpha /
 		    pow( nn->nTrained / 1000.0 + 1.0, rAnneal ) );
     
@@ -3520,7 +3523,7 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 }
 
 static classdumpfunc acdf[ N_CLASSES ] = {
-  DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact, DumpContact
+  DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact
 };
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
@@ -3555,9 +3558,6 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     strcat( szOutput, "CONTACT" );
     break;
 	
-  case CLASS_BPG: 
-    strcat( szOutput, "BPG" );
-    break;
   }
 
   strcat( szOutput, "\n\n" );
@@ -3693,7 +3693,7 @@ static void StatusContact( char *sz ) {
 }
 
 static classstatusfunc acsf[ N_CLASSES ] = {
-  NULL, StatusBearoff2, StatusBearoff1, StatusRace, StatusContact, NULL
+  NULL, StatusBearoff2, StatusBearoff1, StatusRace, StatusContact,
 };
 
 extern void EvalStatus( char *szOutput ) {
