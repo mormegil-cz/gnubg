@@ -201,7 +201,7 @@ extern void CommandDatabaseImport( char *sz ) {
     int i, anBoard[ 2 ][ 25 ];
     unsigned char auchKey[ 10 ];
     
-    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRITER, 0, NULL ) ) ) {
+    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRCREAT, 0666, NULL ) ) ) {
 	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
