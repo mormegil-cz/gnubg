@@ -1,3 +1,18 @@
+Sun Aug  4 19:11:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Implement "unforced cube decisions" -- should give more
+	realistic cube and overall ratings.
+
+	Actual, close, and missed doubles are added up and used instead
+	of total cube decisions when calculating cube decision and overall
+	error rates.
+
+	* eval.c (isMissedDouble, isCloseCubedecision): new functions --
+	well, actually they have just been moved from text.c/html.c.
+	* analysis.c (updateStatContext): sum up anCloseCube.
+	* gtkgame.c (GTKDumpStatcontext), analysis.c (DumpStatcontext):
+	use anCloseCube instead of anTotalCube.
+
 Sun Aug  4 12:28:33 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Experimental code for saving geometries.  Known bugs: The GTK 2.0

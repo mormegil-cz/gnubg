@@ -6342,6 +6342,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Luck rating"),
          N_("Cube decision statistics:"),
          N_("Total cube decisions"),
+         N_("Actual or close cube decisions"),
          N_("Doubles"),
          N_("Takes"),
          N_("Pass"),
@@ -6370,6 +6371,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   ratingtype rt[ 2 ];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
   float r = getMWCFromError ( psc, aaaar );
+  int irow = 0;
 #if WIN32
   char szOutput[4096];
     GtkWidget *pwButtons,
@@ -6395,52 +6397,52 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
-  for (i = 0; i < (38 + ( pms->nMatchTo != 0 ) * 2 ); i++) {
+  for (i = 0; i < (39 + ( pms->nMatchTo != 0 ) * 2 ); i++) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
     gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, gettext ( aszLabels[i] ) );
   }
         
   sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 1, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anTotalMoves[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 1, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anUnforcedMoves[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 2, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anUnforcedMoves[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 2, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 3, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 3, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 4, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 4, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_INTERESTING ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 5, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_INTERESTING ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 5, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 6, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 6, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_DOUBTFUL ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 7, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_DOUBTFUL ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 7, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 8, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 8, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYBAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 9, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 9, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   for ( i = 0 ; i < 2; i++ )
     rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
@@ -6450,56 +6452,56 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
                       psc->anUnforcedMoves[ 0 ], pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
   if ( psc->anUnforcedMoves[ 1 ] )
     FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ],
                       psc->anUnforcedMoves[ 1 ], pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   if ( psc->anTotalMoves[ 0 ] )
     sprintf ( sz, "%-15s", 
               gettext ( aszRating[ rt [ 0 ] ] ) );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 12, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
   if ( psc->anTotalMoves[ 1 ] )
     sprintf ( sz, "%-15s", 
               gettext ( aszRating[ rt [ 1 ] ] ) );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 12, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   /* luck */
 
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 13, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 13, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 14, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 14, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 15, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 15, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 16, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 16, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYBAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYBAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   FormatStatEquity( sz, psc->arLuck[ 0 ], 1, pms->nMatchTo, 1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatEquity( sz, psc->arLuck[ 1 ], 1, pms->nMatchTo, 1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   if ( psc->anTotalMoves[ 0 ] ) 
     FormatStatEquity( sz, psc->arLuck[ 0 ], psc->anTotalMoves[ 0 ],
@@ -6507,7 +6509,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   else
     strcpy ( sz, _("n/a" ) );
 
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 19, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
   if ( psc->anTotalMoves[ 1 ] )
     FormatStatEquity( sz, psc->arLuck[ 1 ], psc->anTotalMoves[ 1 ],
@@ -6515,7 +6517,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   else
     strcpy ( sz, _("n/a" ) );
 
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 19, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   for ( i = 0; i < 2; i++ ) 
     rt[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
@@ -6525,164 +6527,177 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
     sprintf ( sz, "%-15s", gettext ( aszLuckRating[ rt [ 0 ] ] ) );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 20, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   if ( psc->anTotalMoves[ 1 ] )
     sprintf ( sz, "%-15s", gettext ( aszLuckRating[ rt [ 1 ] ] ) );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 20, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   /* cube */
+ 
+  ++irow;
 
   sprintf(sz,"%d", psc->anTotalCube[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 22, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anTotalCube[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 22, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anCloseCube[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anCloseCube[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anDouble[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 23, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anDouble[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 23, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anTake[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 24, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anTake[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 24, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   sprintf(sz,"%d", psc->anPass[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 25, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf(sz,"%d", psc->anPass[ 1 ] );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 25, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 0 ],
 		       psc->arErrorMissedDoubleDP[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 26, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 1 ],
 		       psc->arErrorMissedDoubleDP[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 26, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 0 ],
 		       psc->arErrorMissedDoubleTG[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 27, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 1 ],
 		       psc->arErrorMissedDoubleTG[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 27, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 0 ],
 		       psc->arErrorWrongDoubleDP[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 28, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 1 ],
 		       psc->arErrorWrongDoubleDP[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 28, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 0 ],
 		       psc->arErrorWrongDoubleTG[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 29, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 1 ],
 		       psc->arErrorWrongDoubleTG[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 29, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   FormatStatCubeError( sz, psc->anCubeWrongTake[ 0 ],
 		       psc->arErrorWrongTake[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatCubeError( sz, psc->anCubeWrongTake[ 1 ],
 		       psc->arErrorWrongTake[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   FormatStatCubeError( sz, psc->anCubeWrongPass[ 0 ],
 		       psc->arErrorWrongPass[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 31, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatCubeError( sz, psc->anCubeWrongPass[ 1 ],
 		       psc->arErrorWrongPass[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 31, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ],
                     1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ],
                     1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
 
   FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ],
                     1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ],
                     1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
   for ( i = 0 ; i < 2; i++ )
     rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
 
-  if ( psc->anTotalCube[ 0 ] )
+  if ( psc->anCloseCube[ 0 ] )
     sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
   sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
 
-  if ( psc->anTotalCube[ 1 ] )
+  if ( psc->anCloseCube[ 1 ] )
     sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
   else
     strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
-  if ( psc->anTotalCube[ 0 ] )
+  /* overall error rate */
+
+  ++irow;
+
+  if ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
-  if ( psc->anTotalCube[ 1 ] )
+  if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
   
+  /* overall error rate per move */
 
-  if ( psc->anUnforcedMoves[ 1 ] + psc->anTotalCube[ 1 ] ) 
+  if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
-  if ( psc->anUnforcedMoves[ 0 ] + psc->anTotalCube[ 0 ] ) 
+  if ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+
+  /* overall rating */
   
   for ( i = 0 ; i < 2; i++ )
     rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
 
-  if ( psc->anUnforcedMoves[ 0 ] + psc->anTotalCube[ 0 ] ) 
+  if ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) 
     sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 37, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
-  if ( psc->anUnforcedMoves[ 1 ] + psc->anTotalCube[ 1 ] ) 
+  if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 37, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   if ( pms->nMatchTo ) {
 
     sprintf ( sz, "%7.2f%%", 100.0 * r );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 38, 1, sz);
+    gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
     sprintf ( sz, "%7.2f%%", 100.0 * (1.0 - r) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 38, 2, sz);
+    gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
     sprintf ( sz, "%7.2f", 
               absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ], 
                                    ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 39, 1, sz);
+    gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
     sprintf ( sz, "%7.2f", 
               absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
                                    ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 39, 2, sz);
+    gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   }
 
