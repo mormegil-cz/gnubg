@@ -253,6 +253,9 @@ GList *GetTextureList(int type)
 void FindNamedTexture(TextureInfo** textureInfo, char* name)
 {
 	list *pl;
+	if (textures.plNext == 0)
+	  return;
+
 	for (pl = textures.plNext; pl->p; pl = pl->plNext)
 	{
 		TextureInfo* text = (TextureInfo*)pl->p;
@@ -270,8 +273,12 @@ void FindNamedTexture(TextureInfo** textureInfo, char* name)
 
 void FindTexture(TextureInfo** textureInfo, char* file)
 {
-	list *pl;
-	for (pl = textures.plNext; pl->p; pl = pl->plNext)
+  list *pl = textures.plNext;
+	
+  if (pl == 0)
+    return;
+
+	for ( ; pl->p; pl = pl->plNext)
 	{
 		TextureInfo* text = (TextureInfo*)pl->p;
 		if (!strcasecmp(text->file, file))

@@ -4402,6 +4402,9 @@ SetMatchID ( const char *szMatchID ) {
 
   }
 
+  if (nMatchTo == 1)
+    fCrawford = 0;
+
 #if 0
   printf ( "%d %d %d %d %d %d %d %d %d\n",
            nCube, fCubeOwner, fMove, nMatchTo, anScore[ 0 ], anScore[ 1 ],

@@ -1,3 +1,7 @@
+Wed 14 Apr 2004 16:39:45 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* play.c - turn off Crawford on one point matches
+	* board3d/misc3d.c - avoid segfault if no textures (CLI mode)
 
 Mon 12 Apr 2004 13:12:06 GMT Jim Segrave <jes@jes-2.demon.nl>
 
