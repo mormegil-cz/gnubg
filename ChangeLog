@@ -1,3 +1,16 @@
+Sun Jul 27 01:20:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Update board labels dynamically.
+
+	* gtkboard.c (board_invalidate_labels): new function.
+	* gtkboard.c (board_set): invalidate labels if turn has changed.
+	* gtkprefs.c (GeneralPage): add option for dynamic labels.
+	* renderprefs.c (RenderPrefsParam, RenderPrefsCommand): 
+	add option for dynamic labels.
+	* render.c (CalculateImages): render labels dynamically based
+	on who's on roll.
+	* render.c (RenderImages): render images needed for dynamic labels.
+
 Sat Jul 26 22:45:35 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Include Holger's arrows in the html export.

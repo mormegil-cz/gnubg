@@ -52,6 +52,8 @@ typedef struct _renderdata {
     int fHinges; /* TRUE if hinges should be drawn */
     int fLabels; /* TRUE if point numbers should be drawn */
     int fClockwise; /* orientation for board point numbers */
+    int fDynamicLabels; /* TRUE if the point numbers are dynamic, i.e.,
+                           they adjust depending on the player on roll */
 } renderdata;
 
 typedef struct _renderimages {
@@ -61,6 +63,7 @@ typedef struct _renderimages {
     unsigned char *achResignFaces;
     unsigned short *asRefract[ 2 ];
     unsigned char *auchArrow[ 2 ];
+    unsigned char *achLabels[ 2 ];
 } renderimages;
 
 extern renderdata rdDefault;

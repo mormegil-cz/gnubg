@@ -345,6 +345,27 @@ static void board_invalidate_dice( BoardData *bd ) {
     board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
 }
 
+static void
+board_invalidate_labels( BoardData *bd ) {
+
+  int x, y, cx, cy;
+    
+  x = 0;
+  y = 0;
+  cx = 108 * rdAppearance.nSize;
+  cy = 3 * rdAppearance.nSize;
+
+  board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
+
+  x = 0;
+  y = 69 * rdAppearance.nSize;
+  cx = 108 * rdAppearance.nSize;
+  cy = 3 * rdAppearance.nSize;
+
+  board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
+
+}
+
 static void board_invalidate_cube( BoardData *bd ) {
 
     int x, y, orient;
@@ -2322,8 +2343,10 @@ static gint board_set( Board *board, const gchar *board_text,
     if( rdAppearance.nSize <= 0 )
 	return 0;
 
-    if( bd->turn != old_turn )
+    if( bd->turn != old_turn ) {
       board_invalidate_arrow( bd );
+      board_invalidate_labels( bd );
+    }
 
     if( bd->doubled != old_doubled || 
         bd->cube != old_cube ||

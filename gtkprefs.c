@@ -67,6 +67,7 @@ static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwLabels, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
+static GtkWidget *pwDynamicLabels;
 
 #if HAVE_LIBXML2
 static GtkWidget *pwDesignTitle;
@@ -83,7 +84,7 @@ static GtkWidget *pwCubeColour;
 static GtkWidget *apwDiceDotColour[ 2 ];
 static GtkWidget *apwDieColour[ 2 ];
 static GtkWidget *apwDiceColourBox[ 2 ];
-static int fLabels, fWood, fHinges;
+static int fLabels, fWood, fHinges, fDynamicLabels;
 static int fUpdate;
 
 static void GetPrefs ( renderdata *bd );
@@ -633,6 +634,15 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     return pwx;
 }
 
+static void
+LabelsToggled( GtkWidget *pwLabels, GtkWidget *pwDynamicLabels ) {
+
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+
+  gtk_widget_set_sensitive( GTK_WIDGET( pwDynamicLabels ), f );
+
+}
+
 static GtkWidget *GeneralPage( BoardData *bd ) {
 
     GtkWidget *pw, *pwTable, *pwBox, *pwScale;
@@ -649,7 +659,28 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
     gtk_signal_connect_object( GTK_OBJECT( pwLabels ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+    gtk_tooltips_set_tip( ptt, pwLabels,
+			  _("Show labels (point numbers) "
+                            "below and above board"), 
+                          NULL );
+
+
+    pwDynamicLabels = gtk_check_button_new_with_label( _("Dynamic labels") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ), 
+                                  fDynamicLabels );
+    gtk_box_pack_start( GTK_BOX( pw ), pwDynamicLabels, FALSE, FALSE, 0 );
+    gtk_signal_connect_object( GTK_OBJECT( pwDynamicLabels ), "toggled",
+			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwLabels ), "toggled",
+                        GTK_SIGNAL_FUNC( LabelsToggled ), 
+                        pwDynamicLabels );
+    LabelsToggled( pwLabels, pwDynamicLabels );
     
+    gtk_tooltips_set_tip( ptt, pwDynamicLabels,
+			  _("Update the labels so they are correct "
+                            "for the player on roll"), NULL );
+
+
     pwTable = gtk_table_new( 2, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
@@ -1385,6 +1416,8 @@ static void GetPrefs ( renderdata *prd ) {
     gdouble ar[ 4 ];
     
     fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+    fDynamicLabels = 
+      gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ) );
     fHinges = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwHinges ) );
     fWood = gtk_toggle_button_get_active(
@@ -1462,6 +1495,7 @@ static void GetPrefs ( renderdata *prd ) {
 	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 
     prd->fLabels = fLabels;
+    prd->fDynamicLabels = fDynamicLabels;
     prd->wt = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
 	pwWoodType ) ) : WOOD_PAINT;
     prd->fHinges = fHinges;
@@ -1517,6 +1551,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     GList *plBoardDesigns;
     
     fLabels = rdAppearance.fLabels;
+    fDynamicLabels = rdAppearance.fDynamicLabels;
     fWood = rdAppearance.wt;
     fHinges = rdAppearance.fHinges;
     

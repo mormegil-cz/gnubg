@@ -24,6 +24,7 @@
 #endif
 
 #include <assert.h>
+#include <stdio.h>
 #include <string.h>
 #if HAVE_FREETYPE
 #include <ft2build.h>
@@ -106,7 +107,8 @@ renderdata rdDefault = {
     -1, /* nSize */
     TRUE, /* fHinges */
     TRUE, /* fLabels */
-    FALSE /* fClockwise */
+    FALSE, /* fClockwise */
+    TRUE  /* dynamic labels */
 };
 
 static inline unsigned char clamp( int n ) {
@@ -1359,18 +1361,26 @@ static void RenderNumber( unsigned char *puch, int nStride, FT_Glyph *aftg,
 
 #endif
 
-static void RenderBasicLabels( renderdata *prd, unsigned char *puch,
-			       int nStride ) {
-    int i;
+static void
+RenderBasicLabels( renderdata *prd, unsigned char *puch, int nStride,
+                    const int iStart, const int iEnd, const int iDelta ) {
 
-    for( i = 1; i <= 24; i++ )
-	RenderBasicNumber( puch, nStride, prd->nSize, i,
-			   ( aaanPositions[ prd->fClockwise ][ i ][ 0 ] + 3 ) *
-			   prd->nSize, ( i > 12 ? 2 : 71 ) * prd->nSize,
-			   0xFF, 0xFF, 0xFF );
+  int i;
+
+  for ( i = 0; i < ( 1 + abs( iStart - iEnd ) ); ++i ) 
+    RenderBasicNumber( puch, nStride, prd->nSize, iStart + i * iDelta,
+                       ( aaanPositions[ prd->fClockwise ][ i + 1 ][ 0 ] + 3 ) *
+                       prd->nSize, 2 * prd->nSize,
+                       0xFF, 0xFF, 0xFF );
+
+
 }
 
-static void RenderLabels( renderdata *prd, unsigned char *puch, int nStride ) {
+
+static void
+RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
+               const int iStart, const int iEnd, const int iDelta ) {
+
 
 #if HAVE_FREETYPE
     FT_Face ftf;
@@ -1378,10 +1388,10 @@ static void RenderLabels( renderdata *prd, unsigned char *puch, int nStride ) {
     FT_Glyph aftg[ 10 ];
 
     if( FT_New_Memory_Face( ftl, auchLuxiSB, cbLuxiSB, 0, &ftf ) )
-	return RenderBasicLabels( prd, puch, nStride );
+	return RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
     
     if( FT_Set_Pixel_Sizes( ftf, 0, prd->nSize * 5 / 2 ) )
-	return RenderBasicLabels( prd, puch, nStride );
+	return RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
 
     for( i = 0; i < 10; i++ ) {
 	FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );
@@ -1390,17 +1400,18 @@ static void RenderLabels( renderdata *prd, unsigned char *puch, int nStride ) {
 
     FT_Done_Face( ftf );
 
-    for( i = 1; i <= 24; i++ )
-	RenderNumber( puch, nStride, aftg, i,
-		      ( aaanPositions[ prd->fClockwise ][ i ][ 0 ] + 3 ) *
-		      prd->nSize, ( i > 12 ? 7 : 214 ) * prd->nSize / 3,
+    for ( i = 0; i < ( 1 + abs( iStart - iEnd ) ); ++i ) 
+	RenderNumber( puch, nStride, aftg, iStart + i * iDelta,
+		      ( aaanPositions[ prd->fClockwise ][ i + 1 ][ 0 ] + 3 ) *
+		      prd->nSize, 7 * prd->nSize / 3,
 		      0xFF, 0xFF, 0xFF );
     
     for( i = 0; i < 10; i++ )
 	FT_Done_Glyph( aftg[ i ] );
 #else
-    RenderBasicLabels( prd, puch, nStride );
+    RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
 #endif
+
 }
 
 static unsigned char BoardPixel( renderdata *prd, int i, int antialias,
@@ -1430,8 +1441,9 @@ extern void RenderBoard( renderdata *prd, unsigned char *puch, int nStride ) {
     if( prd->fHinges )
 	RenderHinges( prd, puch, nStride );
 
+    /*
     if( prd->fLabels )
-	RenderLabels( prd, puch, nStride );
+    RenderLabels( prd, puch, nStride );*/
         
     for( iy = 0; iy < 30 * prd->nSize; iy++ )
 	for( ix = 0; ix < 6 * prd->nSize; ix++ ) {
@@ -2464,6 +2476,37 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 	}
     }
 
+    /* draw labels */
+
+    if ( intersects( x, y, cx, cy, 0, 0, 108 * prd->nSize, 3 * prd->nSize ) ) {
+
+      AlphaBlendClip( puch, nStride,
+                      -x, -y, 
+                      cx, cy, 
+                      puch, nStride,
+                      -x, -y,
+                      pri->achLabels[ prd->fDynamicLabels ? nPlayer : 1 ], 
+                      108 * prd->nSize * 4,
+                      0, 0, 108 * prd->nSize, 3 * prd->nSize );
+
+    }
+
+    if ( intersects( x, y, cx, cy, 0, 69 * prd->nSize, 
+                     108 * prd->nSize, 3 * prd->nSize ) ) {
+
+      AlphaBlendClip( puch, nStride,
+                      -x, 69 * prd->nSize  - y, 
+                      cx, cy, 
+                      puch, nStride,
+                      -x, 69 * prd->nSize - y,
+                      pri->achLabels[ prd->fDynamicLabels ? ! nPlayer : 0 ], 
+                      108 * prd->nSize * 4,
+                      0, 0, 108 * prd->nSize, 3 * prd->nSize );
+
+    }
+
+    /* draw points */
+
     for( i = 0; i < 28; i++ ) {
 	PointArea( prd, i, &xPoint, &yPoint, &cxPoint, &cyPoint );
 	if( intersects( x, y, cx, cy, xPoint, yPoint, cxPoint,
@@ -2613,8 +2656,37 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 
 }
 
-extern void RenderImages( renderdata *prd, renderimages *pri ) {
+extern void
+RenderBoardLabels( renderdata *prd, 
+                   unsigned char *achLo, unsigned char *achHi, int nStride ) {
 
+    unsigned char *achTemp = malloc( 108 * prd->nSize * 3 * prd->nSize * 3 );
+
+    /* 12 11 10 9 8 7 - 6 5 4 3 2 1 */
+    
+    memset( achTemp, 0, 108 * prd->nSize * 3 * prd->nSize * 3 );
+    RenderLabels( prd, achTemp, prd->nSize * 108 * 3, 1, 12, 1 );
+    
+    Copy_RGB_to_RGBA( achLo, prd->nSize * 108 * 4,
+                      achTemp, prd->nSize * 108 * 3,
+                      prd->nSize * 108, prd->nSize * 3, 0xFF );
+
+    /* 13 14 15 16 17 18 - 19 20 21 22 24 24 */
+    
+    memset( achTemp, 0, 108 * prd->nSize * 3 * prd->nSize * 3 );
+    RenderLabels( prd, achTemp, prd->nSize * 108 * 3, 24, 13, -1 );
+    
+    Copy_RGB_to_RGBA( achHi, prd->nSize * 108 * 4,
+                      achTemp, prd->nSize * 108 * 3,
+                      prd->nSize * 108, prd->nSize * 3, 0xFF );
+
+    free( achTemp );
+
+}
+
+extern void RenderImages( renderdata *prd, renderimages *pri ) {
+  
+    int i;
     int nSize = prd->nSize;
 
     pri->ach = malloc( nSize * nSize * 108 * 72 * 3 );
@@ -2640,6 +2712,8 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     pri->auchArrow[0] = NULL;
     pri->auchArrow[1] = NULL;
 #endif /* HAVE_LIBART */
+    for ( i = 0; i < 2; ++i )
+      pri->achLabels[ i ] = malloc( nSize * nSize * 108 * 3 * 4 );
     
     RenderBoard( prd, pri->ach, 108 * nSize * 3 );
     RenderChequers( prd, pri->achChequer[ 0 ], pri->achChequer[ 1 ],
@@ -2657,9 +2731,15 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_SIZE * 4 );
 #undef ARROW_SIZE
 #endif /* HAVE_LIBART */
+
+    RenderBoardLabels( prd, pri->achLabels[ 0 ], pri->achLabels[ 1 ],
+                       108 * nSize * 4 );
+
 }
 
 extern void FreeImages( renderimages *pri ) {
+
+    int i;
 
     free( pri->ach );
     free( pri->achChequer[ 0 ] );
@@ -2679,6 +2759,8 @@ extern void FreeImages( renderimages *pri ) {
     art_free( pri->auchArrow[0] );
     art_free( pri->auchArrow[1] );
 #endif /* HAVE_LIBART */
+    for ( i = 0; i < 2; ++i )
+      free( pri->achLabels[ i ] );
 }
 
 extern void RenderInitialise( void ) {

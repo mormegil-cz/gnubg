@@ -280,6 +280,9 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     else if( !strncasecmp( szParam, "labels", c ) )
 	/* labels=bool */
 	prd->fLabels = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "dynamiclabels", c ) )
+	/* dynamiclabels=bool */
+	prd->fDynamicLabels = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "diceicon", c ) )
 	/* FIXME deprecated in favour of "set gui dicearea" */
 	fGUIDiceArea = toupper( *szValue ) == 'Y';
@@ -415,7 +418,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
     sprintf( sz, 
              "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
-	     "labels=%c wood=%s hinges=%c "
+	     "labels=%c dynamiclabels=%c wood=%s hinges=%c "
 	     "light=%0.0f;%0.0f shape=%0.1f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
@@ -434,6 +437,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 	     prd->aanBoardColour[ 1 ][ 2 ],
              /* labels ... */
              prd->fLabels ? 'y' : 'n',
+             prd->fDynamicLabels ? 'y' : 'n',
 	     aszWoodName[ prd->wt ],
 	     prd->fHinges ? 'y' : 'n',
 	     rAzimuth, rElevation, 1.0 - prd->rRound,
