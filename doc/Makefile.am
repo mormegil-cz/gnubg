@@ -2,7 +2,7 @@ info_TEXINFOS = gnubg.texi
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt
-SUFFICES = .png .eps
+SUFFIXES = .png .eps
 
 txt: gnubg.txt
 
