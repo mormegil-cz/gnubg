@@ -1,3 +1,7 @@
+Mon Jun 17 17:29:44 CEST 2002  Achim Mueller <acepoint@deltacity.net>
+
+	added de.po
+
 Sun Jun  2 18:44:00 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* POTFILES.in: entire application's strings marked for gettext.
