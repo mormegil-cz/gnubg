@@ -934,8 +934,8 @@ static void ExportMatchGeneral( int f, char *sz ) {
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export "
-		 "match postscript')." ); /* FIXME not necessarily PS */
+	outputf( "You must specify a file to export to (see `help export "
+		 "match %s\n').", f ? "pdf" : "postscript" );
 	return;
     }
 
