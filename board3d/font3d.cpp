@@ -33,11 +33,12 @@
 #include "FTFont.h"
 
 /* Avoid FTGLOutlineFont::render() as expensive to call repeatedly */
+/*
 class MyOutlineFont : public FTGLOutlineFont
 {
 	void render(const char* string) {FTFont::render(string);}
 };
-
+*/
 #define FONT_SIZE (base_unit / 20.0f)
 #define CUBE_FONT_SIZE (base_unit / 24.0f)
 
@@ -51,12 +52,10 @@ class font
 public:
 	font(int ptSize, float size, unsigned char* fd, unsigned int fs)
 	{
-		fonts[0] = new FTGLPolygonFont();
-		fonts[0]->Open(fd, fs);
+		fonts[0] = new FTGLPolygonFont(fd, fs);
 		fonts[0]->FaceSize(ptSize);
 	
-		fonts[1] = new MyOutlineFont();
-		fonts[1]->Open(fd, fs);
+		fonts[1] = new FTGLOutlineFont(fd, fs);
 		fonts[1]->FaceSize(ptSize);
 
 		float sx, sy, sz, fx, fy, fz;
@@ -81,7 +80,7 @@ public:
 	{
 		glScalef(size, size, 1);
 		glTranslatef(-getTextLen(text) / 2.0f, 0, 0);
-		fonts[mode]->render(text);
+		fonts[mode]->Render(text);
 	}
 
 	void printHorVertAlign(const char* text, int mode)
@@ -89,7 +88,7 @@ public:
 		glTranslatef(0, -height / 2.0f, 0);
 		glScalef(size, size, 1);
 		glTranslatef(-getTextLen(text) / 2.0f, 0, 0);
-		fonts[mode]->render(text);
+		fonts[mode]->Render(text);
 	}
 
 private:
