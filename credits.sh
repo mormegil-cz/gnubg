@@ -103,6 +103,7 @@ Mark Spencer
 Scott Steiner
 Maik Stiebler
 W. Stroop (Rob)
+Stefan Svedberg
 Kaoru TAKAHASHI
 Yoshito Takeuchi
 Jacques Thiriat

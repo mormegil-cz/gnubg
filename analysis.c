@@ -342,7 +342,8 @@ CashPoint( const matchstate* pms )
 static void
 updateStatcontext(statcontext*       psc,
 		  const moverecord*  pmr,
-		  const matchstate*  pms)
+		  const matchstate*  pms,
+                  const list *plGame )
 {
   cubeinfo ci;
   static unsigned char auch[ 10 ];
@@ -350,6 +351,7 @@ updateStatcontext(statcontext*       psc,
   int i;
   int anBoardMove[ 2 ][ 25 ];
   float arDouble[ 4 ];
+  const movegameinfo *pmgi = plGame->plNext->p;
 
   switch ( pmr->mt ) {
 
@@ -397,7 +399,7 @@ updateStatcontext(statcontext*       psc,
 
     GetMatchStateCubeInfo ( &ci, pms );
       
-    if ( pmr->n.esDouble.et != EVAL_NONE && fAnalyseCube ) {
+    if ( pmr->n.esDouble.et != EVAL_NONE && fAnalyseCube && pmgi->fCubeUse ) {
 
       FindCubeDecision( arDouble, pmr->n.aarOutput, &ci );
 
@@ -515,7 +517,8 @@ updateStatcontext(statcontext*       psc,
   case MOVE_DOUBLE:
 
     GetMatchStateCubeInfo ( &ci, pms );
-    if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
+    if ( fAnalyseCube && pmgi->fCubeUse && 
+         pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
       FindCubeDecision( arDouble, 
                         GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, &ci );
@@ -557,7 +560,8 @@ updateStatcontext(statcontext*       psc,
   case MOVE_TAKE:
 
     GetMatchStateCubeInfo ( &ci, pms );
-    if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
+    if ( fAnalyseCube && pmgi->fCubeUse && 
+         pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
       FindCubeDecision( arDouble, 
                         GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, &ci );
@@ -586,7 +590,8 @@ updateStatcontext(statcontext*       psc,
   case MOVE_DROP:
 
     GetMatchStateCubeInfo ( &ci, pms );
-    if( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
+    if( fAnalyseCube && pmgi->fCubeUse && 
+        pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	  
       FindCubeDecision( arDouble, 
                         GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, &ci );
@@ -665,6 +670,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     static float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
     doubletype dt;
     taketype tt;
+    const movegameinfo *pmgi = (movegameinfo *) plGame->plNext->p;
 
     /* analyze this move */
 
@@ -676,7 +682,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
         if ( fUpdateStatistics ) {
           IniStatcontext( psc );
-          updateStatcontext ( psc, pmr, pms );
+          updateStatcontext ( psc, pmr, pms, plGame );
         }
 
 	break;
@@ -698,7 +704,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
 	/* cube action? */
       
-	if ( fAnalyseCube && !fFirstMove &&
+	if ( fAnalyseCube && pmgi->fCubeUse && !fFirstMove &&
 	     GetDPEq ( NULL, NULL, &ci ) ) {
           
           if ( cmp_evalsetup ( pesCube, &pmr->n.esDouble ) > 0 ) {
@@ -799,7 +805,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	}
       
         if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms );
+          updateStatcontext ( psc, pmr, pms, plGame );
 	  
 	fFirstMove = 0;
       
@@ -816,7 +822,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
           break;
 
 	/* cube action */	    
-	if( fAnalyseCube ) {
+	if( fAnalyseCube && pmgi->fCubeUse ) {
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    if ( GetDPEq ( NULL, NULL, &ci ) ||
@@ -861,7 +867,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	}
       
         if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms );
+          updateStatcontext ( psc, pmr, pms, plGame );
 
 	break;
       
@@ -875,7 +881,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
         if ( tt != TT_NORMAL )
           break;
       
-	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
+	if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE ) {
 
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
@@ -885,7 +891,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	}
 
         if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms );
+          updateStatcontext ( psc, pmr, pms, plGame );
 
 	break;
       
@@ -899,7 +905,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
         if ( tt != TT_NORMAL )
           break;
       
-	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
+	if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE ) {
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
@@ -909,7 +915,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
 
         if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms );
+          updateStatcontext ( psc, pmr, pms, plGame );
 
 	break;
       
@@ -985,7 +991,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	}
 
         if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms );
+          updateStatcontext ( psc, pmr, pms, plGame);
 
 	break;
       
@@ -1675,7 +1681,7 @@ updateStatisticsMove( const moverecord* pmr,
   switch ( pmr->mt ) {
   case MOVE_GAMEINFO:
     IniStatcontext ( psc );
-    updateStatcontext( psc, pmr, pms );
+    updateStatcontext( psc, pmr, pms, plGame );
     break;
 
   case MOVE_NORMAL:
@@ -1684,7 +1690,7 @@ updateStatisticsMove( const moverecord* pmr,
       pms->fMove = pmr->n.fPlayer;
     }
       
-    updateStatcontext ( psc, pmr, pms );
+    updateStatcontext ( psc, pmr, pms, plGame );
     break;
 
   case MOVE_DOUBLE:
@@ -1694,13 +1700,13 @@ updateStatisticsMove( const moverecord* pmr,
     }
       
       
-    updateStatcontext ( psc, pmr, pms );
+    updateStatcontext ( psc, pmr, pms, plGame );
     break;
 
   case MOVE_TAKE:
   case MOVE_DROP:
 
-    updateStatcontext ( psc, pmr, pms );
+    updateStatcontext ( psc, pmr, pms, plGame );
     break;
 
   default:

@@ -91,6 +91,7 @@ char *aszCredits[] = {
     "Scott Steiner",
     "Maik Stiebler",
     "W. Stroop (Rob)",
+    "Stefan Svedberg",
     "Kaoru TAKAHASHI",
     "Yoshito Takeuchi",
     "Gerry Tesauro",
