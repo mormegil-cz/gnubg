@@ -1,3 +1,9 @@
+Sun Jul 13 22:24:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c (OutputMoveFilterPly): add a newline
+	* text.c (OutputEvalContextsForRollout): fix some indentation
+	problems.
+
 Sun Jul 13 20:02:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubgmodule.c (PythonPositionID, PythonPositionFromID,
