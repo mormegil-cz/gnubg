@@ -976,7 +976,10 @@ extern void CommandShowCredits( char *sz )
 {
 #if USE_GTK
   if( fX )
+  {
     GTKCommandShowCredits();
+    return;
+  }
 #endif
 
   outputl( aszAUTHORS );
@@ -1351,9 +1354,7 @@ extern void CommandShowTraining( char *sz ) {
 extern void CommandShowVersion( char *sz ) {
 
     char **ppch = aszVersion;
-    extern char *aszCredits[];
-    int i = 0, cch, cCol = 0;
-    
+
 #if USE_GTK
     if( fX ) {
 	GTKShowVersion();
