@@ -1,3 +1,9 @@
+Wed Sep 19 13:02:16 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_set): Recalculate the board pixmap if the
+	chequer direction changes (required if the points are labelled).
+	Reported by Ian Shaw.
+
 Wed Sep 19 11:04:47 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_pointer): Move the single click move code to

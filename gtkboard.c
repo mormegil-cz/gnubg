@@ -1483,6 +1483,15 @@ static gint board_set( Board *board, const gchar *board_text ) {
     board_redraw_dice( bd->drawing_area, bd, 1 );
     board_redraw_cube( bd->drawing_area, bd );
 
+    if( fClockwise != bd->clockwise ) {
+	/* This is complete overkill, but we need to recalculate the
+	   board pixmap if the points are numbered and the direction
+	   changes. */
+	board_free_pixmaps( bd );
+	board_create_pixmaps( pwBoard, bd );
+	gtk_widget_queue_draw( bd->drawing_area );	
+    }
+    
     bd->clockwise = fClockwise;
     
 #if WIN32

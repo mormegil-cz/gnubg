@@ -37,6 +37,7 @@ Zvezdan Petkovic
 Petri Pitkänen
 Sam Pottle
 Jared Riley
+Ian Shaw
 Kit Woolsey
 Frank Worrell
 EOF
