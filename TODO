@@ -97,6 +97,8 @@ duplication of effort and to make sure our changes merge easily.
   gnubg command which evaluates another Guile function which throws an
   exception?  We probably want to evaluate each Guile expression in its own
   dynamic root.
+** Add an option for Guile players (i.e. chequer and cube decisions are
+  passes to a Guile function).
 ** There are several possible REPLs to choose from:
 *** top-repl from (ice-9 boot-9).  Unfortunately this does not handle X
   events while in the REPL.
@@ -240,6 +242,8 @@ functions:
   grabbed -- see HandleXAction and board_animate).
 ** Does VarRednRollout use the pci parameter correctly?  It looks like
   it doesn't pay attention to which player is on roll.
+** "show player" and the GTK player settings should show the socket
+  address for external players (reported by Robert Konigsberg). (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
