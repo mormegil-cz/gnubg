@@ -1,3 +1,56 @@
+Thu May 17 23:46:11 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	This is a large commit. It includes the promised flexibility in
+	the setup of evaluations, albeit not implemented for rollouts
+	yet. All top-levels calls to EvaluatePosition should be changed to
+	EvaluatePositionGeneral which in turn calls EvaluatePosition or
+	RolloutGeneral depending on evalsetup. Similarly, all top levels
+	calls to EvaluatePositionCubeful should be replaced with
+	EvaluatePositionCubefulGeneral. 
+
+	The GTK+ GUI is /not/ updated yet, and this checkin breaks
+	current RC files. The commit also includes a preliminary
+	implementation of cubeful rollouts.
+
+	* analysis.c (AnalyzeGame): copy setup for analysis (instead of
+	setup for `evaluate')
+
+	* eval.c (EvaluatePositionCubeful2): new function (initial
+	implementation of cubeful projections as suggested by David). The
+	function is not used anywhere yet.
+
+	* eval.c (FindCubeDecision): new function (basically a wrapper for
+	EvaluatePositionCubeful). 
+
+	* eval.c: define rolloutcontext and redefine evalsetup.
+
+	* external.c: ecEval is not defined anymore.
+
+	* rollout.c (RolloutGeneral): new rollout driver.
+	* rollout.c (BasicCubefulRollout): preliminary implementation of
+	cubeful rollouts.
+
+	* play.c (ComputerTurn): use new evalsetups.
+
+	* show.c (ShowEvaluation): small format changes.
+	* show.c (ShowRollout, ShowEvalSetup): new functions.
+
+	* set.c: set rolloutcontext, evalsetup, and friends.
+
+	* gnubg.c: define evalsetups and evaltype for `evaluate', `hint',
+	`analysis', player 0, and player 1. Also define commands for
+	setting these. 
+	* gnubg.c (CommandEval, CommandHint): use new evalsetup.
+	* gnubg.c (CommandRollout): use new rolloutcontexts and call the
+	new RolloutGeneral. 
+	* gnubg.c (CommandSaveSettings): save evalsetups, evaltypes, and
+	rolloutcontexts. 
+	* gnubg.c (SaveEvalSetupSettings, SaveEvalSettings,
+	SaveRolloutSetttings, SaveRNGSettings): new functions.
+
+	* gtkgame.c: use new evalsetups. Very few changes only to allow 
+	compilation. Also remove all DOS CR/LF's.
+	
 Tue May 15 10:35:26 2001  Gary Wong  <gtw@research.att.com>
 
 	* import.c (ReadInt16): New function, to portably read the
