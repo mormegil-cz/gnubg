@@ -1964,7 +1964,7 @@ HTMLEpilogueComment ( FILE *pf ) {
   fputs ( " ", pf );
             
   fprintf ( pf,
-            _("(HTML Export version %d.%d)"),
+            _("(HTML Export version %d.%d) -->"),
             iMajor, iMinor );
 
 

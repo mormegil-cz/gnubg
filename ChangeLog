@@ -1,3 +1,8 @@
+Sat Nov 23 12:01:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (HTMLEpilogueComment): add missing -->
+	(reported by Ian Shaw)
+
 Fri Nov 22 21:59:16 2002  Gary Wong  <gtw@gnu.org>
 
 	* set.c (SetPriority): [WIN32] _N() should be N_().
