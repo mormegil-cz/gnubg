@@ -1,3 +1,22 @@
+Sun Jul 14 18:27:51 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (getCurrentMoveRecord): new function.
+	* html.c (CommandExportPositionHtml), 
+	text.c (CommandExportPositionText): use new function
+	getCurrentMoveRecord.
+	
+	* eval.c (CompareMovesGeneral): general sort function for moves
+	(takes evalsetup into account).
+	* eval.c (ScoreMove): declare extern.
+	* eval.c (ScoreMove): arEvalMove now
+	NUM_ROLLOUT_OUTPUTS. Initialise arEvalStdDev.
+	* eval.c (RefreshMoveList): new function. update rBestScore and
+	re-sort the movelist.
+	* eval.c (FormatEval): remove assert.
+
+	* gtkgame.c (GTKHint): add a number of new buttons to Move hint window.
+	
+
 Sat Jul 13 19:13:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (ExportGameHTML): fix typo [use pms or msExport instead of
