@@ -376,9 +376,174 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
 	return 0;
     }
 
-    return PositionFromID( an, sz );
+    if ( ! strncmp ( sz, "board:", 6 ) ) {
+      /* a raw board output from fibs.
+	 A position ID cannot start with 'board:',
+	 as this gives an illegal position. */
+
+      return FibsRawBoard ( an, sz );
+      
+    }
+    else
+      /* assume Position ID */
+      return PositionFromID( an, sz );
 
 }
+
+
+extern int FibsRawBoard ( int an[ 2 ][ 25 ], char *sz ) {
+
+
+  /* FIXME: this routine changes nMatchTo.
+     This should be done through a call to CommandNewMatch */
+
+  typedef struct _gamedata {
+    char szName[ 32 ], szNameOpponent[ 32 ];
+    int nMatchTo, nScore, nScoreOpponent;
+    int anBoard[ 28 ]; /* 0 and 25 are the bars */
+    int fTurn; /* -1 is X, 1 is O, 0 if game over */
+    int anDice[ 2 ], anDiceOpponent[ 2 ]; /* 0, 0 if not rolled */
+    int nCube;
+    int fDouble, fDoubleOpponent; /* allowed to double */
+    int fDoubled; /* opponent just doubled */
+    int fColour; /* -1 for player X, 1 for player O */
+    int fDirection; /* -1 playing from 24 to 1, 1 playing from 1 to 24 */
+    int nHome, nBar; /* 0 or 25 depending on fDirection */
+    int nOff, nOffOpponent; /* number of men borne off */
+    int nOnBar, nOnBarOpponent; /* number of men on bar */
+    int nToMove; /* 0 to 4 -- number of pieces to move */
+    int nForced, nCrawford; /* unused */
+    int nRedoubles; /* number of instant redoubles allowed */
+  } gamedata;
+  
+  gamedata gd;
+
+  char *pch, *pchDest;
+  int i, *pn, **ppn;
+
+  int *apnMatch[] = { &gd.nMatchTo, &gd.nScore, &gd.nScoreOpponent };
+  int *apnGame[] = { &gd.fTurn, gd.anDice, gd.anDice + 1,
+		     gd.anDiceOpponent, gd.anDiceOpponent + 1,
+		     &gd.nCube, &gd.fDouble, &gd.fDoubleOpponent,
+		     &gd.fDoubled, &gd.fColour, &gd.fDirection,
+		     &gd.nHome, &gd.nBar, &gd.nOff, &gd.nOffOpponent,
+		     &gd.nOnBar, &gd.nOnBarOpponent, &gd.nToMove,
+		     &gd.nForced, &gd.nCrawford, &gd.nRedoubles };
+
+  pch = sz;
+
+  if( strncmp( pch, "board:", 6 ) )
+    return -1;
+    
+  pch += 6;
+
+  for( pchDest = gd.szName, i = 31; i && *pch && *pch != ':'; i-- )
+    *pchDest++ = *pch++;
+
+  *pchDest = 0;
+
+  if( !pch )
+    return -1;
+  
+  pch++;
+    
+  for( pchDest = gd.szNameOpponent, i = 31; i && *pch && *pch != ':'; i-- )
+    *pchDest++ = *pch++;
+
+  *pchDest = 0;
+
+  if( !pch )
+    return -1;
+
+  for( i = 3, ppn = apnMatch; i--; ) {
+    if( *pch++ != ':' ) /* FIXME should really check end of string */
+      return -1;
+
+    **ppn++ = strtol( pch, &pch, 10 );
+  }
+
+  for( i = 0, pn = gd.anBoard; i < 26; i++ ) {
+    if( *pch++ != ':' )
+      return -1;
+
+    *pn++ = strtol( pch, &pch, 10 );
+  }
+
+  for( i = 21, ppn = apnGame; i--; ) {
+    if( *pch++ != ':' )
+      return -1;
+    
+    **ppn++ = strtol( pch, &pch, 10 );
+  }
+  
+  if( gd.fColour < 0 )
+    gd.nOff = -gd.nOff;
+  else
+    gd.nOffOpponent = -gd.nOffOpponent;
+  
+  if( gd.fDirection < 0 ) {
+    gd.anBoard[ 26 ] = gd.nOff;
+    gd.anBoard[ 27 ] = gd.nOffOpponent;
+  } else {
+    gd.anBoard[ 26 ] = gd.nOffOpponent;
+    gd.anBoard[ 27 ] = gd.nOff;
+  }
+    
+  if( gd.fDirection > 0 )
+    for( i = 0; i < 25; i++ ) {
+      an[ 0 ][ i ] = ( gd.anBoard[ i + 1 ] * gd.fColour < 0 ) ?
+	gd.anBoard[ i + 1 ] * -gd.fColour : 0;
+      an[ 1 ][ i ] = ( gd.anBoard[ 24 - i ] * gd.fColour > 0 ) ?
+	gd.anBoard[ 24 - i ] * gd.fColour : 0;
+    }
+  else
+    for( i = 0; i < 25; i++ ) {
+      an[ 0 ][ i ] = ( gd.anBoard[ 24 - i ] * gd.fColour < 0 ) ?
+	gd.anBoard[ 24 - i ] * -gd.fColour : 0;
+      an[ 1 ][ i ] = ( gd.anBoard[ i + 1 ] * gd.fColour > 0 ) ?
+	gd.anBoard[ i + 1 ] * gd.fColour : 0;
+    }
+  
+  an[ 0 ][ 24 ] = abs( gd.anBoard[ gd.fDirection < 0 ? 0 : 25 ] );
+  an[ 1 ][ 24 ] = abs( gd.anBoard[ gd.fDirection > 0 ? 0 : 25 ] );
+
+  /* set turn and dice */
+
+  if ( gd.fTurn == gd.fColour ) {
+    fMove = 1; 
+    anDice[ 0 ] = gd.anDice[ 0 ];
+    anDice[ 1 ] = gd.anDice[ 1 ];
+  }
+  else {
+    fMove = 0;
+    anDice[ 0 ] = gd.anDiceOpponent[ 0 ];
+    anDice[ 1 ] = gd.anDiceOpponent[ 1 ];
+    SwapSides ( an );
+  }
+
+  /* cube owner, value, and action */
+  
+  if ( gd.fDouble && gd.fDoubleOpponent )
+    fCubeOwner = -1;
+  else if ( gd.fDouble )
+    fCubeOwner = 0;
+  else
+    fCubeOwner = 1;
+
+  nCube = gd.nCube;
+
+  fDoubled = gd.fDoubled;
+
+  /* match length and score */
+
+  nMatchTo = gd.nMatchTo;
+  anScore[ 0 ] = gd.nScoreOpponent;
+  anScore[ 1 ] = gd.nScore;
+
+  return 0;
+
+}
+
 
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff ) {
