@@ -41,9 +41,9 @@ endif
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@
+              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@
+              @FT2_LIBS@ @GTKEXTRA_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \

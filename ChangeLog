@@ -1,3 +1,11 @@
+Tue Dec 24 11:15:31 2002  Gary Wong  <gtw@gnu.org>
+
+	* configure.in: Detect gtkextra-2.0.
+	* Makefile.am: Use gtkextra flags, as appropriate.
+	* gtkmet.c: Various changes to support gtkextra under both GTK+ 1.2.x
+	and GTK+ 2.0.x.
+	* gtkgame.c: No need to include <gtkextra/gtksheet.h>.
+	
 Tue Dec 24 09:04:57 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkcolour.c: Minor changes for GTK+ 1.2.x compatibility.

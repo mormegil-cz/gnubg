@@ -122,9 +122,6 @@
 /* Define to 1 if you have the <gmp.h> header file. */
 #undef HAVE_GMP_H
 
-/* Define to 1 if you have the <gtkextra/gtksheet.h> header file. */
-#undef HAVE_GTKEXTRA_GTKSHEET_H
-
 /* Define to 1 if you have the `gtk_option_menu_get_history' function. */
 #undef HAVE_GTK_OPTION_MENU_GET_HISTORY
 
@@ -163,9 +160,6 @@
 
 /* Define to 1 if you have the `gmp' library (-lgmp). */
 #undef HAVE_LIBGMP
-
-/* Define if you have the gtkextra library (-lgtkextra). */
-#undef HAVE_LIBGTKEXTRA
 
 /* Define if you have the guilegtk-1.2 library (-lguilegtk-1.2). */
 #undef HAVE_LIBGUILEGTK_1_2
@@ -359,9 +353,6 @@
 /* Define to 1 if you have the `vprintf' function. */
 #undef HAVE_VPRINTF
 
-/* Define to 1 if you have the `XCopyPlane' function. */
-#undef HAVE_XCOPYPLANE
-
 /* Define to 1 if you have the `__argz_count' function. */
 #undef HAVE___ARGZ_COUNT
 
@@ -426,6 +417,10 @@
 
 /* Define if you want to use GTK+ 2.0 or later. */
 #undef USE_GTK2
+
+/* Define to 1 or 2 if you have the gtkextra-1 or -2 library, as appropriate.
+   */
+#undef USE_GTKEXTRA
 
 #if USE_EXT || USE_GTK
 #define USE_GUI 1

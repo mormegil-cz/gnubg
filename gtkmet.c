@@ -26,8 +26,10 @@
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
+#if USE_GTKEXTRA
+#include <gtkextra/gtksheet.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +47,7 @@ typedef struct _mettable {
   GtkWidget *pwName;
   GtkWidget *pwFileName;
   GtkWidget *pwDescription;
-#if !HAVE_LIBGTKEXTRA
+#if !USE_GTKEXTRA
   GtkWidget *aapwLabel[ MAXSCORE ][ MAXSCORE ];
 #endif
 } mettable;
@@ -82,7 +84,7 @@ UpdateTable ( mettable *pmt,
       else
         sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
 
-#if HAVE_LIBGTKEXTRA
+#if USE_GTKEXTRA
       gtk_sheet_set_cell( GTK_SHEET( pmt->pwTable ), i, j, GTK_JUSTIFY_RIGHT,
                           sz );
 #else
@@ -121,7 +123,7 @@ static GtkWidget
   int i, j;
   char sz[ 16 ];
   GtkWidget *pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL );
-#if HAVE_LIBGTKEXTRA
+#if USE_GTKEXTRA
   GtkWidget *pwTable = gtk_sheet_new_browser( nRows, nCols, "" );
 #else
   GtkWidget *pwTable = gtk_table_new( nRows + 1, nCols + 1, TRUE );
@@ -144,7 +146,7 @@ static GtkWidget
 
   gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );
 
-#if HAVE_LIBGTKEXTRA
+#if USE_GTKEXTRA
   gtk_container_add( GTK_CONTAINER( pwScrolledWindow ), pwTable );
 #else
   gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(
@@ -155,7 +157,7 @@ static GtkWidget
     
   for( i = 0; i < nCols; i++ ) {
     sprintf( sz, _("%d-away"), i + 1 );
-#if HAVE_LIBGTKEXTRA
+#if USE_GTKEXTRA
     gtk_sheet_row_button_add_label( GTK_SHEET( pwTable ), i, sz );
 #else
     gtk_table_attach_defaults( GTK_TABLE( pwTable ),
@@ -168,7 +170,7 @@ static GtkWidget
 
   for( i = 0; i < nRows; i++ ) {
     sprintf( sz, _("%d-away"), i + 1 );
-#if HAVE_LIBGTKEXTRA
+#if USE_GTKEXTRA
     gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
 #else
     gtk_table_attach_defaults( GTK_TABLE( pwTable ),
@@ -178,7 +180,7 @@ static GtkWidget
 
   }
 
-#if !HAVE_LIBGTKEXTRA
+#if !USE_GTKEXTRA
 
   /* fill out table */
     
@@ -192,7 +194,7 @@ static GtkWidget
     }
 
   gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
-#endif /* !HAVE_LIBGTKEXTRA */
+#endif /* !USE_GTKEXTRA */
 
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
                                   GTK_POLICY_AUTOMATIC,
