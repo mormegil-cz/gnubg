@@ -72,7 +72,7 @@ static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges, *pwLightTable, *pwMoveIndicator,
     *pwWoodF, *pwNotebook, *pwLabels, *pwDynamicLabels;
 #if HAVE_LIBXML2
-static GList *plBoardDesigns;
+static GList *plBoardDesigns = NULL;
 #endif
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
@@ -207,7 +207,7 @@ static boarddesign* FindDesign (renderdata* prdDesign)
 {
 	int i;
 	renderdata rdTest;
-	for (i = 0; i < g_list_length(plBoardDesigns) - 1; i++)
+	for (i = 0; i < (int)(g_list_length(plBoardDesigns) - 1); i++)
 	{
 		boarddesign *pbde = g_list_nth_data(plBoardDesigns, i + 1);
 		if (pbde)
