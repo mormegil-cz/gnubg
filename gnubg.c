@@ -3239,9 +3239,6 @@ extern void ShowBoard( void ) {
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 #endif
 
-#if USE_GUI
-    int anBoardTemp[ 2 ][ 25 ];
-#endif
     moverecord *pmr;
     
     if( cOutputDisabled )
@@ -3275,7 +3272,12 @@ extern void ShowBoard( void ) {
     if( ms.gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
-	    InitBoard( anBoardTemp, ms.bgv );
+	    /* Start with an empty board, so it's obvious no game is in progress */
+	    int anBoardTemp[ 2 ][ 25 ];
+	    int i;
+	    for( i = 0; i < 25; i++ )
+	      anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
+
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
