@@ -171,7 +171,7 @@ msgstr "未知のプログラム"
 #: bearoff.c:806
 #, c-format
 msgid "Please insert disk with file %s"
-msgstr ""
+msgstr "ファイル %s の入ったディスクを挿入してください"
 
 #: bearoff.c:1023
 #, c-format
@@ -848,7 +848,7 @@ msgstr "エクイティ"
 #: eval.c:3957 gnubg.c:3333 gtkchequer.c:96 gtkchequer.c:591 gtkcube.c:112
 #: gtkcube.c:126 gtkcube.c:443 gtkcube.c:457 gtkcube.c:880 html.c:2485
 msgid "MWC"
-msgstr ""
+msgstr "マッチ勝率"
 
 #: eval.c:3957 eval.c:5205 gtkgame.c:6370 html.c:336 progress.c:693 show.c:115
 msgid "Cubeful"
@@ -1174,7 +1174,7 @@ msgstr ""
 #: format.c:883 gtkmovefilter.c:384 gtkmovefilter.c:394 html.c:2140
 #, c-format
 msgid "%d-ply"
-msgstr ""
+msgstr "%d-ply"
 
 #: format.c:894 html.c:2156
 msgid "cubeless equity"
@@ -1669,7 +1669,7 @@ msgstr "「悪い」とマークする"
 
 #: gnubg.c:572 gnubg.c:583
 msgid "Remove annotations"
-msgstr "注記削除"
+msgstr "注記を削除"
 
 #: gnubg.c:573
 msgid "Mark as doubtful"
@@ -2249,11 +2249,11 @@ msgstr "game-list window の設定"
 
 #: gnubg.c:1000
 msgid "set geometry of main window"
-msgstr "main window の設定"
+msgstr "メインウィンドウの設定"
 
 #: gnubg.c:1002
 msgid "set geometry of message window"
-msgstr "message window の設定"
+msgstr "メッセージウィンドウの設定"
 
 #: gnubg.c:1006
 msgid "Blink chequers being moves"
@@ -2309,7 +2309,7 @@ msgstr "ピップカウントを表示する"
 
 #: gnubg.c:1036
 msgid "Save and restore window positions and sizes"
-msgstr ""
+msgstr "ウィンドウの位置と大きさを保存・復元"
 
 #: gnubg.c:1040
 msgid "Record the name of the match commentator"
@@ -2345,7 +2345,7 @@ msgstr "マッチエクイティ表示をパーセント表示(on)、見込み数値(off)"
 
 #: gnubg.c:1058
 msgid "Show output in MWC (on) or equity (off) (match play only)"
-msgstr "出力を MWC 表示(on)、エクイティ表示(off)（マッチプレイのみ）"
+msgstr "出力をマッチ勝率(MWC)表示(on)、エクイティ表示(off) (マッチプレイのみ)"
 
 #: gnubg.c:1060
 msgid "Give FIBS \"boardstyle 3\" output (on), or an ASCII board (off)"
@@ -2357,7 +2357,7 @@ msgstr "勝率表示をパーセント表示(on)、見込み数値(off)で"
 
 #: gnubg.c:1066
 msgid "Set number of digits after the decimal point in outputs"
-msgstr ""
+msgstr "出力の小数点以下の桁数を設定"
 
 #: gnubg.c:1070
 msgid "Use the ANSI C rand() (usually linear congruential) generator"
@@ -2661,11 +2661,11 @@ msgstr "注記を含む"
 
 #: gnubg.c:1328
 msgid "include analysis (evaluations/rollouts)"
-msgstr "解析（評価／ロールアウト）を含む"
+msgstr "解析(評価/ロールアウト)を含む"
 
 #: gnubg.c:1330
 msgid "include statistics (# of bad moves, # of jokers, etc)"
-msgstr "統計（悪いムーブ数、ジョーカー数、など）を含む"
+msgstr "統計(悪いムーブ数、ジョーカー数など)を含む"
 
 #: gnubg.c:1333
 msgid "include a legend that describes the output of the export"
@@ -2673,11 +2673,11 @@ msgstr "エクスポート内容についての説明・凡例を含む"
 
 #: gnubg.c:1336
 msgid "include information about the match"
-msgstr ""
+msgstr "マッチ情報を含む"
 
 #: gnubg.c:1341
 msgid "show board every [value] move (0 for never)"
-msgstr "全てのムーブで何手まで表示するか（0 は表示しない）"
+msgstr "すべてのムーブで何手まで表示するか (0 なら表示しない)"
 
 #: gnubg.c:1343
 msgid "which player(s) to show"
@@ -2701,7 +2701,7 @@ msgstr "いつムーブを表示するか"
 
 #: gnubg.c:1365
 msgid "Set size of board for PNG export and HTML image export"
-msgstr ""
+msgstr "PNG と HTML image でエクスポートする画像のサイズを設定"
 
 #: gnubg.c:1370
 msgid "Set options for HTML export"
@@ -2817,7 +2817,7 @@ msgstr "優先度を「低」に設定"
 
 #: gnubg.c:1448
 msgid "Specify priority numerically"
-msgstr "優先度(nice)を数値で指定(?)"
+msgstr "優先度(nice)を数値で指定"
 
 #: gnubg.c:1451
 msgid "Set priority to normal"
@@ -2857,7 +2857,7 @@ msgstr "了承"
 
 #: gnubg.c:1474 sound.c:97
 msgid "Analysis is finished"
-msgstr ""
+msgstr "解析が終わりました"
 
 #: gnubg.c:1476 sound.c:94
 msgid "Bot fans"
@@ -2907,7 +2907,7 @@ msgstr "投了"
 
 #: gnubg.c:1500 gtkrolls.c:223 sound.c:89
 msgid "Roll"
-msgstr "ダイスを振る(?)"
+msgstr "ダイスをロール(?)"
 
 #: gnubg.c:1502
 msgid "Starting of GNU Backgammon"
@@ -3170,7 +3170,7 @@ msgstr "ポストクロフォードゲームかどうかの設定"
 
 #: gnubg.c:1656
 msgid "Set the priority of gnubg"
-msgstr ""
+msgstr "gnubg の優先度を設定"
 
 #: gnubg.c:1657
 msgid "Customise the prompt gnubg prints when ready for commands"
@@ -3218,7 +3218,7 @@ msgstr "指導モードのセットアップ調整(?)"
 
 #: gnubg.c:1681
 msgid "Set which variation of backgammon is used"
-msgstr ""
+msgstr "どのバリエーションを使用するか設定"
 
 #: gnubg.c:1686
 msgid "Compute statistics for current game"
@@ -3342,7 +3342,7 @@ msgstr "ポジションの Kleinman count を計算"
 
 #: gnubg.c:1752
 msgid "Display your language preference"
-msgstr ""
+msgstr "表示する言語を選択"
 
 #: gnubg.c:1755
 msgid "show market window for doubles"
@@ -3358,7 +3358,7 @@ msgstr ""
 
 #: gnubg.c:1761
 msgid "Show default match length"
-msgstr ""
+msgstr "マッチのポイント数の標準設定を表示"
 
 #: gnubg.c:1763
 msgid ""
@@ -3371,7 +3371,7 @@ msgstr "`show matcheuitytable' の同義語"
 
 #: gnubg.c:1768 gnubg.c:1770
 msgid "Show misc race theory"
-msgstr ""
+msgstr "さまざまなレース理論を表示"
 
 #: gnubg.c:1771
 msgid "Show how results will be formatted"
@@ -3487,7 +3487,7 @@ msgstr "`redouble' の同義語"
 
 #: gnubg.c:1838
 msgid "Measure evaluation speed, for later time estimates"
-msgstr ""
+msgstr "残り時間推定のための評価速度の測定"
 
 #: gnubg.c:1840
 msgid "Copy current position to clipboard"
@@ -3531,7 +3531,7 @@ msgstr "他のプログラムで使用するためにデータを書き込む"
 
 #: gnubg.c:1857
 msgid "Make moves for an external controller"
-msgstr "外部コントローラーでムーブする"
+msgstr "外部コントローラーでムーブする(?)"
 
 #: gnubg.c:1859
 msgid "Goto first move or game"
@@ -4614,7 +4614,7 @@ msgstr "頂き!"
 
 #: gtkcube.c:336
 msgid "-"
-msgstr ""
+msgstr "-"
 
 #: gtkcube.c:424
 msgid "Cube analysis"
@@ -4828,7 +4828,7 @@ msgstr "前のロールに戻る"
 
 #: gtkgame.c:1173
 msgid "Move ahead to the next roll"
-msgstr "次のロール似進む"
+msgstr "次のロールに進む"
 
 #: gtkgame.c:1178 gtkgame.c:8021
 msgid "Move ahead to the next game"
@@ -4844,7 +4844,7 @@ msgstr "次のマーク済アクションに進む"
 
 #: gtkgame.c:1194
 msgid "(no game)"
-msgstr "(無効試合)"
+msgstr "(ゲーム無し)"
 
 #: gtkgame.c:1205 html.c:2474
 msgid "#"
@@ -5632,7 +5632,7 @@ msgstr "/ヘルプ(_H)/gnubg について(_A)"
 
 #: gtkgame.c:2929
 msgid "Rendering"
-msgstr ""
+msgstr "描画中"
 
 #: gtkgame.c:2989 gtkgame.c:3037
 msgid "OK"
@@ -5933,7 +5933,7 @@ msgstr "ポジションを保存"
 
 #: gtkgame.c:4482
 msgid "Save weights"
-msgstr ""
+msgstr "Weights を保存"
 
 #: gtkgame.c:4491
 msgid "Export .gam game"
@@ -5945,7 +5945,7 @@ msgstr "ゲームを HTML でエクスポート"
 
 #: gtkgame.c:4509
 msgid "Export LaTeX game"
-msgstr "ゲームを LaTex でエクスポート"
+msgstr "ゲームを LaTeX でエクスポート"
 
 #: gtkgame.c:4518
 msgid "Export PDF game"
@@ -5961,7 +5961,7 @@ msgstr "ゲームをテキストでエクスポート"
 
 #: gtkgame.c:4546
 msgid "Export LaTeX match"
-msgstr "マッチを LaTex でエクスポート"
+msgstr "マッチを LaTeX でエクスポート"
 
 #: gtkgame.c:4555
 msgid "Export HTML match"
@@ -6013,7 +6013,7 @@ msgstr "ポジションを Snowie .txt でエクスポート"
 
 #: gtkgame.c:4671
 msgid "Export LaTeX session"
-msgstr "セッションを LaTex でエクスポート"
+msgstr "セッションを LaTeX でエクスポート"
 
 #: gtkgame.c:4681
 msgid "Export PDF session"
@@ -6459,7 +6459,7 @@ msgstr ""
 
 #: gtkgame.c:7167
 msgid "Copying conditions"
-msgstr ""
+msgstr "配布に関する条件"
 
 #: gtkgame.c:7173 show.c:946
 msgid "Warranty"
@@ -8613,7 +8613,7 @@ msgstr "エクスポート"
 
 #: gtktoolbar.c:452
 msgid "Export to another format"
-msgstr ""
+msgstr "他のフォーマットにエクスポート"
 
 #: gtktoolbar.c:465
 msgid "Take the offered cube or accept the offered resignation"
@@ -10096,7 +10096,7 @@ msgstr "プレイヤー %s の記録を消去しました。\n"
 
 #: record.c:501
 msgid "Are you sure you want to erase all player records?"
-msgstr "すべてのプレイヤーの記録を消去してよろしいですか？"
+msgstr "すべてのプレイヤーの記録を消去してよろしいですか?"
 
 #: record.c:513
 msgid "All player records erased."
@@ -13566,13 +13566,6 @@ msgstr ""
 #: text.c:1005
 msgid "You must specify a file to export to (see `help export position text')."
 msgstr ""
-
-#~ msgid ""
-#~ "\n"
-#~ "/* CSS Stylesheet for GNU Backgammon "
-#~ msgstr ""
-#~ "\n"
-#~ "/* CSS Stylesheet for GNU Backgammon "
 
 #~ msgid "Moves marked very good"
 #~ msgstr "非常に良いムーブ"
