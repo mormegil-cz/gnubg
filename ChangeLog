@@ -1,3 +1,9 @@
+Sat Apr 12 10:55:38 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (place_chequer_or_revert): allow pick'n'pass moves
+	that end in bearoff.
+	(reported by Scott Steiner)
+
 Sat Apr 12 09:19:02 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* autogen.sh: touch sounds/Makefile.in

@@ -1075,6 +1075,7 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
     write_points( oldpoints, bd->turn, bd->nchequers, bd->old_board );
 
     if ( ( unhit = ( ( oldpoints[ bd->drag_point ] == -bd->drag_colour ) && 
+                     ( dest < 26 ) &&
                      ( ( bd->drag_point - dest ) * bd->drag_colour < 0 ) ) ) ) {
       bd->points[ bar ] += bd->drag_colour;
       bd->points[ bd->drag_point ] -= bd->drag_colour;
