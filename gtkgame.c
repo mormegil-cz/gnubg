@@ -93,6 +93,9 @@
 #include "timecontrol.h"
 #endif
 
+#define KEY_ESCAPE -229
+#define KEY_TAB -247
+
 #define GNUBGMENURC ".gnubgmenurc"
 
 #if USE_GTK2
@@ -129,6 +132,14 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
 	return -1;
 }
 #endif
+
+char* warningStrings[WARN_NUM_WARNINGS] =
+{N_("Press escape to exit full screen mode")};
+
+char* warningNames[WARN_NUM_WARNINGS] =
+{N_("fullscreenexit")};
+
+int warningEnabled[WARN_NUM_WARNINGS] = {TRUE};
 
 /* Enumeration to be used as index to the table of command strings below
    (since GTK will only let us put integers into a GtkItemFactoryEntry,
@@ -397,6 +408,8 @@ int fTTY = TRUE;
 int fGUISetWindowPos = TRUE;
 
 static guint nStdin, nDisabledCount = 1;
+int lastImportType = -1;
+int lastExportType = -1;
 
 static char *szCopied; /* buffer holding copied data */
 
@@ -2742,7 +2755,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Windows/Show all panels"), NULL, ShowAllPanels, 0, NULL },
 	{ N_("/_Windows/Hide all panels"), NULL, HideAllPanels, 0, NULL },
 	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Windows/Full screen (Test only!)"), NULL, FullScreenMode, 0, NULL },
+	{ N_("/_Windows/Full screen"), NULL, FullScreenMode, 0, NULL },
 	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Windows/Gu_ile"), NULL, NULL, 0, NULL },
 	{ N_("/_Windows/_Python shell (IDLE)..."), 
@@ -3734,7 +3747,7 @@ static gboolean CommandKeyPress(GtkWidget *widget, GdkEventKey *event, gpointer 
 {
 	short k = event->keyval;
 
-	if (k == -247)
+	if (k == KEY_TAB)
 	{	/* Tab press - auto complete */
 		command *pc;
 		char szCommand[128], szUsage[128];
@@ -4284,9 +4297,10 @@ static void FileOK( GtkWidget *pw, filethings *pft ) {
 	break;
 
       case FDT_IMPORT:
-        pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
-	pft->pch = g_strdup_printf("%s \"%s\"", aszImpFormat[pft->n], 
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
+		pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
+		lastImportType = pft->n;
+		pft->pch = g_strdup_printf("%s \"%s\"", aszImpFormat[pft->n], 
+		gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
         break;
 
       case FDT_SAVE:
@@ -4304,6 +4318,7 @@ static void FileOK( GtkWidget *pw, filethings *pft ) {
         break;
       case FDT_EXPORT_FULL:
         pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
+        lastExportType = pft->n;
         if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBMatch )))
            pft->pch = g_strdup_printf("match %s \"%s\"", aszExpFormat[pft->n],  
              gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
@@ -4525,17 +4540,19 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath,
         ft.pwom = gtk_option_menu_new ();
 	
 	gtk_container_set_border_width(GTK_CONTAINER(ft.pwom), 5);
-	
-        gtk_box_pack_start( GTK_BOX ( pwVbox ), ft.pwom, 
-                          FALSE, FALSE, 4);
-        pwm = gtk_menu_new ();
-        for( ppch = aszExportFormats; *ppch; ++ppch )
-	    gtk_menu_append( GTK_MENU( pwm ),
-			 pwMI = gtk_menu_item_new_with_label(
-			     gettext( *ppch ) ) );
-      
-        gtk_widget_show_all( pwm );
-        gtk_option_menu_set_menu( GTK_OPTION_MENU ( ft.pwom ), pwm );
+
+	gtk_box_pack_start( GTK_BOX ( pwVbox ), ft.pwom, 
+					  FALSE, FALSE, 4);
+	pwm = gtk_menu_new ();
+	for( ppch = aszExportFormats; *ppch; ++ppch )
+		gtk_menu_append( GTK_MENU( pwm ),
+			pwMI = gtk_menu_item_new_with_label(
+			gettext( *ppch ) ) );
+
+	gtk_widget_show_all( pwm );
+	gtk_option_menu_set_menu( GTK_OPTION_MENU ( ft.pwom ), pwm );
+	if (lastExportType != -1)
+		gtk_option_menu_set_history( GTK_OPTION_MENU ( ft.pwom ), lastExportType );
 
 	/* Get the sensitivities right */
 	ClickedRadioButton( NULL, &ft );
@@ -4580,6 +4597,8 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath,
       
       gtk_widget_show_all( pwm );
       gtk_option_menu_set_menu( GTK_OPTION_MENU ( ft.pwom ), pwm );
+      if (lastImportType != -1)
+		gtk_option_menu_set_history( GTK_OPTION_MENU ( ft.pwom ), lastImportType );
 
       pwGetPath = gtk_button_new_with_label("Go to default path");
       gtk_container_set_border_width(GTK_CONTAINER(pwGetPath), 5);
@@ -9531,36 +9550,125 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
                                      awg[ WINDOW_MAIN ].nHeight );
 }
 
+GtkWidget *pwTick;
+
+static void
+WarningOK ( GtkWidget *pw, warnings warning )
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwTick)))
+	{	// if tick set, disable warning
+		char cmd[200];
+		sprintf(cmd, "set warning %s off", warningNames[warning]);
+		UserCommand(cmd);
+	}
+	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+extern void GTKShowWarning(warnings warning)
+{
+	if (warningEnabled[warning])
+	{
+		GtkWidget *pwDialog, *pwMsg, *pwv;
+		
+		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"),
+					DT_WARNING, GTK_SIGNAL_FUNC ( WarningOK ), (void*)warning );
+
+		pwv = gtk_vbox_new ( FALSE, 8 );
+		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
+
+		pwMsg = gtk_label_new(warningStrings[warning]);
+		gtk_box_pack_start( GTK_BOX( pwv ), pwMsg, TRUE, TRUE, 0 );
+
+		pwTick = gtk_check_button_new_with_label (_("Don't show this again"));
+		gtk_tooltips_set_tip(ptt, pwTick, _("If set, this message won't appear again"), 0);
+		gtk_box_pack_start( GTK_BOX( pwv ), pwTick, TRUE, TRUE, 0 );
+
+		gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+		gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					  GTK_WINDOW( pwMain ) );
+		gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+				GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+		gtk_widget_show_all( pwDialog );
+
+		GTKDisallowStdin();
+		gtk_main();
+		GTKAllowStdin();
+	}
+}
+
+static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+	short k = event->keyval;
+
+	if (k == KEY_ESCAPE)
+		FullScreenMode(0, 1, 0);
+
+	return FALSE;
+}
+
 static void
 FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	BoardData *bd = BOARD( pwBoard )->board_data;
+	GtkWindow* ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
 	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
-	fGUIShowIDs = FALSE;
+	static gulong id;
+	static int showingPanels;
+
+	if (!n)
+		GTKShowWarning(WARN_FULLSCREEN_EXIT);
+
+	fGUIShowIDs = n;
 	UpdateSetting(&fGUIShowIDs);
 
-	fGUIShowGameInfo = FALSE;
-	
-	gtk_widget_hide(pwMenuBar);
-	gtk_widget_hide(pwToolbar);
-	gtk_widget_hide(pwHandle);
-	gtk_widget_hide(GTK_WIDGET(bd->table));
-	gtk_widget_hide(GTK_WIDGET(bd->dice_area));
-	gtk_widget_hide(pwStatus);
-	gtk_widget_hide(pwProgress);
-        HideAllPanels(NULL, 0, NULL);
+	fGUIShowGameInfo = n;
 
-	/* How can I maximize the window ?? */
+	if (!n)
+	{
+		gtk_widget_hide(pwMenuBar);
+		gtk_widget_hide(pwToolbar);
+		gtk_widget_hide(pwHandle);
+		gtk_widget_hide(GTK_WIDGET(bd->table));
+		gtk_widget_hide(GTK_WIDGET(bd->dice_area));
+		gtk_widget_hide(pwStatus);
+		gtk_widget_hide(pwProgress);
+		showingPanels = fDisplayPanels;
+		HideAllPanels(NULL, 0, NULL);
+		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
+
+/* How can I maximize the window ?? */
 #if USE_GTK2
-{
-	GtkWindow* ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
-	gtk_window_maximize(ptl);
-	gtk_window_set_decorated(ptl, FALSE);
-}
+		gtk_window_maximize(ptl);
+		gtk_window_set_decorated(ptl, FALSE);
 #else
-	/* Not sure about gtk1...
-	gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
-	*/
+		/* Not sure about gtk1...
+		gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
+		*/
 #endif
+	}
+	else
+	{
+		gtk_widget_show(pwMenuBar);
+		gtk_widget_show(pwToolbar);
+		gtk_widget_show(pwHandle);
+		gtk_widget_show(GTK_WIDGET(bd->table));
+		gtk_widget_show(GTK_WIDGET(bd->dice_area));
+		gtk_widget_show(pwStatus);
+		gtk_widget_show(pwProgress);
+		if (showingPanels)
+			ShowAllPanels(NULL, 0, NULL);
+		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
+
+/* How can I (un)maximize the window ?? */
+#if USE_GTK2
+		gtk_window_unmaximize(ptl);
+		gtk_window_set_decorated(ptl, TRUE);
+#else
+		/* Not sure about gtk1...
+		gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
+		*/
+#endif
+	}
 }
 
 #if USE_TIMECONTROL

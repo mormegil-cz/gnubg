@@ -520,6 +520,10 @@ static char szDICE[] = N_("<die> <die>"),
     szSHOWTC[] = N_("[<name> [<levels>]]"),
     szSHOWTCLIST[] = N_("[all]"),
 #endif
+#if	USE_GTK
+	szWARN[] = N_("[<warning>]"),
+	szWARNYN[] = N_("<warning> on|off"),
+#endif
     szJSDS[] = N_("<joint standard deviations>");
 
 command cER = {
@@ -1721,6 +1725,9 @@ command cER = {
     { "tutor", NULL, N_("Control tutor setup"), NULL, acSetTutor }, 
     { "variation", NULL, N_("Set which variation of backgammon is used"), 
       NULL, acSetVariation }, 
+#if	USE_GTK
+    { "warning", CommandSetWarning, N_("Turn warnings on or off"), szWARNYN, NULL},
+#endif
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
     { "game", CommandShowStatisticsGame, 
@@ -1862,6 +1869,9 @@ command cER = {
     { "variation", CommandShowVariation, 
       N_("Give information about which variation of backgammon is being played"),
       NULL, NULL },
+#if	USE_GTK
+    { "warning", CommandShowWarning, N_("Show warning settings"), szWARN, NULL},
+#endif
     { "warranty", CommandShowWarranty, 
       N_("Various kinds of warranty you do not have"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
@@ -5635,6 +5645,15 @@ extern void CommandSaveSettings( char *szParam ) {
      SaveTimeControlSettings( pf );
 #endif
 
+	/* warnings */
+#if USE_GTK
+	for (i = 0; i < WARN_NUM_WARNINGS; i++)
+	{
+		if (!warningEnabled[i])
+			fprintf(pf, "set warning %s off\n", warningNames[i]);
+	}
+#endif
+
     /* the end */
 
     
@@ -8216,31 +8235,29 @@ getDefaultFileName ( const pathformat f ) {
 
 }
 
+static char * getPath(char *path)
+{
+  char *pc;
+
+  if (strlen(path))
+  {
+    pc = strchr ( path, 0 ) - 1;
+    if ( *pc != DIR_SEPARATOR )
+		strcat ( path, DIR_SEPARATOR_S );
+
+    return PathSearch ( path, szDataDirectory );
+  }
+  else 
+    return NULL;
+}
 
 extern char *
 getDefaultPath ( const pathformat f ) {
 
-  char *pc;
-
-  if ( strlen ( aaszPaths[ f ][ 1 ] ) ) {
-    pc = strchr ( aaszPaths[ f ][ 1 ], 0 ) - 1;
-    if ( *pc == DIR_SEPARATOR )
-      return PathSearch ( aaszPaths[ f ][ 1 ], szDataDirectory );
-    else
-      return PathSearch ( strcat ( aaszPaths[ f ][ 1 ], DIR_SEPARATOR_S ), 
-                          szDataDirectory );
-  }
-  else if ( strlen ( aaszPaths[ f ][ 0 ] ) ) {
-    pc = strchr ( aaszPaths[ f ][ 0 ], 0 ) - 1;
-    if ( *pc == DIR_SEPARATOR )
-      return PathSearch ( aaszPaths[ f ][ 0 ], szDataDirectory );
-    else
-      return PathSearch ( strcat ( aaszPaths[ f ][ 0 ], DIR_SEPARATOR_S ), 
-                          szDataDirectory );
-  }
-  else 
-    return NULL;
-
+  char* r = getPath(aaszPaths[ f ][ 1 ]);
+  if (!r)
+	r = getPath(aaszPaths[ f ][ 0 ]);
+  return r;
 }
 
 extern void

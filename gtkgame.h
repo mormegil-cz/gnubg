@@ -51,6 +51,14 @@ typedef enum _filedialogtype {
   FDT_NONE=0, FDT_SAVE, FDT_EXPORT, FDT_IMPORT, FDT_EXPORT_FULL
 } filedialogtype;
 
+typedef enum _warnings { 
+  WARN_FULLSCREEN_EXIT=0, WARN_NUM_WARNINGS
+} warnings;
+
+extern char* warningStrings[WARN_NUM_WARNINGS];
+extern char* warningNames[WARN_NUM_WARNINGS];
+extern int warningEnabled[WARN_NUM_WARNINGS];
+
 extern GtkWidget *pwMain, *pwMenuBar;
 extern GtkWidget *pwToolbar;
 extern GtkTooltips *ptt;
@@ -58,7 +66,7 @@ extern GtkTooltips *ptt;
 extern GtkWidget *pwGrab;
 extern GtkWidget *pwOldGrab;
 
-
+extern int lastImportType, lastExportType;
 extern int fEndDelay;
 
 extern void ShowGameWindow( void );
