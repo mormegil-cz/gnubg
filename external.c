@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #if HAVE_SYS_SOCKET_H
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

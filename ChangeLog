@@ -1,3 +1,8 @@
+Fri Nov  1 19:54:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* external.c: add #include <sys/types.h>
+	(reported by Peter Klein)
+
 Thu Oct 31 22:26:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (CommandExportPositionGammOnLine): 
