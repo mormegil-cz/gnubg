@@ -1,12 +1,26 @@
 GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 
-* Changes in GNU Backgammon 0.15
+* Changes in GNU Backgammon 0.14.1
 
 ** Rollouts
  - extendable rollouts
 
 ** Bearoff
  - support for Hugh Sconyers' 15x15 full bearoff database
+
+** 3D boards
+
+** Time controls
+
+** Translations to
+ - English (US) (complete)
+ - German (95% finished)
+ - Italian (90% finished)
+ - Japanese (60% finished)
+ - French (60% finished)
+ - Islandic (25% finished)
+ - Tyrkish (25% finished)
+ - Danish (20% finished)
 
 * Changes in GNU Backgammon 0.14
 
