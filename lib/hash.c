@@ -1,10 +1,11 @@
 /*
  * hash.c
  *
- * by Gary Wong, 1997
+ * by Gary Wong, 1997-2000
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 
 #include "config.h"
@@ -14,13 +15,13 @@
 static int ac[] = { 2, 3, 7, 13, 31, 61, 127, 251, 509, 1021, 2039, 4093,
 		    8191, 16381, 32749, 65521, 131071, 262139, 524287,
 		    1048573, 2097143, 4194301, 8388593, 16777213, 33554393,
-		    67108859, 134217689, 268435399, 536870909, 1073741789 };
+		    67108859, 134217689, 268435399, 536870909, 1073741789, 0 };
 
 extern int HashCreate( hash *ph, int c, hashcomparefunc phcf ) {
 
     int i;
     
-    for( i = 0; c > ac[ i ]; i++ )
+    for( i = 0; ac[ i + 1 ] && c > ac[ i ]; i++ )
 	;
     
     if( !( ph->aphn = calloc( ac[ i ], sizeof( hashnode * ) ) ) )
@@ -122,7 +123,7 @@ extern int CacheCreate( cache *pc, int c, cachecomparefunc pccf ) {
 
     int i;
     
-    for( i = 0; c > ac[ i ]; i++ )
+    for( i = 0; ac[ i + 1 ] && c > ac[ i ]; i++ )
 	;
     
     if( !( pc->apcn = calloc( ac[ i ], sizeof( cachenode * ) ) ) )
@@ -139,13 +140,14 @@ extern int CacheCreate( cache *pc, int c, cachecomparefunc pccf ) {
 extern int CacheFlush( cache *pc ) {
 
     int i;
-    
-    for( i = 0; i < ac[ pc->icp ]; i++ )
-	if( pc->apcn[ i ] ) {
-	    free( pc->apcn[ i ]->p );
-	    free( pc->apcn[ i ] );
-	    pc->apcn[ i ] = NULL;
-	}
+
+    if( pc->apcn )
+	for( i = 0; i < ac[ pc->icp ]; i++ )
+	    if( pc->apcn[ i ] ) {
+		free( pc->apcn[ i ]->p );
+		free( pc->apcn[ i ] );
+		pc->apcn[ i ] = NULL;
+	    }
     
     return 0;
 }
@@ -153,15 +155,24 @@ extern int CacheFlush( cache *pc ) {
 extern int CacheDestroy( cache *pc ) {
 
     CacheFlush( pc );
-    
-    free( pc->apcn );
+
+    if( pc->apcn )
+	free( pc->apcn );
 
     return 0;
 }
 
 extern int CacheAdd( cache *pc, unsigned long l, void *p, size_t cb ) {
 
-    cachenode **ppcn = pc->apcn + l % ac[ pc->icp ], *pcn = *ppcn;
+    cachenode **ppcn, *pcn;
+
+    if( !pc->apcn ) {
+	errno = EINVAL;
+	return -1;
+    }
+    
+    ppcn = pc->apcn + l % ac[ pc->icp ];
+    pcn = *ppcn;
 
     if( pcn )
 	free( pcn->p );
@@ -185,13 +196,30 @@ extern int CacheAdd( cache *pc, unsigned long l, void *p, size_t cb ) {
 
 extern void *CacheLookup( cache *pc, unsigned long l, void *p ) {
 
-    cachenode **ppcn = pc->apcn + l % ac[ pc->icp ];
+    cachenode **ppcn;
+
+    if( !pc->apcn )
+	return NULL;
+    
+    ppcn = pc->apcn + l % ac[ pc->icp ];
 
     pc->cLookup++;
     
     return *ppcn && ( *ppcn )->l ==l && ( !pc->pccf  ||
 					 !( pc->pccf )( p, ( *ppcn )->p ) ) ?
 	pc->cHit++, ( *ppcn )->p : NULL;
+}
+
+extern int CacheResize( cache *pc, int cNew ) {
+
+    /* FIXME would be nice to save old cache entries (by rehashing), but
+       it's easier just to throw them out and start again */
+
+    cachecomparefunc pccf = pc->pccf;
+
+    CacheDestroy( pc );
+
+    return CacheCreate( pc, cNew, pccf );
 }
 
 extern int CacheStats( cache *pc, int *pcLookup, int *pcHit ) {

@@ -1,1 +1,3 @@
-None, yet.
+Sun Jan  2 11:33:58 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* hash.c (CacheResize): New function.

@@ -1,7 +1,7 @@
 /*
  * cache.h
  *
- * by Gary Wong, 1997-1999
+ * by Gary Wong, 1997-2000
  */
 
 #ifndef _CACHE_H_
@@ -27,6 +27,7 @@ extern int CacheDestroy( cache *pc );
 extern int CacheAdd( cache *pc, unsigned long l, void *p, size_t cb );
 extern void *CacheLookup( cache *pc, unsigned long l, void *p );
 extern int CacheFlush( cache *pc );
+extern int CacheResize( cache *pc, int cNew );
 extern int CacheStats( cache *pc, int *pcLookup, int *pcHit );
 
 #endif
