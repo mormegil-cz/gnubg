@@ -32,6 +32,7 @@
 #endif
 #include "import.h"
 #include "positionid.h"
+#include "i18n.h"
 
 static int ReadInt16( FILE *pf ) {
 
@@ -70,7 +71,7 @@ ImportJF( FILE * fp, char *szFileName) {
   nVersion = ReadInt16( fp );
 
   if ( nVersion < 124 || nVersion > 126 ){
-    outputl("File not recognised as Jellyfish file.");
+    outputl(_("File not recognised as Jellyfish file."));
     return;
   }
   if ( nVersion == 126 ){
@@ -357,7 +358,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	    AddMoveRecord( pmr );
 	}
     } else if( !fWarned ) {
-	outputf( "Unrecognised move \"%s\" in .mat file.\n", sz );
+	outputf( _("Unrecognised move \"%s\" in .mat file.\n"), sz );
 	fWarned = TRUE;
     }
 }
@@ -463,7 +464,7 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
     while( 1 ) {
 	if( ( n = fscanf( pf, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
 			  &ch ) ) == EOF ) {
-	    fprintf( stderr, "%s: not a valid .mat file\n", szFilename );
+	    fprintf( stderr, _("%s: not a valid .mat file\n"), szFilename );
 	    return;
 	} else if( n > 1 )
 	    break;
@@ -477,8 +478,8 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
 	if( fInterrupt )
 	    return;
 	    
-	if( !GetInputYN( "Are you sure you want to import a saved match, "
-			 "and discard the game in progress? " ) )
+	if( !GetInputYN( _("Are you sure you want to import a saved match, "
+			 "and discard the game in progress? ") ) )
 	    return;
     }
 
@@ -634,7 +635,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 
  error:
     if( !fWarned ) {
-	outputf( "Unrecognised move \"%s\" in oldmoves file.\n", sz );
+	outputf( _("Unrecognised move \"%s\" in oldmoves file.\n"), sz );
 	fWarned = TRUE;
     }
 }
@@ -730,7 +731,7 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
     while( 1 ) {
 	if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
 			  &nLength ) ) == EOF ) {
-	    fprintf( stderr, "%s: not a valid oldmoves file\n", szFilename );
+	    fprintf( stderr, _("%s: not a valid oldmoves file\n"), szFilename );
 	    return;
 	} else if( n == 2 ) {
 	    /* assume a money game */
@@ -748,8 +749,8 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 	if( fInterrupt )
 	    return;
 	
-	if( !GetInputYN( "Are you sure you want to import a saved match, "
-			 "and discard the game in progress? " ) )
+	if( !GetInputYN( _("Are you sure you want to import a saved match, "
+			 "and discard the game in progress? ") ) )
 	    return;
     }
 
@@ -1062,7 +1063,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     
     while( 1 ) {
 	if( ( n = fscanf( pf, "%32s vs. %32s\n", sz0, sz1 ) ) == EOF ) {
-	    fprintf( stderr, "%s: not a valid SGG file\n", szFilename );
+	    fprintf( stderr, _("%s: not a valid SGG file\n"), szFilename );
 	    return;
 	} else if( n == 2 )
 	    break;
@@ -1076,8 +1077,8 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
 	if( fInterrupt )
 	    return;
 	
-	if( !GetInputYN( "Are you sure you want to import a saved match, "
-			 "and discard the game in progress? " ) )
+	if( !GetInputYN( _("Are you sure you want to import a saved match, "
+			 "and discard the game in progress? ") ) )
 	    return;
     }
 
