@@ -665,6 +665,10 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
     pes->rc.fStopOnSTD = rcRollout.fStopOnSTD;
     pes->rc.nMinimumGames = rcRollout.nMinimumGames;
     pes->rc.rStdLimit = rcRollout.rStdLimit;
+	memcpy (aarOutput, pchd->aarOutput, 
+			2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+	memcpy (aarStdDev, pchd->aarStdDev,
+			2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
   }
 
   GetMatchStateCubeInfo( &ci, &pchd->ms );
@@ -687,8 +691,10 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   memcpy ( pchd->aarStdDev, aarStdDev, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
+  if (pes->et != EVAL_ROLLOUT)
+	memcpy ( &pchd->pes->rc, &rcRollout, sizeof ( rcRollout ) );
+
   pchd->pes->et = EVAL_ROLLOUT;
-  memcpy ( &pchd->pes->rc, &rcRollout, sizeof ( rcRollout ) );
 
   if ( pchd->arDouble )
     FindCubeDecision ( pchd->arDouble, pchd->aarOutput, &ci );

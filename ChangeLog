@@ -1,3 +1,7 @@
+Wed Jul 22 14:17:18 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkcube.c - allow extending cube decision rollouts
+
 Tue Jul 22 14:29:09 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* set.c - add decimal places to j.s.d. displayed value
