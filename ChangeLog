@@ -1,3 +1,9 @@
+Thu Aug  7 19:57:42 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* sgf.c (SaveGame): fix for MOVE_SETBOARD records where
+	one or both sides has bourne all chequers off.
+	(reported by Hugh Sconyers)
+
 Thu Aug  7 19:45:11 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (HTLMDumpStatcontext): always show Eq. Snowie error rate.
