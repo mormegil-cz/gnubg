@@ -1,3 +1,17 @@
+Mon Dec 20 16:19:21 1999  Joern Thyssen  <joern@thyssen.nu>
+
+	* xgame.c (StatsSet): nMatchTo == 0 is now money session.
+	* gnubg.c (ShowBoard): nMatchTo == 0 is now money session.
+	Added variables and set- and show-functions for 
+	Crawford game, post-Crawford play, and Jacoby play.
+	* set.c (CommandSetJacoby, CommandSetCrawford, 
+	CommandSetPostCrawford): New functions.
+	* show.c (CommandShowJacoby, CommandShowCrawford, 
+	CommandShowPostCrawford): New functions.
+	* play.c (CommandNewMatch, CommandNewSession): initialize 
+	new variables.
+	(Nextturn): changed code used if fAutoGame.
+
 Sat Dec 18 20:37:32 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* set.c (CommandSetPrompt): New function.
