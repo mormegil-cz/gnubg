@@ -170,8 +170,6 @@ duplication of effort and to make sure our changes merge easily.
 ** The edges of the board should cast shadows.  Getting shadows on the
   board surface is fairly easy... getting shadows on the chequers is not.
 ** Update match equity dialog after pressing "Invert"
-** Suggest default filename when saving. For example, something like
-   "jth_vs_gnubg_2002-04-29_9pts_nn.sgf
 ** Make it possible to set up standard paths when saving/loading.
    For example, introduce commands "set path sgf /home/jth/gnubg/sgf". 
    First time the load or save sgf dialog is started it should position itself
