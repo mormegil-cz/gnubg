@@ -147,9 +147,7 @@ def calc_rate(a,b):
 #             gs (the game/match statistics)
 #
 
-def addStat(conn,person_id,gs,gs_other):
-
-   stat_id = next_id(conn,"stat")
+def addStat(conn,person_id,gs,gs_other,stat_id):
 
    # identification
    s1 = "%d,%d," % (stat_id, person_id )
@@ -303,12 +301,19 @@ def addStat(conn,person_id,gs,gs_other):
 
 def addMatch(conn,env_id,person_id0,person_id1,m):
 
-   stat_id = addStat(conn,person_id0,m[ 'stats' ][ 'X' ],m [ 'stats' ][ 'O' ])
+   stat_id = next_id(conn,"stat")
    if stat_id == None:
+      print "Error generating stat_id"
       return None
 
-   stat_id = addStat(conn,person_id1,m[ 'stats' ][ 'O' ],m [ 'stats' ][ 'X' ])
-   if stat_id == None:
+   if addStat(conn,person_id0,m[ 'stats' ][ 'X' ],
+              m [ 'stats' ][ 'O' ],stat_id) == None:
+      print "Error adding player 0's stat to database."
+      return None
+
+   if addStat(conn,person_id1,m[ 'stats' ][ 'O' ],
+              m [ 'stats' ][ 'X' ],stat_id) == None:
+      print "Error adding player 1's stat to database."
       return None
 
    match_id = next_id(conn,"match")
@@ -380,7 +385,10 @@ conn = pgdb.connect(dsn=':gnubg')
 m = gnubg.match(0,0,1,0)
 if m:
    match_id = add_match(conn,m,0)
-   print "Match successfully added to database"
+   if match_id <> None:
+      print "Match successfully added to database"
+   else:
+      print "Error add match to database"
 else:
    print "No match"
 

@@ -170,13 +170,14 @@ CREATE TABLE gnubg.stat (
    ,time_penalty_loss_normalised      FLOAT   NOT NULL
    ,time_penalty_loss                 FLOAT   NOT NULL
    -- 
-   ,PRIMARY KEY (stat_id)
+   ,PRIMARY KEY (stat_id,person_id)
    ,FOREIGN KEY (person_id) REFERENCES gnubg.person (person_id)
       ON DELETE RESTRICT
 );
 
 CREATE UNIQUE INDEX istat ON gnubg.stat (
     stat_id
+   ,person_id
 );
 
 -- Table: match
@@ -216,7 +217,9 @@ CREATE TABLE gnubg.match (
       ON DELETE RESTRICT
    ,FOREIGN KEY (env_id1,person_id1) REFERENCES gnubg.player (env_id,person_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (stat_id) REFERENCES gnubg.stat (stat_id)
+   ,FOREIGN KEY (stat_id,person_id0) REFERENCES gnubg.stat (stat_id,person_id)
+      ON DELETE CASCADE
+   ,FOREIGN KEY (stat_id,person_id1) REFERENCES gnubg.stat (stat_id,person_id)
       ON DELETE CASCADE
 );
 
