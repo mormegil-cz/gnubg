@@ -296,6 +296,8 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
     case MOVE_SETDICE:
 	pms->anDice[ 0 ] = pmr->sd.anDice[ 0 ];
 	pms->anDice[ 1 ] = pmr->sd.anDice[ 1 ];
+	if( pms->fMove != pmr->sd.fPlayer )
+	    SwapSides( pms->anBoard );
 	pms->fTurn = pms->fMove = pmr->sd.fPlayer;
 	pms->fDoubled = FALSE;
 	break;

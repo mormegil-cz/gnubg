@@ -282,6 +282,7 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
 static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
+static void SavePosition( gpointer *p, guint n, GtkWidget *pw );
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAdvOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
@@ -2009,6 +2010,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Save"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Save/_Game..."), NULL, SaveGame, 0, NULL },
 	{ N_("/_File/_Save/_Match or session..."), NULL, SaveMatch, 0, NULL },
+	{ N_("/_File/_Save/_Position..."), NULL, SavePosition, 0, NULL },
 	{ N_("/_File/_Save/_Weights..."), NULL, SaveWeights, 0, NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },	
 	{ N_("/_File/_Import"), NULL, NULL, 0, "<Branch>" },
@@ -3155,6 +3157,15 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_SGF );
   FileCommand( _("Save match or session"), sz, "save match" );
+  if ( sz ) 
+    free ( sz );
+
+}
+
+static void SavePosition( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultFileName ( PATH_SGF );
+  FileCommand( _("Save position"), sz, "save position" );
   if ( sz ) 
     free ( sz );
 

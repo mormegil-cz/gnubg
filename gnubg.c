@@ -614,6 +614,8 @@ command cER = {
     { "match", CommandSaveMatch, 
       N_("Record a log of the match so far to a file"),
       szFILENAME, &cFilename },
+    { "position", CommandSavePosition, N_("Record the current board position "
+      "to a file"), szFILENAME, &cFilename },
     { "settings", CommandSaveSettings, N_("Use the current settings in future "
       "sessions"), NULL, NULL },
     { "weights", CommandSaveWeights, 

@@ -895,9 +895,12 @@ static void RestoreNode( list *pl ) {
 	    PointList( pp->pl->plNext, an );
 	    for( i = 0; i < 25; i++ )
 		ms.anBoard[ 1 ][ i ] += an[ i ];
-	} else if( pp->ach[ 0 ] == 'P' && pp->ach[ 1 ] == 'L' )
-	    ms.fTurn = ms.fMove = *( (char *) pp->pl->plNext->p ) == 'B';
-	else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
+	} else if( pp->ach[ 0 ] == 'P' && pp->ach[ 1 ] == 'L' ) {
+	    int fTurnNew = *( (char *) pp->pl->plNext->p ) == 'B';
+	    if( ms.fMove != fTurnNew )
+		SwapSides( ms.anBoard );
+	    ms.fTurn = ms.fMove = fTurnNew;
+	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
 	    for( i = 1; i <= MAX_CUBE; i <<= 1 )
 		if( atoi( pp->pl->plNext->p ) == i ) {
 		    pmr = malloc( sizeof( pmr->scv ) );
@@ -1871,4 +1874,109 @@ extern void CommandSaveMatch( char *sz ) {
 
     setDefaultFileName ( sz, PATH_SGF );
 
+}
+
+extern void CommandSavePosition( char *sz ) {
+
+    FILE *pf;
+    list l;
+    movegameinfo *pmgi;
+    movesetboard *pmsb;
+    movesetdice *pmsd;
+    movesetcubeval *pmscv;
+    movesetcubepos *pmscp;
+    
+    sz = NextToken( &sz );
+    
+    if( !plGame ) {
+	outputl( _("No game in progress (type `new game' to start one).") );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to save to (see `help save "
+		 "position').") );
+	return;
+    }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	outputerr( sz );
+	return;
+    }
+
+    ListCreate( &l );
+    
+    pmgi = malloc( sizeof( movegameinfo ) );
+    pmgi->mt = MOVE_GAMEINFO;
+    pmgi->sz = NULL;
+    pmgi->i = 0;
+    pmgi->nMatch = ms.nMatchTo;
+    pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
+    pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
+    pmgi->fCrawford = fAutoCrawford && ms.nMatchTo > 1;
+    pmgi->fCrawfordGame = ms.fCrawford;
+    pmgi->fJacoby = fJacoby && !ms.nMatchTo;
+    pmgi->fWinner = -1;
+    pmgi->nPoints = 0;
+    pmgi->fResigned = FALSE;
+    pmgi->nAutoDoubles = 0;
+    IniStatcontext( &pmgi->sc );
+    ListInsert( &l, pmgi );
+
+    pmsb = malloc( sizeof( movesetboard ) );
+    pmsb->mt = MOVE_SETBOARD;
+    pmsb->sz = NULL;
+    if( ms.fMove )
+	SwapSides( ms.anBoard );
+    PositionKey( ms.anBoard, pmsb->auchKey );
+    if( ms.fMove )
+	SwapSides( ms.anBoard );
+    ListInsert( &l, pmsb );
+
+    pmscv = malloc( sizeof( movesetcubeval ) );
+    pmscv->mt = MOVE_SETCUBEVAL;
+    pmscv->sz = NULL;
+    pmscv->nCube = ms.nCube;
+    ListInsert( &l, pmscv );
+    
+    pmscp = malloc( sizeof( movesetcubepos ) );
+    pmscp->mt = MOVE_SETCUBEPOS;
+    pmscp->sz = NULL;
+    pmscp->fCubeOwner = ms.fCubeOwner;
+    ListInsert( &l, pmscp );
+    
+    /* FIXME if the dice are not rolled, this should be done with a PL
+       property (which is SaveGame()'s job) */
+    pmsd = malloc( sizeof( movesetdice ) );
+    pmsd->mt = MOVE_SETDICE;
+    pmsd->sz = NULL;
+    pmsd->fPlayer = ms.fMove;
+    pmsd->anDice[ 0 ] = ms.anDice[ 0 ];
+    pmsd->anDice[ 1 ] = ms.anDice[ 1 ];
+    pmsd->lt = LUCK_NONE;
+    pmsd->rLuck = ERR_VAL;
+    ListInsert( &l, pmsd );
+
+    /* FIXME add MOVE_DOUBLE record(s) as appropriate */
+    
+    SaveGame( pf, &l );
+
+    if( pf != stdout )
+	fclose( pf );
+
+    while( l.plNext->p )
+	ListDelete( l.plNext );
+    
+    free( pmgi );
+    free( pmsb );
+    free( pmsd );
+    free( pmscv );
+    free( pmscp );
+    
+    setDefaultFileName ( sz, PATH_SGF );
 }

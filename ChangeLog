@@ -1,3 +1,7 @@
+Wed Sep 18 17:42:55 2002  Gary Wong  <gtw@gnu.org>
+
+	* sgf.c (CommandSavePosition): New function.
+
 Wed Sep 18 17:10:38 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (CreateDialog): Added "dialogtype" parameter.  All callers
