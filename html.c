@@ -1207,76 +1207,6 @@ printPointGNU ( FILE *pf, const char *szImageDir, const char *szExtension,
 
 
 static void
-printNumbers ( FILE *pf, const int fTop, const htmlexportcss hecss ) {
-
-  int i;
-
-  if ( fClockwise ) {
-
-    if ( fTop ) {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 24; i >= 19; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 18; i >= 13; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-    else {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 1; i <= 6; ++i )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 7; i <= 12; ++i )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-
-  }
-  else {
-
-    if ( fTop ) {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 13; i <= 18; i++ )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 19; i <= 24; i++ )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-    else {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 12; i >= 7; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 6; i >= 1; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-
-  }
-
-}
-
-
-
-static void
 printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                     const char *szImageDir, const char *szExtension,
                     const htmlexportcss hecss ) {
@@ -1303,7 +1233,6 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<table cellpadding=\"0\" border=\"0\" cellspacing=\"0\""
           " style=\"margin: 0; padding: 0; border: 0\">\n", pf );
-  printNumbers ( pf, fTurn, hecss );
 
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
@@ -1630,8 +1559,6 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
   fputs ( "</tr>", pf );
-
-  printNumbers ( pf, ! fTurn, hecss );
 
   fputs ( "</table>\n\n", pf );
 

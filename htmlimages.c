@@ -123,7 +123,7 @@ extern void CommandExportHTMLImages( char *sz ) {
 
     memcpy( &rd, &rdAppearance, sizeof( renderdata ) );
     
-    rd.fLabels = FALSE; /* HTML export draws labels outside the image */
+    rd.fLabels = TRUE; 
     rd.nSize = s;
 
     RenderBoard( &rd, auchBoard, 108 * 4 * 3 );
