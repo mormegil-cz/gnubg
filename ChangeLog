@@ -1,4 +1,8 @@
-Mon Aug  4 09:18:36 2003  Joern Thyssen  <jth@gnubg.org>
+Mon Aug  4 21:04:39 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTMLCubeAnalysisTable): add class for cubeless equity.
+
+Mon Aug  4 09:18:36 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* sgf.c, backgammon.h, play.c, import.c
 	  count number of successive doubles in move record, clean up

@@ -77,6 +77,7 @@ typedef enum _stylesheetclass {
   CLASS_CUBE_ACTION,
   CLASS_CUBE_PLY,
   CLASS_CUBE_PROBABILITIES,
+  CLASS_CUBE_CUBELESS_TEXT,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -118,7 +119,8 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubeequity", "font-weight: bold" },
   { "cubeaction", "color: red" },
   { "cubeply", "font-weight: bold" },
-  { "cubeprobs", "font-weight: bold" }
+  { "cubeprobs", "font-weight: bold" },
+  { "cubecubelesstext", "font-style: italic" }
 };
 
 
@@ -2249,11 +2251,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     fprintf ( pf, 
               "</span> %s</td>"
               "<td %s>%s</td>"
-              "<td>(%s: <span %s>%s</span>)</td>\n",
+              "<td %s>(%s: <span %s>%s</span>)</td>\n",
               ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
               _("cubeless equity") : _("cubeless MWC"),
               GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ),
+              GetStyle( CLASS_CUBE_CUBELESS_TEXT, hecss ),
               _("Money"), 
                GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
