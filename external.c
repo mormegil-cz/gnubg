@@ -291,8 +291,10 @@ extern void CommandExternal( char *sz ) {
 			    &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
 	    outputl( _("Warning: badly formed board from external controller.") );
 	else {
-	    /* FIXME could SwapSides( anBoard ) be necessary? */
-	    
+
+            if ( ! fTurn )
+              SwapSides( anBoard );
+
 	    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
 			  fCrawford, fJacoby, nBeavers, bgvDefault );
 
