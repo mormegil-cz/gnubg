@@ -411,15 +411,14 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
       * These arguments should be dynamically calculated instead 
       * of hardcoded, but it's too painful right now.
       */
-    if( intersects( x0, y0, 0, 0, (BOARD_WIDTH + BAR_WIDTH)/2, 
-		    (BOARD_HEIGHT - CHEQUER_HEIGHT)/2 - 1, 
-		    6 * CHEQUER_WIDTH, CHEQUER_HEIGHT + 2 ) )
-	return POINT_RIGHT;
-    else if( intersects( x0, y0, 0, 0, BEAROFF_WIDTH, 
-			 (BOARD_HEIGHT - CHEQUER_HEIGHT)/2 - 1, 
-			 6 * CHEQUER_WIDTH, CHEQUER_HEIGHT + 2 ) )
-	return POINT_LEFT;
-
+	if( intersects( x0, y0, 0, 0,
+				(BOARD_WIDTH + BAR_WIDTH) / 2, BORDER_HEIGHT + 5 * CHEQUER_HEIGHT,
+				6 * CHEQUER_WIDTH, BOARD_HEIGHT - 10 * CHEQUER_HEIGHT - BORDER_HEIGHT * 3) )
+		return POINT_RIGHT;
+	else if( intersects( x0, y0, 0, 0,
+				BEAROFF_WIDTH, BORDER_HEIGHT + 5 * CHEQUER_HEIGHT,
+				6 * CHEQUER_WIDTH, BOARD_HEIGHT - 10 * CHEQUER_HEIGHT - BORDER_HEIGHT * 3) )
+		return POINT_LEFT;
 
     for( i = 0; i < 28; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
@@ -1237,13 +1236,14 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], DIE_WIDTH, DIE_HEIGHT ) )
 	return POINT_DICE;
     
-    if( intersects( x0, y0, 0, 0, (BOARD_WIDTH + BAR_WIDTH)/ 2, 
-		    BORDER_HEIGHT + 5 * CHEQUER_HEIGHT, 
-		    6 * CHEQUER_WIDTH, CHEQUER_HEIGHT ) )
-	return POINT_RIGHT;
-    else if( intersects( x0, y0, 0, 0, BEAROFF_WIDTH, 5 * CHEQUER_HEIGHT + BORDER_HEIGHT, 
-			 6 * CHEQUER_WIDTH, CHEQUER_HEIGHT ) )
-	return POINT_LEFT;
+	if( intersects( x0, y0, 0, 0,
+				(BOARD_WIDTH + BAR_WIDTH) / 2, BORDER_HEIGHT + 5 * CHEQUER_HEIGHT,
+				6 * CHEQUER_WIDTH, BOARD_HEIGHT - 10 * CHEQUER_HEIGHT - BORDER_HEIGHT * 3) )
+		return POINT_RIGHT;
+	else if( intersects( x0, y0, 0, 0,
+				BEAROFF_WIDTH, BORDER_HEIGHT + 5 * CHEQUER_HEIGHT,
+				6 * CHEQUER_WIDTH, BOARD_HEIGHT - 10 * CHEQUER_HEIGHT - BORDER_HEIGHT * 3) )
+		return POINT_LEFT;
     
     for( i = 0; i < 30; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
