@@ -25,11 +25,12 @@
 extern void PositionKey( int anBoard[ 2 ][ 25 ], unsigned char auchKey[ 10 ] );
 extern char *PositionID( int anBoard[ 2 ][ 25 ] );
 extern char *PositionIDFromKey( unsigned char auchKey[ 10 ] );
-extern unsigned short PositionBearoff( int anBoard[ 6 ] );
+extern unsigned int PositionBearoff( int anBoard[], const int n );
 extern void PositionFromKey( int anBoard[ 2 ][ 25 ],
                              unsigned char *puch );
 extern int PositionFromID( int anBoard[ 2 ][ 25 ], char *szID );
-extern void PositionFromBearoff( int anBoard[ 6 ], unsigned short usID );
+extern void PositionFromBearoff( int anBoard[ 6 ], const unsigned int usID,
+                                 const int n );
 extern int 
 EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
 extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] );

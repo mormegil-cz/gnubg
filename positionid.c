@@ -36,6 +36,7 @@
  */
 
 #include <assert.h>
+#include <stdio.h>
 #include <errno.h>
 #include <string.h>
 #include "positionid.h"
@@ -288,20 +289,20 @@ extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] ) {
     return 1;
 }
 
-static int anCombination[ 21 ][ 6 ], fCalculated = 0;
+static int anCombination[ 27 ][ 12 ], fCalculated = 0;
 
 static int InitCombination( void ) {
 
     int i, j;
 
-    for( i = 0; i < 21; i++ )
+    for( i = 0; i < 27; i++ )
         anCombination[ i ][ 0 ] = i + 1;
     
-    for( j = 1; j < 6; j++ )
+    for( j = 1; j < 12; j++ )
         anCombination[ 0 ][ j ] = 0;
 
-    for( i = 1; i < 21; i++ )
-        for( j = 1; j < 6; j++ )
+    for( i = 1; i < 27; i++ )
+        for( j = 1; j < 12; j++ )
             anCombination[ i ][ j ] = anCombination[ i - 1 ][ j - 1 ] +
                 anCombination[ i - 1 ][ j ];
 
@@ -314,12 +315,12 @@ static int Combination( int n, int r ) {
 
     assert( n > 0 );
     assert( r > 0 );
-    assert( n <= 21 );
-    assert( r <= 6 );
+    assert( n <= 27 );
+    assert( r <= 12 );
 
     if( !fCalculated )
         InitCombination();
-    
+
     return anCombination[ n - 1 ][ r - 1 ];
 }
 
@@ -332,21 +333,23 @@ static int PositionF( int fBits, int n, int r ) {
         PositionF( fBits, n - 1, r - 1 ) : PositionF( fBits, n - 1, r );
 }
 
-extern unsigned short PositionBearoff( int anBoard[ 6 ] ) {
+extern unsigned int PositionBearoff( int anBoard[],
+                                       const int n ) {
 
     int i, fBits, j;
 
-    for( j = 5, i = 0; i < 6; i++ )
+    for( j = n - 1, i = 0; i < n; i++ )
         j += anBoard[ i ];
 
     fBits = 1 << j;
     
-    for( i = 0; i < 6; i++ ) {
+    for( i = 0; i < n; i++ ) {
         j -= anBoard[ i ] + 1;
         fBits |= ( 1 << j );
+
     }
 
-    return PositionF( fBits, 21, 6 );
+    return PositionF( fBits, 15 + n, n );
 }
 
 static int PositionInv( int nID, int n, int r ) {
@@ -364,15 +367,16 @@ static int PositionInv( int nID, int n, int r ) {
         PositionInv( nID - nC, n - 1, r - 1 ) : PositionInv( nID, n - 1, r );
 }
 
-extern void PositionFromBearoff( int anBoard[ 6 ], unsigned short usID ) {
+extern void PositionFromBearoff( int anBoard[], const unsigned int usID,
+                                 const int n ) {
     
-    int fBits = PositionInv( usID, 21, 6 );
+    int fBits = PositionInv( usID, 15 + n, n );
     int i, j;
 
-    for( i = 0; i < 6; i++ )
+    for( i = 0; i < n; i++ )
         anBoard[ i ] = 0;
     
-    for( j = 5, i = 0; j >= 0 && i < 21; i++ ) {
+    for( j = n - 1, i = 0; j >= 0 && i < (15 + n); i++ ) {
         if( fBits & ( 1 << i ) )
             j--;
         else
