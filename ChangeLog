@@ -1,8 +1,15 @@
+Thu Jan  4 10:28:09 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c: Added translucent chequers option.
+	* gtkprefs.c: New file; allows changing board appearance.
+	* set.c (CommandSetColours): New function.
+
 Tue Dec 26 16:11:14 2000  Jørn Thyssen  <joern@thyssen.nu>
 
-	*	eval.c (EvaluatePositionCubeful1): fix of bug noted by Steve Baedke.
+	* eval.c (EvaluatePositionCubeful1): fix of bug noted by Steve Baedke.
 
 Sat Dec 16 11:45:12 2000  Øystein Johansen <oeysteij@online.no>
+	
         * import.c import.h - new files for import of file formats from 
         other programs.
         

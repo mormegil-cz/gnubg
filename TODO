@@ -102,8 +102,6 @@ duplication of effort and to make sure our changes merge easily.
 
 * GTK interface:
 ** Allow copy/paste and drag & drop of the board ID in the board window.
-** Add silly bells and whistles.  Things like colour selector for chequer
-  colours, angle of light, surface of pieces, transparent background, etc.
 ** Finish menus (settings, in particular).  Make sure there is a GUI
   equivalent for every command.
 ** Add a prompt and entry field to allow commands to be entered (replacing
@@ -149,6 +147,10 @@ duplication of effort and to make sure our changes merge easily.
 ** Add commands to _hide_ the game window ("list game" shows it).
   Should we show it by default?
 ** Make the board window accelerators apply to the game window, too.
+** Animate the chequers when the computer moves.
+** Show a preview of the chequers in the appearances dialog.
+** Finish "set colours"; add these to "save settings" so board colours, etc.
+  can be saved.
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
@@ -194,7 +196,6 @@ duplication of effort and to make sure our changes merge easily.
   window shouldn't scroll to centre the current record -- checking
   gtk_clist_row_is_visible should fix this. (gary)
 ** Dithering problems in GDK RGB (gary).
-** >5 chequers on a point no longer work correctly with translucency. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

@@ -33,49 +33,13 @@
 
 #include "backgammon.h"
 #include "drawboard.h"
+#include "gdkgetrgb.h"
 #include "gtkboard.h"
+#include "gtkprefs.h"
 #include "positionid.h"
 
 #define POINT_DICE 28
 #define POINT_CUBE 29
-
-typedef struct _BoardData {
-    GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
-	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
-	*crawford;
-    GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
-    GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
-	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
-	*pm_x_key, *pm_o_key;
-    GdkBitmap *bm_mask, *bm_dice_mask, *bm_cube_mask, *bm_key_mask;
-    GdkFont *cube_font;
-    gint board_size; /* basic unit of board size, in pixels -- a chequer's
-			diameter is 6 of these units (and is 2 units thick) */
-    gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
-	dice_colour[ 2 ], cube_font_rotated, old_board[ 2 ][ 25 ],
-	dice_roll[ 2 ]; /* roll showing on the off-board dice */
-    gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
-    move *all_moves, *valid_move;
-    movelist move_list;
-    
-    /* remainder is from FIBS board: data */
-    char name[ 32 ], name_opponent[ 32 ];
-    gint match_to, score, score_opponent;
-    gint points[ 28 ]; /* 0 and 25 are the bars */
-    gint turn; /* -1 is X, 1 is O, 0 if game over */
-    gint dice[ 2 ], dice_opponent[ 2 ]; /* 0, 0 if not rolled */
-    gint cube;
-    gint can_double, opponent_can_double; /* allowed to double */
-    gint doubled; /* -1 if X is doubling, 1 if O is doubling */
-    gint colour; /* -1 for player X, 1 for player O */
-    gint direction; /* -1 playing from 24 to 1, 1 playing from 1 to 24 */
-    gint home, bar; /* 0 or 25 depending on fDirection */
-    gint off, off_opponent; /* number of men borne off */
-    gint on_bar, on_bar_opponent; /* number of men on bar */
-    gint to_move; /* 0 to 4 -- number of pieces to move */
-    gint forced, crawford_game; /* unused, Crawford game flag */
-    gint redoubles; /* number of instant redoubles allowed */
-} BoardData;
 
 static int positions[ 28 ][ 3 ] = {
     { 51, 25, 7 },
@@ -113,6 +77,171 @@ static void draw_bitplane( GdkDrawable *drawable, GdkGC *gc, GdkDrawable *src,
 		width, height, xdest, ydest, plane );
 }
 
+static void copy_rgb( guchar *src, guchar *dest, int xsrc, int ysrc,
+		      int xdest, int ydest, int width, int height,
+		      int xdestmax, int ydestmax,
+		      int srcstride, int deststride ) {
+    int y;
+
+    if( xsrc < 0 ) {
+	width += xsrc;
+	xdest -= xsrc;
+	xsrc = 0;
+    }
+
+    if( ysrc < 0 ) {
+	height += ysrc;
+	ydest -= ysrc;
+	ysrc = 0;
+    }
+
+    if( xdest < 0 ) {
+	width += xdest;
+	xsrc -= xdest;
+	xdest = 0;
+    }
+
+    if( ydest < 0 ) {
+	height += ydest;
+	ysrc -= ydest;
+	ydest = 0;
+    }
+
+    if( xdest + width > xdestmax )
+	width = xdestmax - xdest;
+    
+    if( ydest + height > ydestmax )
+	height = ydestmax - ydest;
+
+    if( height < 0 || width < 0 )
+	return;
+    
+    src += 3 * xsrc;
+    dest += 3 * xdest;
+
+    src += srcstride * ysrc;
+    dest += deststride * ydest;
+
+    for( y = 0; y < height; y++ ) {
+	memcpy( dest, src, 3 * width );
+	dest += deststride;
+	src += srcstride;
+    }
+}
+
+static inline guchar clamp( gint n ) {
+
+    if( n < 0 )
+	return 0;
+    else if( n > 0xFF )
+	return 0xFF;
+    else
+	return n;
+}
+
+static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
+				      int n ) {
+    int i, x, y, cx, cy, xpix, ypix, invert, y_chequer, c_chequer, i_chequer,
+	i_refract;
+    guchar rgb_under[ 30 * bd->board_size ][ 6 * bd->board_size ][ 3 ],
+	rgb[ 30 * bd->board_size ][ 6 * bd->board_size ][ 3 ],
+	*p, *p_src, *rgba;
+    short *refract;
+    
+    c_chequer = ( !n || n == 25 ) ? 3 : 5;
+
+    if( bd->points[ n ] > 0 ) {
+	rgba = bd->rgba_o;
+	refract = bd->ai_refract[ 1 ];
+    } else {
+	rgba = bd->rgba_x;
+	refract = bd->ai_refract[ 0 ];
+    }
+    
+    x = positions[ n ][ 0 ] * bd->board_size;
+    y = positions[ n ][ 1 ] * bd->board_size;
+    cx = 6 * bd->board_size;
+    cy = -c_chequer * bd->board_size * positions[ n ][ 2 ];
+
+    if( ( invert = cy < 0 ) ) {
+	y += cy * 4 / 5;
+	cy = -cy;
+    }
+
+    /* copy empty point image */
+    if( !n || n == 25 )
+	/* on bar */
+	memcpy( rgb_under[ 0 ][ 0 ], bd->rgb_bar, sizeof( rgb_under ) );
+    else if( n > 25 )
+	/* bear off tray */
+	memcpy( rgb_under[ 0 ][ 0 ], bd->rgb_empty, sizeof( rgb_under ) );
+    else {
+	/* on board; copy saved image */
+	p_src = bd->rgb_points;
+	if( !( ( n ^ invert ) & 1 ) )
+	    p_src += 6 * bd->board_size * 3;
+	if( invert )
+	    p_src += 36 * bd->board_size * 12 * bd->board_size * 3;
+	
+	p = rgb_under[ 0 ][ 0 ];
+	for( ypix = 0; ypix < 30 * bd->board_size; ypix++ ) {
+	    memcpy( p, p_src, 6 * bd->board_size * 3 );
+	    p_src += 12 * bd->board_size * 3;
+	    p += 6 * bd->board_size * 3;
+	}
+    }
+
+    memcpy( rgb, rgb_under, sizeof( rgb ) );
+    
+    y_chequer = invert ? cy - 6 * bd->board_size : 0;
+    
+    i_chequer = 0;
+    
+    for( i = abs( bd->points[ n ] ); i; i-- ) {
+	for( ypix = 0; ypix < 6 * bd->board_size; ypix++ )
+	    for( xpix = 0; xpix < 6 * bd->board_size; xpix++ ) {
+		i_refract = refract[ ypix * 6 * bd->board_size + xpix ];
+		
+		rgb[ ypix + y_chequer ][ xpix ][ 0 ] = clamp(
+		    ( ( rgb_under[ y_chequer ][ i_refract ][ 0 ] *
+			rgba[ ( ypix * 6 * bd->board_size + xpix ) * 4 + 3 ] )
+		      >> 8 ) + rgba[ ( ypix * 6 * bd->board_size + xpix ) * 4
+				   + 0 ] );
+		rgb[ ypix + y_chequer ][ xpix ][ 1 ] = clamp(
+		    ( ( rgb_under[ y_chequer ][ i_refract ][ 1 ] *
+			rgba[ ( ypix * 6 * bd->board_size + xpix ) * 4 + 3 ] )
+		      >> 8 ) + rgba[ ( ypix * 6 * bd->board_size + xpix ) * 4
+				   + 1 ] );
+		rgb[ ypix + y_chequer ][ xpix ][ 2 ] = clamp(
+		    ( ( rgb_under[ y_chequer ][ i_refract ][ 2 ] *
+			rgba[ ( ypix * 6 * bd->board_size + xpix ) * 4 + 3 ] )
+		      >> 8 ) + rgba[ ( ypix * 6 * bd->board_size + xpix ) * 4
+				   + 2 ] );
+	    }
+
+	/* If there are too many chequers to fit on the point, other
+	   chequers might overlap this one; copy the image onto rgb_under
+	   so that things layered over us will work. */
+	if( abs( bd->points[ n ] ) > c_chequer )
+	    memcpy( rgb_under[ y_chequer ][ 0 ], rgb[ y_chequer ][ 0 ],
+		    6 * bd->board_size * 6 * bd->board_size * 3 );
+	
+	y_chequer -= bd->board_size * positions[ n ][ 2 ];
+
+	if( ++i_chequer == c_chequer ) {
+	    i_chequer = 0;
+	    c_chequer--;
+	    
+	    y_chequer = invert ? cy + ( 3 * c_chequer - 21 ) * bd->board_size :
+		( 15 - 3 * c_chequer ) * bd->board_size;
+	}
+    }
+
+    gdk_draw_rgb_image( board->window, bd->gc_copy, x, y, cx, cy,
+			GDK_RGB_DITHER_MAX, rgb[ 0 ][ 0 ],
+			6 * bd->board_size * 3 );
+}
+
 static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
 
     int i, x, y, cx, cy, invert, y_chequer, c_chequer, i_chequer;
@@ -120,6 +249,11 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     if( bd->board_size <= 0 )
 	return;
 
+    if( bd->points[ n ] && bd->translucent ) {
+	board_redraw_translucent( board, bd, n );
+	return;
+    }
+    
     c_chequer = ( !n || n == 25 ) ? 3 : 5;
     
     x = positions[ n ][ 0 ] * bd->board_size;
@@ -148,12 +282,13 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     
     for( i = abs( bd->points[ n ] ); i; i-- ) {
 	draw_bitplane( bd->pm_point, bd->gc_and, bd->bm_mask, 0, 0, 0,
-		       y_chequer, 6 * bd->board_size, 6 * bd->board_size, 1 );
+		       y_chequer, 6 * bd->board_size, 6 * bd->board_size,
+		       1 );
 
 	gdk_draw_pixmap( bd->pm_point, bd->gc_or, bd->points[ n ] > 0 ?
 			 bd->pm_o : bd->pm_x, 0, 0, 0, y_chequer,
 			 6 * bd->board_size, 6 * bd->board_size );
-
+	
 	y_chequer -= bd->board_size * positions[ n ][ 2 ];
 
 	if( ++i_chequer == c_chequer ) {
@@ -508,6 +643,7 @@ static void Confirm( BoardData *bd ) {
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
     GdkPixmap *pm_swap;
+    guchar *rgb_swap;
     int i, n, dest, x, y, bar;
 
     switch( event->type ) {
@@ -589,7 +725,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	}
 
 	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
-	    !bd->dice[ 0 ] ) {
+	    bd->dice[ 0 ] <= 0 ) {
 	    /* Don't let them move chequers unless the dice have been
 	       rolled, or they're editing the board. */
 	    gdk_beep();
@@ -780,62 +916,136 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	bd->x_drag = x;
 	bd->y_drag = y;
 
-	gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
-			 bd->x_drag - 3 * bd->board_size,
-			 bd->y_drag - 3 * bd->board_size,
-			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	if( bd->translucent )
+	    gdk_get_rgb_image( board->window,
+			       gdk_window_get_colormap( board->window ),
+			       bd->x_drag - 3 * bd->board_size,
+			       bd->y_drag - 3 * bd->board_size,
+			       6 * bd->board_size, 6 * bd->board_size,
+			       bd->rgb_saved, 6 * bd->board_size * 3 );
+	else
+	    gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
+			     bd->x_drag - 3 * bd->board_size,
+			     bd->y_drag - 3 * bd->board_size,
+			     0, 0, 6 * bd->board_size, 6 * bd->board_size );
 	
 	/* fall through */
 	
     case GDK_MOTION_NOTIFY:
 	if( bd->drag_point < 0 )
 	    break;
-	
-	gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, board->window,
-			 x- 3 * bd->board_size, y - 3 * bd->board_size,
-			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
-	
-	gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, bd->pm_saved,
-			 0, 0, bd->x_drag - x, bd->y_drag - y,
-			 6 * bd->board_size, 6 * bd->board_size );
-		   
-	gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->pm_temp_saved,
-			 0, 0, 0, 0, 6 * bd->board_size, 6 * bd->board_size );
-		   
-	draw_bitplane( bd->pm_temp, bd->gc_and, bd->bm_mask,
-		       0, 0, 0, 0, 6 * bd->board_size, 6 * bd->board_size, 1 );
-		       
-	gdk_draw_pixmap( bd->pm_temp, bd->gc_or, bd->drag_colour > 0 ?
-			 bd->pm_o : bd->pm_x,
-			 0, 0, 0, 0, 6 * bd->board_size, 6 * bd->board_size );
-	
-	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
-			 0, 0, bd->x_drag - 3 * bd->board_size,
-			 bd->y_drag - 3 * bd->board_size,
-			 6 * bd->board_size, 6 * bd->board_size );
+
+	if( bd->translucent ) {
+	    int c, j;
+	    guchar *psrc, *pdest;
+	    short *refract = bd->drag_colour > 0 ? bd->ai_refract[ 1 ] :
+		bd->ai_refract[ 0 ];
+	    
+	    gdk_get_rgb_image( board->window,
+			       gdk_window_get_colormap( board->window ),
+			       x - 3 * bd->board_size, y - 3 * bd->board_size,
+			       6 * bd->board_size, 6 * bd->board_size,
+			       bd->rgb_temp_saved, 6 * bd->board_size * 3 );
+
+	    copy_rgb( bd->rgb_saved, bd->rgb_temp_saved, 0, 0,
+		      bd->x_drag - x, bd->y_drag - y,
+		      6 * bd->board_size, 6 * bd->board_size,
+		      6 * bd->board_size, 6 * bd->board_size,
+		      6 * bd->board_size * 3, 6 * bd->board_size * 3 );
+
+	    memcpy( bd->rgb_temp, bd->rgb_temp_saved, 6 * bd->board_size *
+		    6 * bd->board_size * 3 );
+
+	    c = 6 * bd->board_size * 6 * bd->board_size;
+	    for( j = 0, psrc = bd->drag_colour > 0 ? bd->rgba_o : bd->rgba_x,
+		     pdest = bd->rgb_temp; j < c; j++ ) {
+		int r = refract[ j ] * 3;
 		
+		pdest[ 0 ] = clamp( ( ( bd->rgb_temp_saved[ r + 0 ] *
+					psrc[ 3 ] ) >> 8 ) + psrc[ 0 ] );
+		pdest[ 1 ] = clamp( ( ( bd->rgb_temp_saved[ r + 1 ] *
+					psrc[ 3 ] ) >> 8 ) + psrc[ 1 ] );
+		pdest[ 2 ] = clamp( ( ( bd->rgb_temp_saved[ r + 2 ] *
+					psrc[ 3 ] ) >> 8 ) + psrc[ 2 ] );
+		pdest += 3;
+		psrc += 4;
+	    }
+	    		
+	    gdk_draw_rgb_image( board->window, bd->gc_copy,
+				bd->x_drag - 3 * bd->board_size,
+				bd->y_drag - 3 * bd->board_size,
+				6 * bd->board_size, 6 * bd->board_size,
+				GDK_RGB_DITHER_MAX, bd->rgb_saved,
+				6 * bd->board_size * 3 );
+	    
+	    gdk_draw_rgb_image( board->window, bd->gc_copy,
+				x - 3 * bd->board_size,
+				y - 3 * bd->board_size,
+				6 * bd->board_size, 6 * bd->board_size,
+				GDK_RGB_DITHER_MAX, bd->rgb_temp,
+				6 * bd->board_size * 3 );
+	    
+	    rgb_swap = bd->rgb_saved;
+	    bd->rgb_saved = bd->rgb_temp_saved;
+	    bd->rgb_temp_saved = rgb_swap;
+	} else {
+	    gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, board->window,
+			     x - 3 * bd->board_size, y - 3 * bd->board_size,
+			     0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	
+	    gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, bd->pm_saved,
+			     0, 0, bd->x_drag - x, bd->y_drag - y,
+			     6 * bd->board_size, 6 * bd->board_size );
+		   
+	    gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->pm_temp_saved,
+			     0, 0, 0, 0, 6 * bd->board_size,
+			     6 * bd->board_size );
+		   
+	    draw_bitplane( bd->pm_temp, bd->gc_and, bd->bm_mask,
+			   0, 0, 0, 0, 6 * bd->board_size, 6 * bd->board_size,
+			   1 );
+		       
+	    gdk_draw_pixmap( bd->pm_temp, bd->gc_or, bd->drag_colour > 0 ?
+			     bd->pm_o : bd->pm_x,
+			     0, 0, 0, 0, 6 * bd->board_size,
+			     6 * bd->board_size );
+	
+	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+			     0, 0, bd->x_drag - 3 * bd->board_size,
+			     bd->y_drag - 3 * bd->board_size,
+			     6 * bd->board_size, 6 * bd->board_size );
+		
+	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_temp,
+			     0, 0, x - 3 * bd->board_size,
+			     y - 3 * bd->board_size,
+			     6 * bd->board_size, 6 * bd->board_size );
+
+	    pm_swap = bd->pm_saved;
+	    bd->pm_saved = bd->pm_temp_saved;
+	    bd->pm_temp_saved = pm_swap;
+	}
+	
 	bd->x_drag = x;
 	bd->y_drag = y;
 
-	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_temp,
-			 0, 0, bd->x_drag - 3 * bd->board_size,
-			 bd->y_drag - 3 * bd->board_size,
-			 6 * bd->board_size, 6 * bd->board_size );
-
-	pm_swap = bd->pm_saved;
-	bd->pm_saved = bd->pm_temp_saved;
-	bd->pm_temp_saved = pm_swap;
-	
 	break;
 	
     case GDK_BUTTON_RELEASE:
 	if( bd->drag_point < 0 )
 	    break;
-	
-	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
-			 0, 0, bd->x_drag - 3 * bd->board_size,
-			 bd->y_drag - 3 * bd->board_size,
-			 6 * bd->board_size, 6 * bd->board_size );
+
+	if( bd->translucent )
+	    gdk_draw_rgb_image( board->window, bd->gc_copy,
+				bd->x_drag - 3 * bd->board_size,
+				bd->y_drag - 3 * bd->board_size,
+				6 * bd->board_size, 6 * bd->board_size,
+				GDK_RGB_DITHER_MAX, bd->rgb_saved,
+				6 * bd->board_size * 3 );
+	else
+	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+			     0, 0, bd->x_drag - 3 * bd->board_size,
+			     bd->y_drag - 3 * bd->board_size,
+			     6 * bd->board_size, 6 * bd->board_size );
 
 	dest = board_point( board, bd, x, y );
     place_chequer:
@@ -1276,20 +1486,35 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     return 0;
 }
 
-static void board_free_pixmaps( BoardData *bd ) {
+extern void board_free_pixmaps( BoardData *bd ) {
+
+    if( bd->translucent ) {
+	free( bd->rgba_x );
+	free( bd->rgba_o );
+	free( bd->ai_refract[ 0 ] );
+	free( bd->ai_refract[ 1 ] );
+	free( bd->rgb_points );
+	free( bd->rgb_empty );
+	free( bd->rgb_bar );
+	free( bd->rgb_saved );
+	free( bd->rgb_temp );
+	free( bd->rgb_temp_saved );
+    } else {
+	gdk_pixmap_unref( bd->pm_x );
+	gdk_pixmap_unref( bd->pm_o );
+	gdk_bitmap_unref( bd->bm_mask );
+	gdk_pixmap_unref( bd->pm_point );
+	gdk_pixmap_unref( bd->pm_saved );
+	gdk_pixmap_unref( bd->pm_temp );
+	gdk_pixmap_unref( bd->pm_temp_saved );
+    }
+    
     gdk_pixmap_unref( bd->pm_board );
-    gdk_pixmap_unref( bd->pm_x );
-    gdk_pixmap_unref( bd->pm_o );
     gdk_pixmap_unref( bd->pm_x_dice );
     gdk_pixmap_unref( bd->pm_o_dice );
     gdk_pixmap_unref( bd->pm_x_pip );
     gdk_pixmap_unref( bd->pm_o_pip );
     gdk_pixmap_unref( bd->pm_cube );
-    gdk_pixmap_unref( bd->pm_saved );
-    gdk_pixmap_unref( bd->pm_temp );
-    gdk_pixmap_unref( bd->pm_temp_saved );
-    gdk_pixmap_unref( bd->pm_point );
-    gdk_bitmap_unref( bd->bm_mask );
     gdk_bitmap_unref( bd->bm_dice_mask );
     gdk_bitmap_unref( bd->bm_cube_mask );
 }
@@ -1326,9 +1551,20 @@ static void board_draw_border( GdkPixmap *pm, GdkGC *gc, int x0, int y0,
     }
 }
 
+static guchar board_pixel( BoardData *bd, int i, int antialias, int j ) {
+
+    return clamp( ( ( (int) bd->aanBoardColour[ 0 ][ j ] -
+		      (int) bd->aSpeckle[ 0 ] / 2 +
+		      (int) RAND % ( bd->aSpeckle[ 0 ] + 1 ) ) *
+		    ( 20 - antialias ) +
+		    ( (int) bd->aanBoardColour[ i ][ j ] -
+		      (int) bd->aSpeckle[ i ] / 2 +
+		      (int) RAND % ( bd->aSpeckle[ i ] + 1 ) ) *
+		    antialias ) / 20 );
+}
+
 static void board_draw( GtkWidget *widget, BoardData *bd ) {
 
-    guchar buf[ 66 * bd->board_size ][ 12 * bd->board_size ][ 3 ];
     gint ix, iy, antialias;
     GdkGC *gc;
     GdkGCValues gcv;
@@ -1338,6 +1574,14 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     bd->pm_board = gdk_pixmap_new( widget->window, 108 * bd->board_size,
 				   72 * bd->board_size, -1 );
 
+    bd->rgb_points = malloc( 66 * bd->board_size * 12 * bd->board_size * 3 );
+    bd->rgb_empty = malloc( 30 * bd->board_size * 6 * bd->board_size * 3 );
+    bd->rgb_bar = malloc( 6 * bd->board_size * 21 * bd->board_size * 3 );
+#define buf( y, x, i ) ( bd->rgb_points[ ( ( (y) * 12 * bd->board_size + (x) )\
+					   * 3 ) + (i) ] )
+#define empty( y, x, i ) ( bd->rgb_empty[ ( ( (y) * 6 * bd->board_size + (x) )\
+					    * 3 ) + (i) ] )
+    
     /* R, B = 0.9^30 x 0.8; G = 0.92 x 0x30 + 0.9^30 x 0.8 */
     gcv.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0x093509 );
     gc = gdk_gc_new_with_values( widget->window, &gcv, GDK_GC_FOREGROUND );
@@ -1390,6 +1634,12 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     
     /* FIXME shade hinges */
     
+    gdk_get_rgb_image( bd->pm_board,
+		       gdk_window_get_colormap( widget->window ),
+		       51 * bd->board_size, 4 * bd->board_size,
+		       6 * bd->board_size, 21 * bd->board_size,
+		       bd->rgb_bar, 6 * bd->board_size * 3 );
+	
     for( iy = 0; iy < 30 * bd->board_size; iy++ )
 	for( ix = 0; ix < 6 * bd->board_size; ix++ ) {
 	    /* <= 0 is board; >= 20 is on a point; interpolate in between */
@@ -1401,60 +1651,45 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 	    else if( antialias > 20 )
 		antialias = 20;
 
-	    buf[ iy ][ ix + 6 * bd->board_size ][ 0 ] =
-		buf[ 66 * bd->board_size - iy - 1 ][ ix ][ 0 ] =
-		( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) * ( 20 - antialias ) +
-		  ( 0x80 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-		  antialias ) / 20;
-		      
-	    buf[ iy ][ ix + 6 * bd->board_size ][ 1 ] =
-		buf[ 66 * bd->board_size - iy - 1 ][ ix ][ 1 ] =
-		( ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) * ( 20 - antialias ) +
-		  ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-		  antialias ) / 20;
-		      
-	    buf[ iy ][ ix + 6 * bd->board_size ][ 2 ] =
-		buf[ 66 * bd->board_size - iy - 1 ][ ix ][ 2 ] =
-		( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) * ( 20 - antialias ) +
-		  ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-		  antialias ) / 20;
+	    buf( iy, ix + 6 * bd->board_size, 0 ) =
+		buf( 66 * bd->board_size - iy - 1, ix, 0 ) =
+		board_pixel( bd, 2, antialias, 0 );
+	    
+	    buf( iy, ix + 6 * bd->board_size, 1 ) =
+		buf( 66 * bd->board_size - iy - 1, ix, 1 ) =
+		board_pixel( bd, 2, antialias, 1 );
+	    
+	    buf( iy, ix + 6 * bd->board_size, 2 ) =
+		buf( 66 * bd->board_size - iy - 1, ix, 2 ) =
+		board_pixel( bd, 2, antialias, 2 );
+	    
+	    buf( iy, ix, 0 ) =
+		buf( 66 * bd->board_size - iy - 1, ix + 6 * bd->board_size,
+		     0 ) = board_pixel( bd, 3, antialias, 0 );
 
-	    buf[ iy ][ ix ][ 0 ] =
-	    buf[ 66 * bd->board_size - iy - 1 ][ ix + 6 * bd->board_size ]
-		[ 0 ] = ( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) *
-			  ( 20 - antialias ) +
-			  ( 0x40 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-			  antialias ) / 20;
-		      
-	    buf[ iy ][ ix ][ 1 ] =
-		buf[ 66 * bd->board_size - iy - 1 ][ ix + 6 * bd->board_size ]
-		[ 1 ] = ( ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-			  ( 20 - antialias ) +
-			  ( 0x40 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-			  antialias ) / 20;
-		      
-	    buf[ iy ][ ix ][ 2 ] =
-		buf[ 66 * bd->board_size - iy - 1 ][ ix + 6 * bd->board_size ]
-		[ 2 ] = ( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) *
-			  ( 20 - antialias ) +
-			  ( 0x40 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
-			  antialias ) / 20;
+	    buf( iy, ix, 1 ) =
+		buf( 66 * bd->board_size - iy - 1, ix + 6 * bd->board_size,
+		     1 ) = board_pixel( bd, 3, antialias, 1 );
+
+	    buf( iy, ix, 2 ) =
+		buf( 66 * bd->board_size - iy - 1, ix + 6 * bd->board_size,
+		     2 ) = board_pixel( bd, 3, antialias, 2 );
 	}
     
     for( iy = 0; iy < 6 * bd->board_size; iy++ )
 	for( ix = 0; ix < 12 * bd->board_size; ix++ ) {
-	    buf[ 30 * bd->board_size + iy ][ ix ][ 0 ] =
-		( RAND & 0x1F ) + ( RAND & 0x1F );
-	    buf[ 30 * bd->board_size + iy ][ ix ][ 1 ] =
-		( RAND & 0x3F ) + ( RAND & 0x3F );
-	    buf[ 30 * bd->board_size + iy ][ ix ][ 2 ] =
-		( RAND & 0x1F ) + ( RAND & 0x1F );
+	    buf( 30 * bd->board_size + iy, ix, 0 ) =
+		board_pixel( bd, 0, 0, 0 );
+	    buf( 30 * bd->board_size + iy, ix, 1 ) =
+		board_pixel( bd, 0, 0, 1 );
+	    buf( 30 * bd->board_size + iy, ix, 2 ) =
+		board_pixel( bd, 0, 0, 2 );
 	}
 
     gdk_draw_rgb_image( bd->pm_board, gc, 12 * bd->board_size,
 			3 * bd->board_size, 12 * bd->board_size,
 			66 * bd->board_size, GDK_RGB_DITHER_MAX,
-			&buf[ 0 ][ 0 ][ 0 ], 12 * bd->board_size * 3 );
+			bd->rgb_points, 12 * bd->board_size * 3 );
 
     gdk_draw_pixmap( bd->pm_board, gc, bd->pm_board,
 		     12 * bd->board_size, 3 * bd->board_size,
@@ -1471,15 +1706,22 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 		     
     for( iy = 0; iy < 30 * bd->board_size; iy++ )
 	for( ix = 0; ix < 6 * bd->board_size; ix++ ) {
-	    buf[ iy ][ ix ][ 0 ] = ( RAND & 0x1F ) + ( RAND & 0x1F );
-	    buf[ iy ][ ix ][ 1 ] = ( RAND & 0x3F ) + ( RAND & 0x3F );
-	    buf[ iy ][ ix ][ 2 ] = ( RAND & 0x1F ) + ( RAND & 0x1F );
+	    empty( iy, ix, 0 ) = board_pixel( bd, 0, 0, 0 );
+	    empty( iy, ix, 1 ) = board_pixel( bd, 0, 0, 1 );
+	    empty( iy, ix, 2 ) = board_pixel( bd, 0, 0, 2 );
 	}
 
     gdk_draw_rgb_image( bd->pm_board, gc, 3 * bd->board_size,
 			3 * bd->board_size, 6 * bd->board_size,
 			30 * bd->board_size, GDK_RGB_DITHER_MAX,
-			&buf[ 0 ][ 0 ][ 0 ], 12 * bd->board_size * 3 );
+			bd->rgb_empty, 6 * bd->board_size * 3 );
+
+    if( !bd->translucent ) {
+	free( bd->rgb_points );
+	free( bd->rgb_empty );
+    }
+#undef buf
+#undef empty
     
     gdk_draw_pixmap( bd->pm_board, gc, bd->pm_board,
 		     3 * bd->board_size, 3 * bd->board_size,
@@ -1497,41 +1739,48 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     gdk_gc_unref( gc );
 }
 
-static inline guchar clamp( gint n ) {
-
-    if( n < 0 )
-	return 0;
-    else if( n > 0xFF )
-	return 0xFF;
-    else
-	return n;
-}
-
 static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 
-    int size = fKey ? 20 : 6 * bd->board_size;
-    guchar buf_x[ size ][ size ][ 3 ], buf_o[ size ][ size ][ 3 ], *buf_mask;
+    int size = fKey ? 16 : 6 * bd->board_size;
+    guchar *buf_x, *buf_o, *buf_mask;
     int ix, iy, in, fx, fy, i;
-    float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta;
+    float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
+	len;
     GdkImage *img;
     GdkGC *gc;
-
-    /* We need to use malloc() for this, since Xlib will free() it. */
-    buf_mask = malloc( ( size ) * ( size + 7 ) >> 3 );
-
-    if( fKey ) {
-	bd->pm_x_key = gdk_pixmap_new( widget->window, size, size, -1 );
-	bd->pm_o_key = gdk_pixmap_new( widget->window, size, size, -1 );
-	bd->bm_key_mask = gdk_pixmap_new( NULL, size, size, 1 );
-    } else {
-	bd->pm_x = gdk_pixmap_new( widget->window, size, size, -1 );
-	bd->pm_o = gdk_pixmap_new( widget->window, size, size, -1 );
-	bd->bm_mask = gdk_pixmap_new( NULL, size, size, 1 );
-    }
+    short *refract_x, *refract_o;
     
-    img = gdk_image_new_bitmap( gdk_window_get_visual( widget->window ),
-				buf_mask, size,
-				size );
+#define BUFX( y, x, i ) buf_x[ ( (y) * size + (x) ) * 4 + (i) ]
+#define BUFO( y, x, i ) buf_o[ ( (y) * size + (x) ) * 4 + (i) ]
+    
+    buf_x = ( fKey ? bd->rgba_x_key : bd->rgba_x ) = malloc( size * size * 4 );
+    buf_o = ( fKey ? bd->rgba_o_key : bd->rgba_o ) = malloc( size * size * 4 );
+    
+    if( bd->translucent ) {
+	if( !fKey ) {
+	    refract_x = bd->ai_refract[ 0 ] = malloc( size * size *
+						      sizeof( short ) );
+	    refract_o = bd->ai_refract[ 1 ] = malloc( size * size *
+						      sizeof( short ) );
+	}
+    } else {
+	/* We need to use malloc() for this, since Xlib will free() it. */
+	buf_mask = malloc( ( size ) * ( size + 7 ) >> 3 );
+
+	if( fKey ) {
+	    bd->pm_x_key = gdk_pixmap_new( widget->window, size, size, -1 );
+	    bd->pm_o_key = gdk_pixmap_new( widget->window, size, size, -1 );
+	    bd->bm_key_mask = gdk_pixmap_new( NULL, size, size, 1 );
+	} else {
+	    bd->pm_x = gdk_pixmap_new( widget->window, size, size, -1 );
+	    bd->pm_o = gdk_pixmap_new( widget->window, size, size, -1 );
+	    bd->bm_mask = gdk_pixmap_new( NULL, size, size, 1 );
+	}
+    
+	img = gdk_image_new_bitmap( gdk_window_get_visual( widget->window ),
+				    buf_mask, size,
+				    size );
+    }
     
     for( iy = 0, y_loop = -1.0; iy < size; iy++ ) {
 	for( ix = 0, x_loop = -1.0; ix < size; ix++ ) {
@@ -1545,59 +1794,160 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 		do {
 		    if( ( z = 1.0 - x * x - y * y ) > 0.0 ) {
 			in++;
-			diffuse += 0.2;
-			z = sqrt( z ) * 5;
-			if( ( cos_theta = ( 0.9 * z - 0.316 * x - 0.3 * y ) /
-			      sqrt( x * x + y * y + z * z ) ) > 0 ) {
-			    diffuse += cos_theta * 0.8;
-			    specular_x += pow( cos_theta, 10 ) * 0.4;
-			    specular_o += pow( cos_theta, 30 ) * 0.8;
+			diffuse += 0.3;
+			z = sqrt( z ) * 1.5;
+			len = sqrt( x * x + y * y + z * z );
+			if( ( cos_theta = ( bd->arLight[ 0 ] * x +
+					    bd->arLight[ 1 ] * -y +
+					    bd->arLight[ 2 ] * z ) / len )
+			    > 0 ) {
+			    diffuse += cos_theta;
+			    if( ( cos_theta = 2 * z * cos_theta / len -
+				  bd->arLight[ 2 ] ) > 0 ) {
+				specular_x += pow( cos_theta,
+						   bd->arExponent[ 0 ] ) *
+				    bd->arCoefficient[ 0 ];
+				specular_o += pow( cos_theta,
+						   bd->arExponent[ 1 ] ) *
+				    bd->arCoefficient[ 1 ];
+			    }
 			}
 		    }
 		    x += 1.0 / ( size );
 		} while( !fx++ );
 		y += 1.0 / ( size );
 	    } while( !fy++ );
-	    
-	    if( in < ( fKey ? 1 : 3 ) ) {
+
+	    if( in < ( bd->translucent || fKey ? 1 : 3 ) ) {
+		/* pixel is outside chequer */
 		for( i = 0; i < 3; i++ )
-		    buf_x[ iy ][ ix ][ i ] = buf_o[ iy ][ ix ][ i ] = 0;
-		gdk_image_put_pixel( img, ix, iy, 0 );
+		    BUFX( iy, ix, i ) = BUFO( iy, ix, i ) = 0;
+
+		if( bd->translucent && !fKey )
+		    *refract_x++ = *refract_o++ = iy * size + ix;
+		
+		if( bd->translucent )
+		    BUFX( iy, ix, 3 ) = BUFO( iy, ix, 3 ) = 0xFF;
+		else
+		    gdk_image_put_pixel( img, ix, iy, 0 );
 	    } else {
-		gdk_image_put_pixel( img, ix, iy, ~0L );
+		/* pixel is inside chequer */
+		if( bd->translucent ) {
+		    if( !fKey ) {
+			float r, s, theta, a, b, p, q;
+			int f;
+			
+			r = sqrt( x_loop * x_loop + y_loop * y_loop );
+			s = sqrt( 1 - r * r );
 
-		buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.8 + specular_x )
-						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.1 + specular_x )
-						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.1 + specular_x )
-						* 64.0 + ( 4 - in ) * 32.0 );
+			theta = atanf( r / s );
 
-		buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.01 + specular_o )
-						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.01 + specular_o )
-						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.02 + specular_o )
-						* 64.0 + ( 4 - in ) * 32.0 );
+			for( f = 0; f < 2; f++ ) {
+			    b = asinf( sinf( theta ) / bd->arRefraction[ f ] );
+			    a = theta - b;
+			    p = r - s * tanf( a );
+			    q = p / r;
+			    
+			    /* write the comparison this strange way to pick up
+			       NaNs as well */
+			    if( !( q >= -1.0f && q <= 1.0f ) )
+				q = 1.0f;
+
+			    *( f ? refract_o++ : refract_x++ ) =
+				lrint( iy * q + size / 2 * ( 1.0 - q ) ) *
+				size +
+				lrint( ix * q + size / 2 * ( 1.0 - q ) );
+			}
+		    }
+		    
+		    BUFX( iy, ix, 0 ) = clamp( ( diffuse *
+						 bd->aarColour[ 0 ][ 0 ] *
+						 bd->aarColour[ 0 ][ 3 ] +
+						 specular_x ) * 64.0 );
+		    BUFX( iy, ix, 1 ) = clamp( ( diffuse *
+						 bd->aarColour[ 0 ][ 1 ] *
+						 bd->aarColour[ 0 ][ 3 ] +
+						 specular_x ) * 64.0 );
+		    BUFX( iy, ix, 2 ) = clamp( ( diffuse *
+						 bd->aarColour[ 0 ][ 2 ] *
+						 bd->aarColour[ 0 ][ 3 ] +
+						 specular_x ) * 64.0 );
+		    
+		    BUFO( iy, ix, 0 ) = clamp( ( diffuse *
+						 bd->aarColour[ 1 ][ 0 ] *
+						 bd->aarColour[ 1 ][ 3 ] +
+						 specular_o ) * 64.0 );
+		    BUFO( iy, ix, 1 ) = clamp( ( diffuse *
+						 bd->aarColour[ 1 ][ 1 ] *
+						 bd->aarColour[ 1 ][ 3 ] +
+						 specular_o ) * 64.0 );
+		    BUFO( iy, ix, 2 ) = clamp( ( diffuse *
+						 bd->aarColour[ 1 ][ 2 ] *
+						 bd->aarColour[ 1 ][ 3 ] +
+						 specular_o ) * 64.0 );
+		    
+		    BUFX( iy, ix, 3 ) = clamp(
+			0xFF * 0.25 * ( ( 4 - in ) +
+					( ( 1.0 - bd->aarColour[ 0 ][ 3 ] ) *
+					  diffuse ) ) );
+		    BUFO( iy, ix, 3 ) = clamp(
+			0xFF * 0.25 * ( ( 4 - in ) +
+					( ( 1.0 - bd->aarColour[ 1 ][ 3 ] ) *
+					  diffuse ) ) );
+		} else {
+		    /* antialias */
+		    BUFX( iy, ix, 0 ) = clamp( ( diffuse *
+						 bd->aarColour[ 0 ][ 0 ] +
+						 specular_x )
+					       * 64.0 + ( 4 - in ) * 32.0 );
+		    BUFX( iy, ix, 1 ) = clamp( ( diffuse *
+						 bd->aarColour[ 0 ][ 1 ] +
+						 specular_x )
+					       * 64.0 + ( 4 - in ) * 32.0 );
+		    BUFX( iy, ix, 2 ) = clamp( ( diffuse *
+						 bd->aarColour[ 0 ][ 2 ] +
+						 specular_x )
+					       * 64.0 + ( 4 - in ) * 32.0 );
+		    
+		    BUFO( iy, ix, 0 ) = clamp( ( diffuse *
+						 bd->aarColour[ 1 ][ 0 ] +
+						 specular_o )
+					       * 64.0 + ( 4 - in ) * 32.0 );
+		    BUFO( iy, ix, 1 ) = clamp( ( diffuse *
+						 bd->aarColour[ 1 ][ 1 ] +
+						 specular_o )
+					       * 64.0 + ( 4 - in ) * 32.0 );
+		    BUFO( iy, ix, 2 ) = clamp( ( diffuse *
+						 bd->aarColour[ 1 ][ 2 ] +
+						 specular_o )
+					       * 64.0 + ( 4 - in ) * 32.0 );
+		    
+		    gdk_image_put_pixel( img, ix, iy, ~0L );
+		}
 	    }
 	    x_loop += 2.0 / ( size );
 	}
 	y_loop += 2.0 / ( size );
     }
 
-    gdk_draw_rgb_image( fKey ? bd->pm_x_key : bd->pm_x, bd->gc_copy, 0, 0,
-			size, size, GDK_RGB_DITHER_MAX,
-			&buf_x[ 0 ][ 0 ][ 0 ], size * 3 );
-    gdk_draw_rgb_image( fKey ? bd->pm_o_key : bd->pm_o, bd->gc_copy, 0, 0,
-			size, size, GDK_RGB_DITHER_MAX,
-			&buf_o[ 0 ][ 0 ][ 0 ], size * 3 );
+    if( !bd->translucent ) {
+	gdk_draw_rgb_32_image( fKey ? bd->pm_x_key : bd->pm_x, bd->gc_copy,
+			       0, 0, size, size, GDK_RGB_DITHER_MAX,
+			       buf_x, size * 4 );
+	gdk_draw_rgb_32_image( fKey ? bd->pm_o_key : bd->pm_o, bd->gc_copy,
+			       0, 0, size, size, GDK_RGB_DITHER_MAX,
+			       buf_o, size * 4 );
 
-    gc = gdk_gc_new( fKey ? bd->bm_key_mask : bd->bm_mask );
-    gdk_draw_image( fKey ? bd->bm_key_mask : bd->bm_mask, gc, img, 0, 0, 0, 0,
-		    size, size );
-    gdk_gc_unref( gc );
+	gc = gdk_gc_new( fKey ? bd->bm_key_mask : bd->bm_mask );
+	gdk_draw_image( fKey ? bd->bm_key_mask : bd->bm_mask, gc, img,
+			0, 0, 0, 0, size, size );
+	gdk_gc_unref( gc );
     
-    gdk_image_destroy( img );
+	gdk_image_destroy( img );
+
+	free( buf_x );
+	free( buf_o );
+    }
 }
 
 static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
@@ -1640,8 +1990,10 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			fabs( y ) < 6.0 / 7.0 ) {
 			in++;
 			diffuse += 0.92; /* 0.9 x 0.8 + 0.2 (ambient) */
-			specular_x += 0.139; /* 0.9^10 x 0.4 */
-			specular_o += 0.034; /* 0.9^30 x 0.8 */
+			specular_x += pow( 0.9, bd->arExponent[ 0 ] ) *
+			    bd->arCoefficient[ 0 ];
+			specular_o += pow( 0.9, bd->arExponent[ 1 ] ) *
+			    bd->arCoefficient[ 1 ];
 		    } else {
 			if( fabs( x ) < 6.0 / 7.0 ) {
 			    x_norm = 0.0;
@@ -1665,8 +2017,12 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			if( ( cos_theta = 0.9 * z_norm - 0.316 * x_norm -
 			      0.3 * y_norm ) > 0.0 ) {
 			    diffuse += cos_theta * 0.8;
-			    specular_x += pow( cos_theta, 10 ) * 0.4;
-			    specular_o += pow( cos_theta, 30 ) * 0.8;
+			    specular_x += pow( cos_theta,
+					       bd->arExponent[ 0 ] ) *
+				bd->arCoefficient[ 0 ];
+			    specular_o += pow( cos_theta,
+					       bd->arExponent[ 1 ] ) *
+				bd->arCoefficient[ 1 ];
 			}
 		    }
 		missed:		    
@@ -1682,18 +2038,30 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 	    } else {
 		gdk_image_put_pixel( img, ix, iy, 1 );
 
-		buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.8 + specular_x )
+		buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
+						  bd->aarColour[ 0 ][ 0 ] +
+						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.1 + specular_x )
+		buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse *
+						  bd->aarColour[ 0 ][ 1 ] +
+						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.1 + specular_x )
+		buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse *
+						  bd->aarColour[ 0 ][ 2 ] +
+						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
-		
-		buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.01 + specular_o )
+
+		buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
+						  bd->aarColour[ 1 ][ 0 ] +
+						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.01 + specular_o )
+		buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse *
+						  bd->aarColour[ 1 ][ 1 ] +
+						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
-		buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.02 + specular_o )
+		buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse *
+						  bd->aarColour[ 1 ][ 2 ] +
+						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 	    }
 	    x_loop += 2.0 / ( 7 * bd->board_size );
@@ -1721,12 +2089,23 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
     guchar buf_x[ bd->board_size ][ bd->board_size ][ 3 ],
 	buf_o[ bd->board_size ][ bd->board_size ][ 3 ];
     int ix, iy, in, fx, fy;
-    float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta;
+    float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
+	dice_top[ 2 ][ 3 ];
 
     bd->pm_x_pip = gdk_pixmap_new( widget->window, bd->board_size,
 				   bd->board_size, -1 );
     bd->pm_o_pip = gdk_pixmap_new( widget->window, bd->board_size,
 				   bd->board_size, -1 );
+
+    specular_x = pow( 0.9, bd->arExponent[ 0 ] ) * bd->arCoefficient[ 0 ];
+    specular_o = pow( 0.9, bd->arExponent[ 1 ] ) * bd->arCoefficient[ 1 ];
+    /* 0.92 = 0.9 x 0.8 + 0.2 (ambient) */
+    dice_top[ 0 ][ 0 ] = (0.92 * bd->aarColour[ 0 ][ 0 ] + specular_x ) * 64.0;
+    dice_top[ 0 ][ 1 ] = (0.92 * bd->aarColour[ 0 ][ 1 ] + specular_x ) * 64.0;
+    dice_top[ 0 ][ 2 ] = (0.92 * bd->aarColour[ 0 ][ 2 ] + specular_x ) * 64.0;
+    dice_top[ 1 ][ 0 ] = (0.92 * bd->aarColour[ 1 ][ 0 ] + specular_o ) * 64.0;
+    dice_top[ 1 ][ 1 ] = (0.92 * bd->aarColour[ 1 ][ 1 ] + specular_o ) * 64.0;
+    dice_top[ 1 ][ 2 ] = (0.92 * bd->aarColour[ 1 ][ 2 ] + specular_o ) * 64.0;
     
     for( iy = 0, y_loop = -1.0; iy < bd->board_size; iy++ ) {
 	for( ix = 0, x_loop = -1.0; ix < bd->board_size; ix++ ) {
@@ -1745,8 +2124,12 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 			if( ( cos_theta = ( 0.316 * x + 0.3 * y + 0.9 * z ) /
 			      sqrt( x * x + y * y + z * z ) ) > 0 ) {
 			    diffuse += cos_theta * 0.8;
-			    specular_x += pow( cos_theta, 10 ) * 0.4;
-			    specular_o += pow( cos_theta, 30 ) * 0.8;
+			    specular_x += pow( cos_theta,
+					       bd->arExponent[ 0 ] ) *
+				bd->arCoefficient[ 0 ];
+			    specular_x += pow( cos_theta,
+					       bd->arExponent[ 1 ] ) *
+				bd->arCoefficient[ 1 ];
 			}
 		    }
 		    x += 1.0 / ( bd->board_size );
@@ -1756,23 +2139,23 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 
 	    buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.7 + specular_x ) *
 					    64.0 + ( 4 - in ) *
-					    ( 0.92 * 0.8 + 0.139 ) * 64.0 );
+					    dice_top[ 0 ][ 0 ] );
 	    buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.7 + specular_x ) *
 					    64.0 + ( 4 - in ) *
-					    ( 0.92 * 0.1 + 0.139 ) * 64.0 );
+					    dice_top[ 0 ][ 1 ] );
 	    buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.7 + specular_x ) *
 					    64.0 + ( 4 - in ) *
-					    ( 0.92 * 0.1 + 0.139 ) * 64.0 );
+					    dice_top[ 0 ][ 2 ] );
 	    
 	    buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.7 + specular_o ) *
 					    64.0 + ( 4 - in ) *
-					    ( 0.92 * 0.01 + 0.034 ) * 64.0 );
+					    dice_top[ 1 ][ 0 ] );
 	    buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.7 + specular_o ) *
 					    64.0 + ( 4 - in ) *
-					    ( 0.92 * 0.01 + 0.034 ) * 64.0 );
+					    dice_top[ 1 ][ 1 ] );
 	    buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.7 + specular_o ) *
 					    64.0 + ( 4 - in ) *
-					    ( 0.92 * 0.02 + 0.034 ) * 64.0 );
+					    dice_top[ 1 ][ 2 ] );
 	    x_loop += 2.0 / ( bd->board_size );
 	}
 	y_loop += 2.0 / ( bd->board_size );
@@ -1886,32 +2269,36 @@ static void board_draw_cube( GtkWidget *widget, BoardData *bd ) {
     gdk_image_destroy( img );
 }
 
-/* Create all of the size-dependent pixmaps.  The chequer key pixmaps are
-   not included here, since they are not resized with the board. */
-static void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
+/* Create all of the size/colour-dependent pixmaps. */
+extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
     
-    if( bd->pm_board )
-	board_free_pixmaps( bd );
-
     board_draw( board, bd );
     board_draw_chequers( board, bd, FALSE );
+    board_draw_chequers( board, bd, TRUE );
     board_draw_dice( board, bd );
     board_draw_pips( board, bd );
     board_draw_cube( board, bd );
     board_set_cube_font( board, bd );
-    
-    bd->pm_saved = gdk_pixmap_new( board->window,
-				   6 * bd->board_size,
-				   6 * bd->board_size, -1 );
-    bd->pm_temp = gdk_pixmap_new( board->window,
-				  6 * bd->board_size,
-				  6 * bd->board_size, -1 );
-    bd->pm_temp_saved = gdk_pixmap_new( board->window,
-					6 * bd->board_size,
-					6 * bd->board_size, -1 );
-    bd->pm_point = gdk_pixmap_new( board->window,
-				   6 * bd->board_size,
-				   35 * bd->board_size, -1 );
+
+    if( bd->translucent ) {
+	bd->rgb_saved = malloc( 6 * bd->board_size * 6 * bd->board_size * 3 );
+	bd->rgb_temp = malloc( 6 * bd->board_size * 6 * bd->board_size * 3 );
+	bd->rgb_temp_saved = malloc( 6 * bd->board_size * 6 * bd->board_size *
+				     3 );
+    } else {
+	bd->pm_saved = gdk_pixmap_new( board->window,
+				       6 * bd->board_size,
+				       6 * bd->board_size, -1 );
+	bd->pm_temp = gdk_pixmap_new( board->window,
+				      6 * bd->board_size,
+				      6 * bd->board_size, -1 );
+	bd->pm_temp_saved = gdk_pixmap_new( board->window,
+					    6 * bd->board_size,
+					    6 * bd->board_size, -1 );
+	bd->pm_point = gdk_pixmap_new( board->window,
+				       6 * bd->board_size,
+				       35 * bd->board_size, -1 );
+    }
 }
 
 static void board_size_allocate( GtkWidget *board,
@@ -1965,9 +2352,11 @@ static void board_size_allocate( GtkWidget *board,
        honours our minimum size this won't happen, but... */
     
     if( ( bd->board_size = new_size ) != old_size &&
-	GTK_WIDGET_REALIZED( board ) )
+	GTK_WIDGET_REALIZED( board ) ) {
+	board_free_pixmaps( bd );
 	board_create_pixmaps( board, bd );
-
+    }
+    
     child_allocation.width = 108 * bd->board_size;
     child_allocation.x = allocation->x + ( ( allocation->width -
 					     child_allocation.width ) >> 1 );
@@ -2029,7 +2418,6 @@ static void board_realize( GtkWidget *board ) {
 	GTK_WIDGET_CLASS( parent_class )->realize( board );
 
     board_create_pixmaps( board, bd );
-    board_draw_chequers( board, bd, TRUE );
 }
 
 static void board_set_position( GtkWidget *pw, BoardData *bd ) {
@@ -2127,13 +2515,58 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
     gdk_window_clear_area( pw->window, event->area.x, event->area.y,
                            event->area.width, event->area.height );
 
-    draw_bitplane( pw->window, bd->gc_and, bd->bm_key_mask, 0, 0, 0, 0,
-		   20, 20, 1 );
+    if( bd->translucent ) {
+	guchar aaauch[ 20 ][ 20 ][ 3 ], *p = *(
+	    (char **) gtk_object_get_user_data( GTK_OBJECT( pw ) ) );
+	int x, y;
 
-    gdk_draw_pixmap( pw->window, bd->gc_or,
-		     *( (GdkPixmap **) gtk_object_get_user_data(
-			 GTK_OBJECT( pw ) ) ), 0, 0, 0, 0,
-		     20, 20 );
+	for( y = 0; y < 20; y++ )
+	    for( x = 0; x < 20; x++ ) {
+		if( x < 2 || x >= 18 || y < 2 || y >= 18 ) {
+		    aaauch[ y ][ x ][ 0 ] =
+			bd->rgb_empty[ ( y * bd->board_size + x ) * 3 ];
+		    aaauch[ y ][ x ][ 1 ] =
+			bd->rgb_empty[ ( y * bd->board_size + x ) * 3 + 1 ];
+		    aaauch[ y ][ x ][ 2 ] =
+			bd->rgb_empty[ ( y * bd->board_size + x ) * 3 + 2 ];
+		} else {
+		    aaauch[ y ][ x ][ 0 ] = clamp(
+			( ( bd->rgb_empty[ ( y * bd->board_size + x ) *
+					 3 ] * (int) p[ 3 ] ) >> 8 ) +
+			p[ 0 ] );
+		    aaauch[ y ][ x ][ 1 ] = clamp(
+			( ( bd->rgb_empty[ ( y * bd->board_size + x ) *
+					 3 + 1 ] * (int) p[ 3 ] ) >> 8 ) +
+			p[ 1 ] );
+		    aaauch[ y ][ x ][ 2 ] = clamp(
+			( ( bd->rgb_empty[ ( y * bd->board_size + x ) *
+					 3 + 2 ] * (int) p[ 3 ] ) >> 8 ) +
+			p[ 2 ] );
+		    
+		    p += 4;
+		}
+	    }		    
+	
+	gdk_draw_rgb_image( pw->window, bd->gc_copy,
+			    0, 0, 20, 20, GDK_RGB_DITHER_MAX,
+			    (guchar *) aaauch, 60 );
+    } else {
+	draw_bitplane( pw->window, bd->gc_and, bd->bm_key_mask, 0, 0, 0, 0,
+		       20, 20, 1 );
+
+	gdk_draw_pixmap( pw->window, bd->gc_or,
+			 *( (GdkPixmap **) gtk_object_get_user_data(
+			     GTK_OBJECT( pw ) ) ), 0, 0, 0, 0,
+			 20, 20 );
+    }
+    
+    return TRUE;
+}
+
+static gboolean key_press( GtkWidget *pw, GdkEvent *event,
+			   BoardData *bd ) {
+    
+    BoardPreferences( bd );
     
     return TRUE;
 }
@@ -2146,11 +2579,21 @@ static GtkWidget *chequer_key_new( int iPlayer, BoardData *bd ) {
 
     gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 20, 20 );
 
-    gtk_object_set_user_data( GTK_OBJECT( pw ), 
-			      iPlayer ? &bd->pm_o_key : &bd->pm_x_key );
+    if( bd->translucent )
+	gtk_object_set_user_data( GTK_OBJECT( pw ),
+				  iPlayer ? &bd->rgba_o_key :
+				  &bd->rgba_x_key );
+    else
+	gtk_object_set_user_data( GTK_OBJECT( pw ), 
+				  iPlayer ? &bd->pm_o_key : &bd->pm_x_key );
+    
+    gtk_widget_set_events( pw, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK |
+			   GDK_STRUCTURE_MASK );
     
     gtk_signal_connect( GTK_OBJECT( pw ), "expose_event",
 			GTK_SIGNAL_FUNC( key_expose ), bd );
+    gtk_signal_connect( GTK_OBJECT( pw ), "button_press_event",
+			GTK_SIGNAL_FUNC( key_press ), bd );
     
     return pw;
 }
@@ -2163,12 +2606,44 @@ static void board_init( Board *board ) {
     GdkGCValues gcval;
     
     board->board_data = bd;
-    
+    bd->widget = GTK_WIDGET( board );
+	
     bd->drag_point = bd->board_size = -1;
     bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
     bd->crawford_game = FALSE;
     
     bd->all_moves = NULL;
+
+    bd->translucent = TRUE;
+
+    bd->arLight[ 0 ] = -0.5;
+    bd->arLight[ 1 ] = 0.5;
+    bd->arLight[ 2 ] = 0.707;
+    bd->arRefraction[ 0 ] = bd->arRefraction[ 1 ] = 1.5;
+    bd->arCoefficient[ 0 ] = 0.2;
+    bd->arExponent[ 0 ] = 3.0;
+    bd->arCoefficient[ 1 ] = 1.0;
+    bd->arExponent[ 1 ] = 30.0;
+    bd->aarColour[ 0 ][ 0 ] = 1.0;
+    bd->aarColour[ 0 ][ 1 ] = 0.20;
+    bd->aarColour[ 0 ][ 2 ] = 0.20;
+    bd->aarColour[ 0 ][ 3 ] = 0.9;
+    bd->aarColour[ 1 ][ 0 ] = 0.05;
+    bd->aarColour[ 1 ][ 1 ] = 0.05;
+    bd->aarColour[ 1 ][ 2 ] = 0.10;
+    bd->aarColour[ 1 ][ 3 ] = 0.5;
+    bd->aanBoardColour[ 0 ][ 0 ] = 0x20;
+    bd->aanBoardColour[ 0 ][ 1 ] = 0x40;
+    bd->aanBoardColour[ 0 ][ 2 ] = 0x20;
+    bd->aanBoardColour[ 2 ][ 0 ] = 0xC0;
+    bd->aanBoardColour[ 2 ][ 1 ] = 0x40;
+    bd->aanBoardColour[ 2 ][ 2 ] = 0x40;
+    bd->aanBoardColour[ 3 ][ 0 ] = 0x80;
+    bd->aanBoardColour[ 3 ][ 1 ] = 0x80;
+    bd->aanBoardColour[ 3 ][ 2 ] = 0x80;
+    bd->aSpeckle[ 0 ] = 25;
+    bd->aSpeckle[ 2 ] = 25;
+    bd->aSpeckle[ 3 ] = 25;
     
     gcval.function = GDK_AND;
     gcval.foreground.pixel = ~0L; /* AllPlanes */
