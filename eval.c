@@ -1610,7 +1610,7 @@ baseInputs(int anBoard[2][25], float arInput[])
 /* Calculates neural net inputs from the board position.
    Returns 0 for contact positions, 1 for races. */
 
-void
+static void
 CalculateInputs(int anBoard[2][25], float arInput[])
 {
   baseInputs(anBoard, arInput);
@@ -1858,7 +1858,7 @@ static int MaxTurns( int id ) {
     abort();
 }
 
-extern void
+static void
 EvalBearoffOS( int anBoard[ 2 ][ 25 ], 
                     float arOutput[] /*, int ignore */ ) {
 
@@ -1867,7 +1867,7 @@ EvalBearoffOS( int anBoard[ 2 ][ 25 ],
 }
 
 
-extern void
+static void
 EvalBearoffTS( int anBoard[ 2 ][ 25 ], 
                     float arOutput[] /*, int ignore */ ) {
 
@@ -1936,7 +1936,7 @@ NNEvalType NNevalAction(void)
 /* side - side that potentially can win a backgammon */
 /* Return - Probablity that side will win a backgammon */
 
-float
+static float
 raceBGprob(int anBoard[2][25], int side)
 {
   int totMenHome = 0;
@@ -2010,7 +2010,7 @@ raceBGprob(int anBoard[2][25], int side)
   }
 }  
 
-extern void
+static void
 EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 {
   float arInput[ NUM_INPUTS ];
@@ -4440,7 +4440,7 @@ FindCubeDecision ( float arDouble[],
   
 
 
-extern int
+static int
 fDoCubeful ( cubeinfo *pci ) {
 
     if( pci->anScore[ 0 ] + pci->nCube >= pci->nMatchTo &&
@@ -5278,7 +5278,7 @@ extern char *FormatEval ( char *sz, evalsetup *pes ) {
 
 }
 
-extern void
+static void
 CalcCubefulEquity ( positionclass pc,
                     float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                     int nPlies, int fDT, cubeinfo *pci ) {

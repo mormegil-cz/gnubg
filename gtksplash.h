@@ -23,7 +23,7 @@
 #define _GTKSPLASH_H_
 
 extern GtkWidget *
-CreateSplash ();
+CreateSplash ( void );
 
 extern void
 DestroySplash ( GtkWidget *pwSplash );

@@ -26,7 +26,6 @@
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 
 #include <stdio.h>

@@ -110,7 +110,7 @@ typedef struct _boarddesign {
 
 static boarddesign *pbdeSelected = NULL;
 
-extern GList *
+static GList *
 read_board_designs ( void ) {
 
   GList *plUser, *plSystem, *plFinal;
@@ -144,7 +144,7 @@ free_board_design ( gpointer data, gpointer user_data ) {
 
 }
 
-extern void
+static void
 free_board_designs ( GList *pl ) {
 
   g_list_foreach ( pl, free_board_design, NULL );

@@ -124,7 +124,6 @@ static GtkWidget
 #endif
   GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 );
   mettable *pmt;
-  GtkWidget *pw;
 
   pmt = (mettable *) g_malloc ( sizeof ( mettable ) );
   pmt->pwTable = pwTable;

@@ -191,7 +191,7 @@ show_movefilters ( const movefilter aaamf[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_P
   }
 }
 
-extern void
+static void
 ShowRollout ( const rolloutcontext *prc ) {
 
   int fDoTruncate = 0;
@@ -301,7 +301,7 @@ ShowRollout ( const rolloutcontext *prc ) {
 
 }
 
-extern void
+static void
 ShowEvalSetup ( const evalsetup *pes ) {
 
   switch ( pes->et ) {

@@ -53,21 +53,32 @@ void PopLocale ( void );
 
 /* locale "independent" functions (meaning they run in the "C" locale) */
 
-extern int 
-liscanf ( const char *format, ... );
-extern int 
-lifscanf ( FILE *stream, const char *format, ... );
-extern int
-lisscanf( const char *str, const char *format, ...);
+#if !defined (__GNUC__) && !defined (__attribute__)
+#define __attribute__(X)
+#endif
 
 extern int 
-liprintf(const char *format, ...);
+liscanf ( const char *format, ... )
+    __attribute__((format(scanf,1,2)));
 extern int 
-lifprintf(FILE *stream, const char *format, ...);
+lifscanf ( FILE *stream, const char *format, ... )
+    __attribute__((format(scanf,2,3)));
+extern int
+lisscanf( const char *str, const char *format, ...)
+    __attribute__((format(scanf,2,3)));
+
 extern int 
-lisprintf(char *str, const char *format, ...);
+liprintf(const char *format, ...)
+    __attribute__((format(printf,1,2)));
 extern int 
-lisnprintf(char *str, size_t size, const  char  *format, ...);
+lifprintf(FILE *stream, const char *format, ...)
+    __attribute__((format(printf,2,3)));
+extern int 
+lisprintf(char *str, const char *format, ...)
+    __attribute__((format(printf,2,3)));
+extern int 
+lisnprintf(char *str, size_t size, const  char  *format, ...)
+    __attribute__((format(printf,3,4)));
 
 
 #endif

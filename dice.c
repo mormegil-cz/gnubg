@@ -186,7 +186,7 @@ extern int InitRNGBBSModulus( char *sz ) {
     return 0;
 }
 
-int BBSGood( mpz_t x ) {
+static int BBSGood( mpz_t x ) {
 
     static mpz_t z19;
     static int f19;
@@ -200,7 +200,7 @@ int BBSGood( mpz_t x ) {
 	mpz_probab_prime_p( x, 10 );
 }
 
-int BBSFindGood( mpz_t x ) {
+static int BBSFindGood( mpz_t x ) {
 
     do
 	mpz_add_ui( x, x, 1 );
@@ -259,13 +259,13 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1 ) {
     return 0;
 }
 
-int BBSGetBit( void ) {
+static int BBSGetBit( void ) {
 
     mpz_powm_ui( zSeed, zSeed, 2, zModulus );
     return ( mpz_get_ui( zSeed ) & 1 );
 }
 
-int BBSGetTrit( void ) {
+static int BBSGetTrit( void ) {
 
     /* Return a trinary digit from a uniform distribution, given binary
        digits as inputs.  This function is perfectly distributed and

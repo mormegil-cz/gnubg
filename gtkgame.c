@@ -2127,7 +2127,7 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
 }
 
 
-gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
+static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
   return (gchar *) gettext ( (const char *) path );
 

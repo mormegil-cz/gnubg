@@ -39,7 +39,7 @@ extern int sgflex( void );
 
 void ( *SGFErrorHandler )( char *, int ) = NULL;
  
-extern int sgferror( char *s ) {
+static int sgferror( char *s ) {
 
     if( SGFErrorHandler )
 	SGFErrorHandler( s, 1 );
@@ -49,7 +49,7 @@ extern int sgferror( char *s ) {
     return 0;
 }
 
-list *NewList( void ) {
+static list *NewList( void ) {
     list *pl = malloc( sizeof( *pl ) );
     ListCreate( pl );
     return pl;

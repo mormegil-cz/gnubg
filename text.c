@@ -1288,7 +1288,7 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 }
 
 
-extern void TextDumpStatcontext ( FILE *pf, const statcontext *psc,
+static void TextDumpStatcontext ( FILE *pf, const statcontext *psc,
                                   matchstate *pms, const int iGame ) {
 
   char sz[ 4096 ];

@@ -261,7 +261,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 }
 
 
-extern void
+static void
 SetMoveFilter(char* sz, 
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 

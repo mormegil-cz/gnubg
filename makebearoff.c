@@ -891,7 +891,7 @@ CubeEquity ( const short int siND, const short int siDT,
 
 }
 
-extern int
+static int
 CalcPosition ( const int i, const int j, const int n ) {
 
   int max;

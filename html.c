@@ -2828,7 +2828,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
  *
  */
 
-extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
+static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                                   matchstate *pms, const int iGame,
                                   const htmlexportcss hecss ) {
 

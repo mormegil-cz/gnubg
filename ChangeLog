@@ -1,3 +1,11 @@
+Wed Jan 22 13:13:22 2003  Gary Wong  <gtw@gnu.org>
+
+	* backgammon.h, dice.c, eval.c, gnubg.c, gtkcube.c, gtkexport.c,
+	gtkgame.c, gtkmet.c, gtkprefs.c, gtkrace.c, gtksplash.c, gtktheory.c,
+	html.c, i18n.h, makebearoff.c, matchequity.c, set.c, sgf.y,
+	show.c, sound.c, text.c: Minor nit-picking changes (mainly making
+	functions static unless they need to be extern).
+
 Wed Jan 22 11:07:38 2003  Gary Wong  <gtw@gnu.org>
 
 	* gtksplash.c (CreateSplash): [!GTK_CHECK_VERSION(2,2,0)] Don't

@@ -26,7 +26,7 @@
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
-#define GTK_ENABLE_BROKEN /* for GtkText */
+
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -36,6 +36,7 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkgame.h"
+#include "gtktheory.h"
 #include "i18n.h"
 #include "matchequity.h"
 

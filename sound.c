@@ -611,7 +611,7 @@ static void play_audio_file(soundcache *psc, const char *file,
 #endif
 }
 
-static char *can_play_audio() {
+static char *can_play_audio( void ) {
 
     static char *asz[] = { "/dev/dsp", "/dev/audio", NULL };
     char **ppch;
