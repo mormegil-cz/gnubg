@@ -140,7 +140,7 @@ Billie Patterson
 Mike Petch
 Zvezdan Petkovic
 Nardy Pillards
-Petri Pitkänen
+Petri Pitkanen
 Sam Pottle
 Henrik Ravn
 James Rech
@@ -148,7 +148,7 @@ Jared Riley
 Klaus Rindholt
 Oliver Riordan
 Rod Roark
-Hans-Jürgen Schäfer
+Hans-Juergen Schaefer
 Steve Schreiber
 Hugh Sconyers
 Martin Schrode
@@ -172,6 +172,7 @@ Robert-Jan Veldhuizen
 Morten Wang
 Jeff White
 JP White
+Mike Whitton
 Chris Wilson
 Kit Woolsey
 Frank Worrell

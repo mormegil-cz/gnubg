@@ -27,30 +27,43 @@
 
              Contributors (of bug reports and suggestions) include:
 
-    Elias Kritikos          Peter Eberhard          Corrin Lakeland
-    Misja Alma              Robert Eberlein         Tim Laursen
-    Christian Anthon        Fotis                   Eli Liang
-    Kazuaki Asai            Kennedy Fraser          Ege Lundgren
-    Eric Augustine          Ric Gerace              Kevin Maguire
-    Erik Barfoed            Michel Grimminck        Massimiliano Maini
-    Ron Barry               Eric Groleau            Giulio De Marco
-    Steve Baedke            Jeff Haferman           John Marttila
-    Olivier Baur            Morten Juul Henriksen   Alix Martin
-    Stefan van den Berg     Alain Henry             William Maslen
-    Holger Bochnig          Jens Hoefkens           Thomas Meyer
-    Chuck Bower             Martin Janke            Achim Mueller
-    Adrian Bunk             Nis Jorgensen           Daniel Murphy
-    Nick Bratby             Petr Kadlec             Magnar Naustdalslid
-    Renzo Campagna          Neil Kazaross           Dave Neary
-    Craig Campbell          Mathias Kegelmann       Rolf Nielsen
-    John Chuang             Matija Kejzar           Mirori Orange
-    Tristan Colgate         Bert Van Kerckhove      Peter Orum
-    Olivier Croisille       James F. Kibler         Roy Passfield
-    Ned Cross               Jonathan Kinsey         Thomas Patrick
-    Bill Davidson           Johnny Kirk             Billie Patterson
-    Michael Depreli         Gerhard Knop            Mike Petch
-    Ian Dunstan             Robert Konigsberg       Zvezdan Petkovic
-    Max Durbano             Martin Krainer          Nardy Pillards
+    Elias Kritikos          Petr Kadlec             Henrik Ravn
+    Misja Alma              Neil Kazaross           James Rech
+    Christian Anthon        Mathias Kegelmann       Jared Riley
+    Kazuaki Asai            Matija Kejzar           Klaus Rindholt
+    Eric Augustine          Bert Van Kerckhove      Oliver Riordan
+    Erik Barfoed            James F. Kibler         Rod Roark
+    Ron Barry               Jonathan Kinsey         Hans-Juergen Schaefer
+    Steve Baedke            Johnny Kirk             Steve Schreiber
+    Olivier Baur            Gerhard Knop            Hugh Sconyers
+    Stefan van den Berg     Robert Konigsberg       Martin Schrode
+    Holger Bochnig          Martin Krainer          Paul Selick
+    Chuck Bower             Corrin Lakeland         Sho Sengoku
+    Adrian Bunk             Tim Laursen             Ian Shaw
+    Nick Bratby             Eli Liang               Albert Silver
+    Renzo Campagna          Ege Lundgren            Alberta di Silvio
+    Craig Campbell          Kevin Maguire           Peter Sochovsky
+    John Chuang             Massimiliano Maini      Mark Spencer
+    Tristan Colgate         Giulio De Marco         Scott Steiner
+    Olivier Croisille       John Marttila           Maik Stiebler
+    Ned Cross               Alix Martin             W. Stroop (Rob)
+    Bill Davidson           William Maslen          Kaoru TAKAHASHI
+    Michael Depreli         Thomas Meyer            Yoshito Takeuchi
+    Ian Dunstan             Achim Mueller           Jacques Thiriat
+    Max Durbano             Daniel Murphy           Malene Thyssen
+    Peter Eberhard          Magnar Naustdalslid     Claes Tornberg
+    Robert Eberlein         Dave Neary              Sander van Rijnswou
+    Fotis                   Rolf Nielsen            Robert-Jan Veldhuizen
+    Kennedy Fraser          Mirori Orange           Morten Wang
+    Ric Gerace              Peter Orum              Jeff White
+    Michel Grimminck        Roy Passfield           JP White
+    Eric Groleau            Thomas Patrick          Mike Whitton
+    Jeff Haferman           Billie Patterson        Chris Wilson
+    Morten Juul Henriksen   Mike Petch              Kit Woolsey
+    Alain Henry             Zvezdan Petkovic        Frank Worrell
+    Jens Hoefkens           Nardy Pillards          Christopher D. Yep
+    Martin Janke            Petri Pitkanen          Anders Zachrison
+    Nis Jorgensen           Sam Pottle              Douglas Zare
 
 
   Credit is also due to those who have published information about backgammon

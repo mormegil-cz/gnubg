@@ -121,7 +121,7 @@ credEntry ceCredits[] = {
   {"Mike Petch", 0},
   {"Zvezdan Petkovic", 0},
   {"Nardy Pillards", 0},
-  {"Petri Pitkänen", 0},
+  {"Petri Pitkanen", 0},
   {"Sam Pottle", 0},
   {"Henrik Ravn", 0},
   {"James Rech", 0},
@@ -129,7 +129,7 @@ credEntry ceCredits[] = {
   {"Klaus Rindholt", 0},
   {"Oliver Riordan", 0},
   {"Rod Roark", 0},
-  {"Hans-Jürgen Schäfer", 0},
+  {"Hans-Juergen Schaefer", 0},
   {"Steve Schreiber", 0},
   {"Martin Schrode", 0},
   {"Hugh Sconyers", 0},
@@ -156,6 +156,7 @@ credEntry ceCredits[] = {
   {"Morten Wang", 0},
   {"Jeff White", 0},
   {"JP White", 0},
+  {"Mike Whitton", 0},
   {"Chris Wilson", 0},
   {"Kit Woolsey", 0},
   {"Frank Worrell", 0},
@@ -204,30 +205,43 @@ char aszAUTHORS[] =
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"
-"    Elias Kritikos          Peter Eberhard          Corrin Lakeland\n"
-"    Misja Alma              Robert Eberlein         Tim Laursen\n"
-"    Christian Anthon        Fotis                   Eli Liang\n"
-"    Kazuaki Asai            Kennedy Fraser          Ege Lundgren\n"
-"    Eric Augustine          Ric Gerace              Kevin Maguire\n"
-"    Erik Barfoed            Michel Grimminck        Massimiliano Maini\n"
-"    Ron Barry               Eric Groleau            Giulio De Marco\n"
-"    Steve Baedke            Jeff Haferman           John Marttila\n"
-"    Olivier Baur            Morten Juul Henriksen   Alix Martin\n"
-"    Stefan van den Berg     Alain Henry             William Maslen\n"
-"    Holger Bochnig          Jens Hoefkens           Thomas Meyer\n"
-"    Chuck Bower             Martin Janke            Achim Mueller\n"
-"    Adrian Bunk             Nis Jorgensen           Daniel Murphy\n"
-"    Nick Bratby             Petr Kadlec             Magnar Naustdalslid\n"
-"    Renzo Campagna          Neil Kazaross           Dave Neary\n"
-"    Craig Campbell          Mathias Kegelmann       Rolf Nielsen\n"
-"    John Chuang             Matija Kejzar           Mirori Orange\n"
-"    Tristan Colgate         Bert Van Kerckhove      Peter Orum\n"
-"    Olivier Croisille       James F. Kibler         Roy Passfield\n"
-"    Ned Cross               Jonathan Kinsey         Thomas Patrick\n"
-"    Bill Davidson           Johnny Kirk             Billie Patterson\n"
-"    Michael Depreli         Gerhard Knop            Mike Petch\n"
-"    Ian Dunstan             Robert Konigsberg       Zvezdan Petkovic\n"
-"    Max Durbano             Martin Krainer          Nardy Pillards\n"
+"    Elias Kritikos          Petr Kadlec             Henrik Ravn\n"
+"    Misja Alma              Neil Kazaross           James Rech\n"
+"    Christian Anthon        Mathias Kegelmann       Jared Riley\n"
+"    Kazuaki Asai            Matija Kejzar           Klaus Rindholt\n"
+"    Eric Augustine          Bert Van Kerckhove      Oliver Riordan\n"
+"    Erik Barfoed            James F. Kibler         Rod Roark\n"
+"    Ron Barry               Jonathan Kinsey         Hans-Juergen Schaefer\n"
+"    Steve Baedke            Johnny Kirk             Steve Schreiber\n"
+"    Olivier Baur            Gerhard Knop            Hugh Sconyers\n"
+"    Stefan van den Berg     Robert Konigsberg       Martin Schrode\n"
+"    Holger Bochnig          Martin Krainer          Paul Selick\n"
+"    Chuck Bower             Corrin Lakeland         Sho Sengoku\n"
+"    Adrian Bunk             Tim Laursen             Ian Shaw\n"
+"    Nick Bratby             Eli Liang               Albert Silver\n"
+"    Renzo Campagna          Ege Lundgren            Alberta di Silvio\n"
+"    Craig Campbell          Kevin Maguire           Peter Sochovsky\n"
+"    John Chuang             Massimiliano Maini      Mark Spencer\n"
+"    Tristan Colgate         Giulio De Marco         Scott Steiner\n"
+"    Olivier Croisille       John Marttila           Maik Stiebler\n"
+"    Ned Cross               Alix Martin             W. Stroop (Rob)\n"
+"    Bill Davidson           William Maslen          Kaoru TAKAHASHI\n"
+"    Michael Depreli         Thomas Meyer            Yoshito Takeuchi\n"
+"    Ian Dunstan             Achim Mueller           Jacques Thiriat\n"
+"    Max Durbano             Daniel Murphy           Malene Thyssen\n"
+"    Peter Eberhard          Magnar Naustdalslid     Claes Tornberg\n"
+"    Robert Eberlein         Dave Neary              Sander van Rijnswou\n"
+"    Fotis                   Rolf Nielsen            Robert-Jan Veldhuizen\n"
+"    Kennedy Fraser          Mirori Orange           Morten Wang\n"
+"    Ric Gerace              Peter Orum              Jeff White\n"
+"    Michel Grimminck        Roy Passfield           JP White\n"
+"    Eric Groleau            Thomas Patrick          Mike Whitton\n"
+"    Jeff Haferman           Billie Patterson        Chris Wilson\n"
+"    Morten Juul Henriksen   Mike Petch              Kit Woolsey\n"
+"    Alain Henry             Zvezdan Petkovic        Frank Worrell\n"
+"    Jens Hoefkens           Nardy Pillards          Christopher D. Yep\n"
+"    Martin Janke            Petri Pitkanen          Anders Zachrison\n"
+"    Nis Jorgensen           Sam Pottle              Douglas Zare\n"
 "\n"
 "\n"
 "  Credit is also due to those who have published information about backgammon\n"
