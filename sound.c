@@ -971,13 +971,10 @@ playSound ( const gnubgsound gs ) {
 
 extern void SoundFlushCache( const gnubgsound gs ) {
 
-#if 0
-    /* FIXME This code breaks sound playback -- why? */
 #ifdef SIGIO
     if( ssSoundSystem == SOUND_SYSTEM_NORMAL )
 	/* the sound might be in use at the moment */
 	SoundWait();
-#endif
 #endif
     
     if( asc[ gs ].pch ) {
@@ -1002,7 +999,7 @@ extern void SoundWait( void ) {
 	while( hSound >= 0 )
 	    sigsuspend( &ssOld );
 	
-	sigprocmask( SIG_SETMASK, &ss, &ssOld );
+	sigprocmask( SIG_SETMASK, &ssOld, NULL );
 	
 	return;
     }
