@@ -1,3 +1,8 @@
+Tue Oct 28 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* import.c: Minor memory bug
+	* gtkboard.c: Minor chequer sound fix
+
 Fri Oct 25 10:10:07 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* rollout.c - correct stupid mistake causing board setup in sgf

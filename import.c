@@ -1762,6 +1762,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
       if ( pmr->r.nResigned > 3 )
         pmr->r.nResigned = 3;
       pmr->r.esResign.et = EVAL_NONE;
+      szComment = NULL;
 
       AddMoveRecord( pmr );
 
