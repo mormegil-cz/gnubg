@@ -645,10 +645,10 @@ command cER = {
     { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, &cOnOff },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, &cOnOff },
-    { "matchequitytable", NULL, "Select match equity table", NULL,
-      acSetMET },
-    { "met", NULL, "Synonym for `set matchequitytable'", NULL,
-      acSetMET },
+    { "matchequitytable", CommandSetMET,
+      "Read match equity table from XML file", szFILENAME, &cFilename },
+    { "met", CommandSetMET,
+      "Synonym for `set matchequitytable'", szFILENAME, &cFilename },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
       szONOFF, &cOnOff },
     { "output", NULL, "Modify options for formatting results", NULL,
@@ -763,17 +763,6 @@ command cER = {
     { "td", CommandTrainTD, "Train the network by TD(0) zero-knowledge "
       "self-play", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acSetMET[] = {
-  {"zadeh", CommandSetMETZadeh, 
-   "Use N. Zadeh's match equity table (match length <= 64)", NULL, NULL },
-  {"snowie", CommandSetMETSnowie, 
-   "Use Snowie's match equity table (match length <= 15)", NULL, NULL },
-  {"woolsey", CommandSetMETWoolsey, 
-   "Use K. Woolsey's match equity table (match length <= 15)", NULL, NULL },
-  {"jacobs", CommandSetMETJacobs, 
-   "Use J. Jacobs and W. Trice's match equity table"
-   "(match length <=25)", NULL, NULL },
-  { NULL, NULL, NULL, NULL, NULL }
 }, acTop[] = {
     { "accept", CommandAccept, "Accept a cube or resignation",
       NULL, NULL },
@@ -3264,20 +3253,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
-    switch( metCurrent ) {
-    case MET_ZADEH:
-	fputs( "set matchequitytable zadeh\n", pf );
-	break;
-    case MET_SNOWIE:
-	fputs( "set matchequitytable snowie\n", pf );
-	break;
-    case MET_WOOLSEY:
-	fputs( "set matchequitytable woolsey\n", pf );
-	break;
-    case MET_JACOBS:
-	fputs( "set matchequitytable jacobs\n", pf );
-	break;
-    }
+    fprintf( pf, "set matchequitytable %s\n", miCurrent.szFileName );
     
     fprintf( pf, "set nackgammon %s\n", fNackgammon ? "on" : "off" );
 
@@ -4580,7 +4556,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
        it up a little bit */
     rcRollout.nSeed ^= 0x792A584B;
     
-    InitMatchEquity ( metCurrent );
+    InitMatchEquity ( "met/zadeh.xml" );
     
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
 			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
