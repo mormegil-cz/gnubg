@@ -1,3 +1,16 @@
+Sun Dec 15 23:04:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+        Export positions to PNG.
+
+        * gnubg.c: new commands "export position png .." and "set pngsize ..."
+        * gnubg.c (CommandSaveSettings): save pngsize.
+        * set.c (CommandSetPNGSize): new function.
+        * Makefile.am: add PNG_LIBS
+        * configure.in: look for libpng.
+	* gtkgame.c (ExportPositionPNG): new function.
+
+        * gtkboard.c: small changes for GTK 1.2
+
 Sun Dec 15 20:40:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (DesignAdd): save board designs in the "C" locale.

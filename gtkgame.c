@@ -269,6 +269,7 @@ static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw );
+static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw );
@@ -2102,6 +2103,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  ExportPositionGammOnLine, 0, NULL },
 	{ N_("/_File/_Export/_Position/Encapsulated PostScript..."), NULL,
 	  ExportPositionEPS, 0, NULL },
+	{ N_("/_File/_Export/_Position/PNG..."), NULL, ExportPositionPNG, 0,
+	  NULL },
 	{ N_("/_File/_Export/_Position/.pos..."), NULL, ExportPositionPos, 0,
 	  NULL },
 	{ N_("/_File/_Export/_Position/Text..."), NULL, ExportPositionText, 0,
@@ -3423,6 +3426,15 @@ static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
   FileCommand( _("Export .pos position"), sz, "export position pos", "pos" );
   if ( sz ) 
     free ( sz );
+
+}
+
+static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw ) {
+
+  /* char *sz = getDefaultFileName ( PATH_PNG ); */
+  FileCommand( _("Export PNG position"), NULL, "export position png", "png" );
+  /* if ( sz ) 
+     free ( sz ); */
 
 }
 
