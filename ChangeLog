@@ -1,3 +1,7 @@
+Mon Mar  4 11:12:01 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtktexi.c: More work on GTK+ 2.0 manual browsing widget.
+
 Sun Mar  3 10:56:47 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (cmp_evalcontext): a few bugfixes.
@@ -10,6 +14,13 @@ Sun Mar  3 10:56:47 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 	* gtkgame.c (EvalGetValues): fetch values from EvalWidget.
 	* gtkgame.c (SettingsMenuActivate, SearchSpaceMenuActivate):
 	called when option menu is changed.
+
+Sat Mar  2 18:42:06 2002  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetPlayerExternal): Remember the socket address
+	(suggested by Robert Konigsberg).
+	* show.c (CommandShowPlayer), gtkgame.c (PlayersPage): Show the
+	socket address for external players.
 
 Thu Feb 28 22:38:19 2002  Øystein Johansen <oeysteij@online.no>
 

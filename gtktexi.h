@@ -28,6 +28,7 @@ typedef struct _texinfocontext texinfocontext;
 
 extern texinfocontext *gtktexi_create( void );
 extern GtkTextBuffer *gtktexi_get_buffer( texinfocontext *ptic );
+extern GtkWidget *gtktexi_get_widget( texinfocontext *ptic );
 extern int gtktexi_load( texinfocontext *ptic, char *szFile );
 extern int gtktexi_render_node( texinfocontext *ptic, char *szTag );
 extern void gtktexi_destroy( texinfocontext *ptic );

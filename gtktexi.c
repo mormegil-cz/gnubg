@@ -45,11 +45,16 @@ typedef struct _refinfo {
 
 struct _texinfocontext {
     /* Always valid: */
+    GtkWidget *pw, *pwText, *pwScrolled, *apwLabel[ 3 ];
     GtkTextBuffer *ptb;
+    GtkItemFactory *pif;
     FILE *pf;
     char *szFile; /* malloc()ed */
     list lNode; /* list of all node (and anchor) offsets in file */
     list lRef; /* list of all cross reference links in buffer */
+    list lHistory; /* list (char **) of file/tag pairs */
+    list *plCurrent; /* pointer into history list */
+    char *aszNavTarget[ 3 ];
     
     /* gtktexi_load() state: */
     int ib, ibNode; /* byte offset into file */
@@ -68,6 +73,7 @@ struct _texinfocontext {
 static GtkTextTagTable *pttt;
 static GtkTextTag *apttItem[ MAX_ITEM_DEPTH ], *pttDefault;
 static hash hIgnore, hPreFormat;
+static char *aszNavLabel[ 3 ] = { "Next:", "Prev:", "Up:" };
 
 static gboolean TagEvent( GtkTextTag *ptt, GtkWidget *pwView, GdkEvent *pev,
 			  GtkTextIter *pti, void *pv ) {
@@ -117,300 +123,285 @@ static gboolean TagEvent( GtkTextTag *ptt, GtkWidget *pwView, GdkEvent *pev,
 		    handlers to run */
 }
 
-extern texinfocontext *gtktexi_create( void ) {
+static void Initialise( void ) {
+    
+    static char *aszIgnore[] = {
+	"columnfraction",
+	"dircategory",
+	"indexterm",
+	"nodename",
+	"printindex",
+	"setfilename",
+	"settitle",
+	"urefurl",
+	NULL
+    }, *aszPreFormat[] = {
+	"display",
+	"example",
+	"format",
+	"lisp",
+	"smalldisplay",
+	"smallexample",
+	"smallformat",
+	"smalllisp",
+	NULL
+    };
+    GtkTextTag *ptt;
+    int i;
+    char **ppch;
+    
+    pttt = gtk_text_tag_table_new();
 
-    texinfocontext *ptic = malloc( sizeof( *ptic ) );
-    static int fInitialised;
+    pttDefault = gtk_text_tag_new( NULL );
+    g_object_set( G_OBJECT( pttDefault ),
+		  "left-margin", 4,
+		  "right-margin", 4,
+		  "editable", FALSE,
+		  "wrap-mode", GTK_WRAP_WORD,
+		  NULL );
+    gtk_text_tag_table_add( pttt, pttDefault );
     
-    if( !fInitialised ) {
-	static char *aszIgnore[] = {
-	    "columnfraction",
-	    "dircategory",
-	    "indexterm",
-	    "nodename",
-	    "nodenext",
-	    "nodeprev",
-	    "nodeup",
-	    "printindex",
-	    "setfilename",
-	    "settitle",
-	    "urefurl",
-	    NULL
-	}, *aszPreFormat[] = {
-	    "display",
-	    "example",
-	    "format",
-	    "lisp",
-	    "smalldisplay",
-	    "smallexample",
-	    "smallformat",
-	    "smalllisp",
-	    NULL
-	};
-	GtkTextTag *ptt;
-	int i;
-	char **ppch;
+    ptt = gtk_text_tag_new( "acronym" );
+    g_object_set( G_OBJECT( ptt ),
+		  "scale", PANGO_SCALE_SMALL, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	pttt = gtk_text_tag_table_new();
-
-	pttDefault = gtk_text_tag_new( NULL );
-	g_object_set( G_OBJECT( pttDefault ),
-		      "left-margin", 4,
-		      "right-margin", 4,
-		      "editable", FALSE,
-		      "wrap-mode", GTK_WRAP_WORD,
-		      NULL );
-	gtk_text_tag_table_add( pttt, pttDefault );
+    ptt = gtk_text_tag_new( "b" );
+    g_object_set( G_OBJECT( ptt ),
+		  "weight", PANGO_WEIGHT_BOLD, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "acronym" );
-	g_object_set( G_OBJECT( ptt ),
-		      "scale", PANGO_SCALE_SMALL, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "center" );
+    g_object_set( G_OBJECT( ptt ),
+		  "justification", GTK_JUSTIFY_CENTER, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "b" );
-	g_object_set( G_OBJECT( ptt ),
-		      "weight", PANGO_WEIGHT_BOLD, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "cite" );
+    g_object_set( G_OBJECT( ptt ),
+		  "style", PANGO_STYLE_ITALIC, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "center" );
-	g_object_set( G_OBJECT( ptt ),
-		      "justification", GTK_JUSTIFY_CENTER, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "code" );
+    g_object_set( G_OBJECT( ptt ),
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "cite" );
-	g_object_set( G_OBJECT( ptt ),
-		      "style", PANGO_STYLE_ITALIC, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "dfn" );
+    g_object_set( G_OBJECT( ptt ),
+		  "style", PANGO_STYLE_ITALIC, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "code" );
-	g_object_set( G_OBJECT( ptt ),
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "display" );
+    g_object_set( G_OBJECT( ptt ),
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "left-margin", 40,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "dfn" );
-	g_object_set( G_OBJECT( ptt ),
-		      "style", PANGO_STYLE_ITALIC, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "emph" );
+    g_object_set( G_OBJECT( ptt ),
+		  "style", PANGO_STYLE_ITALIC, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "display" );
-	g_object_set( G_OBJECT( ptt ),
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "left-margin", 40,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "emph" );
-	g_object_set( G_OBJECT( ptt ),
-		      "style", PANGO_STYLE_ITALIC, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "example" );
-	g_object_set( G_OBJECT( ptt ),
-		      "left-margin", 40,
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "example" );
+    g_object_set( G_OBJECT( ptt ),
+		  "left-margin", 40,
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
 	
-	ptt = gtk_text_tag_new( "format" );
-	g_object_set( G_OBJECT( ptt ),
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "format" );
+    g_object_set( G_OBJECT( ptt ),
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "i" );
-	g_object_set( G_OBJECT( ptt ),
-		      "style", PANGO_STYLE_ITALIC, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
+    ptt = gtk_text_tag_new( "i" );
+    g_object_set( G_OBJECT( ptt ),
+		  "style", PANGO_STYLE_ITALIC, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
     
-	ptt = gtk_text_tag_new( "inforef" );
-	g_object_set( G_OBJECT( ptt ),
-		      "foreground", "blue",
-		      "underline", PANGO_UNDERLINE_SINGLE,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-	g_signal_connect( G_OBJECT( ptt ), "event",
-			  G_CALLBACK( TagEvent ), NULL );
+    ptt = gtk_text_tag_new( "inforef" );
+    g_object_set( G_OBJECT( ptt ),
+		  "foreground", "blue",
+		  "underline", PANGO_UNDERLINE_SINGLE,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    g_signal_connect( G_OBJECT( ptt ), "event",
+		      G_CALLBACK( TagEvent ), NULL );
     
-	for( i = 0; i < MAX_ITEM_DEPTH; i++ ) {
-	    apttItem[ i ] = gtk_text_tag_new( NULL );
-	    g_object_set( G_OBJECT( apttItem[ i ] ),
-			  "left-margin", ( i + 1 ) * 24 + 4, NULL );
-	    gtk_text_tag_table_add( pttt, apttItem[ i ] );
-	}
-    
-	ptt = gtk_text_tag_new( "menutitle" );
-	g_object_set( G_OBJECT( ptt ),
-		      "foreground", "blue",
-		      "underline", PANGO_UNDERLINE_SINGLE,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-	g_signal_connect( G_OBJECT( ptt ), "event",
-			  G_CALLBACK( TagEvent ), NULL );
-    
-	ptt = gtk_text_tag_new( "kbd" );
-	g_object_set( G_OBJECT( ptt ),
-		      "family", "monospace",
-		      "style", PANGO_STYLE_OBLIQUE,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "lisp" );
-	g_object_set( G_OBJECT( ptt ),
-		      "left-margin", 40,
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "menucomment" );
-	g_object_set( G_OBJECT( ptt ),
-		      "wrap_mode", GTK_WRAP_NONE, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "multitable" );
-	g_object_set( G_OBJECT( ptt ),
-		      "left-margin", 40,
-		      "right-margin", 40,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "quotation" );
-	g_object_set( G_OBJECT( ptt ),
-		      "left-margin", 40,
-		      "right-margin", 40,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "r" );
-	g_object_set( G_OBJECT( ptt ),
-		      "style", PANGO_STYLE_NORMAL, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "sc" );
-	g_object_set( G_OBJECT( ptt ),
-		      "variant", PANGO_VARIANT_SMALL_CAPS, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "smalldisplay" );
-	g_object_set( G_OBJECT( ptt ),
-		      "scale", PANGO_SCALE_SMALL,
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "left-margin", 40,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "smallexample" );
-	g_object_set( G_OBJECT( ptt ),
-		      "left-margin", 40,
-		      "scale", PANGO_SCALE_SMALL,
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "smallformat" );
-	g_object_set( G_OBJECT( ptt ),
-		      "scale", PANGO_SCALE_SMALL,
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "smalllisp" );
-	g_object_set( G_OBJECT( ptt ),
-		      "left-margin", 40,
-		      "scale", PANGO_SCALE_SMALL,
-		      "wrap_mode", GTK_WRAP_NONE,
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "strong" );
-	g_object_set( G_OBJECT( ptt ),
-		      "weight", PANGO_WEIGHT_BOLD, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "titlechap" );
-	g_object_set( G_OBJECT( ptt ),
-		      "scale", PANGO_SCALE_XX_LARGE,
-		      "weight", PANGO_WEIGHT_BOLD,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "titlesec" );
-	g_object_set( G_OBJECT( ptt ),
-		      "scale", PANGO_SCALE_X_LARGE,
-		      "weight", PANGO_WEIGHT_BOLD,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "titlesubsec" );
-	g_object_set( G_OBJECT( ptt ),
-		      "scale", PANGO_SCALE_LARGE,
-		      "weight", PANGO_WEIGHT_BOLD,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "titlesubsubsec" );
-	g_object_set( G_OBJECT( ptt ),
-		      "weight", PANGO_WEIGHT_BOLD,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "tt" );
-	g_object_set( G_OBJECT( ptt ),
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "uref" );
-	g_object_set( G_OBJECT( ptt ),
-		      "foreground", "blue",
-		      "underline", PANGO_UNDERLINE_SINGLE,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-	g_signal_connect( G_OBJECT( ptt ), "event",
-			  G_CALLBACK( TagEvent ), NULL );
-    
-	ptt = gtk_text_tag_new( "url" );
-	g_object_set( G_OBJECT( ptt ),
-		      "family", "monospace", NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-    
-	ptt = gtk_text_tag_new( "var" );
-	g_object_set( G_OBJECT( ptt ),
-		      "style", PANGO_STYLE_OBLIQUE, NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-	
-	ptt = gtk_text_tag_new( "xref" );
-	g_object_set( G_OBJECT( ptt ),
-		      "foreground", "blue",
-		      "underline", PANGO_UNDERLINE_SINGLE,
-		      NULL );
-	gtk_text_tag_table_add( pttt, ptt );
-	g_signal_connect( G_OBJECT( ptt ), "event",
-			  G_CALLBACK( TagEvent ), NULL );
-    
-	HashCreate( &hIgnore, 16, (hashcomparefunc) strcmp );
-	for( ppch = aszIgnore; *ppch; ppch++ )
-	    HashAdd( &hIgnore, StringHash( *ppch ), *ppch );
-	
-	HashCreate( &hPreFormat, 16, (hashcomparefunc) strcmp );
-	for( ppch = aszPreFormat; *ppch; ppch++ )
-	    HashAdd( &hPreFormat, StringHash( *ppch ), *ppch );
-
-	fInitialised = TRUE;
+    for( i = 0; i < MAX_ITEM_DEPTH; i++ ) {
+	apttItem[ i ] = gtk_text_tag_new( NULL );
+	g_object_set( G_OBJECT( apttItem[ i ] ),
+		      "left-margin", ( i + 1 ) * 24 + 4, NULL );
+	gtk_text_tag_table_add( pttt, apttItem[ i ] );
     }
-
-    ptic->ptb = gtk_text_buffer_new( pttt );
-    g_object_set_data( G_OBJECT( ptic->ptb ), "texinfocontext", ptic );
-
-    ptic->pf = NULL;
-    ptic->szFile = NULL;
-    ListCreate( &ptic->lNode );
-    ListCreate( &ptic->lRef );
     
-    return ptic;
+    ptt = gtk_text_tag_new( "menutitle" );
+    g_object_set( G_OBJECT( ptt ),
+		  "foreground", "blue",
+		  "underline", PANGO_UNDERLINE_SINGLE,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    g_signal_connect( G_OBJECT( ptt ), "event",
+		      G_CALLBACK( TagEvent ), NULL );
+    
+    ptt = gtk_text_tag_new( "kbd" );
+    g_object_set( G_OBJECT( ptt ),
+		  "family", "monospace",
+		  "style", PANGO_STYLE_OBLIQUE,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "lisp" );
+    g_object_set( G_OBJECT( ptt ),
+		  "left-margin", 40,
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "menucomment" );
+    g_object_set( G_OBJECT( ptt ),
+		  "wrap_mode", GTK_WRAP_NONE, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "multitable" );
+    g_object_set( G_OBJECT( ptt ),
+		  "left-margin", 40,
+		  "right-margin", 40,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "quotation" );
+    g_object_set( G_OBJECT( ptt ),
+		  "left-margin", 40,
+		  "right-margin", 40,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "r" );
+    g_object_set( G_OBJECT( ptt ),
+		  "style", PANGO_STYLE_NORMAL, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "sc" );
+    g_object_set( G_OBJECT( ptt ),
+		  "variant", PANGO_VARIANT_SMALL_CAPS, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "smalldisplay" );
+    g_object_set( G_OBJECT( ptt ),
+		  "scale", PANGO_SCALE_SMALL,
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "left-margin", 40,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "smallexample" );
+    g_object_set( G_OBJECT( ptt ),
+		  "left-margin", 40,
+		  "scale", PANGO_SCALE_SMALL,
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "smallformat" );
+    g_object_set( G_OBJECT( ptt ),
+		  "scale", PANGO_SCALE_SMALL,
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "smalllisp" );
+    g_object_set( G_OBJECT( ptt ),
+		  "left-margin", 40,
+		  "scale", PANGO_SCALE_SMALL,
+		  "wrap_mode", GTK_WRAP_NONE,
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "strong" );
+    g_object_set( G_OBJECT( ptt ),
+		  "weight", PANGO_WEIGHT_BOLD, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "titlechap" );
+    g_object_set( G_OBJECT( ptt ),
+		  "scale", PANGO_SCALE_XX_LARGE,
+		  "weight", PANGO_WEIGHT_BOLD,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "titlesec" );
+    g_object_set( G_OBJECT( ptt ),
+		  "scale", PANGO_SCALE_X_LARGE,
+		  "weight", PANGO_WEIGHT_BOLD,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "titlesubsec" );
+    g_object_set( G_OBJECT( ptt ),
+		  "scale", PANGO_SCALE_LARGE,
+		  "weight", PANGO_WEIGHT_BOLD,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "titlesubsubsec" );
+    g_object_set( G_OBJECT( ptt ),
+		  "weight", PANGO_WEIGHT_BOLD,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "tt" );
+    g_object_set( G_OBJECT( ptt ),
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "uref" );
+    g_object_set( G_OBJECT( ptt ),
+		  "foreground", "blue",
+		  "underline", PANGO_UNDERLINE_SINGLE,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    g_signal_connect( G_OBJECT( ptt ), "event",
+		      G_CALLBACK( TagEvent ), NULL );
+    
+    ptt = gtk_text_tag_new( "url" );
+    g_object_set( G_OBJECT( ptt ),
+		  "family", "monospace", NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    
+    ptt = gtk_text_tag_new( "var" );
+    g_object_set( G_OBJECT( ptt ),
+		  "style", PANGO_STYLE_OBLIQUE, NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+	
+    ptt = gtk_text_tag_new( "xref" );
+    g_object_set( G_OBJECT( ptt ),
+		  "foreground", "blue",
+		  "underline", PANGO_UNDERLINE_SINGLE,
+		  NULL );
+    gtk_text_tag_table_add( pttt, ptt );
+    g_signal_connect( G_OBJECT( ptt ), "event",
+		      G_CALLBACK( TagEvent ), NULL );
+    
+    HashCreate( &hIgnore, 16, (hashcomparefunc) strcmp );
+    for( ppch = aszIgnore; *ppch; ppch++ )
+	HashAdd( &hIgnore, StringHash( *ppch ), *ppch );
+	
+    HashCreate( &hPreFormat, 16, (hashcomparefunc) strcmp );
+    for( ppch = aszPreFormat; *ppch; ppch++ )
+	HashAdd( &hPreFormat, StringHash( *ppch ), *ppch );
 }
 
 extern GtkTextBuffer *gtktexi_get_buffer( texinfocontext *ptic ) {
 
     return ptic->ptb;
+}
+
+extern GtkWidget *gtktexi_get_widget( texinfocontext *ptic ) {
+
+    return ptic->pw;
 }
 
 static void Unload( texinfocontext *ptic ) {
@@ -443,6 +434,8 @@ extern void gtktexi_destroy( texinfocontext *ptic ) {
     Unload( ptic );
 
     /* FIXME unref tag table and buffer? */
+
+    /* FIXME destroy widgets */
 }
 
 static void AddNode( texinfocontext *ptic, char *sz, int fNode, int ib ) {
@@ -636,7 +629,7 @@ static void StartElement( void *pv, const xmlChar *pchName,
 			  const xmlChar **ppchAttrs ) {
 
     texinfocontext *ptic = pv;
-    long l = StringHash( pchName );
+    long l = StringHash( (char *) pchName );
     GtkTextTag *ptt;
 
 #if 0
@@ -651,14 +644,14 @@ static void StartElement( void *pv, const xmlChar *pchName,
 	return;
     }
     
-    if( HashLookup( &hIgnore, l, pchName ) ) {
+    if( HashLookup( &hIgnore, l, (char *) pchName ) ) {
 	ptic->cIgnore++;
 	return;
     }
 
     ptic->fElemStart = TRUE;
     
-    if( HashLookup( &hPreFormat, l, pchName ) )
+    if( HashLookup( &hPreFormat, l, (char *) pchName ) )
 	ptic->cPreFormat++;
 
     if( !strcmp( pchName, "para" ) || !strcmp( pchName, "group" ) )
@@ -666,8 +659,11 @@ static void StartElement( void *pv, const xmlChar *pchName,
 
     if( !strcmp( pchName, "image" ) ||
 	!strcmp( pchName, "xrefnodename" ) ||
-	!strcmp( pchName, "menunode" ) )
+	!strcmp( pchName, "menunode" ) ||
 	/* FIXME handle other types of references too */
+	!strcmp( pchName, "nodenext" ) ||
+	!strcmp( pchName, "nodeprev" ) ||
+	!strcmp( pchName, "nodeup" ) )
 	NewParameter( ptic );
 
     if( !strcmp( pchName, "menucomment" ) )
@@ -756,8 +752,9 @@ static void StartElement( void *pv, const xmlChar *pchName,
 static void EndElement( void *pv, const xmlChar *pchName ) {
 
     texinfocontext *ptic = pv;
-    long l = StringHash( pchName );
-
+    long l = StringHash( (char *) pchName );
+    int iNavLabel;
+    
 #if 0
     printf( "EndElement(%s)\n", pchName );
 #endif
@@ -770,12 +767,12 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
 	return;
     }
     
-    if( HashLookup( &hIgnore, l, pchName ) ) {
+    if( HashLookup( &hIgnore, l, (char *) pchName ) ) {
 	ptic->cIgnore--;
 	return;
     }
 
-    if( HashLookup( &hPreFormat, l, pchName ) )
+    if( HashLookup( &hPreFormat, l, (char *) pchName ) )
 	ptic->cPreFormat--;
 
     if( !strcmp( pchName, "node" ) && ptic->fSingleNode ) {
@@ -819,6 +816,31 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
     } else if( !strcmp( pchName, "menutitle" ) )
 	ptic->pri->iEnd = gtk_text_buffer_get_char_count( ptic->ptb );
     /* FIXME handle other types of references too */
+
+    iNavLabel = -1;
+    if( !strcmp( pchName, "nodenext" ) )
+	iNavLabel = 0;
+    else if( !strcmp( pchName, "nodeprev" ) )
+	iNavLabel = 1;
+    else if( !strcmp( pchName, "nodeup" ) )
+	iNavLabel = 2;
+    if( iNavLabel >= 0 ) {
+	char *pchLabel, *pch = ReadParameter( ptic );
+
+	if( ptic->aszNavTarget[ iNavLabel ] )
+	    free( ptic->aszNavTarget[ iNavLabel ] );
+
+	strcpy( ptic->aszNavTarget[ iNavLabel ] = malloc( strlen( pch ) + 1 ),
+		pch );
+	
+	pchLabel = g_strdup_printf( "%s %s", aszNavLabel[ iNavLabel ], pch );
+
+	gtk_label_set_text( GTK_LABEL( ptic->apwLabel[ iNavLabel ] ),
+			    pchLabel );
+	gtk_widget_set_sensitive( gtk_widget_get_parent(
+	    ptic->apwLabel[ iNavLabel ] ), TRUE );
+	g_free( pchLabel );
+    }
     
     if( !ptic->fEmptyParagraph ) {
 	if( !strcmp( pchName, "tableterm" ) ) {
@@ -986,17 +1008,30 @@ static void ClearBuffer( texinfocontext *ptic ) {
     }
 }
 
-/* Render node SZTAG, or the entire file is SZTAG is NULL. */
-extern int gtktexi_render_node( texinfocontext *ptic, char *szTag ) {
+static void HistoryAdd( texinfocontext *ptic, char *szFile, char *szTag ) {
+
+    char **pp;
+
+    while( ( pp = ptic->plCurrent->plNext->p ) ) {
+	free( pp[ 0 ] );
+	free( pp[ 1 ] );
+	free( pp );
+	ListDelete( ptic->plCurrent->plNext );
+    }
+
+    pp = malloc( 2 * sizeof( *pp ) );
+    strcpy( pp[ 0 ] = malloc( strlen( szFile ) + 1 ), szFile );
+    strcpy( pp[ 1 ] = malloc( strlen( szTag ) + 1 ), szTag );
     
+    ptic->plCurrent = ListInsert( &ptic->lHistory, pp );
+}
+
+static int RenderNode( texinfocontext *ptic, char *szTag ) {
+
     nodeinfo *pni;
     list *pl;
     char ach[ BLOCK_SIZE ];
     int cch, i;
-
-#if 0
-    printf( "gtktexi_render_node(%s)\n", szTag );
-#endif
     
     /* FIXME handle references to tags in other files */
 
@@ -1008,7 +1043,17 @@ extern int gtktexi_render_node( texinfocontext *ptic, char *szTag ) {
     ptic->fEmptyParagraph = TRUE;
     ptic->pch = ptic->szTitleTag = NULL;
     ListCreate( &ptic->l );
-
+    for( i = 0; i < 3; i++ ) {
+	if( ptic->aszNavTarget[ i ] ) {
+	    free( ptic->aszNavTarget[ i ] );
+	    ptic->aszNavTarget[ i ] = NULL;
+	}
+	gtk_label_set_text( GTK_LABEL( ptic->apwLabel[ i ] ),
+			    aszNavLabel[ i ] );
+	gtk_widget_set_sensitive( gtk_widget_get_parent( ptic->apwLabel[ i ] ),
+				  FALSE );
+    }
+    
     if( szTag ) {
 	for( pl = ptic->lNode.plNext; pl != &ptic->lNode; pl = pl->plNext ) {
 	    pni = pl->p;
@@ -1060,6 +1105,222 @@ extern int gtktexi_render_node( texinfocontext *ptic, char *szTag ) {
     return 0;
 }
 
+/* Render node SZTAG, or the entire file if SZTAG is NULL. */
+extern int gtktexi_render_node( texinfocontext *ptic, char *szTag ) {
+    
+#if 0
+    printf( "gtktexi_render_node(%s)\n", szTag );
+#endif
+
+    HistoryAdd( ptic, ptic->szFile, szTag );
+
+    return RenderNode( ptic, szTag );
+}
+
+static void Go( texinfocontext *ptic, list *pl ) {
+
+    char **pp;
+    
+    if( !( pp = pl->p ) )
+	return;
+
+    ptic->plCurrent = pl;
+
+    if( !strcmp( pp[ 0 ], ptic->szFile ) )
+	gtktexi_load( ptic, pp[ 0 ] );
+
+    /* FIXME if this is the current node, just jump to the tag */
+    RenderNode( ptic, pp[ 1 ] );
+}
+
+static void GoBack( GtkWidget *pw, texinfocontext *ptic ) {
+
+    Go( ptic, ptic->plCurrent->plPrev );
+}
+
+static void GoForward( GtkWidget *pw, texinfocontext *ptic ) {
+
+    Go( ptic, ptic->plCurrent->plNext );
+}
+
+static void GoNavTarget( texinfocontext *ptic, int i ) {
+
+    /* NB: it is not safe to pass ptic->aszNavTarget[ i ], because it is in
+       storage that will be freed by gtktexi_render_node() */
+    if( ptic->aszNavTarget[ i ] ) {
+#if __GNUC__
+	char sz[ strlen( ptic->aszNavTarget[ i ] ) + 1 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( ptic->aszNavTarget[ i ] ) + 1 );
+#else
+	char sz[ 4096 ];
+#endif
+	
+	strcpy( sz, ptic->aszNavTarget[ i ] );
+	gtktexi_render_node( ptic, sz );
+    }
+}
+
+static void GoNext( GtkWidget *pw, texinfocontext *ptic ) {
+
+    GoNavTarget( ptic, 0 );
+}
+
+static void GoPrev( GtkWidget *pw, texinfocontext *ptic ) {
+
+    GoNavTarget( ptic, 1 );
+}
+
+static void GoUp( GtkWidget *pw, texinfocontext *ptic ) {
+
+    GoNavTarget( ptic, 2 );
+}
+
+static void MenuGoBack( gpointer pv, guint n, GtkWidget *pw ) {
+
+    GoBack( pw, pv );
+}
+
+static void MenuGoForward( gpointer pv, guint n, GtkWidget *pw ) {
+
+    GoForward( pw, pv );
+}
+
+static void MenuGoUp( gpointer pv, guint n, GtkWidget *pw ) {
+
+    GoNavTarget( pv, 2 );
+}		  
+      		  
+static void MenuGoNext( gpointer pv, guint n, GtkWidget *pw ) {
+
+    GoNavTarget( pv, 0 );
+}		  
+      		  
+static void MenuGoPrev( gpointer pv, guint n, GtkWidget *pw ) {
+
+    GoNavTarget( pv, 1 );
+}		  
+      		  
+static void MenuGoTop( gpointer pv, guint n, GtkWidget *pw ) {
+
+    gtktexi_render_node( pv, "Top" );
+}		  
+      		  
+static void MenuGoDir( gpointer pv, guint n, GtkWidget *pw ) {
+
+    /* FIXME */
+}
+
+extern texinfocontext *gtktexi_create( void ) {
+
+    static int fInitialised;
+    texinfocontext *ptic = malloc( sizeof( *ptic ) );
+    PangoTabArray *pta;
+    GtkTextAttributes *ptaDefault;
+    GtkWidget *pwHbox, *pwToolbar, *pwTable, *pwButton;
+    static GtkItemFactoryEntry aife[] = {
+	{ "/_File", NULL, NULL, 0, "<Branch>" },
+	{ "/File/Close", "<control>W", NULL, 0, "<StockItem>",
+	  GTK_STOCK_CLOSE },
+	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
+	{ "/Edit/_Copy", "<control>C", NULL, 0, "<StockItem>",
+	  GTK_STOCK_COPY },
+	{ "/Edit/-", NULL, NULL, 0, "<Separator>" },
+	{ "/Edit/_Find...", "<control>F", NULL, 0, "<StockItem>",
+	  GTK_STOCK_FIND },
+	{ "/_Go", NULL, NULL, 0, "<Branch>" },
+	{ "/Go/_Back", "L", MenuGoBack, 0, "<StockItem>", GTK_STOCK_GO_BACK },
+	{ "/Go/_Forward", NULL, MenuGoForward, 0, "<StockItem>",
+	  GTK_STOCK_GO_FORWARD },
+	{ "/Go/-", NULL, NULL, 0, "<Separator>" },
+	{ "/Go/_Up", "U", MenuGoUp, 0, "<StockItem>", GTK_STOCK_GO_UP },
+	{ "/Go/_Next", "N", MenuGoNext, 0 },
+	{ "/Go/_Previous", "P", MenuGoPrev, 0 },
+	{ "/Go/_Top", "T", MenuGoTop, 0, "<StockItem>", GTK_STOCK_GOTO_TOP },
+	{ "/Go/_Dir", "D", MenuGoDir, 0 },
+	{ "/_Help", NULL, NULL, 0, "<Branch>" }
+    };
+    static void (*apfNav[ 3 ] )() = { GoNext, GoPrev, GoUp };
+    int i;
+    
+    if( !fInitialised ) {
+	Initialise();
+	fInitialised = TRUE;
+    }
+
+    ptic->pw = gtk_vbox_new( FALSE, 0 );
+
+    ptic->pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<gtktexi-main>",
+				      NULL );
+    gtk_item_factory_create_items( ptic->pif, sizeof( aife ) /
+				   sizeof( aife[ 0 ] ), aife, ptic );
+    gtk_box_pack_start( GTK_BOX( ptic->pw ),
+			gtk_item_factory_get_widget( ptic->pif,
+						     "<gtktexi-main>" ),
+			FALSE, FALSE, 0 );
+
+    pwHbox = gtk_hbox_new( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( ptic->pw ), pwHbox, FALSE, FALSE, 0 );
+    
+    pwToolbar = gtk_toolbar_new();
+    gtk_box_pack_start( GTK_BOX( pwHbox ), pwToolbar, FALSE, FALSE, 0 );
+    gtk_toolbar_insert_stock( GTK_TOOLBAR( pwToolbar ),
+			      GTK_STOCK_GO_BACK, "tooltip", "private",
+			      G_CALLBACK( GoBack ), ptic, -1 );
+    gtk_toolbar_insert_stock( GTK_TOOLBAR( pwToolbar ),
+			      GTK_STOCK_GO_FORWARD, "tooltip", "private",
+			      G_CALLBACK( GoForward ), ptic, -1 );
+
+    pwTable = gtk_table_new( 1, 3, TRUE );
+    gtk_box_pack_start( GTK_BOX( pwHbox ), pwTable, TRUE, TRUE, 0 );
+
+    for( i = 0; i < 3; i++ ) {
+	ptic->aszNavTarget[ i ] = NULL;
+	ptic->apwLabel[ i ] = gtk_label_new( aszNavLabel[ i ] );
+	gtk_misc_set_alignment( GTK_MISC( ptic->apwLabel[ i ] ), 0.0, 0.5 );
+
+	pwButton = gtk_button_new();
+	gtk_widget_set_sensitive( pwButton, FALSE );
+	g_signal_connect( G_OBJECT( pwButton ), "clicked",
+			  G_CALLBACK( apfNav[ i ] ), ptic );
+	gtk_widget_set_size_request( pwButton, 0, -1 );
+	gtk_container_add( GTK_CONTAINER( pwButton ), ptic->apwLabel[ i ] );
+	gtk_table_attach( GTK_TABLE( pwTable ), pwButton, i, i + 1, 0, 1,
+			  GTK_EXPAND | GTK_FILL, GTK_EXPAND, 0, 0 );
+    }
+    
+    ptic->pwScrolled = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_shadow_type(
+	GTK_SCROLLED_WINDOW( ptic->pwScrolled ), GTK_SHADOW_IN );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( ptic->pwScrolled ),
+				    GTK_POLICY_AUTOMATIC,
+				    GTK_POLICY_AUTOMATIC );
+    gtk_box_pack_start( GTK_BOX( ptic->pw ), ptic->pwScrolled, TRUE, TRUE, 0 );
+    
+    ptic->ptb = gtk_text_buffer_new( pttt );
+    g_object_set_data( G_OBJECT( ptic->ptb ), "texinfocontext", ptic );
+
+    ptic->pf = NULL;
+    ptic->szFile = NULL;
+    ListCreate( &ptic->lNode );
+    ListCreate( &ptic->lRef );
+    ListCreate( ptic->plCurrent = &ptic->lHistory );
+
+    ptic->pwText = gtk_text_view_new_with_buffer( gtktexi_get_buffer( ptic ) );
+    gtk_text_view_set_editable( GTK_TEXT_VIEW( ptic->pwText ), FALSE );
+    gtk_text_view_set_cursor_visible( GTK_TEXT_VIEW( ptic->pwText ), FALSE );
+    ptaDefault = gtk_text_view_get_default_attributes(
+	GTK_TEXT_VIEW( ptic->pwText ) );
+    pta = pango_tab_array_new_with_positions(
+	1, FALSE, PANGO_TAB_LEFT,
+	pango_font_description_get_size( ptaDefault->font ) * 20 );
+    gtk_text_attributes_unref( ptaDefault );
+    gtk_text_view_set_tabs( GTK_TEXT_VIEW( ptic->pwText ), pta );
+    gtk_container_add( GTK_CONTAINER( ptic->pwScrolled ), ptic->pwText );
+    
+    return ptic;
+}
+
 /* Things to finish:
 
    - entities, e.g. &dots;
@@ -1070,5 +1331,6 @@ extern int gtktexi_render_node( texinfocontext *ptic, char *szTag ) {
      item text should be aligned with other lines of the item)
    - fix xref and uref display -- make the most of whatever tags are
      present.  Seems impossible to fix completely without patching makeinfo.
-   - indentation (will be buggy until makeinfo handles @noindent)
+   - implement indentation (will be buggy until makeinfo handles @noindent)
+   - handle anchors and references to other files
 */
