@@ -1,6 +1,7 @@
 
 #include <GL/gl.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <math.h>
 #include "matrix.h"
 #include "shadow.h"
@@ -235,13 +236,12 @@ void AddEdge(OccModel* pMod, winged_edge* we)
 	for (i = 0; i < numEdges; i++)
 	{
 		winged_edge *we0 = (winged_edge*)ListGet(&pMod->edges, i);
-		if(we0->e[0] == we->e[0]  && we0->e[1] == we->e[1])
-			g_print("facingness different between polys on edge!\n");
+		/* facingness different between polys on edge! */
+		assert((we0->e[0] != we->e[0] || we0->e[1] != we->e[1]) && "facingness different between polys on edge!");
 
 		if(we0->e[0] == we->e[1]  && we0->e[1] == we->e[0])
 		{
-			if(we0->w[1] != -1)
-				g_print("triple edge! bad...\n");
+			assert((we0->w[1] == -1) && "triple edge! bad...");
 
 			we0->w[1] = we->w[0]; // pair the edge and return
 			return;

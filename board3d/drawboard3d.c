@@ -65,8 +65,12 @@ void initDT(diceTest* dt, int x, int y, int z);
 float ***Alloc3d(int x, int y, int z);
 void Free3d(float ***array, int x, int y);
 
+/* Display list ids and quadratics */
 GLuint diceList, DCList, pieceList;
 GLUquadricObj *qobjTex = 0, *qobj = 0;
+
+/* Saved matrices for picking */
+float modelMatrix[16], projMatrix[16];
 
 /* Define nurbs surface */
 GLUnurbsObj *flagNurb;
@@ -79,6 +83,11 @@ GLUnurbsObj *flagNurb;
 
 /* Control points for the flag. The Z values are modified to make it wave */
 float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3];
+
+/* Clipping planes */
+#define zNear .1f
+#define zFar 70
+float vert, hor;
 
 /* All the board element sizes */
 #define EDGE base_unit
@@ -166,35 +175,34 @@ void preDrawPiece0(BoardData* bd)
 	float discradius = radius * 0.8f;
 	float lip = radius - discradius;
 	float height = PIECE_HEIGHT - 2 * lip;
-	float ***p = Alloc3d(bd->step_accuracy + 1, bd->step_accuracy / 4 + 1, 3);
-	float ***n = Alloc3d(bd->step_accuracy + 1, bd->step_accuracy / 4 + 1, 3);
+	float ***p = Alloc3d(rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1, 3);
+	float ***n = Alloc3d(rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1, 3);
 
-	step = (2 * PI) / bd->step_accuracy;
+	step = (2 * PI) / rdAppearance.curveAccuracy;
 
 	/* Draw top/bottom of piece */
 	if (bd->checkerMat[0].pTexture)
-	{
-		glEnable(GL_TEXTURE_2D);
+	{	/* Texturing will be enabled */
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_HEIGHT);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
-		gluDisk(qobjTex, 0, discradius, bd->step_accuracy, 1);
+		gluDisk(qobjTex, 0, discradius, rdAppearance.curveAccuracy, 1);
 		glPopMatrix();
 		/* Draw bottom - faces other way */
 		gluQuadricOrientation(qobjTex, GLU_INSIDE);
-		gluDisk(qobjTex, 0, discradius, bd->step_accuracy, 1);
+		gluDisk(qobjTex, 0, discradius, rdAppearance.curveAccuracy, 1);
 		gluQuadricOrientation(qobjTex, GLU_OUTSIDE);
 		glDisable(GL_TEXTURE_2D);
 	}
 	else	
 	{
-		circleRev(discradius, 0, bd->step_accuracy);
-		circle(discradius, PIECE_HEIGHT, bd->step_accuracy);
+		circleRev(discradius, 0, rdAppearance.curveAccuracy);
+		circle(discradius, PIECE_HEIGHT, rdAppearance.curveAccuracy);
 	}
 	/* Draw side of piece */
 	angle = 0;
 	glBegin(GL_QUAD_STRIP);
-	for (i = 0; i < bd->step_accuracy + 1; i++)
+	for (i = 0; i < rdAppearance.curveAccuracy + 1; i++)
 	{
 		glNormal3f((float)sin(angle), (float)cos(angle), 0);
 		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, lip);
@@ -206,13 +214,13 @@ void preDrawPiece0(BoardData* bd)
 
 	/* Draw edges of piece */
 	angle2 = 0;
-	for (j = 0; j <= bd->step_accuracy / 4; j++)
+	for (j = 0; j <= rdAppearance.curveAccuracy / 4; j++)
 	{
 		latitude = (float)sin(angle2) * lip;
 		angle = 0;
 		new_radius = (float)sqrt((lip * lip) - (latitude * latitude));
 
-		for (i = 0; i < bd->step_accuracy; i++)
+		for (i = 0; i < rdAppearance.curveAccuracy; i++)
 		{
 			n[i][j][0] = (float)sin(angle) * new_radius;
 			p[i][j][0] = (float)sin(angle) * (discradius + new_radius);
@@ -233,10 +241,10 @@ void preDrawPiece0(BoardData* bd)
 		angle2 += step;
 	}
 
-	for (j = 0; j < bd->step_accuracy / 4; j++)
+	for (j = 0; j < rdAppearance.curveAccuracy / 4; j++)
 	{
 		glBegin(GL_QUAD_STRIP);
-		for (i = 0; i < bd->step_accuracy + 1; i++)
+		for (i = 0; i < rdAppearance.curveAccuracy + 1; i++)
 		{
 			glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
 			glVertex3f(p[i][j][0], p[i][j][1], p[i][j][2]);
@@ -246,7 +254,7 @@ void preDrawPiece0(BoardData* bd)
 		glEnd();
 			
 		glBegin(GL_QUAD_STRIP);
-		for (i = 0; i < bd->step_accuracy + 1; i++)
+		for (i = 0; i < rdAppearance.curveAccuracy + 1; i++)
 		{
 			glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
 			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], PIECE_HEIGHT - p[i][j + 1][2]);
@@ -256,8 +264,11 @@ void preDrawPiece0(BoardData* bd)
 		glEnd();
 	}
 
-	Free3d(p, bd->step_accuracy + 1, bd->step_accuracy / 4 + 1);
-	Free3d(n, bd->step_accuracy + 1, bd->step_accuracy / 4 + 1);
+	if (bd->checkerMat[0].pTexture)
+		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
+
+	Free3d(p, rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1);
+	Free3d(n, rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1);
 }
 
 void preDrawPiece1(BoardData* bd)
@@ -269,25 +280,27 @@ void preDrawPiece1(BoardData* bd)
 
 	/* Draw top of piece */
 	if (bd->checkerMat[0].pTexture)
-	{
-		glEnable(GL_TEXTURE_2D);
+	{	/* Texturing will be enabled */
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_HEIGHT);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
-		gluDisk(qobjTex, 0, pieceBorder, bd->step_accuracy, 1);
+		gluDisk(qobjTex, 0, pieceBorder, rdAppearance.curveAccuracy, 1);
 		glDisable(GL_TEXTURE_2D);
-		gluDisk(qobj, pieceBorder, pieceRad, bd->step_accuracy, 1);
+		gluDisk(qobj, pieceBorder, pieceRad, rdAppearance.curveAccuracy, 1);
 		glPopMatrix();
 	}
 	else
 	{
-		circle(pieceRad, PIECE_HEIGHT, bd->step_accuracy);
+		circle(pieceRad, PIECE_HEIGHT, rdAppearance.curveAccuracy);
 	}
 	/* Draw plain bottom of piece */
-	circleRev(pieceRad, 0, bd->step_accuracy);
+	circleRev(pieceRad, 0, rdAppearance.curveAccuracy);
 
 	/* Edge of piece */
-	gluCylinder(qobj, pieceRad, pieceRad, PIECE_HEIGHT, bd->step_accuracy, 1);
+	gluCylinder(qobj, pieceRad, pieceRad, PIECE_HEIGHT, rdAppearance.curveAccuracy, 1);
+
+	if (bd->checkerMat[0].pTexture)
+		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
 void preDrawPiece(BoardData* bd, int transparent)
@@ -323,18 +336,18 @@ void renderDice(BoardData* bd, float size)
 	float radius;
 	float angle, step;
 
-	int corner_steps = (bd->step_accuracy / 4) + 1;
+	int corner_steps = (rdAppearance.curveAccuracy / 4) + 1;
 	float ***corner_points = Alloc3d(corner_steps, corner_steps, 3);
 
 	radius = size / 2.0f;
-	step = (2 * PI) / bd->step_accuracy;
+	step = (2 * PI) / rdAppearance.curveAccuracy;
 
 	glPushMatrix();
 
 	/* Draw 6 faces */
 	for (c = 0; c < 6; c++)
 	{
-		circle(radius, radius, bd->step_accuracy);
+		circle(radius, radius, rdAppearance.curveAccuracy);
 
 		if (c % 2 == 0)
 			glRotatef(-90, 0, 1, 0);
@@ -343,7 +356,7 @@ void renderDice(BoardData* bd, float size)
 	}
 
 	lat_angle = 0;
-	lns = (bd->step_accuracy / 4);
+	lns = (rdAppearance.curveAccuracy / 4);
 	lat_step = (PI / 2) / lns;
 
 	/* Calculate corner points */
@@ -352,7 +365,7 @@ void renderDice(BoardData* bd, float size)
 		latitude = (float)sin(lat_angle) * radius;
 		new_radius = (float)sqrt(radius * radius - (latitude * latitude));
 
-		ns = (bd->step_accuracy / 4) - i;
+		ns = (rdAppearance.curveAccuracy / 4) - i;
 
 		step = (PI / 2 - lat_angle) / (ns);
 		angle = 0;
@@ -376,9 +389,9 @@ void renderDice(BoardData* bd, float size)
 
 		glRotatef((float)(c * 90), 0, 0, 1);
 
-		for (i = 0; i < bd->step_accuracy / 4; i++)
+		for (i = 0; i < rdAppearance.curveAccuracy / 4; i++)
 		{
-			ns = (bd->step_accuracy / 4) - i - 1;
+			ns = (rdAppearance.curveAccuracy / 4) - i - 1;
 			glBegin(GL_TRIANGLE_STRIP);
 				glNormal3f(corner_points[i][0][0] / radius, corner_points[i][0][1] / radius, corner_points[i][0][2] / radius);
 				glVertex3f(corner_points[i][0][0], corner_points[i][0][1], corner_points[i][0][2]);
@@ -416,12 +429,12 @@ void renderCube(BoardData* bd, float size)
 	float ds = (size * 5.0f / 7.0f);
 	float hds = (ds / 2);
 
-	int corner_steps = (bd->step_accuracy / 4) + 1;
+	int corner_steps = (rdAppearance.curveAccuracy / 4) + 1;
 	float ***corner_points = Alloc3d(corner_steps, corner_steps, 3);
 
 	radius = size / 7.0f;
 
-	step = (2 * PI) / bd->step_accuracy;
+	step = (2 * PI) / rdAppearance.curveAccuracy;
 
 	glPushMatrix();
 
@@ -450,7 +463,7 @@ void renderCube(BoardData* bd, float size)
 
 			angle = 0;
 			glBegin(GL_QUAD_STRIP);
-			for (j = 0; j < bd->step_accuracy / 4 + 1; j++)
+			for (j = 0; j < rdAppearance.curveAccuracy / 4 + 1; j++)
 			{
 				glNormal3f((float)sin(angle), 0, (float)cos(angle));
 				glVertex3f((float)sin(angle) * radius, ds, (float)cos(angle) * radius);
@@ -469,16 +482,16 @@ void renderCube(BoardData* bd, float size)
 	}
 
 	lat_angle = 0;
-	lat_step = (2 * PI) / bd->step_accuracy;
+	lat_step = (2 * PI) / rdAppearance.curveAccuracy;
 
 	/* Calculate corner 1/8th sphere points */
-	for (i = 0; i < (bd->step_accuracy / 4) + 1; i++)
+	for (i = 0; i < (rdAppearance.curveAccuracy / 4) + 1; i++)
 	{
 		latitude = (float)sin(lat_angle) * radius;
 		angle = 0;
 		new_radius = (float)sqrt(radius * radius - (latitude * latitude) );
 
-		ns = (bd->step_accuracy / 4) - i;
+		ns = (rdAppearance.curveAccuracy / 4) - i;
 		step = (2 * PI) / (ns * 4);
 
 		for (j = 0; j <= ns; j++)
@@ -503,9 +516,9 @@ void renderCube(BoardData* bd, float size)
 		glTranslatef(hds, -hds, -radius);
 		glRotatef(-90, 0, 0, 1);
 
-		for (i = 0; i < bd->step_accuracy / 4; i++)
+		for (i = 0; i < rdAppearance.curveAccuracy / 4; i++)
 		{
-			ns = (bd->step_accuracy / 4) - i - 1;
+			ns = (rdAppearance.curveAccuracy / 4) - i - 1;
 			glBegin(GL_TRIANGLE_STRIP);
 				glNormal3f(corner_points[i][ns + 1][0] / radius, corner_points[i][ns + 1][1] / radius, corner_points[i][ns + 1][2] / radius);
 				glVertex3f(corner_points[i][ns + 1][0], corner_points[i][ns + 1][1], corner_points[i][ns + 1][2]);
@@ -737,9 +750,9 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 				glTranslatef(x - hds, y - hds, 0);
 
 				if (drawOutline)
-					circleOutline(DOT_SIZE, dotOffset, bd->step_accuracy);
+					circleOutline(DOT_SIZE, dotOffset, rdAppearance.curveAccuracy);
 				else
-					circle(DOT_SIZE, dotOffset, bd->step_accuracy);
+					circle(DOT_SIZE, dotOffset, rdAppearance.curveAccuracy);
 
 				glPopMatrix();
 
@@ -1097,7 +1110,11 @@ void drawPieces(BoardData* bd)
 		{
 			int target = bd->iTargetHelpPoints[i];
 			if (target != -1)
+			{	/* Make sure texturing is disabled */
+				if (bd->checkerMat[0].pTexture)
+					glDisable(GL_TEXTURE_2D);
 				drawPiece(bd, target, abs(bd->points[target]) + 1);
+			}
 		}
 		glPolygonMode(GL_FRONT, GL_FILL);
 	}
@@ -1285,14 +1302,14 @@ void drawHinge(BoardData* bd, float height)
 	glPushMatrix();
 	glTranslatef((TOTAL_WIDTH) / 2.0f, height, BASE_HEIGHT + EDGE_DEPTH);
 	glRotatef(-90, 1, 0, 0);
-	gluCylinder(qobjTex, HINGE_WIDTH, HINGE_WIDTH, HINGE_HEIGHT, bd->step_accuracy, 1);
+	gluCylinder(qobjTex, HINGE_WIDTH, HINGE_WIDTH, HINGE_HEIGHT, rdAppearance.curveAccuracy, 1);
 
 	glMatrixMode(GL_TEXTURE);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 
 	glRotatef(180, 1, 0, 0);
-	gluDisk(qobjTex, 0, HINGE_WIDTH, bd->step_accuracy, 1);
+	gluDisk(qobjTex, 0, HINGE_WIDTH, rdAppearance.curveAccuracy, 1);
 
 	glPopMatrix();
 }
@@ -1746,10 +1763,10 @@ void drawFlagPick(BoardData* bd)
 	glTranslatef(0, -FLAG_HEIGHT, 0);
 
 	glRotatef(-90, 1, 0, 0);
-	gluCylinder(qobj, FLAGPOLE_WIDTH, FLAGPOLE_WIDTH, FLAGPOLE_HEIGHT, bd->step_accuracy, 1);
+	gluCylinder(qobj, FLAGPOLE_WIDTH, FLAGPOLE_WIDTH, FLAGPOLE_HEIGHT, rdAppearance.curveAccuracy, 1);
 
-	circleRev(FLAGPOLE_WIDTH, 0, bd->step_accuracy);
-	circleRev(FLAGPOLE_WIDTH * 2, FLAGPOLE_HEIGHT, bd->step_accuracy);
+	circleRev(FLAGPOLE_WIDTH, 0, rdAppearance.curveAccuracy);
+	circleRev(FLAGPOLE_WIDTH * 2, FLAGPOLE_HEIGHT, rdAppearance.curveAccuracy);
 
 	glPopMatrix();
 }
@@ -1821,7 +1838,12 @@ int board_point(BoardData *bd, int x, int y, int point)
 
 	glLoadIdentity();
 	gluPickMatrix(x, y, 1, 1, viewport);
-	SetupPerspVolume(bd, viewport);
+
+	/* Setup projection matrix - using saved values */
+	glFrustum(-hor, hor, -vert, vert, zNear, zFar);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadMatrixf(modelMatrix);
 
 	if (bd->resigned)
 	{	/* Flag showing - just pick this */
@@ -2328,9 +2350,11 @@ void workOutWidth(viewArea* pva, float halfRadianFOV, float boardRadAngle, float
 		pva->width = p[0] * 2;
 }
 
+extern char statusString[128];
+
 void SetupPerspVolume(BoardData* bd, int viewport[4])
 {
-	float fovScale, vert, hor;
+	float fovScale;
 	float zoom;
 	float aspectRatio = (float)viewport[2]/(float)(viewport[3]);
 
@@ -2380,9 +2404,6 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 	p[2] = BASE_HEIGHT + EDGE_DEPTH;
 	workOutWidth(&va, halfRadianFOV, boardRadAngle, aspectRatio, p);
 
-	#define zNear .1f
-	#define zFar 70
-
 	fovScale = zNear * (float)tan(halfRadianFOV);
 
 	if (aspectRatio > getAreaRatio(&va))
@@ -2405,6 +2426,7 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 	/* Zoom back so image fills window */
 	zoom = (getViewAreaHeight(&va) / 2) / (float)tan(halfRadianFOV);
 	glTranslatef(0, 0, -zoom);
+//sprintf(statusString, "Zoom: %f ", zoom);
 
 	/* Offset from centre because of perspective */
 	glTranslatef(0, getViewAreaHeight(&va) / 2 + va.bottom, 0);
@@ -2414,6 +2436,9 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 
 	/* Origin is bottom left, so move from centre */
 	glTranslatef(-(getBoardWidth() / 2.0f), -((getBoardHeight()) / 2.0f), 0);
+
+	/* Save matrix for later */
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelMatrix);
 }
 
 void setupFlag()
@@ -2448,7 +2473,7 @@ void renderFlag(BoardData* bd)
 	setMaterial(&bd->flagMat);
 
 	/* Set size of polygons */
-	gluNurbsProperty(flagNurb, GLU_SAMPLING_TOLERANCE, 500.0f / bd->step_accuracy);
+	gluNurbsProperty(flagNurb, GLU_SAMPLING_TOLERANCE, 500.0f / rdAppearance.curveAccuracy);
 
 	gluBeginSurface(flagNurb);
 		gluNurbsSurface(flagNurb, S_NUMKNOTS, s_knots, T_NUMKNOTS, t_knots, 3 * T_NUMPOINTS, 3,
@@ -2462,10 +2487,10 @@ void renderFlag(BoardData* bd)
 
 	glRotatef(-90, 1, 0, 0);
 	SetColour(.2f, .2f, .4f, 0);	/* Blue pole */
-	gluCylinder(qobj, FLAGPOLE_WIDTH, FLAGPOLE_WIDTH, FLAGPOLE_HEIGHT, bd->step_accuracy, 1);
+	gluCylinder(qobj, FLAGPOLE_WIDTH, FLAGPOLE_WIDTH, FLAGPOLE_HEIGHT, rdAppearance.curveAccuracy, 1);
 
-	circleRev(FLAGPOLE_WIDTH, 0, bd->step_accuracy);
-	circleRev(FLAGPOLE_WIDTH * 2, FLAGPOLE_HEIGHT, bd->step_accuracy);
+	circleRev(FLAGPOLE_WIDTH, 0, rdAppearance.curveAccuracy);
+	circleRev(FLAGPOLE_WIDTH * 2, FLAGPOLE_HEIGHT, rdAppearance.curveAccuracy);
 
 	glPopMatrix();
 
@@ -2727,7 +2752,7 @@ void make_model(BoardData* bd)
 	initOccluder(&Occluders[OCC_HINGE1]);
 	copyOccluder(&Occluders[OCC_HINGE1], &Occluders[OCC_HINGE2]);
 
-	addHalfTube(&Occluders[OCC_HINGE1], HINGE_WIDTH, HINGE_HEIGHT, bd->step_accuracy / 2);
+	addHalfTube(&Occluders[OCC_HINGE1], HINGE_WIDTH, HINGE_HEIGHT, rdAppearance.curveAccuracy / 2);
 
 	Occluders[OCC_HINGE1].trans[0] = Occluders[OCC_HINGE2].trans[0] = (TOTAL_WIDTH) / 2.0f;
 	Occluders[OCC_HINGE1].trans[2] = Occluders[OCC_HINGE2].trans[2] = BASE_HEIGHT + EDGE_DEPTH;
@@ -2756,7 +2781,7 @@ void make_model(BoardData* bd)
 		float lip = radius - discradius;
 		float height = PIECE_HEIGHT - 2 * lip;
 
-		addCylinder(&Occluders[OCC_PIECE], 0, 0, lip, PIECE_HOLE / 2.0f, height, bd->step_accuracy);
+		addCylinder(&Occluders[OCC_PIECE], 0, 0, lip, PIECE_HOLE / 2.0f, height, rdAppearance.curveAccuracy);
 	}
 	for (i = OCC_PIECE; i < OCC_PIECE + 30; i++)
 	{

@@ -4050,7 +4050,7 @@ extern GtkWidget *board_dice_widget( Board *board ) {
     return pw;	    
 }
 
-InitBoardData()
+void InitBoardData()
 {	/* Initialize some settings on new game start */
 	BoardData* bd = BOARD(pwBoard)->board_data;
 

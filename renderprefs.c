@@ -298,6 +298,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->debugTime = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "boardtype", c ) )
 		prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
+    else if( !strncasecmp( szParam, "curveaccuracy", c ) )
+		prd->curveAccuracy = atoi( szValue );
 #endif
     else if( !strncasecmp( szParam, "labels", c ) )
 	/* labels=bool */
@@ -446,6 +448,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		 "animateflag=%c "
 		 "closeboard=%c "
 		 "debugTime=%c "
+		 "curveaccuracy=%d "
 #endif
 	     "labels=%c wood=%s hinges=%c "
 	     "light=%0.0f;%0.0f shape=%0.1f " 
@@ -473,6 +476,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->animateFlag ? 'y' : 'n',
 		prd->closeBoardOnExit ? 'y' : 'n',
 		prd->debugTime ? 'y' : 'n',
+		prd->curveAccuracy,
 #endif
              /* labels ... */
              prd->fLabels ? 'y' : 'n',

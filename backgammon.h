@@ -97,6 +97,8 @@ typedef struct _monitor {
 #if USE_GTK
     int fGrab;
     int idSignal;
+#else
+	int dummy;
 #endif
 } monitor;
 

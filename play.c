@@ -49,6 +49,7 @@
 #include "i18n.h"
 #include "sound.h"
 #include "renderprefs.h"
+#include "gtkboard.h"
 
 char *aszGameResult[] = { 
   N_ ("single game"), 

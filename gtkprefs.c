@@ -69,7 +69,7 @@ static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard, *pwSpin,
-	*pwDebugTime, *pwDarkness, *lightLab, *darkLab;
+	*pwDebugTime, *pwDarkness, *lightLab, *darkLab, *pwAccuracy;
 #endif
 
 #if HAVE_LIBXML2
@@ -668,7 +668,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	pwShowShadows = gtk_check_button_new_with_label ("Show shadows");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwShowShadows, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), rdAppearance.showShadows);
-	gtk_signal_connect(G_OBJECT(pwShowShadows), "toggled", GTK_SIGNAL_FUNC(toggle_show_shadows), NULL);
+	gtk_signal_connect(GTK_OBJECT(pwShowShadows), "toggled", GTK_SIGNAL_FUNC(toggle_show_shadows), NULL);
 
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
@@ -677,14 +677,32 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_box_pack_start(GTK_BOX(hBox), lightLab, FALSE, FALSE, 0);
 
 	pwDarkness = gtk_hscale_new_with_range(3, 100, 1);
-	gtk_scale_set_draw_value(pwDarkness, FALSE);
-	gtk_range_set_value(pwDarkness, rdAppearance.shadowDarkness);
+	gtk_scale_set_draw_value(GTK_SCALE(pwDarkness), FALSE);
+	gtk_range_set_value(GTK_RANGE(pwDarkness), rdAppearance.shadowDarkness);
 	gtk_box_pack_start(GTK_BOX(hBox), pwDarkness, TRUE, TRUE, 0);
 
 	darkLab = gtk_label_new("dark");
 	gtk_box_pack_start(GTK_BOX(hBox), darkLab, FALSE, FALSE, 0);
 
 	toggle_show_shadows(pwShowShadows, 0);
+
+	lab = gtk_label_new("Curve accuracy");
+	gtk_box_pack_start (GTK_BOX (dtBox), lab, FALSE, FALSE, 0);
+
+	hBox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("low");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+	pwAccuracy = gtk_hscale_new_with_range(8, 60, 4);
+	gtk_scale_set_draw_value(GTK_SCALE(pwAccuracy), FALSE);
+	gtk_range_set_value(GTK_RANGE(pwAccuracy), rdAppearance.curveAccuracy);
+
+	gtk_box_pack_start(GTK_BOX(hBox), pwAccuracy, TRUE, TRUE, 0);
+
+	lab = gtk_label_new("high");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 	pwAnimateRoll = gtk_check_button_new_with_label ("Animate dice rolls");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateRoll, FALSE, FALSE, 0);
@@ -726,7 +744,6 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     GtkWidget *pwx;
 #if USE_BOARD3D
 	GtkWidget *dtBox, *button, *dtFrame;
-	GSList* group;
 #endif
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -1498,21 +1515,30 @@ static void GetPrefs ( renderdata *prd ) {
 
     int i, j;
     gdouble ar[ 4 ];
+	int newAccuracy;
 
 #if USE_BOARD3D
 	BoardData *bd = BOARD( pwBoard )->board_data;
 
 	rdAppearance.fDisplayType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwBoardType ) ) ? DT_2D : DT_3D;
 	rdAppearance.showShadows = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwShowShadows));
-	rdAppearance.shadowDarkness = gtk_range_get_value(pwDarkness);
+	rdAppearance.shadowDarkness = gtk_range_get_value(GTK_RANGE(pwDarkness));
 	rdAppearance.skin3d = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(pwSpin));
 	SetSkin(bd, rdAppearance.skin3d);
 	rdAppearance.animateRoll = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateRoll));
 	rdAppearance.animateFlag = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateFlag));
 	rdAppearance.closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
 	rdAppearance.debugTime = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwDebugTime));
-	if (rdAppearance.fDisplayType == DT_3D && bd->resigned)
+	if (rdAppearance.fDisplayType == DT_3D && bd->resigned && bd->playing)
 		ShowFlag3d();	/* Showing now - update */
+
+	newAccuracy = gtk_range_get_value(GTK_RANGE(pwAccuracy)) + 2;
+	newAccuracy -= (newAccuracy % 4);
+	if (newAccuracy != rdAppearance.curveAccuracy)
+	{
+		rdAppearance.curveAccuracy = newAccuracy;
+		preDraw3d();
+	}
 #endif
     rdAppearance.fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
     rdAppearance.fHinges = gtk_toggle_button_get_active(

@@ -67,6 +67,7 @@ typedef struct _renderdata {
 	int animateFlag;	/* Animate resignation flag */
 	int closeBoardOnExit;	/* Animate board close on quit */
 	int debugTime;	/* Show average drawing time */
+	int curveAccuracy;	/* Round curve approximation accuracy */
 #endif
 } renderdata;
 

@@ -31,6 +31,9 @@
 
 extern void BuildFont();
 extern void setupFlag();
+extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
+extern void waveFlag(float wag);
+extern void SetTexture(BoardData *bd, Material* pMat, const char* filename);
 
 /* Test function to show normal direction*/
 void CheckNormal()
@@ -54,12 +57,6 @@ void CheckNormal()
 	glBegin(GL_POINTS);
 		glVertex3f(norms[0], norms[1], norms[2]);
 	glEnd();
-}
-
-void Reshape(int w, int h)
-{
-	glViewport(0, 0, w, h);
-	SetupViewingVolume();
 }
 
 extern float (*light_position)[4];
@@ -743,18 +740,6 @@ void SetColour(float r, float g, float b, float a)
 	setMaterial(&col);
 }
 
-int MouseMove(int x, int y)
-{
-	if (pCurBoard->drag_point >= 0)
-	{
-		getProjectedPieceDragPos(x, y, pCurBoard->dragPos);
-		updateMovingPieceOccPos(pCurBoard);
-		return 1;
-	}
-	else
-		return 0;
-}
-
 void SetMovingPieceRotation(int pt)
 {	/* Make sure piece is rotated correctly while dragging */
 	pCurBoard->movingPieceRotation = pCurBoard->pieceRotation[pt][abs(pCurBoard->points[pt])];
@@ -793,6 +778,29 @@ double animStartTime = 0;
 extern int animate_player, *animate_move_list, animation_finished;
 int slide_move;
 extern int convert_point( int i, int player );
+
+void SetupMove()
+{
+	int destDepth;
+    int target = convert_point( animate_move_list[slide_move], animate_player);
+    int dest = convert_point( animate_move_list[slide_move + 1], animate_player);
+    int dir = animate_player ? 1 : -1;
+
+	pCurBoard->points[target] -= dir;
+
+	animStartTime = get_time();
+
+	destDepth = abs(pCurBoard->points[dest]) + 1;
+	if ((abs(pCurBoard->points[dest]) == 1) && (dir != SGN(pCurBoard->points[dest])))
+		destDepth--;
+
+	setupPath(pCurBoard, &path, &pCurBoard->rotateMovingPiece, fClockwise, target, abs(pCurBoard->points[target]) + 1, dest, destDepth);
+	copyPoint(pCurBoard->movingPos, path.pts[0]);
+
+	SetMovingPieceRotation(target);
+
+	updatePieceOccPos(pCurBoard);
+}
 
 int idleAnimate(void)
 {
@@ -865,8 +873,8 @@ void RollDice3d()
 
 	if (rdAppearance.animateRoll)
 	{
-monitor m;
-SuspendInput( &m );
+		monitor m;
+		SuspendInput( &m );
 		animStartTime = get_time();
 
 		pCurBoard->shakingDice = 1;
@@ -877,37 +885,14 @@ SuspendInput( &m );
 		updateOccPos(pCurBoard);
 
 		gtk_main();
-ResumeInput( &m );
+		ResumeInput( &m );
 	}
-}
-
-void SetupMove()
-{
-	int destDepth;
-    int target = convert_point( animate_move_list[slide_move], animate_player);
-    int dest = convert_point( animate_move_list[slide_move + 1], animate_player);
-    int dir = animate_player ? 1 : -1;
-
-	pCurBoard->points[target] -= dir;
-
-	animStartTime = get_time();
-
-	destDepth = abs(pCurBoard->points[dest]) + 1;
-	if ((abs(pCurBoard->points[dest]) == 1) && (dir != SGN(pCurBoard->points[dest])))
-		destDepth--;
-
-	setupPath(pCurBoard, &path, &pCurBoard->rotateMovingPiece, fClockwise, target, abs(pCurBoard->points[target]) + 1, dest, destDepth);
-	copyPoint(pCurBoard->movingPos, path.pts[0]);
-
-	SetMovingPieceRotation(target);
-
-	updatePieceOccPos(pCurBoard);
 }
 
 void AnimateMove3d()
 {
-monitor m;
-SuspendInput( &m );
+	monitor m;
+	SuspendInput( &m );
 	slide_move = 0;
 	pCurBoard->moving = 1;
 
@@ -915,7 +900,7 @@ SuspendInput( &m );
 
 	setIdleFunc(idleAnimate);
 	gtk_main();
-ResumeInput( &m );
+	ResumeInput( &m );
 }
 
 int idleWaveFlag(void)
@@ -982,6 +967,7 @@ void CloseBoard3d(BoardData* bd)
 	bd->cube_use = 0;
 	bd->colour = 0;
 	bd->direction = 1;
+	bd->resigned = 0;
 	fClockwise = 0;
 
 	rdAppearance.showShadows = 0;
@@ -1007,3 +993,22 @@ void CloseBoard3d(BoardData* bd)
 	
 	gtk_main();
 }
+
+int MouseMove(int x, int y)
+{
+	if (pCurBoard->drag_point >= 0)
+	{
+		getProjectedPieceDragPos(x, y, pCurBoard->dragPos);
+		updateMovingPieceOccPos(pCurBoard);
+		return 1;
+	}
+	else
+		return 0;
+}
+
+void Reshape(int w, int h)
+{
+	glViewport(0, 0, w, h);
+	SetupViewingVolume();
+}
+

@@ -115,7 +115,8 @@ renderdata rdDefault = {
 	0,	/* Animate roll */
 	0,	/* Animate flag */
 	0,	/* Close board on exit */
-	0	/* Debug draw time */
+	0,	/* Debug draw time */
+	36	/* Curve accuracy */
 #endif
 };
 

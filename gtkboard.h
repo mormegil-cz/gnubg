@@ -189,7 +189,6 @@ typedef struct _BoardData {
 	char* textureNames[MAX_TEXTURES];
 	int numTextures;
 
-	int step_accuracy;	/* How accurate should 3d curves be */
 	int pieceType;	/* Different piece models */
 	BoardState State;	/* Open/closed board */
 	float perOpen;	/* Percentage open when opening/closing board */
@@ -231,14 +230,31 @@ extern void AnimateMove3d();
 extern void ShowFlag3d();
 extern void StopIdle3d();
 extern void SetShadowDimness3d();
+extern void preDraw3d();
+extern void CloseBoard3d(BoardData* bd);
+extern void SetSkin(BoardData *bd, int num);
 
 extern void PlaceMovingPieceRotation(int dest, int src);
 extern void SetMovingPieceRotation(int pt);
 extern void updateOccPos(BoardData* bd);
+extern void updatePieceOccPos(BoardData* bd);
 extern void updateHingeOccPos(BoardData* bd);
 extern void updateFlagOccPos(BoardData* bd);
 extern void CheckAccelerated();
 #endif
+
+extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] );
+extern void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] );
+extern void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] );
+extern void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] );
+extern void board_beep( BoardData *bd );
+extern void Confirm( BoardData *bd );
+extern int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] );
+extern int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] );
+extern int update_move(BoardData *bd);
+extern gboolean place_chequer_or_revert(BoardData *bd, int dest);
+extern gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] );
+extern void InitBoardData();
 
 extern void
 DrawDie( GdkDrawable *pd, 
@@ -252,3 +268,4 @@ extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
 #endif /* __cplusplus */
 
 #endif
+;

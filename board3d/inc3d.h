@@ -32,11 +32,7 @@
 #else
 	#define USE_GLUT
 
-//#define _RENDER_H_
 #define AlphaBlend ab
-#define _BEAROFF_H_
-typedef struct _bearoffcontext { int a;
-} bearoffcontext;
 
 	/* Comment out next line to switch test harness off */
 	#define TEST
@@ -128,13 +124,12 @@ float randRange(float range);
 void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromPoint, int fromDepth, int toPoint, int toDepth);
 int movePath(Path* p, float d, float* pRotate, float v[3]);
 int finishedPath(Path* p);
-void SetSkin(BoardData *bd, int num);
-void updatePieceOccPos(BoardData* bd);
 void updateHingeOccPos(BoardData* bd);
-void SetShadowDimness(BoardData* bd, int percent);
 double get_time();
 void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(BoardData* bd);
+void updateDiceOccPos(BoardData *bd);
+void setDicePos(BoardData* bd);
 
 typedef int idleFunc(void);
 
