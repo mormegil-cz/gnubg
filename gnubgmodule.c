@@ -513,6 +513,17 @@ METPre( float aar[ MAXSCORE ][ MAXSCORE ], const int n ) {
 }
 
 
+static PyObject *
+PythonNextTurn( PyObject *self IGNORE, PyObject *args ) {
+
+  fNextTurn = TRUE;
+  while( fNextTurn ) {
+    NextTurn( TRUE );
+  }
+
+  return Py_None;
+
+}
 
 
 static PyObject *
@@ -1235,9 +1246,10 @@ PyGameStats(const statcontext* sc)
     int side;
     for(side = 0; side < 2; ++side) {
       PyObject* d =
-	Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i"
+	Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i"
 		      "s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
 		      "total-cube",sc->anTotalCube[side],
+                      "close-cube", sc->anCloseCube[side],
 		      "n-doubles",sc->anDouble[side],
 		      "n-takes", sc->anTake[side],
 		      "n-drops", sc->anPass[side],
@@ -1287,9 +1299,11 @@ PyGameStats(const statcontext* sc)
     int side;
     for(side = 0; side < 2; ++side) {
       PyObject* d =
-	Py_BuildValue("{s:f,s:f}",
+	Py_BuildValue("{s:f,s:f,s:f,s:f}",
 		      "luck", sc->arLuck[side][0],
-		      "luck-cost", sc->arLuck[side][1]);
+		      "luck-cost", sc->arLuck[side][1], 
+                      "actual-result", sc->arActualResult[side],
+                      "luck-adjusted-result", sc->arLuckAdj[side]);
     
       PyObject* m = PyDict_New();
 
@@ -1923,6 +1937,7 @@ PyMethodDef gnubgMethods[] = {
     "Get the current match" },
   { "navigate", (PyCFunction)PythonNavigate, METH_VARARGS|METH_KEYWORDS,
     "" },
+  { "nextturn", (PyCFunction) PythonNextTurn, METH_VARARGS, "" },
   { NULL, NULL, 0, NULL }
 
 };
