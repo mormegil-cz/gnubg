@@ -1,3 +1,8 @@
+Wed Nov 27 20:36:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtktheory.c: show the match equity table being used.
+	(suggested by Ian Shaw)
+
 Wed Nov 27 17:44:30 2002 GMT jsegrave <jsegrave@jes2.demon.nl>
 
 	* minor changes to suppress compiler warnings to

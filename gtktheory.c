@@ -37,6 +37,7 @@
 #include "eval.h"
 #include "gtkgame.h"
 #include "i18n.h"
+#include "matchequity.h"
 
 typedef struct _theorywidget {
 
@@ -539,7 +540,7 @@ GTKShowTheory ( const int fActivePage ) {
   GtkWidget *pwTable;
   GtkWidget *pwAlign;
   
-  GtkWidget *pw, *pwx;
+  GtkWidget *pw, *pwx, *pwz;
 
   int i, j, k;
   char sz[ 256 ];
@@ -672,7 +673,29 @@ GTKShowTheory ( const int fActivePage ) {
     j *= 2;
 
   }
+
+  /* match equity table */
+
+  pwFrame = gtk_frame_new ( _("Match equity table" ) );
+  gtk_container_add ( GTK_CONTAINER ( pw ), pwFrame );
+
+  pwx = gtk_vbox_new ( FALSE, 4 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwx );
+
+  gtk_box_pack_start( GTK_BOX( pwx ), pwz = gtk_label_new( miCurrent.szName ),
+                      FALSE, FALSE, 0 );
+  gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
+  gtk_box_pack_start( GTK_BOX( pwx ),
+                      pwz = gtk_label_new( miCurrent.szFileName ),
+                      FALSE, FALSE, 0 );
+  gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
+  gtk_box_pack_start( GTK_BOX( pwx ),
+                      pwz = gtk_label_new( miCurrent.szDescription ),
+                      FALSE, FALSE, 0 );
+  gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
   
+
+  /* money play widhget */
 
   ptw->apwFrame[ 1 ] = gtk_frame_new ( _("Money play") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 1 ], FALSE, FALSE, 0 );
