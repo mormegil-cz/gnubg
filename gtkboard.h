@@ -26,8 +26,7 @@
 #include "backgammon.h"
 
 #if USE_BOARD3D
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "board3d/glincl.h"
 #include "board3d/mylist.h"
 #endif
 
