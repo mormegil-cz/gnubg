@@ -383,6 +383,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
+        FixMatchState ( &msExport, pmr );
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
             fputs ( "\\noindent{\\Large ", pf );

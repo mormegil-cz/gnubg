@@ -733,6 +733,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
+        FixMatchState ( &msExport, pmr );
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
 	    Ensure( pf, 26 );
