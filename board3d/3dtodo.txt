@@ -1,6 +1,4 @@
 
-* Settings not getting applied correctly on startup (gtk 2)
-
 Todo
 ====
 

@@ -42,7 +42,10 @@
          cube=#D7D7D7
          points0=#FF5F5F;0.20
          points1=#BFBFBF;0.20
-         piecetype=0
+		piecetype=0
+		lighttype=p
+		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
+		lightambient=50 lightdiffuse=70 lightspecular=100
 		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
 		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
 		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
@@ -85,7 +88,10 @@
          cube=#D6D6C6
          points0=#4CA57F;0.09 
          points1=#4C4C4C;0.20
-         piecetype=1
+		piecetype=1
+		lighttype=p
+		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
+		lightambient=50 lightdiffuse=70 lightspecular=100
 		chequers3d0=#FFA5A5;#F2A5A5;#EFB651;61;95;checker.bmp
 		chequers3d1=#CC7FCC;#B074C1;#733F96;65;100;checker.bmp
 		dice3d0=#DA7F29;#F2A5A5;#EFB651;69;95
@@ -128,6 +134,9 @@
          points0=#CC7F00;0.09 
          points1=#7F3F00;0.20
 		piecetype=0
+		lighttype=p
+		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
+		lightambient=50 lightdiffuse=70 lightspecular=100
 		chequers3d0=#FFCE70;#DBE287;#EFB651;51;95;checker2.bmp
 		chequers3d1=#9E6600;#845900;#96412B;49;100;checker2.bmp
 		dice3d0=#337F32;#308420;#9AEF6E;51;60
@@ -170,7 +179,10 @@
          cube=#D3D3C3 
          points0=#980000;0.09 
          points1=#000072;0.20      
-         piecetype=0
+		piecetype=0
+		lighttype=p
+		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
+		lightambient=50 lightdiffuse=70 lightspecular=100
 		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
 		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
 		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
