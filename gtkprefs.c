@@ -204,26 +204,28 @@ extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
 
     BoardData *bd = BOARD( pwBoard )->board_data;
 
-    board_free_pixmaps( bd );
+    if( GTK_WIDGET_REALIZED( pwBoard ) )
+	board_free_pixmaps( bd );
 }
 
 extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
     
     BoardData *bd = BOARD( pwBoard )->board_data;
     
-    board_create_pixmaps( pwBoard, bd );
+    if( GTK_WIDGET_REALIZED( pwBoard ) ) {
+	board_create_pixmaps( pwBoard, bd );
     
-    gtk_widget_queue_draw( bd->drawing_area );
-    gtk_widget_queue_draw( bd->dice_area );
-    gtk_widget_queue_draw( bd->table );
+	gtk_widget_queue_draw( bd->drawing_area );
+	gtk_widget_queue_draw( bd->dice_area );
+	gtk_widget_queue_draw( bd->table );
+    }
 }
 
 static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
     int i;
     gdouble ar[ 4 ];
-
-    BoardPreferencesStart( bd->widget );
+    char sz[ 256 ];
     
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
@@ -263,9 +265,10 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     
     bd->translucent = fTranslucent;
 
-    BoardPreferencesDone( bd->widget );
-			   
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+    BoardPreferencesCommand( bd->widget, sz );
+    UserCommand( sz );
 }
 
 extern void BoardPreferences( GtkWidget *pwBoard ) {
@@ -344,6 +347,62 @@ static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
     return -1;
 }
 
+/* Set colour, alpha, refraction, shine, specular. */
+static int SetColourARSS( BoardData *bd, char *sz, int i ) {
+
+    char *pch;
+    GdkColor col;
+
+    if( ( pch = strchr( sz, ';' ) ) )
+	*pch++ = 0;
+
+    if( gdk_color_parse( sz, &col ) ) {
+	bd->aarColour[ i ][ 0 ] = col.red / 65535.0f;
+	bd->aarColour[ i ][ 1 ] = col.green / 65535.0f;
+	bd->aarColour[ i ][ 2 ] = col.blue / 65535.0f;
+
+	if( pch ) {
+	    /* alpha */
+	    bd->aarColour[ i ][ 3 ] = atof( pch );
+
+	    if( ( pch = strchr( pch, ';' ) ) )
+		*pch++ = 0;
+	} else
+	    bd->aarColour[ i ][ 3 ] = 1.0f; /* opaque */
+
+	if( pch ) {
+	    /* refraction */
+	    bd->arRefraction[ i ] = atof( pch );
+	    
+	    if( ( pch = strchr( pch, ';' ) ) )
+		*pch++ = 0;
+	} else
+	    bd->arRefraction[ i ] = 1.5f;
+
+	if( pch ) {
+	    /* shine */
+	    bd->arCoefficient[ i ] = atof( pch );
+	    
+	    if( ( pch = strchr( pch, ';' ) ) )
+		*pch++ = 0;
+	} else
+	    bd->arCoefficient[ i ] = 0.5f;
+
+	if( pch ) {
+	    /* specular */
+	    bd->arExponent[ i ] = atof( pch );
+	    
+	    if( ( pch = strchr( pch, ';' ) ) )
+		*pch++ = 0;
+	} else
+	    bd->arExponent[ i ] = 10.0f;	
+
+	return 0;
+    }
+
+    return -1;
+}
+
 extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 				   char *szValue ) {
 
@@ -386,10 +445,11 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     } else if( c > 1 &&
 	       ( !g_strncasecmp( szParam, "chequers", c - 1 ) ||
 		 !g_strncasecmp( szParam, "checkers", c - 1 ) ) &&
-	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) ) {
-	/* FIXME set chequers=colour;alpha;refrac;shine;spec */
-    } else if( c > 1 && !g_strncasecmp( szParam, "points", c - 1 ) &&
 	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
+	/* chequers=colour;alpha;refrac;shine;spec */
+	fValueError = SetColourARSS( bd, szValue, szParam[ c - 1 ] - '0' );
+    else if( c > 1 && !g_strncasecmp( szParam, "points", c - 1 ) &&
+	     ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
 	/* pointsn=colour;speckle */
 	fValueError = SetColourSpeckle( szValue,
 					bd->aanBoardColour[
@@ -402,4 +462,43 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     if( fValueError )
 	outputf( "`%s' is not a legal value for parameter `%s'.\n", szValue,
 		 szParam );
+}
+
+extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
+
+    BoardData *bd = BOARD( pwBoard )->board_data;
+    float rAzimuth, rElevation;
+    
+    rElevation = asinf( bd->arLight[ 2 ] ) * 180 / M_PI;
+    rAzimuth = acosf( bd->arLight[ 0 ] / sqrt( 1.0 - bd->arLight[ 2 ] *
+					       bd->arLight[ 2 ] ) ) *
+	180 / M_PI;
+    if( bd->arLight[ 1 ] < 0 )
+	rAzimuth = 360 - rAzimuth;
+    
+    sprintf( sz, "set colours board=rgb:%02X/%02X/%02X;%0.2f translucent=%c "
+	     "light=%0.0f;%0.0f "
+	     "chequers0=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
+	     "chequers1=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
+	     "points0=rgb:%02X/%02X/%02X;%0.2f "
+	     "points1=rgb:%02X/%02X/%02X;%0.2f",
+	     bd->aanBoardColour[ 0 ][ 0 ], bd->aanBoardColour[ 0 ][ 1 ], 
+	     bd->aanBoardColour[ 0 ][ 2 ], bd->aSpeckle[ 0 ] / 128.0f,
+	     bd->translucent ? 'y' : 'n', rAzimuth, rElevation,
+	     (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
+	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 
+	     (int) ( bd->aarColour[ 0 ][ 2 ] * 0xFF ), bd->aarColour[ 0 ][ 3 ],
+	     bd->arRefraction[ 0 ], bd->arCoefficient[ 0 ],
+	     bd->arExponent[ 0 ],
+	     (int) ( bd->aarColour[ 1 ][ 0 ] * 0xFF ),
+	     (int) ( bd->aarColour[ 1 ][ 1 ] * 0xFF ), 
+	     (int) ( bd->aarColour[ 1 ][ 2 ] * 0xFF ), bd->aarColour[ 1 ][ 3 ],
+	     bd->arRefraction[ 1 ], bd->arCoefficient[ 1 ],
+	     bd->arExponent[ 1 ],
+	     bd->aanBoardColour[ 2 ][ 0 ], bd->aanBoardColour[ 2 ][ 1 ], 
+	     bd->aanBoardColour[ 2 ][ 2 ], bd->aSpeckle[ 2 ] / 128.0f,
+	     bd->aanBoardColour[ 3 ][ 0 ], bd->aanBoardColour[ 3 ][ 1 ], 
+	     bd->aanBoardColour[ 3 ][ 2 ], bd->aSpeckle[ 3 ] / 128.0f );
+
+    return sz;
 }
