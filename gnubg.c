@@ -116,10 +116,10 @@ player ap[ 2 ] = {
 static command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
       NULL },
-    { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
-      "for future training", NULL },
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
       "self-play", NULL },
+    { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
+      "for future training", NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL },
     { NULL, NULL, NULL, NULL }
@@ -131,7 +131,7 @@ static command acDatabase[] = {
     { "session", CommandNewSession, "Start a new (money) session", NULL },
     { NULL, NULL, NULL, NULL }
 }, acSave[] = {
-    { "game", CommandNotImplemented, "Record a log of the game so far to a "
+    { "game", CommandSaveGame, "Record a log of the game so far to a "
       "file", NULL },
     { "match", CommandSaveMatch, "Record a log of the match so far to a file",
       NULL },
@@ -229,26 +229,34 @@ static command acDatabase[] = {
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
     { "cache", CommandShowCache, "Display statistics on the evaluation "
       "cache", NULL },
+    { "confirm", CommandShowConfirm, "Show whether confirmation is required "
+      "before aborting a game in progress", NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
-    /* FIXME show cube */
     { "crawford", CommandShowCrawford, 
       "See if this is the Crawford game", NULL },
+    { "cube", CommandShowCube, "Display the current cube value and owner",
+      NULL },
     { "delay", CommandShowDelay, "See what the current delay setting is", 
               NULL },
     { "dice", CommandShowDice, "See what the current dice roll is", NULL },
-    /* FIXME show display */
+    { "display", CommandShowDisplay, "Show whether the board will be updated "
+      "on the computer's turn", NULL },
     { "evaluation", CommandShowEvaluation, "Display evaluation settings "
       "and statistics", NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL },
     { "kleinman", CommandShowKleinman, "Calculate Kleinman count at "
       "current position", NULL },
+    { "nackgammon", CommandShowNackgammon, "Display which starting position "
+      "will be used", NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL },
     { "postcrawford", CommandShowCrawford, 
       "See if this is post-Crawford play", NULL },
+    { "prompt", CommandShowPrompt, "Show the prompt that will be printed "
+      "when ready for commands", NULL },
     { "rng", CommandShowRNG, "Display which random number generator "
       "is being used", NULL },
     { "rollout", CommandShowRollout, "Display the evaluation settings used "
@@ -1013,11 +1021,15 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
     char sz[ 40 ];
     int i = 0, n, nCube = 1, anBoard[ 2 ][ 25 ];
 
-    fprintf( pf, " Game %d\n", iGame + 1 );
-    
-    sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
-    fprintf( pf, " %-33s%s : %d\n", sz, ap[ 1 ].szName, anScore[ 1 ] );
+    if( iGame >= 0 )
+	fprintf( pf, " Game %d\n", iGame + 1 );
 
+    if( anScore ) {
+	sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
+	fprintf( pf, " %-31s%s : %d\n", sz, ap[ 1 ].szName, anScore[ 1 ] );
+    } else
+	fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
+    
     InitBoard( anBoard );
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
@@ -1070,6 +1082,28 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 extern void CommandLoad( char *sz ) {
 
     puts( "Loading is not yet implemented." );
+}
+
+extern void CommandSaveGame( char *sz ) {
+    
+    FILE *pf;
+    
+    if( !sz || !*sz ) {
+	puts( "You must specify a file to save to (see `help save game')." );
+	return;
+    }
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	perror( sz );
+	return;
+    }
+
+    SaveGame( pf, plGame, -1, NULL );
+    
+    if( pf != stdout )
+	fclose( pf );
 }
 
 extern void CommandSaveMatch( char *sz ) {
@@ -1667,6 +1701,8 @@ static void usage( char *argv0 ) {
     printf(
 "Usage: %s [options]\n"
 "Options:\n"
+"  -d DIR, --datadir DIR     Read database and weight files from direcotry "
+"DIR\n"
 "  -h, --help                Display usage and exit\n"
 "  -n, --no-weights          Do not load existing neural net weights\n"
 #if !X_DISPLAY_MISSING
