@@ -1,3 +1,7 @@
+Sat Apr 20 15:51:49 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c (GTKShowMatchEquityTable): Add button to invert table.
+
 Sat Apr 20 12:34:13 2002  Jørn Thyssen  <jthyssen@dk.ibm.cm>
 
 	* analysis.c (updateStatisticsMatch, updateStatisticsGame,
