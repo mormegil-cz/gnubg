@@ -44,6 +44,9 @@ extern void GTKSetGame( int i );
 
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( void );
+extern void GTKAllowStdin( void );
+extern void GTKDisallowStdin( void );
+extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle );
 
 extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,

@@ -143,6 +143,26 @@ static inline guchar clamp( gint n ) {
 	return n;
 }
 
+static void board_label_chequers( GtkWidget *board, BoardData *bd,
+				  int x, int y, int c ) {
+    int cx, cy0, cy1;
+    char sz[ 3 ];
+	
+    gtk_draw_box( board->style, board->window, GTK_STATE_NORMAL,
+		  GTK_SHADOW_OUT, x + bd->board_size, y + bd->board_size,
+		  4 * bd->board_size, 4 * bd->board_size );
+
+    /* FIXME it would be nice to scale the font to the board size, but
+       that's too much work. */
+	
+    sprintf( sz, "%d", c );
+    gdk_string_extents( board->style->font, sz, NULL, NULL, &cx, &cy0, &cy1 );
+	
+    gtk_draw_string( board->style, board->window, GTK_STATE_NORMAL,
+		     x + 3 * bd->board_size - cx / 2,
+		     y + 3 * bd->board_size + cy0 / 2 - cy1, sz );
+}
+
 static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
 				      int n ) {
     int i, x, y, cx, cy, xpix, ypix, invert, y_chequer, c_chequer, i_chequer,
@@ -223,27 +243,19 @@ static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
 				   + 2 ] );
 	    }
 
-	/* If there are too many chequers to fit on the point, other
-	   chequers might overlap this one; copy the image onto rgb_under
-	   so that things layered over us will work. */
-	if( abs( bd->points[ n ] ) > c_chequer )
-	    memcpy( rgb_under[ y_chequer ][ 0 ], rgb[ y_chequer ][ 0 ],
-		    6 * bd->board_size * 6 * bd->board_size * 3 );
+	if( ++i_chequer == c_chequer )
+	    break;
 	
 	y_chequer -= bd->board_size * positions[ n ][ 2 ];
-
-	if( ++i_chequer == c_chequer ) {
-	    i_chequer = 0;
-	    c_chequer--;
-	    
-	    y_chequer = invert ? cy + ( 3 * c_chequer - 21 ) * bd->board_size :
-		( 15 - 3 * c_chequer ) * bd->board_size;
-	}
     }
 
     gdk_draw_rgb_image( board->window, bd->gc_copy, x, y, cx, cy,
 			GDK_RGB_DITHER_MAX, rgb[ 0 ][ 0 ],
 			6 * bd->board_size * 3 );
+
+    if( abs( bd->points[ n ] ) > c_chequer )
+	board_label_chequers( board, bd, x, y + y_chequer,
+			      abs( bd->points[ n ] ) );
 }
 
 static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
@@ -293,21 +305,20 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
 			 bd->pm_o : bd->pm_x, 0, 0, 0, y_chequer,
 			 6 * bd->board_size, 6 * bd->board_size );
 	
-	y_chequer -= bd->board_size * positions[ n ][ 2 ];
+	if( ++i_chequer == c_chequer )
+	    break;
 
-	if( ++i_chequer == c_chequer ) {
-	    i_chequer = 0;
-	    c_chequer--;
-	    
-	    y_chequer = invert ? cy + ( 3 * c_chequer - 21 ) * bd->board_size :
-		( 15 - 3 * c_chequer ) * bd->board_size;
-	}
+	y_chequer -= bd->board_size * positions[ n ][ 2 ];
     }
 
     gdk_gc_set_clip_mask( bd->gc_copy, NULL );
     
     gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_point, 0, 0, x, y,
 		     cx, cy );
+    
+    if( abs( bd->points[ n ] ) > c_chequer )
+	board_label_chequers( board, bd, x, y + y_chequer,
+			      abs( bd->points[ n ] ) );
 }
 
 static void board_redraw_die( GtkWidget *board, BoardData *bd, gint x, gint y,
@@ -604,30 +615,36 @@ static void update_move( BoardData *bd ) {
     char *move = "Illegal move", move_buf[ 40 ];
     gint i, points[ 2 ][ 25 ];
     guchar key[ 10 ];
-
+    int fIncomplete = TRUE;
+    
     read_board( bd, points );
     update_position_id( bd, points );
 
     bd->valid_move = NULL;
     
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
 	move = "(Editing)";
-    else if( EqualBoards( points, bd->old_board ) )
+	fIncomplete = FALSE;
+    } else if( EqualBoards( points, bd->old_board ) ) {
         /* no move has been made */
 	move = NULL;
-    else {
+	fIncomplete = FALSE;
+    } else {
         PositionKey( points, key );
 
         for( i = 0; i < bd->move_list.cMoves; i++ )
             if( EqualKeys( bd->move_list.amMoves[ i ].auch, key ) ) {
-                /* FIXME do something different if the move is complete */
                 bd->valid_move = bd->move_list.amMoves + i;
+		fIncomplete = bd->valid_move->cMoves < bd->move_list.cMaxMoves
+		    || bd->valid_move->cPips < bd->move_list.cMaxPips;
                 FormatMove( move = move_buf, bd->old_board,
 			    bd->valid_move->anMove );
                 break;
             }
     }
 
+    gtk_widget_set_state( bd->move, fIncomplete ? GTK_STATE_ACTIVE :
+			  GTK_STATE_NORMAL );
     gtk_label_set_text( GTK_LABEL( bd->move ), move );
 }
 
@@ -1297,7 +1314,10 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
 				  bd->crawford_game );
-    
+    gtk_widget_set_sensitive( bd->crawford, bd->match_to > 1 &&
+			      ( bd->score == bd->match_to - 1 ||
+				bd->score_opponent == bd->match_to - 1 ) );
+				  
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
     update_move( bd );
@@ -1451,6 +1471,15 @@ extern gint game_set_old_dice( Board *board, gint die0, gint die1 ) {
     return 0;
 }
 
+extern void board_set_playing( Board *board, gboolean f ) {
+
+    BoardData *pbd = board->board_data;
+
+    gtk_widget_set_sensitive( pbd->position_id, f );
+    gtk_widget_set_sensitive( pbd->reset, f );
+    gtk_widget_set_sensitive( pbd->edit, f );
+}
+
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 ) {
@@ -1520,6 +1549,8 @@ extern void board_free_pixmaps( BoardData *bd ) {
     gdk_pixmap_unref( bd->pm_cube );
     gdk_bitmap_unref( bd->bm_dice_mask );
     gdk_bitmap_unref( bd->bm_cube_mask );
+
+    gdk_font_unref( bd->cube_font );
 }
 
 static void board_draw_border( GdkPixmap *pm, GdkGC *gc, int x0, int y0,
@@ -1552,6 +1583,53 @@ static void board_draw_border( GdkPixmap *pm, GdkGC *gc, int x0, int y0,
 	points[ 1 ].y = ++points[ 2 ].y;
 	points[ 0 ].y = points[ 3 ].y = --points[ 4 ].y;
     }
+}
+
+static void board_draw_labels( BoardData *bd ) {
+
+    int i;
+    GdkGC *gc;
+    GdkGCValues gcv;
+    char sz[ 64 ];
+    int cx, cy0, cy1;
+    
+    gcv.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0xFFFFFF );
+
+    for( i = bd->board_size * 2; i; i-- ) {
+	sprintf( sz, "-*-helvetica-medium-r-normal-*-%d-*-*-*-p-*-"
+		 "iso8859-1", i );
+	if( ( gcv.font = gdk_font_load( sz ) ) )
+	    break;
+    }
+
+    if( !gcv.font ) {
+	for( i = bd->board_size * 2; i; i-- ) {
+	    sprintf( sz, "-bitstream-charter-medium-r-normal--%d-*-*-*-p-*-"
+		     "iso8859-1", i );
+	    if( ( gcv.font = gdk_font_load( sz ) ) )
+		break;
+	}
+
+	if( !gcv.font )
+	    return;
+    }
+
+    gc = gdk_gc_new_with_values( bd->pm_board, &gcv,
+				 GDK_GC_FOREGROUND | GDK_GC_FONT );
+    
+    for( i = 1; i <= 24; i++ ) {
+	sprintf( sz, "%d", i );
+
+	gdk_string_extents( gcv.font, sz, NULL, NULL, &cx, &cy0, &cy1 );
+	
+	gdk_draw_string( bd->pm_board, gcv.font, gc,
+			 ( positions[ i ][ 0 ] + 3 ) * bd->board_size - cx / 2,
+			 ( ( i > 12 ? 3 : 141 ) * bd->board_size + cy0 ) / 2 -
+			 cy1, sz );
+    }
+
+    gdk_gc_unref( gc );
+    gdk_font_unref( gcv.font );
 }
 
 static guchar board_pixel( BoardData *bd, int i, int antialias, int j ) {
@@ -1634,6 +1712,9 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 		       bd->board_size, colours, 1 );
     board_draw_border( bd->pm_board, gc, 59, 2, 97, 70,
 		       bd->board_size, colours, 1 );
+
+    if( bd->labels )
+	board_draw_labels( bd );
     
     /* FIXME shade hinges */
     
@@ -2568,22 +2649,24 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 	    for( x = 0; x < 20; x++ ) {
 		if( x < 2 || x >= 18 || y < 2 || y >= 18 ) {
 		    aaauch[ y ][ x ][ 0 ] =
-			bd->rgb_empty[ ( y * bd->board_size + x ) * 3 ];
+			bd->rgb_empty[ ( y * bd->board_size * 6 + x ) * 3 ];
 		    aaauch[ y ][ x ][ 1 ] =
-			bd->rgb_empty[ ( y * bd->board_size + x ) * 3 + 1 ];
+			bd->rgb_empty[ ( y * bd->board_size * 6 + x ) * 3 +
+				     1 ];
 		    aaauch[ y ][ x ][ 2 ] =
-			bd->rgb_empty[ ( y * bd->board_size + x ) * 3 + 2 ];
+			bd->rgb_empty[ ( y * bd->board_size * 6 + x ) * 3 +
+				     2 ];
 		} else {
 		    aaauch[ y ][ x ][ 0 ] = clamp(
-			( ( bd->rgb_empty[ ( y * bd->board_size + x ) *
+			( ( bd->rgb_empty[ ( y * bd->board_size * 6 + x ) *
 					 3 ] * (int) p[ 3 ] ) >> 8 ) +
 			p[ 0 ] );
 		    aaauch[ y ][ x ][ 1 ] = clamp(
-			( ( bd->rgb_empty[ ( y * bd->board_size + x ) *
+			( ( bd->rgb_empty[ ( y * bd->board_size * 6 + x ) *
 					 3 + 1 ] * (int) p[ 3 ] ) >> 8 ) +
 			p[ 1 ] );
 		    aaauch[ y ][ x ][ 2 ] = clamp(
-			( ( bd->rgb_empty[ ( y * bd->board_size + x ) *
+			( ( bd->rgb_empty[ ( y * bd->board_size * 6 + x ) *
 					 3 + 2 ] * (int) p[ 3 ] ) >> 8 ) +
 			p[ 2 ] );
 		    
@@ -2595,17 +2678,17 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 			    0, 0, 20, 20, GDK_RGB_DITHER_MAX,
 			    (guchar *) aaauch, 60 );
     } else {
-	/* FIXME draw board background instead of window_clear_area */
-	gdk_window_clear_area( pw->window, event->area.x, event->area.y,
-			       event->area.width, event->area.height );
-
+	gdk_draw_pixmap( pw->window, bd->gc_copy, bd->pm_board,
+			 3 * bd->board_size, 3 * bd->board_size, 0, 0,
+			 20, 20 );
+	
 	gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_key_mask );
-	gdk_gc_set_clip_origin( bd->gc_copy, 0, 0 );
+	gdk_gc_set_clip_origin( bd->gc_copy, 2, 2 );
 
 	gdk_draw_pixmap( pw->window, bd->gc_copy,
 			 *( (GdkPixmap **) gtk_object_get_user_data(
-			     GTK_OBJECT( pw ) ) ), 0, 0, 0, 0,
-			 20, 20 );
+			     GTK_OBJECT( pw ) ) ), 0, 0, 2, 2,
+			 16, 16 );
 	
 	gdk_gc_set_clip_mask( bd->gc_copy, NULL );
     }
@@ -2665,7 +2748,7 @@ static void board_init( Board *board ) {
     bd->all_moves = NULL;
 
     bd->translucent = TRUE;
-
+    bd->labels = FALSE;
     bd->arLight[ 0 ] = -0.5;
     bd->arLight[ 1 ] = 0.5;
     bd->arLight[ 2 ] = 0.707;
@@ -2723,7 +2806,8 @@ static void board_init( Board *board ) {
 
     gtk_container_add( GTK_CONTAINER( board ),
 		       bd->move = gtk_label_new( NULL ) );
-
+    gtk_widget_set_name( bd->move, "move" );
+    
     bd->dice_area = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
     gtk_widget_set_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |

@@ -49,6 +49,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 );
 extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
+extern void board_set_playing( Board *board, gboolean f );
     
 /* private data */
 typedef struct _BoardData {
@@ -64,7 +65,7 @@ typedef struct _BoardData {
 	*rgb_saved, *rgb_temp, *rgb_temp_saved, *rgb_bar;
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
-    gboolean translucent;
+    gboolean translucent, labels;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */

@@ -90,7 +90,6 @@ typedef enum _gnubgcommand {
     CMD_ROLL,
     CMD_ROLLOUT,
     CMD_SAVE_SETTINGS,
-    CMD_SAVE_WEIGHTS,
     CMD_SET_AUTO_BEAROFF,
     CMD_SET_AUTO_CRAWFORD,
     CMD_SET_AUTO_GAME,
@@ -116,6 +115,9 @@ typedef enum _gnubgcommand {
     CMD_SET_MET_WOOLSEY,
     CMD_SET_MET_ZADEH,
     CMD_SET_NACKGAMMON,
+    CMD_SET_OUTPUT_MATCHPC,
+    CMD_SET_OUTPUT_MWC,
+    CMD_SET_OUTPUT_WINPC,
     CMD_SET_RNG_ANSI,
     CMD_SET_RNG_BSD,
     CMD_SET_RNG_ISAAC,
@@ -155,6 +157,9 @@ static togglecommand atc[] = {
     { &fDisplay, CMD_SET_DISPLAY },
     { &fJacoby, CMD_SET_JACOBY },
     { &fNackgammon, CMD_SET_NACKGAMMON },
+    { &fOutputMatchPC, CMD_SET_OUTPUT_MATCHPC },
+    { &fOutputMWC, CMD_SET_OUTPUT_MWC },
+    { &fOutputWinPC, CMD_SET_OUTPUT_WINPC },
     { NULL }
 };
 
@@ -185,7 +190,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "roll",
     "rollout",
     "save settings",
-    "save weights",
     "set automatic bearoff",
     "set automatic crawford",
     "set automatic game",
@@ -211,6 +215,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set matchequitytable woolsey",
     "set matchequitytable zadeh",
     "set nackgammon",
+    "set output matchpc",
+    "set output mwc",
+    "set output winpc",
     "set rng ansi",
     "set rng bsd",
     "set rng isaac",
@@ -235,6 +242,7 @@ static char *aszCommands[ NUM_CMDS ] = {
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
+static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
@@ -242,6 +250,7 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
 static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
+static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAlpha( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
 static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
@@ -249,6 +258,7 @@ static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
 static void SetEval( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
+static void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 
@@ -268,7 +278,11 @@ static list lOutput;
 int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
 
-void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
+#ifndef HUGE_VALF
+#define HUGE_VALF (-1e38)
+#endif
+
+static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
     char sz[ 2048 ], *pch;
     
@@ -316,7 +330,7 @@ void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
 	Prompt();
 }
 
-void AllowStdin( void ) {
+extern void GTKAllowStdin( void ) {
 
     if( !fTTY || !nDisabledCount )
 	return;
@@ -326,7 +340,7 @@ void AllowStdin( void ) {
 				     StdinReadNotify, NULL, NULL, NULL );
 }
 
-void DisallowStdin( void ) {
+extern void GTKDisallowStdin( void ) {
 
     if( !fTTY )
 	return;
@@ -339,6 +353,16 @@ void DisallowStdin( void ) {
     }
 }
 
+extern void GTKDelay( void ) {
+
+    gtk_grab_add( pwGrab );
+    GTKDisallowStdin();
+    while( !fInterrupt && !gtk_main_iteration_do( TRUE ) )
+	;
+    GTKAllowStdin();
+    gtk_grab_remove( pwGrab );
+}
+
 extern void HandleXAction( void ) {
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
@@ -349,11 +373,10 @@ extern void HandleXAction( void ) {
 
     /* Grab events so that the board window knows this is a re-entrant
        call, and won't allow commands like roll, move or double. */
-    if( !gtk_grab_get_current() )
-	gtk_grab_add( pwGrab );
+    gtk_grab_add( pwGrab );
 
     /* Don't check stdin here; readline isn't ready yet. */
-    DisallowStdin();
+    GTKDisallowStdin();
     
     /* Process incoming X events.  It's important to handle all of them,
        because we won't get another SIGIO for events that are buffered
@@ -361,7 +384,7 @@ extern void HandleXAction( void ) {
     while( gtk_events_pending() )
 	gtk_main_iteration();
 
-    AllowStdin();
+    GTKAllowStdin();
 
     gtk_grab_remove( pwGrab );
 }
@@ -442,9 +465,9 @@ extern int GTKGetManualDice( int an[ 2 ] ) {
     
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     return an[ 0 ] ? 0 : -1;
 }
@@ -527,7 +550,8 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     UpdateSetting( &nCube );
     UpdateSetting( &fCubeOwner );
     UpdateSetting( &fTurn );
-
+    UpdateSetting( &gs );
+    
     ShowBoard();
 }
 
@@ -954,7 +978,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Save/_Game...", NULL, SaveGame, 0, NULL },
 	{ "/_File/_Save/_Match...", NULL, SaveMatch, 0, NULL },
 	{ "/_File/_Save/_Session...", NULL, NULL, 0, NULL },
-	{ "/_File/_Save/_Weights", NULL, Command, CMD_SAVE_WEIGHTS, NULL },
+	{ "/_File/_Save/_Weights...", NULL, SaveWeights, 0, NULL },
 	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_File/_Quit", "<control>Q", Command, CMD_QUIT, NULL },
 	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
@@ -962,6 +986,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Edit/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Edit/_Copy", "<control>C", NULL, 0, NULL },
 	{ "/_Edit/_Paste", "<control>V", NULL, 0, NULL },
+	{ "/_Edit/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Edit/_Enter command...", NULL, EnterCommand, 0, NULL },
 	{ "/_Game", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Roll", "<control>R", Command, CMD_ROLL, NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
@@ -994,8 +1020,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "/Game/Cube/Owner/Centred" },
 	{ "/_Game/_Cube/_Owner/1", NULL, Command, CMD_SET_CUBE_OWNER_1,
 	  "/Game/Cube/Owner/Centred" },
-	{ "/_Game/_Cube/_Use", NULL, Command, CMD_SET_CUBE_USE,
-	  "<CheckItem>" },
 	{ "/_Game/_Cube/_Value", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Cube/_Value/_1", NULL, Command, CMD_SET_CUBE_VALUE_1,
 	  "<RadioItem>" },
@@ -1082,6 +1106,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/_Dice generation/_Seed...", NULL, SetSeed, 0, NULL },
 	{ "/_Settings/Di_splay", NULL, Command, CMD_SET_DISPLAY,
 	  "<CheckItem>" },
+	{ "/_Settings/Doubling cube", NULL, Command, CMD_SET_CUBE_USE,
+	  "<CheckItem>" },
 	{ "/_Settings/_Evaluation...", NULL, SetEval, 0, NULL },
 	{ "/_Settings/_Jacoby rule", NULL, Command, CMD_SET_JACOBY,
 	  "<CheckItem>" },
@@ -1097,12 +1123,15 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/_Nackgammon", NULL, Command, CMD_SET_NACKGAMMON,
 	  "<CheckItem>" },
 	{ "/_Settings/_Output", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Output/_Equity as MWC", NULL, NULL, 0, NULL },
-	{ "/_Settings/_Output/_GWC as percentage", NULL, NULL, 0, NULL },
-	{ "/_Settings/_Output/_MWC as percentage", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Output/_Match equity as MWC", NULL, Command,
+	  CMD_SET_OUTPUT_MWC, "<CheckItem>" },
+	{ "/_Settings/_Output/_GWC as percentage", NULL, Command,
+	  CMD_SET_OUTPUT_WINPC, "<CheckItem>" },
+	{ "/_Settings/_Output/_MWC as percentage", NULL, Command,
+	  CMD_SET_OUTPUT_MATCHPC, "<CheckItem>" },
 	{ "/_Settings/_Players...", NULL, SetPlayers, 0, NULL },
 	{ "/_Settings/Prompt...", NULL, NULL, 0, NULL },
-	{ "/_Settings/_Rollouts...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Rollouts...", NULL, SetRollouts, 0, NULL },
 	{ "/_Settings/_Training", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Training/_Learning rate...", NULL, SetAlpha, 0, NULL },
 	{ "/_Settings/_Training/_Annealing rate...", NULL, SetAnneal, 0,
@@ -1122,7 +1151,16 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Help/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Help/_About gnubg", NULL, NULL, 0, NULL }
     };
+    char sz[ PATH_MAX ], *pch = getenv( "HOME" );
 
+    sprintf( sz, "%s/.gnubg.gtkrc", pch ? pch : "" );
+    if( !access( sz, R_OK ) )
+	gtk_rc_add_default_file( sz );
+    else if( !access( PKGDATADIR "/gnubg.gtkrc", R_OK ) )
+	gtk_rc_add_default_file( PKGDATADIR "/gnubg.gtkrc" );
+    else
+	gtk_rc_add_default_file( "gnubg.gtkrc" );
+    
     if( !gtk_init_check( argc, argv ) )
 	return FALSE;
     
@@ -1147,7 +1185,30 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_box_pack_start( GTK_BOX( pwVbox ),
 			gtk_item_factory_get_widget( pif, "<main>" ),
 			FALSE, FALSE, 0 );
-		       
+
+#if !HAVE_LIBGDBM
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	pif, CMD_DATABASE_DUMP ), FALSE );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	pif, CMD_DATABASE_GENERATE ), FALSE );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	pif, CMD_DATABASE_ROLLOUT ), FALSE );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	pif, CMD_TRAIN_DATABASE ), FALSE );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	pif, "/Train/Import database..." ), FALSE );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	pif, "/Train/Export database..." ), FALSE );
+#endif
+
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	pif, "/Windows/Annotation" ), FALSE );
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	pif, "/Windows/Guile" ), FALSE );
+
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	pif, "/Help/About gnubg" ), FALSE );
+    
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
     pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stop;
     
@@ -1189,10 +1250,11 @@ extern void RunGTK( void ) {
     GTKSet( ap );
     GTKSet( &fTurn );
     GTKSet( &metCurrent );
+    GTKSet( &gs );
     
     ShowBoard();
 
-    AllowStdin();
+    GTKAllowStdin();
     
     if( fTTY ) {
 #ifdef ConnectionNumber /* FIXME use configure somehow to detect this */
@@ -1364,9 +1426,9 @@ static int Message( char *sz, int fQuestion ) {
     if( ( fRestoreNextTurn = nNextTurn ) )
 	gtk_idle_remove( nNextTurn );
 	    
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     if( fRestoreNextTurn )
 	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
@@ -1438,11 +1500,11 @@ extern void GTKOutputNew( void ) {
     while( !fFinishedPopping );
 }
 
-static GtkWidget *pwNumber;
+static GtkWidget *pwEntry;
 
 static void NumberOK( GtkWidget *pw, int *pf ) {
 
-    *pf = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( pwNumber ) );
+    *pf = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( pwEntry ) );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
@@ -1457,35 +1519,77 @@ static int ReadNumber( char *szTitle, char *szPrompt, int nDefault,
 					GTK_SIGNAL_FUNC( NumberOK ), &n ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
-    pwNumber = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), nInc, 0 );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwNumber ), TRUE );
+    pwEntry = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), nInc, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwEntry ), TRUE );
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwPrompt );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwNumber );
+		       pwEntry );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gtk_signal_connect_after( GTK_OBJECT( pwNumber ), "activate",
+    gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
 			GTK_SIGNAL_FUNC( NumberOK ), &n );
     
+    gtk_widget_grab_focus( pwEntry );
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     return n;
 }
 
+static void StringOK( GtkWidget *pw, char **ppch ) {
+
+    *ppch = gtk_editable_get_chars( GTK_EDITABLE( pwEntry ), 0, -1 );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static char *ReadString( char *szTitle, char *szPrompt, char *szDefault ) {
+
+    char *sz = NULL;
+    GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
+					GTK_SIGNAL_FUNC( StringOK ), &sz ),
+	*pwPrompt = gtk_label_new( szPrompt );
+
+    pwEntry = gtk_entry_new();
+    gtk_entry_set_text( GTK_ENTRY( pwEntry ), szDefault );
+
+    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwPrompt );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwEntry );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
+			GTK_SIGNAL_FUNC( StringOK ), &sz );
+
+    gtk_widget_grab_focus( pwEntry );
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    return sz;
+}
+
 static void RealOK( GtkWidget *pw, float *pr ) {
 
-    *pr = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON( pwNumber ) );
+    *pr = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON( pwEntry ) );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
@@ -1500,30 +1604,42 @@ static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
 					GTK_SIGNAL_FUNC( RealOK ), &r ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
-    pwNumber = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), rInc, 0 );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwNumber ), TRUE );
+    pwEntry = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), rInc, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwEntry ), TRUE );
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwPrompt );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwNumber );
+		       pwEntry );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gtk_signal_connect_after( GTK_OBJECT( pwNumber ), "activate",
+    gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
 			GTK_SIGNAL_FUNC( RealOK ), &r );
     
+    gtk_widget_grab_focus( pwEntry );
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     return r;
+}
+
+static void EnterCommand( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch = ReadString( "GNU Backgammon - Enter command", FormatPrompt(),
+			    "" );
+
+    if( pch ) {
+	UserCommand( pch );
+	g_free( pch );
+    }
 }
 
 static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
@@ -1675,9 +1791,9 @@ static char *SelectFile( char *szTitle ) {
     
     gtk_widget_show( pw );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     return pch;
 }
@@ -1687,8 +1803,16 @@ static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Open commands" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandLoadCommands( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "load commands %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
@@ -1698,8 +1822,16 @@ static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Open game" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandLoadGame( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "load game %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
@@ -1709,8 +1841,16 @@ static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Open match" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandLoadMatch( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "load match %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
@@ -1726,8 +1866,16 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
     }
     
     if( ( pch = SelectFile( "Save game" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandSaveGame( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "save game %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
@@ -1745,8 +1893,35 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
     /* FIXME what if nMatch == 0? */
     
     if( ( pch = SelectFile( "Save match" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandSaveMatch( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "save match %s", pch );
+	UserCommand( sz );
+
+	g_free( pch );
+    }
+}
+
+static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( ( pch = SelectFile( "Save weights" ) ) ) {
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "save weights %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
@@ -1756,8 +1931,16 @@ static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Export database" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandDatabaseExport( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "database export %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
@@ -1767,16 +1950,23 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Import database" ) ) ) {
-	/* FIXME use UserCommand, so it's entered in the history */
-	CommandDatabaseImport( pch );
+#if __GNUC__
+	char sz[ strlen( pch ) + 32 ];
+#elif HAVE_ALLOCA
+	char *sz = alloca( strlen( pch ) + 32 );
+#else
+	char sz[ 1024 ];
+#endif
+	sprintf( sz, "database export %s", pch );
+	UserCommand( sz );
+
 	g_free( pch );
     }
 }
 
 typedef struct _evalwidget {
     evalcontext *pec;
-    GtkWidget *pwPlies, *pwSearchCandidates, *pwSearchTolerance, *pwReduced,
-	*pwCubeful;
+    GtkWidget *pwCubeful;
     GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
 	*padjReduced;
     int *pfOK;
@@ -1826,7 +2016,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 
     gtk_container_add( GTK_CONTAINER( pwEval ),
 		       pew->pwCubeful = gtk_check_button_new_with_label(
-			   "Cubeful evaluation" ) );
+			   "Cubeful chequer evaluation" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
+				  pec->fCubeful );
     
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
@@ -1913,9 +2105,9 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     if( fOK )
 	SetEvalCommands( "set evaluation", &ec, &ecEval );
@@ -2067,9 +2259,9 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     if( fOK ) {
 	outputpostpone();
@@ -2090,7 +2282,7 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		
 	    case PLAYER_GNU:
 		if( ap[ i ].pt != PLAYER_GNU ) {
-		    sprintf( sz, "set player %d gnu", i );
+		    sprintf( sz, "set player %d gnubg", i );
 		    UserCommand( sz );
 		}
 		
@@ -2116,7 +2308,128 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 	outputresume();
     }
 }
+
+typedef struct _rolloutwidget {
+    evalcontext ec;
+    int nTrials, nTruncate, fVarRedn, nSeed;
+    GtkWidget *pwEval, *pwVarRedn;
+    GtkAdjustment *padjTrials, *padjTrunc, *padjSeed;
+    int *pfOK;
+} rolloutwidget;
+
+static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
+
+    *prw->pfOK = TRUE;
+
+    prw->nTrials = prw->padjTrials->value;
+    prw->nTruncate = prw->padjTrunc->value;
+    prw->nSeed = prw->padjSeed->value;
+    prw->fVarRedn = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( prw->pwVarRedn ) );
+    
+    EvalOK( prw->pwEval, prw->pwEval );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
+
+    GtkWidget *pwDialog, *pwBox, *pw;
+    int fOK = FALSE;
+    rolloutwidget rw;
+    char sz[ 256 ];
+    
+    memcpy( &rw.ec, &ecRollout, sizeof( ecRollout ) );
+    rw.pfOK = &fOK;
+    
+    pwDialog = CreateDialog( "GNU Backgammon - Rollouts", TRUE,
+			     GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwBox = gtk_vbox_new( FALSE, 0 ) );
+    gtk_container_set_border_width( GTK_CONTAINER( pwBox ), 8 );
+
+    rw.padjTrials = GTK_ADJUSTMENT( gtk_adjustment_new( nRollouts, 1,
+							1296 * 1296,
+							36, 36, 36 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwBox ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Trials:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( rw.padjTrials, 36, 0 ) );
+    
+    rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( nRolloutTruncate, 1,
+						       1000, 1, 1, 1 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwBox ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Truncation:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( rw.padjTrunc, 1, 0 ) );
+
+    gtk_container_add( GTK_CONTAINER( pwBox ),
+		       rw.pwVarRedn = gtk_check_button_new_with_label(
+			   "Variance reduction" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwVarRedn ),
+				  fVarRedn );
+
+    rw.padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new( abs( nRolloutSeed ), 0,
+						       INT_MAX, 1, 1, 1 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwBox ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Seed:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( rw.padjSeed, 1, 0 ) );
+
+    gtk_container_add( GTK_CONTAINER( pwBox ), pw =
+		       gtk_frame_new( "Evaluation" ) );
+    gtk_container_add( GTK_CONTAINER( pw ), rw.pwEval =
+		       EvalWidget( &rw.ec, NULL ) );
 	
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( fOK ) {
+	outputpostpone();
+
+	if( rw.nTrials != nRollouts ) {
+	    sprintf( sz, "set rollout trials %d", rw.nTrials );
+	    UserCommand( sz );
+	}
+
+	if( rw.nTruncate != nRolloutTruncate ) {
+	    sprintf( sz, "set rollout truncation %d", rw.nTruncate );
+	    UserCommand( sz );
+	}
+
+	if( rw.fVarRedn != fVarRedn ) {
+	    sprintf( sz, "set rollout varredn %s",
+		     rw.fVarRedn ? "on" : "off" );
+	    UserCommand( sz );
+	}
+
+	if( rw.nSeed != nRolloutSeed ) {
+	    sprintf( sz, "set rollout seed %d", rw.nSeed );
+	    UserCommand( sz );
+	}
+
+	SetEvalCommands( "set rollout evaluation", &rw.ec, &ecRollout );
+	
+	outputresume();
+    }
+}
+
 extern void GTKEval( char *szOutput ) {
 
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Evaluation",
@@ -2124,7 +2437,14 @@ extern void GTKEval( char *szOutput ) {
 	*pwText = gtk_text_new( NULL, NULL );
     GdkFont *pf;
 
-    pf = gdk_font_load( "fixed" );
+#if WIN32
+    /* Windows fonts come out smaller than you ask for, for some reason... */
+    pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
+			"*-*-*-m-*-iso8859-1" );
+#else
+    pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
+			"*-*-*-m-*-iso8859-1" );
+#endif
     
     gtk_text_set_editable( GTK_TEXT( pwText ), FALSE );
     gtk_text_insert( GTK_TEXT( pwText ), pf, NULL, NULL, szOutput, -1 );
@@ -2133,7 +2453,7 @@ extern void GTKEval( char *szOutput ) {
 		       pwText );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 600 );
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 600, 600 );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
@@ -2141,9 +2461,9 @@ extern void GTKEval( char *szOutput ) {
     
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 
     gdk_font_unref( pf );
 }
@@ -2417,9 +2737,9 @@ extern void GTKHint( movelist *pml ) {
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 }
 
 static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwProgress;
@@ -2489,10 +2809,10 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
     
     gtk_widget_show_all( pwRolloutDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
-    AllowStdin();
+    GTKAllowStdin();
 }
 
 extern void GTKRolloutRow( int i ) {
@@ -2520,10 +2840,10 @@ extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
     
     gtk_progress_configure( GTK_PROGRESS( pwProgress ), iGame + 1, 0, cGames );
     
-    DisallowStdin();
+    GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
-    AllowStdin();
+    GTKAllowStdin();
 
     return 0;
 }
@@ -2542,9 +2862,9 @@ extern void GTKRolloutDone( void ) {
     gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 }
 
 extern void GTKShowMatchEquityTable( int n ) {
@@ -2618,9 +2938,9 @@ extern void GTKShowMatchEquityTable( int n ) {
     
     gtk_widget_show_all( pwDialog );
 
-    DisallowStdin();
+    GTKDisallowStdin();
     gtk_main();
-    AllowStdin();
+    GTKAllowStdin();
 }
 
 static void UpdateToggle( gnubgcommand cmd, int *pf ) {
@@ -2632,6 +2952,25 @@ static void UpdateToggle( gnubgcommand cmd, int *pf ) {
     fAutoCommand = TRUE;
     gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM( pw ), *pf );
     fAutoCommand = FALSE;
+}
+
+static void enable_menu( GtkWidget *pw, int f );
+
+static void enable_sub_menu( GtkWidget *pw, int f ) {
+
+    GtkMenuShell *pms = GTK_MENU_SHELL( pw );
+
+    g_list_foreach( pms->children, (GFunc) enable_menu, (gpointer) f );
+}
+
+static void enable_menu( GtkWidget *pw, int f ) {
+
+    GtkMenuItem *pmi = GTK_MENU_ITEM( pw );
+
+    if( pmi->submenu )
+	enable_sub_menu( pmi->submenu, f );
+    else
+	gtk_widget_set_sensitive( pw, f );
 }
 
 /* A global setting has changed; update entry in Settings menu if necessary. */
@@ -2653,6 +2992,9 @@ extern void GTKSet( void *p ) {
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_RNG_ANSI +
 						   rngCurrent - RNG_ANSI ) ),
 	    TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	    pif, "/Settings/Dice generation/Seed..." ),
+				  rngCurrent != RNG_MANUAL );
 	fAutoCommand = FALSE;
     } else if( p == &metCurrent ) {
 	/* Handle the MET radio items. */
@@ -2709,21 +3051,26 @@ extern void GTKSet( void *p ) {
     } else if( p == &fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;
-
-	/* FIXME it would be nicer to set the "/Game/Turn" menu item
-	   insensitive, but GTK doesn't do that very well. */
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SET_TURN_0 ), fTurn >= 0 );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SET_TURN_1 ), fTurn >= 0 );
-
-	/* FIXME enable/disable other menu items which are only valid when a
-	   game is in progress */
 	
 	if( fTurn >= 0 )
 	    gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
 		gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_0 +
 						       fTurn ) ), TRUE );
+	fAutoCommand = FALSE;
+    } else if( p == &gs ) {
+	/* Handle the game state. */
+	fAutoCommand = TRUE;
+
+	board_set_playing( BOARD( pwBoard ), gs == GAME_PLAYING );
+
+	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
+			 gs == GAME_PLAYING );
+	
+	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
+			 gs == GAME_PLAYING );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
+	
 	fAutoCommand = FALSE;
     } else if( p == &fCrawford )
 	ShowBoard(); /* this is overkill, but it works */

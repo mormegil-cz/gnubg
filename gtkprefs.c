@@ -40,8 +40,9 @@
 static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
     *padjBoard;
-static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *pwBoard, *pwTranslucent;
-static int fTranslucent;
+static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *pwBoard, *pwTranslucent,
+    *pwLabels;
+static int fTranslucent, fLabels;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
@@ -178,8 +179,12 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 			GTK_SIGNAL_FUNC( ToggleTranslucent ), NULL );
     gtk_box_pack_start( GTK_BOX( pw ), pwTranslucent, FALSE, FALSE, 4 );
 
+    pwLabels = gtk_check_button_new_with_label( "Numbered point labels" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), fLabels );
+    gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
+    
     pwTable = gtk_table_new( 2, 2, FALSE );
-    gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
     gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( "Light azimuth" ),
 		      0, 1, 0, 1, 0, 0, 4, 2 );
@@ -231,6 +236,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     gdouble ar[ 4 ];
     char sz[ 256 ];
     
+    fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+    
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
 	bd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
@@ -267,6 +274,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     bd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
 	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
 
+    bd->labels = fLabels;
+    
     /* This is a horrible hack, but we need translucency set to the new
        value to call BoardPreferencesCommand(), so we get the correct
        output; but then we reset it to the _old_ value before we change,
@@ -290,6 +299,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     BoardData *bd = BOARD( pwBoard )->board_data;
     
     fTranslucent = bd->translucent;
+    fLabels = bd->labels;
     
     pwDialog = CreateDialog( "GNU Backgammon - Colours", TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
@@ -458,6 +468,9 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     else if( !g_strncasecmp( szParam, "translucent", c ) )
 	/* translucent=bool */
 	bd->translucent = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "labels", c ) )
+	/* labels=bool */
+	bd->labels = toupper( *szValue ) == 'Y';    
     else if( !g_strncasecmp( szParam, "light", c ) ) {
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;
@@ -511,14 +524,15 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	rAzimuth = 360 - rAzimuth;
     
     sprintf( sz, "set colours board=rgb:%02X/%02X/%02X;%0.2f translucent=%c "
-	     "light=%0.0f;%0.0f "
+	     "labels=%c light=%0.0f;%0.0f "
 	     "chequers0=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "points0=rgb:%02X/%02X/%02X;%0.2f "
 	     "points1=rgb:%02X/%02X/%02X;%0.2f",
 	     bd->aanBoardColour[ 0 ][ 0 ], bd->aanBoardColour[ 0 ][ 1 ], 
 	     bd->aanBoardColour[ 0 ][ 2 ], bd->aSpeckle[ 0 ] / 128.0f,
-	     bd->translucent ? 'y' : 'n', rAzimuth, rElevation,
+	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
+	     rAzimuth, rElevation,
 	     (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 
 	     (int) ( bd->aarColour[ 0 ][ 2 ] * 0xFF ), bd->aarColour[ 0 ][ 3 ],
