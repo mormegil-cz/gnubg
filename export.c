@@ -54,9 +54,6 @@
 
 /* size of html images in steps of 108x72 */
 
-int nPNGSize = 2;
-
-
 static void
 ExportGameEquityEvolution ( FILE *pf, list *plGame, 
                             const int fPlayer,
@@ -539,12 +536,12 @@ CommandExportPositionPNG ( char *sz ) {
   bd = BOARD ( pwBoard )->board_data;
 
   memcpy ( &rd, &bd->rd, sizeof ( renderdata ) );
-  rd.nSize = nPNGSize;
+  rd.nSize = exsExport.nPNGSize;
 
   RenderImages ( &rd, &ri );
 
   GenerateImage ( &ri, &rd, ms.anBoard, sz, 
-                  nPNGSize, 108, 72, 0, 0, 
+                  exsExport.nPNGSize, 108, 72, 0, 0, 
                   ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
                   ms.fDoubled );
 

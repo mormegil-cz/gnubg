@@ -45,8 +45,6 @@ extern char *aszHTMLExportType[];
 extern char *aszHTMLExportCSS[];
 extern char *aszHTMLExportCSSCommand[];
 
-extern int nPNGSize;
-
 typedef struct _exportsetup {
 
   int fIncludeAnnotation;
@@ -82,6 +80,10 @@ typedef struct _exportsetup {
   htmlexporttype het;
   char *szHTMLExtension;
   htmlexportcss hecss;
+
+  /* png */
+
+  int nPNGSize;
 
 } exportsetup;
 
