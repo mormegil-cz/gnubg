@@ -591,7 +591,8 @@ extern void AddGame( moverecord *pmr ) {
 static int NewGame( void ) {
 
     moverecord *pmr;
-
+    int fError;
+    
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
 	if( fConfirm ) {
@@ -635,10 +636,11 @@ static int NewGame( void ) {
     UpdateSetting( &ms.fTurn );
     
  reroll:
-    RollDice( ms.anDice, rngCurrent );
+    fError = RollDice( ms.anDice, rngCurrent );
+    
     playSound ( SOUND_ROLL );
 
-    if( fInterrupt ) {
+    if( fInterrupt || fError ) {
 	PopMoveRecord( plGame->plNext );
 
 	free( plGame );

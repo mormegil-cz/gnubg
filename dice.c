@@ -159,31 +159,45 @@ static int GetManualDice( int anDice[ 2 ] ) {
 
 #if HAVE_LIBGMP
 
-static mpz_t zModulus, zSeed;
+static mpz_t zModulus, zSeed, zZero, zOne;
 static int fZInit;
+
+static void InitRNGBBS( void ) {
+        
+    if( !fZInit ) {
+	mpz_init( zModulus );
+	mpz_init( zSeed );
+	mpz_init_set_ui( zZero, 0 );
+	mpz_init_set_ui( zOne, 1 );
+	fZInit = TRUE;
+    }
+}
 
 extern int InitRNGBBSModulus( char *sz ) {
 
     if( !sz )
 	return -1;
     
-    if( !fZInit ) {
-	mpz_init( zModulus );
-	mpz_init( zSeed );
-	fZInit = TRUE;
-    }
+    InitRNGBBS();
     
     if( mpz_set_str( zModulus, sz, 10 ) || mpz_sgn( zModulus ) < 1 )
 	return -1;
 
-    /* FIXME check for short cycles */
-    
     return 0;
 }
 
 int BBSGood( mpz_t x ) {
 
-    return ( ( mpz_get_ui( x ) & 3 ) == 3 ) && mpz_probab_prime_p( x, 10 );
+    static mpz_t z19;
+    static int f19;
+
+    if( !f19 ) {
+	mpz_init_set_ui( z19, 19 );
+	f19 = TRUE;
+    }
+    
+    return ( ( mpz_get_ui( x ) & 3 ) == 3 ) && mpz_cmp( x, z19 ) >= 0 &&
+	mpz_probab_prime_p( x, 10 );
 }
 
 int BBSFindGood( mpz_t x ) {
@@ -235,18 +249,12 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1 ) {
 	free( pch );
     }
 	
-    if( !fZInit ) {
-	mpz_init( zModulus );
-	mpz_init( zSeed );
-	fZInit = TRUE;
-    }
+    InitRNGBBS();
     
     mpz_mul( zModulus, p, q );
 
     mpz_clear( p );
     mpz_clear( q );
-    
-    /* FIXME check for short cycles */
     
     return 0;
 }
@@ -300,6 +308,53 @@ int BBSGetTrit( void ) {
 	    break;
 	}
     }
+}
+
+static int BBSCheck( void ) {
+
+    return ( mpz_cmp( zSeed, zZero ) && mpz_cmp( zSeed, zOne ) ) ? 0 : -1;
+}
+
+static int BBSInitialSeedFailure( void ) {
+
+    outputl( _("That is not a valid initial state for the Blum, Blum and Shub "
+	       "generator.\n"
+	       "Please choose a different seed and/or modulus." ) );
+    mpz_set( zSeed, zZero ); /* so that BBSCheck will fail */
+    
+    return -1;
+}
+
+static int BBSCheckInitialSeed( void ) {
+
+    mpz_t z, zCycle;
+    int i;
+    
+    if( mpz_sgn( zSeed ) < 1 )
+	return BBSInitialSeedFailure();
+
+    mpz_init_set( z, zSeed );
+
+    for( i = 0; i < 8; i++ )
+	mpz_powm_ui( z, z, 2, zModulus );
+
+    mpz_init_set( zCycle, z );
+    
+    for( i = 0; i < 16; i++ ) {
+	mpz_powm_ui( z, z, 2, zModulus );
+	if( !mpz_cmp( z, zCycle ) ) {
+	    /* short cycle detected */
+	    BBSInitialSeedFailure();
+	    mpz_clear( z );
+	    mpz_clear( zCycle );
+	    return -1;
+	}
+    }
+    
+    mpz_clear( z );
+    mpz_clear( zCycle );
+    
+    return 0;
 }
 #endif
 
@@ -357,7 +412,8 @@ extern void InitRNGSeed( int n, const rng rngx ) {
     case RNG_BBS:
 #if HAVE_LIBGMP
 	assert( fZInit );
-	mpz_set_ui( zSeed, n < 2 ? 2 : n );
+	mpz_set_ui( zSeed, n );
+	BBSCheckInitialSeed();
 	break;
 #else
 	abort();
@@ -421,6 +477,7 @@ static void InitRNGSeedMP( mpz_t n, rng rng ) {
     case RNG_BBS:
 	assert( fZInit );
 	mpz_set( zSeed, n );
+	BBSCheckInitialSeed();
 	break;
 	
     case RNG_ISAAC: {
@@ -640,6 +697,13 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 	
     case RNG_BBS:
 #if HAVE_LIBGMP
+	if( BBSCheck() ) {
+	    outputl( _( "The Blum, Blum and Shub generator is in an illegal "
+			"state.  Please reset the\n"
+			"seed and/or modulus before continuing." ) );
+	    return -1;
+	}
+	
 	anDice[ 0 ] = BBSGetTrit() + BBSGetBit() * 3 + 1;
 	anDice[ 1 ] = BBSGetTrit() + BBSGetBit() * 3 + 1;
 	return 0;
