@@ -258,7 +258,7 @@ static cubeinfo ciBasic = { 1, 0, 0, { 1.0, 1.0, 1.0, 1.0 } };
 
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
 
-static evalcontext ecBasic = { 0, 0, 0, 0, FALSE, FALSE };
+static evalcontext ecBasic = { 0, 0, 0, 0, FALSE };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -2313,7 +2313,6 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	  SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, ! pci->fMove );
 	      
 	  if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
-				     pec->fRelativeAccuracy ? pc :
 				     ClassifyPosition( anBoardNew ) ) )
 	    return -1;
 	      
@@ -2387,7 +2386,6 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	      
 	  if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
 				     &ciOpp, pec, 0, 
-				     pec->fRelativeAccuracy ? pc :
 				     ClassifyPosition( anBoardNew ) ) )
 	    return -1;
 
@@ -2452,7 +2450,6 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
 
 	if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
-				   pec->fRelativeAccuracy ? pc :
 				   ClassifyPosition( anBoardNew ) ) )
 	  return -1;
 
@@ -2510,8 +2507,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
   PositionKey( anBoard, ec.auchKey );
   ec.nEvalContext = nPlies ^ ( pecx->nSearchCandidates << 2 ) ^
     ( ( (int) ( pecx->rSearchTolerance * 100 ) ) << 6 ) ^
-    ( pecx->nReduced << 12 ) ^
-    ( pecx->fRelativeAccuracy << 17 );
+    ( pecx->nReduced << 12 );
   ec.pc = pc;
 
   if ( ! ( nMatchTo && nPlies ) ) {
@@ -2981,19 +2977,6 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies,
     
     pml->rBestScore = -99999.9;
 
-    if( pec->fRelativeAccuracy && pcGeneral == CLASS_ANY ) {
-      positionclass pc;
-      
-      /* Search for the most general class containing all positions */
-      for( i = 0; i < pml->cMoves; i++ ) {
-        PositionFromKey( anBoardTemp, pml->amMoves[ i ].auch );
-        
-        if( ( pc = ClassifyPosition( anBoardTemp ) ) > pcGeneral )
-          if( ( pcGeneral = pc ) == CLASS_GLOBAL )
-            break;
-      }
-    }
-    
     for( i = 0; i < pml->cMoves; i++ ) {
       PositionFromKey( anBoardTemp, pml->amMoves[ i ].auch );
       
@@ -3019,7 +3002,6 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies,
       } else {
 
         if( EvaluatePositionCache( anBoardTemp, arEval, &ci, pec, nPlies,
-                                   pec->fRelativeAccuracy ? pcGeneral :
                                    ClassifyPosition( anBoardTemp ) ) )
           return -1;
 

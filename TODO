@@ -33,7 +33,6 @@ duplication of effort and to make sure our changes merge easily.
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
 ** Make gnubg offer resignations when its position is hopeless.
-** Remove the "fRelativeAccuracy" option.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -74,6 +73,7 @@ duplication of effort and to make sure our changes merge easily.
   10,000 games vs. pubeval).
 ** Should there be a limit to the number of moves listed by "hint"?  For
   example, "set board 7HYbACDsdhsAIA", "set dice 11", "hint".
+** Make sure "set cube value" and "set cube pos" add moverecords.
 
 * Guile:
 ** Lots of things to do.  Define data types ("board", at the least) and
@@ -137,6 +137,8 @@ add Scheme bindings for useful functions.
 ** Add a pop-up menu in the game list window to allow selection of old games.
 ** Show "take" and "drop" buttons in the off-board dice window when
   a double is offered; also "agree" and "decline" for resignations.
+** Process `-h' and `-v' earlier, before trying to start GTK.
+
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
   changes in eval.c to give the information in a useful form; probably
@@ -168,11 +170,8 @@ add Scheme bindings for useful functions.
 ** When ShowBoard() postpones an update, the off-board dice are not set.
   ("next" and "previous" don't change the dice, either -- it would be nice
   to add an external interface to change them.)
-** Selecting the first move in the game list doesn't work.  (Repeatedly
-  trying "prev" doesn't work, either -- why?)
-** It should be possible to select the empty cell at the end of the game
-  list when the player is on roll.
-** Declining a resignation seems to erase the current dice roll. (gary)
+** Cosmetic problems when a "set board" is shown in the game list (the
+  wrong cell is highlighted).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

@@ -122,13 +122,13 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
   nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
   fConfirm = TRUE, fShowProgress;
 
-evalcontext ecTD = { 0, 8, 0.16, 0, FALSE, FALSE };
-evalcontext ecEval = { 1, 8, 0.16, 0, FALSE, FALSE };
-evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE, FALSE };
+evalcontext ecTD = { 0, 8, 0.16, 0, FALSE };
+evalcontext ecEval = { 1, 8, 0.16, 0, FALSE };
+evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE };
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE, FALSE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE, FALSE } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE } }
 };
 
 /* Usage strings */

@@ -78,9 +78,6 @@ typedef struct _evalcontext {
     int nSearchCandidates;
     float rSearchTolerance;
     int nReduced;
-    int fRelativeAccuracy; /* evaluate all positions according to the most
-			      general positionclass, to decrease relative
-			      error */
   /* cubeful evaluation */
   int fCubeful;
 } evalcontext;

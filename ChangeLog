@@ -1,3 +1,17 @@
+Thu Oct 26 10:13:51 2000  Gary Wong  <gtw@research.att.com>
+
+	* Makefile.am: Don't build gnubg.bd by default (since we don't
+	strictly need it).
+
+	* eval.c: Remove the fRelativeAccuracy code.
+
+	* gtkgame.c (GameListSelectRow): Allow the first and last cells
+	to be selected correctly.
+
+	* play.c (ApplyMoveRecord): Handle "set board", "set cubeval"
+	and "set cubepos" records.
+	* set.c (CommandSetBoard): Add a "set board" record.
+	
 Thu Oct 26 11:27:39 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* gnubg.c (CommandHint): `hint' now takes a parameter specifying
