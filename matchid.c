@@ -252,7 +252,7 @@ MatchFromID ( int anDice[ 2 ],
 
   unsigned char auchKey[ 9 ];
   unsigned char *puch = auchKey;
-  unsigned char ach[ 12 ];
+  unsigned char ach[ 13 ];
   unsigned char *pch = ach;
   int i;
 
