@@ -18,6 +18,8 @@
  *
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <math.h>
 #include "backgammon.h"
@@ -80,7 +82,7 @@ ImportJF( FILE * fp, char *szFileName) {
   /* Owner: 1 or 2 is player 1 or 2, 
      respectively, 0 means cube in the middle */
 
-  fCubeOwner = nCubeOwner - 1;  /* Gary, is this right? */
+  fCubeOwner = nCubeOwner - 1;
   
   fread(&w, 2, 1, fp);  nOnRoll = (int) w;
   /* 0 means starting position. 
@@ -150,7 +152,7 @@ ImportJF( FILE * fp, char *szFileName) {
 
   fread(&w, 2, 1, fp);    nDie1 = abs( (int) w );
   fread(&w, 2, 1, fp);    nDie2 = (int) w;
-  /*  if ( nDie1 < 0 ) { nDie1=65536; }  /*  What?? */
+  /*  if ( nDie1 < 0 ) { nDie1=65536; } */ /*  What?? */
 
 
   /* In the end the position itself is stored, 
