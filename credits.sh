@@ -19,6 +19,7 @@ EOF
 cat > $contributors <<'EOF'
 Kazuaki Asai
 Eric Augustine
+Ron Barry
 Steve Baedke
 Holger Bochnig
 Chuck Bower
