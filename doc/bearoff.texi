@@ -156,9 +156,14 @@ The one sided bearoff distributions are
 
 Applying the formula above gives:
 
-@c FIXME raw %s make TeX complain, but \% looks wrong in Info!
-@math{1.917\% * 100\% + 18.749\% * 97.189\% + 44.271\% * 68.786\% ... +
-0.037\% * 0.02\% = 56.7\%}
+@iftex
+@math{1.917\% \times 100\% + 18.749\% \times 97.189\% + 44.271\%
+\times 68.786\% \dots + 0.037\% \times 0.02\% = 56.7\%}
+@end iftex
+@ifnottex
+@math{1.917% * 100% + 18.749% * 97.189% + 44.271% * 68.786% ... +
+0.037% * 0.02% = 56.7%}
+@end ifnottex
 
 The cubeless gwc's calculated from one sided bearoff distributions are
 usually quite good, although no thorough investigations have been
