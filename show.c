@@ -975,7 +975,8 @@ extern void CommandShowKleinman( char *sz ) {
     if (fKC == -1.0)
         outputf (_("Pipcount unsuitable for Kleinman Count.\n"));
     else
-        outputf (_("Cubeless Winning Chance: %.4f\n"), fKC);
+        outputf (_("Cubeless Winning Chance (%s on roll): %.4f\n"), 
+                 ap[ ms.fMove ].szName, fKC );
  }
 
 extern void CommandShowThorp( char *sz ) {
@@ -1021,7 +1022,8 @@ extern void CommandShowThorp( char *sz ) {
       nDiff = -37;
     
     outputf(_("Bower's interpolation: %d%% cubeless winning "
-              "chance\n"), 74 + 2 * nDiff );
+              "chance (%s on roll)\n"), 
+            74 + 2 * nDiff, ap[ ms.fMove ].szName );
 
 }
 
@@ -1108,9 +1110,9 @@ EffectivePipCount( const float arMu[ 2 ], const int anPips[ 2 ] ) {
               "EPC      Wastage") );
   for ( i = 0; i < 2; ++i )
     outputf ( _("%-20.20s   %7.3f  %7.3f\n"),
-              ap[ ms.fMove ? i : !i ].szName,
-              arMu[ i ] * x,
-              arMu[ i ] * x - anPips[ i ] );
+              ap[ i ].szName,
+              arMu[ ms.fMove ? i : !i ] * x,
+              arMu[ ms.fMove ? i : !i ] * x - anPips[ ms.fMove ? i : !i ] );
 
   outputf( _("\n"
              "EPC = Avg. rolls * %5.3f\n" 
@@ -1166,12 +1168,15 @@ CommandShowOneChequer ( char *sz ) {
               "chequer only." ) );
   outputl ( _("                       "
               "Pips     Avg. rolls   Std.dev.") );
-  for ( i = 0; i < 2; ++i )
+  for ( i = 0; i < 2; ++i ) {
+    j = ms.fMove ? i : !i;
     outputf ( _("%-20.20s   %4d     %7.3f       %7.3f\n"),
-              ap[ ms.fMove ? i : !i ].szName,
-              anPips[ i ], arMu[ i ], arSigma[ i ] );
+              ap[ i ].szName,
+              anPips[ j ], arMu[ j ], arSigma[ j ] );
+  }
 
-  outputf ( _("Estimated cubeless gwc: %8.4f%%\n\n"), r * 100.0f );
+  outputf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%\n\n"), 
+            ap[ ms.fMove ].szName, r * 100.0f );
 
   /* effective pip count */
 
@@ -1205,7 +1210,8 @@ CommandShowOneSidedRollout ( char *sz ) {
   }
 #endif
 
-  outputf ( _("One sided rollout with %d trials:\n"), nTrials );
+  outputf ( _("One sided rollout with %d trials (%s on roll):\n"), 
+            nTrials, ap[ ms.fMove ].szName );
 
   raceProbs ( anBoard, nTrials, ar, arMu );
   outputl ( OutputPercents ( ar, TRUE ) );

@@ -57,17 +57,18 @@ typedef struct _racewidget {
   GtkWidget *pwRollout, *pwOutput;
   int anBoard[ 2 ][ 25 ];
   epcwidget epcwOSR;
+  int fMove;
 } racewidget;
 
 
 static GtkWidget *
-KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
+KleinmanPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, nDiff, nSum;
+  int i, j, nDiff, nSum;
   int anPips[ 2 ];
   char *sz;
   
@@ -86,7 +87,9 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
 
   for ( i = 0; i < 2; ++i ) {
 
-    sz = g_strdup_printf ( _("Player %s"), ap[  ms.fMove ? i : !i ].szName );
+    j = fMove ? i : !i;
+
+    sz = g_strdup_printf ( _("Player %s"), ap[  i ].szName );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
                        0, 1, i, i + 1, 
@@ -94,7 +97,7 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( _("%d pips"), anPips[ i ] );
+    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        gtk_label_new ( sz ),
                        1, 2, i, i + 1, 
@@ -166,8 +169,9 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( "Cubeless winning chance = "
+    sz = g_strdup_printf ( "Cubeless winning chance (%s on roll) = "
                            "0.5 (1+erf(K)) = %8.4g%%", 
+                           ap[ fMove ].szName,
                            100.0 * ( 0.5 * ( 1.0 + erf ( rK ) ) ) );
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                          pw = gtk_label_new ( sz ),
@@ -182,13 +186,13 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
 }
 
 static GtkWidget *
-ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
+ThorpPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, nLeader, nTrailer, nDiff;
+  int i, j, nLeader, nTrailer, nDiff;
   int anPips[ 2 ];
   char *sz;
   
@@ -207,7 +211,9 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
 
   for ( i = 0; i < 2; ++i ) {
 
-    sz = g_strdup_printf ( _("Player %s"), ap[  ms.fMove ? i : !i ].szName );
+    j = fMove ? i : !i;
+
+    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
                        0, 1, i, i + 1, 
@@ -215,7 +221,7 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( _("%d pips"), anPips[ i ] );
+    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        gtk_label_new ( sz ),
                        1, 2, i, i + 1, 
@@ -252,8 +258,9 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
     nDiff = 13;
   else if( nDiff < -37 )
     nDiff = -37;
-  sz = g_strdup_printf ( "Bower's interpolation: %d%% cubeless gwc", 
-                         74 + 2 * nDiff );
+  sz = g_strdup_printf ( "Bower's interpolation: "
+                         "%d%% cubeless gwc (%s on roll)", 
+                         74 + 2 * nDiff, ap[ fMove ].szName );
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                        pw = gtk_label_new ( sz ),
                        FALSE, FALSE, 4 );
@@ -266,7 +273,7 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
 
 static GtkWidget *
 EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
-                   epcwidget *pepcw ) {
+                   const int fInvert, epcwidget *pepcw ) {
 
   GtkWidget *pwTable = gtk_table_new( 3, 4, FALSE );
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 0 );
@@ -303,7 +310,7 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( _("%7.3f"), arPips[ i ] );
+    sz = g_strdup_printf ( _("%7.3f"), arPips[ fInvert ? !i : i ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
                        1, 2, i + 1, i + 2, 
@@ -312,7 +319,7 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
     if ( pepcw )
       pepcw->apwEPC[ i ] = pw;
 
-    sz = g_strdup_printf ( "%7.3f", arWastage[ i ] );
+    sz = g_strdup_printf ( "%7.3f", arWastage[ fInvert ? !i : i ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
                        2, 3, i + 1, i + 2, 
@@ -339,7 +346,7 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
 }
 
 static GtkWidget *
-OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
+OneChequerPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pwTable = gtk_table_new ( 3, 4, FALSE );
@@ -367,7 +374,7 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
 
   memcpy( an, anBoard, 2 * 25 *sizeof ( int ) );
 
-  if ( ms.fMove )
+  if ( fMove )
     SwapSides( an );
 
   PipCount ( an, anPips );
@@ -412,6 +419,8 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
 
   for ( i = 0; i < 2; ++i ) {
 
+    j = fMove ? i : !i;
+
     sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
@@ -420,21 +429,21 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( _("%d pips"), anPips[ i ] );
+    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        gtk_label_new ( sz ),
                        1, 2, i + 1, i + 2, 
                        0, 0, 4, 4 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( "%7.3f", arMu[ i ] );
+    sz = g_strdup_printf ( "%7.3f", arMu[ j ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        gtk_label_new ( sz ),
                        2, 3, i + 1, i + 2, 
                        0, 0, 4, 4 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( "%7.3f", arSigma[ i ] );
+    sz = g_strdup_printf ( "%7.3f", arSigma[ j ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        gtk_label_new ( sz ),
                        3, 4, i + 1, i + 2, 
@@ -445,8 +454,8 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
 
   /* cubeless gwc */
 
-  sz = g_strdup_printf ( _("Estimated cubeless gwc: %8.4f%%"),
-                         r * 100.0f );
+  sz = g_strdup_printf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%"),
+                         ap[ fMove ].szName, r * 100.0f );
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                        pw = gtk_label_new ( sz ),
                        FALSE, FALSE, 4 );
@@ -463,7 +472,7 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
   }
 
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       EffectivePipCount( arEPC, arWastage, NULL ),
+                       EffectivePipCount( arEPC, arWastage, !fMove, NULL ),
                        FALSE, FALSE, 4 );
 
   return pwp;
@@ -476,7 +485,7 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
   GtkWidget *pwOutput = prw->pwOutput;
   int nTrials = prw->padjTrials->value;
   float ar[ 5 ];
-  int i;
+  int i, j;
   char sz[ 16 ];
   int anPips[ 2 ];
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
@@ -505,11 +514,13 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
   for ( i = 0; i < 2; ++i ) {
 
-    pch = g_strdup_printf ( _("%7.3f"), arMu[ i ] * x );
+    j = prw->fMove ? i : !i;
+
+    pch = g_strdup_printf ( _("%7.3f"), arMu[ j ] * x );
     gtk_label_set_text( GTK_LABEL( prw->epcwOSR.apwEPC[ i ] ), pch );
     g_free ( pch );
 
-    pch = g_strdup_printf ( "%7.3f", arMu[ i ] * x - anPips[ i ] );
+    pch = g_strdup_printf ( "%7.3f", arMu[ j ] * x - anPips[ j ] );
     gtk_label_set_text( GTK_LABEL( prw->epcwOSR.apwWastage[ i ] ), pch );
     g_free ( pch );
 
@@ -526,6 +537,7 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
   int i;
   char *asz[ 6 ];
   float ar0[ 2 ] = { 0, 0 };
+  char *pch;
   const char *aszTitle[] = {
     "",
     N_("Win"),
@@ -563,6 +575,12 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
 
   /* result */
 
+  pch = g_strdup_printf( _("%s on roll:"), ap[ prw->fMove ].szName );
+  gtk_box_pack_start( GTK_BOX( pwvbox ),
+                      pw = gtk_label_new( pch ), FALSE, FALSE, 4 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0.0f, 0.5f );
+  g_free( pch );
+
   for ( i = 0; i < 6; ++i )
     asz[ i ] = gettext ( aszTitle[ i ] );
 
@@ -594,7 +612,8 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
                        gtk_hseparator_new() , FALSE, FALSE, 4 );
 
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       EffectivePipCount( ar0, ar0, &prw->epcwOSR ),
+                       EffectivePipCount( ar0, ar0, 
+                                          !prw->fMove, &prw->epcwOSR ),
                        FALSE, FALSE, 4 );
 
   return pwp;
@@ -623,6 +642,7 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
 
   prw = malloc ( sizeof ( racewidget ) );
   memcpy ( prw->anBoard, anBoard, 2 * 25 * sizeof ( int ) );
+  prw->fMove = ms.fMove;
 
   /* create dialog */
 
@@ -640,19 +660,19 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
   /* Kleinman */
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             KleinmanPage ( anBoard ),
+                             KleinmanPage ( anBoard, prw->fMove ),
                              gtk_label_new ( _("Kleinman Count") ) );
 
   /* one chequer */
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             OneChequerPage ( anBoard ),
+                             OneChequerPage ( anBoard, prw->fMove ),
                              gtk_label_new ( _("One chequer bearoff") ) );
 
   /* Thorp */
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             ThorpPage ( anBoard ),
+                             ThorpPage ( anBoard, prw->fMove ),
                              gtk_label_new ( _("Thorp Count") ) );
 
   /* One sided rollout */
