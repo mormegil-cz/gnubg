@@ -117,7 +117,7 @@ extern char
 *MatchIDFromKey( unsigned char auchKey[ 9 ] ) {
 
     unsigned char *puch = auchKey;
-    static char szID[ 12 ];
+    static char szID[ 13 ];
     char *pch = szID;
     static char aszBase64[ 64 ] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
