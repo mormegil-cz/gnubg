@@ -63,6 +63,8 @@
 #define SUN_LEN(x) (sizeof *(x))
 #endif
 
+static int iPlayerSet;
+
 static char szEQUITY[] = "<equity>",
     szNAME[] = "<name>",
     szNUMBER[] = "<number>",
@@ -86,8 +88,10 @@ command acSetEvaluation[] = {
       "of moves for deep evaluation", szEQUITY, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
-    { "evaluation", CommandSetPlayerEvaluation, "Control evaluation "
-      "parameters when gnubg plays", NULL, acSetEvaluation },
+    { "chequerplay", CommandSetPlayerChequerplay, "Control chequerplay "
+      "parameters when gnubg plays", NULL, acSetEvalParam },
+    { "cubedecision", CommandSetPlayerCubedecision, "Control cube decision "
+      "parameters when gnubg plays", NULL, acSetEvalParam },
     { "external", CommandSetPlayerExternal, "Have another process make all "
       "moves for a player", NULL, NULL },
     { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
@@ -647,6 +651,12 @@ extern void CommandSetDisplay( char *sz ) {
 
 static evalcontext *pecSet;
 static char *szSet, *szSetCommand;
+static rolloutcontext *prcSet;
+
+static evaltype *petSet;
+static evalsetup *pesSet;
+
+static rng *rngSet;
 
 extern void CommandSetEvalCandidates( char *sz ) {
 
@@ -771,9 +781,9 @@ extern void CommandSetEvalTolerance( char *sz ) {
 
 extern void CommandSetEvaluation( char *sz ) {
 
-    szSet = "`eval', `hint' and analysis";
+    szSet = "`eval' and `hint'";
     szSetCommand = "";
-    pecSet = &ecEval;
+    pecSet = &esEvalChequer.ec;
     HandleCommand( sz, acSetEvaluation );
 }
 
@@ -789,20 +799,40 @@ extern void CommandSetNackgammon( char *sz ) {
 #endif
 }
 
-static int iPlayerSet;
 
-extern void CommandSetPlayerEvaluation( char *sz ) {
+extern void 
+CommandSetPlayerChequerplay( char *sz ) {
 
     szSet = ap[ iPlayerSet ].szName;
-    szSetCommand = "player ";
-    pecSet = &ap[ iPlayerSet ].ec;
+    szSetCommand = "player chequerplay ";
+    pesSet = &ap[ iPlayerSet ].esChequer;
+    petSet = &ap[ iPlayerSet ].etChequer;
 
-    HandleCommand( sz, acSetEvaluation );
+    HandleCommand( sz, acSetEvalParam );
 
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	outputf( "(Note that this setting will have no effect until you "
 		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
+
 }
+
+
+extern void 
+CommandSetPlayerCubedecision( char *sz ) {
+
+    szSet = ap[ iPlayerSet ].szName;
+    szSetCommand = "player cubedecision ";
+    pesSet = &ap[ iPlayerSet ].esCube;
+    petSet = &ap[ iPlayerSet ].etCube;
+
+    HandleCommand( sz, acSetEvalParam );
+
+    if( ap[ iPlayerSet ].pt != PLAYER_GNU )
+	outputf( "(Note that this setting will have no effect until you "
+		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
+
+}
+
 
 extern void CommandSetPlayerExternal( char *sz ) {
 
@@ -934,7 +964,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
 	return;
     }
 
-    ap[ iPlayerSet ].ec.nPlies = n;
+    ap[ iPlayerSet ].esChequer.ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	outputf( "Moves for %s will be played with %d ply lookahead (note that "
@@ -1060,19 +1090,83 @@ extern void CommandSetRNGUser( char *sz ) {
 
 }
 
-extern void CommandSetRolloutEvaluation( char *sz ) {
 
-    szSet = "Rollouts";
-    szSetCommand = "rollout ";
-    pecSet = &ecRollout;
-    HandleCommand( sz, acSetEvaluation );
+extern void CommandSetRollout ( char *sz ) {
+
+  szSet = "Rollouts";
+  szSetCommand = "rollout";
+  
+  prcSet = &rcRollout;
+  HandleCommand ( sz, acSetRollout );
+
 }
+
+
+extern void
+CommandSetRolloutRNG ( char *sz ) {
+
+  rngSet = &prcSet->rngRollout;
+
+  HandleCommand ( sz, acSetRNG );
+
+  CommandNotImplemented ( sz );
+
+}
+  
+
+extern void
+CommandSetRolloutChequerplay ( char *sz ) {
+
+  pecSet = &prcSet->aecChequer[ 0 ];
+
+  HandleCommand ( sz, acSetEvaluation );
+
+  /* copy to both players */
+  memcpy ( &prcSet->aecChequer[ 1 ], &prcSet->aecChequer[ 0 ],
+           sizeof ( evalcontext ) );  
+
+}
+
+
+extern void
+CommandSetRolloutPlayerChequerplay ( char *sz ) {
+
+  pecSet = &prcSet->aecChequer[ iPlayerSet ];
+
+  HandleCommand ( sz, acSetEvaluation );
+
+}
+
+
+extern void
+CommandSetRolloutCubedecision ( char *sz ) {
+
+  pecSet = &prcSet->aecCube[ 0 ];
+
+  HandleCommand ( sz, acSetEvaluation );
+
+  /* copy to both players */
+  memcpy ( &prcSet->aecCube[ 1 ], &prcSet->aecCube[ 0 ],
+           sizeof ( evalcontext ) );  
+
+}
+
+
+extern void
+CommandSetRolloutPlayerCubedecision ( char *sz ) {
+
+  pecSet = &prcSet->aecCube[ iPlayerSet ];
+
+  HandleCommand ( sz, acSetEvaluation );
+
+}
+
 
 extern void CommandSetRolloutSeed( char *sz ) {
 
     int n;
     
-    if( rngCurrent == RNG_MANUAL ) {
+    if( prcSet->rngRollout == RNG_MANUAL ) {
 	outputl( "You can't set a seed if you're using manual dice "
 		 "generation." );
 	return;
@@ -1087,10 +1181,10 @@ extern void CommandSetRolloutSeed( char *sz ) {
 	    return;
 	}
 
-	nRolloutSeed = n;
+	prcSet->nSeed = n;
 	outputf( "Rollout seed set to %d.\n", n );
     } else
-	outputl( InitRNG( &nRolloutSeed, FALSE ) ?
+	outputl( InitRNG( &prcSet->nSeed, FALSE ) ?
 		 "Rollout seed initialised from system random data." :
 		 "Rollout seed initialised by system clock." );    
 }
@@ -1106,10 +1200,10 @@ extern void CommandSetRolloutTrials( char *sz ) {
 	return;
     }
 
-    nRollouts = n;
+    prcSet->nTrials = n;
 
-    outputf( "%d game%s will be played per rollout.\n", nRollouts,
-	    nRollouts == 1 ? "" : "s" );
+    outputf( "%d game%s will be played per rollout.\n", n,
+	    n == 1 ? "" : "s" );
 }
 
 extern void CommandSetRolloutTruncation( char *sz ) {
@@ -1123,18 +1217,84 @@ extern void CommandSetRolloutTruncation( char *sz ) {
 	return;
     }
 
-    nRolloutTruncate = n;
+    prcSet->nTruncate = n;
 
-    outputf( "Rollouts will be truncated after %d pl%s.\n", nRolloutTruncate,
-	    nRolloutTruncate == 1 ? "y" : "ies" );
+    outputf( "Rollouts will be truncated after %d pl%s.\n", n,
+	    n == 1 ? "y" : "ies" );
 }
 
 extern void CommandSetRolloutVarRedn( char *sz ) {
     
-    SetToggle( "rollout varredn", &fVarRedn, sz, "Will lookahead during "
-	       "rollouts to reduce variance.", "Will not use lookahead "
-	       "variance reduction during rollouts." );
+    SetToggle( "rollout varredn", &prcSet->fVarRedn, sz,
+               "Will lookahead during rollouts to reduce variance.",
+               "Will not use lookahead variance "
+               "reduction during rollouts." );
 }
+
+    
+extern void 
+CommandSetRolloutCubeful( char *sz ) {
+    
+    SetToggle( "rollout cubeful", &prcSet->fCubeful, sz, 
+               "Cubeful rollout", "Cubeless rollout" );
+
+    if ( prcSet->fCubeful )
+      outputl ( "Note that cubeful rollouts "
+                "are not implemented yet!" ); 
+
+}
+
+
+extern void
+CommandSetRolloutPlayer ( char *sz ) {
+
+    char *pch = NextToken( &sz ), *pchCopy;
+    int i;
+
+    if( !pch ) {
+	outputf( "You must specify a player -- try\n"
+                 " `help set %s player'.", szSet );
+	
+	return;
+    }
+
+    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+	iPlayerSet = i;
+
+	HandleCommand( sz, acSetRolloutPlayer );
+	
+	return;
+    }
+
+    if( i == 2 ) {
+	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	    outputl( "Insufficient memory." );
+		
+	    return;
+	}
+
+	strcpy( pchCopy, sz );
+
+	outputpostpone();
+	
+	iPlayerSet = 0;
+	HandleCommand( sz, acSetRolloutPlayer );
+
+	iPlayerSet = 1;
+	HandleCommand( pchCopy, acSetRolloutPlayer );
+
+	outputresume();
+	
+	free( pchCopy );
+	
+	return;
+    }
+    
+    outputf( "Unknown player `%s' -- try\n"
+             "`help set %s player'.\n", pch );
+}
+
+
     
 extern void CommandSetScore( char *sz ) {
 
@@ -1461,6 +1621,122 @@ extern void
 CommandSetMETJacobs ( char *sz ) {
 
   SetMET ( MET_JACOBS );
+
+}
+
+
+extern void
+CommandSetEvalParamType ( char *sz ) {
+
+  switch ( sz[ 0 ] ) {
+    
+  case 'r':
+    *petSet = EVAL_ROLLOUT;
+    break;
+
+  case 'e':
+    *petSet = EVAL_EVAL;
+    break;
+
+  case 'n':
+    *petSet = EVAL_NONE;
+    break;
+
+  default:
+    outputf ("Unknown evaluation type: %s -- see\n"
+             "`help set %s type'\n", sz, szSetCommand );
+    return;
+    break;
+
+  }
+
+  outputf ( "%s will now use %s.\n",
+            szSet, aszEvalType[ *petSet ] );
+
+}
+
+
+extern void
+CommandSetEvalParamEvaluation ( char *sz ) {
+
+  pecSet = &pesSet->ec;
+
+  HandleCommand ( sz, acSetEvaluation );
+
+  if ( *petSet != EVAL_EVAL )
+    outputf ( "(Note that this setting will have no effect until you\n"
+              "`set %s type evaluation'\n",
+              szSetCommand );
+}
+
+
+extern void
+CommandSetEvalParamRollout ( char *sz ) {
+
+  prcSet = &pesSet->rc;
+
+  HandleCommand (sz, acSetRollout );
+
+  if ( *petSet != EVAL_ROLLOUT )
+    outputf ( "(Note that this setting will have no effect until you\n"
+              "`set %s type rollout'\n",
+              szSetCommand );
+
+}
+
+
+extern void
+CommandSetAnalysisChequerplay ( char *sz ) {
+
+  petSet = &etAnalysisChequer;
+  pesSet = &esAnalysisChequer;
+
+  szSet = "Analysis chequerplay";
+  szSetCommand = "analysis chequerplay";
+
+  HandleCommand( sz, acSetEvalParam );
+
+}
+
+extern void
+CommandSetAnalysisCubedecision ( char *sz ) {
+
+
+  petSet = &etAnalysisCube;
+  pesSet = &esAnalysisCube;
+
+  szSet = "Analysis cubedecision";
+  szSetCommand = "analysis cubedecision";
+
+  HandleCommand( sz, acSetEvalParam );
+
+}
+
+
+extern void
+CommandSetEvalChequerplay ( char *sz ) {
+
+  petSet = &etEvalChequer;
+  pesSet = &esEvalChequer;
+
+  szSet = "`eval' and `hint' chequerplay";
+  szSetCommand = "evaluation chequerplay ";
+
+  HandleCommand( sz, acSetEvalParam );
+
+}
+
+extern void
+CommandSetEvalCubedecision ( char *sz ) {
+
+
+  petSet = &etEvalCube;
+  pesSet = &esEvalCube;
+
+  szSet = "`eval' and `hint' cube decisions";
+  szSetCommand = "evaluation cubedecisions ";
+
+  HandleCommand( sz, acSetEvalParam );
 
 }
 

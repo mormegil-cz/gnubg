@@ -49,14 +49,14 @@ extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
 static void ShowEvaluation( evalcontext *pec ) {
     
-    outputf( "    %d-ply evaluation.\n"
-             "    %d move search candidate%s.\n"
-             "    %0.3g cubeless search tolerance.\n"
-             "    %.0f%% speed.\n"
-             "    %s evaluations.\n",
+    outputf( "        %d-ply evaluation.\n"
+             "        %d move search candidate%s.\n"
+             "        %0.3g cubeless search tolerance.\n"
+             "        %d%% speed.\n"
+             "        %s evaluations.\n",
              pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
              "" : "s", pec->rSearchTolerance,
-             (pec->nReduced) ? 100. / pec->nReduced : 100.,
+             (pec->nReduced) ? 100 / pec->nReduced : 100,
              pec->fCubeful ? "Cubeful" : "Cubeless" );
 
     if( pec->rNoise )
@@ -67,6 +67,71 @@ static void ShowEvaluation( evalcontext *pec ) {
     outputl( pec->fDeterministic ? " (deterministic noise).\n" :
 	     " (pseudo-random noise).\n" );
 }
+
+
+extern void
+ShowRollout ( rolloutcontext *prc ) {
+
+  static char *aszRNG[] = {
+    "ANSI", "BSD", "ISAAC", "manual", "MD5", "Mersenne Twister",
+    "user supplied"
+  };
+
+  int i;
+
+  outputf( "%d game%s will be played per rollout.\n"
+           "Truncation after %d pl%s.\n"
+           "Lookahead variance reduction is %sabled.\n"
+           "Cube%s rollout.\n"
+           "%s dice generator with seed %u.\n",
+           prc->nTrials, prc->nTrials == 1 ? "" : "s",
+           prc->nTruncate, prc->nTruncate == 1 ? "y" : "ies",
+           prc->fVarRedn ? "en" : "dis",
+           prc->fCubeful ? "ful" : "less",
+           aszRNG[ prc->rngRollout ], prc->nSeed );
+
+  /* FIXME: more compact notation when aecCube = aecChequer etc. */
+
+  outputl ("Chequer play parameters:");
+
+  for ( i = 0; i < 2; i++ ) {
+    outputf ( "  Player %d:\n", i );
+    ShowEvaluation ( &prc->aecChequer[ i ] );
+  }
+
+  outputl ("Cube decision parameters:");
+
+  for ( i = 0; i < 2; i++ ) {
+    outputf ( "  Player %d:\n", i );
+    ShowEvaluation ( &prc->aecCube[ i ] );
+  }
+
+}
+
+
+extern void
+ShowEvalSetup ( evaltype *pet, evalsetup *pes ) {
+
+  switch ( *pet ) {
+
+  case EVAL_NONE:
+    outputl ( "      No evaluation." );
+    break;
+  case EVAL_EVAL:
+    outputl ( "      Neural net evaluation:" );
+    ShowEvaluation ( &pes->ec );
+    break;
+  case EVAL_ROLLOUT:
+    outputl ( "      Rollout:" );
+    ShowRollout ( &pes->rc );
+    break;
+  default:
+    assert ( FALSE );
+
+  }
+
+}
+
 
 static void ShowPaged( char **ppch ) {
 
@@ -143,6 +208,17 @@ extern void CommandShowAnalysis( char *sz ) {
 	     arSkillLevel[ SKILL_BAD ], arSkillLevel[ SKILL_VERYBAD ],
 	     arLuckLevel[ LUCK_VERYGOOD ], arLuckLevel[ LUCK_GOOD ],
 	     arLuckLevel[ LUCK_BAD ], arLuckLevel[ LUCK_VERYBAD ] );
+
+    outputl( "\n"
+             "The analysis will be perform with the "
+             "following evaluation paremters:" );
+    outputl( "    Chequer play:" );
+    ShowEvalSetup ( &etAnalysisChequer, &esAnalysisChequer );
+    outputl( "    Cube decisions:" );
+    ShowEvalSetup ( &etAnalysisCube, &esAnalysisCube );
+
+    
+
 }
 
 extern void CommandShowAutomatic( char *sz ) {
@@ -344,9 +420,14 @@ extern void CommandShowEngine( char *sz ) {
 
 extern void CommandShowEvaluation( char *sz ) {
 
-    outputl( "`eval', `hint' and analysis will use:" );
-    ShowEvaluation( &ecEval );
+    outputl( "`eval' and `hint' will use:" );
+    outputl( "    Chequer play:" );
+    ShowEvalSetup ( &etEvalChequer, &esEvalChequer );
+    outputl( "    Cube decisions:" );
+    ShowEvalSetup ( &etEvalCube, &esEvalCube );
+
 }
+
 
 extern void CommandShowJacoby( char *sz ) {
 
@@ -399,7 +480,10 @@ extern void CommandShowPlayer( char *sz ) {
 	    break;
 	case PLAYER_GNU:
 	    outputf( "gnubg:\n" );
-	    ShowEvaluation( &ap[ i ].ec );
+            outputl( "    Checker play:" );
+            ShowEvalSetup ( &ap[ i ].etChequer, &ap[ i ].esChequer );
+            outputl( "    Cube decisions:" );
+            ShowEvalSetup ( &ap[ i ].etCube, &ap[ i ].esCube );
 	    break;
 	case PLAYER_PUBEVAL:
 	    outputl( "pubeval\n" );
@@ -443,15 +527,9 @@ extern void CommandShowRNG( char *sz ) {
 
 extern void CommandShowRollout( char *sz ) {
 
-    outputl( "Rollouts will use:" );
-    ShowEvaluation( &ecRollout );
+  outputl( "`rollout' will use:" );
+  ShowRollout ( &rcRollout );
 
-    outputf( "%d game%s will be played per rollout, truncating after %d "
-	     "pl%s.\nLookahead variance reduction is %sabled.\n"
-	     "The base seed for rollout dice generation is %u.\n",
-	     nRollouts, nRollouts == 1 ? "" : "s", nRolloutTruncate,
-	     nRolloutTruncate == 1 ? "y" : "ies", fVarRedn ? "en" : "dis",
-	     nRolloutSeed );
 }
 
 extern void CommandShowScore( char *sz ) {
@@ -843,7 +921,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     /* calculate them based on current position */
 
-    if( EvaluatePosition( anBoard, arOutput, &ci, &ecEval ) < 0 )
+    if( EvaluatePosition( anBoard, arOutput, &ci, &esEvalCube.ec ) < 0 )
       return;
 
     if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
