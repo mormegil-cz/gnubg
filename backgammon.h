@@ -822,6 +822,7 @@ extern void CommandAccept( char * ),
     CommandSetRNGAnsi( char * ),
     CommandSetRNGBBS( char * ),
     CommandSetRNGBsd( char * ),
+    CommandSetRNGFile( char * ),
     CommandSetRNGIsaac( char * ),
     CommandSetRNGManual( char * ),
     CommandSetRNGMD5( char * ),
@@ -1011,6 +1012,12 @@ SetMatchInfo( char **ppch, char *sz, char *szMessage );
 
 extern void
 TextToClipboard ( const char * sz );
+
+#ifdef WIN32
+#define BIG_PATH _MAX_PATH
+#else
+#define BIG_PATH PATH_MAX
+#endif
 
 
 #endif

@@ -54,8 +54,8 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -76,7 +76,7 @@
 #endif
 
 
-char *aszRNG[] = {
+char *aszRNG[ NUM_RNGS ] = {
    N_ ("ANSI"),
    N_ ("Blum, Blum and Shub"),
    N_ ("BSD"),
@@ -85,7 +85,8 @@ char *aszRNG[] = {
    N_ ("MD5"),
    N_ ("Mersenne Twister"),
    N_ ("www.random.org"),
-   N_ ("user supplied")
+   N_ ("user supplied"),
+   N_ ("read-from-file")
 };
 
 
@@ -104,6 +105,12 @@ static void *pvUserRNGHandle;
 static char szUserRNGSeed[ 32 ];
 static char szUserRNGRandom[ 32 ];
 #endif
+
+char szDiceFilename[ BIG_PATH ];
+
+static int
+ReadDiceFile( void );
+
 
 static int GetManualDice( int anDice[ 2 ] ) {
 
@@ -393,6 +400,11 @@ extern void PrintRNGSeed( const rng rngx ) {
     case RNG_MD5:
 	outputf( _("The current seed is %u.\n"), nMD5 );
 	break;
+
+    case RNG_FILE:
+        outputf( _("GNU Backgammon is reading dice from file: %s\n"), 
+                 szDiceFilename );
+        break;
 	
     case RNG_USER:
 #if HAVE_LIBDL
@@ -467,6 +479,7 @@ extern void InitRNGSeed( int n, const rng rngx ) {
 
     case RNG_MANUAL:
     case RNG_RANDOM_DOT_ORG:
+    case RNG_FILE:
 	/* no-op */
       break;
 
@@ -513,6 +526,7 @@ static void InitRNGSeedMP( mpz_t n, rng rng ) {
     
     case RNG_MANUAL:
     case RNG_RANDOM_DOT_ORG:
+    case RNG_FILE:
 	/* no-op */
 	break;
     }
@@ -789,6 +803,20 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 
 #endif /* !HAVE_SOCKETS */
 
+      break;
+
+    case RNG_FILE:
+
+      anDice[ 0 ] = ReadDiceFile();
+      anDice[ 1 ] = ReadDiceFile();
+
+      if ( anDice[ 0 ] <= 0 || anDice[ 1 ] <= 0 )
+        return -1;
+      else
+        return 0;
+
+      break;
+
     }
 
     return -1;
@@ -886,3 +914,52 @@ extern void UserRNGClose( void ) {
 }
 
 #endif /* HAVE_LIBDL */
+
+
+static int hDice = -1;
+
+extern int
+OpenDiceFile( const char *sz ) {
+
+  strcpy( szDiceFilename, sz );
+
+  return ( hDice = PathOpen( sz, NULL, 0 ) );
+
+}
+
+extern void
+CloseDiceFile ( void ) {
+
+  if ( hDice >= 0 )
+    close( hDice );
+
+}
+
+
+static int
+ReadDiceFile( void ) {
+
+  unsigned char uch;
+  ssize_t n;
+
+  while ( 1 ) {
+  
+    n = read( hDice, &uch, 1 );
+
+    if ( !n ) {
+      /* end of file */
+      outputf( _("Rewinding dice file (%s)\n"), szDiceFilename );
+      lseek( hDice, 0, SEEK_SET );
+    }
+    else if ( n < 0 ) {
+      outputerr(szDiceFilename);
+      return -1;
+    }
+    else if ( uch >= '1' && uch <= '6' )
+      return (uch - '0');
+
+  }
+
+  return -1;
+
+}

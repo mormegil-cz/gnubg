@@ -24,10 +24,13 @@
 
 typedef enum _rng {
     RNG_ANSI, RNG_BBS, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MD5, RNG_MERSENNE, 
-    RNG_RANDOM_DOT_ORG, RNG_USER
+    RNG_RANDOM_DOT_ORG, RNG_USER, RNG_FILE,
+    NUM_RNGS
 } rng;
 
-extern char *aszRNG[];
+extern char *aszRNG[ NUM_RNGS ];
+
+extern char szDiceFilename[];
 
 extern rng rngCurrent;
 
@@ -48,5 +51,11 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1 );
 extern int UserRNGOpen( char * );
 extern void UserRNGClose( void );
 #endif
+
+extern int
+OpenDiceFile( const char *sz );
+
+extern void
+CloseDiceFile( void );
 
 #endif

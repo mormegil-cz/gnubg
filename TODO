@@ -331,7 +331,6 @@ the rollouts off and come back later.
   can be displayed efficiently. (gary)
 ** We provide access to non-deterministic dice from random.org.  Add
   completely deterministic dice from noentropy.net as well.
-** option to read dice from file (similar to Jellyfish)
 
 * Bugs believed fixed:
 ** Save the results of rollouts/evaluations performed with hint during playing
