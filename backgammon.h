@@ -1,7 +1,7 @@
 /*
  * backgammon.h
  *
- * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -218,7 +218,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fConfirm, fDisplay, fAutoBearoff, fShowProgress,
     nBeavers, fOutputMWC, fEgyptian, fOutputWinPC, fOutputMatchPC, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
-    fAnalyseDice, fAnalyseMove;
+    fAnalyseDice, fAnalyseMove, fRecord;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
@@ -367,7 +367,7 @@ extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
-  acSetRolloutPlayer[], cOnOff;
+    acSetRolloutPlayer[], cOnOff, cFilename;
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
@@ -517,6 +517,7 @@ extern void CommandAccept( char * ),
     CommandSetPlayer( char * ),
     CommandSetPostCrawford( char * ),
     CommandSetPrompt( char * ),
+    CommandSetRecord( char * ),
     CommandSetRNGAnsi( char * ),
     CommandSetRNGBsd( char * ),
     CommandSetRNGIsaac( char * ),

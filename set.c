@@ -1,7 +1,7 @@
 /*
  * set.c
  *
- * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -44,6 +44,7 @@
 #include "dice.h"
 #include "eval.h"
 #if USE_GTK
+#include "gtkgame.h"
 #include "gtkprefs.h"
 #endif
 #include "matchequity.h"
@@ -61,6 +62,7 @@
 static int iPlayerSet;
 
 static char szEQUITY[] = "<equity>",
+    szFILENAME[] = "<filename>",
     szNAME[] = "<name>",
     szNUMBER[] = "<number>",
     szONOFF[] = "on|off",
@@ -89,7 +91,7 @@ command acSetEvaluation[] = {
     { "cubedecision", CommandSetPlayerCubedecision, "Control cube decision "
       "parameters when gnubg plays", NULL, acSetEvalParam },
     { "external", CommandSetPlayerExternal, "Have another process make all "
-      "moves for a player", NULL, NULL },
+      "moves for a player", szFILENAME, &cFilename },
     { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
       NULL, NULL },
     { "human", CommandSetPlayerHuman, "Have a human make all moves for a "
@@ -868,6 +870,8 @@ extern void CommandSetPlayerExternal( char *sz ) {
     int h;
     struct sockaddr_un socsun;
        
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify the name of the socket to the external\n"
 		 "player -- try `help set player external'." );
@@ -1067,6 +1071,13 @@ extern void CommandSetPrompt( char *szParam ) {
 	szDefaultPrompt;
     
     outputf( "The prompt has been set to `%s'.\n", szPrompt );
+}
+
+extern void CommandSetRecord( char *sz ) {
+
+    SetToggle( "record", &fRecord, sz,
+	       "All games in a session will be recorded.",
+	       "Only the active game in a session will be recorded." );
 }
 
 extern void CommandSetRNGAnsi( char *sz ) {
@@ -1469,11 +1480,17 @@ extern void CommandSetScore( char *sz ) {
 	}
     }
 	     
-    if( plGame && ( pmgi = plGame->plNext->p ) ) {
+    if( ms.gs < GAME_OVER && plGame && ( pmgi = plGame->plNext->p ) ) {
 	assert( pmgi->mt == MOVE_GAMEINFO );
 	pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
 	pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
 	pmgi->fCrawfordGame = ms.fCrawford;
+#if USE_GTK
+	/* The score this game was started at is displayed in the option
+	   menu, and is now out of date. */
+	if( fX )
+	    GTKRegenerateGames();
+#endif
     }
     
     CommandShowScore( NULL );
