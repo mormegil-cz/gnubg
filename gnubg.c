@@ -3746,7 +3746,7 @@ HintChequer( char *sz ) {
 
   if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
 
-    ProgressStart( _("Considering moves...") );
+    ProgressStart( _("Considering move...") );
     if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
                             ms.anBoard, 
                             fHasMoved ? auch : NULL, 

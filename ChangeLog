@@ -1,3 +1,8 @@
+Sat Sep  6 18:06:51 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gnubg.c (HintChequer): Message synch with play.c.
+	Replace "Considering moves" with "Considering move".
+
 Sat Sep 6 16:14:58 GMT 2003   Jim Segrave <jes@jes-2.demon.nl>
 
 	* play.c - try to improve distinguishing cube & chequer play
