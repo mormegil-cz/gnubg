@@ -369,23 +369,23 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     /* cube analysis from move */
 
     TextPrintCubeAnalysisTable ( pf, 
-                                 GCCCONSTAHACK pmr->n.aarOutput,
-				 GCCCONSTAHACK pmr->n.aarStdDev,
-                                 pmr->n.fPlayer,
-                                 &pmr->n.esDouble, &ci, FALSE, -1,
-                                 pmr->n.stCube, SKILL_NONE );
+                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
+				 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                 pmr->fPlayer,
+                                 &pmr->CubeDecPtr->esDouble, &ci, FALSE, -1,
+                                 pmr->stCube, SKILL_NONE );
 
     break;
 
   case MOVE_DOUBLE:
 
     TextPrintCubeAnalysisTable ( pf, 
-                                 GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
-				 GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev,
-                                 pmr->d.fPlayer,
-                                 &pmr->d.CubeDecPtr->esDouble, 
+                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
+				 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                 pmr->fPlayer,
+                                 &pmr->CubeDecPtr->esDouble, 
 								 &ci, TRUE, -1,
-                                 pmr->d.st, SKILL_NONE );
+                                 pmr->stCube, SKILL_NONE );
 
     break;
 
@@ -395,14 +395,14 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     /* cube analysis from double, {take, drop, beaver} */
 
     TextPrintCubeAnalysisTable ( pf, 
-                                 GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
-				 GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev,
-                                 pmr->d.fPlayer,
-                                 &pmr->d.CubeDecPtr->esDouble, 
+                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
+				 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                 pmr->fPlayer,
+                                 &pmr->CubeDecPtr->esDouble, 
 								 &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
-                                 pmr->d.st );
+                                 pmr->stCube );
 
     break;
 
@@ -458,57 +458,57 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
       fprintf ( pf, " (%+7.3f)\n",
-                pmr->n.ml.amMoves[ pmr->n.iMove ].rScore -
-                pmr->n.ml.amMoves[ 0 ].rScore  );
+                pmr->ml.amMoves[ pmr->n.iMove ].rScore -
+                pmr->ml.amMoves[ 0 ].rScore  );
     else
       fprintf ( pf, " (%+6.3f%%)\n",
                 100.0f *
-                eq2mwc ( pmr->n.ml.amMoves[ pmr->n.iMove ].rScore, &ci ) - 
+                eq2mwc ( pmr->ml.amMoves[ pmr->n.iMove ].rScore, &ci ) - 
                 100.0f *
-                eq2mwc ( pmr->n.ml.amMoves[ 0 ].rScore, &ci ) );
+                eq2mwc ( pmr->ml.amMoves[ 0 ].rScore, &ci ) );
 
   }
 
-  if ( pmr->n.lt != LUCK_NONE ) {
+  if ( pmr->lt != LUCK_NONE ) {
 
     /* joker */
 
     fprintf ( pf, 
               _("Alert: %s roll!"),
-              gettext ( aszLuckType[ pmr->n.lt ] ) );
+              gettext ( aszLuckType[ pmr->lt ] ) );
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
-      fprintf ( pf, " (%+7.3f)\n", pmr->n.rLuck );
+      fprintf ( pf, " (%+7.3f)\n", pmr->rLuck );
     else
       fprintf ( pf, " (%+6.3f%%)\n",
-                100.0f * eq2mwc ( pmr->n.rLuck, &ci ) - 
+                100.0f * eq2mwc ( pmr->rLuck, &ci ) - 
                 100.0f * eq2mwc ( 0.0f, &ci ) );
 
   }
 
   fputs ( "\n", pf );
 
-  fprintf( pf, _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+  fprintf( pf, _("Rolled %d%d"), pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 
-  if( pmr->n.rLuck != ERR_VAL )
-    fprintf( pf, " (%s):\n", GetLuckAnalysis( pms, pmr->n.rLuck ) );
+  if( pmr->rLuck != ERR_VAL )
+    fprintf( pf, " (%s):\n", GetLuckAnalysis( pms, pmr->rLuck ) );
   else
     fprintf( pf, ":" );
 
-  if ( pmr->n.ml.cMoves ) {
+  if ( pmr->ml.cMoves ) {
 	
-    for( i = 0; i < pmr->n.ml.cMoves; i++ ) {
+    for( i = 0; i < pmr->ml.cMoves; i++ ) {
       if( i >= exsExport.nMoves && i != pmr->n.iMove )
         continue;
 
       fputc( i == pmr->n.iMove ? '*' : ' ', pf );
-      fputs( FormatMoveHint( szBuf, pms, &pmr->n.ml, i,
+      fputs( FormatMoveHint( szBuf, pms, &pmr->ml, i,
                              i != pmr->n.iMove ||
-                             i != pmr->n.ml.cMoves - 1 ||
-                             pmr->n.ml.cMoves == 1,
+                             i != pmr->ml.cMoves - 1 ||
+                             pmr->ml.cMoves == 1,
                              exsExport.fMovesDetailProb,
                              exsExport.afMovesParameters 
-                             [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ), 
+                             [ pmr->ml.amMoves[ i ].esMove.et - 1 ] ), 
              pf );
 
 
@@ -564,12 +564,12 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
                 _("* %s moves %s"),
-                ap[ pmr->n.fPlayer ].szName,
+                ap[ pmr->fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
-    else if ( ! pmr->n.ml.cMoves )
+    else if ( ! pmr->ml.cMoves )
       fprintf ( pf,
                 _("* %s cannot move"),
-                ap[ pmr->n.fPlayer ].szName );
+                ap[ pmr->fPlayer ].szName );
 
     fputs ( "\n", pf );
 
@@ -588,11 +588,11 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     if ( pmr->mt == MOVE_DOUBLE ) 
       fprintf ( pf,
                 "* %s doubles\n\n",
-                ap[ pmr->d.fPlayer ].szName );
+                ap[ pmr->fPlayer ].szName );
     else
       fprintf ( pf,
                 "* %s %s\n\n",
-                ap[ pmr->d.fPlayer ].szName,
+                ap[ pmr->fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
     
     if ( exsExport.fIncludeAnalysis )
@@ -642,30 +642,30 @@ TextPrintComment ( FILE *pf, const moverecord *pmr ) {
   switch ( pmr->mt ) {
 
   case MOVE_GAMEINFO:
-    sz = pmr->g.sz;
+    sz = pmr->sz;
     break;
   case MOVE_DOUBLE:
   case MOVE_TAKE:
   case MOVE_DROP:
-    sz = pmr->d.sz;
+    sz = pmr->sz;
     break;
   case MOVE_NORMAL:
-    sz = pmr->n.sz;
+    sz = pmr->sz;
     break;
   case MOVE_RESIGN:
-    sz = pmr->r.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETBOARD:
-    sz = pmr->sb.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETDICE:
-    sz = pmr->sd.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETCUBEVAL:
-    sz = pmr->scv.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETCUBEPOS:
-    sz = pmr->scp.sz;
+    sz = pmr->sz;
     break;
   case MOVE_TIME:
 	  /* ignore */
@@ -806,7 +806,7 @@ static void ExportGameText ( FILE *pf, list *plGame,
     int iMove = 0;
     statcontext *psc = NULL;
     static statcontext scTotal;
-    movegameinfo *pmgi = NULL;
+    xmovegameinfo *pmgi = NULL;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
@@ -842,14 +842,14 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
       case MOVE_NORMAL:
 
-	if( pmr->n.fPlayer != msExport.fMove ) {
+	if( pmr->fPlayer != msExport.fMove ) {
 	    SwapSides( msExport.anBoard );
-	    msExport.fMove = pmr->n.fPlayer;
+	    msExport.fMove = pmr->fPlayer;
 	}
       
-        msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
-        msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
-        msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+        msExport.fTurn = msExport.fMove = pmr->fPlayer;
+        msExport.anDice[ 0 ] = pmr->anDice[ 0 ];
+        msExport.anDice[ 1 ] = pmr->anDice[ 1 ];
 
         TextBoardHeader ( pf, &msExport, iGame, iMove );
 

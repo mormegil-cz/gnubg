@@ -291,12 +291,13 @@ static int RecordAbort( char *pchOut ) {
 
 static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
 
-    movegameinfo *pmgi = plGame->plNext->p;
+    moverecord *pmr = (moverecord *) plGame->plNext->p;
+    xmovegameinfo* pmgi = &pmr->g;
     int i;
     expaverage ea;
     float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
     
-    assert( pmgi->mt == MOVE_GAMEINFO );
+    assert( pmr->mt == MOVE_GAMEINFO );
     
     if( !pmgi->sc.fMoves || !pmgi->sc.fCube || !pmgi->sc.fDice )
 	/* game is not completely analysed */

@@ -941,8 +941,8 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     if ( pmr && pmr->mt == MOVE_NORMAL ) {
        /* roll dice */
        ms.gs = GAME_PLAYING;
-       ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
-       ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+       ms.anDice[ 0 ] = pmr->anDice[ 0 ];
+       ms.anDice[ 1 ] = pmr->anDice[ 1 ];
    }
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D)
@@ -1032,26 +1032,26 @@ static void CommentaryChanged( GtkWidget *pw, void *p ) {
        (which is much harder to get right) or requiring a specific command
        to update the text (which is probably inconvenient for the user). */
 
-    if( pmrAnnotation->a.sz )
-	free( pmrAnnotation->a.sz );
+    if( pmrAnnotation->sz )
+	free( pmrAnnotation->sz );
     
     if( gtk_text_get_length( GTK_TEXT( pw ) ) ) {
 	pch = gtk_editable_get_chars( GTK_EDITABLE( pw ), 0, -1 );
 	/* This copy is absolutely disgusting, but is necessary because GTK
 	   insists on giving us something allocated with g_malloc() instead
 	   of malloc(). */
-	pmrAnnotation->a.sz = strdup( pch );
+	pmrAnnotation->sz = strdup( pch );
 	g_free( pch );
 
 #ifndef WIN32
 	/* Strip trailing whitespace from the copy. */
-	for( pch = strchr( pmrAnnotation->a.sz, 0 ) - 1;
-	     pch > pmrAnnotation->a.sz && isspace( *pch ); pch-- )
+	for( pch = strchr( pmrAnnotation->sz, 0 ) - 1;
+	     pch > pmrAnnotation->sz && isspace( *pch ); pch-- )
 	    *pch = 0;
 #endif
 
     } else
-	pmrAnnotation->a.sz = NULL;
+	pmrAnnotation->sz = NULL;
 }
 
 static void DeleteMessage ( void )
@@ -1436,19 +1436,19 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 #endif
 
     case MOVE_NORMAL:
-	fPlayer = pmr->n.fPlayer;
+	fPlayer = pmr->fPlayer;
 	pch = sz;
-	sz[ 0 ] = pmr->n.anRoll[ 0 ] + '0';
-	sz[ 1 ] = pmr->n.anRoll[ 1 ] + '0';
+	sz[ 0 ] = pmr->anDice[ 0 ] + '0';
+	sz[ 1 ] = pmr->anDice[ 1 ] + '0';
 	sz[ 2 ] = ':';
 	sz[ 3 ] = ' ';
 	FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );
 	strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
-	strcat( sz, aszSkillTypeAbbr[ pmr->n.stCube ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 
     case MOVE_DOUBLE:
-	fPlayer = pmr->d.fPlayer;
+	fPlayer = pmr->fPlayer;
 	pch = sz;
 
         switch ( ( dt = DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn ) ) ) {
@@ -1466,30 +1466,30 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
           assert ( FALSE );
           break;
         }
-	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 	
     case MOVE_TAKE:
-	fPlayer = pmr->d.fPlayer;
+	fPlayer = pmr->fPlayer;
 	strcpy( pch = sz, _("Take") );
-	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 	
     case MOVE_DROP:
-	fPlayer = pmr->d.fPlayer;
+	fPlayer = pmr->fPlayer;
 	strcpy( pch = sz, _("Drop") );
-	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;
 	
     case MOVE_RESIGN:
-	fPlayer = pmr->r.fPlayer;
+	fPlayer = pmr->fPlayer;
 	pch = _(" Resigns"); /* FIXME show value */
 	break;
 
     case MOVE_SETDICE:
-	fPlayer = pmr->sd.fPlayer;
-	sprintf( pch = sz, _("Rolled %d%d"), pmr->sd.anDice[ 0 ],
-		 pmr->sd.anDice[ 1 ] );
+	fPlayer = pmr->fPlayer;
+	sprintf( pch = sz, _("Rolled %d%d"), pmr->anDice[ 0 ],
+		 pmr->anDice[ 1 ] );
 	break;
 
     case MOVE_SETBOARD:
@@ -1640,7 +1640,7 @@ SkillMenu(skilltype stSelect, char* szAnno)
  */
 
 static GtkWidget *
-TimeAnalysis( const movetime *pmt, const matchstate *pms ) {
+TimeAnalysis( const moverecord *pmr, const matchstate *pms ) {
 
   cubeinfo ci;
   GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
@@ -1650,13 +1650,13 @@ TimeAnalysis( const movetime *pmt, const matchstate *pms ) {
 
   char *sz;
 
-  if ( pmt->es.et == EVAL_NONE ) 
+  if ( pmr->t.es.et == EVAL_NONE ) 
     return NULL;
 
   GetMatchStateCubeInfo ( &ci, pms );
 
   sz = g_strdup_printf( _("Time penalty: %s loses %d points"), 
-                        ap[ pmt->fPlayer ].szName, pmt->nPoints );
+                        ap[ pmr->fPlayer ].szName, pmr->t.nPoints );
   pwLabel = gtk_label_new ( sz );
   gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
   gtk_table_attach ( GTK_TABLE ( pwTable ),
@@ -1696,7 +1696,7 @@ TimeAnalysis( const movetime *pmt, const matchstate *pms ) {
   /* Second column: equities/mwc */
 
   pwLabel = 
-    gtk_label_new ( OutputMWC( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], &ci, TRUE ) );
+    gtk_label_new ( OutputMWC( pmr->t.aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], &ci, TRUE ) );
   gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
   gtk_table_attach ( GTK_TABLE ( pwTable ),
                      pwLabel,
@@ -1706,7 +1706,7 @@ TimeAnalysis( const movetime *pmt, const matchstate *pms ) {
 
 
   pwLabel = 
-    gtk_label_new ( OutputMWC( pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci , TRUE ) );
+    gtk_label_new ( OutputMWC( pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci , TRUE ) );
   gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
   gtk_table_attach ( GTK_TABLE ( pwTable ),
                      pwLabel,
@@ -1715,7 +1715,7 @@ TimeAnalysis( const movetime *pmt, const matchstate *pms ) {
                      8, 2 );
 
   pwLabel = 
-    gtk_label_new ( OutputMWCDiff( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] , pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci ) );
+    gtk_label_new ( OutputMWCDiff( pmr->t.aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] , pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci ) );
   gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
   gtk_table_attach ( GTK_TABLE ( pwTable ),
                      pwLabel,
@@ -1923,10 +1923,10 @@ static void SetAnnotation( moverecord *pmr ) {
     fAutoCommentaryChange = FALSE;
     
     if( pmr ) {
-	if( pmr->a.sz ) {
+	if( pmr->sz ) {
 	    fAutoCommentaryChange = TRUE;
 	    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL,
-			     (pmr->a.sz), -1 );
+			     (pmr->sz), -1 );
 	    fAutoCommentaryChange = FALSE;
 	}
 
@@ -1949,13 +1949,13 @@ static void SetAnnotation( moverecord *pmr ) {
 
 #if 0
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
-				RollAnalysis( pmr->n.anRoll[ 0 ],
-					      pmr->n.anRoll[ 1 ],
-					      pmr->n.rLuck, pmr->n.lt ),
+				RollAnalysis( pmr->anDice[ 0 ],
+					      pmr->anDice[ 1 ],
+					      pmr->rLuck, pmr->lt ),
 				FALSE, FALSE, 4 );
 #endif
 
-	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
+	    ms.fMove = ms.fTurn = pmr->fPlayer;
 
             /* 
              * Skill and luck
@@ -1970,7 +1970,7 @@ static void SetAnnotation( moverecord *pmr ) {
                                    gtk_label_new ( _("Didn't double") ),
                                    FALSE, FALSE, 4 );
               gtk_box_pack_start ( GTK_BOX ( pwBox ),
-                                   SkillMenu ( pmr->n.stCube, "cube" ),
+                                   SkillMenu ( pmr->stCube, "cube" ),
                                    FALSE, FALSE, 4 );
 
 #endif
@@ -1980,11 +1980,11 @@ static void SetAnnotation( moverecord *pmr ) {
                                    0, 1, 0, 1 );
 #if ANALYSIS_HORIZONTAL
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   SkillMenu ( pmr->n.stCube, "cube" ),
+                                   SkillMenu ( pmr->stCube, "cube" ),
                                    1, 2, 0, 1 );
 #else
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   SkillMenu ( pmr->n.stCube, "cube" ),
+                                   SkillMenu ( pmr->stCube, "cube" ),
                                    0, 1, 1, 2 );
 #endif
             }
@@ -1997,15 +1997,15 @@ static void SetAnnotation( moverecord *pmr ) {
     GtkWidget *pwMenu, *pwOptionMenu, *pwItem;
     lucktype lt;
     
-    pch = sz + sprintf( sz, _("Rolled %d%d"), pmr->n.anRoll[0], pmr->n.anRoll[1] );
+    pch = sz + sprintf( sz, _("Rolled %d%d"), pmr->anDice[0], pmr->anDice[1] );
     
-    if( pmr->n.rLuck != ERR_VAL ) {
+    if( pmr->rLuck != ERR_VAL ) {
 	if( fOutputMWC && ms.nMatchTo ) {
 	    GetMatchStateCubeInfo( &ci, &ms );
 	    pch += sprintf( pch, " (%+0.3f%%)",
-	     100.0f * ( eq2mwc( pmr->n.rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
+	     100.0f * ( eq2mwc( pmr->rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
 	} else
-	    pch += sprintf( pch, " (%+0.3f)", pmr->n.rLuck );
+	    pch += sprintf( pch, " (%+0.3f)", pmr->rLuck );
     }
 #if ANALYSIS_HORIZONTAL
     gtk_table_attach_defaults( GTK_TABLE( pwBox ),
@@ -2029,7 +2029,7 @@ static void SetAnnotation( moverecord *pmr ) {
     
     pwOptionMenu = gtk_option_menu_new();
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
-    gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), pmr->n.lt );
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), pmr->lt );
 
     gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 1, 2, 1, 2 );
 
@@ -2073,16 +2073,16 @@ static void SetAnnotation( moverecord *pmr ) {
 
             /* cube */
 
-            pwCubeAnalysis = CreateCubeAnalysis( pmr->n.aarOutput, 
-                                                 pmr->n.aarStdDev,
-                                                 &pmr->n.esDouble, 
+            pwCubeAnalysis = CreateCubeAnalysis( pmr->CubeDecPtr->aarOutput, 
+                                                 pmr->CubeDecPtr->aarStdDev,
+                                                 &pmr->CubeDecPtr->esDouble, 
                                                  MOVE_NORMAL );
 
 
             /* move */
 			      
-	    if( pmr->n.ml.cMoves ) 
-              pwMoveAnalysis = CreateMoveList( &pmr->n.ml, &pmr->n.iMove,
+	    if( pmr->ml.cMoves ) 
+              pwMoveAnalysis = CreateMoveList( &pmr->ml, &pmr->n.iMove,
                                                TRUE, FALSE, !woPanel[WINDOW_ANALYSIS].docked);
 
             if ( pwMoveAnalysis && pwCubeAnalysis ) {
@@ -2135,16 +2135,16 @@ static void SetAnnotation( moverecord *pmr ) {
                                    gettext ( aszDoubleTypes[ dt ] ) ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->d.st, "double" ),
+                                SkillMenu( pmr->stCube, "double" ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 
             if ( dt == DT_NORMAL ) {
 	    
-              if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
-                                               pmr->d.CubeDecPtr->aarStdDev,
-                                               &pmr->d.CubeDecPtr->esDouble,
+              if ( ( pw = CreateCubeAnalysis ( pmr->CubeDecPtr->aarOutput,
+                                               pmr->CubeDecPtr->aarStdDev,
+                                               &pmr->CubeDecPtr->esDouble,
                                                MOVE_DOUBLE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
@@ -2172,17 +2172,17 @@ static void SetAnnotation( moverecord *pmr ) {
 				    _("Drop") ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->d.st, 
-                                           ( pmr->d.mt == MOVE_TAKE ) ?
+                                SkillMenu( pmr->stCube, 
+                                           ( pmr->mt == MOVE_TAKE ) ?
                                            "take" : "drop" ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 
             if ( tt == TT_NORMAL ) {
-              if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
-                                               pmr->d.CubeDecPtr->aarStdDev,
-                                               &pmr->d.CubeDecPtr->esDouble,
+              if ( ( pw = CreateCubeAnalysis ( pmr->CubeDecPtr->aarOutput,
+                                               pmr->CubeDecPtr->aarStdDev,
+                                               &pmr->CubeDecPtr->esDouble,
                                                pmr->mt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
@@ -2242,16 +2242,16 @@ static void SetAnnotation( moverecord *pmr ) {
 	    break;
 	    
 	case MOVE_SETDICE:
-	    pwAnalysis = RollAnalysis( pmr->sd.anDice[ 0 ],
-				       pmr->sd.anDice[ 1 ],
-				       pmr->sd.rLuck, pmr->sd.lt );
+	    pwAnalysis = RollAnalysis( pmr->anDice[ 0 ],
+				       pmr->anDice[ 1 ],
+				       pmr->rLuck, pmr->lt );
 	    break;
 
 #if USE_TIMECONTROL
 
         case MOVE_TIME:
 
-          pwAnalysis = TimeAnalysis( &pmr->t, &ms );
+          pwAnalysis = TimeAnalysis( pmr, &ms );
           break;
 
 #endif /* USE_TIMECONTROL */
@@ -2275,7 +2275,7 @@ static void SetAnnotation( moverecord *pmr ) {
     if ( pmr && pmr->mt == MOVE_NORMAL && pwMoveAnalysis && pwCubeAnalysis ) {
 
       /* (FIXME) Not sure here about SKILL_GOOD */
-      if ( badSkill(pmr->n.stCube) )
+      if ( badSkill(pmr->stCube) )
         gtk_notebook_set_page ( GTK_NOTEBOOK ( pw ), 1 );
 
 
@@ -2318,7 +2318,7 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	if( plGame->plNext->plNext->p ) {
 	    moverecord *pmrNext = plGame->plNext->plNext->p;
 
-	    if( pmrNext->mt == MOVE_NORMAL && pmrNext->n.fPlayer == 1 )
+	    if( pmrNext->mt == MOVE_NORMAL && pmrNext->fPlayer == 1 )
 		xCurrent = 2;
 	    else
 		xCurrent = 1;
@@ -8861,7 +8861,7 @@ static void SetStats(const statcontext *psc)
 
 const statcontext *GetStatContext(int game)
 {
-	movegameinfo *pmgi;
+	xmovegameinfo *pmgi;
 	int i;
 
 	if (!game)
@@ -8873,7 +8873,7 @@ const statcontext *GetStatContext(int game)
 			pl = pl->plNext;
 
 		plGame = pl->p;
-		pmgi = plGame->plNext->p;
+                pmgi = &((moverecord *) plGame->plNext->p)->g;
 		return &pmgi->sc;
 	}
 }

@@ -1,3 +1,12 @@
+Fri May  7 16:17:09 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Change union moverecord into struct moverecord
+	(this is step 1 towards better support for editing positions
+	and storing analysis)
+
+ 	* backgammon.h: Change union moverecord into struct moverecord
+	(change a gazillion subroutines)
+
 Fri May  8 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgame.c, gtkpath.c, set.c: Added png to set path command

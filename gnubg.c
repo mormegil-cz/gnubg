@@ -3092,9 +3092,10 @@ extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms ) {
 #if USE_TIMECONTROL
 
 static void
-DisplayTimeAnalysis( const movetime *pmt, const matchstate *pms ) {
+DisplayTimeAnalysis( const moverecord *pmr, const matchstate *pms ) {
 
   cubeinfo ci;
+  const xmovetime *pmt = &pmr->t;
 
   if ( pmt->es.et == EVAL_NONE )
     /* no analysis */
@@ -3103,7 +3104,7 @@ DisplayTimeAnalysis( const movetime *pmt, const matchstate *pms ) {
   GetMatchStateCubeInfo ( &ci, pms );
 
   outputf( _("Time penalty: %s loses %d points\n"), 
-           ap[ pmt->fPlayer ].szName, pmt->nPoints );
+           ap[ pmr->fPlayer ].szName, pmt->nPoints );
 
   outputf( _("%-30.30s %s\n"), 
            _("Equity before time penalty:"),
@@ -3167,34 +3168,34 @@ static void DisplayAnalysis( moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-        DisplayCubeAnalysis( GCCCONSTAHACK pmr->n.aarOutput,
-			     GCCCONSTAHACK pmr->n.aarStdDev,
-                             &pmr->n.esDouble );
+        DisplayCubeAnalysis( GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
+			     GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                             &pmr->CubeDecPtr->esDouble );
 
-	outputf( _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+	outputf( _("Rolled %d%d"), pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 
-	if( pmr->n.rLuck != ERR_VAL )
-	    outputf( " (%s):\n", GetLuckAnalysis( &ms, pmr->n.rLuck ) );
+	if( pmr->rLuck != ERR_VAL )
+	    outputf( " (%s):\n", GetLuckAnalysis( &ms, pmr->rLuck ) );
 	else
 	    outputl( ":" );
 	
-	for( i = 0; i < pmr->n.ml.cMoves; i++ ) {
+	for( i = 0; i < pmr->ml.cMoves; i++ ) {
 	    if( i >= 10 /* FIXME allow user to choose limit */ &&
 		i != pmr->n.iMove )
 		continue;
 	    outputc( i == pmr->n.iMove ? '*' : ' ' );
-	    output( FormatMoveHint( szBuf, &ms, &pmr->n.ml, i,
+	    output( FormatMoveHint( szBuf, &ms, &pmr->ml, i,
 				    i != pmr->n.iMove ||
-				    i != pmr->n.ml.cMoves - 1, TRUE, TRUE ) );
+				    i != pmr->ml.cMoves - 1, TRUE, TRUE ) );
 
 	}
 	
 	break;
 
     case MOVE_DOUBLE:
-      DisplayCubeAnalysis( GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput,
-                           GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev,
-                           &pmr->n.esDouble );
+      DisplayCubeAnalysis( GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
+                           GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                           &pmr->CubeDecPtr->esDouble );
 	break;
 
     case MOVE_TAKE:
@@ -3203,16 +3204,16 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 	
     case MOVE_SETDICE:
-	if( pmr->n.rLuck != ERR_VAL )
-	    outputf( _("Rolled %d%d (%s):\n"), pmr->sd.anDice[ 0 ],
-		     pmr->sd.anDice[ 1 ], GetLuckAnalysis( &ms,
-							   pmr->sd.rLuck ) );
+	if( pmr->rLuck != ERR_VAL )
+	    outputf( _("Rolled %d%d (%s):\n"), 
+                     pmr->anDice[ 0 ], pmr->anDice[ 1 ], 
+                     GetLuckAnalysis( &ms, pmr->rLuck ) );
 	break;
 
 #if USE_TIMECONTROL
     case MOVE_TIME:
 
-      DisplayTimeAnalysis( &pmr->t, &ms );
+      DisplayTimeAnalysis( pmr, &ms );
 
       break;
 
@@ -3390,8 +3391,8 @@ extern void ShowBoard( void ) {
 
 	if (woPanel[WINDOW_ANALYSIS].showing && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
-	    if( pmr->a.sz )
-		outputl( pmr->a.sz ); /* FIXME word wrap */
+	    if( pmr->sz )
+		outputl( pmr->sz ); /* FIXME word wrap */
 	}
 	
 	if( !ms.fMove )
@@ -4643,7 +4644,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
           continue;
 	    break;
 	case MOVE_NORMAL:
-	    sprintf( sz, "%d%d: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+	    sprintf( sz, "%d%d: ", pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
 	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    SwapSides( anBoard );
@@ -4664,7 +4665,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
         case MOVE_RESIGN:
-            if (pmr->r.fPlayer)
+            if (pmr->fPlayer)
               sprintf( sz, "%s      Wins %d point%s\n", (i & 1) ? "\n" : "",
                        pmr->r.nResigned * nFileCube,
                        ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
@@ -4674,7 +4675,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
                         pmr->r.nResigned * nFileCube,
                         ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
             if( anScore )
-                anScore[ !pmr->r.fPlayer ] += pmr->r.nResigned * nFileCube;
+                anScore[ !pmr->fPlayer ] += pmr->r.nResigned * nFileCube;
             break;
 	case MOVE_SETDICE:
 	    /* ignore */
@@ -4693,7 +4694,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	    break;
 	}
 
-	if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) {
+	if( !i && pmr->mt == MOVE_NORMAL && pmr->fPlayer ) {
 	    fputs( "  1)                             ", pf );
 	    i++;
 	}
@@ -8423,9 +8424,9 @@ swapGame ( list *plGame ) {
 #if USE_TIMECONTROL
     {
 	struct timeval tv;
-	tv = pmr->a.tl[0];
-	pmr->a.tl[0] = pmr->a.tl[1];
-	pmr->a.tl[1] = tv;
+	tv = pmr->tl[0];
+	pmr->tl[0] = pmr->tl[1];
+	pmr->tl[1] = tv;
     }
 #endif
     switch ( pmr->mt ) {
@@ -8451,40 +8452,18 @@ swapGame ( list *plGame ) {
     case MOVE_DOUBLE:
     case MOVE_TAKE:
     case MOVE_DROP:
-
-      pmr->d.fPlayer = ! pmr->d.fPlayer;
-      break;
-
     case MOVE_NORMAL:
-
-      pmr->d.fPlayer = ! pmr->d.fPlayer;
-      break;
-
-
     case MOVE_RESIGN:
-      
-      pmr->r.fPlayer = ! pmr->r.fPlayer;
+    case MOVE_SETDICE:
+    case MOVE_TIME:
+
+      pmr->fPlayer = ! pmr->fPlayer;
       break;
 
     case MOVE_SETBOARD:
-
-      /*no op */
-      break;
-
-    case MOVE_SETDICE:
-      
-      pmr->sd.fPlayer = ! pmr->sd.fPlayer;
-      break;
-
     case MOVE_SETCUBEVAL:
 
-      /* no-op */
-      break;
-
-    case MOVE_TIME:
-#if USE_TIMECONTROL
-      pmr->t.fPlayer = ! pmr->t.fPlayer;
-#endif
+      /*no op */
       break;
 
     case MOVE_SETCUBEPOS:

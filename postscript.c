@@ -1056,9 +1056,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    
 	case MOVE_NORMAL:
 
-	    msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
-            msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
-            msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+	    msExport.fTurn = msExport.fMove = pmr->fPlayer;
+            msExport.anDice[ 0 ] = pmr->anDice[ 0 ];
+            msExport.anDice[ 1 ] = pmr->anDice[ 1 ];
 
 	    if( fTook )
 		/* no need to print board following a double/take */
@@ -1066,33 +1066,33 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    else {
 		Ensure( pf, 260 * nMag / 100 + 30 );
 		PostScriptBoardHeader ( pf, &msExport, iMove );
-		PrintPostScriptBoard( pf, &msExport, pmr->n.fPlayer );
+		PrintPostScriptBoard( pf, &msExport, pmr->fPlayer );
 	    }
 	    
-	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-                                         GCCCONSTAHACK pmr->n.aarOutput,
-					 GCCCONSTAHACK pmr->n.aarStdDev, 
-                                         &pmr->n.esDouble );
+	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->fPlayer,
+                                         GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
+					 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev, 
+                                         &pmr->CubeDecPtr->esDouble );
 	    
 	    Advance( pf, 10 );
 	    FormatMove( sz, msExport.anBoard, pmr->n.anMove );
 	    RequestFont( pf, FONT_RM, 10 );
 	    cx = 15 /* 2 digits + colon + space */ +
-		StringWidth( aszLuckTypeAbbr[ pmr->n.lt ] ) +
+		StringWidth( aszLuckTypeAbbr[ pmr->lt ] ) +
 		StringWidth( aszSkillTypeAbbr[ pmr->n.stMove ] ) +
 		StringWidth( sz );
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%d%d%s: %s%s) Tj\n" :
 		     "%d %d moveto (%d%d%s: %s%s) show\n",
 		     225 - cx / 2 + 6, y,
-		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
-		     aszLuckTypeAbbr[ pmr->n.lt ], sz,
+		     pmr->anDice[ 0 ], pmr->anDice[ 1 ],
+		     aszLuckTypeAbbr[ pmr->lt ], sz,
 		     aszSkillTypeAbbr[ pmr->n.stMove ] );
-	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->fPlayer );
             /* FIXME: output cube skill as well */
 
-	    if( pmr->n.ml.cMoves ) {
+	    if( pmr->ml.cMoves ) {
 		Skip( pf, 4 );
-		for( i = 0; i < pmr->n.ml.cMoves && i <= pmr->n.iMove; i++ ) {
+		for( i = 0; i < pmr->ml.cMoves && i <= pmr->n.iMove; i++ ) {
 		    if( i >= 5 /* FIXME allow user to choose limit */ &&
 			i != pmr->n.iMove )
 			continue;
@@ -1103,9 +1103,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 		    fprintf( pf, fPDF ? "1 0 0 1 46 %d Tm (" :
 			     "46 %d moveto (", y );
 		    putc( i == pmr->n.iMove ? '*' : ' ', pf );
-		    FormatMoveHint( sz, &msExport, &pmr->n.ml, i,
+		    FormatMoveHint( sz, &msExport, &pmr->ml, i,
 				    i != pmr->n.iMove ||
-				    i != pmr->n.ml.cMoves - 1, TRUE, TRUE );
+				    i != pmr->ml.cMoves - 1, TRUE, TRUE );
 		    pch = strchr( sz, '\n' );
 		    *pch++ = 0;
 		    fputs( sz, pf );
@@ -1121,7 +1121,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 		}
 	    }
 
-	    PrintPostScriptComment( pf, pmr->a.sz );
+	    PrintPostScriptComment( pf, pmr->sz );
 
 	    Skip( pf, 6 );
 
@@ -1131,25 +1131,25 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    
 	case MOVE_DOUBLE:	    
 	    Ensure( pf, 260 * nMag / 100 );
-	    PrintPostScriptBoard( pf, &msExport, pmr->d.fPlayer );
+	    PrintPostScriptBoard( pf, &msExport, pmr->fPlayer );
 
-	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-                                         GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
-                                         GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev, 
-                                         &pmr->d.CubeDecPtr->esDouble );
+	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->fPlayer,
+                                         GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
+                                         GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev, 
+                                         &pmr->CubeDecPtr->esDouble );
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Double) stringwidth = 29.439 */
-	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 29;
+	    cx = StringWidth( aszSkillTypeAbbr[ pmr->stCube ] ) + 29;
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s%s) Tj\n" :
 		     "%d %d moveto (%s%s) show\n", 225 - cx / 2 + 6, y,
                      _("Double"),
-		     aszSkillTypeAbbr[ pmr->d.st ] );
+		     aszSkillTypeAbbr[ pmr->stCube ] );
 	    
-	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->fPlayer );
 
-	    PrintPostScriptComment( pf, pmr->a.sz );
+	    PrintPostScriptComment( pf, pmr->sz );
 
 	    Skip( pf, 6 );
 
@@ -1163,15 +1163,15 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Take) stringwidth = 19.9892 */
-	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 20;
+	    cx = StringWidth( aszSkillTypeAbbr[ pmr->stCube ] ) + 20;
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s%s) Tj\n" :
 		     "%d %d moveto (%s%s) show\n", 225 - cx / 2 + 6, y,
                      _("Take"),
-		     aszSkillTypeAbbr[ pmr->d.st ] );
+		     aszSkillTypeAbbr[ pmr->stCube ] );
 	    
-	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->fPlayer );
 
-	    PrintPostScriptComment( pf, pmr->a.sz );
+	    PrintPostScriptComment( pf, pmr->sz );
 
 	    Skip( pf, 6 );
 
@@ -1183,15 +1183,15 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Drop) stringwidth = 20.5494 */
-	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 20;
+	    cx = StringWidth( aszSkillTypeAbbr[ pmr->stCube ] ) + 20;
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%s%s) Tj\n" :
 		     "%d %d moveto (%s%s) show\n", 225 - cx / 2 + 6, y,
                      _("Drop"),
-		     aszSkillTypeAbbr[ pmr->d.st ] );
+		     aszSkillTypeAbbr[ pmr->stCube ] );
 	    
-	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->fPlayer );
 	    
-	    PrintPostScriptComment( pf, pmr->a.sz );
+	    PrintPostScriptComment( pf, pmr->sz );
 
 	    Skip( pf, 6 );
 
@@ -1209,11 +1209,11 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
                      _("Resigns"),
 		     gettext ( aszGameResult[ pmr->r.nResigned - 1 ] ) );
 	    
-	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->fPlayer );
 	    
 	    /* FIXME print resignation analysis, if available */
 	    
-	    PrintPostScriptComment( pf, pmr->a.sz );
+	    PrintPostScriptComment( pf, pmr->sz );
 
 	    Skip( pf, 6 );
 

@@ -873,14 +873,14 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
     pgcOpp->tvStamp = *tvp;
 
     if (pen) {
-    moverecord *pmr;
-	pmr = malloc( sizeof( movetime ) );
+        moverecord *pmr = NewMoveRecord();
+
 	pmr->mt = MOVE_TIME;
-	pmr->t.sz = 0;
-	pmr->t.fPlayer = ms.fTurn;
-	pmr->t.tl[0] = ms.gc.pc[0].tvTimeleft;
-	pmr->t.tl[1] = ms.gc.pc[1].tvTimeleft;
+	pmr->fPlayer = ms.fTurn;
+	pmr->tl[0] = ms.gc.pc[0].tvTimeleft;
+	pmr->tl[1] = ms.gc.pc[1].tvTimeleft;
 	pmr->t.nPoints = pen;
+
 	AddMoveRecord( pmr );
    }
    return pen;

@@ -618,7 +618,7 @@ extern void CommandSetAutoRoll( char *sz ) {
 extern void CommandSetBoard( char *sz ) {
 
     int an[ 2 ][ 25 ];
-    movesetboard *pmsb;
+    moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("There must be a game in progress to set the board.") );
@@ -636,15 +636,15 @@ extern void CommandSetBoard( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
-    pmsb = malloc( sizeof( *pmsb ) );
-    pmsb->mt = MOVE_SETBOARD;
-    pmsb->sz = NULL;
+    pmr = NewMoveRecord();
+
+    pmr->mt = MOVE_SETBOARD;
     
     if( ms.fMove )
 	SwapSides( an );
-    PositionKey( an, pmsb->auchKey );
+    PositionKey( an, pmr->sb.auchKey );
     
-    AddMoveRecord( pmsb );
+    AddMoveRecord( pmr );
     
     ShowBoard();
 }
@@ -767,17 +767,17 @@ extern void CommandSetConfirmSave( char *sz ) {
 
 extern void CommandSetCubeCentre( char *sz ) {
 
-    movesetcubepos *pmscp;
+    moverecord *pmr;
     
     if( CheckCubeAllowed() )
 	return;
     
-    pmscp = malloc( sizeof( *pmscp ) );
-    pmscp->mt = MOVE_SETCUBEPOS;
-    pmscp->sz = NULL;
-    pmscp->fCubeOwner = -1;
+    pmr = NewMoveRecord();
+
+    pmr->mt = MOVE_SETCUBEPOS;
+    pmr->scp.fCubeOwner = -1;
     
-    AddMoveRecord( pmscp );
+    AddMoveRecord( pmr );
     
     outputl( _("The cube has been centred (either player may double).") );
     
@@ -789,7 +789,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 
 extern void CommandSetCubeOwner( char *sz ) {
 
-    movesetcubepos *pmscp;
+    moverecord *pmr;
     
     int i;
     
@@ -812,12 +812,12 @@ extern void CommandSetCubeOwner( char *sz ) {
 	return;
     }
 
-    pmscp = malloc( sizeof( *pmscp ) );
-    pmscp->mt = MOVE_SETCUBEPOS;
-    pmscp->sz = NULL;
-    pmscp->fCubeOwner = i;
+    pmr = NewMoveRecord();
+
+    pmr->mt = MOVE_SETCUBEPOS;
+    pmr->scp.fCubeOwner = i;
     
-    AddMoveRecord( pmscp );
+    AddMoveRecord( pmr );
     
     outputf( _("%s now owns the cube.\n"), ap[ ms.fCubeOwner ].szName );
     
@@ -863,7 +863,7 @@ extern void CommandSetCubeUse( char *sz ) {
 extern void CommandSetCubeValue( char *sz ) {
 
     int i, n;
-    movesetcubeval *pmscv;
+    moverecord *pmr;
     
     if( CheckCubeAllowed() )
 	return;
@@ -872,12 +872,12 @@ extern void CommandSetCubeValue( char *sz ) {
 
     for( i = MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
-	    pmscv = malloc( sizeof( *pmscv ) );
-	    pmscv->mt = MOVE_SETCUBEVAL;
-	    pmscv->sz = NULL;
-	    pmscv->nCube = n;
+            pmr = NewMoveRecord();
+	    pmr->mt = MOVE_SETCUBEVAL;
 
-	    AddMoveRecord( pmscv );
+	    pmr->scv.nCube = n;
+
+	    AddMoveRecord( pmr );
 	    
 	    outputf( _("The cube has been set to %d.\n"), n );
 	    
@@ -927,7 +927,7 @@ extern void CommandSetDelay( char *sz ) {
 extern void CommandSetDice( char *sz ) {
 
     int n0, n1;
-    movesetdice *pmsd;
+    moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("There must be a game in progress to set the dice.") );
@@ -950,16 +950,14 @@ extern void CommandSetDice( char *sz ) {
 	return;
     }
 
-    pmsd = malloc( sizeof( *pmsd ) );
-    pmsd->mt = MOVE_SETDICE;
-    pmsd->sz = NULL;
-    pmsd->fPlayer = ms.fMove;
-    pmsd->anDice[ 0 ] = n0;
-    pmsd->anDice[ 1 ] = n1;
-    pmsd->lt = LUCK_NONE;
-    pmsd->rLuck = ERR_VAL;
+    pmr = NewMoveRecord();
+
+    pmr->mt = MOVE_SETDICE;
+    pmr->fPlayer = ms.fMove;
+    pmr->anDice[ 0 ] = n0;
+    pmr->anDice[ 1 ] = n1;
     
-    AddMoveRecord( pmsd );
+    AddMoveRecord( pmr );
 
     outputf( _("The dice have been set to %d and %d.\n"), n0, n1 );
 
@@ -2323,7 +2321,8 @@ CommandSetRolloutLatePlayer ( char *sz ) {
 extern void CommandSetScore( char *sz ) {
 
     long int n0, n1;
-    movegameinfo *pmgi;
+    moverecord *pmr;
+    xmovegameinfo *pmgi;
     char *pch0, *pch1, *pchEnd0, *pchEnd1;
     int fCrawford0, fCrawford1, fPostCrawford0, fPostCrawford1;
 
@@ -2451,8 +2450,10 @@ extern void CommandSetScore( char *sz ) {
 	}
     }
 	     
-    if( ms.gs < GAME_OVER && plGame && ( pmgi = plGame->plNext->p ) ) {
-	assert( pmgi->mt == MOVE_GAMEINFO );
+    if( ms.gs < GAME_OVER && plGame && 
+        ( pmr = (moverecord *) plGame->plNext->p ) &&
+        ( pmgi = &pmr->g ) ) {
+	assert( pmr == MOVE_GAMEINFO );
 	pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
 	pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
 	pmgi->fCrawfordGame = ms.fCrawford;
@@ -2625,7 +2626,8 @@ extern void CommandSetJacoby( char *sz ) {
 
 extern void CommandSetCrawford( char *sz ) {
 
-  movegameinfo *pmgi;
+  moverecord *pmr;
+  xmovegameinfo *pmgi;
     
   if ( ms.nMatchTo > 0 ) {
     if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
@@ -2642,8 +2644,8 @@ extern void CommandSetCrawford( char *sz ) {
       if( ms.fCrawford )
 	  CancelCubeAction();
       
-      if( plGame && ( pmgi = plGame->plNext->p ) ) {
-	  assert( pmgi->mt == MOVE_GAMEINFO );
+      if( plGame && ( pmr = plGame->plNext->p ) && ( pmgi = &pmr->g ) ) {
+	  assert( pmr->mt == MOVE_GAMEINFO );
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
@@ -2659,7 +2661,8 @@ extern void CommandSetCrawford( char *sz ) {
 
 extern void CommandSetPostCrawford( char *sz ) {
 
-  movegameinfo *pmgi;
+  moverecord *pmr;
+  xmovegameinfo *pmgi;
   
   if ( ms.nMatchTo > 0 ) {
     if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
@@ -2675,8 +2678,8 @@ extern void CommandSetPostCrawford( char *sz ) {
       if( ms.fCrawford )
 	  CancelCubeAction();
       
-      if( plGame && ( pmgi = plGame->plNext->p ) ) {
-	  assert( pmgi->mt == MOVE_GAMEINFO );
+      if( plGame && ( pmr = plGame->plNext->p ) && ( pmgi = &pmr->g ) ) {
+	  assert( pmr->mt == MOVE_GAMEINFO );
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {

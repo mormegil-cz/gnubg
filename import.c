@@ -278,7 +278,6 @@ extern int
 ImportJF( FILE * fp, char *szFileName) {
 
   moverecord *pmr;
-  movegameinfo *pmgi;
   int nMatchTo, fJacoby, fTurn, fCrawfordGame, fPostCrawford;
   int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
   int fCubeUse, fBeavers;
@@ -317,26 +316,25 @@ ImportJF( FILE * fp, char *szFileName) {
 
   /* game info */
 
-  pmgi = (movegameinfo *) malloc( sizeof ( movegameinfo ) );
+  pmr = NewMoveRecord();
 
-  pmgi->mt = MOVE_GAMEINFO;
-  pmgi->sz = NULL;
-  pmgi->i = 0;
-  pmgi->nMatch = nMatchTo;
-  pmgi->anScore[ 0 ] = anScore[ 0 ];
-  pmgi->anScore[ 1 ] = anScore[ 1 ];
-  pmgi->fCrawford = TRUE;
-  pmgi->fCrawfordGame = fCrawfordGame;
-  pmgi->fJacoby = fJacoby;
-  pmgi->fWinner = -1;
-  pmgi->nPoints = 0;
-  pmgi->fResigned = FALSE;
-  pmgi->nAutoDoubles = 0;
-  pmgi->bgv = VARIATION_STANDARD; /* assume standard backgammon */
-  pmgi->fCubeUse = fCubeUse;          /* assume use of cube */
-  IniStatcontext( &pmgi->sc );
+  pmr->mt = MOVE_GAMEINFO;
+  pmr->g.i = 0;
+  pmr->g.nMatch = nMatchTo;
+  pmr->g.anScore[ 0 ] = anScore[ 0 ];
+  pmr->g.anScore[ 1 ] = anScore[ 1 ];
+  pmr->g.fCrawford = TRUE;
+  pmr->g.fCrawfordGame = fCrawfordGame;
+  pmr->g.fJacoby = fJacoby;
+  pmr->g.fWinner = -1;
+  pmr->g.nPoints = 0;
+  pmr->g.fResigned = FALSE;
+  pmr->g.nAutoDoubles = 0;
+  pmr->g.bgv = VARIATION_STANDARD; /* assume standard backgammon */
+  pmr->g.fCubeUse = fCubeUse;          /* assume use of cube */
+  IniStatcontext( &pmr->g.sc );
   
-  AddMoveRecord( pmgi );
+  AddMoveRecord( pmr );
 
   ms.fTurn = ms.fMove = fTurn;
 
@@ -346,22 +344,22 @@ ImportJF( FILE * fp, char *szFileName) {
   /* dice */
 
   if( anDice[ 0 ] ) {
-      pmr = (moverecord *) malloc( sizeof( moverecord ) );
-      pmr->sd.mt = MOVE_SETDICE;
-      pmr->sd.sz = NULL;
-      pmr->sd.fPlayer = fTurn;
-      pmr->sd.anDice[ 0 ] = anDice[ 0 ];
-      pmr->sd.anDice[ 1 ] = anDice[ 1 ];
-      pmr->sd.lt = LUCK_NONE;
-      pmr->sd.rLuck = ERR_VAL;
+      pmr = NewMoveRecord();
+
+      pmr->mt = MOVE_SETDICE;
+      pmr->fPlayer = fTurn;
+      pmr->anDice[ 0 ] = anDice[ 0 ];
+      pmr->anDice[ 1 ] = anDice[ 1 ];
+      pmr->lt = LUCK_NONE;
+      pmr->rLuck = ERR_VAL;
       AddMoveRecord( pmr );
   }
 
   /* board */
 
-  pmr = (moverecord *) malloc( sizeof( moverecord ) );
-  pmr->sb.mt = MOVE_SETBOARD;
-  pmr->sb.sz = NULL;
+  pmr = NewMoveRecord();
+
+  pmr->mt = MOVE_SETBOARD;
   if( fTurn )
     SwapSides( anBoard );
   PositionKey( anBoard, pmr->sb.auchKey );
@@ -369,17 +367,17 @@ ImportJF( FILE * fp, char *szFileName) {
 
   /* cube value */
 
-  pmr = (moverecord *) malloc( sizeof( moverecord ) );
-  pmr->scv.mt = MOVE_SETCUBEVAL;
-  pmr->scv.sz = NULL;
+  pmr = NewMoveRecord();
+
+  pmr->mt = MOVE_SETCUBEVAL;
   pmr->scv.nCube = nCube;
   AddMoveRecord( pmr );
 
   /* cube position */
 
-  pmr = (moverecord *) malloc( sizeof( moverecord ) );
-  pmr->scp.mt = MOVE_SETCUBEPOS;
-  pmr->scp.sz = NULL;
+  pmr = NewMoveRecord();
+
+  pmr->mt = MOVE_SETCUBEPOS;
   pmr->scp.fCubeOwner = fCubeOwner;
   AddMoveRecord( pmr );
 
@@ -505,16 +503,15 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
         if ( fBeaver ) {
           /* look likes the previous beaver was taken */
-          pmr = malloc( sizeof( pmr->d ) );
-          pmr->d.mt = MOVE_TAKE;
-          pmr->d.sz = NULL;
-          pmr->d.fPlayer = iPlayer;
-          pmr->d.st = SKILL_NONE;
+          pmr = NewMoveRecord();
+
+          pmr->mt = MOVE_TAKE;
+          pmr->fPlayer = iPlayer;
           if( !LinkToDouble( pmr ) ) {
             outputl(_("Take record found but doesn't follow a double"));
-			free (pmr);
-			return;
-		  }
+            free (pmr);
+            return;
+          }
           AddMoveRecord( pmr );
         }
         fBeaver = FALSE;
@@ -544,19 +541,15 @@ static void ParseMatMove( char *sz, int iPlayer ) {
           /* FIXME: we only handle illegal moves; not illegal cubes,
              changes to the match score etc. */
 
-          pmr = (moverecord *) malloc( sizeof( moverecord ) );
-          pmr->sd.mt = MOVE_SETDICE;
-          pmr->sd.sz = NULL;
-          pmr->sd.fPlayer = iPlayer;
-          pmr->sd.anDice[ 0 ] = sz[ 0 ] - '0';
-          pmr->sd.anDice[ 1 ] = sz[ 1 ] - '0';
-          pmr->sd.lt = LUCK_NONE;
-          pmr->sd.rLuck = ERR_VAL;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_SETDICE;
+          pmr->fPlayer = iPlayer;
+          pmr->anDice[ 0 ] = sz[ 0 ] - '0';
+          pmr->anDice[ 1 ] = sz[ 1 ] - '0';
           AddMoveRecord( pmr );
 
-          pmr = (moverecord *) malloc( sizeof( moverecord ) );
-          pmr->sb.mt = MOVE_SETBOARD;
-          pmr->sb.sz = NULL;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_SETBOARD;
           if( fTurn )
             SwapSides( anBoard );
           PositionKey( anBoard, pmr->sb.auchKey );
@@ -567,20 +560,11 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
         }
 
-        pmr = malloc( sizeof( pmr->n ) );
-        pmr->n.mt = MOVE_NORMAL;
-        pmr->n.sz = NULL;
-        pmr->n.anRoll[ 0 ] = sz[ 0 ] - '0';
-        pmr->n.anRoll[ 1 ] = sz[ 1 ] - '0';
-        pmr->n.fPlayer = iPlayer;
-        pmr->n.ml.cMoves = 0;
-        pmr->n.ml.amMoves = NULL;
-        pmr->n.esDouble.et = EVAL_NONE;
-        pmr->n.esChequer.et = EVAL_NONE;
-        pmr->n.lt = LUCK_NONE;
-        pmr->n.rLuck = ERR_VAL;
-        pmr->n.stMove = SKILL_NONE;
-        pmr->n.stCube = SKILL_NONE;
+        pmr = NewMoveRecord();
+        pmr->mt = MOVE_NORMAL;
+        pmr->anDice[ 0 ] = sz[ 0 ] - '0';
+        pmr->anDice[ 1 ] = sz[ 1 ] - '0';
+        pmr->fPlayer = iPlayer;
 	
         c = ParseMove( sz + 3, pmr->n.anMove );
 
@@ -598,7 +582,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             /* remove consolidation */
             
             if ( ExpandMatMove ( ms.anBoard, pmr->n.anMove, &c, 
-                                 pmr->n.anRoll ) )
+                                 pmr->anDice ) )
               outputf( _("WARNING: Expand move failed. This file "
                          "contains garbage!") );
             
@@ -618,11 +602,11 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
           /* roll but no move found; if there are legal moves assume
              a resignation */
-          int anDice[ 2 ] = { pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] };
+          int anDice[ 2 ] = { pmr->anDice[ 0 ], pmr->anDice[ 1 ] };
           movelist ml;
 
           switch ( GenerateMoves( &ml, ms.anBoard, 
-                                  pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ], 
+                                  pmr->anDice[ 0 ], pmr->anDice[ 1 ], 
                                   FALSE ) ) {
 
           case 0:
@@ -651,15 +635,12 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             /* legal moves; just record roll */
 
             free( pmr ); /* free movenormal from above */
-          
-            pmr = malloc( sizeof( pmr->sd ) );
-            pmr->sd.mt = MOVE_SETDICE;
-            pmr->sd.sz = NULL;
-            pmr->sd.fPlayer = iPlayer;
-            pmr->sd.anDice[ 0 ] = anDice[ 0 ];
-            pmr->sd.anDice[ 1 ] = anDice[ 1 ];
-            pmr->sd.lt = LUCK_NONE;
-            pmr->sd.rLuck = ERR_VAL;
+
+            pmr = NewMoveRecord();
+            pmr->mt = MOVE_SETDICE;
+            pmr->fPlayer = iPlayer;
+            pmr->anDice[ 0 ] = anDice[ 0 ];
+            pmr->anDice[ 1 ] = anDice[ 1 ];
             AddMoveRecord( pmr );
 
             return;
@@ -674,54 +655,41 @@ static void ParseMatMove( char *sz, int iPlayer ) {
     if( !strncasecmp( sz, "double", 6 ) || 
         !strncasecmp( sz, "beavers", 7 ) ||
         !strncasecmp( sz, "raccoons", 7 ) ) {
-	pmr = malloc( sizeof( pmr->d ) );
-	pmr->d.mt = MOVE_DOUBLE;
-	pmr->d.sz = NULL;
-	pmr->d.fPlayer = iPlayer;
-	if( !LinkToDouble( pmr ) ) {
-	pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-	pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-	  pmr->d.nAnimals = 0;
-	}
-
-	pmr->d.st = SKILL_NONE;
+        pmr = NewMoveRecord();
+	pmr->mt = MOVE_DOUBLE;
+	pmr->fPlayer = iPlayer;
+	LinkToDouble( pmr );
 	AddMoveRecord( pmr );
         fBeaver = !strncasecmp( sz, "beavers", 6 );
 
     } else if( !strncasecmp( sz, "take", 4 ) ) {
-	pmr = malloc( sizeof( pmr->d ) );
-	pmr->d.mt = MOVE_TAKE;
-	pmr->d.sz = NULL;
-	pmr->d.fPlayer = iPlayer;
+        pmr = NewMoveRecord();
+	pmr->mt = MOVE_TAKE;
+	pmr->fPlayer = iPlayer;
 	if( !LinkToDouble( pmr ) ) {
 	  outputl(_("Take record found but doesn't follow a double"));
 	  free (pmr);
 	  return;
 	}
-	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
     } else if( !strncasecmp( sz, "drop", 4 ) ) {
 
-	pmr = malloc( sizeof( pmr->d ) );
-	pmr->d.mt = MOVE_DROP;
-	pmr->d.sz = NULL;
-	pmr->d.fPlayer = iPlayer;
+        pmr = NewMoveRecord();
+	pmr->mt = MOVE_DROP;
+	pmr->fPlayer = iPlayer;
 	if ( !LinkToDouble( pmr ) ) {
 	  outputl(_("Drop record found but doesn't follow a double"));
 	  free (pmr);
 	  return;
 	}
-	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
     } else if( !strncasecmp( sz, "win", 3 ) ) {
 	if( ms.gs == GAME_PLAYING ) {
 	    /* Neither a drop nor a bearoff to win, so we presume the loser
 	       resigned. */
-	    pmr = malloc( sizeof( pmr->r ) );
-	    pmr->r.mt = MOVE_RESIGN;
-	    pmr->r.sz = NULL;
-            pmr->r.esResign.et = EVAL_NONE;
-	    pmr->r.fPlayer = !iPlayer;
+            pmr = NewMoveRecord();
+	    pmr->mt = MOVE_RESIGN;
+	    pmr->fPlayer = !iPlayer;
 	    if( ( pmr->r.nResigned = atoi( sz + 4 ) / ms.nCube ) < 1 )
 		pmr->r.nResigned = 1;
 	    else if( pmr->r.nResigned > 3 )
@@ -805,9 +773,8 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
 	    *pch = '_';
     strcpy( ap[ 1 ].szName, sz1 );
     
-    pmr = malloc( sizeof( movegameinfo ) );
-    pmr->g.mt = MOVE_GAMEINFO;
-    pmr->g.sz = NULL;
+    pmr = NewMoveRecord();
+    pmr->mt = MOVE_GAMEINFO;
     pmr->g.i = iGame;
     pmr->g.nMatch = nLength;
     pmr->g.anScore[ 0 ] = n0;
@@ -999,20 +966,11 @@ static void ParseOldmove( char *sz, int fInvert ) {
     }
     
     if( sz[ 3 ] == '(' && strlen( sz ) >= 8 ) {
-        pmr = malloc( sizeof( pmr->n ) );
-        pmr->n.mt = MOVE_NORMAL;
-	pmr->n.sz = NULL;
-        pmr->n.anRoll[ 0 ] = sz[ 4 ] - '0';
-        pmr->n.anRoll[ 1 ] = sz[ 6 ] - '0';
-        pmr->n.fPlayer = iPlayer;
-	pmr->n.ml.cMoves = 0;
-	pmr->n.ml.amMoves = NULL;
-        pmr->n.esDouble.et = EVAL_NONE;
-        pmr->n.esChequer.et = EVAL_NONE;
-	pmr->n.lt = LUCK_NONE;
-	pmr->n.rLuck = ERR_VAL;
-	pmr->n.stCube = SKILL_NONE;
-	pmr->n.stMove = SKILL_NONE;
+        pmr = NewMoveRecord();
+        pmr->mt = MOVE_NORMAL;
+        pmr->anDice[ 0 ] = sz[ 4 ] - '0';
+        pmr->anDice[ 1 ] = sz[ 6 ] - '0';
+        pmr->fPlayer = iPlayer;
 
 	if( !strncasecmp( sz + 9, "can't move", 10 ) )
 	    c = 0;
@@ -1069,44 +1027,41 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	    free( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "doubles", 7 ) ) {
-	pmr = malloc( sizeof( pmr->d ) );
-	pmr->d.mt = MOVE_DOUBLE;
-	pmr->d.sz = NULL;
-	pmr->d.fPlayer = iPlayer;
+        pmr = NewMoveRecord();
+	pmr->mt = MOVE_DOUBLE;
+	pmr->fPlayer = iPlayer;
 	if( !LinkToDouble( pmr ) ) {
-    pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-	pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-	  pmr->d.nAnimals = 0;
+          pmr->CubeDecPtr = &pmr->CubeDec;
+          pmr->CubeDecPtr->esDouble.et = EVAL_NONE;
+	  pmr->nAnimals = 0;
 	}
-	pmr->d.st = SKILL_NONE;
+	pmr->stCube = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "accepts", 7 ) ) {
 
-	pmr = malloc( sizeof( pmr->d ) );
-	pmr->d.mt = MOVE_TAKE;
-	pmr->d.sz = NULL;
-	pmr->d.fPlayer = iPlayer;
+        pmr = NewMoveRecord();
+	pmr->mt = MOVE_TAKE;
+	pmr->fPlayer = iPlayer;
 	if( !LinkToDouble( pmr ) ) {
 	  outputl(_("Take record found but doesn't follow a double"));
 	  free (pmr);
 	  return;
 	}
-	pmr->d.st = SKILL_NONE;
+	pmr->stCube = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "rejects", 7 ) ) {
 
-	pmr = malloc( sizeof( pmr->d ) );
-	pmr->d.mt = MOVE_DROP;
-	pmr->d.sz = NULL;
-	pmr->d.fPlayer = iPlayer;
+        pmr = NewMoveRecord();
+	pmr->mt = MOVE_DROP;
+	pmr->fPlayer = iPlayer;
 	if( !LinkToDouble( pmr ) ) {
 	  outputl( _( "Drop record found but doesn't follow a double" ) );
 	  free (pmr);
 	  return;
 	}
-	pmr->d.st = SKILL_NONE;
+	pmr->stCube = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "wants to resign", 15 ) ) {
@@ -1116,11 +1071,10 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	if( ms.gs == GAME_PLAYING ) {
 	    /* Neither a drop nor a bearoff to win, so we presume the loser
 	       resigned. */
-	    pmr = malloc( sizeof( pmr->r ) );
-	    pmr->r.mt = MOVE_RESIGN;
+            pmr = NewMoveRecord();
+	    pmr->mt = MOVE_RESIGN;
             pmr->r.esResign.et = EVAL_NONE;
-	    pmr->r.sz = NULL;
-	    pmr->r.fPlayer = !iPlayer;
+	    pmr->fPlayer = !iPlayer;
 	    pmr->r.nResigned = 1; /* FIXME determine from score */
 	    AddMoveRecord( pmr );
 	}
@@ -1289,9 +1243,8 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     /* add game info */
 
 
-    pmr = malloc( sizeof( movegameinfo ) );
-    pmr->g.mt = MOVE_GAMEINFO;
-    pmr->g.sz = NULL;
+    pmr = NewMoveRecord();
+    pmr->mt = MOVE_GAMEINFO;
     pmr->g.i = iGame;
     pmr->g.nMatch = nLength;
     pmr->g.anScore[ fInvert ] = n0;
@@ -1459,9 +1412,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
     ListInsert( &lMatch, plGame );
 
-    pmgi = malloc( sizeof( movegameinfo ) );
-    pmgi->g.mt = MOVE_GAMEINFO;
-    pmgi->g.sz = NULL;
+    pmr = NewMoveRecord();
+    pmgi->mt = MOVE_GAMEINFO;
     pmgi->g.i = i - 1;
     pmgi->g.nMatch = nLength;
     pmgi->g.anScore[ 0 ] = n0;
@@ -1513,18 +1465,16 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                     /* when beavered there is no explicit "take" */
                     if ( fBeaver ) {
 
-                      pmr = malloc( sizeof( pmr->d ) );
-                      pmr->d.mt = MOVE_TAKE;
-                      pmr->d.sz = szComment;
-                      pmr->d.fPlayer = fPlayer;
-		      pmr->d.st = SKILL_NONE;
+                      pmr = NewMoveRecord();
+                      pmr->mt = MOVE_TAKE;
+                      pmr->sz = szComment;
+                      pmr->fPlayer = fPlayer;
 		      if( !LinkToDouble( pmr ) ) {
 			outputl( _( "Beaver record found but doesn't follow a double" ) );
 						free (pmr);
 						return;
 					  }
                       
-                      pmr->d.st = SKILL_NONE;
                       AddMoveRecord( pmr );
                       szComment = NULL;
                       fBeaver = FALSE;
@@ -1538,20 +1488,12 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                       continue;
                     }
                 
-		    pmr = malloc( sizeof( pmr->n ) );
-		    pmr->n.mt = MOVE_NORMAL;
-		    pmr->n.sz = szComment;
-		    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
-		    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
-		    pmr->n.fPlayer = fPlayer;
-		    pmr->n.ml.cMoves = 0;
-		    pmr->n.ml.amMoves = NULL;
-		    pmr->n.esDouble.et = EVAL_NONE;
-		    pmr->n.esChequer.et = EVAL_NONE;
-		    pmr->n.lt = LUCK_NONE;
-		    pmr->n.rLuck = ERR_VAL;
-		    pmr->n.stCube = SKILL_NONE;
-		    pmr->n.stMove = SKILL_NONE;
+                    pmr = NewMoveRecord();
+		    pmr->mt = MOVE_NORMAL;
+		    pmr->sz = szComment;
+		    pmr->anDice[ 0 ] = anRoll[ 0 ];
+		    pmr->anDice[ 1 ] = anRoll[ 1 ];
+		    pmr->fPlayer = fPlayer;
 		    
 		    if( ( c = ParseMove( pch + 4, pmr->n.anMove ) ) >= 0 ) {
 			for( i = 0; i < ( c << 1 ); i++ )
@@ -1591,38 +1533,27 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                             /* when beavered there is no explicit "take" */
                             if ( fBeaver ) {
 
-                              pmr = malloc( sizeof( pmr->d ) );
-                              pmr->d.mt = MOVE_TAKE;
-                              pmr->d.sz = szComment;
-                              pmr->d.fPlayer = fPlayer;
-                              pmr->d.st = SKILL_NONE;
+                              pmr = NewMoveRecord();
+                              pmr->mt = MOVE_TAKE;
+                              pmr->sz = szComment;
+                              pmr->fPlayer = fPlayer;
                               if ( !LinkToDouble( pmr ) ) {
                                 outputl(_("Take record found but doesn't follow a double"));
                                 free (pmr);
                                 return;	
                               }
-                              pmr->d.st = SKILL_NONE;
                               
                               AddMoveRecord( pmr );
                               szComment = NULL;
                               fBeaver = FALSE;
                             }
                             
-                            pmr = malloc( sizeof( pmr->n ) );
-                            pmr->n.mt = MOVE_NORMAL;
-                            pmr->n.sz = szComment;
-			    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
-			    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
-			    pmr->n.fPlayer = fPlayer;
-			    pmr->n.ml.cMoves = 0;
-			    pmr->n.ml.amMoves = NULL;
-			    pmr->n.anMove[ 0 ] = -1;
-			    pmr->n.esDouble.et = EVAL_NONE;
-			    pmr->n.esChequer.et = EVAL_NONE;
-			    pmr->n.lt = LUCK_NONE;
-			    pmr->n.rLuck = ERR_VAL;
-			    pmr->n.stMove = SKILL_NONE;
-			    pmr->n.stCube = SKILL_NONE;
+                            pmr = NewMoveRecord();
+                            pmr->mt = MOVE_NORMAL;
+                            pmr->sz = szComment;
+			    pmr->anDice[ 0 ] = anRoll[ 0 ];
+			    pmr->anDice[ 1 ] = anRoll[ 1 ];
+			    pmr->fPlayer = fPlayer;
 			    AddMoveRecord( pmr );
 
 			    anRoll[ 0 ] = 0;
@@ -1651,31 +1582,27 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                             /* when beavered there is no explicit "take" */
                             if ( fBeaver ) {
 
-                              pmr = malloc( sizeof( pmr->d ) );
-                              pmr->d.mt = MOVE_TAKE;
-                              pmr->d.sz = szComment;
-                              pmr->d.fPlayer = fPlayer;
+                              pmr = NewMoveRecord();
+                              pmr->mt = MOVE_TAKE;
+                              pmr->sz = szComment;
+                              pmr->fPlayer = fPlayer;
                               if( !LinkToDouble( pmr ) ) {
                                 outputl(_("Take record found but doesn't follow a double"));
                                 free (pmr);
                                 return;
                               }
-                              pmr->d.st = SKILL_NONE;
                               
                               AddMoveRecord( pmr );
                               szComment = NULL;
                               fBeaver = FALSE;
                             }
 
-			    pmr = malloc( sizeof( pmr->sd ) );
-			    pmr->sd.mt = MOVE_SETDICE;
+                            pmr = NewMoveRecord();
+			    pmr->mt = MOVE_SETDICE;
                             /* we do not want comments on MOVE_SETDICE */
-			    pmr->sd.sz = NULL;
-			    pmr->sd.fPlayer = fPlayer;
-			    pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
-			    pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
-			    pmr->sd.lt = LUCK_NONE;
-			    pmr->sd.rLuck = ERR_VAL;
+			    pmr->fPlayer = fPlayer;
+			    pmr->anDice[ 0 ] = anRoll[ 0 ];
+			    pmr->anDice[ 1 ] = anRoll[ 1 ];
 
 			    AddMoveRecord( pmr );
                             fBeaver = FALSE;
@@ -1694,16 +1621,11 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 				   SGG file -- ignore */
 				continue;
 			    
-			    pmr = malloc( sizeof( pmr->d ) );
-			    pmr->d.mt = MOVE_DOUBLE;
-			    pmr->d.sz = szComment;
-			    pmr->d.fPlayer = fPlayer;
-			    if( !LinkToDouble( pmr ) ) {
-			    pmr->d.CubeDecPtr = &pmr->d.CubeDec;                
-			    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-			      pmr->d.nAnimals = 0;
-			    }
-			    pmr->d.st = SKILL_NONE;
+                            pmr = NewMoveRecord();
+			    pmr->mt = MOVE_DOUBLE;
+			    pmr->sz = szComment;
+			    pmr->fPlayer = fPlayer;
+			    LinkToDouble( pmr );
 
 			    AddMoveRecord( pmr );
                             fBeaver = FALSE;
@@ -1715,16 +1637,15 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 				   SGG file -- ignore */
 				continue;
 			    
-			    pmr = malloc( sizeof( pmr->d ) );
-			    pmr->d.mt = MOVE_DOUBLE;
-			    pmr->d.sz = szComment;
-			    pmr->d.fPlayer = fPlayer;
+                            pmr = NewMoveRecord();
+			    pmr->mt = MOVE_DOUBLE;
+			    pmr->sz = szComment;
+			    pmr->fPlayer = fPlayer;
 			    if( !LinkToDouble( pmr ) ) {
 			      outputl( _( "Beaver found but doesn't follow a double" ) );
 			      free( pmr );
 			      return;
 			    }
-			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
@@ -1736,16 +1657,15 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                                  SGG file -- ignore */
                               continue;
 			    
-			    pmr = malloc( sizeof( pmr->d ) );
-			    pmr->d.mt = MOVE_DOUBLE;
-			    pmr->d.sz = szComment;
-			    pmr->d.fPlayer = fPlayer;
+                            pmr = NewMoveRecord();
+			    pmr->mt = MOVE_DOUBLE;
+			    pmr->sz = szComment;
+			    pmr->fPlayer = fPlayer;
 			    if( !LinkToDouble( pmr ) ) {
 			      outputl( _( "Raccoon found but doesn't follow a double" ) );
 			      free( pmr );
 			      return;
 			    }
-			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
@@ -1755,32 +1675,30 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    if( !ms.fDoubled )
 				continue;
 			    
-			    pmr = malloc( sizeof( pmr->d ) );
-			    pmr->d.mt = MOVE_TAKE;
-			    pmr->d.sz = szComment;
-			    pmr->d.fPlayer = fPlayer;
+                            pmr = NewMoveRecord();
+			    pmr->mt = MOVE_TAKE;
+			    pmr->sz = szComment;
+			    pmr->fPlayer = fPlayer;
 			    if( !LinkToDouble( pmr ) ) {
 			      outputl(_("Take record found but doesn't follow a double"));
 			      free (pmr);
 			      return;
 			    }
-			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
                             fBeaver = FALSE;
 			} else if( !strncasecmp( pch, "pass", 4 ) ) {
 
-			    pmr = malloc( sizeof( pmr->d ) );
-			    pmr->d.mt = MOVE_DROP;
-			    pmr->d.sz = szComment;
-			    pmr->d.fPlayer = fPlayer;
+                            pmr = NewMoveRecord();
+			    pmr->mt = MOVE_DROP;
+			    pmr->sz = szComment;
+			    pmr->fPlayer = fPlayer;
 			    if( !LinkToDouble( pmr ) ) {
 			      outputl(_("Drop record found but doesn't follow a double"));
 			      free (pmr);
 			      return;
 			    }
-			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
@@ -1844,15 +1762,14 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
       pch += 7; /* step over '  wins ' */
 
-      pmr = malloc( sizeof ( moverecord ) );
+      pmr = NewMoveRecord();
       
       pmr->mt = MOVE_RESIGN;
-      pmr->r.sz = szComment;
-      pmr->r.fPlayer = fResigned;
+      pmr->sz = szComment;
+      pmr->fPlayer = fResigned;
       pmr->r.nResigned = atoi( pch ) / ms.nCube;
       if ( pmr->r.nResigned > 3 )
         pmr->r.nResigned = 3;
-      pmr->r.esResign.et = EVAL_NONE;
       szComment = NULL;
 
       AddMoveRecord( pmr );
@@ -2424,9 +2341,8 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
     ListInsert( &lMatch, plGame );
 
-    pmgi = malloc( sizeof( movegameinfo ) );
-    pmgi->g.mt = MOVE_GAMEINFO;
-    pmgi->g.sz = NULL;
+    pmgi = NewMoveRecord();
+    pmgi->mt = MOVE_GAMEINFO;
     pmgi->g.i = i - 1;
     pmgi->g.nMatch = nLength;
     pmgi->g.anScore[ 0 ] = n0;
@@ -2494,14 +2410,11 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           anRoll[ 0 ] = *pch - '0';
           anRoll[ 1 ] = *(pch+1) - '0';
 
-          pmr = malloc( sizeof( pmr->sd ) );
-          pmr->sd.mt = MOVE_SETDICE;
-          pmr->sd.sz = NULL;
-          pmr->sd.fPlayer = fPlayer;
-          pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
-          pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
-          pmr->sd.lt = LUCK_NONE;
-          pmr->sd.rLuck = ERR_VAL;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_SETDICE;
+          pmr->fPlayer = fPlayer;
+          pmr->anDice[ 0 ] = anRoll[ 0 ];
+          pmr->anDice[ 1 ] = anRoll[ 1 ];
 
           AddMoveRecord( pmr );
 
@@ -2518,21 +2431,11 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
         case TMG_MOVE: /* move:    1 4 24/18 13/10 */
 
-          pmr = malloc( sizeof( pmr->n ) );
-          pmr->n.mt = MOVE_NORMAL;
-          pmr->n.sz = NULL;
-          pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
-          pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
-          pmr->n.fPlayer = fPlayer;
-          pmr->n.ml.cMoves = 0;
-          pmr->n.ml.amMoves = NULL;
-          pmr->n.anMove[ 0 ] = -1;
-          pmr->n.esDouble.et = EVAL_NONE;
-          pmr->n.esChequer.et = EVAL_NONE;
-          pmr->n.lt = LUCK_NONE;
-          pmr->n.rLuck = ERR_VAL;
-          pmr->n.stMove = SKILL_NONE;
-          pmr->n.stCube = SKILL_NONE;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_NORMAL;
+          pmr->anDice[ 0 ] = anRoll[ 0 ];
+          pmr->anDice[ 1 ] = anRoll[ 1 ];
+          pmr->fPlayer = fPlayer;
 
           if ( ! strncmp ( pch, "0/0", 3 ) ) {
             /* fans */
@@ -2554,34 +2457,25 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
         case TMG_DOUBLE: /* double:   -7 5 Double to 2 */
         case TMG_BEAVER: /* beaver:      25 8 Beaver to 8 */
 
-          pmr = malloc( sizeof( pmr->d ) );
-          pmr->d.mt = MOVE_DOUBLE;
-          pmr->d.sz = NULL;
-          pmr->d.fPlayer = fPlayer;
-	  if( !LinkToDouble( pmr ) ) {
-          pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-          pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-	    pmr->d.nAnimals = 0;
-	  }
-          
-          pmr->d.st = SKILL_NONE;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_DOUBLE;
+          pmr->fPlayer = fPlayer;
+	  LinkToDouble( pmr );
           AddMoveRecord( pmr );
 
           break;
 
         case TMG_TAKE: /* take:   -6 7 Take */ 
 
-          pmr = malloc( sizeof( pmr->d ) );
-          pmr->d.mt = MOVE_TAKE;
-          pmr->d.sz = NULL;
-          pmr->d.fPlayer = fPlayer;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_TAKE;
+          pmr->fPlayer = fPlayer;
           if( !LinkToDouble( pmr ) ) {
 
             outputl(_("Take record found but doesn't follow a double"));
             free (pmr);
             return;
           }
-          pmr->d.st = SKILL_NONE;
           
           AddMoveRecord( pmr );
 
@@ -2589,10 +2483,9 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
                             
         case TMG_PASS: /* pass:    5 10 Pass */
 
-          pmr = malloc( sizeof( pmr->d ) );
-          pmr->d.mt = MOVE_DROP;
-          pmr->d.sz = NULL;
-          pmr->d.fPlayer = fPlayer;
+          pmr = NewMoveRecord();
+          pmr->mt = MOVE_DROP;
+          pmr->fPlayer = fPlayer;
           if( !LinkToDouble( pmr ) ) {
 
             outputl(_("Drop record found but doesn't follow a double"));
@@ -2600,8 +2493,6 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
             return;
           }
 
-          pmr->d.st = SKILL_NONE;
-          
           AddMoveRecord( pmr );
 
           break;
@@ -2612,10 +2503,9 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
           if ( ms.gs == GAME_PLAYING ) {
             /* game is in progress: the opponent resigned */
-            pmr = malloc( sizeof( *pmr ) );
-            pmr->r.mt = MOVE_RESIGN;
-            pmr->r.sz = NULL;
-            pmr->r.fPlayer = ! fPlayer;
+            pmr = NewMoveRecord();
+            pmr->mt = MOVE_RESIGN;
+            pmr->fPlayer = ! fPlayer;
             pmr->r.nResigned = atoi ( pch ) / ms.nCube;
             if ( ! pmr->r.nResigned )
               /* handle cases where the TMG file says "wins 1 point"
@@ -2623,8 +2513,6 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
                  last game of a match */
               pmr->r.nResigned = 1;
               
-            pmr->r.esResign.et = EVAL_NONE;
-            
             AddMoveRecord( pmr );
 
           }
@@ -2644,11 +2532,9 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
         case TMG_OUT_OF_TIME:
 	case TMG_OUT_OF_TIME_1:
 #if USE_TIMECONTROL
-          pmr = malloc( sizeof *pmr );
-
+          pmr = NewMoveRecord();
           pmr->mt = MOVE_TIME;
-          pmr->t.sz = NULL;
-          pmr->t.fPlayer = fPlayer;
+          pmr->fPlayer = fPlayer;
           /* pmr->t.tl[ 0 ] = pmr->t.tl[ 1 ] = 0; */
           pmr->t.nPoints = ms.nMatchTo;
 
@@ -2786,9 +2672,8 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 
     ListInsert( &lMatch, plGame );
 
-    pmrGame = pmr = malloc( sizeof( movegameinfo ) );
-    pmr->g.mt = MOVE_GAMEINFO;
-    pmr->g.sz = NULL;
+    pmrGame = pmr = NewMoveRecord();
+    pmr->mt = MOVE_GAMEINFO;
     pmr->g.i = ( *pi )++;
     pmr->g.nMatch = 0; /* not stored in BKG files -- assume money sessions */
     pmr->g.anScore[ 0 ] = ms.anScore[ 0 ];
@@ -2813,11 +2698,9 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 		if( ms.gs == GAME_PLAYING ) {
 		    /* Neither a drop nor a bearoff to win, so we
 		       presume the loser resigned. */
-		    pmr = malloc( sizeof( pmr->r ) );
-		    pmr->r.mt = MOVE_RESIGN;
-		    pmr->r.sz = NULL;
-		    pmr->r.esResign.et = EVAL_NONE;
-		    pmr->r.fPlayer = !fPlayer;
+                    pmr = NewMoveRecord();
+		    pmr->mt = MOVE_RESIGN;
+		    pmr->fPlayer = !fPlayer;
 		    if( strlen( sz ) > 14 && !strncmp( sz + 14, "gammon", 6 ) )
 			pmr->r.nResigned = 2;
 		    else if( strlen( sz ) > 14 &&
@@ -2833,47 +2716,29 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 		return;
 	    } else if( strlen( sz ) > 6 && !strncmp( sz + 6, "Doubles", 7 ) ) {
 
-		pmr = malloc( sizeof( pmr->d ) );
-		pmr->d.mt = MOVE_DOUBLE;
-		pmr->d.sz = NULL;
-		pmr->d.fPlayer = fPlayer;
-		if( !LinkToDouble( pmr ) ) {
-		pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-		pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-		  pmr->d.nAnimals = 0;
-		}
-		pmr->d.st = SKILL_NONE;
+                pmr = NewMoveRecord();
+		pmr->mt = MOVE_DOUBLE;
+		pmr->fPlayer = fPlayer;
+		!LinkToDouble( pmr );
 		AddMoveRecord( pmr );
 
-		pmr = malloc( sizeof( pmr->d ) );
-		pmr->d.mt = strlen( sz ) > 22 &&
+                pmr = NewMoveRecord();
+		pmr->mt = strlen( sz ) > 22 &&
 		    !strncmp( sz + 22, "Accepted", 8 ) ? MOVE_TAKE : MOVE_DROP;
-		pmr->d.sz = NULL;
-		pmr->d.fPlayer = !fPlayer;
+		pmr->fPlayer = !fPlayer;
 		if( !LinkToDouble( pmr ) ) {
 		  outputl(_("Take record found but doesn't follow a double"));
 		  free (pmr);
 		  return;
 		}
-
-		pmr->d.st = SKILL_NONE;
 		AddMoveRecord( pmr );
 	    } else if( strlen( sz ) > 9 && isdigit( sz[ 7 ] ) &&
 		       isdigit( sz[ 9 ] ) ) {
-		pmr = malloc( sizeof( pmr->n ) );
-		pmr->n.mt = MOVE_NORMAL;
-		pmr->n.sz = NULL;
-		pmr->n.anRoll[ 0 ] = sz[ 7 ] - '0';
-		pmr->n.anRoll[ 1 ] = sz[ 9 ] - '0';
-		pmr->n.fPlayer = fPlayer;
-		pmr->n.ml.cMoves = 0;
-		pmr->n.ml.amMoves = NULL;
-		pmr->n.esDouble.et = EVAL_NONE;
-		pmr->n.esChequer.et = EVAL_NONE;
-		pmr->n.lt = LUCK_NONE;
-		pmr->n.rLuck = ERR_VAL;
-		pmr->n.stMove = SKILL_NONE;
-		pmr->n.stCube = SKILL_NONE;
+                pmr = NewMoveRecord();
+		pmr->mt = MOVE_NORMAL;
+		pmr->anDice[ 0 ] = sz[ 7 ] - '0';
+		pmr->anDice[ 1 ] = sz[ 9 ] - '0';
+		pmr->fPlayer = fPlayer;
 
 		if( strlen( sz ) > 13 ) {
 		    for( i = 0, pch = sz + 13; i < 8 && *pch; i++ ) {
@@ -3103,7 +2968,7 @@ ImportSnowieTxt( FILE *pf ) {
   char *pc;
   int c;
   moverecord *pmr;
-  movegameinfo *pmgi;
+  moverecord *pmgi;
 
   int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
   int fCubeOwner, nCube;
@@ -3160,24 +3025,23 @@ ImportSnowieTxt( FILE *pf ) {
 
   /* Game info */
 
-  pmgi = (movegameinfo *) malloc( sizeof ( movegameinfo ) );
+  pmgi = NewMoveRecord();
 
   pmgi->mt = MOVE_GAMEINFO;
-  pmgi->sz = NULL;
-  pmgi->i = 0;
-  pmgi->nMatch = nMatchTo;
-  pmgi->anScore[ 0 ] = anScore[ 0 ];
-  pmgi->anScore[ 1 ] = anScore[ 1 ];
-  pmgi->fCrawford = TRUE;
-  pmgi->fCrawfordGame = fCrawfordGame;
-  pmgi->fJacoby = fJacoby;
-  pmgi->fWinner = -1;
-  pmgi->nPoints = 0;
-  pmgi->fResigned = FALSE;
-  pmgi->nAutoDoubles = 0;
-  pmgi->bgv = VARIATION_STANDARD; /* assume standard backgammon */
-  pmgi->fCubeUse = TRUE;          /* assume use of cube */
-  IniStatcontext( &pmgi->sc );
+  pmgi->g.i = 0;
+  pmgi->g.nMatch = nMatchTo;
+  pmgi->g.anScore[ 0 ] = anScore[ 0 ];
+  pmgi->g.anScore[ 1 ] = anScore[ 1 ];
+  pmgi->g.fCrawford = TRUE;
+  pmgi->g.fCrawfordGame = fCrawfordGame;
+  pmgi->g.fJacoby = fJacoby;
+  pmgi->g.fWinner = -1;
+  pmgi->g.nPoints = 0;
+  pmgi->g.fResigned = FALSE;
+  pmgi->g.nAutoDoubles = 0;
+  pmgi->g.bgv = VARIATION_STANDARD; /* assume standard backgammon */
+  pmgi->g.fCubeUse = TRUE;          /* assume use of cube */
+  IniStatcontext( &pmgi->g.sc );
   
   AddMoveRecord( pmgi );
 
@@ -3189,22 +3053,18 @@ ImportSnowieTxt( FILE *pf ) {
   /* dice */
 
   if( anDice[ 0 ] ) {
-      pmr = (moverecord *) malloc( sizeof( moverecord ) );
-      pmr->sd.mt = MOVE_SETDICE;
-      pmr->sd.sz = NULL;
-      pmr->sd.fPlayer = fTurn;
-      pmr->sd.anDice[ 0 ] = anDice[ 0 ];
-      pmr->sd.anDice[ 1 ] = anDice[ 1 ];
-      pmr->sd.lt = LUCK_NONE;
-      pmr->sd.rLuck = ERR_VAL;
+      pmr = NewMoveRecord();
+      pmr->mt = MOVE_SETDICE;
+      pmr->fPlayer = fTurn;
+      pmr->anDice[ 0 ] = anDice[ 0 ];
+      pmr->anDice[ 1 ] = anDice[ 1 ];
       AddMoveRecord( pmr );
   }
 
   /* board */
 
-  pmr = (moverecord *) malloc( sizeof( moverecord ) );
-  pmr->sb.mt = MOVE_SETBOARD;
-  pmr->sb.sz = NULL;
+  pmr = NewMoveRecord();
+  pmr->mt = MOVE_SETBOARD;
   if( ! fTurn )
       SwapSides( anBoard );
   PositionKey( anBoard, pmr->sb.auchKey );
@@ -3212,17 +3072,15 @@ ImportSnowieTxt( FILE *pf ) {
 
   /* cube value */
 
-  pmr = (moverecord *) malloc( sizeof( moverecord ) );
-  pmr->scv.mt = MOVE_SETCUBEVAL;
-  pmr->scv.sz = NULL;
+  pmr = NewMoveRecord();
+  pmr->mt = MOVE_SETCUBEVAL;
   pmr->scv.nCube = nCube;
   AddMoveRecord( pmr );
 
   /* cube position */
 
-  pmr = (moverecord *) malloc( sizeof( moverecord ) );
-  pmr->scp.mt = MOVE_SETCUBEPOS;
-  pmr->scp.sz = NULL;
+  pmr = NewMoveRecord();
+  pmr->mt = MOVE_SETCUBEPOS;
   pmr->scp.fCubeOwner = fCubeOwner;
   AddMoveRecord( pmr );
 

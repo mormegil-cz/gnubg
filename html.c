@@ -2379,22 +2379,22 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     /* cube analysis from move */
 
     HTMLPrintCubeAnalysisTable ( pf, 
-                                 pmr->n.aarOutput, pmr->n.aarStdDev,
-                                 pmr->n.fPlayer,
-                                 &pmr->n.esDouble, &ci, FALSE, -1,
-                                 pmr->n.stCube, SKILL_NONE, hecss );
+                                 pmr->CubeDecPtr->aarOutput, pmr->CubeDecPtr->aarStdDev,
+                                 pmr->fPlayer,
+                                 &pmr->CubeDecPtr->esDouble, &ci, FALSE, -1,
+                                 pmr->stCube, SKILL_NONE, hecss );
 
     break;
 
   case MOVE_DOUBLE:
 
     HTMLPrintCubeAnalysisTable ( pf, 
-                                 pmr->d.CubeDecPtr->aarOutput, 
-				 pmr->d.CubeDecPtr->aarStdDev,
-                                 pmr->d.fPlayer,
-                                 &pmr->d.CubeDecPtr->esDouble, 
+                                 pmr->CubeDecPtr->aarOutput, 
+				 pmr->CubeDecPtr->aarStdDev,
+                                 pmr->fPlayer,
+                                 &pmr->CubeDecPtr->esDouble, 
 				 &ci, TRUE, -1,
-                                 pmr->d.st, SKILL_NONE, hecss );
+                                 pmr->stCube, SKILL_NONE, hecss );
 
     break;
 
@@ -2404,13 +2404,13 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     /* cube analysis from double, {take, drop, beaver} */
 
     HTMLPrintCubeAnalysisTable ( pf, 
-                                 pmr->d.CubeDecPtr->aarOutput, 
-				 pmr->d.CubeDecPtr->aarStdDev,
-                                 pmr->d.fPlayer,
-                                 &pmr->d.CubeDecPtr->esDouble, &ci, TRUE, 
+                                 pmr->CubeDecPtr->aarOutput, 
+				 pmr->CubeDecPtr->aarStdDev,
+                                 pmr->fPlayer,
+                                 &pmr->CubeDecPtr->esDouble, &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
-                                 pmr->d.st, hecss );
+                                 pmr->stCube, hecss );
 
     break;
 
@@ -2472,18 +2472,18 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
       fprintf ( pf, " (%+7.3f)</span></p>\n",
-                pmr->n.ml.amMoves[ pmr->n.iMove ].rScore -
-                pmr->n.ml.amMoves[ 0 ].rScore  );
+                pmr->ml.amMoves[ pmr->n.iMove ].rScore -
+                pmr->ml.amMoves[ 0 ].rScore  );
     else
       fprintf ( pf, " (%+6.3f%%)</span></p>\n",
                 100.0f *
-                eq2mwc ( pmr->n.ml.amMoves[ pmr->n.iMove ].rScore, &ci ) - 
+                eq2mwc ( pmr->ml.amMoves[ pmr->n.iMove ].rScore, &ci ) - 
                 100.0f *
-                eq2mwc ( pmr->n.ml.amMoves[ 0 ].rScore, &ci ) );
+                eq2mwc ( pmr->ml.amMoves[ 0 ].rScore, &ci ) );
 
   }
 
-  if ( pmr->n.lt != LUCK_NONE ) {
+  if ( pmr->lt != LUCK_NONE ) {
 
     /* joker */
 
@@ -2491,13 +2491,13 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
               GetStyle ( CLASS_JOKER, hecss ) );
     fprintf ( pf, 
               _("Alert: %s roll!"),
-              gettext ( aszLuckType[ pmr->n.lt ] ) );
+              gettext ( aszLuckType[ pmr->lt ] ) );
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
-      fprintf ( pf, " (%+7.3f)</span></p>\n", pmr->n.rLuck );
+      fprintf ( pf, " (%+7.3f)</span></p>\n", pmr->rLuck );
     else
       fprintf ( pf, " (%+6.3f%%)</span></p>\n",
-                100.0f * eq2mwc ( pmr->n.rLuck, &ci ) - 
+                100.0f * eq2mwc ( pmr->rLuck, &ci ) - 
                 100.0f * eq2mwc ( 0.0f, &ci ) );
 
   }
@@ -2525,9 +2525,9 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
             _("Equity") : _("MWC") );
 
 
-  if ( pmr->n.ml.cMoves ) {
+  if ( pmr->ml.cMoves ) {
 
-    for ( i = 0; i < pmr->n.ml.cMoves; i++ ) {
+    for ( i = 0; i < pmr->ml.cMoves; i++ ) {
 
       if ( i >= exsExport.nMoves && i != pmr->n.iMove ) 
         continue;
@@ -2550,8 +2550,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
       /* move no */
 
-      if ( i != pmr->n.iMove || i != pmr->n.ml.cMoves - 1 || 
-           pmr->n.ml.cMoves == 1 ) 
+      if ( i != pmr->n.iMove || i != pmr->ml.cMoves - 1 || 
+           pmr->ml.cMoves == 1 ) 
         fprintf ( pf, 
                   "<td %s>%d</td>\n", 
                   GetStyle ( CLASS_MOVENUMBER, hecss ), i + 1 );
@@ -2561,7 +2561,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
       /* ply */
 
-      switch ( pmr->n.ml.amMoves[ i ].esMove.et ) {
+      switch ( pmr->ml.amMoves[ i ].esMove.et ) {
       case EVAL_NONE:
         fprintf ( pf,
                   "<td %s>n/a</td>\n",
@@ -2571,7 +2571,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
         fprintf ( pf,
                   "<td %s>%d</td>\n",
                   GetStyle ( CLASS_MOVEPLY, hecss ),
-                  pmr->n.ml.amMoves[ i ].esMove.ec.nPlies );
+                  pmr->ml.amMoves[ i ].esMove.ec.nPlies );
         break;
       case EVAL_ROLLOUT:
         fprintf ( pf,
@@ -2586,12 +2586,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                 "<td %s>%s</td>\n",
                 GetStyle ( CLASS_MOVEMOVE, hecss ),
                 FormatMove ( sz, pms->anBoard,
-                             pmr->n.ml.amMoves[ i ].anMove ) );
+                             pmr->ml.amMoves[ i ].anMove ) );
 
       /* equity */
 
-      rEq = pmr->n.ml.amMoves[ i ].rScore;
-      rEqTop = pmr->n.ml.amMoves[ 0 ].rScore;
+      rEq = pmr->ml.amMoves[ i ].rScore;
+      rEqTop = pmr->ml.amMoves[ 0 ].rScore;
 
       if ( i ) 
         fprintf ( pf,
@@ -2615,7 +2615,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
       if ( exsExport.fMovesDetailProb ) {
 
-        float *ar = pmr->n.ml.amMoves[ i ].arEvalMove;
+        float *ar = pmr->ml.amMoves[ i ].arEvalMove;
 
         /* percentages */
 
@@ -2634,19 +2634,19 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
         fputs ( "<td>", pf );
 
 
-        switch ( pmr->n.ml.amMoves[ i ].esMove.et ) {
+        switch ( pmr->ml.amMoves[ i ].esMove.et ) {
         case EVAL_EVAL:
           fputs ( OutputPercents ( ar, TRUE ), pf );
           break;
         case EVAL_ROLLOUT:
           printRolloutTable ( pf, NULL,
                               ( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) 
-                              pmr->n.ml.amMoves[ i ].arEvalMove,
+                              pmr->ml.amMoves[ i ].arEvalMove,
                               ( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) 
-                              pmr->n.ml.amMoves[ i ].arEvalStdDev,
+                              pmr->ml.amMoves[ i ].arEvalStdDev,
                               &ci,
                               1,
-                              pmr->n.ml.amMoves[ i ].esMove.rc.fCubeful,
+                              pmr->ml.amMoves[ i ].esMove.rc.fCubeful,
                               FALSE, hecss );
           break;
         default:
@@ -2665,9 +2665,9 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
        */
       
       if ( exsExport.afMovesParameters 
-           [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
+           [ pmr->ml.amMoves[ i ].esMove.et - 1 ] ) {
         
-        evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
+        evalsetup *pes = &pmr->ml.amMoves[ i ].esMove;
         
         switch ( pes->et ) {
         case EVAL_EVAL: 
@@ -2808,12 +2808,12 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
                 _("%s%s moves %s"), bullet,
-                ap[ pmr->n.fPlayer ].szName,
+                ap[ pmr->fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
-    else if ( ! pmr->n.ml.cMoves )
+    else if ( ! pmr->ml.cMoves )
       fprintf ( pf,
                 _("%s%s cannot move"), bullet,
-                ap[ pmr->n.fPlayer ].szName );
+                ap[ pmr->fPlayer ].szName );
 
     fputs ( "</p>\n", pf );
 
@@ -2841,11 +2841,11 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     if ( pmr->mt == MOVE_DOUBLE )
       fprintf ( pf,
                 "%s%s doubles</p>\n", bullet,
-                ap[ pmr->d.fPlayer ].szName );
+                ap[ pmr->fPlayer ].szName );
     else
       fprintf ( pf,
                 "%s%s %s</p>\n", bullet,
-                ap[ pmr->d.fPlayer ].szName,
+                ap[ pmr->fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
     if ( exsExport.fIncludeAnalysis )
@@ -3020,30 +3020,30 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr,
   switch ( pmr->mt ) {
 
   case MOVE_GAMEINFO:
-    sz = pmr->g.sz;
+    sz = pmr->sz;
     break;
   case MOVE_DOUBLE:
   case MOVE_TAKE:
   case MOVE_DROP:
-    sz = pmr->d.sz;
+    sz = pmr->sz;
     break;
   case MOVE_NORMAL:
-    sz = pmr->n.sz;
+    sz = pmr->sz;
     break;
   case MOVE_RESIGN:
-    sz = pmr->r.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETBOARD:
-    sz = pmr->sb.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETDICE:
-    sz = pmr->sd.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETCUBEVAL:
-    sz = pmr->scv.sz;
+    sz = pmr->sz;
     break;
   case MOVE_SETCUBEPOS:
-    sz = pmr->scp.sz;
+    sz = pmr->sz;
     break;
   case MOVE_TIME:
 	  /* ignore */
@@ -3280,7 +3280,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
     int iMove = 0;
     statcontext *psc = NULL;
     static statcontext scTotal;
-    movegameinfo *pmgi = NULL;
+    xmovegameinfo *pmgi = NULL;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
@@ -3316,14 +3316,14 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
       case MOVE_NORMAL:
 
-	if( pmr->n.fPlayer != msExport.fMove ) {
+	if( pmr->fPlayer != msExport.fMove ) {
 	    SwapSides( msExport.anBoard );
-	    msExport.fMove = pmr->n.fPlayer;
+	    msExport.fMove = pmr->fPlayer;
 	}
       
-        msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
-        msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
-        msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+        msExport.fTurn = msExport.fMove = pmr->fPlayer;
+        msExport.anDice[ 0 ] = pmr->anDice[ 0 ];
+        msExport.anDice[ 1 ] = pmr->anDice[ 1 ];
 
         HTMLBoardHeader ( pf, &msExport, het, hecss, iGame, iMove, TRUE );
 

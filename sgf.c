@@ -172,15 +172,16 @@ static void CopyName( int i, char *sz, char *szCharset ) {
 
 }
 
-static void SetScore( movegameinfo *pmgi, int fBlack, int n ) {
+static void SetScore( xmovegameinfo *pmgi, int fBlack, int n ) {
 
     if( n >= 0 && ( !pmgi->nMatch || n < pmgi->nMatch ) )
 	pmgi->anScore[ fBlack ] = n;
 }
 
-static void RestoreMI( list *pl, movegameinfo *pmgi ) {
+static void RestoreMI( list *pl, moverecord *pmr ) {
 
     char *pch;
+    xmovegameinfo *pmgi = &pmr->g;
 
     for( pl = pl->plNext; ( pch = pl->p ); pl = pl->plNext )
 	if( !strncmp( pch, "length:", 7 ) ) {
@@ -197,9 +198,9 @@ static void RestoreMI( list *pl, movegameinfo *pmgi ) {
 	    SetScore( pmgi, *pch == 'b', atoi( pch + 3 ) );
 #if USE_TIMECONTROL
 	else if( !strncmp( pch, "wtime:", 6 ) ) {
-	    pmgi->tl[0].tv_sec= atoi( pch + 6 );
+	    pmr->tl[0].tv_sec= atoi( pch + 6 );
 	} else if( !strncmp( pch, "btime:", 6 ) ) {
-	    pmgi->tl[1].tv_sec= atoi( pch + 6 );
+	    pmr->tl[1].tv_sec= atoi( pch + 6 );
 	} else if( !strncmp( pch, "wtimeouts:", 10 ) ) {
 	    pmgi->nTimeouts[0] = atoi( pch + 10 );
 	} else if( !strncmp( pch, "btimeouts:", 10 ) ) {
@@ -357,7 +358,7 @@ static void RestoreText( char *sz, char **ppch, const char *szCharset ) {
 }
 
 static void
-RestoreRules( movegameinfo *pmgi, const char *sz ) {
+RestoreRules( xmovegameinfo *pmgi, const char *sz ) {
 
   char *pch;
   char *pchx;
@@ -399,36 +400,38 @@ RestoreRules( movegameinfo *pmgi, const char *sz ) {
 static void RestoreRootNode( list *pl, char *szCharset ) {
 
     property *pp;
-    movegameinfo *pmgi = malloc( sizeof( *pmgi ) );
+    moverecord *pmr;
     char *pch;
     int i;
+
+    pmr = NewMoveRecord();
     
-    pmgi->mt = MOVE_GAMEINFO;
-    pmgi->sz = NULL;
-    pmgi->i = 0;
-    pmgi->nMatch = 0;
-    pmgi->anScore[ 0 ] = 0;
-    pmgi->anScore[ 1 ] = 0;
-    pmgi->fCrawford = FALSE;
-    pmgi->fCrawfordGame = FALSE;
-    pmgi->fJacoby = FALSE;
-    pmgi->fWinner = -1;
-    pmgi->nPoints = 0;
-    pmgi->fResigned = FALSE;
-    pmgi->nAutoDoubles = 0;
-    pmgi->bgv = VARIATION_STANDARD;
-    pmgi->fCubeUse = TRUE;
+    pmr->mt = MOVE_GAMEINFO;
+
+    pmr->g.i = 0;
+    pmr->g.nMatch = 0;
+    pmr->g.anScore[ 0 ] = 0;
+    pmr->g.anScore[ 1 ] = 0;
+    pmr->g.fCrawford = FALSE;
+    pmr->g.fCrawfordGame = FALSE;
+    pmr->g.fJacoby = FALSE;
+    pmr->g.fWinner = -1;
+    pmr->g.nPoints = 0;
+    pmr->g.fResigned = FALSE;
+    pmr->g.nAutoDoubles = 0;
+    pmr->g.bgv = VARIATION_STANDARD;
+    pmr->g.fCubeUse = TRUE;
 #if USE_TIMECONTROL
-    pmgi->tl[0].tv_sec = pmgi->tl[1].tv_sec = 0;
-    pmgi->tl[0].tv_usec = pmgi->tl[1].tv_usec = 0;
-    pmgi->nTimeouts[0] = pmgi->nTimeouts[1] = 0; 
+    pmr->tl[0].tv_sec = pmr->tl[1].tv_sec = 0;
+    pmr->tl[0].tv_usec = pmr->tl[1].tv_usec = 0;
+    pmr->g.nTimeouts[0] = pmr->g.nTimeouts[1] = 0; 
 #endif
-    IniStatcontext( &pmgi->sc );
+    IniStatcontext( &pmr->g.sc );
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext ) 
 	if( pp->ach[ 0 ] == 'M' && pp->ach[ 1 ] == 'I' )
 	    /* MI - Match info property */
-	    RestoreMI( pp->pl, pmgi );
+	    RestoreMI( pp->pl, pmr );
         else if ( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'A' )
           /* CA - charset property */
           strcpy ( szCharset, (const char *) pp->pl->plNext->p );
@@ -442,37 +445,37 @@ static void RestoreRootNode( list *pl, char *szCharset ) {
 	    /* RE - Result property */
 	    pch = pp->pl->plNext->p;
 
-	    pmgi->fWinner = -1;
+	    pmr->g.fWinner = -1;
 	    
 	    if( toupper( *pch ) == 'B' )
-		pmgi->fWinner = 1;
+		pmr->g.fWinner = 1;
 	    else if( toupper( *pch ) == 'W' )
-		pmgi->fWinner = 0;
+		pmr->g.fWinner = 0;
 
-	    if( pmgi->fWinner == -1 )
+	    if( pmr->g.fWinner == -1 )
 		continue;
 	    
 	    if( *++pch != '+' )
 		continue;
 
-	    pmgi->nPoints = strtol( pch, &pch, 10 );
-	    if( pmgi->nPoints < 1 )
-		pmgi->nPoints = 1;
+	    pmr->g.nPoints = strtol( pch, &pch, 10 );
+	    if( pmr->g.nPoints < 1 )
+		pmr->g.nPoints = 1;
 	    
-	    pmgi->fResigned = toupper( *pch ) == 'R';
+	    pmr->g.fResigned = toupper( *pch ) == 'R';
 	} else if( pp->ach[ 0 ] == 'R' && pp->ach[ 1 ] == 'U' ) { 
 	    /* RU - Rules property */
-            RestoreRules( pmgi, (const char *) pp->pl->plNext->p );
+            RestoreRules( &pmr->g, (const char *) pp->pl->plNext->p );
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
 	    /* CV - Cube value (i.e. automatic doubles) */
 	    for( i = 0; ( 1 << i ) <= MAX_CUBE; i++ )
 		if( atoi( pp->pl->plNext->p ) == 1 << i ) {
-		    pmgi->nAutoDoubles = i;
+		    pmr->g.nAutoDoubles = i;
 		    break;
 		}
 	} else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'S' )
 	    /* GS - Game statistics */
-	    RestoreGS( pp->pl, &pmgi->sc );
+	    RestoreGS( pp->pl, &pmr->g.sc );
 	else if( pp->ach[ 0 ] == 'W' && pp->ach[ 1 ] == 'R' )
 	    /* WR - White rank */
 	    RestoreText( pp->pl->plNext->p, &mi.pchRating[ 0 ], szCharset );
@@ -506,7 +509,7 @@ static void RestoreRootNode( list *pl, char *szCharset ) {
 	    /* GC - Game comment */
 	    RestoreText( pp->pl->plNext->p, &mi.pchComment, szCharset );
     
-    AddMoveRecord( pmgi );
+    AddMoveRecord( pmr );
 }
 
 static int Point( char ch, int f ) {
@@ -1084,62 +1087,56 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	    
 	    if( !strcmp( pch, "double" ) ) {
 
-		pmr = calloc( 1, sizeof( pmr->d ) );
+                pmr = NewMoveRecord();
+
 		pmr->mt = MOVE_DOUBLE;
-		pmr->d.sz = NULL;
-		pmr->d.fPlayer = fPlayer;
-		if( ! LinkToDouble( pmr ) ) {
-		  pmr->d.nAnimals = 0;
-		pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-		pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-		}
+		pmr->fPlayer = fPlayer;
+		LinkToDouble( pmr );
+
 	    } else if( !strcmp( pch, "take" ) ) {
-		pmr = calloc( 1, sizeof( pmr->d ) );
+
+                pmr = NewMoveRecord();
+
 		pmr->mt = MOVE_TAKE;
-		pmr->d.sz = NULL;
-		pmr->d.fPlayer = fPlayer;
-		pmr->d.st = SKILL_NONE;
+		pmr->fPlayer = fPlayer;
 		if (!LinkToDouble( pmr ) ) {
 		  free (pmr);
 		  continue;
 		}
 	    } else if( !strcmp( pch, "drop" ) ) {
-		pmr = calloc( 1, sizeof( pmr->d ) );
+
+                pmr = NewMoveRecord();
+
 		pmr->mt = MOVE_DROP;
-		pmr->d.sz = NULL;
-		pmr->d.fPlayer = fPlayer;
-		pmr->d.st = SKILL_NONE;
+		pmr->fPlayer = fPlayer;
 		if (!LinkToDouble( pmr ) ) {
 		  free (pmr);
 		  continue;
 		}
 	    } else {
-		pmr = calloc( 1, sizeof( pmr->n ) );
+
+                pmr = NewMoveRecord();
+
 		pmr->mt = MOVE_NORMAL;
-		pmr->n.sz = NULL;
-		pmr->n.fPlayer = fPlayer;
-		pmr->n.ml.cMoves = 0;
-		pmr->n.ml.amMoves = NULL;
-                pmr->n.esChequer.et = EVAL_NONE;
-		pmr->n.esDouble.et = EVAL_NONE;
+		pmr->fPlayer = fPlayer;
 		
-		pmr->n.anRoll[ 1 ] = 0;
+		pmr->anDice[ 1 ] = 0;
 		
 		for( i = 0; i < 2 && *pch; pch++, i++ )
-		    pmr->n.anRoll[ i ] = *pch - '0';
+		    pmr->anDice[ i ] = *pch - '0';
 
 		for( i = 0; i < 4 && pch[ 0 ] && pch[ 1 ]; pch += 2, i++ ) {
 		    pmr->n.anMove[ i << 1 ] = Point( pch[ 0 ],
-						     pmr->n.fPlayer );
+						     pmr->fPlayer );
 		    pmr->n.anMove[ ( i << 1 ) | 1 ] = Point( pch[ 1 ],
-							     pmr->n.fPlayer );
+							     pmr->fPlayer );
 		}
 
 		if( i < 4 )
 		    pmr->n.anMove[ i << 1 ] = -1;
 			
-		if( pmr->n.anRoll[ 0 ] < 1 || pmr->n.anRoll[ 0 ] > 6 ||
-		    pmr->n.anRoll[ 1 ] < 1 || pmr->n.anRoll[ 1 ] > 6 ) {
+		if( pmr->anDice[ 0 ] < 1 || pmr->anDice[ 0 ] > 6 ||
+		    pmr->anDice[ 1 ] < 1 || pmr->anDice[ 1 ] > 6 ) {
 		    /* illegal roll -- ignore */
 		    free( pmr );
 		    pmr = NULL;
@@ -1171,18 +1168,18 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
 	    for( i = 1; i <= MAX_CUBE; i <<= 1 )
 		if( atoi( pp->pl->plNext->p ) == i ) {
-		    pmr = calloc( 1, sizeof( pmr->scv ) );
+                    pmr = NewMoveRecord();
+
 		    pmr->mt = MOVE_SETCUBEVAL;
-		    pmr->scv.sz = NULL;
 		    pmr->scv.nCube = i;
 		    AddMoveRecord( pmr );
 		    pmr = NULL;
 		    break;
 		}
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'P' ) {
-	    pmr = calloc( 1, sizeof( pmr->scp ) );
+            pmr = NewMoveRecord();
+
 	    pmr->mt = MOVE_SETCUBEPOS;
-	    pmr->scp.sz = NULL;
 	    switch( *( (char *) pp->pl->plNext->p ) ) {
 	    case 'c':
 		pmr->scp.fCubeOwner = -1;
@@ -1209,12 +1206,12 @@ static void RestoreNode( list *pl, char *szCharset ) {
 
 	    if( ach[ 0 ] >= '1' && ach[ 0 ] <= '6' && ach[ 1 ] >= '1' &&
 		ach[ 1 ] <= '6' ) {
-		pmr = calloc( 1, sizeof( pmr->sd ) );
+                pmr = NewMoveRecord();
+
 		pmr->mt = MOVE_SETDICE;
-		pmr->sd.sz = NULL;
-		pmr->sd.fPlayer = ms.fMove;
-		pmr->sd.anDice[ 0 ] = ach[ 0 ] - '0';
-		pmr->sd.anDice[ 1 ] = ach[ 1 ] - '0';
+		pmr->fPlayer = ms.fMove;
+		pmr->anDice[ 0 ] = ach[ 0 ] - '0';
+		pmr->anDice[ 1 ] = ach[ 1 ] - '0';
 	    }
 	} else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'A' )
 	    /* double analysis */
@@ -1261,27 +1258,28 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	    LUCK_BAD;
 #if USE_TIMECONTROL
 	else if( pp->ach[ 0 ] == 'W' && pp->ach[ 1 ] == 'L' ) {
-	    pmr->a.tl[0].tv_sec = atoi ( (char *) pp->pl->plNext->p );
+            pmr->tl[0].tv_sec = atoi ( (char *) pp->pl->plNext->p );
 	    fTimeset |= 1;
 	}
 	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'L' ) {
-	    pmr->a.tl[1].tv_sec = atoi ( (char *) pp->pl->plNext->p );
+	    pmr->tl[1].tv_sec = atoi ( (char *) pp->pl->plNext->p );
 	    fTimeset |= 2;
 	}
 	else if( ( pp->ach[ 0 ] == 'W' || pp->ach[ 0 ] == 'B') && pp->ach[ 1 ] == 'X' ) {
-	    pmr = malloc( sizeof( pmr->t ) );
-	    pmr->t.mt = MOVE_TIME;
-	    pmr->t.sz = 0;
+            pmr = NewMoveRecord();
+
+	    pmr->mt = MOVE_TIME;
+	    pmr->fPlayer = (pp->ach[ 0 ] == 'W');
+
 	    pmr->t.nPoints = atoi ( (char *) pp->pl->plNext->p );
-	    pmr->t.fPlayer = (pp->ach[ 0 ] == 'W');
 	}
 #endif
     }
     
     if( fSetBoard && !pmr ) {
-	pmr = calloc( 1, sizeof( pmr->sb ) );
+        pmr = NewMoveRecord();
+
 	pmr->mt = MOVE_SETBOARD;
-	pmr->sb.sz = NULL;
 	ClosestLegalPosition( ms.anBoard );
 	PositionKey( ms.anBoard, pmr->sb.auchKey );
     }
@@ -1289,14 +1287,14 @@ static void RestoreNode( list *pl, char *szCharset ) {
 #if USE_TIMECONTROL
     /* Compensate for mising timestamps */
     if (pmr && !(fTimeset&1))
-	pmr->a.tl[0]= ((moverecord *) (plLastMove->p))->a.tl[0];
+	pmr->tl[0]= ((moverecord *) (plLastMove->p))->tl[0];
 
     if (pmr && !(fTimeset&2))
-	pmr->a.tl[1]= ((moverecord *) (plLastMove->p))->a.tl[1];
+	pmr->tl[1]= ((moverecord *) (plLastMove->p))->tl[1];
 #endif
 
     if( pmr && ppC )
-	pmr->a.sz = CopyEscapedString( ppC->pl->plNext->p, szCharset );
+	pmr->sz = CopyEscapedString( ppC->pl->plNext->p, szCharset );
 
     if( pmr ) {
       
@@ -1306,18 +1304,18 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	case MOVE_NORMAL:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-                                       pmr->n.aarOutput,
-                                       pmr->n.aarStdDev,
-                                       &pmr->n.esDouble );
+                                       pmr->CubeDecPtr->aarOutput,
+                                       pmr->CubeDecPtr->aarStdDev,
+                                       &pmr->CubeDecPtr->esDouble );
 	    if( ppA )
-		RestoreMoveAnalysis( ppA, pmr->n.fPlayer, &pmr->n.ml,
-				     &pmr->n.iMove, &pmr->n.esChequer,
+                RestoreMoveAnalysis( ppA, pmr->fPlayer, &pmr->ml,
+				     &pmr->n.iMove, &pmr->esChequer,
                                      &ms );
             /* FIXME: separate st's */
 	    pmr->n.stMove = ast[ 0 ];
-	    pmr->n.stCube = ast[ 1 ];
-	    pmr->n.lt = fPlayer ? lt : LUCK_VERYGOOD - lt;
-	    pmr->n.rLuck = rLuck;
+	    pmr->stCube = ast[ 1 ];
+	    pmr->lt = fPlayer ? lt : LUCK_VERYGOOD - lt;
+	    pmr->rLuck = rLuck;
 	    break;
 	    
 	case MOVE_DOUBLE:
@@ -1325,15 +1323,15 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	case MOVE_DROP:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-							   pmr->d.CubeDecPtr->aarOutput,
-							   pmr->d.CubeDecPtr->aarStdDev,
-							   &pmr->d.CubeDecPtr->esDouble );
-	    pmr->d.st = ast[ 0 ];
+                                       pmr->CubeDecPtr->aarOutput,
+                                       pmr->CubeDecPtr->aarStdDev,
+                                       &pmr->CubeDecPtr->esDouble );
+	    pmr->stCube = ast[ 0 ];
 	    break;
 	    
 	case MOVE_SETDICE:
-	    pmr->sd.lt = lt;
-	    pmr->sd.rLuck = rLuck;
+	    pmr->lt = lt;
+	    pmr->rLuck = rLuck;
 	    break;
 	    
 	default:
@@ -1401,7 +1399,7 @@ static void RestoreGame( list *pl, char *szCharset ) {
     AddGame( pmr );
     
 #if USE_TIMECONTROL
-    if( pmr->g.tl[0].tv_sec && pmr->g.tl[1].tv_sec) 
+    if( pmr->tl[0].tv_sec && pmr->tl[1].tv_sec) 
 	ms.gc.pc[0].tc.timing = ms.gc.pc[1].tc.timing =  TC_UNKNOWN;
 #endif
     if( pmr->g.fResigned ) {
@@ -1409,11 +1407,11 @@ static void RestoreGame( list *pl, char *szCharset ) {
          inverted when shown. /jth 2003-10-12 
          ms.fTurn = ms.fMove = -1; */
 	
-	pmrResign = calloc( 1, sizeof( pmrResign ->r ) );
+        pmrResign = NewMoveRecord();
+
 	pmrResign->mt = MOVE_RESIGN;
-	pmrResign->r.sz = NULL;
-        pmrResign->r.esResign.et = EVAL_NONE;
-	pmrResign->r.fPlayer = !pmr->g.fWinner;
+
+	pmrResign->fPlayer = !pmr->g.fWinner;
 	pmrResign->r.nResigned = pmr->g.nPoints / ms.nCube;
 
 	if( pmrResign->r.nResigned < 1 )
@@ -2090,12 +2088,16 @@ static void SaveGame( FILE *pf, list *plGame ) {
     /* If not, money games will be loaded without score and game number */
     /* if( pmr->g.nMatch ) */
 #if USE_TIMECONTROL
-    fprintf( pf, "MI[length:%d][game:%d][ws:%d][bs:%d][wtime:%d][btime:%d][wtimeouts:%d][btimeouts:%d]", pmr->g.nMatch,
-             pmr->g.i, pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ],
-	     (int)pmr->g.tl[0].tv_sec, (int)pmr->g.tl[1].tv_sec, pmr->g.nTimeouts[0], pmr->g.nTimeouts[1]);
+    fprintf( pf, "MI[length:%d][game:%d][ws:%d][bs:%d]"
+             "[wtime:%d][btime:%d][wtimeouts:%d][btimeouts:%d]", 
+             pmr->g.nMatch, pmr->g.i, 
+             pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ],
+	     (int)pmr->tl[0].tv_sec, (int)pmr->tl[1].tv_sec, 
+             pmr->g.nTimeouts[0], pmr->g.nTimeouts[1]);
 #else
-    fprintf( pf, "MI[length:%d][game:%d][ws:%d][bs:%d]", pmr->g.nMatch,
-             pmr->g.i, pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ] );
+    fprintf( pf, "MI[length:%d][game:%d][ws:%d][bs:%d]", 
+             pmr->g.nMatch, pmr->g.i, 
+             pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ] );
 #endif
     
     /* Names */
@@ -2158,76 +2160,80 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
-	    fprintf( pf, "\n;%c[%d%d", pmr->n.fPlayer ? 'B' : 'W',
-		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
-	    WriteMove( pf, pmr->n.fPlayer, pmr->n.anMove );
+	    fprintf( pf, "\n;%c[%d%d", pmr->fPlayer ? 'B' : 'W',
+		     pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
+	    WriteMove( pf, pmr->fPlayer, pmr->n.anMove );
 	    putc( ']', pf );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->n.tl[0].tv_sec, (int)pmr->n.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", 
+                     (int)pmr->tl[0].tv_sec, (int)pmr->tl[1].tv_sec);
 #endif
-	    if( pmr->n.esDouble.et != EVAL_NONE )
+	    if( pmr->CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
-                                     pmr->n.aarOutput, pmr->n.aarStdDev,
-				     &pmr->n.esDouble );
+                                     pmr->CubeDecPtr->aarOutput, 
+                                     pmr->CubeDecPtr->aarStdDev,
+				     &pmr->CubeDecPtr->esDouble );
 
-	    if( pmr->n.ml.cMoves )
-		WriteMoveAnalysis( pf, pmr->n.fPlayer, &pmr->n.ml,
+	    if( pmr->ml.cMoves )
+		WriteMoveAnalysis( pf, pmr->fPlayer, &pmr->ml,
 				   pmr->n.iMove );
 
-	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.rLuck, pmr->n.lt );
+	    WriteLuck( pf, pmr->fPlayer, pmr->rLuck, pmr->lt );
             /* FIXME: separate skill for cube and move */
 	    WriteSkill( pf, pmr->n.stMove );
-	    WriteSkillCube( pf, pmr->n.stCube );
+	    WriteSkillCube( pf, pmr->stCube );
 	    
 	    break;
 	    
 	case MOVE_DOUBLE:
-	    fprintf( pf, "\n;%c[double]", pmr->d.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[double]", pmr->fPlayer ? 'B' : 'W' );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->d.tl[0].tv_sec, (int)pmr->d.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", 
+                     (int)pmr->tl[0].tv_sec, (int)pmr->tl[1].tv_sec);
 #endif
-	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+	    if( pmr->CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
-				     pmr->d.CubeDecPtr->aarOutput, 
-				     pmr->d.CubeDecPtr->aarStdDev,
-				     &pmr->d.CubeDecPtr->esDouble );
+				     pmr->CubeDecPtr->aarOutput, 
+				     pmr->CubeDecPtr->aarStdDev,
+				     &pmr->CubeDecPtr->esDouble );
 	    
-	    WriteSkill( pf, pmr->d.st );
+	    WriteSkill( pf, pmr->stCube );
 	    
 	    break;
 	    
 	case MOVE_TAKE:
-	    fprintf( pf, "\n;%c[take]", pmr->d.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[take]", pmr->fPlayer ? 'B' : 'W' );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->d.tl[0].tv_sec, (int)pmr->d.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", 
+                     (int)pmr->tl[0].tv_sec, (int)pmr->tl[1].tv_sec);
 #endif
-	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+	    if( pmr->CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
-				     pmr->d.CubeDecPtr->aarOutput, 
-				     pmr->d.CubeDecPtr->aarStdDev,
-				     &pmr->d.CubeDecPtr->esDouble );
+				     pmr->CubeDecPtr->aarOutput, 
+				     pmr->CubeDecPtr->aarStdDev,
+				     &pmr->CubeDecPtr->esDouble );
 	    
-	    WriteSkill( pf, pmr->d.st );
+	    WriteSkill( pf, pmr->stCube );
 	    
 	    break;
 	    
 	case MOVE_DROP:
-	    fprintf( pf, "\n;%c[drop]", pmr->d.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[drop]", pmr->fPlayer ? 'B' : 'W' );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->d.tl[0].tv_sec, (int)pmr->d.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->tl[0].tv_sec, (int)pmr->tl[1].tv_sec);
 #endif
-	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+	    if( pmr->CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
-				     pmr->d.CubeDecPtr->aarOutput,
-				     pmr->d.CubeDecPtr->aarStdDev,
-				     &pmr->d.CubeDecPtr->esDouble );
+				     pmr->CubeDecPtr->aarOutput,
+				     pmr->CubeDecPtr->aarStdDev,
+				     &pmr->CubeDecPtr->esDouble );
 
 	    
-	    WriteSkill( pf, pmr->d.st );
+	    WriteSkill( pf, pmr->stCube );
 	    
 	    break;
 	    	    
@@ -2262,10 +2268,10 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_SETDICE:
-	    fprintf( pf, "\n;PL[%c]DI[%d%d]", pmr->sd.fPlayer ? 'B' : 'W',
-		     pmr->sd.anDice[ 0 ], pmr->sd.anDice[ 1 ] );
+	    fprintf( pf, "\n;PL[%c]DI[%d%d]", pmr->fPlayer ? 'B' : 'W',
+		     pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 
-	    WriteLuck( pf, pmr->sd.fPlayer, pmr->sd.rLuck, pmr->sd.lt );
+	    WriteLuck( pf, pmr->fPlayer, pmr->rLuck, pmr->lt );
 	    
 	    break;
 	    
@@ -2279,9 +2285,10 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    
 #if USE_TIMECONTROL
 	case MOVE_TIME:
-	    fprintf( pf, "\n;%cX[%d]",  ! pmr->sd.fPlayer ? 'B' : 'W',
+	    fprintf( pf, "\n;%cX[%d]",  ! pmr->fPlayer ? 'B' : 'W',
 		pmr->t.nPoints);
-	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->t.tl[0].tv_sec, (int)pmr->t.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", 
+                     (int)pmr->tl[0].tv_sec, (int)pmr->tl[1].tv_sec);
 	    break;
 #endif
 
@@ -2289,9 +2296,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    assert( FALSE );
 	}
 
-	if( pmr->a.sz ) {
+	if( pmr->sz ) {
 	    fputs( "C[", pf );
-	    WriteEscapedString( pf, pmr->a.sz, FALSE );
+	    WriteEscapedString( pf, pmr->sz, FALSE );
 	    putc( ']', pf );
 	}
     }
@@ -2384,11 +2391,11 @@ extern void CommandSavePosition( char *sz ) {
 
     FILE *pf;
     list l;
-    movegameinfo *pmgi;
-    movesetboard *pmsb;
-    movesetdice *pmsd;
-    movesetcubeval *pmscv;
-    movesetcubepos *pmscp;
+    moverecord *pmgi;
+    moverecord *pmsb;
+    moverecord *pmsd;
+    moverecord *pmscv;
+    moverecord *pmscp;
     
     sz = NextToken( &sz );
     
@@ -2414,53 +2421,65 @@ extern void CommandSavePosition( char *sz ) {
     }
 
     ListCreate( &l );
+
+    /* gameinfo record */
     
-    pmgi = calloc( 1, sizeof( movegameinfo ) );
+    pmgi = NewMoveRecord();
+
     pmgi->mt = MOVE_GAMEINFO;
     pmgi->sz = NULL;
-    pmgi->i = 0;
-    pmgi->nMatch = ms.nMatchTo;
-    pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
-    pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
-    pmgi->fCrawford = fAutoCrawford && ms.nMatchTo > 1;
-    pmgi->fCrawfordGame = ms.fCrawford;
-    pmgi->fJacoby = ms.fJacoby && !ms.nMatchTo;
-    pmgi->fWinner = -1;
-    pmgi->nPoints = 0;
-    pmgi->fResigned = FALSE;
-    pmgi->nAutoDoubles = 0;
-    pmgi->bgv = ms.bgv;
-    pmgi->fCubeUse = ms.fCubeUse;
-    IniStatcontext( &pmgi->sc );
+    pmgi->g.i = 0;
+    pmgi->g.nMatch = ms.nMatchTo;
+    pmgi->g.anScore[ 0 ] = ms.anScore[ 0 ];
+    pmgi->g.anScore[ 1 ] = ms.anScore[ 1 ];
+    pmgi->g.fCrawford = fAutoCrawford && ms.nMatchTo > 1;
+    pmgi->g.fCrawfordGame = ms.fCrawford;
+    pmgi->g.fJacoby = ms.fJacoby && !ms.nMatchTo;
+    pmgi->g.fWinner = -1;
+    pmgi->g.nPoints = 0;
+    pmgi->g.fResigned = FALSE;
+    pmgi->g.nAutoDoubles = 0;
+    pmgi->g.bgv = ms.bgv;
+    pmgi->g.fCubeUse = ms.fCubeUse;
+    IniStatcontext( &pmgi->g.sc );
     ListInsert( &l, pmgi );
 
-    pmsb = calloc( 1, sizeof( movesetboard ) );
+    /* setboard record */
+
+    pmsb = NewMoveRecord();
+
     pmsb->mt = MOVE_SETBOARD;
-    pmsb->sz = NULL;
     if( ms.fMove )
 	SwapSides( ms.anBoard );
-    PositionKey( ms.anBoard, pmsb->auchKey );
+    PositionKey( ms.anBoard, pmsb->sb.auchKey );
     if( ms.fMove )
 	SwapSides( ms.anBoard );
     ListInsert( &l, pmsb );
 
-    pmscv = calloc( 1, sizeof( movesetcubeval ) );
+    /* set cube value */
+
+    pmscv = NewMoveRecord();
+
     pmscv->mt = MOVE_SETCUBEVAL;
-    pmscv->sz = NULL;
-    pmscv->nCube = ms.nCube;
+    pmscv->scv.nCube = ms.nCube;
     ListInsert( &l, pmscv );
+
+    /* cube position */
     
-    pmscp = calloc( 1, sizeof( movesetcubepos ) );
+    pmscp = NewMoveRecord();
+
     pmscp->mt = MOVE_SETCUBEPOS;
-    pmscp->sz = NULL;
-    pmscp->fCubeOwner = ms.fCubeOwner;
+    pmscp->scp.fCubeOwner = ms.fCubeOwner;
     ListInsert( &l, pmscp );
+
+    /* set dice */
     
     /* FIXME if the dice are not rolled, this should be done with a PL
        property (which is SaveGame()'s job) */
-    pmsd = calloc( 1, sizeof( movesetdice ) );
+    
+    pmsd = NewMoveRecord();
+
     pmsd->mt = MOVE_SETDICE;
-    pmsd->sz = NULL;
     pmsd->fPlayer = ms.fMove;
     pmsd->anDice[ 0 ] = ms.anDice[ 0 ];
     pmsd->anDice[ 1 ] = ms.anDice[ 1 ];

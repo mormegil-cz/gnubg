@@ -420,91 +420,91 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_NORMAL:
-	    msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
+	    msExport.fTurn = msExport.fMove = pmr->fPlayer;
 	    if( fTook )
 		/* no need to print board following a double/take */
 		fTook = FALSE;
 	    else
-		PrintLaTeXBoard( pf, &msExport, pmr->n.fPlayer );
+		PrintLaTeXBoard( pf, &msExport, pmr->fPlayer );
 	    
-	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-				    GCCCONSTAHACK pmr->n.aarOutput,
-				    GCCCONSTAHACK pmr->n.aarStdDev,
-                                    &pmr->n.esDouble );
+	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->fPlayer,
+				    GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
+				    GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                    &pmr->CubeDecPtr->esDouble );
             /* FIXME: output cube skill */
 
-	    sprintf( sz, "%s %d%d%s: ", PlayerSymbol( pmr->n.fPlayer ),
-		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
-		     aszLuckTypeLaTeXAbbr[ pmr->n.lt ] );
+	    sprintf( sz, "%s %d%d%s: ", PlayerSymbol( pmr->fPlayer ),
+		     pmr->anDice[ 0 ], pmr->anDice[ 1 ],
+		     aszLuckTypeLaTeXAbbr[ pmr->lt ] );
 	    FormatMove( strchr( sz, 0 ), msExport.anBoard, pmr->n.anMove );
 	    fprintf( pf, "\\begin{center}%s%s\\end{center}\n\n", sz,
 		     aszSkillTypeAbbr[ pmr->n.stMove ] );
 
 	    /* FIXME use center and tabular environment instead of verbatim */
 	    fputs( "{\\footnotesize\\begin{verbatim}\n", pf );
-	    for( i = 0; i < pmr->n.ml.cMoves && i <= pmr->n.iMove; i++ ) {
+	    for( i = 0; i < pmr->ml.cMoves && i <= pmr->n.iMove; i++ ) {
 		if( i >= 5 /* FIXME allow user to choose limit */ &&
 		    i != pmr->n.iMove )
 		    continue;
 
 		putc( i == pmr->n.iMove ? '*' : ' ', pf );
-		FormatMoveHint( sz, &msExport, &pmr->n.ml, i,
+		FormatMoveHint( sz, &msExport, &pmr->ml, i,
 				i != pmr->n.iMove ||
-				i != pmr->n.ml.cMoves - 1, TRUE, TRUE );
+				i != pmr->ml.cMoves - 1, TRUE, TRUE );
 		fputs( sz, pf );
 	    }
 	    fputs( "\\end{verbatim}}", pf );    
 		
-	    PrintLaTeXComment( pf, pmr->a.sz );
+	    PrintLaTeXComment( pf, pmr->sz );
 	    
 	    break;
 	    
 	case MOVE_DOUBLE:
-	    PrintLaTeXBoard( pf, &msExport, pmr->d.fPlayer );
+	    PrintLaTeXBoard( pf, &msExport, pmr->fPlayer );
 
-	    PrintLaTeXCubeAnalysis(pf, &msExport, pmr->d.fPlayer,
-				   GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
-				   GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev, 
-				   &pmr->d.CubeDecPtr->esDouble );
+	    PrintLaTeXCubeAnalysis(pf, &msExport, pmr->fPlayer,
+				   GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
+				   GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev, 
+				   &pmr->CubeDecPtr->esDouble );
 
 	    /* FIXME what about beavers? */
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
-		     PlayerSymbol( pmr->d.fPlayer ),
+		     PlayerSymbol( pmr->fPlayer ),
                      _("Double"),
-		     aszSkillTypeAbbr[ pmr->d.st ] );
+		     aszSkillTypeAbbr[ pmr->stCube ] );
 	    
-	    PrintLaTeXComment( pf, pmr->a.sz );
+	    PrintLaTeXComment( pf, pmr->sz );
 	    
 	    break;
 	    
 	case MOVE_TAKE:
 	    fTook = TRUE;
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
-		     PlayerSymbol( pmr->d.fPlayer ),
+		     PlayerSymbol( pmr->fPlayer ),
                      _("Take"),
-		     aszSkillTypeAbbr[ pmr->d.st ] );
+		     aszSkillTypeAbbr[ pmr->stCube ] );
 
-	    PrintLaTeXComment( pf, pmr->a.sz );
+	    PrintLaTeXComment( pf, pmr->sz );
 	    
 	    break;
 	    
 	case MOVE_DROP:
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
-		     PlayerSymbol( pmr->d.fPlayer ),
+		     PlayerSymbol( pmr->fPlayer ),
                      _("Drop"),
-		     aszSkillTypeAbbr[ pmr->d.st ] );
+		     aszSkillTypeAbbr[ pmr->stCube ] );
 
-	    PrintLaTeXComment( pf, pmr->a.sz );
+	    PrintLaTeXComment( pf, pmr->sz );
 	    
 	    break;
 	    
 	case MOVE_RESIGN:
 	    fprintf( pf, "\\begin{center}%s %s %s\\end{center}\n\n",
-		     PlayerSymbol( pmr->r.fPlayer ),
+		     PlayerSymbol( pmr->fPlayer ),
                      _("Resigns"),
 		     gettext ( aszGameResult[ pmr->r.nResigned - 1 ]  ) );
 	    /* FIXME print resignation analysis, if available */
-	    PrintLaTeXComment( pf, pmr->a.sz );
+	    PrintLaTeXComment( pf, pmr->sz );
 	    break;
 	    
 	case MOVE_SETDICE:

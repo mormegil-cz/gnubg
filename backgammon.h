@@ -256,13 +256,6 @@ typedef struct _gameclock {
 #endif
 
 typedef struct _movegameinfo {
-  /* "standard" header */
-  movetype mt;
-  char* sz;
-#if USE_TIMECONTROL
-  /* time left after the move */
-  struct timeval tl[2];
-#endif
 
   /* ordinal number of the game within a match */
   int i;
@@ -306,7 +299,7 @@ typedef struct _movegameinfo {
   /* how many timeouts (clock expiry) have happened during the match */
     int nTimeouts[2];
 #endif
-} movegameinfo;
+} xmovegameinfo;
 
 typedef struct cubedecisiondata {
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
@@ -314,67 +307,18 @@ typedef struct cubedecisiondata {
   evalsetup esDouble;
 } cubedecisiondata;
 
-typedef struct _movedouble {
-    movetype mt;
-    char* sz;
-#if USE_TIMECONTROL
-    struct timeval tl[2];
-#endif
-    int fPlayer;
-    int nAnimals;    /* 0 in match play, even numbers are doubles, raccoons
-                        odd numbers are beavers, aardvarken, etc. */
-    cubedecisiondata* CubeDecPtr;
-    cubedecisiondata  CubeDec;
-    skilltype st;
-} movedouble;
-
 typedef struct _movenormal {
-  /* "standard" header */
-  movetype mt;
-  char* sz;
-#if USE_TIMECONTROL
-  struct timeval tl[2];
-#endif
-
-  int fPlayer;
-
-  /* dice for move */ 
-  int anRoll[2];
 
   /* Move made. */
   int anMove[ 8 ];
 
-  /* evaluation setup for move analysis */
-  evalsetup esChequer;
-
-  /* evaluation of cube action before this move */
-  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-
-  evalsetup esDouble;
-
-  /* evaluation of the moves */
-  movelist ml;
-
   /* index into the movelist of the move that was made */
   int iMove; 
 
-  lucktype lt;
-
-  /* ERR_VAL means unknown */
-  float rLuck; 
-
   skilltype stMove;
-  skilltype stCube;
-} movenormal;
+} xmovenormal;
 
 typedef struct _moveresign {
-    movetype mt;
-    char* sz;
-#if USE_TIMECONTROL
-    struct timeval tl[2];
-#endif
-    int fPlayer;
     int nResigned;
 
     evalsetup esResign;
@@ -382,81 +326,93 @@ typedef struct _moveresign {
 
     skilltype stResign;
     skilltype stAccept;
-} moveresign;
+} xmoveresign;
 
 typedef struct _movesetboard {
-    movetype mt;
-    char* sz;
-#if USE_TIMECONTROL
-    struct timeval tl[2];
-#endif
     unsigned char auchKey[ 10 ]; /* always stored as if player 0 was on roll */
-} movesetboard;
-
-typedef struct _movesetdice {
-    movetype mt;
-    char* sz;
-#if USE_TIMECONTROL
-    struct timeval tl[2];
-#endif
-    int fPlayer;
-    int anDice[ 2 ];
-    lucktype lt;
-    float rLuck; /* ERR_VAL means unknown */
-} movesetdice;
+} xmovesetboard;
 
 typedef struct _movesetcubeval {
-    movetype mt;
-    char* sz;
-#if USE_TIMECONTROL
-    struct timeval tl[2];
-#endif
     int nCube;
-} movesetcubeval;
+} xmovesetcubeval;
 
 typedef struct _movesetcubepos {
-    movetype mt;
-    char *sz;
-#if USE_TIMECONTROL
-    struct timeval tl[2];
-#endif
     int fCubeOwner;
-} movesetcubepos;
+} xmovesetcubepos;
 
 #if USE_TIMECONTROL
 typedef struct _movetime {
-    movetype mt;
-    char *sz;
-    struct timeval tl[2];
-    int fPlayer;
     int nPoints;
 
     /* evaluation of loss */
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     evalsetup es;
-} movetime;
+} xmovetime;
 #endif
 
-typedef union _moverecord {
+typedef struct _moverecord {
+
+  /* 
+   * Common variables
+   */
+
+  /* type of the move */
     movetype mt;
-    struct _moverecordall {
-	movetype mt;
-	char* sz;
+
+  /* annotation */
+  char* sz;
+
+  /* stuff for timing */
 #if USE_TIMECONTROL
-	struct timeval tl[2];
+  struct timeval tl[2];
 #endif
-    } a;
-    movegameinfo g;
-    movedouble d; /* cube decisions */
-    movenormal n;
-    moveresign r;
-    movesetboard sb;
-    movesetdice sd;
-    movesetcubeval scv;
-    movesetcubepos scp;
+
+  /* move record is for player */
+  int fPlayer;
+
+  /* luck analysis (shared between MOVE_SETDICE and MOVE_NORMAL) */
+
+  /* dice rolled */
+  int anDice[ 2 ];
+
+  /* classification of luck */
+  lucktype lt;
+
+  /* magnitude of luck */
+  float rLuck; /* ERR_VAL means unknown */
+
+  /* move analysis (shared between MOVE_SETDICE and MOVE_NORMAL) */
+
+  /* evaluation setup for move analysis */
+  evalsetup esChequer;
+
+  /* evaluation of the moves */
+  movelist ml;
+
+  /* cube analysis (shared between MOVE_NORMAL and MOVE_DOUBLE) */
+
+  /* 0 in match play, even numbers are doubles, raccoons 
+     odd numbers are beavers, aardvarken, etc. */
+  int nAnimals;    
+
+  /* the evaluation and settings */
+  cubedecisiondata* CubeDecPtr;
+  cubedecisiondata  CubeDec;
+
+  /* skill for the cube decision */
+  skilltype stCube;
+
+  /* "private" data */
+
+  xmovegameinfo g;     /* game information */
+  xmovenormal n;       /* chequerplay move */
+  xmoveresign r;       /* resignation */
+  xmovesetboard sb;    /* setting up board */
+  xmovesetcubeval scv; /* setting cube */
+  xmovesetcubepos scp; /* setting cube owner */
 #if USE_TIMECONTROL
-    movetime t;
+  xmovetime t;         /* time controls */
 #endif
 } moverecord;
 
@@ -609,6 +565,8 @@ extern char* NextToken( char **ppch );
 extern char* NextTokenGeneral( char **ppch, const char* szTokens );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
+extern moverecord *
+NewMoveRecord( void );
 extern void AddMoveRecord( void* pmr );
 extern moverecord* LinkToDouble( moverecord* pmr);
 extern void ApplyMoveRecord( matchstate* pms, const list* plGame,

@@ -1471,7 +1471,7 @@ PythonGame(const list*    plGame,
 {
   const list* pl = plGame->plNext;
   const moverecord* pmr = pl->p;            
-  const movegameinfo* g = &pmr->g;
+  const xmovegameinfo* g = &pmr->g;
 
   PyObject* gameDict = PyDict_New();
   PyObject* gameInfoDict = PyDict_New();
@@ -1560,32 +1560,33 @@ PythonGame(const list*    plGame,
       switch( pmr->mt ) {
 	case MOVE_NORMAL:
 	{
-	  const movenormal* n = &pmr->n;
-
 	  action = "move";
-	  player = n->fPlayer;
+	  player = pmr->fPlayer;
 
 	  {
-	    PyObject* dice = Py_BuildValue("(ii)", n->anRoll[0], n->anRoll[1]);
+	    PyObject* dice = Py_BuildValue("(ii)", 
+                                           pmr->anDice[0], pmr->anDice[1]);
 
 	    
 	    DictSetItemSteal(recordDict, "dice", dice);
 	  }
 
-	  DictSetItemSteal(recordDict, "move", PyMove(n->anMove));
+	  DictSetItemSteal(recordDict, "move", PyMove(pmr->n.anMove));
 
 	  if( includeBoards ) {
 	    DictSetItemSteal(recordDict, "board",
 			     PyString_FromString(PositionID(anBoard)));
 	    
-	    ApplyMove(anBoard, n->anMove, 0);
+	    ApplyMove(anBoard, pmr->n.anMove, 0);
 	    SwapSides(anBoard);
 	  }
 	  
 	  if( analysis ) {
-	    if( n->esDouble.et != EVAL_NONE ) {
+	    if( pmr->CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	      PyObject* d =
-		PyDoubleAnalysis(&n->esDouble,   n->aarOutput, n->aarStdDev,
+		PyDoubleAnalysis(&pmr->CubeDecPtr->esDouble,   
+                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
+                                 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
 				 ms, verbose);
 	      {
 		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
@@ -1594,28 +1595,27 @@ PythonGame(const list*    plGame,
 	    }
 	  
 	  
-	    if( n->ml.cMoves ) {
-	      PyObject* a = PyMoveAnalysis(&n->ml, ms);
+	    if( pmr->ml.cMoves ) {
+	      PyObject* a = PyMoveAnalysis(&pmr->ml, ms);
 
 	      if( a ) {
 		DictSetItemSteal(analysis, "moves", a);
 
-		DictSetItemSteal(analysis, "imove", PyInt_FromLong(n->iMove));
+		DictSetItemSteal(analysis, "imove", PyInt_FromLong(pmr->n.iMove));
 	      }
 	    }
 
-	    addLuck(analysis, n->rLuck, n->lt);
-	    addSkill(analysis, n->stMove, 0);
-	    addSkill(analysis, n->stCube, "cube-skill");
+	    addLuck(analysis, pmr->rLuck, pmr->lt);
+	    addSkill(analysis, pmr->n.stMove, 0);
+	    addSkill(analysis, pmr->stCube, "cube-skill");
 	  }
 	    
 	  break;
 	}
 	case MOVE_DOUBLE:
 	{
-	  const movedouble* d = &pmr->d;
 	  action = "double";
-	  player = d->fPlayer;
+	  player = pmr->fPlayer;
 
 	  if( includeBoards ) {
 	    DictSetItemSteal(recordDict, "board",
@@ -1623,7 +1623,7 @@ PythonGame(const list*    plGame,
 	  }
 	    
 	  if( analysis ) {
-	    const cubedecisiondata* c = d->CubeDecPtr;
+	    const cubedecisiondata* c = pmr->CubeDecPtr;
 	    if( c->esDouble.et != EVAL_NONE ) {
 	      PyObject* d = PyDoubleAnalysis(&c->esDouble, c->aarOutput,
 					     c->aarStdDev, ms, verbose);
@@ -1633,45 +1633,42 @@ PythonGame(const list*    plGame,
 	      Py_DECREF(d);
 	    }
 	  
-	    addSkill(analysis, d->st, 0);
+	    addSkill(analysis, pmr->stCube, 0);
 	  }
 	    
 	  break;
 	}
 	case MOVE_TAKE:
 	{
-	  const movedouble* d = &pmr->d;
 	  action = "take";
-	  player = d->fPlayer;
+	  player = pmr->fPlayer;
 
 	  /* use nAnimals to point to double analysis ? */
 	  
-	  addSkill(analysis, d->st, 0);
+	  addSkill(analysis, pmr->stCube, 0);
 	    
 	  break;
 	}
 	case MOVE_DROP:
 	{
-	  const movedouble* d = &pmr->d;
 	  action = "drop";
-	  player = d->fPlayer;
+	  player = pmr->fPlayer;
 	    
-	  addSkill(analysis, d->st, 0);
+	  addSkill(analysis, pmr->stCube, 0);
 	    
 	  break;
 	}
 	case MOVE_RESIGN:
 	{
-	  const moveresign* r = &pmr->r;
 	  action = "resign";
-	  player = r->fPlayer;
+	  player = pmr->fPlayer;
 	  break;
 	}
 	
 	case MOVE_SETBOARD:
 	{
-	  const movesetboard* sb = &pmr->sb;
-	  PyObject* id = PyString_FromString(PositionIDFromKey(sb->auchKey));
+	  PyObject* id = 
+            PyString_FromString(PositionIDFromKey(pmr->sb.auchKey));
 
 	  action = "set";
 
@@ -1679,7 +1676,8 @@ PythonGame(const list*    plGame,
 
 	  if( includeBoards ) {
 	    /* (FIXME) what about side? */
-	    PositionFromKey(anBoard, sb->auchKey);
+            /* JTH: the board is always stored as if player 0 was on roll */
+	    PositionFromKey(anBoard, pmr->sb.auchKey);
 	  }
 	  
 	  break;
@@ -1687,34 +1685,31 @@ PythonGame(const list*    plGame,
 	    
 	case MOVE_SETDICE:
 	{
-	  const movesetdice* sd = &pmr->sd;
           PyObject *dice;
 
-	  player = sd->fPlayer;
+	  player = pmr->fPlayer;
 	  action = "set";
 
-	  dice = Py_BuildValue("(ii)", sd->anDice[0], sd->anDice[1]);
+	  dice = Py_BuildValue("(ii)", pmr->anDice[0], pmr->anDice[1]);
 
 	  DictSetItemSteal(recordDict, "dice", dice);
 	    
-	  addLuck(analysis, sd->rLuck, sd->lt);
+	  addLuck(analysis, pmr->rLuck, pmr->lt);
 	    
 	  break;
 	}
 	    
 	case MOVE_SETCUBEVAL:
 	{
-	  const movesetcubeval* scv = &pmr->scv;
 	  action = "set";
-	  DictSetItemSteal(recordDict, "cube", PyInt_FromLong(scv->nCube));
+	  DictSetItemSteal(recordDict, "cube", PyInt_FromLong(pmr->scv.nCube));
 	  break;
 	}
 	    
 	case MOVE_SETCUBEPOS:
 	{
-	  const movesetcubepos* scp = &pmr->scp;
 	  const char* s[] = {"centered", "X", "O"};
-	  const char* o = s[scp->fCubeOwner + 1];
+	  const char* o = s[pmr->scp.fCubeOwner + 1];
 	  
 	  action = "set";
 	  DictSetItemSteal(recordDict, "cube-owner",
@@ -1746,9 +1741,9 @@ PythonGame(const list*    plGame,
 	}
       }
       
-      if( pmr->a.sz ) {
+      if( pmr->sz ) {
 	DictSetItemSteal(recordDict, "comment",
-			     PyString_FromString(pmr->a.sz));
+			     PyString_FromString(pmr->sz));
       }
 
       PyTuple_SET_ITEM(gameTuple, nRecords, recordDict);
@@ -1777,7 +1772,7 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
   /* take match info from first game */
   const list* firstGame = lMatch.plNext->p;
   const moverecord* pmr;
-  const movegameinfo* g;
+  const xmovegameinfo* g;
   int includeAnalysis = 1;
   int verboseAnalysis = 0;
   int statistics = 0;
@@ -2005,7 +2000,7 @@ PythonNavigate(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
       const moverecord* r = (const moverecord*)(plLastMove->plNext->p);
       
       if( r->mt == MOVE_NORMAL ) {
-	memcpy(ms.anDice, r->n.anRoll, sizeof(ms.anDice));
+	memcpy(ms.anDice, r->anDice, sizeof(ms.anDice));
       }
     }
     

@@ -2300,7 +2300,8 @@ CommandShowMatchResult( char *sz ) {
   float arSum[ 2 ] = { 0.0f, 0.0f };
   float arSumSquared[ 2 ] = { 0.0f, 0.0f };
   int n = 0;
-  movegameinfo *pmgi;
+  moverecord *pmr;
+  xmovegameinfo *pmgi;
   statcontext *psc;
   list *pl;
   float r;
@@ -2313,8 +2314,9 @@ CommandShowMatchResult( char *sz ) {
 
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext, ++n ) {
   
-      pmgi = ( (list *) pl->p )->plNext->p;
-      assert( pmgi->mt == MOVE_GAMEINFO );
+      pmr = (moverecord *) ( (list *) pl->p )->plNext->p;
+      pmgi = &pmr->g;
+      assert( pmr->mt == MOVE_GAMEINFO );
       
       psc = &pmgi->sc;
       
