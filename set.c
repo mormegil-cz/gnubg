@@ -103,6 +103,34 @@ command acSetEvaluation[] = {
     { NULL, NULL, NULL, NULL, NULL }
 };
 
+static void
+SetSeed ( const rngx, char *sz ) {
+    
+    int n;
+
+    if( rngx == RNG_MANUAL || rngx == RNG_RANDOM_DOT_ORG ) {
+	outputl( _("You can't set a seed "
+                   "if you're using manual dice generation or random.org") );
+	return;
+    }
+
+    if( *sz ) {
+	n = ParseNumber( &sz );
+
+	if( n < 0 ) {
+	    outputl( _("You must specify a vaid seed -- try `help set seed'.") );
+
+	    return;
+	}
+
+	InitRNGSeed( n, rngx );
+	outputf( _("Seed set to %d.\n"), n );
+    } else
+	outputl( InitRNG( NULL, TRUE, rngx ) ?
+		 _("Seed initialised from system random data.") :
+		 _("Seed initialised by system clock.") );
+}
+
 static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 
     /* FIXME: read name of file with user RNG */
@@ -111,7 +139,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
 		gettext ( aszRNG[ rngNew ] ) );
 	if( szSeed ) {
-	    CommandSetSeed( szSeed );
+	    SetSeed( *prng, szSeed );
         }
     } else {
 	outputf( _("GNU Backgammon will now use the %s generator.\n"),
@@ -142,7 +170,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	}
 	    
 	if( ( *prng = rngNew ) != RNG_MANUAL )
-	    CommandSetSeed( szSeed );
+	    SetSeed( *prng, szSeed );
 	
     }
 }
@@ -1574,29 +1602,8 @@ extern void CommandSetScore( char *sz ) {
 
 extern void CommandSetSeed( char *sz ) {
 
-    int n;
-    
-    if( rngCurrent == RNG_MANUAL || rngCurrent == RNG_RANDOM_DOT_ORG ) {
-	outputl( _("You can't set a seed "
-                   "if you're using manual dice generation or random.org") );
-	return;
-    }
+    SetSeed ( rngCurrent, sz );
 
-    if( *sz ) {
-	n = ParseNumber( &sz );
-
-	if( n < 0 ) {
-	    outputl( _("You must specify a vaid seed -- try `help set seed'.") );
-
-	    return;
-	}
-
-	InitRNGSeed( n, rngCurrent );
-	outputf( _("Seed set to %d.\n"), n );
-    } else
-	outputl( InitRNG( NULL, TRUE, rngCurrent ) ?
-		 _("Seed initialised from system random data.") :
-		 _("Seed initialised by system clock.") );
 }
 
 extern void CommandSetTrainingAlpha( char *sz ) {
