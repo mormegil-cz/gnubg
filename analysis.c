@@ -38,6 +38,7 @@
 #include "rollout.h"
 #include "analysis.h"
 #include "sound.h"
+#include "matchequity.h"
 
 #include "i18n.h"
 
@@ -101,7 +102,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
               2 * 25 * sizeof( int ) );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL,
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
                               (cubeinfo *) pci, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
         return ERR_VAL;
@@ -142,8 +143,8 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       SwapSides ( anBoardTemp );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL,
-                              (cubeinfo *) pci, (evalcontext *) pec, 
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
+                              &ciOpp, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
         return ERR_VAL;
 
@@ -151,13 +152,13 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
         SwapSides( anBoardTemp );
       
-        if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+        if ( GeneralEvaluationE ( ar, anBoardTemp, (cubeinfo *) pci, 
                                   (evalcontext *) pec ) < 0 )
           return ERR_VAL;
 
         if ( pec->fCubeful ) {
           if ( pci->nMatchTo )
-            aar[ i ][ j ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+            aar[ i ][ j ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], pci );
           else
             aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
         }
@@ -174,7 +175,10 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
 
     }
 
-  return aar[ n0 ][ n1 ] - rMean / 30.0f;
+  if ( n0 > n1 )
+    return aar[ n0 ][ n1 ] - rMean / 30.0f;
+  else
+    return aar[ n1 ][ n0 ] - rMean / 30.0f;
 
 }
 
@@ -196,7 +200,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
               2 * 25 * sizeof( int ) );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL,
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
                               (cubeinfo *) pci, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
         return ERR_VAL;
@@ -301,12 +305,38 @@ updateStatcontext ( statcontext *psc,
   int i;
   int anBoardMove[ 2 ][ 25 ];
 
-  GetMatchStateCubeInfo ( &ci, pms );
-
   switch ( pmr->mt ) {
 
   case MOVE_GAMEINFO:
-    /* no-op */
+    /* update luck adjusted result */
+
+    psc->arActualResult[ 0 ] = psc->arActualResult[ 1 ] = 0.0f;
+
+    if ( pmr->g.fWinner != -1 ) {
+
+      if ( pmr->g.nMatch ) {
+
+        psc->arActualResult[ pmr->g.fWinner ] = 
+          getME( pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ], pmr->g.nMatch,
+                 pmr->g.fWinner, pmr->g.nPoints, pmr->g.fWinner,
+                 pmr->g.fCrawfordGame,
+                 aafMET, aafMETPostCrawford ) - 
+          getMEAtScore( pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ], 
+                        pmr->g.nMatch,
+                        pmr->g.fWinner, 
+                        pmr->g.fCrawfordGame,
+                        aafMET, aafMETPostCrawford );
+
+        psc->arActualResult[ ! pmr->g.fWinner ] =
+          - psc->arActualResult[ pmr->g.fWinner ];
+      }
+      else {
+        psc->arActualResult[ pmr->g.fWinner ] = pmr->g.nPoints;
+        psc->arActualResult[ ! pmr->g.fWinner ] = -pmr->g.nPoints;
+      }
+
+    }
+
     break;
 
   case MOVE_NORMAL:
@@ -316,6 +346,8 @@ updateStatcontext ( statcontext *psc,
      *   - missed doubles
      */
 
+    GetMatchStateCubeInfo ( &ci, pms );
+      
     if ( pmr->n.esDouble.et != EVAL_NONE && fAnalyseCube ) {
 
       float *arDouble = pmr->n.arDouble;
@@ -423,9 +455,10 @@ updateStatcontext ( statcontext *psc,
   case MOVE_DOUBLE:
  
 
-    if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
+    GetMatchStateCubeInfo ( &ci, pms );
+    if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
-      float *arDouble = pmr->d.arDouble;
+      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
       rSkill = arDouble[ OUTPUT_TAKE ] <
         arDouble[ OUTPUT_DROP ] ?
@@ -464,9 +497,10 @@ updateStatcontext ( statcontext *psc,
 
   case MOVE_TAKE:
 
-    if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
+    GetMatchStateCubeInfo ( &ci, pms );
+    if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
-      float *arDouble = pmr->d.arDouble;
+      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anTake[ pmr->d.fPlayer ]++;
@@ -493,9 +527,10 @@ updateStatcontext ( statcontext *psc,
 
   case MOVE_DROP:
 
-    if( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
+    GetMatchStateCubeInfo ( &ci, pms );
+    if( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	  
-      float *arDouble = pmr->d.arDouble;
+      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anPass[ pmr->d.fPlayer ]++;
@@ -558,9 +593,11 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_GAMEINFO:
 	fFirstMove = 1;
 
-        if ( fUpdateStatistics )
+        if ( fUpdateStatistics ) {
           IniStatcontext( psc );
-      
+          updateStatcontext ( psc, pmr, pms );
+        }
+
 	break;
       
     case MOVE_NORMAL:
@@ -585,10 +622,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
           
           if ( cmp_evalsetup ( pesCube, &pmr->n.esDouble ) > 0 ) {
             
-	    if ( GeneralCubeDecision ( "",
-				       aarOutput, aarStdDev, aarsStatistics, 
+	    if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics, 
 				       pms->anBoard, &ci,
-				       pesCube ) < 0 )
+				       pesCube, NULL, NULL  ) < 0 )
               return -1;
             
             
@@ -641,8 +677,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	  
               if( FindnSaveBestMoves ( &(pmr->n.ml), pmr->n.anRoll[ 0 ],
                                        pmr->n.anRoll[ 1 ],
-                                       pms->anBoard, auch, &ci,
-                                       &pesChequer->ec, aamf ) < 0 )
+                                       pms->anBoard, auch, 
+                                       arSkillLevel[ SKILL_DOUBTFUL ],
+                                       &ci, &pesChequer->ec, aamf ) < 0 )
 		return -1;
 
             }
@@ -706,27 +743,34 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    if ( GetDPEq ( NULL, NULL, &ci ) ||
                  ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove ) {
 	      
-              if ( cmp_evalsetup ( pesCube, &pmr->d.esDouble ) > 0 ) {
+              if ( cmp_evalsetup ( pesCube, 
+				   &pmr->d.CubeDecPtr->esDouble ) > 0 ) {
 
-		if ( GeneralCubeDecision ( "",
-					   aarOutput, aarStdDev, aarsStatistics, 
-					   pms->anBoard, &ci,
-					   pesCube ) < 0 )
+		if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
+                                           aarsStatistics, pms->anBoard, &ci,
+					   pesCube, NULL, NULL ) < 0 )
 		    return -1;
+		
+		pmr->d.CubeDecPtr->esDouble = *pesCube;
 
               }
               else {
-                memcpy ( aarOutput, pmr->d.aarOutput, sizeof ( aarOutput ) );
-                memcpy ( aarStdDev, pmr->d.aarStdDev, sizeof ( aarStdDev ) );
+                memcpy ( aarOutput, pmr->d.CubeDecPtr->aarOutput, 
+						 sizeof ( aarOutput ) );
+                memcpy ( aarStdDev, pmr->d.CubeDecPtr->aarStdDev, 
+						 sizeof ( aarStdDev ) );
               }
 	      
                 FindCubeDecision ( arDouble, aarOutput, &ci );
 	      
-		esDouble = pmr->d.esDouble = *pesCube;
+		esDouble = pmr->d.CubeDecPtr->esDouble;
 	      
-                memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
-                memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
-                memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
+                memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 
+						 sizeof ( arDouble ) );
+                memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
+						 sizeof ( aarOutput ) );
+                memcpy ( pmr->d.CubeDecPtr->aarStdDev, aarStdDev, 
+						 sizeof ( aarStdDev ) );
 	      
 		rSkill = arDouble[ OUTPUT_TAKE ] <
 		    arDouble[ OUTPUT_DROP ] ?
@@ -758,18 +802,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
-	    pmr->d.esDouble = esDouble;
-
-            memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
-            memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
-            memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
-	  
             pmr->d.st = Skill ( -arDouble[ OUTPUT_TAKE ] - 
                                 -arDouble[ OUTPUT_DROP ] );
 	      
 	}
-        else
-          pmr->d.esDouble.et = EVAL_NONE;
 
         if ( fUpdateStatistics )
           updateStatcontext ( psc, pmr, pms );
@@ -789,18 +825,11 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
-	    pmr->d.esDouble = esDouble;
-
-	    memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
-            memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
-            memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
-	  
-            pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
+	    pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
                                -arDouble[ OUTPUT_TAKE ] );
 	      
 	}
-        else
-          pmr->d.esDouble.et = EVAL_NONE;
+
 
         if ( fUpdateStatistics )
           updateStatcontext ( psc, pmr, pms );
@@ -926,6 +955,35 @@ AnalyzeGame ( list *plGame ) {
     return 0;
 }
 
+
+static void
+UpdateVariance( float *prVariance,
+                const float rSum,
+                const float rSumAdd,
+                const int nGames ) {
+
+  if ( ! nGames || nGames == 1 ) {
+    *prVariance = 0;
+    return;
+  }
+  else {
+
+    /* See <URL:http://mathworld.wolfram.com/SampleVarianceComputation.html>
+       for formula */
+
+    float rDelta = rSumAdd;
+    float rMuNew = rSum/nGames;
+    float rMuOld = ( rSum - rDelta ) / ( nGames - 1 );
+    float rDeltaMu = rMuNew - rMuOld;
+
+    *prVariance = *prVariance * ( 1.0 - 1.0 / ( nGames - 1.0f ) ) +
+      nGames * rDeltaMu * rDeltaMu;
+
+    return;
+
+  }
+
+}
       	
 extern void
 AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
@@ -933,6 +991,8 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
   /* pscB = pscB + pscA */
 
   int i, j;
+
+  pscB->nGames++;
 
   pscB->fMoves |= pscA->fMoves;
   pscB->fDice |= pscA->fDice;
@@ -981,6 +1041,30 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
       pscB->arLuck [ i ][ j ] +=
         pscA->arLuck [ i ][ j ];
 
+    }
+
+  }
+
+  if ( pscA->arActualResult[ 0 ] >= 0.0f || 
+       pscA->arActualResult[ 1 ] >= 0.0f ) {
+    /* actual result is calculated */
+
+    for ( i = 0; i < 2; ++i ) {
+      /* separate loop, else arLuck[ 1 ] is not calculated for i=0 */
+      
+      pscB->arActualResult[ i ] += pscA->arActualResult[ i ];
+      UpdateVariance( &pscB->arVarianceActual[ i ], 
+                      pscB->arActualResult[ i ],
+                      pscA->arActualResult[ i ],
+                      pscB->nGames );
+      UpdateVariance( &pscB->arVarianceLuckAdj[ i ], 
+                      pscB->arActualResult[ i ] - 
+                      pscB->arLuck[ i ][ 1 ] + pscB->arLuck[ !i ][ 1 ],
+                      pscA->arActualResult[ i ] -
+                      pscA->arLuck[ i ][ 1 ] + pscA->arLuck[ !i ][ 1 ],
+                      pscB->nGames );
+      
+      
     }
 
   }
@@ -1153,7 +1237,13 @@ IniStatcontext ( statcontext *psc ) {
 
     }
 
+    psc->arActualResult[ i ] = 0.0f;
+    psc->arVarianceActual[ i ] = 0.0f;
+    psc->arVarianceLuckAdj[ i ] = 0.0f;
+
   }
+
+  psc->nGames = 0;
 
 }
 
@@ -1301,18 +1391,14 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   ratingtype rt[ 2 ];
   char szTemp[1024];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  float r = getMWCFromError ( psc, aaaar );
   float rFac = ms.nMatchTo ? 100.0f : 1.0f;
   int n;
+  int fCalc;
 
-
+  getMWCFromError ( psc, aaaar );
   /* nice human readable dump */
 
-  /* FIXME: make tty output shorter */
-  /* FIXME: the code below is only for match play */
   /* FIXME: honour fOutputMWC etc. */
-  /* FIXME: calculate ratings (ET, World class, etc.) */
-  /* FIXME: use output*() functions, not printf */
 
   sprintf ( szTemp, "Player\t\t\t\t%-15s\t\t%-15s\n\n",
            ap[ 0 ].szName, ap [ 1 ].szName );
@@ -1676,30 +1762,79 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
             ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) ?
             gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
   
+  /* luck adjusted results */
+
+  fCalc = psc->arActualResult[ 0 ] > 0.0f || psc->arActualResult[ 1 ] > 0.0f;
+  if ( psc->fDice && fCalc ) {
+    
+    if ( ms.nMatchTo )
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s %7.2f%%                %7.2f%%\n"
+                "%-31s %7.2f%%                %7.2f%%\n",
+                _("Actual result"),
+                100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
+                100.0 * ( 0.5f + psc->arActualResult[ 1 ] ),
+                _("Luck adjusted result"),
+                100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                          psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ),
+                100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                          psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) );
+    else {
+      sprintf ( strchr ( szOutput, 0 ), 
+                "%-31s %+7.3f                 %+7.3f\n"
+                "%-31s %+7.3f                 %+7.3f\n",
+                _("Actual result"),
+                psc->arActualResult[ 0 ],
+                psc->arActualResult[ 1 ],
+                _("Luck adjusted result"),
+                psc->arActualResult[ 0 ] - 
+                psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
+                psc->arActualResult[ 1 ] - 
+                psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+      if ( psc->nGames > 1 ) {
+        sprintf( strchr( szOutput, 0 ),
+                 "\n"
+                 "%-31.31s %7.3f                 %7.3f\n"
+                 "%-31.31s %7.3f                 %7.3f\n"
+                 "%-31.31s %7.3f                 %7.3f\n"
+                 "%-31.31s %7.3f                 %7.3f\n",
+                 _("Advantage (actual) in ppg"),
+                 psc->arActualResult[ 0 ] / psc->nGames,
+                 psc->arActualResult[ 1 ] / psc->nGames,
+                 _("95%% confidence interval (ppg)"),
+                 1.95996f *
+                 sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
+                 1.95996f *
+                 sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ),
+                 _("Advantage (luck adj.) in ppg"),
+                 ( psc->arActualResult[ 0 ] - 
+                   psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) / 
+                 psc->nGames,
+                 ( psc->arActualResult[ 1 ] - 
+                   psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
+                 psc->nGames,
+                 _("95%% confidence interval (ppg)"),
+                 1.95996f *
+                 sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
+                 1.95996f *
+                 sqrt( psc->arVarianceLuckAdj[ 1 ] / psc->nGames ) );
+      }
+
+    }
+
+  }
   
   /* calculate total error */
-  
+
   if ( ms.nMatchTo ) {
 
-  sprintf ( strchr ( szOutput, 0 ),
-            "%s\n"
-            "%-31s %7.2f%%                %7.2f%%\n"
-            "%-31s %7.2f                 %7.2f\n",
-            _("Match winning chance"),
-            _("against opponent"),
-            100.0 * r, 100.0 * ( 1.0 - r ),
-            _("Guestimated abs. rating"),
-            absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ], 
-                                 ms.nMatchTo ),
-            absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
-                                 ms.nMatchTo ) );
+    float r = 0.5f + psc->arActualResult[ 0 ] - 
+      psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+    float rRating = relativeFibsRating( r, ms.nMatchTo );
 
-  sprintf( strchr( szOutput, 0 ),
-           "%-31s %7.2f                  %7.2f\n",
-           _("Estimated FIBS rating"),
-           calcFibsRating( aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ], ms.nMatchTo  ),
-           calcFibsRating( aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ], ms.nMatchTo ) );
-
+    sprintf ( strchr ( szOutput, 0 ),
+              "%-31s %7.2f                 %7.2f\n",
+              _("Relative FIBS rating"), rRating / 2.0f , -rRating / 2.0f );
 
   }
 
@@ -1804,6 +1939,7 @@ updateStatisticsMove ( moverecord *pmr, matchstate *pms, list *plGame,
   switch ( pmr->mt ) {
   case MOVE_GAMEINFO:
     IniStatcontext ( psc );
+    updateStatcontext( psc, pmr, pms );
     break;
 
   case MOVE_NORMAL:
@@ -1942,7 +2078,7 @@ AnalyseClearMove ( moverecord *pmr ) {
   case MOVE_TAKE:
   case MOVE_DROP:
 
-    pmr->d.esDouble.et = EVAL_NONE;
+    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
     break;
       

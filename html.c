@@ -33,14 +33,18 @@
 #include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
+#include "format.h"
 #include "export.h"
 #include "eval.h"
 #include "positionid.h"
 #include "matchid.h"
 #include "record.h"
+#include "path.h"
 
-#if defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
-#include "libgen.h"
+#if HAVE_LIBGEN_H
+#include <libgen.h>
+#elif ! defined(HAVE_BASENAME) && ! defined (HAVE_DIRNAME )
+#include "simplelibgen.h"
 #endif
 
 #include "i18n.h"
@@ -68,6 +72,11 @@ typedef enum _stylesheetclass {
   CLASS_FONT_FAMILY,
   CLASS_BLOCK,
   CLASS_PERCENT,
+  CLASS_POSITIONID,
+  CLASS_CUBE_EQUITY,
+  CLASS_CUBE_ACTION,
+  CLASS_CUBE_PLY,
+  CLASS_CUBE_PROBABILITIES,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -104,7 +113,12 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
     "font-family: sans-serif" },
   { "fontfamily", "font-family: sans-serif" },
   { "block", "display: block" },
-  { "percent", "text-align: right" }
+  { "percent", "text-align: right" },
+  { "positionid", "font-size: 75%; color: #787878" },
+  { "cubeequity", "font-weight: bold" },
+  { "cubeaction", "color: red" },
+  { "cubeply", "font-weight: bold" },
+  { "cubeprobs", "font-weight: bold" }
 };
 
 
@@ -138,12 +152,30 @@ static char *aszLinkText[] = {
   N_ ("[Next Game]"), 
   N_ ("[Last Game]") };
 
+static const char*
+bullet = "&bull; ";
+
 static void
-WriteStyleSheet ( FILE *pf ) {
+WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
 
   int i;
 
-  fputs ( "<style type=\"text/css\">\n", pf );
+  if ( hecss == HTML_EXPORT_CSS_HEAD )
+    fputs ( "<style type=\"text/css\">\n", pf );
+  else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
+    /* write come comments in the file */
+
+    fputs( _("\n" 
+             "/* CSS Stylesheet for GNU Backgammon " VERSION " */\n"
+             "/* $Id$ */\n"
+             "/* This file is distributed as a part of the "
+             "GNU Backgammon program. */\n"
+             "/* Copying and distribution of verbatim and modified "
+             "versions of this file */\n"
+             "/* is permitted in any medium provided the copyright notice "
+             "and this */\n"
+             "/* permission notice are preserved. */\n\n"),
+           pf );
 
   for ( i = 0; i < NUM_CLASSES; ++i )
     fprintf ( pf, 
@@ -152,7 +184,11 @@ WriteStyleSheet ( FILE *pf ) {
               aaszStyleSheetClasses[ i ][ 1 ] );
 
 
-  fputs ( "</style>\n", pf );
+  if ( hecss == HTML_EXPORT_CSS_HEAD )
+    fputs ( "</style>\n", pf );
+  else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
+    fputs( _("\n"
+             "/* end of file */\n"), pf );
 
 }
 
@@ -180,6 +216,64 @@ GetStyle ( const stylesheetclass ssc,
   return sz;
 
 }
+
+
+static char *
+GetStyleGeneral( const htmlexportcss hecss, ... ) {
+
+  static char sz[ 2048 ];
+  va_list val;
+  stylesheetclass ssc;
+  int i = 0;
+  int j;
+
+  va_start( val, hecss );
+
+  switch ( hecss ) {
+  case HTML_EXPORT_CSS_INLINE:
+    strcpy( sz, "style=\"" );
+    break;
+  case HTML_EXPORT_CSS_EXTERNAL:
+  case HTML_EXPORT_CSS_HEAD:
+    strcpy( sz, "class=\"" );
+    break;
+  default:
+    strcpy ( sz, "" );
+    break;
+  }
+
+  while ( ( j = va_arg( val, int ) ) > -1 ) {
+
+    ssc = (stylesheetclass) j;
+
+    switch ( hecss ) {
+    case HTML_EXPORT_CSS_INLINE:
+      if ( i )
+        strcat( sz, "; " );
+      strcat( sz, aaszStyleSheetClasses[ ssc ][ 1 ] );
+      break;
+    case HTML_EXPORT_CSS_EXTERNAL:
+    case HTML_EXPORT_CSS_HEAD:
+      if ( i )
+        strcat( sz, " " );
+      strcat( sz, aaszStyleSheetClasses[ ssc ][ 0 ] );
+      break;
+    default:
+      break;
+    }
+
+    ++i;
+
+  }
+
+  va_end( val );
+
+  strcat( sz, "\"" );
+
+  return sz;
+
+}
+
 
   
 #if 0
@@ -377,61 +471,63 @@ printStatTableRow ( FILE *pf, const char *format1, const char *format2,
 
 }
 
-
 static void
-printStatTableRow2 ( FILE *pf, const char *format1, const char *format2,
-                     const char *format3, ... ) {
-
-  va_list val;
-  char *sz;
-  int l = 100 + strlen ( format1 ) 
-    + 2 * strlen ( format2 ) + 2 * strlen ( format3 );
-
-  va_start( val, format3 );
-
-  sprintf ( sz = (char *) malloc ( l ),
-             "<tr>\n" 
-             "<td>%s</td>\n" 
-             "<td>%s (%s) </td>\n" 
-             "<td>%s (%s) </td>\n" 
-             "</tr>\n",
-             format1, format2, format3, format2, format3 );
+printStatTableRow2( FILE *pf, const char *format1, int match,
+		    float v01, float v02, float v11, float v12 )
+{
+  if( match ) {
+    v02 *= 100;
+    v12 *= 100;
+  }
   
-  vfprintf ( pf, sz, val );
+  fprintf (pf,
+	   "<tr>\n" 
+	   "<td>%s</td>\n"
+	   "<td>",
+	   format1) ;
 
-  free ( sz );
+  if( v01 != 0.0 ) {
+    fprintf (pf, "%+6.3f (%+7.3f%s)\n",
+	     v01, v02, match ? "%" : "");
+  } else {
+    fprintf(pf, "0");
+  }
+  
+  fprintf(pf, " </td>\n<td>");
 
-  va_end( val );
-
+  if( v11 != 0.0 ) {
+    fprintf (pf, "%+6.3f (%+7.3f%s)",
+	     v11, v12, match ? "%" : "" );
+  } else {
+    fprintf (pf, "0");
+  }
+  
+  fprintf (pf, " </td>\n</tr>\n");
 }
 
 
 static void
-printStatTableRow3 ( FILE *pf, const char *format1, const char *format2,
-                     const char *format3, const char *format4, ... ) {
-
-  va_list val;
-  char *sz;
-  int l = 100 + strlen ( format1 ) 
-    + 2 * strlen ( format2 ) + 2 * strlen ( format3 ) + 2 * strlen (format4 );
-
-  va_start( val, format4 );
-
-  sprintf ( sz = (char *) malloc ( l ),
-             "<tr>\n" 
-             "<td>%s</td>\n" 
-             "<td>%s (%s (%s)) </td>\n" 
-             "<td>%s (%s (%s)) </td>\n" 
-             "</tr>\n",
-             format1, 
-             format2, format3, format4, 
-             format2, format3, format4 );
+printStatTableMissed( FILE *pf, int const match, const char* what,
+		      int const v01, float const v02, float const v03,
+		      int const v11, float const v12, float const v13)
+{
+  fprintf(pf, "<tr>\n"
+	  "<td>%s</td>\n", what);
   
-  vfprintf ( pf, sz, val );
+  if( v01 ) {
+    fprintf(pf, "<td>%d (%+6.3f (%+7.3f%s)) </td>\n",
+	    v01, v02, match? v03*100 : v03, match ? "%" : "");
+  } else {
+    fprintf(pf, "<td>0 </td>\n");
+  }
+  if( v11 ) {
+    fprintf(pf, "<td>%d (%+6.3f (%+7.3f%s)) </td>\n",
+	    v11, v12, match? v13*100 : v13, match ? "%" : "");
+  } else {
+    fprintf(pf, "<td>0 </td>\n");
+  }
 
-  free ( sz );
-
-  va_end( val );
+  fputs( "</tr>\n", pf );
 
 }
 
@@ -450,10 +546,14 @@ printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
   fputs ( "<td>", pf );
 
   if ( f0 ) {
-    fprintf ( pf, format2, r00 );
-    fputs ( " (", pf );
-    fprintf ( pf, format3, r01 );
-    fputs ( " )", pf );
+    if( r00 == 0.0 && r01 == 0.0 ) {
+      fprintf ( pf, "0" );
+    } else {
+      fprintf ( pf, format2, r00 );
+      fputs ( " (", pf );
+      fprintf ( pf, format3, r01 );
+      fputs ( " )", pf );
+    }
   }
   else
     fputs ( _("n/a"), pf );
@@ -461,10 +561,14 @@ printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
   fputs ( "</td>\n<td>", pf );
 
   if ( f1 ) {
-    fprintf ( pf, format2, r10 );
-    fputs ( " (", pf );
-    fprintf ( pf, format3, r11 );
-    fputs ( " )", pf );
+    if( r10 == 0.0 && r11 == 0.0 ) {
+      fprintf ( pf, "0" );
+    } else {
+      fprintf ( pf, format2, r10 );
+      fputs ( " (", pf );
+      fprintf ( pf, format3, r11 );
+      fputs ( ")", pf );
+    }
   }
   else
     fputs ( _("n/a"), pf );
@@ -576,6 +680,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
       acOff[ i ] -= anBoard[ i ][ j ];
   }
 
+  /* avoid page break when printing */
+  fputs( "<p style=\"page-break-inside: avoid\">", pf );
     
   /* 
    * Top row
@@ -714,23 +820,29 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   printImage ( pf, szImageDir, fTurn ? "n_low" : "n_high", 
                szExtension, NULL, hecss, HTML_EXPORT_TYPE_BBS );
 
-  fputs ( "<br />\n", pf );
-
-  /* end of bottom row */
-
-  /* position ID */
-
-  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
-            PositionID ( pms->anBoard ),
-            MatchIDFromMatchState ( pms ) );
+  fputs( "</p>\n", pf );
 
   /* pip counts */
+
+  fputs ( "<p>", pf );
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
-  
+
+  /* position ID */
+
+  fprintf( pf, "<span %s>", 
+           GetStyle ( CLASS_POSITIONID, hecss ) );
+
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  fprintf( pf, "</span>" );
+
+  fputs ( "</p>\n", pf );
 
 }
 
@@ -1082,14 +1194,6 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   fprintf ( pf, "<br />\n" );
 
-  /* position ID */
-
-  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
-               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
-  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
-            PositionID ( pms->anBoard ),
-            MatchIDFromMatchState ( pms ) );
-
   /* pip counts */
 
   printImage ( pf, szImageDir, "b-indent", szExtension, "", 
@@ -1100,6 +1204,19 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
   
+  /* position ID */
+
+  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
+  fprintf( pf, "<span %s>", 
+           GetStyle ( CLASS_POSITIONID, hecss ) );
+
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  fprintf( pf, "</span>" );
+
   fprintf ( pf, "</p>\n" );
 
 }
@@ -1161,76 +1278,6 @@ printPointGNU ( FILE *pf, const char *szImageDir, const char *szExtension,
 
 
 static void
-printNumbers ( FILE *pf, const int fTop, const htmlexportcss hecss ) {
-
-  int i;
-
-  if ( fClockwise ) {
-
-    if ( fTop ) {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 24; i >= 19; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 18; i >= 13; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-    else {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 1; i <= 6; ++i )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 7; i <= 12; ++i )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-
-  }
-  else {
-
-    if ( fTop ) {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 13; i <= 18; i++ )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 19; i <= 24; i++ )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-    else {
-      
-      fputs ( "<tr><td>&nbsp;</td>", pf );
-      for ( i = 12; i >= 7; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "<td>&nbsp;</td>", pf );
-      for ( i = 6; i >= 1; i-- )
-        fprintf ( pf, "<td %s>%d</td>", 
-                  GetStyle ( CLASS_NUMBER, hecss ), i );
-      fputs ( "</tr>\n", pf );
-      
-    }
-
-  }
-
-}
-
-
-
-static void
 printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                     const char *szImageDir, const char *szExtension,
                     const htmlexportcss hecss ) {
@@ -1257,7 +1304,6 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<table cellpadding=\"0\" border=\"0\" cellspacing=\"0\""
           " style=\"margin: 0; padding: 0; border: 0\">\n", pf );
-  printNumbers ( pf, fTurn, hecss );
 
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
@@ -1371,8 +1417,13 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* left part of bar */
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
-               hecss, HTML_EXPORT_TYPE_GNU );
+  if ( fClockwise )
+    printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_GNU );
+  else
+    printImage ( pf, szImageDir, fTurn ? "b-midlb-o" : "b-midlb-x", 
+                 szExtension, "|", hecss, HTML_EXPORT_TYPE_GNU );
+
   fputs ( "</td>", pf );
 
   /* center of board */
@@ -1472,8 +1523,12 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* right part of bar */
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
-               hecss, HTML_EXPORT_TYPE_GNU );
+  if ( ! fClockwise )
+    printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_GNU );
+  else
+    printImage ( pf, szImageDir, fTurn ? "b-midlb-o" : "b-midlb-x", 
+                 szExtension, "|", hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   fputs ( "</tr>\n", pf );
@@ -1585,24 +1640,27 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "</td>", pf );
   fputs ( "</tr>", pf );
 
-  printNumbers ( pf, ! fTurn, hecss );
-
   fputs ( "</table>\n\n", pf );
 
-  /* position ID */
+  /* pip counts */
 
   fputs ( "<p>", pf );
-
-  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
-            PositionID ( pms->anBoard ),
-            MatchIDFromMatchState ( pms ) );
-
-  /* pip counts */
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
+
+  /* position ID */
+
+  fprintf( pf, "<span %s>", 
+           GetStyle ( CLASS_POSITIONID, hecss ) );
+
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  fprintf( pf, "</span>" );
 
   fputs ( "</p>\n", pf );
 
@@ -1794,7 +1852,10 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
             szTitle );
 
   if ( hecss == HTML_EXPORT_CSS_HEAD )
-    WriteStyleSheet ( pf );
+    WriteStyleSheet ( pf, hecss );
+  else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
+    fputs(  "<link title=\"CSS stylesheet\" rel=\"stylesheet\" "
+            "href=\"gnubg.css\" type=\"text/css\" />\n", pf );
 
   fprintf ( pf, "</head>\n"
             "\n"
@@ -2163,7 +2224,10 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* ply */
 
-  fputs ( "<td colspan=\"2\">", pf );
+  fprintf ( pf, 
+            "<td colspan=\"2\">"
+            "<span %s>", 
+            GetStyle( CLASS_CUBE_PLY, hecss ) );
   
   switch ( pes->et ) {
   case EVAL_NONE:
@@ -2182,11 +2246,16 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   /* cubeless equity */
 
   if ( pci->nMatchTo ) 
-    fprintf ( pf, " %s</td><td>%s</td><td>(%s: %s)</td>\n",
+    fprintf ( pf, 
+              "</span> %s</td>"
+              "<td %s>%s</td>"
+              "<td>(%s: <span %s>%s</span>)</td>\n",
               ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
               _("cubeless equity") : _("cubeless MWC"),
+              GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ),
               _("Money"), 
+               GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
   else
     fprintf ( pf, " cubeless equity</td><td>%s</td><td>&nbsp;</td>\n",
@@ -2199,8 +2268,10 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( exsExport.fCubeDetailProb && pes->et == EVAL_EVAL ) {
 
-    fputs ( "<tr><td>&nbsp;</td>"
-            "<td colspan=\"3\">", pf );
+    fprintf( pf, 
+             "<tr><td>&nbsp;</td>"
+             "<td colspan=\"3\" %s>", 
+             GetStyle( CLASS_CUBE_PROBABILITIES, hecss ) );
 
     fputs ( OutputPercents ( aarOutput[ 0 ], TRUE ), pf );
 
@@ -2234,7 +2305,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
               gettext ( aszCube[ ai[ i ] ] ) );
 
     fprintf ( pf,
-              "<td>%s</td>",
+              "<td %s>%s</td>",
+              GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ) );
 
     if ( i )
@@ -2255,8 +2327,9 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fprintf ( pf,
             "<tr><td colspan=\"2\">%s</td>"
-            "<td colspan=\"2\">%s",
+            "<td colspan=\"2\" %s>%s",
             _("Proper cube action:"),
+            GetStyle( CLASS_CUBE_ACTION, hecss ),
             GetCubeRecommendation ( cd ) );
 
   if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
@@ -2307,7 +2380,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] ) {
 
-    char *sz = strdup ( OutputRolloutContext ( NULL, &pes->rc ) );
+    char *sz = strdup ( OutputRolloutContext ( NULL, pes ) );
     char *pcS = sz, *pcE;
 
     while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
@@ -2374,10 +2447,12 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   case MOVE_DOUBLE:
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
-                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+                                 pmr->d.CubeDecPtr->aarOutput, 
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, -1,
+                                 &pmr->d.CubeDecPtr->esDouble, 
+								 &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE, hecss );
 
     break;
@@ -2387,10 +2462,11 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
-                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
+                                 pmr->d.CubeDecPtr->aarOutput, 
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, 
+                                 &pmr->d.CubeDecPtr->esDouble, &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
                                  pmr->d.st, hecss );
@@ -2492,22 +2568,21 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
             "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n"
             "<tr>\n",
             GetStyle ( CLASS_MOVETABLE, hecss ) );
-  fprintf ( pf, "<th %s %s colspan=\"2\">%s</th>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
-            GetStyle ( CLASS_MOVENUMBER, hecss ), _("#") );
-  fprintf ( pf, "<th %s %s>%s</th>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
-            GetStyle ( CLASS_MOVEPLY, hecss ), _("Ply") );
-  fprintf ( pf, "<th %s %s>%s</th>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
-            GetStyle ( CLASS_MOVEMOVE, hecss ), _("Move") );
+  fprintf ( pf, "<th %s colspan=\"2\">%s</th>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVENUMBER, -1 ),
+            _("#") );
+  fprintf ( pf, "<th %s>%s</th>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVEPLY, -1 ),
+            _("Ply") );
+  fprintf ( pf, "<th %s>%s</th>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVEMOVE, -1 ),
+            _("Move") );
   fprintf ( pf,
-            "<th %s %s>%s</th>\n" "</tr>\n",
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
-            GetStyle ( CLASS_MOVEEQUITY, hecss ),
+            "<th %s>%s</th>\n" "</tr>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVEEQUITY, -1 ),
             ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
             _("Equity") : _("MWC") );
-            
+
 
   if ( pmr->n.ml.cMoves ) {
 
@@ -2530,7 +2605,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       fprintf ( pf, 
                 "<td %s>%s</td>\n",
                 GetStyle ( CLASS_MOVENUMBER, hecss ), 
-                ( i == pmr->n.iMove ) ? "*" : "&nbsp;" );
+                ( i == pmr->n.iMove ) ? bullet : "&nbsp;" );
 
       /* move no */
 
@@ -2579,12 +2654,14 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
       if ( i ) 
         fprintf ( pf,
-                  "<td>%s (%s)</td>\n", 
+                  "<td %s>%s (%s)</td>\n", 
+                  GetStyle ( CLASS_MOVEEQUITY, hecss ),
                   OutputEquity ( rEq, &ci, TRUE ), 
                   OutputEquityDiff ( rEq, rEqTop, &ci ) );
       else
         fprintf ( pf,
-                  "<td>%s</td>\n", 
+                  "<td %s>%s</td>\n", 
+                  GetStyle ( CLASS_MOVEEQUITY, hecss ),
                   OutputEquity ( rEq, &ci, TRUE ) );
 
       /* end row */
@@ -2613,7 +2690,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
         fputs ( "<td colspan=\"3\">&nbsp;</td>\n", pf );
 
 
-        fputs ( "<td colspan=\"2\">", pf );
+        fputs ( "<td>", pf );
 
 
         switch ( pmr->n.ml.amMoves[ i ].esMove.et ) {
@@ -2637,21 +2714,23 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         fputs ( "</td>\n", pf );
 
+        fputs( "<td>&nbsp;</td>\n", pf );
+
         fputs ( "</tr>\n", pf );
       }
 
       /*
        * Write row with move parameters 
        */
-  
+      
       if ( exsExport.afMovesParameters 
-              [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
-
+           [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
+        
         evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
-
+        
         switch ( pes->et ) {
         case EVAL_EVAL: 
-
+          
           if ( i == pmr->n.iMove )
             fprintf ( pf, "<tr %s>\n", 
                       GetStyle ( CLASS_MOVETHEMOVE, hecss ) );
@@ -2660,20 +2739,22 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                       GetStyle ( CLASS_MOVEODD, hecss ) );
           else
             fputs ( "<tr>\n", pf );
-
+          
           fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
-
-          fputs ( "<td colspan=\"2\">", pf );
+          
+          fputs ( "<td>", pf );
           fputs ( OutputEvalContext ( &pes->ec, TRUE ), pf );
           fputs ( "</td>\n", pf );
-
+            
+          fputs( "<td>&nbsp;</td>\n", pf );
+          
           fputs ( "</tr>\n", pf );
 
           break;
 
         case EVAL_ROLLOUT: {
 
-          char *sz = strdup ( OutputRolloutContext ( NULL, &pes->rc ) );
+          char *sz = strdup ( OutputRolloutContext ( NULL, pes ) );
           char *pcS = sz, *pcE;
           
           while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
@@ -2691,10 +2772,12 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
             fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
             
-            fputs ( "<td colspan=\"2\">", pf );
+            fputs ( "<td>", pf );
             fputs ( pcS, pf );
             fputs ( "</td>\n", pf );
             
+            fputs( "<td>&nbsp;</td>\n", pf );
+
             fputs ( "</tr>\n", pf );
             
             pcS = pcE + 1;
@@ -2783,12 +2866,12 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
-                _("*%s moves %s"),
+                _("%s%s moves %s"), bullet,
                 ap[ pmr->n.fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
     else if ( ! pmr->n.ml.cMoves )
       fprintf ( pf,
-                _("*%s cannot move"),
+                _("%s%s cannot move"), bullet,
                 ap[ pmr->n.fPlayer ].szName );
 
     fputs ( "</p>\n", pf );
@@ -2814,11 +2897,11 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     if ( pmr->mt == MOVE_DOUBLE )
       fprintf ( pf,
-                "*%s doubles</p>\n",
+                "%s%s doubles</p>\n", bullet,
                 ap[ pmr->d.fPlayer ].szName );
     else
       fprintf ( pf,
-                "*%s %s</p>\n",
+                "%s%s %s</p>\n", bullet,
                 ap[ pmr->d.fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
@@ -2852,7 +2935,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
   ratingtype rt[ 2 ];
   int ai[ 2 ];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  float r = getMWCFromError ( psc, aaaar );
 
   const char *aszLuckRating[] = {
     N_("&quot;Haaa-haaa&quot;"),
@@ -2863,6 +2945,10 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     N_("Go to Las Vegas immediately"),
     N_("Cheater :-)")
   };
+
+  int fCalc;
+
+  getMWCFromError ( psc, aaaar );
 
   fprintf ( pf, "\n<!-- %s Statistics -->\n\n", 
             ( iGame >= 0 ) ? "Game" : "Match" );
@@ -2941,17 +3027,15 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         psc->anMoves[ 0 ][ SKILL_VERYBAD ],
                         psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
 
+    printStatTableRow2 ( pf,
+			  _("Error rate (total)"), pms->nMatchTo,
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
+    
     if ( pms->nMatchTo ) {
 
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
 
       printStatTableRow4 ( pf,
                            _("Error rate (pr. move)"), 
@@ -2967,14 +3051,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     }
     else {
-
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f",
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow4 ( pf,
                            _("Error rate (pr. move)"), 
@@ -3024,35 +3100,27 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         psc->anLuck[ 0 ][ LUCK_VERYBAD ],
                         psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
        
+    printStatTableRow2 ( pf, 
+			  _( "Luck rate (total)"), pms->nMatchTo,
+			  psc->arLuck[ 0 ][ 0 ],
+			  psc->arLuck[ 0 ][ 1 ],
+			  psc->arLuck[ 1 ][ 0 ],
+			  psc->arLuck[ 1 ][ 1 ] );
+    
     if ( pms->nMatchTo ) {
 
       printStatTableRow2 ( pf, 
-                           _( "Luck rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           psc->arLuck[ 0 ][ 0 ],
-                           psc->arLuck[ 0 ][ 1 ] * 100.0f,
-                           psc->arLuck[ 1 ][ 0 ],
-                           psc->arLuck[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow2 ( pf, 
-                           _( "Luck rate (pr. move)"), 
-                           "%+6.3f", "%+7.3f%%",
+			    _( "Luck rate (pr. move)"),  1,
                            psc->arLuck[ 0 ][ 0 ] /
                            psc->anTotalMoves[ 0 ],
-                           psc->arLuck[ 0 ][ 1 ] * 100.0f /
+                           psc->arLuck[ 0 ][ 1 ] /
                            psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 1 ][ 0 ] /
                            psc->anTotalMoves[ 1 ],
-                           psc->arLuck[ 1 ][ 1 ] * 100.0f /
+                           psc->arLuck[ 1 ][ 1 ] /
                            psc->anTotalMoves[ 1 ] );
     }
     else {
-      printStatTableRow2 ( pf, 
-                           _( "Luck rate (total)"), 
-                           "%+6.3f", "%+7.3f",
-                           psc->arLuck[ 0 ][ 0 ],
-                           psc->arLuck[ 0 ][ 1 ],
-                           psc->arLuck[ 1 ][ 0 ],
-                           psc->arLuck[ 1 ][ 1 ] );
       printStatTableRow4 ( pf, 
                            _( "Luck rate (pr. move)"), 
                            "%+6.3f", "%+7.3f",
@@ -3103,120 +3171,65 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         psc->anPass[ 0 ], 
                         psc->anPass[ 1 ] );
       
-    if ( pms->nMatchTo ) {
-
-      printStatTableRow3 ( pf, _ ( "Missed doubles around DP" ),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeMissedDoubleDP[ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeMissedDoubleDP[ 1 ],
-                           -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Missed doubles around TG" ),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeMissedDoubleTG[ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeMissedDoubleTG[ 1 ],
-                           -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongDoubleDP[ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongDoubleDP[ 1 ],
-                           -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongDoubleTG[ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongDoubleTG[ 1 ],
-                           -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong takes"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongTake[ 0 ],
-                           -psc->arErrorWrongTake[ 0 ][ 0 ],
-                           -psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongTake[ 1 ],
-                           -psc->arErrorWrongTake[ 1 ][ 0 ],
-                           -psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong passes"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongPass[ 0 ],
-                           -psc->arErrorWrongPass[ 0 ][ 0 ],
-                           -psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongPass[ 1 ],
-                           -psc->arErrorWrongPass[ 1 ][ 0 ],
-                           -psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
-    }
-    else {
-      printStatTableRow3 ( pf, _ ( "Missed doubles around DP"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed (pf, pms->nMatchTo,
+				 _ ( "Missed doubles around DP" ),
                            psc->anCubeMissedDoubleDP[ 0 ],
                            -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
                            -psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
                            psc->anCubeMissedDoubleDP[ 1 ],
                            -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
                            -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Missed doubles around TG"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Missed doubles around TG" ),
                            psc->anCubeMissedDoubleTG[ 0 ],
                            -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
                            -psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
                            psc->anCubeMissedDoubleTG[ 1 ],
                            -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
                            -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong doubles around DP"),
                            psc->anCubeWrongDoubleDP[ 0 ],
                            -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
                            -psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
                            psc->anCubeWrongDoubleDP[ 1 ],
                            -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
                            -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong doubles around TG"),
                            psc->anCubeWrongDoubleTG[ 0 ],
                            -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
                            -psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
                            psc->anCubeWrongDoubleTG[ 1 ],
                            -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
                            -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong takes"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong takes"),
                            psc->anCubeWrongTake[ 0 ],
                            -psc->arErrorWrongTake[ 0 ][ 0 ],
                            -psc->arErrorWrongTake[ 0 ][ 1 ],
                            psc->anCubeWrongTake[ 1 ],
                            -psc->arErrorWrongTake[ 1 ][ 0 ],
                            -psc->arErrorWrongTake[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong passes"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong passes"),
                            psc->anCubeWrongPass[ 0 ],
                            -psc->arErrorWrongPass[ 0 ][ 0 ],
                            -psc->arErrorWrongPass[ 0 ][ 1 ],
                            psc->anCubeWrongPass[ 1 ],
                            -psc->arErrorWrongPass[ 1 ][ 0 ],
                            -psc->arErrorWrongPass[ 1 ][ 1 ] );
-    }
 
-
-    if ( pms->nMatchTo ) {
 
       printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
+			    _("Error rate (total)"), pms->nMatchTo,
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] ,
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ]  );
+      
+    if ( pms->nMatchTo ) {
+
 
       printStatTableRow4 ( pf,
                            _("Error rate (per cube decision)"), 
@@ -3232,14 +3245,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     }
     else {
-
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f",
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow4 ( pf,
                            _("Error rate (per cube decision)"), 
@@ -3274,17 +3279,15 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     printStatTableHeader ( pf, hecss, 
                            _("Overall rating" ) );
                             
+    printStatTableRow2( pf,
+			 _("Error rate (total)"), pms->nMatchTo,
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_0][NORMALISED],
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_0][UNNORMALISED],
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_1][NORMALISED],
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_1][UNNORMALISED]);
+    
     if ( pms->nMatchTo ) {
 
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
 
       printStatTableRow4 ( pf,
                            _("Error rate (per decision)"), 
@@ -3318,14 +3321,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     }
     else {
 
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%",
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
-
       printStatTableRow4 ( pf,
                            _("Error rate (per decision)"), 
                            "%+6.3f", "%+7.3f%",
@@ -3352,28 +3347,84 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                  pms->nMatchTo, pms->anScore, pms->fCrawford,
                  pms->fJacoby, nBeavers, pms->bgv );
 
+  }
+
+  fCalc = psc->arActualResult[ 0 ] > 0.0f || psc->arActualResult[ 1 ] > 0.0f;
+  if ( psc->fDice && fCalc ) {
+
     if ( pms->nMatchTo ) {
+      float r = 0.5f + psc->arActualResult[ 0 ] - 
+        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+      float rRating = relativeFibsRating( r, pms->nMatchTo );
 
-      /* skill */
+      printStatTableRow( pf, 
+                         _("Actual result"),
+                         "%.2f%%",
+                         100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
+                         100.0 * ( 0.5f + psc->arActualResult[ 1 ] ) );
 
-      printStatTableRow ( pf,
-                          _( "MWC against current opponent"),
-                          "%6.2f%%",
-                          100.0 * r, 
-                          100.0 * ( 1.0 - r ) );
+      printStatTableRow( pf, 
+                         _("Luck adjusted result"),
+                         "%.2f%%",
+                         100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                                   psc->arLuck[ 0 ][ 1 ] + 
+                                   psc->arLuck[ 1 ][ 1 ] ),
+                         100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                                   psc->arLuck[ 1 ][ 1 ] + 
+                                   psc->arLuck[ 0 ][ 1 ] ) );
+      printStatTableRow( pf,
+                         _("Relative FIBS rating"),
+                         "%.2f",
+                         rRating / 2.0f, -rRating / 2.0f );
+    }
+    else {
 
-      printStatTableRow ( pf,
-                          _( "Guestimated abs. rating"),
-                          "%6.2f",
-                          absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ]
-                                                    [ PLAYER_0 ][ NORMALISED ],
-                                               pms->nMatchTo ),
-                          absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ]
-                                                    [ PLAYER_1 ][ NORMALISED ],
-                                               pms->nMatchTo ) );
+      printStatTableRow( pf,
+                         _("Actual result"),
+                         "%+.3f",
+                         psc->arActualResult[ 0 ],
+                         psc->arActualResult[ 1 ] );
+      printStatTableRow( pf,
+                         _("Luck adjusted result"),
+                         "%+.3f",
+                         psc->arActualResult[ 0 ] - 
+                         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
+                         psc->arActualResult[ 1 ] - 
+                         psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+
+      if ( psc->nGames > 1 ) {
+        printStatTableRow( pf,
+                           _("Advantage (actual) in ppg"),
+                           "%+.3f",
+                           psc->arActualResult[ 0 ] / psc->nGames,
+                           psc->arActualResult[ 1 ] / psc->nGames );
+        printStatTableRow( pf,
+                           _("95%% confidence interval (ppg)"),
+                           "%.3f",
+                           1.95996f *
+                           sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
+                           1.95996f *
+                           sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ) );
+        printStatTableRow( pf,
+                           _("Advantage (luck adjusted) in ppg"),
+                           "%+.3f",
+                           ( psc->arActualResult[ 0 ] - 
+                             psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) / 
+                           psc->nGames,
+                           ( psc->arActualResult[ 1 ] - 
+                             psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
+                           psc->nGames );
+        printStatTableRow( pf,
+                           _("95%% confidence interval (ppg)"),
+                           "%.3f",
+                           1.95996f *
+                           sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
+                           1.95996f *
+                           sqrt( psc->arVarianceLuckAdj[ 1 ] / psc->nGames ) );
+      }
 
     }
-  
+
   }
 
   fprintf ( pf, "</table>\n" );
@@ -3461,12 +3512,29 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr,
 
 
 static void
+HTMLPrintMI( FILE *pf, const char *szTitle, const char *sz ) {
+
+  if ( ! sz || ! *sz )
+    return;
+
+  fprintf( pf, "%s: %s<br />\n", szTitle, sz );
+
+}
+
+static void
 HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
                 const htmlexportcss hecss ) {
 
   int i;
   char sz[ 80 ];
   struct tm tmx;
+
+  if ( ! pmi->nYear &&
+       ! pmi->pchRating[ 0 ] && ! pmi->pchRating[ 1 ] &&
+       ! pmi->pchEvent && ! pmi->pchRound && ! pmi->pchPlace &&
+       ! pmi->pchAnnotator && ! pmi->pchComment )
+    /* no match information -- don't print anything */
+    return;
 
   fputs ( "\n<!-- Match Information -->\n\n", pf );
 
@@ -3479,6 +3547,7 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
   /* ratings */
 
   for ( i = 0; i < 2; ++i )
+    if ( pmi->pchRating[ i ] )
       fprintf ( pf, _("%s's rating: %s<br />\n"), 
                 ap[ i ].szName, 
                 pmi->pchRating[ i ] ? pmi->pchRating[ i ] : _("n/a") );
@@ -3494,22 +3563,14 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
     fprintf ( pf, _("Date: %s<br />\n"), sz ); 
 
   }
-  else
-    fputs ( _("Date: n/a<br />\n"), pf );
 
   /* event, round, place and annotator */
 
-  fprintf ( pf, _("Event: %s<br />\n"),
-            pmi->pchEvent ? pmi->pchEvent : _("n/a") );
-  fprintf ( pf, _("Round: %s<br />\n"),
-            pmi->pchRound ? pmi->pchRound : _("n/a") );
-  fprintf ( pf, _("Place: %s<br />\n"),
-            pmi->pchPlace ? pmi->pchPlace : _("n/a") );
-  fprintf ( pf, _("Annotator: %s<br />\n"),
-            pmi->pchAnnotator ? pmi->pchAnnotator : _("n/a") );
-  fprintf ( pf, _("Comments: %s<br />\n"),
-            pmi->pchComment ? pmi->pchComment : _("n/a") );
-
+  HTMLPrintMI( pf, _("Event"), pmi->pchEvent );
+  HTMLPrintMI( pf, _("Round"), pmi->pchRound );
+  HTMLPrintMI( pf, _("Place"), pmi->pchPlace );
+  HTMLPrintMI( pf, _("Annotator"), pmi->pchAnnotator );
+  HTMLPrintMI( pf, _("Comment"), pmi->pchComment );
 
   fputs ( "</p>\n", pf );
 
@@ -3794,6 +3855,44 @@ getMoveNumber ( const list *plGame, const void *p ) {
 }
 
 
+/*
+ * Open file gnubg.css with same path as requested html file
+ *
+ * If the gnubg.css file already exists NULL is returned 
+ * (and gnubg.css is NOT overwritten)
+ *
+ */
+
+static FILE *
+OpenCSS( const char *sz ) {
+
+  char *pch = strdup( sz );
+  char *pchBase = dirname( pch );
+  char *pchCSS;
+  FILE *pf;
+  
+  sprintf( pchCSS = (char *) malloc( strlen( pchBase ) + 20 ),
+           "%s%c%s", pchBase, DIR_SEPARATOR, "gnubg.css" );
+
+  if ( !access( pchCSS, R_OK ) ) {
+    /* file exists */
+    outputf( _("gnubg.css is not written since it already exist in \"%s\"\n"),
+             pchBase );
+    pf = NULL;
+  }
+  else if ( ! ( pf = fopen( pchCSS, "w" ) ) ) {
+    outputerr( pchCSS );
+  }
+
+  free( pch );
+  free( pchBase );
+  free( pchCSS );
+
+  return pf;
+
+}
+
+
 extern void CommandExportGameHtml( char *sz ) {
 
     FILE *pf;
@@ -3833,6 +3932,12 @@ extern void CommandExportGameHtml( char *sz ) {
 
     setDefaultFileName ( sz, PATH_HTML );
     
+    /* external stylesheet */
+
+    if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
+      if ( ( pf = OpenCSS( sz ) ) )
+        WriteStyleSheet ( pf, exsExport.hecss );
+
 }
 
 /*
@@ -3970,6 +4075,12 @@ extern void CommandExportMatchHtml( char *sz ) {
         fclose( pf );
 
     }
+
+    /* external stylesheet */
+
+    if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
+      if ( ( pf = OpenCSS( sz ) ) )
+        WriteStyleSheet ( pf, exsExport.hecss );
     
 }
 
@@ -4040,6 +4151,12 @@ extern void CommandExportPositionHtml( char *sz ) {
 	fclose( pf );
 
     setDefaultFileName ( sz, PATH_HTML );
+
+    /* external stylesheet */
+
+    if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
+      if ( ( pf = OpenCSS( sz ) ) )
+        WriteStyleSheet ( pf, exsExport.hecss );
 
 }
 

@@ -21,12 +21,12 @@
 #ifndef _IMPORT_H_
 #define _IMPORT_H_
 
-extern void ImportJF( FILE * fp, char *szFileName);
-extern void ImportMat( FILE *fp, char *szFilename );
-extern void ImportOldmoves( FILE *pf, char *szFilename );
-extern void ImportSGG( FILE *pf, char *szFilename );
-extern void ImportTMG( FILE *pf, const char *szFilename );
-extern void ImportBKG( FILE *pf, const char *szFilename );
-extern void ImportSnowieTxt( FILE *pf );
+extern int ImportJF( FILE * fp, char *szFileName);
+extern int ImportMat( FILE *fp, char *szFilename );
+extern int ImportOldmoves( FILE *pf, char *szFilename );
+extern int ImportSGG( FILE *pf, char *szFilename );
+extern int ImportTMG( FILE *pf, const char *szFilename );
+extern int ImportBKG( FILE *pf, const char *szFilename );
+extern int ImportSnowieTxt( FILE *pf );
 
 #endif

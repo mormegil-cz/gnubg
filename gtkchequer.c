@@ -43,6 +43,8 @@
 #include "gtkchequer.h"
 #include "i18n.h"
 #include "gtktempmap.h"
+#include "progress.h"
+#include "format.h"
 
 
 
@@ -79,13 +81,11 @@ UpdateMoveList ( const hintdata *phd ) {
     
   GetMatchStateCubeInfo( &ci, &ms );
     
-  if( fOutputMWC && ms.nMatchTo ) {
+  rBest = pml->amMoves[ 0 ].rScore;
+  if( fOutputMWC && ms.nMatchTo ) 
     gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("MWC") );
-    rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
-  } else {
+  else
     gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("Equity") );
-    rBest = pml->amMoves[ 0 ].rScore;
-  }
     
   for( i = 0; i < pml->cMoves; i++ ) {
     float *ar = pml->amMoves[ i ].arEvalMove;
@@ -104,37 +104,24 @@ UpdateMoveList ( const hintdata *phd ) {
     FormatEval( sz, &pml->amMoves[ i ].esMove );
     gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
 
-    for( j = 0; j < 5; j++ ) {
-      if( fOutputWinPC )
-        sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
-      else
-        sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
-	    
+    /* gwc */
+
+    for( j = 0; j < 5; j++ ) 
       gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
-                          sz );
-    }
+                          OutputPercent( ar[ aanColumns[ j ][ 1 ] ] ) );
 
-    if( fOutputWinPC )
-      sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
-    else
-      sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
-	    
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, 
+                        OutputPercent( 1.0f - ar[ OUTPUT_WIN ] ) );
 
-    if( fOutputMWC && ms.nMatchTo )
-      sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
-                                               &ci ) );
-    else
-      sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
+    /* cubeless equity */
+
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, 
+                        OutputEquity( pml->amMoves[ i ].rScore, &ci, TRUE ) );
 
     if( i ) {
-      if( fOutputMWC && ms.nMatchTo )
-        sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
-                 * 100.0f - rBest );
-      else
-        sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
-      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
+      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, 
+                          OutputEquityDiff( pml->amMoves[ i ].rScore, 
+                                            rBest, &ci ) );
     }
 	
     gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
@@ -184,8 +171,9 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 #endif
   int c;
   int i;
-
+  move *m;
   int *ai;
+  void *p;
 
   if ( !  GTK_CLIST( pwMoves )->selection )
     return;
@@ -196,54 +184,46 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
     c++;
 
   /* setup rollout dialog */
-
+  {
 #if HAVE_ALLOCA
+    move **ppm = alloca ( c * sizeof (move *));
+    cubeinfo **ppci = alloca ( c * sizeof (cubeinfo *));
     asz = alloca( 40 * c );
 #else
     if( c > 10 )
 	c = 10;
+    move *pm[10];
+    cubeinfo *pci[10];
 #endif
 
 
-  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
+  for( i =  0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
        pl = pl->next, i++ ) {
 
-    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-
+    m = ppm[ i ] = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+    ppci[ i ] = &ci;
     FormatMove ( asz[ i ], ms.anBoard, m->anMove );
 
   }
 
-#if USE_GTK
-  if( fX )
-    GTKRollout( c, asz, rcRollout.nTrials, NULL ); 
-#endif
+  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
 
-  ProgressStartValue( _("Rolling out positions; position:"), c );
+  if ( fAction )
+    HandleXAction();
 
-  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
-       pl = pl->next, i++ ) {
-
-    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-
-    GTKRolloutRow ( i );
-
-    if ( ScoreMoveRollout ( m, &ci, &rcRollout ) < 0 ) {
-      GTKRolloutDone ();
-      ProgressEnd ();
-      return;
-    }
+  if ( ScoreMoveRollout ( ppm, ppci, c, RolloutProgress, p ) < 0 ) {
+    RolloutProgressEnd( &p );
+    return;
+  }
     
-    ProgressValueAdd ( 1 );
+  RolloutProgressEnd( &p );
 
-    /* Calling RefreshMoveList here requires some extra work, as
-       it may reorder moves */
-
-    UpdateMoveList ( phd );
+  /* Calling RefreshMoveList here requires some extra work, as
+     it may reorder moves */
+  
+  UpdateMoveList ( phd );
 
   }
-
-  GTKRolloutDone ();
 
   gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
 
@@ -257,8 +237,6 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
 
   UpdateMoveList ( phd );
-
-  ProgressEnd ();
 
 }
 
@@ -282,9 +260,6 @@ ShowMove ( hintdata *phd, const int f ) {
 
     memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
     ApplyMove ( anBoard, pm->anMove, FALSE );
-
-    if ( ! ms.fMove )
-      SwapSides ( anBoard );
 
     UpdateMove( ( BOARD( pwBoard ) )->board_data, anBoard );
 

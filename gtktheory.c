@@ -27,6 +27,7 @@
 #include <alloca.h>
 #endif
 
+#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -77,17 +78,14 @@ typedef struct _theorywidget {
 
   /* market window */
 
-  GtkWidget *aaapwMW[ 2 ][ 8 ][ 3 ];
+  GtkWidget *apwMW[ 2 ];
 
   /* window graphs */
   GtkWidget *apwGraph[ 2 ];
     
   /* gammon prices */
 
-  GtkWidget *apwGammonPrice[ 2 ];
-
-  GtkWidget *aapwMatchGP[ 2 ][ 2 ];
-  GtkWidget *aaapwMoneyGP[ 2 ][ 2 ][ 2 ];
+  GtkWidget *pwGammonPrice;
 
   /* dead double, live cash, and dead too good points; for graph drawing */
   float aar[ 2 ][ 3 ];
@@ -100,6 +98,15 @@ typedef struct _theorywidget {
 } theorywidget;
 
 
+
+static void
+MWGetSelection( GtkWidget *pw, GtkSelectionData *psd,
+                guint n, guint t, theorywidget *ptw ) {
+
+
+  printf( "sorry not implemented\n" );
+
+}
 
 static void
 ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
@@ -249,10 +256,11 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   float aaarPoints[ 2 ][ 7 ][ 2 ];
   float aaarPointsMatch[ 2 ][ 4 ][ 2 ];
 
-  char sz[ 255 ];
   int i, j, k;
   int afAutoRedouble[ 2 ];
   int afDead[ 2 ];
+  GdkFont *pf;
+  gchar *pch;
 
   const char *aszMoneyPointLabel[] = {
     N_ ("Take Point (TP)"),
@@ -280,16 +288,6 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
   gtk_widget_show ( ptw->apwFrame[ ! ci.nMatchTo ] );
   gtk_widget_hide ( ptw->apwFrame[ ci.nMatchTo != 0 ] );
-
-  gtk_widget_show ( ptw->apwGammonPrice[ ! ci.nMatchTo ] );
-  gtk_widget_hide ( ptw->apwGammonPrice[ ci.nMatchTo != 0 ] );
-
-  sprintf ( sz, _("Gammon values at %d-away, %d-away (%d cube)"),
-            ci.nMatchTo - ci.anScore[ 0 ],
-            ci.nMatchTo - ci.anScore[ 1 ],
-            ci.nCube );
-  gtk_frame_set_label ( GTK_FRAME ( ptw->apwGammonPrice[ 0 ] ),
-                        sz );
 
   /* update match play widget */
 
@@ -324,30 +322,31 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
   if( ci.nMatchTo ) {
 
+    gchar *asz[ 4 ];
+
     /* match play */
 
     getMatchPoints ( aaarPointsMatch, afAutoRedouble, afDead, &ci, aarRates );
 
-    for ( i = 0; i < 2; i++ ) {
+    for ( i = 0; i < 2; ++i ) {
+    
+      gtk_clist_freeze( GTK_CLIST( ptw->apwMW[ i ] ) );
 
-      /* column headers */
+      gtk_clist_clear( GTK_CLIST( ptw->apwMW[ i ] ) );
 
-      gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 1 ] ),
-                           _("Dead cube") );
-
+      gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 1, 
+                                  _("Dead cube") );
       if ( afAutoRedouble[ i ] )
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             _("Opp. redoubles") );
+        gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 3, 
+                                    _("Opp. redoubles") );
       else
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             _("Live cube") );
+        gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 3, 
+                                    _("Fully live") );
 
       for ( j = 0; j < 4; j++ ) {
 
-        /* row header */
+        asz[ 0 ] = g_strdup( gettext( aszMatchPlayLabel[ j ] ) );
 
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ 0 ] ),
-                             gettext ( aszMatchPlayLabel[ j ] ) );
 
         for ( k = 0; k < 2; k++ ) {
           
@@ -360,62 +359,85 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
           f = f && 
             ( ! ci.nMatchTo || ( ci.anScore[ i ] + ci.nCube < ci.nMatchTo ) );
 
-          if ( f ) {
-            sprintf ( sz, "%7.3f%%", 100.0f * aaarPointsMatch[ i ][ j ][ k ] );
-            gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ k + 1 ] ), 
-                                 sz );
-          }
+          if ( f ) 
+            asz[ 1 + 2 * k ] = 
+              g_strdup_printf( "%7.3f%%", 
+                               100.0f * aaarPointsMatch[ i ][ j ][ k ] );
           else
-            gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ k + 1 ] ), 
-                                 "" );
+            asz[ 1 + 2 * k ] = g_strdup( "" );
 
         }
+
+        asz[ 2 ] = g_strdup( "" );
+
+        gtk_clist_append( GTK_CLIST( ptw->apwMW[ i ] ), asz );
+
+        for ( k = 0; k < 4; ++k )
+          g_free( asz[ k ] );
+
       }
 
-      for ( j = 5; j < 8; j++ ) 
-        for ( k = 0; k < 3; k++ )
-          gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j ][ k ] ), 
-                               "" );
+      gtk_clist_thaw( GTK_CLIST( ptw->apwMW[ i ] ) );
+
+      for ( j = 0; j < 4; ++j )
+        gtk_clist_set_column_width( GTK_CLIST( ptw->apwMW[ i ] ),
+                                    j,
+                                    gtk_clist_optimal_column_width( GTK_CLIST( ptw->apwMW[ i ] ), j  ) );
 
       ptw->aar[ i ][ 0 ] = aaarPointsMatch[ i ][ 1 ][ 0 ];
       ptw->aar[ i ][ 1 ] = aaarPointsMatch[ i ][ 2 ][ 1 ];
       ptw->aar[ i ][ 2 ] = aaarPointsMatch[ i ][ 3 ][ 0 ];
       
       gtk_widget_queue_draw( ptw->apwGraph[ i ] );
+
     }
 
   }
   else {
 
+    gchar *asz[ 4 ];
+
     /* money play */
 
     getMoneyPoints ( aaarPoints, ci.fJacoby, ci.fBeavers, aarRates );
 
-    for ( i = 0; i < 2; i++ ) {
+    for ( i = 0; i < 2; ++i ) {
 
-      /* column headers */
-
-      gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 1 ] ),
-                           _("Dead cube") );
-      gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                           _("Live cube") );
+      gtk_clist_freeze( GTK_CLIST( ptw->apwMW[ i ] ) );
+      
+      gtk_clist_clear( GTK_CLIST( ptw->apwMW[ i ] ) );
+    
+      gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 1, 
+                                _("Dead cube") );
+      gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 3, 
+                                  _("Fully live") );
 
       for ( j = 0; j < 7; j++ ) {
 
-        /* row header */
+        asz[ 0 ] = g_strdup( gettext( aszMoneyPointLabel[ j ] ) );
 
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ 0 ] ),
-                             gettext ( aszMoneyPointLabel[ j ] ) );
 
-        for ( k = 0; k < 2; k++ ) {
+        for ( k = 0; k < 2; k++ )
+          asz[ 2 * k + 1 ] = 
+            g_strdup_printf( "%7.3f%%", 
+                             100.0f * aaarPoints[ i ][ j ][ k ] );
 
-          sprintf ( sz, "%7.3f%%", 100.0f * aaarPoints[ i ][ j ][ k ] );
-          gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ k + 1 ] ), 
-                               sz );
+        asz[ 2 ] = g_strdup( "" );
 
-        }
+        gtk_clist_append( GTK_CLIST( ptw->apwMW[ i ] ), asz );
+
+        for ( k = 0; k < 4; ++k )
+          g_free( asz[ k ] );
+
       }
-      
+
+      gtk_clist_thaw( GTK_CLIST( ptw->apwMW[ i ] ) );
+
+      for ( j = 0; j < 4; ++j )
+        gtk_clist_set_column_width( GTK_CLIST( ptw->apwMW[ i ] ),
+                                    j,
+                                    gtk_clist_optimal_column_width( GTK_CLIST( ptw->apwMW[ i ] ), j ) );
+
       ptw->aar[ i ][ 0 ] = aaarPoints[ i ][ 3 ][ 0 ];
       ptw->aar[ i ][ 1 ] = aaarPoints[ i ][ 5 ][ 1 ];
       ptw->aar[ i ][ 2 ] = aaarPoints[ i ][ 6 ][ 0 ];
@@ -429,55 +451,98 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
    * Update gammon price widgets
    */
 
+#if WIN32
+  /* Windows fonts come out smaller than you ask for, for some reason... */
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
+                      "*-*-*-m-*-iso8859-1" );
+#else
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-10-"
+                      "*-*-*-m-*-iso8859-1" );
+#endif
+
+  gtk_text_freeze( GTK_TEXT( ptw->pwGammonPrice ) );
+
+  gtk_editable_delete_text( GTK_EDITABLE( ptw->pwGammonPrice ), 0, -1 );
+
   if ( ci.nMatchTo ) {
 
-    /* match play */
+    pch = g_strdup_printf( ("Gammon values at %d-away, %d-away (%d cube)\n\n"),
+                           ci.nMatchTo - ci.anScore[ 0 ],
+                           ci.nMatchTo - ci.anScore[ 1 ],
+                           ci.nCube );
 
-    for ( i = 0; i < 2; i++ ) {
+    gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                     pch, -1 );
+    
+    g_free( pch );
 
-      /* divide gammon prices with 2 in order to get the
-         "usual" gammon prices */
+    gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                     "Player                          Gammon   BG\n", -1 );
+    
 
-      sprintf ( sz, "%6.4f", 0.5f * ci.arGammonPrice[ i ] );
-      gtk_label_set_text ( GTK_LABEL ( ptw->aapwMatchGP[ i ][ 0 ] ),
-                            sz );
-
-      /* divide by two and add the gammon price */
-
-      sprintf ( sz, "%6.4f", 
-                0.5f * ( ci.arGammonPrice[ 2 + i ] + ci.arGammonPrice[ i ] ) );
-      gtk_label_set_text ( GTK_LABEL ( ptw->aapwMatchGP[ i ][ 1 ] ),
-                            sz );
-
+    for ( j = 0; j < 2; ++j ) {
+        
+      pch = g_strdup_printf( "%-31.31s %6.4f   %6.4f\n",
+                             ap[ j ].szName,
+                             0.5f * ci.arGammonPrice[ j ],
+                             0.5f * ( ci.arGammonPrice[ 2 + j ] + 
+                                      ci.arGammonPrice[ j ] ) );
+      
+      gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                       pch, -1 );
+      
+      g_free( pch );
+      
     }
 
   }
   else {
 
-    /* money play */
+    gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                     _("Gammon values for money game:\n\n"), -1 );
 
-    for ( j = 0; j < 2; j++ ) {
+    for ( i = 0; i < 2; ++i ) {
 
-      SetCubeInfo ( &ci, 1, j ? 1 : -1, 0, ci.nMatchTo, ci.anScore, 
+      pch = g_strdup_printf( _("%s:\n\n"
+                               "Player                          "
+                               "Gammon   BG\n"),
+                             i ? _("Doubled cube") : _("Centered cube") );
+
+      gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                       pch, -1 );
+    
+      g_free( pch );
+
+
+      SetCubeInfo ( &ci, 1, i ? 1 : -1, 0, ci.nMatchTo, ci.anScore, 
                     ci.fCrawford, ci.fJacoby, ci.fBeavers, ci.bgv );
 
-      for ( i = 0; i < 2; i++ ) {
+      for ( j = 0; j < 2; ++j ) {
         
-        sprintf ( sz, "%6.4f", 0.5f * ci.arGammonPrice[ i ] );
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMoneyGP[ j ][ i ][ 0 ] ),
-                             sz );
-        
-        sprintf ( sz, "%6.4f", 
-                  0.5f * ( ci.arGammonPrice[ 2 + i ] + 
-                           ci.arGammonPrice[ i ] ) );
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMoneyGP[ j ][ i ][ 1 ] ),
-                             sz );
-        
+        pch = g_strdup_printf( "%-31.31s %6.4f   %6.4f\n",
+                               ap[ j ].szName,
+                               0.5f * ci.arGammonPrice[ j ],
+                               0.5f * ( ci.arGammonPrice[ 2 + j ] + 
+                                        ci.arGammonPrice[ j ] ) );
+
+        gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                         pch, -1 );
+    
+        g_free( pch );
+
       }
+
+      gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+                       "\n", -1 );
 
     }
 
   }
+
+  gtk_text_thaw( GTK_TEXT( ptw->pwGammonPrice ) );
+
+
+
 
 }
 
@@ -594,9 +659,18 @@ GTKShowTheory ( const int fActivePage ) {
   
   GtkWidget *pw, *pwx, *pwz;
 
-  int i, j, k;
+  int i, j;
   char sz[ 256 ];
   int *pi;
+
+  static char *aszTitles[] = {
+    "",
+    N_("Dead cube"),
+    "" /* N_("Live cube") */,
+    N_("Fully live")
+  };
+  gchar *asz[ 4 ];
+    
 
   theorywidget *ptw;
 
@@ -604,8 +678,10 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
+  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
                             NULL, NULL );
+
+  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 400, 400 );
 
   pwVBox = gtk_vbox_new ( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pwVBox ), 8 );
@@ -871,35 +947,34 @@ GTKShowTheory ( const int fActivePage ) {
                              pwVBox,
                              gtk_label_new ( _("Market window") ) );
 
-  for ( i = 0; i < 2; i++ ) {
+  for ( i = 0; i < 4; ++i )
+    asz[ i ] = gettext( aszTitles[ i ] );
+
+  for ( i = 0; i < 2; ++i ) {
 
     sprintf ( sz, _("Market window for player %s"), ap[ i ].szName );
     pwFrame = gtk_frame_new ( sz );
     gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwFrame );
 
-    pwTable = gtk_table_new ( 8, 3, FALSE );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
+    ptw->apwMW[ i ] = gtk_clist_new_with_titles( 4, asz );
 
-    for ( j = 0; j < 3; j++ ) 
-      for ( k = 0; k < 8; k++ )
+    gtk_clist_set_selection_mode( GTK_CLIST( ptw->apwMW[ i ] ),
+                              GTK_SELECTION_MULTIPLE );
 
-        if ( j || k ) {
+    gtk_clist_column_titles_passive ( GTK_CLIST( ptw->apwMW[ i ] ) );
 
-          gtk_table_attach ( GTK_TABLE ( pwTable ),
-                             ptw->aaapwMW[ i ][ k ][ j ] = 
-                             gtk_label_new ( "dummy" ),
-                             j, j + 1, k, k + 1,
-                             GTK_EXPAND | GTK_FILL,
-                             GTK_EXPAND | GTK_FILL,
-                             4, 0 );
-          gtk_misc_set_alignment( GTK_MISC( ptw->aaapwMW[ i ][ k ][ j ] ), 
-                                  0, 0.5 );
+    /*
+    for ( j = 0; j < 4; ++j )
+      gtk_clist_set_column_auto_resize ( GTK_CLIST( ptw->apwMW[ i ] ),
+      j, TRUE );*/
 
-        }
-        else 
-          ptw->aaapwMW[ i ][ j ][ k ] = NULL;
+    gtk_selection_add_target( ptw->apwMW[ i ], GDK_SELECTION_PRIMARY,
+                              GDK_SELECTION_TYPE_STRING, 0 );
 
+    gtk_signal_connect( GTK_OBJECT( ptw->apwMW[ i ] ), "selection_get",
+                        GTK_SIGNAL_FUNC( MWGetSelection ), ptw );
 
+    gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwMW[ i ] );
 
   }
 
@@ -929,100 +1004,10 @@ GTKShowTheory ( const int fActivePage ) {
 
   pwVBox = gtk_vbox_new ( 0, FALSE );
 
-  ptw->apwGammonPrice[ 0 ] = 
-    gtk_frame_new ( _("Gammon values at 0-away, 0-away for 0-cube") );
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwGammonPrice[ 0 ] );
+  ptw->pwGammonPrice = gtk_text_new( NULL, NULL );
+  gtk_text_set_line_wrap ( GTK_TEXT( ptw->pwGammonPrice ), FALSE );
 
-  pwTable = gtk_table_new ( 3, 3, TRUE );
-  gtk_container_add ( GTK_CONTAINER ( ptw->apwGammonPrice[ 0 ] ), pwTable );
-
-  for ( i = 0; i < 2; i++ ) {
-
-    gtk_table_attach ( GTK_TABLE ( pwTable ),
-                       pwx = gtk_label_new ( ap[ i ].szName ),
-                       0, 1, 1 + i, 2 + i, 
-                       GTK_EXPAND | GTK_FILL,
-                       GTK_EXPAND | GTK_FILL,
-                       4, 0 );
-    gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
-
-    gtk_table_attach ( GTK_TABLE ( pwTable ),
-                       pwx = gtk_label_new ( i ? _("backgammon value") : 
-                                             _("gammon value") ), 
-                       1+ i, 2 + i, 0, 1, 
-                       GTK_EXPAND | GTK_FILL,
-                       GTK_EXPAND | GTK_FILL,
-                       4, 0 );
-    gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
-
-    for ( j = 0; j < 2; j++ ) {
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ),
-                         ptw->aapwMatchGP[ i ][ j ] = 
-                         gtk_label_new ( "dummy" ),
-                         1 + j, 2 + j, 1 +i, 2 + i,
-                         GTK_EXPAND | GTK_FILL,
-                         GTK_EXPAND | GTK_FILL,
-                         4, 0 );
-      gtk_misc_set_alignment( GTK_MISC( ptw->aapwMatchGP[ i ][ j ] ), 0, 0.5 );
-
-    }
-
-  }
-
-  ptw->apwGammonPrice[ 1 ] = 
-    gtk_frame_new ( _("Gammon values for money game") );
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwGammonPrice[ 1 ] );
-
-  pw = gtk_vbox_new ( 0, FALSE );
-  gtk_container_add ( GTK_CONTAINER ( ptw->apwGammonPrice[ 1 ] ), pw );
-
-  for ( k = 0; k < 2; k++ ) {
-
-    gtk_container_add ( GTK_CONTAINER ( pw ), 
-                        gtk_label_new ( k ?
-                                        _("Doubled cube") :
-                                        _("Centered cube") ) );
-    
-    pwTable = gtk_table_new ( 3, 3, TRUE );
-    gtk_container_add ( GTK_CONTAINER ( pw ), pwTable );
-
-    for ( i = 0; i < 2; i++ ) {
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ),
-                         pwx = gtk_label_new ( ap[ i ].szName ),
-                         0, 1, 1 + i, 2 + i, 
-                         GTK_EXPAND | GTK_FILL,
-                         GTK_EXPAND | GTK_FILL,
-                         4, 0 );
-      gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ),
-                         pwx = gtk_label_new ( i ? _("backgammon value") : 
-                                               _("gammon value") ), 
-                         1+ i, 2 + i, 0, 1, 
-                         GTK_EXPAND | GTK_FILL,
-                         GTK_EXPAND | GTK_FILL,
-                         4, 0 );
-      gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
-
-      for ( j = 0; j < 2; j++ ) {
-        
-        gtk_table_attach ( GTK_TABLE ( pwTable ),
-                           ptw->aaapwMoneyGP[ k ][ i ][ j ] = 
-                           gtk_label_new ( "dummy" ),
-                           1 + j, 2 + j, 1 +i, 2 + i,
-                           GTK_EXPAND | GTK_FILL,
-                           GTK_EXPAND | GTK_FILL,
-                           4, 0 );
-        gtk_misc_set_alignment( GTK_MISC( ptw->aaapwMoneyGP[ k ][ i ][ j ] ), 
-                                0, 0.5 );
-
-      }
-      
-    }
-
-  }
+  gtk_container_add ( GTK_CONTAINER( pwVBox ), ptw->pwGammonPrice );
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,

@@ -68,7 +68,7 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
 static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges, *pwLightTable,
-    *pwWoodF, *pwPreview[ NUM_PIXMAPS ], *pwNotebook;
+    *pwWoodF, *pwPreview[ NUM_PIXMAPS ], *pwNotebook, *pwLabels, *pwDynamicLabels;
 static GList *plBoardDesigns;
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
@@ -84,7 +84,7 @@ GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *p
 	BoardData bd3d;	/* Preview 3d board settings */
 	displaytype previewType;
 	char lastPieceStr[50];
-	char* pieceTypeStr[NUM_PIECE_TYPES] = {"Rounded disc", "Flat edged disc"};
+	char* pieceTypeStr[NUM_PIECE_TYPES] = {N_("Rounded disc"), N_("Flat edged disc")};
 
 	int pc3dDiceId[2], pcChequer2;
 	void *glpixPreview;
@@ -105,9 +105,7 @@ static GtkWidget *pwCubeColour;
 static GtkWidget *apwDiceDotColour[ 2 ];
 static GtkWidget *apwDieColour[ 2 ];
 static GtkWidget *apwDiceColourBox[ 2 ];
-int fWood;
-
-static int fUpdate;
+static int fWood, fUpdate;
 
 static void GetPrefs ( renderdata *bd );
 void AddPages(BoardData* bd, GtkWidget* pwNotebook);
@@ -1032,6 +1030,8 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 
 	ShowLightWidgets(state);
 
+	gtk_widget_set_sensitive(pwTestPerformance, (previewType == DT_3D));
+
 #if USE_GTK && !USE_GTK2
 	/* Realize preview for gtk1 - otherwise doesn't show straight away */
 	gtk_widget_realize(pwPreview[PI_DESIGN]);
@@ -1098,14 +1098,14 @@ GtkWidget *Board3dPage(BoardData *bd)
 	dtBox = gtk_vbox_new (FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(pwx), dtBox, FALSE, FALSE, 0);
 
-	pwMoveIndicator = gtk_check_button_new_with_label ("Show move indicator");
-	gtk_tooltips_set_tip(ptt, pwMoveIndicator, "Show or hide arrow indicating who is moving", 0);
+	pwMoveIndicator = gtk_check_button_new_with_label (_("Show move indicator"));
+	gtk_tooltips_set_tip(ptt, pwMoveIndicator, _("Show or hide arrow indicating who is moving"), 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), pwMoveIndicator, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwMoveIndicator), rdAppearance.showMoveIndicator);
 	gtk_signal_connect(GTK_OBJECT(pwMoveIndicator), "toggled", GTK_SIGNAL_FUNC(option_changed), NULL);
 	
-	pwShowShadows = gtk_check_button_new_with_label ("Show shadows");
-	gtk_tooltips_set_tip(ptt, pwShowShadows, "Display shadows, this option requires a fast graphics card", 0);
+	pwShowShadows = gtk_check_button_new_with_label (_("Show shadows"));
+	gtk_tooltips_set_tip(ptt, pwShowShadows, _("Display shadows, this option requires a fast graphics card"), 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), pwShowShadows, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), rdAppearance.showShadows);
 	gtk_signal_connect(GTK_OBJECT(pwShowShadows), "toggled", GTK_SIGNAL_FUNC(toggle_show_shadows), NULL);
@@ -1113,7 +1113,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
 
-	lightLab = gtk_label_new("light");
+	lightLab = gtk_label_new(_("light"));
 	gtk_box_pack_start(GTK_BOX(hBox), lightLab, FALSE, FALSE, 0);
 
 	padjDarkness = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.shadowDarkness,
@@ -1121,28 +1121,28 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjDarkness ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwDarkness = gtk_hscale_new(padjDarkness);
-	gtk_tooltips_set_tip(ptt, pwDarkness, "Vary the darkness of the shadows", 0);
+	gtk_tooltips_set_tip(ptt, pwDarkness, _("Vary the darkness of the shadows"), 0);
 	gtk_scale_set_draw_value(GTK_SCALE(pwDarkness), FALSE);
 	gtk_box_pack_start(GTK_BOX(hBox), pwDarkness, TRUE, TRUE, 0);
 
-	darkLab = gtk_label_new("dark");
+	darkLab = gtk_label_new(_("dark"));
 	gtk_box_pack_start(GTK_BOX(hBox), darkLab, FALSE, FALSE, 0);
 
 	toggle_show_shadows(pwShowShadows, 0);
 
 
-	pwAnimateRoll = gtk_check_button_new_with_label ("Animate dice rolls");
-	gtk_tooltips_set_tip(ptt, pwAnimateRoll, "Dice rolls will shake across board", 0);
+	pwAnimateRoll = gtk_check_button_new_with_label (_("Animate dice rolls"));
+	gtk_tooltips_set_tip(ptt, pwAnimateRoll, _("Dice rolls will shake across board"), 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateRoll, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), rdAppearance.animateRoll);
 	
-	pwAnimateFlag = gtk_check_button_new_with_label ("Animate resignation flag");
-	gtk_tooltips_set_tip(ptt, pwAnimateFlag, "Waves resignation flag", 0);
+	pwAnimateFlag = gtk_check_button_new_with_label (_("Animate resignation flag"));
+	gtk_tooltips_set_tip(ptt, pwAnimateFlag, _("Waves resignation flag"), 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateFlag, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateFlag), rdAppearance.animateFlag);
 
-	pwCloseBoard = gtk_check_button_new_with_label ("Close board on exit");
-	gtk_tooltips_set_tip(ptt, pwCloseBoard, "When you quit gnubg, the board will close", 0);
+	pwCloseBoard = gtk_check_button_new_with_label (_("Close board on exit"));
+	gtk_tooltips_set_tip(ptt, pwCloseBoard, _("When you quit gnubg, the board will close"), 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), pwCloseBoard, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), rdAppearance.closeBoardOnExit );
 
@@ -1155,7 +1155,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
 
-	lab = gtk_label_new("Board angle: ");
+	lab = gtk_label_new(_("Board angle: "));
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 	padjBoardAngle = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.boardAngle,
@@ -1163,7 +1163,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjBoardAngle ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwBoardAngle = gtk_hscale_new(padjBoardAngle);
-	gtk_tooltips_set_tip(ptt, pwBoardAngle, "Vary the angle the board is tilted at", 0);
+	gtk_tooltips_set_tip(ptt, pwBoardAngle, _("Vary the angle the board is tilted at"), 0);
 	gtk_scale_set_digits( GTK_SCALE( pwBoardAngle ), 0 );
 #if GTK_CHECK_VERSION(2,0,0)
     gtk_widget_set_size_request( pwBoardAngle, 100, -1 );
@@ -1183,19 +1183,24 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjSkewFactor ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwSkewFactor = gtk_hscale_new(padjSkewFactor);
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_widget_set_size_request( pwSkewFactor, 100, -1 );
+#else
+    gtk_widget_set_usize ( GTK_WIDGET ( pwSkewFactor ), 100, -1 );
+#endif
 	gtk_tooltips_set_tip(ptt, pwSkewFactor, "This option is temporary, I think one of these values"
 			" should be ideal for any board angle", 0);
 	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwSkewFactor, FALSE, FALSE, 0);
 
 
-	lab = gtk_label_new("Curve accuracy");
+	lab = gtk_label_new(_("Curve accuracy"));
 	gtk_box_pack_start (GTK_BOX (dtBox), lab, FALSE, FALSE, 0);
 
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
 
-	lab = gtk_label_new("low");
+	lab = gtk_label_new(_("low"));
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 	padjAccuracy = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.curveAccuracy,
@@ -1203,23 +1208,23 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjAccuracy ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwAccuracy = gtk_hscale_new(padjAccuracy);
-	gtk_tooltips_set_tip(ptt, pwAccuracy, "Change how accurately curves are drawn."
+	gtk_tooltips_set_tip(ptt, pwAccuracy, _("Change how accurately curves are drawn."
 		" If performance is slow try lowering this value."
-		" Increasing this value will only have an effect on large displays", 0);
+		" Increasing this value will only have an effect on large displays"), 0);
 	gtk_scale_set_draw_value(GTK_SCALE(pwAccuracy), FALSE);
 	gtk_box_pack_start(GTK_BOX(hBox), pwAccuracy, TRUE, TRUE, 0);
 
-	lab = gtk_label_new("high");
+	lab = gtk_label_new(_("high"));
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 
-	lab = gtk_label_new("Dice size");
+	lab = gtk_label_new(_("Dice size"));
 	gtk_box_pack_start (GTK_BOX (dtBox), lab, FALSE, FALSE, 0);
 
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
 
-	lab = gtk_label_new("small");
+	lab = gtk_label_new(_("small"));
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 	padjDiceSize = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.diceSize,
@@ -1227,15 +1232,14 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjDiceSize ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwDiceSize = gtk_hscale_new(padjDiceSize);
-	gtk_tooltips_set_tip(ptt, pwDiceSize, "Vary the size of the dice", 0);
+	gtk_tooltips_set_tip(ptt, pwDiceSize, _("Vary the size of the dice"), 0);
 	gtk_scale_set_draw_value(GTK_SCALE(pwDiceSize), FALSE);
 	gtk_box_pack_start(GTK_BOX(hBox), pwDiceSize, TRUE, TRUE, 0);
 
-	lab = gtk_label_new("large");
+	lab = gtk_label_new(_("large"));
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
-
-	pwTestPerformance = gtk_button_new_with_label("Test performance");
+	pwTestPerformance = gtk_button_new_with_label(_("Test performance"));
 	gtk_widget_set_sensitive(pwTestPerformance, (rdAppearance.fDisplayType == DT_3D));
 	gtk_box_pack_start(GTK_BOX(dtBox), pwTestPerformance, FALSE, FALSE, 0);
 	gtk_signal_connect(GTK_OBJECT(pwTestPerformance), "clicked",
@@ -1245,7 +1249,15 @@ GtkWidget *Board3dPage(BoardData *bd)
 }
 #endif
 
-static GtkWidget *GeneralPage( BoardData *bd, GtkWidget *pwNotebook ) {
+static void
+LabelsToggled( GtkWidget *pwLabels, GtkWidget *pwDynamicLabels ) {
+
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+  gtk_widget_set_sensitive( GTK_WIDGET( pwDynamicLabels ), f );
+
+}
+
+static GtkWidget *GeneralPage( BoardData *bd ) {
 
     GtkWidget *pw, *pwBox, *pwScale;
     float rAzimuth, rElevation;
@@ -1255,29 +1267,48 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget *pwNotebook ) {
 		*pwLightPosX, *pwLightLevelAmbient, *pwLightLevelDiffuse, *pwLightLevelSpecular,
 		*pwLightPosY, *pwLightPosZ;
 #endif
-
     pwx = gtk_hbox_new ( FALSE, 0 );
 
     pw = gtk_vbox_new( FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
 
 #if USE_BOARD3D
-	dtFrame = gtk_frame_new("Display Type");
+	dtFrame = gtk_frame_new(_("Display Type"));
 	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
 	gtk_box_pack_start(GTK_BOX( pw ), dtFrame, FALSE, FALSE, 0);
 	
 	dtBox = gtk_vbox_new (FALSE, 0);
 	gtk_container_add (GTK_CONTAINER (dtFrame), dtBox);
 	
-	pwBoardType = gtk_radio_button_new_with_label (NULL, "2d Board");
+	pwBoardType = gtk_radio_button_new_with_label (NULL, _("2d Board"));
 	gtk_box_pack_start (GTK_BOX (dtBox), pwBoardType, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBoardType), (rdAppearance.fDisplayType == DT_2D));
 	
-	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwBoardType), "3d Board");
+	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwBoardType), _("3d Board"));
 	gtk_box_pack_start (GTK_BOX (dtBox), button, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.fDisplayType == DT_3D));
 	gtk_signal_connect(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(toggle_display_type), bd);
 #endif
+
+    pwDynamicLabels = gtk_check_button_new_with_label( _("Dynamic labels") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ), 
+                                  rdAppearance.fDynamicLabels );
+    gtk_box_pack_start( GTK_BOX( pw ), pwDynamicLabels, FALSE, FALSE, 0 );
+    gtk_signal_connect_object( GTK_OBJECT( pwDynamicLabels ), "toggled",
+			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+
+    pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), rdAppearance.fLabels );
+    gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pwLabels, _("Show or hide point numbers"), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwLabels ), "toggled",
+                        GTK_SIGNAL_FUNC( LabelsToggled ), 
+                        pwDynamicLabels );
+    LabelsToggled( pwLabels, pwDynamicLabels );
+    
+    gtk_tooltips_set_tip( ptt, pwDynamicLabels,
+			  _("Update the labels so they are correct "
+                            "for the player on roll"), NULL );
 
     pwLightTable = gtk_table_new( 3, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwLightTable, FALSE, FALSE, 4 );
@@ -1809,7 +1840,7 @@ DesignAddTitle ( boarddesign *pbde ) {
   GtkWidget *pwvbox;
   GtkWidget *pwhbox;
 
-  pwDialog = CreateDialog( _("GNU Backgammon - Add current board design"), 
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - Add current board design"), 
                            DT_QUESTION,
                            GTK_SIGNAL_FUNC( DesignAddOK ), pbde );
 
@@ -2408,6 +2439,8 @@ static void GetPrefs ( renderdata *prd ) {
 
     prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
     prd->rRound = 1.0 - padjRound->value;
+	prd->fDynamicLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ) );
+	prd->fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
     
     prd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
     prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
@@ -2541,7 +2574,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 
     fWood = rdAppearance.wt;
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
+    pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
 #if USE_BOARD3D
@@ -2559,7 +2592,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 		       pwNotebook );
 
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      GeneralPage( bd, pwNotebook ),
+			      GeneralPage( bd ),
 			      gtk_label_new( _("General") ) );
 
 #if USE_BOARD3D

@@ -1,0 +1,274 @@
+@node Cubeful equities
+@chapter Cubeful equities
+
+This chapter is a brief description of how @gnubg{} calculates cubeful
+equities. The formulae build directly on the work by Rick Janowski 
+@uref{http://www.msoworld.com/mindzine/news/classic/bg/cubeformulae.html,Take-Points
+in Money Games} from 1993.
+
+@section Basic formulae for cubeful equities
+
+The basic formulae for cubeful equities as derived by Janowski is
+
+@tex
+$$ E(cubeful) = E(dead) \cdot (1-x) + E(live) \cdot x.$$
+@end tex
+@ifnottex
+@quotation
+E(cubeful) = E(dead) * (1-x) + E(live) * x,
+@end quotation
+@end ifnottex
+
+where E(dead) is the dead cube equity (cubeless equity) calculated
+from the standard formulae. E(live) is the cubeful equity assuming a
+fully live cube. We'll return to that in the next section. x is the cube
+efficiency. x=0 gives E(cubeful)=E(dead) as one extreme and x=1 gives
+E(cubeful)=E(live) as the other extreme. In reality x is somewhere
+in between, which typical values around 0.6 - 0.8. 
+
+Janowski's article doesn't mention cubeful equities, so we use the
+straightforward generalisation
+
+@tex
+$$ MWC(cubeful) = MWC(dead) \cdot (1-x) + MWC(live) \cdot x.$$
+@end tex
+@ifnottex
+@quotation
+MWC(cubeful) = MWC(dead) * (1-x) + MWC(live) * x.
+@end quotation
+@end ifnottex
+
+as MWC is the entity that is used for match play evaluations. 
+
+
+@section Live cube equities
+
+The live cube equity is the equity assuming that the equity changes
+continuously, so that doubles and takes occurs exactly at the double
+point and take point. For gammonless play this is the well-known take
+point of 20%. Janowski derives the more general formula
+
+@tex
+$$ TP = {L-0.5}{W+L+0.5}$$
+@end tex
+@ifnottex
+@quotation
+TP = (L-0.5)/(W+L+0.5)
+@end quotation
+@end ifnottex
+
+where W is the average cubeless value of games ultimately won, and L
+is the average cubeless value of games ultimately lost. For example,
+for the following position
+
+@example
+ GNU Backgammon  Position ID: 4HPMwQCMz+AIIQ
+                 Match ID   : cAkAAAAAAAAA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
+ | X  O     X  O    |   | O  X           X |     0 points
+ | X  O        O    |   | O                |
+ | X           O    |   | O                |
+ |                  |   | O                |
+ |                  |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ |                  |   | X                |
+ |                  |   | X                |
+ | O                |   | X                |
+ | O           X  O |   | X        X       |     On roll
+ | O           X  O |   | X        X       |     0 points
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: jth
+@end example
+
+@gnubg{} evaluates
+
+@example
+        Win     W(g)    W(bg)   L(g)    L(bg)   
+static: 0.454   0.103   0.001   0.106   0.003   
+@end example
+
+and hence W=(0.454 + 0.103 + 0.001)/0.454=1.229 and
+L=(0.556+0.106+0.003)/0.556) = 1.196. For gammonless positions, e.g.,
+a race, W=1 and L=1.
+
+The live cube equity is now based on piecewise linear interpolation
+between the points (0%,-L%), (TP,-1), (CP,+1), and (100%,+W): if my
+winning chance is 0 I lose L points, at my take point I lose 1 point,
+at my cash point I cash 1 point, and when I have a certain win I win W
+points:
+
+@multitable @columnfractions 0.67 0.33
+@item @image{mgtp}
+@tab @strong{Figure X} Cubeful equities
+@end multitable
+
+
+For match play there is no simple formula, since redoubles can only
+occur a limited number of times. 
+
+The live cube take point is generally calculated as
+
+TP(live, n Cube)=TP(dead, n cube) * (1 - TP(live, 2n cube)
+
+So to calculate the live cube take points for a 1-cube at 3-0 to 7 we
+need the live cube take points for the 4-cube and the 2-cube. For the
+position above and using
+Woolsey's match equity table the live cube take point are:
+
+@multitable @columnfractions 0.3 0.3 0.3
+@item @strong{Cube value}
+@tab @strong{TP for X}
+@tab @strong{TP for O}
+@item 4  @tab   0%   @tab 41%
+@item 2  @tab  15%   @tab 38.5%
+@item 1  @tab  24.5% @tab 27.3%
+@end multitable
+
+The calculation of these are left as an exercise to the reader.
+
+Ignoring backgammons, the gammon rates for O and X are 0.106/54.6=19%
+and 0.103/0.454=22%, respectively. If O wins the game his MWC will be
+
+81% * MWC(-3,-7) + 19% * MWC(-2,-7) = 78%
+
+and if X wins his MWC will be
+
+78% * MWC(-4,-6) + 22% * MWC(-4,-5) = 41%.
+
+If O cashes 1 point he has MWC(-3,-7)=76% and if X cashes he has
+MWC(-4,-6)=36%. Analogous to money game the live cube MWC is
+calculated as piecewise linear interpolation between (0%,22%),
+(24.5%,24%), (72.7%,36%), and (100%,41%) (from X's point of view):
+
+@multitable @columnfractions 0.67 0.33
+@item @image{mptp}
+@tab @strong{Figure X} Fully live cubeful MWC
+@end multitable
+
+
+@section 0-ply Cubeful equities
+
+Having established the live cube equities and MWCs we're now in
+position to calculate the 0-ply cubeful equities. 
+
+Let's start with money game: the cubeless equity is -0.097 and the
+live cube equity can be determined from Figure X as -0.157. Thus, the
+cubeful equity is -0.138.
+
+
+For the match play example at the score 3-0 the cubeless MWC is 29.1%
+and from Figure X using wins=45.4% we can determine the live cube MWC
+to be 29.2%. Using a value of x=0.68 we arrive at a cubeful MWC of 29.17%.
+
+
+@section n-ply Cubeful equities
+
+The previous section concerned the calculation of 0-ply cubeful
+equities, so how so @gnubg{} calculate cubeful 2-ply equities? The
+answer is: by simple recursion:
+
+@example
+Equity=0
+Loop over 21 dice rolls
+   Find best move for given roll
+   Equity = Equity + Evaluate n-1 ply equity for resulting position
+End Loop
+Equity = Equity/36
+@end example
+
+Note that evaluating the n-1 ply equity involves a cube decision,
+since the opponent may double, so @gnubg{} will actually calculate the
+two n-1 ply equities: (a) assuming no double, and (b) assuming double,
+take. These two equities are combined with the equity for a pass, and
+the optimum of these three is added to the resulting equity. For a
+cubeful 2-ply evaluation @gnubg{} will end up calculating the
+following cubeful 0-ply equities: centred 1-cube, 
+opponent owns 2-cube, owned 4-cube, and opponent owns 8-cube. 
+
+Note that the 2-ply level does not use the cube efficiency, it's not
+used until at the 0-ply level, but it's possible to calculate an
+effective one by isolating x in the basic cube formulae:
+
+@quotation
+x(eff) = (E(2-ply cubeful) - E(2-ply dead))/(E(2-ply live)-E(2-ply dead)).
+@end quotation
+
+@section The cube efficiency
+
+The cube efficiency is obviously an important parameter, unfortunately
+there haven't been much investigation carried out, so @gnubg{}
+basically uses the values 0.6-0.7 originally suggested by Rick
+Janowski:
+
+@multitable @columnfractions 0.4 0.4
+@item @strong{Position Class} @tab @strong{x (Cube efficiency)}
+@item Two-sided (exact) bearoff  @tab n/a
+@item One-sided bearoff   @tab 0.6
+@item Crashed   @tab 0.68
+@item Contact   @tab 0.68
+@item Race      @tab linear interpolation between 0.6 and 0.7
+@end multitable
+
+For race @gnubg{} uses linear interpolation based on pip count for the
+player on roll. A pip count of 40 gives x=0.6 and 120 gives x=0.7. If
+the pip count is below 40 or above 120 values of x=0.6 and x=0.7 are
+used, respectively. 
+
+For the two sided bearoff positions the cubeful money equity is
+already available from the database, so for money game there
+is no need to calculate cubeful equities via Janowski's
+formulae. However, the cubeful equities for money game cannot be used
+for match play. Instead of using a fixed value of x, say, 0.6,
+@gnubg{} will calculate an effective value based on the cubeful money
+equity. The cubeful MWC is calculated as usual, but with the
+calculated x. 
+
+There is obviously room for improvements. For example, holding games
+should intuitively have a lower cube efficiency, since it's very
+difficult to double effectively: either it's not good enough or you've
+lost the market by a mile after rolling a high double or hitting a
+single shot. Similarly, backgames will often have a low cube
+efficiency, whereas blitzes have may have a higher cube efficiency.
+
+
+
+@section Cube decisions
+
+@gnubg{}'s cube decisions are simple based on calculations of cubeful
+equities. For a double decision @gnubg{} calculates the cubeful equity
+for ``no double'' and the cubeful equity for ``double,
+take''. Combined with the equity for ``double, pass'', it's possible
+to determine the correct cube action. 
+
+Figure X shows the relevant cubeful equities for O and X's cube
+decisions in sample position from earlier. 
+
+@multitable @columnfractions 0.67 0.33
+@item @image{mgcd}
+@tab @strong{Figure X} Cubeful equities
+@end multitable
+
+On 0-ply X will double when the green curve (O owns 2-cube) is
+above the red curve (centered cube), and O will take as long as the
+green curve is below 1. Similarly, O will double when the blue curve
+(X owns 2-cube) is below the red curve (centered cube), and X takes as
+long as the blue curve is above -1.
+
+Note that @gnubg{} doesn't calculate the take point or double point
+explicitly. The cube decision is simply made by comparing equities
+from Figure X.
+
+
+@section Beyond the simple model
+
+Janowski has developed two other models for cubeful equities. The
+first is a generalisation of the one used by @gnubg{}; it introduces
+two cube efficiencies instead of one. Often you may see that the cube
+efficiencies are different for the two players, and the ``refined
+general model'' as it is named by Janowski, tries to take this into
+consideration by using different cube efficiency parameters for the
+two players. For example, the blitzer may have another cube efficiency
+that the blitzee. 
+
+The second model is not published, but redefines the cube
+efficiency into a value that can be understood more intuitively and
+calculate easily from rollouts.

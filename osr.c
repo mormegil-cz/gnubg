@@ -95,12 +95,12 @@ isCrossOver ( const int from, const int to ) {
  */
 
 static int
-chequersout ( int anBoard[ 24 ] ) {
+chequersout ( int anBoard[ 25 ] ) {
 
   int i;
   int n=0;
 
-  for ( i = 0; i < 18; i++ )
+  for ( i = 6; i < 25; i++ )
     n += anBoard[i];
 
   return n;
@@ -108,11 +108,11 @@ chequersout ( int anBoard[ 24 ] ) {
 }
 
 static int
-checkboard ( int anBoard[ 24 ] ) {
+checkboard ( int anBoard[ 25 ] ) {
 
   int i;
 
-  for ( i = 0; i < 24; ++i )
+  for ( i = 0; i < 25; ++i )
     if ( anBoard[ i ] < 0 )
       return 0;
 
@@ -121,14 +121,15 @@ checkboard ( int anBoard[ 24 ] ) {
 }
 
 static void
-FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
+FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
   int ifar, inear, iboth;
   int iused = 0;
   int i, j, lc;
+  int found;
 
-  ifar = 18 - anDice[ 0 ];
-  inear = 18 - anDice[ 1 ];
+  ifar = 5 + anDice[ 0 ];
+  inear = 5 + anDice[ 1 ];
 
   if ( anBoard[ ifar ] && anBoard[ inear ] ) {
 
@@ -139,7 +140,7 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
     --anBoard[ ifar ];
     --anBoard[ inear ];
     assert ( checkboard ( anBoard ) );
-    anBoard[ 18 ] += 2;
+    anBoard[ 5 ] += 2;
 
     *pnOut -= 2;
     assert ( *pnOut >= 0 );
@@ -150,7 +151,7 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
   }
 
 
-  iboth = 18 - ( anDice[ 0 ] + anDice[ 1 ] );
+  iboth = 5 + ( anDice[ 0 ] + anDice[ 1 ] );
 
   if ( anBoard[ iboth ] ) {
 
@@ -159,7 +160,7 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
     /* move chequer */
 
     --anBoard[ iboth ];
-    ++anBoard[ 18 ];
+    ++anBoard[ 5 ];
     assert ( checkboard ( anBoard ) );
 
     --*pnOut;
@@ -177,12 +178,12 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
 
     /* check for exact cross over */
 
-    if ( anBoard[ 18 - anDice[ i ] ] ) {
+    if ( anBoard[ 5 + anDice[ i ] ] ) {
 
       /* move chequer */
 
-      --anBoard[ 18 - anDice[ i ] ];
-      ++anBoard[ 18 ];
+      --anBoard[ 5 + anDice[ i ] ];
+      ++anBoard[ 5 ];
     assert ( checkboard ( anBoard ) );
 
       --*pnOut;
@@ -199,22 +200,24 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
 
     /* find chequer furthest away */
 
-    lc = 0;
-    while ( lc < 18 && ! anBoard[ lc ] )
-      ++lc;
+    lc = 24;
+    while ( lc > 5 && ! anBoard[ lc ] )
+      --lc;
 
     /* try to make cross over from the back */
 
-    for ( j = lc; j + anDice[ i ] < 18; ++j ) {
+    found = FALSE;
+    for ( j = lc; j - anDice[ i ] >5; --j ) {
 
-      if ( anBoard[ j ] && isCrossOver ( j, j + anDice[ i ] ) ) {
+      if ( anBoard[ j ] && isCrossOver ( j, j - anDice[ i ] ) ) {
 
         /* move chequer */
 
         --anBoard[ j ];
-        ++anBoard[ j + anDice[ i ] ];
+        ++anBoard[ j - anDice[ i ] ];
         assert ( checkboard ( anBoard ) );
         ++iused;
+        found = TRUE;
         /* FIXME: increment lc if needed */
 
         break;
@@ -224,26 +227,27 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
     }
 
 
-    if ( j + anDice[ i ] >= 18 ) {
+    if ( ! found ) {
 
       /* no move with cross-over was found */
 
       /* move chequer from the rear */
 
-      for ( j = lc; j < 18; ++j ) {
+      for ( j = lc; j > 5; --j ) {
 
         if ( anBoard[ j ] ) {
 
           --anBoard[ j ];
-          ++anBoard[ j + anDice[ i ] ];
-    assert ( checkboard ( anBoard ) );
+          ++anBoard[ j - anDice[ i ] ];
+          assert ( checkboard ( anBoard ) );
           ++iused;
 
-          if ( j + anDice[ i ] >= 18 )
+          if ( j - anDice[ i ] < 6 )
             /* we've moved inside home quadrant */
             --*pnOut;
+
           assert ( *pnOut >= 0 );
-    assert ( *pnOut == chequersout ( anBoard ) );
+          assert ( *pnOut == chequersout ( anBoard ) );
 
           break;
 
@@ -260,23 +264,24 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
 
     /* die 2 still left, and all chequers inside home quadrant */
 
-    if ( anBoard[ 24 - anDice[ 1 ] ] ) {
+    if ( anBoard[ anDice[ 1 ] - 1 ] ) {
       /* bear-off */
-      --anBoard[ 24 - anDice[ 1 ] ];
+      --anBoard[ anDice[ 1 ] - 1 ];
     assert ( checkboard ( anBoard ) );
       return;
     }
 
     /* try filling rearest empty space */
     
-    for ( j = 18; j + anDice[ 1 ] < 24; ++j ) {
+    for ( j = 5; j - anDice[ 1 ] > -1; --j ) {
       
-      if ( anBoard[ j ] && ! anBoard[ j + anDice[ 1 ] ] ) {
+      if ( anBoard[ j ] && ! anBoard[ j - anDice[ 1 ] ] ) {
         /* empty space found */
         
         --anBoard[ j ];
-        ++anBoard[ j + anDice[ 1 ] ];
-    assert ( checkboard ( anBoard ) );
+        ++anBoard[ j - anDice[ 1 ] ];
+
+        assert ( checkboard ( anBoard ) );
         return;
         
       }
@@ -284,7 +289,7 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
 
     /* move chequer from the rear */
 
-    for ( j = 18; j < 24; ++j ) {
+    for ( j = 5; j > -1; --j ) {
 
       if ( anBoard[ j ] ) {
 
@@ -292,13 +297,13 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
 
         --anBoard[ j ];
 
-        if ( j + anDice[ 1 ] < 24 )
+        if ( j - anDice[ 1 ] > -1 )
           /* add chequer to point */
-          ++anBoard[ j + anDice[ 1 ] ];
+          ++anBoard[ j - anDice[ 1 ] ];
         /* else */
         /*   bearoff */
 
-    assert ( checkboard ( anBoard ) );
+        assert ( checkboard ( anBoard ) );
         return;
 
       }
@@ -316,7 +321,7 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
  * Find (and move) best move in one side rollout.
  *
  * Input
- *    anBoard: the board (reversed compared to normal convention)
+ *    anBoard: the board 
  *    anDice: the roll (dice 1 = dice 2)
  *    pnOut: current number of chequers outside home quadrant
  *
@@ -327,7 +332,7 @@ FindBestMoveOSR2 ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
  */
 
 static void
-FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
+FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
 
   int nd = 4;
   int i, n = 0;
@@ -336,10 +341,10 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
 
   /* check for exact bear-ins */
 
-  while ( nd > 0 && *pnOut > 0 && anBoard[ 18 - nDice ] ) {
+  while ( nd > 0 && *pnOut > 0 && anBoard[ 5 + nDice ] ) {
 
-    --anBoard[ 18 - nDice ];
-    ++anBoard[ 18 ];
+    --anBoard[ 5 + nDice ];
+    ++anBoard[ 5 ];
     assert ( checkboard ( anBoard ) );
 
     --nd;
@@ -355,18 +360,18 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
     
     for ( n = nd; n > 1; --n ) {
       
-      i = 18 - n * nDice;
+      i = 5 + n * nDice;
       
-      if ( i >= 0 && anBoard[ i ] ) {
+      if ( i < 25 && anBoard[ i ] ) {
         
         --anBoard[ i ];
-        ++anBoard[ 18 ];
-    assert ( checkboard ( anBoard ) );
+        ++anBoard[ 5 ];
+        assert ( checkboard ( anBoard ) );
         
         nd -= n;
         --*pnOut;
-    assert ( *pnOut >= 0 );
-    assert ( *pnOut == chequersout ( anBoard ) );
+        assert ( *pnOut >= 0 );
+        assert ( *pnOut == chequersout ( anBoard ) );
         
         n =nd; /* restart loop */
         
@@ -382,28 +387,30 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
 
     /* find rearest chequer */
 
-    lc = 0;
-    while ( lc < 18 && ! anBoard[ lc ] )
-      lc++;
+    lc = 24;
+    while ( lc > 5 && ! anBoard[ lc ] )
+      --lc;
 
     /* try to make cross over from the back */
 
-    for ( i = lc; i < 18; ++i ) {
+    for ( i = lc; i > 5; --i ) {
 
       if ( anBoard[ i ] ) {
 
-        if ( isCrossOver ( i, i + nDice ) && ( first || i + nDice < 18 ) ) {
+        if ( isCrossOver ( i, i - nDice ) && ( first || (i - nDice) > 5 ) ) {
 
           /* move chequers */
           
           while ( anBoard[ i ] && nd && *pnOut ) {
             
             --anBoard[ i ];
-            ++anBoard[ i + nDice ];
+            ++anBoard[ i - nDice ];
             assert ( checkboard ( anBoard ) );
             
-            if ( i + nDice >= 18 )
+            if ( i - nDice < 6 )
+              /* we move into homeland */
               --*pnOut;
+            
             assert ( *pnOut >= 0 );
             assert ( *pnOut == chequersout ( anBoard ) );
             
@@ -428,18 +435,19 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
 
     while ( *pnOut && nd ) {
 
-      for ( i = lc; i < 18; ++i ) {
+      for ( i = lc; i > 5; --i ) {
 
         if( anBoard[ i ] ) {
 
           while ( anBoard[ i ] && nd && *pnOut ) {
 
             --anBoard[ i ];
-            ++anBoard[ i + nDice ];
+            ++anBoard[ i - nDice ];
             assert ( checkboard ( anBoard ) );
 
-            if ( i + nDice >= 18 )
+            if ( i - nDice < 6 )
               --*pnOut;
+            
             assert ( *pnOut >= 0 );
             assert ( *pnOut == chequersout ( anBoard ) );
 
@@ -462,35 +470,35 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
 
     while ( nd ) {
 
-      if ( anBoard[ 24 - nDice ] ) {
+      if ( anBoard[ nDice - 1 ] ) {
         /* perfect bear-off */
-        --anBoard[ 24 - nDice ];
+        --anBoard[ nDice - 1 ];
         --nd;
         assert ( checkboard ( anBoard ) );
         continue;
       }
 
-      if ( nd >= 2 && nDice <= 3 && anBoard[ 24 - 2 *nDice ] > 0 ) {
+      if ( nd >= 2 && nDice <= 3 && anBoard[ 2 *nDice - 1 ] > 0 ) {
         /* bear  double 1s, 2s, and 3s off, e.g., 4/2/0 */
-        --anBoard[ 24 - 2 * nDice ];
+        --anBoard[ 2 * nDice - 1 ];
         nd -= 2;
         assert ( checkboard ( anBoard ) );
         continue;
       }
 
-      if ( nd >= 3 && nDice <= 2 && anBoard[ 24 - 3 * nDice ] > 0 ) {
+      if ( nd >= 3 && nDice <= 2 && anBoard[ 3 * nDice - 1 ] > 0 ) {
         /* bear double 1s off from 3 point (3/2/1/0) or
            double 2s off from 6 point (6/4/2/0) */
-        --anBoard[ 24 - 3 * nDice ];
+        --anBoard[ 3 * nDice - 1 ];
         nd -= 3;
         assert ( checkboard ( anBoard ) );
         continue;
       }
 
-      if ( nd >= 4 && nDice <= 1 && anBoard[ 24 - 4 * nDice ] > 0 ) {
+      if ( nd >= 4 && nDice <= 1 && anBoard[ 4 * nDice - 1] > 0 ) {
         /* hmmm, this should not be possible... */
         /* bear off double 1s: 4/3/2/1/0 */
-        --anBoard[ 24 - 4 * nDice ];
+        --anBoard[ 4 * nDice - 1 ];
         assert ( checkboard ( anBoard ) );
         nd -= 4;
       }
@@ -501,7 +509,7 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
 
       /* FIXME: fill gaps? */
 
-      for ( i = 18; nd && i < 24; ++i ) {
+      for ( i = 5; nd && i > -1; --i ) {
 
         while ( anBoard[ i ] && nd ) {
 
@@ -510,8 +518,8 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
           --anBoard[ i ];
           --nd;
 
-          if ( i + nDice < 24 )
-            ++anBoard[ i + nDice ];
+          if ( i - nDice > -1 )
+            ++anBoard[ i - nDice ];
           assert ( checkboard ( anBoard ) );
 
         }
@@ -533,7 +541,7 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
  * Find (and move) best move in one sided rollout.
  *
  * Input
- *    anBoard: the board (reversed compared to normal convention)
+ *    anBoard: the board 
  *    anDice: the roll (dice 1 is assumed to be lower than dice 2)
  *    pnOut: current number of chequers outside home quadrant
  *
@@ -544,7 +552,7 @@ FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
  */
 
 static void
-FindBestMoveOSR ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
+FindBestMoveOSR ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
   if ( anDice[ 0 ] != anDice[ 1 ] )
     FindBestMoveOSR2 ( anBoard, anDice, pnOut );
@@ -568,7 +576,7 @@ FindBestMoveOSR ( int anBoard[ 24 ], const int anDice[ 2 ], int *pnOut ) {
  */
 
 static int
-osr ( int anBoard[ 24 ], const int iGame, const int nGames, const int nOut ) {
+osr ( int anBoard[ 25 ], const int iGame, const int nGames, const int nOut ) {
 
   int iTurn = 0;
   int anDice[ 2 ];
@@ -605,7 +613,7 @@ osr ( int anBoard[ 24 ], const int iGame, const int nGames, const int nOut ) {
  *
  * Input:
  *   nGames: number of simulations
- *   anBoard: the board (reversed compared to normal convention)
+ *   anBoard: the board 
  *   nOut: number of chequers outside home quadrant
  *
  * Output:
@@ -615,13 +623,12 @@ osr ( int anBoard[ 24 ], const int iGame, const int nGames, const int nOut ) {
  */
 
 static void
-rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
+rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
           float arProbs[], const int nMaxProbs,
           float arGammonProbs[], const int nMaxGammonProbs ) {
 
   int anCounts [ nMaxGammonProbs ];
-  int an[ 24 ];
-  int antmp[ 6 ];
+  int an[ 25 ];
   unsigned short int anProb[ 32 ];
   int i, n, m;
   int iGame;
@@ -644,7 +651,7 @@ rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
     /* number of chequers in home quadrant */
 
     m = 0;
-    for ( i = 18; i < 24; ++i )
+    for ( i = 0; i < 6; ++i )
       m += an[ i ];
 
     /* update counts */
@@ -653,10 +660,7 @@ rollOSR ( const int nGames, const int anBoard[ 24 ], const int nOut,
 
     /* get prob. from bearoff1 */
 
-    for ( i = 0; i < 6; ++i )
-      antmp[ i ] = an[ 23 - i ];
-
-    getBearoffProbs ( PositionBearoff ( antmp, 6, 15 ), anProb );
+    getBearoffProbs ( PositionBearoff ( an, 6, 15 ), anProb );
 
     for ( i = 0; i < 32; ++i )
       arProbs[ min ( n + i, nMaxProbs - 1 ) ] += anProb[ i ] / 65535.0f;
@@ -711,25 +715,13 @@ osp ( const int anBoard[ 25 ], const int nGames,
 
   nTotal = nOut = 0;
 
-  for ( i = 0; i < 24; ++i ) {
+  memcpy( an, anBoard, 25 * sizeof( int ) );
 
-    n = anBoard[ 23 - i ];
-
-    /* copy board into an */
-
-    an[ i ] = n;
-
-    if ( n ) {
-
-      /* total number of chequers left */
-      nTotal += n;
-
-      if ( i < 18 )
-        /* number of chequers outside home */
-        nOut += n;
-
-    }
-
+  for ( i = 0; i < 25; ++i ) {
+    /* total number of chequers left */
+    nTotal += anBoard[ i ];
+    if ( i > 5 )
+      nOut += anBoard[ i ];
   }
 
 
@@ -780,13 +772,12 @@ bgProb ( const int anBoard[ 25 ],
   int nTotPipsHome = 0;
   int i, j;
   float r, s;
-  int antmp[ 6 ];
   unsigned short int anProb[ 32 ];
 
   /* total pips before out of opponent's home quadrant */
 
-  for ( i = 1; i < 6; ++i )
-    nTotPipsHome += anBoard[ i ] * ( 6 - i );
+  for ( i = 18; i < 25; ++i )
+    nTotPipsHome += anBoard[ i ] * ( i - 17 );
 
   r = 0.0f;
 
@@ -801,11 +792,10 @@ bgProb ( const int anBoard[ 25 ],
       /* backgammon is possible */
 
       /* get "bear-off" prob (for getting out of opp.'s home quadr.) */
-
-      for ( i = 0; i < 6; ++i )
-        antmp[ i ] = anBoard[ 5 - i ];
       
-      getBearoffProbs ( PositionBearoff ( antmp, 6, 15 ), anProb );
+      /* FIXME: this ignores chequers on the bar */
+
+      getBearoffProbs ( PositionBearoff ( anBoard+18, 6, 15 ), anProb );
 
       for ( i = 0; i < nMaxProbs; ++i ) {
 

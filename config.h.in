@@ -53,6 +53,9 @@
    */
 #undef HAVE_DCGETTEXT
 
+/* Define to 1 if you have the `dirname' function. */
+#undef HAVE_DIRNAME
+
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
 
@@ -449,6 +452,9 @@
 
 /* Define if you want to use the Guile extensibility language. */
 #undef USE_GUILE
+
+/* Define if you want to use Python inside gnubg */
+#undef USE_PYTHON
 
 /* Define if you want to use sounds with GNU Backgammon */
 #undef USE_SOUND

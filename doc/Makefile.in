@@ -133,6 +133,14 @@ PNMTOPNG = @PNMTOPNG@
 PNMTOPS = @PNMTOPS@
 POSUB = @POSUB@
 PSTOPNM = @PSTOPNM@
+PYTHON = @PYTHON@
+PYTHON_CFLAGS = @PYTHON_CFLAGS@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_LDFLAGS = @PYTHON_LDFLAGS@
+PYTHON_LIBS = @PYTHON_LIBS@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SRCONV = @SRCONV@
 STRIP = @STRIP@
@@ -147,8 +155,12 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi movefilters.texi
+gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi movefilters.texi cubeful.texi
 @XML_MANUAL_TRUE@pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 @XML_MANUAL_TRUE@	rulfig4.png rulfig5.png annealing.png
 
@@ -156,7 +168,9 @@ gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi movefilters.texi
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
 	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd \
-	annealing.png annealing.eps
+	annealing.png annealing.eps \
+ 	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
+ 	mgtp.gp mgtp.png mgtp.eps mptp.txt
 
 SUFFIXES = .png .eps .texi .html .txt .xml
 EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
@@ -445,7 +459,7 @@ xml: gnubg.xml
 
 gnubg.dvi: $(EPSFILES)
 
-gnubg.html: $(TXTFILES) annealing.png
+gnubg.html: $(TXTFILES) annealing.png mgtp.png
 
 gnubg.info: $(TXTFILES)
 
@@ -453,7 +467,7 @@ gnubg.ps: $(EPSFILES)
 
 gnubg.txt: $(TXTFILES)
 
-gnubg.xml: $(TXTFILES) annealing.png
+gnubg.xml: $(TXTFILES) annealing.png mgtp.png
 
 annealing.txt annealing.eps: annealing.gp
 	if [ -n "$(GNUPLOT)" ]; then \

@@ -30,6 +30,7 @@
 
 #include "backgammon.h"
 #include "dice.h"
+#include "eval.h"
 #if USE_GTK
 #include "gtkgame.h"
 #endif
@@ -618,11 +619,17 @@ RestoreRolloutRolloutContext ( rolloutcontext *prc, const char *sz ) {
   fRotate = TRUE;
   fTruncBearoff2 = FALSE;
   fTruncBearoffOS = FALSE;
+  /* set usable, but ignored values for everything else */
+  prc->fLateEvals = 0;
+  prc->fStopOnSTD = 0;
+  prc->nLate = 0;
+  prc->nMinimumGames = 144;
+  prc->rStdLimit = 0.1;
 
   if ( ! pc )
     return;
 
-  sscanf ( pc, "RC %d %d %d %hu %u \"%1023s\" %d %d %d %d",
+  sscanf ( pc, "RC %d %d %d %hu %u \"%[^\"]\" %d %d %d %d",
            &fCubeful,
            &fVarRedn,
            &fInitial,
@@ -712,10 +719,8 @@ RestoreCubeRollout ( const char *sz,
                      float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes ) {
 
-  int n;
-
   RestoreCubeRolloutEquities ( ar, sz );
-  RestoreRolloutTrials ( &n, sz );
+  RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
   RestoreCubeRolloutOutput ( aarOutput[ 0 ], aarStdDev[ 0 ], sz, "NoDouble" );
   RestoreCubeRolloutOutput ( aarOutput[ 1 ], aarStdDev[ 1 ], 
                              sz, "DoubleTake" );
@@ -723,6 +728,157 @@ RestoreCubeRollout ( const char *sz,
 
 }
 
+
+
+static void
+RestoreRolloutInternals ( evalsetup *pes, const char *sz) {
+
+  char *pc;
+  if ((pc = strstr (sz, "SK")) != 0)
+    sscanf (pc, "SK %d", &pes->rc.nSkip);
+}
+
+static int 
+CheckExtendedRolloutVersion ( const char *sz ) {
+
+  int	n;
+  char  *pch = strstr (sz, "ver");
+  if ((pch == 0) || (sscanf (pch, "ver %d", &n) != 1))
+    return 0;
+
+  return (n == SGF_ROLLOUT_VER);
+}
+
+static void
+RestoreRolloutMoveFilter (const char *sz, char *name, 
+		movefilter mf[MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+			  int nPlies) {
+
+  char *pc = strstr (sz, name);
+  int  i;
+  int  consumed;
+
+  if (pc == 0)
+    return;
+
+  pc += strlen (name);
+  for (i = 0; i < nPlies; ++i) {
+    if (sscanf (pc, "%d %d %f%n", &mf[ nPlies - 1 ][ i ].Accept,
+		&mf[ nPlies - 1 ][ i ].Extra,
+		&mf[ nPlies - 1][ i ].Threshold,
+		&consumed) != 3)
+      return;
+    pc += consumed;
+  }
+}
+
+static void 
+RestoreExtendedRolloutContext (rolloutcontext *prc, const char *sz ) {
+
+  char *pc = strstr ( sz, "RC" );
+  char szTemp[ 1024 ];
+  int fCubeful, fVarRedn, fInitial, fRotate, fTruncBearoff2, fTruncBearoffOS;
+  int fLateEvals, fDoTruncate;
+  int i;
+
+
+  if ( ! pc )
+    return;
+
+  if (sscanf ( pc, "RC %d %d %d %d %d %d %hu %d %d %hu \"%[^\"]\" %d",
+           &fCubeful,
+           &fVarRedn,
+           &fInitial,
+	   &fRotate,
+	   &fLateEvals,
+	   &fDoTruncate,
+           &prc->nTruncate,
+	   &fTruncBearoff2,
+	   &fTruncBearoffOS,
+	   &prc->nLate,
+           szTemp,
+           &prc->nSeed) != 12)
+    return;
+
+  prc->fCubeful = fCubeful;
+  prc->fVarRedn = fVarRedn;
+  prc->fInitial = fInitial;
+  prc->fRotate = fRotate;
+  prc->fLateEvals = fLateEvals;
+  prc->fDoTruncate = fDoTruncate;
+  prc->fTruncBearoff2 = fTruncBearoff2;
+  prc->fTruncBearoffOS = fTruncBearoffOS;
+  prc->rngRollout = RNG_MERSENNE;
+  prc->nMinimumGames = 144;
+  prc->rStdLimit = 0.1;
+
+  for (i = 0; i < 2; ++i) {
+    sprintf (szTemp, "latecube%d ", i);
+    RestoreRolloutContextEvalContext ( &prc->aecCube[ i ], sz, szTemp + 4 );
+    RestoreRolloutContextEvalContext ( &prc->aecCubeLate[ i ], sz, szTemp );
+    sprintf (szTemp, "latecheq%d", i);
+    RestoreRolloutContextEvalContext ( &prc->aecChequer[ i ], sz, szTemp + 4 );
+    RestoreRolloutContextEvalContext ( &prc->aecChequerLate[ i ], sz, szTemp );
+    sprintf (szTemp, "latefilt%d ", i );
+    if (prc->aecChequer[ i ].nPlies) {
+      RestoreRolloutMoveFilter ( sz, szTemp + 4, prc->aaamfChequer[ i ],
+				 prc->aecChequer[ i ].nPlies);
+    }
+    if (prc->aecChequerLate[ i ].nPlies) {
+      RestoreRolloutMoveFilter ( sz, szTemp, prc->aaamfLate[ i ],
+				 prc->aecChequerLate[ i ].nPlies);
+    }
+  }
+  RestoreRolloutContextEvalContext ( &prc->aecCubeTrunc, sz, "cubetrunc");
+  RestoreRolloutContextEvalContext ( &prc->aecCubeTrunc, sz, "cheqtrunc");
+
+
+}
+  
+static void
+RestoreExtendedCubeRollout ( const char *sz,
+                     float ar[],
+                     float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                     float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                     evalsetup *pes ) {
+ 
+  int is_current;
+  /* we assume new versions will still begin with Eq 4 floats
+     Trials int 
+     */
+  is_current = CheckExtendedRolloutVersion (sz);
+
+  RestoreCubeRolloutEquities ( ar, sz );
+  RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
+  RestoreCubeRolloutOutput ( aarOutput[ 0 ], aarStdDev[ 0 ], sz, "NoDouble" );
+  RestoreCubeRolloutOutput ( aarOutput[ 1 ], aarStdDev[ 1 ],
+                             sz, "DoubleTake" );
+  if (is_current) {
+    RestoreRolloutInternals ( pes, sz );
+    RestoreExtendedRolloutContext ( &pes->rc, sz );
+  }
+}
+
+static void
+RestoreExtendedRollout ( move *pm, const char *sz) {
+
+  evalsetup *pes = &pm->esMove;
+  int is_current;
+
+  /* we assume new versions will still begin with Score 2 floats
+     Trials int 
+     */
+  is_current = CheckExtendedRolloutVersion (sz);
+  pes->et = EVAL_ROLLOUT;
+  RestoreRolloutScore ( pm, sz );
+  RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
+  RestoreRolloutOutput ( pm->arEvalMove, sz, "Output" ); 
+  RestoreRolloutOutput ( pm->arEvalStdDev, sz, "StdDev" ); 
+  if (is_current) {
+    RestoreRolloutInternals ( pes, sz );
+    RestoreExtendedRolloutContext ( &pes->rc, sz );
+  }
+}
 
 static void RestoreDoubleAnalysis( property *pp,
 				   float ar[], 
@@ -775,6 +931,12 @@ static void RestoreDoubleAnalysis( property *pp,
       RestoreCubeRollout ( pch + 1, ar, aarOutput, aarStdDev, pes );
       break;
 
+    case 'X':
+
+      pes->et = EVAL_ROLLOUT;
+      RestoreExtendedCubeRollout (pch + 1, ar, aarOutput, aarStdDev, pes );
+      break;
+
     default:
 	/* FIXME */
 	break;
@@ -801,7 +963,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
     pml->cMaxMoves = pml->cMaxPips = pml->iMoveBest = 0;
     pml->rBestScore = 0;
     
-    pm = pml->amMoves = malloc( pml->cMoves * sizeof( move ) );
+    pm = pml->amMoves = calloc( pml->cMoves, sizeof( move ) );
 
 	pesChequer->et = EVAL_NONE;
 
@@ -858,6 +1020,10 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
           RestoreRollout ( pm, pch );
           break;
 	    
+	case 'X':
+	  RestoreExtendedRollout ( pm, pch );
+	  break;
+
 	default:
 	    /* FIXME */
 	    break;
@@ -917,25 +1083,38 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	    fPlayer = pp->ach[ 0 ] == 'B';
 	    
 	    if( !strcmp( pch, "double" ) ) {
-		pmr = malloc( sizeof( pmr->d ) );
+
+		pmr = calloc( 1, sizeof( pmr->d ) );
 		pmr->mt = MOVE_DOUBLE;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
-		pmr->d.esDouble.et = EVAL_NONE;
+		if( ! LinkToDouble( pmr ) ) {
+		  pmr->d.nAnimals = 0;
+		pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+		pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+		}
 	    } else if( !strcmp( pch, "take" ) ) {
-		pmr = malloc( sizeof( pmr->d ) );
+		pmr = calloc( 1, sizeof( pmr->d ) );
 		pmr->mt = MOVE_TAKE;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
-		pmr->d.esDouble.et = EVAL_NONE;
+		pmr->d.st = SKILL_NONE;
+		if (!LinkToDouble( pmr ) ) {
+		  free (pmr);
+		  continue;
+		}
 	    } else if( !strcmp( pch, "drop" ) ) {
-		pmr = malloc( sizeof( pmr->d ) );
+		pmr = calloc( 1, sizeof( pmr->d ) );
 		pmr->mt = MOVE_DROP;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
-		pmr->d.esDouble.et = EVAL_NONE;
+		pmr->d.st = SKILL_NONE;
+		if (!LinkToDouble( pmr ) ) {
+		  free (pmr);
+		  continue;
+		}
 	    } else {
-		pmr = malloc( sizeof( pmr->n ) );
+		pmr = calloc( 1, sizeof( pmr->n ) );
 		pmr->mt = MOVE_NORMAL;
 		pmr->n.sz = NULL;
 		pmr->n.fPlayer = fPlayer;
@@ -992,7 +1171,7 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
 	    for( i = 1; i <= MAX_CUBE; i <<= 1 )
 		if( atoi( pp->pl->plNext->p ) == i ) {
-		    pmr = malloc( sizeof( pmr->scv ) );
+		    pmr = calloc( 1, sizeof( pmr->scv ) );
 		    pmr->mt = MOVE_SETCUBEVAL;
 		    pmr->scv.sz = NULL;
 		    pmr->scv.nCube = i;
@@ -1001,7 +1180,7 @@ static void RestoreNode( list *pl, char *szCharset ) {
 		    break;
 		}
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'P' ) {
-	    pmr = malloc( sizeof( pmr->scp ) );
+	    pmr = calloc( 1, sizeof( pmr->scp ) );
 	    pmr->mt = MOVE_SETCUBEPOS;
 	    pmr->scp.sz = NULL;
 	    switch( *( (char *) pp->pl->plNext->p ) ) {
@@ -1030,7 +1209,7 @@ static void RestoreNode( list *pl, char *szCharset ) {
 
 	    if( ach[ 0 ] >= '1' && ach[ 0 ] <= '6' && ach[ 1 ] >= '1' &&
 		ach[ 1 ] <= '6' ) {
-		pmr = malloc( sizeof( pmr->sd ) );
+		pmr = calloc( 1, sizeof( pmr->sd ) );
 		pmr->mt = MOVE_SETDICE;
 		pmr->sd.sz = NULL;
 		pmr->sd.fPlayer = ms.fMove;
@@ -1083,7 +1262,7 @@ static void RestoreNode( list *pl, char *szCharset ) {
     }
     
     if( fSetBoard && !pmr ) {
-	pmr = malloc( sizeof( pmr->sb ) );
+	pmr = calloc( 1, sizeof( pmr->sb ) );
 	pmr->mt = MOVE_SETBOARD;
 	pmr->sb.sz = NULL;
 	ClosestLegalPosition( ms.anBoard );
@@ -1121,10 +1300,10 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	case MOVE_DROP:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, 
-				       pmr->d.arDouble, 
-                                       pmr->d.aarOutput,
-                                       pmr->d.aarStdDev,
-                                       &pmr->d.esDouble );
+							   pmr->d.CubeDecPtr->arDouble, 
+							   pmr->d.CubeDecPtr->aarOutput,
+							   pmr->d.CubeDecPtr->aarStdDev,
+							   &pmr->d.CubeDecPtr->esDouble );
 	    pmr->d.st = ast[ 0 ];
 	    break;
 	    
@@ -1196,7 +1375,7 @@ static void RestoreGame( list *pl, char *szCharset ) {
     if( pmr->g.fResigned ) {
 	ms.fTurn = ms.fMove = -1;
 	
-	pmrResign = malloc( sizeof( pmrResign ->r ) );
+	pmrResign = calloc( 1, sizeof( pmrResign ->r ) );
 	pmrResign->mt = MOVE_RESIGN;
 	pmrResign->r.sz = NULL;
         pmrResign->r.esResign.et = EVAL_NONE;
@@ -1436,38 +1615,120 @@ WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 
 }
 
+static void
+WriteMoveFilters (FILE *pf, 
+		  const movefilter mf[MAX_FILTER_PLIES][MAX_FILTER_PLIES], 
+		  int nPlies ) {
+  int   i;
+
+  for (i = 0; i < nPlies; ++i) {
+    fprintf (pf, "%d %d %.5f ", mf[ nPlies - 1 ][ i ].Accept,
+	     mf[ nPlies - 1 ][ i ].Extra,
+	     mf[ nPlies - 1 ][ i ].Threshold);
+  }
+}
 
 static void
 WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
-
+  
   int i;
 
-  fprintf ( pf, "%d %d %d %d %d \"%s\" %d %d %d %d",
+  fprintf ( pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %d ",
             prc->fCubeful,
             prc->fVarRedn,
             prc->fInitial,
-            prc->nTruncate,
-            prc->nTrials,
-            aszRNG[ prc->rngRollout ],
-            prc->nSeed,
             prc->fRotate,
+            prc->fLateEvals,
+	    prc->fDoTruncate,
+            prc->nTruncate,
             prc->fTruncBearoff2, 
-            prc->fTruncBearoffOS );
+            prc->fTruncBearoffOS,
+	    prc->nLate,
+            aszRNG[ prc->rngRollout ],
+            prc->nSeed);
+
+    for ( i = 0; i < 2; i++ ) {
+      fprintf ( pf, " cube%d ", i );
+      WriteEvalContext ( pf, &prc->aecCube[ i ] );
+      fputc ( ' ', pf );
+
+      fprintf ( pf, " cheq%d ", i );
+      WriteEvalContext ( pf, &prc->aecChequer[ i ] );
+      if (prc->aecChequer[ i ].nPlies) {
+	fprintf (pf, " filt%d ", i);
+	WriteMoveFilters (pf, prc->aaamfChequer[ i ], 
+			prc->aecChequer[ i ].nPlies );
+      }
+  }
 
   for ( i = 0; i < 2; i++ ) {
-
-    fprintf ( pf, "cube%d ", i );
-    WriteEvalContext ( pf, &prc->aecCube[ i ] );
+    fprintf ( pf, " latecube%d ", i );
+    WriteEvalContext ( pf, &prc->aecCubeLate[ i ] );
     fputc ( ' ', pf );
 
-    fprintf ( pf, "cheq%d ", i );
-    WriteEvalContext ( pf, &prc->aecChequer[ i ] );
-    fputc ( ' ', pf );
-
+    fprintf ( pf, " latecheq%d ", i );
+    WriteEvalContext ( pf, &prc->aecChequerLate[ i ] );
+    if (prc->aecChequerLate[ i ].nPlies) {
+      fprintf (pf, " latefilt%d ", i);
+      WriteMoveFilters (pf, prc->aaamfLate[i], 
+		      prc->aecChequerLate[ i ].nPlies );
+    }
   }
+
+  fprintf ( pf, " cubetrunc ");
+  WriteEvalContext ( pf, &prc->aecCubeTrunc);
+  fprintf ( pf, " cheqtrunc ");
+  WriteEvalContext ( pf, &prc->aecChequerTrunc);
 
 }
 
+static void WriteRolloutAnalysis( FILE *pf, int fIsMove, float ar[],
+				  float rScore, float rScore2,
+				  float aarOutput0[ NUM_ROLLOUT_OUTPUTS ],
+				  float aarOutput1[ NUM_ROLLOUT_OUTPUTS ],
+				  float aarStdDev0[ NUM_ROLLOUT_OUTPUTS ],
+				  float aarStdDev1[ NUM_ROLLOUT_OUTPUTS ],
+				 evalsetup *pes ) {
+
+  int i;
+
+  /* identify what version we're writing to avoid future problems 
+     the version is defined in eval.h
+     */
+  if (fIsMove) {
+    fprintf ( pf, "X ver %d Score %.10g %.10g ", SGF_ROLLOUT_VER,
+	      rScore, rScore2);
+  } else {
+    fprintf ( pf, "X ver %d Eq ", SGF_ROLLOUT_VER);
+    for (i = 0; i < 4; ++i) 
+      fprintf ( pf, "%.10g ", ar[ i ]);
+  }
+
+  fprintf ( pf, "Trials %d ", pes->rc.nGamesDone);
+  if (!fIsMove) 
+    fprintf (pf, "NoDouble ");
+
+  fprintf (pf, "Output ");
+  for (i = 0; i < 7; ++i) 
+    fprintf ( pf, "%.10g ", aarOutput0[ i] );
+
+  fprintf ( pf, "StdDev ");
+  for (i = 0; i < 7; ++i)
+    fprintf ( pf, "%.10g ", aarStdDev0[ i] );
+
+  if (!fIsMove) {
+    fprintf ( pf, "DoubleTake Output ");
+    for (i = 0; i < 7; ++i) 
+      fprintf ( pf, "%.10g ", aarOutput1[ i] );
+
+    fprintf ( pf, "StdDev ");
+    for (i = 0; i < 7; ++i)
+      fprintf ( pf, "%.10f ", aarStdDev1[ i] );
+  }
+
+  fprintf (pf, "SK %d ", pes->rc.nSkip);
+  WriteRolloutContext ( pf, &pes->rc );
+}
 
 static void WriteDoubleAnalysis( FILE *pf, float ar[], 
                                  float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
@@ -1499,51 +1760,8 @@ static void WriteDoubleAnalysis( FILE *pf, float ar[],
     
   case EVAL_ROLLOUT:
 
-    fprintf ( pf, 
-              "R "
-              "Eq %.4f %.4f %.4f %.4f "
-              "Trials %d "
-              "NoDouble "
-              "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-              "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-              "DoubleTake "
-              "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-              "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-              "RC ",
-              ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
-              0, /* FIXME */
-              aarOutput[ 0 ][ 0 ],
-              aarOutput[ 0 ][ 1 ],
-              aarOutput[ 0 ][ 2 ],
-              aarOutput[ 0 ][ 3 ],
-              aarOutput[ 0 ][ 4 ],
-              aarOutput[ 0 ][ 5 ],
-              aarOutput[ 0 ][ 6 ],
-              aarStdDev[ 0 ][ 0 ],
-              aarStdDev[ 0 ][ 1 ],
-              aarStdDev[ 0 ][ 2 ],
-              aarStdDev[ 0 ][ 3 ],
-              aarStdDev[ 0 ][ 4 ],
-              aarStdDev[ 0 ][ 5 ],
-              aarStdDev[ 0 ][ 6 ],
-              aarOutput[ 1 ][ 0 ],
-              aarOutput[ 1 ][ 1 ],
-              aarOutput[ 1 ][ 2 ],
-              aarOutput[ 1 ][ 3 ],
-              aarOutput[ 1 ][ 4 ],
-              aarOutput[ 1 ][ 5 ],
-              aarOutput[ 1 ][ 6 ],
-              aarStdDev[ 1 ][ 0 ],
-              aarStdDev[ 1 ][ 1 ],
-              aarStdDev[ 1 ][ 2 ],
-              aarStdDev[ 1 ][ 3 ],
-              aarStdDev[ 1 ][ 4 ],
-              aarStdDev[ 1 ][ 5 ],
-              aarStdDev[ 1 ][ 6 ]
-              );
-
-    WriteRolloutContext ( pf, &pes->rc );
-
+    WriteRolloutAnalysis (pf, 0, ar, 0.0f, 0.0f, aarOutput[0], 
+			  aarOutput[1], aarStdDev[0], aarStdDev[1], pes);
     break;
     
   default:
@@ -1607,35 +1825,14 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    break;
 	    
 	case EVAL_ROLLOUT:
-          
-          fprintf ( pf, 
-                    "R "
-                    "Score %.4f %.4f "
-                    "Trials %d "
-                    "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-                    "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-                    "RC ",
-                    pml->amMoves[ i ].rScore,
-                    pml->amMoves[ i ].rScore2,
-                    0, /* FIXME */
-                    pml->amMoves[ i ].arEvalMove[ 0 ],
-                    pml->amMoves[ i ].arEvalMove[ 1 ],
-                    pml->amMoves[ i ].arEvalMove[ 2 ],
-                    pml->amMoves[ i ].arEvalMove[ 3 ],
-                    pml->amMoves[ i ].arEvalMove[ 4 ],
-                    pml->amMoves[ i ].arEvalMove[ 5 ],
-                    pml->amMoves[ i ].arEvalMove[ 6 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 0 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 1 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 2 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 3 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 4 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 5 ],
-                    pml->amMoves[ i ].arEvalStdDev[ 6 ] );
-          
-          WriteRolloutContext ( pf, &pml->amMoves[ i ].esMove.rc );
+              WriteRolloutAnalysis (pf, 1, 0, pml->amMoves[ i ].rScore, 
+				    pml->amMoves[ i ].rScore2, 
+				    pml->amMoves[ i ].arEvalMove, 0, 
+				    pml->amMoves[ i ].arEvalStdDev, 0,
+				    &pml->amMoves[ i ].esMove);
+	      break;
 
-          break;
+	  
 
 	default:
 	    assert( FALSE );
@@ -1939,10 +2136,11 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_DOUBLE:
 	    fprintf( pf, "\n;%c[double]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    if( pmr->d.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.arDouble,
-                                     pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble );
+	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+							 pmr->d.CubeDecPtr->aarOutput, 
+							 pmr->d.CubeDecPtr->aarStdDev,
+							 &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -1951,10 +2149,11 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_TAKE:
 	    fprintf( pf, "\n;%c[take]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    if( pmr->d.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.arDouble,
-                                     pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble );
+	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+							 pmr->d.CubeDecPtr->aarOutput, 
+							 pmr->d.CubeDecPtr->aarStdDev,
+							 &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -1963,10 +2162,11 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_DROP:
 	    fprintf( pf, "\n;%c[drop]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    if( pmr->d.esDouble.et != EVAL_NONE )
-		WriteDoubleAnalysis( pf, pmr->d.arDouble,
-                                     pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble );
+	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.CubeDecPtr->arDouble,
+							 pmr->d.CubeDecPtr->aarOutput,
+							 pmr->d.CubeDecPtr->aarStdDev,
+							 &pmr->d.CubeDecPtr->esDouble );
 	    
 	    WriteSkill( pf, pmr->d.st );
 	    
@@ -2136,7 +2336,7 @@ extern void CommandSavePosition( char *sz ) {
 
     ListCreate( &l );
     
-    pmgi = malloc( sizeof( movegameinfo ) );
+    pmgi = calloc( 1, sizeof( movegameinfo ) );
     pmgi->mt = MOVE_GAMEINFO;
     pmgi->sz = NULL;
     pmgi->i = 0;
@@ -2155,7 +2355,7 @@ extern void CommandSavePosition( char *sz ) {
     IniStatcontext( &pmgi->sc );
     ListInsert( &l, pmgi );
 
-    pmsb = malloc( sizeof( movesetboard ) );
+    pmsb = calloc( 1, sizeof( movesetboard ) );
     pmsb->mt = MOVE_SETBOARD;
     pmsb->sz = NULL;
     if( ms.fMove )
@@ -2165,13 +2365,13 @@ extern void CommandSavePosition( char *sz ) {
 	SwapSides( ms.anBoard );
     ListInsert( &l, pmsb );
 
-    pmscv = malloc( sizeof( movesetcubeval ) );
+    pmscv = calloc( 1, sizeof( movesetcubeval ) );
     pmscv->mt = MOVE_SETCUBEVAL;
     pmscv->sz = NULL;
     pmscv->nCube = ms.nCube;
     ListInsert( &l, pmscv );
     
-    pmscp = malloc( sizeof( movesetcubepos ) );
+    pmscp = calloc( 1, sizeof( movesetcubepos ) );
     pmscp->mt = MOVE_SETCUBEPOS;
     pmscp->sz = NULL;
     pmscp->fCubeOwner = ms.fCubeOwner;
@@ -2179,7 +2379,7 @@ extern void CommandSavePosition( char *sz ) {
     
     /* FIXME if the dice are not rolled, this should be done with a PL
        property (which is SaveGame()'s job) */
-    pmsd = malloc( sizeof( movesetdice ) );
+    pmsd = calloc( 1, sizeof( movesetdice ) );
     pmsd->mt = MOVE_SETDICE;
     pmsd->sz = NULL;
     pmsd->fPlayer = ms.fMove;

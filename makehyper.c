@@ -39,6 +39,13 @@
 static cubeinfo ci;
 static cubeinfo ciJacoby;
 
+/* ugly fixes */
+char *aszRNG[]; 
+char *aszSkillType[ 1 ]; 
+int exsExport;
+int ap;
+/* end ugly fixes */
+
 typedef enum _hyperclass {
   HYPER_OVER,
   HYPER_BEAROFF,

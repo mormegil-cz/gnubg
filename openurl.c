@@ -20,13 +20,16 @@
  * $Id$
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <string.h>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
-
-#include "config.h"
+#if !GTK_CHECK_VERSION(1,3,10)
+#include <stdlib.h>
+#endif
 
 #include "openurl.h"
 #include "i18n.h"
@@ -35,6 +38,8 @@
 #include "windows.h"
 #include "shellapi.h"
 #endif /* WIN32 */
+
+#include "backgammon.h"
 
 
 extern void
@@ -48,17 +53,38 @@ OpenURL( const char *szURL ) {
 
   /* FIXME: implement other browsers */
 
+#ifdef __APPLE__
+#define BROWSERCOMMAND "open %s"
+#else
+#define BROWSERCOMMAND "mozilla \"%s\""
+#endif
+
+#if GTK_CHECK_VERSION(1,3,10)
+
   gchar *pchCommand;
   GError *error = NULL;
 
-  pchCommand = g_strdup_printf( "mozilla \"%s\"", szURL );
+  pchCommand = g_strdup_printf( BROWSERCOMMAND, szURL );
 
   if ( ! g_spawn_command_line_async( pchCommand, &error ) ) {
-    outputerr( _("Error launching browser: %s\n"), error->message );
+    outputerrf( _("Error launching browser: %s\n"), error->message );
     g_error_free( error );
   }
 
   g_free( pchCommand );
+
+#else /* GTK 1.3 */
+
+   
+  gchar *pchCommand;
+  pchCommand = g_strdup_printf( BROWSERCOMMAND, szURL );
+
+  if ( system( pchCommand ) < 0 ) 
+     outputerr( _("Error launching browser\n") );
+
+  g_free( pchCommand );
+
+#endif /* ! GTK 1.3 */
 
 #endif /* ! WIN32 */
 

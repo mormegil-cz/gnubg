@@ -485,8 +485,8 @@ extern void AddMoveRecord( void *pv ) {
     case MOVE_DOUBLE:
     case MOVE_TAKE:
     case MOVE_DROP:
-        assert( pmr->d.esDouble.et >= EVAL_NONE &&
-                pmr->d.esDouble.et <= EVAL_ROLLOUT );
+        assert( pmr->d.CubeDecPtr->esDouble.et >= EVAL_NONE &&
+                pmr->d.CubeDecPtr->esDouble.et <= EVAL_ROLLOUT );
 	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
 	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
 	break;
@@ -856,10 +856,9 @@ extern int ComputerTurn( void ) {
 
       /* Evaluate cube decision */
       ProgressStart( _("Considering cube action...") );
-      if ( GeneralCubeDecision ( _("Computer player"),
-                                 aarOutput, aarStdDev, aarsStatistics,
-                                 ms.anBoard,
-                                 &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
+      if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
+                                 ms.anBoard, &ci, &ap [ ms.fTurn ].esCube,
+                                 NULL, NULL ) < 0 ) {
 	  ProgressEnd();
 	  return -1;
       }
@@ -1065,10 +1064,9 @@ extern int ComputerTurn( void ) {
 
           /* Consider cube action */
 	  ProgressStart( _("Considering cube action...") );
-          if ( GeneralCubeDecision ( _("Computer player"),
-                                     aarOutput, aarStdDev, aarsStatistics,
-                                     ms.anBoard,
-                                     &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
+          if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
+                                     ms.anBoard, &ci, &ap [ ms.fTurn ].esCube,
+                                     NULL, NULL ) < 0 ) {
 	      ProgressEnd();
 	      return -1;
 	  }
@@ -2101,6 +2099,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
+	evalsetup   *pes;
     monitor m;
     evalsetup es;
 
@@ -2115,10 +2114,13 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
       return (SKILL_NONE);
     }
 
-	if (fTutorAnalysis)
-	  pec = &esAnalysisCube.ec;
-	else 
-	  pec = &esEvalCube.ec;
+    if (fTutorAnalysis) {
+      pes = &esAnalysisCube;
+    } else {
+      pes = &esEvalCube;
+    }
+
+     pec = &pes->ec;
 
 
 	GetMatchStateCubeInfo( &ci, &ms );
@@ -2135,7 +2137,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
         SuspendInput ( &m );
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
+	if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
           ResumeInput ( &m );
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2153,12 +2155,13 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
 	    
         /* store cube decision for annotation */
 
-        ec2es ( &pmr->d.esDouble, pec );
-        memcpy ( pmr->d.aarOutput, aarOutput, 
+        ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
+        memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memset ( pmr->d.aarStdDev, 0,
+
+        memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
+        memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
         pmr->d.st = SKILL_NONE;
 
         /* find skill */
@@ -2253,7 +2256,11 @@ extern void CommandDouble( char *sz ) {
     pmr->d.mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    if( !LinkToDouble( pmr ) ) {
+    pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+      pmr->d.nAnimals = 0;
+    }
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE, pmr ) ))
@@ -2283,6 +2290,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
+	evalsetup   *pes;
     monitor m;
     evalsetup es;
 
@@ -2297,9 +2305,11 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
     }
 
 	if (fTutorAnalysis)
-	  pec = &esAnalysisCube.ec;
+	  pes = &esAnalysisCube;
 	else 
-	  pec = &esEvalCube.ec;
+	  pes = &esEvalCube;
+
+	pec = &pes->ec;
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
@@ -2313,7 +2323,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
         SuspendInput ( &m );
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
+	if ( GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0) {
 	  ProgressEnd();
           ResumeInput ( &m );
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2332,12 +2342,12 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	    
         /* store cube decision for annotation */
 
-        ec2es ( &pmr->d.esDouble, pec );
-        memcpy ( pmr->d.aarOutput, aarOutput, 
+        ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
+        memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memset ( pmr->d.aarStdDev, 0,
+        memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
+        memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
         pmr->d.st = SKILL_NONE;
 
 	    
@@ -2387,8 +2397,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
 
 extern void CommandDrop( char *sz ) {
-
-    moverecord *pmr;
+      moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can drop it.") );
@@ -2408,7 +2417,10 @@ extern void CommandDrop( char *sz ) {
     pmr->d.mt = MOVE_DROP;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    if( !LinkToDouble( pmr ) ) {
+      free (pmr);
+      return;
+    }
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( TRUE, pmr ) )) {
@@ -2472,7 +2484,11 @@ static void DumpGameList(char *szOut, list *plGame) {
             sprintf( sz, _("      Resigns") );
             break;
 	case MOVE_SETDICE:
-	    /* ignore */
+	    sprintf( sz, "%d%d%-2s: %s", 
+                     pmr->sd.anDice[ 0 ],
+                     pmr->sd.anDice[ 1 ],
+                     aszLuckTypeAbbr[ pmr->n.lt ],
+                     _("Rolled") );
 	    break;
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
@@ -3506,7 +3522,11 @@ extern void CommandRedouble( char *sz ) {
     pmr->mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    if( !LinkToDouble( pmr ) ) {
+	pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+      pmr->d.nAnimals = 0;
+    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+    }
     pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
@@ -3598,7 +3618,7 @@ static skilltype ShouldDouble ( void ) {
     float rDeltaEquity;
     int      fAnalyseCubeSave = fAnalyseCube;
     evalcontext *pec;
-    evalsetup es;
+    evalsetup es, *pes;
 
     /* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -3612,9 +3632,11 @@ static skilltype ShouldDouble ( void ) {
     }
 
 	if (fTutorAnalysis)
-	  pec = &esAnalysisCube.ec;
+	  pes = &esAnalysisCube;
 	else 
-	  pec = &esEvalCube.ec;
+	  pes = &esEvalCube;
+	
+	pec = &pes->ec;
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
@@ -3627,7 +3649,7 @@ static skilltype ShouldDouble ( void ) {
 	/* Give hint on cube action */
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, pec ) < 0 ) {
+	if ( GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0) {
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);;
@@ -3699,7 +3721,7 @@ CommandRoll( char *sz ) {
   }
 
   if( ms.anDice[ 0 ] ) {
-    outputl( _("You already did roll the dice.") );
+    outputl( _("You have already rolled the dice.") );
 
     return;
   }
@@ -3801,7 +3823,7 @@ CommandRoll( char *sz ) {
 
 extern void CommandTake( char *sz ) {
 
-    moverecord *pmr;
+  moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can take it.") );
@@ -3821,7 +3843,11 @@ extern void CommandTake( char *sz ) {
     pmr->d.mt = MOVE_TAKE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
+    if( !LinkToDouble( pmr ) ) {
+      free (pmr);
+      return;
+    }
+
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( FALSE, pmr ) )) {
@@ -4104,13 +4130,18 @@ getCurrentMoveRecord ( int *pfHistory ) {
       mrHint.d.mt = MOVE_DOUBLE;
       mrHint.d.sz = NULL;
       mrHint.d.fPlayer = ms.fTurn;
-      mrHint.d.esDouble = sc.es;
+      mrHint.d.nAnimals = 0;
+      mrHint.d.CubeDecPtr = &mrHint.d.CubeDec;
+      mrHint.d.CubeDecPtr->esDouble = sc.es;
       mrHint.d.st = SKILL_NONE;
-      memcpy ( mrHint.d.aarOutput, sc.aarOutput, sizeof ( sc.aarOutput ) );
-      memcpy ( mrHint.d.aarStdDev, sc.aarStdDev, sizeof ( sc.aarStdDev ) );
+      memcpy ( mrHint.d.CubeDecPtr->aarOutput, sc.aarOutput, 
+               sizeof ( sc.aarOutput ) );
+      memcpy ( mrHint.d.CubeDecPtr->aarStdDev, sc.aarStdDev, 
+               sizeof ( sc.aarStdDev ) );
       
       GetMatchStateCubeInfo( &ci, &ms );
-      FindCubeDecision ( mrHint.d.arDouble, mrHint.d.aarOutput, &ci );
+      FindCubeDecision ( mrHint.d.CubeDecPtr->arDouble, 
+                         mrHint.d.CubeDecPtr->aarOutput, &ci );
 
       return &mrHint;
 
@@ -4219,3 +4250,29 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
 
 }
 
+/* routine to link doubles/beavers/raccoons/etc and their eventual
+   take/drop decisions into a single evaluation data block
+   returns NULL if there is no preceding double record to link to
+*/
+
+moverecord *LinkToDouble( moverecord *pmr) {
+
+  moverecord *prev;
+  
+
+  if( !plLastMove || ( ( prev = plLastMove->p ) == 0 ) ||
+	  prev->mt != MOVE_DOUBLE )
+	return 0;
+
+  /* link the evaluation data */
+  pmr->d.CubeDecPtr = prev->d.CubeDecPtr;
+
+  /* if this is part of a chain of doubles, add to the count
+     nAnimals will be 0 for the first double, 1 for the beaver,
+     2 for the racoon, etc.
+  */
+  if( pmr->d.mt == MOVE_DOUBLE )
+    pmr->d.nAnimals = 1 + prev->d.nAnimals;
+
+  return pmr;
+}

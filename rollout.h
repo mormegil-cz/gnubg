@@ -22,12 +22,6 @@
 #ifndef _ROLLOUT_H_
 #define _ROLLOUT_H_
 
-#if __GNUC__ || HAVE_ALLOCA
-#define MAX_ROLLOUT_CUBEINFO (-1)
-#else
-#define MAX_ROLLOUT_CUBEINFO 16
-#endif
-
 #define MAXHIT 50 /* for statistics */
 #define STAT_MAXCUBE 10
 
@@ -65,45 +59,69 @@ typedef struct _rolloutstat {
 
 } rolloutstat;
 
-extern int
-RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
-                float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                rolloutstat aarsStatistics[][ 2 ],
-                rolloutcontext *prc,
-                cubeinfo aci[], int afCubeDecTop[], int cci, int fInvert );
+extern int nSkip;
+
+typedef void
+(rolloutprogressfunc) ( float arOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                        float arStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                        const rolloutcontext *prc,
+                        const cubeinfo aci[],
+                        const int iGame,
+                        const int iAlternative,
+						const int nRank,
+						const float rJsd,
+						const int fStopped,
+						const int fShowRanks,
+                        void *pUserData );
 
 extern int
-GeneralEvaluation ( char *sz,
-                    float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
+RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
+                float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
+                float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
+                rolloutstat apStatistics[][2],
+                evalsetup (* apes[]),
+                cubeinfo (* apci[]), 
+                int (* apCubeDecTop[]), int alternatives, 
+		int fInvert, int fCubeRollout,
+                rolloutprogressfunc *pfRolloutProgress,
+                void *pUserData );
+
+extern int
+GeneralEvaluation ( float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
                     float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
                     rolloutstat arsStatistics[ 2 ],
                     int anBoard[ 2 ][ 25 ],
-                    cubeinfo *pci, evalsetup *pes );
+                    cubeinfo *pci, evalsetup *pes,
+                    rolloutprogressfunc *pfRolloutProgress,
+                    void *pUserData );
 
 extern int
-GeneralEvaluationR ( char *sz,
-                     float arOutput[ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationR ( float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev[ NUM_ROLLOUT_OUTPUTS ],
                      rolloutstat arsStatistics[ 2 ],
                      int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, rolloutcontext *prc );
+                     cubeinfo *pci, rolloutcontext *prc,
+                     rolloutprogressfunc *pfRolloutProgress,
+                     void *pUserData );
 
 extern int
-GeneralCubeDecision ( char *sz, 
-                      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+GeneralCubeDecision ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       rolloutstat aarsStatistics[ 2 ][ 2 ],
                       int anBoard[ 2 ][ 25 ],
-                      cubeinfo *pci, evalsetup *pes );
+                      cubeinfo *pci, evalsetup *pes,
+                      rolloutprogressfunc *pfRolloutProgress,
+                      void *pUserData );
+                      
 
 extern int
-GeneralCubeDecisionR ( char *sz, 
-                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        rolloutstat aarsStatistics[ 2 ][ 2 ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, rolloutcontext *prc );
+                       cubeinfo *pci, rolloutcontext *prc, evalsetup *pes,
+                       rolloutprogressfunc *pfRolloutProgress,
+                       void *pUserData );
 
 /* operations on rolloutstat */
 
@@ -126,9 +144,13 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                     float *prBefore, float *prAfter );
 
 extern int
-ScoreMoveRollout ( move *pm, cubeinfo *pci, rolloutcontext *prc );
+ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
+                   rolloutprogressfunc *pfRolloutProgress,
+                   void *pUserData );
 
 extern int
-ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes );
+ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes,
+                   rolloutprogressfunc *pfRolloutProgress,
+                   void *pUserData );
 
 #endif

@@ -207,10 +207,10 @@ ExportGameEquityEvolution (FILE * pf, list * plGame,
 	  rMoveError = 0.0;
 	  rMoveEquity = 0.0;
 
-	  if (pmr->d.esDouble.et != EVAL_NONE)
+	  if (pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE)
 	    {
 
-	      float *arDouble = pmr->d.arDouble;
+	      float *arDouble = pmr->d.CubeDecPtr->arDouble;
 
 	      GetMatchStateCubeInfo (&ci, &msEE);
 
@@ -794,7 +794,7 @@ CommandExportPositionJF (char *sz)
    */
 
   FILE *fp;
-  int i, anBoardJF[26];
+  int i;
   unsigned char c;
   int anBoard[2][25];
 

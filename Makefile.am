@@ -54,11 +54,17 @@ endif
 
 SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
 
+if USE_PYTHON
+PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
+else
+PYTHON_SOURCES=
+endif
+
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ 
+              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ 
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@ @GTKEXTRA_LIBS@
+              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ 
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
@@ -69,10 +75,13 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	export.c sound.h record.c record.h osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
-	htmlimages.c speed.c renderprefs.c renderprefs.h boardpos.c boardpos.h
-COMMON_DEPS = @LIBOBJS@ lib/libevent.a 
+	htmlimages.c speed.c renderprefs.c renderprefs.h \
+	boardpos.c boardpos.h progress.c progress.h format.c format.h
+COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper
+
+gnubg_LDFLAGS= @PYTHON_LDFLAGS@
 
 if USE_GTK
 ## --- GTK
@@ -87,25 +96,27 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
         openurl.c openurl.h gtktempmap.c gtktempmap.h \
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
+	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
+	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c \
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
-        @LIBART_LIBS@ $(BOARD3D_LIBS)
+        @LIBART_LIBS@ $(BOARD3D_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
 if USE_EXT
 ## --- EXT
 INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
 gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-	$(COMMON_LIBS) $(SOUND_LIBS)
+	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 else
 ## --- Plain
 INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-	$(FONT_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
+	$(FONT_SOURCES)  $(PYTHON_SOURCES)
+gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
@@ -122,7 +133,8 @@ check_PROGRAMS = erftest
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
+	format.c format.h
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
@@ -140,7 +152,7 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-        drawboard.c drawboard.h
+        drawboard.c drawboard.h format.c format.h
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS)
 makehyper_DEPENDENCIES = lib/libevent.a
 
@@ -153,7 +165,7 @@ distcheck-hook:
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS boards.xml
+	ABOUT-NLS boards.xml gnubg.py
 
 DISTCLEANFILES=gnubg.wd
 
@@ -234,7 +246,7 @@ bearoff-database: makebearoff
 	@echo ' ** NOTE: you can generate huge one sided and two sided'
 	@echo ' ** bearoff databases for usage with gnubg'
 	@echo ' ** See README for more details'
-	./makebearoff -t 6x6 > $(srcdir)/gnubg_ts0.bd; $(MAKE) gnubg.bd
+	./makebearoff -t 6x6 -f  $(srcdir)/gnubg_ts0.bd
 endif
 
 .PHONY: bearoff-database

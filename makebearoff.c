@@ -47,6 +47,13 @@ typedef struct _xhash {
   xhashent *phe;
 } xhash;
 
+/* ugly fixes */
+char *aszRNG[]; 
+char *aszSkillType[ 1 ]; 
+int exsExport;
+int ap;
+/* end ugly fixes */
+
 
 static long cLookup;
 
@@ -1467,7 +1474,7 @@ extern int main( int argc, char **argv ) {
     if ( pbc ) {
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
-      BearoffClose ( pbc );
+      BearoffClose ( &pbc );
     }
 
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 
@@ -1532,7 +1539,7 @@ extern int main( int argc, char **argv ) {
     if ( pbc ) {
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
-      BearoffClose ( pbc );
+      BearoffClose ( &pbc );
     }
 
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 

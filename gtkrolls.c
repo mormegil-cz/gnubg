@@ -37,7 +37,7 @@
 #include "gtkgame.h"
 #include "drawboard.h"
 #include "i18n.h"
-#include "export.h"
+#include "format.h"
 
 #if USE_GTK2
 
@@ -281,7 +281,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
 #if USE_GTK2
 
-  GtkWidget *pwDialog = CreateDialog( _("Distribution of rolls"),
+  GtkWidget *pwDialog = GTKCreateDialog( _("Distribution of rolls"),
                                       DT_INFO, NULL, NULL );
   GtkWidget *pw, *vbox, *hbox;
 

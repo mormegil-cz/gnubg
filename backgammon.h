@@ -66,6 +66,12 @@ typedef RETSIGTYPE (*psighandler)( int );
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_CUBE_STR "4096"
 
+#ifdef WIN32
+#include <stdlib.h>
+#define BIG_PATH _MAX_PATH
+#else
+#define BIG_PATH PATH_MAX
+#endif
 
 /* position of windows: main window, game list, and annotation */
 
@@ -149,15 +155,21 @@ typedef struct _movegameinfo {
     statcontext sc;
 } movegameinfo;
 
-typedef struct _movedouble {
-    movetype mt;
-    char *sz;
-    int fPlayer;
-    /* evaluation of cube action */
+typedef struct cubedecisiondata {
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float arDouble[ 4 ];
     evalsetup esDouble;
+} cubedecisiondata;
+
+typedef struct _movedouble {
+    movetype mt;
+    char *sz;
+    int fPlayer;
+    int nAnimals;    /* 0 in match play, even numbers are doubles, raccoons
+                        odd numbers are beavers, aardvarken, etc. */
+    cubedecisiondata *CubeDecPtr;
+    cubedecisiondata  CubeDec;
     skilltype st;
 } movedouble;
 
@@ -274,7 +286,7 @@ extern int fNextTurn, fComputing;
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fDisplay, fAutoBearoff, fShowProgress,
-    nBeavers, fOutputMWC, fOutputWinPC, fOutputMatchPC, fJacoby,
+    nBeavers, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord, fMessage, nDefaultLength;
 extern int fInvertMET;
@@ -285,6 +297,10 @@ extern int nThreadPriority;
 extern int fCheat;
 extern int afCheatRoll[ 2 ];
 extern int fGotoFirstGame;
+extern int fSconyers15x15DVD;
+extern char szPathSconyers15x15DVD[ BIG_PATH ];      
+extern int fSconyers15x15Disk;
+extern char szPathSconyers15x15Disk[ BIG_PATH ];      
 
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
@@ -359,6 +375,7 @@ extern char *NextTokenGeneral( char **ppch, const char *szTokens );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
+extern moverecord *LinkToDouble( moverecord *pmr);
 extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
@@ -384,8 +401,6 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
 extern void SetMatchID ( const char *szMatchID );
-extern char*
-FormatCubePosition ( char *sz, cubeinfo *pci );
 extern char *FormatPrompt( void );
 extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			     int i, int fRankKnown,
@@ -461,14 +476,6 @@ extern void HandleInput( char *sz );
 #endif
 #endif
 
-#ifdef WIN32
-#define DIR_SEPARATOR  '\\'
-#define DIR_SEPARATOR_S  "\\"
-#else
-#define DIR_SEPARATOR  '/'
-#define DIR_SEPARATOR_S  "/"
-#endif
-
 
 #if HAVE_LIBREADLINE
 extern int fReadline;
@@ -520,7 +527,8 @@ extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], 
-    acSetRollout[], acSetRolloutLate[], acSetTruncation [], 
+    acSetRollout[], acSetRolloutLate[], acSetRolloutLimit[], 
+  acSetTruncation [], acSetRolloutJsd[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
     acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename,
     cHighlightColour;
@@ -673,6 +681,10 @@ extern void CommandAccept( char * ),
     CommandSetAutoGame( char * ),
     CommandSetAutoMove( char * ),
     CommandSetAutoRoll( char * ),
+    CommandSetBearoffSconyers15x15DVDEnable( char * ),
+    CommandSetBearoffSconyers15x15DVDPath( char * ),
+    CommandSetBearoffSconyers15x15DiskEnable( char * ),
+    CommandSetBearoffSconyers15x15DiskPath( char * ),
     CommandSetBoard( char * ),
     CommandSetBeavers( char * ),
     CommandSetCache( char * ),
@@ -688,6 +700,13 @@ extern void CommandAccept( char * ),
     CommandSetCubeOwner( char * ),
     CommandSetCubeUse( char * ),
     CommandSetCubeValue( char * ),
+    CommandSetCubeEfficiencyOS( char * ),
+    CommandSetCubeEfficiencyRaceFactor( char * ),
+    CommandSetCubeEfficiencyRaceCoefficient( char * ),
+    CommandSetCubeEfficiencyRaceMax( char * ),
+    CommandSetCubeEfficiencyRaceMin( char * ),
+    CommandSetCubeEfficiencyCrashed( char * ),
+    CommandSetCubeEfficiencyContact( char * ),
     CommandSetDelay( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
@@ -787,6 +806,7 @@ extern void CommandAccept( char * ),
     CommandSetMessage ( char * ),
     CommandSetMET( char * ),
     CommandSetMoveFilter( char * ),
+    CommandSetOutputDigits( char *),
     CommandSetOutputMatchPC( char * ),
     CommandSetOutputMWC ( char * ),
     CommandSetOutputRawboard( char * ),
@@ -847,6 +867,15 @@ extern void CommandAccept( char * ),
     CommandSetRolloutChequerplay ( char * ),
     CommandSetRolloutCubeEqualChequer ( char * ),
     CommandSetRolloutInitial( char * ),
+    CommandSetRolloutJsd( char * ),
+    CommandSetRolloutJsdEnable( char * ),
+    CommandSetRolloutJsdLimit( char * ),
+    CommandSetRolloutJsdMinGames( char * ),
+    CommandSetRolloutJsdMoveEnable( char * ),
+    CommandSetRolloutLimit( char * ),
+    CommandSetRolloutLimitEnable( char * ),
+    CommandSetRolloutLimitMinGames( char * ),
+    CommandSetRolloutMaxError( char * ),
     CommandSetRolloutMoveFilter( char * ),
     CommandSetRolloutPlayer ( char * ),
     CommandSetRolloutPlayerChequerplay ( char * ),
@@ -882,6 +911,7 @@ extern void CommandAccept( char * ),
     CommandSetSoundSystemNAS ( char * ),
     CommandSetSoundSystemNormal ( char * ),
     CommandSetSoundSystemWindows ( char * ),
+    CommandSetSoundSystemQuickTime ( char * ),
     CommandSetSoundSoundAgree ( char * ),
     CommandSetSoundSoundAnalysisFinished ( char * ),
     CommandSetSoundSoundBotDance ( char * ),
@@ -928,6 +958,7 @@ extern void CommandAccept( char * ),
     CommandShowCopying( char * ),
     CommandShowCrawford( char * ),
     CommandShowCube( char * ),
+    CommandShowCubeEfficiency( char * ),
     CommandShowDelay( char * ),
     CommandShowDice( char * ),
     CommandShowDisplay( char * ),
@@ -945,6 +976,7 @@ extern void CommandAccept( char * ),
     CommandShowMatchInfo( char * ),
     CommandShowMatchLength( char * ),
     CommandShowMatchEquityTable( char * ),
+    CommandShowMatchResult( char * ),
     CommandShowOneChequer ( char * ),
     CommandShowOneSidedRollout ( char * ),
     CommandShowOutput( char * ),
@@ -957,6 +989,7 @@ extern void CommandAccept( char * ),
     CommandShowRollout( char * ),
     CommandShowRolls ( char * ),
     CommandShowScore( char * ),
+    CommandShowBearoff( char * ),
     CommandShowSeed( char * ),
     CommandShowSound( char * ),
     CommandShowStatisticsGame( char * ),
@@ -987,6 +1020,11 @@ extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 #ifndef HAVE_BASENAME
 extern char *
 basename ( const char *filename );
+#endif
+
+#ifndef HAVE_DIRNAME
+extern char *
+dirname ( char *filename );
 #endif
 
 #if USE_GTK
@@ -1026,11 +1064,7 @@ TextToClipboard ( const char * sz );
 extern void
 PrintCheatRoll( const int fPlayer, const int n );
 
-#ifdef WIN32
-#define BIG_PATH _MAX_PATH
-#else
-#define BIG_PATH PATH_MAX
-#endif
-
+extern void
+ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc );
 
 #endif

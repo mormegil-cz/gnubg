@@ -48,7 +48,12 @@ typedef enum _dialogtype {
 } dialogtype;
 
 extern GtkWidget *pwMain, *pwMenuBar;
+extern GtkWidget *pwToolbar;
 extern GtkTooltips *ptt;
+
+extern GtkWidget *pwGrab;
+extern GtkWidget *pwOldGrab;
+
 
 extern int fEndDelay;
 
@@ -76,7 +81,7 @@ extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle );
 
-extern GtkWidget *CreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
+extern GtkWidget *GTKCreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
 				void *p );
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
     
@@ -103,19 +108,6 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 const evalsetup *pes );
 
-extern void
-GTKRollout( int c, char asz[][ 40 ], int cGames,
-	    rolloutstat ars[][ 2 ] );
-
-extern void GTKRolloutRow( int i );
-
-extern int
-GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
-                  float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
-                  int iGame, int cGames, int fCubeful, int cRows,
-                  cubeinfo aci[] );
-
-extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
 extern void GTKUpdateAnnotations( void );
 extern int GTKGetManualDice( int an[ 2 ] );
@@ -125,7 +117,6 @@ extern void *GTKCalibrationStart( void ),
     GTKCalibrationUpdate( void *context, float rEvalsPerSec ),
     GTKCalibrationEnd( void *context );
 extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data);
-extern void GTKViewRolloutStatistics(GtkWidget *widget, gpointer data);
 extern void GTKWinCopy( GtkWidget *widget, gpointer data);
 extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
@@ -134,13 +125,11 @@ extern void GTKSaveSettings( void );
 extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
-extern void 
-GTKShowPath( void );
 extern void GTKMatchInfo( void );
 
 extern void SetEvaluation( gpointer *p, guint n, GtkWidget *pw );
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
-extern void SetMET( gpointer *p, guint n, GtkWidget *pw );
+extern void SetMET( GtkWidget *pw, gpointer p );
 
 extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves );
 
@@ -165,5 +154,19 @@ extern void GTKRecordShow( FILE *pfIn, char *sz, char *szPlayer );
 
 extern void
 GTKTextToClipboard( const char *sz );
+
+extern char *
+GTKChangeDisk( const char *szMsg, const int fChange, 
+               const char *szMissingFile );
+
+extern int 
+GTKMessage( char *sz, dialogtype dt );
+
+extern int 
+GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
+               int nMin, int nMax, int nInc );
+
+extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
+                            char *szPath, int fExportSetting );
 
 #endif

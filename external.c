@@ -22,11 +22,20 @@
 #include "config.h"
 
 #if HAVE_SOCKETS
+
+#include <signal.h>
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* #if HAVE_UNISTD_H */
+
+#ifndef WIN32
+
 #include <assert.h>
 #include <errno.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -34,11 +43,58 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/un.h>
-#endif
+#endif /* #if HAVE_SYS_SOCKET_H */
+
 #include <stdio.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
+#else /* #ifndef WIN32 */
+#include <winsock.h>
+
+#define EWOULDBLOCK             WSAEWOULDBLOCK
+#define EINPROGRESS             WSAEINPROGRESS
+#define EALREADY                WSAEALREADY
+#define ENOTSOCK                WSAENOTSOCK
+#define EDESTADDRREQ            WSAEDESTADDRREQ
+#define EMSGSIZE                WSAEMSGSIZE
+#define EPROTOTYPE              WSAEPROTOTYPE
+#define ENOPROTOOPT             WSAENOPROTOOPT
+#define EPROTONOSUPPORT         WSAEPROTONOSUPPORT
+#define ESOCKTNOSUPPORT         WSAESOCKTNOSUPPORT
+#define EOPNOTSUPP              WSAEOPNOTSUPP
+#define EPFNOSUPPORT            WSAEPFNOSUPPORT
+#define EAFNOSUPPORT            WSAEAFNOSUPPORT
+#define EADDRINUSE              WSAEADDRINUSE
+#define EADDRNOTAVAIL           WSAEADDRNOTAVAIL
+#define ENETDOWN                WSAENETDOWN
+#define ENETUNREACH             WSAENETUNREACH
+#define ENETRESET               WSAENETRESET
+#define ECONNABORTED            WSAECONNABORTED
+#define ECONNRESET              WSAECONNRESET
+#define ENOBUFS                 WSAENOBUFS
+#define EISCONN                 WSAEISCONN
+#define ENOTCONN                WSAENOTCONN
+#define ESHUTDOWN               WSAESHUTDOWN
+#define ETOOMANYREFS            WSAETOOMANYREFS
+#define ETIMEDOUT               WSAETIMEDOUT
+#define ECONNREFUSED            WSAECONNREFUSED
+#define ELOOP                   WSAELOOP
+#define ENAMETOOLONG            WSAENAMETOOLONG
+#define EHOSTDOWN               WSAEHOSTDOWN
+#define EHOSTUNREACH            WSAEHOSTUNREACH
+#define ENOTEMPTY               WSAENOTEMPTY
+#define EPROCLIM                WSAEPROCLIM
+#define EUSERS                  WSAEUSERS
+#define EDQUOT                  WSAEDQUOT
+#define ESTALE                  WSAESTALE
+#define EREMOTE                 WSAEREMOTE
+#define EINVAL                  WSAEINVAL
+#define EINTR                   WSAEINTR
+
+#define inet_aton(ip,addr)  (addr)->s_addr = inet_addr(ip), 1
+#define inet_pton(fam,ip,addr) (addr)->s_addr = inet_addr(ip), 1
+
+#endif /* #ifndef WIN32 */
+
 #endif /* HAVE_SOCKETS */
 
 #include "backgammon.h"
@@ -55,7 +111,7 @@
 #if HAVE_SOCKETS
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 
-    int h, f;
+    int sock, f;
     struct sockaddr_un *psun;
     struct sockaddr_in *psin;
     struct hostent *phe;
@@ -63,23 +119,34 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
     
     if( ( pch = strchr( sz, ':' ) ) && !strchr( sz, '/' ) ) {
 	/* Internet domain socket. */
-	if( ( h = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
+	if( ( sock = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
 	    return -1;
 
 	f = TRUE;
-	if( setsockopt( h, SOL_SOCKET, SO_REUSEADDR, &f, sizeof f ) )
+
+#ifdef WIN32
+	if( setsockopt( (SOCKET) sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &f, sizeof f ) )
+#else
+	if( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &f, sizeof f ) )
+#endif /* WIN32 */
 	    return -1;
-	
+
 	psin = malloc( *pcb = sizeof (struct sockaddr_in) );
-	
+	memset( psin, 0, sizeof (*psin));
+
 	psin->sin_family = AF_INET;
 
+	/* split hostname and port */
 	*pch = 0;
-	
+
 	if( !*sz )
 	    /* no host specified */
 	    psin->sin_addr.s_addr = htonl( INADDR_ANY );
+#ifdef WIN32
+	else {
+#else
 	else if( !inet_aton( sz, &psin->sin_addr ) ) {
+#endif /* WIN32 */
 	    if( !( phe = gethostbyname( sz ) ) ) {
 		*pch = ':';
 		errno = EINVAL;
@@ -87,7 +154,12 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 		return -1;
 	    }
 
+#ifdef WIN32
+	    memcpy( &(psin->sin_addr), (struct in_addr *) (phe->h_addr), phe->h_length);
+#else
 	    psin->sin_addr = *(struct in_addr *) phe->h_addr;
+#endif /* WIN32 */
+
 	}
 
 	*pch++ = ':';
@@ -97,25 +169,32 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 	*ppsa = (struct sockaddr *) psin;
     } else {
 	/* Local domain socket. */
-	if( ( h = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 )
+	if( ( sock = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 )
 	    return -1;
 
 	/* yuck... there's no portable way to obtain the necessary
 	   sockaddr_un size, but this is a conservative estimate */
 	psun = malloc( *pcb = 16 + strlen( sz ) );
 	
+#ifndef WIN32
 	psun->sun_family = AF_LOCAL;
 	strcpy( psun->sun_path, sz );
+#else /* #ifndef WIN32 */
+	/* FIXME: what will we do on Windows? */
+	return -1;
+#endif /* #ifndef WIN32 */
 
 	*ppsa = (struct sockaddr *) psun;
     }
-    
-    return h;
+
+    return sock;
+
 #if 0 
     assert( FALSE );
-#endif
+#endif /* 0 */
+
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
 static void ExternalUnbind( char *sz ) {
@@ -126,14 +205,16 @@ static void ExternalUnbind( char *sz ) {
 
     unlink( sz );
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
 extern int ExternalRead( int h, char *pch, int cch ) {
 
     char *p = pch, *pEnd;
     int n;
+#ifndef WIN32
     psighandler sh;
+#endif
     
     while( cch ) {
 	if( fAction )
@@ -142,9 +223,21 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	if( fInterrupt )
 	    return -1;
 
+#ifndef WIN32
 	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
+#endif
+
+#ifdef WIN32
+	/* reading from sockets doesn't work on Windows
+	   use recv instead */
+	n = recv( (SOCKET) h, p, cch, 0);
+#else
 	n = read( h, p, cch );
+#endif
+
+#ifndef WIN32
 	PortableSignalRestore( SIGPIPE, &sh );
+#endif
 	
 	if( !n ) {
 	    outputl( _("External connection closed.") );
@@ -153,7 +246,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    outputerr( _("external connection") );
+	    outputerr( _("reading from external connection") );
 	    return -1;
 	}
 	
@@ -173,14 +266,16 @@ extern int ExternalRead( int h, char *pch, int cch ) {
     assert( FALSE );
 #endif
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
 extern int ExternalWrite( int h, char *pch, int cch ) {
 
     char *p = pch;
     int n;
+#ifndef WIN32
     psighandler sh;
+#endif
 
     while( cch ) {
 	if( fAction )
@@ -189,9 +284,21 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	if( fInterrupt )
 	    return -1;
 
+#ifndef WIN32
 	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
+#endif
+
+#ifdef WIN32
+	/* writing to sockets doesn't work on Windows
+	   use send instead */
+	n = send( (SOCKET) h, (const char *) p, cch, 0);
+#else
 	n = write( h, p, cch );
+#endif
+
+#ifndef WIN32
 	PortableSignalRestore( SIGPIPE, &sh );
+#endif
 	
 	if( !n )
 	    return 0;
@@ -199,7 +306,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    outputerr( _("external connection") );
+	    outputerr( _("writing to external connection") );
 	    return -1;
 	}
 	
@@ -212,7 +319,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
     assert( FALSE );
 #endif
 }
-#endif
+#endif /* HAVE_SOCKETS */
 
 extern void CommandExternal( char *sz ) {
 
@@ -303,9 +410,9 @@ extern void CommandExternal( char *sz ) {
 	    if ( fDoubled > 0 ) {
 
 		/* take decision */
-		if( GeneralCubeDecision( "", aarOutput, aarStdDev,
+		if( GeneralCubeDecision( aarOutput, aarStdDev,
 					 aarsStatistics, anBoard, &ci,
-					 &esEvalCube ) < 0 )
+					 &esEvalCube, NULL, NULL ) < 0 )
 		    break;
 	  
 		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {
@@ -376,9 +483,9 @@ extern void CommandExternal( char *sz ) {
 		FormatMovePlain( szResponse, anBoardOrig, anMove );
 	    } else {
 		/* double decision */
-		if( GeneralCubeDecision( "", aarOutput, aarStdDev,
+		if( GeneralCubeDecision( aarOutput, aarStdDev,
 					 aarsStatistics, anBoard, &ci,
-					 &esEvalCube ) < 0 )
+					 &esEvalCube, NULL, NULL ) < 0 )
 		    break;
 		
 		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {

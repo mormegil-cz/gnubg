@@ -24,48 +24,58 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+
 #if HAVE_LIMITS_H
 #include <limits.h>
-#endif
+#endif /* HAVE_LIMITS_H */
+
 #include <math.h>
+
 #if HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
 #include <sys/resource.h>
-#endif
+#endif /* HAVE_SYS_RESOURCE_H */
+
+#ifndef WIN32
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
-#endif
+#endif /* HAVE_SYS_SOCKET_H */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#else /* #ifndef WIN32 */
+#include <winsock.h>
+#endif /* #ifndef WIN32 */
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#endif /* HAVE_UNISTD_H */
 
 #include "backgammon.h"
 #include "dice.h"
 #include "eval.h"
 #include "external.h"
 #include "export.h"
+
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkprefs.h"
-#endif
+#endif /* USE_GTK */
+
 #include "matchequity.h"
 #include "positionid.h"
 #include "renderprefs.h"
 #include "export.h"
 #include "drawboard.h"
+#include "format.h"
 
 #include "i18n.h"
 
 #include "sound.h"
-
-#ifdef WIN32
-#include<windows.h>
-#endif
-
 
 static int iPlayerSet, iPlayerLateSet;
 
@@ -152,7 +162,7 @@ SetSeed ( const rng rngx, char *sz ) {
 
 	InitRNGSeed( n, rngx );
 	outputf( _("Seed set to %d.\n"), n );
-#endif	
+#endif /* HAVE_LIBGMP */
     } else
 	outputl( InitRNG( NULL, TRUE, rngx ) ?
 		 _("Seed initialised from system random data.") :
@@ -173,7 +183,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	UserRNGClose();
 #else
         abort();
-#endif
+#endif /* HAVE_LIBDL */
     
     /* close file if necesary */    
     if ( *prng == RNG_FILE )
@@ -223,7 +233,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	  }
 #else
 	abort();
-#endif
+#endif /* HAVE_LIBGMP */
 	
     case RNG_USER:
 	/* Load dynamic library with user RNG */
@@ -250,7 +260,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	  }
 #else
 	abort();
-#endif
+#endif /* HAVE_LIBDL */
 	break;
 
     case RNG_FILE: 
@@ -537,7 +547,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
 
     if( n > 12 ) {
 	outputl( _("Please specify a smaller limit (up to 12 automatic "
-	      "doubles.") );
+	      "doubles).") );
 	return;
     }
 	
@@ -693,7 +703,7 @@ extern void CommandSetClockwise( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetAppearance( char *sz ) {
@@ -703,15 +713,15 @@ extern void CommandSetAppearance( char *sz ) {
 #if USE_GTK
     if( fX )
 	BoardPreferencesStart( pwBoard );
-#endif
-
-    while( ParseKeyValue( &sz, apch ) )
-	RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
+#endif /* USE_GTK */
+    
+	while( ParseKeyValue( &sz, apch ) )
+		RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
 
 #if USE_GTK
 	if( fX )
 		BoardPreferencesDone( pwBoard );	    
-#endif
+#endif /* USE_GTK */
 }
 
 extern void CommandSetConfirmNew( char *sz ) {
@@ -751,7 +761,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetCubeOwner( char *sz ) {
@@ -791,7 +801,7 @@ extern void CommandSetCubeOwner( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetCubeUse( char *sz ) {
@@ -824,7 +834,7 @@ extern void CommandSetCubeUse( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetCubeValue( char *sz ) {
@@ -851,7 +861,7 @@ extern void CommandSetCubeValue( char *sz ) {
 #if USE_GUI
 	    if( fX )
 		ShowBoard();
-#endif
+#endif /* USE_GUI */
 	    return;
 	}
 
@@ -886,7 +896,7 @@ extern void CommandSetDelay( char *sz ) {
 	nDelay = n;
 	UpdateSetting( &nDelay );
     } else
-#endif
+#endif /* USE_GUI */
 	outputl( _("The `set delay' command applies only when using a window "
 	      "system.") );
 }
@@ -1313,7 +1323,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
     ap[ iPlayerSet ].szSocket = pch;
     
     free( psa );
-#endif
+#endif /* !HAVE_SOCKETS */
 }
 
 extern void CommandSetPlayerGNU( char *sz ) {
@@ -1330,7 +1340,7 @@ extern void CommandSetPlayerGNU( char *sz ) {
     if( fX )
 	/* The "play" button might now be required; update the board. */
 	ShowBoard();
-#endif
+#endif /* USE_GTK */
 }
 
 extern void CommandSetPlayerHuman( char *sz ) {
@@ -1381,7 +1391,7 @@ extern void CommandSetPlayerName( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetPlayerPlies( char *sz ) {
@@ -1506,7 +1516,7 @@ extern void CommandSetRNGBBS( char *sz ) {
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "Blum, Blum and Shub generator.") );
-#endif
+#endif /* HAVE_LIBGMP */
 }
 
 extern void CommandSetRNGBsd( char *sz ) {
@@ -1515,7 +1525,7 @@ extern void CommandSetRNGBsd( char *sz ) {
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "BSD generator.") );
-#endif
+#endif /* HAVE_RANDOM */
 }
 
 extern void CommandSetRNGIsaac( char *sz ) {
@@ -1546,10 +1556,9 @@ extern void CommandSetRNGRandomDotOrg( char *sz ) {
     outputl( _("This installation of GNU Backgammon was compiled without "
                "support for sockets needed for fetching\n"
                "random numbers from <www.random.org>") );
-#endif
+#endif /* HAVE_SOCKETS */
 
 }
-
 
 extern void CommandSetRNGUser( char *sz ) {
 
@@ -1558,7 +1567,7 @@ extern void CommandSetRNGUser( char *sz ) {
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "dynamic linking library needed for user RNG's.") );
-#endif
+#endif /* HAVE_LIBDL */
 
 }
 
@@ -1570,7 +1579,7 @@ extern void CommandSetRolloutLate ( char *sz ) {
 
 extern void CommandSetRolloutLateEnable ( char *sz ) {
 
-  SetToggle( "separate evaluation for later plays", &prcSet->fLateEvals, sz,
+  SetToggle( "separate evaluation for later plies", &prcSet->fLateEvals, sz,
 		 _("Use different evaluation for later moves of rollout."),
 		 _("Do not change evaluations during rollout.") );
 }
@@ -1599,6 +1608,113 @@ extern void CommandSetRolloutLatePlies ( char *sz ) {
 extern void CommandSetRolloutTruncation  ( char *sz ) {
 
   HandleCommand ( sz, acSetTruncation );
+}
+
+extern void CommandSetRolloutLimit ( char *sz ) {
+
+  HandleCommand ( sz, acSetRolloutLimit );
+
+}
+
+extern void CommandSetRolloutLimitEnable ( char *sz ) {
+
+  SetToggle( "stop when the STD's are small enough", &prcSet->fStopOnSTD, sz,
+	     _("Stop rollout when STD's are small enough"),
+	     _("Do not stop rollout based on STDs"));
+}
+
+extern void CommandSetRolloutLimitMinGames ( char *sz ) {
+
+  int n = ParseNumber( &sz );
+
+  if (n < 1) {
+    outputl( _("You must specify a valid minimum number of games to rollout"
+               "-- try 'help set rollout limit minimumgames'.") );
+    return;
+  }
+
+  prcSet->nMinimumGames = n;
+
+  outputf( _("After %d games, rollouts will stop if the STDs are small enough"
+	     ".\n"), n);
+}
+
+extern void CommandSetRolloutMaxError ( char *sz ) {
+
+    double r = ParseReal( &sz );
+
+    if( r < 0.0001 ) {
+      outputl( _("You must set a valid fraction for the ratio "
+		 "STD/value where rollouts can stop "
+		 "-- try 'help set rollout limit maxerror'." ) );
+      return;
+    }
+
+    prcSet->rStdLimit = r;
+
+    outputf ( _("Rollouts can stop when the ratio |STD/value| is less than "
+		"%5.4f for every value (win/gammon/backgammon/...equity\n"),
+	      r);
+}
+
+extern void CommandSetRolloutJsd ( char *sz ) {
+
+  HandleCommand ( sz, acSetRolloutJsd );
+
+}
+
+extern void CommandSetRolloutJsdEnable ( char *sz ) {
+
+  SetToggle( "stop rollout when one move appears "
+   "to have a higher equity", &prcSet->fStopOnJsd, sz,
+	     _("Stop rollout based on J.S.D.s"),
+	     _("Do not stop rollout based on J.S.D.s"));
+
+}
+
+extern void CommandSetRolloutJsdMoveEnable ( char *sz ) {
+
+  SetToggle( "stop rollout of moves which appear to  "
+   "to have a lowerer equity", &prcSet->fStopMoveOnJsd, sz,
+	     _("Stop rollout of moves based on J.S.D.s"),
+	     _("Do not stop rollout of moves based on J.S.D.s"));
+
+}
+
+extern void CommandSetRolloutJsdMinGames ( char *sz ) {
+
+  int n = ParseNumber( &sz );
+
+  if (n < 1) {
+    outputl( _("You must specify a valid minimum number of games to rollout"
+               "-- try 'help set rollout jsd minimumgames'.") );
+    return;
+  }
+  prcSet->nMinimumJsdGames = n;
+
+  outputf( _("After %d games, rollouts will stop if the J.S.D.s are large enough"
+	     ".\n"), n);
+}
+
+
+extern void CommandSetRolloutJsdLimit ( char *sz ) {
+
+    double r = ParseReal( &sz );
+
+    if( r < 0.0001 ) {
+      outputl( 
+  _("You must set a number of joint standard deviations for the equity"
+    " difference with the best move being rolled out "
+   "-- try 'help set rollout jsd limit'." ) );
+      return;
+    }
+
+    prcSet->rJsdLimit = r;
+
+    outputf ( 
+  _("Rollouts (or rollouts of moves) may  stop when the equity is more "
+ "than %5.3f joint standard deviations from the best move being rolled out\n"),
+	      r);
 }
 
 extern void CommandSetRollout ( char *sz ) {
@@ -2243,7 +2359,7 @@ extern void CommandSetScore( char *sz ) {
 	   menu, and is now out of date. */
 	if( fX )
 	    GTKRegenerateGames();
-#endif
+#endif /* USE_GTK */
     }
     
     CommandShowScore( NULL );
@@ -2251,7 +2367,7 @@ extern void CommandSetScore( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetSeed( char *sz ) {
@@ -2352,7 +2468,7 @@ extern void CommandSetTurn( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
     
     outputf( _("`%s' is now on roll.\n"), ap[ i ].szName );
 }
@@ -2467,12 +2583,30 @@ extern void CommandSetBeavers( char *sz ) {
     nBeavers = n;
 
     if( nBeavers > 1 )
-	outputf( _("%d beavers/racoons allowed in money sessions.\n"), nBeavers );
+	outputf( _("%d beavers/raccoons allowed in money sessions.\n"), nBeavers );
     else if( nBeavers == 1 )
 	outputl( _("1 beaver allowed in money sessions.") );
     else
 	outputl( _("No beavers allowed in money sessions.") );
 }
+
+extern void
+CommandSetOutputDigits( char *sz ) {
+
+  int n = ParseNumber( &sz );
+
+  if ( n < 0 || n > 6 ) {
+    outputl( _("You must specify a number between 1 and 6.\n") );
+    return;
+  }
+
+  fOutputDigits = n;
+
+  outputf( _("Probabilities and equities will be shown with %d digits "
+             "after the decimal separator\n"), fOutputDigits );
+
+}
+      
 
 extern void CommandSetOutputMatchPC( char *sz ) {
 
@@ -3014,10 +3148,10 @@ CommandSetExportParametersRollout ( char *sz ) {
 extern void
 CommandSetExportMovesDisplayVeryBad ( char *sz ) {
   
-  SetToggle( "export moves display verybad", 
+  SetToggle( "export moves display very bad", 
              &exsExport.afMovesDisplay[ SKILL_VERYBAD ], sz,
-             _("Export moves marked 'verybad'."),
-             _("Do not export moves marked 'verybad'.") );
+             _("Export moves marked 'very bad'."),
+             _("Do not export moves marked 'very bad'.") );
 
 }
     
@@ -3074,10 +3208,10 @@ CommandSetExportMovesDisplayGood ( char *sz ) {
 extern void
 CommandSetExportMovesDisplayVeryGood ( char *sz ) {
   
-  SetToggle( "export moves display verygood", 
+  SetToggle( "export moves display very good", 
              &exsExport.afMovesDisplay[ SKILL_VERYGOOD ], sz,
-             _("Export moves marked 'verygood'."),
-             _("Do not export moves marked 'verygood'.") );
+             _("Export moves marked 'very good'."),
+             _("Do not export moves marked 'very good'.") );
   
 }
     
@@ -3085,10 +3219,10 @@ CommandSetExportMovesDisplayVeryGood ( char *sz ) {
 extern void
 CommandSetExportCubeDisplayVeryBad ( char *sz ) {
   
-  SetToggle( "export cube display verybad", 
+  SetToggle( "export cube display very bad", 
              &exsExport.afCubeDisplay[ SKILL_VERYBAD ], sz,
-             _("Export cube decisions marked 'verybad'."),
-             _("Do not export cube decisions marked 'verybad'.") );
+             _("Export cube decisions marked 'very bad'."),
+             _("Do not export cube decisions marked 'very bad'.") );
 
 }
     
@@ -3145,10 +3279,10 @@ CommandSetExportCubeDisplayGood ( char *sz ) {
 extern void
 CommandSetExportCubeDisplayVeryGood ( char *sz ) {
   
-  SetToggle( "export cube display verygood", 
+  SetToggle( "export cube display very good", 
              &exsExport.afCubeDisplay[ SKILL_VERYGOOD ], sz,
-             _("Export cube decisions marked 'verygood'."),
-             _("Do not export cube decisions marked 'verygood'.") );
+             _("Export cube decisions marked 'very good'."),
+             _("Do not export cube decisions marked 'very good'.") );
 
 }
     
@@ -3264,7 +3398,7 @@ CommandSetExportHTMLPictureURL ( char *sz ) {
 
   if ( ! sz || ! *sz ) {
     outputl ( _("You must specify a URL. "
-              "See 'help set export html pictureurl'.") );
+              "See `help set export html pictureurl'.") );
     return;
   }
 
@@ -3568,12 +3702,12 @@ CommandSetGeometryWidth ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
 
-
 }
+
 extern void
 CommandSetGeometryHeight ( char *sz ) {
 
@@ -3590,10 +3724,9 @@ CommandSetGeometryHeight ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
-
 
 }
 
@@ -3613,10 +3746,9 @@ CommandSetGeometryPosX ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
-
 
 }
 
@@ -3636,10 +3768,9 @@ CommandSetGeometryPosY ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
-
 
 }
 
@@ -3745,7 +3876,7 @@ CommandSetSoundSystemArtsc ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the ArtsC sound system" ) );
 
-#endif
+#endif /* HAVE_ARTSC */
 
 }
 
@@ -3780,7 +3911,7 @@ CommandSetSoundSystemESD ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the ESD sound system" ) );
 
-#endif
+#endif /* HAVE_ESD */
 
 }
 
@@ -3797,7 +3928,7 @@ CommandSetSoundSystemNAS ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the NAS sound system" ) );
 
-#endif
+#endif /* HAVE_NAS */
 
 }
 
@@ -3814,7 +3945,7 @@ CommandSetSoundSystemNormal ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "playing sounds to /dev/dsp" ) );
 
-#endif
+#endif /* !WIN32 */
 
 }
 
@@ -3831,7 +3962,24 @@ CommandSetSoundSystemWindows ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the MS Windows sound system" ) );
 
-#endif
+#endif /* WIN32 */
+
+}
+
+extern void
+CommandSetSoundSystemQuickTime ( char *sz ) {
+
+#ifdef __APPLE__
+
+  ssSoundSystem = SOUND_SYSTEM_QUICKTIME;
+  outputl ( _("GNU Backgammon will use the Apple QuickTime sound system" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "the Apple QuickTime sound system" ) );
+
+#endif /* __APPLE__ */
 
 }
 
@@ -3978,8 +4126,7 @@ CommandSetSoundSoundTake ( char *sz ) {
 
 }
 
-
-#endif
+#endif /* USE_SOUND */
 
 static void SetPriority( int n ) {
 
@@ -4022,7 +4169,7 @@ static void SetPriority( int n ) {
 		      "%s)\n"), pch );
 #else
     outputerrf( _("Priority changes are not supported on this platform.\n") );
-#endif
+#endif /* HAVE_SETPRIORITY */
 }
 
 extern void CommandSetPriorityAboveNormal ( char *sz ) {
@@ -4182,7 +4329,6 @@ CommandSetExportPNGSize ( char *sz ) {
 
 }
 
-
 static void
 SetVariation( const bgvariation bgvx ) {
 
@@ -4192,10 +4338,9 @@ SetVariation( const bgvariation bgvx ) {
 #if USE_GUI
     if( fX && ms.gs == GAME_NONE )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 
 }
-
 
 extern void
 CommandSetVariation1ChequerHypergammon( char *sz ) {
@@ -4240,4 +4385,154 @@ CommandSetGotoFirstGame( char *sz ) {
              _("Goto first game when loading matches or sessions."),
              _("Goto last game when loading matches or sessions.") );
 
+}
+
+
+static void
+SetEfficiency( const char *szText, char *sz, float *prX ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r >= 0.0f && r <= 1.0f ) {
+    *prX = r;
+    outputf( "%s: %7.5f\n", szText, *prX );
+  }
+  else
+    outputl( _("Cube efficiency must be between 0 and 1") );
+
+}
+
+extern void
+CommandSetCubeEfficiencyOS( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency for one sided bearoff positions"), 
+                 sz, &rOSCubeX );
+
+}
+
+extern void
+CommandSetCubeEfficiencyCrashed( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency for crashed positions"), sz, &rCrashedX );
+
+}
+
+extern void
+CommandSetCubeEfficiencyContact( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency for contact positions"), sz, &rContactX );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceFactor( char *sz ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r >= 0 ) {
+    rRaceFactorX = r;
+    outputf( _("Cube efficiency race factor set to %7.5f\n"), rRaceFactorX );
+  }
+  else
+    outputl( _("Cube efficiency race factor must be larger than 0.") );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceMax( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency race max"), sz, &rRaceMax );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceMin( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency race min"), sz, &rRaceMin );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceCoefficient( char *sz ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r >= 0 ) {
+    rRaceCoefficientX = r;
+    outputf( _("Cube efficiency race coefficienct set to %7.5f\n"), 
+             rRaceCoefficientX );
+  }
+  else
+    outputl( _("Cube efficiency race coefficient must be larger than 0.") );
+
+}
+
+
+extern void
+CommandSetBearoffSconyers15x15DVDEnable( char *sz ) {
+
+  SetToggle( "bearoff sconyers 15x15 dvd enable", 
+             &fSconyers15x15DVD, sz, 
+             _("Enable use of Hugh Sconyers' full bearoff "
+               "databases (browse only)"),
+             _("Disable use of Hugh Sconyers' full bearoff "
+               "databases (browse only)") );
+
+}
+
+extern void
+CommandSetBearoffSconyers15x15DVDPath( char *sz ) {
+
+  sz = NextToken( &sz );
+
+  if ( ! sz || ! *sz ) {
+    outputl ( _("You must specify a path.") );
+    return;
+  }
+
+  strcpy( szPathSconyers15x15DVD, sz );
+
+  outputf( _("Path to Hugh Sconyers' full bearoff databases on DVD is: %s\n"),
+           szPathSconyers15x15DVD );
+
+  /* update path in bearoffcontext */
+
+  if ( pbc15x15_dvd ) {
+    if ( pbc15x15_dvd->szDir )
+      free( pbc15x15_dvd->szDir );
+    pbc15x15_dvd->szDir = strdup( sz );
+  }
+  
+}
+
+extern void
+CommandSetBearoffSconyers15x15DiskEnable( char *sz ) {
+
+  CommandNotImplemented ( NULL );
+  SetToggle( "bearoff sconyers 15x15 disk enable", 
+             &fSconyers15x15Disk, sz, 
+             _("Enable use of Hugh Sconyers' full bearoff "
+               "databases for analysis and evaluations"),
+             _("Disable use of Hugh Sconyers' full bearoff "
+               "databases for analysis and evaluations") );
+
+}
+
+extern void
+CommandSetBearoffSconyers15x15DiskPath( char *sz ) {
+
+  CommandNotImplemented ( NULL );
+
+  sz = NextToken( &sz );
+
+  if ( ! sz || ! *sz ) {
+    outputl ( _("You must specify a path.") );
+    return;
+  }
+
+  strcpy( szPathSconyers15x15Disk, sz );
+
+  outputf( _("Path to Hugh Sconyers' full bearoff databases on disk is: %s\n"),
+           szPathSconyers15x15Disk );
+  
 }

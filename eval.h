@@ -33,13 +33,14 @@
 #define TRUE 1
 #endif
 
-#define WEIGHTS_VERSION "0.13"
-#define WEIGHTS_VERSION_BINARY 0.13f
+#define WEIGHTS_VERSION "0.14"
+#define WEIGHTS_VERSION_BINARY 0.14f
 #define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5
-#define NUM_ROLLOUT_OUTPUTS 7
 #define NUM_CUBEFUL_OUTPUTS 4
+#define MAX_ROLLOUT_CUBEINFO 16
+#define NUM_ROLLOUT_OUTPUTS 7
 
 #define BETA_HIDDEN 0.1
 #define BETA_OUTPUT 1.0
@@ -103,6 +104,12 @@ typedef struct _evalcontext {
     float        rNoise; /* standard deviation */
 } evalcontext;
 
+/* identifies the Rollout Context being written in sgf files. This should
+   be changed if the rollout context changes such that previous .sgf files
+   can't have their rollouts extended
+*/
+
+#define SGF_ROLLOUT_VER 1
 
 typedef struct _rolloutcontext {
 
@@ -124,18 +131,82 @@ typedef struct _rolloutcontext {
   unsigned short nLate; /* switch evaluations on move nLate of game */
   rng rngRollout;
   int nSeed;
-
+  unsigned int fStopOnSTD;    /* stop when std's are small enough */
+  unsigned int nMinimumGames; /* but always do at least this many */
+  double       rStdLimit;     /* stop when abs( value / std ) < this */
+  unsigned int fStopMoveOnJsd;    /* stop multi-line rollout when jsd is small enough */
+  unsigned int fStopOnJsd;
+  unsigned int nMinimumJsdGames;
+  double       rJsdLimit;
+  int nGamesDone;
+  int nSkip;
 } rolloutcontext;
 
+
+typedef struct {
+  float  rEquity;
+  float  rJSD;
+  int    nOrder;
+  int	 nRank;
+} jsdinfo;
 
 typedef enum _evaltype {
   EVAL_NONE, EVAL_EVAL, EVAL_ROLLOUT
 } evaltype;
 
+
+/* enumeration of variations of backgammon
+   (starting position and/or special rules) */
+
+typedef enum _bgvariation {
+  VARIATION_STANDARD,      /* standard backgammon */
+  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
+                            position */
+  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
+  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
+  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
+  NUM_VARIATIONS
+} bgvariation;
+
+extern bgvariation bgvDefault;
+
+extern int anChequers[ NUM_VARIATIONS ];
+extern char *aszVariations[ NUM_VARIATIONS ];
+extern char *aszVariationCommands[ NUM_VARIATIONS ];
+
+
+/*
+ * Cubeinfo contains the information necesary for evaluation
+ * of a position.
+ * These structs are placed here so that the move struct can be defined
+ */
+
+typedef struct _cubeinfo {
+    /*
+     * nCube: the current value of the cube,
+     * fCubeOwner: the owner of the cube,
+     * fMove: the player for which we are
+     *        calculating equity for,
+     * fCrawford, fJacoby, fBeavers: optional rules in effect,
+     * arGammonPrice: the gammon prices;
+     *   [ 0 ] = gammon price for player 0,
+     *   [ 1 ] = gammon price for player 1,
+     *   [ 2 ] = backgammon price for player 0,
+     *   [ 3 ] = backgammon price for player 1.
+     *
+     */
+    int nCube, fCubeOwner, fMove, nMatchTo, anScore[ 2 ], fCrawford, fJacoby,
+	fBeavers;
+    float arGammonPrice[ 4 ];
+    bgvariation bgv;
+} cubeinfo;
+
+
 typedef struct _evalsetup {
   evaltype et;
   evalcontext ec;
   rolloutcontext rc;
+
 } evalsetup;
 
 typedef enum _cubedecision {
@@ -195,8 +266,6 @@ extern const char *aszSettings[ NUM_SETTINGS ];
 extern const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
 extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
-
-
 typedef struct _move {
   int anMove[ 8 ];
   unsigned char auch[ 10 ];
@@ -209,51 +278,6 @@ typedef struct _move {
   evalsetup esMove;
 } move;
 
-/* enumeration of variations of backgammon
-   (starting position and/or special rules) */
-
-typedef enum _bgvariation {
-  VARIATION_STANDARD,      /* standard backgammon */
-  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
-                            position */
-  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
-  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
-  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
-  NUM_VARIATIONS
-} bgvariation;
-
-extern bgvariation bgvDefault;
-
-extern int anChequers[ NUM_VARIATIONS ];
-extern char *aszVariations[ NUM_VARIATIONS ];
-extern char *aszVariationCommands[ NUM_VARIATIONS ];
-
-
-/*
- * Cubeinfo contains the information necesary for evaluation
- * of a position.
- *
- */
-
-typedef struct _cubeinfo {
-    /*
-     * nCube: the current value of the cube,
-     * fCubeOwner: the owner of the cube,
-     * fMove: the player for which we are
-     *        calculating equity for,
-     * fCrawford, fJacoby, fBeavers: optional rules in effect,
-     * arGammonPrice: the gammon prices;
-     *   [ 0 ] = gammon price for player 0,
-     *   [ 1 ] = gammon price for player 1,
-     *   [ 2 ] = backgammon price for player 0,
-     *   [ 3 ] = backgammon price for player 1.
-     *
-     */
-    int nCube, fCubeOwner, fMove, nMatchTo, anScore[ 2 ], fCrawford, fJacoby,
-	fBeavers;
-    float arGammonPrice[ 4 ];
-    bgvariation bgv;
-} cubeinfo;
 
 extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
@@ -261,12 +285,15 @@ extern void ( *fnTick )( void );
 extern cubeinfo ciCubeless;
 extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
+extern int fUse15x15;
 
 extern bearoffcontext *pbc1;
 extern bearoffcontext *pbc2;
 extern bearoffcontext *pbcOS;
 extern bearoffcontext *pbcTS;
 extern bearoffcontext *apbcHyper[ 3 ];
+extern bearoffcontext *pbc15x15;
+extern bearoffcontext *pbc15x15_dvd;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -276,6 +303,18 @@ typedef struct _movelist {
     move *amMoves;
 } movelist;
 
+/* cube efficiencies */
+
+extern float rOSCubeX;
+extern float rRaceFactorX;
+extern float rRaceCoefficientX;
+extern float rRaceMax;
+extern float rRaceMin;
+extern float rCrashedX;
+extern float rContactX;
+
+/* position classes */
+
 typedef enum _positionclass {
     CLASS_OVER = 0,     /* Game already finished */
     CLASS_HYPERGAMMON1, /* hypergammon with 1 chequers */
@@ -283,6 +322,7 @@ typedef enum _positionclass {
     CLASS_HYPERGAMMON3, /* hypergammon with 3 chequers */
     CLASS_BEAROFF2,     /* Two-sided bearoff database (in memory) */
     CLASS_BEAROFF_TS,   /* Two-sided bearoff database (on disk) */
+    CLASS_BEAROFF_15x15,/* Hugh Sconyers complete bearoff database */
     CLASS_BEAROFF1,     /* One-sided bearoff database (in memory) */
     CLASS_BEAROFF_OS,   /* One-sided bearoff database /on disk) */
     CLASS_RACE,         /* Race neural network */
@@ -292,7 +332,7 @@ typedef enum _positionclass {
 
 #define N_CLASSES (CLASS_CONTACT + 1)
 
-#define CLASS_PERFECT CLASS_BEAROFF_TS
+#define CLASS_PERFECT CLASS_BEAROFF_15x15 
 
 #define CFMONEY(arEquity,pci) \
    ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
@@ -346,7 +386,7 @@ int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
 extern int 
 FindnSaveBestMoves( movelist *pml,
                     int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-                    unsigned char *auchMove,
+                    unsigned char *auchMove, const float rThr,
                     cubeinfo *pci, evalcontext *pec,
                     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
@@ -393,8 +433,8 @@ extern positionclass
 ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 
 /* internal use only */
-extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
-                                       float arOutput[] );
+extern int EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
+                             float arOutput[] );
 
 extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
@@ -425,11 +465,11 @@ swap( int *p0, int *p1 );
 extern void 
 SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
-extern void 
+extern int
 EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
               const bgvariation bgv );
 
-extern void
+extern int
 EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv );
 
 extern float 
@@ -442,12 +482,6 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
 extern int
 GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci );
-
-extern int 
-GetCubeActionSz ( float arDouble[ 4 ], 
-                  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                  char *szOutput, cubeinfo *pci,
-		  int fOutputMWC, int fOutputInvert );
 
 extern float
 mwc2eq ( const float rMwc, const cubeinfo *ci );
@@ -471,7 +505,7 @@ FindCubeDecision ( float arDouble[],
 extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, evalcontext *pec );
+                       cubeinfo *pci, evalcontext *pec, evalsetup *pes );
 
 extern int
 GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
@@ -580,5 +614,15 @@ equal_movefilters ( movefilter aamf1[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 
 extern doubletype
 DoubleType ( const int fDoubled, const int fMove, const int fTurn );
+
+extern int
+PerfectCubeful ( bearoffcontext *pbc, 
+                 int anBoard[ 2 ][ 25 ], float arEquity[] );
+
+extern void
+baseInputs(int anBoard[2][25], float arInput[]);
+
+extern void 
+CalculateRaceInputs(int anBoard[2][25], float inputs[]);
 
 #endif

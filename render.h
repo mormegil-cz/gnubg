@@ -104,6 +104,8 @@ typedef struct _renderdata {
     int fHinges; /* TRUE if hinges should be drawn */
     int fLabels; /* TRUE if point numbers should be drawn */
     int fClockwise; /* orientation for board point numbers */
+    int fDynamicLabels; /* TRUE if the point numbers are dynamic, i.e.,
+                           they adjust depending on the player on roll */
 #if USE_BOARD3D
 	displaytype fDisplayType;	/* 2d or 3d display */
 	int showShadows;	/* Show 3d shadows */
@@ -137,6 +139,7 @@ typedef struct _renderimages {
     unsigned char *achResignFaces;
     unsigned short *asRefract[ 2 ];
     unsigned char *auchArrow[ 2 ];
+    unsigned char *achLabels[ 2 ];
 } renderimages;
 
 extern renderdata rdDefault;
@@ -155,6 +158,12 @@ extern void AlphaBlend( unsigned char *puchDest, int nDestStride,
 			unsigned char *puchBack, int nBackStride,
 			unsigned char *puchFore, int nForeStride,
 			int cx, int cy );
+extern void AlphaBlendClip( unsigned char *puchDest, int nDestStride,
+			    int xDest, int yDest, int cxDest, int cyDest,
+			    unsigned char *puchBack, int nBackStride,
+			    int xBack, int yBack,
+			    unsigned char *puchFore, int nForeStride,
+			    int xFore, int yFore, int cx, int cy );
 extern void RefractBlend( unsigned char *puchDest, int nDestStride,
 			  unsigned char *puchBack, int nBackStride,
 			  unsigned char *puchFore, int nForeStride,
@@ -168,6 +177,12 @@ extern void RefractBlendClip( unsigned char *puchDest, int nDestStride,
 			      int xFore, int yFore,
 			      unsigned short *psRefract, int nRefractStride,
 			      int cx, int cy );
+extern void AlphaBlendClip2( unsigned char *puchDest, int nDestStride,
+			     int xDest, int yDest, int cxDest, int cyDest,
+			     unsigned char *puchBack, int nBackStride,
+			     int xBack, int yBack,
+			     unsigned char *puchFore, int nForeStride,
+			     int xFore, int yFore, int cx, int cy );
 extern void RenderBoard( renderdata *prd, unsigned char *puch, int nStride );
 extern void RenderChequers( renderdata *prd, unsigned char *puch0,
 			    unsigned char *puch1, unsigned short *psRefract0,
@@ -183,6 +198,15 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 extern void RenderPips( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride );
 extern void RenderImages( renderdata *prd, renderimages *pri );
+#if HAVE_LIBART
+extern void RenderArrows( renderdata *prd, unsigned char* puch0,
+			  unsigned char* puch1, int nStride );
+#endif
+
+extern void
+RenderBoardLabels( renderdata *prd, 
+                   unsigned char *achLo, unsigned char *achHi, int nStride );
+
 extern void FreeImages( renderimages *pri );
     
 extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,

@@ -80,6 +80,17 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <iconv.h>
 #endif
 
+#if USE_PYTHON
+#include <Python.h>
+#include <gnubgmodule.h>
+#endif
+
+#if HAVE_LIBGEN_H
+#include <libgen.h>
+#elif ! defined(HAVE_BASENAME) && ! defined (HAVE_DIRNAME )
+#include "simplelibgen.h"
+#endif
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -98,6 +109,8 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "rollout.h"
 #include "sound.h"
 #include "record.h"
+#include "progress.h"
+#include "format.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -184,8 +197,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
     fCubeUse = TRUE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
-    nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
+    nBeavers = 3, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
     nDefaultLength = 7;
@@ -200,6 +212,19 @@ int nThreadPriority = 0;
 int fCheat = FALSE;
 int afCheatRoll[ 2 ] = { 0, 0 };
 int fGotoFirstGame = FALSE;
+
+/* Setup for Hugh Sconyers 15x15 full bearoff */
+
+/* The DVD variables are used for the "show bearoff" command */
+
+int fSconyers15x15DVD = TRUE;            /* TRUE if you have Hugh's dvds */
+char szPathSconyers15x15DVD[ BIG_PATH ]; /* Path to Sconyers' databases */
+
+int fSconyers15x15Disk = FALSE;          /* TRUE if you have copied Hugh's
+                                            bearoff database to disk and
+                                            want to use it for evaluations and
+                                            analysis */
+char szPathSconyers15x15Disk[ BIG_PATH ];/* Path to Sconyers's databases */
 
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
@@ -299,7 +324,15 @@ rolloutcontext rcRollout =
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
-  0 /* seed */
+  0,  /* seed */
+  FALSE,  /* no stop on STD */
+  144,    /* minimum games  */
+  0.1,	  /* stop when std's are under 10% of value */
+  FALSE,  /* no stop on JSD */
+  FALSE,  /* no move stop on JSD */
+  144,    /* minimum games  */
+  1.96,   /* stop when best has j.s.d. for 95% confidence */
+
 };
 
 /* parameters for `eval' and `hint' */
@@ -439,7 +472,7 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTSEED[] = N_("[seed]"),
     szOPTSIZE[] = N_("[size]"),
     szOPTVALUE[] = N_("[value]"),
-    /* szPATH[] = N_("<path>"), */
+    szPATH[] = N_("<path>"),
     szPLAYER[] = N_("<player>"),
     szPLAYEROPTRATING[] = N_("<player> [rating]"),
     szPLIES[] = N_("<plies>"),
@@ -453,8 +486,10 @@ static char szDICE[] = N_("<die> <die>"),
     szTRIALS[] = N_("<trials>"),
     szVALUE[] = N_("<value>"),
     szMATCHID[] = N_("<matchid>"),
-    szURL[] = N_("<URL>");
-
+    szURL[] = N_("<URL>"),
+    szMAXERR[] = N_("<fraction>"),
+    szMINGAMES[] = N_("<minimum games to rollout>"),
+    szJSDS[] = N_("<joint standard deviations>");
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
     NULL, NULL, NULL, NULL, &cER
@@ -602,12 +637,12 @@ command cER = {
       N_("Records a log of the game "
       "in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportGamePostScript, NULL, szFILENAME, &cFilename },
-    { "text", CommandExportGameText, N_("Export a log of the game in text formet"), 
+    { "text", CommandExportGameText, N_("Export a log of the game in text format"), 
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
     { "equityevolution", CommandExportMatchEquityEvolution, 
-      N_("Exports the equity evolution of the match (for import into a spreadsheet"), 
+      N_("Exports the equity evolution of the match (for import into a spreadsheet)"), 
       szFILENAME, &cFilename },
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
       "format"), szFILENAME, &cFilename },
@@ -805,6 +840,40 @@ command cER = {
     { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, N_("Specify the "
       "equity loss for a very unlucky roll"), szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers15x15Disk[] = {
+  { "enable", CommandSetBearoffSconyers15x15DiskEnable, 
+    N_("Enable use of Hugh Sconyers' full bearoff database in evaluations"),
+    szONOFF, &cOnOff },
+  { "path", CommandSetBearoffSconyers15x15DiskPath, 
+    N_("Set path to Hugh Sconyers' bearoff databases"),
+    szPATH, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers15x15DVD[] = {
+  { "enable", CommandSetBearoffSconyers15x15DVDEnable, 
+    N_("Enable use of Hugh Sconyers' full bearoff database (browse only)"),
+    szONOFF, &cOnOff },
+  { "path", CommandSetBearoffSconyers15x15DVDPath, 
+    N_("Set path to Hugh Sconyers' bearoff databases"),
+    szPATH, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers15x15[] = {
+  { "disk", NULL, 
+    N_("Usage of Hugh Sconyer's full bearoff database for analysis "
+       "and evaluations"), NULL, acSetBearoffSconyers15x15Disk },
+  { "dvd", NULL, 
+    N_("Usage of Hugh Sconyer's full bearoff database (browse only) "),
+    NULL, acSetBearoffSconyers15x15DVD },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers[] = {
+  { "15x15", NULL, 
+    N_("Parameters for Hugh Sconyer's full bearoff database"),
+    NULL, acSetBearoffSconyers15x15 },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoff[] = {
+  { "sconyers", NULL, N_("Control parameters for gnubg's use of "
+                         "Hugh Sconyers' bearoff databases"),
+    NULL, acSetBearoffSconyers },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetEvalParam[] = {
   { "type", CommandSetEvalParamType,
     N_("Specify type (evaluation or rollout)"), szER, &cER },
@@ -872,6 +941,34 @@ command cER = {
     { "value", CommandSetCubeValue, 
       N_("Fix what the cube stake has been set to"),
       szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetCubeEfficiencyRace[] = {
+    { "factor", CommandSetCubeEfficiencyRaceFactor, 
+      N_("Set cube efficiency race factor"),
+      szVALUE, NULL },
+    { "coefficient", CommandSetCubeEfficiencyRaceCoefficient, 
+      N_("Set cube efficiency race coefficient"),
+      szVALUE, NULL },
+    { "min", CommandSetCubeEfficiencyRaceMin, 
+      N_("Set cube efficiency race minimum value"),
+      szVALUE, NULL },
+    { "max", CommandSetCubeEfficiencyRaceMax, 
+      N_("Set cube efficiency race maximum value"),
+      szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetCubeEfficiency[] = {
+    { "os", CommandSetCubeEfficiencyOS, 
+      N_("Set cube efficiency for one sided bearoff positions"),
+      szVALUE, NULL },
+    { "crashed", CommandSetCubeEfficiencyCrashed, 
+      N_("Set cube efficiency for crashed positions"),
+      szVALUE, NULL },
+    { "contact", CommandSetCubeEfficiencyContact, 
+      N_("Set cube efficiency for contact positions"),
+      szVALUE, NULL },
+    { "race", NULL, 
+      N_("Set cube efficiency parameters for race positions"),
+      szVALUE, acSetCubeEfficiencyRace },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetGeometryValues[] = {
     { "width", CommandSetGeometryWidth, N_("set width of window"), 
@@ -954,6 +1051,9 @@ command cER = {
     { "winpc", CommandSetOutputWinPC,
       N_("Show winning chances as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
+	{ "digits", CommandSetOutputDigits,
+	  N_("Set number of digits after the decimal point in outputs"),
+	  szVALUE, NULL},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
@@ -991,6 +1091,31 @@ command cER = {
       N_("Set parameters for choosing moves to evaluate"), 
       szFILTER, NULL},
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetRolloutLimit[] = {
+    { "enable", CommandSetRolloutLimitEnable,
+      N_("Stop rollouts when STD's are small enough"),
+      szONOFF, &cOnOff },
+    { "minimumgames", CommandSetRolloutLimitMinGames, 
+      N_("Always rollout at least this many games"),
+      szMINGAMES, NULL},
+    { "maxerror", CommandSetRolloutMaxError,
+      N_("Stop when all ratios |std/value| are less than this "),
+      szMAXERR, NULL},
+    { NULL, NULL, NULL, NULL, NULL }
+},acSetRolloutJsd[] = {
+  { "limit", CommandSetRolloutJsdLimit, 
+    N_("Stop when equities differ by this many j.s.d.s"),
+    szJSDS, NULL},
+  { "minimumgames", CommandSetRolloutJsdMinGames,
+      N_("Always rollout at least this many games"),
+      szMINGAMES, NULL},
+  { "move", CommandSetRolloutJsdMoveEnable,
+    N_("Stop rollout of move when J.S.D. is large enough"),
+    szONOFF, &cOnOff },
+  { "stop", CommandSetRolloutJsdEnable,
+    N_("Stop entire rollout when J.S.D.s are large enough"),
+    szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutPlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerChequerplay, 
       N_("Specify parameters "
@@ -1047,9 +1172,15 @@ command cER = {
       "rollout is cubeful or cubeless"), szONOFF, &cOnOff },
     { "initial", CommandSetRolloutInitial, 
       N_("Roll out as the initial position of a game"), szONOFF, &cOnOff },
+    { "jsd", CommandSetRolloutJsd, 
+      N_("Stop truncations based on j.s.d. of equities"),
+      NULL, acSetRolloutJsd},
     {"later", CommandSetRolloutLate,
      N_("Control evaluation parameters for later plies of rollout"),
      NULL, acSetRolloutLate },
+    {"limit", CommandSetRolloutLimit,
+     N_("Stop rollouts based on Standard Deviations"),
+     NULL, acSetRolloutLimit },
     { "movefilter", CommandSetRolloutMoveFilter, 
       N_("Set parameters for choosing moves to evaluate"), 
       szFILTER, NULL},
@@ -1322,6 +1453,8 @@ command cER = {
     N_("Play sounds to /dev/dsp or /dev/audio"), NULL, NULL },
   { "windows", CommandSetSoundSystemWindows, 
     N_("Use MS Windows API for playing sounds"), NULL, NULL },
+  { "quicktime", CommandSetSoundSystemQuickTime, 
+    N_("Use Apple QuickTime API for playing sounds"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetSoundSound[] = {
   { "agree", CommandSetSoundSoundAgree, 
@@ -1439,6 +1572,8 @@ command cER = {
       "graphical interface"), szKEYVALUE, NULL },
     { "automatic", NULL, N_("Perform certain functions without user input"),
       NULL, acSetAutomatic },
+    { "bearoff", NULL, N_("Control parameters for bearoff databases"),
+      NULL, acSetBearoff },
     { "beavers", CommandSetBeavers, 
       N_("Set whether beavers are allowed in money game or not"), 
       szONOFF, &cOnOff },
@@ -1460,6 +1595,8 @@ command cER = {
     { "crawford", CommandSetCrawford, 
       N_("Set whether this is the Crawford game"), szONOFF, &cOnOff },
     { "cube", NULL, N_("Set the cube owner and/or value"), NULL, acSetCube },
+    { "cubeefficiency", NULL, 
+      N_("Set parameters for cube evaluations"), NULL, acSetCubeEfficiency },
     { "delay", CommandSetDelay, N_("Limit the speed at which moves are made"),
       szMILLISECONDS, NULL },
     { "dice", CommandSetDice, N_("Select the roll for the current move"),
@@ -1544,6 +1681,8 @@ command cER = {
     { "beavers", CommandShowBeavers, 
       N_("Show whether beavers are allowed in money game or not"), 
       NULL, NULL },
+    { "bearoff", CommandShowBearoff, 
+      N_("Lookup data in various bearoff databases "), NULL, NULL },
     { "board", CommandShowBoard, 
       N_("Redisplay the board position"), szOPTPOSITION, NULL },
     { "cache", CommandShowCache, N_("Display statistics on the evaluation "
@@ -1565,6 +1704,8 @@ command cER = {
       N_("See if this is the Crawford game"), NULL, NULL },
     { "cube", CommandShowCube, N_("Display the current cube value and owner"),
       NULL, NULL },
+    { "cubeefficiency", CommandShowCubeEfficiency, 
+      N_("Show parameters for cube evaluations"), NULL, NULL },
     { "delay", CommandShowDelay, N_("See what the current delay setting is"), 
       NULL, NULL },
     { "dice", CommandShowDice, N_("See what the current dice roll is"), NULL,
@@ -1600,6 +1741,9 @@ command cER = {
       N_("Display auxiliary match information"), NULL, NULL },
     { "matchlength", CommandShowMatchLength,
       N_("Show default match length"), NULL, NULL },
+    { "matchresult", CommandShowMatchResult,
+      N_("Show the actual and luck adjusted result for each game "
+         "and the entire match"), NULL, NULL },
     { "met", CommandShowMatchEquityTable, 
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
     { "onechequer", CommandShowOneChequer, 
@@ -1753,6 +1897,9 @@ char *aszVersion[] = {
 #if USE_GUILE
     N_ ("Guile supported."),
 #endif
+#if USE_PYTHON
+    N_ ("Python supported."),
+#endif
 #if HAVE_LIBGDBM
     N_ ("Position databases supported."),
 #endif
@@ -1769,7 +1916,7 @@ char *aszVersion[] = {
     N_("Long RNG seeds supported."),
 #endif
 #if USE_SOUND
-    N_("Sound systems supported:"),
+    N_("Sound systems supported."),
 #   if HAVE_ARTSC
     N_("  ArtsC sound system"),
 #   endif
@@ -2405,6 +2552,9 @@ extern void HandleCommand( char *sz, command *ac ) {
     if( ac == acTop ) {
 	outputnew();
     
+	if( *sz == '#' ) /* Comment */
+          return;
+
 	if( *sz == '!' ) {
 	    /* Shell escape */
 	    for( pch = sz + 1; isspace( *pch ); pch++ )
@@ -2458,6 +2608,42 @@ extern void HandleCommand( char *sz, command *ac ) {
 #endif
 	    return;
 	}
+        else if ( *sz == '>' ) {
+
+          while ( *sz == '>' )
+            ++sz;
+
+          /* leading white space confuses Python :-) */
+
+          while ( isspace( *sz ) )
+            ++sz;
+
+#if USE_PYTHON
+#if USE_GTK
+	    if( fX )
+		GTKDisallowStdin();
+#endif
+          if ( *sz ) {
+            /* expression specified -- evalute it */
+
+            PyRun_SimpleString( sz );
+          }
+          else {
+            /* no expresision -- start python shell */
+            PyRun_SimpleString( "import sys; print 'Python', sys.version" );
+            PyRun_AnyFile( stdin, NULL );
+          }
+#if USE_GTK
+	    if( fX )
+		GTKAllowStdin();
+#endif
+#else
+	    outputl( _("This installation of GNU Backgammon was compiled "
+		     "without Python support.") );
+	    outputx();
+#endif
+            return;
+        }
     }
     
     if( !( pch = NextToken( &sz ) ) ) {
@@ -2565,12 +2751,11 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 			pms->fJacoby, nBeavers, pms->bgv );
 }
 
-static void DisplayCubeAnalysis( float arDouble[ 4 ], 
-                                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+static void DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                                 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                                  evalsetup *pes ) {
 
     cubeinfo ci;
-    char sz[ 1024 ];
 
     if( pes->et == EVAL_NONE )
 	return;
@@ -2580,10 +2765,9 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ],
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
 	return;
-    
-    GetCubeActionSz( arDouble, aarOutput, sz, &ci, fOutputMWC, FALSE );
 
-    outputl( sz );
+    outputl( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ) );
+    
 }
 
 extern char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
@@ -2609,7 +2793,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-        DisplayCubeAnalysis( pmr->n.arDouble, pmr->n.aarOutput,
+        DisplayCubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
                              &pmr->n.esDouble );
 
 	outputf( _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
@@ -2633,8 +2817,9 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 
     case MOVE_DOUBLE:
-      DisplayCubeAnalysis( pmr->d.arDouble, pmr->d.aarOutput,
-                             &pmr->n.esDouble );
+      DisplayCubeAnalysis( pmr->d.CubeDecPtr->aarOutput,
+                           pmr->d.CubeDecPtr->aarStdDev,
+                           &pmr->n.esDouble );
 	break;
 
     case MOVE_TAKE:
@@ -3174,7 +3359,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
       case EVAL_ROLLOUT:
         strcat ( sz,
                  OutputRolloutContext ( "        ",
-                                        &pml->amMoves[ i ].esMove.rc ) );
+                                        &pml->amMoves[ i ].esMove ) );
         break;
 
       default:
@@ -3261,7 +3446,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 
 	if( !i ) {
 	    if( fOutputWinPC )
-		sprintf( sz, _(" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		sprintf( sz, _(" %4i. %-14s   %-28s MWC: %7.3f%%\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n"),
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
@@ -3272,7 +3457,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz, _(" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		sprintf( sz, _(" %4i. %-14s   %-28s MWC: %7.3f%%\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n"),
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
@@ -3292,7 +3477,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 		strcpy( sz, "   ?? " );
 	    
 	    if( fOutputWinPC )
-		sprintf( sz + 6, _(" %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, _(" %-14s   %-28s MWC: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n"),
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
@@ -3303,7 +3488,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz + 6, _(" %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, _(" %-14s   %-28s MWC: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n"),
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
@@ -3320,247 +3505,306 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 #endif
 }
 
-extern void CommandHint( char *sz ) {
+
+static void
+HintCube( void ) {
+          
+  cubeinfo ci;
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+
+  GetMatchStateCubeInfo( &ci, &ms );
+    
+  if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) ) {
+      
+    /* no analysis performed yet */
+      
+    if ( GetDPEq ( NULL, NULL, &ci ) ) {
+        
+      /* calculate cube action */
+      
+      ProgressStart( _("Considering cube action...") );
+      if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+                                  &esEvalCube.ec, 0 ) < 0 ) {
+        ProgressEnd();
+        return;
+      }
+      ProgressEnd();
+      
+      UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
+      
+    } else {
+      
+      outputl( _("You cannot double.") );
+      return;
+      
+    }
+    
+  }
+
+#if USE_GTK
+  if ( fX ) {
+    GTKCubeHint( sc.aarOutput, sc.aarStdDev, &sc.es );
+    return;
+  }
+#endif
+
+  outputl( OutputCubeAnalysis( sc.aarOutput, sc.aarStdDev,
+                               &esEvalCube, &ci ) );
+
+}
+    
+
+static void
+HintResigned( void ) {
+
+  float rEqBefore, rEqAfter;
+  cubeinfo ci;
+  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  /* evaluate current position */
+
+  ProgressStart( _("Considering resignation...") );
+  if ( GeneralEvaluationE ( arOutput,
+                            ms.anBoard,
+                            &ci, &esEvalCube.ec ) < 0 ) {
+    ProgressEnd();
+    return;
+  }
+  ProgressEnd();
+  
+  getResignEquities ( arOutput, &ci, ms.fResigned, 
+                      &rEqBefore, &rEqAfter );
+  
+#if USE_GTK
+  if ( fX ) {
+    
+    GTKResignHint ( arOutput, rEqBefore, rEqAfter, &ci, 
+                    ms.nMatchTo && fOutputMWC );
+    
+    return;
+    
+  }
+#endif
+  
+  if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+    
+    outputf ( _("Equity before resignation: %+6.3f\n"),
+              - rEqBefore );
+    outputf ( _("Equity after resignation : %+6.3f (%+6.3f)\n\n"),
+              - rEqAfter, rEqBefore - rEqAfter );
+    outputf ( _("Correct resign decision  : %s\n\n"),
+              ( rEqBefore - rEqAfter >= 0 ) ?
+              _("Accept") : _("Reject") );
+    
+  }
+  else {
+    
+    rEqBefore = eq2mwc ( - rEqBefore, &ci );
+    rEqAfter  = eq2mwc ( - rEqAfter, &ci );
+    
+    outputf ( _("Equity before resignation: %6.2f%%\n"),
+              rEqBefore * 100.0f );
+    outputf ( _("Equity after resignation : %6.2f%% (%6.2f%%)\n\n"),
+              rEqAfter * 100.0f,
+              100.0f * ( rEqAfter - rEqBefore ) );
+    outputf ( _("Correct resign decision  : %s\n\n"),
+              ( rEqAfter - rEqBefore >= 0 ) ?
+              _("Accept") : _("Reject") );
+    
+  }
+  
+  return;
+  
+
+}
+
+
+static void
+HintTake( void ) {
+
+  cubeinfo ci;
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float arDouble[ 4 ];
+
+  /* Give hint on take decision */
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  ProgressStart( _("Considering cube action...") );
+  if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+                              &esEvalCube.ec, &esEvalCube ) < 0 ) {
+    ProgressEnd();
+    return;
+  }
+  ProgressEnd();
+
+  FindCubeDecision ( arDouble, aarOutput, &ci );
+	
+#if USE_GTK
+  if ( fX ) {
+    GTKCubeHint( aarOutput, aarStdDev, &esEvalCube );
+    return;
+  }
+#endif
+	
+  outputl ( _("Take decision:\n") );
+	
+  if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+	    
+    outputf ( _("Equity for take: %+6.3f\n"), -arDouble[ 2 ] );
+    outputf ( _("Equity for pass: %+6.3f\n\n"), -arDouble[ 3 ] );
+	    
+  }
+  else {
+    outputf ( _("MWC for take: %6.2f%%\n"), 
+              100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
+    outputf ( _("MWC for pass: %6.2f%%\n"), 
+              100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
+  }
+	
+  if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
+    outputl ( _("Your proper cube action: Beaver!\n") );
+  else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+    outputl ( _("Your proper cube action: Take.\n") );
+  else
+    outputl ( _("Your proper cube action: Pass.\n") );
+
+  return;
+	
+}
+    
+
+static void
+HintChequer( char *sz ) {
 
   movelist ml;
   int i;
   char szBuf[ 1024 ];
-  static float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  static cubeinfo ci;
   int n = ParseNumber ( &sz );
 #if USE_GTK
   int anMove[ 8 ];
 #endif
   unsigned char auch[ 10 ];
   int fHasMoved;
+  cubeinfo ci;
   
+  if ( n <= 0 )
+    n = 10;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+#if USE_GTK
+  if ( fX ) {
+    fHasMoved = GTKGetMove ( anMove );
+    if ( fHasMoved )
+      MoveKey ( ms.anBoard, anMove, auch );
+  }
+  else
+    fHasMoved = FALSE;
+#else
+  fHasMoved = FALSE;
+#endif /* ! USE_GTK */
+
+  if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
+
+    ProgressStart( _("Considering moves...") );
+    if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
+                            ms.anBoard, 
+                            fHasMoved ? auch : NULL, 
+                            arSkillLevel[ SKILL_DOUBTFUL ],
+                            &ci, &esEvalChequer.ec,
+                            aamfEval ) < 0 || fInterrupt ) {
+      ProgressEnd();
+      return;
+    }
+    ProgressEnd();
+	
+    UpdateStoredMoves ( &ml, &ms );
+
+    if ( ml.amMoves )
+      free ( ml.amMoves );
+
+  }
+
+  n = ( sm.ml.cMoves > n ) ? n : sm.ml.cMoves;
+
+  if( !sm.ml.cMoves ) {
+    outputl( _("There are no legal moves.") );
+    return;
+  }
+
+#if USE_GTK
+  if( fX ) {
+    GTKHint( &sm.ml, locateMove ( ms.anBoard, anMove, &sm.ml ) );
+    return;
+  }
+#endif
+	
+  for( i = 0; i < n; i++ )
+    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, 
+                            TRUE, TRUE, TRUE ) );
+
+}
+
+
+
+
+extern void CommandHint( char *sz ) {
+
   if( ms.gs != GAME_PLAYING ) {
     outputl( _("You must set up a board first.") );
     
     return;
   }
+
+  /* hint on cube decision */
   
   if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
-    GetMatchStateCubeInfo( &ci, &ms );
-    
-    if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) ) {
-      
-      /* no analysis performed yet */
-      
-      if ( GetDPEq ( NULL, NULL, &ci ) ) {
-        
-        /* calculate cube action */
-        
-        ProgressStart( _("Considering cube action...") );
-        if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-                                    &esEvalCube.ec ) < 0 ) {
-          ProgressEnd();
-          return;
-        }
-        ProgressEnd();
-        
-        UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
-        
-      } else {
-        
-        outputl( _("You cannot double.") );
-        return;
-        
-      }
-  
-    }
-    
-      
-#if USE_GTK
-    if ( fX ) {
-      GTKCubeHint( sc.aarOutput, sc.aarStdDev, &sc.es );
-      return;
-    }
-#endif
-    FindCubeDecision ( arDouble, aarOutput, &ci );  
-    
-    GetCubeActionSz ( arDouble, aarOutput,
-                      szBuf, &ci, fOutputMWC, FALSE );
-    
-    outputl ( szBuf );
-    
+    HintCube();
     return;
-
   }
-    
 
-    /* Give hints on resignation */
+  /* Give hint on resignation */
 
-    if ( ms.fResigned ) {
+  if ( ms.fResigned ) {
+    HintResigned();
+    return;
+  }
 
-      float rEqBefore, rEqAfter;
+  /* Give hint on take decision */
 
-      GetMatchStateCubeInfo( &ci, &ms );
+  if ( ms.fDoubled ) {
+    HintTake();
+    return;
+  }
 
-      /* evaluate current position */
+  /* Give hint on chequer play decision */
 
-      ProgressStart( _("Considering resignation...") );
-      if ( GeneralEvaluationE ( aarOutput[ 0 ],
-                                ms.anBoard,
-                                &ci, &esEvalCube.ec ) < 0 ) {
-	  ProgressEnd();
-	  return;
-      }
-      ProgressEnd();
-      
-      getResignEquities ( aarOutput[ 0 ], &ci, ms.fResigned, 
-                          &rEqBefore, &rEqAfter );
+  if ( ms.anDice[ 0 ] ) {
+    HintChequer( sz );
+    return;
+  }
 
-#if USE_GTK
-      if ( fX ) {
-        
-        GTKResignHint ( aarOutput[ 0 ], rEqBefore, rEqAfter, &ci, 
-                        ms.nMatchTo && fOutputMWC );
+}
 
-        return;
+static void
+Shutdown( void ) {
 
-      }
+  EvalShutdown();
+
+#if USE_PYTHON
+  PythonShutdown();
 #endif
 
-      if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
-
-        outputf ( _("Equity before resignation: %+6.3f\n"),
-                  - rEqBefore );
-        outputf ( _("Equity after resignation : %+6.3f (%+6.3f)\n\n"),
-                  - rEqAfter, rEqBefore - rEqAfter );
-        outputf ( _("Correct resign decision  : %s\n\n"),
-                  ( rEqBefore - rEqAfter >= 0 ) ?
-                  _("Accept") : _("Reject") );
-
-      }
-      else {
-        
-        rEqBefore = eq2mwc ( - rEqBefore, &ci );
-        rEqAfter  = eq2mwc ( - rEqAfter, &ci );
-
-        outputf ( _("Equity before resignation: %6.2f%%\n"),
-                  rEqBefore * 100.0f );
-        outputf ( _("Equity after resignation : %6.2f%% (%6.2f%%)\n\n"),
-                  rEqAfter * 100.0f,
-                  100.0f * ( rEqAfter - rEqBefore ) );
-        outputf ( _("Correct resign decision  : %s\n\n"),
-                  ( rEqAfter - rEqBefore >= 0 ) ?
-                  _("Accept") : _("Reject") );
-
-      }
-
-      return;
-
-
-    }
-
-    if ( ms.fDoubled ) {
-	/* Give hint on take decision */
-	GetMatchStateCubeInfo( &ci, &ms );
-
-	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-				    &esEvalCube.ec ) < 0 ) {
-	    ProgressEnd();
-	    return;
-	}
-	ProgressEnd();
-
-        FindCubeDecision ( arDouble, aarOutput, &ci );
-	
-#if USE_GTK
-	if ( fX ) {
-          GTKCubeHint( aarOutput, aarStdDev, &esEvalCube );
-	    return;
-	}
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+    WSACleanup();
 #endif
-	
-	outputl ( _("Take decision:\n") );
-	
-	if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
-	    
-	    outputf ( _("Equity for take: %+6.3f\n"), -arDouble[ 2 ] );
-	    outputf ( _("Equity for pass: %+6.3f\n\n"), -arDouble[ 3 ] );
-	    
-	}
-	else {
-	    outputf ( _("Mwc for take: %6.2f%%\n"), 
-		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-	    outputf ( _("Mwc for pass: %6.2f%%\n"), 
-		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
-	}
-	
-	if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
-	    outputl ( _("Your proper cube action: Beaver!\n") );
-	else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-	    outputl ( _("Your proper cube action: Take.\n") );
-	else
-	    outputl ( _("Your proper cube action: Pass.\n") );
-	
-	return;
-	
-    }
-    
-    if ( ms.anDice[ 0 ] ) {
-
-	/* Give hints on move */
-	
-	if ( n <= 0 )
-	    n = 10;
-
-	GetMatchStateCubeInfo( &ci, &ms );
-
-#if USE_GTK
-        if ( fX ) {
-           fHasMoved = GTKGetMove ( anMove );
-           if ( fHasMoved )
-              MoveKey ( ms.anBoard, anMove, auch );
-        }
-        else
-           fHasMoved = FALSE;
-#else
-        fHasMoved = FALSE;
-#endif /* ! USE_GTK */
-
-        if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
-
-          ProgressStart( _("Considering moves...") );
-          if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                                  ms.anBoard, 
-                                  fHasMoved ? auch : NULL, &ci,
-                                  &esEvalChequer.ec,
-                                  aamfEval ) < 0 || fInterrupt ) {
-	    ProgressEnd();
-	    return;
-          }
-          ProgressEnd();
-	
-          UpdateStoredMoves ( &ml, &ms );
-
-          if ( ml.amMoves )
-            free ( ml.amMoves );
-
-        }
-
-        n = ( sm.ml.cMoves > n ) ? n : sm.ml.cMoves;
-
-	if( !sm.ml.cMoves ) {
-	    outputl( _("There are no legal moves.") );
-	    return;
-	}
-
-#if USE_GTK
-	if( fX ) {
-            GTKHint( &sm.ml, locateMove ( ms.anBoard, anMove, &sm.ml ) );
-	    return;
-	}
 #endif
-	
-	for( i = 0; i < n; i++ )
-	    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, 
-                                    TRUE, TRUE, TRUE ) );
-    }
+
 }
 
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
@@ -3616,13 +3860,13 @@ extern void PromptForExit( void ) {
     
     SoundWait();
 
-    EvalShutdown ();
+    Shutdown();
     
 #if USE_BOARD3D
 	Tidy3dObjects(bd, TRUE);
 #endif
 
-	exit( EXIT_SUCCESS );
+    exit( EXIT_SUCCESS );
 }
 
 extern void CommandNotImplemented( char *sz ) {
@@ -3635,18 +3879,6 @@ extern void CommandQuit( char *sz ) {
     PromptForExit();
 }
 
-
-extern char *FormatCubePosition ( char *sz, cubeinfo *pci ) {
-
-  if ( pci->fCubeOwner == -1 )
-    sprintf ( sz, _("Centered %d-cube"), pci->nCube );
-  else 
-    sprintf ( sz, _("Player %s owns %d-cube"),
-              ap[ pci->fCubeOwner ].szName, pci->nCube );
-
-  return sz;
-
-}
 
 static move *
 GetMove ( int anBoard[ 2 ][ 25 ] ) {
@@ -3674,31 +3906,29 @@ GetMove ( int anBoard[ 2 ][ 25 ] ) {
 extern void 
 CommandRollout( char *sz ) {
     
-    float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-    int i, c, n, fOpponent = FALSE, cGames, fCubeDecTop = TRUE;
+    int i, c, n, fOpponent = FALSE, cGames;
     cubeinfo ci;
-    move *pm;
+    move *pm = 0;
+
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
-    rolloutstat ( *aars)[ 2 ];
 #else
     int aan[ 10 ][ 2 ][ 25 ];
     char asz[ 10 ][ 40 ];
-    rolloutstat aars[ 10 ][ 2 ];
 #endif
 
-    if( !( c = CountTokens( sz ) ) ) {
-	if( ms.gs != GAME_PLAYING ) {
-	    outputl( _("No position specified and no game in progress.") );
-	    return;
-	} else
-	    c = 1; /* current position */
-    }
-    else if ( rcRollout.fInitial ) {
+  if( !( c = CountTokens( sz ) ) ) {
+    if( ms.gs != GAME_PLAYING ) {
+      outputl( _("No position specified and no game in progress.") );
+      return;
+    } else
+      c = 1; /* current position */
+  }
+  else if ( rcRollout.fInitial ) {
 
-      if ( c == 1 && ! strncmp ( sz, _("=cube"), 5 ) )
-        outputl ( _("You cannot do a cube decision rollout for the initial"
+    if ( c == 1 && ! strncmp ( sz, _("=cube"), 5 ) )
+      outputl ( _("You cannot do a cube decision rollout for the initial"
                   " position.\n"
                   "Please 'set rollout initial off'.") );
       else
@@ -3706,68 +3936,80 @@ CommandRollout( char *sz ) {
                   "Please 'set rollout initial off'.") );
       
       return;
-    }
+  }
 
-    /* check for `rollout =cube' */    
-    if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
-      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-      rolloutstat aarsStatistics[ 2 ][ 2 ];
+  /* check for `rollout =cube' */    
+  if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    rolloutstat aarsStatistics[ 2 ][ 2 ];
+    void *p;
+    char aszCube[ 2 ][ 40 ];
 
-      evalsetup es;
+    evalsetup es;
 
-      if( ms.gs != GAME_PLAYING ) {
-	  outputl( _("No game in progress.") );
-	  return;
-      }
-
-      GetMatchStateCubeInfo( &ci, &ms );
-
-      GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
-                             ms.anBoard, &ci, &rcRollout );
-
-      es.et = EVAL_ROLLOUT;
-      es.rc = rcRollout;
-      UpdateStoredCube ( aarOutput, aarStdDev, &es, &ms );
-
+    if( ms.gs != GAME_PLAYING ) {
+      outputl( _("No game in progress.") );
       return;
-
     }
+
+    es.et = EVAL_NONE;
+    memcpy (&es.rc, &rcRollout, sizeof (rcRollout));
+
+    GetMatchStateCubeInfo( &ci, &ms );
+
+    FormatCubePositions( &ci, aszCube );
+
+    RolloutProgressStart( &ci, 2, aarsStatistics, &es.rc, aszCube, &p );
+    
+    GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
+			   ms.anBoard, &ci, &es.rc, &es, RolloutProgress, p );
+
+    UpdateStoredCube ( aarOutput, aarStdDev, &es, &ms );
+
+    RolloutProgressEnd( &p );
+
+    /* bring up Hint-dialog with cube rollout */
+    HintCube();
+
+    return;
+
+  }
 
 
 #if HAVE_ALLOCA
     aan = alloca( 50 * c * sizeof( int ) );
     asz = alloca( 40 * c );
-    aars = alloca( 2 * c * sizeof ( rolloutstat ) );
+
 #else
     if( c > 10 )
 	c = 10;
 #endif
     
     for( i = 0; i < c; i++ ) {
-	if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
-	    return;
-	else if( n ) {
-	    if( ms.fMove )
-		SwapSides( aan[ i ] );
+      if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
+		return;
+      else if( n ) {
+		if( ms.fMove )
+		  SwapSides( aan[ i ] );
 	    
-	    fOpponent = TRUE;
-	}
+		fOpponent = TRUE;
+      }
 
-	if( !sz ) {
-	    /* that was the last parameter */
-	    c = i + 1;
-	    break;
-	}
+      if( !sz ) {
+		/* that was the last parameter */
+		c = i + 1;
+		break;
+      }
     }
 
     /*
-    if( fOpponent ) {
-	an[ 0 ] = ms.anScore[ 1 ];
- 	an[ 1 ] = ms.anScore[ 0 ];
+      if( fOpponent ) {
+      an[ 0 ] = ms.anScore[ 1 ];
+      an[ 1 ] = ms.anScore[ 0 ];
     } else {
-	an[ 0 ] = ms.anScore[ 0 ];
-	an[ 1 ] = ms.anScore[ 1 ];
+    an[ 0 ] = ms.anScore[ 0 ];
+    an[ 1 ] = ms.anScore[ 1 ];
     }
     */
     
@@ -3775,98 +4017,114 @@ CommandRollout( char *sz ) {
 		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
                   nBeavers, ms.bgv );
 
-#if USE_GTK
-    if( fX )
-	GTKRollout( c, asz, rcRollout.nTrials, aars );
-    else
+    {
+      /* create all the explicit pointer arrays for RolloutGeneral */
+      /* cdecl is your friend */
+      float aarNoOutput[ NUM_ROLLOUT_OUTPUTS ];
+      float aarNoStdDev[ NUM_ROLLOUT_OUTPUTS ];
+      evalsetup NoEs;
+      int false = FALSE;
+      void *p;
+#if HAVE_ALLOCA
+      int         (** apBoard)[2][25];
+      float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
+      float       (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ];
+      evalsetup   (** apes);
+      cubeinfo    (** apci);
+      int         (** apCubeDecTop);
+      move	  (** apMoves);
+
+      apBoard = alloca (c * sizeof (int *));
+      apOutput = alloca (c * sizeof (float *));
+      apStdDev = alloca (c * sizeof (float *));
+      apes = alloca (c * sizeof (evalsetup *));
+      apci = alloca (c * sizeof (cubeinfo *));
+      apCubeDecTop = alloca (c * sizeof (int *));
+      apMoves = alloca (c * sizeof (move *));
+
+#else
+      int         (*apBoard[10])[2][25];
+      float       (*apOutput[10])[2][25];
+      float       (*apStdDev[10])[2][25];
+      evalsetup   (*apes[10]);
+      cubeinfo    (*apci[10]);
+      int         (*apCubeDecTop[10]);
+      move        (*apMoves[10]);
+
 #endif
-      outputl( _("                               Win  W(g) W(bg)  L(g) L(bg) "
-		 "Equity   Cube E    n" ) );
-	
-    for( i = 0; i < c; i++ ) {
-#if USE_GTK
-	if( fX )
-	    GTKRolloutRow( i );
-#endif
-	if( ( cGames = RolloutGeneral( aan[ i ], &asz[ i ], &ar, &arStdDev,
-                                       &aars[ i ], &rcRollout, &ci,
-                                       &fCubeDecTop, 1, fOpponent ) ) <= 0 )
-	    return;
 
-        /* save in current movelist */
-
-        if ( fOpponent ) {
-
-          /* it was the =1 =2 notation */
-
-          if ( ( pm = GetMove ( aan[ i ] ) ) ) {
-
-            cubeinfo cix;
-
-            memcpy( &cix, &ci, sizeof( cubeinfo ) );
-            cix.fMove = ! cix.fMove;
-
-            memcpy ( pm->arEvalMove, ar, 
-                     NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-            memcpy ( pm->arEvalStdDev, arStdDev, 
-                     NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-            
-            /* Save evaluation setup */
-            pm->esMove.et = EVAL_ROLLOUT;
-            pm->esMove.rc = rcRollout;
-            
-            /* Score for move:
-               rScore is the primary score (cubeful/cubeless)
-               rScore2 is the secondary score (cubeless) */
-            
-            if ( rcRollout.fCubeful ) {
-              if ( cix.nMatchTo )
-                pm->rScore = 
-                  mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &cix );
-              else
-                pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
-  }
-            else
-              pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
-            
-            pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
-
-            
-
-          }
-
-        }
-
-#if USE_GTK
-	if( !fX )
-#endif
-	    {
-		if( rcRollout.fCubeful )
-		    outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
-			     "%6.3f %4d\n"
-			     "              Standard error %5.3f %5.3f %5.3f "
-			     "%5.3f %5.3f (%6.3f) %6.3f\n\n"),
-			     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
-			     ar[ 4 ], ar[ 5 ],ar[ 6 ], cGames, arStdDev[ 0 ],
-			     arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-			     arStdDev[ 4 ], arStdDev[ 5 ], arStdDev[ 6 ] );
-		else
-		    outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    "
-			     "n/a %4d\n"
-			     "              Standard error %5.3f %5.3f %5.3f "
-			     "%5.3f %5.3f (%6.3f)    n/a\n\n" ),
-			     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
-			     ar[ 4 ], ar[ 5 ], cGames, arStdDev[ 0 ],
-			     arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-			     arStdDev[ 4 ], arStdDev[ 5 ] );
-
-	    }
-    }
+      for( i = 0; i < c; i++ ) {
+	/* set up to call RolloutGeneral for all the moves at once */
+	if ( fOpponent ) 
+	  apMoves[ i ] = pm = GetMove ( aan[ i ] );
     
-#if USE_GTK
-    if( fX )
-	GTKRolloutDone();
-#endif	
+	apBoard[ i ] = aan + i;
+	if (pm) {
+	  apOutput[ i ] = &pm->arEvalMove;
+	  apStdDev[ i ] = &pm->arEvalStdDev;
+	  apes[ i ] = &pm->esMove;
+	} else {
+	  apOutput[ i ] = &aarNoOutput;
+	  apStdDev[ i ] = &aarNoStdDev;
+	  apes[ i ] = &NoEs;
+	  memcpy (&NoEs.rc, &rcRollout, sizeof (rolloutcontext));
+	}
+	apci[ i ] = &ci;
+	apCubeDecTop[ i ] = &false;
+      }
+
+      RolloutProgressStart (&ci, c, NULL, &rcRollout, asz, &p);
+
+      if( ( cGames = 
+	    RolloutGeneral( apBoard, apOutput, apStdDev,
+			    NULL, apes, apci,
+			    apCubeDecTop, c, fOpponent, FALSE,
+                           RolloutProgress, p )) <= 0 ) {
+        RolloutProgressEnd( &p );
+	return;
+      }
+      
+      RolloutProgressEnd( &p );
+
+      /* save in current movelist */
+
+      if ( fOpponent ) {
+        for (i = 0; i < c; ++i) {
+          
+          move *pm = apMoves[ i ];
+          /* it was the =1 =2 notation */
+          
+          cubeinfo cix;
+          
+          memcpy( &cix, &ci, sizeof( cubeinfo ) );
+          cix.fMove = ! cix.fMove;
+          
+          /* Score for move:
+             rScore is the primary score (cubeful/cubeless)
+             rScore2 is the secondary score (cubeless) */
+          
+          if ( pm->esMove.rc.fCubeful ) {
+            if ( cix.nMatchTo )
+              pm->rScore = 
+                mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &cix );
+            else
+              pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
+          }
+          else
+            pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
+          
+          pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
+          
+        }
+        
+        /* bring up Hint-dialog with chequerplay rollout */
+        HintChequer( NULL );
+      
+      }
+
+
+    }
+
 }
 
 static void ExportGameJF( FILE *pf, list *plGame, int iGame,
@@ -3942,7 +4200,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	case MOVE_SETCUBEPOS:
 	    if( !fWarned ) {
 		fWarned = TRUE;
-		outputl( _("Warning: this game was edited during play, and "
+		outputl( _("Warning: this game was edited during play and "
 			 "cannot be recorded in this format.") );
 	    }
 	    break;
@@ -4070,7 +4328,41 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 	    continue;
 	}
 #endif
-	
+
+#if USE_PYTHON
+
+        if ( ! strcmp( sz, ">" ) ) {
+
+          /* Python escape. */
+
+          /* Ideally we should be able to handle both
+           * > print 1+1
+           * and
+           * >
+           * print 1+1
+           * sys.exit()
+           *
+           * but so far we only handle the latter...
+           */
+
+#  if USE_GTK
+          if( fX )
+            GTKDisallowStdin();
+#  endif
+
+          assert( FALSE ); /* FIXME... */
+
+#if USE_GTK
+          if( fX )
+            GTKAllowStdin();
+#endif
+          
+          continue;
+
+        }
+
+#endif /* USE_PYTHON */
+
 	HandleCommand( sz, acTop );
 
 	/* FIXME handle NextTurn events? */
@@ -4101,6 +4393,7 @@ extern void CommandLoadCommands( char *sz ) {
 extern void CommandImportBKG( char *sz ) {
     
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4111,8 +4404,11 @@ extern void CommandImportBKG( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportBKG( pf, sz );
+        rc = ImportBKG( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_BKG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4123,6 +4419,7 @@ extern void CommandImportBKG( char *sz ) {
 extern void CommandImportJF( char *sz ) {
 
     FILE *pf;
+    int rc;
 
     sz = NextToken( &sz );
     
@@ -4133,7 +4430,10 @@ extern void CommandImportJF( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "rb" ) ) ) {
-	ImportJF( pf, sz );
+        rc = ImportJF( pf, sz );
+        if ( rc )
+          /* no file imported */
+          return;
 	fclose( pf );
         setDefaultFileName ( sz, PATH_POS );
     } else
@@ -4145,6 +4445,7 @@ extern void CommandImportJF( char *sz ) {
 extern void CommandImportMat( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4155,8 +4456,11 @@ extern void CommandImportMat( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportMat( pf, sz );
+        rc = ImportMat( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_MAT );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4167,6 +4471,7 @@ extern void CommandImportMat( char *sz ) {
 extern void CommandImportOldmoves( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4177,8 +4482,11 @@ extern void CommandImportOldmoves( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportOldmoves( pf, sz );
+	rc = ImportOldmoves( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_OLDMOVES );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4190,6 +4498,7 @@ extern void CommandImportOldmoves( char *sz ) {
 extern void CommandImportSGG( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4200,8 +4509,11 @@ extern void CommandImportSGG( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportSGG( pf, sz );
+	rc = ImportSGG( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_SGG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4212,6 +4524,7 @@ extern void CommandImportSGG( char *sz ) {
 extern void CommandImportTMG( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4222,8 +4535,11 @@ extern void CommandImportTMG( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportTMG( pf, sz );
+	rc = ImportTMG( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_TMG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4234,6 +4550,7 @@ extern void CommandImportTMG( char *sz ) {
 extern void CommandImportSnowieTxt( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4244,8 +4561,11 @@ extern void CommandImportSnowieTxt( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportSnowieTxt( pf );
+	rc = ImportSnowieTxt( pf );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_SNOWIE_TXT );
     } else
 	outputerr( sz );
@@ -4530,7 +4850,7 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 	/* don't save user RNGs */
 	break;
     case RNG_FILE:
-        fprintf( pf, "%s rng file %s\n", sz, szDiceFilename );
+        fprintf( pf, "%s rng file \"%s\"\n", sz, szDiceFilename );
 	break;
     default:
         break;
@@ -4598,7 +4918,14 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s trials %d\n"
             "%s cube-equal-chequer %s\n"
             "%s players-are-same %s\n"
-            "%s truncate-equal-player0 %s\n",
+            "%s truncate-equal-player0 %s\n"
+            "%s limit enable %s\n"
+            "%s limit minimumgames %d\n"
+            "%s limit maxerror %05.4f\n"
+	    "%s jsd stop %s\n"
+            "%s jsd move %s\n"
+            "%s jsd minimumgames %d\n"
+            "%s jsd limit %05.4f\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -4612,7 +4939,14 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->nTrials,
             sz, fCubeEqualChequer ? "on" : "off",
             sz, fPlayersAreSame ? "on" : "off",
-            sz, fTruncEqualPlayer0 ? "on" : "off"
+            sz, fTruncEqualPlayer0 ? "on" : "off",
+	    sz, prc->fStopOnSTD ? "on" : "off",
+	    sz, prc->nMinimumGames,
+	    sz, prc->rStdLimit,
+            sz, prc->fStopOnJsd ? "on" : "off",
+            sz, prc->fStopMoveOnJsd ? "on" : "off",
+            sz, prc->nMinimumJsdGames,
+            sz, prc->rJsdLimit
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout );
@@ -4781,6 +5115,20 @@ extern void CommandSaveSettings( char *szParam ) {
       fprintf( pf, "set analysis player %d analyse %s\n",
                i, afAnalysePlayers[ i ] ? "yes" : "no" );
 
+    /* Bearoff Settings */
+
+    fprintf( pf,
+             "set bearoff sconyers 15x15 dvd enable %s\n"
+             "set bearoff sconyers 15x15 dvd path \"%s\"\n",
+             fSconyers15x15DVD ? "yes" : "no",
+             szPathSconyers15x15DVD ? szPathSconyers15x15DVD : "" );
+
+    fprintf( pf,
+             "set bearoff sconyers 15x15 disk enable %s\n"
+             "set bearoff sconyers 15x15 disk path \"%s\"\n",
+             fSconyers15x15Disk ? "yes" : "no",
+             szPathSconyers15x15Disk ? szPathSconyers15x15Disk : "" );
+
     /* Render preferences */
 
     fputs( RenderPreferencesCommand( &rdAppearance, szTemp ), pf );
@@ -4874,11 +5222,13 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set output matchpc %s\n"
 	     "set output mwc %s\n"
 	     "set output rawboard %s\n"
-	     "set output winpc %s\n",
+	     "set output winpc %s\n"
+             "set output digits %d\n",
 	     fOutputMatchPC ? "on" : "off",
 	     fOutputMWC ? "on" : "off",
 	     fOutputRawboard ? "on" : "off",
-	     fOutputWinPC ? "on" : "off" );
+	     fOutputWinPC ? "on" : "off",
+             fOutputDigits );
     
     for( i = 0; i < 2; i++ ) {
 	fprintf( pf, "set player %d name %s\n", i, ap[ i ].szName );
@@ -6397,6 +6747,7 @@ _("Usage: %s [options] [saved-game-file]\n"
 "  -q, --quiet               Disable sound effects\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 "  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
+"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
 "  -t, --tty                 Start on tty instead of using window system\n"
 "  -v, --version             Show version information and exit\n"
 "  -w, --window-system-only  Ignore tty input when using window system\n"
@@ -6417,6 +6768,7 @@ _("Usage: %s [options] [saved-game-file]\n"
 "  -q, --quiet               Disable sound effects\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 "  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
+"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
 "  -v, --version             Show version information and exit\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
@@ -6430,7 +6782,7 @@ static void version( void ) {
     char **ppch = aszVersion;
 
     while( *ppch )
-	puts( *ppch++ );
+      puts( gettext( *ppch++ ) );
 }
 
 #if HAVE_FORK
@@ -6447,9 +6799,44 @@ static RETSIGTYPE SoundChild ( int n ) {
 
 #endif /* HAVE_FORK */
 
+
+static char *
+ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
+
+  char *pch;
+  char *pchToken;
+
+#if USE_GTK
+  if ( fX )
+    return GTKChangeDisk( szMsg, fChange, szMissingFile );
+
+#endif
+
+  outputf( szMsg, szMissingFile );
+  outputl( "" );
+
+  if ( ( pch = GetInput( _("Enter new path or press "
+                           "[enter] if unchanged") ) ) ) {
+    printf( "path returned: '%s'\n", pch );
+    pchToken = pch;
+    if ( NextToken( &pchToken ) ) {
+      pchToken = strdup( pchToken );
+      free( pch );
+      printf( "return '%s'\n", pchToken );
+      return pchToken;
+    }
+    free( pch );
+  }
+
+  printf( "nada...\n");
+  return NULL;
+
+}
+
 static void real_main( void *closure, int argc, char *argv[] ) {
 
-    char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
+    char ch, *pch, *pchCommands = NULL, *pchGuileScript = NULL;
+    char *pchPythonScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
     int i, j;
     int fSplash = TRUE;
@@ -6472,6 +6859,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	{ "commands", required_argument, NULL, 'c' },
         { "help", no_argument, NULL, 'h' },
 	{ "script", required_argument, NULL, 's' },
+	{ "python", required_argument, NULL, 'p' },
         { "tty", no_argument, NULL, 't' },
         { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -6514,11 +6902,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     opterr = 0;
     
-    while( ( ch = getopt_long( argc, argv, "cd:hstv", ao + sizeof( ao ) /
+    while( ( ch = getopt_long( argc, argv, "cd:hsptv", ao + sizeof( ao ) /
 			       sizeof( ao[ 0 ] ) - 7, NULL ) ) != (char) -1 )
 	switch( ch ) {
-	case 's': /* script */
+	case 's': /* guile script */
 	case 'c': /* commands */
+        case 'p': /* python script */
 	case 't': /* tty */
 #ifdef WIN32
          /* Bad hack */
@@ -6603,7 +6992,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 		
-    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:tvwS", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwS", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -6632,14 +7021,23 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'r': /* no-rc */
 	    fNoRC = TRUE;
 	    break;
-	case 's': /* script */
+	case 's': /* guile script */
 #if !USE_GUILE
 	    fprintf( stderr, _("%s: option `-s' requires Guile\n"), argv[ 0 ] );
 	    exit( EXIT_FAILURE );
 #endif
-	    pchScript = optarg;
+	    pchGuileScript = optarg;
 	    fInteractive = FALSE;
 	    break;
+        case 'p': /* python script */
+#if !USE_PYTHON
+            fprintf( stderr, 
+                     _("%s: option `-p' requires Python\n"), argv[ 0 ] );
+            exit( EXIT_FAILURE );
+#endif
+            pchPythonScript = optarg;
+            fInteractive = FALSE;
+            break;
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
@@ -6756,12 +7154,56 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		 "directions for obtaining a pre-trained network.") );
 	outputx();
     }
+
+    /* extra bearoff databases */
+
+    /* Hugh Sconyers 15x15 bearoff database */
+
+    if ( fSconyers15x15Disk )
+      pbc15x15 = BearoffInit( NULL, szPathSconyers15x15Disk, 
+                              BO_SCONYERS_15x15 | BO_ON_DISK, NULL );
+
+    if( fSconyers15x15DVD )
+      pbc15x15_dvd = BearoffInit( NULL, szPathSconyers15x15DVD, 
+                                  BO_SCONYERS_15x15 | BO_ON_DVDS, 
+                                  (void *) ChangeDisk );
+
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Windows sockets"), 500 );
+#endif /* USE_GTK */
+
+    /* init Winsock */
+    {
+	short wVersionRequested;
+	WSADATA wsaData;
+	wVersionRequested = MAKEWORD (1, 1);
+	if (WSAStartup (wVersionRequested, &wsaData) != 0) {
+	    outputerr( "Windows sockets initialisation" );
+	}
+    }
+
+#endif /* HAVE_SOCKETS */
+#endif /* WIN32 */
+
 #if USE_GUILE
 #  if USE_GTK
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Guile"), 500 );
 #  endif    
     GuileInitialise( szDataDirectory );
+#endif
+
+
+#if USE_PYTHON
+#  if USE_GTK
+    PushSplash( pwSplash,
+                _("Initialasing"), _("Python"), 500 );
+#  endif
+    PythonInitialise( argv[ 0 ], szDataDirectory );
 #endif
 
 #if USE_GTK
@@ -6830,8 +7272,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     /* create gnubg directory if non-existing */
 
-    if ( CreateGnubgDirectory () )
-      exit ( EXIT_FAILURE );
+    if ( CreateGnubgDirectory () ) {
+	Shutdown();
+	exit( EXIT_FAILURE );
+    }
 
     /* move .gnubgpr into gnubg directory */
     /*  FIXME: this code can be removed when all users have had their
@@ -6896,17 +7340,31 @@ static void real_main( void *closure, int argc, char *argv[] ) {
         DestroySplash ( pwSplash );
 #endif
 	CommandLoadCommands( pchCommands );
-        EvalShutdown();
+        Shutdown();
 	exit( EXIT_SUCCESS );
     }
 
 #if USE_GUILE
-    if( pchScript ) {
-	scm_primitive_load( scm_makfrom0str( pchScript ) );
-        EvalShutdown();
+    if( pchGuileScript ) {
+	scm_primitive_load( scm_makfrom0str( pchGuileScript ) );
+        Shutdown();
 	exit( EXIT_SUCCESS );
     }
 #endif
+
+#if USE_PYTHON
+    if( pchPythonScript ) {
+      FILE *pf = fopen( pchPythonScript, "r" );
+      if ( ! pf ) {
+        outputerr( pchPythonScript );
+        Shutdown();
+        exit( EXIT_FAILURE );
+      }
+      PyRun_AnyFile( pf, pchPythonScript );
+      Shutdown();
+      exit( EXIT_SUCCESS );
+    }
+#endif /* USE_PYTHON */
 
 #if HAVE_FORK
 
@@ -6923,7 +7381,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
       
 	RunGTK( pwSplash );
 
-        EvalShutdown();
+        Shutdown();
 	exit( EXIT_SUCCESS );
     }
 #elif USE_EXT
@@ -6971,7 +7429,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		
 		if( feof( stdin ) ) {
 		    if( !isatty( STDIN_FILENO ) ) {
-                        EvalShutdown();
+                        Shutdown();
 			exit( EXIT_SUCCESS );
                     }
 		    
@@ -7534,9 +7992,9 @@ extern int GiveAdvice( skilltype Skill ) {
 
 	return GetAdviceAnswer( sz );
 }
-
-#if ! defined(HAVE_BASENAME) && ! defined (HAVE_LIBGEN_H)
-
+#if 0
+/* Hopefully this code won't be compiled anyway */
+#if ! defined(HAVE_BASENAME) && ! defined(HAVE_LIBGEN_H ) && defined (HAVE_DIRNAME )
 /*
  * Basename copied from glibc-2.2. for users without glibc.
  */
@@ -7544,12 +8002,76 @@ extern int GiveAdvice( skilltype Skill ) {
 extern char *
 basename (const char *filename) 
 { 
-  char *p1 = strrchr (filename, DIR_SEPARATOR); 
-  return p1 ? p1 + 1 : (char *) filename;
+	  char *p1 = strrchr (filename, DIR_SEPARATOR); 
+	    return p1 ? p1 + 1 : (char *) filename;
 } 
 
-#endif /* ! HAVE_BASENAME */
+#endif /* ! HAVE_BASENAME etc... */
 
+#if ! defined(HAVE_DIRNAME) && ! defined(HAVE_LIBGEN_H) && defined ( HAVE_BASENAME )
+
+/*
+ * This code is taken from glibc-2.2, and modified for Windows systems.
+ */
+
+extern char *
+dirname (char *path)
+{
+  static const char dot[] = ".";
+  char *last_slash;
+
+  /* Find last DIR_SEPARATOR.  */
+  last_slash = path != NULL ? strrchr (path, DIR_SEPARATOR) : NULL;
+
+  if (last_slash != NULL && last_slash != path && last_slash[1] == '\0')
+    {
+      /* Determine whether all remaining characters are slashes.  */
+      char *runp;
+
+      for (runp = last_slash; runp != path; --runp)
+	if (runp[-1] != DIR_SEPARATOR)
+	  break;
+
+      /* The DIR_SEPARATOR is the last character, we have to look further.  */
+      //if (runp != path)
+//	last_slash = __memrchr (path, DIR_SEPARATOR, runp - path);
+    }
+
+  if (last_slash != NULL)
+    {
+      /* Determine whether all remaining characters are slashes.  */
+      char *runp;
+
+      for (runp = last_slash; runp != path; --runp)
+	if (runp[-1] != DIR_SEPARATOR)
+	  break;
+
+      /* Terminate the path.  */
+      if (runp == path)
+	{
+	  /* The last slash is the first character in the string.  We have to
+	     return "/".  As a special case we have to return "//" if there
+	     are exactly two slashes at the beginning of the string.  See
+	     XBD 4.10 Path Name Resolution for more information.  */
+	  if (last_slash == path + 1)
+	    ++last_slash;
+	  else
+	    last_slash = path + 1;
+	}
+
+      last_slash[0] = '\0';
+    }
+  else
+    /* This assignment is ill-designed but the XPG specs require to
+       return a string containing "." in any case no directory part is
+       found and so a static and constant string is required.  */
+    path = (char *) dot;
+
+  return path;
+}
+
+#endif /* ! HAVE_DIRNAME, but defined HAVE_BASENAME */
+#endif /* 0 */
 
 extern char *
 Convert ( const char *sz, 
@@ -7564,8 +8086,7 @@ Convert ( const char *sz,
 #else
   char *pchIn;
 #endif
-  char *pchOut, *pchDest;
-  int fError = FALSE;
+  char *pchOut, *pchDest;  int fError = FALSE;
 
   if ( ! strcmp ( szSourceCharset, szDestCharset ) )
     /* no need for conversion */
@@ -7588,9 +8109,9 @@ Convert ( const char *sz,
   while ( lIn && ! fError ) {
 
 #if WIN32
-    rc = iconv ( id, &pchIn, &lIn, &pchOut, &l );
+    rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
 #else
-    rc = iconv ( id, &pchIn, &lIn, &pchOut, &l );
+    rc = iconv ( id, (ICONV_CONST char **) &pchIn, &lIn, &pchOut, &l );
 #endif
 
     if ( rc == -1 ) 
@@ -7667,3 +8188,5 @@ TextToClipboard( const char *sz ) {
 #endif
 
 }
+
+

@@ -20,6 +20,7 @@ EOF
 cat > $contributors <<'EOF'
 Kazuaki Asai
 Eric Augustine
+Erik Barfoed
 Ron Barry
 Steve Baedke
 Holger Bochnig
@@ -32,13 +33,16 @@ Olivier Croisille
 Ned Cross
 Bill Davidson
 Michael Depreli
+Ian Dunstan
 Max Durbano
+Peter Eberhard
 Robert Eberlein
 Fotis
 Ric Gerace
 Michel Grimminck
 Eric Groleau
 Jeff Haferman
+Morten Juul Henriksen
 Alain Henry
 Jens Hoefkens
 Martin Janke
@@ -53,6 +57,7 @@ Corrin Lakeland
 Tim Laursen
 Eli Liang
 Kevin Maguire
+William Maslen
 Thomas Meyer
 Achim Mueller
 Magnar Naustdalslid
@@ -75,6 +80,7 @@ Oliver Riordan
 Rod Roark
 Hans-Jürgen Schäfer
 Steve Schreiber
+Hugh Sconyers
 Martin Schrode
 Paul Selick
 Sho Sengoku

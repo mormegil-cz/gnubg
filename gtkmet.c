@@ -238,7 +238,7 @@ static void invertMETlocal( GtkWidget *pw, metwidget *pmw ){
 
 static void loadMET ( GtkWidget *pw, metwidget *pmw ) {
 
-  SetMET ( NULL, 0, NULL );
+  SetMET ( NULL, NULL );
 
   UpdateAllTables ( pmw );
 
@@ -251,7 +251,7 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
   /* FIXME: Widget should update after 'Invert' or 'Load ...' */  
   int i;
   char sz[ 50 ];
-  GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Match equity table"),
+  GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Match equity table"),
                                       DT_INFO, NULL, NULL );
   GtkWidget *pwNotebook = gtk_notebook_new ();
   GtkWidget *pwLoad = gtk_button_new_with_label(_("Load table..."));

@@ -36,11 +36,29 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_LIBART
+#include <libart_lgpl/art_misc.h>
+#include <libart_lgpl/art_affine.h>
+#include <libart_lgpl/art_point.h>
+#include <libart_lgpl/art_vpath.h>
+#include <libart_lgpl/art_bpath.h>
+#include <libart_lgpl/art_vpath_bpath.h>
+#include <libart_lgpl/art_svp.h>
+#include <libart_lgpl/art_svp_vpath.h>
+#include <libart_lgpl/art_gray_svp.h>
+#include <libart_lgpl/art_rgb.h>
+#include <libart_lgpl/art_rgb_svp.h>
+#endif
+
 #include "backgammon.h"
 #include "export.h"
 #include "i18n.h"
 #include "render.h"
 #include "renderprefs.h"
+#include "boardpos.h"
+
+
+#if HAVE_LIBPNG
 
 static void DrawPips( unsigned char *auchDest, int nStride,
 		      unsigned char *auchPip, int nPipStride,
@@ -62,6 +80,8 @@ static void DrawPips( unsigned char *auchDest, int nStride,
 			  ( 1 + 2 * iy ) * nSize * nStride, nStride,
 			  auchPip, nPipStride, nSize, nSize );
 }
+
+#endif
 		      
 extern void CommandExportHTMLImages( char *sz ) {
 
@@ -89,6 +109,14 @@ extern void CommandExportHTMLImages( char *sz ) {
 	auchMidBoard[ 36 * 4 * 3 * 6 * 4 ];
     unsigned short asRefract[ 2 ][ 6 * 4 * 6 * 4 ];
     static char *aszCube[ 3 ] = { "ct", "midc", "cb" };
+#if HAVE_LIBART
+    unsigned char *auchArrow[ 2 ];
+    unsigned char auchMidlb[ 108 * 4 * 72 * 4 * 3 ];
+    int x, y;
+#endif
+    unsigned char auchLo[ 108 * 4 * 3 * 4 * 4 ];
+    unsigned char auchHi[ 108 * 4 * 3 * 4 * 4 ];
+    unsigned char auchLabel[ 108 * 4 * 3 * 4 * 3 ];
 	
     sz = NextToken( &sz );
     
@@ -107,7 +135,7 @@ extern void CommandExportHTMLImages( char *sz ) {
 	return;
     }
 
-    ProgressStartValue( _("Generating image:"), 332 );
+    ProgressStartValue( _("Generating image:"), 334 );
     
 #if HAVE_ALLOCA
     szFile = alloca( strlen( sz ) + 32 );
@@ -119,7 +147,7 @@ extern void CommandExportHTMLImages( char *sz ) {
 
     memcpy( &rd, &rdAppearance, sizeof( renderdata ) );
     
-    rd.fLabels = FALSE; /* HTML export draws labels outside the image */
+    rd.fLabels = TRUE; 
     rd.nSize = s;
 
     RenderBoard( &rd, auchBoard, 108 * 4 * 3 );
@@ -127,12 +155,27 @@ extern void CommandExportHTMLImages( char *sz ) {
 		    asRefract[ 1 ], 6 * 4 * 4 );
     RenderChequerLabels( &rd, auchChequerLabels, 4 * 4 * 3 );
 
+#if HAVE_LIBART
+#define ARROW_SIZE 5
+    for ( i = 0; i < 2; ++i )
+      auchArrow[ i ] = 
+        art_new( art_u8, s * s * ARROW_SIZE * ARROW_SIZE * 4 );
+
+    RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_SIZE * 4 );
+#endif /* HAVE_LIBART */
+
+    RenderBoardLabels( &rd, auchLo, auchHi, 108 * 4 * 4 );
+
+    /* cubes and dices are rendered a bit smaller */
+
     rd.nSize = ss;
 
     RenderCube( &rd, auchCube, 8 * ss * 4 );
     RenderCubeFaces( &rd, auchCubeFaces, 6 * ss * 3, auchCube, 8 * ss * 4 );
     RenderDice( &rd, auchDice[ 0 ], auchDice[ 1 ], 7 * ss * 4 );
     RenderPips( &rd, auchPips[ 0 ], auchPips[ 1 ], ss * 3 );
+
+    
 
 #define WRITE( img, stride, cx, cy ) \
     if( WritePNG( szFile, (img), (stride), (cx), (cy) ) ) { \
@@ -142,11 +185,38 @@ extern void CommandExportHTMLImages( char *sz ) {
         ProgressValueAdd( 1 )
 
     /* top border */
-    strcpy( pchFile, "b-hitop.png" );
-    WRITE( auchBoard, nStride, 108 * s, 3 * s );
     
+    CopyArea( auchLabel, 108 * s * 3,
+              auchBoard, 108 * s * 3,
+              108 * s, 3 * s );
+
+    AlphaBlendClip( auchLabel, 108 * s * 3,
+                    0, 0, 
+                    108 * s, 3 * s,
+                    auchLabel, 108 * s * 3,
+                    0, 0,
+                    auchHi,
+                    108 * s * 4,
+                    0, 0, 108 * s, 3 * s );
+
+    strcpy( pchFile, "b-hitop.png" );
+    WRITE( auchLabel, nStride, 108 * s, 3 * s );
+    
+    CopyArea( auchLabel, 108 * s * 3,
+              auchBoard, 108 * s * 3,
+              108 * s, 3 * s );
+
+    AlphaBlendClip( auchLabel, 108 * s * 3,
+                    0, 0, 
+                    108 * s, 3 * s,
+                    auchLabel, 108 * s * 3,
+                    0, 0,
+                    auchLo,
+                    108 * s * 4,
+                    0, 0, 108 * s, 3 * s );
+
     strcpy( pchFile, "b-lotop.png" );
-    WRITE( auchBoard, nStride, 108 * s, 3 * s );
+    WRITE( auchLabel, nStride, 108 * s, 3 * s );
 
     /* empty points */
     strcpy( pchFile, "b-gd.png" );
@@ -175,6 +245,39 @@ extern void CommandExportHTMLImages( char *sz ) {
 	   12 * s, 8 * s );
 
     /* bearoff tray dividers */
+
+#if HAVE_LIBART
+
+    /* the code below is a bit ugly, but what the heck: it works! */
+
+    for ( i = 0; i < 2; ++i ) {
+
+      memcpy( auchMidlb, auchBoard, 108 * 4 * 72 * 4 * 3 );
+      ArrowPosition( rd.fClockwise, s, &x, &y );
+
+      AlphaBlendClip2( auchMidlb, nStride,
+                       x, y,
+                       108 * s, 72 * s, 
+                       auchMidlb, nStride,
+                       x, y, 
+                       auchArrow[ i ],
+                       s * ARROW_SIZE * 4,
+                       0, 0,
+                       s * ARROW_SIZE,
+                       s * ARROW_SIZE );
+
+      sprintf( pchFile, "b-midlb-%c.png", i ? 'o' : 'x' );
+      WRITE( auchMidlb + s * nStride * 33, nStride, 12 * s, 6 * s );
+
+    }
+
+#else
+    for ( i = 0; i < 2; ++i ) {
+      sprintf( pchFile, "b-midlb-%c.png", i ? 'x' : 'o' );
+      WRITE( auchBoard + s * nStride * 33, nStride, 12 * s, 6 * s );
+    }
+#endif
+
     strcpy( pchFile, "b-midlb.png" );
     WRITE( auchBoard + s * nStride * 33, nStride, 12 * s, 6 * s );
 
@@ -199,13 +302,38 @@ extern void CommandExportHTMLImages( char *sz ) {
 	   12 * s, 8 * s );
 
     /* bottom border */
+    CopyArea( auchLabel, 108 * s * 3,
+              auchBoard + s * nStride * 69 , 108 * s * 3,
+              108 * s, 3 * s );
+
+    AlphaBlendClip( auchLabel, 108 * s * 3,
+                    0, 0, 
+                    108 * s, 3 * s,
+                    auchLabel, 108 * s * 3,
+                    0, 0,
+                    auchHi,
+                    108 * s * 4,
+                    0, 0, 108 * s, 3 * s );
+
     strcpy( pchFile, "b-hibot.png" );
-    WRITE( auchBoard + s * nStride * 69, nStride, 108 * s,
-	   3 * s );
+    WRITE( auchLabel, nStride, 108 * s, 3 * s );
     
+    CopyArea( auchLabel, 108 * s * 3,
+              auchBoard + s * nStride * 69 , 108 * s * 3,
+              108 * s, 3 * s );
+
+    AlphaBlendClip( auchLabel, 108 * s * 3,
+                    0, 0, 
+                    108 * s, 3 * s,
+                    auchLabel, 108 * s * 3,
+                    0, 0,
+                    auchLo,
+                    108 * s * 4,
+                    0, 0, 108 * s, 3 * s );
+
     strcpy( pchFile, "b-lobot.png" );
-    WRITE( auchBoard + s * nStride * 69, nStride, 108 * s,
-	   3 * s );
+    WRITE( auchLabel, nStride, 108 * s, 3 * s );
+
 
     CopyArea( auchPoint[ 0 ][ 0 ][ 0 ], 6 * 4 * 3, auchBoard +
 	      3 * s * nStride + 12 * s * 3, nStride, 6 * s, 30 * s );
@@ -477,6 +605,11 @@ extern void CommandExportHTMLImages( char *sz ) {
 		WRITE( auchMidBoard, 36 * s * 3, 36 * s, 6 * s );
 	    }
     }
+
+#if HAVE_LIBART
+    for ( i = 0; i < 2; ++i )
+      art_free( auchArrow[ i ] );
+#endif /* HAVE_LIBART */
 
     ProgressEnd ();
     

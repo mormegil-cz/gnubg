@@ -40,6 +40,7 @@
 #include "i18n.h"
 #include "onechequer.h"
 #include "osr.h"
+#include "format.h"
 
 #if !HAVE_ERF
 extern double erf( double x );
@@ -639,7 +640,7 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( _("GNU Backgammon - Race Theory"), DT_INFO,
+  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Race Theory"), DT_INFO,
                             NULL, NULL );
 
   /* add notebook pages */

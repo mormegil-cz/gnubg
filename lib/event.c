@@ -16,6 +16,7 @@
 #include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>

@@ -34,6 +34,7 @@
 #include "drawboard.h"
 #include "positionid.h"
 #include "i18n.h"
+#include "format.h"
 #include "export.h"
 #include "matchid.h"
 
@@ -143,7 +144,7 @@ static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
     free( sz );
 }
 
-static void StartPage( FILE *pf ) {
+static void PSStartPage( FILE *pf ) {
 
     iPage++;
     fn = FONT_NONE;
@@ -179,7 +180,7 @@ static void StartPage( FILE *pf ) {
 		 ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2 );
 }
 
-static void EndPage( FILE *pf ) {
+static void PSEndPage( FILE *pf ) {
 
     if( fPDF ) {
 	long cb;
@@ -227,8 +228,8 @@ static void Ensure( FILE *pf, int cy ) {
     assert( cy <= 648 );
     
     if( y < cy ) {
-	EndPage( pf );
-	StartPage( pf );
+	PSEndPage( pf );
+	PSStartPage( pf );
     }
 }
 
@@ -248,8 +249,8 @@ static void Advance( FILE *pf, int cy ) {
 static void Skip( FILE *pf, int cy ) {
 
     if( y < cy ) {
-	EndPage( pf );
-	StartPage( pf );
+	PSEndPage( pf );
+	PSStartPage( pf );
     } else if( y != 648 )
 	Consume( pf, cy );
 }
@@ -452,7 +453,7 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
     
     iPage = 0;
     
-    StartPage( pf );
+    PSStartPage( pf );
 }
 
 static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
@@ -824,11 +825,12 @@ PrintPostScriptComment ( FILE *pf, unsigned char *pch ) {
 
 static void 
 PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
-                             int fPlayer, float arDouble[ 4 ],
+                             int fPlayer, 
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                              evalsetup *pes ) { 
     cubeinfo ci;
-    char sz[ 1024 ], *pch, *pchNext;
+    char *sz, *pch, *pchNext;
 
     if( pes->et == EVAL_NONE )
 	return;
@@ -841,7 +843,7 @@ PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
 	/* No cube action possible */
 	return;
     
-    GetCubeActionSz( arDouble, aarOutput, sz, &ci, fOutputMWC, FALSE );
+    sz = OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci );
 
     Skip( pf, 4 );
     for( pch = sz; pch && *pch; pch = pchNext ) {
@@ -1068,8 +1070,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    }
 	    
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-					 pmr->n.arDouble, 
-                                         pmr->n.aarOutput, 
+                                         pmr->n.aarOutput, pmr->n.aarStdDev, 
                                          &pmr->n.esDouble );
 	    
 	    Advance( pf, 10 );
@@ -1132,8 +1133,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptBoard( pf, &msExport, pmr->d.fPlayer );
 
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-					 pmr->d.arDouble, 
-                                         pmr->d.aarOutput, &pmr->d.esDouble );
+                                         pmr->d.CubeDecPtr->aarOutput, 
+                                         pmr->d.CubeDecPtr->aarStdDev, 
+                                         &pmr->d.CubeDecPtr->esDouble );
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
@@ -1243,7 +1245,7 @@ static void PostScriptEpilogue( FILE *pf ) {
     int i;
     long lXRef;
     
-    EndPage( pf );
+    PSEndPage( pf );
 
     if( fPDF ) {
 	StartObject( pf, idPages );

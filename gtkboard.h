@@ -75,9 +75,6 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
 
-extern GtkWidget *
-image_from_xpm_d ( char **xpm, GtkWidget *pw );
-
 #if USE_BOARD3D
 typedef struct _DiceRotation
 {
@@ -145,14 +142,12 @@ typedef struct _BoardData {
         *match_id;
     GtkWidget *mmatch, *lmatch, *match;
     GtkAdjustment *amatch, *ascore0, *ascore1;
-    GtkWidget *toolbar, *vbox_toolbar;
     GtkWidget *roll;
     GtkWidget *take, *drop, *redouble;
     GtkWidget *vbox_ids;
     GtkWidget *pipcount0, *pipcount1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *appmKey[ 2 ];
-    GtkWidget *button_clockwise;
     
     gboolean playing, computer_turn;
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
@@ -273,6 +268,7 @@ typedef struct _BoardData {
 
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd );
 extern void board_free_pixmaps( BoardData *bd );
+extern void board_edit( BoardData *bd );
 
 #if USE_BOARD3D
 /* Functions for 3d board */

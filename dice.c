@@ -36,7 +36,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 #include <assert.h>
 
 #if TIME_WITH_SYS_TIME
@@ -54,14 +53,59 @@
 #include <unistd.h>
 #endif
 
+#ifndef WIN32
+#include <errno.h>
 #include <sys/types.h>
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/un.h>
-#endif
+#endif /* #if HAVE_SYS_SOCKET_H */
+
+#else /* #ifndef WIN32 */
+#include <winsock.h>
+
+#define EWOULDBLOCK             WSAEWOULDBLOCK
+#define EINPROGRESS             WSAEINPROGRESS
+#define EALREADY                WSAEALREADY
+#define ENOTSOCK                WSAENOTSOCK
+#define EDESTADDRREQ            WSAEDESTADDRREQ
+#define EMSGSIZE                WSAEMSGSIZE
+#define EPROTOTYPE              WSAEPROTOTYPE
+#define ENOPROTOOPT             WSAENOPROTOOPT
+#define EPROTONOSUPPORT         WSAEPROTONOSUPPORT
+#define ESOCKTNOSUPPORT         WSAESOCKTNOSUPPORT
+#define EOPNOTSUPP              WSAEOPNOTSUPP
+#define EPFNOSUPPORT            WSAEPFNOSUPPORT
+#define EAFNOSUPPORT            WSAEAFNOSUPPORT
+#define EADDRINUSE              WSAEADDRINUSE
+#define EADDRNOTAVAIL           WSAEADDRNOTAVAIL
+#define ENETDOWN                WSAENETDOWN
+#define ENETUNREACH             WSAENETUNREACH
+#define ENETRESET               WSAENETRESET
+#define ECONNABORTED            WSAECONNABORTED
+#define ECONNRESET              WSAECONNRESET
+#define ENOBUFS                 WSAENOBUFS
+#define EISCONN                 WSAEISCONN
+#define ENOTCONN                WSAENOTCONN
+#define ESHUTDOWN               WSAESHUTDOWN
+#define ETOOMANYREFS            WSAETOOMANYREFS
+#define ETIMEDOUT               WSAETIMEDOUT
+#define ECONNREFUSED            WSAECONNREFUSED
+#define ELOOP                   WSAELOOP
+#define ENAMETOOLONG            WSAENAMETOOLONG
+#define EHOSTDOWN               WSAEHOSTDOWN
+#define EHOSTUNREACH            WSAEHOSTUNREACH
+#define ENOTEMPTY               WSAENOTEMPTY
+#define EPROCLIM                WSAEPROCLIM
+#define EUSERS                  WSAEUSERS
+#define EDQUOT                  WSAEDQUOT
+#define ESTALE                  WSAESTALE
+#define EREMOTE                 WSAEREMOTE
+#endif /* #ifndef WIN32 */
 
 #include "backgammon.h"
 #include "dice.h"
@@ -661,39 +705,53 @@ getDiceRandomDotOrg ( void ) {
 
     /* open socket */
 
-    strcpy ( szHostname, "www.random.org:80" );
+    strcpy( szHostname, "www.random.org:80" );
 
-    if ( ( h = ExternalSocket ( &psa, &cb, szHostname ) ) < 0 ) {
+    if ( ( h = ExternalSocket( &psa, &cb, szHostname ) ) < 0 ) {
       outputerr ( szHostname );
       return -1;
     }
 
     /* connect */
 
-    if ( ( connect ( h, psa, cb ) ) < 0 ) {
-      outputerr ( szHostname );
+#ifdef WIN32
+    if ( connect( (SOCKET) h, (const struct sockaddr*) psa, cb ) < 0 ) {
+#else
+    if ( ( connect( h, psa, cb ) ) < 0 ) {
+#endif /* WIN32 */
+      outputerr( szHostname );
       return -1;
     }
 
     /* read next set of numbers */
 
-    if ( ExternalWrite ( h, szHTTP, strlen ( szHTTP ) + 1 ) < 0 ) {
-      outputerr ( szHTTP );
-      close ( h );
+    if ( ExternalWrite( h, szHTTP, strlen ( szHTTP ) + 1 ) < 0 ) {
+      outputerr( szHTTP );
+      close( h );
       return -1;
     }
 
     /* read data from web-server */
 
-    if ( ! ( nBytesRead = read ( h, acBuf, sizeof ( acBuf ) ) ) ) {
-      outputerr ( "reading data" );
-      close ( h );
+#ifdef WIN32
+	/* reading from sockets doesn't work on Windows
+	   use recv instead */
+	if ( ! ( nBytesRead = recv( (SOCKET) h, acBuf, sizeof ( acBuf ), 0 ) ) ) {
+#else
+	if ( ! ( nBytesRead = read( h, acBuf, sizeof ( acBuf ) ) ) ) {
+#endif
+      outputerr( "reading data" );
+      close( h );
       return -1;
     }
 
     /* close socket */
 
+#ifdef WIN32
+    closesocket( (SOCKET) h ); 
+#else
     close ( h );
+#endif
 
     /* parse string */
 
@@ -709,7 +767,6 @@ getDiceRandomDotOrg ( void ) {
       }
 
     }
-
 
     nCurrent = 1;
     return anBuf[ 0 ];

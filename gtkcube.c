@@ -40,6 +40,8 @@
 #include "gtkgame.h"
 #include "gtkcube.h"
 #include "i18n.h"
+#include "progress.h"
+#include "format.h"
 
 
 
@@ -411,7 +413,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     case EVAL_ROLLOUT:
       if ( ci.nMatchTo )
-        sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
+         sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
                                fOutputMWC ? _("MWC") : _("equity"),
                                OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
                                               &ci, TRUE ),
@@ -651,21 +653,49 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   rolloutstat aarsStatistics[ 2 ][ 2 ];
+  evalsetup *pes = pchd->pes;
+  char asz[ 2 ][ 40 ];
+  void *p;
+
+  if (pes->et != EVAL_ROLLOUT) {
+    pes->rc = rcRollout;
+    pes->rc.nGamesDone = 0;
+  }
+  else {
+    pes->rc.nTrials = rcRollout.nTrials;
+    pes->rc.fStopOnSTD = rcRollout.fStopOnSTD;
+    pes->rc.nMinimumGames = rcRollout.nMinimumGames;
+    pes->rc.rStdLimit = rcRollout.rStdLimit;
+	memcpy (aarOutput, pchd->aarOutput, 
+			2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+	memcpy (aarStdDev, pchd->aarStdDev,
+			2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  }
 
   GetMatchStateCubeInfo( &ci, &pchd->ms );
 
-  if ( GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
-                              pchd->ms.anBoard, &ci, &rcRollout ) < 0 ) {
+  FormatCubePositions( &ci, asz );
+  RolloutProgressStart( &ci, 2, aarsStatistics, &pes->rc, asz, &p );
+
+  if ( GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
+                              pchd->ms.anBoard, &ci, 
+			      &pes->rc, pes,
+                              RolloutProgress, p ) < 0 ) {
+    RolloutProgressEnd( &p );
     return;
   }
+
+  RolloutProgressEnd( &p );
   
   memcpy ( pchd->aarOutput, aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
   memcpy ( pchd->aarStdDev, aarStdDev, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
+  if (pes->et != EVAL_ROLLOUT)
+	memcpy ( &pchd->pes->rc, &rcRollout, sizeof ( rcRollout ) );
+
   pchd->pes->et = EVAL_ROLLOUT;
-  memcpy ( &pchd->pes->rc, &rcRollout, sizeof ( rcRollout ) );
 
   if ( pchd->arDouble )
     FindCubeDecision ( pchd->arDouble, pchd->aarOutput, &ci );
@@ -685,7 +715,7 @@ EvalCube ( cubehintdata *pchd, evalcontext *pec ) {
   ProgressStart( _("Considering cube action...") );
 
   if ( GeneralCubeDecisionE ( aarOutput, pchd->ms.anBoard, &ci, 
-                              pec ) < 0 ) {
+                              pec, 0 ) < 0 ) {
     ProgressEnd();
     return;
   }
@@ -778,9 +808,7 @@ GetContent ( cubehintdata *pchd ) {
   pc = OutputCubeAnalysis ( pchd->aarOutput,
                             pchd->aarStdDev,
                             pchd->pes,
-                            &ci,
-                            -1, -1,
-                            SKILL_NONE, SKILL_NONE );
+                            &ci );
 
   return pc;
 
@@ -956,7 +984,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   pchd->pes = pes;
   pchd->mt = mt;
   pchd->ms = ms;
-
+  
   pchd->pw = pw = gtk_hbox_new ( 4, FALSE );
 
   switch ( mt ) {

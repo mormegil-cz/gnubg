@@ -2,32 +2,33 @@
 Todo
 ====
 
-* Merge code
-	_( before strings
-	-----------------
-	It's internationalisation (i18n), so you can translate gnubg to your
-	preferred language.
-	The macro _(...) marks the string for translation, so you should only do it for strings that need it
-	commands should not be marked.
-	You need to #include "i18n.h" to use _(...).
-	Static arrays of strings need special care:
-		static char *asz[] = { N_("blah", N_("blah blah") };
-	and then
-	    printf( _("Blah blah: %s\n"), gettext( asz[ i ] );
+* Move some/all display options to appearance?
+	These to appearance general:
+		Clockwise movement, show dice below board, Animation, numbered labels, target help
+	Those on general page to lighting
+	Those on 3d page to general?
 
 Bugs
 ====
+
+Ideas
+=====
+
+Look at todo...
+Is it possible to roll-out bad move/cube decesions when analysing games?
+In edit, undo -> go back to board/dice/cube/turn before edit pressed...
+Analyse game/match/session -> show statistics once done?
+Improve player records
+
+Windows
+-------
+	Put game record into main screen, with toggle button?
+		Similarly annotation window (along bottom)
+	Or "modes", playing/analysing/editing...
+	Docking windows?
 
 Other things
 ============
 
 Show/hide 2d arrow with option (after merge)
-Move display options to appearance?
 On close, remap background to a better shape?
-In edit, undo -> go back to board/dice/cube/turn before edit pressed
-
-----------------------------------------------------------
-
-Remove any warnings
-Check builds and runs without BOARD3D defined (check settings ok too)
-Check Gtk1 + 2 ok

@@ -1,4 +1,4 @@
-GNU Backgammon 0.13
+GNU Backgammon 0.14
 ===================
 
 This is a pre-release version of GNU Backgammon (gnubg), a backgammon
@@ -135,7 +135,7 @@ weight file at all (it will generate random weights), we recommend
 that you obtain pre-trained weights; a file compatible with this
 pre-release is available at:
 
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.13a.gz
+        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.14.gz
 
 Make sure you decompress the file (with gunzip) and rename it to
 `gnubg.weights' in the same directory as this README file.
