@@ -938,12 +938,19 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	}
 	
 	if( c >= 0 ) {
-	    for( i = 0; i < ( c << 1 ); i++ ) {
-		pmr->n.anMove[ i ]--;
 
-		if( iPlayer == fInvert && pmr->n.anMove[ i ] >= 0 &&
-		    pmr->n.anMove[ i ] <= 23 )
-		    pmr->n.anMove[ i ] = 23 - pmr->n.anMove[ i ];
+            for( i = 0; i < ( c << 1 ); i++ )
+              pmr->n.anMove[ i ]--;
+
+            /* if the moves are ascending invert it.
+               In theory this is only necessary when iPlayer == fInvert,
+               but some programs may write incompatible files.
+               Joseph's fibs2html is one such program. */
+            
+            if ( c && pmr->n.anMove[ 0 ] < pmr->n.anMove[ 1 ] ) {
+              /* ascending moves: invert */
+              for ( i = 0; i < ( c << 1); ++i ) 
+                pmr->n.anMove[ i ] = 23 - pmr->n.anMove[ i ];
 	    }
  
 	    if( c < 4 )
@@ -957,9 +964,18 @@ static void ParseOldmove( char *sz, int fInvert ) {
 
             CanonicalMoveOrder( pmr->n.anMove );
 
-            /* Now we're ready */
+            if ( ! IsValidMove( ms.anBoard, pmr->n.anMove ) ) {
+              outputf( _("WARNING! Illegal or invalid move: '%s'\n"),
+                       sz );
+              free( pmr );
+            }
+            else {
 
-	    AddMoveRecord( pmr );
+              /* Now we're ready */
+
+              AddMoveRecord( pmr );
+
+            }
 	} else
 	    free( pmr );
 	return;
