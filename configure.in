@@ -36,9 +36,17 @@ AC_PROG_AWK
 
 dnl Checks for libraries.
 AC_CHECK_LIB(m, sqrt)
-AC_CHECK_LIB(readline, readline)
-AC_CHECK_LIB(termcap,tgetent)
-AC_CHECK_LIB(gdbm, gdbm_open)
+AC_ARG_WITH(readline,[  --with-readline         support fancy command line editing])
+if test "$with_readline" != "no"; then
+  for lib in termcap ncurses curses; do
+    AC_CHECK_LIB($lib, tgetent, LIBS="-l$lib $LIBS"; break)
+  done
+  AC_CHECK_LIB(readline, readline)
+fi
+AC_ARG_WITH(gdbm,[  --with-gdbm             use GNU gdm for position databases])
+if test "$with_gdbm" != "no"; then
+  AC_CHECK_LIB(gdbm, gdbm_open)
+fi
 AC_CHECK_LIB(dl, dlopen)
 
 dnl Checks for header files.
