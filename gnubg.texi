@@ -26,7 +26,7 @@ Copyright @copyright{} 1999 Gary Wong.
 @author Gary Wong
 @end titlepage
 
-@ifinfo
+@ifnottex
 @node Top
 @top GNU Backgammon
 
@@ -48,7 +48,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Concept Index::                 Index of concepts described in this manual.
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 @node Introduction
 @chapter Introduction
@@ -641,10 +641,10 @@ FIXME
 @cindex obtaining @t{gnubg}
 
 Pre-release snapshots of GNU Backgammon are periodically made available
-for FTP at @url{ftp://alpha.gnu.org/}.  FIXME:complete URL.
+for FTP at @uref{ftp://alpha.gnu.org/}.  FIXME:complete URL.
 
 If you want to experiment with the very latest code, the development
-sources are kept in a CVS repository at @url{http://subversions.gnu.org/}.
+sources are kept in a CVS repository at @uref{http://subversions.gnu.org/}.
 FIXME:complete URL.
 
 @node How do I play a game?
@@ -681,7 +681,7 @@ The @gnubg distribution is set up to create @file{gnubg.bd} by itself
 during compilation, but it can be a slow process (taking half an hour
 or more, depending on the speed of your computer).  If you would rather
 not wait to generate the database yourself, you can obtain a copy
-via FTP from @url{ftp://alpha.gnu.org/}. FIXME:complete URL.
+via FTP from @uref{ftp://alpha.gnu.org/}. FIXME:complete URL.
 
 @node gnubg.weights errors
 @section Now I get @samp{gnubg.weights: No such file or directory}.  What's that?

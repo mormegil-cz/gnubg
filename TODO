@@ -16,6 +16,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add option for cubeless play.
 ** Finish matches and money sessions.  (Should be done now I think -- anything
   else I've forgotten?)
+** Don't allow beavers in match play.  Allow optional automatic doubles in
+  money play.
 
 * Command interface:
 ** Check "show" exists for every "set"!
