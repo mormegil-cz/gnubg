@@ -57,6 +57,45 @@ typedef struct _cubehintdata {
 } cubehintdata;
 
 
+static GtkWidget *
+OutputPercentsTable( const float ar[] ) 
+{
+    GtkWidget *pwTable;
+    GtkWidget *pw;
+    int i;
+    static gchar *headings[] = { N_("Win"), N_("W(g)"), N_("W(bg)"),
+                                 N_("-"), N_("Lose"), N_("L(g)"), N_("L(bg)") };
+    pwTable = gtk_table_new ( 2, 7, FALSE );
+    
+    for (i = 0; i < 7; i++)
+    {
+      pw = gtk_label_new ( gettext( headings[i] ) );
+      gtk_table_attach(GTK_TABLE(pwTable), pw, i, i+1, 0, 1,
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       2, 0);
+    }
+
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WIN ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 0, 1, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WINGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 1, 2, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WINBACKGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 2, 3, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+
+    pw = gtk_label_new( " - " );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 3, 4, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+
+    pw = gtk_label_new( OutputPercent ( 1.0f - ar [ OUTPUT_WIN ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 4, 5, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_LOSEGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 5, 6, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_LOSEBACKGAMMON ] ) );
+    gtk_table_attach(GTK_TABLE(pwTable), pw, 6, 7, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
+    
+    return pwTable;
+}
+
 
 static GtkWidget*
 TakeAnalysis( const movetype mt, 
@@ -97,7 +136,7 @@ TakeAnalysis( const movetype mt,
     pwFrame = gtk_frame_new ( _("Take analysis") );
     gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
 
-    pwTable = gtk_table_new ( 5, 4, FALSE );
+    pwTable = gtk_table_new ( 6, 4, FALSE );
     gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
 
     /* if EVAL_EVAL include cubeless equity and winning percentages */
@@ -148,22 +187,20 @@ TakeAnalysis( const movetype mt,
                        GTK_EXPAND | GTK_FILL, 
                        GTK_EXPAND | GTK_FILL, 
                        8, 0 );
-    
     iRow++;
+
+    /* winning percentages */
 
     switch ( pes->et ) {
 
     case EVAL_EVAL:
 
-      pw = gtk_label_new ( OutputPercents ( aarOutput[ 0 ], TRUE ) );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0.5, 0.5 );
-      
+      pw = OutputPercentsTable( aarOutput[ 0 ] );
       gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
                          0, 4, iRow, iRow + 1, 
                          GTK_EXPAND | GTK_FILL, 
                          GTK_EXPAND | GTK_FILL, 
                          8, 4 );
-
       iRow++;
 
       break;
@@ -181,6 +218,19 @@ TakeAnalysis( const movetype mt,
 
     }
 
+    /* sub-header */
+
+    pw = gtk_label_new( _("Cubeful equities:") );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                       0, 4, iRow, iRow + 1, 
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       8, 4 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0.0, 0.5 );
+    iRow++;
+
+    /* ordered take actions with equities */
+
     if ( arDouble[ OUTPUT_TAKE ] < arDouble[ OUTPUT_DROP ] ) {
       ai[ 0 ] = OUTPUT_TAKE;
       ai[ 1 ] = OUTPUT_DROP;
@@ -189,7 +239,6 @@ TakeAnalysis( const movetype mt,
       ai[ 0 ] = OUTPUT_DROP;
       ai[ 1 ] = OUTPUT_TAKE;
     }
-      
 
     for ( i = 0; i < 2; i++ ) {
 
@@ -241,11 +290,11 @@ TakeAnalysis( const movetype mt,
       if ( i ) {
         
         if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-          sz = g_strdup_printf ( "(%+7.3f)", 
+          sz = g_strdup_printf ( "%+7.3f", 
                                  arDouble[ ai [ 0 ] ] - 
                                  arDouble[ ai [ i ] ] );
         else
-          sz = g_strdup_printf ( "(%+7.3f%%)", 
+          sz = g_strdup_printf ( "%+7.3f%%", 
                                  100.0f * eq2mwc( arDouble[ ai[ 0 ] ], 
                                                   &ci )-
                                  100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) );
@@ -324,45 +373,6 @@ TakeAnalysis( const movetype mt,
 
     return pwFrame;
 
-}
-
-static GtkWidget *
-OutputPercentsTable( const float ar[] ) 
-{
-    GtkWidget *pwTable;
-    GtkWidget *pw;
-    int i;
-    static gchar *headings[] = { N_("Win"), N_("W(g)"), N_("W(bg)"),
-                                 N_("-"), N_("Lose"), N_("L(g)"), N_("L(bg)") };
-    pwTable = gtk_table_new ( 2, 7, FALSE );
-    
-    for (i = 0; i < 7; i++)
-    {
-      pw = gtk_label_new ( gettext( headings[i] ) );
-      gtk_table_attach(GTK_TABLE(pwTable), pw, i, i+1, 0, 1,
-                       GTK_EXPAND | GTK_FILL, 
-                       GTK_EXPAND | GTK_FILL, 
-                       2, 0);
-    }
-
-    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WIN ] ) );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 0, 1, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WINGAMMON ] ) );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 1, 2, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_WINBACKGAMMON ] ) );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 2, 3, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-
-    pw = gtk_label_new( " - " );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 3, 4, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-
-    pw = gtk_label_new( OutputPercent ( 1.0f - ar [ OUTPUT_WIN ] ) );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 4, 5, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_LOSEGAMMON ] ) );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 5, 6, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-    pw = gtk_label_new( OutputPercent ( ar [ OUTPUT_LOSEBACKGAMMON ] ) );
-    gtk_table_attach(GTK_TABLE(pwTable), pw, 6, 7, 1, 2, GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 2, 0);
-    
-    return pwTable;
 }
 
 
