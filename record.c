@@ -302,6 +302,10 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
 	/* game is not completely analysed */
 	return -1;
 
+    /* ensure statistics are updated */
+
+    updateStatisticsGame ( plGame );
+    
     for( i = 0; i < 2; i++ ) {
 	apr[ i ].cGames++;
 
@@ -391,7 +395,7 @@ extern void CommandRecordAddGame( char *sz ) {
     }
 
     InitPlayerRecords( apr );
-    
+
     if( RecordRead( &pf, &pch, apr ) < 0 )
 	return;
     
