@@ -1,3 +1,9 @@
+Mon Dec 10 21:49:00 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* analysis.c: bug fix for wrong values of equity loss for wrong takes and
+	wrong passes; change rCost to rSkill (bug reported by by Robert-Jan
+	Veldhuizen).
+
 Mon Dec 10 10:41:45 2001  Gary Wong  <gtw@research.att.com>
 
 	* drawboard.c (FIBSBoard): Cope if player names contain `:' characters.

@@ -376,7 +376,7 @@ AnalyzeMove ( moverecord *pmr ) {
 		pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_TAKE ] -
 				   -arDouble[ OUTPUT_DROP ] );
 	      
-		rCost = msAnalyse.nMatchTo ? eq2mwc( rCost, &ci ) -
+		rCost = msAnalyse.nMatchTo ? eq2mwc( rSkill, &ci ) -
 		    eq2mwc( 0.0f, &ci ) : msAnalyse.nCube * rSkill;
 	      
 		psc->anCubeWrongTake[ pmr->d.fPlayer ]++;
@@ -403,7 +403,7 @@ AnalyzeMove ( moverecord *pmr ) {
 		pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
 				   -arDouble[ OUTPUT_TAKE ] );
 	      
-		rCost = msAnalyse.nMatchTo ? eq2mwc( rCost, &ci ) -
+		rCost = msAnalyse.nMatchTo ? eq2mwc( rSkill, &ci ) -
 		    eq2mwc( 0.0f, &ci ) : msAnalyse.nCube * rSkill;
 	      
 		psc->anCubeWrongPass[ pmr->d.fPlayer ]++;
