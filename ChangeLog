@@ -1,3 +1,13 @@
+Sun Jun  8 21:39:30 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Change how cubeful equities are calculated for money play to match
+	match play. 
+ 	(reported by Robert Eberlein and Michael Depreli)
+
+        * eval.c (MoneyLive): new function.
+        * eval.c (Cl2CfMoney): rewrite code so it's similar to the
+        match play code.
+
 Sun Jun  8 22:09:03 2003  Joern Thyssen  <jth@gnubg.org>
 
        	New Cube temperature map

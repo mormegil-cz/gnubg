@@ -4761,6 +4761,70 @@ GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci ) {
 }
 
 
+static float
+MoneyLive( const float rW, const float rL, const float p,
+           const cubeinfo *pci ) {
+
+  if ( pci->fCubeOwner == -1 ) {
+
+    /* centered cube */
+    float rTP = ( rL - 0.5 ) / ( rW + rL + 0.5 );
+    float rCP = ( rL + 1.0 ) / ( rW + rL + 0.5 ); 
+
+    if ( p < rTP )
+      /* linear interpolation between
+         (0,-rL) and ( rTP,-1) */
+      return ( pci->fJacoby ) ? -1.0f : ( -rL + ( -1.0f + rL ) * p / rTP );
+    else if ( p < rCP )
+      /* linear interpolation between
+         (rTP,-1) and (rCP,+1) */
+      return -1.0f + 2.0f * ( p - rTP ) / ( rCP - rTP );
+    else
+      /* linear interpolation between
+         (rCP,+1) and (1,+rW) */
+      return ( pci->fJacoby ) ? 1.0f : ( +1.0f + ( rW - 1.0f ) * ( p - rCP ) / ( 1.0f - rCP ) );
+
+  }
+  else if ( pci->fCubeOwner == pci->fMove ) {
+
+    /* owned cube */
+
+    /* cash point */
+    float rCP = ( rL + 1.0 ) / ( rW + rL + 0.5 ); 
+
+    if ( p < rCP )
+      /* linear interpolation between
+         (0,-rL) and (rCP,+1) */
+      return -rL + ( 1.0f + rL ) * p / rCP;
+    else
+      /* linear interpolation between
+         (rCP,+1) and (1,+rW) */
+      return +1.0f + ( rW - 1.0f ) * ( p - rCP ) / ( 1.0f - rCP );
+
+  }
+  else {
+
+    /* unavailable cube */
+
+    /* take point */
+    float rTP = ( rL - 0.5 ) / ( rW + rL + 0.5 );
+
+    if ( p < rTP )
+      /* linear interpolation between
+         (0,-rL) and ( rTP,-1) */
+      return -rL + ( -1.0f + rL ) * p / rTP;
+    else
+      /* linear interpolation between
+         (rTP,-1) and (1,rW) */
+      return -1.0f + ( rW + 1.0f ) * ( p - rTP ) / ( 1.0f - rTP );
+
+  }
+
+  assert ( FALSE );
+  return 0;
+
+}
+
 
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
@@ -4769,10 +4833,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   const float omepsilon = 0.9999999;
 
   float rW, rL;
-  float rOppTG, rOppCP, rCP, rTG;
-  float rOppIDP, rIDP;
-  float rk, rOppk;
-  float rEq;
+  float rEqDead, rEqLive;
 
   /* money game */
 
@@ -4796,225 +4857,12 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
     return Utility ( arOutput, pci );
   }
 
-      /* Calculate too good and cash points for opponent and
-	 myself. These points are used for doing linear
-	 interpolations. */
+  rEqDead = arOutput[ 0 ] *  ( rW + rL ) - rL;
+  rEqLive = MoneyLive( rW, rL, arOutput[ 0 ], pci );
 
-  rOppTG = 1.0 - ( rW + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
-  rOppCP = 1.0 -
-    ( rW + 0.5 + 0.5 * rCubeX ) /
-    ( rW + rL + 0.5 * rCubeX );
-  rCP =
-    ( rL + 0.5 + 0.5 * rCubeX ) /
-    ( rW + rL + 0.5 * rCubeX );
-  rTG = ( rL + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
-      
-  if ( pci->fCubeOwner == -1 ) {
+  return rEqDead * ( 1.0 - rCubeX ) + rEqLive * rCubeX;
 
-    /* Centered cube.  */
-
-    if ( arOutput[ 0 ] <= rOppTG ) {
-
-      /* Opponent is too good to double.
-         Linear interpolation between: 
-         p=OppTG, E = -1
-         p=0, E = -L
-      */
-
-      if ( pci->fJacoby )
-        rEq = -1.0; /* gammons don't count: rL = 1 */
-      else
-        rEq = -rL + ( rL - 1.0 ) * arOutput[ 0 ] / rOppTG;
-
-    } else if ( arOutput[0 ] > rOppTG && arOutput[ 0 ] < rOppCP ) {
-      /* Opp cashes.  */
-      rEq = -1.0;
-    } else if ( arOutput[ 0 ] > rOppCP && arOutput[ 0 ] < rCP ) {
-      /* In market window.
-	 We do linear interpolation, but the initial double points
-	 are dependent on Jacoby rule and beavers. */
-          
-      if ( ! pci->fJacoby ) {
-
-	/* Constants used in formulae for initial double points are
-	   1 for money game without Jacoby rule. */
-            
-	rOppk = 1.0;
-	rk = 1.0;
-            
-      }
-      else {
-            
-	/* Constants used in formulae for initial double points
-	   with playing with the Jacoby rule. */
-            
-	if ( ! pci->fBeavers ) {
-
-	  /* no beavers and other critters */
-
-	  rOppk =
-	    ( rW + rL ) * ( rW - 0.5 * ( 1.0 - rCubeX ) ) /
-	    ( rW * ( rW + rL - ( 1.0 - rCubeX ) ) );
-
-	  rk =
-	    ( rW + rL ) * ( rL - 0.5 * ( 1.0 - rCubeX ) ) /
-	    ( rL * ( rW + rL - ( 1.0 - rCubeX ) ) );
-
-	}
-	else {
-
-	  /* with beavers and other critters */
-
-	  rOppk =
-	    ( rW + rL ) * ( rW - 0.25 * ( 1.0 - rCubeX ) ) /
-	    ( rW * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
-
-	  rk =
-	    ( rW + rL ) * ( rL - 0.25 * ( 1.0 - rCubeX ) ) /
-	    ( rL * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
-
-	}
-      }
-
-      /* Initial double points: */
-
-      rOppIDP = 1.0 - rOppk *
-	( rW +
-	  rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
-	/ ( rL +  rW + 0.5 * rCubeX );
-
-      rIDP = rk *
-	( rL +
-	  rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
-	/ ( rL +  rW + 0.5 * rCubeX );
-
-      if ( arOutput[ 0 ] < rOppIDP ) {
-
-	/* Winning chance is
-	   rOppCP < p < rOppIDP
-	   Do linear interpolation between
-
-	   p = rOppCP, E = -1, and 
-	   p = rOppIDP, E = rE2 (given below) */
-
-	float rE2 =
-	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
-
-	rEq = -1.0 +  ( rE2 + 1.0 ) *
-	  ( arOutput[ 0 ] - rOppCP ) / ( rOppIDP - rOppCP );
-
-      }
-      else if ( arOutput[ 0 ] < rIDP ) {
-
-	/* Winning chance is
-	   rOppIDP < p < rIDP
-
-	   Do linear interpolation between
-
-	   p = rOppIDP, E = rE2, and
-	   p = rIDP, E = rE3 */
-
-	float rE2 =
-	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
-	float rE3 =
-	  2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
-		  rL - 0.5 * rCubeX );
-
-	rEq = rE2 + ( rE3 - rE2 ) *
-	  ( arOutput[ 0 ] - rOppIDP ) / ( rIDP - rOppIDP );
-
-      }
-      else {
-
-	/* Winning chance is
-	   rIDP < p < rCP
-
-	   Do linear interpolation between
-
-	   p = rIDP, E = rE3, and
-	   p = CP, E = +1 */
-
-	float rE3 =
-	  2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
-		  rL - 0.5 * rCubeX );
-
-	rEq = rE3 + ( 1.0 - rE3 ) *
-	  ( arOutput[ 0 ] - rIDP ) / ( rCP - rIDP );
-
-      }
-
-    } else if ( arOutput[ 0 ] > rCP && arOutput[ 0 ] < rTG ) {
-      /* We cash one point */
-      rEq = 1.0;
-    } else {
-
-      /* we are too good to double */
-
-      if ( pci->fJacoby )
-        rEq = 1.0; /* gammons don't count: rW = 1 */
-      else
-        rEq = rW + 
-          ( 1.0  - rW ) * ( arOutput[ 0 ] - 1.0 ) / ( rTG - 1.0 ) ;
-    }
-
-  }
-  else if ( pci->fCubeOwner == pci->fMove ) {
-
-    /* I own cube */
-
-    if ( arOutput[ 0 ] < rTG ) {
-	  
-      /* Use formula (5) in Rick Janowski's article. 
-	 Linear interpolation between
-	  
-	 p = 0, E = -L, and
-	 p = rTG, E = +1 */
-
-      rEq =
-	( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX ) - rL );
-    }
-    else {
-
-      /* Linear interpolation between
-
-         p = rTG, E = +1, and
-         p = 1, E = +W */
-
-      rEq = 1.0 + ( rW - 1.0 ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
-
-    }
-
-  } else {
-
-    /* Opp own Cube */
-
-    if ( arOutput[ 0 ] > rOppTG ) {
-	  
-      /* Use formula (6) in Rick Janowski's article. 
-	     Linear interpolation between
-	  
-	     p = rOppTG, E = -1, and
-	     p = 1, E = +W */
-
-      rEq = ( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX )
-	      - rL - 0.5 * rCubeX );
-    }
-    else {
-
-      /* Use linear interpolation between
-
-         p = 0, E = -L, and
-         p = rOppTG, E = -1 */
-
-      rEq = -rL + ( rL - 1.0 ) * arOutput[ 0 ] / rOppTG;
-
-    }
-
-  }
-
-  return rEq;
-
-}  
+}
 
 
 static float
