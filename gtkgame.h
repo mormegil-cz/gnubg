@@ -251,3 +251,5 @@ extern GtkWidget* GetPanelWidget(gnubgwindow window);
 extern void PanelShow(gnubgwindow panel);
 extern void PanelHide(gnubgwindow panel);
 extern int IsPanelShowVar(gnubgwindow panel, void *p);
+extern int SetMainWindowSize();
+extern void ShowHidePanel(gnubgwindow panel);
