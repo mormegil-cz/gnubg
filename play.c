@@ -921,9 +921,19 @@ extern void NextTurn( void ) {
 	return;
     
     if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
-	if( fAutoRoll && !anDice[ 0 ] &&
-	    ( !fCubeUse || ( fCubeOwner >= 0 && fCubeOwner != fTurn &&
-			     !fDoubled ) ) )
+	/* Roll for them, if:
+
+	   * "auto roll" is on;
+	   * they haven't already rolled;
+	   * they haven't just been doubled;
+	   * at least one of the following:
+	     - cube use is disabled;
+	     - it's the Crawford game;
+	     - the cube is dead. */
+	if( fAutoRoll && !anDice[ 0 ] && !fDoubled &&
+	    ( !fCubeUse || fCrawford ||
+	      ( fCubeOwner >= 0 && fCubeOwner != fTurn ) ||
+	      ( nMatchTo > 0 && anScore[ fTurn ] + nCube >= nMatchTo ) ) )
 	    CommandRoll( NULL );
 	return;
     } else
