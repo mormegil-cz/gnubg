@@ -670,7 +670,7 @@ command cER = {
     { "verylucky", CommandAnnotateVeryLucky, N_("Mark a very lucky dice roll"),
       NULL, NULL },
     { "veryunlucky", CommandAnnotateVeryUnlucky, 
-      N_("Mark an very unlucky dice roll"), NULL, NULL },
+      N_("Mark a very unlucky dice roll"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotate[] = {
     { "clear", NULL, N_("Clear annotation"), NULL, acAnnotateClear },
@@ -717,7 +717,7 @@ command cER = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
     { "equityevolution", CommandExportGameEquityEvolution, 
-      N_("Exports the equity evolution of the game (for import into a spreadsheet"), 
+      N_("Exports the equity evolution of the game (for import into a spreadsheet)"), 
       szFILENAME, &cFilename },
     { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "
       "format"), szFILENAME, &cFilename },
@@ -1135,7 +1135,7 @@ command cER = {
     { "dragtargethelp", CommandSetGUIDragTargetHelp,
       N_("Show target help while dragging a chequer"), szONOFF, NULL },
     { "usestatspanel", CommandSetGUIUseStatsPanel,
-      N_("Show statistcs in a panel"), szONOFF, NULL },
+      N_("Show statistics in a panel"), szONOFF, NULL },
 #endif
     { "highdiefirst", CommandSetGUIHighDieFirst,
       N_("Show the higher die on the left"), szONOFF, NULL },
@@ -4396,7 +4396,7 @@ CommandRollout( char *sz ) {
   }
   else if ( rcRollout.fInitial ) {
 
-    if ( c == 1 && ! strncmp ( sz, _("=cube"), 5 ) )
+    if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) )
       outputl ( _("You cannot do a cube decision rollout for the initial"
                   " position.\n"
                   "Please 'set rollout initial off'.") );
@@ -7680,7 +7680,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	}
 
 #endif /* USE_GUI */
-    
+
 #if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
 #endif

@@ -157,7 +157,7 @@ char* warningStrings[WARN_NUM_WARNINGS] =
 };
 
 char* warningNames[WARN_NUM_WARNINGS] =
-{N_("fullscreenexit"), N_("quickdraw"), N_("shadows"), N_("unaccelerated")};
+{"fullscreenexit", "quickdraw", "shadows", "unaccelerated"};
 
 int warningEnabled[WARN_NUM_WARNINGS] = {TRUE, TRUE, TRUE, TRUE};
 
@@ -4324,7 +4324,7 @@ static GtkWidget *NewWidget( newwidget *pnw){
   pwButtons = button_from_image( image_from_xpm_d ( stock_new_money_xpm,
                                                       pwToolbar ) );
   gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
-                   pwButtons, "Start a new money game session", NULL );
+                   pwButtons, _("Start a new money game session"), NULL );
   gtk_signal_connect( GTK_OBJECT( pwButtons ), "clicked",
 	    GTK_SIGNAL_FUNC( ToolButtonPressedMS ), pnw );
 
@@ -4913,7 +4913,7 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath,
       if (lastImportType != -1)
 		gtk_option_menu_set_history( GTK_OPTION_MENU ( ft.pwom ), lastImportType );
 
-      pwGetPath = gtk_button_new_with_label("Go to default path");
+      pwGetPath = gtk_button_new_with_label(_("Go to default path"));
       gtk_container_set_border_width(GTK_CONTAINER(pwGetPath), 5);
       gtk_signal_connect( GTK_OBJECT( pwGetPath ), "clicked",
 			    GTK_SIGNAL_FUNC( GetDefaultPath ), &ft );
@@ -7409,7 +7409,7 @@ extern void GTKEval( char *szOutput ) {
 	*pwText = gtk_text_new( NULL, NULL );
     GdkFont *pf;
     GtkWidget *pwButtons,
-        *pwCopy = gtk_button_new_with_label( "Copy" );
+        *pwCopy = gtk_button_new_with_label( _("Copy") );
 
 #if WIN32
     /* Windows fonts come out smaller than you ask for, for some reason... */
@@ -7966,7 +7966,7 @@ extern void GTKCommandShowCredits(void)
 		ce = credit->Entry;
 		while(ce->Name)
 		{
-			AddName(pwVBox, ce->Name, ce->Type);
+			AddName(pwVBox, ce->Name, _(ce->Type));
 			ce++;
 		}
 		if (i == 1)
@@ -10304,7 +10304,7 @@ extern void GTKShowWarning(warnings warning)
 		pwv = gtk_vbox_new ( FALSE, 8 );
 		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
 
-		pwMsg = gtk_label_new(warningStrings[warning]);
+                pwMsg = gtk_label_new( gettext( warningStrings[warning] ) );
 		gtk_box_pack_start( GTK_BOX( pwv ), pwMsg, TRUE, TRUE, 0 );
 
 		pwTick = gtk_check_button_new_with_label (_("Don't show this again"));

@@ -1,3 +1,12 @@
+Wed Apr 21 22:53:44 CEST 2004  Petr Kadlec  <mormegil@centrum.cz>
+
+	Corrected some i18n-related problems + typos.
+
+	* gnubg.c, gtkgame.c, gtkprefs.c, gtkrace.c, html.c,
+	play.c, set.c, show.c, text.c: Added calls to gettext,
+	marked some previously unmarked translatable
+	strings (and vice versa), corrected a few typos.
+
 Tue Apr 20 17:56:25 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* matchequity.c (initPostCrawfordMETFromParameters):

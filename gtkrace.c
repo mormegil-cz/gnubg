@@ -162,15 +162,15 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 
     double rK = (double) ( nDiff + 4 ) / ( 2 * sqrt ( nSum -4 ) );
 
-    sz = g_strdup_printf ( "K = (diff+4)/(2 sqrt(sum-4)) = %8.4g", rK );
+    sz = g_strdup_printf ( _("K = (diff+4)/(2 sqrt(sum-4)) = %8.4g"), rK );
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                          pw = gtk_label_new ( sz ),
                          FALSE, FALSE, 4 );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( "Cubeless winning chance (%s on roll) = "
-                           "0.5 (1+erf(K)) = %8.4g%%", 
+    sz = g_strdup_printf ( _("Cubeless winning chance (%s on roll) = "
+                             "0.5 (1+erf(K)) = %8.4g%%"), 
                            ap[ fMove ].szName,
                            100.0 * ( 0.5 * ( 1.0 + erf ( rK ) ) ) );
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
@@ -258,8 +258,8 @@ ThorpPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
     nDiff = 13;
   else if( nDiff < -37 )
     nDiff = -37;
-  sz = g_strdup_printf ( "Bower's interpolation: "
-                         "%d%% cubeless gwc (%s on roll)", 
+  sz = g_strdup_printf ( _("Bower's interpolation: "
+                           "%d%% cubeless gwc (%s on roll)"), 
                          74 + 2 * nDiff, ap[ fMove ].szName );
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                        pw = gtk_label_new ( sz ),
@@ -310,7 +310,7 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-    sz = g_strdup_printf ( _("%7.3f"), arPips[ fInvert ? !i : i ] );
+    sz = g_strdup_printf ( "%7.3f", arPips[ fInvert ? !i : i ] );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
                        1, 2, i + 1, i + 2, 
@@ -331,13 +331,13 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
   }
 
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( "EPC = Effective pip count = "
-                                            "Avg. rolls * 8.167" ),
+                       pw = gtk_label_new ( _("EPC = Effective pip count = "
+                                              "Avg. rolls * 8.167") ),
                        FALSE, FALSE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( "Wastage = EPC - Pips" ),
+                       pw = gtk_label_new ( _("Wastage = EPC - Pips") ),
                        FALSE, FALSE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
@@ -380,9 +380,9 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   /* build widget */
 
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( "Number of rolls to bear off, "
-                                            "assuming each player has one "
-                                            "chequer only." ),
+                       pw = gtk_label_new ( _("Number of rolls to bear off, "
+                                              "assuming each player has one "
+                                              "chequer only.") ),
                        FALSE, FALSE, 4 );
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
@@ -502,7 +502,7 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
     j = prw->fMove ? i : !i;
 
-    pch = g_strdup_printf ( _("%7.3f"), arMu[ j ] * x );
+    pch = g_strdup_printf ( "%7.3f", arMu[ j ] * x );
     gtk_label_set_text( GTK_LABEL( prw->epcwOSR.apwEPC[ i ] ), pch );
     g_free ( pch );
 

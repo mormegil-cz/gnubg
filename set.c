@@ -342,7 +342,7 @@ SetMoveFilter(char* sz,
 
   if ((accept = ParseNumber( &sz ) ) == INT_MIN ) {
 	outputf (N_ ("You must specify a number of moves to accept (or a negative number to skip "
-			 "this level -- try help set %s movefilter"), szSetCommand);
+			 "this level) -- try help set %s movefilter"), szSetCommand);
 	return;
   }
 
@@ -1580,7 +1580,7 @@ extern void CommandSetRNGBBS( char *sz ) {
 #if HAVE_LIBGMP
     SetRNG( rngSet, RNG_BBS, sz );
 #else
-    outputl( _("This installation of GNU Backgammon was compiled without the"
+    outputl( _("This installation of GNU Backgammon was compiled without the "
                "Blum, Blum and Shub generator.") );
 #endif /* HAVE_LIBGMP */
 }
@@ -1589,7 +1589,7 @@ extern void CommandSetRNGBsd( char *sz ) {
 #if HAVE_RANDOM
     SetRNG( rngSet, RNG_BSD, sz );
 #else
-    outputl( _("This installation of GNU Backgammon was compiled without the"
+    outputl( _("This installation of GNU Backgammon was compiled without the "
                "BSD generator.") );
 #endif /* HAVE_RANDOM */
 }
@@ -1678,7 +1678,7 @@ extern void CommandSetRolloutLatePlies ( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 1 ) {
-	outputl( _("You must specify a valid ply at which to change evaluations  "
+	outputl( _("You must specify a valid ply at which to change evaluations "
         "-- try `help set rollout late plies'.") );
 
 	return;
@@ -1721,7 +1721,7 @@ extern void CommandSetRolloutLimitMinGames ( char *sz ) {
   int n = ParseNumber( &sz );
 
   if (n < 1) {
-    outputl( _("You must specify a valid minimum number of games to rollout"
+    outputl( _("You must specify a valid minimum number of games to rollout "
                "-- try 'help set rollout limit minimumgames'.") );
     return;
   }
@@ -1746,7 +1746,7 @@ extern void CommandSetRolloutMaxError ( char *sz ) {
     prcSet->rStdLimit = r;
 
     outputf ( _("Rollouts can stop when the ratio |STD/value| is less than "
-		"%5.4f for every value (win/gammon/backgammon/...equity\n"),
+		"%5.4f for every value (win/gammon/backgammon/...equity)\n"),
 	      r);
 }
 
@@ -1784,7 +1784,7 @@ extern void CommandSetRolloutJsdMinGames ( char *sz ) {
   int n = ParseNumber( &sz );
 
   if (n < 1) {
-    outputl( _("You must specify a valid minimum number of games to rollout"
+    outputl( _("You must specify a valid minimum number of games to rollout "
                "-- try 'help set rollout jsd minimumgames'.") );
     return;
   }
@@ -1810,7 +1810,7 @@ extern void CommandSetRolloutJsdLimit ( char *sz ) {
     prcSet->rJsdLimit = r;
 
     outputf ( 
-  _("Rollouts (or rollouts of moves) may  stop when the equity is more "
+  _("Rollouts (or rollouts of moves) may stop when the equity is more "
  "than %5.3f joint standard deviations from the best move being rolled out\n"),
 	      r);
 }
@@ -2148,7 +2148,7 @@ extern void CommandSetRolloutTruncationPlies ( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-       outputl( _("You must specify a valid ply at which to truncate rollouts  -- "
+       outputl( _("You must specify a valid ply at which to truncate rollouts -- "
 		"try `help set rollout'.") );
 
 	return;
@@ -3409,7 +3409,7 @@ CommandSetExportMovesDisplayUnmarked ( char *sz ) {
   SetToggle( "export moves display unmarked", 
              &exsExport.afMovesDisplay[ SKILL_NONE ], sz,
              _("Export unmarked moves."),
-             _("Do not export unmarked.") );
+             _("Do not export unmarked moves.") );
 
 }
     
@@ -3905,12 +3905,12 @@ CommandSetGeometryWidth ( char *sz ) {
   int n;
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( "Illegal value. "
-              "See 'help set geometry %s width'.\n", pwoSet->winName );
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s width'.\n"), pwoSet->winName );
   else {
 
     pwoSet->wg.nWidth = n;
-    outputf ( "Width of %s window set to %d.\n", szSet, n );
+    outputf ( _("Width of %s window set to %d.\n"), szSet, n );
 
 #if USE_GTK
     if ( fX )
@@ -3927,12 +3927,12 @@ CommandSetGeometryHeight ( char *sz ) {
   int n;
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( "Illegal value. "
-              "See 'help set geometry %s height'.\n", pwoSet->winName );
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s height'.\n"), pwoSet->winName );
   else {
 
     pwoSet->wg.nHeight = n;
-    outputf ( "Height of %s window set to %d.\n", szSet, n );
+    outputf ( _("Height of %s window set to %d.\n"), szSet, n );
 
 #if USE_GTK
     if ( fX )
@@ -3949,12 +3949,12 @@ CommandSetGeometryPosX ( char *sz ) {
   int n;
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( "Illegal value. "
-              "See 'help set geometry %s xpos'.\n", pwoSet->winName );
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s xpos'.\n"), pwoSet->winName );
   else {
 
     pwoSet->wg.nPosX = n;
-    outputf ( "X-position of %s window set to %d.\n", szSet, n );
+    outputf ( _("X-position of %s window set to %d.\n"), szSet, n );
 
 #if USE_GTK
     if ( fX )
@@ -3971,12 +3971,12 @@ CommandSetGeometryPosY ( char *sz ) {
   int n;
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
-    outputf ( "Illegal value. "
-              "See 'help set geometry %s ypos'.\n", pwoSet->winName );
+    outputf ( _("Illegal value. "
+                "See 'help set geometry %s ypos'.\n"), pwoSet->winName );
   else {
 
     pwoSet->wg.nPosY = n;
-    outputf ( "Y-position of %s window set to %d.\n", szSet, n );
+    outputf ( _("Y-position of %s window set to %d.\n"), szSet, n );
 
 #if USE_GTK
     if ( fX )
@@ -4695,7 +4695,7 @@ CommandSetCubeEfficiencyRaceCoefficient( char *sz ) {
 
   if ( r >= 0 ) {
     rRaceCoefficientX = r;
-    outputf( _("Cube efficiency race coefficienct set to %7.5f\n"), 
+    outputf( _("Cube efficiency race coefficient set to %7.5f\n"), 
              rRaceCoefficientX );
   }
   else

@@ -588,8 +588,8 @@ static GtkWidget *BoardPage3d( BoardData *bd )
     gtk_box_pack_start( GTK_BOX( pwhbox ),
 		gtk_colour_picker_new3d(&bd->rd->BaseMat, DF_NO_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
 
-	pwBgTrays = gtk_check_button_new_with_label ("Show background in bear-off trays");
-	gtk_tooltips_set_tip(ptt, pwBgTrays, ("If unset the bear-off trays will be drawn with the board colour"), 0);
+	pwBgTrays = gtk_check_button_new_with_label (_("Show background in bear-off trays"));
+	gtk_tooltips_set_tip(ptt, pwBgTrays, _("If unset the bear-off trays will be drawn with the board colour"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwBgTrays, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBgTrays), bd->rd->bgInTrays);
 	gtk_signal_connect(GTK_OBJECT(pwBgTrays), "toggled", GTK_SIGNAL_FUNC(option_changed),0);// (GtkObject*) ( pwPreview + PI_BOARD ));
@@ -1272,28 +1272,28 @@ void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 	ResumeInput(&m);
 
 	if (fps >= 30)
-		msg = "3d Performance is very fast.\n";
+		msg = _("3d Performance is very fast.\n");
 	else if (fps >= 15)
-		msg = "3d Performance is good.\n";
+		msg = _("3d Performance is good.\n");
 	else if (fps >= 10)
-		msg = "3d Performance is ok.\n";
+		msg = _("3d Performance is ok.\n");
 	else if (fps >= 5)
-		msg = "3d Performance is poor.\n";
+		msg = _("3d Performance is poor.\n");
 	else
-		msg = "3d Performance is very poor.\n";
+		msg = _("3d Performance is very poor.\n");
 
-	sprintf(str, "%s\n(%d frames per second)\n", msg, fps);
+	sprintf(str, _("%s\n(%d frames per second)\n"), msg, fps);
 
 	outputl(str);
 
 	if (fps <= 5)
 	{	/* Give some advice, hopefully to speed things up */
 		if (bd->rd->showShadows)
-			outputl("Disable shadows to improve performance");
+			outputl(_("Disable shadows to improve performance"));
 		else if (!bd->rd->quickDraw)
-			outputl("Try the quick draw option to improve performance");
+			outputl(_("Try the quick draw option to improve performance"));
 		else
-			outputl("The quick draw option will not change the result of this performance test");
+			outputl(_("The quick draw option will not change the result of this performance test"));
 	}
 	outputx();
 }
@@ -1369,25 +1369,25 @@ GtkWidget *LightingPage(BoardData *bd)
 		dtBox = gtk_vbox_new (FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(pwx), dtBox, FALSE, FALSE, 0);
 
-		dtLightSourceFrame = gtk_frame_new("Light Source Type");
+		dtLightSourceFrame = gtk_frame_new(_("Light Source Type"));
 		gtk_container_set_border_width (GTK_CONTAINER (dtLightSourceFrame), 4);
 		gtk_box_pack_start(GTK_BOX(dtBox), dtLightSourceFrame, FALSE, FALSE, 0);
 		
 		vbox = gtk_vbox_new (FALSE, 0);
 		gtk_container_add (GTK_CONTAINER (dtLightSourceFrame), vbox);
 		
-		pwLightSource = gtk_radio_button_new_with_label (NULL, "Positional");
+		pwLightSource = gtk_radio_button_new_with_label (NULL, _("Positional"));
 		gtk_tooltips_set_tip(ptt, pwLightSource, _("This is a fixed light source, like a lamp"), 0);
 		gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (bd->rd->lightType == LT_POSITIONAL));
 		
-		pwDirectionalSource = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), "Directional");
+		pwDirectionalSource = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), _("Directional"));
 		gtk_tooltips_set_tip(ptt, pwDirectionalSource, _("This is a light direction, like the sun"), 0);
 		gtk_box_pack_start (GTK_BOX (vbox), pwDirectionalSource, FALSE, FALSE, 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (bd->rd->lightType == LT_DIRECTIONAL));
 		gtk_signal_connect(GTK_OBJECT(pwDirectionalSource), "toggled", GTK_SIGNAL_FUNC(option_changed), bd);
 
-		dtLightPositionFrame = gtk_frame_new("Light Position");
+		dtLightPositionFrame = gtk_frame_new(_("Light Position"));
 		gtk_container_set_border_width (GTK_CONTAINER (dtLightPositionFrame), 4);
 		gtk_box_pack_start(GTK_BOX(dtBox), dtLightPositionFrame, FALSE, FALSE, 0);
 
@@ -1397,7 +1397,7 @@ GtkWidget *LightingPage(BoardData *bd)
 		hBox = gtk_hbox_new (FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
 
-		lab = gtk_label_new("Left");
+		lab = gtk_label_new(_("Left"));
 		gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 		padjLightPosX = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->lightPos[0],
@@ -1409,7 +1409,7 @@ GtkWidget *LightingPage(BoardData *bd)
 		gtk_widget_set_usize(pwLightPosX, 150, -1);
 		gtk_box_pack_start(GTK_BOX(hBox), pwLightPosX, TRUE, TRUE, 0);
 
-		lab = gtk_label_new("Right");
+		lab = gtk_label_new(_("Right"));
 		gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 		hBox = gtk_hbox_new(FALSE, 0);
@@ -1418,7 +1418,7 @@ GtkWidget *LightingPage(BoardData *bd)
 		vbox2 = gtk_vbox_new(FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(hBox), vbox2, FALSE, FALSE, 0);
 
-		lab = gtk_label_new("Bottom");
+		lab = gtk_label_new(_("Bottom"));
 		gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
 
 		padjLightPosY = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->lightPos[1],
@@ -1431,13 +1431,13 @@ GtkWidget *LightingPage(BoardData *bd)
 		gtk_widget_set_usize(pwLightPosY, -1, 70);
 		gtk_box_pack_start(GTK_BOX(vbox2), pwLightPosY, TRUE, TRUE, 0);
 
-		lab = gtk_label_new("Top");
+		lab = gtk_label_new(_("Top"));
 		gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
 
 		vbox2 = gtk_vbox_new(FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(hBox), vbox2, FALSE, FALSE, 0);
 
-		lab = gtk_label_new("Low");
+		lab = gtk_label_new(_("Low"));
 		gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
 
 		padjLightPosZ = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->lightPos[2],
@@ -1449,10 +1449,10 @@ GtkWidget *LightingPage(BoardData *bd)
 
 		gtk_box_pack_start(GTK_BOX(vbox2), pwLightPosZ, TRUE, TRUE, 0);
 
-		lab = gtk_label_new("High");
+		lab = gtk_label_new(_("High"));
 		gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
 
-		dtLightLevelsFrame = gtk_frame_new("Light Levels");
+		dtLightLevelsFrame = gtk_frame_new(_("Light Levels"));
 		gtk_container_set_border_width(GTK_CONTAINER(dtLightLevelsFrame), 4);
 		gtk_box_pack_start(GTK_BOX(dtBox), dtLightLevelsFrame, FALSE, FALSE, 0);
 
@@ -1462,7 +1462,7 @@ GtkWidget *LightingPage(BoardData *bd)
 		hBox = gtk_hbox_new (FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
 
-		lab = gtk_label_new("Ambient");
+		lab = gtk_label_new(_("Ambient"));
 		gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 		padjLightLevelAmbient = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->lightLevels[0],
@@ -1476,7 +1476,7 @@ GtkWidget *LightingPage(BoardData *bd)
 		hBox = gtk_hbox_new (FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
 
-		lab = gtk_label_new("Diffuse");
+		lab = gtk_label_new(_("Diffuse"));
 		gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 		padjLightLevelDiffuse = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->lightLevels[1],
@@ -1490,7 +1490,7 @@ GtkWidget *LightingPage(BoardData *bd)
 		hBox = gtk_hbox_new (FALSE, 0);
 		gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
 
-		lab = gtk_label_new("Specular");
+		lab = gtk_label_new(_("Specular"));
 		gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
 
 		padjLightLevelSpecular = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->lightLevels[2],
@@ -1649,7 +1649,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (pw), hBox, FALSE, FALSE, 0);
 
-	skewLab = gtk_label_new("FOV skew: ");
+	skewLab = gtk_label_new(_("FOV skew: "));
 	gtk_box_pack_start(GTK_BOX(hBox), skewLab, FALSE, FALSE, 0);
 
 	padjSkewFactor = GTK_ADJUSTMENT(gtk_adjustment_new(bd->rd->skewFactor,
@@ -1662,12 +1662,12 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 #else
     gtk_widget_set_usize ( GTK_WIDGET ( pwSkewFactor ), 100, -1 );
 #endif
-	gtk_tooltips_set_tip(ptt, pwSkewFactor, "Vary the field-of-view of the 3d display", 0);
+	gtk_tooltips_set_tip(ptt, pwSkewFactor, _("Vary the field-of-view of the 3d display"), 0);
 	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwSkewFactor, FALSE, FALSE, 0);
 
 	pwPlanView = gtk_check_button_new_with_label (_("Plan view"));
-	gtk_tooltips_set_tip(ptt, pwPlanView, "Display the 3d board with a 2d overhead view", 0);
+	gtk_tooltips_set_tip(ptt, pwPlanView, _("Display the 3d board with a 2d overhead view"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwPlanView, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwPlanView), bd->rd->planView);
 	gtk_signal_connect(GTK_OBJECT(pwPlanView), "toggled", GTK_SIGNAL_FUNC(toggle_planview), NULL);
@@ -2391,11 +2391,11 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
   char prompt[200];
 #if USE_BOARD3D
 	if (rdPrefs.fDisplayType == DT_3D)
-		sprintf(prompt, _("Permently overwrite 3d settings for design %s?"), pbdeSelected->szTitle);
+		sprintf(prompt, _("Permanently overwrite 3d settings for design %s?"), pbdeSelected->szTitle);
 	else
-		sprintf(prompt, _("Permently overwrite 2d settings for design %s?"), pbdeSelected->szTitle);
+		sprintf(prompt, _("Permanently overwrite 2d settings for design %s?"), pbdeSelected->szTitle);
 #else
-	sprintf(prompt, _("Permently overwrite settings for design %s?"), pbdeSelected->szTitle);
+	sprintf(prompt, _("Permanently overwrite settings for design %s?"), pbdeSelected->szTitle);
 #endif
 	if (!GetInputYN(prompt))
 		return;

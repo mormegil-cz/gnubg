@@ -3506,7 +3506,7 @@ extern void CommandExportGameHtml( char *sz ) {
     }
     
     if( !sz || !*sz ) {
-	outputl( _("You must specify a file to export to (see `help export"
+	outputl( _("You must specify a file to export to (see `help export "
 		 "game html').") );
 	return;
     }

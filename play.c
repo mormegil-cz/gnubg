@@ -2105,7 +2105,7 @@ static void AnnotateMove( skilltype st ) {
         pmr->n.stCube = st; /* fixme */
         break;
       default:
-        outputl ( _("Invalid annotation.") );
+        outputl ( _("Invalid annotation") );
         break;
       }
 

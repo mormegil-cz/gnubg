@@ -785,7 +785,7 @@ extern void CommandShowMatchInfo( char *sz ) {
 	     _("unknown rating") );
 
     if( mi.nYear )
-	outputf( ", %04d-%02d-%02d\n", mi.nYear, mi.nMonth, mi.nDay );
+	outputf( _(", %04d-%02d-%02d\n"), mi.nYear, mi.nMonth, mi.nDay );
     else
 	outputc( '\n' );
 
