@@ -1,3 +1,8 @@
+Sun Feb  3 21:39:34 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (printImage, printPoint, printHTMLBoard): new functions:
+	print board in HTML format.
+
 Sun Feb  3 15:56:24 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	Check-in of HTML-export skeleton.
