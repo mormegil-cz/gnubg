@@ -153,8 +153,7 @@ static void DrawLaTeXPoint( FILE *pf, int i, int fPlayer, int c ) {
     }
 }
 
-static void PrintLaTeXBoard( FILE *pf, int anBoard[ 2 ][ 25 ], int fPlayer,
-			     int fCubeOwner, int nCube ) {
+static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 
     int anOff[ 2 ] = { 15, 15 }, i, y;
 
@@ -166,19 +165,19 @@ static void PrintLaTeXBoard( FILE *pf, int anBoard[ 2 ][ 25 ], int fPlayer,
 	     "\\%sboard\n", fPlayer ? "black" : "white" );
 
     for( i = 0; i < 25; i++ ) {
-	anOff[ 0 ] -= anBoard[ 0 ][ i ];
-	anOff[ 1 ] -= anBoard[ 1 ][ i ];
+	anOff[ 0 ] -= pms->anBoard[ 0 ][ i ];
+	anOff[ 1 ] -= pms->anBoard[ 1 ][ i ];
 
-	DrawLaTeXPoint( pf, i, 0, anBoard[ !fPlayer ][ i ] );
-	DrawLaTeXPoint( pf, i, 1, anBoard[ fPlayer ][ i ] );
+	DrawLaTeXPoint( pf, i, 0, pms->anBoard[ !fPlayer ][ i ] );
+	DrawLaTeXPoint( pf, i, 1, pms->anBoard[ fPlayer ][ i ] );
     }
 
     DrawLaTeXPoint( pf, 25, 0, anOff[ !fPlayer ] );
     DrawLaTeXPoint( pf, 25, 1, anOff[ fPlayer ] );
 
-    if( fCubeOwner < 0 )
+    if( pms->fCubeOwner < 0 )
 	y = 130;
-    else if( fCubeOwner )
+    else if( pms->fCubeOwner )
 	y = 30;
     else
 	y = 230;
@@ -187,12 +186,12 @@ static void PrintLaTeXBoard( FILE *pf, int anBoard[ 2 ][ 25 ], int fPlayer,
     /* EEPIC ovals don't work very well */
     fprintf( pf, "\\put(35,%d){\\setlength\\maxovaldiam {7pt} \\oval(24,24)}"
 	     "\\put(23,%d){\\makebox(24,24){%d}}\n", y, y - 12,
-	     nCube == 1 ? 64 : nCube );
+	     pms->nCube == 1 ? 64 : pms->nCube );
 #else
     fprintf( pf, "\\path(23,%d)(47,%d)(47,%d)(23,%d)(23,%d)"
 	     "\\put(23,%d){\\makebox(24,24){\\textsf{\\LARGE %d}}}\n",
 	     y - 12, y - 12, y + 12, y + 12, y - 12, y - 12,
-	     nCube == 1 ? 64 : nCube );
+	     pms->nCube == 1 ? 64 : pms->nCube );
 #endif
     
     fputs( "\\end{picture}\\end{center}\\vspace{-4mm}\n\n\\nopagebreak[4]\n",
@@ -325,10 +324,7 @@ static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
     fputs( "\n\n", pf );
 }
 
-static void PrintLaTeXCubeAnalysis( FILE *pf, int nCube, int fCubeOwner,
-				    int fPlayer, int nMatchTo,
-				    int anScore[ 2 ], int fCrawford,
-				    int fJacoby, int fBeavers,
+static void PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
 				    float arDouble[ 4 ], evaltype et,
 				    evalsetup *pes ) {
     cubeinfo ci;
@@ -337,8 +333,8 @@ static void PrintLaTeXCubeAnalysis( FILE *pf, int nCube, int fCubeOwner,
     if( et == EVAL_NONE )
 	return;
     
-    SetCubeInfo( &ci, nCube, fCubeOwner, fPlayer, nMatchTo, anScore,
-		 fCrawford, fJacoby, fBeavers );
+    SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, fPlayer, pms->nMatchTo,
+		 pms->anScore, pms->fCrawford, fJacoby, fBeavers );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
@@ -356,25 +352,16 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
     
     list *pl;
     moverecord *pmr;
-    int nCube = 1, anBoard[ 2 ][ 25 ], anScore[ 2 ];
-    int fCrawfordLocal = fCrawford, fJacobyLocal = fJacoby, i, fTook = FALSE,
-	fBeaversLocal = fBeavers, nMatchToLocal = nMatchTo, fCubeOwner = -1;
+    matchstate msExport;
+    int fTook = FALSE, i;
     char sz[ 1024 ];
 
     /* FIXME game introduction? */
-    
-    InitBoard( anBoard );
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
-	    anScore[ 0 ] = pmr->g.anScore[ 0 ];
-	    anScore[ 1 ] = pmr->g.anScore[ 1 ];
-	    fCrawfordLocal = pmr->g.fCrawfordGame;
-	    nMatchToLocal = pmr->g.nMatch;
-	    nCube = 1 << pmr->g.nAutoDoubles;
-	    
 	    break;
 	    
 	case MOVE_NORMAL:
@@ -382,18 +369,15 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		/* no need to print board following a double/take */
 		fTook = FALSE;
 	    else
-		PrintLaTeXBoard( pf, anBoard, pmr->n.fPlayer, fCubeOwner,
-				 nCube );
+		PrintLaTeXBoard( pf, &msExport, pmr->n.fPlayer );
 	    
-	    PrintLaTeXCubeAnalysis( pf, nCube, fCubeOwner, pmr->n.fPlayer,
-				    nMatchToLocal, anScore, fCrawfordLocal,
-				    fJacobyLocal, fBeaversLocal,
+	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
 				    pmr->n.arDouble, pmr->n.etDouble,
 				    &pmr->n.esDouble );
 
 	    sprintf( sz, "%d%d%s: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeLaTeXAbbr[ pmr->n.lt ] );
-	    FormatMove( strchr( sz, 0 ), anBoard, pmr->n.anMove );
+	    FormatMove( strchr( sz, 0 ), msExport.anBoard, pmr->n.anMove );
 	    fprintf( pf, "\\begin{center}%s%s\\end{center}\n\n", sz,
 		     aszSkillTypeAbbr[ pmr->n.st ] );
 
@@ -405,7 +389,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		    continue;
 
 		putc( i == pmr->n.iMove ? '*' : ' ', pf );
-		FormatMoveHint( sz, anBoard, &pmr->n.ml, i,
+		FormatMoveHint( sz, msExport.anBoard, &pmr->n.ml, i,
 				i != pmr->n.iMove ||
 				i != pmr->n.ml.cMoves - 1 );
 		fputs( sz, pf );
@@ -414,17 +398,12 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		
 	    PrintLaTeXComment( pf, pmr->a.sz );
 	    
-	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
-	    SwapSides( anBoard );
-	    
 	    break;
 	    
 	case MOVE_DOUBLE:
-	    PrintLaTeXBoard( pf, anBoard, pmr->d.fPlayer, fCubeOwner, nCube );
+	    PrintLaTeXBoard( pf, &msExport, pmr->d.fPlayer );
 
-	    PrintLaTeXCubeAnalysis( pf, nCube, fCubeOwner, pmr->d.fPlayer,
-				    nMatchToLocal, anScore, fCrawfordLocal,
-				    fJacobyLocal, fBeaversLocal,
+	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
 				    pmr->d.arDouble, pmr->d.etDouble,
 				    &pmr->d.esDouble );
 
@@ -432,9 +411,6 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 	    
 	    PrintLaTeXComment( pf, pmr->a.sz );
-	    
-	    nCube <<= 1;
-	    fCubeOwner = !pmr->d.fPlayer;
 	    
 	    break;
 	    
@@ -456,23 +432,27 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_RESIGN:
+	    /* FIXME print board? */
 	    /* FIXME print resign */
 	    /* FIXME print resignation analysis, if available */
 	    PrintLaTeXComment( pf, pmr->a.sz );
-	    /* FIXME adjust score */
 	    break;
+	    
 	case MOVE_SETDICE:
 	    /* ignore */
 	    break;
+	    
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
 	case MOVE_SETCUBEPOS:
-	    /* FIXME apply */
+	    /* FIXME print something? */
 	    break;
 	}
+
+	ApplyMoveRecord( &msExport, pmr );
     }
     
-    if( ( GameStatus( anBoard ) ) )
+    if( ( GameStatus( msExport.anBoard ) ) )
 	/* FIXME print game result */
 	;
 }
