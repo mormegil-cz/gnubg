@@ -4304,7 +4304,6 @@ extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
 
       int nAway0 = pci->nMatchTo - pci->anScore[ 0 ] - 1;
       int nAway1 = pci->nMatchTo - pci->anScore[ 1 ] - 1;
-      int i;
 
       if ( ( ! nAway0 || ! nAway1 ) && ! fCrawford ) {
         if ( ! nAway0 )
