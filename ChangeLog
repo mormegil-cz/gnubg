@@ -1,3 +1,9 @@
+Sun Sep 21 16:57:55 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseOldMove): fix a few problems with the FIBS
+	oldmoves import.
+	(reported by Joseph)
+
 Sat Sep 20 22:07:59 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* formatgs.c (errorrateMP): allow control of number of digits in 
