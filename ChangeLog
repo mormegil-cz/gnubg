@@ -1,3 +1,12 @@
+Mon Nov 18 22:50:51 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c - fix handling of setting of plies for late evals
+	              add toggle for truncation pt cube = player 0
+	              default to players being the same settings in
+	              rollout pages
+	* backgammon.h, gnubg.c, set.c, shw.c, gtkchequer.c -
+	  add routines to set highlight colours
+
 Mon Nov 18 19:18:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (printNumbers): remove debug code.
