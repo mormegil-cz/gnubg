@@ -42,6 +42,10 @@
 #include "positionid.h"
 #include "rollout.h"
 
+#if HAVE_SCM_SELECT_MODULE && !HAVE_SCM_SET_CURRENT_MODULE
+#define scm_set_current_module scm_select_module
+#endif
+
 static SCM BoardToSCM( int anBoard[ 2 ][ 25 ] ) {
 
     SCM b0, b1;

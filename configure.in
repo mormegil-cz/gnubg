@@ -16,7 +16,7 @@ dnl GNU General Public License for more details.
 dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software
-dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 AC_INIT(gnubg.c)
 AM_INIT_AUTOMAKE(gnubg,0.12)
@@ -127,7 +127,7 @@ else
   CFLAGS="$CFLAGS $GTK_CFLAGS"
   LIBS="$LIBS $GTK_LIBS"
   AC_CHECK_HEADERS(gdk/gdkx.h)
-  AC_CHECK_FUNCS(XCopyPlane)
+  AC_CHECK_FUNCS(gtk_option_menu_get_history XCopyPlane)
   if test "$with_gtkextra" != "no"; then
     AC_CHECK_HEADERS(gtkextra/gtksheet.h)
     AC_CHECK_LIB(gtkextra,gtk_sheet_new,
@@ -158,6 +158,7 @@ if test "$no_guile" != "yes"; then
   CPPFLAGS="$CPPFLAGS $GUILE_CFLAGS $GTK_CFLAGS"
   CFLAGS="$CFLAGS $GUILE_CFLAGS $GTK_CFLAGS"
   LIBS="$LIBS $GUILE_LDFLAGS $GTK_LIBS"
+  AC_CHECK_FUNCS(scm_set_current_module scm_select_module)
   AC_CHECK_HEADERS(guile-gtk.h)
   AC_CHECK_LIB(guilegtk-1.2, sgtk_wrap_gtkobj,
 [AC_DEFINE_UNQUOTED(HAVE_LIBGUILEGTK_1_2)
