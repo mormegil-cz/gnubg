@@ -4046,8 +4046,8 @@ static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
   sprintf( sz, _(" * %s neural network evaluator:\n"
                  "   - version %s, %d inputs, %d hidden units, "
                  "trained on %d positions.\n\n"),
-           WEIGHTS_VERSION, 
-           szTitle, pnn->cInput, pnn->cHidden, pnn->nTrained );
+           szTitle, WEIGHTS_VERSION, pnn->cInput, pnn->cHidden,
+	   pnn->nTrained );
 }
 
 static void StatusRace( char *sz ) {
