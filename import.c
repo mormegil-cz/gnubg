@@ -2370,6 +2370,12 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
         switch ( trt ) {
         case TMG_ROLL: /* roll:    1 1 21: */
+
+          if ( *pch == '?' ) {
+            /* no roll recorded, because the game is lost on time out */
+            continue;
+          }
+
           anRoll[ 0 ] = *pch - '0';
           anRoll[ 1 ] = *(pch+1) - '0';
 
