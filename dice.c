@@ -588,7 +588,7 @@ extern int InitRNGSeedLong( char *sz, rng rng ) {
 
     mpz_t n;
     
-    if( mpz_init_set_str( n, sz, 10 ) || mpz_sgn( n ) < 1 ) {
+    if( mpz_init_set_str( n, sz, 10 ) || mpz_sgn( n ) < 0 ) {
 	mpz_clear( n );
 	return -1;
     }
