@@ -106,8 +106,12 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
                                 (evalcontext *) pec ) < 0 )
         return ERR_VAL;
 
-      if ( pec->fCubeful )
-        aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+      if ( pec->fCubeful ) {
+        if ( pci->nMatchTo )
+          aar[ i ][ j ] = - mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+        else
+          aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+      }
       else
         aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
 
@@ -133,8 +137,12 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
                                 (evalcontext *) pec ) < 0 )
         return ERR_VAL;
 
-      if ( pec->fCubeful )
-        aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
+      if ( pec->fCubeful ) {
+        if ( pci->nMatchTo )
+          aar[ i ][ j ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+        else
+          aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
+      }
       else
         aar[ i ][ j ] = ar[ OUTPUT_EQUITY ];
 
@@ -173,10 +181,16 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
                                 (evalcontext *) pec ) < 0 )
         return ERR_VAL;
 
-      if ( pec->fCubeful )
-        aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+      if ( pec->fCubeful ) {
+        if ( pci->nMatchTo )
+          aar[ i ][ j ] = - mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+        else
+          aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+      }
       else
         aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+
+      printf ( "LuckNormal: %d %d %f\n", i , j, aar[ i ][ j ] );
 
       rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][j ] * 2.0f;
 

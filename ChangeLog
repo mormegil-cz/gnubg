@@ -1,3 +1,9 @@
+Mon Dec  9 21:24:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (LuckNormal, LuckFirst): fix bug in calculation of
+	luck rates for match play
+	(reported by Oliver Riordan)
+
 Mon Dec  9 20:39:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	
 	Problems with elevation of 90 deg.
