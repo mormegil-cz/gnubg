@@ -29,6 +29,7 @@ Tristan Colgate
 Olivier Croisille
 Ned Cross
 Bill Davidson
+Michael Depreli
 Max Durbano
 Fotis
 Michel Grimminck
