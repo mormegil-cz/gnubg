@@ -3230,9 +3230,10 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 #else
     /* assume obselete version of readline */
     if( pcCompleteContext == &cFilename )
-	return completion_matches( szText, filename_completion_function );
+	return completion_matches( (char *) szText,
+				   filename_completion_function );
     else
-	return completion_matches( szText, GenerateKeywords );
+	return completion_matches( (char *) szText, GenerateKeywords );
 #endif
 }
 #endif
