@@ -9036,7 +9036,7 @@ extern void GTKMatchInfo( void ) {
     id = gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			     GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
-    pwTable = gtk_table_new( 2, 9, FALSE );
+    pwTable = gtk_table_new( 5, 7, FALSE );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwTable );
 
@@ -9063,7 +9063,7 @@ extern void GTKMatchInfo( void ) {
 		      0, 1, 6, 7, 0, 0, 0, 0 );
     gtk_table_attach( GTK_TABLE( pwTable ),
 		      gtk_label_new( _("Comments:") ),
-		      0, 1, 7, 8, 0, 0, 0, 0 );
+		      2, 3, 0, 1, 0, 0, 0, 0 );
 
     apwRating[ 0 ] = gtk_entry_new();
     if( mi.pchRating[ 0 ] )
@@ -9107,10 +9107,16 @@ extern void GTKMatchInfo( void ) {
     gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwAnnotator, 1, 2, 6, 7 );
         
     pwComment = gtk_text_new( NULL, NULL ) ;
+    if( mi.pchComment ) {
+	gint nPos = 0;
+	gtk_editable_insert_text( GTK_EDITABLE( pwComment ), mi.pchComment,
+				  strlen( mi.pchComment ), &nPos );
+    }
     gtk_text_set_word_wrap( GTK_TEXT( pwComment ), TRUE );
     gtk_text_set_editable( GTK_TEXT( pwComment ), TRUE );
-    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwComment, 0, 2, 8, 9 );
-    
+    gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwComment, 2, 5, 1, 7 );
+
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 0 );
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
@@ -9152,6 +9158,7 @@ extern void GTKMatchInfo( void ) {
 			 "annotator", &mi.pchAnnotator );
 	pch = gtk_editable_get_chars( GTK_EDITABLE( pwComment ), 0, -1 );
 	UpdateMatchinfo( pch, "comment", &mi.pchComment );
+	g_free( pch );
 
 	gtk_widget_destroy( pwDialog );
 	

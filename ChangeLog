@@ -1,3 +1,8 @@
+Sun Sep 21 19:28:03 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.c (GTKMatchInfo): show match comment text, rearrange window,
+	fix memory leak
+
 Sun Sep 21 16:57:55 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseOldMove): fix a few problems with the FIBS
