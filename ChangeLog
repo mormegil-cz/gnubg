@@ -1,3 +1,11 @@
+Mon Apr 19 22:52:41 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (EPC): fix "same dice sequence for several games in a
+	row"-bug, reported by several users (Erik Barfoed, Øystein, Murat
+	etc). Well, this is not really a fix, I've just changed the code
+       	to avoid calling the OSR code, that resets the seed.
+	We really need to introduce several RNG contexts...
+
 Mon Apr 19 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Small 3d bug fix
