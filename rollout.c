@@ -524,7 +524,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
             /* invert evaluations if required */
 
-            if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
+            if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
 
             break;
 
@@ -572,7 +572,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
             aarOutput[ ici ][ OUTPUT_EQUITY ];
 
-          if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
+          if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
 
           *pf = FALSE;
           
@@ -613,7 +613,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                            aanBoard[ ici ],
                            pci, &ec );
 
-      if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
+      if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
           
     }
 
