@@ -1,3 +1,7 @@
+Wed Sep 1 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Small import bug fixed
+
 Wed Aug 25 18:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkgamelist.c, import.c, sgf.c: Speed up loading

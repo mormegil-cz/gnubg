@@ -1258,7 +1258,8 @@ extern void GTKThaw( void ) {
 	GL_Thaw();
 	frozen = FALSE;
 	/* Make sure analysis window is correct */
-	GTKSetMoveRecord( plLastMove->p );
+	if (plLastMove)
+		GTKSetMoveRecord( plLastMove->p );
 }
 
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
