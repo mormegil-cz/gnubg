@@ -1632,15 +1632,95 @@ extern void CommandDrop( char *sz ) {
     TurnDone();
 }
 
+static void DumpGameList(char *szOut, list *plGame) {
+
+    list *pl;
+    moverecord *pmr;
+    char sz[ 128 ];
+    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
+
+    InitBoard( anBoard );
+    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+	pmr = pl->p;
+	switch( pmr->mt ) {
+	case MOVE_GAMEINFO:
+	    /* FIXME */
+          continue;
+	    break;
+	case MOVE_NORMAL:
+	    sprintf( sz, "%d%d%-2s: ", pmr->n.anRoll[ 0 ],
+                     pmr->n.anRoll[ 1 ],
+                     aszLuckTypeAbbr[ pmr->n.lt ] );
+	    FormatMove( sz + 6, anBoard, pmr->n.anMove );
+            strcat(sz, " ");
+            strcat(sz, aszSkillTypeAbbr[ pmr->n.st ]);
+	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
+	    SwapSides( anBoard );
+         /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
+              sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
+	    break;
+	case MOVE_DOUBLE:
+	    sprintf( sz, "      Doubles to %d", nFileCube <<= 1 );
+	    break;
+	case MOVE_TAKE:
+	    strcpy( sz, "      Takes" ); /* FIXME beavers? */
+	    break;
+	case MOVE_DROP:
+            sprintf( sz, "      Drop" );
+	  /*  if( anScore )
+		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2; */
+	    break;
+        case MOVE_RESIGN:
+            sprintf( sz, "      Resigns" );
+            break;
+	case MOVE_SETDICE:
+	    /* ignore */
+	    break;
+	case MOVE_SETBOARD:
+	case MOVE_SETCUBEVAL:
+	case MOVE_SETCUBEPOS:
+	    if( !fWarned ) {
+		fWarned = TRUE;
+		outputl( "FIXME!!! (I'm DumpGameList in play.c)" );
+	    }
+	    break;
+        default:
+            printf("\n");
+	}
+
+	if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) {
+	    printf( "  1|                                " );
+	    i++;
+	}
+
+	if(( i & 1 ) || (pmr->mt == MOVE_RESIGN)) {
+	    printf( "%s\n", sz );
+	} else 
+	    printf( "%3d| %-30s ", ( i >> 1 ) + 1, sz );
+
+        if ( pmr->mt == MOVE_DROP ) {
+          printf( "\n" );
+          if ( ! ( i & 1 ) )
+            printf( "\n" );
+        }
+
+	i++;
+    }
+}
+
 extern void CommandListGame( char *sz ) {
+
+    char szOut[4098];
 #if USE_GTK
     if( fX ) {
 	ShowGameWindow();
 	return;
     }
 #endif
+    DumpGameList(szOut, plGame);
+    /* FIXME  outputl(szOut);
+       DumpListGame will soon return szOut */
 
-    /* FIXME */
 }
 
 extern void CommandListMatch( char *sz ) {

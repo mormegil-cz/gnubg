@@ -1,3 +1,7 @@
+Tue Oct 23 23:41:13 2001  Øystein Johansen <oeysteij@online.no>
+
+        play.c (DumpListGame): New function
+
 Mon Oct 22 20:55:13 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* gnubg.c (CommandHint): arDouble uninitialzed: forgot call to

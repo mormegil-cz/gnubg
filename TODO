@@ -100,7 +100,7 @@ duplication of effort and to make sure our changes merge easily.
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
-** Handle "list game" and "list match".
+** Handle "list game" and "list match".  (oysteijo)
 ** Allow setting/editing commentary.
 ** Show take/drop analysis.
 
