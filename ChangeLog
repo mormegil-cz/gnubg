@@ -1,3 +1,7 @@
+Wed Jan  1 15:55:05 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* boards.xml: a few changes to titles.
+
 Tue Dec 31 13:10:57 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtksplash.c (DestroySplash, PushSplash): Use g_usleep(), for
