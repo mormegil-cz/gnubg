@@ -47,6 +47,7 @@
 #include "osr.h"
 #include "positionid.h"
 #include "boarddim.h"
+#include "credits.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -951,12 +952,35 @@ extern void CommandShowBuildInfo( char *sz )
 #endif
 }
 
+static void
+ShowAuthors( const credEntry ace[], const char *title ) {
+
+  int i;
+
+  outputf( title );
+  outputc( '\n' );
+  
+  for ( i = 0; ace[ i ].Name; ++i ) {
+    if ( !(i % 3) )
+      outputc( '\n' );
+    outputf( "   %-20.20s", ace[ i ].Name );
+  }
+  
+  outputc( '\n' );
+  outputc( '\n' );
+
+}
+
+
 extern void CommandShowCredits( char *sz )
 {
 #if USE_GTK
-	if( fX )
-		GTKCommandShowCredits();
+  if( fX )
+    GTKCommandShowCredits();
 #endif
+
+  outputl( aszAUTHORS );
+
 }
 
 extern void CommandShowWarranty( char *sz ) {
@@ -1342,26 +1366,8 @@ extern void CommandShowVersion( char *sz ) {
 
     outputc( '\n' );
 
-    /* To avoid gnubg.pot include non US-ASCII char. */
-    outputf( _("GNU Backgammon was written by %s, %s, %s\n%s, %s and %s.\n\n"),
-	       "Joseph Heled", "Øystein Johansen", "David Montgomery",
-	       "Jim Segrave", "Jørn Thyssen", "Gary Wong");
-
-    outputl( _("Special thanks to:") );
-
-    cCol = 80;
-
-    for( ppch = aszCredits; *ppch; ppch++ ) {
-	i += ( cch = strlen( *ppch ) + 2 );
-	if( i >= cCol ) {
-	    outputc( '\n' );
-	    i = cch;
-	}
-	
-	outputf( "%s%c ", *ppch, *( ppch + 1 ) ? ',' : '.' );
-    }
-
-    outputc( '\n' );
+    ShowAuthors( ceAuthors, _("GNU Backgammon was written by:") );
+  
 }
 
 extern void CommandShowMarketWindow ( char * sz ) {

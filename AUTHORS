@@ -1,11 +1,31 @@
                          GNU Backgammon was written by:
 
-               Joseph Heled     Øystein Johansen     David Montgomery   
-                  Jim Segrave     Jørn Thyssen     Gary Wong
+    Joseph Heled            David Montgomery        Gary Wong
+    Oeystein Johansen       Jim Segrave
+    Johanthan Kinsey        Joern Thyssen
+ 
+                                   Support by:
 
+     Oeystein Johansen (Web Pages)   Nardy Pillards (Web Pages)
+     Achim Mueller (Manual)          Albert Silver (Tutorial)
 
+                         Contributors of code include:
 
-        Contributors (of bug reports, suggestions, and patches) include:
+    Olivier Baur    Nis Joergensen  Stein Kulseth   Rod Roark
+    Holger Bochnig  TAKAHASHI Kaoru Mike Petch
+
+                            Translations by:
+
+     Petr Kadlec (Czech)
+     Joern Thyssen (Danish)
+     Olivier Baur (French)
+     Achim Mueller (German)
+     Hlynur Sigurgislason (Icelandic)
+     Renzo Campagna (Italian)
+     Kaoru TAKAHASHI (Japanese)
+     Akif Dinc (Turkish)
+
+             Contributors (of bug reports and suggestions) include:
 
     Elias Kritikos          Robert Eberlein         Tim Laursen
     Misja Alma              Fotis                   Eli Liang
@@ -37,8 +57,8 @@
    playing programs (references will appear here later).  GNU Backgammon has
                               borrowed ideas from:
 
-             Hans Berliner   Rick Janowski   Gerry Tesauro   Douglas Zare
-             Chuck Bower     Brian Sheppard  Morten Wang     Michael Zehr
+    Hans Berliner   Rick Janowski   Gerry Tesauro   Douglas Zare
+    Chuck Bower     Brian Sheppard  Morten Wang     Michael Zehr
 
        
     The manual for GNU Backgammon includes a chapter describing the rules of
@@ -55,7 +75,7 @@
 
 
       If you feel that you're not given credits for your contributions to
-         GNU Backgammon please write to one of the principal authors.
+         GNU Backgammon please write to one of the developers.
 
 
        Please send bug reports for GNU Backgammon to: <bug-gnubg@gnu.org>

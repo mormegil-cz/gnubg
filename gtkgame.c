@@ -96,6 +96,7 @@
 #include "format.h"
 #include "formatgs.h"
 #include "renderprefs.h"
+#include "credits.h"
 
 #if USE_TIMECONTROL
 #include "timecontrol.h"
@@ -7897,59 +7898,8 @@ static int FindName(list* pList, char* name)
 	return FALSE;
 }
 
-typedef struct _credEntry {
-	char* Name;
-	char* Type;
-} credEntry;
-
-typedef struct _credits {
-	char* Title;
-	credEntry *Entry;
-} credits;
-
-static credEntry ceAuthors[] = {{"Joseph Heled", 0}, {"Øystein Johansen", 0},
-	{"Jonathan Kinsey", 0}, {"David Montgomery", 0}, {"Jim Segrave", 0},
-	{"Jørn Thyssen", 0}, {"Gary Wong", 0}, {0, 0} };
-
-static credEntry ceContrib[] ={
-	{"Olivier Baur", 0},
-	{"Holger Bochnig", 0},
-	{"Nis Jorgensen", 0},
-	{"TAKAHASHI Kaoru", 0},
-	{"Stein Kulseth", 0},
-	{"Mike Petch", 0},
-	{"Rod Roark", 0},
-	{0, 0}};
-
-static credEntry ceSupport[] = {{"Øystein Johansen", N_("Web Pages")},
-	{"Achim Mueller", N_("Manual")},
-	{"Nardy Pillards", N_("Web Pages")},
-	{"Albert Silver", N_("Tutorial")},
-	{0, 0}};
-
-static credEntry ceTranslations[] = {
-	{"Petr Kadlec", N_("Czech")},
-	{"Jørn Thyssen", N_("Danish")},
-	{"Olivier Baur", N_("French")},
-	{"Achim Mueller", N_("German")},
-	{"Hlynur Sigurgíslason", N_("Icelandic")},
-	{"Renzo Campagna", N_("Italian")},
-	{"Kaoru TAKAHASHI", N_("Japanese")},
-	{"Akif Dinc", N_("Turkish")},
-	{0, 0}};
-
-credits creditList[] =
-{
-	{N_("Developers"), ceAuthors},
-	{N_("Code Contributors"), ceContrib},
-	{N_("Translations"), ceTranslations},
-	{N_("Support"), ceSupport},
-	{0, 0}
-};
-
 extern void GTKCommandShowCredits(void)
 {
-	extern char *aszCredits[];
 	GtkWidget *pwDialog, *pwBox, *pwMainHBox, *pwHBox = 0, *pwVBox,
 		*pwList = gtk_list_new(),
 		*pwScrolled = gtk_scrolled_window_new( NULL, NULL );
@@ -8015,10 +7965,10 @@ extern void GTKCommandShowCredits(void)
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
 					GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
 
-	for( i = 0; aszCredits[ i ]; i++ ) {
-		if (!FindName(&names, aszCredits[ i ]))
+	for( i = 0; ceCredits[ i ].Name; i++ ) {
+		if (!FindName(&names, ceCredits[ i ].Name ))
 		gtk_container_add( GTK_CONTAINER( pwList ),
-			gtk_list_item_new_with_label(TRANS(aszCredits[ i ])) );
+			gtk_list_item_new_with_label(TRANS(ceCredits[ i ].Name)) );
 	}
 
 	ListDeleteAll(&names);
