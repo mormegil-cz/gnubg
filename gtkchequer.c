@@ -814,7 +814,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
         N_("Lose"), 
         N_("L g"), 
         N_("L bg"),
-	"", 
+       NULL, 
         N_("Diff."), 
         N_("Move")
     }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,

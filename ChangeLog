@@ -1,3 +1,8 @@
+Sat Aug 16  7:19:27 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
+
+	* gtkchequer.c - empty string instead of null caused errors
+	  in sizing hint and annotation windows
+	
 Fri Aug 15 19:56:24 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
 
 	* po/it.po more translations from Renzo Campagna
