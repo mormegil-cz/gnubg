@@ -1,3 +1,9 @@
+Mon Apr  5 08:24:52 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: add gnubg.sql to DATA
+	* gnubg.sql, scripts/database.py: rename stat to matchstat, and change
+	some PKs/FKs
+
 Sun Apr  4 15:50:55 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	First implementation of gnubg-rel.database interface.

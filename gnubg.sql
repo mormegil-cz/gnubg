@@ -85,12 +85,54 @@ CREATE UNIQUE INDEX iplayer ON gnubg.player (
    ,person_id
 );
 
+-- Table: match
+
+CREATE TABLE gnubg.match (
+    match_id        INTEGER NOT NULL
+   -- Player 0
+   ,env_id0         INTEGER NOT NULL
+   ,person_id0      INTEGER NOT NULL 
+   -- Player 1
+   ,env_id1         INTEGER NOT NULL
+   ,person_id1      INTEGER NOT NULL 
+   -- The result of the match/session:
+   -- - the total number of points won or lost
+   -- - +1/0/-1 for player 0 won the match, match not complete, and
+   --   player 1 won match, respectively
+   ,result          INTEGER NOT NULL
+   -- Length of match
+   -- 0=session, >0=match
+   ,length          INTEGER NOT NULL
+   -- Timestamp for insert into database
+   ,added           TIMESTAMP NOT NULL
+   -- Match info
+   ,rating0         CHAR(80) NOT NULL
+   ,rating1         CHAR(80) NOT NULL
+   ,event           CHAR(80) NOT NULL
+   ,round           CHAR(80) NOT NULL
+   ,place           CHAR(80) NOT NULL
+   ,annotator       CHAR(80) NOT NULL
+   ,comment         CHAR(80) NOT NULL
+   ,date            DATE 
+   ,PRIMARY KEY (match_id)
+   ,FOREIGN KEY (env_id0,person_id0) REFERENCES gnubg.player (env_id,person_id)
+      ON DELETE RESTRICT
+   ,FOREIGN KEY (env_id1,person_id1) REFERENCES gnubg.player (env_id,person_id)
+      ON DELETE RESTRICT
+);
+
+CREATE UNIQUE INDEX imatch ON gnubg.match (
+    match_id
+);
+
+
 -- Table: statistics
 -- Used from match and game tables to store match and game statistics,
 -- respectively.
 
-CREATE TABLE gnubg.stat (
-    stat_id                           INTEGER NOT NULL
+CREATE TABLE gnubg.matchstat (
+   -- match identification
+    match_id                          INTEGER NOT NULL
    -- player identification
    ,person_id                         INTEGER NOT NULL
    -- chequerplay statistics
@@ -170,62 +212,16 @@ CREATE TABLE gnubg.stat (
    ,time_penalty_loss_normalised      FLOAT   NOT NULL
    ,time_penalty_loss                 FLOAT   NOT NULL
    -- 
-   ,PRIMARY KEY (stat_id,person_id)
+   ,PRIMARY KEY (match_id,person_id)
    ,FOREIGN KEY (person_id) REFERENCES gnubg.person (person_id)
       ON DELETE RESTRICT
+   ,FOREIGN KEY (match_id) REFERENCES gnubg.match (match_id)
+      ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX istat ON gnubg.stat (
-    stat_id
+CREATE UNIQUE INDEX ismatchstat ON gnubg.matchstat (
+    match_id
    ,person_id
 );
-
--- Table: match
-
-CREATE TABLE gnubg.match (
-    match_id        INTEGER NOT NULL
-   -- Player 0
-   ,env_id0         INTEGER NOT NULL
-   ,person_id0      INTEGER NOT NULL 
-   -- Player 1
-   ,env_id1         INTEGER NOT NULL
-   ,person_id1      INTEGER NOT NULL 
-   -- The result of the match/session:
-   -- - the total number of points won or lost
-   -- - +1/0/-1 for player 0 won the match, match not complete, and
-   --   player 1 won match, respectively
-   ,result          INTEGER NOT NULL
-   -- Length of match
-   -- 0=session, >0=match
-   ,length          INTEGER NOT NULL
-   -- Timestamp for insert into database
-   ,added           TIMESTAMP NOT NULL
-   -- Match info
-   ,rating0         CHAR(80) NOT NULL
-   ,rating1         CHAR(80) NOT NULL
-   ,event           CHAR(80) NOT NULL
-   ,round           CHAR(80) NOT NULL
-   ,place           CHAR(80) NOT NULL
-   ,annotator       CHAR(80) NOT NULL
-   ,comment         CHAR(80) NOT NULL
-   ,date            DATE 
-   -- Match statistics
-   -- (kept in a separate table)
-   ,stat_id         INTEGER NOT NULL
-   ,PRIMARY KEY (match_id)
-   ,FOREIGN KEY (env_id0,person_id0) REFERENCES gnubg.player (env_id,person_id)
-      ON DELETE RESTRICT
-   ,FOREIGN KEY (env_id1,person_id1) REFERENCES gnubg.player (env_id,person_id)
-      ON DELETE RESTRICT
-   ,FOREIGN KEY (stat_id,person_id0) REFERENCES gnubg.stat (stat_id,person_id)
-      ON DELETE CASCADE
-   ,FOREIGN KEY (stat_id,person_id1) REFERENCES gnubg.stat (stat_id,person_id)
-      ON DELETE CASCADE
-);
-
-CREATE UNIQUE INDEX imatch ON gnubg.match (
-    match_id
-);
-
 
 INSERT INTO gnubg.env VALUES( 0, 'Default env.');

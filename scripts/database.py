@@ -147,10 +147,10 @@ def calc_rate(a,b):
 #             gs (the game/match statistics)
 #
 
-def addStat(conn,person_id,gs,gs_other,stat_id):
+def addStat(conn,match_id,person_id,gs,gs_other):
 
    # identification
-   s1 = "%d,%d," % (stat_id, person_id )
+   s1 = "%d,%d," % (match_id, person_id )
 
    # chequer play statistics
    chs = gs[ 'moves' ]
@@ -283,13 +283,13 @@ def addStat(conn,person_id,gs,gs_other,stat_id):
           gs[ 'time' ][ 'time-penalty-skill' ], \
           gs[ 'time' ][ 'time-penalty-cost' ] )
 
-   query = "INSERT INTO gnubg.stat VALUES (" + \
+   query = "INSERT INTO gnubg.matchstat VALUES (" + \
            s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + ");"
    cursor = conn.cursor()
    cursor.execute(query)
    cursor.close()
 
-   return stat_id
+   return 0
 
 #
 # Add match
@@ -301,20 +301,7 @@ def addStat(conn,person_id,gs,gs_other,stat_id):
 
 def addMatch(conn,env_id,person_id0,person_id1,m):
 
-   stat_id = next_id(conn,"stat")
-   if stat_id == None:
-      print "Error generating stat_id"
-      return None
-
-   if addStat(conn,person_id0,m[ 'stats' ][ 'X' ],
-              m [ 'stats' ][ 'O' ],stat_id) == None:
-      print "Error adding player 0's stat to database."
-      return None
-
-   if addStat(conn,person_id1,m[ 'stats' ][ 'O' ],
-              m [ 'stats' ][ 'X' ],stat_id) == None:
-      print "Error adding player 1's stat to database."
-      return None
+   # add match
 
    match_id = next_id(conn,"match")
 
@@ -327,18 +314,30 @@ def addMatch(conn,env_id,person_id0,person_id1,m):
    else:
       date = "'NULL'"
 
-   query = "INSERT INTO gnubg.match (match_id,env_id0,person_id0,env_id1,person_id1,result,length,added,rating0,rating1,event,round,place,annotator,comment,date,stat_id) VALUES (%d,%d,%d,%d,%d,%d,%d,CURRENT_TIMESTAMP,'%s','%s','%s','%s','%s','%s','%s',%s,%d) " % \
+   query = "INSERT INTO gnubg.match (match_id,env_id0,person_id0,env_id1,person_id1,result,length,added,rating0,rating1,event,round,place,annotator,comment,date) VALUES (%d,%d,%d,%d,%d,%d,%d,CURRENT_TIMESTAMP,'%s','%s','%s','%s','%s','%s','%s',%s) " % \
            (match_id,env_id,person_id0,env_id,person_id1, \
             -1,mi[ 'match-length' ],
             getKey( mi[ 'X' ], 'rating' ),
             getKey( mi[ 'O' ], 'rating' ),
             getKey( mi, 'event' ), getKey( mi, 'round' ),
             getKey( mi, 'place' ), getKey( mi, 'annotator' ),
-            getKey( mi, 'comment' ), date, stat_id )
+            getKey( mi, 'comment' ), date )
 
    cursor = conn.cursor()
    cursor.execute(query)
    cursor.close()
+
+   # add match statistics for both players
+
+   if addStat(conn,match_id,person_id0,m[ 'stats' ][ 'X' ],
+              m [ 'stats' ][ 'O' ]) == None:
+      print "Error adding player 0's stat to database."
+      return None
+
+   if addStat(conn,match_id,person_id1,m[ 'stats' ][ 'O' ],
+              m [ 'stats' ][ 'X' ]) == None:
+      print "Error adding player 1's stat to database."
+      return None
 
    return match_id
          
