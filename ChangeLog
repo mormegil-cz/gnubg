@@ -1,3 +1,10 @@
+Thu Jul 10 13:10:29 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Improve output of settings for rollout 
+	(bug #4243 by Ian Dunstan)
+
+	* text.c (OutputRolloutContext): output more settings
+
 Thu Jul 10 11:14:30 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Trim gtkgame.c: move gtk widget for Settings->Options and

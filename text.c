@@ -153,15 +153,127 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
 
 }
 
+extern int
+GetPredefinedEvalContext( const evalcontext *pec ) {
+
+  int i;
+
+  for ( i = 0; i < NUM_SETTINGS; ++i )
+    if ( ! cmp_evalcontext( &aecSettings[ i ], pec ) )
+      return i;
+
+  return -1;
+
+}
+
+
+extern int
+GetPredefinedMoveFilter( const int nPlies,
+                         movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  int i;
+  
+  if ( ! nPlies )
+    return -1;
+
+  for ( i = 0; i < NUM_MOVEFILTER_SETTINGS; ++i )
+    if ( equal_movefilter( nPlies - 1, 
+                           aamf[ nPlies - 1 ],
+                           aaamfMoveFilterSettings[ i ][ nPlies - 1 ] ) )
+      return i;
+
+  return -1;
+
+}
+
+
+extern int
+GetPredefinedChequerplaySetting( const evalcontext *pec,
+                                 movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  int i = GetPredefinedEvalContext( pec );
+  int j = GetPredefinedMoveFilter( pec->nPlies, aamf );
+  int k;
+
+  if ( i < 0 )
+    return -1;
+
+  if ( j < 0 ) {
+    if (pec->nPlies )
+      return -1;
+    else
+      return i;
+  }
+
+  for ( k = 0; k < NUM_SETTINGS; ++k )
+    if ( j == aiSettingsMoveFilter[ k ] && i == k )
+      return i;
+
+
+  return -1;
+
+}
+
+extern char *
+OutputMoveFilterPly( const char *szIndent, 
+                     const int nPlies,
+                     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  static char sz[ 1024 ];
+  int i;
+
+  strcpy( sz, "" );
+
+  if ( ! nPlies ) 
+    return sz;
+    
+  for ( i = 0; i < nPlies; ++i ) {
+
+    movefilter *pmf = &aamf[ nPlies - 1 ][ i ];
+
+    if ( pmf->Accept < 0 ) {
+      sprintf( strchr( sz, 0 ), 
+               _("Skip pruning for %d-ply moves.\n"),
+               i );
+      continue;
+    }
+
+    if ( pmf->Accept == 1 )
+      sprintf( strchr( sz, 0 ),
+               _("keep the best %d-ply move"), i );
+    else
+      sprintf( strchr( sz, 0 ),
+               _("keep the first %d %d-ply moves"),
+               pmf->Accept, i );
+
+    if ( pmf->Extra )
+      sprintf( strchr( sz, 0 ),
+               _(" and up to %d more moves within equity %0.3g\n"),
+               pmf->Extra, pmf->Threshold );
+
+  }
+
+  return sz;
+
+}
+                                 
+
 static void
 OutputEvalContextsForRollout( char *sz, const char *szIndent,
                               const evalcontext aecCube[ 2 ],
-                              const evalcontext aecChequer[ 2 ] ) {
+                              const evalcontext aecChequer[ 2 ],
+                              movefilter aaamf[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   int fCube = ! cmp_evalcontext ( &aecCube[ 0 ], &aecCube[ 1 ] );
   int fChequer = ! cmp_evalcontext ( &aecChequer[ 0 ], &aecChequer[ 1 ] );
-  int fIdentical = fCube && fChequer;
+  int fMovefilter = fChequer && 
+    ( aecChequer[ 0 ].nPlies || 
+      equal_movefilter( aecChequer[ 0 ].nPlies - 1,
+                        aaamf[ 0 ][ aecChequer[ 0 ].nPlies - 1 ],
+                        aaamf[ 1 ][ aecChequer[ 0 ].nPlies - 1 ] ) );
+  int fIdentical = fCube && fChequer && fMovefilter;
   int i;
+  int j;
 
   for ( i = 0; i < 1 + ! fIdentical; i++ ) {
 
@@ -173,33 +285,31 @@ OutputEvalContextsForRollout( char *sz, const char *szIndent,
       sprintf ( strchr ( sz, 0 ), _("Player %d:\n" ), i );
     }
 
-    if ( ! cmp_evalcontext ( &aecChequer[ i ], &aecCube[ i ] ) ) {
+    /* chequer play */
 
-      if ( szIndent && *szIndent )
-        strcat ( sz, szIndent );
+    j = GetPredefinedChequerplaySetting( &aecChequer[ i ], aaamf[ i ] );
 
-      strcat ( sz, _("Play and cube: ") );
-      strcat ( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
-      strcat ( sz, "\n" );
+    if ( aecChequer[ i ].nPlies ) {
+
+      sprintf( strchr( sz, 0 ),
+               _("Play: %s\n"), 
+               ( j < 0 ) ? "" : gettext ( aszSettings[ j ] ) );
+
+      strcat( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
+      strcat( sz, "\n" );
+      strcat( sz, OutputMoveFilterPly( szIndent, aecChequer[ i ].nPlies, 
+                                       aaamf[ i ] ) );
 
     }
     else {
-
-      if ( szIndent && *szIndent )
-        strcat ( sz, szIndent );
-
       strcat ( sz, _("Play: ") );
-      strcat ( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
+      strcat ( sz, OutputEvalContext ( &aecChequer[ i ], FALSE ) );
       strcat ( sz, "\n" );
-
-      if ( szIndent && *szIndent )
-        strcat ( sz, szIndent );
-
-      strcat ( sz, _("Cube: ") );
-      strcat ( sz, OutputEvalContext ( &aecCube[ i ], FALSE ) );
-      strcat ( sz, "\n" );
-
     }
+
+    strcat ( sz, _("Cube: ") );
+    strcat ( sz, OutputEvalContext ( &aecCube[ i ], FALSE ) );
+    strcat ( sz, "\n" );
 
   }
 
@@ -260,10 +370,19 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
               gettext( aszRNG[ prc->rngRollout ] ),
               prc->nSeed );
 
+  /* stop on std.err */
+
+  if ( prc->fStopOnSTD )
+    sprintf( strchr( sz, 0 ),
+             _("Stop when std.errs. are small enough: ratio "
+               "%.4g (min. %d games)\n"),
+             prc->rStdLimit, prc->nMinimumGames );
+
   /* first play */
 
   OutputEvalContextsForRollout( sz, szIndent, 
-                                prc->aecCube, prc->aecChequer );
+                                prc->aecCube, prc->aecChequer,
+                                ((rolloutcontext *)prc)->aaamfChequer );
 
   /* later play */
 
@@ -277,7 +396,9 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
              prc->nLate );
 
     OutputEvalContextsForRollout( sz, szIndent, 
-                                  prc->aecCubeLate, prc->aecChequerLate );
+                                  prc->aecCubeLate, prc->aecChequerLate,
+                                  ((rolloutcontext *)prc)->aaamfLate );
+
 
   }
 
