@@ -1,10 +1,10 @@
-
 Makefile
 config.cache
 config.log
 config.status
 gnubg.html
-gnubg.info
+gnubg.info*
+gnubg.ps
 gnubg.txt
 gnubg.log gnubg.dvi gnubg.aux gnubg.cp gnubg.fn gnubg.vr
 gnubg.tp gnubg.ky gnubg.pg gnubg.toc gnubg.tmp gnubg.cps gnubg.kys

@@ -16,6 +16,12 @@ This file documents GNU Backgammon, a program for playing and analysing
 backgammon games and matches.
 
 Copyright @copyright{} 1999, 2000 Gary Wong.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1; with
+no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled "GNU Free
+Documentation License".
 @end ifinfo
 
 @titlepage
@@ -24,6 +30,15 @@ Copyright @copyright{} 1999, 2000 Gary Wong.
 @subtitle version @value{VERSION}
 @subtitle @value{month-year}
 @author Gary Wong
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1999, 2000 Gary Wong.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1; with
+no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled "GNU Free
+Documentation License".
 @end titlepage
 
 @ifnottex
@@ -35,18 +50,19 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 (updated in @value{month-year}).
 
 @menu
-* Introduction::                What GNU Backgammon does.
-* How to Play Backgammon::      The rules of the game.
-* Sample Game::                 An example of how to play against gnubg.
-* Invocation::                  Starting and leaving gnubg.
-* Basic Commands::              Fundamental operations in gnubg.
-* Playing::                     gnubg's game playing features.
-* Analysis::                    Using gnubg to evaluate positions.
-* Databases::                   Storing information about positions.
-* Training::                    Modifying gnubg's neural nets.
-* Frequently Asked Questions::  Brief answers to things you might ask.
-* Command Index::               A summary of all the gnubg commands.
-* Concept Index::               Index of concepts described in this manual.
+* Introduction::                   What GNU Backgammon does.
+* How to Play Backgammon::         The rules of the game.
+* Sample Game::                    An example of how to play against gnubg.
+* Invocation::                     Starting and leaving gnubg.
+* Basic Commands::                 Fundamental operations in gnubg.
+* Playing::                        gnubg's game playing features.
+* Analysis::                       Using gnubg to evaluate positions.
+* Databases::                      Storing information about positions.
+* Training::                       Modifying gnubg's neural nets.
+* Frequently Asked Questions::     Brief answers to things you might ask.
+* GNU Free Documentation License:: Your rights regarding this manual.
+* Command Index::                  A summary of all the gnubg commands.
+* Concept Index::                  Index of concepts described in this manual.
 @end menu
 
 @end ifnottex
@@ -775,8 +791,7 @@ Our position is now strong.  Let's try doubling --- this can be done by
 entering the command @kbd{double} at the prompt, or by clicking the
 doubling cube in the board window.  When you are doubled, you should use
 the command @kbd{take} or @kbd{drop} to accept or refuse the cube.  GNU
-Backgammon will drop this double (FIXME actually it doesn't, but it will
-once it knows how):
+Backgammon will drop this double:
 
 @example
 (X) double
@@ -921,8 +936,7 @@ Start GNU Backgammon by running the program @kbd{gnubg}.  Once started, it
 will process commands from the terminal.
 
 You can also instruct @gnubg{} to read an existing match from a file, to
-play or analyse.  (FIXME actually you can't yet, but you should be able
-to.)  To read the match from @var{filename}, specify
+play or analyse.  To read the match from @var{filename}, specify
 @kbd{gnubg @var{filename}}.
 
 @gnubg{} will give you a short summary of how to invoke it if given the
@@ -1130,8 +1144,7 @@ below the board on the right hand side.)  For instance, to set the
 chequers to the starting position, use the command
 @code{set board 4HPwATDgc/ABMA}.
 
-FIXME add a mode to set the board to an arbitrary position when the user
-doesn't know the ID, in the X version at least.
+FIXME describe the GTK edit mode
 @kindex show board
 @item show board [@var{id}]
 The @code{show board} command is used to display a particular position ---
@@ -1618,6 +1631,8 @@ Hopefully nobody will ask this question, but I suppose it will happen...
 
 @node Are the dice fair?
 @end ignore
+
+@include fdl.texi
 
 @node Command Index
 @unnumbered Command Index
