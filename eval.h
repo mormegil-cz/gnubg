@@ -124,6 +124,8 @@ typedef enum _cubedecision {
   REDOUBLE_TAKE, REDOUBLE_PASS, NO_REDOUBLE_TAKE,
   TOOGOODRE_TAKE, TOOGOODRE_PASS,
   NO_REDOUBLE_BEAVER,
+  NODOUBLE_DEADCUBE,     /* cube is dead (match play only) */
+  NO_REDOUBLE_DEADCUBE,     /* cube is dead (match play only) */
   NOT_AVAILABLE, /* Cube not available */
 } cubedecision;
 
