@@ -50,6 +50,9 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more completions to readline (player names, filenames for load/save).
 ** Add interactive rollouts.
 ** Analyse games and matches.
+*** Add luck analysis/variance reduction.
+*** Allow re-evaluating analysis with different settings, and rollouts.
+*** Add "set automatic analysis".
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -80,6 +83,13 @@ duplication of effort and to make sure our changes merge easily.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** If a resignation is rejected, don't allow further resignations for
   that amount or below for the rest of the turn.
+** Is the final sort in FindnSaveBestMoves really a good idea?  It will
+  put the moves in strictly numerical order, but if 0-ply systematically
+  overrates all moves compared to 1-ply, then it will rank some hopeless
+  0-ply move as best, and all the better moves (which it went on to
+  evaluate at deeper plies) as "errors".  It's not clear what behaviour
+  we really want...  (It would also be nice if it evaluated the selected
+  move at the deepest ply.)
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -127,6 +137,7 @@ duplication of effort and to make sure our changes merge easily.
   A function that generates a progress bar/ASCII to stdout would help.
 ** Show "take" and "drop" buttons in the off-board dice window when
   a double is offered; also "agree" and "decline" for resignations.
+  Add an option for "roll" and "double" buttons instead of off-board dice.
 ** Make sure we apply GTK styles correctly: create a GtkRcStyle; set the
   background colour in the style and the flag indicating the background is
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
@@ -147,6 +158,8 @@ duplication of effort and to make sure our changes merge easily.
   use is disabled.
 ** During a rollout, the OK button should be the grab widget.  Can we
   fix that by temporarily modifying pwGrab?
+** Add an option to forbid illegal (part-)moves, instead of just flagging
+  them.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -198,10 +211,6 @@ duplication of effort and to make sure our changes merge easily.
   robust to add a parent to it (box or event box?), and give _that_
   the grab.  Unfortunately, grab add/remove calls must nest, and we
   can't guarantee that...
-** Occasionally there is a core dump in theme_image_unref() when
-  destroying the style for the chosen move in the analysis window.  This
-  might be a bug in the pixmap theme engine, since it doesn't seem to happen
-  with the default theme.  (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -214,8 +223,7 @@ duplication of effort and to make sure our changes merge easily.
   entire game like Motif.
 ** Submit something to <http://www.distributed.net/nextgen/projects.html>.
 ** Allow loading and saving weights to specify binary or ASCII format.
-** Allow annotating moves in matches (both human commentary and automatic
-  analysis).
+** Allow comments to be entered as move annotations.
 ** Import FIBS `oldmoves' games and matches.
 ** Export games, matches and analysis to ASCII, HTML, PostScript, etc.
   Examples: "export game html foo.html", "export match mat bar.mat".
@@ -236,12 +244,15 @@ duplication of effort and to make sure our changes merge easily.
   like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
 ** Handle SGF setup properties when loading games.
 ** Handle SGF variations.
+** Add SGF properties to handle analysis data.
+** Allow loading/saving of compressed games/matches with zlib.
 ** Make the external player handle cube and resignation decisions, and allow
   connection via TCP/IP.
 ** Allow an option for illegal moves to be entered.
 ** Allow ~ and $ escapes in filenames (use wordexp()).
 ** Allow printing positions/games/matches/etc.
 ** Keep statistics of won/lost games/matches.
+** Consider "-s scheme-file" and "-c command-file" options to read scripts.
 
 
 Local Variables:
