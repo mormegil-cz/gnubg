@@ -3577,7 +3577,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     char szTemp[ 1024 ];
     FILE *pf;
-    int i, cCache;
+    int i; /* , cCache; */
     char *szFile;
 
     szParam = NextToken ( &szParam );
@@ -3656,14 +3656,6 @@ extern void CommandSaveSettings( char *szParam ) {
               fAnalyseCube ? "on" : "off",
               fAnalyseDice ? "on" : "off",
               fAnalyseMove ? "on" : "off" );
-    
-    fprintf ( pf,
-              "set analysis cube %s\n"
-              "set analysis luck %s\n"
-              "set analysis moves %s\n",
-              fAnalyseCube ? "on" : "off",
-              fAnalyseDice ? "on" : "off",
-              fAnalyseMove ? "on" : "off" );
 
 #if USE_GTK
     if ( fX ) {
@@ -3690,10 +3682,10 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fAutoMove ? "on" : "off",
 	     fAutoRoll ? "on" : "off",
 	     nBeavers );
-
+#if 0
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     fprintf( pf, "set cache %d\n", cCache );
-
+#endif
     fprintf( pf, "set clockwise %s\n"
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
@@ -4988,8 +4980,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 's': /* script */
 	case 'c': /* commands */
 	case 't': /* tty */
+#ifdef WIN32
+            fX = TRUE;
+            outputl( _("Sorry, this build does not support the -tty option"));
+#else
 	    fX = FALSE;
 	    break;
+#endif
 	case 'h': /* help */
             usage( argv[ 0 ] );
 	    exit( EXIT_SUCCESS );

@@ -71,8 +71,6 @@
 #include "positionid.h"
 #include "i18n.h"
 
-
-
 #define GNUBGMENURC ".gnubgmenurc"
 
 #if !GTK_CHECK_VERSION(1,3,10)
@@ -204,9 +202,6 @@ typedef struct _togglecommand {
 } togglecommand;
 
 static togglecommand atc[] = {
-    { &fAnalyseCube, CMD_SET_ANALYSIS_CUBE },
-    { &fAnalyseDice, CMD_SET_ANALYSIS_LUCK },
-    { &fAnalyseMove, CMD_SET_ANALYSIS_MOVES },
     { &fAutoAnalysis, CMD_SET_AUTO_ANALYSIS },
     { &fAutoBearoff, CMD_SET_AUTO_BEAROFF },
     { &fAutoCrawford, CMD_SET_AUTO_CRAWFORD },
@@ -358,8 +353,6 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAlpha( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
-static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw );
-static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
 static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
 static void SetBeavers( gpointer *p, guint n, GtkWidget *pw );
@@ -2704,20 +2697,7 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, Command, CMD_TRAIN_DATABASE, NULL },
 	{ N_("/_Train/Train with _TD(0)"), NULL, Command, CMD_TRAIN_TD, NULL },
 	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Settings/Analysis"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Settings/Analysis/_Chequer play"), NULL, Command,
-	  CMD_SET_ANALYSIS_MOVES, "<CheckItem>" },
-	{ N_("/_Settings/Analysis/_Cube action"), NULL, Command,
-	  CMD_SET_ANALYSIS_CUBE, "<CheckItem>" },
-	{ N_("/_Settings/Analysis/_Dice rolls"), NULL, Command,
-	  CMD_SET_ANALYSIS_LUCK, "<CheckItem>" },
-	{ N_("/_Settings/Analysis/Move limit..."), 
-          NULL, SetAnalysis, 0, NULL },
-	{ N_("/_Settings/Analysis/Evaluation"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Settings/Analysis/Evaluation/Chequer play..."), NULL, 
-          SetAnalysisEvalChequer, 0, NULL },
-	{ N_("/_Settings/Analysis/Evaluation/Cube decisions..."), NULL, 
-          SetAnalysisEvalCube, 0, NULL },
+	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL },
 	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
 	  NULL },
 	{ N_("/_Settings/_Automatic"), NULL, NULL, 0, "<Branch>" },
@@ -2950,7 +2930,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 extern void RunGTK( void ) {
 
     togglecommand *ptc;
-    
+     
     /* Ensure all menu item settings are initialised to the correct state. */
     for( ptc = atc; ptc->p; ptc++ )
 	GTKSet( ptc->p );
@@ -3417,23 +3397,6 @@ static void SetAlpha( gpointer *p, guint k, GtkWidget *pw ) {
     }
 }
 
-static void SetAnalysis( gpointer *p, guint k, GtkWidget *pw ) {
-
-    /* FIXME make this into a proper dialog, with more settings, and
-     change the "limit" widget into a check button (whether there is a
-     limit at all) and a spin button (what the limit is) */
-    int n = ReadNumber( _("GNU Backgammon - Analysis"),
-			_("Move limit:"), cAnalysisMoves < 0 ? 0 : cAnalysisMoves,
-			0, 100, 1 );
-
-    if( n >= 0 ) {
-	char sz[ 32 ];
-
-	sprintf( sz, "set analysis limit %d", n );
-	UserCommand( sz );
-    }
-}
-
 static void SetAnneal( gpointer *p, guint k, GtkWidget *pw ) {
 
     float r = ReadReal( _("GNU Backgammon - Annealing rate"),
@@ -3478,7 +3441,7 @@ static void SetBeavers( gpointer *p, guint k, GtkWidget *pw ) {
 static void SetCache( gpointer *p, guint k, GtkWidget *pw ) {
 
     int n = ReadNumber( _("GNU Backgammon - Position cache"),
-			_("Cache size (entries):"), 8192, 0, 1048576, 1 );
+			_("Cache size (entries):"), 65536, 0, 1048576, 1 );
 
     if( n >= 0 ) {
 	char sz[ 32 ];
@@ -4394,78 +4357,6 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     outputresume();
 }
 
-static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
-
-    /* FIXME Consider this code as a temporary hack, we should later
-       make a better dialog box for setting all analysis options */
-
-    evalcontext ec;
-    GtkWidget *pwDialog, *pwEval;
-    int fOK;
-    
-    memcpy( &ec, &esAnalysisCube.ec, sizeof ec );
-
-    pwEval = EvalWidget( &ec, &fOK );
-    
-    pwDialog = CreateDialog( _("GNU Backgammon - Analysis cube decisions"), TRUE,
-                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pwEval );
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    if( fOK )
-        SetEvalCommands( "set analysis cubedecision eval", &ec,
-			 &esAnalysisCube.ec );
-}
-
-static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
-
-    /* FIXME Consider this code as a temporary hack, we should later
-       make a better dialog box for setting all analysis options */
-
-    evalcontext ec;
-    GtkWidget *pwDialog, *pwEval;
-    int fOK;
-    
-    memcpy( &ec, &esAnalysisChequer.ec, sizeof ec );
-
-    pwEval = EvalWidget( &ec, &fOK );
-    
-    pwDialog = CreateDialog( _("GNU Backgammon - Analysis chequer play"), TRUE,
-                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pwEval );
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    if( fOK )
-        SetEvalCommands( "set analysis chequer eval", &ec,
-                         &esAnalysisChequer.ec );
-}
-
 static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
 
     evalcontext ec;
@@ -4762,6 +4653,295 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     
 	outputresume();
     }
+}
+
+typedef struct _analysiswidget {
+
+  evalsetup esChequer;
+  evalsetup esCube; 
+
+  GtkAdjustment *padjMoves;
+  GtkAdjustment *apadjSkill[5], *apadjLuck[4];
+  GtkWidget *pwMoves, *pwCube, *pwLuck;
+  GtkWidget *pwEvalCube, *pwEvalChequer;
+    
+} analysiswidget;
+
+/* static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
+
+   FIXME: Write this function 
+   
+} */
+
+static GtkWidget *AnalysisPage( analysiswidget *paw ) {
+
+	/* FIXME : Write this a bit simpler, the code was mostly
+	 * generated by GLADE, and it's not very nice 
+	 */
+	
+	/* Code initiated by GLADE, lots of changes */
+  char *aszSkillLabel[5] = { N_("Very good:"), N_("Good:"),
+	  N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
+  char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
+	  N_("Unlucky:"), N_("Very unlucky:") };
+  int i;
+  GtkWidget *pwPage, *pwFrame, *pwLabel, *pwSpin, *pwTable; 
+  GtkWidget *hbox1, *vbox1, *vbox2, *hbox2;
+
+  pwPage = gtk_vbox_new ( FALSE, 0 );
+  gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
+  
+  hbox1 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox1);
+  gtk_box_pack_start (GTK_BOX (pwPage), hbox1, TRUE, TRUE, 0);
+
+  vbox1 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox1);
+  gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
+
+  pwFrame = gtk_frame_new (_("Analysis"));
+  gtk_widget_show (pwFrame);
+  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  vbox2 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox2);
+  gtk_container_add (GTK_CONTAINER (pwFrame), vbox2);
+
+  paw->pwMoves = gtk_check_button_new_with_label (_("Chequer play"));
+  gtk_widget_show (paw->pwMoves);
+  gtk_box_pack_start (GTK_BOX (vbox2), paw->pwMoves, FALSE, FALSE, 0);
+
+  paw->pwCube = gtk_check_button_new_with_label (_("Cube decisions"));
+  gtk_widget_show (paw->pwCube);
+  gtk_box_pack_start (GTK_BOX (vbox2), paw->pwCube, FALSE, FALSE, 0);
+
+  paw->pwLuck = gtk_check_button_new_with_label (_("Luck"));
+  gtk_widget_show (paw->pwLuck);
+  gtk_box_pack_start (GTK_BOX (vbox2), paw->pwLuck, FALSE, FALSE, 0);
+
+  hbox2 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox2);
+  gtk_box_pack_start (GTK_BOX (vbox2), hbox2, TRUE, TRUE, 0);
+
+  pwLabel = gtk_label_new (_("Move limit:"));
+  gtk_widget_show (pwLabel);
+  gtk_box_pack_start (GTK_BOX (hbox2), pwLabel, FALSE, FALSE, 0);
+
+  paw->padjMoves =  
+    GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 1000, 1, 1, 0 ) );
+
+  pwSpin = gtk_spin_button_new (GTK_ADJUSTMENT (paw->padjMoves), 1, 0);
+  gtk_widget_show (pwSpin);
+  gtk_box_pack_start (GTK_BOX (hbox2), pwSpin, TRUE, TRUE, 0);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
+
+  pwFrame = gtk_frame_new (_("Skill thresholds"));
+  gtk_widget_show (pwFrame);
+  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  pwTable = gtk_table_new (5, 2, FALSE);
+  gtk_widget_show (pwTable);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
+
+  for (i = 0; i < 5; i++){
+    pwLabel = gtk_label_new ( aszSkillLabel[i] );
+    gtk_widget_show (pwLabel);
+    gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+    gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+    gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
+  }
+  
+  for (i = 0; i < 5; i++){
+    paw->apadjSkill[i] = 
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 10 ) );
+
+    pwSpin = 
+	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjSkill[i]), 1, 2);
+    
+    gtk_widget_show (pwSpin);
+    gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
+                      (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
+  }
+  
+  pwFrame = gtk_frame_new (_("Luck thresholds"));
+  gtk_widget_show (pwFrame);
+  gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  pwTable = gtk_table_new (4, 2, FALSE);
+  gtk_widget_show (pwTable);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
+ 
+  for (i = 0; i < 4; i++){
+    pwLabel = gtk_label_new ( aszLuckLabel[i] );
+    gtk_widget_show (pwLabel);
+    gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+    gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+    gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
+  }
+  
+  for (i = 0; i < 4; i++){
+    paw->apadjLuck[i] = 
+	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 10 ) );
+
+    pwSpin = 
+	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjLuck[i]), 1, 2);
+    
+    gtk_widget_show (pwSpin);
+    gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
+                      (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                      (GtkAttachOptions) (0), 0, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
+  }
+  
+  pwFrame = gtk_frame_new (_("Chequer play"));
+  gtk_widget_show (pwFrame);
+  gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  gtk_container_add(GTK_CONTAINER (pwFrame ), 
+		  paw->pwEvalChequer = EvalWidget( &paw->esChequer.ec, NULL ));
+
+  pwFrame = gtk_frame_new (_("Cube decisions"));
+  gtk_widget_show (pwFrame);
+  gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+  
+  gtk_container_add(GTK_CONTAINER (pwFrame ), 
+		  paw->pwEvalCube = EvalWidget( &paw->esCube.ec, NULL ));
+
+  return pwPage;
+}
+
+static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
+
+  /* FIXME: Don't send the commands that does not change a setting */
+	
+  char sz[128]; 
+
+  sprintf(sz, "set analysis moves %s",
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwMoves ) ) ?
+       "on" : "off" );
+  UserCommand(sz); 
+
+  sprintf(sz, "set analysis cube %s",
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwCube ) ) ?
+       "on" : "off" );
+  UserCommand(sz); 
+
+  sprintf(sz, "set analysis luck %s",
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwLuck ) ) ?
+       "on" : "off" );
+  UserCommand(sz); 
+
+  sprintf(sz, "set analysis limit %.0f", paw->padjMoves->value );
+  UserCommand(sz); 
+  
+  sprintf(sz, "set analysis threshold verygood %.3f",
+		  paw->apadjSkill[0]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold good %.3f",
+		  paw->apadjSkill[1]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold doubtful %.3f",
+		  paw->apadjSkill[2]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold bad %.3f",
+		  paw->apadjSkill[3]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold verybad %.3f",
+		  paw->apadjSkill[4]->value );
+  UserCommand(sz); 
+
+  sprintf(sz, "set analysis threshold verylucky %.3f",
+		  paw->apadjLuck[0]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold lucky %.3f",
+		  paw->apadjLuck[1]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold unlucky %.3f",
+		  paw->apadjLuck[2]->value );
+  UserCommand(sz); 
+    
+  sprintf(sz, "set analysis threshold veryunlucky %.3f",
+		  paw->apadjLuck[3]->value );
+  UserCommand(sz); 
+    
+  EvalOK( paw->pwEvalChequer, paw->pwEvalChequer );
+  EvalOK( paw->pwEvalCube, paw->pwEvalCube );
+  
+  SetEvalCommands( "set analysis chequerplay eval", &paw->esChequer.ec,
+		  &esAnalysisChequer.ec );
+  SetEvalCommands( "set analysis cubedecision eval", &paw->esCube.ec,
+		  &esAnalysisCube.ec );
+
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+}
+
+static void 
+AnalysisSet( analysiswidget *paw) {
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwMoves ),
+                                fAnalyseMove );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwCube ),
+                                fAnalyseCube );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwLuck ),
+                                fAnalyseDice );
+  gtk_adjustment_set_value ( paw->padjMoves, cAnalysisMoves );
+  
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ), 
+		 arSkillLevel[SKILL_VERYGOOD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[1] ),
+		 arSkillLevel[SKILL_GOOD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[2] ),
+		 arSkillLevel[SKILL_DOUBTFUL] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[3] ),
+		 arSkillLevel[SKILL_BAD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[4] ),
+		 arSkillLevel[SKILL_VERYBAD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjLuck[0] ),
+		 arLuckLevel[LUCK_VERYGOOD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjLuck[1] ),
+		 arLuckLevel[LUCK_GOOD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjLuck[2] ),
+		 arLuckLevel[LUCK_BAD] );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjLuck[3] ),
+		 arLuckLevel[LUCK_VERYBAD] );
+}  
+
+static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
+
+  GtkWidget *pwDialog, *pwAnalysis;
+  analysiswidget aw;
+
+  memcpy( &aw.esCube, &esAnalysisCube, sizeof( aw.esCube ) );
+  memcpy( &aw.esChequer, &esAnalysisChequer, sizeof( aw.esChequer ) );
+
+  pwDialog = CreateDialog( _("GNU Backgammon - Analysis Settings"), TRUE,
+			     GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+ 		        pwAnalysis = AnalysisPage( &aw ) );
+  gtk_widget_show_all( pwDialog );
+
+  AnalysisSet ( &aw );
+ 
+  gtk_main();
+
 }
 
 typedef struct _rolloutwidget {
@@ -5757,7 +5937,6 @@ GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
   return pw;
 
 }
-
 
 static GtkWidget *
 GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {

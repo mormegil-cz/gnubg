@@ -1,3 +1,12 @@
+Thu Jul  4 17:48:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c: New dialog for setting analysis settings
+
+        * gnubg.c (real_main): Remove -tty option for Windows build
+          with GUI
+
+        * gnubg.c (CommandSaveSettings): Remove saving of cache.
+         
 Wed Jul  3 13:58:03 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* New cache code. Change default cache size to a more reasonable 2^16.
