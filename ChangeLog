@@ -1,3 +1,21 @@
+Sun Aug 18 10:39:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New message window instead of pop-ups.
+
+	* gnubg.c: new command "set geometry message ...".
+	* gnubg.c (CommandSaveSettings): save geometry of new window.
+	* set.c (CommandSetMessage, CommandSetGeometryMessage):
+	new functions.
+	* show.c (CommandShowGeometry): show message geometry.
+	* gtkgame.c (UpdateWindowGeometry, RefreshGeometry): update 
+	message geometry.
+	* gtkgame.c (DeleteMessage, CreateMessageWindow): new
+	functions.
+	* gtkgame.c (InitGTK): new menu entry.
+	* gtkgame.c (GTKOutputX): send multiline output to message window
+	instead of pop-up.
+	* gtkgame.c (GTKSet): handle fMessage.
+
 Fri Aug 16 21:21:31 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandSaveSettings): fix typo that lead to

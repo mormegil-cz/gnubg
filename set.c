@@ -312,6 +312,16 @@ extern void CommandSetAnnotation( char *sz ) {
 	UpdateSetting( &fAnnotation );
 }
 
+extern void CommandSetMessage( char *sz ) {
+
+    if( SetToggle( "message", &fMessage, sz,
+		   _("Show window with messages"),
+		   _("Do not show window with message.") )
+	>= 0 )
+	/* Force an update, even if the setting has not changed. */
+	UpdateSetting( &fMessage );
+}
+
 extern void CommandSetAutoBearoff( char *sz ) {
 
     SetToggle( "automatic bearoff", &fAutoBearoff, sz, _("Will automatically "
@@ -2615,6 +2625,18 @@ CommandSetGeometryMain ( char *sz ) {
   gwSet = WINDOW_MAIN;
   szSet = "main";
   szSetCommand = "main";
+
+  HandleCommand ( sz, acSetGeometryValues );
+
+}
+
+
+extern void
+CommandSetGeometryMessage ( char *sz ) {
+
+  gwSet = WINDOW_MESSAGE;
+  szSet = "message";
+  szSetCommand = "message";
 
   HandleCommand ( sz, acSetGeometryValues );
 

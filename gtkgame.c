@@ -145,6 +145,7 @@ typedef enum _gnubgcommand {
     CMD_SAVE_SETTINGS,
     CMD_SET_ANNOTATION_ON,
     CMD_SET_APPEARANCE,
+    CMD_SET_MESSAGE_ON,
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
     CMD_SHOW_COPYING,
@@ -205,6 +206,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "save settings",
     "set annotation on",
     NULL, /* set appearance */
+    "set message on",
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
     "show copying",
@@ -286,6 +288,7 @@ static GtkWidget *pwStatus, *pwProgress, *pwGameList, *pom,
     *pwAnalysis, *pwCommentary, *pwSetCube;
 static GtkWidget *pwHint = NULL;
 static GtkWidget *pwAnnotation = NULL;
+static GtkWidget *pwMessage = NULL, *pwMessageText;
 static GtkWidget *pwGame = NULL;
 static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
@@ -401,6 +404,9 @@ UpdateGeometry ( const gnubgwindow gw ) {
   case WINDOW_GAME:
     pw = pwGame;
     break;
+  case WINDOW_MESSAGE:
+    pw = pwMessage;
+    break;
   default:
     assert ( FALSE );
   }
@@ -416,6 +422,7 @@ RefreshGeometries ( void ) {
   getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
   getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint );
   getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame );
+  getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
 
 }
 
@@ -798,6 +805,49 @@ static void CommentaryChanged( GtkWidget *pw, void *p ) {
 
     } else
 	pmrAnnotation->a.sz = NULL;
+}
+
+static void DeleteMessage ( void ) {
+
+  getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
+  fMessage = FALSE;
+  UpdateSetting( &fMessage );
+
+}
+
+
+static void CreateMessageWindow( void ) {
+
+    GtkWidget *vscrollbar, *pwhbox, *pwvbox;  
+
+    pwMessage = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+
+
+    gtk_window_set_title( GTK_WINDOW( pwMessage ),
+			  _("GNU Backgammon - Messages") );
+    gtk_window_set_wmclass( GTK_WINDOW( pwMessage ), "message",
+			    "Message" );
+
+    setWindowGeometry ( pwMessage, &awg[ WINDOW_MESSAGE ] );
+
+    gtk_container_add( GTK_CONTAINER( pwMessage ),
+                       pwvbox = gtk_vbox_new ( TRUE, 0 ) );
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                     pwhbox = gtk_hbox_new ( FALSE, 0 ), FALSE, TRUE, 0);
+    
+    pwMessageText = gtk_text_new ( NULL, NULL );
+    
+    gtk_text_set_word_wrap( GTK_TEXT( pwMessageText ), TRUE );
+    gtk_text_set_editable( GTK_TEXT( pwMessageText ), FALSE );
+
+    vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwMessageText)->vadj);
+    gtk_box_pack_start(GTK_BOX(pwhbox), pwMessageText, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(pwhbox), vscrollbar, FALSE, FALSE, 0);
+
+    gtk_signal_connect( GTK_OBJECT( pwMessage ), "delete_event",
+			GTK_SIGNAL_FUNC( DeleteMessage ), NULL );
+
 }
 
 static void CreateAnnotationWindow( void ) {
@@ -2116,6 +2166,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Windows/_Game record"), NULL, Command, CMD_LIST_GAME, NULL },
 	{ N_("/_Windows/_Annotation"), NULL, Command, CMD_SET_ANNOTATION_ON,
 	  NULL },
+	{ N_("/_Windows/_Message"), NULL, Command, CMD_SET_MESSAGE_ON,
+	  NULL },
 	{ N_("/_Windows/Gu_ile"), NULL, NULL, 0, NULL },
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
@@ -2256,6 +2308,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     CreateAnnotationWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwAnnotation ), pagMain );
+    
+    CreateMessageWindow();
+    gtk_window_add_accel_group( GTK_WINDOW( pwMessage ), pagMain );
     
     ListCreate( &lOutput );
 
@@ -2662,15 +2717,25 @@ extern void GTKOutputX( void ) {
     
     *pchDest = 0;
 
-    if( cchOutput > 80 || strchr( sz, '\n' ) )
-	/* Long message; display in dialog. */
-	/* FIXME if fDisplay is false, skip to the last line and display
-	   in status bar. */
-	Message( sz, FALSE );
+    if( cchOutput > 80 || strchr( sz, '\n' ) ) {
+      /* Long message; display in dialog. */
+      /* FIXME if fDisplay is false, skip to the last line and display
+         in status bar. */
+      if ( ! fMessage )
+        Message( sz, FALSE );
+    }
     else
-	/* Short message; display in status bar. */
-	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
+      /* Short message; display in status bar. */
+      gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
     
+    if ( fMessage ) {
+      strcat ( sz, "\n" );
+      gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
+                       sz, -1 );
+
+    }
+
+      
     cchOutput = 0;
     g_free( sz );
 }
@@ -6297,6 +6362,19 @@ extern void GTKSet( void *p ) {
 	       UnmapNotify event to the window manager -- see the ICCCM */
           getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
           gtk_widget_hide( pwAnnotation );
+        }
+    }
+    else if( p == &fMessage ) {
+	if( fMessage ) {
+          setWindowGeometry ( pwMessage, &awg[ WINDOW_MESSAGE ] );
+          gtk_widget_show_all( pwMessage );
+          if( pwMessage->window )
+            gdk_window_raise( pwMessage->window );
+	} else {
+          /* FIXME actually we should unmap the window, and send a synthetic
+             UnmapNotify event to the window manager -- see the ICCCM */
+          getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
+          gtk_widget_hide( pwMessage );
         }
     }
 }

@@ -1500,7 +1500,8 @@ CommandShowGeometry ( char *sz ) {
               "Main window       : size %dx%d, position (%d,%d)\n"
               "Annotation window : size %dx%d, position (%d,%d)\n"
               "Game list window  : size %dx%d, position (%d,%d)\n"
-              "Hint window       : size %dx%d, position (%d,%d)\n" ),
+              "Hint window       : size %dx%d, position (%d,%d)\n"
+              "Message window    : size %dx%d, position (%d,%d)\n" ),
             awg[ WINDOW_MAIN ].nWidth,
             awg[ WINDOW_MAIN ].nHeight,
             awg[ WINDOW_MAIN ].nPosX,
@@ -1516,6 +1517,10 @@ CommandShowGeometry ( char *sz ) {
             awg[ WINDOW_HINT ].nWidth,
             awg[ WINDOW_HINT ].nHeight,
             awg[ WINDOW_HINT ].nPosX,
-            awg[ WINDOW_HINT ].nPosY );
+            awg[ WINDOW_HINT ].nPosY,
+            awg[ WINDOW_MESSAGE ].nWidth,
+            awg[ WINDOW_MESSAGE ].nHeight,
+            awg[ WINDOW_MESSAGE ].nPosX,
+            awg[ WINDOW_MESSAGE ].nPosY );
 
 }
