@@ -5352,7 +5352,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   pwFrame = gtk_frame_new ( _("Truncation") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
-  pw = gtk_vbox_new( FALSE, 8 );
+  pw = gtk_hbox_new( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
    
@@ -5364,7 +5364,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prpw->pwDoTrunc ), "toggled",
                       GTK_SIGNAL_FUNC (TruncEnableToggled), prw);
 
-  prpw->pwAdjTruncPlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  prpw->pwAdjTruncPlies = pwHBox = gtk_vbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                      gtk_label_new( _("Truncate at ply:" ) ) );
@@ -5378,7 +5378,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   pwFrame = gtk_frame_new ( _("Evaluation for later plies") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
-  pw = gtk_vbox_new( FALSE, 8 );
+  pw = gtk_hbox_new( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
    
@@ -5391,7 +5391,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoLate ), 
                       "toggled", GTK_SIGNAL_FUNC (LateEvalToggled), prw);
 
-  prpw->pwAdjLatePlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  prpw->pwAdjLatePlies = pwHBox = gtk_vbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                      gtk_label_new( _("Change eval after ply:" ) ) );
@@ -5404,7 +5404,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   pwFrame = gtk_frame_new ( _("Stop when result is accurate") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
-  pw = gtk_vbox_new( FALSE, 8 );
+  pw = gtk_hbox_new( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
    
@@ -5417,7 +5417,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoSTDStop ), 
                       "toggled", GTK_SIGNAL_FUNC (STDStopToggled), prw);
 
-  prpw->pwAdjMinGames = pwHBox = gtk_hbox_new( FALSE, 0 );
+  prpw->pwAdjMinGames = pwHBox = gtk_vbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                      gtk_label_new( _("Minimum Trials:" ) ) );
@@ -5429,7 +5429,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
 
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMinGames);
 
-  prpw->pwAdjMaxError = pwHBox = gtk_hbox_new( FALSE, 0 );
+  prpw->pwAdjMaxError = pwHBox = gtk_vbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                    gtk_label_new( _("Ratio |Standard Deviation/Value|:" ) ) );

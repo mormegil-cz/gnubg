@@ -1,3 +1,8 @@
+Mon 20 Jul 13:30:41 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* gtkgame.c - quick hackery changing some hboxes to vboxes
+	  to change the aspect ration of the rollout settings main page
+	
 Mon 20 Jul 11:32:04 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* rollout.c - re-instate fix for initial position dice (lost 
