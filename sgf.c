@@ -641,7 +641,10 @@ extern void CommandSaveGame( char *sz ) {
 
     FILE *pf;
 
-    /* FIXME give error if no game in progress */
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to save to (see `help save"
@@ -667,7 +670,10 @@ extern void CommandSaveMatch( char *sz ) {
     FILE *pf;
     list *pl;
 
-    /* FIXME give error if no game in progress */
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     /* FIXME what should be done if nMatchTo == 0? */
     
