@@ -2429,12 +2429,21 @@ static void TutorEnd( GtkWidget *pw, int *pf ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
+static void
+TutorHint ( GtkWidget *pw, void *unused ) {
+
+  gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
+  UserCommand ( "hint" );
+
+}
+
 extern int GtkTutor ( char *sz ) {
 
     int f = FALSE, fRestoreNextTurn;
     GdkPixmap *ppm;
     GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor, *pwHbox, *pwButtons, 
 	  *pwPixmap, *pwPrompt;
+    GtkWidget *pwHint;
     GtkAccelGroup *pag;
 
 #include "question.xpm"
@@ -2443,6 +2452,7 @@ extern int GtkTutor ( char *sz ) {
 	pwOK = gtk_button_new_with_label( _("Play Anyway") );
 	pwCancel = gtk_button_new_with_label( _("Rethink") );
 	pwEndTutor = gtk_button_new_with_label ( _("End Tutor Mode") );
+	pwHint = gtk_button_new_with_label ( _("Hint") );
 	pwHbox = gtk_hbox_new( FALSE, 0 );
 	pwButtons = gtk_hbutton_box_new();
     pag = gtk_accel_group_new();
@@ -2474,6 +2484,10 @@ extern int GtkTutor ( char *sz ) {
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwEndTutor );
 	gtk_signal_connect( GTK_OBJECT( pwEndTutor ), "clicked",
 				   GTK_SIGNAL_FUNC( TutorEnd ), (void *) &f );
+
+	gtk_container_add( GTK_CONTAINER( pwButtons ), pwHint );
+	gtk_signal_connect( GTK_OBJECT( pwHint ), "clicked",
+				   GTK_SIGNAL_FUNC( TutorHint ), (void *) &f );
 
 #if GTK_CHECK_VERSION(1,3,15)
     gtk_window_add_accel_group( GTK_WINDOW( pwTutorDialog ), pag );
