@@ -30,7 +30,7 @@
       <design>
          board=#2F5F2F;0.20 
          border=#003F00 
-         translucent=y 
+         translucent=n 
          wood=alder 
          hinges=y 
          light=150;50 
@@ -60,7 +60,7 @@
       <design>
          board=#F2E5D8;0.09 
          border=#003F00 
-         translucent=y
+         translucent=n
          wood=ebony 
          hinges=y
          light=150;50 
@@ -89,7 +89,7 @@
       <design>
          board=#FFD872;0.09 
          border=#003F00 
-         translucent=y 
+         translucent=n 
          wood=walnut 
          hinges=y 
          light=150;50 
@@ -118,7 +118,7 @@
       <design>
          board=#BFBFBF;0.09 
          border=#003F00 
-         translucent=y 
+         translucent=n 
          wood=walnut 
          hinges=y 
          light=150;50 
@@ -135,6 +135,37 @@
       </design>
 
    </board-design>
+
+
+   <board-design>
+
+     <about> 
+         <title>Red Green</title>  
+         <author>Nardy Pillards</author>
+         <preview-file>boards/nardy.xpm</preview-file>
+      </about>
+  
+      <design>
+         board=#6C9856;0.0
+         border=#004000
+         translucent=n 
+         wood=walnut
+         hinges=n
+         light=51;60
+         shape=0.2
+         chequers0=#98BFA5;0.85;3.10;1.00;51.00
+         chequers1=#982533;1.00;3.00;1.00;41.00
+         dice0=#B4E2B4;1.00;3.00;y 
+         dice1=#5A2D31;1.00;30.00;y
+         dot0=#005600 
+         dot1=#FAF208
+         cube=#D6BA00
+         points0=#CAFDDB;0.00
+         points1=#B52D3C;0.00   
+      </design> 
+
+   </board-design>
+
 
 </board-designs>
 

@@ -1,0 +1,4 @@
+Sun Dec  1 16:59:20 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* boards.xml: Added Nardy's board design.
+	* nardy.xpm: new file
