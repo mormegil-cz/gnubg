@@ -9,7 +9,7 @@ Sat Nov 29 10:14:33 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (ReportBug): use uname to improve logic.
 
-Thy Nov 27 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Nov 27 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* htmlimages.c: Fix dice colour
 	* gtkboard.c: Remove previous fix...
 
@@ -1922,7 +1922,7 @@ Thu Jul 3 15:02 GMT 2003 Jim Segrave jes@jes-2.demon.nl
           fix of call to outputerr()), add explicit returns in eval.c
           for reaching end of non-void function
 
-Thu Jul 31 18:23:52 2003  Joern Thyssen  <jth@gnubg.org>
+Thu Jun 31 18:23:52 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkprefs.c (toggle_display_type): gtk_notebook_get_n_pages does
 	exist in gtk+ 2???
