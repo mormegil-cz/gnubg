@@ -811,6 +811,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	  else
 #endif
 	      {
+#if 0
+		  /* FIXME this output is too wide to fit in 80 columns */
 		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
 			   "Cubeful: %6.3f %5.3f %5d\r", asz[ 0 ],
                            aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
@@ -818,6 +820,12 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                            aarSigma[ 0 ][ 5 ],
                            aarMu[ 0 ][ 6 ], aarSigma[ 0 ][ 6 ],
 			   i + 1 );
+#endif
+		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
+			   "%5d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
+			   aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
+			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
+			   aarMu[ 0 ][ 5 ], aarSigma[ 0 ][ 5 ], i + 1 );
 		  fflush( stdout );
 	      }
       }
