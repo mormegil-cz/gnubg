@@ -47,7 +47,8 @@ Current features:
  - Scripting ability (if GNU Guile or Python is available).
  - Automatic and manual annotation (analysis and commentary) of games and
    matches.
- - Record keeping of statistics of players in games and matches.
+ - Record keeping of statistics of players in games and matches (both native
+   inside gnubg and externally using relational databases and Python).
  - Native language support; 10 languages (complete or in progress). See
    table for status of your language:
 
