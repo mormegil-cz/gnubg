@@ -2520,8 +2520,6 @@ ImportSnowieTxt( FILE *pf ) {
 
   *pc++ = 0;
 
-  printf ( "Line read:-\n%s\n-\n", sz );
-
   /* parse string */
 
   if ( ParseSnowieTxt( sz,
