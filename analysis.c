@@ -54,7 +54,7 @@ const char *aszRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
   "World class", "Extra-terrestrial" };
 
 const float arThrsRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
-  0.005, 0.010, 0.015, 0.020, 0.025, 0.030, 1e38 };
+  1e38, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 };
 
 static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
@@ -1140,15 +1140,15 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
             "Error rate (pr. move)\t\t"
             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
             psc->arErrorCheckerplay[ 0 ][ 0 ],
-            psc->arErrorCheckerplay[ 1 ][ 0 ],
             psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorCheckerplay[ 1 ][ 0 ],
             psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f,
             psc->arErrorCheckerplay[ 0 ][ 0 ] /
             psc->anUnforcedMoves[ 0 ],
-            psc->arErrorCheckerplay[ 1 ][ 0 ] /
-            psc->anUnforcedMoves[ 1 ],
             psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
             psc->anUnforcedMoves[ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ] /
+            psc->anUnforcedMoves[ 1 ],
             psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
             psc->anUnforcedMoves[ 1 ] );
   else
@@ -1157,15 +1157,15 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
             "Error rate (pr. move)\t\t"
             "%+6.3f (%+7.3f%)\t%+6.3f (%+7.3f%)\n\n",
             psc->arErrorCheckerplay[ 0 ][ 0 ],
-            psc->arErrorCheckerplay[ 1 ][ 0 ],
             psc->arErrorCheckerplay[ 0 ][ 1 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ],
             psc->arErrorCheckerplay[ 1 ][ 1 ],
             psc->arErrorCheckerplay[ 0 ][ 0 ] /
             psc->anUnforcedMoves[ 0 ],
-            psc->arErrorCheckerplay[ 1 ][ 0 ] /
-            psc->anUnforcedMoves[ 1 ],
             psc->arErrorCheckerplay[ 0 ][ 1 ] /
             psc->anUnforcedMoves[ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ] /
+            psc->anUnforcedMoves[ 1 ],
             psc->arErrorCheckerplay[ 1 ][ 1 ] /
             psc->anUnforcedMoves[ 1 ] );
 
@@ -1192,15 +1192,15 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
             "Luck rate (pr. move)\t\t"
             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
             psc->arLuck[ 0 ][ 0 ],
-            psc->arLuck[ 1 ][ 0 ],
             psc->arLuck[ 0 ][ 1 ] * 100.0f,
+            psc->arLuck[ 1 ][ 0 ],
             psc->arLuck[ 1 ][ 1 ] * 100.0f,
             psc->arLuck[ 0 ][ 0 ] /
             psc->anTotalMoves[ 0 ],
-            psc->arLuck[ 1 ][ 0 ] /
-            psc->anTotalMoves[ 1 ],
             psc->arLuck[ 0 ][ 1 ] * 100.0f /
             psc->anTotalMoves[ 0 ],
+            psc->arLuck[ 1 ][ 0 ] /
+            psc->anTotalMoves[ 1 ],
             psc->arLuck[ 1 ][ 1 ] * 100.0f /
             psc->anTotalMoves[ 1 ] );
   else
@@ -1209,15 +1209,15 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
             "Luck rate (pr. move)\t\t"
             "%+6.3f (%+7.3f%)\t%+6.3f (%+7.3f%)\n\n",
             psc->arLuck[ 0 ][ 0 ],
-            psc->arLuck[ 1 ][ 0 ],
             psc->arLuck[ 0 ][ 1 ],
+            psc->arLuck[ 1 ][ 0 ],
             psc->arLuck[ 1 ][ 1 ],
             psc->arLuck[ 0 ][ 0 ] /
             psc->anTotalMoves[ 0 ],
-            psc->arLuck[ 1 ][ 0 ] /
-            psc->anTotalMoves[ 1 ],
             psc->arLuck[ 0 ][ 1 ] /
             psc->anTotalMoves[ 0 ],
+            psc->arLuck[ 1 ][ 0 ] /
+            psc->anTotalMoves[ 1 ],
             psc->arLuck[ 1 ][ 1 ] /
             psc->anTotalMoves[ 1 ] );
 
@@ -1258,40 +1258,40 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
             "Wrong passes\t\t\t"
             "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n",
             psc->anCubeMissedDoubleDP[ 0 ],
-            psc->anCubeMissedDoubleDP[ 1 ],
             psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
             psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
+            psc->anCubeMissedDoubleDP[ 1 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
             psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f,
             psc->anCubeMissedDoubleTG[ 0 ],
-            psc->anCubeMissedDoubleTG[ 1 ],
             psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
             psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
+            psc->anCubeMissedDoubleTG[ 1 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
             psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f,
             psc->anCubeWrongDoubleDP[ 0 ],
-            psc->anCubeWrongDoubleDP[ 1 ],
             psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
             psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
+            psc->anCubeWrongDoubleDP[ 1 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
             psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f,
             psc->anCubeWrongDoubleTG[ 0 ],
-            psc->anCubeWrongDoubleTG[ 1 ],
             psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
             psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
+            psc->anCubeWrongDoubleTG[ 1 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
             psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f,
             psc->anCubeWrongTake[ 0 ],
-            psc->anCubeWrongTake[ 1 ],
             psc->arErrorWrongTake[ 0 ][ 0 ],
-            psc->arErrorWrongTake[ 1 ][ 0 ],
             psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
+            psc->anCubeWrongTake[ 1 ],
+            psc->arErrorWrongTake[ 1 ][ 0 ],
             psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f,
             psc->anCubeWrongPass[ 0 ],
-            psc->anCubeWrongPass[ 1 ],
             psc->arErrorWrongPass[ 0 ][ 0 ],
-            psc->arErrorWrongPass[ 1 ][ 0 ],
             psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
+            psc->anCubeWrongPass[ 1 ],
+            psc->arErrorWrongPass[ 1 ][ 0 ],
             psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
   else
     printf ("Missed doubles around DP\t"
@@ -1307,40 +1307,40 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
             "Wrong passes\t\t\t"
             "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n",
             psc->anCubeMissedDoubleDP[ 0 ],
-            psc->anCubeMissedDoubleDP[ 1 ],
             psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
             psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+            psc->anCubeMissedDoubleDP[ 1 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
             psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
             psc->anCubeMissedDoubleTG[ 0 ],
-            psc->anCubeMissedDoubleTG[ 1 ],
             psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
             psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+            psc->anCubeMissedDoubleTG[ 1 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
             psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
             psc->anCubeWrongDoubleDP[ 0 ],
-            psc->anCubeWrongDoubleDP[ 1 ],
             psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
             psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+            psc->anCubeWrongDoubleDP[ 1 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
             psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
             psc->anCubeWrongDoubleTG[ 0 ],
-            psc->anCubeWrongDoubleTG[ 1 ],
             psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
             psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+            psc->anCubeWrongDoubleTG[ 1 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
             psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
             psc->anCubeWrongTake[ 0 ],
-            psc->anCubeWrongTake[ 1 ],
             psc->arErrorWrongTake[ 0 ][ 0 ],
-            psc->arErrorWrongTake[ 1 ][ 0 ],
             psc->arErrorWrongTake[ 0 ][ 1 ],
+            psc->anCubeWrongTake[ 1 ],
+            psc->arErrorWrongTake[ 1 ][ 0 ],
             psc->arErrorWrongTake[ 1 ][ 1 ],
             psc->anCubeWrongPass[ 0 ],
-            psc->anCubeWrongPass[ 1 ],
             psc->arErrorWrongPass[ 0 ][ 0 ],
-            psc->arErrorWrongPass[ 1 ][ 0 ],
             psc->arErrorWrongPass[ 0 ][ 1 ],
+            psc->anCubeWrongPass[ 1 ],
+            psc->arErrorWrongPass[ 1 ][ 0 ],
             psc->arErrorWrongPass[ 1 ][ 1 ] );
 
   for ( i = 0 ; i < 2; i++ )
