@@ -675,6 +675,42 @@ extern int ComputerTurn( void ) {
 
       /* Consider cube action */
 
+      /* 
+       * We may get here in three different scenarios: 
+       * (1) normal double by opponent: fMove != fTurn and fCubeOwner is
+       *     either -1 (centered cube) or = fMove.
+       * (2) beaver by opponent: fMove = fTurn and fCubeOwner = !
+       *     fMove
+       * (3) raccoon by opponent: fMove != fTurn and fCubeOwner =
+       *     fTurn.
+       *
+       */
+
+      if ( ms.fMove != ms.fTurn && ms.fCubeOwner == ms.fTurn ) {
+
+        /* raccoon: consider this a normal double, i.e. 
+             fCubeOwner = fMove */
+        
+        SetCubeInfo ( &ci, ci.nCube,
+                      ci.fMove, ci.fMove,
+                      ci.nMatchTo, ci.anScore, ci.fCrawford,
+                      ci.fJacoby, ci.fBeavers );
+
+      }
+      
+      if ( ms.fMove == ms.fTurn && ms.fCubeOwner != ms.fMove ) {
+
+        /* opponent beavered: consider this a normal double by me */
+
+        SetCubeInfo ( &ci, ci.nCube,
+                      ci.fMove, ci.fMove,
+                      ci.nMatchTo, ci.anScore, ci.fCrawford,
+                      ci.fJacoby, ci.fBeavers );
+
+      }
+
+      /* Evaluate cube decision */
+
       if ( GeneralCubeDecision ( "Computer player",
                                  aarOutput, aarStdDev,
                                  ms.anBoard,

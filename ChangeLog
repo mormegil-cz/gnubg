@@ -1,3 +1,8 @@
+Sat Oct 27 22:52:07 CEST 2001
+
+	* eval.c (ComputerTurn): bug fix for gnubg's reply to beavers. Reported by
+	John Chuang.
+
 Sat Oct 27 21:58:05 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (FindBestCubeDecision): fix typo.
