@@ -64,7 +64,7 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
-	gnubg.gtkrc credits.sh erf.c
+	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $<

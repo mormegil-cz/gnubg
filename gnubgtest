@@ -15,24 +15,24 @@ die () {
 
 # Feature test
 ./gnubg -v > $TEMP || die '--- Feature test fails.'
-grep -q Guile $TEMP && GUILE=yes || GUILE=""
-grep -q databases $TEMP && DATABASES=yes || DATABASES=""
-grep -q Window $TEMP && WINDOW=yes || WINDOW=""
+grep Guile $TEMP > /dev/null && GUILE=yes || GUILE=""
+grep databases $TEMP > /dev/null && DATABASES=yes || DATABASES=""
+grep Window $TEMP > /dev/null && WINDOW=yes || WINDOW=""
 rm -f $TEMP
 echo '--- Feature test succeeds.'
 
 # Test without -b; now requires bearoff database.
-./gnubg $dirparam -t -r -n <> /dev/null || die \
+./gnubg $dirparam -t -r -n < /dev/null > /dev/null || die \
     '--- Bearoff database test fails.'
 echo '--- Bearoff database test succeeds.'
 
 # Test without -n; now requires weights files.
-./gnubg $dirparam -t -r <> /dev/null || die \
+./gnubg $dirparam -t -r < /dev/null > /dev/null || die \
     '--- Neural net weights test fails.'
 echo '--- Neural net weights test succeeds.'
 
 # Make sure an opening 31 is played correctly.
-./gnubg $dirparam -t -r << "EOF" | grep -q sGfwATDgc/ABMA || die \
+./gnubg $dirparam -t -r << "EOF" | grep sGfwATDgc/ABMA > /dev/null || die \
     '--- Opening move test fails.'
 set player both human
 new game
@@ -71,7 +71,7 @@ EOF
 echo '--- Cubeful self-play test succeeds.'
 
 # Test game navigation (and save game for later load test).
-./gnubg $dirparam -t -r << EOF | grep -q '167.*163' || die \
+./gnubg $dirparam -t -r << EOF | grep '167.*163' > /dev/null || die \
     '--- Game navigation fails.'
 set rng manual
 set player both human
@@ -92,7 +92,7 @@ EOF
 echo '--- Game navigation succeeds.'
 
 # Test resignation.
-./gnubg $dirparam -t -r << "EOF" | grep -q 'a 0, b 4' || die \
+./gnubg $dirparam -t -r << "EOF" | grep 'a 0, b 4' > /dev/null || die \
     '--- Resignation test fails.'
 set rng manual
 set player both human
@@ -113,7 +113,7 @@ EOF
 echo '--- Resignation test succeeds.'
 
 # Test beavers.
-./gnubg $dirparam -t -r << "EOF" | grep -q 'a 0, b 4' || die \
+./gnubg $dirparam -t -r << "EOF" | grep 'a 0, b 4' > /dev/null || die \
     '--- Beaver test fails.'
 set rng manual
 set player 0 human
@@ -133,7 +133,7 @@ EOF
 echo '--- Beaver test succeeds.'
 
 # Test saving.
-./gnubg $dirparam -t -r << EOF | grep -q '163.*161' || die \
+./gnubg $dirparam -t -r << EOF | grep '163.*161' > /dev/null || die \
     '--- Load test fails.'
 set player both human
 load game $TEMP
@@ -159,8 +159,8 @@ EOF
 echo '--- Miscellaneous test succeeds.'
 
 # Make sure the example game in the manual works.
-./gnubg $dirparam -t -r << "EOF" | grep -q \
-   'refuses the cube and gives up 1 point.' || die \
+./gnubg $dirparam -t -r << "EOF" | grep \
+   'refuses the cube and gives up 1 point.' > /dev/null || die \
    '--- Manual example test fails.'
 set seed 15
 new game

@@ -1,4 +1,6 @@
-Thu Apr 12 12:44:06 2001  Gary Wong  <gtw@research.att.com>
+Thu Apr 12 13:37:02 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubgtest: Don't use `grep -q' or `<>', which fail on Solaris.
 
 	* erftest.c: New file.
 	* Makefile.am: Use erftest.c to test erf.c.

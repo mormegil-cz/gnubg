@@ -121,7 +121,7 @@ erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm 	gnubg.gtkrc credits.sh erf.c
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
