@@ -52,6 +52,7 @@
 typedef struct _tempmapwidget {
 
   matchstate *pms;
+  cubeinfo ci;
   float aarEquity[ 6 ][ 6 ];
   float rAverage, rMin, rMax;
 
@@ -65,26 +66,28 @@ typedef struct _tempmapwidget {
   GtkWidget *apwGauge[ 2 ];
   GtkWidget *pweAverage;
 
+  int fShowEquity;
+  int fShowBestMove;
+
+  int aaanMove[ 6 ][ 6 ][ 8 ];
+
 } tempmapwidget;
 
 
 static int
-CalcTempMapEquities( evalcontext *pec, matchstate *pms,
-                     float aarEquity[ 6 ][ 6 ] ) {
+CalcTempMapEquities( evalcontext *pec, matchstate *pms, cubeinfo *pci,
+                     float aarEquity[ 6 ][ 6 ], int aaanMove[ 6 ][ 6 ][ 8 ] ) {
 
 
   int i, j;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
   int anBoard[ 2 ][ 25 ];
-  int anMove[ 8 ];
-  cubeinfo ci;
+  int aaan[ 6 ][ 6 ][ 8 ];
   float aar[ 6 ][ 6 ];
 
   /* calculate equities */
 
   ProgressStartValue ( _("Calculating equities" ), 21 );
-
-  GetMatchStateCubeInfo( &ci, pms );
 
   for ( i = 0; i < 6; ++i )
     for ( j = 0; j <= i; ++j ) {
@@ -93,7 +96,7 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms,
 
       memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
 
-      if ( FindBestMove ( anMove, i + 1, j + 1, anBoard, &ci, pec,
+      if ( FindBestMove ( aaan[ i ][ j ], i + 1, j + 1, anBoard, pci, pec,
                           defaultFilters ) < 0 ) {
         ProgressEnd();
         return -1;
@@ -103,16 +106,19 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms,
 
       SwapSides ( anBoard );
 
-      if ( GeneralEvaluationE ( arOutput, anBoard, &ci, pec ) < 0 ) {
+      if ( GeneralEvaluationE ( arOutput, anBoard, pci, pec ) < 0 ) {
         ProgressEnd();
         return -1;
       }
 
       
-      InvertEvaluationR( arOutput, &ci );
+      InvertEvaluationR( arOutput, pci );
 
       aar[ i ][ j ] = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
       aar[ j ][ i ] = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
+
+      if ( i != j )
+        memcpy( aaan[ j ][ i ], aaan[ i ][ j ], sizeof aaan[ 0 ][ 0 ] );
       
       ProgressValueAdd ( 1 );
 
@@ -123,6 +129,7 @@ CalcTempMapEquities( evalcontext *pec, matchstate *pms,
   ProgressEnd();
 
   memcpy( aarEquity, aar, sizeof aar );
+  memcpy( aaanMove, aaan, sizeof aaan );
 
   return 0;
 
@@ -133,10 +140,6 @@ static void
 UpdateStyle( GtkWidget *pw, const float r ) {
 
   GtkStyle *ps = gtk_style_copy( pw->style );
-
-  ps->fg[ GTK_STATE_NORMAL ].red = 0xFFFF;
-  ps->fg[ GTK_STATE_NORMAL ].blue = 
-    ps->fg[ GTK_STATE_NORMAL ].green = ( 1.0 - r ) * 0xFFFF;
 
   ps->bg[ GTK_STATE_NORMAL ].red = 0xFFFF;
   ps->bg[ GTK_STATE_NORMAL ].blue = 
@@ -152,7 +155,7 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
 
   int i, j;
   float rMax, rMin, rAverage, r;
-  cubeinfo ci;
+  cubeinfo *pci = &ptmw->ci;
 
   /* calc. min, max and average */
 
@@ -177,22 +180,20 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
 
   /* update styles */
 
-  GetMatchStateCubeInfo( &ci, ptmw->pms );
-
   for ( i = 0; i < 6; ++i )
     for ( j = 0; j < 6; ++j ) {
       r = ( ptmw->aarEquity[ i ][ j ] - rMin ) / ( rMax - rMin );
       UpdateStyle( ptmw->aapwDA[ i ][ j ], r );
       gtk_tooltips_set_tip( ptt, ptmw->aapwe[ i ][ j ], 
                             OutputMWC( ptmw->aarEquity[ i ][ j ], 
-                                       &ci, TRUE ), "" );
-      gtk_widget_queue_draw( ptmw->aapwDA[ i ][ j ] );
+                                       pci, TRUE ), "" );
+      gtk_widget_queue_draw( ptmw->aapwDA[ i ][ j ] ); 
     }
 
 
   r = ( ptmw->rAverage - rMin ) / ( rMax - rMin );
   gtk_tooltips_set_tip( ptt, ptmw->pweAverage,
-                        OutputMWC( ptmw->rAverage, &ci, TRUE ), "" );
+                        OutputMWC( ptmw->rAverage, pci, TRUE ), "" );
   UpdateStyle( ptmw->pwAverage, r );
   gtk_widget_queue_draw( ptmw->pwAverage );
 
@@ -200,17 +201,48 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
   /* update labels on gauge */
 
   gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ 0 ] ),
-                      OutputMWC( rMin, &ci, TRUE ) );
+                      OutputMWC( rMin, pci, TRUE ) );
   gtk_label_set_text( GTK_LABEL( ptmw->apwGauge[ 1 ] ),
-                      OutputMWC( rMax, &ci, TRUE ) );
+                      OutputMWC( rMax, pci, TRUE ) );
 
 } 
 
 static void
-ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, gpointer *unused ) {
+ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
   
+  int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int i = *pi / 6;
+  int j = *pi % 6;
+  float r = 0.0f;
+
   gtk_draw_box( pw->style, pw->window, GTK_STATE_NORMAL, GTK_SHADOW_IN,
                 0, 0, pw->allocation.width, pw->allocation.height );
+
+  /* this is very ugly! Use Pango instead... */
+
+  if ( j >= 0 )
+    r = ptmw->aarEquity[ i ][ j ];
+  else if ( j == -1 ) 
+    r = ptmw->rAverage;
+
+  if ( j >= -1 && ptmw->fShowEquity ) {
+    gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
+                     10, 15, 
+                     OutputMWC( r, &ptmw->ci, TRUE ) );
+  }
+
+
+  /* move */
+
+  if ( j >= 0 && ptmw->fShowBestMove ) {
+
+    char szMove[ 100 ];
+
+    FormatMove( szMove, ptmw->pms->anBoard, ptmw->aaanMove[ i ][ j ] );
+    gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
+                     10, 30, szMove );
+
+  }
 
 
 }
@@ -231,19 +263,55 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
 
 
 static void
-TempMapPlyClicked( GtkWidget *pw, tempmapwidget *ptmw ) {
+TempMapPlyToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
 
   int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
 
-  ec.nPlies = *pi;
-  if ( CalcTempMapEquities( &ec, ptmw->pms, ptmw->aarEquity ) )
-    return;
+  if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) ) ) {
 
-  UpdateTempMapEquities( ptmw );
+    /* recalculate equities */
 
+    ec.nPlies = *pi;
+
+    if ( CalcTempMapEquities( &ec, ptmw->pms, &ptmw->ci,
+                              ptmw->aarEquity, ptmw->aaanMove ) )
+      return;
+    
+    UpdateTempMapEquities( ptmw );
+
+  }
 
 }
+
+
+static void
+ShowEquityToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
+
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+
+  if ( f != ptmw->fShowEquity ) {
+    ptmw->fShowEquity = f;
+    UpdateTempMapEquities( ptmw );
+  }
+
+}
+
+
+static void
+ShowBestMoveToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
+
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+
+  if ( f != ptmw->fShowBestMove ) {
+    ptmw->fShowBestMove = f;
+    UpdateTempMapEquities( ptmw );
+  }
+
+}
+
+
+
 
 extern void
 GTKShowTempMap( matchstate *pms ) {
@@ -263,6 +331,7 @@ GTKShowTempMap( matchstate *pms ) {
   GtkWidget *pwv;
   GtkWidget *pw;
   GtkWidget *pwh;
+  GtkWidget *pwx = NULL;
 
   /* vbox to hold tree widget and buttons */
 
@@ -304,9 +373,15 @@ GTKShowTempMap( matchstate *pms ) {
                                  i + 1, i + 2,
                                  j + 1, j + 2 );
 
+      pi = (int *) g_malloc( sizeof ( int ) );
+      *pi = i * 6 + j;
+      
+      gtk_object_set_data_full( GTK_OBJECT( tmw.aapwDA[ i ][ j ] ),
+                                "user_data", pi, g_free );
+    
       gtk_signal_connect( GTK_OBJECT( tmw.aapwDA[ i ][ j ] ),
                           "expose_event",
-                          GTK_SIGNAL_FUNC( ExposeQuadrant ), NULL );
+                          GTK_SIGNAL_FUNC( ExposeQuadrant ), &tmw );
 
     }
 
@@ -400,6 +475,12 @@ GTKShowTempMap( matchstate *pms ) {
                                  i, i + 1,
                                  1, 2 );
 
+      pi = (int *) g_malloc( sizeof ( int ) );
+      *pi = -2;
+      
+      gtk_object_set_data_full( GTK_OBJECT( pw ),
+                                "user_data", pi, g_free );
+    
       gtk_signal_connect( GTK_OBJECT( pw ),
                           "expose_event",
                           GTK_SIGNAL_FUNC( ExposeQuadrant ), NULL );
@@ -429,7 +510,13 @@ GTKShowTempMap( matchstate *pms ) {
   for ( i = 0; i < 4; ++i ) {
 
     gchar *sz = g_strdup_printf( _("%d ply"), i );
-    pw = gtk_button_new_with_label( sz );
+    if ( ! i )
+      pw = pwx = gtk_radio_button_new_with_label( NULL, sz );
+    else
+      pw = 
+        gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( pwx ),
+                                                     sz );
+      
     gtk_box_pack_start( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
 
     pi = (int *) g_malloc( sizeof ( int ) );
@@ -438,16 +525,37 @@ GTKShowTempMap( matchstate *pms ) {
     gtk_object_set_data_full( GTK_OBJECT( pw ),
                               "user_data", pi, g_free );
     
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked", 
-                        GTK_SIGNAL_FUNC( TempMapPlyClicked ), &tmw );
+    gtk_signal_connect( GTK_OBJECT( pw ), "toggled", 
+                        GTK_SIGNAL_FUNC( TempMapPlyToggled ), &tmw );
                         
   }
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwx ), TRUE );
+
+
+  /* show-buttons */
+
+  pw = gtk_check_button_new_with_label( _("Show equities") );
+  gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
+  
+  gtk_signal_connect( GTK_OBJECT( pw ), "toggled",
+                      GTK_SIGNAL_FUNC( ShowEquityToggled ), &tmw );
+
+
+  pw = gtk_check_button_new_with_label( _("Show best move") );
+  gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
+  
+  gtk_signal_connect( GTK_OBJECT( pw ), "toggled",
+                      GTK_SIGNAL_FUNC( ShowBestMoveToggled ), &tmw );
 
 
   /* update */
 
+  tmw.fShowBestMove = FALSE;
+  tmw.fShowEquity = FALSE;
   tmw.pms = pms;
-  CalcTempMapEquities( &ec, pms, tmw.aarEquity );
+  GetMatchStateCubeInfo( &tmw.ci, pms );
+  CalcTempMapEquities( &ec, pms, &tmw.ci, tmw.aarEquity, tmw.aaanMove );
   UpdateTempMapEquities( &tmw );
 
   /* modality */

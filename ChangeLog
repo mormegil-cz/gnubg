@@ -1,3 +1,8 @@
+Fri May 30 20:43:50 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktempmap.c: improvements of temperature map.
+	(suggested by Ian Shaw and Michael Depreli)
+
 Fri May 30 17:41:42 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (board_set): move calculation of nchequers to
