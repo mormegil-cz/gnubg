@@ -1,9 +1,16 @@
+Fri Oct 20 14:52:22 2000  Gary Wong  <gary@research.att.com>
+
+	* gtkboard.c (board_set_crawford): New function; move the "Crawford"
+	check box from the Game menu to the score table.
+
+	* play.c (CommandNext, CommandPrevious): New commands.
+
 Thu Oct 19 18:03:26 2000  Gary Wong  <gtw@research.att.com>
 
 	* play.c: Do not allow commands "double", "take", "drop" or "resign"
 	when it is the computer's turn.
 
-Thu Oct 19 10:45:32 2000  Gary Wong  <gary@research.att.com>
+Thu Oct 19 10:45:32 2000  Gary Wong  <gtw@research.att.com>
 
 	* sgf.c: More work parsing SGF input.  Loading should mostly work.
 
@@ -14,7 +21,7 @@ Thu Oct 19 16:37:17 2000  Jørn Thyssen  <joern@thyssen.nu>
 	* eval.c (Cl2CfMoney): bugfix - too good to double with
         centered cube did not work.
 
-Wed Oct 18 11:43:00 2000  Gary Wong  <gary@research.att.com>
+Wed Oct 18 11:43:00 2000  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (ShowBoard): Don't display GTK board if !fGTKOutput
 	(this could occur when loading a match given on command line).

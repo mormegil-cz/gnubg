@@ -194,7 +194,7 @@ static void RestoreRootNode( list *pl ) {
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
-    ListInsert( plGame, pmgi );
+    plLastMove = ListInsert( plGame, pmgi );
 
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'M' && pp->ach[ 1 ] == 'I' )
@@ -228,9 +228,6 @@ static void RestoreRootNode( list *pl ) {
 		pmgi->nPoints = 1;
 	    
 	    pmgi->fResigned = toupper( *pch ) == 'R';
-
-	    /* adjust the score in advance */
-	    anScore[ pmgi->fWinner ] += pmgi->nPoints;
 	} else if( pp->ach[ 0 ] == 'R' && pp->ach[ 1 ] == 'U' ) { 
 	    /* RU - Rules property */
 
@@ -248,44 +245,11 @@ static void RestoreRootNode( list *pl ) {
 static int Point( char ch, int f ) {
 
     if( ch == 'y' )
-	return 25; /* bar */
+	return 24; /* bar */
     else if( ch <= 'x' && ch >= 'a' )
-	return f ? 'x' - ch + 1 : ch - 'a' + 1;
+	return f ? 'x' - ch : ch - 'a';
     else
-	return 0; /* off */
-}
-
-static void PlayMove( int anMove[ 8 ], int fPlayer ) {
-
-    int i, nSrc, nDest;
-    
-    if( fPlayer )
-	SwapSides( anBoard );
-    
-    for( i = 0; i < 8; i += 2 ) {
-	nSrc = anMove[ i ] - 1;
-	nDest = anMove[ i | 1 ] - 1;
-
-	if( nSrc < 0 )
-	    /* move is finished */
-	    break;
-	
-	if( !anBoard[ 1 ][ nSrc ] )
-	    /* source point is empty; ignore */
-	    continue;
-
-	anBoard[ 1 ][ nSrc ]--;
-	if( nDest >= 0 )
-	    anBoard[ 1 ][ nDest ]++;
-
-	if( nSrc >= 0 && nSrc < 24 ) {
-	    anBoard[ 0 ][ 24 ] += anBoard[ 0 ][ 23 - nDest ];
-	    anBoard[ 0 ][ 23 - nDest ] = 0;
-	}
-    }
-
-    if( fPlayer )
-	SwapSides( anBoard );    
+	return -1; /* off */
 }
 
 static void RestoreNode( list *pl ) {
@@ -294,8 +258,6 @@ static void RestoreNode( list *pl ) {
     moverecord *pmr;
     char *pch;
     int i;
-    
-    outputoff();
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) {
@@ -306,27 +268,12 @@ static void RestoreNode( list *pl ) {
 	    if( !strcmp( pch, "double" ) ) {
 		pmr = malloc( sizeof( pmr->mt ) );
 		pmr->mt = MOVE_DOUBLE;
-		
-		if( fDoubled ) {
-		    nCube <<= 1;
-		    fCubeOwner = !fMove;
-		} else
-		    fDoubled = TRUE;
-
-		fTurn = !fTurn;
 	    } else if( !strcmp( pch, "take" ) ) {
 		pmr = malloc( sizeof( pmr->mt ) );
 		pmr->mt = MOVE_TAKE;
-
-		nCube <<= 1;
-		fDoubled = FALSE;
-		fTurn = fCubeOwner = !fMove;
 	    } else if( !strcmp( pch, "drop" ) ) {
 		pmr = malloc( sizeof( pmr->mt ) );
 		pmr->mt = MOVE_DROP;
-
-		fDoubled = FALSE;
-		fTurn = fMove = -1;
 	    } else {
 		pmr = malloc( sizeof( pmr->n ) );
 		pmr->n.mt = MOVE_NORMAL;
@@ -347,28 +294,21 @@ static void RestoreNode( list *pl ) {
 		if( i < 4 )
 		    pmr->n.anMove[ i << 1 ] = -1;
 			
-		if( pmr->n.anRoll[ 0 ] >= 1 && pmr->n.anRoll[ 0 ] <= 6 &&
-		    pmr->n.anRoll[ 1 ] >= 1 && pmr->n.anRoll[ 1 ] <= 6 ) {
-		    PlayMove( pmr->n.anMove, pmr->n.fPlayer );
-		    fMove = fTurn = !pmr->n.fPlayer;
-
-		    if( GameStatus( anBoard ) )
-			/* Game over. */
-			fTurn = fMove = -1;
-		} else {
+		if( pmr->n.anRoll[ 0 ] < 1 || pmr->n.anRoll[ 0 ] > 6 ||
+		    pmr->n.anRoll[ 1 ] < 1 || pmr->n.anRoll[ 1 ] > 6 ) {
 		    /* illegal move -- ignore */
 		    free( pmr );
 		    pmr = NULL;
 		}
 	    }
 	    
-	    if( pmr )
-		ListInsert( plGame, pmr );
+	    if( pmr ) {
+		ApplyMoveRecord( pmr );
+		plLastMove = ListInsert( plGame, pmr );
+	    }
 	} else
 	    /* FIXME handle setup properties */
 	    ;
-
-    outputon();
 }
 
 static void RestoreSequence( list *pl, int fRoot ) {
@@ -406,9 +346,10 @@ static void RestoreGame( list *pl ) {
 
     ListInsert( &lMatch, plGame );
 
+    anDice[ 0 ] = anDice[ 1 ] = 0;
     fResigned = fDoubled = FALSE;
     nCube = 1;
-    fCubeOwner = -1;
+    fTurn = fMove = fCubeOwner = -1;
 
     RestoreTree( pl, TRUE );
 
@@ -426,6 +367,8 @@ static void RestoreGame( list *pl ) {
 	    pmrResign->r.nResigned = 1;
 	else if( pmrResign->r.nResigned > 3 )
 	    pmrResign->r.nResigned = 3;
+
+	ApplyMoveRecord( pmrResign );
     }
 }
 
@@ -448,9 +391,6 @@ static void UpdateSettings( void ) {
     UpdateSetting( &nMatchTo );
     UpdateSetting( &fCrawford );
 
-    if( fMove )
-	SwapSides( anBoard );
-    
     ShowBoard();
 }
 

@@ -32,9 +32,12 @@ duplication of effort and to make sure our changes merge easily.
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
+** Joseph notes the 1-sided bearoff database is nearly as good as the
+  2-sided.  Add an option to omit the 2-sided one, to conserve disk
+  and memory space.
 
 * Commands:
-** Add more completions to readline.
+** Add more completions to readline (player names, filenames for load/save).
 ** Allow timeouts for "train" (and others?).
 ** Add interactive rollouts.
 ** Analyse games and matches.
@@ -94,7 +97,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add a "stop" button which sets fInterrupt; this should be the grab
   widget when gnubg is busy.
 ** Add optional point number labels on the board.
-** Move the Crawford menu item to the name/score table.
 ** The "Set" position button is superfluous.
 ** Add a "Reset" button that restores the position, from
   before the user started to move or edit the position [is useful for

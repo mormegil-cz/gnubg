@@ -133,7 +133,12 @@ extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
-extern list lMatch, *plGame; /* (list of) list of moverecords */
+extern list lMatch, *plGame, *plLastMove;
+/* plGame is the list of moverecords representing the current game;
+   plLastMove points to a move within it (typically the most recently
+   one played, but "previous" and "next" commands navigate back and forth).
+   lMatch is a list of games (i.e. a list of list of moverecords),
+   and plGame points to a game within it (again, typically the last). */
 
 extern player ap[ 2 ];
 
@@ -144,6 +149,7 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
 extern void NextTurn( void );
 extern void TurnDone( void );
+extern void ApplyMoveRecord( moverecord *pmr );
 extern void CancelCubeAction( void );
 extern void FreeMatch( void );
 extern int ParseNumber( char **ppch );
@@ -219,8 +225,10 @@ extern void CommandAccept( char * ),
     CommandNewGame( char * ),
     CommandNewMatch( char * ),
     CommandNewSession( char * ),
+    CommandNext( char * ),
     CommandNotImplemented( char * ),
     CommandPlay( char * ),
+    CommandPrevious( char * ),
     CommandQuit( char * ),
     CommandRedouble( char * ),
     CommandReject( char * ),

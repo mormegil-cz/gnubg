@@ -40,7 +40,7 @@
 
 char *aszGameResult[] = { "single game", "gammon", "backgammon" };
 enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
-list lMatch, *plGame;
+list lMatch, *plGame, *plLastMove;
 
 #if USE_GTK
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
@@ -49,7 +49,135 @@ list lMatch, *plGame;
 #if USE_GUI
 static struct timeval tvLast;
 
-void ResetDelayTimer( void ) {
+static void PlayMove( int anMove[ 8 ], int fPlayer ) {
+
+    int i, nSrc, nDest;
+    
+    if( fMove != -1 && fPlayer != fMove )
+	SwapSides( anBoard );
+    
+    for( i = 0; i < 8; i += 2 ) {
+	nSrc = anMove[ i ];
+	nDest = anMove[ i | 1 ];
+
+	if( nSrc < 0 )
+	    /* move is finished */
+	    break;
+	
+	if( !anBoard[ 1 ][ nSrc ] )
+	    /* source point is empty; ignore */
+	    continue;
+
+	anBoard[ 1 ][ nSrc ]--;
+	if( nDest >= 0 )
+	    anBoard[ 1 ][ nDest ]++;
+
+	if( nSrc >= 0 && nSrc < 24 && nDest >= 0 && nDest <= 23 ) {
+	    anBoard[ 0 ][ 24 ] += anBoard[ 0 ][ 23 - nDest ];
+	    anBoard[ 0 ][ 23 - nDest ] = 0;
+	}
+    }
+
+    fMove = fTurn = !fPlayer;
+    SwapSides( anBoard );    
+}
+
+static void ApplyGameOver( void ) {
+
+    movegameinfo *pmgi = plGame->plNext->p;
+
+    assert( pmgi->mt == MOVE_GAMEINFO );
+
+    if( pmgi->fWinner < 0 )
+	return;
+    
+    anScore[ pmgi->fWinner ] += pmgi->nPoints;
+    fMove = fTurn = -1;
+}
+
+extern void ApplyMoveRecord( moverecord *pmr ) {
+
+    switch( pmr->mt ) {
+    case MOVE_GAMEINFO:
+	InitBoard( anBoard );
+	
+	anScore[ 0 ] = pmr->g.anScore[ 0 ];
+	anScore[ 1 ] = pmr->g.anScore[ 1 ];
+	
+	fMove = fTurn = fCubeOwner = -1;
+	anDice[ 0 ] = anDice[ 1 ] = 0;
+	fResigned = fDoubled = FALSE;
+	nCube = 1 << pmr->g.nAutoDoubles;
+	break;
+	
+    case MOVE_DOUBLE:
+	if( fTurn < 0 )
+	    break;
+	
+	if( fDoubled ) {
+	    nCube <<= 1;
+	    fCubeOwner = !fMove;
+	} else
+	    fDoubled = TRUE;
+	
+	fTurn = !fTurn;
+	break;
+
+    case MOVE_TAKE:
+	if( fTurn < 0 )
+	    break;
+	
+	nCube <<= 1;
+	fDoubled = FALSE;
+	fTurn = fCubeOwner = !fMove;
+	break;
+
+    case MOVE_DROP:
+	if( fTurn < 0 )
+	    break;
+	
+	fDoubled = FALSE;
+	ApplyGameOver();
+	break;
+
+    case MOVE_NORMAL:
+	PlayMove( pmr->n.anMove, pmr->n.fPlayer );
+	anDice[ 0 ] = anDice[ 1 ] = 0;
+
+	if( GameStatus( anBoard ) )
+	    ApplyGameOver();
+
+	break;
+
+    case MOVE_RESIGN:
+	if( fTurn < 0 )
+	    break;
+
+	ApplyGameOver();
+	break;
+	
+    case MOVE_SETBOARD:
+    case MOVE_SETCUBEVAL:
+    case MOVE_SETCUBEPOS:
+	/* FIXME */
+    }
+}
+
+extern void CalculateBoard( void ) {
+
+    list *pl;
+
+    pl = plGame;
+    do {
+	pl = pl->plNext;
+
+	assert( pl->p );
+
+	ApplyMoveRecord( pl->p );
+    } while( pl != plLastMove );
+}
+
+static void ResetDelayTimer( void ) {
     
     if( fX && nDelay && fDisplay )
 	gettimeofday( &tvLast, NULL );
@@ -60,18 +188,26 @@ void ResetDelayTimer( void ) {
 
 static void AddMoveRecord( void *pmr ) {
 
-    /* FIXME delete all records after the current position */
+    /* Delete all records after plLastMove. */
+    /* FIXME when we can handle variations, we should save the old move
+       as an alternate variation. */
+    while( plLastMove->plNext->p ) {
+	free( plLastMove->plNext->p );
+	ListDelete( plLastMove->plNext );
+    }
     
-    ListInsert( plGame, pmr );
+    plLastMove = ListInsert( plGame, pmr );
 }
 
 static void NewGame( void ) {
 
     moverecord *pmr;
     
+    /* FIXME delete all games in the match after the current one */
+    
     InitBoard( anBoard );
 
-    plGame = malloc( sizeof( *plGame ) );
+    plLastMove = plGame = malloc( sizeof( *plGame ) );
     ListCreate( plGame );
 
     ListInsert( &lMatch, plGame );
@@ -884,6 +1020,7 @@ extern void CommandNewGame( char *sz ) {
 	}
 
 	/* The last game of the match should always be the current one. */
+	/* FIXME once we can navigate moves, this will no longer be true. */
 	assert( lMatch.plPrev->p == plGame );
 
 	ListDelete( lMatch.plPrev );
@@ -999,6 +1136,39 @@ extern void CommandNewSession( char *sz ) {
 	CommandNewGame( NULL );
 }
 
+static void UpdateGame( void ) {
+    
+    UpdateSetting( &nCube );
+    UpdateSetting( &fCubeOwner );
+    UpdateSetting( &fTurn );
+
+    ShowBoard();
+}
+
+extern void CommandNext( char *sz ) {
+
+    int n;
+    char *pch;
+    
+    if( ( pch = NextToken( &sz ) ) )
+	n = ParseNumber( &pch );
+    else
+	n = 1;
+    
+    if( n < 1 ) {
+	outputl( "If you specify a parameter to the `next' command, it must "
+		 "be a positive number (the count of moves to step ahead)." );
+	return;
+    }
+    
+    while( n-- && plLastMove->plNext->p ) {
+	plLastMove = plLastMove->plNext;
+	ApplyMoveRecord( plLastMove->p );
+    }
+
+    UpdateGame();
+}
+
 extern void CommandPlay( char *sz ) {
 
     if( fTurn < 0 ) {
@@ -1015,6 +1185,31 @@ extern void CommandPlay( char *sz ) {
 
     if( !ComputerTurn() )
 	TurnDone();
+}
+
+extern void CommandPrevious( char *sz ) {
+
+    int n;
+    char *pch;
+    
+    if( ( pch = NextToken( &sz ) ) )
+	n = ParseNumber( &pch );
+    else
+	n = 1;
+    
+    if( n < 1 ) {
+	outputl( "If you specify a parameter to the `previous' command, it "
+		 "must be a positive number (the count of moves to step "
+		 "back)." );
+	return;
+    }
+
+    while( n-- && plLastMove->plPrev->p )
+	plLastMove = plLastMove->plPrev;
+
+    CalculateBoard();
+
+    UpdateGame();
 }
 
 extern void CommandRedouble( char *sz ) {
