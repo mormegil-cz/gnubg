@@ -13,6 +13,7 @@ char *aszCredits[] = {
     "Olivier Croisille",
     "Ned Cross",
     "Bill Davidson",
+    "Max Durbano",
     "Eric Groleau",
     "Jeff Haferman",
     "Alain Henry",
