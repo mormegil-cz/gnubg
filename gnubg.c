@@ -5907,6 +5907,8 @@ extern void outputl( const char *sz ) {
 #endif
     pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
     puts( pch );
+    if( !isatty( STDOUT_FILENO ) ) 
+       fflush( stdout );
     free( pch );
 }
     
@@ -5994,6 +5996,8 @@ extern void outputerrv( const char *sz, va_list val ) {
 #if USE_GTK || __GLIBC__
     pch = Convert( szFormatted, szTerminalCharset, GNUBG_CHARSET );
     fputs( pch, stderr );
+    if( !isatty( STDOUT_FILENO ) ) 
+       fflush( stdout );
     free( pch );
 #endif
     putc( '\n', stderr );
