@@ -1,3 +1,14 @@
+Fri Jan 25 23:58:28 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* show.c (writeMET): new function. Write met to stdout.
+	* show.c (CommandShowMatchEquityTable): dump both pre- and
+	post-Crawford MET.
+
+	* gtkgame.c (GTKWriteMET): new function. Make table with MET.
+	* gtkgame.c (GTKShowMatchEquityTable): show both pre- and
+	post-Crawford MET (in separate notebook pages).
+
+
 Fri Jan 25 20:21:51 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (GeneralRollout): yet another bugfix... this time

@@ -746,6 +746,31 @@ extern void CommandShowGammonPrice ( char *sz ) {
 
 }
 
+static void
+writeMET ( float aafMET[][ MAXSCORE ],
+           const int nRows, const int nCols, const int fInvert ) {
+
+  int i,j;
+
+  output ( "          " );
+  for ( j = 0; j < nCols; j++ )
+    outputf ( " %3i-away ", j + 1 );
+  output ( "\n" );
+
+  for ( i = 0; i < nRows; i++ ) {
+    
+    outputf ( " %3i-away ", i + 1 );
+    
+    for ( j = 0; j < nCols; j++ )
+      outputf ( " %8.4f ", 
+                fInvert ? 100.0f * ( 1.0 - GET_MET ( i, j, aafMET ) ) :
+                GET_MET ( i, j, aafMET ) * 100.0 );
+    output ( "\n" );
+  }
+  output ( "\n" );
+
+}
+
 
 extern void CommandShowMatchEquityTable ( char *sz ) {
 
@@ -778,23 +803,14 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   outputl( miCurrent.szDescription );
   outputl( "" );
   
-  /* Write column headers */
+  /* write tables */
 
-  output ( "          " );
-  for ( j = 0; j < n; j++ )
-    outputf ( " %3i-away ", j + 1 );
-  output ( "\n" );
+  output ( "Pre-Crawford table:\n\n" );
+  writeMET ( aafMET, n, n, FALSE );
 
-  for ( i = 0; i < n; i++ ) {
-    
-    outputf ( " %3i-away ", i + 1 );
-    
-    for ( j = 0; j < n; j++ )
-      outputf ( " %8.4f ", GET_MET ( i, j, aafMET ) * 100.0 );
-    output ( "\n" );
-  }
-  output ( "\n" );
-
+  output ( "Post-Crawford table:\n\n" );
+  writeMET ( (float (*)[MAXSCORE] ) afMETPostCrawford, 1, n, TRUE );
+  
 }
 
 extern void CommandShowOutput( char *sz ) {

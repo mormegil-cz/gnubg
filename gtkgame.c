@@ -4751,22 +4751,22 @@ extern void GTKRolloutDone( void ) {
     GTKAllowStdin();
 }
 
-extern void GTKShowMatchEquityTable( int n ) {
 
-    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Match equity table",
-					FALSE, NULL, NULL ),
-	*pwBox = gtk_vbox_new( FALSE, 0 ),
-	*pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL ),
-#if HAVE_LIBGTKEXTRA
-	*pwTable = gtk_sheet_new_browser( n, n, "" );
-#else
-	*pwTable = gtk_table_new( n + 1, n + 1, TRUE );
-#endif
+static GtkWidget 
+*GTKWriteMET ( float aafMET[ MAXSCORE ][ MAXSCORE ],
+               const int nRows, const int nCols, const int fInvert ) {
+
     int i, j;
     char sz[ 16 ];
+    GtkWidget *pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL );
+#if HAVE_LIBGTKEXTRA
+    GtkWidget *pwTable = gtk_sheet_new_browser( nRows, nCols, "" );
+#else
+    GtkWidget *pwTable = gtk_table_new( nRows + 1, nCols + 1, TRUE );
+#endif
+    GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 );
     
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwBox );
+
     gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( miCurrent.szName ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwBox ),
@@ -4775,36 +4775,53 @@ extern void GTKShowMatchEquityTable( int n ) {
     gtk_box_pack_start( GTK_BOX( pwBox ),
                         gtk_label_new( miCurrent.szDescription ),
                         FALSE, FALSE, 4 );
+
     gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );
-    
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
-				    GTK_POLICY_AUTOMATIC,
-				    GTK_POLICY_AUTOMATIC );
+
 #if HAVE_LIBGTKEXTRA
     gtk_container_add( GTK_CONTAINER( pwScrolledWindow ), pwTable );
 #else
     gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(
 	pwScrolledWindow ), pwTable );
 #endif
+
+    /* header for rows */
     
-    for( i = 0; i < n; i++ ) {
+    for( i = 0; i < nCols; i++ ) {
 	sprintf( sz, "%d-away", i + 1 );
 #if HAVE_LIBGTKEXTRA
 	gtk_sheet_row_button_add_label( GTK_SHEET( pwTable ), i, sz );
-	gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
 #else
-	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-				   gtk_label_new( sz ),
-				   0, 1, i + 1, i + 2 );
 	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
 				   gtk_label_new( sz ),
 				   i + 1, i + 2, 0, 1 );
 #endif
     }
+
+    /* header for columns */
+
+    for( i = 0; i < nRows; i++ ) {
+	sprintf( sz, "%d-away", i + 1 );
+#if HAVE_LIBGTKEXTRA
+	gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
+#else
+	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
+				   gtk_label_new( sz ),
+				   0, 1, i + 1, i + 2 );
+#endif
+
+    }
+
+    /* fill out table */
     
-    for( i = 0; i < n; i++ )
-	for( j = 0; j < n; j++ ) {
+    for( i = 0; i < nRows; i++ )
+	for( j = 0; j < nCols; j++ ) {
+
+          if ( fInvert )
+	    sprintf( sz, "%8.4f", GET_MET( j, i, aafMET ) * 100.0f );
+          else
 	    sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
+
 #if HAVE_LIBGTKEXTRA
 	    gtk_sheet_set_cell( GTK_SHEET( pwTable ), i, j, GTK_JUSTIFY_RIGHT,
 				sz );
@@ -4818,6 +4835,37 @@ extern void GTKShowMatchEquityTable( int n ) {
 #if !HAVE_LIBGTKEXTRA
     gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
 #endif
+
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
+				    GTK_POLICY_AUTOMATIC,
+				    GTK_POLICY_AUTOMATIC );
+
+    return pwBox;
+
+}
+
+extern void GTKShowMatchEquityTable( int n ) {
+
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Match equity table",
+                                        FALSE, NULL, NULL );
+    GtkWidget *pwNotebook = gtk_notebook_new ();
+
+
+
+    gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
+  
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                       pwNotebook );
+
+    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                               GTKWriteMET ( aafMET, n, n, FALSE ),
+                               gtk_label_new ( "Pre-Crawford" ) );
+
+    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                               GTKWriteMET ( (float (*)[ MAXSCORE ])
+                                             afMETPostCrawford, n, 1, TRUE ),
+                               gtk_label_new ( "Post-Crawford" ) );
+
     
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );
