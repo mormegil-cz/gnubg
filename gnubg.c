@@ -2985,6 +2985,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     if( optind < argc && *argv[ optind ] )
        CommandLoadMatch( argv[ optind ] );
+
+    fflush( NULL );
     
 #if USE_GTK
     if( fX ) {
