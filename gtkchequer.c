@@ -736,7 +736,7 @@ CreateMoveListTools ( hintdata *phd ) {
                          _("Move the selected move") );
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwTempMap,
-                         _("Show Sho Sengoku Temperatur Map of position "
+                         _("Show Sho Sengoku Temperature Map of position "
                            "after selected move"),
                          "" );
 
