@@ -9751,7 +9751,7 @@ static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
 	RowSet r;
 	char *pch, *query;
 	pch = gtk_editable_get_chars( GTK_EDITABLE(pwQueryText), 0, -1 );
-	if (!strnicmp("select ", pch, strlen("select ")))
+	if (!strncasecmp("select ", pch, strlen("select ")))
 		query = pch + strlen("select ");
 	else
 		query = pch;
