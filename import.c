@@ -908,7 +908,7 @@ isAscending( const int anMove[ 8 ] ) {
       /* not moving off */
       return anMove[ 0 ] < anMove[ 1 ];
     else
-      return anMove[ 0 ] > 18;
+      return anMove[ 0 ] > 17;
   }
   else
     return anMove[ 1 ] < 6;
@@ -967,7 +967,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
                In theory this is only necessary when iPlayer == fInvert,
                but some programs may write incompatible files.
                Joseph's fibs2html is one such program. */
-            
+
             if ( c && isAscending( pmr->n.anMove ) ) {
               /* ascending moves: invert */
               for ( i = 0; i < ( c << 1); ++i ) 
