@@ -57,6 +57,8 @@ details.
     arbitrary threshold
 *** Report equivalent number of games when using variance reduction
 *** Aborted rollouts show the full number of games in outputs
+*** Implement for rollouts the same heuristics used by ComputerTurn for 
+   cube decisions
 ** Extend ParsePosition() to handle some sort of syntax like
   [8/5 6/5] (meaning the position after that move).  FIBS boardstyle 3 output
   might be nice, too.
@@ -178,6 +180,8 @@ details.
 ** Make sure all the buttons in the game record window are also available
   as main menu commands.
 ** The sound setting options page isn't complete yet.
+** Show player on roll on board, e.g., dice cup, arrow, or whatever
+** Optionally show numbers based on who's on roll
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
