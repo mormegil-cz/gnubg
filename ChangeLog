@@ -1,3 +1,7 @@
+Fri Jan 24 14:44:34 2003  Gary Wong  <gtw@gnu.org>
+
+	* set.c (CommandSetHighlightLight): Do not intl'ise command strings.
+
 Thu Jan 23 17:36:02 2003  Gary Wong  <gtw@gnu.org>
 
 	* sound.c (play_file_child): [!USE_GTK] Don't use g_snprintf.

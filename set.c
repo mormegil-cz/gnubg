@@ -1678,8 +1678,8 @@ CommandSetRolloutPlayerChequerplay ( char *sz ) {
 
     szSet = iPlayerSet ? _("Chequer play in rollouts (for player 1)") :
 	_("Chequer play in rollouts (for player 0)");
-    szSetCommand = iPlayerSet ? _("rollout player 1 chequerplay") :
-	_("rollout player 0 chequerplay");
+    szSetCommand = iPlayerSet ? "rollout player 1 chequerplay" :
+	"rollout player 0 chequerplay";
   
     pec[0] = prcSet->aecChequer;
 	pec[1] = prcSet->aecChequer + 1;
@@ -1694,8 +1694,8 @@ CommandSetRolloutPlayerLateChequerplay ( char *sz ) {
     szSet = iPlayerLateSet ? 
 	  _("Chequer play for later moves in rollouts (for player 1)") :
 	_("Chequer play for later moves in rollouts (for player 0)");
-    szSetCommand = iPlayerLateSet ? _("rollout late player 1 chequerplay") :
-	_("rollout late player 0 chequerplay");
+    szSetCommand = iPlayerLateSet ? "rollout late player 1 chequerplay" :
+	"rollout late player 0 chequerplay";
   
     pec[0] = prcSet->aecChequerLate;
 	pec[1] = prcSet->aecChequerLate + 1;
@@ -3545,31 +3545,28 @@ CommandSetHighlight ( char *sz ) {
 extern void
 CommandSetHighlightLight ( char *sz ) {
 
-    szSetCommand = _("highlightcolour light");
+    szSetCommand = "highlightcolour light";
 
-	HighlightIntensity = 0;
-	CommandSetHighlightColour ( sz );
-
+    HighlightIntensity = 0;
+    CommandSetHighlightColour ( sz );
 }
 
 extern void
 CommandSetHighlightMedium ( char *sz ) {
 
-    szSetCommand = _("highlightcolour medium");
-	HighlightIntensity = 1;
-	CommandSetHighlightColour ( sz );
-
-
+    szSetCommand = "highlightcolour medium";
+    
+    HighlightIntensity = 1;
+    CommandSetHighlightColour ( sz );
 }
 
 extern void
 CommandSetHighlightDark ( char *sz ) {
 
-    szSetCommand = _("highlightcolour dark");
-	HighlightIntensity = 2;
-	CommandSetHighlightColour ( sz );
-
-
+    szSetCommand = "highlightcolour dark";
+    
+    HighlightIntensity = 2;
+    CommandSetHighlightColour ( sz );
 }
 
 
