@@ -1,3 +1,8 @@
+Tue May 27 18:04:16 2003  Holger Bochnig  <hbgg@gmx.net>
+
+	* gtkboard.c (board_quick_edit, board_pointer): clicking on dice roll area
+	  in edit mode also sets who's on turn
+
 Sat May 24 22:10:53 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	* configure.in, Makefile.am, m4/Makefile.am: add autoconf stuff for LibArt

@@ -1315,6 +1315,12 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 	return;
     } else if( !dragging && ( n == POINT_DICE || n == POINT_LEFT ||
 			      n == POINT_RIGHT ) ) {
+	if ( n == POINT_LEFT && bd->turn != 0 ) {
+		UserCommand( "set turn 0" );
+	}
+	else if ( n == POINT_RIGHT && bd->turn != 1 ) {
+		UserCommand( "set turn 1" );
+	}
 	GTKSetDice( NULL, 0, NULL );
 	return;
     }
@@ -1548,8 +1554,16 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    /* Clicked on dice; end move. */
 	    bd->drag_point = -1;
 	    
-	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
+	    	int n = board_point_with_border( board, bd, x, y );
+		if ( n == POINT_LEFT && bd->turn != 0 ) {
+			UserCommand( "set turn 0" );
+		}
+		else if ( n == POINT_RIGHT && bd->turn != 1 ) {
+			UserCommand( "set turn 1" );
+		}
 		GTKSetDice( NULL, 0, NULL );
+	    }
 	    else if( event->button.button == 1 )
 		Confirm( bd );
 	    else {
@@ -1576,8 +1590,16 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( bd->playing && bd->dice[ 0 ] <= 0 &&
 	    ( ( bd->drag_point == POINT_RIGHT && bd->turn == 1 ) ||
 	      ( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) ) ) {
-	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
+	    	int n = board_point_with_border( board, bd, x, y );
+		if ( n == POINT_LEFT && bd->turn != 0 ) {
+			UserCommand( "set turn 0" );
+		}
+		else if ( n == POINT_RIGHT && bd->turn != 1 ) {
+			UserCommand( "set turn 1" );
+		}
 		GTKSetDice( NULL, 0, NULL );
+	    }
 	    else {
 		/* NB: the UserCommand() call may cause reentrancies,
 		   so it is vital to reset bd->drag_point first! */
