@@ -758,7 +758,9 @@ static void
 HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                              int fPlayer,
                              evalsetup *pes, cubeinfo *pci,
-                             int fDouble, int fTake ) {
+                             int fDouble, int fTake,
+                             skilltype stDouble,
+                             skilltype stTake ) {
   float ar[ 5 ];
   const char *aszCube[] = {
     NULL, "No double", "Double, take", "Double, pass" };
@@ -767,6 +769,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   float r;
 
   int fActual, fClose, fMissed;
+  int fDisplay;
+  int fAnno = FALSE;
 
   /* check if cube analysis should be printed */
 
@@ -777,19 +781,21 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   fClose = isCloseCubedecision ( arDouble ); 
   fMissed = isMissedDouble ( arDouble, fDouble, pci );
 
-  if ( fActual && ! exsExport.fCubeDisplay ) return;
+  fDisplay = 
+    ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
+    ( fClose && exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ) ||
+    ( fMissed && exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ) ||
+    ( exsExport.afCubeDisplay[ stDouble ] ) ||
+    ( exsExport.afCubeDisplay[ stTake ] );
 
-  if ( fClose &&
-       ! ( exsExport.fCubeDisplay | EXPORT_CUBE_CLOSE | EXPORT_CUBE_ALL ) )
-    return;
-
-  if ( fMissed &&
-       ! ( exsExport.fCubeDisplay | EXPORT_CUBE_MISSED | EXPORT_CUBE_ALL ) )
+  if ( ! fDisplay )
     return;
 
   /* print alerts */
 
   if ( fMissed ) {
+
+    fAnno = TRUE;
 
     /* missed double */
 
@@ -802,7 +808,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       else
         r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
 
-      fprintf ( pf, " (%+7.3f)!</span></p>\n", r );
+      fprintf ( pf, " (%+7.3f)!", r );
+      
+      if ( stDouble != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+
+      fprintf ( pf, "</span></p>\n" );
 
     }
     else {
@@ -815,8 +826,13 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
         r = eq2mwc( arDouble[ OUTPUT_TAKE ], pci ) -
           eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
 
-      fprintf ( pf, " (%+6.3f%%)!</span></p>\n",
-                100.0f * r );
+      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
+      
+      if ( stDouble != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+
+      fprintf ( pf, "</span></p>\n" );
+
     }
 
   }
@@ -824,6 +840,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
 
   if ( fTake && r > 0.0f ) {
+
+    fAnno = TRUE;
 
     /* wrong take */
 
@@ -836,7 +854,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       else
         r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
 
-      fprintf ( pf, " (%+7.3f)!</span></p>\n", r );
+      fprintf ( pf, " (%+7.3f)!", r );
+      
+      if ( stTake != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+
+      fprintf ( pf, "</span></p>\n" );
 
     }
     else {
@@ -848,11 +871,62 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
         r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
           eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
 
-      fprintf ( pf, " (%+6.3f%%)!</span></p>\n",
-                100.0f * r );
+      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
+      
+      if ( stTake != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+
+      fprintf ( pf, "</span></p>\n" );
+
     }
 
   }
+
+  r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
+
+  if ( ! fTake && r > 0.0f ) {
+
+    fAnno = TRUE;
+
+    /* wrong pass */
+
+    fprintf ( pf, "<p><span class=\"blunder\">Alert: wrong pass " );
+
+    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
+
+      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
+        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
+      else
+        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
+
+      fprintf ( pf, " (%+7.3f)!", r );
+      
+      if ( stTake != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+
+      fprintf ( pf, "</span></p>\n" );
+
+    }
+    else {
+
+      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
+        r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
+          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
+      else
+        r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
+          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
+
+      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
+      
+      if ( stTake != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+
+      fprintf ( pf, "</span></p>\n" );
+
+    }
+
+  }
+
 
   if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
     r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ];
@@ -860,6 +934,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ];
 
   if ( fDouble && r > 0.0f ) {
+
+    fAnno = TRUE;
 
     /* wrong double */
 
@@ -872,7 +948,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       else
         r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
 
-      fprintf ( pf, " (%+7.3f)!</span></p>\n", r );
+      fprintf ( pf, " (%+7.3f)!", r );
+      
+      if ( stDouble != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+
+      fprintf ( pf, "</span></p>\n" );
 
     }
     else {
@@ -884,10 +965,28 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
         r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
           eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
 
-      fprintf ( pf, " (%+6.3f%%)!</span></p>\n",
-                100.0f * r );
+      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
+      
+      if ( stDouble != SKILL_NONE )
+        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+
+      fprintf ( pf, "</span></p>\n" );
 
     }
+
+  }
+
+  if ( ( stDouble != SKILL_NONE || stTake != SKILL_NONE ) && ! fAnno ) {
+    
+    if ( stDouble != SKILL_NONE )
+      fprintf ( pf, 
+                "<p><span class=\"blunder\">Alert: double decision marked %s"
+                "</span></p>\n", aszSkillType[ stDouble ] );
+
+    if ( stTake != SKILL_NONE )
+      fprintf ( pf, 
+                "<p><span class=\"blunder\">Alert: take decision marked %s"
+                "</span></p>\n", aszSkillType[ stTake ] );
 
   }
 
@@ -904,6 +1003,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   /* ply & cubeless equity */
 
   /* FIXME: include in movenormal and movedouble */
+
+  /* FIXME: about parameters if exsExport.afCubeParameters */
 
   fprintf ( pf, "<tr>" );
 
@@ -938,26 +1039,30 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* percentages */
 
-  /* FIXME: include in movenormal and movedouble */
+  if ( exsExport.fCubeDetailProb ) {
 
-  ar[ 0 ] = ar[ 1 ] = ar[ 2 ] = ar[ 3 ] = ar[ 4 ] = 0;
+    /* FIXME: include in movenormal and movedouble */
 
-  fprintf ( pf,
-            "<tr><td>&nbsp;</td>"
-            "<td colspan=\"3\">"
-            "%s%s%6.2f%% "
-            "%s%s%6.2f%% "
-            "%s%s%6.2f%% "
-            "%s%s%6.2f%% "
-            "%s%s%6.2f%% "
-            "%s%s%6.2f%% "
-            "</td></tr>\n",
-            FORMATHTMLPROB ( ar[ OUTPUT_WINBACKGAMMON ] ),
-            FORMATHTMLPROB ( ar[ OUTPUT_WINGAMMON ] ),
-            FORMATHTMLPROB ( ar[ OUTPUT_WIN ] ),
-            FORMATHTMLPROB ( 1.0 - ar[ OUTPUT_WIN ] ),
-            FORMATHTMLPROB ( ar [ OUTPUT_LOSEGAMMON ] ),
-            FORMATHTMLPROB ( ar [ OUTPUT_LOSEBACKGAMMON ]) );
+    ar[ 0 ] = ar[ 1 ] = ar[ 2 ] = ar[ 3 ] = ar[ 4 ] = 0;
+
+    fprintf ( pf,
+              "<tr><td>&nbsp;</td>"
+              "<td colspan=\"3\">"
+              "%s%s%6.2f%% "
+              "%s%s%6.2f%% "
+              "%s%s%6.2f%% "
+              "%s%s%6.2f%% "
+              "%s%s%6.2f%% "
+              "%s%s%6.2f%% "
+              "</td></tr>\n",
+              FORMATHTMLPROB ( ar[ OUTPUT_WINBACKGAMMON ] ),
+              FORMATHTMLPROB ( ar[ OUTPUT_WINGAMMON ] ),
+              FORMATHTMLPROB ( ar[ OUTPUT_WIN ] ),
+              FORMATHTMLPROB ( 1.0 - ar[ OUTPUT_WIN ] ),
+              FORMATHTMLPROB ( ar [ OUTPUT_LOSEGAMMON ] ),
+              FORMATHTMLPROB ( ar [ OUTPUT_LOSEBACKGAMMON ]) );
+
+  }
 
   /* equities */
 
@@ -1039,19 +1144,29 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     /* cube analysis from move */
 
     HTMLPrintCubeAnalysisTable ( pf, pmr->n.arDouble, pmr->n.fPlayer,
-                                 &pmr->n.esDouble, &ci, FALSE, FALSE );
+                                 &pmr->n.esDouble, &ci, FALSE, FALSE,
+                                 pmr->n.stCube, SKILL_NONE );
 
     break;
 
   case MOVE_DOUBLE:
+
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, pmr->d.fPlayer,
+                                 &pmr->d.esDouble, &ci, TRUE, FALSE,
+                                 pmr->d.st, SKILL_NONE );
+
+    break;
+
   case MOVE_TAKE:
   case MOVE_DROP:
 
     /* cube analysis from double, {take, drop, beaver} */
 
     HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, pmr->d.fPlayer,
-                                 &pmr->n.esDouble, &ci, TRUE, 
-                                 pmr->mt == MOVE_TAKE );
+                                 &pmr->d.esDouble, &ci, TRUE, 
+                                 pmr->mt == MOVE_TAKE,
+                                 SKILL_NONE, /* FIXME: skill from prev. cube */
+                                 pmr->d.st );
 
     break;
 
@@ -1093,7 +1208,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   /* check if move should be printed */
 
-  /* FIXME: use skill and exsExport.fMovesDisplay */
+  if ( ! exsExport.afMovesDisplay [ pmr->n.stMove ] )
+    return;
 
   /* print alerts */
 
@@ -1272,17 +1388,9 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
        * Write row with move parameters 
        */
 
-      if ( exsExport.fMovesParameters ) {
+      if ( exsExport.afMovesParameters [ pmr->n.ml.amMoves[ i ].esMove.et ] ) {
 
         evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
-
-        if ( pes->et == EVAL_NONE ) break;
-        if ( pes->et == EVAL_EVAL &&
-             ! ( exsExport.fMovesParameters | EXPORT_MOVES_EVAL |
-                 EXPORT_MOVES_ALL ) ) break;
-        if ( pes->et == EVAL_ROLLOUT &&
-             ! ( exsExport.fMovesParameters | EXPORT_MOVES_ROLLOUT |
-                 EXPORT_MOVES_ALL ) ) break;
 
         fprintf ( pf, "<tr %s>\n",
                   ( i == pmr->n.iMove ) ? "class=\"movethemove\"" : "" );
