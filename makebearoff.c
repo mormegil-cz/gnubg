@@ -36,22 +36,22 @@
 #include "i18n.h"
 #include "bearoff.h"
 
-typedef struct _hashent {
+typedef struct _xhashent {
   void *p;
   unsigned int iKey;
-} hashent;
+} xhashent;
 
-typedef struct _hash {
+typedef struct _xhash {
   unsigned long int nQueries, nHits, nEntries, nOverwrites;
   int nHashSize;
-  hashent *phe;
-} hash;
+  xhashent *phe;
+} xhash;
 
 
 static long cLookup;
 
 static long int
-HashPosition ( hash *ph, const int iKey ) {
+XhashPosition ( xhash *ph, const int iKey ) {
 
   return iKey % ph->nHashSize;
 
@@ -59,9 +59,9 @@ HashPosition ( hash *ph, const int iKey ) {
 
 
 static void
-HashStatus ( hash *ph ) {
+XhashStatus ( xhash *ph ) {
 
-  fprintf ( stderr, "Hash status:\n" );
+  fprintf ( stderr, "Xhash status:\n" );
   fprintf ( stderr, "Size:    %d elements\n", ph->nHashSize );
   fprintf ( stderr, "Queries: %lu (hits: %ld)\n", ph->nQueries, ph->nHits );
   fprintf ( stderr, "Entries: %lu (overwrites: %lu)\n",
@@ -72,13 +72,13 @@ HashStatus ( hash *ph ) {
 
 
 static int
-HashCreate ( hash *ph, const int nHashSize ) {
+XhashCreate ( xhash *ph, const int nHashSize ) {
 
   int i;
 
   if ( ! ( ph->phe =
-           (hashent *) malloc ( nHashSize * sizeof ( hashent ) ) ) ) {
-    perror ( "hashtable" );
+           (xhashent *) malloc ( nHashSize * sizeof ( xhashent ) ) ) ) {
+    perror ( "xhashtable" );
     return -1;
   }
 
@@ -97,7 +97,7 @@ HashCreate ( hash *ph, const int nHashSize ) {
 
 
 static void
-HashDestroy ( hash *ph ) {
+XhashDestroy ( xhash *ph ) {
 
   int i;
 
@@ -109,10 +109,10 @@ HashDestroy ( hash *ph ) {
 
 
 static void
-HashAdd ( hash *ph, const unsigned int iKey,
+XhashAdd ( xhash *ph, const unsigned int iKey,
           const void *data, const int size ) {
 
-  int l = HashPosition ( ph, iKey );
+  int l = XhashPosition ( ph, iKey );
 
   if ( ph->phe[ l ].p ) {
     /* occupied */
@@ -134,11 +134,11 @@ HashAdd ( hash *ph, const unsigned int iKey,
 
 
 static void *
-HashLookup ( hash *ph, const unsigned int iKey,
+XhashLookup ( xhash *ph, const unsigned int iKey,
              void **data ) {
 
 
-  int l = HashPosition ( ph, iKey );
+  int l = XhashPosition ( ph, iKey );
 
   ++ph->nQueries;
 
@@ -342,7 +342,7 @@ RollsOS ( const unsigned short int aus[ 32 ] ) {
 static void BearOff( int nId, int nPoints, 
                      unsigned short int aOutProb[ 64 ],
                      const int fGammon,
-                     hash *ph, bearoffcontext *pbc,
+                     xhash *ph, bearoffcontext *pbc,
                      const int fCompress, 
                      FILE *pfOutput, FILE *pfTmp ) {
 
@@ -422,12 +422,12 @@ static void BearOff( int nId, int nPoints,
                   pusj[ 32 ] = 0xFFFF;
 
                 }
-                else if ( ! HashLookup ( ph, j, (void **) &pusj ) ) {
+                else if ( ! XhashLookup ( ph, j, (void **) &pusj ) ) {
                   /* look up in file generated so far */
                   OSLookup ( j, nPoints, pusj = ausj, fGammon, fCompress,
                              pfOutput, pfTmp );
 
-                  HashAdd ( ph, j, pusj, fGammon ? 128 : 64 );
+                  XhashAdd ( ph, j, pusj, fGammon ? 128 : 64 );
                 }
 
                 /* find best move to win */
@@ -590,21 +590,21 @@ generate_os ( const int nOS, const int fHeader,
   int i;
   int n;
   unsigned short int aus[ 64 ];
-  hash h;
+  xhash h;
   FILE *pfTmp = NULL;
   time_t t;
   unsigned int npos;
   char szTmp[ 11 ];
 
-  /* initialise hash */
+  /* initialise xhash */
 
-  if ( HashCreate ( &h, nHashSize /  ( fGammon ? 128 : 64 ) ) ) {
-    fprintf ( stderr, _("Error creating hash with %d elements\n"),
+  if ( XhashCreate ( &h, nHashSize /  ( fGammon ? 128 : 64 ) ) ) {
+    fprintf ( stderr, _("Error creating xhash with %d elements\n"),
               nHashSize /  fGammon ? 128 : 64 );
     exit(2);
   }
 
-  HashStatus ( &h );
+  XhashStatus ( &h );
 
   /* write header */
 
@@ -648,7 +648,7 @@ generate_os ( const int nOS, const int fHeader,
     if ( fGammon )
       WriteOS ( aus + 32, fCompress, fCompress ? pfTmp : output );
 
-    HashAdd ( &h, i, aus, fGammon ? 128 : 64 );
+    XhashAdd ( &h, i, aus, fGammon ? 128 : 64 );
 
     if ( fCompress ) 
       WriteIndex ( &npos, aus, fGammon, output );
@@ -675,9 +675,9 @@ generate_os ( const int nOS, const int fHeader,
 
   putc ( '\n', stderr );
   
-  HashStatus ( &h );
+  XhashStatus ( &h );
 
-  HashDestroy ( &h );
+  XhashDestroy ( &h );
 
   return 0;
 
@@ -685,7 +685,7 @@ generate_os ( const int nOS, const int fHeader,
 
 
 static void
-NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
+NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
             bearoffcontext *pbc) {
 
   int d0, d1;
@@ -757,9 +757,9 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
 
         j = PositionBearoff ( anBoardTemp[ 1 ], nPoints );
 
-        if ( ! HashLookup ( ph, j, (void **) &prj ) ) {
+        if ( ! XhashLookup ( ph, j, (void **) &prj ) ) {
           NDBearoff ( j, nPoints, prj = arj, ph, pbc );
-          HashAdd ( ph, j, prj, 16 );
+          XhashAdd ( ph, j, prj, 16 );
         }
 
         /* find best move to win */
@@ -828,14 +828,14 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
   char sz[ 41 ];
   float ar[ 4 ];
 
-  hash h;
+  xhash h;
  
-  if ( HashCreate ( &h, nHashSize / ( 4 * sizeof ( float ) ) ) ) {
+  if ( XhashCreate ( &h, nHashSize / ( 4 * sizeof ( float ) ) ) ) {
     fprintf ( stderr, "Error creating cache\n" );
     return;
   }
 
-  HashStatus ( &h );
+  XhashStatus ( &h );
 
   if ( fHeader ) {
     sprintf ( sz, "gnubg-OS-%02d-15-1-0-1xxxxxxxxxxxxxxxxxxx\n", nPoints );
@@ -852,7 +852,7 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
     for ( j = 0; j < 4; ++j )
       WriteFloat ( ar[ j ], output );
 
-    HashAdd ( &h, i, ar, 16 );
+    XhashAdd ( &h, i, ar, 16 );
 
     if( !( i % 100 ) )
       fprintf( stderr, "1:%d/%d        \r", i, n );
@@ -861,9 +861,9 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
 
   putc ( '\n', stderr );
 
-  HashStatus ( &h );
+  XhashStatus ( &h );
 
-  HashDestroy ( &h );
+  XhashDestroy ( &h );
 
 }
 
@@ -975,7 +975,7 @@ static void BearOff2( int nUs, int nThem,
                       const int nTSP, const int nTSC,
                       short int asiEquity[ 4 ],
                       const int n, const int fCubeful,
-                      hash *ph, bearoffcontext *pbc, FILE *pfTmp ) {
+                      xhash *ph, bearoffcontext *pbc, FILE *pfTmp ) {
 
     int i, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ], anBoardTemp[ 2 ][ 25 ];
     movelist ml;
@@ -1057,11 +1057,11 @@ static void BearOff2( int nUs, int nThem,
                   psij = asij;
                   asij[ 0 ] = asij[ 1 ] = asij[ 2 ] = asij[ 3 ] = EQUITY_M1;
                 }
-                if ( ! HashLookup ( ph, n * nThem + j, (void **) &psij ) ) {
+                if ( ! XhashLookup ( ph, n * nThem + j, (void **) &psij ) ) {
                   /* lookup in file */
                   TSLookup ( nThem, j, nTSP, nTSC, psij = asij, n,
                              fCubeful, pfTmp );
-                  HashAdd ( ph, n * nThem + j, psij, fCubeful ? 8 : 2 );
+                  XhashAdd ( ph, n * nThem + j, psij, fCubeful ? 8 : 2 );
                 }
 
                 /* cubeless */
@@ -1143,7 +1143,7 @@ generate_ts ( const int nTSP, const int nTSC,
     int iPos;
     int n;
     short int asiEquity[ 4 ];
-    hash h;
+    xhash h;
     char szTmp[ 11 ];
     FILE *pfTmp;
     time_t t;
@@ -1156,15 +1156,15 @@ generate_ts ( const int nTSP, const int nTSC,
       exit ( 2 );
     }
 
-    /* initialise hash */
+    /* initialise xhash */
     
-    if ( HashCreate ( &h, nHashSize /  ( fCubeful ? 8 : 2 ) ) ) {
-      fprintf ( stderr, _("Error creating hash with %d elements\n"),
+    if ( XhashCreate ( &h, nHashSize /  ( fCubeful ? 8 : 2 ) ) ) {
+      fprintf ( stderr, _("Error creating xhash with %d elements\n"),
                 nHashSize /  fCubeful ? 8 : 2 );
       exit(2);
     }
     
-    HashStatus ( &h );
+    XhashStatus ( &h );
 
     /* write header information */
 
@@ -1192,7 +1192,7 @@ generate_ts ( const int nTSP, const int nTSC,
         for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
           WriteEquity ( pfTmp, asiEquity[ k ] );
 
-        HashAdd ( &h, ( i - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
+        XhashAdd ( &h, ( i - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
 
       }
       
@@ -1211,7 +1211,7 @@ generate_ts ( const int nTSP, const int nTSC,
         for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
           WriteEquity ( pfTmp, asiEquity[ k ] );
         
-        HashAdd ( &h, ( i + n - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
+        XhashAdd ( &h, ( i + n - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
         
       }
       
@@ -1221,9 +1221,9 @@ generate_ts ( const int nTSP, const int nTSC,
 
     putc ( '\n', stderr );
     
-    HashStatus ( &h );
+    XhashStatus ( &h );
     
-    HashDestroy ( &h );
+    XhashDestroy ( &h );
     
     /* sort file from ordering:
 
@@ -1263,7 +1263,7 @@ usage ( char *arg0 ) {
            "  -t, --two-sided PxC Number of points and number of chequers\n"
            "                      for two-sided database\n"
            "  -o, --one-sided P   Number of points for one-sided database\n"
-           "  -s, --hash-size N   Use cache of size N bytes\n"
+           "  -s, --xhash-size N   Use cache of size N bytes\n"
            "  -O, --old-bearoff filename\n"
            "                      Reuse already generated bearoff database\n"
            "  -H, --no-header     Do not write header\n"
@@ -1313,7 +1313,7 @@ extern int main( int argc, char **argv ) {
   static struct option ao[] = {
     { "two-sided", required_argument, NULL, 't' },
     { "one-sided", required_argument, NULL, 'o' },
-    { "hash-size", required_argument, NULL, 's' },
+    { "xhash-size", required_argument, NULL, 's' },
     { "old-bearoff", required_argument, NULL, 'O' },
     { "no-header", no_argument, NULL, 'H' },
     { "no-cubeful", no_argument, NULL, 'C' },
@@ -1334,7 +1334,7 @@ extern int main( int argc, char **argv ) {
     case 'o': /* size of one-sided */
       nOS = atoi ( optarg );
       break;
-    case 's': /* hash size */
+    case 's': /* xhash size */
       nHashSize = atoi ( optarg );
       break;
     case 'O': /* old database */
@@ -1491,7 +1491,7 @@ extern int main( int argc, char **argv ) {
                 "Number of one-sided positions: %12d\n"
                 "Total number of positions    : %12d\n"
                 "Size of resulting file       : %.0f bytes (%.1f MB)\n"
-                "Size of hash                 : %12d bytes\n"
+                "Size of xhash                 : %12d bytes\n"
                 "Reuse old bearoff database   : %s %s\n"),
               nTSP, nTSC,
               fCubeful ? _("cubeless and cubeful") : _("cubeless only"),
