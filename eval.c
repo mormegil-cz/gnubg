@@ -2080,7 +2080,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	if( EvaluatePositionCache( anBoard, arOutput, &ci, pec, i ) < 0 )
 	    return -1;
 	if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, pec, i ,
-				      EVAL_DOUBLE | EVAL_NODOUBLE ) < 0 )
+				      EVAL_BOTH ) < 0 )
 	  return -1;
 
 	if( !i )
@@ -2354,10 +2354,11 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       nPlies > 0 ) {
     /* internal node; recurse */
     
-    float pr[ 4 ];
+    float pr[ 4 ], arDH[ NUM_OUTPUTS ], rDoublePoint;
     int anBoardNew[ 2 ][ 25 ];
     int anMove[ 8 ];
-    int fNewCubeOwner, fNewMove;
+    int fNewCubeOwner, fNewMove, fTempEvalFlag;
+    evalcontext ecDH = {0, 0, 0 };
 
     cubeinfo cix;
 
@@ -2394,8 +2395,34 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	
 	  SwapSides( anBoardNew );
 
+	  /* 
+	   * check if were in double window 
+	   */
+
+	  /* do 0-ply evaluations */
+
+	  if( EvaluatePosition( anBoardNew, arDH,  &cix, 
+				&ecDH ) )
+	    return -1;
+
+	  /*
+	  printf ( "My winning chance: %7.4f %7.4f %7.4f %7.4f %7.4f\n", 
+		   arDH[ 0 ], arDH[ 1 ], arDH[ 2 ],
+		   arDH[ 3 ], arDH[ 4 ] );
+	  */
+
+	  /* find dead-cube doubling point */
+
+	  GetDoublePointDeadCube ( arDH, anScore, 
+				   nMatchTo, &cix, &rDoublePoint );
+	  
+	  if ( arDH[ 0 ] > rDoublePoint )
+	    fTempEvalFlag = EVAL_BOTH; /* we might double */
+	  else
+	    fTempEvalFlag = EVAL_NODOUBLE; /* we'll never double */
+
 	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
-				       nPlies - 1, EVAL_BOTH ) ) 
+				       nPlies - 1, fTempEvalFlag ) ) 
 	    return -1;
 
 	  prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
