@@ -21,6 +21,9 @@
 
 #include "config.h"
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
@@ -443,9 +446,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       int iTurn, int iGame,
                       cubeinfo aci[], int cci, rolloutcontext *prc ) {
   int anDice [ 2 ];
-  cubeinfo *pciLocal, *pci;
+  cubeinfo *pci;
   cubedecision cd;
-  int *pfFinished, *pf, ici;
+  int *pf, ici;
 
   float arCf[ NUM_CUBEFUL_OUTPUTS ];
 
@@ -454,10 +457,17 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
   /* Make local copy of cubeinfo struct, since it
      may be modified */
-
-  (cubeinfo *) pciLocal = malloc ( cci * sizeof ( cubeinfo ) );
-  (int *) pfFinished = malloc ( cci * sizeof ( int ) );
-
+#if __GNUC__
+  cubeinfo pciLocal[ cci ];
+  int pfFinished[ cci ];
+#elif HAVE_ALLOCA
+  cubeinfo *pciLocal = alloca( cci * sizeof ( cubeinfo ) );
+  int *pfFinished = alloca( cci * sizeof( int ) );
+#else
+  cubeinfo pciLocal[ MAX_ROLLOUT_CUBEINFO ];
+  int pfFinished[ MAX_ROLLOUT_CUBEINFO ];
+#endif
+  
   for ( ici = 0; ici < cci; ici++ )
     pfFinished[ ici ] = TRUE;
 
@@ -484,8 +494,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           switch ( cd ) {
 
           case DOUBLE_TAKE:
-
-            SetCubeInfo ( pci, 2 * pci->nCube, ! fMove, fMove, pci->nMatchTo,
+	      /* FIXME this shouldn't be using the global ms.fMove, should
+		 it? */
+            SetCubeInfo ( pci, 2 * pci->nCube, !ms.fMove, ms.fMove, pci->nMatchTo,
                           pci->anScore, pci->fCrawford, pci->fJacoby,
                           pci->fBeavers);
             break;
@@ -528,11 +539,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
     /* Chequer play */
 
-    if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 ) {
-      free ( pciLocal );
+    if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
       return -1;
-    }
-
 
     for ( ici = 0, pci = pciLocal, pf = pfFinished;
           ici < cci; ici++, pci++, pf++ ) {
@@ -546,11 +554,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         if( fAction )
           fnAction();
     
-        if( fInterrupt ) {
-          free ( pciLocal );
+        if( fInterrupt )
           return -1;
-        }
-
 
         /* Invert board and more */
 	
@@ -613,9 +618,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       
     }
 
-    free ( pciLocal );
-    free ( pfFinished );
-    
     return 0;
 }
 
@@ -627,13 +629,36 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
                    rolloutcontext *prc,
                    cubeinfo aci[], int cci, int fInvert ) {
 
-  int (*aanBoardEval)[ 2 ][ 25 ];
-  float (*aar)[ NUM_ROLLOUT_OUTPUTS ];
-  float (*aarMu)[ NUM_ROLLOUT_OUTPUTS ];
-  float (*aarSigma)[ NUM_ROLLOUT_OUTPUTS ];
-  double (*aarResult)[ NUM_ROLLOUT_OUTPUTS ];
-  double (*aarVariance)[ NUM_ROLLOUT_OUTPUTS ];
-
+#if __GNUC__
+  int aanBoardEval[ cci ][ 2 ][ 25 ];
+  float aar[ cci ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarMu[ cci ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarSigma[ cci ][ NUM_ROLLOUT_OUTPUTS ];
+  double aarResult[ cci ][ NUM_ROLLOUT_OUTPUTS ];
+  double aarVariance[ cci ][ NUM_ROLLOUT_OUTPUTS ];
+#elif HAVE_ALLOCA
+  int ( *aanBoardEval )[ 2 ][ 25 ] = alloca( cci * 50 * sizeof int );
+  float ( *aar )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
+						  sizeof float );
+  float ( *aarMu )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
+						    sizeof float );
+  float ( *aarSigma )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci *
+						       NUM_ROLLOUT_OUTPUTS *
+						       sizeof float );
+  double ( *aarResult )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci *
+							 NUM_ROLLOUT_OUTPUTS *
+							 sizeof double );
+  double ( *aarVariance )[ NUM_ROLLOUT_OUTPUTS ] = alloca(
+      cci * NUM_ROLLOUT_OUTPUTS * sizeof double );
+#else
+  int aanBoardEval[ MAX_ROLLOUT_CUBEINFO ][ 2 ][ 25 ];
+  float aar[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarMu[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarSigma[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
+  double aarResult[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
+  double aarVariance[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
+#endif
+  
   int i, j, ici;
   int anBoardOrig[ 2 ][ 25 ];
 
@@ -641,22 +666,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
 
   int cGames = prc->nTrials;
     
-  /* FIXME: use alloca! */
-
-  aanBoardEval = malloc ( cci * 50 * sizeof ( int ) );
-
-  aar =
-    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-  aarMu =
-    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-  aarSigma =
-    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-
-  aarResult =
-    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
-  aarVariance =
-    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
-
   if( cGames < 1 ) {
     errno = EINVAL;
     return -1;
@@ -822,15 +831,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
       outputc( '\r' );
       fflush( stdout );
   }
-
-  free ( aanBoardEval );
-
-  free ( aar );
-  free ( aarMu );
-  free ( aarSigma );
-
-  free ( aarResult );
-  free ( aarVariance );
 
   return cGames;
 }
