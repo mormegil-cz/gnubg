@@ -49,7 +49,7 @@
 #endif
 
 #ifdef WIN32
-#include "windoes.h" /* for PlaySound */
+#include "windows.h" /* for PlaySound */
 #endif
 
 #include "glib.h"
