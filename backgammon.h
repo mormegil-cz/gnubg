@@ -27,6 +27,7 @@
 #include <list.h>
 #include <math.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include "analysis.h"
 #include "eval.h"
@@ -92,13 +93,17 @@ typedef enum _gnubgwindow {
   WINDOW_ANNOTATION,
   WINDOW_HINT,
   WINDOW_MESSAGE,
-  NUM_WINDOWS 
+  WINDOW_COMMAND,
+  WINDOW_THEORY,
+  NUM_WINDOWS
 } gnubgwindow;
 
 typedef struct _windowgeometry {
   int nWidth, nHeight;
   int nPosX, nPosY;
 } windowgeometry;
+
+typedef void (*panelFun)();
 
 typedef struct _windowobject {
 	char* winName;
@@ -107,12 +112,23 @@ typedef struct _windowobject {
 	int dockable;
 	int undockable;
 #if USE_GTK
+	panelFun showFun;
+	panelFun hideFun;
 	GtkWidget* pwWin;
 #endif
 	windowgeometry wg;
 } windowobject;
 
 extern windowobject woPanel[NUM_WINDOWS];
+extern int fDisplayPanels;
+
+extern void SaveWindowSettings(FILE* pf);
+extern void HidePanel(gnubgwindow window);
+extern void getWindowGeometry(gnubgwindow window);
+extern int PanelShowing(gnubgwindow window);
+
+extern int GetPanelSize();
+extern void SetPanelWidth(int size);
 
 typedef struct _monitor {
 #if USE_GTK
@@ -911,6 +927,7 @@ extern void CommandAccept( char * ),
     CommandSetCheatPlayer ( char * ),
     CommandSetCheatPlayerRoll ( char * ),
     CommandSetClockwise( char * ),
+    CommandSetCommandWindow ( char * ),
     CommandSetConfirmNew( char * ),
     CommandSetConfirmSave( char * ),
     CommandSetCrawford( char * ),
@@ -988,10 +1005,12 @@ extern void CommandAccept( char * ),
     CommandSetExportHtmlSize ( char *),
     CommandSetGameList ( char * ),
     CommandSetGeometryAnalysis( char * ),
+    CommandSetGeometryCommand ( char * ),
     CommandSetGeometryGame ( char * ),
     CommandSetGeometryHint ( char * ),
     CommandSetGeometryMain ( char * ),
     CommandSetGeometryMessage ( char * ),
+    CommandSetGeometryTheory ( char * ),
     CommandSetGeometryWidth ( char * ),
     CommandSetGeometryHeight ( char * ),
     CommandSetGeometryPosX ( char * ),
@@ -1032,6 +1051,7 @@ extern void CommandAccept( char * ),
     CommandSetOutputRawboard( char * ),
     CommandSetOutputWinPC( char * ),
     CommandSetOutputErrorRateFactor( char * ),
+    CommandSetPanelWidth( char * ),
     CommandSetPathEPS( char * ),
     CommandSetPathSGF( char * ),
     CommandSetPathLaTeX( char * ),
@@ -1168,6 +1188,7 @@ extern void CommandAccept( char * ),
     CommandSetTCUnname( char * ),
     CommandSetTimeControl( char * ),
 #endif
+    CommandSetTheoryWindow ( char * ),
     CommandSetToolbar( char * ),
     CommandSetTrainingAlpha( char * ),
     CommandSetTrainingAnneal( char * ),
@@ -1264,8 +1285,6 @@ extern void CommandAccept( char * ),
 
 
 extern int fTutor, fTutorCube, fTutorChequer, nTutorSkillCurrent;
-
-extern int fDisplayPanels;
 
 extern int GiveAdvice ( skilltype Skill );
 extern skilltype TutorSkill;

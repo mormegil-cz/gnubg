@@ -1,3 +1,8 @@
+Fri Sep 10 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.c, gtkgame.c, gnubg.c, gtkpanels.c: Added command and theory
+	panels (test) and slider for panels.
+
 Thu Sep 9 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c, render.*, gnubg.c: Small memory leaks, uninitialized

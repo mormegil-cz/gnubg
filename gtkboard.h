@@ -325,6 +325,9 @@ extern void RestrictiveDrawBoardNumbers(BoardData* bd);
 
 extern int animate_player, *animate_move_list, animation_finished;
 
+enum TheoryTypes{TT_PIPCOUNT = 1, TT_EPC = 2, TT_RETURNHITS = 4, TT_KLEINCOUNT = 8};
+void UpdateTheoryData(BoardData* bd, int UpdateTypes, int points[2][25]);
+
 extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] );
 extern void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] );
 extern void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] );

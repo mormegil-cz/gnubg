@@ -528,7 +528,7 @@ void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
-static char *
+extern char *
 ReturnHits( int anBoard[ 2 ][ 25 ] ) {
 
   int aiHit[ 15 ];
@@ -664,7 +664,7 @@ void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
   }
 
-
+  UpdateTheoryData(bd, TT_PIPCOUNT | TT_EPC | TT_KLEINCOUNT, points);
 }
 
 #if USE_TIMECONTROL
@@ -738,6 +738,7 @@ int update_move(BoardData *bd)
             }
 
         /* show number of return hits */
+        UpdateTheoryData(bd, TT_RETURNHITS, ms.anBoard);
 
         if ( bd->valid_move ) {
           int anBoard[ 2 ][ 25 ];
@@ -752,6 +753,7 @@ int update_move(BoardData *bd)
             outputl( "" ); 
             outputx();
           }
+
         }
 
     }

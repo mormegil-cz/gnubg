@@ -185,6 +185,109 @@ char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
+int fDisplayPanels = TRUE;
+int fDockPanels = TRUE;
+
+#if USE_GTK
+extern void ShowAnalysis();
+extern void DeleteAnalysis();
+extern void ShowAnnotation();
+extern void DeleteAnnotation();
+extern void ShowGameWindow();
+extern void DeleteGame();
+extern void ShowMessage();
+extern void DeleteMessage();
+extern void ShowTheoryWindow();
+extern void DeleteTheoryWindow();
+extern void ShowCommandWindow();
+extern void DeleteCommandWindow();
+#endif
+
+/* Set up window and panel details */
+windowobject woPanel[NUM_WINDOWS] =
+{
+	/* main window */
+	{
+		"main",
+		TRUE, FALSE, FALSE, FALSE,
+#if USE_GTK
+		NULL, NULL,
+		0,
+#endif
+		{0, 0, 20, 20}
+	},
+	/* game list */
+	{
+		"game",
+		TRUE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowGameWindow, DeleteGame,
+		0,
+#endif
+		{ 250, 200, 20, 20 }
+	},
+	/* analysis */
+	{
+		"analysis",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowAnalysis, DeleteAnalysis,
+		0,
+#endif
+		{ 0, 400, 20, 20 }
+	},
+	/* annotation */
+	{
+		"annotation",
+		FALSE, TRUE, TRUE, FALSE,
+#if USE_GTK
+		ShowAnnotation, DeleteAnnotation,
+		0,
+#endif
+		{ 0, 400, 20, 20 }
+	},
+	/* hint */
+	{
+		"hint",
+		FALSE, FALSE, FALSE, FALSE,
+#if USE_GTK
+		NULL, NULL,
+		0,
+#endif
+		{ 0, 450, 20, 20 }
+	},
+	/* message */
+	{
+		"message",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowMessage, DeleteMessage,
+		0,
+#endif
+		{ 0, 500, 20, 20 }
+	},
+	/* command */
+	{
+		"command",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowCommandWindow, DeleteCommandWindow,
+		0,
+#endif
+		{ 0, 0, 20, 20 }
+	}, 
+	/* theory */
+	{
+		"theory",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		ShowTheoryWindow, DeleteTheoryWindow,
+		0,
+#endif
+		{ 0, 0, 20, 20 }
+	}
+};
+
 matchstate ms = {
     {{0}, {0}}, /* anBoard */
     {0}, /* anDice */
@@ -227,8 +330,6 @@ int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
-int fDisplayPanels = TRUE;
-int fDockPanels = TRUE;
 int nThreadPriority = 0;
 int fCheat = FALSE;
 int afCheatRoll[ 2 ] = { 0, 0 };
@@ -465,65 +566,6 @@ storedcube  sc;
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP, MOVEFILTER },
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER } 
-};
-
-/* Set up window and panel details */
-windowobject woPanel[NUM_WINDOWS] =
-{
-	/* main window */
-	{
-		"main",
-		TRUE, FALSE, FALSE, FALSE,
-#if USE_GTK
-		0,
-#endif
-		{0, 0, 20, 20}
-	},
-	/* game list */
-	{
-		"game",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		0,
-#endif
-		{ 250, 200, 20, 20 }
-	},
-	/* analysis */
-	{
-		"analysis",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		0,
-#endif
-		{ 0, 400, 20, 20 }
-	},
-	/* annotation */
-	{
-		"annotation",
-		FALSE, TRUE, TRUE, FALSE,
-#if USE_GTK
-		0,
-#endif
-		{ 0, 400, 20, 20 }
-	},
-	/* hint */
-	{
-		"hint",
-		FALSE, FALSE, FALSE, FALSE,
-#if USE_GTK
-		0,
-#endif
-		{ 0, 0, 20, 20 }
-	},
-	/* message */
-	{
-		"message",
-		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
-		0,
-#endif
-		{ 0, 0, 20, 20 }
-	}
 };
 
 /* Usage strings */
@@ -1116,6 +1158,8 @@ command cER = {
 }, acSetGeometry[] = {
     { "analysis", CommandSetGeometryAnalysis,
       N_("set geometry of analysis window"), NULL, acSetGeometryValues },
+    { "command", CommandSetGeometryCommand,
+      N_("set geometry of command window"), NULL, acSetGeometryValues },
     { "game", CommandSetGeometryGame,
       N_("set geometry of game-list window"), NULL, acSetGeometryValues },
     { "hint", CommandSetGeometryHint,
@@ -1124,6 +1168,8 @@ command cER = {
       N_("set geometry of main window"), NULL, acSetGeometryValues },
     { "message", CommandSetGeometryMessage,
       N_("set geometry of message window"), NULL, acSetGeometryValues },
+    { "theory", CommandSetGeometryTheory,
+      N_("set geometry of theory window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetGUIAnimation[] = {
     { "blink", CommandSetGUIAnimationBlink,
@@ -1728,6 +1774,8 @@ command cER = {
       szONOFF, &cOnOff },
     { "colours", CommandSetAppearance, 
       N_("Synonym for `set appearance'"), NULL, NULL },
+    { "commandwindow", CommandSetCommandWindow, N_("Display command window"),
+      szONOFF, &cOnOff },
     { "confirm", NULL, N_("Confirmation settings"), NULL, acSetConfirm },
     { "crawford", CommandSetCrawford, 
       N_("Set whether this is the Crawford game"), szONOFF, &cOnOff },
@@ -1777,6 +1825,8 @@ command cER = {
     { "panels", CommandSetDisplayPanels, 
       N_("Display game list, annotation and message panels/windows"), 
 	 szONOFF, &cOnOff }, 
+    { "panelwidth", CommandSetPanelWidth, N_("Set the width of the docked panels"),
+      szVALUE, NULL },
     { "path", NULL, N_("Set default path when saving, loading, importing, "
       "and exporting files."), NULL, acSetPath },
     { "player", CommandSetPlayer, N_("Change options for one or both "
@@ -1817,8 +1867,9 @@ command cER = {
     { "tctransition", CommandSetTCTransition, N_("Set time control transition"), szSETTCTRANSITION, NULL}, 
     { "tctype", CommandSetTCType, N_("Set time control type"), szSETTCTYPE, NULL}, 
     { "tcunname", CommandSetTCUnname, N_("Undefine a named time control setting"), szSETTCUNNAME, NULL}, 
-    
 #endif
+    { "theorywindow", CommandSetTheoryWindow, N_("Display game theory in window"),
+      szONOFF, &cOnOff },
     { "toolbar", CommandSetToolbar, N_("Change if icons and/or text are shown on toolbar"),
       szVALUE, NULL },
     { "training", NULL, 
@@ -5569,18 +5620,6 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 }
 
-static void GetGeometryString(char* buf, windowobject* pwo)
-{
-	sprintf(buf, "set geometry %s width %d\n"
-                  "set geometry %s height %d\n"
-                  "set geometry %s xpos %d\n" 
-                  "set geometry %s ypos %d\n", 
-                  pwo->winName, pwo->wg.nWidth,
-                  pwo->winName, pwo->wg.nHeight,
-                  pwo->winName, pwo->wg.nPosX,
-                  pwo->winName, pwo->wg.nPosY );
-}
-
 extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache; 
@@ -5943,26 +5982,8 @@ extern void CommandSaveSettings( char *szParam ) {
     if ( fX )
        RefreshGeometries ();
 
+	SaveWindowSettings(pf);
 #endif
-    if (woPanel[WINDOW_ANNOTATION].showing)
-      fputs("set annotation yes\n", pf);
-    if (woPanel[WINDOW_MESSAGE].showing)
-      fputs("set message yes\n", pf);
-    if (woPanel[WINDOW_GAME].showing)
-      fputs("set gamelist yes\n", pf);
-    if (woPanel[WINDOW_ANALYSIS].showing)
-      fputs("set analysis window yes\n", pf);
-
-    fprintf( pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
-
-	for ( i = 0; i < NUM_WINDOWS; ++i )
-	{
-		if (i != WINDOW_ANNOTATION)
-		{
-			GetGeometryString(szTemp, &woPanel[i]);
-			fputs(szTemp, pf);
-		}
-	}
 
     /* sounds */
 

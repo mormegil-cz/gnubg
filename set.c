@@ -510,32 +510,44 @@ extern void CommandSetAnalysisThresholdVeryUnlucky( char *sz ) {
 
 extern void CommandSetAnnotation( char *sz ) {
 
-    if( SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
+    SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
 		   _("Move analysis and commentary will be displayed."),
-		   _("Move analysis and commentary will not be displayed.") )
-	!= TRUE )
-	/* Force an update, even if the setting has not changed. */
-	UpdateSetting(&woPanel[WINDOW_ANNOTATION].showing);
+		   _("Move analysis and commentary will not be displayed."));
 }
 
 extern void CommandSetMessage( char *sz ) {
 
-    if( SetToggle( "message", &woPanel[WINDOW_MESSAGE].showing, sz,
-		   _("Show window with messages"),
-		   _("Do not show window with message.") )
-	!= TRUE )
-	/* Force an update, even if the setting has not changed. */
-	UpdateSetting(&woPanel[WINDOW_MESSAGE].showing);
+	SetToggle("message", &woPanel[WINDOW_MESSAGE].showing, sz,
+		_("Show window with messages"),
+		_("Do not show window with message."));
+}
+
+extern void CommandSetTheoryWindow( char *sz ) {
+
+	SetToggle("theorywindow", &woPanel[WINDOW_THEORY].showing, sz,
+		_("Show window with theory"),
+		_("Do not show window with theory."));
+}
+
+extern void CommandSetCommandWindow( char *sz ) {
+
+	SetToggle("commandwindow", &woPanel[WINDOW_COMMAND].showing, sz,
+		_("Show window to enter commands"),
+		_("Do not show window to enter commands."));
 }
 
 extern void CommandSetGameList( char *sz ) {
 
-    if( SetToggle( "gamelist", &woPanel[WINDOW_GAME].showing, sz,
+    SetToggle( "gamelist", &woPanel[WINDOW_GAME].showing, sz,
 		   _("Show game window with moves"),
-		   _("Do not show game window with moves.") )
-	!= TRUE )
-	/* Force an update, even if the setting has not changed. */
-	UpdateSetting(&woPanel[WINDOW_GAME].showing);
+		   _("Do not show game window with moves.") );
+}
+
+extern void CommandSetAnalysisWindows( char *sz ) {
+
+    SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,
+		   _("Show window with analysis"),
+		   _("Do not show window with analysis.") );
 }
 
 extern void CommandSetStyledGameList( char *sz ) {
@@ -548,16 +560,6 @@ extern void CommandSetStyledGameList( char *sz ) {
     if( fX )
 		GTKUpdateAnnotations();
 #endif
-}
-
-extern void CommandSetAnalysisWindows( char *sz ) {
-
-    if( SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,
-		   _("Show window with analysis"),
-		   _("Do not show window with analysis.") )
-	!= TRUE )
-	/* Force an update, even if the setting has not changed. */
-	UpdateSetting(&woPanel[WINDOW_ANALYSIS].showing);
 }
 
 extern void CommandSetAutoBearoff( char *sz ) {
@@ -3890,8 +3892,6 @@ extern void
 CommandSetGeometryAnalysis ( char *sz )
 {
 	pwoSet = &woPanel[WINDOW_ANALYSIS];
-	szSet = "analysis";
-
 	HandleCommand ( sz, acSetGeometryValues );
 }
 
@@ -3899,8 +3899,6 @@ extern void
 CommandSetGeometryHint ( char *sz )
 {
 	pwoSet = &woPanel[WINDOW_HINT];
-	szSet = "hint";
-
 	HandleCommand ( sz, acSetGeometryValues );
 }
 
@@ -3908,8 +3906,6 @@ extern void
 CommandSetGeometryGame ( char *sz )
 {
 	pwoSet = &woPanel[WINDOW_GAME];
-	szSet = "game-list";
-
 	HandleCommand ( sz, acSetGeometryValues );
 }
 
@@ -3917,8 +3913,6 @@ extern void
 CommandSetGeometryMain ( char *sz )
 {
 	pwoSet = &woPanel[WINDOW_MAIN];
-	szSet = "main";
-
 	HandleCommand ( sz, acSetGeometryValues );
 }
 
@@ -3926,9 +3920,21 @@ extern void
 CommandSetGeometryMessage ( char *sz )
 {
 	pwoSet = &woPanel[WINDOW_MESSAGE];
-	szSet = "message";
+	HandleCommand(sz, acSetGeometryValues);
+}
 
-	HandleCommand ( sz, acSetGeometryValues );
+extern void
+CommandSetGeometryCommand ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_COMMAND];
+	HandleCommand(sz, acSetGeometryValues);
+}
+
+extern void
+CommandSetGeometryTheory ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_THEORY];
+	HandleCommand(sz, acSetGeometryValues);
 }
 
 extern void
@@ -3942,7 +3948,7 @@ CommandSetGeometryWidth ( char *sz ) {
   else {
 
     pwoSet->wg.nWidth = n;
-    outputf ( _("Width of %s window set to %d.\n"), szSet, n );
+    outputf ( _("Width of %s window set to %d.\n"), pwoSet->winName, n );
 
 #if USE_GTK
     if ( fX )
@@ -3964,7 +3970,7 @@ CommandSetGeometryHeight ( char *sz ) {
   else {
 
     pwoSet->wg.nHeight = n;
-    outputf ( _("Height of %s window set to %d.\n"), szSet, n );
+    outputf ( _("Height of %s window set to %d.\n"), pwoSet->winName, n );
 
 #if USE_GTK
     if ( fX )
@@ -3986,7 +3992,7 @@ CommandSetGeometryPosX ( char *sz ) {
   else {
 
     pwoSet->wg.nPosX = n;
-    outputf ( _("X-position of %s window set to %d.\n"), szSet, n );
+    outputf ( _("X-position of %s window set to %d.\n"), pwoSet->winName, n );
 
 #if USE_GTK
     if ( fX )
@@ -4008,7 +4014,7 @@ CommandSetGeometryPosY ( char *sz ) {
   else {
 
     pwoSet->wg.nPosY = n;
-    outputf ( _("Y-position of %s window set to %d.\n"), szSet, n );
+    outputf ( _("Y-position of %s window set to %d.\n"), pwoSet->winName, n );
 
 #if USE_GTK
     if ( fX )
@@ -4780,6 +4786,21 @@ extern void CommandSetLang( char *sz ) {
 		"The new setting will only take effect on the next start "
 		"of gnubg.\n" ), sz );
 
+}
+
+extern void CommandSetPanelWidth( char *sz )
+{
+	int n = ParseNumber( &sz );
+
+	if (n < 50)
+	{
+		outputl(_("You must specify a number greater than 50"));
+		return;
+	}
+#if USE_GUI
+	if (fX)
+	  SetPanelWidth(n);
+#endif
 }
 
 extern void CommandSetDisplayPanels( char *sz ) {
