@@ -4659,10 +4659,12 @@ static void DestroyHint( gpointer p ) {
 
 }
 
-extern void GTKHint( movelist *pmlOrig ) {
+extern void 
+GTKHint( movelist *pmlOrig, const int iMove ) {
 
     GtkWidget *pwButtons, *pwMoves;
     movelist *pml;
+    static int n;
     
     if( pwHint )
 	gtk_widget_destroy( pwHint );
@@ -4673,7 +4675,8 @@ extern void GTKHint( movelist *pmlOrig ) {
     pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
     memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
 
-    pwMoves = CreateMoveList( pml, NULL, TRUE, TRUE );
+    n = iMove;
+    pwMoves = CreateMoveList( pml, ( n < 0 ) ? NULL : &n, TRUE, TRUE );
 
     /* create dialog */
     
@@ -7933,3 +7936,19 @@ GTKCopy ( void ) {
                           GDK_CURRENT_TIME );
 
 }
+
+
+extern int
+GTKGetMove ( int anMove[ 8 ] ) {
+
+  BoardData *bd = BOARD ( pwBoard )->board_data;
+
+  if ( !bd->valid_move )
+    return 0;
+  
+  memcpy ( anMove, bd->valid_move->anMove, 8 * sizeof ( int ) );
+
+  return 1;
+
+}
+

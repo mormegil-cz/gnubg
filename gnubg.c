@@ -2686,6 +2686,9 @@ extern void CommandHint( char *sz ) {
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo ci;
   int n = ParseNumber ( &sz );
+  int anMove[ 8 ];
+  unsigned char auch[ 10 ];
+  int fHasMoved;
   
   if( ms.gs != GAME_PLAYING ) {
     outputl( _("You must set up a board first.") );
@@ -2863,11 +2866,16 @@ extern void CommandHint( char *sz ) {
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
+        fHasMoved = GTKGetMove ( anMove );
+        if ( fHasMoved )
+          MoveKey ( ms.anBoard, anMove, auch );
+
         if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
 
           ProgressStart( _("Considering moves...") );
           if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                                  ms.anBoard, NULL, &ci,
+                                  ms.anBoard, 
+                                  fHasMoved ? auch : NULL, &ci,
                                   &esEvalChequer.ec ) < 0 || fInterrupt ) {
 	    ProgressEnd();
 	    return;
@@ -2890,7 +2898,7 @@ extern void CommandHint( char *sz ) {
 
 #if USE_GTK
 	if( fX ) {
-	    GTKHint( &sm.ml );
+            GTKHint( &sm.ml, locateMove ( ms.anBoard, anMove, &sm.ml ) );
 	    return;
 	}
 #endif

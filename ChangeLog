@@ -1,3 +1,16 @@
+Fri Aug  9 20:46:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Highlight selected move in GTKHint.
+
+	* positionid.c (EqualKeys): change prototype.
+	* gtkgame.c (GTKGetMove): new function. Retrieve move from
+	board.
+	* gtkgame.c (GTKHint): pass on iHighLight to CreateMoveList.
+	* eval.c (MoveKey): new function. Return position key for
+	a move.
+	* eval.c (locateMove): find index for a move in a movelist.
+	* gnubg.c (CommandHint): pass on selected move to GTKHint.
+
 Thu Aug  8 21:39:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (isCloseCubedecision): adjust threshold for when

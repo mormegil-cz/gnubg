@@ -3135,8 +3135,10 @@ se_eq2mwc ( const float rEq, const cubeinfo *pci ) {
 
 
 
-static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll,
-			 int fCheckLegal ) {
+static int 
+ApplySubMove( int anBoard[ 2 ][ 25 ], 
+              const int iSrc, const int nRoll,
+              const int fCheckLegal ) {
 
     int iDest = iSrc - nRoll;
 
@@ -3172,8 +3174,9 @@ static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll,
     return 0;
 }
 
-extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ],
-		      int fCheckLegal ) {
+extern int 
+ApplyMove( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ],
+           const int fCheckLegal ) {
     int i;
     
     for( i = 0; i < 8 && anMove[ i ] >= 0; i += 2 )
@@ -7077,4 +7080,39 @@ isMissedDouble ( float arDouble[],
                  
 
 
+extern int
+locateMove ( int anBoard[ 2 ][ 25 ], 
+             const int anMove[ 8 ], const movelist *pml ) {
 
+  int i;
+  unsigned char auch[ 10 ];
+  unsigned char key[ 10 ];
+
+  MoveKey ( anBoard, anMove, key );
+
+  for ( i = 0; i < pml->cMoves; ++i ) {
+
+    MoveKey ( anBoard, pml->amMoves[ i ].anMove, auch );
+
+    if ( EqualKeys ( auch, key ) )
+      return i;
+
+
+  }
+
+  return -1;
+
+}
+
+
+extern int
+MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ], 
+          unsigned char auch[ 10 ] ) {
+
+  int anBoardMove[ 2 ][ 25 ];
+
+  memcpy ( anBoardMove, anBoard, sizeof ( anBoardMove ) );
+  ApplyMove ( anBoardMove, anMove, FALSE );
+  PositionKey ( anBoardMove, auch );
+
+}

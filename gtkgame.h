@@ -83,7 +83,8 @@ extern void GTKBearoffProgress( int i );
 extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 				char *szTitle );
 extern void GTKEval( char *szOutput );
-extern void GTKHint( movelist *pml );
+extern void 
+GTKHint( movelist *pmlOrig, const int iMove );
 extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 const evalsetup *pes );
@@ -139,5 +140,8 @@ UpdateGeometry ( const gnubgwindow gw );
 
 extern void
 RefreshGeometries ( void );
+
+extern int
+GTKGetMove ( int anMove[ 8 ] );
 
 #endif

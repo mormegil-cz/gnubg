@@ -223,7 +223,8 @@ extern int PositionFromID( int anBoard[ 2 ][ 25 ], char *pchEnc ) {
   return CheckPosition( anBoard );
 }
 
-extern int EqualKeys( unsigned char auch0[ 10 ], unsigned char auch1[ 10 ] ) {
+extern int 
+EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] ) {
 
     int i;
 

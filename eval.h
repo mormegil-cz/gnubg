@@ -290,7 +290,8 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
                int n0, int n1, int fPartial );
 
 extern int 
-ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int fCheckLegal );
+ApplyMove( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ],
+           const int fCheckLegal );
 
 extern positionclass 
 ClassifyPosition( int anBoard[ 2 ][ 25 ] );
@@ -449,5 +450,13 @@ isMissedDouble ( float arDouble[],
                  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                  const int fDouble, 
                  const cubeinfo *pci );
+
+extern int
+locateMove ( int anBoard[ 2 ][ 25 ], 
+             const int anMove[ 8 ], const movelist *pml );
+
+extern int
+MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ], 
+          unsigned char auch[ 10 ] );
 
 #endif
