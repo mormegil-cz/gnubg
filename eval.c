@@ -562,8 +562,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
   };
 
   /* Points we want to make, in order of importance */
-    
-  static int anPoint[ 6 ] = { 5, 4, 3, 6, 2, 7 };
+/*  static int anPoint[ 6 ] = { 5, 4, 3, 6, 2, 7 }; */
 
   /* One roll stat */
   
@@ -1717,7 +1716,10 @@ static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     long l;
 	
     PositionKey( anBoard, ec.auchKey );
-    ec.nEvalContext = nPlies; /* FIXME consider pecx as well */
+    ec.nEvalContext = nPlies ^ ( pecx->nSearchCandidates << 2 ) ^
+	( ( (int) ( pecx->rSearchTolerance * 100 ) ) << 6 ) ^
+	( pecx->nReduced << 12 ) ^
+	( pecx->fRelativeAccuracy << 17 );
     ec.pc = pc;
 
     l = EvalCacheHash( &ec );
