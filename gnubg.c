@@ -339,22 +339,23 @@ rolloutcontext rcRollout =
   TRUE, /* variance reduction */
   FALSE, /* initial position */
   TRUE, /* rotate */
-  FALSE, /* late evaluations */
-  TRUE,  /* Truncation enabled */
-  11, /* truncation */
-  36, /* number of trials */
   TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
+  FALSE, /* late evaluations */
+  TRUE,  /* Truncation enabled */
+  FALSE,  /* no stop on STD */
+  FALSE,  /* no stop on JSD */
+  FALSE,  /* no move stop on JSD */
+  11, /* truncation */
+  36, /* number of trials */
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
   0,  /* seed */
-  FALSE,  /* no stop on STD */
   144,    /* minimum games  */
   0.1,	  /* stop when std's are under 10% of value */
-  FALSE,  /* no stop on JSD */
-  FALSE,  /* no move stop on JSD */
   144,    /* minimum games  */
   1.96,   /* stop when best has j.s.d. for 95% confidence */
+  0
 
 };
 
@@ -387,19 +388,27 @@ rolloutcontext rcRollout =
     { FALSE, 0, 0, TRUE, 0.0 }, /* truncate chequerplay */ \
     { MOVEFILTER, MOVEFILTER }, \
     { MOVEFILTER, MOVEFILTER }, \
-    FALSE, /* cubeful */ \
-    FALSE, /* variance reduction */ \
-    FALSE, /* initial position */ \
-    TRUE, /* rotate */ \
-    FALSE, /* late evals */ \
-	TRUE, /* truncation enabled */ \
-    7, /* truncation */ \
-    36, /* number of trials */ \
-    TRUE, /* truncate at BEAROFF2 */ \
-    TRUE, /* truncate at BEAROFF2_OS */ \
-    5,  /* late evals start here */ \
-    RNG_MERSENNE, /* RNG */ \
-    0 /* seed */ \
+  FALSE, /* cubeful */ \
+  TRUE, /* variance reduction */ \
+  FALSE, /* initial position */ \
+  TRUE, /* rotate */ \
+  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */ \
+  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */ \
+  FALSE, /* late evaluations */ \
+  TRUE,  /* Truncation enabled */ \
+  FALSE,  /* no stop on STD */ \
+  FALSE,  /* no stop on JSD */ \
+  FALSE,  /* no move stop on JSD */ \
+  11, /* truncation */ \
+  36, /* number of trials */ \
+  5,  /* late evals start here */ \
+  RNG_MERSENNE, /* RNG */ \
+  0,  /* seed */ \
+  144,    /* minimum games  */ \
+  0.1,	  /* stop when std's are under 10% of value */ \
+  144,    /* minimum games  */ \
+  1.96,   /* stop when best has j.s.d. for 95% confidence */ \
+  0 \
   } \
 } 
 

@@ -1,3 +1,10 @@
+Fri May  7 07:27:18 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c: fix problems with initialisation of rollout
+	contexts. This lead the problem about cubeless and cubeful
+	equities being different for -1,-3C rollouts reported by
+	Robert Eberlein.
+
 Thu May  6 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktempmap.c, gtkboard.c: Show correct dice colour in temperture
