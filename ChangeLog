@@ -1,3 +1,7 @@
+Mon Jul 28 14:31:43 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* play.c - missed initialising CubeDecPtr on beavers
+
 Sun Jul 27 17:22:51 2003  Oystein Johansen  <oystein@gnubg.org>
 
 	* simplelibgen.[ch] (new files): put 'dirname' and 'basename' in a new

@@ -3504,6 +3504,7 @@ extern void CommandRedouble( char *sz ) {
     pmr->mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
+	pmr->d.CubeDecPtr = &pmr->d.CubeDec;
     pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
