@@ -61,7 +61,6 @@ typedef enum _stylesheetclass {
   CLASS_CUBEDECISIONHEADER,
   CLASS_COMMENT,
   CLASS_COMMENTHEADER,
-  CLASS_BLOCK,
   CLASS_NUMBER,
   CLASS_FONT_FAMILY,
   CLASS_PERCENT,
@@ -93,7 +92,6 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "commentheader", 
     "background-color: #557711; font-weight: bold; text-align: center; "
     "width: 40em; padding: 0.25em" },
-  { "block", "display: block;" },
   { "number", 
     "text-align: center; font-weight: bold; font-size: 60%; "
     "font-family: sans-serif" },
@@ -491,11 +489,10 @@ printImage ( FILE *pf, const char *szImageDir, const char *szImage,
              const char *szExtension, const char *szAlt,
              const htmlexportcss hecss ) {
 
-  fprintf ( pf, "<img src=\"%s%s%s.%s\" %s alt=\"%s\" />",
+  fprintf ( pf, "<img src=\"%s%s%s.%s\" alt=\"%s\" />",
             ( szImageDir ) ? szImageDir : "",
             ( ! szImageDir || szImageDir[ strlen ( szImageDir ) - 1 ] == '/' ) ? "" : "/",
             szImage, szExtension, 
-            GetStyle ( CLASS_BLOCK, hecss ),
             ( szAlt ) ? szAlt : "" );
 
 }
