@@ -55,6 +55,7 @@ rng rngCurrent = RNG_MERSENNE;
 
 static randctx rc;
 
+#if HAVE_LIBDL
 static void (*pfUserRNGSeed) (unsigned long int);
 static long int (*pfUserRNGRandom) (void);
 static void *pvUserRNGHandle;
@@ -62,6 +63,7 @@ static void *pvUserRNGHandle;
 static char szUserRNGSeed[ 32 ];
 static char szUserRNGRandom[ 32 ];
 static char szUserRNG[ MAXPATHLEN ];
+#endif
 
 static int GetManualDice( int anDice[ 2 ] ) {
 

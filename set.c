@@ -72,20 +72,25 @@ static void SetRNG( rng rngNew, char *szSeed ) {
         /* Dispose dynamically linked user module if necesary */
 
         if ( rngCurrent == RNG_USER )
+#if HAVE_LIBDL
 	  UserRNGClose();
-
+#else
+	  abort();
+#endif
+	  
 	/* Load dynamic library with user RNG */
 
         if ( rngNew == RNG_USER ) {
-	  
+#if HAVE_LIBDL
 	  if ( !UserRNGOpen() ) {
-
 	    printf ( "Error loading shared library.\n" );
 	    printf ( "You are still using the %s generator.\n",
 		     aszRNG[ rngCurrent ] );
             return;
 	  }
-
+#else
+	  abort();
+#endif
 	}
 	    
 	if( ( rngCurrent = rngNew ) != RNG_MANUAL )
