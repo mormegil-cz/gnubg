@@ -59,6 +59,7 @@
 #include "i18n.h"
 #include "bearoff.h"
 #include "path.h"
+#include "format.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -3911,6 +3912,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arDouble[ 4 ];
   positionclass pc = ClassifyPosition( anBoard, pci->bgv );
   int i, nPlies;
+  int j;
   cubedecision cd;
   evalcontext ec;
   static char *aszEvaluator[] = {
@@ -3935,13 +3937,13 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   acdf[ pc ]( anBoard, strchr( szOutput, 0 ), pci->bgv );
   szOutput = strchr( szOutput, 0 );    
 
-  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    strcpy( szOutput, _("\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
-	    "Equity  (cubeful)\n") );
-  else
-    strcpy( szOutput, _("\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
-	    "Mwc     (cubeful)\n") );
-
+  sprintf( strchr( szOutput, 0 ),
+           "\n"
+           "        %-7s %-7s %-7s %-7s %-7s %-9s %-9s\n",
+           _("Win"), _("W(g)"), _("W(bg)"), _("L(g)"), _("L(bg)"),
+           ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ? 
+           _("Equity") : _("MWC"), _("Cubeful") );
+           
   nPlies = pec->nPlies > 9 ? 9 : pec->nPlies;
 
   memcpy ( &ec, pec, sizeof ( evalcontext ) );
@@ -3974,51 +3976,21 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
     /* Print %'s and equities */
 
-    if( pci->nMatchTo && fOutputMWC ) {
-	if( fOutputWinPC )
-	    sprintf( szOutput,
-		     ":\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t"
-		     "(%6.2f%% (%6.2f%%))\n",
-		     100.0f * aarOutput[ 0 ][ 0 ],
-                     100.0f * aarOutput[ 0 ][ 1 ],
-		     100.0f * aarOutput[ 0 ][ 2 ],
-                     100.0f * aarOutput[ 0 ][ 3 ],
-		     100.0f * aarOutput[ 0 ][ 4 ], 
-		     100.0 * eq2mwc ( Utility ( aarOutput[ 0 ], pci ), pci ), 
-		     100.0 * eq2mwc ( arDouble[ 0 ], pci ) ); 
-	else
-	    sprintf( szOutput,
-		     ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-		     "(%6.2f%% (%6.2f%%))\n",
-		     aarOutput[ 0 ][ 0 ],
-                     aarOutput[ 0 ][ 1 ],
-		     aarOutput[ 0 ][ 2 ],
-                     aarOutput[ 0 ][ 3 ],
-		     aarOutput[ 0 ][ 4 ], 
-		     100.0 * eq2mwc ( Utility ( aarOutput[ 0 ], pci ), pci ), 
-		     100.0 * eq2mwc ( arDouble[ 0 ], pci ) ); 
-    } else {
-	if( fOutputWinPC )
-	    sprintf( szOutput,
-		     ":\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t"
-		     "(%+6.3f  (%+6.3f))\n",
-		     100.0f * aarOutput[ 0 ][ 0 ],
-                     100.0f * aarOutput[ 0 ][ 1 ],
-		     100.0f * aarOutput[ 0 ][ 2 ],
-                     100.0f * aarOutput[ 0 ][ 3 ],
-		     100.0f * aarOutput[ 0 ][ 4 ],
-                     UtilityME ( aarOutput[ 0 ], pci ), 
-		     arDouble[ 0 ] ); 
-	else
-	    sprintf( szOutput,
-		     ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-		     "(%+6.3f  (%+6.3f))\n",
-		     aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ],
-		     aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ],
-		     aarOutput[ 0 ][ 4 ], UtilityME ( aarOutput[ 0 ], pci ), 
-		     arDouble[ 0 ] ); 
+    strcat( szOutput, ": " );
+
+    for ( j = 0; j < 5; ++j ) {
+      sprintf( strchr( szOutput, 0 ), "%-7s ",
+               OutputPercent( aarOutput[ 0 ][ j ] ) );
     }
+
+    sprintf( strchr( szOutput, 0 ), "%-9s ",
+             OutputEquity( Utility( aarOutput[ 0 ], pci ), pci, TRUE ) );
+
+    sprintf( strchr( szOutput, 0 ), "%-9s ",
+             OutputMWC( aarOutput[ 0 ][ 6 ], pci, TRUE ) );
     
+    strcat( szOutput, "\n" );
+
     if( fOutputInvert ) {
       pci->fMove = !pci->fMove;
     }
@@ -4027,15 +3999,13 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   /* if cube is available, output cube action */
   if ( GetDPEq ( NULL, NULL, pci ) ) {
 
-    /*
-      if( fOutputInvert )
-      InvertEvaluationCf( arCfOutput ); */
+    evalsetup es;
 
-    szOutput = strchr( szOutput, 0 );    
-    sprintf( szOutput, "\n\n" );
-    szOutput = strchr( szOutput, 0 );    
-    GetCubeActionSz ( arDouble, aarOutput, szOutput, 
-                      pci, fOutputMWC, fOutputInvert );
+    es.et = EVAL_EVAL;
+    es.ec = *pec;
+
+    strcat( szOutput, "\n\n" );
+    strcat( szOutput, OutputCubeAnalysis( aarOutput, NULL, &es, pci ) );
 
   }
 
@@ -4184,199 +4154,6 @@ extern char
     return _("I have no idea!");
   }
 
-}
-
-
-extern int 
-GetCubeActionSz ( float arDouble[ 4 ], 
-                  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                  char *szOutput, cubeinfo *pci,
-		  int fOutputMWC, int fOutputInvert ) {
-
-  static cubedecision cd;
-  static int iOptimal, iBest, iWorst;
-  static char *pc;
-
-  static char *aszCubeString[ 4 ][ 2 ] = {
-    { N_ ("Unknown"), N_ ("Unknown") },
-    { N_ ("No double"), N_ ("No redouble") },
-    { N_ ("Double, take"), N_ ("Redouble, take") },
-    { N_ ("Double, pass"), N_ ("Redouble, pass") } };
-
-  /* Get cube decision */
-
-  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
-
-  if ( cd == NOT_AVAILABLE ) {
-
-    strcpy ( szOutput, "Cube not available\n" );
-    return 0;
-
-  }
-
-  /* write string with cube action */
-
-  if( fOutputInvert )
-    pci->fMove = !pci->fMove;
-
-  switch ( cd ) {
-
-  case DOUBLE_TAKE:
-  case DOUBLE_BEAVER:
-  case REDOUBLE_TAKE:
-
-    /*
-     * Optimal     : Double, take
-     * Best for me : Double, pass
-     * Worst for me: No Double 
-     */
-
-    iOptimal = OUTPUT_TAKE;
-    iBest    = OUTPUT_DROP;
-    iWorst   = OUTPUT_NODOUBLE;
-
-    break;
-
-  case DOUBLE_PASS:
-  case REDOUBLE_PASS:
-
-    /*
-     * Optimal     : Double, pass
-     * Best for me : Double, take
-     * Worst for me: no double 
-     */
-    iOptimal = OUTPUT_DROP;
-    iBest    = OUTPUT_TAKE;
-    iWorst   = OUTPUT_NODOUBLE;
-
-    break;
-
-  case NODOUBLE_TAKE:
-  case NODOUBLE_BEAVER:
-  case TOOGOOD_TAKE:
-  case NO_REDOUBLE_TAKE:
-  case NO_REDOUBLE_BEAVER:
-  case TOOGOODRE_TAKE:
-  case NODOUBLE_DEADCUBE:
-  case NO_REDOUBLE_DEADCUBE:
-  case OPTIONAL_DOUBLE_BEAVER:
-  case OPTIONAL_DOUBLE_TAKE:
-  case OPTIONAL_REDOUBLE_TAKE:
-
-    /*
-     * Optimal     : no double
-     * Best for me : double, pass
-     * Worst for me: double, take
-     */
-
-    iOptimal = OUTPUT_NODOUBLE;
-    iBest    = OUTPUT_DROP;
-    iWorst   = OUTPUT_TAKE;
-
-    break;
-
-  case TOOGOOD_PASS:
-  case TOOGOODRE_PASS:
-  case OPTIONAL_DOUBLE_PASS:
-  case OPTIONAL_REDOUBLE_PASS:
-
-    /*
-     * Optimal     : no double
-     * Best for me : double, take
-     * Worst for me: double, pass
-     */
-
-    iOptimal = OUTPUT_NODOUBLE;
-    iBest    = OUTPUT_TAKE;
-    iWorst   = OUTPUT_DROP;
-
-    break;
-
-  default:
-
-    /* code not reachable; NOT_AVAILABLE is handled outside switch */
-    assert ( FALSE );
-
-    break;
-
-  }
-
-  /* Invert equities if necesary */
-  
-  if( fOutputInvert ) {
-    arDouble[ OUTPUT_NODOUBLE ] = -arDouble[ OUTPUT_NODOUBLE ];
-    arDouble[ OUTPUT_TAKE ] = -arDouble[ OUTPUT_TAKE ];
-    arDouble[ OUTPUT_DROP ] = -arDouble[ OUTPUT_DROP ];
-  }
-
-  /* Write string */
-
-  /* Optimal */
-
-  pc = szOutput;
-
-  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    sprintf ( pc, "%-20s: %+6.3f\n",
-              gettext ( aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ] ),
-              arDouble [ iOptimal ] );
-  else
-    sprintf ( pc, "%-20s: %6.2f%%\n",
-              gettext ( aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ] ),
-              100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
-
-  
-  /* Best for me */
-
-  pc = strchr ( pc, 0 );
-  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    sprintf ( pc, "%-20s: %+6.3f   (%+6.3f)\n",
-              gettext ( aszCubeString[ iBest ][ pci->fCubeOwner != -1 ] ),
-              arDouble[ iBest ],
-              arDouble [ iBest ] - arDouble [ iOptimal ] );
-  else
-    sprintf ( pc, "%-20s: %6.2f%%   (%+6.2f%%)\n",
-              gettext ( aszCubeString[ iBest ][ pci->fCubeOwner != -1 ] ),
-              100.0 * eq2mwc ( arDouble[ iBest ], pci ),
-              100.0 * eq2mwc ( arDouble[ iBest ], pci ) - 
-              100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
-
-
-  /* Worst for me */
-
-
-  pc = strchr ( pc, 0 );
-  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    sprintf ( pc, "%-20s: %+6.3f   (%+6.3f)\n\n",
-              gettext ( aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ] ),
-              arDouble[ iWorst ],
-              arDouble [ iWorst ] - arDouble [ iOptimal ] );
-  else
-    sprintf ( pc, "%-20s: %6.2f%%   (%+6.2f%%)\n\n",
-              gettext ( aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ] ),
-              100.0 * eq2mwc ( arDouble[ iWorst ], pci ),
-              100.0 * eq2mwc ( arDouble[ iWorst ], pci ) - 
-              100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
-
-
-  /* add recommended cube action string */
-
-  pc = strchr ( pc, 0 );
-
-  sprintf ( pc, _("Correct cube action: %s\n"),
-            GetCubeRecommendation ( cd ) );
-
-
-  /* restore input values */
-
-  if( fOutputInvert ) {
-    arDouble[ OUTPUT_NODOUBLE ] = -arDouble[ OUTPUT_NODOUBLE ];
-    arDouble[ OUTPUT_TAKE ] = -arDouble[ OUTPUT_TAKE ];
-    arDouble[ OUTPUT_DROP ] = -arDouble[ OUTPUT_DROP ];
-      
-    pci->fMove = !pci->fMove;
-  }
-  
-  return 0;
 }
 
 

@@ -1,3 +1,11 @@
+Sun Jul 27 13:59:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c: move all Output* functions to new file format.c	
+	(change all callers)
+	* format.c, Makefile.am: new file.
+	* gnubg.c (DisplayCubeAnalysis, DumpPosition): use 
+	OutputCubeAnalysis instead of now deprecated GetCubeActionSz.
+
 Sun Jul 27 12:05:37 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Oops, the html did not validate...
