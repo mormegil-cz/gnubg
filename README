@@ -24,7 +24,7 @@ Current features:
  - Support for both 1-sided and 2-sided bearoff databases: 1-sided
    bearoff database for 15 chequers on the first 6 points and optional
    2-sided database kept in memory.  Optional larger 1-sided and 2-sided
-   databases stored on disk.
+   databases stored on disk. 
  - Neural net functions for giving cubeless evaluations of all other
    contact and race positions.
  - Functions to generate legal moves and evaluate positions at varying
@@ -36,7 +36,7 @@ Current features:
  - Support for either a GTK+ interface with a graphical board window, or
    a rough ASCII representation of a board on text terminals.
  - Automated rollouts of positions, with lookahead and race variance
-   reduction where appropriate.
+   reduction where appropriate. Rollouts may also be extended.
  - Both TD(0) and supervised training of neural net weights.
  - Position databases for supervised training (if GNU dbm is available).
  - Loading and saving .sgf games and matches (.sgf files are in the
@@ -44,7 +44,7 @@ Current features:
  - Exporting games and matches to HTML, LaTeX, .mat, PDF, PNG, PostScript 
    and plain text formats.
  - Importing .bkg, .mat, .pos, .sgg, .tmg and FIBS "oldmoves" files.
- - Scripting ability (if GNU Guile is available).
+ - Scripting ability (if GNU Guile or Python is available).
  - Automatic and manual annotation (analysis and commentary) of games and
    matches.
  - Record keeping of statistics of players in games and matches.
@@ -119,9 +119,8 @@ Also, if present GNU Backgammon will use a 1-sided database from the file
 Note that this database is 118 megabtes and may take up to several hours
 to generate (depending on the speed of your computer).
 
-Huge bearoff databases may be made available for download for time in
-the future. Watch for announcements in <URL:nntp:/rec.games.backgammon> or on
-the mailing list bug-gnubg@gnu.org.
+Larger bearoff databases are available for download at
+<URL:ftp://ftp.demon.nl/pub/games/gnubg/databases/>.
 
 
 The files `gnubg.weights' and `gnubg.wd':
