@@ -316,9 +316,6 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, GraphData
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return TRUE;
 #else
-	/* Draw only last expose. */
-	if (event->count > 0)
-		return TRUE;
 
 	/* OpenGL functions can be called only if make_current returns true */
 	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
