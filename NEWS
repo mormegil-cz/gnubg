@@ -5,15 +5,21 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 ** general
  - improved support for Jacoby rule and variants (Nackgammon, Hypergammon, 
    and cubeless)
+ - new program to generate databases for Hypergammon.
 
 ** New dice generator:
  - read dice from file (similar to Jellyfish)
+ - dice manipulation, e.g., roll the best roll for computer player
 
 ** Import
- - import files in Snowie .txt format
+ - import position files in Snowie .txt format
 
 ** Export
- - export in Snowie .txt format
+ - export positions in Snowie .txt format
+
+** Analysis
+ - option to analyse one side only 
+   (e.g., skip analysis of GNU Backgammons moves)
 
 
 * Changes in GNU Backgammon 0.13
