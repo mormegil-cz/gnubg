@@ -651,8 +651,12 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 		      0, 1, 1, 2, 0, 0, 4, 2 );
 
     rElevation = asinf( bd->arLight[ 2 ] ) * 180 / M_PI;
-    rAzimuth = acosf( bd->arLight[ 0 ] / sqrt( 1.0 - bd->arLight[ 2 ] *
-					   bd->arLight[ 2 ] ) ) * 180 / M_PI;
+    if ( fabs ( bd->arLight[ 2 ] - 1.0f ) < 1e-5 ) 
+      rAzimuth = 0.0;
+    else
+      rAzimuth = 
+        acosf( bd->arLight[ 0 ] / sqrt( 1.0 - bd->arLight[ 2 ] *
+                                        bd->arLight[ 2 ] ) ) * 180 / M_PI;
     if( bd->arLight[ 1 ] < 0 )
 	rAzimuth = 360 - rAzimuth;
     
@@ -929,8 +933,12 @@ UseDesign ( GtkWidget *pw, BoardData *bdBoard ) {
   /* light */
 
   rElevation = asinf( bd.arLight[ 2 ] ) * 180 / M_PI;
-  rAzimuth = acosf( bd.arLight[ 0 ] / sqrt( 1.0 - bd.arLight[ 2 ] *
-                                             bd.arLight[ 2 ] ) ) * 180 / M_PI;
+    if ( fabs ( bd.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
+      rAzimuth = 0.0;
+    else
+      rAzimuth = 
+        acosf( bd.arLight[ 0 ] / sqrt( 1.0 - bd.arLight[ 2 ] *
+                                        bd.arLight[ 2 ] ) ) * 180 / M_PI;
   if( bd.arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
     
@@ -1784,9 +1792,10 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     float rAzimuth, rElevation;
     static char *aszAnim[ ANIMATE_SLIDE + 1 ] = { "none", "blink", "slide" };
     rElevation = asinf( bd->arLight[ 2 ] ) * 180 / M_PI;
-    rAzimuth = acosf( bd->arLight[ 0 ] / sqrt( 1.0 - bd->arLight[ 2 ] *
-					       bd->arLight[ 2 ] ) ) *
-	180 / M_PI;
+    rAzimuth = ( fabs ( bd->arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
+      acosf( bd->arLight[ 0 ] / sqrt( 1.0 - bd->arLight[ 2 ] *
+                                      bd->arLight[ 2 ] ) ) * 180 / M_PI;
+
     if( bd->arLight[ 1 ] < 0 )
 	rAzimuth = 360 - rAzimuth;
 
