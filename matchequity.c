@@ -1411,7 +1411,8 @@ static int readMET ( metdata *pmd, const char *szFileName,
   dtd = xmlParseDTD(XML_PUBLIC_ID, NULL);
   if (!dtd) {
 	  pch = xmlCatalogResolvePublic(XML_PUBLIC_ID);
-	  dtd = xmlParseDTD(NULL, pch); 
+	  dtd = xmlParseDTD(NULL, pch);
+	  if (pch) free(pch);
   }
   if (!dtd) {
     printf ( _("Error resolving DTD for public ID %s"), XML_PUBLIC_ID );
