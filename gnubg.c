@@ -7234,7 +7234,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #if USE_GUILE
     if( pchGuileScript ) {
-	scm_primitive_load( scm_makfrom0str( pchScript ) );
+	scm_primitive_load( scm_makfrom0str( pchGuileScript ) );
         Shutdown();
 	exit( EXIT_SUCCESS );
     }
