@@ -1,7 +1,18 @@
+Mon Feb 24 23:03:00 UTC 2003  Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c - patch from Holger Bochnig to add navigation commands
+ 	  for next/previous unmarked move
+	
 Sun Feb 23 15:58:11 2003  Oystein Johansen <oystein@gnubg.org>
 
 	* html.c (CommandExportPositionGammOnLine): Copy the file
 	directly to the windows clipboard.
+
+Fri Feb 21 23:29:42 UTC Jim Segrave <jes@jes-2.demon.nl>
+
+	* backgammon.h, gnubg.c gtkboard.c, gtkgame.c, set.c
+	  patches from Holger Bochnig to show legal destinations
+	  when dragging checkers
 	
 Mon Feb 17 18:54:11 2003  Jim Segrave <jes@jes-2.demon.nl>
 
