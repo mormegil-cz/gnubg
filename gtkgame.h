@@ -31,6 +31,8 @@ typedef enum _dialogarea {
 
 extern GtkWidget *pwMain;
 
+extern int fEndDelay;
+
 extern void ShowGameWindow( void );
 
 extern void GTKAddMoveRecord( moverecord *pmr );

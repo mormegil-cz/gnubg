@@ -193,6 +193,11 @@ duplication of effort and to make sure our changes merge easily.
   #define AF_LOCAL AF_UNIX (same with PF_).
 ** The fread() calls in import.c need to be byte-swapped on big-endian
   machines.
+** The "stop" button (i.e. the grab widget) automatically removes the
+  grab on itself when it gets a "button release".  It would be more
+  robust to add a parent to it (box or event box?), and give _that_
+  the grab.  Unfortunately, grab add/remove calls must nest, and we
+  can't guarantee that...
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

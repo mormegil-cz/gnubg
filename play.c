@@ -355,7 +355,7 @@ static guint nTimeout, fDelaying;
 static gint DelayTimeout( gpointer p ) {
 
     if( fDelaying )
-	gtk_main_quit();
+	fEndDelay = TRUE;
 
     nTimeout = 0;
     
