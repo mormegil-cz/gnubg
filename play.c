@@ -151,12 +151,14 @@ static void NextTurn( void ) {
 	    
 	    CommandShowScore( NULL );
 
-	    if( fAutoGame ) {
-		NewGame();
+	    /* FIXME: Check if match is over */
 
-		if( ap[ fTurn ].pt == PLAYER_HUMAN )
-		    ShowBoard();
-	    } else {
+	    if( fAutoGame ) {
+
+		CommandNewGame( NULL );
+
+	    } 
+	    else {
 		fTurn = fMove = -1;
 		anDice[ 0 ] = anDice[ 1 ] = 0;
 
@@ -495,6 +497,9 @@ extern void CommandNewMatch( char *sz ) {
 
     anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
+    fJacoby = 0;
+    fCrawford = 0;
+    fPostCrawford = 0;
 
     printf( "A new %d point match has been started.\n", n );
 
@@ -507,6 +512,9 @@ extern void CommandNewSession( char *sz ) {
 
     nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
+    fJacoby = 0;
+    fCrawford = 0;
+    fPostCrawford = 0;
 
     puts( "A new session has been started." );
 }
