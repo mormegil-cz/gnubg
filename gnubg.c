@@ -65,7 +65,8 @@ static int fInteractive;
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoGame = TRUE, fAutoMove = FALSE, fResigned = FALSE, fMove = -1,
     nPliesEval = 1, anScore[ 2 ] = { 0, 0 }, cGames = 0, fDoubled = FALSE,
-    nCube = 1, fCubeOwner = -1, fAutoRoll = TRUE, nMatchTo = 0;
+    nCube = 1, fCubeOwner = -1, fAutoRoll = TRUE, nMatchTo = -1,
+    fJacoby, fCrawford, fPostCrawford;
 
 player ap[ 2 ] = {
     { "O", PLAYER_GNU, 0 },
@@ -129,15 +130,21 @@ static command acDatabase[] = {
       "position", NULL },
     { "cache", CommandNotImplemented, "Set the size of the evaluation "
       "cache", NULL },
+    { "crawford", CommandSetCrawford, 
+      "Set whether this is the Crawford game", NULL },
     { "cube", NULL, "Set the cube owner and/or value", acSetCube },
     { "dice", CommandSetDice, "Select the roll for the current move",
       NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
       "the computer's turn", NULL },
+    { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in"
+      "money game", NULL },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", NULL },
     { "plies", CommandSetPlies, "Choose how many plies the `eval' and `hint' "
       "commands look ahead", NULL },
+    { "postcrawford", CommandSetPostCrawford, 
+      "Set whether this is post-Crawford games", NULL },
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
       "ready for commands", NULL },
     { "rng", NULL, "Select the random number generator algorithm", acSetRNG },
@@ -152,10 +159,16 @@ static command acDatabase[] = {
       "the evaluation cache", NULL },
     { "copying", CommandNotImplemented, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
+    { "crawford", CommandShowCrawford, 
+      "See if this is the Crawford game", NULL },
     { "dice", CommandShowDice, "See what the current dice roll is", NULL },
+    { "jacoby", CommandShowJacoby, 
+      "See if the Jacoby rule is used in money sessions", NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL },
+    { "postcrawford", CommandShowCrawford, 
+      "See if this is post-Crawford play", NULL },
     { "rng", CommandShowRNG, "Display which random number generator "
       "is being used", NULL },
     { "score", CommandShowScore, "View the match or session score ",
@@ -472,7 +485,7 @@ extern void ShowBoard( void ) {
 	    SwapSides( anBoard );
     
 	GameSetBoard( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
-		      9999, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
+		      0, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
 		      anDice[ 1 ] );
 	
 	if( !fMove )
