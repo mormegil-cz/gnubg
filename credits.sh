@@ -43,7 +43,7 @@ cat > $contributors <<EOF
 Olivier Baur
 Holger Bochnig
 Nis Joergensen
-TAKAHASHI Kaoru
+Kaoru Takahashi
 Stein Kulseth
 Mike Petch
 Rod Roark
@@ -63,7 +63,7 @@ Olivier Baur,French
 Achim Mueller,German
 Hlynur Sigurgislason,Icelandic
 Renzo Campagna,Italian
-Kaoru TAKAHASHI,Japanese
+Kaoru Takahashi,Japanese
 Akif Dinc,Turkish
 EOF
 
@@ -76,13 +76,10 @@ Eric Augustine
 Erik Barfoed
 Ron Barry
 Steve Baedke
-Olivier Baur
 Stefan van den Berg
-Holger Bochnig
 Chuck Bower
 Adrian Bunk
 Nick Bratby
-Renzo Campagna
 Craig Campbell
 John Chuang
 Tristan Colgate
@@ -105,13 +102,11 @@ Alain Henry
 Jens Hoefkens
 Martin Janke
 Nis Jorgensen
-Petr Kadlec
 Neil Kazaross
 Mathias Kegelmann
 Matija Kejzar
 Bert Van Kerckhove
 James F. Kibler
-Jonathan Kinsey
 Johnny Kirk
 Gerhard Knop
 Robert Konigsberg
@@ -127,7 +122,6 @@ John Marttila
 Alix Martin
 William Maslen
 Thomas Meyer
-Achim Mueller
 Daniel Murphy
 Magnar Naustdalslid
 Dave Neary
@@ -137,9 +131,7 @@ Peter Orum
 Roy Passfield
 Thomas Patrick
 Billie Patterson
-Mike Petch
 Zvezdan Petkovic
-Nardy Pillards
 Petri Pitkanen
 Sam Pottle
 Henrik Ravn
@@ -147,7 +139,6 @@ James Rech
 Jared Riley
 Klaus Rindholt
 Oliver Riordan
-Rod Roark
 Hans-Juergen Schaefer
 Steve Schreiber
 Hugh Sconyers
@@ -155,14 +146,12 @@ Martin Schrode
 Paul Selick
 Sho Sengoku
 Ian Shaw
-Albert Silver
 Alberta di Silvio
 Peter Sochovsky
 Mark Spencer
 Scott Steiner
 Maik Stiebler
 W. Stroop (Rob)
-Kaoru TAKAHASHI
 Yoshito Takeuchi
 Jacques Thiriat
 Malene Thyssen
