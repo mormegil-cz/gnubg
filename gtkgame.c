@@ -4072,63 +4072,60 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
     UserCommand(sz); 
   }
 
-  /* FIXME I'm trying to send commands only for vidget that changes,
-     no matter what I try this fuck wonæt work!! Please, someone else fix! */  
-
   rCompare = paw->apadjSkill[0]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_VERYGOOD]) > 0.0001 );
+  if(fabs( rCompare - arSkillLevel[SKILL_VERYGOOD]) > 0.0001 )
   {
      lisprintf(sz, "set analysis threshold verygood %.3f", rCompare );
      UserCommand(sz); 
   }
     
   rCompare = paw->apadjSkill[1]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_GOOD] ) > 0.0001 );
+  if(fabs( rCompare - arSkillLevel[SKILL_GOOD] ) > 0.0001 )
   {
      lisprintf(sz, "set analysis threshold good %.3f", rCompare );
      UserCommand(sz); 
   }
 
   rCompare = paw->apadjSkill[2]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_DOUBTFUL] ) > 0.0001 );
+  if(fabs( rCompare - arSkillLevel[SKILL_DOUBTFUL] ) > 0.0001 )
   {
      lisprintf(sz, "set analysis threshold doubtful %.3f", rCompare );
      UserCommand(sz); 
   }
 
   rCompare = paw->apadjSkill[3]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_BAD] ) > 0.0001 );
+  if(fabs( rCompare - arSkillLevel[SKILL_BAD] ) > 0.0001 )
   {
      lisprintf(sz, "set analysis threshold bad %.3f", rCompare );
      UserCommand(sz); 
   }
 
   rCompare = paw->apadjSkill[4]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_VERYBAD] ) > 0.0001 );
+  if(fabs( rCompare - arSkillLevel[SKILL_VERYBAD] ) > 0.0001 )
   {
      lisprintf(sz, "set analysis threshold verybad %.3f", rCompare );
      UserCommand(sz); 
   }
 
-  if(( rCompare = paw->apadjLuck[0]->value ) != arLuckLevel[LUCK_VERYGOOD] );
+  if(( rCompare = paw->apadjLuck[0]->value ) != arLuckLevel[LUCK_VERYGOOD] )
   {
      lisprintf(sz, "set analysis threshold verylucky %.3f", rCompare );
      UserCommand(sz); 
   }
 
-  if(( rCompare = paw->apadjLuck[1]->value ) != arLuckLevel[LUCK_GOOD] );
+  if(( rCompare = paw->apadjLuck[1]->value ) != arLuckLevel[LUCK_GOOD] )
   {
      lisprintf(sz, "set analysis threshold lucky %.3f", rCompare );
      UserCommand(sz); 
   }
 
-  if(( rCompare = paw->apadjLuck[2]->value ) != arLuckLevel[LUCK_BAD] );
+  if(( rCompare = paw->apadjLuck[2]->value ) != arLuckLevel[LUCK_BAD] )
   {
      lisprintf(sz, "set analysis threshold unlucky %.3f", rCompare );
      UserCommand(sz); 
   }
 
-  if(( rCompare = paw->apadjLuck[3]->value ) != arLuckLevel[LUCK_VERYBAD] );
+  if(( rCompare = paw->apadjLuck[3]->value ) != arLuckLevel[LUCK_VERYBAD] )
   {
      lisprintf(sz, "set analysis threshold veryunlucky %.3f", rCompare );
      UserCommand(sz); 
