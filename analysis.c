@@ -1225,7 +1225,7 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
     rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
                           psc->anUnforcedMoves[ i ] );
 
-  printf ( "Checker play rating:\t\t%-15s\t%-15s\n\n",
+  printf ( "Checker play rating:\t\t%-15s\t\t%-15s\n\n",
            aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
 
   printf ( "\nCube decisions statistics:\n\n" );
@@ -1366,7 +1366,7 @@ DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
                           psc->arErrorCheckerplay[ i ][ 0 ] /
                           psc->anUnforcedMoves[ i ] );
 
-  printf ( "Overall rating:\t\t\t%-15s\t%-15s\n\n",
+  printf ( "Overall rating:\t\t\t%-15s\t\t%-15s\n\n",
            aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
 
   if ( ! fCompleteAnalysis )
