@@ -1,3 +1,7 @@
+Thu Mar 28 16:48:24 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (SetCubeInfoMatch): fix bug in calculation of gammon prices.
+
 Thu Mar 28 15:09:24 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 	
 	* eval.c (SanityCheck): fix bug. SanityCheck would report

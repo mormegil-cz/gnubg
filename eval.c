@@ -1,3 +1,4 @@
+
 /*
  * eval.c
  *
@@ -4302,32 +4303,32 @@ extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
     {
       float rWin = 
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                0, pci->nCube, 0, pci->fCrawford,
                 aafMET, aafMETPostCrawford );
 
       float rWinGammon = 
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+                0, 2 * pci->nCube, 0, pci->fCrawford,
                 aafMET, aafMETPostCrawford );
 
       float rWinBG = 
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
+                0, 3 * pci->nCube, 0, pci->fCrawford,
                 aafMET, aafMETPostCrawford );
 
       float rLose = 
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+                0, pci->nCube, 1, pci->fCrawford,
                 aafMET, aafMETPostCrawford );
 
       float rLoseGammon = 
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+                0, 2 * pci->nCube, 1, pci->fCrawford,
                 aafMET, aafMETPostCrawford );
 
       float rLoseBG = 
         getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
+                0, 3 * pci->nCube, 1, pci->fCrawford,
                 aafMET, aafMETPostCrawford );
 
       float rCenter = ( rWin + rLose ) / 2.0;
