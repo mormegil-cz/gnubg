@@ -335,7 +335,7 @@ extern void CommandShowWarranty( char *sz ) {
     ShowPaged( aszWarranty );
 }
 
-extern void CommandShowKleinmann( char *sz ) {
+extern void CommandShowKleinman( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
     float fKC;
@@ -353,9 +353,9 @@ extern void CommandShowKleinmann( char *sz ) {
      
     PipCount( an, anPips );
  
-    fKC = KleinmannCount (anPips[1], anPips[0]);
+    fKC = KleinmanCount (anPips[1], anPips[0]);
     if (fKC == -1.0)
-        printf ("Pipcount unsuitable for Kleinmann Count.\n");
+        printf ("Pipcount unsuitable for Kleinman Count.\n");
     else
         printf ("Cubeless Winning Chance: %.4f\n", fKC);
  }

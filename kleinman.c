@@ -1,14 +1,14 @@
-/* kleinmann.c    Øystein Johansen 2000
+/* kleinman.c    Øystein Johansen 2000
  * This function/program gives the Cubeless Winning Probability in race
- * position. It is based on the Kleinmann Count.  */
+ * position. It is based on the Kleinman Count.  */
 
 /* Compile like this if you want a standalone program:
    
-   gcc -O2 -DSTANDALONE -o kleinmann kleinmann.c -lm
+   gcc -O2 -DSTANDALONE -o kleinman kleinman.c -lm
 
    or if you just like the function as a object:
 
-   gcc -O2 -c kleinmann.c 
+   gcc -O2 -c kleinman.c 
 
 */
 
@@ -19,7 +19,7 @@
 #include <math.h>
 
 extern float
-KleinmannCount (int nPipOnRoll, int nPipNotOnRoll)
+KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
 {
   int nDiff, nSum;
   float fK, fW;
@@ -57,9 +57,9 @@ main (int argc, char *argv[])
     {
       sscanf (argv[1], "%d", &a);
       sscanf (argv[2], "%d", &b);
-      KC = KleinmannCount (a, b);
+      KC = KleinmanCount (a, b);
       if (KC == -1)
-	printf ("Pipcount unsuitable for Kleinmann Count.\n");
+	printf ("Pipcount unsuitable for Kleinman Count.\n");
       else
 	printf ("Cubeless Winning Chance: %f\n", KC);
     }

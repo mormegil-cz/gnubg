@@ -156,9 +156,8 @@ static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	   CLASS_BEAROFF1 ) {
 	if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
 	    return -1;
-	
-	FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-		      anBoard, pec );
+
+	FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ], anBoard, pec );
 
 	if( fInterrupt )
 	    return -1;
