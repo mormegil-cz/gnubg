@@ -7861,7 +7861,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-      printf( _("GNU Backgammon %s  Copyright 1999, 2000, 2001, 2002, 2003 "
+      printf( _("GNU Backgammon %s  Copyright 1999-2004 "
                 "Gary Wong.\n"
                 "GNU Backgammon is free software, covered by the GNU "
                 "General Public License\n"
