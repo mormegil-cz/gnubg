@@ -368,8 +368,6 @@ void DoAcceleratedCheck(GtkWidget* board)
 
 GdkGLContext *glPixmapContext = NULL;
 
-unsigned char testbuf[ BOARD_WIDTH * 3 * BOARD_HEIGHT * 3 * 3 ];
-
 void SetupPreview(BoardData* bd, renderdata* prd)
 {
 	ClearTextures(bd, TRUE);
