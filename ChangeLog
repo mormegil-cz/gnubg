@@ -1,3 +1,9 @@
+Mon Aug 14 15:29:57 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* eval.c (EvaluatePositionCubeful): Bugfix: corrected some typos,
+	and initialize fDoubleBranch. Using an un-initialized value often
+ 	led to wrong evaluations.
+
 Mon Aug 14 14:39:08 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* set.c (CommandSetEvalReduced): Corrected faulty logic, where 

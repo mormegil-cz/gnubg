@@ -2988,8 +2988,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
     /* nCube is doubled; Cube owner is opponent */
 
-    SetCubeInfo ( &ciD, 2 * pci -> nCube, ! fMove, fMove );
-    SetCubeInfo ( &ciR, 2 * pci -> nCube, ! fMove, ! fMove );
+    SetCubeInfo ( &ciD, 2 * pci -> nCube, ! pci -> fMove, pci -> fMove );
+    SetCubeInfo ( &ciR, 2 * pci -> nCube, ! pci -> fMove, ! pci -> fMove );
 
     if ( pc != CLASS_OVER && nPlies > 0 ) {
 
@@ -3095,6 +3095,8 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     SetCubeInfo ( &ciND, pci -> nCube, pci -> fCubeOwner,
                   ! pci -> fMove );
+
+    fDoubleBranch = 0;
 
     if ( fCube ) {
 
