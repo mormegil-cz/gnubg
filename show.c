@@ -237,7 +237,9 @@ extern void CommandShowAutomatic( char *sz ) {
 
     static char *szOn = "On", *szOff = "Off";
     
-    outputf( "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
+    outputf( 
+            "analysis \t(Analyse game during play (tutor-mode)):      \t%s\n"
+            "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
 	    "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
 	    "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
 	    "game    \t(Start a new game after each one is completed):\t%s\n"
