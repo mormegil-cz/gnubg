@@ -1,3 +1,8 @@
+Sun Jan 19 10:20:32 2003  Gary Wong  <gtw@gnu.org>
+
+	* renderprefs.c: #define M_PI, if necessary (reported by Nardy
+	Pillards).
+
 Sat Jan 18 23:14:56 2003  Gary Wong  <gtw@gnu.org>
 
 	* renderprefs.c, renderprefs.h: New files.  Allow "set appearance"
