@@ -50,6 +50,7 @@ static int fComputerDecision = FALSE;
 #if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #endif
+#include "gtkboard.h"
 #include "gtkgame.h"
 #endif
 
@@ -164,6 +165,11 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 
     case MOVE_NORMAL:
 	fDoubled = FALSE;
+#if USE_GTK
+	if( fX )
+	    game_set_old_dice( BOARD( pwBoard ), pmr->n.anRoll[ 0 ],
+			       pmr->n.anRoll[ 1 ] );
+#endif
 	PlayMove( pmr->n.anMove, pmr->n.fPlayer );
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 
@@ -450,7 +456,8 @@ static void NewGame( void ) {
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
 	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
 	    pmr->g.nAutoDoubles++;
-	    outputf( "The cube is now at %d.\n", nCube <<= 1 );
+	    if( fDisplay )
+		outputf( "The cube is now at %d.\n", nCube <<= 1 );
 	    UpdateSetting( &nCube );
 	}
 	
@@ -497,6 +504,12 @@ static int ComputerTurn( void ) {
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
   char szBoard[ 256 ], szResponse[ 256 ];
   int i, c;
+
+  if( fAction )
+      fnAction();
+
+  if( fInterrupt )
+      return -1;
   
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
 		fCrawford, fJacoby, fBeavers );
@@ -918,8 +931,12 @@ extern void NextTurn( void ) {
 		 pmgi->nPoints > 1 ? "s" : "" );
 	
 #if USE_GUI
-	if( fX && fDisplay )
-	    ShowBoard();
+	if( fX ) {
+	    if( fDisplay )
+		ShowBoard();
+	    else
+		outputx();
+	}
 #endif
 	
 	if( nMatchTo && fAutoCrawford ) {
@@ -928,8 +945,11 @@ extern void NextTurn( void ) {
 		anScore[ pmgi->fWinner ] == nMatchTo - 1 &&
 		anScore[ !pmgi->fWinner ] != nMatchTo - 1;
 	}
-	
-	CommandShowScore( NULL );
+
+#if USE_GUI
+	if( !fX || fDisplay )
+#endif
+	    CommandShowScore( NULL );
 	
 	if( nMatchTo && anScore[ pmgi->fWinner ] >= nMatchTo ) {
 	    outputf( "%s has won the match.\n", ap[ pmgi->fWinner ].szName );

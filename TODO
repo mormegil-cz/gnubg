@@ -135,8 +135,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
   angle when rendering the border.
-** Make "next" and "previous" change the off-board dice (see
-  game_set_old_dice()).
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?
 ** Spin buttons with large values (e.g. the RNG seed settings) behave
@@ -144,6 +142,8 @@ duplication of effort and to make sure our changes merge easily.
   floats, which have less precision than ints).
 ** Don't show a cube in the board window in the Crawford game, or if cube
   use is disabled.
+** During a rollout, the OK button should be the grab widget.  Can we
+  fix that by temporarily modifying pwGrab?
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
