@@ -84,6 +84,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
   int anBoardTemp[ 2 ][ 25 ], i, j;
   float aar[ 6 ][ 6 ], ar[ NUM_ROLLOUT_OUTPUTS ], rMean = 0.0f;
   cubeinfo ciOpp;
+  movelist ml;
   
   /* first with player pci->fMove on roll */
 
@@ -96,24 +97,33 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
               2 * 25 * sizeof( int ) );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
-                        (cubeinfo *) pci, NULL, defaultFilters ) < 0 )
-        return ERR_VAL;
-      
-      SwapSides( anBoardTemp );
-      
-      if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
-                                (evalcontext *) pec ) < 0 )
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL,
+                              (cubeinfo *) pci, (evalcontext *) pec, 
+                              defaultFilters ) < 0 )
         return ERR_VAL;
 
-      if ( pec->fCubeful ) {
-        if ( pci->nMatchTo )
-          aar[ i ][ j ] = - mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+      if ( ! ml.cMoves ) {
+      
+        SwapSides( anBoardTemp );
+      
+        if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+                                  (evalcontext *) pec ) < 0 )
+          return ERR_VAL;
+
+        if ( pec->fCubeful ) {
+          if ( pci->nMatchTo )
+            aar[ i ][ j ] = - mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+          else
+            aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+        }
         else
-          aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+          aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+
       }
-      else
-        aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+      else {
+        aar[ i ][ j ] = ml.amMoves[ 0 ].rScore;
+        free ( ml.amMoves );
+      }
 
       rMean += aar[ i ][ j ];
 
@@ -128,24 +138,33 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       SwapSides ( anBoardTemp );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, &ciOpp, 
-                        NULL, defaultFilters ) < 0 )
-        return ERR_VAL;
-      
-      SwapSides( anBoardTemp );
-      
-      if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
-                                (evalcontext *) pec ) < 0 )
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL,
+                              (cubeinfo *) pci, (evalcontext *) pec, 
+                              defaultFilters ) < 0 )
         return ERR_VAL;
 
-      if ( pec->fCubeful ) {
-        if ( pci->nMatchTo )
-          aar[ i ][ j ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+      if ( ! ml.cMoves ) {
+      
+        SwapSides( anBoardTemp );
+      
+        if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+                                  (evalcontext *) pec ) < 0 )
+          return ERR_VAL;
+
+        if ( pec->fCubeful ) {
+          if ( pci->nMatchTo )
+            aar[ i ][ j ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+          else
+            aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
+        }
         else
-          aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
+          aar[ i ][ j ] = ar[ OUTPUT_EQUITY ];
+
       }
-      else
-        aar[ i ][ j ] = ar[ OUTPUT_EQUITY ];
+      else {
+        aar[ i ][ j ] = - ml.amMoves[ 0 ].rScore;
+        free ( ml.amMoves );
+      }
 
       rMean += aar[ i ][ j ];
 
@@ -162,6 +181,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
   int anBoardTemp[ 2 ][ 25 ], i, j;
   float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
   cubeinfo ciOpp;
+  movelist ml;
 
   memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
   ciOpp.fMove = ! pci->fMove;
@@ -172,24 +192,33 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
               2 * 25 * sizeof( int ) );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
-                        (cubeinfo *) pci, NULL, defaultFilters ) < 0 )
-        return ERR_VAL;
-      
-      SwapSides( anBoardTemp );
-      
-      if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
-                                (evalcontext *) pec ) < 0 )
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL,
+                              (cubeinfo *) pci, (evalcontext *) pec, 
+                              defaultFilters ) < 0 )
         return ERR_VAL;
 
-      if ( pec->fCubeful ) {
-        if ( pci->nMatchTo )
-          aar[ i ][ j ] = - mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+      if ( ! ml.cMoves ) {
+      
+        SwapSides( anBoardTemp );
+      
+        if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+                                  (evalcontext *) pec ) < 0 )
+          return ERR_VAL;
+
+        if ( pec->fCubeful ) {
+          if ( pci->nMatchTo )
+            aar[ i ][ j ] = - mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], &ciOpp );
+          else
+            aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+        }
         else
-          aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+          aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+
       }
-      else
-        aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+      else {
+        aar[ i ][ j ] = ml.amMoves[ 0 ].rScore;
+        free ( ml.amMoves );
+      }
 
       rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][j ] * 2.0f;
 

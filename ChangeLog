@@ -1,3 +1,10 @@
+Mon Dec 16 22:52:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (LuckFirst, LuckNormal): pass luck analysis evalcontext to
+	FindnSaveBestMoves.
+	(suggested by Oliver Riordan)
+
+
 Mon Dec 16 18:36:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* text.c (OutputRolloutContext): show RNG for quasi-random dice
