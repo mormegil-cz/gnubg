@@ -83,9 +83,9 @@ UpdateMoveList ( const hintdata *phd ) {
     
   rBest = pml->amMoves[ 0 ].rScore;
   if( fOutputMWC && ms.nMatchTo ) 
-    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("MWC") );
+    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 2, _("MWC") );
   else
-    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("Equity") );
+    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 2, _("Equity") );
     
   for( i = 0; i < pml->cMoves; i++ ) {
     float *ar = pml->amMoves[ i ].arEvalMove;
@@ -106,25 +106,26 @@ UpdateMoveList ( const hintdata *phd ) {
 
     /* gwc */
 
+#if 0
     for( j = 0; j < 5; j++ ) 
       gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
                           OutputPercent( ar[ aanColumns[ j ][ 1 ] ] ) );
-
     gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, 
                         OutputPercent( 1.0f - ar[ OUTPUT_WIN ] ) );
+#endif
 
     /* cubeless equity */
 
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, 
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 2, 
                         OutputEquity( pml->amMoves[ i ].rScore, &ci, TRUE ) );
 
     if( i ) {
-      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, 
+      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 3, 
                           OutputEquityDiff( pml->amMoves[ i ].rScore, 
                                             rBest, &ci ) );
     }
 	
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 4,
                         FormatMove( sz, ms.anBoard,
                                     pml->amMoves[ i ].anMove ) );
   }
@@ -552,7 +553,11 @@ MoveListMove ( GtkWidget *pw, hintdata *phd ) {
   UserCommand( szMove );
 
 }
-
+static void
+MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
+{
+  /* FIXME: Not implemented */  
+}
 
 static void
 MoveListCopy ( GtkWidget *pw, hintdata *phd ) {
@@ -576,6 +581,7 @@ CreateMoveListTools ( hintdata *phd ) {
   GtkWidget *pwShow = gtk_toggle_button_new_with_label ( _("Show") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
   GtkWidget *pwTempMap = gtk_button_new_with_label( _("Temp. Map") );
+  GtkWidget *pwDetails = gtk_button_new_with_label( _("Details") );
   GtkWidget *pwply;
   int i;
   char *sz;
@@ -593,7 +599,7 @@ CreateMoveListTools ( hintdata *phd ) {
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pwTools = gtk_table_new (8, 2, FALSE);
+  pwTools = gtk_table_new (2, 7, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -604,7 +610,7 @@ CreateMoveListTools ( hintdata *phd ) {
                     (GtkAttachOptions) (0), 0, 0);
   
   phd->pwEvalPly = gtk_hbox_new ( FALSE, 0 );
-  gtk_table_attach (GTK_TABLE (pwTools), phd->pwEvalPly, 0, 2, 1, 2, 
+  gtk_table_attach (GTK_TABLE (pwTools), phd->pwEvalPly, 2, 3, 0, 1, 
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
@@ -626,37 +632,42 @@ CreateMoveListTools ( hintdata *phd ) {
 
   }
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 2, 3,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 3, 4, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 2, 3,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 4, 5, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 3, 4,
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 5, 6, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 4, 5,
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwShow, 0, 2, 5, 6,
+  gtk_table_attach (GTK_TABLE (pwTools), pwShow, 2, 3, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 0, 2, 6, 7,
+  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 3, 5, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 0, 2, 7, 8,
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 5, 6, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwDetails, 6, 7, 0, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
   
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   gtk_widget_set_sensitive( pwMove, FALSE );
   gtk_widget_set_sensitive( pwCopy, FALSE );
+  gtk_widget_set_sensitive( pwDetails, FALSE );
   gtk_widget_set_sensitive( pwTempMap, FALSE );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
@@ -682,6 +693,8 @@ CreateMoveListTools ( hintdata *phd ) {
                       GTK_SIGNAL_FUNC( MoveListCopy ), phd );
   gtk_signal_connect( GTK_OBJECT( pwTempMap ), "clicked",
                       GTK_SIGNAL_FUNC( MoveListTempMapClicked ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwDetails ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListDetailsClicked ), phd );
 
   /* tool tips */
 
@@ -800,7 +813,7 @@ CheckHintButtons( hintdata *phd ) {
 }
 
 
-
+#if 0
 extern GtkWidget *
 CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
                 const int fDestroyOnMove ) {
@@ -869,7 +882,106 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     gtk_container_add( GTK_CONTAINER( pw ),
                        pwMoves );
 
-    pwHBox = gtk_hbox_new ( FALSE, 0 );
+    pwHBox = gtk_vbox_new ( FALSE, 0 );  /* Variable name does not match 
+					    actual widget */
+
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
+    gtk_box_pack_end ( GTK_BOX ( pwHBox ),
+                       CreateMoveListTools( phd ),
+                       FALSE, FALSE, 0 );
+    
+    gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
+			      GDK_SELECTION_TYPE_STRING, 0 );
+    
+    gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data", 
+                              phd, free );
+
+    HintSelect( pwMoves, 0, 0, NULL, phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
+			GTK_SIGNAL_FUNC( HintSelect ), phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
+			GTK_SIGNAL_FUNC( HintSelect ), phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_clear_event",
+			GTK_SIGNAL_FUNC( HintClearSelection ), phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
+			GTK_SIGNAL_FUNC( HintGetSelection ), phd );
+    
+    return pwHBox;
+
+}
+#endif
+
+extern GtkWidget *
+CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
+                const int fDestroyOnMove ) {
+
+    static char *aszTitle[] = {
+	N_("Rank"), 
+        N_("Type"), 
+#if 0
+        N_("Win"), 
+        N_("W g"), 
+        N_("W bg"), 
+        N_("Lose"), 
+        N_("L g"), 
+        N_("L bg"),
+#endif
+	"", 
+        N_("Diff."), 
+        N_("Move")
+    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL };
+    char *aszTemp[ 5 ];
+    GtkWidget *pwMoves;
+    GtkWidget *pw;
+    GtkWidget *pwHBox;
+    int i;
+
+    hintdata *phd = (hintdata *) malloc ( sizeof ( hintdata ) );
+
+    /* set titles */
+
+    phd->piHighlight = piHighlight;
+    phd->pml = pml;
+    phd->fButtonsValid = fButtonsValid;
+    phd->fDestroyOnMove = fDestroyOnMove;
+    phd->pwMove = NULL;
+
+    for ( i = 0; i < 5; i++ )
+     aszTemp[ i ] = gettext ( aszTitle[ i ] );
+
+    pwMoves = gtk_clist_new_with_titles( 5, aszTemp );
+
+    /* This function should only be called when the game state matches
+       the move list. */
+    assert( ms.fMove == 0 || ms.fMove == 1 );
+    
+    for( i = 0; i < 11; i++ ) {
+	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
+	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
+					    i == 1 || i == 4 ?
+					    GTK_JUSTIFY_LEFT :
+					    GTK_JUSTIFY_RIGHT );
+    }
+    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
+    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
+				  GTK_SELECTION_MULTIPLE );
+
+    for( i = 0; i < pml->cMoves; i++ )
+      gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
+
+
+    phd->pwMoves = pwMoves;
+    UpdateMoveList ( phd );
+
+    pw = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pw ),
+                                    GTK_POLICY_NEVER, 
+                                    GTK_POLICY_AUTOMATIC );
+    gtk_container_add( GTK_CONTAINER( pw ),
+                       pwMoves );
+
+    pwHBox = gtk_vbox_new ( FALSE, 0 );  /* Variable name does not match 
+					    actual widget */
 
     gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
     gtk_box_pack_end ( GTK_BOX ( pwHBox ),

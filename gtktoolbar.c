@@ -1,10 +1,7 @@
 /*
- * gtkbearoff.c
+ * gtktoolbar.c
  *
  * by Joern Thyssen <jth@gnubg.org>, 2003
- *
- * Based on Sho Sengoku's Equity Temperature Map
- * http://www46.pair.com/sengoku/TempMap/English/TempMap.html
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -36,23 +33,30 @@
 #include "backgammon.h"
 #include "gtktoolbar.h"
 #include "gtkboard.h"
+#include "gtkgame.h"
 #include "gtk-multiview.h"
 #include "i18n.h"
 #include "drawboard.h"
 #include "renderprefs.h"
+extern void NewDialog( gpointer *p, guint n, GtkWidget *pw ); 
 
 typedef struct _toolbarwidget {
 
-  GtkWidget *pwRoll;       /* button for "Roll" */
-  GtkWidget *pwDouble;     /* button for "Double" */
+  GtkWidget *pwNew;        /* button for "New" */
+  GtkWidget *pwOpen;       /* button for "Open" */
+  GtkWidget *pwImport;       /* button for "Roll" */
+  GtkWidget *pwSave;     /* button for "Double" */
+  GtkWidget *pwExport;    /* button for "Double" */
   GtkWidget *pwRedouble;   /* button for "Redouble" */
   GtkWidget *pwTake;       /* button for "Take" */
   GtkWidget *pwDrop;       /* button for "Drop" */
-  GtkWidget *pwPlay;       /* button for "Play" */
+  GtkWidget *pwResign;       /* button for "Play" */
+  GtkWidget *pwHint;      /* button for "Reset" */
   GtkWidget *pwReset;      /* button for "Reset" */
   GtkWidget *pwStop;       /* button for "Stop" */
   GtkWidget *pwStopParent; /* parent for pwStop */
   GtkWidget *pwEdit;       /* button for "Edit" */
+  GtkWidget *pwHideShowPanel; /* button hide/show panel */
   GtkWidget *pwButtonClockwise; /* button for clockwise */
 
 } toolbarwidget;
@@ -121,11 +125,12 @@ toggle_button_from_image ( GtkWidget *pwImage ) {
 
 static GtkWidget *
 toggle_button_from_images( GtkWidget *pwImageOff,
-                           GtkWidget *pwImageOn ) {
+                           GtkWidget *pwImageOn, char *sz ) {
 
   GtkWidget **aapw;
   GtkWidget *pwm = gtk_multiview_new();
   GtkWidget *pw = gtk_toggle_button_new();
+  GtkWidget *pwvbox = gtk_vbox_new(FALSE, 0); 
 
   aapw = (GtkWidget **) g_malloc( 3 * sizeof ( GtkWidget *) );
 
@@ -133,10 +138,13 @@ toggle_button_from_images( GtkWidget *pwImageOff,
   aapw[ 1 ] = pwImageOn;
   aapw[ 2 ] = pwm;
 
-  gtk_container_add( GTK_CONTAINER( pw ), pwm );
+  gtk_container_add( GTK_CONTAINER( pwvbox ), pwm );
 
   gtk_container_add( GTK_CONTAINER( pwm ), pwImageOff );
   gtk_container_add( GTK_CONTAINER( pwm ), pwImageOn );
+  gtk_container_add( GTK_CONTAINER( pwvbox ), gtk_label_new(sz));
+  gtk_container_add( GTK_CONTAINER( pw ), pwvbox);
+
   
   gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", aapw, g_free );
 
@@ -159,15 +167,15 @@ ToolbarSetClockwise( GtkWidget *pwToolbar, const int f ) {
 
   toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
   
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwButtonClockwise ),
-                                f );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwButtonClockwise ), f );
 
 }
-
-
+  
 static void
 ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
 
+	/* FIXME This function makes gnubg crash when pressing 
+	 * the direction button in the toolbar. */
   GtkWidget **aapw = 
     (GtkWidget **) gtk_object_get_user_data( GTK_OBJECT( pw ) );
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
@@ -206,16 +214,50 @@ ToolbarStop( GtkWidget *pw, gpointer unused ) {
 #endif
 }
 
+static void 
+OpenClicked( GtkWidget *pw, gpointer unused ) {
+
+  char *sz = getDefaultPath ( PATH_SGF );
+
+  GTKFileCommand(_("Open match, session, game or position"), 
+		   sz, "load match", "sgf", FDT_NONE);
+  if ( sz ) 
+    free ( sz );
+}
+
+static void 
+SaveClicked( GtkWidget *pw, gpointer unused ) {
+
+  char *sz = getDefaultFileName ( PATH_SGF );
+  GTKFileCommand(_("Save match, session, game or position"), 
+		   sz, "save", "sgf", FDT_SAVE);
+  if ( sz ) 
+    free ( sz );
+}
+
+static void 
+ImportClicked( GtkWidget *pw, gpointer unused ) {
+
+  GTKFileCommand(_("Import match, session, game or position"), 
+		   NULL, "import", "N", FDT_IMPORT);
+}
+
+static void 
+ExportClicked( GtkWidget *pw, gpointer unused ) {
+
+  GTKFileCommand(_("Export match, session, game or position"), 
+		   NULL, "export", "N", FDT_EXPORT_FULL);
+}
+
 
 extern GtkWidget *
 ToolbarGetStopParent ( GtkWidget *pwToolbar ) {
-
+	
   toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
 
   assert ( ptw );
 
   return ptw->pwStopParent;
-
 }
 
 extern int
@@ -224,9 +266,15 @@ ToolbarIsEditing( GtkWidget *pwToolbar ) {
   toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
 
   return gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ) );
-
 }
 
+extern void
+ToolbarActivateEdit( GtkWidget *pwToolbar ) {
+  /* This is only used fot the New->Position option */
+	
+  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ), TRUE );
+}
 
 extern toolbarcontrol
 ToolbarUpdate ( GtkWidget *pwToolbar,
@@ -237,7 +285,7 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
 
   toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
   toolbarcontrol c;
-  
+  int fEdit = ToolbarIsEditing( pwToolbar );
 
   assert ( ptw );
 
@@ -255,13 +303,14 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   if( fComputerTurn )
     c = C_PLAY;
 
-  if( ToolbarIsEditing( pwToolbar ) || ! fPlaying )
+  if( fEdit || ! fPlaying )
     c = C_NONE;
-
+#if 0
   gtk_widget_set_sensitive ( ptw->pwRoll, c == C_ROLLDOUBLE );
   gtk_widget_set_sensitive ( ptw->pwDouble, c == C_ROLLDOUBLE );
 
   gtk_widget_set_sensitive ( ptw->pwPlay, c == C_PLAY );
+#endif
 
   gtk_widget_set_sensitive ( ptw->pwTake,
                              c == C_TAKEDROP || c == C_AGREEDECLINE );
@@ -271,30 +320,56 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   gtk_widget_set_sensitive ( ptw->pwRedouble,
                              c == C_TAKEDROP && ! pms->nMatchTo );
 
+  gtk_widget_set_sensitive ( ptw->pwSave,  plGame != NULL );
+  gtk_widget_set_sensitive ( ptw->pwExport,  plGame != NULL);
+  gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
+
   return c;
 
-
 }
-
-
-
 
 
 extern GtkWidget *
 ToolbarNew ( void ) {
 
+	/* FIXME in this function:
+	 *
+	 * For GTK 2.0 there should be _real_ stock icons, so the 
+	 * the user cab change the theme
+	 *
+	 * The toolbar style should be user optional. Icons only or Text
+	 * only or both text and icons.
+	 * 
+	 * Several other bugs.....
+	 * 
+	 */
+
   GtkWidget *vbox_toolbar;
-  GtkWidget *pwToolbar;
+  GtkWidget *pwToolbar, *pwvbox;
 
   toolbarwidget *ptw;
-
+#if 0
 #include "xpm/tb_roll.xpm"
 #include "xpm/tb_double.xpm"
-#include "xpm/tb_redouble.xpm"
 #include "xpm/tb_edit.xpm"
+#endif
+#include "xpm/beaver.xpm"
 #include "xpm/tb_anticlockwise.xpm"
 #include "xpm/tb_clockwise.xpm"
-#ifndef USE_GTK2
+#include "xpm/resign.xpm"
+#include "xpm/hint_alt.xpm"
+#include "xpm/stock_new.xpm"
+#include "xpm/stock_open.xpm"
+#include "xpm/stock_import.xpm"
+#include "xpm/stock_save.xpm"
+#include "xpm/stock_export.xpm"
+#include "xpm/stock_ok.xpm"
+#include "xpm/stock_cancel.xpm"
+#include "xpm/stock_undo.xpm"
+#include "xpm/stock_edit.xpm"
+#include "xpm/stock_stop.xpm"
+#if 0
 #include "xpm/tb_no.xpm"
 #include "xpm/tb_yes.xpm"
 #include "xpm/tb_stop.xpm"
@@ -306,12 +381,11 @@ ToolbarNew ( void ) {
    */
   
   ptw = (toolbarwidget *) g_malloc ( sizeof ( toolbarwidget ) );
-  
-  vbox_toolbar = gtk_vbox_new ( FALSE, 0 );
+
+  vbox_toolbar = gtk_vbox_new (FALSE, 0);
   
   gtk_object_set_data_full ( GTK_OBJECT ( vbox_toolbar ), "user_data",
                              ptw, g_free );
-  
 #if USE_GTK2
   pwToolbar = gtk_toolbar_new ();
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
@@ -320,191 +394,180 @@ ToolbarNew ( void ) {
                           GTK_TOOLBAR_ICONS );
 #else
   pwToolbar = gtk_toolbar_new ( GTK_ORIENTATION_HORIZONTAL,
-                                GTK_TOOLBAR_ICONS );
+                                GTK_TOOLBAR_BOTH );
 #endif /* ! USE_GTK2 */
+  gtk_toolbar_set_space_style ( GTK_TOOLBAR ( pwToolbar ),
+                          GTK_TOOLBAR_SPACE_LINE );
 
+  gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
+		  GTK_RELIEF_NONE);
 
   gtk_box_pack_start( GTK_BOX( vbox_toolbar ), pwToolbar, 
                       FALSE, FALSE, 0 );
 
   gtk_toolbar_set_tooltips ( GTK_TOOLBAR ( pwToolbar ), TRUE );
 
-  /* roll button */
-
-  ptw->pwRoll = button_from_image( image_from_xpm_d ( tb_roll_xpm,
-                                                      pwToolbar ) );
-  gtk_signal_connect( GTK_OBJECT( ptw->pwRoll ), "clicked",
-                      GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwRoll ), FALSE );
+  /* new button */
   
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwRoll,
-                              _("Roll dice"), NULL );
+  gtk_toolbar_append_item ( GTK_TOOLBAR ( pwToolbar ),
+			       _("New"),
+                               _("Start new game, match, session or position"),
+                               NULL,
+			       image_from_xpm_d ( stock_new_xpm, pwToolbar),
+                               GTK_SIGNAL_FUNC( GTKNew ), NULL );
+  /* Open button */
+  gtk_toolbar_append_item ( GTK_TOOLBAR ( pwToolbar ),
+			       _("Open"),
+                              _("Open game, match, session or position"),
+                               NULL,
+			       image_from_xpm_d ( stock_open_xpm, pwToolbar),
+                               GTK_SIGNAL_FUNC( OpenClicked ), NULL );
 
-    /* double button */
+    /* Import button */
+  gtk_toolbar_append_item ( GTK_TOOLBAR ( pwToolbar ),
+			       _("Import"),
+                               _("Import game, match or position"), 
+                               NULL,
+			       image_from_xpm_d ( stock_import_xpm, pwToolbar),
+                               GTK_SIGNAL_FUNC( ImportClicked ), NULL );
 
-  ptw->pwDouble = button_from_image( image_from_xpm_d ( tb_double_xpm,
-                                                        pwToolbar ) );
-  gtk_signal_connect( GTK_OBJECT( ptw->pwDouble ), "clicked",
-                      GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwDouble ), FALSE );
+#define TB_BUTTON_ADD(pointer,icon,label,cb,arg,tooltip,tooltip2) \
+  pointer = gtk_button_new(); \
+  pwvbox = gtk_vbox_new(FALSE, 0); \
+  gtk_container_add(GTK_CONTAINER(pwvbox), \
+		  image_from_xpm_d (icon, pwToolbar)); \
+  gtk_container_add(GTK_CONTAINER(pwvbox), \
+		  gtk_label_new(label)); \
+  gtk_container_add(GTK_CONTAINER(pointer), pwvbox); \
+  gtk_signal_connect(GTK_OBJECT(pointer), "clicked", \
+		  GTK_SIGNAL_FUNC( cb ), arg ); \
+  gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), \
+			    pointer, tooltip, tooltip2 ); \
+  gtk_button_set_relief( GTK_BUTTON(pointer), \
+		  GTK_RELIEF_NONE);
 
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwDouble, _("Double"), NULL );
+#define TB_TOGGLE_BUTTON_ADD(pointer,icon,label,cb,arg,tooltip,tooltip2) \
+  pointer = gtk_toggle_button_new(); \
+  pwvbox = gtk_vbox_new(FALSE, 0); \
+  gtk_container_add(GTK_CONTAINER(pwvbox), \
+		  image_from_xpm_d (icon, pwToolbar)); \
+  gtk_container_add(GTK_CONTAINER(pwvbox), \
+		  gtk_label_new(label)); \
+  gtk_container_add(GTK_CONTAINER(pointer), pwvbox); \
+  gtk_signal_connect(GTK_OBJECT(pointer), "toggled", \
+		  GTK_SIGNAL_FUNC( cb ), arg ); \
+  gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), \
+			    pointer, tooltip, tooltip2 ); \
+  gtk_button_set_relief( GTK_BUTTON(pointer), \
+		  GTK_RELIEF_NONE);
+  
+  /* Save button */
+  TB_BUTTON_ADD(ptw->pwSave, stock_save_xpm, _("Save"), SaveClicked,
+		  NULL, 
+                  _("Save match, session, game or position"), 
+		  NULL) ;
+  
+  /* Export button */
 
-  /* take button */
+  TB_BUTTON_ADD(ptw->pwExport, stock_export_xpm, _("Export"), ExportClicked,
+		  NULL, 
+                          _("Export to another format"), 
+                               NULL);
 
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( pwToolbar ) );
-
-#if USE_GTK2
-  ptw->pwTake =
-    button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_YES, 
-                                                   GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-  ptw->pwTake =
-    button_from_image ( image_from_xpm_d ( tb_yes_xpm,
-                                           pwToolbar ) );
-#endif
-
-  gtk_signal_connect( GTK_OBJECT( ptw->pwTake ), "clicked",
-                      GTK_SIGNAL_FUNC( ButtonClickedYesNo ), "yes" );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwTake ), FALSE );
-
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwTake,
-                              _("Take the offered cube or "
-                                "accept the offered resignation"), NULL );
-
+  
+  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+  gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
+		  GTK_RELIEF_NONE);
+  
+  /* Take/accept button */
+  TB_BUTTON_ADD(ptw->pwTake, stock_ok_xpm, _("Accept"), ButtonClickedYesNo,
+		  "yes", 
+                  _("Take the offered cube or accept the offered resignation"),
+		  NULL) ;
+  
   /* drop button */
+  TB_BUTTON_ADD(ptw->pwDrop, stock_cancel_xpm, _("Decline"), ButtonClickedYesNo,
+		  "no", 
+                  _("Drop the offered cube or decline the offered resignation"),
+		  NULL) ;
 
-#if USE_GTK2
-  ptw->pwDrop =
-    button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_NO, 
-                                                   GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-  ptw->pwDrop =
-    button_from_image ( image_from_xpm_d ( tb_no_xpm,
-                                           pwToolbar ) );
-#endif
-
-  gtk_signal_connect( GTK_OBJECT( ptw->pwDrop ), "clicked",
-                      GTK_SIGNAL_FUNC( ButtonClickedYesNo ), "no" );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwDrop ), FALSE );
-
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwDrop,
-                              _("Drop the offered cube or "
-                                "decline offered resignation"), NULL );
-
-  /* ptw->pwRedouble button */
-
-  ptw->pwRedouble = button_from_image( image_from_xpm_d ( tb_redouble_xpm,
-                                                          pwToolbar ) );
-  gtk_signal_connect( GTK_OBJECT( ptw->pwRedouble ), "clicked",
-                      GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwRedouble ), FALSE );
-
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwRedouble,
-                              _("Redouble immediately (beaver)"), NULL );
+  /* Redouble button */
+  TB_BUTTON_ADD(ptw->pwRedouble, beaver_xpm, _("Beaver"), ButtonClicked,
+		  "redouble", 
+                  _("Redouble immediately (beaver)"),
+		  NULL) ;
+  
+  /* Resign button */
+  TB_BUTTON_ADD(ptw->pwResign, resign_xpm, _("Resign"), GTKResign,
+		  NULL, 
+                  _("Resign the current game"),
+		  NULL) ;
 
   /* play button */
-
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( pwToolbar ) );
-
-#if USE_GTK2
-  ptw->pwPlay = 
-    button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_EXECUTE, 
-                                                   GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-  ptw->pwPlay = gtk_button_new_with_label ( _("Play" ) );
-#endif
-  gtk_signal_connect( GTK_OBJECT( ptw->pwPlay ), "clicked",
-                      GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwPlay ), FALSE );
-
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwPlay,
-                              _("Force computer to play"), NULL );
-
+  
+  /* How often do you use the "play" button? I guess it's so seldom
+   * you won't mind using the pulldown menues */
+  
+  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+  
   /* reset button */
-
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( pwToolbar ) );
-
-#if USE_GTK2
-  ptw->pwReset = 
-    button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_UNDO, 
-                                                   GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-  ptw->pwReset = 
-    button_from_image ( image_from_xpm_d ( tb_undo_xpm,
-                                           pwToolbar ) );
-#endif
-  gtk_signal_connect( GTK_OBJECT( ptw->pwReset ), "clicked",
-                      GTK_SIGNAL_FUNC( ShowBoard ), NULL );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( ptw->pwReset ), FALSE );
-
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwReset,
-                              _("Undo moves"), NULL );
+  TB_BUTTON_ADD(ptw->pwReset, stock_undo_xpm, _("Undo"), ShowBoard,
+		  NULL, 
+                  _("Undo moves"),
+		  NULL) ;
+  /* Hint button */
+  TB_BUTTON_ADD(ptw->pwHint, hint_alt_xpm, _("Hint"), ButtonClicked,
+		  "hint", 
+                  _("Show the best moves or cube action"),
+		  NULL) ;
 
   /* edit button */
-
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( pwToolbar ) );
-
-  ptw->pwEdit =
-    toggle_button_from_image ( image_from_xpm_d ( tb_edit_xpm,
-                                                  pwToolbar ) );
-  gtk_signal_connect( GTK_OBJECT( ptw->pwEdit ), "toggled",
-                      GTK_SIGNAL_FUNC( ToolbarToggleEdit ), ptw );
-    
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwEdit,
-                              _("Edit position"), NULL );
+  TB_TOGGLE_BUTTON_ADD(ptw->pwEdit, stock_edit_xpm, _("Edit"), 
+		  ToolbarToggleEdit,
+		  ptw, 
+                  _("Edit position"),
+		  NULL) ;
 
   /* direction of play */
+  ptw->pwButtonClockwise = toggle_button_from_images ( 
+		  image_from_xpm_d( tb_anticlockwise_xpm, pwToolbar),
+		  image_from_xpm_d( tb_clockwise_xpm, pwToolbar),
+                  _("Direction"));
 
-  ptw->pwButtonClockwise =
-    toggle_button_from_images( image_from_xpm_d( tb_anticlockwise_xpm,
-                                                 pwToolbar ),
-                               image_from_xpm_d( tb_clockwise_xpm,
-                                                 pwToolbar ) );
-  gtk_signal_connect( GTK_OBJECT( ptw->pwButtonClockwise ), "toggled",
-                      GTK_SIGNAL_FUNC( ToolbarToggleClockwise ), ptw );
+  gtk_signal_connect(GTK_OBJECT(ptw->pwButtonClockwise), "toggled", 
+		  GTK_SIGNAL_FUNC( ToolbarToggleClockwise ), ptw );
+  gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), 
+			    ptw->pwButtonClockwise,
+			    _("Reverse direction of play"), NULL ); 
+  gtk_button_set_relief( GTK_BUTTON(ptw->pwButtonClockwise), 
+		  GTK_RELIEF_NONE);
 
-  gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
-                             ptw->pwButtonClockwise,
-                             _("Reverse direction of play"),
-                             NULL );
-
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwButtonClockwise ),
-                                fClockwise );
-                                 
-
+  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+  
   /* stop button */
-
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( pwToolbar ) );
-
+  
   ptw->pwStopParent = gtk_event_box_new();
-#if USE_GTK2
-  ptw->pwStop =
-    button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_STOP, 
-                                                   GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-  ptw->pwStop =
-    button_from_image ( image_from_xpm_d ( tb_stop_xpm,
-                                           pwToolbar ) );
-#endif
+  ptw->pwStop = gtk_button_new(),
   gtk_container_add( GTK_CONTAINER( ptw->pwStopParent ), ptw->pwStop );
 
-  gtk_signal_connect( GTK_OBJECT( ptw->pwStop ), "clicked",
-                      GTK_SIGNAL_FUNC( ToolbarStop ), NULL );
+  pwvbox = gtk_vbox_new(FALSE, 0); 
+  gtk_container_add(GTK_CONTAINER(pwvbox), 
+		  image_from_xpm_d (stock_stop_xpm, pwToolbar)); 
+  gtk_container_add(GTK_CONTAINER(pwvbox), 
+		  gtk_label_new(_("Stop")));
+  gtk_container_add(GTK_CONTAINER(ptw->pwStop), pwvbox); 
+  gtk_signal_connect(GTK_OBJECT(ptw->pwStop), "clicked", 
+		  GTK_SIGNAL_FUNC( ToolbarStop ), NULL );
+  gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), 
+			    ptw->pwStopParent, _("Stop the current operation"),
+			    NULL);
+  gtk_button_set_relief( GTK_BUTTON(ptw->pwStop), 
+		  GTK_RELIEF_NONE);
 
-  gtk_toolbar_append_widget ( GTK_TOOLBAR ( pwToolbar ),
-                              ptw->pwStopParent,
-                              _("Stop the current operation"), NULL );
-
-
+#undef TB_TOGGLE_BUTTON_ADD
+#undef TB_BUTTON_ADD
+  
   return vbox_toolbar;
 
 }
+

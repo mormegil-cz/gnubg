@@ -1,3 +1,23 @@
+Sun Aug 24 21:22:13 2003  Oystein Johansen  <oystein@gnubg.org>
+
+	This is a big patch to integrate the GUI. There are still
+	a couple of issues to be solved, but I'm commiting this, and hope
+	someone can help out with the remaining issues. (See my post to the
+	mailing list.
+
+	* render.c, boardpos.c, gtkprefs.c, gtkboard.[ch]: Stretch the 2D board
+	  to fit the screen better. The size is now 108 x 82.
+
+	* gtkgame.[ch]: Integrate the game record, annotation and message window
+	  with the main window. Add a "New" dialog. Improve GTKFileCommand
+
+	* gtkchequer.c gtkcube.c: Move the tool buttons under the
+          movelist/cubeevauation to save width.
+
+	* gtktoolbar.[ch]: Redesign of the toolbar.
+
+	* gnubg.c, backgammon.h: Small changes, for integration.
+	
 Sun Aug 24 17:18:13 2003  Oystein Johansen  <oystein@gnubg.org>
 
 	* gtkbearoff.c: Make pixmaps of the dice in the pulldown menu.

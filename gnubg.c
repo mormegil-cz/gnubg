@@ -208,6 +208,7 @@ int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int fMessage = FALSE;
+int fGameList = FALSE;
 int nThreadPriority = 0;
 int fCheat = FALSE;
 int afCheatRoll[ 2 ] = { 0, 0 };

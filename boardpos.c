@@ -31,22 +31,22 @@
 
 int positions[ 2 ][ 30 ][ 3 ] = { {
     { 51, 25, 7 },
-    { 90, 63, 6 }, { 84, 63, 6 }, { 78, 63, 6 }, { 72, 63, 6 }, { 66, 63, 6 },
-    { 60, 63, 6 }, { 42, 63, 6 }, { 36, 63, 6 }, { 30, 63, 6 }, { 24, 63, 6 },
-    { 18, 63, 6 }, { 12, 63, 6 },
+    { 90, 73, 6 }, { 84, 73, 6 }, { 78, 73, 6 }, { 72, 73, 6 }, { 66, 73, 6 },
+    { 60, 73, 6 }, { 42, 73, 6 }, { 36, 73, 6 }, { 30, 73, 6 }, { 24, 73, 6 },
+    { 18, 73, 6 }, { 12, 73, 6 },
     { 12, 3, -6 }, { 18, 3, -6 }, { 24, 3, -6 }, { 30, 3, -6 }, { 36, 3, -6 },
     { 42, 3, -6 }, { 60, 3, -6 }, { 66, 3, -6 }, { 72, 3, -6 }, { 78, 3, -6 },
     { 84, 3, -6 }, { 90, 3, -6 },
-    { 51, 41, -7 }, { 99, 63, 6 }, { 99, 3, -6 }, { 3, 63, 6 }, { 3, 3, -6 }
+    { 51, 51, -7 }, { 99, 73, 6 }, { 99, 3, -6 }, { 3, 73, 6 }, { 3, 3, -6 }
 }, {
     { 51, 25, 7 },
-    { 12, 63, 6 }, { 18, 63, 6 }, { 24, 63, 6 }, { 30, 63, 6 }, { 36, 63, 6 },
-    { 42, 63, 6 }, { 60, 63, 6 }, { 66, 63, 6 }, { 72, 63, 6 }, { 78, 63, 6 },
-    { 84, 63, 6 }, { 90, 63, 6 },
+    { 12, 73, 6 }, { 18, 73, 6 }, { 24, 73, 6 }, { 30, 73, 6 }, { 36, 73, 6 },
+    { 42, 73, 6 }, { 60, 73, 6 }, { 66, 73, 6 }, { 72, 73, 6 }, { 78, 73, 6 },
+    { 84, 73, 6 }, { 90, 73, 6 },
     { 90, 3, -6 }, { 84, 3, -6 }, { 78, 3, -6 }, { 72, 3, -6 }, { 66, 3, -6 },
     { 60, 3, -6 }, { 42, 3, -6 }, { 36, 3, -6 }, { 30, 3, -6 }, { 24, 3, -6 },
     { 18, 3, -6 }, { 12, 3, -6 },
-    { 51, 41, -7 }, { 3, 63, 6 }, { 3, 3, -6 }, { 99, 63, 6 }, { 99, 3, -6 }
+    { 51, 51, -7 }, { 3, 73, 6 }, { 3, 3, -6 }, { 99, 73, 6 }, { 99, 3, -6 }
 } };
 
 
@@ -82,10 +82,10 @@ PointArea( const int fClockwise, const int nSize,
     *pcy = positions[ fClockwise ][ n ][ 2 ] * nSize;
     
     if( *pcy > 0 ) {
-	*pcy = *pcy * ( c_chequer - 1 ) + 6 * nSize;
+	*pcy = *pcy * ( c_chequer - 1 ) + 10 * nSize;
 	*py += 6 * nSize - *pcy;
     } else
-	*pcy = -*pcy * ( c_chequer - 1 ) + 6 * nSize;
+	*pcy = -*pcy * ( c_chequer - 1 ) + 10 * nSize;
 
 
 
@@ -103,12 +103,12 @@ CubePosition( const int crawford_game, const int cube_use,
 	if( py ) *py = -32768;
 	if( porient ) *porient = -1;
     } else if( doubled ) {
-	if( px ) *px = 50 - 20 * doubled;
-	if( py ) *py = 32;
+	if( px ) *px = 50 - 25 * doubled;
+	if( py ) *py = 37;
 	if( porient ) *porient = doubled;
     } else {
 	if( px ) *px = 50;
-	if( py ) *py = 32 - 29 * cube_owner;
+	if( py ) *py = 37 - 34 * cube_owner;
 	if( porient ) *porient = cube_owner;
     }
 
@@ -120,7 +120,7 @@ ResignPosition( const int resigned, int *px, int *py, int *porient ) {
 
   if( resigned ) {
     if ( px ) *px = 50 + 30 * resigned / abs ( resigned );
-    if ( py ) *py = 32;
+    if ( py ) *py = 37;
     if( porient ) *porient = - resigned / abs ( resigned );
   }
   else {
@@ -153,8 +153,8 @@ ArrowPosition( const int clockwise, const int nSize, int *px, int *py ) {
 
     if ( px ) *px = Point29_x + Point29_dx / 2
 			- nSize * ARROW_SIZE / 2;
-    if ( py ) *py = Point29_y + Point29_dy + Point29_dx / 2
-			- nSize * ARROW_SIZE / 2;
+    if ( py ) *py = (Point29_y + Point29_dy + Point29_dx / 2
+			- nSize * ARROW_SIZE / 2) + nSize;
 
 
 }

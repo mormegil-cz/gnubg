@@ -47,6 +47,10 @@ typedef enum _dialogtype {
     NUM_DIALOG_TYPES
 } dialogtype;
 
+typedef enum _filedialogtype { 
+  FDT_NONE=0, FDT_SAVE, FDT_EXPORT, FDT_IMPORT, FDT_EXPORT_FULL
+} filedialogtype;
+
 extern GtkWidget *pwMain, *pwMenuBar;
 extern GtkWidget *pwToolbar;
 extern GtkTooltips *ptt;
@@ -118,6 +122,7 @@ extern void *GTKCalibrationStart( void ),
     GTKCalibrationEnd( void *context );
 extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data);
 extern void GTKWinCopy( GtkWidget *widget, gpointer data);
+extern void GTKResign( gpointer *p, guint n, GtkWidget *pw);
 extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC );
@@ -140,6 +145,8 @@ GtkTutor ( char *sz );
 
 extern void
 GTKCopy ( void );
+extern void
+GTKNew ( void );
 
 extern void
 UpdateGeometry ( const gnubgwindow gw );
@@ -167,6 +174,6 @@ GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
                int nMin, int nMax, int nInc );
 
 extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
-                            char *szPath, int fExportSetting );
+                            char *szPath, filedialogtype fdt );
 
 #endif

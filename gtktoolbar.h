@@ -48,6 +48,9 @@ extern int
 ToolbarIsEditing( GtkWidget *pwToolbar );
 
 extern void
+ToolbarActivateEdit( GtkWidget *pwToolbar );
+
+extern void
 ToolbarSetPlaying( GtkWidget *pwToolbar, const int f );
 
 extern void

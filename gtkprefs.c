@@ -197,11 +197,11 @@ Preview2D( renderdata *prd ) {
     GdkGC *gc;
     renderdata rd;
     renderimages ri;
-    unsigned char auch[ 108 * 3 * 72 * 3 * 3 ];
+    unsigned char auch[ 108 * 3 * 82 * 3 * 3 ];
     int anBoard[ 2 ][ 25 ];
     int anDice[ 2 ] = { 4, 3 };
-    int anDicePosition[ 2 ][ 2 ] = { { 70, 30 }, { 80, 32 } };
-    int anCubePosition[ 2 ] = { 50, 32 };
+    int anDicePosition[ 2 ][ 2 ] = { { 70, 35 }, { 80, 37 } };
+    int anCubePosition[ 2 ] = { 50, 37 };
     int anResignPosition[ 2 ] = { -32768, -32768 };
     int fResign = 0, nResignOrientation = 0;
 
@@ -216,12 +216,12 @@ Preview2D( renderdata *prd ) {
 		   anDicePosition, 1, anCubePosition, 0, 0, 
                    anResignPosition, fResign, nResignOrientation,
 		   NULL, 0, 0,
-                   0, 0, 108 * 3, 72 * 3 );
+                   0, 0, 108 * 3, 82 * 3 );
     FreeImages( &ri );
   
     gc = gdk_gc_new( ppm );
 
-    gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 72 * 3, GDK_RGB_DITHER_MAX,
+    gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 82 * 3, GDK_RGB_DITHER_MAX,
 			auch, 108 * 3 * 3 );
 
     gdk_gc_unref( gc );
@@ -230,7 +230,7 @@ Preview2D( renderdata *prd ) {
 #if USE_BOARD3D
 static void Preview3D(renderdata *prd)
 {
-	unsigned char auch[ 108 * 3 * 72 * 3 * 3 ];
+	unsigned char auch[ 108 * 3 * 82 * 3 * 3 ];
 	GdkGC *gc;
 
 	testSet3dSetting(&bd3d, prd);
@@ -238,7 +238,7 @@ static void Preview3D(renderdata *prd)
 	RenderBoard3d(&bd3d, prd, glpixPreview, auch);
 
 	gc = gdk_gc_new( ppm );
-	gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 72 * 3, GDK_RGB_DITHER_MAX,
+	gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 82 * 3, GDK_RGB_DITHER_MAX,
 					  auch, 108 * 3 * 3 );
 	gdk_gc_unref( gc );
 }
@@ -2282,7 +2282,7 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 		/* design preview */
 		gtk_box_pack_start (GTK_BOX(pwvbox), pwPreview[PI_DESIGN],
 			FALSE, FALSE, 0);
-		gtk_widget_set_usize(pwPreview[PI_DESIGN], 108 * 3, 72 * 3);
+		gtk_widget_set_usize(pwPreview[PI_DESIGN], 108 * 3, 82 * 3);
 	}
 	else
 	{
@@ -2549,7 +2549,7 @@ static void append_preview_page( GtkWidget *pwNotebook, GtkWidget *pwPage,
 
 void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 {
-    ppm = gdk_pixmap_new( bd->drawing_area->window, 108 * 3, 72 * 3, -1 );
+    ppm = gdk_pixmap_new( bd->drawing_area->window, 108 * 3, 82 * 3, -1 );
 
 #if HAVE_LIBXML2
 {
@@ -2648,6 +2648,11 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
+    ppm = gdk_pixmap_new( bd->drawing_area->window, 108 * 3, 82 * 3, -1 );
+    fUpdate = TRUE;
+    Preview( &rdAppearance );
+    fUpdate = FALSE;
+    
 #if USE_BOARD3D
 	colourDialog3d = Create3dColourDialog(bd->drawing_area3d->window, pwDialog);
 #endif

@@ -894,7 +894,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pchd->pwTools = pwTools = gtk_table_new (6, 2, FALSE);
+  pchd->pwTools = pwTools = gtk_table_new (2, 5, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -905,7 +905,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                     (GtkAttachOptions) (0), 0, 0);
 
   pw = gtk_hbox_new ( FALSE, 0 );
-  gtk_table_attach (GTK_TABLE (pwTools), pw, 0, 2, 1, 2, 
+  gtk_table_attach (GTK_TABLE (pwTools), pw, 2, 3, 0, 1, 
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
@@ -927,23 +927,23 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   }
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 2, 3,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 3, 4, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 2, 3,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 4, 5, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 3, 4,
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 4, 5,
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 2, 3, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 0, 2, 5, 6,
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 3, 5, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
@@ -1060,13 +1060,13 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   gtk_box_pack_start ( GTK_BOX ( pw ), pchd->pwFrame, FALSE, FALSE, 0 );
 
 
-  pwx = gtk_hbox_new ( 0, FALSE );
+  pwx = gtk_vbox_new ( 0, FALSE );
 
   gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pwx ), 
                      CreateCubeAnalysisTools ( pchd ), 
-                     FALSE, FALSE, 0 );
+                     TRUE, FALSE, 0 );
 
   gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", 
                             pchd, free );

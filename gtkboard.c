@@ -61,6 +61,7 @@
 animation animGUI = ANIMATE_SLIDE;
 int nGUIAnimSpeed = 4, fGUIBeep = TRUE, fGUIDiceArea = FALSE,
     fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE, fGUIShowIDs = TRUE,
+    fGUIShowGameInfo = TRUE,
     fGUIShowPips = TRUE, fGUIDragTargetHelp = TRUE;
 
 #if !GTK_CHECK_VERSION(1,3,0)
@@ -247,8 +248,8 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 	y = 0;
     }
 
-    if( y + cy > 72 * rdAppearance.nSize )
-	cy = 72 * rdAppearance.nSize - y;
+    if( y + cy > 82 * rdAppearance.nSize )
+	cy = 82 * rdAppearance.nSize - y;
 
     if( x + cx > 108 * rdAppearance.nSize )
 	cx = 108 * rdAppearance.nSize - x;
@@ -408,9 +409,9 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
       * These arguments should be dynamically calculated instead 
       * of hardcoded, but it's too painful right now.
       */
-    if( intersects( x0, y0, 0, 0, 60, 33, 36, 6 ) )
+    if( intersects( x0, y0, 0, 0, 60, 37, 36, 8 ) )
 	return POINT_RIGHT;
-    else if( intersects( x0, y0, 0, 0, 12, 33, 36, 6 ) )
+    else if( intersects( x0, y0, 0, 0, 12, 37, 36, 8 ) )
 	return POINT_LEFT;
 
 
@@ -2114,8 +2115,8 @@ void RollDice2d(BoardData* bd)
 		bd->x_dice[ 1 ] += 48;
 	}
 
-	bd->y_dice[ 0 ] = RAND % 10 + 28;
-	bd->y_dice[ 1 ] = RAND % 10 + 28;
+	bd->y_dice[ 0 ] = RAND % 9 + 33;
+	bd->y_dice[ 1 ] = RAND % 9 + 33;
 
 	if( rdAppearance.nSize > 0 )
 	{
@@ -2822,7 +2823,7 @@ else
 /* Create all of the size/colour-dependent pixmaps. */
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 
-    unsigned char auch[ 20 * 20 * 3 ], auchBoard[ 108 * 3 * 72 * 3 * 3 ],
+    unsigned char auch[ 20 * 20 * 3 ], auchBoard[ 108 * 3 * 82 * 3 * 3 ],
 	auchChequers[ 2 ][ 6 * 3 * 6 * 3 * 4 ];
     unsigned short asRefract[ 2 ][ 6 * 3 * 6 * 3 ];
     int i, nSizeReal;
@@ -2906,16 +2907,15 @@ static void board_size_allocate( GtkWidget *board,
       gtk_widget_size_allocate( bd->vbox_ids, &child_allocation );
       
     }
-
-    gtk_widget_get_child_requisition( bd->table, &requisition );
-    allocation->height -= requisition.height;
-    child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y + allocation->height;
-    child_allocation.width = allocation->width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->table, &child_allocation );
-    
-
+    if ( fGUIShowGameInfo ) {
+      gtk_widget_get_child_requisition( bd->table, &requisition );
+      allocation->height -= requisition.height;
+      child_allocation.x = allocation->x;
+      child_allocation.y = allocation->y + allocation->height;
+      child_allocation.width = allocation->width;
+      child_allocation.height = requisition.height;
+      gtk_widget_size_allocate( bd->table, &child_allocation );
+    }
 
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
@@ -2925,7 +2925,7 @@ static void board_size_allocate( GtkWidget *board,
 #endif
 	) {
       new_size = MIN( allocation->width / 108,
-                      ( allocation->height - 2 ) / 79 );
+                      ( allocation->height - 2 ) / 89 );
 
       /* subtract pixels used */
       allocation->height -= new_size * 7 + 2;
@@ -2933,7 +2933,7 @@ static void board_size_allocate( GtkWidget *board,
     }
     else {
       new_size = MIN( allocation->width / 108,
-                      ( allocation->height - 2 ) / 72 );
+                      ( allocation->height - 2 ) / 82 );
     }
     
     /* FIXME what should we do if new_size < 1?  If the window manager
@@ -2956,9 +2956,9 @@ static void board_size_allocate( GtkWidget *board,
     child_allocation.width = 108 * rdAppearance.nSize;
     cx = child_allocation.x = allocation->x + ( ( allocation->width -
 					     child_allocation.width ) >> 1 );
-    child_allocation.height = 72 * rdAppearance.nSize;
+    child_allocation.height = 82 * rdAppearance.nSize;
     child_allocation.y = allocation->y + ( ( allocation->height -
-					     72 * rdAppearance.nSize ) >> 1 );
+					     82 * rdAppearance.nSize ) >> 1 );
     gtk_widget_size_allocate( bd->drawing_area, &child_allocation );
 
     /* allocation for dice area */
@@ -2971,7 +2971,7 @@ static void board_size_allocate( GtkWidget *board,
       child_allocation.width = 15 * rdAppearance.nSize;
       child_allocation.x += ( 108 - 15 ) * rdAppearance.nSize;
       child_allocation.height = 7 * rdAppearance.nSize;
-      child_allocation.y += 72 * rdAppearance.nSize + 1;
+      child_allocation.y += 82 * rdAppearance.nSize + 1;
       gtk_widget_size_allocate( bd->dice_area, &child_allocation );
 		}
 
@@ -3362,8 +3362,9 @@ static void board_init( Board *board ) {
     /* board drawing area */
 
     bd->drawing_area = gtk_drawing_area_new();
+    /* gtk_widget_set_name(GTK_WIDGET(bd->drawing_area), "background"); */
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->drawing_area ), 108,
-			   72 );
+			   82 );
     gtk_widget_add_events( GTK_WIDGET( bd->drawing_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
@@ -3409,7 +3410,7 @@ static void board_init( Board *board ) {
     /* the rest */
 
     bd->table = gtk_hbox_new ( FALSE, 0 );
-    gtk_container_add ( GTK_CONTAINER ( board ), bd->table );
+    gtk_box_pack_start( GTK_BOX ( board ), bd->table, FALSE, TRUE, 0 );
 
     /* 
      * player 0 
@@ -3605,6 +3606,7 @@ static void board_init( Board *board ) {
 
     gtk_container_add ( GTK_CONTAINER ( board ),
                         bd->dice_area = gtk_drawing_area_new() );
+    /* gtk_widget_set_name( GTK_WIDGET(bd->dice_area), "dice_area"); */
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
     gtk_widget_add_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );

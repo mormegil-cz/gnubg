@@ -52,7 +52,7 @@ typedef enum _animation {
 
 extern animation animGUI;
 extern int nGUIAnimSpeed, fGUIBeep, fGUIDiceArea, fGUIHighDieFirst,
-    fGUIIllegal, fGUIShowIDs, fGUIShowPips, fGUISetWindowPos,
+    fGUIIllegal, fGUIShowIDs, fGUIShowGameInfo, fGUIShowPips, fGUISetWindowPos,
     fGUIDragTargetHelp;
 
 typedef struct _Board {
