@@ -136,15 +136,6 @@ static char *aszLinkText[] = {
   N_ ("[Next Game]"), 
   N_ ("[Last Game]") };
 
-/* Color of chequers */
-
-static char *aaszColorName[ NUM_HTML_EXPORT_TYPES ][ 2 ] = {
-  { N_("red"), N_("black") },
-  { N_("white"), N_("blue") },
-  { N_("white"), N_("red") }
-};
-
-
 static void
 WriteStyleSheet ( FILE *pf ) {
 
@@ -734,8 +725,9 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   /* pip counts */
 
   PipCount ( anBoard, anPips );
-  fprintf ( pf, _("Pip counts: Blue %d, White %d<br />\n"),
-            anPips[ 0 ], anPips[ 1 ] );
+  fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
+            ap[ 1 ].szName, anPips[ 0 ], 
+            ap[ 0 ].szName, anPips[ 1 ] );
   
 
 }
@@ -1102,8 +1094,9 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
   PipCount ( anBoard, anPips );
-  fprintf ( pf, _("Pip counts: Red %d, White %d<br />\n"),
-            anPips[ 0 ], anPips[ 1 ] );
+  fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
+            ap[ 1 ].szName, anPips[ 0 ], 
+            ap[ 0 ].szName, anPips[ 1 ] );
   
   fprintf ( pf, "</p>\n" );
 
@@ -1611,8 +1604,9 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* pip counts */
 
   PipCount ( anBoard, anPips );
-  fprintf ( pf, _("Pip counts: Black %d, Red %d<br />\n"),
-            anPips[ 0 ], anPips[ 1 ] );
+  fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
+            ap[ 1 ].szName, anPips[ 0 ], 
+            ap[ 0 ].szName, anPips[ 1 ] );
 
   fputs ( "</p>\n", pf );
 
@@ -1685,7 +1679,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s resigns %d points"), 
-              gettext ( aaszColorName[ het ][ pms->fTurn ] ),
+              ap[ pms->fTurn ].szName,
               pms->fResigned * pms->nCube
             );
   
@@ -1695,7 +1689,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s to play %d%d"),
-              gettext ( aaszColorName[ het ][ pms->fMove ] ),
+              ap[ pms->fMove ].szName,
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -1705,7 +1699,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s doubles to %d"),
-              gettext ( aaszColorName[ het ][ pms->fMove ] ),
+              ap[ pms->fMove ].szName,
               pms->nCube * 2
             );
 
@@ -1715,8 +1709,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s on roll, cube decision?"),
-              gettext ( aaszColorName[ het ][ pms->fMove ] ) );
-
+              ap[ pms->fMove ].szName );
 
   fputs ( "</p>\n", pf );
 
@@ -1764,19 +1757,19 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
 
   if ( pms->nMatchTo )
     sprintf ( szHeader,
-              _("%s (%s, %d pts) vs. %s (%s, %d pts) (Match to %d)"),
-              aaszColorName[ het ][ 0 ],
-              ap [ 0 ].szName, pms->anScore[ 0 ],
-              aaszColorName[ het ][ 1 ],
-              ap [ 1 ].szName, pms->anScore[ 1 ],
+              _("%s (%d pts) vs. %s (%d pts) (Match to %d)"),
+              ap[ 0 ].szName,
+              pms->anScore[ 0 ],
+              ap[ 1 ].szName,
+              pms->anScore[ 0 ],
               pms->nMatchTo );
   else
     sprintf ( szHeader,
-              _("%s (%s, %d pts) vs. %s (%s, %d pts) (money game)"),
-              aaszColorName[ het ][ 0 ],
-              ap [ 0 ].szName, pms->anScore[ 0 ],
-              aaszColorName[ het ][ 1 ],
-              ap [ 1 ].szName, pms->anScore[ 1 ] );
+              _("%s (%d pts) vs. %s (%d pts) (money game)"),
+              ap[ 0 ].szName,
+              pms->anScore[ 0 ],
+              ap[ 1 ].szName,
+              pms->anScore[ 1 ] );
 
 
   fprintf ( pf,
@@ -4056,18 +4049,18 @@ CommandExportPositionGammOnLine ( char *sz ) {
       fprintf ( pf, 
                 _("<strong>%s (%s, %d pts) vs. %s (%s, %d pts) "
                   "(Match to %d)</strong>\n"),
-                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 0 ],
+                ap[ 0 ].szName,
                 ap [ 0 ].szName, ms.anScore[ 0 ],
-                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 1 ],
+                ap[ 1 ].szName,
                 ap [ 1 ].szName, ms.anScore[ 1 ],
                 ms.nMatchTo );
     else
       fprintf ( pf,
                 _("<strong>%s (%s, %d pts) vs. %s (%s, %d pts) "
                   "(money game)</strong>\n"),
-                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 0 ],
+                ap[ 0 ].szName,
                 ap [ 0 ].szName, ms.anScore[ 0 ],
-                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 1 ],
+                ap[ 1 ].szName,
                 ap [ 1 ].szName, ms.anScore[ 1 ] );
 
     fputs ( "\n<!-- End Score -->\n\n", pf );

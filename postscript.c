@@ -79,12 +79,6 @@ static char *aszFontName[ NUM_FONTS ] = {
   "Courier-Bold-Oblique" 
 };
 
-static char *aszColorName[ 2 ] = {
-  N_("White"),
-  N_("Black")
-};
-  
-
 /* Output settings.  FIXME there should be commands to modify these! */
 static int cxPage = 595, cyPage = 842; /* A4 -- min (451,648) */
 static int nMag = 100; /* Board scale (percentage) -- min 1, max 127 */
@@ -571,8 +565,8 @@ PostScriptPipCounts ( FILE *pf, int anBoard[ 2 ][ 25 ], int fMove ) {
   RequestFont ( pf, FONT_RM, 10 );
   fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (" : "%d %d moveto (", 
            285 - 200 * nMag / 100, y );
-  fprintf ( pf, _("Pip counts: White %d, Black %d"), 
-            anPips[ 0 ], anPips[ 1 ] );
+  fprintf ( pf, _("Pip counts: %s %d, %s %d"), 
+            ap[ 0 ].szName, anPips[ 0 ], ap[ 1 ].szName, anPips[ 1 ] );
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
 
 }
@@ -964,7 +958,7 @@ PostScriptBoardHeader ( FILE *pf, matchstate *pms, const int iMove ) {
 
     fprintf ( pf,
               _("%s resigns %d points"), 
-              aszColorName[ pms->fTurn ],
+              ap[ pms->fTurn ].szName,
               pms->fResigned * pms->nCube
             );
   
@@ -974,7 +968,7 @@ PostScriptBoardHeader ( FILE *pf, matchstate *pms, const int iMove ) {
 
     fprintf ( pf,
               _("%s to play %d%d"),
-              aszColorName[ pms->fTurn ],
+              ap[ pms->fTurn ].szName,
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -984,7 +978,7 @@ PostScriptBoardHeader ( FILE *pf, matchstate *pms, const int iMove ) {
 
     fprintf ( pf,
               _("%s doubles to %d"),
-              aszColorName[ pms->fMove ],
+              ap[ pms->fMove ].szName,
               pms->nCube * 2
             );
 
@@ -994,7 +988,7 @@ PostScriptBoardHeader ( FILE *pf, matchstate *pms, const int iMove ) {
 
     fprintf ( pf,
               _("%s on roll, cube decision?"),
-              aszColorName[ pms->fTurn ]
+              ap[ pms->fTurn ].szName
             );
 
   fputs( fPDF ? ") Tj\n" : ") show\n", pf );
