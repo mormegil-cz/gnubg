@@ -261,8 +261,6 @@ MatchFromID ( int anDice[ 2 ],
   for( i = 0; i < 12 && szMatchID[ i ]; i++ )
     pch[ i ] = Base64( szMatchID[ i ] );
 
-  pch[ i ] = 0;
-
   for( i = 0; i < 3; i++ ) {
     *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
     *puch++ = ( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
