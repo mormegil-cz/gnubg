@@ -49,15 +49,17 @@ extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 static void ShowEvaluation( evalcontext *pec ) {
     
     outputf( "    %d-ply evaluation.\n"
-	    "    %d move search candidate%s.\n"
-	    "    %0.3g cubeless search tolerance.\n"
-	    "    %.0f%% speed.\n"
-	    "    %s.\n\n",
-	    pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
-	    "" : "s", pec->rSearchTolerance,
-	    (pec->nReduced) ? 100. * pec->nReduced / 21.0 : 100.,
-	    pec->fRelativeAccuracy ? "Consistent evaluations" :
-	    "Variable evaluations" );
+             "    %d move search candidate%s.\n"
+             "    %0.3g cubeless search tolerance.\n"
+             "    %.0f%% speed.\n"
+             "    %s evaluations.\n"
+             "    %s.\n\n",
+             pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
+             "" : "s", pec->rSearchTolerance,
+             (pec->nReduced) ? 100. * pec->nReduced / 21.0 : 100.,
+             pec->fCubeful ? "Cubeful" : "Cubeless",
+             pec->fRelativeAccuracy ? "Consistent evaluations" :
+             "Variable evaluations" );
 }
 
 static void ShowPaged( char **ppch ) {
