@@ -1,0 +1,362 @@
+
+gettext.h,455
+#define _GETTEXT_H 19,858
+#define _MAGIC 28,1022
+#define _MAGIC_SWAPPED 29,1048
+#define MO_REVISION_NUMBER 32,1154
+# define UINT_MAX_32_BITS 41,1508
+# define UINT_MAX_32_BITS 43,1552
+# define UINT_MAX 52,1869
+typedef unsigned nls_uint32;nls_uint3256,1945
+typedef unsigned short nls_uint32;nls_uint3259,2015
+typedef unsigned long nls_uint32;nls_uint3262,2093
+struct mo_file_headermo_file_header73,2353
+struct string_descstring_desc91,2885
+
+gettextP.h,538
+#define _GETTEXTP_H20,899
+#  define PARAMS(PARAMS40,1191
+#  define PARAMS(PARAMS42,1226
+# define internal_function47,1294
+# define __builtin_expect(__builtin_expect53,1472
+# define W(W57,1534
+# define SWAP(SWAP63,1634
+SWAP 66,1695
+struct expressionexpression76,1898
+struct parse_argsparse_args112,2996
+struct loaded_domainloaded_domain120,3121
+# define ZERO 148,3665
+# define ZERO 150,3687
+struct bindingbinding155,3843
+extern int _nl_msg_cat_cntr;167,4172
+struct loaded_l10nfile *_nl_find_domain PARAMS 169,4202
+
+hash-string.h,115
+#  define PARAMS(PARAMS22,905
+#  define PARAMS(PARAMS24,940
+#define HASHWORDBITS 29,1056
+hash_string 38,1375
+
+libgnuintl.h,332
+#define _LIBINTL_H	19,836
+# define LC_MESSAGES 30,1350
+#define __USE_GNU_GETTEXT 35,1482
+# define gettext 41,1652
+#  define PARAMS(PARAMS46,1737
+#  define PARAMS(PARAMS48,1772
+# define gettext(gettext108,3925
+# define dgettext(dgettext111,3989
+# define ngettext(ngettext114,4084
+# define dngettext(dngettext117,4172
+
+libgettext.h,449
+#define _LIBGETTEXT_H 19,855
+# define gettext(gettext29,1055
+# define dgettext(dgettext30,1087
+# define dcgettext(dcgettext31,1132
+# define ngettext(ngettext32,1188
+# define dngettext(dngettext34,1282
+# define dcngettext(dcngettext36,1389
+# define textdomain(textdomain38,1507
+# define bindtextdomain(bindtextdomain39,1563
+# define bind_textdomain_codeset(bind_textdomain_codeset40,1629
+#define gettext_noop(gettext_noop46,1845
+
+loadinfo.h,590
+#define _LOADINFO_H	20,895
+#  define PARAMS(PARAMS24,947
+#  define PARAMS(PARAMS26,982
+# define internal_function31,1050
+# define __builtin_expect(__builtin_expect37,1228
+# define PATH_SEPARATOR 43,1435
+# define PATH_SEPARATOR 46,1482
+#define CEN_REVISION	50,1556
+#define CEN_SPONSOR	51,1580
+#define CEN_SPECIAL	52,1603
+#define XPG_NORM_CODESET	53,1626
+#define XPG_CODESET	54,1653
+#define TERRITORY	55,1677
+#define CEN_AUDIENCE	56,1699
+#define XPG_MODIFIER	57,1724
+#define CEN_SPECIFIC	59,1751
+#define XPG_SPECIFIC	60,1824
+struct loaded_l10nfileloaded_l10nfile63,1891
+
+bindtextdom.c,663
+# define __libc_rwlock_define(__libc_rwlock_define38,1194
+# define __libc_rwlock_wrlock(__libc_rwlock_wrlock39,1237
+# define __libc_rwlock_unlock(__libc_rwlock_unlock40,1273
+# define _nl_default_dirname 47,1531
+# define _nl_domain_bindings 48,1582
+# define offsetof(offsetof53,1732
+extern const char _nl_default_dirname[59,1890
+extern struct binding *_nl_domain_bindings;62,1979
+# define BINDTEXTDOMAIN 73,2424
+# define BIND_TEXTDOMAIN_CODESET 74,2465
+#  define strdup(strdup76,2540
+# define BINDTEXTDOMAIN 79,2591
+# define BIND_TEXTDOMAIN_CODESET 80,2632
+__libc_rwlock_define 65,2103
+BINDTEXTDOMAIN 345,9154
+BIND_TEXTDOMAIN_CODESET 356,9453
+
+dcgettext.c,133
+# define DCGETTEXT 36,1265
+# define DCIGETTEXT 37,1296
+# define DCGETTEXT 39,1335
+# define DCIGETTEXT 40,1366
+DCGETTEXT 46,1505
+
+dgettext.c,128
+# define DGETTEXT 38,1285
+# define DCGETTEXT 39,1314
+# define DGETTEXT 41,1351
+# define DCGETTEXT 42,1380
+DGETTEXT 48,1519
+
+gettext.c,153
+# define __need_NULL23,877
+# define GETTEXT 43,1373
+# define DCGETTEXT 44,1400
+# define GETTEXT 46,1437
+# define DCGETTEXT 47,1464
+GETTEXT 54,1668
+
+finddomain.c,120
+static struct loaded_l10nfile *_nl_loaded_domains;41,1233
+_nl_find_domain 49,1501
+static void __attribute__ 180,5292
+
+loadmsgcat.c,1050
+# define _GNU_SOURCE 22,1033
+# define alloca 36,1236
+# define HAVE_ALLOCA 37,1269
+# define HAVE_MMAP	68,1827
+# define open 86,2212
+# define close 87,2235
+# define read 88,2259
+# define mmap 89,2282
+# define munmap 90,2305
+# define PLURAL_PARSE 98,2611
+# define PLURAL_PARSE 100,2654
+# define freea(freea106,2829
+# define alloca(alloca108,2867
+# define freea(freea109,2897
+# define O_BINARY 116,3124
+# define O_TEXT 117,3152
+# define O_BINARY 126,3378
+int _nl_msg_cat_cntr;132,3592
+static const struct expression plvar 139,3868
+static const struct expression plone 144,3946
+static struct expression germanic_plural 153,4054
+# define INIT_GERMANIC_PLURAL(INIT_GERMANIC_PLURAL167,4267
+static struct expression plvar;174,4416
+static struct expression plone;175,4448
+static struct expression germanic_plural;176,4480
+init_germanic_plural 179,4535
+# define INIT_GERMANIC_PLURAL(INIT_GERMANIC_PLURAL197,4899
+_nl_init_domain_conv 206,5100
+_nl_free_domain_conv 318,8308
+_nl_load_domain 339,8795
+_nl_unload_domain 549,14542
+
+localealias.c,798
+# define _GNU_SOURCE 22,1036
+# define alloca 34,1198
+# define HAVE_ALLOCA 35,1231
+#  define strchr 55,1533
+# define strcasecmp 67,1829
+#  define mempcpy 70,1880
+# define HAVE_MEMPCPY	72,1916
+# define internal_function81,2126
+# define freea(freea87,2291
+# define alloca(alloca89,2329
+# define freea(freea90,2359
+# define fgets(fgets95,2467
+# define feof(feof99,2602
+struct alias_mapalias_map103,2646
+static char *string_space;110,2712
+static size_t string_space_act;111,2739
+static size_t string_space_max;112,2771
+static struct alias_map *map;113,2803
+static size_t nmap;114,2833
+static size_t maxmap;115,2853
+static size_t read_alias_file PARAMS 119,2916
+read_alias_file 191,4446
+extend_alias_table 342,8100
+static void __attribute__ 361,8479
+alias_compare 374,8692
+
+textdomain.c,500
+# define __libc_rwlock_define(__libc_rwlock_define37,1171
+# define __libc_rwlock_wrlock(__libc_rwlock_wrlock38,1214
+# define __libc_rwlock_unlock(__libc_rwlock_unlock39,1250
+# define _nl_default_default_domain 46,1508
+# define _nl_current_default_domain 47,1573
+extern const char _nl_default_default_domain[53,1713
+extern const char *_nl_current_default_domain;56,1838
+# define TEXTDOMAIN 64,2160
+#  define strdup(strdup66,2209
+# define TEXTDOMAIN 69,2260
+__libc_rwlock_define 73,2380
+
+l10nflist.c,441
+# define _GNU_SOURCE	22,1064
+#  define strchr 32,1216
+#  define NULL 48,1531
+#  define NULL 50,1566
+#  define stpcpy(stpcpy61,1849
+argz_count__ 76,2243
+# define __argz_count(__argz_count91,2508
+argz_stringify__ 100,2872
+# define __argz_stringify(__argz_stringify115,3138
+argz_next__ 123,3414
+# define __argz_next(__argz_next142,3776
+pop 150,3980
+_nl_make_l10nflist 164,4246
+_nl_normalize_codeset 347,9292
+stpcpy 396,10298
+
+explodename.c,101
+#  define NULL 31,1096
+#  define NULL 33,1131
+_nl_find_language 40,1198
+_nl_explode_name 52,1393
+
+dcigettext.c,2935
+# define _GNU_SOURCE	22,1055
+# define alloca 32,1176
+# define HAVE_ALLOCA 33,1209
+extern int errno;50,1452
+# define __set_errno(__set_errno53,1497
+#  define strchr 62,1657
+# define __libc_lock_define_initialized(__libc_lock_define_initialized89,2124
+# define __libc_lock_lock(__libc_lock_lock90,2177
+# define __libc_lock_unlock(__libc_lock_unlock91,2209
+# define __libc_rwlock_define_initialized(__libc_rwlock_define_initialized92,2243
+# define __libc_rwlock_rdlock(__libc_rwlock_rdlock93,2298
+# define __libc_rwlock_unlock(__libc_rwlock_unlock94,2334
+# define alignof(alignof99,2443
+# define alignof(alignof101,2491
+# define _nl_default_default_domain 109,2804
+# define _nl_current_default_domain 110,2869
+# define _nl_default_dirname 111,2934
+# define _nl_domain_bindings 112,2985
+# define offsetof(offsetof117,3135
+# define getcwd 126,3438
+#  define stpcpy 128,3479
+# define tfind 130,3513
+#  define getcwd(getcwd134,3584
+#define PATH_INCR 147,3907
+# define _POSIX_PATH_MAX 158,4284
+# define PATH_MAX 162,4367
+# define PATH_MAX 171,4672
+# define PATH_MAX 175,4726
+# define ISSLASH(ISSLASH186,5198
+# define HAS_DEVICE(HAS_DEVICE187,5246
+# define IS_ABSOLUTE_PATH(IS_ABSOLUTE_PATH190,5372
+# define IS_PATH_WITH_DIR(IS_PATH_WITH_DIR191,5438
+# define ISSLASH(ISSLASH195,5564
+# define IS_ABSOLUTE_PATH(IS_ABSOLUTE_PATH196,5597
+# define IS_PATH_WITH_DIR(IS_PATH_WITH_DIR197,5643
+# define HAVE_LOCALE_NULL207,6115
+struct known_translation_tknown_translation_t212,6238
+static void *root;239,6895
+#  define tsearch 242,6929
+transcmp 248,7115
+const char _nl_default_default_domain[276,7866
+const char *_nl_current_default_domain 279,7977
+const char _nl_default_dirname[282,8109
+struct binding *_nl_domain_bindings;286,8240
+static char *plural_lookup PARAMS 289,8317
+# define ADD_BLOCK(ADD_BLOCK307,8996
+# define FREE_BLOCKS(FREE_BLOCKS308,9044
+struct block_listblock_list310,9091
+# define ADD_BLOCK(ADD_BLOCK315,9158
+# define FREE_BLOCKS(FREE_BLOCKS326,9610
+# define alloca(alloca335,9883
+typedef struct transmem_listtransmem_list341,10011
+} transmem_block_t;transmem_block_t345,10091
+static struct transmem_list *transmem_list;346,10111
+typedef unsigned char transmem_block_t;transmem_block_t348,10161
+# define DCIGETTEXT 357,10483
+# define DCIGETTEXT 359,10522
+# define ENABLE_SECURE 370,10862
+# define DETERMINE_SECURE371,10906
+#  define getuid(getuid374,10959
+#  define getgid(getgid377,11009
+#  define geteuid(geteuid380,11060
+#  define getegid(getegid383,11119
+static int enable_secure;385,11156
+# define ENABLE_SECURE 386,11182
+# define DETERMINE_SECURE 387,11226
+DCIGETTEXT 401,11685
+_nl_find_msg 677,19398
+# define INITIAL_BLOCK_SIZE	816,23511
+plural_lookup 968,27059
+plural_eval 1009,28188
+category_to_name 1090,29951
+guess_category_value 1150,31018
+stpcpy 1199,32690
+mempcpy 1211,32882
+static void __attribute__ 1224,33126
+
+dcngettext.c,136
+# define DCNGETTEXT 36,1266
+# define DCIGETTEXT 37,1299
+# define DCNGETTEXT 39,1338
+# define DCIGETTEXT 40,1371
+DCNGETTEXT 46,1510
+
+dngettext.c,133
+# define DNGETTEXT 38,1286
+# define DCNGETTEXT 39,1317
+# define DNGETTEXT 41,1356
+# define DCNGETTEXT 42,1387
+DNGETTEXT 48,1574
+
+ngettext.c,158
+# define __need_NULL23,878
+# define NGETTEXT 45,1395
+# define DCNGETTEXT 46,1424
+# define NGETTEXT 48,1463
+# define DCNGETTEXT 49,1492
+NGETTEXT 56,1698
+
+plural.y,348
+# define FREE_EXPRESSION 40,1573
+# define FREE_EXPRESSION 42,1623
+# define __gettextparse 43,1667
+#define YYLEX_PARAM	46,1714
+#define YYPARSE_PARAM	47,1767
+new_exp 78,2729
+new_exp_0 110,3417
+new_exp_1 117,3526
+new_exp_2 128,3716
+new_exp_3 141,3967
+start:177,4886
+exp:185,4994
+FREE_EXPRESSION 236,5693
+yylex 263,6138
+yyerror 408,8245
+
+localcharset.c,261
+# define WIN3242,1243
+# define WIN32_LEAN_AND_MEAN54,1417
+# define DIRECTORY_SEPARATOR 59,1504
+# define ISSLASH(ISSLASH63,1561
+# define volatile 73,2075
+static char * volatile charset_aliases;78,2301
+get_charset_aliases 82,2429
+locale_charset 203,5155
+
+intl-compat.c,195
+gettext 83,3260
+dgettext 91,3341
+dcgettext 100,3477
+ngettext 110,3654
+dngettext 120,3813
+dcngettext 131,4027
+textdomain 143,4282
+bindtextdomain 151,4384
+bind_textdomain_codeset 160,4538
