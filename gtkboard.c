@@ -457,7 +457,7 @@ static void Confirm( BoardData *bd ) {
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
     GdkPixmap *pm_swap;
-    int n, dest, x, y, bar;
+    int i, n, dest, x, y, bar;
 
     switch( event->type ) {
     case GDK_BUTTON_PRESS:
@@ -485,19 +485,12 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     case GDK_BUTTON_PRESS:
 	bd->drag_point = board_point( board, bd, x, y );
 
-	/* FIXME if the dice are set, and nDragPoint is between 1 and 24 and
-	   contains no chequers of the player on roll, then scan through all
-	   the legal moves looking for the one which makes that point with
-	   the smallest pip count, make it and return. */
-
 	/* FIXME if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
 	   then bear off as many chequers as possible, and return. */
 	
-	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0
-	    || ( bd->drag_point < 28 && !bd->points[ bd->drag_point ] ) ) {
-	    /* Click on empty point, or not on a point at all */
+	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
+	    /* Click on illegal area. */
 	    gdk_beep();
-
 	    bd->drag_point = -1;
 	    
 	    return TRUE;
@@ -531,6 +524,104 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		board_redraw_dice( board, bd, 1 );
 	    }
 	    
+	    return TRUE;
+	}
+
+	if( bd->drag_point > 0 && bd->drag_point < 25 &&
+	    ( !bd->points[ bd->drag_point ] ||
+	    bd->points[ bd->drag_point ] == -bd->turn ) ) {
+	    /* Click on an empty point or opponent blot; try to make the
+	       point. */
+	    int n[ 2 ];
+	    int old_points[ 28 ], points[ 2 ][ 25 ];
+	    unsigned char key[ 10 ];
+	    
+	    memcpy( old_points, bd->points, sizeof old_points );
+	    
+	    if( !bd->dice[ 0 ] ) {
+		gdk_beep();
+		bd->drag_point = -1;
+	    
+		return TRUE;
+	    }
+
+	    bd->drag_colour = bd->turn;
+	    bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
+	    
+	    if( bd->dice[ 0 ] == bd->dice[ 1 ] ) {
+		/* Rolled a double; find the two closest chequers to make
+		   the point. */
+		int c = 0;
+
+		n[ 0 ] = n[ 1 ] = -1;
+		
+		for( i = 0; i < 4 && c < 2; i++ ) {
+		    int j = bd->drag_point + bd->dice[ 0 ] * bd->drag_colour *
+			( i + 1 );
+
+		    if( j < 0 || j > 25 )
+			break;
+
+		    while( c < 2 && bd->points[ j ] * bd->drag_colour > 0 ) {
+			/* temporarily take chequer, so it's not used again */
+			bd->points[ j ] -= bd->drag_colour;
+			n[ c++ ] = j;
+		    }
+		}
+		
+		/* replace chequers removed above */
+		for( i = 0; i < c; i++ )
+		    bd->points[ n[ i ] ] += bd->drag_colour;
+	    } else {
+		/* Rolled a non-double; take one chequer from each point
+		   indicated by the dice. */
+		n[ 0 ] = bd->drag_point + bd->dice[ 0 ] * bd->drag_colour;
+		n[ 1 ] = bd->drag_point + bd->dice[ 1 ] * bd->drag_colour;
+	    }
+	    
+	    if( n[ 0 ] >= 0 && n[ 0 ] <= 25 && n[ 1 ] >= 0 && n[ 1 ] <= 25 &&
+		bd->points[ n[ 0 ] ] * bd->drag_colour > 0 &&
+		bd->points[ n[ 1 ] ] * bd->drag_colour > 0 ) {
+		/* the point can be made */
+		if( bd->points[ bd->drag_point ] )
+		    /* hitting the opponent in the process */
+		    bd->points[ bar ] -= bd->drag_colour;
+		
+		bd->points[ n[ 0 ] ] -= bd->drag_colour;
+		bd->points[ n[ 1 ] ] -= bd->drag_colour;
+		bd->points[ bd->drag_point ] = bd->drag_colour << 1;
+		
+		read_board( bd, points );
+		PositionKey( points, key );
+
+		for( i = 0; i < bd->move_list.cMoves; i++ )
+		    if( EqualKeys( bd->move_list.amMoves[ i ].auch, key ) ) {
+			update_move( bd );
+
+			board_expose_point( board, bd, n[ 0 ] );
+			board_expose_point( board, bd, n[ 1 ] );
+			board_expose_point( board, bd, bd->drag_point );
+			board_expose_point( board, bd, bar );
+
+			goto finished;
+		    }
+
+		/* the move to make the point wasn't legal; undo it. */
+		memcpy( bd->points, old_points, sizeof bd->points );
+	    }
+	    
+	    gdk_beep();
+	    
+	finished:
+	    bd->drag_point = -1;
+	    return TRUE;
+	}
+
+	if( !bd->points[ bd->drag_point ] ) {
+	    /* click on empty bearoff tray */
+	    gdk_beep();
+	    
+	    bd->drag_point = -1;
 	    return TRUE;
 	}
 	
@@ -621,7 +712,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( dest == -1 || ( bd->drag_colour > 0 ? bd->points[ dest ] < -1
 			     : bd->points[ dest ] > 1 ) || dest == bar ||
 	    dest > 27 ) {
-	    /* FIXME check with owner that move is legal */
+	    /* FIXME check move is legal */
 	    gdk_beep();
 	    
 	    dest = bd->drag_point;
@@ -827,6 +918,7 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
+    gtk_label_set_text( GTK_LABEL( bd->move ), NULL );
 
     if( bd->dice[ 0 ] || bd->dice_opponent[ 0 ] ) {
 	GenerateMoves( &bd->move_list, bd->old_board,
@@ -1742,15 +1834,15 @@ static void board_init( Board *board ) {
     bd->pm_board = NULL;
 
     bd->drawing_area = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->drawing_area ), 108 * 3,
-			   72 * 3 );
+    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->drawing_area ), 108,
+			   72 );
     gtk_widget_set_events( GTK_WIDGET( bd->drawing_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_MOTION_MASK | GDK_BUTTON_PRESS_MASK |
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area );
 
     bd->dice_area = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15 * 3, 8 * 3 );
+    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
     gtk_widget_set_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->dice_area );
