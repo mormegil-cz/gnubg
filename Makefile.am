@@ -100,7 +100,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	mec.h mec.c relational.h relational.c
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
-bin_PROGRAMS = gnubg makebearoff makehyper
+bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
 
 gnubg_LDFLAGS= @PYTHON_LDFLAGS@
 
@@ -170,6 +170,15 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
 
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makehyper_DEPENDENCIES = lib/libevent.a
+
+bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
+	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+        i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
+	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)  $(BR1_SOURCES)
+bearoffdump_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
+bearoffdump_DEPENDENCIES = lib/libevent.a
+
 
 erftest_SOURCES = erftest.c
 
