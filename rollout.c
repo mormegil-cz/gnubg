@@ -451,8 +451,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   cubeinfo *pci;
   cubedecision cd;
   int *pf, ici, i;
+  evalcontext ec;
 
-  float arCf[ NUM_CUBEFUL_OUTPUTS ];
+  float arDouble[ NUM_CUBEFUL_OUTPUTS ];
   float aar[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
   int nTruncate = prc->nTruncate;
@@ -470,6 +471,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   cubeinfo pciLocal[ MAX_ROLLOUT_CUBEINFO ];
   int pfFinished[ MAX_ROLLOUT_CUBEINFO ];
 #endif
+
   
   for ( ici = 0; ici < cci; ici++ )
     pfFinished[ ici ] = TRUE;
@@ -493,7 +495,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                                       &prc->aecCube[ pci->fMove ] ) < 0 ) 
             return -1;
 
-          cd = FindCubeDecision ( arCf, aar, pci );
+          cd = FindCubeDecision ( arDouble, aar, pci );
 
           switch ( cd ) {
 
@@ -514,24 +516,15 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
             /* assign outputs */
 
-            for ( i = 0; i < OUTPUT_LOSEBACKGAMMON; i++ )
+            for ( i = 0; i <= OUTPUT_EQUITY; i++ )
               aarOutput[ ici ][ i ] = aar[ 0 ][ i ];
 
             aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
-              arCf[ OUTPUT_OPTIMAL ];
+              arDouble[ OUTPUT_OPTIMAL ];
 
             /* invert evaluations if required */
 
-            if ( iTurn & 1 ) {
-
-              InvertEvaluation ( aarOutput[ ici ] );
-              if ( pci->nMatchTo )
-                aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
-                  1.0 - aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ];
-              else
-                aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
-
-            }
+            if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
 
             break;
 
@@ -568,6 +561,23 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         if( fInterrupt )
           return -1;
 
+        /* check if game is over */
+
+        if ( ClassifyPosition ( aanBoard[ ici ] ) == CLASS_OVER ) {
+
+          GeneralEvaluationE ( aarOutput[ ici ],
+                               aanBoard[ ici ],
+                               pci, &prc->aecCube[ pci->fMove ] );
+
+          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
+            aarOutput[ ici ][ OUTPUT_EQUITY ];
+
+          if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
+
+          *pf = FALSE;
+          
+        }
+          
         /* Invert board and more */
 	
         SwapSides( aanBoard[ ici ] );
@@ -587,18 +597,25 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
   /* evaluation at truncation */
 
-    for ( ici = 0, pci = pciLocal, pf = pfFinished;
-          ici < cci; ici++, pci++, pf++ ) {
+  for ( ici = 0, pci = pciLocal, pf = pfFinished;
+        ici < cci; ici++, pci++, pf++ ) {
 
-      if ( *pf ) {
+    if ( *pf ) {
 
-        GeneralEvaluationE ( aarOutput[ ici ],
-                             aanBoard[ ici ],
-                             pci, &prc->aecCube[ pci->fMove ] );
+      /* ensure cubeful evaluation at truncation */
 
-        if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
+      memcpy ( &ec, &prc->aecCube[ pci->fMove ], sizeof ( ec ) );
+      ec.fCubeful = prc->fCubeful;
+
+      /* evaluation at truncation */
+
+      GeneralEvaluationE ( aarOutput[ ici ],
+                           aanBoard[ ici ],
+                           pci, &ec );
+
+      if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ] );
           
-      }
+    }
 
       /* convert to MWC or normalize against old cube value. */
 
