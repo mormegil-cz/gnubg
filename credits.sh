@@ -21,6 +21,7 @@ Eric Augustine
 Steve Baedke
 Chuck Bower
 Craig Campbell
+John Chuang
 Tristan Colgate
 Bill Davidson
 Eric Groleau

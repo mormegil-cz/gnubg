@@ -7,6 +7,7 @@ char *aszCredits[] = {
     "Hans Berliner",
     "Chuck Bower",
     "Craig Campbell",
+    "John Chuang",
     "Tristan Colgate",
     "Bill Davidson",
     "Eric Groleau",
