@@ -397,7 +397,7 @@ ImportJF( FILE * fp, char *szFileName) {
 static int fWarned, fPostCrawford;
 
 
-static void
+static int
 ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
              const int anDice[ 2 ] ) {
 
@@ -455,7 +455,9 @@ ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
 
         ++*pc;
 
-        assert ( *pc <= 4 );
+        if ( *pc > 4 )
+          /* something is wrong */
+          return -1;
 
         /* terminator */
 
@@ -473,6 +475,8 @@ ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
   if ( c != *pc )
     /* reorder moves */
     CanonicalMoveOrder ( anMove );
+
+  return 0;
 
 }
 
@@ -589,8 +593,10 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             
             /* remove consolidation */
             
-            ExpandMatMove ( ms.anBoard, pmr->n.anMove, &c, 
-                            pmr->n.anRoll );
+            if ( ExpandMatMove ( ms.anBoard, pmr->n.anMove, &c, 
+                                 pmr->n.anRoll ) )
+              outputf( _("WARNING: Expand move failed. This file "
+                         "contains garbage!") );
             
             /* check if move is valid */
             
