@@ -1,3 +1,8 @@
+Wed Aug 13 22:48:07 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (UpdateMoveList): ensure proper error 
+	handling.
+
 Wed Aug 13 22:38:33 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* set.c (CommandSetTutorChequer): fix typo.
