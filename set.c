@@ -24,34 +24,48 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+
 #if HAVE_LIMITS_H
 #include <limits.h>
-#endif
+#endif /* HAVE_LIMITS_H */
+
 #include <math.h>
+
 #if HAVE_SYS_RESOURCE_H
 #include <sys/time.h>
 #include <sys/resource.h>
-#endif
+#endif /* HAVE_SYS_RESOURCE_H */
+
+#ifndef WIN32
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
-#endif
+#endif /* HAVE_SYS_SOCKET_H */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#else /* #ifndef WIN32 */
+#include <winsock.h>
+#endif /* #ifndef WIN32 */
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#endif /* HAVE_UNISTD_H */
 
 #include "backgammon.h"
 #include "dice.h"
 #include "eval.h"
 #include "external.h"
 #include "export.h"
+
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkprefs.h"
-#endif
+#endif /* USE_GTK */
+
 #include "matchequity.h"
 #include "positionid.h"
 #include "renderprefs.h"
@@ -61,11 +75,6 @@
 #include "i18n.h"
 
 #include "sound.h"
-
-#ifdef WIN32
-#include<windows.h>
-#endif
-
 
 static int iPlayerSet, iPlayerLateSet;
 
@@ -152,7 +161,7 @@ SetSeed ( const rng rngx, char *sz ) {
 
 	InitRNGSeed( n, rngx );
 	outputf( _("Seed set to %d.\n"), n );
-#endif	
+#endif /* HAVE_LIBGMP */
     } else
 	outputl( InitRNG( NULL, TRUE, rngx ) ?
 		 _("Seed initialised from system random data.") :
@@ -173,7 +182,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	UserRNGClose();
 #else
         abort();
-#endif
+#endif /* HAVE_LIBDL */
     
     /* close file if necesary */    
     if ( *prng == RNG_FILE )
@@ -223,7 +232,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	  }
 #else
 	abort();
-#endif
+#endif /* HAVE_LIBGMP */
 	
     case RNG_USER:
 	/* Load dynamic library with user RNG */
@@ -250,7 +259,7 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 	  }
 #else
 	abort();
-#endif
+#endif /* HAVE_LIBDL */
 	break;
 
     case RNG_FILE: 
@@ -693,7 +702,7 @@ extern void CommandSetClockwise( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetAppearance( char *sz ) {
@@ -703,7 +712,7 @@ extern void CommandSetAppearance( char *sz ) {
 #if USE_GTK
     if( fX )
 	BoardPreferencesStart( pwBoard );
-#endif
+#endif /* USE_GTK */
     
     while( ParseKeyValue( &sz, apch ) )
 	RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
@@ -711,7 +720,7 @@ extern void CommandSetAppearance( char *sz ) {
 #if USE_GTK
     if( fX )
 	BoardPreferencesDone( pwBoard );	    
-#endif
+#endif /* USE_GTK */
 }
 
 extern void CommandSetConfirmNew( char *sz ) {
@@ -751,7 +760,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetCubeOwner( char *sz ) {
@@ -791,7 +800,7 @@ extern void CommandSetCubeOwner( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetCubeUse( char *sz ) {
@@ -824,7 +833,7 @@ extern void CommandSetCubeUse( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetCubeValue( char *sz ) {
@@ -851,7 +860,7 @@ extern void CommandSetCubeValue( char *sz ) {
 #if USE_GUI
 	    if( fX )
 		ShowBoard();
-#endif
+#endif /* USE_GUI */
 	    return;
 	}
 
@@ -886,7 +895,7 @@ extern void CommandSetDelay( char *sz ) {
 	nDelay = n;
 	UpdateSetting( &nDelay );
     } else
-#endif
+#endif /* USE_GUI */
 	outputl( _("The `set delay' command applies only when using a window "
 	      "system.") );
 }
@@ -1313,7 +1322,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
     ap[ iPlayerSet ].szSocket = pch;
     
     free( psa );
-#endif
+#endif /* !HAVE_SOCKETS */
 }
 
 extern void CommandSetPlayerGNU( char *sz ) {
@@ -1330,7 +1339,7 @@ extern void CommandSetPlayerGNU( char *sz ) {
     if( fX )
 	/* The "play" button might now be required; update the board. */
 	ShowBoard();
-#endif
+#endif /* USE_GTK */
 }
 
 extern void CommandSetPlayerHuman( char *sz ) {
@@ -1381,7 +1390,7 @@ extern void CommandSetPlayerName( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetPlayerPlies( char *sz ) {
@@ -1506,7 +1515,7 @@ extern void CommandSetRNGBBS( char *sz ) {
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "Blum, Blum and Shub generator.") );
-#endif
+#endif /* HAVE_LIBGMP */
 }
 
 extern void CommandSetRNGBsd( char *sz ) {
@@ -1515,7 +1524,7 @@ extern void CommandSetRNGBsd( char *sz ) {
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "BSD generator.") );
-#endif
+#endif /* HAVE_RANDOM */
 }
 
 extern void CommandSetRNGIsaac( char *sz ) {
@@ -1546,10 +1555,9 @@ extern void CommandSetRNGRandomDotOrg( char *sz ) {
     outputl( _("This installation of GNU Backgammon was compiled without "
                "support for sockets needed for fetching\n"
                "random numbers from <www.random.org>") );
-#endif
+#endif /* HAVE_SOCKETS */
 
 }
-
 
 extern void CommandSetRNGUser( char *sz ) {
 
@@ -1558,7 +1566,7 @@ extern void CommandSetRNGUser( char *sz ) {
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "dynamic linking library needed for user RNG's.") );
-#endif
+#endif /* HAVE_LIBDL */
 
 }
 
@@ -2290,7 +2298,7 @@ extern void CommandSetScore( char *sz ) {
 	   menu, and is now out of date. */
 	if( fX )
 	    GTKRegenerateGames();
-#endif
+#endif /* USE_GTK */
     }
     
     CommandShowScore( NULL );
@@ -2298,7 +2306,7 @@ extern void CommandSetScore( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 }
 
 extern void CommandSetSeed( char *sz ) {
@@ -2399,7 +2407,7 @@ extern void CommandSetTurn( char *sz ) {
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
     
     outputf( _("`%s' is now on roll.\n"), ap[ i ].szName );
 }
@@ -3615,12 +3623,12 @@ CommandSetGeometryWidth ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
 
-
 }
+
 extern void
 CommandSetGeometryHeight ( char *sz ) {
 
@@ -3637,10 +3645,9 @@ CommandSetGeometryHeight ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
-
 
 }
 
@@ -3660,10 +3667,9 @@ CommandSetGeometryPosX ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
-
 
 }
 
@@ -3683,10 +3689,9 @@ CommandSetGeometryPosY ( char *sz ) {
 #if USE_GTK
     if ( fX )
       UpdateGeometry ( gwSet );
-#endif
+#endif /* USE_GTK */
 
   }
-
 
 }
 
@@ -3792,7 +3797,7 @@ CommandSetSoundSystemArtsc ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the ArtsC sound system" ) );
 
-#endif
+#endif /* HAVE_ARTSC */
 
 }
 
@@ -3827,7 +3832,7 @@ CommandSetSoundSystemESD ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the ESD sound system" ) );
 
-#endif
+#endif /* HAVE_ESD */
 
 }
 
@@ -3844,7 +3849,7 @@ CommandSetSoundSystemNAS ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the NAS sound system" ) );
 
-#endif
+#endif /* HAVE_NAS */
 
 }
 
@@ -3861,7 +3866,7 @@ CommandSetSoundSystemNormal ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "playing sounds to /dev/dsp" ) );
 
-#endif
+#endif /* !WIN32 */
 
 }
 
@@ -3878,7 +3883,7 @@ CommandSetSoundSystemWindows ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the MS Windows sound system" ) );
 
-#endif
+#endif /* WIN32 */
 
 }
 
@@ -3895,7 +3900,7 @@ CommandSetSoundSystemQuickTime ( char *sz ) {
   outputl ( _("GNU Backgammon was compiled without support for "
               "the Apple QuickTime sound system" ) );
 
-#endif
+#endif /* __APPLE__ */
 
 }
 
@@ -4042,8 +4047,7 @@ CommandSetSoundSoundTake ( char *sz ) {
 
 }
 
-
-#endif
+#endif /* USE_SOUND */
 
 static void SetPriority( int n ) {
 
@@ -4086,7 +4090,7 @@ static void SetPriority( int n ) {
 		      "%s)\n"), pch );
 #else
     outputerrf( _("Priority changes are not supported on this platform.\n") );
-#endif
+#endif /* HAVE_SETPRIORITY */
 }
 
 extern void CommandSetPriorityAboveNormal ( char *sz ) {
@@ -4246,7 +4250,6 @@ CommandSetExportPNGSize ( char *sz ) {
 
 }
 
-
 static void
 SetVariation( const bgvariation bgvx ) {
 
@@ -4256,10 +4259,9 @@ SetVariation( const bgvariation bgvx ) {
 #if USE_GUI
     if( fX && ms.gs == GAME_NONE )
 	ShowBoard();
-#endif
+#endif /* USE_GUI */
 
 }
-
 
 extern void
 CommandSetVariation1ChequerHypergammon( char *sz ) {
@@ -4455,4 +4457,3 @@ CommandSetBearoffSconyers15x15DiskPath( char *sz ) {
            szPathSconyers15x15Disk );
   
 }
-
