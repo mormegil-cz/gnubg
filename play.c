@@ -673,13 +673,6 @@ extern int ComputerTurn( void ) {
 
       cd = FindCubeDecision ( arDouble, aarOutput, &ci );
 
-#ifdef OLDCODE
-      if ( EvaluatePositionCubeful ( ms.anBoard, arDouble, arOutput, &ci,
-                                     &ap [ ms.fTurn ].esCube.ec,
-                                     ap [ ms.fTurn ].esCube.ec.nPlies ) < 0 )
-        return -1;
-#endif
-
       fComputerDecision = TRUE;
 
       if ( ms.fTurn == ms.fMove ) {
