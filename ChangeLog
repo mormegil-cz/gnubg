@@ -1,3 +1,8 @@
+Wed Oct  9 21:43:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkboard.c (update_pipcount): show relative pip counts as well.
+	* gtkboard.c (board_set): show relative match score.
+
 Wed Oct  9 21:40:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (SetAnnotation): show analysis in a notebook.
