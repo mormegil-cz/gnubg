@@ -753,7 +753,8 @@ PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
 static inline void
 DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
 {
-  int const s = PyDict_SetItemString(dict, key, val);        assert( s == 0 );
+  int const s = PyDict_SetItemString(dict, (char *) key, val);  
+  assert( s == 0 );
   Py_DECREF(val);
 }
 
@@ -1303,11 +1304,13 @@ PythonGame(const list*    plGame,
 	   PyMatchState*  ms)
 {
   const list* pl = plGame->plNext;
-  const moverecord* pmr = pl->p;            assert( pmr->mt == MOVE_GAMEINFO );
+  const moverecord* pmr = pl->p;            
   const movegameinfo* g = &pmr->g;
 
   PyObject* gameDict = PyDict_New();
   PyObject* gameInfoDict = PyDict_New();
+
+  assert( pmr->mt == MOVE_GAMEINFO );
 
   if( ! (gameDict && gameInfoDict) ) {
     PyErr_SetString(PyExc_MemoryError, "");
@@ -1342,9 +1345,12 @@ PythonGame(const list*    plGame,
   DictSetItemSteal(gameDict, "info", gameInfoDict);
     
   if( includeStatistics ) {
+    
+    PyObject *s;
+
     updateStatisticsGame ( plGame );
 
-    PyObject* s = PyGameStats(&g->sc);
+    s = PyGameStats(&g->sc);
 
     if( s ) {
       DictSetItemSteal(gameDict, "stats", s);
@@ -1354,7 +1360,8 @@ PythonGame(const list*    plGame,
   {
     int nRecords = 0;
     int anBoard[2][25];
-    
+    PyObject* gameTuple;
+
     {
       list* t;
       for( t = pl->plNext; t != plGame; t = t->plNext ) {
@@ -1362,7 +1369,7 @@ PythonGame(const list*    plGame,
       }
     }
 
-    PyObject* gameTuple = PyTuple_New(nRecords);
+    gameTuple = PyTuple_New(nRecords);
 
     nRecords = 0;
 
@@ -1510,11 +1517,12 @@ PythonGame(const list*    plGame,
 	case MOVE_SETDICE:
 	{
 	  const movesetdice* sd = &pmr->sd;
+          PyObject *dice;
 
 	  player = sd->fPlayer;
 	  action = "set";
 
-	  PyObject* dice = Py_BuildValue("(ii)", sd->anDice[0], sd->anDice[1]);
+	  dice = Py_BuildValue("(ii)", sd->anDice[0], sd->anDice[1]);
 
 	  DictSetItemSteal(recordDict, "dice", dice);
 	    
@@ -1599,6 +1607,15 @@ PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
   const list* firstGame = lMatch.plNext->p;
   const moverecord* pmr;
   const movegameinfo* g;
+  int includeAnalysis = 1;
+  int verboseAnalysis = 0;
+  int statistics = 0;
+  int boards = 1;
+  PyObject* matchDict;
+  PyObject* matchInfoDict;
+  PyMatchState s;
+  
+  static char* kwlist[] = {"analysis", "boards", "statistics", "verbose", 0};
   
   if( ! firstGame ) {
     Py_INCREF(Py_None);
@@ -1609,21 +1626,14 @@ PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
   {                                       assert( pmr->mt == MOVE_GAMEINFO ); }
   g = &pmr->g;
 
-  int includeAnalysis = 1;
-  int verboseAnalysis = 0;
-  int statistics = 0;
-  int boards = 1;
-  
-  static char* kwlist[] = {"analysis", "boards", "statistics", "verbose", 0};
-  
   if( !PyArg_ParseTupleAndKeywords(args, keywds, "|iiii", kwlist,
 				   &includeAnalysis, &boards, &statistics,
 				   &verboseAnalysis) )
     return 0;
 
   
-  PyObject* matchDict = PyDict_New();
-  PyObject* matchInfoDict = PyDict_New();
+  matchDict = PyDict_New();
+  matchInfoDict = PyDict_New();
 
   if( !matchDict && !matchInfoDict ) {
     PyErr_SetString(PyExc_MemoryError, "");
@@ -1690,18 +1700,19 @@ PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
 
   DictSetItemSteal(matchDict, "match-info", matchInfoDict);
 
-  PyMatchState s;
   s.ec = 0;
   s.rc = 0;
   
   {
     int nGames = 0;
     const list* pl;
+    PyObject *matchTuple;
+
     for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
       ++nGames;
     }
 
-    PyObject* matchTuple = PyTuple_New(nGames);
+    matchTuple = PyTuple_New(nGames);
 
     nGames = 0;
     for(pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext) {
@@ -1747,6 +1758,7 @@ PythonNavigate(PyObject* self, PyObject* args, PyObject* keywds)
   int nextGame = INT_MIN;
   int gamesDif = 0;
   int recordsDiff = 0;
+  PyObject *r;
   
   static char* kwlist[] = {"next", "game", 0};
 
@@ -1760,7 +1772,7 @@ PythonNavigate(PyObject* self, PyObject* args, PyObject* keywds)
     return 0;
 
 
-  PyObject* r = 0;
+  r = 0;
   
   if( nextRecord == INT_MIN && nextGame == INT_MIN ) {
     /* no args, go to start */
