@@ -4555,7 +4555,7 @@ static void board_init( Board *board ) {
     bd->usedicearea = FALSE;
     bd->permit_illegal = FALSE;
     bd->beep_illegal = TRUE;
-    bd->higher_die_first = FALSE;
+    bd->higher_die_first = TRUE;
     bd->animate_computer_moves = ANIMATE_SLIDE;
     bd->animate_speed = 4;
     bd->arLight[ 0 ] = -0.55667;

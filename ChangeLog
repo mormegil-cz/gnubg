@@ -1,3 +1,8 @@
+Wed Sep 11 17:21:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkboard.c (board_init): make higher_die_first default
+	to TRUE.
+
 Wed Sep 11 17:14:13 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c (board_init): gtk_image_new_from_stock requires enums for
