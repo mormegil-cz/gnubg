@@ -1,3 +1,11 @@
+Mon May 20 19:21:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix bug in bearoff cube evaluations.
+
+	* eval.c (Cl2CfMoney): return cubeless equity for p<epsilon and
+	p>1-epsilon.
+	* eval.c (EvalEfficiency): return X=0 instead of X=-1 for EVAL_OVER.
+
 Sun May 12 12:46:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Ask for confirmation before overwriting existing files.

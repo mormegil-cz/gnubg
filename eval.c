@@ -5086,6 +5086,9 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
+  const float epsilon   = 0.0000001;
+  const float omepsilon = 0.9999999;
+
   float rW, rL;
   float rOppTG, rOppCP, rCP, rTG;
   float rOppIDP, rIDP;
@@ -5094,21 +5097,25 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   /* money game */
 
-      /* Transform cubeless 0-ply equity to cubeful 0-ply equity using
-	 Rick Janowski's formulas [insert ref here]. */
+  /* Transform cubeless 0-ply equity to cubeful 0-ply equity using
+     Rick Janowski's formulas [insert ref here]. */
 
-      /* First calculate average win and loss W and L: */
+  /* First calculate average win and loss W and L: */
 
-  if ( arOutput[ 0 ] > 0.0 )
+  if ( arOutput[ 0 ] > epsilon )
     rW = 1.0 + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
-  else
-    rW = 1.0;
+  else {
+    /* basically a dead cube */
+    return Utility ( arOutput, pci );
+  }
 
-  if ( arOutput[ 0 ] < 1.0 )
+  if ( arOutput[ 0 ] < omepsilon )
     rL = 1.0 + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
       ( 1.0 - arOutput [ 0 ] );
-  else
-    rL = 1.0;
+  else {
+    /* basically a dead cube */
+    return Utility ( arOutput, pci );
+  }
 
       /* Calculate too good and cash points for opponent and
 	 myself. These points are used for doing linear
@@ -5754,7 +5761,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
      inputs should preferebly be cached to same time. */
 
   if (pc == CLASS_OVER)
-    return -1.0;
+    return 0.0; /* dead cube */
 
   if (pc == CLASS_BEAROFF1)
 
