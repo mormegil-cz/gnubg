@@ -187,16 +187,20 @@ free_board_designs ( GList *pl ) {
 
 #endif /* HAVE_LIBXML2 */
 
+#if HAVE_LIBXML2
 static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused );
 static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused );
+#endif
 
 void SetTitle()
 {	/* Update dialog title to include design name + author */
+#if HAVE_LIBXML2
 	int i = 0;
-	char title[1024];
 	int found = FALSE;
+#endif
+	char title[1024];
 	GtkWidget *pwDialog = gtk_widget_get_toplevel(pwPrevBoard);
 
 	strcpy(title, _("GNU Backgammon - Appearance"));
@@ -1199,7 +1203,12 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 		DoAcceleratedCheck(bd->drawing_area3d);
 
 		updateDiceOccPos(bd);
-	}			
+	}
+	else
+	{
+		board_free_pixmaps( bd );
+		board_create_pixmaps( pwPrevBoard, bd );
+	}
 
 	AddPages(bd, pwNotebook);
 	gtk_widget_set_sensitive(pwTestPerformance, (rdPrefs.fDisplayType == DT_3D));
