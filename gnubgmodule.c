@@ -40,6 +40,7 @@
 #include "eval.h"
 #include "matchequity.h"
 #include "path.h"
+#include "positionid.h"
 
 
 static PyObject *
@@ -101,24 +102,71 @@ BoardToPy( int anBoard[ 2 ][ 25 ] ) {
 
 }
 
+static PyObject *
+Board1ToPy( int anBoard [ 25 ] ) {
+
+  return 
+    Py_BuildValue( "[i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i]",
+                   anBoard[ 0 ],
+                   anBoard[ 1 ],
+                   anBoard[ 2 ],
+                   anBoard[ 3 ],
+                   anBoard[ 4 ],
+                   anBoard[ 5 ],
+                   anBoard[ 6 ],
+                   anBoard[ 7 ],
+                   anBoard[ 8 ],
+                   anBoard[ 9 ],
+                   anBoard[ 10 ],
+                   anBoard[ 11 ],
+                   anBoard[ 12 ],
+                   anBoard[ 13 ],
+                   anBoard[ 14 ],
+                   anBoard[ 15 ],
+                   anBoard[ 16 ],
+                   anBoard[ 17 ],
+                   anBoard[ 18 ],
+                   anBoard[ 19 ],
+                   anBoard[ 20 ],
+                   anBoard[ 21 ],
+                   anBoard[ 22 ],
+                   anBoard[ 23 ],
+                   anBoard[ 24 ] );
+
+}
+
+
+static int
+PyToBoard1( PyObject *p, int anBoard[ 25 ] ) {
+
+  int j;
+  PyObject *pi;
+
+  for ( j = 0; j < 25; ++j ) {
+    if ( ! ( pi = PyList_GetItem( p, j ) ) )
+      return -1;
+    
+    anBoard[ j ] = (int) PyInt_AsLong( pi );
+      
+  }
+
+  return 0;
+
+}
+
 static int
 PyToBoard( PyObject *p, int anBoard[ 2 ][ 25 ] ) {
 
   PyObject *py;
-  PyObject *pi;
-  int i, j;
+  int i;
 
   for ( i = 0; i < 2; ++i ) {
     if ( ! ( py = PyList_GetItem( p, i ) ) )
       return -1;
 
-    for ( j = 0; j < 25; ++j ) {
-      if ( ! ( pi = PyList_GetItem( py, j ) ) )
-        return -1;
+    if ( PyToBoard1( py, anBoard[ i ] ) )
+      return -1;
 
-      anBoard[ i ][ j ] = (int) PyInt_AsLong( pi );
-      
-    }
   }
 
   return 0;
@@ -158,7 +206,6 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
   static char *aszKeys[] = {
     "jacoby", "crawford", "move", "beavers", "cube", "matchto",
     "bgv", "cubeowner", "score", "gammonprice", NULL };
-  char *pch;
   int iKey;
   int i;
   void *ap[] = { &pci->fJacoby, &pci->fCrawford, &pci->fMove,
@@ -258,7 +305,6 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
   char *pchKey;
   static char *aszKeys[] = {
     "cubeful", "plies", "reduced", "deterministic", "noise", NULL };
-  char *pch;
   int iKey;
   int i;
   
@@ -531,7 +577,6 @@ PythonMET( PyObject *self, PyObject *args ) {
 
   int n = ms.nMatchTo ? ms.nMatchTo : MAXSCORE;
   int i;
-  PyObject *pyf;
   PyObject *pyMET;
   PyObject *pyList;
 
@@ -651,21 +696,81 @@ PythonPositionFromID( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
+PythonPositionKey( PyObject *self, PyObject *args ) {
+
+  PyObject *pyBoard = NULL;
+  int anBoard[ 2 ][ 25 ];
+  unsigned char auch[ 10 ];
+
+  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+
+  if ( ! PyArg_ParseTuple( args, "|O!:positionkey", &PyList_Type, &pyBoard ) )
+    return NULL;
+
+  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+    return NULL;
+
+  PositionKey( anBoard, auch );
+
+  return Py_BuildValue( "[iiiiiiiiii]", 
+                        auch[ 0 ], auch[ 1 ], auch[ 2 ], auch[ 3 ],
+                        auch[ 4 ], auch[ 5 ], auch[ 6 ], auch[ 7 ],
+                        auch[ 8 ], auch[ 9 ] );
+
+}
+
+static PyObject *
+PythonPositionFromKey( PyObject *self, PyObject *args ) {
+
+  int anBoard[ 2 ][ 25 ];
+  int i;
+  PyObject *pyKey = NULL;
+  PyObject *py;
+  unsigned char auch[ 10 ];
+
+  if ( ! PyArg_ParseTuple( args, "|O!:positionfromkey", &PyList_Type, &pyKey ) )
+    return NULL;
+
+  if ( pyKey ) {
+
+    for ( i = 0; i < 10; ++i ) {
+      if ( ! ( py = PyList_GetItem( pyKey, i ) ) )
+        return NULL;
+      
+      auch[ i ] = (unsigned char) PyInt_AsLong( py );
+    }
+
+  }
+  else {
+
+    for ( i = 0; i < 10; ++i )
+      auch[ i ] = 0;
+
+  }
+
+  PositionFromKey( anBoard, auch );
+
+  return BoardToPy( anBoard );
+
+}
+
+
+static PyObject *
 PythonPositionBearoff( PyObject *self, PyObject *args ) {
 
 
   PyObject *pyBoard = NULL;
   int nChequers = 15;
   int nPoints = 6;
-  int anBoard[ 2 ][ 25 ];
+  int anBoard[ 25 ];
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, 0, sizeof anBoard );
 
   if ( ! PyArg_ParseTuple( args, "|Oii:positionbearoff", 
                            &pyBoard, &nPoints, &nChequers ) )
     return NULL;
 
-  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+  if ( pyBoard && PyToBoard1( pyBoard, anBoard ) )
     return NULL;
 
   return Py_BuildValue( "i", PositionBearoff( anBoard, nPoints, nChequers ) );
@@ -676,7 +781,7 @@ PythonPositionBearoff( PyObject *self, PyObject *args ) {
 static PyObject *
 PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
 
-  int anBoard[ 2 ][ 25 ];
+  int anBoard[ 25 ];
   int iPos = 0;
   int nChequers = 15;
   int nPoints = 6;
@@ -703,7 +808,7 @@ PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
   memset( anBoard, 0, sizeof anBoard );
   PositionFromBearoff( anBoard, iPos, nPoints, nChequers );
 
-  return BoardToPy( anBoard );
+  return Board1ToPy( anBoard );
 
 
 }
@@ -733,14 +838,19 @@ PyMethodDef gnubgMethods[] = {
     "return board from position ID" },
   { "positionbearoff", PythonPositionBearoff, METH_VARARGS,
     "return the bearoff id for the given position" },
-  { "positionfrombearoff", PythonPositionBearoff, METH_VARARGS,
+  { "positionfrombearoff", PythonPositionFromBearoff, METH_VARARGS,
     "return the board from the given bearoff id" },
+  { "positionkey", PythonPositionKey, METH_VARARGS,
+    "return key for position" },
+  { "positionfromkey", PythonPositionFromKey, METH_VARARGS,
+    "return position from key" },
   { NULL, NULL, 0, NULL }
 
 };
 
 #if HAVE_LIBREADLINE
 
+#if 0
 static char *
 PythonReadline( char *p ) {
 
@@ -761,6 +871,7 @@ PythonReadline( char *p ) {
   return pch;
 
 }
+#endif
 
 #endif
 
