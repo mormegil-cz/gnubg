@@ -1987,9 +1987,11 @@ invertMET ( void ) {
       aafMET[ j ][ i ] = 1.0 - r;
 
     }
-    
   }
-
+  /* Clear any stored results to stop previous table causing problems */
+  EvalCacheFlush();
+  InvalidateStoredMoves();
+  InvalidateStoredCube();
 }
 
 /* given a match score, return a pair of arrays with the METs for

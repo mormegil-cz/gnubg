@@ -1,3 +1,7 @@
+Tue Oct 21 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* matchequity.c, set.c : Bug fix while inverting met
+
 Tue Oct 19 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c : Fixes for import/export appearance designs

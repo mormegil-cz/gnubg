@@ -2935,7 +2935,8 @@ extern void CommandSetMET( char *sz ) {
              miCurrent.nLength, miCurrent.nLength );
 
   }
-
+  if (fInvertMET)
+    invertMET();
 }
 
 
@@ -3703,7 +3704,6 @@ CommandSetInvertMatchEquityTable ( char *sz ) {
 
   if ( fOldInvertMET != fInvertMET )
     invertMET ();
-
 
 }
 
