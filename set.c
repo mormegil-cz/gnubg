@@ -504,7 +504,7 @@ extern void CommandSetEvalCandidates( char *sz ) {
 
     int n = ParseNumber( &sz );
 
-    if( n < 0 || n > MAX_SEARCH_CANDIDATES ) {
+    if( n < 2 || n > MAX_SEARCH_CANDIDATES ) {
 	outputf( "You must specify a valid number of moves to consider -- try "
 	      "`help set %sevaluation candidates'.\n", szSetCommand );
 
@@ -513,9 +513,8 @@ extern void CommandSetEvalCandidates( char *sz ) {
 
     pecSet->nSearchCandidates = n;
 
-    outputf( "%s will consider up to %d move%s for evaluation at deeper "
-	    "plies.\n", szSet, pecSet->nSearchCandidates,
-	    pecSet->nSearchCandidates == 1 ? "" : "s" );
+    outputf( "%s will consider up to %d moves for evaluation at deeper "
+	     "plies.\n", szSet, pecSet->nSearchCandidates );
 }
 
 
@@ -807,12 +806,16 @@ extern void CommandSetPlayer( char *sz ) {
 
 	strcpy( pchCopy, sz );
 
+	outputpostpone();
+	
 	iPlayerSet = 0;
 	HandleCommand( sz, acSetPlayer );
 
 	iPlayerSet = 1;
 	HandleCommand( pchCopy, acSetPlayer );
 
+	outputresume();
+	
 	UpdateSetting( ap );
 	
 	free( pchCopy );
@@ -1004,9 +1007,15 @@ extern void CommandSetTrainingAlpha( char *sz ) {
 
 extern void CommandSetTrainingAnneal( char *sz ) {
 
-    SetToggle( "training anneal", &fAnneal, sz,
-	       "Will reduce alpha as training progresses.",
-	       "Will not reduce alpha as training progresses." );
+    float r = ParseReal( &sz );
+
+    if( r == -HUGE_VAL ) {
+	outputl( "You must specify a valid annealing rate." );
+	return;
+    }
+
+    rAnneal = r;
+    outputf( "Annealing rate set to %f.\n", r );
 }
 
 extern void CommandSetTurn( char *sz ) {

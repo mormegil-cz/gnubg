@@ -190,7 +190,7 @@ FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
 
 extern int 
 TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[], float rAlpha,
-	       int fAnneal );
+	       float rAnneal );
 
 extern int 
 PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );

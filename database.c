@@ -414,7 +414,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 		
 		PositionFromKey( anBoardTrain, (unsigned char *) dKey.dptr );
 		
-		TrainPosition( anBoardTrain, arDesired, rAlpha, fAnneal );
+		TrainPosition( anBoardTrain, arDesired, rAlpha, rAnneal );
 	    }
 	    
 	    free( pev );
