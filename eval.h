@@ -411,7 +411,7 @@ ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer );
 extern int 
 DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
               const evalcontext* pec, cubeinfo* pci, int fOutputMWC,
-	      int fOutputWinPC, int fOutputInvert );
+	      int fOutputWinPC, int fOutputInvert, const char *szMatchID );
 
 extern void 
 SwapSides( int anBoard[ 2 ][ 25 ] );

@@ -3907,7 +3907,8 @@ static classdumpfunc acdf[ N_CLASSES ] = {
 extern int
 DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
 	      const evalcontext* pec, cubeinfo* pci, int fOutputMWC,
-	      int fOutputWinPC, int fOutputInvert ) {
+	      int fOutputWinPC, int fOutputInvert, 
+              const char *szMatchID ) {
 
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arDouble[ 4 ];
   positionclass pc = ClassifyPosition( anBoard, pci->bgv );
@@ -3930,8 +3931,19 @@ DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
     N_("CONTACT")
   };
 
+  strcpy( szOutput, "" );
+
+  strcat( szOutput, _("Position ID:\t") );
+  strcat( szOutput, PositionID( anBoard ) );
+  strcat( szOutput, "\n" );
+  if ( szMatchID ) {
+    strcat( szOutput, _("Match ID:\t") );
+    strcat( szOutput, szMatchID );
+    strcat( szOutput, "\n" );
+  }
+  strcat( szOutput, "\n" );
     
-  strcpy( szOutput, _("Evaluator: \t") );
+  strcat( szOutput, _("Evaluator: \t") );
   strcat( szOutput, gettext( aszEvaluator[ pc ] ) );
   strcat( szOutput, "\n\n" );
   acdf[ pc ]( anBoard, strchr( szOutput, 0 ), pci->bgv );
