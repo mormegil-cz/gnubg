@@ -1598,12 +1598,31 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	    /* Clicked on cube; double. */
 	    bd->drag_point = -1;
 	    
-			if(editing)
-				GTKSetCube(NULL, 0, NULL);
-			else if (bd->doubled)
-				UserCommand("take");
-			else
-				UserCommand("double");
+            if(editing)
+              GTKSetCube(NULL, 0, NULL);
+            else if (bd->doubled) {
+              switch( event->button ) {
+              case 1:
+                /* left */
+                UserCommand( "take" );
+                break;
+              case 2:
+                /* center */
+                if ( ! bd->match_to )
+                  UserCommand( "redouble" );
+                else
+                  UserCommand( "take" );
+                break;
+              case 3:
+              default:
+                /* right */
+                UserCommand( "drop" );
+                break;
+
+              }
+            }
+            else
+              UserCommand("double");
 	    
 	    return TRUE;
 
@@ -1619,7 +1638,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 
 		bd->drag_point = -1;
 		if (bd->resigned && !editing)
-			UserCommand("accept");
+                  UserCommand(event->button == 1 ? "accept" : "reject" );
 
 		return TRUE;
 

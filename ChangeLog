@@ -1,3 +1,9 @@
+Wed Aug 13 19:09:18 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (button_press_event): right clicks to 
+	drop double and reject resignation.
+	(contributed by Rob ...)
+
 Wed Aug 13 18:08:35 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* configure.in: add some magic for board3d and gtk1.2. Also add
