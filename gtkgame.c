@@ -6171,7 +6171,7 @@ static GtkWidget* CreateSetCubeDialog ()
   for( nCubeTurns = 0; ms.nCube >> ( nCubeTurns + 1 ); nCubeTurns++ )
        ;
 
-  SetCubeWindow = gtk_window_new (GTK_WINDOW_DIALOG);
+  SetCubeWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_object_set_data (GTK_OBJECT (SetCubeWindow), "SetCubeWindow",
                          SetCubeWindow);
   gtk_window_set_title (GTK_WINDOW (SetCubeWindow), "Set cube");
