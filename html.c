@@ -164,6 +164,7 @@ WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
 
     fputs( _("\n" 
              "/* CSS Stylesheet for GNU Backgammon " VERSION " */\n"
+             "/* $Id$ */\n"
              "/* This file is distributed as a part of the "
              "GNU Backgammon program. */\n"
              "/* Copying and distribution of verbatim and modified "
@@ -212,6 +213,64 @@ GetStyle ( const stylesheetclass ssc,
   return sz;
 
 }
+
+
+static char *
+GetStyleGeneral( const htmlexportcss hecss, ... ) {
+
+  static char sz[ 2048 ];
+  va_list val;
+  stylesheetclass ssc;
+  int i = 0;
+  int j;
+
+  va_start( val, hecss );
+
+  switch ( hecss ) {
+  case HTML_EXPORT_CSS_INLINE:
+    strcpy( sz, "style=\"" );
+    break;
+  case HTML_EXPORT_CSS_EXTERNAL:
+  case HTML_EXPORT_CSS_HEAD:
+    strcpy( sz, "class=\"" );
+    break;
+  default:
+    strcpy ( sz, "" );
+    break;
+  }
+
+  while ( ( j = va_arg( val, int ) ) > -1 ) {
+
+    ssc = (stylesheetclass) j;
+
+    switch ( hecss ) {
+    case HTML_EXPORT_CSS_INLINE:
+      if ( i )
+        strcat( sz, "; " );
+      strcat( sz, aaszStyleSheetClasses[ ssc ][ 1 ] );
+      break;
+    case HTML_EXPORT_CSS_EXTERNAL:
+    case HTML_EXPORT_CSS_HEAD:
+      if ( i )
+        strcat( sz, " " );
+      strcat( sz, aaszStyleSheetClasses[ ssc ][ 0 ] );
+      break;
+    default:
+      break;
+    }
+
+    ++i;
+
+  }
+
+  va_end( val );
+
+  strcat( sz, "\"" );
+
+  return sz;
+
+}
+
 
   
 #if 0
@@ -464,6 +523,9 @@ printStatTableMissed( FILE *pf, int const match, const char* what,
   } else {
     fprintf(pf, "<td>0 </td>\n");
   }
+
+  fputs( "</tr>\n", pf );
+
 }
 
 
@@ -1790,7 +1852,7 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
     WriteStyleSheet ( pf, hecss );
   else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
     fputs(  "<link title=\"CSS stylesheet\" rel=\"stylesheet\" "
-            "href=\"gnubg.css\" type=\"text/css\">\n", pf );
+            "href=\"gnubg.css\" type=\"text/css\" />\n", pf );
 
   fprintf ( pf, "</head>\n"
             "\n"
@@ -2440,7 +2502,6 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
   char sz[ 64 ];
   int i;
   float rEq, rEqTop;
-  char *pch;
 
   cubeinfo ci;
 
@@ -2500,30 +2561,25 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   /* table header */
 
-  pch = strdup( GetStyle ( CLASS_MOVEHEADER, hecss ) );
-
   fprintf ( pf,
             "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n"
             "<tr>\n",
             GetStyle ( CLASS_MOVETABLE, hecss ) );
-  fprintf ( pf, "<th %s %s colspan=\"2\">%s</th>\n",
-            pch, 
-            GetStyle ( CLASS_MOVENUMBER, hecss ), _("#") );
-  fprintf ( pf, "<th %s %s>%s</th>\n",
-            pch, 
-            GetStyle ( CLASS_MOVEPLY, hecss ), _("Ply") );
-  fprintf ( pf, "<th %s %s>%s</th>\n",
-            pch, 
-            GetStyle ( CLASS_MOVEMOVE, hecss ), _("Move") );
+  fprintf ( pf, "<th %s colspan=\"2\">%s</th>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVENUMBER, -1 ),
+            _("#") );
+  fprintf ( pf, "<th %s>%s</th>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVEPLY, -1 ),
+            _("Ply") );
+  fprintf ( pf, "<th %s>%s</th>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVEMOVE, -1 ),
+            _("Move") );
   fprintf ( pf,
-            "<th %s %s>%s</th>\n" "</tr>\n",
-            pch, 
-            GetStyle ( CLASS_MOVEEQUITY, hecss ),
+            "<th %s>%s</th>\n" "</tr>\n",
+            GetStyleGeneral( hecss, CLASS_MOVEHEADER, CLASS_MOVEEQUITY, -1 ),
             ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
             _("Equity") : _("MWC") );
 
-  free( pch );
-            
 
   if ( pmr->n.ml.cMoves ) {
 

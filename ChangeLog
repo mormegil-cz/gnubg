@@ -1,3 +1,11 @@
+Sun Jul 27 12:05:37 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Oops, the html did not validate...
+
+	* html.c (GetStyleGeneral): new function.
+	* html.c (HTMLPrintMoveAnalysis): re-fix reentrancy problems.
+	* html.c (HTMLPrologue): missing end tag on <link>
+
 Sun Jul 27 11:43:36 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (HTMLPrintMoveAnalysis): remove some colspans to
