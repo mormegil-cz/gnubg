@@ -378,8 +378,8 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 
 	xppm = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
 	CreatePreview();
-	pwPreview = gtk_pixmap_new(xppm, NULL),
-		gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
+	pwPreview = gtk_pixmap_new(xppm, NULL);
+	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
 
 static gboolean cancel( GtkWidget *pw, GdkEvent *pev, void* arg )
