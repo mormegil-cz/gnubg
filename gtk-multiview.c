@@ -33,8 +33,10 @@ static void    gtk_multiview_size_allocate (GtkWidget         *widget,
 					    GtkAllocation     *allocation);
 static void    gtk_multiview_map           (GtkWidget         *widget);
 static void    gtk_multiview_unmap         (GtkWidget         *widget);
+#if !GTK_CHECK_VERSION(1,3,10)
 static int     gtk_multiview_expose        (GtkWidget         *widget,
 					    GdkEventExpose    *event);
+#endif
 static GtkType gtk_multiview_child_type    (GtkContainer      *container);
 static void    gtk_multiview_forall        (GtkContainer      *container,
 					    gboolean           include_internals,
@@ -98,8 +100,10 @@ gtk_multiview_class_init (GtkMultiviewClass *klass)
   widget_class->size_allocate = gtk_multiview_size_allocate;
   widget_class->map = gtk_multiview_map;
   widget_class->unmap = gtk_multiview_unmap;
+#if !GTK_CHECK_VERSION(1,3,10)
   widget_class->expose_event = gtk_multiview_expose;
-
+#endif
+  
   container_class->forall = gtk_multiview_forall;
   container_class->add = gtk_multiview_add;
   container_class->remove = gtk_multiview_remove;
@@ -203,6 +207,7 @@ gtk_multiview_unmap (GtkWidget *widget)
     }
 }
 
+#if !GTK_CHECK_VERSION(1,3,10)
 static gint
 gtk_multiview_expose (GtkWidget      *widget,
 		      GdkEventExpose *event)
@@ -230,16 +235,13 @@ gtk_multiview_expose (GtkWidget      *widget,
 	  if (GTK_WIDGET_DRAWABLE (child) &&
 	      GTK_WIDGET_NO_WINDOW (child))
 	    {
-#if GTK_CHECK_VERSION(1,3,10)
-		/* FIXME help! */
-#else
 		gtk_widget_event (child, (GdkEvent*) event);
-#endif
 	    }
 	}
     }
   return FALSE;
 }
+#endif
 
 static GtkType
 gtk_multiview_child_type (GtkContainer *container)
