@@ -456,12 +456,194 @@ static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
     return NULL;
 }
 
+#if HAVE_SIGACTION
+typedef struct sigaction psighandler;
+#elif HAVE_SIGVEC
+typedef struct sigvec psighandler;
+#else
+typedef RETSIGTYPE (*psighandler)( int );
+#endif
+
+static void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
+			     psighandler *pOld ) {
+#if HAVE_SIGACTION
+    struct sigaction sa;
+
+    sa.sa_handler = p;
+    sigemptyset( &sa.sa_mask );
+    sa.sa_flags =
+# if SA_RESTART
+	SA_RESTART |
+# endif
+# if SA_NOCLDSTOP
+	SA_NOCLDSTOP |
+# endif
+	0;
+    sigaction( nSignal, &sa, pOld );
+#elif HAVE_SIGVEC
+    struct sigvec sv;
+
+    sv.sv_handler = p;
+    sigemptyset( &sv.sv_mask );
+    sv.sv_flags = 0;
+
+    sigvec( nSignal, &sv, pOld );
+#else
+    if( pOld )
+	*pOld = signal( nSignal, p );
+    else
+	signal( nSignal, p );
+#endif
+}
+
+static void PortableSignalRestore( int nSignal, psighandler *p ) {
+#if HAVE_SIGACTION
+    sigaction( nSignal, p, NULL );
+#elif HAVE_SIGVEC
+    sigvec( nSignal, p, NULL );
+#else
+    signal( nSignal, p );
+#endif
+}
+
+/* Reset the SIGINT handler, on return to the main command loop.  Notify
+   the user if processing had been interrupted. */
+static void ResetInterrupt( void ) {
+    
+    if( fInterrupt ) {
+	puts( "(Interrupted)" );
+
+	fInterrupt = FALSE;
+#if !X_DISPLAY_MISSING
+	EventPending( &evNextTurn, FALSE );
+#endif
+    }
+    
+#if HAVE_SIGPROCMASK
+    {
+	sigset_t ss;
+
+	sigemptyset( &ss );
+	sigaddset( &ss, SIGINT );
+	sigprocmask( SIG_UNBLOCK, &ss, NULL );
+    }
+#elif HAVE_SIGBLOCK
+    sigsetmask( 0 );
+#endif
+}
+
+#if !X_DISPLAY_MISSING
+static int fChildDied;
+
+static RETSIGTYPE HandleChild( int n ) {
+
+    fChildDied = TRUE;
+}
+#endif
+
+void ShellEscape( char *pch ) {
+
+    pid_t pid;
+    char *pchShell;
+    psighandler shQuit;
+#if !X_DISPLAY_MISSING
+    psighandler shChild;
+    
+    PortableSignal( SIGCHLD, HandleChild, &shChild );
+#endif
+    PortableSignal( SIGQUIT, SIG_IGN, &shQuit );
+    
+    if( ( pid = fork() ) < 0 ) {
+	/* Error */
+	perror( "fork" );
+
+#if !X_DISPLAY_MISSING
+	PortableSignalRestore( SIGCHLD, &shChild );
+#endif
+	PortableSignalRestore( SIGQUIT, &shQuit );
+	
+	return;
+    } else if( !pid ) {
+	/* Child */
+	PortableSignalRestore( SIGQUIT, &shQuit );	
+	
+	if( pch && *pch )
+	    execl( "/bin/sh", "sh", "-c", pch, NULL );
+	else {
+	    if( !( pchShell = getenv( "SHELL" ) ) )
+		pchShell = "/bin/sh";
+	    execl( pchShell, pchShell, NULL );
+	}
+	_exit( EXIT_FAILURE );
+    }
+    
+    /* Parent */
+#if !X_DISPLAY_MISSING
+ TryAgain:
+#if HAVE_SIGPROCMASK
+    {
+	sigset_t ss, ssOld;
+
+	sigemptyset( &ss );
+	sigaddset( &ss, SIGCHLD );
+	sigaddset( &ss, SIGIO );
+	sigprocmask( SIG_BLOCK, &ss, &ssOld );
+	
+	while( !fChildDied ) {
+	    sigsuspend( &ssOld );
+	    if( fAction )
+		HandleXAction();
+	}
+
+	fChildDied = FALSE;
+	sigprocmask( SIG_UNBLOCK, &ss, NULL );
+    }
+#elif HAVE_SIGBLOCK
+    {
+	int n;
+
+	n = sigblock( sigmask( SIGCHLD ) | sigmask( SIGIO ) );
+
+	while( !fChildDied ) {
+	    sigpause( n );
+	    if( fAction )
+		HandleXAction();
+	}
+	fChildDied = FALSE;
+	sigsetmask( n );
+    }
+#else
+    /* NB: Without reliable signal handling semantics (sigsuspend or
+       sigpause), we can't avoid a race condition here because the
+       test of fChildDied and pause() are not atomic. */
+    while( !fChildDied ) {
+	pause();
+	if( fAction )
+	    HandleXAction();
+    }
+    fChildDied = FALSE;
+#endif
+    
+    if( !waitpid( pid, NULL, WNOHANG ) )
+	/* Presumably the child is stopped and not dead. */
+	goto TryAgain;
+    
+    PortableSignalRestore( SIGCHLD, &shChild );
+#else
+    while( !waitpid( pid, NULL, 0 ) )
+	;
+#endif
+
+    PortableSignalRestore( SIGCHLD, &shQuit );
+    
+    return;
+}
+
 extern void HandleCommand( char *sz, command *ac ) {
 
     command *pc;
-    char *pch, *pchShell;
+    char *pch;
     int cch;
-    pid_t pid;
     
     if( ac == acTop ) {
 	if( *sz == '!' ) {
@@ -469,30 +651,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    for( pch = sz + 1; isspace( *pch ); pch++ )
 		;
 
-	    if( *pch ) {
-		/* Command specified; system() is more portable than
-		   fork/exec */
-		/* FIXME it would be nice to handle X events while waiting
-		   for the child, but then system() wouldn't be good enough. */
-		system( pch );
-		return;
-	    } else if( ( pid = fork() ) < 0 ) {
-		/* Error */
-		perror( "fork" );
-		return;
-	    } else if( pid ) {
-		/* Parent */
-		/* FIXME it would be nice to handle X events while waiting
-		   for the child. */
-		waitpid( pid, NULL, 0 );
-		return;
-	    } else {
-		/* Child */
-		if( !( pchShell = getenv( "SHELL" ) ) )
-		    pchShell = "/bin/sh";
-		execl( pchShell, pchShell, NULL );
-		_exit( EXIT_FAILURE );
-	    }
+	    ShellEscape( pch );
+	    return;
 	} else if( *sz == ':' ) {
 	    /* Guile escape */
 	    puts( "This installation of GNU Backgammon was compiled without "
@@ -534,32 +694,6 @@ extern void HandleCommand( char *sz, command *ac ) {
 	pc->pf( sz );
     else
 	HandleCommand( sz, pc->pc );
-}
-
-/* Reset the SIGINT handler, on return to the main command loop.  Notify
-   the user if processing had been interrupted. */
-static void ResetInterrupt( void ) {
-    
-    if( fInterrupt ) {
-	puts( "(Interrupted)" );
-
-	fInterrupt = FALSE;
-#if !X_DISPLAY_MISSING
-	EventPending( &evNextTurn, FALSE );
-#endif
-    }
-    
-#if HAVE_SIGPROCMASK
-    {
-	sigset_t ss;
-
-	sigemptyset( &ss );
-	sigaddset( &ss, SIGINT );
-	sigprocmask( SIG_UNBLOCK, &ss, NULL );
-    }
-#elif HAVE_SIGBLOCK
-    sigsetmask( 0 );
-#endif
 }
 
 extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
@@ -936,6 +1070,11 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	
 	i++;
     }
+}
+
+extern void CommandLoad( char *sz ) {
+
+    puts( "Loading is not yet implemented." );
 }
 
 extern void CommandSaveMatch( char *sz ) {
@@ -1490,7 +1629,9 @@ extern char *GetInput( char *szPrompt ) {
     fputs( szPrompt, stdout );
     fflush( stdout );
 
+#if !X_DISPLAY_MISSING
  ReadDirect:
+#endif
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */
     
     fgets( sz, 256, stdin );
@@ -1631,51 +1772,20 @@ extern int main( int argc, char *argv[] ) {
     
     srandom( time( NULL ) );
 
-#if HAVE_SIGACTION
-    {
-	struct sigaction sa;
-
-	sa.sa_handler = HandleInterrupt;
-	sigemptyset( &sa.sa_mask );
-# if SA_RESTART
-	sa.sa_flags = SA_RESTART;
-# else
-	sa.sa_flags = 0;
-# endif
-	sigaction( SIGINT, &sa, NULL );
-
-# if !X_DISPLAY_MISSING
-	sa.sa_handler = HandleIO;
-	sigaction( SIGIO, &sa, NULL );
-# endif
-    }
-#elif HAVE_SIGVEC
-    {
-	struct sigvec sv;
-
-	sv.sv_handler = HandleInterrupt;
-	sigemptyset( &sv.sv_mask );
-	sv.sv_flags = 0;
-
-	sigvec( SIGINT, &sv, NULL );
-# if !X_DISPLAY_MISSING
-	sv.sv_handler = HandleIO;
-	sigaction( SIGIO, &sv, NULL );
-# endif
-    }
-#else
-    signal( SIGINT, HandleInterrupt );
-# if !X_DISPLAY_MISSING
-    signal( SIGIO, HandleIO );
-# endif
+    PortableSignal( SIGINT, HandleInterrupt, NULL );
+#if !X_DISPLAY_MISSING
+    PortableSignal( SIGIO, HandleIO, NULL );
 #endif
-
+    
 #if HAVE_LIBREADLINE
     rl_readline_name = "gnubg";
     rl_basic_word_break_characters = szCommandSeparators;
     rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
     rl_completion_entry_function = (Function *) NullGenerator;
 #endif
+
+    if( optind < argc )
+	CommandLoad( argv[ optind ] );
     
 #if !X_DISPLAY_MISSING
     if( fX ) {

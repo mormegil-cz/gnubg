@@ -13,6 +13,9 @@ duplication of effort and to make sure our changes merge easily.
 ** Add partial searching.
 ** See http://www.oasya.com/CubefulAdvantages.html for example of
   cubeful evaluation.
+** Improve quasi-random dice generation for rollouts. (gary)
+** Create multiple threads to parallelise rollouts (and evaluations?) on
+  multiprocessors.  Perhaps start remote processes?
 
 * Game play:
 ** Add cube handling for computer player.  See tag "thyssen-double-branch"
@@ -23,8 +26,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more completions to help and readline.
 ** Allow timeouts for "train" (and others?).
 ** Add interactive rollouts.
-** Load, save and analyse games and matches.  Also load matches given
-  as command line parameters.
+** Load, save and analyse games and matches.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -46,8 +48,7 @@ duplication of effort and to make sure our changes merge easily.
 ** When "set board" is given with no parameters under X, set it to the
   current position displayed in the board window.  (Perhaps a button in
   the board window would be better.)
-** Show rollout results while in progress, and allow resuming interrupted
-  rollouts.
+** Allow resuming interrupted rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
@@ -59,6 +60,8 @@ duplication of effort and to make sure our changes merge easily.
   some of this should wait for Gnome.
 ** Add a board edit mode.  What would be the best semantics for the
   interface?
+** Add a game window, which lists the moves made in the game so far and
+  allows moving back and forth.
 ** Try to use some optimisation like XCheckIfEvent() to ignore all but
   the most recent MotionNotify event in the queue when dragging chequers.
 ** Allow clicking on a point to make that point.
@@ -81,8 +84,6 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
-** X events are not handled during shell escapes.
-** Forced and automatic moves do not pause for "set delay". (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

@@ -1,3 +1,23 @@
+Fri Feb  4 10:00:39 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c (CommandSetDelay): Warn that delays will have no effect
+	if "set display" is off.
+	
+	* rollout.c (Rollout): Show current results while performing
+	rollouts.
+	
+	* gnubg.c (PortableSignal, PortableSignalRestore): New functions.
+	(ShellEscape): New function.  Handle X events while waiting for
+	child.
+
+	* play.c (ResetDelayTimer): New function.  Correctly handle
+	"set delay" pauses.
+
+	* configure.in, config.h.in: add --with-readline and --with-gdbm
+	options.  Try linking with termcap, ncurses or curses for readline.
+	
+	* backgammon.h: #include <list.h>, even if not using X.
+
 Thu Feb  3 09:36:22 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* play.c (ShowAutoMove): New function.
