@@ -1,7 +1,13 @@
+Wed Jan  8 18:21:25 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* export.c (GenerateImage): position of cube was wrong
+	(reported by Nardy Pillards)
+
 Wed Jan  8 17:59:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (RolloutPageGeneral): fix typo.
 	* makebearoff.c (usage) fix typo.
+	(reported by Oeystein Johansen)
 
 Wed Jan  8 17:43:32 2003  Joern Thyssen  <jth@gnubg.org>
 

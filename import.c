@@ -349,6 +349,10 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	    if( c < 4 )
 		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
 
+            for ( i = 0; i < c; ++i )
+              printf ( "move= %d/%d\n", pmr->n.anMove[ 2 * i ],
+                       pmr->n.anMove[ 2 * i + 1 ] );
+
             if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) )
               outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"),
                         sz + 3 );
