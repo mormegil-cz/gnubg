@@ -1837,8 +1837,6 @@ MainSelectionReceived ( GtkWidget *pw, GtkSelectionData *data,
 
   szCopied = strdup ( data->data );
 
-  printf ( "data \"%s\"\n", szCopied );
-  
 }
 
 
