@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <glib.h>
 
 #if USE_GTK
 #include <gtk/gtk.h>
