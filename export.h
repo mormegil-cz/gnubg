@@ -73,6 +73,6 @@ typedef struct _exportsetup {
 
 } exportsetup;
 
-extern exportsetup ecsExport;
+extern exportsetup exsExport;
 
 #endif
