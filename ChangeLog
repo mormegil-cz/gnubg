@@ -1,3 +1,8 @@
+Wed Aug 13 18:03:57 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* set.c: Clear cache when changing MET table. (Reported by Albert
+	Silver)
+
 Tue Aug 12 10:53:49 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gnubgmodule.c (PythonMatch): Initial version. Incomplete in some

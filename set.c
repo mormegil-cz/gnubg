@@ -2649,6 +2649,9 @@ extern void CommandSetMET( char *sz ) {
   InitMatchEquity ( sz, szDataDirectory );
   setDefaultPath ( sz, PATH_MET );
 
+  /* Cubeful evaluation get confused withh entries from another table */
+  EvalCacheFlush();
+  
   outputf( _("GNU Backgammon will now use the %s match equity table.\n"),
            miCurrent.szName );
 
