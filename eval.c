@@ -883,7 +883,7 @@ barPrimeBackGame(int anBoard[ 2 ][ 25 ])
     for(i = 24 - first; i < 20; ++i) {
       unsigned int n = 0;
       for(k = i; k <= i+3; ++k) {
-	if( anBoard[1-side][k] > 0 ) {
+	if( anBoard[1-side][k] > 1 ) {
 	  ++n;
 	}
       }
