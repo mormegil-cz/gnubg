@@ -161,10 +161,8 @@ typedef enum _movetype {
     MOVE_SETBOARD,
     MOVE_SETDICE,
     MOVE_SETCUBEVAL,
-    MOVE_SETCUBEPOS
-#if USE_TIMECONTROL
-    , MOVE_TIME
-#endif
+    MOVE_SETCUBEPOS,
+    MOVE_TIME
 } movetype;
 
 #ifdef USE_TIMECONTROL

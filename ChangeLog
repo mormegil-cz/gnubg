@@ -1,3 +1,7 @@
+Fri 12 Sep 19:17:25 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	backgammon.h MOVE_TIME needn't be conditional
+	
 Fri 12 Sep 19:00:57 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubg.c show.c set.c backgammon.h gtkgame.c - add panels on/off
