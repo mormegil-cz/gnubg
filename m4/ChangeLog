@@ -1,3 +1,8 @@
+Wed Mar 31 20:44:10 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* glib-2.0.m4, glib-gettext.m4, glib.m4: add a few m4 files
+	(reported by Christian Anthon)
+
 Mon Aug 11 22:30:11 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* iconv.m4, intdiv0.m4, inttypes_h.m4, inttypes.m4, inttypes-pri.m4,

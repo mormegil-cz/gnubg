@@ -407,7 +407,7 @@ fi
 
 PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you want to use libxml2 to parse XML.), no_libxml2=yes)
 
-AC_ARG_ENABLE(bearoff,[  --enable-bearoff=TYPE   specify bearoff database (TYPE=no,external,dynamic,static)],bearoff_database="$enable_bearoff")
+AC_ARG_ENABLE(bearoff,[  --enable-bearoff=TYPE   specify bearoff database (TYPE=no,external,static)],bearoff_database="$enable_bearoff")
 
 case "$bearoff_database" in
   "external")
