@@ -1,3 +1,11 @@
+Sat Oct 12 14:29:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Player's colors wrong in html header.
+	(reported by Ned Cross)
+
+	* html.c (HTMLBoardHeader): use aaszColorName instead of 
+	hardcoded red/black. (change all callers)
+
 Sat Oct 12 14:17:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Parse SGG header and read into matchinfo struct.

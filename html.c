@@ -1446,7 +1446,8 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 static void 
 HTMLPrologue ( FILE *pf, const matchstate *pms,
                const int iGame,
-               char *aszLinks[ 4 ] ) {
+               char *aszLinks[ 4 ],
+               const htmlexporttype het ) {
 
   char szTitle[ 100 ];
   char szHeader[ 100 ];
@@ -1471,14 +1472,18 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
 
   if ( pms->nMatchTo )
     sprintf ( szHeader,
-              _("%s (red, %d pts) vs. %s (black, %d pts) (Match to %d)"),
+              _("%s (%s, %d pts) vs. %s (%s, %d pts) (Match to %d)"),
+              aaszColorName[ het ][ 0 ],
               ap [ 0 ].szName, pms->anScore[ 0 ],
+              aaszColorName[ het ][ 1 ],
               ap [ 1 ].szName, pms->anScore[ 1 ],
               pms->nMatchTo );
   else
     sprintf ( szHeader,
-              _("%s (red, %d pts) vs. %s (black, %d pts) (money game)"),
+              _("%s (%s, %d pts) vs. %s (%s, %d pts) (money game)"),
+              aaszColorName[ het ][ 0 ],
               ap [ 0 ].szName, pms->anScore[ 0 ],
+              aaszColorName[ het ][ 1 ],
               ap [ 1 ].szName, pms->anScore[ 1 ] );
 
 
@@ -3109,7 +3114,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
         ApplyMoveRecord ( &msExport, pmr );
 
-        HTMLPrologue( pf, &msExport, iGame, aszLinks );
+        HTMLPrologue( pf, &msExport, iGame, aszLinks, het );
 
         HTMLMatchInfo ( pf, &mi );
 
@@ -3469,7 +3474,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 	return;
     }
 
-    HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL );
+    HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL, exsExport.het );
 
     HTMLMatchInfo ( pf, &mi );
 
