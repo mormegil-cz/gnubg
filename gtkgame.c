@@ -4621,7 +4621,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
     gtk_container_add( GTK_CONTAINER( pwBox ),
 		       rw.pwRotate = gtk_check_button_new_with_label(
-			   _("Rotate first two rolls") ) );
+			   _("Use rotation for first rolls") ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwRotate ),
 				  rcRollout.fRotate );
 

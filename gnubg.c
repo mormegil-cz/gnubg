@@ -816,7 +816,7 @@ command cER = {
     { "rng", CommandSetRolloutRNG, N_("Specify the random number "
       "generator algorithm for rollouts"), NULL, acSetRNG },
     { "rotate", CommandSetRolloutRotate, 
-      N_("Rotate the first two rolls"), szONOFF, &cOnOff },
+      N_("Use rotation for the first rolls"), szONOFF, &cOnOff },
     { "seed", CommandSetRolloutSeed, N_("Specify the base pseudo-random seed "
       "to use for rollouts"), szOPTSEED, NULL },
     { "trials", CommandSetRolloutTrials, N_("Control how many rollouts to "

@@ -1,3 +1,10 @@
+Mon Oct 21 23:04:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* set.c (CommandSetRolloutRotate), gnubg.c,
+	gtkgame.c (SetRollouts): change "rotate first two rolls" to
+	"Use rotation for first rolls".
+	(suggested by Zorba)
+
 Mon Oct 21 22:47:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Export position for BBS.

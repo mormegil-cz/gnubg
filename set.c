@@ -1409,8 +1409,8 @@ CommandSetRolloutRotate ( char *sz ) {
   int f = prcSet->fRotate;
 
   SetToggle ( "rollout rotate", &f, sz,
-              _("Will rotate first two rolls of rollout"),
-              _("Will not rotate first two rolls of rollout") );
+              _("Use rotation for the first rolls"),
+              _("Do not use rotation for the first rolls") );
 
   prcSet->fRotate = f;
 
@@ -2497,6 +2497,9 @@ SetExportHTMLCSS ( const htmlexportcss hecss ) {
 
   if ( exsExport.hecss == hecss )
     return;
+
+  if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL )
+    CommandNotImplemented ( NULL );
 
   exsExport.hecss = hecss;
 
