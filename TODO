@@ -81,8 +81,6 @@ duplication of effort and to make sure our changes merge easily.
 ** EvaluatePositionCache should store more information in the evalcache
   struct, to make sure that cache entries for the same position with
   different cube values or evaluation parameters don't collide.
-** Think about what should happen with variance reduction in Rollout()
-  when a probability turns out <0 or >1.
 ** Nothing handles running out of memory gracefully.  A solution
   could be to write a malloc() wrapper that (if malloc fails) first
   tries to free memory (e.g. flush the eval cache); if malloc still
