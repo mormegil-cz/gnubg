@@ -3819,44 +3819,11 @@ static void NewOK( GtkWidget *pw, newwidget *pnw ) {
   int S = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwS));
   int P = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwP));
   int Mlength = pnw->padjML->value; 
-  int fManDice = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice));
-  int fTM = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwTutorMode));
-  int fCPS = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwCPS));
-  int fGH = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwGNUvsHuman));
-  int fHH = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwHumanHuman));
-  
+
+  UpdatePlayerSettings(pnw);
+
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-		  
-  if(!fCPS){
-	  if (fGH){
-		  UserCommand("set player 0 gnubg");
-		  UserCommand("set player 1 human");
-	  }
-	  if (fHH){
-		  UserCommand("set player 0 human");
-		  UserCommand("set player 1 human");
-	  }
-  }
 
-  
-  if((fManDice) && (rngCurrent != RNG_MANUAL))
-	  UserCommand("set rng manual");
-  
-  if((!fManDice) && (rngCurrent == RNG_MANUAL))
-	  UserCommand("set rng mersenne");
-  
-  if((fTM) && (!fTutor))
-	  UserCommand("set tutor mode on");
-
-  if((!fTM) && (fTutor))
-	  UserCommand("set tutor mode off");
-
-		  
   if (G)
 	  UserCommand("new game");
   else if(M){
@@ -3876,7 +3843,9 @@ static void NewSet( newwidget *pnw) {
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwM ), TRUE );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwTutorMode ),
                                 fTutor );
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice), rngCurrent == RNG_MANUAL);
   gtk_adjustment_set_value( GTK_ADJUSTMENT( pnw->padjML ), nDefaultLength );
+
 }
 
 static void NewDialog( gpointer *p, guint n, GtkWidget *pw ) {
@@ -8225,6 +8194,10 @@ extern void GTKDumpStatcontext( int game )
 	pwNotebook = gtk_notebook_new();
 	gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
 	gtk_notebook_popup_disable( GTK_NOTEBOOK( pwNotebook ) );
+
+/* Not sure if this is a good idea...
+	gtk_tooltips_set_tip( ptt, pwNotebook, _("Right click to copy statistics"), "" );
+*/
 
 	pvbox = gtk_vbox_new( FALSE, 0 ),
     gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, TRUE, TRUE, 0);
