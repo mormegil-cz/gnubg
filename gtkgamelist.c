@@ -34,11 +34,6 @@
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_style_get_font(s) ((s)->font)
-static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
-
-    ps->font = pf;
-    gdk_font_ref( pf );
-}
 
 static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
 {
@@ -47,7 +42,9 @@ static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
 
 static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
 {
-	gtk_style_set_font(psStyle, gtk_style_get_font(psValue));
+	GdkFont *pf = gtk_style_get_font(psValue);
+	psStyle->font = pf;
+	gdk_font_ref( pf );
 }
 
 #else
@@ -262,31 +259,30 @@ GtkWidget* GL_Create()
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 1, FALSE );
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 2, FALSE );
     gtk_widget_ensure_style( pwGameList );
-    ps = gtk_style_new();
+    GetStyleFromRCFile(&ps, "gnubg", pwGameList->style);
     ps->base[ GTK_STATE_SELECTED ] =
-	ps->base[ GTK_STATE_ACTIVE ] =
-	ps->base[ GTK_STATE_NORMAL ] =
-	pwGameList->style->base[ GTK_STATE_NORMAL ];
+    	ps->base[ GTK_STATE_ACTIVE ] =
+    	ps->base[ GTK_STATE_NORMAL ] =
+    	pwGameList->style->base[ GTK_STATE_NORMAL ];
     ps->fg[ GTK_STATE_SELECTED ] =
-	ps->fg[ GTK_STATE_ACTIVE ] =
-	ps->fg[ GTK_STATE_NORMAL ] =
-	pwGameList->style->fg[ GTK_STATE_NORMAL ];
-    gtk_style_set_font( ps, gtk_style_get_font( pwGameList->style ) );
+    	ps->fg[ GTK_STATE_ACTIVE ] =
+    	ps->fg[ GTK_STATE_NORMAL ] =
+    	pwGameList->style->fg[ GTK_STATE_NORMAL ];
     gtk_widget_set_style( pwGameList, ps );
     
     psGameList = gtk_style_copy( ps );
     psGameList->bg[ GTK_STATE_SELECTED ] = psGameList->bg[ GTK_STATE_NORMAL ] =
-	ps->base[ GTK_STATE_NORMAL ];
+    	ps->base[ GTK_STATE_NORMAL ];
 
     psCurrent = gtk_style_copy( psGameList );
     psCurrent->bg[ GTK_STATE_SELECTED ] = psCurrent->bg[ GTK_STATE_NORMAL ] =
-	psCurrent->base[ GTK_STATE_SELECTED ] =
-	psCurrent->base[ GTK_STATE_NORMAL ] =
-	psGameList->fg[ GTK_STATE_NORMAL ];
+    	psCurrent->base[ GTK_STATE_SELECTED ] =
+    	psCurrent->base[ GTK_STATE_NORMAL ] =
+    	psGameList->fg[ GTK_STATE_NORMAL ];
     psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
-	psGameList->bg[ GTK_STATE_NORMAL ];
+    	psGameList->bg[ GTK_STATE_NORMAL ];
 
-	GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "gamelist-cube-blunder", psGameList);
+    GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "gamelist-cube-blunder", psGameList);
     GetStyleFromRCFile(&psCubeErrors[SKILL_BAD], "gamelist-cube-error", psGameList);
     GetStyleFromRCFile(&psCubeErrors[SKILL_DOUBTFUL], "gamelist-cube-doubtful", psGameList);
 

@@ -139,6 +139,8 @@ UpdateMoveList ( const hintdata *phd ) {
     {	/* Get highlight style first time in */
       GtkStyle *psMoves = gtk_widget_get_style( pwMoves );
       GetStyleFromRCFile(&psHighlight, "move-done", psMoves);
+      /* Use correct background colour when selected */
+      memcpy(&psHighlight->bg[GTK_STATE_SELECTED], &psMoves->bg[GTK_STATE_SELECTED], sizeof(GdkColor));
     }
     for ( i = 0; i < pml->cMoves; i++ )
       gtk_clist_set_row_style( GTK_CLIST( pwMoves ), i, i == *piHighlight ?
