@@ -1909,7 +1909,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 }
 
 static gint board_set( Board *board, const gchar *board_text,
-                       const gint resigned ) {
+                       const gint resigned, const gint cube_use ) {
 
     BoardData *bd = board->board_data;
     gchar *dest, buf[ 32 ];
@@ -2194,19 +2194,18 @@ static gint board_set( Board *board, const gchar *board_text,
 	}
     }
 
-
     if( rdAppearance.nSize <= 0 )
 	return 0;
 
     if( bd->doubled != old_doubled || 
         bd->cube != old_cube ||
 	bd->cube_owner != bd->opponent_can_double - bd->can_double ||
-	fCubeUse != bd->cube_use || 
+	cube_use != bd->cube_use || 
         bd->crawford_game != old_crawford ) {
 	int xCube, yCube;
 
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
-	bd->cube_use = fCubeUse;
+	bd->cube_use = cube_use;
 		
 	/* erase old cube */
 	board_invalidate_rect( bd->drawing_area, old_xCube * rdAppearance.nSize,
@@ -2581,7 +2580,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
 	       ms.fTurn, ms.fCrawford);
 
-    board_set( board, board_str, -pbd->turn * ms.fResigned );
+    board_set( board, board_str, -pbd->turn * ms.fResigned, ms.fCubeUse );
     
     /* FIXME update names, score, match length */
     if( rdAppearance.nSize <= 0 )
@@ -3595,7 +3594,7 @@ static void board_init( Board *board ) {
 
     board_set( board, "board:::1:0:0:"
               "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
-              "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0", 0 );
+              "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0", 0, TRUE );
     
     gtk_widget_show_all( GTK_WIDGET( board ) );
 	

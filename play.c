@@ -214,6 +214,8 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	    ( pms->anScore[ 0 ] == pms->nMatchTo - 1 ||
 	      pms->anScore[ 1 ] == pms->nMatchTo - 1 );
         pms->bgv = pmr->g.bgv;
+        pms->fCubeUse = pmr->g.fCubeUse;
+        pms->fJacoby = pmr->g.fJacoby;
 	break;
 	
     case MOVE_DOUBLE:
@@ -273,7 +275,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 
 	if( ( n = GameStatus( pms->anBoard ) ) ) {
 
-            if( fJacoby && pms->fCubeOwner == -1 && ! pms->nMatchTo )
+            if( pms->fJacoby && pms->fCubeOwner == -1 && ! pms->nMatchTo )
               /* gammons do not count on a centred cube during money
                  sessions under the Jacoby rule */
                 n = 1;
@@ -462,6 +464,8 @@ extern void AddMoveRecord( void *pv ) {
 	}
 	if( !pmr->g.fCrawford )
 	    assert( !pmr->g.fCrawfordGame );
+        assert ( pmr->g.bgv >= VARIATION_STANDARD &&
+                 pmr->g.bgv < NUM_VARIATIONS );
 	
 	break;
 	
@@ -635,12 +639,13 @@ static int NewGame( void ) {
     pmr->g.anScore[ 1 ] = ms.anScore[ 1 ];
     pmr->g.fCrawford = fAutoCrawford && ms.nMatchTo > 1;
     pmr->g.fCrawfordGame = ms.fCrawford;
-    pmr->g.fJacoby = fJacoby && !ms.nMatchTo;
+    pmr->g.fJacoby = ms.fJacoby && !ms.nMatchTo;
     pmr->g.fWinner = -1;
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
     pmr->g.bgv = ms.bgv;
+    pmr->g.fCubeUse = ms.fCubeUse;
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -672,7 +677,7 @@ static int NewGame( void ) {
     }
 
     if( ms.anDice[ 0 ] == ms.anDice[ 1 ] && ms.nCube < MAX_CUBE ) {
-	if( !ms.nMatchTo && ms.nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
+	if( !ms.nMatchTo && ms.nCube < ( 1 << cAutoDoubles ) && ms.fCubeUse ) {
 	    pmr->g.nAutoDoubles++;
 	    if( fDisplay )
 		outputf( _("The cube is now at %d.\n"), ms.nCube <<= 1 );
@@ -1010,7 +1015,7 @@ extern int ComputerTurn( void ) {
       
       /* Consider doubling */
 
-      if ( fCubeUse && !ms.anDice[ 0 ] && ms.nCube < MAX_CUBE &&
+      if ( ms.fCubeUse && !ms.anDice[ 0 ] && ms.nCube < MAX_CUBE &&
 	   GetDPEq ( NULL, NULL, &ci ) ) {
 	  evalcontext ecDH;
 
@@ -1248,7 +1253,7 @@ extern int ComputerTurn( void ) {
 #endif
 
       if( !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
-	  ( !fCubeUse || ms.nCube >= MAX_CUBE ||
+	  ( !ms.fCubeUse || ms.nCube >= MAX_CUBE ||
 	    !GetDPEq( NULL, NULL, &ci ) ) ) {
 	  if( RollDice( ms.anDice, rngCurrent ) < 0 )
 	      return -1;
@@ -1578,7 +1583,7 @@ extern int NextTurn( int fPlayNext ) {
 	( ms.gs == GAME_RESIGNED && ( ( n = ms.fResigned ) ) ) ) {
 	movegameinfo *pmgi = plGame->plNext->p;
 	
-	if( fJacoby && ms.fCubeOwner == -1 && !ms.nMatchTo )
+	if( ms.fJacoby && ms.fCubeOwner == -1 && !ms.nMatchTo )
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
@@ -1668,7 +1673,7 @@ extern int NextTurn( int fPlayNext ) {
 	     - it's the Crawford game;
 	     - the cube is dead. */
 	if( fAutoRoll && !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
-	    ( !fCubeUse || ms.fCrawford ||
+	    ( !ms.fCubeUse || ms.fCrawford ||
 	      ( ms.fCubeOwner >= 0 && ms.fCubeOwner != ms.fTurn ) ||
 	      ( ms.nMatchTo > 0 && ms.anScore[ ms.fTurn ] +
 		ms.nCube >= ms.nMatchTo ) ) )
@@ -2187,7 +2192,7 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
-    if( !fCubeUse ) {
+    if( !ms.fCubeUse ) {
 	outputl( _("The doubling cube has been disabled (see `help set cube "
 	      "use').") );
 
@@ -2892,6 +2897,8 @@ extern void CommandNewMatch( char *sz ) {
 
     ms.nMatchTo = n;
     ms.bgv = bgvDefault;
+    ms.fCubeUse = fCubeUse;
+    ms.fJacoby = fJacoby;
 
     SetMatchDate( &mi );
     
@@ -2926,6 +2933,8 @@ extern void CommandNewSession( char *sz ) {
     ClearMatch();
     
     ms.bgv = bgvDefault;
+    ms.fCubeUse = fCubeUse;
+    ms.fJacoby = fJacoby;
     plLastMove = NULL;
 
     SetMatchDate( &mi );
@@ -3562,7 +3571,7 @@ static skilltype ShouldDouble ( void ) {
 		ms.anDice[ 0 ]         || 
 		ms.fDoubled || 
 		ms.fResigned ||
-                ! fCubeUse ||
+                ! ms.fCubeUse ||
 		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
 
       return (SKILL_NONE);
@@ -3860,6 +3869,8 @@ SetMatchID ( const char *szMatchID ) {
     ( ( anScore[ 0 ] == nMatchTo - 1 ) || 
       ( anScore[ 1] == nMatchTo - 1 ) );
   ms.bgv = bgvDefault; /* FIXME: include bgv in match ID */
+  ms.fCubeUse = fCubeUse; /* FIXME: include cube use in match ID */
+  ms.fJacoby = fJacoby; /* FIXME: include Jacoby in match ID */
   
   /* start new game */
     
@@ -3880,12 +3891,13 @@ SetMatchID ( const char *szMatchID ) {
   pmr->g.anScore[ 1 ] = ms.anScore[ 1 ];
   pmr->g.fCrawford = fAutoCrawford && ms.nMatchTo > 1;
   pmr->g.fCrawfordGame = ms.fCrawford;
-  pmr->g.fJacoby = fJacoby && !ms.nMatchTo;
+  pmr->g.fJacoby = ms.fJacoby && !ms.nMatchTo;
   pmr->g.fWinner = -1;
   pmr->g.nPoints = 0;
   pmr->g.fResigned = FALSE;
   pmr->g.nAutoDoubles = 0;
   pmr->g.bgv = ms.bgv;
+  pmr->g.fCubeUse = ms.fCubeUse;
   IniStatcontext( &pmr->g.sc );
   AddMoveRecord( pmr );
 

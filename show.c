@@ -656,7 +656,7 @@ extern void CommandShowCube( char *sz ) {
 	return;
     }
     
-    if( !fCubeUse ) {
+    if( !ms.fCubeUse ) {
 	outputl( _("The doubling cube is disabled.") );
 	return;
     }
@@ -723,10 +723,17 @@ extern void CommandShowEgyptian( char *sz ) {
 
 extern void CommandShowJacoby( char *sz ) {
 
-    if ( fJacoby ) 
-      outputl( _("Money sessions are played with the Jacoby rule.") );
-    else
-      outputl( _("Money sessions are played without the Jacoby rule.") );
+  if ( ! ms.nMatchTo )
+    outputl( ms.fJacoby ? 
+             _("This money session is play with the Jacoby rule."
+               " Default is:") :
+             _("This money session is play without the Jacoby rule."
+               " Default is:") );
+
+  if ( fJacoby ) 
+    outputl( _("Money sessions are played with the Jacoby rule.") );
+  else
+    outputl( _("Money sessions are played without the Jacoby rule.") );
 
 }
 
@@ -872,7 +879,7 @@ extern void CommandShowScore( char *sz ) {
 					 _(", post-Crawford play") : ""));
     } 
     else {
-        if ( fJacoby )
+        if ( ms.fJacoby )
 	    outputl ( _(" (money session,\nwith Jacoby rule).") );
         else
 	    outputl ( _(" (money session,\nwithout Jacoby rule).") );

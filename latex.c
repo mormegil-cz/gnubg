@@ -356,7 +356,7 @@ PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
 	return;
     
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, fPlayer, pms->nMatchTo,
-		 pms->anScore, pms->fCrawford, fJacoby, nBeavers );
+		 pms->anScore, pms->fCrawford, pms->fJacoby, nBeavers );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */

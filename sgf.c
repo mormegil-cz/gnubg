@@ -370,6 +370,8 @@ RestoreRules( movegameinfo *pmgi, const char *sz ) {
       pmgi->bgv = VARIATION_HYPERGAMMON_2;
     else if( !strcmp( pchx, "Hypergammon3" ) )
       pmgi->bgv = VARIATION_HYPERGAMMON_3;
+    else if( !strcmp( pchx, "NoCube" ) )
+      pmgi->fCubeUse = FALSE;
 
     pchx = strtok( NULL, ":" );
 
@@ -402,6 +404,7 @@ static void RestoreRootNode( list *pl, char *szCharset ) {
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
     pmgi->bgv = VARIATION_STANDARD;
+    pmgi->fCubeUse = TRUE;
     IniStatcontext( &pmgi->sc );
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext ) 
@@ -1756,6 +1759,14 @@ static void WriteProperty( FILE *pf, char *szName, char *szValue ) {
     putc( ']', pf );
 }
 
+static void
+AddRule( FILE *pf, const char *sz, int *pfFirst ) {
+
+  fprintf( pf, "%s%s", ( *pfFirst ) ? "" : ":", sz );
+  *pfFirst = FALSE;
+
+}
+
 static void SaveGame( FILE *pf, list *plGame ) {
 
     list *pl;
@@ -1803,22 +1814,24 @@ static void SaveGame( FILE *pf, list *plGame ) {
     }
 
     if ( pmr->g.fCrawford || pmr->g.fJacoby || 
-         pmr->g.bgv != VARIATION_STANDARD ) {
+         pmr->g.bgv != VARIATION_STANDARD || ! pmr->g.fCubeUse ) {
 
       static char *aszSGFVariation[ NUM_VARIATIONS ] =
         { NULL, "Nackgammon", "Hypergammon1", "Hypergammon2", "Hypergammon3" };
+      int fFirst = TRUE;
 
       fputs( "RU[", pf );
       
+      if( !pmr->g.fCubeUse ) 
+        AddRule( pf, "NoCube", &fFirst );
       if( pmr->g.fCrawford )
-	fputs( "Crawford", pf );
+        AddRule( pf, "Crawford", &fFirst );
       if( pmr->g.fCrawfordGame )
-        fputs( ":CrawfordGame", pf );
-      if( pmr->g.fJacoby )
-        fprintf( pf, "%sJacoby", pmr->g.fCrawford ? ":" : "" );
+        AddRule( pf, "CrawfordGame", &fFirst );
+      if( pmr->g.fJacoby ) 
+        AddRule( pf, "Jacoby", &fFirst );
       if( pmr->g.bgv != VARIATION_STANDARD )
-        fprintf( pf, "%s%s", ( pmr->g.fCrawford || pmr->g.fJacoby ) ? ":" : "",
-                 aszSGFVariation[ pmr->g.bgv ] );
+        AddRule( pf, aszSGFVariation[ pmr->g.bgv ], &fFirst );
 
       fputs( "]", pf );
     }
@@ -2067,12 +2080,13 @@ extern void CommandSavePosition( char *sz ) {
     pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
     pmgi->fCrawford = fAutoCrawford && ms.nMatchTo > 1;
     pmgi->fCrawfordGame = ms.fCrawford;
-    pmgi->fJacoby = fJacoby && !ms.nMatchTo;
+    pmgi->fJacoby = ms.fJacoby && !ms.nMatchTo;
     pmgi->fWinner = -1;
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
     pmgi->bgv = ms.bgv;
+    pmgi->fCubeUse = ms.fCubeUse;
     IniStatcontext( &pmgi->sc );
     ListInsert( &l, pmgi );
 

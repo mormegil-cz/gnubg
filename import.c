@@ -587,12 +587,13 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
     if( ( pmr->g.fCrawfordGame = !fPostCrawford &&
 	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
 	fPostCrawford = TRUE;
-    pmr->g.fJacoby = FALSE; /* assume JF never uses Jacoby rule */
+    pmr->g.fJacoby = fJacoby;
     pmr->g.fWinner = -1;
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
     pmr->g.bgv = VARIATION_STANDARD; /* always standard backgammon */
+    pmr->g.fCubeUse = fCubeUse; 
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -965,6 +966,7 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     pmr->g.nMatch = nLength;
     pmr->g.anScore[ fInvert ] = n0;
     pmr->g.anScore[ ! fInvert ] = n1;
+    pmr->g.fCubeUse = TRUE; /* always use cube */
 
     /* check if score is swapped (due to fibs oldmoves bug) */
 
@@ -1103,7 +1105,7 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			   int fCrawford,
                            int fCrawfordRule, int fAutoDoubles, 
-                           int fJacobyRule, bgvariation bgv ) {
+                           int fJacobyRule, bgvariation bgv, int fCubeUse ) {
 
 
     char sz[ 1024 ];
@@ -1137,6 +1139,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.fResigned = FALSE;
     pmgi->g.nAutoDoubles = 0; /* we check for automatic doubles later */
     pmgi->g.bgv = bgv;
+    pmgi->g.fCubeUse = fCubeUse;
     IniStatcontext( &pmgi->g.sc );
     AddMoveRecord( pmgi );
 
@@ -1536,7 +1539,7 @@ ParseSGGDate ( const char *sz, int *pnDay, int *pnMonth, int *pnYear ) {
 static void
 ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
                   int *pfAutoDoubles, int *pfJacobyRule,
-                  bgvariation *pbgv ) {
+                  bgvariation *pbgv, int *pfCubeUse ) {
 
   char szTemp[ 80 ];
   int i;
@@ -1622,6 +1625,13 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
   case 13:
 
     /* doubling cube */
+
+    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+      break;
+
+    *pfCubeUse = ! strcmp ( szTemp, "Yes" );
+    break;
+
     break;
 
   case 14:
@@ -1677,6 +1687,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     int fCrawfordRule = TRUE;
     int fJacobyRule = TRUE;
     int fAutoDoubles = 0;
+    int fCubeUse = TRUE;
     bgvariation bgv = VARIATION_STANDARD;
 
     fWarned = FALSE;
@@ -1718,13 +1729,14 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
         break;
       
       ParseSGGOptions ( sz, &mi, &fCrawfordRule, 
-                        &fAutoDoubles, &fJacobyRule, &bgv );
+                        &fAutoDoubles, &fJacobyRule, &bgv, &fCubeUse );
 
     }
     
     while( !feof( pf ) ) {
 	ImportSGGGame( pf, i, nLength, n0, n1, fCrawford,
-                       fCrawfordRule, fAutoDoubles, fJacobyRule, bgv );
+                       fCrawfordRule, fAutoDoubles, fJacobyRule, bgv, 
+                       fCubeUse );
 	
 	while( fgets( sz, 80, pf ) )
 	    if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
@@ -1754,7 +1766,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
 static int
 ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
                   int *pfAutoDoubles, int *pfJacobyRule,
-                  int *pnLength, bgvariation *pbgv ) {
+                  int *pnLength, bgvariation *pbgv, int *pfCubeUse ) {
 
   char szTemp[ 80 ];
   int i, j;
@@ -1824,10 +1836,17 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     break;
 
   case 11: /* Crawford */
-    /* ignore. Possible FIXME: use it? */
+    if ( ! ( pc = strchr( sz, ':' ) ) )
+      return 0;
+    *pfCrawfordRule = atoi ( pc + 2 );
+    return 0;
     break;
 
   case 12: /* Cube */
+    if ( ! ( pc = strchr( sz, ':' ) ) )
+      return 0;
+    *pfCubeUse = atoi ( pc + 2 );
+    return 0;
     break;
 
   case 14: /* Length */
@@ -1844,6 +1863,9 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     switch( atoi( pc + 2 ) ) {
     case 1:
       *pbgv = VARIATION_STANDARD;
+      break;
+    case 2:
+      *pbgv = VARIATION_NACKGAMMON;
       break;
     default:
       outputf ( "Unknown variation in TMG file\n"
@@ -1892,7 +1914,7 @@ ParseTMGGame ( const char *sz,
 static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			   int fCrawford,
                            int fCrawfordRule, int fAutoDoubles, 
-                           int fJacobyRule, bgvariation bgv ) {
+                           int fJacobyRule, bgvariation bgv, int fCubeUse ) {
 
 
     char sz[ 1024 ];
@@ -1937,6 +1959,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.fResigned = FALSE;
     pmgi->g.nAutoDoubles = 0; /* we check for automatic doubles later */
     pmgi->g.bgv = bgv;
+    pmgi->g.fCubeUse = fCubeUse;
     IniStatcontext( &pmgi->g.sc );
     AddMoveRecord( pmgi );
 
@@ -2132,7 +2155,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
            disable beavers and auto doubles during play */
 
         ParseTMGOptions ( sz, &mi, &pmgi->g.fCrawford,
-                           &j, &pmgi->g.fJacoby, &j, &bgv );
+                           &j, &pmgi->g.fJacoby, &j, &bgv, &fCubeUse );
 
       }
 
@@ -2153,6 +2176,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   int fAutoDoubles = 0;
   int nLength = 0;
   int fCrawford = FALSE;
+  int fCubeUse = TRUE;
   int n0, n1;
   int i, j;
   char sz[ 80 ];
@@ -2180,7 +2204,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
       break;
       
     ParseTMGOptions ( sz, &mi, &fCrawfordRule, 
-                      &fAutoDoubles, &fJacobyRule, &nLength, &bgv );
+                      &fAutoDoubles, &fJacobyRule, &nLength, &bgv, &fCubeUse );
 
   }
 
@@ -2189,7 +2213,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   while( !feof( pf ) ) {
 
     ImportTMGGame( pf, i, nLength, n0, n1, fCrawford,
-                   fCrawfordRule, fAutoDoubles, fJacobyRule, bgv );
+                   fCrawfordRule, fAutoDoubles, fJacobyRule, bgv, fCubeUse );
 	
     while( fgets( sz, 80, pf ) )
       if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, nLength ) )
@@ -2245,6 +2269,7 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
     pmr->g.bgv = VARIATION_STANDARD; /* assume standard backgammon */
+    pmr->g.fCubeUse = TRUE;          /* assume use of cube */
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -2605,6 +2630,7 @@ ImportSnowieTxt( FILE *pf ) {
   pmgi->fResigned = FALSE;
   pmgi->nAutoDoubles = 0;
   pmgi->bgv = VARIATION_STANDARD; /* assume standard backgammon */
+  pmgi->fCubeUse = TRUE;          /* assume use of cube */
   IniStatcontext( &pmgi->sc );
   
   AddMoveRecord( pmgi );

@@ -122,6 +122,8 @@ typedef struct _rolloutcontext {
   unsigned int fTruncBearoff2 : 1; /* cubeless rollout: trunc at BEAROFF2 */
   unsigned int fTruncBearoffOS: 1; /* cubeless rollout: trunc at BEAROFF_OS */
   unsigned short nLate; /* switch evaluations on move nLate of game */
+  unsigned short int fIgnoreJacobyCubeless; /* ignore Jacoby rule for cubeless
+                                         money game rollouts */
   rng rngRollout;
   int nSeed;
 

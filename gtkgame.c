@@ -699,7 +699,7 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
     char sz[ 20 ]; /* "set cube value 4096" */
     GtkWidget *pwDialog, *pwCube;
 
-    if( ms.gs != GAME_PLAYING || ms.fCrawford || !fCubeUse )
+    if( ms.gs != GAME_PLAYING || ms.fCrawford || !ms.fCubeUse )
 	return;
 	
     pwDialog = CreateDialog( _("GNU Backgammon - Cube"),

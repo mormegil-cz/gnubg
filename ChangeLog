@@ -1,3 +1,13 @@
+Thu Mar 20 21:09:15 2003  Joern Thyssen  <jth@gnubg.org>
+
+        Improve support for Jacoby and cube use.
+
+        * gnubg.c, sgf.c, import.c, gtkgame.c, gtkboard.c, set.c, show.c,
+        postscript.c, latex.c, html.c
+
+        * import.c: TMG: support for Jacoby rule, cube use, and Nackgammon.  
+        * import.c: SGG: support for Jacoby rule and cube use.
+
 Thu Mar 20 14:17:22 2003  Gary Wong  <gtw@gnu.org>
 
 	* configure.in: Add --enable-train-menu option, so the GTK+ train

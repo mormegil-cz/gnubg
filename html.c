@@ -3339,7 +3339,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, 0,
                  pms->nMatchTo, pms->anScore, pms->fCrawford,
-                 fJacoby, nBeavers );
+                 pms->fJacoby, nBeavers );
 
     if ( pms->nMatchTo ) {
 
