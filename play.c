@@ -1,7 +1,7 @@
 /*
  * play.c
  *
- * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -115,6 +115,7 @@ static void ApplyGameOver( matchstate *pms ) {
 	return;
     
     pms->anScore[ pmgi->fWinner ] += pmgi->nPoints;
+    pms->cGames++;
 }
 
 extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
@@ -138,6 +139,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	pms->nMatchTo = pmr->g.nMatch;
 	pms->anScore[ 0 ] = pmr->g.anScore[ 0 ];
 	pms->anScore[ 1 ] = pmr->g.anScore[ 1 ];
+	pms->cGames = pmr->g.i;
 	
 	pms->gs = GAME_NONE;
 	pms->fMove = pms->fTurn = pms->fCubeOwner = -1;
@@ -328,7 +330,6 @@ static int PopGame( list *plDelete, int fInclusive ) {
 	pl = pl->plNext;
 	FreeGame( pl->plPrev->p );
 	ListDelete( pl->plPrev );
-	ms.cGames--;
     } while( pl->p );
 
     return 0;
@@ -505,24 +506,31 @@ static void ResetDelayTimer( void ) {
 
 extern void AddGame( moverecord *pmr ) {
     
-#if USE_GTK
-    char sz[ 32 ];
-    
-    if( fX ) {
-	sprintf( sz, "Game %d: %d-%d", pmr->g.i + 1, pmr->g.anScore[ 0 ],
-		 pmr->g.anScore[ 1 ] );
-	GTKAddGame( sz );
-    }
-#endif
-    
     assert( pmr->mt == MOVE_GAMEINFO );
-    
-    ms.cGames++;
+
+#if USE_GTK
+    if( fX )
+	GTKAddGame( pmr );
+#endif
 }
 
 static int NewGame( void ) {
 
     moverecord *pmr;
+
+    if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
+	/* only recording the active game of a session; discard any others */
+	if( fConfirm ) {
+	    if( fInterrupt )
+		return -1;
+	    
+	    if( !GetInputYN( "Are you sure you want to start a new game, "
+			     "and discard the one in progress? " ) )
+		return -1;
+	}
+
+	PopGame( lMatch.plNext->p, TRUE );
+    }
     
     InitBoard( ms.anBoard );
 
@@ -1071,34 +1079,39 @@ extern int ComputerTurn( void ) {
 
   case PLAYER_EXTERNAL:
 #if HAVE_SOCKETS
+#if 1
+      /* FIXME handle resignations -- there must be some way of indicating
+	 that a resignation has been offered to the external player. */
       if( ms.fResigned == 3 ) {
-	  /* FIXME get resignation decision */
 	  fComputerDecision = TRUE;
 	  CommandAgree( NULL );
 	  fComputerDecision = FALSE;
 	  return 0;
       } else if( ms.fResigned ) {
-	  /* FIXME get resignation decision */
 	  fComputerDecision = TRUE;
 	  CommandDecline( NULL );
 	  fComputerDecision = FALSE;
 	  return 0;
-      } else if( ms.fDoubled ) {
-	  /* FIXME get take decision */
-	  fComputerDecision = TRUE;
-	  CommandTake( NULL );
-	  fComputerDecision = FALSE;
-	  return 0;
-      } else if( !ms.anDice[ 0 ] ) {
-	  /* FIXME get double decision (check cube use on, cube access, and
-	     Crawford) */
+      }
+#endif
+
+	if( fAutoRoll && !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
+	    ( !fCubeUse || ms.fCrawford ||
+	      ( ms.fCubeOwner >= 0 && ms.fCubeOwner != ms.fTurn ) ||
+	      ( ms.nMatchTo > 0 && ms.anScore[ ms.fTurn ] +
+		ms.nCube >= ms.nMatchTo ) ) )
+
+	    
+      if( !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
+	  ( !fCubeUse || ms.nCube >= MAX_CUBE ||
+	    !GetDPEq( NULL, NULL, &ci ) ) ) {
 	  if( RollDice( ms.anDice ) < 0 )
 	      return -1;
-	  
+	      
 	  if( fDisplay )
 	      ShowBoard();
       }
-
+	  
       FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
 		 ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		 ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ], ms.nCube,
@@ -1112,36 +1125,92 @@ extern int ComputerTurn( void ) {
       if( ExternalRead( ap[ ms.fTurn ].h, szResponse,
 			sizeof( szResponse ) ) < 0 )
 	  return -1;
+
+#if 0
+      /* Resignations for external players -- not yet implemented. */
+      if( ms.fResigned ) {
+	  fComputerDecision = TRUE;
+	  
+	  if( tolower( *szResponse ) == 'a' ) /* accept or agree */
+	      CommandAgree( NULL );
+	  else if( tolower( *szResponse ) == 'd' ||
+		   tolower( *szResponse ) == 'r' ) /* decline or reject */
+	      CommandDecline( NULL );
+	  else
+	      outputl( "Warning: badly formed resignation response from "
+		       "external player" );
+	  
+	  fComputerDecision = FALSE;
+	  
+	  return 0;
+      }
+#endif
       
-      pmn = malloc( sizeof( *pmn ) );
-      pmn->mt = MOVE_NORMAL;
-      pmn->sz = NULL;
-      pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
-      pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
-      pmn->fPlayer = ms.fTurn;
-      pmn->ml.cMoves = 0;
-      pmn->ml.amMoves = NULL;
-      pmn->esDouble.et = EVAL_NONE;
-      pmn->esChequer.et = EVAL_NONE;
-      pmn->lt = LUCK_NONE;
-      pmn->rLuck = ERR_VAL;
-      pmn->st = SKILL_NONE;
+      if( ms.fDoubled ) {
+	  fComputerDecision = TRUE;
+	  
+	  if( tolower( *szResponse ) == 'a' ||
+	      tolower( *szResponse ) == 't' ) /* accept or take */
+	      CommandTake( NULL );
+	  else if( tolower( *szResponse ) == 'd' || /* drop */
+		   tolower( *szResponse ) == 'p' || /* pass */
+		   !strncasecmp( szResponse, "rej", 3 ) ) /* reject */
+	      CommandDrop( NULL );
+	  else if( tolower( *szResponse ) == 'b' || /* beaver */
+		   !strncasecmp( szResponse, "red", 3 ) ) /* redouble */
+	      CommandRedouble( NULL );
+	  else
+	      outputl( "Warning: badly formed cube response from "
+		       "external player" );
+	  
+	  fComputerDecision = FALSE;
+	  
+	  return 0;
+      } else if( !ms.anDice[ 0 ] ) {
+	  if( tolower( *szResponse ) == 'r' ) { /* roll */
+	      if( RollDice( ms.anDice ) < 0 )
+		  return -1;
+	      
+	      if( fDisplay )
+		  ShowBoard();
+	  } else if( tolower( *szResponse ) == 'd' ) { /* double */
+	      fComputerDecision = TRUE;
+	      CommandDouble( NULL );
+	      fComputerDecision = FALSE;
+	  }
+
+	  return 0;
+      } else {
+	  pmn = malloc( sizeof( *pmn ) );
+	  pmn->mt = MOVE_NORMAL;
+	  pmn->sz = NULL;
+	  pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
+	  pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
+	  pmn->fPlayer = ms.fTurn;
+	  pmn->ml.cMoves = 0;
+	  pmn->ml.amMoves = NULL;
+	  pmn->esDouble.et = EVAL_NONE;
+	  pmn->esChequer.et = EVAL_NONE;
+	  pmn->lt = LUCK_NONE;
+	  pmn->rLuck = ERR_VAL;
+	  pmn->st = SKILL_NONE;
+	  
+	  if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
+	      pmn->anMove[ 0 ] = 0;
+	      outputl( "Warning: badly formed move from external player" );
+	  } else
+	      for( i = 0; i < 4; i++ )
+		  if( i < c ) {
+		      pmn->anMove[ i << 1 ]--;
+		      pmn->anMove[ ( i << 1 ) + 1 ]--;
+		  } else {
+		      pmn->anMove[ i << 1 ] = -1;
+		      pmn->anMove[ ( i << 1 ) + 1 ] = -1;
+		  }
       
-      if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
-	  pmn->anMove[ 0 ] = 0;
-	  outputl( "Warning: badly formed move from external player" );
-      } else
-	  for( i = 0; i < 4; i++ )
-	      if( i < c ) {
-		  pmn->anMove[ i << 1 ]--;
-		  pmn->anMove[ ( i << 1 ) + 1 ]--;
-	      } else {
-		  pmn->anMove[ i << 1 ] = -1;
-		  pmn->anMove[ ( i << 1 ) + 1 ] = -1;
-	      }
-      
-      AddMoveRecord( pmn );
-      return 0;
+	  AddMoveRecord( pmn );
+	  return 0;
+      }
 #else
       /* fall through */
 #endif
@@ -2051,8 +2120,6 @@ CommandMove( char *sz ) {
 
 extern void CommandNewGame( char *sz ) {
 
-    list *pl;
-    
     if( ms.nMatchTo && ( ms.anScore[ 0 ] >= ms.nMatchTo ||
 			 ms.anScore[ 1 ] >= ms.nMatchTo ) ) {
 	outputl( "The match is already over." );
@@ -2069,16 +2136,9 @@ extern void CommandNewGame( char *sz ) {
 			     "and discard the one in progress? " ) )
 		return;
 	}
-
-	/* Delete all games at the _end_ of the match, back to and including
-	   the current one. */
-	do {
-	    pl = lMatch.plPrev->p;
-	    ListDelete( lMatch.plPrev );
-	    FreeGame( pl );
-	    ms.cGames--;
-	} while( pl != plGame );
     }
+    
+    PopGame( plGame, TRUE );
     
     fComputing = TRUE;
     
@@ -2110,13 +2170,7 @@ extern void ClearMatch( void ) {
 
 extern void FreeMatch( void ) {
 
-    list *plMatch;
-
-    while( ( plMatch = lMatch.plNext ) != &lMatch ) {
-	FreeGame( plMatch->p );
-	ListDelete( plMatch );
-    }
-
+    PopGame( lMatch.plNext->p, TRUE );
     IniStatcontext( &scMatch );
 }
 
@@ -2210,14 +2264,35 @@ extern void CommandNewSession( char *sz ) {
 	CommandNewGame( NULL );
 }
 
-static void UpdateGame( void ) {
+static void UpdateGame( int fShowBoard ) {
     
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
     
-    ShowBoard();
+#if USE_GUI
+    if( fX || ( fShowBoard && fDisplay ) )
+	ShowBoard();
+#else
+    if( fShowBoard && fDisplay )
+	ShowBoard();
+#endif
+}
+
+static int GameIndex( list *plGame ) {
+
+    list *pl;
+    int i;
+
+    for( i = 0, pl = lMatch.plNext; pl->p != plGame && pl != &lMatch;
+	 pl = pl->plNext, i++ )
+	;
+
+    if( pl == &lMatch )
+	return -1;
+    else
+	return i;
 }
 
 extern void ChangeGame( list *plGameNew ) {
@@ -2237,13 +2312,13 @@ extern void ChangeGame( list *plGameNew ) {
 	    ApplyMoveRecord( &ms, pl->p );
 	}
 
-	GTKSetGame( ( (moverecord *) plGame->plNext->p )->g.i );
+	GTKSetGame( GameIndex( plGame ) );
     }
 #endif
     
     CalculateBoard();
     
-    UpdateGame();
+    UpdateGame( FALSE );
 
     SetMoveRecord( plLastMove->p );
 }
@@ -2301,7 +2376,7 @@ static void CommandNextRoll( char *sz ) {
     ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
     ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
     
-    ShowBoard();
+    UpdateGame( FALSE );
 }
 
 extern void CommandNext( char *sz ) {
@@ -2337,7 +2412,7 @@ extern void CommandNext( char *sz ) {
 	ApplyMoveRecord( &ms, plLastMove->p );
     }
     
-    UpdateGame();
+    UpdateGame( FALSE );
 
     SetMoveRecord( plLastMove->p );
 }
@@ -2426,7 +2501,7 @@ static void CommandPreviousRoll( char *sz ) {
     ms.anDice[ 0 ] = 0;
     ms.anDice[ 1 ] = 0;
     
-    ShowBoard();
+    UpdateGame( FALSE );
 }
 
 extern void CommandPrevious( char *sz ) {
@@ -2463,7 +2538,7 @@ extern void CommandPrevious( char *sz ) {
 
     CalculateBoard();
 
-    UpdateGame();
+    UpdateGame( FALSE );
 
     SetMoveRecord( plLastMove->p );
 }

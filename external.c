@@ -1,7 +1,7 @@
 /*
  * external.c
  *
- * by Gary Wong <gtw@gnu.org>, 2001.
+ * by Gary Wong <gtw@gnu.org>, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -37,6 +37,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "external.h"
+#include "rollout.h"
 
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
 #define AF_LOCAL AF_UNIX
@@ -141,6 +142,10 @@ extern void CommandExternal( char *sz ) {
     int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
 	anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
 	anMove[ 8 ];
+    float arDouble[ NUM_CUBEFUL_OUTPUTS ],
+	aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+	aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    rolloutstat aarsStatistics[ 2 ][ 2 ];
     cubeinfo ci;
     
     sz = NextToken( &sz );
@@ -199,23 +204,64 @@ extern void CommandExternal( char *sz ) {
 
     while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) )
 	if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
-			     anScore, anScore + 1, anDice, &nCube,
+			     anScore + 1, anScore, anDice, &nCube,
 			    &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
 	    outputl( "Warning: badly formed board from external controller." );
 	else {
-	    /* FIXME check if this is a double/take/resign decision */
 	    /* FIXME could SwapSides( anBoard ) be necessary? */
 	    
 	    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
 			  fCrawford, fJacoby, nBeavers );
 
 	    memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
-	    
-	    if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
-			      anBoard, &ci, &esEvalChequer.ec ) < 0 )
-		break;
 
-	    FormatMove( szResponse, anBoardOrig, anMove );
+	    if( fDoubled ) {
+		/* take decision */
+		if( GeneralCubeDecision( "", aarOutput, aarStdDev,
+					 aarsStatistics, anBoard, &ci,
+					 &esEvalCube ) < 0 )
+		    break;
+	  
+		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {
+		case DOUBLE_PASS:
+		case TOOGOOD_PASS:
+		case REDOUBLE_PASS:
+		case TOOGOODRE_PASS:
+		    strcpy( szResponse, "drop" );
+		    break;
+
+		default:
+		    /* we don't consider beavers */
+		    strcpy( szResponse, "take" );
+		}
+	    } else if( anDice[ 0 ] ) {
+		/* move */
+		if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
+				  anBoard, &ci, &esEvalChequer.ec ) < 0 )
+		    break;
+
+		FormatMovePlain( szResponse, anBoardOrig, anMove );
+	    } else {
+		/* double decision */
+		if( GeneralCubeDecision( "", aarOutput, aarStdDev,
+					 aarsStatistics, anBoard, &ci,
+					 &esEvalCube ) < 0 )
+		    break;
+		
+		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {
+		case DOUBLE_TAKE:
+		case DOUBLE_PASS:
+		case DOUBLE_BEAVER:
+		case REDOUBLE_TAKE:
+		case REDOUBLE_PASS:
+		    strcpy( szResponse, "double" );
+		    break;
+		    
+		default:
+		    strcpy( szResponse, "roll" );
+		}
+	    }
+	    
 	    strcat( szResponse, "\n" );
 	    
 	    if( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
