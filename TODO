@@ -142,8 +142,6 @@ duplication of effort and to make sure our changes merge easily.
 ** "set player <tab>" gives incorrect completions.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
-** For money, try "hint" on the position 1M6hAQZk38YBAA; it gives equities
-  D/P +1.000; D/T +1.420; ND +0.056 -- why is the "no double" equity so low?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
