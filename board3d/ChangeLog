@@ -1,3 +1,8 @@
+Thu Mar 4 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* widget3d.c: Remove 3d accelerated test on non-windows platforms
+		as didn't work very well...
+
 Thu Jan 29 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c, misc3d.c: 3d quick draw-last options added
