@@ -29,7 +29,11 @@ extern void ShowList( char *asz[], char *szTitle );
 extern int GTKGetInputYN( char *szPrompt );
 extern void GTKOutput( char *sz );
 extern void GTKOutputX( void );
+extern void GTKOutputNew( void );
 extern void GTKHint( movelist *pml );
+extern void GTKRollout( int c );
+extern int GTKRolloutUpdate( float arMu[], float arSigma[], int i, int c );
+extern void GTKSet( void *p );
 
 extern int fGTKOutput;
 
