@@ -16425,7 +16425,7 @@ fi
 
 
 
-                                                                                                                                  ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile"
+                                                                                                                        ac_config_files="$ac_config_files Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -17067,7 +17067,6 @@ do
   # Handling of arguments.
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
-  "ext/Makefile" ) CONFIG_FILES="$CONFIG_FILES ext/Makefile" ;;
   "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
   "met/Makefile" ) CONFIG_FILES="$CONFIG_FILES met/Makefile" ;;
   "po/Makefile.in" ) CONFIG_FILES="$CONFIG_FILES po/Makefile.in" ;;
