@@ -4069,6 +4069,8 @@ CommandRollout( char *sz ) {
 	apCubeDecTop[ i ] = &false;
       }
 
+      RolloutProgressStart (&ci, c, NULL, &rcRollout, asz, &p);
+
       if( ( cGames = 
 	    RolloutGeneral( apBoard, apOutput, apStdDev,
 			    NULL, apes, apci,

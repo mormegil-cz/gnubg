@@ -1,3 +1,8 @@
+Fri Jul 18 21:15:10 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* gnubg.c - missing call to RolloutProgressStart in CommandRollout
+	  for chequer play
+	
 Fri Jul 18 21:32:34 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c gtkoptions.c: fix [bug #4288] Incorrect path to MET
