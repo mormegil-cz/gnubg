@@ -429,9 +429,9 @@ PythonCommand( PyObject* self IGNORE, PyObject *args ) {
   PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
   HandleCommand( sz, acTop );
 
-/*   if( ms.gs != GAME_NONE ) {  /\* HACK, no idea if this is right or not *\/ */
+   if( ms.gs != GAME_NONE ) {  /* HACK, no idea if this is right or not */
   PythonNextTurn(0, 0); 
-/*   } */
+   }
 
   outputx();
   free( sz );
