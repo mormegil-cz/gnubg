@@ -134,7 +134,7 @@ endif
 
 
 pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ @GUILEDATA@ \
-	$(BR1DATA) $(BOARD3DDATA)
+	$(BR1DATA) $(BOARD3DDATA) gnubg.sql
 
 man_MANS = gnubg.6
 
