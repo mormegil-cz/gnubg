@@ -227,7 +227,6 @@ static boarddesign* FindDesign (renderdata* prdDesign)
 void SetTitle()
 {	/* Update dialog title to include design name + author */
 #if HAVE_LIBXML2
-	int i = 0;
 	boarddesign *pbde;
 #endif
 	char title[1024];
@@ -1730,8 +1729,6 @@ UseDesign ( void ) {
   int i, j;
   gdouble ar[ 4 ];
   gfloat rAzimuth, rElevation;
-  char *apch[ 2 ];
-  gchar *sz, *pch;
   renderdata newPrefs;
 #if USE_BOARD3D
   BoardData *bd = BOARD(pwPrevBoard)->board_data;
@@ -2561,8 +2558,6 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 #if USE_BOARD3D
 	if (rdPrefs.fDisplayType == DT_3D)
 	{
-		char *apch[ 2 ];
-		gchar *sz, *pch;
 		/* Get current (2d) settings for design */
 		ParsePreferences(pbdeModified, &newPrefs);
 
@@ -2572,8 +2567,6 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 	else
 #endif
 	{
-		char *apch[ 2 ];
-		gchar *sz, *pch;
 #if USE_BOARD3D
 		/* Get current (3d) design settings */
 		renderdata designPrefs;

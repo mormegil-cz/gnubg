@@ -33,6 +33,7 @@
 #include "list.h"
 #include "path.h"
 #include "mec.h"
+#include "backgammon.h"
 
 #if HAVE_LIBXML2
 #include <libxml/tree.h>
