@@ -261,9 +261,6 @@ ShowMove ( hintdata *phd, const int f ) {
     memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
     ApplyMove ( anBoard, pm->anMove, FALSE );
 
-    if ( ! ms.fMove )
-      SwapSides ( anBoard );
-
     UpdateMove( ( BOARD( pwBoard ) )->board_data, anBoard );
 
   }

@@ -156,15 +156,22 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
     anOff[ 1 ] -= anBoard[ 1 ][ i ];
   }
     
-  points[ 26 ] = anOff[ 0 ];
-  points[ 27 ] = -anOff[ 1 ];
+  points[ 26 ] = anOff[ 1 ];
+  points[ 27 ] = -anOff[ 0 ];
 
 }
 
 static void
 write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 
-  write_points( bd->points, bd->turn, bd->nchequers, anBoard );
+  int an[ 2 ][ 25 ];
+
+  memcpy( an, anBoard, sizeof an );
+
+  if ( bd->turn < 0 )
+    SwapSides( an );
+
+  write_points( bd->points, bd->turn, bd->nchequers, an );
 
 }
 
