@@ -1,3 +1,9 @@
+Tue Oct  9 10:29:09 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ExportGameJF): Add "Wins n points" following a cube drop
+	(patched by Øystein).  Add extra space when the left hand move is
+	too long to fit in the column.
+
 2001-10-07  Joern Thyssen  <jth@localhost.localdomain>
 
 	* eval.c (FindCubeDecision): convert from mwc to eq for match

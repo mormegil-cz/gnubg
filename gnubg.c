@@ -2375,7 +2375,9 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	    strcpy( sz, " Takes" ); /* FIXME beavers? */
 	    break;
 	case MOVE_DROP:
-	    strcpy( sz, " Drops" );
+            sprintf( sz, " Drops%sWins %d point%s",
+                   (i & 1) ? "\n      " : "                       ",
+                   nFileCube / 2, (nFileCube == 2) ? "" :"s" );
 	    if( anScore )
 		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
@@ -2406,7 +2408,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	    fputs( sz, pf );
 	    fputc( '\n', pf );
 	} else
-	    fprintf( pf, "%3d) %-28s", ( i >> 1 ) + 1, sz );
+	    fprintf( pf, "%3d) %-27s ", ( i >> 1 ) + 1, sz );
 
         if ( pmr->mt == MOVE_DROP ) {
           fputc( '\n', pf );
