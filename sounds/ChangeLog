@@ -1,3 +1,7 @@
+Fri Dec 13 16:08:57 2002  Gary Wong  <gtw@gnu.org>
+
+	* Makefile.am (EXTRA_DIST): Add some necessary files.
+
 Fri Sep 13 23:13:02 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am: Compute the sound effects at 44kHz, and then convert
