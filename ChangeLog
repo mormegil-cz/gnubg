@@ -1,3 +1,8 @@
+Wed Apr  3 23:03:45 2002  Joern Thyssen  <jthyssen@dk,ibm.com>
+
+	* matchequity.c (calcGammonPrice): fix bug for post-Crawford gammon 
+	prices (reported on rec.games.backgammon by J. Marttila).
+
 Tue Apr  2 11:45:21 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (CubeAnalysis, TakeAnalysis): Remove gtk_widget_pop_style

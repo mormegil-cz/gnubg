@@ -1628,10 +1628,10 @@ calcGammonPrices ( float aafMET[ MAXSCORE ][ MAXSCORE ],
   for ( i = 0, nCube = 1; i < MAXCUBELEVEL; i++, nCube *= 2 )
     for ( j = 0; j < MAXSCORE; j++ ) {
       getGammonPrice( aaaafGammonPricesPostCrawford[ i ][ j ][ 0 ],
-                      1, MAXSCORE - j - 1, MAXSCORE,
+                      MAXSCORE - 1, MAXSCORE - j - 1, MAXSCORE,
                       nCube, FALSE, aafMET, aafMETPostCrawford );
       getGammonPrice( aaaafGammonPricesPostCrawford[ i ][ j ][ 1 ],
-                      MAXSCORE - j - 1, 1, MAXSCORE,
+                      MAXSCORE - j - 1, MAXSCORE - 1, MAXSCORE,
                       nCube, FALSE, aafMET, aafMETPostCrawford );
     }
 
