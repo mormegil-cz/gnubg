@@ -3025,7 +3025,7 @@ static char *SelectFile( char *szTitle, char *szDefault ) {
 
     if( szDefault )
 	gtk_file_selection_set_filename( GTK_FILE_SELECTION( pw ), szDefault );
-    
+
     gtk_signal_connect( GTK_OBJECT( GTK_FILE_SELECTION( pw )->ok_button ),
 			"clicked", GTK_SIGNAL_FUNC( FileOK ), &pch );
     gtk_signal_connect_object( GTK_OBJECT( GTK_FILE_SELECTION( pw )->
@@ -8154,7 +8154,7 @@ GTKGetMove ( int anMove[ 8 ] ) {
 
 extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 
-    GtkWidget *pw, *pwList, *pwScrolled;
+    GtkWidget *pw = NULL, *pwList = NULL, *pwScrolled;
     static char *aszTitles[ 14 ] = { N_("Name"), N_("Chequer (20)"),
 				     N_("Cube (20)"), N_("Chequer (100)"),
 				     N_("Cube (100)"), N_("Chequer (500)"),
