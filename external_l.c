@@ -724,119 +724,114 @@ YY_RULE_SETUP
 #line 41 "external_l.l"
 {
 			char *buf = malloc( strlen( exttext ) + 1 );
-
 			exttext[strlen(exttext)-1] = '\0';
 			escapes(exttext+1, buf);
-			extlval.sval = (char *) strdup(buf);
-                        free( buf );
-                        BEGIN(INITIAL);
+			extlval.sval = buf;
+			BEGIN(INITIAL);
 			return STRING;
 		}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 52 "external_l.l"
+#line 50 "external_l.l"
 { return EVALUATION; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 53 "external_l.l"
+#line 51 "external_l.l"
 { return FIBSBOARD; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 54 "external_l.l"
+#line 52 "external_l.l"
 { return CUBEFUL; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 55 "external_l.l"
+#line 53 "external_l.l"
 { return CUBELESS; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 56 "external_l.l"
+#line 54 "external_l.l"
 { return CUBE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 57 "external_l.l"
+#line 55 "external_l.l"
 { return PLIES; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 58 "external_l.l"
+#line 56 "external_l.l"
 { return NOISE; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 59 "external_l.l"
+#line 57 "external_l.l"
 { return REDUCED; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 60 "external_l.l"
+#line 58 "external_l.l"
 { return ON; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 61 "external_l.l"
+#line 59 "external_l.l"
 { return ON; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 62 "external_l.l"
+#line 60 "external_l.l"
 { return OFF; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 63 "external_l.l"
+#line 61 "external_l.l"
 { return OFF; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 65 "external_l.l"
+#line 63 "external_l.l"
 { 
 			char *buf = malloc( strlen( exttext ) + 1 );
 			escapes(exttext, buf);
-			extlval.sval = (char *) strdup(buf);
-                        free( buf );
-                        return AFIBSBOARD; 
-                }
+			extlval.sval = buf;
+			return AFIBSBOARD; 
+		}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 74 "external_l.l"
+#line 71 "external_l.l"
 { prc_lineno++;	}   /* newline is ignored */
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 76 "external_l.l"
+#line 73 "external_l.l"
 { extlval.number = atoi(exttext); return NUMBER; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 78 "external_l.l"
+#line 75 "external_l.l"
 {
 			char *buf = malloc( strlen( exttext ) + 1 );
-
 			escapes(exttext, buf);
-			extlval.sval = (char *) strdup(buf);
-                        free( buf );
+			extlval.sval = buf;
 			return STRING;
 		}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 87 "external_l.l"
+#line 82 "external_l.l"
 ;	/* whitespace */
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 89 "external_l.l"
+#line 84 "external_l.l"
 ECHO;
 	YY_BREAK
-#line 840 "external_l.c"
+#line 835 "external_l.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1722,7 +1717,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 89 "external_l.l"
+#line 84 "external_l.l"
 
 
 void escapes(const char *cp, char *tp)
@@ -1767,3 +1762,10 @@ void escapes(const char *cp, char *tp)
     *tp = '\0';
 }
 
+void ExtStartParse(const char* szCommand)
+{
+	YY_BUFFER_STATE buf_state;
+	buf_state = ext_scan_string(szCommand);
+	extparse();
+	ext_delete_buffer(buf_state);
+}

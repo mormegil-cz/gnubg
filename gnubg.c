@@ -7644,6 +7644,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
           assert (lang != 0);
           sprintf (lang, "LANG=%s", szLang);
           putenv (lang);
+          free(lang);
 	}
 
 	outputon();

@@ -366,9 +366,7 @@ ExtParse( const char *szCommand ) {
   ExtErrorHandler = ErrorHandler;
   fError = FALSE;
   szError = NULL;
-
-  ext_scan_string( szCommand );
-  extparse();
+  ExtStartParse(szCommand);
 
   return fError ? NULL : &ec;
 

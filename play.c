@@ -834,9 +834,11 @@ void DiceRolled()
 		bd->diceShown = DICE_ROLLING;
 		ShowBoard();
 	}
-        if ( ! fX )
+	if ( ! fX )
+#else
+	if (fDisplay)
 #endif
-          ShowBoard();
+		ShowBoard();
 
 }
 
@@ -978,6 +980,9 @@ static int NewGame( void ) {
 static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char sz[ 40 ];
+
+	if (!fDisplay)
+		return;
 
     if( anMove[ 0 ] == -1 )
 	outputf( _("%s cannot move.\n"), ap[ ms.fTurn ].szName );

@@ -73,14 +73,14 @@ reset_command  : /* empty */ {
  
 cmdfibsboard   : AFIBSBOARD { 
   ec.ct = COMMAND_FIBSBOARD;
-  g_free( ec.szFIBSBoard );
-  ec.szFIBSBoard = g_strdup( $1 );
+  free( ec.szFIBSBoard );
+  ec.szFIBSBoard = $1;
 }
                ;
 
 fibsboard      : AFIBSBOARD { 
-  g_free( ec.szFIBSBoard );
-  ec.szFIBSBoard = g_strdup( $1 );
+  free( ec.szFIBSBoard );
+  ec.szFIBSBoard = $1;
 }
                ;
 
@@ -143,6 +143,7 @@ reset_command() {
   ec.fDeterministic = 1;
   ec.fCubeful = 0;
   ec.nReduced = 0;
+  free(ec.szFIBSBoard);
   ec.szFIBSBoard = NULL;
 
 }

@@ -1068,16 +1068,16 @@ yyreduce:
 #line 74 "external_y.y"
     { 
   ec.ct = COMMAND_FIBSBOARD;
-  g_free( ec.szFIBSBoard );
-  ec.szFIBSBoard = g_strdup( yyvsp[0].sval );
+  free( ec.szFIBSBoard );
+  ec.szFIBSBoard = yyvsp[0].sval;
 ;}
     break;
 
   case 8:
 #line 81 "external_y.y"
     { 
-  g_free( ec.szFIBSBoard );
-  ec.szFIBSBoard = g_strdup( yyvsp[0].sval );
+  free( ec.szFIBSBoard );
+  ec.szFIBSBoard = yyvsp[0].sval;
 ;}
     break;
 
@@ -1363,6 +1363,7 @@ reset_command() {
   ec.fDeterministic = 1;
   ec.fCubeful = 0;
   ec.nReduced = 0;
+  free(ec.szFIBSBoard);
   ec.szFIBSBoard = NULL;
 
 }

@@ -1,3 +1,7 @@
+Tur May 20 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* external.*: Remove memory leaks
+
 Tue May 18 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* external.*: Minor changes to parser
