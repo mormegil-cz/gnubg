@@ -187,8 +187,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Make sure the socket changes for external players work on Solaris.  Things
   to check: #include <sys/types.h>; don't use the identifier "sun";
   #define AF_LOCAL AF_UNIX (same with PF_).
-** The gnubg and external data in the player struct shouldn't be in a
-  union.  (Switching between the two corrupts their settings.) (gary)
+** The fread() calls in import.c need to be byte-swapped on big-endian
+  machines.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

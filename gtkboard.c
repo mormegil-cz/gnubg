@@ -1410,7 +1410,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	board_redraw_dice( bd->drawing_area, bd, 1 );
 	board_redraw_cube( bd->drawing_area, bd );
     }
-    
+
     return 0;
 }
 

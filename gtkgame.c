@@ -70,6 +70,7 @@ typedef enum _gnubgcommand {
     CMD_EVAL,
     CMD_HELP,
     CMD_HINT,
+    CMD_LIST_GAME,
     CMD_NEW_GAME,
     CMD_NEW_SESSION,
     CMD_PLAY,
@@ -160,6 +161,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "eval",
     "help",
     "hint",
+    "list game",
     "new game",
     "new session",
     "play",
@@ -642,6 +644,8 @@ static void CreateGameWindow( void ) {
 extern void ShowGameWindow( void ) {
 
     gtk_widget_show_all( pwGame );
+    if( pwGame->window )
+	gdk_window_raise( pwGame->window );
 }
 
 static int AddMoveRecordRow( void ) {
@@ -1073,6 +1077,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/_Rollouts...", NULL, NULL, 0, NULL },
 	{ "/_Settings/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Settings/Save settings", NULL, Command, CMD_SAVE_SETTINGS, NULL },
+	{ "/_Windows", NULL, NULL, 0, "<Branch>" },
+	{ "/_Windows/_Game record", NULL, Command, CMD_LIST_GAME, NULL },
+	{ "/_Windows/_Annotation", NULL, NULL, 0, NULL },
+	{ "/_Windows/Gu_ile", NULL, NULL, 0, NULL },
 	{ "/_Help", NULL, NULL, 0, "<Branch>" },
 	{ "/_Help/_Commands", NULL, Command, CMD_HELP, NULL },
 	{ "/_Help/Co_pying gnubg", NULL, Command, CMD_SHOW_COPYING, NULL },
@@ -1720,29 +1728,38 @@ static void EvalOK( GtkWidget *pw, void *p ) {
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void SetEvalCommands( char *szPrefix, evalcontext *pec ) {
+static void SetEvalCommands( char *szPrefix, evalcontext *pec,
+			     evalcontext *pecOrig ) {
 
     char sz[ 256 ];
 
     outputpostpone();
-    
-    sprintf( sz, "%s plies %d", szPrefix, pec->nPlies );
-    UserCommand( sz );
 
-    sprintf( sz, "%s candidates %d", szPrefix, pec->nSearchCandidates );
-    UserCommand( sz );
+    if( pec->nPlies != pecOrig->nPlies ) {
+	sprintf( sz, "%s plies %d", szPrefix, pec->nPlies );
+	UserCommand( sz );
+    }
 
-    sprintf( sz, "%s tolerance %.3f", szPrefix, pec->rSearchTolerance );
-    UserCommand( sz );
+    if( pec->nSearchCandidates != pecOrig->nSearchCandidates ) {
+	sprintf( sz, "%s candidates %d", szPrefix, pec->nSearchCandidates );
+	UserCommand( sz );
+    }
 
-    if( pec->nPlies > 1 ) {
-	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
+    if( pec->rSearchTolerance != pecOrig->rSearchTolerance ) {
+	sprintf( sz, "%s tolerance %.3f", szPrefix, pec->rSearchTolerance );
 	UserCommand( sz );
     }
     
-    sprintf( sz, "%s cubeful %s", szPrefix, pec->fCubeful ? "on" : "off" );
-    UserCommand( sz );
+    if( pec->nPlies > 1 && pec->nReduced != pecOrig->nReduced ) {
+	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
+	UserCommand( sz );
+    }
 
+    if( pec->fCubeful != pecOrig->fCubeful ) {
+	sprintf( sz, "%s cubeful %s", szPrefix, pec->fCubeful ? "on" : "off" );
+	UserCommand( sz );
+    }
+    
     outputresume();
 }
 
@@ -1775,14 +1792,15 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     AllowStdin();
 
     if( fOK )
-	SetEvalCommands( "set evaluation", &ec );
+	SetEvalCommands( "set evaluation", &ec, &ecEval );
 }
 
 typedef struct _playerswidget {
+    int *pfOK;
     player *ap;
     GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEval[ 2 ],
 	*apwSocket[ 2 ], *apwExternal[ 2 ];
-    evalcontext aec[ 2 ];
+    char aszSocket[ 2 ][ 128 ];
 } playerswidget;
 
 static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
@@ -1827,7 +1845,7 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 			   "GNU Backgammon" ) );
 
     gtk_container_add( GTK_CONTAINER( pwPage ), ppw->apwEval[ i ] =
-		       EvalWidget( ppw->aec + i, NULL ) );
+		       EvalWidget( &ppw->ap[ i ].ec, NULL ) );
     gtk_widget_set_sensitive( ppw->apwEval[ i ],
 			      ap[ i ].pt == PLAYER_GNU );
     
@@ -1862,26 +1880,48 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     return pwPage;
 }
 
-static void PlayersOK( GtkWidget *pw, void *p ) {
+static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
+
+    int i,j ;
+    static playertype apt[ 4 ] = { PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL,
+				   PLAYER_EXTERNAL };
+    *pplw->pfOK = TRUE;
+
+    for( i = 0; i < 2; i++ ) {
+	strcpyn( pplw->ap[ i ].szName, gtk_entry_get_text(
+	    GTK_ENTRY( pplw->apwName[ i ] ) ), 32 );
+	
+	for( j = 0; j < 4; j++ )
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+		pplw->apwRadio[ i ][ j ] ) ) ) {
+		pplw->ap[ i ].pt = apt[ j ];
+		break;
+	    }
+	assert( j < 4 );
+
+	EvalOK( pplw->apwEval[ i ], pplw->apwEval[ i ] );
+
+	strcpyn( pplw->aszSocket[ i ], gtk_entry_get_text(
+	    GTK_ENTRY( pplw->apwSocket[ i ] ) ), 128 );
+    }
+
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 
     GtkWidget *pwDialog, *pwNotebook;
-    int i, fOK;
+    int i, fOK = FALSE;
     player apTemp[ 2 ];
     playerswidget plw;
-    static evalcontext ecDefault = { 0, 8, 0.16, 0, FALSE };
+    char sz[ 256 ];
     
     memcpy( apTemp, ap, sizeof ap );
     plw.ap = apTemp;
-    
-    for( i = 0; i < 2; i++ )
-	memcpy( plw.aec + i, ap[ i ].pt == PLAYER_GNU ? &ap[ i ].pd.ec :
-		&ecDefault, sizeof( evalcontext ) );
+    plw.pfOK = &fOK;
     
     pwDialog = CreateDialog( "GNU Backgammon - Players", TRUE,
-			     GTK_SIGNAL_FUNC( PlayersOK ), NULL );
+			     GTK_SIGNAL_FUNC( PlayersOK ), &plw );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwNotebook = gtk_notebook_new() );
@@ -1905,10 +1945,52 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     AllowStdin();
 
-    if( fOK )
-	/* FIXME */;
-}
+    if( fOK ) {
+	outputpostpone();
 
+	for( i = 0; i < 2; i++ ) {
+	    if( strcmp( ap[ i ].szName, apTemp[ i ].szName ) ) {
+		sprintf( sz, "set player %d name %s", i, apTemp[ i ].szName );
+		UserCommand( sz );
+	    }
+	    
+	    switch( apTemp[ i ].pt ) {
+	    case PLAYER_HUMAN:
+		if( ap[ i ].pt != PLAYER_HUMAN ) {
+		    sprintf( sz, "set player %d human", i );
+		    UserCommand( sz );
+		}
+		break;
+		
+	    case PLAYER_GNU:
+		if( ap[ i ].pt != PLAYER_GNU ) {
+		    sprintf( sz, "set player %d gnu", i );
+		    UserCommand( sz );
+		}
+		
+		sprintf( sz, "set player %d evaluation", i );
+		SetEvalCommands( sz, &apTemp[ i ].ec, &ap[ i ].ec );
+		break;
+		
+	    case PLAYER_PUBEVAL:
+		if( ap[ i ].pt != PLAYER_PUBEVAL ) {
+		    sprintf( sz, "set player %d pubeval", i );
+		    UserCommand( sz );
+		}
+		break;
+		
+	    case PLAYER_EXTERNAL:
+		sprintf( sz, "set player %d external %s", i,
+			 plw.aszSocket[ i ] );
+		UserCommand( sz );
+		break;
+	    }
+	}
+    
+	outputresume();
+    }
+}
+	
 extern void GTKEval( char *szOutput ) {
 
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Evaluation",

@@ -1,3 +1,22 @@
+Tue Mar 13 12:20:31 2001  Gary Wong  <gtw@research.att.com>
+
+	* acinclude.m4 (AM_GUILE): Allow a `--with-guile-prefix=' parameter.
+
+	* backgammon.h: Separate ec and h in the player struct (they were
+	formerly in a union).
+
+	* gnubg.c (PortableSignalRestore): Add a type cast to the signal()
+	call, to pacify the compiler.
+
+	* gnubg.c (strcpyn): New function.
+
+	* gtkgame.c: Add "Windows" menu.
+
+	* gtkgame.c (SetEvalCommands): Don't issue commands for unchanged
+	parameters.
+
+	* gtkgame.c (SetPlayers): Finished the player settings dialog.
+
 Mon Mar 12 11:03:37 2001  Gary Wong  <gtw@research.att.com>
 
 	* gdkgetrgb.c (gdk_get_rgb_image): Use gdk_drawable_get_size()
