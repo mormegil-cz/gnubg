@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <stdarg.h>
 
+#include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
 #include "export.h"
@@ -2324,22 +2325,6 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
 }
 
-static int getLuckRating ( const float rLuck ) {
-
-  if ( rLuck < -0.10 )
-    return 0;
-  else if ( rLuck < -0.06 )
-    return 1;
-  else if ( rLuck < -0.02 )
-    return 2;
-  else if ( rLuck < +0.02 )
-    return 3;
-  else if ( rLuck < +0.06 )
-    return 4;
-  else
-    return 5;
-
-}
 
 /*
  * Dump statcontext
@@ -3026,7 +3011,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
  *
  */
 
-static int
+extern int
 getGameNumber ( const list *plGame ) {
 
   list *pl;
@@ -3053,7 +3038,7 @@ getGameNumber ( const list *plGame ) {
  *
  */
 
-static int
+extern int
 getMoveNumber ( const list *plGame, const void *p ) {
 
   list *pl;
@@ -3140,7 +3125,7 @@ extern void CommandExportGameHtml( char *sz ) {
  * 
  */
 
-static char *
+extern char *
 HTMLFilename ( const char *szBase, const int iGame ) {
 
   if ( ! iGame )
