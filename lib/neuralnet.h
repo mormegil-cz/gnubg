@@ -28,6 +28,8 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput );
 
 extern int NeuralNetLoad( neuralnet *pnn, FILE *pf );
+extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf );
 extern int NeuralNetSave( neuralnet *pnn, FILE *pf );
+extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf );
 
 #endif

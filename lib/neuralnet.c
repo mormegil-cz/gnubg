@@ -307,6 +307,42 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
     return 0;
 }
 
+extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
+
+    int nTrained;
+
+#define FREAD( p, c ) \
+    if( fread( (p), sizeof( *(p) ), (c), pf ) < (c) ) return -1;
+
+    FREAD( &pnn->cInput, 1 );
+    FREAD( &pnn->cHidden, 1 );
+    FREAD( &pnn->cOutput, 1 );
+    FREAD( &nTrained, 1 );
+    FREAD( &pnn->rBetaHidden, 1 );
+    FREAD( &pnn->rBetaOutput, 1 );
+
+    if( pnn->cInput < 1 || pnn->cHidden < 1 || pnn->cOutput < 1 ||
+	nTrained < 0 || pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
+	errno = EINVAL;
+
+	return -1;
+    }
+
+    if( NeuralNetCreate( pnn, pnn->cInput, pnn->cHidden, pnn->cOutput,
+			 pnn->rBetaHidden, pnn->rBetaOutput ) )
+	return -1;
+
+    pnn->nTrained = nTrained;
+    
+    FREAD( pnn->arHiddenWeight, pnn->cInput * pnn->cHidden );
+    FREAD( pnn->arOutputWeight, pnn->cHidden * pnn->cOutput );
+    FREAD( pnn->arHiddenThreshold, pnn->cHidden );
+    FREAD( pnn->arOutputThreshold, pnn->cOutput );
+#undef FREAD
+
+    return 0;
+}
+
 extern int NeuralNetSave( neuralnet *pnn, FILE *pf ) {
 
     int i;
@@ -333,5 +369,26 @@ extern int NeuralNetSave( neuralnet *pnn, FILE *pf ) {
 	if( fprintf( pf, "%11.7f\n", *pr++ ) < 0 )
 	    return -1;
 
+    return 0;
+}
+
+extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
+
+#define FWRITE( p, c ) \
+    if( fwrite( (p), sizeof( *(p) ), (c), pf ) < (c) ) return -1;
+
+    FWRITE( &pnn->cInput, 1 );
+    FWRITE( &pnn->cHidden, 1 );
+    FWRITE( &pnn->cOutput, 1 );
+    FWRITE( &pnn->nTrained, 1 );
+    FWRITE( &pnn->rBetaHidden, 1 );
+    FWRITE( &pnn->rBetaOutput, 1 );
+
+    FWRITE( pnn->arHiddenWeight, pnn->cInput * pnn->cHidden );
+    FWRITE( pnn->arOutputWeight, pnn->cHidden * pnn->cOutput );
+    FWRITE( pnn->arHiddenThreshold, pnn->cHidden );
+    FWRITE( pnn->arOutputThreshold, pnn->cOutput );
+#undef FWRITE
+    
     return 0;
 }

@@ -31,6 +31,8 @@
 #endif
 
 #define WEIGHTS_VERSION "0.0"
+#define WEIGHTS_VERSION_BINARY 0.0f
+#define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5
 #define NUM_ROLLOUT_OUTPUTS 6 /* Includes equity */
@@ -48,6 +50,7 @@
 			   rollouts do. */
 			   
 #define GNUBG_WEIGHTS "gnubg.weights"
+#define GNUBG_WEIGHTS_BINARY "gnubg.wd"
 #define GNUBG_BEAROFF "gnubg.bd"
 
 typedef struct _move {
@@ -77,7 +80,8 @@ typedef enum _positionclass {
 
 #define CLASS_PERFECT CLASS_BEAROFF2
 
-extern int EvalInitialise( char *szWeights, char *szDatabase );
+extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
+			   char *szDatabase );
 extern int EvalSave( char *szWeights );
 
 extern void SetGammonPrice( float rGammon, float rLoseGammon,

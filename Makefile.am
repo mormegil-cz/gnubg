@@ -28,23 +28,35 @@ gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lX11 -lXmu @X_EXTRA_LIBS@ \
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 endif
 
-pkgdata_DATA = gnubg.bd gnubg.weights
+pkgdata_DATA = gnubg.bd gnubg.wd
 
-noinst_PROGRAMS = makebearoff
+noinst_PROGRAMS = makebearoff makeweights
+
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c
 makebearoff_LDADD = -Llib -levent
 makebearoff_DEPENDENCIES = lib/libevent.a
 
+makeweights_SOURCES = makeweights.c
+makeweights_LDADD = -Llib -levent
+makeweights_DEPENDENCIES = lib/libevent.a
+
 info_TEXINFOS = gnubg.texi
 
+EXTRA_DIST = userrng.c
+
 gnubg.bd: makebearoff
-	[ -s gnubg.bd ] || ./makebearoff > gnubg.bd
+	[ -s $@ ] || ./makebearoff > $@
 
 gnubg.weights:
-	@echo 'NOTE: For proper operation, GNU Backgammon requires'
-	@echo 'a "gnubg.weights" file containing neural net'
-	@echo 'parameters.  This file is not included in the'
-	@echo 'distribution, but you can obtain it from the GNU'
-	@echo 'Backgammon home page <http://gnubg.sourceforge.net/>'
-	@echo 'or generate one by training a neural net yourself.'
+	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
+	@echo ' ** a "gnubg.weights" file containing neural net'
+	@echo ' ** parameters.  This file is not included in the'
+	@echo ' ** distribution, but you can obtain it from the GNU'
+	@echo ' ** Backgammon home page <http://gnubg.sourceforge.net/>'
+	@echo ' ** or generate one by training a neural net yourself.'
+
+gnubg.wd: gnubg.weights
+	if [ -s $< ]; then ./makeweights < $< > $@; fi
+
+.DELETE_ON_ERROR:

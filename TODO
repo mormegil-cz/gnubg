@@ -13,7 +13,7 @@ duplication of effort and to make sure our changes merge easily.
 * Game play:
 ** Add cube handling for computer player.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
-  progress.
+  progress.  To do it properly requires improved input routines.
 ** Finish the "set cube" subcommands.
 
 * Command interface:
@@ -99,7 +99,4 @@ duplication of effort and to make sure our changes merge easily.
   unlikely to change should be documented.
 ** When $USER, $LOGNAME, getlogin(), getpwnam() or equivalent is available,
   set the player name to the user's name.  (Maybe this isn't a good idea.)
-** Add routines to load and save (mmap) neural nets from binary files in
-  addition to the current ASCII weights.  Add Makefile rule to generate
-  binary weights from ASCII weights, so we can still use a portable
-  ASCII distribution.
+** Allow loading and saving weights to specify binary or ASCII format.

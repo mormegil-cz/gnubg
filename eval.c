@@ -114,12 +114,14 @@ static long EvalCacheHash( evalcache *pec ) {
     return l;    
 }
 
-extern int EvalInitialise( char *szWeights, char *szDatabase ) {
+extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
+			   char *szDatabase ) {
 
     FILE *pfWeights;
-    int h;
+    int h, fReadWeights = FALSE;
     char szFileVersion[ 16 ];
     char szPath[ PATH_MAX ];
+    float r;
     
     /* FIXME allow starting without bearoff database (to generate it later!) */
 
@@ -160,42 +162,75 @@ extern int EvalInitialise( char *szWeights, char *szDatabase ) {
 	    
 	ComputeTable();
     }
-    
-    if( szWeights ) {
-	if( !( pfWeights = fopen( szWeights, "r" ) ) ) {
-	    sprintf( szPath, PKGDATADIR "/%s", szWeights );
-	    if( !( pfWeights = fopen( szPath, "r" ) ) ) {
-		perror( szWeights );
-		return -1;
+
+    if( szWeightsBinary ) {
+	if( !( pfWeights = fopen( szWeightsBinary, "r" ) ) ) {
+	    sprintf( szPath, PKGDATADIR "/%s", szWeightsBinary );
+	    pfWeights = fopen( szPath, "r" );
+	}
+
+	if( pfWeights ) {
+	    if( fread( &r, sizeof r, 1, pfWeights ) < 1 ||
+		r != WEIGHTS_MAGIC_BINARY ||
+		fread( &r, sizeof r, 1, pfWeights ) < 1 ||
+		r != WEIGHTS_VERSION_BINARY )
+		fprintf( stderr, "%s: Invalid weights file\n",
+			 szWeightsBinary );
+	    else {
+		if( !( fReadWeights = !NeuralNetLoadBinary( &nnContact,
+							    pfWeights ) &&
+		       !NeuralNetLoadBinary( &nnRace, pfWeights ) ) )
+		    perror( szWeightsBinary );
+	
+		fclose( pfWeights );
 	    }
 	}
-    
-	if( fscanf( pfWeights, "GNU Backgammon %15s\n", szFileVersion ) != 1 ||
-	    strcmp( szFileVersion, WEIGHTS_VERSION ) ) {
-	    fprintf( stderr, "%s: invalid weights file\n", szWeights );
-	    return EINVAL;
-	}
-    
-	NeuralNetLoad( &nnContact, pfWeights );
-	NeuralNetLoad( &nnRace, pfWeights );
+    }
 
+    if( !fReadWeights && szWeights ) {
+	if( !( pfWeights = fopen( szWeights, "r" ) ) ) {
+	    sprintf( szPath, PKGDATADIR "/%s", szWeights );
+	    if( !( pfWeights = fopen( szPath, "r" ) ) )
+		/* FIXME both fopen()s have failed; report the error of the
+		   `more serious' (e.g. if one is an EPERM and the other
+		   a ENOENT, then report EPERM) */
+		perror( szWeights );
+	}
+
+	if( pfWeights ) {
+	    if( fscanf( pfWeights, "GNU Backgammon %15s\n",
+			szFileVersion ) != 1 ||
+		strcmp( szFileVersion, WEIGHTS_VERSION ) )
+		fprintf( stderr, "%s: Invalid weights file\n", szWeights );
+	    else {
+		if( !( fReadWeights = !NeuralNetLoad( &nnContact,
+						      pfWeights ) &&
+		       !NeuralNetLoad( &nnRace, pfWeights ) ) )
+		    perror( szWeights );
+	
+		fclose( pfWeights );
+	    }
+	}
+    }
+
+    if( fReadWeights ) {
 	if( nnContact.cInput != NUM_INPUTS ||
 	    nnContact.cOutput != NUM_OUTPUTS )
 	    NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden,
 			     NUM_OUTPUTS );
-
-	if( nnRace.cInput != NUM_RACE_INPUTS || nnRace.cOutput != NUM_OUTPUTS )
+	
+	if( nnRace.cInput != NUM_RACE_INPUTS ||
+	    nnRace.cOutput != NUM_OUTPUTS )
 	    NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
-			     NUM_OUTPUTS );
-		
-	fclose( pfWeights );
+			     NUM_OUTPUTS );	
     } else {
+	puts( "Creating random neural net weights..." );
 	NeuralNetCreate( &nnContact, NUM_INPUTS, 128 /* FIXME */,
 			 NUM_OUTPUTS, 0.1, 1.0 );
 	NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, 128 /* FIXME */,
 			 NUM_OUTPUTS, 0.1, 1.0 );
     }
-
+    
     return 0;
 }
 

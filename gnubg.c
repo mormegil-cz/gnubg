@@ -1072,6 +1072,7 @@ static void usage( char *argv0 ) {
 "Usage: %s [options]\n"
 "Options:\n"
 "  -h, --help                Display usage and exit\n"
+"  -n, --no-weights          Do not load existing neural net weights\n"
 #if !X_DISPLAY_MISSING
 "  -t, --tty                 Start on tty instead of using X\n"
 #endif
@@ -1084,8 +1085,10 @@ static void usage( char *argv0 ) {
 extern int main( int argc, char *argv[] ) {
 
     char ch;
+    static int fNoWeights = FALSE;
     static struct option ao[] = {
         { "help", no_argument, NULL, 'h' },
+	{ "no-weights", no_argument, NULL, 'n' },
         { "tty", no_argument, NULL, 't' },
         { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -1093,12 +1096,15 @@ extern int main( int argc, char *argv[] ) {
 
     fInteractive = isatty( STDIN_FILENO );
     
-    while( ( ch = getopt_long( argc, argv, "htv", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "hntv", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'h': /* help */
             usage( argv[ 0 ] );
             return EXIT_SUCCESS;
+	case 'n':
+	    fNoWeights = TRUE;
+	    break;
 	case 't': /* tty */
 #if !X_DISPLAY_MISSING
 	    fX = FALSE;
@@ -1128,7 +1134,9 @@ extern int main( int argc, char *argv[] ) {
 
     InitRNG();
     
-    if( EvalInitialise( GNUBG_WEIGHTS, GNUBG_BEAROFF ) )
+    if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
+			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
+			GNUBG_BEAROFF ) )
 	return EXIT_FAILURE;
 
     ListCreate( &lMatch );
