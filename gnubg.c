@@ -68,10 +68,6 @@
 static int fReadingOther;
 #endif
 
-#if USE_GUILE
-#include <libguile.h>
-#endif
-
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
@@ -81,6 +77,11 @@ static int fReadingOther;
 #include "rollout.h"
 #include "matchequity.h"
 #include "analysis.h"
+
+#if USE_GUILE
+#include <libguile.h>
+#include "guile.h"
+#endif
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -2387,7 +2388,7 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 static void usage( char *argv0 ) {
 
     printf(
-"Usage: %s [options]\n"
+"Usage: %s [options] [saved-game-file]\n"
 "Options:\n"
 "  -b, --no-bearoff          Do not use bearoff database\n"
 "  -d DIR, --datadir DIR     Read database and weight files from direcotry "
@@ -2412,13 +2413,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     static int fNoWeights = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
-        { "help", no_argument, NULL, 'h' },
 	{ "no-bearoff", no_argument, NULL, 'b' },
 	{ "no-weights", no_argument, NULL, 'n' },
-        { "version", no_argument, NULL, 'v' },
 	{ "window-system-only", no_argument, NULL, 'w' },
-	/* `tty' must be the last option -- see below. */
+	/* `help', `tty' and `version' must come last -- see below. */
+        { "help", no_argument, NULL, 'h' },
         { "tty", no_argument, NULL, 't' },
+        { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
 #if HAVE_GETPWUID
@@ -2434,15 +2435,32 @@ static void real_main( void *closure, int argc, char *argv[] ) {
        we have to check for -t before the other options to avoid connecting
        to the X server if it is specified.
 
-       We use the last element of ao to get the "--tty" option only. */
+       We use the last three element of ao to get the "--help", "--tty" and
+       "--version" options only. */
     
     opterr = 0;
     
-    while( ( ch = getopt_long( argc, argv, "t", ao + sizeof( ao ) /
-			       sizeof( ao[ 0 ] ) - 2, NULL ) ) != (char) -1 )
-	if( ch == 't' ) {
+    while( ( ch = getopt_long( argc, argv, "htv", ao + sizeof( ao ) /
+			       sizeof( ao[ 0 ] ) - 4, NULL ) ) != (char) -1 )
+	switch( ch ) {
+	case 'h': /* help */
+            usage( argv[ 0 ] );
+	    exit( EXIT_SUCCESS );
+	case 't': /* tty */
 	    fX = FALSE;
 	    break;
+	case 'v': /* version */
+	    puts( "GNU Backgammon " VERSION );
+#if USE_GUILE
+	    puts( "Guile supported." );
+#endif
+#if HAVE_LIBGDBM
+	    puts( "Position databases supported." );
+#endif
+#if USE_GUI
+	    puts( "Window system supported." );
+#endif
+	    exit( EXIT_SUCCESS );
 	}
     
     optind = 0;
@@ -2474,34 +2492,11 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'd': /* datadir */
 	    pchDataDir = optarg;
 	    break;
-	case 'h': /* help */
-            usage( argv[ 0 ] );
-	    exit( EXIT_SUCCESS );
 	case 'n':
 	    fNoWeights = TRUE;
 	    break;
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
-	    break;
-	case 'v': /* version */
-	    puts( "GNU Backgammon " VERSION );
-#if USE_GUILE
-	    puts( "Guile supported." );
-#endif
-#if HAVE_LIBGDBM
-	    puts( "Position databases supported." );
-#endif
-#if USE_GUI
-	    puts( "Window system supported." );
-#endif
-	    exit( EXIT_SUCCESS );
-	case 'w':
-#if USE_GTK
-	    if( fX )
-		fTTY = FALSE;
-#else
-	    /* silently ignore */
-#endif
 	    break;
 	default:
 	    usage( argv[ 0 ] );
@@ -2532,6 +2527,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 			fShowProgress ) )
 	exit( EXIT_FAILURE );
 
+#if USE_GUILE
+    GuileInitialise();
+#endif
+    
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
     else if( ( pch = getenv( "USER" ) ) )

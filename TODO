@@ -71,33 +71,21 @@ duplication of effort and to make sure our changes merge easily.
   recorded (which implies that "save", "list" and the game list window
   won't work, but it will save memory for situations like playing
   10,000 games vs. pubeval).
-** Should there be a limit to the number of moves listed by "hint"?  For
-  example, "set board 7HYbACDsdhsAIA", "set dice 11", "hint".
-** Make sure "set cube value" and "set cube pos" add moverecords.
 
 * Guile:
-** Lots of things to do.  Define data types ("board", at the least) and
-add Scheme bindings for useful functions.
+** Add more data types and Scheme bindings for useful functions.
+** Remove the board smob.  Boards would be better represented as a
+  pair of vectors (whoops).
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
-** Don't flood the server with requests (which can happen if gnubg is
-  playing itself at ply 0).  Wait until the server has finished the
-  previous ShowBoard before sending a new one; boards in the meantime
-  can be silently discarded.  HandleXAction() should check if the
-  server has caught up (with LastKnownRequestProcessed) and send a
-  ShowBoard update if one was queued.  Note that ShowBoard would be
-  better off calling XFlush() than gdk_flush (GDK is broken and calls
-  XSync() instead). (gary)
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
 
 * GTK interface:
-** Add a game window, which lists the moves made in the game so far and
-  allows moving back and forth. (gary)
 ** Make sure the board window behaves properly with ICCCM things.
 ** Allow copy/paste and drag & drop of the board ID in the board window.
 ** Add silly bells and whistles.  Things like colour selector for chequer
@@ -114,7 +102,7 @@ add Scheme bindings for useful functions.
 ** Add a "stop" button which sets fInterrupt; this should be the grab
   widget when gnubg is busy.
 ** Add optional point number labels on the board.
-** The "Set" position button is superfluous.
+** Remove the superfluous "Set" position button.
 ** Add a "Reset" button that restores the position, from
   before the user started to move or edit the position [is useful for
   undoing moves]. Alternatively there could be button for restoring the
@@ -137,16 +125,15 @@ add Scheme bindings for useful functions.
 ** Add a pop-up menu in the game list window to allow selection of old games.
 ** Show "take" and "drop" buttons in the off-board dice window when
   a double is offered; also "agree" and "decline" for resignations.
-** Process `-h' and `-v' earlier, before trying to start GTK.
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
   changes in eval.c to give the information in a useful form; probably
   a "DumpPositionRaw".
-*** Make slow commands which currently use carriage returns to update
-  their status use a progress bar in a dialog (like rollouts).
 *** Make "help" show its output in a CList.  There must be a button in
   the dialog to allow the user to recurse through help for subcommands.
+*** Update GTKHint to match the new TTY hint, and add a scrollbar to
+  the hint window. (gary)
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -199,8 +186,6 @@ add Scheme bindings for useful functions.
   having standalone lib (event) and ext packages more difficult, but that
   probably isn't critical any more.
 ** Add optional time rules, for tournament play when clocks are used.
-** Make the "set ..." commands add the appropriate moverecord to the
-  game list, and write code to handle those records in ApplyMoveRecord, etc.
 
 
 Local Variables:
