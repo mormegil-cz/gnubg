@@ -1,3 +1,7 @@
+Thu Oct 11 23:30:40 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gnubg.c (ExportGameJF): Some improvements for resigned games
+
 Thu Oct 11 22:37:49 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (ComputerTurn): Use GeneralCubedecision instead of the
