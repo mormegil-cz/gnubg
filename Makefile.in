@@ -69,7 +69,7 @@ GTK_LIBS = @GTK_LIBS@
 GUILEDATA = @GUILEDATA@
 GUILE_CFLAGS = @GUILE_CFLAGS@
 GUILE_CONFIG = @GUILE_CONFIG@
-GUILE_LDFLAGS = @GUILE_LDFLAGS@
+GUILE_LIBS = @GUILE_LIBS@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
@@ -83,7 +83,7 @@ VERSION = @VERSION@
 @USE_EXT_FALSE@SUBDIRS = lib doc
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LDFLAGS@
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c dice.c dice.h 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c         guile.h import.c import.h external.c external.h credits.c latex.c 	postscript.c html.c export.h
 
 COMMON_DEPS = lib/libevent.a

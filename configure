@@ -4449,6 +4449,15 @@ EOF
 
   fi
 else
+  
+
+if false; then
+  USE_EXT_TRUE=
+  USE_EXT_FALSE='#'
+else
+  USE_EXT_TRUE='#'
+  USE_EXT_FALSE=
+fi
   cat >> confdefs.h <<\EOF
 #define USE_GTK 1
 EOF
@@ -4463,17 +4472,17 @@ EOF
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4467: checking for $ac_hdr" >&5
+echo "configure:4476: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4472 "configure"
+#line 4481 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4477: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4486: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4502,12 +4511,12 @@ done
   for ac_func in gtk_option_menu_get_history XCopyPlane
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:4506: checking for $ac_func" >&5
+echo "configure:4515: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4511 "configure"
+#line 4520 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -4530,7 +4539,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:4534: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4543: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -4559,17 +4568,17 @@ done
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4563: checking for $ac_hdr" >&5
+echo "configure:4572: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4568 "configure"
+#line 4577 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4573: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4582: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4596,7 +4605,7 @@ fi
 done
 
     echo $ac_n "checking for gtk_sheet_new in -lgtkextra""... $ac_c" 1>&6
-echo "configure:4600: checking for gtk_sheet_new in -lgtkextra" >&5
+echo "configure:4609: checking for gtk_sheet_new in -lgtkextra" >&5
 ac_lib_var=`echo gtkextra'_'gtk_sheet_new | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4604,7 +4613,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lgtkextra  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4608 "configure"
+#line 4617 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4615,7 +4624,7 @@ int main() {
 gtk_sheet_new()
 ; return 0; }
 EOF
-if { (eval echo configure:4619: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4628: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4671,7 +4680,7 @@ fi
   # Extract the first word of "guile-config", so it can be a program name with args.
 set dummy guile-config; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4675: checking for $ac_word" >&5
+echo "configure:4684: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_GUILE_CONFIG'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4709,7 +4718,7 @@ fi
     :
   else
     echo $ac_n "checking for Guile version 1.4 or newer""... $ac_c" 1>&6
-echo "configure:4713: checking for Guile version 1.4 or newer" >&5
+echo "configure:4722: checking for Guile version 1.4 or newer" >&5
     guile_major_version=`$GUILE_CONFIG --version 2>&1 | \
 	sed -n 's/.* \([0-9]\+\)[^ ]*$/\1/p'`
     guile_minor_version=`$GUILE_CONFIG --version 2>&1 | \
@@ -4717,7 +4726,7 @@ echo "configure:4713: checking for Guile version 1.4 or newer" >&5
     if test `expr "${guile_major_version:-0}" \* 1000 + \
 	"${guile_minor_version:-0}"` -ge 1004; then
       GUILE_CFLAGS="`$GUILE_CONFIG compile`"
-      GUILE_LDFLAGS="`$GUILE_CONFIG link`"
+      GUILE_LIBS="`$GUILE_CONFIG link`"
       echo "$ac_t""yes" 1>&6
       :
     else
@@ -4730,7 +4739,7 @@ echo "configure:4713: checking for Guile version 1.4 or newer" >&5
   
 
   if test "$with_guile" != ""; then
-    GUILE_LDFLAGS="$with_guile"
+    GUILE_LIBS="$with_guile"
   fi
 fi
 if test "$no_guile" != "yes"; then
@@ -4743,16 +4752,16 @@ EOF
   ac_save_LIBS="$LIBS"
   CPPFLAGS="$CPPFLAGS $GUILE_CFLAGS $GTK_CFLAGS"
   CFLAGS="$CFLAGS $GUILE_CFLAGS $GTK_CFLAGS"
-  LIBS="$LIBS $GUILE_LDFLAGS $GTK_LIBS"
+  LIBS="$LIBS $GUILE_LIBS $GTK_LIBS"
   for ac_func in scm_set_current_module scm_select_module
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:4751: checking for $ac_func" >&5
+echo "configure:4760: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4756 "configure"
+#line 4765 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -4775,7 +4784,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:4779: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4788: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -4803,17 +4812,17 @@ done
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4807: checking for $ac_hdr" >&5
+echo "configure:4816: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4812 "configure"
+#line 4821 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4817: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4826: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4840,7 +4849,7 @@ fi
 done
 
   echo $ac_n "checking for sgtk_wrap_gtkobj in -lguilegtk-1.2""... $ac_c" 1>&6
-echo "configure:4844: checking for sgtk_wrap_gtkobj in -lguilegtk-1.2" >&5
+echo "configure:4853: checking for sgtk_wrap_gtkobj in -lguilegtk-1.2" >&5
 ac_lib_var=`echo guilegtk-1.2'_'sgtk_wrap_gtkobj | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4848,7 +4857,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lguilegtk-1.2  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4852 "configure"
+#line 4861 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4859,7 +4868,7 @@ int main() {
 sgtk_wrap_gtkobj()
 ; return 0; }
 EOF
-if { (eval echo configure:4863: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4872: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4878,7 +4887,7 @@ if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
 #define HAVE_LIBGUILEGTK_1_2 1
 EOF
 
-GUILE_LDFLAGS="-lguilegtk-1.2 $GUILE_LDFLAGS"
+GUILE_LIBS="-lguilegtk-1.2 $GUILE_LIBS"
 
 else
   echo "$ac_t""no" 1>&6
@@ -4892,7 +4901,7 @@ fi
 fi
 
 echo $ac_n "checking for xmlParseFile in -lxml2""... $ac_c" 1>&6
-echo "configure:4896: checking for xmlParseFile in -lxml2" >&5
+echo "configure:4905: checking for xmlParseFile in -lxml2" >&5
 ac_lib_var=`echo xml2'_'xmlParseFile | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4900,7 +4909,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lxml2  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4904 "configure"
+#line 4913 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4911,7 +4920,7 @@ int main() {
 xmlParseFile()
 ; return 0; }
 EOF
-if { (eval echo configure:4915: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4924: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5133,7 +5142,7 @@ s%@USE_EXT_FALSE@%$USE_EXT_FALSE%g
 s%@GTKDATA@%$GTKDATA%g
 s%@GUILE_CONFIG@%$GUILE_CONFIG%g
 s%@GUILE_CFLAGS@%$GUILE_CFLAGS%g
-s%@GUILE_LDFLAGS@%$GUILE_LDFLAGS%g
+s%@GUILE_LIBS@%$GUILE_LIBS%g
 s%@GUILEDATA@%$GUILEDATA%g
 s%@CROSS_COMPILING_TRUE@%$CROSS_COMPILING_TRUE%g
 s%@CROSS_COMPILING_FALSE@%$CROSS_COMPILING_FALSE%g

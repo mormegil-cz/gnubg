@@ -169,7 +169,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
 ** Make sure copy/paste works correctly everywhere.  See
-  <http://www.freedesktop.org/standards/clipboards.txt>. (gary)
+  <http://www.freedesktop.org/standards/clipboards.txt>.  (Wait for GTK+ 2.0.)
 ** Add some shortcuts to set the cube owner/value in edit mode (e.g.
   button 1 increases value, button 2+ decreases value, ctrl+button cycles
   through owners/centred).
