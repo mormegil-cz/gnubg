@@ -173,8 +173,12 @@ static char szDICE[] = "<die> <die>",
 command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
       NULL, NULL },
+    { "export", CommandDatabaseExport, "Write the positions in the database "
+      "to a portable format", NULL, NULL },
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
-      "self-play", NULL, NULL },
+      "self-play", szOPTVALUE, NULL },
+    { "import", CommandDatabaseImport, "Merge positions into the database",
+      szFILENAME, NULL },
     { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
       "for future training", NULL, NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
@@ -184,12 +188,16 @@ command acDatabase[] = {
     /* FIXME once we have more formats, add another level in the hierarchy
        specifying the format.  Examples: "export game html foo.html",
        "export match mat bar.mat" */
+    { "database", CommandDatabaseExport, "Write the positions in the database "
+      "to a portable format", NULL, NULL },
     { "game", CommandExportGame, "Record a log of the game so far to a "
       "file", szFILENAME, NULL },
     { "match", CommandExportMatch, "Record a log of the match so far to a "
       "file", szFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
+    { "database", CommandDatabaseImport, "Merge positions into the database",
+      szFILENAME, NULL },
     { "pos", CommandImportJF, "Import a Jellyfish position file", szFILENAME,
       NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -948,7 +956,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 		if( ( sResult = scm_internal_catch( SCM_BOOL_T,
 				    (scm_catch_body_t) scm_eval_0str,
 				    sz + 1, scm_handle_by_message_noexit,
-				    NULL ) ) != SCM_UNSPECIFIED ) {
+				    NULL ) ) != SCM_UNSPECIFIED &&
+		    !cOutputDisabled ) {
 		    scm_write( sResult, SCM_UNDEFINED );
 		    scm_newline( SCM_UNDEFINED );
 		}

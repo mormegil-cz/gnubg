@@ -1,3 +1,11 @@
+Wed Feb 14 13:54:53 2001  Gary Wong  <gtw@research.att.com>
+
+	* database.c (CommandDatabaseExport, CommandDatabaseImport): New
+	functions.
+
+	* guile.c (GuileStartIntHandler, GuileEndIntHandler): Don't change
+	SIGINT behaviour if stdin is not a TTY.
+
 Tue Feb 13 12:55:52 2001  Gary Wong  <gtw@research.att.com>
 
 	* external.c: New file (to support external players).

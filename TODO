@@ -59,7 +59,7 @@ duplication of effort and to make sure our changes merge easily.
   calls will have to be replaced, for instance.
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
   multiple moves (e.g. "8/7(2) 6/5(2)").
-** Allow resuming interrupted rollouts.
+** Allow resuming interrupted rollouts, and extending completed rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
@@ -86,8 +86,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Use Guile keywords in cube-info.  Add a similar function for eval
   contexts.
 ** Add Guile functions to access the current game state.
-** Don't change the SIGINT handler if it's SIG_DFL (i.e. we never installed
-  a handler because stdin is not a TTY).
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -204,7 +202,6 @@ duplication of effort and to make sure our changes merge easily.
   Examples: "export game html foo.html", "export match mat bar.mat".
   Make the .mat format identical to Jellyfish (things to check:
   beavers, resignations, "and the match"...)
-** Import and export position databases to a portable format.
 ** Add option to flip the board.
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where

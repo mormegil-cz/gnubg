@@ -93,6 +93,149 @@ extern void CommandDatabaseDump( char *sz ) {
   gdbm_close( pdb );
 }
 
+extern void CommandDatabaseExport( char *sz ) {
+    
+    GDBM_FILE pdb;
+    datum dKey, dValue;
+    dbevaluation *pev;
+    void *p;
+    FILE *pf;
+    
+    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
+	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+        
+	return;
+    }
+
+    if( !sz || !*sz ) {
+	outputl( "You must specify a file to export to (see `help database "
+		 "export')." );
+	gdbm_close( pdb );
+	return;
+    }
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	perror( sz );
+	gdbm_close( pdb );
+	return;
+    }
+
+    dKey = gdbm_firstkey( pdb );
+
+    while( dKey.dptr ) {
+	dValue = gdbm_fetch( pdb, dKey );
+	
+	pev = (dbevaluation *) dValue.dptr;
+
+	fprintf( pf, "%14s %d %d %d %d %d %d %ld\n",
+		 PositionIDFromKey( (unsigned char *) dKey.dptr ),
+		 pev->asEq[ OUTPUT_WIN ],
+		 pev->asEq[ OUTPUT_WINGAMMON ],
+		 pev->asEq[ OUTPUT_WINBACKGAMMON ],
+		 pev->asEq[ OUTPUT_LOSEGAMMON ],
+		 pev->asEq[ OUTPUT_LOSEBACKGAMMON ],
+		 pev->c, (long) pev->t );
+	
+	free( pev );
+
+	p = dKey.dptr;
+	
+	if( fInterrupt ) {
+	    free( p );
+	    break;
+	}
+    
+	dKey = gdbm_nextkey( pdb, dKey );
+	
+	free( p );
+    }
+
+    if( pf != stdout )
+	fclose( pf );
+    
+    gdbm_close( pdb );
+}
+
+extern void CommandDatabaseImport( char *sz ) {
+
+    GDBM_FILE pdb;
+    datum dKey, dValue;
+    dbevaluation ev, *pev;
+    FILE *pf;
+    char szID[ 15 ];
+    long lTime;
+    int i, anBoard[ 2 ][ 25 ];
+    unsigned char auchKey[ 10 ];
+    
+    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRITER, 0, NULL ) ) ) {
+	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+        
+	return;
+    }
+
+    if( !sz || !*sz ) {
+	outputl( "You must specify a file to import from (see `help database "
+		 "import')." );
+	gdbm_close( pdb );
+	return;
+    }
+
+    if( !( pf = fopen( sz, "r" ) ) ) {
+	perror( sz );
+	gdbm_close( pdb );
+	return;
+    }
+
+    while( 1 ) {
+	if( fscanf( pf, "%14s %hd %hd %hd %hd %hd %hd %ld\n",
+		    szID, ev.asEq + OUTPUT_WIN,
+		    ev.asEq + OUTPUT_WINGAMMON,
+		    ev.asEq + OUTPUT_WINBACKGAMMON,
+		    ev.asEq + OUTPUT_LOSEGAMMON,
+		    ev.asEq + OUTPUT_LOSEBACKGAMMON, &ev.c, &lTime ) < 8 )
+	    break;
+
+	PositionFromID( anBoard, szID );
+	PositionKey( anBoard, auchKey );
+
+	dKey.dsize = 10;
+	dKey.dptr = auchKey;
+
+	dValue = gdbm_fetch( pdb, dKey );
+	pev = (dbevaluation *) dValue.dptr;
+
+	if( pev && pev->t && pev->t < (time_t) lTime )
+	    ev.t = pev->t;
+	else
+	    ev.t = (time_t) lTime;
+
+	if( pev ) {
+	    ev.c += pev->c;
+	    if( pev->c + ev.c )
+		for( i = OUTPUT_WIN; i <= OUTPUT_LOSEBACKGAMMON; i++ )
+		    ev.asEq[ i ] = ( ev.c * ev.asEq[ i ] + pev->c *
+				     pev->asEq[ i ] ) / ( ev.c + pev->c );
+	}
+
+	dValue.dptr = (char *) &ev;
+	dValue.dsize = sizeof ev;
+	gdbm_store( pdb, dKey, dValue, GDBM_REPLACE );
+
+	if( pev )
+	    free( pev );
+    }
+
+    if( ferror( pf ) )
+	perror( sz );
+    else if( !feof( pf ) )
+	fprintf( stderr, "%s: malformed position data\n", sz );
+    
+    fclose( pf );
+    gdbm_close( pdb );
+}
+
 extern void CommandDatabaseRollout( char *sz ) {
 
     GDBM_FILE pdb;
