@@ -1,3 +1,9 @@
+Mon Mar 11 22:53:26 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (RolloutGeneral): remove call to VarRednRollout. Use
+	BasicCubefulRollout instead, since it handles multiple cubeinfo's
+	and all.
+
 Mon Mar 11 10:59:05 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtktheory.c (GraphExpose): New function.  Add another notebook

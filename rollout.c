@@ -1085,21 +1085,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                                aarsStatistics );
         break;
       case BASIC:
+      case VARREDN:
 	  BasicCubefulRollout( aanBoardEval, aar, 
                                0, i, aci, afCubeDecTop, cci, prc,
                                aarsStatistics );
 	  break;
-      case VARREDN:
-
-        if ( ! prc->fCubeful )
-	  VarRednRollout( *aanBoardEval, *aar, prc->nTruncate,
-                          0, i, cGames, &aci[ 0 ],
-                          &prc->aecChequer[ 0 ] );
-        else
-	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, afCubeDecTop, cci, prc,
-                               aarsStatistics );
-        break;
       }
       
       if( fInterrupt )
