@@ -1,3 +1,12 @@
+Fri Jan 10 15:10:20 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* rollout.c: Fix incorrect accumulating of rollout results for
+	cubeless + bearoff truncation.
+
+Thu Jan  9 10:39:48 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* bearoff.c: fix bug with setting of ausProb and ausGammonProb
+
 Thu Jan  9 21:48:05 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* set.c (CommandSetRolloutBearoffTruncationOS): fix typo.
