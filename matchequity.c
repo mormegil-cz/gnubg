@@ -54,6 +54,8 @@ extern double erf( double x );
 #include "matchequity.h"
 #include "i18n.h"
 
+const static char* XML_PUBLIC_ID = "-//GNU Backgammon//DTD Match Equity Tables//EN";
+
 typedef struct _parameter {
 
   char *szName, *szValue;
@@ -1353,7 +1355,8 @@ static int readMET ( metdata *pmd, const char *szFileName,
   xmlDocPtr doc;
   xmlNodePtr root, cur;
 
-  xmlValidCtxt ctxt;
+  xmlValidCtxtPtr ctxt;
+  xmlDtdPtr dtd;
 
   char *pc, *pch;
 
@@ -1372,18 +1375,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if ( ! root ) {
 
-    printf ( _("Error reading XML file (%s): no document root!\n"), szFileName );
-    fError = 1;
-    goto finish;
-
-  }
-
-  /* check if the dtd has the correct name */
-
-  if ( xmlStrcmp ( root->name, (const xmlChar *) "met" ) ) {
-
-    printf ( _("Error reading XML file (%s): wrong DTD (%s)\n"), 
-             szFileName, root->name );
+    printf ( _("Error reading XML file (%s): not well-formed!\n"), szFileName );
     fError = 1;
     goto finish;
 
@@ -1393,41 +1385,58 @@ static int readMET ( metdata *pmd, const char *szFileName,
    * validate document 
    */
 
-  /* load catalogs */
+/* libxml2 version 2.4.3 introduced xml catalogs, it dates 25th august 2001 ... */
+/* older versions used SGML format catalogs, but it's not clear when the default behaviour changed */
+#if LIBXML_VERSION > 20403
 
-  /* FIXME: any tweaks needed for win32? */
+  /* load catalog */
 
-  xmlLoadCatalog( pch = PathSearch( "met/catalog", szDir ) );
-  free( pch );
-  xmlLoadCatalog ( PKGDATADIR "/met/catalog " );
-  if ( ( pc = getenv ( "SGML_CATALOG_FILES" ) ) )
-    xmlLoadCatalog ( pc );
-  xmlLoadCatalog ( "./met/catalog" );
-  xmlLoadCatalog ( "./catalog" );
+  	xmlInitializeCatalog();
+	pch = NULL;
+	
+	if (0 == xmlLoadCatalog(pch = PathSearch( "met/catalog.xml", szDir ))) {}
+	else if ( 0 == xmlLoadCatalog(PKGDATADIR "/met/catalog.xml")) {}
+	else if ( 0 == xmlLoadCatalog ( "./met/catalog.xml" )) {}
+	else if ( 0 == xmlLoadCatalog ( "./catalog.xml" )) {}
+    else {
+      printf ( _("Error reading \"catalog.xml\". File not found or parse error.") );
+	      fError = 1;
+		  if (pch)  free( pch );
+		  goto finish;
+  }
+  if (pch) free( pch );
 
-  pc = xmlCatalogResolve ( doc->intSubset->ExternalID, 
-                           doc->intSubset->SystemID );
-  fError = ! pc;
-  free ( pc );
+  /* load dtd */
 
-  if ( fError ) {
-
-    printf ( _("met DTD not found\n") );
+  dtd = xmlParseDTD(XML_PUBLIC_ID, NULL);
+  if (!dtd) {
+	  pch = xmlCatalogResolvePublic(XML_PUBLIC_ID);
+	  dtd = xmlParseDTD(NULL, pch); 
+  }
+  if (!dtd) {
+    printf ( _("Error resolving DTD for public ID %s"), XML_PUBLIC_ID );
     fError = 1;
     goto finish;
 
   }
 
-  ctxt.error = validateError;
-  ctxt.warning = validateWarning;
+  /* validate against the DTD */
+  ctxt = xmlNewValidCtxt();
+  ctxt->error = validateError;
+  ctxt->warning = validateWarning;
 
-  if ( ! xmlValidateDocument ( &ctxt, doc ) ) {
+  if ( !(xmlValidateDtd(ctxt, doc, dtd) && xmlValidateDtdFinal(ctxt, doc)) ) {
 
-    printf ( _("XML does not validate!\n") );
+    printf ( _("Error reading XML file (%s): not valid!\n"), szFileName );
     fError = 1;
     goto finish;
 
   }
+
+  if (ctxt) xmlFreeValidCtxt(ctxt);
+  if (dtd) xmlFreeDtd(dtd);
+
+#endif /* XMLVERSION */
 
   /* initialise data */
 
@@ -1504,6 +1513,8 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
 #ifdef UNDEF
 
+  int i, j;
+
   /* debug dump */
 
   printf ( "Name          : '%s'\n", pmd->mi.szName );
@@ -1520,8 +1531,6 @@ static int readMET ( metdata *pmd, const char *szFileName,
       printf ( "\n" );
     }
   }
-
-  printf ( "post-Crawford:\n" );
 
   if ( ! strcmp ( pmd->mpPostCrawford.szName, "explicit" ) ) {
     printf ( "row %2d: ", 0 );
@@ -1545,11 +1554,9 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   return fError;
 
-  
-  
 }
 
-#endif
+#endif /* HAVE_LIBXML */
 
 
 /*
