@@ -408,7 +408,7 @@ GetTakePoint ( float arOutput [ 5 ],
 
 		
 		if ( arOutput[ 0 ] > 0.0 )
-			rG1 = arOutput[ 1 ] / arOutput[ 0 ] : 0.0;
+			rG1 = arOutput[ 1 ] / arOutput[ 0 ];
 		else
 			rG1 = 0.0;
 
