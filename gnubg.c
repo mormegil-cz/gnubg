@@ -2643,22 +2643,22 @@ extern void HandleCommand( char *sz, command *ac ) {
 #endif
           if ( *sz ) {
             /* expression specified -- evalute it */
-#if USE_GUI
+#ifdef ndef
             StartPythonHandleX();
 #endif
             PyRun_SimpleString( sz );
-#if USE_GUI
+#ifdef ndef
             StopPythonHandleX();
 #endif
           }
           else {
-#if USE_GUI
+#ifdef ndef
             /* no expresision -- start python shell */
             StartPythonHandleX();
 #endif
             PyRun_SimpleString( "import sys; print 'Python', sys.version" );
             PyRun_AnyFile( stdin, NULL );
-#if USE_GUI
+#ifdef ndef
             StopPythonHandleX();
 #endif
           }
