@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include <time.h>
 
-#ifdef HAVE_LIBXML2
+#if HAVE_LIBXML2
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
 #endif

@@ -411,7 +411,7 @@ windowgeometry awg[ NUM_WINDOWS ] =
 
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
-#ifdef USE_SOUND
+#if USE_SOUND
     szCOMMAND[] = N_("<command>"),
 #endif
     szCOLOUR[] = N_("<colour>"),
@@ -1310,7 +1310,7 @@ command cER = {
   { "timecritical", CommandSetPriorityTimeCritical,
     N_("Set priority to time critical"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
-#ifdef USE_SOUND
+#if USE_SOUND
 }, acSetSoundSystem[] = {
   { "artsc", CommandSetSoundSystemArtsc, 
     N_("Use ESD sound system"), NULL, NULL },
@@ -1516,7 +1516,7 @@ command cER = {
       szSCORE, NULL },
     { "seed", CommandSetSeed, 
       N_("Set the dice generator seed"), szOPTSEED, NULL },
-#ifdef USE_SOUND
+#if USE_SOUND
     { "sound", NULL, 
       N_("Control audio parameters"), NULL, acSetSound },
 #endif /* USE_SOUND */
@@ -1630,7 +1630,7 @@ command cER = {
       NULL, NULL },
     { "seed", CommandShowSeed, N_("Show the dice generator seed"), 
       NULL, NULL },
-#ifdef USE_SOUND
+#if USE_SOUND
     { "sound", CommandShowSound, N_("Show information abount sounds"), 
       NULL, NULL },
 #endif /* USE_SOUND */
@@ -1765,7 +1765,7 @@ char *aszVersion[] = {
 #if HAVE_LIBGMP
     N_("Long RNG seeds supported."),
 #endif
-#ifdef USE_SOUND
+#if USE_SOUND
     N_("Sound systems supported:"),
 #   if HAVE_ARTSC
     N_("  ArtsC sound system"),
@@ -6415,7 +6415,7 @@ static void version( void ) {
 	puts( *ppch++ );
 }
 
-#ifdef HAVE_FORK
+#if HAVE_FORK
 
 static RETSIGTYPE SoundChild ( int n ) {
     
@@ -6468,7 +6468,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     GtkWidget *pwSplash = NULL;
 #endif
 
-#ifdef HAVE_SETLOCALE
+#if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
 #endif
     bindtextdomain (PACKAGE, LOCALEDIR);

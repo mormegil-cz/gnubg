@@ -619,7 +619,7 @@ extern int InitRNG( int *pnSeed, int fSet, const rng rngx ) {
  *
  */
 
-#ifdef HAVE_SOCKETS
+#if HAVE_SOCKETS
 
 static int
 getDiceRandomDotOrg ( void ) {

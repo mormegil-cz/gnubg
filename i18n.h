@@ -26,7 +26,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_LOCALE_H
+#if HAVE_LOCALE_H
 #include <locale.h>
 #endif
 

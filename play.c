@@ -1124,7 +1124,7 @@ extern int ComputerTurn( void ) {
 				the delay. */
 	
 	  /* write line to status bar if using GTK */
-#ifdef USE_GTK        
+#if USE_GTK        
 	  if ( fX ) {
 
 	      outputnew ();
@@ -1168,7 +1168,7 @@ extern int ComputerTurn( void ) {
       ProgressEnd();
       
       /* write move to status bar if using GTK */
-#ifdef USE_GTK        
+#if USE_GTK        
       if ( fX ) {
 	  
 	  outputnew ();
@@ -2753,7 +2753,7 @@ CommandMove( char *sz ) {
                   return;
                 }
 
-#ifdef USE_GTK        
+#if USE_GTK        
 		/* There's no point delaying here. */
 		if( nTimeout ) {
 		    gtk_timeout_remove( nTimeout );
@@ -3706,7 +3706,7 @@ CommandRoll( char *sz ) {
   
   ShowBoard();
 
-#ifdef USE_GTK        
+#if USE_GTK        
   if ( fX ) {
 
     outputnew ();

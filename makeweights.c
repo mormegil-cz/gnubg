@@ -71,7 +71,7 @@ extern int main( int argc, char *argv[] ) {
 
     /* i18n */
 
-#ifdef HAVE_SETLOCALE
+#if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
 #endif
     bindtextdomain (PACKAGE, LOCALEDIR);

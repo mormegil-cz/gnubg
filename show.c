@@ -1945,7 +1945,7 @@ extern void CommandShowHighlightColour ( char *sz ) {
 
 
 
-#ifdef USE_SOUND
+#if USE_SOUND
 
 extern void
 CommandShowSound ( char *sz ) {

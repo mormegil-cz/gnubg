@@ -1621,7 +1621,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
   int i,j;
   metdata md;
 
-#ifdef HAVE_LIBXML2
+#if HAVE_LIBXML2
   static int fTableLoaded = FALSE;
 
   /*

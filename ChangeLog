@@ -1,3 +1,9 @@
+Sat May 24 10:17:25 2003  Holger Bochnig  <hbgg@gmx.net>
+
+	* dice.c, gnubg.c, gtkprefs.c, i18n.h, makehyper.c, makeweights.c, matchequity.c,
+	  play.c, set.c, show.c, sound.c, sound.h: changed some #ifdef to #if to follow
+	  config.h better
+
 Fri May 23 19:06:12 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	* gnubg.c (NextTokenGeneral): fix for paths with spaces
