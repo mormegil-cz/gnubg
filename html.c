@@ -53,6 +53,8 @@
 ".tiny { font-size: 25%% } \n" \
 ".cubedecision { background-color: #ddddee; text-align: left } \n" \
 ".cubedecision th { background-color: #89d0e2; text-align: center} \n" \
+".comment { background-color: #449911; width: 39.5em; padding: 0.5em } \n" \
+".commentheader { background-color: #557711; font-weight: bold; text-align: center; width: 40em; padding: 0.25em } \n" \
 "</style>\n" 
 
 #define FORMATHTMLPROB(f) \
@@ -1464,6 +1466,9 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 }
 
 
+
+
+
 /*
  * Print cube analysis
  *
@@ -1973,6 +1978,70 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 }
 
 
+static void
+HTMLPrintComment ( FILE *pf, const moverecord *pmr ) {
+
+  char *sz;
+
+  switch ( pmr->mt ) {
+
+  case MOVE_GAMEINFO:
+    sz = pmr->g.sz;
+    break;
+  case MOVE_DOUBLE:
+  case MOVE_TAKE:
+  case MOVE_DROP:
+    sz = pmr->d.sz;
+    break;
+  case MOVE_NORMAL:
+    sz = pmr->n.sz;
+    break;
+  case MOVE_RESIGN:
+    sz = pmr->r.sz;
+    break;
+  case MOVE_SETBOARD:
+    sz = pmr->sb.sz;
+    break;
+  case MOVE_SETDICE:
+    sz = pmr->sd.sz;
+    break;
+  case MOVE_SETCUBEVAL:
+    sz = pmr->scv.sz;
+    break;
+  case MOVE_SETCUBEPOS:
+    sz = pmr->scp.sz;
+    break;
+
+  }
+
+  if ( sz ) {
+
+    fputs ( "<br />\n"
+            "<div class=\"commentheader\">Annotation</div>\n", pf );
+
+    fputs ( "<div class=\"comment\">", pf );
+
+    while ( *sz ) {
+
+      if ( *sz == '\n' )
+        fputs ( "<br />\n", pf );
+      else
+        fputc ( *sz, pf );
+
+      sz++;
+
+    }
+
+    fputs ( "</div>\n", pf );
+
+    
+
+  }
+
+
+}
+
+
 /*
  * Export a game in HTML
  *
@@ -2057,6 +2126,8 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
         break;
         
       }
+
+      HTMLPrintComment ( pf, pmr );
 
       ApplyMoveRecord ( &msExport, pmr );
 

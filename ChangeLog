@@ -1,3 +1,8 @@
+Wed Apr 17 21:59:29 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (HTMLPrintComment): new function. dump user's annotations.
+	* html.c (ExportGameHTML): call HTMLPrintComment.
+
 Wed Apr 17 20:59:30 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (CommandAnnotateVeryBad, CommandAnnotateVeryGood, 
