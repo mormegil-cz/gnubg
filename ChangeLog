@@ -1,3 +1,10 @@
+Fri Sep  5 22:46:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* matchequity.c (InitMatchEquity):  extend the post Crawford match
+	equty table from n - 1 as the  post Crawford table of a n match equity
+	table might not include the post Crawford equity at n-away, since the
+	first "legal" post Crawford score is n-1.
+
 Fri Sep  5 19:23:04 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (TextToClipboard): fix small memory leak.
