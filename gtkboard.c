@@ -197,6 +197,23 @@ static void chequer_position( int point, int chequer, int *px, int *py ) {
 	positions[ fClockwise ][ point ][ 2 ];
 }
 
+static void point_area( BoardData *bd, int n, int *px, int *py,
+			int *pcx, int *pcy ) {
+    
+    int c_chequer = ( !n || n == 25 ) ? 3 : 5;
+    
+    *px = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
+    *py = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
+    *pcx = 6 * bd->board_size;
+    *pcy = positions[ fClockwise ][ n ][ 2 ] * bd->board_size;
+    
+    if( *pcy > 0 ) {
+	*pcy = *pcy * ( c_chequer - 1 ) + 6 * bd->board_size;
+	*py += 6 * bd->board_size - *pcy;
+    } else
+	*pcy = -*pcy * ( c_chequer - 1 ) + 6 * bd->board_size;
+}
+
 static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
 				      int n ) {
     int i, x, y, cx, cy, xpix, ypix, invert, y_chequer, c_chequer, i_chequer,
@@ -215,18 +232,10 @@ static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
 	rgba = bd->rgba_x;
 	refract = bd->ai_refract[ 0 ];
     }
-    
-    x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
-    y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
-    cx = 6 * bd->board_size;
-    cy = positions[ fClockwise ][ n ][ 2 ] * bd->board_size;
-    
-    if( ( invert = cy > 0 ) ) {
-	cy = cy * ( c_chequer - 1 ) + 6 * bd->board_size;
-	y += 6 * bd->board_size - cy;
-    } else
-	cy = -cy * ( c_chequer - 1 ) + 6 * bd->board_size;
-    
+
+    point_area( bd, n, &x, &y, &cx, &cy );
+    invert = positions[ fClockwise ][ n ][ 2 ] > 0;
+
     /* copy empty point image */
     if( !n || n == 25 )
 	/* on bar */
@@ -307,17 +316,10 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     }
     
     c_chequer = ( !n || n == 25 ) ? 3 : 5;
+
+    point_area( bd, n, &x, &y, &cx, &cy );
+    invert = positions[ fClockwise ][ n ][ 2 ] > 0;
     
-    x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
-    y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
-    cx = 6 * bd->board_size;
-    cy = -c_chequer * bd->board_size * positions[ fClockwise ][ n ][ 2 ];
-
-    if( ( invert = cy < 0 ) ) {
-	y += cy * 4 / 5;
-	cy = -cy;
-    }
-
     if( !bd->points[ n ] ) {
 	/* point is empty; draw straight to screen and return */
 	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_board, x, y, x, y,
@@ -513,35 +515,23 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 		     event->area.width, event->area.height );
 
     for( i = 0; i < 28; i++ ) {
-	int y, cy;
+	int x, cx, y, cy;
 
-	y = positions[ fClockwise ][ i ][ 1 ] * bd->board_size;
-	cy = -5 * bd->board_size * positions[ fClockwise ][ i ][ 2 ];
-
-	if( cy < 0 ) {
-	    y += cy * 4 / 5;
-	    cy = -cy;
-	}
-
+	point_area( bd, i, &x, &y, &cx, &cy );
+	
 	if( intersects( event->area.x, event->area.y, event->area.width,
-			event->area.height, positions[ fClockwise ][ i ][ 0 ] *
-			bd->board_size, y, 6 * bd->board_size, cy ) ) {
+			event->area.height, x, y, cx, cy ) ) {
 	    board_redraw_point( board, bd, i );
 	    /* Redrawing the point might have drawn outside the exposed
 	       area; enlarge the invalid area in case the dice now need
 	       redrawing as well. */
-	    if( event->area.x > positions[ fClockwise ][ i ][ 0 ] *
-		bd->board_size ) {
-		event->area.width += event->area.x -
-		    positions[ fClockwise ][ i ][ 0 ] * bd->board_size;
-		event->area.x = positions[ fClockwise ][ i ][ 0 ] *
-		    bd->board_size;
+	    if( event->area.x > x ) {
+		event->area.width += event->area.x - x;
+		event->area.x = x;
 	    }
 	    
-	    if( event->area.x + event->area.width <
-		( positions[ fClockwise ][ i ][ 0 ] + 6 ) * bd->board_size )
-		event->area.width = ( positions[ fClockwise ][ i ][ 0 ] + 6 ) *
-		    bd->board_size - event->area.x;
+	    if( event->area.x + event->area.width < x + cx )
+		event->area.width = x + cx - event->area.x;
 	    
 	    if( event->area.y > y ) {
 		event->area.height += event->area.y - y;
@@ -579,29 +569,33 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 
 static void board_expose_point( GtkWidget *board, BoardData *bd, int n ) {
     
-    GdkEventExpose event;
-    gint cy;
-    
     if( bd->board_size <= 0 )
 	return;
 
-    event.count = 0;
-    event.area.x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
-    event.area.y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
-    event.area.width = 6 * bd->board_size;
-    cy = -5 * bd->board_size * positions[ fClockwise ][ n ][ 2 ];
-    if( cy < 0 ) {
-        event.area.y += cy * 4 / 5;
-        event.area.height = -cy;
-    } else
-	event.area.height = cy;
+#if GTK_CHECK_VERSION(2,0,0)
+    {
+	GdkRectangle r;
+	
+	point_area( bd, n, &r.x, &r.y, &r.width, &r.height );
+	
+	gdk_window_invalidate_rect( board->window, &r, FALSE );
+    }
+#else
+    {
+	GdkEventExpose event;
     
-    board_expose( board, &event, bd );
+	event.count = 0;
+	point_area( bd, n, &event.area.x, &event.area.y, &event.area.width,
+		    &event.area.height );
+	
+	board_expose( board, &event, bd );
+    }
+#endif
 }
 
 static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 
-    int i, y, cy, xCube, yCube;
+    int i, x, y, cx, cy, xCube, yCube;
 
     x0 /= bd->board_size;
     y0 /= bd->board_size;
@@ -626,15 +620,14 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 	return POINT_CUBE;
     
     for( i = 0; i < 28; i++ ) {
-	y = positions[ fClockwise ][ i ][ 1 ];
-	cy = -5 * positions[ fClockwise ][ i ][ 2 ];
-	if( cy < 0 ) {
-	    y += cy * 4 / 5;
-	    cy = -cy;
-	}
+	point_area( bd, i, &x, &y, &cx, &cy );
 
-	if( intersects( x0, y0, 0, 0, positions[ fClockwise ][ i ][ 0 ],
-			y, 6, cy ) )
+	x /= bd->board_size;
+	y /= bd->board_size;
+	cx /= bd->board_size;
+	cy /= bd->board_size;
+	
+	if( intersects( x0, y0, 0, 0, x, y, cx, cy ) )
 	    return i;
     }
 
@@ -732,9 +725,13 @@ static void board_start_drag( GtkWidget *board, BoardData *bd,
     bd->drag_colour = bd->points[ drag_point ] < 0 ? -1 : 1;
 
     bd->points[ drag_point ] -= bd->drag_colour;
-    
+
     board_expose_point( board, bd, drag_point );
 
+#if GTK_CHECK_VERSION(2,0,0)
+    gdk_window_process_updates( board->window, FALSE );
+#endif
+    
     bd->x_drag = x;
     bd->y_drag = y;
 
@@ -763,6 +760,14 @@ static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
 	short *refract = bd->drag_colour > 0 ? bd->ai_refract[ 1 ] :
 	    bd->ai_refract[ 0 ];
 	
+#if GTK_CHECK_VERSION(2,0,0)
+	gdk_window_process_updates( board->window, FALSE );
+#endif
+	
+	/* FIXME it would be nice to perform the point update and the drag
+	   start in a begin_paint, but there are many problems (e.g.
+	   board_expose_point can't cope with it, and GDK insists on
+	   clearing the background first, which ruins things for us) */
 	gdk_get_rgb_image( board->window,
 			   gdk_window_get_colormap( board->window ),
 			   x - 3 * bd->board_size, y - 3 * bd->board_size,
@@ -856,6 +861,10 @@ static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
 
 static void board_end_drag( GtkWidget *board, BoardData *bd ) {
     
+#if GTK_CHECK_VERSION(2,0,0)
+    gdk_window_process_updates( board->window, FALSE );
+#endif
+    
     gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
 		     0, 0, bd->x_drag - 3 * bd->board_size,
 		     bd->y_drag - 3 * bd->board_size,
@@ -928,7 +937,7 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
    0-27 and also allows clicking on a small border and all bearoff trays */
 static int board_point_with_border( GtkWidget *board, BoardData *bd, 
 				    int x0, int y0 ) {
-    int i, y, cy;
+    int i, x, y, cx, cy;
 
     x0 /= bd->board_size;
     y0 /= bd->board_size;
@@ -936,21 +945,19 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
     /* Similar to board_point, but adds the nasty y-=3 cy+=3 border
        allowances */
     for( i = 0; i < 30; i++ ) {
-	y = positions[ fClockwise ][ i ][ 1 ];
-	cy = -5 * positions[ fClockwise ][ i ][ 2 ];
-	if( cy < 0 ) {
-	    y += cy * 4 / 5;
-	    cy = -cy;
-	} else {
+	point_area( bd, i, &x, &y, &cx, &cy );
+
+	x /= bd->board_size;
+	y /= bd->board_size;
+	cx /= bd->board_size;
+	cy /= bd->board_size;
+
+	if( y < 36 )
 	    y -= 3;
-	    if( i == 0 || i == 25 )
-		y -= 3;
-	}
 
 	cy += 3;
 
-	if( intersects( x0, y0, 0, 0,
-			positions[ fClockwise ][ i ][ 0 ], y, 6, cy ) )
+	if( intersects( x0, y0, 0, 0, x, y, cx, cy ) )
 	    return i;
     }
 
