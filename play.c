@@ -2380,7 +2380,7 @@ CommandMove( char *sz ) {
 			sizeof( pmn->anMove ) );
 
 		if ( fTutor && !GiveAdvice ( GoodMove( pmn ) )) {
-                  free ( pmr ); /* garbage collect */
+                  free ( pmn ); /* garbage collect */
                   return;
                 }
 
