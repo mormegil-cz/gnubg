@@ -87,6 +87,9 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
+** If the exposed area in BoardRedraw() intersects a point but not the
+  dice, the point will be redrawn -- but sometimes that will overwrite
+  the dice, which then need updating.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
