@@ -190,7 +190,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
              const cubeinfo *pci, const evalcontext *pec ) {
   
   int anBoardTemp[ 2 ][ 25 ], i, j;
-  float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
+  float aar[ 6 ][ 6 ], ar[ NUM_ROLLOUT_OUTPUTS ], rMean = 0.0f;
   cubeinfo ciOpp;
   movelist ml;
 
