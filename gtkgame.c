@@ -750,7 +750,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 	    sprintf( sz, "%d", i + 1 );
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
 
-	FormatEval( sz, pml->amMoves[ i ].etMove, pml->amMoves[ i ].esMove );
+	FormatEval( sz, &pml->amMoves[ i ].esMove );
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
 
 	for( j = 0; j < 5; j++ ) {
@@ -1206,12 +1206,11 @@ static GtkWidget *SkillMenu( skilltype stSelect ) {
     return pwOptionMenu;
 }
 
-static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
-				evalsetup *pes ) {
+static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
     cubeinfo ci;
     char sz[ 1024 ];
 
-    if( et == EVAL_NONE )
+    if( pes->et == EVAL_NONE )
 	return NULL;
 
     GetMatchStateCubeInfo( &ci, &ms );
@@ -1225,13 +1224,13 @@ static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
     return gtk_label_new( sz );
 }
 
-static GtkWidget *TakeAnalysis( movetype mt, float arDouble[], evaltype et,
+static GtkWidget *TakeAnalysis( movetype mt, float arDouble[], 
 				evalsetup *pes ) {
     char sz[ 128 ], *pch;
     cubeinfo ci;
     float rError;
     
-    if( et == EVAL_NONE )
+    if( pes->et == EVAL_NONE )
 	return NULL;
 
     switch( mt ) {
@@ -1373,7 +1372,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 	    
-	    if( ( pw = CubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
+	    if( ( pw = CubeAnalysis( pmr->n.arDouble, 
 				     &pmr->n.esDouble ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
@@ -1418,7 +1417,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	case MOVE_DOUBLE:
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 	    
-	    if( ( pw = CubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
+	    if( ( pw = CubeAnalysis( pmr->d.arDouble, 
 				     &pmr->d.esDouble ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
@@ -1442,7 +1441,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 
 	    if( ( pw = TakeAnalysis( pmr->mt, pmr->d.arDouble,
-				     pmr->d.etDouble, &pmr->d.esDouble ) ) )
+				     &pmr->d.esDouble ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -3549,8 +3548,9 @@ static void RolloutCancel( GtkObject *po, gpointer p ) {
 extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
     
     static char *aszTitle[] = {
-	"", "Win", "Win (g)", "Win (bg)", "Lose (g)", "Lose (bg)", "Equity"
-    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+	"", "Win", "Win (g)", "Win (bg)", "Lose (g)", "Lose (bg)",
+        "Equity", "Cubeful"
+    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     int i;
     GtkWidget *pwVbox;
     
@@ -3564,7 +3564,7 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
 
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
-    pwRolloutResult = gtk_clist_new_with_titles( 7, aszTitle );
+    pwRolloutResult = gtk_clist_new_with_titles( 8, aszTitle );
     gtk_clist_column_titles_passive( GTK_CLIST( pwRolloutResult ) );
     
     pwProgress = gtk_progress_bar_new();
@@ -3614,22 +3614,46 @@ extern void GTKRolloutRow( int i ) {
     iRolloutRow = i;
 }
 
-extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
-			      int cGames ) {
-    char sz[ 32 ];
-    int i;
+extern int
+GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
+                  float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
+                  int iGame, int cGames, int fCubeful, int cRows ) {
 
-    if( !pwRolloutResult )
+    char sz[ 32 ];
+    int i, j, iRow;
+
+    for ( j = 0; j < cRows; j++ ) {
+
+      iRow = j + iRolloutRow;
+
+      if( !pwRolloutResult )
 	return -1;
     
-    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
-	sprintf( sz, i == OUTPUT_EQUITY ? "%+6.3f" : "%5.3f", arMu[ i ] );
-	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRolloutRow << 1,
+      for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
+        
+        if ( i < OUTPUT_EQUITY )
+          sprintf( sz, "%5.3f", aarMu[ j ][ i ] );
+        else if ( i == OUTPUT_EQUITY )
+          sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
+        else {
+          if ( fCubeful )
+            sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
+          else
+            strcpy ( sz, "n/a" );
+        }
+
+	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRow << 1,
 			    i + 1, sz );
 	
-	sprintf( sz, "%5.3f", arSigma[ i ] );
-	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), ( iRolloutRow << 1 )
+        if ( i != OUTPUT_CUBEFUL_EQUITY || fCubeful )
+          sprintf( sz, "%5.3f", aarSigma[ j ][ i ] );
+        else
+            strcpy ( sz, "n/a" );
+
+	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), ( iRow << 1 )
 			    | 1, i + 1, sz );
+      }
+
     }
     
     gtk_progress_configure( GTK_PROGRESS( pwProgress ), iGame + 1, 0, cGames );

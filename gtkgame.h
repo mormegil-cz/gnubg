@@ -71,7 +71,12 @@ extern void GTKEval( char *szOutput );
 extern void GTKHint( movelist *pml );
 extern void GTKRollout( int c, char asz[][ 40 ], int cGames );
 extern void GTKRolloutRow( int i );
-extern int GTKRolloutUpdate( float arMu[], float arSigma[], int i, int c );
+
+extern int
+GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
+                  float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
+                  int iGame, int cGames, int fCubeful, int cRows );
+
 extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
 extern void GTKUpdateAnnotations( void );
