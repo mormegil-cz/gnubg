@@ -370,7 +370,7 @@ updateStatcontext ( statcontext *psc,
 }
 
 
-static int
+extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
               int fUpdateStatistics ) {
 
@@ -409,25 +409,29 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
       
 	if ( fAnalyseCube && !fFirstMove &&
 	     GetDPEq ( NULL, NULL, &ci ) ) {
-
+          
+          if ( cmp_evalsetup ( &esAnalysisCube, &pmr->n.esDouble ) > 0 ) {
+            
 	    if ( GeneralCubeDecision ( "",
 				       aarOutput, aarStdDev, aarsStatistics, 
 				       pms->anBoard, &ci,
 				       &esAnalysisCube ) < 0 )
-		return -1;
-	  
+              return -1;
+            
+            
 	    FindCubeDecision ( arDouble, aarOutput, &ci );
-	  
+            
 	    pmr->n.esDouble = esAnalysisCube;
 	    for ( i = 0; i < 4; i++ ) 
-		pmr->n.arDouble[ i ] = arDouble[ i ];
-
-            rSkill = arDouble[ OUTPUT_NODOUBLE ] -
-              arDouble[ OUTPUT_OPTIMAL ];
+              pmr->n.arDouble[ i ] = arDouble[ i ];
+            
+          }
+          
+          rSkill = pmr->n.arDouble[ OUTPUT_NODOUBLE ] -
+            pmr->n.arDouble[ OUTPUT_OPTIMAL ];
 	      
-
 	} else
-	    pmr->n.esDouble.et = EVAL_NONE;
+          pmr->n.esDouble.et = EVAL_NONE;
 
         /* luck analysis */
       
@@ -444,7 +448,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
       
 	if( fAnalyseMove ) {
 	    /* evaluate move */
-	  
+
 	    memcpy( anBoardMove, pms->anBoard,
 		    sizeof( anBoardMove ) );
 	    ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
@@ -453,13 +457,18 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    if( pmr->n.ml.cMoves )
 		free( pmr->n.ml.amMoves );
 	  
-	    /* find best moves */
+            if ( cmp_evalsetup ( &esAnalysisChequer, 
+                                 &pmr->n.esChequer ) > 0 ) {
 	  
-	    if( FindnSaveBestMoves ( &(pmr->n.ml), pmr->n.anRoll[ 0 ],
-				     pmr->n.anRoll[ 1 ],
-				     pms->anBoard, auch, &ci,
-				     &esAnalysisChequer.ec ) < 0 )
+              /* find best moves */
+	  
+              if( FindnSaveBestMoves ( &(pmr->n.ml), pmr->n.anRoll[ 0 ],
+                                       pmr->n.anRoll[ 1 ],
+                                       pms->anBoard, auch, &ci,
+                                       &esAnalysisChequer.ec ) < 0 )
 		return -1;
+
+            }
 	  
 	    for( pmr->n.iMove = 0; pmr->n.iMove < pmr->n.ml.cMoves;
 		 pmr->n.iMove++ )
@@ -493,7 +502,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 			 cAnalysisMoves * sizeof( move ) );
 		pmr->n.ml.cMoves = cAnalysisMoves;
 	    }
-	  
+
+            pmr->n.esChequer = esAnalysisChequer;
+            
 	}
       
         if ( fUpdateStatistics )
@@ -515,11 +526,15 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	  
 	    if ( GetDPEq ( NULL, NULL, &ci ) ) {
 	      
+              if ( cmp_evalsetup ( &esAnalysisCube, &pmr->n.esDouble ) > 0 ) {
+
 		if ( GeneralCubeDecision ( "",
 					   aarOutput, aarStdDev, aarsStatistics, 
 					   pms->anBoard, &ci,
 					   &esAnalysisCube ) < 0 )
 		    return -1;
+
+              }
 	      
 		FindCubeDecision ( arDouble, aarOutput, &ci );
 	      
@@ -601,8 +616,12 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 
         GetMatchStateCubeInfo ( &ci, pms );
 
-        nResign =
-          getResignation ( pmr->r.arResign, ms.anBoard, &ci, &esAnalysisCube );
+          if ( cmp_evalsetup ( &esAnalysisCube, &pmr->n.esDouble ) >= 0 ) {
+            nResign =
+              getResignation ( pmr->r.arResign, ms.anBoard, 
+                               &ci, &esAnalysisCube );
+
+          }
 
         getResignEquities ( pmr->r.arResign, &ci, pmr->r.nResigned,
                             &rBefore, &rAfter );
@@ -654,9 +673,11 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
   
     ApplyMoveRecord( pms, pmr );
   
-    psc->fMoves = fAnalyseMove;
-    psc->fCube = fAnalyseCube;
-    psc->fDice = fAnalyseDice;
+    if ( fUpdateStatistics ) {
+      psc->fMoves = fAnalyseMove;
+      psc->fCube = fAnalyseCube;
+      psc->fDice = fAnalyseDice;
+    }
   
     return 0;
 }
