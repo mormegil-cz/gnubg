@@ -167,6 +167,7 @@ static void Draw(Material* pMat)
 
 void UpdatePreviewBar(Material* pMat, GdkPixmap *pixmap)
 {
+#if !LINUX
 	GdkGC *gc;
 
 	RenderPreview(pMat, auch);
@@ -175,6 +176,7 @@ void UpdatePreviewBar(Material* pMat, GdkPixmap *pixmap)
 	gdk_draw_rgb_image(pixmap, gc, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GDK_RGB_DITHER_MAX,
 					  auch, PREVIEW_WIDTH * 3 );
 	gdk_gc_unref( gc );
+#endif
 }
 
 void UpdateColourPreview(void *arg)

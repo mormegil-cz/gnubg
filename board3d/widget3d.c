@@ -411,6 +411,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 
 void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
 {
+#if !LINUX
 	GLint viewport[4];
 	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE((GdkGLPixmap *)glpixmap);
@@ -427,6 +428,7 @@ void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char
 
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
+#endif
 }
 
 #else
@@ -462,6 +464,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 
 void RenderBoard3d(BoardData* bd, renderdata* prd, void *ppm, unsigned char* buf)
 {
+#if !LINUX
 	GLint viewport[4];
 	GdkGLPixmap *glpixmap;
 
@@ -482,6 +485,7 @@ void RenderBoard3d(BoardData* bd, renderdata* prd, void *ppm, unsigned char* buf
 
 	gdk_gl_pixmap_unref(glpixmap);
 	gdk_gl_context_unref(glPixmapContext);
+#endif
 }
 
 #endif
