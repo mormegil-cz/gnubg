@@ -60,6 +60,18 @@
 #include "gtkgame.h"
 #endif
 
+
+char *aszRNG[] = {
+   N_ ("ANSI"),
+   N_ ("BSD"),
+   N_ ("ISAAC"),
+   N_ ("manual"),
+   N_ ("MD5"),
+   N_ ("Mersenne Twister"),
+   N_ ("user supplied")
+};
+
+
 rng rngCurrent = RNG_MERSENNE;
 
 static randctx rc;
