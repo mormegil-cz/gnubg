@@ -1,11 +1,39 @@
 #define PROCESSING_UNITS 1
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdlib.h>
 #include <pthread.h>
 #include <assert.h>
+#include <string.h>
+#include <errno.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
+
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
+
+#include <signal.h>
 #include <stddef.h>
+
+#include "backgammon.h"
 #include "procunits.h"
 #include "threadglobals.h"
 
@@ -76,6 +104,18 @@ extern void *Threaded_BasicCubefulRollout (void *data);
 void * Thread_RemoteProcessingUnit (void *data);
 
 
+static int StartProcessingUnit (procunit *ppu, int fWait);
+static int StopProcessingUnit (procunit *ppu);
+static void PrintProcessingUnitInfo (procunit *ppu);
+static int StartRemoteProcessingUnit (procunit *ppu);
+static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step);
+static void RPU_DumpData (unsigned char *data, int len);
+
+static procunit *CreateProcessingUnit (pu_type type, pu_status status, pu_task_type taskMask, int maxTasks);
+static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id);
+
+
+
 static const char asProcunitType[][10] = { "None", "Local", "Remote" };
 static const char asProcunitStatus[][14] = { "None", "N/A", "Ready", "Busy", 
                         "Stopped", "Connecting" };
@@ -94,7 +134,7 @@ static rpu_slavestatus gSlaveStatus = rpu_stat_na;
 rpu_slavestats gSlaveStats;
 
 
-int GetProcessorCount (void)
+static int GetProcessorCount (void)
 {
     int cProcessors = 1;
     
@@ -118,7 +158,7 @@ int GetProcessorCount (void)
 }
 
 
-void ClearStats (pu_stats *s)
+static void ClearStats (pu_stats *s)
 {
     s->avgSpeed = 0.0f;
     s->total = 0;
@@ -126,13 +166,10 @@ void ClearStats (pu_stats *s)
     s->totalFailed = 0;
 }
 
-procunit *CreateProcessingUnit (pu_type type, pu_status status, pu_task_type taskMask, int maxTasks);
-procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id);
-
 
 /* Creates all processing units available on the host.
 */
-void InitProcessingUnits (void)
+extern void InitProcessingUnits (void)
 {
     int i;
     int nProcs = GetProcessorCount ();
@@ -173,13 +210,13 @@ void InitProcessingUnits (void)
 }
 
 
-pu_mode GetProcessingUnitsMode (void)
+extern pu_mode GetProcessingUnitsMode (void)
 {
     return gProcunitsMode;
 }
 
 
-int GetProcessingUnitsCount (void)
+static int GetProcessingUnitsCount (void)
 {
     procunit 	*ppu = gpulist;
     int		n = 0;
@@ -199,7 +236,7 @@ int GetProcessingUnitsCount (void)
    
    Note: in the case of RPU's, doesn't START the RPU (no thread created)
 */
-procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_type taskMask, int maxTasks)
+static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_type taskMask, int maxTasks)
 {
     procunit **pppu = &gpulist;
     
@@ -223,9 +260,12 @@ procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_type ta
 
         switch (ppu->type) {
             case pu_type_local:
-                break;
+              break;
             case pu_type_remote:
-                break;
+              break;
+            default:
+              assert( FALSE );
+              break;
         }
 
         ClearStats (&ppu->rolloutStats);
@@ -241,9 +281,9 @@ procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_type ta
 
 /* Create and START a remote processing unit */
 
-procunit * CreateRemoteProcessingUnit (struct in_addr *inAddress, int fWait)
+static procunit * CreateRemoteProcessingUnit (struct in_addr *inAddress, int fWait)
 {
-    int 	err;
+
     procunit 	*ppu = CreateProcessingUnit (pu_type_remote, 
                             pu_stat_busy, pu_task_info|pu_task_rollout, 0);
         /* create rpu in busy state so it can't be used for now (connecting) */
@@ -260,7 +300,7 @@ procunit * CreateRemoteProcessingUnit (struct in_addr *inAddress, int fWait)
 }
 
 
-void DestroyProcessingUnit (int procunit_id)
+static void DestroyProcessingUnit (int procunit_id)
 {
     procunit **plpu = &gpulist;
     procunit *ppu = FindProcessingUnit (NULL, pu_type_none, pu_stat_none, pu_task_none, procunit_id);
@@ -285,7 +325,7 @@ void DestroyProcessingUnit (int procunit_id)
 
 
 
-void PrintProcessingUnitInfo (procunit *ppu)
+static void PrintProcessingUnitInfo (procunit *ppu)
 {
     char asTasks[256] = "";
     char asAddress[256] = "n/a";
@@ -307,7 +347,7 @@ void PrintProcessingUnitInfo (procunit *ppu)
 }
 
 
-void PrintProcessingUnitList (void)
+extern void PrintProcessingUnitList (void)
 {
     procunit *ppu = gpulist;
     
@@ -322,7 +362,7 @@ void PrintProcessingUnitList (void)
 }
 
 
-void PrintProcessingUnitStats (int procunit_id)
+static void PrintProcessingUnitStats (int procunit_id)
 {
     procunit *ppu = gpulist;
         
@@ -377,7 +417,7 @@ void PrintProcessingUnitStats (int procunit_id)
    criteria type, status and taskType.
    Returns a pointer to the found processing unit, or NULL if none found.
 */
-procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id)
+static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id)
 {
     if (ppu == NULL) ppu = gpulist;
     
@@ -404,7 +444,7 @@ procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_
         RPU is actually running (usage: give synchronous feedback to
         the user when he enters command "pu start <procunit_id>")
 */
-int StartProcessingUnit (procunit *ppu, int fWait)
+static int StartProcessingUnit (procunit *ppu, int fWait)
 {
     switch (ppu->type) {
     
@@ -425,13 +465,16 @@ int StartProcessingUnit (procunit *ppu, int fWait)
             }
             else
                 StartRemoteProcessingUnit (ppu);
+        default:
+          assert ( FALSE );
+          break;
     }
     
     return -1;
 }
 
 
-int StartRemoteProcessingUnit (procunit *ppu)
+static int StartRemoteProcessingUnit (procunit *ppu)
 {
     int err;
     
@@ -453,7 +496,7 @@ int StartRemoteProcessingUnit (procunit *ppu)
 }
 
 
-int StopProcessingUnit (procunit *ppu)
+static int StopProcessingUnit (procunit *ppu)
 {
     int step = -3;	/* wait 3 secs before displaying wait message */
     
@@ -477,6 +520,10 @@ int StopProcessingUnit (procunit *ppu)
             if (ppu->status == pu_stat_deactivated) 
                 return 0;
     
+        default:
+          assert ( FALSE );
+          break;
+
     }
     
     return -1;
@@ -489,7 +536,7 @@ int StopProcessingUnit (procunit *ppu)
     will allow threads waiting for ppu->condStatusChanged to be
     immediately unlocked
 */
-void ChangeProcessingUnitStatus (procunit *ppu, pu_status status)
+static void ChangeProcessingUnitStatus (procunit *ppu, pu_status status)
 {
     assert (ppu != NULL);
     
@@ -503,7 +550,7 @@ void ChangeProcessingUnitStatus (procunit *ppu, pu_status status)
 }
 
 
-int WaitForAllProcessingUnits (void)
+static int WaitForAllProcessingUnits (void)
 {
     procunit *ppu = gpulist;
     
@@ -537,7 +584,7 @@ int WaitForAllProcessingUnits (void)
 
 
 
-void CancelProcessingUnitTasks (procunit *ppu)
+static void CancelProcessingUnitTasks (procunit *ppu)
 {
     int i;
     int procunit_id = ppu->procunit_id;
@@ -552,6 +599,9 @@ void CancelProcessingUnitTasks (procunit *ppu)
                 switch (taskList[i]->type) {
                     case pu_task_rollout: ppu->rolloutStats.totalFailed ++; break;
                     case pu_task_eval: ppu->evalStats.totalFailed ++; break;
+                    default:
+                      assert( FALSE );
+                      break;
                 }
                 taskList[i]->status = pu_task_todo;
             }
@@ -563,7 +613,7 @@ void CancelProcessingUnitTasks (procunit *ppu)
 }
 
 
-int InterruptAllProcessingUnits ()
+static int InterruptAllProcessingUnits ()
 {
     procunit *ppu = gpulist;
     
@@ -578,6 +628,10 @@ int InterruptAllProcessingUnits ()
                 CancelProcessingUnitTasks (ppu);
                 ppu->info.remote.fInterrupt = TRUE;
                 break;
+
+            default:
+                assert( FALSE );
+                 break;
         }
     
         ppu = ppu->next;
@@ -589,7 +643,7 @@ int InterruptAllProcessingUnits ()
 
 
 /* Returns TRUE if successfully started */
-int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
+static int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
 {
     int	err = -1;
     
@@ -616,6 +670,11 @@ int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
         case pu_task_eval:
             /* for future use */
             break;
+
+       default:
+           assert( FALSE );
+           break;
+
     }
     
     if (err == 0) {
@@ -627,7 +686,8 @@ int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
     }
     
     if (PU_DEBUG) {
-        if (err == 0) fprintf (stderr, "Started local procunit (0x%x)\n", ppu->info.local.thread);
+        if (err == 0) fprintf (stderr, "Started local procunit (0x%x)\n", 
+                               (int) ppu->info.local.thread);
         else fprintf (stderr, "*** RunTaskOnLocalProcessingUnit(): Could not start local procunit!\n");
     }
     
@@ -643,7 +703,7 @@ int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
     about the task being processed (or even received) on the remote 
     (slave) half of the rpu 
 */
-int RunTaskOnRemoteProcessingUnit (pu_task *pt, procunit *ppu)
+static int RunTaskOnRemoteProcessingUnit (pu_task *pt, procunit *ppu)
 {
     int	err = 0;
     
@@ -665,7 +725,7 @@ int RunTaskOnRemoteProcessingUnit (pu_task *pt, procunit *ppu)
     return ( err == 0 );
 }
 
-void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
+static void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
 {
     int started = 0;
 
@@ -676,6 +736,11 @@ void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
         case pu_type_remote:
             started = RunTaskOnRemoteProcessingUnit (pt, ppu);
             break;
+        
+        default:
+            assert( FALSE );
+            break;
+
     }
 
     if (started) {
@@ -687,12 +752,15 @@ void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
             case pu_task_eval:
                 ppu->evalStats.total ++;
                 break;
+            default:
+                assert( FALSE );
+                break;
         }
     }
 }
 
 
-void InitTasks (void)
+extern void InitTasks (void)
 {
     int i;
     
@@ -706,7 +774,7 @@ void InitTasks (void)
 }
 
 
-void ReleaseTasks (void)
+static void ReleaseTasks (void)
 {
     int i;
     
@@ -723,13 +791,8 @@ void ReleaseTasks (void)
 }
 
 
-int GetTaskListMax (void)
-{
-    return taskListMax;
-}
 
-
-pu_task *CreateTask (pu_task_type type, int fDetached)
+extern pu_task *CreateTask (pu_task_type type, int fDetached)
 {
     pu_task	*pt = NULL;
     
@@ -770,7 +833,7 @@ pu_task *CreateTask (pu_task_type type, int fDetached)
 }
 
 
-pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int taskId, int procunit_id)
+static pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int taskId, int procunit_id)
 {
     int i;
     
@@ -788,7 +851,7 @@ pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int taskId, int
 }
 
 
-int GetTaskCount (pu_task_status status, pu_task_type taskMask)
+static int GetTaskCount (pu_task_status status, pu_task_type taskMask)
 {
     int i, n = 0;
     
@@ -804,7 +867,7 @@ int GetTaskCount (pu_task_status status, pu_task_type taskMask)
 }
 
 
-pu_task *AttachTask (pu_task *pt)
+static pu_task *AttachTask (pu_task *pt)
 {
     int i;
     
@@ -823,7 +886,7 @@ pu_task *AttachTask (pu_task *pt)
 }
 
 
-void PrintTaskList (void)
+extern void PrintTaskList (void)
 {
     int i;
     
@@ -873,6 +936,10 @@ void FreeTask (pu_task *pt)
         case pu_task_eval:
             /* for future use */
             break;
+
+        default:
+            assert( FALSE );
+            break;
     
     } /* switch */
     
@@ -886,7 +953,7 @@ void FreeTask (pu_task *pt)
 }
 
 
-int AssignTasksToProcessingUnits (void)
+static int AssignTasksToProcessingUnits (void)
 {
     procunit 	*ppu = gpulist;
     int		totalAvailQueue = 0;
@@ -942,7 +1009,7 @@ int AssignTasksToProcessingUnits (void)
     returns the number of tasks put in *papt (caller must
     free *papt after use), or 0 if none (*papt set to NULL) */
     
-int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task ***papt, int maxTasks)
+static int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task ***papt, int maxTasks)
 {
     int 	i, cTasks = 0;
     
@@ -962,7 +1029,7 @@ int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task ***papt
         &&  taskList[i]->procunit_id == ppu->procunit_id) {
             (*papt)[cTasks ++] = taskList[i];
             if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU picked up jobtask #%d id=%d.\n", 
-                                    pthread_self (), cTasks, taskList[i]->task_id.taskId);
+                                    (int) pthread_self (), cTasks, taskList[i]->task_id.taskId);
         }
     }
     
@@ -970,7 +1037,7 @@ int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task ***papt
 }
 
 
-void MarkTaskDone (pu_task *pt, procunit *ppu)
+extern void MarkTaskDone (pu_task *pt, procunit *ppu)
 {
     //fprintf (stderr, "# Task done.\n");
     
@@ -1001,6 +1068,9 @@ void MarkTaskDone (pu_task *pt, procunit *ppu)
                 ppu->evalStats.totalDone ++;
                 ppu->evalStats.avgSpeed += duration;
                 break;
+            default:
+                assert( FALSE );
+                break;
         }
         
         if (ppu->type == pu_type_local)
@@ -1018,7 +1088,7 @@ void MarkTaskDone (pu_task *pt, procunit *ppu)
 }
 
 
-void TaskEngine_Init (void)
+extern void TaskEngine_Init (void)
 {
     if (PU_DEBUG) fprintf (stderr, "Starting Task Engine...\n");
     InitTasks ();
@@ -1026,7 +1096,7 @@ void TaskEngine_Init (void)
 }
 
 
-void TaskEngine_Shutdown (void)
+extern void TaskEngine_Shutdown (void)
 {
     if (PU_DEBUG) fprintf (stderr, "Stopping Task Engine...\n");
     InterruptAllProcessingUnits ();
@@ -1035,7 +1105,7 @@ void TaskEngine_Shutdown (void)
 }
 
 
-int TaskEngine_Full (void)
+extern int TaskEngine_Full (void)
 {
     int i;
     
@@ -1046,7 +1116,7 @@ int TaskEngine_Full (void)
 }
 
 
-int TaskEngine_Empty (void)
+extern int TaskEngine_Empty (void)
 {
     int i;
     
@@ -1057,7 +1127,7 @@ int TaskEngine_Empty (void)
 }
 
 
-pu_task * TaskEngine_GetCompletedTask (void)
+extern pu_task * TaskEngine_GetCompletedTask (void)
 {
     int done = FALSE;
     static int foundLastTime = TRUE;
@@ -1088,6 +1158,9 @@ pu_task * TaskEngine_GetCompletedTask (void)
                                 pf[0], pf[1], pf[2], pf[3], pf[4], pf[5],
                                 pt->taskdata.rollout.seed);
                         }
+                    default:
+                        assert( FALSE );
+                        break;
                 }
             }
 
@@ -1120,8 +1193,8 @@ pu_task * TaskEngine_GetCompletedTask (void)
     return NULL;
 }
 
-#if RPU_DEBUG_PACK
-void RPU_DumpData (unsigned char *data, int len)
+
+static void RPU_DumpData (unsigned char *data, int len)
 {
     int i;
     
@@ -1136,19 +1209,20 @@ void RPU_DumpData (unsigned char *data, int len)
     
     fprintf (stderr, "]\n");
 }
-#endif
 
 
-int RPU_PackJob (char **job, int *jobSize, int *p, void *data, int size)
+
+static int RPU_PackJob (char **job, int *jobSize, int *p, void *data, int size)
 {
     if (RPU_DEBUG_PACK) 
         fprintf (stderr, "  > RPU_PackJob(): size=%d bytes at p=+%d\n", size, *p);
         
     while ((*p) + size > *jobSize) {
+      char *newJob;
         if (RPU_DEBUG_PACK) fprintf (stderr, "[Resizing Job]");
         /* no more room, let's double the size of the job */
         *jobSize *= 2;
-        char *newJob = realloc (*job, *jobSize);
+        newJob = realloc (*job, *jobSize);
         if (newJob == NULL) {
             /* realloc won't work: let's do it the long way */
             newJob = malloc (*jobSize);
@@ -1166,7 +1240,7 @@ int RPU_PackJob (char **job, int *jobSize, int *p, void *data, int size)
     return size;  
 }
 
-int RPU_PackJobPtr (char **job, int *jobSize, int *p, char *data, int size, int q)
+static int RPU_PackJobPtr (char **job, int *jobSize, int *p, char *data, int size, int q)
 {
     int n = 0;
     int totalSize = sizeof (q) + q * size;
@@ -1186,7 +1260,7 @@ int RPU_PackJobPtr (char **job, int *jobSize, int *p, char *data, int size, int 
                                     (char *) (x), sizeof (t), (q))
 #define DEFAULT_JOBSIZE (100 * 1024)
 
-rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
+static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
 {
     int 		len = sizeof (rpu_jobtask);
     int			jobSize = DEFAULT_JOBSIZE;
@@ -1238,6 +1312,10 @@ rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
             
         case pu_task_eval:
             break;
+
+       default:
+           assert( FALSE );
+           break;
     
     }
 
@@ -1248,7 +1326,7 @@ rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
 }
 
 
-rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
+static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
 {
     rpu_job	*pJob = NULL;
     rpu_jobtask **apJobTasks;
@@ -1268,7 +1346,8 @@ rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
         assert (apJobTasks[i] != NULL);
         if (RPU_DEBUG_PACK) fprintf (stderr, "[Job #%d packed to jobtask, %d bytes]\n", 
                                                 i, apJobTasks[i]->len);
-        if (RPU_DEBUG_PACK > 1) RPU_DumpData (apJobTasks[i], apJobTasks[i]->len);
+        if (RPU_DEBUG_PACK > 1) RPU_DumpData ( (char *) apJobTasks[i], 
+                                               apJobTasks[i]->len);
         totalJobTasksSize += apJobTasks[i]->len;
     }
     
@@ -1288,12 +1367,12 @@ rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
                 memcpy (p, apJobTasks[i], apJobTasks[i]->len);
                 if (RPU_DEBUG_PACK) fprintf (stderr, "[Jobtask #%d moved to job, %d bytes]\n", 
                                                         i, apJobTasks[i]->len);
-                if (RPU_DEBUG_PACK > 1) RPU_DumpData (p, apJobTasks[i]->len);
+                if (RPU_DEBUG_PACK > 1) RPU_DumpData ( (char *) p, apJobTasks[i]->len);
                 p += apJobTasks[i]->len;
                 free ((char *) apJobTasks[i]);
             }
             if (RPU_DEBUG_PACK) fprintf (stderr, "[Job packed, %d task(s), %d bytes]\n", cTasks, pjoblen);
-            if (RPU_DEBUG_PACK > 1) RPU_DumpData (pJob, pjoblen);
+            if (RPU_DEBUG_PACK > 1) RPU_DumpData ( (char *) pJob, pjoblen);
         }
     }
     
@@ -1319,7 +1398,7 @@ rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
         p += sizeof (int); \
         x = malloc (len); memcpy (x, p, len); p += len; 
 
-pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
+static pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
 {
     pu_task	*pt;
     char	*p = (char *) &pjt->data;
@@ -1379,7 +1458,7 @@ pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
 }
 
 
-int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInterrupt)
+static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInterrupt)
 {
     int 	n;
     int 	fError, fShutdown;
@@ -1413,7 +1492,7 @@ int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInterrupt)
 
 
 /* timeout in seconds; timeout == 0 for no timeout */
-rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterrupt, int timeout)
+static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterrupt, int timeout)
 {
     rpu_message *msg = NULL;
     int 	n, len;
@@ -1471,7 +1550,7 @@ rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterrupt, int
 }
 
 
-rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int datalen)
+static rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int datalen)
 {
     int		msglen = offsetof (rpu_message, data) + datalen;
     rpu_message *msg = malloc (msglen);
@@ -1487,27 +1566,27 @@ rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int datalen)
 }
 
 
-void * RPU_GetMessageData (rpu_message *msg, pu_message_type msgType)
+static void * RPU_GetMessageData (rpu_message *msg, pu_message_type msgType)
 {
     if (msg == NULL) return NULL;
     
     if (msg->version > RPU_MSG_VERSION) {
         fprintf (stderr, "# (0x%x) Received message version=0x%x "
                         "(implemented version=0x%x)\n", 
-                        pthread_self (), msg->version, RPU_MSG_VERSION);
+                        (int) pthread_self (), msg->version, RPU_MSG_VERSION);
         return NULL;
     }
     
     if (msg->type != msgType) {
         fprintf (stderr, "# (0x%x) Was expecting message type=%d, received "
-                    "message type=%d.\n", pthread_self (), msgType, msg->type);
+                    "message type=%d.\n", (int) pthread_self (), msgType, msg->type);
         return NULL;
     }
 
     return &msg->data;
 }
 
-int RPU_SetSocketOptions (int s)
+static int RPU_SetSocketOptions (int s)
 {
     struct timeval 	tv;
     int			err = 0;
@@ -1545,13 +1624,13 @@ int RPU_SetSocketOptions (int s)
 }
 
 
-int RPU_CheckHostList (void)
+static int RPU_CheckHostList (void)
 {
     return 0;
 }
 
 
-int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_in remoteAddr)
+static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_in remoteAddr)
 {
     /* check in authorized host list */
     if (RPU_CheckHostList ()) 
@@ -1572,7 +1651,7 @@ int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_in remot
 }
 
 
-void RPU_PrintInfo (rpu_info *info)
+static void RPU_PrintInfo (rpu_info *info)
 {
     int i;
     outputf ("Processing units installed on RPU: %d\n", info->cProcunits);
@@ -1581,7 +1660,7 @@ void RPU_PrintInfo (rpu_info *info)
 }
 
 
-int Slave_DoJob (int toSocket, rpu_job *job)
+static int Slave_DoJob (int toSocket, rpu_job *job)
 {
     pu_task 	*pt;
     rpu_jobtask *pjt = (rpu_jobtask *) &job->data;
@@ -1594,7 +1673,7 @@ int Slave_DoJob (int toSocket, rpu_job *job)
     
     if (RPU_DEBUG_PACK > 1) {
         fprintf (stderr, "Received job (len=%d):\n", job->len);
-        RPU_DumpData (job, job->len);
+        RPU_DumpData ( (char *) job, job->len);
     }
     
     for (i = 0, j = 0; (i < cJobTasks || j < cJobTasks) && err == 0; ) {
@@ -1608,6 +1687,7 @@ int Slave_DoJob (int toSocket, rpu_job *job)
                 switch (pt->type) {
                     case pu_task_rollout: gSlaveStats.rollout.rcvd ++; break;
                     case pu_task_eval: gSlaveStats.eval.rcvd ++; break;
+                    default: assert ( FALSE ); break;
                 }
                 Slave_UpdateStatus ();
                 if (RPU_DEBUG) {
@@ -1642,6 +1722,9 @@ int Slave_DoJob (int toSocket, rpu_job *job)
                                 pf[0], pf[1], pf[2], pf[3], pf[4], pf[5], 
                                 pt->taskdata.rollout.seed);
                         }
+                    default:
+                        assert( FALSE );
+                        break;
                 }
             }
             
@@ -1664,6 +1747,7 @@ int Slave_DoJob (int toSocket, rpu_job *job)
                     switch (pt->type) {
                         case pu_task_rollout: gSlaveStats.rollout.sent ++; break;
                         case pu_task_eval: gSlaveStats.eval.sent ++; break;
+                        default: assert( FALSE ); break;
                     }
                     Slave_UpdateStatus ();
                     free ((char *) msg);
@@ -1685,7 +1769,7 @@ int Slave_DoJob (int toSocket, rpu_job *job)
 }
 
 
-int Slave_GetInfo (int toSocket)
+static int Slave_GetInfo (int toSocket)
 {
     int 	i, err;
     int 	cProcunits = GetProcessingUnitsCount ();
@@ -1716,7 +1800,7 @@ int Slave_GetInfo (int toSocket)
     return err;
 }
 
-void Slave_UpdateStatus (void)
+extern void Slave_UpdateStatus (void)
 {
     int cInTaskList = GetTaskCount (0, 0);
     int cTodo = GetTaskCount (pu_task_todo, 0);
@@ -1756,7 +1840,7 @@ void Slave_UpdateStatus (void)
 }
 
 
-void Slave_PrintStatus (void)
+static void Slave_PrintStatus (void)
 {
     outputf ("Tasks (todo/prog/done)  "
              "Rollouts (rcvd/sent/fail)  "
@@ -1781,7 +1865,7 @@ void Slave_PrintStatus (void)
                              and expects responses)
 */
 
-void Slave (void)
+static void Slave (void)
 {
     int	done = FALSE;
     int	listenSocket;
@@ -1799,7 +1883,7 @@ void Slave (void)
     listenSocket = socket (AF_INET, SOCK_STREAM, 0);
     if (listenSocket == -1) {
         fprintf (stderr, "*** RPU could not create slave socket (err=%d).\n", 
-            pthread_self (), errno);
+            errno);
         perror ("socket_create");
     }
     else {
@@ -1865,7 +1949,7 @@ void Slave (void)
                             
                             if (msg != NULL) {
                                 if (RPU_DEBUG) fprintf (stderr, "Received message type=%d.\n", msg->type);
-                                if (RPU_DEBUG_PACK) RPU_DumpData (msg, msg->len);
+                                if (RPU_DEBUG_PACK) RPU_DumpData ((char *) msg, msg->len);
                                 switch (msg->type) {
                                     case mmGetInfo:
                                         if (RPU_DEBUG) fprintf (stderr, "Received GetInfo msg\n");
@@ -1935,7 +2019,7 @@ void Slave (void)
     if (RPU_DEBUG) fprintf (stderr, "RPU Local Half stopped.\n");    
 }
 
-int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step)
+static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step)
 {
     int			err;
     struct timespec   	ts;
@@ -1974,7 +2058,7 @@ pthread_key_t tlsThreadGlobalsKey;
 
 /* called when a thread which has called CreateThreadGlobalStorage() quits;
     release memory allocated for the thread's global storage */
-void DestroyThreadGlobalStorage (void *tg)
+static void DestroyThreadGlobalStorage (void *tg)
 {
     free (tg);
     pthread_setspecific (tlsThreadGlobalsKey, NULL);
@@ -1982,7 +2066,7 @@ void DestroyThreadGlobalStorage (void *tg)
 
 /* InitThreadGlobalStorage() must be called ONCE from main thread
     before any call to CreateThreadGlobalStorage() can be made */
-int InitThreadGlobalStorage (void)
+extern int InitThreadGlobalStorage (void)
 {
     int err;
     static int fInitialised = 0;
@@ -2006,7 +2090,7 @@ int InitThreadGlobalStorage (void)
     those globals must  be accessed through the ThreadGlobal() macro; 
     the initialisers (default values) for the globals must be written 
     in the GLOBALS_INITIALISERS macro */
-int CreateThreadGlobalStorage (void)
+extern int CreateThreadGlobalStorage (void)
 {
     /* allocate global storage for calling thread */
     threadglobals *ptg = (threadglobals *) calloc (1, sizeof (threadglobals));
@@ -2032,14 +2116,14 @@ int CreateThreadGlobalStorage (void)
 }
 
 
-void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
+static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
 {
     int err = 0;
     
     /* look for tasks to perform until we are stopped */
     while (err == 0 && !ppu->info.remote.fStop) {
         
-        int 	i, cJobTasks = 0;
+        int 	cJobTasks = 0;
         pu_task	**apJobTasks = NULL;    
         
         ChangeProcessingUnitStatus (ppu, pu_stat_ready);
@@ -2055,9 +2139,10 @@ void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
             if (RPU_DEBUG) {
                 if (ppu->info.remote.fTasksAvailable)
                     fprintf (stderr, "\n# (0x%x) RPU woken up to perform assigned "
-                        "todo tasks.\n", pthread_self ());
+                        "todo tasks.\n", (int) pthread_self ());
                 if (ppu->info.remote.fInterrupt) {
-                    fprintf (stderr, "\n# (0x%x) RPU interrupted.\n", pthread_self ());
+                    fprintf (stderr, "\n# (0x%x) RPU interrupted.\n", 
+                             (int) pthread_self ());
                 }
             }
             ppu->info.remote.fInterrupt = FALSE;
@@ -2125,14 +2210,14 @@ void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
                 if (RPU_DEBUG) {
                     PrintTaskList ();
                     fprintf (stderr, "# (0x%x) Waiting for job result (%d task(s) pending).\n",
-                                                pthread_self (), cJobTasks);
+                                                (int) pthread_self (), cJobTasks);
                 }
                 
                 msg = RPU_ReceiveMessage (rpuSocket, &ppu->info.remote.fInterrupt, 0);
                 
                 if (msg == NULL) {
                     if (RPU_DEBUG) fprintf (stderr, "# (0x%x) No result received for job.\n",
-                                                pthread_self ());
+                                                (int) pthread_self ());
                     err = -1;
                 }
                 else {
@@ -2143,23 +2228,24 @@ void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
                         err = -1;
                     }
                     else {
+                        pu_task *pt;
                         /* extract task results from received message */
                         if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU received results.\n",
-                                    pthread_self ());
+                                    (int) pthread_self ());
                         
                         /* note: pt is a "detached" task, not yet in the taskList */
-                        pu_task *pt = RPU_UnpackJobToTask (&msg->data.taskresult, TRUE);
+                        pt = RPU_UnpackJobToTask (&msg->data.taskresult, TRUE);
                         if (pt == NULL) {
                             fprintf (stderr, "# (0x%x) RPU could not unpack task result.\n",
-                                    pthread_self ());
+                                    (int) pthread_self ());
                             err = -1;
                         }
                         else {
+                            pu_task *oldpt;
                             if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU received task id=%d results.\n",
-                                        pthread_self (), pt->task_id.src_taskId);
+                                        (int) pthread_self (), pt->task_id.src_taskId);
                             pthread_mutex_lock (&mutexTaskListAccess);
                             /* store received task with results back to master task list */
-                            pu_task *oldpt;
                             /* remove original task... */
                             oldpt = FindTask (0, 0, pt->task_id.src_taskId, 0);
                             if (oldpt == NULL) {
@@ -2185,10 +2271,10 @@ void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
                                 if (RPU_DEBUG) { 
                                     fprintf (stderr, "# (0x%x) RPU results for task id=%d "
                                                 "integrated back to lisk:\n",
-                                                pthread_self (), pt->task_id.src_taskId);
+                                                (int) pthread_self (), pt->task_id.src_taskId);
                                     PrintTaskList ();
                                     fprintf (stderr, "# (0x%x) RPU end of ilst.\n",
-                                                pthread_self ());
+                                                (int) pthread_self ());
                                 }
                                 cJobTasks --;
                             }
@@ -2233,13 +2319,13 @@ void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
     remote hosts = SLAVES, act as servers
 */
 
-void * Thread_RemoteProcessingUnit (void *data)
+extern void * Thread_RemoteProcessingUnit (void *data)
 {
     int 	rpuSocket;
     procunit	*ppu = (procunit *) data;
-    int		done = FALSE, err = 0;
+    int		err = 0;
     
-    if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU Local Half started.\n", pthread_self ());
+    if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU Local Half started.\n", (int) pthread_self ());
     
     while (!ppu->info.remote.fStop) {
     
@@ -2250,7 +2336,7 @@ void * Thread_RemoteProcessingUnit (void *data)
         rpuSocket = socket (AF_INET, SOCK_STREAM, 0);
         if (rpuSocket == -1) {
             fprintf (stderr, "# (0x%x) RPU could not create socket (err=%d).\n", 
-                pthread_self (), errno);
+                (int) pthread_self (), errno);
             perror ("socket_create");
             ppu->info.remote.fStop = TRUE;
         }
@@ -2264,13 +2350,13 @@ void * Thread_RemoteProcessingUnit (void *data)
     
             if (connect (rpuSocket, (const struct sockaddr *) &remoteAddress, sizeof(remoteAddress)) < 0) {
                 fprintf (stderr, "# (0x%x) RPU could not connect socket (err=%d).\n", 
-                    pthread_self (), errno);
+                    (int) pthread_self (), errno);
                 perror ("connect");
                 ppu->info.remote.fStop = TRUE;
             }
             else {
                 /* RPU: local half connected with remote host */
-                if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU connected.\n", pthread_self ());
+                if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU connected.\n", (int) pthread_self ());
                 
                 RPU_SetSocketOptions (rpuSocket);
                 
@@ -2279,25 +2365,25 @@ void * Thread_RemoteProcessingUnit (void *data)
                     rpu_getinfo msgGetInfo = {};
                     rpu_message *msg = RPU_MakeMessage (mmGetInfo, &msgGetInfo, sizeof (msgGetInfo));
                     assert (msg != NULL);
-                    if (RPU_DEBUG_PACK) RPU_DumpData (msg, msg->len);
+                    if (RPU_DEBUG_PACK) RPU_DumpData ((char *) msg, msg->len);
                     err = RPU_SendMessage (rpuSocket, msg, &ppu->info.remote.fInterrupt);
                     if (err != 0) {
                         fprintf (stderr, "# (0x%x) RPU couldn't send GetInfo msg to slave host.\n", 
-                                        pthread_self ());
+                                        (int) pthread_self ());
                     }
                     else {
                         free ((char *) msg);
                         msg = RPU_ReceiveMessage (rpuSocket, &ppu->info.remote.fInterrupt, RPU_TIMEOUT);
                         if (msg == NULL) {
                             fprintf (stderr, "# (0x%x) RPU couldn't receive Info msg "
-                                            "from slave host.\n", pthread_self ());
+                                            "from slave host.\n", (int) pthread_self ());
                             err = -1;
                         }
                         else {
                             /* read info */
                             rpu_info *pinfo = RPU_GetMessageData (msg, mmInfo);
                             if (pinfo == NULL) {
-                                fprintf (stderr, "# (0x%x) RPU couldn't read Info msg.\n", pthread_self ());
+                                fprintf (stderr, "# (0x%x) RPU couldn't read Info msg.\n", (int) pthread_self ());
                                 err = -1;
                             }
                             else {
@@ -2349,7 +2435,7 @@ void * Thread_RemoteProcessingUnit (void *data)
 
     ChangeProcessingUnitStatus (ppu, pu_stat_deactivated);
     
-    if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU Local Half terminated.\n", pthread_self ());
+    if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU Local Half terminated.\n", (int) pthread_self ());
     
     return 0;
 }
@@ -2486,7 +2572,6 @@ extern void CommandProcunitsAddLocal( char *sz )
 extern void CommandProcunitsAddRemote( char *sz ) 
 {    
     struct in_addr	inAddress;
-    int			err;
 
     if (sz == NULL) {
         outputf ( "Remote processing unit address not specified.\n");
@@ -2530,6 +2615,9 @@ extern void CommandShowProcunitsInfo ( char *sz )
                 nProcunits ++;
                 nRemote ++;
                 break;
+            default:
+                assert( FALSE );
+                break;
         }
         ppu = ppu->next;
     }
@@ -2550,8 +2638,9 @@ extern void CommandShowProcunitsStats ( char *sz )
     int procunit_id = 0;
     
     if (sz != NULL) {
+        procunit *ppu;
         sscanf (sz, "%d", &procunit_id);
-        procunit *ppu = FindProcessingUnit (NULL, pu_type_none, pu_stat_none, pu_task_none, procunit_id);
+        ppu = FindProcessingUnit (NULL, pu_type_none, pu_stat_none, pu_task_none, procunit_id);
         
         if (ppu == NULL) {
             outputf ( "No processing unit found with specified id (%d).\n"
@@ -2593,7 +2682,6 @@ extern void CommandSetProcunitsRemoteMode ( char *sz )
 extern void CommandSetProcunitsRemoteMask ( char *sz ) 
 {
     struct in_addr	inMask;
-    int			err;
 
     if (sz == NULL) {
         outputf ( "IP mask not specified.\n");

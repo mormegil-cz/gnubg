@@ -236,25 +236,25 @@ extern rpu_slavestats 	gSlaveStats;
     --------------------------------------------------
 */
 
+extern void InitProcessingUnits (void);
+extern pu_mode GetProcessingUnitsMode (void);
+extern void PrintProcessingUnitList (void);
 
-void InitProcessingUnits (void);
-pu_mode GetProcessingUnitsMode (void);
-void PrintProcessingUnitList (void);
+extern void InitTasks (void);
+extern void PrintTaskList (void);
 
-void InitTasks (void);
-void PrintTaskList (void);
+extern pu_task *CreateTask (pu_task_type type, int fDetached);
+extern void MarkTaskDone (pu_task *pt, procunit *ppu);
+extern void FreeTask (pu_task *pt);
 
-pu_task *CreateTask (pu_task_type type, int fDetached);
-void MarkTaskDone (pu_task *pt, procunit *ppu);
-void FreeTask (pu_task *pt);
+extern void TaskEngine_Init (void);
+extern void TaskEngine_Shutdown (void);
+extern int TaskEngine_Full (void);
+extern int TaskEngine_Empty (void);
+extern pu_task * TaskEngine_GetCompletedTask (void);
 
-void TaskEngine_Init (void);
-void TaskEngine_Shutdown (void);
-int TaskEngine_Full (void);
-int TaskEngine_Empty (void);
-pu_task * TaskEngine_GetCompletedTask (void);
+extern void Slave_UpdateStatus (void);
 
-void Slave_UpdateStatus (void);
 
 
 extern void CommandProcunitsAddLocal( char *sz ) ;
@@ -305,8 +305,8 @@ extern void CommandSetProcunitsRemoteQueue ( char *sz ) ;
 extern pthread_key_t tlsThreadGlobalsKey;
 extern int gDebugDisableCache;
 
-int InitThreadGlobalStorage (void);
-int CreateThreadGlobalStorage (void);
+extern int InitThreadGlobalStorage (void);
+extern int CreateThreadGlobalStorage (void);
 
 
 
