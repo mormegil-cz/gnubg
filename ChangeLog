@@ -1,3 +1,13 @@
+Wed Feb 16 10:28:51 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c (FindBestMovePlied): Set a minimum tolerance for ply 0.
+	The differences between 1 and 0ply are sometimes large enough so that a
+	small tolerance eliminates the better moves.
+	Those situations are more likely to happen when different moves are
+	evaluated with different neural nets. This is a drawback of using
+	several neural nets, and we probably want a better solution in the
+	future.
+
 Sun Feb 13 18:28:18 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c (barPrimeBackGame): fix a serious bug. Some non BPG positions

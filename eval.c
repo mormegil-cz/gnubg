@@ -1538,71 +1538,89 @@ extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], evalcontext *pec,
 			      int nPlies ) {
-    int i, j, iPly;
-    movelist ml;
+  int i, j, iPly;
+  movelist ml;
 #if __GNUC__
-    move amCandidates[ pec->nSearchCandidates ];
+  move amCandidates[ pec->nSearchCandidates ];
 #elif HAVE_ALLOCA
-    move *amCandidates = alloca( pec->nSearchCandidates * sizeof( move ) );
+  move* amCandidates = alloca( pec->nSearchCandidates * sizeof( move ) );
 #else
-    move amCandidates[ MAX_SEARCH_CANDIDATES ];
+  move amCandidates[ MAX_SEARCH_CANDIDATES ];
 #endif
 
-    if( anMove )
-	for( i = 0; i < 8; i++ )
-	    anMove[ i ] = -1;
-
-    GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
-    
-    if( !ml.cMoves )
-	/* no legal moves */
-	return 0;
-    else if( ml.cMoves == 1 )
-	/* forced move */
-	ml.iMoveBest = 0;
-    else {
-	/* choice of moves */
-	if( ScoreMoves( &ml, pec, 0 ) )
-	    return -1;
-
-	for( iPly = 0; iPly < nPlies; iPly++ ) {
-	    for( i = 0, j = 0; i < ml.cMoves; i++ )
-		if( ml.amMoves[ i ].rScore >= ml.rBestScore -
-		    ( pec->rSearchTolerance / ( 1 << iPly ) ) ) {
-		    if( i != j )
-			ml.amMoves[ j ] = ml.amMoves[ i ];
-		    
-		    j++;
-		}
-	    
-	    if( j == 1 )
-		break;
-
-	    qsort( ml.amMoves, j, sizeof( move ), (cfunc) CompareMoves );
-
-	    ml.iMoveBest = 0;
-	    
-	    ml.cMoves = ( j < ( pec->nSearchCandidates >> iPly ) ? j :
-			  ( pec->nSearchCandidates >> iPly ) );
-
-	    if( ml.amMoves != amCandidates ) {
-		memcpy( amCandidates, ml.amMoves, ml.cMoves * sizeof( move ) );
-	    
-		ml.amMoves = amCandidates;
-	    }
-
-	    if( ScoreMoves( &ml, pec, iPly + 1 ) )
-		return -1;
-	}
+  if( anMove ) {
+    for( i = 0; i < 8; i++ ) {
+      anMove[ i ] = -1;
     }
+  }
 
-    if( anMove )
-	for( i = 0; i < ml.cMaxMoves * 2; i++ )
-	    anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
+  GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
+    
+  if( !ml.cMoves )
+    /* no legal moves */
+    return 0;
+  else if( ml.cMoves == 1 )
+    /* forced move */
+    ml.iMoveBest = 0;
+  else {
+    /* choice of moves */
+    if( ScoreMoves( &ml, pec, 0 ) )
+      return -1;
+
+    for( iPly = 0; iPly < nPlies; iPly++ ) {
+
+      float tol = pec->rSearchTolerance / ( 1 << iPly );
+      
+      if( iPly == 0 && tol < 0.24 ) {
+	/* Set a minimum tolerance for ply 0. The differences between
+           1 and 0ply are sometimes large enough so that a small
+           tolerance eliminates the better moves.  Those situations
+           are more likely to happen when different moves are
+           evaluated with different neural nets. This is a drawback of
+           using several neural nets, and we probably want a better
+           solution in the future. */
+
+	tol = 0.24;
+      }
+      
+      for( i = 0, j = 0; i < ml.cMoves; i++ )
+	if( ml.amMoves[ i ].rScore >= ml.rBestScore - tol ) {
+	  if( i != j )
+	    ml.amMoves[ j ] = ml.amMoves[ i ];
+		    
+	  j++;
+	}
+	    
+      if( j == 1 )
+	break;
+
+      qsort( ml.amMoves, j, sizeof( move ), (cfunc) CompareMoves );
+
+      ml.iMoveBest = 0;
+	    
+      ml.cMoves = ( j < ( pec->nSearchCandidates >> iPly ) ? j :
+		    ( pec->nSearchCandidates >> iPly ) );
+
+      if( ml.amMoves != amCandidates ) {
+	memcpy( amCandidates, ml.amMoves, ml.cMoves * sizeof( move ) );
+	    
+	ml.amMoves = amCandidates;
+      }
+
+      if( ScoreMoves( &ml, pec, iPly + 1 ) )
+	return -1;
+    }
+  }
+
+  if( anMove ) {
+    for( i = 0; i < ml.cMaxMoves * 2; i++ ) {
+      anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
+    }
+  }
 	
-    PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
+  PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
 
-    return ml.cMaxMoves * 2;
+  return ml.cMaxMoves * 2;
 }
 
 extern int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
