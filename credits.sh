@@ -34,6 +34,7 @@ Tim Laursen
 Kevin Maguire
 Dave Neary
 Peter Orum
+Roy Passfield
 Thomas Patrick
 Zvezdan Petkovic
 Petri Pitkänen
