@@ -155,14 +155,24 @@ static GtkWidget *BoardPage( BoardData *bd ) {
     return pw;
 }
 
-static void ToggleTranslucent( GtkWidget *pw ) {
+static void ToggleTranslucent( GtkWidget *pw, BoardData *bd ) {
 
+    gdouble ar[ 4 ];
+    
     fTranslucent = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
 
     gtk_color_selection_set_opacity( GTK_COLOR_SELECTION( apwColour[ 0 ] ),
 				     fTranslucent );
     gtk_color_selection_set_opacity( GTK_COLOR_SELECTION( apwColour[ 1 ] ),
 				     fTranslucent );
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ), ar );
+    ar[ 3 ] = bd->aarColour[ 0 ][ 3 ];
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ), ar );
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ), ar );
+    ar[ 3 ] = bd->aarColour[ 1 ][ 3 ];
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ), ar );
 }
 
 static GtkWidget *GeneralPage( BoardData *bd ) {
@@ -176,7 +186,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwTranslucent ),
 				  fTranslucent );
     gtk_signal_connect( GTK_OBJECT( pwTranslucent ), "toggled",
-			GTK_SIGNAL_FUNC( ToggleTranslucent ), NULL );
+			GTK_SIGNAL_FUNC( ToggleTranslucent ), bd );
     gtk_box_pack_start( GTK_BOX( pw ), pwTranslucent, FALSE, FALSE, 4 );
 
     pwLabels = gtk_check_button_new_with_label( "Numbered point labels" );
@@ -270,10 +280,17 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	bd->arExponent[ i ] = apadjExponent[ i ]->value;
     }
     
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ),
-				   bd->aarColour[ 0 ] );
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ),
-				   bd->aarColour[ 1 ] );
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ), ar );
+    for( i = 0; i < 3; i++ )
+	bd->aarColour[ 0 ][ i ] = ar[ i ];
+    if( fTranslucent )
+	bd->aarColour[ 0 ][ 3 ] = ar[ 3 ];
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ), ar );
+    for( i = 0; i < 3; i++ )
+	bd->aarColour[ 1 ][ i ] = ar[ i ];
+    if( fTranslucent )
+	bd->aarColour[ 1 ][ 3 ] = ar[ 3 ];
 
     gtk_color_selection_get_color( GTK_COLOR_SELECTION( pwBoard ),
 				   ar );
