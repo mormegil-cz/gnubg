@@ -32,13 +32,20 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
+
+#ifndef WIN32
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
-#endif
+#endif /* HAVE_SYS_SOCKET_H */
+#else /* WIN32 */
+#include <winsock.h>
+#endif /* WIN32 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -61,10 +68,6 @@
 #include "i18n.h"
 
 #include "sound.h"
-
-#ifdef WIN32
-#include<windows.h>
-#endif
 
 
 static int iPlayerSet, iPlayerLateSet;

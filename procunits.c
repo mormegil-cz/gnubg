@@ -25,7 +25,11 @@
 
 #if PROCESSING_UNITS
 #include <stdlib.h>
+
+#ifdef HAVE_LIBPTHREAD
 #include <pthread.h>
+#endif /* HAVE_LIBPTHREAD */
+
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
@@ -34,27 +38,15 @@
 #include <unistd.h>
 #endif /* #if HAVE_UNISTD_H */
 
+#ifndef WIN32
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #endif /* #if HAVE_SYS_SOCKET_H */
-
-#if TIME_WITH_SYS_TIME
-#include <sys/time.h>
-#include <time.h>
-#else
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif /* #if HAVE_SYS_TIME_H */
-#endif /* #if TIME_WITH_SYS_TIME */
-
-#if WIN32
-#include <windows.h>
-/* copied the following from <libxml2/win32config.h> */
+#else /* WIN32 */
+#include <winsock.h>
 #define EWOULDBLOCK             WSAEWOULDBLOCK
 #define EINPROGRESS             WSAEINPROGRESS
 #define EALREADY                WSAEALREADY
@@ -93,8 +85,19 @@
 #define EUSERS                  WSAEUSERS
 #define EDQUOT                  WSAEDQUOT
 #define ESTALE                  WSAESTALE
-#define EREMOTE                 WSAEREMOTE 
-#endif /* #if WIN32 */
+#define EREMOTE                 WSAEREMOTE
+#endif /* WIN32 */
+
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif /* #if HAVE_SYS_TIME_H */
+#endif /* #if TIME_WITH_SYS_TIME */
 
 #include <signal.h>
 #include <stddef.h>
@@ -379,7 +382,9 @@ extern void InitProcessingUnits (void)
 {
     int 		i;
     int 		nProcs = GetProcessorCount ();
+#if HAVE_SIGACTION
     struct sigaction 	act;
+#endif /* HAVE_SIGACTION */
     pthread_mutexattr_t	mutexAttrRecursive;
     
     
@@ -387,15 +392,19 @@ extern void InitProcessingUnits (void)
     gfProcessingUnitsInitialised = TRUE;
     gMainThread = pthread_self ();
     
+#if HAVE_SIGACTION
     /* ignore process-wide SIGPIPE signals that can be 
         raised by a send() call to a remote host that has 
         closed its connection, in function RPU_SendMessage() */
-    bzero (&act, sizeof (act));
+    memset (&act, 0, sizeof (act));
     act.sa_handler = SIG_IGN;
+#ifndef WIN32
     if (sigaction (SIGPIPE, &act, NULL) < 0) {
         outputerr ("sigaction");
         assert (FALSE);
     }
+#endif /* ! WIN32 */
+#endif /* HAVE_SIGACTION */
         
     /* create inter-thread mutexes and conditions neeeded for
         multithreaded operation */
@@ -413,13 +422,13 @@ extern void InitProcessingUnits (void)
 
     pthread_mutexattr_destroy (&mutexAttrRecursive);
 
-#if USE_GTK
+#if USE_GTK2
     if (fX && gplsProcunits == NULL) {
         /* create the list gplsProcunits; the gplsProcunits itself has only ONE column, which
             holds pointers to the installed procunits */
         gplsProcunits = gtk_list_store_new (1, G_TYPE_POINTER);                                                    
     }
-#endif /* #if USE_GTK */
+#endif /* #if USE_GTK2 */
 
     /* create local processing unit: each will execute one rollout thread;
        N should be set to the number of processors available on the host */
@@ -621,8 +630,8 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
         ClearStats (&ppu->rolloutStats);
         ClearStats (&ppu->evalStats);
         ClearStats (&ppu->analysisStats);
-        
-#if USE_GTK
+
+#if USE_GTK2
         if (fX) {
             GtkTreeIter iter;
             if (!IsMainThread ()) gdk_threads_enter ();
@@ -630,7 +639,7 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
             gtk_list_store_set (gplsProcunits, &iter, 0, ppu, -1);
             if (!IsMainThread ()) gdk_threads_leave ();
         }
-#endif /* #if USE_GTK */
+#endif /* USE_GTK2 */
 
         pthread_mutex_init (&ppu->mutexStatusChanged, NULL);
         pthread_cond_init (&ppu->condStatusChanged, NULL);
@@ -666,7 +675,7 @@ static procunit * CreateRemoteProcessingUnit (char *szAddress, int fWait)
             the task mask and queue size will be set during handshake with remote half of rpu */
     
     if (ppu != NULL) {
-        bzero ((char *) &ppu->info.remote.inAddress, sizeof (ppu->info.remote.inAddress));
+    	memset( &ppu->info.remote.inAddress, 0, sizeof( ppu->info.remote.inAddress ));
         strncpy (ppu->info.remote.hostName, szAddress, MAX_HOSTNAME);
         ppu->info.remote.fTasksAvailable = FALSE;
         pthread_mutex_init (&ppu->info.remote.mutexTasksAvailable, NULL);
@@ -709,7 +718,7 @@ static void DestroyProcessingUnit (int procunit_id)
         while (*plpu != NULL) {
             /*PrintProcessingUnitInfo (*plpu);*/
             if (*plpu == ppu) {
-#if USE_GTK
+#if USE_GTK2
                 if (fX) {
                     GtkTreeIter iter;      
                     if (!IsMainThread ()) gdk_threads_enter ();
@@ -724,7 +733,7 @@ static void DestroyProcessingUnit (int procunit_id)
                         } while (gtk_tree_model_iter_next (GTK_TREE_MODEL(gplsProcunits), &iter));
                     if (!IsMainThread ()) gdk_threads_leave ();
                 }
-#endif /* #if USE_GTK */
+#endif /* USE_GTK2 */
                 procunit *next = ppu->next;
                 free ((char *) ppu);
                 *plpu = next;
@@ -2704,7 +2713,11 @@ static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInte
     
     do {
         GTK_YIELDTIME;
+#ifdef WIN32
+        n = send( (SOCKET) toSocket, (const char *) msg, msg->len, 0);
+#else
         n = send (toSocket, msg, msg->len, 0);
+#endif /* WIN32 */
         fError = (n == -1 && !(errno == EAGAIN || errno == EWOULDBLOCK));
         fShutdown = (n == 0 || n == ECONNRESET);
         if (fShutdown) { 
@@ -2754,7 +2767,23 @@ static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterru
     /* receive first chunck containing whole message length */
     do {
         GTK_YIELDTIME;
+#ifdef WIN32
+	/* recv on Win32 does not support MSG_WAITALL
+	   see http://www.experts-exchange.com/Programming/Q_20669574.html
+	   and http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winsock/winsock/wsarecv_2.asp
+	   possible work-around: look at MSG_PARTIAL in WSARecv calls
+	WSABUF Buffers;
+	char buf[ sizeof( len ) ];
+	Buffers.len = sizeof( len );
+	Buffers.buf = buf;
+	DWORD dwFlags = MSG_PEEK | MSG_PARTIAL;
+	n = WSARecv( (SOCKET) fromSocket, &Buffers, 1,
+		     (LPDWORD) &len, &dwFlags, NULL, NULL );
+	*/
+	n = recv( (SOCKET) fromSocket, (char*) &len, sizeof(len), MSG_PEEK );
+#else
         n = recv (fromSocket, &len, sizeof (len), MSG_PEEK | MSG_WAITALL);
+#endif /* WIN32 */
         fNoData = (n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK));
         fError = (n == -1 && !(errno == EAGAIN || errno == EWOULDBLOCK));
         fShutdown = (n == 0 || n == ECONNRESET);
@@ -2908,13 +2937,21 @@ static int RPU_SetSocketOptions (int s)
 
 #endif /* __APPLE__ */
 
+#ifdef WIN32
+    err = setsockopt( (SOCKET) s, SOL_SOCKET, SO_REUSEADDR, (const char*) &fReuseAddr, sizeof( fReuseAddr ) );
+#else
     err = setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &fReuseAddr, sizeof (fReuseAddr));
+#endif /* WIN32 */
     if (err != 0) {
         outputerr ("setsockopt(SO_REUSEADDR)");
         assert (FALSE);
     }
 
+#ifdef WIN32
+    err = setsockopt( (SOCKET) s, SOL_SOCKET, SO_REUSEADDR, (const char*) &fKeepAlive, sizeof( fKeepAlive ) );
+#else
     err = setsockopt (s, SOL_SOCKET, SO_KEEPALIVE, &fKeepAlive, sizeof (fKeepAlive));
+#endif /* WIN32 */
     if (err != 0) {
         outputerr ("setsockopt(SO_KEEPALIVE)");
         assert (FALSE);
@@ -2990,8 +3027,12 @@ static int RPU_CheckClose (int s)
     int n;
     
     if (RPU_DEBUG_NOTIF) outputerrf ("[checking close]");
-    
+
+#ifdef WIN32
+    n = recv( (SOCKET) s, (char*) &msg, sizeof( msg ), MSG_PEEK );
+#else
     n = recv (s, &msg, sizeof (msg), MSG_PEEK);
+#endif /* WIN32 */
     
     if (n > 0 && msg.type == mmClose) {
         if (RPU_DEBUG_NOTIF) outputerrf (">>> Connection closed by slave.\n");
@@ -3025,8 +3066,8 @@ static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
 {
     char 		*szPort;
     struct hostent 	*phe;
-    
-    bzero ((char *) inAddress, sizeof (struct sockaddr_in));
+
+    memset( &inAddress, 0, sizeof( sockaddr_in ));
     inAddress->sin_family = AF_INET;
     
     /* scan for port, eg 192.168.0.1:1234 or host.gnu.org:1234 */
@@ -3049,8 +3090,10 @@ static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
     
     /* read the non-port part of the address */
     /* try the number version, eg 192.168.0.1 */
+#ifndef WIN32
     if (inet_aton (sz, &inAddress->sin_addr) != 0) return 0;
-    
+#endif /* ! WIN32 */
+
     /* didn't work, it must be a host name, eg myhost.gnu.org */
     phe = gethostbyname (sz);
     if (phe == NULL) {
@@ -3406,9 +3449,9 @@ static void Slave (void)
     pthread_t		notifier;
     
     if (RPU_DEBUG) outputerrf ("RPU Local Half started.\n");
-    
-    bzero (&gSlaveStats, sizeof (gSlaveStats));
-    
+
+    memset( &gSlaveStats, 0, sizeof( gSlaveStats ));
+
     gSlaveStatus = rpu_stat_na;
     Slave_PrintStatus ();
     Slave_UpdateStatus ();
@@ -3436,7 +3479,7 @@ static void Slave (void)
     else {
         /* bind local address to socket */
         struct sockaddr_in listenAddress;
-        bzero((char *) &listenAddress, sizeof (struct sockaddr_in));
+        memset( &listenAddress, 0, sizeof( sockaddr_in ));
         listenAddress.sin_family	= AF_INET;
         listenAddress.sin_addr.s_addr 	= htonl(INADDR_ANY);
         listenAddress.sin_port 		= htons(gRPU_SlaveTCPPort);
@@ -3446,9 +3489,14 @@ static void Slave (void)
             outputerr("socket_bind");
         }
         else {
-        
-            if (fcntl (listenSocket, F_SETFL, O_NONBLOCK) < 0) {
+#ifdef WIN32
+            u_long arg = TRUE;
+            if ( ioctlsocket( (SOCKET) listenSocket, FIONBIO, &arg ) < 0 ) {
+                outputerr ("set socket to non-blocking");
+#else
+            if ( fcntl (listenSocket, F_SETFL, O_NONBLOCK) < 0 ) {
                 outputerr ("fcntl F_SETFL, O_NONBLOCK");
+#endif /* WIN32 */
                 assert (FALSE);
             }
 
@@ -3564,8 +3612,12 @@ static void Slave (void)
                         }
                         
                         /* close connection */
+#ifdef WIN32
+                        closesocket (rpuSocket);
+#else
                         shutdown (rpuSocket, SHUT_RDWR);
                         close (rpuSocket);
+#endif /* WIN32 */
                         
                     } /* accept() */
                     
@@ -3579,8 +3631,12 @@ static void Slave (void)
         } /* bind() */
         
         /* close connection listening */
+#ifdef WIN32
+        closesocket (listenSocket);
+#else
         shutdown (listenSocket, SHUT_RDWR);
         close (listenSocket);
+#endif /* WIN32 */
         
         gSlaveStatus = rpu_stat_na;
         Slave_UpdateStatus ();
@@ -3625,6 +3681,7 @@ static void Slave (void)
 
 static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step)
 {
+#ifdef HAVE_GETTIMEOFDAY
     int			err;
     struct timespec   	ts;
     struct timeval    	tp;    
@@ -3646,6 +3703,7 @@ static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char 
     }
                             
     if (PU_DEBUG > 1 && err == ETIMEDOUT) outputerrf ("[Timeout]\n");
+#endif /* HAVE_GETTIMEOFDAY */
     
     return 0;
 }
@@ -4051,12 +4109,17 @@ extern void *Thread_NotificationSender (void *data)
     if (notifySocket < 0) {
         outputerrf ("*** Could not create notification socket.\n");
         outputerr ("socket");
-        return;
+        return 0;
     }
     
     option = 1;
+#ifdef WIN32
+    if (gfRPU_NotificationBroadcast
+    &&	setsockopt( (SOCKET) notifySocket, SOL_SOCKET, SO_REUSEADDR, (const char*) &option, sizeof( option ) ) == -1) {
+#else
     if (gfRPU_NotificationBroadcast
     &&	setsockopt (notifySocket, SOL_SOCKET, SO_BROADCAST, &option, sizeof(option)) == -1) {
+#endif /* WIN32 */
         outputerrf ("*** Could not set socket to broadcast mode.\n");        
         outputerr("setsockopt"); 
     }
@@ -4073,15 +4136,20 @@ extern void *Thread_NotificationSender (void *data)
         else {
             int 		done = FALSE;
             rpuNotificationMsg	msg;
-            struct hostent 	*phe;
+            struct hostent 	*phe = NULL;
             
             if (RPU_DEBUG_NOTIF) outputerrf ("# (0x%x) Notification sender started.\n", 
                                                 (int) pthread_self());
             msg.inAddress = localAddress;
             msg.port = gRPU_SlaveTCPPort;
+#ifndef WIN32
             phe = gethostent ();
+#endif /* ! WIN32 */
             if (phe != NULL) {
                 sprintf (msg.hostName, "%s:%d", phe->h_name, gRPU_SlaveTCPPort);
+            }
+            else {
+            	assert( FALSE );
             }
             
             while (!done && !fInterrupt && gfRPU_Notification) {
@@ -4289,7 +4357,7 @@ extern void CommandProcunitsSlave ( char *sz )
             }
             else 
                 gRPU_SlaveTCPPort = port;
-            bzero (&ginRPU_NotificationAddr, sizeof (ginRPU_NotificationAddr));
+	    memset( &ginRPU_NotificationAddr, 0, sizeof( ginRPU_NotificationAddr ));
             ginRPU_NotificationAddr.sin_family 		= AF_INET;
             ginRPU_NotificationAddr.sin_addr.s_addr 	= htonl(INADDR_BROADCAST);
             ginRPU_NotificationAddr.sin_port 		= htons(gRPU_SlaveTCPPort);

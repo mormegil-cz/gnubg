@@ -1,3 +1,8 @@
+Mon Jul 21 19:54:25 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gnubg.c, procunits.c, rollout.c, set.c, procunits.c:
+	  part of trying to port the multi-processing code to Windows
+
 Fri Jul 11 20:42:23 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* external.c: ignore SIGPIPE on Windows

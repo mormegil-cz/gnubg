@@ -6657,11 +6657,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if PROCESSING_UNITS
     InitThreadGlobalStorage ();
     CreateThreadGlobalStorage ();
-    #if USE_GTK
-        g_thread_init (NULL);
-        gdk_threads_init ();
-    #endif
-#endif
+#if USE_GTK
+    g_thread_init (NULL);
+#if GTK_CHECK_VERSION(2,0,0)
+    gdk_threads_init ();
+#endif /* GTK_CHECK_VERSION(2,0,0) */
+#endif /* USE_GTK */
+#endif /* PROCESSING_UNITS */
 
 
 #if HAVE_SETLOCALE
