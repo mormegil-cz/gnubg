@@ -7516,8 +7516,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
 
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%+.2f%%", 
-                 100.0 * ( psc->arActualResult[ i ] - 
-                           psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] ) );
+                 100.0 * psc->arLuckAdj[ i ] );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
       }
 
@@ -7535,9 +7534,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     }
     else {
       for ( i = 0; i < 2; ++i ) {
-        sprintf( sz, "%+.3f", 
-                 psc->arActualResult[ i ] - 
-                 psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] );
+        sprintf( sz, "%+.3f",  psc->arLuckAdj[ i ] );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
         
         if( fIsMatch && psc->nGames > 1 ) {
@@ -7552,9 +7549,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
           gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 2, i + 1, sz );
 
           sprintf( sz, "%+.3f",
-                   ( psc->arActualResult[ i ] - 
-                     psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] ) / 
-                   psc->nGames );
+                   psc->arLuckAdj[ i ] / psc->nGames );
           gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 3, i + 1, sz );
           
           sprintf( sz, "%.3f",

@@ -90,6 +90,7 @@ typedef struct {
   /* luck adjusted result */
 
   float arActualResult[ 2 ];
+  float arLuckAdj[ 2 ]; 
   float arVarianceActual[ 2 ];
   float arVarianceLuckAdj[ 2 ];
   int nGames;

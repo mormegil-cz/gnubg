@@ -3373,12 +3373,8 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow( pf, 
                          _("Luck adjusted result"),
                          "%+.2f%%",
-                         100.0 * ( psc->arActualResult[ 0 ] - 
-                                   psc->arLuck[ 0 ][ 1 ] + 
-                                   psc->arLuck[ 1 ][ 1 ] ),
-                         100.0 * ( psc->arActualResult[ 1 ] - 
-                                   psc->arLuck[ 1 ][ 1 ] + 
-                                   psc->arLuck[ 0 ][ 1 ] ) );
+                         100.0 * psc->arLuckAdj[ 0 ],
+                         100.0 * psc->arLuckAdj[ 1 ] );
 
       if ( fIsMatch ) {
 
@@ -3407,10 +3403,8 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow( pf,
                          _("Luck adjusted result"),
                          "%+.3f",
-                         psc->arActualResult[ 0 ] - 
-                         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
-                         psc->arActualResult[ 1 ] - 
-                         psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+                         psc->arLuckAdj[ 0 ],
+                         psc->arLuckAdj[ 1 ] );
 
       if ( fIsMatch && psc->nGames > 1 ) {
         printStatTableRow( pf,
@@ -3428,12 +3422,8 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
         printStatTableRow( pf,
                            _("Advantage (luck adjusted) in ppg"),
                            "%+.3f",
-                           ( psc->arActualResult[ 0 ] - 
-                             psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) / 
-                           psc->nGames,
-                           ( psc->arActualResult[ 1 ] - 
-                             psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
-                           psc->nGames );
+                           psc->arLuckAdj[ 0 ] / psc->nGames,
+                           psc->arLuckAdj[ 0 ] / psc->nGames );
         printStatTableRow( pf,
                            _("95%% confidence interval (ppg)"),
                            "%.3f",

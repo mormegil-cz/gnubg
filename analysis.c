@@ -336,6 +336,9 @@ updateStatcontext(statcontext*       psc,
 
     }
 
+    for ( i = 0; i < 2; ++i )
+      psc->arLuckAdj[ i ] = psc->arActualResult[ i ];
+
     break;
 
   case MOVE_NORMAL:
@@ -395,10 +398,15 @@ updateStatcontext(statcontext*       psc,
 
     if ( fAnalyseDice && pmr->n.rLuck != ERR_VAL ) {
 
-      psc->arLuck[ pmr->n.fPlayer ][ 0 ] += pmr->n.rLuck;
-      psc->arLuck[ pmr->n.fPlayer ][ 1 ] += pms->nMatchTo ?
+      float r = pms->nMatchTo ?
         eq2mwc( pmr->n.rLuck, &ci ) - eq2mwc( 0.0f, &ci ) :
         pms->nCube * pmr->n.rLuck;
+
+      psc->arLuck[ pmr->n.fPlayer ][ 0 ] += pmr->n.rLuck;
+      psc->arLuck[ pmr->n.fPlayer ][ 1 ] += r;
+
+      psc->arLuckAdj[ pmr->n.fPlayer ] -= r;
+      psc->arLuckAdj[ ! pmr->n.fPlayer ] += r;
       
       psc->anLuck[ pmr->n.fPlayer ][ pmr->n.lt ]++;
 
@@ -557,6 +565,30 @@ updateStatcontext(statcontext*       psc,
         psc->arErrorWrongPass[ pmr->d.fPlayer ][ 1 ] -= rCost;
 
       }
+
+    }
+
+    break;
+
+  case MOVE_SETDICE:
+
+    /*
+     * update luck statistics for roll
+     */
+
+    if ( fAnalyseDice && pmr->sd.rLuck != ERR_VAL ) {
+
+      float r = pms->nMatchTo ?
+        eq2mwc( pmr->sd.rLuck, &ci ) - eq2mwc( 0.0f, &ci ) :
+        pms->nCube * pmr->sd.rLuck;
+
+      psc->arLuck[ pmr->sd.fPlayer ][ 0 ] += pmr->sd.rLuck;
+      psc->arLuck[ pmr->sd.fPlayer ][ 1 ] += r;
+
+      psc->arLuckAdj[ pmr->sd.fPlayer ] -= r;
+      psc->arLuckAdj[ ! pmr->sd.fPlayer ] += r;
+      
+      psc->anLuck[ pmr->sd.fPlayer ][ pmr->sd.lt ]++;
 
     }
 
@@ -913,7 +945,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 					  &ci, fFirstMove );
 	    pmr->sd.lt = Luck( pmr->sd.rLuck );
 	}
-      
+
+        if ( fUpdateStatistics )
+          updateStatcontext ( psc, pmr, pms );
+
 	break;
       
     case MOVE_SETBOARD:	  
@@ -1060,15 +1095,13 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
       /* separate loop, else arLuck[ 1 ] is not calculated for i=0 */
       
       pscB->arActualResult[ i ] += pscA->arActualResult[ i ];
+      pscB->arLuckAdj[ i ] += pscA->arLuckAdj[ i ];
       UpdateVariance( &pscB->arVarianceActual[ i ], 
                       pscB->arActualResult[ i ],
                       pscA->arActualResult[ i ],
                       pscB->nGames );
       UpdateVariance( &pscB->arVarianceLuckAdj[ i ], 
-                      pscB->arActualResult[ i ] - 
-                      pscB->arLuck[ i ][ 1 ] + pscB->arLuck[ !i ][ 1 ],
-                      pscA->arActualResult[ i ] -
-                      pscA->arLuck[ i ][ 1 ] + pscA->arLuck[ !i ][ 1 ],
+                      pscB->arLuckAdj[ i ], pscA->arLuckAdj[ i ],
                       pscB->nGames );
       
       
@@ -1245,6 +1278,7 @@ IniStatcontext ( statcontext *psc ) {
     }
 
     psc->arActualResult[ i ] = 0.0f;
+    psc->arLuckAdj[ i ] = 0.0f;
     psc->arVarianceActual[ i ] = 0.0f;
     psc->arVarianceLuckAdj[ i ] = 0.0f;
 
@@ -1773,10 +1807,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
                 100.0 * psc->arActualResult[ 0 ],
                 100.0 * psc->arActualResult[ 1 ],
                 _("Luck adjusted result"),
-                100.0 * ( psc->arActualResult[ 0 ] - 
-                          psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ),
-                100.0 * ( psc->arActualResult[ 1 ] - 
-                          psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) );
+                100.0 * psc->arLuckAdj[ 0 ],
+                100.0 * psc->arLuckAdj[ 1 ] );
     else {
       sprintf ( strchr ( szOutput, 0 ), 
                 "%-31s %+7.3f                 %+7.3f\n"
@@ -1785,10 +1817,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
                 psc->arActualResult[ 0 ],
                 psc->arActualResult[ 1 ],
                 _("Luck adjusted result"),
-                psc->arActualResult[ 0 ] - 
-                psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
-                psc->arActualResult[ 1 ] - 
-                psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+                psc->arLuckAdj[ 0 ], psc->arLuckAdj[ 1 ] );
       if ( fIsMatch && psc->nGames > 1 ) {
         sprintf( strchr( szOutput, 0 ),
                  "\n"
@@ -1805,12 +1834,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
                  1.95996f *
                  sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ),
                  _("Advantage (luck adj.) in ppg"),
-                 ( psc->arActualResult[ 0 ] - 
-                   psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) / 
-                 psc->nGames,
-                 ( psc->arActualResult[ 1 ] - 
-                   psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
-                 psc->nGames,
+                 psc->arLuckAdj[ 0 ] / psc->nGames,
+                 psc->arLuckAdj[ 1 ] / psc->nGames,
                  _("95%% confidence interval (ppg)"),
                  1.95996f *
                  sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),

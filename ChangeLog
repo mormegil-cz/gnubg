@@ -1,3 +1,14 @@
+Sat Aug 16 11:24:24 2003  Joern Thyssen  <jth@gnubg.org>
+
+        * analysis.c: include only finished games in luck adj.
+
+Sat Aug 16 11:05:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): show actual and luck adj. result
+	relative instead of absolute.
+	(suggested by Chris D. Yep)
+
 Sat Aug 16 10:43:32 2003  Joern Thyssen  <jth@gnubg.org>
 
         * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
