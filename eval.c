@@ -265,6 +265,7 @@ static neuralnet nnContact, nnRace, nnCrashed;
 unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static int fBearoffOS = -1;
 static int nBearoffOSPoints = -1;
+static int fBearoffOSND = FALSE;
 static int fBearoffHeuristic;
 static cache cEval;
 static int cCache;
@@ -793,6 +794,17 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
             close ( fBearoffOS );
             fBearoffOS = -1;
           }
+
+          fBearoffOSND = *(sz+5) == 'N';
+
+          if ( *(sz+3) != '1' && ! fBearoffOSND ) {
+            fprintf ( stderr, 
+                      _("Cannot read uncompressed OS bearoff database: %s\n"), 
+                      szOSDatabase );
+            close ( fBearoffOS );
+            fBearoffOS = -1;
+          }
+
         }
 
 
@@ -2299,16 +2311,134 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
   }
 }  
 
+static float
+fnd ( const float x, const float mu, const float sigma  ) {
+
+   const float epsilon = 1.0e-7;
+   const float PI = 3.14159265358979323846;
+
+   if ( sigma <= epsilon )
+      /* dirac delta function */
+      return ( fabs ( mu - x ) < epsilon ) ? 1.0 : 0.0;
+   else {
+
+     float xm = ( x - mu ) / sigma;
+
+     return 1.0 / ( sigma * sqrt ( 2.0 * PI ) ) * exp ( - xm * xm / 2.0 );
+
+   }
+
+}
+
 
 static void
-EvalOS ( const int n, 
+EvalOSND ( const unsigned int n,
+           float arProb[ 32 ], float arGammonProb[ 32 ],
+           float *ar ) {
+
+  unsigned char ac[ 16 ];
+  float arx[ 4 ];
+  int i;
+
+  if ( lseek ( fBearoffOS, 20 + n * 16, SEEK_SET ) < 0 ) {
+    perror ( "OS bearoff database" );
+    return;
+  }
+
+  if ( read ( fBearoffOS, ac, 16 ) < 16 ) {
+    if ( errno )
+      perror ( "OS bearoff database" );
+    else
+      fprintf ( stderr, "error reading OS bearoff database" );
+    return;
+  }
+
+  memcpy ( arx, ac, 16 );
+
+  for ( i = 0; i < 32; ++i ) {
+    arProb[ i ] = fnd ( 1.0f * i, arx[ 0 ], arx[ 1 ] );
+    arGammonProb[ i ] = fnd ( 1.0f * i, arx[ 2 ], arx[ 3 ] );
+  }
+
+  if ( ar )
+    memcpy ( ar, arx, 16 );
+
+}
+
+
+static void
+EvalOS ( const unsigned int n, 
          unsigned short int aProb[ 32 ],
          unsigned short int aGammonProb[ 32 ] ) {
 
   unsigned char ac[ 128 ];
-  int i;
-  off_t iOffset = 21 + n * 64 * 2;
+  int i, j;
+  off_t iOffset;
+  int nBytes;
+  int nPos = Combination ( nBearoffOSPoints + 15, nBearoffOSPoints );
 
+  unsigned int ioff, nz, ioffg, nzg;
+
+  /* find offsets and no. of non-zero elements */
+
+  if ( lseek ( fBearoffOS, 20 + n * 8, SEEK_SET ) < 0 ) {
+    perror ( "OS bearoff database" );
+    return;
+  }
+
+  if ( read ( fBearoffOS, ac, 8 ) < 8 ) {
+    if ( errno )
+      perror ( "OS bearoff database" );
+    else
+      fprintf ( stderr, "error reading OS bearoff database" );
+    return;
+  }
+
+  iOffset = 
+    ac[ 0 ] | 
+    ac[ 1 ] << 8 |
+    ac[ 2 ] << 16 |
+    ac[ 3 ] << 24;
+
+  nz = ac[ 4 ];
+  ioff = ac[ 5 ];
+  nzg = ac[ 6 ];
+  ioffg = ac[ 7 ];
+
+  /* read prob + gammon probs */
+
+  iOffset = 20     /* the header */
+    + nPos * 8     /* the offset data */
+    + 2 * iOffset; /* offset to current position */
+
+  /* read values */
+
+  nBytes = 2 * ( nz + nzg );
+
+  if ( lseek ( fBearoffOS, iOffset, SEEK_SET ) < 0 ) {
+    perror ( "OS bearoff database" );
+    return;
+  }
+
+  if ( read ( fBearoffOS, ac, nBytes ) < nBytes ) {
+    if ( errno )
+      perror ( "OS bearoff database" );
+    else
+      fprintf ( stderr, "error reading OS bearoff database" );
+    return;
+  }
+
+  i = 0;
+  memset ( aProb, 0, 2 * 32 );
+  for ( j = 0; j < nz; ++j, i += 2 )
+    aProb[ ioff + j ] = ac[ i ] | ac[ i + 1 ] << 8;
+
+
+  memset ( aGammonProb, 0, 2 * 32 );
+  for ( j = 0; j < nzg; ++j, i += 2 ) 
+    aGammonProb[ ioffg + j ] = ac[ i ] | ac[ i+1 ] << 8;
+
+#ifdef OLD_CODE
   if ( lseek ( fBearoffOS, iOffset, SEEK_SET ) < 0 ) {
     perror ( "OS bearoff database" );
     return;
@@ -2326,11 +2456,12 @@ EvalOS ( const int n,
     aProb[ i ] = ac[ 4 * i ] | ac[ 4 * i + 1 ] << 8;
     aGammonProb[ i ] = ac[ 4 * i  + 2 ] | ac[ 4 * i + 3 ] << 8;
   }
+#endif
 
 }
 
 
-extern unsigned long
+static unsigned long
 EvalBearoffOSFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
   int n, nOpp;
@@ -2391,11 +2522,78 @@ EvalBearoffOSFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
 }
 
+
+static float
+EvalBearoffOSND ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+
+
+  int n, nOpp;
+  int i, j;
+  float aarProb[ 2 ][ 32 ];
+  float r;
+  float aarGammonProb[ 2 ][ 32 ];
+
+  assert ( fBearoffOS >= 0 );
+
+  nOpp = PositionBearoff ( anBoard[ 0 ], nBearoffOSPoints );
+  n = PositionBearoff ( anBoard[ 1 ], nBearoffOSPoints );
+
+  EvalOSND ( n, aarProb[ 0 ], aarGammonProb[ 0 ], NULL );
+  EvalOSND ( nOpp, aarProb[ 1 ], aarGammonProb[ 1 ], NULL );
+
+  r = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i; j < 32; j++ )
+      r += aarProb[ 0 ][ i ] * aarProb[ 1 ][ j ];
+
+  arOutput[ OUTPUT_WIN ] = r;
+
+  /* calculate gammon percentages */
+
+  /* my gammon chance */
+
+  /* I'm out in i rolls and my opponent isn't inside home quadrant
+     in less than i rolls */
+
+  r = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i; j < 32; j++ )
+      r += aarProb[ 0 ][ i ] * aarGammonProb[ 1 ][ j ];
+
+  arOutput[ OUTPUT_WINGAMMON ] = r;
+
+  /* opp gammon chance */
+
+  r = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i + 1; j < 32; j++ )
+      r += aarProb[ 1 ][ i ] * aarGammonProb[ 0 ][ j ];
+
+  arOutput[ OUTPUT_LOSEGAMMON ] = r;
+
+  /* no backgammons possible */
+
+  arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
+  arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
+
+  return 0;
+
+
+
+
+}
+
 extern void
 EvalBearoffOS( int anBoard[ 2 ][ 25 ], 
-                    float arOutput[] /*, int ignore */ )
-{
-  EvalBearoffOSFull( anBoard, arOutput );
+                    float arOutput[] /*, int ignore */ ) {
+
+  if ( fBearoffOSND ) 
+    /* normal distribution db */
+    EvalBearoffOSND ( anBoard, arOutput );
+  else
+    /* exact one-sided db */
+    EvalBearoffOSFull ( anBoard, arOutput );
+
 }
 
 
@@ -3900,9 +4098,36 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 	strcat( pchOutput, _("(single)\n") );
 }
 
+
+static float 
+AverageRolls ( const unsigned short int aus[ 32 ],
+               float *prMu ) {
+
+  float sx;
+  float sx2;
+  float r;
+  int i;
+
+  sx = sx2 = 0.0f;
+
+  for ( i = 1; i < 32; ++i ) {
+    r = aus[ i ] / 65565.0;
+    sx += i * r;
+    sx2 += i * i * r;
+  }
+
+  if ( prMu )
+    *prMu = sqrt ( sx2 - sx *sx );
+
+  return sx;
+
+}
+
 static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    int i, n, nOpp, an[ 2 ], f0 = FALSE, f1 = FALSE;
+    int i, n, nOpp, f0 = FALSE, f1 = FALSE;
+    unsigned short int aaProb[ 2 ][ 32 ];
+    float arMu[ 2 ];
 
     assert( pBearoff1 );
     
@@ -3915,30 +4140,45 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
               n, nOpp );
 
     strcat( szOutput, _("Rolls\tPlayer\tOpponent\n") );
+
+    memset ( aaProb, 0, 2 * 32 * 2 );
     
     for( i = 0; i < 32; i++ ) {
-	an[ 0 ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
+	aaProb[ 0 ][ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
 	    ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
 
-	an[ 1 ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
+	aaProb[ 1 ][ i ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
 	    ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
 
-	if( an[ 0 ] )
+	if( aaProb[ 0 ][ i ] )
 	    f0 = TRUE;
 
-	if( an[ 1 ] )
+	if( aaProb[ 1 ][ i ] )
 	    f1 = TRUE;
 
 	if( f0 || f1 ) {
-    if( f0 && f1 && !an[ 0 ] && !an[ 1 ] )
+    if( f0 && f1 && !aaProb[ 0 ][ i ] && !aaProb[ 1 ][ i ] )
       break;
 
     szOutput = strchr( szOutput, 0 );
 	
-    sprintf( szOutput, "%5d\t%6.3f\t%8.3f\n", i, an[ 0 ] / 655.35,
-             an[ 1 ] / 655.35 );
+    sprintf( szOutput, "%5d\t%6.3f\t%8.3f\n", i, aaProb[ 0 ][ i ] / 655.35,
+             aaProb[ 1 ][ i ] / 655.35 );
 	}
     }
+
+    strcat( szOutput, _("\nAverage rolls\n") );
+    strcat( szOutput, _("Bearing off\n") );
+    strcat( szOutput, _("\tPlayer\tOpponent\n") );
+
+    sprintf ( szOutput = strchr ( szOutput, 0 ),
+              "Mean\t%7.3f\t%7.3f\n",
+              AverageRolls ( aaProb[ 0 ], &arMu[ 0 ] ),
+              AverageRolls ( aaProb[ 1 ], &arMu[ 1 ] ) );
+
+    sprintf ( szOutput = strchr ( szOutput, 0 ),
+              "Var.\t%7.3f\t%7.3f\n", arMu[ 0 ], arMu[ 1 ] );
+
 }
 
 static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
@@ -3951,13 +4191,97 @@ static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
     /* no-op -- nothing much we can say */
 }
 
-static void DumpBearoffOS ( int anBoard[ 2 ][ 25 ], 
-                            char *szOutput ) {
+static void 
+DumpBearoffOSND ( int anBoard[ 2 ][ 25 ], 
+                  char *szOutput ) {
+
+    int i, n, nOpp; 
+    int f0 = FALSE, f1 = FALSE, f2 = FALSE, f3 = FALSE;
+    float aarProb[ 2 ][ 32 ];
+    float aarGammonProb[ 2 ][ 32 ];
+    float arOpp[ 4 ], ar[ 4 ];
+
+    assert( fBearoffOS >= 0 );
+    
+    nOpp = PositionBearoff( anBoard[ 0 ], nBearoffOSPoints );
+    n = PositionBearoff( anBoard[ 1 ], nBearoffOSPoints );
+
+    EvalOSND ( nOpp, aarProb[ 1 ], aarGammonProb[ 1 ], arOpp );
+    EvalOSND ( n, aarProb[ 0 ], aarGammonProb[ 0 ], ar );
+
+    sprintf ( strchr ( szOutput, 0 ),
+              "             Player       Opponent\n"
+              "Position %12d  %12d\n\n", 
+              n, nOpp );
+
+    strcat( szOutput, _("\nAverage rolls\n") );
+    strcat( szOutput, _("Bearing off" "\t\t\t\t"
+                        "Saving gammon\n") );
+    strcat( szOutput, _("\tPlayer\tOpponent" "\t" 
+                        "Player\tOpponent\n") );
+
+    sprintf ( szOutput = strchr ( szOutput, 0 ),
+              "Mean\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
+              ar[ 0 ], arOpp[ 0 ], ar[ 2 ], arOpp[ 2 ] );
+
+    sprintf ( szOutput = strchr ( szOutput, 0 ),
+              "Var.\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n\n",
+              ar[ 1 ], arOpp[ 1 ], ar[ 3 ], arOpp[ 3 ] );
+
+    strcat( szOutput, _("Approximative distribution:\n") );
+    strcat( szOutput, _("Bearing off" "\t\t\t\t"
+                        "Bearing at least one chequer off\n") );
+    strcat( szOutput, _("Rolls\tPlayer\tOpponent" "\t" 
+                        "Player\tOpponent\n") );
+    
+    for( i = 0; i < 32; i++ ) {
+
+        if( aarProb[ 0 ][ i ] > 0.0f )
+	    f0 = TRUE;
+
+        if( aarProb[ 1 ][ i ] > 0.0f )
+	    f1 = TRUE;
+
+        if( aarGammonProb[ 0 ][ i ] > 0.0f )
+	    f2 = TRUE;
+
+        if( aarGammonProb[ 1 ][ i ] > 0.0f )
+	    f3 = TRUE;
 
 
-    int i, n, nOpp, f0 = FALSE, f1 = FALSE;
+
+	if( f0 || f1 || f2 || f3 ) {
+          if( f0 && f1 && f2 && f3 &&
+              aarProb[ 0 ][ i ] == 0.0f && aarProb[ 1 ][ i ] == 0.0f &&
+              aarGammonProb[ 0 ][ i ] == 0.0f && 
+              aarGammonProb[ 1 ][ i ] == 0.0f ) 
+            break;
+          
+          szOutput = strchr( szOutput, 0 );
+	
+          sprintf( szOutput, 
+                   "%5d\t%7.3f\t%7.3f" "\t\t"
+                   "%7.3f\t%7.3f\n", 
+                   i, 
+                   aarProb[ 0 ][ i ] * 100.0f,
+                   aarProb[ 1 ][ i ] * 100.0f,
+                   aarGammonProb[ 0 ][ i ] * 100.0f,
+                   aarGammonProb[ 1 ][ i ] * 100.0f );
+
+	}
+    }
+
+}
+
+static void 
+DumpBearoffOSExact ( int anBoard[ 2 ][ 25 ], 
+                     char *szOutput ) {
+
+    int i, n, nOpp; 
+    int f0 = FALSE, f1 = FALSE, f2 = FALSE, f3 = FALSE;
     unsigned short int aaProb[ 2 ][ 32 ];
     unsigned short int aaGammonProb[ 2 ][ 32 ];
+    float arMu[ 2 ], arMuG[ 2 ];
 
     assert( fBearoffOS >= 0 );
     
@@ -3972,29 +4296,76 @@ static void DumpBearoffOS ( int anBoard[ 2 ][ 25 ],
               "Position %12d  %12d\n\n", 
               n, nOpp );
 
-    strcat( szOutput, _("Rolls\tPlayer\tOpponent\n") );
+    strcat( szOutput, _("Bearing off" "\t\t\t\t"
+                        "Bearing at least one chequer off\n") );
+    strcat( szOutput, _("Rolls\tPlayer\tOpponent" "\t" 
+                        "Player\tOpponent\n") );
     
     for( i = 0; i < 32; i++ ) {
 
-	if( aaProb[ 0 ][ i ] )
+        if( aaProb[ 0 ][ i ] )
 	    f0 = TRUE;
 
-	if( aaProb[ 1 ][ i ] )
+        if( aaProb[ 1 ][ i ])
 	    f1 = TRUE;
 
-	if( f0 || f1 ) {
-          if( f0 && f1 && !aaProb[ 0 ][ i ] && !aaProb[ 1 ][ i ] )
-            break;
+        if( aaGammonProb[ 0 ][ i ] )
+	    f2 = TRUE;
 
-    szOutput = strchr( szOutput, 0 );
+        if( aaGammonProb[ 1 ][ i ])
+	    f3 = TRUE;
+
+
+
+	if( f0 || f1 || f2 || f3 ) {
+          if( f0 && f1 && f2 && f3 &&
+              !aaProb[ 0 ][ i ] && !aaProb[ 1 ][ i ] &&
+              !aaGammonProb[ 0 ][ i ] && !aaGammonProb[ 1 ][ i ] ) 
+            break;
+          
+          szOutput = strchr( szOutput, 0 );
 	
-    sprintf( szOutput, "%5d\t%6.3f\t%8.3f\n", i, 
-             aaProb[ 0 ][ i ] / 655.35,
-             aaProb[ 1 ][ i ] / 655.35 );
+          sprintf( szOutput, 
+                   "%5d\t%7.3f\t%7.3f" "\t\t"
+                   "%7.3f\t%7.3f\n", 
+                   i, 
+                   aaProb[ 0 ][ i ] / 655.35,
+                   aaProb[ 1 ][ i ] / 655.35,
+                   aaGammonProb[ 0 ][ i ] / 655.35,
+                   aaGammonProb[ 1 ][ i ] / 655.35 );
 	}
     }
 
+    strcat( szOutput, _("\nAverage rolls\n") );
+    strcat( szOutput, _("Bearing off" "\t\t\t\t"
+                        "Saving gammon\n") );
+    strcat( szOutput, _("\tPlayer\tOpponent" "\t" 
+                        "Player\tOpponent\n") );
+
+    sprintf ( szOutput = strchr ( szOutput, 0 ),
+              "Mean\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
+              AverageRolls ( aaProb[ 0 ], &arMu[ 0 ] ),
+              AverageRolls ( aaProb[ 1 ], &arMu[ 1 ] ),
+              AverageRolls ( aaGammonProb[ 0 ], &arMuG[ 0 ] ),
+              AverageRolls ( aaGammonProb[ 1 ], &arMuG[ 1 ] ) );
+
+    sprintf ( szOutput = strchr ( szOutput, 0 ),
+              "Var.\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
+              arMu[ 0 ], arMu[ 1 ], arMuG[ 0 ], arMuG[ 1 ] );
+
 }
+
+static void DumpBearoffOS ( int anBoard[ 2 ][ 25 ], 
+                            char *szOutput ) {
+
+  if ( fBearoffOSND )
+    DumpBearoffOSND ( anBoard, szOutput );
+  else
+    DumpBearoffOSExact ( anBoard, szOutput );
+
+}
+
+
 
 
 static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput ) {
@@ -4272,7 +4643,7 @@ static void StatusBearoff1( char *sz ) {
     if( !pBearoff1 )
 	return;
 
-    sprintf( sz, _(" * 1-sided %sbearoff database evaluator:\n"
+    sprintf( sz, _(" * In memory 1-sided %sbearoff database evaluator:\n"
 	     "   - up to 6 points (54264 positions) per player.\n\n"),
 	     fBearoffHeuristic ? _("heuristic ") : "" );
 }
@@ -4301,8 +4672,20 @@ static void StatusContact( char *sz ) {
     StatusNeuralNet( &nnContact, _("Contact"), sz );
 }
 
+static void StatusOS ( char *sz ) {
+
+  if ( fBearoffOS >= 0 ) {
+    sprintf ( sz, _("* On disk 1-sided (%s) bearoff database evaluator:\n"
+                    "   - up to %d points (%d positions) per player.\n\n"),
+              fBearoffOSND ? _("normal distribution") : _("exact"),
+              nBearoffOSPoints, 
+              Combination ( nBearoffOSPoints + 15, nBearoffOSPoints ) );
+  }
+
+}
+
 static classstatusfunc acsf[ N_CLASSES ] = {
-  NULL, StatusBearoff2, StatusBearoff1, StatusRace, StatusCrashed,
+  NULL, StatusBearoff2, StatusBearoff1, StatusOS, StatusRace, StatusCrashed,
   StatusContact
 };
 

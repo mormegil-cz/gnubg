@@ -576,7 +576,7 @@ RestoreRolloutRolloutContext ( rolloutcontext *prc, const char *sz ) {
 
   char *pc = strstr ( sz, "RC" );
   char szTemp[ 1024 ];
-  int fCubeful, fVarRedn, fInitial, fRotate;
+  int fCubeful, fVarRedn, fInitial, fRotate, fTruncBearoff2, fTruncBearoffOS;
 
   fCubeful = FALSE;
   fVarRedn = FALSE;
@@ -586,11 +586,13 @@ RestoreRolloutRolloutContext ( rolloutcontext *prc, const char *sz ) {
   prc->rngRollout = RNG_MERSENNE;
   prc->nSeed = 0;
   fRotate = TRUE;
+  fTruncBearoff2 = FALSE;
+  fTruncBearoffOS = FALSE;
 
   if ( ! pc )
     return;
 
-  sscanf ( pc, "RC %d %d %d %hu %u \"%1023s\" %d %d",
+  sscanf ( pc, "RC %d %d %d %hu %u \"%1023s\" %d %d %d %d",
            &fCubeful,
            &fVarRedn,
            &fInitial,
@@ -598,12 +600,16 @@ RestoreRolloutRolloutContext ( rolloutcontext *prc, const char *sz ) {
            &prc->nTrials,
            szTemp,
            &prc->nSeed,
-           &fRotate );
+           &fRotate,
+           &fTruncBearoff2, 
+           &fTruncBearoffOS );
 
   prc->fCubeful = fCubeful;
   prc->fVarRedn = fVarRedn;
   prc->fRotate = fRotate;
   prc->fInitial = fInitial;
+  prc->fTruncBearoff2 = fTruncBearoff2;
+  prc->fTruncBearoffOS = fTruncBearoffOS;
 
   RestoreRolloutContextEvalContext ( &prc->aecCube[ 0 ],
                                      sz, "cube0" );
@@ -1348,7 +1354,7 @@ WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
 
   int i;
 
-  fprintf ( pf, "%d %d %d %d %d \"%s\" %d %d ",
+  fprintf ( pf, "%d %d %d %d %d \"%s\" %d %d %d %d",
             prc->fCubeful,
             prc->fVarRedn,
             prc->fInitial,
@@ -1356,7 +1362,9 @@ WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
             prc->nTrials,
             aszRNG[ prc->rngRollout ],
             prc->nSeed,
-            prc->fRotate );
+            prc->fRotate,
+            prc->fTruncBearoff2, 
+            prc->fTruncBearoffOS );
 
   for ( i = 0; i < 2; i++ ) {
 

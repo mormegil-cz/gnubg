@@ -188,6 +188,11 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
               _("Full cubeful rollout") :
               _("Full cubeless rollout") );
 
+  if ( prc->fTruncBearoffOS && ! prc->fCubeful )
+    strcat ( pc, _(" (trunc. at one-sided bearoff)") );
+  else if ( prc->fTruncBearoff2 && ! prc->fCubeful )
+    strcat ( pc, _(" (trunc. at exact bearoff)") );
+
   sprintf ( pc = strchr ( sz, 0 ),
             prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );
 
