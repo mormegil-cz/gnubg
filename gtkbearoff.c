@@ -72,6 +72,22 @@ DestroyDialog( gpointer p ) {
 
 
 static void
+ToggleWho( GtkWidget *pw, bearoffwidget *pbw ) {
+
+  int f = 
+    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbw->apwWho[ 0 ] ) );
+
+  printf( "toggle who...%d %d\n", f, pbw->ms.fMove );
+
+  if ( f != pbw->ms.fMove ) {
+    pbw->ms.fMove = f;
+    SwapSides( pbw->ms.anBoard );
+  }
+
+}
+
+
+static void
 BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 
   int i;
@@ -99,10 +115,10 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 
 #if WIN32
   /* Windows fonts come out smaller than you ask for, for some reason... */
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
                       "*-*-*-m-*-iso8859-1" );
 #else
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-10-"
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
                       "*-*-*-m-*-iso8859-1" );
 #endif
 
@@ -131,11 +147,16 @@ BearoffSet( bearoffwidget *pbw ) {
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pbw->apwRoll[ pbw->ms.anDice[ 0 ] > 0 ] ), TRUE );
   
+  printf( "dice...%d %d\n", pbw->ms.anDice[ 0 ], pbw->ms.anDice[ 1 ] );
   if ( pbw->ms.anDice[ 0 ] > 0 ) {
     for( i = 0; i < 2; ++i ) 
       gtk_option_menu_set_history( GTK_OPTION_MENU( pbw->apwDice[ i ] ),
                                    pbw->ms.anDice[ i ] - 1 );
   }
+  
+  /* force update */
+
+  BearoffUpdated( NULL, pbw );
 
 }
 
@@ -177,8 +198,12 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
                       gtk_label_new( _("Player on roll:") ), 
                       FALSE, FALSE, 4 );
 
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pbw->apwWho[ pbw->ms.fMove ] ), TRUE );
+
   for ( i = 0; i < 2; ++i ) {
     gtk_box_pack_start( GTK_BOX( pwh ), pbw->apwWho[ i ], FALSE, FALSE, 0 );
+    gtk_signal_connect( GTK_OBJECT( pbw->apwWho[ i ] ), "toggled",
+                        GTK_SIGNAL_FUNC( ToggleWho ), pbw );
     gtk_signal_connect( GTK_OBJECT( pbw->apwWho[ i ] ), "toggled",
                         GTK_SIGNAL_FUNC( BearoffUpdated ), pbw );
   }
@@ -189,8 +214,6 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
   pbw->apwRoll[ 1 ] = 
     gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON( pbw->apwRoll[ 0 ] ),
                                                  _("Rolled") );
-
-  
   pwh = gtk_hbox_new( FALSE, 4 );
   gtk_box_pack_start( GTK_BOX( pwv ), pwh, FALSE, FALSE, 0 );
 
@@ -202,6 +225,9 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
 
   for ( i = 0; i < 2; ++i ) {
     char sz[ 2 ];
+    int die = pbw->ms.anDice[ i ];
+
+
     
     pw = gtk_menu_new();
     
@@ -216,6 +242,10 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
     pbw->apwDice[ i ] = gtk_option_menu_new();
 
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pbw->apwDice[ i ] ), pw );
+
+    if ( die > 0 ) 
+      gtk_option_menu_set_history( GTK_OPTION_MENU( pbw->apwDice[ i ] ),
+                                   die - 1 );
 
     gtk_box_pack_start( GTK_BOX( pwh ), pbw->apwDice[ i ], FALSE, FALSE, 0 );
 

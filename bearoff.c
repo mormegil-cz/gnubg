@@ -898,7 +898,7 @@ ReadSconyers15x15( bearoffcontext *pbc,
 
   /* Each position uses 16 bytes (4 floats of 4 bytes each) */
 
-  printf( "modified lPos %ld\n", lPos ); 
+  /* printf( "modified lPos %ld\n", lPos ); */
 
   lPos *= 16L;
 

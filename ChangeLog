@@ -1,3 +1,10 @@
+Fri Jul 25 16:35:48 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkbearoff.c: widget did not update when pressing who's
+	was on roll.
+	* bearoff.c (ReadSconyers15x15): remove debug print.
+	(reported by Hugh Sconyers)
+	
 Fri Jul 25 07:53:09 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gtkgame.c (FormatStatEquity,FormatStatCubeError): Remove verbose
