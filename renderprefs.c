@@ -102,6 +102,7 @@ static int SetColourSpeckle( char *sz, unsigned char anColour[],
     return -1;
 }
 
+#if USE_GTK
 /* Set colour (with floats) */
 static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
 
@@ -120,6 +121,7 @@ static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
 
     return -1;
 }
+#endif
 
 /* Set colour, alpha, refraction, shine, specular. */
 static int SetColourARSS( double aarColour[ 2 ][ 4 ], 
@@ -133,6 +135,7 @@ static int SetColourARSS( double aarColour[ 2 ][ 4 ],
     if( ( pch = strchr( sz, ';' ) ) )
 	*pch++ = 0;
 
+#if	USE_GTK
     if( !SetColourX( aarColour[ i ], sz ) ) {
         PushLocale ( "C" );
 
@@ -177,9 +180,12 @@ static int SetColourARSS( double aarColour[ 2 ][ 4 ],
 	return 0;
     }
 
+#endif
+
     return -1;
 }
 
+#if USE_GTK
 /* Set colour, shine, specular, flag. */
 static int SetColourSSF( gdouble aarColour[ 2 ][ 4 ], 
                          gfloat arCoefficient[ 2 ],
@@ -229,6 +235,7 @@ static int SetColourSSF( gdouble aarColour[ 2 ][ 4 ],
 
     return -1;
 }
+#endif
 
 static int SetWood( char *sz, woodtype *pbw ) {
 
@@ -246,7 +253,7 @@ static int SetWood( char *sz, woodtype *pbw ) {
 
 extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 				    char *szValue ) {
-
+#if USE_GTK
     int c, fValueError = FALSE;
     
     if( !szParam || !*szParam )
@@ -387,6 +394,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     if( fValueError )
 	outputf( _("`%s' is not a legal value for parameter `%s'.\n"), szValue,
 		 szParam );
+
+#endif
 
 }
 

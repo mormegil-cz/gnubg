@@ -872,8 +872,10 @@ command cER = {
       szONOFF, NULL },
     { "dicearea", CommandSetGUIDiceArea,
       N_("Show dice icon when human player on roll"), szONOFF, NULL },
+#if	USE_GTK
     { "dragtargethelp", CommandSetGUIDragTargetHelp,
       N_("Show target help while dragging a chequer"), szONOFF, NULL },
+#endif
     { "highdiefirst", CommandSetGUIHighDieFirst,
       N_("Show the higher die on the left"), szONOFF, NULL },
     { "illegal", CommandSetGUIIllegal,
@@ -4823,9 +4825,9 @@ extern void CommandSaveSettings( char *szParam ) {
 
     /* geometries */
     /* "set gui windowpositions" must come first */
+#if USE_GTK
     fprintf( pf, "set gui windowpositions %s\n",
 	     fGUISetWindowPos ? "on" : "off" );
-#if USE_GTK
     if ( fX )
        RefreshGeometries ();
 #endif

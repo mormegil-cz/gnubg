@@ -1,3 +1,8 @@
+Mon Mar 3 18:54:15 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* renderprefs.c, gnubg.c - conditionals to allow a build
+	  after configure --without-gtk --without-gtk2 --without-x
+
 Sun Mar  2 16:31:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	New function: TextToClipboard. Copies a given string to
