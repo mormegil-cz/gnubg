@@ -610,6 +610,105 @@ PythonMwc2eq( PyObject *self, PyObject *args ) {
 }
 
 
+static PyObject *
+PythonPositionID( PyObject *self, PyObject *args ) {
+
+  PyObject *pyBoard = NULL;
+  int anBoard[ 2 ][ 25 ];
+
+  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+
+  if ( ! PyArg_ParseTuple( args, "|O:positionid", &pyBoard ) )
+    return NULL;
+
+  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+    return NULL;
+
+  return Py_BuildValue( "s", PositionID( anBoard ) );
+
+}
+
+static PyObject *
+PythonPositionFromID( PyObject *self, PyObject *args ) {
+
+  char *sz = NULL;
+  int anBoard[ 2 ][ 25 ];
+
+  if ( ! PyArg_ParseTuple( args, "|s:positionfromid", &sz ) )
+    return NULL;
+
+  if ( sz && PositionFromID( anBoard, sz ) ) {
+    PyErr_SetString( PyExc_ValueError, 
+                     _("invalid positionid") );
+    return NULL;
+  }
+  else
+    memcpy( anBoard, ms.anBoard, sizeof anBoard );
+
+  return BoardToPy( anBoard );
+
+}
+
+
+static PyObject *
+PythonPositionBearoff( PyObject *self, PyObject *args ) {
+
+
+  PyObject *pyBoard = NULL;
+  int nChequers = 15;
+  int nPoints = 6;
+  int anBoard[ 2 ][ 25 ];
+
+  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+
+  if ( ! PyArg_ParseTuple( args, "|Oii:positionbearoff", 
+                           &pyBoard, &nPoints, &nChequers ) )
+    return NULL;
+
+  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+    return NULL;
+
+  return Py_BuildValue( "i", PositionBearoff( anBoard, nPoints, nChequers ) );
+
+}
+
+
+static PyObject *
+PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
+
+  int anBoard[ 2 ][ 25 ];
+  int iPos = 0;
+  int nChequers = 15;
+  int nPoints = 6;
+  int n;
+
+  if ( ! PyArg_ParseTuple( args, "|iii:positionfrombearoff", 
+                           &iPos, nChequers, &nPoints  ) )
+    return NULL;
+
+  if ( nChequers < 1 || nChequers > 15 || nPoints < 1 || nPoints > 25 ) {
+    PyErr_SetString( PyExc_ValueError,
+                     _("invalid number of chequers or points") );
+    return NULL;
+  }
+
+  n = Combination( nChequers + nPoints, nPoints );
+
+  if ( iPos < 0 || iPos >= n ) {
+    PyErr_SetString( PyExc_ValueError,
+                     _("invalid position number") );
+    return NULL;
+  }
+
+  memset( anBoard, 0, sizeof anBoard );
+  PositionFromBearoff( anBoard, iPos, nPoints, nChequers );
+
+  return BoardToPy( anBoard );
+
+
+}
+
+
 PyMethodDef gnubgMethods[] = {
 
   { "board", PythonBoard, METH_VARARGS,
@@ -628,6 +727,14 @@ PyMethodDef gnubgMethods[] = {
     "Make a cubeinfo" },
   { "met", PythonMET, METH_VARARGS,
     "return the current match equity table" },
+  { "positionid", PythonPositionID, METH_VARARGS,
+    "return position ID from board" },
+  { "positionfromid", PythonPositionFromID, METH_VARARGS,
+    "return board from position ID" },
+  { "positionbearoff", PythonPositionBearoff, METH_VARARGS,
+    "return the bearoff id for the given position" },
+  { "positionfrombearoff", PythonPositionBearoff, METH_VARARGS,
+    "return the board from the given bearoff id" },
   { NULL, NULL, 0, NULL }
 
 };
@@ -666,7 +773,7 @@ PythonInitialise( const char *argv0, const char *szDir ) {
   Py_SetProgramName( (char *) argv0 );
   Py_Initialize();
 
-  /* ensure that python now about our gnubg module */
+  /* ensure that python know about our gnubg module */
   Py_InitModule( "gnubg", gnubgMethods );
   PyRun_SimpleString( "import gnubg\n" );
 

@@ -1,8 +1,12 @@
+Sun Jul 13 20:02:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubgmodule.c (PythonPositionID, PythonPositionFromID,
+	PythonPositionFromBearoff, PythonPositionBearoff): new functions.
+
 Sun Jul 13 18:17:05 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* make sure rollouts skip completed trials without wasting time
 		
-
 Sun Jul 13 19:49:16 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.py: new file (read during startup).
