@@ -1,3 +1,8 @@
+Tue Dec 24 12:25:42 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	* eval.c (EvaluatePositionCubeful3, EvaluatePositionFull): Fix small
+	bug in yesterday's code.
+
 Mon Dec 23 18:48:13 2002  Gary Wong  <gtw@gnu.org>
 
 	* rollout.c (RolloutDice): Generate quasi-random dice for initial

@@ -2292,7 +2292,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
-    fUseReduction = pec->nReduced && ( nPlies == ( pec->nPlies - 1 ) );
+    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
 
     if ( fUseReduction ) {
       nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
@@ -5676,7 +5676,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 
     MakeCubePos ( aciCubePos, cci, fTop, aci, TRUE );
 
-    fUseReduction = pec->nReduced && ( nPlies == ( pec->nPlies - 1 ) );
+    fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
 
     if ( fUseReduction ) {
       nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
