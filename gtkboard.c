@@ -297,7 +297,7 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 	    y += cy * 4 / 5;
 	    cy = -cy;
 	}
-	
+
 	if( intersects( event->area.x, event->area.y, event->area.width,
 			event->area.height, positions[ i ][ 0 ] *
 			bd->board_size, y, 6 * bd->board_size, cy ) ) {
@@ -305,16 +305,24 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 	    /* Redrawing the point might have drawn outside the exposed
 	       area; enlarge the invalid area in case the dice now need
 	       redrawing as well. */
-	    if( event->area.x > positions[ i ][ 0 ] * bd->board_size )
+	    if( event->area.x > positions[ i ][ 0 ] * bd->board_size ) {
+		event->area.width += event->area.x -
+		    positions[ i ][ 0 ] * bd->board_size;
 		event->area.x = positions[ i ][ 0 ] * bd->board_size;
+	    }
+	    
 	    if( event->area.x + event->area.width < ( positions[ i ][ 0 ] + 6 )
 		* bd->board_size )
 		event->area.width = ( positions[ i ][ 0 ] + 6 ) *
 		    bd->board_size - event->area.x;
-	    if( event->area.y > y )
+	    
+	    if( event->area.y > y ) {
+		event->area.height += event->area.y - y;
 		event->area.y = y;
-	    if( event->area.y + event->area.width < y + cy )
-		event->area.width = y + cy - event->area.y;
+	    }
+	    
+	    if( event->area.y + event->area.height < y + cy )
+		event->area.height = y + cy - event->area.y;
 	}
     }
 
@@ -1155,8 +1163,9 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     }
     
     sprintf( strchr( board_str, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
-	     "0:0:0", die0, die1, die0, die1, nCube, fCubeOwner != 0,
-	     fCubeOwner != 1, fDoubled, off[ 1 ], off[ 0 ] );
+	     "0:0:0", die0, die1, die0, die1, fTurn < 0 ? 1 : nCube,
+	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,
+	     fDoubled, off[ 1 ], off[ 0 ] );
     
     board_set( board, board_str );
     

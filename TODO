@@ -136,9 +136,6 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
-** If the exposed area in BoardRedraw() intersects a point but not the
-  dice, the point will be redrawn -- but sometimes that will overwrite
-  the dice, which then need updating.
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages; "set score -1 -1" gives a bad message too (it
   should be redefined to set 1-away, 1-away); "help r" doesn't do anything.

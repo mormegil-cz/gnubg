@@ -1,3 +1,10 @@
+Mon Aug 28 07:39:17 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkboard.c (game_set): If no game is in progress, display the
+	cube centred at 1.
+	
+	* gtkboard.c (board_expose): Fix buggy exposure calculation.
+
 Thu Aug 17 14:11:44 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* eval.c (EvaluatePositionCubeful1): Misc. bugfixes.
