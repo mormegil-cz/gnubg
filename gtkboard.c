@@ -143,6 +143,41 @@ static void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
     points[ bd->turn > 0 ][ 24 ] = abs( bd->points[ 25 ] );
 }
 
+
+static void
+write_board ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+
+  gint i;
+  gint anOff[ 2 ];
+
+  for ( i = 0; i < 28; ++i )
+    bd->points[ i ] = 0;
+
+  /* Opponent on bar */
+  bd->points[ 0 ] = -points[ 0 ][ 24 ];
+
+  /* Board */
+  for( i = 0; i < 24; i++ ) {
+    if ( points[ bd->turn > 0 ][ i ] )
+      bd->points[ i + 1 ] = bd->turn * points[ bd->turn > 0 ][ i ];
+    if ( points[ bd->turn <= 0 ][ i ] )
+      bd->points[ 24 - i ] = -bd->turn * points[ bd->turn <= 0 ][ i ];
+  }
+
+  /* Player on bar */
+  bd->points[ 25 ] = points[ 1 ][ 24 ];
+
+  anOff[ 0 ] = anOff[ 1 ] = 15;
+  for( i = 0; i < 25; i++ ) {
+    anOff[ 0 ] -= points[ 0 ][ i ];
+    anOff[ 1 ] -= points[ 1 ][ i ];
+  }
+    
+  bd->points[ 26 ] = anOff[ bd->turn >= 0  ];
+  bd->points[ 27 ] = anOff[ bd->turn < 0 ];
+
+}
+
 static void chequer_position( int point, int chequer, int *px, int *py ) {
 
     int c_chequer;
@@ -933,6 +968,60 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
     update_pipcount ( bd, points );
 }
 
+
+static int
+ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+
+  movelist ml;
+
+  GenerateMoves ( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+
+  if ( ml.cMoves == 1 ) {
+
+    ApplyMove ( anBoard, ml.amMoves[ 0 ].anMove, TRUE );
+    return TRUE;
+     
+  }
+  else
+    return FALSE;
+
+}
+
+static int
+GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+
+  movelist ml;
+  int i, iMove, cMoves;
+  
+  /* check for all chequers inside home quadrant */
+
+  for ( i = 6; i < 25; ++i )
+    if ( anBoard[ 1 ][ i ] )
+      return FALSE;
+
+  cMoves = ( anDice[ 0 ] == anDice[ 1 ] ) ? 4 : 2;
+
+  GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+
+  for( i = 0; i < ml.cMoves; i++ )
+    for( iMove = 0; iMove < cMoves; iMove++ )
+      if( ( ml.amMoves[ i ].anMove[ iMove << 1 ] < 0 ) ||
+          ( ml.amMoves[ i ].anMove[ ( iMove << 1 ) + 1 ] != -1 ) )
+        /* not a bearoff move */
+        break;
+      else if( iMove == cMoves - 1 ) {
+        /* All dice bear off */
+        ApplyMove ( anBoard, ml.amMoves[ i ].anMove, TRUE );
+        return TRUE;
+      }
+
+  return FALSE;
+
+}
+
+
+
+
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
     int i, n, dest, x, y, bar;
@@ -1074,8 +1163,62 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 	
-	/* FIXME if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
+	/* if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
 	   then bear off as many chequers as possible, and return. */
+
+        if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+            bd->drag_point == ( ( 53 - bd->turn ) / 2 ) &&
+            bd->dice[ 0 ] ) {
+
+          /* user clicked on bear-off tray: try to bear-off chequers or
+             show forced move */
+
+          int anBoard[ 2 ][ 25 ];
+          
+          read_board ( bd, anBoard );
+
+          bd->drag_colour = bd->turn;
+          bd->drag_point = -1;
+          
+          if ( ForcedMove ( anBoard, bd->dice ) ||
+               GreadyBearoff ( anBoard, bd->dice ) ) {
+
+            /* we've found a move: update board  */
+
+            int old_points[ 28 ];
+            int i, j;
+            int an[ 28 ];
+
+	    memcpy( old_points, bd->points, sizeof old_points );
+
+            write_board ( bd, anBoard );
+
+            for ( i = 0, j = 0; i < 28; ++i )
+              if ( old_points[ i ] != bd->points[ i ] )
+                an[ j++ ] = i;
+
+            if ( !update_move ( bd ) ) {
+
+              /* redraw points */
+
+              for ( i = 0; i < j; ++i )
+                board_invalidate_point( bd, an[ i ] );
+
+            }
+            else {
+
+              /* whoops: this should not happen as ForcedMove and GreadyBearoff
+                 only returns legal moves */
+
+              assert ( FALSE );
+
+            }
+            
+          }
+
+          return TRUE;
+
+        }
 	
 	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
 	    bd->drag_point > 0 && bd->drag_point <= 24 &&

@@ -1,3 +1,9 @@
+Mon Jan 27 20:04:23 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (ForcedMove, GreadyBearoff): new functions.
+	* gtkboard.c (board_pointer): click bearoff tray for gready
+	bearoff or for showing forced move.
+
 Mon Jan 27 10:26:49 2003  Gary Wong  <gtw@gnu.org>
 
 	* eval.c (NNevalAction, EvalRace, EvalContact, EvalCrashed, 
