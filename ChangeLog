@@ -1,3 +1,8 @@
+Fri Aug 29 13:58:55 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* autogen.sh: touch board3d/Makefile.in and textures/Makefile.in.
+	* credits.sh, credits.c, AUTHORS: Fix my name and refresh.
+
 Fri Aut 30 12:31:43 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* fixes for graph functions

@@ -96,7 +96,7 @@ Mark Spencer
 Scott Steiner
 Maik Stiebler
 W. Stroop (Rob)
-Kaoru Takahasi
+Kaoru TAKAHASHI
 Yoshito Takeuchi
 Jacques Thiriat
 Malene Thyssen
