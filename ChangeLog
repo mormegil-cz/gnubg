@@ -1,3 +1,9 @@
+Thu Aug 12 07:46:18 2004  Joseph Heled  <joseph@gnubg.org>
+
+	* gnubg.c: Add search in "scripts/gnubg.py" if all else fails in
+	CommandLoadPython, since this IS the place 'gmake install' puts on
+	my Linux box (i.e./usr/local/share/gnubg/scripts/gnubg.py).
+
 Mon Jul 02 09:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* play.c: Fixed 3d quick draw bug

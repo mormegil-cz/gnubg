@@ -4821,18 +4821,34 @@ CommandLoadPython( char * sz ) {
   }
 
   pch = PathSearch( sz, NULL );
-  pf = fopen( pch, "r" );
-  if (!pf)
-  {  /* Couldn't find file, have a look in the scripts dir */
+  pf = pch ? fopen( pch, "r" ) : NULL;
+  if( !pf ) {
+    /* Couldn't find file, have a look in the scripts dir */
     char scriptDir[BIG_PATH];
-    strcpy(scriptDir, (szDataDirectory && *szDataDirectory) ? szDataDirectory: ".");
-    strcat(scriptDir, "/scripts");
-    pch = PathSearch( sz, scriptDir);
-    pf = fopen( pch, "r" );
+    scriptDir[0] = 0;
+    pch = 0;
+    
+    if( szDataDirectory && *szDataDirectory ) {
+      strcpy(scriptDir, szDataDirectory);
+      strcat(scriptDir, "/scripts");
+      pch = PathSearch(sz, scriptDir);
+      pf = fopen( pch, "r" );
+      if( ! pf ) {
+	pch = 0;
+      }
+    }
+    /* Look in scripts/file, same as met */
+    if( ! pch ) {
+      strcpy(scriptDir, "scripts/");
+      strcat(scriptDir, sz);
+      pch = PathSearch(scriptDir, 0);
+      if( pch ) {
+	pf = fopen( pch, "r" );
+      }
+    }
   }
 
-  if (pf)
-  {
+  if( pf ) {
     PyRun_AnyFile( pf, pch );
     fclose( pf );
   }
