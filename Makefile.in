@@ -251,10 +251,10 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gtkprefs.c gtkprefs.h gtk-multiview.c \
-@USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
-@USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
+@USE_GTK_TRUE@	gtk-multiview.h \
+@USE_GTK_TRUE@	gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
-@USE_GTK_TRUE@	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
+@USE_GTK_TRUE@	gtkrace.c gtkrace.h \
 @USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 @USE_GTK_TRUE@	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
 @USE_GTK_TRUE@        openurl.c openurl.h gtktempmap.c gtktempmap.h \
