@@ -334,7 +334,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	if( pgd->nDragPoint == POINT_CUBE ) {
 	    /* Clicked on cube; double. */
 	    pgd->nDragPoint = -1;
-	    CommandDouble( NULL );
+	    UserCommand( "double" );
 	    return;
 	}
 	

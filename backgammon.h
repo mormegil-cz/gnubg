@@ -80,7 +80,7 @@ extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
     fAutoGame, fAutoMove, fResigned, fMove, fDoubled, anScore[ 2 ],
     cGames, nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
     fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon,
-    fVarRedn, nRollouts, nRolloutTruncate, fNextTurn;
+    fVarRedn, nRollouts, nRolloutTruncate, fNextTurn, fConfirm;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
@@ -88,6 +88,7 @@ extern list lMatch, *plGame; /* (list of) list of moverecords */
 
 extern player ap[ 2 ];
 
+extern char *GetInput( char *szPrompt );
 extern void HandleCommand( char *sz, command *ac );
 extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
@@ -100,6 +101,10 @@ extern double ParseReal( char **ppch );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
+
+#if !X_DISPLAY_MISSING
+extern void UserCommand( char *sz );
+#endif
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),

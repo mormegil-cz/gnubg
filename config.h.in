@@ -48,6 +48,12 @@
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION
 
+/* Define if you have the sigblock function.  */
+#undef HAVE_SIGBLOCK
+
+/* Define if you have the sigprocmask function.  */
+#undef HAVE_SIGPROCMASK
+
 /* Define if you have the sigvec function.  */
 #undef HAVE_SIGVEC
 
@@ -75,6 +81,9 @@
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
 
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
+
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
@@ -89,6 +98,9 @@
 
 /* Define if you have the readline library (-lreadline).  */
 #undef HAVE_LIBREADLINE
+
+/* Define if you have the termcap library (-ltermcap).  */
+#undef HAVE_LIBTERMCAP
 
 /* Name of package */
 #undef PACKAGE

@@ -224,9 +224,7 @@ extern int StatsConfirm( extwindow *pewnd ) {
 	psd->pm->cPips == psd->ml.cMaxPips ) {
 	FormatMove( sz, psd->pgd->anBoardOld, psd->pm->anMove );
     
-	CommandMove( sz ); /* FIXME output from this command (if any) looks a
-			      bit grotty, because no linefeed was typed after
-			      the prompt */
+	UserCommand( sz );
     } else
 	/* Illegal move */
 	XBell( pewnd->pdsp, 100 );
@@ -415,7 +413,7 @@ static int DiceHandler( extwindow *pewnd, XEvent *pxev ) {
 	if( fBusy )
 	    XBell( pewnd->pdsp, 100 );
 	else
-	    CommandRoll( NULL );
+	    UserCommand( "roll" );
 	
 	break;
 	

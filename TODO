@@ -29,11 +29,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
-** Write a proper input routine which will read a line from stdin under all
-  conditions (with or without X, with or without readline, and whether
-  stdin is a TTY or not).  Echo commands input with the mouse as if they had
-  been typed (this is nontrivial if a partial TTY command has been entered).
-  (gary)
+** Make sure input behaves correctly when stdin is not a TTY. (gary)
 ** Write fancy output routines (to replace printf, puts, etc.) that wraps
   words and pauses before scrolling (as in gdb).
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
@@ -54,6 +50,11 @@ duplication of effort and to make sure our changes merge easily.
   the board window would be better.)
 ** Show rollout results while in progress, and allow resuming interrupted
   rollouts.
+** When a game is in progress and EOF is read from the terminal, ask if
+  they're sure they want to exit.
+** Save partial input when reading something below the top level, or when
+  TTY input is overwritten by an X command.
+** Add "set confirm".
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -79,28 +80,16 @@ duplication of effort and to make sure our changes merge easily.
   if it isn't a TTY. (gary)
 ** Think about what should happen with variance reduction in Rollout()
   when a probability turns out <0 or >1.
-** When X and readline are enabled, using the board window to play
-  while the rng is set to manual really confuses the terminal
-  (readline has left the TTY in a silly state while GetManualDice() is
-  trying to read).  It also means that the interrupt key won't work on
-  commands initiated from the mouse.  To fix this properly will take
-  far cleverer input handling (we want to be responsive to X events
-  and stdin, which more or less means that while waiting for any kind
-  of input we must be in the top level HandleEvents(); this makes it
-  very difficult for routines like GetManualDice which want to block
-  until input is ready).  Also, what happens when the user types half
-  a command and then moves with the mouse which causes the manual dice
-  prompt?  "set delay" is related to this; other things should happen
-  while waiting for the delay. (gary)
-** When the interrupt key is pressed during processing in response to
-  a board window event, "(Interrupted)" is not shown. (gary)
-** Make sure that ComputerMove() updating anBoard and the call to
-  NextTurn() are atomic, even if a SIGINT occurs. (gary)
+** Make sure as much as possible can happen during delays from
+  "set delay". (gary)
 ** Nothing handles running out of memory gracefully.  A solution
   could be to write a malloc() wrapper that (if malloc fails) first
   tries to free memory (e.g. flush the eval cache); if malloc still
   doesn't succeed, then print an error message and longjmp() to the
-  main loop.
+  main loop.  When using the GNU C library, __malloc_hook can be used
+  too (so we can intercept calls coming from Xlib, for instance).  We
+  shouldn't longjmp() out of the hook, though (it might confuse library
+  functions).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -120,4 +109,3 @@ duplication of effort and to make sure our changes merge easily.
   The SGF format (Smart Game Format -- see <http://www.red-bean.com/sgf/>)
   can probably be extended to backgammon, instead.
 ** Export matches (and analysis) to ASCII, HTML, PostScript, etc.
-** mtrace() debugging at some point. (gary)

@@ -1,3 +1,22 @@
+Mon Jan 31 10:43:48 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (ResetInterrupt): New function.
+	(ProcessInput): New function.
+	(HandleInputRecursive): New function.
+	(UserCommand): New function.  Handles non-TTY commands (e.g. input
+	from board window), and echos them to TTY.
+	(GetInput): New function.  Reads input from TTY below the top level.
+	* play.c (NewGame): Abort new game if interrupted during the opening
+	roll.
+	(ComputerPlayer): Block SIGINTs if anBoard is going to be updated,
+	so that the end of the move is atomic.
+	(CommandNewGame): Ask "are you sure" if game already in progress.
+	
+	* dice.c (RollDice): Can now be interrupted (and return error).  All
+	callers changed.
+	(GetManualDice): Use GetInput to read dice, and return error on
+	interrupt.
+
 Thu Jan 27 17:34:45 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c [HAVE_SYS_FILE_H]: #include <sys/file.h> if present, to

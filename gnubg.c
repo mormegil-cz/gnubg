@@ -40,7 +40,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
 #include <time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -67,8 +79,12 @@
 static extdisplay edsp;
 extwindow ewnd;
 int fX = TRUE; /* use X display */
-int nDelay = 0, fNeedPrompt = FALSE;
+int nDelay = 0;
 event evNextTurn;
+static int fNeedPrompt = FALSE;
+#if HAVE_LIBREADLINE
+static int fReadingCommand, fReadingOther;
+#endif
 #endif
 
 char szDefaultPrompt[] = "(\\p) ",
@@ -82,7 +98,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
     fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 1,
     fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
-    nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE;
+    nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
+    fConfirm = TRUE;
 
 evalcontext ecTD = { 0, 8, 0.16 }, ecEval = { 1, 8, 0.16 },
     ecRollout = { 0, 8, 0.16 };
@@ -488,6 +505,32 @@ extern void HandleCommand( char *sz, command *ac ) {
 	HandleCommand( sz, pc->pc );
 }
 
+/* Reset the SIGINT handler, on return to the main command loop.  Notify
+   the user if processing had been interrupted. */
+static void ResetInterrupt( void ) {
+    
+    if( fInterrupt ) {
+	puts( "(Interrupted)" );
+
+	fInterrupt = FALSE;
+#if !X_DISPLAY_MISSING
+	EventPending( &evNextTurn, FALSE );
+#endif
+    }
+    
+#if HAVE_SIGPROCMASK
+    {
+	sigset_t ss;
+
+	sigemptyset( &ss );
+	sigaddset( &ss, SIGINT );
+	sigprocmask( SIG_UNBLOCK, &ss, NULL );
+    }
+#elif HAVE_SIGBLOCK
+    sigsetmask( 0 );
+#endif
+}
+
 extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
 
     int i;
@@ -583,13 +626,6 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
 
-	/* FIXME this is a horrible hack to get the board to display when
-	   it's the computer's turn (i.e. may be performing a long evaluation
-	   and be unresponsive for a while).  A much better mechanism is
-	   needed that can respond to other events in the meantime
-	   (especially Expose, but perhaps some menu commands).  There
-	   may also be some need to check whether events need to be enabled
-	   (see ExtDspCommit). */
 	XFlush( ewnd.pdsp );
     }    
 #endif    
@@ -893,6 +929,9 @@ extern void CommandTrainTD( char *sz ) {
 	    
 	    RollDice( anDiceTrain );
 
+	    if( fInterrupt )
+		return;
+	    
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 	    
 	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
@@ -915,7 +954,6 @@ extern void CommandTrainTD( char *sz ) {
 }
 
 #if HAVE_LIBREADLINE
-
 static command *pcCompleteContext;
 
 static char *NullGenerator( char *sz, int nState ) {
@@ -928,6 +966,9 @@ static char *GenerateKeywords( char *sz, int nState ) {
     static int cch;
     static command *pc;
     char *szDup;
+
+    if( fReadingOther )
+	return NULL;
     
     if( !nState ) {
 	cch = strlen( sz );
@@ -974,10 +1015,14 @@ static void Prompt( void ) {
 
 #if !X_DISPLAY_MISSING
 #if HAVE_LIBREADLINE
-void HandleInput( char *sz ) {
+static void HandleInput( char *sz );
 
+static void ProcessInput( char *sz, int fFree ) {
+    
+    rl_callback_handler_remove();
+    fReadingCommand = FALSE;
+    
     if( !sz ) {
-	rl_callback_handler_remove();
 	StopEvents();
 	return;
     }
@@ -989,27 +1034,73 @@ void HandleInput( char *sz ) {
 	
     HandleCommand( sz, acTop );
 
-    if( fInterrupt ) {
-	puts( "(Interrupted)" );
+    ResetInterrupt();
 
-	fInterrupt = FALSE;
-	EventPending( &evNextTurn, FALSE );
-    }
-    
-    free( sz );
+    if( fFree )
+	free( sz );
 
     /* Recalculate prompt -- if we call nothing, then readline will
        redisplay the old prompt.  This isn't what we want: we either
        want no prompt at all, yet (if NextTurn is going to be called),
        or if we do want to prompt immediately, we recalculate it in
        case the information in the old one is out of date. */
-    if( evNextTurn.fPending ) {
-	rl_callback_handler_remove();
+    if( evNextTurn.fPending )
 	fNeedPrompt = TRUE;
-    } else
+    else {
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
+	fReadingCommand = TRUE;
+    }
+}
+
+static void HandleInput( char *sz ) {
+
+    ProcessInput( sz, TRUE );
+}
+
+static char *szInput;
+
+void HandleInputRecursive( char *sz ) {
+
+    if( !sz ) {
+	putchar( '\n' );
+	exit( EXIT_SUCCESS );
+    }
+
+    szInput = sz;
+
+    rl_callback_handler_remove();
 }
 #endif
+
+/* Handle a command as if it had been typed by the user. */
+extern void UserCommand( char *sz ) {
+
+#if HAVE_LIBREADLINE
+    int nOldEnd;
+    
+    nOldEnd = rl_end;
+    rl_end = 0;
+    rl_redisplay();
+    puts( sz );
+    ProcessInput( sz, FALSE );
+    return;
+#else
+    putchar( '\n' );
+    Prompt();
+    puts( sz );
+
+    fInterrupt = FALSE;
+    
+    HandleCommand( sz, acTop );
+
+    ResetInterrupt();
+    
+    if( !evNextTurn.fPending )
+	Prompt();
+    else
+	fNeedPrompt = TRUE;
+#endif
+}
 
 int StdinReadNotify( event *pev, void *p ) {
 #if HAVE_LIBREADLINE
@@ -1032,12 +1123,7 @@ int StdinReadNotify( event *pev, void *p ) {
 
     HandleCommand( sz, acTop );
 
-    if( fInterrupt ) {
-	puts( "(Interrupted)" );
-
-	fInterrupt = FALSE;
-	EventPending( &evNextTurn, FALSE );
-    }
+    ResetInterrupt();
 
     if( evNextTurn.fPending )
 	fNeedPrompt = TRUE;
@@ -1053,21 +1139,28 @@ int StdinReadNotify( event *pev, void *p ) {
 int NextTurnNotify( event *pev, void *p ) {
 
     EventPending( pev, FALSE );
-    
+
+    /* FIXME should we really abort now?  If we've gotten this far, it might
+       be too late... */
+#if 1
     if( fInterrupt ) {
 	puts( "(Interrupted)" );
 
 	fInterrupt = FALSE;
     } else
+#endif
 	NextTurn();
 
+    ResetInterrupt();
+    
     if( !pev->fPending && fNeedPrompt ) {
-	fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
+	fReadingCommand = TRUE;
 #else
 	Prompt();
 #endif
+	fNeedPrompt = FALSE;
     }
     
     return 0;
@@ -1178,6 +1271,7 @@ void RunX( void ) {
     }
     
 #if HAVE_LIBREADLINE
+    fReadingCommand = TRUE;
     rl_callback_handler_install( FormatPrompt(), HandleInput );
     atexit( rl_callback_handler_remove );
 #else
@@ -1191,6 +1285,158 @@ void RunX( void ) {
     exit( EXIT_SUCCESS );
 }
 #endif
+
+/* Read a line from stdin, and handle X and readline input if
+ * appropriate.  This function blocks until a line is ready, and does
+ * not call HandleEvents(), and because fBusy will be set some X
+ * commands will not work.  Therefore, it should not be used for
+ * reading top level commands.  The line it returns has been allocated
+ * with malloc (as with readline()). */
+extern char *GetInput( char *szPrompt ) {
+
+    /* FIXME handle interrupts and EOF in this function. */
+    
+    char *sz;
+#if !HAVE_LIBREADLINE
+    char *pch;
+#endif
+#if !X_DISPLAY_MISSING
+    fd_set fds;
+    
+    if( fX ) {
+#if HAVE_LIBREADLINE
+	/* Using readline and X. */
+	char *szOldPrompt, *szOldInput;
+	int nOldEnd, nOldMark, nOldPoint;
+	
+	if( fInterrupt )
+	    return NULL;
+
+	fReadingOther = TRUE;
+	
+	if( fReadingCommand ) {
+	    /* Save old readline context. */
+	    szOldPrompt = rl_prompt;
+	    szOldInput = rl_copy_text( 0, rl_end );
+	    nOldEnd = rl_end;
+	    nOldMark = rl_mark;
+	    nOldPoint = rl_point;
+	    /* FIXME this is unnecessary when handling an X command! */
+	    putchar( '\n' );
+	}
+	
+	szInput = NULL;
+	
+	rl_callback_handler_install( szPrompt, HandleInputRecursive );
+
+	while( !szInput ) {
+	    FD_ZERO( &fds );
+	    FD_SET( STDIN_FILENO, &fds );
+	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+
+	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
+		    NULL );
+
+	    if( fInterrupt ) {
+		putchar( '\n' );
+		break;
+	    }
+	    
+	    if( FD_ISSET( STDIN_FILENO, &fds ) )
+		rl_callback_read_char();
+
+	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
+		HandleXAction();
+	}
+
+	if( fReadingCommand ) {
+	    /* Restore old readline context. */
+	    rl_callback_handler_install( szOldPrompt, HandleInput );
+	    rl_insert_text( szOldInput );
+	    free( szOldInput );
+	    rl_end = nOldEnd;
+	    rl_mark = nOldMark;
+	    rl_point = nOldPoint;
+	    rl_redisplay();
+	} else
+	    rl_callback_handler_remove();	
+
+	fReadingOther = FALSE;
+	
+	return szInput;
+#else
+	/* Using X, but not readline. */
+	if( fInterrupt )
+	    return NULL;
+
+	putchar( '\n' );
+	fputs( szPrompt, stdout );
+	fflush( stdout );
+
+	do {
+	    FD_ZERO( &fds );
+	    FD_SET( STDIN_FILENO, &fds );
+	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+
+	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
+		    NULL );
+
+	    if( fInterrupt ) {
+		putchar( '\n' );
+		return NULL;
+	    }
+	    
+	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
+		HandleXAction();
+	} while( !FD_ISSET( STDIN_FILENO, &fds ) );
+
+	goto ReadDirect;
+#endif
+    }
+#endif
+#if HAVE_LIBREADLINE
+    /* Using readline, but not X. */
+    if( fInterrupt )
+	return NULL;
+
+    if( !( sz = readline( szPrompt ) ) ) {
+	putchar( '\n' );
+	exit( EXIT_SUCCESS );
+    }
+    
+    if( fInterrupt )
+	return NULL;
+
+    return sz;
+#else
+    /* Not using readline or X. */
+    if( fInterrupt )
+	return NULL;
+
+    fputs( szPrompt, stdout );
+    fflush( stdout );
+
+ ReadDirect:
+    sz = malloc( 256 );
+    
+    fgets( sz, 256, stdin );
+    
+    if( fInterrupt ) {
+	free( sz );
+	return NULL;
+    }
+    
+    if( ( pch = strchr( sz, '\n' ) ) )
+	*pch = 0;
+    
+    if( feof( stdin ) && !*sz ) {
+	putchar( '\n' );
+	exit( EXIT_SUCCESS );
+    }
+    
+    return sz;
+#endif
+}
 
 static RETSIGTYPE HandleInterrupt( int idSignal ) {
 
@@ -1367,8 +1613,10 @@ extern int main( int argc, char *argv[] ) {
     
     for(;;) {
 #if HAVE_LIBREADLINE
-	if( !( sz = readline( FormatPrompt() ) ) )
+	if( !( sz = readline( FormatPrompt() ) ) ) {
+	    putchar( '\n' );
 	    return EXIT_SUCCESS;
+	}
 	
 	fInterrupt = FALSE;
 	
@@ -1404,11 +1652,7 @@ extern int main( int argc, char *argv[] ) {
 
 	while( !fInterrupt && fNextTurn )
 	    NextTurn();
-	
-	if( fInterrupt ) {
-	    puts( "(Interrupted)" );
-	    
-	    fInterrupt = FALSE;
-	}
+
+	ResetInterrupt();
     }
 }
