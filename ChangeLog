@@ -1,3 +1,7 @@
+Sun Sep 15 11:02:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* sound.c: add #ifdef HAVE_SYS_IOCTL_H
+
 Sat Sep 14 19:53:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c: merge agree and take widgets; marge decline and

@@ -32,7 +32,9 @@
 #endif
 #include <errno.h>
 #include <fcntl.h>
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <signal.h>
 #if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
