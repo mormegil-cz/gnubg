@@ -66,7 +66,7 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fResigned = FALSE, fMove = -1, nPliesEval = 1, anScore[ 2 ] = { 0, 0 },
     cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
-    fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
+    fAutoRoll = TRUE, nMatchTo = 0, fJacoby = TRUE, fCrawford = FALSE,
     fPostCrawford = FALSE;
 
 player ap[ 2 ] = {
