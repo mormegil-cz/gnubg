@@ -3485,9 +3485,17 @@ static void Slave (void)
     
     /* create socket */
     listenSocket = socket (AF_INET, SOCK_STREAM, 0);
+#ifdef WIN32
+    if (listenSocket == INVALID_SOCKET) {
+#else
     if (listenSocket == -1) {
+#endif /* WIN32 */
         outputerrf ("*** RPU could not create slave socket (err=%d).\n", 
+#ifdef WIN32
+            GetLastError() );
+#else
             errno);
+#endif /* WIN32 */
         outputerr ("socket_create");
     }
     else {

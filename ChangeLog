@@ -1,3 +1,7 @@
+Wed Jul 23 20:50:09 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gnubg.c: add Winsock initilisation and cleanup
+
 Tue Jul 22 19:48:58 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* external.c procunits.c rollout.c: multi-processing code

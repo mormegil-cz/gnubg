@@ -3747,6 +3747,12 @@ extern void PromptForExit( void ) {
 
     EvalShutdown ();
     
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+    WSACleanup();
+#endif
+#endif
+
     exit( EXIT_SUCCESS );
 }
 
@@ -6869,6 +6875,29 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 
 
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+
+#if USE_GTK
+    gdk_threads_enter ();
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Windows sockets"), 500 );
+    gdk_threads_leave ();
+#endif /* USE_GTK */
+
+    /* init Winsock */
+    {
+	short wVersionRequested;
+	WSADATA wsaData;
+	wVersionRequested = MAKEWORD (1, 1);
+	if (WSAStartup (wVersionRequested, &wsaData) != 0) {
+	    outputerr( "Windows sockets initialisation" );
+	}
+    }
+
+#endif /* HAVE_SOCKETS */
+#endif /* WIN32 */
+
 
 #if PROCESSING_UNITS
 #if USE_GTK
@@ -6960,6 +6989,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		 "directions for obtaining a pre-trained network.") );
 	outputx();
     }
+
 #if USE_GUILE
 #  if USE_GTK
     gdk_threads_enter ();
@@ -7113,6 +7143,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 	CommandLoadCommands( pchCommands );
         EvalShutdown();
+
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+    WSACleanup();
+#endif
+#endif
+
 	exit( EXIT_SUCCESS );
     }
 
@@ -7120,6 +7157,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( pchScript ) {
 	scm_primitive_load( scm_makfrom0str( pchScript ) );
         EvalShutdown();
+
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+    WSACleanup();
+#endif
+#endif
+
 	exit( EXIT_SUCCESS );
     }
 #endif
@@ -7142,6 +7186,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	RunGTK( pwSplash );
 
         EvalShutdown();
+
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+    WSACleanup();
+#endif
+#endif
+
 	exit( EXIT_SUCCESS );
     }
 #elif USE_EXT
@@ -7190,6 +7241,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		if( feof( stdin ) ) {
 		    if( !isatty( STDIN_FILENO ) ) {
                         EvalShutdown();
+
+#ifdef WIN32
+#ifdef HAVE_SOCKETS
+    WSACleanup();
+#endif
+#endif
+
 			exit( EXIT_SUCCESS );
                     }
 		    
