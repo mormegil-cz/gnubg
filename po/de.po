@@ -3147,7 +3147,7 @@ msgstr "Spielfeld"
 
 #: gtkexport.c:337
 msgid "move(s) between board shown"
-msgstr ""
+msgstr "Anzahl Zuege zwischen zwei Boards"
 
 #: gtkexport.c:349
 msgid "Players"
