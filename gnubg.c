@@ -115,7 +115,7 @@ static command acDatabase[] = {
     { "manual", CommandSetRNGManual, "Enter all dice rolls manually", NULL },
     { "mersenne", CommandSetRNGMersenne, "Use the Mersenne Twister generator",
       NULL },
-    { "user", CommandNotImplemented, "Specify an external generator", NULL },
+    { "user", CommandSetRNGUser, "Specify an external generator", NULL },
     { NULL, NULL, NULL, NULL }
 }, acSet[] = {
     { "autogame", CommandSetAutoGame, "Select whether to start new games "
@@ -153,7 +153,7 @@ static command acDatabase[] = {
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL },
-    { "rng", CommandNotImplemented, "Display which random number generator "
+    { "rng", CommandShowRNG, "Display which random number generator "
       "is being used", NULL },
     { "score", CommandShowScore, "View the match or session score ",
       NULL },
@@ -265,7 +265,7 @@ extern int ParsePlayer( char *sz ) {
 }
 
 extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
-
+ 
     /* FIXME allow more formats */
 
     if( !sz || !*sz ) {
@@ -967,6 +967,7 @@ static void usage( char *argv0 ) {
 "Usage: %s [options]\n"
 "Options:\n"
 "  -h, --help                Display usage and exit\n"
+"  -t, --tty                 Start on tty instead of using X\n"
 "  -v, --version             Show version information and exit\n"
 "\n"
 "Report bugs to <gnubg@sourceforge.net>.\n", argv0 );
@@ -977,14 +978,14 @@ extern int main( int argc, char *argv[] ) {
     char ch;
     static struct option ao[] = {
         { "help", no_argument, NULL, 'h' },
-	{ "tty", no_argument, NULL, 't' },
+        { "tty", no_argument, NULL, 't' },
         { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
 
     fInteractive = isatty( STDIN_FILENO );
     
-    while( ( ch = getopt_long( argc, argv, "hv", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "htv", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'h': /* help */
