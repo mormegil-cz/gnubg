@@ -2319,7 +2319,7 @@ extern int main( int argc, char *argv[] ) {
 	case 'v': /* version */
 	    outputl( "GNU Backgammon " VERSION );
 #if USE_GUI
-	    outputl( "X Window System supported." );
+	    outputl( "Window system supported." );
 #endif
 #if HAVE_LIBGDBM
 	    outputl( "Position databases supported." );
@@ -2327,7 +2327,8 @@ extern int main( int argc, char *argv[] ) {
 	    return EXIT_SUCCESS;
 	case 'w':
 #if USE_GTK
-	    fTTY = FALSE;
+	    if( fX )
+		fTTY = FALSE;
 #else
 	    /* silently ignore */
 #endif
@@ -2337,17 +2338,21 @@ extern int main( int argc, char *argv[] ) {
 	    return EXIT_FAILURE;
 	}
 
-    outputl( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong.\n"
-	  "GNU Backgammon is free software, covered by the GNU "
-	  "General Public License\n"
-	  "version 2, and you are welcome to change it and/or distribute "
-	  "copies of it\n"
-	  "under certain conditions.  Type \"show copying\" to see "
-	  "the conditions.\n"
-	  "There is absolutely no warranty for GNU Backgammon.  "
-	  "Type \"show warranty\" for\n"
-	  "details." );
-
+#if USE_GTK
+    if( fTTY )
+#endif
+	outputl( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong."
+		 "\n"
+		 "GNU Backgammon is free software, covered by the GNU "
+		 "General Public License\n"
+		 "version 2, and you are welcome to change it and/or "
+		 "distribute copies of it\n"
+		 "under certain conditions.  Type \"show copying\" to see "
+		 "the conditions.\n"
+		 "There is absolutely no warranty for GNU Backgammon.  "
+		 "Type \"show warranty\" for\n"
+		 "details." );
+    
     InitRNG();
 
     InitMatchEquity ( metCurrent );
@@ -2374,7 +2379,11 @@ extern int main( int argc, char *argv[] ) {
     
     srandom( time( NULL ) );
 
-    PortableSignal( SIGINT, HandleInterrupt, NULL );
+#if USE_GTK
+    if( fTTY )
+#endif
+	PortableSignal( SIGINT, HandleInterrupt, NULL );
+    
 #if USE_GUI
     PortableSignal( SIGIO, HandleIO, NULL );
 #endif
@@ -2386,8 +2395,8 @@ extern int main( int argc, char *argv[] ) {
     rl_completion_entry_function = (Function *) NullGenerator;
 #endif
 
-    /* FIXME if( optind < argc )
-       CommandLoad( argv[ optind ] ); */
+    if( optind < argc )
+       CommandLoadMatch( argv[ optind ] );
 
     LoadRCFiles();
     
