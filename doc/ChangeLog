@@ -1,3 +1,8 @@
+Thu Sep 25 22:45:38 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * faq.texi: Moved the Mailing list guidelined to 
+	http://www.gnubg.org/resources/mailinglist/
+
 Thu Sep 18 21:02:38 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * faq.texi: Commit Achim's file
