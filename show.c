@@ -504,9 +504,9 @@ void CommandShowFullBoard( char *sz ) {
 #if USE_GUI
     if( fX )
 #if USE_GTK
-	game_set( BOARD( pwBoard ), an, TRUE, 
-                  ap[ 0 ].szName, ap[ 1 ].szName , ms.nMatchTo, 
-                  ms.anScore[ 0 ], ms.anScore[ 1 ], 
+	game_set( BOARD( pwBoard ), an, ms.fTurn, 
+                  ap[ 1 ].szName, ap[ 0 ].szName , ms.nMatchTo, 
+                  ms.anScore[ 1 ], ms.anScore[ 0 ], 
                   ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
 #else
         GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    

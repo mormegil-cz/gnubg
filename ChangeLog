@@ -1,3 +1,8 @@
+Mon Jan 13 18:17:57 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* show.c (CommandShowFullBoard): player names and scores were inverted.
+	(reported by Nardy Pillards)
+
 Sun Jan 12 17:29:14 2003  Gary Wong  <gtw@gnu.org>
 
 	* eval.c (EvalKey): New parameter fCubefulEquity, so that cache
