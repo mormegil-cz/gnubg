@@ -1843,15 +1843,8 @@ getME ( const int nScore0, const int nScore1, const int nMatchTo,
 }
 
 
-/*
- * Invert match equity table.
- *
- * That is, set  MWC(x,y) = 1.0 -  MWC (y,x)
- *
- */
-
 extern void
-CommandInvertMatchEquityTable ( char *sz ) {
+invertMET ( void ) {
 
   int i, j;
   float r;

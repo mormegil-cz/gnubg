@@ -82,5 +82,8 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] );
 extern float
 GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci );
 
+extern void
+invertMET ( void );
+
 #endif
 
