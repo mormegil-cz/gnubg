@@ -13,6 +13,10 @@
 #include "config.h"
 #include "cache.h"
 #include "hash.h"
+#include "threadglobals.h"
+
+
+#define PROCESSING_UNITS 1
 
 static int ac[] = { 2, 3, 7, 13, 31, 61, 127, 251, 509, 1021, 2039, 4093,
 		    8191, 16381, 32749, 65521, 131071, 262139, 524287,
@@ -329,6 +333,10 @@ CacheCreate(cache* pc, unsigned int s)
     return -1;
   }
   
+  #if PROCESSING_UNITS
+  pthread_mutex_init (&pc->mutex, 0);
+  #endif
+  
   CacheFlush(pc);
 
   return 0;
@@ -337,8 +345,16 @@ CacheCreate(cache* pc, unsigned int s)
 cacheNode*
 CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
 {
-  unsigned int size = pc->size;
-  unsigned long l = keyToLong(e->auchKey, e->nEvalContext);
+  unsigned int size;
+  unsigned long l;
+  DECLARE_THREADSTATICLOCAL(cacheNode, result, {} );
+  
+  #if PROCESSING_UNITS
+  pthread_mutex_lock (&pc->mutex);
+  #endif
+  
+  size = pc->size;
+  l = keyToLong(e->auchKey, e->nEvalContext);
   
   l = (l & ((size >> 1)-1)) << 1;
 
@@ -354,6 +370,9 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
        && memcmp(e->auchKey, ck1->auchKey, sizeof(e->auchKey)) == 0) ) {
     // found at first slot
     ++pc->cHit;
+    #if PROCESSING_UNITS
+    pthread_mutex_unlock (&pc->mutex);
+    #endif
     return ck1;
   }
 
@@ -367,10 +386,17 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
       *ck2 = tmp;
 
       ++pc->cHit;
+      #if PROCESSING_UNITS
+      pthread_mutex_unlock (&pc->mutex);
+      #endif
       return ck1;
     }
   }
   }
+  
+  #if PROCESSING_UNITS
+  pthread_mutex_unlock (&pc->mutex);
+  #endif
   
   return 0;
 }
@@ -378,7 +404,13 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
 void
 CacheAdd(cache* pc, cacheNode* e, unsigned long l)
 {
-  cacheNode* ck1 = pc->m + l;
+  cacheNode* ck1;
+  
+  #if PROCESSING_UNITS
+  pthread_mutex_lock (&pc->mutex);
+  #endif
+  
+   ck1 = pc->m + l;
 
   ++pc->nAdds;
   
@@ -386,22 +418,41 @@ CacheAdd(cache* pc, cacheNode* e, unsigned long l)
     pc->m[l+1] = *ck1;
   }
   *ck1 = *e;
+
+  #if PROCESSING_UNITS
+  pthread_mutex_unlock (&pc->mutex);
+  #endif
 }
 
 
 void
 CacheDestroy(cache* pc)
 {
+  #if PROCESSING_UNITS
+  pthread_mutex_lock (&pc->mutex);
+  pthread_mutex_destroy (&pc->mutex);
+  #endif
+
   free(pc->m);
+
 }
 
 void
 CacheFlush(cache* pc)
 {
   int k;
+
+  #if PROCESSING_UNITS
+  pthread_mutex_lock (&pc->mutex);
+  #endif
+
   for(k = 0; k < pc->size; ++k) {
     pc->m[k].nEvalContext = (unsigned int)-1;
   }
+
+  #if PROCESSING_UNITS
+  pthread_mutex_unlock (&pc->mutex);
+  #endif
 }
 
 int

@@ -21,6 +21,8 @@
 
 #include "config.h"
 
+#define PROCESSING_UNITS 1
+
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
@@ -98,6 +100,11 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "rollout.h"
 #include "sound.h"
 #include "record.h"
+
+#if PROCESSING_UNITS
+#include "procunits.h"
+#include "threadglobals.h"
+#endif
 
 #if USE_GUILE
 #include <libguile.h>
@@ -453,7 +460,12 @@ static char szDICE[] = N_("<die> <die>"),
     szTRIALS[] = N_("<trials>"),
     szVALUE[] = N_("<value>"),
     szMATCHID[] = N_("<matchid>"),
-    szURL[] = N_("<URL>");
+    szURL[] = N_("<URL>"),
+    szPROCUNITID[] = N_("<procunit-id>"),
+    szPROCUNITIDVALUE[] = N_("<procunit-id> <value>"),
+    szADDRESS[] = N_("<address>"),
+    szSLAVEMASTER[] = N_("slave | master"),
+    szOPTN[] = N_("[n]");
 
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
@@ -485,6 +497,9 @@ command cER = {
 }, cHighlightColour = {
     /* dummy command used for highlight colour names */
     NULL, NULL, NULL, NULL, &cHighlightColour
+}, cSlaveMaster = {
+    /* dummy command used for slave / master */
+    NULL, NULL, NULL, NULL, &cSlaveMaster
 }, acAnalyseClear[] = {
     { "game", CommandAnalyseClearGame, 
       N_("Clear analysis for this game"), NULL, NULL },
@@ -741,6 +756,28 @@ command cER = {
     { "weights", CommandNewWeights, N_("Create new (random) neural net "
       "weights"), szOPTSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acProcunitsAdd[] = {
+    { "local", CommandProcunitsAddLocal, N_("Add n local processing unit(s)"), 
+      szOPTN, NULL },
+    { "remote", CommandProcunitsAddRemote, N_("Add a slave remote processing unit"), 
+      szADDRESS, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acProcunits[] = {
+    { "info", CommandShowProcunitsInfo, N_("Show info about processing units (same as 'show pu info') "), 
+      NULL, NULL },
+    { "master", CommandProcunitsMaster, N_("Set host in master mode (default) for remote processing"), 
+      NULL, NULL },
+    { "slave", CommandProcunitsSlave, N_("Set host in slave mode for remote processing"), 
+      NULL, NULL },
+    { "add", NULL, N_("Add a processing unit"), 
+      NULL, acProcunitsAdd },
+    { "remove", CommandProcunitsRemove, N_("Remove a processing unit"), 
+      szPROCUNITID, NULL },
+    { "start", CommandProcunitsStart, N_("Start/reconnect a processing unit"), 
+      szPROCUNITID, NULL },
+    { "stop", CommandProcunitsStop, N_("Stop/disconnect a processing unit"), 
+      szPROCUNITID, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acRecordAdd[] = {
     { "game", CommandRecordAddGame,
       N_("Log the game statistics to the player records"), NULL, NULL },
@@ -954,6 +991,22 @@ command cER = {
     { "winpc", CommandSetOutputWinPC,
       N_("Show winning chances as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetProcunitsRemote[] = {
+    { "mode", CommandSetProcunitsRemoteMode,
+        N_("Set host in master or slave remote mode"), szSLAVEMASTER, &cSlaveMaster },
+    { "mask", CommandSetProcunitsRemoteMask, 
+        N_("Set remote processing IP address mask"), szADDRESS, NULL },
+    { "port", CommandSetProcunitsRemotePort, 
+        N_("Set remote processing TCP port"), szVALUE, NULL },
+    { "queue", CommandSetProcunitsRemoteQueue, 
+        N_("Set remote processing unit queue size"), szPROCUNITIDVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetProcunits[] = {
+    { "enabled", CommandSetProcunitsEnabled,
+        N_("Enable/disable processing units"), szONOFF, &cOnOff },
+    { "remote", NULL, 
+        N_("Set remote processing units parameters"), NULL, acSetProcunitsRemote },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
@@ -1504,6 +1557,7 @@ command cER = {
     { "postcrawford", CommandSetPostCrawford, 
       N_("Set whether this is a post-Crawford game"), szONOFF, &cOnOff },
     { "priority", NULL, N_("Set the priority of gnubg"), NULL, acSetPriority },
+    { "pu", NULL, N_("Set processing units parameteres"), NULL, acSetProcunits },
     { "prompt", CommandSetPrompt, N_("Customise the prompt gnubg prints when "
       "ready for commands"), szPROMPT, NULL },
     { "record", CommandSetRecord, N_("Set whether all games in a session are "
@@ -1535,6 +1589,20 @@ command cER = {
       N_("Compute statistics for every game in the match"), NULL, NULL },
     { "session", CommandShowStatisticsSession, 
       N_("Compute statistics for every game in the session"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acShowProcunitsRemote[] = {
+    { "mask", CommandShowProcunitsRemoteMask, 
+      N_("Show remote processing IP address mask"), NULL, NULL },
+    { "port", CommandShowProcunitsRemotePort, 
+      N_("Show remote processing TCP port"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acShowProcunits[] = {
+    { "info", CommandShowProcunitsInfo, 
+      N_("Show processing units information"), NULL, NULL },
+    { "stats", CommandShowProcunitsStats, 
+      N_("Show processing units statistics"), szPROCUNITID, NULL },
+    { "remote", NULL, 
+      N_("Show information about remote processing"), NULL, acShowProcunitsRemote },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShow[] = {
     { "analysis", CommandShowAnalysis, N_("Show parameters used for analysing "
@@ -1616,6 +1684,8 @@ command cER = {
     { "player", CommandShowPlayer, N_("View per-player options"), NULL, NULL },
     { "postcrawford", CommandShowCrawford, 
       N_("See if this is post-Crawford play"), NULL, NULL },
+    { "pu", NULL, N_("Show processing units info "
+        "and parameters"), NULL, acShowProcunits },
     { "prompt", CommandShowPrompt, N_("Show the prompt that will be printed "
       "when ready for commands"), NULL, NULL },
     { "record", CommandRecordShow, N_("View the player records"), szOPTNAME,
@@ -1717,6 +1787,9 @@ command cER = {
     { "play", CommandPlay, N_("Force the computer to move"), NULL, NULL },
     { "previous", CommandPrevious, N_("Step backward within the game"), szSTEP,
       NULL },
+    #if PROCESSING_UNITS
+    { "pu", NULL, N_("Processing units commands"), NULL, acProcunits},
+    #endif
     { "quit", CommandQuit, N_("Leave GNU Backgammon"), NULL, NULL },
     { "r", CommandRoll, NULL, NULL, NULL },
     { "redouble", CommandRedouble, N_("Accept the cube one level higher "
@@ -6473,6 +6546,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 #if USE_GTK
     GtkWidget *pwSplash = NULL;
+#endif
+
+#if PROCESSING_UNITS
+    InitThreadGlobalStorage ();
+    CreateThreadGlobalStorage ();
+    InitProcessingUnits ();
 #endif
 
 #if HAVE_SETLOCALE

@@ -67,6 +67,15 @@
 #define BINARY 0
 #endif
 
+#if VECTOR
+#if VECTOR_VE
+#include "vector_ve.h"
+#endif
+#endif
+
+#define PROCESSING_UNITS 1
+#include "threadglobals.h"
+
 
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
@@ -275,12 +284,14 @@ bearoffcontext *pbc1 = NULL;
 bearoffcontext *pbc2 = NULL;
 bearoffcontext *apbcHyper[ 3 ] = { NULL, NULL, NULL };
 
+//DECLARE_THREADSTATICGLOBAL (cache, cEval, {} );
+//DECLARE_THREADSTATICGLOBAL (int, cCache, 0 );
 static cache cEval;
 static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
 static int iTick;
-static float rCubeX = 2.0/3.0;
+DECLARE_THREADSTATICGLOBAL(float, rCubeX, 2.0/3.0);
 int fEgyptian = FALSE;
 
 /* variation of backgammon used by gnubg */
@@ -333,11 +344,17 @@ defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
     int nEvalContext;
+    #if VECTOR
+    #if VECTOR_VE
+    // so that ar is 16byte-aligned
+    vector float dummy;
+    #endif
+    #endif
     float ar[ NUM_OUTPUTS ];
 } evalcache;
 #endif
 
-static int nReductionGroup   = 0;
+DECLARE_THREADSTATICGLOBAL (int, nReductionGroup, 0);
 
 static int all_d1[] = { 1, 1, 1, 1, 1, 1, 
                         2, 2, 2, 2, 2, 
@@ -869,6 +886,25 @@ extern int EvalSave( char *szWeights ) {
 }
 
 
+typedef  struct {
+    /* if true, all intermediate points (if any) are required;
+       if false, one of two intermediate points are required.
+       Set to true for a direct hit, but that can be checked with
+       nFaces == 1,
+    */
+    int fAll;
+
+    /* Intermediate points required */
+    int anIntermediate[ 3 ];
+
+    /* Number of faces used in hit (1 to 4) */
+    int nFaces;
+
+    /* Number of pips used to hit */
+    int nPips;
+} hit_t;
+
+
 /* Calculates the inputs for one player only.  Returns 0 for contact
    positions, 1 for races. */
 static void
@@ -909,27 +945,10 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
   };
     
   /* One way to hit */ 
-  static struct {
-    /* if true, all intermediate points (if any) are required;
-       if false, one of two intermediate points are required.
-       Set to true for a direct hit, but that can be checked with
-       nFaces == 1,
-    */
-    int fAll;
+  hit_t *pi;
 
-    /* Intermediate points required */
-    int anIntermediate[ 3 ];
-
-    /* Number of faces used in hit (1 to 4) */
-    int nFaces;
-
-    /* Number of pips used to hit */
-    int nPips;
-  } *pi,
-
-      /* All ways to hit */
-	
-      aIntermediate[ 39 ] = {
+  /* All ways to hit */
+  static hit_t aIntermediate[ 39 ] = {
 	{ 1, { 0, 0, 0 }, 1, 1 }, /*  0: 1x hits 1 */
 	{ 1, { 0, 0, 0 }, 1, 2 }, /*  1: 2x hits 2 */
 	{ 1, { 1, 0, 0 }, 2, 2 }, /*  2: 11 hits 2 */
@@ -2009,19 +2028,22 @@ enum {
   OBG_POSSIBLE = 0x8
 };
 
+
 /* separate context for race, crashed, contact
    -1: regulare eval
     0: save base
     1: from base
  */
-static int nContext[3] = {-1, -1, -1};
+DECLARE_THREADSTATICGLOBAL (int, nContext[3], ({-1, -1, -1}));
+
 
 static inline NNEvalType
 NNevalAction(positionclass p)
 {
-  {                     assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
+  {                     
+  assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
   
-  switch( nContext[p - CLASS_RACE] ) {
+  switch( THREADGLOBAL(nContext)[p - CLASS_RACE] ) {
     case -1:
     {
       /* incremental evaluation not useful */
@@ -2030,7 +2052,7 @@ NNevalAction(positionclass p)
     case 0:
     {
       /* next call should return FROMBASE */
-      nContext[p - CLASS_RACE] = 1;
+      THREADGLOBAL(nContext)[p - CLASS_RACE] = 1;
       
       /* starting a new context; save base in the hope it will be useful */
       return NNEVAL_SAVE;
@@ -2126,7 +2148,11 @@ raceBGprob(int anBoard[2][25], int side, const bgvariation bgv)
 static void
 EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
 
+#if VECTOR
+  VECTOR_FLOATARRAY(arInput,NUM_INPUTS);
+#else
   float arInput[ NUM_INPUTS ];
+#endif
 
   CalculateRaceInputs( anBoard, arInput );
     
@@ -2222,22 +2248,32 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
 static void
 EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 {
-  float arInput[ NUM_INPUTS ];
+    #if VECTOR
+    VECTOR_FLOATARRAY(arInput,NUM_INPUTS);
+    #else
+    float arInput[ NUM_INPUTS ];
+    #endif
+    DECLARE_THREADSTATICLOCAL (int, nLastContext_EvalContact, 0);
     
-  CalculateInputs( anBoard, arInput );
+    CalculateInputs( anBoard, arInput );
     
-  NeuralNetEvaluate(&nnContact, arInput, arOutput,
+    NeuralNetEvaluate(&nnContact, arInput, arOutput,
 		    NNevalAction( CLASS_CONTACT ) );
 }
 
 static void
 EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
 {
-  float arInput[ NUM_INPUTS ];
+    #if VECTOR
+    VECTOR_FLOATARRAY(arInput,NUM_INPUTS);
+    #else
+    float arInput[ NUM_INPUTS ];
+    #endif
+    DECLARE_THREADSTATICLOCAL (int, nLastContext_EvalCrashed, 0);
     
-  CalculateInputs( anBoard, arInput );
+    CalculateInputs( anBoard, arInput );
     
-  NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
+    NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
 		     NNevalAction( CLASS_CRASHED ) );
 }
 
@@ -2402,7 +2438,11 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   int fUseReduction;
   laRollList_t *rolls = NULL;
   laRollList_t *rollList = NULL;
+  #if VECTOR
+  VECTOR_FLOATARRAY(arVariationOutput,NUM_OUTPUTS);
+  #else
   float arVariationOutput[ NUM_OUTPUTS ];
+  #endif
   float rTemp;
   int r, w, sumW;
   
@@ -2419,9 +2459,9 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
 
     if ( fUseReduction ) {
-      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
+      THREADGLOBAL(nReductionGroup) = (THREADGLOBAL(nReductionGroup) + 1) % pec->nReduced;
       rollList = rollLists[ pec->nReduced ];
-      rolls = &rollList[ nReductionGroup ];
+      rolls = &rollList[ THREADGLOBAL(nReductionGroup) ];
     }
     else
       rolls = &allLists[ 0 ];
@@ -2486,6 +2526,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   else {
     /* at leaf node; use static evaluation */
     
+    //fprintf (stderr, "<NeuralNet>");
     acef[ pc ]( anBoard, arOutput, pci->bgv );
 
     if( pec->rNoise )
@@ -2565,16 +2606,20 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 #if defined( GARY_CACHE )
     l = EvalCacheHash( &ec );
     
+    //pthread_mutex_lock (&cEval.mutex);
     if( ( pec = CacheLookup( &cEval, l, &ec ) ) )
 #else
     if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) 
 #endif
       {
 	memcpy( arOutput, pec->ar, sizeof ( float ) * NUM_OUTPUTS );
-	
+        //fprintf (stderr, "[cache hit]");
+	//pthread_mutex_unlock (&cEval.mutex);
 	return 0;
     }
+    //pthread_mutex_unlock (&cEval.mutex);
     
+    //fprintf (stderr, "[EvaluatePositionFull]");
     if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
 	return -1;
     
@@ -2696,7 +2741,11 @@ InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS],
 extern int 
 GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
+#if VECTOR
+  VECTOR_FLOATARRAY(ar,NUM_OUTPUTS);
+#else
   float ar[ NUM_OUTPUTS ];
+#endif
     
   if( ClassifyPosition( anBoard, bgv ) != CLASS_OVER )
     return 0;
@@ -2716,9 +2765,13 @@ GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
 			  float rAlpha, float rAnneal,
                           const bgvariation bgv ) {
-
+    #if VECTOR
+    VECTOR_FLOATARRAY(arInput,NUM_INPUTS);
+    VECTOR_FLOATARRAY(arOutput,NUM_OUTPUTS);
+    #else
     float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
-
+    #endif
+    
     int pc = ClassifyPosition( anBoard, bgv );
   
     neuralnet* nn;
@@ -3052,8 +3105,17 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
 	    return;
 	}
     
+    #if 0
     for( i = 0; i < cMoves * 2; i++ )
 	pm->anMove[ i ] = anMoves[ i ] > -1 ? anMoves[ i ] : -1;
+    #else
+    // PROCESSING_UNITS DEBUG
+    for( i = 0; i < cMoves * 2; i++ ) {
+        int x = anMoves[ i ] > -1 ? anMoves[ i ] : -1;
+	pm->anMove[ i ] = x;
+    }
+    #endif
+        
     
     if( cMoves < 4 )
 	pm->anMove[ cMoves * 2 ] = -1;
@@ -3229,7 +3291,7 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
 
   if( nPlies == 0 ) {
     /* start incremental evaluations */
-    nContext[0] = nContext[1] = nContext[2] = 0;
+    THREADGLOBAL(nContext)[0] = THREADGLOBAL(nContext)[1] = THREADGLOBAL(nContext)[2] = 0;
   }
     
   for( i = 0; i < pml->cMoves; i++ ) {
@@ -3249,7 +3311,7 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
 
   if( nPlies == 0 ) {
     /* reset to none */
-    nContext[0] = nContext[1] = nContext[2] = -1;
+    THREADGLOBAL(nContext)[0] = THREADGLOBAL(nContext)[1] = THREADGLOBAL(nContext)[2] = -1;
   }
     
   return 0;
@@ -3260,15 +3322,17 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
                int n0, int n1, int fPartial ) {
 
   int anRoll[ 4 ], anMoves[ 8 ];
-  static move amMoves[ MAX_INCOMPLETE_MOVES ];
-
+  //move *amMoves = calloc (MAX_INCOMPLETE_MOVES, sizeof (move));
+  //static move amMoves[ MAX_INCOMPLETE_MOVES ];
+  DECLARE_THREADSTATICLOCAL(move, amMoves[MAX_INCOMPLETE_MOVES], {});
+  
     anRoll[ 0 ] = n0;
     anRoll[ 1 ] = n1;
 
     anRoll[ 2 ] = anRoll[ 3 ] = ( ( n0 == n1 ) ? n0 : 0 );
 
     pml->cMoves = pml->cMaxMoves = pml->cMaxPips = pml->iMoveBest = 0;
-    pml->amMoves = amMoves; /* use static array for top-level search, since
+    pml->amMoves = THREADGLOBAL(amMoves); /* use static array for top-level search, since
 			       it doesn't need to be re-entrant */
     
     GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves,fPartial );
@@ -3278,7 +3342,9 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 
 	GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves, fPartial );
     }
-
+    
+    //free (amMoves);
+    
     return pml->cMoves;
 }
 
@@ -3606,7 +3672,11 @@ extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] ) {
 static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput, 
                       const bgvariation bgv ) {
 
+    #if VECTOR
+    VECTOR_FLOATARRAY(ar,NUM_OUTPUTS);
+    #else
     float ar[ NUM_OUTPUTS ];
+    #endif
     
     EvalOver( anBoard, ar, bgv );
 
@@ -3674,9 +3744,15 @@ static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput,
 static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput,
                          const bgvariation bgv ) {
 
-  float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
-    arDerivative[ NUM_INPUTS * NUM_OUTPUTS ],
-    ardEdI[ NUM_INPUTS ], *p;
+    #if VECTOR
+    VECTOR_FLOATARRAY(arInput,NUM_INPUTS);
+    VECTOR_FLOATARRAY(arOutput,NUM_OUTPUTS);
+    VECTOR_FLOATARRAY(ardEdI,NUM_INPUTS);
+    #else
+    float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
+        ardEdI[ NUM_INPUTS ];
+    #endif
+    float  arDerivative[ NUM_INPUTS * NUM_OUTPUTS ], *p;
   int i, j;
     
   CalculateInputs( anBoard, arInput );
@@ -4094,9 +4170,9 @@ GetCubeActionSz ( float arDouble[ 4 ],
                   char *szOutput, cubeinfo *pci,
 		  int fOutputMWC, int fOutputInvert ) {
 
-  static cubedecision cd;
-  static int iOptimal, iBest, iWorst;
-  static char *pc;
+  cubedecision cd;
+  int iOptimal, iBest, iWorst;
+  char *pc;
 
   static char *aszCubeString[ 4 ][ 2 ] = {
     { N_ ("Unknown"), N_ ("Unknown") },
@@ -4790,14 +4866,14 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	 myself. These points are used for doing linear
 	 interpolations. */
 
-  rOppTG = 1.0 - ( rW + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
+  rOppTG = 1.0 - ( rW + 1.0 ) / ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) );
   rOppCP = 1.0 -
-    ( rW + 0.5 + 0.5 * rCubeX ) /
-    ( rW + rL + 0.5 * rCubeX );
+    ( rW + 0.5 + 0.5 * THREADGLOBAL(rCubeX) ) /
+    ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) );
   rCP =
-    ( rL + 0.5 + 0.5 * rCubeX ) /
-    ( rW + rL + 0.5 * rCubeX );
-  rTG = ( rL + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
+    ( rL + 0.5 + 0.5 * THREADGLOBAL(rCubeX) ) /
+    ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) );
+  rTG = ( rL + 1.0 ) / ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) );
       
   if ( pci->fCubeOwner == -1 ) {
 
@@ -4843,12 +4919,12 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	  /* no beavers and other critters */
 
 	  rOppk =
-	    ( rW + rL ) * ( rW - 0.5 * ( 1.0 - rCubeX ) ) /
-	    ( rW * ( rW + rL - ( 1.0 - rCubeX ) ) );
+	    ( rW + rL ) * ( rW - 0.5 * ( 1.0 - THREADGLOBAL(rCubeX) ) ) /
+	    ( rW * ( rW + rL - ( 1.0 - THREADGLOBAL(rCubeX) ) ) );
 
 	  rk =
-	    ( rW + rL ) * ( rL - 0.5 * ( 1.0 - rCubeX ) ) /
-	    ( rL * ( rW + rL - ( 1.0 - rCubeX ) ) );
+	    ( rW + rL ) * ( rL - 0.5 * ( 1.0 - THREADGLOBAL(rCubeX) ) ) /
+	    ( rL * ( rW + rL - ( 1.0 - THREADGLOBAL(rCubeX) ) ) );
 
 	}
 	else {
@@ -4856,12 +4932,12 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	  /* with beavers and other critters */
 
 	  rOppk =
-	    ( rW + rL ) * ( rW - 0.25 * ( 1.0 - rCubeX ) ) /
-	    ( rW * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
+	    ( rW + rL ) * ( rW - 0.25 * ( 1.0 - THREADGLOBAL(rCubeX) ) ) /
+	    ( rW * ( rW + rL - 0.5 * ( 1.0 - THREADGLOBAL(rCubeX) ) ) );
 
 	  rk =
-	    ( rW + rL ) * ( rL - 0.25 * ( 1.0 - rCubeX ) ) /
-	    ( rL * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
+	    ( rW + rL ) * ( rL - 0.25 * ( 1.0 - THREADGLOBAL(rCubeX) ) ) /
+	    ( rL * ( rW + rL - 0.5 * ( 1.0 - THREADGLOBAL(rCubeX) ) ) );
 
 	}
       }
@@ -4870,13 +4946,13 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
       rOppIDP = 1.0 - rOppk *
 	( rW +
-	  rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
-	/ ( rL +  rW + 0.5 * rCubeX );
+	  THREADGLOBAL(rCubeX) / 2.0 * ( 3.0 - THREADGLOBAL(rCubeX) )  / ( 2.0 - THREADGLOBAL(rCubeX) ) )
+	/ ( rL +  rW + 0.5 * THREADGLOBAL(rCubeX) );
 
       rIDP = rk *
 	( rL +
-	  rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
-	/ ( rL +  rW + 0.5 * rCubeX );
+	  THREADGLOBAL(rCubeX) / 2.0 * ( 3.0 - THREADGLOBAL(rCubeX) )  / ( 2.0 - THREADGLOBAL(rCubeX) ) )
+	/ ( rL +  rW + 0.5 * THREADGLOBAL(rCubeX) );
 
       if ( arOutput[ 0 ] < rOppIDP ) {
 
@@ -4888,7 +4964,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	   p = rOppIDP, E = rE2 (given below) */
 
 	float rE2 =
-	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
+	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) ) - rL );
 
 	rEq = -1.0 +  ( rE2 + 1.0 ) *
 	  ( arOutput[ 0 ] - rOppCP ) / ( rOppIDP - rOppCP );
@@ -4905,10 +4981,10 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	   p = rIDP, E = rE3 */
 
 	float rE2 =
-	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
+	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) ) - rL );
 	float rE3 =
-	  2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
-		  rL - 0.5 * rCubeX );
+	  2.0 * ( rIDP * ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) ) -
+		  rL - 0.5 * THREADGLOBAL(rCubeX) );
 
 	rEq = rE2 + ( rE3 - rE2 ) *
 	  ( arOutput[ 0 ] - rOppIDP ) / ( rIDP - rOppIDP );
@@ -4925,8 +5001,8 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	   p = CP, E = +1 */
 
 	float rE3 =
-	  2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
-		  rL - 0.5 * rCubeX );
+	  2.0 * ( rIDP * ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) ) -
+		  rL - 0.5 * THREADGLOBAL(rCubeX) );
 
 	rEq = rE3 + ( 1.0 - rE3 ) *
 	  ( arOutput[ 0 ] - rIDP ) / ( rCP - rIDP );
@@ -4961,7 +5037,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	 p = rTG, E = +1 */
 
       rEq =
-	( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX ) - rL );
+	( arOutput[ 0 ] * ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) ) - rL );
     }
     else {
 
@@ -4986,8 +5062,8 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	     p = rOppTG, E = -1, and
 	     p = 1, E = +W */
 
-      rEq = ( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX )
-	      - rL - 0.5 * rCubeX );
+      rEq = ( arOutput[ 0 ] * ( rW + rL + 0.5 * THREADGLOBAL(rCubeX) )
+	      - rL - 0.5 * THREADGLOBAL(rCubeX) );
     }
     else {
 
@@ -5108,7 +5184,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   } 
   else {
@@ -5136,7 +5212,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   }
 
@@ -5219,7 +5295,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   }
   else {
@@ -5245,7 +5321,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   } 
 
@@ -5323,7 +5399,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
       
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   }
   else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] < rTG ) {
@@ -5333,7 +5409,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
     rMWCLive = 
       rMWCOppCash + 
       (rMWCCash - rMWCOppCash) * ( arOutput[ 0 ] - rOppTG ) / ( rTG - rOppTG); 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   } else {
 
@@ -5359,7 +5435,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     /* (1-x) MWC(dead) + x MWC(live) */
 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+    return  rMWCDead * ( 1.0 - THREADGLOBAL(rCubeX) ) + rMWCLive * THREADGLOBAL(rCubeX);
 
   } 
 
@@ -5441,8 +5517,13 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
       /* FIXME: very important: use opponents inputs as well */
 
+        #if VECTOR
+        VECTOR_FLOATARRAY(arInput,NUM_INPUTS);
+        /* VECTOR_FLOATARRAY(arOutput,NUM_OUTPUTS); */
+        #else
 	float arInput[ NUM_INPUTS ] /* , arOutput[ NUM_OUTPUTS ] */;
-
+        #endif 
+        
       return 0.68;
 
       CalculateInputs( anBoard, arInput );
@@ -5676,7 +5757,11 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        int anBoard[ 2 ][ 25 ],
                        cubeinfo *pci, evalcontext *pec ) {
 
+#if VECTOR
+  VECTOR_FLOATARRAY(arOutput,NUM_OUTPUTS);
+#else
   float arOutput[ NUM_OUTPUTS ];
+#endif
   cubeinfo aciCubePos[ 2 ];
   float arCubeful[ 2 ];
   int i,j;
@@ -5928,12 +6013,13 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   fAll = ! fTop; /* FIXME: fTop should be a part of EvalKey */
 
   for ( ici = 0; ici < cci && fAll; ++ici ) {
-
+      //fprintf (stderr, "[Checking cache]");
       if ( aciCubePos[ ici ].nCube < 0 )
         continue;
 
       ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
       
+      //pthread_mutex_lock (&cEval.mutex);
       if ( ( pecx = CacheLookup ( &cEval, &ec, &l ) ) ) {
         /* cache hit */
         memcpy ( arOutput, pecx->ar, sizeof ( float ) * NUM_OUTPUTS );
@@ -5942,17 +6028,20 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
       }
       else
         fAll = FALSE;
+      //pthread_mutex_unlock (&cEval.mutex);
   }
 
   /* get equities */
   
   if ( ! fAll ) {
     /* cache miss */
+    //fprintf (stderr, "[Evaluating]");
     if ( EvaluatePositionCubeful4 ( anBoard, arOutput, arCubeful, 
                                     aciCubePos, 
                                     cci, pciMove, pec, nPlies, fTop ) )
       return -1;
     
+    //fprintf (stderr, "[Evaluated]");
     /* add to cache */
     
     if ( ! fTop ) {
@@ -5993,8 +6082,13 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
   int i, ici;
   positionclass pc;
   float r;
+#if VECTOR
+  VECTOR_FLOATARRAY(ar,NUM_OUTPUTS);
+#else
   float ar[ NUM_OUTPUTS ];
+#endif
   float arEquity[ 4 ];
+    
 
   cubeinfo ciMoveOpp;
 
@@ -6020,10 +6114,13 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
   int n0, n1;
 
   pc = ClassifyPosition ( anBoard, pciMove->bgv );
-  
+  //fprintf (stderr, "[Classify=%d]", pc);
+
   if( pc > CLASS_OVER && nPlies > 0 && 
       ! ( pc <= CLASS_PERFECT && !pciMove->nMatchTo ) ) {
     /* internal node; recurse */
+    
+    //fprintf (stderr, "[internal node]");
 
     int anBoardNew[ 2 ][ 25 ];
 
@@ -6040,9 +6137,9 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
     fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
 
     if ( fUseReduction ) {
-      nReductionGroup = (nReductionGroup + 1) % pec->nReduced;
+      THREADGLOBAL(nReductionGroup) = (THREADGLOBAL(nReductionGroup) + 1) % pec->nReduced;
       rollList = rollLists[ pec->nReduced ];
-      rolls = &rollList[ nReductionGroup ];
+      rolls = &rollList[ THREADGLOBAL(nReductionGroup) ];
     }
     else
       rolls = &allLists[ 0 ];
@@ -6134,6 +6231,8 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
   } else {
     /* at leaf node; use static evaluation */
 
+    //fprintf (stderr, "[leaf node]");
+
     if ( pc == CLASS_HYPERGAMMON1 || pc == CLASS_HYPERGAMMON2 ||
          pc == CLASS_HYPERGAMMON3 ) {
 
@@ -6161,8 +6260,11 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
       /* evaluate with neural net */
       
+      //fprintf (stderr, "[nneval]");
       EvaluatePosition ( anBoard, arOutput, pciMove, NULL );
-      
+      //{ int j; for (j = 0; j < NUM_OUTPUTS; j ++)
+      //          fprintf (stderr, "%f ", arOutput[j]);  }
+
       if( pec->rNoise )
         for( i = 0; i < NUM_OUTPUTS; i++ )
           arOutput[ i ] += Noise( pec, anBoard, i );
@@ -6174,7 +6276,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
     
     /* Calculate cube efficiency */
       
-    rCubeX = EvalEfficiency ( anBoard, pc );
+    THREADGLOBAL(rCubeX) = EvalEfficiency ( anBoard, pc );
 
     /* Build all possible cube positions */
     
@@ -6223,7 +6325,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
         else {
 
           float rCl, rCf, rCfMoney;
-          float X = rCubeX;
+          float X = THREADGLOBAL(rCubeX);
           cubeinfo ciMoney;
 
           /* match play */
@@ -6238,16 +6340,16 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                          aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
 
             rCl = Utility( arOutput, &ciMoney );
-            rCubeX = 1.0;
+            THREADGLOBAL(rCubeX) = 1.0;
             rCf = Cl2CfMoney( arOutput, &ciMoney );
             rCfMoney = CFHYPER( arEquity, &ciMoney );
 
             if ( fabs( rCl - rCf ) > 0.0001 )
-              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
+              THREADGLOBAL(rCubeX) = ( rCfMoney - rCl ) / ( rCf - rCl );
 
             arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ] );
 
-            rCubeX = X;
+            THREADGLOBAL(rCubeX) = X;
 
             break;
 
@@ -6259,18 +6361,18 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                          aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
 
             rCl = arEquity[ 0 ];
-            rCubeX = 1.0;
+            THREADGLOBAL(rCubeX) = 1.0;
             rCf = Cl2CfMoney( arOutput, &ciMoney );
             rCfMoney = CFMONEY( arEquity, &ciMoney );
 
             if ( fabs( rCl - rCf ) > 0.0001 )
-              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
+              THREADGLOBAL(rCubeX) = ( rCfMoney - rCl ) / ( rCf - rCl );
             else
-              rCubeX = X;
+              THREADGLOBAL(rCubeX) = X;
 
             arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ] );
 
-            rCubeX = X;
+            THREADGLOBAL(rCubeX) = X;
 
             break;
 
@@ -6602,7 +6704,11 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
                  cubeinfo *pci,
                  float aarRates[ 2 ][ 2 ] ) {
 
+#if VECTOR
+  VECTOR_FLOATARRAY(arOutput,NUM_OUTPUTS);
+#else
   float arOutput[ NUM_OUTPUTS ];
+#endif
   float arDP1[ 2 ], arDP2[ 2 ],arCP1[ 2 ], arCP2[ 2 ], arTG[ 2 ];
   float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain;
 

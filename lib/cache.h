@@ -9,6 +9,12 @@
 
 #include <stdlib.h>
 
+#define PROCESSING_UNITS 1
+
+#if PROCESSING_UNITS
+#include <pthread.h>
+#endif
+
 #if defined( GARY_CACHE )
 typedef int ( *cachecomparefunc )( void *p0, void *p1 );
 
@@ -49,6 +55,9 @@ typedef struct _cache {
   unsigned int nAdds;
   unsigned int cLookup;
   unsigned int cHit;
+#if PROCESSING_UNITS
+  pthread_mutex_t mutex;
+#endif
 } cache;
 
 /* Cache size will be adjusted to a power of 2 */

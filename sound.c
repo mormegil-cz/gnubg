@@ -865,11 +865,11 @@ play_file_child(soundcache *psc, const char *filename) {
         char *args[4];
         char command[4096];
 
-#if USE_GTK
-        g_snprintf(command, sizeof(command), szSoundCommand, filename);
-#else
-	sprintf( command, szSoundCommand, filename );
-#endif
+    #if USE_GTK
+            g_snprintf(command, sizeof(command), szSoundCommand, filename);
+    #else
+            sprintf( command, szSoundCommand, filename );
+    #endif
 	
         args[0] = "sh";
         args[1] = "-c";
@@ -925,9 +925,9 @@ play_file_child(soundcache *psc, const char *filename) {
 	char *pch;
 	if( ( pch = can_play_audio() ) ) {
 	    play_audio_file(psc,filename, pch);
-#ifndef SIGIO
-	    _exit(0);
-#endif
+    #ifndef SIGIO
+                _exit(0);
+    #endif
 	}
     }
 #else
@@ -959,13 +959,13 @@ play_file(soundcache *psc, const char *filename) {
 
   int pid;
 
-#ifdef SIGIO
-  if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {
-      /* we can play directly without forking */
-      play_file_child( psc, filename );
-      return;
-  }
-#endif
+    #ifdef SIGIO
+    if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {
+        /* we can play directly without forking */
+        play_file_child( psc, filename );
+        return;
+    }
+    #endif
   
   /* fork, so we don't have to wait for the sound to finish */
   pid = fork();

@@ -89,7 +89,7 @@ PositionKey(int anBoard[2][25], unsigned char auchKey[10])
 extern char *PositionIDFromKey( unsigned char auchKey[ 10 ] ) {
 
     unsigned char *puch = auchKey;
-    static char szID[ 15 ];
+    /*static*/ char szID[ 15 ];		/* olivier: no need for static here */
     char *pch = szID;
     static char aszBase64[ 64 ] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

@@ -21,9 +21,12 @@
 
 #include "config.h"
 
+#define PROCESSING_UNITS 1
+
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
+#include <assert.h>
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>
@@ -32,6 +35,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+#ifndef VECTOR
+    #define VECTOR 0
+#endif
+#if VECTOR
+    #if VECTOR_VE
+        #define VECTOR_MULTIPLY 0
+        #define VECTOR_SIGMOID 0
+        #define VECTOR_MULTIPLYSIG 0
+        #include "vector_ve.h"
+    #elif 0
+    #else
+    #include "vector_none.h"
+    #endif
+#else
+    #include "vector_none.h"
+#endif
+
+#if PROCESSING_UNITS
+
+#include "procunits.h"
+#include "threadglobals.h"
+
+/* this list replaces the savedBase and savedIBase fields of the
+    neuralnet structs; thus, each thread can have its own
+    savedbases in separate storages */
+DECLARE_THREADGLOBAL(savedBases, gSavedBasesList, NULL)
+
+#endif
+
+static int gVector = VECTOR;
 
 /* e[k] = exp(k/10) / 10 */
 static float e[100] = {
@@ -196,6 +230,58 @@ static void CheckRC( void ) {
     }
 }
 
+
+#if PROCESSING_UNITS 
+
+/* returns the savedBase and savedIBase of the pnn neural net
+   belonging to the exacuting thread */
+savedBases * GetThreadSavedBases (neuralnet *pnn)
+{
+    savedBases *psb = THREADGLOBAL(gSavedBasesList), **ppsb;
+    
+    /* look for thread-specific saved bases pertaining to
+        that pnn in our thread-specific saved bases list */
+    while (psb != NULL) {
+        if (psb->pnn == pnn) 
+            return psb;
+        psb = psb->next;
+    }
+    
+    /* if not found, let's alloc new saved bases for that pnn
+        and store them in our thread-specific saved bases list */
+    ppsb = (savedBases **) &THREADGLOBAL(gSavedBasesList);
+    while (*ppsb != NULL)
+        ppsb = &((*ppsb)->next);
+        
+    *ppsb = malloc (sizeof (savedBases));
+    assert (*ppsb);
+    (*ppsb)->next = NULL;
+    (*ppsb)->pnn = pnn;
+    (*ppsb)->savedBase = malloc( pnn->cHidden * sizeof( float ) ); 
+    (*ppsb)->savedIBase = malloc( pnn->cInput * sizeof( float ) ); 
+    assert ((*ppsb)->savedBase);
+    assert ((*ppsb)->savedIBase);
+    
+    return *ppsb;
+}
+
+/* this function must be called by each terminating thread
+    that has called at least once GetThreadSavedBases() */
+void FreeThreadSavedBases (void)
+{
+    savedBases *psb = THREADGLOBAL(gSavedBasesList);
+
+    while (psb != NULL) {
+        savedBases *next = psb->next;
+        if (psb->savedBase != NULL) free (psb->savedBase);
+        if (psb->savedIBase != NULL) free (psb->savedIBase);
+        free (psb);
+        psb = next;
+    }
+}
+
+#endif
+
 extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput, float rBetaHidden,
 			    float rBetaOutput ) {
@@ -235,9 +321,11 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 
     CheckRC();
 
+    #if !PROCESSING_UNITS
     pnn->savedBase = malloc( cHidden * sizeof( float ) ); 
     pnn->savedIBase = malloc( cInput * sizeof( float ) ); 
- 
+    #endif
+    
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
 	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
@@ -250,8 +338,17 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
 	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
 
+    #if VECTOR
+        pnn->vector.dirty = 1;
+        pnn->vector.arHiddenWeight = calloc (VECTOR_COUNTALIGN(cHidden) * VECTOR_COUNTALIGN(cInput),  sizeof( float ) );
+        pnn->vector.arOutputWeight = calloc (VECTOR_COUNTALIGN(cOutput) * VECTOR_COUNTALIGN(cHidden), sizeof( float ) );
+        pnn->vector.arHiddenThreshold = calloc (VECTOR_COUNTALIGN(cHidden), sizeof (float));
+        pnn->vector.arOutputThreshold = calloc (VECTOR_COUNTALIGN(cOutput), sizeof (float));
+    #endif
+    
     return 0;
 }
+
 extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
  
    pnn->cInput = *( ( (int *) p )++ );
@@ -279,8 +376,18 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
    pnn->arOutputThreshold = p;
    ( (float *) p ) += pnn->cOutput;
 
+   #if !PROCESSING_UNITS
    pnn->savedBase = malloc( pnn->cHidden * sizeof( float ) ); 
    pnn->savedIBase = malloc( pnn->cInput * sizeof( float ) ); 
+   #endif
+   
+    #if VECTOR
+        pnn->vector.dirty = 1;
+        pnn->vector.arHiddenWeight = calloc (VECTOR_COUNTALIGN(pnn->cHidden) * VECTOR_COUNTALIGN(pnn->cInput),  sizeof( float ) );
+        pnn->vector.arOutputWeight = calloc (VECTOR_COUNTALIGN(pnn->cOutput) * VECTOR_COUNTALIGN(pnn->cHidden), sizeof( float ) );
+        pnn->vector.arHiddenThreshold = calloc (VECTOR_COUNTALIGN(pnn->cHidden), sizeof (float));
+        pnn->vector.arOutputThreshold = calloc (VECTOR_COUNTALIGN(pnn->cOutput), sizeof (float));
+    #endif
 
    return p;
 }
@@ -295,57 +402,129 @@ NeuralNetDestroy( neuralnet *pnn )
     free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
   }
 
+  #if !PROCESSING_UNITS
   free(pnn->savedBase); pnn->savedBase = 0;
   free(pnn->savedIBase); pnn->savedIBase = 0;
+  #endif
   
+    #if VECTOR
+        free( pnn->vector.arHiddenWeight ); pnn->vector.arHiddenWeight = 0;
+        free( pnn->vector.arOutputWeight ); pnn->vector.arOutputWeight = 0;
+        free( pnn->vector.arHiddenThreshold ); pnn->vector.arHiddenThreshold = 0;
+        free( pnn->vector.arOutputThreshold ); pnn->vector.arOutputThreshold = 0;
+    #endif
+
   return 0;
 }
+
+#if VECTOR
+vector float sigmoidv (vector float vx);
+float sigmoid2 (const float x);
+#endif
 
 static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
 		     float arOutput[], float *saveAr ) {
     int i, j;
     float *prWeight;
-
-    /* Calculate activity at hidden nodes */
-    for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = pnn->arHiddenThreshold[ i ];
-
-    prWeight = pnn->arHiddenWeight;
     
-    for( i = 0; i < pnn->cInput; i++ ) {
-	float const ari = arInput[ i ];
-
-	if( ari ) {
-	    float *pr = ar;
-
-	    if( ari == 1.0f )
-		for( j = pnn->cHidden; j; j-- )
-		    *pr++ += *prWeight++;
-	    else
-		for( j = pnn->cHidden; j; j-- )
-		    *pr++ += *prWeight++ * ari;
-	} else
-	    prWeight += pnn->cHidden;
-    }
-
-    if( saveAr)
-      memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
-
+    /* Calculate activity at hidden nodes */
+    
     for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+        ar[ i ] = pnn->arHiddenThreshold[ i ];
+
+    if (gVector && VECTOR_MULTIPLYSIG && !saveAr) {
+        #if VECTOR
+        Vector_MultiplySig (pnn, pnn->cInput, pnn->cHidden, arInput, ar, pnn->vector.arHiddenWeight, -pnn->rBetaHidden);
+        #endif
+    }
+    else {
+            
+        if (gVector && VECTOR_MULTIPLY) {
+            #if VECTOR
+            Vector_Multiply (pnn, pnn->cInput, pnn->cHidden, arInput, ar, pnn->vector.arHiddenWeight);
+            #endif
+        }    
+        else {
+            prWeight = pnn->arHiddenWeight;
+            
+            for( i = 0; i < pnn->cInput; i++ ) {
+                float const ari = arInput[ i ];
+        
+                if( ari ) {
+                    float *pr = ar;
+        
+                    if( ari == 1.0f )
+                        for( j = pnn->cHidden; j; j-- )
+                            *pr++ += *prWeight++;
+                    else
+                        for( j = pnn->cHidden; j; j-- )
+                            *pr++ += *prWeight++ * ari;
+                } else
+                    prWeight += pnn->cHidden;
+            }
+        }
+    
+        if( saveAr)
+        memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
+    
+        if (gVector && VECTOR_SIGMOID) {
+            #if VECTOR
+            Vector_Sigmoid (pnn->cHidden, ar, -pnn->rBetaHidden);
+            #endif
+        }    
+        else {
+            for( i = 0; i < pnn->cHidden; i++ )
+                ar[ i ] = sigmoid ( -pnn->rBetaHidden * ar[ i ] );
+        }
+        
+    }
 
     /* Calculate activity at output nodes */
-    prWeight = pnn->arOutputWeight;
 
-    for( i = 0; i < pnn->cOutput; i++ ) {
-	float r = pnn->arOutputThreshold[ i ];
-	
-	for( j = 0; j < pnn->cHidden; j++ )
-	    r += ar[ j ] * *prWeight++;
-
-	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
+    if (gVector && VECTOR_MULTIPLYSIG) {
+        for( i = 0; i < pnn->cOutput; i++ ) 
+            arOutput[i] = pnn->arOutputThreshold[ i ];
+        #if VECTOR
+        Vector_MultiplySig (pnn, pnn->cHidden, pnn->cOutput, ar, arOutput, pnn->vector.arOutputWeight, -pnn->rBetaOutput);
+        #endif
     }
-
+    else {
+        
+        if (gVector && VECTOR_MULTIPLY) {
+            #if VECTOR
+                for( i = 0; i < pnn->cOutput; i++ ) 
+                    arOutput[i] = pnn->arOutputThreshold[ i ];
+                Vector_Multiply (pnn, pnn->cHidden, pnn->cOutput, ar, arOutput, pnn->vector.arOutputWeight);
+                #if VECTOR_SIGMOID
+                Vector_Sigmoid (pnn->cOutput, arOutput, -pnn->rBetaOutput);
+                #else
+                for( i = 0; i < pnn->cOutput; i++ )
+                    arOutput[ i ] = sigmoid ( -pnn->rBetaOutput * arOutput[ i ] );
+                #endif
+            #endif
+        }
+        else {
+            prWeight = pnn->arOutputWeight;
+    
+            for( i = 0; i < pnn->cOutput; i++ ) {
+                float r = pnn->arOutputThreshold[ i ];
+                
+                for( j = 0; j < pnn->cHidden; j++ )
+                    r += ar[ j ] * *prWeight++;
+        
+                #if VECTOR_SIGMOID
+                arOutput[ i ] = r;                
+                #else
+                arOutput[ i ] = sigmoid ( -pnn->rBetaOutput * r );                
+                #endif
+            }
+            #if VECTOR_SIGMOID
+            Vector_Sigmoid (pnn->cOutput, arOutput, -pnn->rBetaOutput);
+            #endif
+        }
+        
+    }
+    
     return 0;
 }
 
@@ -400,6 +579,9 @@ static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
+#if VECTOR
+    VECTOR_FLOATARRAY(ar,1024);
+#else
 #if __GNUC__
     float ar[ pnn->cHidden ];
 #elif HAVE_ALLOCA
@@ -407,28 +589,48 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 #else
     float ar[ 1024 ];
 #endif
+#endif
     switch( t ) {
       case NNEVAL_NONE:
       {
+        //fprintf (stderr, "<nneval-none>");
         Evaluate(pnn, arInput, ar, arOutput, 0);
         break;
       }
       case NNEVAL_SAVE:
       {
-        memcpy(pnn->savedIBase, arInput, pnn->cInput * sizeof(*ar));
-        Evaluate(pnn, arInput, ar, arOutput, pnn->savedBase);
+        //fprintf (stderr, "<nneval-save>");
+        #if PROCESSING_UNITS
+            savedBases	*psb = GetThreadSavedBases (pnn);
+            assert (psb);
+            memcpy(psb->savedIBase, arInput, pnn->cInput * sizeof(*ar));
+            Evaluate(pnn, arInput, ar, arOutput, psb->savedBase);
+        #else
+            memcpy(pnn->savedIBase, arInput, pnn->cInput * sizeof(*ar));
+            Evaluate(pnn, arInput, ar, arOutput, pnn->savedBase);
+        #endif
         break;
       }
       case NNEVAL_FROMBASE:
       {
         int i;
-        
-        memcpy(ar, pnn->savedBase, pnn->cHidden * sizeof(*ar));
+        //fprintf (stderr, "<nneval-frombase>");        
+        #if PROCESSING_UNITS
+            savedBases	*psb = GetThreadSavedBases (pnn);
+            assert (psb);
+            memcpy(ar, psb->savedBase, pnn->cHidden * sizeof(*ar));
+        #else
+            memcpy(ar, pnn->savedBase, pnn->cHidden * sizeof(*ar));
+        #endif
   
         {
           float* r = arInput;
+          #if PROCESSING_UNITS
+          float* s = psb->savedIBase;          
+          #else
           float* s = pnn->savedIBase;
-         
+          #endif
+          
           for(i = 0; i < pnn->cInput; ++i, ++r, ++s) {
             if( *r != *s ) {
               *r -= *s;
@@ -453,6 +655,11 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
  */
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
+#if VECTOR
+    VECTOR_FLOATARRAY(ar,1024);
+    VECTOR_FLOATARRAY(arIDelta,1024);
+    VECTOR_FLOATARRAY(arODelta,1024);
+#else
 #if __GNUC__
     float ar[ pnn->cHidden ], arIDelta[ pnn->cInput ],
 	arODelta[ pnn->cOutput ];
@@ -463,6 +670,8 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 #else
     float ar[ 1024 ], arIDelta[ 1024 ], arODelta[ 1024 ];
 #endif
+#endif
+
     int i, j;
 
     Evaluate( pnn, arInput, ar, arOutput, 0 );
@@ -502,6 +711,10 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 #if 0
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
+#if VECTOR
+    VECTOR_FLOATARRAY(ar,1024);
+    *ardOdSigmaI = malloc( pnn->cHidden * pnn->cOutput * sizeof( float ) );
+#else
 #if __GNUC__
     float ar[ pnn->cHidden ], ardOdSigmaI[ pnn->cHidden * pnn->cOutput ];
 #elif HAVE_ALLOCA
@@ -510,6 +723,7 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 #else
     float ar[ 1024 ], *ardOdSigmaI = malloc( pnn->cHidden * pnn->cOutput *
 					sizeof( float ) );
+#endif
 #endif
     int i, j, k;
     float rdOdSigmaH, *prWeight, *prdOdSigmaI, *prdOdI;
@@ -541,9 +755,13 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 	    prdOdI++;
 	}
     }
-    
+
+#if VECTOR
+    free( ardOdSigmaI );
+#else
 #if !__GNUC__ && !HAVE_ALLOCA
     free( ardOdSigmaI );
+#endif
 #endif
 
     return 0;
@@ -554,6 +772,11 @@ extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 			   float arDesired[], float rAlpha ) {
     int i, j;    
     float *pr, *prWeight;
+#if VECTOR
+    VECTOR_FLOATARRAY(ar,1024);
+    VECTOR_FLOATARRAY(arOutputError,1024);
+    VECTOR_FLOATARRAY(arHiddenError,1024);
+#else
 #if __GNUC__
     float ar[ pnn->cHidden ], arOutputError[ pnn->cOutput ],
 	arHiddenError[ pnn->cHidden ];
@@ -564,6 +787,7 @@ extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 #else
     float ar[ 1024 ], arOutputError[ 128 ], arHiddenError[ 1024 ];
 #endif
+#endif;
     
     Evaluate( pnn, arInput, ar, arOutput, 0 );
 
@@ -689,6 +913,18 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     pnn->cHidden = cHidden;
     pnn->cOutput = cOutput;
     
+    #if VECTOR
+        free (pnn->vector.arHiddenWeight);
+        pnn->vector.arHiddenWeight = calloc (VECTOR_COUNTALIGN(cHidden) * VECTOR_COUNTALIGN(cInput),  sizeof( float ) );
+        free (pnn->vector.arOutputWeight);
+        pnn->vector.arOutputWeight = calloc (VECTOR_COUNTALIGN(cOutput) * VECTOR_COUNTALIGN(cHidden), sizeof( float ) );
+        free (pnn->vector.arHiddenThreshold);
+        pnn->vector.arHiddenThreshold = calloc (VECTOR_COUNTALIGN(cHidden), sizeof (float));
+        free (pnn->vector.arOutputThreshold);
+        pnn->vector.arOutputThreshold = calloc (VECTOR_COUNTALIGN(cOutput), sizeof (float));
+        pnn->vector.dirty = 1;
+    #endif
+    
     return 0;
 }
 
@@ -729,12 +965,20 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
 	if( fscanf( pf, "%f\n", pr++ ) < 1 )
 	    return -1;
 
+    #if !PROCESSING_UNITS
+    
     for(i = 0; i < pnn->cHidden; ++i)
       pnn->savedBase[i] = 0.0;
 
     for(i = 0; i < pnn->cInput; ++i) 
       pnn->savedIBase[i] = 0.0;
- 
+      
+    #endif
+    
+    #if VECTOR
+    pnn->vector.dirty = 1;
+    #endif
+
     return 0;
 }
 
@@ -770,13 +1014,21 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
     FREAD( pnn->arHiddenThreshold, pnn->cHidden );
     FREAD( pnn->arOutputThreshold, pnn->cOutput );
 #undef FREAD
-
+    
+    #if !PROCESSING_UNITS
+    
     for(i = 0; i < pnn->cHidden; ++i)
       pnn->savedBase[i] = 0.0;
 
     for(i = 0; i < pnn->cInput; ++i) 
       pnn->savedIBase[i] = 0.0;
+    
+    #endif
  
+    #if VECTOR
+    pnn->vector.dirty = 1;
+    #endif
+
     return 0;
 }
 
@@ -829,3 +1081,5 @@ extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
     
     return 0;
 }
+
+

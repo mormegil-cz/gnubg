@@ -54,7 +54,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	export.c sound.h record.c record.h osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
-	htmlimages.c speed.c renderprefs.c renderprefs.h boardpos.c boardpos.h
+	htmlimages.c speed.c renderprefs.c renderprefs.h boardpos.c boardpos.h \
+        procunits.c procunits.h threadglobals.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper
@@ -105,7 +106,8 @@ check_PROGRAMS = erftest
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
+        procunits.c procunits.h threadglobals.h
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
@@ -123,7 +125,8 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-        drawboard.c drawboard.h
+        drawboard.c drawboard.h \
+        procunits.c procunits.h threadglobals.h
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS)
 makehyper_DEPENDENCIES = lib/libevent.a
 

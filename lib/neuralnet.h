@@ -9,12 +9,33 @@
 
 #include <stdio.h>
 
+#define VECTOR 0
+#define VECTOR_VE 0
+
+//#if VECTOR
+    typedef struct {
+        int dirty;
+        float *arHiddenWeight, *arOutputWeight;
+        float *arHiddenThreshold, *arOutputThreshold;
+    } _neuralnetvector;
+//#endif
+
 typedef struct _neuralnet {
     int cInput, cHidden, cOutput, nTrained, fDirect;
     float rBetaHidden, rBetaOutput, *arHiddenWeight, *arOutputWeight,
 	*arHiddenThreshold, *arOutputThreshold;
-    float *savedBase, *savedIBase;
+    #if !PROCESSING_UNITS 
+    float * savedBase;
+    float * savedIBase;     
+    /* since these can't be shared among different threads using the same
+        neural networks, we'll be using a thread-specific mechanism for storing 
+        them : see the savedBases struct below */
+    #endif
+//#if VECTOR
+    _neuralnetvector vector;
+//#endif
 } neuralnet;
+
 
 extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput, float rBetaHidden,
@@ -43,5 +64,18 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf );
 extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf );
 extern int NeuralNetSave( neuralnet *pnn, FILE *pf );
 extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf );
+
+#if PROCESSING_UNITS
+
+typedef struct _savedBases {
+    struct _savedBases *next;
+    neuralnet	*pnn;
+    float 	*savedBase;
+    float 	*savedIBase;
+} savedBases;
+
+void FreeThreadSavedBases (void);
+
+#endif
 
 #endif
