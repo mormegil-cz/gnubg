@@ -25,4 +25,7 @@
 extern void
 GTKShowBearoff( const matchstate *pms );
 
+extern void
+GTKShowEPC( int anBoard[ 2 ][ 25 ] );
+
 #endif /* _GTKBEAROFF_H_ */

@@ -112,10 +112,10 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 #if WIN32
   /* Windows fonts come out smaller than you ask for, for some reason... */
   pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
-                      "*-*-*-m-*-*" );
+                      "*-*-*-m-*-*-*" );
 #else
   pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-                      "*-*-*-m-*-*" );
+                      "*-*-*-m-*-*-*" );
 #endif
 
 
@@ -328,4 +328,56 @@ GTKShowBearoff( const matchstate *pms ) {
 
   gtk_widget_show_all( pwDialog );
 
+}
+
+
+
+extern void
+GTKShowEPC( int anBoard[ 2 ][ 25 ] ) {
+
+  GtkWidget *pwDialog;
+  GdkFont *pf;
+  GtkWidget *pwText;
+  gchar *pch;
+
+  pwDialog = GTKCreateDialog( _("Effective Pip Count"), 
+                              DT_INFO, NULL, NULL );
+
+  pwText = gtk_text_new( NULL, NULL );
+  gtk_text_set_line_wrap ( GTK_TEXT( pwText ), FALSE );
+  gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), 
+                      pwText );
+
+  /* content */
+
+#if WIN32
+  /* Windows fonts come out smaller than you ask for, for some reason... */
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
+                      "*-*-*-m-*-*-*" );
+#else
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
+                      "*-*-*-m-*-*-*" );
+#endif
+
+  pch = ShowEPC( anBoard );
+
+  gtk_text_insert( GTK_TEXT( pwText ), pf, NULL, NULL, pch, -1 );
+
+  g_free( pch );
+
+  /* show dialog */
+
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                GTK_WINDOW( pwMain ) );
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+  
+  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 500 ); 
+  gtk_widget_show_all( pwDialog );
+    
+  GTKDisallowStdin();
+  gtk_main();
+  GTKAllowStdin();
+    
 }
