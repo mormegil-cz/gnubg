@@ -2158,8 +2158,6 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	gtk_widget_queue_draw( bd->drawing_area );	
     }
     
-    bd->clockwise = fClockwise;
-    
     return 0;
 }
 
@@ -3639,6 +3637,8 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     }
 #undef buf
 #undef empty
+    
+    bd->clockwise = fClockwise;
 
     gdk_gc_unref( gc );
 }

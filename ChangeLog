@@ -1,3 +1,8 @@
+Tue Sep 24 17:32:44 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_draw): Move set of bd->clockwise to board_draw,
+	to avoid superfluous board render when starting the first game.
+
 Tue Sep 24 16:45:05 2002  Gary Wong  <gtw@gnu.org>
 
 	* play.c (ShowMark): New function.  When moving to next or previous
