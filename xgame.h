@@ -78,5 +78,5 @@ extern void GameRedrawDice( extwindow *pewnd, gamedata *pgd, int x, int y,
 extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
 		    char *szPlayer, char *szOpp, int nMatchTo,
 		    int nScore, int nOpponent, int nDice0, int nDice1 );
-
+extern void RunExt( void );
 #endif

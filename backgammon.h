@@ -25,11 +25,19 @@
 #include <list.h>
 #include "eval.h"
 
-#if !X_DISPLAY_MISSING
+#if USE_GTK
 #include <gtk/gtk.h>
 extern GtkWidget *pwMain, *pwBoard;
 extern int fX, nDelay;
 extern guint nNextTurn; /* GTK idle function */
+#define DISPLAY GDK_DISPLAY()
+#elif USE_EXT
+#include <ext.h>
+#include <event.h>
+extern extwindow ewnd;
+extern int fX, nDelay;
+extern event evNextTurn;
+#define DISPLAY ewnd.pdsp
 #endif
 
 #define MAX_CUBE ( 1 << 12 )
@@ -105,8 +113,12 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 extern void ShowBoard( void );
 extern char *FormatPrompt( void );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
+#if USE_GTK
 extern gint NextTurnNotify( gpointer p );
+#else
+extern int NextTurnNotify( event *pev, void *p );
+#endif
 extern void UserCommand( char *sz );
 extern void HandleXAction( void );
 #if HAVE_LIBREADLINE

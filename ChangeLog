@@ -1,3 +1,9 @@
+Wed Jul 12 20:01:20 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* configure.in: Merged the GTK and Ext ports back together.  Use
+	GTK if possible; otherwise use Ext if possible; otherwise use
+	plain TTY.  Extensive changes elsewhere to support merge.
+
 Wed Jul 12 10:27:11 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkgame.c (HandleXAction): Recursive event handling is now

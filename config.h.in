@@ -18,6 +18,9 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
 
+/* Define if the X Window System is missing or not being used.  */
+#undef X_DISPLAY_MISSING
+
 /* Installation directory (used to determine PKGDATADIR below). */
 #undef DATADIR
 
@@ -108,6 +111,16 @@
 /* Version number of package */
 #undef VERSION
 
+/* Define if you want to use the ext toolkit and widgets. */
+#undef USE_EXT
+
+/* Define if you want to use the GTK toolkit and widgets. */
+#undef USE_GTK
+
+/* Are we using either GUI (ext or GTK)? */
+#if USE_EXT || USE_GTK
+#define USE_GUI 1
+#endif
 
 /* The directory where the weights and databases will be stored. */
 #define PKGDATADIR DATADIR "/" PACKAGE

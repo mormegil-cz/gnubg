@@ -41,9 +41,11 @@ char *aszGameResult[] = { "single game", "gammon", "backgammon" };
 enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
 list lMatch, *plGame;
 
-#if !X_DISPLAY_MISSING
+#if USE_GTK
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+#endif
 
+#if USE_GUI
 static struct timeval tvLast;
 
 void ResetDelayTimer( void ) {
@@ -92,7 +94,7 @@ static void NewGame( void ) {
 	
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
     
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX && fDisplay )
 	ShowBoard();
 
@@ -231,17 +233,21 @@ static int TryBearoff( void ) {
 extern void NextTurn( void ) {
 
     int n, fWinner;
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     struct timeval tv;
     fd_set fds;
 #endif
     
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX ) {
+#if USE_GTK
 	if( nNextTurn ) {
 	    gtk_idle_remove( nNextTurn );
 	    nNextTurn = 0;
 	}
+#else
+        EventPending( &evNextTurn, FALSE );	
+#endif
     } else
 #endif
 	fNextTurn = FALSE;
@@ -255,7 +261,7 @@ extern void NextTurn( void ) {
 	SwapSides( anBoard );
     }
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX && nDelay && fDisplay ) {
 	if( tvLast.tv_sec ) {
 	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
@@ -276,9 +282,9 @@ extern void NextTurn( void ) {
 		}
 		
 		FD_ZERO( &fds );
-		FD_SET( ConnectionNumber( GDK_DISPLAY() ), &fds );
+		FD_SET( ConnectionNumber( DISPLAY ), &fds );
 		/* GTK-FIXME: use timeout */
-		if( select( ConnectionNumber( GDK_DISPLAY() ) + 1, &fds, NULL,
+		if( select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL,
 			    NULL, &tv ) > 0 ) {
 		    HandleXAction();
 		    if( !fInterrupt )
@@ -316,7 +322,7 @@ extern void NextTurn( void ) {
 		aszGameResult[ n - 1 ], n * nCube,
 		n * nCube > 1 ? "s" : "" );
 	
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	if( fX && fDisplay )
 	    ShowBoard();
 #endif
@@ -358,10 +364,14 @@ extern void NextTurn( void ) {
 	    CommandRoll( NULL );
 	return;
     } else
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	if( fX ) {
+#if USE_GTK
 	    if( !ComputerTurn() )
 		nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+#else
+            EventPending( &evNextTurn, !ComputerTurn() );	    
+#endif
 	} else
 #endif
 	    fNextTurn = !ComputerTurn();
@@ -369,9 +379,13 @@ extern void NextTurn( void ) {
 
 extern void TurnDone( void ) {
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
+#if USE_GTK
 	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+#else
+        EventPending( &evNextTurn, TRUE );    
+#endif
     else
 #endif
 	fNextTurn = TRUE;	
@@ -733,7 +747,7 @@ extern void CommandNewMatch( char *sz ) {
 
     printf( "A new %d point match has been started.\n", n );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
 	ShowBoard();
 #endif
@@ -750,7 +764,7 @@ extern void CommandNewSession( char *sz ) {
 
     puts( "A new session has been started." );
     
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
 	ShowBoard();
 #endif

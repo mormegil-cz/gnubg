@@ -74,16 +74,27 @@ static int fReadingOther;
 #include "positionid.h"
 #include "rollout.h"
 
-#if !X_DISPLAY_MISSING
+#if USE_GTK
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #include "gtkboard.h"
 #include "gtkgame.h"
 
 GtkWidget *pwMain, *pwBoard;
+guint nNextTurn = 0; /* GTK idle function */
+#elif USE_EXT
+#include <ext.h>
+#include <extwin.h>
+#include <stdio.h>
+#include "xgame.h"
+
+extwindow ewnd;
+event evNextTurn;
+#endif
+
+#if USE_GUI
 int fX = TRUE; /* use X display */
 int nDelay = 0;
-guint nNextTurn = 0; /* GTK idle function */
 static int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
 int fReadingCommand;
@@ -562,16 +573,18 @@ static void ResetInterrupt( void ) {
 
 	fInterrupt = FALSE;
 	
-#if !X_DISPLAY_MISSING
+#if USE_GTK
 	if( nNextTurn ) {
 	    gtk_idle_remove( nNextTurn );
 	    nNextTurn = 0;
 	}
+#elif USE_EXT
+        EventPending( &evNextTurn, FALSE );
 #endif
     }
 }
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 static int fChildDied;
 
 static RETSIGTYPE HandleChild( int n ) {
@@ -585,7 +598,7 @@ void ShellEscape( char *pch ) {
     pid_t pid;
     char *pchShell;
     psighandler shQuit;
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     psighandler shChild;
     
     PortableSignal( SIGCHLD, HandleChild, &shChild );
@@ -596,7 +609,7 @@ void ShellEscape( char *pch ) {
 	/* Error */
 	perror( "fork" );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	PortableSignalRestore( SIGCHLD, &shChild );
 #endif
 	PortableSignalRestore( SIGQUIT, &shQuit );
@@ -617,7 +630,7 @@ void ShellEscape( char *pch ) {
     }
     
     /* Parent */
-#if !X_DISPLAY_MISSING
+#if USE_GUI
  TryAgain:
 #if HAVE_SIGPROCMASK
     {
@@ -758,12 +771,17 @@ extern void ShowBoard( void ) {
     char *apch[ 7 ] = { szPlayer0, NULL, NULL, NULL, NULL, NULL, szPlayer1 };
 
     if( fTurn == -1 ) {
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	if( fX ) {
 	    InitBoard( anBoard );
+#if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoard, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
 		      -1, -1 );
+#else
+            GameSet( &ewnd, anBoard, 0, ap[ 1 ].szName, ap[ 0 ].szName,
+                     nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
+#endif
 	} else
 #endif
 	    puts( "No game in progress." );
@@ -771,7 +789,7 @@ extern void ShowBoard( void ) {
 	return;
     }
     
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( !fX ) {
 #endif
 	if( fDoubled ) {
@@ -819,19 +837,27 @@ extern void ShowBoard( void ) {
 	
 	if( !fMove )
 	    SwapSides( anBoard );
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     } else {
 	if( !fMove )
 	    SwapSides( anBoard );
-    
+
+#if USE_GTK
 	game_set( BOARD( pwBoard ), anBoard, fMove, ap[ 1 ].szName,
 		  ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
 		  anDice[ 0 ], anDice[ 1 ] );
-	
+#else
+        GameSet( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
+                 nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
+                 anDice[ 1 ] );	
+#endif
 	if( !fMove )
 	    SwapSides( anBoard );
-
+#if USE_GTK
 	gdk_flush();
+#else
+	XFlush( ewnd.pdsp );
+#endif
     }    
 #endif    
 }
@@ -1333,7 +1359,7 @@ static void Prompt( void ) {
 }
 #endif
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 #if HAVE_LIBREADLINE
 static void ProcessInput( char *sz, int fFree ) {
     
@@ -1363,7 +1389,11 @@ static void ProcessInput( char *sz, int fFree ) {
        want no prompt at all, yet (if NextTurn is going to be called),
        or if we do want to prompt immediately, we recalculate it in
        case the information in the old one is out of date. */
+#if USE_GTK
     if( nNextTurn )
+#else
+    if( evNextTurn.fPending )
+#endif
 	fNeedPrompt = TRUE;
     else {
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
@@ -1440,13 +1470,23 @@ extern void UserCommand( char *szCommand ) {
 #endif
 }
 
-extern gint NextTurnNotify( gpointer p ) {
+#if USE_GTK
+extern gint NextTurnNotify( gpointer p )
+#else
+extern int NextTurnNotify( event *pev, void *p )
+#endif
+{
 
     NextTurn();
 
     ResetInterrupt();
-    
-    if( fNeedPrompt ) {
+
+#if USE_GTK
+    if( fNeedPrompt )
+#else
+    if( !pev->fPending && fNeedPrompt )
+#endif
+    {
 #if HAVE_LIBREADLINE
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
 	fReadingCommand = TRUE;
@@ -1456,7 +1496,7 @@ extern gint NextTurnNotify( gpointer p ) {
 	fNeedPrompt = FALSE;
     }
     
-    return FALSE; /* remove idle handler */
+    return FALSE; /* remove idle handler, if GTK */
 }
 #endif
 
@@ -1474,7 +1514,7 @@ extern char *GetInput( char *szPrompt ) {
 #if !HAVE_LIBREADLINE
     char *pch;
 #endif
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     fd_set fds;
     
     if( fX ) {
@@ -1507,9 +1547,9 @@ extern char *GetInput( char *szPrompt ) {
 	while( !szInput ) {
 	    FD_ZERO( &fds );
 	    FD_SET( STDIN_FILENO, &fds );
-	    FD_SET( ConnectionNumber( GDK_DISPLAY() ), &fds );
+	    FD_SET( ConnectionNumber( DISPLAY ), &fds );
 
-	    select( ConnectionNumber( GDK_DISPLAY() ) + 1, &fds, NULL, NULL,
+	    select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL, NULL,
 		    NULL );
 
 	    if( fInterrupt ) {
@@ -1527,7 +1567,7 @@ extern char *GetInput( char *szPrompt ) {
 		}
 	    }
 
-	    if( FD_ISSET( ConnectionNumber( GDK_DISPLAY() ), &fds ) )
+	    if( FD_ISSET( ConnectionNumber( DISPLAY ), &fds ) )
 		HandleXAction();
 	}
 
@@ -1559,9 +1599,9 @@ extern char *GetInput( char *szPrompt ) {
 	do {
 	    FD_ZERO( &fds );
 	    FD_SET( STDIN_FILENO, &fds );
-	    FD_SET( ConnectionNumber( GDK_DISPLAY() ), &fds );
+	    FD_SET( ConnectionNumber( DISPLAY ), &fds );
 
-	    select( ConnectionNumber( GDK_DISPLAY() ) + 1, &fds, NULL, NULL,
+	    select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL, NULL,
 		    NULL );
 
 	    if( fInterrupt ) {
@@ -1569,7 +1609,7 @@ extern char *GetInput( char *szPrompt ) {
 		return NULL;
 	    }
 	    
-	    if( FD_ISSET( ConnectionNumber( GDK_DISPLAY() ), &fds ) )
+	    if( FD_ISSET( ConnectionNumber( DISPLAY ), &fds ) )
 		HandleXAction();
 	} while( !FD_ISSET( STDIN_FILENO, &fds ) );
 
@@ -1603,7 +1643,7 @@ extern char *GetInput( char *szPrompt ) {
     fputs( szPrompt, stdout );
     fflush( stdout );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
  ReadDirect:
 #endif
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */
@@ -1634,7 +1674,7 @@ static RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 static RETSIGTYPE HandleIO( int idSignal ) {
 
     /* NB: It is safe to write to fAction even if it cannot be read
@@ -1653,7 +1693,7 @@ static void usage( char *argv0 ) {
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
 "  -n, --no-weights          Do not load existing neural net weights\n"
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 "  -t, --tty                 Start on tty instead of using X\n"
 #endif
 "  -v, --version             Show version information and exit\n"
@@ -1682,7 +1722,7 @@ extern int main( int argc, char *argv[] ) {
     char *sz;
 #endif
     
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     /* The GTK interface is fairly grotty; it makes it impossible to
        separate argv handling from attempting to open the display, so
        we have to check for -t before the other options to avoid connecting
@@ -1701,9 +1741,14 @@ extern int main( int argc, char *argv[] ) {
     
     optind = 0;
     opterr = 1;
-    
+
     if( fX )
+#if USE_GTK
 	fX = gtk_init_check( &argc, &argv );
+#else
+        if( !getenv( "DISPLAY" ) )
+	    fX = FALSE;
+#endif
 #endif
     
     fInteractive = isatty( STDIN_FILENO );
@@ -1726,7 +1771,7 @@ extern int main( int argc, char *argv[] ) {
 	    break;
 	case 'v': /* version */
 	    puts( "GNU Backgammon " VERSION );
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	    puts( "X Window System supported." );
 #endif
 #if HAVE_LIBGDBM
@@ -1774,7 +1819,7 @@ extern int main( int argc, char *argv[] ) {
     srandom( time( NULL ) );
 
     PortableSignal( SIGINT, HandleInterrupt, NULL );
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     PortableSignal( SIGIO, HandleIO, NULL );
 #endif
     
@@ -1788,11 +1833,18 @@ extern int main( int argc, char *argv[] ) {
     if( optind < argc )
 	CommandLoad( argv[ optind ] );
     
-#if !X_DISPLAY_MISSING
+#if USE_GTK
     if( fX ) {
 	RunGTK();
 
 	return EXIT_SUCCESS;
+    }
+#elif USE_EXT
+    if( fX ) {
+        RunExt();
+
+        fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
+        fX = FALSE;
     }
 #endif
     
