@@ -1014,7 +1014,7 @@ static void ExportGameGeneral( int f, char *sz ) {
 	
 	pf = stdout;
     } else if( !( pf = fopen( sz, f ? "wb" : "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -1074,7 +1074,7 @@ static void ExportMatchGeneral( int f, char *sz ) {
 	
 	pf = stdout;
     } else if( !( pf = fopen( sz, f ? "wb" : "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -1130,7 +1130,7 @@ extern void CommandExportPositionEPS( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 

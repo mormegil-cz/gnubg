@@ -389,6 +389,8 @@ extern void outputf( char *sz, ... ) __attribute__((format(printf,1,2)));
 /* Write a string to stdout/status bar/popup window, vprintf style */
 extern void outputv( char *sz, va_list val )
     __attribute__((format(printf,1,0)));
+/* Write an error message, perror() style */
+extern void outputerr( char *sz );
 /* Signifies that all output for the current command is complete */
 extern void outputx( void );
 /* Temporarily disable outputx() calls */

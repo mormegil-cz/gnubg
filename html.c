@@ -3229,7 +3229,7 @@ extern void CommandExportGameHtml( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -3360,7 +3360,7 @@ extern void CommandExportMatchHtml( char *sz ) {
       if( !strcmp( szCurrent, "-" ) )
 	pf = stdout;
       else if( !( pf = fopen( szCurrent, "w" ) ) ) {
-	perror( szCurrent );
+	outputerr( szCurrent );
 		for ( j = 0; j < 4; j++ )
 		  free (filenames [ j ] );
 
@@ -3412,7 +3412,7 @@ extern void CommandExportPositionHtml( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 

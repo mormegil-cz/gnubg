@@ -53,8 +53,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish supervised training, and allow people to submit training data via
   web.
 ** Make output*() functions wrap words, and pause before scrolling (as in
-  gdb).  Make sure output to stderr is available when using GTK -- perror
-  calls will have to be replaced, for instance.
+  gdb).  Make sure output to stderr is available when using GTK.
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
 ** Add a command "show moves" which shows a list of legal moves, like hint
   does, but without evaluating them.

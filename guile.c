@@ -547,7 +547,7 @@ extern int GuileInitialise( char *szDir ) {
 	return 0;
     }
     
-    perror( GNUBG_SCM );
+    outputerr( GNUBG_SCM );
     return -1;
 }
 #endif

@@ -152,7 +152,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    perror( _("external connection") );
+	    outputerr( _("external connection") );
 	    return -1;
 	}
 	
@@ -198,7 +198,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    perror( _("external connection") );
+	    outputerr( _("external connection") );
 	    return -1;
 	}
 	
@@ -241,12 +241,12 @@ extern void CommandExternal( char *sz ) {
     }
 
     if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
     if( bind( h, psa, cb ) < 0 ) {
-	perror( sz );
+	outputerr( sz );
 	close( h );
 	free( psa );
 	return;
@@ -255,7 +255,7 @@ extern void CommandExternal( char *sz ) {
     free( psa );
     
     if( listen( h, 1 ) < 0 ) {
-	perror( _("listen") );
+	outputerr( _("listen") );
 	close( h );
 	ExternalUnbind( sz );
 	return;
@@ -275,7 +275,7 @@ extern void CommandExternal( char *sz ) {
 	    continue;
 	}
 	
-	perror( _("accept") );
+	outputerr( _("accept") );
 	close( h );
 	ExternalUnbind( sz );
 	return;

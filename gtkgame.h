@@ -69,6 +69,7 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
     
 extern int GTKGetInputYN( char *szPrompt );
 extern void GTKOutput( char *sz );
+extern void GTKOutputErr( char *sz );
 extern void GTKOutputX( void );
 extern void GTKOutputNew( void );
 extern void GTKProgressStart( char *sz );

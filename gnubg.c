@@ -1816,7 +1816,7 @@ void ShellEscape( char *pch ) {
     
     if( ( pid = fork() ) < 0 ) {
 	/* Error */
-	perror( "fork" );
+	outputerr( "fork" );
 
 #if USE_GUI
 	PortableSignalRestore( SIGCHLD, &shChild );
@@ -3406,7 +3406,7 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 	    *pch = 0;
 
 	if( ferror( pf ) ) {
-	    perror( szFile );
+	    outputerr( szFile );
 	    outputresume();
 	    return;
 	}
@@ -3480,7 +3480,7 @@ extern void CommandLoadCommands( char *sz ) {
 	LoadCommands( pf, sz );
 	fclose( pf );
     } else
-	perror( sz );
+	outputerr( sz );
 }
 
 extern void CommandImportJF( char *sz ) {
@@ -3507,7 +3507,7 @@ extern void CommandImportJF( char *sz ) {
 	fclose( pf );
         setDefaultFileName ( sz, PATH_POS );
     } else
-	perror( sz );
+	outputerr( sz );
 
     ShowBoard();
 }
@@ -3529,7 +3529,7 @@ extern void CommandImportMat( char *sz ) {
 	fclose( pf );
         setDefaultFileName ( sz, PATH_MAT );
     } else
-	perror( sz );
+	outputerr( sz );
 }
 
 extern void CommandImportOldmoves( char *sz ) {
@@ -3549,7 +3549,7 @@ extern void CommandImportOldmoves( char *sz ) {
 	fclose( pf );
         setDefaultFileName ( sz, PATH_OLDMOVES );
     } else
-	perror( sz );
+	outputerr( sz );
 }
 
 extern void CommandImportSGG( char *sz ) {
@@ -3569,7 +3569,7 @@ extern void CommandImportSGG( char *sz ) {
 	fclose( pf );
         setDefaultFileName ( sz, PATH_SGG );
     } else
-	perror( sz );
+	outputerr( sz );
 }
 
 extern void CommandCopy (char *sz)
@@ -3746,7 +3746,7 @@ extern void CommandExportGameGam( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -3786,7 +3786,7 @@ extern void CommandExportMatchMat( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -3971,7 +3971,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     if ( ! pf ) {
       free ( szFile );
-      perror( szFile );
+      outputerr( szFile );
       return;
     }
 
@@ -4276,7 +4276,7 @@ extern void CommandSaveSettings( char *szParam ) {
       fclose( pf );
     
     if( errno )
-      perror( szFile );
+      outputerr( szFile );
     else
       outputf( _("Settings saved to %s.\n"),
                ( ! strcmp ( szFile, "-" ) ) ? _("standard output stream") :
@@ -4303,7 +4303,7 @@ extern void CommandSaveWeights( char *sz ) {
       return;
 
     if( EvalSave( sz ) )
-	perror( sz );
+	outputerr( sz );
     else
 	outputf( _("Evaluator weights saved to %s.\n"), sz );
 }
@@ -5096,6 +5096,17 @@ extern void outputv( char *sz, va_list val ) {
     }
 #endif
     vprintf( sz, val );
+}
+
+/* Write an error message, perror() style */
+extern void outputerr( char *sz ) {
+
+    perror( sz );
+    
+#if USE_GTK
+    if( fX )
+	GTKOutputErr( sz );
+#endif
 }
 
 /* Signifies that all output for the current command is complete */

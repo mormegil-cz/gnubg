@@ -99,7 +99,7 @@ static list *LoadCollection( char *sz ) {
     
     if( strcmp( sz, "-" ) ) {
 	if( !( pf = fopen( sz, "r" ) ) ) {
-	    perror( sz );
+	    outputerr( sz );
             PopLocale ();
 	    return NULL;
 	}
@@ -1820,7 +1820,7 @@ extern void CommandSaveGame( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -1859,7 +1859,7 @@ extern void CommandSaveMatch( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 

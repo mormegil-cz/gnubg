@@ -248,7 +248,7 @@ int main( int argc, char *argv[] ) {
 
     if( argc > 1 )
 	if( !( pf = fopen( argv[ 1 ], "r" ) ) ) {
-	    perror( argv[ 1 ] );
+	    outputerr( argv[ 1 ] );
 	    return 1;
 	}
     

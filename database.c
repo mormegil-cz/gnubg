@@ -140,7 +140,7 @@ extern void CommandDatabaseExport( char *sz ) {
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	gdbm_close( pdb );
 	return;
     }
@@ -221,7 +221,7 @@ extern void CommandDatabaseImport( char *sz ) {
     }
 
     if( !( pf = fopen( sz, "r" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	gdbm_close( pdb );
 	return;
     }
@@ -274,7 +274,7 @@ extern void CommandDatabaseImport( char *sz ) {
     }
 
     if( ferror( pf ) )
-	perror( sz );
+	outputerr( sz );
     else if( !feof( pf ) )
 	fprintf( stderr, _("%s: malformed position data\n"), sz );
     

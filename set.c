@@ -463,7 +463,7 @@ extern void CommandSetCache( char *sz ) {
     }
 
     if( EvalCacheResize( n ) )
-	perror( "EvalCacheResize" );
+	outputerr( "EvalCacheResize" );
     else {
       if ( n == 1 )
 	outputf( _("The position cache has been sized to %d entry.\n"), n );
@@ -954,7 +954,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
     pch = strcpy( malloc( strlen( sz ) + 1 ), sz );
     
     if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
-	perror( pch );
+	outputerr( pch );
 	free( pch );
 	return;
     }
@@ -974,7 +974,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	    continue;
 	}
 	
-	perror( pch );
+	outputerr( pch );
 	close( h );
 	free( psa );
 	free( pch );

@@ -27,6 +27,7 @@
 #include <alloca.h>
 #endif
 #include <assert.h>
+#include <errno.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -2757,6 +2758,15 @@ extern void GTKOutputX( void ) {
       
     cchOutput = 0;
     g_free( sz );
+}
+
+extern void GTKOutputErr( char *sz ) {
+
+    char szMessage[ 4096 ];
+
+    sprintf( szMessage, "%s: %s", sz, strerror( errno ) );
+    /* FIXME it would be nice to have an error icon in this message box */
+    Message( szMessage, FALSE );
 }
 
 extern void GTKOutputNew( void ) {
@@ -5992,7 +6002,7 @@ static int ShowManualSection( char *szTitle, char *szNode ) {
     if( !( pch = PathSearch( "gnubg.xml", szDataDirectory ) ) )
 	return -1;
     else if( access( pch, R_OK ) ) {
-	perror( pch );
+	outputerr( pch );
 	free( pch );
 	return -1;
     }
@@ -8204,7 +8214,7 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
     }
 
     if( ferror( pfIn ) )
-	perror( szFile );
+	outputerr( szFile );
     else if( !f )
 	outputl( _("No player records found.") );
 

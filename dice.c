@@ -310,21 +310,21 @@ getDiceRandomDotOrg ( void ) {
     strcpy ( szHostname, "www.random.org:80" );
 
     if ( ( h = ExternalSocket ( &psa, &cb, szHostname ) ) < 0 ) {
-      perror ( szHostname );
+      outputerr ( szHostname );
       return -1;
     }
 
     /* connect */
 
     if ( ( connect ( h, psa, cb ) ) < 0 ) {
-      perror ( szHostname );
+      outputerr ( szHostname );
       return -1;
     }
 
     /* read next set of numbers */
 
     if ( ExternalWrite ( h, szHTTP, strlen ( szHTTP ) + 1 ) < 0 ) {
-      perror ( szHTTP );
+      outputerr ( szHTTP );
       close ( h );
       return -1;
     }
@@ -332,7 +332,7 @@ getDiceRandomDotOrg ( void ) {
     /* read data from web-server */
 
     if ( ! ( nBytesRead = read ( h, acBuf, sizeof ( acBuf ) ) ) ) {
-      perror ( "reading data" );
+      outputerr ( "reading data" );
       close ( h );
       return -1;
     }

@@ -1,3 +1,8 @@
+Wed Sep 18 15:07:30 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (outputerr): New function, replacing perror().  Most
+	perror() calls changed.
+
 Wed Sep 18 14:42:33 2002  Gary Wong  <gtw@gnu.org>
 
 	* record.c: Record error rates per move, not per game.

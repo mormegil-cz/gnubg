@@ -60,7 +60,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	if( feof( pf ) )
 	    return 1;
 	else {
-	    perror( pch );
+	    outputerr( pch );
 	    return -1;
 	}
     }
@@ -72,7 +72,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    if( feof( pf ) )
 		fprintf( stderr, "%s: invalid record file\n", pch );
 	    else
-		perror( pch );
+		outputerr( pch );
 	    return -1;
 	} else if( ch == '\\' ) {
 	    ppr->szName[ i ] = ( getc( pf ) & 007 ) << 6;
@@ -94,7 +94,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 		    &ppr->arErrorCombined[ ea ],
 		    &ppr->arLuck[ ea ] ) < 4 ) {
 	    if( ferror( pf ) )
-		perror( pch );
+		outputerr( pch );
 	    else
 		fprintf( stderr, "%s: invalid record file\n", pch );
 	    
@@ -113,7 +113,7 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
     for( pchName = ppr->szName; *pchName; pchName++ )
 	if( isalnum( *pchName ) ? ( putc( *pchName, pf ) == EOF ) :
 	    ( fprintf( pf, "\\%03o", *pchName ) < 0 ) ) {
-	    perror( pch );
+	    outputerr( pch );
 	    return -1;
 	}
 
@@ -128,7 +128,7 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
     putc( '\n', pf );
 
     if( ferror( pf ) ) {
-	perror( pch );
+	outputerr( pch );
 	return -1;
     }
     
@@ -159,7 +159,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 	);
 
     if( !( *ppfOut = fopen( *ppchOut, "w" ) ) ) {
-	perror( *ppchOut );
+	outputerr( *ppchOut );
 	free( *ppchOut );
 	return -1;
     }
@@ -212,7 +212,7 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
     }
     
     if( fclose( pfOut ) ) {
-	perror( pchOut );
+	outputerr( pchOut );
 	free( pchOut );
 	return -1;
     }
@@ -220,7 +220,7 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
     sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
 
     if( rename( pchOut, sz ) ) {
-	perror( sz );
+	outputerr( sz );
 	free( pchOut );
 	return -1;
     }
@@ -390,7 +390,7 @@ extern void CommandRecordShow( char *szPlayer ) {
     
     sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
     if( !( pfIn = fopen( sz, "r" ) ) ) {
-	perror( sz );
+	outputerr( sz );
 	return;
     }
 
@@ -421,7 +421,7 @@ extern void CommandRecordShow( char *szPlayer ) {
 	}
 
     if( ferror( pfIn ) )
-	perror( sz );
+	outputerr( sz );
     else if( !f ) {
 	if( szPlayer && *szPlayer )
 	    outputf( _("No record for player `%s' found.\n"), szPlayer );
