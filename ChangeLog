@@ -1,3 +1,14 @@
+Tue Jul  9 19:21:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (getMWCFromError): improve function.
+
+	* html.c (HTMLDumpStatContext): fix bugs.
+	* analysis.c (HTMLDumpStatContext): fix bugs.
+	* gtkgame.c (HTMLDumpStatContext): fix bugs.
+
+	* analysis.c (absoluteFibsRating): fix typo.
+	
+
 Mon Jul  8 09:53:00 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (AnalysisOK): write some command locale independent.
