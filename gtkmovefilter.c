@@ -473,7 +473,6 @@ ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
   GtkWidget *pwMoveFilterSetup;
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
-  return;
   memcpy ( aamf, pmfw->pmf, sizeof ( aamf ) );
   pwMoveFilterSetup = MoveFilterSetup( aamf, &fOK );
 
