@@ -166,6 +166,14 @@ command acDatabase[] = {
       "file", szFILENAME, NULL },
     { "match", CommandExportMatch, "Record a log of the match so far to a "
       "file", szFILENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acList[] = {
+    { "game", CommandListGame, "Show the moves made in this game", NULL,
+      NULL },
+    { "match", CommandListMatch, "Show the games played in this match", NULL,
+      NULL },
+    { "session", CommandListMatch, "Show the games played in this session",
+      NULL, NULL },
 }, acLoad[] = {
     { "commands", CommandLoadCommands, "Read commands from a script file",
       szFILENAME, NULL },
@@ -386,6 +394,7 @@ command acDatabase[] = {
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint, "Show the best evaluations of legal "
       "moves", NULL, NULL },
+    { "list", NULL, "Show a list of games or moves", NULL, acList },
     { "load", NULL, "Read data from a file", NULL, acLoad },
     { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
     { "n", CommandNext, NULL, NULL, NULL },
@@ -851,30 +860,63 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
 	anBoard[ 0 ][ 22 ] = anBoard[ 1 ][ 22 ] = 2;
 }
 
+#if USE_GTK
+static unsigned long nLastRequest;
+static guint nUpdate;
+
+static gint UpdateBoard( gpointer p ) {
+
+    /* we've waited long enough -- force this update */
+    nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
+
+    ShowBoard();
+
+    nUpdate = 0;
+
+    return FALSE; /* remove idle handler */
+}
+#endif
+
 extern void ShowBoard( void ) {
 
     char szBoard[ 2048 ];
     char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
     char *apch[ 7 ] = { szPlayer0, NULL, NULL, NULL, NULL, NULL, szPlayer1 };
-
+    int anBoardTemp[ 2 ][ 25 ];
+    
     if( cOutputDisabled )
 	return;
 
 #if USE_GTK
-    if( fX && !fGTKOutput )
-	return;
+    if( fX && !nDelay ) {
+	/* Is the server still processing our last request?  If so, don't
+	   give it more until it's finished what it has.  (Always update
+	   the board immediately if nDelay is set, though -- show the user
+	   something while they're waiting!) */
+	XEventsQueued( GDK_DISPLAY(), QueuedAfterReading );
+	/* Subtract and compare as signed, just in case the request numbers
+	   wrap around */
+	if( (long) ( LastKnownRequestProcessed( GDK_DISPLAY() ) -
+		     nLastRequest ) < 0 ) {
+	    if( !nUpdate )
+		nUpdate = gtk_idle_add( UpdateBoard, NULL );
+
+	    return;
+	}
+    }
 #endif
     
     if( fTurn == -1 ) {
 #if USE_GUI
 	if( fX ) {
-	    InitBoard( anBoard );
+	    InitBoard( anBoardTemp );
 #if USE_GTK
-	    game_set( BOARD( pwBoard ), anBoard, 0, ap[ 1 ].szName,
+	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
 		      -1, -1 );
+	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #else
-            GameSet( &ewnd, anBoard, 0, ap[ 1 ].szName, ap[ 0 ].szName,
+            GameSet( &ewnd, anBoardTemp, 0, ap[ 1 ].szName, ap[ 0 ].szName,
                      nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
 #endif
 	} else
@@ -943,6 +985,7 @@ extern void ShowBoard( void ) {
 	game_set( BOARD( pwBoard ), anBoard, fMove, ap[ 1 ].szName,
 		  ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
 		  anDice[ 0 ], anDice[ 1 ] );
+	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #else
         GameSet( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
                  nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
@@ -951,7 +994,7 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
 #if USE_GTK
-	gdk_flush();
+	XFlush( GDK_DISPLAY() );
 #else
 	XFlush( ewnd.pdsp );
 #endif
@@ -2175,7 +2218,7 @@ extern void output( char *sz ) {
 	return;
     
 #if USE_GTK
-    if( fX && fGTKOutput) {
+    if( fX ) {
 	GTKOutput( g_strdup( sz ) );
 	return;
     }
@@ -2190,7 +2233,7 @@ extern void outputl( char *sz ) {
 	return;
     
 #if USE_GTK
-    if( fX && fGTKOutput ) {
+    if( fX ) {
 	int cch;
 	char *pch;
 
@@ -2213,7 +2256,7 @@ extern void outputc( char ch ) {
 	return;
     
 #if USE_GTK
-    if( fX && fGTKOutput ) {
+    if( fX ) {
 	char *pch;
 
 	pch = g_malloc( 2 );
@@ -2243,7 +2286,7 @@ extern void outputv( char *sz, va_list val ) {
 	return;
     
 #if USE_GTK
-    if( fX && fGTKOutput ) {
+    if( fX ) {
 	GTKOutput( g_strdup_vprintf( sz, val ));
 	return;
     }
@@ -2258,7 +2301,7 @@ extern void outputx( void ) {
 	return;
     
 #if USE_GTK
-    if( fX && fGTKOutput )
+    if( fX )
 	GTKOutputX();
 #endif
 }
@@ -2270,7 +2313,7 @@ extern void outputnew( void ) {
 	return;
     
 #if USE_GTK
-    if( fX && fGTKOutput )
+    if( fX )
 	GTKOutputNew();
 #endif
 }
@@ -2372,15 +2415,20 @@ extern int main( int argc, char *argv[] ) {
 
     if( fX )
 #if USE_GTK
-	fX = gtk_init_check( &argc, &argv );
+	fX = InitGTK( &argc, &argv );
 #else
         if( !getenv( "DISPLAY" ) )
 	    fX = FALSE;
 #endif
+
+    if( fX )
+	fInteractive = fShowProgress = TRUE;
+    else 
 #endif
-    
-    fInteractive = isatty( STDIN_FILENO );
-    fShowProgress = isatty( STDOUT_FILENO );
+	{
+	    fInteractive = isatty( STDIN_FILENO );
+	    fShowProgress = isatty( STDOUT_FILENO );
+	}
     
     while( ( ch = getopt_long( argc, argv, "bd:hntvw", ao, NULL ) ) !=
            (char) -1 )
@@ -2425,17 +2473,16 @@ extern int main( int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-	outputl( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong."
-		 "\n"
-		 "GNU Backgammon is free software, covered by the GNU "
-		 "General Public License\n"
-		 "version 2, and you are welcome to change it and/or "
-		 "distribute copies of it\n"
-		 "under certain conditions.  Type \"show copying\" to see "
-		 "the conditions.\n"
-		 "There is absolutely no warranty for GNU Backgammon.  "
-		 "Type \"show warranty\" for\n"
-		 "details." );
+	puts( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong.\n"
+	      "GNU Backgammon is free software, covered by the GNU "
+	      "General Public License\n"
+	      "version 2, and you are welcome to change it and/or "
+	      "distribute copies of it\n"
+	      "under certain conditions.  Type \"show copying\" to see "
+	      "the conditions.\n"
+	      "There is absolutely no warranty for GNU Backgammon.  "
+	      "Type \"show warranty\" for\n"
+	      "details." );
     
     InitRNG();
 
@@ -2443,7 +2490,8 @@ extern int main( int argc, char *argv[] ) {
     
     if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir ) )
+			fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
+			fShowProgress ) )
 	return EXIT_FAILURE;
 
     if( ( pch = getenv( "LOGNAME" ) ) )
@@ -2461,8 +2509,6 @@ extern int main( int argc, char *argv[] ) {
     
     ListCreate( &lMatch );
     
-    srandom( time( NULL ) );
-
 #if USE_GTK
     if( fTTY )
 #endif

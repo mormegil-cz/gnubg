@@ -144,14 +144,13 @@ extern void CommandShowBoard( char *sz ) {
     }
 
 #if USE_GUI
-    if( fX ) {
+    if( fX )
 #if USE_GTK
-	if( fGTKOutput )
-	    game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1 );
+	game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1 );
 #else
         GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
 #endif
-    } else
+    else
 #endif
 	outputl( DrawBoard( szOut, an, TRUE, ap ) );
 }
