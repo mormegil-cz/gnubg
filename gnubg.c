@@ -744,6 +744,9 @@ command acAnalyse[] = {
     { "decline", CommandDecline, "Decline a resignation", NULL, NULL },
     { "double", CommandDouble, "Offer a double", NULL, NULL },
     { "drop", CommandDrop, "Decline an offered double", NULL, NULL },
+    { "eq2mwc", CommandEq2MWC,
+      "Convert normalised money equity to match winning chance",
+      szVALUE, NULL },
     { "eval", CommandEval, "Display evaluation of a position", szOPTPOSITION,
       NULL },
     { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
@@ -758,6 +761,9 @@ command acAnalyse[] = {
     { "list", NULL, "Show a list of games or moves", NULL, acList },
     { "load", NULL, "Read data from a file", NULL, acLoad },
     { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
+    { "mwc2eq", CommandMWC2Eq,
+      "Convert match winning chance to normalised money equity",
+      szVALUE, NULL },
     { "n", CommandNext, NULL, NULL, NULL },
     { "new", NULL, "Start a new game, match or session", NULL, acNew },
     { "next", CommandNext, "Step ahead within the game", NULL, NULL },
@@ -4184,3 +4190,93 @@ extern int main( int argc, char *argv[] ) {
     
     return EXIT_FAILURE;
 }
+
+/*
+ * Command: convert normalised money equity to match winning chance.
+ *
+ * The result is written to stdout.
+ * FIXME: implement GTK version.
+ * FIXME: allow more parameters (match score, match length)
+ *
+ * Input: 
+ *   sz: string with equity
+ *
+ * Output:
+ *   none.
+ *
+ */
+
+extern void CommandEq2MWC ( char *sz ) {
+
+  float rEq;
+  cubeinfo ci;
+
+  if ( ! ms.nMatchTo ) {
+    outputl ( "Command only valid in match play" );
+    return;
+  }
+
+
+  rEq = ParseReal ( &sz );
+
+  if ( rEq == -HUGE_VAL ) rEq = 0.0;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  outputf ( "MWC for equity = %+6.3f: %6.2f%%\n",
+            -1.0, 100.0 * eq2mwc ( -1.0, &ci ) );
+  outputf ( "MWC for equity = %+6.3f: %6.2f%%\n",
+            +1.0, 100.0 * eq2mwc ( +1.0, &ci ) );
+  outputf ( "By linear interpolation:\n" );
+  outputf ( "MWC for equity = %+6.3f: %6.2f%%\n",
+            rEq, 100.0 * eq2mwc ( rEq, &ci ) );
+
+}
+
+
+/*
+ * Command: convert match winning chance to normalised money equity.
+ *
+ * The result is written to stdout.
+ * FIXME: implement GTK version.
+ * FIXME: allow more parameters (match score, match length)
+ *
+ * Input: 
+ *   sz: string with match winning chance
+ *
+ * Output:
+ *   none.
+ *
+ */
+
+extern void CommandMWC2Eq ( char *sz ) {
+
+  float rMwc;
+  cubeinfo ci;
+
+  if ( ! ms.nMatchTo ) {
+    outputl ( "Command only valid in match play" );
+    return;
+  }
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  rMwc = ParseReal ( &sz );
+
+  if ( rMwc == -HUGE_VAL ) rMwc = eq2mwc ( 0.0, &ci );
+
+  if ( rMwc > 1.0 ) rMwc /= 100.0;
+
+  outputf ( "Equity for MWC = %6.2f%%: %+6.3f\n",
+            100.0 * eq2mwc ( -1.0, &ci ), -1.0 );
+  outputf ( "Equity for MWC = %6.2f%%: %+6.3f\n",
+            100.0 * eq2mwc ( +1.0, &ci ), +1.0 );
+  outputf ( "By linear interpolation:\n" );
+  outputf ( "Equity for MWC = %6.2f%%: %+6.3f\n",
+            100.0 * rMwc, mwc2eq ( rMwc, &ci ) );
+
+
+}
+
+
+
