@@ -540,17 +540,17 @@ msgstr ""
 #: dice.c:432
 #, c-format
 msgid "The current seed is %s, "
-msgstr "現在のシードは %s, "
+msgstr "現在のシードは %s。"
 
 #: dice.c:436
 #, c-format
 msgid "and the modulus is %s.\n"
-msgstr ""
+msgstr "モジュロは %s。\n"
 
 #: dice.c:446
 #, c-format
 msgid "The current seed is %u.\n"
-msgstr "現在のシードは %u.\n"
+msgstr "現在のシードは %u。\n"
 
 #: dice.c:450
 #, c-format
@@ -720,7 +720,7 @@ msgstr "ラクーン"
 #: eval.c:768 eval.c:821
 #, c-format
 msgid "%s: not a weights file\n"
-msgstr "%s: weights ファイルがありません\n"
+msgstr "%s: weights ファイルではありません\n"
 
 #: eval.c:772
 #, c-format
@@ -818,7 +818,7 @@ msgstr "マッチ ID:\t"
 
 #: eval.c:3946
 msgid "Evaluator: \t"
-msgstr ""
+msgstr "評価器: \t"
 
 #: eval.c:3955 gtkchequer.c:836 gtkcube.c:335 gtkrace.c:543 html.c:327
 #: progress.c:687
@@ -1037,11 +1037,11 @@ msgstr "%d-ply %s"
 
 #: format.c:121
 msgid "cubeful"
-msgstr ""
+msgstr "キューブフル"
 
 #: format.c:121
 msgid "cubeless"
-msgstr ""
+msgstr "キューブレス"
 
 #: format.c:243 show.c:69
 #, c-format
@@ -1066,7 +1066,7 @@ msgstr ""
 #: format.c:293 show.c:165 show.c:178 show.c:194
 #, c-format
 msgid "Player %d:\n"
-msgstr ""
+msgstr "プレイヤー %d:\n"
 
 #: format.c:306
 #, c-format
@@ -1079,7 +1079,7 @@ msgstr ""
 
 #: format.c:324
 msgid "Cube: "
-msgstr ""
+msgstr "キューブ: "
 
 #: format.c:348
 #, c-format
@@ -1170,6 +1170,8 @@ msgid ""
 "\n"
 "Cube analysis\n"
 msgstr ""
+"\n"
+"キューブ解析\n"
 
 #: format.c:883 gtkmovefilter.c:384 gtkmovefilter.c:394 html.c:2140
 #, c-format
@@ -1248,7 +1250,7 @@ msgstr "エラーレート (ムーブ毎の平均)"
 
 #: formatgs.c:198
 msgid "Chequerplay rating"
-msgstr ""
+msgstr "チェッカープレイのレーティング"
 
 #: formatgs.c:216
 msgid "Total cube decisions"
@@ -1394,57 +1396,57 @@ msgstr ""
 #: getopt.c:673
 #, c-format
 msgid "%s: option `%s' is ambiguous\n"
-msgstr ""
+msgstr "%s: オプション `%s' は曖昧です\n"
 
 #: getopt.c:697
 #, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: オプション `--%s' は引数が不要です\n"
 
 #: getopt.c:702
 #, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: オプション `%c%s' は引数が不要です\n"
 
 #: getopt.c:720 getopt.c:893
 #, c-format
 msgid "%s: option `%s' requires an argument\n"
-msgstr ""
+msgstr "%s: オプション `%s' には引数が必要です\n"
 
 #: getopt.c:749
 #, c-format
 msgid "%s: unrecognized option `--%s'\n"
-msgstr ""
+msgstr "%s: `--%s' は認識できないオプションです\n"
 
 #: getopt.c:753
 #, c-format
 msgid "%s: unrecognized option `%c%s'\n"
-msgstr ""
+msgstr "%s: `%c%s' は認識できないオプションです\n"
 
 #: getopt.c:779
 #, c-format
 msgid "%s: illegal option -- %c\n"
-msgstr ""
+msgstr "%s: 無効なオプション -- %c\n"
 
 #: getopt.c:782
 #, c-format
 msgid "%s: invalid option -- %c\n"
-msgstr ""
+msgstr "%s: 無効なオプション -- %c\n"
 
 #: getopt.c:812 getopt.c:942
 #, c-format
 msgid "%s: option requires an argument -- %c\n"
-msgstr ""
+msgstr "%s: オプションは引数を要求します -- %c\n"
 
 #: getopt.c:859
 #, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
-msgstr ""
+msgstr "%s: `-W %s' オプションが曖昧です\n"
 
 #: getopt.c:877
 #, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: `-W %s' オプションには引数が不要です\n"
 
 #: gnubg.c:454
 msgid "<die> <die>"
@@ -2097,11 +2099,11 @@ msgstr ""
 
 #: gnubg.c:888
 msgid "Specify type (evaluation or rollout)"
-msgstr "指定するタイプ（評価 or ロールアウト）"
+msgstr "指定するタイプ(評価 or ロールアウト)"
 
 #: gnubg.c:890
 msgid "Specify parameters for neural net evaluation"
-msgstr "neural net 評価のパラメータを指定する"
+msgstr "ニューラルネット評価のパラメータを指定する"
 
 #: gnubg.c:893
 msgid "Specify parameters for rollout"
@@ -2374,7 +2376,7 @@ msgstr "ANSI C の rand() 関数を使用する (線形合同法)"
 
 #: gnubg.c:1072
 msgid "Use the Blum, Blum and Shub generator"
-msgstr "Blum-Blum-Shub 法を使用する"
+msgstr "Blum-Blum-Shub 乱数生成器を使用する"
 
 #: gnubg.c:1074
 msgid "Use the BSD random() non-linear additive feedback generator"
@@ -2394,11 +2396,11 @@ msgstr "ダイスの出目を手で入力する"
 
 #: gnubg.c:1082
 msgid "Use the MD5 generator"
-msgstr "MD5 関数を使用する"
+msgstr "MD5 関数を乱数生成器として使用する"
 
 #: gnubg.c:1084
 msgid "Use the Mersenne Twister generator"
-msgstr "メルセンヌ・ツイスター法を使用する"
+msgstr "メルセンヌ・ツイスター乱数生成器を使用する"
 
 #: gnubg.c:1087
 msgid "Use random numbers fetched from <www.random.org>"
@@ -2594,15 +2596,15 @@ msgstr ""
 
 #: gnubg.c:1271
 msgid "Write CSS stylesheet in <head>"
-msgstr ""
+msgstr "スタイルシートを <head> 要素に書き込む"
 
 #: gnubg.c:1273
 msgid "Write stylesheet to external file (\"gnubg.css\")"
-msgstr ""
+msgstr "スタイルシートを外部ファイル (\"gnubg.css\") に書き込む"
 
 #: gnubg.c:1275
 msgid "Write stylesheet inside tags"
-msgstr ""
+msgstr "スタイルシートをタグの内側に書き込む"
 
 #: gnubg.c:1279
 msgid "Control how the CSS stylesheet is written"
@@ -2826,7 +2828,7 @@ msgstr "優先度を「低」に設定"
 
 #: gnubg.c:1448
 msgid "Specify priority numerically"
-msgstr "優先度(nice)を数値で指定"
+msgstr "優先度を数値で指定(nice)"
 
 #: gnubg.c:1451
 msgid "Set priority to normal"
@@ -4147,7 +4149,7 @@ msgstr ""
 "# 警告: このファイル、`.gnubgautorc' は `save settings' コマンドにより自動的"
 "に\n"
 "# 作成されます。 そして、次のセッティングがセーブされる時に上書きされます。\n"
-"# もし、手動で立ち上げる場合は、代わりに`.gnubgrc' を使って下さい。\n"
+"# もし、手動で変更したい場合は代わりに`.gnubgrc' を使って下さい。\n"
 "\n"
 
 #: gnubg.c:5520
@@ -4283,7 +4285,7 @@ msgstr ""
 
 #: gnubg.c:7368
 msgid "Windows sockets"
-msgstr ""
+msgstr "Windows ソケット"
 
 #: gnubg.c:7387
 msgid "Guile"
@@ -4415,7 +4417,7 @@ msgstr "ベアオフデータベース"
 
 #: gtkbearoff.c:306
 msgid "Sconyers' Bearoff (15x15)"
-msgstr ""
+msgstr "Sconyers のベアオフ (15x15)"
 
 #: gtkbearoff.c:314
 msgid "Two-sided (disk)"
@@ -4785,7 +4787,7 @@ msgstr ""
 
 #: gtkexport.c:735
 msgid "CSS Style sheet:"
-msgstr ""
+msgstr "CSS スタイルシート:"
 
 #: gtkexport.c:741
 msgid "In <head>"
@@ -6632,15 +6634,15 @@ msgstr "運:"
 
 #: gtkgame.c:8571
 msgid "20"
-msgstr ""
+msgstr "20"
 
 #: gtkgame.c:8574
 msgid "100"
-msgstr ""
+msgstr "100"
 
 #: gtkgame.c:8577
 msgid "500"
-msgstr ""
+msgstr "500"
 
 #: gtkgame.c:8580 progress.c:152 progress.c:242
 msgid "Total"
@@ -6721,7 +6723,7 @@ msgstr "(n/a)"
 
 #: gtkgame.c:9064
 msgid "Change Disk"
-msgstr ""
+msgstr "ディスク交換(?)"
 
 #: gtkgame.c:9131
 msgid "Resign normal"
@@ -6883,7 +6885,7 @@ msgstr "random.org の提供する非決定的な乱数生成器"
 
 #: gtkoptions.c:197
 msgid "A user-provided external shared library"
-msgstr ""
+msgstr "ユーザの提供した外部の共有ライブラリ(?)"
 
 #: gtkoptions.c:198
 msgid ""
@@ -8069,7 +8071,7 @@ msgstr "ポイントに数字を付ける"
 
 #: gtkprefs.c:1397
 msgid "Show or hide point numbers"
-msgstr ""
+msgstr "ポイントナンバーを表示するかしないか"
 
 #: gtkprefs.c:1399
 msgid "Dynamic labels"
@@ -8085,7 +8087,7 @@ msgstr "手番の表示"
 
 #: gtkprefs.c:1416
 msgid "Show or hide arrow indicating who is moving"
-msgstr ""
+msgstr "手番を示す矢印の表示と非表示"
 
 #: gtkprefs.c:1423
 msgid "3d Options"
@@ -8097,7 +8099,7 @@ msgstr "影の表示"
 
 #: gtkprefs.c:1431
 msgid "Display shadows, this option requires a fast graphics card"
-msgstr ""
+msgstr "影を表示します。このオプションには速いビデオカードが必要です"
 
 #: gtkprefs.c:1439
 msgid "light"
@@ -8105,7 +8107,7 @@ msgstr "明るい"
 
 #: gtkprefs.c:1447
 msgid "Vary the darkness of the shadows"
-msgstr ""
+msgstr "影の暗さを変更します"
 
 #: gtkprefs.c:1451
 msgid "dark"
@@ -8125,7 +8127,7 @@ msgstr "白旗のアニメーション"
 
 #: gtkprefs.c:1462
 msgid "Waves resignation flag"
-msgstr ""
+msgstr "投了の白旗をはためかせる"
 
 #: gtkprefs.c:1466
 msgid "Close board on exit"
@@ -8183,7 +8185,7 @@ msgstr "大"
 
 #: gtkprefs.c:1569
 msgid "Test performance"
-msgstr "性能テスト"
+msgstr "ビデオカードの性能テスト"
 
 #: gtkprefs.c:1776
 #, c-format
@@ -8748,7 +8750,7 @@ msgstr "ピップカウント: %s %d, %s %d<br />\n"
 #: html.c:738 html.c:1113 html.c:1558
 #, c-format
 msgid "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"
-msgstr ""
+msgstr "ポジション ID: <tt>%s</tt> マッチ ID: <tt>%s</tt><br />\n"
 
 #: html.c:1587
 msgid "unknown board type\n"
@@ -8915,7 +8917,7 @@ msgstr "注記"
 #: html.c:3085
 #, c-format
 msgid "%s's rating: %s<br />\n"
-msgstr ""
+msgstr "%s のレーティング: %s<br />\n"
 
 #: html.c:3096 postscript.c:911 text.c:688
 msgid "%B %d, %Y"
@@ -8924,7 +8926,7 @@ msgstr ""
 #: html.c:3097
 #, c-format
 msgid "Date: %s<br />\n"
-msgstr ""
+msgstr "日時: %s<br />\n"
 
 #: html.c:3103
 msgid "Event"
@@ -13686,9 +13688,6 @@ msgstr "テクスチャ無し"
 
 #~ msgid "Rolling out positions; position:"
 #~ msgstr "ロールアウトポジション; ポジション:"
-
-#~ msgid "/_File/_Batch..."
-#~ msgstr "/ファイル(_F)_バッチ(_B)..."
 
 #~ msgid "GNU Backgammon - New Match"
 #~ msgstr "GNU Backgammon - 新しいマッチ"
