@@ -1317,9 +1317,9 @@ GeneralCubeDecisionR ( char *sz,
   { (rolloutstat (*)[2]) aarsStatistics[0], 
     (rolloutstat (*)[2]) aarsStatistics[1] };
   evalsetup (* apes[2]);
-  cubeinfo (* apci[2]) = { pci, pci };
-
   cubeinfo aci[ 2 ];
+  cubeinfo (* apci[2]) = { &aci[ 0 ], &aci[ 1 ] };
+
 
   char aach[ 2 ][ 40 ];
 
