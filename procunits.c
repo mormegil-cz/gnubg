@@ -135,6 +135,7 @@ rpu_slavestats gSlaveStats;
 static int GetProcessorCount (void)
 {
     int cProcessors = 1;
+    int i;
     
     #if __APPLE__
         #include <CoreServices/CoreServices.h>
@@ -147,6 +148,19 @@ static int GetProcessorCount (void)
         /* add here Win32 specific code */
         
         
+        ;
+
+    #else
+
+        /* try _NPROCESSORS_ONLN from sysconf */
+
+        if ( ( i = sysconf( _SC_NPROCESSORS_ONLN ) ) > 0 )
+          i = cProcessors;
+
+        /* other ideas? */
+
+
+
     #endif
 
     
