@@ -134,3 +134,15 @@ xboard.c
 xboard.h
 xgame.c
 xgame.h
+board3d/drawboard3d.c
+board3d/graph.c
+board3d/gtkcolour3d.c
+board3d/inc3d.h
+board3d/matrix.c
+board3d/misc3d.c
+board3d/model.c
+board3d/mylist.c
+board3d/shadow.c
+board3d/texture3d.c
+board3d/timer.c
+board3d/widget3d.c
