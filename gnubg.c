@@ -5035,9 +5035,7 @@ CommandXCopy ( char *sz ) {
 
 #ifdef WIN32
 
-#if !USE_GTK
 #include <windows.h>
-#endif
 
 int CountLines(const char* buf)
 {

@@ -963,14 +963,14 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
     sprintf( strchr( sz, 0 ), "%d:", anBoard[ 1 ][ 24 ] );
 
     /* Whose turn */
-    strcat( strchr( sz, 0 ), fRoll ? "1:" : "-1:" );
+    strcat( sz, fRoll ? "1:" : "-1:" );
 
     anOff[ 0 ] = anOff[ 1 ] = nChequers ? nChequers : 15;
     for( i = 0; i < 25; i++ ) {
 	anOff[ 0 ] -= anBoard[ 0 ][ i ];
 	anOff[ 1 ] -= anBoard[ 1 ][ i ];
     }
-    
+
     sprintf( strchr( sz, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
 	     "0:%d:0", nDice0, nDice1, nDice0, nDice1, fTurn < 0 ? 1 : nCube,
 	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,

@@ -875,11 +875,7 @@ freeMP ( metparameters *pmp ) {
   list *pl;
 
   if ( pmp->szName )
-#if __GNUC__
     free ( pmp->szName );
-#else
-    xmlFree ( pmp->szName );
-#endif
 
   pl = &pmp->lParameters;
 
@@ -1329,11 +1325,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
   pc = xmlCatalogResolve ( doc->intSubset->ExternalID, 
                            doc->intSubset->SystemID );
   fError = ! pc;
-#if __GNUC__
   free ( pc );
-#else
-  xmlFree ( pc );
-#endif
 
   if ( fError ) {
 
