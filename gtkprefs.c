@@ -88,6 +88,8 @@ static animation anim;
 static GList *
 ParseBoardDesigns ( const char *szFile );
 
+static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK );
+
 
 typedef struct _boarddesign {
 
@@ -802,7 +804,7 @@ RemoveDesign ( GtkWidget *pw, gpointer data ) {
 
 #endif
 static void
-UseDesign ( GtkWidget *pw, gpointer unused ) {
+UseDesign ( GtkWidget *pw, BoardData *bdBoard ) {
 
   BoardData bd;
   int i, j;
@@ -935,6 +937,8 @@ UseDesign ( GtkWidget *pw, gpointer unused ) {
                              rElevation );
 
 
+  BoardPrefsDo ( pw, bdBoard, FALSE );
+
 }
 
 
@@ -985,7 +989,7 @@ static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
 
 
 static GtkWidget *
-DesignPage ( GList *plBoardDesigns ) {
+DesignPage ( GList *plBoardDesigns, BoardData *bd ) {
 
   GtkWidget *pwvbox;
   GtkWidget *pwhbox;
@@ -1067,11 +1071,11 @@ DesignPage ( GList *plBoardDesigns ) {
 
   /* buttons */
 
-  pwDesignUse = gtk_button_new_with_label ( _("Use design") );
+  pwDesignUse = gtk_button_new_with_label ( _("Apply design") );
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignUse, FALSE, FALSE, 4 );
 
   gtk_signal_connect ( GTK_OBJECT ( pwDesignUse ), "clicked",
-                       GTK_SIGNAL_FUNC ( UseDesign ), NULL );
+                       GTK_SIGNAL_FUNC ( UseDesign ), bd );
 
 #if 0
 
@@ -1360,7 +1364,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 #if HAVE_LIBXML2
     plBoardDesigns = read_board_designs ();
     gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                               DesignPage ( plBoardDesigns ),
+                               DesignPage ( plBoardDesigns, bd ),
                                gtk_label_new ( "Designs" ) );
 #endif /* HAVE_LIBXML2 */
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),

@@ -1,3 +1,9 @@
+Sun Dec  1 18:53:13 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (DesignPage, UseDesign): change "Use Design" to
+	"Apply Design".
+	(suggested by Nardy Pillards)
+
 Sun Dec  1 18:33:01 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (ScanCharacters): get rid of ugle code from
