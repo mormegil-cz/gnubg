@@ -224,6 +224,7 @@ typedef struct _BoardData {
 	int testSkewFactor;	/* Debug FOV adjustment */
 	int curveAccuracy;	/* Round curve approximation accuracy */
 	float diceSize;
+	int roundedEdges;	/* Rounded board edges? */
 
 	float movingPos[3];
 	float dragPos[3];

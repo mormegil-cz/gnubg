@@ -121,6 +121,7 @@ typedef struct _renderdata {
 	int boardAngle;	/* Angle board is tilted at */
 	int testSkewFactor;	/* Debug FOV adjustment */
 	float diceSize;	/* How big are the dice */
+	int roundedEdges;	/* Rounded board edges? */
 	PieceType pieceType;
 	Material rdChequerMat[2];	/* Chequer colours */
 	Material rdDiceMat[2], rdDiceDotMat[2];

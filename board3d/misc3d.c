@@ -158,6 +158,11 @@ void setMaterial(Material* pMat)
 	}
 }
 
+int IsSet(int flags, int bit)
+{
+	return ((flags & bit) == bit) ? 1 : 0;
+}
+
 /* Texture functions */
 
 myList textures;
@@ -368,8 +373,9 @@ void testSet3dSetting(BoardData* bd, const renderdata *prd)
 	bd->showHinges = prd->fHinges;
 	bd->showMoveIndicator = prd->showMoveIndicator;
 	bd->showShadows = prd->showShadows;
+	bd->roundedEdges = prd->roundedEdges;
 	bd->shadowDarkness = prd->shadowDarkness;
-	SetShadowDimness3d(BOARD(pwBoard)->board_data);
+	SetShadowDimness3d(bd);
 	bd->curveAccuracy = prd->curveAccuracy;
 	bd->testSkewFactor = prd->testSkewFactor;
 	bd->boardAngle = prd->boardAngle;
@@ -751,9 +757,9 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 	{	/* no texture co-ords */
 	glBegin(GL_QUADS);
 		/* Front Face */
+		glNormal3f(0, 0, normZ);
 		if (type & BOX_SPLITTOP)
 		{
-			glNormal3f(0, 0, normZ);
 			glVertex3f(-1, -1, 1);
 			glVertex3f(1, -1, 1);
 			glVertex3f(1, 0, 1);
@@ -765,13 +771,26 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 			glVertex3f(-1, 1, 1);
 		}
 		else
+		if (type & BOX_SPLITWIDTH)
 		{
-			glNormal3f(0, 0, normZ);
+			glVertex3f(-1, -1, 1);
+			glVertex3f(0, -1, 1);
+			glVertex3f(0, 1, 1);
+			glVertex3f(-1, 1, 1);
+
+			glVertex3f(0, -1, 1);
+			glVertex3f(1, -1, 1);
+			glVertex3f(1, 1, 1);
+			glVertex3f(0, 1, 1);
+		}
+		else
+		{
 			glVertex3f(-1, -1, 1);
 			glVertex3f(1, -1, 1);
 			glVertex3f(1, 1, 1);
 			glVertex3f(-1, 1, 1);
 		}
+
 		if (!(type & BOX_NOENDS))
 		{
 			/* Top Face */

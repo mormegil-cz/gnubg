@@ -28,7 +28,6 @@
 #ifdef USE_MSDEV_TEST_HARNESS
 	#undef USE_GTK
 	#define USE_GLUT
-	/* Comment out next line to remove glut library (needed for debug font) */
 	#define USE_GLUT_FONT
 	/* Comment out next line to switch test harness off */
 	#define TEST

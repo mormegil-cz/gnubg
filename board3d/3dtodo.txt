@@ -2,11 +2,13 @@
 Todo
 ====
 
-* Move some/all display options to appearance?
-	These to appearance general:
-		Clockwise movement, show dice below board, Animation, numbered labels, target help
-	Those on general page to lighting
-	Those on 3d page to general?
+Fillet top edge of board?
+	* Try just 4 outside corners to start with
+		+ Reduce size slightly and round resulting gap
+		+ Look at texturing this
+		+ Look at shadow... (just make smaller?)
+		+ Ignore (don't fillet) hinge gap
+	* Then six inside rectangles...
 
 Bugs
 ====
@@ -23,12 +25,11 @@ Improve player records
 Windows
 -------
 	Put game record into main screen, with toggle button?
-		Similarly annotation window (along bottom)
+		Similarly annotation window (along bottom?)
 	Or "modes", playing/analysing/editing...
 	Docking windows?
 
 Other things
 ============
 
-Show/hide 2d arrow with option (after merge)
 On close, remap background to a better shape?

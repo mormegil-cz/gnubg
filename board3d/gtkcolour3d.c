@@ -456,11 +456,6 @@ void setCol(GtkColourPicker* pCP, float val[4])
 	gtk_colour_picker_set_colour(pCP, dval);
 }
 
-int IsSet(int flags, int bit)
-{
-	return ((flags & bit) == bit) ? 1 : 0;
-}
-
 void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 {
 	col3d = pDetails->pMat;
