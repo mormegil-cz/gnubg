@@ -39,11 +39,11 @@ static void Points1_12( FILE *pf, int y ) {
 
     if( fClockwise )
 	for( i = 1; i <= 12; i++ )
-	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsl{\\tiny %d}}}\n",
 		     50 + i * 20 + ( i > 6 ) * 20, y, i );
     else
 	for( i = 1; i <= 12; i++ )
-	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsl{\\tiny %d}}}\n",
 		     330 - i * 20 - ( i > 6 ) * 20, y, i );
 }
 
@@ -53,18 +53,19 @@ static void Points13_24( FILE *pf, int y ) {
     
     if( fClockwise )
 	for( i = 13; i <= 24; i++ )
-	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsl{\\tiny %d}}}\n",
 		     570 - i * 20 - ( i > 18 ) * 20, y, i );
     else
 	for( i = 13; i <= 24; i++ )
-	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsl{\\tiny %d}}}\n",
 		     i * 20 - 190 + ( i > 18 ) * 20, y, i );
 }
 
 static void LaTeXPrologue( FILE *pf ) {
 
     fputs( "\\documentclass{article}\n"
-	   "\\usepackage{epic,eepic,textcomp}\n"
+	   "\\usepackage{epic,eepic,textcomp,ucs}\n"
+	   "\\usepackage[utf8]{inputenc}\n"
 	   "\\newcommand{\\board}{\n"
 	   "\\shade\\path(70,20)(80,120)(90,20)(110,20)(120,120)(130,20)"
 	   "(150,20)(160,120)\n"
@@ -110,6 +111,7 @@ static void LaTeXPrologue( FILE *pf ) {
 	   "\\addtolength\\oddsidemargin{-72pt}\n"
 	   "\\addtolength\\evensidemargin{-72pt}\n"
 	   "\\addtolength\\topmargin{-72pt}\n\n"
+           "\\setlength{\\unitlength}{0.20mm}\n\n"  /* user should set size */
 	   "\\begin{document}\n", pf );
 
     /* FIXME define commands for \cubetext, \labeltext, etc. here, which
@@ -146,7 +148,7 @@ static void DrawLaTeXPoint( FILE *pf, int i, int fPlayer, int c ) {
 	if( j == 5 || ( i == 24 && j == 3 ) ) {
 	    fprintf( pf, "\\whiten\\path(%d,%d)(%d,%d)(%d,%d)(%d,%d)(%d,%d)\n"
 		     "\\path(%d,%d)(%d,%d)(%d,%d)(%d,%d)(%d,%d)\n"
-		     "\\put(%d,%d){\\makebox(10,10){\\textsf{%d}}}\n",
+		     "\\put(%d,%d){\\makebox(10,10){\\textsf{\\tiny %d}}}\n",
 		     x - 5, y - 5, x + 5, y - 5, x + 5, y + 5, x - 5, y + 5,
 		     x - 5, y - 5,
 		     x - 5, y - 5, x + 5, y - 5, x + 5, y + 5, x - 5, y + 5,
@@ -205,7 +207,7 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 	y = 230;
 
     fprintf( pf, "\\path(%d,%d)(%d,%d)(%d,%d)(%d,%d)(%d,%d)"
-	     "\\put(%d,%d){\\makebox(24,24){\\textsf{\\LARGE %d}}}\n",
+	     "\\put(%d,%d){\\makebox(24,24){\\textsf{\\large %d}}}\n",
 	     x - 12, y - 12, x + 12, y - 12, x + 12, y + 12, x - 12, y + 12,
 	     x - 12, y - 12, x - 12, y - 12,
 	     pms->nCube == 1 ? 64 : pms->nCube );
@@ -213,7 +215,7 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     fputs( "\\end{picture}\\end{center}\\vspace{-4mm}\n\n\\nopagebreak[4]\n",
 	   pf );
 }
-
+#if 0
 static void LaTeXEscape( FILE *pf, unsigned char *pch ) {
 
     /* Translation table from GNU recode, by François Pinard. */
@@ -337,11 +339,13 @@ static void LaTeXEscape( FILE *pf, unsigned char *pch ) {
 	pch++;
     }
 }
+#endif
 
 static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
 
-    LaTeXEscape( pf, pch );
-
+    /* LaTeXEscape( pf, pch ); */
+    if( pch != NULL)
+        fputs( pch, pf );
     fputs( "\n\n", pf );
 }
 
@@ -394,7 +398,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
             fputs ( "\\noindent{\\Large ", pf );
 	    if( pmr->g.nMatch )
 		fprintf( pf, _("%d point match (game %d)"), 
-                         pmr->g.nMatch, pmr->g.i );
+                         pmr->g.nMatch, pmr->g.i + 1);
 	    else
 		fprintf( pf, _("Money session (game %d)"), 
                          pmr->g.i + 1 );
@@ -403,12 +407,14 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 
 	    fprintf( pf, "\\noindent\n\\makebox[0.5\\textwidth][s]"
 		     "{\\large %s ", PlayerSymbol( 0 ) );
-	    LaTeXEscape( pf, ap[ 0 ].szName );
+	    fputs( ap[ 0 ].szName, pf );
+/*	    LaTeXEscape( pf, ap[ 0 ].szName ); */
 	    fprintf( pf, " (%d points)\\hfill}", pmr->g.anScore[ 0 ] );
 	    
 	    fprintf( pf, "\\makebox[0.5\\textwidth][s]"
 		     "{\\large %s ", PlayerSymbol( 1 ) );
-	    LaTeXEscape( pf, ap[ 1 ].szName );
+	    fputs( ap[ 1 ].szName, pf );
+/*	    LaTeXEscape( pf, ap[ 1 ].szName ); */
 	    fprintf( pf, " (%d points)\\hfill}\n\n", pmr->g.anScore[ 1 ] );
 	    	    
 	    break;
