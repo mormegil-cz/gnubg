@@ -1,0 +1,943 @@
+#
+#
+# Generate pictures for HTML export
+#
+# by Joern Thyssen <jthyssen@dk.ibm.com>, 2002
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of version 2 of the GNU General Public License as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# $Id$
+#
+# Prerequisites:
+# (1) gnubg 
+# (2) convert, import  from ImageMagick
+# (3) running a unix-like system
+#
+# Instructions:
+#
+# (1) open gnubg with a window size of 480x498
+#     (i.e, open gnubg and resize the window to *exactly 480x498)
+# (2) search and replace 0x240001d with your actual window ID
+#     (you can find your window ID with xwininfo)
+# (3) run "load commands script"
+#
+#
+#
+set player 0 human
+set player 1 human
+#
+#xwininfo: Please select the window about which you
+#          would like information by clicking the
+#          mouse in that window.
+#
+#xwininfo: Window id: 0x240001d "GNU Backgammon"
+#
+#  Absolute upper-left X:  4
+#  Absolute upper-left Y:  20
+#  Relative upper-left X:  0
+#  Relative upper-left Y:  0
+#  Width: 480
+#  Height: 498
+#  Depth: 24
+#  Visual Class: TrueColor
+#  Border width: 0
+#  Class: InputOutput
+#  Colormap: 0x20 (installed)
+#  Bit Gravity State: ForgetGravity
+#  Window Gravity State: NorthWestGravity
+#  Backing Store State: NotUseful
+#  Save Under State: no
+#  Map State: IsViewable
+#  Override Redirect State: no
+#  Corners:  +4+20  -916+20  -916-532  +4-532
+#  -geometry 480x498+0+0
+#
+#
+# search and replace WINDOWID with the actual window ID
+#
+# get upper thingie
+!mkdir images
+!import -window "0x240001d" bla.png
+!convert -crop 432x12+24+30 bla.png images/b-hitop.png
+!cp images/b-hitop.png images/b-lotop.png
+#
+# get lower thingie
+#
+!convert -crop 432x12+24+306 bla.png images/b-hibot.png
+!cp images/b-hibot.png images/b-lobot.png
+#
+# left-bearoff tray
+#
+!convert -crop 48x120+24+42 bla.png images/b-loff.png
+#
+#
+set matchid cAkAAAAAAAAA
+#
+# black chequers on upper gray point
+#
+# empty
+#
+set board AAAAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o15.png
+#
+set board AAAAACAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o1.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o14.png
+#
+set board AAAAAGAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o2.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o13.png
+#
+set board AAAAAOAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o3.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o12.png
+#
+set board AAAAAOABAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o4.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o11.png
+#
+set board AAAAAOADAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o5.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o10.png
+#
+set board AAAAAOAHAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o6.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o9.png
+#
+set board AAAAAOAPAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o7.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o8.png
+#
+set board AAAAAOAfAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o8.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o7.png
+#
+set board AAAAAOA/AAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o9.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o6.png
+#
+set board AAAAAOB/AAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o10.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o5.png
+#
+set board AAAAAOD/AAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o11.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o4.png
+#
+set board AAAAAOD/AQAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o12.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o3.png
+#
+set board AAAAAOD/AwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o13.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o2.png
+#
+set board AAAAAOD/BwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o14.png
+!convert -crop 48x120+408+186 bla.png images/b-roff-o1.png
+#
+set board AAAAAOD/DwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-o15.png
+!convert -crop 48x120+408+186 bla.png images/b-roff.png
+#
+# red chequers on upper gray point
+#
+set board AAAAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x15.png
+#
+set board AAgAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x1.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x14.png
+#
+set board ABgAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x2.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x13.png
+#
+set board ADgAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x3.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x12.png
+#
+set board AHgAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x4.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x11.png
+#
+set board APgAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x5.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x10.png
+#
+set board APgBAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x6.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x9.png
+#
+set board APgDAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x7.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x8.png
+#
+set board APgHAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x8.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x7.png
+#
+set board APgPAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x9.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x6.png
+#
+set board APgfAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x10.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x5.png
+#
+set board APg/AAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x11.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x4.png
+#
+set board APh/AAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x12.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x3.png
+#
+set board APj/AAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x13.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x2.png
+#
+set board APj/AQAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x14.png
+!convert -crop 48x120+408+42 bla.png images/b-roff-x1.png
+#
+set board APj/AwAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+42 bla.png images/b-gd-x15.png
+!convert -crop 48x120+408+42 bla.png images/b-roff.png
+#
+# red chequers on upper red point
+#
+set board AAAAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd.png
+#
+set board AAQAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x1.png
+#
+set board AAwAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x2.png
+#
+set board ABwAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x3.png
+#
+set board ADwAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x4.png
+#
+set board AHwAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x5.png
+#
+set board APwAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x6.png
+#
+set board APwBAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x7.png
+#
+set board APwDAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x8.png
+#
+set board APwHAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x9.png
+#
+set board APwPAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x10.png
+#
+set board APwfAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x11.png
+#
+set board APw/AAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x12.png
+#
+set board APx/AAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x13.png
+#
+set board APz/AAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x14.png
+#
+set board APz/AQAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-x15.png
+#
+# black chequers on upper red point
+#
+set board AAAAAEAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o1.png
+#
+set board AAAAAMAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o2.png
+#
+set board AAAAAMABAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o3.png
+#
+set board AAAAAMADAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o4.png
+#
+set board AAAAAMAHAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o5.png
+#
+set board AAAAAMAPAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o6.png
+#
+set board AAAAAMAfAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o7.png
+#
+set board AAAAAMA/AAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o8.png
+#
+set board AAAAAMB/AAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o9.png
+#
+set board AAAAAMD/AAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o10.png
+#
+set board AAAAAMD/AQAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o11.png
+#
+set board AAAAAMD/AwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o12.png
+#
+set board AAAAAMD/BwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o13.png
+#
+set board AAAAAMD/DwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o14.png
+#
+set board AAAAAMD/HwAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+96+42 bla.png images/b-rd-o15.png
+
+
+
+#
+# black chequers on lower gray point
+#
+set board AMD/HwAA+P8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o15.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x15.png
+#
+set board AMD/LwAA9P8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o14.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o1.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x14.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x1.png
+#
+set board AMD/NwAA7P8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o13.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o2.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x13.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x2.png
+#
+set board AMD/OwAA3P8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o12.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o3.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x12.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x3.png
+#
+set board AMD/PQAAvP8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o11.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o4.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x11.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x4.png
+#
+set board AMD/PgAAfP8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o10.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o5.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x10.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x5.png
+#
+set board AMB/PwAA/P4DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o9.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o6.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x9.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x6.png
+#
+set board AMC/PwAA/P0DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o8.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o7.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x8.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x7.png
+#
+set board AMDfPwAA/PsDAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o7.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o8.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x7.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x8.png
+#
+set board AMDvPwAA/PcDAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o6.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o9.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x6.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x9.png
+#
+set board AMD3PwAA/O8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o5.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o10.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x5.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x10.png
+#
+set board AMD7PwAA/N8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o4.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o11.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x4.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x11.png
+#
+set board AMD9PwAA/L8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o3.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o12.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x3.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x12.png
+#
+set board AMD+PwAA/H8DAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o2.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o13.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x2.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x13.png
+#
+set board AED/PwAA/P8CAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru-o1.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o14.png
+!convert -crop 24x120+120+186 bla.png images/b-ru-x1.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x14.png
+#
+set board AID/PwAA/P8BAA
+!import -window "0x240001d" bla.png
+!convert -crop 24x120+72+186 bla.png  images/b-ru.png
+!convert -crop 24x120+96+186 bla.png  images/b-gu-o15.png
+!convert -crop 24x120+144+186 bla.png images/b-gu-x15.png
+#
+# red owns cube
+#
+set cube use off
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct.png
+set cube use on
+set cube owner 0
+#
+set cube value 1
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-1.png
+#
+set cube value 2
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-2.png
+#
+set cube value 4
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-4.png
+#
+set cube value 8
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-8.png
+#
+set cube value 16
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-16.png
+#
+set cube value 32
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-32.png
+#
+set cube value 64
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+42 bla.png  images/b-ct-64.png
+#
+# black owns cube
+#
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb.png
+set cube use on
+set cube owner 1
+#
+set cube value 1
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-1.png
+#
+set cube value 2
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-2.png
+#
+set cube value 4
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-4.png
+#
+set cube value 8
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-8.png
+#
+set cube value 16
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-16.png
+#
+set cube value 32
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-32.png
+#
+set cube value 64
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+274 bla.png  images/b-cb-64.png
+#
+# chequers on the bar
+#
+set cube use off
+#
+set board AAAAAAAAAAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o0.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x0.png
+#
+set board AAAAAQAABAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o1.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x1.png
+#
+set board AAAAAwAAGAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o2.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x2.png
+#
+set board AAAABwAAcAAAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o3.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x3.png
+#
+set board AAAADwAA4AEAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o4.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x4.png
+#
+set board AAAAHwAAwAcAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o5.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x5.png
+#
+set board AAAAPwAAgB8AAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o6.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x6.png
+#
+set board AAAAfwAAAH8AAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o7.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x7.png
+#
+set board AAAA/wAAAP4BAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o8.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x8.png
+#
+set board AAAA/wEAAPwHAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o9.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x9.png
+#
+set board AAAA/wMAAPgfAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o10.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x10.png
+#
+set board AAAA/wcAAPB/AA
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o11.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x11.png
+#
+set board AAAA/w8AAOD/AQ
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o12.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x12.png
+#
+set board AAAA/x8AAMD/Bw
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o13.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x13.png
+#
+set board AAAA/z8AAID/Hw
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o14.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x14.png
+#
+set board AAAA/38AAAD/fw
+!import -window "0x240001d" bla.png
+!convert -crop 48x88+216+74 bla.png   images/b-bar-o15.png
+!convert -crop 48x88+216+186 bla.png  images/b-bar-x15.png
+#
+# mid pictures
+#
+set board 21bVAAC1bVsAAA
+!import -window "0x240001d" bla.png
+!convert -crop 48x8+24+162 bla.png    x.png
+!convert -crop 48x8+24+170 bla.png    y.png
+!convert -crop 48x8+24+178 bla.png    z.png
+!convert -append x.png y.png y.png z.png images/b-midlb.png
+!convert -crop 48x8+408+162 bla.png    x.png
+!convert -crop 48x8+408+170 bla.png    y.png
+!convert -crop 48x8+408+178 bla.png    z.png
+!convert -append x.png y.png y.png z.png images/b-midrb.png
+#
+!convert -crop 144x32+72+158 bla.png   images/b-midl.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr.png
+#
+set matchid cAkAAAAAAAAA
+set cube use on
+set turn 0
+set cube value 1
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr-c2.png
+#
+set turn 0
+set cube value 2
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr-c4.png
+#
+set turn 0
+set cube value 4
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr-c8.png
+#
+set turn 0
+set cube value 8
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr-c16.png
+#
+set turn 0
+set cube value 16
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr-c32.png
+#
+set turn 0
+set cube value 32
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+264+158 bla.png  images/b-midr-c64.png
+#
+set turn 1
+set cube value 1
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+72+158 bla.png  images/b-midl-c2.png
+#
+set turn 1
+set cube value 2
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+72+158 bla.png  images/b-midl-c4.png
+#
+set turn 1
+set cube value 4
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+72+158 bla.png  images/b-midl-c8.png
+#
+set turn 1
+set cube value 8
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+72+158 bla.png  images/b-midl-c16.png
+#
+set turn 1
+set cube value 16
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+72+158 bla.png  images/b-midl-c32.png
+#
+set turn 1
+set cube value 32
+set cube owner both
+double
+show board
+!import -window "0x240001d" bla.png
+!convert -crop 144x32+72+158 bla.png  images/b-midl-c64.png
+#
+!echo picture b-midl.png and b-midr.png must be edited: remove points
+#
+# centered cubes
+# 
+!convert -crop 48x32+216+158 bla.png   images/b-midc.png
+set cube use on
+set cube owner both
+#
+set cube value 1
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-1.png
+#
+set cube value 2
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-2.png
+#
+set cube value 4
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-4.png
+#
+set cube value 8
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-8.png
+#
+set cube value 16
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-16.png
+#
+set cube value 32
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-32.png
+#
+set cube value 64
+!import -window "0x240001d" bla.png
+!convert -crop 48x32+216+158 bla.png   images/b-midc-64.png
+#
+# dice
+#
+# first make all dice
+#
+set dice 2 1
+set turn 1
+!import -window "0x240001d" bla.png
+!convert -crop 28x2+291+166 bla.png   28x2.png
+!convert -crop 28x28+428+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png o-die1.png
+!convert -crop 28x28+396+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png o-die2.png
+set dice 4 3
+set turn 1
+!import -window "0x240001d" bla.png
+!convert -crop 28x28+428+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png o-die3.png
+!convert -crop 28x28+396+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png o-die4.png
+set dice 6 5
+set turn 1
+!import -window "0x240001d" bla.png
+!convert -crop 28x28+428+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png o-die5.png
+!convert -crop 28x28+396+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png o-die6.png
+#
+set dice 2 1
+set turn 0
+!import -window "0x240001d" bla.png
+!convert -crop 28x28+428+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png x-die1.png
+!convert -crop 28x28+396+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png x-die2.png
+set dice 4 3
+set turn 0
+!import -window "0x240001d" bla.png
+!convert -crop 28x28+428+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png x-die3.png
+!convert -crop 28x28+396+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png x-die4.png
+set dice 6 5
+set turn 0
+!import -window "0x240001d" bla.png
+!convert -crop 28x28+428+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png x-die5.png
+!convert -crop 28x28+396+319 bla.png   x.png
+!convert -append 28x2.png x.png 28x2.png x-die6.png
+#
+# black's dice
+#
+!convert -crop 40x32+264+158 bla.png   x.png
+!convert -crop  8x32+332+158 bla.png   y.png
+!convert -crop 40x32+368+158 bla.png   z.png
+#
+!convert -append x.png o-die1.png y.png o-die1.png z.png images/b-midr-o11.png
+!convert -append x.png o-die1.png y.png o-die2.png z.png images/b-midr-o12.png
+!convert -append x.png o-die1.png y.png o-die3.png z.png images/b-midr-o13.png
+!convert -append x.png o-die1.png y.png o-die4.png z.png images/b-midr-o14.png
+!convert -append x.png o-die1.png y.png o-die5.png z.png images/b-midr-o15.png
+!convert -append x.png o-die1.png y.png o-die6.png z.png images/b-midr-o16.png
+#
+!convert -append x.png o-die2.png y.png o-die1.png z.png images/b-midr-o21.png
+!convert -append x.png o-die2.png y.png o-die2.png z.png images/b-midr-o22.png
+!convert -append x.png o-die2.png y.png o-die3.png z.png images/b-midr-o23.png
+!convert -append x.png o-die2.png y.png o-die4.png z.png images/b-midr-o24.png
+!convert -append x.png o-die2.png y.png o-die5.png z.png images/b-midr-o25.png
+!convert -append x.png o-die2.png y.png o-die6.png z.png images/b-midr-o26.png
+#
+!convert -append x.png o-die3.png y.png o-die1.png z.png images/b-midr-o31.png
+!convert -append x.png o-die3.png y.png o-die2.png z.png images/b-midr-o32.png
+!convert -append x.png o-die3.png y.png o-die3.png z.png images/b-midr-o33.png
+!convert -append x.png o-die3.png y.png o-die4.png z.png images/b-midr-o34.png
+!convert -append x.png o-die3.png y.png o-die5.png z.png images/b-midr-o35.png
+!convert -append x.png o-die3.png y.png o-die6.png z.png images/b-midr-o36.png
+#
+!convert -append x.png o-die4.png y.png o-die1.png z.png images/b-midr-o41.png
+!convert -append x.png o-die4.png y.png o-die2.png z.png images/b-midr-o42.png
+!convert -append x.png o-die4.png y.png o-die3.png z.png images/b-midr-o43.png
+!convert -append x.png o-die4.png y.png o-die4.png z.png images/b-midr-o44.png
+!convert -append x.png o-die4.png y.png o-die5.png z.png images/b-midr-o45.png
+!convert -append x.png o-die4.png y.png o-die6.png z.png images/b-midr-o46.png
+#
+!convert -append x.png o-die5.png y.png o-die1.png z.png images/b-midr-o51.png
+!convert -append x.png o-die5.png y.png o-die2.png z.png images/b-midr-o52.png
+!convert -append x.png o-die5.png y.png o-die3.png z.png images/b-midr-o53.png
+!convert -append x.png o-die5.png y.png o-die4.png z.png images/b-midr-o54.png
+!convert -append x.png o-die5.png y.png o-die5.png z.png images/b-midr-o55.png
+!convert -append x.png o-die5.png y.png o-die6.png z.png images/b-midr-o56.png
+#
+!convert -append x.png o-die6.png y.png o-die1.png z.png images/b-midr-o61.png
+!convert -append x.png o-die6.png y.png o-die2.png z.png images/b-midr-o62.png
+!convert -append x.png o-die6.png y.png o-die3.png z.png images/b-midr-o63.png
+!convert -append x.png o-die6.png y.png o-die4.png z.png images/b-midr-o64.png
+!convert -append x.png o-die6.png y.png o-die5.png z.png images/b-midr-o65.png
+!convert -append x.png o-die6.png y.png o-die6.png z.png images/b-midr-o66.png
+#
+# red's dice
+#
+!convert -crop 40x32+72+158 bla.png   x.png
+!convert -crop  8x32+140+158 bla.png   y.png
+!convert -crop 40x32+176+158 bla.png   z.png
+#
+!convert -append x.png x-die1.png y.png x-die1.png z.png images/b-midl-x11.png
+!convert -append x.png x-die1.png y.png x-die2.png z.png images/b-midl-x12.png
+!convert -append x.png x-die1.png y.png x-die3.png z.png images/b-midl-x13.png
+!convert -append x.png x-die1.png y.png x-die4.png z.png images/b-midl-x14.png
+!convert -append x.png x-die1.png y.png x-die5.png z.png images/b-midl-x15.png
+!convert -append x.png x-die1.png y.png x-die6.png z.png images/b-midl-x16.png
+#
+!convert -append x.png x-die2.png y.png x-die1.png z.png images/b-midl-x21.png
+!convert -append x.png x-die2.png y.png x-die2.png z.png images/b-midl-x22.png
+!convert -append x.png x-die2.png y.png x-die3.png z.png images/b-midl-x23.png
+!convert -append x.png x-die2.png y.png x-die4.png z.png images/b-midl-x24.png
+!convert -append x.png x-die2.png y.png x-die5.png z.png images/b-midl-x25.png
+!convert -append x.png x-die2.png y.png x-die6.png z.png images/b-midl-x26.png
+#
+!convert -append x.png x-die3.png y.png x-die1.png z.png images/b-midl-x21.png
+!convert -append x.png x-die3.png y.png x-die2.png z.png images/b-midl-x32.png
+!convert -append x.png x-die3.png y.png x-die3.png z.png images/b-midl-x33.png
+!convert -append x.png x-die3.png y.png x-die4.png z.png images/b-midl-x34.png
+!convert -append x.png x-die3.png y.png x-die5.png z.png images/b-midl-x35.png
+!convert -append x.png x-die3.png y.png x-die6.png z.png images/b-midl-x36.png
+#
+!convert -append x.png x-die4.png y.png x-die1.png z.png images/b-midl-x41.png
+!convert -append x.png x-die4.png y.png x-die2.png z.png images/b-midl-x42.png
+!convert -append x.png x-die4.png y.png x-die3.png z.png images/b-midl-x43.png
+!convert -append x.png x-die4.png y.png x-die4.png z.png images/b-midl-x44.png
+!convert -append x.png x-die4.png y.png x-die5.png z.png images/b-midl-x45.png
+!convert -append x.png x-die4.png y.png x-die6.png z.png images/b-midl-x46.png
+#
+!convert -append x.png x-die5.png y.png x-die1.png z.png images/b-midl-x51.png
+!convert -append x.png x-die5.png y.png x-die2.png z.png images/b-midl-x52.png
+!convert -append x.png x-die5.png y.png x-die3.png z.png images/b-midl-x53.png
+!convert -append x.png x-die5.png y.png x-die4.png z.png images/b-midl-x54.png
+!convert -append x.png x-die5.png y.png x-die5.png z.png images/b-midl-x55.png
+!convert -append x.png x-die5.png y.png x-die6.png z.png images/b-midl-x56.png
+#
+!convert -append x.png x-die6.png y.png x-die1.png z.png images/b-midl-x61.png
+!convert -append x.png x-die6.png y.png x-die2.png z.png images/b-midl-x62.png
+!convert -append x.png x-die6.png y.png x-die3.png z.png images/b-midl-x63.png
+!convert -append x.png x-die6.png y.png x-die4.png z.png images/b-midl-x64.png
+!convert -append x.png x-die6.png y.png x-die5.png z.png images/b-midl-x65.png
+!convert -append x.png x-die6.png y.png x-die6.png z.png images/b-midl-x66.png
