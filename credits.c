@@ -25,6 +25,7 @@ char *aszCredits[] = {
     "Jared Riley",
     "Brian Sheppard",
     "Gerry Tesauro",
+    "Kit Woolsey",
     "Frank Worrell",
     "Michael Zehr",
     0

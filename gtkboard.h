@@ -56,7 +56,8 @@ typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
 	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
 	*crawford, *widget, *key0, *key1, *stop, *takedrop, *rolldouble,
-	*agreedecline, *redouble, *doub;
+	*agreedecline, *redouble, *doub, *lname0, *lname1, *lscore0, *lscore1,
+	*mname0, *mname1, *mscore0, *mscore1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,

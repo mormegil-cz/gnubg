@@ -57,11 +57,11 @@ duplication of effort and to make sure our changes merge easily.
 *** Should luck be evaluated cubefully?  (An option, perhaps?)
 *** Use the fComputed field in statcontext (make "show statistics ..."
   complain if not computed, disable the GTK menu items if not available).
-  Actually, fComputed should probably be broken into 3 (chequer, cube, luck).
   Be careful to avoid division by 0 when computing statistics (e.g. in a
   1-point match, there are no cube decisions, so the cube error = 0/0 = NaN,
   so players always get cube and overall ratings of "beginner").
-*** Load and save statistics. (gary)
+*** Make DumpStatcontext and GTKDumpStatcontext work for money sessions.
+*** Make sure analysis works with resignations.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -92,6 +92,12 @@ duplication of effort and to make sure our changes merge easily.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** If a resignation is rejected, don't allow further resignations for
   that amount or below for the rest of the turn.
+** Kit suggests that it's more important to get early plays right in
+  rollouts.  Should we consider options that allow larger search space/
+  search depth/etc. for early moves in rollouts than later ones?  (Kit's
+  suggestion is to maximise the chance of finding the right play for
+  the initial roll and response, and whatever speeds things along while
+  still finding reasonable plays after that.)
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -99,6 +105,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Use Guile keywords in cube-info.  Add a similar function for eval
   contexts.
 ** Add Guile functions to access the current game state.
+** Add whatever Guile functions are necessary for implementing Cam Trenor's
+  suggestion (generating random positions which are initial doubles). (gary)
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -164,19 +172,15 @@ duplication of effort and to make sure our changes merge easily.
   annotation.
 ** Add the players' names in the drop-down menu in the game window.  (They
   used to be there, but weren't updated if the names were changed.)
-** Add option menus corresponding to the "annotate" commands in the
-  annotation window. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
 ** Kit Woolsey suggests modifying the "edit mode" interface.  SW
   <http://www.oasya.com/HTMLHelp/UserInterface/Editing.html> would be a
   good starting point.
-** The entry fields and spin buttons for player names and scores are
-  confusing: adjusting things has no effect until you press "enter".  A
-  better approach would be to disallow changing those settings except
-  while in edit mode, and they would take effect once you leave edit
-  mode.
 ** When a long string is displayed in the status bar, the main window
-  grows to accomodate it -- not very pretty.
+  grows to accomodate it -- not very pretty.  A Layout or Viewport widget
+  might be able to fix this.
+** Make GTKDumpStatcontext check psc->fMoves, psc->fDice and psc->fCube,
+  and only output the relevant statistics.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -225,13 +229,17 @@ duplication of effort and to make sure our changes merge easily.
 ** There's no way to see the annotation on the opening move using the
   TTY interface.  Changing ShowBoard() to display the starting position
   and then the annotation might work.
-** The SGF lexer and parser are robust against illegal output, but the
+** The SGF lexer and parser are robust against illegal input, but the
   game reading functions in sgf.c are very fragile.  They need to be
   fixed to detect invalid saved games.
 ** fPlayer is probably set incorrectly in the MOVE_TAKE and MOVE_DROP
   cases in AnalyzeGame().
-** The error messages about net weights should mention the file they're
-  complaining about (since several are searched).
+** CommandCopy() should complain (or copy a board initialised to the
+  starting position) if no game is being played.
+** Problems importing JF positions (see David's e-mail).
+** "show score" (and the Guile function current-score) report the
+  number of games _started_, but should probably show the number
+  finished.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -272,8 +280,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Keep statistics of won/lost games/matches.
 ** Consider "-s scheme-file" and "-c command-file" options to read scripts.
 ** Replace HUGE_VALF with the more portable FLT_MAX in <float.h>.
-** Finish the annotation commands in play.c.
-** Load and save take/drop errors in sgf.c.
+** Write CommandAnnotateClear in play.c.  Should there be different commands
+  for clearing luck and skill annotations?
 ** Make sure the Nackgammon option works properly: record when loading/saving,
   make sure that InitBoard during analysis gets it right, etc.
 ** Make calls to irandinit() in eval.c and lib/neuralnet.c give the time as

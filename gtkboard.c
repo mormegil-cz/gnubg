@@ -38,6 +38,7 @@
 #include "drawboard.h"
 #include "gdkgetrgb.h"
 #include "gtkboard.h"
+#include "gtk-multiview.h"
 #include "gtkprefs.h"
 #include "positionid.h"
 
@@ -1310,7 +1311,9 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
     gtk_entry_set_text( GTK_ENTRY( bd->name0 ), bd->name_opponent );
     gtk_entry_set_text( GTK_ENTRY( bd->name1 ), bd->name );
-
+    gtk_label_set_text( GTK_LABEL( bd->lname0 ), bd->name_opponent );
+    gtk_label_set_text( GTK_LABEL( bd->lname1 ), bd->name );
+    
     if( bd->match_to ) {
 	sprintf( buf, "%d", bd->match_to );
 	gtk_label_set_text( GTK_LABEL( bd->match ), buf );
@@ -1327,6 +1330,10 @@ static gint board_set( Board *board, const gchar *board_text ) {
 			       bd->score_opponent );
     gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
 			       bd->score );
+    sprintf( buf, "%d", bd->score_opponent );
+    gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
+    sprintf( buf, "%d", bd->score );
+    gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
 
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
 				  bd->crawford_game );
@@ -2693,27 +2700,6 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
     }
 }
 
-static void board_set_name( GtkWidget *pw, BoardData *bd ) {
-
-    char sz[ 82 ]; /* "set player ..32.. name ..32.." */
-
-    sprintf( sz, "set player %s name %s", ap[ pw == bd->name0 ? 0 : 1 ].szName,
-	     gtk_entry_get_text( GTK_ENTRY( pw ) ) );
-
-    UserCommand( sz );
-}
-
-static void board_set_score( GtkWidget *pw, BoardData *bd ) {
-
-    char sz[ 32 ]; /* "set score ..10.. ..10.." */
-
-    sprintf( sz, "set score %s %s",
-	     gtk_entry_get_text( GTK_ENTRY( bd->score0 ) ),
-	     gtk_entry_get_text( GTK_ENTRY( bd->score1 ) ) );
-
-    UserCommand( sz );
-}
-
 static void board_stop( GtkWidget *pw, BoardData *bd ) {
 
     fInterrupt = TRUE;
@@ -2726,15 +2712,55 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
     update_move( bd );
     update_buttons( bd );
     
-    if( !f ) {
+    if( f ) {
+	/* Entering edit mode: enable entry fields for names and scores */
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname0 ), bd->name0 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname1 ), bd->name1 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore0 ), bd->score0 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore1 ), bd->score1 );
+    } else {
 	/* Editing complete; set board. */
-	int points[ 2 ][ 25 ];
-	char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
-	
+	int points[ 2 ][ 25 ], anScoreNew[ 2 ];
+	char *pch0, *pch1, sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
+
+	/* We need to query all the widgets before issuing any commands,
+	   since those commands have side effects which disturb other
+	   widgets. */
+	pch0 = gtk_entry_get_text( GTK_ENTRY( bd->name0 ) );
+	pch1 = gtk_entry_get_text( GTK_ENTRY( bd->name1 ) );
+	anScoreNew[ 0 ] = GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
+	anScoreNew[ 1 ] = GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
 	read_board( bd, points );
-	sprintf( sz, "set board %s", PositionID( points ) );
-    
-	UserCommand( sz );
+	
+	outputpostpone();
+
+	if( strcmp( pch0, ap[ 0 ].szName ) ) {
+	    sprintf( sz, "set player 0 name %s", pch0 );
+	    UserCommand( sz );
+	}
+	
+	if( strcmp( pch1, ap[ 1 ].szName ) ) {
+	    sprintf( sz, "set player 1 name %s", pch1 );
+	    UserCommand( sz );
+	}
+	
+	if( anScoreNew[ 0 ] != anScore[ 0 ] ||
+	    anScoreNew[ 1 ] != anScore[ 1 ] ) {
+	    sprintf( sz, "set score %d %d", anScoreNew[ 0 ], anScoreNew[ 1 ] );
+	    UserCommand( sz );
+	}
+	
+	if( !EqualBoards( anBoard, points ) ) {
+	    sprintf( sz, "set board %s", PositionID( points ) );
+	    UserCommand( sz );
+	}
+	
+	outputresume();
+
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname0 ), bd->lname0 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname1 ), bd->lname1 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore0 ), bd->lscore0 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore1 ), bd->lscore1 );
     }
 }
 
@@ -2993,37 +3019,47 @@ static void board_init( Board *board ) {
     gtk_box_pack_end( GTK_BOX( bd->hbox_pos ),
 		      gtk_label_new( "Position:" ), FALSE, FALSE, 0 );
     
-    gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Name" ),
-		      1, 2, 0, 1, 0, 0, 8, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), pw = gtk_label_new( "Name" ),
+		      1, 2, 0, 1, GTK_FILL, 0, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Score" ),
 		      2, 3, 0, 1, 0, 0, 8, 0 );
     
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->name0 =
-		      gtk_entry_new_with_max_length( 32 ),
-		      1, 2, 1, 2, 0, 0, 4, 0 );
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->name1 =
-		      gtk_entry_new_with_max_length( 32 ),
-		      1, 2, 2, 3, 0, 0, 4, 0 );
-    gtk_signal_connect( GTK_OBJECT( bd->name0 ), "activate",
-			GTK_SIGNAL_FUNC( board_set_name ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->name1 ), "activate",
-			GTK_SIGNAL_FUNC( board_set_name ), bd );
-    
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->mname0 =
+		      gtk_multiview_new(), 1, 2, 1, 2, 0, 0, 4, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->mname1 =
+		      gtk_multiview_new(), 1, 2, 2, 3, 0, 0, 4, 0 );
+    bd->name0 = gtk_entry_new_with_max_length( 32 );
+    bd->lname0 = gtk_label_new( NULL );
+    gtk_misc_set_alignment( GTK_MISC( bd->lname0 ), 0, 0.5 );
+    bd->name1 = gtk_entry_new_with_max_length( 32 );
+    bd->lname1 = gtk_label_new( NULL );
+    gtk_misc_set_alignment( GTK_MISC( bd->lname1 ), 0, 0.5 );
+    gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->lname0 );
+    gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->name0 );
+    gtk_container_add( GTK_CONTAINER( bd->mname1 ), bd->lname1 );
+    gtk_container_add( GTK_CONTAINER( bd->mname1 ), bd->name1 );
+
     gtk_table_attach( GTK_TABLE( bd->table ), bd->key0 =
 		      chequer_key_new( 0, bd ), 0, 1, 1, 2, 0, 0, 8, 1 );
     gtk_table_attach( GTK_TABLE( bd->table ), bd->key1 =
 		      chequer_key_new( 1, bd ), 0, 1, 2, 3, 0, 0, 8, 0 );
     
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->score0 =
-		      gtk_spin_button_new( GTK_ADJUSTMENT(
-			  gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
-					   1, 0 ),
-		      2, 3, 1, 2, 0, 0, 4, 0 );
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->score1 =
-		      gtk_spin_button_new( GTK_ADJUSTMENT(
-			  gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
-					   1, 0 ),
-		      2, 3, 2, 3, 0, 0, 4, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->mscore0 =
+		      gtk_multiview_new(), 2, 3, 1, 2, 0, 0, 4, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->mscore1 =
+		      gtk_multiview_new(), 2, 3, 2, 3, 0, 0, 4, 0 );
+    bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT(
+	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
+    bd->score1 = gtk_spin_button_new( GTK_ADJUSTMENT(
+	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
+    bd->lscore0 = gtk_label_new( NULL );
+    bd->lscore1 = gtk_label_new( NULL );
+    gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->lscore0 );
+    gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->score0 );
+    gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->lscore1 );
+    gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->score1 );
+    
     gtk_table_attach( GTK_TABLE( bd->table ), bd->crawford =
 		      gtk_check_button_new_with_label( "Crawford game" ),
 		      3, 4, 1, 3, 0, 0, 0, 0 );
@@ -3031,10 +3067,6 @@ static void board_init( Board *board ) {
 			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
-    gtk_signal_connect( GTK_OBJECT( bd->score0 ), "activate",
-			GTK_SIGNAL_FUNC( board_set_score ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->score1 ), "activate",
-			GTK_SIGNAL_FUNC( board_set_score ), bd );
     
     gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
 			gtk_label_new( "Match:" ), FALSE, FALSE, 4 );

@@ -1,3 +1,16 @@
+Mon Apr 30 15:23:42 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (DumpStatcontext): Only show statistics which have been
+	computed.
+
+	* gtkboard.c: Allow changing name/scores in edit mode only.
+	* gtk-multiview.c, gtk-multiview.h: New files.
+	
+	* gtkgame.c: Add option menus in the annotation window corresponding
+	to the "annotate" commands.
+
+	* guile.c (evaluate_position_cubeful, game_state): New functions.
+
 Fri Apr 27 16:45:01 2001  Øystein Johansen <oeysteij@online.no>
 
         * analysis.c (DumpStatcontext): Fix bug in overall rating.

@@ -19,6 +19,7 @@ EOF
 cat > $contributors <<'EOF'
 Eric Augustine
 Steve Baedke
+Chuck Bower
 Bill Davidson
 Eric Groleau
 Jeff Haferman
@@ -34,6 +35,7 @@ Zvezdan Petkovic
 Petri Pitkänen
 Sam Pottle
 Jared Riley
+Kit Woolsey
 Frank Worrell
 EOF
 

@@ -240,7 +240,7 @@ extern int GetInputYN( char *szPrompt );
 extern void HandleCommand( char *sz, command *ac );
 extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
-extern void NextTurn( void );
+extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
 extern void ApplyMoveRecord( moverecord *pmr );
@@ -250,6 +250,7 @@ extern void AddGame( moverecord *pmr );
 extern void ChangeGame( list *plGameNew );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
+extern int ComputerTurn( void );
 extern void FreeMatch( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
@@ -340,6 +341,10 @@ extern void CommandAccept( char * ),
     CommandAnnotateInteresting( char * ),
     CommandAnnotateLucky( char * ),
     CommandAnnotateUnlucky( char * ),
+    CommandAnnotateVeryBad( char * ),
+    CommandAnnotateVeryGood( char * ),
+    CommandAnnotateVeryLucky( char * ),
+    CommandAnnotateVeryUnlucky( char * ),
     CommandCopy ( char * ),
     CommandDatabaseDump( char * ),
     CommandDatabaseExport( char * ),
