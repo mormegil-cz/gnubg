@@ -21,7 +21,8 @@ duplication of effort and to make sure our changes merge easily.
   two moves both are so bad that the opponent should double, and we 
   should pass, both moves have cubeful equity -1. But the opponent
   might not double, in which case it had been best to choose the
-  move with highest cubeless equity. (thyssen)
+  move with highest cubeless equity. (thyssen) (this looks like it's done
+  already)
 ** Add another "eval"-like command that show the distribution of
   equities n rolls ahead.  SW does bar graphs of this stuff; Cam Trenor
   suggests alternative output.
@@ -53,7 +54,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
-** Make sure input behaves correctly when stdin is not a TTY. (gary)
+** Make sure input behaves correctly when stdin is not a TTY (the only
+  problems seem to be cosmetic; junk is echoed to stdout). (gary)
 ** Make output*() functions wrap words, and pause before scrolling (as in
   gdb).  Make sure output to stderr is available when using GTK -- perror
   calls will have to be replaced, for instance.
@@ -83,6 +85,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more data types and Scheme bindings for useful functions.
 ** Define Scheme "port"s for the gnubg output() functions.
 ** Defer and allow Guile interrupts at appropriate places in guile.c.
+  (For instance, evaluating "(define (x) (x)) (x)" in Guile can be
+  interrupted.  But "(rollout-position (current-board))" cannot.) (gary)
 ** Use Guile keywords in cube-info.  Add a similar function for eval
   contexts.
 ** Add Guile functions to access the current game state.

@@ -2804,6 +2804,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
+	case 'w':
+#if USE_GTK
+	    if( fX )
+		fTTY = FALSE;
+#else
+	    /* silently ignore */
+#endif
+	    break;
 	default:
 	    usage( argv[ 0 ] );
 	    exit( EXIT_FAILURE );
@@ -2856,7 +2864,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-	PortableSignal( SIGINT, HandleInterrupt, NULL );
+	if( fInteractive )
+	    PortableSignal( SIGINT, HandleInterrupt, NULL );
     
 #if USE_GUI
     PortableSignal( SIGIO, HandleIO, NULL );
