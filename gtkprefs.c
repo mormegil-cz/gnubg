@@ -114,6 +114,7 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook);
 
 #if HAVE_LIBXML2
 static void AddDesignRow ( gpointer data, gpointer user_data );
+static void AddDesignRowIfNew ( gpointer data, gpointer user_data );
 #endif
 
 #if USE_BOARD3D
@@ -193,11 +194,41 @@ static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused );
 #endif
 
+void ParsePreferences(boarddesign *pbde, renderdata* prdNew)
+{
+	char *apch[2];
+	gchar *sz, *pch;
+
+	*prdNew = rdPrefs;
+	pch = sz = g_strdup(pbde->szBoardDesign);
+	while(ParseKeyValue(&sz, apch)) 
+		RenderPreferencesParam(prdNew, apch[0], apch[1]);
+		
+	g_free(pch);
+}
+
+static boarddesign* FindDesign (renderdata* prdDesign)
+{
+	int i;
+	renderdata rdTest;
+	for (i = 0; i < g_list_length(plBoardDesigns) - 1; i++)
+	{
+		boarddesign *pbde = g_list_nth_data(plBoardDesigns, i + 1);
+		if (pbde)
+		{
+			ParsePreferences(pbde, &rdTest);
+			if (PreferenceCompare(&rdTest, prdDesign))
+				return pbde;
+		}
+	}
+	return NULL;
+}
+
 void SetTitle()
 {	/* Update dialog title to include design name + author */
 #if HAVE_LIBXML2
 	int i = 0;
-	int found = FALSE;
+	boarddesign *pbde;
 #endif
 	char title[1024];
 	GtkWidget *pwDialog = gtk_widget_get_toplevel(pwPrevBoard);
@@ -205,46 +236,34 @@ void SetTitle()
 	strcpy(title, _("GNU Backgammon - Appearance"));
 
 #if HAVE_LIBXML2
-{	/* Search for current settings in designs */
-	gchar *sz, *pch;
-	renderdata rdTest;
-	char *apch[ 2 ];
+	/* Search for current settings in designs */
 	strcat(title, ": ");
-	for (i = 0; i < g_list_length(plBoardDesigns) - 1; i++)
+
+	pbde = FindDesign (&rdPrefs);
+	if (pbde)
 	{
-		boarddesign *pbde = g_list_nth_data(plBoardDesigns, i + 1);
-		if (pbde)
-		{
-			rdTest = rdPrefs;
-			pch = sz = g_strdup(pbde->szBoardDesign);
-			while (ParseKeyValue(&sz, apch)) 
-			RenderPreferencesParam(&rdTest, apch[ 0 ], apch[ 1 ]);
-			g_free(pch);
-			if (PreferenceCompare(&rdTest, &rdPrefs))
-			{
-				char design[1024];
-				int row = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ), pbde);
-				gtk_signal_handler_block_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignSelect ), 0);
-				gtk_signal_handler_block_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignUnselect ), 0);
-				gtk_clist_select_row( GTK_CLIST( pwDesignList ), row, 0);
-				gtk_signal_handler_unblock_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignSelect ), 0);
-				gtk_signal_handler_unblock_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignUnselect ), 0);
+		char design[1024];
+		int row = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ), pbde);
+		gtk_signal_handler_block_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignSelect ), 0);
+		gtk_signal_handler_block_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignUnselect ), 0);
+		gtk_clist_select_row( GTK_CLIST( pwDesignList ), row, 0);
+		gtk_signal_handler_unblock_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignSelect ), 0);
+		gtk_signal_handler_unblock_by_func(GTK_OBJECT(pwDesignList), GTK_SIGNAL_FUNC( DesignUnselect ), 0);
 
-				gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), pbde->fDeletable );
+		gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), pbde->fDeletable );
 
-				sprintf(design, "%s by %s (%s)", pbde->szTitle, pbde->szAuthor,
-					pbde->fDeletable ? _("user defined") : _("predefined" ) );
-				strcat(title, design);
-				found = TRUE;
-				pbdeSelected = pbde;
-				break;
-			}
-		}
+		sprintf(design, "%s by %s (%s)", pbde->szTitle, pbde->szAuthor,
+			pbde->fDeletable ? _("user defined") : _("predefined" ) );
+		strcat(title, design);
+		pbdeSelected = pbde;
+
+		gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignAdd ), FALSE );
+		gtk_widget_set_sensitive(pwDesignUpdate, FALSE );
 	}
-	gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignAdd ), !found );
-	if (!found)
+	else
 	{
 		strcat(title, _("Custom design"));
+		gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignAdd ), TRUE );
 		if (GTK_WIDGET_IS_SENSITIVE(pwDesignRemove))
 		{
 			gtk_widget_set_sensitive(pwDesignUpdate, TRUE );
@@ -253,10 +272,6 @@ void SetTitle()
 		}
 		pbdeSelected = 0;
 	}
-	else 
-		gtk_widget_set_sensitive(pwDesignUpdate, FALSE );
-
-}
 #endif
 	gtk_window_set_title( GTK_WINDOW( pwDialog ),  title);
 }
@@ -1729,13 +1744,7 @@ UseDesign ( void ) {
     ClearTextures(bd);
 #endif
 
-  newPrefs = rdPrefs;
-
-  pch = sz = g_strdup ( pbdeSelected->szBoardDesign );
-  while( ParseKeyValue( &sz, apch ) ) 
-    RenderPreferencesParam( &newPrefs, apch[ 0 ], apch[ 1 ] );
-
-  g_free ( pch );
+  ParsePreferences(pbdeSelected, &newPrefs);
 
 #if USE_BOARD3D
 
@@ -2000,7 +2009,6 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
     g_free ( szFile );
     return;
   }
-  g_free ( szFile );
 
   WriteDesignHeader( szFile, pf );
   g_list_foreach ( *pplBoardDesigns, WriteDesignOnlyDeletables, pf );
@@ -2008,6 +2016,8 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
 
   fclose ( pf );
   
+  g_free ( szFile );
+
 }
 
 static void DesignAddOK( GtkWidget *pw, boarddesign *pbde ) {
@@ -2378,120 +2388,135 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
 
 static void ExportDesign ( GtkWidget *pw, gpointer data ) 
 {
+	GList* designs;
+	gchar *pch;
+	gchar *szFile;
+	FILE *pf;
+	boarddesign *pbde;
+	renderdata rdNew;
 
-  gchar *pch;
-  gchar *szFile;
-  FILE *pf;
+	if (!( pch = szFile = 
+         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE ) ) )
+		return;
 
-  if ( ( pch = szFile = 
-         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE ) ) ) {
+	szFile = NextToken( &szFile );
 
-    boarddesign *pbde;
-    renderdata rdNew;
+	/* 
+	* Copy current design 
+	*/
 
-    /* 
-     * Copy current design 
-     */
+	if ( ! ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) ) {
+		outputerr ( "allocate boarddesign" );
+		return;
+	}
 
-    if ( ! ( pbde = (boarddesign *) g_malloc ( sizeof ( boarddesign ) ) ) ) {
-      outputerr ( "allocate boarddesign" );
-      return;
-    }
+	/* get title from current selection if possible */
 
-    /* get title from current selection if possible */
+	if ( g_list_length( GTK_CLIST( pwDesignList )->selection ) == 1 ) {
+		int selrow = 
+		GPOINTER_TO_INT( GTK_CLIST( pwDesignList )->selection->data );
+		boarddesign *pbdeCurrent = 
+		gtk_clist_get_row_data ( GTK_CLIST ( pwDesignList ), selrow );
+		pbde->szTitle = g_strdup( pbdeCurrent->szTitle );
+		pbde->szAuthor = g_strdup( pbdeCurrent->szAuthor );
+	}
+	else {
+		/* user defined */
+		pbde->szTitle = g_strdup( _("User defined") );
+		pbde->szAuthor = g_strdup( _("User" ) );
+	}
 
-    if ( g_list_length( GTK_CLIST( pwDesignList )->selection ) == 1 ) {
-      int selrow = 
-        GPOINTER_TO_INT( GTK_CLIST( pwDesignList )->selection->data );
-      boarddesign *pbdeCurrent = 
-        gtk_clist_get_row_data ( GTK_CLIST ( pwDesignList ), selrow );
-      pbde->szTitle = g_strdup( pbdeCurrent->szTitle );
-      pbde->szAuthor = g_strdup( pbdeCurrent->szAuthor );
-    }
-    else {
-      /* user defined */
-      pbde->szTitle = g_strdup( _("User defined") );
-      pbde->szAuthor = g_strdup( _("User" ) );
-    }
+	/* get actual board design */
 
-    /* get actual board design */
-
-    GetPrefs(&rdPrefs);
-    rdNew = rdPrefs;
+	if (pbdeSelected)
+	{	/* Exporting current design so just get settings */
+		ParsePreferences(pbdeSelected, &rdNew);
+	}
+	else
+	{
+		/* new design, so get settings and copy to other dimension */
+		GetPrefs(&rdPrefs);
+		rdNew = rdPrefs;
 #if USE_BOARD3D
-    CopyNewSettingsToOtherDimension(&rdNew);
+		CopyNewSettingsToOtherDimension(&rdNew);
 #endif
-    
-    WriteDesignString(pbde, &rdNew);
-    
-    pbde->fDeletable = TRUE;
+	}
 
-    /* write design to file */
+	WriteDesignString(pbde, &rdNew);
 
-    szFile = NextToken( &szFile );
+	pbde->fDeletable = TRUE;
 
-    if ( ! ( pf = fopen ( szFile, "w" ) ) ) {
-      outputerr ( szFile );
-      free_board_design( pbde, NULL );
-      g_free ( pch );
-      return;
-    }
+	/* if file exists, read in any designs */
+	if (!(designs = ParseBoardDesigns(szFile, TRUE)))
+	{	/* None found so create empty list */
+		designs = g_list_alloc();
+	}
+	designs = g_list_append(designs, (gpointer)pbde);
 
-    WriteDesignHeader( szFile, pf );
-    WriteDesign( pbde, pf );
-    WriteDesignFooter( pf );
-    fclose ( pf );
-    
-    free_board_design( pbde, NULL );
-    g_free ( pch );
+	/* write designs to file */
 
-  }
-  
+	if ( ! ( pf = fopen ( szFile, "w+" ) ) ) {
+		outputerr ( szFile );
+		free_board_design( pbde, NULL );
+		g_free ( pch );
+		return;
+	}
+
+	WriteDesignHeader( szFile, pf );
+	g_list_foreach(designs, WriteDesign, pf);
+	WriteDesignFooter( pf );
+	fclose ( pf );
+
+	free_board_design( pbde, NULL );
+	g_free ( pch );
 }
 
 static void ImportDesign ( GtkWidget *pw, gpointer data ) 
 {
+	gchar *pch;
+	gchar *szFile;
+	GList *new_designs;
+	gint old_length;
+	gint num_added;
 
-  gchar *pch;
-  gchar *szFile;
-  GList *new_designs;
+	if ( !( pch = szFile = 
+         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE ) ) )
+		return;
 
-  if ( ( pch = szFile = 
-         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE ) ) ) {
+	szFile = NextToken( &szFile );
 
-    gint old_length;
-    gint new_length;
+	if ( ! ( new_designs = ParseBoardDesigns( szFile, TRUE ) ) ) {
+		/* no designs found */
+		outputl( _("File not found or no designs in file.") );
+		outputx();
+		g_free( pch );
+		return;
+	}
 
-    szFile = NextToken( &szFile );
+	g_free( pch );
 
-    if ( ! ( new_designs = ParseBoardDesigns( szFile, TRUE ) ) ) {
-      /* no designs found */
-      outputl( _("File not found or not designs in file.") );
-      outputx();
-      g_free( pch );
-      return;
-    }
+	/* add designs to current list */
 
-    g_free( pch );
+	/* FIXME: show dialog instead */
+	outputl( _("Adding new designs:") );
 
-    /* add designs to current lis */
+	old_length = g_list_length( plBoardDesigns );
 
-    old_length = g_list_length( plBoardDesigns );
+	g_list_foreach ( new_designs, AddDesignRowIfNew, pwDesignList );
 
-    plBoardDesigns = g_list_concat ( plBoardDesigns, new_designs );
-    g_list_foreach ( new_designs, AddDesignRow, pwDesignList );
+	num_added = g_list_length( plBoardDesigns ) - old_length;
 
-    new_length = g_list_length( plBoardDesigns );
+	outputf( ngettext( "%d design added.\n",
+						"%d designs added.\n", num_added ),
+				num_added );
+	outputx();
 
-    /* FIXME: show dialog instead */
-    outputf( ngettext( "%d design added.\n",
-                       "%d designs added.\n",
-                       new_length - old_length ),
-             new_length - old_length );
-    outputx();
-
-  }
-
+	if (num_added > 0)
+	{
+		DesignSave(pw, data);
+		pbdeSelected = g_list_nth_data(plBoardDesigns, old_length);
+		UseDesign();
+	}
 }
 
 
@@ -2539,11 +2564,7 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 		char *apch[ 2 ];
 		gchar *sz, *pch;
 		/* Get current (2d) settings for design */
-		newPrefs = rdPrefs;
-		pch = sz = g_strdup ( pbdeModified->szBoardDesign );
-		while( ParseKeyValue( &sz, apch ) ) 
-			RenderPreferencesParam( &newPrefs, apch[ 0 ], apch[ 1 ] );
-		g_free ( pch );
+		ParsePreferences(pbdeModified, &newPrefs);
 
 		/* Overwrite 3d settings with current values */
 		Set3dSettings(&newPrefs, &rdPrefs);
@@ -2553,13 +2574,11 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 	{
 		char *apch[ 2 ];
 		gchar *sz, *pch;
+#if USE_BOARD3D
 		/* Get current (3d) design settings */
 		renderdata designPrefs;
-		designPrefs = rdPrefs;
-		pch = sz = g_strdup ( pbdeModified->szBoardDesign );
-		while( ParseKeyValue( &sz, apch ) ) 
-			RenderPreferencesParam( &designPrefs, apch[ 0 ], apch[ 1 ] );
-		g_free ( pch );
+		ParsePreferences(pbdeModified, &designPrefs);
+#endif
 
 		/* Copy current (2d) settings */
 		GetPrefs(&rdPrefs);
@@ -2575,6 +2594,34 @@ static void UpdateDesign( GtkWidget *pw, gpointer data )
 	DesignSave(pw, data);
 
 	SetTitle();
+}
+
+static void
+AddDesignRowIfNew( gpointer data, gpointer user_data ) {
+
+  renderdata rdNew;
+  GtkWidget *pwList = user_data;
+  boarddesign *pbde = data;
+  char *asz[ 1 ];
+  gint i;
+
+  if (!pbde)
+    return;
+
+  ParsePreferences(pbde, &rdNew);
+  if (FindDesign(&rdNew))
+  {
+    outputf("Design %s already present\n", pbde->szTitle);
+    return;
+  }
+
+  asz[ 0 ] = pbde->szTitle;
+
+  i = gtk_clist_append ( GTK_CLIST ( pwList ), asz );
+  gtk_clist_set_row_data ( GTK_CLIST ( pwList ), i, pbde );
+
+  plBoardDesigns = g_list_append ( plBoardDesigns, (gpointer)pbde );
+  outputf("Design %s added\n", pbde->szTitle);
 }
 
 static void

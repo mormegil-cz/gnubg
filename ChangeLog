@@ -1,3 +1,7 @@
+Tue Oct 19 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c : Fixes for import/export appearance designs
+
 Sun Oct 17 22:14:00 2004 UTC Jim Segrave <jes@jes-2.demon.nl>
 
 	* Makefile.in - missing gtkpanels.*
