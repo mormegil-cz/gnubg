@@ -80,9 +80,9 @@ it is hoped that users will be able to pool rollout results and
 collectively train it to a level stronger than any individual could
 obtain.
 
-If you can tolerate the rough edges, periodic snapshots of @gnubg and
+If you can tolerate the rough edges, periodic snapshots of @gnubg{} and
 anonymous CVS access to the pre-release source are being made available.
-You can also compete against a recent version of @gnubg on FIBS; it
+You can also compete against a recent version of @gnubg{} on FIBS; it
 plays there under the name @samp{gnu}.
 
 FIXME update this section.
@@ -107,7 +107,7 @@ Although GNU Backgammon has many commands and options, only a few of them
 are used during routine play.  This chapter demonstrates some of those
 most commonly used.
 
-If your @gnubg installation is complete, you should be able to start it
+If your @gnubg{} installation is complete, you should be able to start it
 and get output similar to the following:
 
 @example
@@ -121,7 +121,7 @@ warranty" for details.
 (No game) 
 @end example
 
-When you start a game, @gnubg will (by default) show which player's move it
+When you start a game, @gnubg{} will (by default) show which player's move it
 is; it is displaying @samp{(No game)} at the moment to indicate that it
 isn't anybody's turn.
 
@@ -173,7 +173,7 @@ disabled; if your environment supports a graphical board, you will see a
 better representation of a backgammon board than this.  Exactly the
 same information is available, either way.
 
-You have just won the opening roll (you have a 3, and @gnubg has a 1) --- the
+You have just won the opening roll (you have a 3, and @gnubg{} has a 1) --- the
 dice roll is in the bottom right hand corner for the TTY board, and shown
 as graphical dice on the right hand side of the board window.  The
 position ID (the @samp{4HPwATDgc/ABMA} in this example) is an encoded
@@ -197,7 +197,7 @@ window.  Click mouse button 1 on the dice to indicate you have finished
 your move (just as you would pick up your dice to end your move if you
 were playing on a real board).
 
-Once you have done that, @gnubg will take its turn, rolling 63 and playing
+Once you have done that, @gnubg{} will take its turn, rolling 63 and playing
 24/15.  It is now your move again:
 
 @example
@@ -253,7 +253,7 @@ window.)
 
 Let's play this roll by hitting twice: 13/10*, 6/1*.  You can enter this
 move with @kbd{13 10 6 1} --- note that you don't need to specify anything
-special to hit; @gnubg will automatically move blots that are hit to the
+special to hit; @gnubg{} will automatically move blots that are hit to the
 bar.  You can also make this move by dragging chequers in the board window,
 of course.
 
@@ -304,7 +304,7 @@ v|                  |BAR|                  |     (Cube: 1)
 (X)
 @end example
 
-Play this roll as @kbd{13 11 6 1}.  @gnubg will now roll 16 --- and still
+Play this roll as @kbd{13 11 6 1}.  @gnubg{} will now roll 16 --- and still
 can't move!
 
 @example
@@ -348,7 +348,7 @@ when re-entering a hit chequer (e.g.@: @kbd{bar 20 24 20}) and
 @kbd{off} to remove a chequer from the board when bearing off
 (e.g.@: @kbd{6 off 5 off}).
 
-Type @kbd{help} from within @gnubg for a summary of all commands, or
+Type @kbd{help} from within @gnubg{} for a summary of all commands, or
 browse the rest of this manual to learn more.  Have fun playing
 GNU Backgammon!
 
@@ -460,12 +460,12 @@ are finished.
 Start GNU Backgammon by running the program @kbd{gnubg}.  Once started, it
 will process commands from the terminal.
 
-You can also instruct @gnubg to read an existing match from a file, to
+You can also instruct @gnubg{} to read an existing match from a file, to
 play or analyse.  (FIXME actually you can't yet, but you should be able
 to.)  To read the match from @var{filename}, specify
 @kbd{gnubg @var{filename}}.
 
-@gnubg will give you a short summary of how to invoke it if given the
+@gnubg{} will give you a short summary of how to invoke it if given the
 option @option{--help} (@option{-h} for short), and report its version
 with @option{--version} (@option{-v}).
 
@@ -486,18 +486,18 @@ can be abbreviated to @option{-t}).
 @itemx quit
 To exit @gnubg{}, use the @kbd{exit} or @kbd{quit} commands (they are
 synonymous).  If you are currently playing a game, the match in progress
-will be lost, so @gnubg will ask you if you are sure you want to exit
+will be lost, so @gnubg{} will ask you if you are sure you want to exit
 in this case.  (FIXME it doesn't yet, but it should.)
 @end table
 
-@gnubg will also exit upon end-of-file; you can therefore exit by typing
+@gnubg{} will also exit upon end-of-file; you can therefore exit by typing
 an end-of-file character (usually @kbd{C-d}, i.e. hold the @key{CTRL}
 key and press D).
 
 @cindex interrupting @t{gnubg}
 @cindex cancelling commands
 If you send an interrupt sequence (often by pressing @kbd{C-c}), the
-current @gnubg command (if any) will be terminated.  This can be useful
+current @gnubg{} command (if any) will be terminated.  This can be useful
 if you do not want to wait for a slow command to complete.
 
 @node Shell Commands
@@ -505,13 +505,13 @@ if you do not want to wait for a slow command to complete.
 @cindex shell commands
 @cindex escapes, shell
 
-You can execute shell commands from @gnubg without leaving or suspending it.
+You can execute shell commands from @gnubg{} without leaving or suspending it.
 
 @table @code
 @kindex !
 @item !@var{command}
 Invoke a subshell to execute @var{command}.  The environment variable
-@code{SHELL} determines which shell to use (@gnubg defaults to
+@code{SHELL} determines which shell to use (@gnubg{} defaults to
 @file{/bin/sh} if @code{$SHELL} is not set).  FIXME not implemented yet.
 @end table
 
@@ -568,7 +568,7 @@ set display
 FIXME
 
 @node Computer Player
-@section Having @gnubg Make Moves
+@section Having @gnubg{} Make Moves
 @cindex computer player
 @cindex @t{gnubg}, making moves @comment @gnubg{}, doesn't work here, why?
 
@@ -603,7 +603,7 @@ FIXME
 FIXME
 
 @node Analysis
-@chapter Using @gnubg to Analyse Positions
+@chapter Using @gnubg{} to Analyse Positions
 @cindex analysis of positions
 @cindex position analysis
 
@@ -654,9 +654,9 @@ FIXME:complete URL.
 
 Once you are running @gnubg{}, enter @kbd{new game} at the @samp{(gnubg)}
 prompt to start a game against the computer opponent.  You should now
-see a board (if an X display is available, @gnubg will use a graphical
+see a board (if an X display is available, @gnubg{} will use a graphical
 board window; otherwise, it will display an ASCII board on your
-terminal).  If @gnubg won the opening roll, it will have moved; you can
+terminal).  If @gnubg{} won the opening roll, it will have moved; you can
 now type @kbd{roll} (or click on the dice below the board if you are
 using X) to roll the dice yourself.  In either case, it will now be your
 move; you should enter the moves for each chequer as pairs of numbers.
@@ -672,12 +672,12 @@ the dice when you have finished.
 @vindex gnubg.bd
 @cindex errors starting @t{gnubg}
 
-The file @file{gnubg.bd} is the bearoff database that @gnubg uses to
-evaluate endgame positions.  @gnubg will look for it first in the current
+The file @file{gnubg.bd} is the bearoff database that @gnubg{} uses to
+evaluate endgame positions.  @gnubg{} will look for it first in the current
 directory and then in the installed directory (@file{/usr/local/share/gnubg/}
 by default).
 
-The @gnubg distribution is set up to create @file{gnubg.bd} by itself
+The @gnubg{} distribution is set up to create @file{gnubg.bd} by itself
 during compilation, but it can be a slow process (taking half an hour
 or more, depending on the speed of your computer).  If you would rather
 not wait to generate the database yourself, you can obtain a copy
@@ -692,8 +692,8 @@ The file @file{gnubg.weights} contains the trained neural net weights
 for most of @gnubg{}'s position evaluators.  Like @file{gnubg.bd}, it should
 be kept in either the current directory or the installed directory.
 
-You should be able to obtain a copy from wherever you found the @gnubg
-distribution.  Future releases of @gnubg will allow you to start without
+You should be able to obtain a copy from wherever you found the @gnubg{}
+distribution.  Future releases of @gnubg{} will allow you to start without
 any existing weights at all, if you want to train your own.
 
 @node Black and white board window
@@ -702,18 +702,18 @@ any existing weights at all, if you want to train your own.
 If you see this problem, your X server is probably using a
 @dfn{PseudoColor} visual, and is dynamically allocating colours
 to clients from a limited colourmap.  On these types of displays, 
-@gnubg tries to be a well-behaved client by using colours from the
+@gnubg{} tries to be a well-behaved client by using colours from the
 default standard colourmap.  This will allow it to share colours
 with other clients that use the same scheme, which will help them
 all to use as many colours as possible without exhausting the
 colourmap.
 
 Unfortunately, not all X clients use standard colourmaps.  If other
-clients have been run before @gnubg and allocated most of the colours,
-then there may not be enough left for @gnubg to allocate a standard
+clients have been run before @gnubg{} and allocated most of the colours,
+then there may not be enough left for @gnubg{} to allocate a standard
 colourmap.  If this happens, it will just take what it can get (which
 in the worst case might be black and white only).  You can try to
-avoid this problem by running @gnubg before other colour-hungry clients,
+avoid this problem by running @gnubg{} before other colour-hungry clients,
 or by using the @file{xstdcmap} utility to install the default
 standard colourmap early in your session while colours are still
 available.  Depending on your hardware, you may be able to configure
