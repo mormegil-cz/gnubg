@@ -1,3 +1,8 @@
+Thu Apr  3 22:06:56 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (OptionsPages): move dice manipulation options to the
+	dice page.
+
 Thu Apr  3 22:01:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (EvaluatePositionCubeful4): use money game cube efficiency
