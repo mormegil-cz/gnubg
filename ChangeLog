@@ -1,3 +1,9 @@
+Mon Dec 17 14:01:07 2001  Gary Wong  <gtw@research.att.com>
+
+	* rollout.c (BasicCubefulRollout, RolloutGeneral): Don't compute or
+	show statistics if aarsStatistics is NULL.
+	(printRolloutstat): Pacify compiler warnings.
+	
 Sun Dec 16 16:49:38 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (FindBestCubeDecision): fix logic. Old logic would return "too

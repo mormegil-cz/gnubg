@@ -177,6 +177,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Add some shortcuts to set the cube owner/value in edit mode (e.g.
   button 1 increases value, button 2+ decreases value, ctrl+button cycles
   through owners/centred).
+** Add some kind of GTK interface for viewing rollout statistics.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -254,7 +255,6 @@ functions:
   of both problems.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
-** Problems importing .sgg files (see Peter Sochovsky's bug report).
 ** "help next" (and "next <tab>" areincomplete.
 
 * Documentation:

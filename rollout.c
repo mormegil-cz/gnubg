@@ -550,9 +550,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           case REDOUBLE_BEAVER:
 
             /* update statistics */
-
-            aarsStatistics[ ici ]
-              [ pci->fMove ].acDoubleTake[ getCubeTurns ( pci->nCube ) ]++; 
+	    if( aarsStatistics )
+		aarsStatistics[ ici ]
+		    [ pci->fMove ].acDoubleTake[ getCubeTurns ( pci->nCube ) ]++; 
 
             SetCubeInfo ( pci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
 			  pci->nMatchTo,
@@ -585,8 +585,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
             /* update statistics */
 
-            aarsStatistics[ ici ]
-              [ pci->fMove ].acDoubleDrop[ getCubeTurns ( pci->nCube ) ]++; 
+	    if( aarsStatistics )
+		aarsStatistics[ ici ]
+		    [ pci->fMove ].acDoubleDrop[ getCubeTurns ( pci->nCube ) ]++; 
 
             break;
 
@@ -633,9 +634,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         /* FIXME: record double hit, triple hits etc. ? */
 
-        for ( i = 0; i < 2; i++ )
-          aarsStatistics[ ici ][ i ].acHit[ (iTurn < MAXHIT ) ? iTurn : MAXHIT ] +=
-            aiBar[ ! i ] != aanBoard[ ici][ ! i ][ 25 ]; 
+	if( aarsStatistics )
+	    for ( i = 0; i < 2; i++ )
+		aarsStatistics[ ici ][ i ].acHit[ (iTurn < MAXHIT ) ? iTurn : MAXHIT ] +=
+		    aiBar[ ! i ] != aanBoard[ ici][ ! i ][ 25 ]; 
           
 
         if( fAction )
@@ -667,20 +669,21 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           /* update statistics */
 
-          switch ( GameStatus ( aanBoard[ ici ] ) ) {
-          case 1:
-            aarsStatistics[ ici ][ pci->fMove ].
-              acWin[ getCubeTurns ( pci->nCube )]++;
-            break;
-          case 2:
-            aarsStatistics[ ici ][ pci->fMove ].
-              acWinGammon[ getCubeTurns ( pci->nCube )]++;
-            break;
-          case 3:
-            aarsStatistics[ ici ][ pci->fMove ].
-              acWinBackgammon[ getCubeTurns ( pci->nCube )]++;
-            break;
-          }
+	  if( aarsStatistics )
+	      switch ( GameStatus ( aanBoard[ ici ] ) ) {
+	      case 1:
+		  aarsStatistics[ ici ][ pci->fMove ].
+		      acWin[ getCubeTurns ( pci->nCube )]++;
+		  break;
+	      case 2:
+		  aarsStatistics[ ici ][ pci->fMove ].
+		      acWinGammon[ getCubeTurns ( pci->nCube )]++;
+		  break;
+	      case 3:
+		  aarsStatistics[ ici ][ pci->fMove ].
+		      acWinBackgammon[ getCubeTurns ( pci->nCube )]++;
+		  break;
+	      }
 
         }
           
@@ -829,9 +832,10 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
     /* Initialise statistics */
 
-    initRolloutstat ( &aarsStatistics[ ici ][ 0 ] );
-    initRolloutstat ( &aarsStatistics[ ici ][ 1 ] );
-
+    if( aarsStatistics ) {
+	initRolloutstat ( &aarsStatistics[ ici ][ 0 ] );
+	initRolloutstat ( &aarsStatistics[ ici ][ 1 ] );
+    }
   }
 
 
@@ -993,16 +997,17 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #if 0
   /* FIXME: make output prettier -- and move to GTKRollout*. */
 
-  for ( ici = 0; ici < cci; ici++ ) {
-    outputf ( "\n\n rollout no %d\n", ici );
-    for ( i = 0; i < 2; i++ ) {
-      outputf ( "\n\nplayer %d\n\n", i );
-
-      printRolloutstat ( NULL, &aarsStatistics[ ici ][ i ], cGames );
-
-    }
-
-  }
+  if( aarsStatistics )
+      for ( ici = 0; ici < cci; ici++ ) {
+	  outputf ( "\n\n rollout no %d\n", ici );
+	  for ( i = 0; i < 2; i++ ) {
+	      outputf ( "\n\nplayer %d\n\n", i );
+	      
+	      printRolloutstat ( NULL, &aarsStatistics[ ici ][ i ], cGames );
+	      
+	  }
+	  
+      }
 #endif
 
   return cGames;
@@ -1257,7 +1262,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of wins %4d-cube          %8d   %7.3f%%     %8ld\n",
+    sprintf ( pc, "Number of wins %4d-cube          %8d   %7.3f%%     %8d\n",
               nCube,
               prs->acWin[ i ],
               100.0f * prs->acWin[ i ] / cGames,
@@ -1288,7 +1293,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of gammon wins %4d-cube   %8d   %7.3f%%     %8ld\n",
+    sprintf ( pc, "Number of gammon wins %4d-cube   %8d   %7.3f%%     %8d\n",
               nCube,
               prs->acWinGammon[ i ],
               100.0f * prs->acWinGammon[ i ] / cGames,
@@ -1317,10 +1322,11 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of bg wins %4d-cube       %8d   %7.3f%%     %8ld\n",
+    sprintf ( pc, "Number of bg wins %4d-cube       %8d   %7.3f%%     %8d\n",
               nCube,
               prs->acWinBackgammon[ i ],
-              100.0f * prs->acWinBackgammon[ i ] / cGames  );
+              100.0f * prs->acWinBackgammon[ i ] / cGames,
+	      nCube * 3 * prs->acWinBackgammon[ i ] );
     pc = strchr ( pc, 0 );
     
     nSum += prs->acWinBackgammon[ i ];
@@ -1345,7 +1351,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of %4d-cube double, drop  %8d   %7.3f%%    %8ld\n",
+    sprintf ( pc, "Number of %4d-cube double, drop  %8d   %7.3f%%    %8d\n",
               nCube,
               prs->acDoubleDrop[ i ],
               100.0f * prs->acDoubleDrop[ i ] / cGames,
