@@ -77,6 +77,7 @@ static int fReadingOther;
 #include "rollout.h"
 #include "matchequity.h"
 #include "analysis.h"
+#include "import.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -91,7 +92,7 @@ static int fReadingOther;
 #elif USE_EXT
 #include <ext.h>
 #include <extwin.h>
-#include <stdio.h>
+#include <stdio.h>  /* Gary, isn't this also included at line 42? ØJ */
 #include "xgame.h"
 
 extwindow ewnd;
@@ -178,6 +179,10 @@ command acDatabase[] = {
       "file", szFILENAME, NULL },
     { "match", CommandExportMatch, "Record a log of the match so far to a "
       "file", szFILENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acImport[] = {
+    { "pos", CommandImportJF, "Import a Jellyfish position file", szFILENAME,
+      NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acList[] = {
     { "game", CommandListGame, "Show the moves made in this game", NULL,
@@ -405,6 +410,8 @@ command acDatabase[] = {
       NULL },
     { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
     { "export", NULL, "Write data for use by other programs", NULL, acExport },
+    { "import", NULL, "Import matches, games or positions from other programs",
+      NULL, acImport },
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint, 
       "Give hints on cube action or best legal moves", 
@@ -1758,6 +1765,32 @@ extern void CommandLoadCommands( char *sz ) {
 	fclose( pf );
     } else
 	perror( sz );
+}
+
+extern void CommandImportJF( char *sz ) {
+
+    FILE *pf;
+
+    if( gs != GAME_PLAYING ) {
+	outputl( "There must be a game in progress to import a Jellyfish "
+                 "position." );
+
+	return;
+    }
+
+    if( !sz || !*sz ) {
+	outputl( "You must specify a Jellyfish file to import (see `help "
+		 "import')." );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "rb" ) ) ) {
+	ImportJF( pf, sz );
+	fclose( pf );
+    } else
+	perror( sz );
+
+    ShowBoard();
 }
 
 static void LoadRCFiles( void ) {

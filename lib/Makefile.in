@@ -127,7 +127,7 @@ DIST_COMMON =  AUTHORS ChangeLog Makefile.am Makefile.in mdate-sh
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/buffer.P .deps/dynarray.P .deps/event.P .deps/fifo.P \
 .deps/hash.P .deps/hashtest.P .deps/heap.P .deps/isaac.P .deps/list.P \
@@ -235,7 +235,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pr $$/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \

@@ -1,3 +1,10 @@
+Sat Dec 16 11:45:12 2000  Øystein Johansen <oeysteij@online.no>
+        * import.c import.h - new files for import of file formats from 
+        other programs.
+        
+        * gnubg.c (New function CommandImportJF) New function to import
+        Jellyfish position files.
+ 
 Wed Nov 29 11:35:41 2000  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (ApplyMove): Added `fCheckLegal' parameter; this is required
