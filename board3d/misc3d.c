@@ -33,6 +33,7 @@
 #include "sound.h"
 #include "event.h"
 #include "backgammon.h"
+#include "path.h"
 
 double animStartTime = 0;
 int stopNextTime;
@@ -275,7 +276,7 @@ void LoadTextureInfo()
 
 	ListInit(&textures, sizeof(TextureInfo));
 
-        if ( ! ( szFile = PathSearch( TEXTTURE_FILE, szDataDirectory ) ) ) {
+        if ( ! ( szFile = PathSearch( TEXTURE_FILE, szDataDirectory ) ) ) {
           g_print( "PathSearch failed!\n" );
           return;
         }
@@ -418,7 +419,7 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 	unsigned char* bits = 0;
 	int n;
         char *szFile = PathSearch( filename, szDataDirectory );
-        FILE *pf;
+        FILE *fp;
 
         if ( ! szFile )
           return 0;

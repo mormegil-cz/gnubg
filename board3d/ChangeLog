@@ -1,3 +1,7 @@
+Fri Aug 22 17:05:05 2003  Oystein Johansen  <oystein@gnubg.org>
+
+	* misc3d.c: Fix typos.
+
 Thu Aug 21 23:21:05 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Experimental code for reading texture file and textures
