@@ -433,13 +433,13 @@ static void RestoreNode( list *pl ) {
 	    } else if( !strcmp( pch, "take" ) ) {
 		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_TAKE;
-		pmr->t.sz = NULL;
-		pmr->t.fPlayer = fPlayer;
+		pmr->d.sz = NULL;
+		pmr->d.fPlayer = fPlayer;
 	    } else if( !strcmp( pch, "drop" ) ) {
 		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_DROP;
-		pmr->t.sz = NULL;
-		pmr->t.fPlayer = fPlayer;
+		pmr->d.sz = NULL;
+		pmr->d.fPlayer = fPlayer;
 	    } else {
 		pmr = malloc( sizeof( pmr->n ) );
 		pmr->mt = MOVE_NORMAL;

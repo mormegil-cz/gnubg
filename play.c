@@ -382,8 +382,8 @@ extern void AddMoveRecord( void *pv ) {
 	
     case MOVE_TAKE:
     case MOVE_DROP:
-	assert( pmr->t.fPlayer >= 0 && pmr->t.fPlayer <= 1 );
-	assert( pmr->t.st >= SKILL_VERYBAD && pmr->t.st <= SKILL_VERYGOOD );
+	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
+	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
 	break;
 	
     case MOVE_RESIGN:
@@ -1224,7 +1224,7 @@ static void AnnotateMove( skilltype st ) {
 	
     case MOVE_TAKE:
     case MOVE_DROP:
-	pmr->t.st = st;
+	pmr->d.st = st;
 	break;
 	
     default:
