@@ -1548,6 +1548,8 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
                  const char *szImageDir, const char *szExtension,
                  const htmlexporttype het, const htmlexportcss hecss ) {
 
+  fputs ( "\n<!--  Board -->\n\n", pf );
+
   switch ( het ) {
   case HTML_EXPORT_TYPE_FIBS2HTML:
     printHTMLBoardF2H ( pf, pms, fTurn, szImageDir, szExtension, hecss );
@@ -1563,6 +1565,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
     break;
   }
 
+  fputs ( "\n<!-- End Board -->\n\n", pf );
 
 }
 
@@ -1584,15 +1587,21 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
                   const int iGame, const int iMove,
                   const int fHR ) {
 
+  fputs ( "\n<!-- Header -->\n\n", pf );
+
   if ( fHR )
     fputs ( "<hr />\n", pf );
 
-  fprintf ( pf,
-            "<p><b>"
-            "<a name=\"game%d.move%d\">",
-            iGame + 1, iMove + 1 );
-  fprintf ( pf, _("Move number %d:"), iMove + 1 );
-  fputs ( "</a></b>", pf );
+  fputs ( "<p>", pf );
+
+  if ( iMove >= 0 ) {
+    fprintf ( pf,
+              "<b>"
+              "<a name=\"game%d.move%d\">",
+              iGame + 1, iMove + 1 );
+    fprintf ( pf, _("Move number %d:"), iMove + 1 );
+    fputs ( "</a></b>", pf );
+  }
 
   if ( pms->fResigned ) 
     
@@ -1629,11 +1638,13 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
     /* cube decision */
 
     fprintf ( pf,
-              _(" %s onroll, cube decision?"),
+              _(" %s on roll, cube decision?"),
               gettext ( aaszColorName[ het ][ pms->fMove ] ) );
 
 
   fputs ( "</p>\n", pf );
+
+  fputs ( "\n<!-- End Header -->\n\n", pf );
 
 }
 
@@ -1780,6 +1791,8 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ],
   iMajor = atoi ( strchr ( szVersion, ' ' ) );
   iMinor = atoi ( strchr ( szVersion, '.' ) + 1 );
 
+  fputs ( "\n<!-- Epilogue -->\n\n", pf );
+
   /* add links to other games */
 
   fFirst = TRUE;
@@ -1868,6 +1881,8 @@ HTMLEpilogueComment ( FILE *pf ) {
   if ( ( pc = strchr ( pc, '\n' ) ) )
     *pc = 0;
 
+  fputs ( "\n<!-- Epilogue -->\n\n", pf );
+
   fprintf ( pf, 
             _("<!-- Output generated %s by GNU Backgammon %s "
               "(http://www.gnu.org/software/gnubg/) "),
@@ -1941,6 +1956,9 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( ! fDisplay )
     return;
+
+  fputs ( "\n<!-- Cube Analysis -->\n\n", pf );
+
 
   /* print alerts */
 
@@ -2233,6 +2251,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   fprintf ( pf,
             "</table>\n" );
 
+  fputs ( "\n<!-- End Cube Analysis -->\n\n", pf );
+
 }
 
 
@@ -2339,6 +2359,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   if ( ! exsExport.afMovesDisplay [ pmr->n.stMove ] )
     return;
+
+  fputs ( "\n<!-- Move Analysis -->\n\n", pf );
 
   /* print alerts */
 
@@ -2635,6 +2657,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
   fprintf ( pf,
             "</table>\n" );
 
+  fputs ( "\n<!-- End Move Analysis -->\n\n", pf );
+
   return;
 
 }
@@ -2677,7 +2701,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                 _("*%s moves %s"),
                 ap[ pmr->n.fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
-    else
+    else if ( ! pmr->n.ml.cMoves )
       fprintf ( pf,
                 _("*%s cannot move"),
                 ap[ pmr->n.fPlayer ].szName );
@@ -2754,6 +2778,9 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     N_("Go to Las Vegas immediately"),
     N_("Cheater :-)")
   };
+
+  fprintf ( pf, "\n<!-- %s Statistics -->\n\n", 
+            ( iGame >= 0 ) ? "Game" : "Match" );
 
   fprintf ( pf,
             "<table %s>\n",
@@ -3249,6 +3276,9 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   fprintf ( pf, "</table>\n" );
 
+  fprintf ( pf, "\n<!-- End %s Statistics -->\n\n", 
+            ( iGame >= 0 ) ? "Game" : "Match" );
+
 
 
 }
@@ -3332,6 +3362,8 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
   char sz[ 80 ];
   struct tm tmx;
 
+  fputs ( "\n<!-- Match Information -->\n\n", pf );
+
   fputs ( "<hr />", pf );
 
   fprintf ( pf, "<h2>%s</h2>\n", _("Match Information") );
@@ -3374,6 +3406,8 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
 
 
   fputs ( "</p>\n", pf );
+
+  fputs ( "\n<!-- End Match Information -->\n\n", pf );
 
 }
 
@@ -3750,7 +3784,9 @@ extern void CommandExportMatchHtml( char *sz ) {
 extern void CommandExportPositionHtml( char *sz ) {
 
     FILE *pf;
-    moverecord *pmr = getCurrentMoveRecord ();
+    int fHistory;
+    moverecord *pmr = getCurrentMoveRecord ( &fHistory );
+    int iMove;
 	
     sz = NextToken( &sz );
     
@@ -3781,9 +3817,15 @@ extern void CommandExportPositionHtml( char *sz ) {
     if ( exsExport.fIncludeMatchInfo )
       HTMLMatchInfo ( pf, &mi, exsExport.hecss );
 
+    if ( fHistory )
+      iMove = getMoveNumber ( plGame, pmr ) - 1;
+    else if ( plLastMove )
+      iMove = getMoveNumber ( plGame, plLastMove->p );
+    else
+      iMove = -1;
+
     HTMLBoardHeader ( pf, &ms, exsExport.het, exsExport.hecss,
-                      getGameNumber ( plGame ),
-                      getMoveNumber ( plGame, pmr ) - 1, TRUE );
+                      getGameNumber ( plGame ), iMove, TRUE );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
@@ -3809,7 +3851,9 @@ CommandExportPositionGammOnLine ( char *sz ) {
 
 
     FILE *pf;
-    moverecord *pmr = getCurrentMoveRecord ();
+    int fHistory;
+    moverecord *pmr = getCurrentMoveRecord ( &fHistory );
+    int iMove;
 	
     sz = NextToken( &sz );
     
@@ -3837,30 +3881,55 @@ CommandExportPositionGammOnLine ( char *sz ) {
     fprintf ( pf, "<div %s>\n", 
               GetStyle ( CLASS_FONT_FAMILY, HTML_EXPORT_CSS_INLINE ) );
 
-    fputs ( "\n<!-- Header -->\n\n", pf );
+    fputs ( "\n<!-- Score -->\n\n", pf );
+
+    if ( ms.nMatchTo )
+      fprintf ( pf, 
+                _("<strong>%s (%s, %d pts) vs. %s (%s, %d pts) "
+                  "(Match to %d)</strong>\n"),
+                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 0 ],
+                ap [ 0 ].szName, ms.anScore[ 0 ],
+                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 1 ],
+                ap [ 1 ].szName, ms.anScore[ 1 ],
+                ms.nMatchTo );
+    else
+      fprintf ( pf,
+                _("<strong>%s (%s, %d pts) vs. %s (%s, %d pts) "
+                  "(money game)</strong>\n"),
+                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 0 ],
+                ap [ 0 ].szName, ms.anScore[ 0 ],
+                aaszColorName[ HTML_EXPORT_TYPE_BBS ][ 1 ],
+                ap [ 1 ].szName, ms.anScore[ 1 ] );
+
+    fputs ( "\n<!-- End Score -->\n\n", pf );
+
+
+    if ( fHistory )
+      iMove = getMoveNumber ( plGame, pmr ) - 1;
+    else if ( plLastMove )
+      iMove = getMoveNumber ( plGame, plLastMove->p );
+    else
+      iMove = -1;
 
     HTMLBoardHeader ( pf, &ms, HTML_EXPORT_TYPE_BBS,
                       HTML_EXPORT_CSS_INLINE,
-                      getGameNumber ( plGame ),
-                      getMoveNumber ( plGame, pmr ) - 1, FALSE );
-
-    fputs ( "\n<!-- Board -->\n\n", pf );
+                      getGameNumber ( plGame ), iMove, FALSE );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
+#ifdef GAMMONLINE_TEST
+                    "http://www.gammonline.com/demo/Images/",
+#else
                     "../Images/",
+#endif
                     "gif", HTML_EXPORT_TYPE_BBS, 
                     HTML_EXPORT_CSS_INLINE );
 
-    if( pmr ) {
-      fputs ( "\n<!-- Analysis -->\n\n", pf );
+    if( pmr )
       HTMLAnalysis ( pf, &ms, pmr,
                      "../Images/",
                      "gif", HTML_EXPORT_TYPE_BBS, 
                      HTML_EXPORT_CSS_INLINE );
-    }
-    
 
-    fputs ( "\n<!-- Epilogue -->\n\n", pf );
     HTMLEpilogueComment ( pf );
 
     fputs ( "</div>\n", pf );

@@ -3969,7 +3969,6 @@ getCurrentMoveRecord ( int *pfHistory ) {
         mrHint.n.esDouble.et = EVAL_NONE;
       }
 
-      printf ( "move\n" );
       return &mrHint;
 
     }
