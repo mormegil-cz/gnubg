@@ -315,17 +315,15 @@ extern void CommandDatabaseRollout( char *sz ) {
 	    PositionFromKey( anBoardEval, (unsigned char *) dKey.dptr );
 	
 	    /* FIXME if position has some existing rollouts, merge them */
-	    
-	    /* FIXME allow user to change these parameters */
-	    if( ( pev->c = Rollout( anBoardEval, PositionIDFromKey(
-		(unsigned char *) dKey.dptr ), arOutput, NULL,
-				    rcRollout.nTruncate,
-				    rcRollout.nTrials, rcRollout.fVarRedn,
-				    &ciCubeless, &ecRollout, FALSE ) ) > 0 ) {
+
+	    if( !GeneralEvaluationR( PositionIDFromKey(
+		(unsigned char *) dKey.dptr ), arOutput, NULL, anBoardEval,
+				     &ciCubeless, &rcRollout ) ) {
+		pev->c = rcRollout.nTrials;
+		pev->t = time( NULL );
+
 		for( i = 0; i < NUM_OUTPUTS; i++ )
 		    pev->asEq[ i ] = arOutput[ i ] * 0xFFFF;
-		
-		pev->t = time( NULL );
 	    } else {
 		for( i = 0; i < NUM_OUTPUTS; i++ )
 		    pev->asEq[ i ] = 0;

@@ -385,9 +385,8 @@ static SCM position_id_to_board( SCM sPosID ) {
 	return BoardToSCM( anBoard );
 }
 
-static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
-			     SCM sVarRedn, SCM sCube, SCM sEvalContext,
-			     SCM sDesc, SCM sInvert ) {
+static SCM rollout_position( SCM sBoard, SCM sCube, SCM sRolloutContext,
+			     SCM sDesc ) {
     int i, anBoard[ 2 ][ 25 ], n;
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
     SCM s;
@@ -395,16 +394,8 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
     static char sz[] = "rollout-position";
     psighandler sh;
     
-    SCM_ASSERT( SCM_INUMP( sGames ) || sGames == SCM_UNDEFINED, sGames,
-		SCM_ARG2, sz );
-    SCM_ASSERT( SCM_INUMP( sTruncate ) || sTruncate == SCM_UNDEFINED,
-		sTruncate, SCM_ARG3, sz );
-    if( sVarRedn == SCM_UNDEFINED )
-	sVarRedn = SCM_BOOL_F;
     SCM_ASSERT( SCM_STRINGP( sDesc ) || sDesc == SCM_UNDEFINED, sDesc,
-		SCM_ARG7, sz );
-    if( sInvert == SCM_UNDEFINED )
-	sInvert = SCM_BOOL_F;
+		SCM_ARG4, sz );
     
     SCMToBoard( sBoard, anBoard );
 
@@ -416,14 +407,8 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
     SCMToCubeInfo( sCube, &ci );
 
     PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );    
-    n = Rollout( anBoard, sDesc == SCM_UNDEFINED ?
-		 PositionID( anBoard ) : SCM_CHARS( sDesc ),
-		 ar, arStdDev, sTruncate == SCM_UNDEFINED ?
-		 rcRollout.nTruncate : SCM_INUM( sTruncate ), sGames ==
-		 SCM_UNDEFINED ? rcRollout.nTrials : SCM_INUM( sGames ),
-		 SCM_NFALSEP( sVarRedn ), &ci,
-		 &ecRollout /* FIXME use sEvalContext */,
-		 SCM_NFALSEP( sInvert ) );
+    n = GeneralEvaluationR( SCM_CHARS( sDesc ), ar, arStdDev, anBoard,
+			    &ci, &rcRollout /* FIXME use sRolloutContext */ );
     PortableSignalRestore( SIGINT, &sh );
     if( fInterrupt ) {
 	raise( SIGINT );
@@ -444,9 +429,6 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 			  scm_make_real( arStdDev[ i ] ) );
     }
 
-    /* FIXME n (i.e. the number of rollouts completed) should be returned
-       to the caller somehow */
-    
     return s;
 }
 
@@ -507,7 +489,7 @@ extern int GuileInitialise( char *szDir ) {
     scm_make_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
     scm_make_gsubr( "menu-bar", 0, 0, 0, menu_bar );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
-    scm_make_gsubr( "rollout-position", 1, 7, 0, rollout_position );
+    scm_make_gsubr( "rollout-position", 1, 3, 0, rollout_position );
 
     /* This is an ugly way to get something to pass to scm_sigaction,
        but it works. */
