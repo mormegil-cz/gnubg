@@ -20,10 +20,14 @@
 #include <rand_r.h>
 #endif
 
+#include "backgammon.h"
 #include "xboard.h"
 #include "xgame.h"
 
 static extquark eq_cubeFont = { "cubeFont", 0 };
+
+#define POINT_DICE 28
+#define POINT_CUBE 29
 
 static int aanPosition[ 28 ][ 3 ] = {
     { 51, 25, 7 },
@@ -140,7 +144,8 @@ static void BoardRedrawPoint( extwindow *pewnd, gamedata *pgd, int n ) {
 	y += cy * 4 / 5;
 	cy = -cy;
     }
-    
+
+    /* FIXME draw straight to screen and return if point is empty */
     XCopyArea( pewnd->pdsp, pgd->pmBoard, pgd->pmPoint, pgd->gcCopy, x, y,
 	       cx, cy, 0, 0 );
 
@@ -252,9 +257,10 @@ static int BoardPoint( extwindow *pewnd, gamedata *pgd, int x0, int y0 ) {
 
     if( Intersects( x0, y0, 0, 0, pgd->xDice[ 0 ], pgd->yDice[ 0 ], 7, 7 ) ||
 	Intersects( x0, y0, 0, 0, pgd->xDice[ 1 ], pgd->yDice[ 1 ], 7, 7 ) )
-	return 28;
+	return POINT_DICE;
 
-    /* FIXME check for cube */
+    if( Intersects( x0, y0, 0, 0, 50, 30 - 29 * pgd->fCubeOwner, 8, 8 ) )
+	return POINT_CUBE;
     
     for( i = 0; i < 28; i++ ) {
 	y = aanPosition[ i ][ 1 ];
@@ -305,15 +311,22 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	    return;
 	}
 
-	if( pgd->nDragPoint == 28 ) {
-	    /* Clicked on dice */
+	if( pgd->nDragPoint == POINT_CUBE ) {
+	    /* Clicked on cube; double. */
+	    pgd->nDragPoint = -1;
+	    CommandDouble( NULL );
+	    return;
+	}
+	
+	if( pgd->nDragPoint == POINT_DICE ) {
+	    /* Clicked on dice. */
 	    pgd->nDragPoint = -1;
 	    
 	    if( pxev->xbutton.button == Button1 )
-		/* Button 1 on dice confirms move */
+		/* Button 1 on dice confirms move. */
 		StatsConfirm( &pgd->ewndStats );
 	    else {
-		/* Other buttons on dice swaps positions */
+		/* Other buttons on dice swaps positions. */
 		n = pgd->anDice[ 0 ];
 		pgd->anDice[ 0 ] = pgd->anDice[ 1 ];
 		pgd->anDice[ 1 ] = n;
@@ -324,8 +337,6 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
 		BoardRedrawDice( pewnd, pgd, 0 );
 		BoardRedrawDice( pewnd, pgd, 1 );
-		
-		pgd->nDragPoint = -1;
 	    }
 	    
 	    return;
@@ -339,7 +350,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
 	if( pxev->xbutton.button != Button1 ) {
 	    /* Automatically place chequer on destination point
-	       (as opposed to starting a drag) */
+	       (as opposed to starting a drag). */
 	    nDest = pgd->nDragPoint - ( pxev->xbutton.button == Button2 ?
 					pgd->anDice[ 0 ] :
 					pgd->anDice[ 1 ] ) * pgd->fDragColour;
