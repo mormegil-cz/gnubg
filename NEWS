@@ -2,6 +2,16 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 
 * Changes in GNU Backgammon 0.14.4
 
+** add functions for importing and exporting board designs.
+
+** coloring of blunders, lucky rolls etc in the game list (controlled by styles
+in gnubg.gtkrc)
+
+** improved chequer movement in GUI (dragging with pick'n'pass)
+
+** right-click context menu with entries for undo move and score sheet
+
+
 * Changes in GNU Backgammon 0.14.3
 
 ** fix "bug" in Zadeh match equity table
