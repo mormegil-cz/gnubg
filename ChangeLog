@@ -19,6 +19,11 @@ Mon Sep 01 22:55:25 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 	* analysis.c (updateStatcontext): alter logic
 	* analysis.c (getMarketWindowDividerMWC): new function 
 
+Mon Sep  1 21:19:42 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c, text.c: honour more export settings.
+	(reported by Martin Krainer)
+
 Mon Sep  1 19:28:48 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseOldmove): do not subtract 1 from move
