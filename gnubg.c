@@ -3481,248 +3481,294 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 #endif
 }
 
-extern void CommandHint( char *sz ) {
+
+static void
+HintCube( void ) {
+          
+  char szBuf[ 1024 ];
+  float arDouble[ 4 ];
+  cubeinfo ci;
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+
+  GetMatchStateCubeInfo( &ci, &ms );
+    
+  if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) ) {
+      
+    /* no analysis performed yet */
+      
+    if ( GetDPEq ( NULL, NULL, &ci ) ) {
+        
+      /* calculate cube action */
+      
+      ProgressStart( _("Considering cube action...") );
+      if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+                                  &esEvalCube.ec, 0 ) < 0 ) {
+        ProgressEnd();
+        return;
+      }
+      ProgressEnd();
+      
+      UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
+      
+    } else {
+      
+      outputl( _("You cannot double.") );
+      return;
+      
+    }
+    
+  }
+
+#if USE_GTK
+  if ( fX ) {
+    GTKCubeHint( sc.aarOutput, sc.aarStdDev, &sc.es );
+    return;
+  }
+#endif
+  FindCubeDecision ( arDouble, sc.aarOutput, &ci );  
+  
+  GetCubeActionSz ( arDouble, sc.aarOutput,
+                    szBuf, &ci, fOutputMWC, FALSE );
+  
+  outputl ( szBuf );
+
+}
+    
+
+static void
+HintResigned( void ) {
+
+  float rEqBefore, rEqAfter;
+  cubeinfo ci;
+  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  /* evaluate current position */
+
+  ProgressStart( _("Considering resignation...") );
+  if ( GeneralEvaluationE ( arOutput,
+                            ms.anBoard,
+                            &ci, &esEvalCube.ec ) < 0 ) {
+    ProgressEnd();
+    return;
+  }
+  ProgressEnd();
+  
+  getResignEquities ( arOutput, &ci, ms.fResigned, 
+                      &rEqBefore, &rEqAfter );
+  
+#if USE_GTK
+  if ( fX ) {
+    
+    GTKResignHint ( arOutput, rEqBefore, rEqAfter, &ci, 
+                    ms.nMatchTo && fOutputMWC );
+    
+    return;
+    
+  }
+#endif
+  
+  if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+    
+    outputf ( _("Equity before resignation: %+6.3f\n"),
+              - rEqBefore );
+    outputf ( _("Equity after resignation : %+6.3f (%+6.3f)\n\n"),
+              - rEqAfter, rEqBefore - rEqAfter );
+    outputf ( _("Correct resign decision  : %s\n\n"),
+              ( rEqBefore - rEqAfter >= 0 ) ?
+              _("Accept") : _("Reject") );
+    
+  }
+  else {
+    
+    rEqBefore = eq2mwc ( - rEqBefore, &ci );
+    rEqAfter  = eq2mwc ( - rEqAfter, &ci );
+    
+    outputf ( _("Equity before resignation: %6.2f%%\n"),
+              rEqBefore * 100.0f );
+    outputf ( _("Equity after resignation : %6.2f%% (%6.2f%%)\n\n"),
+              rEqAfter * 100.0f,
+              100.0f * ( rEqAfter - rEqBefore ) );
+    outputf ( _("Correct resign decision  : %s\n\n"),
+              ( rEqAfter - rEqBefore >= 0 ) ?
+              _("Accept") : _("Reject") );
+    
+  }
+  
+  return;
+  
+
+}
+
+
+static void
+HintTake( void ) {
+
+  cubeinfo ci;
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float arDouble[ 4 ];
+
+  /* Give hint on take decision */
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  ProgressStart( _("Considering cube action...") );
+  if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+                              &esEvalCube.ec, &esEvalCube ) < 0 ) {
+    ProgressEnd();
+    return;
+  }
+  ProgressEnd();
+
+  FindCubeDecision ( arDouble, aarOutput, &ci );
+	
+#if USE_GTK
+  if ( fX ) {
+    GTKCubeHint( aarOutput, aarStdDev, &esEvalCube );
+    return;
+  }
+#endif
+	
+  outputl ( _("Take decision:\n") );
+	
+  if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+	    
+    outputf ( _("Equity for take: %+6.3f\n"), -arDouble[ 2 ] );
+    outputf ( _("Equity for pass: %+6.3f\n\n"), -arDouble[ 3 ] );
+	    
+  }
+  else {
+    outputf ( _("Mwc for take: %6.2f%%\n"), 
+              100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
+    outputf ( _("Mwc for pass: %6.2f%%\n"), 
+              100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
+  }
+	
+  if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
+    outputl ( _("Your proper cube action: Beaver!\n") );
+  else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+    outputl ( _("Your proper cube action: Take.\n") );
+  else
+    outputl ( _("Your proper cube action: Pass.\n") );
+
+  return;
+	
+}
+    
+
+static void
+HintChequer( char *sz ) {
 
   movelist ml;
   int i;
   char szBuf[ 1024 ];
-  static float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  static cubeinfo ci;
   int n = ParseNumber ( &sz );
 #if USE_GTK
   int anMove[ 8 ];
 #endif
   unsigned char auch[ 10 ];
   int fHasMoved;
+  cubeinfo ci;
   
+  if ( n <= 0 )
+    n = 10;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+#if USE_GTK
+  if ( fX ) {
+    fHasMoved = GTKGetMove ( anMove );
+    if ( fHasMoved )
+      MoveKey ( ms.anBoard, anMove, auch );
+  }
+  else
+    fHasMoved = FALSE;
+#else
+  fHasMoved = FALSE;
+#endif /* ! USE_GTK */
+
+  if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
+
+    ProgressStart( _("Considering moves...") );
+    if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
+                            ms.anBoard, 
+                            fHasMoved ? auch : NULL, 
+                            arSkillLevel[ SKILL_DOUBTFUL ],
+                            &ci, &esEvalChequer.ec,
+                            aamfEval ) < 0 || fInterrupt ) {
+      ProgressEnd();
+      return;
+    }
+    ProgressEnd();
+	
+    UpdateStoredMoves ( &ml, &ms );
+
+    if ( ml.amMoves )
+      free ( ml.amMoves );
+
+  }
+
+  n = ( sm.ml.cMoves > n ) ? n : sm.ml.cMoves;
+
+  if( !sm.ml.cMoves ) {
+    outputl( _("There are no legal moves.") );
+    return;
+  }
+
+#if USE_GTK
+  if( fX ) {
+    GTKHint( &sm.ml, locateMove ( ms.anBoard, anMove, &sm.ml ) );
+    return;
+  }
+#endif
+	
+  for( i = 0; i < n; i++ )
+    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, 
+                            TRUE, TRUE, TRUE ) );
+
+}
+
+
+
+
+extern void CommandHint( char *sz ) {
+
   if( ms.gs != GAME_PLAYING ) {
     outputl( _("You must set up a board first.") );
     
     return;
   }
+
+  /* hint on cube decision */
   
   if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
-    GetMatchStateCubeInfo( &ci, &ms );
-    
-    if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) ) {
-      
-      /* no analysis performed yet */
-      
-      if ( GetDPEq ( NULL, NULL, &ci ) ) {
-        
-        /* calculate cube action */
-        
-        ProgressStart( _("Considering cube action...") );
-        if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-                                    &esEvalCube.ec, 0 ) < 0 ) {
-          ProgressEnd();
-          return;
-        }
-        ProgressEnd();
-        
-        UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
-        
-      } else {
-        
-        outputl( _("You cannot double.") );
-        return;
-        
-      }
-  
-    }
-    
-      
-#if USE_GTK
-    if ( fX ) {
-      GTKCubeHint( sc.aarOutput, sc.aarStdDev, &sc.es );
-      return;
-    }
-#endif
-    FindCubeDecision ( arDouble, aarOutput, &ci );  
-    
-    GetCubeActionSz ( arDouble, aarOutput,
-                      szBuf, &ci, fOutputMWC, FALSE );
-    
-    outputl ( szBuf );
-    
+    HintCube();
     return;
-
   }
-    
 
-    /* Give hints on resignation */
+  /* Give hint on resignation */
 
-    if ( ms.fResigned ) {
+  if ( ms.fResigned ) {
+    HintResigned();
+    return;
+  }
 
-      float rEqBefore, rEqAfter;
+  /* Give hint on take decision */
 
-      GetMatchStateCubeInfo( &ci, &ms );
+  if ( ms.fDoubled ) {
+    HintTake();
+    return;
+  }
 
-      /* evaluate current position */
+  /* Give hint on chequer play decision */
 
-      ProgressStart( _("Considering resignation...") );
-      if ( GeneralEvaluationE ( aarOutput[ 0 ],
-                                ms.anBoard,
-                                &ci, &esEvalCube.ec ) < 0 ) {
-	  ProgressEnd();
-	  return;
-      }
-      ProgressEnd();
-      
-      getResignEquities ( aarOutput[ 0 ], &ci, ms.fResigned, 
-                          &rEqBefore, &rEqAfter );
+  if ( ms.anDice[ 0 ] ) {
+    HintChequer( sz );
+    return;
+  }
 
-#if USE_GTK
-      if ( fX ) {
-        
-        GTKResignHint ( aarOutput[ 0 ], rEqBefore, rEqAfter, &ci, 
-                        ms.nMatchTo && fOutputMWC );
-
-        return;
-
-      }
-#endif
-
-      if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
-
-        outputf ( _("Equity before resignation: %+6.3f\n"),
-                  - rEqBefore );
-        outputf ( _("Equity after resignation : %+6.3f (%+6.3f)\n\n"),
-                  - rEqAfter, rEqBefore - rEqAfter );
-        outputf ( _("Correct resign decision  : %s\n\n"),
-                  ( rEqBefore - rEqAfter >= 0 ) ?
-                  _("Accept") : _("Reject") );
-
-      }
-      else {
-        
-        rEqBefore = eq2mwc ( - rEqBefore, &ci );
-        rEqAfter  = eq2mwc ( - rEqAfter, &ci );
-
-        outputf ( _("Equity before resignation: %6.2f%%\n"),
-                  rEqBefore * 100.0f );
-        outputf ( _("Equity after resignation : %6.2f%% (%6.2f%%)\n\n"),
-                  rEqAfter * 100.0f,
-                  100.0f * ( rEqAfter - rEqBefore ) );
-        outputf ( _("Correct resign decision  : %s\n\n"),
-                  ( rEqAfter - rEqBefore >= 0 ) ?
-                  _("Accept") : _("Reject") );
-
-      }
-
-      return;
-
-
-    }
-
-    if ( ms.fDoubled ) {
-	/* Give hint on take decision */
-	GetMatchStateCubeInfo( &ci, &ms );
-
-	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-				    &esEvalCube.ec, &esEvalCube ) < 0 ) {
-	    ProgressEnd();
-	    return;
-	}
-	ProgressEnd();
-
-        FindCubeDecision ( arDouble, aarOutput, &ci );
-	
-#if USE_GTK
-	if ( fX ) {
-          GTKCubeHint( aarOutput, aarStdDev, &esEvalCube );
-	    return;
-	}
-#endif
-	
-	outputl ( _("Take decision:\n") );
-	
-	if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
-	    
-	    outputf ( _("Equity for take: %+6.3f\n"), -arDouble[ 2 ] );
-	    outputf ( _("Equity for pass: %+6.3f\n\n"), -arDouble[ 3 ] );
-	    
-	}
-	else {
-	    outputf ( _("Mwc for take: %6.2f%%\n"), 
-		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-	    outputf ( _("Mwc for pass: %6.2f%%\n"), 
-		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
-	}
-	
-	if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
-	    outputl ( _("Your proper cube action: Beaver!\n") );
-	else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-	    outputl ( _("Your proper cube action: Take.\n") );
-	else
-	    outputl ( _("Your proper cube action: Pass.\n") );
-
-	return;
-	
-    }
-    
-    if ( ms.anDice[ 0 ] ) {
-
-	/* Give hints on move */
-	
-	if ( n <= 0 )
-	    n = 10;
-
-	GetMatchStateCubeInfo( &ci, &ms );
-
-#if USE_GTK
-        if ( fX ) {
-           fHasMoved = GTKGetMove ( anMove );
-           if ( fHasMoved )
-              MoveKey ( ms.anBoard, anMove, auch );
-        }
-        else
-           fHasMoved = FALSE;
-#else
-        fHasMoved = FALSE;
-#endif /* ! USE_GTK */
-
-        if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
-
-          ProgressStart( _("Considering moves...") );
-          if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                                  ms.anBoard, 
-                                  fHasMoved ? auch : NULL, 
-                                  arSkillLevel[ SKILL_DOUBTFUL ],
-                                  &ci, &esEvalChequer.ec,
-                                  aamfEval ) < 0 || fInterrupt ) {
-	    ProgressEnd();
-	    return;
-          }
-          ProgressEnd();
-	
-          UpdateStoredMoves ( &ml, &ms );
-
-          if ( ml.amMoves )
-            free ( ml.amMoves );
-
-        }
-
-        n = ( sm.ml.cMoves > n ) ? n : sm.ml.cMoves;
-
-	if( !sm.ml.cMoves ) {
-	    outputl( _("There are no legal moves.") );
-	    return;
-	}
-
-#if USE_GTK
-	if( fX ) {
-            GTKHint( &sm.ml, locateMove ( ms.anBoard, anMove, &sm.ml ) );
-	    return;
-	}
-#endif
-	
-	for( i = 0; i < n; i++ )
-	    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, 
-                                    TRUE, TRUE, TRUE ) );
-    }
 }
 
 static void
@@ -3828,7 +3874,6 @@ GetMove ( int anBoard[ 2 ][ 25 ] ) {
 extern void 
 CommandRollout( char *sz ) {
     
-    float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
     int i, c, n, fOpponent = FALSE, cGames;
     cubeinfo ci;
     move *pm = 0;
@@ -3895,7 +3940,7 @@ CommandRollout( char *sz ) {
     RolloutProgressEnd( &p );
 
     /* bring up Hint-dialog with cube rollout */
-    CommandHint( NULL );
+    HintCube();
 
     return;
 
@@ -4048,7 +4093,7 @@ CommandRollout( char *sz ) {
         }
         
         /* bring up Hint-dialog with chequerplay rollout */
-        CommandHint( NULL );
+        HintChequer( NULL );
       
       }
 

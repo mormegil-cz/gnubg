@@ -1,3 +1,8 @@
+Wed Jul 16 21:28:23 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (CommandHint): move code into a set of subroutines.
+	* gnubg.c (CommandRollout): call new functions HintCube and HintChequer.
+
 Wed Jul 16 21:21:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkoptions.c: introduce gui equivalent to "set output digits ..."
