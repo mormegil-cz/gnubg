@@ -1,3 +1,8 @@
+Wed Apr 18 10:15:47 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ShowBoard): SwapSides() if necessary when giving
+	rawboard output (reported by Jens Hoefkens).
+
 Tue Apr 17 13:26:17 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (CommandAnalyseGame, CommandAnalyseMatch): Update
