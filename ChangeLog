@@ -1,3 +1,7 @@
+Sat Apr  5 21:49:41 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (place_chequer_or_revert): fix bug.
+
 Sat Apr  5 20:39:42 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Play sound when analysis is finished.

@@ -146,36 +146,44 @@ static void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
 
 static void
-write_board ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+write_points ( gint points[ 28 ], const gint turn, const gint nchequers, 
+               int anBoard[ 2 ][ 25 ] ) {
 
   gint i;
   gint anOff[ 2 ];
 
   for ( i = 0; i < 28; ++i )
-    bd->points[ i ] = 0;
+    points[ i ] = 0;
 
   /* Opponent on bar */
-  bd->points[ 0 ] = -points[ 0 ][ 24 ];
+  points[ 0 ] = -anBoard[ 0 ][ 24 ];
 
   /* Board */
   for( i = 0; i < 24; i++ ) {
-    if ( points[ bd->turn > 0 ][ i ] )
-      bd->points[ i + 1 ] = bd->turn * points[ bd->turn > 0 ][ i ];
-    if ( points[ bd->turn <= 0 ][ i ] )
-      bd->points[ 24 - i ] = -bd->turn * points[ bd->turn <= 0 ][ i ];
+    if ( anBoard[ turn > 0 ][ i ] )
+      points[ i + 1 ] = turn * anBoard[ turn > 0 ][ i ];
+    if ( anBoard[ turn <= 0 ][ i ] )
+      points[ 24 - i ] = -turn * anBoard[ turn <= 0 ][ i ];
   }
 
   /* Player on bar */
-  bd->points[ 25 ] = points[ 1 ][ 24 ];
+  points[ 25 ] = anBoard[ 1 ][ 24 ];
 
-  anOff[ 0 ] = anOff[ 1 ] = bd->nchequers;
+  anOff[ 0 ] = anOff[ 1 ] = nchequers;
   for( i = 0; i < 25; i++ ) {
-    anOff[ 0 ] -= points[ 0 ][ i ];
-    anOff[ 1 ] -= points[ 1 ][ i ];
+    anOff[ 0 ] -= anBoard[ 0 ][ i ];
+    anOff[ 1 ] -= anBoard[ 1 ][ i ];
   }
     
-  bd->points[ 26 ] = anOff[ bd->turn >= 0  ];
-  bd->points[ 27 ] = anOff[ bd->turn < 0 ];
+  points[ 26 ] = anOff[ turn >= 0  ];
+  points[ 27 ] = anOff[ turn < 0 ];
+
+}
+
+static void
+write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
+
+  write_points( bd->points, bd->turn, bd->nchequers, anBoard );
 
 }
 
@@ -1033,6 +1041,8 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
 					 int dest ) {
     int bar, hit;
     gboolean placed = TRUE;
+    int unhit;
+    int oldpoints[ 28 ];
 
     bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
     
@@ -1052,12 +1062,34 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
 	
 	board_invalidate_point( bd, bar );
     }
+
+    /* 
+     * Check for taking chequer off point where we hit 
+     */
+
+    /* check if the opponent had a chequer on the drag point (source),
+       and that it's not pick'n'pass */
+
+    /* FIXME: this does not detect undoing pick'n'pass */
+    
+    write_points( oldpoints, bd->turn, bd->nchequers, bd->old_board );
+
+    if ( ( unhit = ( ( oldpoints[ bd->drag_point ] == -bd->drag_colour ) && 
+                     ( ( bd->drag_point - dest ) * bd->drag_colour < 0 ) ) ) ) {
+      bd->points[ bar ] += bd->drag_colour;
+      bd->points[ bd->drag_point ] -= bd->drag_colour;
+      board_invalidate_point( bd, bar );
+      board_invalidate_point( bd, bd->drag_point );
+
+    }
+
+          
     
     bd->points[ dest ] += bd->drag_colour;
     
     board_invalidate_point( bd, dest );
     
-    if( bd->drag_point != dest )
+    if( bd->drag_point != dest ) {
 	if( update_move( bd ) && !fGUIIllegal ) {
 	    /* the move was illegal; undo it */
 	    bd->points[ dest ] -= bd->drag_colour;
@@ -1067,12 +1099,20 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
 		bd->points[ dest ] = -bd->drag_colour;
 		board_invalidate_point( bd, bar );
 	    }
+
+            if ( unhit ) {
+              bd->points[ bar ] -= bd->drag_colour;
+              bd->points[ bd->drag_point ] += bd->drag_colour;
+              board_invalidate_point( bd, bar );
+            }
+              
 		    
 	    board_invalidate_point( bd, bd->drag_point );
 	    board_invalidate_point( bd, dest );
 	    update_move( bd );
 	    placed = FALSE;
 	}
+    }
 
     return placed;
 }
