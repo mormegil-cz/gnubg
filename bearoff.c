@@ -1389,10 +1389,10 @@ AssignOneSided ( float arProb[ 32 ], float arGammonProb[ 32 ],
   float arx[ 64 ];
 
   if ( ausProb )
-    memcpy ( ausProb, ausProbx, sizeof ( ausProb ) );
+    memcpy ( ausProb, ausProbx, 32 * sizeof ( ausProb[0] ) );
 
   if ( ausGammonProb )
-    memcpy ( ausGammonProb, ausGammonProbx, sizeof ( ausGammonProbx ) );
+    memcpy ( ausGammonProb, ausGammonProbx, 32 * sizeof (ausGammonProbx[0]) );
 
   if ( ar || arProb || arGammonProb ) {
     for ( i = 0; i < 32; ++i ) 
