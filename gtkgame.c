@@ -2333,7 +2333,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Navigate/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Navigate/Previous chequer _play"), "<alt>Page_Up",
 	  Command, CMD_PREV_ROLLED, NULL },
-	{ N_("/_Navigate/Next _cheqeer play"), "<alt>Page_Down",
+	{ N_("/_Navigate/Next _chequer play"), "<alt>Page_Down",
 	  Command, CMD_NEXT_ROLLED, NULL },
 	{ N_("/_Navigate/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Navigate/Previous marke_d move"), "<control><shift>Page_Up", 
