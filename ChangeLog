@@ -1,3 +1,9 @@
+Fri Jun  6 12:43:47 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktempmap.c (ExposeQuadrant): ahem, fix small bug in
+	index calculation.
+	(bug 3873 reported by Ned Cross)
+
 Fri Jun  6 12:21:14 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c (SetMatchID): dump values for invalid match IDs.

@@ -331,7 +331,7 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
   if ( pi ) {
     if ( *pi >= 0 ) {
       i = ( *pi % 100 ) / 6;
-      j = *pi % 6;
+      j = ( *pi % 100 ) % 6;
       m = *pi / 100;
     }
     else {
