@@ -666,19 +666,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       
     }
 
-/*
-  printf ( "rollout %i %f %f %f %f %f %f %f\n",
-           iGame,
-           aarOutput[ 0 ][ 0 ],
-           aarOutput[ 0 ][ 1 ],
-           aarOutput[ 0 ][ 2 ],
-           aarOutput[ 0 ][ 3 ],
-           aarOutput[ 0 ][ 4 ],
-           aarOutput[ 0 ][ 5 ],
-           aarOutput[ 0 ][ 6 ] );
- */
-           
-
     return 0;
 }
 
