@@ -44,6 +44,7 @@
 #include "gtkboard.h"
 #include "drawboard.h"
 #include "boardpos.h"
+#include "analysis.h"
 
 /* Define relative sizes of objects from arbitrary unit .05 */
 #define base_unit .05f
@@ -77,12 +78,35 @@ void InitBoard3d(BoardData *bd);
 void InitBoardPreview(BoardData *bd);
 void InitGL(BoardData *bd);
 
+/* font functions */
+#ifndef __cplusplus
+void glPrintPointNumbers(BoardData* bd, const char *text, int mode);
+void glPrintCube(BoardData* bd, const char *text, int mode);
+void glPrintNumbersRA(BoardData* bd, const char *text, int mode);
+float getFontHeight(BoardData* bd);
+void BuildFont(BoardData* bd);
+void KillFont(BoardData* bd);
+#endif
+
 /* Drawing functions */
 void drawBoard(BoardData* bd);
 void SetupPerspVolume(BoardData* bd, int viewport[4]);
 float getBoardWidth();
 float getBoardHeight();
 void calculateBackgroundSize(BoardData *bd, int viewport[4]);
+
+/* Graph functions*/
+typedef struct _GraphData
+{
+	float ***data;
+	int numGames;
+	float maxY;
+} GraphData;
+
+GtkWidget* StatGraph(GraphData* pgd);
+void SetNumGames(GraphData* pgd, int numGames);
+void AddGameData(GraphData* pgd, int game, statcontext *psc);
+void TidyGraphData(GraphData* pgd);
 
 /* Misc functions */
 void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureFormat format);
@@ -105,6 +129,10 @@ void LoadTextureInfo();
 GList *GetTextureList(int type);
 int IsSet(int flags, int bit);
 float Dist2d(float a, float b);
+float ***Alloc3d(int x, int y, int z);
+void Free3d(float ***array, int x, int y);
+int LoadTexture(Texture* texture, const char* Filename, TextureFormat format);
+void CheckOpenglError();
 
 typedef int idleFunc(BoardData* bd);
 void setIdleFunc(BoardData* bd, idleFunc* pFun);

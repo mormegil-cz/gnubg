@@ -1,3 +1,9 @@
+
+Thu Aug 29 10:39:52 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c - display statistics in a graph
+	* graph.c - new file to draw a graph
+
 Thu Aug 28 19:23:52 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis (absoluteFIBSRating): use new formulae provided by Kees.

@@ -23,6 +23,10 @@
 #include <config.h>
 #endif
 
+#if USE_BOARD3D
+#include "board3d/inc3d.h"
+#endif
+
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
@@ -8474,12 +8478,12 @@ static void StatsSelectGame(GtkWidget *pw, int i)
 	else
 	{
 		char sz[100];
-		list *pl = lMatch.plNext;
+		list *plGame, *pl = lMatch.plNext;
 		for (i = 1; i < curStatGame; i++)
 			pl = pl->plNext;
 
-		pl = pl->p;
-		pmgi = pl->plNext->p;
+		plGame = pl->p;
+		pmgi = plGame->plNext->p;
 
 		strcpy(sz, _("Statistics for game "));
 		sprintf(sz + strlen(sz), "%d", curStatGame);
@@ -8578,7 +8582,9 @@ static void AddNavigation(GtkWidget* pvbox)
 
 	pm = gtk_menu_new();
 
-	pw = gtk_menu_item_new_with_label(_("All games"));
+	sprintf(sz, _("All games: %s %d, %s %d"), ap[ 0 ].szName,
+		 ms.anScore[ 0 ], ap[ 1 ].szName, ms.anScore[ 1 ] );
+	pw = gtk_menu_item_new_with_label(sz);
 	gtk_menu_append(GTK_MENU(pm), pw);
 	gtk_signal_connect( GTK_OBJECT( pw ), "activate",
 			GTK_SIGNAL_FUNC(StatsSelectGame), 0);
@@ -8612,17 +8618,21 @@ static void AddNavigation(GtkWidget* pvbox)
 extern void GTKDumpStatcontext( int game )
 {
 	GtkWidget *pwNotebook, *copyMenu, *menu_item, *pvbox;
-
+#if USE_BOARD3D
+	GraphData gd;
+	GtkWidget *pw;
+	list *pl;
+	int i;
+#endif;
 	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, NULL );
 
 	pwNotebook = gtk_notebook_new();
 	gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
 	gtk_notebook_popup_disable( GTK_NOTEBOOK( pwNotebook ) );
 
-	gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
-
 	pvbox = gtk_vbox_new( FALSE, 0 ),
-    gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, TRUE, TRUE, 0);
+
 	AddNavigation(pvbox);
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwStatDialog, DA_MAIN ) ), pvbox );
 
@@ -8637,6 +8647,28 @@ extern void GTKDumpStatcontext( int game )
 
 	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[3] = CreateList(),
 					  gtk_label_new(_("Luck")));
+
+#if USE_BOARD3D
+	SetNumGames(&gd, numStatGames);
+
+	pl = lMatch.plNext;
+	for (i = 0; i < numStatGames; i++)
+	{
+		list *plGame = pl->p;
+		movegameinfo *pmgi = plGame->plNext->p;
+		AddGameData(&gd, i, &pmgi->sc);
+		pl = pl->plNext;
+	}
+	/* Total values */
+	AddGameData(&gd, i, &scMatch);
+
+	pw = StatGraph(&gd);
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), pw,
+					  gtk_label_new(_("Graph")));
+    gtk_tooltips_set_tip( ptt, pw, _("This graph shows the total error rates per game for each player."
+		" The games are along the bottom and the error rates up the side."
+		" Chequer error in green, cube error in blue."), "" );
+#endif
 
 	/* modality */
 	gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 300 );
@@ -8668,7 +8700,11 @@ extern void GTKDumpStatcontext( int game )
 	GTKDisallowStdin();
 	gtk_main();
 	GTKAllowStdin();
-} 
+
+#if USE_BOARD3D
+	TidyGraphData(&gd);
+#endif
+}
 
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw ) {
 

@@ -72,10 +72,8 @@ unsigned char auch[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
 extern void InitGL(BoardData *bd);
 extern void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a);
 extern void setMaterial(Material* pMat);
-extern void CheckOpenglError();
 extern void UpdatePreview(GtkWidget **ppw);
 extern void RenderPreview(Material* pMat, unsigned char* buf);
-extern int LoadTexture(Texture* texture, const char* Filename, TextureFormat format);
 extern BoardData bd3d;
 
 int previewLightLevels[3];

@@ -39,7 +39,6 @@ double animStartTime = 0;
 int stopNextTime;
 int slide_move;
 extern int convert_point( int i, int player );
-extern void BuildFont(BoardData* bd);
 extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
 extern void waveFlag(BoardData* bd, float wag);

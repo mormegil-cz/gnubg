@@ -84,6 +84,13 @@ public:
 		fonts[mode]->Render(text);
 	}
 
+	void printRightAlign(const char* text, int mode)
+	{
+		glScalef(size, size, 1);
+		glTranslatef(-getTextLen(text), 0, 0);
+		fonts[mode]->Render(text);
+	}
+
 	void printHorVertAlign(const char* text, int mode)
 	{
 		glTranslatef(0, -height / 2.0f, 0);
@@ -123,6 +130,11 @@ extern "C" void glPrintPointNumbers(BoardData* bd, const char *text, int mode)
 extern "C" void glPrintCube(BoardData* bd, const char *text, int mode)
 {
 	((font*)bd->cubeFont)->printHorVertAlign(text, mode);
+}
+
+extern "C" void glPrintNumbersRA(BoardData* bd, const char *text, int mode)
+{	/* Right aligned numbers */
+	((font*)bd->numberFont)->printRightAlign(text, mode);
 }
 
 #else
