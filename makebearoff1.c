@@ -60,7 +60,8 @@ PrintPre ( FILE *pf ) {
          " * $Id$\n"
          " */\n"
          "\n\n\n"
-         "#include <stdio.h>\n\n"
+         "#include <stdio.h>\n"
+         "#include <stdlib.h>\n\n"
          "#include \"config.h\"\n"
          "#include \"bearoff.h\"\n\n\n",
          pf );
@@ -205,6 +206,8 @@ main ( int argc, char **argv ) {
     fclose ( pfOut );
   if ( pfIn != stdin )
     fclose ( pfIn );
+
+  return 0;
 
 }
 

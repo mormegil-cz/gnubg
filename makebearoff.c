@@ -208,7 +208,11 @@ static void BearOff( int nId, int nPoints,
     unsigned int usBest;
     unsigned short int *pusj;
     unsigned short int ausj[ 64 ];
-    unsigned short int ausBest[ 64 ];
+    unsigned short int ausBest[ 32 ];
+
+    unsigned int usGammonBest;
+    unsigned short int ausGammonBest[ 32 ];
+    int iGammonBest;
 
     /* get board for given position */
 
@@ -261,6 +265,7 @@ static void BearOff( int nId, int nPoints,
 	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
 
 	    usBest = 0xFFFFFFFF; iBest = -1;
+            usGammonBest = 0xFFFFFFFF; iGammonBest = -1;
 	    
 	    for( i = 0; i < ml.cMoves; i++ ) {
 		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
@@ -275,28 +280,40 @@ static void BearOff( int nId, int nPoints,
                   HashAdd ( ph, j, pusj, fGammon ? 128 : 64 );
                 }
 
+                /* find best move to win */
+
                 if ( ( us = RollsOS ( pusj ) ) < usBest ) {
                   iBest = j;
                   usBest = us;
-                  memcpy ( ausBest, pusj, fGammon ? 128 : 64 );
+                  memcpy ( ausBest, pusj, 64 );
                 }
+
+                /* find best move to save gammon */
                   
+                if ( fGammon && 
+                     ( ( us = RollsOS ( pusj + 32 ) ) < usGammonBest ) ) {
+                  iGammonBest = j;
+                  usGammonBest = us;
+                  memcpy ( ausGammonBest, pusj + 32, 64 );
+                }
+
 	    }
 
 	    assert( iBest >= 0 );
+            assert( iGammonBest >= 0 );
 
 	    if( anRoll[ 0 ] == anRoll[ 1 ] ) {
               for( i = 0; i < 31; i++ ) {
                 aProb[ i + 1 ] += ausBest[ i ];
                 if ( k == 15 && fGammon )
-                  aProb[ 32 + i + 1 ] += ausBest[ 32 + i ];
+                  aProb[ 32 + i + 1 ] += ausGammonBest[ i ];
               }
             }
 	    else {
               for( i = 0; i < 31; i++ ) {
                 aProb[ i + 1 ] += 2 * ausBest[ i ];
                 if ( k == 15 && fGammon )
-                  aProb[ 32 + i + 1 ] += 2 * ausBest[ 32 + i ];
+                  aProb[ 32 + i + 1 ] += 2 * ausGammonBest[ i ];
               }
             }
 	}
@@ -546,6 +563,10 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
   float arj[ 4 ];
   float arBest[ 4 ];
 
+  int iGammonBest;
+  float arGammonBest[ 4 ];
+  float rGammonBest;
+
   for ( i = 0; i < 4; ++i )
     ar[ i ] = 0.0f;
 
@@ -588,6 +609,9 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
       GenerateMoves ( &ml, anBoard, d0, d1, FALSE );
 
       rBest = 1e10;
+      rGammonBest = 1e10;
+      iBest = -1;
+      iGammonBest = -1;
 
       for ( i = 0; i < ml.cMoves; ++i ) {
 
@@ -600,13 +624,26 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
           HashAdd ( ph, j, prj, 16 );
         }
 
+        /* find best move to win */
+
         if ( prj[ 0 ] < rBest ) {
           iBest = j;
           rBest = prj[ 0 ];
           memcpy ( arBest, prj, 4 * sizeof ( float ) );
         }
 
+        /* find best move to save gammon */
+
+        if ( prj[ 2 ] < rGammonBest ) {
+          iGammonBest = j;
+          rGammonBest = prj[ 2 ];
+          memcpy ( arGammonBest, prj, 4 * sizeof ( float ) );
+        }
+
       }
+
+      assert ( iBest >= 0 );
+      assert ( iGammonBest >= 0 );
       
       rMean = 1.0f + arBest[ 0 ];
 
@@ -618,12 +655,12 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
       
       if ( k == 15 ) {
 
-        rMean = 1.0f + arBest[ 2 ];
+        rMean = 1.0f + arGammonBest[ 2 ];
 
         ar[ 2 ] += ( d0 == d1 ) ? rMean : 2.0f * rMean;
 
         rMean = 
-          arBest[ 3 ] * arBest[ 3 ] + rMean * rMean;
+          arGammonBest[ 3 ] * arGammonBest[ 3 ] + rMean * rMean;
 
         rGammonVarSum += ( d0 == d1 ) ? rMean : 2.0f * rMean;
 
@@ -1306,5 +1343,6 @@ extern bearoffcontext *
 BearoffInitBuiltin ( void ) {
 
   printf ( "Make makebearoff build (avoid resursive rules Makefile :-)\n" );
+  return NULL;
 
 }

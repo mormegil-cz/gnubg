@@ -1,3 +1,12 @@
+Sun Nov 24 12:21:00 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix some bugs in bearoff code.
+
+	* makebearoff.c (BearOff, NDBearOff): improve gammon
+	distributions.
+	* makebearoff1.c (main): pacify pussy compilers.
+	* bearoff.c (ReadBearoffONeSidedExact): calculate mean/average.
+
 Sun Nov 24 11:59:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* bearoff.c (BearoffEvalOneSided): fix typo.
