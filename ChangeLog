@@ -1,3 +1,16 @@
+Wed Jul 24 18:34:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+ 	Tutor mode (contributed by Jim Segrave).
+
+	* analysis.c (Skill): declare extern.	
+	* gnubg.c (GiveAdvice, GetAdviceAnswer): tutor mode.
+	* gnubg.c (CommandSaveSettings): save tutor flag.	
+	* set.c (CommandSetTutor), show.c (CommandShowTutor): tutor mode.
+	* play.c: tutor mode.
+	* gtkgame.c: tutor mode.
+
+	* text.c, html.c: pacify fussy compilers.
+
 Tue Jul 23 17:30:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (HintCopy): pacify fussy compilers.

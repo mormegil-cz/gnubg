@@ -136,7 +136,7 @@ autoAnalyseMove ( void *p, const matchstate *pms ) {
 
   }
 
-  /* tutor-mode */
+  /* auto-analysis-mode */
 
   if ( fAutoAnalysis && f ) {
       SuspendInput( &m );
@@ -2108,6 +2108,26 @@ extern void CommandDouble( char *sz ) {
     TurnDone();
 }
 
+static skilltype ShouldDrop( moverecord *pmr ) {
+
+    int		 fAnalyseCubeSave = fAnalyseCube;	
+	matchstate msx;
+
+	if ((pmr == 0) ||
+		(pmr->d.mt != MOVE_DROP) ||
+		(ms.gs != GAME_PLAYING)  ||
+		!ms.fDoubled             ||
+		(ap[ ms.fTurn ].pt != PLAYER_HUMAN ))
+	  return SKILL_NONE;
+
+	fAnalyseCube = TRUE;
+	memcpy ( &msx, &ms, sizeof ( matchstate ) );
+	AnalyzeMove ( pmr, &msx, NULL, FALSE );
+	fAnalyseCube = fAnalyseCubeSave;
+
+	return pmr->d.st;
+}
+
 extern void CommandDrop( char *sz ) {
 
     moverecord *pmr;
@@ -2124,10 +2144,6 @@ extern void CommandDrop( char *sz ) {
 	return;
     }
 
-    if( fDisplay )
-	outputf( _("%s refuses the cube and gives up %d point%s.\n"),
-		ap[ ms.fTurn ].szName, ms.nCube, ms.nCube == 1 ? "" : "s" );
-    
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_DROP;
     pmr->d.sz = NULL;
@@ -2135,6 +2151,14 @@ extern void CommandDrop( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
+	if ( fTutor && !GiveAdvice ( ShouldDrop ( pmr ) ))
+	  return;
+
+
+    if( fDisplay )
+	outputf( _("%s refuses the cube and gives up %d point%s.\n"),
+		ap[ ms.fTurn ].szName, ms.nCube, ms.nCube == 1 ? "" : "s" );
+    
     autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
@@ -2249,6 +2273,29 @@ extern void CommandListMatch( char *sz ) {
 #endif
 
     /* FIXME */
+}
+
+static skilltype GoodMove (movenormal *p) {
+
+	 matchstate msx;
+	 int        fAnalyseMoveSaved = fAnalyseMove;
+	 moverecord *pmr = (moverecord *) p;
+
+	 /* should never happen, but if it does, tutoring
+	  * is a non-starter
+	  */
+	 if ((pmr == 0) ||
+		 (pmr->mt != MOVE_NORMAL) ||
+		 (ap[ pmr->n.fPlayer ].pt != PLAYER_HUMAN))
+	   return SKILL_NONE;
+	 
+	 /* ensure we're analyzing moves */
+	 fAnalyseMove = 1;
+	 memcpy ( &msx, &ms, sizeof ( matchstate ) );
+	 AnalyzeMove ( pmr, &msx, NULL, FALSE );
+	 fAnalyseMove = fAnalyseMoveSaved;
+
+     return pmr->n.stMove;
 }
 
 extern void 
@@ -2385,7 +2432,10 @@ CommandMove( char *sz ) {
 		pmn->stMove = SKILL_NONE;
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
-		
+
+		if ( fTutor && !GiveAdvice ( GoodMove( pmn ) ))
+			 return;
+
 #ifdef USE_GTK        
 		/* There's no point delaying here. */
 		if( nTimeout ) {
@@ -3037,6 +3087,67 @@ extern void CommandResign( char *sz ) {
     TurnDone();
 }
 
+/* evaluate wisdom of not having doubled/redoubled */
+
+static skilltype ShouldDouble (void) {
+
+    float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    cubeinfo ci;
+	cubedecision cd;
+    float rDeltaEquity;
+	int      fAnalyseCubeSave = fAnalyseCube;
+
+	/* reasons that doubling is not an issue */
+    if( (ms.gs != GAME_PLAYING) || 
+		ms.anDice[ 0 ]         || 
+		ms.fDoubled || 
+		ms.fResigned ||
+		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
+
+      return (SKILL_NONE);
+    }
+
+	GetMatchStateCubeInfo( &ci, &ms );
+
+	fAnalyseCube = TRUE;
+	if( !GetDPEq ( NULL, NULL, &ci ) ) {
+	  fAnalyseCube = fAnalyseCubeSave;
+	  return (SKILL_NONE);
+	}
+
+	/* Give hint on cube action */
+
+	ProgressStart( _("Considering cube action...") );
+	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+								&esEvalCube.ec ) < 0 ) {
+	  ProgressEnd();
+	  fAnalyseCube = fAnalyseCubeSave;
+	  return (SKILL_NONE);;
+	}
+	ProgressEnd();
+	    
+	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
+
+	switch ( cd ) {
+	case DOUBLE_TAKE:
+	case DOUBLE_BEAVER:
+	case REDOUBLE_TAKE:
+
+ 	  rDeltaEquity = arDouble [OUTPUT_NODOUBLE] - arDouble [OUTPUT_TAKE];
+	  break;
+
+	case DOUBLE_PASS:
+	case REDOUBLE_PASS:
+
+ 	  rDeltaEquity = arDouble [OUTPUT_NODOUBLE] - arDouble [OUTPUT_NODOUBLE];
+	  break;
+
+	default:
+	  return (SKILL_NONE);
+	}
+
+	return Skill (rDeltaEquity);
+}
 
 extern void 
 CommandRoll( char *sz ) {
@@ -3044,7 +3155,7 @@ CommandRoll( char *sz ) {
   movelist ml;
   movenormal *pmn;
   moverecord *pmr;
-  
+
   if( ms.gs != GAME_PLAYING ) {
     outputl( _("No game in progress (type `new game' to start one).") );
 
@@ -3076,6 +3187,9 @@ CommandRoll( char *sz ) {
     return;
   }
     
+  if ( fTutor && !GiveAdvice( ShouldDouble() ))
+	  return;
+
   if( RollDice( ms.anDice ) < 0 )
     return;
 
@@ -3158,6 +3272,26 @@ CommandRoll( char *sz ) {
 }
 
 
+static skilltype ShouldTake ( moverecord *pmr ) {
+
+    int		 fAnalyseCubeSave = fAnalyseCube;	
+	matchstate msx;
+
+	if ((pmr == 0) ||
+		(pmr->d.mt != MOVE_TAKE) ||
+		(ms.gs != GAME_PLAYING) ||
+		!ms.fDoubled             ||
+		( ap[ ms.fTurn ].pt != PLAYER_HUMAN ))
+	  return SKILL_NONE;
+
+	fAnalyseCube = TRUE;
+	memcpy ( &msx, &ms, sizeof ( matchstate ) );
+	AnalyzeMove ( pmr, &msx, NULL, FALSE );
+	fAnalyseCube = fAnalyseCubeSave;
+
+	return pmr->d.st;
+}
+
 extern void CommandTake( char *sz ) {
 
     moverecord *pmr;
@@ -3174,10 +3308,6 @@ extern void CommandTake( char *sz ) {
 	return;
     }
 
-    if( fDisplay )
-	outputf( _("%s accepts the cube at %d.\n"), ap[ ms.fTurn ].szName,
-		 ms.nCube << 1 );
-    
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_TAKE;
     pmr->d.sz = NULL;
@@ -3185,6 +3315,13 @@ extern void CommandTake( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
+	if ( fTutor && !GiveAdvice ( ShouldTake ( pmr ) ))
+	  return;
+
+    if( fDisplay )
+	outputf( _("%s accepts the cube at %d.\n"), ap[ ms.fTurn ].szName,
+		 ms.nCube << 1 );
+    
     autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
 

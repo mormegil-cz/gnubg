@@ -176,6 +176,7 @@ typedef enum _gnubgcommand {
     CMD_SET_RNG_USER,
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
+	CMD_SET_TUTOR,
     CMD_SHOW_COPYING,
     CMD_SHOW_ENGINE,
     CMD_SHOW_EXPORT,
@@ -189,6 +190,7 @@ typedef enum _gnubgcommand {
     CMD_SHOW_STATISTICS_MATCH,
     CMD_SHOW_STATISTICS_SESSION,
     CMD_SHOW_THORP,
+	CMD_SHOW_TUTOR,
     CMD_SHOW_VERSION,
     CMD_SHOW_WARRANTY,
     CMD_SWAP_PLAYERS,
@@ -265,6 +267,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set rng user",
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
+	"set tutor",
     "show copying",
     "show engine",
     "show export",
@@ -278,6 +281,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show statistics match",
     "show statistics session",
     "show thorp",
+	"show tutor",
     "show version",
     "show warranty",
     "swap players",
@@ -2279,6 +2283,7 @@ static void OK( GtkWidget *pw, int *pf ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
+
 extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 				void *p ) {
 #include "gnu.xpm"
@@ -2403,6 +2408,122 @@ static int Message( char *sz, int fQuestion ) {
 extern int GTKGetInputYN( char *szPrompt ) {
 
     return Message( szPrompt, TRUE );
+}
+
+/*
+ * put up a tutor window with a message about how bad the intended
+ * play is. Allow selections:
+ * Continue (play it anyway)
+ * Cancel   (rethink)
+ * returns TRUE if play it anyway
+ */
+
+
+
+static void TutorEnd( GtkWidget *pw, int *pf ) {
+
+    if( pf )
+	*pf = TRUE;
+    
+	fTutor = FALSE;
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+extern int GtkTutor ( char *sz ) {
+
+    int f = FALSE, fRestoreNextTurn;
+    GdkPixmap *ppm;
+    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor, *pwHbox, *pwButtons, 
+	  *pwPixmap, *pwPrompt;
+    GtkAccelGroup *pag;
+
+#include "question.xpm"
+
+	pwTutorDialog = gtk_dialog_new();
+	pwOK = gtk_button_new_with_label( _("Play Anyway") );
+	pwCancel = gtk_button_new_with_label( _("Rethink") );
+	pwEndTutor = gtk_button_new_with_label ( _("End Tutor Mode") );
+	pwHbox = gtk_hbox_new( FALSE, 0 );
+	pwButtons = gtk_hbutton_box_new();
+    pag = gtk_accel_group_new();
+
+    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
+	 gtk_widget_get_colormap( pwTutorDialog ), NULL, NULL,
+	 question_xpm);
+    pwPixmap = gtk_pixmap_new( ppm, NULL );
+    gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
+
+    gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
+			       GTK_BUTTONBOX_SPREAD );
+    
+    gtk_box_pack_start( GTK_BOX( pwHbox ), pwPixmap, FALSE, FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwTutorDialog )->vbox ),
+		       pwHbox );
+    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwTutorDialog )->action_area ),
+		       pwButtons );
+
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwOK );
+    gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", 
+			GTK_SIGNAL_FUNC( OK ), (void *) &f );
+
+	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
+	gtk_signal_connect_object( GTK_OBJECT( pwCancel ), "clicked",
+				   GTK_SIGNAL_FUNC( gtk_widget_destroy ),
+				   GTK_OBJECT( pwTutorDialog ) );
+
+	gtk_container_add( GTK_CONTAINER( pwButtons ), pwEndTutor );
+	gtk_signal_connect( GTK_OBJECT( pwEndTutor ), "clicked",
+				   GTK_SIGNAL_FUNC( TutorEnd ), (void *) &f );
+
+#if GTK_CHECK_VERSION(1,3,15)
+    gtk_window_add_accel_group( GTK_WINDOW( pwTutorDialog ), pag );
+#else
+    gtk_accel_group_attach( pag, GTK_OBJECT( pwTutorDialog ) );
+#endif
+    gtk_widget_add_accelerator( pwCancel, "clicked", pag,
+				GDK_Escape, 0, 0 );
+
+    gtk_window_set_title( GTK_WINDOW( pwTutorDialog ), 
+						  _("GNU Backgammon - Tutor") );
+
+    GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
+    gtk_widget_grab_default( pwOK );
+
+	pwPrompt = gtk_label_new( sz );
+
+    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
+    gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
+    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwTutorDialog, DA_MAIN ) ),
+		       pwPrompt );
+
+    gtk_window_set_policy( GTK_WINDOW( pwTutorDialog ), FALSE, FALSE, FALSE );
+    gtk_window_set_modal( GTK_WINDOW( pwTutorDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwTutorDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwTutorDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwTutorDialog );
+
+    /* This dialog should be REALLY modal -- disable "next turn" idle
+       processing and stdin handler, to avoid reentrancy problems. */
+    if( ( fRestoreNextTurn = nNextTurn ) )
+	gtk_idle_remove( nNextTurn );
+	    
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( fRestoreNextTurn )
+	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+
+    /* if tutor mode was disabled, update the checklist */
+	if ( !fTutor) {
+	  GTKSet ( (void *) &fTutor);
+	}
+
+    return f;
 }
 
 extern void GTKOutput( char *sz ) {
@@ -6848,7 +6969,7 @@ GTKShowPath ( void ) {
 typedef struct _optionswidget {
 
   GtkWidget *pwAutoAnalyse, *pwAutoBearoff, *pwAutoCrawford, *pwAutoGame,
-            *pwAutoMove, *pwAutoRoll;
+            *pwAutoMove, *pwAutoRoll, *pwTutor;
   GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic;
   GtkWidget *pwCubeUsecube, *pwCubeJacoby, *pwCubeInvert;
   GtkWidget *pwGameClockwise, *pwGameNackgammon, *pwGameEgyptian;
@@ -6926,6 +7047,9 @@ static GtkWidget* OptionsPage( optionswidget *pow)
 
   pow->pwAutoRoll = gtk_check_button_new_with_label (_("Roll"));
   gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwAutoRoll, FALSE, FALSE, 0);
+
+  pow->pwTutor = gtk_check_button_new_with_label (_("Tutor"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwTutor, FALSE, FALSE, 0);
 
   pwFrame = gtk_frame_new (_("Cube"));
   gtk_box_pack_start (GTK_BOX (pwHBoxMain), pwFrame, TRUE, TRUE, 0);
@@ -7134,7 +7258,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwAutoRoll,fAutoRoll, "set automatic roll %s")
   CHECKUPDATE(pow->pwAutoMove,fAutoMove, "set automatic move %s")
   CHECKUPDATE(pow->pwAutoAnalyse,fAutoAnalysis, "set automatic analysis %s")
-  
+  CHECKUPDATE(pow->pwTutor, fTutor, "set tutor %s")
+
   CHECKUPDATE(pow->pwCubeUsecube,fCubeUse, "set cube use %s")
   CHECKUPDATE(pow->pwCubeJacoby,fJacoby, "set jacoby %s")
   CHECKUPDATE(pow->pwCubeInvert,fInvertMET, "set invert met %s")
@@ -7219,6 +7344,8 @@ OptionsSet( optionswidget *pow) {
                                 fAutoMove );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoRoll ),
                                 fAutoRoll );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwTutor ),
+                                fTutor );
 
   gtk_adjustment_set_value ( pow->padjCubeBeaver, nBeavers );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwCubeUsecube ),

@@ -128,4 +128,8 @@ extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves );
 
 extern int fTTY;
 
+extern int 
+GtkTutor ( char *sz );
+
+
 #endif
