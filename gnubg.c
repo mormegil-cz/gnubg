@@ -2514,6 +2514,10 @@ extern void UpdateSettings( void ) {
     UpdateSetting( &ms.gs );
     
     ShowBoard();
+
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 }
 
 /* handle turning a setting on / off

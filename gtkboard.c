@@ -57,7 +57,9 @@
 
 /* minimum time in milliseconds before a drag to the
 	same point is considered a real drag rather than a click */
-#define CLICK_TIME 250
+#define CLICK_TIME 450
+/* After this time show drag target help */
+#define HINT_TIME 150
 
 animation animGUI = ANIMATE_SLIDE;
 int nGUIAnimSpeed = 4, fGUIBeep = TRUE, fGUIDiceArea = FALSE,
@@ -1221,10 +1223,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
 	{
 		if (placed)
 			RestrictiveEndMouseMove(bd, dest, abs(bd->points[dest]));
-		else
-			RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
-
-		if (hit)
+		if (placed && hit)
 			RestrictiveDrawPiece(bd, bar, abs(bd->points[bar]));
 	}
 	if (placed && rdAppearance.fDisplayType == DT_3D)
@@ -1401,7 +1400,9 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
 			write_board( bd, anBoard );
 		}
 #if USE_BOARD3D
-		if (rdAppearance.fDisplayType == DT_2D)
+		if (rdAppearance.fDisplayType == DT_3D)
+			RestrictiveRedraw();
+		else
 #endif
 			for( i = 0; i < 28; i++ )
 				board_invalidate_point( bd, i );
@@ -1497,7 +1498,9 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
     }
 
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_2D)
+	if (rdAppearance.fDisplayType == DT_3D)
+		RestrictiveRedraw();
+	else
 #endif
 	{
 	    board_invalidate_point(bd, n);
@@ -1637,8 +1640,6 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 		else if (bd->drag_point == POINT_RIGHT && bd->turn != 1)
 			UserCommand( "set turn 1" );
 
-		/* -2 to avoid motion causing immediate edit */
-		bd->drag_point = -2;
 		GTKSetDice( NULL, 0, NULL );
 		return TRUE;
 	}
@@ -1809,7 +1810,9 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 				if (memcmp(old_points, bd->points, sizeof old_points))
 					playSound( SOUND_CHEQUER );
 			}
-
+#if USE_BOARD3D
+			RestrictiveRedraw();
+#endif
 			return TRUE;
 		}
 
@@ -1886,6 +1889,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 					if (rdAppearance.fDisplayType == DT_3D)
 					{
 						updatePieceOccPos(bd);
+						RestrictiveRedraw();
 						gtk_widget_queue_draw(board);
 					}
 					else
@@ -1991,6 +1995,10 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 			board_beep(bd);
 			dest = bd->drag_point;
 			place_chequer_or_revert(bd, dest);
+#if USE_BOARD3D
+			if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
+				RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+#endif
 		}
 		else
 		{
@@ -2034,7 +2042,12 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 				else 
 				{
 #if USE_BOARD3D
-					if (rdAppearance.fDisplayType == DT_2D)
+					if (rdAppearance.fDisplayType == DT_3D)
+					{
+						if (rdAppearance.quickDraw)
+							RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+					}
+					else
 #endif
 						board_invalidate_point(bd, bd->drag_point);
 					board_beep(bd);
@@ -2047,7 +2060,13 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 		if (place_chequer_or_revert(bd, dest))
 			playSound(SOUND_CHEQUER);
 		else
+		{
 			board_beep(bd);
+#if USE_BOARD3D
+			if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
+				RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+#endif
+		}
 	}
 
 #if USE_BOARD3D
@@ -2090,7 +2109,7 @@ gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData*
 	if (fGUIDragTargetHelp && !bd->DragTargetHelp && !editing)
 	{	/* Decide if drag targets should be shown (shown after small pause) */
 		if ((ap[bd->drag_colour == -1 ? 0 : 1].pt == PLAYER_HUMAN)		/* not for computer turn */
-			&& gdk_event_get_time((GdkEvent*)event) - bd->click_time > CLICK_TIME)
+			&& gdk_event_get_time((GdkEvent*)event) - bd->click_time > HINT_TIME)
 		{
 			bd->DragTargetHelp = LegalDestPoints(bd, bd->iTargetHelpPoints);
 		}
@@ -2411,7 +2430,7 @@ static gint board_set( Board *board, const gchar *board_text,
 
 	if (bd->diceRoll[0] != old_dice[0] ||
 		bd->diceRoll[1] != old_dice[1] ||
-		bd->drag_point == -2)	/* editing */
+		editing)
 	{
 		redrawNeeded = 1;
 

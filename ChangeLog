@@ -1,3 +1,9 @@
+
+Mon Jan 19 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkboard.c, gtkchequer.c, gtkgame.c, gtkgame.h,
+	gtkprefs.c, gtktoolbar.c: More 3d quick draw option stuff
+
 Fri Jan 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* set.c, render.c, play.c, renderprefs.c, gtkprefs.c, gtkoptions.c,

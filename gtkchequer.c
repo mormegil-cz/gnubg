@@ -275,7 +275,9 @@ ShowMove ( hintdata *phd, const int f ) {
     g_free ( sz );
 
   }
-
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 }
 
 
@@ -338,8 +340,11 @@ MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
 
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
   int c = CheckHintButtons ( phd );
+  int selrow = -1;
   GtkWidget *pwMoves = phd->pwMoves;
 
+  if (f && c == 1)
+      selrow = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
 
   /* allow only one move to be selected when "Show" is active */
 
@@ -350,14 +355,13 @@ MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
     gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
 				  GTK_SELECTION_MULTIPLE );
 
-
-  c = CheckHintButtons( phd );
-
-  if ( f && c == 1 )
-    ShowMove ( phd, TRUE );
-  else
-    ShowMove ( phd, FALSE );
-  
+	if (selrow != -1)
+	{	/* Show single selcted move when show clicked */
+		gtk_clist_select_row( GTK_CLIST( pwMoves ), selrow, 0 );
+		ShowMove ( phd, TRUE );
+	}
+	else
+		ShowMove ( phd, FALSE );
 }
 
 
@@ -552,7 +556,11 @@ MoveListMove ( GtkWidget *pw, hintdata *phd ) {
   FormatMove( szMove, ms.anBoard, m.anMove );
   UserCommand( szMove );
 
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 }
+
 static void
 MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
 {

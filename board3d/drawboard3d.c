@@ -3530,7 +3530,6 @@ void RestrictiveDrawPiece(BoardData* bd, int pos, int depth)
 {
 	float newPos[3];
 	getPiecePos(pos, depth, fClockwise, newPos);
-
 	RestrictiveDrawFrame(newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 }
 

@@ -514,7 +514,7 @@ ToolbarNew ( void ) {
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
   
   /* reset button */
-  TB_BUTTON_ADD(ptw->pwReset, stock_undo_xpm, _("Undo"), ShowBoard,
+  TB_BUTTON_ADD(ptw->pwReset, stock_undo_xpm, _("Undo"), Undo,
 		  NULL, 
                   _("Undo moves"),
 		  NULL) ;

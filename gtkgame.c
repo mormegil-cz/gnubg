@@ -145,8 +145,7 @@ char* warningStrings[WARN_NUM_WARNINGS] =
 {
 	N_("Press escape to exit full screen mode"),
 	N_("This option will speed up the 3d drawing for slow machines.\n"
-		"Several options will be disabled, so only select this option if performance is poor"
-		"\n\n ** This option isn't finished and is only available for testing **"),
+		"Several options will be disabled, so only select this option if performance is poor"),
 	N_("Drawing shadows is only supported on the latest graphics cards\n"
 		"Disable this option if performance is poor"),
 	N_("No hardware accelerated graphics card found, performance may be slow\n")
@@ -2744,7 +2743,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT, NULL },
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Edit/_Undo"), "<control>Z", ShowBoard, 0, NULL },
+	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, NULL },
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Edit/_Copy"), "<control>C", Command, CMD_XCOPY, NULL },
 	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
@@ -3497,6 +3496,9 @@ TutorHint ( GtkWidget *pw, void *unused ) {
 static void
 TutorRethink ( GtkWidget *pw, void *unused ) {
 
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
   gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
   ShowBoard ();
 
@@ -9956,7 +9958,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_show(pwHandle);
 		gtk_widget_show(GTK_WIDGET(bd->table));
 #if USE_BOARD3D
-    // Only show 2d dice below board if in 2d
+	/* Only show 2d dice below board if in 2d */
   	if (rdAppearance.fDisplayType == DT_2D)
 #endif
 		  gtk_widget_show(GTK_WIDGET(bd->dice_area));
@@ -9981,6 +9983,14 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 #endif
 	}
 	UpdateSetting(&fGUIShowIDs);
+}
+
+extern void Undo()
+{
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
+	ShowBoard();
 }
 
 #if USE_TIMECONTROL

@@ -1134,11 +1134,11 @@ LabelsToggled( GtkWidget *pwLabels, GtkWidget *pwDynamicLabels ) {
 	if (previewType == DT_3D &&
 		pwQuickDraw && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw)))
 		f = 0;	/* Disable for quick drawing */
+
+	redrawChange = TRUE;
 #endif
 
 	gtk_widget_set_sensitive( GTK_WIDGET( pwDynamicLabels ), f );
-
-	redrawChange = TRUE;
 }
 
 #if USE_BOARD3D

@@ -1550,11 +1550,15 @@ void InitBox(ClipBox* pCb, float x, float y)
 void RationalizeBox(ClipBox* pCb)
 {
 	int midX, midY, maxXoff, maxYoff;
-	pCb->xx += .25f;
+	/* Make things a bit bigger to avoid slight drawing errors */
+	pCb->x -= .5f;
+	pCb->xx += .5f;
+	pCb->y -= .5f;
+	pCb->yy += .5f;
 	midX = (int)BoxMidWidth(pCb);
 	midY = (int)BoxMidHeight(pCb);
-	maxXoff = (int)max(midX - pCb->x, pCb->xx - midX) + 1;
-	maxYoff = (int)max(midY - pCb->y, pCb->yy - midY) + 1;
+	maxXoff = (int)MAX(midX - pCb->x, pCb->xx - midX) + 1;
+	maxYoff = (int)MAX(midY - pCb->y, pCb->yy - midY) + 1;
 	pCb->x = midX - maxXoff;
 	pCb->xx = midX + maxXoff;
 	pCb->y = midY - maxYoff;
@@ -1615,7 +1619,7 @@ void RestrictiveDrawFrame(float pos[3], float width, float height, float depth)
 		numRestrictFrames++;
 		if (numRestrictFrames == MAX_FRAMES)
 		{	/* Too many drawing requests - just redraw whole screen */
-			numRestrictFrames = -1;
+			RestrictiveRedraw();
 			return;
 		}
 		RestrictiveDraw(&cb[numRestrictFrames], pos, width, height, depth);
@@ -1705,13 +1709,23 @@ void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth)
 	float newPos[3];
 	getPiecePos(pos, depth, fClockwise, newPos);
 
-	RestrictiveDraw(&cb[numRestrictFrames], newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+	if (pos == 26 || pos == 27)
+	{
+		newPos[2] -= PIECE_HOLE / 2.0f;
+		RestrictiveDraw(&cb[numRestrictFrames], newPos, PIECE_HOLE, PIECE_HOLE, PIECE_HOLE);
+	}
+	else
+		RestrictiveDraw(&cb[numRestrictFrames], newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+
 	if (freezeRestrict)
 		EnlargeCurrentToBox(&eraseCb);
 	else
 		EnlargeCurrentToBox(&lastCb);
 
 	freezeRestrict = 0;
+
+	if (numRestrictFrames > 1)
+		numRestrictFrames = -1;
 }
 
 void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
@@ -1766,7 +1780,8 @@ int idleAnimate(BoardData* bd)
 
 	if (bd->moving)
 	{
-		float old_pos[3], new_pos[3];
+		float old_pos[3];
+		ClipBox temp;
 		float *pRotate = 0;
 		if (bd->rotateMovingPiece != -1 && bd->piecePath.state == 2)
 			pRotate = &bd->rotateMovingPiece;
@@ -1802,7 +1817,17 @@ int idleAnimate(BoardData* bd)
 			PlaceMovingPieceRotation(bd, moveDest, moveStart);
 
 			if (bd->quickDraw)
+			{
+				float new_pos[3];
 				getPiecePos(moveDest, abs(bd->points[moveDest]), fClockwise, new_pos);
+				if (moveDest == 26 || moveDest == 27)
+				{
+					new_pos[2] -= PIECE_HOLE / 2.0f;
+					RestrictiveDraw(&temp, new_pos, PIECE_HOLE, PIECE_HOLE, PIECE_HOLE);
+				}
+				else
+					RestrictiveDraw(&temp, new_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			}
 
 			/* Next piece */
 			slide_move += 2;
@@ -1822,13 +1847,11 @@ int idleAnimate(BoardData* bd)
 		else
 		{
 			updateMovingPieceOccPos(bd);
-			copyPoint(new_pos, bd->movingPos);
+			RestrictiveDraw(&temp, bd->movingPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 		}
 		if (bd->quickDraw)
 		{
-			ClipBox temp;
 			RestrictiveDrawFrame(old_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
-			RestrictiveDraw(&temp, new_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 			EnlargeCurrentToBox(&temp);
 		}
 	}
@@ -2017,10 +2040,10 @@ void CloseBoard3d(BoardData* bd)
 void SetupViewingVolume3d(BoardData *bd, renderdata* prd)
 {
 	GLint viewport[4];
-float tempMatrix[16];
+	float tempMatrix[16];
 	glGetIntegerv (GL_VIEWPORT, viewport);
 
-memcpy(tempMatrix, bd->modelMatrix, sizeof(float[16]));
+	memcpy(tempMatrix, bd->modelMatrix, sizeof(float[16]));
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -2028,8 +2051,8 @@ memcpy(tempMatrix, bd->modelMatrix, sizeof(float[16]));
 
 	SetupLight3d(bd, prd);
 	calculateBackgroundSize(bd, viewport);
-if (memcmp(tempMatrix, bd->modelMatrix, sizeof(float[16])))
-	numRestrictFrames = -1;
+	if (memcmp(tempMatrix, bd->modelMatrix, sizeof(float[16])))
+		RestrictiveRedraw();
 }
 
 void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a)

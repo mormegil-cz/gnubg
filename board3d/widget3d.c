@@ -117,6 +117,8 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
 	glViewport(0, 0, width, height);
 	SetupViewingVolume3d(bd, &rdAppearance);
 
+	RestrictiveRedraw();
+
 #if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
@@ -186,10 +188,10 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 		{
 			RestrictiveRender(bd);
 		}
-		else
+		else if (numRestrictFrames < 0)
 		{
-			numRestrictFrames = 0;
 			Draw(bd);
+			numRestrictFrames = 0;
 		}
 	}
 

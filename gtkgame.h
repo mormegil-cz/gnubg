@@ -190,6 +190,8 @@ GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
 extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
                             char *szPath, filedialogtype fdt );
 
+extern void Undo();
+
 #if USE_TIMECONTROL
 extern void GTKAddTimeControl( char *szName) ;
 extern void GTKRemoveTimeControl( char *szName) ;
