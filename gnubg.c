@@ -628,6 +628,10 @@ command cER = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
     { "gammonline", CommandExportPositionGammOnLine,
+      N_("Save the current position in .html format "
+         "(special for GammOnLine)"), 
+      szFILENAME, &cFilename },
+    { "gol2clipboard", CommandExportPositionGOL2Clipboard,
       N_("Copy the current position in .html format to clipboard"
          "(special for GammOnLine)"), 
       szFILENAME, &cFilename },

@@ -1,3 +1,14 @@
+Mon Mar 31 21:50:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Restore "export position gammonline ..." to the previous
+	version, but write new "export position gol2clipboard" for
+	inserting html on clipboard.
+
+	* html.c (ExportPositionGammOnLine, 
+	CommandExportPositionGOL2Clipboard): new functions.
+	* gtkgame.c: menu entries for new function.
+	* html.c (CommandExportPositionGammOnLine): use new function.
+
 Mon Mar 31 21:10:14 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (MoveListEvalSettings, MoveListRolloutSettings):

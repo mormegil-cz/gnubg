@@ -276,6 +276,7 @@ static char *aszCommands[ NUM_CMDS ] = {
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
 #endif
+static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw );
 static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw );
@@ -2264,10 +2265,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Export/_Position"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Position/HTML..."), NULL,
 	  ExportPositionHtml, 0, NULL },
-#if 0
 	{ N_("/_File/_Export/_Position/GammOnLine (HTML)..."), NULL,
 	  ExportPositionGammOnLine, 0, NULL },
-#endif
 	{ N_("/_File/_Export/_Position/Encapsulated PostScript..."), NULL,
 	  ExportPositionEPS, 0, NULL },
 	{ N_("/_File/_Export/_Position/PNG..."), NULL, ExportPositionPNG, 0,
@@ -2302,7 +2301,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Edit/Copy as/Position as ASCII"), NULL,
 	  CommandCopy, 0, NULL },
 	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
-	  ExportPositionGammOnLine, 0, NULL },
+	  CopyAsGOL, 0, NULL },
 	{ N_("/_Edit/_Paste"), "<control>V", NULL, 0, NULL },
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Edit/_Enter command..."), NULL, EnterCommand, 0, NULL },
@@ -3685,14 +3684,16 @@ static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
 static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw ) {
 
-#if 0
   char *sz = getDefaultFileName ( PATH_HTML );
   FileCommand( _("Export position to GammOnLine (HTML)"), 
                sz, "export position gammonline", "html", 0 );
   if ( sz ) 
     free ( sz );
-#endif
-  UserCommand("export position gammonline dummy");
+}
+
+static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw ) {
+
+  UserCommand("export position gol2clipboard");
 
 }
 

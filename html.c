@@ -27,6 +27,8 @@
 #include <time.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -4033,44 +4035,13 @@ extern void CommandExportPositionHtml( char *sz ) {
 }
 
 
-extern void
-CommandExportPositionGammOnLine ( char *sz ) {
+static void
+ExportPositionGammOnLine( FILE *pf ) {
 
-    FILE *pf;
     int fHistory;
     moverecord *pmr = getCurrentMoveRecord ( &fHistory );
-    int iMove, i = 0;
-    char szClipboard[8192]; 
-    
-    sz = NextToken( &sz );
-    
-    if( ms.gs == GAME_NONE ) {
-	outputl( _("No game in progress (type `new game' to start one).") );
-	return;
-    }
-    
-#if 0
-    if( !sz || !*sz ) {
-	outputl( _("You must specify a file to export to (see `help export "
-		 "position html').") );
-	return;
-    }
-    
-    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
-      return;
+    int iMove;
 
-    if( !strcmp( sz, "-" ) )
-	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
-	outputerr( sz );
-	return;
-    }
-#endif
-    if( !( pf = tmpfile() ) ) {
-	    outputerr("Temporary file");
-	    return;
-    }
-    
     fputs ( "\n<!-- Score -->\n\n", pf );
 
     if ( ms.nMatchTo )
@@ -4125,21 +4096,95 @@ CommandExportPositionGammOnLine ( char *sz ) {
     }
 
     HTMLEpilogueComment ( pf );
-#if 0    
+
+}
+
+
+extern void
+CommandExportPositionGammOnLine ( char *sz ) {
+
+    FILE *pf;
+    
+    sz = NextToken( &sz );
+    
+    if( ms.gs == GAME_NONE ) {
+	outputl( _("No game in progress (type `new game' to start one).") );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to export to (see `help export "
+		 "position html').") );
+	return;
+    }
+    
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	outputerr( sz );
+	return;
+    }
+
+    ExportPositionGammOnLine( pf );
+
     if( pf != stdout )
 	fclose( pf );
-#endif    
-    /* copy contents onto clipboard */
 
-    
-    /*   pf = fopen( sz, "r"); */ /* why doesn't rewind(pf) work? */
-    
-    rewind(pf);
-    
-    while ( (szClipboard[i] = fgetc(pf)) != EOF )
-       i++;
-    szClipboard[i]= '\0';
-
-    TextToClipboard(szClipboard);
-    fclose( pf );
 }
+
+
+extern void
+CommandExportPositionGOL2Clipboard( char *sz ) {
+
+    char *szClipboard;
+    long l;
+    FILE *pf;
+
+    if( ms.gs == GAME_NONE ) {
+      outputl( _("No game in progress (type `new game' to start one).") );
+      return;
+    }
+    
+    /* get tmp file name */
+
+    if ( ! ( pf = tmpfile() ) ) {
+      outputerr("temporary file");
+      return;
+    }
+
+    /* generate file */
+
+    ExportPositionGammOnLine( pf );
+
+    /* find size of file */
+
+    if ( fseek( pf, 0L, SEEK_END ) ) {
+      outputerr( "temporary file" );
+      return;
+    }
+
+    l = ftell( pf );
+
+    if ( fseek( pf, 0L, SEEK_SET ) ) {
+      outputerr( "temporary file" );
+      return;
+    }
+
+    /* copy file to clipboard */
+
+    szClipboard = (char *) malloc ( l + 1 );
+
+    fread( szClipboard, 1, l + 1, pf );
+    szClipboard[ l ] = 0;
+
+    TextToClipboard( szClipboard );
+
+    free( szClipboard );
+
+    fclose( pf );
+
+}
+
