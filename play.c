@@ -672,10 +672,10 @@ static int NewGame( void ) {
     UpdateSetting( &ms.fTurn );
 
 #if USE_BOARD3D
-{
+    if (fX) {
 	BoardData* bd = BOARD(pwBoard)->board_data;
 	InitBoardData(bd);
-}
+    }
 #endif
 
  reroll:

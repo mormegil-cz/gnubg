@@ -1,3 +1,9 @@
+Sun Aug 17  0:44:16 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
+
+	* play.c - put if(fX) around 3d board code (seg faulted on
+	  starting game in text mode
+	* board3d/gtkcolour.c - needs string.h
+	
 Sat Aug 16 11:24:24 2003  Joern Thyssen  <jth@gnubg.org>
 
         * analysis.c: include only finished games in luck adj.
