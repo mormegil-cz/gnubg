@@ -1,3 +1,23 @@
+Thu Feb 15 11:49:16 2001  Joseph Heled  <pepe@internet.co.nz>
+
+	* database.c: added dummy CommandDatabaseExport and
+	CommandDatabaseImport when gdbm is not available.
+
+Thu Feb 15 11:48:53 2001  Joseph Heled  <pepe@internet.co.nz>
+
+	* external.c: added missing include for assert.h
+
+Thu Feb 15 11:39:17 2001  Joseph Heled  <pepe@internet.co.nz>
+
+	* set.c: change variable name from sun to socsun, since on a Sun
+	machine cpp predefines sun to the constant 1.
+
+Thu Feb 15 11:26:43 2001  Joseph Heled  <pepe@internet.co.nz>
+
+	* positionid.c (PositionFromKey): a faster version. Eliminate return
+	value, which is not used anyway (since PositionFromKey is used only for
+	internally generated positions, known to be valid).
+
 Wed Feb 14 13:54:53 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c (CommandDatabaseExport, CommandDatabaseImport): New

@@ -23,6 +23,7 @@
 
 #include <errno.h>
 #include <signal.h>
+#include <assert.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <sys/un.h>

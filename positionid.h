@@ -26,7 +26,7 @@ extern void PositionKey( int anBoard[ 2 ][ 25 ], unsigned char auchKey[ 10 ] );
 extern char *PositionID( int anBoard[ 2 ][ 25 ] );
 extern char *PositionIDFromKey( unsigned char auchKey[ 10 ] );
 extern unsigned short PositionBearoff( int anBoard[ 6 ] );
-extern int PositionFromKey( int anBoard[ 2 ][ 25 ],
+extern void PositionFromKey( int anBoard[ 2 ][ 25 ],
                              unsigned char *puch );
 extern int PositionFromID( int anBoard[ 2 ][ 25 ], char *szID );
 extern void PositionFromBearoff( int anBoard[ 6 ], unsigned short usID );

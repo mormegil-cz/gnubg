@@ -629,7 +629,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	     "socket support, and does not implement external players." );
 #else
     int h;
-    struct sockaddr_un sun;
+    struct sockaddr_un socsun;
        
     if( !sz || !*sz ) {
 	outputl( "You must specify the name of the socket to the external\n"
@@ -644,12 +644,12 @@ extern void CommandSetPlayerExternal( char *sz ) {
 
     /* FIXME allow some syntax for TCP connections instead of AF_LOCAL */
     
-    sun.sun_family = AF_LOCAL;
-    strcpy( sun.sun_path, sz ); /* yuck!  opportunities for buffer overflow
+    socsun.sun_family = AF_LOCAL;
+    strcpy( socsun.sun_path, sz ); /* yuck!  opportunities for buffer overflow
 				    here... but we didn't write the broken
 				    interface */
     
-    while( connect( h, (struct sockaddr *) &sun, SUN_LEN( &sun ) ) < 0 ) {
+    while( connect( h, (struct sockaddr *) &socsun, SUN_LEN( &socsun ) ) < 0 ) {
 	if( errno == EINTR ) {
 	    if( fAction )
 		fnAction();

@@ -39,7 +39,11 @@
 #include <errno.h>
 #include "positionid.h"
 
-static inline void
+static
+#if defined( __GNUC__ )
+inline
+#endif
+void
 addBits(unsigned char auchKey[10], int bitPos, int nBits)
 {
   int const k = bitPos / 8;
@@ -117,17 +121,6 @@ extern char *PositionID( int anBoard[ 2 ][ 25 ] ) {
     return PositionIDFromKey( auch );
 }
 
-static int ReadBit( unsigned char **ppuch, int *piBit ) {
-
-    int n = **ppuch & ( 1 << *piBit );
-
-    if( ++*piBit > 7 ) {
-        *piBit = 0;
-        ++*ppuch;
-    }
-
-    return n != 0;
-}
 
 static int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
 
@@ -160,21 +153,30 @@ static int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
     return -1;
 }
 
-extern int PositionFromKey( int anBoard[ 2 ][ 25 ],
-                             unsigned char *puch ) {
+extern void
+PositionFromKey(int anBoard[2][25], unsigned char* pauch)
+{
+  int i = 0, j  = 0, k;
+  unsigned char* a;
 
-    int i, j, iBit = 0;
-    unsigned char *puchInit = puch;
-
-    for( i = 0; i < 2; i++ )
-        for( j = 0; j < 25; j++ ) {
-            anBoard[ i ][ j ] = 0;
-            
-            while( puch < puchInit + 10 && ReadBit( &puch, &iBit ) )
-                anBoard[ i ][ j ]++;
-        }
-
-    return CheckPosition( anBoard );
+  memset(anBoard[0], 0, sizeof(anBoard[0]));
+  memset(anBoard[1], 0, sizeof(anBoard[1]));
+  
+  for(a = pauch; a < pauch + 10; ++a) {
+    unsigned char cur = *a;
+    
+    for(k = 0; k < 8; ++k) {
+      if( (cur & 0x1) ) {
+	++anBoard[i][j];
+      } else {
+	if( ++j == 25 ) {
+	  ++i;
+	  j = 0;
+	}
+      }
+      cur >>= 1;
+    }
+  }
 }
 
 static int Base64( char ch ) {
@@ -196,27 +198,27 @@ static int Base64( char ch ) {
 
 extern int PositionFromID( int anBoard[ 2 ][ 25 ], char *pchEnc ) {
 
-    unsigned char auchKey[ 10 ], ach[ 15 ], *pch = ach, *puch = auchKey;
-    int i;
+  unsigned char auchKey[ 10 ], ach[ 15 ], *pch = ach, *puch = auchKey;
+  int i;
 
-    for( i = 0; i < 14 && pchEnc[ i ]; i++ )
-        pch[ i ] = Base64( pchEnc[ i ] );
+  for( i = 0; i < 14 && pchEnc[ i ]; i++ )
+    pch[ i ] = Base64( pchEnc[ i ] );
 
-    pch[ i ] = 0;
+  pch[ i ] = 0;
     
-    for( i = 0; i < 3; i++ ) {
-        *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
-        *puch++ = ( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
-        *puch++ = ( pch[ 2 ] << 6 ) | pch[ 3 ];
+  for( i = 0; i < 3; i++ ) {
+    *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
+    *puch++ = ( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
+    *puch++ = ( pch[ 2 ] << 6 ) | pch[ 3 ];
 
-        pch += 4;
-    }
+    pch += 4;
+  }
 
-    *puch = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
+  *puch = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
 
-    PositionFromKey( anBoard, auchKey );
+  PositionFromKey( anBoard, auchKey );
 
-    return CheckPosition( anBoard );
+  return CheckPosition( anBoard );
 }
 
 extern int EqualKeys( unsigned char auch0[ 10 ], unsigned char auch1[ 10 ] ) {

@@ -438,6 +438,14 @@ static void NoGDBM( void ) {
            "support, and does not implement position database operations." );
 }
 
+extern void CommandDatabaseExport( char *sz ) {
+  NoGDBM();
+}
+
+extern void CommandDatabaseImport( char *sz ) {
+  NoGDBM();
+}
+
 extern void CommandDatabaseDump( char *sz ) {
   NoGDBM();
 }
