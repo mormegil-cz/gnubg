@@ -63,7 +63,14 @@ extern void CommandDatabaseDump( char *sz ) {
     dKey = gdbm_firstkey( pdb );
     
     while( dKey.dptr ) {
-	dValue = gdbm_fetch( pdb, dKey );
+	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
+	    fprintf( stderr, "%s: %s\n", szDatabase,
+		     gdbm_strerror( gdbm_errno ) );
+	    
+	    gdbm_close( pdb );
+
+	    return;
+	}
 
 	pev = (dbevaluation *) dValue.dptr;
 	
@@ -137,7 +144,17 @@ extern void CommandDatabaseExport( char *sz ) {
     dKey = gdbm_firstkey( pdb );
 
     while( dKey.dptr ) {
-	dValue = gdbm_fetch( pdb, dKey );
+	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
+	    fprintf( stderr, "%s: %s\n", szDatabase,
+		     gdbm_strerror( gdbm_errno ) );
+	    
+	    gdbm_close( pdb );
+
+	    if( pf != stdout )
+		fclose( pf );
+	    
+	    return;
+	}
 	
 	pev = (dbevaluation *) dValue.dptr;
 
@@ -236,7 +253,15 @@ extern void CommandDatabaseImport( char *sz ) {
 
 	dValue.dptr = (char *) &ev;
 	dValue.dsize = sizeof ev;
-	gdbm_store( pdb, dKey, dValue, GDBM_REPLACE );
+	if( gdbm_store( pdb, dKey, dValue, GDBM_REPLACE ) < 0 ) {
+	    fprintf( stderr, "%s: %s\n", szDatabase,
+		     gdbm_strerror( gdbm_errno ) );
+
+	    fclose( pf );
+	    gdbm_close( pdb );
+
+	    return;	    
+	}
 
 	if( pev )
 	    free( pev );
@@ -269,7 +294,14 @@ extern void CommandDatabaseRollout( char *sz ) {
     dKey = gdbm_firstkey( pdb );
     
     while( dKey.dptr ) {
-	dValue = gdbm_fetch( pdb, dKey );
+	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
+	    fprintf( stderr, "%s: %s\n", szDatabase,
+		     gdbm_strerror( gdbm_errno ) );
+	    
+	    gdbm_close( pdb );
+
+	    return;
+	}
 	
 	pev = (dbevaluation *) dValue.dptr;
 	
@@ -298,7 +330,14 @@ extern void CommandDatabaseRollout( char *sz ) {
 		pev->t = 0;
 	    }
 	    
-	    gdbm_store( pdb, dKey, dValue, GDBM_REPLACE );
+	    if( gdbm_store( pdb, dKey, dValue, GDBM_REPLACE ) < 0 ) {
+		fprintf( stderr, "%s: %s\n", szDatabase,
+			 gdbm_strerror( gdbm_errno ) );
+		
+		gdbm_close( pdb );
+		
+		return;	    
+	    }
 	}
 	
 	free( pev );
@@ -405,7 +444,16 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	dValue.dptr = (char *) &ev;
 	dValue.dsize = sizeof ev;
 	
-	gdbm_store( pdb, dKey, dValue, GDBM_INSERT );
+	if( gdbm_store( pdb, dKey, dValue, GDBM_INSERT ) < 0 ) {
+	    ProgressEnd();
+	    
+	    fprintf( stderr, "%s: %s\n", szDatabase,
+		     gdbm_strerror( gdbm_errno ) );
+	    
+	    gdbm_close( pdb );
+	    
+	    return;	    
+	}
     } while( ( !n || c <= n ) && !fInterrupt &&
 	     ClassifyPosition( anBoardGenerate ) > CLASS_PERFECT );
   }
@@ -445,7 +493,16 @@ extern void CommandDatabaseTrain( char *sz ) {
 	dKey = gdbm_firstkey( pdb );
 	
 	while( dKey.dptr ) {
-	    dValue = gdbm_fetch( pdb, dKey );
+	    if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
+		ProgressEnd();
+		
+		fprintf( stderr, "%s: %s\n", szDatabase,
+			 gdbm_strerror( gdbm_errno ) );
+		
+		gdbm_close( pdb );
+		
+		return;
+	    }
 	    
 	    pev = (dbevaluation *) dValue.dptr;
 
@@ -512,7 +569,14 @@ extern void CommandDatabaseVerify( char *sz ) {
     dKey = gdbm_firstkey( pdb );
     
     while( dKey.dptr ) {
-	dValue = gdbm_fetch( pdb, dKey );
+	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
+	    fprintf( stderr, "%s: %s\n", szDatabase,
+		     gdbm_strerror( gdbm_errno ) );
+	    
+	    gdbm_close( pdb );
+
+	    return;
+	}
 	
 	pev = (dbevaluation *) dValue.dptr;
 	
