@@ -52,6 +52,9 @@ extern void GTKRegenerateGames( void );
 extern void GTKFreeze( void );
 extern void GTKThaw( void );
 
+extern void GTKSuspendInput( monitor *pm );
+extern void GTKResumeInput( monitor *pm );
+
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( void );
 extern void GTKAllowStdin( void );

@@ -109,7 +109,8 @@ autoAnalyseMove ( void *p, const matchstate *pms ) {
   matchstate msx;
   moverecord *pmr = p;
   int f;
-
+  monitor m;
+  
   if ( ! p ) 
     return;
 
@@ -138,10 +139,10 @@ autoAnalyseMove ( void *p, const matchstate *pms ) {
   /* tutor-mode */
 
   if ( fAutoAnalysis && f ) {
-
-    memcpy ( &msx, pms, sizeof ( matchstate ) );
-    AnalyzeMove ( pmr, &msx, NULL, FALSE );
-    
+      SuspendInput( &m );
+      memcpy ( &msx, pms, sizeof ( matchstate ) );
+      AnalyzeMove ( pmr, &msx, NULL, FALSE );
+      ResumeInput( &m );
   }
 
 }

@@ -176,9 +176,8 @@ duplication of effort and to make sure our changes merge easily.
    in /home/jth/gnubg/sgf.
 ** Extended navigation in the game list window, some gui analog to 
    "next move for player 0 marked doubtful".
-** Problem with auto-analysis
-   (X events must be disabled whilst analysing)
-
+** Problem with auto-analysis (X events must be disabled whilst analysing).
+  Preliminary patch has been committed -- does this resolve the bug?
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -207,14 +206,6 @@ functions:
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)
-** The "stop" button (i.e. the grab widget) automatically removes the
-  grab on itself when it gets a "button release".  It would be more
-  robust to add a parent to it (box or event box?), and give _that_
-  the grab.  Unfortunately, grab add/remove calls must nest, and we
-  can't guarantee that...  Another possible workaround would be to
-  set the grab immediately before gtk_main_iteration(); we currently
-  do this in GTKDelay() but only once for the loop in HandleXAction().
-  Perhaps we should do it everywhere we call gtk_main_iteration()? (gary)
 ** There's no way to see the annotation on the opening move using the
   TTY interface.  Changing ShowBoard() to display the starting position
   and then the annotation might work.

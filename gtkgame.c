@@ -434,6 +434,31 @@ getWindowGeometry ( windowgeometry *pwg, GtkWidget *pw ) {
 
 }
 
+extern void GTKSuspendInput( monitor *pm ) {
+    
+    /* Grab events so that the board window knows this is a re-entrant
+       call, and won't allow commands like roll, move or double. */
+    if( ( pm->fGrab = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) )
+	gtk_grab_add( pwGrab );
+    
+    pm->idSignal = gtk_signal_connect_after( GTK_OBJECT( pwGrab ),
+					     "key-press-event",
+					     GTK_SIGNAL_FUNC( gtk_true ),
+					     NULL );
+    
+    /* Don't check stdin here; readline isn't ready yet. */
+    GTKDisallowStdin();
+}
+
+extern void GTKResumeInput( monitor *pm ) {
+    
+    GTKAllowStdin();
+
+    gtk_signal_disconnect( GTK_OBJECT( pwGrab ), pm->idSignal );
+    
+    if( pm->fGrab )
+	gtk_grab_remove( pwGrab );
+}
 
 static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
@@ -510,35 +535,21 @@ int fEndDelay;
 
 extern void GTKDelay( void ) {
 
-    int f, id;
+    monitor m;
     
-    GTKDisallowStdin();
+    SuspendInput( &m );
     
-    while( !fInterrupt && !fEndDelay ) {
-	/* Grab events so that the board window knows this is a re-entrant
-	   call, and won't allow commands like roll, move or double. */
-	if( ( f = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) )
-	    gtk_grab_add( pwGrab );
-	
-	id = gtk_signal_connect_after( GTK_OBJECT( pwGrab ), "key-press-event",
-				       GTK_SIGNAL_FUNC( gtk_true ), NULL );
-	
+    while( !fInterrupt && !fEndDelay )
 	gtk_main_iteration();
-
-	gtk_signal_disconnect( GTK_OBJECT( pwGrab ), id );
-	
-	if( f )
-	    gtk_grab_remove( pwGrab );
-    }
     
     fEndDelay = FALSE;
     
-    GTKAllowStdin();
+    ResumeInput( &m );
 }
 
 extern void HandleXAction( void ) {
 
-    int f, id;
+    monitor m;
     
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
@@ -547,16 +558,7 @@ extern void HandleXAction( void ) {
        still process its I/O. */
     fAction = FALSE;
 
-    /* Grab events so that the board window knows this is a re-entrant
-       call, and won't allow commands like roll, move or double. */
-    if( ( f = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) )
-	gtk_grab_add( pwGrab );
-    
-    id = gtk_signal_connect_after( GTK_OBJECT( pwGrab ), "key-press-event",
-				   GTK_SIGNAL_FUNC( gtk_true ), NULL );
-    
-    /* Don't check stdin here; readline isn't ready yet. */
-    GTKDisallowStdin();
+    SuspendInput( &m );
     
     /* Process incoming X events.  It's important to handle all of them,
        because we won't get another SIGIO for events that are buffered
@@ -564,12 +566,7 @@ extern void HandleXAction( void ) {
     while( gtk_events_pending() )
 	gtk_main_iteration();
 
-    GTKAllowStdin();
-
-    gtk_signal_disconnect( GTK_OBJECT( pwGrab ), id );
-    
-    if( f )
-	gtk_grab_remove( pwGrab );
+    ResumeInput( &m );
 }
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
@@ -3165,7 +3162,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	pif, "/Windows/Guile" ), FALSE );
 
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
-    pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stop;
+    pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stopparent;
 
     gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
 		      FALSE, FALSE, 0 );

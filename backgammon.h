@@ -79,6 +79,12 @@ extern windowgeometry wgMain, wgGame, wgAnnotation;
 
 #endif
 
+typedef struct _monitor {
+#if USE_GTK
+    int fGrab;
+    int idSignal;
+#endif
+} monitor;
 
 typedef struct _command {
     char *sz; /* Command name (NULL indicates end of list) */
@@ -363,6 +369,11 @@ extern void outputnew( void );
 extern void outputoff( void );
 /* Enable output */
 extern void outputon( void );
+
+/* Temporarily ignore TTY/GUI input. */
+extern void SuspendInput( monitor *pm );
+/* Resume input (must match a previous SuspendInput). */
+extern void ResumeInput( monitor *pm );
 
 extern void ProgressStart( char *sz );
 extern void ProgressStartValue( char *sz, int iMax );

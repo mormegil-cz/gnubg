@@ -4721,6 +4721,22 @@ extern void outputresume( void ) {
 	outputx();
 }
 
+/* Temporarily ignore TTY/GUI input. */
+extern void SuspendInput( monitor *pm ) {
+
+#if USE_GTK
+    GTKSuspendInput( pm );
+#endif
+}
+
+/* Resume input (must match a previous SuspendInput). */
+extern void ResumeInput( monitor *pm ) {
+
+#if USE_GTK
+    GTKResumeInput( pm );
+#endif
+}
+
 extern void ProgressStart( char *sz ) {
 
     if( !fShowProgress )

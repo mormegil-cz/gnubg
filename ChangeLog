@@ -1,3 +1,14 @@
+Tue Jul 16 13:36:33 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_init): Put the "stop" button in its own container,
+	which we can set to be the grab widget when we want to restrict GTK
+	input.
+
+	* gnubg.c (SuspendInput, ResumeInput): New functions.
+	* gtkgame.c (GTKSuspendInput, GTKResumeInput): New functions.
+
+	* play.c (autoAnalyseMove): Suspend input while analysing.
+	
 Tue Jul 16 10:30:02 2002  Gary Wong  <gtw@gnu.org>
 
 	* sgf.c (RestoreRolloutRolloutContext): correct sscanf() parameters.

@@ -2199,7 +2199,8 @@ static gint board_slide_timeout( gpointer p ) {
 extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
     BoardData *pbd = board->board_data;
-    int n, f, id;
+    int n;
+    monitor m;
 	
     if( pbd->animate_computer_moves == ANIMATE_NONE )
 	return;
@@ -2217,19 +2218,9 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 			     board );
     
     while( !animation_finished ) {
-	if( ( f = !GTK_WIDGET_HAS_GRAB( pbd->stop ) ) )
-	    gtk_grab_add( pbd->stop );
-	
-	id = gtk_signal_connect_after( GTK_OBJECT( pbd->stop ),
-				       "key-press-event",
-				       GTK_SIGNAL_FUNC( gtk_true ), NULL );
-	
+	SuspendInput( &m );
 	gtk_main_iteration();
-
-	gtk_signal_disconnect( GTK_OBJECT( pbd->stop ), id );
-	
-	if( f )
-	    gtk_grab_remove( pbd->stop );
+	ResumeInput( &m );
     }
 }
 
@@ -4621,7 +4612,9 @@ static void board_init( Board *board ) {
     gtk_box_pack_start( GTK_BOX( bd->hbox_pos ),
 			pw = gtk_alignment_new( 0.5, 0.5, 0, 0 ),
 			FALSE, FALSE, 8 );
-    gtk_container_add( GTK_CONTAINER( pw ), bd->stop =
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       bd->stopparent = gtk_hbox_new( 0, FALSE ) );
+    gtk_container_add( GTK_CONTAINER( bd->stopparent ), bd->stop =
 		       gtk_button_new_with_label( _("Stop") ) );
 
     bd->pos_table = gtk_table_new( 2, 4, FALSE );
