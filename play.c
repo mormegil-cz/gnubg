@@ -3075,10 +3075,15 @@ CommandFirstGame( char *sz ) {
 static void CommandNextRoll( char *sz ) {
 
     moverecord *pmr;
+
 #if USE_GTK
-	BoardData *bd = BOARD( pwBoard )->board_data;
+    BoardData *bd;
+
+    if (fX) {
+      bd = BOARD( pwBoard )->board_data;
 	/* Make sure dice aren't rolled */
 	bd->diceShown = DICE_ON_BOARD;
+    }
 #endif
     
     if( !plLastMove || !plLastMove->plNext ||
@@ -3102,7 +3107,9 @@ static void CommandNextRoll( char *sz ) {
 
 #if USE_GTK
 	/* Make sure dice are shown */
+    if( fX ) {      
 	bd->diceRoll[0] = !ms.anDice[0];
+    }
 #endif
 
     if ( plLastMove->plNext && plLastMove->plNext->p )
@@ -3211,7 +3218,7 @@ InternalCommandNext(int const fMarkedMoves, int n)
 	plLastMove = orig_p;
 	FixMatchState ( &ms, plLastMove->p );
 	ApplyMoveRecord( &ms, plGame, plLastMove->p );
-	return;
+	return 0;
       }
 	
     plLastMove = p->plPrev;

@@ -2258,7 +2258,8 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
       TMG_WIN_GAMMON = 15,
       TMG_WIN_BACKGAMMON = 16,
       TMG_OUT_OF_TIME = 17,
-      TMG_TABLE_STAKE = 19 } tmgrecordtype;
+      TMG_TABLE_STAKE = 19,
+      TMG_OUT_OF_TIME_1 } tmgrecordtype;
     tmgrecordtype trt;
     
     InitBoard( ms.anBoard, ms.bgv );
@@ -2473,7 +2474,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           break;
 
         case TMG_OUT_OF_TIME:
-
+	case TMG_OUT_OF_TIME_1:
           /* ignore ??? */
           break;
 

@@ -1,3 +1,10 @@
+Fri Aug 22 15:01:19 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* import.c - add out of time type 22 for .tmg imports
+	* gnubg.c, play.c wrap pwBoard and pwBoard->data with tests
+	  for fX, to prevent text mode core dumps
+	* board3d/misc3d.c - fix typos
+	
 Thu Aug 21 23:18:40 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am, configure.in: add texture directory.

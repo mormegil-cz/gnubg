@@ -3825,7 +3825,10 @@ extern void PromptForExit( void ) {
 
     static int fExiting;
 #if USE_BOARD3D
-	BoardData* bd = BOARD(pwBoard)->board_data;
+	BoardData* bd;
+	
+	if (fX)
+	  bd = BOARD(pwBoard)->board_data;
 #endif
 
     if( !fExiting && fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
@@ -3841,7 +3844,8 @@ extern void PromptForExit( void ) {
     }
 
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
+    
+    if ((rdAppearance.fDisplayType == DT_3D) && fX)
 	{	/* Stop any 3d animations */
 		StopIdle3d(bd);
 	}
@@ -3851,7 +3855,7 @@ extern void PromptForExit( void ) {
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.closeBoardOnExit
-		&& rdAppearance.fHinges)
+		&& rdAppearance.fHinges && fX)
 		CloseBoard3d(bd);
 	else
 #endif
@@ -3875,6 +3879,7 @@ extern void PromptForExit( void ) {
     Shutdown();
     
 #if USE_BOARD3D
+    if (fX)
 	Tidy3dObjects(bd, TRUE);
 #endif
 
