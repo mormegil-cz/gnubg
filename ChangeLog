@@ -1,3 +1,9 @@
+Thu Jan 16 21:54:21 2003  Gary Wong  <gtw@gnu.org>
+
+	* set.c (CommandSetMatchLength): New function.  Allow specifying
+	default match length.
+	* show.c (CommandShowMatchLength): New function.
+
 Thu Jan 16 15:43:11 2003  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (OptionsPages): New function.  Rearrange options into

@@ -2851,7 +2851,12 @@ extern void SetMatchDate( matchinfo *pmi ) {
 
 extern void CommandNewMatch( char *sz ) {
 
-    int n = ParseNumber( &sz );
+    int n;
+
+    if( !sz || !*sz )
+	n = nDefaultLength;
+    else
+	n = ParseNumber( &sz );
 
     if( n < 1 ) {
 	outputl( _("You must specify a valid match length (1 or longer).") );

@@ -748,6 +748,12 @@ extern void CommandShowMatchInfo( char *sz ) {
 	outputf( "\n%s\n", mi.pchComment );    
 }
 
+extern void CommandShowMatchLength( char *sz ) {
+    
+    outputf( nDefaultLength == 1 ? _("New matches default to %d point.\n") :
+	     _("New matches default to %d points.\n"), nDefaultLength );
+}
+
 extern void CommandShowNackgammon( char *sz ) {
 
     if( fNackgammon )

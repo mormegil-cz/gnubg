@@ -173,7 +173,8 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
-    fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE;
+    fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
+    nDefaultLength = 7;
 int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
@@ -406,6 +407,7 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTCOMMAND[] = N_("[command]"),
     szOPTFILENAME[] = N_("[filename]"),
     szOPTGENERATOROPTSEED[] = N_("[generator] [seed]"),
+    szOPTLENGTH[] = N_("[length]"),
     szOPTLIMIT[] = N_("[limit]"),
     szOPTMODULUSOPTSEED[] = N_("[modulus <modulus>|factors <factor> <factor>] "
 			       "[seed]"),
@@ -695,7 +697,7 @@ command cER = {
     { "game", CommandNewGame, 
       N_("Start a new game within the current match or session"), NULL, NULL },
     { "match", CommandNewMatch, 
-      N_("Play a new match to some number of points"), szLENGTH, NULL },
+      N_("Play a new match to some number of points"), szOPTLENGTH, NULL },
     { "session", CommandNewSession, N_("Start a new (money) session"), NULL,
       NULL },
     { "weights", CommandNewWeights, N_("Create new (random) neural net "
@@ -1357,6 +1359,8 @@ command cER = {
     { "matchid", CommandSetMatchID, N_("set Match ID"), szMATCHID, NULL },
     { "matchinfo", NULL, N_("Record auxiliary match information"), NULL,
       acSetMatchInfo },
+    { "matchlength", CommandSetMatchLength,
+      N_("Specify the default length for new matches"), szLENGTH, NULL },
     { "message", CommandSetMessage, N_("Display window with messages"),
       szONOFF, &cOnOff },
     { "met", CommandSetMET,
@@ -1460,6 +1464,8 @@ command cER = {
       N_("Show match equity table"), szOPTVALUE, NULL },
     { "matchinfo", CommandShowMatchInfo,
       N_("Display auxiliary match information"), NULL, NULL },
+    { "matchlength", CommandShowMatchLength,
+      N_("Show default match length"), NULL, NULL },
     { "met", CommandShowMatchEquityTable, 
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon,
@@ -4602,6 +4608,7 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
     fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );
+    fprintf( pf, "set matchlength %d\n", nDefaultLength );
     
     fprintf( pf, "set nackgammon %s\n", fNackgammon ? "on" : "off" );
 

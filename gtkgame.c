@@ -3175,7 +3175,7 @@ static void EnterCommand( gpointer *p, guint n, GtkWidget *pw ) {
 static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
     int nLength = ReadNumber( _("GNU Backgammon - New Match"),
-			      _("Match length:"), 7, 1, 99, 1 );
+			      _("Match length:"), nDefaultLength, 1, 99, 1 );
     
     if( nLength > 0 ) {
 	char sz[ 32 ];
@@ -7878,7 +7878,7 @@ typedef struct _optionswidget {
             *pwAutoMove, *pwAutoRoll;
   GtkWidget *pwTutor, *pwTutorCube, *pwTutorChequer, *pwTutorSkill,
             *pwTutorEvalHint, *pwTutorEvalAnalysis;
-  GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic;
+  GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic, *padjLength;
   GtkWidget *pwCubeUsecube, *pwCubeJacoby, *pwCubeInvert;
   GtkWidget *pwGameClockwise, *pwGameNackgammon, *pwGameEgyptian;
   GtkWidget *pwOutputMWC, *pwOutputGWC, *pwOutputMWCpst;
@@ -8272,16 +8272,44 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "be shown as probabilities (e.g. 0.712)."),
 			  NULL );
 
-    /* MET options */
+    /* Match options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwn ), pwp,
-			      gtk_label_new( _("MET") ) );
+			      gtk_label_new( _("Match") ) );
     pwvbox = gtk_vbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
-    pow->pwLoadMET = gtk_button_new_with_label (_("Load table..."));
-    gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwLoadMET, FALSE, FALSE, 0);
+    pwev = gtk_event_box_new();
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
+
+    gtk_box_pack_start (GTK_BOX (pwhbox),
+			gtk_label_new( _("Default match length:") ),
+			FALSE, FALSE, 0);
+
+    pow->padjLength = GTK_ADJUSTMENT( gtk_adjustment_new (nDefaultLength, 1,
+							  99, 1, 1, 1 ) );
+    pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjLength),
+			      1, 0);
+    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (pwhbox),
+			gtk_label_new( _("points") ),
+			FALSE, FALSE, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
+    gtk_tooltips_set_tip (ptt, pwev,
+			  _("Specify the default length to use when starting "
+			    "new matches."), NULL );
+    
+    pwf = gtk_frame_new (_("Match equity table"));
+    gtk_box_pack_start (GTK_BOX (pwvbox), pwf, TRUE, TRUE, 0);
+    gtk_container_set_border_width (GTK_CONTAINER (pwf), 4);
+    pwb = gtk_vbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (pwf), pwb);
+    
+    pow->pwLoadMET = gtk_button_new_with_label (_("Load..."));
+    gtk_box_pack_start (GTK_BOX (pwb), pow->pwLoadMET, FALSE, FALSE, 0);
     gtk_container_set_border_width (GTK_CONTAINER (pow->pwLoadMET), 2);
     gtk_tooltips_set_tip( ptt, pow->pwLoadMET,
 			  _("Read a file containing a match equity table."),
@@ -8291,7 +8319,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			 GTK_SIGNAL_FUNC ( SetMET ), NULL );
 
     pow->pwCubeInvert = gtk_check_button_new_with_label (_("Invert table"));
-    gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwCubeInvert, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwb), pow->pwCubeInvert, FALSE, FALSE, 0);
     gtk_tooltips_set_tip( ptt, pow->pwCubeInvert,
 			  _("Use the specified match equity table around "
 			    "the other way (i.e., swap the players before "
@@ -8705,6 +8733,12 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
     sprintf(sz, "set beavers %d", n );
     UserCommand(sz); 
   }
+  
+  if(( n = pow->padjLength->value ) != nDefaultLength){
+    sprintf(sz, "set matchlength %d", n );
+    UserCommand(sz); 
+  }
+  
   if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwDiceManual))) {
     if (rngCurrent != RNG_MANUAL)
       UserCommand("set rng manual");  

@@ -2496,6 +2496,22 @@ extern void CommandSetMatchEvent( char *sz ) {
     SetMatchInfo( &mi.pchEvent, sz, _("Match event") );
 }
 
+extern void CommandSetMatchLength( char *sz ) {
+
+    int n = ParseNumber( &sz );
+
+    if( n < 1 ) {
+	outputl( _("You must specify a valid match length (1 or longer).") );
+
+	return;
+    }
+
+    nDefaultLength = n;
+
+    outputf( n == 1 ? _("New matches will default to %d point.\n") :
+	     _("New matches will default to %d points.\n"), n );
+}
+
 extern void CommandSetMatchPlace( char *sz ) {
 
     SetMatchInfo( &mi.pchPlace, sz, _("Match place") );
