@@ -366,6 +366,7 @@ static void BearOff( int nId, int nPoints,
     unsigned int usGammonBest;
     unsigned short int ausGammonBest[ 32 ];
     int iGammonBest;
+    int nBack;
 
     /* get board for given position */
 
@@ -392,12 +393,16 @@ static void BearOff( int nId, int nPoints,
     for( i = 0; i < 25; i++ )
 	anBoard[ 0 ][ i ] = 0;
 
-    for ( i = 0, k = 0; i < nPoints; ++i )
+    nBack = 0;
+    for ( i = 0, k = 0; i < nPoints; ++i ) {
+      if ( anBoard[ 1 ][ i ] )
+         nBack = i;
       k += anBoard[ 1 ][ i ];
+    }
 
     /* look for position in existing bearoff file */
     
-    if ( pbc && isBearoff ( pbc, anBoard ) ) {
+    if ( pbc && nBack < pbc->nPoints ) {
       unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], 
                                               pbc->nPoints, pbc->nChequers );
       BearoffDist ( pbc, nPosID, NULL, NULL, NULL, aOutProb, aOutProb + 32 );
