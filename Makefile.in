@@ -68,7 +68,7 @@ VERSION = @VERSION@
 
 COMMON_INCS = -I$(srcdir)/lib
 COMMON_LIBS = -Llib -levent
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c
+COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinmann.c
 
 COMMON_DEPS = lib/libevent.a
 
@@ -88,7 +88,7 @@ noinst_PROGRAMS = makebearoff makeweights
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c 	pub_eval.c
 
-makebearoff_LDADD = -Llib -levent
+makebearoff_LDADD = -Llib -levent -lm
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 makeweights_SOURCES = makeweights.c
@@ -115,11 +115,11 @@ X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_PRE_LIBS = @X_PRE_LIBS@
 @NOX_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
-@NOX_TRUE@mt19937int.o dice.o rollout.o isaac.o copying.o
+@NOX_TRUE@mt19937int.o dice.o rollout.o isaac.o copying.o kleinmann.o
 @NOX_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_FALSE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
 @NOX_FALSE@mt19937int.o dice.o rollout.o isaac.o copying.o xboard.o \
-@NOX_FALSE@xgame.o
+@NOX_FALSE@xgame.o kleinmann.o
 gnubg_LDFLAGS = 
 makebearoff_OBJECTS =  makebearoff.o eval.o positionid.o pub_eval.o
 makebearoff_LDFLAGS = 

@@ -334,3 +334,29 @@ extern void CommandShowWarranty( char *sz ) {
 
     ShowPaged( aszWarranty );
 }
+
+extern void CommandShowKleinmann( char *sz ) {
+
+    int anPips[ 2 ], an[ 2 ][ 25 ];
+    float KC;
+
+    if( !sz && !*sz && fTurn == -1 ) {
+        puts( "No position specified and no game in progress." );
+        return;
+    }
+ 
+    if( ParsePosition( an, sz ) ) {
+        puts( "Illegal position." );
+
+        return;
+    }
+     
+    PipCount( an, anPips );
+ 
+    KC = KleinmannCount (anPips[1], anPips[0]);
+    if (KC == -1.0)
+        printf ("Pipcount unsuitable for Kleinmann Count.\n");
+    else
+        printf ("Cubeless Winning Chance: %f\n", KC);
+ }
+

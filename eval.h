@@ -162,5 +162,5 @@ extern float Utility( float ar[ NUM_OUTPUTS ] );
 extern void swap( int *p0, int *p1 );
 extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
-
+extern float KleinmannCount (int nPipOnRoll, int nPipNotOnRoll);
 #endif

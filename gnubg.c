@@ -241,6 +241,8 @@ static command acDatabase[] = {
       "and statistics", NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL },
+    { "kleinmann", CommandShowKleinmann, "Calculate Kleinmann count at "
+      "current position", NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL },
