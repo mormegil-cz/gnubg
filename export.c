@@ -42,6 +42,7 @@
 #include "renderprefs.h"
 #include "matchid.h"
 #include "i18n.h"
+#include "boardpos.h"
 
 /* size of html images in steps of 108x72 */
 
@@ -435,6 +436,8 @@ GenerateImage (renderimages * pri, renderdata * prd,
   /* FIXME: resignations */
   int anResignPosition[2];
   int fResign = 0, nResignOrientation = 0;
+  int anArrowPosition[ 2 ];
+  int cube_owner;
 
   if (!fMove)
     SwapSides (anBoard);
@@ -454,28 +457,16 @@ GenerateImage (renderimages * pri, renderdata * prd,
   else
     doubled = 0;
 
-
-
-  if (fCube)
-    {
-      if (doubled || fCubeOwner == -1)
-	{
-	  anCubePosition[0] = 50 - 24 * doubled;
-	  anCubePosition[1] = 32;
-	  nOrient = doubled;
-	}
-      else
-	{
-	  nOrient = fCubeOwner ? -1 : +1;
-	  anCubePosition[0] = 50;
-	  anCubePosition[1] = 32 - nOrient * 29;
-	}
-    }
+  if ( ! fCubeOwner )
+    cube_owner = 1;
+  else if ( fCubeOwner == 1 )
+    cube_owner = -1;
   else
-    {
-      nOrient = -1;
-      anCubePosition[0] = anCubePosition[1] = -0x8000;
-    }
+    cube_owner = 0;
+
+
+  CubePosition( FALSE, fCube, doubled, cube_owner,
+                &anCubePosition[ 0 ], &anCubePosition[ 1 ], &nOrient );
 
   /* calculate dice position */
 
@@ -496,9 +487,8 @@ GenerateImage (renderimages * pri, renderdata * prd,
       anDicePosition[1][1] = -1;
     }
 
-  /* FIXME: calculate arrow position:
-     call Arrow_Position() from gtkboard.c */
-  /* requires pointer to BoardData */
+  ArrowPosition( fClockwise, nSize, 
+                 &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
 
   /* render board */
 
@@ -510,7 +500,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
 		 LogCube( nCube ) + ( doubled != 0 ),
 		 nOrient,
 		 anResignPosition, fResign, nResignOrientation,
-		 NULL /*anArrowPosition*/, 0 /*bd->playing or ms.gs != GAME_NONE*/, fMove == 1,
+		 anArrowPosition, ms.gs != GAME_NONE, fMove == 1,
 		 0, 0, 108 * nSize, 72 * nSize);
 
   /* crop */

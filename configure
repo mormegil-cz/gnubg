@@ -843,6 +843,7 @@ Optional Features:
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --disable-gtktest       Do not try to compile and run a test GTK program
   --enable-train-menu     show GTK+ neural network training options
+  --disable-libarttest       Do not try to compile and run a test LIBART program
   --enable-bearoff=TYPE   specify bearoff database (TYPE=no,external,static)
   --disable-freetypetest  Do not try to compile and run
                           a test FreeType program
@@ -863,6 +864,8 @@ Optional Packages:
   --with-gtk-prefix=PFX   Prefix where GTK is installed (optional)
   --with-gtk-exec-prefix=PFX Exec prefix where GTK is installed (optional)
   --with-x                use the X Window System
+  --with-libart-prefix=PFX   Prefix where LIBART is installed (optional)
+  --with-libart-exec-prefix=PFX Exec prefix where LIBART is installed (optional)
   --with-guile            use the Guile extensibility language
   --with-guile-prefix=PREFIX Prefix where Guile is installed (optional)
   --with-ft-prefix=PREFIX
@@ -8941,6 +8944,278 @@ _ACEOF
   LIBS="$ac_save_LIBS"
   GTKDATA=gnubg.gtkrc
 
+
+# Check whether --with-libart-prefix or --without-libart-prefix was given.
+if test "${with_libart_prefix+set}" = set; then
+  withval="$with_libart_prefix"
+  libart_prefix="$withval"
+else
+  libart_prefix=""
+fi;
+
+# Check whether --with-libart-exec-prefix or --without-libart-exec-prefix was given.
+if test "${with_libart_exec_prefix+set}" = set; then
+  withval="$with_libart_exec_prefix"
+  libart_exec_prefix="$withval"
+else
+  libart_exec_prefix=""
+fi;
+# Check whether --enable-libarttest or --disable-libarttest was given.
+if test "${enable_libarttest+set}" = set; then
+  enableval="$enable_libarttest"
+
+else
+  enable_libarttest=yes
+fi;
+
+  if test x$libart_exec_prefix != x ; then
+     libart_args="$libart_args --exec-prefix=$libart_exec_prefix"
+     if test x${LIBART_CONFIG+set} != xset ; then
+        LIBART_CONFIG=$libart_exec_prefix/bin/libart-config
+     fi
+  fi
+  if test x$libart_prefix != x ; then
+     libart_args="$libart_args --prefix=$libart_prefix"
+     if test x${LIBART_CONFIG+set} != xset ; then
+        LIBART_CONFIG=$libart_prefix/bin/libart-config
+     fi
+  fi
+
+  # Extract the first word of "libart-config", so it can be a program name with args.
+set dummy libart-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_LIBART_CONFIG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $LIBART_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_LIBART_CONFIG="$LIBART_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_LIBART_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_path_LIBART_CONFIG" && ac_cv_path_LIBART_CONFIG="no"
+  ;;
+esac
+fi
+LIBART_CONFIG=$ac_cv_path_LIBART_CONFIG
+
+if test -n "$LIBART_CONFIG"; then
+  echo "$as_me:$LINENO: result: $LIBART_CONFIG" >&5
+echo "${ECHO_T}$LIBART_CONFIG" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  min_libart_version=0.2.5
+  echo "$as_me:$LINENO: checking for LIBART - version >= $min_libart_version" >&5
+echo $ECHO_N "checking for LIBART - version >= $min_libart_version... $ECHO_C" >&6
+  no_libart=""
+  if test "$LIBART_CONFIG" = "no" ; then
+    no_libart=yes
+  else
+    LIBART_CFLAGS=`$LIBART_CONFIG $libartconf_args --cflags`
+    LIBART_LIBS=`$LIBART_CONFIG $libartconf_args --libs`
+
+    libart_major_version=`$LIBART_CONFIG $libart_args --version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
+    libart_minor_version=`$LIBART_CONFIG $libart_args --version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
+    libart_micro_version=`$LIBART_CONFIG $libart_config_args --version | \
+           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
+    if test "x$enable_libarttest" = "xyes" ; then
+      ac_save_CFLAGS="$CFLAGS"
+      ac_save_LIBS="$LIBS"
+      CFLAGS="$CFLAGS $LIBART_CFLAGS"
+      LIBS="$LIBS $LIBART_LIBS"
+      rm -f conf.libarttest
+      if test "$cross_compiling" = yes; then
+  echo $ac_n "cross compiling; assumed OK... $ac_c"
+else
+  cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <libart_lgpl/libart.h>
+
+char*
+my_strdup (char *str)
+{
+  char *new_str;
+
+  if (str)
+    {
+      new_str = malloc ((strlen (str) + 1) * sizeof(char));
+      strcpy (new_str, str);
+    }
+  else
+    new_str = NULL;
+
+  return new_str;
+}
+
+int main ()
+{
+  int major, minor, micro;
+  char *tmp_version;
+
+  system ("touch conf.libarttest");
+
+  /* HP/UX 9 (%@#!) writes to sscanf strings */
+  tmp_version = my_strdup("$min_libart_version");
+  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
+     printf("%s, bad version string\n", "$min_libart_version");
+     exit(1);
+   }
+
+   if (($libart_major_version > major) ||
+      (($libart_major_version == major) && ($libart_minor_version > minor)) ||
+      (($libart_major_version == major) && ($libart_minor_version == minor) && ($libart_micro_version >= micro)))
+    {
+      return 0;
+    }
+  else
+    {
+      printf("\n*** 'libart-config --version' returned %d.%d.%d, but the minimum version\n", $libart_major_version, $libart_minor_version, $libart_micro_version);
+      printf("*** of LIBART required is %d.%d.%d. If libart-config is correct, then it is\n", major, minor, micro);
+      printf("*** best to upgrade to the required version.\n");
+      printf("*** If libart-config was wrong, set the environment variable LIBART_CONFIG\n");
+      printf("*** to point to the correct copy of libart-config, and remove the file\n");
+      printf("*** config.cache before re-running configure\n");
+      return 1;
+    }
+}
+
+
+_ACEOF
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  :
+else
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+( exit $ac_status )
+no_libart=yes
+fi
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
+       CFLAGS="$ac_save_CFLAGS"
+       LIBS="$ac_save_LIBS"
+     fi
+  fi
+  if test "x$no_libart" = x ; then
+     echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBART 1
+_ACEOF
+
+  else
+     echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+     if test "$LIBART_CONFIG" = "no" ; then
+       echo "*** The libart-config script installed by LIBART could not be found"
+       echo "*** If LIBART was installed in PREFIX, make sure PREFIX/bin is in"
+       echo "*** your path, or set the LIBART_CONFIG environment variable to the"
+       echo "*** full path to libart-config."
+     else
+       if test -f conf.libarttest ; then
+        :
+       else
+          echo "*** Could not run LIBART test program, checking why..."
+          CFLAGS="$CFLAGS $LIBART_CFLAGS"
+          LIBS="$LIBS $LIBART_LIBS"
+          cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+#include <stdio.h>
+#include <libart_lgpl/libart.h>
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+ return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+   echo "*** The test program compiled, but did not run. This usually means"
+          echo "*** that the run-time linker is not finding LIBART or finding the wrong"
+          echo "*** version of LIBART. If it is not finding LIBART, you'll need to set your"
+          echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
+          echo "*** to the installed location  Also, make sure you have run ldconfig if that"
+          echo "*** is required on your system"
+	  echo "***"
+          echo "*** If you have an old version installed, it is best to remove it, although"
+          echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ echo "*** The test program failed to compile or link. See the file config.log for the"
+          echo "*** exact error that occured. This usually means LIBART was incorrectly installed"
+          echo "*** or that you have moved LIBART since it was installed. In the latter case, you"
+          echo "*** may want to edit the libart-config script: $LIBART_CONFIG"
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+          CFLAGS="$ac_save_CFLAGS"
+          LIBS="$ac_save_LIBS"
+       fi
+     fi
+     LIBART_CFLAGS=""
+     LIBART_LIBS=""
+     :
+  fi
+
+
+  rm -f conf.libarttest
+
 fi
 
 
@@ -13807,6 +14082,9 @@ s,@USE_EXT_FALSE@,$USE_EXT_FALSE,;t t
 s,@GTKEXTRA_CFLAGS@,$GTKEXTRA_CFLAGS,;t t
 s,@GTKEXTRA_LIBS@,$GTKEXTRA_LIBS,;t t
 s,@GTKDATA@,$GTKDATA,;t t
+s,@LIBART_CONFIG@,$LIBART_CONFIG,;t t
+s,@LIBART_CFLAGS@,$LIBART_CFLAGS,;t t
+s,@LIBART_LIBS@,$LIBART_LIBS,;t t
 s,@GUILE_CONFIG@,$GUILE_CONFIG,;t t
 s,@GUILE_CFLAGS@,$GUILE_CFLAGS,;t t
 s,@GUILE_LIBS@,$GUILE_LIBS,;t t

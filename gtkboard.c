@@ -43,14 +43,8 @@
 #include "sound.h"
 #include "matchid.h"
 #include "i18n.h"
+#include "boardpos.h"
 
-#define POINT_UNUSED0 28 /* the top unused bearoff tray */
-#define POINT_UNUSED1 29 /* the bottom unused bearoff tray */
-#define POINT_DICE 30
-#define POINT_CUBE 31
-#define POINT_RIGHT 32
-#define POINT_LEFT 33
-#define POINT_RESIGN 34
 
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
 			  same point is considered a real drag rather than a
@@ -61,26 +55,6 @@
 #if !USE_GTK2
 #define gtk_image_new_from_pixmap gtk_pixmap_new
 #endif
-
-static int positions[ 2 ][ 30 ][ 3 ] = { {
-    { 51, 25, 7 },
-    { 90, 63, 6 }, { 84, 63, 6 }, { 78, 63, 6 }, { 72, 63, 6 }, { 66, 63, 6 },
-    { 60, 63, 6 }, { 42, 63, 6 }, { 36, 63, 6 }, { 30, 63, 6 }, { 24, 63, 6 },
-    { 18, 63, 6 }, { 12, 63, 6 },
-    { 12, 3, -6 }, { 18, 3, -6 }, { 24, 3, -6 }, { 30, 3, -6 }, { 36, 3, -6 },
-    { 42, 3, -6 }, { 60, 3, -6 }, { 66, 3, -6 }, { 72, 3, -6 }, { 78, 3, -6 },
-    { 84, 3, -6 }, { 90, 3, -6 },
-    { 51, 41, -7 }, { 99, 63, 6 }, { 99, 3, -6 }, { 3, 63, 6 }, { 3, 3, -6 }
-}, {
-    { 51, 25, 7 },
-    { 12, 63, 6 }, { 18, 63, 6 }, { 24, 63, 6 }, { 30, 63, 6 }, { 36, 63, 6 },
-    { 42, 63, 6 }, { 60, 63, 6 }, { 66, 63, 6 }, { 72, 63, 6 }, { 78, 63, 6 },
-    { 84, 63, 6 }, { 90, 63, 6 },
-    { 90, 3, -6 }, { 84, 3, -6 }, { 78, 3, -6 }, { 72, 3, -6 }, { 66, 3, -6 },
-    { 60, 3, -6 }, { 42, 3, -6 }, { 36, 3, -6 }, { 30, 3, -6 }, { 24, 3, -6 },
-    { 18, 3, -6 }, { 12, 3, -6 },
-    { 51, 41, -7 }, { 3, 63, 6 }, { 3, 3, -6 }, { 99, 63, 6 }, { 99, 3, -6 }
-} };
 
 animation animGUI = ANIMATE_SLIDE;
 int nGUIAnimSpeed = 4, fGUIBeep = TRUE, fGUIDiceArea = FALSE,
@@ -189,33 +163,15 @@ write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 
 static void chequer_position( int point, int chequer, int *px, int *py ) {
 
-    int c_chequer;
+  ChequerPosition( fClockwise, point, chequer, px, py );
 
-    c_chequer = ( !point || point == 25 ) ? 3 : 5;
-
-    if( chequer > c_chequer )
-	chequer = c_chequer;
-    
-    *px = positions[ fClockwise ][ point ][ 0 ];
-    *py = positions[ fClockwise ][ point ][ 1 ] - ( chequer - 1 ) *
-	positions[ fClockwise ][ point ][ 2 ];
 }
 
 static void point_area( BoardData *bd, int n, int *px, int *py,
 			int *pcx, int *pcy ) {
+
+  PointArea( fClockwise, rdAppearance.nSize, n, px, py, pcx, pcy );
     
-    int c_chequer = ( !n || n == 25 ) ? 3 : 5;
-    
-    *px = positions[ fClockwise ][ n ][ 0 ] * rdAppearance.nSize;
-    *py = positions[ fClockwise ][ n ][ 1 ] * rdAppearance.nSize;
-    *pcx = 6 * rdAppearance.nSize;
-    *pcy = positions[ fClockwise ][ n ][ 2 ] * rdAppearance.nSize;
-    
-    if( *pcy > 0 ) {
-	*pcy = *pcy * ( c_chequer - 1 ) + 6 * rdAppearance.nSize;
-	*py += 6 * rdAppearance.nSize - *pcy;
-    } else
-	*pcy = -*pcy * ( c_chequer - 1 ) + 6 * rdAppearance.nSize;
 }
 
 /* Determine the position and rotation of the cube; *px and *py return the
@@ -224,59 +180,21 @@ static void point_area( BoardData *bd, int n, int *px, int *py,
    the side, -1 = facing the bottom). */
 static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
 
-    if( bd->crawford_game || !bd->cube_use ) {
-	/* no cube */
-	if( px ) *px = -32768;
-	if( py ) *py = -32768;
-	if( porient ) *porient = -1;
-    } else if( bd->doubled ) {
-	if( px ) *px = 50 - 20 * bd->doubled;
-	if( py ) *py = 32;
-	if( porient ) *porient = bd->doubled;
-    } else {
-	if( px ) *px = 50;
-	if( py ) *py = 32 - 29 * bd->cube_owner;
-	if( porient ) *porient = bd->cube_owner;
-    }
+  CubePosition( bd->crawford_game, bd->cube_use, bd->doubled,
+                bd->cube_owner, px, py, porient );
+
 }
 
 static void resign_position( BoardData *bd, int *px, int *py, int *porient ) {
 
-  if( bd->resigned ) {
-    if ( px ) *px = 50 + 30 * bd->resigned / abs ( bd->resigned );
-    if ( py ) *py = 32;
-    if( porient ) *porient = - bd->resigned / abs ( bd->resigned );
-  }
-  else {
-    /* no resignation */
-    if( px ) *px = -32768;
-    if( py ) *py = -32768;
-    if( porient ) *porient = -1;
-  }
+  ResignPosition( bd->resigned, px, py, porient );
 
 }
 
-#define ARROW_SIZE 5
-
 static void Arrow_Position( BoardData *bd, int *px, int *py ) {
-/* calculate the position of the arrow to indicate
-   player on turn and direction of play;  *px and *py
-   return the position of the upper left corner in pixels,
-   NOT board units */
 
-    int Point28_x, Point28_y, Point28_dx, Point28_dy;
-    int Point29_x, Point29_y, Point29_dx, Point29_dy;
-    point_area( bd, POINT_UNUSED0, &Point28_x, &Point28_y, &Point28_dx, &Point28_dy );
-    point_area( bd, POINT_UNUSED1, &Point29_x, &Point29_y, &Point29_dx, &Point29_dy );
+  ArrowPosition( fClockwise, rdAppearance.nSize, px, py );
 
-    assert( Point28_x == Point29_x );
-    assert( Point28_dx == Point29_dx );
-    assert( Point28_dy == Point29_dy );
-
-    if ( px ) *px = Point29_x + Point29_dx / 2
-			- rdAppearance.nSize * ARROW_SIZE / 2;
-    if ( py ) *py = Point29_y + Point29_dy + Point29_dx / 2
-			- rdAppearance.nSize * ARROW_SIZE / 2;
 }
 
 static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,

@@ -5,6 +5,8 @@ bearoff.c
 bearoffgammon.c
 bearoffgammon.h
 bearoff.h
+boardpos.c
+boardpos.h
 copying.c
 credits.c
 database.c
