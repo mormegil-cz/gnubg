@@ -322,7 +322,7 @@ extern void CommandShowClockwise( char *sz ) {
 
 static void ShowCommands( command *pc, char *szPrefix ) {
 
-    char sz[ 64 ], *pch;
+    char sz[ 128 ], *pch;
 
     strcpy( sz, szPrefix );
     pch = strchr( sz, 0 );
@@ -333,7 +333,7 @@ static void ShowCommands( command *pc, char *szPrefix ) {
 
 	strcpy( pch, pc->sz );
 
-	if( pc->pc ) {
+	if( pc->pc && pc->pc != pc ) {
 	    strcat( sz, " " );
 	    ShowCommands( pc->pc, sz );
 	} else
