@@ -59,7 +59,7 @@ extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
 static void ShowMoveFilter ( const movefilter *pmf, const int ply) {
   
-  if (pmf->Accept == 0) {
+  if (pmf->Accept < 0 ) {
 	outputf( _("Skip pruning for %d-ply moves.\n"), ply );
 	return;
   }
@@ -90,7 +90,7 @@ ShowMoveFilters ( const movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] 
   
     for ( j = 0; j <= i; ++j ) {
       outputf ( "        " );
-      ShowMoveFilter ( &aamf[i ][ j ], i );
+      ShowMoveFilter ( &aamf[i ][ j ], j );
     }
   }
 

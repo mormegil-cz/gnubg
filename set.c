@@ -290,14 +290,14 @@ SetMoveFilter(char* sz,
 
   pmfFilter = &aamf[ply-1][level];
 
-  if ((accept = ParseNumber( &sz ) ) < 0) {
-	outputf (N_ ("You must specify a number of moves to accept (or 0 to skip "
+  if ((accept = ParseNumber( &sz ) ) == INT_MIN ) {
+	outputf (N_ ("You must specify a number of moves to accept (or a negative number to skip "
 			 "this level -- try help set %s movefilter "), szSetCommand);
 	return;
   }
 
-  if (accept == 0) {
-	pmfFilter->Accept = 0;
+  if (accept < 0 ) {
+	pmfFilter->Accept = -1;
 	pmfFilter->Extra = 0;
 	pmfFilter->Threshold = 0.0;
 	return;

@@ -3686,6 +3686,7 @@ typedef struct _evalwidget {
     int *pfOK;
   GtkWidget *pwOptionMenu;
   int fMoveFilter;
+  GtkWidget *pwMoveFilter;
 } evalwidget;
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
@@ -3715,14 +3716,21 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
   int i;
   evalcontext ecCurrent;
   int fFound = FALSE;
+  int fEval, fMoveFilter;
 
   EvalGetValues ( &ecCurrent, pew );
 
   /* update predefined settings menu */
 
-  for ( i = 0; i < NUM_SETTINGS; i++ )
+  for ( i = 0; i < NUM_SETTINGS; i++ ) {
 
-    if ( ! cmp_evalcontext ( &aecSettings[ i ], &ecCurrent ) ) {
+    fEval = ! cmp_evalcontext ( &aecSettings[ i ], &ecCurrent );
+    fMoveFilter = aecSettings[ i ].nPlies &&
+      ( ! pew->fMoveFilter || 
+        equal_movefilters ( pew->pmf, 
+                            aaamfMoveFilterSettings[ aiSettingsMoveFilter[ i ] ] ) );
+
+    if ( fEval && fMoveFilter ) {
 
       /* current settings equal to a predefined setting */
 
@@ -3732,12 +3740,19 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
 
     }
 
+  }
+
 
   /* user defined setting */
 
   if ( ! fFound )
     gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwOptionMenu ),
                                   NUM_SETTINGS );
+
+  
+  if ( pew->fMoveFilter )
+    gtk_widget_set_sensitive ( GTK_WIDGET ( pew->pwMoveFilter ),
+                               ecCurrent.nPlies );
 
 }
 
@@ -3784,6 +3799,9 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
                                 pec->fDeterministic );
 
+  if ( pew->fMoveFilter )
+    MoveFilterSetPredefined ( pew->pwMoveFilter, 
+                              aiSettingsMoveFilter[ *piSelected ] );
 
 }
 
@@ -3970,21 +3988,27 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
 				  pec->fDeterministic );
 
+    /* misc data */
+
+    pew->fMoveFilter = fMoveFilter;
+    pew->pec = pec;
+    pew->pmf = pmf;
+    pew->pfOK = pfOK;
+
     /* move filter */
 
     if ( fMoveFilter ) {
       
-      GtkWidget *pwMoveFilter = MoveFilterWidget ( pmf, pfOK );
-      gtk_container_add ( GTK_CONTAINER ( pwEval ), pwMoveFilter );
+      pew->pwMoveFilter = MoveFilterWidget ( pmf, pfOK, 
+                                             GTK_SIGNAL_FUNC ( EvalChanged ), 
+                                             pew );
+      gtk_container_add ( GTK_CONTAINER ( pwEval ), pew->pwMoveFilter );
 
     }
+    else
+      pew->pwMoveFilter = NULL;
 
     /* setup signals */
-
-    pew->pec = pec;
-    pew->pmf = pmf;
-    pew->fMoveFilter = fMoveFilter;
-    pew->pfOK = pfOK;
 
     gtk_signal_connect( GTK_OBJECT( pew->padjPlies ), "value-changed",
 			GTK_SIGNAL_FUNC( EvalPliesValueChanged ), pew );

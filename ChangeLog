@@ -1,3 +1,16 @@
+Mon Jan  6 20:50:29 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Use Michael Depreli's set of predefined filters, and introduce
+	0 as an acceptable "accept" value.
+
+	* gtkmovefilter.c: new check buttons for enabling/disabling a
+	movefilter.
+	* set.c (SetMoveFilter): 0 is an acceptable value for "accept".
+	* show.c (ShowMoveFilter): -1 means disabled move filter.
+	* eval.c (FindBestMovePlied, FindBestMove): -1 means disabled move filter.
+	* eval.c: new predefined evaluation settings.
+	* gtkgame.c: include the move filter in the predefined evaluation settings.
+
 Mon Jan  6 18:14:07 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (SaveRolloutSettings): save move filter settings

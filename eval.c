@@ -403,7 +403,11 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("intermediate"), 
   N_ ("advanced"), 
   N_ ("expert"), 
-  N_ ("world class") };
+  N_ ("world class"),
+  N_ ("supremo"),
+  N_ ("grandmaster") };
+
+/* which evaluation context does the predefined settings use */
 
 evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 0, 0, TRUE, 0.060 }, /* casual play */
@@ -412,8 +416,24 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 0, 0, TRUE, 0.015 }, /* advanced */
   { TRUE, 0, 0, TRUE, 0.0 }, /* expert */
   { TRUE, 2, 0, TRUE, 0.0 }, /* world class */
+  { TRUE, 2, 0, TRUE, 0.0 }, /* supremo */
+  { TRUE, 3, 0, TRUE, 0.0 }, /* grand master */
 };
 
+/* which move filter does the predefined settings use */
+
+int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
+  -1, /* beginner: n/a */
+  -1, /* casual play: n/a */
+  -1, /* intermediate: n/a */
+  -1, /* advanced: n/a */
+  -1, /* expoert: n/a */
+  2,  /* wc: normal */
+  3,  /* supremo: large */
+  2,  /* grandmaster: normal */
+};
+
+/* the predefined move filters */
 
 const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
   N_("Tiny"),
@@ -425,30 +445,30 @@ const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
 
 movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = {
   /* tiny */
-  { { { 2, 1, 0.03 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
-    { { 2, 1, 0.03 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
-    { { 2, 1, 0.03 }, { 0, 0, 0 }, { 2, 0, 0 }, { 0, 0, 0 } }, 
-    { { 2, 1, 0.03 }, { 0, 0, 0 }, { 2, 0, 0 }, { 0, 0, 0 } } },
+  { { { 0,  8, 0.08 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0,  8, 0.08 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0,  8, 0.08 }, { -1, 0, 0 }, { 0, 2, 0.02 }, {  0, 0, 0 } }, 
+    { { 0,  8, 0.08 }, { -1, 0, 0 }, { 0, 2, 0.02 }, { -1 , 0, 0 } } },
   /* narrow */
-  { { { 3, 2, 0.05 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
-    { { 3, 2, 0.05 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
-    { { 3, 2, 0.05 }, { 0, 0, 0 }, { 2, 0, 0 }, { 0, 0, 0 } }, 
-    { { 3, 2, 0.05 }, { 0, 0, 0 }, { 2, 0, 0 }, { 0, 0, 0 } } },
+  { { { 0,  8, 0.12 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0,  8, 0.12 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0,  8, 0.12 }, { -1, 0, 0 }, { 0, 2, 0.03 }, {  0, 0, 0 } }, 
+    { { 0,  8, 0.12 }, { -1, 0, 0 }, { 0, 2, 0.03 }, { -1, 0, 0 } } },
   /* normal */
-  { { { 4, 3, 0.07 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
-    { { 4, 3, 0.07 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
-    { { 4, 3, 0.07 }, { 0, 0, 0 }, { 2, 1, 0.04 }, { 0, 0, 0 } }, 
-    { { 4, 3, 0.07 }, { 0, 0, 0 }, { 2, 1, 0.04 }, { 0, 0, 0 } } },
+  { { { 0,  8, 0.16 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, {  0, 0, 0 } }, 
+    { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, { -1, 0, 0 } } },
   /* large */
-  { { { 5, 4, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
-    { { 5, 4, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
-    { { 5, 4, 0.10 }, { 0, 0, 0 }, { 2, 3, 0.05 }, { 0, 0, 0 } }, 
-    { { 5, 4, 0.10 }, { 0, 0, 0 }, { 2, 3, 0.05 }, { 0, 0, 0.0 } } },
+  { { { 0, 16, 0.32 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0, 16, 0.32 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0, 16, 0.32 }, { -1, 0, 0 }, { 0, 4, 0.08 }, {  0, 0, 0 } }, 
+    { { 0, 16, 0.32 }, { -1, 0, 0 }, { 0, 4, 0.08 }, { -1, 0, 0.0 } } },
   /* huge */
-  { { { 7, 6, 0.2 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
-    { { 7, 6, 0.2 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
-    { { 7, 6, 0.2 }, { 0, 0, 0 }, { 2, 4, 0.1 }, { 0, 0, 0 } }, 
-    { { 7, 6, 0.2 }, { 0, 0, 0 }, { 2, 4, 0.1 }, { 0, 0, 0.0 } } }
+  { { { 0, 20, 0.44 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0, 20, 0.44 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0, 20, 0.44 }, { -1, 0, 0 }, { 0, 6, 0.11 }, {  0, 0, 0 } }, 
+    { { 0, 20, 0.44 }, { -1, 0, 0 }, { 0, 6, 0.11 }, { -1, 0, 0.0 } } }
 };
 
 
@@ -3120,7 +3140,7 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 	 
       unsigned int k;
 
-      if( mFilter->Accept == 0 ) {
+      if( mFilter->Accept < 0 ) {
 	continue;
       }
 
@@ -3223,7 +3243,7 @@ FindnSaveBestMoves( movelist *pml,
 	 
       unsigned int k;
 
-      if( mFilter->Accept == 0 ) {
+      if( mFilter->Accept < 0 ) {
 	continue;
       }
 
@@ -6651,7 +6671,7 @@ equal_movefilter ( const int i,
   for ( j = 0; j <= i; ++j ) {
     if ( amf1[ j ].Accept != amf2[ j ].Accept )
       return 0;
-    if ( ! amf1[ j ].Accept )
+    if ( amf1[ j ].Accept < 0 )
       continue;
     if ( amf1[ j ].Extra != amf2[ j ].Extra )
       return 0;
