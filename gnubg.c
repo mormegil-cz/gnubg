@@ -2410,6 +2410,7 @@ extern void CommandHint( char *sz ) {
     int i;
     char szBuf[ 1024 ];
     float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
     int n = ParseNumber ( &sz );
     
@@ -2433,16 +2434,16 @@ extern void CommandHint( char *sz ) {
 	    }
 	    ProgressEnd();
 	    
+#if USE_GTK
+	    if ( fX ) {
+		GTKDoubleHint( aarOutput, aarStdDev, &esEvalCube );
+		return;
+	    }
+#endif
 	    FindCubeDecision ( arDouble, aarOutput, &ci );  
 
 	    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
 
-#if USE_GTK
-	    if ( fX ) {
-		GTKDoubleHint( szBuf );
-		return;
-	    }
-#endif
 	    outputl ( szBuf );
 	    
 	    return;
@@ -2538,8 +2539,7 @@ extern void CommandHint( char *sz ) {
 	
 #if USE_GTK
 	if ( fX ) {
-	    GTKTakeHint( arDouble, ms.nMatchTo && fOutputMWC,
-			 !ms.nMatchTo && ms.cBeavers < nBeavers, &ci );
+          GTKTakeHint( aarOutput, aarStdDev, &esEvalCube );
 	    return;
 	}
 #endif
