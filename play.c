@@ -1141,9 +1141,10 @@ extern void CommandTake( char *sz ) {
     
     fDoubled = FALSE;
 
-    fCubeOwner = !fMove;
+    fTurn = fCubeOwner = !fMove;
+    UpdateSetting( &fTurn );
     UpdateSetting( &fCubeOwner );
-    
+
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
     ListInsert( plGame, pmt );
