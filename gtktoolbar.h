@@ -22,6 +22,7 @@
 #ifndef _GTKTOOLBAR_H_
 #define _GTKTOOLBAR_H_
 
+#include "gtkboard.h"
 
 typedef enum _toolbarcontrol { 
   C_NONE, 
@@ -39,7 +40,7 @@ ToolbarGetStopParent ( GtkWidget *pwToolbar );
 extern toolbarcontrol
 ToolbarUpdate ( GtkWidget *pwToolbar,
                 const matchstate *pms,
-                const int anDice[ 2 ],
+                const DiceShown diceShown,
                 const int fComputerTurn,
                 const int fPlaying );
 

@@ -868,7 +868,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   double    v, s;
   unsigned int nFirstTrial;
   evalsetup *pes;
-  rolloutcontext *prc, rcRolloutSave;
+  rolloutcontext *prc = NULL, rcRolloutSave;
   int   cGames;
   int nIsCubeless = 0;
   int nIsCubeful = 0;

@@ -414,8 +414,39 @@ WritePNG (const char *sz, unsigned char *puch, int nStride,
 
 }
 
+#if USE_BOARD3D
 
+#include "gtkboard.h"
 
+void GenerateImage3d(renderdata *prd, const char* szName,
+	const int nSize, const int nSizeX, const int nSizeY)
+{
+	unsigned char *puch;
+	BoardData* bd = BOARD(pwBoard)->board_data;
+	BoardData bdpw;
+	GdkPixmap *ppm = gdk_pixmap_new(bd->drawing_area->window, nSizeX * nSize, nSizeY * nSize, -1 );
+	void *glpixPreview;
+
+	if (!(puch = (unsigned char *) malloc (nSizeX * nSizeY * nSize * nSize * 3)))
+	{
+		outputerr ("malloc");
+		return;
+	}
+	/* Create preview area */
+	glpixPreview = CreatePreviewBoard3d(&bdpw, ppm);
+
+	/* Copy current settings */
+	CopySettings3d(bd, &bdpw);
+	
+	/* Draw board */
+	RenderBoard3d(&bdpw, prd, glpixPreview, puch);
+
+	WritePNG(szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize);
+
+	gdk_pixmap_unref(ppm);
+	free(puch);
+}
+#endif
 
 static int
 GenerateImage (renderimages * pri, renderdata * prd,
@@ -527,6 +558,8 @@ GenerateImage (renderimages * pri, renderdata * prd,
 
   WritePNG (szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize);
 
+	free(puch);
+
   return 0;
 }
 
@@ -559,6 +592,14 @@ CommandExportPositionPNG (char *sz)
 
   /* generate PNG image */
 
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+	{
+		GenerateImage3d(&rdAppearance, sz, exsExport.nPNGSize, 108, 72);
+	}
+	else
+#endif
+{
   memcpy (&rd, &rdAppearance, sizeof rd);
 
   rd.nSize = exsExport.nPNGSize;
@@ -573,7 +614,7 @@ CommandExportPositionPNG (char *sz)
 		 ms.fDoubled, ms.fCubeOwner);
 
   FreeImages (&ri);
-
+}
 
 }
 

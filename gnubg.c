@@ -2858,12 +2858,6 @@ extern void ShowBoard( void ) {
        postponing updates can lead to animating based on the wrong
        display */
     if( fX && !nDelay && animGUI == ANIMATE_NONE ) {
-	/* Always let the board widget know about dice rolls, even if the
-	   board update is elided (see below). */
-	if( ms.anDice[ 0 ] )
-	    game_set_old_dice( BOARD( pwBoard ), ms.anDice[ 0 ],
-			       ms.anDice[ 1 ] );
-	
 	/* Is the server still processing our last request?  If so, don't
 	   give it more until it's finished what it has.  (Always update
 	   the board immediately if nDelay is set, though -- show the user
@@ -3820,6 +3814,7 @@ Shutdown( void ) {
 extern void PromptForExit( void ) {
 
     static int fExiting;
+	BoardData* bd = BOARD(pwBoard)->board_data;
 
     if( !fExiting && fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
 	fExiting = TRUE;
@@ -3833,6 +3828,21 @@ extern void PromptForExit( void ) {
 	}
     }
 
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+	{	/* Stop any 3d animations */
+		StopIdle3d(bd);
+	}
+#endif
+
+    playSound ( SOUND_EXIT );
+
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.closeBoardOnExit
+		&& rdAppearance.fHinges)
+		CloseBoard3d(bd);
+	else
+#endif
 #if USE_GTK
     if( fX ) {
 #if USE_GTK2
@@ -3848,10 +3858,14 @@ extern void PromptForExit( void ) {
     if( fInteractive )
 	PortableSignalRestore( SIGINT, &shInterruptOld );
     
-    playSound ( SOUND_EXIT );
     SoundWait();
 
     Shutdown();
+    
+#if USE_BOARD3D
+	Tidy3dObjects(bd, TRUE);
+#endif
+
     exit( EXIT_SUCCESS );
 }
 
@@ -5004,8 +5018,6 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 
 extern void CommandSaveSettings( char *szParam ) {
-
-    char szTemp[ 1024 ];
     FILE *pf;
     int i, cCache; 
     char *szFile;

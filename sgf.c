@@ -1083,7 +1083,6 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	    fPlayer = pp->ach[ 0 ] == 'B';
 	    
 	    if( !strcmp( pch, "double" ) ) {
-	        moverecord *prev;
 
 		pmr = calloc( 1, sizeof( pmr->d ) );
 		pmr->mt = MOVE_DOUBLE;

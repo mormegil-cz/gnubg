@@ -715,12 +715,12 @@ extern void CommandSetAppearance( char *sz ) {
 	BoardPreferencesStart( pwBoard );
 #endif /* USE_GTK */
     
-    while( ParseKeyValue( &sz, apch ) )
-	RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
+	while( ParseKeyValue( &sz, apch ) )
+		RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
 
 #if USE_GTK
-    if( fX )
-	BoardPreferencesDone( pwBoard );	    
+	if( fX )
+		BoardPreferencesDone( pwBoard );	    
 #endif /* USE_GTK */
 }
 

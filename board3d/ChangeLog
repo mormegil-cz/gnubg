@@ -1,0 +1,10 @@
+Mon Jun 16 21:35:59 2003  Joern Thyssen  <jth@gnubg.org>
+
+	autoconf magic for BOARD3D
+
+	* font3d.cpp: s/HAVE_FREETYPE/HAVE_FTGL/g
+	* widget3d.c: s/USE_GTKGLEXT/HAVE_GTKGLEXT/g
+	* widget3d.c, drawboard3d.c, inc3d.h: change paths to includes
+	* shadow.c: fix typo (gl->GL)
+	* inc3d.h: small updates
+	* Makefile.am: autoconf magic

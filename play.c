@@ -48,6 +48,8 @@
 #include "rollout.h"
 #include "i18n.h"
 #include "sound.h"
+#include "renderprefs.h"
+#include "gtkboard.h"
 
 char *aszGameResult[] = { 
   N_ ("single game"), 
@@ -265,11 +267,6 @@ extern void ApplyMoveRecord( matchstate *pms, const list* plGame, moverecord *pm
     case MOVE_NORMAL:
 	pms->fDoubled = FALSE;
 
-#if USE_GTK
-	if( fX )
-	    game_set_old_dice( BOARD( pwBoard ), pmr->n.anRoll[ 0 ],
-			       pmr->n.anRoll[ 1 ] );
-#endif
 	PlayMove( pms, pmr->n.anMove, pmr->n.fPlayer );
 	pms->anDice[ 0 ] = pms->anDice[ 1 ] = 0;
 
@@ -605,6 +602,21 @@ extern void AddGame( moverecord *pmr ) {
 #endif
 }
 
+void DiceRolled()
+{
+	playSound ( SOUND_ROLL );
+    
+#if USE_GUI
+	if (fX && fDisplay)
+	{
+		BoardData *bd = BOARD(pwBoard)->board_data;
+		/* Make sure dice are updated */
+		bd->diceRoll[0] = 0;
+		ShowBoard();
+	}
+#endif
+}
+
 static int NewGame( void ) {
 
     moverecord *pmr;
@@ -654,11 +666,16 @@ static int NewGame( void ) {
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
-    
+
+#if USE_BOARD3D
+{
+	BoardData* bd = BOARD(pwBoard)->board_data;
+	InitBoardData(bd);
+}
+#endif
+
  reroll:
     fError = RollDice( ms.anDice, rngCurrent );
-    
-    playSound ( SOUND_ROLL );
 
     if( fInterrupt || fError ) {
 	PopMoveRecord( plGame->plNext );
@@ -706,11 +723,9 @@ static int NewGame( void ) {
     AddMoveRecord( pmr );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
-    
+    /* Play sound after initial dice decided */
+	DiceRolled();
 #if USE_GUI
-    if( fX && fDisplay )
-	ShowBoard();
-
     ResetDelayTimer();
 #endif
 
@@ -1118,13 +1133,8 @@ extern int ComputerTurn( void ) {
                                      &ms, afCheatRoll[ ms.fMove ] ) )
 	  if( RollDice ( ms.anDice, rngCurrent ) < 0 )
             return -1;
-	  
-	  playSound ( SOUND_ROLL );
-	  
-	  ResetDelayTimer(); /* Start the timer again -- otherwise the time
-				we spent contemplating the cube could replace
-				the delay. */
-	
+
+	  DiceRolled();      
 	  /* write line to status bar if using GTK */
 #if USE_GTK        
 	  if ( fX ) {
@@ -1137,11 +1147,10 @@ extern int ComputerTurn( void ) {
 	      
 	  }
 #endif
+	  ResetDelayTimer(); /* Start the timer again -- otherwise the time
+				we spent contemplating the cube could replace
+				the delay. */
       }
-
-      
-      if ( fDisplay )
-	  ShowBoard();
 
       pmn = malloc( sizeof( *pmn ) );
       pmn->mt = MOVE_NORMAL;
@@ -1207,11 +1216,8 @@ extern int ComputerTurn( void ) {
       if ( ! fCheat || CheatDice ( ms.anDice, &ms, afCheatRoll[ ms.fMove ] ) )
         if( RollDice ( ms.anDice, rngCurrent ) < 0 )
           return -1;
-      
-      playSound ( SOUND_ROLL );
-      
-      if( fDisplay )
-        ShowBoard();
+
+		DiceRolled();      
     }
     
     pmn = malloc( sizeof( *pmn ) );
@@ -1264,12 +1270,8 @@ extern int ComputerTurn( void ) {
 	  if( RollDice( ms.anDice, rngCurrent ) < 0 )
 	      return -1;
 	      
-	  playSound ( SOUND_ROLL );
-	  
-	  if( fDisplay )
-	      ShowBoard();
-      }
-	  
+	  DiceRolled();      
+	 }
       FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
 		 ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		 ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ], ms.nCube,
@@ -1346,10 +1348,7 @@ extern int ComputerTurn( void ) {
 	      if( RollDice( ms.anDice, rngCurrent ) < 0 )
 		  return -1;
 	      
-	      playSound ( SOUND_ROLL );
-	      
-	      if( fDisplay )
-		  ShowBoard();
+		  DiceRolled();      
 
 	      return 0; /* we'll end up back here to play the roll, but
 			   that's OK */
@@ -1608,7 +1607,13 @@ extern int NextTurn( int fPlayNext ) {
 #if USE_GUI
 	if( fX ) {
 	    if( fDisplay )
-		ShowBoard();
+		{
+#if USE_BOARD3D
+			if (ms.fResigned && rdAppearance.fDisplayType == DT_3D)
+				StopIdle3d(BOARD(pwBoard)->board_data);	/* Stop flag waving */
+#endif
+			ShowBoard();
+		}
 	    else
 		outputx();
 	}
@@ -3088,6 +3093,10 @@ CommandFirstGame( char *sz ) {
 static void CommandNextRoll( char *sz ) {
 
     moverecord *pmr;
+	BoardData *bd = BOARD( pwBoard )->board_data;
+
+	/* Make sure dice aren't rolled */
+	bd->diceShown = DICE_ON_BOARD;
     
     if( !plLastMove || !plLastMove->plNext ||
 	!( pmr = plLastMove->plNext->p ) )
@@ -3107,7 +3116,10 @@ static void CommandNextRoll( char *sz ) {
 	
     ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
     ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
-    
+
+	/* Make sure dice are shown */
+	bd->diceRoll[0] = !ms.anDice[0];
+
     if ( plLastMove->plNext && plLastMove->plNext->p )
       FixMatchState ( &ms, plLastMove->plNext->p );
 
@@ -3151,6 +3163,7 @@ static int MoveIsMarked (moverecord *pmr) {
 
 static void ShowMark( moverecord *pmr ) {
 
+	BoardData *bd = BOARD( pwBoard )->board_data;
     /* Show the dice roll, if the chequer play is marked but the cube
        decision is not. */
     if( pmr->mt == MOVE_NORMAL && pmr->n.stCube == SKILL_NONE &&
@@ -3161,6 +3174,10 @@ static void ShowMark( moverecord *pmr ) {
 	ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
 	ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
     }
+	/* Don't roll dice */
+	bd->diceShown = DICE_ON_BOARD;
+	/* Make sure dice are shown */
+	bd->diceRoll[0] = !ms.anDice[0];
 }
 
 extern void CommandNext( char *sz ) {
@@ -3716,8 +3733,6 @@ CommandRoll( char *sz ) {
     if( RollDice ( ms.anDice, rngCurrent ) < 0 )
       return;
 
-  playSound ( SOUND_ROLL );
-
   pmr = malloc( sizeof( pmr->sd ) );
   pmr->mt = MOVE_SETDICE;
   pmr->sd.sz = NULL;
@@ -3730,7 +3745,7 @@ CommandRoll( char *sz ) {
 
   InvalidateStoredMoves();
   
-  ShowBoard();
+  DiceRolled();      
 
 #if USE_GTK        
   if ( fX ) {

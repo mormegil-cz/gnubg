@@ -32,6 +32,64 @@ typedef enum _woodtype {
     WOOD_WALNUT, WOOD_WILLOW, WOOD_PAINT
 } woodtype;
 
+#if USE_BOARD3D
+typedef enum _displaytype {
+    DT_2D, DT_3D
+} displaytype;
+
+typedef enum _lighttype {
+    LT_POSITIONAL, LT_DIRECTIONAL
+} lighttype;
+
+typedef struct _Texture
+{
+	int texID;
+	int width;
+	int height;
+} Texture;
+
+#define FILENAME_SIZE 15
+#define NAME_SIZE 20
+
+typedef enum _TextureFormat
+{
+	TF_BMP, TF_PNG, TF_COUNT
+} TextureFormat;
+
+typedef enum _TextureType
+{
+	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
+} TextureType;
+
+typedef struct _TextureInfo
+{
+	char file[FILENAME_SIZE + 1];
+	char name[NAME_SIZE + 1];
+	TextureType type;
+	TextureFormat format;
+} TextureInfo;
+
+typedef struct _Material
+{
+	float ambientColour[4];
+	float diffuseColour[4];
+	float specularColour[4];
+	int shininess;
+	int alphaBlend;
+	TextureInfo* textureInfo;
+	Texture* pTexture;
+} Material;
+
+typedef enum _PieceType
+{
+	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
+} PieceType;
+
+extern void FindTexture(TextureInfo** textureInfo, char* file);
+extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
+
+#endif
+
 typedef struct _renderdata {
     woodtype wt;
     double aarColour[ 2 ][ 4 ]; /* RGBA for each player */
@@ -54,6 +112,32 @@ typedef struct _renderdata {
     int fClockwise; /* orientation for board point numbers */
     int fDynamicLabels; /* TRUE if the point numbers are dynamic, i.e.,
                            they adjust depending on the player on roll */
+#if USE_BOARD3D
+	displaytype fDisplayType;	/* 2d or 3d display */
+	int showShadows;	/* Show 3d shadows */
+	int shadowDarkness;	/* How dark are shadows */
+	int animateRoll;	/* Animate dice rolls */
+	int animateFlag;	/* Animate resignation flag */
+	int closeBoardOnExit;	/* Animate board close on quit */
+	int curveAccuracy;	/* Round curve approximation accuracy */
+	lighttype lightType;	/* Positional/Directional light source */
+	float lightPos[3];	/* x,y,z pos of light source */
+	int lightLevels[3];	/* amibient/diffuse/specular light levels */
+	int showMoveIndicator;
+	int boardAngle;	/* Angle board is tilted at */
+	int testSkewFactor;	/* Debug FOV adjustment */
+	int planView;	/* Ortho view? */
+	float diceSize;	/* How big are the dice */
+	int roundedEdges;	/* Rounded board edges? */
+	PieceType pieceType;
+	Material rdChequerMat[2];	/* Chequer colours */
+	Material rdDiceMat[2], rdDiceDotMat[2];
+	Material rdCubeMat, rdCubeNumberMat;
+	Material rdBaseMat, rdPointMat[2];
+	Material rdBoxMat, rdHingeMat;
+	Material rdPointNumberMat;
+	Material rdBackGroundMat;
+#endif
 } renderdata;
 
 typedef struct _renderimages {

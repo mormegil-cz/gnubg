@@ -79,6 +79,7 @@
 #include "gtkoptions.h"
 #include "gtktoolbar.h"
 #include "format.h"
+#include "renderprefs.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -822,6 +823,7 @@ static moverecord *GameListLookupMove( int i ) {
 
 static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 			       GdkEventButton *pev, gpointer p ) {
+	BoardData *bd = BOARD( pwBoard )->board_data;
     gamelistrow *pglr;
     moverecord *pmr, *pmrPrev = NULL;
     list *pl;
@@ -869,6 +871,13 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
        ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
        ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
    }
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+	{	/* Make sure dice are shown (and not rolled) */
+		bd->diceShown = DICE_ON_BOARD;
+		bd->diceRoll[0] = !ms.anDice[0];
+	}
+#endif
 
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
@@ -2558,6 +2567,11 @@ extern int InitGTK( int *argc, char ***argv ) {
     if( !gtk_init_check( argc, argv ) )
 	return FALSE;
     
+#if USE_BOARD3D
+	/* Initialize openGL widget */
+	InitGTK3d(argc, argv);
+#endif
+
     fnAction = HandleXAction;
 
     gdk_rgb_init();
@@ -2766,6 +2780,10 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     
     gtk_widget_show_all( pwMain );
     
+#if USE_BOARD3D
+	DisplayCorrectBoardType();
+#endif
+
     DestroySplash ( pwSplash );
 
     /* force update of board; needed to display board correctly if user
@@ -6679,6 +6697,7 @@ static void enable_menu( GtkWidget *pw, int f ) {
 
 /* A global setting has changed; update entry in Settings menu if necessary. */
 extern void GTKSet( void *p ) {
+	BoardData *bd = BOARD( pwBoard )->board_data;
 
     if( p == ap ) {
 	/* Handle the player names. */
@@ -6831,14 +6850,22 @@ extern void GTKSet( void *p ) {
           gtk_widget_hide( pwMessage );
         }
     } else if( p == &fGUIDiceArea ) {
-	BoardData *bd = BOARD( pwBoard )->board_data;
-    
-	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
-	    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
-		gtk_widget_hide( bd->dice_area );
-	    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
-		gtk_widget_show_all( bd->dice_area );
-	}
+	if( GTK_WIDGET_REALIZED( pwBoard ) )
+	{
+#if USE_BOARD3D
+		/* If in 3d mode may need to update sizes */
+		if (rdAppearance.fDisplayType == DT_3D)
+			SetupViewingVolume3d(bd, &rdAppearance);
+		else
+#endif
+		{    
+			if( GTK_WIDGET_REALIZED( pwBoard ) ) {
+			    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
+				gtk_widget_hide( bd->dice_area );
+			    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
+				gtk_widget_show_all( bd->dice_area );
+			}
+		}}
     } else if( p == &fGUIShowIDs ) {
 	BoardData *bd = BOARD( pwBoard )->board_data;
     
@@ -8347,3 +8374,4 @@ PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
   g_free( pch );
 
 }
+

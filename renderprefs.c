@@ -34,6 +34,7 @@
 #include "i18n.h"
 #include "render.h"
 #include "renderprefs.h"
+#include "gtkboard.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -121,6 +122,134 @@ static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
 
     return -1;
 }
+static int SetColourF( float arColour[ 4 ], char *sz ) {
+
+    char *pch;
+    unsigned char anColour[ 3 ];
+    
+    if( ( pch = strchr( sz, ';' ) ) )
+	*pch++ = 0;
+
+    if( !SetColour( sz, anColour ) ) {
+	arColour[ 0 ] = anColour[ 0 ] / 255.0f;
+	arColour[ 1 ] = anColour[ 1 ] / 255.0f;
+	arColour[ 2 ] = anColour[ 2 ] / 255.0f;
+	return 0;
+    }
+
+    return -1;
+}
+#endif
+
+#if USE_BOARD3D
+static int SetMaterial(Material* pMat, char *sz)
+{
+	float opac;
+	char* pch;
+
+    if (SetColourF(pMat->ambientColour, sz) != 0)
+		return -1;
+	sz += strlen(sz) + 1;
+
+    if (SetColourF(pMat->diffuseColour, sz) != 0)
+		return -1;
+	sz += strlen(sz) + 1;
+
+    if (SetColourF(pMat->specularColour, sz) != 0)
+		return -1;
+
+	if (sz)
+		sz += strlen(sz) + 1;
+    if ((pch = strchr(sz, ';')))
+		*pch = 0;
+
+	if (sz)
+		pMat->shininess = atoi(sz);
+	else
+		pMat->shininess = 128;
+
+	if (sz)
+		sz += strlen(sz) + 1;
+    if ((pch = strchr(sz, ';')))
+		*pch = 0;
+	if (sz)
+	{
+		int o = atoi(sz);
+		if (o == 100)
+			opac = 1;
+		else
+			opac = o / 100.0f;
+	}
+	else
+		opac = 1;
+
+	pMat->ambientColour[3] = pMat->diffuseColour[3] = pMat->specularColour[3] = opac;
+	pMat->alphaBlend = (opac != 1) && (opac != 0);
+
+	pMat->textureInfo = 0;
+	pMat->pTexture = 0;
+	if (pch)
+	{
+		sz += strlen(sz) + 1;
+		if (sz && *sz)
+			FindTexture(&pMat->textureInfo, sz);
+	}
+
+	return 0;
+}
+
+static int SetMaterialDice(Material* pMat, char *sz, int* flag)
+{	/* Bit different as extra paramater at end */
+	float opac;
+	char* pch;
+
+    if (SetColourF(pMat->ambientColour, sz) != 0)
+		return -1;
+	sz += strlen(sz) + 1;
+
+    if (SetColourF(pMat->diffuseColour, sz) != 0)
+		return -1;
+	sz += strlen(sz) + 1;
+
+    if (SetColourF(pMat->specularColour, sz) != 0)
+		return -1;
+
+	if (sz)
+		sz += strlen(sz) + 1;
+    if ((pch = strchr(sz, ';')))
+		*pch = 0;
+
+	if (sz)
+		pMat->shininess = atoi(sz);
+	else
+		pMat->shininess = 128;
+
+	if (sz)
+		sz += strlen(sz) + 1;
+    if ((pch = strchr(sz, ';')))
+		*pch = 0;
+	if (sz)
+	{
+		int o = atoi(sz);
+		if (o == 100)
+			opac = 1;
+		else
+			opac = o / 100.0f;
+	}
+	else
+		opac = 1;
+
+	/* die colour same as chequer colour */
+	*flag = TRUE;
+	if (pch)
+	{
+		sz += strlen(sz) + 1;
+		if (sz)
+			*flag = (toupper(*sz) == 'Y');
+	}
+	return 0;
+}
+
 #endif
 
 /* Set colour, alpha, refraction, shine, specular. */
@@ -355,7 +484,80 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 	else
 	    prd->rRound = 1.0 - rRound;
         PopLocale ();
-    } else if( c > 1 &&
+    }
+#if USE_BOARD3D
+    else if( !strncasecmp( szParam, "boardshadows", c ) )
+		prd->showShadows = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "shadowdarkness", c ) )
+		prd->shadowDarkness = atoi(szValue);
+    else if( !strncasecmp( szParam, "animateroll", c ) )
+		prd->animateRoll = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "animateflag", c ) )
+		prd->animateFlag = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "closeboard", c ) )
+		prd->closeBoardOnExit = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "boardtype", c ) )
+		prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
+    else if( !strncasecmp( szParam, "curveaccuracy", c ) )
+		prd->curveAccuracy = atoi( szValue );
+    else if( !strncasecmp( szParam, "lighttype", c ) )
+		prd->lightType = *szValue == 'p' ? LT_POSITIONAL : LT_DIRECTIONAL;
+    else if( !strncasecmp( szParam, "lightposx", c ) )
+		sscanf(szValue, "%f", &prd->lightPos[0]);
+    else if( !strncasecmp( szParam, "lightposy", c ) )
+		sscanf(szValue, "%f", &prd->lightPos[1]);
+    else if( !strncasecmp( szParam, "lightposz", c ) )
+		sscanf(szValue, "%f", &prd->lightPos[2]);
+    else if( !strncasecmp( szParam, "lightambient", c ) )
+		prd->lightLevels[0] = atoi(szValue);
+    else if( !strncasecmp( szParam, "lightdiffuse", c ) )
+		prd->lightLevels[1] = atoi(szValue);
+    else if( !strncasecmp( szParam, "lightspecular", c ) )
+		prd->lightLevels[2] = atoi(szValue);
+    else if( !strncasecmp( szParam, "moveindicator", c ) )
+		prd->showMoveIndicator = toupper(*szValue) == 'Y';
+    else if( !strncasecmp( szParam, "boardangle", c ) )
+		prd->boardAngle = atoi(szValue);
+    else if( !strncasecmp( szParam, "skewfactor", c ) )
+		prd->testSkewFactor = atoi(szValue);
+    else if( !strncasecmp( szParam, "planview", c ) )
+		prd->planView = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "dicesize", c ) )
+		prd->diceSize = atof(szValue);
+    else if( !strncasecmp( szParam, "roundededges", c ) )
+		prd->roundedEdges = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "piecetype", c ) )
+		prd->pieceType = (PieceType)atoi(szValue);
+	else if ((!strncasecmp(szParam, "chequers3d", strlen("chequers3d")) ||
+		 !strncasecmp(szParam, "checkers3d", strlen("checkers3d"))) &&
+	       (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
+		fValueError = SetMaterial(&prd->rdChequerMat[szParam[ c - 1 ] - '0'], szValue);
+	else if (!strncasecmp(szParam, "dice3d", strlen("dice3d")) &&
+	       (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
+		fValueError = SetMaterialDice(&prd->rdDiceMat[szParam[ c - 1 ] - '0'], szValue,
+			&prd->afDieColour[szParam[ c - 1 ] - '0']);
+	else if (!strncasecmp(szParam, "dot3d", strlen("dot3d")) &&
+	       (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
+		fValueError = SetMaterial(&prd->rdDiceDotMat[szParam[ c - 1 ] - '0'], szValue);
+	else if (!strncasecmp(szParam, "cube3d", c))
+		fValueError = SetMaterial(&prd->rdCubeMat, szValue);
+	else if (!strncasecmp(szParam, "cubetext3d", c))
+		fValueError = SetMaterial(&prd->rdCubeNumberMat, szValue);
+	else if (!strncasecmp(szParam, "base3d", c))
+		fValueError = SetMaterial(&prd->rdBaseMat, szValue);
+	else if (!strncasecmp(szParam, "points3d", strlen("points3d")) &&
+	       (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
+		fValueError = SetMaterial(&prd->rdPointMat[szParam[ c - 1 ] - '0'], szValue);
+	else if (!strncasecmp(szParam, "border3d", c))
+		fValueError = SetMaterial(&prd->rdBoxMat, szValue);
+	else if (!strncasecmp(szParam, "hinge3d", c))
+		fValueError = SetMaterial(&prd->rdHingeMat, szValue);
+	else if (!strncasecmp(szParam, "numbers3d", c))
+		fValueError = SetMaterial(&prd->rdPointNumberMat, szValue);
+	else if (!strncasecmp(szParam, "background3d", c))
+		fValueError = SetMaterial(&prd->rdBackGroundMat, szValue);
+#endif
+	else if( c > 1 &&
 	       ( !strncasecmp( szParam, "chequers", c - 1 ) ||
 		 !strncasecmp( szParam, "checkers", c - 1 ) ) &&
 	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
@@ -402,6 +604,37 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 
 }
 
+#if USE_BOARD3D
+
+char *WriteMaterial(Material* pMat)
+{
+#define NUM_MATS 20
+	static int cur = 0;
+	static char buf[NUM_MATS][100];
+	cur = (cur + 1) % NUM_MATS;
+
+	sprintf(buf[cur], "#%02X%02X%02X;#%02X%02X%02X;#%02X%02X%02X;%d;%d",
+		(int)(pMat->ambientColour[0] * 0xFF),
+		(int)(pMat->ambientColour[1] * 0xFF),
+		(int)(pMat->ambientColour[2] * 0xFF),
+		(int)(pMat->diffuseColour[0] * 0xFF),
+		(int)(pMat->diffuseColour[1] * 0xFF),
+		(int)(pMat->diffuseColour[2] * 0xFF),
+		(int)(pMat->specularColour[0] * 0xFF),
+		(int)(pMat->specularColour[1] * 0xFF),
+		(int)(pMat->specularColour[2] * 0xFF),
+		pMat->shininess,
+		(int)((pMat->ambientColour[3] + .001f) * 100));
+	if (pMat->textureInfo)
+	{
+		strcat(buf[cur], ";");
+		strcat(buf[cur], pMat->textureInfo->file);
+	}
+	return buf[cur];
+}
+
+#endif
+
 extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 
     float rAzimuth, rElevation;
@@ -418,6 +651,40 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
     sprintf( sz, 
              "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
+#if USE_BOARD3D
+		"boardtype=%c "
+		"boardshadows=%c "
+		"shadowdarkness=%d "
+		"animateroll=%c "
+		"animateflag=%c "
+		"closeboard=%c "
+		"curveaccuracy=%d "
+		"lighttype=%c "
+		"lightposx=%f lightposy=%f lightposz=%f "
+		"lightambient=%d lightdiffuse=%d lightspecular=%d "
+		"moveindicator=%c "
+		"boardangle=%d "
+		"skewfactor=%d "
+		"planview=%c "
+		"dicesize=%f "
+		"roundededges=%c "
+		"piecetype=%d "
+		"chequers3d0=%s "
+		"chequers3d1=%s "
+        "dice3d0=%s "
+        "dice3d1=%s "
+        "dot3d0=%s "
+        "dot3d1=%s "
+        "cube3d=%s "
+        "cubetext3d=%s "
+		"base3d=%s "
+		"points3d0=%s "
+		"points3d1=%s "
+		"border3d=%s "
+		"hinge3d=%s "
+		"numbers3d=%s "
+		"background3d=%s "
+#endif
 	     "labels=%c dynamiclabels=%c wood=%s hinges=%c "
 	     "light=%0.0f;%0.0f shape=%0.1f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
@@ -435,6 +702,40 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
              /* border */
 	     prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
 	     prd->aanBoardColour[ 1 ][ 2 ],
+#if USE_BOARD3D
+		prd->fDisplayType == DT_2D ? '2' : '3',
+		prd->showShadows ? 'y' : 'n',
+		prd->shadowDarkness,
+		prd->animateRoll ? 'y' : 'n',
+		prd->animateFlag ? 'y' : 'n',
+		prd->closeBoardOnExit ? 'y' : 'n',
+		prd->curveAccuracy,
+		prd->lightType == LT_POSITIONAL ? 'p' : 'd',
+		prd->lightPos[0], prd->lightPos[1], prd->lightPos[2],
+		prd->lightLevels[0], prd->lightLevels[1], prd->lightLevels[2],
+		prd->showMoveIndicator ? 'y' : 'n',
+		prd->boardAngle,
+		prd->testSkewFactor,
+		prd->planView ? 'y' : 'n',
+		prd->diceSize,
+		prd->roundedEdges ? 'y' : 'n',
+		prd->pieceType,
+		WriteMaterial(&prd->rdChequerMat[0]),
+		WriteMaterial(&prd->rdChequerMat[1]),
+		WriteMaterial(&prd->rdDiceMat[0]),
+		WriteMaterial(&prd->rdDiceMat[1]),
+		WriteMaterial(&prd->rdDiceDotMat[0]),
+		WriteMaterial(&prd->rdDiceDotMat[1]),
+		WriteMaterial(&prd->rdCubeMat),
+		WriteMaterial(&prd->rdCubeNumberMat),
+		WriteMaterial(&prd->rdBaseMat),
+		WriteMaterial(&prd->rdPointMat[0]),
+		WriteMaterial(&prd->rdPointMat[1]),
+		WriteMaterial(&prd->rdBoxMat),
+		WriteMaterial(&prd->rdHingeMat),
+		WriteMaterial(&prd->rdPointNumberMat),
+		WriteMaterial(&prd->rdBackGroundMat),
+#endif
              /* labels ... */
              prd->fLabels ? 'y' : 'n',
              prd->fDynamicLabels ? 'y' : 'n',

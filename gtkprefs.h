@@ -28,4 +28,6 @@ extern void BoardPreferences( GtkWidget *pwBoard );
 extern void BoardPreferencesStart( GtkWidget *pwBoard );
 extern void BoardPreferencesDone( GtkWidget *pwBoard );
 
+extern char szTemp[];
+
 #endif

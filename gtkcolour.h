@@ -26,6 +26,24 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if USE_BOARD3D
+#include "render.h"
+
+#define DF_VARIABLE_OPACITY 1
+#define DF_NO_ALPHA 2
+#define DF_FULL_ALPHA 4
+
+typedef struct UpdateDetails_T
+{
+	Material* pMat;
+	GdkPixmap* pixmap;
+	GtkWidget* preview;
+	GtkWidget** parentPreview;
+	int opacity;
+	TextureType texture;
+} UpdateDetails;
+#endif
+
 #define GTK_TYPE_COLOUR_PICKER (gtk_colour_picker_get_type())
 #define GTK_COLOUR_PICKER(obj) (GTK_CHECK_CAST((obj), GTK_TYPE_COLOUR_PICKER, \
 	GtkColourPicker))

@@ -78,6 +78,7 @@ BUILD_INCLUDED_LIBINTL = @BUILD_INCLUDED_LIBINTL@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CSOUND = @CSOUND@
+CXX = @CXX@
 DATADIRNAME = @DATADIRNAME@
 DEPDIR = @DEPDIR@
 ESD_CFLAGS = @ESD_CFLAGS@
@@ -87,12 +88,15 @@ FLEX = @FLEX@
 FT2_CFLAGS = @FT2_CFLAGS@
 FT2_CONFIG = @FT2_CONFIG@
 FT2_LIBS = @FT2_LIBS@
+FTGL_LIBS = @FTGL_LIBS@
 GENCAT = @GENCAT@
 GLIBC21 = @GLIBC21@
 GMSGFMT = @GMSGFMT@
 GNUPLOT = @GNUPLOT@
 GTKDATA = @GTKDATA@
 GTKEXTRA_LIBS = @GTKEXTRA_LIBS@
+GTKGLEXT_CFLAGS = @GTKGLEXT_CFLAGS@
+GTKGLEXT_LIBS = @GTKGLEXT_LIBS@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
@@ -154,6 +158,8 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
+@USE_EXT_TRUE@EXT_DIR = ext
+@USE_EXT_FALSE@EXT_DIR = 
 pkgpyexecdir = @pkgpyexecdir@
 pkgpythondir = @pkgpythondir@
 pyexecdir = @pyexecdir@
@@ -188,8 +194,18 @@ ACLOCAL_AMFLAGS = -I m4
 @EXTERNAL_BR1_TRUE@BR1DATA = gnubg_os0.bd
 @EXTERNAL_BR1_FALSE@BR1DATA = 
 
+@USE_BOARD3D_TRUE@BOARD3D_DIR = board3d
+@USE_BOARD3D_FALSE@BOARD3D_DIR = 
+@USE_BOARD3D_TRUE@BOARD3D_DEPS = board3d/libboard3d.a
+@USE_BOARD3D_FALSE@BOARD3D_DEPS = 
+@USE_BOARD3D_TRUE@BOARD3D_LIBS = -L$(srcdir)/board3d -lboard3d @GTKGLEXT_LIBS@ @FTGL_LIBS@
+@USE_BOARD3D_FALSE@BOARD3D_LIBS = 
+@USE_BOARD3D_TRUE@BOARD3D_INCS = @GTKGLEXT_CFLAGS@
+@USE_BOARD3D_FALSE@BOARD3D_INCS = 
 @USE_PYTHON_TRUE@PYTHON_SOURCES = gnubgmodule.c gnubgmodule.h
 @USE_PYTHON_FALSE@PYTHON_SOURCES = 
+
+SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
@@ -212,7 +228,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
 	$(LIBGEN_SOURCES)
 
-COMMON_DEPS = @LIBOBJS@ lib/libevent.a
+COMMON_DEPS = @LIBOBJS@ lib/libevent.a 
 
 bin_PROGRAMS = gnubg makebearoff makehyper
 
@@ -220,7 +236,9 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
-@USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@
+@USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
+@USE_GTK_TRUE@           $(BOARD3D_INCS)
+
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
 @USE_EXT_FALSE@@USE_GTK_FALSE@	$(FONT_SOURCES)  $(PYTHON_SOURCES)
 
@@ -245,12 +263,11 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 @USE_EXT_TRUE@@USE_GTK_FALSE@	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
 
 @USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
-@USE_GTK_TRUE@	@LIBART_LIBS@ @THREAD_LIBS@
-
+@USE_GTK_TRUE@	@LIBART_LIBS@ @THREAD_LIBS@ $(BOARD3D_LIBS)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
-@USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
+@USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 
 pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ @GUILEDATA@ \
 	$(BR1DATA)
@@ -458,7 +475,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	py-compile strdup.c
-DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds
+DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds board3d
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
 all: config.h

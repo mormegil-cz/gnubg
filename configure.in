@@ -33,6 +33,7 @@ fi
 dnl Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
+AC_PROG_CXX
 AC_PROG_CC_IEEE
 AC_PROG_LN_S
 AC_PROG_RANLIB
@@ -290,6 +291,7 @@ else
   AM_PATH_LIBART(,AC_DEFINE(HAVE_LIBART,1,[Define if you have the art library]))
 fi
 
+
 AH_VERBATIM([USE_GUI],
 [#if USE_EXT || USE_GTK
 #define USE_GUI 1
@@ -404,6 +406,27 @@ if test "$have_freetype" = "yes"; then
 fi
 AM_CONDITIONAL(USE_FREETYPE, test "$have_freetype" = "yes")
 
+dnl ---------------------------------------
+dnl Look for libraries needed for 3D boards
+
+if test "$no_gtk" != "yes"; then
+   AM_PATH_GTKGLEXT_1_0(,AC_DEFINE(HAVE_GTKGLEXT,1,
+                                   [Define if you have GtkGLExt]))
+   if test "$no_gtkglext" != "yes"; then
+      dnl check for GtkGLExt
+      AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
+      dnl check for FTGL (dependent on freetype)
+      if test "$have_freetype" = "yes"; then
+         dnl fixme: write a test...
+         AC_DEFINE(HAVE_FTGL,1,[Define if you have the FTGL library])
+         FTGL_LIBS="-lftgl"
+	 AC_SUBST(FTGL_LIBS)
+      fi
+   fi
+fi
+AM_CONDITIONAL(USE_BOARD3D,test "$no_gtkglext" != "yes")
+
+dnl ---------------------------------------
 dnl Sounds
 
 AC_ARG_WITH(sound,[  --with-sound            use sounds with GNU Backgammon])
@@ -476,4 +499,4 @@ AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
 AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
 
-AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile )
+AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile)

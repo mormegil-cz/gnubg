@@ -130,12 +130,12 @@ Thu Jul 31 11:36:53 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* rollout.c: prevent division by zero when jsds are small. This
           time it actually should do something
-	* set.c:  missing space in option description
-	
+	* set.c - missing space in option description
+
 Wed Jul 30 09:36:07 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
-	* rollout.c: prevent division by zero when jsds are small
-	
+	* rollout.c - prevent division by zero when jsds are small
+
 Mon Jul 28 21:31:19 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (InitGTK): new menu entry for IDLE (Python).
@@ -797,6 +797,11 @@ Thu Jul 3 15:02 GMT 2003 Jim Segrave jes@jes-2.demon.nl
           fix of call to outputerr()), add explicit returns in eval.c
           for reaching end of non-void function
 
+Thu Jul 31 18:23:52 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkprefs.c (toggle_display_type): gtk_notebook_get_n_pages does
+	exist in gtk+ 2???
+
 Fri Jun 27 21:20 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
         * rollout.c - fix results after interupted rollouts
@@ -828,6 +833,10 @@ Wed Jun 25 21:13:29 2003  Joern Thyssen  <jth@gnubg.org>
 
         * matchequity.c (getMEAtScore): new function.
 
+Tue Jun 24 17:57:53 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkprefs.c, boards.xml: preview 3D boards, 3D board designs.
+
 Mon Jun 24 00:03 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
         * Use deprecated gtk_spin_button_get_value_as_float, for gtk1.2
@@ -848,6 +857,10 @@ u       * eval.c (DumpAnyContact): Fix incorrect indexing into inputs vector. (B
 Sun Jun 22 12:42:10 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
         * eval.c (DumpContact): fix for crashed positions. 
+
+Mon Jun 16 21:28:35 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, configure.in: autoconf magic for BOARD3D.
 
 Sat Jun 14 13:18:34 2003  Joern Thyssen  <jth@gnubg.org>
 

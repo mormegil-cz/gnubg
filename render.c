@@ -109,6 +109,40 @@ renderdata rdDefault = {
     TRUE, /* fLabels */
     FALSE, /* fClockwise */
     TRUE  /* dynamic labels */
+#if USE_BOARD3D
+	, DT_3D,	/* Display type */
+	FALSE,	/* Show shadows */
+	50,	/* Shadow darkness */
+	0,	/* Animate roll */
+	0,	/* Animate flag */
+	0,	/* Close board on exit */
+	36,	/* Curve accuracy */
+	LT_POSITIONAL, /* light source type */
+	{0, 2, 3.5f},	/* x,y,z pos of light source */
+	{50, 70, 100},	/* amibient/diffuse/specular light levels */
+	1,	/* Show move indicator */
+	35,	/* Board angle */
+	20,	/* FOV skew factor */
+	0,	/* Plan view */
+	3,	/* Dice size */
+	0,	/* Rounded edges */
+	PT_ROUNDED,	/* Piece type */
+    {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
+	 {{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0}},
+    {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
+	 {{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0}},
+	{{{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0},
+     {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0}},
+    {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
+	{{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0},
+    {{.5, .5, .5, .5}, {.5, .5, .5, .5}, {.5, .5, .5, .5}, 100, 0, 0},
+    {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
+	 {{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0}},
+	{{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0},
+    {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
+    {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
+    {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0}
+#endif
 };
 
 static inline unsigned char clamp( int n ) {
@@ -1393,21 +1427,24 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
     if( FT_Set_Pixel_Sizes( ftf, 0, prd->nSize * 5 / 2 ) )
 	return RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
 
-    for( i = 0; i < 10; i++ ) {
-	FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );
-	FT_Get_Glyph( ftf->glyph, aftg + i );
-    }
+	if (prd->fLabels)
+	{
+		for( i = 0; i < 10; i++ ) {
+		FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );
+		FT_Get_Glyph( ftf->glyph, aftg + i );
+		}
 
-    FT_Done_Face( ftf );
+		FT_Done_Face( ftf );
 
-    for ( i = 0; i < ( 1 + abs( iStart - iEnd ) ); ++i ) 
-	RenderNumber( puch, nStride, aftg, iStart + i * iDelta,
-		      ( aaanPositions[ prd->fClockwise ][ i + 1 ][ 0 ] + 3 ) *
-		      prd->nSize, 7 * prd->nSize / 3,
-		      0xFF, 0xFF, 0xFF );
+		for ( i = 0; i < ( 1 + abs( iStart - iEnd ) ); ++i ) 
+		RenderNumber( puch, nStride, aftg, iStart + i * iDelta,
+				  ( aaanPositions[ prd->fClockwise ][ i + 1 ][ 0 ] + 3 ) *
+				  prd->nSize, 7 * prd->nSize / 3,
+				  0xFF, 0xFF, 0xFF );
     
-    for( i = 0; i < 10; i++ )
-	FT_Done_Glyph( aftg[ i ] );
+		for( i = 0; i < 10; i++ )
+		FT_Done_Glyph( aftg[ i ] );
+	}
 #else
     RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
 #endif
@@ -2197,6 +2234,7 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
     }
 }
 
+#if HAVE_LIBART
 static void InsertAlpha( unsigned char *puchDest, int nDestStride,
 		         unsigned char *puchAlpha, int nAlphaStride,
 		         int cx, int cy ) {
@@ -2218,7 +2256,6 @@ static void InsertAlpha( unsigned char *puchDest, int nDestStride,
     }
 }
 
-#if HAVE_LIBART
 static ArtBpath * Make_Path_Arrow( void ) {
 /* set up a B-spline vector path representing an arrow */
 
@@ -2635,7 +2672,8 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
     /* draw arrow for direction of play */
 
 #if HAVE_LIBART
-    if( fPlaying && intersects( x, y, cx, cy,
+    if( fPlaying && prd->showMoveIndicator &&
+			intersects( x, y, cx, cy,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
                     ARROW_SIZE * prd->nSize, ARROW_SIZE * prd->nSize ) ) {
 
@@ -2728,7 +2766,8 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     RenderResignFaces( prd, pri->achResignFaces, nSize * 6 * 3, pri->achResign,
                        nSize * 8 * 4 );
 #if HAVE_LIBART
-    RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_SIZE * 4 );
+	if (prd->showMoveIndicator)
+		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_SIZE * 4 );
 #undef ARROW_SIZE
 #endif /* HAVE_LIBART */
 
