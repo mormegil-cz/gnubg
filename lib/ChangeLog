@@ -1,4 +1,11 @@
-Fir Feb 25 11:16:41 CEST 2004  Jon Kinsey
+Thu Apr 28 22:35:53 2005  Øystein Johansen <oysteim@gnubg.org>
+
+	* neuralnet.c (Evaluate128, EvaluateFromBase128, NeuralNetEvaluate128):
+	
+	New functions for vectorized evaluation of neural networks
+	with 128 hidden	nodes.
+	
+Fri Feb 25 11:16:41 CEST 2004  Jon Kinsey
 
 	* neuralnet.c Relegate BLAS code as proved slower
 
@@ -22,7 +29,7 @@ Thu Dec 18 23:35:48 2003  Joern Thyssen  <jth@gnubg.org>
 
 Fri Jan 10 19:13:15 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* hash.h: enlarge cache to hold cubeful equities as well
+	* hash.h: enlage cache to hold cubeful equities as well
 	(and possibly cubeless ones).
 
 Thu Dec 19 22:53:52 2002  Joern Thyssen  <jth@freeshell.org>

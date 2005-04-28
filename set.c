@@ -1001,8 +1001,8 @@ CommandSetEvalPrune( char *sz ) {
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
     int f = pecSet->fUsePrune;
     
-    sprintf( asz[ 0 ], _("%s use prunning.\n"), szSet );
-    sprintf( asz[ 1 ], _("%s don't use prunning.\n"), szSet );
+    sprintf( asz[ 0 ], _("%s will use pruning.\n"), szSet );
+    sprintf( asz[ 1 ], _("%s will not use pruning.\n"), szSet );
     sprintf( szCommand, "%s prune", szSetCommand );
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fUsePrune = f;
