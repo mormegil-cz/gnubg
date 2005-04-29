@@ -33,6 +33,8 @@ typedef enum  {
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t);
+extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
+			      float arOutput[], NNEvalType t);
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] );
 extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
