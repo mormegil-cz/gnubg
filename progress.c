@@ -67,13 +67,51 @@ typedef struct _rolloutprogress {
   GtkWidget *pwLeft;
   GtkWidget *pwSE;
   int nGamesDone;
+  char ***pListText;
 #endif
 
 } rolloutprogress;
 
+#if USE_GTK
+void AllocTextList(rolloutprogress *prp)
+{	// 2d array to cache displayed widget text
+	int i;
+	int lines = prp->n;
+	prp->pListText = malloc(sizeof(char*) * lines * 2);
 
+	for (i = 0; i < lines; i++)
+	{
+		prp->pListText[i * 2] = malloc(sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
+		memset(prp->pListText[i * 2], 0, sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
+		prp->pListText[i * 2 + 1] = malloc(sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
+		memset(prp->pListText[i * 2 + 1], 0, sizeof(char*) * (NUM_ROLLOUT_OUTPUTS + 2));
+	}
+}
 
+void FreeTextList(rolloutprogress *prp)
+{	// destroy list
+	int i;
+	int lines = prp->n;
 
+	for (i = 0; i < lines; i++)
+	{
+		free(prp->pListText[i * 2]);
+		free(prp->pListText[i * 2 + 1]);
+	}
+	free(prp->pListText);
+}
+
+void SetRolloutText(rolloutprogress *prp, int x, int y, char* sz)
+{	// Cache set text to reduce flicker (and speed things up a bit)
+	if (!prp->pListText[x][y] || strcmp(prp->pListText[x][y - 1], sz))
+	{
+		gtk_clist_set_text(GTK_CLIST(prp->pwRolloutResult), x, y, sz);
+		free(prp->pListText[x][y - 1]);
+		prp->pListText[x][y - 1] = malloc(strlen(sz) + 1);
+		strcpy(prp->pListText[x][y - 1], sz);
+	}
+}
+#endif
 
 
 /*
@@ -772,6 +810,8 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   prp->n = n;
   fInterrupt = FALSE;
 
+  AllocTextList(prp);
+
   prp->pwRolloutDialog = 
     GTKCreateDialog( _("GNU Backgammon - Rollout"), DT_INFO,
                      NULL, NULL );
@@ -903,8 +943,6 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
 
 }
 
-
-
 static void
 GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                     float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
@@ -943,8 +981,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                 prc->fCubeful ? OutputMWC( aarOutput[ iAlternative ][ i ],
                                            &aci[ 0 ], TRUE ) : "n/a" );
 
-      gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ), 
-                          iAlternative * 2, i + 1, sz );
+		SetRolloutText(prp, iAlternative * 2, i + 1, sz);
 
       /* standard errors */
 
@@ -959,25 +996,21 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                 prc->fCubeful ? OutputMWC( aarStdDev[ iAlternative ][ i ],
                                            &aci[ 0 ], FALSE ) : "n/a" );
 
-      gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ), 
-                          iAlternative * 2 + 1, i + 1, sz );
+		SetRolloutText(prp, iAlternative * 2 + 1, i + 1, sz);
 
     }
 
     if (fShowRanks && iGame > 1) {
 	  sprintf (sz, "%d %s", nRank, fStopped ? "s" : "r");
-	  gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ),
-			      iAlternative * 2, i + 1, sz);
+	  SetRolloutText(prp, iAlternative * 2, i + 1, sz);
 	  if (nRank != 1)
 	    sprintf( sz,  "%5.3f", rJsd);
 	  else
 	    strcpy (sz, " ");
 
-	  gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ),
-			      iAlternative * 2 + 1, i + 1, sz);
+	  SetRolloutText(prp, iAlternative * 2 + 1, i + 1, sz);
 	} else {
-	  gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ),
-						  iAlternative * 2, i + 1, "n/a");
+	  SetRolloutText(prp, iAlternative * 2, i + 1, "n/a");
 	}
 	  
 #if !USE_GTK2
@@ -1055,6 +1088,8 @@ static void GTKRolloutProgressEnd( void **pp ) {
     fInterrupt = FALSE;
 
     pwGrab = pwOldGrab;
+
+    FreeTextList(prp);
 
     /* if they cancelled the rollout early, 
        prp->pwRolloutDialog has already been destroyed */
