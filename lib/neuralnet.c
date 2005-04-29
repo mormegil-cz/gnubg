@@ -42,12 +42,7 @@
 #include <cblas.h>
 #endif /* HAVE_LIBATLAS */
 
-#ifdef USE_SSE_VECTORIZE
-#include <xmmintrin.h>
-#include <mm_malloc.h>
-#define ALIGN_SIZE 16
-#endif
-
+#include "sse.h"
 #if SIGMOID_BAUR
 #define sigmoid sigmoid_baur
 #elif SIGMOID_JTH
@@ -172,8 +167,8 @@ static float e[100] = {
    The Intel x87's `f2xm1' instruction makes calculating accurate
    exponentials comparatively fast, but still about 30% slower than
    the lookup table used here. */
-static inline float sigmoid(float const xin) { 
-/* static float sigmoid_original(float const xin) { */
+
+static inline float sigmoid_original(float const xin) {
     
     if( !signbit( xin ) ) { /* signbit() can be faster than a compare to 0.0 */
 	/* xin is almost always positive; we place this branch of the `if'
@@ -182,17 +177,17 @@ static inline float sigmoid(float const xin) {
 	if( xin < 10.0f ) {
 	    /* again, predict the branch not to be taken */
 	    const float x1 = 10.0f * xin;
-	    const unsigned int i = (int) x1;
+	    const int i = (int)x1;
 	    
-	    return 1.0f / ( 1.0f + e[ i ] * ( 10.0f - (int) i + x1 ) );
-	} else
+		return 1 / (1 + e[i] * (10 - i + x1));
+ 	} else
 	    return 1.0f / 19931.370438230298f;
     } else {
 	if( xin > -10.0f ) {
 	    const float x1 = -10.0f * xin;
-	    const unsigned int i = (int) x1;
+	    const int i = (int)x1;
 	    
-	    return 1.0f - 1.0f / ( 1.0f + e[ i ] * ( 10.0f - (int) i + x1 ) );
+		return 1 - 1 / (1 + e[i] * (10 - i + x1));
 	} else
 	    return 19930.370438230298f / 19931.370438230298f;	
     }
@@ -348,65 +343,34 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     pnn->nTrained = 0;
     pnn->fDirect = FALSE;
    
-#if USE_SSE_VECTORIZE
-    if( !( pnn->arHiddenWeight = _mm_malloc( cHidden * cInput *
-					 sizeof( float ), ALIGN_SIZE ) ) )
-	return -1;
-
-    if( !( pnn->arOutputWeight = _mm_malloc( cOutput * cHidden *
-					 sizeof( float ), ALIGN_SIZE ) ) ) {
-	_mm_free( pnn->arHiddenWeight );
-	return -1;
-    }
-    
-    if( !( pnn->arHiddenThreshold = _mm_malloc( cHidden * sizeof( float ),
-				    ALIGN_SIZE ) ) ) {
-	_mm_free( pnn->arOutputWeight );
-	_mm_free( pnn->arHiddenWeight );
-	return -1;
-    }
-	   
-    if( !( pnn->arOutputThreshold = _mm_malloc( cOutput * sizeof( float ),
-				    ALIGN_SIZE ) ) ) {
-	_mm_free( pnn->arHiddenThreshold );
-	_mm_free( pnn->arOutputWeight );
-	_mm_free( pnn->arHiddenWeight );
-	return -1;
-    }
-#else
-    if( !( pnn->arHiddenWeight = malloc( cHidden * cInput *
+    if( !( pnn->arHiddenWeight = sse_malloc( cHidden * cInput *
 					 sizeof( float ) ) ) )
 	return -1;
 
-    if( !( pnn->arOutputWeight = malloc( cOutput * cHidden *
+    if( !( pnn->arOutputWeight = sse_malloc( cOutput * cHidden *
 					 sizeof( float ) ) ) ) {
-	free( pnn->arHiddenWeight );
+	sse_free( pnn->arHiddenWeight );
 	return -1;
     }
     
-    if( !( pnn->arHiddenThreshold = malloc( cHidden * sizeof( float ) ) ) ) {
-	free( pnn->arOutputWeight );
-	free( pnn->arHiddenWeight );
+    if( !( pnn->arHiddenThreshold = sse_malloc( cHidden * sizeof( float ) ) ) ) {
+	sse_free( pnn->arOutputWeight );
+	sse_free( pnn->arHiddenWeight );
 	return -1;
     }
 	   
-    if( !( pnn->arOutputThreshold = malloc( cOutput * sizeof( float ) ) ) ) {
-	free( pnn->arHiddenThreshold );
-	free( pnn->arOutputWeight );
-	free( pnn->arHiddenWeight );
+    if( !( pnn->arOutputThreshold = sse_malloc( cOutput * sizeof( float ) ) ) ) {
+	sse_free( pnn->arHiddenThreshold );
+	sse_free( pnn->arOutputWeight );
+	sse_free( pnn->arHiddenWeight );
 	return -1;
     }
-#endif
-    
+
     CheckRC();
 
-#if USE_SSE_VECTORIZE
-    pnn->savedBase = _mm_malloc( cHidden * sizeof( float ), ALIGN_SIZE ); 
-    pnn->savedIBase = _mm_malloc( cInput * sizeof( float ), ALIGN_SIZE ); 
-#else
-    pnn->savedBase = malloc( cHidden * sizeof( float ) ); 
-    pnn->savedIBase = malloc( cInput * sizeof( float ) ); 
-#endif
+    pnn->savedBase = sse_malloc( cHidden * sizeof( float ) ); 
+    pnn->savedIBase = sse_malloc( cInput * sizeof( float ) ); 
+ 
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
 	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
@@ -457,14 +421,9 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
    fp += pnn->cHidden;
    pnn->arOutputThreshold = fp;
    fp += pnn->cOutput;
-   
-#if USE_SSE_VECTORIZE
-   pnn->savedBase = _mm_malloc( pnn->cHidden * sizeof( float ), ALIGN_SIZE ); 
-   pnn->savedIBase = _mm_malloc( pnn->cInput * sizeof( float ), ALIGN_SIZE ); 
-#else
-   pnn->savedBase = malloc( pnn->cHidden * sizeof( float ) ); 
-   pnn->savedIBase = malloc( pnn->cInput * sizeof( float ) ); 
-#endif
+
+   pnn->savedBase = sse_malloc( pnn->cHidden * sizeof( float ) ); 
+   pnn->savedIBase = sse_malloc( pnn->cInput * sizeof( float ) ); 
 
    return fp;
 }
@@ -473,27 +432,16 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
 extern int
 NeuralNetDestroy( neuralnet *pnn )
 {
-#if USE_SSE_VECTORIZE
   if( !pnn->fDirect ) {
-    _mm_free( pnn->arHiddenWeight ); pnn->arHiddenWeight = 0;
-    _mm_free( pnn->arOutputWeight ); pnn->arOutputWeight = 0;
-    _mm_free( pnn->arHiddenThreshold ); pnn->arHiddenThreshold = 0;
-    _mm_free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
+    sse_free( pnn->arHiddenWeight ); pnn->arHiddenWeight = 0;
+    sse_free( pnn->arOutputWeight ); pnn->arOutputWeight = 0;
+    sse_free( pnn->arHiddenThreshold ); pnn->arHiddenThreshold = 0;
+    sse_free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
   }
 
-  _mm_free(pnn->savedBase); pnn->savedBase = 0;
-  _mm_free(pnn->savedIBase); pnn->savedIBase = 0;
-#else
-  if( !pnn->fDirect ) {
-    free( pnn->arHiddenWeight ); pnn->arHiddenWeight = 0;
-    free( pnn->arOutputWeight ); pnn->arOutputWeight = 0;
-    free( pnn->arHiddenThreshold ); pnn->arHiddenThreshold = 0;
-    free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
-  }
-
-  free(pnn->savedBase); pnn->savedBase = 0;
-  free(pnn->savedIBase); pnn->savedIBase = 0;
-#endif
+  sse_free(pnn->savedBase); pnn->savedBase = 0;
+  sse_free(pnn->savedIBase); pnn->savedIBase = 0;
+  
   return 0;
 }
 
@@ -932,15 +880,9 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     }
     
     if( cHidden != pnn->cHidden || cInput != pnn->cInput ) {
-#ifdef USE_SSE_VECTORIZE
-	if( !( pr = _mm_malloc( cHidden * cInput * sizeof( float ),
-					ALIGN_SIZE ) ) )
+	if( !( pr = sse_malloc( cHidden * cInput * sizeof( float ) ) ) )
 	    return -1;
-#else
-	if( !( pr = malloc( cHidden * cInput * sizeof( float ) ) ) )
-	    return -1;
-#endif
-	
+
 	prNew = pr;
 	
 	for( i = 0; i < cInput; i++ )
@@ -954,11 +896,8 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 		else
 		    *prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
 		    
-#ifdef USE_SSE_VECTORIZE
-	_mm_free( pnn->arHiddenWeight );
-#else
-	free( pnn->arHiddenWeight );
-#endif
+	sse_free( pnn->arHiddenWeight );
+
 	pnn->arHiddenWeight = pr;
     }
 	
@@ -973,14 +912,9 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     }
     
     if( cOutput != pnn->cOutput || cHidden != pnn->cHidden ) {
-#ifdef USE_SSE_VECTORIZE
-	if( !( pr = _mm_malloc( cOutput * cHidden * sizeof( float ),
-					ALIGN_SIZE ) ) )
+	if( !( pr = sse_malloc( cOutput * cHidden * sizeof( float ) ) ) )
 	    return -1;
-#else
-	if( !( pr = malloc( cOutput * cHidden * sizeof( float ) ) ) )
-	    return -1;
-#endif
+
 	prNew = pr;
 	
 	for( i = 0; i < cHidden; i++ )
@@ -994,11 +928,8 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 		else
 		    *prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
 
-#ifdef USE_SSE_VECTORIZE
-	_mm_free( pnn->arOutputWeight );
-#else
-	free( pnn->arOutputWeight );
-#endif
+	sse_free( pnn->arOutputWeight );
+
 	pnn->arOutputWeight = pr;
     }
 
@@ -1147,22 +1078,7 @@ extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
     return 0;
 }
 
-#ifdef USE_SSE_VECTORIZE
-
-typedef float v4sf __attribute__ ((vector_size(16)));
-
-typedef union _vec4f {
-  v4sf v;
-  float f[4];
-} vec4f;
-
-void
-printvec( v4sf vec ){
-  float *pFloat = ( float *) &vec;
-  printf("%f, %f, %f, %f: sum: %f\n",
-     pFloat[0], pFloat[1], pFloat[2], pFloat[3],
-     pFloat[0]+pFloat[1]+pFloat[2]+pFloat[3]);
-}
+#if USE_SSE_VECTORIZE
 
 static int
 Evaluate128( neuralnet *pnn, float arInput[], float ar[],
@@ -1170,80 +1086,75 @@ Evaluate128( neuralnet *pnn, float arInput[], float ar[],
 
     int i, j;
     float *prWeight;
+    __m128 vec0, vec1, vec3, scalevec, sum;
     
     /* Calculate activity at hidden nodes */
-    /* memcpy( ar, pnn->arHiddenThreshold, pnn->cHidden * sizeof( *ar )); */
-    memcpy( ar, pnn->arHiddenThreshold, 512 );
-    /* This memcpy is a bit dangerous, since pointer size isn't always 2 bytes.
-     *      -- use the above line if it dosn't work! */ 
+    memcpy(ar, pnn->arHiddenThreshold, HIDDEN_NODES * sizeof(float));
 
     prWeight = pnn->arHiddenWeight;
     
-    for( i = 0; i < pnn->cInput; i++ ) {
-	float const ari = arInput[ i ];
-        v4sf vec0, vec1, vec3, scalevec, sum;
+	for (i = 0; i < pnn->cInput; i++)
+	{
+		float const ari = arInput[i];
 
-	if( ari ) {
-	    float *pr = ar;
-
-	    if( ari == 1.0f )
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
+		if (ari)
+		{
+			float *pr = ar;
+			if (ari == 1.0f)
+			{
+				for( j = 32; j; j--, pr += 4, prWeight += 4 )
+				{
                    vec0 = _mm_load_ps( pr );  
                    vec1 = _mm_load_ps( prWeight );  
                    sum =  _mm_add_ps(vec0, vec1);
                    _mm_store_ps(pr, sum);
+				}
+			}
+			else
+			{
+                scalevec = _mm_set1_ps( ari );
+				for( j = 32; j; j--, pr += 4, prWeight += 4 )
+				{
+					vec0 = _mm_load_ps( pr );  
+					vec1 = _mm_load_ps( prWeight ); 
+					vec3 = _mm_mul_ps( vec1, scalevec );
+					sum =  _mm_add_ps( vec0, vec3 );
+					_mm_store_ps ( pr, sum );
+				}
+			}
 		}
-	    else {
-		scalevec = _mm_set1_ps( ari );
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
-                   vec0 = _mm_load_ps( pr );  
-	           vec1 = _mm_load_ps( prWeight ); 
-		   vec3 = _mm_mul_ps( vec1, scalevec );
-                   sum =  _mm_add_ps( vec0, vec3 );
-                   _mm_store_ps ( pr, sum );
-		}
-	    }
-	} else
-	    prWeight += pnn->cHidden;
+		else
+			prWeight += HIDDEN_NODES;
     }
 
     if( saveAr)
-      memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
+      memcpy( saveAr, ar, HIDDEN_NODES * sizeof( *saveAr));
     
-    for( i = 0; i < pnn->cHidden; i++ )
+    for( i = 0; i < HIDDEN_NODES; i++ )
 	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
     
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
 
     for( i = 0; i < pnn->cOutput; i++ ) {
-       float r = pnn->arOutputThreshold[ i ];
+
+       float r;
        float *pr = ar;
-       vec4f sum;
-       v4sf vec0, vec1, vec3;
-       sum.v = _mm_xor_ps(sum.v, sum.v);
+       sum = _mm_xor_ps(sum, sum);
        for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
          vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
          vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
          vec3 = _mm_mul_ps ( vec0, vec1 );   /* Multiply */
-         sum.v = _mm_add_ps( sum.v, vec3 );  /* Add */
+         sum = _mm_add_ps( sum, vec3 );  /* Add */
        }
 
-       r += sum.f[0] + sum.f[1] + sum.f[2] + sum.f[3]; 
-#if 0
-       /* I don't understand why this does not work? */
-       printvec( sum2 );
-       
-       vec0 = _mm_shuffle_ps(sum2, sum2,_MM_SHUFFLE(2,3,0,1));
-       vec1 = _mm_add_ps(sum2, vec0);
+       vec0 = _mm_shuffle_ps(sum, sum,_MM_SHUFFLE(2,3,0,1));
+       vec1 = _mm_add_ps(sum, vec0);
        vec0 = _mm_shuffle_ps(vec1,vec1,_MM_SHUFFLE(1,1,3,3));
-       sum2  = _mm_add_ps(vec1,vec0);
-       _mm_store_ss (&r, sum2); 
+       sum = _mm_add_ps(vec1,vec0);
+       _mm_store_ss(&r, sum); 
 
-       printf("r: %5.5f\n", r);
-       /* Even the sum gets right, but the move gets wrong? */
-#endif
-       arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
+       arOutput[ i ] = sigmoid( -pnn->rBetaOutput * (r + pnn->arOutputThreshold[ i ]));
     }
 
     return 0;
@@ -1254,12 +1165,12 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
 
     int i, j;
     float *prWeight;
+    __m128 vec0, vec1, vec3, scalevec, sum;
 
     prWeight = pnn->arHiddenWeight;
     
     for( i = 0; i < pnn->cInput; ++i ) {
 	float const ari = arInputDif[ i ];
-        v4sf vec0, vec1, vec3, scalevec, sum;
 
 	if( ari ) {
 	    float *pr = ar;
@@ -1290,30 +1201,34 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
 		}
 	    }
 	} else
-	    prWeight += pnn->cHidden;
+	    prWeight += HIDDEN_NODES;
     }
     
-    for( i = 0; i < pnn->cHidden; i++ )
+    for( i = 0; i < HIDDEN_NODES; i++ )
 	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
 
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
 
     for( i = 0; i < pnn->cOutput; i++ ) {
-       float r = pnn->arOutputThreshold[ i ];
+
+       float r;
        float *pr = ar;
-       vec4f sum;
-       v4sf vec0, vec1, vec3;
-       sum.v = _mm_xor_ps(sum.v, sum.v);
+       sum = _mm_xor_ps(sum, sum);
        for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
          vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
          vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
          vec3 = _mm_mul_ps ( vec0, vec1 );   /* Multiply */
-         sum.v = _mm_add_ps( sum.v, vec3 );  /* Add */
+         sum = _mm_add_ps( sum, vec3 );  /* Add */
        }
 
-       r += sum.f[0] + sum.f[1] + sum.f[2] + sum.f[3]; 
-       arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
+	   vec0 = _mm_shuffle_ps(sum, sum,_MM_SHUFFLE(2,3,0,1));
+       vec1 = _mm_add_ps(sum, vec0);
+       vec0 = _mm_shuffle_ps(vec1,vec1,_MM_SHUFFLE(1,1,3,3));
+       sum = _mm_add_ps(vec1,vec0);
+       _mm_store_ss(&r, sum); 
+
+	   arOutput[ i ] = sigmoid( -pnn->rBetaOutput * (r + pnn->arOutputThreshold[ i ]));
     }
 
     return 0;
@@ -1322,9 +1237,9 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
 
 extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
-    float ar[ 128 ];
+    float ar[HIDDEN_NODES];
     
-    assert ( pnn->cHidden == 128 );
+    assert(pnn->cHidden == HIDDEN_NODES);
 
     switch( t ) {
       case NNEVAL_NONE:
@@ -1342,7 +1257,7 @@ extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
       {
         int i;
         
-        memcpy(ar, pnn->savedBase, pnn->cHidden * sizeof(*ar));
+        memcpy(ar, pnn->savedBase, HIDDEN_NODES * sizeof(*ar));
   
         {
           float* r = arInput;
@@ -1364,4 +1279,3 @@ extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
 }
 
 #endif
-
