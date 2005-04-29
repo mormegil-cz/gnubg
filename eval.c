@@ -1211,8 +1211,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
     if( anBoard[ i ] )
       nBoard++;
 
-  for( i = 0; i < 39; i++ )
-    aHit[ i ] = 0;
+    memset(aHit, 0, sizeof(aHit));
     
     /* for every point we'd consider hitting a blot on, */
     
@@ -1263,8 +1262,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
 	  cannot_hit: ;
 	  }
 
-  for( i = 0; i < 21; i++ )
-    aRoll[ i ].nPips = aRoll[ i ].nChequers = 0;
+  memset(aRoll, 0, sizeof(aRoll));
     
   if( !anBoard[ 24 ] ) {
     /* we're not on the bar; for each roll, */
