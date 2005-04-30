@@ -1,3 +1,8 @@
+Fri Apr 29 21:16:41 CEST 2004  Jon Kinsey
+
+	* neuralnet.c: Minor improvments to new code
+	* sse.h: New file with sse specific defines
+	
 Thu Apr 28 22:35:53 2005  Øystein Johansen <oysteim@gnubg.org>
 
 	* neuralnet.c (Evaluate128, EvaluateFromBase128, NeuralNetEvaluate128):

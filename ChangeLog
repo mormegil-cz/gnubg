@@ -1,3 +1,9 @@
+Fri Mar  29  20:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* progress.c: Limit list updates in rollouts to reduce flicker
+		and improve speed (gtk 2.6)
+	* eval.c: Minor speed improvment
+	
 Thu Mar  28  22:35:45 2005 Oystein Johansen <oystein@gnubg.org>
 
 	Vectorization of neural net evaluation.
@@ -5,7 +11,7 @@ Thu Mar  28  22:35:45 2005 Oystein Johansen <oystein@gnubg.org>
 	* eval.c: Change callers to NeuralNetEvaluate to use vectorized code.
 	* set.c:  Fix typo. Thanks Jim Curtis.
 	
-Wed Mar  30  16:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Mar  27  16:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkfile.c : Allow spaces in filenames (new 2.6 file dialog),
 		not tested with linux

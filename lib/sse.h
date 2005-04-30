@@ -9,8 +9,13 @@
 #define sse_malloc(A) _mm_malloc(A,ALIGN_SIZE)
 #define sse_free _mm_free
 
-#define _mm_load_ps _mm_loadu_ps
-#define _mm_store_ps _mm_storeu_ps
+#define sse_aligned(ar) (!(((int)ar) % ALIGN_SIZE))
+
+#ifdef _MSC_VER
+#define SSE_ALIGN(D) __declspec(align(ALIGN_SIZE)) D
+#else
+#define SSE_ALIGN(D) D __attribute__ ((aligned(ALIGN_SIZE)))
+#endif
 
 #else
 

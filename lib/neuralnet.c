@@ -1140,7 +1140,7 @@ Evaluate128( neuralnet *pnn, float arInput[], float ar[],
 
        float r;
        float *pr = ar;
-       sum = _mm_xor_ps(sum, sum);
+       sum = _mm_setzero_ps();
        for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
          vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
          vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
@@ -1214,7 +1214,7 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
 
        float r;
        float *pr = ar;
-       sum = _mm_xor_ps(sum, sum);
+       sum = _mm_setzero_ps();
        for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
          vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
          vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
@@ -1237,8 +1237,11 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
 
 extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
-    float ar[HIDDEN_NODES];
-    
+
+    SSE_ALIGN(float ar[HIDDEN_NODES]);
+    assert(sse_aligned(ar));
+    assert(sse_aligned(arInput));
+
     assert(pnn->cHidden == HIDDEN_NODES);
 
     switch( t ) {
