@@ -60,6 +60,7 @@
 #include "bearoff.h"
 #include "path.h"
 #include "format.h"
+#include "sse.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -2278,9 +2279,9 @@ raceBGprob(int anBoard[2][25], int side, const bgvariation bgv)
 }  
 
 static int
-EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
-
-  float arInput[ NUM_INPUTS ];
+EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+{
+  SSE_ALIGN(float arInput[ NUM_INPUTS ]);
 
   CalculateRaceInputs( anBoard, arInput );
 #if USE_SSE_VECTORIZE 
@@ -2386,7 +2387,7 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
 static int
 EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 {
-  float arInput[ NUM_INPUTS ];
+  SSE_ALIGN(float arInput[ NUM_INPUTS ]);
     
   CalculateContactInputs( anBoard, arInput );
     
@@ -2402,8 +2403,8 @@ EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 static int
 EvalCrashed(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 {
-  float arInput[ NUM_INPUTS ];
-    
+  SSE_ALIGN(float arInput[ NUM_INPUTS ]);
+
   CalculateCrashedInputs( anBoard, arInput );
     
 #if USE_SSE_VECTORIZE 
