@@ -2292,6 +2292,3 @@ isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] ) {
     return FALSE;
 
 }
-
-
-
