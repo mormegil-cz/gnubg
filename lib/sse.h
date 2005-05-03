@@ -22,6 +22,8 @@
 #define sse_malloc malloc
 #define sse_free free
 
+#define SSE_ALIGN(D) D
+
 #endif
 
 #define HIDDEN_NODES 128
