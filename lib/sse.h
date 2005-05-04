@@ -1,3 +1,5 @@
+/* $Id$ 
+ */
 
 #if USE_SSE_VECTORIZE
 
