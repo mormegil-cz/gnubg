@@ -197,7 +197,7 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 
   /* table with results */
 
-  aszColumnTitle[ 0 ] = strdup ( _("Cube") );
+  aszColumnTitle[ 0 ] = g_strdup ( _("Cube") );
   for ( i = 0; i < 2; i++ ) {
     aszColumnTitle[ 3 * i + 1 ] = 
       g_strdup_printf ( _("Win Single\n%s"), ap[ i ].szName );
@@ -286,7 +286,7 @@ GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
   char sz[ 100 ];
   int anTotal[ 4 ];
 
-  aszColumnTitle[ 0 ] = strdup ( _("Cube") );
+  aszColumnTitle[ 0 ] = g_strdup ( _("Cube") );
   for ( i = 0; i < 2; i++ ) {
     aszColumnTitle[ 2 * i + 1 ] = 
       g_strdup_printf ( _("#Double, take\n%s"), ap[ i ].szName );

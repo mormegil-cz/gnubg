@@ -1683,14 +1683,17 @@ extern void SetPanelWidth(int size)
 
 extern void SwapBoardToPanel(int ToPanel)
 {	/* Show/Hide panel on right of screen */
+
+#if USE_GTK2
+	/* Need to hide these, as handle box seems to be buggy and gets confused */
+	gtk_widget_hide(gtk_widget_get_parent(pwMenuBar));
+	gtk_widget_hide(gtk_widget_get_parent(pwToolbar));
+#endif
+
 	if (ToPanel)
 	{
-		gtk_widget_show(hpaned);
-#if USE_GTK2
-		while(gtk_events_pending())
-			gtk_main_iteration();
-#endif
 		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
+		gtk_widget_show(hpaned);
 #if USE_GTK2
 		while(gtk_events_pending())
 			gtk_main_iteration();
@@ -1700,15 +1703,22 @@ extern void SwapBoardToPanel(int ToPanel)
 	}
 	else
 	{
+		gtk_widget_reparent(pwEventBox, pwGameBox);
 		gtk_widget_show(pwGameBox);
 #if USE_GTK2
 		while(gtk_events_pending())
 			gtk_main_iteration();
 #endif
-		panelSize = GetPanelSize();
-		gtk_widget_reparent(pwEventBox, pwGameBox);
-		gtk_widget_hide(hpaned);
+		if (GTK_WIDGET_VISIBLE(hpaned))
+		{
+			panelSize = GetPanelSize();
+			gtk_widget_hide(hpaned);
+		}
 	}
+#if USE_GTK2
+	gtk_widget_show(gtk_widget_get_parent(pwMenuBar));
+	gtk_widget_show(gtk_widget_get_parent(pwToolbar));
+#endif
 }
 
 static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
@@ -1865,7 +1875,6 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 
 	return FALSE;
 }
-
 extern int InitGTK( int *argc, char ***argv ) {
     
     GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
@@ -1959,7 +1968,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "/View/Toolbar/Text only" },
 	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
 	  "/View/Toolbar/Text only" },
-	{ N_("/_View/Full screen"), NULL, FullScreenMode, 0, NULL },
+	{ N_("/_View/Full screen"), NULL, FullScreenMode, 0, "<CheckItem>" },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_View/Gu_ile"), NULL, NULL, 0, NULL },
 	{ N_("/_View/_Python shell (IDLE)..."), 
@@ -2351,12 +2360,14 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
 				   aife, NULL );
     gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
+
     gtk_box_pack_start( GTK_BOX( pwVbox ),
 			pwHandle = gtk_handle_box_new(),
 			FALSE, FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwHandle ),
 			pwMenuBar = gtk_item_factory_get_widget( pif,
 								 "<main>" ));
+
     sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
 #if GTK_CHECK_VERSION(1,3,15)
     gtk_accel_map_load( sz );
@@ -9198,7 +9209,7 @@ static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer us
 	short k = event->keyval;
 
 	if (k == KEY_ESCAPE)
-		FullScreenMode(0, 1, 0);
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen")), 0);
 
 	return FALSE;
 }
@@ -9212,12 +9223,23 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	static int showingPanels;
 	static int showIDs;
 	static int maximised;
+	static int changedRP, changedDP;
 
-	bd->rd->fShowGameInfo = n;
+	int state = !gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen")));
 
-	if (!n)
+	GtkWidget* pmiRP = gtk_item_factory_get_widget(pif, "/View/Restore panels");
+	GtkWidget* pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
+
+	bd->rd->fShowGameInfo = state;
+
+	if (!state)
 	{
 		GTKShowWarning(WARN_FULLSCREEN_EXIT);
+
+		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP) && GTK_WIDGET_IS_SENSITIVE(pmiRP))
+			changedRP = TRUE;
+		if (pmiDP && GTK_WIDGET_VISIBLE(pmiDP) && GTK_WIDGET_IS_SENSITIVE(pmiDP))
+			changedDP = TRUE;
 
 #if USE_GTK2
 		/* Check if window is maximized */
@@ -9229,9 +9251,6 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
 
-		gtk_widget_hide(pwMenuBar);
-		gtk_widget_hide(pwToolbar);
-		gtk_widget_hide(pwHandle);
 		gtk_widget_hide(GTK_WIDGET(bd->table));
 		gtk_widget_hide(GTK_WIDGET(bd->dice_area));
 		gtk_widget_hide(pwStatus);
@@ -9244,16 +9263,23 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 		HideAllPanels(NULL, 0, NULL);
 
-/* How can I maximize the window ?? */
+/* Don't hide for gtk 2.6 as stops accelerators working... */
+#if !USE_GTK2
+		gtk_widget_hide(pwMenuBar);
+#endif
+		gtk_widget_hide(pwToolbar);
+		gtk_widget_hide(pwHandle);
+
+		/* Max window maximal */
 #if USE_GTK2
 		if (!maximised)
 			gtk_window_maximize(ptl);
 		gtk_window_set_decorated(ptl, FALSE);
-#else
-		/* Not sure about gtk1...
-		gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
-		*/
 #endif
+		if (pmiRP)
+			gtk_widget_set_sensitive(pmiRP, FALSE);
+		if (pmiDP)
+			gtk_widget_set_sensitive(pmiDP, FALSE);
 	}
 	else
 	{
@@ -9273,19 +9299,26 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
 
-/* How can I (un)maximize the window ?? */
 #if USE_GTK2
+		/* Restore window */
 		if (!maximised)
 			gtk_window_unmaximize(ptl);
 		gtk_window_set_decorated(ptl, TRUE);
-#else
-		/* Not sure about gtk1...
-		gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
-		*/
 #endif
+
 		if (showingPanels)
 			ShowAllPanels(NULL, 0, NULL);
 
+		if (changedRP)
+		{
+			gtk_widget_set_sensitive(pmiRP, TRUE);
+			changedRP = FALSE;
+		}
+		if (changedDP)
+		{
+			gtk_widget_set_sensitive(pmiDP, TRUE);
+			changedDP = FALSE;
+		}
 	}
 	UpdateSetting(&bd->rd->fShowIDs);
 }
