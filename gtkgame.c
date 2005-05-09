@@ -9222,7 +9222,9 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	static gulong id;
 	static int showingPanels;
 	static int showIDs;
+#if USE_GTK2
 	static int maximised;
+#endif
 	static int changedRP, changedDP;
 
 	int state = !GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
