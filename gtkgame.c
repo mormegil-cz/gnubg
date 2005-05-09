@@ -9225,8 +9225,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	static int maximised;
 	static int changedRP, changedDP;
 
-	int state = !gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen")));
-
+	int state = !GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
 	GtkWidget* pmiRP = gtk_item_factory_get_widget(pif, "/View/Restore panels");
 	GtkWidget* pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
 
