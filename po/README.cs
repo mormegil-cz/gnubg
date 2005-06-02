@@ -1,7 +1,5 @@
 Èeština pro GNUBG
 *****************
-Verze: 13.6.2004 (gnubg 0.14.2-dev 1.1604)
-
 
 Jak nainstalovat?
 -----------------
