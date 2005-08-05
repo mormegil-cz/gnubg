@@ -1,3 +1,7 @@
+Fri Aug  5 11:45:31 2005 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkexport.c - fix to skip SKILL_GOOD for cube decisions
+	
 Sun May  8 12:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkpanels.c: full screen improvments (for gtk 2.6)

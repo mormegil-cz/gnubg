@@ -292,6 +292,9 @@ SetExportCommands ( const exportsetup *pexsOrig,
               "cube parameters rollout" );
 
   for ( i = 0; i < N_SKILLS; ++i ) {
+    if ( i == SKILL_GOOD ) {
+      continue;
+    }
     if ( i == SKILL_NONE ) {
       CHECKFLAG ( pexsOrig, pexsNew, afCubeDisplay[ i ], 
                   "cube display unmarked" );
