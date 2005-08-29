@@ -46,4 +46,7 @@ CreateMoveList( movelist *pml, int *piHighlight,
 extern int 
 CheckHintButtons( hintdata *phd );
 
+extern void MoveListRefreshSize();
+extern GtkWidget* pwDetails;
+extern int showMoveListDetail;
 #endif

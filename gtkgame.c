@@ -389,6 +389,7 @@ GtkWidget *pom = 0;
 static GtkWidget *pwStatus, *pwProgress;
 GtkWidget *pwMessageText, *pwPanelVbox, *pwAnalysis, *pwCommentary;
 static moverecord *pmrAnnotation;
+moverecord *pmrCurAnn;
 GtkAccelGroup *pagMain;
 GtkTooltips *ptt;
 GtkItemFactory *pif;
@@ -1106,18 +1107,23 @@ static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
 
 #define ANALYSIS_HORIZONTAL 0
 
+GtkWidget *pwMoveAnalysis = NULL;
+
 extern void SetAnnotation( moverecord *pmr ) {
 
     GtkWidget *pwParent = pwAnalysis->parent, *pw = NULL, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
     list *pl;
     char sz[ 64 ];
-    GtkWidget *pwMoveAnalysis = NULL, *pwCubeAnalysis = NULL;
+    GtkWidget *pwCubeAnalysis = NULL;
     doubletype dt;
     taketype tt;
     cubeinfo ci;
-    
+    pwMoveAnalysis = NULL;
+
     /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
+    pmrCurAnn = pmr;
+
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext )
 	if( pl->p == pmr ) {
 	    pmr = pl->plNext->p;
@@ -7718,6 +7724,15 @@ extern void GTKSet( void *p ) {
 	}
     } else if( p == &fGUIShowPips )
 	ShowBoard(); /* this is overkill, but it works */
+	else if (p == &fOutputWinPC)
+	{
+		MoveListRefreshSize();
+	}
+	else if (p == &showMoveListDetail)
+	{
+		if (pwMoveAnalysis && pwDetails)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwDetails), showMoveListDetail);
+	}
 }
 
 

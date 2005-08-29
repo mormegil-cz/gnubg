@@ -1,3 +1,8 @@
+Mon Aug 29 15:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkchequer.c (and a few others), gtkmovelist(.h, .c, ctrl.c) - new files
+		Added win/loss stats to movelist
+
 Fri Aug  5 11:45:31 2005 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkexport.c - fix to skip SKILL_GOOD for cube decisions

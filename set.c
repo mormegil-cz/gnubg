@@ -66,6 +66,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkprefs.h"
+#include "gtkchequer.h"
 #endif /* USE_GTK */
 
 #include "matchequity.h"
@@ -1198,6 +1199,13 @@ extern void CommandSetGUIUseStatsPanel( char *sz ) {
     SetToggle( "gui usestatspanel", &fGUIUseStatsPanel, sz,
 		   _("The match statistics will be shown in a panel"),
 		   _("The match statistics will be shown in a list") );
+}
+
+extern void CommandSetGUIMoveListDetail( char *sz )
+{
+		SetToggle( "gui movelistdetail", &showMoveListDetail, sz,
+			_("The win loss statistics will be shown in the move analysis"),
+			_("Basic details will be shown in the move analysis") );
 }
 
 extern void CommandSetGUIShowPips( char *sz ) {
@@ -2850,6 +2858,9 @@ CommandSetOutputDigits( char *sz ) {
   outputf( _("Probabilities and equities will be shown with %d digits "
              "after the decimal separator\n"), fOutputDigits );
 
+#if USE_GTK
+	MoveListRefreshSize();
+#endif
 }
       
 

@@ -136,6 +136,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "gtkgame.h"
 #include "gtkprefs.h"
 #include "gtksplash.h"
+#include "gtkchequer.h"
 #elif USE_EXT
 #include <ext.h>
 #include <extwin.h>
@@ -1248,6 +1249,8 @@ command cER = {
       N_("Show target help while dragging a chequer"), szONOFF, NULL },
     { "usestatspanel", CommandSetGUIUseStatsPanel,
       N_("Show statistics in a panel"), szONOFF, NULL },
+    { "movelistdetail", CommandSetGUIMoveListDetail,
+      N_("Show win/loss stats in move list"), szONOFF, NULL },
 #endif
     { "highdiefirst", CommandSetGUIHighDieFirst,
       N_("Show the higher die on the left"), szONOFF, NULL },
@@ -5885,7 +5888,8 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set gui showids %s\n"
 	     "set gui showpips %s\n"
 	     "set gui dragtargethelp %s\n"
-		 "set gui usestatspanel %s\n",
+		 "set gui usestatspanel %s\n"
+		 "set gui movelistdetail %s\n",
 	     aszAnimation[ animGUI ], nGUIAnimSpeed,
 	     fGUIBeep ? "on" : "off",
 	     GetMainAppearance()->fDiceArea ? "on" : "off",
@@ -5894,7 +5898,8 @@ extern void CommandSaveSettings( char *szParam ) {
 	     GetMainAppearance()->fShowIDs ? "on" : "off",
 	     fGUIShowPips ? "on" : "off",
 	     fGUIDragTargetHelp ? "on" : "off",
-		 fGUIUseStatsPanel ? "on" : "off");
+		 fGUIUseStatsPanel ? "on" : "off",
+		 showMoveListDetail ? "on" : "off");
 #endif
     
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
