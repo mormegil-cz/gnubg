@@ -241,12 +241,13 @@ void custom_cell_renderer_invalidate_size()
 		B
  A a b c c d E
 		C
- A Z Z Z s Z Z Z E
+ A2 Z Z Z s Z Z Z E
 		D
 
 (Y - space)
+(m - minus)
 */
-int _s_A, _s_B, _s_C, _s_D, _s_E, _s_Y, _s_Z, _s_ZP, _s_a, _s_b, _s_c, _s_cP, _s_d, _s_s;
+int _s_A, _s_A2, _s_B, _s_C, _s_D, _s_E, _s_Y, _s_Z, _s_ZP, _s_a, _s_b, _s_c, _s_cP, _s_d, _s_s, _s_m;
 
 static void
 custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
@@ -287,12 +288,14 @@ custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
 		g_object_unref (layout);
 		_s_Y = logical_rect.width;
 
-		layout = gtk_widget_create_pango_layout (widget, "-   ");
+		layout = gtk_widget_create_pango_layout (widget, "-");
 		pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
 		g_object_unref (layout);
-		_s_s = logical_rect.width;
+		_s_m = logical_rect.width;
+		_s_s = 6 * _s_Y;
 
-		l2Width = 6 * _s_Z + 5 * _s_Y * 2 + _s_s;
+		_s_A2 = _s_A + _s_Y * 4;
+		l2Width = _s_A2 + 6 * _s_Z + 5 * _s_Y * 2 + _s_s;
 
 		layout = gtk_widget_create_pango_layout (widget, "1000");
 		pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
@@ -320,7 +323,7 @@ custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
 		g_object_unref (layout);
 		_s_d = logical_rect.width;
 
-		l1Width = _s_a + _s_b + 2 * _s_c + _s_d + 4 * _s_Y;
+		l1Width = _s_A + _s_a + _s_b + 2 * _s_c + _s_d + 4 * _s_Y;
 
 		minWidth = (l1Width > l2Width) ? l1Width : l2Width;
 	}
@@ -373,7 +376,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 	int i, x, y, selected;
 	char buf[100];
 	float *ar;
-	GdkColor *pFontCol;
+	GdkColor *pFontCol, *fg;
 	PangoRectangle logical_rect;
 	cubeinfo ci;
 	GetMatchStateCubeInfo( &ci, &ms );
@@ -417,7 +420,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 
 	gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, pFontCol, 0);
 
-	x = _s_A + _s_a + _s_Y * 2;
+	x = _s_A + _s_a + _s_Y * 3;
 	FormatEval( buf, &cellprogress->pml->esMove );
 	pango_layout_set_text(layout, buf, -1);
 	gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, pFontCol, 0);
@@ -455,10 +458,15 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 
 	/* Second line w/l stats */
 
-	x = _s_A;
+	x = _s_A2;
 	y += fontheight + _s_C;
 
 	ar = cellprogress->pml->arEvalMove;
+
+	if (selected)
+		fg = &widget->style->base[GTK_STATE_NORMAL];
+	else
+		fg = &wlCol;
 
 	for (i = 0; i < 6; i++)
 	{
@@ -470,34 +478,29 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 		else
 			str = OutputPercent( ar[ aanColumns[ i - 1 ][ 1 ] ] );
 
-		if (i == 3)
-		{
-			if (fOutputWinPC)
-				sprintf(buf, " -  %s", str);
-			else
-				sprintf(buf, "-   %s", str);
-				str = buf;
-		}
+		while (*str == ' ')
+			str++;
 
 		pango_layout_set_text(layout, str, -1);
-
-		{
-			GdkColor *fg;
-			if (selected)
-				fg = &widget->style->base[GTK_STATE_NORMAL];
-			else
-				fg = &wlCol;
-
-			gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, fg, 0);
-		}
+		gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, fg, 0);
 
 		if (fOutputWinPC)
-			x += _s_ZP + _s_Y * 2;
+			x += _s_ZP;
 		else
-			x += _s_Z + _s_Y * 2;
+			x += _s_Z;
 
-		if (i == 3)
+		if (i == 2)
+		{
+			int minOff = (_s_s - _s_m) / 2;
+			if (fOutputWinPC)
+				minOff -= _s_Y;
+			pango_layout_set_text(layout, "-", -1);
+			gdk_draw_layout_with_colors(window, gc, cell_area->x + x + minOff, cell_area->y + y, layout, fg, 0);
+
 			x += _s_s;
+		}
+		else
+			x += _s_Y * 2;
 	}
 
 	g_object_unref (layout);
