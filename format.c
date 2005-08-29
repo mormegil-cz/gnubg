@@ -467,7 +467,7 @@ OutputEquity ( const float r, const cubeinfo *pci, const int f ) {
   else {
     if ( fOutputMatchPC ) {
       /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits - 1 );
+      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
       sprintf ( sz, fmt,
                 100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
     }
@@ -536,7 +536,7 @@ OutputEquityScale ( const float r, const cubeinfo *pci,
 
       if ( fOutputMatchPC ) {
         /* fmt: "%6.2f%%" */
-        sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits - 1 );
+        sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
         sprintf ( sz, fmt,
                   100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
       }
@@ -591,7 +591,7 @@ OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci ) {
   else {
     if ( fOutputMatchPC ) {
       /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits - 1 );
+      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
       sprintf ( sz, fmt,
                 100.0f * eq2mwc ( r1, pci ) - 100.0f * eq2mwc ( r2, pci ) );
     }
@@ -637,7 +637,7 @@ OutputMWCDiff ( const float r1, const float r2, const cubeinfo *pci ) {
   else {
     if ( fOutputMatchPC ) {
       /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits - 1 );
+      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
       sprintf ( sz, fmt,
                 100.0f * r1 - 100.0f * r2 );
     }
@@ -685,7 +685,7 @@ OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
     }
     else if ( fOutputMatchPC ) {
       /* fmt: "%6.2f%%" */
-      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits - 1 );
+      sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 3, fOutputDigits > 1 ? fOutputDigits - 1 : 0 );
       sprintf ( sz, fmt, 100.0f * r );
     }
     else {
@@ -709,7 +709,7 @@ OutputPercent ( const float r ) {
 
   if ( fOutputWinPC ) {
     /* fmt: "%5.1f" */
-    sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 2, fOutputDigits - 2 );
+	  sprintf( fmt, "%%%d.%df%%%%", fOutputDigits + 2, fOutputDigits > 2 ? fOutputDigits - 2 : 0 );
     sprintf ( sz, fmt, 100.0 * r );
   }
   else {
