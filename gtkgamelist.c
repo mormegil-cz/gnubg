@@ -65,8 +65,6 @@ static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
 GtkWidget *pwGameList;
 GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], *psLucky[LUCK_VERYGOOD + 1];
 
-extern void SetAnnotation( moverecord *pmr );
-
 typedef struct _gamelistrow {
     moverecord *apmr[ 2 ]; /* moverecord entries for each column */
     int fCombined; /* this message's row is combined across both columns */

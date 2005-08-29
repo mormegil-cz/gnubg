@@ -30,6 +30,8 @@
 #include "format.h"
 #include "assert.h"
 #include "gtkmovelistctrl.h"
+#include "gtkgame.h"
+#include "drawboard.h"
 
 #if USE_GTK2
 extern void HintDoubleClick(GtkTreeView        *treeview,
@@ -78,13 +80,6 @@ void MoveListCreate(hintdata *phd)
         N_("L g"), 
         N_("L bg"),
        NULL, 
-        N_("Diff."), 
-        N_("Move")
-    };
-    static char *aszTitle[] = {
-	N_("Rank"), 
-        N_("Type"), 
-	NULL, 
         N_("Diff."), 
         N_("Move")
     };

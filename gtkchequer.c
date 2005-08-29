@@ -94,7 +94,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   if ( fAction )
     HandleXAction();
 
-  res = ScoreMoveRollout ( ppm, ppci, c, RolloutProgress, p );
+  res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
   RolloutProgressEnd( &p );
 
@@ -125,9 +125,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
 void ShowMove ( hintdata *phd, const int f )
 {
-  move *pm;
   char *sz;
-  int i;
   int anBoard[ 2 ][ 25 ];
 	if ( f )
 	{
@@ -355,11 +353,10 @@ static char *MoveListCopyData ( hintdata *phd )
 static void
 MoveListMove ( GtkWidget *pw, hintdata *phd )
 {
-  move m;
-move *pm;
-char szMove[ 40 ];
-  int i;
-  int anBoard[ 2 ][ 25 ];
+	move m;
+	move *pm;
+	char szMove[ 40 ];
+	int anBoard[ 2 ][ 25 ];
 	GList *plSelList = MoveListGetSelectionList(phd);
 	if (!plSelList)
 		return;
@@ -369,21 +366,21 @@ char szMove[ 40 ];
 
 	memcpy(&m, pm, sizeof(move));
 
-  memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
-  ApplyMove ( anBoard, m.anMove, FALSE );
+	memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
+	ApplyMove ( anBoard, m.anMove, FALSE );
 
-  if ( ! ms.fMove )
-    SwapSides ( anBoard );
+	if ( ! ms.fMove )
+	SwapSides ( anBoard );
 
-  sprintf ( szMove, "show fullboard %s", PositionID ( anBoard ) );
-  UserCommand ( szMove );
-  
-  if ( phd->fDestroyOnMove )
-    /* Destroy widget on exit */
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+	sprintf ( szMove, "show fullboard %s", PositionID ( anBoard ) );
+	UserCommand ( szMove );
 
-  FormatMove( szMove, ms.anBoard, m.anMove );
-  UserCommand( szMove );
+	if ( phd->fDestroyOnMove )
+	/* Destroy widget on exit */
+		gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+	FormatMove( szMove, ms.anBoard, m.anMove );
+	UserCommand( szMove );
 
 #if USE_BOARD3D
 	RestrictiveRedraw();
@@ -665,9 +662,7 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
 extern int 
 CheckHintButtons( hintdata *phd )
 {
-    int c;
-    GList *pl;
-	c = g_list_length(MoveListGetSelectionList(phd));
+    int c = g_list_length(MoveListGetSelectionList(phd));
 
     gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
@@ -683,10 +678,8 @@ extern GtkWidget *
 CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
                 const int fDestroyOnMove, const int fDetails )
 {
-    GtkWidget *pwMoves;
     GtkWidget *pw;
     GtkWidget *pwHBox;
-    int i;
 
     hintdata *phd = (hintdata *) malloc ( sizeof ( hintdata ) );
 

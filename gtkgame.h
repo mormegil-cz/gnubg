@@ -261,3 +261,4 @@ extern int IsPanelShowVar(gnubgwindow panel, void *p);
 extern int SetMainWindowSize();
 extern void ShowHidePanel(gnubgwindow panel);
 extern void GTKSetCurrentParent(GtkWidget *parent);
+extern void SetAnnotation( moverecord *pmr );

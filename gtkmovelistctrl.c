@@ -35,10 +35,6 @@ GdkColor wlCol;
 
 static void     custom_cell_renderer_movelist_init       (CustomCellRendererMovelist      *cellprogress);
 static void     custom_cell_renderer_movelist_class_init (CustomCellRendererMovelistClass *klass);
-static void     custom_cell_renderer_movelist_get_property  (GObject                    *object,
-                                                             guint                       param_id,
-                                                             GValue                     *value,
-                                                             GParamSpec                 *pspec);
 static void     custom_cell_renderer_movelist_set_property  (GObject                    *object,
                                                              guint                       param_id,
                                                              const GValue               *value,
