@@ -433,7 +433,7 @@ custom_cell_renderer_movelist_render (GtkCellRenderer *cell,
 		x += _s_cP + _s_Y * 2;
 	else
 		x += _s_c + _s_Y * 2;
-	if (cellprogress->rank > 1)
+	if (cellprogress->rank != 1)
 	{
 		pango_layout_set_text(layout, OutputEquityDiff( cellprogress->pml->rScore, rBest, &ci), -1);
 		gdk_draw_layout_with_colors(window, gc, cell_area->x + x, cell_area->y + y, layout, pFontCol, 0);
