@@ -2298,7 +2298,7 @@ void InitBoard3d(BoardData *bd)
 	SetupSimpleMat(&bd->gapColour, 0, 0, 0);
 	SetupSimpleMat(&bd->logoMat, 1, 1, 1);
 	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
-	SetupMat(&bd->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 0);
+	SetupMat(&bd->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 1);
 
 	bd->diceList = bd->DCList = bd->pieceList = 0;
 	bd->qobjTex = bd->qobj = 0;

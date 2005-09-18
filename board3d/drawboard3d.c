@@ -3270,9 +3270,30 @@ void renderFlag(BoardData* bd)
 	{
 		/* Draw number */
 		char flagValue[2] = "x";
+		/* No specular light */
+		float specular[4];
+		float zero[4] = {0,0,0,0};
+		glGetLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, zero);
+
 		flagValue[0] = '0' + abs(bd->resigned);
-		glScalef(1.5f, 1.3f, 1);
+		glScalef(1.3f, 1.3f, 1);
+
+		glPushMatrix();
 		glPrintCube(bd, flagValue, 0);
+		glPopMatrix();
+
+		/* Anti-alias flag number */
+		glLineWidth(.5f);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_BLEND);
+
+		glPrintCube(bd, flagValue, 1);
+
+		glDisable(GL_BLEND);
+		glDisable(GL_LINE_SMOOTH);
+
+		glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	}
 	glPopMatrix();
 
