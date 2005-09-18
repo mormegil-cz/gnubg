@@ -429,12 +429,12 @@ class relational:
             CURRENT_TIME = 'CURRENT_TIMESTAMP'
 
          res = g[ 'info' ].get( 'points-won', 0 )
-         if g[ 'info' ].get( 'winner', 'O' ) == 'O' : res = -res
+         if g[ 'info' ].get( 'winner', 'X' ) == 'O' : res = -res
          query = ("INSERT INTO game(game_id, match_id, nick_id0, nick_id1, " \
                   "score_0, score_1, result, added, game_number, crawford) " \
                   "VALUES (%d, %d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", %d, %d )") % \
                   (game_id, match_id, nick_id0, nick_id1, \
-                   g[ 'info' ][ 'score-O' ], g[ 'info'][ 'score-X' ], res,
+                   g[ 'info' ][ 'score-X' ], g[ 'info'][ 'score-O' ], res,
                    g[ 'info'][ 'game_number' ], g[ 'info' ].get( 'crawford', False ) )
 
          cursor = self.conn.cursor()
@@ -443,11 +443,13 @@ class relational:
 
          # add game statistics for both players
 
+         # print "addstat: ", game_id, nick_id0, g[ 'stats' ][ 'X' ][ 'moves' ]
          if self.__addStat( game_id, nick_id0, g[ 'stats' ][ 'X' ],
                             g [ 'stats' ][ 'O' ], "gamestat" ) == None:
             print "Error adding player 0's stat to database."
             return None
 
+         # print "addstat: ", game_id, nick_id1, g[ 'stats' ][ 'O' ][ 'moves' ]
          if self.__addStat( game_id, nick_id1, g[ 'stats' ][ 'O' ],
                             g[ 'stats' ][ 'X' ], "gamestat" ) == None:
             print "Error adding player 1's stat to database."
