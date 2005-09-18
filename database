@@ -1,0 +1,40 @@
+
+# all specifications for the match/game database begin with the text gnubg*
+
+# type = postgres or sqlite, maybe mysql somedoay
+gnubg*type postgres
+
+# parameters used during connect for storing/retreiving matches/games
+# for sqlite, this is only dbname
+# for postgresql:
+#   dsn         Data source name host:database:user:password:options:tty
+#               trailing fields and their ':' can be omitted
+#               localhost:gnubg:mylogin:mypass defaults options and tty
+#               :gnubg defaults host, user, password, options and tty
+#   user        User name as string (optional)
+#   password    Password as string (optional)
+#   host        Hostname (optional)
+#   database    Database name (optional)
+#   host, user, password and database will override those
+#               parts of the dsn. If you need a non-default port no
+#               you have to supply the host line
+#   parameters can contain embedded white space if they are surrounded
+#   by single or double quotes (so single or double quotes can also be 
+#   included, but not both in the same parameter:
+#   gnubg password 'this is my password'
+#   gnubg password "it's a secret"
+
+#gnubg*user jes
+#gnubg*host localhost:5432
+gnubg*database gnubg
+#gnubg*password "abcdef ghig"
+# this line, tells gnubg to include details of individual
+# games
+gnubg*games no
+
+# parameters used during connect for storing/retreiving errors
+# see above notes (still in development)
+error*user jes
+error*host localhost:5432
+error*database blunders
+

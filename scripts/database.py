@@ -30,19 +30,99 @@ import sys
 import os
 import traceback
 import string
+import re
 
 # different database types
 DB_SQLITE = 1
 DB_POSTGRESQL = 2
+DB_MYSQL = 3
 
 # Change this line to set the database type
 DB_TYPE = DB_POSTGRESQL
 
 class relational:
 
+   # parse out the gnubg* lines from database config file
+   def __configure__( self ) :
+      home = os.environ.get("HOME", 0)
+      if home :
+         fname = "%s/%s" % ( home, ".gnubg/database" )
+         try :
+            f = open( fname, "r" )
+         except IOError, e :
+            if e.errno == 2 :
+               return
+            raise e
+
+      for line in f.readlines() :
+         re.sub( r'#.*', '', line )
+         line.strip()
+         mo = re.match( r'^gnubg\*(\S+)\s+(\S.*)', line)
+         if mo :
+            (item, value) = mo.groups()
+            mo = re.match(r'([\'"])(.*)\1', value )
+            if mo :
+               value = mo.group( 2 )
+            if item == "dsn" : self.dsn = value
+            if item == "host" : self.host = value
+            if item == "user" : self.user = value
+            if item == "password" : self.password = value
+            if item == "database" : self.database = value
+            if item == "type" :
+               if re.match( r'^postgres', value ) :
+                  self.db_type = DB_POSTGRESQL
+               elif re.match( r'sqlite', value ) :
+                  self.db_type = DB_SQLITE
+               elif re.match( r'mysql', value ) :
+                  self.db_type = DB_MYSQL
+                  
+            if item == "games" :
+               if value in ["yes", "on", "true", "1" ] :
+                  self.games = True
+               else :
+                  self.games = False
+
+      f.close()
+      # rebuild the dsn to include user/password and maybe host
+      parts = self.dsn.split( ':' )
+      if self.db_type == DB_POSTGRESQL and self.host and not re.match( r'.*:', self.host) :
+         parts[ 0 ] = self.host
+         self.host = None
+      if self.database :
+         while len( parts ) < 2 :  parts.append( "" )
+         parts[ 1 ] = self.database
+      if self.user :
+         while len( parts ) < 3 : parts.append( "" )
+         parts[ 2 ] = self.user
+      if self.password :
+         while len( parts ) < 4 : parts.append( "" )
+         parts[ 3 ] = self.password
+      self.dsn = ":".join( parts )
+      if self.db_type == DB_SQLITE :
+         if self.database :
+            DBFILE = self.database
+         else :
+            DBFILE = "data.db"
+      elif self.db_type == DB_MYSQL :
+         if not self.database :
+            self.database = "gnubg"
+         self.match_table_name = "match_tbl"
+         
    def __init__(self):
 
       self.conn = None
+      
+      self.dsn = ":gnubg"
+      self.database = None
+      self.user = None
+      self.password = None
+      self.host = None
+      self.games = False
+      self.match_table_name = "match"
+      
+      self.db_type = DB_POSTGRESQL
+      
+      self.__configure__()
 
    #
    # Return next free "id" from the given table
@@ -145,18 +225,23 @@ class relational:
          return a/b
 
    #
-   # Add statistics
+   # Add game/match statistics
    # Parameters: conn (the database connection, DB API v2)
+   #             gm_id (the match or game id)
    #             nick_id (the nick id for this statistics)
    #             gs (the game/match statistics)
-   #
+   #             gs_other (opponent's game/match statistics)
+   #             table_name (matchstat or gamestat)
    
-   def __addStat(self,match_id,nick_id,gs,gs_other):
-      
-      matchstat_id = self.__next_id("matchstat")
+   def __addStat( self, gm_id, nick_id, gs, gs_other, table_name ):
+
+      if table_name == "gamestat" :
+         gms_id = self.__next_id("gamestat")
+      else :
+         gms_id = self.__next_id("matchstat")
 
       # identification
-      s1 = "%d,%d,%d," % (matchstat_id, match_id, nick_id)
+      s1 = "%d,%d,%d," % (gms_id, gm_id, nick_id)
       
       # chequer play statistics
       chs = gs[ 'moves' ]
@@ -298,8 +383,8 @@ class relational:
       else:
          s8 = "0, 0, 0"
       
-      query = "INSERT INTO matchstat VALUES (" + \
-              s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + ");"
+      query = "INSERT INTO %s VALUES (" % ( table_name )+ \
+              s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + " );"
       cursor = self.conn.cursor()
       cursor.execute(query)
       cursor.close()
@@ -307,9 +392,70 @@ class relational:
       return 0
 
    #
+   # Add games
+   # Parameters: conn (the database connection, DB API v2)
+   #             person_id0 (nick_id of player 0)
+   #             person_id1 (nick_id of player 1)
+   #             m (the gnubg match)             
+   
+   def __addgames( self, nick_id0, nick_id1, m, match_id):
+
+      # add games - first get an array of games dictionaris
+      ga = m[ 'games' ]
+      #assign game numbers by total score at start of each game
+      ts = {}
+      i = -1;
+      for g in ga :
+         i += 1
+         ts[ g[ 'info'][ 'score-X' ] + g['info'][ 'score-O' ] ] = i
+
+      tsa = ts.keys()
+      tsa.sort()
+      ml = m[ 'match-info' ][ 'match-length' ]
+      for i in range( 0, len( tsa ) ) :
+         ga[ ts[ tsa[ i ] ] ][ 'info' ][ 'game_number' ] = i 
+
+      for g in ga :
+         game_id = self.__next_id("game")
+         if ml > 0 :
+            g[ 'info'][ 'score-X' ] = ml - g[ 'info'][ 'score-X' ]
+            g[ 'info'][ 'score-O' ] = ml - g[ 'info'][ 'score-O' ]
+            
+      
+         # CURRENT_TIMESTAMP - SQL99, may have different names in various databases
+         if self.db_type == DB_SQLITE:
+            CURRENT_TIME = "datetime('now', 'localtime')"
+         else :
+            CURRENT_TIME = 'CURRENT_TIMESTAMP'
+
+         res = g[ 'info' ].get( 'points-won', 0 )
+         if g[ 'info' ].get( 'winner', 'X' ) == 'X' : res = -res
+         query = ("INSERT INTO game(game_id, match_id, nick_id0, nick_id1, " \
+                  "score_0, score_1, result, added, game_number, crawford) " \
+                  "VALUES (%d, %d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", %d, %d )") % \
+                  (game_id, match_id, nick_id0, nick_id1, \
+                   g[ 'info' ][ 'score-O' ], g[ 'info'][ 'score-X' ], res,
+                   g[ 'info'][ 'game_number' ], g[ 'info' ].get( 'crawford', False ) )
+
+         cursor = self.conn.cursor()
+         cursor.execute(query)
+         cursor.close()
+
+         # add game statistics for both players
+
+         if self.__addStat( game_id, nick_id0, g[ 'stats' ][ 'X' ],
+                            g [ 'stats' ][ 'O' ], "gamestat" ) == None:
+            print "Error adding player 0's stat to database."
+            return None
+
+         if self.__addStat( game_id, nick_id1, g[ 'stats' ][ 'X' ],
+                            g[ 'stats' ][ 'O' ], "gamestat" ) == None:
+            print "Error adding player 1's stat to database."
+            return None
+         
+   #
    # Add match
    # Parameters: conn (the database connection, DB API v2)
-   #             env_id (the env)
    #             person_id0 (nick_id of player 0)
    #             person_id1 (nick_id of player 1)
    #             m (the gnubg match)             
@@ -330,15 +476,16 @@ class relational:
          date = "NULL"
 
       # CURRENT_TIMESTAMP - SQL99, may have different names in various databases
-      if DB_TYPE == DB_SQLITE:
+      if self.db_type == DB_SQLITE:
          CURRENT_TIME = "datetime('now', 'localtime')"
-      elif DB_TYPE == DB_POSTGRESQL:
+      else :
          CURRENT_TIME = 'CURRENT_TIMESTAMP'
 
-      query = ("INSERT INTO match(match_id, checksum, nick_id0, nick_id1, " \
+      query = ("INSERT INTO %s(match_id, checksum, nick_id0, nick_id1, " \
               "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) " \
               "VALUES (%d, '%s', %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
-              (match_id, key, nick_id0, nick_id1, \
+              (self.match_table_name,
+               match_id, key, nick_id0, nick_id1, \
                mi[ 'result' ], mi[ 'match-length' ],
                self.__getKey( mi[ 'X' ], 'rating' )[0:80],
                self.__getKey( mi[ 'O' ], 'rating' )[0:80],
@@ -353,19 +500,21 @@ class relational:
 
       # add match statistics for both players
 
-      if self.__addStat(match_id,nick_id0,m[ 'stats' ][ 'X' ],
-                   m [ 'stats' ][ 'O' ]) == None:
+      if self.__addStat( match_id, nick_id0, m[ 'stats' ][ 'X' ],
+                   m [ 'stats' ][ 'O' ], "matchstat" ) == None:
          print "Error adding player 0's stat to database."
          return None
 
-      if self.__addStat(match_id,nick_id1,m[ 'stats' ][ 'O' ],
-                   m [ 'stats' ][ 'X' ]) == None:
+      if self.__addStat( match_id, nick_id1, m[ 'stats' ][ 'O' ],
+                   m [ 'stats' ][ 'X' ], "matchstat" ) == None:
          print "Error adding player 1's stat to database."
          return None
-      
+
+      # add games for both players
+      if self.games :
+         self.__addgames( nick_id0, nick_id1, m, match_id)
       return match_id
          
-   
    #
    # Add match to database
    # Parameters: conn (the database connection, DB API v2)
@@ -430,7 +579,7 @@ class relational:
 
    def is_existing_match(self, key):
 
-      return self.__runqueryvalue("SELECT match_id FROM match WHERE checksum = '%s'" % (key))
+      return self.__runqueryvalue("SELECT match_id FROM %s WHERE checksum = '%s'" % (self.match_table_name, key))
 
    #
    # Main logic
@@ -461,24 +610,43 @@ class relational:
 
    def connect(self):
 
-      if DB_TYPE == DB_SQLITE:
-         DBFILE = "data.db"
+      if self.db_type == DB_SQLITE:
          import sqlite
-      elif DB_TYPE == DB_POSTGRESQL:
+      elif self.db_type == DB_POSTGRESQL:
          # Import the DB API v2 postgresql module
          import pgdb
          import _pg
-
+      elif self.db_type == DB_MYSQL :
+         import MySQLdb
+         
       try:
-         if DB_TYPE == DB_SQLITE:
+         if self.db_type == DB_SQLITE:
             dbfile = os.access(DBFILE, os.F_OK)
             self.conn = sqlite.connect(DBFILE)
             if (dbfile == 0):
                self.createdatabase()
 
-         elif DB_TYPE == DB_POSTGRESQL:
-            self.conn = pgdb.connect(dsn=':gnubg')
+         elif self.db_type == DB_POSTGRESQL:
+            if self.host :
+               self.conn = pgdb.connect( dsn = self.dsn, host = self.host )
+            else :
+               self.conn = pgdb.connect( dsn = self.dsn )
 
+         elif self.db_type == DB_MYSQL :
+            if self.host :
+               if self.user :
+                  if self.password :
+                     self.conn = MySQLdb.connect( db = self.database, user=self.user, passwd=self.password, host = self.host )
+               else :
+                  self.conn = MySQLdb.connect( db = self.database, host = self.host )
+            elif self.user :
+               if self.password :
+                  self.conn = MySQLdb.connect( db = self.database, user=self.user, passwd=self.password )
+               else :
+                     self.conn = MySQLdb.connect( db = self.database, user=self.user )
+            else :
+               self.conn = MySQLdb.connect( db = self.databasem )
+               
          return self.conn
 #if Postgresql
 #      except _pg.error, e:
@@ -535,7 +703,7 @@ class relational:
             if (force):
                # Replace match in database - so first delete existing match
                self.__runquery("DELETE FROM matchstat WHERE match_id = %d" % existing_id);
-               self.__runquery("DELETE FROM match WHERE match_id = %d" % existing_id);
+               self.__runquery("DELETE FROM %s WHERE match_id = %d" % (self.match_table_name, existing_id ) );
             else:
                # Match is already in the database
                return -3
@@ -590,16 +758,16 @@ class relational:
 
       stats = []
 
-      row = self.__runqueryvalue("SELECT count(*) FROM match WHERE nick_id0 = %d OR nick_id1 = %d" % \
-         (nick_id, nick_id));
+      row = self.__runqueryvalue("SELECT count(*) FROM %s WHERE nick_id0 = %d OR nick_id1 = %d" % \
+         (self.match_table_name, nick_id, nick_id));
       if row == None:
          played = 0
       else:
          played = int(row)
       stats.append(("Matches played", played))
 
-      row = self.__runqueryvalue("SELECT COUNT(*) FROM match WHERE (nick_id0 = %d and result = 1)" \
-        " OR (nick_id1 = %d and result = -1)" % (nick_id, nick_id));
+      row = self.__runqueryvalue("SELECT COUNT(*) FROM %s WHERE (nick_id0 = %d and result = 1)" \
+        " OR (nick_id1 = %d and result = -1)" % (self.match_table_name, nick_id, nick_id));
       if row == None:
          wins = 0
       else:
@@ -632,18 +800,18 @@ class relational:
          return -1
 
       # from query to select all matches involving env
-      mq1 = "(SELECT match_id FROM match INNER JOIN nick ON match.nick_id0 = nick.nick_id" \
-         " WHERE env_id = %d)" % env_id
-      mq2 = "(SELECT match_id FROM match INNER JOIN nick ON match.nick_id1 = nick.nick_id" \
-         " WHERE env_id = %d)" % env_id
+      mq1 = "(SELECT match_id FROM %s INNER JOIN nick ON match.nick_id0 = nick.nick_id" \
+         " WHERE env_id = %d)" % (self.match_table_name, env_id )
+      mq2 = "(SELECT match_id FROM %s INNER JOIN nick ON match.nick_id1 = nick.nick_id" \
+         " WHERE env_id = %d)" % (self.match_table_name, env_id )
 
       # first remove any matchstats
       self.__runquery("DELETE FROM matchstat WHERE match_id in " + mq1);
       self.__runquery("DELETE FROM matchstat WHERE match_id in " + mq2);
 
       # then remove any matches
-      self.__runquery("DELETE FROM match WHERE match_id in " + mq1);
-      self.__runquery("DELETE FROM match WHERE match_id in " + mq2);
+      self.__runquery("DELETE FROM %s WHERE match_id in " % (self.match_table_name ) + mq1 );
+      self.__runquery("DELETE FROM %s WHERE match_id in " % (self.match_table_name ) + mq2);
       
       # then any nicks
       self.__runquery("DELETE FROM nick WHERE env_id = %d" % \
@@ -726,8 +894,8 @@ class relational:
         return -1
 
       # from query to select all matches involving player
-      mq = "FROM match WHERE nick_id0 = %d OR nick_id1 = %d" % \
-         (nick_id, nick_id)
+      mq = "FROM %s WHERE nick_id0 = %d OR nick_id1 = %d" % \
+         (self.match_table_name, nick_id, nick_id)
 
       # first remove any matchstats
       self.__runquery("DELETE FROM matchstat WHERE match_id in " \
@@ -758,7 +926,7 @@ class relational:
       self.__runquery("DELETE FROM matchstat");
 
       # then remove all matches
-      self.__runquery("DELETE FROM match");
+      self.__runquery("DELETE FROM %s" % (self.match_table_name ) );
       
       # then all nicks
       self.__runquery("DELETE FROM nick");

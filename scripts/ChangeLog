@@ -1,3 +1,8 @@
+Sun 18 Sep 14:08:50 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+
+	* database.py - add code to support configuration file and option
+	* to save individual game statistics, first cut mysql support
+	
 Sun 12 Dec 13:28:50 Jim Segrave <jes@jes-2.demon.nl>
 
 	* buggettes in database.py - missed doubles below cp was repeated,

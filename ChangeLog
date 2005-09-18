@@ -1,3 +1,9 @@
+Sun Sep 18 14:10:02 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubg.game.sql, gnubg.game.mysql - create databases with tables
+	  for game statistics
+	* database - sample database configuration file
+	
 Mon Aug 29 15:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkchequer.c (and a few others), gtkmovelist(.h, .c, ctrl.c) - new files
