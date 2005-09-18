@@ -314,6 +314,7 @@ MoveListRolloutSettings ( GtkWidget *pw, void *unused )
 #endif
 }
 
+#if !USE_GTK2
 typedef int ( *cfunc )( const void *, const void * );
 
 static int CompareInts( int *p0, int *p1 ) {
@@ -349,6 +350,7 @@ static char *MoveListCopyData ( hintdata *phd )
 
 	return sz;
 }
+#endif
 
 static void
 MoveListMove ( GtkWidget *pw, hintdata *phd )
@@ -647,7 +649,6 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
       }
     }
 }
-#endif
 static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
 			      guint n, guint t, hintdata *phd )
 {
@@ -658,6 +659,7 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
   
   free ( pc );
 }
+#endif
 
 extern int 
 CheckHintButtons( hintdata *phd )
