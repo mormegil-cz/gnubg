@@ -40,7 +40,7 @@ public:
 	MyOutlineFont(const unsigned char *pBufferBytes, size_t bufferSizeInBytes) :
 		FTGLOutlineFont(pBufferBytes, bufferSizeInBytes) {}
 
-	void render(const char* string) {FTFont::Render(string);}
+	void Render(const char* string) {FTFont::Render(string);}
 };
 
 #define FONT_SIZE (base_unit / 20.0f)
@@ -58,25 +58,30 @@ public:
 	{
 		fonts[0] = new FTGLPolygonFont(fd, fs);
 		fonts[0]->FaceSize(ptSize);
-	
+#if !FTGL_BROKEN
 		fonts[1] = new MyOutlineFont(fd, fs);
 		fonts[1]->FaceSize(ptSize);
-
+#endif
 		float sx, sy, sz, fx, fy, fz;
-		fonts[1]->BBox("1", sx, sy, sz, fx, fy, fz);
+		fonts[0]->BBox("1", sx, sy, sz, fx, fy, fz);
 		height = (fy - sy) * size;
 		
 		this->size = size;
 	}
 
-	~font() {delete fonts[0]; delete fonts[1];}
+	~font(){
+		delete fonts[0];
+#if !FTGL_BROKEN
+		delete fonts[1];
+#endif
+	}
 
 	float getHeight() {return height;}
 
 	float getTextLen(const char* text)
 	{
 		float sx, sy, sz, fx, fy, fz;
-		fonts[1]->BBox(text, sx, sy, sz, fx, fy, fz);
+		fonts[0]->BBox(text, sx, sy, sz, fx, fy, fz);
 		return fx;
 	}
 
@@ -84,6 +89,9 @@ public:
 	{
 		glScalef(size, size, 1);
 		glTranslatef(-getTextLen(text) / 2.0f, 0, 0);
+#if FTGL_BROKEN
+		if (mode != 0) return;
+#endif
 		fonts[mode]->Render(text);
 	}
 
@@ -91,6 +99,9 @@ public:
 	{
 		glScalef(size, size, 1);
 		glTranslatef(-getTextLen(text), 0, 0);
+#if FTGL_BROKEN
+		if (mode != 0) return;
+#endif
 		fonts[mode]->Render(text);
 	}
 
@@ -99,6 +110,9 @@ public:
 		glTranslatef(0, -height / 2.0f, 0);
 		glScalef(size, size, 1);
 		glTranslatef(-getTextLen(text) / 2.0f, 0, 0);
+#if FTGL_BROKEN
+		if (mode != 0) return;
+#endif
 		fonts[mode]->Render(text);
 	}
 
