@@ -429,7 +429,7 @@ class relational:
             CURRENT_TIME = 'CURRENT_TIMESTAMP'
 
          res = g[ 'info' ].get( 'points-won', 0 )
-         if g[ 'info' ].get( 'winner', 'X' ) == 'X' : res = -res
+         if g[ 'info' ].get( 'winner', 'O' ) == 'O' : res = -res
          query = ("INSERT INTO game(game_id, match_id, nick_id0, nick_id1, " \
                   "score_0, score_1, result, added, game_number, crawford) " \
                   "VALUES (%d, %d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", %d, %d )") % \
@@ -448,8 +448,8 @@ class relational:
             print "Error adding player 0's stat to database."
             return None
 
-         if self.__addStat( game_id, nick_id1, g[ 'stats' ][ 'X' ],
-                            g[ 'stats' ][ 'O' ], "gamestat" ) == None:
+         if self.__addStat( game_id, nick_id1, g[ 'stats' ][ 'O' ],
+                            g[ 'stats' ][ 'X' ], "gamestat" ) == None:
             print "Error adding player 1's stat to database."
             return None
          

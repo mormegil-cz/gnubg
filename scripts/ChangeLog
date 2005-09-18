@@ -1,3 +1,8 @@
+Sun 18 Sep 22:13:50 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+
+	* database.py - had player 0 and 1 reversed, same gamestats for
+	  both players
+	
 Sun 18 Sep 14:08:50 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 
 	* database.py - add code to support configuration file and option
