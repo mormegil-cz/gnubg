@@ -9433,21 +9433,23 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 {
 	char *pName, *pEnv;
 	RowSet r, r2;
-	char query[256];
+	char query[1024];
 	int i;
 
 	gtk_clist_get_text(GTK_CLIST(pw), y, 0, &pName);
 	gtk_clist_get_text(GTK_CLIST(pw), y, 1, &pEnv);
 
 	sprintf(query, "person.person_id, person.name, person.notes"
-		" FROM nick INNER JOIN env INNER JOIN person"
-		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" FROM nick INNER JOIN env ON nick.env_id = env.env_id"
+		" INNER JOIN person"
+		" ON nick.person_id = person.person_id"
 		" WHERE nick.name = '%s' AND env.place = '%s'",
 		pName, pEnv);
 
 	ClearText(pwPlayerNotes);
-	ClearText(pwAliasList);
-
+	if( pwAliasList ) {
+	  ClearText(pwAliasList);
+	}
 	if (!RunQuery(&r, query))
 	{
 		gtk_entry_set_text(GTK_ENTRY(pwPlayerName), "");
@@ -9462,25 +9464,32 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 	gtk_text_insert(GTK_TEXT(pwPlayerNotes), NULL, NULL, NULL, r.data[1][2], -1);
 
 	sprintf(query, _("%s is:"), r.data[1][1]);
-	gtk_label_set_text(GTK_LABEL(aliases), query);
+	if( aliases )
+	  gtk_label_set_text(GTK_LABEL(aliases), query);
 
 	sprintf(query, "nick.name, env.place"
-		" FROM nick INNER JOIN env INNER JOIN person"
-		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" FROM nick INNER JOIN env ON nick.env_id = env.env_id"
+		" INNER JOIN person"
+		" ON nick.person_id = person.person_id"
 		" WHERE person.person_id = %d", curPlayerId);
 
-	if (!RunQuery(&r2, query))
+	if (!RunQuery(&r2, query)) {
 		return;
+	}
 
 	for (i = 1; i < r2.rows; i++)
 	{
 		char line[100];
 		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
-		gtk_text_insert(GTK_TEXT(pwAliasList), NULL, NULL, NULL, line, -1);
+		if( pwAliasList) {
+		  gtk_text_insert(GTK_TEXT(pwAliasList), NULL, 
+				  NULL, NULL, line, -1);
+		}
 	}
 
 	FreeRowset(&r);
 	FreeRowset(&r2);
+
 }
 
 static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
@@ -9548,8 +9557,9 @@ static void RelationalLinkPlayers(GtkWidget *pw, GtkWidget *pwRelList)
 
 	/* Pick suitable linking players with this query... */
 	sprintf(query, "person.name AS Player FROM person WHERE person_id NOT IN"
-		" (SELECT person.person_id FROM nick INNER JOIN env INNER JOIN person"
-		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" (SELECT person.person_id FROM nick" 
+		" INNER JOIN env ON nick.env_id = env.env_id"
+		" INNER JOIN person ON nick.person_id = person.person_id"
 		" WHERE env.env_id IN"
 		" (SELECT env_id FROM nick INNER JOIN person"
 		" ON nick.person_id = person.person_id"
@@ -9709,7 +9719,7 @@ static int GtkGetEnv(char* env)
 		/* find out what envs players nicks are in */
 		int found, cur1, cur2, i, NextEnv;
 		RowSet nick1, nick2;
-		char query[256];
+		char query[1024];
 		char *queryText = "env_id, person.name"
 				" FROM nick INNER JOIN person"
 				" ON nick.person_id = person.person_id"
@@ -9875,6 +9885,10 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen, *pwn,
 		*pwLabel, *pwLink, *pwScrolled;
 	int multipleEnv;
+
+
+	pwAliasList = 0;
+	aliases = 0;
 
 	/* See if there's more than one environment */
 	if (!RunQuery(&r, "env_id FROM env"))

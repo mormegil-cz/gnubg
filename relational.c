@@ -710,8 +710,8 @@ CommandRelationalShowPlayers( char *sz )
 #if USE_PYTHON
 	/* Use the Select command */
 	CommandRelationalSelect("person.name AS Player, nick.name AS Nickname, env.place AS env"
-		" FROM nick INNER JOIN env INNER JOIN person"
-		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" FROM nick INNER JOIN env ON nick.env_id = env.env_id"
+		" INNER JOIN person ON nick.person_id = person.person_id"
 		" ORDER BY person.name");
 
 #else /* USE_PYTHON */

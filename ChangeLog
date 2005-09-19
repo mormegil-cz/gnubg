@@ -1,3 +1,15 @@
+Mon Sep 19 22:37:25 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+
+	* relational.c, gtkgame.c - don't reference non-existent gtk
+	  objects
+	  postgresql does not accept queries in the form
+	  SELECT column from A INNER JOIN B INNER JOIN C 
+	    ON A.id1 = B.id1 AND B.id2 = C.id2
+
+	  must be
+	  SELECT column from A INNER JOIN B ON A.id1 = B.id1
+	    INNER JOIN C ON B.id2 = C.id2
+
 Sun Sep 18 14:10:02 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubg.game.sql, gnubg.game.mysql - create databases with tables
