@@ -266,7 +266,7 @@ void Init3d()
 	LoadTextureInfo(FALSE);
 }
 
-#ifdef TEMP_REMOVE //WIN32
+#ifdef WIN32
 
 #ifndef PFD_GENERIC_ACCELERATED
 #define PFD_GENERIC_ACCELERATED     0x00001000

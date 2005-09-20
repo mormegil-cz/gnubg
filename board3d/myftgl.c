@@ -119,8 +119,6 @@ Glyph *GetGlyph(OGLFont *pFont, int charCode)
 		Vectoriser vect;
 		Mesh mesh;
 		int index, point;
-		unsigned int horizontalTextureScale = pFont->face->size->metrics.x_ppem * 64;
-		unsigned int verticalTextureScale = pFont->face->size->metrics.y_ppem * 64;
 
 		int glyphIndex = FT_Get_Char_Index(pFont->face, charCode);
 		if (!glyphIndex)
@@ -316,9 +314,13 @@ void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int 
 		{
 			int previousPointIndex = (pointIndex == 0) ? numberOfPoints - 1 : pointIndex - 1;
 			int nextPointIndex = (pointIndex == numberOfPoints - 1) ? 0 : pointIndex + 1;
-			Point controlPoint = {points[pointIndex].x, points[pointIndex].y};
-			Point previousPoint = {points[previousPointIndex].x, points[previousPointIndex].y};
-			Point nextPoint = {points[nextPointIndex].x, points[nextPointIndex].y};
+			Point controlPoint, previousPoint, nextPoint;
+			controlPoint.data[0] = points[pointIndex].x;
+			controlPoint.data[1] = points[pointIndex].y;
+			previousPoint.data[0] = points[previousPointIndex].x;
+			previousPoint.data[1] = points[previousPointIndex].y;
+			nextPoint.data[0] = points[nextPointIndex].x;
+			nextPoint.data[1] = points[nextPointIndex].y;
 
 			assert(pointTag == FT_Curve_Tag_Conic);	/* Only this main type supported */
 
