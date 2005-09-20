@@ -88,12 +88,11 @@ void InitGL(BoardData *bd);
 
 /* font functions */
 #ifndef __cplusplus
-void glPrintPointNumbers(BoardData* bd, const char *text, int mode);
-void glPrintCube(BoardData* bd, const char *text, int mode);
-void glPrintNumbersRA(BoardData* bd, const char *text, int mode);
+void glPrintPointNumbers(BoardData* bd, const char *text);
+void glPrintCube(BoardData* bd, const char *text);
+void glPrintNumbersRA(BoardData* bd, const char *text);
 float getFontHeight(BoardData* bd);
 void BuildFont(BoardData* bd);
-void KillFont(BoardData* bd);
 #endif
 
 /* Drawing functions */

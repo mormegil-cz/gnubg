@@ -154,7 +154,6 @@ void TidyShadows(BoardData* bd)
 
 void Tidy3dObjects(BoardData* bd)
 {
-	KillFont(bd);
 	glDeleteLists(bd->pieceList, 1);
 	glDeleteLists(bd->diceList, 1);
 	glDeleteLists(bd->DCList, 1);
@@ -586,7 +585,7 @@ void moveToDoubleCubePos(BoardData* bd)
 	glTranslatef(v[0], v[1], v[2]);
 }
 
-void drawDCNumbers(BoardData* bd, int mode, diceTest* dt)
+void drawDCNumbers(BoardData* bd, diceTest* dt)
 {
 	int c, nice;
 	float radius = DOUBLECUBE_SIZE / 7.0f;
@@ -597,6 +596,7 @@ void drawDCNumbers(BoardData* bd, int mode, diceTest* dt)
 	char* sides[] = {"4", "16", "32", "64", "8", "2"};
 	int side;
 
+	glLineWidth(1);
 	glPushMatrix();
 	for (c = 0; c < 6; c++)
 	{
@@ -618,7 +618,7 @@ void drawDCNumbers(BoardData* bd, int mode, diceTest* dt)
 			glPushMatrix();
 			glTranslatef(0, 0, depth + !nice * LIFT_OFF);
 
-			glPrintCube(bd, sides[side], mode);
+			glPrintCube(bd, sides[side]);
 
 			glPopMatrix();
 			if (nice)
@@ -660,17 +660,7 @@ void DrawDCNumbers(BoardData* bd)
 	setMaterial(&bd->rd->CubeNumberMat);
 	glNormal3f(0, 0, 1);
 
-	/* Draw inside then anti-aliased outline of numbers */
-	drawDCNumbers(bd, 0, &dt);
-
-	glLineWidth(.5f);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_BLEND);
-
-	drawDCNumbers(bd, 1, &dt);
-
-	glDisable(GL_BLEND);
-	glDisable(GL_LINE_SMOOTH);
+	drawDCNumbers(bd, &dt);
 }
 
 void drawDC(BoardData* bd)
@@ -1100,7 +1090,7 @@ void drawPieces(BoardData* bd)
 	}
 }
 
-void DrawNumbers(BoardData* bd, int sides, int mode)
+void DrawNumbers(BoardData* bd, int sides)
 {
 	int i;
 	char num[3];
@@ -1131,7 +1121,7 @@ void DrawNumbers(BoardData* bd, int sides, int mode)
 				n = 25 - n;
 
 			sprintf(num, "%d", n);
-			glPrintPointNumbers(bd, num, mode);
+			glPrintPointNumbers(bd, num);
 			glPopMatrix();
 		}
 	}
@@ -1159,7 +1149,7 @@ void DrawNumbers(BoardData* bd, int sides, int mode)
 				n = 25 - n;
 
 			sprintf(num, "%d", n);
-			glPrintPointNumbers(bd, num, mode);
+			glPrintPointNumbers(bd, num);
 			glPopMatrix();
 		}
 	}
@@ -1174,16 +1164,8 @@ void drawNumbers(BoardData* bd, int sides)
 	setMaterial(&bd->rd->PointNumberMat);
 	glNormal3f(0, 0, 1);
 
-	DrawNumbers(bd, sides, 0);
-
 	glLineWidth(1);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_BLEND);
-
-	DrawNumbers(bd, sides, 1);
-
-	glDisable(GL_BLEND);
-	glDisable(GL_LINE_SMOOTH);
+	DrawNumbers(bd, sides);
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -3279,19 +3261,8 @@ void renderFlag(BoardData* bd)
 		flagValue[0] = '0' + abs(bd->resigned);
 		glScalef(1.3f, 1.3f, 1);
 
-		glPushMatrix();
-		glPrintCube(bd, flagValue, 0);
-		glPopMatrix();
-
-		/* Anti-alias flag number */
 		glLineWidth(.5f);
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_BLEND);
-
-		glPrintCube(bd, flagValue, 1);
-
-		glDisable(GL_BLEND);
-		glDisable(GL_LINE_SMOOTH);
+		glPrintCube(bd, flagValue);
 
 		glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	}

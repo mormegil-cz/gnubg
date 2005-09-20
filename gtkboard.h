@@ -28,6 +28,7 @@
 #if USE_BOARD3D
 #include "board3d/glincl.h"
 #include "board3d/mylist.h"
+#include "board3d/myftgl.h"
 #endif
 
 #ifdef __cplusplus
@@ -229,7 +230,7 @@ typedef struct _BoardData {
 
 	float flagWaved;	/* How much has flag waved */
 
-	void *numberFont, *cubeFont;	/* FTGL fonts */
+	OGLFont numberFont, cubeFont;	/* OpenGL fonts */
 
 	/* Saved viewing values (used for picking) */
 	float vertFrustrum, horFrustrum;
