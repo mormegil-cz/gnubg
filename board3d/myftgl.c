@@ -353,9 +353,14 @@ void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int 
 	}
 }
 
-// TODO: Probably won't work cross platform...
+/* Unfortunately the glu library doesn't define this callback type precisely
+ so it may well cause problems on different platforms / opengl implementations */
+#if WIN32
+/* Need to set the callback calling convention for windows */
 #define TESS_CALLBACK CALLBACK
-typedef void (TESS_CALLBACK *GLUTesselatorFunction)();
+#else
+#define TESS_CALLBACK
+#endif
 
 Tesselation curTess;
 
