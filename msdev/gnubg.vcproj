@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="gnubg"
+	ProjectGUID="{A09F674E-9839-4717-985C-18730F116028}"
 	RootNamespace="gnubg"
 	SccProjectName=""
 	SccLocalPath="">
@@ -85,8 +86,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(MINGW)\lib\gtk+\include&quot;;&quot;$(MINGW)\include\glib-2.0&quot;;&quot;$(MINGW)\lib\glib-2.0\include&quot;;..;..\lib;..\intl;&quot;$(MINGW)\include\msdev&quot;;&quot;$(MINGW)\include\freetype2&quot;;&quot;$(MINGW)\include\libxml2&quot;;&quot;$(MINGW)\..\Python23\include&quot;"
-				PreprocessorDefinitions="_DEBUG;HAVE_CONFIG_H;_CONFIG;WIN32;USE_GTK=1"
+				AdditionalIncludeDirectories="&quot;$(GTK26)\include\gtk-2.0&quot;;&quot;$(GTK26)\lib\gtk-2.0\include&quot;;&quot;$(GTK26)\include\glib-2.0&quot;;&quot;$(GTK26)\lib\glib-2.0\include&quot;;&quot;$(GTK26)\include\pango-1.0&quot;;&quot;$(GTK26)\include\atk-1.0&quot;;&quot;$(GTK26)\include\libart-2.0&quot;;..;..\lib;..\intl;&quot;$(GTK26)\include\msdev&quot;;&quot;$(GTK26)\include\freetype2&quot;;&quot;$(GTK26)\include\libxml2&quot;;&quot;$(GTK26)\..\Python23\include&quot;"
+				PreprocessorDefinitions="_DEBUG;HAVE_CONFIG_H=1;_CONFIG;WIN32;USE_GTK=1;USE_GTK2"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				DisableLanguageExtensions="FALSE"
@@ -104,11 +105,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib opengl32.lib glu32.lib odbc32.lib odbccp32.lib winmm.lib glib-2.0.lib gtk.lib gdk.lib libfreetype.lib libgdbm.lib libxml2.lib libgtkgl-1.2.3.dll.a libpng_msd.lib libart_msd.lib ftgl_msd.lib &quot;$(TEMP)\Intermediate\Debug\lib.lib&quot; &quot;$(TEMP)\Intermediate\Debug\board3d.lib&quot; libintl_msd.lib"
-				OutputFile="c:\program files\gnubg\gnubg_msdevd.exe"
+				AdditionalDependencies="ws2_32.lib opengl32.lib glu32.lib odbc32.lib odbccp32.lib winmm.lib glib-2.0.lib gtk-win32-2.0.lib gdk-win32-2.0.lib gobject-2.0.lib freetype.lib libgdbm.lib libxml2.lib libgtkgl-1.2.3.dll.a libpng_msd.lib libart_msd.lib ftgl_msd.lib &quot;$(TEMP)\Intermediate\Debug\lib.lib&quot; &quot;$(TEMP)\Intermediate\Debug\board3d.lib&quot; libintl_msd.lib pango-1.0.lib gdk_pixbuf-2.0.lib gtkglext-win32-1.0.lib gdkglext-win32-1.0.lib"
+				OutputFile="c:\program files\gnubg26\bin\gnubg_msdevd.exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="$(MINGW)\lib,$(MINGW)\lib\msdev"
+				AdditionalLibraryDirectories="$(GTK26)\lib,$(GTK26)\lib\msdev,$(MINGW)\lib"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(TEMP)\Intermediate\Debug/gnubg_msdevd.pdb"
 				SubSystem="1"
@@ -5765,6 +5766,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\gtkfile.c">
+			</File>
+			<File
 				RelativePath="..\gtkgame.c">
 				<FileConfiguration
 					Name="CmdLine Debug|Win32"
@@ -6120,6 +6124,15 @@
 					<Tool
 						Name="VCCustomBuildTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\gtkmovelist.c">
+			</File>
+			<File
+				RelativePath="..\gtkmovelistctrl.c">
+			</File>
+			<File
+				RelativePath="..\gtkmovelistctrl.h">
 			</File>
 			<File
 				RelativePath="..\gtkoptions.c">

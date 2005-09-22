@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="lib"
+	ProjectGUID="{ED7A8E2D-ACA1-433C-A715-FFC92618E80D}"
 	RootNamespace="lib"
 	SccProjectName=""
 	SccLocalPath="">
