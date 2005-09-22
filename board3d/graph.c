@@ -116,6 +116,8 @@ static void realize(GtkWidget *widget, void* arg)
 	total.texID = 0;
 	LoadTexture(&total, TEXTURE_PATH"total.bmp", TF_BMP);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 #if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
@@ -249,9 +251,6 @@ void DrawGraph(GraphData *gd)
 	int i;
 	float lastx = 0;
 
-	/* Avoid over-blurry anti-aliasing */
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
 	if (total.texID)
 	{
 		glEnable(GL_TEXTURE_2D);
@@ -300,8 +299,6 @@ void DrawGraph(GraphData *gd)
 	glBegin(GL_POINTS);
 		glVertex2f(NUM_WIDTH, NUM_HEIGHT);
 	glEnd();
-
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, GraphData* gd)
