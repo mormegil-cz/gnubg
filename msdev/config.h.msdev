@@ -2,7 +2,6 @@
 
 #if USE_GTK
 #define USE_BOARD3D 1
-#define HAVE_LIBFTGL 1
 #endif
 
 #define HAVE_LIBPNG 1

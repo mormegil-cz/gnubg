@@ -18,7 +18,7 @@ Compile steps
 Notes
 =====
 
-1) png and libart and ftgl
+1) png and libart and others
 need to be built by msdev, for simplicity just compile without these (remove from config.h).
 
 2) gnubg.exe will be produced in \program files\gnubg.exe, you'll probably want to change this.

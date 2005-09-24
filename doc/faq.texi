@@ -227,7 +227,6 @@ snapshots}
 @item gtk+-devel
 @item gtkglarea (optional for the 3d-board)
 @item gtkglext (optional for the 3d-board)
-@item ftgl (optional for the 3d-board)
 @item python (optional for the python shell)
 @item guile (optional, for invoking your own macros)
 @item guile-devel
