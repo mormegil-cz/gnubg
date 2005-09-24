@@ -111,7 +111,7 @@ static void realize(GtkWidget *widget, void* arg)
 	/* Deep blue background colour */
 	glClearColor(.2f, .2f, .4f, 1);
 
-	BuildFont(&fonts);
+	BuildFont3d(&fonts);
 
 	total.texID = 0;
 	LoadTexture(&total, TEXTURE_PATH"total.bmp", TF_BMP);

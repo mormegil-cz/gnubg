@@ -190,7 +190,9 @@ void InitGL(BoardData *bd)
 	if (bd)
 	{
 		/* Setup some 3d things */
-		BuildFont(bd);
+		if (!BuildFont3d(bd))
+			g_print("Error creating fonts\n");
+
 		setupFlag(bd);
 		shadowInit(bd);
 #if GL_VERSION_1_2
@@ -2309,4 +2311,25 @@ void InitBoard3d(BoardData *bd)
 	bd->boardPoints = NULL;
 
 	memset(bd->modelMatrix, 0, sizeof(float[16]));
+}
+
+extern void glPrintPointNumbers(BoardData* bd, const char *text)
+{
+	/* Align horizontally */
+	glTranslatef(-getTextLen3d(&bd->numberFont, text) / 2.0f, 0, 0);
+	RenderString3d(&bd->numberFont, text);
+}
+
+extern void glPrintCube(BoardData* bd, const char *text)
+{
+	/* Align horizontally and vertically */
+	glTranslatef(-getTextLen3d(&bd->cubeFont, text) / 2.0f, -bd->cubeFont.height / 2.0f, 0);
+	RenderString3d(&bd->cubeFont, text);
+}
+
+extern void glPrintNumbersRA(BoardData* bd, const char *text)
+{
+	/* Right align */
+	glTranslatef(-getTextLen3d(&bd->numberFont, text), 0, 0);
+	RenderString3d(&bd->numberFont, text);
 }

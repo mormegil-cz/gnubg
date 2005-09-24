@@ -87,13 +87,12 @@ typedef struct _diceTest
 void InitGL(BoardData *bd);
 
 /* font functions */
-#ifndef __cplusplus
 void glPrintPointNumbers(BoardData* bd, const char *text);
 void glPrintCube(BoardData* bd, const char *text);
 void glPrintNumbersRA(BoardData* bd, const char *text);
-float getFontHeight(BoardData* bd);
-void BuildFont(BoardData* bd);
-#endif
+int BuildFont3d(BoardData* bd);
+int RenderString3d(OGLFont *pFont, const char* str);
+float getTextLen3d(OGLFont *pFont, const char* text);
 
 /* Drawing functions */
 void drawBoard(BoardData* bd);

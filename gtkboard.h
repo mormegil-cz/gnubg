@@ -28,7 +28,6 @@
 #if USE_BOARD3D
 #include "board3d/glincl.h"
 #include "board3d/mylist.h"
-#include "board3d/myftgl.h"
 #endif
 
 #ifdef __cplusplus
@@ -83,6 +82,15 @@ extern void board_set_scores(Board *board, int s0, int s1);
 #endif
 
 #if USE_BOARD3D
+typedef struct _OGLFont
+{
+	int glyphs;
+	int advance;
+	int kern[10][10];
+	float scale;
+	float height;
+} OGLFont;
+
 typedef struct _DiceRotation
 {
 	float xRotStart, yRotStart;
