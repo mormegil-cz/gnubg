@@ -55,7 +55,7 @@ extern double erf( double x );
 #include "i18n.h"
 
 
-#if LIBXML_VERSION > 20403
+#if (LIBXML_VERSION > 20412)
 const static char* XML_PUBLIC_ID = "-//GNU Backgammon//DTD Match Equity Tables//EN";
 #endif
 
@@ -1327,7 +1327,7 @@ static void parseInfo ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
 }
 
-#if LIBXML_VERSION > 20403
+#if (LIBXML_VERSION > 20412)
 
 static void validateWarning ( void *ctx,
                         const char *msg, 
@@ -1390,7 +1390,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
 /* libxml2 version 2.4.3 introduced xml catalogs, it dates 25th august 2001 ... */
 /* older versions used SGML format catalogs, but it's not clear when the default behaviour changed */
-#if LIBXML_VERSION > 20403
+#if (LIBXML_VERSION > 20412)
 {
   xmlValidCtxtPtr ctxt;
   xmlDtdPtr dtd;
