@@ -27,7 +27,7 @@
   <info>
     <name>Kazaross</name>
     <description>Neil Kazaross and GNU Backgammon, Table based on GNU Backgammon rollouts.</description>
-    <length>4</length>
+    <length>5</length>
   </info>
 
   <pre-crawford-table type="explicit">
