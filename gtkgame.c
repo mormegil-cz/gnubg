@@ -7068,7 +7068,7 @@ extern void GTKCommandShowCredits(GtkWidget *pwParent)
 #if HAVE_GTKTEXI
 static int ShowManualSection( char *szTitle, char *szNode ) {
     
-    static GtkWidget *pw;
+    static GtkWidget *pw = NULL;
     char *pch;
     
     if( pw ) {
@@ -7077,7 +7077,7 @@ static int ShowManualSection( char *szTitle, char *szNode ) {
 	return 0;
     }
 
-    if( !( pch = PathSearch( "gnubg.xml", szDataDirectory ) ) )
+    if( !( pch = PathSearch( "doc/gnubg.xml", szDataDirectory ) ) )
 	return -1;
     else if( access( pch, R_OK ) ) {
 	outputerr( pch );

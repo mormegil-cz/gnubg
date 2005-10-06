@@ -516,15 +516,13 @@ static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
     }
 }
 
-static void Err( void *pv, const char *msg, ... ) {
-
-#if 0
+static void Err( void *pv, const char *msg, ... )
+{
     va_list args;
 
     va_start(args, msg);
     vprintf(msg, args);
     va_end(args);
-#endif
 }
 
 static xmlSAXHandler xsaxScan = {
@@ -1062,7 +1060,7 @@ static int RenderNode( GtkTexi *pw, char *szTag ) {
     
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pw->pif, "/Go/Top" ), strcmp( szTag, "Top" ) );
-	
+
     if( strcmp( szTag, "*" ) ) {
 	for( pl = pw->ptic->lNode.plNext; pl != &pw->ptic->lNode;
 	     pl = pl->plNext ) {
