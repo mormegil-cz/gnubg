@@ -4178,7 +4178,7 @@ extern void SetMET( GtkWidget *pw, gpointer p ) {
     }
     
     GTKFileCommand( _("Set match equity table"), pch, "set matchequitytable ",
-		 "met", FDT_NONE_OPEN, PATH_NULL );
+		 "met", FDT_NONE_OPEN, PATH_MET );
 
     /* update filename on option page */
     if ( p && GTK_WIDGET_VISIBLE( p ) )
