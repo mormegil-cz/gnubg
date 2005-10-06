@@ -105,7 +105,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib opengl32.lib glu32.lib odbc32.lib odbccp32.lib winmm.lib glib-2.0.lib gtk-win32-2.0.lib gdk-win32-2.0.lib gobject-2.0.lib freetype.lib libgdbm.lib libxml2.lib libgtkgl-1.2.3.dll.a libpng_msd.lib libart_msd.lib ftgl_msd.lib &quot;$(TEMP)\Intermediate\Debug\lib.lib&quot; &quot;$(TEMP)\Intermediate\Debug\board3d.lib&quot; libintl_msd.lib pango-1.0.lib gdk_pixbuf-2.0.lib gtkglext-win32-1.0.lib gdkglext-win32-1.0.lib"
+				AdditionalOptions="/fixed:no"
+				AdditionalDependencies="ws2_32.lib opengl32.lib glu32.lib odbc32.lib odbccp32.lib winmm.lib glib-2.0.lib gtk-win32-2.0.lib gdk-win32-2.0.lib gobject-2.0.lib freetype.lib libxml2_msd.lib &quot;$(TEMP)\Intermediate\Debug\lib.lib&quot; &quot;$(TEMP)\Intermediate\Debug\board3d.lib&quot; pango-1.0.lib gdk_pixbuf-2.0.lib libgdbm.lib libpng_msd.lib libart_msd.lib gdkglext-win32-1.0.lib gtkglext-win32-1.0.lib"
 				OutputFile="c:\program files\gnubg26\bin\gnubg_msdevd.exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="TRUE"
