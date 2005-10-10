@@ -717,6 +717,108 @@ EvalShutdown ( void ) {
 
 }
 
+#if USE_SSE_VECTORIZE
+
+#ifdef _MSC_VER
+
+int SSE_Supported()
+{
+	return 1;
+}
+
+#else
+
+int CheckSSE()
+{
+	int result = 0;
+	
+	asm (
+		// Check if cpuid is supported (can bit 21 of flags be changed)
+		"mov $1, %%eax\n\t"
+		"shl $21, %%eax\n\t"
+		"mov %%eax, %%edx\n\t"
+
+		"pushfl\n\t"
+		"popl %%eax\n\t"
+		"mov %%eax, %%ecx\n\t"
+		"xor %%edx, %%eax\n\t"
+		"pushl %%eax\n\t"
+		"popfl\n\t"
+
+		"pushfl\n\t"
+		"popl %%eax\n\t"
+		"xor %%ecx, %%eax\n\t"
+		"test %%edx, %%eax\n\t"
+		"jnz basecpuid\n\t"
+		// Failed (non-pentium compatible machine)
+		"mov $-1, %%ebx\n\t"
+		"jp end\n\t"
+
+"basecpuid:"
+		// Check feature test is supported
+		"mov $0, %%eax\n\t"
+		"cpuid\n\t"
+		"cmp $1, %%eax\n\t"
+		"jge testsse\n\t"
+		// Unlucky - somehow cpuid 1 isn't supported
+		"mov $-2, %%ebx\n\t"
+		"jp end\n\t"
+
+"testsse:"
+		// Check if sse is supported (bit 25 in edx from cpuid 1)
+		"mov $1, %%eax\n\t"
+		"cpuid\n\t"
+		"mov $1, %%eax\n\t"
+		"shl $25, %%eax\n\t"
+		"test %%eax, %%edx\n\t"
+		"jnz ok\n\t"
+		// Not supported
+		"mov $0, %%ebx\n\t"
+		"jp end\n\t"
+"ok:"
+		// Supported
+		"mov $1, %%ebx\n\t"
+"end:"
+
+			: "=b"(result) : : "%eax", "%ecx", "%edx");
+
+	switch (result)
+	{
+	case -1:
+		printf("Can't check for SSE - non pentium cpu\n");
+		break;
+	case -2:
+		printf("No sse cpuid check available\n");
+		break;
+	case 0:
+		// No SSE support
+		break;
+	case 1:
+		// SSE support
+		return 1;
+	default:
+		printf("Unknown return testing for SSE\n");
+	}
+
+	return 0;
+}
+
+int SSE_Supported()
+{
+	static int state = -1;
+
+	if (state == -1)
+		state = CheckSSE();
+
+	return state;
+}
+
+#endif
+#endif
+
+int (*NeuralNetEvaluateFn)( neuralnet *pnn, float arInput[],
+			      float arOutput[], NNEvalType t) = 0;
+
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		int fNoBearoff, 
@@ -730,6 +832,13 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     static int fInitialised = FALSE;
 
     if( !fInitialised ) {
+
+#if USE_SSE_VECTORIZE
+		if (SSE_Supported())
+			NeuralNetEvaluateFn = NeuralNetEvaluate128;
+		else
+#endif
+			NeuralNetEvaluateFn = NeuralNetEvaluate;
 
       /* initialise table for sigmoid */
 
@@ -2284,15 +2393,10 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
   SSE_ALIGN(float arInput[ NUM_INPUTS ]);
 
   CalculateRaceInputs( anBoard, arInput );
-#if USE_SSE_VECTORIZE 
-  if ( NeuralNetEvaluate128( &nnRace, arInput, arOutput, 
+
+  if ( NeuralNetEvaluateFn( &nnRace, arInput, arOutput, 
                           NNevalAction( CLASS_RACE ) ) )
     return -1;
-#else
-  if ( NeuralNetEvaluate( &nnRace, arInput, arOutput, 
-                          NNevalAction( CLASS_RACE ) ) )
-    return -1;
-#endif
   
   /* anBoard[1] is on roll */
   {
@@ -2391,13 +2495,8 @@ EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
     
   CalculateContactInputs( anBoard, arInput );
     
-#if USE_SSE_VECTORIZE 
-  return NeuralNetEvaluate128(&nnContact, arInput, arOutput,
+  return NeuralNetEvaluateFn(&nnContact, arInput, arOutput,
                            NNevalAction( CLASS_CONTACT ) );
-#else
-  return NeuralNetEvaluate(&nnContact, arInput, arOutput,
-                           NNevalAction( CLASS_CONTACT ) );
-#endif
 }
 
 static int
@@ -2407,13 +2506,8 @@ EvalCrashed(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
 
   CalculateCrashedInputs( anBoard, arInput );
     
-#if USE_SSE_VECTORIZE 
-  return NeuralNetEvaluate128( &nnCrashed, arInput, arOutput,
+  return NeuralNetEvaluateFn( &nnCrashed, arInput, arOutput,
                             NNevalAction( CLASS_CRASHED ) );
-#else
-  return NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
-                            NNevalAction( CLASS_CRASHED ) );
-#endif
 }
 
 extern int

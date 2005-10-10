@@ -31,6 +31,9 @@ typedef enum  {
   NNEVAL_FROMBASE,
 } NNEvalType;
 
+extern int (*NeuralNetEvaluateFn)( neuralnet *pnn, float arInput[],
+			      float arOutput[], NNEvalType t);
+
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t);
 extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
