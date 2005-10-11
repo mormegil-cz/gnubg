@@ -263,7 +263,7 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
     int i;
     
     static char *aszPrologue[] = {
-	"%%%%Creator: (GNU Backgammon " VERSION ")\n"
+	"%%%%Creator: (" VERSION_STRING ")\n"
 	"%%%%DocumentData: Clean7Bit\n"
 	"%%%%DocumentNeededResources: font Courier Helvetica Times-Roman\n"
 	"%%%%DocumentSuppliedResources: procset GNU-Backgammon-Prolog 1.0 0\n"

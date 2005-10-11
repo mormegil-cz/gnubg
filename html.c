@@ -172,7 +172,7 @@ WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
     /* write come comments in the file */
 
     fputs( "\n"
-           "/* CSS Stylesheet for GNU Backgammon " VERSION " */\n"
+           "/* CSS Stylesheet for " VERSION_STRING " */\n"
            "/* $Id$ */\n",
            pf );
 
@@ -1773,20 +1773,20 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
             "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" "
             "lang=\"en\">\n"
             "<head>\n"
-            "<meta name=\"generator\" content=\"GNU Backgammon %s\" />\n"
+            "<meta name=\"generator\" content=\"%s\" />\n"
             "<meta http-equiv=\"Content-Type\" "
             "content=\"text/html; charset=%s\" />\n" 
             "<meta name=\"keywords\" content=\"%s, %s, %s\" />\n"
             "<meta name=\"description\" "
             "content=\"",
-            VERSION,
+            VERSION_STRING,
             GNUBG_CHARSET,
             ap[ 0 ].szName, ap[ 1 ].szName,
             ( pms->nMatchTo ) ? _("match play") : _("money game") );
 
   fprintf ( pf, 
-            _("%s (analysed by GNU Backgammon %s)"),
-            szTitle, VERSION );
+            _("%s (analysed by %s)"),
+            szTitle, VERSION_STRING );
 
   fprintf ( pf,
             "\" />\n"
@@ -1887,9 +1887,8 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ],
 
   fprintf ( pf, 
             _("Output generated %s by "
-              "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
-              "%s</a>") ,
-            ctime ( &t ), VERSION );
+              "<a href=\"http://www.gnu.org/software/gnubg/\">%s</a>") ,
+            ctime ( &t ), VERSION_STRING );
 
   fputs ( " ", pf );
             
@@ -1950,9 +1949,9 @@ HTMLEpilogueComment ( FILE *pf ) {
   fputs ( "\n<!-- Epilogue -->\n\n", pf );
 
   fprintf ( pf, 
-            _("<!-- Output generated %s by GNU Backgammon %s "
+            _("<!-- Output generated %s by %s "
               "(http://www.gnu.org/software/gnubg/) "),
-            pc, VERSION );
+            pc, VERSION_STRING );
 
   fputs ( " ", pf );
             

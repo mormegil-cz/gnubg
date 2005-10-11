@@ -978,16 +978,15 @@ ShowAuthors( const credEntry ace[], const char *title ) {
 
 extern void CommandShowBuildInfo( char *sz )
 {
-    char **ppch = aszVersion;
+    char *pch;
 
 #if USE_GTK
 	if( fX )
 		GTKShowBuildInfo(pwMain);
 #endif
 
-	ppch++;	/* Skip version line */
-	while (*ppch)
-		outputl( gettext ( *ppch++ ) );
+    while(pch = GetBuildInfoString())
+		outputl( gettext(pch) );
 
     outputc( '\n' );
 }
@@ -1471,7 +1470,7 @@ extern void CommandShowVersion( char *sz )
 	}
 #endif
 
-	outputl( gettext ( *aszVersion ) );
+	outputl( gettext ( VERSION_STRING ) );
 	outputc( '\n' );
 	ShowAuthors( ceAuthors, _("Written by:") );
 }

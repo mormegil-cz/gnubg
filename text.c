@@ -274,8 +274,8 @@ TextEpilogue ( FILE *pf, const matchstate *pms ) {
 
   fprintf ( pf, 
             _("Output generated %s"
-              "by GNU Backgammon %s ") ,
-            ctime ( &t ), VERSION );
+              "by %s ") ,
+            ctime ( &t ), VERSION_STRING );
             
   fprintf ( pf,
             _("(Text Export version %d.%d)\n\n"),

@@ -713,7 +713,10 @@ InvalidateStoredMoves( void );
 extern void
 InvalidateStoredCube( void );
 
-extern char* aszVersion[], *szHomeDirectory, *szDataDirectory,
+#define VERSION_STRING "GNU Backgammon " VERSION
+
+extern char *GetBuildInfoString();
+extern char *szHomeDirectory, *szDataDirectory,
     *szTerminalCharset;
 
 extern char* aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],

@@ -119,7 +119,7 @@ WritePNG (const char *sz, unsigned char *puch, int nStride,
   atext[0].compression = PNG_TEXT_COMPRESSION_NONE;
 
   atext[1].key = "author";
-  atext[1].text = "GNU Backgammon" VERSION;
+  atext[1].text = VERSION_STRING;
   atext[1].compression = PNG_TEXT_COMPRESSION_NONE;
 
 #ifdef PNG_iTXt_SUPPORTED

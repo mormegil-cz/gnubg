@@ -73,7 +73,7 @@ CreateSplash () {
 #endif
 #endif
   gtk_window_set_title ( GTK_WINDOW ( pgs->pwWindow ), 
-                         _("Starting GNU Backgammon " VERSION ) );
+                         _("Starting " VERSION_STRING ) );
   gtk_window_set_position ( GTK_WINDOW ( pgs->pwWindow ), GTK_WIN_POS_CENTER );
   
   gtk_widget_realize ( GTK_WIDGET ( pgs->pwWindow ) );
