@@ -205,13 +205,6 @@ void MoveListCreate(hintdata *phd)
 }
 
 float rBest;
-int aanColumns[][ 2 ] = {
-    { 2, OUTPUT_WIN },
-    { 3, OUTPUT_WINGAMMON },
-    { 4, OUTPUT_WINBACKGAMMON },
-    { 6, OUTPUT_LOSEGAMMON },
-    { 7, OUTPUT_LOSEBACKGAMMON }
-  };
 
 GtkStyle *psHighlight = NULL;
 
@@ -234,7 +227,7 @@ void MoveListRefreshSize()
  */
 void MoveListUpdate ( const hintdata *phd )
 {
-  int i, j;
+  int i, j, colNum;
   char sz[ 32 ];
   cubeinfo ci;
   movelist *pml = phd->pml;
@@ -338,23 +331,29 @@ if (!psHighlight)
 #endif
 
     /* gwc */
-    if ( phd->fDetails )
+	if ( phd->fDetails )
 	{
+		colNum = ML_COL_WIN;
 		for( j = 0; j < 5; j++ ) 
 		{
+			if (j == 3)
+			{
 #if USE_GTK2
-			gtk_list_store_set(store, &iter, ML_COL_WIN + j, OutputPercent( ar[ aanColumns[ j ][ 1 ] ] ), -1);
+				gtk_list_store_set(store, &iter, colNum, OutputPercent(1.0f - ar[ OUTPUT_WIN ] ), -1);
 #else
-		    gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, aanColumns[ j ][ 0 ],
-                            OutputPercent( ar[ aanColumns[ j ][ 1 ] ] ) );
+				gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, 5,
+							OutputPercent( 1.0f - ar[ OUTPUT_WIN ] ) );
 #endif
-		  }
+				colNum++;
+			}
 #if USE_GTK2
-		gtk_list_store_set(store, &iter, ML_COL_WIN + j, OutputPercent(1.0f - ar[ aanColumns[ OUTPUT_WIN ][ 1 ] ] ), -1);
+			gtk_list_store_set(store, &iter, colNum, OutputPercent(ar[j]), -1);
 #else
-		gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, 5, 
-                          OutputPercent( 1.0f - ar[ OUTPUT_WIN ] ) );
+			gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, colNum,
+							OutputPercent(ar[j]) );
 #endif
+			colNum++;
+		}
 	}
 
     /* cubeless equity */
