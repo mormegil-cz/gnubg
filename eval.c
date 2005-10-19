@@ -3588,7 +3588,14 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     move *pm;
     unsigned char auch[ 10 ];
 
-    if( fPartial ) {
+	if (fEgyptian)
+	{	/* Check no point has more than 5 chequers */
+		for (i = 1; i < 25; i++)
+			if (anBoard[0][i] > 5 || anBoard[1][i] > 5)
+				return;
+	}
+
+	if( fPartial ) {
 	/* Save all moves, even incomplete ones */
 	if( cMoves > pml->cMaxMoves )
 	    pml->cMaxMoves = cMoves;
@@ -3654,18 +3661,11 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
 static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
 
     int i, nBack = 0, iDest = iSrc - nPips;
-
-    if( iDest >= 0 ) { /* Here we can do the Chris rule check */
-        if( fEgyptian ) {
-            if( anBoard[ 0 ][ 23 - iDest ] < 2 ) {
-                return ( anBoard[ 1 ][ iDest ] < 5 );
-            };
-            return ( 0 );
-        } else {
-            return ( anBoard[ 0 ][ 23 - iDest ] < 2 );
-        }
+	
+	if (iDest >= 0)
+	{ /* Here we can do the Chris rule check */
+		return ( anBoard[ 0 ][ 23 - iDest ] < 2 );
     }
-
     /* otherwise, attempting to bear off */
 
     for( i = 1; i < 25; i++ )
@@ -3713,11 +3713,8 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 		anMoves[ nMoveDepth * 2 + 1 ] = i -
 		    anRoll[ nMoveDepth ];
 		
-		for( iCopy = 0; iCopy < 25; iCopy++ ) {
-		    anBoardNew[ 0 ][ iCopy ] = anBoard[ 0 ][ iCopy ];
-		    anBoardNew[ 1 ][ iCopy ] = anBoard[ 1 ][ iCopy ];
-		}
-    
+		memcpy(anBoardNew, anBoard, sizeof(anBoardNew));
+
 		ApplySubMove( anBoardNew, i, anRoll[ nMoveDepth ], TRUE );
 		
 		if( GenerateMovesSub( pml, anRoll, nMoveDepth + 1,
