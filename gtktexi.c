@@ -21,27 +21,29 @@
 
 #if HAVE_CONFIG_H
 #include <config.h>
-#else
-/* Compiling standalone; assume all dependencies are satisfied. */
-#define HAVE_LIBXML2 1
-#define USE_GTK2 1
+#include "backgammon.h"
 #endif
 
-#if HAVE_LIBXML2 && USE_GTK2
+#include "gtktexi.h"
+
+#if HAVE_GTKTEXI
 
 #include <assert.h>
 #include <ctype.h>
-#include <hash.h>
-#include <list.h>
-#include <libxml/parser.h>
 #include <stdarg.h>
 #include <string.h>
+#include <libxml/parser.h>
+#include <io.h>
 
-#include "gtktexi.h"
+#include "list.h"
+#include "hash.h"
 #include "i18n.h"
 
 #define BLOCK_SIZE 1024
 #define MAX_ITEM_DEPTH 8
+
+/* Uncomment to output debug info */
+/*#define DEBUG_XML 1*/
 
 typedef struct _nodeinfo {
     char *sz; /* node/anchor tag; malloc()ed */
@@ -49,9 +51,12 @@ typedef struct _nodeinfo {
     int ib; /* approximate byte offset in file (ib <= true offset) */
 } nodeinfo;
 
+typedef enum _refType {ref_unknown, ref_internal, ref_external} refType;
+
 typedef struct _refinfo {
     char *sz; /* target; malloc()ed */
     int iStart, iEnd; /* offsets in buffer */
+	refType type;
 } refinfo;
 
 struct _gtktexicontext {
@@ -83,46 +88,76 @@ static GtkTextTag *apttItem[ MAX_ITEM_DEPTH ], *pttDefault;
 static hash hIgnore, hPreFormat;
 static char *aszNavLabel[ 3 ] = { N_("Next:"), N_("Prev:"), N_("Up:") };
 static GtkWindowClass *pcParent;
+static GdkWindow* cursorChanged = NULL;
 
 static gboolean TagEvent( GtkTextTag *ptt, GtkWidget *pwView, GdkEvent *pev,
 			  GtkTextIter *pti, void *pv ) {
 
     static GtkTextTag *pttButton;
-    
-    if( pev->type == GDK_BUTTON_PRESS )
-	pttButton = ptt;
-    else if( pev->type == GDK_BUTTON_RELEASE ) {
-	if( ptt == pttButton ) {
-	    /* cross reference */
-	    GtkTexi *pw = GTK_TEXI( gtk_widget_get_toplevel( pwView ) );
-	    list *pl;
-	    refinfo *pri;
-	    int i = gtk_text_iter_get_offset( pti );
+	GtkTexi *pw = GTK_TEXI( gtk_widget_get_toplevel( pwView ) );
 
-	    for( pl = pw->ptic->lRef.plNext; ( pri = pl->p ); pl = pl->plNext )
-		if( i < pri->iStart ) {
-		    pri = NULL;
-		    break;
-		} else if( i < pri->iEnd )
-		    break;
-
-	    if( pri && pri->sz ) {
-		/* NB: it is not safe to pass pri->sz, because it is in
-		   storage that will be freed by gtktexi_render_node() */
-#if __GNUC__
-		char sz[ strlen( pri->sz ) + 1 ];
-#elif HAVE_ALLOCA
-		char *sz = alloca( strlen( pri->sz ) + 1 );
-#else
-		char sz[ 4096 ];
-#endif
-		strcpy( sz, pri->sz );
-		gtk_texi_render_node( pw, sz );
-	    }
+	if (pev->type == GDK_MOTION_NOTIFY)
+	{
+		if (ptt)
+		{
+			GdkCursor *cursor;
+			GdkWindow *pWin = gtk_text_view_get_window(GTK_TEXT_VIEW(pwView), GTK_TEXT_WINDOW_TEXT);
+			if (!strcmp(ptt->name, "uref"))
+				cursor=gdk_cursor_new(GDK_HAND2);
+			else
+				cursor=gdk_cursor_new(GDK_HAND1);
+			gdk_window_set_cursor(pWin,cursor);
+			gdk_cursor_unref(cursor);
+			cursorChanged = pWin;
+		}
 	}
-	
-	pttButton = NULL;
-    }
+	else if( pev->type == GDK_BUTTON_PRESS )
+		pttButton = ptt;
+	else if( pev->type == GDK_BUTTON_RELEASE )
+	{
+		if (ptt == pttButton)
+		{
+			/* cross reference */
+			list *pl;
+			refinfo *pri = NULL;
+			int i = gtk_text_iter_get_offset( pti );
+			
+			for( pl = pw->ptic->lRef.plNext; ( pri = pl->p ); pl = pl->plNext )
+			{
+				if( i < pri->iStart )
+				{
+					pri = NULL;
+					break;
+				}
+				else if (i < pri->iEnd && i >= pri->iStart)
+					break;
+			}
+
+			if( pri && pri->sz )
+			{
+				switch (pri->type)
+				{
+				case ref_external:
+					OpenURL(pri->sz);
+					break;
+				case ref_internal:
+				{
+					/* NB: it is not safe to pass pri->sz, because it is in
+						storage that will be freed by gtktexi_render_node() */
+					char *sz = strdup(pri->sz);
+					MouseMove(NULL, NULL);	/* Remove hand cursor */
+					gtk_texi_render_node( pw, sz );
+					free(sz);
+					break;
+				}
+				case ref_unknown:
+					printf("Unknown ref\n");
+					break;
+				}
+			}
+		}
+		pttButton = NULL;
+	}
     
     return TRUE; /* not ideal, but GTK gets into all sorts of trouble if
 		    we drastically modify the buffer and then allow other
@@ -139,7 +174,6 @@ static void Initialise( void ) {
 	"printindex",
 	"setfilename",
 	"settitle",
-	"urefurl",
 	NULL
     }, *aszPreFormat[] = {
 	"display",
@@ -366,6 +400,7 @@ static void Initialise( void ) {
     ptt = gtk_text_tag_new( "uref" );
     g_object_set( G_OBJECT( ptt ),
 		  "foreground", "blue",
+		  "style", PANGO_STYLE_ITALIC,
 		  "underline", PANGO_UNDERLINE_SINGLE,
 		  NULL );
     gtk_text_tag_table_add( pttt, ptt );
@@ -485,7 +520,7 @@ static void ScanStartElement( void *pv, const xmlChar *pchName,
 			      const xmlChar **ppchAttrs ) {
 
     GtkTexi *pw = pv;
-    
+
     if( !strcmp( pchName, "anchor" ) )
 	AddNode( pw, "FIXME handle anchor name attribute", FALSE,
 		 pw->ptic->ib );
@@ -498,7 +533,7 @@ static void ScanStartElement( void *pv, const xmlChar *pchName,
 static void ScanEndElement( void *pv, const xmlChar *pchName ) {
 
     GtkTexi *pw = pv;
-    
+
     if( !strcmp( pchName, "nodename" ) ) {
 	AddNode( pw, ReadParameter( pw ), TRUE, pw->ptic->ibNode );
 	pw->ptic->pch = NULL;
@@ -516,13 +551,91 @@ static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
     }
 }
 
-static void Err( void *pv, const char *msg, ... )
+static void ScanErr( void *pv, const char *msg, ... )
 {
+#if DEBUG_XML
     va_list args;
 
     va_start(args, msg);
     vprintf(msg, args);
     va_end(args);
+#endif
+}
+
+static xmlEntity xmlEntityCprt = {
+    NULL, XML_ENTITY_DECL, BAD_CAST "copyright",
+    NULL, NULL, NULL, NULL, NULL, NULL, 
+    BAD_CAST "©", BAD_CAST "©", 1,
+    XML_INTERNAL_PREDEFINED_ENTITY,
+    NULL, NULL, NULL, NULL
+};
+static xmlEntity xmlEntityBullet = {
+    NULL, XML_ENTITY_DECL, BAD_CAST "bullet",
+    NULL, NULL, NULL, NULL, NULL, NULL, 
+    BAD_CAST "", BAD_CAST "", 1,
+    XML_INTERNAL_PREDEFINED_ENTITY,
+    NULL, NULL, NULL, NULL
+};
+static xmlEntity xmlEntityLdQuo = {
+    NULL, XML_ENTITY_DECL, BAD_CAST "ldqu",
+    NULL, NULL, NULL, NULL, NULL, NULL, 
+    BAD_CAST "‘", BAD_CAST "‘", 1,
+    XML_INTERNAL_PREDEFINED_ENTITY,
+    NULL, NULL, NULL, NULL
+};
+static xmlEntity xmlEntityRdQuo = {
+    NULL, XML_ENTITY_DECL, BAD_CAST "rdqu",
+    NULL, NULL, NULL, NULL, NULL, NULL, 
+    BAD_CAST "’", BAD_CAST "’", 1,
+    XML_INTERNAL_PREDEFINED_ENTITY,
+    NULL, NULL, NULL, NULL
+};
+static xmlEntity xmlEntityLnBrk = {
+    NULL, XML_ENTITY_DECL, BAD_CAST "lnbrk",
+    NULL, NULL, NULL, NULL, NULL, NULL, 
+    BAD_CAST "<<linebreak>>", BAD_CAST ">", 1,
+    XML_INTERNAL_PREDEFINED_ENTITY,
+    NULL, NULL, NULL, NULL
+};
+static xmlEntity xmlEntityNdash = {
+    NULL, XML_ENTITY_DECL, BAD_CAST "ndash",
+    NULL, NULL, NULL, NULL, NULL, NULL, 
+    BAD_CAST "-ndash-", BAD_CAST "-ndash-", 1,
+    XML_INTERNAL_PREDEFINED_ENTITY,
+    NULL, NULL, NULL, NULL
+};
+
+static xmlEntityPtr GetEntity(void *user_data, const xmlChar *name)
+{
+    xmlEntityPtr xmlEP = xmlGetPredefinedEntity(name);
+	if (!xmlEP)
+	{
+		if (!stricmp(name, "copyright"))
+		{
+			return &xmlEntityCprt;
+		}
+		if (!stricmp(name, "bullet"))
+		{
+			return &xmlEntityBullet;
+		}
+		if (!stricmp(name, "ldquo"))
+		{
+			return &xmlEntityLdQuo;
+		}
+		if (!stricmp(name, "rdquo"))
+		{
+			return &xmlEntityRdQuo;
+		}
+		if (!stricmp(name, "linebreak"))
+		{
+			return &xmlEntityLnBrk;
+		}
+		if (!stricmp(name, "ndash"))
+		{
+			return &xmlEntityNdash;
+		}
+	}
+	return xmlEP;
 }
 
 static xmlSAXHandler xsaxScan = {
@@ -531,10 +644,10 @@ static xmlSAXHandler xsaxScan = {
     NULL, /* hasInternalSubset */
     NULL, /* hasExternalSubset */
     NULL, /* resolveEntity */
-    NULL, /* getEntity */
+    GetEntity, /* getEntity */
     NULL, /* entityDecl */
     NULL, /* notationDecl */
-    NULL, /* attributeDecl */
+	NULL, /* attributeDecl */
     NULL, /* elementDecl */
     NULL, /* unparsedEntityDecl */
     NULL, /* setDocumentLocator */
@@ -547,14 +660,25 @@ static xmlSAXHandler xsaxScan = {
     NULL, /* ignorableWhitespace */
     NULL, /* processingInstruction */
     NULL, /* comment */
-    Err, /* xmlParserWarning */
-    Err, /* xmlParserError */
-    Err, /* fatal error */
+    ScanErr, /* xmlParserWarning */
+    ScanErr, /* xmlParserError */
+    ScanErr, /* fatal error */
     NULL, /* getParameterEntity */
     NULL, /* cdataBlock; */
     NULL,  /* externalSubset; */
     TRUE
 };
+
+static void ParseError( void *pv, const char *msg, ... )
+{
+#if DEBUG_XML
+    va_list args;
+
+    va_start(args, msg);
+    vprintf(msg, args);
+    va_end(args);
+#endif
+}
 
 extern int gtk_texi_load( GtkTexi *pw, char *szFile ) {
 
@@ -634,10 +758,26 @@ static refinfo *NewRef( GtkTexi *pw ) {
     pri->sz = NULL;
     pri->iStart = gtk_text_buffer_get_char_count( pw->ptb );
     pri->iEnd = -1;
+	pri->type = ref_unknown;
 
     ListInsert( &pw->ptic->lRef, pri );
     
     return pri;
+}
+
+char* FindAttribute(const char* name, const xmlChar **ppchAttrs)
+{
+	while (*ppchAttrs)
+	{
+		if (!stricmp(*ppchAttrs, name))
+			return (char*)ppchAttrs[1];
+
+		/* Skip to next attribute */
+		ppchAttrs++;
+		if (*ppchAttrs)
+			ppchAttrs++;
+	}
+	return NULL;
 }
 
 static void StartElement( void *pv, const xmlChar *pchName,
@@ -647,7 +787,7 @@ static void StartElement( void *pv, const xmlChar *pchName,
     long l = StringHash( (char *) pchName );
     GtkTextTag *ptt;
 
-#if 0
+#if DEBUG_XML
     printf( "StartElement(%s)\n", pchName );
 #endif
     
@@ -672,10 +812,17 @@ static void StartElement( void *pv, const xmlChar *pchName,
     if( !strcmp( pchName, "para" ) || !strcmp( pchName, "group" ) )
 	pw->ptic->cPara++;
 
-    if( !strcmp( pchName, "image" ) ||
-	!strcmp( pchName, "xrefnodename" ) ||
+    if (!strcmp(pchName, "image"))
+	{
+		const char* filename = FindAttribute("name", ppchAttrs);
+		NewParameter(pw);
+		if (filename)
+			strcpy(pw->ptic->pch, filename);
+	}
+	if (!strcmp( pchName, "xrefnodename" ) ||
 	!strcmp( pchName, "menunode" ) ||
-	/* FIXME handle other types of references too */
+	!strcmp( pchName, "urefurl" ) ||
+/* FIXME handle other types of references too */
 	!strcmp( pchName, "nodenext" ) ||
 	!strcmp( pchName, "nodeprev" ) ||
 	!strcmp( pchName, "nodeup" ) )
@@ -724,9 +871,16 @@ static void StartElement( void *pv, const xmlChar *pchName,
 
     /* FIXME handle "key" tag here */
 
-    if( !strcmp( pchName, "inforef" ) || !strcmp( pchName, "menuentry" ) ||
-	!strcmp( pchName, "uref" ) || !strcmp( pchName, "xref" ) )
-	pw->ptic->pri = NewRef( pw );
+    if( !strcmp( pchName, "inforef" ) || !strcmp( pchName, "menuentry" ) || !strcmp( pchName, "xref" ) )
+	{
+		pw->ptic->pri = NewRef( pw );
+		pw->ptic->pri->type = ref_internal;
+	}
+	else if (!strcmp( pchName, "uref"))
+	{
+		pw->ptic->pri = NewRef( pw );
+		pw->ptic->pri->type = ref_external;
+	}
     else if( !strcmp( pchName, "menutitle" ) )
 	pw->ptic->pri->iStart = gtk_text_buffer_get_char_count( pw->ptb );
     
@@ -772,7 +926,7 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
     long l = StringHash( (char *) pchName );
     int iNavLabel;
     
-#if 0
+#if DEBUG_XML
     printf( "EndElement(%s)\n", pchName );
 #endif
     
@@ -801,30 +955,53 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
     if( !strcmp( pchName, "para" ) || !strcmp( pchName, "group" ) )
 	pw->ptic->cPara--;
 
-    if( !strcmp( pchName, "image" ) ) {
-	GdkPixbuf *ppb;
+	if (!strcmp(pchName, "image"))
+	{
+		GdkPixbuf *ppb = NULL;
 
-	/* FIXME look for image in same directory as original file */
-	strcpy( pw->ptic->pch, ".png" );
-	if( !( ppb = gdk_pixbuf_new_from_file( pw->ptic->szParameter,
-					       NULL ) ) ) {
-	    strcpy( pw->ptic->pch, ".jpg" );
-	    ppb = gdk_pixbuf_new_from_file( pw->ptic->szParameter, NULL );
-	}
+		char buf[BIG_PATH];
+		char* pchr;
+		strcpy(buf, pw->ptic->szFile);
+		pchr = buf + strlen(buf);
+		while (pchr != buf)
+		{
+			if (*pchr == '\\' || *pchr == '/')
+			{
+				pchr++;
+				break;
+			}
+			pchr--;
+		}
+		strcpy(pchr, pw->ptic->szParameter);
+		pchr = buf + strlen(buf);
+		strcpy(pchr, ".png");
+		if (access(buf, R_OK))
+			strcpy(pchr, ".jpg");
 
-	if( ppb ) {
-	    BufferAppendPixbuf( pw, ppb );
-	    pw->ptic->fEmptyParagraph = FALSE;
-	} else
+		if (!access(buf, R_OK))
+			ppb = gdk_pixbuf_new_from_file(buf, NULL);
+
+		if (ppb)
+		{
+			BufferAppendPixbuf(pw, ppb);
+			pw->ptic->fEmptyParagraph = FALSE;
+		}
+		else
 	    /* FIXME draw default "missing image" */
 	    ;
 
-	/* FIXME do we need to handle refcounts on the image? */
+		/* FIXME do we need to handle refcounts on the image? */
 
-	ReadParameter( pw );
-    }
-
-    if( !strcmp( pchName, "xrefnodename" ) ) {
+		ReadParameter( pw );
+	}
+    if (!strcmp(pchName, "uref"))
+	{
+		pw->ptic->pri->iEnd = gtk_text_buffer_get_char_count( pw->ptb );
+	}
+	else if (!strcmp(pchName, "urefurl"))
+	{
+		pw->ptic->pri->sz = strdup(ReadParameter(pw));
+    } else if( !strcmp( pchName, "xrefnodename" ) ) {
 	BufferAppend( pw, ReadParameter( pw ), -1 );
 	pw->ptic->pri->iEnd = gtk_text_buffer_get_char_count( pw->ptb );
 	pw->ptic->pri->sz = strdup( pw->ptic->szParameter );
@@ -863,7 +1040,8 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
     }
     
     if( !pw->ptic->fEmptyParagraph ) {
-	if( !strcmp( pchName, "tableterm" ) ) {
+	if( !strcmp( pchName, "tableterm" ) ||
+		!strcmp( pchName, "menuentry" )) {
 	    BufferAppend( pw, "\n", 1 );
 	    pw->ptic->fEmptyParagraph = TRUE;
 	} else if( !strcmp( pchName, "para" ) ||
@@ -896,6 +1074,14 @@ static void Characters( void *pv, const xmlChar *pchIn, int cch ) {
     char sz[ 4096 ];
 #endif
     char *pch;
+
+#if DEBUG_XML
+	int i;
+	printf("Chars: ");
+	for (i = 0; i < cch; i++)
+	    putchar(pchIn[i]);
+	printf("\n");
+#endif
 
     if( pw->ptic->pch ) {
 	/* reading a parameter */
@@ -954,7 +1140,7 @@ xmlSAXHandler xsax = {
     NULL, /* hasInternalSubset */
     NULL, /* hasExternalSubset */
     NULL, /* resolveEntity */
-    NULL, /* getEntity */
+    GetEntity, /* getEntity */
     NULL, /* entityDecl */
     NULL, /* notationDecl */
     NULL, /* attributeDecl */
@@ -970,9 +1156,9 @@ xmlSAXHandler xsax = {
     NULL, /* ignorableWhitespace */
     NULL, /* processingInstruction */
     NULL, /* comment */
-    Err, /* xmlParserWarning */
-    Err, /* xmlParserError */
-    Err, /* fatal error */
+    ParseError, /* xmlParserWarning */
+    ParseError, /* xmlParserError */
+    ParseError, /* fatal error */
     NULL, /* getParameterEntity */
     NULL, /* cdataBlock; */
     NULL,  /* externalSubset; */
@@ -1065,7 +1251,7 @@ static int RenderNode( GtkTexi *pw, char *szTag ) {
 	for( pl = pw->ptic->lNode.plNext; pl != &pw->ptic->lNode;
 	     pl = pl->plNext ) {
 	    pni = pl->p;
-#if 0
+#if DEBUG_XML
 	    printf( "Looking for %s, got %s\n", szTag, pni->sz );
 #endif
 	    if( !strcmp( szTag, pni->sz ) )
@@ -1094,7 +1280,7 @@ static int RenderNode( GtkTexi *pw, char *szTag ) {
 	pw->ptic->fSingleNode = FALSE;
     }
     
-#if 0
+#if DEBUG_XML
     printf( "skipping to %s\n", pw->ptic->szSkipTo );
 #endif
     
@@ -1115,7 +1301,7 @@ static int RenderNode( GtkTexi *pw, char *szTag ) {
 
 extern int gtk_texi_render_node( GtkTexi *pw, char *szTag ) {
     
-#if 0
+#if DEBUG_XML
     printf( "gtktexi_render_node(%s)\n", szTag );
 #endif
 
@@ -1221,6 +1407,17 @@ static void MenuGoTop( gpointer pv, guint n, GtkWidget *pw ) {
 static void MenuGoDir( gpointer pv, guint n, GtkWidget *pw ) {
 
     /* FIXME */
+}
+
+static gboolean MouseMove( GtkWidget *widget,
+                                     GdkEventMotion *event )
+{
+	if (cursorChanged)
+	{
+		gdk_window_set_cursor(cursorChanged, NULL);
+		cursorChanged = FALSE;
+	}
+	return TRUE;
 }
 
 static void gtk_texi_init( GtkTexi *pw ) {
@@ -1348,6 +1545,8 @@ static void gtk_texi_init( GtkTexi *pw ) {
     ListCreate( pw->ptic->plCurrent = &pw->ptic->lHistory );
 
     pw->pwText = gtk_text_view_new_with_buffer( pw->ptb );
+	g_signal_connect(G_OBJECT(pw->pwText), "motion_notify_event", G_CALLBACK(MouseMove), NULL);
+    
     gtk_text_view_set_editable( GTK_TEXT_VIEW( pw->pwText ), FALSE );
     gtk_text_view_set_cursor_visible( GTK_TEXT_VIEW( pw->pwText ), FALSE );
     ptaDefault = gtk_text_view_get_default_attributes(
