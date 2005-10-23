@@ -21,6 +21,7 @@
 
 #if HAVE_CONFIG_H
 #include <config.h>
+#include "backgammon.h"
 #endif
 
 #include "gtktexi.h"
