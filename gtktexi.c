@@ -21,12 +21,15 @@
 
 #if HAVE_CONFIG_H
 #include <config.h>
-#include "backgammon.h"
 #endif
 
 #include "gtktexi.h"
 
 #if HAVE_GTKTEXI
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <assert.h>
 #include <ctype.h>
@@ -610,27 +613,27 @@ static xmlEntityPtr GetEntity(void *user_data, const xmlChar *name)
     xmlEntityPtr xmlEP = xmlGetPredefinedEntity(name);
 	if (!xmlEP)
 	{
-		if (!stricmp(name, "copyright"))
+		if (!strcasecmp(name, "copyright"))
 		{
 			return &xmlEntityCprt;
 		}
-		if (!stricmp(name, "bullet"))
+		if (!strcasecmp(name, "bullet"))
 		{
 			return &xmlEntityBullet;
 		}
-		if (!stricmp(name, "ldquo"))
+		if (!strcasecmp(name, "ldquo"))
 		{
 			return &xmlEntityLdQuo;
 		}
-		if (!stricmp(name, "rdquo"))
+		if (!strcasecmp(name, "rdquo"))
 		{
 			return &xmlEntityRdQuo;
 		}
-		if (!stricmp(name, "linebreak"))
+		if (!strcasecmp(name, "linebreak"))
 		{
 			return &xmlEntityLnBrk;
 		}
-		if (!stricmp(name, "ndash"))
+		if (!strcasecmp(name, "ndash"))
 		{
 			return &xmlEntityNdash;
 		}
@@ -769,7 +772,7 @@ char* FindAttribute(const char* name, const xmlChar **ppchAttrs)
 {
 	while (*ppchAttrs)
 	{
-		if (!stricmp(*ppchAttrs, name))
+		if (!strcasecmp(*ppchAttrs, name))
 			return (char*)ppchAttrs[1];
 
 		/* Skip to next attribute */
