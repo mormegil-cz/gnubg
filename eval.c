@@ -730,8 +730,8 @@ int SSE_Supported()
 
 int CheckSSE()
 {
-	int result = 1;
-#if 0	
+	int result = 0;
+
 	asm (
 		// Check if cpuid is supported (can bit 21 of flags be changed)
 		"mov $1, %%eax\n\t"
@@ -781,7 +781,7 @@ int CheckSSE()
 "end:"
 
 			: "=b"(result) : : "%eax", "%ecx", "%edx");
-#endif
+	
 	switch (result)
 	{
 	case -1:
