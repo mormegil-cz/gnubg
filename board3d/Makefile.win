@@ -2,7 +2,7 @@
 
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
-FLAGS=-g -Wall -mms-bitfields $(DEFS)
+FLAGS= -Wall $(COMPOPT) $(DEFS)
 TARGET = libboard3d.a
 
 MINGW=$(GNU)/mingw

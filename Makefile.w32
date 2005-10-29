@@ -2,7 +2,7 @@
 
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
-FLAGS=-g -Wall -mms-bitfields $(DEFS)
+FLAGS= -Wall $(COMPOPT) $(DEFS)
 MINGW=$(GNU)/mingw
 
 TARGET = gnubg.exe
@@ -70,8 +70,8 @@ obj/%.o: %.c
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
 clean: 
-	@$(MAKE) -fmakefile.win -C board3d clean
-	@$(MAKE) -fmakefile.w32 -C lib clean
+	@$(MAKE) --no-print-directory -fmakefile.win -C board3d clean
+	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib clean
 	@del .\obj\*.o
 	@del "$(TARGET)"
 	@echo $(TARGET) clean
