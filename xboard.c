@@ -21,13 +21,15 @@
 
 #include "config.h"
 
+#if USE_EXT
 #include <ext.h>
 #include <extwin.h>
+#include <X11/Xutil.h>
+#endif
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <X11/Xutil.h>
 
 #include "backgammon.h"
 #include "xboard.h"

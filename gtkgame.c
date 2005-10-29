@@ -6895,7 +6895,6 @@ GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
 extern void GTKShowBuildInfo(GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwPrompt;
-	int i;
 	char* pch;
 
 	pwDialog = GTKCreateDialog( _("GNU Backgammon - Build Info"),
@@ -6919,7 +6918,7 @@ extern void GTKShowBuildInfo(GtkWidget *pwParent)
 
 	gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
 
-    while(pch = GetBuildInfoString())
+    while((pch = GetBuildInfoString()))
 		gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new( gettext(pch) ),
 			FALSE, FALSE, 0 );
 
@@ -7066,8 +7065,8 @@ extern void GTKCommandShowCredits(GtkWidget *pwParent)
 }
 
 #if HAVE_GTKTEXI
-static int ShowManualSection( char *szTitle, char *szNode ) {
-    
+static int ShowManualSection( char *szTitle, char *szNode )
+{
     static GtkWidget *pw = NULL;
     char *pch;
     
@@ -7092,9 +7091,9 @@ static int ShowManualSection( char *szTitle, char *szNode ) {
     gtk_widget_show_all( pw );
 
     gtk_texi_load( GTK_TEXI( pw ), pch );
-    free( pch );
     gtk_texi_render_node( GTK_TEXI( pw ), szNode );
 
+    free( pch );
     return 0;
 }
 #endif

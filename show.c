@@ -985,7 +985,7 @@ extern void CommandShowBuildInfo( char *sz )
 		GTKShowBuildInfo(pwMain);
 #endif
 
-    while(pch = GetBuildInfoString())
+    while((pch = GetBuildInfoString()))
 		outputl( gettext(pch) );
 
     outputc( '\n' );

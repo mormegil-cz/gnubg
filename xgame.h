@@ -22,7 +22,9 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
+#if USE_EXT
 #include <ext.h>
+#endif
 
 #include "eval.h"
 

@@ -21,8 +21,10 @@
 
 #include "config.h"
 
+#if USE_EXT
 #include <ext.h>
 #include <extwin.h>
+#endif
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif

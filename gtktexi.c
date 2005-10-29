@@ -22,6 +22,7 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #include "backgammon.h"
+#include "openurl.h"
 #endif
 
 #include "gtktexi.h"
@@ -93,6 +94,17 @@ static hash hIgnore, hPreFormat;
 static char *aszNavLabel[ 3 ] = { N_("Next:"), N_("Prev:"), N_("Up:") };
 static GtkWindowClass *pcParent;
 static GdkWindow* cursorChanged = NULL;
+
+static gboolean MouseMove( GtkWidget *widget,
+                                     GdkEventMotion *event )
+{
+	if (cursorChanged)
+	{
+		gdk_window_set_cursor(cursorChanged, NULL);
+		cursorChanged = FALSE;
+	}
+	return TRUE;
+}
 
 static gboolean TagEvent( GtkTextTag *ptt, GtkWidget *pwView, GdkEvent *pev,
 			  GtkTextIter *pti, void *pv ) {
@@ -1411,17 +1423,6 @@ static void MenuGoTop( gpointer pv, guint n, GtkWidget *pw ) {
 static void MenuGoDir( gpointer pv, guint n, GtkWidget *pw ) {
 
     /* FIXME */
-}
-
-static gboolean MouseMove( GtkWidget *widget,
-                                     GdkEventMotion *event )
-{
-	if (cursorChanged)
-	{
-		gdk_window_set_cursor(cursorChanged, NULL);
-		cursorChanged = FALSE;
-	}
-	return TRUE;
 }
 
 static void gtk_texi_init( GtkTexi *pw ) {

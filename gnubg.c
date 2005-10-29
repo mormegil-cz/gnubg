@@ -7487,7 +7487,7 @@ static void version( void ) {
 	puts(VERSION_STRING);
 	puts("");
 
-    while(pch = GetBuildInfoString())
+    while((pch = GetBuildInfoString()))
       puts(gettext(pch));
 }
 

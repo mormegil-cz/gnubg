@@ -3678,7 +3678,7 @@ static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
 static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 			     int iPip, int cPip, int anBoard[ 2 ][ 25 ],
 			     int anMoves[], int fPartial ) {
-    int i, iCopy, fUsed = 0;
+    int i, fUsed = 0;
     int anBoardNew[ 2 ][ 25 ];
 
     if( nMoveDepth > 3 || !anRoll[ nMoveDepth ] )

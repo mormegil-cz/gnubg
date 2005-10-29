@@ -53,12 +53,18 @@ extern long int getrandom ( void ) {
  * $Id$
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <stdio.h>
+#if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 #include <unistd.h>
 #include <string.h>
 

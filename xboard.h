@@ -22,7 +22,9 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+#if USE_EXT
 #include <ext.h>
+#endif
 
 extern extwindowclass ewcBoard;
 
