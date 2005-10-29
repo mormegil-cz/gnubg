@@ -9,9 +9,11 @@
 #ifndef _EXT_H_
 #define _EXT_H_
 
+#if EXT
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
+#endif
 
 #include <event.h>
 #include <list.h>

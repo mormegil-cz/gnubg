@@ -9,7 +9,9 @@
 #ifndef _EXTWIN_H_
 #define _EXTWIN_H_
 
+#if EXT
 #include <ext.h>
+#endif
 
 extern extwindowclass ewcText;
 

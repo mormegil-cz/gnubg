@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#if EXT
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
@@ -22,6 +23,7 @@
 
 #include <ext.h>
 #include <extwin.h>
+#endif
 
 #define AllButtonMask ( Button1Mask | Button2Mask | Button3Mask | Button4Mask \
 			| Button5Mask )

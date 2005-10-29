@@ -13,17 +13,21 @@
 #include <hash.h>
 #include <stdlib.h>
 #include <string.h>
+#if EXT
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 #include <X11/Xmu/StdCmap.h>
+#endif
 
 #if EXT_DEBUG
 #include <stdio.h>
 #endif
 
+#if EXT
 #include <ext.h>
+#endif
 
 static XContext xc;
 
