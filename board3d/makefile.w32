@@ -1,47 +1,45 @@
-change#trying to get file back...
-BASEDIR=c:\copied\mingw
-GNUDIR=c:\gnu\gnubg
-LIBFLAGS=-mwindows
-#CFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
-CPPFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
-RM=del
-AR=ar cr
-RANLIB=ranlib
+# Windows mingw makefile
+
 CC=gcc
-
-INCLUDE= \
-	-I$(BASEDIR)/include/gtk-2.0 \
-	-I$(BASEDIR)/lib/gtk-2.0/include \
-	-I$(BASEDIR)/include/glib-2.0 \
-	-I$(BASEDIR)/lib/glib-2.0/include \
-	-I$(BASEDIR)/include/pango-1.0 \
-	-I$(BASEDIR)/include/atk-1.0 \
-	-I$(BASEDIR)/include/gtkglext-1.0 \
-	-I$(BASEDIR)/lib/gtkglext-1.0/include \
-	-I$(BASEDIR)/include/freetype2 \
-	-I$(BASEDIR)/FTGL/include \
-	-I$(GNUDIR) \
-	-I$(GNUDIR)/lib
-
-LIBS=-lftgl -lglib-2.0.dll -lgtk-win32-2.0 -lgobject-2.0.dll \
-	-lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll -lfreetype \
-	-lopengl32 -lglu32 -lglut32
-
-TARGET=board.a
+DEFS = -DHAVE_CONFIG_H
+FLAGS=-g -Wall -mms-bitfields $(DEFS)
+TARGET = libboard3d.a
 
 SOURCE=	drawboard3d misc3d texture3d font3d widget3d \
-	matrix model shadow mylist timer gtkcolour3d
-OBJECTS=$(patsubst %,%.o,$(SOURCE)) $(GNUDIR)/luxi.o
-HEADERS=../gnubg/gtkboard.h inc3d.h test/main.h
+	matrix model shadow mylist gtkcolour3d graph
+
+OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
+
+INCLUDE = -I. -I.. -I../lib \
+	-I$(MINGW)/include/gtk-2.0 \
+	-I$(MINGW)/lib/gtk-2.0/include \
+	-I$(MINGW)/include/cairo \
+	-I$(MINGW)/include/glib-2.0 \
+	-I$(MINGW)/lib/glib-2.0/include \
+	-I$(MINGW)/include/atk-1.0 \
+	-I$(MINGW)/include/libxml2 \
+	-I$(MINGW)/include/pango-1.0 \
+	-I$(MINGW)/../Python23/include \
+	-I$(MINGW)/include/gtkglext-1.0 \
+	-I$(MINGW)/lib/gtkglext-1.0/include \
+	-I$(MINGW)/include/freetype2
 
 all: $(TARGET)
-	@echo done
+	@echo $(TARGET) done
 
-$(TARGET): $(OBJECTS)
+$(TARGET): obj $(OBJECTS)
 	@echo creating lib
-	$(AR) $(TARGET) $(OBJECTS)
-	$(RANLIB) $(TARGET)
-	
+	@ar cr $(TARGET) $(OBJECTS)
+	@ranlib $(TARGET)
+
+obj:
+	@mkdir $@
+
+obj/%.o: %.c
+	@echo Compiling $<
+	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
+
 clean:
-	$(RM) $(OBJECTS)
-	@echo clean
+	@del .\obj\*.o
+	@del $(TARGET)
+	@echo $(TARGET) clean
