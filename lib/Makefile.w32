@@ -1,0 +1,33 @@
+# Windows libevent makefile
+
+CC=gcc
+DEFS = -DHAVE_CONFIG_H
+FLAGS=-g -Wall -mms-bitfields $(DEFS)
+TARGET = libevent.a
+
+SOURCE=	dynarray fifo hash heap \
+	list neuralnet mt19937ar isaac md5
+
+OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
+
+INCLUDE = -I. -I.. 
+
+all: $(TARGET)
+	@echo $(TARGET) done
+
+$(TARGET): obj $(OBJECTS)
+	@echo creating lib
+	@ar cr $(TARGET) $(OBJECTS)
+	@ranlib $(TARGET)
+
+obj:
+	@mkdir $@
+
+obj/%.o: %.c
+	@echo Compiling $<
+	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
+
+clean:
+	@del .\obj\*.o
+	@del $(TARGET)
+	@echo $(TARGET) clean
