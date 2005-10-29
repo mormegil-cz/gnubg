@@ -266,7 +266,8 @@ void Init3d()
 	LoadTextureInfo(FALSE);
 }
 
-#ifdef WIN32
+/* This doesn't seem to work even on windows anymore... */
+#ifdef TEMP_REMOVE
 
 #ifndef PFD_GENERIC_ACCELERATED
 #define PFD_GENERIC_ACCELERATED     0x00001000

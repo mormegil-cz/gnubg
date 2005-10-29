@@ -2,8 +2,8 @@
 
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
-
 FLAGS=-g -Wall -mms-bitfields $(DEFS)
+MINGW=$(GNU)/mingw
 
 TARGET = gnubg.exe
 

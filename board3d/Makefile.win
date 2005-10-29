@@ -5,6 +5,8 @@ DEFS = -DHAVE_CONFIG_H
 FLAGS=-g -Wall -mms-bitfields $(DEFS)
 TARGET = libboard3d.a
 
+MINGW=$(GNU)/mingw
+
 SOURCE=	drawboard3d misc3d texture3d font3d widget3d \
 	matrix model shadow mylist gtkcolour3d graph
 
