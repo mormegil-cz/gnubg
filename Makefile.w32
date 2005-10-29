@@ -56,7 +56,7 @@ all: Libraries $(TARGET)
 
 Libraries:
 	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib
-	@$(MAKE) --no-print-directory -fmakefile.w32 -C board3d
+	@$(MAKE) --no-print-directory -fmakefile.win -C board3d
 
 $(TARGET): obj $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
 	@echo linking
@@ -70,7 +70,7 @@ obj/%.o: %.c
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
 clean: 
-	@$(MAKE) -fmakefile.w32 -C board3d clean
+	@$(MAKE) -fmakefile.win -C board3d clean
 	@$(MAKE) -fmakefile.w32 -C lib clean
 	@del .\obj\*.o
 	@del "$(TARGET)"
