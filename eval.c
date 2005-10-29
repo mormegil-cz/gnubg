@@ -636,9 +636,9 @@ static int EvalCacheCompare( evalcache *p0, evalcache *p1 ) {
 	p0->nEvalContext != p1->nEvalContext;
 }
 
-static long EvalCacheHash( evalcache *pec ) {
+static unsigned long EvalCacheHash( evalcache *pec ) {
 
-    long l;
+    unsigned long l;
     int i;
     
     l = pec->nEvalContext;
@@ -730,8 +730,8 @@ int SSE_Supported()
 
 int CheckSSE()
 {
-	int result = 0;
-	
+	int result = 1;
+#if 0	
 	asm (
 		// Check if cpuid is supported (can bit 21 of flags be changed)
 		"mov $1, %%eax\n\t"
@@ -781,7 +781,7 @@ int CheckSSE()
 "end:"
 
 			: "=b"(result) : : "%eax", "%ecx", "%edx");
-
+#endif
 	switch (result)
 	{
 	case -1:
@@ -2607,7 +2607,7 @@ static float Noise( const evalcontext* pec, int anBoard[ 2 ][ 25 ],
     float r;
     
     if( pec->fDeterministic ) {
-	unsigned char auchBoard[ 50 ], auch[ 16 ];
+	char auchBoard[ 50 ], auch[ 16 ];
 	int i;
 
 	for( i = 0; i < 25; i++ ) {
@@ -2725,7 +2725,7 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
 #if !defined(GARY_CACHE) && defined(PRUNE_CACHE)
 {
 	  evalcache ec, *pec;
-	  long l;
+	  unsigned long l;
 	  memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
 	  ec.nEvalContext = 0;
 	  if( ( pec = CacheLookup( &cpEval, &ec, &l ) ) ) {
@@ -2814,7 +2814,7 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
 #if !defined(GARY_CACHE)
       {
 	evalcache ec, *pec;
-	long l;
+	unsigned long l;
 	memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
 	ec.nEvalContext =  pci->fMove << 14;
 	if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) {
@@ -3119,7 +3119,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
                        const cubeinfo* pci, const evalcontext* pecx,
 		       int nPlies, positionclass pc ) {
     evalcache ec, *pec;
-    long l;
+    unsigned long l;
 
     /* This should be a part of the code that is called in all
        time-consuming operations at a relatively steady rate, so is a
@@ -3273,7 +3273,7 @@ InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS], const cubeinfo* pci )
 extern int 
 GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
-  float ar[ NUM_OUTPUTS ];
+  float ar[ NUM_OUTPUTS ] = { 0, 0, 0, 0, 0 };  /* NUM_OUTPUTS are 5 */
     
   if( ClassifyPosition( anBoard, bgv ) != CLASS_OVER )
     return 0;
@@ -4135,7 +4135,7 @@ extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] ) {
 static int DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput, 
                       const bgvariation bgv ) {
 
-    float ar[ NUM_OUTPUTS ];
+    float ar[ NUM_OUTPUTS ] = { 0, 0, 0, 0, 0}; /* NUM_OUTPUTS is 5 */
     
     if ( EvalOver( anBoard, ar, bgv ) )
       return -1;
