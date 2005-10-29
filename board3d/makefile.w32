@@ -1,3 +1,4 @@
+#trying to get file back...
 BASEDIR=c:\copied\mingw
 GNUDIR=c:\gnu\gnubg
 LIBFLAGS=-mwindows
