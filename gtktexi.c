@@ -31,6 +31,8 @@
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
+#else
+#include <io.h>
 #endif
 
 #include <assert.h>
@@ -38,7 +40,6 @@
 #include <stdarg.h>
 #include <string.h>
 #include <libxml/parser.h>
-#include <io.h>
 
 #include "list.h"
 #include "hash.h"

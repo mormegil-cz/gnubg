@@ -1,3 +1,9 @@
+Fri Nov 18 16:38:11 GNT 2995 Jim Segrave <jes@jes-2.demon.nl>
+
+	*gtktexi.c - make inclusion of io.h dependent on not having 
+	 unistd.h, as done in other routines (io.h is a Windows-only 
+	 header)
+	
 Mon Sep 19 22:37:25 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 
 	* relational.c, gtkgame.c - don't reference non-existent gtk
