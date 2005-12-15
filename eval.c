@@ -749,36 +749,36 @@ int CheckSSE()
 		"popl %%eax\n\t"
 		"xor %%ecx, %%eax\n\t"
 		"test %%edx, %%eax\n\t"
-		"jnz basecpuid\n\t"
+		"jnz 1f\n\t"
 		// Failed (non-pentium compatible machine)
 		"mov $-1, %%ebx\n\t"
-		"jp end\n\t"
+		"jp 4f\n\t"
 
-"basecpuid:"
+"1:"
 		// Check feature test is supported
 		"mov $0, %%eax\n\t"
 		"cpuid\n\t"
 		"cmp $1, %%eax\n\t"
-		"jge testsse\n\t"
+		"jge 2f\n\t"
 		// Unlucky - somehow cpuid 1 isn't supported
 		"mov $-2, %%ebx\n\t"
-		"jp end\n\t"
+		"jp 4f\n\t"
 
-"testsse:"
+"2:"
 		// Check if sse is supported (bit 25 in edx from cpuid 1)
 		"mov $1, %%eax\n\t"
 		"cpuid\n\t"
 		"mov $1, %%eax\n\t"
 		"shl $25, %%eax\n\t"
 		"test %%eax, %%edx\n\t"
-		"jnz ok\n\t"
+		"jnz 3f\n\t"
 		// Not supported
 		"mov $0, %%ebx\n\t"
-		"jp end\n\t"
-"ok:"
+		"jp 4f\n\t"
+"3:"
 		// Supported
 		"mov $1, %%ebx\n\t"
-"end:"
+"4:"
 
 			: "=b"(result) : : "%eax", "%ecx", "%edx");
 	

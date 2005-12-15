@@ -1,4 +1,11 @@
-Fri Nov 18 16:38:11 GNT 2995 Jim Segrave <jes@jes-2.demon.nl>
+Thu Dec 12 13:23:12 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+
+	    *eval.c change assembler code labels to locals. gcc 3.42 saw
+	    labels as redfined. I don't know what this will do to MS
+	    compilers
+	    or the Intel compiler.
+	    
+Fri Nov 18 16:38:11 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 
 	*gtktexi.c - make inclusion of io.h dependent on not having 
 	 unistd.h, as done in other routines (io.h is a Windows-only 
