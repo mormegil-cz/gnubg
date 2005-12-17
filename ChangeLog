@@ -1,3 +1,9 @@
+Sat Dec 17 -1:22:09 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+	* html.c - copy basemane() from simplelibgen.c to
+	  get_basename(), as basename() is not promised to be
+	  re-entrant. This caused all the links between html game
+	  files to be set to the last call to basename()
+	
 Thu Dec 12 13:23:12 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 
 	    *eval.c change assembler code labels to locals. gcc 3.42 saw

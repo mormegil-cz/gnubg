@@ -3557,6 +3557,21 @@ extern void CommandExportGameHtml( char *sz ) {
  *   Caller must free returned pointer if not NULL
  * 
  */
+#ifdef WIN32
+#define DIR_SEPARATOR  '\\'
+#define DIR_SEPARATOR_S  "\\"
+#else
+#define DIR_SEPARATOR  '/'
+#define DIR_SEPARATOR_S  "/"
+#endif
+
+static char *
+get_basename (const char *filename) 
+{ 
+  char *p1 = strrchr (filename, DIR_SEPARATOR); 
+  return p1 ? p1 + 1 : (char *) filename;
+} 
+
 
 extern char *
 HTMLFilename ( const char *szBase, const int iGame ) {
@@ -3619,23 +3634,23 @@ extern void CommandExportMatchHtml( char *sz ) {
 
       szCurrent = HTMLFilename ( sz, i );
 	  filenames[0] = HTMLFilename ( sz, 0 );
-      aszLinks[ 0 ] = basename ( filenames[ 0 ] );
+      aszLinks[ 0 ] = get_basename ( filenames[ 0 ] );
 	  filenames[ 1 ] = aszLinks[ 1 ] = NULL;
 	  if (i > 0) {
 		filenames[ 1 ] = HTMLFilename ( sz, i - 1 );
-		aszLinks[ 1 ]  = basename ( filenames[ 1 ] );
+		aszLinks[ 1 ]  = get_basename ( filenames[ 1 ] );
 	  }
 		
 	  filenames[ 2 ] = aszLinks[ 2 ] = NULL;
 	  if (i < nGames - 1) {
 		filenames[ 2 ] = HTMLFilename ( sz, i + 1 );
-		aszLinks[ 2 ]  = basename ( filenames[ 2 ] );
+		aszLinks[ 2 ]  = get_basename ( filenames[ 2 ] );
 	  }
 
 
 	  
 	  filenames[ 3 ] = HTMLFilename ( sz, nGames - 1 );
-	  aszLinks[ 3 ] = basename ( filenames[ 3 ] );
+	  aszLinks[ 3 ] = get_basename ( filenames[ 3 ] );
       if ( !i ) {
 
         if ( ! confirmOverwrite ( sz, fConfirmSave ) ) {
