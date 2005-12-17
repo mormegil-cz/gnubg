@@ -1,3 +1,7 @@
+Sat Dec 17 -3:31:09 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+	* gtkchequer.c - CreateMoveListTools() must be called before
+	  calling MoveListCreate(), otherwise coredumps can result
+	
 Sat Dec 17 -1:22:09 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 	* html.c - copy basemane() from simplelibgen.c to
 	  get_basename(), as basename() is not promised to be
