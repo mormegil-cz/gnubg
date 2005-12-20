@@ -86,7 +86,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(GTK26)\include\gtk-2.0&quot;;&quot;$(GTK26)\lib\gtk-2.0\include&quot;;&quot;$(GTK26)\include\glib-2.0&quot;;&quot;$(GTK26)\lib\glib-2.0\include&quot;;&quot;$(GTK26)\include\pango-1.0&quot;;&quot;$(GTK26)\include\atk-1.0&quot;;&quot;$(GTK26)\include\libart-2.0&quot;;..;..\lib;..\intl;&quot;$(GTK26)\include\msdev&quot;;&quot;$(GTK26)\include\freetype2&quot;;&quot;$(GTK26)\include\libxml2&quot;;&quot;$(GTK26)\..\Python23\include&quot;"
+				AdditionalIncludeDirectories="&quot;$(GTK26)\include\gtk-2.0&quot;;&quot;$(GTK26)\lib\gtk-2.0\include&quot;;&quot;$(GTK26)\include\glib-2.0&quot;;&quot;$(GTK26)\lib\glib-2.0\include&quot;;&quot;$(GTK26)\include\pango-1.0&quot;;&quot;$(GTK26)\include\atk-1.0&quot;;&quot;$(GTK26)\include\cairo&quot;;&quot;$(GTK26)\include\libart-2.0&quot;;..;..\lib;..\intl;&quot;$(GTK26)\include\msdev&quot;;&quot;$(GTK26)\include\freetype2&quot;;&quot;$(GTK26)\include\libxml2&quot;;&quot;$(GTK26)\..\Python23\include&quot;"
 				PreprocessorDefinitions="_DEBUG;HAVE_CONFIG_H=1;_CONFIG;WIN32;USE_GTK=1;USE_GTK2"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -110,7 +110,7 @@
 				OutputFile="c:\program files\gnubg26\bin\gnubg_msdevd.exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="$(GTK26)\lib,$(GTK26)\lib\msdev,$(MINGW)\lib"
+				AdditionalLibraryDirectories="&quot;$(GTK26)\lib&quot;;&quot;$(GTK26)\lib\msdev&quot;"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(TEMP)\Intermediate\Debug/gnubg_msdevd.pdb"
 				SubSystem="1"
@@ -7302,7 +7302,7 @@ rename lex.ext.c external_l.c
 						Name="VCCustomBuildTool"
 						Description="Creating external_l.c using flex"
 						CommandLine="cd $(InputDir)
-&quot;%MINGW%\..\GnuWin32\bin\flex&quot; -L -Pext external_l.l
+&quot;%GTK26%\..\GnuWin32\bin\flex&quot; -L -Pext external_l.l
 if EXIST external_l.c del external_l.c
 rename lex.ext.c external_l.c
 "
@@ -7428,9 +7428,9 @@ rename external_y.tab.h external_y.h
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Creating external_y.c/.h using bison"
-						CommandLine="set path=%MINGW%\..\GnuWin32\bin;%PATH%
+						CommandLine="set path=%GTK26%\..\GnuWin32\bin;%PATH%
 cd $(InputDir)
-&quot;%MINGW%\..\GnuWin32\bin\bison&quot; -d -l external_y.y
+&quot;%GTK26%\..\GnuWin32\bin\bison&quot; -d -l external_y.y
 if EXIST external_y.c del external_y.c
 rename external_y.tab.c external_y.c
 if EXIST external_y.h del external_y.h
@@ -7550,7 +7550,7 @@ rename lex.sgf.c sgfl.c
 						Name="VCCustomBuildTool"
 						Description="Creating sgfl.c using flex"
 						CommandLine="cd $(InputDir)
-&quot;%MINGW%\..\GnuWin32\bin\flex&quot; -L -Psgf sgf.l
+&quot;%GTK26%\..\GnuWin32\bin\flex&quot; -L -Psgf sgf.l
 if EXIST sgfl.c del sgfl.c
 rename lex.sgf.c sgfl.c
 "
@@ -7658,9 +7658,9 @@ rename sgf.tab.h sgfp.h
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Creating sgfp.c using bison"
-						CommandLine="set path=%MINGW%\..\GnuWin32\bin;%PATH%
+						CommandLine="set path=%GTK26%\..\GnuWin32\bin;%PATH%
 cd $(InputDir)
-&quot;%MINGW%\..\GnuWin32\bin\bison&quot; -d -l -p sgf sgf.y
+&quot;%GTK26%\..\GnuWin32\bin\bison&quot; -d -l -p sgf sgf.y
 if EXIST sgfp.c del sgfp.c
 rename sgf.tab.c sgfp.c
 if EXIST sgfp.h del sgfp.h

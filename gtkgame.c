@@ -113,6 +113,23 @@
 
 void DockPanels();
 
+static void ClearText(GtkTextView* pwText)
+{
+  gtk_text_buffer_set_text(gtk_text_view_get_buffer(pwText), "", -1);
+}
+
+static char* GetText(GtkTextView* pwText)
+{
+  GtkTextIter start, end;
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer(pwText);
+	char *pch;
+
+  gtk_text_buffer_get_start_iter(buffer, &start);
+  gtk_text_buffer_get_end_iter(buffer, &end);
+	pch = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+  return pch;
+}
+
 #if USE_GTK2
 #define GTK_STOCK_DIALOG_GNU "gtk-dialog-gnu" /* stock gnu head icon */
 #endif
@@ -9420,14 +9437,6 @@ int curPlayerId, curRow;
 GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *pwQueryBox,
 	*aliases, *pwAliasList;
 
-static void ClearText(GtkWidget* pwText)
-{
-	gtk_text_set_point(GTK_TEXT(pwText), 0);
-	gtk_text_freeze(GTK_TEXT(pwText));
-	gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
-	gtk_text_thaw(GTK_TEXT(pwText));
-}
-
 static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
 {
 	char *pName, *pEnv;
@@ -9445,9 +9454,9 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 		" WHERE nick.name = '%s' AND env.place = '%s'",
 		pName, pEnv);
 
-	ClearText(pwPlayerNotes);
+	ClearText(GTK_TEXT_VIEW(pwPlayerNotes));
 	if( pwAliasList ) {
-	  ClearText(pwAliasList);
+	  ClearText(GTK_TEXT_VIEW(pwAliasList));
 	}
 	if (!RunQuery(&r, query))
 	{
@@ -9460,7 +9469,7 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 	curRow = y;
 	curPlayerId = atoi(r.data[1][0]);
 	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), r.data[1][1]);
-	gtk_text_insert(GTK_TEXT(pwPlayerNotes), NULL, NULL, NULL, r.data[1][2], -1);
+  gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwPlayerNotes)), r.data[1][2], -1);
 
 	sprintf(query, _("%s is:"), r.data[1][1]);
 	if( aliases )
@@ -9476,16 +9485,20 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 		return;
 	}
 
-	for (i = 1; i < r2.rows; i++)
-	{
-		char line[100];
-		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
-		if( pwAliasList) {
-		  gtk_text_insert(GTK_TEXT(pwAliasList), NULL, 
-				  NULL, NULL, line, -1);
-		}
+	if( pwAliasList)
+  {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwAliasList));
+    GtkTextIter it;
+    gtk_text_buffer_get_end_iter(buffer, &it);
+  	for (i = 1; i < r2.rows; i++)
+  	{
+  		char line[100];
+  		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
+  		  gtk_text_buffer_insert(buffer, &it, line, -1);
+  		  gtk_text_insert(GTK_TEXT(pwAliasList), NULL, 
+  				  NULL, NULL, line, -1);
+  	}
 	}
-
 	FreeRowset(&r);
 	FreeRowset(&r2);
 
@@ -9495,7 +9508,9 @@ static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
 {
 	RowSet r;
 	char *pch, *query;
-	pch = gtk_editable_get_chars( GTK_EDITABLE(pwQueryText), 0, -1 );
+
+  pch = GetText(GTK_TEXT_VIEW(pwQueryText));
+
 	if (!strncasecmp("select ", pch, strlen("select ")))
 		query = pch + strlen("select ");
 	else
@@ -9518,7 +9533,8 @@ static void UpdatePlayerDetails(GtkWidget *pw, int *dummy)
 	char *pch;
 	if (curPlayerId == -1)
 		return;
-	pch = gtk_editable_get_chars( GTK_EDITABLE(pwPlayerNotes), 0, -1 );
+		
+  pch = GetText(GTK_TEXT_VIEW(pwPlayerNotes));
 	RelationalUpdatePlayerDetails(curPlayerId, gtk_entry_get_text(GTK_ENTRY(pwPlayerName)), pch);
 	g_free(pch);
 }
@@ -9847,7 +9863,7 @@ static int GtkGetEnv(char* env)
 				strcpy(env, envString);
 			}
 			else
-				*envString = '\0';
+				*env = '\0';
 		}
 
 		FreeRowset(&nick1);
@@ -9867,8 +9883,10 @@ static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
 		return;
 
-	if (!GtkGetEnv(env))
+	if (GtkGetEnv(env) != 0)
+	 {
 		return;
+	}
 
 	/* Pass in env id and force addition */
 	sprintf(buf, "\"%s\" Yes", env);
@@ -9877,6 +9895,13 @@ static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 	outputx();
 }
 
+#define PACK_OFFSET 4
+#define OUTSIDE_FRAME_GAP PACK_OFFSET
+#define INSIDE_FRAME_GAP PACK_OFFSET
+#define NAME_NOTES_VGAP PACK_OFFSET
+#define BUTTON_GAP PACK_OFFSET
+#define QUERY_BORDER 1
+
 static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 {
 	RowSet r;
@@ -9884,7 +9909,6 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen, *pwn,
 		*pwLabel, *pwLink, *pwScrolled;
 	int multipleEnv;
-
 
 	pwAliasList = 0;
 	aliases = 0;
@@ -9904,14 +9928,19 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 					DT_INFO, NULL, NULL );
 
 	pwn = gtk_notebook_new();
-    gtk_container_set_border_width(GTK_CONTAINER(pwn), 8);
-
+  gtk_container_set_border_width(GTK_CONTAINER(pwn), 0);
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwn);
 
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwHbox = gtk_hbox_new(FALSE, 0),
-			      gtk_label_new(_("Players")));
+////////////////////////////////////////////////////////
+// Start of (left hand side) of player screen...
+////////////////////////////////////////////////////////
 
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+  pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwHbox, gtk_label_new(_("Players")));
+
+	pwVbox = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox, FALSE, FALSE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
 
 	if (!RunQuery(&r, "name AS Nickname, place AS env FROM nick INNER JOIN env"
 		" ON nick.env_id = env.env_id ORDER BY name"))
@@ -9934,51 +9963,66 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
 		gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
 
-	pwHbox2 = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 4);
 
-	pwOpen = gtk_button_new_with_label( _("Open" ) );
+	pwHbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
+
+	pwOpen = gtk_button_new_with_label( "Open" );
 	gtk_signal_connect(GTK_OBJECT(pwOpen), "clicked",
 				GTK_SIGNAL_FUNC(RelationalOpen), pwList);
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwOpen, FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwOpen, FALSE, FALSE, 0);
 
-	pwErase = gtk_button_new_with_label( _("Erase" ) );
+	pwErase = gtk_button_new_with_label( "Erase" );
 	gtk_signal_connect(GTK_OBJECT(pwErase), "clicked",
 				GTK_SIGNAL_FUNC(RelationalErase), pwList);
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwErase, FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwErase, FALSE, FALSE, BUTTON_GAP);
 
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+////////////////////////////////////////////////////////
+// Start of right hand side of player screen...
+////////////////////////////////////////////////////////
 
-	pwPlayerFrame = gtk_frame_new(_("Player"));
-	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame), 4);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwPlayerFrame, TRUE, TRUE, 0);
+	pwPlayerFrame = gtk_frame_new("Player");
+	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame), OUTSIDE_FRAME_GAP);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwPlayerFrame, TRUE, TRUE, 0);
 
-	pwHbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (pwPlayerFrame), pwHbox);
-	pwVbox2 = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox2, FALSE, FALSE, 0);
+	pwVbox = gtk_vbox_new(FALSE, NAME_NOTES_VGAP);
+	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
+	gtk_container_add(GTK_CONTAINER(pwPlayerFrame), pwVbox);
 
 	pwHbox2 = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox2), pwHbox2, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox2), gtk_label_new(_("Name")), FALSE, FALSE, 0);
-	pwPlayerName = gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwPlayerName, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
 
-	pwHbox2 = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox2), pwHbox2, FALSE, FALSE, 0);
-
-	pwLabel = gtk_label_new(_("Notes"));
-	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
+  pwLabel = gtk_label_new("Name");
 	gtk_box_pack_start(GTK_BOX(pwHbox2), pwLabel, FALSE, FALSE, 0);
+	pwPlayerName = gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwPlayerName, TRUE, TRUE, 0);
 
-	pwPlayerNotes = gtk_text_new(NULL, NULL);
-	gtk_text_set_editable(GTK_TEXT(pwPlayerNotes), TRUE);
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwPlayerNotes, TRUE, TRUE, 0);
+	pwVbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwVbox2, TRUE, TRUE, 0);
 
-	pwUpdate = gtk_button_new_with_label(_("Update Details"));
-	gtk_box_pack_start(GTK_BOX(pwVbox2), pwUpdate, FALSE, FALSE, 0);
+	pwLabel = gtk_label_new("Notes");
+	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(pwVbox2), pwLabel, FALSE, FALSE, 0);
+
+	pwPlayerNotes = gtk_text_view_new();
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(pwPlayerNotes), TRUE);
+
+  pwScrolled = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_container_add(GTK_CONTAINER(pwScrolled), pwPlayerNotes);
+	gtk_box_pack_start(GTK_BOX(pwVbox2), pwScrolled, TRUE, TRUE, 0);
+
+	pwHbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
+	
+	pwUpdate = gtk_button_new_with_label("Update Details");
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwUpdate, FALSE, FALSE, 0);
 	gtk_signal_connect_object(GTK_OBJECT(pwUpdate), "clicked",
 					GTK_SIGNAL_FUNC(UpdatePlayerDetails), NULL);
+
+/*******************************************************
+** End of right hand side of player screen...
+*******************************************************/
 
 	/* If more than one environment, show linked nicknames */
 	if (multipleEnv)
@@ -9988,8 +10032,8 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 		gtk_misc_set_alignment(GTK_MISC(aliases), 0, 0);
 		gtk_box_pack_start(GTK_BOX(pwVbox), aliases, FALSE, FALSE, 0);
 
-		pwAliasList = gtk_text_new(NULL, NULL);
-		gtk_text_set_editable(GTK_TEXT(pwAliasList), FALSE);
+		pwAliasList = gtk_text_view_new();
+		gtk_text_view_set_editable(GTK_TEXT_VIEW(pwAliasList), FALSE);
 		gtk_box_pack_start(GTK_BOX(pwVbox), pwAliasList, TRUE, TRUE, 0);
 
 		pwLink = gtk_button_new_with_label(_("Link players"));
@@ -9999,23 +10043,30 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	}
 
 	/* Query sheet */
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwVbox = gtk_vbox_new(FALSE, 0),
-			      gtk_label_new(_("Query")));
-	pwLabel = gtk_label_new(_("Query text"));
+  pwVbox = gtk_vbox_new(FALSE, 0);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwVbox, gtk_label_new(_("Query")));
+	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
+
+	pwLabel = gtk_label_new("Query text");
 	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwLabel, FALSE, FALSE, 0);
 
-	pwQueryText = gtk_text_new(NULL, NULL);
-	gtk_text_set_editable(GTK_TEXT(pwQueryText), TRUE);
+	pwQueryText = gtk_text_view_new();
+  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_TOP, QUERY_BORDER);
+  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_RIGHT, QUERY_BORDER);
+  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_BOTTOM, QUERY_BORDER);
+  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_LEFT, QUERY_BORDER);
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(pwQueryText), TRUE);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryText, FALSE, FALSE, 0);
 	gtk_widget_set_usize(pwQueryText, 250, 80);
 
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox = gtk_hbox_new(FALSE, 0), FALSE, FALSE, 0);
-	pwLabel = gtk_label_new(_("Result"));
+  pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox, FALSE, FALSE, 0);
+	pwLabel = gtk_label_new("Result");
 	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwLabel, TRUE, TRUE, 0);
 
-	pwRun = gtk_button_new_with_label( _("Run Query" ) );
+	pwRun = gtk_button_new_with_label( "Run Query" );
 	gtk_signal_connect(GTK_OBJECT(pwRun), "clicked",
 				GTK_SIGNAL_FUNC(RelationalQuery), pwVbox);
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwRun, FALSE, FALSE, 0);

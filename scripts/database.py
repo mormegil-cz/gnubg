@@ -37,22 +37,29 @@ DB_SQLITE = 1
 DB_POSTGRESQL = 2
 DB_MYSQL = 3
 
-# Change this line to set the database type
-DB_TYPE = DB_POSTGRESQL
+DBFILE = ""
 
 class relational:
 
    # parse out the gnubg* lines from database config file
    def __configure__( self ) :
-      home = os.environ.get("HOME", 0)
-      if home :
-         fname = "%s/%s" % ( home, ".gnubg/database" )
-         try :
-            f = open( fname, "r" )
-         except IOError, e :
-            if e.errno == 2 :
-               return
-            raise e
+      global DBFILE
+      fname = "database";
+      file = os.access(fname, os.F_OK)
+      if (file == 0):
+        home = os.environ.get("HOME", 0)
+        if home :
+           fname = "%s/%s" % ( home, ".gnubg/database" )
+           file = os.access(fname, os.F_OK)
+        if (file == 0):
+           print "Database prefence file not found"
+           return
+      try :
+        f = open( fname, "r" )
+      except IOError, e :
+        if e.errno == 2 :
+           return
+        raise e
 
       for line in f.readlines() :
          re.sub( r'#.*', '', line )
@@ -83,6 +90,7 @@ class relational:
                   self.games = False
 
       f.close()
+
       # rebuild the dsn to include user/password and maybe host
       parts = self.dsn.split( ':' )
       if self.db_type == DB_POSTGRESQL and self.host and not re.match( r'.*:', self.host) :
@@ -107,7 +115,7 @@ class relational:
          if not self.database :
             self.database = "gnubg"
          self.match_table_name = "match_tbl"
-         
+      
    def __init__(self):
 
       self.conn = None
@@ -588,7 +596,7 @@ class relational:
    #
 
    def createdatabase(self):
-
+      
       cursor = self.conn.cursor()
       # Open file which has db create sql statments
       sqlfile = open("gnubg.sql", "r")
@@ -613,7 +621,7 @@ class relational:
    def connect(self):
 
       if self.db_type == DB_SQLITE:
-         import sqlite
+         from pysqlite2 import dbapi2 as sqlite
       elif self.db_type == DB_POSTGRESQL:
          # Import the DB API v2 postgresql module
          import pgdb
@@ -953,8 +961,9 @@ class relational:
          return None
 
       all = cursor.fetchall()
-      titles = [cursor.description[i][0] for i in range(len(cursor.description))]
-      all.insert(0, titles)
+      if (all):
+        titles = [cursor.description[i][0] for i in range(len(cursor.description))]
+        all.insert(0, titles)
 
       cursor.close()
 
