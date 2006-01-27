@@ -1,3 +1,6 @@
+Fri Jan 27 18:36:46 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
+	* play.c - don't do anything to undock panels in CLI mode
+	
 Sat Dec 17 -3:31:09 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
 	* gtkchequer.c - CreateMoveListTools() must be called before
 	  calling MoveListCreate(), otherwise coredumps can result
