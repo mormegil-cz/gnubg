@@ -792,7 +792,9 @@ void DockPanels()
 {
 	int i;
 	int currentSelectedGame = -1;
-	
+	if(!fX)
+	  return;
+
 	if (pom)
 		currentSelectedGame = gtk_option_menu_get_history( GTK_OPTION_MENU( pom ) );
 

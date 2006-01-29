@@ -1,3 +1,7 @@
+Sun Jan 29 19:32:05 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
+	* gtkpanels.c - don't do anything to undock panels in CLI mode
+	  ChangeLog entry for 27/01 listed the wrong source file, sigh
+
 Fri Jan 27 18:36:46 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
 	* play.c - don't do anything to undock panels in CLI mode
 	
