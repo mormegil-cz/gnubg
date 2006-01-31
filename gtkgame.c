@@ -108,6 +108,7 @@
 
 /* Offset action to avoid predefined values */
 #define TOOLBAR_ACTION_OFFSET 10000
+#define MENU_OFFSET 50
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -385,6 +386,9 @@ static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
 static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 static void FullScreenMode( gpointer *p, guint n, GtkWidget *pw );
+#if USE_BOARD3D
+static void SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw );
+#endif
 #if USE_TIMECONTROL
 static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw );
 #endif
@@ -1992,6 +1996,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
 	  "/View/Toolbar/Text only" },
 	{ N_("/_View/Full screen"), NULL, FullScreenMode, 0, "<CheckItem>" },
+#if USE_BOARD3D
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/Switch to xD view"), NULL, SwitchDisplayMode, TOOLBAR_ACTION_OFFSET + MENU_OFFSET, NULL },
+#endif
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_View/Gu_ile"), NULL, NULL, 0, NULL },
 	{ N_("/_View/_Python shell (IDLE)..."), 
@@ -2586,6 +2594,7 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	SetToolbarStyle(nToolbarStyle);
 
 #if USE_BOARD3D
+	SetSwitchModeMenuText();
 	DisplayCorrectBoardType(BOARD(pwBoard)->board_data);
 #endif
 
@@ -9244,6 +9253,49 @@ static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer us
 
 	return FALSE;
 }
+
+#if USE_BOARD3D
+
+void SetSwitchModeMenuText()
+{	/* Update menu text */
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	GtkWidget *pMenuItem = gtk_item_factory_get_widget_by_action(pif, TOOLBAR_ACTION_OFFSET + MENU_OFFSET);
+	char *text;
+	if (bd->rd->fDisplayType == DT_2D)
+		text = _("Switch to 3D view");
+	else
+		text = _("Switch to 2D view");
+	gtk_label_set_text(GTK_LABEL(gtk_bin_get_child(GTK_BIN(pMenuItem))), text);
+}
+
+static void
+SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+
+	if (bd->rd->fDisplayType == DT_2D)
+	{
+		bd->rd->fDisplayType = DT_3D;
+		/* Reset 3d settings */
+		MakeCurrent3d(bd->drawing_area3d);
+		preDraw3d(bd);
+		updateOccPos(bd);	/* Make sure shadows are in correct place */
+		if (bd->diceShown == DICE_ON_BOARD)
+			setDicePos(bd);	/* Make sure dice appear ok */
+		RestrictiveRedraw();
+	}
+	else
+	{
+		bd->rd->fDisplayType = DT_2D;
+		/* Make sure 2d pixmaps are correct */
+		board_free_pixmaps( bd );
+		board_create_pixmaps( pwBoard, bd );
+	}
+
+	DisplayCorrectBoardType(bd);
+	SetSwitchModeMenuText();
+}
+#endif
 
 static void
 FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {

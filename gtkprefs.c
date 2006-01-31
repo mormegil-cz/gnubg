@@ -1072,6 +1072,7 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 
 #if USE_BOARD3D
 	DisplayCorrectBoardType(bd);
+	SetSwitchModeMenuText();
 
 	if (bd->rd->fDisplayType == DT_3D)
 	{

@@ -262,3 +262,7 @@ extern int SetMainWindowSize();
 extern void ShowHidePanel(gnubgwindow panel);
 extern void GTKSetCurrentParent(GtkWidget *parent);
 extern void SetAnnotation( moverecord *pmr );
+
+#if USE_BOARD3D
+extern void SetSwitchModeMenuText();
+#endif
