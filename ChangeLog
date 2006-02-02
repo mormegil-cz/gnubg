@@ -1,3 +1,11 @@
+Thu Feb 02 07:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkgamelist.c: Replace old gdk_string_width() calls
+
+Thu Jan 31 07:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Add menu option to switch between 2d and 3d views
+
 Sun Jan 29 19:32:05 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
 	* gtkpanels.c - don't do anything to undock panels in CLI mode
 	  ChangeLog entry for 27/01 listed the wrong source file, sigh

@@ -6665,6 +6665,8 @@ extern void GTKShowScoreSheet( void )
 	GtkWidget *hbox;
 	GtkWidget *pwList;
 	GtkWidget* pwScrolled;
+	PangoRectangle logical_rect;
+	PangoLayout *layout;
 	int width1, width2;
 	int i;
 	int numRows = 0;
@@ -6708,8 +6710,17 @@ extern void GTKShowScoreSheet( void )
 	pwList = gtk_clist_new_with_titles( 2, titles );
 	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
 	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
-	width1 = gdk_string_width( gtk_style_get_font( pwList->style ), titles[0] );
-	width2 = gdk_string_width( gtk_style_get_font( pwList->style ), titles[1] );
+
+	layout = gtk_widget_create_pango_layout(pwList, titles[0]);
+	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
+	g_object_unref (layout);
+	width1 = logical_rect.width;
+
+	layout = gtk_widget_create_pango_layout(pwList, titles[1]);
+	pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
+	g_object_unref (layout);
+	width2 = logical_rect.width;
+
 	colWidth = MAX(width1, width2);
 
 	data[0] = malloc(10);
@@ -9461,6 +9472,8 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
 static GtkWidget* GetRelList(RowSet* pRow)
 {
 	int i;
+	PangoRectangle logical_rect;
+	PangoLayout *layout;
 	GtkWidget *pwList = gtk_clist_new(pRow->cols);
 	gtk_clist_column_titles_show(GTK_CLIST(pwList));
 	gtk_clist_column_titles_passive(GTK_CLIST(pwList));
@@ -9470,7 +9483,11 @@ static GtkWidget* GetRelList(RowSet* pRow)
 		int width;
 		memset(widthStr, 'a', pRow->widths[i]);
 		widthStr[pRow->widths[i]] = '\0';
-		width = gdk_string_width(gtk_style_get_font( pwList->style ), widthStr);
+
+		layout = gtk_widget_create_pango_layout(pwList, widthStr);
+		pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
+		g_object_unref (layout);
+		width = logical_rect.width;
 		gtk_clist_set_column_title(GTK_CLIST(pwList), i, pRow->data[0][i]);
 
 		gtk_clist_set_column_width( GTK_CLIST( pwList ), i, width);
