@@ -948,7 +948,11 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    if( !fstat( h, &st ) &&
 		( p = mmap( NULL, st.st_size, PROT_READ | PROT_WRITE,
 			    MAP_PRIVATE, h, 0 ) ) ) {
-		p = ( (float *) p ) + 2; /* skip magic number and version */
+		/* gcc 4 doesn't support casts as lvalues.
+		   -- rra, 2006-01-14 */
+		float *pf = p;
+		pf += 2;              /* skip magic number and version */
+		p = pf;
 		fReadWeights =
 		  ( p = NeuralNetCreateDirect( &nnContact, p ) ) &&
 		  ( p = NeuralNetCreateDirect( &nnRace, p ) ) &&
