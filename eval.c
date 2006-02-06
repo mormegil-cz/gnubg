@@ -894,7 +894,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		      "You should obtain the file gnubg_ts0.bd or generate\n"
 		      "it yourself using the program 'makebearoff'.\n"
 		      "You can generate the file with the command:\n"
-		      "makebearoff -t 6x6 > gnubg_ts0.bd\n"
+		      "makebearoff -t 6x6 -f gnubg_ts0.bd\n"
 		      "You can also generate other bearoff databases; see\n"
 		      "README for more details\n\n" );
 	

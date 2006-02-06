@@ -365,7 +365,9 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 		gtk_file_filter_add_pattern (anyFileFilter, "*");
 		gtk_file_filter_set_name    (anyFileFilter, "Show all Files (*)");
 		gtk_file_filter_set_name    (suffixFileFilter, filterDescription);
-		gtk_file_chooser_add_filter ((GtkFileChooser *) filechooser, suffixFileFilter);
+		/* Only show *.suffix filter if suffix is not empty */
+		if (*eiof->file_suffix)
+			gtk_file_chooser_add_filter ((GtkFileChooser *) filechooser, suffixFileFilter);
 		gtk_file_chooser_add_filter ((GtkFileChooser *) filechooser, anyFileFilter);
 
 		if (filterDescription) g_free(filterDescription);

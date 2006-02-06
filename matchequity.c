@@ -1427,6 +1427,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   }
 
+#if (LIBXML_VERSION > 20507)
   /* validate against the DTD */
   ctxt = xmlNewValidCtxt();
   ctxt->error = validateError;
@@ -1442,6 +1443,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if (ctxt) xmlFreeValidCtxt(ctxt);
   if (dtd) xmlFreeDtd(dtd);
+#endif /* XMLVERSION > 20507 */
 }
 #endif /* XMLVERSION */
 
