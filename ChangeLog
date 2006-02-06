@@ -1,3 +1,7 @@
+Mon Feb 06 08:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkfile.c, eval.c, matchequity.c: 3 small fixes from Philippe Michel
+
 Thu Feb 02 07:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkgamelist.c: Replace old gdk_string_width() calls
