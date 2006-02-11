@@ -2479,10 +2479,15 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           pmr->anDice[ 1 ] = anRoll[ 1 ];
           pmr->fPlayer = fPlayer;
 
-          if ( ! strncmp ( pch, "0/0", 3 ) ) {
-            /* fans */
-            AddMoveRecord ( pmr );
-          }
+		if (!strncmp(pch, "0/0", 3))
+		{	/* See if fan is legal (i.e. no moves available) - otherwise skip */
+			movelist ml;
+			if (GenerateMoves(&ml, ms.anBoard, pmr->anDice[ 0 ], pmr->anDice[ 1 ], FALSE) == 0)
+			{
+				/* fans */
+				AddMoveRecord ( pmr );
+			}
+		}
           else if( ( c = ParseMove( pch, pmr->n.anMove ) ) >= 0 ) {
             for( i = 0; i < ( c << 1 ); i++ )
               pmr->n.anMove[ i ]--;
