@@ -2223,8 +2223,6 @@ command cER = {
     { "take", CommandTake, N_("Agree to an offered double"), NULL, NULL },
     { "train", NULL, N_("Update gnubg's weights from training data"), NULL,
       acTrain },
-    { "xcopy", CommandXCopy, 
-      N_("Copy the primary selection to the clipboard"), NULL, NULL },
     { "?", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
@@ -5321,79 +5319,7 @@ extern void CommandCopy (char *sz)
              anChequers[ ms.bgv ] );
   strcat (szOut, "\n");
   TextToClipboard (szOut);
-
 }
-
-extern void
-CommandXCopy ( char *sz ) {
-
-#if USE_GTK
-  if ( fX )
-    GTKCopy ();
-#endif
-
-}
-
-#ifdef WIN32
-
-#include <windows.h>
-
-int CountLines(const char* buf)
-{
-	int lines = 0;
-	while ((buf = strchr(buf, '\n')))
-	{
-		lines++;
-		buf++;
-	}
-	return lines;
-}
-
-void CopyAndAddLFs(char* to, const char* from)
-{
-	const char* pCR;
-	int len;
-	while ((pCR = strchr(from, '\n')))
-	{
-		len = pCR - from;
-		if (len)
-		{
-			strncpy(to, from, len);
-			to += len;
-			from += len;
-		}
-		*to++ = '\r';
-		*to++ = '\n';
-		from++;
-	}
-	/* Last bit */
-	strcpy(to, from);
-}
-
-/* Convert newline to cr/lf for windows */
-static void WinCopy( const char *szOut ){
-
-  if(OpenClipboard(0)) {
-
-    HGLOBAL clipbuffer;
-    char * buf;
-	int numLines = CountLines(szOut);
-	int bufSize = strlen(szOut) + numLines + 1;
-
-    EmptyClipboard();
-    clipbuffer = GlobalAlloc(GMEM_DDESHARE, bufSize );
-    buf = (char*)GlobalLock(clipbuffer);
-	CopyAndAddLFs(buf, szOut);
-    GlobalUnlock(clipbuffer);
-    SetClipboardData(CF_TEXT, clipbuffer);
-    CloseClipboard();
-
-    } else {
-
-    outputl( _("Can't open clipboard") ); 
-  }
-}
-#endif
 
 static void LoadRCFiles( void ) {
 
@@ -9128,39 +9054,16 @@ Convert ( const char *sz,
 
 }
 
-
-extern void
-TextToClipboard( const char *sz ) {
-
-#if WIN32
-#if ENABLE_NLS
-  /* dirty hack for Windows Japanese edition */
-  if ( !strncasecmp( "ja", setlocale(LC_ALL, NULL), 2 ) ) {
-    char *pch = Convert( sz, "SHIFT_JIS", GNUBG_CHARSET );
-    WinCopy( pch );
-    free( pch );
-  }
-  else {
-    WinCopy ( sz );
-  }
-#else /* ENABLE_NLS */
-  WinCopy ( sz );
-#endif /* ! ENABLE_NLS */
-#else /* WIN32 */
-
+extern void TextToClipboard(const char *sz)
+{
 #if USE_GTK
-  if ( fX ) {
-    GTKTextToClipboard( sz );
-    return;
-  }
-#else /* USE_GTK */
+  if (fX)
+    GTKTextToClipboard(sz);
+#else
   /* no clipboard: just write string */
-  outputl( sz );
-#endif /* ! USE_GTK */
-#endif /* ! WIN32 */
-
+  outputl(sz);
+#endif
 }
-
 
 void 
 CommandDiceRolls (char *sz) {

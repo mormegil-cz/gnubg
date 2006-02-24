@@ -3501,16 +3501,17 @@ static void board_realize( GtkWidget *board ) {
     board_create_pixmaps( board, bd );
 }
 
-static void board_set_position( GtkWidget *pw, BoardData *bd ) {
+extern void board_set_position( GtkWidget *pw, BoardData *bd ) {
 
   char *sz = g_strdup_printf ( "set board %s",
                   gtk_entry_get_text( GTK_ENTRY( bd->position_id ) ) );
+
   UserCommand( sz );
   g_free ( sz );
 
 }
 
-static void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
+extern void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
 
   char *sz = g_strdup_printf ( "set matchid %s",
             gtk_entry_get_text ( GTK_ENTRY ( bd->match_id ) ) );
@@ -4189,7 +4190,11 @@ static void board_init( Board *board ) {
 
     gtk_signal_connect( GTK_OBJECT( bd->position_id ), "activate",
 			GTK_SIGNAL_FUNC( board_set_position ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->position_id ), "paste-clipboard",
+			GTK_SIGNAL_FUNC( board_set_position ), bd );
     gtk_signal_connect( GTK_OBJECT( bd->match_id ), "activate",
+			GTK_SIGNAL_FUNC( board_set_matchid ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->match_id ), "paste-clipboard",
 			GTK_SIGNAL_FUNC( board_set_matchid ), bd );
 
     gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "expose_event",

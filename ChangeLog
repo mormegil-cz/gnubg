@@ -1,3 +1,7 @@
+Fri Feb 24 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c and others: Sort out copy/paste for gtk 2
+
 Sat Feb 11 09:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* import.c: Fixed an import bug for TMG files

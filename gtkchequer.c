@@ -60,6 +60,8 @@ extern gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintd
 extern void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd);
 extern int MoveListGetSelectionCount(const hintdata *phd);
 
+static void MoveListCopy(GtkWidget *pw, hintdata *phd);
+
 static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 {
 	cubeinfo ci;
@@ -314,7 +316,6 @@ MoveListRolloutSettings ( GtkWidget *pw, void *unused )
 #endif
 }
 
-#if !USE_GTK2
 typedef int ( *cfunc )( const void *, const void * );
 
 static int CompareInts( int *p0, int *p1 ) {
@@ -337,7 +338,13 @@ static char *MoveListCopyData ( hintdata *phd )
 	*sz = 0;
 
 	for (i = 0, pl = plSelList; pl; pl = pl->next, i++)
-		an[ i ] = GPOINTER_TO_INT( pl->data );
+  {
+    move *m = MoveListGetMove(phd, pl);
+    int rank = 0;
+    while(&phd->pml->amMoves[rank] != m)
+      rank++;
+    an[i] = rank;
+	}
 
 	MoveListFreeSelectionList(plSelList);
 
@@ -350,7 +357,6 @@ static char *MoveListCopyData ( hintdata *phd )
 
 	return sz;
 }
-#endif
 
 static void
 MoveListMove ( GtkWidget *pw, hintdata *phd )
@@ -400,12 +406,6 @@ MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
   /* show hint dialog */
   GTKHint( phd->pml, phd->piHighlight ? *phd->piHighlight : -1 );
 #endif
-}
-
-static void
-MoveListCopy ( GtkWidget *pw, hintdata *phd )
-{
-  UserCommand ( "xcopy" );
 }
 
 GtkWidget *pwDetails;
@@ -624,9 +624,6 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 	int c = g_list_length(MoveListGetSelectionList(phd));
 	CheckHintButtons( phd );
 
-    if( c && peb )
-	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
-
     /* Double clicking a row makes that move. */
     if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && 
         phd->fButtonsValid ) {
@@ -649,17 +646,14 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
       }
     }
 }
-static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
-			      guint n, guint t, hintdata *phd )
-{
-  char *pc = MoveListCopyData ( phd );
-    
-  gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
-                          pc, strlen( pc ) );
-  
-  free ( pc );
-}
 #endif
+
+static void MoveListCopy(GtkWidget *pw, hintdata *phd)
+{
+  char *pc = MoveListCopyData(phd);
+  if ( pc )
+    TextToClipboard( pc );
+}
 
 extern int 
 CheckHintButtons( hintdata *phd )
@@ -681,8 +675,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
                 const int fDestroyOnMove, const int fDetails )
 {
     GtkWidget *pw;
-    GtkWidget *pwHBox;
-    GtkWidget *pwTools;
+    GtkWidget *pwHBox, *mlt;
 
     hintdata *phd = (hintdata *) malloc ( sizeof ( hintdata ) );
 
@@ -695,8 +688,8 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     phd->fButtonsValid = fButtonsValid;
     phd->fDestroyOnMove = fDestroyOnMove;
     phd->pwMove = NULL;
-    pwTools = CreateMoveListTools( phd );
     phd->fDetails = fDetails;
+  mlt = CreateMoveListTools( phd );
 	MoveListCreate(phd);
 
     pw = gtk_scrolled_window_new( NULL, NULL );
@@ -710,7 +703,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
 
     gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
     gtk_box_pack_end ( GTK_BOX ( pwHBox ),
-		       pwTools,
+                       mlt,
                        FALSE, FALSE, 0 );
 
     gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data", 

@@ -167,17 +167,12 @@ void MoveListCreate(hintdata *phd)
     gtk_clist_set_selection_mode( GTK_CLIST( phd->pwMoves ),
 				  GTK_SELECTION_MULTIPLE );
 
-    gtk_selection_add_target( phd->pwMoves, GDK_SELECTION_PRIMARY,
-			      GDK_SELECTION_TYPE_STRING, 0 );
-
     gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "select-row",
 			GTK_SIGNAL_FUNC( HintSelect ), phd );
     gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "unselect-row",
 			GTK_SIGNAL_FUNC( HintSelect ), phd );
     gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "selection_clear_event",
 			GTK_SIGNAL_FUNC( MoveListClearSelection ), phd );
-    gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "selection_get",
-			GTK_SIGNAL_FUNC( HintGetSelection ), phd );
 #endif
 
 /* Add empty rows */

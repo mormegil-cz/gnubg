@@ -98,16 +98,6 @@ typedef struct _theorywidget {
 } theorywidget;
 
 
-
-static void
-MWGetSelection( GtkWidget *pw, GtkSelectionData *psd,
-                guint n, guint t, theorywidget *ptw ) {
-
-
-  printf( "sorry not implemented\n" );
-
-}
-
 static void
 ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
 
@@ -980,12 +970,6 @@ GTKShowTheory ( const int fActivePage ) {
     for ( j = 0; j < 4; ++j )
       gtk_clist_set_column_auto_resize ( GTK_CLIST( ptw->apwMW[ i ] ),
       j, TRUE );*/
-
-    gtk_selection_add_target( ptw->apwMW[ i ], GDK_SELECTION_PRIMARY,
-                              GDK_SELECTION_TYPE_STRING, 0 );
-
-    gtk_signal_connect( GTK_OBJECT( ptw->apwMW[ i ] ), "selection_get",
-                        GTK_SIGNAL_FUNC( MWGetSelection ), ptw );
 
     gtk_container_add ( GTK_CONTAINER( pwFrame ), ptw->apwMW[ i ] );
 

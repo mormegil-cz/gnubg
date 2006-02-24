@@ -1271,8 +1271,7 @@ extern void CommandAccept( char * ),
     CommandShowWarranty( char * ),
     CommandSwapPlayers ( char * ),
     CommandTake( char * ),
-    CommandTrainTD( char * ),
-    CommandXCopy ( char * );
+    CommandTrainTD( char * );
 
 
 extern int fTutor, fTutorCube, fTutorChequer, nTutorSkillCurrent;

@@ -186,9 +186,6 @@ extern int frozen;
 extern int 
 GtkTutor ( char *sz );
 
-extern void
-GTKCopy ( void );
-
 extern void GTKNew ( void );
 extern void GTKOpen ( void );
 extern void GTKSave ( void );

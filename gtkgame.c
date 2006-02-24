@@ -98,6 +98,7 @@
 #include "formatgs.h"
 #include "renderprefs.h"
 #include "credits.h"
+#include "matchid.h"
 
 #if USE_TIMECONTROL
 #include "timecontrol.h"
@@ -263,7 +264,6 @@ typedef enum _gnubgcommand {
     CMD_TAKE,
     CMD_TRAIN_DATABASE,
     CMD_TRAIN_TD,
-    CMD_XCOPY,
 #if USE_TIMECONTROL
     CMD_SET_TC_OFF,
     CMD_SET_TC,
@@ -354,8 +354,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "swap players",
     "take",
     "train database",
-    "train td",
-    "xcopy"
+    "train td"
 #if USE_TIMECONTROL
     , "set tc off"
     , "set tc"
@@ -368,6 +367,7 @@ static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
 #endif
 static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw );
+static void CopyAsIDs( gpointer *p, guint n, GtkWidget *pw );
 static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw );
 static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw );
 static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw );
@@ -423,8 +423,6 @@ int fGUISetWindowPos = TRUE;
 int frozen = FALSE;
 
 static guint nStdin, nDisabledCount = 1;
-
-static char *szCopied; /* buffer holding copied data */
 
 #if GTK_CHECK_VERSION(1,3,0)
 static char *ToUTF8( unsigned char *sz ) {
@@ -1839,60 +1837,51 @@ static void ToolbarStyle(gpointer    callback_data,
 	}
 }
 
-static void
-MainGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
-                   guint n, guint t, void *unused ) {
+GtkClipboard *clipboard = NULL;
 
-#ifdef WIN32
-
-  if ( szCopied )
-    TextToClipboard ( szCopied );
-
-#else /* WIN32 */
-
-  if ( szCopied )
-    gtk_selection_data_set ( psd, GDK_SELECTION_TYPE_STRING, 8,
-                             szCopied, strlen ( szCopied ) );
-
-#endif /* WIN32 */
- 
+static void CopyActiveEntry()
+{
+  GtkWidget *pFocus;
+  if (gtk_window_has_toplevel_focus(GTK_WINDOW(pwMain)))
+  {
+    pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
+    if (pFocus && GTK_IS_ENTRY(pFocus))
+    {
+        const char* text = gtk_entry_get_text(GTK_ENTRY(pFocus));
+        GTKTextToClipboard(text);
+    }
+  }
 }
 
-static void
-MainSelectionReceived ( GtkWidget *pw, GtkSelectionData *data,
-                        guint time, gpointer user_data ) {
-
-  if ( data->length < 0 ) 
-    /* no data */
-    return;
-
-  if ( data->type != GDK_SELECTION_TYPE_STRING )
-    /* no of type string */
-    return;
-
-  if ( szCopied )
-    free ( szCopied );
-
-  szCopied = strdup ( data->data );
-
+static void PasteActiveEntry()
+{
+  GtkWidget *pFocus;
+  if (gtk_window_has_toplevel_focus(GTK_WINDOW(pwMain)))
+  {
+    pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
+    if (pFocus && GTK_IS_ENTRY(pFocus))
+    {
+        char *text;
+        text = gtk_clipboard_wait_for_text(clipboard);
+      
+        if (text)
+        {
+          BoardData *bd = BOARD(pwBoard)->board_data;
+          
+          gtk_entry_set_text(GTK_ENTRY(pFocus), text);
+          
+          if (pFocus == bd->position_id)
+            board_set_position(0, bd);
+          else if (pFocus == bd->match_id)
+            board_set_matchid(0, bd);
+        }
+    }
+  }
 }
 
-extern void
-GTKTextToClipboard( const char *sz ) {
-
-  /* copy text into global pointer used by MainGetSelection */
-
-  if ( szCopied )
-    free ( szCopied );
-
-  szCopied = strdup( sz );
-
-  /* claim clipboard and primary selection */
-
-  gtk_selection_owner_set ( pwMain, gdk_atom_intern ("CLIPBOARD", FALSE), 
-                            GDK_CURRENT_TIME );
-  gtk_selection_owner_set ( pwMain, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME );
-
+extern void GTKTextToClipboard(const char *text)
+{
+  gtk_clipboard_set_text(clipboard, text, -1);
 }
 
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void* null)
@@ -1902,6 +1891,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 
 	return FALSE;
 }
+
 extern int InitGTK( int *argc, char ***argv ) {
     
     GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
@@ -1951,19 +1941,24 @@ extern int InitGTK( int *argc, char ***argv ) {
 #endif
 	},
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Edit/_Copy"), "<control>C", Command, CMD_XCOPY,
+
+	{ N_("/_Edit/_Copy"), "<control>C", CopyActiveEntry, 0,
 #if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_COPY
 #else
 		NULL
 #endif
 	},
+
 	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Edit/Copy as/Position as ASCII"), NULL,
 	  CommandCopy, 0, NULL },
 	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
 	  CopyAsGOL, 0, NULL },
-	{ N_("/_Edit/_Paste"), "<control>V", NULL, 0,
+	{ N_("/_Edit/Copy as/Position and Match IDs"), NULL,
+	  CopyAsIDs, 0, NULL },
+
+	{ N_("/_Edit/_Paste"), "<control>V", PasteActiveEntry, 0,
 #if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_PASTE
 #else
@@ -2503,13 +2498,6 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
 #endif
 
-    gtk_selection_add_target( pwMain, 
-                              gdk_atom_intern ("CLIPBOARD", FALSE),
-                              GDK_SELECTION_TYPE_STRING, 0 );
-    gtk_selection_add_target( pwMain, 
-                              GDK_SELECTION_PRIMARY,
-                              GDK_SELECTION_TYPE_STRING, 0 );
-
     gtk_signal_connect(GTK_OBJECT(pwMain), "configure_event",
 			GTK_SIGNAL_FUNC(configure_event), NULL);
     gtk_signal_connect( GTK_OBJECT( pwMain ), "size-request",
@@ -2518,10 +2506,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 			GTK_SIGNAL_FUNC( main_delete ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwMain ), "destroy_event",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwMain ), "selection_get", 
-			GTK_SIGNAL_FUNC( MainGetSelection ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwMain ), "selection_received", 
-			GTK_SIGNAL_FUNC( MainSelectionReceived ), NULL );
+
     ListCreate( &lOutput );
 
     cedDialog.showHelp = 0;
@@ -2533,6 +2518,13 @@ extern int InitGTK( int *argc, char ***argv ) {
     cedPanel.numHistory = 0;
     cedPanel.completing = 0;
     cedPanel.modal = FALSE;
+
+{
+  GdkAtom cb = gdk_atom_intern("CLIPBOARD", TRUE);
+  clipboard = gtk_clipboard_get(cb);
+  if (!clipboard)
+    printf("Failed to get clipboard!\n");
+}
 
     return TRUE;
 }
@@ -4220,6 +4212,16 @@ static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw ) {
 
   UserCommand("export position gol2clipboard");
 
+}
+
+static void CopyAsIDs(gpointer *p, guint n, GtkWidget *pw)
+{ /* Copy the position and match ids to the clipboard */
+  char buffer[1024];
+
+  sprintf(buffer, "%s %s\n%s %s\n", _("Position ID:"), PositionID(ms.anBoard),
+    _("Match ID:"), MatchIDFromMatchState(&ms));
+
+  GTKTextToClipboard(buffer);
 }
 
 static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
@@ -8099,16 +8101,6 @@ void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
 	}
 }
 
-static void
-StatcontextSelect ( GtkWidget *pw, int y, int x, GdkEventButton *peb,
-                    GtkWidget *pwCopy ) {
-
-  if ( g_list_length( GTK_CLIST( pw )->selection ) && peb )
-     gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, peb->time );
-
-}
-
-
 gint 
 compare_func( gconstpointer a, gconstpointer b ) {
 
@@ -8124,10 +8116,8 @@ compare_func( gconstpointer a, gconstpointer b ) {
 
 }
 
-static void
-StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
-                          guint n, guint t, void *unused ) {
-
+static void StatcontextCopy(GtkWidget *pw, GtkWidget *pwList)
+{
   GList *pl;
   GList *plCopy;
   int i;
@@ -8140,7 +8130,7 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
             "", ap[ 0 ].szName, ap[ 1 ].szName );
 
   /* copy list (note that the integers in the list are NOT copied) */
-  plCopy = g_list_copy( GTK_CLIST ( pw )->selection );
+  plCopy = g_list_copy( GTK_CLIST ( pwList )->selection );
 
   /* sort list; otherwise the lines are returned in whatever order the
      user clicked the lines (bug #4160) */
@@ -8151,42 +8141,23 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
     i = GPOINTER_TO_INT( pl->data );
 
     sprintf ( pc = strchr ( szOutput, 0 ), "%-37s ", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 0, &sz ) ) ?
+              ( gtk_clist_get_text ( GTK_CLIST ( pwList ), i, 0, &sz ) ) ?
               sz : "" );
       
     sprintf ( pc = strchr ( szOutput, 0 ), "%-20s ", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 1, &sz ) ) ?
+              ( gtk_clist_get_text ( GTK_CLIST ( pwList ), i, 1, &sz ) ) ?
               sz : "" );
       
     sprintf ( pc = strchr ( szOutput, 0 ), "%-20s\n", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
+              ( gtk_clist_get_text ( GTK_CLIST ( pwList ), i, 2, &sz ) ) ?
               sz : "" );
       
   }
 
   /* garbage collect */
-  g_list_free( plCopy );
-
-  gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
-                          szOutput, strlen( szOutput ) );
-
-}
-
-static gint
-StatcontextClearSelection  ( GtkWidget *pw, GdkEventSelection *pes,
-                             void *unused ) {
-
-  gtk_clist_unselect_all ( GTK_CLIST ( pw ) );
-
-  return TRUE;
-
-}
-
-static void
-StatcontextCopy ( GtkWidget *pw, void *unused ) {
-
-  UserCommand ( "xcopy" );
-
+  g_list_free(plCopy);
+  
+  GTKTextToClipboard(szOutput);
 }
 
 
@@ -8209,18 +8180,6 @@ static GtkWidget *CreateList()
 
 	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), 
                                       GTK_SELECTION_EXTENDED );
-        
-	gtk_selection_add_target( pwList, GDK_SELECTION_PRIMARY,
-                                  GDK_SELECTION_TYPE_STRING, 0 );
-
-	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
-                            GTK_SIGNAL_FUNC( StatcontextSelect ), pwList );
-	gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
-                            GTK_SIGNAL_FUNC( StatcontextSelect ), pwList );
-	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_clear_event",
-                            GTK_SIGNAL_FUNC( StatcontextClearSelection ), 0 );
-	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_get",
-                            GTK_SIGNAL_FUNC( StatcontextGetSelection ), 0 );
 
 	return pwList;
 }
@@ -8307,8 +8266,7 @@ extern void GTKDumpStatcontext( int game )
 	menu_item = gtk_menu_item_new_with_label ("Copy selection");
 	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
 	gtk_widget_show (menu_item);
-	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( StatcontextCopy ), pwNotebook );
-    gtk_widget_set_sensitive( menu_item, FALSE );
+	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( StatcontextCopy ), pwList );
 
 	menu_item = gtk_menu_item_new_with_label ("Copy all");
 	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
@@ -8366,29 +8324,6 @@ static void SetOptions( gpointer *p, guint n, GtkWidget *pw ) {
   GTKSetOptions();
 
 }
-
-/*
- * Copy
- * 
- * - Obtain the contents of the primary selection
- * - claim the clipboard
- *
- */
-
-extern void
-GTKCopy ( void ) {
-
-  gtk_selection_owner_set ( pwMain, gdk_atom_intern ("CLIPBOARD", FALSE), 
-                            GDK_CURRENT_TIME );
-
-  /* get contents of primary selection */
-
-  gtk_selection_convert ( pwMain, GDK_SELECTION_PRIMARY, 
-                          GDK_SELECTION_TYPE_STRING, 
-                          GDK_CURRENT_TIME );
-
-}
-
 
 extern int
 GTKGetMove ( int anMove[ 8 ] ) {
@@ -9506,6 +9441,14 @@ int curPlayerId, curRow;
 GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *pwQueryBox,
 	*aliases, *pwAliasList;
 
+static void ClearText(GtkWidget* pwText)
+{
+	gtk_text_set_point(GTK_TEXT(pwText), 0);
+	gtk_text_freeze(GTK_TEXT(pwText));
+	gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
+	gtk_text_thaw(GTK_TEXT(pwText));
+}
+
 static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
 {
 	char *pName, *pEnv;
@@ -9952,10 +9895,8 @@ static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
 		return;
 
-	if (GtkGetEnv(env) != 0)
-	 {
+	if (!GtkGetEnv(env))
 		return;
-	}
 
 	/* Pass in env id and force addition */
 	sprintf(buf, "\"%s\" Yes", env);
@@ -9978,6 +9919,7 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen, *pwn,
 		*pwLabel, *pwLink, *pwScrolled;
 	int multipleEnv;
+
 
 	pwAliasList = 0;
 	aliases = 0;
