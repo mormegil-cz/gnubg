@@ -2548,15 +2548,17 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   switch ( cd ) {
 	case NODOUBLE_TAKE:
 	case NODOUBLE_BEAVER:
-	case TOOGOOD_TAKE:
-	case TOOGOOD_PASS:
 	case NO_REDOUBLE_TAKE:
 	case NO_REDOUBLE_BEAVER:
+	case TOOGOOD_TAKE:
 	case TOOGOODRE_TAKE:
-
-	  rDeltaEquity = arDouble [OUTPUT_TAKE] - arDouble [OUTPUT_NODOUBLE];
+	  rDeltaEquity = arDouble[OUTPUT_TAKE] - arDouble[OUTPUT_NODOUBLE];
 	  break;
-  
+
+	case TOOGOOD_PASS:
+	  rDeltaEquity = arDouble[OUTPUT_DROP] - arDouble[OUTPUT_NODOUBLE];
+	  break;
+
 	default:
 	  return (SKILL_NONE);
 	}
@@ -2749,6 +2751,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	case NODOUBLE_BEAVER:
 	case NO_REDOUBLE_TAKE:
 	case NO_REDOUBLE_BEAVER:
+	case TOOGOOD_TAKE:
 	case TOOGOODRE_TAKE:
         case OPTIONAL_DOUBLE_BEAVER:
         case OPTIONAL_DOUBLE_TAKE:
