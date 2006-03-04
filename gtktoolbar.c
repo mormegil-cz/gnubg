@@ -169,13 +169,36 @@ ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
 }
 
 
+int editing = FALSE;
+
 static void
 ToolbarToggleEdit( GtkWidget *pw, toolbarwidget *ptw ) {
 
   BoardData *pbd = BOARD( pwBoard )->board_data;
 
-  board_edit( pbd );
+  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ) ))
+  { /* Undo any partial move that may have been made when entering edit mode */
+    Undo();
+    editing = TRUE;
+  }
+  else
+    editing = FALSE;
 
+  board_edit( pbd );
+}
+
+extern int
+ToolbarIsEditing( GtkWidget *pwToolbar ) {
+
+  return editing;
+}
+
+extern void
+ToolbarActivateEdit( GtkWidget *pwToolbar ) {
+  /* This is only used fot the New->Position option */
+	
+  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ), TRUE );
 }
 
 
@@ -204,22 +227,6 @@ ToolbarGetStopParent ( GtkWidget *pwToolbar ) {
   assert ( ptw );
 
   return ptw->pwStopParent;
-}
-
-extern int
-ToolbarIsEditing( GtkWidget *pwToolbar ) {
-
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
-
-  return gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ) );
-}
-
-extern void
-ToolbarActivateEdit( GtkWidget *pwToolbar ) {
-  /* This is only used fot the New->Position option */
-	
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ), TRUE );
 }
 
 extern toolbarcontrol
