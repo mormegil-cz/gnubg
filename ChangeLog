@@ -1,3 +1,7 @@
+Sat Mar 03 10:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Change mouse pointer to watch when computer is thinking
+
 Sat Mar 03 09:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktoolbar.c:  Undo any partial move that may have been made
