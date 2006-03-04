@@ -9441,14 +9441,6 @@ int curPlayerId, curRow;
 GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *pwQueryBox,
 	*aliases, *pwAliasList;
 
-static void ClearText(GtkWidget* pwText)
-{
-	gtk_text_set_point(GTK_TEXT(pwText), 0);
-	gtk_text_freeze(GTK_TEXT(pwText));
-	gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
-	gtk_text_thaw(GTK_TEXT(pwText));
-}
-
 static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
 {
 	char *pName, *pEnv;
