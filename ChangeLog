@@ -1,3 +1,8 @@
+Sat Mar 20 23:16:45 2006 Øystein Johansen <oystein@gnubg.org>
+	
+	* analysis.c: Fix for problem with wrong double statistics.
+	(Thanks to Christian Anthon)
+
 Sat Mar 03 10:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Change mouse pointer to watch when computer is thinking
