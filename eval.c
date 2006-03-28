@@ -7329,24 +7329,18 @@ CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
  *
  */
 
+#ifndef min
+#define min(x,y)   (((x) > (y)) ? (y) : (x))
+#endif
+
 extern int
 isCloseCubedecision ( const float arDouble[] ) {
-  
-  const float rThr = 0.25;
+  const float rThr = 0.16;
+  float rDouble;
+  rDouble = min (arDouble[ OUTPUT_TAKE ] , 1.0f);
 
-  /* too good positions */
-
-  if ( arDouble[ OUTPUT_NODOUBLE ] > 1.0 ) return 1;
-
-  /* almost a double */
-
-  if ( fabs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ] ) < rThr )
-    return 1;
-
-  /* almost a pass */
-
-  if ( fabs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ] ) < rThr )
-    return 1;
+  /* Report if doubling is less than very bad (0.16) */
+  if ( arDouble[ OUTPUT_OPTIMAL ] - rDouble < rThr ) return 1;
 
   return 0;
 

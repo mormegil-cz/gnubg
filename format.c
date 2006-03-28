@@ -774,7 +774,7 @@ OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   float r;
 
-  int fClose, fMissed;
+  int fMissed;
   int fAnno = FALSE;
 
   float arDouble[ 4 ];
@@ -793,7 +793,6 @@ OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   /* print alerts */
 
-  fClose = isCloseCubedecision ( arDouble ); 
   fMissed = 
     fDouble > -1 &&
     isMissedDouble ( arDouble, aarOutput, fDouble, pci );

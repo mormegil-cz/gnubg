@@ -366,11 +366,9 @@ updateStatcontext(statcontext*       psc,
 
       psc->anTotalCube[ pmr->fPlayer ]++;
 
-      if ( isCloseCubedecision ( arDouble ) || 
-           isMissedDouble ( arDouble, GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
-			    FALSE, &ci ) )
-        psc->anCloseCube[ pmr->fPlayer ]++;
-	  
+      /* Count doubles less than very bad */
+      if ( isCloseCubedecision ( arDouble ) ) psc->anCloseCube[ pmr->fPlayer ]++;
+
       if( arDouble[ OUTPUT_NODOUBLE ] <
           arDouble[ OUTPUT_OPTIMAL ] ) {
         /* it was a double */
