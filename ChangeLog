@@ -1,3 +1,7 @@
+Tue Mar 28 23:45:53 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* gnubg.game.mysql gnubg.game.sql gnubg.sql: Fix switched order of
+	normalised/unnormalised for some error_, so that it matches
+	database.py.
 
 Tue Mar 28 23:37:40 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* remove m4/gettext.m4
