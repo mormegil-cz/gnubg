@@ -1,3 +1,11 @@
+
+Tue Mar 28 23:37:40 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* remove m4/gettext.m4
+
+Tue Mar 28 23:24:14 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* format.c eval.c analysis.c: Clean up isCloseCube and lower limit to
+	    0.16
+
 Sat Mar 20 23:16:45 2006 Øystein Johansen <oystein@gnubg.org>
 	
 	* analysis.c: Fix for problem with wrong double statistics.
