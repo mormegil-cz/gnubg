@@ -1,3 +1,7 @@
+Wed Mar 29 10:13:39 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	*  **/Makefile.in aclocal.m4 config.h.in configure: Sync auto-tools
+	files.
+
 Tue Mar 28 23:45:53 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* gnubg.game.mysql gnubg.game.sql gnubg.sql: Fix switched order of
 	normalised/unnormalised for some error_, so that it matches

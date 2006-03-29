@@ -52,6 +52,14 @@
 /* Define to 1 if you have the `basename' function. */
 #undef HAVE_BASENAME
 
+/* Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the
+   CoreFoundation framework. */
+#undef HAVE_CFLOCALECOPYCURRENT
+
+/* Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in
+   the CoreFoundation framework. */
+#undef HAVE_CFPREFERENCESCOPYAPPVALUE
+
 /* Define to 1 if you have the `cosf' function. */
 #undef HAVE_COSF
 
@@ -532,6 +540,9 @@
 
 /* Define if you want to use sounds with GNU Backgammon */
 #undef USE_SOUND
+
+/* Define if you want to compile with SSE support */
+#undef USE_SSE_VECTORIZE
 
 /* Define if you want to use time controls (eg. clocks) with GNU Backgammon */
 #undef USE_TIMECONTROL

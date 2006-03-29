@@ -1,7 +1,7 @@
-# generated automatically by aclocal 1.9.4 -*- Autoconf -*-
+# generated automatically by aclocal 1.9.5 -*- Autoconf -*-
 
-# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-# Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+# 2005  Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -11,193 +11,11 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-# Configure paths for the Audio File Library
-# Bertrand Guiheneuf 98-10-21
-# stolen from esd.m4 in esound :
-# Manish Singh    98-9-30
-# stolen back from Frank Belew
-# stolen from Manish Singh
-# Shamelessly stolen from Owen Taylor
-
-dnl AM_PATH_AUDIOFILE([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-dnl Test for Audio File Library, and define AUDIOFILE_CFLAGS and AUDIOFILE_LIBS.
-dnl
-AC_DEFUN([AM_PATH_AUDIOFILE],
-[dnl 
-dnl Get compiler flags and libraries from the audiofile-config script.
-dnl
-AC_ARG_WITH(audiofile-prefix,[  --with-audiofile-prefix=PFX   Prefix where Audio File Library is installed (optional)],
-            audiofile_prefix="$withval", audiofile_prefix="")
-AC_ARG_WITH(audiofile-exec-prefix,[  --with-audiofile-exec-prefix=PFX Exec prefix where Audio File Library is installed (optional)],
-            audiofile_exec_prefix="$withval", audiofile_exec_prefix="")
-AC_ARG_ENABLE(audiofiletest, [  --disable-audiofiletest       Do not try to compile and run a test Audio File Library program], , enable_audiofiletest=yes)
-
-  if test x$audiofile_exec_prefix != x ; then
-     audiofile_args="$audiofile_args --exec-prefix=$audiofile_exec_prefix"
-     if test x${AUDIOFILE_CONFIG+set} != xset ; then
-        AUDIOFILE_CONFIG=$audiofile_exec_prefix/bin/audiofile-config
-     fi
-  fi
-  if test x$audiofile_prefix != x ; then
-     audiofile_args="$audiofile_args --prefix=$audiofile_prefix"
-     if test x${AUDIOFILE_CONFIG+set} != xset ; then
-        AUDIOFILE_CONFIG=$audiofile_prefix/bin/audiofile-config
-     fi
-  fi
-
-  AC_PATH_PROG(AUDIOFILE_CONFIG, audiofile-config, no)
-  min_audiofile_version=ifelse([$1], ,0.2.5,$1)
-  AC_MSG_CHECKING(for Audio File Library - version >= $min_audiofile_version)
-  no_audiofile=""
-  if test "$AUDIOFILE_CONFIG" = "no" ; then
-    no_audiofile=yes
-  else
-    AUDIOFILE_LIBS=`$AUDIOFILE_CONFIG $audiofileconf_args --libs`
-    AUDIOFILE_CFLAGS=`$AUDIOFILE_CONFIG $audiofileconf_args --cflags`
-    audiofile_major_version=`$AUDIOFILE_CONFIG $audiofile_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    audiofile_minor_version=`$AUDIOFILE_CONFIG $audiofile_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    audiofile_micro_version=`$AUDIOFILE_CONFIG $audiofile_config_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-    if test "x$enable_audiofiletest" = "xyes" ; then
-      AC_LANG_SAVE
-      AC_LANG_C
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $AUDIOFILE_CFLAGS"
-      LIBS="$LIBS $AUDIOFILE_LIBS"
-dnl
-dnl Now check if the installed Audio File Library is sufficiently new. 
-dnl (Also checks the sanity of the results of audiofile-config to some extent.)
-dnl
-      rm -f conf.audiofiletest
-      AC_TRY_RUN([
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <audiofile.h>
-
-char*
-my_strdup (char *str)
-{
-  char *new_str;
-  
-  if (str)
-    {
-      new_str = malloc ((strlen (str) + 1) * sizeof(char));
-      strcpy (new_str, str);
-    }
-  else
-    new_str = NULL;
-  
-  return new_str;
-}
-
-int main ()
-{
-  int major, minor, micro;
-  char *tmp_version;
-
-  system ("touch conf.audiofiletest");
-
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = my_strdup("$min_audiofile_version");
-  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
-     printf("%s, bad version string\n", "$min_audiofile_version");
-     exit(1);
-   }
-
-   if (($audiofile_major_version > major) ||
-      (($audiofile_major_version == major) && ($audiofile_minor_version > minor)) ||
-      (($audiofile_major_version == major) && ($audiofile_minor_version == minor) && ($audiofile_micro_version >= micro)))
-    {
-      return 0;
-    }
-  else
-    {
-      printf("\n*** 'audiofile-config --version' returned %d.%d.%d, but the minimum version\n", $audiofile_major_version, $audiofile_minor_version, $audiofile_micro_version);
-      printf("*** of the Audio File Library required is %d.%d.%d. If audiofile-config is correct, then it is\n", major, minor, micro);
-      printf("*** best to upgrade to the required version.\n");
-      printf("*** If audiofile-config was wrong, set the environment variable AUDIOFILE_CONFIG\n");
-      printf("*** to point to the correct copy of audiofile-config, and remove the file\n");
-      printf("*** config.cache before re-running configure\n");
-      return 1;
-    }
-}
-
-],, no_audiofile=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-       AC_LANG_RESTORE
-     fi
-  fi
-  if test "x$no_audiofile" = x ; then
-     AC_MSG_RESULT(yes)
-     ifelse([$2], , :, [$2])     
-  else
-     AC_MSG_RESULT(no)
-     if test "$AUDIOFILE_CONFIG" = "no" ; then
-       cat <<END
-*** The audiofile-config script installed by the Audio File Library could
-*** not be found.  If the Audio File Library was installed in PREFIX, make
-*** sure PREFIX/bin is in your path, or set the AUDIOFILE_CONFIG
-*** environment variable to the full path to audiofile-config.
-END
-     else
-       if test -f conf.audiofiletest ; then
-        :
-       else
-          echo "*** Could not run Audio File Library test program; checking why..."
-          AC_LANG_SAVE
-          AC_LANG_C
-          CFLAGS="$CFLAGS $AUDIOFILE_CFLAGS"
-          LIBS="$LIBS $AUDIOFILE_LIBS"
-          AC_TRY_LINK([
-#include <stdio.h>
-#include <audiofile.h>
-],      [ return 0; ],
-        [ cat <<END
-*** The test program compiled, but did not run.  This usually means that
-*** the run-time linker is not finding Audio File Library or finding the
-*** wrong version of Audio File Library.
-***
-*** If it is not finding Audio File Library, you'll need to set your
-*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point
-*** to the installed location.  Also, make sure you have run ldconfig if
-*** that is required on your system.
-***
-*** If you have an old version installed, it is best to remove it, although
-*** you may also be able to get things to work by modifying
-*** LD_LIBRARY_PATH.
-END
-        ],
-        [ echo "*** The test program failed to compile or link. See the file config.log"
-          echo "*** for the exact error that occured. This usually means the Audio File"
-          echo "*** Library was incorrectly installed or that you have moved the Audio"
-          echo "*** File Library since it was installed. In the latter case, you may want"
-          echo "*** to edit the audiofile-config script: $AUDIOFILE_CONFIG" ])
-          CFLAGS="$ac_save_CFLAGS"
-          LIBS="$ac_save_LIBS"
-          AC_LANG_RESTORE
-       fi
-     fi
-     AUDIOFILE_CFLAGS=""
-     AUDIOFILE_LIBS=""
-     ifelse([$3], , :, [$3])
-  fi
-  AC_SUBST(AUDIOFILE_CFLAGS)
-  AC_SUBST(AUDIOFILE_LIBS)
-  rm -f conf.audiofiletest
-])
-
 # codeset.m4 serial AM1 (gettext-0.10.40)
 dnl Copyright (C) 2000-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 
@@ -215,387 +33,11 @@ AC_DEFUN([AM_LANGINFO_CODESET],
   fi
 ])
 
-# Configure paths for ESD
-# Manish Singh    98-9-30
-# stolen back from Frank Belew
-# stolen from Manish Singh
-# Shamelessly stolen from Owen Taylor
-
-dnl AM_PATH_ESD([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-dnl Test for ESD, and define ESD_CFLAGS and ESD_LIBS
-dnl
-AC_DEFUN([AM_PATH_ESD],
-[dnl 
-dnl Get the cflags and libraries from the esd-config script
-dnl
-AC_ARG_WITH(esd-prefix,[  --with-esd-prefix=PFX   Prefix where ESD is installed (optional)],
-            esd_prefix="$withval", esd_prefix="")
-AC_ARG_WITH(esd-exec-prefix,[  --with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)],
-            esd_exec_prefix="$withval", esd_exec_prefix="")
-AC_ARG_ENABLE(esdtest, [  --disable-esdtest       Do not try to compile and run a test ESD program],
-		    , enable_esdtest=yes)
-
-  if test x$esd_exec_prefix != x ; then
-     esd_args="$esd_args --exec-prefix=$esd_exec_prefix"
-     if test x${ESD_CONFIG+set} != xset ; then
-        ESD_CONFIG=$esd_exec_prefix/bin/esd-config
-     fi
-  fi
-  if test x$esd_prefix != x ; then
-     esd_args="$esd_args --prefix=$esd_prefix"
-     if test x${ESD_CONFIG+set} != xset ; then
-        ESD_CONFIG=$esd_prefix/bin/esd-config
-     fi
-  fi
-
-  AC_PATH_PROG(ESD_CONFIG, esd-config, no)
-  min_esd_version=ifelse([$1], ,0.2.7,$1)
-  AC_MSG_CHECKING(for ESD - version >= $min_esd_version)
-  no_esd=""
-  if test "$ESD_CONFIG" = "no" ; then
-    no_esd=yes
-  else
-    AC_LANG_SAVE
-    AC_LANG_C
-    ESD_CFLAGS=`$ESD_CONFIG $esdconf_args --cflags`
-    ESD_LIBS=`$ESD_CONFIG $esdconf_args --libs`
-
-    esd_major_version=`$ESD_CONFIG $esd_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    esd_minor_version=`$ESD_CONFIG $esd_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    esd_micro_version=`$ESD_CONFIG $esd_config_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-    if test "x$enable_esdtest" = "xyes" ; then
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $ESD_CFLAGS"
-      LIBS="$LIBS $ESD_LIBS"
-dnl
-dnl Now check if the installed ESD is sufficiently new. (Also sanity
-dnl checks the results of esd-config to some extent
-dnl
-      rm -f conf.esdtest
-      AC_TRY_RUN([
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <esd.h>
-
-char*
-my_strdup (char *str)
-{
-  char *new_str;
-  
-  if (str)
-    {
-      new_str = malloc ((strlen (str) + 1) * sizeof(char));
-      strcpy (new_str, str);
-    }
-  else
-    new_str = NULL;
-  
-  return new_str;
-}
-
-int main ()
-{
-  int major, minor, micro;
-  char *tmp_version;
-
-  system ("touch conf.esdtest");
-
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = my_strdup("$min_esd_version");
-  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
-     printf("%s, bad version string\n", "$min_esd_version");
-     exit(1);
-   }
-
-   if (($esd_major_version > major) ||
-      (($esd_major_version == major) && ($esd_minor_version > minor)) ||
-      (($esd_major_version == major) && ($esd_minor_version == minor) && ($esd_micro_version >= micro)))
-    {
-      return 0;
-    }
-  else
-    {
-      printf("\n*** 'esd-config --version' returned %d.%d.%d, but the minimum version\n", $esd_major_version, $esd_minor_version, $esd_micro_version);
-      printf("*** of ESD required is %d.%d.%d. If esd-config is correct, then it is\n", major, minor, micro);
-      printf("*** best to upgrade to the required version.\n");
-      printf("*** If esd-config was wrong, set the environment variable ESD_CONFIG\n");
-      printf("*** to point to the correct copy of esd-config, and remove the file\n");
-      printf("*** config.cache before re-running configure\n");
-      return 1;
-    }
-}
-
-],, no_esd=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-       AC_LANG_RESTORE
-     fi
-  fi
-  if test "x$no_esd" = x ; then
-     AC_MSG_RESULT(yes)
-     ifelse([$2], , :, [$2])     
-  else
-     AC_MSG_RESULT(no)
-     if test "$ESD_CONFIG" = "no" ; then
-       echo "*** The esd-config script installed by ESD could not be found"
-       echo "*** If ESD was installed in PREFIX, make sure PREFIX/bin is in"
-       echo "*** your path, or set the ESD_CONFIG environment variable to the"
-       echo "*** full path to esd-config."
-     else
-       if test -f conf.esdtest ; then
-        :
-       else
-          echo "*** Could not run ESD test program, checking why..."
-          CFLAGS="$CFLAGS $ESD_CFLAGS"
-          LIBS="$LIBS $ESD_LIBS"
-          AC_LANG_SAVE
-          AC_LANG_C
-          AC_TRY_LINK([
-#include <stdio.h>
-#include <esd.h>
-],      [ return 0; ],
-        [ echo "*** The test program compiled, but did not run. This usually means"
-          echo "*** that the run-time linker is not finding ESD or finding the wrong"
-          echo "*** version of ESD. If it is not finding ESD, you'll need to set your"
-          echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
-          echo "*** to the installed location  Also, make sure you have run ldconfig if that"
-          echo "*** is required on your system"
-	  echo "***"
-          echo "*** If you have an old version installed, it is best to remove it, although"
-          echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"],
-        [ echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means ESD was incorrectly installed"
-          echo "*** or that you have moved ESD since it was installed. In the latter case, you"
-          echo "*** may want to edit the esd-config script: $ESD_CONFIG" ])
-          CFLAGS="$ac_save_CFLAGS"
-          LIBS="$ac_save_LIBS"
-          AC_LANG_RESTORE
-       fi
-     fi
-     ESD_CFLAGS=""
-     ESD_LIBS=""
-     ifelse([$3], , :, [$3])
-  fi
-  AC_SUBST(ESD_CFLAGS)
-  AC_SUBST(ESD_LIBS)
-  rm -f conf.esdtest
-])
-
-dnl AM_ESD_SUPPORTS_MULTIPLE_RECORD([ACTION-IF-SUPPORTS [, ACTION-IF-NOT-SUPPORTS]])
-dnl Test, whether esd supports multiple recording clients (version >=0.2.21)
-dnl
-AC_DEFUN([AM_ESD_SUPPORTS_MULTIPLE_RECORD],
-[dnl
-  AC_MSG_NOTICE([whether installed esd version supports multiple recording clients])
-  ac_save_ESD_CFLAGS="$ESD_CFLAGS"
-  ac_save_ESD_LIBS="$ESD_LIBS"
-  AM_PATH_ESD(0.2.21,
-    ifelse([$1], , [
-      AM_CONDITIONAL(ESD_SUPPORTS_MULTIPLE_RECORD, true)
-      AC_DEFINE(ESD_SUPPORTS_MULTIPLE_RECORD, 1,
-	[Define if you have esound with support of multiple recording clients.])],
-    [$1]),
-    ifelse([$2], , [AM_CONDITIONAL(ESD_SUPPORTS_MULTIPLE_RECORD, false)], [$2])
-    if test "x$ac_save_ESD_CFLAGS" != x ; then
-       ESD_CFLAGS="$ac_save_ESD_CFLAGS"
-    fi
-    if test "x$ac_save_ESD_LIBS" != x ; then
-       ESD_LIBS="$ac_save_ESD_LIBS"
-    fi
-  )
-])
-
-# Configure paths for FreeType2
-# Marcelo Magallon 2001-10-26, based on gtk.m4 by Owen Taylor
-#
-# serial 2
-
-# AC_CHECK_FT2([MINIMUM-VERSION [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-# Test for FreeType 2, and define FT2_CFLAGS and FT2_LIBS.
-# MINIMUM-VERSION is what libtool reports; the default is `7.0.1' (this is
-# FreeType 2.0.4).
-#
-AC_DEFUN([AC_CHECK_FT2],
-  [# Get the cflags and libraries from the freetype-config script
-   #
-   AC_ARG_WITH([ft-prefix],
-     dnl don't quote AS_HELP_STRING!
-     AS_HELP_STRING([--with-ft-prefix=PREFIX],
-                    [Prefix where FreeType is installed (optional)]),
-     [ft_config_prefix="$withval"],
-     [ft_config_prefix=""])
-
-   AC_ARG_WITH([ft-exec-prefix],
-     dnl don't quote AS_HELP_STRING!
-     AS_HELP_STRING([--with-ft-exec-prefix=PREFIX],
-                    [Exec prefix where FreeType is installed (optional)]),
-     [ft_config_exec_prefix="$withval"],
-     [ft_config_exec_prefix=""])
-
-   AC_ARG_ENABLE([freetypetest],
-     dnl don't quote AS_HELP_STRING!
-     AS_HELP_STRING([--disable-freetypetest],
-                    [Do not try to compile and run a test FreeType program]),
-     [],
-     [enable_fttest=yes])
-
-   if test x$ft_config_exec_prefix != x ; then
-     ft_config_args="$ft_config_args --exec-prefix=$ft_config_exec_prefix"
-     if test x${FT2_CONFIG+set} != xset ; then
-       FT2_CONFIG=$ft_config_exec_prefix/bin/freetype-config
-     fi
-   fi
-
-   if test x$ft_config_prefix != x ; then
-     ft_config_args="$ft_config_args --prefix=$ft_config_prefix"
-     if test x${FT2_CONFIG+set} != xset ; then
-       FT2_CONFIG=$ft_config_prefix/bin/freetype-config
-     fi
-   fi
-
-   AC_PATH_PROG([FT2_CONFIG], [freetype-config], [no])
-
-   min_ft_version=m4_if([$1], [], [7.0.1], [$1])
-   AC_MSG_CHECKING([for FreeType -- version >= $min_ft_version])
-   no_ft=""
-   if test "$FT2_CONFIG" = "no" ; then
-     no_ft=yes
-   else
-     FT2_CFLAGS=`$FT2_CONFIG $ft_config_args --cflags`
-     FT2_LIBS=`$FT2_CONFIG $ft_config_args --libs`
-     ft_config_major_version=`$FT2_CONFIG $ft_config_args --version | \
-       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-     ft_config_minor_version=`$FT2_CONFIG $ft_config_args --version | \
-       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-     ft_config_micro_version=`$FT2_CONFIG $ft_config_args --version | \
-       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-     ft_min_major_version=`echo $min_ft_version | \
-       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-     ft_min_minor_version=`echo $min_ft_version | \
-       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-     ft_min_micro_version=`echo $min_ft_version | \
-       sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-     if test x$enable_fttest = xyes ; then
-       ft_config_is_lt=""
-       if test $ft_config_major_version -lt $ft_min_major_version ; then
-         ft_config_is_lt=yes
-       else
-         if test $ft_config_major_version -eq $ft_min_major_version ; then
-           if test $ft_config_minor_version -lt $ft_min_minor_version ; then
-             ft_config_is_lt=yes
-           else
-             if test $ft_config_minor_version -eq $ft_min_minor_version ; then
-               if test $ft_config_micro_version -lt $ft_min_micro_version ; then
-                 ft_config_is_lt=yes
-               fi
-             fi
-           fi
-         fi
-       fi
-       if test x$ft_config_is_lt = xyes ; then
-         no_ft=yes
-       else
-         ac_save_CFLAGS="$CFLAGS"
-         ac_save_LIBS="$LIBS"
-         CFLAGS="$CFLAGS $FT2_CFLAGS"
-         LIBS="$FT2_LIBS $LIBS"
-
-         #
-         # Sanity checks for the results of freetype-config to some extent.
-         #
-         AC_RUN_IFELSE([
-             AC_LANG_SOURCE([[
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include <stdio.h>
-#include <stdlib.h>
-
-int
-main()
-{
-  FT_Library library;
-  FT_Error  error;
-
-  error = FT_Init_FreeType(&library);
-
-  if (error)
-    return 1;
-  else
-  {
-    FT_Done_FreeType(library);
-    return 0;
-  }
-}
-
-             ]])
-           ],
-           [],
-           [no_ft=yes],
-           [echo $ECHO_N "cross compiling; assuming OK... $ECHO_C"])
-
-         CFLAGS="$ac_save_CFLAGS"
-         LIBS="$ac_save_LIBS"
-       fi             # test $ft_config_version -lt $ft_min_version
-     fi               # test x$enable_fttest = xyes
-   fi                 # test "$FT2_CONFIG" = "no"
-
-   if test x$no_ft = x ; then
-     AC_MSG_RESULT([yes])
-     m4_if([$2], [], [:], [$2])
-   else
-     AC_MSG_RESULT([no])
-     if test "$FT2_CONFIG" = "no" ; then
-       AC_MSG_WARN([
-
-  The freetype-config script installed by FreeType 2 could not be found.
-  If FreeType 2 was installed in PREFIX, make sure PREFIX/bin is in
-  your path, or set the FT2_CONFIG environment variable to the
-  full path to freetype-config.
-       ])
-     else
-       if test x$ft_config_is_lt = xyes ; then
-         AC_MSG_WARN([
-
-  Your installed version of the FreeType 2 library is too old.
-  If you have different versions of FreeType 2, make sure that
-  correct values for --with-ft-prefix or --with-ft-exec-prefix
-  are used, or set the FT2_CONFIG environment variable to the
-  full path to freetype-config.
-         ])
-       else
-         AC_MSG_WARN([
-
-  The FreeType test program failed to run.  If your system uses
-  shared libraries and they are installed outside the normal
-  system library path, make sure the variable LD_LIBRARY_PATH
-  (or whatever is appropiate for your system) is correctly set.
-         ])
-       fi
-     fi
-
-     FT2_CFLAGS=""
-     FT2_LIBS=""
-     m4_if([$3], [], [:], [$3])
-   fi
-
-   AC_SUBST([FT2_CFLAGS])
-   AC_SUBST([FT2_LIBS])])
-
-# end of freetype2.m4
-
-# gettext.m4 serial 28 (gettext-0.13)
-dnl Copyright (C) 1995-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# gettext.m4 serial 37 (gettext-0.14.4)
+dnl Copyright (C) 1995-2005 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 dnl
 dnl This file can can be used in projects which are not available under
 dnl the GNU General Public License or the GNU Library General Public
@@ -656,8 +98,8 @@ AC_DEFUN([AM_GNU_GETTEXT],
   ifelse([$2], [], , [ifelse([$2], [need-ngettext], , [ifelse([$2], [need-formatstring-macros], ,
     [errprint([ERROR: invalid second argument to AM_GNU_GETTEXT
 ])])])])
-  define(gt_included_intl, ifelse([$1], [external], [no], [yes]))
-  define(gt_libtool_suffix_prefix, ifelse([$1], [use-libtool], [l], []))
+  define([gt_included_intl], ifelse([$1], [external], [no], [yes]))
+  define([gt_libtool_suffix_prefix], ifelse([$1], [use-libtool], [l], []))
 
   AC_REQUIRE([AM_PO_SUBDIRS])dnl
   ifelse(gt_included_intl, yes, [
@@ -682,6 +124,9 @@ AC_DEFUN([AM_GNU_GETTEXT],
   ifelse(gt_included_intl, yes, , [
     AC_REQUIRE([AM_ICONV_LINKFLAGS_BODY])
   ])
+
+  dnl Sometimes, on MacOS X, libintl requires linking with CoreFoundation.
+  gt_INTL_MACOSX
 
   dnl Set USE_NLS.
   AM_NLS
@@ -729,7 +174,7 @@ changequote([,])dnl
 ], [])[extern int _nl_msg_cat_cntr;
 extern int *_nl_domain_bindings;],
             [bindtextdomain ("", "");
-return (int) gettext ("")]ifelse([$2], [need-ngettext], [ + (int) ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr + *_nl_domain_bindings],
+return * gettext ("")]ifelse([$2], [need-ngettext], [ + * ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr + *_nl_domain_bindings],
             gt_cv_func_gnugettext_libc=yes,
             gt_cv_func_gnugettext_libc=no)])
 
@@ -763,9 +208,9 @@ extern
 #ifdef __cplusplus
 "C"
 #endif
-const char *_nl_expand_alias ();],
+const char *_nl_expand_alias (const char *);],
               [bindtextdomain ("", "");
-return (int) gettext ("")]ifelse([$2], [need-ngettext], [ + (int) ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr + *_nl_expand_alias (0)],
+return * gettext ("")]ifelse([$2], [need-ngettext], [ + * ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr + *_nl_expand_alias ("")],
               gt_cv_func_gnugettext_libintl=yes,
               gt_cv_func_gnugettext_libintl=no)
             dnl Now see whether libintl exists and depends on libiconv.
@@ -784,9 +229,9 @@ extern
 #ifdef __cplusplus
 "C"
 #endif
-const char *_nl_expand_alias ();],
+const char *_nl_expand_alias (const char *);],
                 [bindtextdomain ("", "");
-return (int) gettext ("")]ifelse([$2], [need-ngettext], [ + (int) ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr + *_nl_expand_alias (0)],
+return * gettext ("")]ifelse([$2], [need-ngettext], [ + * ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr + *_nl_expand_alias ("")],
                [LIBINTL="$LIBINTL $LIBICONV"
                 LTLIBINTL="$LTLIBINTL $LTLIBICONV"
                 gt_cv_func_gnugettext_libintl=yes
@@ -829,12 +274,22 @@ return (int) gettext ("")]ifelse([$2], [need-ngettext], [ + (int) ngettext ("", 
         LIBS=`echo " $LIBS " | sed -e 's/ -lintl / /' -e 's/^ //' -e 's/ $//'`
       fi
 
+      CATOBJEXT=
       if test "$gt_use_preinstalled_gnugettext" = "yes" \
          || test "$nls_cv_use_gnu_gettext" = "yes"; then
         dnl Mark actions to use GNU gettext tools.
         CATOBJEXT=.gmo
       fi
     ])
+
+    if test -n "$INTL_MACOSX_LIBS"; then
+      if test "$gt_use_preinstalled_gnugettext" = "yes" \
+         || test "$nls_cv_use_gnu_gettext" = "yes"; then
+        dnl Some extra flags are needed during linking.
+        LIBINTL="$LIBINTL $INTL_MACOSX_LIBS"
+        LTLIBINTL="$LTLIBINTL $INTL_MACOSX_LIBS"
+      fi
+    fi
 
     if test "$gt_use_preinstalled_gnugettext" = "yes" \
        || test "$nls_cv_use_gnu_gettext" = "yes"; then
@@ -911,6 +366,7 @@ return (int) gettext ("")]ifelse([$2], [need-ngettext], [ + (int) ngettext ("", 
     AC_SUBST(GENCAT)
 
     dnl For backward compatibility. Some Makefiles may be using this.
+    INTLOBJS=
     if test "$USE_INCLUDED_LIBINTL" = yes; then
       INTLOBJS="\$(GETTOBJS)"
     fi
@@ -941,6 +397,7 @@ AC_DEFUN([AM_INTL_SUBDIR],
   AC_REQUIRE([AM_MKINSTALLDIRS])dnl
   AC_REQUIRE([AC_PROG_CC])dnl
   AC_REQUIRE([AC_CANONICAL_HOST])dnl
+  AC_REQUIRE([gt_GLIBC2])dnl
   AC_REQUIRE([AC_PROG_RANLIB])dnl
   AC_REQUIRE([AC_ISC_POSIX])dnl
   AC_REQUIRE([AC_HEADER_STDC])dnl
@@ -949,22 +406,23 @@ AC_DEFUN([AM_INTL_SUBDIR],
   AC_REQUIRE([AC_C_INLINE])dnl
   AC_REQUIRE([AC_TYPE_OFF_T])dnl
   AC_REQUIRE([AC_TYPE_SIZE_T])dnl
-  AC_REQUIRE([jm_AC_TYPE_LONG_LONG])dnl
+  AC_REQUIRE([gl_AC_TYPE_LONG_LONG])dnl
   AC_REQUIRE([gt_TYPE_LONGDOUBLE])dnl
   AC_REQUIRE([gt_TYPE_WCHAR_T])dnl
   AC_REQUIRE([gt_TYPE_WINT_T])dnl
-  AC_REQUIRE([jm_AC_HEADER_INTTYPES_H])
-  AC_REQUIRE([jm_AC_HEADER_STDINT_H])
+  AC_REQUIRE([gl_AC_HEADER_INTTYPES_H])
+  AC_REQUIRE([gl_AC_HEADER_STDINT_H])
   AC_REQUIRE([gt_TYPE_INTMAX_T])
   AC_REQUIRE([gt_PRINTF_POSIX])
   AC_REQUIRE([AC_FUNC_ALLOCA])dnl
   AC_REQUIRE([AC_FUNC_MMAP])dnl
-  AC_REQUIRE([jm_GLIBC21])dnl
+  AC_REQUIRE([gl_GLIBC21])dnl
   AC_REQUIRE([gt_INTDIV0])dnl
-  AC_REQUIRE([jm_AC_TYPE_UINTMAX_T])dnl
+  AC_REQUIRE([gl_AC_TYPE_UINTMAX_T])dnl
   AC_REQUIRE([gt_HEADER_INTTYPES_H])dnl
   AC_REQUIRE([gt_INTTYPES_PRI])dnl
   AC_REQUIRE([gl_XSIZE])dnl
+  AC_REQUIRE([gt_INTL_MACOSX])dnl
 
   AC_CHECK_TYPE([ptrdiff_t], ,
     [AC_DEFINE([ptrdiff_t], [long],
@@ -1018,7 +476,11 @@ __fsetlocking])
   AM_ICONV
   AM_LANGINFO_CODESET
   if test $ac_cv_header_locale_h = yes; then
-    AM_LC_MESSAGES
+    gt_LC_MESSAGES
+  fi
+
+  if test -n "$INTL_MACOSX_LIBS"; then
+    CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/CoreFoundation.framework/Headers"
   fi
 
   dnl intl/plural.c is generated from intl/plural.y. It requires bison,
@@ -1054,6 +516,50 @@ changequote([,])dnl
 ])
 
 
+dnl Checks for special options needed on MacOS X.
+dnl Defines INTL_MACOSX_LIBS.
+AC_DEFUN([gt_INTL_MACOSX],
+[
+  dnl Check for API introduced in MacOS X 10.2.
+  AC_CACHE_CHECK([for CFPreferencesCopyAppValue],
+    gt_cv_func_CFPreferencesCopyAppValue,
+    [gt_save_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/CoreFoundation.framework/Headers"
+     gt_save_LIBS="$LIBS"
+     LIBS="$LIBS -framework CoreFoundation"
+     AC_TRY_LINK([#include <CFPreferences.h>],
+       [CFPreferencesCopyAppValue(NULL, NULL)],
+       [gt_cv_func_CFPreferencesCopyAppValue=yes],
+       [gt_cv_func_CFPreferencesCopyAppValue=no])
+     CPPFLAGS="$gt_save_CPPFLAGS"
+     LIBS="$gt_save_LIBS"])
+  if test $gt_cv_func_CFPreferencesCopyAppValue = yes; then
+    AC_DEFINE([HAVE_CFPREFERENCESCOPYAPPVALUE], 1,
+      [Define to 1 if you have the MacOS X function CFPreferencesCopyAppValue in the CoreFoundation framework.])
+  fi
+  dnl Check for API introduced in MacOS X 10.3.
+  AC_CACHE_CHECK([for CFLocaleCopyCurrent], gt_cv_func_CFLocaleCopyCurrent,
+    [gt_save_CPPFLAGS="$CPPFLAGS"
+     CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/CoreFoundation.framework/Headers"
+     gt_save_LIBS="$LIBS"
+     LIBS="$LIBS -framework CoreFoundation"
+     AC_TRY_LINK([#include <CFLocale.h>], [CFLocaleCopyCurrent();],
+       [gt_cv_func_CFLocaleCopyCurrent=yes],
+       [gt_cv_func_CFLocaleCopyCurrent=no])
+     CPPFLAGS="$gt_save_CPPFLAGS"
+     LIBS="$gt_save_LIBS"])
+  if test $gt_cv_func_CFLocaleCopyCurrent = yes; then
+    AC_DEFINE([HAVE_CFLOCALECOPYCURRENT], 1,
+      [Define to 1 if you have the MacOS X function CFLocaleCopyCurrent in the CoreFoundation framework.])
+  fi
+  INTL_MACOSX_LIBS=
+  if test $gt_cv_func_CFPreferencesCopyAppValue = yes || test $gt_cv_func_CFLocaleCopyCurrent = yes; then
+    INTL_MACOSX_LIBS="-Wl,-framework -Wl,CoreFoundation"
+  fi
+  AC_SUBST([INTL_MACOSX_LIBS])
+])
+
+
 dnl gt_CHECK_DECL(FUNC, INCLUDES)
 dnl Check whether a function is declared.
 AC_DEFUN([gt_CHECK_DECL],
@@ -1077,234 +583,47 @@ AC_DEFUN([gt_CHECK_DECL],
 dnl Usage: AM_GNU_GETTEXT_VERSION([gettext-version])
 AC_DEFUN([AM_GNU_GETTEXT_VERSION], [])
 
-# Configure paths for GLIB
-# Owen Taylor     1997-2001
+# glibc2.m4 serial 1
+dnl Copyright (C) 2000-2002, 2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
-dnl AM_PATH_GLIB_2_0([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND [, MODULES]]]])
-dnl Test for GLIB, and define GLIB_CFLAGS and GLIB_LIBS, if gmodule, gobject or 
-dnl gthread is specified in MODULES, pass to pkg-config
-dnl
-AC_DEFUN([AM_PATH_GLIB_2_0],
-[dnl 
-dnl Get the cflags and libraries from pkg-config
-dnl
-AC_ARG_ENABLE(glibtest, [  --disable-glibtest      do not try to compile and run a test GLIB program],
-		    , enable_glibtest=yes)
+# Test for the GNU C Library, version 2.0 or newer.
+# From Bruno Haible.
 
-  pkg_config_args=glib-2.0
-  for module in . $4
-  do
-      case "$module" in
-         gmodule) 
-             pkg_config_args="$pkg_config_args gmodule-2.0"
-         ;;
-         gmodule-no-export) 
-             pkg_config_args="$pkg_config_args gmodule-no-export-2.0"
-         ;;
-         gobject) 
-             pkg_config_args="$pkg_config_args gobject-2.0"
-         ;;
-         gthread) 
-             pkg_config_args="$pkg_config_args gthread-2.0"
-         ;;
-      esac
-  done
+AC_DEFUN([gt_GLIBC2],
+  [
+    AC_CACHE_CHECK(whether we are using the GNU C Library 2 or newer,
+      ac_cv_gnu_library_2,
+      [AC_EGREP_CPP([Lucky GNU user],
+	[
+#include <features.h>
+#ifdef __GNU_LIBRARY__
+ #if (__GLIBC__ >= 2)
+  Lucky GNU user
+ #endif
+#endif
+	],
+	ac_cv_gnu_library_2=yes,
+	ac_cv_gnu_library_2=no)
+      ]
+    )
+    AC_SUBST(GLIBC2)
+    GLIBC2="$ac_cv_gnu_library_2"
+  ]
+)
 
-  AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-
-  no_glib=""
-
-  if test x$PKG_CONFIG != xno ; then
-    if $PKG_CONFIG --atleast-pkgconfig-version 0.7 ; then
-      :
-    else
-      echo *** pkg-config too old; version 0.7 or better required.
-      no_glib=yes
-      PKG_CONFIG=no
-    fi
-  else
-    no_glib=yes
-  fi
-
-  min_glib_version=ifelse([$1], ,2.0.0,$1)
-  AC_MSG_CHECKING(for GLIB - version >= $min_glib_version)
-
-  if test x$PKG_CONFIG != xno ; then
-    ## don't try to run the test against uninstalled libtool libs
-    if $PKG_CONFIG --uninstalled $pkg_config_args; then
-	  echo "Will use uninstalled version of GLib found in PKG_CONFIG_PATH"
-	  enable_glibtest=no
-    fi
-
-    if $PKG_CONFIG --atleast-version $min_glib_version $pkg_config_args; then
-	  :
-    else
-	  no_glib=yes
-    fi
-  fi
-
-  if test x"$no_glib" = x ; then
-    GLIB_GENMARSHAL=`$PKG_CONFIG --variable=glib_genmarshal glib-2.0`
-    GOBJECT_QUERY=`$PKG_CONFIG --variable=gobject_query glib-2.0`
-    GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
-
-    GLIB_CFLAGS=`$PKG_CONFIG --cflags $pkg_config_args`
-    GLIB_LIBS=`$PKG_CONFIG --libs $pkg_config_args`
-    glib_config_major_version=`$PKG_CONFIG --modversion glib-2.0 | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    glib_config_minor_version=`$PKG_CONFIG --modversion glib-2.0 | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    glib_config_micro_version=`$PKG_CONFIG --modversion glib-2.0 | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-    if test "x$enable_glibtest" = "xyes" ; then
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $GLIB_CFLAGS"
-      LIBS="$GLIB_LIBS $LIBS"
-dnl
-dnl Now check if the installed GLIB is sufficiently new. (Also sanity
-dnl checks the results of pkg-config to some extent)
-dnl
-      rm -f conf.glibtest
-      AC_TRY_RUN([
-#include <glib.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-int 
-main ()
-{
-  int major, minor, micro;
-  char *tmp_version;
-
-  system ("touch conf.glibtest");
-
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = g_strdup("$min_glib_version");
-  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
-     printf("%s, bad version string\n", "$min_glib_version");
-     exit(1);
-   }
-
-  if ((glib_major_version != $glib_config_major_version) ||
-      (glib_minor_version != $glib_config_minor_version) ||
-      (glib_micro_version != $glib_config_micro_version))
-    {
-      printf("\n*** 'pkg-config --modversion glib-2.0' returned %d.%d.%d, but GLIB (%d.%d.%d)\n", 
-             $glib_config_major_version, $glib_config_minor_version, $glib_config_micro_version,
-             glib_major_version, glib_minor_version, glib_micro_version);
-      printf ("*** was found! If pkg-config was correct, then it is best\n");
-      printf ("*** to remove the old version of GLib. You may also be able to fix the error\n");
-      printf("*** by modifying your LD_LIBRARY_PATH enviroment variable, or by editing\n");
-      printf("*** /etc/ld.so.conf. Make sure you have run ldconfig if that is\n");
-      printf("*** required on your system.\n");
-      printf("*** If pkg-config was wrong, set the environment variable PKG_CONFIG_PATH\n");
-      printf("*** to point to the correct configuration files\n");
-    } 
-  else if ((glib_major_version != GLIB_MAJOR_VERSION) ||
-	   (glib_minor_version != GLIB_MINOR_VERSION) ||
-           (glib_micro_version != GLIB_MICRO_VERSION))
-    {
-      printf("*** GLIB header files (version %d.%d.%d) do not match\n",
-	     GLIB_MAJOR_VERSION, GLIB_MINOR_VERSION, GLIB_MICRO_VERSION);
-      printf("*** library (version %d.%d.%d)\n",
-	     glib_major_version, glib_minor_version, glib_micro_version);
-    }
-  else
-    {
-      if ((glib_major_version > major) ||
-        ((glib_major_version == major) && (glib_minor_version > minor)) ||
-        ((glib_major_version == major) && (glib_minor_version == minor) && (glib_micro_version >= micro)))
-      {
-        return 0;
-       }
-     else
-      {
-        printf("\n*** An old version of GLIB (%d.%d.%d) was found.\n",
-               glib_major_version, glib_minor_version, glib_micro_version);
-        printf("*** You need a version of GLIB newer than %d.%d.%d. The latest version of\n",
-	       major, minor, micro);
-        printf("*** GLIB is always available from ftp://ftp.gtk.org.\n");
-        printf("***\n");
-        printf("*** If you have already installed a sufficiently new version, this error\n");
-        printf("*** probably means that the wrong copy of the pkg-config shell script is\n");
-        printf("*** being found. The easiest way to fix this is to remove the old version\n");
-        printf("*** of GLIB, but you can also set the PKG_CONFIG environment to point to the\n");
-        printf("*** correct copy of pkg-config. (In this case, you will have to\n");
-        printf("*** modify your LD_LIBRARY_PATH enviroment variable, or edit /etc/ld.so.conf\n");
-        printf("*** so that the correct libraries are found at run-time))\n");
-      }
-    }
-  return 1;
-}
-],, no_glib=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-     fi
-  fi
-  if test "x$no_glib" = x ; then
-     AC_MSG_RESULT(yes (version $glib_config_major_version.$glib_config_minor_version.$glib_config_micro_version))
-     ifelse([$2], , :, [$2])     
-  else
-     AC_MSG_RESULT(no)
-     if test "$PKG_CONFIG" = "no" ; then
-       echo "*** A new enough version of pkg-config was not found."
-       echo "*** See http://www.freedesktop.org/software/pkgconfig/"
-     else
-       if test -f conf.glibtest ; then
-        :
-       else
-          echo "*** Could not run GLIB test program, checking why..."
-          ac_save_CFLAGS="$CFLAGS"
-          ac_save_LIBS="$LIBS"
-          CFLAGS="$CFLAGS $GLIB_CFLAGS"
-          LIBS="$LIBS $GLIB_LIBS"
-          AC_TRY_LINK([
-#include <glib.h>
-#include <stdio.h>
-],      [ return ((glib_major_version) || (glib_minor_version) || (glib_micro_version)); ],
-        [ echo "*** The test program compiled, but did not run. This usually means"
-          echo "*** that the run-time linker is not finding GLIB or finding the wrong"
-          echo "*** version of GLIB. If it is not finding GLIB, you'll need to set your"
-          echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
-          echo "*** to the installed location  Also, make sure you have run ldconfig if that"
-          echo "*** is required on your system"
-	  echo "***"
-          echo "*** If you have an old version installed, it is best to remove it, although"
-          echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH" ],
-        [ echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means GLIB is incorrectly installed."])
-          CFLAGS="$ac_save_CFLAGS"
-          LIBS="$ac_save_LIBS"
-       fi
-     fi
-     GLIB_CFLAGS=""
-     GLIB_LIBS=""
-     GLIB_GENMARSHAL=""
-     GOBJECT_QUERY=""
-     GLIB_MKENUMS=""
-     ifelse([$3], , :, [$3])
-  fi
-  AC_SUBST(GLIB_CFLAGS)
-  AC_SUBST(GLIB_LIBS)
-  AC_SUBST(GLIB_GENMARSHAL)
-  AC_SUBST(GOBJECT_QUERY)
-  AC_SUBST(GLIB_MKENUMS)
-  rm -f conf.glibtest
-])
-
-# glibc21.m4 serial 2 (fileutils-4.1.3, gettext-0.10.40)
-dnl Copyright (C) 2000-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# glibc21.m4 serial 3
+dnl Copyright (C) 2000-2002, 2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 # Test for the GNU C Library, version 2.1 or newer.
 # From Bruno Haible.
 
-AC_DEFUN([jm_GLIBC21],
+AC_DEFUN([gl_GLIBC21],
   [
     AC_CACHE_CHECK(whether we are using the GNU C Library 2.1 or newer,
       ac_cv_gnu_library_2_1,
@@ -1326,421 +645,11 @@ AC_DEFUN([jm_GLIBC21],
   ]
 )
 
-# Configure paths for GtkGLExt
-# Naofumi Yasufuku
-#
-# Shamelessly stolen from gtk-2.0.m4
-# Configure paths for GTK+
-# Owen Taylor     1997-2001
-
-dnl AM_PATH_GTKGLEXT_1_0([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-dnl Test for GtkGLExt, and define GTKGLEXT_CFLAGS and GTKGLEXT_LIBS.
-dnl
-AC_DEFUN([AM_PATH_GTKGLEXT_1_0],
-[ no_gtkglext=""
-  GTKGLEXT_CFLAGS=""
-  GTKGLEXT_LIBS=""
-
-  # GtkGLExt pkg-config module
-  gtkglext_module=gtkglext-1.0
-
-  # minimum GtkGLExt version
-  gtkglext_min_version=ifelse([$1], ,1.0.0,$1)
-
-  # minimum pkg-config version
-  pkgconfig_min_version=0.7
-
-AC_ARG_ENABLE(gtkglext-test,
-[  --disable-gtkglext-test do not try to compile and run a test GtkGLExt program],
-, enable_gtkglext_test=yes)
-
-dnl 
-dnl Get the cflags and libraries from pkg-config
-dnl
-  pkg_config_modules=$gtkglext_module
-
-  AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-
-  if test x$PKG_CONFIG != xno ; then
-    if pkg-config --atleast-pkgconfig-version $pkgconfig_min_version ; then
-      :
-    else
-      echo ""
-      echo "*** pkg-config too old; version $pkgconfig_min_version or better required."
-      no_gtkglext=yes
-      PKG_CONFIG=no
-    fi
-  else
-    no_gtkglext=yes
-  fi
-
-  AC_MSG_CHECKING(for GtkGLExt - version >= $gtkglext_min_version)
-
-  if test x$PKG_CONFIG != xno ; then
-    ## don't try to run the test against uninstalled libtool libs
-    if $PKG_CONFIG --uninstalled $pkg_config_modules; then
-      echo ""
-      echo "Will use uninstalled version of GtkGLExt found in PKG_CONFIG_PATH"
-      enable_gtkglext_test=no
-    fi
-
-    if $PKG_CONFIG --atleast-version $gtkglext_min_version $pkg_config_modules; then
-      :
-    else
-      echo ""
-      echo "*** pkg-config cannot find $gtkglext_module >= $gtkglext_min_version"
-      echo "*** Set the environment variable PKG_CONFIG_PATH to point to the correct"
-      echo "*** configuration files."
-      no_gtkglext=yes
-      enable_gtkglext_test=no
-    fi
-  fi
-
-  if test x"$no_gtkglext" = x ; then
-    GTKGLEXT_CFLAGS=`$PKG_CONFIG --cflags $pkg_config_modules`
-    GTKGLEXT_LIBS=`$PKG_CONFIG --libs $pkg_config_modules`
-    gtkglext_config_major_version=`$PKG_CONFIG --modversion $gtkglext_module | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    gtkglext_config_minor_version=`$PKG_CONFIG --modversion $gtkglext_module | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    gtkglext_config_micro_version=`$PKG_CONFIG --modversion $gtkglext_module | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-    if test "x$enable_gtkglext_test" = "xyes" ; then
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $GTKGLEXT_CFLAGS"
-      LIBS="$GTKGLEXT_LIBS $LIBS"
-dnl
-dnl Now check if the installed GtkGLExt is sufficiently new. (Also sanity
-dnl checks the results of pkg-config to some extent)
-dnl
-      rm -f conf.gtkgltest
-      AC_TRY_RUN([
-#include <gtk/gtk.h>
-#include <gtk/gtkgl.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-int 
-main ()
-{
-  int major, minor, micro;
-  char *tmp_version;
-
-  system ("touch conf.gtkgltest");
-
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = g_strdup ("$gtkglext_min_version");
-  if (sscanf (tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3)
-    {
-      printf ("%s, bad version string\n", "$gtkglext_min_version");
-      exit (1);
-    }
-
-  if ((gtkglext_major_version != $gtkglext_config_major_version) ||
-      (gtkglext_minor_version != $gtkglext_config_minor_version) ||
-      (gtkglext_micro_version != $gtkglext_config_micro_version))
-    {
-      printf ("\n*** 'pkg-config --modversion $gtkglext_module' returned %d.%d.%d, but GtkGLExt\n",
-              $gtkglext_config_major_version, $gtkglext_config_minor_version, $gtkglext_config_micro_version);
-      printf ("*** library %d.%d.%d was found!\n",
-              gtkglext_major_version, gtkglext_minor_version, gtkglext_micro_version);
-      printf ("***\n");
-      printf ("*** If pkg-config was correct, then it is best to remove the old version\n");
-      printf ("*** of GtkGLExt. You may also be able to fix the error by modifying your\n");
-      printf ("*** LD_LIBRARY_PATH enviroment variable, or by editing /etc/ld.so.conf.\n");
-      printf ("*** Make sure you have run ldconfig if that is required on your system.\n");
-      printf ("***\n");
-      printf ("*** If pkg-config was wrong, set the environment variable PKG_CONFIG_PATH\n");
-      printf ("*** to point to the correct configuration files.\n");
-    } 
-  else if ((gtkglext_major_version != GTKGLEXT_MAJOR_VERSION) ||
-	   (gtkglext_minor_version != GTKGLEXT_MINOR_VERSION) ||
-           (gtkglext_micro_version != GTKGLEXT_MICRO_VERSION))
-    {
-      printf ("\n*** GtkGLExt header files (version %d.%d.%d) do not match library (version %d.%d.%d).\n",
-              GTKGLEXT_MAJOR_VERSION, GTKGLEXT_MINOR_VERSION, GTKGLEXT_MICRO_VERSION,
-              gtkglext_major_version, gtkglext_minor_version, gtkglext_micro_version);
-    }
-  else
-    {
-      if ((gtkglext_major_version > major) ||
-          ((gtkglext_major_version == major) && (gtkglext_minor_version > minor)) ||
-          ((gtkglext_major_version == major) && (gtkglext_minor_version == minor) && (gtkglext_micro_version >= micro)))
-        {
-          return 0;
-        }
-      else
-        {
-          printf ("\n*** An old version of GtkGLExt library (%d.%d.%d) was found.\n",
-                  gtkglext_major_version, gtkglext_minor_version, gtkglext_micro_version);
-          printf ("*** You need a version of GtkGLExt newer than %d.%d.%d. The latest version of\n",
-                  major, minor, micro);
-          printf ("*** GtkGLExt is always available from http://gtkglext.sourceforge.net/.\n");
-          printf ("***\n");
-          printf ("*** If you have already installed a sufficiently new version, this error\n");
-          printf ("*** probably means that the wrong copy of the pkg-config shell script is\n");
-          printf ("*** being found. The easiest way to fix this is to remove the old version\n");
-          printf ("*** of GtkGLExt, but you can also set the PKG_CONFIG environment to point\n");
-          printf ("*** to the correct copy of pkg-config. (In this case, you will have to\n");
-          printf ("*** modify your LD_LIBRARY_PATH enviroment variable, or edit /etc/ld.so.conf\n");
-          printf ("*** so that the correct libraries are found at run-time)\n");
-        }
-    }
-  return 1;
-}
-],, no_gtkglext=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-     fi
-  fi
-  if test "x$no_gtkglext" = x ; then
-     AC_MSG_RESULT(yes (version $gtkglext_config_major_version.$gtkglext_config_minor_version.$gtkglext_config_micro_version))
-     ifelse([$2], , :, [$2])
-  else
-     AC_MSG_RESULT(no)
-     if test "$PKG_CONFIG" = "no" ; then
-       echo "*** A new enough version of pkg-config was not found."
-       echo "*** See http://www.freedesktop.org/software/pkgconfig/."
-     elif test "x$enable_gtkglext_test" = "xyes" ; then
-       if test -f conf.gtkgltest ; then
-        :
-       else
-          echo "*** Could not run GtkGLExt test program, checking why..."
-	  ac_save_CFLAGS="$CFLAGS"
-	  ac_save_LIBS="$LIBS"
-          CFLAGS="$CFLAGS $GTKGLEXT_CFLAGS"
-          LIBS="$LIBS $GTKGLEXT_LIBS"
-          AC_TRY_LINK([
-#include <gtk/gtk.h>
-#include <gtk/gtkgl.h>
-#include <stdio.h>
-],      [ return ((gtkglext_major_version) || (gtkglext_minor_version) || (gtkglext_micro_version)); ],
-        [ echo "*** The test program compiled, but did not run. This usually means"
-          echo "*** that the run-time linker is not finding GtkGLExt or finding the wrong"
-          echo "*** version of GtkGLExt. If it is not finding GtkGLExt, you'll need to set your"
-          echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
-          echo "*** to the installed location  Also, make sure you have run ldconfig if that"
-          echo "*** is required on your system"
-	  echo "***"
-          echo "*** If you have an old version installed, it is best to remove it, although"
-          echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH" ],
-        [ echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means GtkGLExt is incorrectly installed."])
-          CFLAGS="$ac_save_CFLAGS"
-          LIBS="$ac_save_LIBS"
-       fi
-     fi
-     GTKGLEXT_CFLAGS=""
-     GTKGLEXT_LIBS=""
-     ifelse([$3], , :, [$3])
-  fi
-  AC_SUBST(GTKGLEXT_CFLAGS)
-  AC_SUBST(GTKGLEXT_LIBS)
-  rm -f conf.gtkgltest
-])
-
-dnl AC_GTKGLEXT_SUPPORTS_MULTIHEAD([ACTION-IF-SUPPORTED [, ACTION-IF-NOT-SUPPORTED]])
-dnl Checks whether GtkGLExt supports multihead.
-dnl
-AC_DEFUN([AC_GTKGLEXT_SUPPORTS_MULTIHEAD],
-[ AC_CACHE_CHECK([whether GtkGLExt supports multihead],
-                 [ac_cv_gtkglext_supports_multihead],
-                 [AC_TRY_LINK([#include <gdk/gdkglquery.h>], 
-                              [gdk_gl_query_extension_for_display(gdk_display_get_default());],
-                              [ac_cv_gtkglext_supports_multihead=yes],
-                              [ac_cv_gtkglext_supports_multihead=no])])
-  if test "x$ac_cv_gtkglext_supports_multihead" = "xyes" ; then
-    ifelse([$1], , :, [$1])
-  else
-    ifelse([$2], , :, [$2])
-  fi
-])
-
-# iconv.m4 serial AM4 (gettext-0.11.3)
-dnl Copyright (C) 2000-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
-
-dnl From Bruno Haible.
-
-AC_DEFUN([AM_ICONV_LINKFLAGS_BODY],
-[
-  dnl Prerequisites of AC_LIB_LINKFLAGS_BODY.
-  AC_REQUIRE([AC_LIB_PREPARE_PREFIX])
-  AC_REQUIRE([AC_LIB_RPATH])
-
-  dnl Search for libiconv and define LIBICONV, LTLIBICONV and INCICONV
-  dnl accordingly.
-  AC_LIB_LINKFLAGS_BODY([iconv])
-])
-
-AC_DEFUN([AM_ICONV_LINK],
-[
-  dnl Some systems have iconv in libc, some have it in libiconv (OSF/1 and
-  dnl those with the standalone portable GNU libiconv installed).
-
-  dnl Search for libiconv and define LIBICONV, LTLIBICONV and INCICONV
-  dnl accordingly.
-  AC_REQUIRE([AM_ICONV_LINKFLAGS_BODY])
-
-  dnl Add $INCICONV to CPPFLAGS before performing the following checks,
-  dnl because if the user has installed libiconv and not disabled its use
-  dnl via --without-libiconv-prefix, he wants to use it. The first
-  dnl AC_TRY_LINK will then fail, the second AC_TRY_LINK will succeed.
-  am_save_CPPFLAGS="$CPPFLAGS"
-  AC_LIB_APPENDTOVAR([CPPFLAGS], [$INCICONV])
-
-  AC_CACHE_CHECK(for iconv, am_cv_func_iconv, [
-    am_cv_func_iconv="no, consider installing GNU libiconv"
-    am_cv_lib_iconv=no
-    AC_TRY_LINK([#include <stdlib.h>
-#include <iconv.h>],
-      [iconv_t cd = iconv_open("","");
-       iconv(cd,NULL,NULL,NULL,NULL);
-       iconv_close(cd);],
-      am_cv_func_iconv=yes)
-    if test "$am_cv_func_iconv" != yes; then
-      am_save_LIBS="$LIBS"
-      LIBS="$LIBS $LIBICONV"
-      AC_TRY_LINK([#include <stdlib.h>
-#include <iconv.h>],
-        [iconv_t cd = iconv_open("","");
-         iconv(cd,NULL,NULL,NULL,NULL);
-         iconv_close(cd);],
-        am_cv_lib_iconv=yes
-        am_cv_func_iconv=yes)
-      LIBS="$am_save_LIBS"
-    fi
-  ])
-  if test "$am_cv_func_iconv" = yes; then
-    AC_DEFINE(HAVE_ICONV, 1, [Define if you have the iconv() function.])
-  fi
-  if test "$am_cv_lib_iconv" = yes; then
-    AC_MSG_CHECKING([how to link with libiconv])
-    AC_MSG_RESULT([$LIBICONV])
-  else
-    dnl If $LIBICONV didn't lead to a usable library, we don't need $INCICONV
-    dnl either.
-    CPPFLAGS="$am_save_CPPFLAGS"
-    LIBICONV=
-    LTLIBICONV=
-  fi
-  AC_SUBST(LIBICONV)
-  AC_SUBST(LTLIBICONV)
-])
-
-AC_DEFUN([AM_ICONV],
-[
-  AM_ICONV_LINK
-  if test "$am_cv_func_iconv" = yes; then
-    AC_MSG_CHECKING([for iconv declaration])
-    AC_CACHE_VAL(am_cv_proto_iconv, [
-      AC_TRY_COMPILE([
-#include <stdlib.h>
-#include <iconv.h>
-extern
-#ifdef __cplusplus
-"C"
-#endif
-#if defined(__STDC__) || defined(__cplusplus)
-size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
-#else
-size_t iconv();
-#endif
-], [], am_cv_proto_iconv_arg1="", am_cv_proto_iconv_arg1="const")
-      am_cv_proto_iconv="extern size_t iconv (iconv_t cd, $am_cv_proto_iconv_arg1 char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);"])
-    am_cv_proto_iconv=`echo "[$]am_cv_proto_iconv" | tr -s ' ' | sed -e 's/( /(/'`
-    AC_MSG_RESULT([$]{ac_t:-
-         }[$]am_cv_proto_iconv)
-    AC_DEFINE_UNQUOTED(ICONV_CONST, $am_cv_proto_iconv_arg1,
-      [Define as const if the declaration of iconv() needs const.])
-  fi
-])
-
-# intdiv0.m4 serial 1 (gettext-0.11.3)
-dnl Copyright (C) 2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
-
-dnl From Bruno Haible.
-
-AC_DEFUN([gt_INTDIV0],
-[
-  AC_REQUIRE([AC_PROG_CC])dnl
-  AC_REQUIRE([AC_CANONICAL_HOST])dnl
-
-  AC_CACHE_CHECK([whether integer division by zero raises SIGFPE],
-    gt_cv_int_divbyzero_sigfpe,
-    [
-      AC_TRY_RUN([
-#include <stdlib.h>
-#include <signal.h>
-
-static void
-#ifdef __cplusplus
-sigfpe_handler (int sig)
-#else
-sigfpe_handler (sig) int sig;
-#endif
-{
-  /* Exit with code 0 if SIGFPE, with code 1 if any other signal.  */
-  exit (sig != SIGFPE);
-}
-
-int x = 1;
-int y = 0;
-int z;
-int nan;
-
-int main ()
-{
-  signal (SIGFPE, sigfpe_handler);
-/* IRIX and AIX (when "xlc -qcheck" is used) yield signal SIGTRAP.  */
-#if (defined (__sgi) || defined (_AIX)) && defined (SIGTRAP)
-  signal (SIGTRAP, sigfpe_handler);
-#endif
-/* Linux/SPARC yields signal SIGILL.  */
-#if defined (__sparc__) && defined (__linux__)
-  signal (SIGILL, sigfpe_handler);
-#endif
-
-  z = x / y;
-  nan = y / y;
-  exit (1);
-}
-], gt_cv_int_divbyzero_sigfpe=yes, gt_cv_int_divbyzero_sigfpe=no,
-        [
-          # Guess based on the CPU.
-          case "$host_cpu" in
-            alpha* | i[34567]86 | m68k | s390*)
-              gt_cv_int_divbyzero_sigfpe="guessing yes";;
-            *)
-              gt_cv_int_divbyzero_sigfpe="guessing no";;
-          esac
-        ])
-    ])
-  case "$gt_cv_int_divbyzero_sigfpe" in
-    *yes) value=1;;
-    *) value=0;;
-  esac
-  AC_DEFINE_UNQUOTED(INTDIV0_RAISES_SIGFPE, $value,
-    [Define if integer division by zero raises signal SIGFPE.])
-])
-
-# intmax.m4 serial 1 (gettext-0.12)
-dnl Copyright (C) 2002-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# intmax.m4 serial 2 (gettext-0.14.2)
+dnl Copyright (C) 2002-2005 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 dnl Test whether the system has the 'intmax_t' type, but don't attempt to
@@ -1748,11 +657,11 @@ dnl find a replacement if it is lacking.
 
 AC_DEFUN([gt_TYPE_INTMAX_T],
 [
-  AC_REQUIRE([jm_AC_HEADER_INTTYPES_H])
-  AC_REQUIRE([jm_AC_HEADER_STDINT_H])
+  AC_REQUIRE([gl_AC_HEADER_INTTYPES_H])
+  AC_REQUIRE([gl_AC_HEADER_STDINT_H])
   AC_CACHE_CHECK(for intmax_t, gt_cv_c_intmax_t,
     [AC_TRY_COMPILE([
-#include <stddef.h> 
+#include <stddef.h>
 #include <stdlib.h>
 #if HAVE_STDINT_H_WITH_UINTMAX
 #include <stdint.h>
@@ -1767,103 +676,38 @@ AC_DEFUN([gt_TYPE_INTMAX_T],
   fi
 ])
 
-# inttypes-pri.m4 serial 1 (gettext-0.11.4)
-dnl Copyright (C) 1997-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
-
-dnl From Bruno Haible.
-
-# Define PRI_MACROS_BROKEN if <inttypes.h> exists and defines the PRI*
-# macros to non-string values.  This is the case on AIX 4.3.3.
-
-AC_DEFUN([gt_INTTYPES_PRI],
-[
-  AC_REQUIRE([gt_HEADER_INTTYPES_H])
-  if test $gt_cv_header_inttypes_h = yes; then
-    AC_CACHE_CHECK([whether the inttypes.h PRIxNN macros are broken],
-      gt_cv_inttypes_pri_broken,
-      [
-        AC_TRY_COMPILE([#include <inttypes.h>
-#ifdef PRId32
-char *p = PRId32;
-#endif
-], [], gt_cv_inttypes_pri_broken=no, gt_cv_inttypes_pri_broken=yes)
-      ])
-  fi
-  if test "$gt_cv_inttypes_pri_broken" = yes; then
-    AC_DEFINE_UNQUOTED(PRI_MACROS_BROKEN, 1,
-      [Define if <inttypes.h> exists and defines unusable PRI* macros.])
-  fi
-])
-
-# inttypes.m4 serial 1 (gettext-0.11.4)
-dnl Copyright (C) 1997-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
-
-dnl From Paul Eggert.
-
-# Define HAVE_INTTYPES_H if <inttypes.h> exists and doesn't clash with
-# <sys/types.h>.
-
-AC_DEFUN([gt_HEADER_INTTYPES_H],
-[
-  AC_CACHE_CHECK([for inttypes.h], gt_cv_header_inttypes_h,
-  [
-    AC_TRY_COMPILE(
-      [#include <sys/types.h>
-#include <inttypes.h>],
-      [], gt_cv_header_inttypes_h=yes, gt_cv_header_inttypes_h=no)
-  ])
-  if test $gt_cv_header_inttypes_h = yes; then
-    AC_DEFINE_UNQUOTED(HAVE_INTTYPES_H, 1,
-      [Define if <inttypes.h> exists and doesn't clash with <sys/types.h>.])
-  fi
-])
-
-# inttypes_h.m4 serial 5 (gettext-0.12)
-dnl Copyright (C) 1997-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# inttypes_h.m4 serial 6
+dnl Copyright (C) 1997-2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Paul Eggert.
 
 # Define HAVE_INTTYPES_H_WITH_UINTMAX if <inttypes.h> exists,
 # doesn't clash with <sys/types.h>, and declares uintmax_t.
 
-AC_DEFUN([jm_AC_HEADER_INTTYPES_H],
+AC_DEFUN([gl_AC_HEADER_INTTYPES_H],
 [
-  AC_CACHE_CHECK([for inttypes.h], jm_ac_cv_header_inttypes_h,
+  AC_CACHE_CHECK([for inttypes.h], gl_cv_header_inttypes_h,
   [AC_TRY_COMPILE(
     [#include <sys/types.h>
 #include <inttypes.h>],
     [uintmax_t i = (uintmax_t) -1;],
-    jm_ac_cv_header_inttypes_h=yes,
-    jm_ac_cv_header_inttypes_h=no)])
-  if test $jm_ac_cv_header_inttypes_h = yes; then
+    gl_cv_header_inttypes_h=yes,
+    gl_cv_header_inttypes_h=no)])
+  if test $gl_cv_header_inttypes_h = yes; then
     AC_DEFINE_UNQUOTED(HAVE_INTTYPES_H_WITH_UINTMAX, 1,
       [Define if <inttypes.h> exists, doesn't clash with <sys/types.h>,
        and declares uintmax_t. ])
   fi
 ])
 
-# lcmessage.m4 serial 3 (gettext-0.11.3)
-dnl Copyright (C) 1995-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# lcmessage.m4 serial 4 (gettext-0.14.2)
+dnl Copyright (C) 1995-2002, 2004-2005 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 dnl
 dnl This file can can be used in projects which are not available under
 dnl the GNU General Public License or the GNU Library General Public
@@ -1879,12 +723,12 @@ dnl   Ulrich Drepper <drepper@cygnus.com>, 1995.
 
 # Check whether LC_MESSAGES is available in <locale.h>.
 
-AC_DEFUN([AM_LC_MESSAGES],
+AC_DEFUN([gt_LC_MESSAGES],
 [
-  AC_CACHE_CHECK([for LC_MESSAGES], am_cv_val_LC_MESSAGES,
+  AC_CACHE_CHECK([for LC_MESSAGES], gt_cv_val_LC_MESSAGES,
     [AC_TRY_LINK([#include <locale.h>], [return LC_MESSAGES],
-       am_cv_val_LC_MESSAGES=yes, am_cv_val_LC_MESSAGES=no)])
-  if test $am_cv_val_LC_MESSAGES = yes; then
+       gt_cv_val_LC_MESSAGES=yes, gt_cv_val_LC_MESSAGES=no)])
+  if test $gt_cv_val_LC_MESSAGES = yes; then
     AC_DEFINE(HAVE_LC_MESSAGES, 1,
       [Define if your <locale.h> file defines LC_MESSAGES.])
   fi
@@ -1892,11 +736,9 @@ AC_DEFUN([AM_LC_MESSAGES],
 
 # lib-ld.m4 serial 3 (gettext-0.13)
 dnl Copyright (C) 1996-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl Subroutines of libtool.m4,
 dnl with replacements s/AC_/AC_LIB/ and s/lt_cv/acl_cv/ to avoid collision
@@ -2003,15 +845,15 @@ test -z "$LD" && AC_MSG_ERROR([no acceptable ld found in \$PATH])
 AC_LIB_PROG_LD_GNU
 ])
 
-# lib-link.m4 serial 4 (gettext-0.12)
-dnl Copyright (C) 2001-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# lib-link.m4 serial 6 (gettext-0.14.3)
+dnl Copyright (C) 2001-2005 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
+
+AC_PREREQ(2.50)
 
 dnl AC_LIB_LINKFLAGS(name [, dependencies]) searches for libname and
 dnl the libraries corresponding to explicit and implicit dependencies.
@@ -2100,6 +942,8 @@ dnl libext, shlibext, hardcode_libdir_flag_spec, hardcode_libdir_separator,
 dnl hardcode_direct, hardcode_minus_L.
 AC_DEFUN([AC_LIB_RPATH],
 [
+  dnl Tell automake >= 1.10 to complain if config.rpath is missing.
+  m4_ifdef([AC_REQUIRE_AUX_FILE], [AC_REQUIRE_AUX_FILE([config.rpath])])
   AC_REQUIRE([AC_PROG_CC])                dnl we use $CC, $GCC, $LDFLAGS
   AC_REQUIRE([AC_LIB_PROG_LD])            dnl we use $LD, $with_gnu_ld
   AC_REQUIRE([AC_CANONICAL_HOST])         dnl we use $host
@@ -2355,7 +1199,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
                 if test "X$additional_includedir" = "X/usr/local/include"; then
                   if test -n "$GCC"; then
                     case $host_os in
-                      linux*) haveit=yes;;
+                      linux* | gnu* | k*bsd*-gnu) haveit=yes;;
                     esac
                   fi
                 fi
@@ -2404,7 +1248,7 @@ AC_DEFUN([AC_LIB_LINKFLAGS_BODY],
                       if test "X$additional_libdir" = "X/usr/local/lib"; then
                         if test -n "$GCC"; then
                           case $host_os in
-                            linux*) haveit=yes;;
+                            linux* | gnu* | k*bsd*-gnu) haveit=yes;;
                           esac
                         fi
                       fi
@@ -2555,13 +1399,11 @@ AC_DEFUN([AC_LIB_APPENDTOVAR],
   done
 ])
 
-# lib-prefix.m4 serial 3 (gettext-0.13)
-dnl Copyright (C) 2001-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# lib-prefix.m4 serial 4 (gettext-0.14.2)
+dnl Copyright (C) 2001-2005 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 
@@ -2628,7 +1470,7 @@ AC_DEFUN([AC_LIB_PREFIX],
         if test "X$additional_includedir" = "X/usr/local/include"; then
           if test -n "$GCC"; then
             case $host_os in
-              linux*) haveit=yes;;
+              linux* | gnu* | k*bsd*-gnu) haveit=yes;;
             esac
           fi
         fi
@@ -2711,179 +1553,11 @@ AC_DEFUN([AC_LIB_WITH_FINAL_PREFIX],
   prefix="$acl_save_prefix"
 ])
 
-# Configure paths for LIBART
-# Raph Levien 98-11-18
-# stolen from Manish Singh    98-9-30
-# stolen back from Frank Belew
-# stolen from Manish Singh
-# Shamelessly stolen from Owen Taylor
-
-dnl AM_PATH_LIBART([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
-dnl Test for LIBART, and define LIBART_CFLAGS and LIBART_LIBS
-dnl
-AC_DEFUN(AM_PATH_LIBART,
-[dnl 
-dnl Get the cflags and libraries from the libart-config script
-dnl
-AC_ARG_WITH(libart-prefix,[  --with-libart-prefix=PFX   Prefix where LIBART is installed (optional)],
-            libart_prefix="$withval", libart_prefix="")
-AC_ARG_WITH(libart-exec-prefix,[  --with-libart-exec-prefix=PFX Exec prefix where LIBART is installed (optional)],
-            libart_exec_prefix="$withval", libart_exec_prefix="")
-AC_ARG_ENABLE(libarttest, [  --disable-libarttest       Do not try to compile and run a test LIBART program],
-		    , enable_libarttest=yes)
-
-  if test x$libart_exec_prefix != x ; then
-     libart_args="$libart_args --exec-prefix=$libart_exec_prefix"
-     if test x${LIBART_CONFIG+set} != xset ; then
-        LIBART_CONFIG=$libart_exec_prefix/bin/libart-config
-     fi
-  fi
-  if test x$libart_prefix != x ; then
-     libart_args="$libart_args --prefix=$libart_prefix"
-     if test x${LIBART_CONFIG+set} != xset ; then
-        LIBART_CONFIG=$libart_prefix/bin/libart-config
-     fi
-  fi
-
-  AC_PATH_PROG(LIBART_CONFIG, libart-config, no)
-  min_libart_version=ifelse([$1], ,0.2.5,$1)
-  AC_MSG_CHECKING(for LIBART - version >= $min_libart_version)
-  no_libart=""
-  if test "$LIBART_CONFIG" = "no" ; then
-    no_libart=yes
-  else
-    LIBART_CFLAGS=`$LIBART_CONFIG $libartconf_args --cflags`
-    LIBART_LIBS=`$LIBART_CONFIG $libartconf_args --libs`
-
-    libart_major_version=`$LIBART_CONFIG $libart_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
-    libart_minor_version=`$LIBART_CONFIG $libart_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\2/'`
-    libart_micro_version=`$LIBART_CONFIG $libart_config_args --version | \
-           sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\3/'`
-    if test "x$enable_libarttest" = "xyes" ; then
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $LIBART_CFLAGS"
-      LIBS="$LIBS $LIBART_LIBS"
-dnl
-dnl Now check if the installed LIBART is sufficiently new. (Also sanity
-dnl checks the results of libart-config to some extent
-dnl
-      rm -f conf.libarttest
-      AC_TRY_RUN([
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <libart_lgpl/libart.h>
-
-char*
-my_strdup (char *str)
-{
-  char *new_str;
-  
-  if (str)
-    {
-      new_str = malloc ((strlen (str) + 1) * sizeof(char));
-      strcpy (new_str, str);
-    }
-  else
-    new_str = NULL;
-  
-  return new_str;
-}
-
-int main ()
-{
-  int major, minor, micro;
-  char *tmp_version;
-
-  system ("touch conf.libarttest");
-
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = my_strdup("$min_libart_version");
-  if (sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) != 3) {
-     printf("%s, bad version string\n", "$min_libart_version");
-     exit(1);
-   }
-
-   if (($libart_major_version > major) ||
-      (($libart_major_version == major) && ($libart_minor_version > minor)) ||
-      (($libart_major_version == major) && ($libart_minor_version == minor) && ($libart_micro_version >= micro)))
-    {
-      return 0;
-    }
-  else
-    {
-      printf("\n*** 'libart-config --version' returned %d.%d.%d, but the minimum version\n", $libart_major_version, $libart_minor_version, $libart_micro_version);
-      printf("*** of LIBART required is %d.%d.%d. If libart-config is correct, then it is\n", major, minor, micro);
-      printf("*** best to upgrade to the required version.\n");
-      printf("*** If libart-config was wrong, set the environment variable LIBART_CONFIG\n");
-      printf("*** to point to the correct copy of libart-config, and remove the file\n");
-      printf("*** config.cache before re-running configure\n");
-      return 1;
-    }
-}
-
-],, no_libart=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-     fi
-  fi
-  if test "x$no_libart" = x ; then
-     AC_MSG_RESULT(yes)
-     ifelse([$2], , :, [$2])     
-  else
-     AC_MSG_RESULT(no)
-     if test "$LIBART_CONFIG" = "no" ; then
-       echo "*** The libart-config script installed by LIBART could not be found"
-       echo "*** If LIBART was installed in PREFIX, make sure PREFIX/bin is in"
-       echo "*** your path, or set the LIBART_CONFIG environment variable to the"
-       echo "*** full path to libart-config."
-     else
-       if test -f conf.libarttest ; then
-        :
-       else
-          echo "*** Could not run LIBART test program, checking why..."
-          CFLAGS="$CFLAGS $LIBART_CFLAGS"
-          LIBS="$LIBS $LIBART_LIBS"
-          AC_TRY_LINK([
-#include <stdio.h>
-#include <libart_lgpl/libart.h>
-],      [ return 0; ],
-        [ echo "*** The test program compiled, but did not run. This usually means"
-          echo "*** that the run-time linker is not finding LIBART or finding the wrong"
-          echo "*** version of LIBART. If it is not finding LIBART, you'll need to set your"
-          echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
-          echo "*** to the installed location  Also, make sure you have run ldconfig if that"
-          echo "*** is required on your system"
-	  echo "***"
-          echo "*** If you have an old version installed, it is best to remove it, although"
-          echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"],
-        [ echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means LIBART was incorrectly installed"
-          echo "*** or that you have moved LIBART since it was installed. In the latter case, you"
-          echo "*** may want to edit the libart-config script: $LIBART_CONFIG" ])
-          CFLAGS="$ac_save_CFLAGS"
-          LIBS="$ac_save_LIBS"
-       fi
-     fi
-     LIBART_CFLAGS=""
-     LIBART_LIBS=""
-     ifelse([$3], , :, [$3])
-  fi
-  AC_SUBST(LIBART_CFLAGS)
-  AC_SUBST(LIBART_LIBS)
-  rm -f conf.libarttest
-])
-
 # longdouble.m4 serial 1 (gettext-0.12)
 dnl Copyright (C) 2002-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 dnl Test whether the compiler supports the 'long double' type.
@@ -2908,19 +1582,17 @@ AC_DEFUN([gt_TYPE_LONGDOUBLE],
   fi
 ])
 
-# longlong.m4 serial 4
-dnl Copyright (C) 1999-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# longlong.m4 serial 5
+dnl Copyright (C) 1999-2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Paul Eggert.
 
 # Define HAVE_LONG_LONG if 'long long' works.
 
-AC_DEFUN([jm_AC_TYPE_LONG_LONG],
+AC_DEFUN([gl_AC_TYPE_LONG_LONG],
 [
   AC_CACHE_CHECK([for long long], ac_cv_type_long_long,
   [AC_TRY_LINK([long long ll = 1LL; int i = 63;],
@@ -2934,490 +1606,11 @@ AC_DEFUN([jm_AC_TYPE_LONG_LONG],
   fi
 ])
 
-# nls.m4 serial 1 (gettext-0.12)
-dnl Copyright (C) 1995-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
-dnl
-dnl This file can can be used in projects which are not available under
-dnl the GNU General Public License or the GNU Library General Public
-dnl License but which still want to provide support for the GNU gettext
-dnl functionality.
-dnl Please note that the actual code of the GNU gettext library is covered
-dnl by the GNU Library General Public License, and the rest of the GNU
-dnl gettext package package is covered by the GNU General Public License.
-dnl They are *not* in the public domain.
-
-dnl Authors:
-dnl   Ulrich Drepper <drepper@cygnus.com>, 1995-2000.
-dnl   Bruno Haible <haible@clisp.cons.org>, 2000-2003.
-
-AC_DEFUN([AM_NLS],
-[
-  AC_MSG_CHECKING([whether NLS is requested])
-  dnl Default is enabled NLS
-  AC_ARG_ENABLE(nls,
-    [  --disable-nls           do not use Native Language Support],
-    USE_NLS=$enableval, USE_NLS=yes)
-  AC_MSG_RESULT($USE_NLS)
-  AC_SUBST(USE_NLS)
-])
-
-AC_DEFUN([AM_MKINSTALLDIRS],
-[
-  dnl If the AC_CONFIG_AUX_DIR macro for autoconf is used we possibly
-  dnl find the mkinstalldirs script in another subdir but $(top_srcdir).
-  dnl Try to locate it.
-  MKINSTALLDIRS=
-  if test -n "$ac_aux_dir"; then
-    case "$ac_aux_dir" in
-      /*) MKINSTALLDIRS="$ac_aux_dir/mkinstalldirs" ;;
-      *) MKINSTALLDIRS="\$(top_builddir)/$ac_aux_dir/mkinstalldirs" ;;
-    esac
-  fi
-  if test -z "$MKINSTALLDIRS"; then
-    MKINSTALLDIRS="\$(top_srcdir)/mkinstalldirs"
-  fi
-  AC_SUBST(MKINSTALLDIRS)
-])
-
-# po.m4 serial 3 (gettext-0.14)
-dnl Copyright (C) 1995-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
-dnl
-dnl This file can can be used in projects which are not available under
-dnl the GNU General Public License or the GNU Library General Public
-dnl License but which still want to provide support for the GNU gettext
-dnl functionality.
-dnl Please note that the actual code of the GNU gettext library is covered
-dnl by the GNU Library General Public License, and the rest of the GNU
-dnl gettext package package is covered by the GNU General Public License.
-dnl They are *not* in the public domain.
-
-dnl Authors:
-dnl   Ulrich Drepper <drepper@cygnus.com>, 1995-2000.
-dnl   Bruno Haible <haible@clisp.cons.org>, 2000-2003.
-
-dnl Checks for all prerequisites of the po subdirectory.
-AC_DEFUN([AM_PO_SUBDIRS],
-[
-  AC_REQUIRE([AC_PROG_MAKE_SET])dnl
-  AC_REQUIRE([AC_PROG_INSTALL])dnl
-  AC_REQUIRE([AM_MKINSTALLDIRS])dnl
-  AC_REQUIRE([AM_NLS])dnl
-
-  dnl Perform the following tests also if --disable-nls has been given,
-  dnl because they are needed for "make dist" to work.
-
-  dnl Search for GNU msgfmt in the PATH.
-  dnl The first test excludes Solaris msgfmt and early GNU msgfmt versions.
-  dnl The second test excludes FreeBSD msgfmt.
-  AM_PATH_PROG_WITH_TEST(MSGFMT, msgfmt,
-    [$ac_dir/$ac_word --statistics /dev/null >/dev/null 2>&1 &&
-     (if $ac_dir/$ac_word --statistics /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi)],
-    :)
-  AC_PATH_PROG(GMSGFMT, gmsgfmt, $MSGFMT)
-
-  dnl Search for GNU xgettext 0.12 or newer in the PATH.
-  dnl The first test excludes Solaris xgettext and early GNU xgettext versions.
-  dnl The second test excludes FreeBSD xgettext.
-  AM_PATH_PROG_WITH_TEST(XGETTEXT, xgettext,
-    [$ac_dir/$ac_word --omit-header --copyright-holder= --msgid-bugs-address= /dev/null >/dev/null 2>&1 &&
-     (if $ac_dir/$ac_word --omit-header --copyright-holder= --msgid-bugs-address= /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi)],
-    :)
-  dnl Remove leftover from FreeBSD xgettext call.
-  rm -f messages.po
-
-  dnl Search for GNU msgmerge 0.11 or newer in the PATH.
-  AM_PATH_PROG_WITH_TEST(MSGMERGE, msgmerge,
-    [$ac_dir/$ac_word --update -q /dev/null /dev/null >/dev/null 2>&1], :)
-
-  dnl This could go away some day; the PATH_PROG_WITH_TEST already does it.
-  dnl Test whether we really found GNU msgfmt.
-  if test "$GMSGFMT" != ":"; then
-    dnl If it is no GNU msgfmt we define it as : so that the
-    dnl Makefiles still can work.
-    if $GMSGFMT --statistics /dev/null >/dev/null 2>&1 &&
-       (if $GMSGFMT --statistics /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi); then
-      : ;
-    else
-      GMSGFMT=`echo "$GMSGFMT" | sed -e 's,^.*/,,'`
-      AC_MSG_RESULT(
-        [found $GMSGFMT program is not GNU msgfmt; ignore it])
-      GMSGFMT=":"
-    fi
-  fi
-
-  dnl This could go away some day; the PATH_PROG_WITH_TEST already does it.
-  dnl Test whether we really found GNU xgettext.
-  if test "$XGETTEXT" != ":"; then
-    dnl If it is no GNU xgettext we define it as : so that the
-    dnl Makefiles still can work.
-    if $XGETTEXT --omit-header --copyright-holder= --msgid-bugs-address= /dev/null >/dev/null 2>&1 &&
-       (if $XGETTEXT --omit-header --copyright-holder= --msgid-bugs-address= /dev/null 2>&1 >/dev/null | grep usage >/dev/null; then exit 1; else exit 0; fi); then
-      : ;
-    else
-      AC_MSG_RESULT(
-        [found xgettext program is not GNU xgettext; ignore it])
-      XGETTEXT=":"
-    fi
-    dnl Remove leftover from FreeBSD xgettext call.
-    rm -f messages.po
-  fi
-
-  AC_OUTPUT_COMMANDS([
-    for ac_file in $CONFIG_FILES; do
-      # Support "outfile[:infile[:infile...]]"
-      case "$ac_file" in
-        *:*) ac_file=`echo "$ac_file"|sed 's%:.*%%'` ;;
-      esac
-      # PO directories have a Makefile.in generated from Makefile.in.in.
-      case "$ac_file" in */Makefile.in)
-        # Adjust a relative srcdir.
-        ac_dir=`echo "$ac_file"|sed 's%/[^/][^/]*$%%'`
-        ac_dir_suffix="/`echo "$ac_dir"|sed 's%^\./%%'`"
-        ac_dots=`echo "$ac_dir_suffix"|sed 's%/[^/]*%../%g'`
-        # In autoconf-2.13 it is called $ac_given_srcdir.
-        # In autoconf-2.50 it is called $srcdir.
-        test -n "$ac_given_srcdir" || ac_given_srcdir="$srcdir"
-        case "$ac_given_srcdir" in
-          .)  top_srcdir=`echo $ac_dots|sed 's%/$%%'` ;;
-          /*) top_srcdir="$ac_given_srcdir" ;;
-          *)  top_srcdir="$ac_dots$ac_given_srcdir" ;;
-        esac
-        if test -f "$ac_given_srcdir/$ac_dir/POTFILES.in"; then
-          rm -f "$ac_dir/POTFILES"
-          test -n "$as_me" && echo "$as_me: creating $ac_dir/POTFILES" || echo "creating $ac_dir/POTFILES"
-          cat "$ac_given_srcdir/$ac_dir/POTFILES.in" | sed -e "/^#/d" -e "/^[ 	]*\$/d" -e "s,.*,     $top_srcdir/& \\\\," | sed -e "\$s/\(.*\) \\\\/\1/" > "$ac_dir/POTFILES"
-          POMAKEFILEDEPS="POTFILES.in"
-          # ALL_LINGUAS, POFILES, UPDATEPOFILES, DUMMYPOFILES, GMOFILES depend
-          # on $ac_dir but don't depend on user-specified configuration
-          # parameters.
-          if test -f "$ac_given_srcdir/$ac_dir/LINGUAS"; then
-            # The LINGUAS file contains the set of available languages.
-            if test -n "$OBSOLETE_ALL_LINGUAS"; then
-              test -n "$as_me" && echo "$as_me: setting ALL_LINGUAS in configure.in is obsolete" || echo "setting ALL_LINGUAS in configure.in is obsolete"
-            fi
-            ALL_LINGUAS_=`sed -e "/^#/d" "$ac_given_srcdir/$ac_dir/LINGUAS"`
-            # Hide the ALL_LINGUAS assigment from automake.
-            eval 'ALL_LINGUAS''=$ALL_LINGUAS_'
-            POMAKEFILEDEPS="$POMAKEFILEDEPS LINGUAS"
-          else
-            # The set of available languages was given in configure.in.
-            eval 'ALL_LINGUAS''=$OBSOLETE_ALL_LINGUAS'
-          fi
-          # Compute POFILES
-          # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(lang).po)
-          # Compute UPDATEPOFILES
-          # as      $(foreach lang, $(ALL_LINGUAS), $(lang).po-update)
-          # Compute DUMMYPOFILES
-          # as      $(foreach lang, $(ALL_LINGUAS), $(lang).nop)
-          # Compute GMOFILES
-          # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(lang).gmo)
-          case "$ac_given_srcdir" in
-            .) srcdirpre= ;;
-            *) srcdirpre='$(srcdir)/' ;;
-          esac
-          POFILES=
-          UPDATEPOFILES=
-          DUMMYPOFILES=
-          GMOFILES=
-          for lang in $ALL_LINGUAS; do
-            POFILES="$POFILES $srcdirpre$lang.po"
-            UPDATEPOFILES="$UPDATEPOFILES $lang.po-update"
-            DUMMYPOFILES="$DUMMYPOFILES $lang.nop"
-            GMOFILES="$GMOFILES $srcdirpre$lang.gmo"
-          done
-          # CATALOGS depends on both $ac_dir and the user's LINGUAS
-          # environment variable.
-          INST_LINGUAS=
-          if test -n "$ALL_LINGUAS"; then
-            for presentlang in $ALL_LINGUAS; do
-              useit=no
-              if test "%UNSET%" != "$LINGUAS"; then
-                desiredlanguages="$LINGUAS"
-              else
-                desiredlanguages="$ALL_LINGUAS"
-              fi
-              for desiredlang in $desiredlanguages; do
-                # Use the presentlang catalog if desiredlang is
-                #   a. equal to presentlang, or
-                #   b. a variant of presentlang (because in this case,
-                #      presentlang can be used as a fallback for messages
-                #      which are not translated in the desiredlang catalog).
-                case "$desiredlang" in
-                  "$presentlang"*) useit=yes;;
-                esac
-              done
-              if test $useit = yes; then
-                INST_LINGUAS="$INST_LINGUAS $presentlang"
-              fi
-            done
-          fi
-          CATALOGS=
-          if test -n "$INST_LINGUAS"; then
-            for lang in $INST_LINGUAS; do
-              CATALOGS="$CATALOGS $lang.gmo"
-            done
-          fi
-          test -n "$as_me" && echo "$as_me: creating $ac_dir/Makefile" || echo "creating $ac_dir/Makefile"
-          sed -e "/^POTFILES =/r $ac_dir/POTFILES" -e "/^# Makevars/r $ac_given_srcdir/$ac_dir/Makevars" -e "s|@POFILES@|$POFILES|g" -e "s|@UPDATEPOFILES@|$UPDATEPOFILES|g" -e "s|@DUMMYPOFILES@|$DUMMYPOFILES|g" -e "s|@GMOFILES@|$GMOFILES|g" -e "s|@CATALOGS@|$CATALOGS|g" -e "s|@POMAKEFILEDEPS@|$POMAKEFILEDEPS|g" "$ac_dir/Makefile.in" > "$ac_dir/Makefile"
-          for f in "$ac_given_srcdir/$ac_dir"/Rules-*; do
-            if test -f "$f"; then
-              case "$f" in
-                *.orig | *.bak | *~) ;;
-                *) cat "$f" >> "$ac_dir/Makefile" ;;
-              esac
-            fi
-          done
-        fi
-        ;;
-      esac
-    done],
-   [# Capture the value of obsolete ALL_LINGUAS because we need it to compute
-    # POFILES, UPDATEPOFILES, DUMMYPOFILES, GMOFILES, CATALOGS. But hide it
-    # from automake.
-    eval 'OBSOLETE_ALL_LINGUAS''="$ALL_LINGUAS"'
-    # Capture the value of LINGUAS because we need it to compute CATALOGS.
-    LINGUAS="${LINGUAS-%UNSET%}"
-   ])
-])
-
-dnl Postprocesses a Makefile in a directory containing PO files.
-AC_DEFUN([AM_POSTPROCESS_PO_MAKEFILE],
-[
-  # When this code is run, in config.status, two variables have already been
-  # set:
-  # - OBSOLETE_ALL_LINGUAS is the value of LINGUAS set in configure.in,
-  # - LINGUAS is the value of the environment variable LINGUAS at configure
-  #   time.
-
-changequote(,)dnl
-  # Adjust a relative srcdir.
-  ac_dir=`echo "$ac_file"|sed 's%/[^/][^/]*$%%'`
-  ac_dir_suffix="/`echo "$ac_dir"|sed 's%^\./%%'`"
-  ac_dots=`echo "$ac_dir_suffix"|sed 's%/[^/]*%../%g'`
-  # In autoconf-2.13 it is called $ac_given_srcdir.
-  # In autoconf-2.50 it is called $srcdir.
-  test -n "$ac_given_srcdir" || ac_given_srcdir="$srcdir"
-  case "$ac_given_srcdir" in
-    .)  top_srcdir=`echo $ac_dots|sed 's%/$%%'` ;;
-    /*) top_srcdir="$ac_given_srcdir" ;;
-    *)  top_srcdir="$ac_dots$ac_given_srcdir" ;;
-  esac
-
-  # Find a way to echo strings without interpreting backslash.
-  if test "X`(echo '\t') 2>/dev/null`" = 'X\t'; then
-    gt_echo='echo'
-  else
-    if test "X`(printf '%s\n' '\t') 2>/dev/null`" = 'X\t'; then
-      gt_echo='printf %s\n'
-    else
-      echo_func () {
-        cat <<EOT
-$*
-EOT
-      }
-      gt_echo='echo_func'
-    fi
-  fi
-
-  # A sed script that extracts the value of VARIABLE from a Makefile.
-  sed_x_variable='
-# Test if the hold space is empty.
-x
-s/P/P/
-x
-ta
-# Yes it was empty. Look if we have the expected variable definition.
-/^[	 ]*VARIABLE[	 ]*=/{
-  # Seen the first line of the variable definition.
-  s/^[	 ]*VARIABLE[	 ]*=//
-  ba
-}
-bd
-:a
-# Here we are processing a line from the variable definition.
-# Remove comment, more precisely replace it with a space.
-s/#.*$/ /
-# See if the line ends in a backslash.
-tb
-:b
-s/\\$//
-# Print the line, without the trailing backslash.
-p
-tc
-# There was no trailing backslash. The end of the variable definition is
-# reached. Clear the hold space.
-s/^.*$//
-x
-bd
-:c
-# A trailing backslash means that the variable definition continues in the
-# next line. Put a nonempty string into the hold space to indicate this.
-s/^.*$/P/
-x
-:d
-'
-changequote([,])dnl
-
-  # Set POTFILES to the value of the Makefile variable POTFILES.
-  sed_x_POTFILES="`$gt_echo \"$sed_x_variable\" | sed -e '/^ *#/d' -e 's/VARIABLE/POTFILES/g'`"
-  POTFILES=`sed -n -e "$sed_x_POTFILES" < "$ac_file"`
-  # Compute POTFILES_DEPS as
-  #   $(foreach file, $(POTFILES), $(top_srcdir)/$(file))
-  POTFILES_DEPS=
-  for file in $POTFILES; do
-    POTFILES_DEPS="$POTFILES_DEPS "'$(top_srcdir)/'"$file"
-  done
-  POMAKEFILEDEPS=""
-
-  if test -n "$OBSOLETE_ALL_LINGUAS"; then
-    test -n "$as_me" && echo "$as_me: setting ALL_LINGUAS in configure.in is obsolete" || echo "setting ALL_LINGUAS in configure.in is obsolete"
-  fi
-  if test -f "$ac_given_srcdir/$ac_dir/LINGUAS"; then
-    # The LINGUAS file contains the set of available languages.
-    ALL_LINGUAS_=`sed -e "/^#/d" "$ac_given_srcdir/$ac_dir/LINGUAS"`
-    POMAKEFILEDEPS="$POMAKEFILEDEPS LINGUAS"
-  else
-    # Set ALL_LINGUAS to the value of the Makefile variable LINGUAS.
-    sed_x_LINGUAS="`$gt_echo \"$sed_x_variable\" | sed -e '/^ *#/d' -e 's/VARIABLE/LINGUAS/g'`"
-    ALL_LINGUAS_=`sed -n -e "$sed_x_LINGUAS" < "$ac_file"`
-  fi
-  # Hide the ALL_LINGUAS assigment from automake.
-  eval 'ALL_LINGUAS''=$ALL_LINGUAS_'
-  # Compute POFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(lang).po)
-  # Compute UPDATEPOFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(lang).po-update)
-  # Compute DUMMYPOFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(lang).nop)
-  # Compute GMOFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(lang).gmo)
-  # Compute PROPERTIESFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(top_srcdir)/$(DOMAIN)_$(lang).properties)
-  # Compute CLASSFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(top_srcdir)/$(DOMAIN)_$(lang).class)
-  # Compute QMFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(lang).qm)
-  # Compute MSGFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(frob $(lang)).msg)
-  # Compute RESOURCESDLLFILES
-  # as      $(foreach lang, $(ALL_LINGUAS), $(srcdir)/$(frob $(lang))/$(DOMAIN).resources.dll)
-  case "$ac_given_srcdir" in
-    .) srcdirpre= ;;
-    *) srcdirpre='$(srcdir)/' ;;
-  esac
-  POFILES=
-  UPDATEPOFILES=
-  DUMMYPOFILES=
-  GMOFILES=
-  PROPERTIESFILES=
-  CLASSFILES=
-  QMFILES=
-  MSGFILES=
-  RESOURCESDLLFILES=
-  for lang in $ALL_LINGUAS; do
-    POFILES="$POFILES $srcdirpre$lang.po"
-    UPDATEPOFILES="$UPDATEPOFILES $lang.po-update"
-    DUMMYPOFILES="$DUMMYPOFILES $lang.nop"
-    GMOFILES="$GMOFILES $srcdirpre$lang.gmo"
-    PROPERTIESFILES="$PROPERTIESFILES \$(top_srcdir)/\$(DOMAIN)_$lang.properties"
-    CLASSFILES="$CLASSFILES \$(top_srcdir)/\$(DOMAIN)_$lang.class"
-    QMFILES="$QMFILES $srcdirpre$lang.qm"
-    frobbedlang=`echo $lang | sed -e 's/\..*$//' -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
-    MSGFILES="$MSGFILES $srcdirpre$frobbedlang.msg"
-    frobbedlang=`echo $lang | sed -e 's/_/-/g'`
-    RESOURCESDLLFILES="$RESOURCESDLLFILES $srcdirpre$frobbedlang/\$(DOMAIN).resources.dll"
-  done
-  # CATALOGS depends on both $ac_dir and the user's LINGUAS
-  # environment variable.
-  INST_LINGUAS=
-  if test -n "$ALL_LINGUAS"; then
-    for presentlang in $ALL_LINGUAS; do
-      useit=no
-      if test "%UNSET%" != "$LINGUAS"; then
-        desiredlanguages="$LINGUAS"
-      else
-        desiredlanguages="$ALL_LINGUAS"
-      fi
-      for desiredlang in $desiredlanguages; do
-        # Use the presentlang catalog if desiredlang is
-        #   a. equal to presentlang, or
-        #   b. a variant of presentlang (because in this case,
-        #      presentlang can be used as a fallback for messages
-        #      which are not translated in the desiredlang catalog).
-        case "$desiredlang" in
-          "$presentlang"*) useit=yes;;
-        esac
-      done
-      if test $useit = yes; then
-        INST_LINGUAS="$INST_LINGUAS $presentlang"
-      fi
-    done
-  fi
-  CATALOGS=
-  JAVACATALOGS=
-  QTCATALOGS=
-  TCLCATALOGS=
-  CSHARPCATALOGS=
-  if test -n "$INST_LINGUAS"; then
-    for lang in $INST_LINGUAS; do
-      CATALOGS="$CATALOGS $lang.gmo"
-      JAVACATALOGS="$JAVACATALOGS \$(DOMAIN)_$lang.properties"
-      QTCATALOGS="$QTCATALOGS $lang.qm"
-      frobbedlang=`echo $lang | sed -e 's/\..*$//' -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
-      TCLCATALOGS="$TCLCATALOGS $frobbedlang.msg"
-      frobbedlang=`echo $lang | sed -e 's/_/-/g'`
-      CSHARPCATALOGS="$CSHARPCATALOGS $frobbedlang/\$(DOMAIN).resources.dll"
-    done
-  fi
-
-  sed -e "s|@POTFILES_DEPS@|$POTFILES_DEPS|g" -e "s|@POFILES@|$POFILES|g" -e "s|@UPDATEPOFILES@|$UPDATEPOFILES|g" -e "s|@DUMMYPOFILES@|$DUMMYPOFILES|g" -e "s|@GMOFILES@|$GMOFILES|g" -e "s|@PROPERTIESFILES@|$PROPERTIESFILES|g" -e "s|@CLASSFILES@|$CLASSFILES|g" -e "s|@QMFILES@|$QMFILES|g" -e "s|@MSGFILES@|$MSGFILES|g" -e "s|@RESOURCESDLLFILES@|$RESOURCESDLLFILES|g" -e "s|@CATALOGS@|$CATALOGS|g" -e "s|@JAVACATALOGS@|$JAVACATALOGS|g" -e "s|@QTCATALOGS@|$QTCATALOGS|g" -e "s|@TCLCATALOGS@|$TCLCATALOGS|g" -e "s|@CSHARPCATALOGS@|$CSHARPCATALOGS|g" -e 's,^#distdir:,distdir:,' < "$ac_file" > "$ac_file.tmp"
-  if grep -l '@TCLCATALOGS@' "$ac_file" > /dev/null; then
-    # Add dependencies that cannot be formulated as a simple suffix rule.
-    for lang in $ALL_LINGUAS; do
-      frobbedlang=`echo $lang | sed -e 's/\..*$//' -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
-      cat >> "$ac_file.tmp" <<EOF
-$frobbedlang.msg: $lang.po
-	@echo "\$(MSGFMT) -c --tcl -d \$(srcdir) -l $lang $srcdirpre$lang.po"; \
-	\$(MSGFMT) -c --tcl -d "\$(srcdir)" -l $lang $srcdirpre$lang.po || { rm -f "\$(srcdir)/$frobbedlang.msg"; exit 1; }
-EOF
-    done
-  fi
-  if grep -l '@CSHARPCATALOGS@' "$ac_file" > /dev/null; then
-    # Add dependencies that cannot be formulated as a simple suffix rule.
-    for lang in $ALL_LINGUAS; do
-      frobbedlang=`echo $lang | sed -e 's/_/-/g'`
-      cat >> "$ac_file.tmp" <<EOF
-$frobbedlang/\$(DOMAIN).resources.dll: $lang.po
-	@echo "\$(MSGFMT) -c --csharp -d \$(srcdir) -l $lang $srcdirpre$lang.po -r \$(DOMAIN)"; \
-	\$(MSGFMT) -c --csharp -d "\$(srcdir)" -l $lang $srcdirpre$lang.po -r "\$(DOMAIN)" || { rm -f "\$(srcdir)/$frobbedlang.msg"; exit 1; }
-EOF
-    done
-  fi
-  if test -n "$POMAKEFILEDEPS"; then
-    cat >> "$ac_file.tmp" <<EOF
-Makefile: $POMAKEFILEDEPS
-EOF
-  fi
-  mv "$ac_file.tmp" "$ac_file"
-])
-
 # printf-posix.m4 serial 2 (gettext-0.13.1)
 dnl Copyright (C) 2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 dnl Test whether the printf() function supports POSIX/XSI format strings with
@@ -3458,13 +1651,11 @@ int main ()
   esac
 ])
 
-# progtest.m4 serial 3 (gettext-0.12)
-dnl Copyright (C) 1996-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# progtest.m4 serial 4 (gettext-0.14.2)
+dnl Copyright (C) 1996-2003, 2005 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 dnl
 dnl This file can can be used in projects which are not available under
 dnl the GNU General Public License or the GNU Library General Public
@@ -3477,6 +1668,8 @@ dnl They are *not* in the public domain.
 
 dnl Authors:
 dnl   Ulrich Drepper <drepper@cygnus.com>, 1996.
+
+AC_PREREQ(2.50)
 
 # Search path for a program which passes the given test.
 
@@ -3527,6 +1720,7 @@ AC_CACHE_VAL(ac_cv_path_$1,
       test -z "$ac_dir" && ac_dir=.
       for ac_exec_ext in '' $ac_executable_extensions; do
         if $ac_executable_p "$ac_dir/$ac_word$ac_exec_ext"; then
+          echo "$as_me: trying $ac_dir/$ac_word..." >&AS_MESSAGE_LOG_FD
           if [$3]; then
             ac_cv_path_$1="$ac_dir/$ac_word$ac_exec_ext"
             break 2
@@ -3552,11 +1746,9 @@ AC_SUBST($1)dnl
 
 # signed.m4 serial 1 (gettext-0.10.40)
 dnl Copyright (C) 2001-2002 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 
@@ -3572,11 +1764,9 @@ AC_DEFUN([bh_C_SIGNED],
 
 # size_max.m4 serial 2
 dnl Copyright (C) 2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 
@@ -3632,42 +1822,38 @@ Found it
   fi
 ])
 
-# stdint_h.m4 serial 3 (gettext-0.12)
-dnl Copyright (C) 1997-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# stdint_h.m4 serial 5
+dnl Copyright (C) 1997-2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Paul Eggert.
 
 # Define HAVE_STDINT_H_WITH_UINTMAX if <stdint.h> exists,
 # doesn't clash with <sys/types.h>, and declares uintmax_t.
 
-AC_DEFUN([jm_AC_HEADER_STDINT_H],
+AC_DEFUN([gl_AC_HEADER_STDINT_H],
 [
-  AC_CACHE_CHECK([for stdint.h], jm_ac_cv_header_stdint_h,
+  AC_CACHE_CHECK([for stdint.h], gl_cv_header_stdint_h,
   [AC_TRY_COMPILE(
     [#include <sys/types.h>
 #include <stdint.h>],
     [uintmax_t i = (uintmax_t) -1;],
-    jm_ac_cv_header_stdint_h=yes,
-    jm_ac_cv_header_stdint_h=no)])
-  if test $jm_ac_cv_header_stdint_h = yes; then
+    gl_cv_header_stdint_h=yes,
+    gl_cv_header_stdint_h=no)])
+  if test $gl_cv_header_stdint_h = yes; then
     AC_DEFINE_UNQUOTED(HAVE_STDINT_H_WITH_UINTMAX, 1,
       [Define if <stdint.h> exists, doesn't clash with <sys/types.h>,
        and declares uintmax_t. ])
   fi
 ])
 
-# uintmax_t.m4 serial 7 (gettext-0.12)
-dnl Copyright (C) 1997-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# uintmax_t.m4 serial 9
+dnl Copyright (C) 1997-2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Paul Eggert.
 
@@ -3676,12 +1862,12 @@ AC_PREREQ(2.13)
 # Define uintmax_t to 'unsigned long' or 'unsigned long long'
 # if it is not already defined in <stdint.h> or <inttypes.h>.
 
-AC_DEFUN([jm_AC_TYPE_UINTMAX_T],
+AC_DEFUN([gl_AC_TYPE_UINTMAX_T],
 [
-  AC_REQUIRE([jm_AC_HEADER_INTTYPES_H])
-  AC_REQUIRE([jm_AC_HEADER_STDINT_H])
-  if test $jm_ac_cv_header_inttypes_h = no && test $jm_ac_cv_header_stdint_h = no; then
-    AC_REQUIRE([jm_AC_TYPE_UNSIGNED_LONG_LONG])
+  AC_REQUIRE([gl_AC_HEADER_INTTYPES_H])
+  AC_REQUIRE([gl_AC_HEADER_STDINT_H])
+  if test $gl_cv_header_inttypes_h = no && test $gl_cv_header_stdint_h = no; then
+    AC_REQUIRE([gl_AC_TYPE_UNSIGNED_LONG_LONG])
     test $ac_cv_type_unsigned_long_long = yes \
       && ac_type='unsigned long long' \
       || ac_type='unsigned long'
@@ -3694,19 +1880,17 @@ AC_DEFUN([jm_AC_TYPE_UINTMAX_T],
   fi
 ])
 
-# ulonglong.m4 serial 3
-dnl Copyright (C) 1999-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# ulonglong.m4 serial 4
+dnl Copyright (C) 1999-2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Paul Eggert.
 
 # Define HAVE_UNSIGNED_LONG_LONG if 'unsigned long long' works.
 
-AC_DEFUN([jm_AC_TYPE_UNSIGNED_LONG_LONG],
+AC_DEFUN([gl_AC_TYPE_UNSIGNED_LONG_LONG],
 [
   AC_CACHE_CHECK([for unsigned long long], ac_cv_type_unsigned_long_long,
   [AC_TRY_LINK([unsigned long long ull = 1ULL; int i = 63;],
@@ -3722,11 +1906,9 @@ AC_DEFUN([jm_AC_TYPE_UNSIGNED_LONG_LONG],
 
 # wchar_t.m4 serial 1 (gettext-0.12)
 dnl Copyright (C) 2002-2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 dnl Test whether <stddef.h> has the 'wchar_t' type.
@@ -3745,11 +1927,9 @@ AC_DEFUN([gt_TYPE_WCHAR_T],
 
 # wint_t.m4 serial 1 (gettext-0.12)
 dnl Copyright (C) 2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 dnl From Bruno Haible.
 dnl Test whether <wchar.h> has the 'wint_t' type.
@@ -3766,38 +1946,25 @@ AC_DEFUN([gt_TYPE_WINT_T],
   fi
 ])
 
-# xsize.m4 serial 2
-dnl Copyright (C) 2003 Free Software Foundation, Inc.
-dnl This file is free software, distributed under the terms of the GNU
-dnl General Public License.  As a special exception to the GNU General
-dnl Public License, this file may be distributed as part of a program
-dnl that contains a configuration script generated by Autoconf, under
-dnl the same distribution terms as the rest of that program.
+# xsize.m4 serial 3
+dnl Copyright (C) 2003-2004 Free Software Foundation, Inc.
+dnl This file is free software; the Free Software Foundation
+dnl gives unlimited permission to copy and/or distribute it,
+dnl with or without modifications, as long as this notice is preserved.
 
 AC_DEFUN([gl_XSIZE],
 [
   dnl Prerequisites of lib/xsize.h.
   AC_REQUIRE([gl_SIZE_MAX])
+  AC_REQUIRE([AC_C_INLINE])
   AC_CHECK_HEADERS(stdint.h)
 ])
 
-#                                                        -*- Autoconf -*-
-# Copyright (C) 2002, 2003  Free Software Foundation, Inc.
-# Generated from amversion.in; do not edit by hand.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# Copyright (C) 2002, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
 # AM_AUTOMAKE_VERSION(VERSION)
 # ----------------------------
@@ -3810,26 +1977,15 @@ AC_DEFUN([AM_AUTOMAKE_VERSION], [am__api_version="1.9"])
 # Call AM_AUTOMAKE_VERSION so it can be traced.
 # This function is AC_REQUIREd by AC_INIT_AUTOMAKE.
 AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
-	 [AM_AUTOMAKE_VERSION([1.9.4])])
+	 [AM_AUTOMAKE_VERSION([1.9.5])])
 
-# AM_AUX_DIR_EXPAND
+# AM_AUX_DIR_EXPAND                                         -*- Autoconf -*-
 
-# Copyright (C) 2001, 2003 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
 # For projects using AC_CONFIG_AUX_DIR([foo]), Autoconf sets
 # $ac_aux_dir to `$srcdir/foo'.  In other projects, it is set to
@@ -3876,26 +2032,16 @@ AC_PREREQ([2.50])dnl
 am_aux_dir=`cd $ac_aux_dir && pwd`
 ])
 
-# AM_CONDITIONAL                                              -*- Autoconf -*-
+# AM_CONDITIONAL                                            -*- Autoconf -*-
 
-# Copyright (C) 1997, 2000, 2001, 2003, 2004 Free Software Foundation, Inc.
+# Copyright (C) 1997, 2000, 2001, 2003, 2004, 2005
+# Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 6
+# serial 7
 
 # AM_CONDITIONAL(NAME, SHELL-CONDITION)
 # -------------------------------------
@@ -3919,33 +2065,21 @@ AC_CONFIG_COMMANDS_PRE(
 Usually this means the macro was only invoked conditionally.]])
 fi])])
 
-# serial 7						-*- Autoconf -*-
 
-# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004
+# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005
 # Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
+# serial 8
 
 # There are a few dirty hacks below to avoid letting `AC_PROG_CC' be
 # written in clear, in which case automake, when reading aclocal.m4,
 # will think it sees a *use*, and therefore will trigger all it's
 # C support machinery.  Also note that it means that autoscan, seeing
 # CC etc. in the Makefile, will ask for an AC_PROG_CC use...
-
 
 
 # _AM_DEPENDENCIES(NAME)
@@ -4087,27 +2221,16 @@ AM_CONDITIONAL([AMDEP], [test "x$enable_dependency_tracking" != xno])
 AC_SUBST([AMDEPBACKSLASH])
 ])
 
-# Generate code to set up dependency tracking.   -*- Autoconf -*-
+# Generate code to set up dependency tracking.              -*- Autoconf -*-
 
-# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004
-#   Free Software Foundation, Inc.
+# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005
+# Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-#serial 2
+#serial 3
 
 # _AM_OUTPUT_DEPENDENCY_COMMANDS
 # ------------------------------
@@ -4166,54 +2289,31 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
      [AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"])
 ])
 
-# Like AC_CONFIG_HEADER, but automatically create stamp file. -*- Autoconf -*-
+# Copyright (C) 1996, 1997, 2000, 2001, 2003, 2005
+# Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# Copyright (C) 1996, 1997, 2000, 2001, 2003 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 7
+# serial 8
 
 # AM_CONFIG_HEADER is obsolete.  It has been replaced by AC_CONFIG_HEADERS.
 AU_DEFUN([AM_CONFIG_HEADER], [AC_CONFIG_HEADERS($@)])
 
-# Do all the work for Automake.                            -*- Autoconf -*-
+# Do all the work for Automake.                             -*- Autoconf -*-
 
-# This macro actually does too much some checks are only needed if
-# your package does certain things.  But this isn't really a big deal.
-
-# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
 # Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
+# serial 12
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 11
+# This macro actually does too much.  Some checks are only needed if
+# your package does certain things.  But this isn't really a big deal.
 
 # AM_INIT_AUTOMAKE(PACKAGE, VERSION, [NO-DEFINE])
 # AM_INIT_AUTOMAKE([OPTIONS])
@@ -4315,51 +2415,27 @@ for _am_header in $config_headers :; do
 done
 echo "timestamp for $1" >`AS_DIRNAME([$1])`/stamp-h[]$_am_stamp_count])
 
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
 # AM_PROG_INSTALL_SH
 # ------------------
 # Define $install_sh.
-
-# Copyright (C) 2001, 2003 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
 AC_DEFUN([AM_PROG_INSTALL_SH],
 [AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
 install_sh=${install_sh-"$am_aux_dir/install-sh"}
 AC_SUBST(install_sh)])
 
-#                                                          -*- Autoconf -*-
-# Copyright (C) 2003  Free Software Foundation, Inc.
+# Copyright (C) 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 1
+# serial 2
 
 # Check whether the underlying file-system supports filenames
 # with a leading dot.  For instance MS-DOS doesn't.
@@ -4374,26 +2450,14 @@ fi
 rmdir .tst 2>/dev/null
 AC_SUBST([am__leading_dot])])
 
-
-# Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003
+# Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2005
 # Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 4
+# serial 5
 
 # AM_PROG_LEX
 # -----------
@@ -4407,26 +2471,15 @@ if test "$LEX" = :; then
   LEX=${am_missing_run}flex
 fi])
 
-# Check to see how 'make' treats includes.	-*- Autoconf -*-
+# Check to see how 'make' treats includes.	            -*- Autoconf -*-
 
-# Copyright (C) 2001, 2002, 2003 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 2
+# serial 3
 
 # AM_MAKE_INCLUDE()
 # -----------------
@@ -4470,27 +2523,16 @@ AC_MSG_RESULT([$_am_result])
 rm -f confinc confmf
 ])
 
-#  -*- Autoconf -*-
+# Fake the existence of programs that GNU maintainers use.  -*- Autoconf -*-
 
+# Copyright (C) 1997, 1999, 2000, 2001, 2003, 2005
+# Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# Copyright (C) 1997, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 3
+# serial 4
 
 # AM_MISSING_PROG(NAME, PROGRAM)
 # ------------------------------
@@ -4516,27 +2558,16 @@ else
 fi
 ])
 
+# Copyright (C) 2003, 2004, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
 # AM_PROG_MKDIR_P
 # ---------------
 # Check whether `mkdir -p' is supported, fallback to mkinstalldirs otherwise.
-
-# Copyright (C) 2003, 2004 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
+#
 # Automake 1.8 used `mkdir -m 0755 -p --' to ensure that directories
 # created by `make install' are always world readable, even if the
 # installer happens to have an overly restrictive umask (e.g. 077).
@@ -4590,26 +2621,15 @@ else
 fi
 AC_SUBST([mkdir_p])])
 
-# Helper functions for option handling.                    -*- Autoconf -*-
+# Helper functions for option handling.                     -*- Autoconf -*-
 
-# Copyright (C) 2001, 2002, 2003  Free Software Foundation, Inc.
+# Copyright (C) 2001, 2002, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 2
+# serial 3
 
 # _AM_MANGLE_OPTION(NAME)
 # -----------------------
@@ -4634,199 +2654,11 @@ AC_DEFUN([_AM_SET_OPTIONS],
 AC_DEFUN([_AM_IF_OPTION],
 [m4_ifset(_AM_MANGLE_OPTION([$1]), [$2], [$3])])
 
-
-# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004
-# Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# AM_PATH_PYTHON([MINIMUM-VERSION], [ACTION-IF-FOUND], [ACTION-IF-NOT-FOUND])
-
-# Adds support for distributing Python modules and packages.  To
-# install modules, copy them to $(pythondir), using the python_PYTHON
-# automake variable.  To install a package with the same name as the
-# automake package, install to $(pkgpythondir), or use the
-# pkgpython_PYTHON automake variable.
-
-# The variables $(pyexecdir) and $(pkgpyexecdir) are provided as
-# locations to install python extension modules (shared libraries).
-# Another macro is required to find the appropriate flags to compile
-# extension modules.
-
-# If your package is configured with a different prefix to python,
-# users will have to add the install directory to the PYTHONPATH
-# environment variable, or create a .pth file (see the python
-# documentation for details).
-
-# If the MINIMUM-VERSION argument is passed, AM_PATH_PYTHON will
-# cause an error if the version of python installed on the system
-# doesn't meet the requirement.  MINIMUM-VERSION should consist of
-# numbers and dots only.
-
-AC_DEFUN([AM_PATH_PYTHON],
- [
-  dnl Find a Python interpreter.  Python versions prior to 1.5 are not
-  dnl supported because the default installation locations changed from
-  dnl $prefix/lib/site-python in 1.4 to $prefix/lib/python1.5/site-packages
-  dnl in 1.5.
-  m4_define_default([_AM_PYTHON_INTERPRETER_LIST],
-                    [python python2 python2.4 python2.3 python2.2 dnl
-python2.1 python2.0 python1.6 python1.5])
-
-  m4_if([$1],[],[
-    dnl No version check is needed.
-    # Find any Python interpreter.
-    if test -z "$PYTHON"; then
-      AC_PATH_PROGS([PYTHON], _AM_PYTHON_INTERPRETER_LIST, :)
-    fi
-    am_display_PYTHON=python
-  ], [
-    dnl A version check is needed.
-    if test -n "$PYTHON"; then
-      # If the user set $PYTHON, use it and don't search something else.
-      AC_MSG_CHECKING([whether $PYTHON version >= $1])
-      AM_PYTHON_CHECK_VERSION([$PYTHON], [$1],
-			      [AC_MSG_RESULT(yes)],
-			      [AC_MSG_ERROR(too old)])
-      am_display_PYTHON=$PYTHON
-    else
-      # Otherwise, try each interpreter until we find one that satisfies
-      # VERSION.
-      AC_CACHE_CHECK([for a Python interpreter with version >= $1],
-	[am_cv_pathless_PYTHON],[
-	for am_cv_pathless_PYTHON in _AM_PYTHON_INTERPRETER_LIST none; do
-	  test "$am_cv_pathless_PYTHON" = none && break
-	  AM_PYTHON_CHECK_VERSION([$am_cv_pathless_PYTHON], [$1], [break])
-	done])
-      # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
-      if test "$am_cv_pathless_PYTHON" = none; then
-	PYTHON=:
-      else
-        AC_PATH_PROG([PYTHON], [$am_cv_pathless_PYTHON])
-      fi
-      am_display_PYTHON=$am_cv_pathless_PYTHON
-    fi
-  ])
-
-  if test "$PYTHON" = :; then
-  dnl Run any user-specified action, or abort.
-    m4_default([$3], [AC_MSG_ERROR([no suitable Python interpreter found])])
-  else
-
-  dnl Query Python for its version number.  Getting [:3] seems to be
-  dnl the best way to do this; it's what "site.py" does in the standard
-  dnl library.
-
-  AC_CACHE_CHECK([for $am_display_PYTHON version], [am_cv_python_version],
-    [am_cv_python_version=`$PYTHON -c "import sys; print sys.version[[:3]]"`])
-  AC_SUBST([PYTHON_VERSION], [$am_cv_python_version])
-
-  dnl Use the values of $prefix and $exec_prefix for the corresponding
-  dnl values of PYTHON_PREFIX and PYTHON_EXEC_PREFIX.  These are made
-  dnl distinct variables so they can be overridden if need be.  However,
-  dnl general consensus is that you shouldn't need this ability.
-
-  AC_SUBST([PYTHON_PREFIX], ['${prefix}'])
-  AC_SUBST([PYTHON_EXEC_PREFIX], ['${exec_prefix}'])
-
-  dnl At times (like when building shared libraries) you may want
-  dnl to know which OS platform Python thinks this is.
-
-  AC_CACHE_CHECK([for $am_display_PYTHON platform], [am_cv_python_platform],
-    [am_cv_python_platform=`$PYTHON -c "import sys; print sys.platform"`])
-  AC_SUBST([PYTHON_PLATFORM], [$am_cv_python_platform])
-
-
-  dnl Set up 4 directories:
-
-  dnl pythondir -- where to install python scripts.  This is the
-  dnl   site-packages directory, not the python standard library
-  dnl   directory like in previous automake betas.  This behavior
-  dnl   is more consistent with lispdir.m4 for example.
-  dnl Query distutils for this directory.  distutils does not exist in
-  dnl Python 1.5, so we fall back to the hardcoded directory if it
-  dnl doesn't work.
-  AC_CACHE_CHECK([for $am_display_PYTHON script directory],
-    [am_cv_python_pythondir],
-    [am_cv_python_pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(0,0,prefix='$PYTHON_PREFIX')" 2>/dev/null ||
-     echo "$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages"`])
-  AC_SUBST([pythondir], [$am_cv_python_pythondir])
-
-  dnl pkgpythondir -- $PACKAGE directory under pythondir.  Was
-  dnl   PYTHON_SITE_PACKAGE in previous betas, but this naming is
-  dnl   more consistent with the rest of automake.
-
-  AC_SUBST([pkgpythondir], [\${pythondir}/$PACKAGE])
-
-  dnl pyexecdir -- directory for installing python extension modules
-  dnl   (shared libraries)
-  dnl Query distutils for this directory.  distutils does not exist in
-  dnl Python 1.5, so we fall back to the hardcoded directory if it
-  dnl doesn't work.
-  AC_CACHE_CHECK([for $am_display_PYTHON extension module directory],
-    [am_cv_python_pyexecdir],
-    [am_cv_python_pyexecdir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='$PYTHON_EXEC_PREFIX')" 2>/dev/null ||
-     echo "${PYTHON_EXEC_PREFIX}/lib/python${PYTHON_VERSION}/site-packages"`])
-  AC_SUBST([pyexecdir], [$am_cv_python_pyexecdir])
-
-  dnl pkgpyexecdir -- $(pyexecdir)/$(PACKAGE)
-
-  AC_SUBST([pkgpyexecdir], [\${pyexecdir}/$PACKAGE])
-
-  dnl Run any user-specified action.
-  $2
-  fi
-
-])
-
-
-# AM_PYTHON_CHECK_VERSION(PROG, VERSION, [ACTION-IF-TRUE], [ACTION-IF-FALSE])
-# ---------------------------------------------------------------------------
-# Run ACTION-IF-TRUE if the Python interpreter PROG has version >= VERSION.
-# Run ACTION-IF-FALSE otherwise.
-# This test uses sys.hexversion instead of the string equivalent (first
-# word of sys.version), in order to cope with versions such as 2.2c1.
-# hexversion has been introduced in Python 1.5.2; it's probably not
-# worth to support older versions (1.5.1 was released on October 31, 1998).
-AC_DEFUN([AM_PYTHON_CHECK_VERSION],
- [prog="import sys, string
-# split strings by '.' and convert to numeric.  Append some zeros
-# because we need at least 4 digits for the hex conversion.
-minver = map(int, string.split('$2', '.')) + [[0, 0, 0]]
-minverhex = 0
-for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[[i]]
-sys.exit(sys.hexversion < minverhex)"
-  AS_IF([AM_RUN_LOG([$1 -c "$prog"])], [$3], [$4])])
-
-# Copyright (C) 2001, 2003 Free Software Foundation, Inc.     -*- Autoconf -*-
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
 # AM_RUN_LOG(COMMAND)
 # -------------------
@@ -4839,28 +2671,16 @@ AC_DEFUN([AM_RUN_LOG],
    echo "$as_me:$LINENO: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
    (exit $ac_status); }])
 
+# Check to make sure that the build environment is sane.    -*- Autoconf -*-
+
+# Copyright (C) 1996, 1997, 2000, 2001, 2003, 2005
+# Free Software Foundation, Inc.
 #
-# Check to make sure that the build environment is sane.
-#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# Copyright (C) 1996, 1997, 2000, 2001, 2003 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 3
+# serial 4
 
 # AM_SANITY_CHECK
 # ---------------
@@ -4903,25 +2723,14 @@ Check your system clock])
 fi
 AC_MSG_RESULT(yes)])
 
+# Copyright (C) 2001, 2003, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
 # AM_PROG_INSTALL_STRIP
-
-# Copyright (C) 2001, 2003 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
+# ---------------------
 # One issue with vendor `install' (even GNU) is that you can't
 # specify the program used to strip binaries.  This is especially
 # annoying in cross-compiling environments, where the build's strip
@@ -4944,25 +2753,13 @@ AC_SUBST([INSTALL_STRIP_PROGRAM])])
 
 # Check how to create a tarball.                            -*- Autoconf -*-
 
-# Copyright (C) 2004  Free Software Foundation, Inc.
+# Copyright (C) 2004, 2005  Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-# 02111-1307, USA.
-
-# serial 1
-
+# serial 2
 
 # _AM_PROG_TAR(FORMAT)
 # --------------------
@@ -5050,4 +2847,17 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+m4_include([m4/audiofile.m4])
+m4_include([m4/esd.m4])
+m4_include([m4/freetype2.m4])
+m4_include([m4/glib-2.0.m4])
+m4_include([m4/gtkglext-1.0.m4])
+m4_include([m4/iconv.m4])
+m4_include([m4/intdiv0.m4])
+m4_include([m4/inttypes-pri.m4])
+m4_include([m4/inttypes.m4])
+m4_include([m4/libart.m4])
+m4_include([m4/nls.m4])
+m4_include([m4/po.m4])
+m4_include([m4/python.m4])
 m4_include([acinclude.m4])
