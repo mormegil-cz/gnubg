@@ -1,3 +1,6 @@
+Thu Apr  6 22:30:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* html.c make it clearer who is who when exporting to gammonline
+
 Wed Mar 29 10:13:39 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	*  **/Makefile.in aclocal.m4 config.h.in configure: Sync auto-tools
 	files.

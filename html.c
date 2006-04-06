@@ -590,6 +590,11 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
       acOff[ i ] -= anBoard[ i ][ j ];
   }
 
+  PipCount ( anBoard, anPips );
+
+  /* Begin table  and print for player 0*/
+  fprintf ( pf, "<table><tr><th align=\"left\">%s<th align=\"right\">%d<tr><th colspan=\"2\">", ap[ 0 ].szName,  anPips[ 1 ]);
+
   /* avoid page break when printing */
   fputs( "<p style=\"page-break-inside: avoid\">", pf );
     
@@ -732,27 +737,22 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs( "</p>\n", pf );
 
+  fprintf ( pf, "<tr><th align=\"left\">%s<th align=\"right\">%d<tr><th colspan=\"2\">", ap[ 1 ].szName, anPips[ 0 ] );
+
   /* pip counts */
 
   fputs ( "<p>", pf );
 
-  PipCount ( anBoard, anPips );
-  fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
-            ap[ 0 ].szName, anPips[ 1 ], 
-            ap[ 1 ].szName, anPips[ 0 ] );
 
-  /* position ID */
+  /* position ID Player 1 and end of table*/
 
   fprintf( pf, "<span %s>", 
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
-  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br /></span></table>\n"),
             PositionID ( pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
 
-  fprintf( pf, "</span>" );
-
-  fputs ( "</p>\n", pf );
 
 }
 
@@ -3818,7 +3818,6 @@ ExportPositionGammOnLine( FILE *pf )
       iMove = getMoveNumber ( plGame, plLastMove->p );
     else
       iMove = -1;
-
     HTMLBoardHeader ( pf, &ms, HTML_EXPORT_TYPE_BBS,
                       HTML_EXPORT_CSS_INLINE,
                       getGameNumber ( plGame ), iMove, FALSE );
