@@ -599,7 +599,10 @@ class relational:
       
       cursor = self.conn.cursor()
       # Open file which has db create sql statments
-      sqlfile = open("gnubg.sql", "r")
+      if self.games: 
+          sqlfile = open("gnubg.games.sql", "r")
+      else:
+          sqlfile = open("gnubg.sql", "r")
       done = False
       stmt = ""
       # Loop through file and run sql commands
