@@ -593,7 +593,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   PipCount ( anBoard, anPips );
 
   /* Begin table  and print for player 0*/
-  fprintf ( pf, "<table><tr><th align=\"left\">%s<th align=\"right\">%d<tr><th colspan=\"2\">", ap[ 0 ].szName,  anPips[ 1 ]);
+  fprintf ( pf, "<table><tr><th align=\"left\">%s<th align=\"right\">%d<tr><th align=\"center\" colspan=\"2\">", ap[ 0 ].szName,  anPips[ 1 ]);
 
   /* avoid page break when printing */
   fputs( "<p style=\"page-break-inside: avoid\">", pf );
@@ -737,7 +737,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs( "</p>\n", pf );
 
-  fprintf ( pf, "<tr><th align=\"left\">%s<th align=\"right\">%d<tr><th colspan=\"2\">", ap[ 1 ].szName, anPips[ 0 ] );
+  fprintf ( pf, "<tr><th align=\"left\">%s<th align=\"right\">%d<tr><th align=\"center\" colspan=\"2\">", ap[ 1 ].szName, anPips[ 0 ] );
 
   /* pip counts */
 

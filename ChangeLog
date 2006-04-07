@@ -1,3 +1,9 @@
+Fri Apr  7 13:46:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* gnubg.c, gtkgame.c: Fix problems with help menus in gtk
+	* gtkgame.c         : Enable add game to relational in gtk(thx MaX)
+	* database.py       : Create games database when appropriate(thx MaX) 
+	* html.c            : small improvement on previous
+
 Thu Apr  6 22:30:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* html.c make it clearer who is who when exporting to gammonline
 
