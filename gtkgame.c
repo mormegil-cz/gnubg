@@ -2155,13 +2155,7 @@ extern int InitGTK( int *argc, char ***argv ) {
         { N_("/_Analyse/Relational database/Test"), NULL,
           Command, CMD_RELATIONAL_TEST, NULL },
         { N_("/_Analyse/Relational database/Help"), NULL,
-          Command, CMD_RELATIONAL_HELP,
-#if GTK_CHECK_VERSION(2,0,0)
-		"<StockItem>", GTK_STOCK_HELP
-#else
-		NULL
-#endif
-	},
+          Command, CMD_RELATIONAL_HELP, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -2282,13 +2276,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 #endif
 	},
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP,
-#if GTK_CHECK_VERSION(2,0,0)
-		"<StockItem>", GTK_STOCK_HELP
-#else
-		NULL
-#endif
-	},
+	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
 	{ N_("/_Help/gnubg _Manual"), NULL, Command, 
           CMD_SHOW_MANUAL_GUI, NULL },
 	{ N_("/_Help/gnubg M_anual (web)"), NULL, Command, 
@@ -9904,7 +9892,7 @@ static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
 		return;
 
-	if (!GtkGetEnv(env))
+	if (GtkGetEnv(env) < 0)
 		return;
 
 	/* Pass in env id and force addition */

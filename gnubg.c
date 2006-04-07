@@ -1627,6 +1627,7 @@ command cER = {
 }, acSetImport[] = {
   { "filetype", CommandSetImportFileType, N_("Set default filetype "
       "for import"), szFILETYPE, &cFilename },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetInvert[] = {
   { "matchequitytable", CommandSetInvertMatchEquityTable,
     N_("invert match equity table"), szONOFF, &cOnOff },
