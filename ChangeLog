@@ -1,3 +1,6 @@
+Mon Apr 10 09:49:03 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* gtkgame.c: Fixed typo causing crash in RelationalAddMatch
+
 Fri Apr  7 13:46:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* gnubg.c, gtkgame.c: Fix problems with help menus in gtk
 	* gtkgame.c         : Enable add game to relational in gtk(thx MaX)

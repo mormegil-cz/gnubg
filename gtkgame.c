@@ -9886,7 +9886,7 @@ static int GtkGetEnv(char* env)
 static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 {
 	char env[100];
-	char buf[20];
+	char buf[200];
 	int exists = RelationalMatchExists();
 	if (exists == -1 ||
 		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
