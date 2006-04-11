@@ -1283,7 +1283,9 @@ gboolean place_chequer_or_revert(BoardData *bd,
     /* Check for hits, undoing hits, including pick-and pass */
 
 
-    if ( (source - dest2) * bd->drag_colour > 0 ) { /*We are moving forward */ 
+    if (( (source - dest2) * bd->drag_colour > 0 ) /*We are moving forward */ 
+		|| ToolbarIsEditing( pwToolbar ))	/* Or in edit mode */
+	{ 
         if( bd->points[ dest ] == -bd->drag_colour ) {
              /* outputf ("Hitting on %d \n", dest); */
              hit++;
