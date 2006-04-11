@@ -1,5 +1,6 @@
 Tue Apr 11 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
-	widget3d.c: Only update board size when window actually changes size
+
+	* widget3d.c: Only update board size when window actually changes size
 
 Tue Apr 11 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
