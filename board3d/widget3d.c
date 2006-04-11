@@ -111,6 +111,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
   	if (width != oldWidth || height != oldHeight)
     {
       oldWidth = width, oldHeight = height;
+	  {
 #if HAVE_GTKGLEXT
     	/*** OpenGL BEGIN ***/
     	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
@@ -132,6 +133,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
     	gdk_gl_drawable_gl_end(gldrawable);
     	/*** OpenGL END ***/
 #endif
+	  }
     }
   }
 	return TRUE;
