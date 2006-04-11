@@ -399,10 +399,6 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 
 	gtk_widget_destroy (filechooser);
 	External_IO_Format_destroy(eiof);
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
 }
 #endif
 
