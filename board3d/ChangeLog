@@ -1,3 +1,11 @@
+Tue Apr 11 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	widget3d.c: Only update board size when window actually changes size
+
+Tue Apr 11 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* Makefile.win: Compile drawboard3d.c without SSE
+	(to fix crash when window moved during rollout)
+	
 Mon Feb  7 17:41:35 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* Add glincl.h openGL include file and use in other files
