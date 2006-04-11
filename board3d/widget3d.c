@@ -104,31 +104,36 @@ void Draw(BoardData* bd)
 
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, BoardData* bd)
 {
-	int width, height;
+	if (bd->rd->fDisplayType == DT_3D)
+  {
+    static int oldHeight = -1, oldWidth = -1;
+  	int width = widget->allocation.width, height = widget->allocation.height;
+  	if (width != oldWidth || height != oldHeight)
+    {
+      oldWidth = width, oldHeight = height;
 #if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
-	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
-
-	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
-		return FALSE;
+    	/*** OpenGL BEGIN ***/
+    	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
+    
+    	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
+    		return FALSE;
 #else
-	/* OpenGL functions can be called only if make_current returns true */
-	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return FALSE;
+    	/* OpenGL functions can be called only if make_current returns true */
+    	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
+    		return FALSE;
 #endif
-	width = widget->allocation.width;
-	height = widget->allocation.height;
-
-	glViewport(0, 0, width, height);
-	SetupViewingVolume3d(bd);
-
-	RestrictiveRedraw();
+  
+    	glViewport(0, 0, width, height);
+    	SetupViewingVolume3d(bd);
+    
+    	RestrictiveRedraw();
 
 #if HAVE_GTKGLEXT
-	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
+    	gdk_gl_drawable_gl_end(gldrawable);
+    	/*** OpenGL END ***/
 #endif
-
+    }
+  }
 	return TRUE;
 }
 
