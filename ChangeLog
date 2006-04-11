@@ -1,3 +1,10 @@
+Tue Apr 11 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* rollout.c: Only update rollout stats once a second at most
+	
+Tue Apr 11 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* gtkfile.c: Fix bug changing met with gtk 2
+
 Mon Apr 10 09:49:03 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* gtkgame.c: Fixed typo causing crash in RelationalAddMatch
 
