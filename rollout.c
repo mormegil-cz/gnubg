@@ -964,15 +964,16 @@ extern double get_time();
 
 int UpdateTimePassed()
 {
-  static double lasttime = -1;
+	static double lasttime = -1;
+	double current = get_time();
 
-  double current = get_time();
-  if (current - lasttime > 1000)
-  {
-      lasttime = current;
-      return TRUE;
-  }
-  return FALSE;
+	if (current - lasttime > 1000)
+	{
+		lasttime = current;
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 extern int
@@ -1174,6 +1175,8 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   /* ============ begin rollout loop ============= */
 
   for( i = nFirstTrial; i < cGames; i++ ) {
+	int updateProgress = fShowProgress && pfProgress && UpdateTimePassed();
+
     active_alternatives = alternatives;
     err_too_big = 1;
 
@@ -1265,7 +1268,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         aarSigma[ alt ][ j ] = sqrt( aarVariance[ alt ][ j ] / ( i + 1 ) );
       } /* for (j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) */
 
-      if( fShowProgress && pfProgress && UpdateTimePassed()) {
+      if( updateProgress) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
                        i, alt, ajiJSD[ alt ].nRank + 1,
 		       ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
@@ -1401,8 +1404,8 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
              comp_jsdinfo_order);
 
     }
- 
-    if( fShowProgress && pfProgress && UpdateTimePassed()) 
+
+    if( updateProgress) 
       for (alt = 0; alt < alternatives; ++alt) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
                        i, alt, ajiJSD[ alt ].nRank + 1,
@@ -1471,6 +1474,14 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
     if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
       break;
   } /* for( i = nFirstTrial; i < cGames; i++ ) */
+
+	/* Make sure final output is upto date */
+	for (alt = 0; alt < alternatives; ++alt) {
+	(*pfProgress)( aarMu, aarSigma, prc, aciLocal,
+					min(i, cGames - 1), alt, ajiJSD[ alt ].nRank + 1,
+					ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
+					pUserData );
+	}
 
   if (log_rollouts && log_name) {
     free (log_name);
