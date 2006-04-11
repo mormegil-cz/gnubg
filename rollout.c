@@ -960,6 +960,21 @@ comp_jsdinfo_order (const void *a, const void *b) {
   return 0;
 }
 
+extern double get_time();
+
+int UpdateTimePassed()
+{
+  static double lasttime = -1;
+
+  double current = get_time();
+  if (current - lasttime > 1000)
+  {
+      lasttime = current;
+      return TRUE;
+  }
+  return FALSE;
+}
+
 extern int
 RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
                 float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
@@ -1250,7 +1265,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         aarSigma[ alt ][ j ] = sqrt( aarVariance[ alt ][ j ] / ( i + 1 ) );
       } /* for (j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) */
 
-      if( fShowProgress && pfProgress ) {
+      if( fShowProgress && pfProgress && UpdateTimePassed()) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
                        i, alt, ajiJSD[ alt ].nRank + 1,
 		       ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
@@ -1387,7 +1402,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
     }
  
-    if( fShowProgress && pfProgress ) 
+    if( fShowProgress && pfProgress && UpdateTimePassed()) 
       for (alt = 0; alt < alternatives; ++alt) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
                        i, alt, ajiJSD[ alt ].nRank + 1,
