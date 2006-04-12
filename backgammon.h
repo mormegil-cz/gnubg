@@ -72,6 +72,13 @@ typedef struct sigvec psighandler;
 typedef RETSIGTYPE (*psighandler)( int );
 #endif
 
+#ifndef MIN
+#define MIN(A,B) (((A) < (B)) ? (A) : (B))
+#endif
+#ifndef MAX
+#define MAX(A,B) (((A) > (B)) ? (A) : (B))
+#endif
+
 #define MAX_CUBE ( 1 << 12 )
 
 #ifdef WIN32

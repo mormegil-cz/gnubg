@@ -1624,8 +1624,8 @@ void RationalizeBox(ClipBox* pCb)
 	pCb->yy += .5f;
 	midX = (int)BoxMidWidth(pCb);
 	midY = (int)BoxMidHeight(pCb);
-	maxXoff = (int)MAX(midX - pCb->x, pCb->xx - midX) + 1;
-	maxYoff = (int)MAX(midY - pCb->y, pCb->yy - midY) + 1;
+	maxXoff = MAX(midX - (int)pCb->x, (int)pCb->xx - midX) + 1;
+	maxYoff = MAX(midY - (int)pCb->y, (int)pCb->yy - midY) + 1;
 	pCb->x = (float)(midX - maxXoff);
 	pCb->xx = (float)(midX + maxXoff);
 	pCb->y = (float)(midY - maxYoff);

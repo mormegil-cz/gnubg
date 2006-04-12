@@ -1310,7 +1310,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
             }
         } else {
           if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || (
-              dest > 25 && ABS (source - dest2) > MAX (bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
+              dest > 25 && ABS (source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
               ) 
             for (i = 0; i < 2; i++) {
                     passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;

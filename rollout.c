@@ -33,10 +33,6 @@
 #endif
 #endif
 
-#ifndef min
-#define min(x,y)   (((x) > (y)) ? (y) : (x))
-#endif
-
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>
@@ -1482,7 +1478,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 	/* Make sure final output is upto date */
 	for (alt = 0; alt < alternatives; ++alt) {
 	(*pfProgress)( aarMu, aarSigma, prc, aciLocal,
-					min(i, cGames - 1), alt, ajiJSD[ alt ].nRank + 1,
+					MIN(i, cGames - 1), alt, ajiJSD[ alt ].nRank + 1,
 					ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
 					pUserData );
 	}

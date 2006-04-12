@@ -3863,10 +3863,6 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
     return pml->cMoves;
 }
 
-#ifndef min
-#define min(x,y)   (((x) > (y)) ? (y) : (x))
-#endif
-
 static movefilter NullFilter = {0, 0, 0.0};
 
 static int 
@@ -3972,10 +3968,10 @@ FindnSaveBestMoves( movelist *pml,
       pml->iMoveBest = 0;
       
       k = pml->cMoves;
-      pml->cMoves = min(mFilter->Accept, pml->cMoves );
+      pml->cMoves = MIN(mFilter->Accept, pml->cMoves );
 
       {
-	unsigned int limit = min(k, pml->cMoves + mFilter->Extra);
+	unsigned int limit = MIN(k, pml->cMoves + mFilter->Extra);
       
 	for( /**/ ; pml->cMoves < limit; ++pml->cMoves ) {
 	  if( pml->amMoves[ pml->cMoves ].rScore <
@@ -7329,15 +7325,11 @@ CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
  *
  */
 
-#ifndef min
-#define min(x,y)   (((x) > (y)) ? (y) : (x))
-#endif
-
 extern int
 isCloseCubedecision ( const float arDouble[] ) {
   const float rThr = 0.16;
   float rDouble;
-  rDouble = min (arDouble[ OUTPUT_TAKE ] , 1.0f);
+  rDouble = MIN(arDouble[ OUTPUT_TAKE ] , 1.0f);
 
   /* Report if doubling is less than very bad (0.16) */
   if ( arDouble[ OUTPUT_OPTIMAL ] - rDouble < rThr ) return 1;

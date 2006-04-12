@@ -30,9 +30,6 @@
 	#define HAVE_IMP_GDBM_ERRNO 1
 #endif
 
-#undef	MIN
-#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
-
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp

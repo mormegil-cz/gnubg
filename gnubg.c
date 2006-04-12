@@ -7476,7 +7476,7 @@ getInstallDir( void ) {
   char *p;
 
   GetModuleFileName(NULL, buf, sizeof(buf));
-  p = max(strrchr(buf, '/'), strrchr(buf, '\\'));
+  p = MAX(strrchr(buf, '/'), strrchr(buf, '\\'));
   if (p)
 	  *p = '\0';
   return strdup(buf);

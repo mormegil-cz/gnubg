@@ -31,6 +31,7 @@
 
 #include "config.h"
 
+#include "backgammon.h"
 #include "eval.h"
 #include "positionid.h"
 #include "osr.h"
@@ -39,7 +40,6 @@
 
 #define MAX_PROBS        32
 #define MAX_GAMMON_PROBS 15
-#define min(x,y)   (((x) > (y)) ? (y) : (x))
 
 static unsigned long mt[ N ];
 static int mti = N + 1;
@@ -667,14 +667,14 @@ rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
 
     /* update counts */
 
-    ++anCounts[ min ( m == 15 ? n + 1 : n, nMaxGammonProbs - 1 ) ];
+    ++anCounts[ MIN( m == 15 ? n + 1 : n, nMaxGammonProbs - 1 ) ];
 
     /* get prob. from bearoff1 */
 
     getBearoffProbs ( PositionBearoff ( an, 6, 15 ), anProb );
 
     for ( i = 0; i < 32; ++i )
-      arProbs[ min ( n + i, nMaxProbs - 1 ) ] += anProb[ i ] / 65535.0f;
+      arProbs[ MIN( n + i, nMaxProbs - 1 ) ] += anProb[ i ] / 65535.0f;
 
   }
 
@@ -761,7 +761,7 @@ osp ( const int anBoard[ 25 ], const int nGames,
     getBearoffProbs ( PositionBearoff ( anBoard, 6, 15 ), anProb );
 
     for ( i = 0; i < 32; ++i ) {
-      n = min ( i, MAX_PROBS - 1 );
+      n = MIN( i, MAX_PROBS - 1 );
       arProbs[ n ] += anProb[ i ] / 65535.0f;
       /* printf ( "arProbs[%d]=%f\n", n, arProbs[n] ); */
     }
@@ -893,7 +893,7 @@ raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
 
   }
 
-  arOutput[ OUTPUT_WIN ] = min ( w, 1.0f );
+  arOutput[ OUTPUT_WIN ] = MIN( w, 1.0f );
 
   /* calculate gammon and backgammon probs */
 
@@ -930,10 +930,10 @@ raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
 
   }
 
-  arOutput[ OUTPUT_WINGAMMON ] = min ( arG[ 1 ], 1.0f );
-  arOutput[ OUTPUT_LOSEGAMMON ] = min ( arG[ 0 ], 1.0f );
-  arOutput[ OUTPUT_WINBACKGAMMON ] = min ( arBG[ 1 ], 1.0f );
-  arOutput[ OUTPUT_LOSEBACKGAMMON ] = min ( arBG[ 0 ], 1.0f );
+  arOutput[ OUTPUT_WINGAMMON ] = MIN( arG[ 1 ], 1.0f );
+  arOutput[ OUTPUT_LOSEGAMMON ] = MIN( arG[ 0 ], 1.0f );
+  arOutput[ OUTPUT_WINBACKGAMMON ] = MIN( arBG[ 1 ], 1.0f );
+  arOutput[ OUTPUT_LOSEBACKGAMMON ] = MIN( arBG[ 0 ], 1.0f );
 
   /* calculate average number of rolls to bear off */
 
