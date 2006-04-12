@@ -78,6 +78,19 @@ esac
 AC_MSG_RESULT([$darwinppc])
 AM_CONDITIONAL(OS_DARWINPPC, test "$darwinppc" = yes)
 
+AC_MSG_CHECKING([for Solaris])
+case "$host" in
+  *-*-solaris*)
+    solaris=yes;
+    ;;
+  *)
+    solaris=no;
+    ;;
+esac
+
+AC_MSG_RESULT([$solaris])
+AM_CONDITIONAL(OS_SOLARIS, test "$solaris" = yes)
+
 dnl Shamelessly stolen taken from the libgnomecanvas configure.in
 dnl with slight modifications. Check for Win32 Native platform
 dnl then determine appropriate directive for the gcc compiler -
@@ -353,6 +366,10 @@ if test "$no_gtk" != "yes"; then
   AM_PATH_LIBART(,AC_DEFINE(HAVE_LIBART,1,[Define if you have the art library]))
 
   if test "$darwinppc" = "yes"; then
+    GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
+  fi
+
+  if test "$solaris" = "yes"; then
     GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
   fi
 fi

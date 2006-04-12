@@ -35,6 +35,10 @@
 #include <math.h>
 #include <stdlib.h>
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 #if HAVE_LIBART
 #include <libart_lgpl/art_misc.h>
 #include <libart_lgpl/art_affine.h>

@@ -581,7 +581,7 @@ static void play_audio_file(soundcache *psc, const char *file,
     }
 #elif defined( AUDIO_SETINFO )
     {
-	struct audio_info_t ait;
+	audio_info_t ait;
 
 	AUDIO_INITINFO( &ait );
 	ait.play.sample_rate = psc->nSampleRate;

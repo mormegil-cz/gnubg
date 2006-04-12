@@ -25,6 +25,9 @@
 #include <assert.h>
 #include <string.h>
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 #include "config.h"
 

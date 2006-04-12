@@ -109,6 +109,10 @@
 #endif /* #ifndef WIN32 */
 #endif /* #if HAVE_SOCKETS */
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
 #include "backgammon.h"
 #include "dice.h"
 #include "md5.h"
@@ -1120,7 +1124,7 @@ extern int UserRNGOpen( void *p, char *sz ) {
 #if __GNUC__
   char szCWD[ strlen( sz ) + 3 ];
 #elif HAVE_ALLOCA
-  char *szCWD = alloca( strlen( szOrig ) + 3 );
+  char *szCWD = alloca( strlen( sz ) + 3 );
 #else
   char szCWD[ 4096 ];
 #endif
