@@ -34,22 +34,12 @@
 #include <time.h>
 #include <assert.h>
 
-#define SIGMOID_BAUR 0
-#define SIGMOID_JTH 0
-
 #if HAVE_LIBATLAS
 #warning "LIBATLAS processing..."
 #include <cblas.h>
 #endif /* HAVE_LIBATLAS */
 
 #include "sse.h"
-#if SIGMOID_BAUR
-#define sigmoid sigmoid_baur
-#elif SIGMOID_JTH
-#define sigmoid sigmoid_jth
-#else
-#define sigmoid sigmoid_original
-#endif
 
 
 /* e[k] = exp(k/10) / 10 */
@@ -168,7 +158,7 @@ static float e[100] = {
    exponentials comparatively fast, but still about 30% slower than
    the lookup table used here. */
 
-static inline float sigmoid_original(float const xin) {
+extern /*inline*/ float sigmoid_original(float const xin) {
     
     if( !signbit( xin ) ) { /* signbit() can be faster than a compare to 0.0 */
 	/* xin is almost always positive; we place this branch of the `if'
@@ -251,7 +241,7 @@ ComputeSigTable (void) {
 
 #if SIGMOID_BAUR
 
-static float 
+extern float 
 sigmoid_baur (float const x) {
 
   float x2 = x * SIG_Q;
@@ -276,7 +266,7 @@ sigmoid_baur (float const x) {
 
 #if SIGMOID_JTH
 
-static float
+extern float
 sigmoid_jth( const float x ) {
 
   float x2 = x * SIG_Q;
@@ -1077,208 +1067,3 @@ extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
     
     return 0;
 }
-
-#if USE_SSE_VECTORIZE
-
-static int
-Evaluate128( neuralnet *pnn, float arInput[], float ar[],
-                        float arOutput[], float *saveAr ) {
-
-    int i, j;
-    float *prWeight;
-    __m128 vec0, vec1, vec3, scalevec, sum;
-    
-    /* Calculate activity at hidden nodes */
-    memcpy(ar, pnn->arHiddenThreshold, HIDDEN_NODES * sizeof(float));
-
-    prWeight = pnn->arHiddenWeight;
-    
-	for (i = 0; i < pnn->cInput; i++)
-	{
-		float const ari = arInput[i];
-
-		if (ari)
-		{
-			float *pr = ar;
-			if (ari == 1.0f)
-			{
-				for( j = 32; j; j--, pr += 4, prWeight += 4 )
-				{
-                   vec0 = _mm_load_ps( pr );  
-                   vec1 = _mm_load_ps( prWeight );  
-                   sum =  _mm_add_ps(vec0, vec1);
-                   _mm_store_ps(pr, sum);
-				}
-			}
-			else
-			{
-                scalevec = _mm_set1_ps( ari );
-				for( j = 32; j; j--, pr += 4, prWeight += 4 )
-				{
-					vec0 = _mm_load_ps( pr );  
-					vec1 = _mm_load_ps( prWeight ); 
-					vec3 = _mm_mul_ps( vec1, scalevec );
-					sum =  _mm_add_ps( vec0, vec3 );
-					_mm_store_ps ( pr, sum );
-				}
-			}
-		}
-		else
-			prWeight += HIDDEN_NODES;
-    }
-
-    if( saveAr)
-      memcpy( saveAr, ar, HIDDEN_NODES * sizeof( *saveAr));
-    
-    for( i = 0; i < HIDDEN_NODES; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
-    
-    /* Calculate activity at output nodes */
-    prWeight = pnn->arOutputWeight;
-
-    for( i = 0; i < pnn->cOutput; i++ ) {
-
-       float r;
-       float *pr = ar;
-       sum = _mm_setzero_ps();
-       for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
-         vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
-         vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
-         vec3 = _mm_mul_ps ( vec0, vec1 );   /* Multiply */
-         sum = _mm_add_ps( sum, vec3 );  /* Add */
-       }
-
-       vec0 = _mm_shuffle_ps(sum, sum,_MM_SHUFFLE(2,3,0,1));
-       vec1 = _mm_add_ps(sum, vec0);
-       vec0 = _mm_shuffle_ps(vec1,vec1,_MM_SHUFFLE(1,1,3,3));
-       sum = _mm_add_ps(vec1,vec0);
-       _mm_store_ss(&r, sum); 
-
-       arOutput[ i ] = sigmoid( -pnn->rBetaOutput * (r + pnn->arOutputThreshold[ i ]));
-    }
-
-    return 0;
-}
-
-static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
-		     float arOutput[] ) {
-
-    int i, j;
-    float *prWeight;
-    __m128 vec0, vec1, vec3, scalevec, sum;
-
-    prWeight = pnn->arHiddenWeight;
-    
-    for( i = 0; i < pnn->cInput; ++i ) {
-	float const ari = arInputDif[ i ];
-
-	if( ari ) {
-	    float *pr = ar;
-
-	    if( ari == 1.0f )
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
-                   vec0 = _mm_load_ps( pr );  
-                   vec1 = _mm_load_ps( prWeight );  
-                   sum =  _mm_add_ps(vec0, vec1);
-                   _mm_store_ps(pr, sum);
-		}
-	    else
-            if(ari == -1.0f)
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
-                   vec0 = _mm_load_ps( pr );  
-                   vec1 = _mm_load_ps( prWeight );  
-                   sum =  _mm_sub_ps(vec0, vec1);
-                   _mm_store_ps(pr, sum);
-		}
-	    else {
-		scalevec = _mm_set1_ps( ari );
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
-                   vec0 = _mm_load_ps( pr );  
-	           vec1 = _mm_load_ps( prWeight ); 
-		   vec3 = _mm_mul_ps( vec1, scalevec );
-                   sum =  _mm_add_ps( vec0, vec3 );
-                   _mm_store_ps ( pr, sum );
-		}
-	    }
-	} else
-	    prWeight += HIDDEN_NODES;
-    }
-    
-    for( i = 0; i < HIDDEN_NODES; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
-
-    /* Calculate activity at output nodes */
-    prWeight = pnn->arOutputWeight;
-
-    for( i = 0; i < pnn->cOutput; i++ ) {
-
-       float r;
-       float *pr = ar;
-       sum = _mm_setzero_ps();
-       for( j = 32; j ; j--, prWeight += 4, pr += 4 ){
-         vec0 = _mm_load_ps( pr );           /* Four floats into vec0 */
-         vec1 = _mm_load_ps( prWeight );     /* Four weights into vect1 */ 
-         vec3 = _mm_mul_ps ( vec0, vec1 );   /* Multiply */
-         sum = _mm_add_ps( sum, vec3 );  /* Add */
-       }
-
-	   vec0 = _mm_shuffle_ps(sum, sum,_MM_SHUFFLE(2,3,0,1));
-       vec1 = _mm_add_ps(sum, vec0);
-       vec0 = _mm_shuffle_ps(vec1,vec1,_MM_SHUFFLE(1,1,3,3));
-       sum = _mm_add_ps(vec1,vec0);
-       _mm_store_ss(&r, sum); 
-
-	   arOutput[ i ] = sigmoid( -pnn->rBetaOutput * (r + pnn->arOutputThreshold[ i ]));
-    }
-
-    return 0;
-
-}
-
-extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
-			      float arOutput[], NNEvalType t ) {
-
-    SSE_ALIGN(float ar[HIDDEN_NODES]);
-    assert(sse_aligned(ar));
-    assert(sse_aligned(arInput));
-
-    assert(pnn->cHidden == HIDDEN_NODES);
-
-    switch( t ) {
-      case NNEVAL_NONE:
-      {
-        Evaluate128(pnn, arInput, ar, arOutput, 0);
-        break;
-      }
-      case NNEVAL_SAVE:
-      {
-        memcpy(pnn->savedIBase, arInput, pnn->cInput * sizeof(*ar));
-        Evaluate128(pnn, arInput, ar, arOutput, pnn->savedBase);
-        break;
-      }
-      case NNEVAL_FROMBASE:
-      {
-        int i;
-        
-        memcpy(ar, pnn->savedBase, HIDDEN_NODES * sizeof(*ar));
-  
-        {
-          float* r = arInput;
-          float* s = pnn->savedIBase;
-         
-          for(i = 0; i < pnn->cInput; ++i, ++r, ++s) {
-            if( *r != *s ) {
-              *r -= *s;
-            } else {
-              *r = 0.0;
-            }
-          }
-        }
-        EvaluateFromBase128(pnn, arInput, ar, arOutput);
-        break;
-      }
-    }
-    return 0;
-}
-
-#endif

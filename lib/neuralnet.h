@@ -10,6 +10,18 @@
 
 #include <stdio.h>
 
+#define SIGMOID_BAUR 0
+#define SIGMOID_JTH 0
+
+#if SIGMOID_BAUR
+#define sigmoid sigmoid_baur
+#elif SIGMOID_JTH
+#define sigmoid sigmoid_jth
+#else
+extern /*inline*/ float sigmoid_original(float const xin);
+#define sigmoid sigmoid_original
+#endif
+
 typedef struct _neuralnet {
     int cInput, cHidden, cOutput, nTrained, fDirect;
     float rBetaHidden, rBetaOutput, *arHiddenWeight, *arOutputWeight,

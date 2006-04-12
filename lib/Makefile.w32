@@ -6,7 +6,7 @@ FLAGS= -Wall $(COMPOPT) $(DEFS)
 TARGET = libevent.a
 
 SOURCE=	dynarray fifo hash heap \
-	list neuralnet mt19937ar isaac md5
+	list neuralnet neuralnetsse mt19937ar isaac md5
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
@@ -22,6 +22,10 @@ $(TARGET): obj $(OBJECTS)
 
 obj:
 	@mkdir $@
+
+obj/neuralnetsse.o: neuralnetsse.c
+	@echo Compiling neuralnetsse
+	@${CC} $(FLAGS) -msse $(INCLUDE) -o $@ -c $<
 
 obj/%.o: %.c
 	@echo Compiling $<

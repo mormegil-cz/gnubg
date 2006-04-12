@@ -1,3 +1,7 @@
+Fri Apr 29 21:16:41 CEST 2004  Jon Kinsey
+
+	* neualnetsse.c: Split out SSE code to seperate file
+
 Wed May  4 18:10:43 GMT  2005  Jim Segrave <jes@jes-2.demon.nl>
 
 	* sse.h: add CVS tag 
