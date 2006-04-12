@@ -1,3 +1,8 @@
+Thu Apr 13 01:37:29 CEST 2006 Christian Anthon
+	* Make Jon's sse-splitup actually compile on linux. Moved
+	SSE_Support() to neuralnet.c to make makeweights compile. Added some
+	autoconf magick.
+
 Tue Apr 12 07:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* backgammon.h +various: Tidy up min/max to use MIN/MAX everywhere

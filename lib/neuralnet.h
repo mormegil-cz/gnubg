@@ -65,4 +65,6 @@ extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf );
 extern void 
 ComputeSigTable (void);
 
+extern int SSE_Supported();
+
 #endif

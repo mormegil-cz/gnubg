@@ -658,6 +658,4 @@ baseInputs(int anBoard[2][25], float arInput[]);
 extern void 
 CalculateRaceInputs(int anBoard[2][25], float inputs[]);
 
-extern int SSE_Supported();
-
 #endif

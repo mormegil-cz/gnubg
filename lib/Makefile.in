@@ -65,7 +65,7 @@ libevent_a_LIBADD =
 am_libevent_a_OBJECTS = buffer.$(OBJEXT) dynarray.$(OBJEXT) \
 	event.$(OBJEXT) fifo.$(OBJEXT) hash.$(OBJEXT) heap.$(OBJEXT) \
 	list.$(OBJEXT) neuralnet.$(OBJEXT) mt19937ar.$(OBJEXT) \
-	isaac.$(OBJEXT) md5.$(OBJEXT)
+	isaac.$(OBJEXT) md5.$(OBJEXT) neuralnetsse.$(OBJEXT)
 libevent_a_OBJECTS = $(am_libevent_a_OBJECTS)
 am_hashtest_OBJECTS = hashtest.$(OBJEXT) hash.$(OBJEXT)
 hashtest_OBJECTS = $(am_hashtest_OBJECTS)
@@ -206,6 +206,8 @@ NAS_LIBS = @NAS_LIBS@
 OBJEXT = @OBJEXT@
 OS_DARWINPPC_FALSE = @OS_DARWINPPC_FALSE@
 OS_DARWINPPC_TRUE = @OS_DARWINPPC_TRUE@
+OS_SOLARIS_FALSE = @OS_SOLARIS_FALSE@
+OS_SOLARIS_TRUE = @OS_SOLARIS_TRUE@
 OS_WIN32_FALSE = @OS_WIN32_FALSE@
 OS_WIN32_TRUE = @OS_WIN32_TRUE@
 PACKAGE = @PACKAGE@
@@ -235,6 +237,7 @@ RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SRCONV = @SRCONV@
+SSE_CFLAGS = @SSE_CFLAGS@
 STRIP = @STRIP@
 THREAD_LIBS = @THREAD_LIBS@
 TR = @TR@
@@ -308,10 +311,10 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libevent.a
 libevent_a_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
-	neuralnet.c mt19937ar.c isaac.c md5.c
+	neuralnet.c mt19937ar.c isaac.c md5.c neuralnetsse.c
 
 noinst_HEADERS = buffer.h cache.h dynarray.h event.h fifo.h hash.h heap.h \
-	list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h
+	list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h ../eval.h
 
 noinst_TEXINFOS = event.texi
 hashtest_SOURCES = hashtest.c hash.c
@@ -386,6 +389,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt19937ar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/neuralnet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/neuralnetsse.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -524,6 +528,7 @@ check-TESTS: $(TESTS)
 	else :; fi
 
 distdir: $(DISTFILES)
+	$(mkdir_p) $(distdir)/..
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -641,6 +646,9 @@ uninstall-am: uninstall-info-am
 	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-info-am
 
+
+neuralnetsse.o: neuralnetsse.c
+	$(COMPILE) $(SSE_CFLAGS) neuralnetsse.c -c -o neuralnetsse.o
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

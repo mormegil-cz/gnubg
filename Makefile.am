@@ -26,6 +26,7 @@ SOUND_SOURCES =
 SOUND_LIBS = 
 endif
 
+
 ## timecontrol
 if USE_TIMECONTROL
 TIME_SOURCES = timecontrol.h timecontrol.c tctutorial.h
