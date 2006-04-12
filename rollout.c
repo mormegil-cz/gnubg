@@ -33,6 +33,10 @@
 #endif
 #endif
 
+#ifndef min
+#define min(x,y)   (((x) > (y)) ? (y) : (x))
+#endif
+
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>
