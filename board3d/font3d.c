@@ -373,7 +373,7 @@ void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int 
  so it may well cause problems on different platforms / opengl implementations */
 #if WIN32
 /* Need to set the callback calling convention for windows */
-#define TESS_CALLBACK CALLBACK
+#define TESS_CALLBACK APIENTRY
 #else
 #define TESS_CALLBACK
 #endif
