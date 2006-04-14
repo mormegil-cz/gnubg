@@ -1,3 +1,7 @@
+Tue Apr 14 09:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* export.c : Fix 3d png export (and 3d preview bars in appearance dialog)
+
 Thu Apr 13 01:37:29 CEST 2006 Christian Anthon
 	* Make Jon's sse-splitup actually compile on linux. Moved
 	SSE_Support() to neuralnet.c to make makeweights compile. Added some

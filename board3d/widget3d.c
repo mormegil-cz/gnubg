@@ -425,7 +425,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 	gldrawable = GDK_GL_DRAWABLE(glpixmap);
 	glPixmapContext = gdk_gl_context_new (gldrawable, NULL, FALSE, GDK_GL_RGBA_TYPE);
 
-	InitBoardPreview(bd);
+	InitBoard3d(bd);
 
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return 0;
@@ -483,7 +483,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 {
 	SetupVisual();
 
-	InitBoardPreview(bd);
+	InitBoard3d(bd);
 
 	return ppm;
 }

@@ -569,7 +569,7 @@ extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind)
 	dialogParent = parent;
 	refWind = wind;
 	if (!xppm)
-		xppm = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
+		xppm = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, 24);
 	CreatePreview();
 }
 
