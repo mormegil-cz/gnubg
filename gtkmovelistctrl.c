@@ -27,6 +27,8 @@
 #include "format.h"
 #include "drawboard.h"
 #include "gtkchequer.h"
+#include "string.h"
+
 
 extern float rBest;
 extern GtkStyle *psHighlight;
