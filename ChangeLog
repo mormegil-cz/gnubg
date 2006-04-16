@@ -1,3 +1,7 @@
+Sun Apr 16 12:48:31 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* rollout.c: Use abs in time check
+	* gnubg.py : Fix typo
+
 Tue Apr 14 09:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* export.c : Fix 3d png export (and 3d preview bars in appearance dialog)

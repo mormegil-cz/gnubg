@@ -83,7 +83,7 @@ def exportBad(baseName) :
           if skillBad(analysis.get("cube-skill", None)) :
             bad = True
         elif type == "take" or type == "drop" :
-          if badSkill(prevSkill) :
+          if skillBad(prevSkill) :
             # Already exported
             bad = False
 

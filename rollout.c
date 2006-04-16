@@ -967,7 +967,7 @@ int UpdateTimePassed()
 	static double lasttime = -1;
 	double current = get_time();
 
-	if (current - lasttime > 1000)
+	if (abs(current - lasttime) > 1000)
 	{
 		lasttime = current;
 		return TRUE;
