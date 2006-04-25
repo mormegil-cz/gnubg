@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-04-22 18:04+0200\n"
-"PO-Revision-Date: 2006-04-22 18:18+0200\n"
+"POT-Creation-Date: 2006-04-25 16:27+0200\n"
+"PO-Revision-Date: 2006-04-25 16:26+0200\n"
 "Last-Translator: \n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2388,7 +2388,7 @@ msgstr ""
 
 #: gnubg.c:1011
 msgid "Rename items in the external relational database"
-msgstr ""
+msgstr "Benenne die Elemente in der externen relationalen Datenbank um"
 
 #: gnubg.c:1013
 msgid "Query the relational database"
@@ -3560,7 +3560,7 @@ msgstr "Wähle aus, ob das Spielfeld beim Computerzug erneuert werden soll"
 
 #: gnubg.c:1861
 msgid "Dock or float windows"
-msgstr ""
+msgstr "Integrierte oder frei schwebende Fensterelemente"
 
 #: gnubg.c:1864
 msgid "Control position evaluation parameters"
@@ -3734,7 +3734,7 @@ msgstr "Setze die (addierte) Gesamtzeit für das Match"
 
 #: gnubg.c:1946
 msgid "Set time control transition"
-msgstr ""
+msgstr "Bestimme den Übergang in der Zeitkontrolle"
 
 #: gnubg.c:1947
 msgid "Set time control type"
@@ -3751,6 +3751,8 @@ msgstr "Zeige das Theoriefenster an"
 #: gnubg.c:1954
 msgid "Change if icons and/or text are shown on toolbar"
 msgstr ""
+"Bestimme, ob Symbole und/oder Text in der Werkzeugleiste gezeigt werden "
+"sollen"
 
 #: gnubg.c:1957
 msgid "Control training parameters"
@@ -3850,7 +3852,7 @@ msgstr "Zeige, ob dies die 'Crawford'-Partie ist"
 
 #: gnubg.c:2014
 msgid "Display contributors to gnubg"
-msgstr ""
+msgstr "Zeige die Mitwirkenden des Projekts \"Gnubg\""
 
 #: gnubg.c:2015
 msgid "Display the current cube value and owner"
@@ -5749,67 +5751,67 @@ msgstr "/_Bearbeiten/_Einfügen"
 
 #: gtkgame.c:1970
 msgid "/_View"
-msgstr "/_Betrachte"
+msgstr "/_Ansicht"
 
 #: gtkgame.c:1971
 msgid "/_View/_Game record"
-msgstr "/_Betrachte/_Partieaufzeichnung"
+msgstr "/_Ansicht/_Partieaufzeichnung"
 
 #: gtkgame.c:1973
 msgid "/_View/_Analysis"
-msgstr "/_Betrachte/_Analyse"
+msgstr "/_Ansicht/_Analyse"
 
 #: gtkgame.c:1975
 msgid "/_View/_Commentary"
-msgstr "/_Betrachte/_Kommentare"
+msgstr "/_Ansicht/_Kommentare"
 
 #: gtkgame.c:1977
 msgid "/_View/_Message"
-msgstr "/_Betrachte/_Meldung"
+msgstr "/_Ansicht/_Meldung"
 
 #: gtkgame.c:1979
 msgid "/_View/_Theory"
-msgstr "/_Betrachte/_Theorie"
+msgstr "/_Ansicht/_Theorie"
 
 #: gtkgame.c:1981
 msgid "/_View/_Command"
-msgstr "/_Betrachte/_Kommandos"
+msgstr "/_Ansicht/_Kommandos"
 
 #: gtkgame.c:1983 gtkgame.c:1987 gtkgame.c:1997 gtkgame.c:2000
 msgid "/_View/-"
-msgstr "/_Betrachte/-"
+msgstr "/_Ansicht/-"
 
 #: gtkgame.c:1984
 msgid "/_View/_Dock panels"
-msgstr "/_Betrachte/Angedockte Fenster"
+msgstr "/_Ansicht/Angedockte Fenster"
 
 #: gtkgame.c:1985
 msgid "/_View/Restore panels"
-msgstr "/_Betrachte/Stelle alle Fenster dar"
+msgstr "/_Ansicht/Stelle alle Fenster dar"
 
 #: gtkgame.c:1986
 msgid "/_View/Hide panels"
-msgstr "/_Betrachte/Verstecke alle Felder"
+msgstr "/_Ansicht/Verstecke alle Felder"
 
 #: gtkgame.c:1988
 msgid "/_View/_Toolbar"
-msgstr "/_Betrachte/_Werkzeugleiste"
+msgstr "/_Ansicht/_Werkzeugleiste"
 
 #: gtkgame.c:1989
 msgid "/_View/_Toolbar/Text only"
-msgstr "/_Betrachte/_Werkzeugleiste/Nur Text"
+msgstr "/_Ansicht/_Werkzeugleiste/Nur Text"
 
 #: gtkgame.c:1991
 msgid "/_View/_Toolbar/Icons only"
-msgstr "/_Betrachte/_Werkzeugleiste/Nur Symbole"
+msgstr "/_Ansicht/_Werkzeugleiste/Nur Symbole"
 
 #: gtkgame.c:1993
 msgid "/_View/_Toolbar/Both"
-msgstr "/_Betrachte/_Werkzeugleiste/Beides"
+msgstr "/_Ansicht/_Werkzeugleiste/Beides"
 
 #: gtkgame.c:1995
 msgid "/_View/Full screen"
-msgstr "/_Betrachte/Vollbild"
+msgstr "/_Ansicht/Vollbild"
 
 #: gtkgame.c:1998
 msgid "/_View/Switch to xD view"
@@ -5817,11 +5819,11 @@ msgstr ""
 
 #: gtkgame.c:2001
 msgid "/_View/Gu_ile"
-msgstr "/_Betrachte/Guile"
+msgstr "/_Ansicht/Guile"
 
 #: gtkgame.c:2002
 msgid "/_View/_Python shell (IDLE)..."
-msgstr "/_Betrachte/Python-Shell (IDLE)..."
+msgstr "/_Ansicht/Python-Shell (IDLE)..."
 
 #: gtkgame.c:2004
 msgid "/_Game"
@@ -6624,11 +6626,11 @@ msgstr "Reduzierte Abschätzung"
 
 #: gtkgame.c:4596
 msgid "Pruning neural nets"
-msgstr ""
+msgstr "Beschneide das neuronale Netz"
 
 #: gtkgame.c:4601
 msgid "Use neural net pruning"
-msgstr ""
+msgstr "Benutze Beschneidung des neuronalen Netzes"
 
 #: gtkgame.c:4610 set.c:118
 msgid "Cubeful evaluations"
@@ -7316,11 +7318,11 @@ msgstr "Wenn aktiviert, verschwindet diese Meldung nicht wieder"
 
 #: gtkgame.c:9221
 msgid "Switch to 3D view"
-msgstr ""
+msgstr "Wechsle in die 3D Ansicht"
 
 #: gtkgame.c:9223
 msgid "Switch to 2D view"
-msgstr ""
+msgstr "Wechsle in die 2D Ansicht"
 
 #: gtkgame.c:9488
 #, c-format
@@ -7511,7 +7513,7 @@ msgstr "99"
 
 #: gtkgamelist.c:293
 msgid " (set board AAAAAAAAAAAAAA)"
-msgstr ""
+msgstr " (set board AAAAAAAAAAAAAA)"
 
 #: gtkmet.c:160 gtkmet.c:177
 #, c-format
@@ -8592,7 +8594,7 @@ msgstr ""
 
 #: gtkoptions.c:1499
 msgid "Display colours for marked moves in game list"
-msgstr ""
+msgstr "Stelle markierte Züge in der Zugliste farbig dar"
 
 #: gtkoptions.c:1503
 msgid ""
@@ -8793,7 +8795,7 @@ msgstr ""
 
 #: gtkprefs.c:447
 msgid "Texture type"
-msgstr ""
+msgstr "Oberflächenstruktur"
 
 #: gtkprefs.c:455
 msgid "All of piece"
@@ -9176,7 +9178,7 @@ msgstr ""
 
 #: gtkprefs.c:1545
 msgid "Show move indicator"
-msgstr ""
+msgstr "Zeige die Zugmöglichkeiten"
 
 #: gtkprefs.c:1546
 msgid "Show or hide arrow indicating who is moving"
@@ -10507,7 +10509,7 @@ msgstr ""
 #: makehyper.c:731
 #, c-format
 msgid "*** Iteration %03d *** \n"
-msgstr ""
+msgstr "***Wiederholung %03d*** \n"
 
 #: makehyper.c:741
 #, c-format
@@ -11386,12 +11388,12 @@ msgstr "Geschätzte verbleibende Zeit %s\n"
 #: progress.c:1248
 #, c-format
 msgid "Estimated SE for \"%s\" after %d trials %s\n"
-msgstr ""
+msgstr "Geschätzter Standardfehler für \"%s\" nach %d Läufen %s\n"
 
 #: progress.c:1251
 #, c-format
 msgid "Estimated SE after %d trials %s\n"
-msgstr ""
+msgstr "Geschätzter Standardfehler nach %d Läufeb %s\n"
 
 #: progress.c:1262
 #, c-format
@@ -11602,7 +11604,7 @@ msgstr ""
 #: relational.c:650 relational.c:1050
 #, c-format
 msgid "Error getting item no %d\n"
-msgstr ""
+msgstr "Fehler im Element Nr.%d\n"
 
 #: relational.c:660
 #, c-format
@@ -11621,7 +11623,7 @@ msgstr "Unbekannter Typ"
 #: relational.c:675 relational.c:1109
 #, c-format
 msgid "Item no. %d is not a sequence\n"
-msgstr ""
+msgstr "Element Nr.%d is keine Sequenz\n"
 
 #: relational.c:688 relational.c:751
 msgid "Player not in database"
@@ -11704,7 +11706,7 @@ msgstr ""
 #: relational.c:1064
 #, c-format
 msgid "Error getting sub item no (%d, %d)\n"
-msgstr ""
+msgstr "Fehler im Unterelement Nr (%d, %d)\n"
 
 #: relational.c:1089
 msgid "[null]"
@@ -11720,7 +11722,7 @@ msgstr "Du mußt eine sql-Abfrage bestimmen"
 
 #: relational.c:1142
 msgid "No rows found.\n"
-msgstr ""
+msgstr "Keine Reihen gefunden.\n"
 
 #: relational.c:1204 relational.c:1218
 msgid "Error running database command"
@@ -11731,6 +11733,8 @@ msgid ""
 "Player name already exists.  Use the link button to combine different "
 "nicknames for the same player"
 msgstr ""
+"Spielername existiert bereits.  Benutze den \"link\" Knopf, um verschiedene "
+"Spitznamen für den gleichen Spieler miteinander zu verbinden"
 
 #: renderprefs.c:594
 #, c-format
@@ -12413,12 +12417,12 @@ msgstr "%s benutzt nun die Abschätzung ohne Doppler.\n"
 #: set.c:1005
 #, c-format
 msgid "%s will use pruning.\n"
-msgstr ""
+msgstr "%s benutzt Beschneidung.\n"
 
 #: set.c:1006
 #, c-format
 msgid "%s will not use pruning.\n"
-msgstr ""
+msgstr "%s benutzt keine Beschneidung.\n"
 
 #: set.c:1018
 #, c-format
@@ -13278,7 +13282,7 @@ msgstr "Kann \"Post-Crawford\" nicht in Sitzungen um Geld setzen. "
 
 #: set.c:2757
 msgid "Incorrect syntax for set warning command."
-msgstr ""
+msgstr "Fehlerhafte Syntax im \"set warning\" Kommand."
 
 #: set.c:2765 set.c:2817
 #, c-format
@@ -14227,11 +14231,11 @@ msgstr ""
 
 #: show.c:129
 msgid "Using pruning neural nets."
-msgstr ""
+msgstr "Benutze beschnittene neuronale Netze"
 
 #: show.c:130
 msgid "Not using pruning neural nets."
-msgstr ""
+msgstr "Benutzte keine beschnittenen neuronalen Netze"
 
 #: show.c:135
 #, c-format
@@ -15718,22 +15722,22 @@ msgstr "Zeitkontrolle: %s\n"
 #: timecontrol.c:356
 #, c-format
 msgid "%*sPlain timing\n"
-msgstr ""
+msgstr "%*s einfache Zeit\n"
 
 #: timecontrol.c:359
 #, c-format
 msgid "%*sFischer timing\n"
-msgstr ""
+msgstr "%*s Fischers Zeit\n"
 
 #: timecontrol.c:362
 #, c-format
 msgid "%*sBronstein timing\n"
-msgstr ""
+msgstr "%*s Bronstein Zeit\n"
 
 #: timecontrol.c:365
 #, c-format
 msgid "%*sHourglass timing\n"
-msgstr ""
+msgstr "%*s Sanduhr Zeit\n"
 
 #: timecontrol.c:376
 msgid "lose match\n"
@@ -15752,7 +15756,7 @@ msgstr "Des %*sGegners nächste Zeitkontrolle: %s\n"
 #: timecontrol.c:437
 #, c-format
 msgid "%*sTransition: %s - %s\n"
-msgstr ""
+msgstr "%*s Übergang: %s - %s\n"
 
 #: timecontrol.c:549
 #, c-format
