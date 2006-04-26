@@ -644,11 +644,11 @@ void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
       fl = arEPC[ 0 ] >= 100.0f || arEPC[ 1 ] >= 100.0f;
       gtk_label_set_text ( GTK_LABEL ( bd->epclabel0 ), _("epc: ") );
       gtk_label_set_text ( GTK_LABEL ( bd->epclabel1 ), _("epc: ") );
-      pc = g_strdup_printf( fl ? "%.0f (%+.0f)" : "%.1f (%+.1f)", 
+      pc = g_strdup_printf( fl ? "%.2f (%+.2f)" : "%.2f (%+.2f)", 
                            arEPC[ !f ], arEPC[ !f ] - arEPC[ f ] );
       gtk_label_set_text ( GTK_LABEL ( bd->epc0 ), pc );
       g_free( pc );
-      pc = g_strdup_printf( fl ? "%.0f (%+.0f)" : "%.1f (%+.1f)", 
+      pc = g_strdup_printf( fl ? "%.2f (%+.2f)" : "%.2f (%+.2f)", 
                            arEPC[ f ], arEPC[ f ] - arEPC[ ! f ] );
       gtk_label_set_text ( GTK_LABEL ( bd->epc1 ), pc );
       g_free( pc );
