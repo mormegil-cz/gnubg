@@ -70,7 +70,6 @@ Dmitri I GOULIAEV,Russian
 EOF
 
 cat > $credit <<EOF
-Elias Kritikos
 Misja Alma
 Christian Anthon
 Kazuaki Asai
@@ -115,6 +114,7 @@ Johnny Kirk
 Gerhard Knop
 Robert Konigsberg
 Martin Krainer
+Elias Kritikos
 Corrin Lakeland
 Tim Laursen
 Eli Liang
@@ -144,6 +144,7 @@ James Rech
 Jared Riley
 Klaus Rindholt
 Oliver Riordan
+Alex Romosan
 Hans-Juergen Schaefer
 Steve Schreiber
 Hugh Sconyers
