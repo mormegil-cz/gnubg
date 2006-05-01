@@ -116,7 +116,7 @@ static void Draw(Material* pMat)
 		char buf[100];
 		strcpy(buf, TEXTURE_PATH);
 		strcat(buf, pMat->textureInfo->file);
-		LoadTexture(&texture, buf, pMat->textureInfo->format);
+		LoadTexture(&texture, buf);
 
 		gluQuadricTexture(qobj, GL_TRUE);
 

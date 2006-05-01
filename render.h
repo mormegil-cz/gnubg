@@ -51,11 +51,6 @@ typedef struct _Texture
 #define FILENAME_SIZE 15
 #define NAME_SIZE 20
 
-typedef enum _TextureFormat
-{
-	TF_BMP, TF_PNG, TF_COUNT
-} TextureFormat;
-
 typedef enum _TextureType
 {
 	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
@@ -66,7 +61,6 @@ typedef struct _TextureInfo
 	char file[FILENAME_SIZE + 1];
 	char name[NAME_SIZE + 1];
 	TextureType type;
-	TextureFormat format;
 } TextureInfo;
 
 typedef struct _Material

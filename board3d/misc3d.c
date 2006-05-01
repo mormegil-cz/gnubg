@@ -51,6 +51,8 @@ extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
 extern void waveFlag(BoardData* bd, float wag);
 extern float getDiceSize(BoardData* bd);
+static
+void SetTexture(BoardData* bd, Material* pMat, const char* filename);
 
 /* Test function to show normal direction */
 void CheckNormal()
@@ -242,7 +244,6 @@ int IsSet(int flags, int bit)
 list textures;
 
 char* TextureTypeStrs[TT_COUNT] = {"general", "piece", "hinge"};
-char* TextureFormatStrs[TF_COUNT] = {"bmp", "png"};
 
 GList *GetTextureList(int type)
 {
@@ -293,14 +294,9 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		char *szFile = PathSearch( file, szDataDirectory );
 		if (szFile && !access(szFile, R_OK))
 		{
-			int len = strlen(file);
 			/* Add entry for unknown texture */
 			TextureInfo text;
 			strcpy(text.file, file);
-			if (len > 4 && !strcasecmp(&file[len - 4], ".png"))
-				text.format = TF_PNG;
-			else
-				text.format = TF_BMP;
 			strcpy(text.name, file);
 			text.type = TT_NONE;	/* Don't show in lists */
 
@@ -320,7 +316,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 }
 
 #define TEXTURE_FILE "textures.txt"
-#define TEXTURE_FILE_VERSION 2
+#define TEXTURE_FILE_VERSION 3
 
 void LoadTextureInfo(int FirstPass)
 {	/* May be called several times, no errors shown on first pass */
@@ -375,35 +371,6 @@ void LoadTextureInfo(int FirstPass)
 		}
 		else
 			strcpy(text.file, buf);
-
-		/* format */
-		if (!fgets(buf, BUF_SIZE, fp))
-		{
-			g_print("Error in texture file info.\n");
-			return;
-		}
-		len = strlen(buf);
-		if (len > 0 && buf[len - 1] == '\n')
-		{
-			len--;
-			buf[len] = '\0';
-		}
-		found = -1;
-		for (i = 0; i < TF_COUNT; i++)
-		{
-			if (!strcasecmp(buf, TextureFormatStrs[i]))
-			{
-				found = i;
-				break;
-			}
-		}
-		if (found == -1)
-		{
-			g_print("Unknown texture format %s.  Entry ignored.\n", buf);
-			err = 1;
-		}
-		else
-			text.format = (TextureFormat)i;
 
 		/* name */
 		if (!fgets(buf, BUF_SIZE, fp))
@@ -468,7 +435,7 @@ void LoadTextureInfo(int FirstPass)
 void DeleteTexture(Texture* texture)
 {
 	if (texture->texID)
-		glDeleteTextures(1, &texture->texID);
+		glDeleteTextures(1, (GLuint *) &texture->texID);
 
 	texture->texID = 0;
 }
@@ -476,7 +443,7 @@ void DeleteTexture(Texture* texture)
 void CreateTexture(int* pID, int width, int height, unsigned char* bits)
 {
 	/* Create texture */
-	glGenTextures(1, pID);
+	glGenTextures(1, (GLuint *) pID);
 	glBindTexture(GL_TEXTURE_2D, *pID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -484,17 +451,20 @@ void CreateTexture(int* pID, int width, int height, unsigned char* bits)
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
 }
 
-int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
+int LoadTexture(Texture* texture, const char* filename)
 {
 	unsigned char* bits = 0;
 	int n;
 	char *szFile = PathSearch( filename, szDataDirectory );
-	FILE *fp;
-
+	GError *pix_error = NULL;
+	GdkPixbuf *pixbuf;
+	
 	if (!szFile)
 		return 0;
+ 
+	pixbuf = gdk_pixbuf_new_from_file(szFile, &pix_error);
 
-	if (!(fp = fopen( szFile, "rb"))) {
+	if (pix_error) {
 		g_print("Failed to open texture: %s\n", szFile );
 		free( szFile );
 		return 0;	/* failed to load file */
@@ -502,28 +472,17 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 
 	free( szFile );
 
-	switch(format)
-	{
-	case TF_BMP:
-		bits = LoadDIBTexture(fp, &texture->width, &texture->height);
-		break;
-#if HAVE_LIBPNG
-	case TF_PNG:
-		bits = LoadPNGTexture(fp, &texture->width, &texture->height);
-		break;
-#endif
-	default:
-		g_print("Unknown texture type for texture %s\n", filename);
-		return 0;	/* failed to load file */
-	}
-
-	fclose(fp);
+	bits = gdk_pixbuf_get_pixels(pixbuf);
+	
+	texture->width = gdk_pixbuf_get_width(pixbuf); 
+	texture->height = gdk_pixbuf_get_height(pixbuf);
 
 	if (!bits)
 	{
 		g_print("Failed to load texture: %s\n", filename);
 		return 0;	/* failed to load file */
 	}
+	
 	if (texture->width != texture->height)
 	{
 		g_print("Failed to load texture %s. width (%d) different to height (%d)\n",
@@ -541,7 +500,7 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 
 	CreateTexture(&texture->texID, texture->width, texture->height, bits);
 
-	free(bits);	/* Release loaded image data */
+	g_object_unref(pixbuf);
 
 	return 1;
 }
@@ -553,7 +512,7 @@ void GetTexture(BoardData* bd, Material* pMat)
 		char buf[100];
 		strcpy(buf, TEXTURE_PATH);
 		strcat(buf, pMat->textureInfo->file);
-		SetTexture(bd, pMat, buf, pMat->textureInfo->format);
+		SetTexture(bd, pMat, buf);
 	}
 	else
 		pMat->pTexture = 0;
@@ -831,12 +790,12 @@ void initDT(diceTest* dt, int x, int y, int z)
 float ***Alloc3d(int x, int y, int z)
 {	/* Allocate 3d array */
 	int i, j;
-	float ***array = (float ***)malloc(sizeof(float) * x);
+	float ***array = (float ***)malloc(sizeof(float*) * x);
 	for (i = 0; i < x; i++)
 	{
-		array[i] = (float **)malloc(sizeof(float) * y);
+		array[i] = (float **)malloc(sizeof(float*) * y);
 		for (j = 0; j < y; j++)
-			array[i][j] = (float *)malloc(sizeof(float) * z);
+			array[i][j] = (float *)malloc(sizeof(float*) * z);
 	}
 	return array;
 }
@@ -2133,9 +2092,9 @@ void CloseBoard3d(BoardData* bd)
 
 	/* Random logo */
 	if (rand() % 2)
-		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp", TF_BMP);
+		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp");
 	else
-		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo2.bmp", TF_BMP);
+		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo2.bmp");
 
 	animStartTime = get_time();
 	bd->perOpen = 0;
@@ -2197,7 +2156,8 @@ void SetupSimpleMat(Material* pMat, float r, float g, float b)
 	SetupMat(pMat, r, g, b, r, g, b, 0, 0, 0, 0, 0);
 }
 
-void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureFormat format)
+static
+void SetTexture(BoardData* bd, Material* pMat, const char* filename)
 {
 	/* See if already loaded */
 	int i;
@@ -2231,7 +2191,7 @@ void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureForm
 		return;
 	}
 
-	if (LoadTexture(&bd->textureList[bd->numTextures], filename, format))
+	if (LoadTexture(&bd->textureList[bd->numTextures], filename))
 	{
 		/* Remeber name */
 		bd->textureName[bd->numTextures] = malloc(strlen(nameStart) + 1);

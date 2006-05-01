@@ -114,7 +114,7 @@ static void realize(GtkWidget *widget, void* arg)
 	BuildFont3d(&fonts);
 
 	total.texID = 0;
-	LoadTexture(&total, TEXTURE_PATH"total.bmp", TF_BMP);
+	LoadTexture(&total, TEXTURE_PATH"total.bmp");
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
