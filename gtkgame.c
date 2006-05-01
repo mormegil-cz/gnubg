@@ -426,8 +426,9 @@ int frozen = FALSE;
 
 static guint nStdin, nDisabledCount = 1;
 
-#if GTK_CHECK_VERSION(1,3,0)
-static char *ToUTF8( unsigned char *sz ) {
+#if 0 
+/* GTK_CHECK_VERSION(1,3,0) */
+static unsigned char *ToUTF8( unsigned char *sz ) {
 
     static unsigned char szOut[ 128 ], *pch;
 
@@ -8821,7 +8822,7 @@ extern void GTKMatchInfo( void ) {
     GTKAllowStdin();
 
     if( fOK ) {
-	int nYear, nMonth, nDay;
+	unsigned int nYear, nMonth, nDay;
 	
 	gtk_signal_disconnect( GTK_OBJECT( pwDialog ), id );
 	

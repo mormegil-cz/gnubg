@@ -1,3 +1,8 @@
+Mon May 1  22:06:34 2006 Øystein Johansen <oystein@gnubg.org>
+
+	* renderprefs.c: Apply Alex patch.
+	* texture.txt: Bump version
+
 Sun Apr 16 12:48:31 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* rollout.c: Use abs in time check
 	* gnubg.py : Fix typo

@@ -6536,6 +6536,7 @@ extern void UserCommand( char *szCommand ) {
 #if USE_GTK
     if( !fTTY ) {
 	fInterrupt = FALSE;
+	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
 	HandleCommand( sz, acTop );
 	ResetInterrupt();
 
