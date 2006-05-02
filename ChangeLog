@@ -1,3 +1,6 @@
+Tue May  2 00:33:07 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* gtkgame.c: fix display of gtkeval window
+
 Mon May 1  22:06:34 2006 Øystein Johansen <oystein@gnubg.org>
 
 	* renderprefs.c: Apply Alex patch.
