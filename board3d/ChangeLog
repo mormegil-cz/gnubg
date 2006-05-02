@@ -1,3 +1,6 @@
+Tue May  2 13:48:20 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* Makefile.in, Makefile.am: remove texture3d
+
 Mon May 1  22:06:34 2006 Øystein Johansen <oystein@gnubg.org>
 
 	* misc3d.c: LoadTexture (and otheres) Use GdkPixbif functions
