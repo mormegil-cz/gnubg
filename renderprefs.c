@@ -158,21 +158,21 @@ static int SetColourF( float arColour[ 4 ], char *sz ) {
 #endif /* USE_GTK */
 
 #if USE_BOARD3D
-static char * SetMaterialCommon(Material* pMat, char *sz)
+static int SetMaterialCommon(Material* pMat, char *sz)
 {
 	float opac;
 	char* pch;
 
 	if (SetColourF(pMat->ambientColour, sz) != 0)
-		return (char*)0;
+		return -1;
 	sz += strlen(sz) + 1;
 
 	if (SetColourF(pMat->diffuseColour, sz) != 0)
-		return (char*)0;
+		return -1;
 	sz += strlen(sz) + 1;
 
 	if (SetColourF(pMat->specularColour, sz) != 0)
-		return (char*)0;
+		return -1;
 
 	if (sz)
 		sz += strlen(sz) + 1;
@@ -206,42 +206,38 @@ static char * SetMaterialCommon(Material* pMat, char *sz)
 	{
 		sz += strlen(sz) + 1;
 		if (sz && *sz)
-			return sz;
+			return (int)sz;
 	}
-	return (char*)0;
+	return 0;
 }
 
 static int SetMaterial(Material* pMat, char *sz)
 {
-	int result = -1;
 	if (fX)
 	{
-		sz = SetMaterialCommon(pMat, sz);
+		sz = (char*)SetMaterialCommon(pMat, sz);
 		pMat->textureInfo = 0;
 		pMat->pTexture = 0;
-		if (sz != 0)
+		if (sz > 0)
 		{
 			FindTexture(&pMat->textureInfo, sz);
-			sz = (char*)0;
-			result = 0;
+			sz = 0;
 		}
 	}
-	return result;
+	return (int)sz;
 }
 
 static int SetMaterialDice(Material* pMat, char *sz, int* flag)
 {
-	int result = -1;
-	sz = SetMaterialCommon(pMat, sz);
+	sz = (char*)SetMaterialCommon(pMat, sz);
 	/* die colour same as chequer colour */
 	*flag = TRUE;
-	if (sz != 0)
+	if (sz > 0)
 	{
 		*flag = (toupper(*sz) == 'Y');
 		sz = 0;
-		result = 0;
 	}
-	return result;
+	return (int)sz;
 }
 
 #endif
@@ -683,7 +679,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"bgintrays=%c "
 		"roundedpoints=%c "
 		"piecetype=%d "
- 		"piecetexturetype=%d "
+		"piecetexturetype=%d "
 		"chequers3d0=%s "
 		"chequers3d1=%s "
         "dice3d0=%s "
@@ -739,7 +735,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->bgInTrays ? 'y' : 'n',
 		prd->roundedPoints ? 'y' : 'n',
 		prd->pieceType,
- 		prd->pieceTextureType,
+		prd->pieceTextureType,
 		WriteMaterial(&prd->ChequerMat[0]),
 		WriteMaterial(&prd->ChequerMat[1]),
 		WriteMaterialDice(prd, 0),
