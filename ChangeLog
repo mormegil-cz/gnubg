@@ -1,3 +1,7 @@
+Mon May 8  21:32:34 2006 Øystein Johansen <oystein@gnubg.org>
+	
+	* renderprefs.c: A revised 64 bit patch from Alex applied.
+
 Sun May 7  18:49:34 2006 Øystein Johansen <oystein@gnubg.org>
 	
 	* renderprefs.c: Revert Alex' patch.
