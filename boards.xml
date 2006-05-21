@@ -1152,5 +1152,109 @@
 
    </board-design>
 
+   <board-design>
+
+      <about>
+         <title>Zolda</title>
+         <author>Wilson Amaral Jorge</author>
+      </about>
+
+      <design>
+         board=#FFFCC4;0.20
+         border=#009E00
+         wood=alder
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#FFFFFF;1.00;1.60;0.90;30.50
+         chequers1=#D11616;1.00;1.50;1.00;30.00
+         dice0=#FFFEFE;0.80;3.00;n
+         dice1=#FF2626;1.00;30.00;n
+         dot0=#0D0D0D
+         dot1=#F8FB0A
+         cube=#F7FFAE
+         points0=#D11717;0.20
+         points1=#4CA57F;0.20
+         hinges3d=y
+         piecetype=0
+         piecetexturetype=1
+         roundededges=y
+         bgintrays=n
+         roundedpoints=n
+         lighttype=p
+         lightposx=0.000000 lightposy=1.000000 lightposz=3.000000
+         lightambient=45 lightdiffuse=75 lightspecular=95
+         chequers3d0=#FFFFFF;#FFFFFF;#FF0000;60;100
+         chequers3d1=#D11616;#D11616;#3F3F3F;70;100
+         dice3d0=#FFFEFE;#FFFEFE;#FF0000;100;100;n
+         dice3d1=#FF2626;#FF2626;#3F3F3F;70;100;n
+         dot3d0=#0D0D0D;#0D0D0D;#4C4F4C;128;100
+         dot3d1=#F8FB0A;#F8FB0A;#1B1B1B;128;100
+         cube3d=#F7FFAE;#F7FFAE;#CBCCCB;80;100
+         cubetext3d=#000066;#00007F;#00008C;98;100
+         base3d=#FFFCC4;#FFFCC4;#000000;128;100;felt.png
+         points3d0=#D11717;#D11717;#49181D;128;100;felt.png
+         points3d1=#4CA57F;#4CA57F;#47514A;128;100;felt.png
+         border3d=#009E00;#009E00;#37465C;128;100;alder.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
+         numbers3d=#AB78CC;#E7E675;#010101;116;100
+         background3d=#D45588;#933E98;#CA41C7;116;0;felt.png
+
+      </design>
+
+   </board-design>
+
+
+   <board-design>
+
+      <about>
+         <title>Mundica</title>
+         <author>Wilson Amaral Jorge</author>
+      </about>
+
+      <design>
+         board=#0B0B0B;0.20
+         border=#FFFFFF
+         wood=willow
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#F9F9F9;1.00;2.80;0.30;20.10
+         chequers1=#DEDA19;1.00;3.50;0.00;4.90
+         dice0=#FFFFFF;0.30;3.00;n
+         dice1=#EEFB15;0.20;20.10;n
+         dot0=#010101
+         dot1=#1E0101
+         cube=#FFFFFF
+         points0=#42CC22;0.00
+         points1=#FDFF40;0.00
+         hinges3d=y
+         piecetype=0
+         piecetexturetype=1
+         roundededges=y
+         bgintrays=n
+         roundedpoints=n
+         lighttype=p
+         lightposx=0.000000 lightposy=1.000000 lightposz=3.000000
+         lightambient=45 lightdiffuse=75 lightspecular=95
+         chequers3d0=#F9F9F9;#F9F9F9;#FF0000;60;100
+         chequers3d1=#DEDA19;#DEDA19;#3F3F3F;70;100
+         dice3d0=#FFFFFF;#FFFFFF;#FF0000;100;100;n
+         dice3d1=#EEFB15;#EEFB15;#3F3F3F;70;100;n
+         dot3d0=#010101;#010101;#4C4F4C;128;100
+         dot3d1=#1E0101;#1E0101;#1B1B1B;128;100
+         cube3d=#FFFFFF;#FFFFFF;#CBCCCB;80;100
+         cubetext3d=#000066;#00007F;#00008C;98;100
+         base3d=#0B0B0B;#0B0B0B;#000000;128;100;felt.png
+         points3d0=#42CC22;#42CC22;#49181D;128;100;felt.png
+         points3d1=#FDFF40;#FDFF40;#47514A;128;100;felt.png
+         border3d=#FFFFFF;#FFFFFF;#37465C;128;100;alder.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
+         numbers3d=#AB78CC;#E7E675;#010101;116;100
+         background3d=#D45588;#933E98;#CA41C7;116;0;felt.png
+
+   </design>
+
+   </board-design>
 
 </board-designs>
