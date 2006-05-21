@@ -4434,8 +4434,9 @@ extern void PromptForExit( void ) {
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
     }
+	SoundWait();	// Wait for sound to finish before final close
 #endif
-    
+
     if( fInteractive )
 	PortableSignalRestore( SIGINT, &shInterruptOld );
     
