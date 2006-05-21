@@ -148,7 +148,7 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)  $(BR1_SOURCES)
+	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makebearoff_DEPENDENCIES = lib/libevent.a
 
@@ -177,7 +177,7 @@ bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)  $(BR1_SOURCES)
+	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)
 bearoffdump_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 bearoffdump_DEPENDENCIES = lib/libevent.a
 
@@ -196,7 +196,7 @@ EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 
 DISTCLEANFILES=gnubg.wd
 
-br1.c:	makebearoff makebearoff1 gnubg_os0.bd
+br1.c:	makebearoff$(EXEEXT) makebearoff1$(EXEEXT) gnubg_os0.bd
 	if [ ! -f br1.c ]; then \
 	   ./makebearoff1 -o br1.c < gnubg_os0.bd; \
 	fi
