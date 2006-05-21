@@ -164,7 +164,7 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	BoardData* bd = BOARD(pwBoard)->board_data;
 	BoardData bdpw;
 	renderdata rd;
-	GdkPixmap *ppm = gdk_pixmap_new(bd->drawing_area->window, nSizeX * nSize, nSizeY * nSize, 24);
+	GdkPixmap *ppm = gdk_pixmap_new(NULL, nSizeX * nSize, nSizeY * nSize, 24);
 	void *glpixPreview;
 
 	/* Copy current settings */

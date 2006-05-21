@@ -51,8 +51,7 @@ extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
 extern void waveFlag(BoardData* bd, float wag);
 extern float getDiceSize(BoardData* bd);
-static
-void SetTexture(BoardData* bd, Material* pMat, const char* filename);
+static void SetTexture(BoardData* bd, Material* pMat, const char* filename);
 
 /* Test function to show normal direction */
 void CheckNormal()
