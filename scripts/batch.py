@@ -24,6 +24,13 @@
  by Jon Kinsey <Jon_Kinsey@hotmail.com>, 2004
 \n"""
 
+# Achim Mueller <ace@gnubg.org>
+#
+# Usage: start gnubg -t
+# (no game) load python batch.py
+# Answer questions regarding source and destination directory
+# Enjoy the analysis
+
 import os
 
 # file extensions, names and gnubg import commands
