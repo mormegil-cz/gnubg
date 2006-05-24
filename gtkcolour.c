@@ -68,6 +68,7 @@ static void render_pixmap( GtkColourPicker *pcp ) {
 
     GdkGC *gc0, *gc1;
     GdkColor col;
+    double opac;
     
     if( !pcp->ppm )
 	return;
@@ -77,15 +78,20 @@ static void render_pixmap( GtkColourPicker *pcp ) {
     gc0 = gdk_gc_new( pcp->ppm );
     gc1 = gdk_gc_new( pcp->ppm );
 
-    col.red = ( pcp->arColour[ 0 ] * pcp->arColour[ 3 ] + 0.66667 * ( 1 - pcp->arColour[ 3 ] ) ) * 0xFFFF;
-    col.green = ( pcp->arColour[ 1 ] * pcp->arColour[ 3 ] + 0.66667 * ( 1 - pcp->arColour[ 3 ] ) ) * 0xFFFF;
-    col.blue = ( pcp->arColour[ 2 ] * pcp->arColour[ 3 ] + 0.66667 * ( 1 - pcp->arColour[ 3 ] ) ) * 0xFFFF;
+    if (!pcp->hasOpacity)
+      opac = 1;
+    else
+      opac = pcp->arColour[3];
+
+    col.red = ( pcp->arColour[ 0 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF;
+    col.green = ( pcp->arColour[ 1 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF;
+    col.blue = ( pcp->arColour[ 2 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF;
 
     set_gc_colour( gc0, gtk_widget_get_colormap( GTK_WIDGET( pcp ) ), &col );
     
-    col.red = ( pcp->arColour[ 0 ] * pcp->arColour[ 3 ] + 0.33333 * ( 1 - pcp->arColour[ 3 ] ) ) * 0xFFFF;
-    col.green = ( pcp->arColour[ 1 ] * pcp->arColour[ 3 ] + 0.33333 * ( 1 - pcp->arColour[ 3 ] ) ) * 0xFFFF;
-    col.blue = ( pcp->arColour[ 2 ] * pcp->arColour[ 3 ] + 0.33333 * ( 1 - pcp->arColour[ 3 ] ) ) * 0xFFFF;
+    col.red = ( pcp->arColour[ 0 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF;
+    col.green = ( pcp->arColour[ 1 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF;
+    col.blue = ( pcp->arColour[ 2 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF;
 
     set_gc_colour( gc1, gtk_widget_get_colormap( GTK_WIDGET( pcp ) ), &col );
     
@@ -106,8 +112,6 @@ extern void gtk_colour_picker_set_colour( GtkColourPicker *pcp,
 					  gdouble *ar ) {
 
     memcpy(pcp->arColour, ar, sizeof (pcp->arColour));
-    if (!pcp->hasOpacity)
-		pcp->arColour[3] = 1.0;
 
     render_pixmap( pcp );
 }
