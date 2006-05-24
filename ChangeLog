@@ -1,4 +1,8 @@
-Sat May 24 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue May 24 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c : Fixed memory overwrite and .mat export for foreign languages
+
+Tue May 24 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* render.c, htmlimages.c : Rewrite libart 2d board arrows using cairo
 

@@ -3326,8 +3326,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
 extern void ShowBoard( void )
 {
     char szBoard[ 2048 ];
-    char sz[ 32 ], szCube[ 32 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
-	szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
+    char sz[ 50 ], szCube[ 50 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
+	szScore0[ 50 ], szScore1[ 50 ], szMatch[ 50 ];
 #if USE_TIMECONTROL
     char szTime0[20], szTime1[20];
     char *apch[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
@@ -4741,7 +4741,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
        it's not broken, so I won't fix it. */
     
     if( iGame >= 0 )
-	fprintf( pf, _(" Game %d\n"), iGame + 1 );
+	fprintf( pf, " Game %d\n", iGame + 1 );
 
     if( anScore ) {
 	sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
