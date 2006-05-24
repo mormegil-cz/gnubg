@@ -39,26 +39,20 @@
 #include <alloca.h>
 #endif
 
-#if HAVE_LIBART
-#include <libart_lgpl/art_misc.h>
-#include <libart_lgpl/art_affine.h>
-#include <libart_lgpl/art_point.h>
-#include <libart_lgpl/art_vpath.h>
-#include <libart_lgpl/art_bpath.h>
-#include <libart_lgpl/art_vpath_bpath.h>
-#include <libart_lgpl/art_svp.h>
-#include <libart_lgpl/art_svp_vpath.h>
-#include <libart_lgpl/art_gray_svp.h>
-#include <libart_lgpl/art_rgb.h>
-#include <libart_lgpl/art_rgb_svp.h>
-#endif
-
 #include "render.h"
 #include "renderprefs.h"
 #include "boarddim.h"
 
+#if USE_GTK2
+#include <gtk/gtk.h>
+#endif
+
 static randctx rc;
 #define RAND irand( &rc )
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 /* aaanPositions[Clockwise][x][point number][x, y. deltay] */
 int positions[ 2 ][ 30 ][ 3 ] = { {
@@ -2382,184 +2376,59 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
     }
 }
 
-#if HAVE_LIBART
-static void InsertAlpha( unsigned char *puchDest, int nDestStride,
-		         unsigned char *puchAlpha, int nAlphaStride,
-		         int cx, int cy ) {
-/* insert an alpha channel mask into an 24+8-bit RGBA buffer of
-   dimension cx x cy */
+#if USE_GTK2
+static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int up)
+{
+	cairo_surface_t* surface = cairo_image_surface_create_for_data (puch, CAIRO_FORMAT_RGB24,
+												nSize * ARROW_WIDTH,
+												nSize * ARROW_HEIGHT,
+												nSize * ARROW_WIDTH * 4);
+	cairo_t* cr = cairo_create(surface);
 
-    int x;
+#define AR_LINE_WIDTH 0.01
+#define AR_WIDTH 0.4
+#define AR_HEAD_SIZE 0.4
 
-    nDestStride -= cx * 4;  /* 8 bit alpha + 24 packed rgb bits */
-    nAlphaStride -= cx * 1; /* 8 bit alpha */
+	cairo_scale(cr, nSize * ARROW_WIDTH, nSize * ARROW_HEIGHT);
 
-    for( ; cy; cy-- ) {
-	for( x = cx; x; x-- ) {
-	    puchDest += 3;  /* advance to alpha */
-	    *puchDest++ = *puchAlpha++;
+	if (!up)
+	{	/* Rotate by 180 degrees */
+		cairo_translate(cr, .5, .5);
+		cairo_rotate(cr, M_PI);
+		cairo_translate(cr, -.5, -.5);
 	}
-	puchDest += nDestStride;
-	puchAlpha += nAlphaStride;
-    }
+
+	cairo_set_line_width (cr, AR_LINE_WIDTH);
+
+	cairo_set_source_rgba (cr, 0, 0, 0, 1);
+	cairo_rectangle(cr, 0, 0, 1, 1);
+	cairo_fill(cr);
+
+	cairo_move_to (cr, (1 - AR_WIDTH) / 2, 1 - AR_LINE_WIDTH);
+	cairo_line_to (cr, 1 - (1 - AR_WIDTH) / 2, 1 - AR_LINE_WIDTH);
+	cairo_line_to (cr, 1 - (1 - AR_WIDTH) / 2, AR_HEAD_SIZE);
+	cairo_line_to (cr, 1 - AR_LINE_WIDTH, AR_HEAD_SIZE);
+	cairo_line_to (cr, 0.5, AR_LINE_WIDTH);
+	cairo_line_to (cr, AR_LINE_WIDTH, AR_HEAD_SIZE);
+	cairo_line_to (cr, (1 - AR_WIDTH) / 2, AR_HEAD_SIZE);
+	cairo_close_path(cr);
+
+	cairo_set_source_rgba (cr, arColour[2], arColour[1], arColour[0], 1);
+	cairo_fill_preserve (cr);
+	cairo_set_source_rgba (cr, 0, 0, 0, 1);
+	cairo_stroke(cr);
+
+	cairo_destroy (cr);
+	cairo_surface_destroy(surface);
 }
 
-static ArtBpath * Make_Path_Arrow( void ) {
-/* set up a B-spline vector path representing an arrow */
-
-    ArtBpath *vec = NULL;
-
-    vec = art_new( ArtBpath, 10 );
-    vec[0].code = ART_MOVETO;
-    vec[0].y1 = 0.;
-    vec[0].y1 = 0.;
-    vec[0].y2 = 0.;
-    vec[0].y2 = 0.;
-    vec[0].x3 = 5.;
-    vec[0].y3 = 0.;
-    vec[1].code = ART_LINETO;
-    vec[1].y1 = 0.;
-    vec[1].y1 = 0.;
-    vec[1].y2 = 0.;
-    vec[1].y2 = 0.;
-    vec[1].x3 = 0.;
-    vec[1].y3 = 4.;
-    vec[2].code = ART_LINETO;
-    vec[2].y1 = 0.;
-    vec[2].y1 = 0.;
-    vec[2].y2 = 0.;
-    vec[2].y2 = 0.;
-    vec[2].x3 = 3.;
-    vec[2].y3 = 4.;
-    vec[3].code = ART_LINETO;
-    vec[3].y1 = 0.;
-    vec[3].y1 = 0.;
-    vec[3].y2 = 0.;
-    vec[3].y2 = 0.;
-    vec[3].x3 = 3.;
-    vec[3].y3 = 10.;
-    vec[4].code = ART_LINETO;
-    vec[4].y1 = 0.;
-    vec[4].y1 = 0.;
-    vec[4].y2 = 0.;
-    vec[4].y2 = 0.;
-    vec[4].x3 = 7.;
-    vec[4].y3 = 10.;
-    vec[5].code = ART_LINETO;
-    vec[5].y1 = 0.;
-    vec[5].y1 = 0.;
-    vec[5].y2 = 0.;
-    vec[5].y2 = 0.;
-    vec[5].x3 = 7.;
-    vec[5].y3 = 4.;
-    vec[6].code = ART_LINETO;
-    vec[6].y1 = 0.;
-    vec[6].y1 = 0.;
-    vec[6].y2 = 0.;
-    vec[6].y2 = 0.;
-    vec[6].x3 = 10.;
-    vec[6].y3 = 4.;
-    vec[7].code = ART_LINETO;
-    vec[7].y1 = 0.;
-    vec[7].y1 = 0.;
-    vec[7].y2 = 0.;
-    vec[7].y2 = 0.;
-    vec[7].x3 = 5.;
-    vec[7].y3 = 0.;
-    vec[8].code = ART_END;
-
-    return vec;
-}
-#endif /* HAVE_LIBART */
-
-#if HAVE_LIBART
-static void Render_Path( art_u8 *puchRGBAbuf, const ArtBpath* bpPath,
-			 int iWidth, int iHeight,
-			 art_u32 fg_color, art_u32 bg_color ) {
-/* render an anti-aliased vector path filled with fg_color into an RGBA buffer
-   of dimension iWidth x iHeight, make background transparent (alpha mask) */
-
-    art_u8 *puchRGBbuf = NULL;
-    art_u8 *puchAlphabuf = NULL;
-    double adAffine[6];
-    ArtBpath *bpTransformed = NULL;
-    ArtVpath *vpTransformed = NULL;
-    ArtSVP *svp = NULL;
-
-    art_affine_scale( adAffine, iWidth/10.0, iHeight/10.0 ); /* assume a vector area of [0,10] */
-    bpTransformed = art_bpath_affine_transform( bpPath, adAffine );
-
-    vpTransformed = art_bez_path_to_vec( bpTransformed, 0. );
-    svp = art_svp_from_vpath( vpTransformed );
-    art_free( vpTransformed );
-    art_free( bpTransformed );
-
-    puchRGBbuf = art_new( art_u8, iWidth*iHeight*3 );	/* 24 packed rgb bits */
-    assert( puchRGBbuf );
-    /* fill with background colour */
-    art_rgb_fill_run( puchRGBbuf, 0x00, 0x00, 0x00, iWidth*iHeight );
-    /* render foreground */
-    art_rgb_svp_aa( svp, 0, 0, iWidth, iHeight, fg_color, bg_color,
-		    puchRGBbuf, iWidth*3, NULL );
-    /* convert */
-    assert( puchRGBAbuf );
-    Copy_RGB_to_RGBA( puchRGBAbuf, iWidth*4, puchRGBbuf, iWidth*3,
-		      iWidth, iHeight, 0xFF );
-    art_free( puchRGBbuf );
-    /* render alpha */
-    puchAlphabuf = art_new( art_u8, iWidth*iHeight*1 );	/* 8 bit alpha */
-    assert( puchAlphabuf );
-    art_gray_svp_aa( svp, 0, 0, iWidth, iHeight, puchAlphabuf, iWidth*1 );
-    /* integrate alpha information from puchAlphabuf into puchRGBAbuf */
-    InsertAlpha( puchRGBAbuf, iWidth*4,
-		 puchAlphabuf, iWidth*1, iWidth, iHeight );
-    art_free( puchAlphabuf );
-    art_svp_free(svp);
-}
-#endif /* HAVE_LIBART */
-
-#if HAVE_LIBART
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
-			  unsigned char* puch1, int nStride ) {
-/* render arrows for direction of play and player on turn */
-
-    ArtBpath *bpArrow = NULL;
-    ArtBpath *bpTmp = NULL;
-    double adAffine[6];
-    art_u32 fg_colour = (0xFF << 24) |
-			( (art_u8) ( prd->aarColour[ 0 ][ 0 ] * 0xFF ) << 16 ) |
-			( (art_u8) ( prd->aarColour[ 0 ][ 1 ] * 0xFF ) <<  8 ) |
-			( (art_u8) ( prd->aarColour[ 0 ][ 2 ] * 0xFF ) );	/* AARRGGBB */
-    art_u32 bg_colour = 0xFFC9CACB;
-
-    bpArrow = Make_Path_Arrow();
-
-    /* player 0 */
-    Render_Path( (art_u8 *) puch0, bpArrow, prd->nSize * ARROW_WIDTH,
-		 prd->nSize * ARROW_HEIGHT, fg_colour, bg_colour );
-
-    /* set up a 180Å∞ rotation around (5,5) */
-    adAffine[0] = -1.;
-    adAffine[1] = 0.;
-    adAffine[2] = 0.;
-    adAffine[3] = -1.;
-    adAffine[4] = 10.;
-    adAffine[5] = 10.;
-    bpTmp = art_bpath_affine_transform( bpArrow, adAffine );
-    art_free( bpArrow );
-
-    fg_colour = (0xFF << 24) |
-		( (art_u8) ( prd->aarColour[ 1 ][ 0 ] * 0xFF ) << 16 ) |
-		( (art_u8) ( prd->aarColour[ 1 ][ 1 ] * 0xFF ) <<  8 ) |
-		( (art_u8) ( prd->aarColour[ 1 ][ 2 ] * 0xFF ) );	/* AARRGGBB */
-
-    /* player 1 */
-    Render_Path( (art_u8 *) puch1, bpTmp, prd->nSize * ARROW_WIDTH,
-		 prd->nSize * ARROW_HEIGHT, fg_colour, bg_colour );
-
-    art_free( bpTmp );
+			  unsigned char* puch1, int nStride )
+{
+	RenderArrow(puch0, prd->aarColour[0], prd->nSize, TRUE);
+	RenderArrow(puch1, prd->aarColour[1], prd->nSize, FALSE);
 }
-#endif /* HAVE_LIBART */
+#endif
 
 static void PointArea( renderdata *prd, int n, int *px, int *py,
 		       int *pcx, int *pcy ) {
@@ -2831,8 +2700,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
     }
 
     /* draw arrow for direction of play */
-
-#if HAVE_LIBART
+#if USE_GTK2
     if( prd->showMoveIndicator &&
 			intersects( x, y, cx, cy,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
@@ -2849,9 +2717,8 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			 prd->nSize * ARROW_WIDTH * 4,
 			 0, 0,
 			 prd->nSize * ARROW_WIDTH, prd->nSize * ARROW_HEIGHT );
-    }
-#endif /* HAVE_LIBART */
-
+		}
+#endif
 }
 
 extern void
@@ -2908,13 +2775,13 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     pri->achResign = malloc ( nSize * nSize * RESIGN_WIDTH * RESIGN_HEIGHT * 4 );
     pri->achResignFaces = malloc ( nSize * nSize * RESIGN_LABEL_WIDTH * 
 				   RESIGN_LABEL_HEIGHT * 3 * 3 );
-#if HAVE_LIBART
-    pri->auchArrow[0] = art_new( art_u8, nSize * nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
-    pri->auchArrow[1] = art_new( art_u8, nSize * nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
+#if USE_GTK2
+    pri->auchArrow[0] = malloc(prd->nSize * prd->nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
+    pri->auchArrow[1] = malloc(prd->nSize * prd->nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
 #else
     pri->auchArrow[0] = NULL;
     pri->auchArrow[1] = NULL;
-#endif /* HAVE_LIBART */
+#endif
     for ( i = 0; i < 2; ++i )
       pri->achLabels[ i ] = malloc( nSize * nSize * BOARD_WIDTH * 
 				    BORDER_HEIGHT * 4 );
@@ -2933,10 +2800,10 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     RenderResign( prd, pri->achResign, nSize * RESIGN_WIDTH * 4 );
     RenderResignFaces( prd, pri->achResignFaces, nSize * RESIGN_LABEL_WIDTH * 3,
 		       pri->achResign, nSize * RESIGN_WIDTH * 4 );
-#if HAVE_LIBART
+#if USE_GTK2
 	if (prd->showMoveIndicator)
 		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_WIDTH * 4 );
-#endif /* HAVE_LIBART */
+#endif
 
     RenderBoardLabels( prd, pri->achLabels[ 0 ], pri->achLabels[ 1 ],
                        BOARD_WIDTH * nSize * 4 );
@@ -2961,10 +2828,10 @@ extern void FreeImages( renderimages *pri ) {
     free( pri->asRefract[ 1 ] );
     free( pri->achResign );
     free( pri->achResignFaces );
-#if HAVE_LIBART
-    art_free( pri->auchArrow[0] );
-    art_free( pri->auchArrow[1] );
-#endif /* HAVE_LIBART */
+#if USE_GTK2
+    free( pri->auchArrow[0] );
+    free( pri->auchArrow[1] );
+#endif
     for ( i = 0; i < 2; ++i )
       free( pri->achLabels[ i ] );
 }

@@ -44,20 +44,6 @@
 #include <malloc.h>
 #endif
 
-#if HAVE_LIBART
-#include <libart_lgpl/art_misc.h>
-#include <libart_lgpl/art_affine.h>
-#include <libart_lgpl/art_point.h>
-#include <libart_lgpl/art_vpath.h>
-#include <libart_lgpl/art_bpath.h>
-#include <libart_lgpl/art_vpath_bpath.h>
-#include <libart_lgpl/art_svp.h>
-#include <libart_lgpl/art_svp_vpath.h>
-#include <libart_lgpl/art_gray_svp.h>
-#include <libart_lgpl/art_rgb.h>
-#include <libart_lgpl/art_rgb_svp.h>
-#endif
-
 #include <glib.h>
 
 #include "backgammon.h"
@@ -91,7 +77,7 @@ unsigned char *auchBoard, *auchChequer[2], *auchChequerLabels, *auchLo, *auchHi,
 
 unsigned short *asRefract[2];
 
-#if HAVE_LIBART
+#if USE_GTK2
 unsigned char *auchArrow[ 2 ];
 #endif
 unsigned char *auchMidlb;
@@ -123,14 +109,13 @@ static void Write(const char* name, unsigned char* img, int cx, int cy)
 
 static void DrawArrow(int side, int player)
 { /* side 0 = left, 1 = right */
-#if HAVE_LIBART
-	int x, y;
-#endif
 	int offset_x = 0;
 
 	memcpy( auchMidlb, auchBoard, BOARD_WIDTH * s * BOARD_HEIGHT * s * 3 );
 
-#if HAVE_LIBART
+#if USE_GTK2
+{
+	int x, y;
 	ArrowPosition(side /* rd.fClockwise */, s, &x, &y);
 
 	AlphaBlendClip2( auchMidlb, boardStride,
@@ -143,6 +128,7 @@ static void DrawArrow(int side, int player)
 				0, 0,
 				s * ARROW_WIDTH,
 				s * ARROW_HEIGHT );
+}
 #endif
 
 	sprintf( pchFile, "b-mid%cb-%c.png", side ? 'r' : 'l', player ? 'o' : 'x' );
@@ -642,9 +628,9 @@ static void RenderObjects()
 			asRefract[ 1 ], CHEQUER_WIDTH * s * 4 );
 	RenderChequerLabels( &rd, auchChequerLabels, CHEQUER_LABEL_WIDTH * s * 3 );
 
-#if HAVE_LIBART
+#if USE_GTK2
 	RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4 );
-#endif /* HAVE_LIBART */
+#endif
 
 	/* Render numbers in both directions */
 	clockwise = rd.fClockwise;
@@ -702,9 +688,9 @@ static void AllocObjects()
 	s = exsExport.nHtmlSize;
 
 	auchMidlb = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
-#if HAVE_LIBART
-	for (i = 0; i < 2; i++)
-		auchArrow[i] = art_new( art_u8, s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT );
+#if USE_GTK2
+    auchArrow[0] = malloc(s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT);
+    auchArrow[1] = malloc(s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT);
 #endif
 
 	auchBoard = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
@@ -740,10 +726,10 @@ static void TidyObjects()
 {
 	int i, j, k;
 	free(auchMidlb);
-#if HAVE_LIBART
-	for (i = 0; i < 2; i++)
-		art_free( auchArrow[ i ] );
-#endif /* HAVE_LIBART */
+#if USE_GTK2
+	free(auchArrow[0]);
+	free(auchArrow[1]);
+#endif
 	free(szFile);
 	free(auchBoard);
 	for (i = 0; i < 2; i++)

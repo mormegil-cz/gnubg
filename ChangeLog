@@ -1,3 +1,7 @@
+Sat May 24 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* render.c, htmlimages.c : Rewrite libart 2d board arrows using cairo
+
 Sat May 21 15:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boards.xml : Added two new designs by Wilson Amaral Jorge.
