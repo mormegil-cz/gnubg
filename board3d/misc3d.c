@@ -456,12 +456,12 @@ int LoadTexture(Texture* texture, const char* filename)
 	int n;
 	char *szFile = PathSearch( filename, szDataDirectory );
 	GError *pix_error = NULL;
-	GdkPixbuf *pixbuf;
+	GdkPixbuf *fpixbuf, *pixbuf;
 	
 	if (!szFile)
 		return 0;
  
-	pixbuf = gdk_pixbuf_new_from_file(szFile, &pix_error);
+	fpixbuf = gdk_pixbuf_new_from_file(szFile, &pix_error);
 
 	if (pix_error) {
 		g_print("Failed to open texture: %s\n", szFile );
@@ -470,6 +470,9 @@ int LoadTexture(Texture* texture, const char* filename)
 	}
 
 	free( szFile );
+
+	pixbuf = gdk_pixbuf_flip(fpixbuf, FALSE);
+	g_object_unref(fpixbuf);
 
 	bits = gdk_pixbuf_get_pixels(pixbuf);
 	
