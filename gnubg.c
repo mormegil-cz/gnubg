@@ -124,7 +124,9 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #if USE_GTK
 #include <gtk/gtk.h>
+#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h>
+#endif
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
@@ -3114,7 +3116,7 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
 }
 
-#if USE_GTK
+#if USE_GTK && HAVE_GDK_GDKX_H
 static unsigned long nLastRequest;
 static guint nUpdate;
 
@@ -3297,6 +3299,7 @@ extern void ShowBoard( void )
 	   give it more until it's finished what it has.  (Always update
 	   the board immediately if nDelay is set, though -- show the user
 	   something while they're waiting!) */
+#if HAVE_GDK_GDKX_H
 	XEventsQueued( GDK_DISPLAY(), QueuedAfterReading );
 
 	/* Subtract and compare as signed, just in case the request numbers
@@ -3308,6 +3311,7 @@ extern void ShowBoard( void )
 
 	    return;
 	}
+#endif
     }
 #endif
     if( ms.gs == GAME_NONE ) {
@@ -3320,7 +3324,9 @@ extern void ShowBoard( void )
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		      ms.anScore[ 0 ], -1, -1, FALSE, anChequers[ ms.bgv ] );
+#if HAVE_GDK_GDKX_H
 	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
+#endif
 #else
             GameSet( &ewnd, anBoardTemp, 0, ap[ 1 ].szName, ap[ 0 ].szName,
                      ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], -1, -1 );
@@ -3451,7 +3457,9 @@ extern void ShowBoard( void )
 		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
 		  ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
 		  !nNextTurn, anChequers[ ms.bgv ] );
+#if HAVE_GDK_GDKX_H
 	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
+#endif
 #else
         GameSet( &ewnd, ms.anBoard, ms.fMove, ap[ 1 ].szName, ap[ 0 ].szName,
                  ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], ms.anDice[ 0 ],
@@ -3460,7 +3468,9 @@ extern void ShowBoard( void )
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
 #if USE_GTK
+#if HAVE_GDK_GDKX_H
 	XFlush( GDK_DISPLAY() );
+#endif
 #else
 	XFlush( ewnd.pdsp );
 #endif

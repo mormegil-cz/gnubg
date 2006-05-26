@@ -1,3 +1,7 @@
+Fri May 26 20:35:05 2006 Øystein Johansen <oystein@gnubg.org>
+
+	* gnubg.c: Simple Win32 fixes (Windows doesn't use gdkx.h)
+
 Fri May 26 11:51:05 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* Many files : Updated the autobuild system. Please read INSTALL in
 	the topdir. Gtk1 and guile are no longer supported.

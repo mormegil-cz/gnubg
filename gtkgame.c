@@ -39,7 +39,6 @@
 #define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #include <gtk/gtktext.h>
 
 #if HAVE_STROPTS_H
