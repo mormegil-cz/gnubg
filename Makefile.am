@@ -134,7 +134,7 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 
 
-pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml gnubg.xml @GTKDATA@ \
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ \
 	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql
 
 man_MANS = gnubg.6
@@ -189,7 +189,7 @@ distcheck-hook:
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
 	gnubg.gtkrc credits.sh xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS boards.xml gnubg.xml external_l.l external_y.y gnubg.games.sql \
+	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.games.sql \
 	$(BOARD3D_TEXTURE_FILES)
 
 DISTCLEANFILES=gnubg.wd

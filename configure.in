@@ -382,7 +382,6 @@ if test "$bearoff_database" = "static"; then
 fi
 
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
-AM_CONDITIONAL(XML_MANUAL, test "$no_libxml2" != "yes" -a "$gtk2" = "yes")
 
 dnl AC_ARG_WITH(freetype,[  --with-freetype         compile with freetype2 support])
 dnl if test "$with_freetype" != "no"; then

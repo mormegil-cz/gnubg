@@ -3,8 +3,8 @@
 <texinfo xml:lang="en">
   <setfilename>gnubg.xml</setfilename>
   <settitle>GNU Backgammon</settitle>
-  <setvalue name="UPDATED">16 November 2003</setvalue>
-  <setvalue name="UPDATED-MONTH">November 2003</setvalue>
+  <setvalue name="UPDATED">23 May 2006</setvalue>
+  <setvalue name="UPDATED-MONTH">May 2006</setvalue>
   <setvalue name="EDITION">0.14.3-devel</setvalue>
   <setvalue name="VERSION">0.14.3-devel</setvalue>
   <setvalue name="month-year">October, 2003</setvalue>
@@ -1050,7 +1050,7 @@ or
         <para><indexterm index="cp">import, batch</indexterm> <tt>gnubg</tt> doesn't support batch import and analysis using the GUI, but batch import is possible with the command line version of <tt>gnubg</tt>.</para>
         <para>Under Unix execute:</para>
         <para><code>gnubg -t &lt; <var>input-file</var> &gt; <var>output-file</var></code></para>
-        <para>Under Windows it depends on how your version of gnubg was build. For example, if you use the build by Øystein Johansen you should execute</para>
+        <para>Under Windows it depends on how your version of gnubg was build. For example, if you use the build by Oystein Johansen you should execute</para>
         <para><code>gnubg-no-gui.exe &lt; <var>input-file</var> &gt; <var>output-file</var></code></para>
         <para>The <var>input-file</var> must be carefully prepared. For example, it could look like:</para>
         <example xml:space="preserve">import sgg file1.sgg

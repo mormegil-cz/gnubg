@@ -6,15 +6,14 @@ import.texi install.texi intro.texi movefilters.texi opening.texi \
 playing.texi rules.texi saving.texi scripting.texi settings.texi \
 starting.texi training.texi version.texi
 
-if XML_MANUAL
-pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
-	rulfig4.png rulfig5.png annealing.png
-endif
+subdir = doc
+docfiles = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png  rulfig4.png rulfig5.png annealing.png
+docdir = $(pkgdatadir)/doc
+doc_DATA = ${docfiles}
 
-EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
-	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
-	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd \
-	annealing.png annealing.eps \
+EXTRA_DIST = ${docfiles} rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
+	annealing.gp annealing.txt fdl.texi \
+	annealing.eps \
 	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
 	mptp.gp mptp.png mptp.eps mptp.txt \
 	mgcd.gp mgcd.png mgcd.eps mgcd.txt \
