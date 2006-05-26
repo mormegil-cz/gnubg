@@ -122,16 +122,9 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <gnubgmodule.h>
 #endif
 
-#if USE_GUILE
-#include <libguile.h>
-#include "guile.h"
-#endif
-
 #if USE_GTK
 #include <gtk/gtk.h>
-#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h>
-#endif
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
@@ -2237,9 +2230,6 @@ int lastExportType = -1;
 char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
 
 char *aszBuildInfo[] = {
-#if USE_GUILE
-    N_ ("Guile supported."),
-#endif
 #if USE_PYTHON
     N_ ("Python supported."),
 #endif
@@ -2991,48 +2981,6 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    outputx();
 	    return;
 	} else if( *sz == ':' ) {
-	    /* Guile escape */
-#if USE_GUILE
-	    /* FIXME can we modify our SIGIO handler to handle X events
-	       directly (rather than setting fAction) while in Guile?
-	       If we do that, we have to reset the handler to the flag-setter
-	       when executing any callbacks from Guile.  It's probably
-	       a good idea to prohibit the execution of the ":" gnubg
-	       command from Guile... that's far too much reentrancy for
-	       good taste! */
-#if USE_GTK
-	    if( fX )
-		GTKDisallowStdin();
-#endif
-	    if( sz[ 1 ] ) {
-		/* Expression specified -- evaluate it */
-		SCM sResult;
-		psighandler sh;
-
-		PortableSignal( SIGINT, NULL, &sh, FALSE );
-		GuileStartIntHandler();
-		if( ( sResult = scm_internal_catch( SCM_BOOL_T,
-				    (scm_catch_body_t) scm_c_eval_string,
-				    sz + 1, scm_handle_by_message_noexit,
-				    NULL ) ) != SCM_UNSPECIFIED &&
-		    !cOutputDisabled ) {
-		    scm_write( sResult, SCM_UNDEFINED );
-		    scm_newline( SCM_UNDEFINED );
-		}
-		GuileEndIntHandler();
-		PortableSignalRestore( SIGINT, &sh );
-	    } else
-		/* No command -- start a Scheme shell */
-		scm_c_eval_string( "(top-repl)" );
-#if USE_GTK
-	    if( fX )
-		GTKAllowStdin();
-#endif
-#else
-	    outputl( _("This installation of GNU Backgammon was compiled "
-		     "without Guile support.") );
-	    outputx();
-#endif
 	    return;
 	}
         else if ( *sz == '>' ) {
@@ -3166,7 +3114,7 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
 }
 
-#if USE_GTK && HAVE_GDK_GDKX_H
+#if USE_GTK
 static unsigned long nLastRequest;
 static guint nUpdate;
 
@@ -3349,7 +3297,6 @@ extern void ShowBoard( void )
 	   give it more until it's finished what it has.  (Always update
 	   the board immediately if nDelay is set, though -- show the user
 	   something while they're waiting!) */
-#if HAVE_GDK_GDKX_H
 	XEventsQueued( GDK_DISPLAY(), QueuedAfterReading );
 
 	/* Subtract and compare as signed, just in case the request numbers
@@ -3361,7 +3308,6 @@ extern void ShowBoard( void )
 
 	    return;
 	}
-#endif
     }
 #endif
     if( ms.gs == GAME_NONE ) {
@@ -3374,9 +3320,7 @@ extern void ShowBoard( void )
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		      ms.anScore[ 0 ], -1, -1, FALSE, anChequers[ ms.bgv ] );
-#if HAVE_GDK_GDKX_H
 	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
-#endif
 #else
             GameSet( &ewnd, anBoardTemp, 0, ap[ 1 ].szName, ap[ 0 ].szName,
                      ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], -1, -1 );
@@ -3507,9 +3451,7 @@ extern void ShowBoard( void )
 		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
 		  ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
 		  !nNextTurn, anChequers[ ms.bgv ] );
-#if HAVE_GDK_GDKX_H
 	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
-#endif
 #else
         GameSet( &ewnd, ms.anBoard, ms.fMove, ap[ 1 ].szName, ap[ 0 ].szName,
                  ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], ms.anDice[ 0 ],
@@ -3518,9 +3460,7 @@ extern void ShowBoard( void )
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
 #if USE_GTK
-#if HAVE_GDK_GDKX_H	
 	XFlush( GDK_DISPLAY() );
-#endif
 #else
 	XFlush( ewnd.pdsp );
 #endif
@@ -4842,37 +4782,11 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
     }
 }
 
-#if USE_GUILE
-static SCM LoadCommandsGuileCatch( void *p, SCM sTag, SCM sArgs ) {
-
-    char *pch;
-    
-    if( SCM_SYMBOLP( sTag ) && ( pch = SCM_SYMBOL_CHARS( sTag ) ) &&
-	( !strcmp( pch, "quit" ) || !strcmp( pch, "end-of-file" ) ) )
-	return SCM_BOOL_T;
-    else
-	return scm_handle_by_message_noexit( p, sTag, sArgs ); /* SCM_BOOL_F */
-}
-
-static void LoadCommandsGuile( SCM s ) {
-
-    for(;;)
-	scm_read_and_eval_x( s );
-}
-#endif
-
 static void LoadCommands( FILE *pf, char *szFile ) {
     
     char sz[ 2048 ], *pch;
 
     outputpostpone();
-    
-#if USE_GUILE
-    /* We have to be conservative with input buffering, because if there
-       is a Guile escape in the file, we will want Guile to take over
-       parsing for us, and we won't want to have buffered ahead. */
-    setvbuf( pf, NULL, _IONBF, 0 );
-#endif
     
     for(;;) {
 	sz[ 0 ] = 0;
@@ -4899,40 +4813,6 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 
 	if( *sz == '#' ) /* Comment */
 	    continue;
-
-#if USE_GUILE
-	if( !strcmp( sz, ":" ) ) {
-	    /* Guile escape.  If we let HandleCommand() take care of this,
-	       it will start a REPL, which is not what we want; we need to
-	       read and evaluate expressions from the file ourselves. */
-	    SCM s;
-	    psighandler sh;
-
-#if USE_GTK
-	    if( fX )
-		GTKDisallowStdin();
-#endif
-	    PortableSignal( SIGINT, NULL, &sh, FALSE );
-	    GuileStartIntHandler();
-
-	    s = scm_fdes_to_port( fileno( pf ), "r0",
-				  scm_makfrom0str( szFile ) );
-	    scm_set_port_revealed_x( s, SCM_MAKINUM( 1 ) );
-
-	    while( SCM_FALSEP( scm_internal_catch(
-		SCM_BOOL_T, (scm_catch_body_t) LoadCommandsGuile,
-		s, LoadCommandsGuileCatch, NULL ) ) )
-		;
-	    
-	    GuileEndIntHandler();
-	    PortableSignalRestore( SIGINT, &sh );
-#if USE_GTK
-	    if( fX )
-		GTKAllowStdin();
-#endif
-	    continue;
-	}
-#endif
 
 #if USE_PYTHON
 
@@ -7536,9 +7416,9 @@ char* getenvvalue(char* str)
 #endif /* WIN32 */
 
 
-static void real_main( void *closure, int argc, char *argv[] ) {
+int main(int argc, char *argv[] ) {
 
-    char ch, *pch, *pchCommands = NULL, *pchGuileScript = NULL;
+    char ch, *pch, *pchCommands = NULL;
     char *pchPythonScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
     int i, j;
@@ -7668,7 +7548,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     while( ( ch = getopt_long( argc, argv, "cd:hsptvl:", ao + sizeof( ao ) /
 			       sizeof( ao[ 0 ] ) - 9, NULL ) ) != (char) -1 )
 	switch( ch ) {
-	case 's': /* guile script */
 	case 'c': /* commands */
         case 'p': /* python script */
 	case 't': /* tty */
@@ -7843,14 +7722,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'r': /* no-rc */
 	    fNoRC = TRUE;
 	    break;
-	case 's': /* guile script */
-#if !USE_GUILE
-	    fprintf( stderr, _("%s: option `-s' requires Guile\n"), argv[ 0 ] );
-	    exit( EXIT_FAILURE );
-#endif
-	    pchGuileScript = optarg;
-	    fInteractive = FALSE;
-	    break;
         case 'p': /* python script */
 #if !USE_PYTHON
             fprintf( stderr, 
@@ -8021,15 +7892,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #endif /* HAVE_SOCKETS */
 #endif /* WIN32 */
-
-#if USE_GUILE
-#  if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Initialising"), _("Guile"), 500 );
-#  endif    
-    GuileInitialise( szDataDirectory );
-#endif
-
 
 #if USE_PYTHON
 #  if USE_GTK
@@ -8209,14 +8071,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	exit( EXIT_SUCCESS );
     }
 
-#if USE_GUILE
-    if( pchGuileScript ) {
-	scm_primitive_load( scm_makfrom0str( pchGuileScript ) );
-        Shutdown();
-	exit( EXIT_SUCCESS );
-    }
-#endif
-
 #if USE_PYTHON
     if( pchPythonScript ) {
       FILE *pf = fopen( pchPythonScript, "r" );
@@ -8324,19 +8178,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    NextTurn( TRUE );
 	ResetInterrupt();
     }
-}
-
-extern int main( int argc, char *argv[] ) {
-
-#if USE_GUILE
-    scm_boot_guile( argc, argv, real_main, NULL );
-#else
-    real_main( NULL, argc, argv );
-#endif
-    /* should never return */
-    
     return EXIT_FAILURE;
 }
+
 
 /*
  * Command: convert normalised money equity to match winning chance.

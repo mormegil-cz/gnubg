@@ -27,9 +27,6 @@
 #include <alloca.h>
 #endif
 #include <gtk/gtk.h>
-#if USE_GTKEXTRA
-#include <gtkextra/gtksheet.h>
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -123,12 +120,8 @@ static GtkWidget
   int i, j;
   char sz[ 16 ];
   GtkWidget *pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL );
-#if USE_GTKEXTRA
-  GtkWidget *pwTable = gtk_sheet_new_browser( nRows, nCols, "" );
-#else
   GtkWidget *pwTable = gtk_table_new( nRows + 1, nCols + 1, TRUE );
   GtkWidget *pw;
-#endif
   GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 );
   mettable *pmt;
 
@@ -147,20 +140,13 @@ static GtkWidget
 
   gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );
 
-#if USE_GTKEXTRA
-  gtk_container_add( GTK_CONTAINER( pwScrolledWindow ), pwTable );
-#else
   gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(
                                                              pwScrolledWindow ), pwTable );
-#endif
 
   /* header for rows */
 
   for( i = 0; i < nCols; i++ ) {
     sprintf( sz, _("%d-away"), i + 1 );
-#if USE_GTKEXTRA
-    gtk_sheet_row_button_add_label( GTK_SHEET( pwTable ), i, sz );
-#else
     gtk_table_attach_defaults( GTK_TABLE( pwTable ),
                                pw = gtk_label_new( sz ),
                                i + 1, i + 2, 0, 1 );
@@ -168,16 +154,12 @@ static GtkWidget
       gtk_widget_set_name ( GTK_WIDGET ( pw ),
                             "gnubg-met-matching-score" );
     }
-#endif
   }
 
   /* header for columns */
 
   for( i = 0; i < nRows; i++ ) {
     sprintf( sz, _("%d-away"), i + 1 );
-#if USE_GTKEXTRA
-    gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
-#else
     gtk_table_attach_defaults( GTK_TABLE( pwTable ),
                                pw = gtk_label_new( sz ),
                                0, 1, i + 1, i + 2 );
@@ -185,7 +167,6 @@ static GtkWidget
       gtk_widget_set_name ( GTK_WIDGET ( pw ),
                             "gnubg-met-matching-score" );
     }
-#endif
 
   }
 
@@ -197,14 +178,9 @@ static GtkWidget
 
       pmt->aapwLabel[ i ][ j ] = gtk_label_new( NULL );
 
-#if USE_GTKEXTRA
-      gtk_sheet_attach_default ( GTK_SHEET ( pmt->pwTable ),
-                                 pmt->aapwLabel[ i ][ j ], i, j );
-#else
       gtk_table_attach_defaults( GTK_TABLE( pmt->pwTable ),
                                  pmt->aapwLabel[ i ][ j ],
                                  j + 1, j + 2, i + 1, i + 2 );
-#endif /* USE_GTKEXTRA */
 
       if ( i == nAway0 && j == nAway1 ) {
         gtk_widget_set_name ( GTK_WIDGET ( pmt->aapwLabel[ i ][ j ] ),
@@ -216,9 +192,7 @@ static GtkWidget
       }
     }
 
-#if !USE_GTKEXTRA
   gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
-#endif
 
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
                                   GTK_POLICY_AUTOMATIC,

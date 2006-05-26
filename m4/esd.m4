@@ -7,7 +7,7 @@
 dnl AM_PATH_ESD([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]])
 dnl Test for ESD, and define ESD_CFLAGS and ESD_LIBS
 dnl
-AC_DEFUN(AM_PATH_ESD,
+AC_DEFUN([AM_PATH_ESD],
 [dnl 
 dnl Get the cflags and libraries from the esd-config script
 dnl
@@ -38,6 +38,8 @@ AC_ARG_ENABLE(esdtest, [  --disable-esdtest       Do not try to compile and run 
   if test "$ESD_CONFIG" = "no" ; then
     no_esd=yes
   else
+    AC_LANG_SAVE
+    AC_LANG_C
     ESD_CFLAGS=`$ESD_CONFIG $esdconf_args --cflags`
     ESD_LIBS=`$ESD_CONFIG $esdconf_args --libs`
 
@@ -114,6 +116,7 @@ int main ()
 ],, no_esd=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
        CFLAGS="$ac_save_CFLAGS"
        LIBS="$ac_save_LIBS"
+       AC_LANG_RESTORE
      fi
   fi
   if test "x$no_esd" = x ; then
@@ -133,6 +136,8 @@ int main ()
           echo "*** Could not run ESD test program, checking why..."
           CFLAGS="$CFLAGS $ESD_CFLAGS"
           LIBS="$LIBS $ESD_LIBS"
+          AC_LANG_SAVE
+          AC_LANG_C
           AC_TRY_LINK([
 #include <stdio.h>
 #include <esd.h>
@@ -152,6 +157,7 @@ int main ()
           echo "*** may want to edit the esd-config script: $ESD_CONFIG" ])
           CFLAGS="$ac_save_CFLAGS"
           LIBS="$ac_save_LIBS"
+          AC_LANG_RESTORE
        fi
      fi
      ESD_CFLAGS=""
@@ -166,7 +172,7 @@ int main ()
 dnl AM_ESD_SUPPORTS_MULTIPLE_RECORD([ACTION-IF-SUPPORTS [, ACTION-IF-NOT-SUPPORTS]])
 dnl Test, whether esd supports multiple recording clients (version >=0.2.21)
 dnl
-AC_DEFUN(AM_ESD_SUPPORTS_MULTIPLE_RECORD,
+AC_DEFUN([AM_ESD_SUPPORTS_MULTIPLE_RECORD],
 [dnl
   AC_MSG_NOTICE([whether installed esd version supports multiple recording clients])
   ac_save_ESD_CFLAGS="$ESD_CFLAGS"

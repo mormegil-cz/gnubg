@@ -1,3 +1,7 @@
+Fri May 26 11:51:05 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* Many files : Updated the autobuild system. Please read INSTALL in
+	the topdir. Gtk1 and guile are no longer supported.
+
 Tue May 24 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c : Fixed memory overwrite and .mat export for foreign languages
@@ -3416,4 +3420,3 @@ Thu Jun 31 18:23:52 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkprefs.c (toggle_display_type): gtk_notebook_get_n_pages does
 	exist in gtk+ 2???
-

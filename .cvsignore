@@ -1,5 +1,6 @@
 .deps
 Makefile
+Makefile.in
 autom4te.cache
 config.cache
 config.h
@@ -18,3 +19,7 @@ stamp-*
 br1.c
 external_y.output
 bearoffdump
+.libs
+configure.scan
+config.h.in
+configure

@@ -68,8 +68,6 @@ export CFLAGS="$RPM_OPT_FLAGS"
             --infodir=%{prefix}/share/info \
             --mandir=%{prefix}/share/man \
             --without-gdbm \
-            --without-guile
-
 make
 
 
@@ -113,7 +111,7 @@ rm -f $RPM_BUILD_ROOT/usr/share/info/dir*
 - info now fits (stuff is FHS conform)
 
 * Thu Oct 23 2003 - <ace@gnubg.org>
-- disabled gdbm and guile
+- disabled gdbmguile
 - changed info- and manpath
 
 * Mon Oct 20 2003 - <ace@gnubg.org>

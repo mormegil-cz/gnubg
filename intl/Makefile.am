@@ -38,7 +38,7 @@ aliaspath = $(localedir)
 subdir = intl
 
 INSTALL = @INSTALL@
-INSTALL_DATA = @INSTALL_DATA@
+#INSTALL_DATA = @INSTALL_DATA@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 mkinstalldirs = $(SHELL) $(MKINSTALLDIRS)
 
@@ -64,17 +64,6 @@ LIBS = @LIBS@
 
 COMPILE = $(CC) -c $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(XCFLAGS)
 
-HEADERS = \
-  gmo.h \
-  gettextP.h \
-  hash-string.h \
-  loadinfo.h \
-  plural-exp.h \
-  eval-plural.h \
-  localcharset.h \
-  relocatable.h \
-  os2compat.h \
-  libgnuintl.h.in
 SOURCES = \
   bindtextdom.c \
   dcgettext.c \
@@ -98,7 +87,17 @@ SOURCES = \
   log.c \
   osdep.c \
   os2compat.c \
-  intl-compat.c
+  intl-compat.c \
+  gmo.h \
+  gettextP.h \
+  hash-string.h \
+  loadinfo.h \
+  plural-exp.h \
+  eval-plural.h \
+  localcharset.h \
+  relocatable.h \
+  os2compat.h \
+  libgnuintl.h.in
 OBJECTS = \
   bindtextdom.$lo \
   dcgettext.$lo \
@@ -159,8 +158,7 @@ LTV_CURRENT=5
 LTV_REVISION=0
 LTV_AGE=3
 
-.SUFFIXES:
-.SUFFIXES: .c .y .o .lo .sin .sed
+SUFFIXES=".c .y .o .lo .sin .sed"
 
 .c.o:
 	$(COMPILE) $<

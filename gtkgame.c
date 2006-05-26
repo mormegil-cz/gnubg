@@ -39,9 +39,7 @@
 #define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
-#endif
 #include <gtk/gtktext.h>
 
 #if HAVE_STROPTS_H
@@ -141,26 +139,6 @@ static char* GetText(GtkTextView* pwText)
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_widget_get_parent(w) ((w)->parent)
 #define gtk_style_get_font(s) ((s)->font)
-#endif
-
-#if !HAVE_GTK_OPTION_MENU_GET_HISTORY
-extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
-    
-    GtkWidget *active_widget;
-  
-    g_return_val_if_fail (GTK_IS_OPTION_MENU (option_menu), -1);
-
-    if (option_menu->menu) {
-	active_widget = gtk_menu_get_active (GTK_MENU (option_menu->menu));
-
-	if (active_widget)
-	    return g_list_index (GTK_MENU_SHELL (option_menu->menu)->children,
-				 active_widget);
-	else
-	    return -1;
-    } else
-	return -1;
-}
 #endif
 
 struct CommandEntryData_T cedDialog, cedPanel;
@@ -2408,9 +2386,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	pif, "/Train/Export database..." ), FALSE );
 #endif
 #endif
-
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/View/Guile" ), FALSE );
 
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pif, "/View/Python shell (IDLE)..." ), 

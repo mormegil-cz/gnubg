@@ -77,18 +77,17 @@ else
 PYTHON_SOURCES=
 endif
 
-COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
+COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ \
-              @GLIB_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
+              @FT2_CFLAGS@ @PYTHON_CFLAGS@ @GLIB_CFLAGS@
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @INTLLIBS@ @LIBXML2_LIBS@ \
+              @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
-	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
-        guile.h import.c import.h external.c external.h credits.h credits.c \
+	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c \
+        import.c import.h external.c external.h credits.h credits.c \
 	latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
@@ -107,8 +106,7 @@ gnubg_LDFLAGS= @PYTHON_LDFLAGS@
 
 if USE_GTK
 ## --- GTK
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
-           $(BOARD3D_INCS)
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) $(BOARD3D_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c \
 	gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
@@ -122,11 +120,11 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtkmovelist.c gtkmovelistctrl.c \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
-        @LIBART_LIBS@ $(BOARD3D_LIBS) @THREAD_LIBS@
+        $(BOARD3D_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
 ## --- Plain
-INCLUDES = $(COMMON_INCS) $(SOUND_INCS) @LIBART_CFLAGS@
+INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
 	$(FONT_SOURCES)  $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
@@ -136,8 +134,8 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 
 
-pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ @GUILEDATA@ \
-	$(BR1DATA) $(BOARD3DDATA) gnubg.sql
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml gnubg.xml @GTKDATA@ \
+	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql
 
 man_MANS = gnubg.6
 
@@ -189,9 +187,9 @@ distcheck-hook:
 	chmod -R a+w $(distdir)
 	-cp $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
-	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.sql \
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
+	gnubg.gtkrc credits.sh xboard.c xboard.h xgame.c xgame.h \
+	ABOUT-NLS boards.xml gnubg.xml external_l.l external_y.y gnubg.games.sql \
 	$(BOARD3D_TEXTURE_FILES)
 
 DISTCLEANFILES=gnubg.wd

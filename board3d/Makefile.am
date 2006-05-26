@@ -3,10 +3,10 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
-	-I$(top_srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
+	-I$(top_srcdir)/lib @LIBXML2_CFLAGS@ \
 	-I$(top_srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-	@FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @GTKGLEXT_CFLAGS@
+	@FT2_CFLAGS@ @GTKGLEXT_CFLAGS@
 
 noinst_LIBRARIES = libboard3d.a
 libboard3d_a_SOURCES = drawboard3d.c matrix.h mylist.c \

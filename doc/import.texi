@@ -128,7 +128,7 @@ Under Unix execute:
 @code{gnubg -t < @var{input-file} > @var{output-file}}
 
 Under Windows it depends on how your version of gnubg was build. For
-example, if you use the build by Øystein Johansen you should execute
+example, if you use the build by Oystein Johansen you should execute
 
 @code{gnubg-no-gui.exe < @var{input-file} > @var{output-file}}
 

@@ -45,6 +45,7 @@
 
 #if USE_GTK2
 #include <gtk/gtk.h>
+#include <cairo.h>
 #endif
 
 static randctx rc;
