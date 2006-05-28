@@ -422,8 +422,8 @@ CommandRelationalAddMatch( char *sz ) {
   }
 
   /* Warn if match is not finished or fully analyzed */
-  /*if (!GameOver())
-	  strcat(warnings, _("The match is not finished\n")); */
+  if (!GameOver())
+	  strcat(warnings, _("The match is not finished\n"));
   if (!MatchAnalysed())
 	  strcat(warnings, _("All of the match is not analyzed\n"));
 
