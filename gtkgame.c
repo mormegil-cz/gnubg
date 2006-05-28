@@ -9219,6 +9219,9 @@ SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
 		/* Make sure 2d pixmaps are correct */
 		board_free_pixmaps( bd );
 		board_create_pixmaps( pwBoard, bd );
+		/* Make sure dice are visible if rolled */
+		if (bd->diceShown == DICE_ON_BOARD && bd->x_dice[0] <= 0)
+			RollDice2d(bd);
 	}
 
 	DisplayCorrectBoardType(bd);
