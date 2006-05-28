@@ -77,6 +77,16 @@ style "movedone" = "default"
 
 widget "*.gnubg-move-done" style "movedone"
 
+#
+# Style for the move list, used in detail view, sets font colour for stat line
+#
+
+style "movewinlossfg" = "default"
+{
+  fg[ACTIVE] = { 0x8000, 0x8000, 0x8000 }
+}
+
+widget "*.gnubg-move-winlossfg" style "movewinlossfg"
 
 #
 # Style for the uncompleted move (shown as you move pieces around)
