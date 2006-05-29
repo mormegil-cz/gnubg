@@ -28,10 +28,6 @@
 #include "rollout.h"
 #include "relational.h"
 
-#if !HAVE_GTK_OPTION_MENU_GET_HISTORY
-extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu);
-#endif
-
 typedef enum _dialogarea {
     DA_MAIN,
     DA_BUTTONS,

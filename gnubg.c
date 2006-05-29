@@ -3123,8 +3123,9 @@ static guint nUpdate;
 static gint UpdateBoard( gpointer p ) {
 
     /* we've waited long enough -- force this update */
+#if HAVE_GDK_GDKX_H
     nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
-    
+#endif    
     ShowBoard();
 
     nUpdate = 0;
