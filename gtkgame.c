@@ -131,14 +131,28 @@ static char* GetText(GtkTextView* pwText)
 }
 #endif
 
-#if USE_GTK2
 #define GTK_STOCK_DIALOG_GNU "gtk-dialog-gnu" /* stock gnu head icon */
-#endif
 
-#if !GTK_CHECK_VERSION(1,3,10)
-#define gtk_widget_get_parent(w) ((w)->parent)
-#define gtk_style_get_font(s) ((s)->font)
-#endif
+#if !HAVE_GTK_OPTION_MENU_GET_HISTORY   
+extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {          
+
+    GtkWidget *active_widget;      
+
+    g_return_val_if_fail (GTK_IS_OPTION_MENU (option_menu), -1);      
+
+    if (option_menu->menu) {     
+        active_widget = gtk_menu_get_active (GTK_MENU (option_menu->menu));     
+
+        if (active_widget)     
+            return g_list_index (GTK_MENU_SHELL (option_menu->menu)->children,    
+                    active_widget);     
+        else          
+            return -1;   
+    } else   
+        return -1;      
+}   
+#endif          
+
 
 struct CommandEntryData_T cedDialog, cedPanel;
 
@@ -403,28 +417,6 @@ int frozen = FALSE;
 
 static guint nStdin, nDisabledCount = 1;
 
-#if 0 
-/* GTK_CHECK_VERSION(1,3,0) */
-static unsigned char *ToUTF8( unsigned char *sz ) {
-
-    static unsigned char szOut[ 128 ], *pch;
-
-    for( pch = szOut; *sz; sz++ )
-	if( *sz < 0x80 )
-	    *pch++ = *sz;
-	else {
-	    *pch++ = 0xC0 | ( *sz >> 6 );
-	    *pch++ = 0x80 | ( *sz & 0x3F );
-	}
-
-    *pch = 0;
-
-    return szOut;
-}
-#define TRANS(x) ToUTF8(x)
-#else
-#define TRANS(x) (x)
-#endif
 
 #if USE_TIMECONTROL
 extern void GTKUpdateClock(void)
@@ -1149,8 +1141,7 @@ extern void SetAnnotation( moverecord *pmr ) {
     if( pmr ) {
 	if( pmr->sz ) {
 	    fAutoCommentaryChange = TRUE;
-	    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL,
-			     (pmr->sz), -1 );
+	    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL, (pmr->sz), -1 );
 	    fAutoCommentaryChange = FALSE;
 	}
 
@@ -1611,27 +1602,9 @@ extern void GTKUpdateAnnotations( void ) {
 
 extern void GTKSaveSettings( void ) {
 
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + 15 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + 15 );
-#else
-    char sz[ 4096 ];
-#endif
-
-#if GTK_CHECK_VERSION(1,3,15)
+    char *sz = g_alloca( strlen( szHomeDirectory ) + 15 );
     sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
     gtk_accel_map_save( sz );
-#else
-    GtkPatternSpec ps;
-
-    gtk_pattern_spec_init( &ps, "*" );
-    
-    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
-    gtk_item_factory_dump_rc( sz, &ps, TRUE );
-
-    gtk_pattern_spec_free_segs( &ps );
-#endif
 }
 
 static gboolean main_delete( GtkWidget *pw ) {
@@ -1660,11 +1633,7 @@ extern int GetPanelSize()
 {
     if( GTK_WIDGET_REALIZED( pwMain ) )
 	{
-#if GTK_CHECK_VERSION(2,0,0)
 		int pos = gtk_paned_get_position(GTK_PANED(hpaned));
-#else
-		int pos = GTK_PANED(hpaned)->handle_xpos;
-#endif
 		return pwMain->allocation.width - pos;
 	}
 	else
@@ -1689,20 +1658,16 @@ extern void SetPanelWidth(int size)
 extern void SwapBoardToPanel(int ToPanel)
 {	/* Show/Hide panel on right of screen */
 
-#if USE_GTK2
 	/* Need to hide these, as handle box seems to be buggy and gets confused */
 	gtk_widget_hide(gtk_widget_get_parent(pwMenuBar));
 	gtk_widget_hide(gtk_widget_get_parent(pwToolbar));
-#endif
 
 	if (ToPanel)
 	{
 		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
 		gtk_widget_show(hpaned);
-#if USE_GTK2
 		while(gtk_events_pending())
 			gtk_main_iteration();
-#endif
 		gtk_widget_hide(pwGameBox);
 		SetPanelWidth(panelSize);
 	}
@@ -1710,20 +1675,16 @@ extern void SwapBoardToPanel(int ToPanel)
 	{
 		gtk_widget_reparent(pwEventBox, pwGameBox);
 		gtk_widget_show(pwGameBox);
-#if USE_GTK2
 		while(gtk_events_pending())
 			gtk_main_iteration();
-#endif
 		if (GTK_WIDGET_VISIBLE(hpaned))
 		{
 			panelSize = GetPanelSize();
 			gtk_widget_hide(hpaned);
 		}
 	}
-#if USE_GTK2
 	gtk_widget_show(gtk_widget_get_parent(pwMenuBar));
 	gtk_widget_show(gtk_widget_get_parent(pwToolbar));
-#endif
 }
 
 static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
@@ -1879,26 +1840,14 @@ extern int InitGTK( int *argc, char ***argv ) {
     static GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_NEW
-#else
-		NULL
-#endif
 	},
 	{ N_("/_File/_Open..."), "<control>O", OpenClicked, 0, 
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_OPEN
-#else
-		NULL
-#endif
 	},
 	{ N_("/_File/Open _Commands..."), NULL, LoadCommands, 0, NULL },
 	{ N_("/_File/_Save..."), "<control>S", SaveClicked, 0, 
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_SAVE
-#else
-		NULL
-#endif
 	},
 	{ N_("/_File/_Import..."), NULL, ImportClicked, 0, NULL },
 	{ N_("/_File/_Export..."), NULL, ExportClicked, 0, NULL },
@@ -1906,28 +1855,16 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_QUIT
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, 
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_UNDO
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
 
 	{ N_("/_Edit/_Copy"), "<control>C", CopyActiveEntry, 0,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_COPY
-#else
-		NULL
-#endif
 	},
 
 	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
@@ -1939,11 +1876,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CopyAsIDs, 0, NULL },
 
 	{ N_("/_Edit/_Paste"), "<control>V", PasteActiveEntry, 0,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_PASTE
-#else
-		NULL
-#endif
 	},
 	{ N_("/_View"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_View/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
@@ -1985,36 +1918,20 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL },
 	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_APPLY
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Game/Dro_p"), "<control>P", Command, CMD_DROP,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_CANCEL
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Game/B_eaver"), NULL, Command, CMD_REDOUBLE, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Re_sign"), NULL, GTKResign, 0, NULL },
         { N_("/_Game/_Agree to resignation"), NULL, Command, CMD_AGREE,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_APPLY
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Game/De_cline resignation"), 
           NULL, Command, CMD_DECLINE,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_CANCEL
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Play computer turn"), NULL, Command, CMD_PLAY, NULL },
@@ -2033,11 +1950,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_DIALOG_INFO
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Analyse/_Rollout"), NULL, Command, CMD_ROLLOUT, NULL },
 	{ N_("/_Analyse/Rollout _cube decision"), 
@@ -2054,35 +1967,19 @@ extern int InitGTK( int *argc, char ***argv ) {
         { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>" },
         { N_("/_Analyse/Clear analysis/Move"), 
           NULL, Command, CMD_ANALYSE_CLEAR_MOVE, 
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_CLEAR
-#else
-		NULL
-#endif
 	},
         { N_("/_Analyse/Clear analysis/_Game"), 
           NULL, Command, CMD_ANALYSE_CLEAR_GAME,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_CLEAR
-#else
-		NULL
-#endif
 	},
         { N_("/_Analyse/Clear analysis/_Match"), 
           NULL, Command, CMD_ANALYSE_CLEAR_MATCH,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_CLEAR
-#else
-		NULL
-#endif
 	},
         { N_("/_Analyse/Clear analysis/_Session"), 
           NULL, Command, CMD_ANALYSE_CLEAR_SESSION,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_CLEAR
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/Game statistics"), NULL, Command,
@@ -2097,36 +1994,20 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse/Add to player records"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/Add to player records/Game statistics"), NULL, Command,
 	  CMD_RECORD_ADD_GAME,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_ADD
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Analyse/Add to player records/Match statistics"), NULL,
 	  Command, CMD_RECORD_ADD_MATCH,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_ADD
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
 	  Command, CMD_RECORD_ADD_SESSION,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_ADD
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
         { N_("/_Analyse/Relational database/Add match or session"), NULL,
           GtkRelationalAddMatch, 0,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_ADD
-#else
-		NULL
-#endif
 	},
         { N_("/_Analyse/Relational database/Show Records"), NULL,
           GtkShowRelational, 0, NULL },
@@ -2145,10 +2026,8 @@ extern int InitGTK( int *argc, char ***argv ) {
           CMD_SHOW_ONECHEQUER, NULL },
 	{ N_("/_Analyse/One sided rollout"), NULL, Command, 
           CMD_SHOW_ONESIDEDROLLOUT, NULL },
-#if USE_GTK2
 	{ N_("/_Analyse/Distribution of rolls"), NULL, Command, 
           CMD_SHOW_ROLLS, NULL },
-#endif /* USE_GTK2 */
 	{ N_("/_Analyse/Temperature Map"), NULL, Command, 
           CMD_SHOW_TEMPERATURE_MAP, NULL },
 	{ N_("/_Analyse/Temperature Map (cube decision)"), NULL, Command, 
@@ -2209,19 +2088,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Go"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Go/Previous rol_l"), "Page_Up", 
           Command, CMD_PREV_ROLL,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_GO_BACK
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Go/Next _roll"), "Page_Down",
 	  Command, CMD_NEXT_ROLL, 
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_GO_FORWARD
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
@@ -2241,19 +2112,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
           Command, CMD_PREV_GAME,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_GOTO_FIRST
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Go/Next _game"), "<control>Page_Down",
 	  Command, CMD_NEXT_GAME,
-#if GTK_CHECK_VERSION(2,0,0)
 		"<StockItem>", GTK_STOCK_GOTO_LAST
-#else
-		NULL
-#endif
 	},
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
@@ -2269,21 +2132,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Help/_Report bug"), NULL, ReportBug, 0, NULL },
 	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
-#if GTK_CHECK_VERSION(2,6,0)
 		"<StockItem>", GTK_STOCK_ABOUT
-#else
-		NULL
-#endif
 	}
     };
     
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + 15 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + 15 );
-#else
-    char sz[ 4096 ];
-#endif
+    char *sz = g_alloca( strlen( szHomeDirectory ) + 15 );
 
     gtk_set_locale ();
 
@@ -2310,7 +2163,6 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
     gtk_widget_set_default_visual( gdk_rgb_get_visual() );
 
-#if USE_GTK2
     {
 #include "xpm/gnu.xpm"
 	GtkIconFactory *pif = gtk_icon_factory_new();
@@ -2322,17 +2174,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 				  gdk_pixbuf_new_from_xpm_data(
 				      (const char **) gnu_xpm ) ) );
     }
-#endif
 
     ptt = gtk_tooltips_new();
     
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	SetPanelWidget(WINDOW_MAIN, pwMain);
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
     gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
 			      GDK_WINDOW_TYPE_HINT_NORMAL );
-#endif
     /* NB: the following call to gtk_object_set_user_data is needed
        to work around a nasty bug in GTK+ (the problem is that calls to
        gtk_object_get_user_data relies on a side effect from a previous
@@ -2363,11 +2212,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 								 "<main>" ));
 
     sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
-#if GTK_CHECK_VERSION(1,3,15)
     gtk_accel_map_load( sz );
-#else
-    gtk_item_factory_parse_rc( sz );
-#endif
    
 #if ENABLE_TRAIN_MENU
 #if !HAVE_LIBGDBM
@@ -2411,9 +2256,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 
    gtk_paned_add1(GTK_PANED(hpaned), pwPanelGameBox = gtk_hbox_new(FALSE, 0));
    gtk_container_add(GTK_CONTAINER(pwPanelGameBox), pwEventBox = gtk_event_box_new());
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwEventBox), FALSE);
-#endif
 
    gtk_container_add(GTK_CONTAINER(pwEventBox), pwBoard = board_new(GetMainAppearance()));
    gtk_signal_connect(GTK_OBJECT(pwEventBox), "button-press-event", GTK_SIGNAL_FUNC(button_press_event),
@@ -2432,9 +2275,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
 		      TRUE, TRUE, 0 );
-#if GTK_CHECK_VERSION(1,3,10)
     gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), FALSE );
-#endif
     /* It's a bit naughty to access pwStatus->label, but its default alignment
        is ugly, and GTK gives us no other way to change it. */
     gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
@@ -2449,19 +2290,12 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_box_pack_start( GTK_BOX( pwHbox ),
 			pwProgress = gtk_progress_bar_new(),
 			FALSE, FALSE, 0 );
-#if GTK_CHECK_VERSION(1,3,10)
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
-#endif
     /* This is a kludge to work around an ugly bug in GTK: we don't want to
        show text in the progress bar yet, but we might later.  So we have to
        pretend we want text in order to be sized correctly, and then set the
        format string to something so we don't get the default text. */
-#if USE_GTK2
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
-#else
-    gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
-    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
-#endif
 
     gtk_signal_connect(GTK_OBJECT(pwMain), "configure_event",
 			GTK_SIGNAL_FUNC(configure_event), NULL);
@@ -2512,28 +2346,6 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     GTKAllowStdin();
     
     if( fTTY ) {
-#ifdef ConnectionNumber /* FIXME use configure somehow to detect this */
-#if defined(O_ASYNC) || defined(__CYGWIN__)
-    /* BSD O_ASYNC-style I/O notification */
-    {
-	int n;
-	
-	if( ( n = fcntl( ConnectionNumber( GDK_DISPLAY() ),
-			 F_GETFL ) ) != -1 ) {
-	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETOWN, getpid() );
-#if !defined(__CYGWIN__)
-	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | O_ASYNC );
-#else
-	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | FASYNC );
-#endif
-	}
-    }
-#else
-    /* System V SIGPOLL-style I/O notification */
-    ioctl( ConnectionNumber( GDK_DISPLAY() ), I_SETSIG, S_RDNORM );
-#endif
-#endif
-    
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
 	    fReadingCommand = TRUE;
@@ -2657,7 +2469,6 @@ extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt,
 	*pwPixmap;
     GtkAccelGroup *pag = gtk_accel_group_new();
     int fQuestion = dt == DT_QUESTION || dt == DT_AREYOUSURE;
-#if USE_GTK2
     static char *aszStockItem[ NUM_DIALOG_TYPES ] = {
 	GTK_STOCK_DIALOG_INFO,
 	GTK_STOCK_DIALOG_QUESTION,
@@ -2668,16 +2479,6 @@ extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt,
     };
     pwPixmap = gtk_image_new_from_stock( aszStockItem[ dt ],
 					 GTK_ICON_SIZE_DIALOG );
-#else
-#include "xpm/gnu.xpm"
-#include "xpm/question.xpm"
-    GdkPixmap *ppm;
-    
-    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
-	 gtk_widget_get_colormap( pwDialog ), NULL, NULL,
-	 fQuestion ? question_xpm : gnu_xpm );
-    pwPixmap = gtk_pixmap_new( ppm, NULL );
-#endif
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
 
     gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
@@ -2700,11 +2501,7 @@ extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt,
 				   GTK_OBJECT( pwDialog ) );
     }
 
-#if GTK_CHECK_VERSION(1,3,15)
     gtk_window_add_accel_group( GTK_WINDOW( pwDialog ), pag );
-#else
-    gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
-#endif
     gtk_widget_add_accelerator( fQuestion ? pwCancel : pwOK,
 				"clicked", pag, GDK_Escape, 0, 0 );
 
@@ -2948,11 +2745,7 @@ extern int GtkTutor ( char *sz ) {
 	gtk_signal_connect( GTK_OBJECT( pwHint ), "clicked",
 				   GTK_SIGNAL_FUNC( TutorHint ), (void *) &f );
 
-#if GTK_CHECK_VERSION(1,3,15)
     gtk_window_add_accel_group( GTK_WINDOW( pwTutorDialog ), pag );
-#else
-    gtk_accel_group_attach( pag, GTK_OBJECT( pwTutorDialog ) );
-#endif
     gtk_widget_add_accelerator( pwCancel, "clicked", pag,
 				GDK_Escape, 0, 0 );
     
@@ -3049,12 +2842,6 @@ extern void GTKOutputX( void ) {
       strcat ( sz, "\n" );
       gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
                        sz, -1 );
-#if !USE_GTK2
-      /* Hack to make sure message is drawn correctly with gtk 1 */
-      gtk_text_freeze(GTK_TEXT( pwMessageText ));
-      gtk_text_thaw(GTK_TEXT( pwMessageText ));
-#endif
-
     }
       
     cchOutput = 0;
@@ -3070,11 +2857,6 @@ extern void GTKOutputErr( char *sz ) {
 			 sz, -1 );
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
 			 "\n", 1 );
-#if !USE_GTK2
-		/* Hack to make sure message is drawn correctly with gtk 1 */
-		gtk_text_freeze(GTK_TEXT( pwMessageText ));
-		gtk_text_thaw(GTK_TEXT( pwMessageText ));
-#endif
     }
 }
 
@@ -3434,16 +3216,11 @@ static GtkWidget *NewWidget( newwidget *pnw){
 #include "xpm/stock_new_all.xpm"
 #include "xpm/stock_new_money.xpm"
   pwVbox = gtk_vbox_new(FALSE, 0);
-#if USE_GTK2
   pwToolbar = gtk_toolbar_new ();
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
                                 GTK_ORIENTATION_HORIZONTAL );
   gtk_toolbar_set_style ( GTK_TOOLBAR ( pwToolbar ),
                           GTK_TOOLBAR_ICONS );
-#else
-  pwToolbar = gtk_toolbar_new ( GTK_ORIENTATION_HORIZONTAL,
-                                GTK_TOOLBAR_ICONS );
-#endif /* ! USE_GTK2 */
   pwFrame = gtk_frame_new(_("Shortcut buttons"));
   gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwFrame, TRUE, TRUE, 0);
   gtk_container_add( GTK_CONTAINER( pwFrame ), pwToolbar);
@@ -3905,11 +3682,7 @@ extern char *SelectFile( char *szTitle, char *szDefault, char *szPath,
     ft.pwom = NULL;
     
     if( szPath ) {
-#if USE_GTK2
 	pwButton = gtk_button_new_with_mnemonic( _("Set Default _Path") );
-#else
-	pwButton = gtk_button_new_with_label( _("Set Default Path") );
-#endif
 	
 	gtk_widget_show( pwButton );
 	gtk_container_add( GTK_CONTAINER(
@@ -4113,26 +3886,16 @@ extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
 
   char *pch;
 
-#if GTK_CHECK_VERSION(2,4,0)
   if (fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE) {
     GTKFileCommand24(szPrompt, szDefault, szCommand, szPath, fdt, pathId);
     return;
   }
-#endif
 
   if (pathId == PATH_NULL || fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE)
                      fdt = FDT_NONE;
 
     if( ( pch = SelectFile( szPrompt, szDefault, szPath, fdt ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + strlen( szCommand ) + 4 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + strlen( szCommand ) + 4 );
-#elif GLIB_CHECK_VERSION(1,1,12)
-	char *sz = g_alloca(strlen( filename ) + strlen( szCommand ) + 4);
-#else
-	char sz[ 1024 ];
-#endif
+	char *sz = g_alloca( strlen( pch ) + strlen( szCommand ) + 4 );
 	sprintf( sz, "%s %s", szCommand, pch );
 	UserCommand( sz );
 
@@ -4413,9 +4176,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
      */
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev );
 
     pwFrame = gtk_frame_new ( _("Predefined settings") );
@@ -4481,9 +4242,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     /* lookahead */
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
@@ -4513,9 +4272,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
        check button won't work */
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
@@ -4548,10 +4305,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     }
     
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect ( GTK_OBJECT( pwMenu ), "selection-done",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
-#endif
 
     pew->pwReduced = gtk_option_menu_new ();
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pew->pwReduced ), pwMenu );
@@ -4611,9 +4366,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     /* noise */
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
@@ -4664,9 +4417,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                                              pew );
 
       pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
       gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev ); 
       gtk_container_add ( GTK_CONTAINER ( pwev ), pew->pwMoveFilter );
 
@@ -4700,10 +4451,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
     
 #if defined (REDUCTION_CODE)
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "changed",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
-#endif
 #else
     gtk_signal_connect ( GTK_OBJECT( pew->pwUsePrune ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
@@ -6308,38 +6057,32 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
 extern void GTKEval( char *szOutput ) {
 
-    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation"),
-            DT_INFO, NULL, NULL ), *pwText = gtk_text_new( NULL, NULL );
-    GdkFont *pf;
-    GtkWidget *scrolledwindow1, *pwButtons, *pwCopy = gtk_button_new_with_label( _("Copy") );
+    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation"), DT_INFO, NULL, NULL );
+    GtkWidget *pwText;
+    GtkWidget *sw, *pwButtons;
+    GtkWidget *pwCopy = gtk_button_new_with_label( _("Copy") );
+    GtkTextBuffer *buffer;
+    GtkTextIter iter;
 
-    pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-			"*-*-*-m-*-*-*" );
+    pwText = gtk_text_view_new ();
+    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pwText), GTK_WRAP_NONE);
 
-    /* FIXME There should be some way to extract the text on Unix as well */
-    pwButtons = DialogArea( pwDialog, DA_BUTTONS );
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
-    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
-			GTK_SIGNAL_FUNC( GTKWinCopy ), (gpointer) szOutput );
-    
-    gtk_text_set_editable( GTK_TEXT( pwText ), FALSE );
-    gtk_text_insert( GTK_TEXT( pwText ), pf, NULL, NULL, szOutput, -1 );
+    buffer = gtk_text_buffer_new(NULL);
+    gtk_text_buffer_create_tag (buffer, "monospace", "family", "monospace", NULL);
+    gtk_text_buffer_get_end_iter (buffer, &iter);
+    gtk_text_buffer_insert_with_tags_by_name (buffer, &iter, szOutput, -1, "monospace", NULL);
+    gtk_text_view_set_buffer(GTK_TEXT_VIEW (pwText), buffer);
 
-    /* create a vertical scrollwindow container for the eval text */
-    scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
-    gtk_container_add (GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-            scrolledwindow1);
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1),
-            GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    sw = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_container_add (GTK_CONTAINER (sw), pwText);
 
-    gtk_container_add (GTK_CONTAINER (scrolledwindow1), pwText);
-
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       sw );
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 600, 600 );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 700, 600 );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ), GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy", GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
  
     gtk_widget_show_all( pwDialog );
 
@@ -6347,7 +6090,7 @@ extern void GTKEval( char *szOutput ) {
     gtk_main();
     GTKAllowStdin();
 
-    gdk_font_unref( pf );
+
 }
 
 static void DestroyHint( gpointer p ) {
@@ -6547,12 +6290,6 @@ static void SetMouseCursor(GdkCursorType cursorType)
 
 extern void GTKProgressStart( char *sz ) {
 
-#if !USE_GTK2
-    /* This is all deprecated in GTK 2.x */
-    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), TRUE );
-    gtk_progress_bar_set_activity_step( GTK_PROGRESS_BAR( pwProgress ), 5 );
-    gtk_progress_bar_set_activity_blocks( GTK_PROGRESS_BAR( pwProgress ), 5 );
-#endif
     if( sz )
 	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 
@@ -6563,14 +6300,6 @@ extern void GTKProgressStart( char *sz ) {
 extern void
 GTKProgressStartValue( char *sz, int iMax ) {
 
-#if !USE_GTK2
-   /* This is all deprecated in GTK 2.x */
-  gtk_progress_set_activity_mode ( GTK_PROGRESS ( pwProgress ), FALSE );
-  gtk_progress_configure ( GTK_PROGRESS ( pwProgress ),
-                           0, 0, iMax );
-  gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
-				    "%v/%u (%p%%)" );
-#endif
 
   if( sz )
     gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
@@ -6581,16 +6310,12 @@ GTKProgressStartValue( char *sz, int iMax ) {
 extern void
 GTKProgressValue ( int iValue, int iMax ) {
 
-#if !USE_GTK2
-    gtk_progress_set_value( GTK_PROGRESS ( pwProgress ), iValue );
-#else
     gchar *gsz;
     gdouble frac = 1.0 * iValue / (1.0 * iMax );
     gsz = g_strdup_printf("%d/%d (%.0f%%)", iValue, iMax, 100 * frac);
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), gsz);
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), frac);
     g_free(gsz);
-#endif
 
     SuspendInput();
 
@@ -6603,12 +6328,7 @@ GTKProgressValue ( int iValue, int iMax ) {
 
 extern void GTKProgress( void ) {
 
-#if !USE_GTK2
-    static int i;
-    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
-#else
     gtk_progress_bar_pulse( GTK_PROGRESS_BAR( pwProgress ) );
-#endif
 
     SuspendInput();
 
@@ -6620,14 +6340,8 @@ extern void GTKProgress( void ) {
 
 extern void GTKProgressEnd( void ) {
 
-#if !USE_GTK2
-    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), FALSE );
-    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
-    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
-#else
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
-#endif
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 
 	SetMouseCursor(0);
@@ -6818,24 +6532,15 @@ extern void GTKShowVersion( void ) {
 	sprintf(PromptStr, "%s", _(VERSION_STRING));
 	pwPrompt = gtk_label_new(PromptStr);
 	gtk_box_pack_start( GTK_BOX( pwImageVBox ), pwPrompt, FALSE, FALSE, 0 );
-#if GTK_CHECK_VERSION(1,3,10)
 	ps->font_desc = pango_font_description_new();
 	pango_font_description_set_family_static( ps->font_desc, "serif" );
 	pango_font_description_set_size( ps->font_desc, 24 * PANGO_SCALE );    
-#else
-	ps->font_name = g_strdup( "-*-times-medium-r-normal-*-24-*-*-*-p-*-"
-		"*-*" );
-#endif
 	gtk_widget_modify_style( pwPrompt, ps );
 	gtk_rc_style_unref( ps );
 
 	pwOK = gtk_button_new_with_label( _("OK") );
 
-#if GTK_CHECK_VERSION(1,3,15)
 	gtk_window_add_accel_group( GTK_WINDOW( pwDialog ), pag );
-#else
-	gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
-#endif
 	gtk_widget_add_accelerator( pwOK, "clicked", pag, GDK_Escape, 0, 0 );
 
 	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ), pwOK );
@@ -6873,46 +6578,12 @@ extern void GTKShowVersion( void ) {
 	gtk_widget_show_all( pwDialog );
 }
 
-# if GTK_CHECK_VERSION(2,0,0)
 GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
 {
 	GtkWidget* pwLabel = gtk_label_new(text);
 	gtk_label_set_selectable(GTK_LABEL(pwLabel), TRUE);
 	return pwLabel;
 }
-#else
-/* Hack a gtk 1 entry into a selectable label... */
-void deletestop(GtkEditable *editable, gint start_pos, gint end_pos, gpointer user_data)
-{
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(editable), "delete-text");
-}                                            
-
-void insertstop(GtkEditable *editable, gint start_pos, gint end_pos, gpointer user_data)
-{
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(editable), "insert-text");
-}                                            
-
-GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
-{
-	GtkWidget* entry = gtk_entry_new();
-	GtkRcStyle *rc_style = gtk_rc_style_new ();
-
-	GtkStyle* style = gtk_widget_get_style (reference);
-	rc_style->base[GTK_STATE_NORMAL] = style->bg[GTK_STATE_NORMAL];
-	rc_style->color_flags[GTK_STATE_NORMAL] |= GTK_RC_BASE;
-	gtk_widget_modify_style (entry, rc_style);
-	gtk_rc_style_unref (rc_style);
-
-	gtk_entry_set_text (GTK_ENTRY (entry), text);
-
-	gtk_signal_connect ( GTK_OBJECT (entry), "delete-text",
-						GTK_SIGNAL_FUNC ( deletestop ), 0 );
-	gtk_signal_connect ( GTK_OBJECT (entry), "insert-text",
-						GTK_SIGNAL_FUNC ( insertstop ), 0 );
-
-	return entry;
-}
-#endif
 
 extern void GTKShowBuildInfo(GtkWidget *pwParent)
 {
@@ -6970,13 +6641,9 @@ static void AddTitle(GtkWidget* pwBox, char* Title)
 		*pwHBox = gtk_hbox_new( TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(pwBox), pwHBox, FALSE, FALSE, 4);
 
-#if GTK_CHECK_VERSION(1,3,10)
 	ps->font_desc = pango_font_description_new();
 	pango_font_description_set_family_static( ps->font_desc, "serif" );
 	pango_font_description_set_size( ps->font_desc, 16 * PANGO_SCALE );    
-#else
-	ps->font_name = g_strdup( "-*-times-medium-r-normal-*-16-*-*-*-p-*-*-*" );
-#endif
 	gtk_widget_modify_style( pwTitle, ps );
 	gtk_rc_style_unref( ps );
 
@@ -6987,9 +6654,9 @@ static void AddName(GtkWidget* pwBox, char* name, char* type)
 {
 	char buf[255];
 	if (type)
-		sprintf(buf, "%s: %s", type, TRANS(name));
+		sprintf(buf, "%s: %s", type, name);
 	else
-		strcpy(buf, TRANS(name));
+		strcpy(buf, name);
 
 	gtk_box_pack_start(GTK_BOX(pwBox), gtk_label_new(buf), FALSE, FALSE, 0);
 	ListInsert(&names, name);
@@ -7076,7 +6743,7 @@ extern void GTKCommandShowCredits(GtkWidget *pwParent)
 	for( i = 0; ceCredits[ i ].Name; i++ ) {
 		if (!FindName(&names, ceCredits[ i ].Name ))
 		gtk_container_add( GTK_CONTAINER( pwList ),
-			gtk_list_item_new_with_label(TRANS(ceCredits[ i ].Name)) );
+			gtk_list_item_new_with_label(ceCredits[ i ].Name)) ;
 	}
 
 	while(names.plNext->p)
@@ -7269,7 +6936,6 @@ static void ShowFAQ( gpointer *p, guint n, GtkWidget *pwEvent ) {
     NoFAQ();
 }
 
-#if GTK_CHECK_VERSION(2,0,0)
 static GtkWidget *pwHelpTree, *pwHelpLabel;
 
 static void GTKHelpAdd( GtkTreeStore *pts, GtkTreeIter *ptiParent,
@@ -7463,7 +7129,6 @@ extern void GTKHelp( char *sz ) {
     gtk_tree_path_free( ptp );
     gtk_tree_path_free( ptpExpand );
 }
-#endif
 
 static void GTKBearoffProgressCancel( void ) {
 
@@ -7479,17 +7144,13 @@ static void GTKBearoffProgressCancel( void ) {
 extern void GTKBearoffProgress( int i ) {
 
     static GtkWidget *pwDialog, *pw, *pwAlign;
-#if USE_GTK2
     gchar *gsz;
-#endif
     
     if( !pwDialog ) {
 	pwDialog = GTKCreateDialog( _("GNU Backgammon"), DT_INFO, NULL, NULL );
-#if GTK_CHECK_VERSION(2,0,0)
 	gtk_window_set_role( GTK_WINDOW( pwDialog ), "progress" );
 	gtk_window_set_type_hint( GTK_WINDOW(pwDialog),
 			      GDK_WINDOW_TYPE_HINT_DIALOG );
-#endif
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			    GTK_SIGNAL_FUNC( GTKBearoffProgressCancel ),
@@ -7501,22 +7162,13 @@ extern void GTKBearoffProgress( int i ) {
 	gtk_container_add( GTK_CONTAINER( pwAlign ),
 			   pw = gtk_progress_bar_new() );
 	
-#if !USE_GTK2
-	gtk_progress_set_format_string( GTK_PROGRESS( pw ),
-					_("Generating bearoff database (%p%%)") );
-	gtk_progress_set_show_text( GTK_PROGRESS( pw ), TRUE );
-#endif	
 	gtk_widget_show_all( pwDialog );
     }
 
-#if !USE_GTK2
-    gtk_progress_set_percentage( GTK_PROGRESS( pw ), i / 54264.0 );
-#else
     gsz = g_strdup_printf("Generating bearoff database (%.0f %%)", i / 542.64);
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pw ), gsz );
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pw ), i / 54264.0 );
     g_free(gsz);
-#endif
 
     if( i >= 54000 ) {
 	gtk_signal_disconnect_by_func(
@@ -8366,13 +8018,7 @@ static void RecordErase( GtkWidget *pw, recordwindowinfo *prwi ) {
 static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
 
     FILE *pf;
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + 10 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + 10 );
-#else
-    char sz[ 4096 ];
-#endif
+    char *sz = g_alloca( strlen( szHomeDirectory ) + 10 );
     
     UserCommand( "record eraseall" );
 
@@ -9237,9 +8883,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	static gulong id;
 	static int showingPanels;
 	static int showIDs;
-#if USE_GTK2
 	static int maximised;
-#endif
 	static int changedRP, changedDP;
 
 	int state = !GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
@@ -9257,13 +8901,11 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		if (pmiDP && GTK_WIDGET_VISIBLE(pmiDP) && GTK_WIDGET_IS_SENSITIVE(pmiDP))
 			changedDP = TRUE;
 
-#if USE_GTK2
 		/* Check if window is maximized */
 		{
 		GdkWindowState state = gdk_window_get_state(GTK_WIDGET(ptl)->window);
 		maximised = ((state & GDK_WINDOW_STATE_MAXIMIZED) == GDK_WINDOW_STATE_MAXIMIZED);
 		}
-#endif
 
 		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
 
@@ -9279,19 +8921,13 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 		HideAllPanels(NULL, 0, NULL);
 
-/* Don't hide for gtk 2.6 as stops accelerators working... */
-#if !USE_GTK2
-		gtk_widget_hide(pwMenuBar);
-#endif
 		gtk_widget_hide(pwToolbar);
 		gtk_widget_hide(pwHandle);
 
 		/* Max window maximal */
-#if USE_GTK2
 		if (!maximised)
 			gtk_window_maximize(ptl);
 		gtk_window_set_decorated(ptl, FALSE);
-#endif
 		if (pmiRP)
 			gtk_widget_set_sensitive(pmiRP, FALSE);
 		if (pmiDP)
@@ -9315,12 +8951,10 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
 
-#if USE_GTK2
 		/* Restore window */
 		if (!maximised)
 			gtk_window_unmaximize(ptl);
 		gtk_window_set_decorated(ptl, TRUE);
-#endif
 
 		if (showingPanels)
 			ShowAllPanels(NULL, 0, NULL);

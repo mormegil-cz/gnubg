@@ -124,9 +124,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #if USE_GTK
 #include <gtk/gtk.h>
-#if HAVE_GDK_GDKX_H
-#include <gdk/gdkx.h>
-#endif
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
@@ -3116,23 +3113,6 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
 }
 
-#if USE_GTK && HAVE_GDK_GDKX_H
-static unsigned long nLastRequest;
-static guint nUpdate;
-
-static gint UpdateBoard( gpointer p ) {
-
-    /* we've waited long enough -- force this update */
-#if HAVE_GDK_GDKX_H
-    nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
-#endif    
-    ShowBoard();
-
-    nUpdate = 0;
-
-    return FALSE; /* remove idle handler */
-}
-#endif
 
 extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms ) {
 
@@ -3291,47 +3271,15 @@ extern void ShowBoard( void )
     if( cOutputDisabled )
 	return;
 
-#if USE_GTK
-    /* FIXME it's ugly to access ...->animate_computer_moves here, but
-       postponing updates can lead to animating based on the wrong
-       display */
-    if( fX && !nDelay && animGUI == ANIMATE_NONE ) {
-	/* Is the server still processing our last request?  If so, don't
-	   give it more until it's finished what it has.  (Always update
-	   the board immediately if nDelay is set, though -- show the user
-	   something while they're waiting!) */
-#if HAVE_GDK_GDKX_H
-	XEventsQueued( GDK_DISPLAY(), QueuedAfterReading );
-
-	/* Subtract and compare as signed, just in case the request numbers
-	   wrap around. */
-	if( (long) ( LastKnownRequestProcessed( GDK_DISPLAY() ) -
-		     nLastRequest ) < 0 ) {
-	    if( !nUpdate )
-		nUpdate = gtk_idle_add( UpdateBoard, NULL );
-
-	    return;
-	}
-#endif
-    }
-#endif
     if( ms.gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
 	    int anBoardTemp[ 2 ][ 25 ];
 	    InitBoard( anBoardTemp, ms.bgv );
 
-#if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		      ms.anScore[ 0 ], -1, -1, FALSE, anChequers[ ms.bgv ] );
-#if HAVE_GDK_GDKX_H
-	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
-#endif
-#else
-            GameSet( &ewnd, anBoardTemp, 0, ap[ 1 ].szName, ap[ 0 ].szName,
-                     ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], -1, -1 );
-#endif
 	} else
 #endif
 
@@ -3447,35 +3395,19 @@ extern void ShowBoard( void )
 	
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
-#if USE_GUI
+#if USE_GTK2
     } else {
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
 
-#if USE_GTK
 	game_set( BOARD( pwBoard ), ms.anBoard, ms.fMove, ap[ 1 ].szName,
 		  ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
 		  ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
 		  !nNextTurn, anChequers[ ms.bgv ] );
-#if HAVE_GDK_GDKX_H
-	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
-#endif
-#else
-        GameSet( &ewnd, ms.anBoard, ms.fMove, ap[ 1 ].szName, ap[ 0 ].szName,
-                 ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], ms.anDice[ 0 ],
-                 ms.anDice[ 1 ] );	
-#endif
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
-#if USE_GTK
-#if HAVE_GDK_GDKX_H
-	XFlush( GDK_DISPLAY() );
-#endif
-#else
-	XFlush( ewnd.pdsp );
-#endif
-    }    
+    }
 #endif    
 
 #ifdef UNDEF
@@ -3711,12 +3643,10 @@ extern void CommandHelp( char *sz ) {
     command *pc, *pcFull;
     char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
     
-#if USE_GTK 
-# if GTK_CHECK_VERSION(2,0,0)
+#if USE_GTK2 
     if( fX )
 	GTKHelp( sz );
     return;
-# endif
 #endif
     
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {

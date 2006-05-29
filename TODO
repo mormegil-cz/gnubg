@@ -96,34 +96,6 @@ details.
 ** The "play" command is broken in "load command" scripts.  Add subcommands
   like "play game", "play match" for finer control. (gary)
 
-* Guile:
-** Add more data types and Scheme bindings for useful functions.
-** Define Scheme "port"s for the gnubg output() functions.
-** Use Guile keywords in cube-info.  Add similar functions for eval
-  contexts and rollout contexts.
-** Add Guile functions to access and modify the current game state.
-** Add whatever Guile functions are necessary for implementing Cam Trenor's
-  suggestion (generating random positions which are initial doubles). (gary)
-** What happens if a Guile function sets up a catch handler and executes a
-  gnubg command which evaluates another Guile function which throws an
-  exception?  We probably want to evaluate each Guile expression in its own
-  dynamic root.
-** Add an option for Guile players (i.e. chequer and cube decisions are
-  passes to a Guile function).
-** There are several possible REPLs to choose from:
-*** top-repl from (ice-9 boot-9).  Unfortunately this does not handle X
-  events while in the REPL.
-*** top-repl with the readline ports in (ice-9 readline).  This does handle
-  X events, but its readline state and ours get completely confused.
-*** gtk-repl from (gtk repl).  This handles X events and works for a while,
-  but as soon as NextTurnNotify runs, gnubg and the REPL start fighting over
-  the terminal.
-*** guile-gui, which uses (gui event-loop) etc.  This sets up a REPL in its
-  own window which seems to work, but if it is called from a `:' escape
-  then the terminal is broken, because the call to Guile has not yet returned
-  and so GTKDisallowStdin() is still in effect.  If executed independently
-  (e.g. from a menu callback), then things generally seem to work.
-
 * TTY interface:
 ** Handle "list game" and "list match".  (oysteijo)
 ** Allow setting/editing commentary.

@@ -42,8 +42,8 @@
 
 style "default"
 {
-
-#font = "-*-tahoma-normal-r-normal-*-*-100-*-*-*-*-*-*"
+#uncomment to make default font smaller
+#font_name = "9"
 
 # base, text, bg, fg are possible
 bg[SELECTED] = { 0.67, 0.67, 0.67 }

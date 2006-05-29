@@ -1,3 +1,13 @@
+Mon May 29 13:01:07 CEST 2006 Christian Anthon
+    * M Makefile.am, configure.in, gnubg.gtkrc : gtk1/gtk2 cleanup, we now
+    expect gtk-2.6.0
+    * M README,TODO : guile clean
+    * R config.guess, config.sub, ltmain.sh, libtool : autoconfig cleanup
+    * M gnubg.c, gtkgame.c : gtk1/gtk2 cleanup, get rid of gdkx.h, which seems
+    unneeded, update evaluate widget to gtk_text_view
+    * M gnubg.gtkrc : gtk2 cleanup, don't autogenerate from gnubg.gtkrc.in
+    anymore
+
 Fri May 26 20:35:05 2006 Øystein Johansen <oystein@gnubg.org>
 
 	* gnubg.c: Simple Win32 fixes (Windows doesn't use gdkx.h)

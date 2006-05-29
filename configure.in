@@ -274,7 +274,7 @@ AC_REPLACE_FUNCS(erf strdup)
 dnl Check for GTK
 AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK+ 2.0])
 if test "$with_gtk2" != "no"; then
-    AM_PATH_GTK_2_0
+    AM_PATH_GTK_2_0(2.6.0)
 fi
 AM_CONDITIONAL(USE_GTK2, test "$no_gtk2" != "yes" )
 AM_CONDITIONAL(USE_GTK, test "$no_gtk2" != "yes" )
@@ -521,5 +521,5 @@ AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
 AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
 
-AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile gnubg.gtkrc])
+AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile])
 AC_OUTPUT

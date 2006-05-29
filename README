@@ -44,7 +44,7 @@ Current features:
  - Exporting games and matches to HTML, LaTeX, .mat, PDF, PNG, PostScript 
    and plain text formats.
  - Importing .bkg, .mat, .pos, .sgg, .tmg and FIBS "oldmoves" files.
- - Scripting ability (if GNU Guile or Python is available).
+ - Scripting ability (if Python is available).
  - Automatic and manual annotation (analysis and commentary) of games and
    matches.
  - Record keeping of statistics of players in games and matches (both native

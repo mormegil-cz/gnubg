@@ -214,8 +214,7 @@ copying.c: COPYING copying.awk
 # Create symlinks to all the necessary parts of $(srcdir), so that gnubg
 # can run happily in the build directory.
 all-local:
-	@for i in gnubg_os0.bd gnubg_ts0.bd gnubg.gtkrc gnubg.scm \
-	gnubg.weights; do \
+	@for i in gnubg_os0.bd gnubg_ts0.bd gnubg.gtkrc gnubg.weights; do \
 	[ -s $$i ] || if [ -s $(srcdir)/$$i ]; then $(LN_S) $(srcdir)/$$i .; \
 	fi; done
 	@for i in gnubg.xml annealing.png rulfig1.png rulfig2.png rulfig3.png \
