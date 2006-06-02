@@ -1,3 +1,8 @@
+2006-06-02  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.14.5.
+	* Rules-quot: Upgrade to gettext-0.14.5.
+
 Thu Jun 02 21:32:20 CEST 2005  Petr Kadlec  <mormegil@centrum.cz>
 
 	* cs.po: update

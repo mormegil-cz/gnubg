@@ -487,7 +487,7 @@ AC_DEFINE([PKGDATADIR],[_DATADIR "/" PACKAGE],
           [The directory where the weights and databases will be stored.])
 
 dnl internationalization macros
-AM_GNU_GETTEXT
+AM_GNU_GETTEXT([external])
 
 if test "$USE_NLS" = "yes"; then
    if test -z "$MSGFMT"; then
@@ -521,5 +521,5 @@ AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
 AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
 
-AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile])
+AC_CONFIG_FILES([Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile])
 AC_OUTPUT

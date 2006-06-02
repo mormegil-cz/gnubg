@@ -1,4 +1,8 @@
-Mon May 29 13:01:07 CEST 2006 Christian Anthon
+2006-06-02  Christian Anthon  <anthon@kiku.dk>
+    * Makefile.am (SUBDIRS): Remove intl. (EXTRA_DIST): Add config.rpath.
+    Upgrade to gettext-0.14.5.
+
+Mon May 29 13:01:07 CEST 2006 Christian Anthon <anthon@kiku.dk>
     * M Makefile.am, configure.in, gnubg.gtkrc : gtk1/gtk2 cleanup, we now
     expect gtk-2.6.0
     * M README,TODO : guile clean

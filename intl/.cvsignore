@@ -1,8 +1,0 @@
-Makefile
-Makefile.in
-charset.alias
-libintl.h
-ref-add.sed
-ref-del.sed
-TAGS
-libgnuintl.h

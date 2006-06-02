@@ -24,3 +24,7 @@ configure.scan
 config.h.in
 configure
 aclocal.m4
+config.guess
+config.sub
+libtool
+ltmain.sh

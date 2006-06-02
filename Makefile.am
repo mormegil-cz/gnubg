@@ -69,7 +69,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts
+SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
@@ -78,9 +78,9 @@ PYTHON_SOURCES=
 endif
 
 COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
-              -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
+              -DLOCALEDIR=\"$(localedir)\" \
               @FT2_CFLAGS@ @PYTHON_CFLAGS@ @GLIB_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @INTLLIBS@ @LIBXML2_LIBS@ \
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @LTLIBINTL@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
@@ -187,7 +187,7 @@ distcheck-hook:
 	chmod -R a+w $(distdir)
 	-cp $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
+EXTRA_DIST = config.rpath  userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
 	gnubg.gtkrc credits.sh xboard.c xboard.h xgame.c xgame.h \
 	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.games.sql \
 	$(BOARD3D_TEXTURE_FILES)
