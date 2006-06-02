@@ -23,6 +23,7 @@
 #include <config.h>
 
 #include <gtk/gtk.h>
+#include <string.h>
 #include "eval.h"
 #include "gtkchequer.h"
 #include "i18n.h"
