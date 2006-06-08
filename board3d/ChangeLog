@@ -1,3 +1,7 @@
+Thu Jun 08 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* mylist.h+c and others: Replaced vector with glib GArray
+	2 files removed and a few small changes
+
 Tue May  2 13:48:20 CEST 2006 Christian Anthon <anthon@kiku.dk>
 	* Makefile.in, Makefile.am: remove texture3d
 
