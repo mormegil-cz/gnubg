@@ -51,9 +51,9 @@ typedef struct _winged_edge
 void initOccluder(Occluder* pOcc)
 {
 	pOcc->handle = (OccModel*)malloc(sizeof(OccModel));
-	VectorInit(&pOcc->handle->planes, sizeof(plane));
-	VectorInit(&pOcc->handle->edges, sizeof(winged_edge));
-	VectorInit(&pOcc->handle->points, sizeof(position));
+	pOcc->handle->planes = g_array_new(FALSE, FALSE, sizeof(plane));
+	pOcc->handle->edges = g_array_new(FALSE, FALSE, sizeof(winged_edge));
+	pOcc->handle->points = g_array_new(FALSE, FALSE, sizeof(position));
 
 	pOcc->rotator = 0;
 	pOcc->show = 1;
@@ -63,9 +63,9 @@ void freeOccluder(Occluder* pOcc)
 {
 	if (pOcc->handle)
 	{
-		VectorClear(&pOcc->handle->planes);
-		VectorClear(&pOcc->handle->edges);
-		VectorClear(&pOcc->handle->points);
+		g_array_free(pOcc->handle->planes, TRUE);
+		g_array_free(pOcc->handle->edges, TRUE);
+		g_array_free(pOcc->handle->points, TRUE);
 		free(pOcc->handle);
 		pOcc->handle = 0;
 	}
@@ -80,20 +80,20 @@ void copyOccluder(Occluder* fromOcc, Occluder* toOcc)
 
 int AddPos(OccModel* pMod, float a, float b, float c)
 {
-	int index;
+	unsigned int index;
 	position pos;
 	pos.x = a;
 	pos.y = b;
 	pos.z = c;
 
-	index = VectorFind(&pMod->points, &pos);
-	if (index == -1)
+	for (index = 0; index < pMod->points->len; index++)
 	{
-		VectorAdd(&pMod->points, &pos);
-		return VectorSize(&pMod->points) - 1;
+		if (!memcmp(&pos, &g_array_index(pMod->points, position, index), sizeof(position)))
+			return index;
 	}
-	else
-		return index;
+
+	g_array_append_val(pMod->points, pos);
+	return pMod->points->len - 1;
 }
 
 void CreatePlane(plane* p, position* p1, position* p2, position* p3)
@@ -131,28 +131,29 @@ void CreatePlane(plane* p, position* p1, position* p2, position* p3)
 
 int AddPlane(OccModel* pMod, position* a, position* b, position* c)
 {
-	int pos;
+	unsigned int index;
 	plane p;
 	CreatePlane(&p, a, b, c);
-	pos = VectorFind(&pMod->planes, &p);
-	if (pos == -1)
+
+	for (index = 0; index < pMod->planes->len; index++)
 	{
-		VectorAdd(&pMod->planes, &p);
-		return VectorSize(&pMod->planes) - 1;
+		if (!memcmp(&p, &g_array_index(pMod->planes, plane, index), sizeof(plane)))
+			return index;
 	}
-	else
-		return pos;
+
+	g_array_append_val(pMod->planes, p);
+	return pMod->planes->len - 1;
 }
 
 void GenerateShadowEdges(Occluder* pOcc)
 {	/* For testing */
 	int i;
-	int numEdges = VectorSize(&pOcc->handle->edges);
+	int numEdges = pOcc->handle->edges->len;
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we = (winged_edge*)VectorGet(&pOcc->handle->edges, i);
-		position *pn0 = (position*)VectorGet(&pOcc->handle->points, we->e[0]);
-		position *pn1 = (position*)VectorGet(&pOcc->handle->points, we->e[1]);
+		winged_edge *we = &g_array_index(pOcc->handle->edges, winged_edge, i);
+		position *pn0 = &g_array_index(pOcc->handle->points, position, we->e[0]);
+		position *pn1 = &g_array_index(pOcc->handle->points, position, we->e[1]);
 
 		glBegin(GL_LINES);
 			glVertex3f(pn0->x, pn0->y, pn0->z);
@@ -185,7 +186,7 @@ void GenerateShadowEdges(Occluder* pOcc)
 
 float sqdDist(OccModel* pMod, int pIndex, float point[4])
 {
-	plane* p = (plane*)VectorGet(&pMod->planes, pIndex);
+	plane* p = &g_array_index(pMod->planes, plane, pIndex);
 	return (p->a * point[0] + p->b * point[1] + p->c * point[2] + p->d * point[3]);
 }
 
@@ -193,11 +194,11 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 {
 	int edgeOrder[2];
 	int i;
-	int numEdges = VectorSize(&pOcc->handle->edges);
+	int numEdges = pOcc->handle->edges->len;
 
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we = (winged_edge*)VectorGet(&pOcc->handle->edges, i);
+		winged_edge *we = &g_array_index(pOcc->handle->edges, winged_edge, i);
 
 		float f0 = sqdDist(pOcc->handle, we->w[0], olight);
 		float f1;
@@ -226,8 +227,8 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 		}
 
 		{
-			position *pn0 = (position*)VectorGet(&pOcc->handle->points, edgeOrder[0]);
-			position *pn1 = (position*)VectorGet(&pOcc->handle->points, edgeOrder[1]);
+			position *pn0 = &g_array_index(pOcc->handle->points, position, edgeOrder[0]);
+			position *pn1 = &g_array_index(pOcc->handle->points, position, edgeOrder[1]);
 
 			/* local segment */
 			glVertex3f(pn0->x, pn0->y, pn0->z);
@@ -250,10 +251,10 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 void AddEdge(OccModel* pMod, winged_edge* we)
 {
 	int i;
-	int numEdges = VectorSize(&pMod->edges);
+	int numEdges = pMod->edges->len;
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we0 = (winged_edge*)VectorGet(&pMod->edges, i);
+		winged_edge *we0 = &g_array_index(pMod->edges, winged_edge, i);
 		/* facingness different between polys on edge! */
 		assert((we0->e[0] != we->e[0] || we0->e[1] != we->e[1]) && "facingness different between polys on edge!");
 
@@ -265,7 +266,7 @@ void AddEdge(OccModel* pMod, winged_edge* we)
 			return;
 		}
 	}
-	VectorAdd(&pMod->edges, we);  /* otherwise, add the new edge */
+	g_array_append_val(pMod->edges, *we);  /* otherwise, add the new edge */
 }
 
 void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)
@@ -280,7 +281,7 @@ void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, flo
 	pn3.y = y3;
 	pn3.z = z3;
 
-	plane = AddPlane(pOcc->handle, (position*)VectorGet(&pOcc->handle->points, p1), (position*)VectorGet(&pOcc->handle->points, p2), &pn3);
+	plane = AddPlane(pOcc->handle, &g_array_index(pOcc->handle->points, position, p1), &g_array_index(pOcc->handle->points, position, p2), &pn3);
 
 	we.e[0] = p1;
 	we.e[1] = p2;

@@ -27,7 +27,6 @@
 
 #if USE_BOARD3D
 #include "board3d/glincl.h"
-#include "board3d/mylist.h"
 #endif
 
 #ifdef __cplusplus
@@ -122,9 +121,9 @@ typedef struct _Path
 /* Occulsion model */
 typedef struct _OccModel
 {
-	vector planes;
-	vector edges;
-	vector points;
+	GArray *planes;
+	GArray *edges;
+	GArray *points;
 } OccModel;
 
 typedef struct Occluder_T

@@ -9,9 +9,9 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
 	@FT2_CFLAGS@ @GTKGLEXT_CFLAGS@
 
 noinst_LIBRARIES = libboard3d.a
-libboard3d_a_SOURCES = drawboard3d.c matrix.h mylist.c \
+libboard3d_a_SOURCES = drawboard3d.c matrix.h \
 	misc3d.c  widget3d.c gtkcolour3d.c \
         matrix.c model.c shadow.c font3d.c graph.c
 
 
-noinst_HEADERS = shadow.h mylist.h inc3d.h
+noinst_HEADERS = shadow.h inc3d.h

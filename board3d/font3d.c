@@ -45,24 +45,24 @@ typedef struct _Point
 
 typedef struct _Contour
 {
-	vector points;
+	GArray *conPoints;
 } Contour;
 
 typedef struct _Vectoriser
 {
-	vector contours;
+	GArray *contours;
 	int numPoints;
 } Vectoriser;
 
 typedef struct _Tesselation
 {
-	vector points;
+	GArray *tessPoints;
 	GLenum meshType;
 } Tesselation;
 
 typedef struct _Mesh
 {
-	vector tesselations;
+	GArray *tesselations;
 } Mesh;
 
 void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline);
@@ -146,11 +146,11 @@ int MakeGlyph(FT_Outline* pOutline, int list)
 {
 	Vectoriser vect;
 	Mesh mesh;
-	int index, point;
+	unsigned int index, point;
 
 	PopulateVectoriser(&vect, pOutline);
 
-	if ((VectorSize(&vect.contours) < 1) || (vect.numPoints < 3))
+	if ((vect.contours->len < 1) || (vect.numPoints < 3))
 		return 0;
 
 	glNewList(list, GL_COMPILE);
@@ -158,18 +158,17 @@ int MakeGlyph(FT_Outline* pOutline, int list)
 	/* Solid font */
 	PopulateMesh(&vect, &mesh);
 
-	for (index = 0; index < VectorSize(&mesh.tesselations); index++)
+	for (index = 0; index < mesh.tesselations->len; index++)
 	{
-		int pointIndex;
-		Tesselation* subMesh = (Tesselation*)VectorGet(&mesh.tesselations, index);
+		Tesselation* subMesh = &g_array_index(mesh.tesselations, Tesselation, index);
 
 		glBegin(subMesh->meshType);
-		for (pointIndex = 0; pointIndex < VectorSize(&subMesh->points); pointIndex++)
+		for (point = 0; point < subMesh->tessPoints->len; point++)
 		{
-			Point* point = (Point*)VectorGet(&subMesh->points, pointIndex);
+			Point* pPoint = &g_array_index(subMesh->tessPoints, Point, point);
 
-			assert(point->data[2] == 0);
-			glVertex2f((float)point->data[0] / 64.0f, (float)point->data[1] / 64.0f);
+			assert(pPoint->data[2] == 0);
+			glVertex2f((float)pPoint->data[0] / 64.0f, (float)pPoint->data[1] / 64.0f);
 		}
 		glEnd();
 	}
@@ -178,14 +177,14 @@ int MakeGlyph(FT_Outline* pOutline, int list)
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
-	for (index = 0; index < VectorSize(&vect.contours); index++)
+	for (index = 0; index < vect.contours->len; index++)
 	{
-		Contour* contour = (Contour*)VectorGet(&vect.contours, index);
+		Contour* contour = &g_array_index(vect.contours, Contour, index);
 
 		glBegin( GL_LINE_LOOP);
-		for (point = 0; point < VectorSize(&contour->points); point++)
+		for (point = 0; point < contour->conPoints->len; point++)
 		{
-			Point* pPoint = VectorGet(&contour->points, point);
+			Point* pPoint = &g_array_index(contour->conPoints, Point, point);
 			glVertex2f((float)pPoint->data[0] / 64.0f, (float)pPoint->data[1] / 64.0f);
 		}
 		glEnd();
@@ -236,7 +235,7 @@ extern int RenderString3d(OGLFont *pFont, const char* str)
 	return 1;
 }
 
-vector combineList;
+GArray *combineList;
 
 void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 {
@@ -245,9 +244,9 @@ void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 	int contourLength;
 	int contourIndex;
 
-	VectorInit(&combineList, sizeof(double[4]));
+	combineList = g_array_new(FALSE, FALSE, sizeof(double[4]));
 
-	VectorInit(&pVect->contours, sizeof(Contour));
+	pVect->contours = g_array_new(FALSE, FALSE, sizeof(Contour));
 	pVect->numPoints = 0;
 
 	for (contourIndex = 0; contourIndex < pOutline->n_contours; contourIndex++)
@@ -260,8 +259,8 @@ void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 		contourLength = (endIndex - startIndex) + 1;
 
 		PopulateContour(&newContour, pointList, tagList, contourLength);
-		pVect->numPoints += VectorSize(&newContour.points);
-		VectorAdd(&pVect->contours, &newContour);
+		pVect->numPoints += newContour.conPoints->len;
+		g_array_append_val(pVect->contours, newContour);
 
 		startIndex = endIndex + 1;
 	}
@@ -269,9 +268,9 @@ void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 
 void AddPoint(Contour* pContour, double x, double y)
 {
-	if (VectorSize(&pContour->points) > 0)
+	if (pContour->conPoints->len > 0)
 	{	/* Ignore duplicate contour points */
-		Point* point = (Point*)VectorGet(&pContour->points, VectorSize(&pContour->points) - 1);
+		Point* point = &g_array_index(pContour->conPoints, Point, pContour->conPoints->len - 1);
 		if (point->data[0] == x && point->data[1] == y)
 			return;
 	}
@@ -282,7 +281,7 @@ void AddPoint(Contour* pContour, double x, double y)
 		newPoint.data[1] = y;
 		newPoint.data[2] = 0;
 
-		VectorAdd(&pContour->points, &newPoint);
+		g_array_append_val(pContour->conPoints, newPoint);
 	}
 }
 
@@ -316,7 +315,7 @@ void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int 
 {
 	int pointIndex;
 
-	VectorInit(&pContour->points, sizeof(Point));
+	pContour->conPoints = g_array_new(FALSE, FALSE, sizeof(Point));
 
 	for (pointIndex = 0; pointIndex < numberOfPoints; pointIndex++)
 	{
@@ -394,33 +393,33 @@ void TESS_CALLBACK tcbVertex(void* data, Mesh* pMesh)
 	newPoint.data[1] = vertex[1];
 	newPoint.data[2] = vertex[2];
 
-	VectorAdd(&curTess.points, &newPoint);
+	g_array_append_val(curTess.tessPoints, newPoint);
 }
 
 void TESS_CALLBACK tcbCombine(double coords[3], void* vertex_data[4], GLfloat weight[4], void** outData, Mesh* pMesh)
 {
 	/* Just return vertex position (colours etc. not required) */
-	VectorAdd(&combineList, coords);
-	*outData = VectorGet(&combineList, VectorSize(&combineList) - 1);
+	g_array_append_val(combineList, coords);
+	outData = g_array_index(combineList, void*, combineList->len - 1);
 }
 
 void TESS_CALLBACK tcbBegin(GLenum type, Mesh* pMesh)
 {
-	VectorInit(&curTess.points, sizeof(Point));
+	curTess.tessPoints = g_array_new(FALSE, FALSE, sizeof(Point));
 	curTess.meshType = type;
 }
 
 void TESS_CALLBACK tcbEnd(Mesh* pMesh)
 {
-	VectorAdd(&pMesh->tesselations, &curTess);
+	g_array_append_val(pMesh->tesselations, curTess);
 }
 
 void PopulateMesh(Vectoriser* pVect, Mesh* pMesh)
 {
-	int c, p;
+	unsigned int c, p;
 	GLUtesselator* tobj = gluNewTess();
 
-	VectorInit(&pMesh->tesselations, sizeof(Tesselation));
+	pMesh->tesselations = g_array_new(FALSE, FALSE, sizeof(Tesselation));
 
 	gluTessCallback( tobj, GLU_TESS_BEGIN_DATA, tcbBegin);
 	gluTessCallback( tobj, GLU_TESS_VERTEX_DATA, tcbVertex);
@@ -435,15 +434,15 @@ gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
 
 	gluTessBeginPolygon( tobj, pMesh);
 
-	for(c = 0; c < VectorSize(&pVect->contours); ++c)
+	for(c = 0; c < pVect->contours->len; ++c)
 	{
-		Contour* contour = (Contour*)VectorGet(&pVect->contours, c);
+		Contour* contour = &g_array_index(pVect->contours, Contour, c);
 
 		gluTessBeginContour( tobj);
 
-		for(p = 0; p < VectorSize(&contour->points); p++)
+		for(p = 0; p < contour->conPoints->len; p++)
 		{
-			Point* point = (Point*)VectorGet(&contour->points, p);
+			Point* point = &g_array_index(contour->conPoints, Point, p);
 			gluTessVertex(tobj, point->data, point->data);
 		}
 
@@ -457,19 +456,19 @@ gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
 
 void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
 {
-	int c, i;
-	for (c = 0; c < VectorSize(&pVect->contours); c++)
+	unsigned int c, i;
+	for (c = 0; c < pVect->contours->len; c++)
 	{
-		Contour* contour = (Contour*)VectorGet(&pVect->contours, c);
-		VectorClear(&contour->points);
+		Contour* contour = &g_array_index(pVect->contours, Contour, c);
+		g_array_free(contour->conPoints, TRUE);
 	}
-	VectorClear(&pVect->contours);
-	for (i = 0; i < VectorSize(&pMesh->tesselations); i++)
+	g_array_free(pVect->contours, TRUE);
+	for (i = 0; i < pMesh->tesselations->len; i++)
 	{
-		Tesselation* subMesh = (Tesselation*)VectorGet(&pMesh->tesselations, i);
-		VectorClear(&subMesh->points);
+		Tesselation* subMesh = &g_array_index(pMesh->tesselations, Tesselation, i);
+		g_array_free(subMesh->tessPoints, TRUE);
 	}
-	VectorClear(&pMesh->tesselations);
+	g_array_free(pMesh->tesselations, TRUE);
 
-	VectorClear(&combineList);
+	g_array_free(combineList, TRUE);
 }
