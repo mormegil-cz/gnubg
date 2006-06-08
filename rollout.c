@@ -1477,6 +1477,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
 	/* Make sure final output is upto date */
 	for (alt = 0; alt < alternatives; ++alt) {
+	 if (nGamesDone[ alt ] > 0)
 	(*pfProgress)( aarMu, aarSigma, prc, aciLocal,
 					MIN(i, cGames - 1), alt, ajiJSD[ alt ].nRank + 1,
 					ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds,
