@@ -3644,9 +3644,10 @@ extern void CommandHelp( char *sz ) {
     char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
     
 #if USE_GTK2 
-    if( fX )
-	GTKHelp( sz );
-    return;
+    if( fX ){
+        GTKHelp( sz );
+        return;
+    }
 #endif
     
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
