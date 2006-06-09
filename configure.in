@@ -302,7 +302,6 @@ if test "$with_gtk" != "no"; then
 fi
 AM_CONDITIONAL(USE_GTK2, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
-AM_CONDITIONAL(USE_GUI, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_BOARD3D, test "$no_board3d" != "yes" )
 
 AM_PATH_GLIB_2_0(2.0.0)
