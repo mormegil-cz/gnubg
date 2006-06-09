@@ -77,12 +77,8 @@ extern char *FormatClock(struct timeval * ptl , char *buf);
  * issue a 
  * MOVE_TIME record if time has run out
  */ 
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
 extern gboolean UpdateClockNotify(gpointer *p); 
-#else
-extern int UpdateClockNotify(event *pev, void *p); 
-#endif
 #else
 extern int UpdateClockNotify(void *p);
 #endif

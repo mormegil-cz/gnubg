@@ -904,12 +904,8 @@ static char staticBuf[20];
 }
 
 
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
 extern gboolean UpdateClockNotify(gpointer *p)
-#else
-extern int UpdateClockNotify(event *pev, void *p)
-#endif
 #else
 extern int UpdateClockNotify(void *p)
 #endif

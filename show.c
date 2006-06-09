@@ -60,8 +60,6 @@
 #include "gtkrolls.h"
 #include "gtktempmap.h"
 #include "gtkbearoff.h"
-#elif USE_EXT
-#include "xgame.h"
 #else
 #include <glib.h>
 #endif
@@ -503,14 +501,10 @@ extern void CommandShowBoard( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
-#if USE_GUI
+#if USE_GTK2
     if( fX )
-#if USE_GTK
       game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1, FALSE,
                 anChequers[ ms.bgv ] );
-#else
-        GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
-#endif
     else
 #endif
         outputl( DrawBoard( szOut, an, TRUE, ap, 
@@ -538,17 +532,13 @@ void CommandShowFullBoard( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
-#if USE_GUI
+#if USE_GTK2
     if( fX )
-#if USE_GTK
 	game_set( BOARD( pwBoard ), an, ms.fTurn, 
                   ap[ 1 ].szName, ap[ 0 ].szName , ms.nMatchTo, 
                   ms.anScore[ 1 ], ms.anScore[ 0 ], 
                   ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE,
                   anChequers[ ms.bgv ] );
-#else
-        GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
-#endif
     else
 #endif
         outputl( DrawBoard( szOut, an, TRUE, apch, 
@@ -558,7 +548,7 @@ void CommandShowFullBoard( char *sz ) {
 
 
 extern void CommandShowDelay( char *sz ) {
-#if USE_GUI
+#if USE_GTK2
     if( nDelay )
 	outputf( _("The delay is set to %d ms.\n"),nDelay);
     else
@@ -1437,7 +1427,7 @@ extern void CommandShowOutput( char *sz ) {
              _("Game winning chances will be shown as percentages.\n") :
              _("Game winning chances will be shown as probabilities.\n") );
 
-#if USE_GUI
+#if USE_GTK2
     if( !fX )
 #endif
       outputf( fOutputRawboard ? 

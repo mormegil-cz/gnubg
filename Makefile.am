@@ -188,7 +188,7 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = config.rpath  userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
-	gnubg.gtkrc credits.sh xboard.c xboard.h xgame.c xgame.h \
+	gnubg.gtkrc credits.sh \
 	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.games.sql \
 	$(BOARD3D_TEXTURE_FILES)
 

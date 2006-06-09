@@ -56,12 +56,6 @@ extern guint nNextTurn; /* GTK idle function */
 #if USE_TIMECONTROL
 extern void GTKUpdateClock(void);
 #endif
-#elif USE_EXT
-#include <ext.h>
-#include <event.h>
-extern extwindow ewnd;
-extern int fX, nDelay, fNeedPrompt;
-extern event evNextTurn;
 #endif
 
 #if HAVE_SIGACTION
@@ -650,12 +644,8 @@ extern void ProgressValue ( int iValue );
 extern void ProgressValueAdd ( int iValue );
 extern void ProgressEnd( void );
 
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
 extern gint NextTurnNotify( gpointer p );
-#else
-extern int NextTurnNotify( event* pev, void* p );
-#endif
 extern void UserCommand( char* sz );
 extern void HandleXAction( void );
 #if HAVE_LIBREADLINE
@@ -663,11 +653,9 @@ extern int fReadingCommand;
 extern void HandleInput( char* sz );
 #endif
 #endif
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
 extern void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 extern void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
-#endif
 #endif
 
 #if HAVE_LIBREADLINE

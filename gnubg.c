@@ -129,12 +129,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "gtkprefs.h"
 #include "gtksplash.h"
 #include "gtkchequer.h"
-#elif USE_EXT
-#include <ext.h>
-#include <extwin.h>
-#include "xgame.h"
-extwindow ewnd;
-event evNextTurn;
 #else
 #include <glib.h>
 #endif
@@ -153,7 +147,7 @@ event evNextTurn;
 #define NO_BACKSLASH_ESCAPES 1
 #endif
 
-#if USE_GUI
+#if USE_GTK2
 int fX = TRUE; /* use X display */
 int nDelay = 300;
 int fNeedPrompt = FALSE;
@@ -2235,7 +2229,7 @@ char *aszBuildInfo[] = {
 #if HAVE_LIBGDBM
     N_ ("Position databases supported."),
 #endif
-#if USE_GUI
+#if USE_GTK2
     N_ ("Window system supported."),
 #endif
 #if HAVE_SOCKETS
@@ -2845,13 +2839,11 @@ extern void ResetInterrupt( void ) {
 	    gtk_idle_remove( nNextTurn );
 	    nNextTurn = 0;
 	}
-#elif USE_EXT
-        EventPending( &evNextTurn, FALSE );
 #endif
     }
 }
 
-#if USE_GUI && HAVE_FORK
+#if USE_GTK2 && HAVE_FORK
 static int fChildDied;
 
 static RETSIGTYPE HandleChild( int n ) {
@@ -2865,7 +2857,7 @@ static void ShellEscape( char *pch ) {
     pid_t pid;
     char *pchShell;
     psighandler shQuit;
-#if USE_GUI
+#if USE_GTK2
     psighandler shChild;
     
     PortableSignal( SIGCHLD, HandleChild, &shChild, TRUE );
@@ -2876,7 +2868,7 @@ static void ShellEscape( char *pch ) {
 	/* Error */
 	outputerr( "fork" );
 
-#if USE_GUI
+#if USE_GTK2
 	PortableSignalRestore( SIGCHLD, &shChild );
 #endif
 	PortableSignalRestore( SIGQUIT, &shQuit );
@@ -2897,7 +2889,7 @@ static void ShellEscape( char *pch ) {
     }
     
     /* Parent */
-#if USE_GUI
+#if USE_GTK2
  TryAgain:
 #if HAVE_SIGPROCMASK
     {
@@ -3272,7 +3264,7 @@ extern void ShowBoard( void )
 	return;
 
     if( ms.gs == GAME_NONE ) {
-#if USE_GUI
+#if USE_GTK2
 	if( fX ) {
 	    int anBoardTemp[ 2 ][ 25 ];
 	    InitBoard( anBoardTemp, ms.bgv );
@@ -3288,7 +3280,7 @@ extern void ShowBoard( void )
 	return;
     }
     
-#if USE_GUI
+#if USE_GTK2
     if( !fX ) {
 #endif
 	if( fOutputRawboard ) {
@@ -5627,7 +5619,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
 	     "set cube use %s\n"
-#if USE_GUI
+#if USE_GTK2
 	     "set delay %d\n"
 #endif
 	     "set display %s\n"
@@ -5642,7 +5634,7 @@ extern void CommandSaveSettings( char *szParam ) {
              fConfirm ? "on" : "off",
              fConfirmSave ? "on" : "off",
 	     fCubeUse ? "on" : "off",
-#if USE_GUI
+#if USE_GTK2
 	     nDelay,
 #endif
 	     fDisplay ? "on" : "off", fEgyptian ? "on" : "off" );
@@ -6242,7 +6234,7 @@ extern void Prompt( void ) {
     fflush( stdout );    
 }
 
-#if USE_GUI
+#if USE_GTK2
 #if HAVE_LIBREADLINE
 static void ProcessInput( char *sz, int fFree ) {
 
@@ -6267,20 +6259,16 @@ static void ProcessInput( char *sz, int fFree ) {
     if( *pchExpanded )
 	add_history( pchExpanded );
 	
-#if USE_GTK
     if( fX )
 	GTKDisallowStdin();
-#endif
 
     szConverted = Convert( pchExpanded, GNUBG_CHARSET, szTerminalCharset );
     free( pchExpanded );
     HandleCommand( szConverted, acTop );
     free( szConverted );
     
-#if USE_GTK
     if( fX )
 	GTKAllowStdin();
-#endif
 
     ResetInterrupt();
 
@@ -6293,11 +6281,7 @@ static void ProcessInput( char *sz, int fFree ) {
        want no prompt at all, yet (if NextTurn is going to be called),
        or if we do want to prompt immediately, we recalculate it in
        case the information in the old one is out of date. */
-#if USE_GTK
     if( nNextTurn )
-#else
-    if( evNextTurn.fPending )
-#endif
 	fNeedPrompt = TRUE;
     else {
 	ProgressEnd();
@@ -6310,28 +6294,6 @@ extern void HandleInput( char *sz ) {
 
     ProcessInput( sz, TRUE );
 }
-
-#if USE_EXT
-
-static char *szInput;
-static int fInputAgain;
-
-static void HandleInputRecursive( char *sz ) {
-
-    if( !sz ) {
-	outputc( '\n' );
-	PromptForExit();
-	szInput = NULL;
-	fInputAgain = TRUE;
-	return;
-    }
-
-    szInput = sz;
-
-    rl_callback_handler_remove();
-}
-
-#endif /* USE_EXT */
 
 #endif
 
@@ -6356,7 +6318,6 @@ extern void UserCommand( char *szCommand ) {
        read-only storage and HandleCommand might want to modify it. */
     strcpy( sz, szCommand );
 
-#if USE_GTK
     if( !fTTY ) {
 	fInterrupt = FALSE;
 	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
@@ -6365,7 +6326,6 @@ extern void UserCommand( char *szCommand ) {
 
 	return;
     }
-#endif
 
     /* Note that the command is always echoed to stdout; the output*()
        functions are bypassed. */
@@ -6396,32 +6356,20 @@ extern void UserCommand( char *szCommand ) {
 
     ResetInterrupt();
     
-#if USE_GTK
     if( nNextTurn )
-#else
-    if( evNextTurn.fPending )
-#endif
 	Prompt();
     else
 	fNeedPrompt = TRUE;
 }
 
-#if USE_GTK
 extern gint NextTurnNotify( gpointer p )
-#else
-extern int NextTurnNotify( event *pev, void *p )
-#endif
 {
 
     NextTurn( TRUE );
 
     ResetInterrupt();
 
-#if USE_GTK
     if( fNeedPrompt )
-#else
-    if( !pev->fPending && fNeedPrompt )
-#endif
     {
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
@@ -6453,118 +6401,10 @@ extern char *GetInput( char *szPrompt ) {
     char *sz;
     char *pch;
     char *pchConverted;
-    
 #if USE_GTK
     assert( fTTY && !fX );
 #endif
 
-#if USE_EXT
-    fd_set fds;
-
-    if( fX ) {
-#if HAVE_LIBREADLINE
-	if( fReadline ) {
-	    /* Using readline and X. */
-	    char *szOldPrompt, *szOldInput;
-	    int nOldEnd, nOldMark, nOldPoint, fWasReadingCommand;
-	
-	    if( fInterrupt )
-		return NULL;
-
-	    fReadingOther = TRUE;
-	    
-	    if( ( fWasReadingCommand = fReadingCommand ) ) {
-		/* Save old readline context. */
-		szOldPrompt = rl_prompt;
-		szOldInput = rl_copy_text( 0, rl_end );
-		nOldEnd = rl_end;
-		nOldMark = rl_mark;
-		nOldPoint = rl_point;
-		fReadingCommand = FALSE;
-		/* FIXME this is unnecessary when handling an X command! */
-		outputc( '\n' );
-	    }
-	    
-	    szInput = FALSE;
-	    
-	    rl_callback_handler_install( szPrompt, HandleInputRecursive );
-	    
-	    while( !szInput ) {
-		FD_ZERO( &fds );
-		FD_SET( STDIN_FILENO, &fds );
-		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
-		
-		select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
-			NULL );
-
-		if( fInterrupt ) {
-		    outputc( '\n' );
-		    break;
-		}
-		
-		if( FD_ISSET( STDIN_FILENO, &fds ) ) {
-		    rl_callback_read_char();
-		    if( fInputAgain ) {
-			rl_callback_handler_install( szPrompt,
-						     HandleInputRecursive );
-			szInput = NULL;
-			fInputAgain = FALSE;
-		    }
-		}
-
-		if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
-		    HandleXAction();
-	    }
-
-	    if( fWasReadingCommand ) {
-		/* Restore old readline context. */
-		rl_callback_handler_install( szOldPrompt, HandleInput );
-		rl_insert_text( szOldInput );
-		free( szOldInput );
-		rl_end = nOldEnd;
-		rl_mark = nOldMark;
-		rl_point = nOldPoint;
-		rl_redisplay();
-		fReadingCommand = TRUE;
-	    } else
-		rl_callback_handler_remove();	
-	    
-	    fReadingOther = FALSE;
-
-	    pchConverted = Convert( szInput, GNUBG_CHARSET,
-				    szTerminalCharset );
-	    free( szInput );
-	    return pchConverted;
-	}
-#endif
-	/* Using X, but not readline. */
-	if( fInterrupt )
-	    return NULL;
-
-	outputc( '\n' );
-	output( szPrompt );
-	fflush( stdout );
-
-	do {
-	    FD_ZERO( &fds );
-	    FD_SET( STDIN_FILENO, &fds );
-	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
-
-	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
-		    NULL );
-
-	    if( fInterrupt ) {
-		outputc( '\n' );
-		return NULL;
-	    }
-	    
-	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
-		HandleXAction();
-	} while( !FD_ISSET( STDIN_FILENO, &fds ) );
-
-	goto ReadDirect;
-    }
-#endif
 #if HAVE_LIBREADLINE
     if( fReadline ) {
 	/* Using readline, but not X. */
@@ -6595,9 +6435,6 @@ extern char *GetInput( char *szPrompt ) {
     output( szPrompt );
     fflush( stdout );
 
-#if USE_EXT
- ReadDirect:
-#endif
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */
 
     clearerr( stdin );
@@ -7157,9 +6994,9 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if ( USE_GUI || USE_SOUND ) && defined(SIGIO)
+#if ( USE_GTK2 || USE_SOUND ) && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
-#if USE_GUI
+#if USE_GTK2
     /* NB: It is safe to write to fAction even if it cannot be read
        atomically, because it is only used to hold a binary value. */
     if( fX )
@@ -7187,7 +7024,7 @@ static void BearoffProgress( int i ) {
 
 static void usage( char *argv0 ) {
 
-#if USE_GUI
+#if USE_GTK2
 
     printf(
 _("Usage: %s [options] [saved-game-file]\n"
@@ -7476,7 +7313,7 @@ int main(int argc, char *argv[] ) {
 	outputon();
     }
 
-#if USE_GUI
+#if USE_GTK2
     /* The GTK interface is fairly grotty; it makes it impossible to
        separate argv handling from attempting to open the display, so
        we have to check for -t before the other options to avoid connecting
@@ -7529,7 +7366,7 @@ int main(int argc, char *argv[] ) {
 	  }
 	}
 
-#endif /* USE_GUI */
+#endif /* USE_GTK2 */
 
 #if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
@@ -7575,13 +7412,12 @@ int main(int argc, char *argv[] ) {
     szTerminalCharset = "ISO-8859-1"; /* best guess */
 #endif
 
-#if USE_GUI
+#if USE_GTK2
 
     optind = 0;
     opterr = 1;
 
     if( fX )
-#if USE_GTK
 	fX = InitGTK( &argc, &argv );
 
 #ifndef WIN32
@@ -7589,8 +7425,6 @@ int main(int argc, char *argv[] ) {
         if( !getenv( "DISPLAY" ) )
 	    fX = FALSE;
 #endif /* ! WIN32 */
-#endif /* ! USE_GTK */
-
     if( fX ) {
 #if WIN32
 	/* The MS Windows port cannot support multiplexed GUI/TTY input;
@@ -7602,7 +7436,7 @@ int main(int argc, char *argv[] ) {
 	fReadline = isatty( STDIN_FILENO );
 #endif
     } else 
-#endif /* USE_GUI */
+#endif /* USE_GTK2 */
 	{
 #if HAVE_LIBREADLINE
 	    fReadline =
@@ -7909,7 +7743,7 @@ int main(int argc, char *argv[] ) {
 	}
     
 #ifdef SIGIO
-# if USE_GUI
+# if USE_GTK2
     if( fX )
 	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
 #  if USE_SOUND
@@ -8044,13 +7878,6 @@ int main(int argc, char *argv[] ) {
 
 	Shutdown();
 	gtk_exit ( EXIT_SUCCESS );
-    }
-#elif USE_EXT
-    if( fX ) {
-        RunExt();
-
-	fputs( _("Could not open X display.  Continuing on TTY.\n"), stderr );
-        fX = FALSE;
     }
 #endif
     

@@ -272,47 +272,45 @@ AC_SEARCH_LIBS(inet_aton,resolv)
 AC_REPLACE_FUNCS(erf strdup)
 
 dnl Check for GTK
-AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK+ 2.0])
-if test "$with_gtk2" != "no"; then
+no_gtk="yes"
+no_board3d="yes"
+no_gtkglext="yes"
+AC_ARG_WITH(gtk,[  --with-gtk             use GTK+ 2.0])
+AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
+if test "$with_gtk" != "no"; then
     AM_PATH_GTK_2_0(2.6.0)
-fi
-AM_CONDITIONAL(USE_GTK2, test "$no_gtk2" != "yes" )
-AM_CONDITIONAL(USE_GTK, test "$no_gtk2" != "yes" )
+    if test "$no_gtk" != "yes"; then
+        AC_DEFINE(USE_GTK2,1,Define if you want to use GTK+ 2.0 or later.)
+        AC_DEFINE(USE_GTK,1,Define if you want to use GTK+ 2.0 or later.)
+        AC_ARG_ENABLE(train-menu,[  --enable-train-menu     show GTK+ neural network training options],AC_DEFINE(ENABLE_TRAIN_MENU,1,[Define if you want a GTK+ neural network training menu]))
+        GTKDATA=gnubg.gtkrc
+        AC_SUBST(GTKDATA)
+        if test "$darwinppc" = "yes"; then
+            GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
+        fi
 
-if test "$no_gtk2" != "yes"; then
-   dnl look for Glib 2.x
-   echo "look for glib 2"
-   AM_PATH_GLIB_2_0(2.0.0)
+        if test "$solaris" = "yes"; then
+            GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
+        fi
+        if test "$with_board3d" != "no"; then
+            AM_PATH_GTKGLEXT_1_0(,AC_DEFINE(HAVE_GTKGLEXT,1, [Define if you have GtkGLExt]))
+            if test  "$no_gtkglext" != "yes"; then
+                no_board3d=AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
+            fi
+        fi
+    fi
 fi
+AM_CONDITIONAL(USE_GTK2, test "$no_gtk" != "yes" )
+AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
+AM_CONDITIONAL(USE_GUI, test "$no_gtk" != "yes" )
+AM_CONDITIONAL(USE_BOARD3D, test "$no_board3d" != "yes" )
 
+AM_PATH_GLIB_2_0(2.0.0)
 if test x"$no_glib" != "x"; then
    echo "*** You must have installed Glib1 or Glib2 in order to "
    echo "    compile GNU Backgammon"
    exit 1
 fi
-
-
-if test "$no_gtk2" != "yes"; then
-  AC_DEFINE(USE_GTK2,1,Define if you want to use GTK+ 2.0 or later.)
-  AC_DEFINE(USE_GTK,1,Define if you want to use GTK+ 2.0 or later.)
-  AC_ARG_ENABLE(train-menu,[  --enable-train-menu     show GTK+ neural network training options],AC_DEFINE(ENABLE_TRAIN_MENU,1,[Define if you want a GTK+ neural network training menu]))
-  GTKDATA=gnubg.gtkrc
-  AC_SUBST(GTKDATA)
-
-  if test "$darwinppc" = "yes"; then
-    GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
-  fi
-
-  if test "$solaris" = "yes"; then
-    GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
-  fi
-fi
-
-
-AH_VERBATIM([USE_GUI],
-[#if USE_GTK
-#define USE_GUI 1
-#endif])
 
 
 dnl
@@ -392,35 +390,6 @@ dnl if test "$with_freetype" != "no"; then
   fi
 dnl fi
 AM_CONDITIONAL(USE_FREETYPE, test "$have_freetype" = "yes")
-
-dnl ---------------------------------------
-dnl Look for libraries needed for 3D boards
-
-AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
-
-no_board3d="yes"
-
-# if test "with_board3d" = "yes"; then
-#echo "debug with_board3d: $with_board3d"
-
-no_board3d="yes"
-if test "$with_board3d" != "no"; then
-
-    if test "$no_gtk2" != "yes"; then
-        dnl Gtk GL libraries for GTK+ 2.x: GtkGlExt
-        AM_PATH_GTKGLEXT_1_0(,AC_DEFINE(HAVE_GTKGLEXT,1,
-                             [Define if you have GtkGLExt]))
-        no_gtkgl=$no_gtkglext
-
-        if test "$no_gtkgl" != "yes"; then
-            no_board3d=
-            AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
-            fi
-        fi
-    fi
-
-AM_CONDITIONAL(USE_BOARD3D,test "$no_board3d" != "yes")
-
 dnl ---------------------------------------
 dnl Sounds
 

@@ -1,3 +1,6 @@
+Sat Jun 10 00:02:19 CEST 2006 Christian Anthon  <anthon@kiku.dk>
+    * : Removal of USE_GUI, USE_EXT, xgame* xboard*, the ext directory
+
 2006-06-02  Christian Anthon  <anthon@kiku.dk>
     * Makefile.am (SUBDIRS): Remove intl. (EXTRA_DIST): Add config.rpath.
     Upgrade to gettext-0.14.5.

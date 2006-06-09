@@ -1298,7 +1298,7 @@ extern void CommandSetDisplayPanels( char *sz ) {
   _("Game list, Annotation and Message panels/windows will not be displayed.")
 	     );
 
-#if USE_GUI && USE_GTK
+#if USE_GTK
   if (fX) {
     if (fDisplayPanels)
       ShowAllPanels (0, 0, 0);

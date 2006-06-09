@@ -805,14 +805,6 @@ static void ResetDelayTimer( void ) {
 	nTimeout = gtk_timeout_add( nDelay, DelayTimeout, NULL );
     }
 }
-#elif USE_EXT && HAVE_SELECT
-static struct timeval tvLast;
-
-static void ResetDelayTimer( void ) {
-    
-    if( fX && nDelay && fDisplay )
-	gettimeofday( &tvLast, NULL );
-}
 #else
 #define ResetDelayTimer()
 #endif
@@ -831,7 +823,7 @@ void DiceRolled()
 {
 	playSound ( SOUND_ROLL );
     
-#if USE_GUI
+#if USE_GTK2
 	if (fX && fDisplay)
 	{
 		BoardData *bd = BOARD(pwBoard)->board_data;
@@ -976,7 +968,7 @@ static int NewGame( void ) {
     UpdateSetting( &ms.gs );
     /* Play sound after initial dice decided */
 	DiceRolled();
-#if USE_GUI
+#if USE_GTK2
     ResetDelayTimer();
 #endif
 
@@ -1802,27 +1794,15 @@ static int TryBearoff( void ) {
 
 extern int NextTurn( int fPlayNext ) {
     int n;
-#if USE_EXT && HAVE_SELECT
-    struct timeval tv;
-    fd_set fds;
-#endif
-
     assert( !fComputing );
 	
-#if USE_GUI
+#if USE_GTK2
     if( fX ) {
-#if USE_GTK
 	if( nNextTurn ) {
 	    gtk_idle_remove( nNextTurn );
 	    nNextTurn = 0;
 	} else
 	    return -1;
-#else
-	if( evNextTurn.fPending )
-	    EventPending( &evNextTurn, FALSE );
-	else
-	    return -1;
-#endif
     } else
 #endif
 	if( fNextTurn )
@@ -1852,45 +1832,6 @@ extern int NextTurn( int fPlayNext ) {
 	    fLastMove = FALSE;
 	}
     }
-    
-#elif USE_EXT && HAVE_SELECT
-    if( fX && nDelay && fDisplay ) {
-	if( tvLast.tv_sec ) {
-	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
-		tvLast.tv_sec += tvLast.tv_usec / 1000000;
-		tvLast.tv_usec %= 1000000;
-	    }
-	
-	restart:
-	    gettimeofday( &tv, NULL );
-		
-	    if( tvLast.tv_sec > tv.tv_sec ||
-		( tvLast.tv_sec == tv.tv_sec &&
-		  tvLast.tv_usec > tv.tv_usec ) ) {
-		tv.tv_sec = tvLast.tv_sec - tv.tv_sec;
-		if( ( tv.tv_usec = tvLast.tv_usec - tv.tv_usec ) < 0 ) {
-		    tv.tv_usec += 1000000;
-		    tv.tv_sec--;
-		}
-
-#ifdef ConnectionNumber /* FIXME use configure for this */
-		FD_ZERO( &fds );
-		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
-		if( select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL,
-			    NULL, &tv ) > 0 ) {
-		    HandleXAction();
-		    if( !fInterrupt )
-			goto restart;
-		}
-#else
-		if( select( 0, NULL, NULL, NULL, &tv ) > 0 && !fInterrupt )
-		    goto restart;
-#endif
-		 
-	    }
-	}
-	ResetDelayTimer();
-    }
 #endif
 
     UpdateSetting( &ms.nCube );
@@ -1919,7 +1860,7 @@ extern int NextTurn( int fPlayNext ) {
 		gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints);
 
 
-#if USE_GUI
+#if USE_GTK2
 	if( fX ) {
 	    if( fDisplay )
 		{
@@ -1943,7 +1884,7 @@ extern int NextTurn( int fPlayNext ) {
 		ms.anScore[ !pmgi->fWinner ] != ms.nMatchTo - 1;
 	}
 
-#if USE_GUI
+#if USE_GTK2
 	if( !fX || fDisplay )
 #endif
 	    CommandShowScore( NULL );
@@ -1957,18 +1898,13 @@ extern int NextTurn( int fPlayNext ) {
 	    outputf( _("%s has won the match.\n"), ap[ pmgi->fWinner ].szName );
 	    outputx();
 #if USE_TIMECONTROL
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
             if ( nClockTimeout ) {
               /* ugly hack, jth */
               gtk_timeout_remove(nClockTimeout);
               nClockTimeout = 0;
             }
-#else
-	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
 #endif
-#endif
-
 #endif
 	    fComputing = FALSE;
 	    return -1;
@@ -2036,14 +1972,10 @@ extern int NextTurn( int fPlayNext ) {
 	return -1;
     }
     
-#if USE_GUI
+#if USE_GTK2
     if( fX ) {
-#if USE_GTK
 	if( !ComputerTurn() && !nNextTurn )
 	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
-#else
-	EventPending( &evNextTurn, !ComputerTurn() );	    
-#endif
     } else
 #endif
 	fNextTurn = !ComputerTurn();
@@ -2054,14 +1986,10 @@ extern int NextTurn( int fPlayNext ) {
 
 extern void TurnDone( void ) {
 
-#if USE_GUI
+#if USE_GTK2
     if( fX ) {
-#if USE_GTK
 	if( !nNextTurn )
 	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
-#else
-	EventPending( &evNextTurn, TRUE );    
-#endif
     } else
 #endif
 	fNextTurn = TRUE;
@@ -3362,18 +3290,14 @@ extern void CommandNewMatch( char *sz ) {
     
 #if USE_TIMECONTROL
     InitGameClock(&ms.gc, &tc, 2*ms.nMatchTo);
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
     nClockTimeout = gtk_timeout_add(314 , (GtkFunction)UpdateClockNotify, 0 );
-#else
-	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
-#endif
 #endif
 
 #endif
     outputf( _("A new %d point match has been started.\n"), n );
 
-#if USE_GUI
+#if USE_GTK2
     if( fX )
 	ShowBoard();
 #endif
@@ -3410,18 +3334,14 @@ extern void CommandNewSession( char *sz ) {
     
 #if USE_TIMECONTROL
     InitGameClock(&ms.gc, &tc, 0);
-#if USE_GUI
-#if USE_GTK
+#if USE_GTK2
 	nClockTimeout = gtk_timeout_add( 314 , (GtkFunction)UpdateClockNotify, 0 );
-#else
-	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
-#endif
 #endif
 #endif
 
     outputl( _("A new session has been started.") );
     
-#if USE_GUI
+#if USE_GTK2
     if( fX )
 	ShowBoard();
 #endif
@@ -3437,7 +3357,7 @@ static void UpdateGame( int fShowBoard ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
 
-#if USE_GUI
+#if USE_GTK2
     if( fX || ( fShowBoard && fDisplay ) )
 	ShowBoard();
 #else
