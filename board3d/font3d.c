@@ -65,11 +65,26 @@ typedef struct _Mesh
 	GArray *tesselations;
 } Mesh;
 
+int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, unsigned char *pBufferBytes, unsigned int bufferSizeInBytes, int pointSize, float scale);
 void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline);
 void TidyMemory(Vectoriser* pVect, Mesh* pMesh);
 void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int numberOfPoints);
 void PopulateMesh(Vectoriser* pVect, Mesh* pMesh);
 int MakeGlyph(FT_Outline* pOutline, int list);
+
+int BuildFont3d(BoardData* bd)
+{
+	FT_Library ftLib;
+	if (FT_Init_FreeType(&ftLib))
+		return 0;
+
+	if (!CreateOGLFont(ftLib, &bd->numberFont, auchLuxiSR, cbLuxiSR, 24, FONT_SIZE))
+		return 0;
+	if (!CreateOGLFont(ftLib, &bd->cubeFont, auchLuxiRB, cbLuxiRB, 44, CUBE_FONT_SIZE))
+		return 0;
+
+	return !FT_Done_FreeType(ftLib);
+}
 
 int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, unsigned char *pBufferBytes, unsigned int bufferSizeInBytes, int pointSize, float scale)
 {
@@ -126,20 +141,6 @@ int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, unsigned char *pBufferBytes,
 	}
 
 	return !FT_Done_Face(face);
-}
-
-int BuildFont3d(BoardData* bd)
-{
-	FT_Library ftLib;
-	if (FT_Init_FreeType(&ftLib))
-		return 0;
-
-	if (!CreateOGLFont(ftLib, &bd->numberFont, auchLuxiSR, cbLuxiSR, 24, FONT_SIZE))
-		return 0;
-	if (!CreateOGLFont(ftLib, &bd->cubeFont, auchLuxiRB, cbLuxiRB, 44, CUBE_FONT_SIZE))
-		return 0;
-
-	return !FT_Done_FreeType(ftLib);
 }
 
 int MakeGlyph(FT_Outline* pOutline, int list)
@@ -235,7 +236,7 @@ extern int RenderString3d(OGLFont *pFont, const char* str)
 	return 1;
 }
 
-GArray *combineList;
+GList *combineList;
 
 void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 {
@@ -243,8 +244,6 @@ void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 	int endIndex;
 	int contourLength;
 	int contourIndex;
-
-	combineList = g_array_new(FALSE, FALSE, sizeof(double[4]));
 
 	pVect->contours = g_array_new(FALSE, FALSE, sizeof(Contour));
 	pVect->numPoints = 0;
@@ -399,8 +398,11 @@ void TESS_CALLBACK tcbVertex(void* data, Mesh* pMesh)
 void TESS_CALLBACK tcbCombine(double coords[3], void* vertex_data[4], GLfloat weight[4], void** outData, Mesh* pMesh)
 {
 	/* Just return vertex position (colours etc. not required) */
-	g_array_append_val(combineList, coords);
-	outData = g_array_index(combineList, void*, combineList->len - 1);
+	Point *newEle = (Point*)malloc(sizeof(Point));
+	memcpy(newEle->data, coords, sizeof(double[3]));
+
+	combineList = g_list_append(combineList, newEle);
+	*outData = newEle;
 }
 
 void TESS_CALLBACK tcbBegin(GLenum type, Mesh* pMesh)
@@ -418,6 +420,8 @@ void PopulateMesh(Vectoriser* pVect, Mesh* pMesh)
 {
 	unsigned int c, p;
 	GLUtesselator* tobj = gluNewTess();
+
+	combineList = NULL;
 
 	pMesh->tesselations = g_array_new(FALSE, FALSE, sizeof(Tesselation));
 
@@ -456,7 +460,9 @@ gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
 
 void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
 {
+	GList *pl;
 	unsigned int c, i;
+	
 	for (c = 0; c < pVect->contours->len; c++)
 	{
 		Contour* contour = &g_array_index(pVect->contours, Contour, c);
@@ -470,5 +476,9 @@ void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
 	}
 	g_array_free(pMesh->tesselations, TRUE);
 
-	g_array_free(combineList, TRUE);
+	for (pl = g_list_first(combineList); pl; pl = g_list_next(pl))
+	{
+		free(pl->data);
+	}
+	g_list_free(combineList);
 }
