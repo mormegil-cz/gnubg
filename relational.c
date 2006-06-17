@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <glib.h>
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "relational.h"
 #include "backgammon.h"
 #include "positionid.h"

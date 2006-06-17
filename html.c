@@ -51,7 +51,7 @@
 #include "simplelibgen.h"
 #endif
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 typedef enum _stylesheetclass {
   CLASS_MOVETABLE,

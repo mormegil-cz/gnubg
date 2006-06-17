@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "backgammon.h"
 #include "gtkboard.h"
 #include "drawboard.h"

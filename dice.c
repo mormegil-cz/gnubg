@@ -118,7 +118,7 @@
 #include "md5.h"
 #include "mt19937ar.h"
 #include "isaac.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "external.h"
 #include "path.h"
 

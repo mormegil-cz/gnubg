@@ -29,7 +29,7 @@
 #include "drawboard.h"
 #include "export.h"
 #include "format.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 static char*aszLuckTypeLaTeXAbbr[] = { "$--$", "$-$", "", "$+$", "$++$" };
 

@@ -94,7 +94,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "export.h"
 #include "getopt.h"
 #include "import.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "matchid.h"
 #include "path.h"
@@ -412,7 +412,7 @@ rolloutcontext rcRollout =
   0 \
   } \
 } 
-#else /* RESUCTION_CODE */
+#else /* REDUCTION_CODE */
 
 void *rngctxRollout = NULL;
 rolloutcontext rcRollout =
@@ -759,24 +759,6 @@ command cER = {
   { "hint", CommandClearHint, 
     N_("Clear analysis used for `hint'"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
-}, acDatabase[] = {
-    { "dump", CommandDatabaseDump, N_("List the positions in the database"),
-      NULL, NULL },
-    { "export", CommandDatabaseExport, 
-      N_("Write the positions in the database "
-      "to a portable format"), szFILENAME, &cFilename },
-    { "generate", CommandDatabaseGenerate, N_("Generate database positions by "
-      "self-play"), szOPTVALUE, NULL },
-    { "import", CommandDatabaseImport, 
-      N_("Merge positions into the database"),
-      szFILENAME, &cFilename },
-    { "rollout", CommandDatabaseRollout, N_("Evaluate positions in database "
-      "for future training"), NULL, NULL },
-    { "train", CommandDatabaseTrain, N_("Train the network from a database of "
-      "positions"), NULL, NULL },
-    { "verify", CommandDatabaseVerify, N_("Measure the current network error "
-      "against the database"), NULL, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
     { "equityevolution", CommandExportGameEquityEvolution, 
       N_("Exports the equity evolution of the game (for import into a spreadsheet)"), 
@@ -862,9 +844,6 @@ command cER = {
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExport[] = {
-    { "database", CommandDatabaseExport, 
-      N_("Write the positions in the database "
-      "to a portable format"), szFILENAME, &cFilename },
     { "game", NULL, N_("Record a log of the game so far to a file"), NULL,
       acExportGame },
     { "htmlimages", CommandExportHTMLImages, N_("Generate images to be used "
@@ -884,9 +863,6 @@ command cER = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
     { "bkg", CommandImportBKG, N_("Import from Hans Berliner's BKG format"),
-      szFILENAME, &cFilename },
-    { "database", CommandDatabaseImport, 
-      N_("Merge positions into the database"),
       szFILENAME, &cFilename },
     { "mat", CommandImportMat, N_("Import a Jellyfish match"), szFILENAME,
       &cFilename },
@@ -2115,12 +2091,6 @@ command cER = {
 }, acSwap[] = {
     { "players", CommandSwapPlayers, N_("Swap players"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acTrain[] = {
-    { "database", CommandDatabaseTrain, 
-      N_("Train the network from a database of positions"), NULL, NULL },
-    { "td", CommandTrainTD, N_("Train the network by TD(0) zero-knowledge "
-      "self-play"), NULL, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
 #if USE_TIMECONTROL
 }, acTc[] = {
     { "show", CommandShowTimeControl, N_("alt show"), NULL, NULL },
@@ -2141,8 +2111,6 @@ command cER = {
     { "clear", NULL, N_("Clear information"), NULL, acClear },
     { "copy", CommandCopy, N_("Copy current position to clipboard"), 
       NULL, NULL },
-    { "database", NULL, N_("Manipulate a database of positions"), NULL,
-      acDatabase },
     { "decline", CommandDecline, N_("Decline a resignation"), NULL, NULL },
     { "dicerolls", CommandDiceRolls, N_("Generate a list of rolls"), 
       NULL, NULL },
@@ -2208,8 +2176,6 @@ command cER = {
     { "show", NULL, N_("View program parameters"), NULL, acShow },
     { "swap", NULL, N_("Swap players"), NULL, acSwap },
     { "take", CommandTake, N_("Agree to an offered double"), NULL, NULL },
-    { "train", NULL, N_("Update gnubg's weights from training data"), NULL,
-      acTrain },
     { "?", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
@@ -2225,9 +2191,6 @@ char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
 char *aszBuildInfo[] = {
 #if USE_PYTHON
     N_ ("Python supported."),
-#endif
-#if HAVE_LIBGDBM
-    N_ ("Position databases supported."),
 #endif
 #if USE_GTK2
     N_ ("Window system supported."),
@@ -2245,22 +2208,22 @@ char *aszBuildInfo[] = {
     N_("3d Boards supported."),
 #endif
 #if HAVE_SOCKETS
-	N_("External commands supported."),
+    N_("External commands supported."),
 #endif
 #if USE_SOUND
 #ifdef WIN32
     N_("Windows sound system supported."),
 #else
-	N_("Sound systems supported:"),
-#   if HAVE_ARTSC
+    N_("Sound systems supported:"),
+#if HAVE_ARTSC
     N_("  ArtsC sound system"),
-#   endif
-#   if HAVE_ESD
+#endif
+#if HAVE_ESD
     N_("  ESD sound system"),
-#   endif
-#   if HAVE_NAS
+#endif
+#if HAVE_NAS
     N_("  NAS sound system"),
-#   endif
+#endif
     N_("  /dev/dsp"),
 #endif
 #endif /* USE_SOUND */
@@ -2489,6 +2452,7 @@ static int CountTokens( char *pch ) {
 /* extract a token and convert to double. On error or no token, return 
    ERR_VAL (a very large negative double.
 */
+
 extern double ParseReal( char **ppch ) {
 
     char *pch, *pchOrig;
@@ -2497,9 +2461,7 @@ extern double ParseReal( char **ppch ) {
     if( !ppch || !( pchOrig = NextToken( ppch ) ) )
 	return ERR_VAL;
 
-    PushLocale ( "C" );
-    r = strtod( pchOrig, &pch );
-    PopLocale ();
+    r = g_ascii_strtod( pchOrig, &pch );
 
     return *pch ? ERR_VAL : r;
 }
@@ -5313,16 +5275,18 @@ SaveMoveFilterSettings ( FILE *pf,
                          const char *sz,
                          movefilter aamf [ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
-  int i, j;
+    int i, j;
+    gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
 
     for (i = 0; i < MAX_FILTER_PLIES; ++i) 
       for (j = 0; j <= i; ++j) {
-	fprintf (pf, "%s %d  %d  %d %d %0.3g\n",
+	fprintf (pf, "%s %d  %d  %d %d %s\n",
                  sz, 
 		 i+1, j, 
 		 aamf[i][j].Accept,
 		 aamf[i][j].Extra,
-		 aamf[i][j].Threshold);
+	         g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE,
+			 "%0.3g", aamf[i][j].Threshold));
       }
 }
 
@@ -5332,6 +5296,8 @@ SaveMoveFilterSettings ( FILE *pf,
 static void 
 SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
+    gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+    gchar *szNoise = g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.3f",  pec->rNoise);
     fprintf( pf, "%s plies %d\n"
 #if defined( REDUCTION_CODE )
 	     "%s reduced %d\n"
@@ -5339,7 +5305,7 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 	     "%s prune %s\n"
 #endif
 	     "%s cubeful %s\n"
-	     "%s noise %.3f\n"
+	     "%s noise %s\n"
 	     "%s deterministic %s\n",
 	     sz, pec->nPlies, 
 #if defined( REDUCTION_CODE )
@@ -5348,7 +5314,7 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 	     sz, pec->fUsePrune ? "on" : "off",
 #endif
 	     sz, pec->fCubeful ? "on" : "off",
-	     sz, pec->rNoise, 
+	     sz, szNoise,
              sz, pec->fDeterministic ? "on" : "off" );
 }
 
@@ -5357,9 +5323,12 @@ static void
 SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
 
   char *pch;
-  int i;
+  int i; /* flags and stuff */
+  gchar szTemp1[G_ASCII_DTOSTR_BUF_SIZE];
+  gchar szTemp2[G_ASCII_DTOSTR_BUF_SIZE];
 
-  /* flags and stuff */
+  g_ascii_formatd(szTemp1, G_ASCII_DTOSTR_BUF_SIZE, "%05.4f",  prc->rStdLimit);
+  g_ascii_formatd(szTemp2, G_ASCII_DTOSTR_BUF_SIZE, "%05.4f",  prc->rJsdLimit);
 
   fprintf ( pf,
             "%s cubeful %s\n"
@@ -5378,11 +5347,11 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s truncate-equal-player0 %s\n"
             "%s limit enable %s\n"
             "%s limit minimumgames %d\n"
-            "%s limit maxerror %05.4f\n"
+            "%s limit maxerror %s\n"
 	    "%s jsd stop %s\n"
             "%s jsd move %s\n"
             "%s jsd minimumgames %d\n"
-            "%s jsd limit %05.4f\n",
+            "%s jsd limit %s\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -5399,11 +5368,11 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, fTruncEqualPlayer0 ? "on" : "off",
 	    sz, prc->fStopOnSTD ? "on" : "off",
 	    sz, prc->nMinimumGames,
-	    sz, prc->rStdLimit,
+	    sz, szTemp1,
             sz, prc->fStopOnJsd ? "on" : "off",
             sz, prc->fStopMoveOnJsd ? "on" : "off",
             sz, prc->nMinimumJsdGames,
-            sz, prc->rJsdLimit
+	    sz, szTemp2
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout, rngctxRollout );
@@ -5481,6 +5450,19 @@ extern void CommandSaveSettings( char *szParam ) {
 #if USE_GTK
     char *aszAnimation[] = {"none", "blink", "slide"};
 #endif
+    gchar buf[ G_ASCII_DTOSTR_BUF_SIZE ];
+    gchar aszThr[7][ G_ASCII_DTOSTR_BUF_SIZE ];
+    
+    g_ascii_formatd(aszThr[0], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arSkillLevel[ SKILL_BAD ]);
+    g_ascii_formatd(aszThr[1], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arSkillLevel[ SKILL_DOUBTFUL ]);
+	     /* arSkillLevel[ SKILL_GOOD ], 
+	      arSkillLevel[ SKILL_INTERESTING ], */
+    g_ascii_formatd(aszThr[2], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_GOOD ]);
+    g_ascii_formatd(aszThr[3], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_BAD ]);
+    g_ascii_formatd(aszThr[4], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arSkillLevel[ SKILL_VERYBAD ]);
+	     /* arSkillLevel[ SKILL_VERYGOOD ], */
+    g_ascii_formatd(aszThr[5], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_VERYGOOD ]);
+    g_ascii_formatd(aszThr[6], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_VERYBAD ] );
 
     szParam = NextToken ( &szParam );
     
@@ -5505,8 +5487,6 @@ extern void CommandSaveSettings( char *szParam ) {
     }
 
     errno = 0;
-
-    PushLocale ( "C" );
 
     fprintf ( pf, 
               _( "#\n"
@@ -5539,27 +5519,18 @@ extern void CommandSaveSettings( char *szParam ) {
     
     fprintf( pf, "set analysis limit %d\n", cAnalysisMoves );
 
-    fprintf( pf, "set analysis threshold bad %.3f\n"
-	     "set analysis threshold doubtful %.3f\n"
+    fprintf( pf, "set analysis threshold bad %s\n"
+	     "set analysis threshold doubtful %s\n"
 	     /* "set analysis threshold good %.3f\n"
 	     "set analysis threshold interesting %.3f\n" */
-	     "set analysis threshold lucky %.3f\n"
-	     "set analysis threshold unlucky %.3f\n"
-	     "set analysis threshold verybad %.3f\n"
+	     "set analysis threshold lucky %s\n"
+	     "set analysis threshold unlucky %s\n"
+	     "set analysis threshold verybad %s\n"
 	     /* "set analysis threshold verygood %.3f\n" */
-	     "set analysis threshold verylucky %.3f\n"
-	     "set analysis threshold veryunlucky %.3f\n",
-	     arSkillLevel[ SKILL_BAD ],
-	     arSkillLevel[ SKILL_DOUBTFUL ],
-	     /* arSkillLevel[ SKILL_GOOD ], 
-	      arSkillLevel[ SKILL_INTERESTING ], */
-	     arLuckLevel[ LUCK_GOOD ],
-	     arLuckLevel[ LUCK_BAD ],
-	     arSkillLevel[ SKILL_VERYBAD ],
-	     /* arSkillLevel[ SKILL_VERYGOOD ], */
-	     arLuckLevel[ LUCK_VERYGOOD ],
-	     arLuckLevel[ LUCK_VERYBAD ] );
-
+	     "set analysis threshold verylucky %s\n"
+	     "set analysis threshold veryunlucky %s\n", 
+	     aszThr[0], aszThr[1], aszThr[2], aszThr[3], aszThr[4], aszThr[5], aszThr[6]);
+	    
     fprintf ( pf,
               "set analysis cube %s\n"
               "set analysis luck %s\n"
@@ -5685,13 +5656,13 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set output rawboard %s\n"
 	     "set output winpc %s\n"
              "set output digits %d\n"
-             "set output errorratefactor %f\n",
+             "set output errorratefactor %s\n",
 	     fOutputMatchPC ? "on" : "off",
 	     fOutputMWC ? "on" : "off",
 	     fOutputRawboard ? "on" : "off",
 	     fOutputWinPC ? "on" : "off",
              fOutputDigits,
-             rErrorRateFactor );
+	         g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rErrorRateFactor ));
     
     for( i = 0; i < 2; i++ ) {
 	fprintf( pf, "set player %d name %s\n", i, ap[ i ].szName );
@@ -5727,11 +5698,6 @@ extern void CommandSaveSettings( char *szParam ) {
 
     SaveRolloutSettings( pf, "set rollout", &rcRollout );
     
-    fprintf( pf, "set training alpha %f\n"
-	     "set training anneal %f\n"
-	     "set training threshold %f\n",
-	     rAlpha, rAnneal, rThreshold );
-
     /* save import settings */
 
 	if (lastImportType != -1)
@@ -5869,7 +5835,8 @@ extern void CommandSaveSettings( char *szParam ) {
 
     /* rating offset */
     
-    fprintf( pf, "set ratingoffset %f\n", rRatingOffset );
+    fprintf( pf, "set ratingoffset %s\n",
+       g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rRatingOffset ));
 #if USE_TIMECONTROL
      SaveTimeControlSettings( pf );
 #endif
@@ -5907,8 +5874,6 @@ extern void CommandSaveSettings( char *szParam ) {
     if( fX )
 	GTKSaveSettings();
 #endif
-
-    PopLocale ();
 
 }
 

@@ -30,7 +30,7 @@
 #include <ctype.h>
 #define GTK_ENABLE_BROKEN /* for GtkText */
 #include "backgammon.h"
-#include <i18n.h>
+#include <glib/gi18n.h>
 #include <string.h>
 #if USE_GTK
 #include "gtkboard.h"

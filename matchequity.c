@@ -52,7 +52,7 @@ extern double erf( double x );
 
 #include "eval.h"
 #include "matchequity.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 
 #if (LIBXML_VERSION > 20412)
@@ -961,8 +961,6 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
     /* 
      */
 
-    PushLocale ( "C" );
-
     /* obtain parameters */
 
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
@@ -971,14 +969,11 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
       pp = pl->p;
 
       if ( ! strcmp ( pp->szName, "gammon-rate" ) )
-        rG = atof ( pp->szValue );
+        rG = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "win-rate" ) )
-        rWR = atof ( pp->szValue );
+        rWR = (float) g_ascii_strtod ( pp->szValue, NULL );
 
     }
-
-    PopLocale ();
-    
 
     /* calculate table */
 
@@ -1000,8 +995,6 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
      * Use Zadeh's formulae 
      */
 
-    PushLocale ( "C" );
-
     /* obtain parameters */
 
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
@@ -1010,18 +1003,15 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
       pp = pl->p;
 
       if ( ! strcmp ( pp->szName, "gammon-rate-leader" ) )
-        rG1 = atof ( pp->szValue );
+        rG1 = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "gammon-rate-trailer" ) )
-        rG2 = atof ( pp->szValue );
+        rG2 = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "delta" ) )
-        rDelta = atof ( pp->szValue );
+        rDelta = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "delta-bar" ) )
-        rDeltaBar = atof ( pp->szValue );
+        rDeltaBar = (float) g_ascii_strtod ( pp->szValue, NULL );
 
     }
-
-    PopLocale ();
-    
 
     /* calculate table */
 
@@ -1059,8 +1049,6 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
      * Use Zadeh's formulae 
      */
 
-    PushLocale ( "C" );
-
     /* obtain parameters */
 
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
@@ -1069,15 +1057,13 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
       pp = pl->p;
 
       if ( ! strcmp ( pp->szName, "gammon-rate-trailer" ) )
-        rG = atof ( pp->szValue );
+        rG = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "free-drop-2-away" ) )
-        rFD2 = atof ( pp->szValue );
+        rFD2 = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "free-drop-4-away" ) )
-        rFD4 = atof ( pp->szValue );
+        rFD4 = (float) g_ascii_strtod ( pp->szValue, NULL );
 
     }
-
-    PopLocale ();
 
     /* calculate table */
 
@@ -1096,25 +1082,21 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
 
     /* obtain parameters */
 
-    PushLocale ( "C" );
-
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
           pl = pl->plNext ) {
 
       pp = pl->p;
 
       if ( ! strcmp ( pp->szName, "gammon-rate" ) )
-        rG = atof ( pp->szValue );
+        rG = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "free-drop-2-away" ) )
-        rFD2 = atof ( pp->szValue );
+        rFD2 = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp ( pp->szName, "free-drop-4-away" ) )
-        rFD4 = atof ( pp->szValue );
+        rFD4 = (float) g_ascii_strtod ( pp->szValue, NULL );
       else if ( ! strcmp( pp->szName, "win-rate" ) )
-        rWR = atof ( pp->szValue );
+        rWR = (float) g_ascii_strtod ( pp->szValue, NULL );
 
     }
-
-    PopLocale ();
 
     /* calculate table */
 
@@ -1149,7 +1131,7 @@ parseRow ( float arRow[], xmlDocPtr doc, xmlNodePtr root ) {
 
     if ( ! strcmp ( cur->name, "me" ) ) {
       char* row = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      arRow[ iCol ]  = atof(row);
+      arRow[ iCol ]  = g_ascii_strtod( row , NULL );
       xmlFree(row);        
 
       iCol++;
@@ -1449,8 +1431,6 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   /* initialise data */
 
-  PushLocale ( "C" );
-
   initMD ( pmd );
 
   /* fetch information from xml doc */
@@ -1552,8 +1532,6 @@ static int readMET ( metdata *pmd, const char *szFileName,
 #endif
 
  finish:
-
-  PopLocale ();
 
   if ( doc )
     xmlFreeDoc ( doc );

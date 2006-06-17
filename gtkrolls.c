@@ -38,7 +38,7 @@
 #include "gtkrolls.h"
 #include "gtkgame.h"
 #include "drawboard.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "format.h"
 
 #if USE_GTK2

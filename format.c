@@ -29,7 +29,7 @@
 #include "eval.h"
 #include "format.h"
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "export.h"
 
 

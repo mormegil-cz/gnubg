@@ -34,7 +34,7 @@
 #include "backgammon.h"
 #include "eval.h"
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "sound.h"
 #include "timecontrol.h"
 

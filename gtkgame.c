@@ -82,7 +82,7 @@
 #include "gtkprefs.h"
 #include "gtksplash.h"
 #include "gtktexi.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "openurl.h"
 #include "path.h"
@@ -183,9 +183,6 @@ typedef enum _gnubgcommand {
     CMD_ANALYSE_GAME,
     CMD_ANALYSE_MATCH,
     CMD_ANALYSE_SESSION,
-    CMD_DATABASE_DUMP,
-    CMD_DATABASE_GENERATE,
-    CMD_DATABASE_ROLLOUT,
     CMD_DECLINE,
     CMD_DOUBLE,
     CMD_DROP,
@@ -274,9 +271,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "analyse game",
     "analyse match",
     "analyse session",
-    "database dump",
-    "database generate",
-    "database rollout",
     "decline",
     "double",
     "drop",
@@ -354,10 +348,6 @@ static char *aszCommands[ NUM_CMDS ] = {
 };
 enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE, TOGGLE_THEORY, TOGGLE_COMMAND };
 
-#if ENABLE_TRAIN_MENU
-static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
-static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
-#endif
 static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw );
 static void CopyAsIDs( gpointer *p, guint n, GtkWidget *pw );
 static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw );
@@ -376,7 +366,6 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
-static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 static void FullScreenMode( gpointer *p, guint n, GtkWidget *pw );
 #if USE_BOARD3D
 static void SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw );
@@ -1907,10 +1896,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_View/Switch to xD view"), NULL, SwitchDisplayMode, TOOLBAR_ACTION_OFFSET + MENU_OFFSET, NULL },
 #endif
-	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_View/Gu_ile"), NULL, NULL, 0, NULL },
-	{ N_("/_View/_Python shell (IDLE)..."), 
-          NULL, PythonShell, 0, NULL },
 	{ N_("/_Game"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL },
 	{ N_("/_Game/_Finish move"), "<control>F", FinishMove, 0, NULL },
@@ -2048,21 +2033,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SHOW_ENGINE, NULL },
 	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
 	  CMD_SHOW_CALIBRATION, NULL },
-#if ENABLE_TRAIN_MENU
-	{ N_("/_Train"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Train/D_ump database"), 
-          NULL, Command, CMD_DATABASE_DUMP, NULL },
-	{ N_("/_Train/_Generate database"), 
-          NULL, Command, CMD_DATABASE_GENERATE, NULL },
-	{ N_("/_Train/_Rollout database"), NULL, Command, CMD_DATABASE_ROLLOUT,
-	  NULL },
-	{ N_("/_Train/_Import database..."), NULL, DatabaseImport, 0, NULL },
-	{ N_("/_Train/_Export database..."), NULL, DatabaseExport, 0, NULL },
-	{ N_("/_Train/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Train/Train from _database"), 
-          NULL, Command, CMD_TRAIN_DATABASE, NULL },
-	{ N_("/_Train/Train with _TD(0)"), NULL, Command, CMD_TRAIN_TD, NULL },
-#endif
 	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL },
 	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
@@ -2213,32 +2183,6 @@ extern int InitGTK( int *argc, char ***argv ) {
     sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
     gtk_accel_map_load( sz );
    
-#if ENABLE_TRAIN_MENU
-#if !HAVE_LIBGDBM
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	pif, CMD_DATABASE_DUMP ), FALSE );
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	pif, CMD_DATABASE_GENERATE ), FALSE );
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	pif, CMD_DATABASE_ROLLOUT ), FALSE );
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	pif, CMD_TRAIN_DATABASE ), FALSE );
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/Train/Import database..." ), FALSE );
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/Train/Export database..." ), FALSE );
-#endif
-#endif
-
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/View/Python shell (IDLE)..." ), 
-#if USE_PYTHON 
-                              TRUE
-#else
-                              FALSE
-#endif
-                              );
-
    gtk_box_pack_start( GTK_BOX( pwVbox ),
                        pwHandle = gtk_handle_box_new(), FALSE, TRUE, 0 );
    gtk_container_add( GTK_CONTAINER( pwHandle ),
@@ -3959,28 +3903,6 @@ static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
 	free ( sz );
 }
 
-#if ENABLE_TRAIN_MENU
-
-static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
-  GTKFileCommand( _("Export database"), sz, "database export", NULL, FDT_NONE_SAVE, PATH_NULL );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
-  GTKFileCommand( _("Import database"), sz, "database import", NULL, FDT_NONE_OPEN, PATH_NULL );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-#endif /* ENABLE_TRAIN_MENU */
-
 typedef struct _evalwidget {
     evalcontext *pec;
     movefilter *pmf;
@@ -4506,7 +4428,10 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     }
 
     if( pec->rNoise != pecOrig->rNoise ) {
-	lisprintf( sz, "%s noise %.3f", szPrefix, pec->rNoise );
+        gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+	sprintf( sz, "%s noise %s", szPrefix, 
+                                  g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE,
+			           "%.3f", pec->rNoise ));
 	UserCommand( sz );
     }
     
@@ -5056,14 +4981,18 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 #define ADJUSTSKILLUPDATE(button,flag,string) \
   if( paw->apadjSkill[(button)]->value != arSkillLevel[(flag)] ) \
   { \
-     lisprintf(sz,  (string), paw->apadjSkill[(button)]->value ); \
+     gchar buf[G_ASCII_DTOSTR_BUF_SIZE]; \
+     sprintf(sz,  (string), g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, \
+			           "%0.3f", (gdouble) paw->apadjSkill[(button)]->value )); \
      UserCommand(sz); \
   }
 
 #define ADJUSTLUCKUPDATE(button,flag,string) \
   if( paw->apadjLuck[(button)]->value != arLuckLevel[(flag)] ) \
   { \
-     lisprintf(sz, (string), paw->apadjLuck[(button)]->value ); \
+     gchar buf[G_ASCII_DTOSTR_BUF_SIZE]; \
+     sprintf(sz,  (string), g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, \
+			           "%0.3f", (gdouble) paw->apadjLuck[(button)]->value )); \
      UserCommand(sz); \
   }
      
@@ -5089,14 +5018,14 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
 /*   ADJUSTSKILLUPDATE( 0, SKILL_VERYGOOD, "set analysis threshold verygood %.3f" ) */
 /*   ADJUSTSKILLUPDATE( 1, SKILL_GOOD, "set analysis threshold good %.3f" ) */
-  ADJUSTSKILLUPDATE( 2, SKILL_DOUBTFUL, "set analysis threshold doubtful %.3f" )
-  ADJUSTSKILLUPDATE( 3, SKILL_BAD, "set analysis threshold bad %.3f" )
-  ADJUSTSKILLUPDATE( 4, SKILL_VERYBAD, "set analysis threshold verybad %.3f" )
+  ADJUSTSKILLUPDATE( 2, SKILL_DOUBTFUL, "set analysis threshold doubtful %s" )
+  ADJUSTSKILLUPDATE( 3, SKILL_BAD, "set analysis threshold bad %s" )
+  ADJUSTSKILLUPDATE( 4, SKILL_VERYBAD, "set analysis threshold verybad %s" )
 
-  ADJUSTLUCKUPDATE( 0, LUCK_VERYGOOD, "set analysis threshold verylucky %.3f" )
-  ADJUSTLUCKUPDATE( 1, LUCK_GOOD, "set analysis threshold lucky %.3f" )
-  ADJUSTLUCKUPDATE( 2, LUCK_BAD, "set analysis threshold unlucky %.3f" )
-  ADJUSTLUCKUPDATE( 3, LUCK_VERYBAD, "set analysis threshold veryunlucky %.3f" )
+  ADJUSTLUCKUPDATE( 0, LUCK_VERYGOOD, "set analysis threshold verylucky %s" )
+  ADJUSTLUCKUPDATE( 1, LUCK_GOOD, "set analysis threshold lucky %s" )
+  ADJUSTLUCKUPDATE( 2, LUCK_BAD, "set analysis threshold unlucky %s" )
+  ADJUSTLUCKUPDATE( 3, LUCK_VERYBAD, "set analysis threshold veryunlucky %s" )
 
   EvalOK( paw->pwEvalChequer, paw->pwEvalChequer );
   EvalOK( paw->pwEvalCube, paw->pwEvalCube );
@@ -5982,7 +5911,10 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     }
 
     if( fabs( rw.rcRollout.rStdLimit - rcRollout.rStdLimit ) > epsilon ) {
-      lisprintf( sz, "set rollout limit maxerr %5.4f", rw.rcRollout.rStdLimit );
+      gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+      sprintf( sz, "set rollout limit maxerr %s",
+                                  g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE,
+			           "%5.4f", rw.rcRollout.rStdLimit ));
       UserCommand( sz );
     }
 
@@ -6004,7 +5936,10 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     }
 
     if( fabs( rw.rcRollout.rJsdLimit - rcRollout.rJsdLimit ) > epsilon ) {
-      lisprintf( sz, "set rollout jsd limit %5.4f", rw.rcRollout.rJsdLimit );
+      gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+      sprintf( sz, "set rollout jsd limit %s",
+                                  g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE,
+			           "%5.4f", rw.rcRollout.rJsdLimit ));
       UserCommand( sz );
     }
 
@@ -6058,8 +5993,7 @@ extern void GTKEval( char *szOutput ) {
 
     GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation"), DT_INFO, NULL, NULL );
     GtkWidget *pwText;
-    GtkWidget *sw, *pwButtons;
-    GtkWidget *pwCopy = gtk_button_new_with_label( _("Copy") );
+    GtkWidget *sw;
     GtkTextBuffer *buffer;
     GtkTextIter iter;
 
@@ -8754,21 +8688,6 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_widget_show_all(pwWindow);
     
     gtk_main();
-}
-
-
-static void 
-PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
-
-#if WIN32
-  char *pch = g_strdup( ">import idlelib.PyShell; idlelib.PyShell.main()\n");
-#else
-  char *pch = g_strdup( ">import idle.PyShell; idle.PyShell.main()\n" );
-#endif
-  UserCommand( pch );
-
-  g_free( pch );
-
 }
 
 GtkWidget *pwTick;

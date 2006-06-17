@@ -104,7 +104,7 @@
 #include "drawboard.h"
 #include "external.h"
 #include "rollout.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 #if HAVE_SOCKETS
 /* Stuff for the yacc/lex parser */
@@ -651,7 +651,7 @@ extern void CommandExternal( char *sz ) {
       outputf( _("Accepted connection from %s.\n"), 
                  inet_ntoa( saRemote.sin_addr ) );
 
-      PushLocale( "C" );
+      /* PushLocale( "C" ); Fuck */
 
       while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) ) {
 
@@ -690,7 +690,7 @@ extern void CommandExternal( char *sz ) {
       }
 
 
-      PopLocale();
+      /* PopLocale(); */
 
       closesocket( hPeer );
 

@@ -43,7 +43,7 @@
 #include "gtkcolour.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "path.h"
 #include "render.h"
 #include "renderprefs.h"
@@ -2115,36 +2115,34 @@ DesignAddTitle ( boarddesign *pbde ) {
 
 void WriteDesignString(boarddesign *pbde, renderdata *prd)
 {
-  float rElevation;
-  float rAzimuth;
   char szTemp[2048];
+  gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
 
-  rElevation = asinf( prd->arLight[ 2 ] ) * 180 / M_PI;
-  rAzimuth = ( fabs ( prd->arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
+  float rElevation = asinf( prd->arLight[ 2 ] ) * 180 / M_PI;
+  float rAzimuth = ( fabs ( prd->arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
     acosf( prd->arLight[ 0 ] / sqrt( 1.0 - prd->arLight[ 2 ] *
                                     prd->arLight[ 2 ] ) ) * 180 / M_PI;
+
   if( prd->arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
 
-  PushLocale( "C" );
-
 	sprintf(szTemp,
             "\n"
-            "         board=#%02X%02X%02X;%0.2f\n"
+            "         board=#%02X%02X%02X;%sf\n"
             "         border=#%02X%02X%02X\n"
             "         wood=%s\n"
             "         hinges=%c\n"
-            "         light=%0.0f;%0.0f\n"
-            "         shape=%0.1f\n"
-            "         chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f\n"
-            "         chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f\n"
-            "         dice0=#%02X%02X%02X;%0.2f;%0.2f;%c\n"
-            "         dice1=#%02X%02X%02X;%0.2f;%0.2f;%c\n"
+            "         light=%s;%s\n"
+            "         shape=%s\n"
+            "         chequers0=#%02X%02X%02X;%s;%s;%s;%s\n"
+            "         chequers1=#%02X%02X%02X;%s;%0.2f;%s;%s\n"
+            "         dice0=#%02X%02X%02X;%s;%s;%c\n"
+            "         dice1=#%02X%02X%02X;%s;%s;%c\n"
             "         dot0=#%02X%02X%02X\n"
             "         dot1=#%02X%02X%02X\n"
             "         cube=#%02X%02X%02X\n"
-            "         points0=#%02X%02X%02X;%0.2f\n"
-            "         points1=#%02X%02X%02X;%0.2f\n"
+            "         points0=#%02X%02X%02X;%s\n"
+            "         points1=#%02X%02X%02X;%s\n"
 #if USE_BOARD3D
             "         hinges3d=%c\n"
             "         piecetype=%d\n"
@@ -2153,7 +2151,7 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 			"         bgintrays=%c\n"
 			"         roundedpoints=%c\n"
             "         lighttype=%c\n"
-            "         lightposx=%f lightposy=%f lightposz=%f\n"
+            "         lightposx=%s lightposy=%s lightposz=%s\n"
             "         lightambient=%d lightdiffuse=%d lightspecular=%d\n"
 			"         chequers3d0=%s\n"
 			"         chequers3d1=%s\n"
@@ -2174,37 +2172,46 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
             "\n",
             /* board */
             prd->aanBoardColour[ 0 ][ 0 ], prd->aanBoardColour[ 0 ][ 1 ], 
-            prd->aanBoardColour[ 0 ][ 2 ], prd->aSpeckle[ 0 ] / 128.0f,
+            prd->aanBoardColour[ 0 ][ 2 ],
+	    g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 0 ] / 128.0f ),
             /* border */
             prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
             prd->aanBoardColour[ 1 ][ 2 ],
             /* wood ... */
             aszWoodName[ prd->wt ],
             prd->fHinges ? 'y' : 'n',
-            rAzimuth, rElevation, 1.0 - prd->rRound,
+            g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.0f", rAzimuth),
+	    g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.0f", rElevation),
+	    g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.1f", 1.0 - prd->rRound),
              /* chequers0 */
              (int) ( prd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( prd->aarColour[ 0 ][ 1 ] * 0xFF ), 
 	     (int) ( prd->aarColour[ 0 ][ 2 ] * 0xFF ), 
-             prd->aarColour[ 0 ][ 3 ], prd->arRefraction[ 0 ], 
-             prd->arCoefficient[ 0 ], prd->arExponent[ 0 ],
+             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aarColour[ 0 ][ 3 ]),
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arRefraction[ 0 ]), 
+             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arCoefficient[ 0 ]),
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arExponent[ 0 ]),
              /* chequers1 */
 	     (int) ( prd->aarColour[ 1 ][ 0 ] * 0xFF ),
 	     (int) ( prd->aarColour[ 1 ][ 1 ] * 0xFF ), 
 	     (int) ( prd->aarColour[ 1 ][ 2 ] * 0xFF ), 
-             prd->aarColour[ 1 ][ 3 ], prd->arRefraction[ 1 ], 
-             prd->arCoefficient[ 1 ], prd->arExponent[ 1 ],
+             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aarColour[ 1 ][ 3 ] ),
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arRefraction[ 1 ] ),  
+             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arCoefficient[ 1 ] ),
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arExponent[ 1 ] ),
              /* dice0 */
              (int) ( prd->aarDiceColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( prd->aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
 	     (int) ( prd->aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
-             prd->arDiceCoefficient[ 0 ], prd->arDiceExponent[ 0 ],
+             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceCoefficient[ 0 ] ),
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceExponent[ 0 ] ),
              prd->afDieColour[ 0 ] ? 'y' : 'n',
              /* dice1 */
 	     (int) ( prd->aarDiceColour[ 1 ][ 0 ] * 0xFF ),
 	     (int) ( prd->aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
 	     (int) ( prd->aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
-             prd->arDiceCoefficient[ 1 ], prd->arDiceExponent[ 1 ],
+             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceCoefficient[ 1 ] ),
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceExponent[ 1 ] ),
              prd->afDieColour[ 1 ] ? 'y' : 'n',
              /* dot0 */
 	     (int) ( prd->aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
@@ -2220,10 +2227,12 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 	     (int) ( prd->arCubeColour[ 2 ] * 0xFF ), 
              /* points0 */
 	     prd->aanBoardColour[ 2 ][ 0 ], prd->aanBoardColour[ 2 ][ 1 ], 
-	     prd->aanBoardColour[ 2 ][ 2 ], prd->aSpeckle[ 2 ] / 128.0f,
+	     prd->aanBoardColour[ 2 ][ 2 ],
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 2 ] / 128.0f),
              /* points1 */
 	     prd->aanBoardColour[ 3 ][ 0 ], prd->aanBoardColour[ 3 ][ 1 ], 
-	     prd->aanBoardColour[ 3 ][ 2 ], prd->aSpeckle[ 3 ] / 128.0f
+	     prd->aanBoardColour[ 3 ][ 2 ],
+	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 3 ] / 128.0f )
 #if USE_BOARD3D
 			, 
             prd->fHinges3d ? 'y' : 'n',
@@ -2233,7 +2242,9 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 			prd->bgInTrays ? 'y' : 'n',
 			prd->roundedPoints ? 'y' : 'n',
 			prd->lightType == LT_POSITIONAL ? 'p' : 'd',
-			prd->lightPos[0], prd->lightPos[1], prd->lightPos[2],
+			g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[0] ),
+		       	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[1]),
+			g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[2]),
 			prd->lightLevels[0], prd->lightLevels[1], prd->lightLevels[2],
 			WriteMaterial(&prd->ChequerMat[0]),
 			WriteMaterial(&prd->ChequerMat[1]),
@@ -2255,7 +2266,6 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
     pbde->szBoardDesign = g_malloc(strlen(szTemp) + 1);
 	strcpy(pbde->szBoardDesign, szTemp);
 
-	PopLocale();
 }
 
 void ShowSelectedRow()

@@ -934,7 +934,7 @@ char *yytext;
 
 #include "sgf.h"
 #include "sgfp.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 extern int _SGFWarning( char * );
 

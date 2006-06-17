@@ -36,7 +36,7 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkgame.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkmet.h"
 

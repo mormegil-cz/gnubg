@@ -28,7 +28,7 @@
 
 #include "boarddim.h"
 #include "boardpos.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 extern void
 ChequerPosition( const int clockwise, 

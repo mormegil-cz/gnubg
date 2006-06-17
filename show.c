@@ -41,7 +41,7 @@
 #include "dice.h"
 #include "matchequity.h"
 #include "matchid.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "sound.h"
 #include "onechequer.h"
 #include "osr.h"

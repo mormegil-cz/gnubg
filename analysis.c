@@ -42,7 +42,7 @@
 #include "export.h"
 #include "formatgs.h"
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 const char *aszRating [ RAT_UNDEFINED + 1 ] = {
   N_("Awful!"), 

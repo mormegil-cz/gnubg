@@ -56,7 +56,7 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "matchequity.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "bearoff.h"
 #include "path.h"
 #include "format.h"
@@ -895,7 +895,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
                          szWeights, WEIGHTS_VERSION, szFileVersion );
 	    else {
 
-                PushLocale ( "C" );
+                /* PushLocale ( "C" ); */
 
 		if( !( fReadWeights =
 		       !NeuralNetLoad( &nnContact, pfWeights ) &&
@@ -908,7 +908,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		       ) )
 		    perror( szWeights );
 
-                PopLocale ();
+                /* PopLocale (); */
 
 		fclose( pfWeights );
 	    }
@@ -1690,7 +1690,112 @@ CalculateRaceInputs(int anBoard[2][25], float inputs[])
   }
 }
 
+#if 0
+float inpvec[16][4] = { 
+/*  0 */				{ 0.0, 0.0, 0.0, 0.0 },
+/*  1 */				{ 1.0, 0.0, 0.0, 0.0 },
+/*  2 */				{ 0.0, 1.0, 0.0, 0.0 },
+/*  3 */				{ 0.0, 0.0, 1.0, 0.0 },
+/*  4 */				{ 0.0, 0.0, 1.0, 0.5 },
+/*  5 */				{ 0.0, 0.0, 1.0, 1.0 },
+/*  6 */				{ 0.0, 0.0, 1.0, 1.5 },
+/*  7 */				{ 0.0, 0.0, 1.0, 2.0 },
+/*  8 */				{ 0.0, 0.0, 1.0, 2.5 },
+/*  9 */				{ 0.0, 0.0, 1.0, 3.0 },
+/* 10 */				{ 0.0, 0.0, 1.0, 3.5 },
+/* 11 */				{ 0.0, 0.0, 1.0, 4.0 },
+/* 12 */				{ 0.0, 0.0, 1.0, 4.5 },
+/* 13 */				{ 0.0, 0.0, 1.0, 5.0 },
+/* 14 */				{ 0.0, 0.0, 1.0, 5.5 },
+/* 15 */				{ 0.0, 0.0, 1.0, 6.0 } };
 
+float inpvecb[16][4] = { 
+/*  0 */				{ 0.0, 0.0, 0.0, 0.0 },
+/*  1 */				{ 1.0, 0.0, 0.0, 0.0 },
+/*  2 */				{ 1.0, 1.0, 0.0, 0.0 },
+/*  3 */				{ 1.0, 1.0, 1.0, 0.0 },
+/*  4 */				{ 1.0, 1.0, 1.0, 0.5 },
+/*  5 */				{ 1.0, 1.0, 1.0, 1.0 },
+/*  6 */				{ 1.0, 1.0, 1.0, 1.5 },
+/*  7 */				{ 1.0, 1.0, 1.0, 2.0 },
+/*  8 */				{ 1.0, 1.0, 1.0, 2.5 },
+/*  9 */				{ 1.0, 1.0, 1.0, 3.0 },
+/* 10 */				{ 1.0, 1.0, 1.0, 3.5 },
+/* 11 */				{ 1.0, 1.0, 1.0, 4.0 },
+/* 12 */				{ 1.0, 1.0, 1.0, 4.5 },
+/* 13 */				{ 1.0, 1.0, 1.0, 5.0 },
+/* 14 */				{ 1.0, 1.0, 1.0, 5.5 },
+/* 15 */				{ 1.0, 1.0, 1.0, 6.0 } };
+
+extern void
+baseInputs(int anBoard[2][25], float arInput[])
+{
+  int i = 3;
+
+	int *pB = &anBoard[0][0];
+	float *pInput = &arInput[0];
+	register __m128 vec0;
+	register __m128 vec1;
+	register __m128 vec2;
+	register __m128 vec3;
+	register __m128 vec4;
+	register __m128 vec5;
+	register __m128 vec6;
+	register __m128 vec7;
+	
+	while ( i-- ){
+					vec0 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput , vec0 );
+					vec1 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec1 );
+					vec2 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec2 );
+					vec3 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec3 );
+					vec4 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec4 );
+					vec5 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec5 );
+					vec6 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec6 );
+					vec7 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4 , vec7 );
+					pInput += 4;
+	}
+
+	/* bar */
+	vec0 = _mm_load_ps(inpvecb[*pB++]);
+	_mm_store_ps(pInput, vec0 );
+	pInput += 4;
+
+	i = 3;
+	while ( i-- ){
+					vec0 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput , vec0 );
+					vec1 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec1 );
+					vec2 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec2 );
+					vec3 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec3 );
+					vec4 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec4 );
+					vec5 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec5 );
+					vec6 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec6 );
+					vec7 = _mm_load_ps(inpvec[*pB++]);
+					_mm_store_ps(pInput += 4, vec7 );
+					pInput += 4;
+	}
+	
+	/* bar */
+	vec0 = _mm_load_ps(inpvecb[*pB]);
+	_mm_store_ps(pInput, vec0 );
+	
+	return;
+}
+#else
 extern void
 baseInputs(int anBoard[2][25], float arInput[])
 {
@@ -1721,7 +1826,7 @@ baseInputs(int anBoard[2][25], float arInput[])
     }
   }
 }
-
+#endif 
 
 static void
 menOffAll(const int* anBoard, float* afInput)

@@ -37,7 +37,7 @@
 #include "analysis.h"
 #include "positionid.h"
 #include "sgf.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 static char *szFile;
 static int fError;
@@ -97,12 +97,9 @@ static list *LoadCollection( char *sz ) {
     fError = FALSE;
     SGFErrorHandler = ErrorHandler;
 
-    PushLocale ( "C" );
-    
     if( strcmp( sz, "-" ) ) {
 	if( !( pf = fopen( sz, "r" ) ) ) {
 	    outputerr( sz );
-            PopLocale ();
 	    return NULL;
 	}
 	szFile = sz;
@@ -150,7 +147,6 @@ static list *LoadCollection( char *sz ) {
 	}
     }
     
-    PopLocale ();
     return plCollection;
 }
 
@@ -1457,8 +1453,6 @@ static void RestoreGame( list *pl, char *szCharset ) {
 
     moverecord *pmr, *pmrResign;
 
-    PushLocale ( "C" );
-    
     InitBoard( ms.anBoard, ms.bgv );
 
     /* FIXME should anything be done with the current game? */
@@ -1507,8 +1501,6 @@ static void RestoreGame( list *pl, char *szCharset ) {
 
 	AddMoveRecord( pmrResign );
     }
-
-    PopLocale ();
 
 }
 
@@ -2216,7 +2208,6 @@ static void SaveGame( FILE *pf, list *plGame ) {
     int i, j, anBoard[ 2 ][ 25 ];
 
     updateStatisticsGame ( plGame );
-    PushLocale ( "C" );
     
     pl = plGame->plNext;
     pmr = pl->p;
@@ -2450,7 +2441,6 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
     fputs( ")\n", pf );
 
-    PopLocale ();
 }
 
 extern void CommandSaveGame( char *sz ) {

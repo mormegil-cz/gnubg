@@ -32,7 +32,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "getopt.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "bearoff.h"
 
 static void

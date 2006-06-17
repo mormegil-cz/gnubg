@@ -43,7 +43,7 @@
 
 #include "list.h"
 #include "hash.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 #define BLOCK_SIZE 1024
 #define MAX_ITEM_DEPTH 8

@@ -50,7 +50,7 @@
 #include "positionid.h"
 #include "eval.h"
 #include "bearoff.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "bearoffgammon.h"
 #include "path.h"
 

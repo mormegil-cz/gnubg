@@ -41,7 +41,7 @@
 #include "timecontrol.h"
 #endif
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 
 /* "Color" of chequers */

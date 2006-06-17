@@ -82,7 +82,7 @@
 #include <string.h>
 
 #include "sgf.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 static list *plCollection;    
     

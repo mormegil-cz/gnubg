@@ -36,7 +36,7 @@
 #include "eval.h"
 #include "gtksplash.h"
 #include "gtktoolbar.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 #if GTK_CHECK_VERSION(2,0,0)
 #define USLEEP(x) g_usleep(x)

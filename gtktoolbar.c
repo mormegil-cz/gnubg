@@ -37,7 +37,7 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtk-multiview.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "drawboard.h"
 #include "renderprefs.h"
 extern void NewDialog( gpointer *p, guint n, GtkWidget *pw ); 

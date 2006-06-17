@@ -37,7 +37,7 @@
 
 #include <stdio.h>
 #include <glib.h>
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "backgammon.h"
 #include "eval.h"
 #include "matchequity.h"
@@ -2015,7 +2015,7 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
     return 0;
   }
 
-  PushLocale("C");
+  /* PushLocale("C"); */
 
   if (g->i != 0)
   {
@@ -2151,7 +2151,7 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 /* 		     PyInt_FromLong(SGF_ROLLOUT_VER)); */
   }
 
-  PopLocale();
+  /* PopLocale(); */
 
   return matchDict;
 }

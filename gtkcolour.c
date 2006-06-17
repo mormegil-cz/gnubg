@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "gtkcolour.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_color_selection_set_has_opacity_control(p,f) \

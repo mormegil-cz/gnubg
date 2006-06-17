@@ -36,7 +36,7 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkgame.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkmovefilter.h"
 
@@ -610,19 +610,19 @@ SetMovefilterCommands ( const char *sz,
 
   int i, j;
   char *szCmd;
+  gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
 
   for ( i = 0; i < MAX_FILTER_PLIES; ++i )
     for ( j = 0; j <= i; ++j ) {
       if ( aamfNew[ i ][ j ].Accept != aamfOld[ i ][ j ].Accept ||
            aamfNew[ i ][ j ].Extra != aamfOld[ i ][ j ].Extra ||
            aamfNew[ i ][ j ].Threshold != aamfOld[ i ][ j ].Threshold ) {
-        PushLocale ( "C" );
-        szCmd = g_strdup_printf ( "%s %d %d %d %d %f",
+        szCmd = g_strdup_printf ( "%s %d %d %d %d %s",
                                   sz, i + 1, j,
                                   aamfNew[ i ][ j ].Accept,
                                   aamfNew[ i ][ j ].Extra,
-                                  aamfNew[ i ][ j ].Threshold );
-        PopLocale ();
+                                  g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE,
+			           "%0.3f", aamfNew[ i ][ j ].Threshold ));
         UserCommand ( szCmd );
         g_free ( szCmd );
       }

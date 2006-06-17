@@ -41,7 +41,7 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkchequer.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "gtktempmap.h"
 #include "progress.h"
 #include "format.h"

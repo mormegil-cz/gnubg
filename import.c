@@ -36,7 +36,7 @@
 #endif
 #include "import.h"
 #include "positionid.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 static int
 ParseSnowieTxt( char *sz,  

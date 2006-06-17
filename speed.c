@@ -31,7 +31,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #endif
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 #define EVALS_PER_ITERATION 1024
 

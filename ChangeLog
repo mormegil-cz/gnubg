@@ -1,25 +1,36 @@
+Sat Jun 17 19:42:19 2006 Øystein Johansen <oystein@gnubg.org>
+
+	* Many files: Remove i18n functions like PushLocale and PopLocale,
+	use glibs g_ascii_strtod and g_ascii_formatd instead.
+
+	* gnubg.c and others: Remove gdbm database training
+	
 Sat Jun 10 00:02:19 CEST 2006 Christian Anthon  <anthon@kiku.dk>
-    * : Removal of USE_GUI, USE_EXT, xgame* xboard*, the ext directory
+	
+	* : Removal of USE_GUI, USE_EXT, xgame* xboard*, the ext directory
 
 2006-06-02  Christian Anthon  <anthon@kiku.dk>
-    * Makefile.am (SUBDIRS): Remove intl. (EXTRA_DIST): Add config.rpath.
-    Upgrade to gettext-0.14.5.
+
+	* Makefile.am (SUBDIRS): Remove intl. (EXTRA_DIST): Add config.rpath.
+	Upgrade to gettext-0.14.5.
 
 Mon May 29 13:01:07 CEST 2006 Christian Anthon <anthon@kiku.dk>
-    * M Makefile.am, configure.in, gnubg.gtkrc : gtk1/gtk2 cleanup, we now
-    expect gtk-2.6.0
-    * M README,TODO : guile clean
-    * R config.guess, config.sub, ltmain.sh, libtool : autoconfig cleanup
-    * M gnubg.c, gtkgame.c : gtk1/gtk2 cleanup, get rid of gdkx.h, which seems
-    unneeded, update evaluate widget to gtk_text_view
-    * M gnubg.gtkrc : gtk2 cleanup, don't autogenerate from gnubg.gtkrc.in
-    anymore
+
+	* M Makefile.am, configure.in, gnubg.gtkrc : gtk1/gtk2 cleanup, we now
+	expect gtk-2.6.0
+	* M README,TODO : guile clean
+	* R config.guess, config.sub, ltmain.sh, libtool : autoconfig cleanup
+	* M gnubg.c, gtkgame.c : gtk1/gtk2 cleanup, get rid of gdkx.h, which seems
+	unneeded, update evaluate widget to gtk_text_view
+	* M gnubg.gtkrc : gtk2 cleanup, don't autogenerate from gnubg.gtkrc.in
+	anymore
 
 Fri May 26 20:35:05 2006 Øystein Johansen <oystein@gnubg.org>
 
 	* gnubg.c: Simple Win32 fixes (Windows doesn't use gdkx.h)
 
 Fri May 26 11:51:05 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
 	* Many files : Updated the autobuild system. Please read INSTALL in
 	the topdir. Gtk1 and guile are no longer supported.
 

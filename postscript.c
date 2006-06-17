@@ -33,7 +33,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "positionid.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "format.h"
 #include "export.h"
 #include "matchid.h"
@@ -575,6 +575,7 @@ PostScriptPipCounts ( FILE *pf, int anBoard[ 2 ][ 25 ], int fMove ) {
 static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 
     int yCube, theta, cos, sin, anOff[ 2 ] = { 15, 15 }, i;
+    gchar buf[ G_ASCII_DTOSTR_BUF_SIZE ];
 
     if( pms->fCubeOwner < 0 ) {
 	yCube = 130;
@@ -599,8 +600,10 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     if( fPDF ) {
 	/* FIXME most of the following could be encapsulated into a PDF
 	   XObject to optimise the output file */
-	lifprintf( pf, "q 1 0 0 1 %d %d cm %.2f 0 0 %.2f 0 0 cm 0.5 g\n",
-		 225 - 200 * nMag / 100, y, nMag / 100.0, nMag / 100.0 );
+	fprintf( pf, "q 1 0 0 1 %d %d cm %s 0 0 %s 0 0 cm 0.5 g\n",
+		 225 - 200 * nMag / 100, y, 
+		   g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", nMag / 100.0),
+		   g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", nMag / 100.0));
 	fputs( "60 10 280 240 re S\n", pf );
 	for( i = 0; i < 6; i++ ) {
 	    fprintf( pf, "%d %d m %d %d l %d %d l %c\n",
@@ -635,11 +638,13 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 		 pms->nCube == 1 || pms->nCube > 8 ? -10 : -5,
 		 pms->nCube == 1 ? 64 : pms->nCube );
     } else
-	lifprintf( pf, "gsave\n"
-		   "%d %d translate %.2f %.2f scale\n"
+	fprintf( pf, "gsave\n"
+		   "%d %d translate %s %s scale\n"
 		   "0 0 moveto %s board\n"
 		   "%d %d %d cube\n", 225 - 200 * nMag / 100, y,
-		   nMag / 100.0, nMag / 100.0, fPlayer ? "true" : "false",
+		   g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", nMag / 100.0),
+		   g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%.2f", nMag / 100.0),
+		   fPlayer ? "true" : "false",
 		   pms->nCube == 1 ? 64 : pms->nCube, yCube, theta );
 
     for( i = 0; i < 25; i++ ) {

@@ -37,7 +37,7 @@
 #include "eval.h"
 #include "gtkrace.h"
 #include "gtkgame.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "onechequer.h"
 #include "osr.h"
 #include "format.h"

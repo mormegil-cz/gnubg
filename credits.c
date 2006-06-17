@@ -1,7 +1,7 @@
 /* Do not modify this file!  It is created automatically by credits.sh.
    Modify credits.sh instead. */
 
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "credits.h"
 
 char aszCOPYRIGHT[] = N_("Copyright 1999, 2000, 2001, 2002, 2003, 2004 "

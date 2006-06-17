@@ -36,7 +36,7 @@
 #endif
 
 #include "openurl.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include "windows.h"

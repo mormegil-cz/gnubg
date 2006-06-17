@@ -37,7 +37,7 @@
 #include "gtkgame.h"
 #include "export.h"
 #include "gtkexport.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "boarddim.h"
 
 

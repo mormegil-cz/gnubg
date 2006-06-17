@@ -35,7 +35,7 @@
 
 #include "backgammon.h"
 #include "gtkgame.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 
 

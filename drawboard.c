@@ -30,7 +30,7 @@
 
 #include "drawboard.h"
 #include "positionid.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 int fClockwise = FALSE; /* Player 1 moves clockwise */
 

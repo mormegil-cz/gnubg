@@ -38,7 +38,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #endif
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "record.h"
 
 static int anAvg[ NUM_AVG - 1 ] = { 20, 100, 500 };
@@ -114,41 +114,48 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
     } while( i < 31 && !isspace( ch = getc( pf ) ) );
     ppr->szName[ i ] = 0;
 
+    /*
     if( nVersion > 1 )
 	PushLocale( "C" );
-    
+    */
     fscanf( pf, " %d ", &ppr->cGames );
     if( ppr->cGames < 0 )
 	ppr->cGames = 0;
     
-    for( ea = 0; ea < NUM_AVG; ea++ )
-	if( fscanf( pf, "%g %g %g %g ",
-		    &ppr->arErrorChequerplay[ ea ],
-		    &ppr->arErrorCube[ ea ],
-		    &ppr->arErrorCombined[ ea ],
-		    &ppr->arLuck[ ea ] ) < 4 ) {
+    for( ea = 0; ea < NUM_AVG; ea++ ){
+	    /* Not really cute, but let me guess that this will
+	     * be cleaned out anytime in the near future. */
+	gchar str1[G_ASCII_DTOSTR_BUF_SIZE];
+	gchar str2[G_ASCII_DTOSTR_BUF_SIZE];
+	gchar str3[G_ASCII_DTOSTR_BUF_SIZE];
+	gchar str4[G_ASCII_DTOSTR_BUF_SIZE];
+	
+	if( fscanf( pf, "%s %s %s %s ", str1, str2, str3, str4) < 4){
 	    if( ferror( pf ) )
 		outputerr( pch );
 	    else
 		outputerrf( _("%s: invalid record file"), pch );
 
 	    nVersion = 0;
-	    
-	    if( nVersion > 1 )
-		PopLocale();
     
 	    return -1;
 	}
+        ppr->arErrorChequerplay[ ea ] = g_ascii_strtod(str1, NULL);
+        ppr->arErrorCube[ ea ] =g_ascii_strtod(str1, NULL);
+        ppr->arErrorCombined[ ea ] = g_ascii_strtod(str1, NULL);
+        ppr->arLuck[ ea ]  = g_ascii_strtod(str1, NULL);
+    }
 
-    if( nVersion > 1 )
-	PopLocale();
-    
     return 0;
 }
 
 static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 
     char *pchName;
+    gchar buf0[G_ASCII_DTOSTR_BUF_SIZE];
+    gchar buf1[G_ASCII_DTOSTR_BUF_SIZE];
+    gchar buf2[G_ASCII_DTOSTR_BUF_SIZE];
+    gchar buf3[G_ASCII_DTOSTR_BUF_SIZE];
     expaverage ea;
 
     if( !*ppr->szName )
@@ -162,20 +169,16 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    return -1;
 	}
 
-    PushLocale( "C" );
-    
     fprintf( pf, " %d ", ppr->cGames );
     for( ea = 0; ea < NUM_AVG; ea++ )
-	fprintf( pf, "%g %g %g %g ",
-		 ppr->arErrorChequerplay[ ea ],
-		 ppr->arErrorCube[ ea ],
-		 ppr->arErrorCombined[ ea ],
-		 ppr->arLuck[ ea ] );
+	fprintf( pf, "%s %s %s %s ",
+		 g_ascii_formatd ( buf0, G_ASCII_DTOSTR_BUF_SIZE, "%g", ppr->arErrorChequerplay[ ea ]),
+		 g_ascii_formatd ( buf1, G_ASCII_DTOSTR_BUF_SIZE, "%g", ppr->arErrorCube[ ea ]),
+		 g_ascii_formatd ( buf2, G_ASCII_DTOSTR_BUF_SIZE, "%g", ppr->arErrorCombined[ ea ]),
+		 g_ascii_formatd ( buf3, G_ASCII_DTOSTR_BUF_SIZE, "%g", ppr->arLuck[ ea ] ) );
 
     putc( '\n', pf );
 
-    PopLocale();
-    
     if( ferror( pf ) ) {
 	outputerr( pch );
 	return -1;

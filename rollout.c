@@ -51,7 +51,7 @@
 #include "matchid.h"
 #include "positionid.h"
 #include "rollout.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "format.h"
 
 int log_rollouts = 0;

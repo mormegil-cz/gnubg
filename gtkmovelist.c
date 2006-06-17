@@ -26,7 +26,7 @@
 #include <string.h>
 #include "eval.h"
 #include "gtkchequer.h"
-#include "i18n.h"
+#include <glib/gi18n.h>
 #include "backgammon.h"
 #include "format.h"
 #include "assert.h"
