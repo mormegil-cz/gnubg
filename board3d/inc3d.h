@@ -31,7 +31,7 @@
 #endif
 
 #include <stdio.h>
-#include "i18n.h"
+#include <glib/gi18n.h>
 
 #if USE_GTK
 #include <gtk/gtk.h>
