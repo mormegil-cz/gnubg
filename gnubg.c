@@ -7333,9 +7333,7 @@ int main(int argc, char *argv[] ) {
 
 #endif /* USE_GTK2 */
 
-#if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
-#endif
     bindtextdomain (PACKAGE, LOCALEDIR);
     textdomain (PACKAGE);
     bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );

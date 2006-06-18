@@ -84,12 +84,12 @@ COMMON_LIBS = @LIBOBJS@ -Llib -levent @LTLIBINTL@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
-	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
+	pub_eval.c set.c show.c dice.c dice.h \
 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c \
         import.c import.h external.c external.h credits.h credits.c \
 	latex.c \
-	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
+	postscript.c html.c export.h matchid.c matchid.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
@@ -144,7 +144,7 @@ check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+	getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
@@ -157,13 +157,13 @@ makebearoff1_LDADD = @GTK_LIBS@
 makebearoff1_DEPENDENCIES = 
 
 
-makeweights_SOURCES = makeweights.c i18n.c i18n.h $(LIBGEN_SOURCES)
+makeweights_SOURCES = makeweights.c $(LIBGEN_SOURCES)
 makeweights_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makeweights_DEPENDENCIES = lib/libevent.a
 
 makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-        i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
         drawboard.c drawboard.h format.c format.h mec.h mec.c \
 	$(LIBGEN_SOURCES) $(BR1_SOURCES)
@@ -173,7 +173,7 @@ makehyper_DEPENDENCIES = lib/libevent.a
 
 bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-        i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)
 bearoffdump_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@

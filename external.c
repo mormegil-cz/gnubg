@@ -651,8 +651,6 @@ extern void CommandExternal( char *sz ) {
       outputf( _("Accepted connection from %s.\n"), 
                  inet_ntoa( saRemote.sin_addr ) );
 
-      /* PushLocale( "C" ); Fuck */
-
       while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) ) {
 
         if ( ! ( pec = ExtParse( szCommand ) ) ) {
@@ -688,12 +686,7 @@ extern void CommandExternal( char *sz ) {
         }
 
       }
-
-
-      /* PopLocale(); */
-
       closesocket( hPeer );
-
     } while ( 1 );
 #endif
 }

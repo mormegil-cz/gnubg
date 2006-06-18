@@ -2015,8 +2015,6 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
     return 0;
   }
 
-  /* PushLocale("C"); */
-
   if (g->i != 0)
   {
       PyErr_SetString(PyExc_StandardError, "First game missing from match");
@@ -2150,8 +2148,6 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 /*     DictSetItemSteal(matchInfoDict, "sgf-rollout-version", */
 /* 		     PyInt_FromLong(SGF_ROLLOUT_VER)); */
   }
-
-  /* PopLocale(); */
 
   return matchDict;
 }

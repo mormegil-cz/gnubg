@@ -1,3 +1,6 @@
+Sun Jun 18 01:26:05 CEST 2006 Christian Anthon
+	* Several files: cleanup after Øystein i18n changes
+
 Sat Jun 17 19:42:19 2006 Øystein Johansen <oystein@gnubg.org>
 
 	* Many files: Remove i18n functions like PushLocale and PopLocale,

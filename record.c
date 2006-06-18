@@ -114,10 +114,6 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
     } while( i < 31 && !isspace( ch = getc( pf ) ) );
     ppr->szName[ i ] = 0;
 
-    /*
-    if( nVersion > 1 )
-	PushLocale( "C" );
-    */
     fscanf( pf, " %d ", &ppr->cGames );
     if( ppr->cGames < 0 )
 	ppr->cGames = 0;

@@ -895,8 +895,6 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
                          szWeights, WEIGHTS_VERSION, szFileVersion );
 	    else {
 
-                /* PushLocale ( "C" ); */
-
 		if( !( fReadWeights =
 		       !NeuralNetLoad( &nnContact, pfWeights ) &&
 		       !NeuralNetLoad( &nnRace, pfWeights ) &&
@@ -907,8 +905,6 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		       !NeuralNetLoad( &nnpRace, pfWeights ) 
 		       ) )
 		    perror( szWeights );
-
-                /* PopLocale (); */
 
 		fclose( pfWeights );
 	    }

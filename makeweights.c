@@ -69,11 +69,7 @@ extern int main( int argc, char *argv[] ) {
       usage (argv[0]);
     }
 
-    /* i18n */
-
-#if HAVE_SETLOCALE
-    setlocale (LC_ALL, "");
-#endif
+    setlocale (LC_ALL, "C");
     bindtextdomain (PACKAGE, LOCALEDIR);
     textdomain (PACKAGE);
 
@@ -95,22 +91,12 @@ extern int main( int argc, char *argv[] ) {
 	
     fwrite( ar, sizeof( ar[ 0 ] ), 2, output );
 
-    PushLocale ( "C" );
-
     for( c = 0; !NeuralNetLoad( &nn, stdin ); c++ )
       if( NeuralNetSaveBinary( &nn, output ) )
 	    return EXIT_FAILURE;
-
-    PopLocale ();
 
     fprintf( stderr, _("%d nets converted\n"), c );
 
     return EXIT_SUCCESS;
 
 }
-
-
-
-
-
-

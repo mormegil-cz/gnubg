@@ -634,9 +634,7 @@ main ( int argc, char **argv ) {
 
   /* i18n */
 
-#if HAVE_SETLOCALE
   setlocale (LC_ALL, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
