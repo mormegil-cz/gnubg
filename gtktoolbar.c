@@ -335,7 +335,7 @@ ToolbarNew ( void ) {
   
   gtk_object_set_data_full ( GTK_OBJECT ( vbox_toolbar ), "user_data",
                              ptw, g_free );
-#if USE_GTK2
+#if USE_GTK
   pwToolbar = gtk_toolbar_new ();
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
                                 GTK_ORIENTATION_HORIZONTAL );
@@ -349,7 +349,7 @@ ToolbarNew ( void ) {
 
   gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
 		  GTK_RELIEF_NONE);
-#endif /* ! USE_GTK2 */
+#endif /* ! USE_GTK */
 
   gtk_box_pack_start( GTK_BOX( vbox_toolbar ), pwToolbar, 
                       FALSE, FALSE, 0 );
@@ -426,7 +426,7 @@ ToolbarNew ( void ) {
   
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
 
-#if !USE_GTK2
+#if !USE_GTK
   gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
 		  GTK_RELIEF_NONE);
 #endif
@@ -499,9 +499,7 @@ ToolbarNew ( void ) {
   /* stop button */
   
   ptw->pwStopParent = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(ptw->pwStopParent), FALSE);
-#endif
   ptw->pwStop = gtk_button_new(),
   gtk_container_add( GTK_CONTAINER( ptw->pwStopParent ), ptw->pwStop );
 

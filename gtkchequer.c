@@ -46,7 +46,7 @@
 #include "progress.h"
 #include "format.h"
 
-#if USE_GTK2
+#if USE_GTK
 extern moverecord *pmrCurAnn;;
 int showMoveListDetail = 1;
 #endif
@@ -299,10 +299,8 @@ MoveListEvalSettings ( GtkWidget *pw, void *unused )
 {
   SetEvaluation ( NULL, 0, NULL );
 
-#if GTK_CHECK_VERSION(2,0,0)
   /* bring the dialog holding this button to the top */
   gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );
-#endif
 }
 
 static void
@@ -310,10 +308,8 @@ MoveListRolloutSettings ( GtkWidget *pw, void *unused )
 {
   SetRollouts ( NULL, 0, NULL );
 
-#if GTK_CHECK_VERSION(2,0,0)
   /* bring the dialog holding this button to the top */
   gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );
-#endif
 }
 
 typedef int ( *cfunc )( const void *, const void * );
@@ -398,7 +394,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 static void
 MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
 {
-#if USE_GTK2
+#if USE_GTK
 	 showMoveListDetail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
 	 /* Reshow list */
 	 SetAnnotation(pmrCurAnn);
@@ -430,7 +426,7 @@ CreateMoveListTools ( hintdata *phd )
   GtkTooltips *pt = gtk_tooltips_new ();
 
   pwDetails = 
-#if USE_GTK2
+#if USE_GTK
     phd->fDetails ? NULL : gtk_toggle_button_new_with_label( _("Details") );
 #else
     phd->fDetails ? NULL : gtk_button_new_with_label( _("Details") );
@@ -521,7 +517,7 @@ CreateMoveListTools ( hintdata *phd )
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
 
-#if USE_GTK2
+#if USE_GTK
   if (pwDetails)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwDetails), showMoveListDetail);
 #endif
@@ -589,7 +585,7 @@ CreateMoveListTools ( hintdata *phd )
   return pwTools;
 }
 
-#if USE_GTK2
+#if USE_GTK
 void HintDoubleClick(GtkTreeView        *treeview,
                        GtkTreePath        *path,
                        GtkTreeViewColumn  *col,

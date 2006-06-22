@@ -729,10 +729,10 @@ extern void CommandSetClockwise( char *sz ) {
 #if USE_BOARD3D
 	RestrictiveRedraw();
 #endif
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 }
 
 extern void CommandSetAppearance( char *sz ) {
@@ -787,10 +787,10 @@ extern void CommandSetCubeCentre( char *sz ) {
     
     outputl( _("The cube has been centred.") );
     
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 }
 
 extern void CommandSetCubeOwner( char *sz ) {
@@ -827,10 +827,10 @@ extern void CommandSetCubeOwner( char *sz ) {
     
     outputf( _("%s now owns the cube.\n"), ap[ ms.fCubeOwner ].szName );
     
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 }
 
 extern void CommandSetCubeUse( char *sz ) {
@@ -860,10 +860,10 @@ extern void CommandSetCubeUse( char *sz ) {
 
     ms.fCubeUse = fCubeUse;
 	
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 }
 
 extern void CommandSetCubeValue( char *sz ) {
@@ -887,10 +887,10 @@ extern void CommandSetCubeValue( char *sz ) {
 	    
 	    outputf( _("The cube has been set to %d.\n"), n );
 	    
-#if USE_GTK2
+#if USE_GTK
 	    if( fX )
 		ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 	    return;
 	}
 
@@ -899,7 +899,7 @@ extern void CommandSetCubeValue( char *sz ) {
 }
 
 extern void CommandSetDelay( char *sz ) {
-#if USE_GTK2
+#if USE_GTK
     int n;
 
     if( fX ) {
@@ -925,7 +925,7 @@ extern void CommandSetDelay( char *sz ) {
 	nDelay = n;
 	UpdateSetting( &nDelay );
     } else
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 	outputl( _("The `set delay' command applies only when using a window "
 	      "system.") );
 }
@@ -970,7 +970,7 @@ extern void CommandSetDice( char *sz ) {
 #if USE_BOARD3D
 	RestrictiveRedraw();
 #endif
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
 #endif
@@ -1113,7 +1113,7 @@ extern void CommandSetEvaluation( char *sz ) {
     HandleCommand( sz, acSetEvaluation );
 }
 
-#if USE_GTK2
+#if USE_GTK
 extern void CommandSetGUIAnimationBlink( char *sz ) {
 
     animGUI = ANIMATE_BLINK;
@@ -1472,10 +1472,10 @@ extern void CommandSetPlayerName( char *sz ) {
 
     outputf( _("Player %d is now known as `%s'.\n"), iPlayerSet, sz );
 
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 }
 
 extern void CommandSetPlayerPlies( char *sz ) {
@@ -2502,10 +2502,10 @@ extern void CommandSetScore( char *sz ) {
     
     CommandShowScore( NULL );
 
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 }
 
 extern void CommandSetSeed( char *sz ) {
@@ -2567,7 +2567,7 @@ extern void CommandSetToolbar( char *sz )
 		outputl(_("You must specify either 0, 1 or 2"));
 		return;
 	}
-#if USE_GTK2
+#if USE_GTK
 	if (fX)
 	  SetToolbarStyle(n);
 #endif
@@ -2623,10 +2623,10 @@ extern void CommandSetTurn( char *sz ) {
 
     UpdateSetting( &ms.fTurn );
 
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
     
     outputf( _("`%s' is now on roll.\n"), ap[ i ].szName );
 }
@@ -4420,10 +4420,10 @@ SetVariation( const bgvariation bgvx ) {
   outputf( _("Please start a new match or session to play `%s'\n"),
            gettext( aszVariations[ bgvDefault ] ) );
 
-#if USE_GTK2
+#if USE_GTK
     if( fX && ms.gs == GAME_NONE )
 	ShowBoard();
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 
 }
 
@@ -4675,7 +4675,7 @@ extern void CommandSetPanelWidth( char *sz )
 		outputl(_("You must specify a number greater than 50"));
 		return;
 	}
-#if USE_GTK2
+#if USE_GTK
 	if (fX)
 	  SetPanelWidth(n);
 #endif

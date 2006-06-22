@@ -33,7 +33,6 @@
 
 /* --------------------------------------------------------------------------------------------- */
 
-#if GTK_CHECK_VERSION(2,4,0)
 
 /* This is a temporary hack and will move and mutate. Too many places where things
    are hardcoded or omplicated to access -- this clumsy switch is my dynamic copy.
@@ -380,15 +379,7 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 	    filename = gtk_file_chooser_get_filename ((GtkFileChooser *)  filechooser);
 
 		if (filename) {
-#if __GNUC__
-			char sz[ strlen( filename ) + strlen( szCommand ) + 4 ];
-#elif HAVE_ALLOCA
-			char *sz = alloca( strlen( filename ) + strlen( szCommand ) + 4 );
-#elif GLIB_CHECK_VERSION(1,1,12)
 			char *sz = g_alloca(strlen( filename ) + strlen( szCommand ) + 4);
-#else
-			char sz[ 1024 ];
-#endif
 			/* and actually do the requested IO */
 			sprintf( sz, "%s \"%s\"", szCommand, filename );
 			UserCommand( sz );
@@ -400,6 +391,4 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 	gtk_widget_destroy (filechooser);
 	External_IO_Format_destroy(eiof);
 }
-#endif
-
 /* ------------------------------------------------------------------------------------------ */

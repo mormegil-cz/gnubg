@@ -41,7 +41,7 @@
 #include <glib/gi18n.h>
 #include "format.h"
 
-#if USE_GTK2
+#if USE_GTK
 
 typedef struct _rollswidget {
 
@@ -340,12 +340,12 @@ static gint RollsClose(GtkWidget *widget, GdkEvent *event, rollswidget *prw)
 		return FALSE;
 }
 
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 
 extern void
 GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
-#if USE_GTK2
+#if USE_GTK
 
   GtkWidget *vbox, *hbox;
   GtkAdjustment *padj;

@@ -33,10 +33,6 @@ static void    gtk_multiview_size_allocate (GtkWidget         *widget,
 					    GtkAllocation     *allocation);
 static void    gtk_multiview_map           (GtkWidget         *widget);
 static void    gtk_multiview_unmap         (GtkWidget         *widget);
-#if !GTK_CHECK_VERSION(1,3,10)
-static int     gtk_multiview_expose        (GtkWidget         *widget,
-					    GdkEventExpose    *event);
-#endif
 static GtkType gtk_multiview_child_type    (GtkContainer      *container);
 static void    gtk_multiview_forall        (GtkContainer      *container,
 					    gboolean           include_internals,
@@ -100,9 +96,6 @@ gtk_multiview_class_init (GtkMultiviewClass *klass)
   widget_class->size_allocate = gtk_multiview_size_allocate;
   widget_class->map = gtk_multiview_map;
   widget_class->unmap = gtk_multiview_unmap;
-#if !GTK_CHECK_VERSION(1,3,10)
-  widget_class->expose_event = gtk_multiview_expose;
-#endif
   
   container_class->forall = gtk_multiview_forall;
   container_class->add = gtk_multiview_add;
@@ -206,42 +199,6 @@ gtk_multiview_unmap (GtkWidget *widget)
       gtk_widget_unmap (GTK_WIDGET (multiview->current));
     }
 }
-
-#if !GTK_CHECK_VERSION(1,3,10)
-static gint
-gtk_multiview_expose (GtkWidget      *widget,
-		      GdkEventExpose *event)
-{
-  GtkMultiview *multiview;
-  GtkWidget *child;
-  GList *tmp_list;
-  GdkEventExpose child_event;
-
-  g_return_val_if_fail (widget != NULL, FALSE);
-  g_return_val_if_fail (GTK_IS_MULTIVIEW (widget), FALSE);
-  g_return_val_if_fail (event != NULL, FALSE);
-
-  if (GTK_WIDGET_DRAWABLE (widget))
-    {
-      multiview = GTK_MULTIVIEW (widget);
-      child_event = *event;
-
-      tmp_list = multiview->children;
-      while (tmp_list)
-	{
-	  child = GTK_WIDGET (tmp_list->data);
-	  tmp_list = tmp_list->next;
-
-	  if (GTK_WIDGET_DRAWABLE (child) &&
-	      GTK_WIDGET_NO_WINDOW (child))
-	    {
-		gtk_widget_event (child, (GdkEvent*) event);
-	    }
-	}
-    }
-  return FALSE;
-}
-#endif
 
 static GtkType
 gtk_multiview_child_type (GtkContainer *container)

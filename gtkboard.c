@@ -51,7 +51,7 @@
 #define MASK_INVISIBLE 1
 #define MASK_VISIBLE 0
 
-#if !USE_GTK2
+#if !USE_GTK
 #define gtk_image_new_from_pixmap gtk_pixmap_new
 #endif
 
@@ -65,10 +65,6 @@ animation animGUI = ANIMATE_SLIDE;
 int nGUIAnimSpeed = 4, fGUIBeep = TRUE,
     fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE,
     fGUIShowPips = TRUE, fGUIDragTargetHelp = TRUE, fGUIShowEPCs = TRUE;
-
-#if !GTK_CHECK_VERSION(1,3,0)
-#define g_alloca alloca
-#endif
 
 static GtkVBoxClass *parent_class = NULL;
 
@@ -331,7 +327,6 @@ static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y,
     
     assert( GTK_IS_DRAWING_AREA( drawing_area ) );
     
-#if GTK_CHECK_VERSION(2,0,0)
     {
 	GdkRectangle r;
 	
@@ -342,19 +337,6 @@ static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y,
 	
 	gdk_window_invalidate_rect( drawing_area->window, &r, FALSE );
     }
-#else
-    {
-	GdkEventExpose event;
-    
-	event.count = 0;
-	event.area.x = x;
-	event.area.y = y;
-	event.area.width = cx;
-	event.area.height = cy;
-	
-	board_expose( drawing_area, &event, bd );
-    }
-#endif    
 }
 
 static void board_invalidate_point( BoardData *bd, int n ) {
@@ -806,9 +788,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd,
 	{
 	    board_invalidate_point( bd, drag_point );
 
-#if GTK_CHECK_VERSION(2,0,0)
     gdk_window_process_updates( bd->drawing_area->window, FALSE );
-#endif
     
 		bd->x_drag = x;
 		bd->y_drag = y;
@@ -1152,9 +1132,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
 	}
 #endif
 
-#if GTK_CHECK_VERSION(2,0,0)
     gdk_window_process_updates( bd->drawing_area->window, FALSE );
-#endif
 
     puch = g_alloca( 6 * s * 6 * s * 3 );
     puchNew = g_alloca( 6 * s * 6 * s * 3 );
@@ -1171,7 +1149,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
 		      6 * s );
 
     /* FIXME use dithalign */
-#if USE_GTK2
+#if USE_GTK
     {
 	GdkRegion *pr;
 	GdkRectangle r;
@@ -1198,7 +1176,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
     gdk_draw_rgb_image( bd->drawing_area->window, bd->gc_copy,
 			x - 3 * s, y - 3 * s, 6 * s, 6 * s,
 			GDK_RGB_DITHER_MAX, puchChequer, 6 * s * 3 );
-#if USE_GTK2
+#if USE_GTK
     gdk_window_end_paint( bd->drawing_area->window );
 #endif
     
@@ -1211,9 +1189,7 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
     unsigned char *puch;
     int s = bd->rd->nSize;
     
-#if GTK_CHECK_VERSION(2,0,0)
     gdk_window_process_updates( bd->drawing_area->window, FALSE );
-#endif
 
     puch = g_alloca( 6 * s * 6 * s * 3 );
     
@@ -2983,9 +2959,7 @@ static gint board_blink_timeout( gpointer p ) {
 	blink_move += 2;	
     }
     
-#if GTK_CHECK_VERSION(2,0,0)
     gdk_window_process_updates( pbd->drawing_area->window, FALSE );
-#endif
 
     return TRUE;
 }
@@ -3104,11 +3078,7 @@ static gint board_slide_timeout( gpointer p ) {
 	    bd->drag_point = -1;
 	    slide_phase = 0;
 	    slide_move += 2;
-
-#if GTK_CHECK_VERSION(2,0,0)
 	    gdk_window_process_updates( bd->drawing_area->window, FALSE );
-#endif
-	    
 	    playSound( SOUND_CHEQUER );
 
 	    return TRUE;
@@ -3667,7 +3637,7 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 			    unsigned char *puchSrc, int nStride,
 			    int cx, int cy ) {
     
-#if USE_GTK2
+#if USE_GTK
     unsigned char *puch, *puchDest, *auch = g_alloca( cx * cy * 4 );
     int ix, iy;
     GdkPixbuf *ppb;
@@ -3796,9 +3766,7 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
     GdkPixmap *ppm;
     char sz[ 128 ];
 
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pw), FALSE);
-#endif
     ppm = bd->appmKey[ iPlayer ] = gdk_pixmap_new(
 	NULL, 20, 20, gtk_widget_get_visual( GTK_WIDGET( board ) )->depth );
 

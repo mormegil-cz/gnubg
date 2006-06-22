@@ -77,7 +77,7 @@ unsigned char *auchBoard, *auchChequer[2], *auchChequerLabels, *auchLo, *auchHi,
 
 unsigned short *asRefract[2];
 
-#if USE_GTK2
+#if USE_GTK
 unsigned char *auchArrow[ 2 ];
 #endif
 unsigned char *auchMidlb;
@@ -113,7 +113,7 @@ static void DrawArrow(int side, int player)
 
 	memcpy( auchMidlb, auchBoard, BOARD_WIDTH * s * BOARD_HEIGHT * s * 3 );
 
-#if USE_GTK2
+#if USE_GTK
 {
 	int x, y;
 	ArrowPosition(side /* rd.fClockwise */, s, &x, &y);
@@ -628,7 +628,7 @@ static void RenderObjects()
 			asRefract[ 1 ], CHEQUER_WIDTH * s * 4 );
 	RenderChequerLabels( &rd, auchChequerLabels, CHEQUER_LABEL_WIDTH * s * 3 );
 
-#if USE_GTK2
+#if USE_GTK
 	RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4 );
 #endif
 
@@ -688,7 +688,7 @@ static void AllocObjects()
 	s = exsExport.nHtmlSize;
 
 	auchMidlb = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
-#if USE_GTK2
+#if USE_GTK
     auchArrow[0] = malloc(s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT);
     auchArrow[1] = malloc(s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT);
 #endif
@@ -726,7 +726,7 @@ static void TidyObjects()
 {
 	int i, j, k;
 	free(auchMidlb);
-#if USE_GTK2
+#if USE_GTK
 	free(auchArrow[0]);
 	free(auchArrow[1]);
 #endif

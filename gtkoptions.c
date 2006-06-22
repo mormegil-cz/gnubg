@@ -392,9 +392,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "games, not matches."), NULL );
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -417,9 +415,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "matches."), NULL);
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -497,34 +493,19 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "the \"Analysis\" settings."), NULL );
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
 
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Warning level:") ),
 			FALSE, FALSE, 0);
-#if GTK_CHECK_VERSION(2,4,0)
 	pow->pwTutorSkill = gtk_combo_box_new_text();
     gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwTutorSkill, FALSE, FALSE, 0);
 	for( ppch = aszTutor; *ppch; ppch++ ) {
 		gtk_combo_box_append_text (GTK_COMBO_BOX (pow->pwTutorSkill), gettext( *ppch ));
 	}
 	assert(nTutorSkillCurrent >= 0 && nTutorSkillCurrent <= 2) ;
-#else
-    pow->pwTutorSkill = gtk_option_menu_new ();
-    gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwTutorSkill, FALSE, FALSE, 0);
-    pwm = gtk_menu_new ();
-    for( ppch = aszTutor; *ppch; ppch++ )
-	gtk_menu_append( GTK_MENU( pwm ),
-			 pw = gtk_menu_item_new_with_label(
-			     gettext( *ppch ) ) );
-    gtk_widget_show_all( pwm );
-    gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwTutorSkill), pwm );
-    gtk_option_menu_set_history (GTK_OPTION_MENU (pow->pwTutorSkill), 0);
-#endif
     gtk_tooltips_set_tip (ptt, pwev,
 			  _("Specify how bad GNU Backgammon must think a "
 			    "decision is before questioning you about a "
@@ -556,9 +537,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			  NULL );
   
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -664,9 +643,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "the board between the points."), NULL );
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwAnimBox ), pwev, FALSE, FALSE, 0 );    
     pwSpeed = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwSpeed );
@@ -674,11 +651,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     pow->padjSpeed = GTK_ADJUSTMENT( gtk_adjustment_new( nGUIAnimSpeed, 0, 7,
 							 1, 1, 0 ) );
     pwScale = gtk_hscale_new( pow->padjSpeed );
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_widget_set_size_request( pwScale, 100, -1 );
-#else
-    gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
-#endif
     gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
     gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
 
@@ -766,9 +739,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     /* number of digits in output */
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -811,9 +782,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1203,9 +1172,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1225,9 +1192,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "will retain more existing knowledge."), NULL );
 
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1249,9 +1214,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			  NULL );
     
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1306,9 +1269,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     /* path */
     
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwb ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1374,9 +1335,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     /* path */
     
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwb ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1455,9 +1414,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "matches or sessions, to save memory."), NULL );
   
     pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
     pwhbox = gtk_hbox_new( FALSE, 4 );
     gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
@@ -1577,7 +1534,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 	  UserCommand( "set tutor eval on");
   }
 
-#if GTK_CHECK_VERSION(2,4,0)
   {
 	GtkTreeModel *model;
 	GtkTreeIter iter;
@@ -1605,29 +1561,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 		g_free(selection);
 	}	
   }
-#else
-  n = gtk_option_menu_get_history(GTK_OPTION_MENU( pow->pwTutorSkill ));
-  switch ( n ) {
-  case 0:
-	if (TutorSkill != SKILL_DOUBTFUL)
-	  UserCommand ("set tutor skill doubtful");
-	break;
-
-  case 1:
-	if (TutorSkill != SKILL_BAD)
-	  UserCommand ("set tutor skill bad");
-	break;
-
-  case 2:
-	if (TutorSkill != SKILL_VERYBAD)
-	  UserCommand ("set tutor skill very bad");
-	break;
-
-  default:
-	UserCommand ("set tutor skill doubtful");
-  }
-  gtk_widget_set_sensitive( pow->pwTutorSkill, n );
-#endif
 
   CHECKUPDATE(pow->pwCubeUsecube,fCubeUse, "set cube use %s")
   CHECKUPDATE(pow->pwCubeJacoby,fJacoby, "set jacoby %s")
@@ -1945,13 +1878,7 @@ OptionsSet( optionswidget *pow) {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON( pow->pwTutorEvalAnalysis ),
 								 TRUE );
 
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_combo_box_set_active (GTK_COMBO_BOX (pow->pwTutorSkill), nTutorSkillCurrent);
-#else
-  gtk_option_menu_set_history(GTK_OPTION_MENU( pow->pwTutorSkill ), 
-                                 nTutorSkillCurrent );
-#endif
-
   gtk_adjustment_set_value ( pow->padjCubeBeaver, nBeavers );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwCubeUsecube ),
                                 fCubeUse );

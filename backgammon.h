@@ -644,7 +644,7 @@ extern void ProgressValue ( int iValue );
 extern void ProgressValueAdd ( int iValue );
 extern void ProgressEnd( void );
 
-#if USE_GTK2
+#if USE_GTK
 extern gint NextTurnNotify( gpointer p );
 extern void UserCommand( char* sz );
 extern void HandleXAction( void );
@@ -652,8 +652,6 @@ extern void HandleXAction( void );
 extern int fReadingCommand;
 extern void HandleInput( char* sz );
 #endif
-#endif
-#if USE_GTK2
 extern void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 extern void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 #endif
@@ -1288,13 +1286,7 @@ dirname ( char* filename );
 #endif
 
 #if USE_GTK
-#  if GTK_CHECK_VERSION(1,3,0) || defined (WIN32)
-#    define GNUBG_CHARSET "UTF-8"
-#  else
-#    define GNUBG_CHARSET "ISO-8859-1"
-#  endif
-#else
-#  define GNUBG_CHARSET "ISO-8859-1"
+#define GNUBG_CHARSET "UTF-8"
 #endif
 
 extern char *

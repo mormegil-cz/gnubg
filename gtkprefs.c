@@ -718,11 +718,7 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 		gtk_signal_connect_object( GTK_OBJECT( padjRound ), "value-changed",
 					   GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
 		pwScale = gtk_hscale_new( padjRound );
-#if GTK_CHECK_VERSION(2,0,0)
 		gtk_widget_set_size_request( pwScale, 100, -1 );
-#else
-		gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
-#endif
 		gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
 		gtk_scale_set_digits( GTK_SCALE( pwScale ), 2 );
 
@@ -994,13 +990,8 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 	gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ),
 				     bd->rd->wt );
 
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect_object( GTK_OBJECT( pwWoodType ), "changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),0);
-#else
-    gtk_signal_connect_object( GTK_OBJECT( pwWoodMenu ), "selection-done",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),0);
-#endif
     
     gtk_box_pack_start( GTK_BOX( pw ),
 			pwWoodF = gtk_radio_button_new_with_label_from_widget(
@@ -1601,9 +1592,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), bd->rd->closeBoardOnExit );
 
 	pwev = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-#endif
 	gtk_box_pack_start(GTK_BOX(pw), pwev, FALSE, FALSE, 0);
 	pwhbox = gtk_hbox_new(FALSE, 4);
 	gtk_container_add(GTK_CONTAINER(pwev), pwhbox);
@@ -1622,11 +1611,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	pwBoardAngle = gtk_hscale_new(padjBoardAngle);
 	gtk_tooltips_set_tip(ptt, pwBoardAngle, _("Vary the angle the board is tilted at"), 0);
 	gtk_scale_set_digits( GTK_SCALE( pwBoardAngle ), 0 );
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_widget_set_size_request( pwBoardAngle, 100, -1 );
-#else
-    gtk_widget_set_usize ( GTK_WIDGET ( pwBoardAngle ), 100, -1 );
-#endif
 	gtk_box_pack_start(GTK_BOX(hBox), pwBoardAngle, FALSE, FALSE, 0);
 
 	hBox = gtk_hbox_new(FALSE, 0);
@@ -1640,11 +1625,7 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	gtk_signal_connect_object( GTK_OBJECT( padjSkewFactor ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwSkewFactor = gtk_hscale_new(padjSkewFactor);
-#if GTK_CHECK_VERSION(2,0,0)
     gtk_widget_set_size_request( pwSkewFactor, 100, -1 );
-#else
-    gtk_widget_set_usize ( GTK_WIDGET ( pwSkewFactor ), 100, -1 );
-#endif
 	gtk_tooltips_set_tip(ptt, pwSkewFactor, _("Vary the field-of-view of the 3d display"), 0);
 	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwSkewFactor, FALSE, FALSE, 0);
@@ -2135,7 +2116,7 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
             "         light=%s;%s\n"
             "         shape=%s\n"
             "         chequers0=#%02X%02X%02X;%s;%s;%s;%s\n"
-            "         chequers1=#%02X%02X%02X;%s;%0.2f;%s;%s\n"
+            "         chequers1=#%02X%02X%02X;%s;%s;%s;%s\n"
             "         dice0=#%02X%02X%02X;%s;%s;%c\n"
             "         dice1=#%02X%02X%02X;%s;%s;%c\n"
             "         dot0=#%02X%02X%02X\n"
@@ -2939,10 +2920,6 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 
 	gtk_widget_set_sensitive(frame3dOptions, rdPrefs.fDisplayType == DT_3D);
 
-#if !HAVE_GTKGLEXT
-	if (rdPrefs.fDisplayType == DT_3D)
-		SetupVisual();
-#endif
 #endif
 
 #if HAVE_LIBXML2

@@ -856,7 +856,7 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   gtk_clist_column_titles_passive( GTK_CLIST( prp->pwRolloutResult ) );
     
   prp->pwRolloutProgress = gtk_progress_bar_new();
-#if !USE_GTK2
+#if !USE_GTK
   gtk_progress_set_show_text ( GTK_PROGRESS ( prp->pwRolloutProgress ), TRUE );
 #endif
   
@@ -881,7 +881,7 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                         _("Standard error") );
   }
 
-#if !USE_GTK2
+#if !USE_GTK
   gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ), 0, 0, 
                           prc->nTrials );
   gtk_progress_set_format_string( GTK_PROGRESS( prp->pwRolloutProgress ),
@@ -958,7 +958,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     char sz[ 32 ];
     int i;
-#if USE_GTK2
+#if USE_GTK
     gchar *gsz;
     double frac;
 #endif
@@ -1013,7 +1013,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 	  SetRolloutText(prp, iAlternative * 2, i + 1, "n/a");
 	}
 	  
-#if !USE_GTK2
+#if !USE_GTK
     gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ),
                             iGame + 1, 0, prc->nTrials );
 #else
@@ -1079,7 +1079,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
 static void GTKRolloutProgressEnd( void **pp ) {
     
-#if USE_GTK2
+#if USE_GTK
     gchar *gsz;
 #endif
 
@@ -1102,15 +1102,10 @@ static void GTKRolloutProgressEnd( void **pp ) {
     gtk_widget_set_sensitive( prp->pwRolloutStop, FALSE );
     gtk_widget_set_sensitive( prp->pwRolloutViewStat, TRUE );
 
-#if !USE_GTK2
-    gtk_progress_set_format_string( GTK_PROGRESS( prp->pwRolloutProgress ),
-                                    _("Finished (%v trials)") );
-#else
     gsz = g_strdup_printf( _("Finished (%d trials)") , prp->nGamesDone);
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( prp->pwRolloutProgress ),
                                     gsz );
     g_free( gsz );
-#endif
 
     gtk_signal_disconnect( GTK_OBJECT( prp->pwRolloutDialog ), 
                            prp->nRolloutSignal );

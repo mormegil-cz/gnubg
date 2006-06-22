@@ -501,7 +501,7 @@ extern void CommandShowBoard( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
-#if USE_GTK2
+#if USE_GTK
     if( fX )
       game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1, FALSE,
                 anChequers[ ms.bgv ] );
@@ -532,7 +532,7 @@ void CommandShowFullBoard( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	game_set( BOARD( pwBoard ), an, ms.fTurn, 
                   ap[ 1 ].szName, ap[ 0 ].szName , ms.nMatchTo, 
@@ -548,7 +548,7 @@ void CommandShowFullBoard( char *sz ) {
 
 
 extern void CommandShowDelay( char *sz ) {
-#if USE_GTK2
+#if USE_GTK
     if( nDelay )
 	outputf( _("The delay is set to %d ms.\n"),nDelay);
     else
@@ -1427,7 +1427,7 @@ extern void CommandShowOutput( char *sz ) {
              _("Game winning chances will be shown as percentages.\n") :
              _("Game winning chances will be shown as probabilities.\n") );
 
-#if USE_GTK2
+#if USE_GTK
     if( !fX )
 #endif
       outputf( fOutputRawboard ? 
@@ -1789,7 +1789,7 @@ CommandShowExport ( char *sz ) {
 
   int i;
 
-#if USE_GTK 
+#if USE_GTK
   if( fX ) {
     GTKShowExport( &exsExport ); 
     return;
@@ -2079,7 +2079,7 @@ CommandShowSound ( char *sz ) {
 extern void
 CommandShowRolls ( char *sz ) {
 
-#if USE_GTK2
+#if USE_GTK
   int nDepth = ParseNumber ( &sz );
 #endif
 
@@ -2089,7 +2089,7 @@ CommandShowRolls ( char *sz ) {
     return;
   }
 
-#if USE_GTK2
+#if USE_GTK
 
   if ( fX ) {
 #if defined (REDUCTION_CODE)

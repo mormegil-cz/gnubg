@@ -30,9 +30,6 @@
 #if USE_GTK
 #include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
-#if !GTK_CHECK_VERSION(1,3,10)
-#include <stdlib.h>
-#endif
 #endif
 
 #include "openurl.h"

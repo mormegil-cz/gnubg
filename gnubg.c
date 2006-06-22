@@ -111,6 +111,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "relational.h"
 #include "credits.h"
 #include "external.h"
+#include <neuralnet.h>
 
 #ifdef WIN32
 #if HAVE_SOCKETS
@@ -147,7 +148,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #define NO_BACKSLASH_ESCAPES 1
 #endif
 
-#if USE_GTK2
+#if USE_GTK
 int fX = TRUE; /* use X display */
 int nDelay = 300;
 int fNeedPrompt = FALSE;
@@ -639,7 +640,7 @@ static char szDICE[] = N_("<die> <die>"),
     szSHOWTC[] = N_("[<name> [<levels>]]"),
     szSHOWTCLIST[] = N_("[all]"),
 #endif
-#if	USE_GTK
+#if USE_GTK
 	szWARN[] = N_("[<warning>]"),
 	szWARNYN[] = N_("<warning> on|off"),
 #endif
@@ -1093,7 +1094,7 @@ command cER = {
       N_("Player specific options"), szPLAYER, acSetAnalysisPlayer },
     { "threshold", NULL, N_("Specify levels for marking moves"), NULL,
       acSetAnalysisThreshold },
-#if	USE_GTK
+#if USE_GTK
     { "window", CommandSetAnalysisWindows, N_("Display window with analysis"),
       szONOFF, &cOnOff },
 #endif
@@ -1159,7 +1160,7 @@ command cER = {
       N_("Set cube efficiency parameters for race positions"),
       szVALUE, acSetCubeEfficiencyRace },
     { NULL, NULL, NULL, NULL, NULL }
-#if	USE_GTK
+#if USE_GTK
 }, acSetGeometryValues[] = {
     { "width", CommandSetGeometryWidth, N_("set width of window"), 
       szVALUE, NULL },
@@ -1206,7 +1207,7 @@ command cER = {
       szONOFF, NULL },
     { "dicearea", CommandSetGUIDiceArea,
       N_("Show dice icon when human player on roll"), szONOFF, NULL },
-#if	USE_GTK
+#if USE_GTK
     { "dragtargethelp", CommandSetGUIDragTargetHelp,
       N_("Show target help while dragging a chequer"), szONOFF, NULL },
     { "usestatspanel", CommandSetGUIUseStatsPanel,
@@ -1775,7 +1776,7 @@ command cER = {
 }, acSet[] = {
     { "analysis", NULL, N_("Control parameters used when analysing moves"),
       NULL, acSetAnalysis },
-#if	USE_GTK
+#if USE_GTK
     { "annotation", CommandSetAnnotation, N_("Select whether move analysis and "
       "commentary are shown"), szONOFF, &cOnOff },
 #endif
@@ -1922,7 +1923,7 @@ command cER = {
     { "tutor", NULL, N_("Control tutor setup"), NULL, acSetTutor }, 
     { "variation", NULL, N_("Set which variation of backgammon is used"), 
       NULL, acSetVariation }, 
-#if	USE_GTK
+#if USE_GTK
     { "warning", CommandSetWarning, N_("Turn warnings on or off"), szWARNYN, NULL},
 #endif
     { NULL, NULL, NULL, NULL, NULL }
@@ -2082,7 +2083,7 @@ command cER = {
     { "variation", CommandShowVariation, 
       N_("Give information about which variation of backgammon is being played"),
       NULL, NULL },
-#if	USE_GTK
+#if USE_GTK
     { "warning", CommandShowWarning, N_("Show warning settings"), szWARN, NULL},
 #endif
     { "warranty", CommandShowWarranty, 
@@ -2192,7 +2193,7 @@ char *aszBuildInfo[] = {
 #if USE_PYTHON
     N_ ("Python supported."),
 #endif
-#if USE_GTK2
+#if USE_GTK
     N_ ("Window system supported."),
 #endif
 #if HAVE_SOCKETS
@@ -2805,7 +2806,7 @@ extern void ResetInterrupt( void ) {
     }
 }
 
-#if USE_GTK2 && HAVE_FORK
+#if USE_GTK && HAVE_FORK
 static int fChildDied;
 
 static RETSIGTYPE HandleChild( int n ) {
@@ -2819,7 +2820,7 @@ static void ShellEscape( char *pch ) {
     pid_t pid;
     char *pchShell;
     psighandler shQuit;
-#if USE_GTK2
+#if USE_GTK
     psighandler shChild;
     
     PortableSignal( SIGCHLD, HandleChild, &shChild, TRUE );
@@ -2830,7 +2831,7 @@ static void ShellEscape( char *pch ) {
 	/* Error */
 	outputerr( "fork" );
 
-#if USE_GTK2
+#if USE_GTK
 	PortableSignalRestore( SIGCHLD, &shChild );
 #endif
 	PortableSignalRestore( SIGQUIT, &shQuit );
@@ -2851,7 +2852,7 @@ static void ShellEscape( char *pch ) {
     }
     
     /* Parent */
-#if USE_GTK2
+#if USE_GTK
  TryAgain:
 #if HAVE_SIGPROCMASK
     {
@@ -3226,7 +3227,7 @@ extern void ShowBoard( void )
 	return;
 
     if( ms.gs == GAME_NONE ) {
-#if USE_GTK2
+#if USE_GTK
 	if( fX ) {
 	    int anBoardTemp[ 2 ][ 25 ];
 	    InitBoard( anBoardTemp, ms.bgv );
@@ -3242,7 +3243,7 @@ extern void ShowBoard( void )
 	return;
     }
     
-#if USE_GTK2
+#if USE_GTK
     if( !fX ) {
 #endif
 	if( fOutputRawboard ) {
@@ -3349,7 +3350,7 @@ extern void ShowBoard( void )
 	
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
-#if USE_GTK2
+#if USE_GTK
     } else {
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
@@ -3597,7 +3598,7 @@ extern void CommandHelp( char *sz ) {
     command *pc, *pcFull;
     char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
     
-#if USE_GTK2 
+#if USE_GTK 
     if( fX ){
         GTKHelp( sz );
         return;
@@ -5590,7 +5591,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
 	     "set cube use %s\n"
-#if USE_GTK2
+#if USE_GTK
 	     "set delay %d\n"
 #endif
 	     "set display %s\n"
@@ -5605,7 +5606,7 @@ extern void CommandSaveSettings( char *szParam ) {
              fConfirm ? "on" : "off",
              fConfirmSave ? "on" : "off",
 	     fCubeUse ? "on" : "off",
-#if USE_GTK2
+#if USE_GTK
 	     nDelay,
 #endif
 	     fDisplay ? "on" : "off", fEgyptian ? "on" : "off" );
@@ -6199,7 +6200,7 @@ extern void Prompt( void ) {
     fflush( stdout );    
 }
 
-#if USE_GTK2
+#if USE_GTK
 #if HAVE_LIBREADLINE
 static void ProcessInput( char *sz, int fFree ) {
 
@@ -6555,30 +6556,12 @@ extern void outputf( const char *sz, ... ) {
 /* Write a string to stdout/status bar/popup window, vprintf style */
 extern void outputv( const char *sz, va_list val ) {
 
-#if USE_GTK || __GLIBC__
     char *szFormatted;
-#endif
-    
     if( cOutputDisabled )
 	return;
-    
-#if __GLIBC__
-    vasprintf( &szFormatted, sz, val );
-#elif USE_GTK
     szFormatted = g_strdup_vprintf( sz, val );
-#else
-    vprintf( sz, val );
-#endif
-
-#if USE_GTK || __GLIBC__
     output( szFormatted );
-#endif
-
-#if __GLIBC__
-    free( szFormatted );
-#elif USE_GTK
     g_free( szFormatted );
-#endif
 }
 
 /* Write an error message, perror() style */
@@ -6602,39 +6585,20 @@ extern void outputerrf( const char *sz, ... ) {
 /* Write an error message, vfprintf() style */
 extern void outputerrv( const char *sz, va_list val ) {
 
-#if USE_GTK || __GLIBC__
     char *pch;
     char *szFormatted;
-#endif
-        
-#if __GLIBC__
-    vasprintf( &szFormatted, sz, val );
-#elif USE_GTK
     szFormatted = g_strdup_vprintf( sz, val );
-#else
-    vfprintf( stderr, sz, val );
-#endif
-
-#if USE_GTK || __GLIBC__
     pch = Convert( szFormatted, szTerminalCharset, GNUBG_CHARSET );
     fputs( pch, stderr );
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
     free( pch );
-#endif
     putc( '\n', stderr );
-
 #if USE_GTK
     if( fX )
 	GTKOutputErr( szFormatted );
 #endif
-    
-#if __GLIBC__
-    free( szFormatted );
-#elif USE_GTK
     g_free( szFormatted );
-#endif
-    
 }
 
 /* Signifies that all output for the current command is complete */
@@ -6959,9 +6923,9 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if ( USE_GTK2 || USE_SOUND ) && defined(SIGIO)
+#if ( USE_GTK || USE_SOUND ) && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
-#if USE_GTK2
+#if USE_GTK
     /* NB: It is safe to write to fAction even if it cannot be read
        atomically, because it is only used to hold a binary value. */
     if( fX )
@@ -6989,7 +6953,7 @@ static void BearoffProgress( int i ) {
 
 static void usage( char *argv0 ) {
 
-#if USE_GTK2
+#if USE_GTK
 
     printf(
 _("Usage: %s [options] [saved-game-file]\n"
@@ -7278,7 +7242,7 @@ int main(int argc, char *argv[] ) {
 	outputon();
     }
 
-#if USE_GTK2
+#if USE_GTK
     /* The GTK interface is fairly grotty; it makes it impossible to
        separate argv handling from attempting to open the display, so
        we have to check for -t before the other options to avoid connecting
@@ -7331,7 +7295,7 @@ int main(int argc, char *argv[] ) {
 	  }
 	}
 
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 
     setlocale (LC_ALL, "");
     bindtextdomain (PACKAGE, LOCALEDIR);
@@ -7375,7 +7339,7 @@ int main(int argc, char *argv[] ) {
     szTerminalCharset = "ISO-8859-1"; /* best guess */
 #endif
 
-#if USE_GTK2
+#if USE_GTK
 
     optind = 0;
     opterr = 1;
@@ -7399,7 +7363,7 @@ int main(int argc, char *argv[] ) {
 	fReadline = isatty( STDIN_FILENO );
 #endif
     } else 
-#endif /* USE_GTK2 */
+#endif /* USE_GTK */
 	{
 #if HAVE_LIBREADLINE
 	    fReadline =
@@ -7706,7 +7670,7 @@ int main(int argc, char *argv[] ) {
 	}
     
 #ifdef SIGIO
-# if USE_GTK2
+# if USE_GTK
     if( fX )
 	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
 #  if USE_SOUND

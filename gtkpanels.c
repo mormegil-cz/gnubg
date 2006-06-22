@@ -417,13 +417,9 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 
 		gtk_window_set_title( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ),
 				  _("Annotation - GNU Backgammon") );
-#if GTK_CHECK_VERSION(2,0,0)
 	    gtk_window_set_role( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ), "annotation" );
-#if GTK_CHECK_VERSION(2,2,0)
 		gtk_window_set_type_hint( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ),
 			      GDK_WINDOW_TYPE_HINT_UTILITY );
-#endif
-#endif
 
 		setWindowGeometry(WINDOW_ANALYSIS);
 
@@ -516,13 +512,9 @@ static void CreateGameWindow( void ) {
 
 		gtk_window_set_title( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ),
 			_("Game record - GNU Backgammon") );
-#if GTK_CHECK_VERSION(2,0,0)
 		gtk_window_set_role( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ), "game record" );
-#if GTK_CHECK_VERSION(2,2,0)
 		gtk_window_set_type_hint( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ),
 			      GDK_WINDOW_TYPE_HINT_UTILITY );
-#endif
-#endif
 
 		setWindowGeometry(WINDOW_GAME);
     
@@ -733,7 +725,6 @@ extern void getWindowGeometry(gnubgwindow window)
 	if (pwo->docked || !pwo->pwWin)
 		return;
 
-#if GTK_CHECK_VERSION(2,0,0)
 
 	if (GTK_WIDGET_REALIZED(pwo->pwWin))
 	{
@@ -749,20 +740,6 @@ extern void getWindowGeometry(gnubgwindow window)
                         &pwo->wg.nWidth, &pwo->wg.nHeight );
 	}
 
-#else
-
-  if (!pwo->pwWin->window)
-    return;
-
-  gdk_window_get_position ( pwo->pwWin->window,
-                            &pwo->wg.nPosX, &pwo->wg.nPosY );
-
-  gdk_window_get_size ( pwo->pwWin->window,
-                        &pwo->wg.nWidth, &pwo->wg.nHeight );
-
-  pwo->wg.max = FALSE;
-
-#endif /* ! GTK 2.0 */
 }
 
 static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, char* windowRole)
@@ -771,12 +748,8 @@ static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, 
 	{
 		woPanel[window].pwWin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_title(GTK_WINDOW(woPanel[window].pwWin), winTitle);
-#if GTK_CHECK_VERSION(2,0,0)
 		gtk_window_set_role( GTK_WINDOW( woPanel[window].pwWin ), windowRole );
-#if GTK_CHECK_VERSION(2,2,0)
 		gtk_window_set_type_hint(GTK_WINDOW(woPanel[window].pwWin), GDK_WINDOW_TYPE_HINT_UTILITY);
-#endif
-#endif
 
 		setWindowGeometry(window);
 		gtk_container_add(GTK_CONTAINER(woPanel[window].pwWin), pWidget);
@@ -1027,7 +1000,6 @@ setWindowGeometry(gnubgwindow window)
 	if (pwo->docked || !pwo->pwWin || !fGUISetWindowPos)
 		return;
 
-#if GTK_CHECK_VERSION(2,0,0)
 
   gtk_window_set_default_size ( GTK_WINDOW ( pwo->pwWin ),
                       ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
@@ -1041,17 +1013,6 @@ setWindowGeometry(gnubgwindow window)
     gtk_window_maximize(GTK_WINDOW( pwo->pwWin ));
 
 
-#else
-
-  gtk_window_set_default_size( GTK_WINDOW( pwo->pwWin ), 
-                               ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
-                               ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
-  
-  gtk_widget_set_uposition ( pwo->pwWin, 
-                             ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
-                             ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
-
-#endif /* ! GTK 2.0 */
 
 }
 

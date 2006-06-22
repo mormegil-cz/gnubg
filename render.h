@@ -221,11 +221,8 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 extern void RenderPips( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride );
 extern void RenderImages( renderdata *prd, renderimages *pri );
-#if HAVE_LIBART
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
 			  unsigned char* puch1, int nStride );
-#endif
-
 extern void
 RenderBoardLabels( renderdata *prd, 
                    unsigned char *achLo, unsigned char *achHi, int nStride );

@@ -823,7 +823,7 @@ void DiceRolled()
 {
 	playSound ( SOUND_ROLL );
     
-#if USE_GTK2
+#if USE_GTK
 	if (fX && fDisplay)
 	{
 		BoardData *bd = BOARD(pwBoard)->board_data;
@@ -968,7 +968,7 @@ static int NewGame( void ) {
     UpdateSetting( &ms.gs );
     /* Play sound after initial dice decided */
 	DiceRolled();
-#if USE_GTK2
+#if USE_GTK
     ResetDelayTimer();
 #endif
 
@@ -1390,7 +1390,7 @@ extern int ComputerTurn( void ) {
 
 	  DiceRolled();      
 	  /* write line to status bar if using GTK */
-#if USE_GTK        
+#if USE_GTK
 	  if ( fX ) {
 
 	      outputnew ();
@@ -1796,7 +1796,7 @@ extern int NextTurn( int fPlayNext ) {
     int n;
     assert( !fComputing );
 	
-#if USE_GTK2
+#if USE_GTK
     if( fX ) {
 	if( nNextTurn ) {
 	    gtk_idle_remove( nNextTurn );
@@ -1860,7 +1860,7 @@ extern int NextTurn( int fPlayNext ) {
 		gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints);
 
 
-#if USE_GTK2
+#if USE_GTK
 	if( fX ) {
 	    if( fDisplay )
 		{
@@ -1884,7 +1884,7 @@ extern int NextTurn( int fPlayNext ) {
 		ms.anScore[ !pmgi->fWinner ] != ms.nMatchTo - 1;
 	}
 
-#if USE_GTK2
+#if USE_GTK
 	if( !fX || fDisplay )
 #endif
 	    CommandShowScore( NULL );
@@ -1898,7 +1898,7 @@ extern int NextTurn( int fPlayNext ) {
 	    outputf( _("%s has won the match.\n"), ap[ pmgi->fWinner ].szName );
 	    outputx();
 #if USE_TIMECONTROL
-#if USE_GTK2
+#if USE_GTK
             if ( nClockTimeout ) {
               /* ugly hack, jth */
               gtk_timeout_remove(nClockTimeout);
@@ -1972,7 +1972,7 @@ extern int NextTurn( int fPlayNext ) {
 	return -1;
     }
     
-#if USE_GTK2
+#if USE_GTK
     if( fX ) {
 	if( !ComputerTurn() && !nNextTurn )
 	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
@@ -1986,7 +1986,7 @@ extern int NextTurn( int fPlayNext ) {
 
 extern void TurnDone( void ) {
 
-#if USE_GTK2
+#if USE_GTK
     if( fX ) {
 	if( !nNextTurn )
 	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
@@ -3115,7 +3115,7 @@ CommandMove( char *sz ) {
                   return;
                 }
 
-#if USE_GTK        
+#if USE_GTK
 		/* There's no point delaying here. */
 		if( nTimeout ) {
 		    gtk_timeout_remove( nTimeout );
@@ -3290,14 +3290,14 @@ extern void CommandNewMatch( char *sz ) {
     
 #if USE_TIMECONTROL
     InitGameClock(&ms.gc, &tc, 2*ms.nMatchTo);
-#if USE_GTK2
+#if USE_GTK
     nClockTimeout = gtk_timeout_add(314 , (GtkFunction)UpdateClockNotify, 0 );
 #endif
 
 #endif
     outputf( _("A new %d point match has been started.\n"), n );
 
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
 #endif
@@ -3334,14 +3334,14 @@ extern void CommandNewSession( char *sz ) {
     
 #if USE_TIMECONTROL
     InitGameClock(&ms.gc, &tc, 0);
-#if USE_GTK2
+#if USE_GTK
 	nClockTimeout = gtk_timeout_add( 314 , (GtkFunction)UpdateClockNotify, 0 );
 #endif
 #endif
 
     outputl( _("A new session has been started.") );
     
-#if USE_GTK2
+#if USE_GTK
     if( fX )
 	ShowBoard();
 #endif
@@ -3357,7 +3357,7 @@ static void UpdateGame( int fShowBoard ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
 
-#if USE_GTK2
+#if USE_GTK
     if( fX || ( fShowBoard && fDisplay ) )
 	ShowBoard();
 #else
@@ -3553,7 +3553,7 @@ static int MoveIsMarked (moverecord *pmr) {
 
 static void ShowMark( moverecord *pmr ) {
 
-#if USE_GTK  
+#if USE_GTK
      BoardData *bd = NULL;
 
      if ( fX )
@@ -4157,7 +4157,7 @@ CommandRoll( char *sz ) {
   
   DiceRolled();      
 
-#if USE_GTK        
+#if USE_GTK
   if ( fX ) {
 
     outputnew ();

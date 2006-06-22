@@ -38,13 +38,6 @@
 #include "gtktoolbar.h"
 #include <glib/gi18n.h>
 
-#if GTK_CHECK_VERSION(2,0,0)
-#define USLEEP(x) g_usleep(x)
-#elif HAVE_USLEEP
-#define USLEEP(x) usleep(x)
-#else
-#define USLEEP(x)
-#endif
 
 typedef struct _gtksplash {
   GtkWidget *pwWindow;
@@ -64,14 +57,10 @@ CreateSplash () {
   pgs = (gtksplash *) g_malloc ( sizeof ( gtksplash ) );
 
   pgs->pwWindow = gtk_window_new ( GTK_WINDOW_TOPLEVEL );
-#if GTK_CHECK_VERSION(2,0,0)
   gtk_window_set_role( GTK_WINDOW( pgs->pwWindow ),
 		       "splash screen" );
-#if GTK_CHECK_VERSION(2,2,0)
   gtk_window_set_type_hint( GTK_WINDOW( pgs->pwWindow ),
 			    GDK_WINDOW_TYPE_HINT_SPLASHSCREEN );
-#endif
-#endif
   gtk_window_set_title ( GTK_WINDOW ( pgs->pwWindow ), 
                          _("Starting " VERSION_STRING ) );
   gtk_window_set_position ( GTK_WINDOW ( pgs->pwWindow ), GTK_WIN_POS_CENTER );
@@ -127,7 +116,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
   if ( ! pwSplash )
     return;
   
-  USLEEP( 1000 );
+  g_usleep ( 1000 );
 
   gtk_widget_destroy ( pwSplash );
 
@@ -153,6 +142,6 @@ PushSplash ( GtkWidget *pwSplash,
   while( gtk_events_pending() )
     gtk_main_iteration();
 
-  USLEEP( nMuSec );
+  g_usleep ( nMuSec );
 
 }

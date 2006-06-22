@@ -43,7 +43,7 @@
 #include "renderprefs.h"
 #include "boarddim.h"
 
-#if USE_GTK2
+#if USE_GTK
 #include <gtk/gtk.h>
 #include <cairo.h>
 #endif
@@ -2377,7 +2377,7 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
     }
 }
 
-#if USE_GTK2
+#if USE_GTK
 static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int up)
 {
 	cairo_surface_t* surface = cairo_image_surface_create_for_data (puch, CAIRO_FORMAT_RGB24,
@@ -2701,7 +2701,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
     }
 
     /* draw arrow for direction of play */
-#if USE_GTK2
+#if USE_GTK
     if( prd->showMoveIndicator &&
 			intersects( x, y, cx, cy,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
@@ -2776,7 +2776,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     pri->achResign = malloc ( nSize * nSize * RESIGN_WIDTH * RESIGN_HEIGHT * 4 );
     pri->achResignFaces = malloc ( nSize * nSize * RESIGN_LABEL_WIDTH * 
 				   RESIGN_LABEL_HEIGHT * 3 * 3 );
-#if USE_GTK2
+#if USE_GTK
     pri->auchArrow[0] = malloc(prd->nSize * prd->nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
     pri->auchArrow[1] = malloc(prd->nSize * prd->nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
 #else
@@ -2801,7 +2801,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     RenderResign( prd, pri->achResign, nSize * RESIGN_WIDTH * 4 );
     RenderResignFaces( prd, pri->achResignFaces, nSize * RESIGN_LABEL_WIDTH * 3,
 		       pri->achResign, nSize * RESIGN_WIDTH * 4 );
-#if USE_GTK2
+#if USE_GTK
 	if (prd->showMoveIndicator)
 		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_WIDTH * 4 );
 #endif
@@ -2829,7 +2829,7 @@ extern void FreeImages( renderimages *pri ) {
     free( pri->asRefract[ 1 ] );
     free( pri->achResign );
     free( pri->achResignFaces );
-#if USE_GTK2
+#if USE_GTK
     free( pri->auchArrow[0] );
     free( pri->auchArrow[1] );
 #endif

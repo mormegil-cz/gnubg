@@ -33,23 +33,6 @@
 #include "positionid.h"
 #include "gtkgame.h"
 
-#if !GTK_CHECK_VERSION(1,3,10)
-#define gtk_style_get_font(s) ((s)->font)
-
-static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
-{
-	return gdk_font_equal(gtk_style_get_font(psOne), gtk_style_get_font(psTwo));
-}
-
-static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
-{
-	GdkFont *pf = gtk_style_get_font(psValue);
-	psStyle->font = pf;
-	gdk_font_ref( pf );
-}
-
-#else
-
 static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
 {
 	return pango_font_description_equal(psOne->font_desc, psTwo->font_desc);
@@ -59,8 +42,6 @@ static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
 {
 	psStyle->font_desc = pango_font_description_copy(psValue->font_desc);
 }
-
-#endif
 
 GtkWidget *pwGameList;
 GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], *psLucky[LUCK_VERYGOOD + 1];

@@ -604,9 +604,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
           
           ptm->aapwDA[ i ][ j ] = gtk_drawing_area_new();
           ptm->aapwe[ i ][ j ] = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(ptm->aapwe[i][j]), FALSE);
-#endif
           
           gtk_container_add( GTK_CONTAINER( ptm->aapwe[ i ][ j ] ),
                              ptm->aapwDA[ i ][ j ] );
@@ -676,9 +674,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
       
       ptm->pwAverage = gtk_drawing_area_new();
       ptm->pweAverage = gtk_event_box_new();
-#if GTK_CHECK_VERSION(2,4,0)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(ptm->pweAverage), FALSE);
-#endif
 
       gtk_container_add( GTK_CONTAINER( ptm->pweAverage ), ptm->pwAverage );
 
