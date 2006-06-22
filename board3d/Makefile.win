@@ -7,8 +7,8 @@ TARGET = libboard3d.a
 
 MINGW=$(GNU)/mingw
 
-SOURCE=	drawboard3d misc3d texture3d font3d widget3d \
-	matrix model shadow mylist gtkcolour3d graph
+SOURCE=	drawboard3d misc3d font3d widget3d \
+	matrix model shadow gtkcolour3d graph
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 

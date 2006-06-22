@@ -22,12 +22,14 @@
 */
 
 #include "config.h"
+
 #include <gtk/gtk.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib/gi18n.h>
+
 #include "backgammon.h"
+#include <glib/gi18n.h>
 #include "gtkboard.h"
 #include "drawboard.h"
 #include "positionid.h"

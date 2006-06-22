@@ -22,21 +22,17 @@
 */
 
 #include <config.h>
-#include "glincl.h"
-#if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
 #include <gtk/gtkglwidget.h>
-#else
-#include <gtkgl/gtkglarea.h>
-#endif
+
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include "inc3d.h"
 #include "renderprefs.h"
+#include "gtkboard.h"
+#include "font3d.h"
 
-#if HAVE_GTKGLEXT
-extern GdkGLConfig *glconfig;
-#endif
+extern GdkGLConfig *getGlConfig();
 
 #define BAR_WIDTH 5
 #define MID_GAP 1
@@ -53,6 +49,8 @@ float modelWidth, modelHeight;
 BoardData fonts;
 Texture total;
 
+extern GdkGLConfig *getGlConfig();
+
 static gboolean graph_button_press_event(GtkWidget *board, GdkEventButton *event, void* arg)
 {
 	return FALSE;
@@ -62,16 +60,12 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, G
 {
 	int width, height;
 	float maxY, maxX;
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
+
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return FALSE;
-#else
-	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return FALSE;
-#endif
+
 	width = widget->allocation.width;
 	height = widget->allocation.height;
 
@@ -88,30 +82,21 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, G
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
-#endif
 
 	return TRUE;
 }
 
 static void realize(GtkWidget *widget, void* arg)
 {
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return;
-#else
-    if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return;
-#endif
 	/* Deep blue background colour */
 	glClearColor(.2f, .2f, .4f, 1);
 
-	BuildFont3d(&fonts);
+	BuildFont3d(&fonts.bd3d);
 
 	total.texID = 0;
 	LoadTexture(&total, TEXTURE_PATH"total.bmp");
@@ -196,7 +181,7 @@ void PrintBottomNumber(int num, float width, float height, float x, float y)
 	glColor3f(1, 1, 1);
 	glScalef(width, height, 1);
 	glLineWidth(.5f);
-	glPrintCube(&fonts, numStr);
+	glPrintCube(&fonts.bd3d, numStr);
 	glPopMatrix();
 }
 
@@ -210,7 +195,7 @@ void PrintSideNumber(int num, float width, float height, float x, float y)
 
 	glScalef(width, height, 1);
 	glLineWidth(.5f);
-	glPrintNumbersRA(&fonts, numStr);
+	glPrintNumbersRA(&fonts.bd3d, numStr);
 	glPopMatrix();
 }
 
@@ -303,32 +288,19 @@ void DrawGraph(GraphData *gd)
 
 static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, GraphData* gd)
 {
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return TRUE;
-#else
-
-	/* OpenGL functions can be called only if make_current returns true */
-	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return TRUE;
-#endif
 	CheckOpenglError();
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	DrawGraph(gd);
 
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_swap_buffers(gldrawable);
 
 	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
-#else
-	gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
-#endif
 
 	return TRUE;
 }
@@ -337,15 +309,12 @@ GtkWidget* StatGraph(GraphData* pgd)
 {
 	float f1, f2;
 	GtkWidget* pw;
-#if HAVE_GTKGLEXT
+
 	/* Drawing area for OpenGL */
 	pw = gtk_drawing_area_new();
 	/* Set OpenGL-capability to the widget - no list sharing */
-	gtk_widget_set_gl_capability(pw, glconfig, NULL, TRUE, GDK_GL_RGBA_TYPE);
-#else
-	pw = gtk_gl_area_new_vargs(NULL, /* no sharing of lists */
-			 GDK_GL_RGBA, GDK_GL_DOUBLEBUFFER, GDK_GL_STENCIL_SIZE, 1, GDK_GL_NONE);
-#endif
+	gtk_widget_set_gl_capability(pw, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE);
+
 	if (pw == NULL)
 	{
 		g_print("Can't create opengl drawing widget\n");

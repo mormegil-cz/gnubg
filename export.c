@@ -38,7 +38,6 @@
 #include "export.h"
 #include "eval.h"
 #include "positionid.h"
-#include "render.h"
 #include "renderprefs.h"
 #include "matchid.h"
 #include <glib/gi18n.h>
@@ -131,11 +130,7 @@ WritePNG (const char *sz, unsigned char *puch, int nStride,
   png_write_info (ppng, pinfo);
 
   {
-#if __GNUC__ || !HAVE_ALLOCA
-    png_bytep aprow[nSizeY];
-#else
-    png_bytep *aprow = (png_bytep *)alloca(nSizeY * sizeof(png_bytep));
-#endif
+    VARIABLE_ARRAY(png_bytep, aprow, nSizeY);
     for (i = 0; i < nSizeY; ++i)
       aprow[i] = puch + nStride * i;
 
@@ -152,44 +147,6 @@ WritePNG (const char *sz, unsigned char *puch, int nStride,
   return 0;
 
 }
-
-#if USE_BOARD3D
-
-#include "gtkboard.h"
-
-void GenerateImage3d(renderdata *prd, const char* szName,
-	const int nSize, const int nSizeX, const int nSizeY)
-{
-	unsigned char *puch;
-	BoardData* bd = BOARD(pwBoard)->board_data;
-	BoardData bdpw;
-	renderdata rd;
-	GdkPixmap *ppm = gdk_pixmap_new(NULL, nSizeX * nSize, nSizeY * nSize, 24);
-	void *glpixPreview;
-
-	/* Copy current settings */
-	CopyAppearance(&rd);
-	CopySettings3d(bd, &bdpw);
-	bdpw.rd = &rd;
-	rd.nSize = nSize;
-
-	if (!(puch = (unsigned char *) malloc (nSizeX * nSizeY * nSize * nSize * 3)))
-	{
-		outputerr ("malloc");
-		return;
-	}
-	/* Create preview area */
-	glpixPreview = CreatePreviewBoard3d(&bdpw, ppm);
-
-	/* Draw board */
-	RenderBoard3d(&bdpw, prd, glpixPreview, puch);
-
-	WritePNG(szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize);
-
-	gdk_pixmap_unref(ppm);
-	free(puch);
-}
-#endif
 
 static int
 GenerateImage (renderimages * pri, renderdata * prd,
@@ -339,26 +296,24 @@ CommandExportPositionPNG (char *sz)
 #if USE_BOARD3D
 	if (rd.fDisplayType == DT_3D)
 	{
-		GenerateImage3d( &rd, sz, exsExport.nPNGSize,
-				 BOARD_WIDTH, BOARD_HEIGHT );
+		GenerateImage3d( &rd, sz, exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT );
 	}
 	else
 #endif
-{
-  rd.nSize = exsExport.nPNGSize;
+	{
+		rd.nSize = exsExport.nPNGSize;
 
-  assert (rd.nSize >= 1);
+		assert (rd.nSize >= 1);
 
-  RenderImages (&rd, &ri);
+		RenderImages (&rd, &ri);
 
-  GenerateImage (&ri, &rd, ms.anBoard, sz,
-		 exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT, 0, 0,
-		 ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
-		 ms.fDoubled, ms.fCubeOwner);
+		GenerateImage (&ri, &rd, ms.anBoard, sz,
+				exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT, 0, 0,
+				ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
+				ms.fDoubled, ms.fCubeOwner);
 
-  FreeImages (&ri);
-}
-
+		FreeImages (&ri);
+	}
 }
 
 

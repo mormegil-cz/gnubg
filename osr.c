@@ -638,11 +638,7 @@ rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
   int i, n, m;
   int iGame;
   
-#if __GNUC__ || !HAVE_ALLOCA
-  int anCounts[nMaxGammonProbs];
-#else
-  int *anCounts = (int*)alloca(sizeof(int) * nMaxGammonProbs);
-#endif
+  VARIABLE_ARRAY(int, anCounts, nMaxGammonProbs)
 
   memset(anCounts, 0, sizeof(int) * nMaxGammonProbs);
 

@@ -379,7 +379,7 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 	    filename = gtk_file_chooser_get_filename ((GtkFileChooser *)  filechooser);
 
 		if (filename) {
-			char *sz = g_alloca(strlen( filename ) + strlen( szCommand ) + 4);
+			VARIABLE_ARRAY(char, sz, strlen( filename ) + strlen( szCommand ) + 4)
 			/* and actually do the requested IO */
 			sprintf( sz, "%s \"%s\"", szCommand, filename );
 			UserCommand( sz );

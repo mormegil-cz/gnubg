@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define USES_badSkill
 #include "backgammon.h"
 #include "eval.h"
 #include "format.h"

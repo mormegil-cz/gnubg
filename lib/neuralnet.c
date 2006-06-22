@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>
-#include <neuralnet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,8 +38,9 @@
 #include <cblas.h>
 #endif /* HAVE_LIBATLAS */
 
+#include "neuralnet.h"
 #include "sse.h"
-
+#include "common.h"
 
 /* e[k] = exp(k/10) / 10 */
 static float e[100] = {
@@ -638,13 +638,7 @@ static int EvaluateFromBaseBlas( neuralnet *pnn, float arInputDif[], float ar[],
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
-#if __GNUC__
-    float ar[ pnn->cHidden ];
-#elif HAVE_ALLOCA
-    float *ar = alloca( pnn->cHidden * sizeof( float ) );
-#else
-    float ar[ 1024 ];
-#endif
+    VARIABLE_ARRAY(float, ar, pnn->cHidden)
     switch( t ) {
       case NNEVAL_NONE:
       {
@@ -691,16 +685,9 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
  */
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
-#if __GNUC__
-    float ar[ pnn->cHidden ], arIDelta[ pnn->cInput ],
-	arODelta[ pnn->cOutput ];
-#elif HAVE_ALLOCA
-    float *ar = alloca( pnn->cHidden * sizeof( float ) ),
-	*arIDelta = alloca( pnn->cInput * sizeof( float ) ),
-	*arODelta = alloca( pnn->cOutput * sizeof( float ) );
-#else
-    float ar[ 1024 ], arIDelta[ 1024 ], arODelta[ 1024 ];
-#endif
+    VARIABLE_ARRAY(float, ar, pnn->cHidden)
+    VARIABLE_ARRAY(float, arIDelta, pnn->cInput)
+    VARIABLE_ARRAY(float, arODelta, pnn->cOutput)
     int i, j;
 
     Evaluate( pnn, arInput, ar, arOutput, 0 );
@@ -740,15 +727,8 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 #if 0
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
-#if __GNUC__
-    float ar[ pnn->cHidden ], ardOdSigmaI[ pnn->cHidden * pnn->cOutput ];
-#elif HAVE_ALLOCA
-    float *ar = alloca( pnn->cHidden * sizeof( float ) ),
-	*ardOdSigmaI = alloca( pnn->cHidden * pnn->cOutput * sizeof( float ) );
-#else
-    float ar[ 1024 ], *ardOdSigmaI = malloc( pnn->cHidden * pnn->cOutput *
-					sizeof( float ) );
-#endif
+    VARIABLE_ARRAY(float, ar, pnn->cHidden)
+    VARIABLE_ARRAY(float, ardOdSigmaI, pnn->cHidden * pnn->cOutput)
     int i, j, k;
     float rdOdSigmaH, *prWeight, *prdOdSigmaI, *prdOdI;
     
@@ -779,10 +759,6 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 	    prdOdI++;
 	}
     }
-    
-#if !__GNUC__ && !HAVE_ALLOCA
-    free( ardOdSigmaI );
-#endif
 
     return 0;
 }
@@ -792,16 +768,9 @@ extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 			   float arDesired[], float rAlpha ) {
     int i, j;    
     float *pr, *prWeight;
-#if __GNUC__
-    float ar[ pnn->cHidden ], arOutputError[ pnn->cOutput ],
-	arHiddenError[ pnn->cHidden ];
-#elif HAVE_ALLOCA
-    float *ar = alloca( pnn->cHidden * sizeof( float ) ),
-	*arOutputError = alloca( pnn->cOutput * sizeof( float ) ),
-	*arHiddenError = alloca( pnn->cHidden * sizeof( float ) );
-#else
-    float ar[ 1024 ], arOutputError[ 128 ], arHiddenError[ 1024 ];
-#endif
+    VARIABLE_ARRAY(float, ar, pnn->cHidden)
+    VARIABLE_ARRAY(float, arOutputError, pnn->cOutput)
+    VARIABLE_ARRAY(float, arHiddenError, pnn->cHidden)
     
     Evaluate( pnn, arInput, ar, arOutput, 0 );
 
@@ -1083,7 +1052,7 @@ int CheckSSE()
 	int result = 0;
 
 	asm (
-		// Check if cpuid is supported (can bit 21 of flags be changed)
+		/* Check if cpuid is supported (can bit 21 of flags be changed) */
 		"mov $1, %%eax\n\t"
 		"shl $21, %%eax\n\t"
 		"mov %%eax, %%edx\n\t"
@@ -1100,33 +1069,33 @@ int CheckSSE()
 		"xor %%ecx, %%eax\n\t"
 		"test %%edx, %%eax\n\t"
 		"jnz 1f\n\t"
-		// Failed (non-pentium compatible machine)
+		/* Failed (non-pentium compatible machine) */
 		"mov $-1, %%ebx\n\t"
 		"jp 4f\n\t"
 
 "1:"
-		// Check feature test is supported
+		/* Check feature test is supported */
 		"mov $0, %%eax\n\t"
 		"cpuid\n\t"
 		"cmp $1, %%eax\n\t"
 		"jge 2f\n\t"
-		// Unlucky - somehow cpuid 1 isn't supported
+		/* Unlucky - somehow cpuid 1 isn't supported */
 		"mov $-2, %%ebx\n\t"
 		"jp 4f\n\t"
 
 "2:"
-		// Check if sse is supported (bit 25 in edx from cpuid 1)
+		/* Check if sse is supported (bit 25 in edx from cpuid 1) */
 		"mov $1, %%eax\n\t"
 		"cpuid\n\t"
 		"mov $1, %%eax\n\t"
 		"shl $25, %%eax\n\t"
 		"test %%eax, %%edx\n\t"
 		"jnz 3f\n\t"
-		// Not supported
+		/* Not supported */
 		"mov $0, %%ebx\n\t"
 		"jp 4f\n\t"
 "3:"
-		// Supported
+		/* Supported */
 		"mov $1, %%ebx\n\t"
 "4:"
 
@@ -1141,10 +1110,10 @@ int CheckSSE()
 		printf("No sse cpuid check available\n");
 		break;
 	case 0:
-		// No SSE support
+		/* No SSE support */
 		break;
 	case 1:
-		// SSE support
+		/* SSE support */
 		return 1;
 	default:
 		printf("Unknown return testing for SSE\n");

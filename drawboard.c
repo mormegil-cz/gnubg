@@ -522,7 +522,7 @@ extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 
     return ( DrawBoardCls( sz, anBoard, fRoll, asz, 
                            szMatchID, nChequers ) ) ;   
-};
+}
 
 static char *FormatPoint( char *pch, int n ) {
 

@@ -31,21 +31,10 @@
 
 #include "analysis.h"
 #include "eval.h"
+#include "common.h"
 
 #if USE_TIMECONTROL && WIN32
 #include <winsock2.h>
-#endif
-
-#if !defined (__GNUC__) && !defined (__attribute__)
-#define __attribute__(X)
-#endif
-
-#ifdef HUGE_VALF
-#define ERR_VAL (-HUGE_VALF)
-#elif defined (HUGE_VAL)
-#define ERR_VAL (-HUGE_VAL)
-#else
-#define ERR_VAL (-FLT_MAX)
 #endif
 
 #if USE_GTK
@@ -58,32 +47,7 @@ extern void GTKUpdateClock(void);
 #endif
 #endif
 
-#if HAVE_SIGACTION
-typedef struct sigaction psighandler;
-#elif HAVE_SIGVEC
-typedef struct sigvec psighandler;
-#else
-typedef RETSIGTYPE (*psighandler)( int );
-#endif
-
-#ifndef MIN
-#define MIN(A,B) (((A) < (B)) ? (A) : (B))
-#endif
-#ifndef MAX
-#define MAX(A,B) (((A) > (B)) ? (A) : (B))
-#endif
-
 #define MAX_CUBE ( 1 << 12 )
-
-#ifdef WIN32
-#include <stdlib.h>
-#define BIG_PATH _MAX_PATH
-#else
-#ifdef HAVE_LIMITS_H
-#include <limits.h>
-#endif
-#define BIG_PATH PATH_MAX
-#endif
 
 /* position of windows: main window, game list, and annotation */
 

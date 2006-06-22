@@ -40,7 +40,7 @@ extern int NeuralNetDestroy( neuralnet *pnn );
 typedef enum  {
   NNEVAL_NONE,
   NNEVAL_SAVE,
-  NNEVAL_FROMBASE,
+  NNEVAL_FROMBASE
 } NNEvalType;
 
 extern int (*NeuralNetEvaluateFn)( neuralnet *pnn, float arInput[],

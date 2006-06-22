@@ -36,7 +36,6 @@
 #include <unistd.h>
 #endif
 
-#define USES_badSkill
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"

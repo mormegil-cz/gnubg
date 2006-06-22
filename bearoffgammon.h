@@ -36,10 +36,10 @@
 
 /* pack for space */
 struct GammonProbs {
-  unsigned long p1 : 16;  /* 0 - 36^2 */
-  unsigned long p2 : 16;  /* 0 - 36^3 */
-  unsigned long p3 : 24;  /* 0 - 36^4 */
-  unsigned long p0 : 8;   /*  0 - 36 */
+  unsigned int p1 : 16;  /* 0 - 36^2 */
+  unsigned int p2 : 16;  /* 0 - 36^3 */
+  unsigned int p3 : 24;  /* 0 - 36^4 */
+  unsigned int p0 : 8;   /*  0 - 36 */
 };
 
 #if defined( __cplusplus )

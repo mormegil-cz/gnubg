@@ -53,6 +53,7 @@
 #include <glib/gi18n.h>
 #include "bearoffgammon.h"
 #include "path.h"
+#include "backgammon.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -342,7 +343,7 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
   if ( ! pc ) {
 
     if ( pbc->fInMemory )
-      pc = ((char *) pbc->p)+ 40 + 2 * iPos * k;
+      pc = ((unsigned char *) pbc->p) + 40 + 2 * iPos * k;
     else {
       lseek ( pbc->h, 40 + 2 * iPos * k, SEEK_SET );
       read ( pbc->h, ac, k * 2 );
@@ -586,7 +587,7 @@ ReadHypergammon( bearoffcontext *pbc,
   const int x = 28;
 
   if ( pbc->fInMemory )
-    pc = ((char *) pbc->p)+ 40 + x * iPos;
+    pc = ((unsigned char *)pbc->p) + 40 + x * iPos;
   else {
     lseek ( pbc->h, 40 + x * iPos, SEEK_SET );
     read ( pbc->h, ac, x );
@@ -1490,7 +1491,7 @@ BearoffAlloc( void ) {
 
 static bearoffcontext *
 BearoffInitSconyers( const char *szFilename, const char *szDir,
-                     const int bo, void *p ) {
+                     const int bo, void (*p)() ) {
 
   bearoffcontext *pbc;
   int i;
@@ -1540,7 +1541,7 @@ BearoffInitSconyers( const char *szFilename, const char *szDir,
     pbc->fCubeful = TRUE; /* yup, it has cubeful equities as well */
     pbc->hsdb = HS_15x15_ON_DVDS;
     pbc->nCurrentFile = -1;
-    pbc->pfDJ = p; /* pointer to the disk jockey function */
+    pbc->pfDJ = (diskjockeyfunc *)p; /* pointer to the disk jockey function */
     pbc->szDir = szDir ? strdup( szDir ) : NULL;
     pbc->szFilename = NULL;
     pbc->ph = NULL;
@@ -1577,7 +1578,7 @@ BearoffInitSconyers( const char *szFilename, const char *szDir,
 
 extern bearoffcontext *
 BearoffInit ( const char *szFilename, const char *szDir,
-              const int bo, void *p ) {
+              const int bo, void (*p)() ) {
 
   bearoffcontext *pbc;
   char sz[ 41 ];
@@ -1889,7 +1890,6 @@ extern float
 fnd ( const float x, const float mu, const float sigma  ) {
 
    const float epsilon = 1.0e-7;
-   const float PI = 3.14159265358979323846;
 
    if ( sigma <= epsilon )
       /* dirac delta function */

@@ -50,6 +50,7 @@
 #include <unistd.h>
 #endif
 
+#include "common.h"
 #include "path.h"
 
 #if WIN32
@@ -106,16 +107,7 @@ extern int
 PathOpen( const char *szFile, const char *szDir, const int f ) {
 
     int h, idFirstError = 0;
-#if __GNUC__
-    char szPath[ strlen( PKGDATADIR ) + ( szDir ? strlen( szDir ) : 0 ) +
-	       strlen( szFile ) + 2 ];
-#elif HAVE_ALLOCA
-    char *szPath = alloca( strlen( PKGDATADIR ) +
-			   ( szDir ? strlen( szDir ) : 0 ) +
-			   strlen( szFile ) + 2 );
-#else
-    char szPath[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, szPath, strlen( PKGDATADIR ) + ( szDir ? strlen( szDir ) : 0 ) + strlen( szFile ) + 2)
     
     if( szDir ) {
 	sprintf( szPath, "%s%c%s", szDir, DIR_SEPARATOR, szFile );

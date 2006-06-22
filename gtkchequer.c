@@ -47,7 +47,7 @@
 #include "format.h"
 
 #if USE_GTK
-extern moverecord *pmrCurAnn;;
+extern moverecord *pmrCurAnn;
 int showMoveListDetail = 1;
 #endif
 

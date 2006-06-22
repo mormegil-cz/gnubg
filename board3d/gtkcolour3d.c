@@ -22,18 +22,18 @@
 */
 
 #include "config.h"
-#include "glincl.h"
 #include <string.h>
 #include "inc3d.h"
 #include <gdk/gdkkeysyms.h>
+#include "gtkboard.h"
+#include <glib/gi18n.h>
 
-#if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
-#else
-#include <gtkgl/gtkglarea.h>
-#endif
 
 #include "gtkcolour.h"
+
+extern void UpdatePreview(GtkWidget **ppw);
+static void RenderPreview(Material* pMat, unsigned char* buf);
 
 #define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( GTK_COLOUR_PICKER( \
 	pcp )->pwColourSel )
@@ -68,12 +68,6 @@ int curDetail;
 #define STRIP_HEIGHT 10
 
 unsigned char auch[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
-
-extern void InitGL(BoardData *bd);
-extern void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a);
-extern void setMaterial(Material* pMat);
-extern void UpdatePreview(GtkWidget **ppw);
-static void RenderPreview(Material* pMat, unsigned char* buf);
 
 extern GtkWidget *pwPrevBoard;
 
@@ -220,8 +214,6 @@ void SetupColourPreview()
 	glLoadIdentity();
 }
 
-#if HAVE_GTKGLEXT
-
 GdkGLConfig *getglconfigSingle();
 
 GdkGLPixmap *glpixmap;
@@ -258,39 +250,6 @@ static void RenderPreview(Material* pMat, unsigned char* buf)
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 }
-
-#else
-
-extern GdkVisual *visual;
-
-void CreatePreview()
-{
-	SetupVisual();
-}
-
-static void RenderPreview(Material* pMat, unsigned char* buf)
-{
-	GdkGLPixmap *glpixmap;
-	GdkGLContext *glPixmapContext;
-
-	glPixmapContext = gdk_gl_context_new(visual);
-	glpixmap = gdk_gl_pixmap_new(visual, xppm);
-
-	if (!gdk_gl_pixmap_make_current(glpixmap, glPixmapContext))
-		return;
-
-	SetupColourPreview();
-	SetupLight();
-
-	Draw(pMat);
-
-	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
-
-	gdk_gl_pixmap_unref(glpixmap);
-	gdk_gl_context_unref(glPixmapContext);
-}
-
-#endif
 
 void TextureChange(GtkList *list, gpointer user_data)
 {
@@ -396,8 +355,8 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 			else
 			{
 				BoardData *bd = BOARD(pwPrevBoard)->board_data;
-				ClearTextures(bd);
-				GetTextures(bd);
+				ClearTextures(&bd->bd3d);
+				GetTextures(&bd->bd3d, bd->rd);
 			}
 		}
 		gc = gdk_gc_new(pDetails->pixmap);
@@ -464,7 +423,7 @@ void setCol(GtkColourPicker* pCP, float val[4])
 	gtk_colour_picker_set_colour(pCP, dval);
 }
 
-void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
+static void UpdateColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 {
 	col3d = *pDetails->pMat;
 
@@ -595,7 +554,7 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, int texture)
 	details[curDetail].texture = texture;
 
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(SetColour3d), &details[curDetail]);
+				   GTK_SIGNAL_FUNC(UpdateColour3d), &details[curDetail]);
 
 	UpdatePreviewBar(pMat, pixmap);
 	curDetail++;

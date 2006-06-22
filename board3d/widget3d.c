@@ -2,7 +2,7 @@
 * widget3d.c
 * by Jon Kinsey, 2003
 *
-* Gtkglarea/Gtkglext widget for 3d drawing
+* GtkGLExt widget for 3d drawing
 *
 *
 * This program is free software; you can redistribute it and/or modify
@@ -22,76 +22,21 @@
 */
 
 #include <config.h>
-#include "glincl.h"
+
 #include "inc3d.h"
+#include "gtkboard.h"
 #include "shadow.h"
-#include "renderprefs.h"
-#include "backgammon.h"
 #include "gtkgame.h"
-#include "gtkprefs.h"
 
-#if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
-#else
-#include <gtkgl/gtkglarea.h>
-#endif
 
-#if HAVE_GTKGLEXT
-GdkGLConfig *glconfig;
-
-GdkGLConfig *getGlConfig()
+extern GdkGLConfig *getGlConfig()
 {
+	static GdkGLConfig *glconfig = NULL;
 	if (!glconfig)
 		glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
 
 	return glconfig;
-}
-#endif
-
-guint idleId = 0;
-idleFunc *pIdleFun;
-
-gboolean idle(BoardData* bd)
-{
-	if (pIdleFun(bd))
-		gtk_widget_queue_draw(bd->drawing_area3d);
-
-	return TRUE;
-}
-
-void StopIdle3d(BoardData* bd)
-{	/* Animation has finished (or could have been interruptted) */
-	if (bd->shakingDice)
-	{
-		bd->shakingDice = 0;
-		updateDiceOccPos(bd);
-		gtk_main_quit();
-	}
-	if (bd->moving)
-	{
-		bd->moving = 0;
-		updatePieceOccPos(bd);
-		animation_finished = TRUE;
-		gtk_main_quit();
-	}
-
-	if (idleId)
-	{
-		g_idle_remove_by_data(bd);
-		idleId = 0;
-	}
-}
-
-void setIdleFunc(BoardData* bd, idleFunc* pFun)
-{
-	if (idleId)
-	{
-		g_idle_remove_by_data(bd);
-		idleId = 0;
-	}
-	pIdleFun = pFun;
-
-	idleId = g_idle_add((GtkFunction)idle, bd);
 }
 
 void Draw(BoardData* bd)
@@ -99,7 +44,7 @@ void Draw(BoardData* bd)
 	if (bd->rd->showShadows)
 		shadowDisplay(drawBoard, bd);
 	else
-		drawBoard(bd);
+		drawBoard(bd, &bd->bd3d, bd->rd);
 }
 
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, BoardData* bd)
@@ -112,27 +57,17 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
     {
       oldWidth = width, oldHeight = height;
 	  {
-#if HAVE_GTKGLEXT
-    	/*** OpenGL BEGIN ***/
     	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
     
     	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
     		return FALSE;
-#else
-    	/* OpenGL functions can be called only if make_current returns true */
-    	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-    		return FALSE;
-#endif
   
     	glViewport(0, 0, width, height);
-    	SetupViewingVolume3d(bd);
+    	SetupViewingVolume3d(bd, &bd->bd3d, bd->rd);
     
     	RestrictiveRedraw();
 
-#if HAVE_GTKGLEXT
     	gdk_gl_drawable_gl_end(gldrawable);
-    	/*** OpenGL END ***/
-#endif
 	  }
     }
   }
@@ -141,50 +76,31 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
 
 void realize(GtkWidget *widget, BoardData* bd)
 {
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return;
-#else
-    if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return;
-#endif
 
 	InitGL(bd);
-	SetupViewingVolume3d(bd);
-	GetTextures(bd);
-	preDraw3d(bd);
+	SetupViewingVolume3d(bd, &bd->bd3d, bd->rd);
+	GetTextures(&bd->bd3d, bd->rd);
+	preDraw3d(bd, &bd->bd3d, bd->rd);
 
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
-#endif
 }
 
 void MakeCurrent3d(GtkWidget *widget)
 {
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_make_current(gtk_widget_get_gl_drawable(widget), gtk_widget_get_gl_context(widget));
-#else
-	gtk_gl_area_make_current(GTK_GL_AREA(widget));
-#endif
 }
 
 static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData* bd)
 {
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return TRUE;
-#else
-	/* OpenGL functions can be called only if make_current returns true */
-	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
-		return TRUE;
-#endif
+
 	CheckOpenglError();
 
 	if (!bd->rd->quickDraw)
@@ -193,7 +109,7 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 	{	/* Quick drawing mode */
 		if (numRestrictFrames > 0)
 		{
-			RestrictiveRender(bd);
+			RestrictiveRender(bd, &bd->bd3d, bd->rd);
 		}
 		else if (numRestrictFrames < 0)
 		{
@@ -202,14 +118,9 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 		}
 	}
 
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_swap_buffers(gldrawable);
 
 	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
-#else
-	gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
-#endif
 
 	return TRUE;
 }
@@ -217,15 +128,11 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 extern GtkWidget* CreateGLWidget(BoardData* bd)
 {
 	GtkWidget* drawing_area;
-#if HAVE_GTKGLEXT
 	/* Drawing area for OpenGL */
 	drawing_area = gtk_drawing_area_new();
 	/* Set OpenGL-capability to the widget - no list sharing */
 	gtk_widget_set_gl_capability(drawing_area, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE);
-#else
-	drawing_area = gtk_gl_area_new_vargs(NULL, /* no sharing of lists */
-			 GDK_GL_RGBA, GDK_GL_DOUBLEBUFFER, GDK_GL_DEPTH_SIZE, 1, GDK_GL_STENCIL_SIZE, 1, GDK_GL_NONE);
-#endif
+
 	if (drawing_area == NULL)
 	{
 		g_print("Can't create opengl drawing widget\n");
@@ -246,9 +153,7 @@ extern GtkWidget* CreateGLWidget(BoardData* bd)
 
 void InitGTK3d(int *argc, char ***argv)
 {
-#if HAVE_GTKGLEXT
 	gtk_gl_init(argc, argv);
-#endif
 
 	/* Call LoadTextureInfo to get texture details from textures.txt */
 	LoadTextureInfo(TRUE);
@@ -262,11 +167,7 @@ void Init3d()
 	initilized = TRUE;
 
 	/* Check for opengl support */
-#if HAVE_GTKGLEXT
 	if (!getGlConfig())
-#else
-	if (!gdk_gl_query())
-#endif
 		g_print("*** Cannot find OpenGL-capable visual ***\n");
 
 	/* Second call to LoadTextureInfo to show any error messages */
@@ -311,17 +212,10 @@ void getFormatDetails(HDC hdc, int* accl, int* dbl, int* col, int* depth, int* s
 
 static int CheckAccelerated(GtkWidget* board)
 {
-#if HAVE_GTKGLEXT
-	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(board);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(board)))
 		return 1;
-#else
-	/* OpenGL functions can be called only if make_current returns true */
-	if (!gtk_gl_area_make_current(GTK_GL_AREA(board)))
-		return 1;
-#endif
 {
 	int accl = 0, dbl, col, depth, stencil, accum;
 	HDC dc = wglGetCurrentDC();
@@ -350,10 +244,7 @@ static int CheckAccelerated(GtkWidget* board)
 			accl ? "" : "NOT ", dbl?"Double buffered":"Single buffered", col, depth, stencil, accum);
 */
 	}
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
-#endif
 
 	return accl;
 }
@@ -397,13 +288,11 @@ GdkGLContext *glPixmapContext = NULL;
 
 void SetupPreview(BoardData* bd, renderdata* prd)
 {
-	ClearTextures(bd);
-	GetTextures(bd);
-	SetupViewingVolume3d(bd);
-	preDraw3d(bd);
+	ClearTextures(&bd->bd3d);
+	GetTextures(&bd->bd3d, bd->rd);
+	SetupViewingVolume3d(bd, &bd->bd3d, bd->rd);
+	preDraw3d(bd, &bd->bd3d, bd->rd);
 }
-
-#if HAVE_GTKGLEXT
 
 GdkGLConfig *glconfigSingle = NULL;
 
@@ -425,7 +314,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 	gldrawable = GDK_GL_DRAWABLE(glpixmap);
 	glPixmapContext = gdk_gl_context_new (gldrawable, NULL, FALSE, GDK_GL_RGBA_TYPE);
 
-	InitBoard3d(bd);
+	InitBoard3d(bd, &bd->bd3d);
 
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return 0;
@@ -456,60 +345,3 @@ void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 }
-
-#else
-
-GdkVisual *visual = NULL;
-
-void SetupVisual()
-{
-	int visual_attributes[] = {GDK_GL_RGBA,
-				GDK_GL_DEPTH_SIZE, 1,
-				GDK_GL_STENCIL_SIZE, 1,
-			    GDK_GL_NONE};
-
-	if (!visual)
-	{
-		visual = gdk_gl_choose_visual(visual_attributes);
-		if (visual == NULL)
-		{
-			g_print("Can't get visual\n");
-			return;
-		}
-	}
-}
-
-void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
-{
-	SetupVisual();
-
-	InitBoard3d(bd);
-
-	return ppm;
-}
-
-void RenderBoard3d(BoardData* bd, renderdata* prd, void *ppm, unsigned char* buf)
-{
-	GLint viewport[4];
-	GdkGLPixmap *glpixmap;
-
-	glPixmapContext = gdk_gl_context_new(visual);
-	glpixmap = gdk_gl_pixmap_new(visual, (GdkPixmap*)ppm);
-
-	if (!gdk_gl_pixmap_make_current(glpixmap, glPixmapContext))
-		return;
-
-	InitGL(bd);
-
-	SetupPreview(bd, prd);
-
-	Draw(bd);
-
-	glGetIntegerv (GL_VIEWPORT, viewport);
-	glReadPixels(0, 0, viewport[2], viewport[3], GL_RGB, GL_UNSIGNED_BYTE, buf);
-
-	gdk_gl_pixmap_unref(glpixmap);
-	gdk_gl_context_unref(glPixmapContext);
-}
-
-#endif

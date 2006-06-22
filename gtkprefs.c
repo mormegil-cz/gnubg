@@ -55,10 +55,6 @@
 #define NUM_NONPREVIEW_PAGES 1
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 typedef enum _pixmapindex {
     PI_DESIGN, PI_CHEQUERS0, PI_CHEQUERS1, PI_BOARD, PI_BORDER, PI_DICE0,
     PI_DICE1, PI_CUBE, NUM_PIXMAPS
@@ -275,46 +271,48 @@ void SetTitle()
 void UpdatePreview(GtkWidget **ppw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
+	BoardData3d *bd3d = &bd->bd3d;
+	renderdata *prd = bd->rd;
 
 	if (!fUpdate)
 		return;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (prd->fDisplayType == DT_3D)
 	{	/* Sort out chequer and dice special settings */
-		if (bd->rd->ChequerMat[0].textureInfo != bd->rd->ChequerMat[1].textureInfo)
+		if (prd->ChequerMat[0].textureInfo != prd->ChequerMat[1].textureInfo)
 		{	/* Make both chequers have the same texture */
-			bd->rd->ChequerMat[1].textureInfo = bd->rd->ChequerMat[0].textureInfo;
-			bd->rd->ChequerMat[1].pTexture = bd->rd->ChequerMat[0].pTexture;
+			prd->ChequerMat[1].textureInfo = prd->ChequerMat[0].textureInfo;
+			prd->ChequerMat[1].pTexture = prd->ChequerMat[0].pTexture;
 			UpdateColPreview(pcChequer2);
 			/* Change to main area and recreate piece display lists */
-			MakeCurrent3d(bd->drawing_area3d);
-			preDraw3d(bd);
+			MakeCurrent3d(bd3d->drawing_area3d);
+			preDraw3d(bd, bd3d, prd);
 		}
-		if (bd->rd->afDieColour3d[0] &&
-			!MaterialCompare(&bd->rd->DiceMat[0], &bd->rd->ChequerMat[0]))
+		if (prd->afDieColour3d[0] &&
+			!MaterialCompare(&prd->DiceMat[0], &prd->ChequerMat[0]))
 		{
-			memcpy(&bd->rd->DiceMat[0], &bd->rd->ChequerMat[0], sizeof(Material));
-			bd->rd->DiceMat[0].textureInfo = 0;
-			bd->rd->DiceMat[0].pTexture = 0;
+			memcpy(&prd->DiceMat[0], &prd->ChequerMat[0], sizeof(Material));
+			prd->DiceMat[0].textureInfo = 0;
+			prd->DiceMat[0].pTexture = 0;
 			UpdateColPreview(pc3dDiceId[0]);
 		}
-		if (bd->rd->afDieColour3d[1] &&
-			!MaterialCompare(&bd->rd->DiceMat[1], &bd->rd->ChequerMat[1]))
+		if (prd->afDieColour3d[1] &&
+			!MaterialCompare(&prd->DiceMat[1], &prd->ChequerMat[1]))
 		{
-			memcpy(&bd->rd->DiceMat[1], &bd->rd->ChequerMat[1], sizeof(Material));
-			bd->rd->DiceMat[1].textureInfo = 0;
-			bd->rd->DiceMat[1].pTexture = 0;
+			memcpy(&prd->DiceMat[1], &prd->ChequerMat[1], sizeof(Material));
+			prd->DiceMat[1].textureInfo = 0;
+			prd->DiceMat[1].pTexture = 0;
 			UpdateColPreview(pc3dDiceId[1]);
 		}
-		gtk_widget_set_sensitive(GTK_WIDGET(dtTextureTypeFrame), (bd->rd->ChequerMat[0].textureInfo != NULL));
+		gtk_widget_set_sensitive(GTK_WIDGET(dtTextureTypeFrame), (prd->ChequerMat[0].textureInfo != NULL));
 	}
 	else
 #endif
 	{	/* Create new 2d pixmaps */
-		board_free_pixmaps( bd );
+		board_free_pixmaps(bd);
 		GetPrefs(&rdPrefs);
-		board_create_pixmaps( pwPrevBoard, bd );
+		board_create_pixmaps(pwPrevBoard, bd);
 	}
 	SetTitle();
 	gtk_widget_queue_draw(pwPrevBoard);
@@ -350,24 +348,29 @@ void option_changed(GtkWidget *widget, GtkWidget *pw)
 	if (!fUpdate)
 		return;
 
+{
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	BoardData3d *bd3d = &bd->bd3d;
+	renderdata *prd = bd->rd;
+
+	if (prd->fDisplayType == DT_3D)
 	{
-		ClearTextures(bd);
-		freeEigthPoints(&bd->boardPoints, rdPrefs.curveAccuracy);
+		ClearTextures(bd3d);
+		freeEigthPoints(&bd3d->boardPoints, rdPrefs.curveAccuracy);
 
 		GetPrefs(&rdPrefs);
-		GetTextures(bd);
+		GetTextures(bd3d, prd);
 
-		SetupViewingVolume3d(bd);
-		preDraw3d(bd);
+		SetupViewingVolume3d(bd, bd3d, prd);
+		preDraw3d(bd, bd3d, prd);
 	}
 	else
 #endif
 	{
-		board_free_pixmaps( bd );
-		board_create_pixmaps( pwPrevBoard, bd );
+		board_free_pixmaps(bd);
+		board_create_pixmaps(pwPrevBoard, bd);
 	}
+}
 	UpdatePreview(0);
 }
 
@@ -387,8 +390,8 @@ void DiceSizeChanged(GtkWidget *pw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	bd->rd->diceSize = padjDiceSize->value;
-	if (DiceTooClose(bd))
-		setDicePos(bd);
+	if (DiceTooClose(&bd->bd3d, bd->rd))
+		setDicePos(bd, &bd->bd3d);
 	option_changed(0, 0);
 }
 
@@ -1037,11 +1040,11 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 	redrawChange = FALSE;
 	rdPrefs.quickDraw = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw));
 
-	freeEigthPoints(&bd->boardPoints, bd->rd->curveAccuracy);
+	freeEigthPoints(&bd->bd3d.boardPoints, bd->rd->curveAccuracy);
 	if (rdPrefs.fDisplayType == DT_3D)
 	{
 		/* Delete old objects */
-		ClearTextures(bd);
+		ClearTextures(&bd->bd3d);
 	}
 	else
 #endif
@@ -1062,20 +1065,25 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 	*bd->rd = rdPrefs;
 
 #if USE_BOARD3D
-	DisplayCorrectBoardType(bd);
+{
+	BoardData3d *bd3d = &bd->bd3d;
+	renderdata *prd = bd->rd;
+
+	DisplayCorrectBoardType(bd, bd3d, prd);
 	SetSwitchModeMenuText();
 
-	if (bd->rd->fDisplayType == DT_3D)
+	if (prd->fDisplayType == DT_3D)
 	{
-		MakeCurrent3d(bd->drawing_area3d);
-		GetTextures(bd);
-		preDraw3d(bd);
-		SetupViewingVolume3d(bd);
-		ShowFlag3d(bd);
+		MakeCurrent3d(bd3d->drawing_area3d);
+		GetTextures(bd3d, prd);
+		preDraw3d(bd, bd3d, prd);
+		SetupViewingVolume3d(bd, bd3d, prd);
+		ShowFlag3d(bd, bd3d, prd);
 		if (bd->diceShown == DICE_ON_BOARD)
-			setDicePos(bd);	/* Make sure dice appear ok */
+			setDicePos(bd, bd3d);	/* Make sure dice appear ok */
 		RestrictiveRedraw();
 	}
+}
 #endif
 	board_create_pixmaps( mainBoard, bd );
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -1085,10 +1093,10 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 
 void WorkOut2dLight(renderdata* prd)
 {
-    prd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
-    prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
+    prd->arLight[ 2 ] = sinf( paElevation->value / 180 * PI );
+    prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * PI ) *
     	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
-    prd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
+    prd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * PI ) *
 	    sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 }
 
@@ -1162,9 +1170,9 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 		/* Make sure 3d code is initialized */
 		Init3d();
 
-		DoAcceleratedCheck(bd->drawing_area3d);
+		DoAcceleratedCheck(bd->bd3d.drawing_area3d);
 
-		updateDiceOccPos(bd);
+		updateDiceOccPos(bd, &bd->bd3d);
 	}
 	else
 	{
@@ -1176,7 +1184,7 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	gtk_widget_set_sensitive(pwTestPerformance, (rdPrefs.fDisplayType == DT_3D));
 
 #if USE_BOARD3D
-	DisplayCorrectBoardType(bd);
+	DisplayCorrectBoardType(bd, &bd->bd3d, bd->rd);
 #endif
 	/* Make sure everything is correctly sized */
 	gtk_widget_queue_resize(gtk_widget_get_toplevel(pwNotebook));
@@ -1284,7 +1292,7 @@ void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
     gtk_table_attach( GTK_TABLE( pwLightTable ), gtk_label_new( _("Light elevation") ),
 		      0, 1, 1, 2, 0, 0, 4, 2 );
 
-    rElevation = asinf( prd->arLight[ 2 ] ) * 180 / M_PI;
+    rElevation = asinf( prd->arLight[ 2 ] ) * 180 / PI;
 	{
 		float s = sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 		if (s == 0)
@@ -1295,7 +1303,7 @@ void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
 			if (ac == 0)
 				rAzimuth = 0;
 			else
-				rAzimuth = ac * 180 / M_PI;
+				rAzimuth = ac * 180 / PI;
 		}
 	}
     if( prd->arLight[ 1 ] < 0 )
@@ -1720,7 +1728,7 @@ UseDesign ( void ) {
 
 #if USE_BOARD3D
   if (rdPrefs.fDisplayType == DT_3D)
-    ClearTextures(bd);
+    ClearTextures(&bd->bd3d);
 #endif
 
   ParsePreferences(pbdeSelected, &newPrefs);
@@ -1731,7 +1739,7 @@ UseDesign ( void ) {
 	if (rdPrefs.fDisplayType == DT_3D)
 	{
 		Set3dSettings(&rdPrefs, &newPrefs);
-		GetTextures(bd);
+		GetTextures(&bd->bd3d, bd->rd);
 
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (newPrefs.lightType == LT_POSITIONAL));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (newPrefs.lightType == LT_DIRECTIONAL));
@@ -1859,13 +1867,13 @@ UseDesign ( void ) {
 
 		/* light */
 
-		rElevation = asinf( newPrefs.arLight[ 2 ] ) * 180 / M_PI;
+		rElevation = asinf( newPrefs.arLight[ 2 ] ) * 180 / PI;
 			if ( fabs ( newPrefs.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
 			rAzimuth = 0.0;
 			else
 			rAzimuth = 
 				acosf( newPrefs.arLight[ 0 ] / sqrt( 1.0 - newPrefs.arLight[ 2 ] *
-												newPrefs.arLight[ 2 ] ) ) * 180 / M_PI;
+												newPrefs.arLight[ 2 ] ) ) * 180 / PI;
 		if( newPrefs.arLight[ 1 ] < 0 )
 			rAzimuth = 360 - rAzimuth;
 
@@ -2984,7 +2992,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 			bd->turn = -1;
 #if USE_BOARD3D
 			if (rdPrefs.fDisplayType == DT_3D)
-				updateDiceOccPos(bd);
+				updateDiceOccPos(bd, &bd->bd3d);
 			else
 #endif
 				RollDice2d(bd);
@@ -2999,7 +3007,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 			bd->turn = 1;
 #if USE_BOARD3D
 			if (rdPrefs.fDisplayType == DT_3D)
-				updateDiceOccPos(bd);
+				updateDiceOccPos(bd, &bd->bd3d);
 			else
 #endif
 				RollDice2d(bd);
@@ -3087,7 +3095,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
     gtk_widget_show_all( pwDialog );
 
 #if USE_BOARD3D
-	DisplayCorrectBoardType(bd);
+	DisplayCorrectBoardType(bd, &bd->bd3d, bd->rd);
 	redrawChange = FALSE;
 	bd->rd->quickDraw = FALSE;
 #endif
@@ -3113,22 +3121,26 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard )
 	if( GTK_WIDGET_REALIZED( pwBoard ) )
 	{
 		board_create_pixmaps( pwBoard, bd );
-
+{
 #if USE_BOARD3D
-		DisplayCorrectBoardType(bd);
-		if (bd->rd->fDisplayType == DT_3D)
+		BoardData3d *bd3d = &bd->bd3d;
+		renderdata *prd = bd->rd;
+
+		DisplayCorrectBoardType(bd, bd3d, prd);
+		if (prd->fDisplayType == DT_3D)
 			updateOccPos(bd);
 		else
 			StopIdle3d(bd);
 
-		if (bd->rd->fDisplayType == DT_2D)
+		if (prd->fDisplayType == DT_2D)
 #endif
 		{
-			gtk_widget_queue_draw( bd->drawing_area );
-			gtk_widget_queue_draw( bd->dice_area );
+			gtk_widget_queue_draw(bd->drawing_area);
+			gtk_widget_queue_draw(bd->dice_area);
 		}
-		gtk_widget_queue_draw( bd->table );
-    }
+		gtk_widget_queue_draw(bd->table);
+}
+	}
 }
 
 #if USE_BOARD3D
@@ -3236,7 +3248,7 @@ typedef enum _parsestate {
   STATE_BOARD_DESIGN,
   STATE_ABOUT,
   STATE_TITLE, STATE_AUTHOR,
-  STATE_DESIGN, 
+  STATE_DESIGN
 } parsestate;
 
 typedef struct _parsecontext {

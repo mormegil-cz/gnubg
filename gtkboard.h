@@ -26,7 +26,7 @@
 #include "backgammon.h"
 
 #if USE_BOARD3D
-#include "board3d/glincl.h"
+#include "board3d/inc3d.h"
 #endif
 
 #ifdef __cplusplus
@@ -78,72 +78,6 @@ extern void board_animate( Board *board, int move[ 8 ], int player );
 #if USE_TIMECONTROL
 extern void board_set_clock(Board *board, gchar *c0, gchar *c1);
 extern void board_set_scores(Board *board, int s0, int s1);
-#endif
-
-#if USE_BOARD3D
-typedef struct _OGLFont
-{
-	int glyphs;
-	int advance;
-	int kern[10][10];
-	float scale;
-	float height;
-} OGLFont;
-
-typedef struct _DiceRotation
-{
-	float xRotStart, yRotStart;
-	float xRot, yRot;
-	float xRotFactor, yRotFactor;
-} DiceRotation;
-
-typedef enum _BoardState
-{
-	BOARD_CLOSED, BOARD_CLOSING, BOARD_OPENING, BOARD_OPEN
-} BoardState;
-
-/* Animation paths */
-#define MAX_PATHS 3
-typedef enum _PathType
-{
-	PATH_LINE, PATH_CURVE_9TO12, PATH_CURVE_12TO3, PATH_PARABOLA, PATH_PARABOLA_12TO3
-} PathType;
-
-typedef struct _Path
-{
-	float pts[MAX_PATHS + 1][3];
-	PathType pathType[MAX_PATHS];
-	int state;
-	float mileStone;
-	int numSegments;
-} Path;
-
-/* Occulsion model */
-typedef struct _OccModel
-{
-	GArray *planes;
-	GArray *edges;
-	GArray *points;
-} OccModel;
-
-typedef struct Occluder_T
-{
-	float invMat[4][4];
-	float trans[3];
-	float rot[3];
-	int rotator;
-
-	OccModel* handle;
-	int show;
-} Occluder;
-
-typedef enum _OcculderType {
-	OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE
-} OcculderType;
-#define LAST_PIECE (OCC_PIECE + 29)
-
-#define NUM_OCC (LAST_PIECE + 1)
-
 #endif
 
 /* private data */
@@ -203,73 +137,8 @@ typedef struct _BoardData {
 	int DragTargetHelp;	/* Currently showing draw targets? */
 	int iTargetHelpPoints[4];	/* Drag target position */
 
-/* extra members for 3d board */
 #if USE_BOARD3D
-	GtkWidget *drawing_area3d;	/* main 3d widget */
-
-	/* Bit of a hack - assign each possible position a set rotation */
-	int pieceRotation[28][15];
-	int movingPieceRotation;
-
-	/* Misc 3d objects */
-	Material gapColour;
-	Material logoMat;
-	Material flagMat, flagNumberMat;
-
-	/* Store how "big" the screen maps to in 3d */
-	float backGroundPos[2], backGroundSize[2];
-
-	BoardState State;	/* Open/closed board */
-	float perOpen;	/* Percentage open when opening/closing board */
-
-	int moving;	/* Is a piece moving (animating) */
-	Path piecePath;	/* Animation path for moving pieces */
-	float rotateMovingPiece;	/* Piece going home? */
-	int shakingDice;	/* Are dice being animated */
-	Path dicePaths[2];	/* Dice shaking paths */
-
-	/* Some positions of dice, moving/dragging pieces */
-	float movingPos[3];
-	float dragPos[3];
-	float dicePos[2][3];
-	float diceMovingPos[2][3];
-	DiceRotation diceRotation[2];
-
-	float flagWaved;	/* How much has flag waved */
-
-	OGLFont numberFont, cubeFont;	/* OpenGL fonts */
-
-	/* Saved viewing values (used for picking) */
-	float vertFrustrum, horFrustrum;
-	float modelMatrix[16];
-
-	/* Display list ids and quadratics */
-	GLuint diceList, DCList, pieceList;
-	GLUquadricObj *qobjTex, *qobj;
-
-	/* Define nurbs surface - for flag */
-	GLUnurbsObj *flagNurb;
-	#define S_NUMPOINTS 4
-	#define S_NUMKNOTS (S_NUMPOINTS * 2)
-	#define T_NUMPOINTS 2
-	#define T_NUMKNOTS (T_NUMPOINTS * 2)
-	/* Control points for the flag. The Z values are modified to make it wave */
-	float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3];
-
-	/* Shadow casters */
-	Occluder Occluders[NUM_OCC];
-
-	float shadow_light_position[4];
-
-	float ***boardPoints;	/* Used for rounded corners */
-
-	/* Textures */
-#define MAX_TEXTURES 10
-	Texture textureList[MAX_TEXTURES];
-	char* textureName[MAX_TEXTURES];
-	int numTextures;
-	int dotTexture;	/* Holds texture used to draw dots on dice */
-
+	BoardData3d bd3d;	/* extra members for 3d board */
 #endif
 	renderdata* rd;	/* The board colour settings */
 } BoardData;
@@ -279,56 +148,6 @@ extern void board_free_pixmaps( BoardData *bd );
 extern void board_edit( BoardData *bd );
 
 extern void InitBoardPreview(BoardData *bd);
-
-#if USE_BOARD3D
-/* Functions for 3d board */
-extern void InitGTK3d(int *argc, char ***argv);
-extern void Init3d();
-extern void InitBoard3d(BoardData *bd);
-extern void freeEigthPoints(float ****boardPoints, int accuracy);
-extern void SetupVisual();
-extern void SetupViewingVolume3d(BoardData *bd);
-extern void DisplayCorrectBoardType(BoardData* bd);
-extern void SetupLight3d(BoardData *bd, renderdata* prd);
-extern GtkWidget* CreateGLWidget(BoardData* bd);
-extern int DoAcceleratedCheck(GtkWidget* board);
-
-extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
-extern void RollDice3d(BoardData *bd);
-extern void AnimateMove3d(BoardData *bd);
-extern void ShowFlag3d(BoardData *bd);
-extern void StopIdle3d(BoardData* bd);
-extern void preDraw3d();
-extern void CloseBoard3d(BoardData* bd);
-extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
-extern int MouseMove3d(BoardData *bd, int x, int y);
-extern void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf);
-extern void Tidy3dObjects(BoardData* bd);
-extern float TestPerformance3d(BoardData* bd);
-extern void Set3dSettings(renderdata *prdnew, const renderdata *prd);
-extern void CopySettings3d(BoardData* from, BoardData* to);
-extern void MakeCurrent3d(GtkWidget *widget);
-extern void GetTextures(BoardData* bd);
-extern void ClearTextures(BoardData* bd);
-
-extern void PlaceMovingPieceRotation(BoardData* bd, int dest, int src);
-extern void SetMovingPieceRotation(BoardData* bd, int pt);
-extern void updateOccPos(BoardData* bd);
-extern void updateDiceOccPos(BoardData *bd);
-extern void updatePieceOccPos(BoardData* bd);
-extern void updateHingeOccPos(BoardData* bd);
-extern void updateFlagOccPos(BoardData* bd);
-
-extern void RestrictiveRedraw();
-extern void RestrictiveDrawPiece(int pos, int depth);
-extern void RestrictiveStartMouseMove(int pos, int depth);
-extern void RestrictiveEndMouseMove(int pos, int depth);
-extern void RestrictiveDrawDice(BoardData* bd);
-extern void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner);
-extern void RestrictiveDrawMoveIndicator(BoardData* bd);
-extern void RestrictiveDrawBoardNumbers(BoardData* bd);
-
-#endif
 
 extern int animate_player, *animate_move_list, animation_finished;
 
@@ -344,8 +163,8 @@ extern void Confirm( BoardData *bd );
 extern int update_move(BoardData *bd);
 extern gboolean place_chequer_or_revert(BoardData *bd, int dest);
 extern gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] );
-extern void setDicePos(BoardData* bd);
-extern int DiceTooClose(BoardData* bd);
+extern void setDicePos(BoardData *bd, BoardData3d *bd3d);
+extern int DiceTooClose(BoardData3d *bd3d, renderdata *prd);
 extern void InitBoardData(BoardData* bd);
 extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
 extern gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, BoardData* bd);
@@ -365,5 +184,7 @@ extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#include "board3d/fun3d.h"
 
 #endif

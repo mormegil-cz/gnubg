@@ -27,20 +27,15 @@
 #include <stdlib.h>
 #include <glib.h>
 
-#if USE_GTK
-#include <gtk/gtk.h>
-#include <gdk/gdkprivate.h>
-#endif
-
-#include "openurl.h"
+#include "backgammon.h"
 #include <glib/gi18n.h>
+#include "openurl.h"
+
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include "windows.h"
 #include "shellapi.h"
 #endif /* WIN32 */
-
-#include "backgammon.h"
 
 
 #ifndef WIN32

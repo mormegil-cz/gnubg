@@ -23,34 +23,191 @@
 #ifndef _INC3D_H_
 #define _INC3D_H_
 
-#ifdef TRUE
-#undef TRUE
-#endif
-#ifdef FALSE
-#undef FALSE
-#endif
-
 #include <stdio.h>
-#include <glib/gi18n.h>
-
-#if USE_GTK
 #include <gtk/gtk.h>
+
+#include "model.h"
+
+
+#if defined(WIN32) && (defined(__INTEL_COMPILER) || defined(_MSC_VER))
+/* MS gl.h needs windows.h to be included first */
+#include <windows.h>
 #endif
 
-#ifdef USE_MSDEV_TEST_HARNESS
-	#define USE_GLUT
-	#define USE_GLUT_FONT
+#include <GL/gl.h>
+#include <GL/glu.h>
 
-	#define gtk_main_quit() 0
-	#define gtk_main() 0
-	#define g_print(a) 0
+#if !defined(WIN32)
+/* x-windows include */
+#include <GL/glx.h>
 #endif
 
-#include "eval.h"
-#include "gtkboard.h"
-#include "drawboard.h"
-#include "boardpos.h"
-#include "analysis.h"
+typedef struct _OGLFont
+{
+	int glyphs;
+	int advance;
+	int kern[10][10];
+	float scale;
+	float height;
+} OGLFont;
+
+typedef struct _DiceRotation
+{
+	float xRotStart, yRotStart;
+	float xRot, yRot;
+	float xRotFactor, yRotFactor;
+} DiceRotation;
+
+typedef enum _BoardState
+{
+	BOARD_CLOSED, BOARD_CLOSING, BOARD_OPENING, BOARD_OPEN
+} BoardState;
+
+/* Animation paths */
+#define MAX_PATHS 3
+typedef enum _PathType
+{
+	PATH_LINE, PATH_CURVE_9TO12, PATH_CURVE_12TO3, PATH_PARABOLA, PATH_PARABOLA_12TO3
+} PathType;
+
+typedef struct _Path
+{
+	float pts[MAX_PATHS + 1][3];
+	PathType pathType[MAX_PATHS];
+	int state;
+	float mileStone;
+	int numSegments;
+} Path;
+
+typedef enum _OcculderType {
+	OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE
+} OcculderType;
+#define LAST_PIECE (OCC_PIECE + 29)
+
+#define NUM_OCC (LAST_PIECE + 1)
+
+typedef enum _displaytype {
+    DT_2D, DT_3D
+} displaytype;
+
+typedef enum _lighttype {
+    LT_POSITIONAL, LT_DIRECTIONAL
+} lighttype;
+
+typedef struct _Texture
+{
+	int texID;
+	int width;
+	int height;
+} Texture;
+
+#define FILENAME_SIZE 15
+#define NAME_SIZE 20
+
+typedef enum _TextureType
+{
+	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
+} TextureType;
+
+typedef struct _TextureInfo
+{
+	char file[FILENAME_SIZE + 1];
+	char name[NAME_SIZE + 1];
+	TextureType type;
+} TextureInfo;
+
+typedef struct _Material
+{
+	float ambientColour[4];
+	float diffuseColour[4];
+	float specularColour[4];
+	int shine;
+	int alphaBlend;
+	TextureInfo* textureInfo;
+	Texture* pTexture;
+} Material;
+
+typedef enum _PieceType
+{
+	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
+} PieceType;
+
+typedef enum _PieceTextureType
+{
+	PTT_TOP, PTT_ALL, NUM_TEXTURE_TYPES
+} PieceTextureType;
+
+extern void FindTexture(TextureInfo** textureInfo, char* file);
+extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
+extern int MaterialCompare(Material* pMat1, Material* pMat2);
+
+typedef struct _BoardData3d
+{
+	GtkWidget *drawing_area3d;	/* main 3d widget */
+
+	/* Bit of a hack - assign each possible position a set rotation */
+	int pieceRotation[28][15];
+	int movingPieceRotation;
+
+	/* Misc 3d objects */
+	Material gapColour;
+	Material logoMat;
+	Material flagMat, flagNumberMat;
+
+	/* Store how "big" the screen maps to in 3d */
+	float backGroundPos[2], backGroundSize[2];
+
+	BoardState State;	/* Open/closed board */
+	float perOpen;	/* Percentage open when opening/closing board */
+
+	int moving;	/* Is a piece moving (animating) */
+	Path piecePath;	/* Animation path for moving pieces */
+	float rotateMovingPiece;	/* Piece going home? */
+	int shakingDice;	/* Are dice being animated */
+	Path dicePaths[2];	/* Dice shaking paths */
+
+	/* Some positions of dice, moving/dragging pieces */
+	float movingPos[3];
+	float dragPos[3];
+	float dicePos[2][3];
+	float diceMovingPos[2][3];
+	DiceRotation diceRotation[2];
+
+	float flagWaved;	/* How much has flag waved */
+
+	OGLFont numberFont, cubeFont;	/* OpenGL fonts */
+
+	/* Saved viewing values (used for picking) */
+	float vertFrustrum, horFrustrum;
+	float modelMatrix[16];
+
+	/* Display list ids and quadratics */
+	GLuint diceList, DCList, pieceList;
+	GLUquadricObj *qobjTex, *qobj;
+
+	/* Define nurbs surface - for flag */
+	GLUnurbsObj *flagNurb;
+	#define S_NUMPOINTS 4
+	#define S_NUMKNOTS (S_NUMPOINTS * 2)
+	#define T_NUMPOINTS 2
+	#define T_NUMKNOTS (T_NUMPOINTS * 2)
+	/* Control points for the flag. The Z values are modified to make it wave */
+	float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3];
+
+	/* Shadow casters */
+	Occluder Occluders[NUM_OCC];
+
+	float shadow_light_position[4];
+
+	float ***boardPoints;	/* Used for rounded corners */
+
+	/* Textures */
+#define MAX_TEXTURES 10
+	Texture textureList[MAX_TEXTURES];
+	char* textureName[MAX_TEXTURES];
+	int numTextures;
+	int dotTexture;	/* Holds texture used to draw dots on dice */
+} BoardData3d;
 
 /* Define relative sizes of objects from arbitrary unit .05 */
 #define base_unit .05f
@@ -62,7 +219,6 @@
 /* Scale textures by this amount */
 #define TEXTURE_SCALE (10.0f / base_unit)
 
-#define PI 3.14159265358979323846f
 #define copyPoint(to, from) memcpy(to, from, sizeof(float[3]))
 #define SGN(x) (x / abs(x))
 
@@ -82,88 +238,5 @@ typedef struct _diceTest
 {
 	int top, bottom, side[4];
 } diceTest;
-
-/* Setup functions */
-void InitGL(BoardData *bd);
-
-/* font functions */
-void glPrintPointNumbers(BoardData* bd, const char *text);
-void glPrintCube(BoardData* bd, const char *text);
-void glPrintNumbersRA(BoardData* bd, const char *text);
-int BuildFont3d(BoardData* bd);
-int RenderString3d(OGLFont *pFont, const char* str);
-float getTextLen3d(OGLFont *pFont, const char* text);
-
-/* Drawing functions */
-void drawBoard(BoardData* bd);
-void SetupPerspVolume(BoardData* bd, int viewport[4]);
-float getBoardWidth();
-float getBoardHeight();
-void calculateBackgroundSize(BoardData *bd, int viewport[4]);
-
-typedef struct _ClipBox
-{
-	float x;
-	float y;
-	float xx;
-	float yy;
-} ClipBox;
-
-#define MAX_FRAMES 10
-extern ClipBox cb[MAX_FRAMES];
-extern int numRestrictFrames;
-
-void RestrictiveRender(BoardData *bd);
-void RestrictiveDrawFrame(float pos[3], float width, float height, float depth);
-void RestrictiveDraw(ClipBox* pCb, float pos[3], float width, float height, float depth);
-void EnlargeCurrentToBox(ClipBox* pOtherCb);
-void RestrictiveDrawFlag(BoardData* bd);
-
-extern void getPiecePos(int point, int pos, int swap, float v[3]);
-
-/* Clipping planes */
-#define zNear .1f
-#define zFar 70
-
-/* Graph functions*/
-typedef struct _GraphData
-{
-	float ***data;
-	int numGames;
-	float maxY;
-} GraphData;
-
-GtkWidget* StatGraph(GraphData* pgd);
-void SetNumGames(GraphData* pgd, int numGames);
-void AddGameData(GraphData* pgd, int game, statcontext *psc);
-void TidyGraphData(GraphData* pgd);
-
-/* Misc functions */
-void GetTexture(BoardData* bd, Material* pMat);
-void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
-void SetupSimpleMat(Material* pMat, float r, float g, float b);
-void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a);
-void setMaterial(Material* pMat);
-void SetColour(float r, float g, float b, float a);
-/* unsigned char *LoadDIBTexture(FILE* fp, int *width, int *height); */
-/* unsigned char *LoadPNGTexture(FILE *fp, int *width, int *height); */
-float randRange(float range);
-void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromPoint, int fromDepth, int toPoint, int toDepth);
-int movePath(Path* p, float d, float* pRotate, float v[3]);
-int finishedPath(Path* p);
-void updateHingeOccPos(BoardData* bd);
-void getProjectedPieceDragPos(int x, int y, float pos[3]);
-void updateMovingPieceOccPos(BoardData* bd);
-void LoadTextureInfo(int FirstPass);
-GList *GetTextureList(int type);
-int IsSet(int flags, int bit);
-float Dist2d(float a, float b);
-float ***Alloc3d(int x, int y, int z);
-void Free3d(float ***array, int x, int y);
-int LoadTexture(Texture* texture, const char* Filename);
-void CheckOpenglError();
-
-typedef int idleFunc(BoardData* bd);
-void setIdleFunc(BoardData* bd, idleFunc* pFun);
 
 #endif

@@ -188,13 +188,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
     int n;
     playerrecord pr;
     FILE *pfIn;
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
 
     *ppchOut = malloc( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 8 );
     sprintf( *ppchOut, "%s/%s%06d", szHomeDirectory, GNUBGPR, 
@@ -239,13 +233,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 
 static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
 
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
 
     if( RecordWriteItem( pfOut, pchOut, &apr[ 0 ] ) ||
 	RecordWriteItem( pfOut, pchOut, &apr[ 1 ] ) ) {
@@ -490,13 +478,7 @@ extern void CommandRecordErase( char *szPlayer ) {
 
 extern void CommandRecordEraseAll( char *szIgnore ) {
 
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
     
     if( fConfirmSave && !GetInputYN( _("Are you sure you want to erase all "
 				       "player records?") ) )
@@ -518,13 +500,7 @@ extern void CommandRecordShow( char *szPlayer ) {
     FILE *pfIn;
     int f = FALSE;
     playerrecord pr;
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
     
     sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
     if( !( pfIn = fopen( sz, "r" ) ) ) {
@@ -581,13 +557,7 @@ GetPlayerRecord( char *szPlayer ) {
 
     FILE *pfIn;
     static playerrecord pr;
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
     
     sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
     if( !( pfIn = fopen( sz, "r" ) ) ) 

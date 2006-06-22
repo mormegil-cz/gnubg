@@ -111,7 +111,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "relational.h"
 #include "credits.h"
 #include "external.h"
-#include <neuralnet.h>
+#include "neuralnet.h"
 
 #ifdef WIN32
 #if HAVE_SOCKETS
@@ -2779,7 +2779,7 @@ extern void PortableSignalRestore( int nSignal, psighandler *p ) {
 #elif HAVE_SIGVEC
     sigvec( nSignal, p, NULL );
 #else
-    signal( nSignal, (RETSIGTYPE (*)(int)) p );
+    signal( nSignal, *p );
 #endif
 }
 
@@ -4262,16 +4262,15 @@ extern void PromptForExit( void ) {
     playSound ( SOUND_EXIT );
 
 #if USE_BOARD3D
-	if (fX && bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit
-		&& bd->rd->fHinges3d)
-		CloseBoard3d(bd);
+	if (fX && bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
+		CloseBoard3d(bd, &bd->bd3d, bd->rd);
 #endif
 #if USE_GTK
     if( fX ) {
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
     }
-	SoundWait();	// Wait for sound to finish before final close
+	SoundWait();	/* Wait for sound to finish before final close */
 #endif
 
     if( fInteractive )
@@ -4282,7 +4281,7 @@ extern void PromptForExit( void ) {
 		board_free_pixmaps(bd);
 #if USE_BOARD3D
 	if (fX)
-		Tidy3dObjects(bd);
+		Tidy3dObjects(&bd->bd3d, bd->rd);
 #endif
 #endif
 
@@ -4483,8 +4482,8 @@ CommandRollout( char *sz ) {
 
 #else
       int         (*apBoard[10])[2][25];
-      float       (*apOutput[10])[2][25];
-      float       (*apStdDev[10])[2][25];
+      float       (*apOutput[10])[NUM_ROLLOUT_OUTPUTS];
+      float       (*apStdDev[10])[NUM_ROLLOUT_OUTPUTS];
       evalsetup   (*apes[10]);
       const cubeinfo    (*apci[10]);
       int         (*apCubeDecTop[10]);
@@ -5102,13 +5101,7 @@ extern void CommandCopy (char *sz)
 
 static void LoadRCFiles( void ) {
 
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + 14 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + 14 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + 14)
     FILE *pf;
 
     outputoff();
@@ -5531,7 +5524,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set analysis threshold verylucky %s\n"
 	     "set analysis threshold veryunlucky %s\n", 
 	     aszThr[0], aszThr[1], aszThr[2], aszThr[3], aszThr[4], aszThr[5], aszThr[6]);
-	    
+
     fprintf ( pf,
               "set analysis cube %s\n"
               "set analysis luck %s\n"
@@ -6097,13 +6090,7 @@ static char *PlayerCompletionBoth( const char *sz, int nState ) {
 
 static command *FindContext( command *pc, char *szOrig, int ich ) {
 
-#if __GNUC__
-    char sz[ strlen( szOrig ) + 1 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szOrig ) + 1 );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, strlen( szOrig ) + 1)
     char *pch, *pchCurrent;
     command *pcResume = NULL;
     
@@ -6271,14 +6258,7 @@ extern void UserCommand( char *szCommand ) {
 #endif
     int cch = strlen( szCommand ) + 1;
     char *pchTranslated;
-#if __GNUC__
-    char sz[ cch ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( cch );
-#else
-    char sz[ 1024 ];
-    assert( cch <= 1024 );
-#endif
+    VARIABLE_ARRAY(char, sz, cch)
     
     /* Unfortunately we need to copy the command, because it might be in
        read-only storage and HandleCommand might want to modify it. */
@@ -6538,7 +6518,9 @@ extern void outputl( const char *sz ) {
 /* Write a character to stdout/status bar/popup window */
 extern void outputc( const char ch ) {
 
-    char sz[ 2 ] = { ch, 0 };
+    char sz[2];
+	sz[0] = ch;
+	sz[1] = '\0';
     
     output( sz );
 }
@@ -6893,16 +6875,8 @@ CreateGnubgDirectory ( void ) {
 static void
 MoveGnubgpr ( void ) {
 
-#if __GNUC__
-    char szOld[ strlen( szHomeDirectory ) + 10 ];
-    char szNew[ strlen( szHomeDirectory ) + 2 + strlen ( GNUBGPR ) ];
-#elif HAVE_ALLOCA
-    char *szOld = alloca( strlen( szHomeDirectory ) + 10 );
-    char *szNew = alloca( strlen( szHomeDirectory ) + 2 + strlen ( GNUBGPR ) );
-#else
-    char szOld[ 4096 ];
-    char szNew[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, szOld, strlen( szHomeDirectory ) + 10)
+    VARIABLE_ARRAY(char, szNew, strlen (szHomeDirectory ) + 2 + strlen ( GNUBGPR ))
 
   sprintf ( szOld, "%s/.gnubgpr", szHomeDirectory );
   sprintf ( szNew, "%s/%s", szHomeDirectory, GNUBGPR );
@@ -7573,7 +7547,7 @@ int main(int argc, char *argv[] ) {
     if( fSconyers15x15DVD )
       pbc15x15_dvd = BearoffInit( NULL, szPathSconyers15x15DVD, 
                                   BO_SCONYERS_15x15 | BO_ON_DVDS, 
-                                  (void *) ChangeDisk );
+                                  (void (*)())ChangeDisk );
 
 #ifdef WIN32
 #if HAVE_SOCKETS
@@ -7615,7 +7589,7 @@ int main(int argc, char *argv[] ) {
 	strcpy( ap[ 1 ].szName, pch );
     else if( ( pch = getenv( "USER" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
-    else if( ( pch = getenv( "USERNAME" ) ) ) // it's username on Win 2000 / XP ...
+    else if( ( pch = getenv( "USERNAME" ) ) ) /* it's username on Win 2000 / XP ... */
 	strcpy( ap[ 1 ].szName, pch );
 #if HAVE_GETLOGIN
     else if( ( pch = getlogin() ) )
@@ -8537,11 +8511,7 @@ Convert ( const char *sz,
 
   while ( lIn && ! fError ) {
 
-#if WIN32
     rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
-#else
-    rc = iconv ( id, (ICONV_CONST char **) &pchIn, &lIn, &pchOut, &l );
-#endif
 
     if ( rc == (size_t)(-1) ) 
       switch ( errno ) {

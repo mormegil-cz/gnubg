@@ -23,8 +23,6 @@
 #include <config.h>
 #endif
 
-#define  USES_badSkill
-
 #if USE_BOARD3D
 #include "board3d/inc3d.h"
 #endif
@@ -2306,8 +2304,14 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	SetToolbarStyle(nToolbarStyle);
 
 #if USE_BOARD3D
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	BoardData3d *bd3d = &bd->bd3d;
+	renderdata *prd = bd->rd;
+
 	SetSwitchModeMenuText();
-	DisplayCorrectBoardType(BOARD(pwBoard)->board_data);
+	DisplayCorrectBoardType(bd, bd3d, prd);
+}
 #endif
 
 	DestroySplash ( pwSplash );
@@ -7308,7 +7312,7 @@ extern void GTKSet( void *p ) {
 #if USE_BOARD3D
 		/* If in 3d mode may need to update sizes */
 		if (bd->rd->fDisplayType == DT_3D)
-			SetupViewingVolume3d(bd);
+			SetupViewingVolume3d(bd, &bd->bd3d, bd->rd);
 		else
 #endif
 		{    
@@ -7552,7 +7556,7 @@ static void StatsNextGame( GtkWidget *pw, char *szCommand )
 }
 
 extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm,
-				void *fn )
+				void (*fn)( GtkWidget *, char *))
 {
     GdkPixmap *ppm;
     GdkBitmap *pbm;
@@ -8765,30 +8769,32 @@ static void
 SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
+	BoardData3d *bd3d = &bd->bd3d;
+	renderdata *prd = bd->rd;
 
-	if (bd->rd->fDisplayType == DT_2D)
+	if (prd->fDisplayType == DT_2D)
 	{
-		bd->rd->fDisplayType = DT_3D;
+		prd->fDisplayType = DT_3D;
 		/* Reset 3d settings */
-		MakeCurrent3d(bd->drawing_area3d);
-		preDraw3d(bd);
+		MakeCurrent3d(bd3d->drawing_area3d);
+		preDraw3d(bd, bd3d, prd);
 		updateOccPos(bd);	/* Make sure shadows are in correct place */
 		if (bd->diceShown == DICE_ON_BOARD)
-			setDicePos(bd);	/* Make sure dice appear ok */
+			setDicePos(bd, bd3d);	/* Make sure dice appear ok */
 		RestrictiveRedraw();
 	}
 	else
 	{
-		bd->rd->fDisplayType = DT_2D;
+		prd->fDisplayType = DT_2D;
 		/* Make sure 2d pixmaps are correct */
-		board_free_pixmaps( bd );
-		board_create_pixmaps( pwBoard, bd );
+		board_free_pixmaps(bd);
+		board_create_pixmaps(pwBoard, bd);
 		/* Make sure dice are visible if rolled */
 		if (bd->diceShown == DICE_ON_BOARD && bd->x_dice[0] <= 0)
 			RollDice2d(bd);
 	}
 
-	DisplayCorrectBoardType(bd);
+	DisplayCorrectBoardType(bd, bd3d, prd);
 	SetSwitchModeMenuText();
 }
 #endif
@@ -9472,9 +9478,9 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
   gtk_container_set_border_width(GTK_CONTAINER(pwn), 0);
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwn);
 
-////////////////////////////////////////////////////////
-// Start of (left hand side) of player screen...
-////////////////////////////////////////////////////////
+/*******************************************************
+** Start of (left hand side) of player screen...
+*******************************************************/
 
   pwHbox = gtk_hbox_new(FALSE, 0);
 	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwHbox, gtk_label_new(_("Players")));
@@ -9518,9 +9524,9 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 				GTK_SIGNAL_FUNC(RelationalErase), pwList);
 	gtk_box_pack_start(GTK_BOX(pwHbox2), pwErase, FALSE, FALSE, BUTTON_GAP);
 
-////////////////////////////////////////////////////////
-// Start of right hand side of player screen...
-////////////////////////////////////////////////////////
+/*******************************************************
+** Start of right hand side of player screen...
+*******************************************************/
 
 	pwPlayerFrame = gtk_frame_new("Player");
 	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame), OUTSIDE_FRAME_GAP);

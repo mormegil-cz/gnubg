@@ -1121,13 +1121,7 @@ extern int RollDice( int anDice[ 2 ], const rng rngx, void *p ) {
 extern int UserRNGOpen( void *p, char *sz ) {
 
   char *error;
-#if __GNUC__
-  char szCWD[ strlen( sz ) + 3 ];
-#elif HAVE_ALLOCA
-  char *szCWD = alloca( strlen( sz ) + 3 );
-#else
-  char szCWD[ 4096 ];
-#endif
+  VARIABLE_ARRAY(char, szCWD, strlen( sz ) + 3)
   rngcontext *rngctx = (rngcontext *) p;
 
   /* 

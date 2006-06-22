@@ -1083,13 +1083,7 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
 static void Characters( void *pv, const xmlChar *pchIn, int cch ) {
 
     GtkTexi *pw = pv;
-#if __GNUC__
-    char sz[ cch ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( cch );
-#else
-    char sz[ 4096 ];
-#endif
+    VARIABLE_ARRAY(char, sz, cch)
     char *pch;
 
 #if DEBUG_XML
@@ -1358,13 +1352,7 @@ static void GoNavTarget( GtkTexi *pw, int i ) {
     /* NB: it is not safe to pass ptic->aszNavTarget[ i ], because it is in
        storage that will be freed by gtktexi_render_node() */
     if( pw->ptic->aszNavTarget[ i ] ) {
-#if __GNUC__
-	char sz[ strlen( pw->ptic->aszNavTarget[ i ] ) + 1 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pw->ptic->aszNavTarget[ i ] ) + 1 );
-#else
-	char sz[ 4096 ];
-#endif
+	VARIABLE_ARRAY(char, sz, strlen( pw->ptic->aszNavTarget[ i ] ) + 1)
 	
 	strcpy( sz, pw->ptic->aszNavTarget[ i ] );
 	gtk_texi_render_node( pw, sz );

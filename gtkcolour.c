@@ -29,6 +29,13 @@
 #include "gtkcolour.h"
 #include <glib/gi18n.h>
 
+#if !GTK_CHECK_VERSION(1,3,10)
+#define gtk_color_selection_set_has_opacity_control(p,f) \
+    gtk_color_selection_set_opacity(p,f)
+#define gtk_color_selection_get_has_opacity_control(p) \
+    ( (p)->use_opacity )
+#endif
+
 #define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( (pcp)->pwColourSel )
 #define COLOUR_SEL( pcp ) GTK_COLOR_SELECTION( COLOUR_SEL_DIA(pcp)->colorsel )
 

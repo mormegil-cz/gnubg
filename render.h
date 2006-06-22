@@ -22,6 +22,10 @@
 #ifndef _RENDER_H_
 #define _RENDER_H_
 
+#if USE_BOARD3D
+#include "board3d/inc3d.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -31,64 +35,6 @@ typedef enum _woodtype {
     WOOD_EBONY, WOOD_FIR, WOOD_MAPLE, WOOD_OAK, WOOD_PINE, WOOD_REDWOOD,
     WOOD_WALNUT, WOOD_WILLOW, WOOD_PAINT
 } woodtype;
-
-#if USE_BOARD3D
-typedef enum _displaytype {
-    DT_2D, DT_3D
-} displaytype;
-
-typedef enum _lighttype {
-    LT_POSITIONAL, LT_DIRECTIONAL
-} lighttype;
-
-typedef struct _Texture
-{
-	int texID;
-	int width;
-	int height;
-} Texture;
-
-#define FILENAME_SIZE 15
-#define NAME_SIZE 20
-
-typedef enum _TextureType
-{
-	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
-} TextureType;
-
-typedef struct _TextureInfo
-{
-	char file[FILENAME_SIZE + 1];
-	char name[NAME_SIZE + 1];
-	TextureType type;
-} TextureInfo;
-
-typedef struct _Material
-{
-	float ambientColour[4];
-	float diffuseColour[4];
-	float specularColour[4];
-	int shine;
-	int alphaBlend;
-	TextureInfo* textureInfo;
-	Texture* pTexture;
-} Material;
-
-typedef enum _PieceType
-{
-	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
-} PieceType;
-
-typedef enum _PieceTextureType
-{
-	PTT_TOP, PTT_ALL, NUM_TEXTURE_TYPES
-} PieceTextureType;
-
-extern void FindTexture(TextureInfo** textureInfo, char* file);
-extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
-extern int MaterialCompare(Material* pMat1, Material* pMat2);
-
-#endif
 
 typedef struct _renderdata {
     woodtype wt;
@@ -221,6 +167,7 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 extern void RenderPips( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride );
 extern void RenderImages( renderdata *prd, renderimages *pri );
+#if USE_GTK
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
 			  unsigned char* puch1, int nStride );
 extern void

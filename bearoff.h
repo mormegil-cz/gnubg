@@ -99,7 +99,7 @@ enum _bearoffoptions {
 
 extern bearoffcontext *
 BearoffInit ( const char *szFilename, const char *szDir,
-              const int bo, void *p );
+              const int bo, void (*p)() );
 
 extern bearoffcontext *
 BearoffInitBuiltin ( void );

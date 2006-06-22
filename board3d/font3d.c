@@ -22,7 +22,7 @@
 */
 
 #include "config.h"
-#include "glincl.h"
+
 #include "inc3d.h"
 #include "gtkboard.h"
 #include <assert.h>
@@ -72,15 +72,15 @@ void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int 
 void PopulateMesh(Vectoriser* pVect, Mesh* pMesh);
 int MakeGlyph(FT_Outline* pOutline, int list);
 
-int BuildFont3d(BoardData* bd)
+int BuildFont3d(BoardData3d* bd3d)
 {
 	FT_Library ftLib;
 	if (FT_Init_FreeType(&ftLib))
 		return 0;
 
-	if (!CreateOGLFont(ftLib, &bd->numberFont, auchLuxiSR, cbLuxiSR, 24, FONT_SIZE))
+	if (!CreateOGLFont(ftLib, &bd3d->numberFont, auchLuxiSR, cbLuxiSR, 24, FONT_SIZE))
 		return 0;
-	if (!CreateOGLFont(ftLib, &bd->cubeFont, auchLuxiRB, cbLuxiRB, 44, CUBE_FONT_SIZE))
+	if (!CreateOGLFont(ftLib, &bd3d->cubeFont, auchLuxiRB, cbLuxiRB, 44, CUBE_FONT_SIZE))
 		return 0;
 
 	return !FT_Done_FreeType(ftLib);
@@ -431,8 +431,7 @@ void PopulateMesh(Vectoriser* pVect, Mesh* pMesh)
 	gluTessCallback( tobj, GLU_TESS_END_DATA, tcbEnd);
 	gluTessCallback( tobj, GLU_TESS_ERROR_DATA, tcbError);
 
-gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
-//gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_NONZERO);
+	gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
 
 	gluTessNormal( tobj, 0, 0, 1);
 
@@ -481,4 +480,25 @@ void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
 		free(pl->data);
 	}
 	g_list_free(combineList);
+}
+
+extern void glPrintPointNumbers(BoardData3d* bd3d, const char *text)
+{
+	/* Align horizontally */
+	glTranslatef(-getTextLen3d(&bd3d->numberFont, text) / 2.0f, 0, 0);
+	RenderString3d(&bd3d->numberFont, text);
+}
+
+extern void glPrintCube(BoardData3d* bd3d, const char *text)
+{
+	/* Align horizontally and vertically */
+	glTranslatef(-getTextLen3d(&bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont.height / 2.0f, 0);
+	RenderString3d(&bd3d->cubeFont, text);
+}
+
+extern void glPrintNumbersRA(BoardData3d* bd3d, const char *text)
+{
+	/* Right align */
+	glTranslatef(-getTextLen3d(&bd3d->numberFont, text), 0, 0);
+	RenderString3d(&bd3d->numberFont, text);
 }

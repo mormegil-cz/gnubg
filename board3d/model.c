@@ -26,7 +26,6 @@
 #include <assert.h>
 #include <math.h>
 #include "matrix.h"
-#include "glincl.h"
 #include "inc3d.h"
 #include "shadow.h"
 
@@ -76,6 +75,18 @@ void copyOccluder(Occluder* fromOcc, Occluder* toOcc)
 	toOcc->handle = fromOcc->handle;
 	toOcc->show = fromOcc->show;
 	toOcc->rotator = fromOcc->rotator;
+}
+
+void moveToOcc(Occluder* pOcc)
+{
+	glTranslatef(pOcc->trans[0], pOcc->trans[1], pOcc->trans[2]);
+
+	if (pOcc->rotator)
+	{
+		glRotatef(pOcc->rot[0], 0, 1, 0);
+		glRotatef(pOcc->rot[1], 1, 0, 0);
+		glRotatef(pOcc->rot[2], 0, 0, 1);
+	}
 }
 
 int AddPos(OccModel* pMod, float a, float b, float c)

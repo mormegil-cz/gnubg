@@ -31,27 +31,78 @@
 #else
 #include <io.h>
 #endif
-#include "glincl.h"
 #include "inc3d.h"
 #include "shadow.h"
 #include "renderprefs.h"
 #include "sound.h"
 #include "backgammon.h"
 #include "path.h"
+#include "export.h"
+#include <glib/gi18n.h>
+#include "drawboard.h"
+#include "font3d.h"
 
 int stopNextTime;
 int slide_move;
 double animStartTime = 0;
 
-void CreateDotTexture(BoardData *bd);
+void CreateDotTexture(int *pDotTexture);
 
 extern double get_time();
 extern int convert_point( int i, int player );
-extern void setupFlag(BoardData* bd);
-extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
+extern void setupFlag(BoardData3d *bd3d);
+extern void setupDicePaths(BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);
 extern void waveFlag(BoardData* bd, float wag);
 extern float getDiceSize(BoardData* bd);
-static void SetTexture(BoardData* bd, Material* pMat, const char* filename);
+static void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename);
+
+typedef int idleFunc(BoardData* bd);
+guint idleId = 0;
+idleFunc *pIdleFun;
+
+static gboolean idle(BoardData* bd)
+{
+	if (pIdleFun(bd))
+		gtk_widget_queue_draw(bd->bd3d.drawing_area3d);
+
+	return TRUE;
+}
+
+void StopIdle3d(BoardData* bd)
+{	/* Animation has finished (or could have been interruptted) */
+	BoardData3d *bd3d = &bd->bd3d;
+	if (bd3d->shakingDice)
+	{
+		bd3d->shakingDice = 0;
+		updateDiceOccPos(bd, bd3d);
+		gtk_main_quit();
+	}
+	if (bd3d->moving)
+	{
+		bd3d->moving = 0;
+		updatePieceOccPos(bd, bd3d);
+		animation_finished = TRUE;
+		gtk_main_quit();
+	}
+
+	if (idleId)
+	{
+		g_source_remove(idleId);
+		idleId = 0;
+	}
+}
+
+void setIdleFunc(BoardData* bd, idleFunc* pFun)
+{
+	if (idleId)
+	{
+		g_source_remove(idleId);
+		idleId = 0;
+	}
+	pIdleFun = pFun;
+
+	idleId = g_idle_add((GtkFunction)idle, bd);
+}
 
 /* Test function to show normal direction */
 void CheckNormal()
@@ -84,7 +135,7 @@ void CheckOpenglError()
 		g_print("OpenGL Error: %s\n", gluErrorString(glErr));
 }
 
-void SetupLight3d(BoardData *bd, renderdata* prd)
+void SetupLight3d(BoardData3d *bd3d, renderdata* prd)
 {
 	float lp[4];
 	float al[4], dl[4], sl[4];
@@ -113,7 +164,7 @@ void SetupLight3d(BoardData *bd, renderdata* prd)
 	glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
 
 	/* Shadow light position */
-	memcpy(bd->shadow_light_position, lp, sizeof(float[4]));
+	memcpy(bd3d->shadow_light_position, lp, sizeof(float[4]));
 }
 
 #if !GL_VERSION_1_2
@@ -190,19 +241,20 @@ void InitGL(BoardData *bd)
 
 	if (bd)
 	{
+		BoardData3d *bd3d = &bd->bd3d;
 		/* Setup some 3d things */
-		if (!BuildFont3d(bd))
+		if (!BuildFont3d(bd3d))
 			g_print("Error creating fonts\n");
 
-		setupFlag(bd);
-		shadowInit(bd);
+		setupFlag(bd3d);
+		shadowInit(bd3d, bd->rd);
 #if GL_VERSION_1_2
 		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 #else
 		if (extensionSupported("GL_EXT_separate_specular_color"))
 			glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
-		CreateDotTexture(bd);
+		CreateDotTexture(&bd3d->dotTexture);
 	}
 }
 
@@ -507,36 +559,36 @@ int LoadTexture(Texture* texture, const char* filename)
 	return 1;
 }
 
-void GetTexture(BoardData* bd, Material* pMat)
+void GetTexture(BoardData3d* bd3d, Material* pMat)
 {
 	if (pMat->textureInfo)
 	{
 		char buf[100];
 		strcpy(buf, TEXTURE_PATH);
 		strcat(buf, pMat->textureInfo->file);
-		SetTexture(bd, pMat, buf);
+		SetTexture(bd3d, pMat, buf);
 	}
 	else
 		pMat->pTexture = 0;
 }
 
-void GetTextures(BoardData* bd)
+void GetTextures(BoardData3d* bd3d, renderdata *prd)
 {
-	GetTexture(bd, &bd->rd->ChequerMat[0]);
-	GetTexture(bd, &bd->rd->ChequerMat[1]);
-	GetTexture(bd, &bd->rd->BaseMat);
-	GetTexture(bd, &bd->rd->PointMat[0]);
-	GetTexture(bd, &bd->rd->PointMat[1]);
-	GetTexture(bd, &bd->rd->BoxMat);
-	GetTexture(bd, &bd->rd->HingeMat);
-	GetTexture(bd, &bd->rd->BackGroundMat);
+	GetTexture(bd3d, &prd->ChequerMat[0]);
+	GetTexture(bd3d, &prd->ChequerMat[1]);
+	GetTexture(bd3d, &prd->BaseMat);
+	GetTexture(bd3d, &prd->PointMat[0]);
+	GetTexture(bd3d, &prd->PointMat[1]);
+	GetTexture(bd3d, &prd->BoxMat);
+	GetTexture(bd3d, &prd->HingeMat);
+	GetTexture(bd3d, &prd->BackGroundMat);
 }
 
 #define DOT_SIZE 32
 #define MAX_DIST ((DOT_SIZE / 2) * (DOT_SIZE / 2))
 #define MIN_DIST ((DOT_SIZE / 2) * .70f * (DOT_SIZE / 2) * .70f)
 
-void CreateDotTexture(BoardData *bd)
+void CreateDotTexture(int *pDotTexture)
 {
 	int i, j;
 	unsigned char* data = malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
@@ -561,7 +613,7 @@ void CreateDotTexture(BoardData *bd)
 			pData += 3;
 		}
 	}
-	CreateTexture(&bd->dotTexture, DOT_SIZE, DOT_SIZE, data);
+	CreateTexture(pDotTexture, DOT_SIZE, DOT_SIZE, data);
 	free(data);
 }
 
@@ -603,10 +655,10 @@ void Set3dSettings(renderdata *prdnew, const renderdata *prd)
 }
 
 void CopySettings3d(BoardData* from, BoardData* to)
-{	/* Just copy the whole thing */
+{	/* Just copy the whole thing (for now?) */
 	memcpy(to, from, sizeof(BoardData));
-	/* Shallow copy, so reset allocated points */
-	to->boardPoints = 0;
+	/* Shallow copy, so reset allocated data */
+	to->bd3d.boardPoints = 0;
 }
 
 /* Return v position, d distance along path segment */
@@ -1490,22 +1542,22 @@ void freeEigthPoints(float ****boardPoints, int accuracy)
 	*boardPoints = 0;
 }
 
-void SetColour(float r, float g, float b, float a)
+void SetColour3d(float r, float g, float b, float a)
 {
 	Material col;
 	SetupSimpleMatAlpha(&col, r, g, b, a);
 	setMaterial(&col);
 }
 
-void SetMovingPieceRotation(BoardData* bd, int pt)
+void SetMovingPieceRotation(BoardData *bd, BoardData3d *bd3d, int pt)
 {	/* Make sure piece is rotated correctly while dragging */
-	bd->movingPieceRotation = bd->pieceRotation[pt][abs(bd->points[pt])];
+	bd3d->movingPieceRotation = bd3d->pieceRotation[pt][abs(bd->points[pt])];
 }
 
-void PlaceMovingPieceRotation(BoardData* bd, int dest, int src)
+void PlaceMovingPieceRotation(BoardData *bd, BoardData3d *bd3d, int dest, int src)
 {	/* Make sure rotation is correct in new position */
-	bd->pieceRotation[src][abs(bd->points[src])] = bd->pieceRotation[dest][abs(bd->points[dest] - 1)];
-	bd->pieceRotation[dest][abs(bd->points[dest]) - 1] = bd->movingPieceRotation;
+	bd3d->pieceRotation[src][abs(bd->points[src])] = bd3d->pieceRotation[dest][abs(bd->points[dest] - 1)];
+	bd3d->pieceRotation[dest][abs(bd->points[dest]) - 1] = bd3d->movingPieceRotation;
 }
 
 void getProjectedCoord(float pos[3], float* x, float* y)
@@ -1654,7 +1706,7 @@ void RestrictiveDrawFrame(float pos[3], float width, float height, float depth)
 	}
 }
 
-void RestrictiveRender(BoardData *bd)
+void RestrictiveRender(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 {
 	GLint viewport[4];
 	glGetIntegerv (GL_VIEWPORT, viewport);
@@ -1672,16 +1724,16 @@ void RestrictiveRender(BoardData *bd)
 			BoxWidth(&cb[numRestrictFrames]), BoxHeight(&cb[numRestrictFrames]), viewport);
 
 		/* Setup projection matrix - using saved values */
-		if (bd->rd->planView)
-			glOrtho(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, 0, 5);
+		if (prd->planView)
+			glOrtho(-bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, 0, 5);
 		else
-			glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
+			glFrustum(-bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, zNear, zFar);
 
 		glMatrixMode(GL_MODELVIEW);
 		glViewport((int)(cb[numRestrictFrames].x), (int)(cb[numRestrictFrames].y),
 				   (int)BoxWidth(&cb[numRestrictFrames]), (int)BoxHeight(&cb[numRestrictFrames]));
 
-		drawBoard(bd);
+		drawBoard(bd, bd3d, prd);
 
 		if (!freezeRestrict)
 			numRestrictFrames--;
@@ -1703,19 +1755,19 @@ void RestrictiveRender(BoardData *bd)
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
-int MouseMove3d(BoardData *bd, int x, int y)
+int MouseMove3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd, int x, int y)
 {
 	if (bd->drag_point >= 0)
 	{
-		getProjectedPieceDragPos(x, y, bd->dragPos);
-		updateMovingPieceOccPos(bd);
+		getProjectedPieceDragPos(x, y, bd3d->dragPos);
+		updateMovingPieceOccPos(bd, bd3d);
 
-		if(bd->rd->quickDraw && numRestrictFrames != -1)
+		if(prd->quickDraw && numRestrictFrames != -1)
 		{
 			if (!freezeRestrict)
 				CopyBox(&eraseCb, &lastCb);
 
-			RestrictiveDraw(&cb[numRestrictFrames], bd->dragPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			RestrictiveDraw(&cb[numRestrictFrames], bd3d->dragPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 			freezeRestrict++;
 
 			CopyBox(&lastCb, &cb[numRestrictFrames]);
@@ -1777,7 +1829,7 @@ void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
 	}
 }
 
-void SetupMove(BoardData* bd)
+void SetupMove(BoardData* bd, BoardData3d *bd3d)
 {
 	int destDepth;
     int target = convert_point( animate_move_list[slide_move], animate_player);
@@ -1792,12 +1844,12 @@ void SetupMove(BoardData* bd)
 	if ((abs(bd->points[dest]) == 1) && (dir != SGN(bd->points[dest])))
 		destDepth--;
 
-	setupPath(bd, &bd->piecePath, &bd->rotateMovingPiece, fClockwise, target, abs(bd->points[target]) + 1, dest, destDepth);
-	copyPoint(bd->movingPos, bd->piecePath.pts[0]);
+	setupPath(bd, &bd3d->piecePath, &bd3d->rotateMovingPiece, fClockwise, target, abs(bd->points[target]) + 1, dest, destDepth);
+	copyPoint(bd3d->movingPos, bd3d->piecePath.pts[0]);
 
-	SetMovingPieceRotation(bd, target);
+	SetMovingPieceRotation(bd, bd3d, target);
 
-	updatePieceOccPos(bd);
+	updatePieceOccPos(bd, bd3d);
 }
 
 int firstFrame;
@@ -1807,6 +1859,8 @@ int idleAnimate(BoardData* bd)
 	float elapsedTime = (float)((get_time() - animStartTime) / 1000.0f);
 	float vel = .2f + nGUIAnimSpeed * .3f;
 	float animateDistance = elapsedTime * vel;
+	BoardData3d *bd3d = &bd->bd3d;
+	renderdata *prd = bd->rd;
 
 	if (stopNextTime)
 	{	/* Stop now - last animation frame has been drawn */
@@ -1815,17 +1869,17 @@ int idleAnimate(BoardData* bd)
 		return 1;
 	}
 
-	if (bd->moving)
+	if (bd3d->moving)
 	{
 		float old_pos[3];
 		ClipBox temp;
 		float *pRotate = 0;
-		if (bd->rotateMovingPiece != -1 && bd->piecePath.state == 2)
-			pRotate = &bd->rotateMovingPiece;
+		if (bd3d->rotateMovingPiece != -1 && bd3d->piecePath.state == 2)
+			pRotate = &bd3d->rotateMovingPiece;
 
-		copyPoint(old_pos, bd->movingPos);
+		copyPoint(old_pos, bd3d->movingPos);
 
-		if (!movePath(&bd->piecePath, animateDistance, pRotate, bd->movingPos))
+		if (!movePath(&bd3d->piecePath, animateDistance, pRotate, bd3d->movingPos))
 		{
 			int points[2][25];
 		    int moveStart = convert_point(animate_move_list[slide_move], animate_player);
@@ -1841,7 +1895,7 @@ int idleAnimate(BoardData* bd)
 				bd->points[bar] -= bd->turn;
 				bd->points[moveDest] = 0;
 
-				if (bd->rd->quickDraw)
+				if (prd->quickDraw)
 					RestrictiveDrawPiece(bar, abs(bd->points[bar]));
 			}
 
@@ -1851,9 +1905,9 @@ int idleAnimate(BoardData* bd)
 			read_board(bd, points);
 			update_pipcount(bd, points);
 
-			PlaceMovingPieceRotation(bd, moveDest, moveStart);
+			PlaceMovingPieceRotation(bd, bd3d, moveDest, moveStart);
 
-			if (bd->rd->quickDraw && numRestrictFrames != -1)
+			if (prd->quickDraw && numRestrictFrames != -1)
 			{
 				float new_pos[3];
 				getPiecePos(moveDest, abs(bd->points[moveDest]), fClockwise, new_pos);
@@ -1871,42 +1925,42 @@ int idleAnimate(BoardData* bd)
 
 			if (slide_move >= 8 || animate_move_list[ slide_move ] < 0)
 			{	/* All done */
-				bd->moving = 0;
-				updatePieceOccPos(bd);
+				bd3d->moving = 0;
+				updatePieceOccPos(bd, bd3d);
 				animation_finished = TRUE;
 				stopNextTime = 1;
 			}
 			else
-				SetupMove(bd);
+				SetupMove(bd, bd3d);
 
 			playSound( SOUND_CHEQUER );
 		}
 		else
 		{
-			updateMovingPieceOccPos(bd);
-			if (bd->rd->quickDraw && numRestrictFrames != -1)
-				RestrictiveDraw(&temp, bd->movingPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			updateMovingPieceOccPos(bd, bd3d);
+			if (prd->quickDraw && numRestrictFrames != -1)
+				RestrictiveDraw(&temp, bd3d->movingPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 		}
-		if (bd->rd->quickDraw && numRestrictFrames != -1)
+		if (prd->quickDraw && numRestrictFrames != -1)
 		{
 			RestrictiveDrawFrame(old_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 			EnlargeCurrentToBox(&temp);
 		}
 	}
 
-	if (bd->shakingDice)
+	if (bd3d->shakingDice)
 	{
-		if (!finishedPath(&bd->dicePaths[0]))
-			updateDicePos(&bd->dicePaths[0], &bd->diceRotation[0], animateDistance / 2.0f, bd->diceMovingPos[0]);
-		if (!finishedPath(&bd->dicePaths[1]))
-			updateDicePos(&bd->dicePaths[1], &bd->diceRotation[1], animateDistance / 2.0f, bd->diceMovingPos[1]);
+		if (!finishedPath(&bd3d->dicePaths[0]))
+			updateDicePos(&bd3d->dicePaths[0], &bd3d->diceRotation[0], animateDistance / 2.0f, bd3d->diceMovingPos[0]);
+		if (!finishedPath(&bd3d->dicePaths[1]))
+			updateDicePos(&bd3d->dicePaths[1], &bd3d->diceRotation[1], animateDistance / 2.0f, bd3d->diceMovingPos[1]);
 
-		if (finishedPath(&bd->dicePaths[0]) && finishedPath(&bd->dicePaths[1]))
+		if (finishedPath(&bd3d->dicePaths[0]) && finishedPath(&bd3d->dicePaths[1]))
 		{
-			bd->shakingDice = 0;
+			bd3d->shakingDice = 0;
 			stopNextTime = 1;
 		}
-		updateDiceOccPos(bd);
+		updateDiceOccPos(bd, bd3d);
 
 		if (bd->rd->quickDraw && numRestrictFrames != -1)
 		{
@@ -1915,11 +1969,11 @@ int idleAnimate(BoardData* bd)
 			ClipBox temp;
 
 			overSize = getDiceSize(bd) * 1.5f;
-			copyPoint(pos, bd->diceMovingPos[0]);
+			copyPoint(pos, bd3d->diceMovingPos[0]);
 			pos[2] -= getDiceSize(bd) / 2.0f;
 			RestrictiveDrawFrame(pos, overSize, overSize, overSize);
 
-			copyPoint(pos, bd->diceMovingPos[1]);
+			copyPoint(pos, bd3d->diceMovingPos[1]);
 			pos[2] -= getDiceSize(bd) / 2.0f;
 			RestrictiveDraw(&temp, pos, overSize, overSize, overSize);
 			EnlargeCurrentToBox(&temp);
@@ -1939,23 +1993,23 @@ int idleAnimate(BoardData* bd)
 	return 1;
 }
 
-void RollDice3d(BoardData *bd)
+void RollDice3d(BoardData *bd, BoardData3d* bd3d, renderdata *prd)
 {	/* animate the dice roll if not below board */
-	setDicePos(bd);
+	setDicePos(bd, bd3d);
 	SuspendInput();
 
-	if (bd->rd->animateRoll)
+	if (prd->animateRoll)
 	{
 		animStartTime = get_time();
 
-		bd->shakingDice = 1;
+		bd3d->shakingDice = 1;
 		stopNextTime = 0;
 		setIdleFunc(bd, idleAnimate);
 
-		setupDicePaths(bd, bd->dicePaths);
+		setupDicePaths(bd, bd3d->dicePaths, bd3d->diceMovingPos, bd3d->diceRotation);
 		/* Make sure shadows are in correct place */
 		updateOccPos(bd);
-		if (bd->rd->quickDraw)
+		if (prd->quickDraw)
 		{	/* Mark this as the first frame (or -1 to indicate full draw in progress) */
 			if (numRestrictFrames == -1)
 				firstFrame = -1;
@@ -1967,20 +2021,20 @@ void RollDice3d(BoardData *bd)
 	else
 	{
 		/* Show dice on board */
-		gtk_widget_queue_draw(bd->drawing_area3d);
+		gtk_widget_queue_draw(bd3d->drawing_area3d);
 		while(gtk_events_pending())
 			gtk_main_iteration();	
 	}
 	ResumeInput();
 }
 
-void AnimateMove3d(BoardData *bd)
+void AnimateMove3d(BoardData *bd, BoardData3d *bd3d)
 {
 	SuspendInput();
 	slide_move = 0;
-	bd->moving = 1;
+	bd3d->moving = 1;
 
-	SetupMove(bd);
+	SetupMove(bd, bd3d);
 
 	stopNextTime = 0;
 	setIdleFunc(bd, idleAnimate);
@@ -1990,18 +2044,19 @@ void AnimateMove3d(BoardData *bd)
 
 int idleWaveFlag(BoardData* bd)
 {
+	BoardData3d *bd3d = &bd->bd3d;
 	float elapsedTime = (float)(get_time() - animStartTime);
-	bd->flagWaved = elapsedTime / 200;
-	updateFlagOccPos(bd);
+	bd3d->flagWaved = elapsedTime / 200;
+	updateFlagOccPos(bd, bd3d);
 	RestrictiveDrawFlag(bd);
 	return 1;
 }
 
-void ShowFlag3d(BoardData *bd)
+void ShowFlag3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 {
-	bd->flagWaved = 0;
+	bd3d->flagWaved = 0;
 
-	if (bd->rd->animateFlag && bd->resigned && ms.gs == GAME_PLAYING && bd->playing &&
+	if (prd->animateFlag && bd->resigned && ms.gs == GAME_PLAYING && bd->playing &&
 		(ap[bd->turn == 1 ? 0 : 1].pt == PLAYER_HUMAN))		/* not for computer turn */
 	{
 		animStartTime = get_time();
@@ -2011,15 +2066,16 @@ void ShowFlag3d(BoardData *bd)
 		StopIdle3d(bd);
 
 	waveFlag(bd, 0);
-	updateFlagOccPos(bd);
+	updateFlagOccPos(bd, bd3d);
 
 	RestrictiveDrawFlag(bd);
 }
 
 int idleCloseBoard(BoardData* bd)
 {
+	BoardData3d *bd3d = &bd->bd3d;
 	float elapsedTime = (float)(get_time() - animStartTime);
-	if (bd->State == BOARD_CLOSED)
+	if (bd3d->State == BOARD_CLOSED)
 	{	/* finished */
 		StopIdle3d(bd);
 		gtk_main_quit();
@@ -2027,11 +2083,11 @@ int idleCloseBoard(BoardData* bd)
 		return 1;
 	}
 
-	bd->perOpen = (elapsedTime / 3000);
-	if (bd->perOpen >= 1)
+	bd3d->perOpen = (elapsedTime / 3000);
+	if (bd3d->perOpen >= 1)
 	{
-		bd->perOpen = 1;
-		bd->State = BOARD_CLOSED;
+		bd3d->perOpen = 1;
+		bd3d->State = BOARD_CLOSED;
 	}
 
 	return 1;
@@ -2072,13 +2128,13 @@ void EmptyPos(BoardData *bd)
 {	/* All checkers home */
 	int ip[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,-15};
 	memcpy(bd->points, ip, sizeof(bd->points));
-	updatePieceOccPos(bd);
+	updatePieceOccPos(bd, &bd->bd3d);
 }
 
-void CloseBoard3d(BoardData* bd)
+void CloseBoard3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 {
 	EmptyPos(bd);
-	bd->State = BOARD_CLOSED;
+	bd3d->State = BOARD_CLOSED;
 	/* Turn off most things so they don't interfere when board closed/opening */
 	bd->cube_use = 0;
 	bd->colour = 0;
@@ -2086,20 +2142,20 @@ void CloseBoard3d(BoardData* bd)
 	bd->resigned = 0;
 	fClockwise = 0;
 
-	bd->rd->showShadows = 0;
-	bd->rd->showMoveIndicator = 0;
-	bd->rd->fLabels = 0;
+	prd->showShadows = 0;
+	prd->showMoveIndicator = 0;
+	prd->fLabels = 0;
 	bd->diceShown = DICE_NOT_SHOWN;
-	bd->State = BOARD_CLOSING;
+	bd3d->State = BOARD_CLOSING;
 
 	/* Random logo */
 	if (rand() % 2)
-		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp");
+		SetTexture(bd3d, &bd3d->logoMat, TEXTURE_PATH"logo.bmp");
 	else
-		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo2.bmp");
+		SetTexture(bd3d, &bd3d->logoMat, TEXTURE_PATH"logo2.bmp");
 
 	animStartTime = get_time();
-	bd->perOpen = 0;
+	bd3d->perOpen = 0;
 	setIdleFunc(bd, idleCloseBoard);
 	/* Push matrix as idleCloseBoard assumes last matrix is on stack */
 	glPushMatrix();
@@ -2107,21 +2163,21 @@ void CloseBoard3d(BoardData* bd)
 	gtk_main();
 }
 
-void SetupViewingVolume3d(BoardData *bd)
+void SetupViewingVolume3d(BoardData *bd, BoardData3d* bd3d, renderdata *prd)
 {
 	GLint viewport[4];
 	float tempMatrix[16];
 	glGetIntegerv(GL_VIEWPORT, viewport);
 
-	memcpy(tempMatrix, bd->modelMatrix, sizeof(float[16]));
+	memcpy(tempMatrix, bd3d->modelMatrix, sizeof(float[16]));
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	SetupPerspVolume(bd, viewport);
+	SetupPerspVolume(bd, bd3d, prd, viewport);
 
-	SetupLight3d(bd, bd->rd);
-	calculateBackgroundSize(bd, viewport);
-	if (memcmp(tempMatrix, bd->modelMatrix, sizeof(float[16])))
+	SetupLight3d(bd3d, prd);
+	calculateBackgroundSize(bd3d, viewport);
+	if (memcmp(tempMatrix, bd3d->modelMatrix, sizeof(float[16])))
 		RestrictiveRedraw();
 }
 
@@ -2159,7 +2215,7 @@ void SetupSimpleMat(Material* pMat, float r, float g, float b)
 }
 
 static
-void SetTexture(BoardData* bd, Material* pMat, const char* filename)
+void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename)
 {
 	/* See if already loaded */
 	int i;
@@ -2177,30 +2233,30 @@ void SetTexture(BoardData* bd, Material* pMat, const char* filename)
 	} while(newStart);
 
 	/* Search for name in cached list */
-	for (i = 0; i < bd->numTextures; i++)
+	for (i = 0; i < bd3d->numTextures; i++)
 	{
-		if (!strcasecmp(nameStart, bd->textureName[i]))
+		if (!strcasecmp(nameStart, bd3d->textureName[i]))
 		{	/* found */
-			pMat->pTexture = &bd->textureList[i];
+			pMat->pTexture = &bd3d->textureList[i];
 			return;
 		}
 	}
 
 	/* Not found - Load new texture */
-	if (bd->numTextures == MAX_TEXTURES - 1)
+	if (bd3d->numTextures == MAX_TEXTURES - 1)
 	{
 		g_print("Error: Too many textures loaded...\n");
 		return;
 	}
 
-	if (LoadTexture(&bd->textureList[bd->numTextures], filename))
+	if (LoadTexture(&bd3d->textureList[bd3d->numTextures], filename))
 	{
 		/* Remeber name */
-		bd->textureName[bd->numTextures] = malloc(strlen(nameStart) + 1);
-		strcpy(bd->textureName[bd->numTextures], nameStart);
+		bd3d->textureName[bd3d->numTextures] = malloc(strlen(nameStart) + 1);
+		strcpy(bd3d->textureName[bd3d->numTextures], nameStart);
 
-		pMat->pTexture = &bd->textureList[bd->numTextures];
-		bd->numTextures++;
+		pMat->pTexture = &bd3d->textureList[bd3d->numTextures];
+		bd3d->numTextures++;
 	}
 }
 
@@ -2228,70 +2284,82 @@ void RemoveTexture(Material* pMat)
 }
 */
 
-void ClearTextures(BoardData* bd)
+void ClearTextures(BoardData3d* bd3d)
 {
 	int i;
-	if (!bd->numTextures)
+	if (!bd3d->numTextures)
 		return;
 
-	MakeCurrent3d(bd->drawing_area3d);
+	MakeCurrent3d(bd3d->drawing_area3d);
 
-	for (i = 0; i < bd->numTextures; i++)
+	for (i = 0; i < bd3d->numTextures; i++)
 	{
-		DeleteTexture(&bd->textureList[i]);
-		free(bd->textureName[i]);
+		DeleteTexture(&bd3d->textureList[i]);
+		free(bd3d->textureName[i]);
 	}
-	bd->numTextures = 0;
+	bd3d->numTextures = 0;
 }
 
-void InitBoard3d(BoardData *bd)
+void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 {	/* Initilize 3d parts of boarddata */
 	int i, j;
 	/* Assign random rotation to each board position */
 	for (i = 0; i < 28; i++)
 		for (j = 0; j < 15; j++)
-			bd->pieceRotation[i][j] = rand() % 360;
+			bd3d->pieceRotation[i][j] = rand() % 360;
 
-	bd->State = BOARD_OPEN;
-	bd->moving = 0;
-	bd->shakingDice = 0;
+	bd3d->State = BOARD_OPEN;
+	bd3d->moving = 0;
+	bd3d->shakingDice = 0;
 	bd->drag_point = -1;
 	bd->DragTargetHelp = 0;
-	setDicePos(bd);
+	setDicePos(bd, bd3d);
 
-	SetupSimpleMat(&bd->gapColour, 0, 0, 0);
-	SetupSimpleMat(&bd->logoMat, 1, 1, 1);
-	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
-	SetupMat(&bd->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 1);
+	SetupSimpleMat(&bd3d->gapColour, 0, 0, 0);
+	SetupSimpleMat(&bd3d->logoMat, 1, 1, 1);
+	SetupMat(&bd3d->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
+	SetupMat(&bd3d->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 1);
 
-	bd->diceList = bd->DCList = bd->pieceList = 0;
-	bd->qobjTex = bd->qobj = 0;
-	bd->flagNurb = 0;
+	bd3d->diceList = bd3d->DCList = bd3d->pieceList = 0;
+	bd3d->qobjTex = bd3d->qobj = 0;
+	bd3d->flagNurb = 0;
 
-	bd->numTextures = 0;
+	bd3d->numTextures = 0;
 
-	bd->boardPoints = NULL;
+	bd3d->boardPoints = NULL;
 
-	memset(bd->modelMatrix, 0, sizeof(float[16]));
+	memset(bd3d->modelMatrix, 0, sizeof(float[16]));
 }
 
-extern void glPrintPointNumbers(BoardData* bd, const char *text)
+void GenerateImage3d(renderdata *prd, const char* szName,
+	const int nSize, const int nSizeX, const int nSizeY)
 {
-	/* Align horizontally */
-	glTranslatef(-getTextLen3d(&bd->numberFont, text) / 2.0f, 0, 0);
-	RenderString3d(&bd->numberFont, text);
-}
+	unsigned char *puch;
+	BoardData* bd = BOARD(pwBoard)->board_data;
+	BoardData bdpw;
+	renderdata rd;
+	GdkPixmap *ppm = gdk_pixmap_new(NULL, nSizeX * nSize, nSizeY * nSize, 24);
+	void *glpixPreview;
 
-extern void glPrintCube(BoardData* bd, const char *text)
-{
-	/* Align horizontally and vertically */
-	glTranslatef(-getTextLen3d(&bd->cubeFont, text) / 2.0f, -bd->cubeFont.height / 2.0f, 0);
-	RenderString3d(&bd->cubeFont, text);
-}
+	/* Copy current settings */
+	CopyAppearance(&rd);
+	CopySettings3d(bd, &bdpw);
+	bdpw.rd = &rd;
+	rd.nSize = nSize;
 
-extern void glPrintNumbersRA(BoardData* bd, const char *text)
-{
-	/* Right align */
-	glTranslatef(-getTextLen3d(&bd->numberFont, text), 0, 0);
-	RenderString3d(&bd->numberFont, text);
+	if (!(puch = (unsigned char *) malloc (nSizeX * nSizeY * nSize * nSize * 3)))
+	{
+		outputerr ("malloc");
+		return;
+	}
+	/* Create preview area */
+	glpixPreview = CreatePreviewBoard3d(&bdpw, ppm);
+
+	/* Draw board */
+	RenderBoard3d(&bdpw, prd, glpixPreview, puch);
+
+	WritePNG(szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize);
+
+	gdk_pixmap_unref(ppm);
+	free(puch);
 }

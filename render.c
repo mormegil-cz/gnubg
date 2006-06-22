@@ -42,6 +42,7 @@
 #include "render.h"
 #include "renderprefs.h"
 #include "boarddim.h"
+#include "backgammon.h"
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -50,10 +51,6 @@
 
 static randctx rc;
 #define RAND irand( &rc )
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 /* aaanPositions[Clockwise][x][point number][x, y. deltay] */
 int positions[ 2 ][ 30 ][ 3 ] = { {
@@ -665,11 +662,7 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
 				int nStride ) {
     int i, ix;
     float x, z, cos_theta, diffuse, specular;
-#if __GNUC__ || !HAVE_ALLOCA
-	unsigned char colours[ 4 * 3 * prd->nSize ];
-#else
-	unsigned char *colours = (unsigned char*)alloca( 4 * 3 * prd->nSize * sizeof(unsigned char) );
-#endif
+	VARIABLE_ARRAY(unsigned char, colours, 4 * 3 * prd->nSize)
 
     diffuse = 0.8 * prd->arLight[ 2 ] + 0.2;
     specular = pow( prd->arLight[ 2 ], 20 ) * 0.6;
@@ -2395,7 +2388,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 	if (!up)
 	{	/* Rotate by 180 degrees */
 		cairo_translate(cr, .5, .5);
-		cairo_rotate(cr, M_PI);
+		cairo_rotate(cr, PI);
 		cairo_translate(cr, -.5, -.5);
 	}
 

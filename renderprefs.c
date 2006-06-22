@@ -39,10 +39,6 @@
 #include "gtkboard.h"
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 char *aszWoodName[] = {
   "alder", "ash", "basswood", "beech", "cedar", "ebony", "fir", "maple",
   "oak", "pine", "redwood", "walnut", "willow", "paint"

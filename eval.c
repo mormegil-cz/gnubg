@@ -2784,31 +2784,25 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
     }
 
     /* See if this is the problem */
-    if( cubefullPrune ) {
-      ((cubeinfo*)pci)->fMove = !pci->fMove;
-      if( use ) {
-#if __GNUC__
-          move amMoves[ ml.cMoves ];
-#elif HAVE_ALLOCA
-          move *amMoves = alloca( ml.cMoves * sizeof(move) );
-#else
-          move *amMoves = malloc( ml.cMoves * sizeof(move) );
-#endif
+	if (cubefullPrune)
+	{
+	((cubeinfo*)pci)->fMove = !pci->fMove;
+	if( use ) {
+	VARIABLE_ARRAY(move, amMoves, ml.cMoves)
 	for(i = 0; (int)i < ml.cMoves; i++) {
-	  int const j = bmovesi[i];
-	  memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
-	  bmovesi[i] = i;
+	int const j = bmovesi[i];
+	memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
+	bmovesi[i] = i;
 	}
 	memcpy(&ml.amMoves[0], amMoves, ml.cMoves * sizeof(amMoves[0]));
-#if !__GNUC__ && !HAVE_ALLOCA
-        free(amMoves);
-#endif
-      }
-      ScoreMoves(&ml, pci, pec, 0);
+	}
+	ScoreMoves(&ml, pci, pec, 0);
 
-      //((cubeinfo*)pci)->fMove = !pci->fMove;
-      //int c = ml.iMoveBest;
-    } else {
+	/*
+	((cubeinfo*)pci)->fMove = !pci->fMove;
+	int c = ml.iMoveBest;
+	*/
+	} else {
 
     nContext[0] = nContext[1] = nContext[2] = 0;
     rBestScore = 99999.9;
@@ -6177,21 +6171,9 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
   cubeinfo ciMoveOpp;
 
-#if __GNUC__
-  float arCf[ 2 * cci ];
-  float arCfTemp[ 2 * cci ];
-  cubeinfo aci[ 2 * cci ];
-#elif HAVE_ALLOCA
-  float *arCf =
-    alloca( 2 * cci * sizeof(float) );
-  float *arCfTemp =
-    alloca( 2 * cci * sizeof(float) );
-  cubeinfo *aci = alloca ( 2 * cci * sizeof ( cubeinfo ) );
-#else
-  float arCf[ 128 ];
-  float arCfTemp[ 128 ];
-  cubeinfo aci[ 128 ];
-#endif
+  VARIABLE_ARRAY(float, arCf, 2 * cci)
+  VARIABLE_ARRAY(float, arCfTemp, 2 * cci)
+  VARIABLE_ARRAY(cubeinfo, aci, 2 * cci)
 
 #if defined( REDUCTION_CODE )
   int fUseReduction, ir;

@@ -19,6 +19,8 @@
  * $Id$
  */
 
+#include "render.h"
+
 #ifndef _EXPORT_H_
 #define _EXPORT_H_
 
@@ -100,5 +102,9 @@ HTMLFilename ( const char *szBase, const int iGame );
 
 extern int WritePNG( const char *sz, unsigned char *puch, int nStride,
 		     const int nSizeX, const int nSizeY );
+
+#if USE_BOARD3D
+void GenerateImage3d(renderdata *prd, const char* szName, const int nSize, const int nSizeX, const int nSizeY);
+#endif
 
 #endif

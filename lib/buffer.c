@@ -23,6 +23,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "common.h"
 
 #if HAVE_BUFFER
 
@@ -230,15 +231,7 @@ int BufferWritef( buffer *pb, char *szFormat, ... ) {
     va_list val;
     /* FIXME this is terrible... there's no limit on the vsprintf()
        buffer size!!  If vsnprintf() is available, we can do better. */
-#if __GNUC__
-    char sz[ FifoRemaining( &pb->fWrite ) > 65536 ?
-	   FifoRemaining( &pb->fWrite ) : 65536 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( FifoRemaining( &pb->fWrite ) > 65536 ?
-		       FifoRemaining( &pb->fWrite ) : 65536 );
-#else
-    char sz[ 65536 ];
-#endif
+    VARIABLE_ARRAY(char, sz, FifoRemaining( &pb->fWrite ) > 65536 ? FifoRemaining( &pb->fWrite ) : 65536)
     
     int cch;
     
