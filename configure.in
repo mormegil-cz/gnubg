@@ -266,7 +266,6 @@ AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
 if test "$with_gtk" != "no"; then
     AM_PATH_GTK_2_0(2.6.0)
     if test "$no_gtk" != "yes"; then
-        AC_DEFINE(USE_GTK2,1,Define if you want to use GTK+ 2.0 or later.)
         AC_DEFINE(USE_GTK,1,Define if you want to use GTK+ 2.0 or later.)
         AC_SUBST(GTKDATA)
         if test "$darwinppc" = "yes"; then
@@ -277,14 +276,13 @@ if test "$with_gtk" != "no"; then
             GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
         fi
         if test "$with_board3d" != "no"; then
-            AM_PATH_GTKGLEXT_1_0(,AC_DEFINE(HAVE_GTKGLEXT,1, [Define if you have GtkGLExt]))
+            AM_PATH_GTKGLEXT_1_0()
             if test  "$no_gtkglext" != "yes"; then
                 no_board3d=AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
             fi
         fi
     fi
 fi
-AM_CONDITIONAL(USE_GTK2, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 AM_CONDITIONAL(USE_BOARD3D, test "$no_board3d" != "yes" )
 

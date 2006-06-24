@@ -103,10 +103,8 @@ static void realize(GtkWidget *widget, void* arg)
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
-#endif
 }
 
 void DrawBar(float col[4], float x, float y, float first, float second)
