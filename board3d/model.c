@@ -28,6 +28,7 @@
 #include "matrix.h"
 #include "inc3d.h"
 #include "shadow.h"
+#include <string.h>
 
 #define TOP_EDGE -2
 

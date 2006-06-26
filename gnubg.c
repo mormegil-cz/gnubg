@@ -21,6 +21,10 @@
 
 #include "config.h"
 
+#if USE_PYTHON
+#include <gnubgmodule.h>
+#endif
+
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
@@ -89,6 +93,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "getopt.h"
 #include "import.h"
 #include <glib/gi18n.h>
+#include <locale.h>
 #include "matchequity.h"
 #include "matchid.h"
 #include "path.h"
@@ -112,10 +117,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <winsock2.h>
 #endif
 #endif /* WIN32 */
-
-#if USE_PYTHON
-#include <gnubgmodule.h>
-#endif
 
 #if USE_GTK
 #include <gtk/gtk.h>

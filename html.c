@@ -3467,7 +3467,7 @@ OpenCSS( const char *sz ) {
   gchar *pchCSS;
   FILE *pf;
   
-  pchCSS = g_build_filename(pchBase, "gnubg.css" );
+  pchCSS = g_build_filename(pchBase, "gnubg.css", NULL );
 
   if ( !access( pchCSS, R_OK ) ) {
     /* file exists */

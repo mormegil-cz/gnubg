@@ -19,13 +19,19 @@
  * $Id$
  */
 
-#include <stdio.h>
-
-
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 
+#if USE_PYTHON
+
+#include "gnubgmodule.h"
+
+#if USE_GTK
+#include "gtkgame.h"
+#endif
+
+#include <stdio.h>
 #include <assert.h>
 #include <glib.h>
 
@@ -35,13 +41,6 @@
 #include "positionid.h"
 #include "rollout.h"
 
-#if USE_PYTHON
-
-#include "gnubgmodule.h"
-
-#if USE_GTK
-#include "gtkgame.h"
-#endif
 
 static void
 LoadDatabasePy( void ) {
