@@ -65,7 +65,7 @@
 #include <sys/utsname.h>
 #endif
 
-#include "glib.h"
+#include <glib.h>
 
 #include "analysis.h"
 #include "backgammon.h"

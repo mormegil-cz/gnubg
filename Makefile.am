@@ -4,14 +4,6 @@ localedir = $(datadir)/locale
 
 ACLOCAL_AMFLAGS = -I m4
 
-## libgen
-
-if  HAVE_LIBGEN
-LIBGEN_SOURCES = 
-else
-LIBGEN_SOURCES = simplelibgen.c simplelibgen.h
-endif
-
 ## sounds
 
 if  USE_SOUND 
@@ -95,7 +87,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
-	formatgs.c formatgs.h boarddim.h timer.c $(LIBGEN_SOURCES) \
+	formatgs.c formatgs.h boarddim.h timer.c \
 	external_y.y external_l.l external_y.h openurl.c openurl.h \
 	mec.h mec.c relational.h relational.c
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
@@ -146,18 +138,17 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)
+	format.c format.h mec.h mec.c
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 
-makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c \
-	$(LIBGEN_SOURCES)
+makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
 makebearoff1_LDADD = @GTK_LIBS@ 
 makebearoff1_DEPENDENCIES = 
 
 
-makeweights_SOURCES = makeweights.c $(LIBGEN_SOURCES)
+makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makeweights_DEPENDENCIES = lib/libevent.a
 
@@ -166,7 +157,7 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
         drawboard.c drawboard.h format.c format.h mec.h mec.c \
-	$(LIBGEN_SOURCES) $(BR1_SOURCES)
+	$(BR1_SOURCES)
 
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makehyper_DEPENDENCIES = lib/libevent.a
@@ -175,7 +166,7 @@ bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)
+	format.c format.h mec.h mec.c
 bearoffdump_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 bearoffdump_DEPENDENCIES = lib/libevent.a
 

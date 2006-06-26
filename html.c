@@ -31,6 +31,7 @@
 #include <unistd.h>
 #endif
 #include <stdlib.h>
+#include <glib.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -43,12 +44,6 @@
 #include "record.h"
 #include "path.h"
 #include "formatgs.h"
-
-#if HAVE_LIBGEN_H
-#include <libgen.h>
-#elif ! defined(HAVE_BASENAME) && ! defined (HAVE_DIRNAME )
-#include "simplelibgen.h"
-#endif
 
 #include <glib/gi18n.h>
 
@@ -3467,13 +3462,12 @@ getMoveNumber ( const list *plGame, const void *p ) {
 static FILE *
 OpenCSS( const char *sz ) {
 
-  char *pch = strdup( sz );
-  char *pchBase = dirname( pch );
-  char *pchCSS;
+  gchar *pch = g_strdup( sz );
+  gchar *pchBase = g_path_get_dirname( pch );
+  gchar *pchCSS;
   FILE *pf;
   
-  sprintf( pchCSS = (char *) malloc( strlen( pchBase ) + 20 ),
-           "%s%c%s", pchBase, DIR_SEPARATOR, "gnubg.css" );
+  pchCSS = g_build_filename(pchBase, "gnubg.css" );
 
   if ( !access( pchCSS, R_OK ) ) {
     /* file exists */
@@ -3485,9 +3479,9 @@ OpenCSS( const char *sz ) {
     outputerr( pchCSS );
   }
 
-  free( pch );
-  free( pchBase );
-  free( pchCSS );
+  g_free( pch );
+  g_free( pchBase );
+  g_free( pchCSS );
 
   return pf;
 
@@ -3556,21 +3550,6 @@ extern void CommandExportGameHtml( char *sz ) {
  *   Caller must free returned pointer if not NULL
  * 
  */
-#ifdef WIN32
-#define DIR_SEPARATOR  '\\'
-#define DIR_SEPARATOR_S  "\\"
-#else
-#define DIR_SEPARATOR  '/'
-#define DIR_SEPARATOR_S  "/"
-#endif
-
-static char *
-get_basename (const char *filename) 
-{ 
-  char *p1 = strrchr (filename, DIR_SEPARATOR); 
-  return p1 ? p1 + 1 : (char *) filename;
-} 
-
 
 extern char *
 HTMLFilename ( const char *szBase, const int iGame ) {
@@ -3633,23 +3612,23 @@ extern void CommandExportMatchHtml( char *sz ) {
 
       szCurrent = HTMLFilename ( sz, i );
 	  filenames[0] = HTMLFilename ( sz, 0 );
-      aszLinks[ 0 ] = get_basename ( filenames[ 0 ] );
+      aszLinks[ 0 ] = g_path_get_basename ( filenames[ 0 ] );
 	  filenames[ 1 ] = aszLinks[ 1 ] = NULL;
 	  if (i > 0) {
 		filenames[ 1 ] = HTMLFilename ( sz, i - 1 );
-		aszLinks[ 1 ]  = get_basename ( filenames[ 1 ] );
+		aszLinks[ 1 ]  = g_path_get_basename ( filenames[ 1 ] );
 	  }
 		
 	  filenames[ 2 ] = aszLinks[ 2 ] = NULL;
 	  if (i < nGames - 1) {
 		filenames[ 2 ] = HTMLFilename ( sz, i + 1 );
-		aszLinks[ 2 ]  = get_basename ( filenames[ 2 ] );
+		aszLinks[ 2 ]  = g_path_get_basename ( filenames[ 2 ] );
 	  }
 
 
 	  
 	  filenames[ 3 ] = HTMLFilename ( sz, nGames - 1 );
-	  aszLinks[ 3 ] = get_basename ( filenames[ 3 ] );
+	  aszLinks[ 3 ] = g_path_get_basename ( filenames[ 3 ] );
       if ( !i ) {
 
         if ( ! confirmOverwrite ( sz, fConfirmSave ) ) {

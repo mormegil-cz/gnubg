@@ -1239,16 +1239,6 @@ extern int fTutorAnalysis;
 
 extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 
-#ifndef HAVE_BASENAME
-extern char *
-basename ( const char* filename );
-#endif
-
-#ifndef HAVE_DIRNAME
-extern char *
-dirname ( char* filename );
-#endif
-
 #if USE_GTK
 #define GNUBG_CHARSET "UTF-8"
 #endif
