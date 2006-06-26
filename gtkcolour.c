@@ -36,14 +36,7 @@ static gpointer parent_class = NULL;
 
 static void set_gc_colour( GdkGC *gc, GdkColormap *pcm, GdkColor *col ) {
 
-#if USE_GTK
     gdk_gc_set_rgb_fg_color( gc, col );
-#else
-    /* FIXME this is ugly -- we never free the allocated colour.  But
-       that only matters on pseudo-colour visuals. */
-    gdk_colormap_alloc_color( pcm, col, FALSE, TRUE );
-    gdk_gc_set_foreground( gc, col );
-#endif
 }
 
 extern GtkWidget *gtk_colour_picker_new(ColorPickerFunc	func, void *data) {

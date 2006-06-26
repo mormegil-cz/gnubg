@@ -51,10 +51,6 @@
 #define MASK_INVISIBLE 1
 #define MASK_VISIBLE 0
 
-#if !USE_GTK
-#define gtk_image_new_from_pixmap gtk_pixmap_new
-#endif
-
 /* minimum time in milliseconds before a drag to the
 	same point is considered a real drag rather than a click */
 #define CLICK_TIME 450
@@ -1149,7 +1145,6 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
 		      6 * s );
 
     /* FIXME use dithalign */
-#if USE_GTK
     {
 	GdkRegion *pr;
 	GdkRectangle r;
@@ -1168,7 +1163,6 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
 	
 	gdk_region_destroy( pr );
     }
-#endif
     
     gdk_draw_rgb_image( bd->drawing_area->window, bd->gc_copy,
 			bd->x_drag - 3 * s, bd->y_drag - 3 * s, 6 * s, 6 * s,
@@ -1176,10 +1170,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
     gdk_draw_rgb_image( bd->drawing_area->window, bd->gc_copy,
 			x - 3 * s, y - 3 * s, 6 * s, 6 * s,
 			GDK_RGB_DITHER_MAX, puchChequer, 6 * s * 3 );
-#if USE_GTK
     gdk_window_end_paint( bd->drawing_area->window );
-#endif
-    
     bd->x_drag = x;
     bd->y_drag = y;
 }
@@ -3642,7 +3633,6 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 			    unsigned char *puchSrc, int nStride,
 			    int cx, int cy ) {
     
-#if USE_GTK
     unsigned char *puch, *puchDest, *auch = g_alloca( cx * cy * 4 );
     int ix, iy;
     GdkPixbuf *ppb;
@@ -3671,37 +3661,6 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 					 GDK_PIXBUF_ALPHA_FULL, 128,
 					 GDK_RGB_DITHER_MAX, 0, 0 );
     g_object_unref( G_OBJECT( ppb ) );
-#else
-    /* according to the API documentation "mask" should be freed again,
-       when the image is freed, so no explicit call to "free" here 
-       <URL: http://developer.gnome.org/doc/API/2.0/gdk/gdk-Images.html#
-       gdk-image-new-bitmap>
-    */
-
-    guchar *mask = malloc( ( cy ) * ( cx + 7 ) >> 3 );
-    GdkImage *pi = gdk_image_new_bitmap( gdk_window_get_visual( pd ),
-					  mask, cx, cy );
-    GdkBitmap *pbm = gdk_pixmap_new( NULL, cx, cy, 1 );
-    GdkGC *gc;
-    int ix, iy;
-    
-    for( iy = 0; iy < cy; iy++ )
-	for( ix = 0; ix < cx; ix++ )
-	    gdk_image_put_pixel( pi, ix, iy, puchSrc[ iy * nStride +
-						      ix * 4 + 3 ] & 0x80 ?
-				 MASK_INVISIBLE : MASK_VISIBLE );
-    gc = gdk_gc_new( pbm );
-    gdk_draw_image( pbm, gc, pi, 0, 0, 0, 0, cx, cy );
-    gdk_gc_unref( gc );
-    gc = gdk_gc_new( pd );
-    gdk_gc_set_clip_mask( gc, pbm );
-    gdk_gc_set_clip_origin( gc, x, y );
-    gdk_draw_rgb_32_image( pd, gc, x, y, cx, cy, GDK_RGB_DITHER_MAX, puchSrc,
-			   nStride );
-    gdk_gc_unref( gc );
-    gdk_image_destroy( pi );
-    gdk_pixmap_unref( pbm );
-#endif
 }    
 
 extern void

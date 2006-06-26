@@ -1,11 +1,17 @@
+Thu Jun 22 20:53:54 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* Several files: remove gtk_1 code missed first time
+
 Thu Jun 22 23:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* Several files: Moved some 3d settings and code into 3d lib.
 
 Thu Jun 22 20:53:54 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
 	* Several files: cleanup after Øystein i18n changes
 
 Sun Jun 18 01:26:05 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
 	* Several files: remove gtk_1 code
 
 Sat Jun 17 19:42:19 2006 Øystein Johansen <oystein@gnubg.org>
@@ -19,7 +25,7 @@ Sat Jun 10 00:02:19 CEST 2006 Christian Anthon  <anthon@kiku.dk>
 	
 	* : Removal of USE_GUI, USE_EXT, xgame* xboard*, the ext directory
 
-2006-06-02  Christian Anthon  <anthon@kiku.dk>
+Tue Jun 22 Christian Anthon  <anthon@kiku.dk>
 
 	* Makefile.am (SUBDIRS): Remove intl. (EXTRA_DIST): Add config.rpath.
 	Upgrade to gettext-0.14.5.

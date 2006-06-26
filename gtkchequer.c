@@ -46,11 +46,8 @@
 #include "progress.h"
 #include "format.h"
 
-#if USE_GTK
 extern moverecord *pmrCurAnn;
 int showMoveListDetail = 1;
-#endif
-
 extern void MoveListCreate(hintdata *phd);
 extern void MoveListUpdate(const hintdata *phd);
 extern GList* MoveListGetSelectionList(const hintdata *phd);
@@ -394,14 +391,9 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 static void
 MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
 {
-#if USE_GTK
 	 showMoveListDetail = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
 	 /* Reshow list */
 	 SetAnnotation(pmrCurAnn);
-#else
-  /* show hint dialog */
-  GTKHint( phd->pml, phd->piHighlight ? *phd->piHighlight : -1 );
-#endif
 }
 
 GtkWidget *pwDetails;
@@ -426,12 +418,7 @@ CreateMoveListTools ( hintdata *phd )
   GtkTooltips *pt = gtk_tooltips_new ();
 
   pwDetails = 
-#if USE_GTK
     phd->fDetails ? NULL : gtk_toggle_button_new_with_label( _("Details") );
-#else
-    phd->fDetails ? NULL : gtk_button_new_with_label( _("Details") );
-#endif
-
   phd->pwRollout = pwRollout;
   phd->pwRolloutSettings = pwRolloutSettings;
   phd->pwEval = pwEval;
@@ -517,11 +504,8 @@ CreateMoveListTools ( hintdata *phd )
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
 
-#if USE_GTK
   if (pwDetails)
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwDetails), showMoveListDetail);
-#endif
-
   /* signals */
 
   gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
@@ -585,7 +569,6 @@ CreateMoveListTools ( hintdata *phd )
   return pwTools;
 }
 
-#if USE_GTK
 void HintDoubleClick(GtkTreeView        *treeview,
                        GtkTreePath        *path,
                        GtkTreeViewColumn  *col,
@@ -613,36 +596,6 @@ void HintSelect(GtkTreeSelection *selection, hintdata *phd)
 		}
 	}
 }
-#else
-static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
-			hintdata *phd )
-{
-	int c = g_list_length(MoveListGetSelectionList(phd));
-	CheckHintButtons( phd );
-
-    /* Double clicking a row makes that move. */
-    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && 
-        phd->fButtonsValid ) {
-      gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
-      return;
-    }
-
-    /* show moves */
-
-    if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) ) ) {
-      switch ( c ) {
-      case 0:
-      case 1:
-        ShowMove ( phd, c );
-        break;
-
-      default:
-        ShowMove ( phd, FALSE );
-        break;
-      }
-    }
-}
-#endif
 
 static void MoveListCopy(GtkWidget *pw, hintdata *phd)
 {

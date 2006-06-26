@@ -335,22 +335,11 @@ ToolbarNew ( void ) {
   
   gtk_object_set_data_full ( GTK_OBJECT ( vbox_toolbar ), "user_data",
                              ptw, g_free );
-#if USE_GTK
   pwToolbar = gtk_toolbar_new ();
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
                                 GTK_ORIENTATION_HORIZONTAL );
   gtk_toolbar_set_style ( GTK_TOOLBAR ( pwToolbar ),
                           GTK_TOOLBAR_ICONS );
-#else
-  pwToolbar = gtk_toolbar_new ( GTK_ORIENTATION_HORIZONTAL,
-                                GTK_TOOLBAR_BOTH );
-  gtk_toolbar_set_space_style ( GTK_TOOLBAR ( pwToolbar ),
-                          GTK_TOOLBAR_SPACE_LINE );
-
-  gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
-		  GTK_RELIEF_NONE);
-#endif /* ! USE_GTK */
-
   gtk_box_pack_start( GTK_BOX( vbox_toolbar ), pwToolbar, 
                       FALSE, FALSE, 0 );
 
@@ -426,11 +415,6 @@ ToolbarNew ( void ) {
   
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
 
-#if !USE_GTK
-  gtk_toolbar_set_button_relief( GTK_TOOLBAR( pwToolbar ), 
-		  GTK_RELIEF_NONE);
-#endif
-  
   /* Take/accept button */
   TB_BUTTON_ADD(ptw->pwTake, stock_ok_xpm, _("Accept"), ButtonClickedYesNo,
 		  "yes", 

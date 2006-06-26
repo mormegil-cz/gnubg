@@ -32,7 +32,6 @@
 #include "backgammon.h"
 #include <glib/gi18n.h>
 #include <string.h>
-#if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "positionid.h"
@@ -46,7 +45,6 @@ extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm, void (*fn)( 
 
 static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, char* windowRole);
 
-#endif
 
 int fDisplayPanels = TRUE;
 int fDockPanels = TRUE;
@@ -73,11 +71,9 @@ typedef struct _windowobject {
 	int docked;
 	int dockable;
 	int undockable;
-#if USE_GTK
 	panelFun showFun;
 	panelFun hideFun;
 	GtkWidget* pwWin;
-#endif
 	windowgeometry wg;
 } windowobject;
 
@@ -88,85 +84,68 @@ windowobject woPanel[NUM_WINDOWS] =
 	{
 		"main",
 		TRUE, FALSE, FALSE, FALSE,
-#if USE_GTK
 		NULL, NULL,
 		0,
-#endif
 		{0, 0, 20, 20}
 	},
 	/* game list */
 	{
 		"game",
 		TRUE, TRUE, TRUE, TRUE,
-#if USE_GTK
 		ShowGameWindow, DeleteGame,
 		0,
-#endif
 		{ 250, 200, 20, 20 }
 	},
 	/* analysis */
 	{
 		"analysis",
 		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
 		ShowAnalysis, DeleteAnalysis,
 		0,
-#endif
 		{ 0, 400, 20, 20 }
 	},
 	/* annotation */
 	{
 		"annotation",
 		FALSE, TRUE, TRUE, FALSE,
-#if USE_GTK
 		ShowAnnotation, DeleteAnnotation,
 		0,
-#endif
 		{ 0, 400, 20, 20 }
 	},
 	/* hint */
 	{
 		"hint",
 		FALSE, FALSE, FALSE, FALSE,
-#if USE_GTK
 		NULL, NULL,
 		0,
-#endif
 		{ 0, 450, 20, 20 }
 	},
 	/* message */
 	{
 		"message",
 		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
 		ShowMessage, DeleteMessage,
 		0,
-#endif
 		{ 0, 500, 20, 20 }
 	},
 	/* command */
 	{
 		"command",
 		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
 		ShowCommandWindow, DeleteCommandWindow,
 		0,
-#endif
 		{ 0, 0, 20, 20 }
 	}, 
 	/* theory */
 	{
 		"theory",
 		FALSE, TRUE, TRUE, TRUE,
-#if USE_GTK
 		ShowTheoryWindow, DeleteTheoryWindow,
 		0,
-#endif
 		{ 0, 0, 20, 20 }
 	}
 };
 
-#if USE_GTK
 
 extern gboolean ShowPanel(gnubgwindow window)
 {
@@ -1055,8 +1034,6 @@ RefreshGeometries ( void )
 		getWindowGeometry(i);
 }
 
-#endif
-
 extern void CommandSetAnnotation( char *sz ) {
 
     SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
@@ -1163,10 +1140,8 @@ CommandSetGeometryWidth ( char *sz ) {
     woPanel[pwoSetPanel].wg.nWidth = n;
     outputf ( _("Width of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
 
-#if USE_GTK
     if ( fX )
 		setWindowGeometry(pwoSetPanel);
-#endif
 
   }
 
@@ -1185,11 +1160,8 @@ CommandSetGeometryHeight ( char *sz ) {
     woPanel[pwoSetPanel].wg.nHeight = n;
     outputf ( _("Height of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
 
-#if USE_GTK
     if ( fX )
 		setWindowGeometry(pwoSetPanel);
-#endif
-
   }
 
 }
@@ -1207,10 +1179,8 @@ CommandSetGeometryPosX ( char *sz ) {
     woPanel[pwoSetPanel].wg.nPosX = n;
     outputf ( _("X-position of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
 
-#if USE_GTK
     if ( fX )
 		setWindowGeometry(pwoSetPanel);
-#endif
 
   }
 
@@ -1229,11 +1199,8 @@ CommandSetGeometryPosY ( char *sz ) {
     woPanel[pwoSetPanel].wg.nPosY = n;
     outputf ( _("Y-position of %s window set to %d.\n"), woPanel[pwoSetPanel].winName, n );
 
-#if USE_GTK
     if ( fX )
 		setWindowGeometry(pwoSetPanel);
-#endif
-
   }
 
 }
@@ -1246,10 +1213,8 @@ CommandSetGeometryMax ( char *sz )
   outputf ( maxed ? _("%s window maximised.\n") : _("%s window unmaximised.\n"),
 	  woPanel[pwoSetPanel].winName);
 
-#if USE_GTK
     if ( fX )
 		setWindowGeometry(pwoSetPanel);
-#endif
 }
 
 extern void CommandSetDisplayPanels( char *sz ) {
@@ -1259,14 +1224,12 @@ extern void CommandSetDisplayPanels( char *sz ) {
   _("Game list, Annotation and Message panels/windows will not be displayed.")
 	     );
 
-#if USE_GTK
   if (fX) {
     if (fDisplayPanels)
       ShowAllPanels (0, 0, 0);
     else
       HideAllPanels (0, 0, 0);
   }
-#endif
     
 }
 
@@ -1283,9 +1246,7 @@ extern void CommandSetDockPanels( char *sz ) {
 
     SetToggle( "dockdisplay", &fDockPanels, sz, _("Windows will be docked."),
 		_("Windows will be detached.") );
-#if USE_GTK
 	DockPanels();
-#endif
 }
 
 static void GetGeometryDisplayString(char* buf, windowobject* pwo)

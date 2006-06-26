@@ -22,7 +22,7 @@
 #ifndef _GTKTEXI_H_
 #define _GTKTEXI_H_
 
-#if HAVE_LIBXML2 && USE_GTK
+#if HAVE_LIBXML2
 
 #define HAVE_GTKTEXI 1
 

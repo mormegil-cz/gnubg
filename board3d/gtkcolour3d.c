@@ -396,11 +396,7 @@ GtkWidget* Create3dColourDialog(UpdateDetails* pDetails)
 	gtk_signal_connect(GTK_OBJECT(pwColourDialog3d), "realize",
 			GTK_SIGNAL_FUNC(UpdateColourPreview), 0 );
 
-#if GTK_CHECK_VERSION(1,3,15)
 	gtk_window_add_accel_group( GTK_WINDOW( pwColourDialog3d ), pag );
-#else
-	gtk_accel_group_attach( pag, GTK_OBJECT( pwColourDialog3d ) );
-#endif
 	gtk_widget_add_accelerator( pwCancel, "clicked", pag, GDK_Escape, 0, 0 );
 
 	gtk_window_set_title( GTK_WINDOW( pwColourDialog3d ), _("3d Colour selection") );

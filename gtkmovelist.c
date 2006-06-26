@@ -34,13 +34,11 @@
 #include "gtkgame.h"
 #include "drawboard.h"
 
-#if USE_GTK
 extern void HintDoubleClick(GtkTreeView        *treeview,
                        GtkTreePath        *path,
                        GtkTreeViewColumn  *col,
                        hintdata *phd);
 extern void HintSelect(GtkTreeSelection *selection, hintdata *phd);
-#endif
 
 extern GdkColor wlCol;
 void ShowMove ( hintdata *phd, const int f );
@@ -48,7 +46,6 @@ void ShowMove ( hintdata *phd, const int f );
 #define DETAIL_COLUMN_COUNT 11
 #define MIN_COLUMN_COUNT 5
 
-#if USE_GTK
 enum
 {
   ML_COL_RANK = 0,
@@ -65,7 +62,6 @@ enum
   ML_COL_FGCOL,
   ML_COL_DATA
 } ;
-#endif
 
 void MoveListUpdate ( const hintdata *phd );
 
@@ -88,7 +84,6 @@ void MoveListCreate(hintdata *phd)
 	int showWLTree = showMoveListDetail && !phd->fDetails;
 
 /* Create list widget */
-#if USE_GTK
 	GtkListStore *store;
 	GtkTreeIter iter;
 	GtkTreeSelection* sel;
@@ -135,49 +130,8 @@ void MoveListCreate(hintdata *phd)
 	g_signal_connect(view, "row-activated", G_CALLBACK(HintDoubleClick), phd);
 	g_signal_connect(sel, "changed", G_CALLBACK(HintSelect), phd);
 
-#else
-    static char *aszEmpty[] = { NULL, NULL, NULL, NULL, 
-                                NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-    char *aszTemp[DETAIL_COLUMN_COUNT];
-	int numCols;
-
-    /* set titles */
-
-	if (phd->fDetails)
-	{
-		numCols = DETAIL_COLUMN_COUNT;
-      for ( i = 0; i < numCols; i++ )
-        aszTemp[ i ] = aszTitleDetails[ i ] ? gettext ( aszTitleDetails[ i ] ) : NULL;
-    }
-    else
-	{
-		numCols = MIN_COLUMN_COUNT;
-      for ( i = 0; i < numCols; i++ )
-        aszTemp[ i ] = aszTitle[ i ] ? gettext ( aszTitle[ i ] ) : NULL;
-    }
-
-	phd->pwMoves = gtk_clist_new_with_titles(numCols, aszTemp);
-
-    for (i = 0; i < numCols; i++)
-	{
-	gtk_clist_set_column_auto_resize( GTK_CLIST( phd->pwMoves ), i, TRUE );
-	gtk_clist_set_column_justification( GTK_CLIST( phd->pwMoves ), i,
-					    (i == 1 || i == (numCols - 1)) ? GTK_JUSTIFY_LEFT : GTK_JUSTIFY_RIGHT );
-    }
-    gtk_clist_column_titles_passive( GTK_CLIST( phd->pwMoves ) );
-    gtk_clist_set_selection_mode( GTK_CLIST( phd->pwMoves ),
-				  GTK_SELECTION_MULTIPLE );
-
-    gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "select-row",
-			GTK_SIGNAL_FUNC( HintSelect ), phd );
-    gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "unselect-row",
-			GTK_SIGNAL_FUNC( HintSelect ), phd );
-    gtk_signal_connect( GTK_OBJECT( phd->pwMoves ), "selection_clear_event",
-			GTK_SIGNAL_FUNC( MoveListClearSelection ), phd );
-#endif
 
 /* Add empty rows */
-#if USE_GTK
 	if (phd->fDetails)
 		store = gtk_list_store_new(DETAIL_COLUMN_COUNT + 2, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 	else
@@ -192,11 +146,6 @@ void MoveListCreate(hintdata *phd)
 		gtk_list_store_append(store, &iter);
 
 	gtk_tree_view_set_model(GTK_TREE_VIEW(view), GTK_TREE_MODEL(store));
-#else
-	for (i = 0; i < phd->pml->cMoves; i++)
-		gtk_clist_append( GTK_CLIST( phd->pwMoves ), aszEmpty );
-#endif
-
     MoveListUpdate(phd);
 }
 
@@ -230,13 +179,11 @@ void MoveListUpdate ( const hintdata *phd )
   int col = phd->fDetails ? 8 : 2;
   int showWLTree = showMoveListDetail && !phd->fDetails;
 
-#if USE_GTK
 	int offset = (phd->fDetails) ? 0 : MIN_COLUMN_COUNT - DETAIL_COLUMN_COUNT;
 	GtkTreeIter iter;
 	GtkListStore *store;
 	store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(phd->pwMoves)));
 	gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
-#endif
 
 if (!psHighlight)
 {	/* Get highlight style first time in */
@@ -258,28 +205,19 @@ if (!psHighlight)
   GetMatchStateCubeInfo( &ci, &ms );
   rBest = pml->amMoves[ 0 ].rScore;
 
-#if USE_GTK
 	if (!showWLTree)
 		gtk_tree_view_column_set_title(gtk_tree_view_get_column(GTK_TREE_VIEW(phd->pwMoves), col),
 			(fOutputMWC && ms.nMatchTo) ? _("MWC") : _("Equity"));
-#else
-	gtk_clist_set_column_title(GTK_CLIST(phd->pwMoves), col,
-		(fOutputMWC && ms.nMatchTo) ? _("MWC") : _("Equity"));
-#endif
 
   for( i = 0; i < pml->cMoves; i++ )
   {
     float *ar = pml->amMoves[ i ].arEvalMove;
 	int rankKnown;
 
-#if USE_GTK
 	if (showWLTree)
 		gtk_list_store_set(store, &iter, 0, pml->amMoves + i, -1);
 	else
 		gtk_list_store_set(store, &iter, ML_COL_DATA + offset, pml->amMoves + i, -1);
-#else
-    gtk_clist_set_row_data( GTK_CLIST(phd->pwMoves), i, pml->amMoves + i );
-#endif
 
 	rankKnown = 1;
     if( i && i == pml->cMoves - 1 && phd->piHighlight && i == *phd->piHighlight )
@@ -307,7 +245,6 @@ if (!psHighlight)
     else
       strcpy( sz, "??" );
 
-#if USE_GTK
 	if (showWLTree)
 	{
 		gtk_list_store_set(store, &iter, 1, rankKnown ? i + 1 : -1, -1);
@@ -315,16 +252,8 @@ if (!psHighlight)
 	}
 	else
 		gtk_list_store_set(store, &iter, ML_COL_RANK, sz, -1);
-#else
-    gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, 0, sz );
-#endif
-
     FormatEval( sz, &pml->amMoves[ i ].esMove );
-#if USE_GTK
 	gtk_list_store_set(store, &iter, ML_COL_TYPE, sz, -1);
-#else
-    gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, 1, sz );
-#endif
 
     /* gwc */
 	if ( phd->fDetails )
@@ -334,47 +263,24 @@ if (!psHighlight)
 		{
 			if (j == 3)
 			{
-#if USE_GTK
 				gtk_list_store_set(store, &iter, colNum, OutputPercent(1.0f - ar[ OUTPUT_WIN ] ), -1);
-#else
-				gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, 5,
-							OutputPercent( 1.0f - ar[ OUTPUT_WIN ] ) );
-#endif
 				colNum++;
 			}
-#if USE_GTK
 			gtk_list_store_set(store, &iter, colNum, OutputPercent(ar[j]), -1);
-#else
-			gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, colNum,
-							OutputPercent(ar[j]) );
-#endif
 			colNum++;
 		}
 	}
 
     /* cubeless equity */
-#if USE_GTK
 	gtk_list_store_set(store, &iter, ML_COL_EQUITY + offset,
                         OutputEquity( pml->amMoves[ i ].rScore, &ci, TRUE ), -1);
-#else
-    gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, col, 
-                        OutputEquity( pml->amMoves[ i ].rScore, &ci, TRUE ) );
-#endif
-
 	if (i != 0)
 	{
-#if USE_GTK
 		gtk_list_store_set(store, &iter, ML_COL_DIFF + offset,
                           OutputEquityDiff( pml->amMoves[ i ].rScore, 
                                             rBest, &ci ), -1);
-#else
-		gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, col + 1, 
-                          OutputEquityDiff( pml->amMoves[ i ].rScore, 
-                                            rBest, &ci ) );
-#endif
     }
 	
-#if USE_GTK
 	gtk_list_store_set(store, &iter, ML_COL_MOVE + offset,
                         FormatMove( sz, ms.anBoard,
                                     pml->amMoves[ i ].anMove ), -1);
@@ -386,26 +292,10 @@ if (!psHighlight)
 		sprintf(buf, "#%02x%02x%02x", psHighlight->fg[GTK_STATE_SELECTED].red / 256, psHighlight->fg[GTK_STATE_SELECTED].green / 256, psHighlight->fg[GTK_STATE_SELECTED].blue / 256);
 		gtk_list_store_set(store, &iter, ML_COL_FGCOL + offset, buf, -1);
 	}
-#else
-    gtk_clist_set_text( GTK_CLIST(phd->pwMoves), i, col + 2,
-                        FormatMove( sz, ms.anBoard,
-                                    pml->amMoves[ i ].anMove ) );
-#endif
-#if USE_GTK
 skipoldcode:	/* Messy as 3 copies of code at moment... */
 	gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
-#endif
   }
 
-#if !USE_GTK
-  /* highlight row */
-  if (phd->piHighlight && *phd->piHighlight >= 0)
-  {
-    for ( i = 0; i < pml->cMoves; i++ )
-      gtk_clist_set_row_style( GTK_CLIST(phd->pwMoves), i, i == *phd->piHighlight ?
-				 psHighlight : NULL );
-  }
-#endif
 
   /* update storedmoves global struct */
   UpdateStoredMoves ( pml, &ms );
@@ -413,35 +303,24 @@ skipoldcode:	/* Messy as 3 copies of code at moment... */
 
 int MoveListGetSelectionCount(const hintdata *phd)
 {
-#if USE_GTK
 	return gtk_tree_selection_count_selected_rows(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)));
-#else
-	return g_list_length(GTK_CLIST( phd->pwMoves )->selection);
-#endif
 }
 
 GList *MoveListGetSelectionList(const hintdata *phd)
 {
-#if USE_GTK
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(phd->pwMoves));
 	GtkTreeSelection* sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves));
 	return gtk_tree_selection_get_selected_rows(sel, &model);
-#else
-	return GTK_CLIST( phd->pwMoves )->selection;
-#endif
 }
 
 void MoveListFreeSelectionList(GList *pl)
 {
-#if USE_GTK
 	g_list_foreach (pl, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(pl);
-#endif
 }
 
 move *MoveListGetMove(const hintdata *phd, GList *pl)
 {
-#if USE_GTK
 	move *m;
 	int showWLTree = showMoveListDetail && !phd->fDetails;
 	int col, offset = (phd->fDetails) ? 0 : MIN_COLUMN_COUNT - DETAIL_COLUMN_COUNT;
@@ -457,57 +336,21 @@ move *MoveListGetMove(const hintdata *phd, GList *pl)
 		col = ML_COL_DATA + offset;
 	gtk_tree_model_get(model, &iter, col, &m, -1);
 	return m;
-#else
-	return &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-#endif
 }
 
 void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd)
 {
 	int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
-#if USE_GTK
 	if (f)
 		gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)), GTK_SELECTION_SINGLE);
 	else
 		gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)), GTK_SELECTION_MULTIPLE);
 
 	ShowMove(phd, f);
-#else
-	int selrow = -1;
-	GList *plSelList = MoveListGetSelectionList(phd);
-
-	if ( f )
-	{
-		if (g_list_length(plSelList) == 1)
-			selrow = GPOINTER_TO_INT(plSelList->data);
-
-		/* allow only one move to be selected when "Show" is active */
-		gtk_clist_set_selection_mode( GTK_CLIST( phd->pwMoves ),
-				  GTK_SELECTION_SINGLE );
-	}
-  else
-    gtk_clist_set_selection_mode( GTK_CLIST( phd->pwMoves ),
-				  GTK_SELECTION_MULTIPLE );
-
-	if (selrow != -1)
-	{	/* Show single selcted move when show clicked */
-		gtk_clist_select_row( GTK_CLIST( phd->pwMoves ), selrow, 0 );
-		ShowMove ( phd, TRUE );
-	}
-	else
-		ShowMove ( phd, FALSE );
-
-	MoveListFreeSelectionList(plSelList);
-#endif
 }
 
 gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintdata *phd )
 {
-#if USE_GTK
 	gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)));
-#else
-	gtk_clist_unselect_all( GTK_CLIST( phd->pwMoves ) );
-#endif
-
     return TRUE;
 }
