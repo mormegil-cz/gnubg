@@ -467,10 +467,10 @@ RenderPreferencesParam (renderdata * prd, char *szParam, char *szValue)
     else if (rElevation > 90.0f)
       rElevation = 90.0f;
 
-    prd->arLight[2] = sinf (rElevation / 180 * M_PI);
-    prd->arLight[0] = cosf (rAzimuth / 180 * M_PI) *
+    prd->arLight[2] = sinf (rElevation / 180 * PI);
+    prd->arLight[0] = cosf (rAzimuth / 180 * PI) *
       sqrt (1.0 - prd->arLight[2] * prd->arLight[2]);
-    prd->arLight[1] = sinf (rAzimuth / 180 * M_PI) *
+    prd->arLight[1] = sinf (rAzimuth / 180 * PI) *
       sqrt (1.0 - prd->arLight[2] * prd->arLight[2]);
   }
   else if (!strncasecmp (szParam, "shape", c)) {
@@ -656,10 +656,10 @@ RenderPreferencesCommand (renderdata * prd, char *sz)
   gchar buf2[G_ASCII_DTOSTR_BUF_SIZE];
   gchar buf3[G_ASCII_DTOSTR_BUF_SIZE];
   
-  float rElevation = asinf (prd->arLight[2]) * 180 / M_PI;
+  float rElevation = asinf (prd->arLight[2]) * 180 / PI;
   float rAzimuth = (fabs (prd->arLight[2] - 1.0f) < 1e-5) ? 0.0f :
     acosf (prd->arLight[0] / sqrt (1.0 - prd->arLight[2] *
-           prd->arLight[2])) * 180 / M_PI;
+           prd->arLight[2])) * 180 / PI;
 
   if (prd->arLight[1] < 0)
     rAzimuth = 360 - rAzimuth;

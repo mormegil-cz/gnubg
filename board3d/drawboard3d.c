@@ -189,7 +189,7 @@ void preDrawPiece0(renderdata* prd)
 	float ***p = Alloc3d(prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1, 3);
 	float ***n = Alloc3d(prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1, 3);
 
-	step = (2 * PI) / prd->curveAccuracy;
+	step = (2 * (float)PI) / prd->curveAccuracy;
 
 	/* Draw top/bottom of piece */
 	circleTex(discradius, PIECE_DEPTH, prd->curveAccuracy, prd->ChequerMat[0].pTexture);
@@ -371,7 +371,7 @@ void renderDice(renderdata* prd)
 	float ***corner_points = Alloc3d(corner_steps, corner_steps, 3);
 
 	radius = size / 2.0f;
-	step = (2 * PI) / prd->curveAccuracy;
+	step = (2 * (float)PI) / prd->curveAccuracy;
 
 	glPushMatrix();
 
@@ -388,7 +388,7 @@ void renderDice(renderdata* prd)
 
 	lat_angle = 0;
 	lns = (prd->curveAccuracy / 4);
-	lat_step = (PI / 2) / lns;
+	lat_step = ((float)PI / 2) / lns;
 
 	/* Calculate corner points */
 	for (i = 0; i < lns + 1; i++)
@@ -398,7 +398,7 @@ void renderDice(renderdata* prd)
 
 		ns = (prd->curveAccuracy / 4) - i;
 
-		step = (PI / 2 - lat_angle) / (ns);
+		step = ((float)PI / 2 - lat_angle) / (ns);
 		angle = 0;
 
 		for (j = 0; j <= ns; j++)
@@ -1218,7 +1218,7 @@ void drawPoint(renderdata* prd, float tuv, int i, int p, int outline)
 			float angle, step;
 			float radius = w / 2.0f;
 
-			step = (2 * PI) / prd->curveAccuracy;
+			step = (2 * (float)PI) / prd->curveAccuracy;
 			angle = -step * (prd->curveAccuracy / 4);
 			glNormal3f(0, 0, 1);
 			glBegin(outline ? GL_LINE_STRIP : GL_TRIANGLE_FAN);
@@ -3049,8 +3049,8 @@ void WorkOutViewArea(BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float 
 	float boardRadAngle;
 	initViewArea(pva);
 
-	boardRadAngle = (bd->rd->boardAngle * PI) / 180.0f;
-	*pHalfRadianFOV = ((GetFOVAngle(bd) * PI) / 180.0f) / 2.0f;
+	boardRadAngle = (bd->rd->boardAngle * (float)PI) / 180.0f;
+	*pHalfRadianFOV = ((GetFOVAngle(bd) * (float)PI) / 180.0f) / 2.0f;
 
 	/* Sort out viewing area */
 	addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -getBoardHeight() / 2, 0);
@@ -3248,7 +3248,7 @@ void renderFlag(BoardData *bd, BoardData3d *bd3d, int curveAccuracy)
 	{
 		/* Work out approx angle of number based on control points */
 		float ang = (float)atan(-(bd3d->ctlpoints[2][0][2] - bd3d->ctlpoints[1][0][2]) / (bd3d->ctlpoints[2][0][0] - bd3d->ctlpoints[1][0][0]));
-		float degAng = (ang) * 180 / PI;
+		float degAng = (ang) * 180 / (float)PI;
 
 		glRotatef(degAng, 0, 1, 0);
 	}

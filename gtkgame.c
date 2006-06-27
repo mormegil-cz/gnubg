@@ -7556,7 +7556,7 @@ static void StatsNextGame( GtkWidget *pw, char *szCommand )
 }
 
 extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm,
-				void (*fn)( GtkWidget *, char *))
+				void (*fn)())
 {
     GdkPixmap *ppm;
     GdkBitmap *pbm;

@@ -49,7 +49,7 @@
 #include <glib/gi18n.h>
 #include "bearoffgammon.h"
 #include "path.h"
-#include "backgammon.h"
+#include "common.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -277,7 +277,7 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
     }
 }
 
-static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
+static unsigned char *HeuristicDatabase( void (*pfProgress)() ) {
 
     unsigned char *pm = malloc( 40 + 54264 * 64 );
     unsigned char *p = pm ? pm + 40 : NULL;

@@ -456,7 +456,7 @@ void addCubeCentered(Occluder* pOcc, float x, float y, float z, float w, float h
 
 void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, int numSteps)
 {
-	float step = (2 * PI) / numSteps;
+	float step = (2 * (float)PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);
 	float *yPts = (float *)malloc(sizeof(float) * numSteps);
 	int i;
@@ -491,14 +491,14 @@ void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, in
 
 void addHalfTube(Occluder* pOcc, float r, float h, int numSteps)
 {
-	float step = ((2 * PI) / numSteps) / 2.0f;
+	float step = ((2 * (float)PI) / numSteps) / 2.0f;
 	float *xPts = (float *)malloc(sizeof(float) * (numSteps + 1));
 	float *yPts = (float *)malloc(sizeof(float) * (numSteps + 1));
 	int i;
 
 	for (i = 0; i <= numSteps; i++)
 	{
-		float ang = step * i - (PI / 2.0f);
+		float ang = step * i - ((float)PI / 2.0f);
 		xPts[i] = (float)sin(ang) * r;
 		yPts[i] = (float)cos(ang) * r;
 	}
@@ -557,7 +557,7 @@ void GetCoords(float x, float y, float d, int c, int f, float v[3])
 void addDice(Occluder* pOcc, float size)
 {	/* Hard-coded numSteps to keep model simple + doesn't work correctly when > 8... */
 	int numSteps = 8;
-	float step = (2 * PI) / numSteps;
+	float step = (2 * (float)PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);
 	float *yPts = (float *)malloc(sizeof(float) * numSteps);
 	int i, c, f;

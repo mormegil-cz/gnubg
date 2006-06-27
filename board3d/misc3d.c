@@ -716,7 +716,7 @@ float moveAlong(float d, PathType type, float start[3], float end[3], float v[3]
 
 		xRad = end[0] - start[0];
 		zRad = end[2] - start[2];
-		lineLen = PI * (((float)fabs(xRad) + (float)fabs(zRad)) / 2.0f) / 2.0f;
+		lineLen = (float)PI * (((float)fabs(xRad) + (float)fabs(zRad)) / 2.0f) / 2.0f;
 		if (d <= lineLen)
 		{
 			per = d / lineLen;
@@ -870,8 +870,8 @@ void cylinder(float radius, float height, int accuracy, Texture* texture)
 {
 	int i;
 	float angle = 0;
-	float circum = PI * radius * 2 / (accuracy + 1);
-	float step = (2 * PI) / accuracy;
+	float circum = (float)PI * radius * 2 / (accuracy + 1);
+	float step = (2 * (float)PI) / accuracy;
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy + 1; i++)
 	{
@@ -894,7 +894,7 @@ void circleOutlineOutward(float radius, float height, int accuracy)
 	int i;
 	float angle, step;
 
-	step = (2 * PI) / accuracy;
+	step = (2 * (float)PI) / accuracy;
 	angle = 0;
 	glNormal3f(0, 0, 1);
 	glBegin(GL_LINE_STRIP);
@@ -912,7 +912,7 @@ void circleOutline(float radius, float height, int accuracy)
 	int i;
 	float angle, step;
 
-	step = (2 * PI) / accuracy;
+	step = (2 * (float)PI) / accuracy;
 	angle = 0;
 	glNormal3f(0, 0, 1);
 	glBegin(GL_LINE_STRIP);
@@ -929,7 +929,7 @@ void circle(float radius, float height, int accuracy)
 	int i;
 	float angle, step;
 
-	step = (2 * PI) / accuracy;
+	step = (2 * (float)PI) / accuracy;
 	angle = 0;
 	glNormal3f(0, 0, 1);
 	glBegin(GL_TRIANGLE_FAN);
@@ -947,7 +947,7 @@ void circleRev(float radius, float height, int accuracy)
 	int i;
 	float angle, step;
 
-	step = (2 * PI) / accuracy;
+	step = (2 * (float)PI) / accuracy;
 	angle = 0;
 	glNormal3f(0, 0, 1);
 	glBegin(GL_TRIANGLE_FAN);
@@ -971,7 +971,7 @@ void circleTex(float radius, float height, int accuracy, Texture* texture)
 		return;
 	}
 
-	step = (2 * PI) / accuracy;
+	step = (2 * (float)PI) / accuracy;
 	angle = 0;
 	glNormal3f(0, 0, 1);
 	glBegin(GL_TRIANGLE_FAN);
@@ -997,7 +997,7 @@ void circleRevTex(float radius, float height, int accuracy, Texture* texture)
 		return;
 	}
 
-	step = (2 * PI) / accuracy;
+	step = (2 * (float)PI) / accuracy;
 	angle = 0;
 	glNormal3f(0, 0, 1);
 	glBegin(GL_TRIANGLE_FAN);
@@ -1367,7 +1367,7 @@ void QuarterCylinder(float radius, float len, int accuracy, Texture* texture)
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
-		angle = (i * 2 * PI) / accuracy;
+		angle = (i * 2 * (float)PI) / accuracy;
 		glNormal3f((float)sin(angle), 0, (float)cos(angle));
 
 		sar = (float)sin(angle) * radius;
@@ -1411,7 +1411,7 @@ void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* t
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
-		angle = (i * 2 * PI) / accuracy;
+		angle = (i * 2 * (float)PI) / accuracy;
 		glNormal3f((float)sin(angle), 0, (float)cos(angle));
 
 		sar = (float)sin(angle) * radius;
@@ -1455,7 +1455,7 @@ void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* text
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
-		angle = (i * 2 * PI) / accuracy;
+		angle = (i * 2 * (float)PI) / accuracy;
 		glNormal3f((float)sin(angle), 0, (float)cos(angle));
 
 		sar = (float)sin(angle) * radius;
@@ -1510,7 +1510,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 	*boardPoints = Alloc3d(corner_steps, corner_steps, 3);
 
 	lat_angle = 0;
-	lat_step = (2 * PI) / accuracy;
+	lat_step = (2 * (float)PI) / accuracy;
 
 	/* Calculate corner 1/8th sphere points */
 	for (i = 0; i < (accuracy / 4) + 1; i++)
@@ -1520,7 +1520,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 
 		angle = 0;
 		ns = (accuracy / 4) - i;
-		step = (2 * PI) / (ns * 4);
+		step = (2 * (float)PI) / (ns * 4);
 
 		for (j = 0; j <= ns; j++)
 		{
@@ -2331,6 +2331,8 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 	memset(bd3d->modelMatrix, 0, sizeof(float[16]));
 }
 
+#if HAVE_LIBPNG
+
 void GenerateImage3d(renderdata *prd, const char* szName,
 	const int nSize, const int nSizeX, const int nSizeY)
 {
@@ -2363,3 +2365,5 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	gdk_pixmap_unref(ppm);
 	free(puch);
 }
+
+#endif

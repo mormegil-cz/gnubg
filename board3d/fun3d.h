@@ -112,3 +112,6 @@ extern void RestrictiveDrawDice(BoardData* bd);
 extern void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner);
 extern void RestrictiveDrawMoveIndicator(BoardData* bd);
 extern void RestrictiveDrawBoardNumbers(BoardData3d *bd3d);
+
+extern void setDicePos(BoardData *bd, BoardData3d *bd3d);
+extern int DiceTooClose(BoardData3d *bd3d, renderdata *prd);

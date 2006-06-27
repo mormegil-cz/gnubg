@@ -163,8 +163,6 @@ extern void Confirm( BoardData *bd );
 extern int update_move(BoardData *bd);
 extern gboolean place_chequer_or_revert(BoardData *bd, int dest);
 extern gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] );
-extern void setDicePos(BoardData *bd, BoardData3d *bd3d);
-extern int DiceTooClose(BoardData3d *bd3d, renderdata *prd);
 extern void InitBoardData(BoardData* bd);
 extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
 extern gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, BoardData* bd);
@@ -185,6 +183,8 @@ extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
 }
 #endif /* __cplusplus */
 
+#if USE_BOARD3D
 #include "board3d/fun3d.h"
+#endif
 
 #endif
