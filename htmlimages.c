@@ -40,7 +40,7 @@
 #include <unistd.h>
 #endif
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <glib.h>
 
 #include "backgammon.h"

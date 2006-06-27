@@ -121,12 +121,10 @@ static void Disconnect(PyObject *r)
 
 	Py_DECREF(r);
 }
-#endif /* USE_PYTHON */
 
 extern int RelationalMatchExists()
 {
   int ret = -1;
-#if USE_PYTHON
   PyObject *v, *r;
 
   if (!(r = Connect()))
@@ -151,9 +149,6 @@ extern int RelationalMatchExists()
 
   Disconnect(r);
 
-#else /* USE_PYTHON */
-  outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
   return ret;
 }
 
@@ -406,7 +401,6 @@ int MatchAnalysed()
 extern void
 CommandRelationalAddMatch( char *sz ) {
 
-#if USE_PYTHON
   PyObject *v, *r;
   char* env;
   int force = FALSE;
@@ -483,17 +477,12 @@ CommandRelationalAddMatch( char *sz ) {
 
   Disconnect(r);
 
-#else /* USE_PYTHON */
-  outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
-
 }
 
 int env_added;	/* Horrid flag to see if next function worked... */
 
 extern void CommandRelationalAddEnvironment(char *sz)
 {
-#if USE_PYTHON
 	PyObject *v, *r;
 
 	env_added = FALSE;
@@ -537,15 +526,11 @@ extern void CommandRelationalAddEnvironment(char *sz)
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void
 CommandRelationalTest( char *sz ) {
 
-#if USE_PYTHON
   PyObject *v, *r;
 
   if (!(r = Connect()))
@@ -582,37 +567,26 @@ CommandRelationalTest( char *sz ) {
 
   Disconnect(r);
 
-#else /* USE_PYTHON */
-  outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
-
 }
 
 extern void
 CommandRelationalHelp( char *sz ) {
-#if USE_PYTHON
 	LoadDatabasePy();
-#endif
   CommandNotImplemented( sz );
 }
 
 extern void
 CommandRelationalShowEnvironments( char *sz )
 {
-#if USE_PYTHON
 	/* Use the Select command */
 	CommandRelationalSelect("place FROM env "
                          "ORDER BY env_id");
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void
 CommandRelationalShowDetails( char *sz )
 {
-#if USE_PYTHON
 	PyObject *v, *r;
 
 	char *player_name, *env;
@@ -698,29 +672,21 @@ CommandRelationalShowDetails( char *sz )
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void
 CommandRelationalShowPlayers( char *sz )
 {
-#if USE_PYTHON
 	/* Use the Select command */
 	CommandRelationalSelect("person.name AS Player, nick.name AS Nickname, env.place AS env"
 		" FROM nick INNER JOIN env ON nick.env_id = env.env_id"
 		" INNER JOIN person ON nick.person_id = person.person_id"
 		" ORDER BY person.name");
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void CommandRelationalErase(char *sz)
 {
-#if USE_PYTHON
 	PyObject *v, *r;
 	char *player_name, *env;
 
@@ -762,14 +728,10 @@ extern void CommandRelationalErase(char *sz)
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void RelationalLinkNick(char* nick, char* env, char* player)
 {	/* Link nick on env to player */
-#if USE_PYTHON
 	PyObject *v, *r;
 
 	r = Connect();
@@ -797,14 +759,10 @@ extern void RelationalLinkNick(char* nick, char* env, char* player)
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void CommandRelationalRenameEnv(char *sz)
 {
-#if USE_PYTHON
 	PyObject *v, *r;
 	char *env_name, *new_name;
 
@@ -842,16 +800,12 @@ extern void CommandRelationalRenameEnv(char *sz)
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 int env_deleted;	/* Horrid flag to see if next function worked... */
 
 extern void CommandRelationalEraseEnv(char *sz)
 {
-#if USE_PYTHON
 	PyObject *v, *r;
 
 	env_deleted = FALSE;
@@ -897,14 +851,10 @@ extern void CommandRelationalEraseEnv(char *sz)
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
 extern void CommandRelationalEraseAll(char *sz)
 {
-#if USE_PYTHON
 	PyObject *v, *r;
 
 	if( fConfirmSave && !GetInputYN( _("Are you sure you want to erase all "
@@ -935,12 +885,8 @@ extern void CommandRelationalEraseAll(char *sz)
 
 	Disconnect(r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
 
-#if USE_PYTHON
 
 extern void FreeRowset(RowSet* pRow)
 {
@@ -979,7 +925,6 @@ void MallocRowset(RowSet* pRow, int rows, int cols)
 	pRow->rows = rows;
 }
 
-#if USE_PYTHON
 extern int UpdateQuery(char *sz)
 {
 	PyObject *v, *r;
@@ -1116,12 +1061,9 @@ extern int RunQuery(RowSet* pRow, char *sz)
 
 	return TRUE;
 }
-#endif
-#endif
 
 extern void CommandRelationalSelect(char *sz)
 {
-#if USE_PYTHON
 #if !USE_GTK
 	int i, j;
 #endif
@@ -1184,11 +1126,7 @@ extern void CommandRelationalSelect(char *sz)
 #endif
 	FreeRowset(&r);
 
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
 }
-#if USE_PYTHON
 extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
 										  const char* newNotes)
 {
@@ -1217,5 +1155,68 @@ extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
 			outputerrf( _("Error running database command") );
 	}
 	FreeRowset(&r);
+}
+#else
+#include "backgammon.h"
+#include <glib/gi18n.h>
+extern void
+CommandRelationalAddEnvironment (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalErase (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalRenameEnv (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalEraseEnv (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalEraseAll (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalSelect (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalAddMatch (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalTest (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalHelp (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalShowEnvironments (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalShowDetails (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
+}
+extern void
+CommandRelationalShowPlayers (char *sz)
+{
+  outputl (_("This build was not compiled with support for Python.\n"));
 }
 #endif
