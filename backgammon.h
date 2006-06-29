@@ -1239,9 +1239,7 @@ extern int fTutorAnalysis;
 
 extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 
-#if USE_GTK
 #define GNUBG_CHARSET "UTF-8"
-#endif
 
 extern char *
 Convert ( const char* sz, 
