@@ -10,7 +10,6 @@ erftest
 gnubg
 *.bd
 gnubg.wd
-gnubg.weights
 makebearoff
 makebearoff1
 makehyper
@@ -28,3 +27,11 @@ config.guess
 config.sub
 libtool
 ltmain.sh
+copying.c
+credits.c
+credits.h
+external_l.c
+external_y.c
+external_y.h
+sgfl.c
+sgfp.c

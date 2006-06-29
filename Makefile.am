@@ -74,22 +74,25 @@ COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
               @FT2_CFLAGS@ @PYTHON_CFLAGS@ @GLIB_CFLAGS@
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @LTLIBINTL@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
-	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
-	pub_eval.c set.c show.c dice.c dice.h \
-	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
-	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c \
-        import.c import.h external.c external.h credits.h credits.c \
-	latex.c \
-	postscript.c html.c export.h matchid.c matchid.h text.c \
-	export.c sound.h record.c record.h osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
-	onechequer.c onechequer.h path.c path.h render.c render.h \
-	htmlimages.c speed.c renderprefs.c renderprefs.h \
-	boardpos.c boardpos.h progress.c progress.h format.c format.h \
-	formatgs.c formatgs.h boarddim.h timer.c \
-	external_y.y external_l.l external_y.h openurl.c openurl.h \
-	mec.h mec.c relational.h relational.c
+
+COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
+		 getopt.h getopt.c getopt1.c eval.h eval.c play.c \
+		 positionid.h positionid.c drawboard.h drawboard.c \
+		 pub_eval.c set.c show.c dice.c dice.h rollout.c \
+		 rollout.h kleinman.c matchequity.c matchequity.h \
+		 analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h \
+		 sgfl.c import.c import.h external.c external.h \
+		 latex.c postscript.c html.c export.h matchid.c \
+		 matchid.h text.c export.c sound.h record.c record.h \
+		 osr.c osr.h bearoffgammon.c bearoffgammon.h bearoff.c \
+		 bearoff.h onechequer.c onechequer.h path.c path.h \
+		 render.c render.h htmlimages.c speed.c \
+		 renderprefs.c renderprefs.h boardpos.c boardpos.h \
+		 progress.c progress.h format.c format.h formatgs.c \
+		 formatgs.h boarddim.h timer.c external_y.y \
+		 external_l.l external_y.h openurl.c openurl.h mec.h \
+		 mec.c relational.h relational.c
+
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
@@ -196,7 +199,11 @@ sgfp.c sgfp.h: sgf.y
 sgfl.c: sgf.l
 	$(LEX) -o$@ -Psgf $(srcdir)/sgf.l
 
-credits.c AUTHORS: credits.sh
+#LEX must not clobber sgf.c, but make sure the sources are in place
+sgf.c: sgfp.c sgfp.h sgfl.c
+	@true
+
+credits.c credits.h: credits.sh
 	cd $(srcdir) && $(SHELL) ./credits.sh
 
 copying.c: COPYING copying.awk
