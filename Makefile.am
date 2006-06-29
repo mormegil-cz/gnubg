@@ -90,7 +90,7 @@ COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 renderprefs.c renderprefs.h boardpos.c boardpos.h \
 		 progress.c progress.h format.c format.h formatgs.c \
 		 formatgs.h boarddim.h timer.c external_y.y \
-		 external_l.l external_y.h openurl.c openurl.h mec.h \
+		 external_l.l openurl.c openurl.h mec.h \
 		 mec.c relational.h relational.c
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
