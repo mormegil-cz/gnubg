@@ -1,4 +1,9 @@
+Fri Jun 30 11:41:51 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: fix save settings when using gnubg -t
+
 Thu Jun 29 11:41:00 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
 	* gnubg.weights: added to archive
 
 Thu Jun 29 11:27:09 CEST 2006 Christian Anthon <anthon@kiku.dk>
