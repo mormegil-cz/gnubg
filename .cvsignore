@@ -35,3 +35,4 @@ external_y.c
 external_y.h
 sgfl.c
 sgfp.c
+sgfp.h
