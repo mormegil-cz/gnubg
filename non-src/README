@@ -1,0 +1,27 @@
+The files in this directory will be generated automatically on linux
+and other system supporting the autobuild process. You should
+therefore not edit any of these files. If you need to alter any code
+in any of these files you should rather edit the corresponding file
+that generates it.
+
+If you have troubles building any of these files you may copy the file
+causing problems from this directory to its intended location.
+
+TARGET                     SOURCE
+
+../copying.c               ../copying.awk
+
+../credits.c               ../credits.sh
+../credits.h               ../credits.sh
+
+../external_l.c            ../external_l.l
+
+../external_y.c            ../external_y.y
+../external_y.h            ../external_y.y
+
+../doc/gnubg.xml           ../doc/gnubg.texi
+
+../sgfl.c                  ../sgf.l
+../sgfp.c                  ../sgf.y
+../sgfp.h                  ../sgf.y
+

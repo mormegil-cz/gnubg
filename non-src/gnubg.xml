@@ -3,8 +3,8 @@
 <texinfo xml:lang="en">
   <setfilename>gnubg.xml</setfilename>
   <settitle>GNU Backgammon</settitle>
-  <setvalue name="UPDATED">2 June 2006</setvalue>
-  <setvalue name="UPDATED-MONTH">June 2006</setvalue>
+  <setvalue name="UPDATED">16 November 2003</setvalue>
+  <setvalue name="UPDATED-MONTH">November 2003</setvalue>
   <setvalue name="EDITION">0.14.3-devel</setvalue>
   <setvalue name="VERSION">0.14.3-devel</setvalue>
   <setvalue name="month-year">October, 2003</setvalue>

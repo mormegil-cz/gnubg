@@ -1,3 +1,8 @@
+Mon Jul  3 17:58:33 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* doc/gnubg.xml, non-src/README: gnubg.xml moved (edit gnubg.texi
+	instead).
+
 Fri Jun 30 11:41:51 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: fix save settings when using gnubg -t
