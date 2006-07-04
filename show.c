@@ -1392,9 +1392,9 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
 #endif
 
   output ( _("Match equity table: ") );
-  outputl( miCurrent.szName );
+  outputl( (char*)miCurrent.szName );
   outputf( "(%s)\n", miCurrent.szFileName );
-  outputl( miCurrent.szDescription );
+  outputl( (char*)miCurrent.szDescription );
   outputl( "" );
   
   /* write tables */

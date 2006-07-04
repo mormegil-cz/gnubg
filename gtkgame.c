@@ -3874,8 +3874,8 @@ extern void SetMET( GtkWidget *pw, gpointer p ) {
 		 "met", FDT_NONE_OPEN, PATH_MET );
 
     /* update filename on option page */
-    if ( p && GTK_WIDGET_VISIBLE( p ) )
-	gtk_label_set_text( GTK_LABEL( p ), miCurrent.szFileName );
+    if ( p && GTK_WIDGET_VISIBLE ( p ) )
+        gtk_label_set_text ( GTK_LABEL ( p ), ( char * ) miCurrent.szFileName );
 
     if( pch )
 	free( pch );

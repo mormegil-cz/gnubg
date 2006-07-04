@@ -69,9 +69,9 @@ UpdateTable ( mettable *pmt,
 
   /* set labels */
 
-  gtk_label_set_text ( GTK_LABEL ( pmt->pwName ), pmi->szName );
-  gtk_label_set_text ( GTK_LABEL ( pmt->pwFileName ), pmi->szFileName );
-  gtk_label_set_text ( GTK_LABEL ( pmt->pwDescription ), pmi->szDescription );
+  gtk_label_set_text ( GTK_LABEL ( pmt->pwName ), (char*) pmi->szName );
+  gtk_label_set_text ( GTK_LABEL ( pmt->pwFileName ), (char*) pmi->szFileName );
+  gtk_label_set_text ( GTK_LABEL ( pmt->pwDescription ), (char*) pmi->szDescription );
 
   /* fill out table */
     
@@ -129,13 +129,13 @@ static GtkWidget
   pmt->pwTable = pwTable;
 
   gtk_box_pack_start( GTK_BOX( pwBox ), 
-                      pmt->pwName = gtk_label_new( miCurrent.szName ),
+                      pmt->pwName = gtk_label_new( (char*) miCurrent.szName ),
                       FALSE, FALSE, 4 );
   gtk_box_pack_start( GTK_BOX( pwBox ),
-                      pmt->pwFileName = gtk_label_new( miCurrent.szFileName ),
+                      pmt->pwFileName = gtk_label_new( (char*) miCurrent.szFileName ),
                       FALSE, FALSE, 4 );
   gtk_box_pack_start( GTK_BOX( pwBox ),
-                      pmt->pwDescription = gtk_label_new( miCurrent.szDescription ),
+                      pmt->pwDescription = gtk_label_new( (char*) miCurrent.szDescription ),
                       FALSE, FALSE, 4 );
 
   gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );

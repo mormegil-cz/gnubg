@@ -56,19 +56,19 @@ extern double erf( double x );
 
 
 #if (LIBXML_VERSION > 20412)
-const static char* XML_PUBLIC_ID = "-//GNU Backgammon//DTD Match Equity Tables//EN";
+const static xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
 #endif
 
 typedef struct _parameter {
 
-  char *szName, *szValue;
+  xmlChar *szName, *szValue;
 
 } parameter;
 
 
 typedef struct _metparameters {
 
-  char *szName;
+  xmlChar *szName;
   list lParameters;
 
 } metparameters;
@@ -904,15 +904,15 @@ getDefaultMET ( metdata *pmd ) {
   parameter *pp;
 
   static parameter apPreCrawford[] = 
-  { { "gammon-rate-leader", "0.25" },
-    { "gammon-rate-trailer", "0.15" },
-    { "delta", "0.08" },
-    { "deltebar", "0.06" } };
+  { { BAD_CAST "gammon-rate-leader", BAD_CAST "0.25" },
+    { BAD_CAST "gammon-rate-trailer", BAD_CAST "0.15" },
+    { BAD_CAST "delta", BAD_CAST "0.08" },
+    { BAD_CAST "deltebar", BAD_CAST "0.06" } };
 
   static parameter apPostCrawford[] = 
-  { { "gammon-rate-trailer", "0.25" },
-    { "free-drop-2-away", "0.015" },
-    { "free-drop-4-away", "0.004" } };
+  { { BAD_CAST "gammon-rate-trailer", BAD_CAST "0.25" },
+    { BAD_CAST "free-drop-2-away", BAD_CAST "0.015" },
+    { BAD_CAST "free-drop-4-away", BAD_CAST "0.004" } };
 
   /* Setup default met */
 
@@ -920,26 +920,26 @@ getDefaultMET ( metdata *pmd ) {
 
   for ( i = 0; i < 4; i++ ) {
     pp = (parameter *) malloc ( sizeof ( parameter ) );
-    pp->szName = strdup ( apPreCrawford[ i ].szName );
-    pp->szValue = strdup ( apPreCrawford[ i ].szValue );
+    pp->szName = BAD_CAST strdup ( (char*) apPreCrawford[ i ].szName );
+    pp->szValue = BAD_CAST strdup ( (char*) apPreCrawford[ i ].szValue );
     ListInsert ( &pmd->mpPreCrawford.lParameters, pp );
   }
 
   for ( j = 0; j < 2; j++ ) {
     for ( i = 0; i < 3; i++ ) {
       pp = (parameter *) malloc ( sizeof ( parameter ) );
-      pp->szName = strdup ( apPostCrawford[ i ].szName );
-      pp->szValue = strdup ( apPostCrawford[ i ].szValue );
+      pp->szName = BAD_CAST strdup ( (char*) apPostCrawford[ i ].szName );
+      pp->szValue = BAD_CAST strdup ( (char*) apPostCrawford[ i ].szValue );
       ListInsert ( &pmd->ampPostCrawford[ j ].lParameters, pp );
     }
-    pmd->ampPostCrawford[ j ].szName = strdup ( "zadeh" );
+    pmd->ampPostCrawford[ j ].szName = BAD_CAST strdup ( "zadeh" );
   }
 
-  pmd->mpPreCrawford.szName = strdup ( "zadeh" );
+  pmd->mpPreCrawford.szName = BAD_CAST strdup ( "zadeh" );
 
-  pmd->mi.szName = strdup ( "N. Zadeh, Management Science 23, 986 (1977)" );
-  pmd->mi.szFileName = strdup ( "met/zadeh.xml" );
-  pmd->mi.szDescription = strdup ( "" );
+  pmd->mi.szName = BAD_CAST strdup ( "N. Zadeh, Management Science 23, 986 (1977)" );
+  pmd->mi.szFileName = BAD_CAST strdup ( "met/zadeh.xml" );
+  pmd->mi.szDescription = BAD_CAST strdup ( "" );
   pmd->mi.nLength = MAXSCORE;
 
 }
@@ -951,7 +951,7 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
                         int nLength,
                         metparameters *pmp ) {
 
-  if ( ! strcmp ( pmp->szName, "mec" ) ) {
+  if ( ! strcmp ( (char*)pmp->szName, "mec" ) ) {
     
     float rG = 0.15;
     float rWR = 0.5;
@@ -968,10 +968,10 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
 
       pp = pl->p;
 
-      if ( ! strcmp ( pp->szName, "gammon-rate" ) )
-        rG = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "win-rate" ) )
-        rWR = (float) g_ascii_strtod ( pp->szValue, NULL );
+      if ( ! strcmp ( (char*)pp->szName, "gammon-rate" ) )
+        rG = (float) g_ascii_strtod ( (char*)pp->szValue, NULL );
+      else if ( ! strcmp ( (char*)pp->szName, "win-rate" ) )
+        rWR = (float) g_ascii_strtod ( (char*)pp->szValue, NULL );
 
     }
 
@@ -982,7 +982,7 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
     return 0;
 
   }
-  else if ( ! strcmp ( pmp->szName, "zadeh" ) ) {
+  else if ( ! strcmp ( (char*) pmp->szName, "zadeh" ) ) {
     
     float rG1 = 0.25;
     float rG2 = 0.15;
@@ -1002,14 +1002,14 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
 
       pp = pl->p;
 
-      if ( ! strcmp ( pp->szName, "gammon-rate-leader" ) )
-        rG1 = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "gammon-rate-trailer" ) )
-        rG2 = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "delta" ) )
-        rDelta = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "delta-bar" ) )
-        rDeltaBar = (float) g_ascii_strtod ( pp->szValue, NULL );
+      if ( ! strcmp ( (char*) pp->szName, "gammon-rate-leader" ) )
+        rG1 = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "gammon-rate-trailer" ) )
+        rG2 = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "delta" ) )
+        rDelta = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "delta-bar" ) )
+        rDeltaBar = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
 
     }
 
@@ -1037,7 +1037,7 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
                                     int nLength,
                                     metparameters *pmp ) {
 
-  if ( ! strcmp ( pmp->szName, "zadeh" ) ) {
+  if ( ! strcmp ( (char*) pmp->szName, "zadeh" ) ) {
     
     float rG = 0.25;
     float rFD2 = 0.015;
@@ -1056,12 +1056,12 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
 
       pp = pl->p;
 
-      if ( ! strcmp ( pp->szName, "gammon-rate-trailer" ) )
-        rG = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "free-drop-2-away" ) )
-        rFD2 = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "free-drop-4-away" ) )
-        rFD4 = (float) g_ascii_strtod ( pp->szValue, NULL );
+      if ( ! strcmp ( (char*) pp->szName, "gammon-rate-trailer" ) )
+        rG = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "free-drop-2-away" ) )
+        rFD2 = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "free-drop-4-away" ) )
+        rFD4 = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
 
     }
 
@@ -1071,7 +1071,7 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
     return 0;
 
   }
-  else if ( ! strcmp( pmp->szName, "mec" ) ) {
+  else if ( ! strcmp ( (char*) pmp->szName, "mec" ) ) {
 
     float rG = 0.25;
     float rFD2 = 0.015;
@@ -1087,14 +1087,14 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
 
       pp = pl->p;
 
-      if ( ! strcmp ( pp->szName, "gammon-rate" ) )
-        rG = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "free-drop-2-away" ) )
-        rFD2 = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp ( pp->szName, "free-drop-4-away" ) )
-        rFD4 = (float) g_ascii_strtod ( pp->szValue, NULL );
-      else if ( ! strcmp( pp->szName, "win-rate" ) )
-        rWR = (float) g_ascii_strtod ( pp->szValue, NULL );
+      if ( ! strcmp ( (char*) pp->szName, "gammon-rate" ) )
+        rG = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "free-drop-2-away" ) )
+        rFD2 = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "free-drop-4-away" ) )
+        rFD4 = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
+      else if ( ! strcmp ( (char*) pp->szName, "win-rate" ) )
+        rWR = (float) g_ascii_strtod ( (char*) pp->szValue, NULL );
 
     }
 
@@ -1129,9 +1129,9 @@ parseRow ( float arRow[], xmlDocPtr doc, xmlNodePtr root ) {
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "me" ) ) {
-      char* row = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      arRow[ iCol ]  = g_ascii_strtod( row , NULL );
+    if ( ! strcmp ( (char*) (char*)cur->name, "me" ) ) {
+      xmlChar *row = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
+      arRow[ iCol ]  = g_ascii_strtod( (char*)row , NULL );
       xmlFree(row);        
 
       iCol++;
@@ -1152,7 +1152,7 @@ parsePreCrawfordExplicit ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "row" ) )
+    if ( ! strcmp ( (char*)cur->name, "row" ) )
       parseRow ( pmd->aarMET[ iRow++ ], doc, cur );
 
   }
@@ -1163,21 +1163,21 @@ static void
 parseParameters ( list *plList, xmlDocPtr doc, xmlNodePtr root ) {
 
   xmlNodePtr cur;
-  char *pc;
+  xmlChar *pc;
   parameter *pp;
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "parameter" ) ) {
+    if ( ! strcmp ( (char*)cur->name, "parameter" ) ) {
 
       pp = (parameter *) malloc ( sizeof ( parameter ) );
 
-      pc = xmlGetProp ( cur, "name" );
-      pp->szName = strdup ( pc ? pc : "" );
+      pc = xmlGetProp ( cur, BAD_CAST "name" );
+      pp->szName = BAD_CAST strdup ( (char*) (pc ? pc : BAD_CAST "" ));
       xmlFree(pc);
       
       pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pp->szValue = strdup ( pc ? pc : "" );
+      pp->szValue = BAD_CAST strdup ( (char*) (pc ? pc : BAD_CAST ""));
       xmlFree(pc);
 
       ListInsert ( plList, pp );
@@ -1197,7 +1197,7 @@ parsePreCrawfordFormula ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "parameters" ) )
+    if ( ! strcmp ( (char*) cur->name, "parameters" ) )
       parseParameters ( &pmd->mpPreCrawford.lParameters, 
                         doc, cur );
 
@@ -1214,7 +1214,7 @@ parsePostCrawfordFormula ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root,
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "parameters" ) ) {
+    if ( ! strcmp ( (char*) cur->name, "parameters" ) ) {
 
       if ( fPlayer < 0 ) {
         parseParameters ( &pmd->ampPostCrawford[ 0 ].lParameters, 
@@ -1241,7 +1241,7 @@ parsePostCrawfordExplicit ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root,
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "row" ) ) {
+    if ( ! strcmp ( (char*) cur->name, "row" ) ) {
 
       if ( fPlayer < 0 ) {
         parseRow ( pmd->aarMETPostCrawford[ 0 ], doc, cur );
@@ -1261,7 +1261,7 @@ parsePostCrawfordExplicit ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root,
 
 static void parsePreCrawford ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
-  if ( ! strcmp ( pmd->mpPreCrawford.szName, "explicit" ) )
+  if ( ! strcmp ( (char*) pmd->mpPreCrawford.szName, "explicit" ) )
     parsePreCrawfordExplicit ( pmd, doc, root );
   else
     parsePreCrawfordFormula ( pmd, doc, root );
@@ -1274,7 +1274,7 @@ static void parsePostCrawford ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root,
 
   int i = ( fPlayer < 0 ) ? 0 : fPlayer;
 
-  if ( ! strcmp ( pmd->ampPostCrawford[ i ].szName, "explicit" ) )
+  if ( ! strcmp ( (char*) pmd->ampPostCrawford[ i ].szName, "explicit" ) )
     parsePostCrawfordExplicit ( pmd, doc, root, fPlayer );
   else
     parsePostCrawfordFormula ( pmd, doc, root, fPlayer );
@@ -1285,24 +1285,24 @@ static void parsePostCrawford ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root,
 static void parseInfo ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
   xmlNodePtr cur;
-  char *pc;
+  xmlChar *pc;
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "name" ) ) {
+    if ( ! strcmp ( (char*) cur->name, "name" ) ) {
       pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pmd->mi.szName = ( pc ) ? strdup ( pc ) : NULL;
+      pmd->mi.szName = ( pc ) ? BAD_CAST strdup ( (char*) pc ) : NULL;
       xmlFree(pc);
     }
-    else if ( ! strcmp ( cur->name, "description" ) ) {
+    else if ( ! strcmp ( (char*) cur->name, "description" ) ) {
       pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pmd->mi.szDescription = ( pc ) ? strdup ( pc ) : NULL;
+      pmd->mi.szDescription = ( pc ) ? BAD_CAST strdup ( (char*) pc ) : NULL;
       xmlFree(pc);
     }
-    else if ( ! strcmp ( cur->name, "length" ) )
+    else if ( ! strcmp ( (char*) cur->name, "length" ) )
     {
-      char* len = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
-      pmd->mi.nLength = atoi(len);
+      xmlChar* len = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
+      pmd->mi.nLength = atoi((char*)len);
       xmlFree(len);
     }
   }
@@ -1343,7 +1343,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
   xmlDocPtr doc;
   xmlNodePtr root, cur;
 
-  char *pc, *pch;
+  xmlChar *pc, *pch;
 
   int fError;
 
@@ -1351,7 +1351,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   /* parse document */
 
-  doc = xmlParseFile( pch = PathSearch( szFileName, szDir ) );
+  doc = xmlParseFile( (char*) (pch = BAD_CAST PathSearch( szFileName, szDir )) );
   free( pch );
   
   /* check root */
@@ -1382,7 +1382,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
   	xmlInitializeCatalog();
 	pch = NULL;
 	
-	if (0 == xmlLoadCatalog(pch = PathSearch( "met/catalog.xml", szDir ))) {}
+	if (0 == xmlLoadCatalog((char*) (pch = BAD_CAST PathSearch( "met/catalog.xml", szDir )))) {}
 	else if ( 0 == xmlLoadCatalog(PKGDATADIR "/met/catalog.xml")) {}
 	else if ( 0 == xmlLoadCatalog ( "./met/catalog.xml" )) {}
 	else if ( 0 == xmlLoadCatalog ( "./catalog.xml" )) {}
@@ -1437,33 +1437,33 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
 
-    if ( ! strcmp ( cur->name, "info" ) )
+    if ( ! strcmp ( (char*) cur->name, "info" ) )
       parseInfo ( pmd, doc, cur );
-    else if ( ! strcmp ( cur->name, "pre-crawford-table" ) ) {
+    else if ( ! strcmp ( (char*) cur->name, "pre-crawford-table" ) ) {
 
-      pc = xmlGetProp ( cur, "type" );
+      pc = xmlGetProp ( cur, BAD_CAST "type" );
       if ( pc )
         pmd->mpPreCrawford.szName = pc;
       else
-        pmd->mpPreCrawford.szName = strdup ( "explicit" );
+        pmd->mpPreCrawford.szName = BAD_CAST strdup ( "explicit" );
 
       parsePreCrawford ( pmd, doc, cur );
 
     }
-    else if ( ! strcmp ( cur->name, "post-crawford-table" ) ) {
+    else if ( ! strcmp ( (char*) cur->name, "post-crawford-table" ) ) {
 
       int fPlayer;
       int i;
 
-      pc = xmlGetProp ( cur, "player" );
+      pc = xmlGetProp ( cur, BAD_CAST "player" );
       if ( pc ) {
         
         /* attribute "player" was specified */
 
-        if ( ! strcmp ( pc, "both" ) || ! strcmp ( pc, "all" ) )
+        if ( ! strcmp ( (char*) pc, "both" ) || ! strcmp ( (char*) pc, "all" ) )
           fPlayer = -1;
         else
-          fPlayer = atoi ( pc );
+          fPlayer = atoi ( (char*)pc );
 
         if ( fPlayer < -1 || fPlayer > 1 ) {
           printf ( _("Illegal value for attribute player: '%s'\n"), pc );
@@ -1482,12 +1482,12 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
         if ( fPlayer < 0 || i == fPlayer ) {
 
-          pc = xmlGetProp ( cur, "type" );
+          pc = xmlGetProp ( cur, BAD_CAST "type" );
 
           if ( pc )
-            pmd->ampPostCrawford[ i ].szName = pc;
+            pmd->ampPostCrawford[ i ].szName = BAD_CAST pc;
           else
-            pmd->ampPostCrawford[ i ].szName = strdup ( "explicit" );
+            pmd->ampPostCrawford[ i ].szName = BAD_CAST strdup ( "explicit" );
         }
 
       }
@@ -1511,7 +1511,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
   printf ( "Length        : %d\n", pmd->mi.nLength );
   printf ( "pre-Crawford:\n" );
 
-  if ( ! strcmp ( pmd->mpPreCrawford.szName, "explicit" ) ) {
+  if ( ! strcmp ( (char*) pmd->mpPreCrawford.szName, "explicit" ) ) {
     for ( j = 0; j < pmd->mi.nLength; j++ ) {
       printf ( "row %2d: ", j );
       for ( i = 0; i < pmd->mi.nLength; i++ ) {
@@ -1521,7 +1521,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
     }
   }
 
-  if ( ! strcmp ( pmd->mpPostCrawford.szName, "explicit" ) ) {
+  if ( ! strcmp ( (char*) pmd->mpPostCrawford.szName, "explicit" ) ) {
     printf ( "row %2d: ", 0 );
     for ( i = 0; i < pmd->mi.nLength; i++ ) {
       printf ( "%5.3f ", pmd->arMETPostCrawford[ i ] );
@@ -1537,7 +1537,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
     xmlFreeDoc ( doc );
 
   if ( ! fError )
-    pmd->mi.szFileName = strdup ( szFileName );
+    pmd->mi.szFileName = BAD_CAST strdup ( (char*) szFileName );
 
   return fError;
 
@@ -1751,7 +1751,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
 
   for ( j = 0; j < 2; j++ ) {
 
-    if ( ! strcmp ( md.ampPostCrawford[ j ].szName, "explicit" ) ) {
+    if ( ! strcmp ( (char*) md.ampPostCrawford[ j ].szName, "explicit" ) ) {
 
       /* copy and extend table */
 
@@ -1788,7 +1788,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
 
   /* pre-Crawford table */
 
-  if ( ! strcmp ( md.mpPreCrawford.szName, "explicit" ) ) {
+  if ( ! strcmp ( (char*) md.mpPreCrawford.szName, "explicit" ) ) {
 
     /* copy table */
 

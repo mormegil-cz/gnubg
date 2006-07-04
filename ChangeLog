@@ -1,3 +1,8 @@
+Tue Jul  4 18:45:04 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* several files: fix gcc4 compiler warnings due to xml using usigned
+	char
+
 Mon Jul  3 17:58:33 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* doc/gnubg.xml, non-src/README: gnubg.xml moved (edit gnubg.texi

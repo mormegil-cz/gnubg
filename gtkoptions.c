@@ -815,7 +815,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_box_pack_start (GTK_BOX (pwhoriz),
 			gtk_label_new( _("Current:") ),
 			FALSE, FALSE, 2);
-    pwLabelFile = gtk_label_new( miCurrent.szFileName );
+    pwLabelFile = gtk_label_new( (char*) miCurrent.szFileName );
     gtk_box_pack_end(GTK_BOX (pwhoriz), pwLabelFile,
 		     FALSE, FALSE, 2);
     pow->pwLoadMET = gtk_button_new_with_label (_("Load..."));

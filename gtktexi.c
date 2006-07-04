@@ -538,12 +538,12 @@ static void ScanStartElement( void *pv, const xmlChar *pchName,
 
     GtkTexi *pw = pv;
 
-    if( !strcmp( pchName, "anchor" ) )
+    if( !strcmp( (char*) pchName, "anchor" ) )
 	AddNode( pw, "FIXME handle anchor name attribute", FALSE,
 		 pw->ptic->ib );
-    else if( !strcmp( pchName, "node" ) )
+    else if( !strcmp( (char*) pchName, "node" ) )
 	pw->ptic->ibNode = pw->ptic->ib;
-    else if( !strcmp( pchName, "nodename" ) )
+    else if( !strcmp( (char*) pchName, "nodename" ) )
 	NewParameter( pw );
 }
 
@@ -551,7 +551,7 @@ static void ScanEndElement( void *pv, const xmlChar *pchName ) {
 
     GtkTexi *pw = pv;
 
-    if( !strcmp( pchName, "nodename" ) ) {
+    if( !strcmp((char*)  pchName, "nodename" ) ) {
 	AddNode( pw, ReadParameter( pw ), TRUE, pw->ptic->ibNode );
 	pw->ptic->pch = NULL;
     }
@@ -627,27 +627,27 @@ static xmlEntityPtr GetEntity(void *user_data, const xmlChar *name)
     xmlEntityPtr xmlEP = xmlGetPredefinedEntity(name);
 	if (!xmlEP)
 	{
-		if (!strcasecmp(name, "copyright"))
+		if (!strcasecmp( (char*) name, "copyright"))
 		{
 			return &xmlEntityCprt;
 		}
-		if (!strcasecmp(name, "bullet"))
+		if (!strcasecmp( (char*) name, "bullet"))
 		{
 			return &xmlEntityBullet;
 		}
-		if (!strcasecmp(name, "ldquo"))
+		if (!strcasecmp( (char*) name, "ldquo"))
 		{
 			return &xmlEntityLdQuo;
 		}
-		if (!strcasecmp(name, "rdquo"))
+		if (!strcasecmp( (char*) name, "rdquo"))
 		{
 			return &xmlEntityRdQuo;
 		}
-		if (!strcasecmp(name, "linebreak"))
+		if (!strcasecmp( (char*) name, "linebreak"))
 		{
 			return &xmlEntityLnBrk;
 		}
-		if (!strcasecmp(name, "ndash"))
+		if (!strcasecmp( (char*) name, "ndash"))
 		{
 			return &xmlEntityNdash;
 		}
@@ -786,7 +786,7 @@ char* FindAttribute(const char* name, const xmlChar **ppchAttrs)
 {
 	while (*ppchAttrs)
 	{
-		if (!strcasecmp(*ppchAttrs, name))
+		if (!strcasecmp((char*)*ppchAttrs, name))
 			return (char*)ppchAttrs[1];
 
 		/* Skip to next attribute */
@@ -810,7 +810,7 @@ static void StartElement( void *pv, const xmlChar *pchName,
     
     if( pw->ptic->szSkipTo ) {
 	/* ignore everything except the <nodename> we're looking for */
-	if( !strcmp( pchName, "nodename" ) )
+	if( !strcmp((char*)  pchName, "nodename" ) )
 	    NewParameter( pw );
 
 	return;
@@ -826,61 +826,61 @@ static void StartElement( void *pv, const xmlChar *pchName,
     if( HashLookup( &hPreFormat, l, (char *) pchName ) )
 	pw->ptic->cPreFormat++;
 
-    if( !strcmp( pchName, "para" ) || !strcmp( pchName, "group" ) )
+    if( !strcmp( (char*) pchName, "para" ) || !strcmp( (char*)pchName, "group" ) )
 	pw->ptic->cPara++;
 
-    if (!strcmp(pchName, "image"))
+    if (!strcmp( (char*) pchName, "image"))
 	{
 		const char* filename = FindAttribute("name", ppchAttrs);
 		NewParameter(pw);
 		if (filename)
 			strcpy(pw->ptic->pch, filename);
 	}
-	if (!strcmp( pchName, "xrefnodename" ) ||
-	!strcmp( pchName, "menunode" ) ||
-	!strcmp( pchName, "urefurl" ) ||
+	if (!strcmp( (char*) pchName, "xrefnodename" ) ||
+	!strcmp( (char*) pchName, "menunode" ) ||
+	!strcmp( (char*) pchName, "urefurl" ) ||
 /* FIXME handle other types of references too */
-	!strcmp( pchName, "nodenext" ) ||
-	!strcmp( pchName, "nodeprev" ) ||
-	!strcmp( pchName, "nodeup" ) )
+	!strcmp( (char*) pchName, "nodenext" ) ||
+	!strcmp( (char*) pchName, "nodeprev" ) ||
+	!strcmp( (char*) pchName, "nodeup" ) )
 	NewParameter( pw );
 
-    if( !strcmp( pchName, "menucomment" ) )
+    if( !strcmp( (char*) pchName, "menucomment" ) )
 	BufferAppend( pw, "\t", 1 );
     
-    if( !strcmp( pchName, "chapter" ) || !strcmp( pchName, "unnumbered" ) ||
-	!strcmp( pchName, "appendix" ) || !strcmp( pchName, "chapheading" ) )
+    if( !strcmp( (char*) pchName, "chapter" ) || !strcmp( (char*) pchName, "unnumbered" ) ||
+	!strcmp( (char*) pchName, "appendix" ) || !strcmp( (char*) pchName, "chapheading" ) )
 	pw->ptic->szTitleTag = "titlechap";
-    else if( !strcmp( pchName, "section" ) ||
-	     !strcmp( pchName, "unnumberedsec" ) ||
-	     !strcmp( pchName, "appendixsec" ) ||
-	     !strcmp( pchName, "heading" ) )
+    else if( !strcmp( (char*) pchName, "section" ) ||
+	     !strcmp( (char*) pchName, "unnumberedsec" ) ||
+	     !strcmp( (char*) pchName, "appendixsec" ) ||
+	     !strcmp( (char*) pchName, "heading" ) )
 	pw->ptic->szTitleTag = "titlesec";
-    else if( !strcmp( pchName, "section" ) ||
-	     !strcmp( pchName, "unnumberedsec" ) ||
-	     !strcmp( pchName, "appendixsec" ) ||
-	     !strcmp( pchName, "heading" ) )
+    else if( !strcmp( (char*) pchName, "section" ) ||
+	     !strcmp( (char*) pchName, "unnumberedsec" ) ||
+	     !strcmp( (char*) pchName, "appendixsec" ) ||
+	     !strcmp( (char*) pchName, "heading" ) )
 	pw->ptic->szTitleTag = "titlesec";
-    else if( !strcmp( pchName, "subsection" ) ||
-	     !strcmp( pchName, "unnumberedsubsec" ) ||
-	     !strcmp( pchName, "appendixsubsec" ) ||
-	     !strcmp( pchName, "subheading" ) )
+    else if( !strcmp( (char*) pchName, "subsection" ) ||
+	     !strcmp( (char*) pchName, "unnumberedsubsec" ) ||
+	     !strcmp( (char*) pchName, "appendixsubsec" ) ||
+	     !strcmp( (char*) pchName, "subheading" ) )
 	pw->ptic->szTitleTag = "titlesubsec";
-    else if( !strcmp( pchName, "subsubsection" ) ||
-	     !strcmp( pchName, "unnumberedsubsubsec" ) ||
-	     !strcmp( pchName, "appendixsubsubsec" ) ||
-	     !strcmp( pchName, "subsubheading" ) )
+    else if( !strcmp( (char*) pchName, "subsubsection" ) ||
+	     !strcmp( (char*) pchName, "unnumberedsubsubsec" ) ||
+	     !strcmp( (char*) pchName, "appendixsubsubsec" ) ||
+	     !strcmp( (char*) pchName, "subsubheading" ) )
 	pw->ptic->szTitleTag = "titlesubsubsec";
 
-    if( !strcmp( pchName, "enumerate" ) ) {
+    if( !strcmp( (char*) pchName, "enumerate" ) ) {
 	pw->ptic->cList = MIN( pw->ptic->cList + 1, 7 );
 	pw->ptic->achList[ pw->ptic->cList ] = 1; /* FIXME */
 	pw->ptic->aListType[ pw->ptic->cList ] = LIST_NUMERIC; /* FIXME */
-    } else if( !strcmp( pchName, "itemize" ) ) {
+    } else if( !strcmp( (char*) pchName, "itemize" ) ) {
 	pw->ptic->cList = MIN( pw->ptic->cList + 1, 7 );
 	pw->ptic->achList[ pw->ptic->cList ] = '*'; /* FIXME */
 	pw->ptic->aListType[ pw->ptic->cList ] = LIST_CONST;
-    } else if( !strcmp( pchName, "table" ) ) {
+    } else if( !strcmp( (char*) pchName, "table" ) ) {
 	pw->ptic->cList = MIN( pw->ptic->cList + 1, 7 );
 	pw->ptic->achList[ pw->ptic->cList ] = 0;
 	pw->ptic->aListType[ pw->ptic->cList ] = LIST_CONST;
@@ -888,29 +888,29 @@ static void StartElement( void *pv, const xmlChar *pchName,
 
     /* FIXME handle "key" tag here */
 
-    if( !strcmp( pchName, "inforef" ) || !strcmp( pchName, "menuentry" ) || !strcmp( pchName, "xref" ) )
+    if( !strcmp( (char*) pchName, "inforef" ) || !strcmp( (char*) pchName, "menuentry" ) || !strcmp( (char*) pchName, "xref" ) )
 	{
 		pw->ptic->pri = NewRef( pw );
 		pw->ptic->pri->type = ref_internal;
 	}
-	else if (!strcmp( pchName, "uref"))
+	else if (!strcmp( (char*) pchName, "uref"))
 	{
 		pw->ptic->pri = NewRef( pw );
 		pw->ptic->pri->type = ref_external;
 	}
-    else if( !strcmp( pchName, "menutitle" ) )
+    else if( !strcmp( (char*) pchName, "menutitle" ) )
 	pw->ptic->pri->iStart = gtk_text_buffer_get_char_count( pw->ptb );
     
-    if( !strcmp( pchName, "item" ) ) 
+    if( !strcmp( (char*) pchName, "item" ) ) 
 	ptt = apttItem[ CLAMP( pw->ptic->cList, 0, 7 ) ];
     else
-	ptt = gtk_text_tag_table_lookup( pttt, strcmp( pchName, "title" ) ?
+	ptt = gtk_text_tag_table_lookup( pttt, strcmp( (char*) pchName, "title" ) ?
 					 (char *) pchName :
 					 pw->ptic->szTitleTag );
     
     ListInsert( &pw->ptic->l, ptt );
 
-    if( !strcmp( pchName, "item" ) ) {
+    if( !strcmp( (char*) pchName, "item" ) ) {
 	char szLabel[ 32 ];
 	
 	switch( pw->ptic->aListType[ pw->ptic->cList ] ) {
@@ -948,7 +948,7 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
 #endif
     
     if( pw->ptic->szSkipTo ) {
-	if( !strcmp( pchName, "nodename" ) &&
+	if( !strcmp( (char*) pchName, "nodename" ) &&
 	    !strcmp( ReadParameter( pw ), pw->ptic->szSkipTo ) )
 	    pw->ptic->szSkipTo = NULL;
 	
@@ -963,16 +963,16 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
     if( HashLookup( &hPreFormat, l, (char *) pchName ) )
 	pw->ptic->cPreFormat--;
 
-    if( !strcmp( pchName, "node" ) && pw->ptic->fSingleNode ) {
+    if( !strcmp( (char*) pchName, "node" ) && pw->ptic->fSingleNode ) {
 	pw->ptic->fFinished = TRUE;
 	xmlStopParser( pw->ptic->pxpc );
 	return;
     }
     
-    if( !strcmp( pchName, "para" ) || !strcmp( pchName, "group" ) )
+    if( !strcmp( (char*) pchName, "para" ) || !strcmp( (char*) pchName, "group" ) )
 	pw->ptic->cPara--;
 
-	if (!strcmp(pchName, "image"))
+	if (!strcmp( (char*) pchName, "image"))
 	{
 		GdkPixbuf *ppb = NULL;
 
@@ -1011,30 +1011,30 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
 
 		ReadParameter( pw );
 	}
-    if (!strcmp(pchName, "uref"))
+    if (!strcmp( (char*) pchName, "uref"))
 	{
 		pw->ptic->pri->iEnd = gtk_text_buffer_get_char_count( pw->ptb );
 	}
-	else if (!strcmp(pchName, "urefurl"))
+	else if (!strcmp( (char*) pchName, "urefurl"))
 	{
 		pw->ptic->pri->sz = strdup(ReadParameter(pw));
-    } else if( !strcmp( pchName, "xrefnodename" ) ) {
+    } else if( !strcmp( (char*) pchName, "xrefnodename" ) ) {
 	BufferAppend( pw, ReadParameter( pw ), -1 );
 	pw->ptic->pri->iEnd = gtk_text_buffer_get_char_count( pw->ptb );
 	pw->ptic->pri->sz = strdup( pw->ptic->szParameter );
-    } else if( !strcmp( pchName, "menunode" ) ) {
+    } else if( !strcmp( (char*) pchName, "menunode" ) ) {
 	ReadParameter( pw );
 	pw->ptic->pri->sz = strdup( pw->ptic->szParameter );
-    } else if( !strcmp( pchName, "menutitle" ) )
+    } else if( !strcmp( (char*) pchName, "menutitle" ) )
 	pw->ptic->pri->iEnd = gtk_text_buffer_get_char_count( pw->ptb );
     /* FIXME handle other types of references too */
 
     iNavLabel = -1;
-    if( !strcmp( pchName, "nodenext" ) )
+    if( !strcmp( (char*) pchName, "nodenext" ) )
 	iNavLabel = 0;
-    else if( !strcmp( pchName, "nodeprev" ) )
+    else if( !strcmp( (char*) pchName, "nodeprev" ) )
 	iNavLabel = 1;
-    else if( !strcmp( pchName, "nodeup" ) )
+    else if( !strcmp( (char*) pchName, "nodeup" ) )
 	iNavLabel = 2;
     if( iNavLabel >= 0 ) {
 	char *pchLabel, *pch = ReadParameter( pw );
@@ -1057,21 +1057,21 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
     }
     
     if( !pw->ptic->fEmptyParagraph ) {
-	if( !strcmp( pchName, "tableterm" ) ||
-		!strcmp( pchName, "menuentry" )) {
+	if( !strcmp( (char*) pchName, "tableterm" ) ||
+		!strcmp( (char*) pchName, "menuentry" )) {
 	    BufferAppend( pw, "\n", 1 );
 	    pw->ptic->fEmptyParagraph = TRUE;
-	} else if( !strcmp( pchName, "para" ) ||
-		   !strcmp( pchName, "entry" ) ||
-		   !strcmp( pchName, "row" ) ||
-		   !strcmp( pchName, "title" ) ) {
+	} else if( !strcmp( (char*) pchName, "para" ) ||
+		   !strcmp( (char*) pchName, "entry" ) ||
+		   !strcmp( (char*) pchName, "row" ) ||
+		   !strcmp( (char*) pchName, "title" ) ) {
 	    BufferAppend( pw, "\n\n", 2 );
 	    pw->ptic->fEmptyParagraph = TRUE;
 	}
     }
     
-    if( !strcmp( pchName, "enumerate" ) || !strcmp( pchName, "itemize" ) ||
-	!strcmp( pchName, "table" ) )
+    if( !strcmp( (char*) pchName, "enumerate" ) || !strcmp( (char*) pchName, "itemize" ) ||
+	!strcmp( (char*) pchName, "table" ) )
 	pw->ptic->cList = MAX( pw->ptic->cList - 1, -1 );
 
     /* FIXME handle "key" tag here */
@@ -1140,7 +1140,7 @@ static void Characters( void *pv, const xmlChar *pchIn, int cch ) {
 
 	BufferAppend( pw, sz, -1 );
     } else {
-	BufferAppend( pw, pchIn, cch );
+	BufferAppend( pw, (char*)pchIn, cch );
 	pw->ptic->fEmptyParagraph = FALSE;
     }
 }

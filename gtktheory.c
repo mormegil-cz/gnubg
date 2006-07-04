@@ -814,15 +814,15 @@ GTKShowTheory ( const int fActivePage ) {
   pwx = gtk_vbox_new ( FALSE, 4 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwx );
 
-  gtk_box_pack_start( GTK_BOX( pwx ), pwz = gtk_label_new( miCurrent.szName ),
+  gtk_box_pack_start( GTK_BOX( pwx ), pwz = gtk_label_new( (char*) miCurrent.szName ),
                       FALSE, FALSE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
   gtk_box_pack_start( GTK_BOX( pwx ),
-                      pwz = gtk_label_new( miCurrent.szFileName ),
+                      pwz = gtk_label_new( (char*) miCurrent.szFileName ),
                       FALSE, FALSE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
   gtk_box_pack_start( GTK_BOX( pwx ),
-                      pwz = gtk_label_new( miCurrent.szDescription ),
+                      pwz = gtk_label_new( (char*) miCurrent.szDescription ),
                       FALSE, FALSE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
   

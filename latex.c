@@ -341,7 +341,7 @@ static void LaTeXEscape( FILE *pf, unsigned char *pch ) {
 }
 #endif
 
-static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
+static void PrintLaTeXComment( FILE *pf, char *pch ) {
 
     /* LaTeXEscape( pf, pch ); */
     if( pch != NULL)
