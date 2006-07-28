@@ -7,25 +7,25 @@ MINGW=$(GNU)/mingw
 
 TARGET = gnubg.exe
 
-SOURCE = analysis bearoff bearoffgammon copying credits \
-	database dice drawboard erf eval export external \
+SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
+	dice drawboard erf eval export external \
 	getopt getopt1 gnubg gtk-multiview \
 	gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
 	play gtkprefs gtkmovefilter gtkrace gtktexi gtktheory \
-	guile htmlimages onechequer \
-	html i18n import kleinman latex luxi matchequity \
+	htmlimages onechequer \
+	html import kleinman latex luxi matchequity \
 	matchid path positionid postscript pub_eval record \
-	render rollout set sgf sgfl sgfp show sound strdup \
+	render rollout set sgf non-src/sgfl non-src/sgfp show sound strdup \
 	text osr gtksplash gtkcolour renderprefs speed openurl \
 	gtkrolls boardpos gtktempmap progress format gtktoolbar \
-	gtkpath gtkbearoff gtkoptions simplelibgen formatgs \
+	gtkpath gtkbearoff gtkoptions formatgs \
 	timecontrol timer mec relational gtkgamelist \
-	gtkpanels gnubgmodule external_l external_y gtkfile \
+	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
 	gtkmovelist gtkmovelistctrl
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
-INCLUDE = -I. -I./lib \
+INCLUDE = -I. -I./lib -I./non-src \
 	-I$(MINGW)/include/gtk-2.0 \
 	-I$(MINGW)/lib/gtk-2.0/include \
 	-I$(MINGW)/include/cairo \
@@ -44,9 +44,9 @@ LIBS = \
 	-levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
 	-lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
 	-liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
-	-lopengl32 -lglu32 -lglut32 -lwsock32 -lstdc++ \
+	-lopengl32 -lglu32 -lglut32 -lwsock32 \
 	-lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
-	-lart_lgpl_2 
+	-lart_lgpl_2 -llibintl -lcairo
 
 LIBEVENT = lib\libevent.a
 LIBBOARD3D = board3d\libboard3d.a
@@ -58,12 +58,15 @@ Libraries:
 	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib
 	@$(MAKE) --no-print-directory -fmakefile.win -C board3d
 
-$(TARGET): obj $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
+$(TARGET): objdirs $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
 	@echo linking
 	@$(CC) -o "$(TARGET)" $(OBJECTS) $(LIBPATH) $(LIBS)
 
+objdirs: obj
+	@mkdir obj\non-src
+
 obj:
-	@mkdir $@
+	@mkdir obj
 
 obj/%.o: %.c
 	@echo Compiling $<
@@ -73,5 +76,6 @@ clean:
 	@$(MAKE) --no-print-directory -fmakefile.win -C board3d clean
 	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib clean
 	@del .\obj\*.o
+	@del .\obj\non-src\*.o
 	@del "$(TARGET)"
 	@echo $(TARGET) clean
