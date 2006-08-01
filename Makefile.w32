@@ -25,6 +25,20 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
+makebearoff_SOURCE = makebearoff eval positionid pub_eval matchequity \
+	matchid getopt getopt1 osr bearoffgammon bearoff path \
+	format mec
+
+makebearoff_OBJECTS=$(patsubst %,obj/%.o,$(makebearoff_SOURCE))
+
+makebearoff_LIBS = \
+	-levent -lglib-2.0.dll -lxml2 -lfreetype.dll \
+	-lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
+	-liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
+	-lopengl32 -lglu32 -lglut32 -lwsock32 \
+	-lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
+	-lart_lgpl_2 -llibintl -lcairo -lcomctl32
+
 INCLUDE = -I. -I./lib -I./non-src \
 	-I$(MINGW)/include/gtk-2.0 \
 	-I$(MINGW)/lib/gtk-2.0/include \
@@ -50,19 +64,37 @@ LIBS = \
 
 LIBEVENT = lib\libevent.a
 LIBBOARD3D = board3d\libboard3d.a
+Libraries = $(LIBEVENT) $(LIBBOARD3D)
 
-all: Libraries $(TARGET)
+all: objdirs $(Libraries) $(TARGET) BearOffDBs
 	@echo $(TARGET) done
 
-Libraries:
+$(LIBEVENT):
 	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib
+$(LIBBOARD3D):
 	@$(MAKE) --no-print-directory -fmakefile.win -C board3d
 
-$(TARGET): objdirs $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
+BearOffDBs: gnubg_os0.bd gnubg_ts0.bd
+
+gnubg_os0.bd: makebearoff.exe
+	@echo Generating one-sided bearoff database (this will take a while)
+	@makebearoff -o 6 -s 7999999 -f gnubg_os0.bd
+
+gnubg_ts0.bd: makebearoff.exe
+	@echo Generating two-sided bearoff database (this will take longer than the previous one)
+	@makebearoff -t 6x6 -f gnubg_ts0.bd
+
+makebearoff.exe: $(LIBEVENT) $(makebearoff_OBJECTS)
+	@echo linking makebearoff
+	@$(CC) -o "makebearoff.exe" $(makebearoff_OBJECTS) -L./lib $(makebearoff_LIBS)
+
+$(TARGET): $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
 	@echo linking
 	@$(CC) -o "$(TARGET)" $(OBJECTS) $(LIBPATH) $(LIBS)
 
-objdirs: obj
+objdirs: obj obj\non-src
+
+obj\non-src:
 	@mkdir obj\non-src
 
 obj:
@@ -78,4 +110,6 @@ clean:
 	@del .\obj\*.o
 	@del .\obj\non-src\*.o
 	@del "$(TARGET)"
+	@del makebearoff.exe
+	@del gnubg_os0.bd gnubg_ts0.bd
 	@echo $(TARGET) clean
