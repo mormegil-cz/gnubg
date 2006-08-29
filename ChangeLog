@@ -1,3 +1,6 @@
+Tue Aug 29 14:32:51 CEST 2006 Christian Anthon <anthon@kiku.dk>
+	* drawboard.c 'off' and 'bar' should not be translated
+	
 Wed 23 Aug 2006 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubg.c - initialise rollout context when calling RolloutGeneral

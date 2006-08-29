@@ -529,11 +529,11 @@ static char *FormatPoint( char *pch, int n ) {
     assert( n >= 0 );
     
     if( !n ) {
-        strcpy( pch, _("off") );
-        return pch + strlen(_("off") );
+        strcpy( pch, N_("off") );
+        return pch + strlen(N_("off") );
     } else if( n == 25 ) {
-        strcpy( pch, _("bar") );
-        return pch + strlen(_("bar") );
+        strcpy( pch, N_("bar") );
+        return pch + strlen(N_("bar") );
     } else if( n > 9 )
         *pch++ = n / 10 + '0';
 
