@@ -331,7 +331,6 @@ extern void
 GTKShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
   GtkWidget *pwDialog;
-  GdkFont *pf;
   GtkWidget *pwText;
   gchar *pch;
   GtkTextBuffer *buffer;
