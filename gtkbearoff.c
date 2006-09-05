@@ -23,7 +23,6 @@
 #include <config.h>
 #endif
 
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -88,8 +87,9 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 
   int i;
   int f;
-  GdkFont *pf;
   gchar *pch;
+  GtkTextBuffer *buffer;
+  PangoFontDescription *font_desc;
 
   /* read values */
 
@@ -109,27 +109,18 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 
   /* get text */
 
-#if WIN32
-  /* Windows fonts come out smaller than you ask for, for some reason... */
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
-                      "*-*-*-m-*-*-*" );
-#else
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-                      "*-*-*-m-*-*-*" );
-#endif
-
-
-  gtk_text_freeze( GTK_TEXT( pbw->pwText ) );
-
-  gtk_editable_delete_text( GTK_EDITABLE( pbw->pwText ), 0, -1 );
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pbw->pwText));
 
   pch = g_malloc( 2000 );
   strcpy( pch, "" );
   ShowBearoff( pch, &pbw->ms, pbw->pbc );
-  gtk_text_insert( GTK_TEXT( pbw->pwText ), pf, NULL, NULL, pch, -1 );
-  g_free( pch );
 
-  gtk_text_thaw( GTK_TEXT( pbw->pwText ) );
+  font_desc = pango_font_description_from_string ("Monospace");
+  gtk_widget_modify_font (pbw->pwText, font_desc);
+  pango_font_description_free (font_desc);
+  gtk_text_buffer_set_text(buffer, pch, -1);
+
+  g_free( pch );
 
 }
 
@@ -262,8 +253,8 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
 
   /* text widget for output */
 
-  pbw->pwText = gtk_text_new( NULL, NULL );
-  gtk_text_set_line_wrap ( GTK_TEXT( pbw->pwText ), FALSE );
+  pbw->pwText = gtk_text_view_new();
+  gtk_text_view_set_wrap_mode ( GTK_TEXT_VIEW( pbw->pwText ), GTK_WRAP_NONE );
   gtk_box_pack_end( GTK_BOX( pwv ), pbw->pwText, TRUE, TRUE, 0 );
   
   return pbw;
@@ -343,29 +334,28 @@ GTKShowEPC( int anBoard[ 2 ][ 25 ] ) {
   GdkFont *pf;
   GtkWidget *pwText;
   gchar *pch;
+  GtkTextBuffer *buffer;
+  PangoFontDescription *font_desc;
 
   pwDialog = GTKCreateDialog( _("Effective Pip Count"), 
                               DT_INFO, NULL, NULL );
 
-  pwText = gtk_text_new( NULL, NULL );
-  gtk_text_set_line_wrap ( GTK_TEXT( pwText ), FALSE );
+  pwText = gtk_text_view_new();
+  gtk_text_view_set_wrap_mode ( GTK_TEXT_VIEW(pwText), GTK_WRAP_NONE );
+  gtk_text_view_set_editable (GTK_TEXT_VIEW(pwText), FALSE);
   gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), 
                       pwText );
 
   /* content */
 
-#if WIN32
-  /* Windows fonts come out smaller than you ask for, for some reason... */
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
-                      "*-*-*-m-*-*-*" );
-#else
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-                      "*-*-*-m-*-*-*" );
-#endif
-
   pch = ShowEPC( anBoard );
 
-  gtk_text_insert( GTK_TEXT( pwText ), pf, NULL, NULL, pch, -1 );
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwText));
+
+  font_desc = pango_font_description_from_string ("Monospace");
+  gtk_widget_modify_font (pwText, font_desc);
+  pango_font_description_free (font_desc);
+  gtk_text_buffer_set_text(buffer, pch, -1);
 
   g_free( pch );
 

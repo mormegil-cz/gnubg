@@ -28,7 +28,6 @@
 #include <limits.h>
 #endif
 #include <ctype.h>
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include "backgammon.h"
 #include <glib/gi18n.h>
 #include <string.h>
@@ -215,22 +214,17 @@ extern gboolean ShowCommandWindow( void )
 
 static void CreateMessageWindow( void )
 {
-	GtkWidget *vscrollbar, *pwhbox;  
-	GtkWidget *pwvbox = gtk_vbox_new ( TRUE, 0 ) ;
+        GtkWidget *psw;
 
-	CreatePanel(WINDOW_MESSAGE, pwvbox, _("Messages - GNU Backgammon"), "messages");
-
-	gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-						pwhbox = gtk_hbox_new ( FALSE, 0 ), FALSE, TRUE, 0);
-
-	pwMessageText = gtk_text_new ( NULL, NULL );
-
-	gtk_text_set_word_wrap( GTK_TEXT( pwMessageText ), TRUE );
-	gtk_text_set_editable( GTK_TEXT( pwMessageText ), FALSE );
-
-	vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwMessageText)->vadj);
-	gtk_box_pack_start(GTK_BOX(pwhbox), pwMessageText, TRUE, TRUE, 0);
-	gtk_box_pack_end(GTK_BOX(pwhbox), vscrollbar, FALSE, FALSE, 0);
+	pwMessageText = gtk_text_view_new ();
+        gtk_text_view_set_wrap_mode ( GTK_TEXT_VIEW( pwMessageText ), GTK_WRAP_WORD_CHAR );
+        gtk_text_view_set_editable(GTK_TEXT_VIEW(pwMessageText), FALSE);
+        psw = gtk_scrolled_window_new( NULL, NULL );
+        gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+                GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
+        gtk_widget_set_size_request (psw, -1, 150);
+        gtk_container_add( GTK_CONTAINER( psw ), pwMessageText);
+	CreatePanel(WINDOW_MESSAGE, psw, _("Messages - GNU Backgammon"), "messages");
 }
 
 GtkWidget *pwTheoryList = NULL;
@@ -387,7 +381,8 @@ static GtkWidget *CreateCommandWindow( void )
 
 static GtkWidget *CreateAnalysisWindow( void ) {
 
-    GtkWidget *vscrollbar, *pHbox;
+    GtkWidget *pHbox, *sw;
+    GtkTextBuffer *buffer;
 	if (!woPanel[WINDOW_ANALYSIS].docked)
 	{
 		GtkWidget *pwPaned = gtk_vpaned_new() ;
@@ -418,18 +413,20 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 		pHbox = gtk_hbox_new( FALSE, 0 );
 	}
 
-    pwCommentary = gtk_text_new( NULL, NULL ) ;
+    pwCommentary = gtk_text_view_new() ;
 
-    gtk_text_set_word_wrap( GTK_TEXT( pwCommentary ), TRUE );
-    gtk_text_set_editable( GTK_TEXT( pwCommentary ), TRUE );
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pwCommentary), GTK_WRAP_WORD); 
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(pwCommentary), TRUE);
     gtk_widget_set_sensitive( pwCommentary, FALSE );
 
-    vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwCommentary)->vadj);
-    gtk_box_pack_start(GTK_BOX(pHbox), pwCommentary, TRUE, TRUE, 0);
-    gtk_box_pack_end(GTK_BOX(pHbox), vscrollbar, FALSE, FALSE, 0);
-
-    gtk_signal_connect( GTK_OBJECT( pwCommentary ), "changed",
-			GTK_SIGNAL_FUNC( CommentaryChanged ), NULL );
+    sw = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_container_add(GTK_CONTAINER(sw), pwCommentary);
+    gtk_box_pack_start(GTK_BOX(pHbox), sw, TRUE, TRUE, 0);
+    gtk_widget_set_size_request (sw, -1, 150);
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwCommentary));
+    g_signal_connect( G_OBJECT( buffer ), "changed",
+		    G_CALLBACK( CommentaryChanged ), buffer );
 
 	if (!woPanel[WINDOW_ANALYSIS].docked)
 	{

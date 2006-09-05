@@ -25,7 +25,6 @@
 
 #include <stdlib.h>
 
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 
 #include <stdio.h>

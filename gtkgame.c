@@ -34,7 +34,6 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtktext.h>
@@ -720,9 +719,10 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 
 static int fAutoCommentaryChange;
 
-extern void CommentaryChanged( GtkWidget *pw, void *p ) {
+extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer ) {
 
     char *pch;
+    GtkTextIter begin, end;
     
     if( fAutoCommentaryChange )
 	return;
@@ -737,23 +737,13 @@ extern void CommentaryChanged( GtkWidget *pw, void *p ) {
     if( pmrAnnotation->sz )
 	free( pmrAnnotation->sz );
     
-    if( gtk_text_get_length( GTK_TEXT( pw ) ) ) {
-	pch = gtk_editable_get_chars( GTK_EDITABLE( pw ), 0, -1 );
+    gtk_text_buffer_get_bounds (buffer, &begin, &end);
+    pch = gtk_text_buffer_get_text(buffer, &begin, &end, FALSE);
 	/* This copy is absolutely disgusting, but is necessary because GTK
 	   insists on giving us something allocated with g_malloc() instead
 	   of malloc(). */
 	pmrAnnotation->sz = strdup( pch );
 	g_free( pch );
-
-#ifndef WIN32
-	/* Strip trailing whitespace from the copy. */
-	for( pch = strchr( pmrAnnotation->sz, 0 ) - 1;
-	     pch > pmrAnnotation->sz && isspace( *pch ); pch-- )
-	    *pch = 0;
-#endif
-
-    } else
-	pmrAnnotation->sz = NULL;
 }
 
 extern void GTKFreeze( void ) {
@@ -1097,6 +1087,7 @@ extern void SetAnnotation( moverecord *pmr ) {
     taketype tt;
     cubeinfo ci;
     pwMoveAnalysis = NULL;
+    GtkTextBuffer *buffer;
 
     /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
     pmrCurAnn = pmr;
@@ -1121,13 +1112,14 @@ extern void SetAnnotation( moverecord *pmr ) {
 
     gtk_widget_set_sensitive( pwCommentary, pmr != NULL );
     fAutoCommentaryChange = TRUE;
-    gtk_editable_delete_text( GTK_EDITABLE( pwCommentary ), 0, -1 );
+    buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW(pwCommentary));
+    gtk_text_buffer_set_text (buffer, "", -1);
     fAutoCommentaryChange = FALSE;
     
     if( pmr ) {
 	if( pmr->sz ) {
 	    fAutoCommentaryChange = TRUE;
-	    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL, (pmr->sz), -1 );
+	    gtk_text_buffer_set_text (buffer, pmr->sz, -1);
 	    fAutoCommentaryChange = FALSE;
 	}
 
@@ -2753,6 +2745,8 @@ extern void GTKOutputX( void ) {
 
     char *sz, *pchSrc, *pchDest;
     list *pl;
+    GtkTextBuffer *buffer;
+    GtkTextIter iter;
 
     if( !cchOutput )
 	return;
@@ -2787,8 +2781,10 @@ extern void GTKOutputX( void ) {
     
     if (PanelShowing(WINDOW_MESSAGE) && *sz ) {
       strcat ( sz, "\n" );
-      gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
-                       sz, -1 );
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
+      gtk_text_buffer_get_end_iter (buffer, &iter);
+      gtk_text_buffer_insert( buffer, &iter, sz, -1);
+      gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(pwMessageText), &iter, 0.0, FALSE, 0.0, 1.0 );
     }
       
     cchOutput = 0;
@@ -2797,13 +2793,16 @@ extern void GTKOutputX( void ) {
 
 extern void GTKOutputErr( char *sz ) {
 
+    GtkTextBuffer *buffer;
+    GtkTextIter iter;
     GTKMessage( sz, DT_ERROR );
     
     if (PanelShowing(WINDOW_MESSAGE)) {
-	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
-			 sz, -1 );
-	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
-			 "\n", 1 );
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
+      gtk_text_buffer_get_end_iter (buffer, &iter);
+      gtk_text_buffer_insert( buffer, &iter, sz, -1);
+      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
+      gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(pwMessageText), &iter, 0.0, FALSE, 0.0, 1.0 );
     }
 }
 
@@ -2826,7 +2825,6 @@ extern void GTKOutputNew( void ) {
 extern command *FindHelpCommand( command *pcBase, char *sz,
 				 char *pchCommand, char *pchUsage );
 extern char* CheckCommand(char *sz, command *ac);
-GtkWidget *vscrollbar, *pwHelpbox;
 
 /* Display help for command (pStr) in widget (pwText) */
 extern void ShowHelp(GtkWidget *pwText, char* pStr)
@@ -2834,28 +2832,28 @@ extern void ShowHelp(GtkWidget *pwText, char* pStr)
 	command *pc, *pcFull;
 	char szCommand[128], szUsage[128], szBuf[255], *cc, *pTemp;
 	command cTop = { NULL, NULL, NULL, NULL, acTop };
-
-	gtk_text_freeze(GTK_TEXT(pwText));
-	gtk_text_set_point(GTK_TEXT(pwText), 0);
+        GtkTextBuffer *buffer;
+        GtkTextIter iter;
 
 	/* Copy string as token striping corrupts string */
 	pTemp = malloc(strlen(pStr) + 1);
 	strcpy(pTemp, pStr);
 	cc = CheckCommand(pTemp, acTop);
 
+        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwText));
+
 	if (cc)
 	{
 		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
-		gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
-		gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+                gtk_text_buffer_set_text(buffer, szBuf, -1);
 	}
 	else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage)))
 	{
-		gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
-
+                gtk_text_buffer_set_text(buffer, "", -1);
+                gtk_text_buffer_get_end_iter (buffer, &iter);
 		if (!*pStr)
 		{
-			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, 
+                        gtk_text_buffer_insert( buffer, &iter,
 				_("Available commands:\n"), -1);
 		}
 		else
@@ -2874,17 +2872,17 @@ extern void ShowHelp(GtkWidget *pwText, char* pStr)
 			}
 
 			sprintf(szBuf, "Command: %s\n", szCommand);
-			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
-			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, gettext ( pc->szHelp ), -1);
+                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
+                        gtk_text_buffer_insert( buffer, &iter, gettext ( pc->szHelp ), -1);
 			sprintf(szBuf, "\n\nUsage: %s", szUsage);
-			gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
 
 			if(!( pc->pc && pc->pc->sz ))
-				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, "\n", -1);
+                                gtk_text_buffer_insert( buffer, &iter, "\n", -1);
 			else
 			{
-				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, _("<subcommand>\n"), -1);
-				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, 
+                                gtk_text_buffer_insert( buffer, &iter, _("<subcommand>\n"), -1);
+                                gtk_text_buffer_insert( buffer, &iter,
 					_("Available subcommands:\n"), -1);
 			}
 		}
@@ -2896,13 +2894,12 @@ extern void ShowHelp(GtkWidget *pwText, char* pStr)
 			if( pc->szHelp )
 			{
 				sprintf(szBuf, "%-15s\t%s\n", pc->sz, gettext ( pc->szHelp ) );
-				gtk_text_insert(GTK_TEXT(pwText), NULL, NULL, NULL, szBuf, -1);
+                                gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
 			}
 			pc++;
 		}
 	}
 	free(pTemp);
-	gtk_text_thaw(GTK_TEXT( pwText ));
 }
 
 extern void PopulateCommandHistory(struct CommandEntryData_T *pData)
@@ -2986,12 +2983,13 @@ extern void CommandTextChange(GtkEntry *entry, struct CommandEntryData_T *pData)
 
 static void CreateHelpText(struct CommandEntryData_T *pData)
 {
-	pData->pwHelpText = gtk_text_new ( NULL, NULL );
+        GtkWidget *psw;
+	pData->pwHelpText = gtk_text_view_new ();
 	gtk_widget_set_usize(pData->pwHelpText, 400, 300);
-	vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pData->pwHelpText)->vadj);
-	gtk_box_pack_start(GTK_BOX(pwHelpbox), pData->pwHelpText, TRUE, TRUE, 0);
-	gtk_box_pack_end(GTK_BOX(pwHelpbox), vscrollbar, FALSE, FALSE, 0);
-
+	psw = gtk_scrolled_window_new( NULL, NULL );
+        gtk_container_add(GTK_CONTAINER(psw), pData->pwHelpText);
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
 	CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
 }
 
@@ -3006,7 +3004,6 @@ extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData)
 		if (pData->modal)
 		{
 			gtk_widget_show(pData->pwHelpText);
-			gtk_widget_show(vscrollbar);
 		}
 		CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
 	}
@@ -3016,7 +3013,6 @@ extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData)
 		if (pData->modal)
 		{
 			gtk_widget_hide(pData->pwHelpText);
-			gtk_widget_hide(vscrollbar);
 		}
 	}
 	gtk_widget_grab_focus(pData->pwEntry);
@@ -8291,6 +8287,8 @@ extern void GTKMatchInfo( void ) {
 	*pwAnnotator, *pwComment;
     char sz[ 128 ], *pch;
     gulong id;
+    GtkTextBuffer *buffer;
+    GtkTextIter begin, end;
     
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
@@ -8359,14 +8357,12 @@ extern void GTKMatchInfo( void ) {
 	gtk_entry_set_text( GTK_ENTRY( pwAnnotator ), mi.pchAnnotator );
     gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwAnnotator, 1, 2, 6, 7 );
         
-    pwComment = gtk_text_new( NULL, NULL ) ;
+    pwComment = gtk_text_view_new() ;
+    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwComment));
     if( mi.pchComment ) {
-	gint nPos = 0;
-	gtk_editable_insert_text( GTK_EDITABLE( pwComment ), mi.pchComment,
-				  strlen( mi.pchComment ), &nPos );
+	gtk_text_buffer_set_text(buffer, mi.pchComment, -1);
     }
-    gtk_text_set_word_wrap( GTK_TEXT( pwComment ), TRUE );
-    gtk_text_set_editable( GTK_TEXT( pwComment ), TRUE );
+    gtk_text_view_set_wrap_mode( GTK_TEXT_VIEW( pwComment ), GTK_WRAP_WORD );
     gtk_table_attach_defaults( GTK_TABLE( pwTable ), pwComment, 2, 5, 1, 7 );
 
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 0 );
@@ -8409,7 +8405,9 @@ extern void GTKMatchInfo( void ) {
 			 "place", &mi.pchPlace );
 	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwAnnotator ) ),
 			 "annotator", &mi.pchAnnotator );
-	pch = gtk_editable_get_chars( GTK_EDITABLE( pwComment ), 0, -1 );
+
+        gtk_text_buffer_get_bounds (buffer, &begin, &end);
+        pch = gtk_text_buffer_get_text(buffer, &begin, &end, FALSE);
 	UpdateMatchinfo( pch, "comment", &mi.pchComment );
 	g_free( pch );
 
@@ -9043,8 +9041,6 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
   		char line[100];
   		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
   		  gtk_text_buffer_insert(buffer, &it, line, -1);
-  		  gtk_text_insert(GTK_TEXT(pwAliasList), NULL, 
-  				  NULL, NULL, line, -1);
   	}
 	}
 	FreeRowset(&r);

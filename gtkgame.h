@@ -168,7 +168,7 @@ extern void GTKShowBuildInfo(GtkWidget *pwParent);
 extern void GTKCommandShowCredits(GtkWidget* parent);
 extern void GTKShowScoreSheet(void);
 extern void SwapBoardToPanel(int ToPanel);
-extern void CommentaryChanged( GtkWidget *pw, void *p );
+extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer );
 
 extern void SetEvaluation( gpointer *p, guint n, GtkWidget *pw );
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );

@@ -27,7 +27,6 @@
 #include <alloca.h>
 #endif
 
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -254,8 +253,9 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   int i, j, k;
   int afAutoRedouble[ 2 ];
   int afDead[ 2 ];
-  GdkFont *pf;
   gchar *pch;
+  GtkTextBuffer *buffer;
+  GtkTextIter iter;
 
   const char *aszMoneyPointLabel[] = {
     N_ ("Take Point (TP)"),
@@ -451,18 +451,9 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
    * Update gammon price widgets
    */
 
-#if WIN32
-  /* Windows fonts come out smaller than you ask for, for some reason... */
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
-                      "*-*-*-m-*-*-*" );
-#else
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-                      "*-*-*-m-*-*-*" );
-#endif
-
-  gtk_text_freeze( GTK_TEXT( ptw->pwGammonPrice ) );
-
-  gtk_editable_delete_text( GTK_EDITABLE( ptw->pwGammonPrice ), 0, -1 );
+  buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(ptw->pwGammonPrice));
+  gtk_text_buffer_set_text(buffer, "", -1);
+  gtk_text_buffer_get_end_iter (buffer, &iter);
 
   if ( ci.nMatchTo ) {
 
@@ -471,12 +462,11 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
                            ci.nMatchTo - ci.anScore[ 1 ],
                            ci.nCube );
 
-    gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
-                     pch, -1 );
+    gtk_text_buffer_insert( buffer, &iter, pch, -1);
     
     g_free( pch );
 
-    gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+    gtk_text_buffer_insert( buffer, &iter,
                      _("Player                          Gammon   BG\n"), -1 );
     
 
@@ -488,8 +478,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
                              0.5f * ( ci.arGammonPrice[ 2 + j ] + 
                                       ci.arGammonPrice[ j ] ) );
       
-      gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
-                       pch, -1 );
+      gtk_text_buffer_insert( buffer, &iter, pch, -1);
       
       g_free( pch );
       
@@ -498,7 +487,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   }
   else {
 
-    gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+    gtk_text_buffer_insert( buffer, &iter,
                      _("Gammon values for money game:\n\n"), -1 );
 
     for ( i = 0; i < 2; ++i ) {
@@ -508,8 +497,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
                                "Gammon   BG\n"),
                              i ? _("Doubled cube") : _("Centered cube") );
 
-      gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
-                       pch, -1 );
+      gtk_text_buffer_insert( buffer, &iter, pch, -1);
     
       g_free( pch );
 
@@ -525,24 +513,18 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
                                0.5f * ( ci.arGammonPrice[ 2 + j ] + 
                                         ci.arGammonPrice[ j ] ) );
 
-        gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
-                         pch, -1 );
+        gtk_text_buffer_insert( buffer, &iter, pch, -1);
     
         g_free( pch );
 
       }
 
-      gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
+    gtk_text_buffer_insert( buffer, &iter,
                        "\n", -1 );
 
     }
 
   }
-
-  gtk_text_thaw( GTK_TEXT( ptw->pwGammonPrice ) );
-
-
-
 
 }
 
@@ -663,6 +645,7 @@ GTKShowTheory ( const int fActivePage ) {
   int i, j;
   char sz[ 256 ];
   int *pi;
+  PangoFontDescription *font_desc;
 
   static char *aszTitles[] = {
     NULL,
@@ -1001,8 +984,13 @@ GTKShowTheory ( const int fActivePage ) {
 
   pwVBox = gtk_vbox_new ( FALSE, 0 );
 
-  ptw->pwGammonPrice = gtk_text_new( NULL, NULL );
-  gtk_text_set_line_wrap ( GTK_TEXT( ptw->pwGammonPrice ), FALSE );
+  ptw->pwGammonPrice = gtk_text_view_new();
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(ptw->pwGammonPrice), FALSE);
+
+  font_desc = pango_font_description_from_string ("Monospace");
+  gtk_widget_modify_font (ptw->pwGammonPrice, font_desc);
+  pango_font_description_free (font_desc);
+  gtk_text_view_set_wrap_mode ( GTK_TEXT_VIEW( ptw->pwGammonPrice ), GTK_WRAP_NONE );
 
   gtk_container_add ( GTK_CONTAINER( pwVBox ), ptw->pwGammonPrice );
 
