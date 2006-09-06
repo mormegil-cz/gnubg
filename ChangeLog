@@ -1,3 +1,7 @@
+Wed Sep  6 19:16:04 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: make ctrl-c and ctrl-v work for gtktextview
+
 Tue Sep  5 12:42:29 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c and friends: replace gtktext (gtk1) with gtktextview

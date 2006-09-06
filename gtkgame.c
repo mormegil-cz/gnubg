@@ -1758,44 +1758,52 @@ static void ToolbarStyle(gpointer    callback_data,
 
 GtkClipboard *clipboard = NULL;
 
-static void CopyActiveEntry()
+static void CopyText()
 {
-  GtkWidget *pFocus;
-  if (gtk_window_has_toplevel_focus(GTK_WINDOW(pwMain)))
-  {
-    pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
-    if (pFocus && GTK_IS_ENTRY(pFocus))
-    {
-        const char* text = gtk_entry_get_text(GTK_ENTRY(pFocus));
-        GTKTextToClipboard(text);
-    }
-  }
+	GtkWidget *pFocus;
+	GtkTextIter start, end;
+	GtkTextBuffer *buffer;
+	const char *text;
+
+	pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
+	if (!pFocus || !text)
+		return;
+	if (GTK_IS_ENTRY(pFocus)) {
+		text = gtk_entry_get_text(GTK_ENTRY(pFocus));
+	} else if (GTK_IS_TEXT_VIEW(pFocus)) {
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pFocus));
+		gtk_text_buffer_get_selection_bounds(buffer, &start, &end);
+		text =
+		    gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
+	}
+	GTKTextToClipboard(text);
 }
 
-static void PasteActiveEntry()
+static void PasteText()
 {
-  GtkWidget *pFocus;
-  if (gtk_window_has_toplevel_focus(GTK_WINDOW(pwMain)))
-  {
-    pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
-    if (pFocus && GTK_IS_ENTRY(pFocus))
-    {
-        char *text;
-        text = gtk_clipboard_wait_for_text(clipboard);
-      
-        if (text)
-        {
-          BoardData *bd = BOARD(pwBoard)->board_data;
-          
-          gtk_entry_set_text(GTK_ENTRY(pFocus), text);
-          
-          if (pFocus == bd->position_id)
-            board_set_position(0, bd);
-          else if (pFocus == bd->match_id)
-            board_set_matchid(0, bd);
-        }
-    }
-  }
+	GtkWidget *pFocus;
+	GtkTextBuffer *buffer;
+	char *text;
+
+	pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
+	text = gtk_clipboard_wait_for_text(clipboard);
+	if (!pFocus || !text)
+		return;
+	if (GTK_IS_ENTRY(pFocus)) {
+		gtk_entry_set_text(GTK_ENTRY(pFocus), text);
+		BoardData *bd = BOARD(pwBoard)->board_data;
+		if (pFocus == bd->position_id)
+			board_set_position(0, bd);
+		else if (pFocus == bd->match_id)
+			board_set_matchid(0, bd);
+	} else if (GTK_IS_TEXT_VIEW(pFocus)) {
+		if (!gtk_text_view_get_editable(GTK_TEXT_VIEW(pFocus)))
+			return;
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pFocus));
+		gtk_text_buffer_insert_at_cursor(buffer, text, -1);
+		return;
+	}
+	g_free(text);
 }
 
 extern void GTKTextToClipboard(const char *text)
@@ -1841,7 +1849,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	},
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
 
-	{ N_("/_Edit/_Copy"), "<control>C", CopyActiveEntry, 0,
+	{ N_("/_Edit/_Copy"), "<control>C", CopyText, 0,
 		"<StockItem>", GTK_STOCK_COPY
 	},
 
@@ -1853,7 +1861,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Edit/Copy as/Position and Match IDs"), NULL,
 	  CopyAsIDs, 0, NULL },
 
-	{ N_("/_Edit/_Paste"), "<control>V", PasteActiveEntry, 0,
+	{ N_("/_Edit/_Paste"), "<control>V", PasteText, 0,
 		"<StockItem>", GTK_STOCK_PASTE
 	},
 	{ N_("/_View"), NULL, NULL, 0, "<Branch>" },
