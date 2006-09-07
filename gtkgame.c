@@ -1766,7 +1766,7 @@ static void CopyText()
 	const char *text;
 
 	pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
-	if (!pFocus || !text)
+	if (!pFocus)
 		return;
 	if (GTK_IS_ENTRY(pFocus)) {
 		text = gtk_entry_get_text(GTK_ENTRY(pFocus));
@@ -1797,11 +1797,12 @@ static void PasteText()
 		else if (pFocus == bd->match_id)
 			board_set_matchid(0, bd);
 	} else if (GTK_IS_TEXT_VIEW(pFocus)) {
-		if (!gtk_text_view_get_editable(GTK_TEXT_VIEW(pFocus)))
-			return;
-		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pFocus));
-		gtk_text_buffer_insert_at_cursor(buffer, text, -1);
-		return;
+		if (gtk_text_view_get_editable(GTK_TEXT_VIEW(pFocus))) {
+			buffer =
+			    gtk_text_view_get_buffer(GTK_TEXT_VIEW
+						     (pFocus));
+			gtk_text_buffer_insert_at_cursor(buffer, text, -1);
+		}
 	}
 	g_free(text);
 }
