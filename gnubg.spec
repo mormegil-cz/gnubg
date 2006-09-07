@@ -15,8 +15,8 @@ License:      GNU General Public License (GPL) - all versions
 Group:        Amusements/Games/Board/Other
 Packager:     <ace@gnubg.org>
 Summary:      A backgammon game and analyser
-Version:      0.14
-Release:      3
+Version:      0.15
+Release:      1
 Source:       %{name}-%{version}.tar.gz
 BuildRoot:    %{_tmppath}/%{name}-%{version}-build
 URL:          http://gnubg.org
@@ -63,6 +63,7 @@ This package contains the sounds for GNU Backgammon.
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS"
+./autogen.sh
 ./configure --prefix=%{prefix} \
             --with-python \
             --infodir=%{prefix}/share/info \
@@ -107,6 +108,9 @@ rm -f $RPM_BUILD_ROOT/usr/share/info/dir*
 
 
 %changelog -n gnubg
+* Thu Sep 07 2006 - <ace@gnubg.org
+- new version, %build slightly changed (should now work on all distributions)
+
 * Mon Oct 27 2003 - <ace@gnubg.org>
 - info now fits (stuff is FHS conform)
 
