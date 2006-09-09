@@ -363,6 +363,7 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
+static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 static void FullScreenMode( gpointer *p, guint n, GtkWidget *pw );
 #if USE_BOARD3D
 static void SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw );
@@ -1775,7 +1776,8 @@ static void CopyText()
 		gtk_text_buffer_get_selection_bounds(buffer, &start, &end);
 		text =
 		    gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-	}
+	} else
+		return;
 	GTKTextToClipboard(text);
 }
 
@@ -1878,6 +1880,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ N_("/_View/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
 	  "<CheckItem>" },
+        { N_("/_View/_Python shell (IDLE)..."),  
+                           NULL, PythonShell, 0, NULL },
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_View/_Dock panels"), NULL, ToggleDockPanels, 0, "<CheckItem>" },
 	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL },
@@ -8699,6 +8703,19 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_widget_show_all(pwWindow);
     
     gtk_main();
+}
+
+/* PyShell expects sys.argv to be defined. '-n' makes PyShell run without a
+ * subshell, which is needed because of some conflict with the gnubg module. */
+static void PythonShell(gpointer * p, guint n, GtkWidget * pw)
+{
+	char *pch;
+	pch =
+	    strdup(">import sys;"
+		   "sys.argv=['','-n'];"
+		   "import idlelib.PyShell;" "idlelib.PyShell.main()");
+	UserCommand(pch);
+	free(pch);
 }
 
 GtkWidget *pwTick;

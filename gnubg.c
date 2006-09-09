@@ -2949,25 +2949,11 @@ extern void HandleCommand( char *sz, command *ac ) {
 		GTKDisallowStdin();
 #endif
           if ( *sz ) {
-            /* expression specified -- evalute it */
-#ifdef ndef
-            StartPythonHandleX();
-#endif
             PyRun_SimpleString( sz );
-#ifdef ndef
-            StopPythonHandleX();
-#endif
           }
           else {
-#ifdef ndef
-            /* no expresision -- start python shell */
-            StartPythonHandleX();
-#endif
             PyRun_SimpleString( "import sys; print 'Python', sys.version" );
             PyRun_AnyFile( stdin, NULL );
-#ifdef ndef
-            StopPythonHandleX();
-#endif
           }
 #if USE_GTK
 	    if( fX )
