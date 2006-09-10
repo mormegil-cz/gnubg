@@ -15,19 +15,19 @@
 #endif
 
 #if __GNUC__
-	#define VARIABLE_ARRAY(atype,var,len) atype var[len];
+	#define VARIABLE_ARRAY(atype,var,count) atype var[count];
 #elif HAVE_ALLOCA
-	#define VARIABLE_ARRAY(atype,var,len) atype *var = (atype *)alloca(len);
+	#define VARIABLE_ARRAY(atype,var,count) atype *var = (atype *)alloca(count * sizeof(atype));
 #elif defined(GLIB_CHECK_VERSION)
 #if GLIB_CHECK_VERSION(1,1,12)
-	#define VARIABLE_ARRAY(atype,var,len) atype *var = (atype *)g_alloca(len);
+	#define VARIABLE_ARRAY(atype,var,count) atype *var = (atype *)g_alloca(count * sizeof(atype));
 #else
 	/* In some trouble if got this far - just forget about memory */
-	#define VARIABLE_ARRAY(atype,var,len) atype *var = (atype *)malloc(len);
+	#define VARIABLE_ARRAY(atype,var,count) atype *var = (atype *)malloc(count * sizeof(atype));
 #endif
 #else
 	/* In some trouble if got this far - just forget about memory */
-	#define VARIABLE_ARRAY(atype,var,len) atype *var = (atype *)malloc(len);
+	#define VARIABLE_ARRAY(atype,var,count) atype *var = (atype *)malloc(count * sizeof(atype));
 #endif
 
 #undef PI
