@@ -52,7 +52,7 @@ extern double get_time();
 extern int convert_point( int i, int player );
 extern void setupFlag(BoardData3d *bd3d);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);
-extern void waveFlag(BoardData* bd, float wag);
+extern void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag);
 extern float getDiceSize(BoardData* bd);
 static void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename);
 
@@ -844,12 +844,12 @@ void initDT(diceTest* dt, int x, int y, int z)
 float ***Alloc3d(int x, int y, int z)
 {	/* Allocate 3d array */
 	int i, j;
-	float ***array = (float ***)malloc(sizeof(float*) * x);
+	float ***array = (float ***)malloc(sizeof(float**) * x);
 	for (i = 0; i < x; i++)
 	{
 		array[i] = (float **)malloc(sizeof(float*) * y);
 		for (j = 0; j < y; j++)
-			array[i][j] = (float *)malloc(sizeof(float*) * z);
+			array[i][j] = (float *)malloc(sizeof(float) * z);
 	}
 	return array;
 }
@@ -2065,7 +2065,7 @@ void ShowFlag3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	else
 		StopIdle3d(bd);
 
-	waveFlag(bd, 0);
+	waveFlag(bd3d->ctlpoints, bd3d->flagWaved);
 	updateFlagOccPos(bd, bd3d);
 
 	RestrictiveDrawFlag(bd);
