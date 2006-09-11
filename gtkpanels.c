@@ -28,6 +28,7 @@
 #include <limits.h>
 #endif
 #include <ctype.h>
+#define GTK_ENABLE_BROKEN /* for GtkText */
 #include "backgammon.h"
 #include <glib/gi18n.h>
 #include <string.h>
@@ -214,17 +215,22 @@ extern gboolean ShowCommandWindow( void )
 
 static void CreateMessageWindow( void )
 {
-        GtkWidget *psw;
+	GtkWidget *vscrollbar, *pwhbox;  
+	GtkWidget *pwvbox = gtk_vbox_new ( TRUE, 0 ) ;
 
-	pwMessageText = gtk_text_view_new ();
-        gtk_text_view_set_wrap_mode ( GTK_TEXT_VIEW( pwMessageText ), GTK_WRAP_WORD_CHAR );
-        gtk_text_view_set_editable(GTK_TEXT_VIEW(pwMessageText), FALSE);
-        psw = gtk_scrolled_window_new( NULL, NULL );
-        gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-                GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
-        gtk_widget_set_size_request (psw, -1, 150);
-        gtk_container_add( GTK_CONTAINER( psw ), pwMessageText);
-	CreatePanel(WINDOW_MESSAGE, psw, _("Messages - GNU Backgammon"), "messages");
+	CreatePanel(WINDOW_MESSAGE, pwvbox, _("Messages - GNU Backgammon"), "messages");
+
+	gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+						pwhbox = gtk_hbox_new ( FALSE, 0 ), FALSE, TRUE, 0);
+
+	pwMessageText = gtk_text_new ( NULL, NULL );
+
+	gtk_text_set_word_wrap( GTK_TEXT( pwMessageText ), TRUE );
+	gtk_text_set_editable( GTK_TEXT( pwMessageText ), FALSE );
+
+	vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwMessageText)->vadj);
+	gtk_box_pack_start(GTK_BOX(pwhbox), pwMessageText, TRUE, TRUE, 0);
+	gtk_box_pack_end(GTK_BOX(pwhbox), vscrollbar, FALSE, FALSE, 0);
 }
 
 GtkWidget *pwTheoryList = NULL;

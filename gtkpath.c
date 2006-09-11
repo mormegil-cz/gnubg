@@ -36,7 +36,7 @@
 #include "backgammon.h"
 #include "gtkgame.h"
 #include <glib/gi18n.h>
-
+#include "gtkwindows.h"
 
 
 
@@ -75,7 +75,7 @@ ModifyPath ( GtkWidget *pw, pathdata *ppd ) {
     pc = SelectPath ( "Select Path", 
     aaszPaths[ *pi ][ 0 ] ) );
   */
-
+	GTKSetCurrentParent(pw);	/* Get nesting correct */
   GTKMessage ( _("NOT IMPLEMENTED!\n"
             "Use the \"set path\" command instead!"), DT_ERROR );
 
@@ -164,9 +164,8 @@ GTKShowPath ( void ) {
       N_("Snowie .txt") }
   };
 
-  
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Paths"), DT_QUESTION,
-                           GTK_SIGNAL_FUNC ( PathOK ), &pd );
+                           NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( PathOK ), &pd );
     
   pwApply = gtk_button_new_with_label( _("Apply") );
 
@@ -248,14 +247,8 @@ GTKShowPath ( void ) {
 
   }
 
-  /* signals, modality, etc */
+  /* show dialog */
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-		      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
   gtk_widget_show_all( pwDialog );
 
   GTKDisallowStdin();

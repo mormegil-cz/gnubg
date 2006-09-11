@@ -1,3 +1,8 @@
+Mon Sep 11 23:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkwindows.c+.h, lots of gtk files: Move dialog code to new file
+	Fixed modal dialog z order problems (mainly on windows)
+
 Sat Sep  9 14:11:25 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: Reimplement the idle python shell

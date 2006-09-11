@@ -42,6 +42,7 @@
 
 #if USE_GTK
 #include "gtkgame.h"
+#include "gtkwindows.h"
 #endif /* USE_GTK */
 
 
@@ -715,8 +716,7 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
 
   /* Create dialog */
 
-  pwDialog = GTKCreateDialog ( _("Rollout statistics"), DT_INFO, NULL, NULL );
-
+  pwDialog = GTKCreateDialog ( _("Rollout statistics"), DT_INFO, prp->pwRolloutDialog, DIALOG_FLAG_MODAL, NULL, NULL );
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 400 );
 
   /* Create notebook pages */
@@ -725,33 +725,19 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
 
   gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
 
-  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                     pwNotebook );
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwNotebook );
 
-  for ( i = 0; i < nRollouts; i++ ) {
-
+  for ( i = 0; i < nRollouts; i++ )
+  {
     gtk_clist_get_text ( GTK_CLIST ( prp->pwRolloutResult ),
                               i * 2, 0, &sz );
 
     gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                               GTKRolloutStatPage ( &prs[ i * 2 ],
-                                                    cGames ),
-                               gtk_label_new ( sz ) );
-
+		GTKRolloutStatPage ( &prs[ i * 2 ], cGames ), gtk_label_new ( sz ) );
   }
 
-
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
   gtk_widget_show_all( pwDialog );
-
   gtk_main();
-
-
 }
 
 static void RolloutCancel( GtkObject *po, rolloutprogress *prp ) {
@@ -812,11 +798,8 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
 
   AllocTextList(prp);
 
-  prp->pwRolloutDialog = 
-    GTKCreateDialog( _("GNU Backgammon - Rollout"), DT_INFO,
-                     NULL, NULL );
-  prp->pwRolloutViewStat = 
-    gtk_button_new_with_label ( _("View statistics") );
+  prp->pwRolloutDialog = GTKCreateDialog( _("GNU Backgammon - Rollout"), DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
+  prp->pwRolloutViewStat = gtk_button_new_with_label ( _("View statistics") );
   prp->pwRolloutStop = gtk_button_new_with_label( _("Stop") );
     
   pwOldGrab = pwGrab;
@@ -920,15 +903,8 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                       prp->pwSE = gtk_label_new( _("n/a") ),
                       FALSE, FALSE, 4 );
 
-  
-    
   gtk_container_add( GTK_CONTAINER( DialogArea( prp->pwRolloutDialog, DA_MAIN ) ),
                      pwVbox );
-
-  gtk_window_set_modal( GTK_WINDOW( prp->pwRolloutDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( prp->pwRolloutDialog ),
-                                GTK_WINDOW( pwMain ) );
-    
   gtk_widget_show_all( prp->pwRolloutDialog );
 
   /* record start time */

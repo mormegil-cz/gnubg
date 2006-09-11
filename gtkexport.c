@@ -39,7 +39,7 @@
 #include "gtkexport.h"
 #include <glib/gi18n.h>
 #include "boarddim.h"
-
+#include "gtkwindows.h"
 
 static char *aszInclude[] = {
     N_("Annotations"), 
@@ -493,8 +493,8 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* create dialog */
 
-  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Export Settings"),
-			       DT_QUESTION, GTK_SIGNAL_FUNC ( ExportOK ), pew );
+  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Export Settings"), DT_QUESTION,
+	  NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( ExportOK ), pew );
 
   pwTable = gtk_table_new ( 3, 2, FALSE );
   gtk_container_add ( GTK_CONTAINER ( DialogArea ( pwDialog, DA_MAIN ) ),
@@ -831,20 +831,10 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* show dialog */
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
   gtk_widget_show_all( pwDialog );
-
   ExportSet ( pew );
 
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();
-
 }
-
-

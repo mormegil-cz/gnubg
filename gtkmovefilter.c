@@ -38,6 +38,7 @@
 #include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkmovefilter.h"
+#include "gtkwindows.h"
 
 typedef struct _movefilterwidget {
 
@@ -498,18 +499,11 @@ ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
   pwMoveFilterSetup = MoveFilterSetup( aamf, &fOK );
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Move filter setup"), 
-                           DT_QUESTION,
-                           GTK_SIGNAL_FUNC( MoveFilterSetupOK ), 
-                           pwMoveFilterSetup );
+			DT_QUESTION, pw, DIALOG_FLAG_MODAL,
+            GTK_SIGNAL_FUNC( MoveFilterSetupOK ), pwMoveFilterSetup );
 
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                      pwMoveFilterSetup );
-  
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
   
   gtk_widget_show_all( pwDialog );
   

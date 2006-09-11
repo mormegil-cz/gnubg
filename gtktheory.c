@@ -39,6 +39,7 @@
 #include "gtktheory.h"
 #include <glib/gi18n.h>
 #include "matchequity.h"
+#include "gtkwindows.h"
 
 #define MAXPLY 4
 
@@ -662,8 +663,8 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* create dialog */
 
-  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
-                            NULL, NULL );
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - Theory"), DT_INFO,
+		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 660, 300 );
 
@@ -1000,24 +1001,15 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* show dialog */
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
   gtk_widget_show_all( pwDialog );
 
   ResetTheory ( NULL, ptw );
-  
   TheoryUpdated ( NULL, ptw );
   
-  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ),
-                          fActivePage ? 2 /* prices */ : 0 /* market */ );
+  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ), fActivePage ? 2 /* prices */ : 0 /* market */ );
 
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();
-
 }
 

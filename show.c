@@ -972,7 +972,7 @@ extern void CommandShowBuildInfo( char *sz )
 
 #if USE_GTK
 	if( fX )
-		GTKShowBuildInfo(pwMain);
+		GTKShowBuildInfo(pwMain, NULL);
 #endif
 
     while((pch = GetBuildInfoString()))
@@ -1076,7 +1076,7 @@ extern void CommandShowCredits( char *sz )
 #if USE_GTK
   if( fX )
   {
-    GTKCommandShowCredits(pwMain);
+    GTKCommandShowCredits(NULL, NULL);
     return;
   }
 #endif
@@ -2208,6 +2208,12 @@ CommandShowBearoff( char *sz ) {
 
   char szTemp[ 4096 ];
 
+	if( ms.gs != GAME_PLAYING )
+	{
+		outputl( _("No game is being played.") );
+		return;
+	}
+
 #if USE_GTK
   if ( fX ) {
     GTKShowBearoff( &ms );
@@ -2440,7 +2446,7 @@ CommandShowMatchResult( char *sz ) {
 
 extern void CommandShowTCTutorial( char *sz ) {
 #if USE_GTK
-    if ( fX )
+    if ( fX )	/* This should be converted to texi and added to the manual */
 	ShowList( aszTcTutorial, _("Time Control Tutorial"), NULL );
     else
 #endif

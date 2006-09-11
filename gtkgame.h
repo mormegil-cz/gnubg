@@ -28,22 +28,6 @@
 #include "rollout.h"
 #include "relational.h"
 
-typedef enum _dialogarea {
-    DA_MAIN,
-    DA_BUTTONS,
-    DA_OK
-} dialogarea;
-
-typedef enum _dialogtype {
-    DT_INFO,
-    DT_QUESTION,
-    DT_AREYOUSURE,
-    DT_WARNING,
-    DT_ERROR,
-    DT_GNU,
-    NUM_DIALOG_TYPES
-} dialogtype;
-
 typedef enum _filedialogtype { 
   FDT_NONE=0, FDT_SAVE, FDT_EXPORT, FDT_IMPORT, FDT_EXPORT_FULL,
   FDT_NONE_OPEN, FDT_NONE_SAVE
@@ -73,7 +57,7 @@ extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData)
 extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct CommandEntryData_T *pData);
 extern void PopulateCommandHistory(struct CommandEntryData_T *pData);
 
-extern void GTKShowWarning(warnings warning);
+extern void GTKShowWarning(warnings warning, GtkWidget *pwParent);
 extern char* warningStrings[WARN_NUM_WARNINGS];
 extern char* warningNames[WARN_NUM_WARNINGS];
 extern int warningEnabled[WARN_NUM_WARNINGS];
@@ -119,11 +103,6 @@ extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle, GtkWidget* pwParent );
 extern void GTKUpdateScores();
 
-extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 
-                                   GtkSignalFunc pf, void *p );
-extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
-    
-extern int GTKGetInputYN( char *szPrompt );
 extern void GTKOutput( char *sz );
 extern void GTKOutputErr( char *sz );
 extern void GTKOutputX( void );
@@ -164,11 +143,11 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
 extern void GTKMatchInfo( void );
-extern void GTKShowBuildInfo(GtkWidget *pwParent);
-extern void GTKCommandShowCredits(GtkWidget* parent);
+extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent);
+extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget* parent);
 extern void GTKShowScoreSheet(void);
 extern void SwapBoardToPanel(int ToPanel);
-extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer );
+extern void CommentaryChanged( GtkWidget *pw, void *p );
 
 extern void SetEvaluation( gpointer *p, guint n, GtkWidget *pw );
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
@@ -205,9 +184,6 @@ GTKTextToClipboard( const char *sz );
 extern char *
 GTKChangeDisk( const char *szMsg, const int fChange, 
                const char *szMissingFile );
-
-extern int 
-GTKMessage( char *sz, dialogtype dt );
 
 extern int 
 GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
@@ -253,7 +229,6 @@ extern void PanelHide(gnubgwindow panel);
 extern int IsPanelShowVar(gnubgwindow panel, void *p);
 extern int SetMainWindowSize();
 extern void ShowHidePanel(gnubgwindow panel);
-extern void GTKSetCurrentParent(GtkWidget *parent);
 extern void SetAnnotation( moverecord *pmr );
 
 #if USE_BOARD3D

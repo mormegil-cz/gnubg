@@ -41,6 +41,7 @@
 #include "onechequer.h"
 #include "osr.h"
 #include "format.h"
+#include "gtkwindows.h"
 
 #if !HAVE_ERF
 extern double erf( double x );
@@ -633,7 +634,7 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
   /* create dialog */
 
   pwDialog = GTKCreateDialog ( _("GNU Backgammon - Race Theory"), DT_INFO,
-                            NULL, NULL );
+                            NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
   /* add notebook pages */
 
@@ -669,12 +670,6 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
 
   /* show dialog */
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
   gtk_widget_show_all( pwDialog );
 
   PerformOSR ( NULL, prw );
@@ -685,5 +680,4 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();
-
 }

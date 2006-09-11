@@ -45,6 +45,7 @@
 #include "format.h"
 #include "gtkboard.h"
 #include "renderprefs.h"
+#include "gtkwindows.h"
 
 typedef struct _optionswidget {
 
@@ -1964,10 +1965,7 @@ GTKSetOptions( void ) {
   optionswidget ow;
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - General options"), DT_QUESTION,
-			     GTK_SIGNAL_FUNC( OptionsOK ), &ow );
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
+			     NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( OptionsOK ), &ow );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwOptions = OptionsPages( &ow ) );
   gtk_widget_show_all( pwDialog );
@@ -1975,5 +1973,4 @@ GTKSetOptions( void ) {
   OptionsSet ( &ow );
  
   gtk_main();
-
 }

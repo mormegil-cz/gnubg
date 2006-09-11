@@ -88,6 +88,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   }
 	MoveListFreeSelectionList(plSelList);
 
+	GTKSetCurrentParent(pw);
   RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
 
   if ( fAction )
@@ -196,6 +197,7 @@ static void MoveListTempMapClicked( GtkWidget *pw, hintdata *phd )
   }
 	MoveListFreeSelectionList(plSelList);
 
+	GTKSetCurrentParent(pw);
   GTKShowTempMap( ams, c, ( const gchar** ) asz, TRUE );
 
   g_free( ams );
@@ -294,6 +296,7 @@ MoveListEvalPly ( GtkWidget *pw, hintdata *phd )
 static void
 MoveListEvalSettings ( GtkWidget *pw, void *unused )
 {
+	GTKSetCurrentParent(pw);
   SetEvaluation ( NULL, 0, NULL );
 
   /* bring the dialog holding this button to the top */
@@ -303,7 +306,8 @@ MoveListEvalSettings ( GtkWidget *pw, void *unused )
 static void
 MoveListRolloutSettings ( GtkWidget *pw, void *unused )
 {
-  SetRollouts ( NULL, 0, NULL );
+	GTKSetCurrentParent(pw);
+	SetRollouts ( NULL, 0, NULL );
 
   /* bring the dialog holding this button to the top */
   gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );

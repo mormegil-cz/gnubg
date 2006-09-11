@@ -39,6 +39,7 @@
 #include <glib/gi18n.h>
 #include "matchequity.h"
 #include "gtkmet.h"
+#include "gtkwindows.h"
 
 typedef struct _mettable {
   GtkWidget *pwTable;
@@ -232,7 +233,7 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
   int i;
   char sz[ 50 ];
   GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Match equity table"),
-                                      DT_INFO, NULL, NULL );
+                                      DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
   GtkWidget *pwNotebook = gtk_notebook_new ();
   GtkWidget *pwLoad = gtk_button_new_with_label(_("Load table..."));
     
@@ -273,16 +274,11 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
                                gtk_label_new ( sz ) );
   }
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
   gtk_signal_connect( GTK_OBJECT( pwInvertButton ), "toggled",
                       GTK_SIGNAL_FUNC( invertMETlocal ), &mw );
   gtk_signal_connect( GTK_OBJECT( pwLoad ), "clicked",
                       GTK_SIGNAL_FUNC ( loadMET ), &mw );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
   UpdateAllTables ( &mw );
     
@@ -291,7 +287,4 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();
-
 }
-
-

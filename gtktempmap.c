@@ -47,6 +47,7 @@
 #include "renderprefs.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "gtkwindows.h"
 
 #define SIZE_DIE 4
 #define SIZE_QUADRANT 40
@@ -530,11 +531,8 @@ GTKShowTempMap( const matchstate ams[], const int n,
 
   /* dialog */
 
-  pwDialog = GTKCreateDialog( _("Sho Sengoku Temperature Map - "
-                             "Distribution of rolls"), DT_INFO, NULL, NULL );
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
+  pwDialog = GTKCreateDialog( _("Sho Sengoku Temperature Map - Distribution of rolls"),
+	  DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
   ptmw = (tempmapwidget *) g_malloc( sizeof ( tempmapwidget ) );
   ptmw->fShowBestMove = FALSE;
@@ -556,7 +554,6 @@ GTKShowTempMap( const matchstate ams[], const int n,
   pwv = gtk_vbox_new ( FALSE, 8 );
   gtk_container_set_border_width ( GTK_CONTAINER ( pwv ), 8);
   gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
-
 
   /* calculate number of rows and columns */
 
@@ -801,5 +798,5 @@ GTKShowTempMap( const matchstate ams[], const int n,
   gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyDialog, ptmw );
 
   gtk_widget_show_all( pwDialog );
-
+	gtk_main();
 }

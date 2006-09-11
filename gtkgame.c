@@ -93,6 +93,7 @@
 #include "renderprefs.h"
 #include "credits.h"
 #include "matchid.h"
+#include "gtkwindows.h"
 
 #if USE_TIMECONTROL
 #include "timecontrol.h"
@@ -147,8 +148,6 @@ static char* GetText(GtkTextView* pwText)
   return pch;
 }
 #endif
-
-#define GTK_STOCK_DIALOG_GNU "gtk-dialog-gnu" /* stock gnu head icon */
 
 struct CommandEntryData_T cedDialog, cedPanel;
 
@@ -382,7 +381,7 @@ extern void GL_SetNames();
 GtkWidget *pwGrab;
 GtkWidget *pwOldGrab;
 
-GtkWidget *pwBoard, *pwMain, *pwMenuBar;
+GtkWidget *pwBoard, *pwMain = NULL, *pwMenuBar;
 GtkWidget *pwToolbar;
 
 GtkWidget *pom = 0;
@@ -620,7 +619,7 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
 extern int GTKGetManualDice( int an[ 2 ] ) {
 
     GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Dice"),
-					DT_INFO, NULL, NULL ),
+					DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL ),
 	*pwDice = board_dice_widget( BOARD( pwBoard ) );
 
     an[ 0 ] = 0;
@@ -629,11 +628,6 @@ extern int GTKGetManualDice( int an[ 2 ] ) {
 		       pwDice );
     gtk_object_set_user_data( GTK_OBJECT( pwDice ), an );
     
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwDice ), "destroy",
 			GTK_SIGNAL_FUNC( DestroySetDice ), pwDialog );
     
@@ -667,8 +661,8 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
     if( ms.gs != GAME_PLAYING || ms.fCrawford || !ms.fCubeUse )
 	return;
 	
-    pwDialog = GTKCreateDialog( _("GNU Backgammon - Cube"),
-			     DT_INFO, NULL, NULL );
+    pwDialog = GTKCreateDialog( _("GNU Backgammon - Cube"), DT_INFO,
+			NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL );
     pwCube = board_cube_widget( BOARD( pwBoard ) );
 
     an[ 0 ] = -1;
@@ -677,11 +671,6 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 		       pwCube );
     gtk_object_set_user_data( GTK_OBJECT( pwCube ), an );
     
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwCube ), "destroy",
 			GTK_SIGNAL_FUNC( DestroySetCube ), pwDialog );
     
@@ -1087,8 +1076,8 @@ extern void SetAnnotation( moverecord *pmr ) {
     doubletype dt;
     taketype tt;
     cubeinfo ci;
-    pwMoveAnalysis = NULL;
     GtkTextBuffer *buffer;
+    pwMoveAnalysis = NULL;
 
     /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
     pmrCurAnn = pmr;
@@ -1792,8 +1781,8 @@ static void PasteText()
 	if (!pFocus || !text)
 		return;
 	if (GTK_IS_ENTRY(pFocus)) {
-		gtk_entry_set_text(GTK_ENTRY(pFocus), text);
 		BoardData *bd = BOARD(pwBoard)->board_data;
+		gtk_entry_set_text(GTK_ENTRY(pFocus), text);
 		if (pFocus == bd->position_id)
 			board_set_position(0, bd);
 		else if (pFocus == bd->match_id)
@@ -2137,15 +2126,17 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     {
 #include "xpm/gnu.xpm"
+#include "xpm/question.xpm"
+
 	GtkIconFactory *pif = gtk_icon_factory_new();
 
 	gtk_icon_factory_add_default( pif );
 
 	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
-			      gtk_icon_set_new_from_pixbuf(
-				  gdk_pixbuf_new_from_xpm_data(
-				      (const char **) gnu_xpm ) ) );
-    }
+		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)gnu_xpm)));
+	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU_QUESTION,
+		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)question_xpm)));
+	}
 
     ptt = gtk_tooltips_new();
     
@@ -2350,263 +2341,38 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	gtk_main();
 }
 
-static void DestroyList( gpointer p ) {
+extern void ShowList( char *psz[], char *szTitle, GtkWidget *parent)
+{
+    GtkWidget *pwDialog, *pwList, *pwScroll;
 
-    *( (void **) p ) = NULL;
-}
+	pwDialog = GTKCreateDialog(szTitle, DT_INFO, parent, DIALOG_FLAG_MODAL, NULL, NULL);
 
-extern void ShowList( char *psz[], char *szTitle, GtkWidget *pwParent ) {
-
-    static GtkWidget *pwDialog;
-    GtkWidget *pwList = gtk_list_new(),
-	*pwScroll = gtk_scrolled_window_new( NULL, NULL ),
-	*pwOK = gtk_button_new_with_label( _("OK") );
-
-    if( pwDialog )
-	gtk_widget_destroy( pwDialog );
-
-    pwDialog = gtk_dialog_new();
-	if (pwParent)
-	{	/* Modal */
-		gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-		gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-						GTK_WINDOW( pwParent ) );
-	}
-    gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyList, &pwDialog );
-
+    pwList = gtk_list_new();
     while( *psz )
 	gtk_container_add( GTK_CONTAINER( pwList ),
 			   gtk_list_item_new_with_label( *psz++ ) );
     
-    gtk_signal_connect_object( GTK_OBJECT( pwOK ), "clicked",
-			       GTK_SIGNAL_FUNC( gtk_widget_destroy ),
-			       GTK_OBJECT( pwDialog ) );
-
+	pwScroll = gtk_scrolled_window_new( NULL, NULL );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScroll ),
 				    GTK_POLICY_AUTOMATIC,
 				    GTK_POLICY_AUTOMATIC );
     gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScroll ),
 					   pwList );
     
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ),
-		       pwScroll );
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ),
-		       pwOK );
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwScroll);
     
-    GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
-    gtk_widget_grab_default( pwOK );
-    
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
-    gtk_window_set_title( GTK_WINDOW( pwDialog ), szTitle );
+	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
 
     gtk_widget_show_all( pwDialog );
+	gtk_main();
 }
 
-static void OK( GtkWidget *pw, int *pf ) {
+extern void OK( GtkWidget *pw, int *pf ) {
 
     if( pf )
 	*pf = TRUE;
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-
-
-extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 
-                                   GtkSignalFunc pf, void *p ) {
-    GtkWidget *pwDialog = gtk_dialog_new(),
-	*pwOK = gtk_button_new_with_label( _("OK") ),
-	*pwCancel = gtk_button_new_with_label( _("Cancel") ),
-	*pwHbox = gtk_hbox_new( FALSE, 0 ),
-	*pwButtons = gtk_hbutton_box_new(),
-	*pwPixmap;
-    GtkAccelGroup *pag = gtk_accel_group_new();
-    int fQuestion = dt == DT_QUESTION || dt == DT_AREYOUSURE;
-    static char *aszStockItem[ NUM_DIALOG_TYPES ] = {
-	GTK_STOCK_DIALOG_INFO,
-	GTK_STOCK_DIALOG_QUESTION,
-	GTK_STOCK_DIALOG_WARNING,
-	GTK_STOCK_DIALOG_WARNING,
-	GTK_STOCK_DIALOG_ERROR,
-	GTK_STOCK_DIALOG_GNU
-    };
-    pwPixmap = gtk_image_new_from_stock( aszStockItem[ dt ],
-					 GTK_ICON_SIZE_DIALOG );
-    gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
-
-    gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
-			       GTK_BUTTONBOX_SPREAD );
-    
-    gtk_box_pack_start( GTK_BOX( pwHbox ), pwPixmap, FALSE, FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ),
-		       pwHbox );
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ),
-		       pwButtons );
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwOK );
-
-    gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", pf ? pf :
-			GTK_SIGNAL_FUNC( OK ), p );
-
-    if( fQuestion ) {
-	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
-	gtk_signal_connect_object( GTK_OBJECT( pwCancel ), "clicked",
-				   GTK_SIGNAL_FUNC( gtk_widget_destroy ),
-				   GTK_OBJECT( pwDialog ) );
-    }
-
-    gtk_window_add_accel_group( GTK_WINDOW( pwDialog ), pag );
-    gtk_widget_add_accelerator( fQuestion ? pwCancel : pwOK,
-				"clicked", pag, GDK_Escape, 0, 0 );
-
-    gtk_window_set_title( GTK_WINDOW( pwDialog ), szTitle );
-
-    GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
-    gtk_widget_grab_default( pwOK );
-
-    return pwDialog;
-}
-
-extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
-
-    GList *pl;
-    GtkWidget *pwChild;
-    
-    switch( da ) {
-    case DA_MAIN:
-    case DA_BUTTONS:
-	pl = gtk_container_children( GTK_CONTAINER(
-	    da == DA_MAIN ? GTK_DIALOG( pw )->vbox :
-	    GTK_DIALOG( pw )->action_area ) );
-	pwChild = pl->data;
-	g_list_free( pl );
-	return pwChild;
-
-    case DA_OK:
-	pl = gtk_container_children( GTK_CONTAINER(
-					 DialogArea( pw, DA_BUTTONS ) ) );
-	pwChild = pl->data;
-	g_list_free( pl );
-	return pwChild;
-	
-    default:
-	abort();
-    }
-}
-
-/* Use to temporarily set the parent dialog for nested dialogs */
-GtkWidget *pwCurrentParent = NULL;
-void GTKSetCurrentParent(GtkWidget *parent)
-{
-	pwCurrentParent = parent;
-}
-GtkWidget *GTKGetCurrentParent()
-{
-	GtkWidget *current = pwCurrentParent ? pwCurrentParent : pwMain;
-	pwCurrentParent = NULL;
-	return current;
-}
-
-extern int 
-GTKMessage( char *sz, dialogtype dt ) {
-
-    int f = FALSE, fRestoreNextTurn;
-    static char *aszTitle[ NUM_DIALOG_TYPES - 1 ] = {
-	N_("GNU Backgammon - Message"),
-	N_("GNU Backgammon - Question"),
-	N_("GNU Backgammon - Warning"), /* are you sure */
-	N_("GNU Backgammon - Warning"),
-	N_("GNU Backgammon - Error"),
-    };
-    GtkWidget *pwDialog = GTKCreateDialog( gettext( aszTitle[ dt ] ),
-					   dt, NULL, &f );
-    GtkWidget *psw;
-    GtkWidget *pwPrompt = gtk_label_new( sz );
-    GtkRequisition req;
-
-    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
-    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
-
-    gtk_widget_size_request( GTK_WIDGET( pwPrompt ), &req );
-
-    if ( req.height > 500 ) {
-	psw = gtk_scrolled_window_new( NULL, NULL );
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-			   psw );
-	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( psw ),
-					       pwPrompt );
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-					GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
-	gtk_window_set_default_size( GTK_WINDOW( pwDialog ),
-				     req.width, req.height );
-	gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, TRUE, TRUE );
-    }
-    else {
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwPrompt );
-    gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, FALSE, FALSE );
-    }
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-		GTK_WINDOW(GTKGetCurrentParent()));
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show_all( pwDialog );
-
-    /* This dialog should be REALLY modal -- disable "next turn" idle
-       processing and stdin handler, to avoid reentrancy problems. */
-    if( ( fRestoreNextTurn = nNextTurn ) )
-	gtk_idle_remove( nNextTurn );
-	    
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    if( fRestoreNextTurn )
-	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
-    
-    return f;
-}
-
-extern int GTKGetInputYN( char *szPrompt ) {
-
-    return GTKMessage( szPrompt, DT_AREYOUSURE );
-}
-
-char* inputString;
-static void GetInputOk( GtkWidget *pw, GtkWidget *pwEntry )
-{
-	inputString = strdup(gtk_entry_get_text(GTK_ENTRY(pwEntry)));
-    gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-}
-
-extern char* GTKGetInput(char* title, char* prompt)
-{
-	GtkWidget *pwDialog, *pwHbox, *pwEntry;
-	pwEntry = gtk_entry_new();
-	inputString = NULL;
-	pwDialog = GTKCreateDialog(title, DT_QUESTION, GTK_SIGNAL_FUNC(GetInputOk), pwEntry );
-
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
-		pwHbox = gtk_hbox_new(FALSE, 0));
-
-	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(prompt), FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwEntry, FALSE, FALSE, 0);
-	gtk_widget_grab_focus(pwEntry);
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
-	gtk_widget_show_all( pwDialog );
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
-	return inputString;
 }
 
 /*
@@ -2645,45 +2411,23 @@ TutorRethink ( GtkWidget *pw, void *unused ) {
 
 }
 
-extern int GtkTutor ( char *sz ) {
-
+extern int GtkTutor ( char *sz )
+{
     int f = FALSE, fRestoreNextTurn;
-    GdkPixmap *ppm;
     GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor, *pwHbox,
-          *pwButtons, *pwPixmap, *pwPrompt;
-    GtkWidget *pwHint;
-    GtkAccelGroup *pag;
+          *pwButtons, *pwPixmap, *pwPrompt, *pwHint;
 
-#include "xpm/question.xpm"
+	pwTutorDialog = GTKCreateDialog( _("GNU Backgammon - Tutor"),
+		DT_GNUQUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(OK), (void*)&f);
 
-	pwTutorDialog = gtk_dialog_new();
-	pwOK = gtk_button_new_with_label( _("Play Anyway") );
+	pwOK = DialogArea(pwTutorDialog, DA_OK);
+	gtk_button_set_label(GTK_BUTTON(pwOK), _("Play Anyway"));
+
 	pwCancel = gtk_button_new_with_label( _("Rethink") );
 	pwEndTutor = gtk_button_new_with_label ( _("End Tutor Mode") );
 	pwHint = gtk_button_new_with_label ( _("Hint") );
-	pwHbox = gtk_hbox_new( FALSE, 0 );
-	pwButtons = gtk_hbutton_box_new();
+	pwButtons = DialogArea(pwTutorDialog, DA_BUTTONS);
 
-    pag = gtk_accel_group_new();
-    
-    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
-                   gtk_widget_get_colormap( pwTutorDialog ), NULL, NULL,
-                   question_xpm);
-    pwPixmap = gtk_pixmap_new( ppm, NULL );
-    gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
-    
-    gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
-			       GTK_BUTTONBOX_SPREAD );
-    
-    gtk_box_pack_start( GTK_BOX( pwHbox ), pwPixmap, FALSE, FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwTutorDialog )->vbox ),
-		       pwHbox );
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwTutorDialog )->action_area ),
-		       pwButtons );
-    
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwOK );
-    gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", 
-			GTK_SIGNAL_FUNC( OK ), (void *) &f );
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
 	gtk_signal_connect( GTK_OBJECT( pwCancel ), "clicked",
 				   GTK_SIGNAL_FUNC( TutorRethink ),
@@ -2696,16 +2440,6 @@ extern int GtkTutor ( char *sz ) {
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwHint );
 	gtk_signal_connect( GTK_OBJECT( pwHint ), "clicked",
 				   GTK_SIGNAL_FUNC( TutorHint ), (void *) &f );
-
-    gtk_window_add_accel_group( GTK_WINDOW( pwTutorDialog ), pag );
-    gtk_widget_add_accelerator( pwCancel, "clicked", pag,
-				GDK_Escape, 0, 0 );
-    
-    gtk_window_set_title( GTK_WINDOW( pwTutorDialog ), 
-                          _("GNU Backgammon - Tutor") );
-
-    GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
-    gtk_widget_grab_default( pwOK );
     
     pwPrompt = gtk_label_new( sz );
 
@@ -2716,12 +2450,6 @@ extern int GtkTutor ( char *sz ) {
 		       pwPrompt );
     
     gtk_window_set_policy( GTK_WINDOW( pwTutorDialog ), FALSE, FALSE, FALSE );
-    gtk_window_set_modal( GTK_WINDOW( pwTutorDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwTutorDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwTutorDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
     gtk_widget_show_all( pwTutorDialog );
     
     /* This dialog should be REALLY modal -- disable "next turn" idle
@@ -3143,8 +2871,10 @@ static void UpdatePlayerSettings( newwidget *pnw ) {
 
 }
 
-static void SettingsPressed( GtkWidget *pw, gpointer data ) {
-  SetPlayers( NULL, 0, NULL);
+static void SettingsPressed( GtkWidget *pw, gpointer data )
+{
+	GTKSetCurrentParent(pw);
+	SetPlayers( NULL, 0, NULL);
 }
 
 static void ToolButtonPressedMS( GtkWidget *pw, newwidget *pnw ) {
@@ -3412,15 +3142,10 @@ extern void GTKNew( void ){
   newwidget nw;
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - New"),
-			   DT_QUESTION, GTK_SIGNAL_FUNC( NewOK ), &nw );
+			   DT_QUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( NewOK ), &nw );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwPage = NewWidget(&nw));
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-  
   gtk_widget_show_all( pwDialog );
 
   NewSet( &nw );
@@ -4479,14 +4204,11 @@ EvaluationOK ( GtkWidget *pw, setevalwidget *psew ) {
   EvalGetValues ( pew->pec, pew );
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-
 }
 
-
 extern void
-SetEvaluation ( gpointer *p, guint n, GtkWidget *pw ) {
-
-
+SetEvaluation ( gpointer *p, guint n, GtkWidget *pw )
+{
     evalcontext ecChequer, ecCube;
     GtkWidget *pwDialog;
     GtkWidget *pwhbox, *pwFrame;
@@ -4518,18 +4240,12 @@ SetEvaluation ( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), sew.pwCube, FALSE, FALSE, 0 );
     
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation settings"), 
-                             DT_QUESTION,
+                             DT_QUESTION, NULL, DIALOG_FLAG_MODAL,
                              GTK_SIGNAL_FUNC( EvaluationOK ), &sew );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pwhbox );
 
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
@@ -4545,11 +4261,7 @@ SetEvaluation ( gpointer *p, guint n, GtkWidget *pw ) {
       SetMovefilterCommands ( "set evaluation movefilter",
                               aamf, aamfEval );
     }
-
-
-
 }
-
 
 typedef struct _playerswidget {
     int *pfOK;
@@ -4711,7 +4423,7 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     plw.pfOK = &fOK;
     
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Players"), DT_QUESTION,
-			     GTK_SIGNAL_FUNC( PlayersOK ), &plw );
+			     NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( PlayersOK ), &plw );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwNotebook = gtk_notebook_new() );
@@ -4722,12 +4434,6 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      PlayersPage( &plw, 1 ),
 			      gtk_label_new( _("Player 1") ) );
-    
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
     gtk_widget_show_all( pwDialog );
 
@@ -5094,8 +4800,8 @@ static void AnalysisSet( analysiswidget *paw) {
 		 arLuckLevel[LUCK_VERYBAD] );
 }  
 
-static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
-
+static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw )
+{
   GtkWidget *pwDialog;
   analysiswidget aw;
 
@@ -5104,10 +4810,8 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
   memcpy( &aw.aamf, aamfAnalysis, sizeof( aw.aamf ) );
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Analysis Settings"),
-			   DT_QUESTION, GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
+			   DT_QUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
+
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		         AnalysisPage( &aw ) );
   gtk_widget_show_all( pwDialog );
@@ -5115,9 +4819,7 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
   AnalysisSet ( &aw );
  
   gtk_main();
-
 }
-
 
 typedef struct _rolloutpagewidget {
   int *pfOK;
@@ -5694,8 +5396,8 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   return pwPage;
 }
 
-extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
-
+extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
+{
   GtkWidget *pwDialog;
   int fOK = FALSE;
   rolloutwidget rw;
@@ -5738,7 +5440,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
   RPTrunc.precCheq = &rw.rcRollout.aecChequerTrunc;
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Rollouts"), DT_QUESTION,
-                           GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
+                           NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
 
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                      rw.RolloutNotebook = gtk_notebook_new() );
@@ -5769,12 +5471,6 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
                             RolloutPage (rw.prpwTrunc, FALSE ),
                             gtk_label_new ( _("Truncation Pt.") ) );
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
   gtk_widget_show_all( pwDialog );
    
   GTKDisallowStdin();
@@ -6002,9 +5698,10 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 }
 
 
-extern void GTKEval( char *szOutput ) {
-
-    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation"), DT_INFO, NULL, NULL );
+extern void GTKEval( char *szOutput )
+{
+    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation"),
+		DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
     GtkWidget *pwText;
     GtkWidget *sw;
     GtkTextBuffer *buffer;
@@ -6025,18 +5722,13 @@ extern void GTKEval( char *szOutput ) {
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       sw );
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 700, 600 );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ), GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy", GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
  
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
-
-
 }
 
 static void DestroyHint( gpointer p ) {
@@ -6071,7 +5763,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
 
 	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
-			   GTK_SIGNAL_FUNC( HintOK ), NULL );
+			   NULL, DIALOG_FLAG_NONE, GTK_SIGNAL_FUNC( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
@@ -6089,8 +5781,6 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     gtk_window_set_default_size(GTK_WINDOW(pwHint), 400, 300);
     
     gtk_widget_show_all( pwHint );
-
-
 }
 
 /*
@@ -6110,8 +5800,8 @@ extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC ) {
     
-    GtkWidget *pwDialog =
-	GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO, NULL, NULL );
+    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
+			NULL, DIALOG_FLAG_MODAL, NULL, NULL );
     GtkWidget *pw;
     GtkWidget *pwTable = gtk_table_new( 2, 3, FALSE );
 
@@ -6166,12 +5856,6 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwTable );
 
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
- 
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
@@ -6186,7 +5870,7 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
 extern void 
 GTKHint( movelist *pmlOrig, const int iMove) {
 
-    GtkWidget *pwButtons, *pwMoves, *pwHint;
+    GtkWidget *pwMoves, *pwHint;
     movelist *pml;
     static int n;
     
@@ -6205,9 +5889,8 @@ GTKHint( movelist *pmlOrig, const int iMove) {
     /* create dialog */
 
 	pwHint = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
-			   GTK_SIGNAL_FUNC( HintOK ), NULL );
+			   NULL, DIALOG_FLAG_NONE, GTK_SIGNAL_FUNC( HintOK ), NULL );
 	SetPanelWidget(WINDOW_HINT, pwHint);
-    pwButtons = DialogArea(pwHint, DA_BUTTONS );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
@@ -6330,18 +6013,11 @@ extern void GTKShowScoreSheet( void )
 	else
 		strcat(title, _("Money Session"));
 
-	pwDialog = GTKCreateDialog(title, DT_INFO, NULL, NULL );
+	pwDialog = GTKCreateDialog(title, DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 	pwBox = gtk_vbox_new( FALSE, 0);
 	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
 
 	gtk_widget_set_usize(GTK_WIDGET (pwDialog), -1, 200);
 	gtk_container_set_border_width(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 4);
@@ -6433,7 +6109,7 @@ extern void GTKShowScoreSheet( void )
 	gtk_signal_connect(GTK_OBJECT(pwList), "realize",
 			GTK_SIGNAL_FUNC(MoveListIntoView), (gpointer *)(numRows - 1) );
 
-	gtk_widget_show_all( pwDialog );
+	gtk_widget_show_all(pwDialog);
 	gtk_main();
 }
 
@@ -6441,73 +6117,37 @@ extern char *aszCopying[], *aszWarranty[];
 
 void GtkShowCopying(GtkWidget *pwWidget)
 {
-	ShowList( aszCopying, _("Copying"), gtk_widget_get_toplevel(pwWidget) );
+	ShowList( aszCopying, _("Copying"), pwWidget );
 }
 
 void GtkShowWarranty(GtkWidget *pwWidget)
 {
-	ShowList( aszWarranty, _("Warranty"), gtk_widget_get_toplevel(pwWidget) );
+	ShowList( aszWarranty, _("Warranty"), pwWidget );
 }
 
-extern void GTKShowVersion( void ) {
-
+extern void GTKShowVersion( void )
+{
 #include "xpm/gnubg-big.xpm"
-	GtkWidget *pwDialog;
-	GtkWidget *pwTopHBox = gtk_hbox_new( FALSE, -8 ),
-		*pwImageVBox = gtk_vbox_new( FALSE, 0 ),
-		*pwButtonBox = gtk_vbox_new( FALSE, 0 ),
-		*pwOK, *pwPrompt, *pwImage, *pwButton;
-	GtkRcStyle *ps = gtk_rc_style_new();
-	char PromptStr[255];
-	GtkAccelGroup *pag = gtk_accel_group_new();
+	GtkWidget *pwDialog, *pwButtonBox, *pwButton;
 
-	pwDialog = gtk_dialog_new();
-	gtk_window_set_title( GTK_WINDOW( pwDialog ), _("About GNU Backgammon") );
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-
-	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ), pwTopHBox );
-
-	gtk_box_pack_start( GTK_BOX( pwTopHBox ), pwImageVBox, FALSE, FALSE, 0 );
-	/* image */
-	pwImage = image_from_xpm_d ( gnubg_big_xpm, pwDialog );
-	gtk_misc_set_padding( GTK_MISC( pwImage ), 8, 8 );
-	gtk_box_pack_start( GTK_BOX( pwImageVBox ), pwImage, FALSE, FALSE, 0 );
-
-	sprintf(PromptStr, "%s", _(VERSION_STRING));
-	pwPrompt = gtk_label_new(PromptStr);
-	gtk_box_pack_start( GTK_BOX( pwImageVBox ), pwPrompt, FALSE, FALSE, 0 );
-	ps->font_desc = pango_font_description_new();
-	pango_font_description_set_family_static( ps->font_desc, "serif" );
-	pango_font_description_set_size( ps->font_desc, 24 * PANGO_SCALE );    
-	gtk_widget_modify_style( pwPrompt, ps );
-	gtk_rc_style_unref( ps );
-
-	pwOK = gtk_button_new_with_label( _("OK") );
-
-	gtk_window_add_accel_group( GTK_WINDOW( pwDialog ), pag );
-	gtk_widget_add_accelerator( pwOK, "clicked", pag, GDK_Escape, 0, 0 );
-
-	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ), pwOK );
-	GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
-	gtk_widget_grab_default( pwOK );
-	gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", GTK_SIGNAL_FUNC( OK ), NULL );
+	pwDialog = GTKCreateDialog(_("About GNU Backgammon"), DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CUSTOM_PICKMAP, NULL, gnubg_big_xpm);
+    gtk_window_set_policy(GTK_WINDOW(pwDialog), FALSE, FALSE, FALSE);
 
 	/* Buttons on right side */
-	gtk_box_pack_start( GTK_BOX( pwTopHBox ), pwButtonBox, FALSE, FALSE, 8 );
+	pwButtonBox = gtk_vbox_new( FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX(DialogArea(pwDialog, DA_MAIN)), pwButtonBox, FALSE, FALSE, 8 );
 
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Credits") ),
 	FALSE, FALSE, 8 );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-		GTK_SIGNAL_FUNC( GTKCommandShowCredits ), NULL );
+		GTK_SIGNAL_FUNC( GTKCommandShowCredits ), pwDialog );
 	
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Build Info") ),
 	FALSE, FALSE, 8 );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-		GTK_SIGNAL_FUNC( GTKShowBuildInfo ), NULL );
+		GTK_SIGNAL_FUNC( GTKShowBuildInfo ), pwDialog );
 	
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Copying conditions") ),
@@ -6522,6 +6162,7 @@ extern void GTKShowVersion( void ) {
 		GTK_SIGNAL_FUNC( GtkShowWarranty ), NULL );
 
 	gtk_widget_show_all( pwDialog );
+	gtk_main();
 }
 
 GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
@@ -6531,23 +6172,17 @@ GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
 	return pwLabel;
 }
 
-extern void GTKShowBuildInfo(GtkWidget *pwParent)
+extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwPrompt;
 	char* pch;
 
 	pwDialog = GTKCreateDialog( _("GNU Backgammon - Build Info"),
-					DT_INFO, NULL, NULL );
+		DT_INFO, pwParent, DIALOG_FLAG_MODAL, NULL, NULL );
 	pwBox = gtk_vbox_new( FALSE, 0);
 	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( gtk_widget_get_toplevel(pwParent) ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 	gtk_box_pack_start( GTK_BOX( pwBox ), SelectableLabel(pwDialog, "Version " VERSION 
 #ifdef WIN32
@@ -6573,7 +6208,7 @@ extern void GTKShowBuildInfo(GtkWidget *pwParent)
 	"absolutely no warranty for GNU Backgammon.") ), FALSE, FALSE, 4 );
 	gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
 	
-	gtk_widget_show_all( pwDialog );
+	gtk_widget_show_all(pwDialog);
 	gtk_main();
 }
 
@@ -6619,7 +6254,7 @@ static int FindName(list* pList, char* name)
 	return FALSE;
 }
 
-extern void GTKCommandShowCredits(GtkWidget *pwParent)
+extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwMainHBox, *pwHBox = 0, *pwVBox,
 		*pwList = gtk_list_new(),
@@ -6631,17 +6266,11 @@ extern void GTKCommandShowCredits(GtkWidget *pwParent)
 	ListCreate(&names);
 
 	pwDialog = GTKCreateDialog( _("GNU Backgammon - Credits"),
-					DT_INFO, NULL, NULL );
+		DT_INFO, pwParent, DIALOG_FLAG_MODAL, NULL, NULL );
 
 	pwMainHBox = gtk_hbox_new(FALSE, 0);
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwMainHBox);
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( gtk_widget_get_toplevel(pwParent) ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 	pwBox = gtk_vbox_new( FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwMainHBox), pwBox, FALSE, FALSE, 0);
@@ -6695,7 +6324,7 @@ extern void GTKCommandShowCredits(GtkWidget *pwParent)
 	while(names.plNext->p)
 		ListDelete(names.plNext );
 
-	gtk_widget_show_all( pwDialog );
+	gtk_widget_show_all(pwDialog);
 	gtk_main();
 }
 
@@ -6949,9 +6578,9 @@ static void GTKHelpSelect( GtkTreeSelection *pts, gpointer p ) {
 	gtk_label_set_text( GTK_LABEL( pwHelpLabel ), NULL );
 }
 
-extern void GTKHelp( char *sz ) {
-
-    static GtkWidget *pw;
+extern void GTKHelp( char *sz )
+{
+    static GtkWidget *pw = NULL;
     GtkWidget *pwPaned, *pwScrolled;
     GtkTreeStore *pts;
     GtkTreeIter ti, tiSearch;
@@ -6961,18 +6590,18 @@ extern void GTKHelp( char *sz ) {
     int cch, i, c, *pn;
     void ( *pf )( char * );
     
-    if( pw ) {
-	gtk_window_present( GTK_WINDOW( pw ) );
-	gtk_tree_view_collapse_all( GTK_TREE_VIEW( pwHelpTree ) );
-	pts = GTK_TREE_STORE( gtk_tree_view_get_model(
-	    GTK_TREE_VIEW( pwHelpTree ) ) );
-    } else {
+    if( pw )
+	{
+		gtk_window_present( GTK_WINDOW( pw ) );
+		return;
+	}
+
 	pts = gtk_tree_store_new( 3, G_TYPE_STRING, G_TYPE_STRING,
 				  G_TYPE_POINTER );
 
 	GTKHelpAdd( pts, NULL, acTop );
 	
-	pw = gtk_dialog_new();
+	pw = GTKCreateDialog(_("Help - command reference"), DT_INFO, NULL, DIALOG_FLAG_NONE, NULL, NULL);
 	g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer *) &pw );
 	gtk_window_set_title( GTK_WINDOW( pw ), _("Help - command reference") );
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
@@ -7016,7 +6645,6 @@ extern void GTKHelp( char *sz ) {
 	gtk_label_set_selectable( GTK_LABEL( pwHelpLabel ), TRUE );
 	
 	gtk_widget_show_all( pw );
-    }
 
     gtk_tree_model_get_iter_first( GTK_TREE_MODEL( pts ), &ti );
     tiSearch = ti;
@@ -7093,11 +6721,9 @@ extern void GTKBearoffProgress( int i ) {
     gchar *gsz;
     
     if( !pwDialog ) {
-	pwDialog = GTKCreateDialog( _("GNU Backgammon"), DT_INFO, NULL, NULL );
+		pwDialog = GTKCreateDialog( _("GNU Backgammon"), DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 	gtk_window_set_role( GTK_WINDOW( pwDialog ), "progress" );
-	gtk_window_set_type_hint( GTK_WINDOW(pwDialog),
-			      GDK_WINDOW_TYPE_HINT_DIALOG );
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_type_hint( GTK_WINDOW(pwDialog), GDK_WINDOW_TYPE_HINT_DIALOG );
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			    GTK_SIGNAL_FUNC( GTKBearoffProgressCancel ),
 			    NULL );
@@ -7775,7 +7401,7 @@ extern void GTKDumpStatcontext( int game )
 	GtkWidget *pw;
 	list *pl;
 #endif
-	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, NULL );
+	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
 	pwNotebook = gtk_notebook_new();
 	gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
@@ -7856,7 +7482,7 @@ extern void GTKDumpStatcontext( int game )
 
 	gtk_signal_connect( GTK_OBJECT( pwList ), "button-press-event", GTK_SIGNAL_FUNC( ContextCopyMenu ), copyMenu );
 
-	/* modality */
+	/* dialog size */
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwUsePanels ) ) )
 	    gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 300 );
 	else {
@@ -7865,9 +7491,6 @@ extern void GTKDumpStatcontext( int game )
 	    if ( req.height < 600 )
 		gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 600 );
 	}
-	gtk_window_set_modal( GTK_WINDOW( pwStatDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwStatDialog ),
-								GTK_WINDOW( pwMain ) );
 
 	copyMenu = gtk_menu_new ();
 
@@ -7882,9 +7505,6 @@ extern void GTKDumpStatcontext( int game )
 	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( CopyAll ), pwNotebook );
 
 	gtk_signal_connect( GTK_OBJECT( pwNotebook ), "button-press-event", GTK_SIGNAL_FUNC( ContextCopyMenu ), copyMenu );
-
-	gtk_signal_connect( GTK_OBJECT( pwStatDialog ), "destroy",
-					  GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 	gtk_widget_show_all( pwStatDialog );
 
@@ -8029,7 +7649,7 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	if( !f ) {
 	    f = TRUE;
 	    pw = GTKCreateDialog( _("GNU Backgammon - Player records"), DT_INFO,
-			       NULL, NULL );
+			NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 	    
 	    for( i = 0; i < 22; i++ )
 		asz[ i ] = "";
@@ -8247,13 +7867,7 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	gtk_clist_sort( GTK_CLIST( pwList ) );
 	
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
-	gtk_window_set_modal( GTK_WINDOW( pw ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pw ), GTK_WINDOW( pwMain ) );
-
 	gtk_widget_show_all( pw );
-	
-	gtk_signal_connect( GTK_OBJECT( pw ), "destroy",
-			    GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 	
 	GTKDisallowStdin();
 	gtk_main();
@@ -8289,13 +7903,11 @@ static void AddToTable(GtkWidget* pwTable, char* str, int x, int y)
 		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 0, 0);
 }
 
-extern void GTKMatchInfo( void ) {
-
+extern void GTKMatchInfo( void )
+{
     int fOK = FALSE;
-    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Match "
-					  "information"),
-					DT_QUESTION,
-					GTK_SIGNAL_FUNC( MatchInfoOK ), &fOK ),
+    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Match information"),
+		DT_QUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( MatchInfoOK ), &fOK ),
 	*pwTable, *apwRating[ 2 ], *pwDate, *pwEvent, *pwRound, *pwPlace,
 	*pwAnnotator, *pwComment;
     char sz[ 128 ], *pch;
@@ -8388,8 +8000,6 @@ extern void GTKMatchInfo( void ) {
     if( fOK ) {
 	unsigned int nYear, nMonth, nDay;
 	
-	gtk_signal_disconnect( GTK_OBJECT( pwDialog ), id );
-	
 	outputpostpone();
 
 	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 0 ] ) ),
@@ -8424,8 +8034,6 @@ extern void GTKMatchInfo( void ) {
 	UpdateMatchinfo( pch, "comment", &mi.pchComment );
 	g_free( pch );
 
-	gtk_widget_destroy( pwDialog );
-	
 	outputresume();
     }
 }
@@ -8453,9 +8061,9 @@ static void CalibrationEnable( GtkWidget *pw, GtkWidget *pwspin ) {
 				  GTK_TOGGLE_BUTTON( pw ) ) );
 }
 
-static void CalibrationGo( GtkWidget *pw, GtkWidget *apw[ 2 ] ) {
-
-	GTKSetCurrentParent(gtk_widget_get_toplevel(pw));
+static void CalibrationGo( GtkWidget *pw, GtkWidget *apw[ 2 ] )
+{
+	GTKSetCurrentParent(pw);
     UserCommand( "calibrate" );
 
     fInterrupt = FALSE;
@@ -8468,15 +8076,14 @@ static void CalibrationGo( GtkWidget *pw, GtkWidget *apw[ 2 ] ) {
     }
 }
 
-extern void GTKShowCalibration( void ) {
-
+extern void GTKShowCalibration( void )
+{
     GtkAdjustment *padj;
     GtkWidget *pwDialog, *pwvbox, *pwhbox, *pwenable, *pwspin, *pwbutton,
 	*apw[ 2 ];
     
-    pwDialog = GTKCreateDialog( _("GNU Backgammon - Speed estimate"),
-			     DT_QUESTION, GTK_SIGNAL_FUNC( CalibrationOK ),
-			     &pwspin );
+    pwDialog = GTKCreateDialog( _("GNU Backgammon - Speed estimate"), DT_QUESTION,
+		NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( CalibrationOK ), &pwspin );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwvbox = gtk_vbox_new( FALSE, 8 ) );
     gtk_container_set_border_width( GTK_CONTAINER( pwvbox ), 8 );
@@ -8510,12 +8117,6 @@ extern void GTKShowCalibration( void ) {
     gtk_signal_connect( GTK_OBJECT( pwenable ), "toggled",
 			GTK_SIGNAL_FUNC( CalibrationEnable ), pwspin );
     
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
@@ -8535,7 +8136,7 @@ extern void *GTKCalibrationStart( void ) {
     GtkWidget *pwDialog, *pwhbox, *pwResult;
     
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Calibration"), DT_INFO,
-			     GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
+		NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwhbox = gtk_hbox_new( FALSE, 8 ) );
     gtk_container_set_border_width( GTK_CONTAINER( pwhbox ), 8 );
@@ -8546,10 +8147,6 @@ extern void *GTKCalibrationStart( void ) {
     gtk_container_add( GTK_CONTAINER( pwhbox ),
 		       gtk_label_new( _("static evaluations/second") ) );
     
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( GTKGetCurrentParent() ) );
-
     pwOldGrab = pwGrab;
     pwGrab = pwDialog;
     
@@ -8598,7 +8195,7 @@ GTKChangeDisk( const char *szMsg, const int fChange,
   gchar *pch;
   int f = FALSE;
 
-  pwDialog = GTKCreateDialog( _("Change Disk"), DT_QUESTION, NULL, &f );
+  pwDialog = GTKCreateDialog( _("Change Disk"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL, NULL, &f );
 
   pch = g_strdup_printf( szMsg, szMissingFile );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -8608,12 +8205,6 @@ GTKChangeDisk( const char *szMsg, const int fChange,
   /* FIXME: add call to a file dialog for change of paths */
   /* FIXME: handle interrupt */
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-  
   gtk_widget_show_all( pwDialog );
 
   GTKDisallowStdin();
@@ -8624,7 +8215,6 @@ GTKChangeDisk( const char *szMsg, const int fChange,
     fInterrupt = TRUE;
   
   return NULL;
-
 }
 
 
@@ -8642,16 +8232,11 @@ FinishMove( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
-static void CallbackResign(GtkWidget *pw, gpointer data){
-
+static void CallbackResign(GtkWidget *pw, gpointer data)
+{
     int i = (int ) data;
     char *asz[3]= { "normal", "gammon", "backgammon" };
     char sz[20];
-    
-    if( i == -1 ){
-        gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-	return;
-    }
 
     sprintf(sz, "resign %s", asz[i]);
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -8660,8 +8245,44 @@ static void CallbackResign(GtkWidget *pw, gpointer data){
     return;
 }
     
-extern void GTKResign( gpointer *p, guint n, GtkWidget *pw ) {
+extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
+{
+    GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
+    int i;
+    char **apXPM[3];
+    char *asz[3] = { _("Resign normal"),
+		 _("Resign gammon"),
+		 _("Resign backgammon") };
+		 
+#include "xpm/resigns.xpm"
+    apXPM[0] = resign_n_xpm;
+    apXPM[1] = resign_g_xpm;
+    apXPM[2] = resign_bg_xpm;
 
+	pwDialog = GTKCreateDialog(_("Resign"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOOK, NULL, NULL);
+
+    pwVbox = gtk_vbox_new(TRUE, 5);
+
+    for (i = 0; i < 3 ; i++){
+	pwButtons = gtk_button_new();
+	pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(pwButtons), pwHbox); 
+    	gtk_box_pack_start(GTK_BOX(pwHbox), 
+		image_from_xpm_d(apXPM[i], pwButtons), FALSE,FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(asz[i]), TRUE, TRUE, 10);
+	gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
+	gtk_signal_connect(GTK_OBJECT(pwButtons), "clicked",
+		GTK_SIGNAL_FUNC( CallbackResign ), (int *) i );
+    }
+
+    gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwVbox);
+    gtk_widget_show_all(pwDialog);
+    
+    gtk_main();
+}
+// remove...
+extern void GTKResignOld( gpointer *p, guint n, GtkWidget *pw )
+{
     GtkWidget *pwWindow, *pwVbox, *pwHbox, *pwButtons;
     int i;
     char **apXPM[3];
@@ -8732,14 +8353,14 @@ WarningOK ( GtkWidget *pw, warnings warning )
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-extern void GTKShowWarning(warnings warning)
+extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
 {
 	if (warningEnabled[warning])
 	{
 		GtkWidget *pwDialog, *pwMsg, *pwv;
 		
-		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"),
-					DT_WARNING, GTK_SIGNAL_FUNC ( WarningOK ), (void*)warning );
+		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), DT_WARNING,
+			pwParent, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( WarningOK ), (void*)warning );
 
 		pwv = gtk_vbox_new ( FALSE, 8 );
 		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
@@ -8750,12 +8371,6 @@ extern void GTKShowWarning(warnings warning)
 		pwTick = gtk_check_button_new_with_label (_("Don't show this again"));
 		gtk_tooltips_set_tip(ptt, pwTick, _("If set, this message won't appear again"), 0);
 		gtk_box_pack_start( GTK_BOX( pwv ), pwTick, TRUE, TRUE, 0 );
-
-		gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-		gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					  GTK_WINDOW( pwMain ) );
-		gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-				GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 		gtk_widget_show_all( pwDialog );
 
@@ -8842,7 +8457,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 	if (!state)
 	{
-		GTKShowWarning(WARN_FULLSCREEN_EXIT);
+		GTKShowWarning(WARN_FULLSCREEN_EXIT, pw);
 
 		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP) && GTK_WIDGET_IS_SENSITIVE(pmiRP))
 			changedRP = TRUE;
@@ -9067,6 +8682,8 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
   		char line[100];
   		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
   		  gtk_text_buffer_insert(buffer, &it, line, -1);
+  		  gtk_text_insert(GTK_TEXT(pwAliasList), NULL, 
+  				  NULL, NULL, line, -1);
   	}
 	}
 	FreeRowset(&r);
@@ -9163,18 +8780,12 @@ static void RelationalLinkPlayers(GtkWidget *pw, GtkWidget *pwRelList)
 	pwList = GetRelList(&r);
 	FreeRowset(&r);
 
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Linked Player"),
-						   DT_QUESTION, GTK_SIGNAL_FUNC(SelectLinkOK), pwList);
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Linked Player"), DT_QUESTION,
+		pw, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(SelectLinkOK), pwList);
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwList);
 	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
 							GTK_SIGNAL_FUNC( LinkPlayerSelect ), pwList );
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 	gtk_widget_show_all( pwDialog );
 
@@ -9375,8 +8986,8 @@ static int GtkGetEnv(char* env)
 			GtkWidget *pwEnvCombo, *pwDialog, *pwHbox, *pwVbox;
 			pwEnvCombo = gtk_combo_new();
 
-			pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Environment"),
-							DT_QUESTION, GTK_SIGNAL_FUNC(SelectEnvOK), pwEnvCombo);
+			pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Environment"), DT_QUESTION,
+				NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(SelectEnvOK), pwEnvCombo);
 
 			gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
 				pwHbox = gtk_hbox_new(FALSE, 0));
@@ -9413,12 +9024,6 @@ static int GtkGetEnv(char* env)
 			gtk_box_pack_start(GTK_BOX(pwVbox), envP2, FALSE, FALSE, 0);
 
 			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pwEnvCombo)->entry), envRows.data[i][1]);
-
-			gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-			gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-							GTK_WINDOW( pwMain ) );
-			gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-					GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 			gtk_widget_show_all( pwDialog );
 
@@ -9493,8 +9098,8 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 
 	curPlayerId = -1;
 
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Relational Database"),
-					DT_INFO, NULL, NULL );
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Relational Database"), DT_INFO,
+		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
 	pwn = gtk_notebook_new();
   gtk_container_set_border_width(GTK_CONTAINER(pwn), 0);
@@ -9654,12 +9259,6 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(pwScrolled), pwQueryBox);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
 
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
 	gtk_widget_show_all( pwDialog );
 
 	GTKDisallowStdin();
@@ -9671,18 +9270,12 @@ extern void GtkShowQuery(RowSet* pRow)
 {
 	GtkWidget *pwDialog;
 
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Database Result"),
-					DT_INFO, NULL, NULL );
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Database Result"), DT_INFO,
+		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 	
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       GetRelList(pRow));
 
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
- 
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
@@ -9772,8 +9365,8 @@ static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
 	RowSet r;
 	GtkWidget *pwList, *pwDialog, *pwHbox, *pwVbox, *pwBut;
 
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Manage Environments"),
-					DT_INFO, NULL, NULL );
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Manage Environments"), DT_INFO,
+		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
 		pwHbox = gtk_hbox_new(FALSE, 0));
@@ -9810,12 +9403,6 @@ static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
 
 	gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
 	gtk_widget_set_sensitive(pwRenameEnv, FALSE);
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
 	gtk_widget_show_all( pwDialog );
 
@@ -9982,16 +9569,11 @@ static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw ) {
   GtkWidget *pwDialog, *pwPage;
   definetcwidget dtcw;
 
-  pwDialog = GTKCreateDialog( _("GNU Backgammon - Define Time Control"),
-                           DT_QUESTION, GTK_SIGNAL_FUNC( DefineTCOK ), &dtcw );
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - Define Time Control"), DT_QUESTION,
+	  NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( DefineTCOK ), &dtcw );
 
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                         pwPage = DefineTCWidget(&dtcw));
-
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
   gtk_widget_show_all( pwDialog );
 

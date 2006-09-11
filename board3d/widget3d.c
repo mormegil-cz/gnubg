@@ -271,11 +271,11 @@ static int CheckAccelerated(GtkWidget* board)
 
 #endif
 
-int DoAcceleratedCheck(GtkWidget* board)
+int DoAcceleratedCheck(GtkWidget* board, GtkWidget* pwParent)
 {
 	if (!CheckAccelerated(board))
 	{	/* Display warning message as performance may be bad */
-		GTKShowWarning(WARN_UNACCELERATED);
+		GTKShowWarning(WARN_UNACCELERATED, pwParent);
 		return 0;
 	}
 	else

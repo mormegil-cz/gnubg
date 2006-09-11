@@ -35,6 +35,7 @@
 #include "gtktoolbar.h"
 #include "bearoff.h"
 #include <glib/gi18n.h>
+#include "gtkwindows.h"
 
 typedef struct _bearoffwidget {
 
@@ -263,20 +264,14 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
 
 
 extern void
-GTKShowBearoff( const matchstate *pms ) {
-
-
+GTKShowBearoff( const matchstate *pms )
+{
   GtkWidget *pwDialog;
   GtkWidget *pwNotebook;
   GtkWidget *pwv;
   sconyerswidget *psw;
 
-  pwDialog = GTKCreateDialog( _("Bearoff Databases"), 
-                              DT_INFO, NULL, NULL );
-
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                  GTK_WINDOW( pwMain ) );
+  pwDialog = GTKCreateDialog( _("Bearoff Databases"), DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
   pwv = gtk_vbox_new ( FALSE, 8 );
   gtk_container_set_border_width ( GTK_CONTAINER ( pwv ), 8);
@@ -320,24 +315,24 @@ GTKShowBearoff( const matchstate *pms ) {
   
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 500 ); 
   gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyDialog, psw );
-
   gtk_widget_show_all( pwDialog );
-
+  gtk_main();
 }
 
 
 
 extern void
-GTKShowEPC( int anBoard[ 2 ][ 25 ] ) {
-
+GTKShowEPC( int anBoard[ 2 ][ 25 ] )
+{
   GtkWidget *pwDialog;
+  GdkFont *pf;
   GtkWidget *pwText;
   gchar *pch;
   GtkTextBuffer *buffer;
   PangoFontDescription *font_desc;
 
-  pwDialog = GTKCreateDialog( _("Effective Pip Count"), 
-                              DT_INFO, NULL, NULL );
+  pwDialog = GTKCreateDialog( _("Effective Pip Count"), DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
+
 
   pwText = gtk_text_view_new();
   gtk_text_view_set_wrap_mode ( GTK_TEXT_VIEW(pwText), GTK_WRAP_NONE );
@@ -360,17 +355,10 @@ GTKShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
   /* show dialog */
 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-  
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 500 ); 
   gtk_widget_show_all( pwDialog );
     
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();
-    
 }

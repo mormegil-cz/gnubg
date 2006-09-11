@@ -76,7 +76,7 @@ extern void SetupVisual();
 extern void SetupViewingVolume3d(BoardData *bd, BoardData3d* bd3d, renderdata *prd);
 extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata* prd);
 extern GtkWidget* CreateGLWidget(BoardData* bd);
-extern int DoAcceleratedCheck(GtkWidget* board);
+extern int DoAcceleratedCheck(GtkWidget* board, GtkWidget* pwParent);
 
 extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
 extern void RollDice3d(BoardData *bd, BoardData3d* bd3d, renderdata *prd);
