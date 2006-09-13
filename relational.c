@@ -35,11 +35,11 @@
 #include <assert.h>
 #include <glib.h>
 
-#include <glib/gi18n.h>
 #include "relational.h"
 #include "backgammon.h"
 #include "positionid.h"
 #include "rollout.h"
+#include <glib/gi18n.h>
 
 
 static void

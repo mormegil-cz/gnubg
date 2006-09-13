@@ -37,7 +37,6 @@
 
 #include <stdio.h>
 #include <glib.h>
-#include <glib/gi18n.h>
 #include "backgammon.h"
 #include "eval.h"
 #include "matchequity.h"
@@ -45,6 +44,7 @@
 #include "positionid.h"
 #include "analysis.h"
 #include "md5.h"
+#include <glib/gi18n.h>
 
 #undef IGNORE	// Ignore msdev define
 #define IGNORE __attribute__ ((unused))
