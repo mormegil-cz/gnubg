@@ -39,6 +39,7 @@
 #include "rollout.h"
 #include "gtkgame.h"
 #include "gtkcube.h"
+#include "gtkwindows.h"
 #include <glib/gi18n.h>
 #include "progress.h"
 #include "format.h"

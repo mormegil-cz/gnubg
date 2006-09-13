@@ -2414,8 +2414,8 @@ TutorRethink ( GtkWidget *pw, void *unused ) {
 extern int GtkTutor ( char *sz )
 {
     int f = FALSE, fRestoreNextTurn;
-    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor, *pwHbox,
-          *pwButtons, *pwPixmap, *pwPrompt, *pwHint;
+    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor,
+          *pwButtons, *pwPrompt, *pwHint;
 
 	pwTutorDialog = GTKCreateDialog( _("GNU Backgammon - Tutor"),
 		DT_GNUQUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(OK), (void*)&f);

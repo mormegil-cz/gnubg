@@ -867,15 +867,13 @@ RestoreExtendedCubeRollout(const char *sz,
 			   float aarStdDev[][NUM_ROLLOUT_OUTPUTS],
 			   evalsetup * pes)
 {
-        int ver;
-
     /* we assume new versions will still begin with Eq 4 floats
        Trials int 
      */
     RestoreRolloutTrials(&pes->rc.nGamesDone, sz);
     RestoreCubeRolloutOutput(aarOutput[0], aarStdDev[0], sz, "NoDouble");
     RestoreCubeRolloutOutput(aarOutput[1], aarStdDev[1], sz, "DoubleTake");
-    if (ver = CheckSGFVersion(&sz)) {
+    if (CheckSGFVersion(&sz)) {
 	RestoreRolloutInternals(pes, sz);
 	RestoreExtendedRolloutContext(&pes->rc, sz);
     }
@@ -906,7 +904,7 @@ static void RestoreDoubleAnalysis(property * pp,
 				  evalsetup * pes)
 {
 
-    char *pch = pp->pl->plNext->p, ch;
+    char *pch = pp->pl->plNext->p;
     int nReduced, fUsePrune = 0;
     /* leftovers from earlier formats */
     float arUnused[4];
@@ -997,7 +995,7 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
     char *pch;
     char ch;
     move *pm;
-    int i, nPlies, fDeterministic, nReduced, fUsePrune = 0;
+    int i, fDeterministic, nReduced, fUsePrune = 0;
     int anBoardMove[2][25];
     int ver;
     *piMove = atoi(pl->p);
