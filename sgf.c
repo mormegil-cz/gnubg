@@ -235,10 +235,10 @@ static void RestoreGS(list * pl, statcontext * psc)
 		psc->anMoves[1][st] = strtol(pch, &pch, 10);
 	    }
 
-	    psc->arErrorCheckerplay[0][0] = strtod(pch, &pch);
-	    psc->arErrorCheckerplay[0][1] = strtod(pch, &pch);
-	    psc->arErrorCheckerplay[1][0] = strtod(pch, &pch);
-	    psc->arErrorCheckerplay[1][1] = strtod(pch, &pch);
+	    psc->arErrorCheckerplay[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorCheckerplay[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorCheckerplay[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorCheckerplay[1][1] = g_ascii_strtod(pch, &pch);
 
 	    break;
 
@@ -267,30 +267,30 @@ static void RestoreGS(list * pl, statcontext * psc)
 	    psc->anCubeWrongPass[0] = strtol(pch, &pch, 10);
 	    psc->anCubeWrongPass[1] = strtol(pch, &pch, 10);
 
-	    psc->arErrorMissedDoubleDP[0][0] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleDP[0][1] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleTG[0][0] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleTG[0][1] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleDP[0][0] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleDP[0][1] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleTG[0][0] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleTG[0][1] = strtod(pch, &pch);
-	    psc->arErrorWrongTake[0][0] = strtod(pch, &pch);
-	    psc->arErrorWrongTake[0][1] = strtod(pch, &pch);
-	    psc->arErrorWrongPass[0][0] = strtod(pch, &pch);
-	    psc->arErrorWrongPass[0][1] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleDP[1][0] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleDP[1][1] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleTG[1][0] = strtod(pch, &pch);
-	    psc->arErrorMissedDoubleTG[1][1] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleDP[1][0] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleDP[1][1] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleTG[1][0] = strtod(pch, &pch);
-	    psc->arErrorWrongDoubleTG[1][1] = strtod(pch, &pch);
-	    psc->arErrorWrongTake[1][0] = strtod(pch, &pch);
-	    psc->arErrorWrongTake[1][1] = strtod(pch, &pch);
-	    psc->arErrorWrongPass[1][0] = strtod(pch, &pch);
-	    psc->arErrorWrongPass[1][1] = strtod(pch, &pch);
+	    psc->arErrorMissedDoubleDP[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleDP[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleTG[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleTG[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleDP[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleDP[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleTG[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleTG[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongTake[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongTake[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongPass[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongPass[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleDP[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleDP[1][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleTG[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorMissedDoubleTG[1][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleDP[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleDP[1][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleTG[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongDoubleTG[1][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongTake[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongTake[1][1] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongPass[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arErrorWrongPass[1][1] = g_ascii_strtod(pch, &pch);
 
 	    break;
 
@@ -304,10 +304,10 @@ static void RestoreGS(list * pl, statcontext * psc)
 		psc->anLuck[1][lt] = strtol(pch, &pch, 10);
 	    }
 
-	    psc->arLuck[0][0] = strtod(pch, &pch);
-	    psc->arLuck[0][1] = strtod(pch, &pch);
-	    psc->arLuck[1][0] = strtod(pch, &pch);
-	    psc->arLuck[1][1] = strtod(pch, &pch);
+	    psc->arLuck[0][0] = g_ascii_strtod(pch, &pch);
+	    psc->arLuck[0][1] = g_ascii_strtod(pch, &pch);
+	    psc->arLuck[1][0] = g_ascii_strtod(pch, &pch);
+	    psc->arLuck[1][1] = g_ascii_strtod(pch, &pch);
 
 	    break;
 
@@ -319,7 +319,7 @@ static void RestoreGS(list * pl, statcontext * psc)
     AddStatcontext(psc, &scMatch);
 }
 
-static char *CopyEscapedString(char *pchOrig, const char *szCharset)
+static char *CopyEscapedString(const char *pchOrig, const char *szCharset)
 {
 
     char *sz, *pch;
@@ -540,9 +540,9 @@ static void RestoreRolloutScore(move * pm, const char *sz)
 
     if (!pc)
 	return;
-
-    sscanf(pc, "Score %f %f", &pm->rScore, &pm->rScore2);
-
+    pc += 6;
+    pm->rScore = g_ascii_strtod(pc, &pc);
+    pm->rScore2 = g_ascii_strtod(pc, &pc);
 }
 
 static void RestoreRolloutTrials(int *piTrials, const char *sz)
@@ -573,8 +573,10 @@ RestoreRolloutOutput(float ar[NUM_ROLLOUT_OUTPUTS],
     if (!pc)
 	return;
 
-    sscanf(pc, "%*s %f %f %f %f %f %f %f",
-	   &ar[0], &ar[1], &ar[2], &ar[3], &ar[4], &ar[5], &ar[6]);
+    pc += strlen(szKeyword) + 1;
+
+    for (i = 0; i < 7; i++)
+	ar[i] = g_ascii_strtod(pc, &pc);
 
 }
 
@@ -594,33 +596,34 @@ static void InitEvalContext(evalcontext * pec)
 }
 
 
-static void RestoreEvalContext(evalcontext * pec, const char *sz)
+static void RestoreEvalContext(evalcontext * pec, char *pc)
 {
 
-    int nPlies, fUsePrune = 0, fDeterministic;
-    char ch;
-    int ver = CheckSGFVersion(&sz);
+    int fUsePrune = 0;
     int red = 0;
+    int ver = CheckSGFVersion((const char **) &pc);
 
     InitEvalContext(pec);
-    /* Still need to read reduced */
-    if (ver < 3) {
-	sscanf(sz, "%d%c %d %d %f",
-	       &nPlies, &ch, &red, &fDeterministic, &pec->rNoise);
-    } else {
-	sscanf(sz, "%d%c %d %f %d",
-	       &nPlies, &ch, &fDeterministic, &pec->rNoise, &fUsePrune);
+    pec->nPlies = strtol(pc, &pc, 10);
+    if (*pc == 'C') {
+	pec->fCubeful = TRUE;
+	pc++;
     }
-
+    if (ver < 3) {
+	red = strtol(pc, &pc, 10);
 #if defined( REDUCTION_CODE )
-    pec->nReduced = red;
-#else
-    pec->fUsePrune = fUsePrune;
+	pec->nReduced = red;
 #endif
-    pec->nPlies = nPlies;
-    pec->fCubeful = ch == 'C';
-    pec->fDeterministic = fDeterministic;
-
+	pec->fDeterministic = strtol(pc, &pc, 10);
+	pec->rNoise = g_ascii_strtod(pc, &pc);
+    } else {
+	pec->fDeterministic = strtol(pc, &pc, 10);
+	pec->rNoise = g_ascii_strtod(pc, &pc);
+	fUsePrune = strtol(pc, &pc, 10);
+#if !REDUCION_CODE
+	pec->fUsePrune = fUsePrune;
+#endif
+    }
 }
 
 static void
@@ -759,16 +762,18 @@ static int CheckSGFVersion(const char **sz)
 {
 
     int n;
+    static int ver = 0;
     char *pch = strstr(*sz, "ver");
     if ((pch == 0) || (sscanf(pch, "ver %d", &n) != 1))
-	return 0;
+	return ver;
+    ver = n;
     /* skip over version info */
     pch += 4;
     while (*pch != ' ') {
 	++pch;
     }
     *sz = pch;
-    return n;
+    return ver;
 }
 
 static void
@@ -779,18 +784,15 @@ RestoreRolloutMoveFilter(const char *sz, char *name,
 
     char *pc = strstr(sz, name);
     int i;
-    int consumed;
 
     if (pc == 0)
 	return;
 
     pc += strlen(name);
     for (i = 0; i < nPlies; ++i) {
-	if (sscanf(pc, "%d %d %f%n", &mf[nPlies - 1][i].Accept,
-		   &mf[nPlies - 1][i].Extra,
-		   &mf[nPlies - 1][i].Threshold, &consumed) != 3)
-	    return;
-	pc += consumed;
+	mf[nPlies - 1][i].Accept = strtol(pc, &pc, 10);
+	mf[nPlies - 1][i].Extra = strtol(pc, &pc, 10);
+	mf[nPlies - 1][i].Threshold = g_ascii_strtod(pc, &pc);
     }
 }
 
@@ -853,7 +855,8 @@ RestoreExtendedRolloutContext(rolloutcontext * prc, const char *sz)
 	}
     }
     RestoreRolloutContextEvalContext(&prc->aecCubeTrunc, sz, "cubetrunc");
-    RestoreRolloutContextEvalContext(&prc->aecCubeTrunc, sz, "cheqtrunc");
+    RestoreRolloutContextEvalContext(&prc->aecChequerTrunc, sz,
+				     "cheqtrunc");
 
 
 }
@@ -864,17 +867,15 @@ RestoreExtendedCubeRollout(const char *sz,
 			   float aarStdDev[][NUM_ROLLOUT_OUTPUTS],
 			   evalsetup * pes)
 {
+        int ver;
 
-    int is_current;
     /* we assume new versions will still begin with Eq 4 floats
        Trials int 
      */
-    is_current = CheckSGFVersion(&sz);
-
     RestoreRolloutTrials(&pes->rc.nGamesDone, sz);
     RestoreCubeRolloutOutput(aarOutput[0], aarStdDev[0], sz, "NoDouble");
     RestoreCubeRolloutOutput(aarOutput[1], aarStdDev[1], sz, "DoubleTake");
-    if (is_current) {
+    if (ver = CheckSGFVersion(&sz)) {
 	RestoreRolloutInternals(pes, sz);
 	RestoreExtendedRolloutContext(&pes->rc, sz);
     }
@@ -884,18 +885,16 @@ static void RestoreExtendedRollout(move * pm, const char *sz)
 {
 
     evalsetup *pes = &pm->esMove;
-    int is_current;
 
     /* we assume new versions will still begin with Score 2 floats
        Trials int 
      */
-    is_current = CheckSGFVersion(&sz);
     pes->et = EVAL_ROLLOUT;
     RestoreRolloutScore(pm, sz);
     RestoreRolloutTrials(&pes->rc.nGamesDone, sz);
     RestoreRolloutOutput(pm->arEvalMove, sz, "Output");
     RestoreRolloutOutput(pm->arEvalStdDev, sz, "StdDev");
-    if (is_current) {
+    if (CheckSGFVersion(&sz)) {
 	RestoreRolloutInternals(pes, sz);
 	RestoreExtendedRolloutContext(&pes->rc, sz);
     }
@@ -908,10 +907,11 @@ static void RestoreDoubleAnalysis(property * pp,
 {
 
     char *pch = pp->pl->plNext->p, ch;
-    int nPlies, nReduced, fUsePrune = 0, fDeterministic;
+    int nReduced, fUsePrune = 0;
     /* leftovers from earlier formats */
     float arUnused[4];
     int ver;
+    int i, j;
 
     switch (*pch) {
     case 'E':
@@ -921,70 +921,52 @@ static void RestoreDoubleAnalysis(property * pp,
 	ver = CheckSGFVersion((const char **) &pch);
 	nReduced = 0;
 	pes->ec.rNoise = 0.0f;
-	fDeterministic = TRUE;
 	memset(aarOutput[0], 0, NUM_ROLLOUT_OUTPUTS * sizeof(float));
 	memset(aarOutput[1], 0, NUM_ROLLOUT_OUTPUTS * sizeof(float));
 	aarOutput[0][OUTPUT_CUBEFUL_EQUITY] = -20000.0;
 	aarOutput[1][OUTPUT_CUBEFUL_EQUITY] = -20000.0;
 
 	if (ver < 2) {
-	    sscanf(pch, "%f %f %f %f %d%c %d %d %f"
-		   "%f %f %f %f %f %f %f"
-		   "%f %f %f %f %f %f %f",
-		   &arUnused[0], &arUnused[1],
-		   &arUnused[2], &arUnused[3],
-		   &nPlies, &ch,
-		   &nReduced,
-		   &fDeterministic,
-		   &pes->ec.rNoise,
-		   &aarOutput[0][0], &aarOutput[0][1],
-		   &aarOutput[0][2], &aarOutput[0][3],
-		   &aarOutput[0][4], &aarOutput[0][5],
-		   &aarOutput[0][6],
-		   &aarOutput[1][0], &aarOutput[1][1],
-		   &aarOutput[1][2], &aarOutput[1][3],
-		   &aarOutput[1][4], &aarOutput[1][5], &aarOutput[1][6]);
+	    arUnused[0] = g_ascii_strtod(pch, &pch);
+	    arUnused[1] = g_ascii_strtod(pch, &pch);
+	    arUnused[2] = g_ascii_strtod(pch, &pch);
+	    arUnused[3] = g_ascii_strtod(pch, &pch);
+	    pes->ec.nPlies = strtol(pch, &pch, 10);
+	    if (*pch == 'C') {
+		pes->ec.fCubeful = TRUE;
+		pch++;
+	    }
+	    nReduced = strtol(pch, &pch, 10);
+	    pes->ec.fDeterministic = strtol(pch, &pch, 10);
+	    pes->ec.rNoise = g_ascii_strtod(pch, &pch);
 	} else if (ver == 2) {
-	    sscanf(pch, "%d%c %d %d %f %d"
-		   "%f %f %f %f %f %f %f"
-		   "%f %f %f %f %f %f %f",
-		   &nPlies, &ch,
-		   &nReduced,
-		   &fDeterministic,
-		   &pes->ec.rNoise,
-		   &fUsePrune,
-		   &aarOutput[0][0], &aarOutput[0][1],
-		   &aarOutput[0][2], &aarOutput[0][3],
-		   &aarOutput[0][4], &aarOutput[0][5],
-		   &aarOutput[0][6],
-		   &aarOutput[1][0], &aarOutput[1][1],
-		   &aarOutput[1][2], &aarOutput[1][3],
-		   &aarOutput[1][4], &aarOutput[1][5], &aarOutput[1][6]);
+	    pes->ec.nPlies = strtol(pch, &pch, 10);
+	    if (*pch == 'C') {
+		pes->ec.fCubeful = TRUE;
+		pch++;
+	    }
+	    nReduced = strtol(pch, &pch, 10);
+	    pes->ec.fDeterministic = strtol(pch, &pch, 10);
+	    pes->ec.rNoise = g_ascii_strtod(pch, &pch);
+	    fUsePrune = strtol(pch, &pch, 10);
 	} else {
-	    sscanf(pch, "%d%c %d %f %d"
-		   "%f %f %f %f %f %f %f"
-		   "%f %f %f %f %f %f %f",
-		   &nPlies, &ch,
-		   &fDeterministic,
-		   &pes->ec.rNoise,
-		   &fUsePrune,
-		   &aarOutput[0][0], &aarOutput[0][1],
-		   &aarOutput[0][2], &aarOutput[0][3],
-		   &aarOutput[0][4], &aarOutput[0][5],
-		   &aarOutput[0][6],
-		   &aarOutput[1][0], &aarOutput[1][1],
-		   &aarOutput[1][2], &aarOutput[1][3],
-		   &aarOutput[1][4], &aarOutput[1][5], &aarOutput[1][6]);
+	    pes->ec.nPlies = strtol(pch, &pch, 10);
+	    if (*pch == 'C') {
+		pes->ec.fCubeful = TRUE;
+		pch++;
+	    }
+	    pes->ec.fDeterministic = strtol(pch, &pch, 10);
+	    pes->ec.rNoise = g_ascii_strtod(pch, &pch);
+	    fUsePrune = strtol(pch, &pch, 10);
 	}
-	pes->ec.nPlies = nPlies;
 #if defined( REDUCTION_CODE )
 	pes->ec.nReduced = nReduced;
 #else
 	pes->ec.fUsePrune = fUsePrune;
 #endif
-	pes->ec.fDeterministic = fDeterministic;
-	pes->ec.fCubeful = ch == 'C';
-
+	for (i = 0; i < 2; i++)
+	    for (j = 0; j < 7; j++)
+		aarOutput[i][j] = g_ascii_strtod(pch, &pch);
 	break;
 
     case 'R':
@@ -1000,7 +982,6 @@ static void RestoreDoubleAnalysis(property * pp,
 	break;
 
     default:
-	/* FIXME */
 	break;
     }
 }
@@ -1012,7 +993,8 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
 				const matchstate * pms)
 {
     list *pl = pp->pl->plNext;
-    const char *pch;
+    const char *pc;
+    char *pch;
     char ch;
     move *pm;
     int i, nPlies, fDeterministic, nReduced, fUsePrune = 0;
@@ -1032,16 +1014,15 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
     pesChequer->et = EVAL_NONE;
 
     for (pl = pp->pl->plNext->plNext; pl->p; pl = pl->plNext, pm++) {
-	pch = pl->p;
+	pc = pl->p;
 
 	/* FIXME we could work these out, but it hardly seems worth it */
 	pm->cMoves = pm->cPips = 0;
 	pm->rScore2 = 0;
 
-	for (i = 0; i < 4 && pch[0] && pch[1] && pch[0] != ' ';
-	     pch += 2, i++) {
-	    pm->anMove[i << 1] = Point(pch[0], fPlayer);
-	    pm->anMove[(i << 1) | 1] = Point(pch[1], fPlayer);
+	for (i = 0; i < 4 && pc[0] && pc[1] && pc[0] != ' '; pc += 2, i++) {
+	    pm->anMove[i << 1] = Point(pc[0], fPlayer);
+	    pm->anMove[(i << 1) | 1] = Point(pc[1], fPlayer);
 	}
 
 	if (i < 4)
@@ -1053,54 +1034,60 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
 	ApplyMove(anBoardMove, pm->anMove, FALSE);
 	PositionKey(anBoardMove, pm->auch);
 
-	sscanf(pch, " %c", &ch);
+	pch = (char *) pc;
+	while (isspace(ch = *pch++)) {
+	};
+	pch++;
 
 	switch (ch) {
 	case 'E':
+	    ver = CheckSGFVersion((const char **) &pch);
 	    /* EVAL_EVAL */
-	    ver = CheckSGFVersion(&pch);
 	    pm->esMove.et = EVAL_EVAL;
 	    nReduced = 0;
 	    fDeterministic = 0;
+	    for (i = 0; i < 5; i++)
+		pm->arEvalMove[i] = g_ascii_strtod(pch, &pch);
+	    pm->rScore = g_ascii_strtod(pch, &pch);
 	    if (ver < 2) {
-		sscanf(pch, " %*c %f %f %f %f %f %f %d%c %d %d %f",
-		       &pm->arEvalMove[0], &pm->arEvalMove[1],
-		       &pm->arEvalMove[2], &pm->arEvalMove[3],
-		       &pm->arEvalMove[4], &pm->rScore,
-		       &nPlies,
-		       &ch,
-		       &nReduced, &fDeterministic, &pm->esMove.ec.rNoise);
+		pm->esMove.ec.nPlies = strtol(pch, &pch, 10);
+		if (*pch == 'C') {
+		    pm->esMove.ec.fCubeful = TRUE;
+		    pch++;
+		}
+		nReduced = strtol(pch, &pch, 10);
+		pm->esMove.ec.fDeterministic = strtol(pch, &pch, 10);
+		pm->esMove.ec.rNoise = g_ascii_strtod(pch, &pch);
 	    } else if (ver == 2) {
-		sscanf(pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d",
-		       &pm->arEvalMove[0], &pm->arEvalMove[1],
-		       &pm->arEvalMove[2], &pm->arEvalMove[3],
-		       &pm->arEvalMove[4], &pm->rScore,
-		       &nPlies,
-		       &ch,
-		       &nReduced,
-		       &fDeterministic, &pm->esMove.ec.rNoise, &fUsePrune);
+		pm->esMove.ec.nPlies = strtol(pch, &pch, 10);
+		if (*pch == 'C') {
+		    pm->esMove.ec.fCubeful = TRUE;
+		    pch++;
+		}
+		nReduced = strtol(pch, &pch, 10);
+		pm->esMove.ec.fDeterministic = strtol(pch, &pch, 10);
+		pm->esMove.ec.rNoise = g_ascii_strtod(pch, &pch);
+		fUsePrune = strtol(pch, &pch, 10);
 	    } else {
-		sscanf(pch, " %*c %f %f %f %f %f %f %d%c %d %f %d",
-		       &pm->arEvalMove[0], &pm->arEvalMove[1],
-		       &pm->arEvalMove[2], &pm->arEvalMove[3],
-		       &pm->arEvalMove[4], &pm->rScore,
-		       &nPlies,
-		       &ch,
-		       &fDeterministic, &pm->esMove.ec.rNoise, &fUsePrune);
+		pm->esMove.ec.nPlies = strtol(pch, &pch, 10);
+		if (*pch == 'C') {
+		    pm->esMove.ec.fCubeful = TRUE;
+		    pch++;
+		}
+	    /* FIXME: reduced shouldn't be saved/loaded */
+                nReduced = strtol(pch, &pch, 10);
+		pm->esMove.ec.fDeterministic = strtol(pch, &pch, 10);
+		pm->esMove.ec.rNoise = g_ascii_strtod(pch, &pch);
+		fUsePrune = strtol(pch, &pch, 10);
 	    }
-
-	    pm->esMove.ec.fCubeful = ch == 'C';
-	    pm->esMove.ec.nPlies = nPlies;
 #if defined( REDUCTION_CODE )
 	    pm->esMove.ec.nReduced = nReduced;
 #else
 	    pm->esMove.ec.fUsePrune = fUsePrune;
 #endif
-	    pm->esMove.ec.fDeterministic = fDeterministic;
 	    break;
 
 	case 'R':
-
 	    RestoreRollout(pm, pch);
 	    break;
 
@@ -1313,26 +1300,14 @@ static void RestoreNode(list * pl, char *szCharset)
 		SKILL_BAD;
 	else if (pp->ach[0] == 'D' && pp->ach[1] == 'O')
 	    ast[0] = SKILL_DOUBTFUL;
-/* 	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'T' ) */
-/* 	    ast[ 0 ] = SKILL_INTERESTING; */
-/* 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' ) */
-/* 	    ast[ 0 ]  */
-/*               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD : */
-/* 	    SKILL_GOOD; */
 	else if (pp->ach[0] == 'B' && pp->ach[1] == 'C')
 	    ast[1]
 		= *((char *) pp->pl->plNext->p) == '2' ? SKILL_VERYBAD :
 		SKILL_BAD;
 	else if (pp->ach[0] == 'D' && pp->ach[1] == 'C')
 	    ast[1] = SKILL_DOUBTFUL;
-/* 	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'C' ) */
-/* 	    ast[ 1 ] = SKILL_INTERESTING; */
-/* 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'C' ) */
-/* 	    ast[ 1 ]  */
-/*               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD : */
-/* 	    SKILL_GOOD; */
 	else if (pp->ach[0] == 'L' && pp->ach[1] == 'U')
-	    rLuck = atof(pp->pl->plNext->p);
+	    rLuck = g_ascii_strtod(pp->pl->plNext->p, NULL);
 	else if (pp->ach[0] == 'G' && pp->ach[1] == 'B')
 	    /* good for black */
 	    lt = *((char *) pp->pl->plNext->p) == '2' ? LUCK_VERYGOOD :
@@ -1731,20 +1706,22 @@ static void WriteEscapedString(FILE * pf, char *pch, int fEscapeColons)
 static void WriteEvalContext(FILE * pf, const evalcontext * pec)
 {
 
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
+    g_ascii_formatd(buffer, sizeof(buffer), "%.6f", pec->rNoise);
 #if defined( REDUCTION_CODE )
-    fprintf(pf, "ver %d %d%s %d %d %.4f %d",
+    fprintf(pf, "ver %d %d%s %d %d %s %d",
 	    SGF_FORMAT_VER,
 	    pec->nPlies,
 	    pec->fCubeful ? "C" : "",
-	    pec->nReduced, pec->fDeterministic, pec->rNoise,
+	    pec->nReduced, pec->fDeterministic, buffer,
 /*         , pec->fUsePrune */
 	    0);
 #else
-    fprintf(pf, "ver %d %d%s %d %.4f %d",
+    fprintf(pf, "ver %d %d%s %d %s %d",
 	    SGF_FORMAT_VER,
 	    pec->nPlies,
 	    pec->fCubeful ? "C" : "",
-	    pec->fDeterministic, pec->rNoise, pec->fUsePrune);
+	    pec->fDeterministic, buffer, pec->fUsePrune);
 #endif
 
 }
@@ -1755,10 +1732,13 @@ WriteMoveFilters(FILE * pf,
 		 int nPlies)
 {
     int i;
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
     for (i = 0; i < nPlies; ++i) {
-	fprintf(pf, "%d %d %.5f ", mf[nPlies - 1][i].Accept,
-		mf[nPlies - 1][i].Extra, mf[nPlies - 1][i].Threshold);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.5f",
+			mf[nPlies - 1][i].Threshold);
+	fprintf(pf, "%d %d %s ", mf[nPlies - 1][i].Accept,
+		mf[nPlies - 1][i].Extra, buffer);
     }
 }
 
@@ -1766,8 +1746,6 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 {
 
     int i;
-
-    printf("rng %d\n", prc->rngRollout);
 
     fprintf(pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %d ",
 	    prc->fCubeful,
@@ -1826,13 +1804,17 @@ static void WriteRolloutAnalysis(FILE * pf, int fIsMove,
 {
 
     int i;
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
     /* identify what version we're writing to avoid future problems 
        the version is defined in eval.h
      */
     if (fIsMove) {
-	fprintf(pf, "X ver %d Score %.10g %.10g ", SGF_FORMAT_VER,
-		rScore, rScore2);
+	fprintf(pf, "X ver %d Score ", SGF_FORMAT_VER);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.10g", rScore);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.10g", rScore2);
+	fprintf(pf, "%s ", buffer);
     } else {
 	fprintf(pf, "X ver %d Eq ", SGF_FORMAT_VER);
     }
@@ -1842,21 +1824,30 @@ static void WriteRolloutAnalysis(FILE * pf, int fIsMove,
 	fprintf(pf, "NoDouble ");
 
     fprintf(pf, "Output ");
-    for (i = 0; i < 7; ++i)
-	fprintf(pf, "%.10g ", aarOutput0[i]);
+    for (i = 0; i < 7; ++i) {
+	g_ascii_formatd(buffer, sizeof(buffer), "%.10g", aarOutput0[i]);
+	fprintf(pf, "%s ", buffer);
+    }
 
     fprintf(pf, "StdDev ");
-    for (i = 0; i < 7; ++i)
-	fprintf(pf, "%.10g ", aarStdDev0[i]);
+    for (i = 0; i < 7; ++i) {
+	g_ascii_formatd(buffer, sizeof(buffer), "%.10g", aarStdDev0[i]);
+	fprintf(pf, "%s ", buffer);
+    }
 
     if (!fIsMove) {
 	fprintf(pf, "DoubleTake Output ");
-	for (i = 0; i < 7; ++i)
-	    fprintf(pf, "%.10g ", aarOutput1[i]);
-
+	for (i = 0; i < 7; ++i) {
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.10g",
+			    aarOutput1[i]);
+	    fprintf(pf, "%s ", buffer);
+	}
 	fprintf(pf, "StdDev ");
-	for (i = 0; i < 7; ++i)
-	    fprintf(pf, "%.10f ", aarStdDev1[i]);
+	for (i = 0; i < 7; ++i) {
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.10g",
+			    aarStdDev1[i]);
+	    fprintf(pf, "%s ", buffer);
+	}
     }
 
     fprintf(pf, "SK %d ", pes->rc.nSkip);
@@ -1869,47 +1860,37 @@ static void WriteDoubleAnalysis(FILE * pf,
 				evalsetup * pes)
 {
 
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
+    int i, j;
     /* FIXME: removing write of 0 0 0 0 will break existing SGF files */
 
     fputs("DA[", pf);
 
     switch (pes->et) {
     case EVAL_EVAL:
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f", pes->ec.rNoise);
 #if defined( REDUCTION_CODE )
-	fprintf(pf, "E ver %d %d%s %d %d %.4f %d "
-		"%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-		"%.4f %.4f %.4f %.4f %.4f %.4f %.4f",
+	fprintf(pf, "E ver %d %d%s %d %d %s %d",
 		SGF_FORMAT_VER,
 		pes->ec.nPlies,
 		pes->ec.fCubeful ? "C" : "",
-		pes->ec.nReduced, pes->ec.fDeterministic, pes->ec.rNoise,
+		pes->ec.nReduced, pes->ec.fDeterministic, buffer,
 /*	     pes->ec.fUsePrune, */
-		0,
-		aarOutput[0][0], aarOutput[0][1],
-		aarOutput[0][2], aarOutput[0][3],
-		aarOutput[0][4], aarOutput[0][5],
-		aarOutput[0][6],
-		aarOutput[1][0], aarOutput[1][1],
-		aarOutput[1][2], aarOutput[1][3],
-		aarOutput[1][4], aarOutput[1][5], aarOutput[1][6]);
+		0);
 #else
-	fprintf(pf, "E ver %d %d%s %d %.4f %d "
-		"%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-		"%.4f %.4f %.4f %.4f %.4f %.4f %.4f",
+	fprintf(pf, "E ver %d %d%s %d %s %d",
 		SGF_FORMAT_VER,
 		pes->ec.nPlies,
 		pes->ec.fCubeful ? "C" : "",
-		pes->ec.fDeterministic,
-		pes->ec.rNoise,
-		pes->ec.fUsePrune,
-		aarOutput[0][0], aarOutput[0][1],
-		aarOutput[0][2], aarOutput[0][3],
-		aarOutput[0][4], aarOutput[0][5],
-		aarOutput[0][6],
-		aarOutput[1][0], aarOutput[1][1],
-		aarOutput[1][2], aarOutput[1][3],
-		aarOutput[1][4], aarOutput[1][5], aarOutput[1][6]);
+		pes->ec.fDeterministic, buffer, pes->ec.fUsePrune);
 #endif
+	for (i = 0; i < 2; i++) {
+	    for (j = 0; j < 7; j++) {
+		g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+				aarOutput[i][j]);
+		fprintf(pf, " %s", buffer);
+	    }
+	}
 
 	break;
 
@@ -1954,6 +1935,7 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 {
 
     int i;
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
     fprintf(pf, "A[%d]", iMove);
 
@@ -1967,23 +1949,36 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 	    break;
 
 	case EVAL_EVAL:
-	    fprintf(pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s "
-		    "%d %d %.4f %d",
-		    pml->amMoves[i].arEvalMove[0],
-		    pml->amMoves[i].arEvalMove[1],
-		    pml->amMoves[i].arEvalMove[2],
-		    pml->amMoves[i].arEvalMove[3],
-		    pml->amMoves[i].arEvalMove[4],
-		    pml->amMoves[i].rScore,
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].arEvalMove[0]);
+	    fprintf(pf, "E ver %d %s ", SGF_FORMAT_VER, buffer);
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].arEvalMove[1]);
+	    fprintf(pf, "%s ", buffer);
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].arEvalMove[2]);
+	    fprintf(pf, "%s ", buffer);
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].arEvalMove[3]);
+	    fprintf(pf, "%s ", buffer);
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].arEvalMove[4]);
+	    fprintf(pf, "%s ", buffer);
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].rScore);
+	    fprintf(pf, "%s ", buffer);
+	    g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			    pml->amMoves[i].esMove.ec.rNoise);
+	    fprintf(pf, "%d%s %d %d %s %d",
 		    pml->amMoves[i].esMove.ec.nPlies,
 		    pml->amMoves[i].esMove.ec.fCubeful ? "C" : "",
 #if defined( REDUCTION_CODE )
 		    pml->amMoves[i].esMove.ec.nReduced,
 #else
+		       /* FIXME: reduced shouldn't be saved/loaded */
 		    0,
 #endif
-		    pml->amMoves[i].esMove.ec.fDeterministic,
-		    pml->amMoves[i].esMove.ec.rNoise,
+		    pml->amMoves[i].esMove.ec.fDeterministic, buffer,
 #if !defined( REDUCTION_CODE )
 		    pml->amMoves[i].esMove.ec.fUsePrune
 #else
@@ -2012,9 +2007,11 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 
 static void WriteLuck(FILE * pf, int fPlayer, float rLuck, lucktype lt)
 {
-
-    if (rLuck != ERR_VAL)
-	fprintf(pf, "LU[%+.5f]", rLuck);
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
+    if (rLuck != ERR_VAL) {
+	g_ascii_formatd(buffer, sizeof(buffer), "%.5f", rLuck);
+	fprintf(pf, "LU[%s]", buffer);
+    }
 
     switch (lt) {
     case LUCK_VERYBAD:
@@ -2054,24 +2051,8 @@ static void WriteSkill(FILE * pf, const skilltype st)
 	fputs("DO[]", pf);
 	break;
 
-    case SKILL_NONE:
+    default:
 	break;
-
-    case SKILL_GOOD:
-	fputs("TE[1]", pf);
-	break;
-
-/*     case SKILL_INTERESTING: */
-/* 	fputs( "IT[]", pf ); */
-/* 	break; */
-
-/*     case SKILL_GOOD: */
-/* 	fputs( "TE[1]", pf ); */
-/* 	break; */
-
-/*     case SKILL_VERYGOOD: */
-/* 	fputs( "TE[2]", pf ); */
-/* 	break; */
     }
 }
 
@@ -2091,20 +2072,9 @@ static void WriteSkillCube(FILE * pf, const skilltype st)
 	fputs("DC[]", pf);
 	break;
 
-    case SKILL_NONE:
+    default:
 	break;
 
-/*     case SKILL_INTERESTING: */
-/* 	fputs( "IC[]", pf ); */
-/* 	break; */
-
-    case SKILL_GOOD:
-	fputs("TC[1]", pf);
-	break;
-
-/*     case SKILL_VERYGOOD: */
-/* 	fputs( "TC[2]", pf ); */
-/* 	break; */
     }
 }
 
@@ -2113,6 +2083,7 @@ static void WriteStatContext(FILE * pf, statcontext * psc)
 
     lucktype lt;
     skilltype st;
+    gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
     fputs("GS", pf);
 
@@ -2123,10 +2094,18 @@ static void WriteStatContext(FILE * pf, statcontext * psc)
 	for (st = SKILL_VERYBAD; st < N_SKILLS; st++)
 	    fprintf(pf, "%d %d ", psc->anMoves[0][st],
 		    psc->anMoves[1][st]);
-	fprintf(pf, "%.6f %.6f %.6f %.6f]", psc->arErrorCheckerplay[0][0],
-		psc->arErrorCheckerplay[0][1],
-		psc->arErrorCheckerplay[1][0],
-		psc->arErrorCheckerplay[1][1]);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorCheckerplay[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorCheckerplay[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorCheckerplay[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorCheckerplay[1][1]);
+	fprintf(pf, "%s]", buffer);
     }
 
     if (psc->fCube) {
@@ -2143,40 +2122,92 @@ static void WriteStatContext(FILE * pf, statcontext * psc)
 		psc->anCubeWrongDoubleTG[0], psc->anCubeWrongDoubleTG[1],
 		psc->anCubeWrongTake[0], psc->anCubeWrongTake[1],
 		psc->anCubeWrongPass[0], psc->anCubeWrongPass[1]);
-	fprintf(pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
-		"%.6f %.6f %.6f %.6f ",
-		psc->arErrorMissedDoubleDP[0][0],
-		psc->arErrorMissedDoubleDP[0][1],
-		psc->arErrorMissedDoubleTG[0][0],
-		psc->arErrorMissedDoubleTG[0][1],
-		psc->arErrorWrongDoubleDP[0][0],
-		psc->arErrorWrongDoubleDP[0][1],
-		psc->arErrorWrongDoubleTG[0][0],
-		psc->arErrorWrongDoubleTG[0][1],
-		psc->arErrorWrongTake[0][0],
-		psc->arErrorWrongTake[0][1],
-		psc->arErrorWrongPass[0][0], psc->arErrorWrongPass[0][1]);
-	fprintf(pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
-		"%.6f %.6f %.6f %.6f]",
-		psc->arErrorMissedDoubleDP[1][0],
-		psc->arErrorMissedDoubleDP[1][1],
-		psc->arErrorMissedDoubleTG[1][0],
-		psc->arErrorMissedDoubleTG[1][1],
-		psc->arErrorWrongDoubleDP[1][0],
-		psc->arErrorWrongDoubleDP[1][1],
-		psc->arErrorWrongDoubleTG[1][0],
-		psc->arErrorWrongDoubleTG[1][1],
-		psc->arErrorWrongTake[1][0],
-		psc->arErrorWrongTake[1][1],
-		psc->arErrorWrongPass[1][0], psc->arErrorWrongPass[1][1]);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleDP[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleDP[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleTG[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleTG[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleDP[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleDP[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleTG[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleTG[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongTake[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongTake[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongPass[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongPass[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleDP[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleDP[1][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleTG[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorMissedDoubleTG[1][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleDP[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleDP[1][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleTG[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongDoubleTG[1][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongTake[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongTake[1][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongPass[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f",
+			psc->arErrorWrongPass[1][1]);
+	fprintf(pf, "%s]", buffer);
     }
 
     if (psc->fDice) {
 	fputs("[D:", pf);
 	for (lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++)
 	    fprintf(pf, "%d %d ", psc->anLuck[0][lt], psc->anLuck[1][lt]);
-	fprintf(pf, "%.6f %.6f %.6f %.6f]", psc->arLuck[0][0],
-		psc->arLuck[0][1], psc->arLuck[1][0], psc->arLuck[1][1]);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f", psc->arLuck[0][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f", psc->arLuck[0][1]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f", psc->arLuck[1][0]);
+	fprintf(pf, "%s ", buffer);
+	g_ascii_formatd(buffer, sizeof(buffer), "%.6f", psc->arLuck[1][1]);
+	fprintf(pf, "%s]", buffer);
     }
 }
 
