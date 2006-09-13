@@ -1,3 +1,7 @@
+Wed Sep 13 21:42:45 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtk*, Makefile.am: Cleanup after modal comit
+
 Wed Sep 13 21:38:50 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* sgf.c: make save/load locale independent

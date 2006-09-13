@@ -8682,8 +8682,6 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
   		char line[100];
   		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
   		  gtk_text_buffer_insert(buffer, &it, line, -1);
-  		  gtk_text_insert(GTK_TEXT(pwAliasList), NULL, 
-  				  NULL, NULL, line, -1);
   	}
 	}
 	FreeRowset(&r);

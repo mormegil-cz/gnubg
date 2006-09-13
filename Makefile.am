@@ -112,7 +112,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
         gtktempmap.c gtktempmap.h \
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
-	gtkmovelist.c gtkmovelistctrl.c \
+	gtkmovelist.c gtkmovelistctrl.c gtkwindows.c \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
         $(BOARD3D_LIBS) @THREAD_LIBS@
