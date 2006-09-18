@@ -1173,6 +1173,45 @@ extern void CommandShowThorp( char *sz ) {
 
 }
 
+extern void CommandShowKeith( char *sz ) {
+
+    int an[ 2 ][ 25 ];
+    int nLeader, nTrailer;
+    int nDiff;
+    float fL;
+
+    if( !*sz && ms.gs == GAME_NONE ) {
+        outputl( _("No position specified and no game in progress.") );
+        return;
+    }
+
+    if( ParsePosition( an, &sz, NULL ) < 0 )
+	return;
+
+#if USE_GTK
+    if ( fX ) {
+      GTKShowRace ( 3, an );
+      return;
+    }
+#endif
+
+    KeithCount ( an, &nLeader, &nTrailer );
+    fL = (float) nLeader*8.0f /7.0f;
+    outputf("L = %d(%.1f)  T = %d  -> ", nLeader, fL, nTrailer);
+    if (nTrailer >= (fL - 3))
+      output(_("Redouble, "));
+    else if (nTrailer >= (fL - 4))
+      output(_("Double, "));
+    else
+      output(_("No double, "));
+    
+    if (nTrailer >= (fL - 2))
+      outputl(_("Drop"));
+    else
+      outputl(_("Take"));
+    
+}
+
 extern void CommandShowBeavers( char *sz ) {
 
     if( nBeavers > 1 )

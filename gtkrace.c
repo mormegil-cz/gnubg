@@ -187,6 +187,79 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 }
 
 static GtkWidget *
+KeithPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
+
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
+  GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
+  GtkWidget *pw;
+  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
+  int i, j, nLeader, nTrailer, nDiff;
+  int anPips[ 2 ];
+  float fL;
+  char *sz;
+  
+  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+
+  /* 
+   * pip counts, diffs and sum 
+   */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
+
+  /* pip counts */
+
+  PipCount ( anBoard, anPips );
+
+  for ( i = 0; i < 2; ++i ) {
+
+    j = fMove ? i : !i;
+
+    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       pw = gtk_label_new ( sz ),
+                       0, 1, i, i + 1, 
+                       0, 0, 4, 4 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    g_free ( sz );
+
+    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       gtk_label_new ( sz ),
+                       1, 2, i, i + 1, 
+                       0, 0, 4, 4 );
+    g_free ( sz );
+
+  }
+
+  /* separator */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       gtk_hseparator_new() , FALSE, FALSE, 4 );
+
+  /* Keith count */
+
+  KeithCount ( anBoard, &nLeader, &nTrailer );
+
+  fL = (float) nLeader*8.0f /7.0f;
+  sz = g_strdup_printf ( "L = %d(%.1f)  T = %d -> %s, %s", 
+                         nLeader, fL, nTrailer,
+                         ( nTrailer >= ( fL -3 ) ? _("Redouble") :
+                           ( ( nTrailer >= ( fL -4 ) ) ? _("Double") : 
+                             _("No double") ) ),
+                         ( nTrailer >= ( fL - 2 ) ) ? 
+                         _("drop") : _("take") );
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pw = gtk_label_new ( sz ),
+                       FALSE, FALSE, 4 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+  g_free ( sz );
+
+  return pwp;
+
+}
+
+static GtkWidget *
 ThorpPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
@@ -661,6 +734,12 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              ThorpPage ( anBoard, prw->fMove ),
                              gtk_label_new ( _("Thorp Count") ) );
+
+  /* Keith */
+
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                             KeithPage ( anBoard, prw->fMove ),
+                             gtk_label_new ( _("Keith Count") ) );
 
   /* One sided rollout */
 

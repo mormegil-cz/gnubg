@@ -2003,6 +2003,8 @@ command cER = {
 #endif
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
+    { "keith", CommandShowKeith, N_("Calculate Keith Count for "
+      "position"), szOPTPOSITION, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
       "position"), szOPTPOSITION, NULL },
     { "lang", CommandShowLang, N_("Display your language preference"),

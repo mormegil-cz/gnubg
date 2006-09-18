@@ -4065,6 +4065,26 @@ FindnSaveBestMoves( movelist *pml,
 
 }
 
+extern int KeithCount(int anBoard[2][25], int *pnL, int *pnT)
+{
+    int anPips[2];
+    int i, x;
+    int pn[2];
+    PipCount(anBoard, anPips);
+    for (i = 0; i < 2; i++) {
+	pn[i] = anPips[i];
+	pn[i] += MAX(0, (anBoard[i][0] - 1) * 2);
+	pn[i] += MAX(0, (anBoard[i][1] - 1));
+	pn[i] += MAX(0, (anBoard[i][2] - 3));
+	for (x = 3; x < 6; x++)
+	    if (!anBoard[i][x])
+		pn[i]++;
+    }
+    *pnT = pn[0];
+    *pnL = pn[1];
+    return 0;
+}
+
 extern int
 ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer ) {
   
