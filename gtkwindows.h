@@ -1,4 +1,7 @@
 
+#ifndef _GTKWINDOWS_H_
+#define _GTKWINDOWS_H_
+
 #define GTK_STOCK_DIALOG_GNU "gtk-dialog-gnu" /* stock gnu head icon */
 #define GTK_STOCK_DIALOG_GNU_QUESTION "gtk-dialog-gnuquestion" /* stock gnu head icon with question mark */
 #define GTK_STOCK_DIALOG_GNU_BIG "gtk-dialog-gnubig" /* large gnu icon */
@@ -39,3 +42,5 @@ extern char* GTKGetInput(char* title, char* prompt);
 extern int GTKMessage( char *sz, dialogtype dt );
 extern void GTKSetCurrentParent(GtkWidget *parent);
 extern GtkWidget *GTKGetCurrentParent();
+
+#endif
