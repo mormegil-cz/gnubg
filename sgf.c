@@ -620,7 +620,7 @@ static void RestoreEvalContext(evalcontext * pec, char *pc)
 	pec->fDeterministic = strtol(pc, &pc, 10);
 	pec->rNoise = g_ascii_strtod(pc, &pc);
 	fUsePrune = strtol(pc, &pc, 10);
-#if !REDUCION_CODE
+#if !REDUCTION_CODE
 	pec->fUsePrune = fUsePrune;
 #endif
     }
