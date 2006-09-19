@@ -8460,7 +8460,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 	if (!state)
 	{
-		GTKShowWarning(WARN_FULLSCREEN_EXIT, pw);
+		GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
 
 		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP) && GTK_WIDGET_IS_SENSITIVE(pmiRP))
 			changedRP = TRUE;
@@ -8490,10 +8490,11 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_hide(pwToolbar);
 		gtk_widget_hide(pwHandle);
 
-		/* Max window maximal */
-		if (!maximised)
-			gtk_window_maximize(ptl);
+		/* Make window maximal - need to restore first (so title bar is removed) */
+		if (maximised)
+			gtk_window_unmaximize(ptl);
 		gtk_window_set_decorated(ptl, FALSE);
+		gtk_window_maximize(ptl);
 		if (pmiRP)
 			gtk_widget_set_sensitive(pmiRP, FALSE);
 		if (pmiDP)
