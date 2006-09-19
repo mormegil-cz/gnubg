@@ -1177,7 +1177,6 @@ extern void CommandShowKeith( char *sz ) {
 
     int an[ 2 ][ 25 ];
     int nLeader, nTrailer;
-    int nDiff;
     float fL;
 
     if( !*sz && ms.gs == GAME_NONE ) {

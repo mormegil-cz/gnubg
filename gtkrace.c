@@ -193,7 +193,7 @@ KeithPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, j, nLeader, nTrailer, nDiff;
+  int i, j, nLeader, nTrailer;
   int anPips[ 2 ];
   float fL;
   char *sz;

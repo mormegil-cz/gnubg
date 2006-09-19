@@ -421,6 +421,9 @@ PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
 extern int 
 ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer );
 
+extern int
+KeithCount(int anBoard[2][25], int *pnL, int *pnT);
+
 extern int 
 DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
               const evalcontext* pec, cubeinfo* pci, int fOutputMWC,

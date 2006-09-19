@@ -72,7 +72,7 @@ endif
 COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
               -DLOCALEDIR=\"$(localedir)\" \
               @FT2_CFLAGS@ @PYTHON_CFLAGS@ @GLIB_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @LTLIBINTL@ @LIBXML2_LIBS@ \
+COMMON_LIBS = -Llib -levent @LIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 
 COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
@@ -93,7 +93,7 @@ COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 external_l.l openurl.c openurl.h mec.h \
 		 mec.c relational.h relational.c
 
-COMMON_DEPS = @LIBOBJS@ lib/libevent.a
+COMMON_DEPS =  lib/libevent.a @LIBOBJS@
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
 
@@ -114,7 +114,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
 	gtkmovelist.c gtkmovelistctrl.c gtkwindows.c \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
-gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
+gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) $(PNG_LIBS) \
         $(BOARD3D_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
@@ -142,7 +142,7 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
-makebearoff_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
+makebearoff_LDADD = $(COMMON_LIBS) @GTK_LIBS@
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 
@@ -152,7 +152,7 @@ makebearoff1_DEPENDENCIES =
 
 
 makeweights_SOURCES = makeweights.c
-makeweights_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
+makeweights_LDADD = $(COMMON_LIBS) @GTK_LIBS@
 makeweights_DEPENDENCIES = lib/libevent.a
 
 makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
@@ -162,7 +162,7 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         drawboard.c drawboard.h format.c format.h mec.h mec.c \
 	$(BR1_SOURCES)
 
-makehyper_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
+makehyper_LDADD = $(COMMON_LIBS) @GTK_LIBS@
 makehyper_DEPENDENCIES = lib/libevent.a
 
 bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
@@ -170,7 +170,7 @@ bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
         getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
-bearoffdump_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
+bearoffdump_LDADD = $(COMMON_LIBS) @GTK_LIBS@
 bearoffdump_DEPENDENCIES = lib/libevent.a
 
 

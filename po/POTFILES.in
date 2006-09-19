@@ -9,7 +9,6 @@ bearoff.h
 boarddim.h
 boardpos.c
 boardpos.h
-br1.c
 common.h
 config.h
 copying.c
@@ -53,7 +52,6 @@ gtkcube.h
 gtkexport.c
 gtkexport.h
 gtkfile.c
-gtkfilenew.c
 gtkgame.c
 gtkgame.h
 gtkgamelist.c
