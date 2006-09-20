@@ -230,6 +230,8 @@ extern int IsPanelShowVar(gnubgwindow panel, void *p);
 extern int SetMainWindowSize();
 extern void ShowHidePanel(gnubgwindow panel);
 extern void SetAnnotation( moverecord *pmr );
+extern void FullScreenMode(int state);
+extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
 
 #if USE_BOARD3D
 extern void SetSwitchModeMenuText();

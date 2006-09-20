@@ -529,6 +529,23 @@ extern void CommandSetStyledGameList( char *sz ) {
 #endif
 }
 
+extern void CommandSetFullScreen( char *sz )
+{
+	int newValue;
+	SetToggle( "fullscreen", &newValue, sz,
+		   _("Show board in full screen mode"),
+		   _("Show board in normal screen mode.") );
+
+	if (newValue != fFullScreen)
+	{	/* Value has changed */
+		fFullScreen = newValue;
+#if USE_GTK
+	    if( fX )
+			FullScreenMode(fFullScreen);
+#endif
+	}
+}
+
 extern void CommandSetAutoBearoff( char *sz ) {
 
     SetToggle( "automatic bearoff", &fAutoBearoff, sz, _("Will automatically "

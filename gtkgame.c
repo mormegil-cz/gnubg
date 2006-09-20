@@ -365,7 +365,7 @@ static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
 static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
-static void FullScreenMode( gpointer *p, guint n, GtkWidget *pw );
+static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw );
 #if USE_BOARD3D
 static void SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw );
 #endif
@@ -1601,7 +1601,7 @@ int panelSize = 325;
 
 extern int GetPanelSize()
 {
-    if(  (fX) && GTK_WIDGET_REALIZED( pwMain ))
+    if (!fFullScreen && fX && GTK_WIDGET_REALIZED(pwMain))
 	{
 		int pos = gtk_paned_get_position(GTK_PANED(hpaned));
 		return pwMain->allocation.width - pos;
@@ -1885,7 +1885,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "/View/Toolbar/Text only" },
 	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
 	  "/View/Toolbar/Text only" },
-	{ N_("/_View/Full screen"), NULL, FullScreenMode, 0, "<CheckItem>" },
+	{ N_("/_View/Full screen"), NULL, DoFullScreenMode, 0, "<CheckItem>" },
 #if USE_BOARD3D
 	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_View/Switch to xD view"), NULL, SwitchDisplayMode, TOOLBAR_ACTION_OFFSET + MENU_OFFSET, NULL },
@@ -2340,6 +2340,14 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	for( i = 0; i < 25; i++ )
 		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
 	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, -1, -1, FALSE, anChequers[ms.bgv]);
+
+	if (fFullScreen)
+	{	/* Change to full screen (but hide warning) */
+		int temp = warningEnabled[WARN_FULLSCREEN_EXIT];
+		warningEnabled[WARN_FULLSCREEN_EXIT] = FALSE;
+		FullScreenMode(TRUE);
+		warningEnabled[WARN_FULLSCREEN_EXIT] = temp;
+	}
 
 	gtk_main();
 }
@@ -8353,7 +8361,7 @@ WarningOK ( GtkWidget *pw, warnings warning )
 		sprintf(cmd, "set warning %s off", warningNames[warning]);
 		UserCommand(cmd);
 	}
-	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 }
 
 extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
@@ -8381,16 +8389,6 @@ extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
 		gtk_main();
 		GTKAllowStdin();
 	}
-}
-
-static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
-{
-	short k = event->keyval;
-
-	if (k == KEY_ESCAPE)
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen")), 0);
-
-	return FALSE;
 }
 
 #if USE_BOARD3D
@@ -8441,24 +8439,56 @@ SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
 }
 #endif
 
-static void
-FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
+extern void FullScreenMode(int state)
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	GtkWidget *pw = gtk_item_factory_get_widget(pif, "/View/Full screen");
+	if (GTK_WIDGET_REALIZED(bd->table))
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pw), state);
+}
+
+static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+	short k = event->keyval;
+
+	if (k == KEY_ESCAPE)
+		FullScreenMode(FALSE);
+
+	return FALSE;
+}
+
+/* Save state of windows for full screen */
+int showingPanels, showingIDs, maximised;
+void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed)
+{
+	*panels = showingPanels;
+	*ids = showingIDs;
+	*maxed = maximised;
+}
+void SetFullscreenWindowSettings(int panels, int ids, int maxed)
+{
+	showingPanels = panels;
+	showingIDs = ids;
+	maximised = maxed;
+}
+
+static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
+{
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	GtkWindow* ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
 	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
+	int showingPanels;
+	int maximised;
 	static gulong id;
-	static int showingPanels;
-	static int showIDs;
-	static int maximised;
 	static int changedRP, changedDP;
 
-	int state = !GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
 	GtkWidget* pmiRP = gtk_item_factory_get_widget(pif, "/View/Restore panels");
 	GtkWidget* pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
 
-	bd->rd->fShowGameInfo = state;
+	fFullScreen = GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
+	bd->rd->fShowGameInfo = !fFullScreen;
 
-	if (!state)
+	if (fFullScreen)
 	{
 		GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
 
@@ -8471,6 +8501,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		{
 		GdkWindowState state = gdk_window_get_state(GTK_WIDGET(ptl)->window);
 		maximised = ((state & GDK_WINDOW_STATE_MAXIMIZED) == GDK_WINDOW_STATE_MAXIMIZED);
+		SetFullscreenWindowSettings(ArePanelsShowing(), bd->rd->fShowIDs, maximised);
 		}
 
 		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
@@ -8480,12 +8511,10 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_hide(pwStatus);
 		gtk_widget_hide(pwProgress);
 
-		showingPanels = ArePanelsShowing();
-
-		showIDs = bd->rd->fShowIDs;
-		bd->rd->fShowIDs = 0;
-
+		fFullScreen = FALSE;
 		HideAllPanels(NULL, 0, NULL);
+		fFullScreen = TRUE;
+		bd->rd->fShowIDs = 0;
 
 		gtk_widget_hide(pwToolbar);
 		gtk_widget_hide(pwHandle);
@@ -8514,7 +8543,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_show(pwStatus);
 		gtk_widget_show(pwProgress);
 
-		bd->rd->fShowIDs = showIDs;
+		GetFullscreenWindowSettings(&showingPanels, &bd->rd->fShowIDs, &maximised);
 
 		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
 

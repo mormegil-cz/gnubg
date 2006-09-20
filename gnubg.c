@@ -212,7 +212,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     nBeavers = 3, fOutputRawboard = FALSE, 
     cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
-    nDefaultLength = 7, nToolbarStyle = 2, fStyledGamelist = TRUE;
+    nDefaultLength = 7, nToolbarStyle = 2, fStyledGamelist = TRUE, fFullScreen = FALSE;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
 	fTruncEqualPlayer0 =TRUE;
 int fInvertMET = FALSE;
@@ -1826,6 +1826,8 @@ command cER = {
     { "egyptian", CommandSetEgyptian, 
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
+    { "fullscreen", CommandSetFullScreen, N_("Change to full screen mode"),
+      szONOFF, &cOnOff },
 #if USE_GTK
     { "gamelist", CommandSetGameList, N_("Display game window with moves"),
       szONOFF, &cOnOff },
@@ -5598,6 +5600,11 @@ extern void CommandSaveSettings( char *szParam ) {
                
 
 #if USE_GTK
+{
+	int dummy;
+	if (fFullScreen)
+		GetFullscreenWindowSettings(&dummy, &GetMainAppearance()->fShowIDs, &dummy);
+
     fprintf( pf, "set gui animation %s\n"
 	     "set gui animation speed %d\n"
 	     "set gui beep %s\n"
@@ -5619,6 +5626,10 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fGUIDragTargetHelp ? "on" : "off",
 		 fGUIUseStatsPanel ? "on" : "off",
 		 showMoveListDetail ? "on" : "off");
+
+	if (fFullScreen)
+		GetMainAppearance()->fShowIDs = FALSE;
+}
 #endif
     
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
@@ -5833,6 +5844,9 @@ extern void CommandSaveSettings( char *szParam ) {
 	/* Save gamelist style on/off (if not set - default is set) */
 	if (!fStyledGamelist)
 		fputs("set styledgamelist off\n", pf);
+
+	if (fFullScreen)
+		fputs("set fullscreen on\n", pf);
 
     /* the end */
 

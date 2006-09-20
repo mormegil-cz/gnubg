@@ -828,6 +828,12 @@ extern void CommandShowPipCount( char *sz ) {
     
     outputf( _("The pip counts are: %s %d, %s %d.\n"), ap[ ms.fMove ].szName,
 	    anPips[ 1 ], ap[ !ms.fMove ].szName, anPips[ 0 ] );
+
+	if (fX && fFullScreen)
+	{	/* Display in dialog box in full screen mode (urgh) */
+		output(" ");
+		outputx();
+	}
 }
 
 extern void CommandShowPlayer( char *sz ) {

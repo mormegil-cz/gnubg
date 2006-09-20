@@ -660,6 +660,12 @@ extern void SaveWindowSettings(FILE* pf)
 	char szTemp[1024];
 	int i;
 
+	int saveShowingPanels, dummy;
+	if (fFullScreen)
+		GetFullscreenWindowSettings(&saveShowingPanels, &dummy, &woPanel[WINDOW_MAIN].wg.max);
+	else
+		saveShowingPanels = fDisplayPanels;
+
 	fprintf(pf, "set annotation %s\n", woPanel[WINDOW_ANNOTATION].showing ? "yes" : "no");
 	fprintf(pf, "set message %s\n", woPanel[WINDOW_MESSAGE].showing ? "yes" : "no");
 	fprintf(pf, "set gamelist %s\n", woPanel[WINDOW_GAME].showing ? "yes" : "no");
@@ -667,7 +673,7 @@ extern void SaveWindowSettings(FILE* pf)
 	fprintf(pf, "set theorywindow %s\n", woPanel[WINDOW_THEORY].showing ? "yes" : "no");
 	fprintf(pf, "set commandwindow %s\n", woPanel[WINDOW_COMMAND].showing ? "yes" : "no");
 
-	fprintf(pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
+	fprintf(pf, "set panels %s\n", saveShowingPanels ? "yes" : "no");
 
 	for (i = 0; i < NUM_WINDOWS; i++)
 	{
@@ -683,6 +689,9 @@ extern void SaveWindowSettings(FILE* pf)
 	/* Save panel dock state (if not docked - default is docked) */
 	if (!fDockPanels)
 		fputs("set dockpanels off\n", pf);
+
+	if (fFullScreen)
+		woPanel[WINDOW_MAIN].wg.max = TRUE;
 }
 
 extern void HidePanel(gnubgwindow window)

@@ -415,7 +415,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     nBeavers, fJacoby,
     fOutputRawboard, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord,
-	nDefaultLength, nToolbarStyle, fStyledGamelist;
+	nDefaultLength, nToolbarStyle, fStyledGamelist, fFullScreen;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
@@ -948,6 +948,7 @@ extern void CommandAccept( char * ),
     CommandSetExportParametersRollout ( char * ),
     CommandSetExportPNGSize ( char *),
     CommandSetExportHtmlSize ( char *),
+    CommandSetFullScreen ( char * ),
     CommandSetGameList ( char * ),
     CommandSetGeometryAnalysis( char * ),
     CommandSetGeometryCommand ( char * ),

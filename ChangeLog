@@ -1,3 +1,7 @@
+Wed Sep 20 21:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Save full screen state and show pip count
+
 Mon Sep 18 22:17:39 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* misc: Keith Count 
