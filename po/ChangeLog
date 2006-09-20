@@ -1,3 +1,7 @@
+Wed Sep 20 04:10:00 2006 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* ja,po, tr.po: Remove msgstr[1] entries for gettext-0.15.
+
 Mon Sep 18 21:09:57 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* POTFILES.in, gnubg.pot, *.po: merge & update

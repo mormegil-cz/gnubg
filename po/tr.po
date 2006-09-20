@@ -4144,7 +4144,6 @@ msgstr ""
 msgid "Time penalty: %s loses %d point\n"
 msgid_plural "Time penalty: %s loses %d points\n"
 msgstr[0] ""
-msgstr[1] ""
 
 #: gnubg.c:3081 gnubg.c:3086 gnubg.c:3091
 #, c-format
@@ -5311,7 +5310,6 @@ msgstr ""
 msgid "Time penalty: %s loses %d point"
 msgid_plural "Time penalty: %s loses %d points"
 msgstr[0] ""
-msgstr[1] ""
 
 #: gtkgame.c:865
 msgid "Loss from penalty:"
@@ -9108,7 +9106,6 @@ msgstr "Yeni biçimin baþlýðý:"
 msgid "%d design added.\n"
 msgid_plural "%d designs added.\n"
 msgstr[0] ""
-msgstr[1] ""
 
 #: gtkprefs.c:2521
 #, c-format

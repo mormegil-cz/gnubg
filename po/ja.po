@@ -9153,7 +9153,6 @@ msgstr "デザインのタイトル:"
 msgid "%d design added.\n"
 msgid_plural "%d designs added.\n"
 msgstr[0] ""
-msgstr[1] ""
 
 #: gtkprefs.c:2521
 #, c-format
