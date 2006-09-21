@@ -366,7 +366,7 @@ static void ShowPaged( char **ppch ) {
 	if( !( ioctl( STDIN_FILENO, TIOCGWINSZ, &ws ) ) )
 	    nRows = ws.ws_row;
 #endif
-	if( !nRows && ( pchLines = getenv( "LINES" ) ) )
+	if( !nRows && ((pchLines = getenv( "LINES" )) != NULL) )
 	    nRows = atoi( pchLines );
 
 	/* FIXME we could try termcap-style tgetnum( "li" ) here, but it
@@ -829,11 +829,13 @@ extern void CommandShowPipCount( char *sz ) {
     outputf( _("The pip counts are: %s %d, %s %d.\n"), ap[ ms.fMove ].szName,
 	    anPips[ 1 ], ap[ !ms.fMove ].szName, anPips[ 0 ] );
 
+#if USE_GTK
 	if (fX && fFullScreen)
 	{	/* Display in dialog box in full screen mode (urgh) */
 		output(" ");
 		outputx();
 	}
+#endif
 }
 
 extern void CommandShowPlayer( char *sz ) {
@@ -981,7 +983,7 @@ extern void CommandShowBuildInfo( char *sz )
 		GTKShowBuildInfo(pwMain, NULL);
 #endif
 
-    while((pch = GetBuildInfoString()))
+    while((pch = GetBuildInfoString()) != 0)
 		outputl( gettext(pch) );
 
     outputc( '\n' );
@@ -1291,7 +1293,7 @@ EffectivePipCount( const float arMu[ 2 ], const int anPips[ 2 ] ) {
   int i;
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
               5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
-              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
 
   outputl ( "" );
   outputl ( _("Effective pip count:") );
@@ -1542,15 +1544,15 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
   /* see if ratios are given on command line */
 
-  aarRates[ 0 ][ 0 ] = ParseReal ( &sz );
+  aarRates[ 0 ][ 0 ] = (float)ParseReal ( &sz );
 
   if ( aarRates[ 0 ][ 0 ] >= 0 ) {
 
     /* read the others */
 
-    aarRates[ 1 ][ 0 ]  = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
-    aarRates[ 0 ][ 1 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
-    aarRates[ 1 ][ 1 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+    aarRates[ 1 ][ 0 ]  = ( (r = (float)ParseReal ( &sz ) ) > 0.0f) ? r : 0.0f;
+    aarRates[ 0 ][ 1 ] = ( (r = (float)ParseReal ( &sz ) ) > 0.0f) ? r : 0.0f;
+    aarRates[ 1 ][ 1 ] = ( (r = (float)ParseReal ( &sz ) ) > 0.0f) ? r : 0.0f;
 
     /* If one of the ratios are larger than 1 we assume the user
        has entered 25.1 instead of 0.251 */
@@ -1583,11 +1585,11 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     arOutput[ OUTPUT_WIN ] = 0.5;
     arOutput[ OUTPUT_WINGAMMON ] =
-      ( aarRates[ ms.fMove ][ 0 ] + aarRates[ ms.fMove ][ 1 ] ) * 0.5;
+      ( aarRates[ ms.fMove ][ 0 ] + aarRates[ ms.fMove ][ 1 ] ) * 0.5f;
     arOutput[ OUTPUT_LOSEGAMMON ] =
-      ( aarRates[ !ms.fMove ][ 0 ] + aarRates[ !ms.fMove ][ 1 ] ) * 0.5;
-    arOutput[ OUTPUT_WINBACKGAMMON ] = aarRates[ ms.fMove ][ 1 ] * 0.5;
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = aarRates[ !ms.fMove ][ 1 ] * 0.5;
+      ( aarRates[ !ms.fMove ][ 0 ] + aarRates[ !ms.fMove ][ 1 ] ) * 0.5f;
+    arOutput[ OUTPUT_WINBACKGAMMON ] = aarRates[ ms.fMove ][ 1 ] * 0.5f;
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = aarRates[ !ms.fMove ][ 1 ] * 0.5f;
 
   } else {
 
@@ -1626,7 +1628,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
       /* MWC for "double, take; win" */
 
       rDTW =
-        (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+        (1.0f - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
         getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
                 2 * ms.nCube, i, ms.fCrawford,
                 aafMET, aafMETPostCrawford )
@@ -1642,7 +1644,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
       /* MWC for "no double, take; win" */
 
       rNDW =
-        (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+        (1.0f - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
         getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
                 ms.nCube, i, ms.fCrawford,
                 aafMET, aafMETPostCrawford )
@@ -1658,7 +1660,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
       /* MWC for "Double, take; lose" */
 
       rDTL =
-        (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+        (1.0f - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
         getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
                 2 * ms.nCube, ! i, ms.fCrawford,
                 aafMET, aafMETPostCrawford )
@@ -1674,7 +1676,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
       /* MWC for "No double; lose" */
 
       rNDL =
-        (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+        (1.0f - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
         getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
                 1 * ms.nCube, ! i, ms.fCrawford,
                 aafMET, aafMETPostCrawford )
@@ -1707,14 +1709,14 @@ extern void CommandShowMarketWindow ( char * sz ) {
       rRisk = rDTW - rDP;
       rGain = rDP - rDTL;
 
-      arCP1 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+      arCP1 [ i ] = 1.0f - rRisk / ( rRisk + rGain );
 
       if ( fAutoRedouble[ i ] ) {
 
         /* With redouble */
 
         rDTW =
-          (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
+          (1.0f - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
           getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
                   4 * ms.nCube, i, ms.fCrawford,
                   aafMET, aafMETPostCrawford )
@@ -1728,7 +1730,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
                   aafMET, aafMETPostCrawford );
 
         rDTL =
-          (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
+          (1.0f - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
           getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
                   4 * ms.nCube, ! i, ms.fCrawford,
                   aafMET, aafMETPostCrawford )
@@ -1744,7 +1746,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
         rRisk = rDTW - rDP;
         rGain = rDP - rDTL;
 
-        arCP2 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+        arCP2 [ i ] = 1.0f - rRisk / ( rRisk + rGain );
 
         /* Double point */
 
