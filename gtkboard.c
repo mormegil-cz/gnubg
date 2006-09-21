@@ -1816,8 +1816,8 @@ void ShowBoardPopup(GdkEventButton* event)
 
 gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd)
 {
-	int x = event->x;
-	int y = event->y;
+	int x = (int)event->x;
+	int y = (int)event->y;
 	int editing = ToolbarIsEditing( pwToolbar );
 	int numOnPoint;
 
@@ -2183,8 +2183,8 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 
 gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData* bd)
 {
-	int x = event->x;
-	int y = event->y;
+	int x = (int)event->x;
+	int y = (int)event->y;
 	int editing = ToolbarIsEditing( pwToolbar );
 	int dest;
 
@@ -2324,8 +2324,8 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 
 gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData* bd)
 {
-	int x = event->x;
-	int y = event->y;
+	int x = (int)event->x;
+	int y = (int)event->y;
 	int editing = ToolbarIsEditing( pwToolbar );
 
 #if USE_BOARD3D
@@ -2402,7 +2402,7 @@ static void
 score_changed( GtkAdjustment *adj, BoardData *bd ) {
 
   gchar buf[ 32 ];
-  int nMatchLen = GTK_SPIN_BUTTON( bd->match )->adjustment->value;
+  int nMatchLen = (int)GTK_SPIN_BUTTON( bd->match )->adjustment->value;
 
   if ((bd->match_to != nMatchLen) && (adj == bd->amatch)) {
     /* reset limits for scores if match length is changed */
@@ -3244,7 +3244,7 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 
 		for (j = 0; j < 4; j++)
 		{
-			bd->rd->aanBoardColour[0][j] = bd->rd->BaseMat.ambientColour[j] * 0xff;
+			bd->rd->aanBoardColour[0][j] = (unsigned char)(bd->rd->BaseMat.ambientColour[j] * 0xff);
 			bd->rd->arCubeColour[j] = bd->rd->CubeMat.ambientColour[j];
 
 			for (i = 0; i < 2; i++)
@@ -3549,9 +3549,9 @@ void board_edit( BoardData *bd ) {
 	crawford = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
 	pch0 = gtk_entry_get_text( GTK_ENTRY( bd->name0 ) );
 	pch1 = gtk_entry_get_text( GTK_ENTRY( bd->name1 ) );
-	anScoreNew[ 0 ] = GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
-	anScoreNew[ 1 ] = GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
-        nMatchToNew = GTK_SPIN_BUTTON( bd->match )->adjustment->value;
+	anScoreNew[ 0 ] = (int)GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
+	anScoreNew[ 1 ] = (int)GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
+        nMatchToNew = (int)GTK_SPIN_BUTTON( bd->match )->adjustment->value;
 	read_board( bd, points );
 
 	outputpostpone();
@@ -3683,8 +3683,8 @@ DrawDie( GdkDrawable *pd,
     for( iy = 0; iy < 3; iy++ )
 	for( ix = 0; ix < 3; ix++ )
 	    if( afPip[ iy * 3 + ix ] )
-	        gdk_draw_rgb_image (pd, gc,  s * 1.5 + x + 1.5 * s * ix,
-			    s * 1.5 + y + 1.5 * s * iy, s, s,
+	        gdk_draw_rgb_image (pd, gc, (int)(s * 1.5 + x + 1.5 * s * ix),
+			    (int)(s * 1.5 + y + 1.5 * s * iy), s, s,
 			    GDK_RGB_DITHER_MAX, achPip[fColour], s * 3);
 }
 

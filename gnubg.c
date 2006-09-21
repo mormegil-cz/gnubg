@@ -295,10 +295,10 @@ evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
 
 #define MOVEFILTER \
 { \
- { { 8, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
- { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
- { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, \
- { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } , \
+ { { 8, 0, 0.0f }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
+ { { 2, 3, 0.10f }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
+ { { 16, 0, 0.0f }, { 4, 0, 0 }, { 0, 0, 0.0f }, { 0, 0, 0 } }, \
+ { { 8, 0, 0.0f }, { 0, 0, 0 }, { 2, 3, 0.1f }, { 0, 0, 0.0f } } , \
 }
 
 #if defined (REDUCTION_CODE)
@@ -7876,7 +7876,7 @@ extern void CommandEq2MWC ( char *sz ) {
   }
 
 
-  rEq = ParseReal ( &sz );
+  rEq = (float)ParseReal ( &sz );
 
   if ( rEq == ERR_VAL ) rEq = 0.0;
 
@@ -7920,7 +7920,7 @@ extern void CommandMWC2Eq ( char *sz ) {
 
   GetMatchStateCubeInfo( &ci, &ms );
 
-  rMwc = ParseReal ( &sz );
+  rMwc = (float)ParseReal ( &sz );
 
   if ( rMwc == ERR_VAL ) rMwc = eq2mwc ( 0.0, &ci );
 
@@ -8564,7 +8564,7 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
                     5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
-                    1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+                    1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
 
   if ( isBearoff ( pbc1, anBoard ) ) {
     /* one sided in-memory database */
@@ -8711,29 +8711,29 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
   for ( i = 0; i < 2; ++i )
     for ( j = 0; j < 2; ++j ) {
-      an[ 0 ] = arEPC[ 0 ] + i;
-      an[ 1 ] = arEPC[ 1 ] + j;
+      an[ 0 ] = (int)arEPC[ 0 ] + i;
+      an[ 1 ] = (int)arEPC[ 1 ] + j;
       aar[ i ][ j ] = GWCFromPipCount( an, NULL, NULL );
     }
 
   /* Some spiffy linear interpolation in two dimensions. This is 
      probably not correct, but it's the best we can do for now. */
 
-  an[ 0 ] = arEPC[ 0 ];
-  an[ 1 ] = arEPC[ 0 ] + 1;
+  an[ 0 ] = (int)arEPC[ 0 ];
+  an[ 1 ] = (int)arEPC[ 0 ] + 1;
 
-  ar[ 0 ] = LinearInterpolation( an[ 0 ], aar[ 0 ][ 0 ], 
-                                 an[ 1 ], aar[ 1 ][ 0 ], 
+  ar[ 0 ] = LinearInterpolation( (float)an[ 0 ], aar[ 0 ][ 0 ], 
+                                 (float)an[ 1 ], aar[ 1 ][ 0 ], 
                                  arEPC[ 0 ] );
 
-  ar[ 1 ] = LinearInterpolation( an[ 0 ], aar[ 0 ][ 1 ], 
-                                 an[ 1 ], aar[ 1 ][ 1 ], 
+  ar[ 1 ] = LinearInterpolation( (float)an[ 0 ], aar[ 0 ][ 1 ], 
+                                 (float)an[ 1 ], aar[ 1 ][ 1 ], 
                                  arEPC[ 0 ] );
 
-  an[ 0 ] = arEPC[ 1 ];
-  an[ 1 ] = arEPC[ 1 ] + 1;
+  an[ 0 ] = (int)arEPC[ 1 ];
+  an[ 1 ] = (int)arEPC[ 1 ] + 1;
 
-  r = LinearInterpolation( an[ 0 ], ar[ 0 ], an[ 1 ], ar[ 1 ], arEPC[ 1 ] );
+  r = LinearInterpolation( (float)an[ 0 ], ar[ 0 ], (float)an[ 1 ], ar[ 1 ], arEPC[ 1 ] );
 
   szz = g_strdup_printf( _("Estimated gwc: %8.4f (one chequer approximation)\n"), r );
 

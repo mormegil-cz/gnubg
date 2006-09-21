@@ -69,8 +69,7 @@ static const unsigned char fillbuf[64] = { 0x80, 0 /* , 0, 0, ...  */ };
 /* Initialize structure containing state of computation.
    (RFC 1321, 3.3: Step 3)  */
 void
-md5_init_ctx (ctx)
-     struct md5_ctx *ctx;
+md5_init_ctx (struct md5_ctx *ctx)
 {
   ctx->A = 0x67452301;
   ctx->B = 0xefcdab89;
@@ -87,9 +86,7 @@ md5_init_ctx (ctx)
    IMPORTANT: On some systems it is required that RESBUF is correctly
    aligned for a 32 bits value.  */
 void *
-md5_read_ctx (ctx, resbuf)
-     const struct md5_ctx *ctx;
-     void *resbuf;
+md5_read_ctx (const struct md5_ctx *ctx, void *resbuf)
 {
   char *r = resbuf;
   WRITE (r, ctx->A);
@@ -231,7 +228,7 @@ md5_process_bytes (buffer, len, ctx)
       add -= add % sizeof (md5_uint32);
 
       memcpy (&ctx->buffer[left_over], buffer, add);
-      ctx->buflen += add;
+      ctx->buflen += (md5_uint32)add;
 
       if (ctx->buflen > 64)
 	{
@@ -268,7 +265,7 @@ md5_process_bytes (buffer, len, ctx)
 	  left_over -= 64;
 	  memcpy (ctx->buffer, &ctx->buffer[64], left_over);
 	}
-      ctx->buflen = left_over;
+      ctx->buflen = (md5_uint32)left_over;
     }
 }
 
@@ -303,7 +300,7 @@ md5_process_block (buffer, len, ctx)
   /* First increment the byte count.  RFC 1321 specifies the possible
      length of the file up to 2^64 bits.  Here we only compute the
      number of bytes.  Do a double word increment.  */
-  ctx->total[0] += len;
+  ctx->total[0] += (md5_uint32)len;
   if (ctx->total[0] < len)
     ++ctx->total[1];
 

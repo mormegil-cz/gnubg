@@ -161,7 +161,7 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
   int i, j;
   char **aaXpm[6];
   
-  if ( ! ( pbw = (bearoffwidget *) g_malloc( sizeof ( bearoffwidget ) ) ) )
+  if ( ( pbw = (bearoffwidget *) g_malloc( sizeof ( bearoffwidget ) ) ) == NULL )
     return NULL;
 
   memcpy( &pbw->ms, pms, sizeof ( matchstate ) );

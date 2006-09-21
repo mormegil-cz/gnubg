@@ -939,7 +939,7 @@ raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
     for ( i = 0; i < 2; ++i ) {
       arMu[ i ] = 0.0f;
       for ( j = 0; j < MAX_PROBS; ++j )
-        arMu[ i ] += 1.0 * j * aarProbs[ i ][ j ];
+        arMu[ i ] += 1.0f * j * aarProbs[ i ][ j ];
 
     }
 

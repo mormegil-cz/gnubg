@@ -214,10 +214,11 @@ GtkWidget* GL_Create()
 {
     GtkStyle *ps;
     gint nMaxWidth; 
-    char *asz[] = {_("#"), NULL, NULL};
+    char *asz[] = {NULL, NULL, NULL};
 	PangoRectangle logical_rect;
 	PangoLayout *layout;
 
+	asz[0] = _("#");
     pwGameList = gtk_clist_new_with_titles(3, asz);
     GTK_WIDGET_UNSET_FLAGS(pwGameList, GTK_CAN_FOCUS);
 
@@ -485,7 +486,7 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	gtk_clist_set_cell_style(pcl, yCurrent, xCurrent, psCurrent);
 
 	if( gtk_clist_row_is_visible( pcl, yCurrent ) != GTK_VISIBILITY_FULL )
-		gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.8, 0.5 );
+		gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.8f, 0.5f );
 }
 
 extern void GTKPopMoveRecord( moverecord *pmr ) {

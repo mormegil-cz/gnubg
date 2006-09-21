@@ -119,7 +119,7 @@ setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
     make[1] = (make[0] + gp->p1/(36.0*36.0));
     make[2] = (make[1] + gp->p2/(36.0*36.0*36.0));
     
-    *g1 = ((prob[1] / 65535.0) +
+    *g1 = (float)((prob[1] / 65535.0) +
 	   (1 - make[0]) * (prob[2] / 65535.0) +
 	   (1 - make[1]) * (prob[3] / 65535.0) +
 	   (1 - make[2]) * (prob[4] / 65535.0));
@@ -135,7 +135,7 @@ setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
     make[1] = (make[0] + gp->p1/(36.0*36.0));
     make[2] = (make[1] + gp->p2/(36.0*36.0*36.0));
 
-    *g0 = ((prob[1] / 65535.0) * (1-make[0]) + (prob[2]/65535.0) * (1-make[1])
+    *g0 = (float)((prob[1] / 65535.0) * (1-make[0]) + (prob[2]/65535.0) * (1-make[1])
 	   + (prob[3]/65535.0) * (1-make[2]));
   }
 }  
@@ -157,7 +157,7 @@ AverageRolls ( const float arProb[ 32 ], float *ar ) {
 
 
   ar[ 0 ] = sx;
-  ar[ 1 ] = sqrt ( sx2 - sx *sx );
+  ar[ 1 ] = (float)sqrt ( sx2 - sx *sx );
 
 }
 
@@ -490,7 +490,7 @@ ReadExactBearoff ( bearoffcontext *pbc,
     if ( ar )
       ar[ i ] = ul / storefactor - 2.0f;
     if ( aus )
-      aus[ i ] = ul >> 8;
+      aus[ i ] = (unsigned short)(ul >> 8);
 
   }
   
@@ -563,7 +563,7 @@ BearoffEvalTwoSided ( bearoffcontext *pbc,
     return -1;
 
   memset ( arOutput, 0, 5 * sizeof ( float ) );
-  arOutput[ OUTPUT_WIN ] = ar[ 0 ] / 2.0f + 0.5;
+  arOutput[ OUTPUT_WIN ] = ar[ 0 ] / 2.0f + 0.5f;
   
   return 0;
 
@@ -593,7 +593,7 @@ ReadHypergammon( bearoffcontext *pbc,
   if ( arOutput )
     for ( i = 0; i < NUM_OUTPUTS; ++i ) {
       us = pc[ 3 * i ] | ( pc[ 3 * i + 1 ] ) << 8 | ( pc[ 3 * i + 2 ] ) << 16;
-      arOutput[ i ] = us / 16777215.0;
+      arOutput[ i ] = us / 16777215.0f;
     }
 
   if ( arEquity )
@@ -1103,7 +1103,7 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   int anPips[ 2 ];
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
               5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
-              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
 
 
   if ( BearoffDist ( pbc, nUs, aarProb[ 0 ], aarGammonProb[ 0 ], ar[ 0 ], 
@@ -1355,7 +1355,7 @@ BearoffClose ( bearoffcontext **ppbc ) {
     free ( (*ppbc)->p );
 
   if ( (*ppbc)->szDir )
-    g_free( (*ppbc)->szDir );
+    free( (*ppbc)->szDir );
 
   if ( (*ppbc)->szFilename )
     free( (*ppbc)->szFilename );
@@ -1885,16 +1885,16 @@ BearoffInit ( const char *szFilename, const char *szDir,
 extern float
 fnd ( const float x, const float mu, const float sigma  ) {
 
-   const float epsilon = 1.0e-7;
+   const float epsilon = 1.0e-7f;
 
    if ( sigma <= epsilon )
       /* dirac delta function */
-      return ( fabs ( mu - x ) < epsilon ) ? 1.0 : 0.0;
+      return ( fabs ( mu - x ) < epsilon ) ? 1.0f : 0.0f;
    else {
 
      float xm = ( x - mu ) / sigma;
 
-     return 1.0 / ( sigma * sqrt ( 2.0 * PI ) ) * exp ( - xm * xm / 2.0 );
+     return 1.0f / (float)(( sigma * sqrt ( 2.0 * PI ) ) * exp ( - xm * xm / 2.0 ));
 
    }
 
@@ -1936,7 +1936,7 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
        if ( arProb )
          arProb[ i ] = r;
        if ( ausProb )
-         ausProb[ i ] = r * 65535.0f;
+         ausProb[ i ] = (unsigned short)(r * 65535.0f);
      }
      
 
@@ -1947,7 +1947,7 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
       if ( arGammonProb )
         arGammonProb[ i ] = r;
       if ( ausGammonProb )
-        ausGammonProb[ i ] = r * 65535.0f;
+        ausGammonProb[ i ] = (unsigned short)(r * 65535.0f);
     }
   
   if ( ar )
@@ -2012,7 +2012,7 @@ CopyBytes ( unsigned short int aus[ 64 ],
             const unsigned int nzg,
             const unsigned int ioffg ) {
 
-  int i, j;
+  unsigned int i, j;
 
   i = 0;
   memset ( aus, 0, 64 * sizeof ( unsigned short int ) );

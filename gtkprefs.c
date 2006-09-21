@@ -391,7 +391,7 @@ void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
 void DiceSizeChanged(GtkWidget *pw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
-	bd->rd->diceSize = padjDiceSize->value;
+	bd->rd->diceSize = (float)padjDiceSize->value;
 	if (DiceTooClose(&bd->bd3d, bd->rd))
 		setDicePos(bd, &bd->bd3d);
 	option_changed(0, 0);
@@ -1095,11 +1095,11 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 
 void WorkOut2dLight(renderdata* prd)
 {
-    prd->arLight[ 2 ] = sinf( paElevation->value / 180 * PI );
-    prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * PI ) *
-    	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
-    prd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * PI ) *
-	    sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
+    prd->arLight[ 2 ] = (float)sinf( paElevation->value / 180 * PI );
+    prd->arLight[ 0 ] = (float)(cosf( paAzimuth->value / 180 * PI ) *
+    	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] ));
+    prd->arLight[ 1 ] = (float)(sinf( paAzimuth->value / 180 * PI ) *
+	    sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] ));
 }
 
 static void LightChanged2d( GtkWidget *pwWidget, void* data )
@@ -1294,18 +1294,18 @@ void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
     gtk_table_attach( GTK_TABLE( pwLightTable ), gtk_label_new( _("Light elevation") ),
 		      0, 1, 1, 2, 0, 0, 4, 2 );
 
-    rElevation = asinf( prd->arLight[ 2 ] ) * 180 / PI;
+    rElevation = (float)(asinf( prd->arLight[ 2 ] ) * 180 / PI);
 	{
-		float s = sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
+		float s = (float)sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 		if (s == 0)
 			rAzimuth = 0;
 		else
 		{
-			float ac = acosf( prd->arLight[ 0 ] / s );
+			float ac = (float)acosf( prd->arLight[ 0 ] / s );
 			if (ac == 0)
 				rAzimuth = 0;
 			else
-				rAzimuth = ac * 180 / PI;
+				rAzimuth = (float)(ac * 180 / PI);
 		}
 	}
     if( prd->arLight[ 1 ] < 0 )
@@ -1869,13 +1869,13 @@ UseDesign ( void ) {
 
 		/* light */
 
-		rElevation = asinf( newPrefs.arLight[ 2 ] ) * 180 / PI;
+		rElevation = (float)(asinf( newPrefs.arLight[ 2 ] ) * 180 / PI);
 			if ( fabs ( newPrefs.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
 			rAzimuth = 0.0;
 			else
-			rAzimuth = 
+			rAzimuth = (float)(
 				acosf( newPrefs.arLight[ 0 ] / sqrt( 1.0 - newPrefs.arLight[ 2 ] *
-												newPrefs.arLight[ 2 ] ) ) * 180 / PI;
+												newPrefs.arLight[ 2 ] ) ) * 180 / PI);
 		if( newPrefs.arLight[ 1 ] < 0 )
 			rAzimuth = 360 - rAzimuth;
 
@@ -2101,10 +2101,10 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
   char szTemp[2048];
   gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
 
-  float rElevation = asinf( prd->arLight[ 2 ] ) * 180 / PI;
+  float rElevation = (float)(asinf( prd->arLight[ 2 ] ) * 180 / PI);
   float rAzimuth = ( fabs ( prd->arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
-    acosf( prd->arLight[ 0 ] / sqrt( 1.0 - prd->arLight[ 2 ] *
-                                    prd->arLight[ 2 ] ) ) * 180 / PI;
+    (float)(acosf( prd->arLight[ 0 ] / sqrt( 1.0 - prd->arLight[ 2 ] *
+                                    prd->arLight[ 2 ] ) ) * 180 / PI);
 
   if( prd->arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
@@ -2270,17 +2270,17 @@ void Set2dColour(double newcol[4], Material* pMat)
 
 void Set2dColourChar(unsigned char newcol[4], Material* pMat)
 {
-	newcol[0] = ((pMat->ambientColour[0] + pMat->diffuseColour[0]) / 2) * 255;
-	newcol[1] = ((pMat->ambientColour[1] + pMat->diffuseColour[1]) / 2) * 255;
-	newcol[2] = ((pMat->ambientColour[2] + pMat->diffuseColour[2]) / 2) * 255;
-	newcol[3] = ((pMat->ambientColour[3] + pMat->diffuseColour[3]) / 2) * 255;
+	newcol[0] = (unsigned char)(((pMat->ambientColour[0] + pMat->diffuseColour[0]) / 2) * 255);
+	newcol[1] = (unsigned char)(((pMat->ambientColour[1] + pMat->diffuseColour[1]) / 2) * 255);
+	newcol[2] = (unsigned char)(((pMat->ambientColour[2] + pMat->diffuseColour[2]) / 2) * 255);
+	newcol[3] = (unsigned char)(((pMat->ambientColour[3] + pMat->diffuseColour[3]) / 2) * 255);
 }
 
 void Set3dColour(Material* pMat, double col[4])
 {
-	pMat->ambientColour[0] = pMat->diffuseColour[0] = col[0];
-	pMat->ambientColour[1] = pMat->diffuseColour[1] = col[1];
-	pMat->ambientColour[2] = pMat->diffuseColour[2] = col[2];
+	pMat->ambientColour[0] = pMat->diffuseColour[0] = (float)col[0];
+	pMat->ambientColour[1] = pMat->diffuseColour[1] = (float)col[1];
+	pMat->ambientColour[2] = pMat->diffuseColour[2] = (float)col[2];
 	pMat->ambientColour[3] = pMat->diffuseColour[3] = 1;
 }
 
@@ -2781,7 +2781,7 @@ static void GetPrefs ( renderdata* prd ) {
 		}
 
 		prd->showShadows = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwShowShadows));
-		prd->shadowDarkness = padjDarkness->value;
+		prd->shadowDarkness = (int)padjDarkness->value;
 		/* Darkness as percentage of ambient light */
 		prd->dimness = ((prd->lightLevels[1] / 100.0f) * (100 - prd->shadowDarkness)) / 100;
 
@@ -2789,23 +2789,23 @@ static void GetPrefs ( renderdata* prd ) {
 		prd->animateFlag = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateFlag));
 		prd->closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
 
-		newCurveAccuracy = padjAccuracy->value;
+		newCurveAccuracy = (int)padjAccuracy->value;
 		newCurveAccuracy -= (newCurveAccuracy % 4);
 		prd->curveAccuracy = newCurveAccuracy;
 
 		prd->lightType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwLightSource) ) ? LT_POSITIONAL : LT_DIRECTIONAL;
-		prd->lightPos[0] = padjLightPosX->value;
-		prd->lightPos[1] = padjLightPosY->value;
-		prd->lightPos[2] = padjLightPosZ->value;
-		prd->lightLevels[0] = padjLightLevelAmbient->value;
-		prd->lightLevels[1] = padjLightLevelDiffuse->value;
-		prd->lightLevels[2] = padjLightLevelSpecular->value;
+		prd->lightPos[0] = (float)padjLightPosX->value;
+		prd->lightPos[1] = (float)padjLightPosY->value;
+		prd->lightPos[2] = (float)padjLightPosZ->value;
+		prd->lightLevels[0] = (int)padjLightLevelAmbient->value;
+		prd->lightLevels[1] = (int)padjLightLevelDiffuse->value;
+		prd->lightLevels[2] = (int)padjLightLevelSpecular->value;
 
-		prd->boardAngle = padjBoardAngle->value;
-		prd->skewFactor = padjSkewFactor->value;
+		prd->boardAngle = (int)padjBoardAngle->value;
+		prd->skewFactor = (int)padjSkewFactor->value;
 		prd->pieceType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedPiece) ) ? PT_ROUNDED : PT_FLAT;
 		prd->pieceTextureType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwTextureAllPiece) ) ? PTT_ALL : PTT_TOP;
-		prd->diceSize = padjDiceSize->value;
+		prd->diceSize = (float)padjDiceSize->value;
 		prd->roundedEdges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedEdges));
 		prd->bgInTrays = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwBgTrays));
 		prd->roundedPoints = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundPoints));
@@ -2825,12 +2825,12 @@ static void GetPrefs ( renderdata* prd ) {
 	}
 
     for( i = 0; i < 2; i++ ) {
-	prd->arRefraction[ i ] = apadj[ i ]->value;
-	prd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
-	prd->arExponent[ i ] = apadjExponent[ i ]->value;
+	prd->arRefraction[ i ] = (float)apadj[ i ]->value;
+	prd->arCoefficient[ i ] = (float)apadjCoefficient[ i ]->value;
+	prd->arExponent[ i ] = (float)apadjExponent[ i ]->value;
 
-        prd->arDiceCoefficient[ i ] = apadjDiceCoefficient[ i ]->value;
-	prd->arDiceExponent[ i ] = apadjDiceExponent[ i ]->value;
+        prd->arDiceCoefficient[ i ] = (float)apadjDiceCoefficient[ i ]->value;
+	prd->arDiceExponent[ i ] = (float)apadjDiceExponent[ i ]->value;
     }
     
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 0 ] ), ar );
@@ -2872,20 +2872,20 @@ static void GetPrefs ( renderdata* prd ) {
 	gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwBoard[ j ] ),
 				      ar );
 	for( i = 0; i < 3; i++ )
-	    prd->aanBoardColour[ j ][ i ] = ar[ i ] * 0xFF;
+	    prd->aanBoardColour[ j ][ i ] = (unsigned char)(ar[ i ] * 0xFF);
     }
     
-    prd->aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
-/*    prd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80; */
-    prd->aSpeckle[ 2 ] = apadjBoard[ 2 ]->value * 0x80;
-    prd->aSpeckle[ 3 ] = apadjBoard[ 3 ]->value * 0x80;
+    prd->aSpeckle[ 0 ] = (int)(apadjBoard[ 0 ]->value * 0x80);
+/*    prd->aSpeckle[ 1 ] = (int)(apadjBoard[ 1 ]->value * 0x80); */
+    prd->aSpeckle[ 2 ] = (int)(apadjBoard[ 2 ]->value * 0x80);
+    prd->aSpeckle[ 3 ] = (int)(apadjBoard[ 3 ]->value * 0x80);
     
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pwWood ) ))
 	    prd->wt = gtk_option_menu_get_history( GTK_OPTION_MENU(pwWoodType ) );
 	else
 		prd->wt = WOOD_PAINT;
 
-    prd->rRound = 1.0 - padjRound->value;
+    prd->rRound = 1.0f - (float)padjRound->value;
 
 	prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
 
@@ -2968,7 +2968,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 				guint page_num, gpointer user_data)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
-	int dicePage = NUM_NONPREVIEW_PAGES + PI_DICE0;
+	unsigned int dicePage = NUM_NONPREVIEW_PAGES + PI_DICE0;
 
 	if (!fUpdate)
 		return;

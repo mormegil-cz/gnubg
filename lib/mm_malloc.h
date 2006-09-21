@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-static __inline__ void*
+__inline__ void*
 _mm_malloc (size_t size, size_t align)
 {
   void * malloc_ptr;
@@ -67,7 +67,7 @@ _mm_malloc (size_t size, size_t align)
   return aligned_ptr;
 }
 
-static __inline__ void
+__inline__ void
 _mm_free (void * aligned_ptr)
 {
   if (aligned_ptr)

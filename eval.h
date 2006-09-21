@@ -42,8 +42,8 @@
 #define MAX_ROLLOUT_CUBEINFO 16
 #define NUM_ROLLOUT_OUTPUTS 7
 
-#define BETA_HIDDEN 0.1
-#define BETA_OUTPUT 1.0
+#define BETA_HIDDEN 0.1f
+#define BETA_OUTPUT 1.0f
 
 #define OUTPUT_WIN 0
 #define OUTPUT_WINGAMMON 1

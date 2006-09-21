@@ -639,7 +639,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
               for ( k = 0; k < NUM_ROLLOUT_OUTPUTS; k++ )
                 arMean[ k ] += ( ( i == j ) ? aaar[ i ][ j ][ k ] :
-                                 ( aaar[ i ][ j ][ k ] * 2.0 ) );
+                                 ( aaar[ i ][ j ][ k ] * 2.0f ) );
 
             }
 
@@ -967,7 +967,7 @@ int UpdateTimePassed()
 	static double lasttime = -1;
 	double current = get_time();
 
-	if (abs(current - lasttime) > 1000)
+	if (fabs(current - lasttime) > 1000)
 	{
 		lasttime = current;
 		return TRUE;
@@ -1002,7 +1002,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 	alloca( alternatives * NUM_ROLLOUT_OUTPUTS *  sizeof ( double ) );
   cubeinfo *aciLocal = alloca ( alternatives * sizeof ( cubeinfo ) );
   jsdinfo * ajiJSD = alloca ( alternatives * sizeof ( jsdinfo ));
-  int *nGamesDone = alloca ( alternatives * sizeof ( int ));
+  unsigned int *nGamesDone = alloca ( alternatives * sizeof ( unsigned int ));
   int *fNoMore =  alloca ( alternatives * sizeof ( int ));
 
 #else
@@ -1014,19 +1014,20 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   double aarVariance[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo aciLocal[ MAX_ROLLOUT_CUBEINFO ];
   jsdinfo ajiJSD[MAX_ROLLOUT_CUBEINFO];
-  int nGamesDone[MAX_ROLLOUT_CUBEINFO];
+  unsigned int nGamesDone[MAX_ROLLOUT_CUBEINFO];
   int fNoMore[MAX_ROLLOUT_CUBEINFO];
 
 #endif
   
-  int i, j, alt;
+  int j, alt;
+  unsigned int i;
   int anBoardOrig[ 2 ][ 25 ];
   int     err_too_big;
   double    v, s;
   unsigned int nFirstTrial;
   evalsetup *pes;
   rolloutcontext *prc = NULL, rcRolloutSave;
-  int   cGames;
+  unsigned int   cGames;
   int nIsCubeless = 0;
   int nIsCubeful = 0;
   int fOutputMWCSave = fOutputMWC;
@@ -1134,7 +1135,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 	  prc->aecCubeLate[ i ].fCubeful = 
 	  prc->aecChequerLate[ i] .fCubeful = (prc->fCubeful || fCubeRollout);
 
-      if ((nGamesDone[ alt ] = nGames) < nFirstTrial) 
+      if ((nGamesDone[ alt ] = nGames) < (int)nFirstTrial) 
         nFirstTrial = nGames;
       /* restore internal variables from input values */
       for ( j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {
@@ -1244,7 +1245,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         float rMuNew, rDelta;
       
         aarResult[ alt ][ j ] += aar[ alt ][ j ];
-        rMuNew = aarResult[ alt ][ j ] / ( i + 1 );
+        rMuNew = (float)aarResult[ alt ][ j ] / ( i + 1 );
       
         if ( i ) {
           /* for i == 0 aarVariance is not defined */
@@ -1265,7 +1266,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
             aarMu[ alt ][ j ] = 1.0f;
         }
       
-        aarSigma[ alt ][ j ] = sqrt( aarVariance[ alt ][ j ] / ( i + 1 ) );
+        aarSigma[ alt ][ j ] = (float)sqrt( aarVariance[ alt ][ j ] / ( i + 1 ) );
       } /* for (j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) */
 
       if( updateProgress) {
@@ -1290,7 +1291,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
     */
     if (show_jsds) {
       float v, s, denominator;
-      int  reset_to = i;
+      unsigned int  reset_to = i;
 
       for (alt = 0; alt < alternatives; ++alt) {
 
@@ -1349,10 +1350,10 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         ajiJSD[ alt ].nRank = alt;
         ajiJSD[ alt ].rEquity = v - ajiJSD[ alt ].rEquity;
         
-	denominator = sqrt (s + ajiJSD[ alt ].rJSD * ajiJSD[ alt ].rJSD);
+	denominator = (float)sqrt (s + ajiJSD[ alt ].rJSD * ajiJSD[ alt ].rJSD);
 
-	if (denominator < 1e-8)
-	  denominator = 1e-8;
+	if (denominator < 1e-8f)
+	  denominator = 1e-8f;
 
         ajiJSD[ alt ].rJSD = ajiJSD[ alt ].rEquity / denominator;
         

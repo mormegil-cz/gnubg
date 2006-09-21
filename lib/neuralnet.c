@@ -44,106 +44,106 @@
 
 /* e[k] = exp(k/10) / 10 */
 static float e[100] = {
-0.10000000000000001, 
-0.11051709180756478, 
-0.12214027581601698, 
-0.13498588075760032, 
-0.14918246976412702, 
-0.16487212707001281, 
-0.18221188003905089, 
-0.20137527074704767, 
-0.22255409284924679, 
-0.245960311115695, 
-0.27182818284590454, 
-0.30041660239464335, 
-0.33201169227365473, 
-0.36692966676192446, 
-0.40551999668446748, 
-0.44816890703380646, 
-0.49530324243951152, 
-0.54739473917271997, 
-0.60496474644129461, 
-0.66858944422792688, 
-0.73890560989306509, 
-0.81661699125676512, 
-0.90250134994341225, 
-0.99741824548147184, 
-1.1023176380641602, 
-1.2182493960703473, 
-1.3463738035001691, 
-1.4879731724872838, 
-1.6444646771097049, 
-1.817414536944306, 
-2.0085536923187668, 
-2.2197951281441637, 
-2.4532530197109352, 
-2.7112638920657881, 
-2.9964100047397011, 
-3.3115451958692312, 
-3.6598234443677988, 
-4.0447304360067395, 
-4.4701184493300818, 
-4.9402449105530168, 
-5.4598150033144233, 
-6.034028759736195, 
-6.6686331040925158, 
-7.3699793699595784, 
-8.1450868664968148, 
-9.0017131300521811, 
-9.9484315641933776, 
-10.994717245212353, 
-12.151041751873485, 
-13.428977968493552, 
-14.841315910257659, 
-16.402190729990171, 
-18.127224187515122, 
-20.033680997479166, 
-22.140641620418716, 
-24.469193226422039, 
-27.042640742615255, 
-29.886740096706028, 
-33.029955990964865, 
-36.503746786532886, 
-40.34287934927351, 
-44.585777008251675, 
-49.274904109325632, 
-54.457191012592901, 
-60.184503787208222, 
-66.514163304436181, 
-73.509518924197266, 
-81.24058251675433, 
-89.784729165041753, 
-99.227471560502622, 
-109.66331584284585, 
-121.19670744925763, 
-133.9430764394418, 
-148.02999275845451, 
-163.59844299959269, 
-180.80424144560632, 
-199.81958951041173, 
-220.83479918872089, 
-244.06019776244983, 
-269.72823282685101, 
-298.09579870417281, 
-329.44680752838406, 
-364.09503073323521, 
-402.38723938223131, 
-444.7066747699858, 
-491.47688402991344, 
-543.16595913629783, 
-600.29122172610175, 
-663.42440062778894, 
-733.19735391559948, 
-810.3083927575384, 
-895.52927034825075, 
-989.71290587439091, 
-1093.8019208165192, 
-1208.8380730216988, 
-1335.9726829661872, 
-1476.4781565577266, 
-1631.7607198015421, 
-1803.3744927828525, 
-1993.0370438230298, 
+0.10000000000000001f, 
+0.11051709180756478f, 
+0.12214027581601698f, 
+0.13498588075760032f, 
+0.14918246976412702f, 
+0.16487212707001281f, 
+0.18221188003905089f, 
+0.20137527074704767f, 
+0.22255409284924679f, 
+0.245960311115695f, 
+0.27182818284590454f, 
+0.30041660239464335f, 
+0.33201169227365473f, 
+0.36692966676192446f, 
+0.40551999668446748f, 
+0.44816890703380646f, 
+0.49530324243951152f, 
+0.54739473917271997f, 
+0.60496474644129461f, 
+0.66858944422792688f, 
+0.73890560989306509f, 
+0.81661699125676512f, 
+0.90250134994341225f, 
+0.99741824548147184f, 
+1.1023176380641602f, 
+1.2182493960703473f, 
+1.3463738035001691f, 
+1.4879731724872838f, 
+1.6444646771097049f, 
+1.817414536944306f, 
+2.0085536923187668f, 
+2.2197951281441637f, 
+2.4532530197109352f, 
+2.7112638920657881f, 
+2.9964100047397011f, 
+3.3115451958692312f, 
+3.6598234443677988f, 
+4.0447304360067395f, 
+4.4701184493300818f, 
+4.9402449105530168f, 
+5.4598150033144233f, 
+6.034028759736195f, 
+6.6686331040925158f, 
+7.3699793699595784f, 
+8.1450868664968148f, 
+9.0017131300521811f, 
+9.9484315641933776f, 
+10.994717245212353f, 
+12.151041751873485f, 
+13.428977968493552f, 
+14.841315910257659f, 
+16.402190729990171f, 
+18.127224187515122f, 
+20.033680997479166f, 
+22.140641620418716f, 
+24.469193226422039f, 
+27.042640742615255f, 
+29.886740096706028f, 
+33.029955990964865f, 
+36.503746786532886f, 
+40.34287934927351f, 
+44.585777008251675f, 
+49.274904109325632f, 
+54.457191012592901f, 
+60.184503787208222f, 
+66.514163304436181f, 
+73.509518924197266f, 
+81.24058251675433f, 
+89.784729165041753f, 
+99.227471560502622f, 
+109.66331584284585f, 
+121.19670744925763f, 
+133.9430764394418f, 
+148.02999275845451f, 
+163.59844299959269f, 
+180.80424144560632f, 
+199.81958951041173f, 
+220.83479918872089f, 
+244.06019776244983f, 
+269.72823282685101f, 
+298.09579870417281f, 
+329.44680752838406f, 
+364.09503073323521f, 
+402.38723938223131f, 
+444.7066747699858f, 
+491.47688402991344f, 
+543.16595913629783f, 
+600.29122172610175f, 
+663.42440062778894f, 
+733.19735391559948f, 
+810.3083927575384f, 
+895.52927034825075f, 
+989.71290587439091f, 
+1093.8019208165192f, 
+1208.8380730216988f, 
+1335.9726829661872f, 
+1476.4781565577266f, 
+1631.7607198015421f, 
+1803.3744927828525f, 
+1993.0370438230298f, 
 };
 
 /* Calculate an approximation to the sigmoid function 1 / ( 1 + e^x ).
@@ -310,7 +310,7 @@ static void CheckRC( void ) {
     if( !frc ) {
         int i;
 
-        rc.randrsl[ 0 ] = time( NULL );
+        rc.randrsl[ 0 ] = (ub4)time( NULL );
         for( i = 0; i < RANDSIZ; i++ )
            rc.randrsl[ i ] = rc.randrsl[ 0 ];
         irandinit( &rc, TRUE );
@@ -333,23 +333,23 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     pnn->nTrained = 0;
     pnn->fDirect = FALSE;
    
-    if( !( pnn->arHiddenWeight = sse_malloc( cHidden * cInput *
-					 sizeof( float ) ) ) )
+    if( ( pnn->arHiddenWeight = sse_malloc( cHidden * cInput *
+					 sizeof( float ) ) ) == NULL )
 	return -1;
 
-    if( !( pnn->arOutputWeight = sse_malloc( cOutput * cHidden *
-					 sizeof( float ) ) ) ) {
+    if( ( pnn->arOutputWeight = sse_malloc( cOutput * cHidden *
+					 sizeof( float ) ) ) == NULL ) {
 	sse_free( pnn->arHiddenWeight );
 	return -1;
     }
     
-    if( !( pnn->arHiddenThreshold = sse_malloc( cHidden * sizeof( float ) ) ) ) {
+    if( ( pnn->arHiddenThreshold = sse_malloc( cHidden * sizeof( float ) ) ) == NULL ) {
 	sse_free( pnn->arOutputWeight );
 	sse_free( pnn->arHiddenWeight );
 	return -1;
     }
 	   
-    if( !( pnn->arOutputThreshold = sse_malloc( cOutput * sizeof( float ) ) ) ) {
+    if( ( pnn->arOutputThreshold = sse_malloc( cOutput * sizeof( float ) ) ) == NULL ) {
 	sse_free( pnn->arHiddenThreshold );
 	sse_free( pnn->arOutputWeight );
 	sse_free( pnn->arHiddenWeight );
@@ -362,16 +362,16 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     pnn->savedIBase = sse_malloc( cInput * sizeof( float ) ); 
  
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
     for( i = cOutput * cHidden, pf = pnn->arOutputWeight; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
     for( i = cHidden, pf = pnn->arHiddenThreshold; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
     for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
 
     return 0;
 }
@@ -829,17 +829,17 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     CheckRC();
     
     if( cHidden != pnn->cHidden ) {
-	if( !( pnn->arHiddenThreshold = realloc( pnn->arHiddenThreshold,
-		cHidden * sizeof( float ) ) ) )
+	if( ( pnn->arHiddenThreshold = realloc( pnn->arHiddenThreshold,
+		cHidden * sizeof( float ) ) ) == NULL )
 	    return -1;
 
 	for( i = pnn->cHidden; i < cHidden; i++ )
 	    pnn->arHiddenThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
-					    0x8000 ) / 131072.0;
+					    0x8000 ) / 131072.0f;
     }
     
     if( cHidden != pnn->cHidden || cInput != pnn->cInput ) {
-	if( !( pr = sse_malloc( cHidden * cInput * sizeof( float ) ) ) )
+	if( ( pr = sse_malloc( cHidden * cInput * sizeof( float ) ) ) == NULL )
 	    return -1;
 
 	prNew = pr;
@@ -848,10 +848,10 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	    for( j = 0; j < cHidden; j++ )
 		if( j >= pnn->cHidden )
 		    *prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
-			131072.0;
+			131072.0f;
 		else if( i >= pnn->cInput )
 		    *prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
-			131072.0;
+			131072.0f;
 		else
 		    *prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
 		    
@@ -861,17 +861,17 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     }
 	
     if( cOutput != pnn->cOutput ) {
-	if( !( pnn->arOutputThreshold = realloc( pnn->arOutputThreshold,
-		cOutput * sizeof( float ) ) ) )
+	if( ( pnn->arOutputThreshold = realloc( pnn->arOutputThreshold,
+		cOutput * sizeof( float ) ) ) == NULL )
 	    return -1;
 
 	for( i = pnn->cOutput; i < cOutput; i++ )
 	    pnn->arOutputThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
-					    0x8000 ) / 131072.0;
+					    0x8000 ) / 131072.0f;
     }
     
     if( cOutput != pnn->cOutput || cHidden != pnn->cHidden ) {
-	if( !( pr = sse_malloc( cOutput * cHidden * sizeof( float ) ) ) )
+	if( ( pr = sse_malloc( cOutput * cHidden * sizeof( float ) ) ) == NULL )
 	    return -1;
 
 	prNew = pr;
@@ -880,10 +880,10 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	    for( j = 0; j < cOutput; j++ )
 		if( j >= pnn->cOutput )
 		    *prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
-			131072.0;
+			131072.0f;
 		else if( i >= pnn->cHidden )
 		    *prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
-			131072.0;
+			131072.0f;
 		else
 		    *prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
 
@@ -950,7 +950,7 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
     int nTrained, i;
 
 #define FREAD( p, c ) \
-    if( fread( (p), sizeof( *(p) ), (c), pf ) < (c) ) return -1;
+    if( fread( (p), sizeof( *(p) ), (c), pf ) < (unsigned int)(c) ) return -1;
 
     FREAD( &pnn->cInput, 1 );
     FREAD( &pnn->cHidden, 1 );
@@ -1019,7 +1019,7 @@ extern int NeuralNetSave( neuralnet *pnn, FILE *pf ) {
 extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
 
 #define FWRITE( p, c ) \
-    if( fwrite( (p), sizeof( *(p) ), (c), pf ) < (c) ) return -1;
+    if( fwrite( (p), sizeof( *(p) ), (c), pf ) < (unsigned int)(c) ) return -1;
 
     FWRITE( &pnn->cInput, 1 );
     FWRITE( &pnn->cHidden, 1 );

@@ -789,7 +789,7 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
             const int nMaxScore ) {
 
   static const float arStddevTable[] =
-  { 0, 1.24, 1.27, 1.47, 1.50, 1.60, 1.61, 1.66, 1.68, 1.70, 1.72, 1.77 };
+  { 0, 1.24f, 1.27f, 1.47f, 1.50f, 1.60f, 1.61f, 1.66f, 1.68f, 1.70f, 1.72f, 1.77f };
 
   float rStddev0, rStddev1, rGames, rSigma;
   int i,j;
@@ -807,12 +807,12 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
       rGames = ( nScore0 + nScore1 ) / 2.00f;
 
       if ( nScore0 > 10 ) 
-        rStddev0 = 1.77;
+        rStddev0 = 1.77f;
       else
         rStddev0 = arStddevTable[ nScore0 ];
 
       if ( nScore1 > 10 ) 
-        rStddev1 = 1.77;
+        rStddev1 = 1.77f;
       else
         rStddev1 = arStddevTable[ nScore1 ];
 
@@ -823,7 +823,7 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
       assert ( 6.0f * rSigma > nScore1 - nScore0 );
 
       aafMET[ i ][ j ] =
-        1.0 - NormalDistArea ( nScore1 - nScore0, 6.0f * rSigma,
+        1.0f - NormalDistArea ( (float)(nScore1 - nScore0), 6.0f * rSigma,
                                0.0f, rSigma );
 
     }
@@ -953,8 +953,8 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
 
   if ( ! strcmp ( (char*)pmp->szName, "mec" ) ) {
     
-    float rG = 0.15;
-    float rWR = 0.5;
+    float rG = 0.15f;
+    float rWR = 0.5f;
     list *pl; 
     parameter *pp;
 
@@ -984,10 +984,10 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
   }
   else if ( ! strcmp ( (char*) pmp->szName, "zadeh" ) ) {
     
-    float rG1 = 0.25;
-    float rG2 = 0.15;
-    float rDelta = 0.08;
-    float rDeltaBar = 0.06;
+    float rG1 = 0.25f;
+    float rG2 = 0.15f;
+    float rDelta = 0.08f;
+    float rDeltaBar = 0.06f;
     list *pl; 
     parameter *pp;
 
@@ -1039,9 +1039,9 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
 
   if ( ! strcmp ( (char*) pmp->szName, "zadeh" ) ) {
     
-    float rG = 0.25;
-    float rFD2 = 0.015;
-    float rFD4 = 0.004;
+    float rG = 0.25f;
+    float rFD2 = 0.015f;
+    float rFD4 = 0.004f;
     list *pl;
     parameter *pp;
 
@@ -1073,10 +1073,10 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
   }
   else if ( ! strcmp ( (char*) pmp->szName, "mec" ) ) {
 
-    float rG = 0.25;
-    float rFD2 = 0.015;
-    float rFD4 = 0.004;
-    float rWR = 0.5;
+    float rG = 0.25f;
+    float rFD2 = 0.015f;
+    float rFD4 = 0.004f;
+    float rWR = 0.5f;
     list *pl;
     parameter *pp;
 
@@ -1568,7 +1568,7 @@ getGammonPrice ( float arGammonPrice[ 4 ],
                  float aafMET[ MAXSCORE ][ MAXSCORE ],
                  float aafMETPostCrawford[ 2 ][ MAXSCORE ] ) {
 
-  const float epsilon = 1.0E-7;
+  const float epsilon = 1.0E-7f;
 
   float rWin = 
     getME ( nScore0, nScore1, nMatchTo,
@@ -1766,7 +1766,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
         aafMETPostCrawford[ j ][ i ] = md.aarMETPostCrawford[ j ][ i ];
 
       initPostCrawfordMET ( aafMETPostCrawford[ j ], md.mi.nLength - 1, 
-                            GAMMONRATE, 0.015, 0.004 );
+                            GAMMONRATE, 0.015f, 0.004f );
 
     }
     else {

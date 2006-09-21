@@ -1222,7 +1222,8 @@ ReadDiceFile( rngcontext *rngctx ) {
   unsigned char uch;
   int n;
 
-  while ( 1 ) {
+uglyloop:
+  {
   
     n = read( rngctx->hDice, &uch, 1 );
 
@@ -1239,6 +1240,7 @@ ReadDiceFile( rngcontext *rngctx ) {
       return (uch - '0');
 
   }
+  goto uglyloop;	/* This logic should be reconsidered */
 
   return -1;
 

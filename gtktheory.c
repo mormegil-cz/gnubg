@@ -185,7 +185,7 @@ TheoryGetValues ( theorywidget *ptw, cubeinfo *pci,
 
   for ( i = 0; i < 2; i++ )
     for ( j = 0; j < 2; j++ )
-      aarRates[ i ][ j ] = 0.01f * ptw->aapwRates[ i ][ j ]->value;
+      aarRates[ i ][ j ] = 0.01f * (float)ptw->aapwRates[ i ][ j ]->value;
 
 
   /* money game or match play */
@@ -194,8 +194,8 @@ TheoryGetValues ( theorywidget *ptw, cubeinfo *pci,
 
     /* match play */
 
-    int n0 = ptw->apwScoreAway[ 0 ]->value;
-    int n1 = ptw->apwScoreAway[ 1 ]->value;
+    int n0 = (int)ptw->apwScoreAway[ 0 ]->value;
+    int n1 = (int)ptw->apwScoreAway[ 1 ]->value;
 
     pci->nMatchTo = ( n1 > n0 ) ? n1 : n0;
 
@@ -557,7 +557,7 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
     }
 
     for( i = 0; i < 3; i++ )
-	ax[ i ] = x + cx * ptw->aar[ iPlayer ][ i ];
+	ax[ i ] = (int)(x + cx * ptw->aar[ iPlayer ][ i ]);
 
     gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL,
 		   GTK_SHADOW_IN, NULL, pwGraph, "doubling-window",

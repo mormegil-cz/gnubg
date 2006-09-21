@@ -50,7 +50,7 @@ KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
 
   rK = (double) (nDiff + 4) / (2 * sqrt( nSum - 4 ));
 
-  return 0.5 * (1.0 + erf( rK ));
+  return 0.5f * (1.0f + (float)erf( rK ));
 }
 
 #ifdef STANDALONE

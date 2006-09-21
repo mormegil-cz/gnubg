@@ -1616,7 +1616,7 @@ extern void SetPanelWidth(int size)
     if( GTK_WIDGET_REALIZED( pwMain ) )
 	{
 		if (panelSize > pwMain->allocation.width * .8)
-			panelSize = pwMain->allocation.width * .8;
+			panelSize = (int)(pwMain->allocation.width * .8);
 		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
 		/* Wait while gtk resizes things and try again (in case window had to grow */
 		while(gtk_events_pending())
@@ -3040,7 +3040,7 @@ static void NewOK( GtkWidget *pw, newwidget *pnw ) {
   int M = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwM));
   int S = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwS));
   int P = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwP));
-  int Mlength = pnw->padjML->value; 
+  int Mlength = (int)pnw->padjML->value; 
 
   UpdatePlayerSettings(pnw);
 
@@ -3677,7 +3677,7 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
   GtkWidget *pwMenu, *pwItem;
   int *pi;
 #endif
-  pec->nPlies = pew->padjPlies->value;
+  pec->nPlies = (int)pew->padjPlies->value;
   pec->fCubeful =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
 
@@ -3693,7 +3693,7 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
   
 #endif
 
-  pec->rNoise = pew->padjNoise->value;
+  pec->rNoise = (float)pew->padjNoise->value;
   pec->fDeterministic =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
 }
@@ -4741,7 +4741,7 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   CHECKUPDATE(paw->apwAnalysePlayers[ 1 ], afAnalysePlayers[ 1 ],
               "set analysis player 1 analyse %s")
 
-  if((n = paw->padjMoves->value) != cAnalysisMoves) {
+  if((n = (int)paw->padjMoves->value) != cAnalysisMoves) {
     sprintf(sz, "set analysis limit %d", n );
     UserCommand(sz); 
   }
@@ -4881,11 +4881,10 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
   int fCubeEqChequer, fPlayersAreSame, nTruncPlies;
   *prw->pfOK = TRUE;
 
-  prw->rcRollout.nTrials = prw->prwGeneral->padjTrials->value;
-  nTruncPlies = prw->rcRollout.nTruncate = 
-    prw->prwGeneral->padjTruncPlies->value;
+  prw->rcRollout.nTrials = (int)prw->prwGeneral->padjTrials->value;
+  nTruncPlies = prw->rcRollout.nTruncate = (int)prw->prwGeneral->padjTruncPlies->value;
 
-  prw->rcRollout.nSeed = prw->prwGeneral->padjSeed->value;
+  prw->rcRollout.nSeed = (int)prw->prwGeneral->padjSeed->value;
 
   prw->rcRollout.fCubeful = gtk_toggle_button_get_active(
                                                          GTK_TOGGLE_BUTTON( prw->prwGeneral->pwCubeful ) );
@@ -4914,7 +4913,7 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.fLateEvals = gtk_toggle_button_get_active(
                                                            GTK_TOGGLE_BUTTON( prw->prwGeneral->pwDoLate ) );
 
-  prw->rcRollout.nLate = prw->prwGeneral->padjLatePlies->value;
+  prw->rcRollout.nLate = (int)prw->prwGeneral->padjLatePlies->value;
 
   fCubeEqChequer = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
@@ -5417,7 +5416,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
     RPTrunc;
   char sz[ 256 ];
   int  i;
-  const float epsilon = 1.0e-6;
+  const float epsilon = 1.0e-6f;
 
   memcpy (&rw.rcRollout, &rcRollout, sizeof (rcRollout));
   rw.prwGeneral = &RPGeneral;

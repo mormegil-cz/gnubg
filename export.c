@@ -583,12 +583,12 @@ CommandExportPositionJF (char *sz)
       WriteInt16 (fp, ms.anScore[1]);
     }
 
-  c = strlen (ap[0].szName);
+  c = (unsigned char)strlen (ap[0].szName);
   fwrite (&c, 1, 1, fp);
   for (i = 0; i < c; i++)
     fwrite (&ap[0].szName[i], 1, 1, fp);
 
-  c = strlen (ap[1].szName);
+  c = (unsigned char)strlen (ap[1].szName);
   fwrite (&c, 1, 1, fp);
   for (i = 0; i < c; i++)
     fwrite (&ap[1].szName[i], 1, 1, fp);

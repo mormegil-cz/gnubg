@@ -88,7 +88,7 @@ extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
     const unsigned char *puch = auchKey;
     static char szID[ 15 ];
     char *pch = szID;
-    static char aszBase64[ 64 ] =
+    static char aszBase64[ 65 ] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     int i;
     
@@ -251,7 +251,7 @@ PositionFromID(int anBoard[ 2 ][ 25 ], const char* pchEnc)
   memset ( ach, 0, 15 );
 
   for( i = 0; i < 14 && pchEnc[ i ]; i++ )
-    pch[ i ] = Base64( pchEnc[ i ] );
+    pch[ i ] = (unsigned char)Base64( pchEnc[ i ] );
 
   for( i = 0; i < 3; i++ ) {
     *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
@@ -410,5 +410,5 @@ PositionIndex(int g, int anBoard[6])
 
   /* FIXME: 15 should be replaced by nChequers, but the function is
      only called from bearoffgammon, so this should be fine. */
-  return PositionF( fBits, 15, g );
+  return (unsigned short)PositionF( fBits, 15, g );
 }

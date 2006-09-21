@@ -66,7 +66,7 @@ const char *aszLuckRating[] = {
 };
 
 static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
-  1e38, 0.035, 0.026, 0.018, 0.012, 0.008, 0.005, 0.002 };
+  1e38f, 0.035f, 0.026f, 0.018f, 0.012f, 0.008f, 0.005f, 0.002f };
 /* 1e38, 0.060, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 }; */
 
 int afAnalysePlayers[ 2 ] = { TRUE, TRUE };
@@ -111,7 +111,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
                               (cubeinfo *) pci, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
-        return ERR_VAL;
+        return (float)ERR_VAL;
 
       if ( ! ml.cMoves ) {
       
@@ -119,7 +119,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
         if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
                                   (evalcontext *) pec ) < 0 )
-          return ERR_VAL;
+          return (float)ERR_VAL;
 
         if ( pec->fCubeful ) {
           if ( pci->nMatchTo )
@@ -152,7 +152,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
                               &ciOpp, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
-        return ERR_VAL;
+        return (float)ERR_VAL;
 
       if ( ! ml.cMoves ) {
       
@@ -160,7 +160,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
         if ( GeneralEvaluationE ( ar, anBoardTemp, (cubeinfo *) pci, 
                                   (evalcontext *) pec ) < 0 )
-          return ERR_VAL;
+          return (float)ERR_VAL;
 
         if ( pec->fCubeful ) {
           if ( pci->nMatchTo )
@@ -209,7 +209,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
                               (cubeinfo *) pci, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
-        return ERR_VAL;
+        return (float)ERR_VAL;
 
       if ( ! ml.cMoves ) {
       
@@ -217,7 +217,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
         if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
                                   (evalcontext *) pec ) < 0 )
-          return ERR_VAL;
+          return (float)ERR_VAL;
 
         if ( pec->fCubeful ) {
           if ( pci->nMatchTo )
@@ -338,8 +338,8 @@ updateStatcontext(statcontext*       psc,
           - psc->arActualResult[ pmr->g.fWinner ];
       }
       else {
-        psc->arActualResult[ pmr->g.fWinner ] = pmr->g.nPoints;
-        psc->arActualResult[ ! pmr->g.fWinner ] = -pmr->g.nPoints;
+        psc->arActualResult[ pmr->g.fWinner ] = (float)pmr->g.nPoints;
+        psc->arActualResult[ ! pmr->g.fWinner ] = (float)-pmr->g.nPoints;
       }
 
     }
@@ -1030,7 +1030,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
           if ( pms->nMatchTo ) 
                                  pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = 
-            ( pmr->fPlayer == ci.fMove ) ? 0.0 : 1.0;
+            ( pmr->fPlayer == ci.fMove ) ? 0.0f : 1.0f;
           pmr->t.aarStdDev[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = 0.0;
 
         }
@@ -1129,7 +1129,7 @@ UpdateVariance( float *prVariance,
     float rMuOld = ( rSum - rDelta ) / ( nGames - 1 );
     float rDeltaMu = rMuNew - rMuOld;
 
-    *prVariance = *prVariance * ( 1.0 - 1.0 / ( nGames - 1.0f ) ) +
+    *prVariance = *prVariance * ( 1.0f - 1.0f / ( nGames - 1.0f ) ) +
       nGames * rDeltaMu * rDeltaMu;
 
     return;
@@ -1420,7 +1420,7 @@ IniStatcontext ( statcontext *psc ) {
 extern float
 relativeFibsRating ( float r, int n )
 {
-  float const x = - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
+  float const x = - 2000.0f / (float)(sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 ));
 
   return ( x < -2100 ) ? -2100 : x;
 }
@@ -1530,7 +1530,7 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
 
     }
 
-  r =0.50 
+  r =0.50f
     - aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
     + aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ];
 
@@ -1892,7 +1892,7 @@ AnalyseClearMove ( moverecord *pmr ) {
 
     pmr->CubeDecPtr->esDouble.et = pmr->esChequer.et = EVAL_NONE;
     pmr->n.stMove = pmr->stCube = SKILL_NONE;
-    pmr->rLuck = ERR_VAL;
+    pmr->rLuck = (float)ERR_VAL;
     pmr->lt = LUCK_NONE;
     if ( pmr->ml.amMoves ) {
       free ( pmr->ml.amMoves );
@@ -1918,7 +1918,7 @@ AnalyseClearMove ( moverecord *pmr ) {
   case MOVE_SETDICE:
 
     pmr->lt = LUCK_NONE;
-    pmr->rLuck = ERR_VAL;
+    pmr->rLuck = (float)ERR_VAL;
     break;
 
   default:

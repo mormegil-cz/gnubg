@@ -69,15 +69,15 @@ static void render_pixmap( GtkColourPicker *pcp ) {
     else
       opac = pcp->arColour[3];
 
-    col.red = ( pcp->arColour[ 0 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF;
-    col.green = ( pcp->arColour[ 1 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF;
-    col.blue = ( pcp->arColour[ 2 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF;
+    col.red = (guint16)(( pcp->arColour[ 0 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF);
+    col.green = (guint16)(( pcp->arColour[ 1 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF);
+    col.blue = (guint16)(( pcp->arColour[ 2 ] * opac + 0.66667 * ( 1 - opac ) ) * 0xFFFF);
 
     set_gc_colour( gc0, gtk_widget_get_colormap( GTK_WIDGET( pcp ) ), &col );
     
-    col.red = ( pcp->arColour[ 0 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF;
-    col.green = ( pcp->arColour[ 1 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF;
-    col.blue = ( pcp->arColour[ 2 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF;
+    col.red = (guint16)(( pcp->arColour[ 0 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF);
+    col.green = (guint16)(( pcp->arColour[ 1 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF);
+    col.blue = (guint16)(( pcp->arColour[ 2 ] * opac + 0.33333 * ( 1 - opac ) ) * 0xFFFF);
 
     set_gc_colour( gc1, gtk_widget_get_colormap( GTK_WIDGET( pcp ) ), &col );
     

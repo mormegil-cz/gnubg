@@ -51,7 +51,7 @@ AverageRolls ( const float arProb[ 32 ], float *ar ) {
 
 
   ar[ 0 ] = sx;
-  ar[ 1 ] = sqrt ( sx2 - sx *sx );
+  ar[ 1 ] = (float)sqrt ( sx2 - sx *sx );
 
 }
 
@@ -121,8 +121,6 @@ getDist( const int nPips, const int nRoll, float *table ) {
 
     return ( table[ nPips * 32 + nRoll ] = r );
   }
-
-  assert( FALSE );
 
 }
 

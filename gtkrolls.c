@@ -167,8 +167,8 @@ sort_func ( GtkTreeModel *model,
   gtk_tree_model_get ( model, a, 2, &sz0, -1 );
   gtk_tree_model_get ( model, b, 2, &sz1, -1 );
 
-  r0 = atof ( sz0 );
-  r1 = atof ( sz1 );
+  r0 = (float)atof ( sz0 );
+  r1 = (float)atof ( sz1 );
 
   if ( r0 < r1 )
     return -1;
@@ -274,7 +274,7 @@ static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 		return;
 	}
 
-	n = gtk_range_get_value(pr);
+	n = (int)gtk_range_get_value(pr);
 	if (n == prw->nDepth)
 		return;
 
@@ -406,7 +406,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
   /* tree  */
 
-  if( ( prw->ptv = RollsTree ( n, pec, pms ) ) ) {
+  if( ( prw->ptv = RollsTree ( n, pec, pms ) ) != 0 ) {
       gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
       prw->nDepth = n;
   }

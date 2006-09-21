@@ -3262,7 +3262,7 @@ void renderFlag(BoardData *bd, BoardData3d *bd3d, int curveAccuracy)
 		glGetLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 		glLightfv(GL_LIGHT0, GL_SPECULAR, zero);
 
-		flagValue[0] = '0' + abs(bd->resigned);
+		flagValue[0] = '0' + (char)abs(bd->resigned);
 		glScalef(1.3f, 1.3f, 1);
 
 		glLineWidth(.5f);

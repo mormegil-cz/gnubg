@@ -26,7 +26,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#include <sys\types.h>
 #include <math.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -652,10 +655,9 @@ generate_os ( const int nOS, const int fHeader,
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
+  INITCOMMONCONTROLSEX InitCtrlEx;
   if( hdlg != NULL)
     ShowWindow(hdlg, SW_SHOW);
-
-  INITCOMMONCONTROLSEX InitCtrlEx;
 
   InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
   InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;
@@ -929,10 +931,9 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
+  INITCOMMONCONTROLSEX InitCtrlEx;
   if( hdlg != NULL)
     ShowWindow(hdlg, SW_SHOW);
-
-  INITCOMMONCONTROLSEX InitCtrlEx;
 
   InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
   InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;
@@ -1284,10 +1285,9 @@ generate_ts ( const int nTSP, const int nTSC,
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
+  INITCOMMONCONTROLSEX InitCtrlEx;
   if( hdlg != NULL)
     ShowWindow(hdlg, SW_SHOW);
-
-  INITCOMMONCONTROLSEX InitCtrlEx;
 
   InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
   InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;

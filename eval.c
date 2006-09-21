@@ -289,7 +289,7 @@ static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
 static int iTick;
-static float rCubeX = 2.0/3.0;
+static float rCubeX = 2.0f/3.0f;
 int fEgyptian = FALSE;
 int fUse15x15 = TRUE;
 
@@ -338,10 +338,10 @@ static evalcontext ecBasic = { FALSE, 0, FALSE, TRUE, 0.0 };
 /* defaults for the filters  - 0 ply uses no filters */
 movefilter
 defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
-  { { 0,  8, 0.16 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-  { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-  { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, {  0, 0, 0 } }, 
-  { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, { -1, 0, 0 } },
+  { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+  { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+  { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, 
+  { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } },
 };
 
 #if defined( GARY_CACHE )
@@ -464,14 +464,14 @@ const char *aszSettings[ NUM_SETTINGS ] = {
 /* which evaluation context does the predefined settings use */
 #if defined (REDUCTION_CODE)
 evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { TRUE, 0, 0, TRUE, 0.060 }, /* casual play */
-  { TRUE, 0, 0, TRUE, 0.050 }, /* beginner */
-  { TRUE, 0, 0, TRUE, 0.040 }, /* intermediate */
-  { TRUE, 0, 0, TRUE, 0.015 }, /* advanced */
-  { TRUE, 0, 0, TRUE, 0.0 }, /* expert */
-  { TRUE, 2, 0, TRUE, 0.0 }, /* world class */
-  { TRUE, 2, 0, TRUE, 0.0 }, /* supremo */
-  { TRUE, 3, 0, TRUE, 0.0 }, /* grand master */
+  { TRUE, 0, 0, TRUE, 0.060f }, /* casual play */
+  { TRUE, 0, 0, TRUE, 0.050f }, /* beginner */
+  { TRUE, 0, 0, TRUE, 0.040f }, /* intermediate */
+  { TRUE, 0, 0, TRUE, 0.015f }, /* advanced */
+  { TRUE, 0, 0, TRUE, 0.0f }, /* expert */
+  { TRUE, 2, 0, TRUE, 0.0f }, /* world class */
+  { TRUE, 2, 0, TRUE, 0.0f }, /* supremo */
+  { TRUE, 3, 0, TRUE, 0.0f }, /* grand master */
 };
 
 #else
@@ -511,30 +511,30 @@ const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
 
 movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = {
   /* tiny */
-  { { { 0,  5, 0.08 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0,  5, 0.08 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0,  5, 0.08 }, { -1, 0, 0 }, { 0, 2, 0.02 }, {  0, 0, 0 } }, 
-    { { 0,  5, 0.08 }, { -1, 0, 0 }, { 0, 2, 0.02 }, { -1 , 0, 0 } } },
+  { { { 0,  5, 0.08f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0,  5, 0.08f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0,  5, 0.08f }, { -1, 0, 0 }, { 0, 2, 0.02f }, {  0, 0, 0 } }, 
+    { { 0,  5, 0.08f }, { -1, 0, 0 }, { 0, 2, 0.02f }, { -1 , 0, 0 } } },
   /* narrow */
-  { { { 0,  8, 0.12 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0,  8, 0.12 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0,  8, 0.12 }, { -1, 0, 0 }, { 0, 2, 0.03 }, {  0, 0, 0 } }, 
-    { { 0,  8, 0.12 }, { -1, 0, 0 }, { 0, 2, 0.03 }, { -1, 0, 0 } } },
+  { { { 0,  8, 0.12f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0,  8, 0.12f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0,  8, 0.12f }, { -1, 0, 0 }, { 0, 2, 0.03f }, {  0, 0, 0 } }, 
+    { { 0,  8, 0.12f }, { -1, 0, 0 }, { 0, 2, 0.03f }, { -1, 0, 0 } } },
   /* normal */
-  { { { 0,  8, 0.16 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, {  0, 0, 0 } }, 
-    { { 0,  8, 0.16 }, { -1, 0, 0 }, { 0, 2, 0.04 }, { -1, 0, 0 } } },
+  { { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, 
+    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } } },
   /* large */
-  { { { 0, 16, 0.32 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0, 16, 0.32 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0, 16, 0.32 }, { -1, 0, 0 }, { 0, 4, 0.08 }, {  0, 0, 0 } }, 
-    { { 0, 16, 0.32 }, { -1, 0, 0 }, { 0, 4, 0.08 }, { -1, 0, 0.0 } } },
+  { { { 0, 16, 0.32f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, {  0, 0, 0 } }, 
+    { { 0, 16, 0.32f }, { -1, 0, 0 }, { 0, 4, 0.08f }, { -1, 0, 0.0f } } },
   /* huge */
-  { { { 0, 20, 0.44 }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
-    { { 0, 20, 0.44 }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
-    { { 0, 20, 0.44 }, { -1, 0, 0 }, { 0, 6, 0.11 }, {  0, 0, 0 } }, 
-    { { 0, 20, 0.44 }, { -1, 0, 0 }, { 0, 6, 0.11 }, { -1, 0, 0.0 } } }
+  { { { 0, 20, 0.44f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } ,
+    { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , 
+    { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 6, 0.11f }, {  0, 0, 0 } }, 
+    { { 0, 20, 0.44f }, { -1, 0, 0 }, { 0, 6, 0.11f }, { -1, 0, 0.0 } } }
 };
 
 
@@ -546,13 +546,13 @@ char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
 
 /* parameters for EvalEfficiency */
 
-float rOSCubeX = 0.6;
-float rRaceFactorX = 0.00125;
-float rRaceCoefficientX = 0.55;
-float rRaceMax = 0.7;
-float rRaceMin = 0.6;
-float rCrashedX = 0.68;
-float rContactX = 0.68;
+float rOSCubeX = 0.6f;
+float rRaceFactorX = 0.00125f;
+float rRaceCoefficientX = 0.55f;
+float rRaceMax = 0.7f;
+float rRaceMin = 0.6f;
+float rCrashedX = 0.68f;
+float rContactX = 0.68f;
 
 
 static void ComputeTable0( void )
@@ -1657,10 +1657,10 @@ CalculateRaceInputs(int anBoard[2][25], float inputs[])
 
       menOff -= nc;
       
-      afInput[ k++ ] = nc == 1;
-      afInput[ k++ ] = nc == 2;
-      afInput[ k++ ] = nc >= 3;
-      afInput[ k ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+	  afInput[ k++ ] = (nc == 1) ? 1.0f : 0.0f;
+      afInput[ k++ ] = (nc == 2) ? 1.0f : 0.0f;
+      afInput[ k++ ] = (nc >= 3) ? 1.0f : 0.0f;
+      afInput[ k ] = nc > 3 ? ( nc - 3 ) / 2.0f : 0.0f;
     }
 
     /* Men off */
@@ -1805,20 +1805,20 @@ baseInputs(int anBoard[2][25], float arInput[])
     for( i = 0; i < 24; i++ ) {
       int nc = board[ i ];
       
-      afInput[ i * 4 + 0 ] = nc == 1;
-      afInput[ i * 4 + 1 ] = nc == 2;
-      afInput[ i * 4 + 2 ] = nc >= 3;
-      afInput[ i * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+      afInput[ i * 4 + 0 ] = (nc == 1) ? 1.0f : 0.0f;
+      afInput[ i * 4 + 1 ] = (nc == 2) ? 1.0f : 0.0f;
+      afInput[ i * 4 + 2 ] = (nc >= 3) ? 1.0f : 0.0f;
+      afInput[ i * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0f : 0.0f;
     }
 
     /* Bar */
     {
       int nc = board[ 24 ];
       
-      afInput[ 24 * 4 + 0 ] = nc >= 1;
-      afInput[ 24 * 4 + 1 ] = nc >= 2; /**/
-      afInput[ 24 * 4 + 2 ] = nc >= 3;
-      afInput[ 24 * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+      afInput[ 24 * 4 + 0 ] = (nc == 1) ? 1.0f : 0.0f;
+      afInput[ 24 * 4 + 1 ] = (nc >= 2) ? 1.0f : 0.0f;	/* is this correct? */
+      afInput[ 24 * 4 + 2 ] = (nc >= 3) ? 1.0f : 0.0f;
+      afInput[ 24 * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0f : 0.0f;
     }
   }
 }
@@ -2053,7 +2053,7 @@ SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] )
 	arOutput[ OUTPUT_LOSEBACKGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
 
     {
-      float noise = 1/10000.0;
+      float noise = 1/10000.0f;
 
       for(i = OUTPUT_WINGAMMON; i < 5; ++i) {
 	if( arOutput[i] < noise ) {
@@ -3803,7 +3803,7 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
   /* return value */
   int r = 0;
   
-  pml->rBestScore = -99999.9;
+  pml->rBestScore = -99999.9f;
 
   if( nPlies == 0 ) {
     /* start incremental evaluations */
@@ -4118,11 +4118,11 @@ ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer ) {
   
   if (*pnLeader > 30) {
     if ((*pnLeader % 10) > 5) {
-        *pnLeader *= 1.1;
+        *pnLeader = (int)(*pnLeader * 1.1);
         *pnLeader += 1;
     }
     else
-      *pnLeader *= 1.1;
+      *pnLeader = (int)(*pnLeader * 1.1);
   }
   *pnTrailer = anPips[0];
   *pnTrailer += 2*anMenLeft[0];
@@ -4696,7 +4696,7 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
     ml.iMoveBest = 0;
   else {
     /* choice of moves */
-    ml.rBestScore = -99999.9;
+    ml.rBestScore = -99999.9f;
 
     for( i = 0; i < ml.cMoves; i++ ) {
 	    PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
@@ -4827,7 +4827,7 @@ SetCubeInfo ( cubeinfo *pci, const int nCube, const int fCubeOwner,
 static int
 isOptional ( const float r1, const float r2 ) {
 
-  const float epsilon = 1.0e-5;
+  const float epsilon = 1.0e-5f;
 
   return ( fabs ( r1 - r2 ) <= epsilon );
 
@@ -5185,8 +5185,8 @@ MoneyLive( const float rW, const float rL, const float p,
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
-  const float epsilon   = 0.0000001;
-  const float omepsilon = 0.9999999;
+  const float epsilon   = 0.0000001f;
+  const float omepsilon = 0.9999999f;
 
   float rW, rL;
   float rEqDead, rEqLive;
@@ -5597,7 +5597,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
     
     /* FIXME */
     
-     return 0.60;
+     return 0.60f;
      break;
      
   case CLASS_BEAROFF1:
@@ -7332,7 +7332,7 @@ CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
 
 extern int
 isCloseCubedecision ( const float arDouble[] ) {
-  const float rThr = 0.16;
+  const float rThr = 0.16f;
   float rDouble;
   rDouble = MIN(arDouble[ OUTPUT_TAKE ] , 1.0f);
 

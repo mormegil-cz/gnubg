@@ -597,7 +597,8 @@ extern void CommandExternal( char *sz ) {
 	return;
     }
 
-    do {
+listenloop:
+	{
 
       if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
 	SockErr( sz );
@@ -687,6 +688,7 @@ extern void CommandExternal( char *sz ) {
 
       }
       closesocket( hPeer );
-    } while ( 1 );
+    }
+	goto listenloop;
 #endif
 }

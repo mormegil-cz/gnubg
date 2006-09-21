@@ -363,7 +363,7 @@ SetMoveFilter(char* sz,
   }
 
   if ( ( ( extras = ParseNumber( &sz ) ) < 0 )  || 
-	   ( ( tolerance = ParseReal( &sz ) ) < 0.0 )) {
+	   ( ( tolerance = (float)ParseReal( &sz ) ) < 0.0 )) {
 	outputf (N_ ("You must set a count of extra moves and a search tolerance "
 				 "-- try help set %s movefilter"), 
 			 szSetCommand);
@@ -446,7 +446,7 @@ static void SetLuckThreshold( lucktype lt, char *sz ) {
 	return;
     }
 
-    arLuckLevel[ lt ] = r;
+    arLuckLevel[ lt ] = (float)r;
 
     outputf( _("`%s' threshold set to %.3f.\n"), szCommand, r );
 }
@@ -462,7 +462,7 @@ static void SetSkillThreshold( skilltype lt, char *sz ) {
 	return;
     }
 
-    arSkillLevel[ lt ] = r;
+    arSkillLevel[ lt ] = (float)r;
 
     outputf( _("`%s' threshold set to %.3f.\n"), szCommand, r );
 }
@@ -723,7 +723,7 @@ extern void CommandSetCalibration( char *sz ) {
 	return;
     }
     
-    if( ( r = ParseReal( &sz ) ) <= 2.0f ) {
+    if( ( r = (float)ParseReal( &sz ) ) <= 2.0f ) {
 	outputl( _("If you give a parameter to `set calibration', it must "
 		   "be a legal number of evaluations per second.") );
 	return;
@@ -1054,7 +1054,7 @@ extern void CommandSetEvalNoise( char *sz ) {
 	return;
     }
 
-    pecSet->rNoise = r;
+    pecSet->rNoise = (float)r;
 
     if( pecSet->rNoise )
 	outputf( _("%s will use noise with standard deviation %5.3f.\n"),
@@ -1728,7 +1728,7 @@ extern void CommandSetRolloutLatePlies ( char *sz ) {
 	return;
     }
 
-    prcSet->nLate = n;
+    prcSet->nLate = (unsigned short)n;
 
     if( !n )
 	   outputl( _("No evaluations changes will be made during rollouts.") );
@@ -2199,7 +2199,7 @@ extern void CommandSetRolloutTruncationPlies ( char *sz ) {
 	return;
     }
 
-    prcSet->nTruncate = n;
+    prcSet->nTruncate = (unsigned short)n;
 
     if( ( n == 0 ) || !prcSet->fDoTruncate )
 	outputl( _("Rollouts will not be truncated.") );
@@ -2533,7 +2533,7 @@ extern void CommandSetSeed( char *sz ) {
 
 extern void CommandSetTrainingAlpha( char *sz ) {
 
-    float r = ParseReal( &sz );
+    float r = (float)ParseReal( &sz );
 
     if( r <= 0.0f || r > 1.0f ) {
 	outputl( _("You must specify a value for alpha which is greater than\n"
@@ -2554,13 +2554,13 @@ extern void CommandSetTrainingAnneal( char *sz ) {
 	return;
     }
 
-    rAnneal = r;
+    rAnneal = (float)r;
     outputf( _("Annealing rate set to %f.\n"), r );
 }
 
 extern void CommandSetTrainingThreshold( char *sz ) {
 
-    float r = ParseReal( &sz );
+    float r = (float)ParseReal( &sz );
 
     if( r < 0.0f ) {
 	outputl( _("You must specify a valid error threshold.") );
@@ -4493,7 +4493,7 @@ CommandSetGotoFirstGame( char *sz ) {
 static void
 SetEfficiency( const char *szText, char *sz, float *prX ) {
 
-  float r = ParseReal( &sz );
+  float r = (float)ParseReal( &sz );
 
   if ( r >= 0.0f && r <= 1.0f ) {
     *prX = r;
@@ -4529,7 +4529,7 @@ CommandSetCubeEfficiencyContact( char *sz ) {
 extern void
 CommandSetCubeEfficiencyRaceFactor( char *sz ) {
 
-  float r = ParseReal( &sz );
+  float r = (float)ParseReal( &sz );
 
   if ( r >= 0 ) {
     rRaceFactorX = r;
@@ -4557,7 +4557,7 @@ CommandSetCubeEfficiencyRaceMin( char *sz ) {
 extern void
 CommandSetCubeEfficiencyRaceCoefficient( char *sz ) {
 
-  float r = ParseReal( &sz );
+  float r = (float)ParseReal( &sz );
 
   if ( r >= 0 ) {
     rRaceCoefficientX = r;
@@ -4643,7 +4643,7 @@ CommandSetBearoffSconyers15x15DiskPath( char *sz ) {
 extern void
 CommandSetRatingOffset( char *sz ) {
 
-  float r = ParseReal( &sz );
+  float r = (float)ParseReal( &sz );
 
   if ( r < 0 ) {
     outputl( _("Please provide a positive rating offset\n" ) );
@@ -4701,7 +4701,7 @@ extern void CommandSetPanelWidth( char *sz )
 extern void
 CommandSetOutputErrorRateFactor( char *sz ) {
 
-  float r = ParseReal( &sz );
+  float r = (float)ParseReal( &sz );
 
   if ( r < 0 ) {
     outputl( _("Please provide a positive number\n" ) );

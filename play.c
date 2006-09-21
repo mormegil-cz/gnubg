@@ -124,7 +124,7 @@ NewMoveRecord( void ) {
   pmr->fPlayer = 0;
   pmr->anDice[ 0 ] = pmr->anDice[ 1 ] = -1;
   pmr->lt = LUCK_NONE;
-  pmr->rLuck = ERR_VAL;
+  pmr->rLuck = (float)ERR_VAL;
   pmr->esChequer.et = EVAL_NONE;
   pmr->nAnimals = 0;
   pmr->CubeDecPtr = &pmr->CubeDec;
@@ -1012,7 +1012,7 @@ extern int ComputerTurn( void ) {
     if( ms.fResigned ) {
 
       float rEqBefore, rEqAfter;
-      const float epsilon = 1.0e-6;
+      const float epsilon = 1.0e-6f;
 
 #if defined (REDUCTION_CODE)
       const evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
@@ -4484,7 +4484,7 @@ getCurrentMoveRecord ( int *pfHistory ) {
       mrHint.fPlayer = ms.fTurn;
       mrHint.ml = sm.ml;
       mrHint.lt = LUCK_NONE;
-      mrHint.rLuck = ERR_VAL;
+      mrHint.rLuck = (float)ERR_VAL;
       mrHint.n.stMove = SKILL_NONE;
 
       mrHint.n.iMove = -1;
@@ -4618,7 +4618,7 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
         ( pec->fCubeful ) ? ar[ OUTPUT_CUBEFUL_EQUITY ] : ar[ OUTPUT_EQUITY ];
 
       if ( pci->nMatchTo )
-        r = 1.0 - r;
+        r = 1.0f - r;
       else
         r = -r;
 
@@ -4740,8 +4740,8 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 	case MOVE_NORMAL:
 	*pPlayer = pmr->fPlayer;
 		pch = sz;
-		sz[ 0 ] = pmr->anDice[ 0 ] + '0';
-		sz[ 1 ] = pmr->anDice[ 1 ] + '0';
+		sz[ 0 ] = (char)pmr->anDice[ 0 ] + '0';
+		sz[ 1 ] = (char)pmr->anDice[ 1 ] + '0';
 		sz[ 2 ] = ':';
 		sz[ 3 ] = ' ';
 		FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );

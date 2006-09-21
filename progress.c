@@ -137,7 +137,7 @@ estimatedTimeLeft( const time_t tStart, const int iGame, const int nTrials,
 
   /* estimate time left */
 
-  return ( ( nAlt - iAlt - 1 ) + ( nTrials - iGame - 1 ) * nAlt ) * tpert;
+  return (time_t)(( ( nAlt - iAlt - 1 ) + ( nTrials - iGame - 1 ) * nAlt ) * tpert);
 
 }
 
@@ -166,7 +166,7 @@ formatDelta( const time_t t ) {
 static float
 estimatedSE( const float rSE, const int iGame, const int nTrials ) {
 
-  return rSE * sqrt( ( 1.0f * iGame ) / ( 1.0f * ( nTrials - 1 ) ) );
+  return rSE * (float)sqrt( ( 1.0 * iGame ) / ( 1.0 * ( nTrials - 1 ) ) );
 
 
 }

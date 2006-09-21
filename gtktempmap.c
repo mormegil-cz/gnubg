@@ -178,7 +178,7 @@ CalcTempMapEquities( evalcontext *pec, tempmapwidget *ptmw ) {
                           ptmw->atm[ i ].aarEquity, 
                           ptmw->atm[ i ].aaanMove,
                           ptmw->atm[ i ].szTitle,
-                          ptmw->atm[ i ].pms->nCube / ptmw->atm[ 0 ].pms->nCube ) < 0 ) 
+                          (float)(ptmw->atm[ i ].pms->nCube / ptmw->atm[ 0 ].pms->nCube) ) < 0 ) 
       return -1;
 
   return 0;
@@ -195,7 +195,7 @@ UpdateStyle( GtkWidget *pw, const float r ) {
 
   ps->bg[ GTK_STATE_NORMAL ].red = 0xFFFF;
   ps->bg[ GTK_STATE_NORMAL ].blue = 
-    ps->bg[ GTK_STATE_NORMAL ].green = ( 1.0 - r ) * 0xFFFF;
+  ps->bg[ GTK_STATE_NORMAL ].green = (guint16)(( 1.0f - r ) * 0xFFFF);
 
   gtk_widget_set_style( pw, ps ); 
 
@@ -207,7 +207,7 @@ SetStyle( GtkWidget *pw, const float rEquity,
           const float rMin, const float rMax, const int fInvert ) {
 
   float r = ( rEquity - rMin ) / ( rMax - rMin );
-  UpdateStyle( pw, fInvert ? ( 1.0 - r ) : r );
+  UpdateStyle( pw, fInvert ? ( 1.0f - r ) : r );
 
 }
 
@@ -220,7 +220,7 @@ GetEquityString( const float rEquity, cubeinfo *pci, const int fInvert ) {
   if ( fInvert ) {
     /* invert equity */
     if ( pci->nMatchTo )
-      r = 1.0 - rEquity;
+      r = 1.0f - rEquity;
     else
       r = -rEquity;
   }
@@ -721,7 +721,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
                         "expose_event",
                         GTK_SIGNAL_FUNC( ExposeQuadrant ), NULL );
     
-    UpdateStyle( pw, 1.0 * i / 15.0 );
+    UpdateStyle( pw, 1.0f * i / 15.0f );
     
     
   }

@@ -80,7 +80,7 @@ extern char *PathSearch( const char *szFile, const char *szDir ) {
 
     cch += strlen( szFile ) + 2;
 
-    if( !( pch = malloc( cch ) ) )
+    if( ( pch = malloc( cch ) ) == NULL )
 	return NULL;
 
     if( szDir ) {
@@ -154,7 +154,7 @@ BackupFile ( const char *sz ) {
   if ( access ( sz, R_OK ) )
     return 0;
 
-  if ( ! ( szNew = (char *) malloc ( strlen ( sz ) + 2 ) ) ) 
+  if ( ( szNew = (char *) malloc ( strlen ( sz ) + 2 ) ) == NULL ) 
     return -1;
 
   strcpy ( szNew, sz );

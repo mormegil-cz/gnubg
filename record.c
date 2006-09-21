@@ -45,7 +45,7 @@ static int anAvg[ NUM_AVG - 1 ] = { 20, 100, 500 };
 
 /* exponential filter function, using the first three terms of the
    Taylor expansion of e^x */
-#define DECAY(n) ( 1.0 - 1.0/(n) + 0.5/(n)/(n) )
+#define DECAY(n) ( 1.0f - 1.0f/(n) + 0.5f/(n)/(n) )
 static float arDecay[ NUM_AVG - 1 ] = {
     DECAY(20), DECAY(100), DECAY(500)
 };

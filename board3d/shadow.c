@@ -96,7 +96,7 @@ void draw_shadow_volume_to_stencil(BoardData3d* bd3d)
 	glDepthMask(GL_FALSE);
 
 	/* Z-pass approach */
-	glStencilFunc(GL_ALWAYS, midStencilVal, ~0);
+	glStencilFunc(GL_ALWAYS, midStencilVal, (GLuint)~0);
 
 	glCullFace(GL_FRONT);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_DECR);
@@ -142,7 +142,7 @@ void shadowDisplay(void (*drawScene)(BoardData *, BoardData3d *, renderdata *), 
 	draw_shadow_volume_to_stencil(&bd->bd3d);
 
 	/* Pass 2: Redraw model, full light in non-shadowed areas */
-	glStencilFunc(GL_EQUAL, midStencilVal, ~0);
+	glStencilFunc(GL_EQUAL, midStencilVal, (GLuint)~0);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
 	drawScene(bd, &bd->bd3d, prd);

@@ -438,7 +438,7 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   float arWastage[ 2 ];
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
               5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
-              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
 
   gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
   gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
@@ -543,14 +543,14 @@ static void
 PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
   GtkWidget *pwOutput = prw->pwOutput;
-  int nTrials = prw->padjTrials->value;
+  int nTrials = (int)prw->padjTrials->value;
   float ar[ 5 ];
   int i, j;
   char sz[ 16 ];
   int anPips[ 2 ];
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
               5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
-              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
   float arMu[ 2 ];
   gchar *pch;
 

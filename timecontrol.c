@@ -51,7 +51,7 @@
 #if USE_TIMECONTROL
 
 timecontrol tc=
-	{ 0, 0, 0, 0, 0, 0,  0, 1.0, 0, 0, 0};
+	{ 0, 0, 0, 0, 0, 0,  0, 1, 0, 0, 0};
 
 /* Key values */
 static char szTCPLAIN[] = N_("plain")
@@ -402,7 +402,7 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
 		30-strlen(szTCMULT),
 		"Scale old time by:",
 		szTCMULT,
-		time2str(ptc->dMultiplier, 0)
+		time2str((int)ptc->dMultiplier, 0)
 		);
 
 

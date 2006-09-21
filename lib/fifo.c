@@ -14,7 +14,7 @@
 
 int FifoCreate( fifo *pf, int cb ) {
 
-    if( !( pf->pchBuffer = malloc( cb ) ) )
+    if( ( pf->pchBuffer = malloc( cb ) ) == NULL )
 	return -1;
 
     pf->cbSize = cb;

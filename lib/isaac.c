@@ -23,8 +23,7 @@ MODIFIED:
   *(r++) = b = (ind(mm,y>>RANDSIZL) + x) & 0xffffffff; \
 }
 
-void     isaac(ctx)
-randctx *ctx;
+void     isaac(randctx *ctx)
 {
    register ub4 a,b,x,y,*m,*mm,*m2,*r,*mend;
    mm=ctx->randmem; r=ctx->randrsl;
@@ -60,9 +59,7 @@ randctx *ctx;
 }
 
 /* if (flag==TRUE), then use the contents of randrsl[] to initialize mm[]. */
-void irandinit(ctx, flag)
-randctx *ctx;
-word     flag;
+void irandinit(randctx *ctx, word     flag)
 {
    word i;
    ub4 a,b,c,d,e,f,g,h;

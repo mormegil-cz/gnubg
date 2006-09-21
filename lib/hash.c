@@ -27,7 +27,7 @@ extern int HashCreate( hash *ph, int c, hashcomparefunc phcf ) {
     for( i = 0; ac[ i + 1 ] && c > ac[ i ]; i++ )
 	;
     
-    if( !( ph->aphn = calloc( ac[ i ], sizeof( hashnode * ) ) ) )
+    if( ( ph->aphn = calloc( ac[ i ], sizeof( hashnode * ) ) ) == NULL )
 	return -1;
     
     ph->c = 0;

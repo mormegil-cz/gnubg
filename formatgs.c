@@ -70,7 +70,7 @@ errorRate( const float rn, const float ru, const matchstate *pms ) {
 static char *
 errorRateMP( const float rn, const float ru, const matchstate *pms ) {
 
-  int n = fOutputDigits - ( log10( rErrorRateFactor ) - 0.5 );
+  int n = fOutputDigits - (int)( log10( rErrorRateFactor ) - 0.5 );
 
   if ( n < 0 )
     n = 0;

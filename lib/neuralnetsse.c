@@ -33,8 +33,6 @@
 #include <xmmintrin.h>
 #include <mm_malloc.h>
 
-#define sse_aligned(ar) (!(((int)ar) % ALIGN_SIZE))
-
 #define HIDDEN_NODES 128
 
 void *sse_malloc(size_t size)
@@ -212,9 +210,11 @@ extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
 
     SSE_ALIGN(float ar[HIDDEN_NODES]);
+#if DEBUG_SSE	
+	/* Removed as not 64bit robust (pointer truncation) and caused strange crash */
     assert(sse_aligned(ar));
     assert(sse_aligned(arInput));
-
+#endif
     assert(pnn->cHidden == HIDDEN_NODES);
 
     switch( t ) {

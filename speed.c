@@ -119,7 +119,7 @@ extern void CommandCalibrate( char *sz ) {
 
 #if USE_GTK
 	if( fX )
-	    GTKCalibrationUpdate( pcc, ( iIter + 1.0 ) * EVALS_PER_ITERATION *
+	    GTKCalibrationUpdate( pcc, ( iIter + 1.0f ) * EVALS_PER_ITERATION *
 				  CLOCKS_PER_SEC / c );
 	else
 #endif

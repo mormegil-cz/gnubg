@@ -239,7 +239,7 @@ mec_pc( const float rGammonRate,
   /* save post Crawford equities */
 
   for ( i = 0; i < ml; ++i )
-    arMetPC[ i ] = E[ i + 1 ][ 1 ];
+    arMetPC[ i ] = (float)E[ i + 1 ][ 1 ];
     
   /* garbage collect */
 
@@ -329,7 +329,7 @@ mec( const float rGammonRate,
 
   for ( i = 0; i < ml; ++i )
     for ( j = 0; j < ml; ++j )
-      aarMet[ i ][ j ] = E[ i + 1 ][ j + 1 ];
+      aarMet[ i ][ j ] = (float)E[ i + 1 ][ j + 1 ];
 
   /* garbage collect */
 

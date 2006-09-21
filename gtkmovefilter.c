@@ -125,11 +125,11 @@ MoveFilterSetupGetValues ( movefilter *pmf, movefiltersetupwidget *pmfsw ) {
       f = gtk_toggle_button_get_active ( 
              GTK_TOGGLE_BUTTON ( pmfsw->aapwEnable[ i ][ j ] ) );
 
-      aamf[ i ][ j ].Accept = f ? pmfsw->aapadjAccept[ i ][ j ]->value : -1;
+      aamf[ i ][ j ].Accept = f ? (int)pmfsw->aapadjAccept[ i ][ j ]->value : -1;
       aamf[ i ][ j ].Extra = ( aamf[ i ][ j ].Accept >= 0 ) ? 
-        pmfsw->aapadjExtra[ i ][ j ]->value : 0;
+        (int)pmfsw->aapadjExtra[ i ][ j ]->value : 0;
       aamf[ i ][ j ].Threshold = ( aamf[ i ][ j ].Extra ) ? 
-      pmfsw->aapadjThreshold[ i ][ j ]->value : 0;
+      (float)pmfsw->aapadjThreshold[ i ][ j ]->value : 0;
 
     }
 

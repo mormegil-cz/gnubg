@@ -354,7 +354,7 @@ ImportJF( FILE * fp, char *szFileName) {
       pmr->anDice[ 0 ] = anDice[ 0 ];
       pmr->anDice[ 1 ] = anDice[ 1 ];
       pmr->lt = LUCK_NONE;
-      pmr->rLuck = ERR_VAL;
+      pmr->rLuck = (float)ERR_VAL;
       AddMoveRecord( pmr );
   }
 
@@ -605,8 +605,10 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
           /* roll but no move found; if there are legal moves assume
              a resignation */
-          int anDice[ 2 ] = { pmr->anDice[ 0 ], pmr->anDice[ 1 ] };
           movelist ml;
+          int anDice[ 2 ];
+		  anDice[0] = pmr->anDice[0];
+		  anDice[1] = pmr->anDice[1];
 
           switch ( GenerateMoves( &ml, ms.anBoard, 
                                   pmr->anDice[ 0 ], pmr->anDice[ 1 ], 
@@ -1337,10 +1339,8 @@ static char *FindScoreIs( FILE *pf, char *buffer ) {
 
   char *p;
 
-  while( 1 ) {
-    if( ! fgets( buffer, MAXLINE, pf ) )
-      break;
-
+  while( fgets( buffer, MAXLINE, pf ) )
+  {
     if( ( p = strstr( buffer, "Score is " ) ) != 0 ) 
       return p;
   }
@@ -1395,11 +1395,8 @@ extern int ImportOldmoves( FILE *pf, char *szFilename ) {
 
     i = 0;
     
-    while( 1 ) {
-        if ( ImportOldmovesGame( pf, i++, nLength, n0, n1 ) )
-          /* new match */
-          break;
-
+    while( ImportOldmovesGame( pf, i++, nLength, n0, n1 ) == 0 )
+	{
 	p = FindScoreIs( pf, buffer );
 	if( p == 0 ) 
 	  break;
@@ -2736,7 +2733,8 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
-    while( 1 ) {
+uglyloop:
+	{
 	if( !strncmp( sz, "Black", 5 ) || !strncmp( sz, "White", 5 ) ) {
 	    fPlayer = !strncmp( sz, "White", 5 );
 	    
@@ -2814,6 +2812,7 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 	if( feof( pf ) )
 	    return;
     }
+	goto uglyloop;	/* The logic here should be rewritten */
 }
 
 extern int ImportBKG( FILE *pf, const char *szFilename ) {
