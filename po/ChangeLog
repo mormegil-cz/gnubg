@@ -1,3 +1,7 @@
+Sun Sep 24 05:24:40 2006 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* ja.po: Update fuzzy entries.
+
 Wed Sep 20 04:10:00 2006 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* ja,po, tr.po: Remove msgstr[1] entries for gettext-0.15.
