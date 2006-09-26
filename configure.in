@@ -249,6 +249,8 @@ AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
 if test "$with_gtk" != "no"; then
     AM_PATH_GTK_2_0(2.6.0)
     if test "$no_gtk" != "yes"; then
+        dnl Check for Cairo
+        PKG_CHECK_MODULES(CAIRO, [cairo >= 0.9.0], AC_DEFINE(HAVE_CAIRO,1,Define if you want to use libcairo), no_libcairo=yes)
         AC_DEFINE(USE_GTK,1,Define if you want to use GTK+ 2.0 or later.)
         AC_SUBST(GTKDATA)
         if test "$darwinppc" = "yes"; then

@@ -600,7 +600,7 @@ class relational:
       cursor = self.conn.cursor()
       # Open file which has db create sql statments
       if self.games: 
-          sqlfile = open("gnubg.games.sql", "r")
+          sqlfile = open("gnubg.game.sql", "r")
       else:
           sqlfile = open("gnubg.sql", "r")
       done = False

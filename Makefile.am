@@ -101,7 +101,7 @@ gnubg_LDFLAGS= @PYTHON_LDFLAGS@
 
 if USE_GTK
 ## --- GTK
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) $(BOARD3D_INCS)
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) $(BOARD3D_INCS) @CAIRO_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c \
 	gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
@@ -115,7 +115,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtkmovelist.c gtkmovelistctrl.c gtkwindows.c \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) $(PNG_LIBS) \
-        $(BOARD3D_LIBS) @THREAD_LIBS@
+        $(BOARD3D_LIBS) @THREAD_LIBS@ @CAIRO_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
 ## --- Plain
@@ -183,7 +183,7 @@ distcheck-hook:
 
 EXTRA_DIST = config.rpath  userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
 	gnubg.gtkrc credits.sh \
-	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.games.sql \
+	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.game.sql \
 	$(BOARD3D_TEXTURE_FILES)
 
 DISTCLEANFILES=gnubg.wd
