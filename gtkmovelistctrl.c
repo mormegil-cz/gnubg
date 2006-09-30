@@ -342,13 +342,13 @@ custom_cell_renderer_movelist_get_size (GtkCellRenderer *cell,
   {
     if (x_offset)
     {
-      *x_offset = cell->xalign * (cell_area->width - calc_width);
+      *x_offset = (int)(cell->xalign * (cell_area->width - calc_width));
       *x_offset = MAX(*x_offset, 0);
     }
 
     if (y_offset)
     {
-      *y_offset = cell->yalign * (cell_area->height - calc_height);
+      *y_offset = (int)(cell->yalign * (cell_area->height - calc_height));
       *y_offset = MAX(*y_offset, 0);
     }
   }
