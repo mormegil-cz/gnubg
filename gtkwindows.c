@@ -67,6 +67,8 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 		parent = GTKGetCurrentParent();
 	if (!GTK_IS_WINDOW(parent))
 		parent = gtk_widget_get_toplevel(parent);
+	if (!GTK_WIDGET_REALIZED(parent))
+		parent = NULL;
 	if (parent != NULL && (flags & DIALOG_FLAG_MODAL))
 	{
 		if ((flags & DIALOG_FLAG_NOTIDY) == 0)
