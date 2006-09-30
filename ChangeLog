@@ -1,3 +1,7 @@
+Sat Sep 30 09:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Fix minor edit bug (labels dissappearing when panels moved)
+
 Sun Sep 24 06:12:42 2006 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* makebearoff.c: Fix typo: #include <sys/types.h>.
