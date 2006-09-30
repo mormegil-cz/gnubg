@@ -137,9 +137,9 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    return -1;
 	}
         ppr->arErrorChequerplay[ ea ] = g_ascii_strtod(str1, NULL);
-        ppr->arErrorCube[ ea ] =g_ascii_strtod(str1, NULL);
-        ppr->arErrorCombined[ ea ] = g_ascii_strtod(str1, NULL);
-        ppr->arLuck[ ea ]  = g_ascii_strtod(str1, NULL);
+        ppr->arErrorCube[ ea ] =g_ascii_strtod(str2, NULL);
+        ppr->arErrorCombined[ ea ] = g_ascii_strtod(str3, NULL);
+        ppr->arLuck[ ea ]  = g_ascii_strtod(str4, NULL);
     }
 
     return 0;
