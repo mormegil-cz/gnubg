@@ -320,8 +320,9 @@ void UpdatePreview(GtkWidget **ppw)
 	gtk_widget_queue_draw(pwPrevBoard);
 }
 
-void DieColourChanged (GtkWidget *pw, int f)
+void DieColourChanged (GtkWidget *pw, gpointer pf)
 {
+	int f = GPOINTER_TO_INT(pf);
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
 	gtk_widget_set_sensitive(apwDiceColourBox[f], !set);
 
@@ -508,7 +509,7 @@ static GtkWidget *DicePrefs3d( BoardData *bd, int f)
     gtk_box_pack_start(GTK_BOX(pwhbox), gtk_colour_picker_new3d(&bd->rd->DiceDotMat[f], DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, 4);
 
     gtk_signal_connect ( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
-                         GTK_SIGNAL_FUNC( DieColourChanged ), (void*)f);
+                         GTK_SIGNAL_FUNC( DieColourChanged ), GINT_TO_POINTER(f));
 
 	return pwx;
 }
@@ -852,7 +853,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
         bd->rd->aarDiceDotColour[ f ] );
 
     gtk_signal_connect ( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
-                         GTK_SIGNAL_FUNC( DieColourChanged ), (void*)f);
+                         GTK_SIGNAL_FUNC( DieColourChanged ), GINT_TO_POINTER(f));
 
     return pwx;
 }

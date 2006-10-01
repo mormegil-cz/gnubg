@@ -1636,7 +1636,6 @@ extern void SwapBoardToPanel(int ToPanel)
 		gtk_widget_hide(pwGameBox);
 		SetPanelWidth(panelSize);
 {	/* Hack to sort out widget positions - may be removed if works in later version of gtk */
-		BoardData *bd = BOARD( pwBoard )->board_data;
 		GtkAllocation temp = pwMain->allocation;
 		temp.height++;
 		gtk_widget_size_allocate(pwMain, &temp);
@@ -1702,7 +1701,7 @@ GtkWidget* firstChild(GtkWidget* widget)
 static void SetToolbarItemStyle(gpointer data, gpointer user_data)
 {
 	GtkWidget* widget = GTK_WIDGET(data);
-	int style = (int)user_data;
+	int style = GPOINTER_TO_INT(user_data);
 	/* Find icon and text widgets from parent object */
 	GList* buttonParts;
 	GtkWidget *icon, *text;
@@ -1736,7 +1735,7 @@ extern void SetToolbarStyle(int value)
 	GtkWidget* pwMainToolbar = firstChild(pwToolbar);
 	/* Set each toolbar item separately */
 	GList* toolbarItems = gtk_container_children(GTK_CONTAINER(pwMainToolbar));
-	g_list_foreach(toolbarItems, SetToolbarItemStyle, (gpointer)value);
+	g_list_foreach(toolbarItems, SetToolbarItemStyle, GINT_TO_POINTER(value));
 	g_list_free(toolbarItems);
 
 	/* Resize handle box parent */
@@ -5995,11 +5994,11 @@ extern void GTKProgressEnd( void ) {
 
 int colWidth;
 
-void MoveListIntoView(GtkWidget *pwList, int row)
+void MoveListIntoView(GtkWidget *pwList, int *row)
 {
-  if (gtk_clist_row_is_visible(GTK_CLIST(pwList), row) != GTK_VISIBILITY_FULL)
+  if (gtk_clist_row_is_visible(GTK_CLIST(pwList), *row) != GTK_VISIBILITY_FULL)
   {
-    gtk_clist_moveto(GTK_CLIST(pwList), row, 0, 0, 0);
+    gtk_clist_moveto(GTK_CLIST(pwList), *row, 0, 0, 0);
     gtk_widget_set_usize(GTK_WIDGET(pwList), colWidth * 2 + 50, -1);
   }
 }
@@ -6124,7 +6123,7 @@ extern void GTKShowScoreSheet( void )
 	gtk_clist_select_row(GTK_CLIST(pwList), numRows - 1, 1);
 
 	gtk_signal_connect(GTK_OBJECT(pwList), "realize",
-			GTK_SIGNAL_FUNC(MoveListIntoView), (gpointer *)(numRows - 1) );
+			GTK_SIGNAL_FUNC(MoveListIntoView), GINT_TO_POINTER(numRows - 1) );
 
 	gtk_widget_show_all(pwDialog);
 	gtk_main();
@@ -6777,7 +6776,7 @@ static void enable_sub_menu( GtkWidget *pw, int f ) {
 
     GtkMenuShell *pms = GTK_MENU_SHELL( pw );
 
-    g_list_foreach( pms->children, (GFunc) enable_menu, (gpointer) f );
+    g_list_foreach( pms->children, (GFunc) enable_menu, GINT_TO_POINTER(f) );
 }
 
 static void enable_menu( GtkWidget *pw, int f ) {
@@ -8251,7 +8250,7 @@ FinishMove( gpointer *p, guint n, GtkWidget *pw ) {
 
 static void CallbackResign(GtkWidget *pw, gpointer data)
 {
-    int i = (int ) data;
+    int i = GPOINTER_TO_INT(data);
     char *asz[3]= { "normal", "gammon", "backgammon" };
     char sz[20];
 
@@ -8289,7 +8288,7 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
 	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(asz[i]), TRUE, TRUE, 10);
 	gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
 	gtk_signal_connect(GTK_OBJECT(pwButtons), "clicked",
-		GTK_SIGNAL_FUNC( CallbackResign ), (int *) i );
+		GTK_SIGNAL_FUNC( CallbackResign ), GINT_TO_POINTER(i) );
     }
 
     gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwVbox);
@@ -8327,7 +8326,7 @@ extern void GTKResignOld( gpointer *p, guint n, GtkWidget *pw )
 	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(asz[i]), TRUE, TRUE, 10);
 	gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
 	gtk_signal_connect(GTK_OBJECT(pwButtons), "clicked",
-		GTK_SIGNAL_FUNC( CallbackResign ), (int *) i );
+		GTK_SIGNAL_FUNC( CallbackResign ), GINT_TO_POINTER(i) );
     }
 
     pwButtons = gtk_button_new_with_label(_("Cancel"));

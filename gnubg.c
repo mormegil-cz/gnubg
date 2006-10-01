@@ -6187,7 +6187,7 @@ extern void Prompt( void ) {
 
 #if USE_GTK
 #if HAVE_LIBREADLINE
-static void ProcessInput( char *sz, int fFree ) {
+static void ProcessInput( char *sz) {
 
     char *szConverted;
     char *pchExpanded;
@@ -6224,9 +6224,6 @@ static void ProcessInput( char *sz, int fFree ) {
     ResetInterrupt();
 
 
-    if( fFree )
-	free( sz );
-
     /* Recalculate prompt -- if we call nothing, then readline will
        redisplay the old prompt.  This isn't what we want: we either
        want no prompt at all, yet (if NextTurn is going to be called),
@@ -6243,7 +6240,7 @@ static void ProcessInput( char *sz, int fFree ) {
 
 extern void HandleInput( char *sz ) {
 
-    ProcessInput( sz, TRUE );
+    ProcessInput( sz);
 }
 
 #endif
@@ -6281,7 +6278,7 @@ extern void UserCommand( char *szCommand ) {
 	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
 	puts( pchTranslated );
 	free( pchTranslated );
-	ProcessInput( sz, FALSE );
+	ProcessInput( sz);
 	return;
     }
 #endif

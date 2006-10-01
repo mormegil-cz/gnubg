@@ -154,7 +154,7 @@ static void PSStartPage( FILE *pf ) {
 	int id, idContents;
 	
 	StartObject( pf, id = AllocateObject() );
-	DynArrayAdd( &daPages, (void *) id );
+	DynArrayAdd( &daPages, GINT_TO_POINTER(id) );
 
 	idContents = AllocateObject();
 	fprintf( pf, "<<\n"
@@ -1259,7 +1259,7 @@ static void PostScriptEpilogue( FILE *pf ) {
 	       "/Type /Pages\n"
 	       "/Kids [\n", pf );
 	for( i = 0; i < daPages.c; i++ )
-	    fprintf( pf, " %d 0 R\n", (int) daPages.ap[ i ] );
+	    fprintf( pf, " %d 0 R\n", GPOINTER_TO_INT(daPages.ap[ i ]) );
 	fprintf( pf, "]\n"
 		 "/Count %d\n"
 		 "/MediaBox [0 0 %d %d]\n"
