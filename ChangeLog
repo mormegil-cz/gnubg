@@ -1,4 +1,9 @@
-Mon Oct  2 00:49:27 CEST 2006 Christina Anthon <anthon@kiku.dk>
+Wed Oct  4 11:58:50 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtktoolbar.c: make sure labels are shown
+	* .cvsignore: add linked files 
+
+Mon Oct  2 00:49:27 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* several: compiler warnings mainly on 64bit platforms. Avoid casting
 	integer to pointer and back.

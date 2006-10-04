@@ -338,7 +338,7 @@ ToolbarNew ( void ) {
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
                                 GTK_ORIENTATION_HORIZONTAL );
   gtk_toolbar_set_style ( GTK_TOOLBAR ( pwToolbar ),
-                          GTK_TOOLBAR_ICONS );
+                          GTK_TOOLBAR_BOTH );
   gtk_box_pack_start( GTK_BOX( vbox_toolbar ), pwToolbar, 
                       FALSE, FALSE, 0 );
 
