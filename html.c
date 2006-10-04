@@ -2910,7 +2910,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fMoves ) {
 
-    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_CHEQUER );
+    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_CHEQUER );
     GList *pl;
 
     printStatTableHeader ( pf, hecss, _("Checker play statistics") );
@@ -2932,7 +2932,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fDice ) {
 
-    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_LUCK );
+    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_LUCK );
     GList *pl;
 
     printStatTableHeader ( pf, hecss, 
@@ -2955,7 +2955,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fCube ) {
 
-    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_CUBE );
+    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_CUBE );
     GList *pl;
 
     printStatTableHeader ( pf, hecss, 
@@ -2978,7 +2978,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   {
     
-    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_OVERALL );
+    GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, FORMATGS_OVERALL );
     GList *pl;
     
     printStatTableHeader ( pf, hecss, 

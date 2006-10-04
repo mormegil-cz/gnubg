@@ -1,3 +1,12 @@
+Wed Oct  4 14:18:35 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am analysis.c, analysis.h, formatgs.c, formatgs.h, html.c,
+	text.c: minor changes to allow "relational show details"
+	* database, database.example: rename
+	* gtkgame.c, gtkgame.h, gtkrelational.c, gtkrelational.h,
+	relational.c: detailed player stats in the CL version. List of all
+	player stats and details upon double-clicking in the GUI.
+
 Wed Oct  4 11:58:50 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtktoolbar.c: make sure labels are shown

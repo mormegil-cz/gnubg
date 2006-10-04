@@ -625,8 +625,8 @@ static void TextDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   }
 
-  DumpStatcontext ( sz, psc, NULL, iGame < 0 );
-
+  DumpStatcontext ( sz, psc, ap[0].szName, ap[1].szName,
+          NULL, iGame < 0 );
   fputs ( sz, pf );
 
   fputs ( "\n\n", pf );

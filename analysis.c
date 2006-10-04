@@ -1558,16 +1558,16 @@ calcFibsRating( const float rMWC, const int nMatchTo ) {
 
 
 extern void
-DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
+DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const char * op, const char * sz,
                   const int fIsMatch ) {
 
   /* header */
 
   sprintf( szOutput, "%-31s %-23s %-23s\n\n",
-           _("Player"), ap[ 0 ].szName, ap[ 1 ].szName );
+           _("Player"), pl, op );
 
   if ( psc->fMoves ) {
-    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_CHEQUER );
+    GList *list = formatGS( psc, ms.nMatchTo, fIsMatch, FORMATGS_CHEQUER );
     GList *pl;
 
     strcat( szOutput, _("Chequerplay statistics") );
@@ -1591,7 +1591,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
 
 
   if ( psc->fDice ) {
-    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_LUCK );
+    GList *list = formatGS( psc, ms.nMatchTo, fIsMatch, FORMATGS_LUCK );
     GList *pl;
 
     strcat( szOutput, _("Luck statistics") );
@@ -1615,7 +1615,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
 
 
   if ( psc->fCube ) {
-    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_CUBE );
+    GList *list = formatGS( psc, ms.nMatchTo, fIsMatch, FORMATGS_CUBE );
     GList *pl;
 
     strcat( szOutput, _("Cube statistics") );
@@ -1639,7 +1639,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
 
   {
 
-    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_OVERALL );
+    GList *list = formatGS( psc, ms.nMatchTo, fIsMatch, FORMATGS_OVERALL );
     GList *pl;
     
     strcat( szOutput, _("Overall statistics") );
@@ -1678,7 +1678,7 @@ CommandShowStatisticsMatch ( char *sz ) {
     }
 #endif
 
-    DumpStatcontext ( szOutput, &scMatch, 
+    DumpStatcontext ( szOutput, &scMatch, ap[0].szName, ap[1].szName,
                       _("Statistics for all games"), TRUE );
     outputl(szOutput);
 }
@@ -1717,7 +1717,7 @@ CommandShowStatisticsGame ( char *sz )
   }
 #endif
 
-  DumpStatcontext ( szOutput, &pmr->g.sc, 
+  DumpStatcontext ( szOutput, &pmr->g.sc, ap[0].szName, ap[1].szName,
                     _("Statistics for current game"), FALSE );
   outputl( szOutput );
 }

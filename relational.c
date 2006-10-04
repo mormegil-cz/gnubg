@@ -29,16 +29,19 @@
 
 #if USE_GTK
 #include "gtkgame.h"
+#include "gtkwindows.h"
 #endif
 
 #include <stdio.h>
 #include <assert.h>
 #include <glib.h>
+#include <stdlib.h>
 
 #include "relational.h"
 #include "backgammon.h"
 #include "positionid.h"
 #include "rollout.h"
+#include "analysis.h"
 #include <glib/gi18n.h>
 
 
@@ -585,94 +588,127 @@ CommandRelationalShowEnvironments( char *sz )
 }
 
 extern void
-CommandRelationalShowDetails( char *sz )
+CommandRelationalShowDetails (char *sz)
 {
-	PyObject *v, *r;
+  gchar *buf, output[4096], query[2][200], *player_name;
+  RowSet r;
+  gint i, id, query_return;
+  statcontext sc;
 
-	char *player_name, *env;
-
-	if (!sz || !*sz || !(player_name = NextToken(&sz)))
+  if (!sz || !*sz || !(player_name = NextToken (&sz)))
+    {
+      outputl (_("You must specify a player name to list the details for "
+		 "(see `help relational show details')."));
+      return;
+    }
+  buf =
+    g_strdup_printf ("nick.nick_id from nick where nick.name = '%s'",
+		     player_name);
+  if (RunQuery (&r, buf))
+    id = strtol (r.data[1][0], NULL, 0);
+  else {
+	  outputl (_("Player not found or player stats empty"));
+	  return;
+  }
+  g_free (buf);
+  sprintf (query[0], "where matchstat.nick_id = %d", id);
+  sprintf (query[1], "NATURAL JOIN match WHERE "
+		   "(match.nick_id0 = %d OR match.nick_id1 = %d) "
+		   "AND matchstat.nick_id != %d", id, id, id);
+  IniStatcontext (&sc);
+  for (i = 0; i < 2; ++i)
+    {
+      buf = g_strdup_printf ("SUM(total_moves),"
+			     "SUM(unforced_moves),"
+			     "SUM(total_cube_decisions),"
+			     "SUM(close_cube_decisions),"
+			     "SUM(doubles),"
+			     "SUM(takes),"
+			     "SUM(passes),"
+			     "SUM(very_bad_moves),"
+			     "SUM(bad_moves),"
+			     "SUM(doubtful_moves),"
+			     "SUM(unmarked_moves),"
+			     "SUM(good_moves),"
+			     "SUM(very_unlucky_rolls),"
+			     "SUM(unlucky_rolls),"
+			     "SUM(unmarked_rolls),"
+			     "SUM(lucky_rolls),"
+			     "SUM(very_lucky_rolls),"
+			     "SUM(missed_doubles_below_cp),"
+			     "SUM(missed_doubles_above_cp),"
+			     "SUM(wrong_doubles_below_dp),"
+			     "SUM(wrong_doubles_above_tg),"
+			     "SUM(wrong_takes),"
+			     "SUM(wrong_passes),"
+			     "SUM(chequer_error_total_normalised),"
+			     "SUM(error_missed_doubles_below_cp_normalised),"
+			     "SUM(error_missed_doubles_above_cp_normalised),"
+			     "SUM(error_wrong_doubles_below_dp_normalised),"
+			     "SUM(error_wrong_doubles_above_tg_normalised),"
+			     "SUM(error_wrong_takes_normalised),"
+			     "SUM(error_wrong_passes_normalised),"
+			     "SUM(luck_total_normalised)"
+			     "from matchstat " "%s", query[i]);
+      query_return = RunQuery (&r, buf);
+      g_free (buf);
+      if ((!query_return) || !strtol (r.data[1][0], NULL, 0))
 	{
-		outputl( _("You must specify a player name to list the details for "
-		"(see `help relational show details').") );
-		return;
+	  outputl (_("Player not found or player stats empty"));
+	  return;
 	}
-	env = NextToken(&sz);
-	if (!env)
-		env = "";
-
-	r = Connect();
-
-	/* list env */
-	if (!(v = PyObject_CallMethod(r, "list_details", "ss", player_name, env)))
-	{
-		PyErr_Print();
-		return;
-	}
-
-	if (PySequence_Check(v))
-	{
-		int i;
-
-		for ( i = 0; i < PySequence_Size( v ); ++i )
-		{
-			PyObject *e = PySequence_GetItem(v, i);
-
-			if ( !e )
-			{
-				outputf( _("Error getting item no %d\n"), i );
-				continue;
-			}
-
-			if (PySequence_Check(e))
-			{
-				PyObject *detail = PySequence_GetItem(e, 0);
-				PyObject *value = PySequence_GetItem(e, 1);
-
-				if (PyInt_Check(value))
-					outputf( _("%s: %d\n"),
-						PyString_AsString(detail),
-						(int)PyInt_AsLong(value));
-				else if (PyFloat_Check(value))
-					outputf( _("%s: %.2f\n"),
-						PyString_AsString(detail),
-						PyFloat_AsDouble(value));
-				else
-					outputf( _("unknown type"));
-
-				Py_DECREF(detail);
-				Py_DECREF(value);
-			}
-			else
-			{
-				outputf( _("Item no. %d is not a sequence\n"), i );
-				continue;
-			}
-			Py_DECREF( e );
-		}
-		outputl( "" );
-	}
-	else
-	{
-		if (PyInt_Check(v))
-		{
-			int l = PyInt_AsLong(v);
-			if (l == -1)
-				outputl( _("Player not in database") );
-			else if (l == -4)
-				outputl( _("Unknown environment") );
-			else
-				outputl( _("unknown return value") );
-		}
-		else
-			outputl( _("invalid return type") );
-	}
-
-	Py_DECREF( v );
-
-	Disconnect(r);
-
+      sc.anTotalMoves[i] = strtol (r.data[1][0], NULL, 0);
+      sc.anUnforcedMoves[i] = strtol (r.data[1][1], NULL, 0);
+      sc.anTotalCube[i] = strtol (r.data[1][2], NULL, 0);
+      sc.anCloseCube[i] = strtol (r.data[1][3], NULL, 0);
+      sc.anDouble[i] = strtol (r.data[1][4], NULL, 0);
+      sc.anTake[i] = strtol (r.data[1][5], NULL, 0);
+      sc.anPass[i] = strtol (r.data[1][6], NULL, 0);
+      sc.anMoves[i][SKILL_VERYBAD] = strtol (r.data[1][7], NULL, 0);
+      sc.anMoves[i][SKILL_BAD] = strtol (r.data[1][8], NULL, 0);
+      sc.anMoves[i][SKILL_DOUBTFUL] = strtol (r.data[1][9], NULL, 0);
+      sc.anMoves[i][SKILL_NONE] = strtol (r.data[1][10], NULL, 0);
+      sc.anMoves[i][SKILL_GOOD] = strtol (r.data[1][11], NULL, 0);
+      sc.anLuck[i][LUCK_VERYBAD] = strtol (r.data[1][12], NULL, 0);
+      sc.anLuck[i][LUCK_BAD] = strtol (r.data[1][13], NULL, 0);
+      sc.anLuck[i][LUCK_NONE] = strtol (r.data[1][14], NULL, 0);
+      sc.anLuck[i][LUCK_GOOD] = strtol (r.data[1][15], NULL, 0);
+      sc.anLuck[i][LUCK_VERYGOOD] = strtol (r.data[1][16], NULL, 0);
+      sc.anCubeMissedDoubleDP[i] = strtol (r.data[1][17], NULL, 0);
+      sc.anCubeMissedDoubleTG[i] = strtol (r.data[1][18], NULL, 0);
+      sc.anCubeWrongDoubleDP[i] = strtol (r.data[1][19], NULL, 0);
+      sc.anCubeWrongDoubleTG[i] = strtol (r.data[1][20], NULL, 0);
+      sc.anCubeWrongTake[i] = strtol (r.data[1][21], NULL, 0);
+      sc.anCubeWrongPass[i] = strtol (r.data[1][22], NULL, 0);
+      sc.arErrorCheckerplay[i][0] = g_strtod (r.data[1][23], NULL);
+      sc.arErrorMissedDoubleDP[i][0] = g_strtod (r.data[1][24], NULL);
+      sc.arErrorMissedDoubleTG[i][0] = g_strtod (r.data[1][25], NULL);
+      sc.arErrorWrongDoubleDP[i][0] = g_strtod (r.data[1][26], NULL);
+      sc.arErrorWrongDoubleTG[i][0] = g_strtod (r.data[1][27], NULL);
+      sc.arErrorWrongTake[i][0] = g_strtod (r.data[1][28], NULL);
+      sc.arErrorWrongPass[i][0] = g_strtod (r.data[1][29], NULL);
+      sc.arLuck[i][0] = g_strtod (r.data[1][30], NULL);
+    }
+  sc.fMoves = 1;
+  sc.fCube = 1;
+  sc.fDice = 1;
+  DumpStatcontext (output, &sc, player_name, _("Opponents"), NULL, FALSE);
+#if USE_GTK
+  if (fX)
+    {
+      GTKTextWindow (output, _("Player statistics\n"), DT_INFO);
+    }
+  else
+    {
+#endif
+      outputl (_("Player statistics\n\n"));
+      outputl (output);
+#if USE_GTK
+    }
+#endif
 }
+
+
 
 extern void
 CommandRelationalShowPlayers( char *sz )
@@ -1010,7 +1046,7 @@ extern int RunQuery(RowSet* pRow, char *sz)
 				}
         if (PyUnicode_Check(e2))
         {
-					strcpy(buf, PyString_AsString(PyObject_Str(e2)));
+					strcpy(buf, PyString_AsString(PyUnicode_AsUTF8String(e2)));
 					size = strlen(buf);
         }
 				else if (PyString_Check(e2))
@@ -1025,7 +1061,7 @@ extern int RunQuery(RowSet* pRow, char *sz)
 				}
 				else if (PyFloat_Check(e2))
 				{
-					sprintf(buf, "%.2f", PyFloat_AsDouble(e2));
+					sprintf(buf, "%.4f", PyFloat_AsDouble(e2));
 					size = ((int)log(PyFloat_AsDouble(e2))) + 1 + 3;
 				}
 				else if (e2 == Py_None)

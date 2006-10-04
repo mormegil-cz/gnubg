@@ -230,6 +230,7 @@ extern int IsPanelShowVar(gnubgwindow panel, void *p);
 extern int SetMainWindowSize();
 extern void ShowHidePanel(gnubgwindow panel);
 extern void SetAnnotation( moverecord *pmr );
+extern void GTKTextWindow( const char *szOutput, const char *title, const int type  );
 extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
 

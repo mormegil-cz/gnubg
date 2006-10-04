@@ -112,7 +112,7 @@ extern void IniStatcontext ( statcontext* psc );
 extern void AddStatcontext ( const statcontext* pscA, statcontext* pscB );
 
 extern void
-DumpStatcontext ( char* szOutput, const statcontext* psc, const char* sz,
+DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const char * op, const char * sz,
                   const int fIsMatch );
 
 extern void

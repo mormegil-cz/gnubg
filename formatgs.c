@@ -50,11 +50,11 @@ numberEntry( const char *sz, const int n0, const int n1 ) {
 }
 
 static char *
-errorRate( const float rn, const float ru, const matchstate *pms ) {
+errorRate( const float rn, const float ru, const int nMatchTo) {
 
   if ( rn != 0.0f ) {
 
-    if ( pms->nMatchTo ) 
+    if ( nMatchTo ) 
       return g_strdup_printf( "%+6.3f (%+7.3f%%)",
                               rn, ru * 100.0f );
     else
@@ -68,7 +68,7 @@ errorRate( const float rn, const float ru, const matchstate *pms ) {
 }
 
 static char *
-errorRateMP( const float rn, const float ru, const matchstate *pms ) {
+errorRateMP( const float rn, const float ru, const int nMatchTo ) {
 
   int n = fOutputDigits - (int)( log10( rErrorRateFactor ) - 0.5 );
 
@@ -77,7 +77,7 @@ errorRateMP( const float rn, const float ru, const matchstate *pms ) {
 
   if ( rn != 0.0f && ru != 0.0f ) {
 
-    if ( pms->nMatchTo ) 
+    if ( nMatchTo ) 
       return g_strdup_printf( "%+*.*f (%+7.3f%%)",
                               n + 5, n, 
                               rErrorRateFactor * rn, ru * 100.0f );
@@ -94,12 +94,12 @@ errorRateMP( const float rn, const float ru, const matchstate *pms ) {
 
 static char *
 cubeEntry( const int n, const float rn, const float ru, 
-           const matchstate *pms ) {
+           const int nMatchTo) {
 
   if ( ! n )
     return g_strdup( "  0" );
   else {
-    if ( pms->nMatchTo ) 
+    if ( nMatchTo ) 
       return g_strdup_printf( "%3d (%+6.3f (%+7.3f%%))", 
                               n, rn, 100.0f * ru );
     else
@@ -114,7 +114,7 @@ cubeEntry( const int n, const float rn, const float ru,
 
 
 static char **
-luckAdjust( const char *sz, const float ar[ 2 ], const matchstate *pms ) {
+luckAdjust( const char *sz, const float ar[ 2 ], const int nMatchTo) {
 
   char **aasz;
   int i;
@@ -124,7 +124,7 @@ luckAdjust( const char *sz, const float ar[ 2 ], const matchstate *pms ) {
   aasz[ 0 ] = g_strdup( sz );
   
   for ( i = 0; i < 2; ++i )
-    if ( pms->nMatchTo )
+    if ( nMatchTo )
       aasz[ i + 1 ] = g_strdup_printf( "%+7.2f%%", 100.0f * ar[ i ] );
     else
       aasz[ i + 1 ] = g_strdup_printf( "%+7.3f", ar[ i ] );
@@ -134,7 +134,7 @@ luckAdjust( const char *sz, const float ar[ 2 ], const matchstate *pms ) {
 }
 
 extern GList *
-formatGS( const statcontext *psc, const matchstate *pms,
+formatGS( const statcontext *psc, const int nMatchTo,
           const int fIsMatch, const enum _formatgs fg ) {
 
   GList *list = NULL;
@@ -182,7 +182,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
         aasz[ i + 1 ] = errorRate( 
               -aaaar[ CHEQUERPLAY ][ TOTAL ][ i ][ NORMALISED ],
               -aaaar[ CHEQUERPLAY ][ TOTAL ][ i ][ UNNORMALISED ],
-              pms );
+              nMatchTo);
 
       list = g_list_append( list, aasz );
 
@@ -196,7 +196,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
         aasz[ i + 1 ] = errorRateMP( 
               -aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ],
               -aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ UNNORMALISED ],
-              pms );
+              nMatchTo);
 
       list = g_list_append( list, aasz );
 
@@ -274,7 +274,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
           aasz[ j + 1 ] = cubeEntry( ai2[ i ][ j ],
                                      -af2[ j ][ i ][ 0 ],
                                      -af2[ j ][ i ][ 1 ],
-                                     pms );
+                                     nMatchTo);
 
         list = g_list_append( list, aasz );
 
@@ -290,7 +290,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
         aasz[ i + 1 ] = errorRate( 
               -aaaar[ CUBEDECISION ][ TOTAL ][ i ][ NORMALISED ],
               -aaaar[ CUBEDECISION ][ TOTAL ][ i ][ UNNORMALISED ],
-              pms );
+              nMatchTo);
 
       list = g_list_append( list, aasz );
 
@@ -304,7 +304,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
         aasz[ i + 1 ] = errorRateMP( 
               -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ],
               -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ UNNORMALISED ],
-              pms );
+              nMatchTo);
 
       list = g_list_append( list, aasz );
 
@@ -354,7 +354,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
       for ( i = 0; i < 2; ++i )
         aasz[ i + 1 ] = errorRate( psc->arLuck[ i ][ 0 ],
-                                   psc->arLuck[ i ][ 1 ], pms );
+                                   psc->arLuck[ i ][ 1 ], nMatchTo);
 
       list = g_list_append( list, aasz );
 
@@ -370,7 +370,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
                                      psc->anTotalMoves[ i ], 
                                      psc->arLuck[ i ][ 1 ] / 
                                      psc->anTotalMoves[ i ], 
-                                     pms );
+                                     nMatchTo);
         else
           aasz[ i + 1 ] = g_strdup( _("n/a") );
 
@@ -411,7 +411,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
           aasz[ i + 1 ] = errorRate( 
                                     -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ],
                                     -aaaar[ COMBINED ][ TOTAL ][ i ][ UNNORMALISED ],
-                                    pms );
+                                    nMatchTo);
 
         list = g_list_append( list, aasz );
 
@@ -425,7 +425,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
           aasz[ i + 1 ] = errorRateMP( 
                                       -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
                                       -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ],
-                                      pms );
+                                      nMatchTo);
 
         list = g_list_append( list, aasz );
 
@@ -439,7 +439,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
           if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
             aasz[ i + 1 ] = 
               errorRateMP( -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n,
-                           0.0f, pms );
+                           0.0f, nMatchTo );
           else
             aasz[ i + 1 ] = g_strdup( _("n/a") );
 
@@ -472,14 +472,14 @@ formatGS( const statcontext *psc, const matchstate *pms,
           list = g_list_append( list, 
                                 luckAdjust( _("Actual result"),
                                             psc->arActualResult,
-                                            pms ) );
+                                            nMatchTo ) );
         
           list = g_list_append( list, 
                                 luckAdjust( _("Luck adjusted result"),
                                             psc->arLuckAdj,
-                                            pms ) );
+                                            nMatchTo ) );
 
-          if ( fIsMatch && pms->nMatchTo ) {
+          if ( fIsMatch && nMatchTo ) {
 
             /* luck based fibs rating */
           
@@ -510,7 +510,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
         /* error based fibs rating */
 
-        if ( fIsMatch && pms->nMatchTo ) {
+        if ( fIsMatch && nMatchTo ) {
 
           aasz = g_malloc( 3 * sizeof ( *aasz ) );
           aasz[ 0 ] = g_strdup( _("Error based abs. FIBS rating") );
@@ -520,7 +520,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
               aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
                                                absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
                                                                    aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                   pms->nMatchTo, rRatingOffset ) );
+                                                                   nMatchTo, rRatingOffset ) );
             else
               aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
 
@@ -535,7 +535,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
             if ( psc->anUnforcedMoves[ i ] )
               aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
                                                absoluteFibsRatingChequer( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                          pms->nMatchTo ) );
+                                                                          nMatchTo ) );
             else
               aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
 
@@ -550,7 +550,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
             if ( psc->anCloseCube[ i ] )
               aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
                                                absoluteFibsRatingCube( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                       pms->nMatchTo ) );
+                                                                       nMatchTo ) );
             else
               aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
 
@@ -560,7 +560,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
       }
 
-      if( psc->fDice && fIsMatch && !pms->nMatchTo && psc->nGames > 1 ) {
+      if( psc->fDice && fIsMatch && !nMatchTo && psc->nGames > 1 ) {
 
 	static char *asz[ 2 ][ 2 ] = {
           { N_("Advantage (actual) in ppg"),
@@ -637,7 +637,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
         for ( i = 0; i < 2; ++i )
           aasz[ i + 1 ] = errorRate( -psc->aarTimeLoss[ i ][ 0 ],
-                                     -psc->aarTimeLoss[ i ][ 1 ], pms );
+                                     -psc->aarTimeLoss[ i ][ 1 ], nMatchTo );
         
         list = g_list_append( list, aasz );
 

@@ -79,6 +79,7 @@
 #include "gtkprefs.h"
 #include "gtksplash.h"
 #include "gtktexi.h"
+#include "gtkrelational.h"
 #include <glib/gi18n.h>
 #include "matchequity.h"
 #include "openurl.h"
@@ -1988,6 +1989,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  Command, CMD_RECORD_ADD_SESSION,
 		"<StockItem>", GTK_STOCK_ADD
 	},
+#if USE_PYTHON
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
         { N_("/_Analyse/Relational database/Add match or session"), NULL,
           GtkRelationalAddMatch, 0,
@@ -2001,6 +2003,9 @@ extern int InitGTK( int *argc, char ***argv ) {
           Command, CMD_RELATIONAL_TEST, NULL },
         { N_("/_Analyse/Relational database/Help"), NULL,
           Command, CMD_RELATIONAL_HELP, NULL },
+        { N_("/_Analyse/Relational database/Show Stats"), NULL,
+          GtkRelationalShowStats, 0, NULL },
+#endif
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -5713,38 +5718,47 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
   }	
 }
 
-
-extern void GTKEval( char *szOutput )
+void
+GTKTextWindow (const char *szOutput, const char *title, const int type)
 {
-    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Evaluation"),
-		DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
-    GtkWidget *pwText;
-    GtkWidget *sw;
-    GtkTextBuffer *buffer;
-    GtkTextIter iter;
 
-    pwText = gtk_text_view_new ();
-    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pwText), GTK_WRAP_NONE);
+  GtkWidget *pwDialog = GTKCreateDialog (title, type, NULL, 0, NULL, NULL);
+  GtkWidget *pwText;
+  GtkWidget *sw;
+  GtkTextBuffer *buffer;
+  GtkTextIter iter;
 
-    buffer = gtk_text_buffer_new(NULL);
-    gtk_text_buffer_create_tag (buffer, "monospace", "family", "monospace", NULL);
-    gtk_text_buffer_get_end_iter (buffer, &iter);
-    gtk_text_buffer_insert_with_tags_by_name (buffer, &iter, szOutput, -1, "monospace", NULL);
-    gtk_text_view_set_buffer(GTK_TEXT_VIEW (pwText), buffer);
+  pwText = gtk_text_view_new ();
+  gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (pwText), GTK_WRAP_NONE);
 
-    sw = gtk_scrolled_window_new (NULL, NULL);
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_container_add (GTK_CONTAINER (sw), pwText);
+  buffer = gtk_text_buffer_new (NULL);
+  gtk_text_buffer_create_tag (buffer, "monospace", "family", "monospace",
+			      NULL);
+  gtk_text_buffer_get_end_iter (buffer, &iter);
+  gtk_text_buffer_insert_with_tags_by_name (buffer, &iter, szOutput, -1,
+					    "monospace", NULL);
+  gtk_text_view_set_buffer (GTK_TEXT_VIEW (pwText), buffer);
 
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       sw );
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 700, 600 );
- 
-    gtk_widget_show_all( pwDialog );
+  sw = gtk_scrolled_window_new (NULL, NULL);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw), GTK_POLICY_NEVER,
+				  GTK_POLICY_AUTOMATIC);
+  gtk_container_add (GTK_CONTAINER (sw), pwText);
 
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+  gtk_container_add (GTK_CONTAINER (DialogArea (pwDialog, DA_MAIN)), sw);
+  gtk_window_set_modal (GTK_WINDOW (pwDialog), TRUE);
+  gtk_window_set_default_size (GTK_WINDOW (pwDialog), 800, 600);
+  gtk_window_set_transient_for (GTK_WINDOW (pwDialog), GTK_WINDOW (pwMain));
+  gtk_signal_connect (GTK_OBJECT (pwDialog), "destroy",
+		      GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
+  gtk_widget_show_all (pwDialog);
+
+  GTKDisallowStdin ();
+  gtk_main ();
+  GTKAllowStdin ();
+}
+
+extern void GTKEval( char *szOutput ) {
+    GTKTextWindow( szOutput,  _("GNU Backgammon - Evaluation"), DT_INFO);
 }
 
 static void DestroyHint( gpointer p ) {
@@ -6939,6 +6953,11 @@ extern void GTKSet( void *p ) {
                                        "/Analyse/"
                                        "Relational database/Manage Environments" ), 
           TRUE );
+    gtk_widget_set_sensitive( 
+          gtk_item_factory_get_widget( pif,
+                                       "/Analyse/"
+                                       "Relational database/Show Stats" ),
+          TRUE );
 #endif /* USE_PYTHON */
 
 	fAutoCommand = FALSE;
@@ -7095,7 +7114,7 @@ static void FillStats(const statcontext *psc, const matchstate *pms,
 {
 
   int fIsMatch = (curStatGame == 0);
-  GList *list = formatGS( psc, pms, fIsMatch, gs );
+  GList *list = formatGS( psc, pms->nMatchTo, fIsMatch, gs );
   GList *pl;
   
   for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
