@@ -1,3 +1,8 @@
+Thu Oct  5 23:51:15 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: Fix compiler warnings without USE_PYTHON after last
+	commit
+
 Wed Oct  4 14:18:35 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am analysis.c, analysis.h, formatgs.c, formatgs.h, html.c,
