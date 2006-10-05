@@ -53,7 +53,7 @@ extern int convert_point( int i, int player );
 extern void setupFlag(BoardData3d *bd3d);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);
 extern void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag);
-extern float getDiceSize(BoardData* bd);
+extern float getDiceSize(renderdata* prd);
 static void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename);
 
 typedef int idleFunc(BoardData* bd);
@@ -1970,13 +1970,13 @@ int idleAnimate(BoardData* bd)
 			float overSize;
 			ClipBox temp;
 
-			overSize = getDiceSize(bd) * 1.5f;
+			overSize = getDiceSize(bd->rd) * 1.5f;
 			copyPoint(pos, bd3d->diceMovingPos[0]);
-			pos[2] -= getDiceSize(bd) / 2.0f;
+			pos[2] -= getDiceSize(bd->rd) / 2.0f;
 			RestrictiveDrawFrame(pos, overSize, overSize, overSize);
 
 			copyPoint(pos, bd3d->diceMovingPos[1]);
-			pos[2] -= getDiceSize(bd) / 2.0f;
+			pos[2] -= getDiceSize(bd->rd) / 2.0f;
 			RestrictiveDraw(&temp, pos, overSize, overSize, overSize);
 			EnlargeCurrentToBox(&temp);
 

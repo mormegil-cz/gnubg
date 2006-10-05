@@ -1,3 +1,6 @@
+Thu Oct 10 13:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* misc3d.c: Fix bug with quick drawing rolling dice
+
 Thu Jun 08 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* mylist.h+c and others: Replaced vector with glib GArray
 	2 files removed and a few small changes
