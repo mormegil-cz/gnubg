@@ -680,14 +680,14 @@ CommandRelationalShowDetails (char *sz)
       sc.anCubeWrongDoubleTG[i] = strtol (r.data[1][20], NULL, 0);
       sc.anCubeWrongTake[i] = strtol (r.data[1][21], NULL, 0);
       sc.anCubeWrongPass[i] = strtol (r.data[1][22], NULL, 0);
-      sc.arErrorCheckerplay[i][0] = g_strtod (r.data[1][23], NULL);
-      sc.arErrorMissedDoubleDP[i][0] = g_strtod (r.data[1][24], NULL);
-      sc.arErrorMissedDoubleTG[i][0] = g_strtod (r.data[1][25], NULL);
-      sc.arErrorWrongDoubleDP[i][0] = g_strtod (r.data[1][26], NULL);
-      sc.arErrorWrongDoubleTG[i][0] = g_strtod (r.data[1][27], NULL);
-      sc.arErrorWrongTake[i][0] = g_strtod (r.data[1][28], NULL);
-      sc.arErrorWrongPass[i][0] = g_strtod (r.data[1][29], NULL);
-      sc.arLuck[i][0] = g_strtod (r.data[1][30], NULL);
+      sc.arErrorCheckerplay[i][0] = (float)g_strtod (r.data[1][23], NULL);
+      sc.arErrorMissedDoubleDP[i][0] = (float)g_strtod (r.data[1][24], NULL);
+      sc.arErrorMissedDoubleTG[i][0] = (float)g_strtod (r.data[1][25], NULL);
+      sc.arErrorWrongDoubleDP[i][0] = (float)g_strtod (r.data[1][26], NULL);
+      sc.arErrorWrongDoubleTG[i][0] = (float)g_strtod (r.data[1][27], NULL);
+      sc.arErrorWrongTake[i][0] = (float)g_strtod (r.data[1][28], NULL);
+      sc.arErrorWrongPass[i][0] = (float)g_strtod (r.data[1][29], NULL);
+      sc.arLuck[i][0] = (float)g_strtod (r.data[1][30], NULL);
     }
   sc.fMoves = 1;
   sc.fCube = 1;
@@ -696,7 +696,7 @@ CommandRelationalShowDetails (char *sz)
 #if USE_GTK
   if (fX)
     {
-      GTKTextWindow (output, _("Player statistics\n"), DT_INFO);
+      GTKTextWindow (output, _("Player statistics"), DT_INFO);
     }
   else
     {

@@ -79,7 +79,7 @@ create_model (void)
   GtkTreeIter iter;
   RowSet r;
 
-  long long moves[3];
+  long moves[3];
   int i, j;
   gfloat stats[13];
 
@@ -120,11 +120,11 @@ create_model (void)
     {
       for (i = 1; i < 4; ++i)
 	{
-	  moves[i - 1] = strtoll (r.data[j][i], NULL, 0);
+	  moves[i - 1] = strtol (r.data[j][i], NULL, 0);
 	}
       for (i = 4; i < 13; ++i)
 	{
-	  stats[i - 4] = g_strtod (r.data[j][i], NULL);
+	  stats[i - 4] = (float)g_strtod (r.data[j][i], NULL);
 	}
       gtk_list_store_append (store, &iter);
       gtk_list_store_set (store, &iter,
@@ -243,6 +243,7 @@ view_onRowActivated (GtkTreeView * treeview,
     {
       gchar *name;
       gtk_tree_model_get (model, &iter, COLUMN_NICK, &name, -1);
+	  GTKSetCurrentParent(GTK_WIDGET(userdata));
       CommandRelationalShowDetails (name);
       g_free (name);
     }
@@ -255,6 +256,9 @@ GtkRelationalShowStats (gpointer p, guint n, GtkWidget * pw)
   GtkWidget *scrolledwindow1;
   GtkWidget *treeview1;
 
+  pwDialog = GTKCreateDialog (_("GNU Backgammon - Player Stats"),
+	  DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL);
+
   scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW
 				       (scrolledwindow1), GTK_SHADOW_IN);
@@ -266,11 +270,9 @@ GtkRelationalShowStats (gpointer p, guint n, GtkWidget * pw)
 
   treeview1 = do_list_store ();
   g_signal_connect (treeview1, "row-activated",
-		    (GCallback) view_onRowActivated, NULL);
+		    (GCallback) view_onRowActivated, pwDialog);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), treeview1);
-  pwDialog =
-    GTKCreateDialog (_("GNU Backgammon - Cube"), DT_INFO, NULL, 0, NULL,
-		     NULL);
+
   gtk_container_add (GTK_CONTAINER (DialogArea (pwDialog, DA_MAIN)),
 		     scrolledwindow1);
   gtk_window_set_default_size (GTK_WINDOW (pwDialog), 1, 400);
