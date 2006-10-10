@@ -47,10 +47,10 @@
 #include <glib/gi18n.h>
 
 #ifdef _MSC_VER
-#undef IGNORE	// Ignore msdev define
-#define IGNORE __attribute__ ((unused))
 #include <direct.h>
+#undef IGNORE	// Ignore msdev define
 #endif
+#define IGNORE __attribute__ ((unused))
 
 static PyObject *
 BoardToPy( int anBoard[ 2 ][ 25 ] )
