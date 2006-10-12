@@ -72,6 +72,7 @@ extern void SaveWindowSettings(FILE* pf);
 extern void HidePanel(gnubgwindow window);
 extern void getWindowGeometry(gnubgwindow window);
 extern int PanelShowing(gnubgwindow window);
+extern void ClosePanels();
 
 extern int GetPanelSize();
 extern void SetPanelWidth(int size);
@@ -1270,5 +1271,7 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 
 extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] );
+
+extern void SetupLanguage(char *newLangCode);
 
 #endif

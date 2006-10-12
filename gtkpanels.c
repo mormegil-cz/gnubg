@@ -1312,3 +1312,21 @@ int PanelShowing(gnubgwindow window)
 {
 	return woPanel[window].showing && (fDisplayPanels || !woPanel[window].docked);
 }
+
+void ClosePanels()
+{
+	/* loop through and close each panel (not main window) */
+	int window;
+	for (window = 0; window < NUM_WINDOWS; window++)
+	{
+		if (window != WINDOW_MAIN)
+		{
+			if (woPanel[window].pwWin)
+			{
+				gtk_widget_destroy(woPanel[window].pwWin);
+				woPanel[window].pwWin = NULL;
+			}
+		}
+	}
+	pwTheoryList = NULL;	/* Reset this to stop errors - may be other ones that need reseting? */
+}

@@ -7200,14 +7200,6 @@ int main(int argc, char *argv[] ) {
     
 	free (szFile);
 
-	if ( szLang && *szLang && strcmp( "system", szLang ) ) {
-          char *lang = malloc (1 + strlen ("LANG=") + strlen (szLang));
-          assert (lang != 0);
-          sprintf (lang, "LANG=%s", szLang);
-          putenv (lang);
-          free(lang);
-	}
-
 	outputon();
     }
 
@@ -7257,20 +7249,12 @@ int main(int argc, char *argv[] ) {
 	    exit( EXIT_SUCCESS );
 
 	case 'l': {
-	  char *lang = malloc (1 + strlen ("LANG=") + strlen (optarg));
-	  assert (lang != 0);
-	  sprintf (lang, "LANG=%s", optarg);
-	  putenv (lang);
+		SetupLanguage(optarg);
 	  }
 	}
 
 #endif /* USE_GTK */
 
-    setlocale (LC_ALL, "");
-    bindtextdomain (PACKAGE, LOCALEDIR);
-    textdomain (PACKAGE);
-    bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );
-			     
 #if HAVE_LANGINFO_CODESET
  {
    char *cs = nl_langinfo( CODESET );
@@ -8805,4 +8789,19 @@ extern void CommandSetImportFileType(char *sz)
 	}
 
  	outputl(_("Invalid file type specified"));
+}
+
+void SetupLanguage(char *newLangCode)
+{	/* Set LANG env var and bind new text domain */
+	char *lang = malloc (strlen ("LANG=") + strlen(newLangCode) + 1);
+	sprintf(lang, "LANG=%s", newLangCode);
+	putenv(lang);
+	free(lang);
+
+	setlocale (LC_ALL, "");
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
+
+	bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );
+	//bind_textdomain_codeset( PACKAGE, "ASCII" );
 }

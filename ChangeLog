@@ -1,3 +1,7 @@
+Thu Oct  12 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkoptions.c, flags dir: Added new dialog to set language
+
 Thu Oct  5 23:51:15 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: Fix compiler warnings without USE_PYTHON after last

@@ -362,6 +362,7 @@ static void SaveClicked( gpointer *p, guint n, GtkWidget *pw );
 static void ImportClicked( gpointer *p, guint n, GtkWidget *pw );
 static void ExportClicked( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
+static void SetLanguage( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
@@ -1822,11 +1823,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 	return FALSE;
 }
 
-extern int InitGTK( int *argc, char ***argv ) {
-    
-    GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
-
-    static GtkItemFactoryEntry aife[] = {
+GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
 		"<StockItem>", GTK_STOCK_NEW
@@ -2059,6 +2056,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
 	{ N_("/_Settings/Paths..."), NULL, Command, CMD_SHOW_PATH, NULL },
+	{ N_("/_Settings/Language..."), NULL, SetLanguage, 0, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL },
@@ -2111,51 +2109,12 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
 		"<StockItem>", GTK_STOCK_ABOUT
 	}
-    };
-    
-    char *sz = g_alloca( strlen( szHomeDirectory ) + 15 );
+};
 
-    gtk_set_locale ();
+void CreateMainWindow()
+{
+    GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
 
-    sprintf( sz, "%s/.gnubg.gtkrc", szHomeDirectory );
-    if( !access( sz, R_OK ) )
-	gtk_rc_add_default_file( sz );
-    else if( !access( PKGDATADIR "/gnubg.gtkrc", R_OK ) )
-	gtk_rc_add_default_file( PKGDATADIR "/gnubg.gtkrc" );
-    else
-	gtk_rc_add_default_file( "gnubg.gtkrc" );
-    
-    if( !gtk_init_check( argc, argv ) )
-	return FALSE;
-    
-#if USE_BOARD3D
-	/* Initialize openGL widget library */
-	InitGTK3d(argc, argv);
-#endif
-
-    fnAction = HandleXAction;
-
-    gdk_rgb_init();
-    gdk_rgb_set_min_colors( 2 * 2 * 2 );
-    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
-    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
-
-    {
-#include "xpm/gnu.xpm"
-#include "xpm/question.xpm"
-
-	GtkIconFactory *pif = gtk_icon_factory_new();
-
-	gtk_icon_factory_add_default( pif );
-
-	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
-		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)gnu_xpm)));
-	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU_QUESTION,
-		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)question_xpm)));
-	}
-
-    ptt = gtk_tooltips_new();
-    
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	SetPanelWidget(WINDOW_MAIN, pwMain);
     gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
@@ -2190,9 +2149,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 			pwMenuBar = gtk_item_factory_get_widget( pif,
 								 "<main>" ));
 
-    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
-    gtk_accel_map_load( sz );
-   
    gtk_box_pack_start( GTK_BOX( pwVbox ),
                        pwHandle = gtk_handle_box_new(), FALSE, TRUE, 0 );
    gtk_container_add( GTK_CONTAINER( pwHandle ),
@@ -2256,8 +2212,61 @@ extern int InitGTK( int *argc, char ***argv ) {
 			GTK_SIGNAL_FUNC( MainSize ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwMain ), "delete_event",
 			GTK_SIGNAL_FUNC( main_delete ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwMain ), "destroy_event",
+    gtk_signal_connect( GTK_OBJECT( pwMain ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+}
+
+extern int InitGTK( int *argc, char ***argv )
+{
+    int anBoardTemp[ 2 ][ 25 ];
+    int i;
+    char *sz = g_alloca( strlen( szHomeDirectory ) + 15 );
+
+    gtk_set_locale ();
+
+    sprintf( sz, "%s/.gnubg.gtkrc", szHomeDirectory );
+    if( !access( sz, R_OK ) )
+	gtk_rc_add_default_file( sz );
+    else if( !access( PKGDATADIR "/gnubg.gtkrc", R_OK ) )
+	gtk_rc_add_default_file( PKGDATADIR "/gnubg.gtkrc" );
+    else
+	gtk_rc_add_default_file( "gnubg.gtkrc" );
+    
+    if( !gtk_init_check( argc, argv ) )
+	return FALSE;
+    
+#if USE_BOARD3D
+	/* Initialize openGL widget library */
+	InitGTK3d(argc, argv);
+#endif
+
+    fnAction = HandleXAction;
+
+    gdk_rgb_init();
+    gdk_rgb_set_min_colors( 2 * 2 * 2 );
+    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
+    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
+
+    {
+#include "xpm/gnu.xpm"
+#include "xpm/question.xpm"
+
+	GtkIconFactory *pif = gtk_icon_factory_new();
+
+	gtk_icon_factory_add_default( pif );
+
+	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
+		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)gnu_xpm)));
+	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU_QUESTION,
+		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)question_xpm)));
+	}
+
+    ptt = gtk_tooltips_new();
+
+    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+    gtk_accel_map_load( sz );
+
+	CreateMainWindow();
 
     ListCreate( &lOutput );
 
@@ -2278,91 +2287,117 @@ extern int InitGTK( int *argc, char ***argv ) {
     printf("Failed to get clipboard!\n");
 }
 
-    return TRUE;
-}
-
-extern void RunGTK( GtkWidget *pwSplash ) {
-
-    int anBoardTemp[ 2 ][ 25 ];
-    int i;
-    GTKSet( &ms.fCubeOwner );
-    GTKSet( &ms.nCube );
-    GTKSet( ap );
-    GTKSet( &ms.fTurn );
-    GTKSet( &ms.gs );
-    
-    PushSplash ( pwSplash, 
-                 _("Rendering"), _("Board"), 0 );
-
-    ShowBoard();
-
-    GTKAllowStdin();
-    
-    if( fTTY ) {
-#if HAVE_LIBREADLINE
-	if( fReadline ) {
-	    fReadingCommand = TRUE;
-	    rl_callback_handler_install( FormatPrompt(), HandleInput );
-	    atexit( rl_callback_handler_remove );
-	} else
-#endif
-	    Prompt();
-    }
-
-	/* Show everything */
-	gtk_widget_show_all( pwMain );
-
-	/* Make sure toolbar looks correct */
-	SetToolbarStyle(nToolbarStyle);
-
-#if USE_BOARD3D
-{
-	BoardData *bd = BOARD( pwBoard )->board_data;
-	BoardData3d *bd3d = &bd->bd3d;
-	renderdata *prd = bd->rd;
-
-	SetSwitchModeMenuText();
-	DisplayCorrectBoardType(bd, bd3d, prd);
-}
-#endif
-
-	DestroySplash ( pwSplash );
-
-	/* Display any other windows now */
-	DisplayWindows();
-
-	/* Make sure some things stay hidden */
-	if (!ArePanelsDocked())
-	{
-		gtk_widget_hide(hpaned);
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
-	}
-	else if (ArePanelsShowing())
-		gtk_widget_hide(pwGameBox);
-
-	/* Make sure main window is on top */
-	gdk_window_raise(pwMain->window);
-
-	/* force update of board; needed to display board correctly if user
-		has special settings, e.g., clockwise or nackgammon */
-	ShowBoard();
-
 	/* Clear board at startup */
 	for( i = 0; i < 25; i++ )
 		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
 	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, -1, -1, FALSE, anChequers[ms.bgv]);
 
-	if (fFullScreen)
-	{	/* Change to full screen (but hide warning) */
-		int temp = warningEnabled[WARN_FULLSCREEN_EXIT];
-		warningEnabled[WARN_FULLSCREEN_EXIT] = FALSE;
-		FullScreenMode(TRUE);
-		warningEnabled[WARN_FULLSCREEN_EXIT] = temp;
-	}
+    return TRUE;
+}
 
-	gtk_main();
+enum {RE_NONE, RE_LANGUAGE_CHANGE};
+
+int reasonExited;
+
+extern void RunGTK( GtkWidget *pwSplash )
+{
+	do
+	{
+		reasonExited = RE_NONE;
+
+		GTKSet( &ms.fCubeOwner );
+		GTKSet( &ms.nCube );
+		GTKSet( ap );
+		GTKSet( &ms.fTurn );
+		GTKSet( &ms.gs );
+	    
+		PushSplash ( pwSplash, 
+					_("Rendering"), _("Board"), 0 );
+
+		ShowBoard();
+
+		GTKAllowStdin();
+	    
+		if( fTTY ) {
+#if HAVE_LIBREADLINE
+		if( fReadline ) {
+			fReadingCommand = TRUE;
+			rl_callback_handler_install( FormatPrompt(), HandleInput );
+			atexit( rl_callback_handler_remove );
+		} else
+#endif
+			Prompt();
+		}
+
+		/* Show everything */
+		gtk_widget_show_all( pwMain );
+
+		/* Make sure toolbar looks correct */
+		SetToolbarStyle(nToolbarStyle);
+
+#if USE_BOARD3D
+	{
+		BoardData *bd = BOARD( pwBoard )->board_data;
+		BoardData3d *bd3d = &bd->bd3d;
+		renderdata *prd = bd->rd;
+
+		SetSwitchModeMenuText();
+		DisplayCorrectBoardType(bd, bd3d, prd);
+	}
+#endif
+
+		DestroySplash ( pwSplash );
+
+		/* Display any other windows now */
+		DisplayWindows();
+
+		/* Make sure some things stay hidden */
+		if (!ArePanelsDocked())
+		{
+			gtk_widget_hide(hpaned);
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+		}
+		else if (ArePanelsShowing())
+			gtk_widget_hide(pwGameBox);
+
+		/* Make sure main window is on top */
+		gdk_window_raise(pwMain->window);
+
+		/* force update of board; needed to display board correctly if user
+			has special settings, e.g., clockwise or nackgammon */
+		ShowBoard();
+
+		if (fFullScreen)
+		{	/* Change to full screen (but hide warning) */
+			int temp = warningEnabled[WARN_FULLSCREEN_EXIT];
+			warningEnabled[WARN_FULLSCREEN_EXIT] = FALSE;
+			FullScreenMode(TRUE);
+			warningEnabled[WARN_FULLSCREEN_EXIT] = temp;
+		}
+
+		gtk_main();
+
+		if (reasonExited == RE_LANGUAGE_CHANGE)
+		{	/* Recreate main window with new language */
+			CreateMainWindow();
+			setWindowGeometry(WINDOW_MAIN);
+		}
+	} while (reasonExited != RE_NONE);
+}
+
+void GtkChangeLanguage()
+{
+	if (pwMain && GTK_WIDGET_REALIZED(pwMain))
+	{
+		reasonExited = RE_LANGUAGE_CHANGE;
+
+		ClosePanels();
+		getWindowGeometry(WINDOW_MAIN);
+		DestroyPanel(WINDOW_MAIN);
+		pom = NULL;
+	}
 }
 
 extern void ShowList( char *psz[], char *szTitle, GtkWidget *parent)
@@ -6927,6 +6962,7 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
 
+#if USE_PYTHON	
        gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
@@ -6938,7 +6974,6 @@ extern void GTKSet( void *p ) {
                                        "Relational database/Help" ), 
           TRUE );
 
-#if USE_PYTHON	
     gtk_widget_set_sensitive( 
        gtk_item_factory_get_widget( pif,
                                     "/Analyse/Relational database/"
@@ -9630,3 +9665,254 @@ static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw ) {
 }
 
 #endif
+
+/* Language selection code */
+
+GtkWidget *curSel;
+GtkWidget *pwLangDialog, *pwLangRadio1, *pwLangRadio2, *pwLangTable;
+
+/* Language screen name, code and flag name */
+static char *aaszLang[][ 3 ] = {
+    { N_("System default"), "system", NULL },
+    { N_("Czech"),	    "cs_CZ", "czech" },
+    { N_("Danish"),	    "da_DA", "denmark" },
+    { N_("English (UK)"),   "en_UK", "england" },
+    { N_("English (US)"),   "en_US", "usa" },
+    { N_("French"),	    "fr_FR", "france" },
+    { N_("German"),	    "de_DE", "germany" },
+    { N_("Icelandic"),      "is_IS", "iceland" },
+    { N_("Italian"),	    "it_IT", "italy" },
+    { N_("Japanese"),	    "ja_JP", "japan" },
+	{ N_("Russian"),	    "ru_RU", "russia" },
+    { N_("Turkish"),	    "tr_TR", "turkey" },
+    { NULL, NULL, NULL }
+};
+
+void TranslateWidgets(GtkWidget *p)
+{
+	if (GTK_IS_CONTAINER(p))
+	{
+		GList *pl = gtk_container_get_children(GTK_CONTAINER(p));
+		while(pl)
+		{
+			TranslateWidgets(pl->data);
+			pl = pl->next;
+		}
+		g_list_free(pl);
+	}
+	if (GTK_IS_LABEL(p))
+	{
+		char *name = (char*)g_object_get_data(G_OBJECT(p), "lang");
+		gtk_label_set_text(GTK_LABEL(p), _(name));
+	}
+}
+
+void SetLangDialogText()
+{
+   gtk_window_set_title(GTK_WINDOW(pwLangDialog), _("Select language"));
+   TranslateWidgets(pwLangDialog);
+}
+
+int FlagClicked(GtkWidget *pw)
+{	/* Manually highlight clicked flag */
+	GtkWidget *frame, *eb;
+
+	if (curSel == pw)
+		return FALSE;
+
+	if (curSel)
+	{	/* Reset old item */
+		frame = gtk_bin_get_child(GTK_BIN(curSel));
+		eb = gtk_bin_get_child(GTK_BIN(frame));
+		gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
+		gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, NULL);
+	}
+
+	curSel = pw;
+	frame = gtk_bin_get_child(GTK_BIN(pw));
+	eb = gtk_bin_get_child(GTK_BIN(frame));
+
+	gtk_frame_set_shadow_type(GTK_FRAME(gtk_bin_get_child(GTK_BIN(pw))), GTK_SHADOW_ETCHED_OUT);
+	gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, &pwMain->style->bg[GTK_STATE_SELECTED]);
+
+	/* Immediately translate this dialog */
+	SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
+	SetLangDialogText();
+
+	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
+
+	return FALSE;
+}
+
+GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
+{	/* Create a flag */
+	GtkWidget *eb, *eb2, *vbox, *lab1;
+	GtkWidget *frame;
+	char file[1024];
+	GdkPixbuf *pixbuf;
+	GtkWidget *image;
+	GError *pix_error = NULL;
+
+	eb = gtk_event_box_new();
+	gtk_widget_modify_bg(eb, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
+	frame = gtk_frame_new(NULL);
+	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
+	gtk_container_add( GTK_CONTAINER( eb ), frame );
+
+	eb2 = gtk_event_box_new();
+	gtk_widget_modify_bg(eb2, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
+	gtk_container_add( GTK_CONTAINER( frame ), eb2 );
+
+	vbox = gtk_vbox_new( FALSE, 5 );
+	gtk_container_set_border_width( GTK_CONTAINER(vbox), 5);
+	gtk_container_add( GTK_CONTAINER( eb2 ), vbox );
+
+	if (flagfilename)
+	{
+		strcpy(file, "./flags/");
+		strcat(file, flagfilename);
+		strcat(file, ".png");
+		pixbuf = gdk_pixbuf_new_from_file(file, &pix_error);
+
+		if (pix_error)
+			g_print("Failed to open flag: %s\n", file);
+		else
+		{
+			image = gtk_image_new_from_pixbuf(pixbuf);
+			gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
+		}
+	}
+	lab1 = gtk_label_new(NULL);
+	gtk_box_pack_start (GTK_BOX (vbox), lab1, FALSE, FALSE, 0);
+	g_object_set_data(G_OBJECT(lab1), "lang", language);
+
+	g_signal_connect(G_OBJECT(eb), "button_press_event", G_CALLBACK(FlagClicked), NULL);
+
+	g_object_set_data(G_OBJECT(eb), "lang", langCode);
+
+	return eb;
+}
+
+int defclick(GtkWidget *pw, void *dummy, GtkWidget *table)
+{
+	gtk_widget_set_sensitive(table, FALSE);
+	SetupLanguage("");
+	SetLangDialogText();
+	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
+	return FALSE;
+}
+
+int selclick(GtkWidget *pw, void *dummy, GtkWidget *table)
+{
+	gtk_widget_set_sensitive(table, TRUE);
+	if (curSel)
+	{
+		SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
+		SetLangDialogText();
+	}
+	else
+		gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), FALSE);
+
+	return FALSE;
+}
+
+void SetWidgetLabelLang(GtkWidget *pw, char *text)
+{
+	if (GTK_IS_CONTAINER(pw))
+	{
+		GList *pl = gtk_container_get_children(GTK_CONTAINER(pw));
+		while(pl)
+		{
+			SetWidgetLabelLang(pl->data, text);
+			pl = pl->next;
+		}
+		g_list_free(pl);
+	}
+	if (GTK_IS_LABEL(pw))
+		g_object_set_data(G_OBJECT(pw), "lang", text);
+}
+
+void AddLangWidgets(GtkWidget *cont)
+{
+	int i, numLangs;
+	GtkWidget *pwVbox, *pwHbox, *selLang = NULL;
+	pwVbox = gtk_vbox_new( FALSE, 0 );
+	gtk_container_add( GTK_CONTAINER( cont ), pwVbox );
+
+	pwLangRadio1 = gtk_radio_button_new_with_label(NULL, "");
+	SetWidgetLabelLang(pwLangRadio1, N_("System default"));
+	pwLangRadio2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pwLangRadio1), "");
+	SetWidgetLabelLang(pwLangRadio2, N_("Select language"));
+	gtk_box_pack_start (GTK_BOX (pwVbox), pwLangRadio1, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (pwVbox), pwLangRadio2, FALSE, FALSE, 0);
+
+	numLangs = 0;
+	while (*aaszLang[numLangs])
+		numLangs++;
+	numLangs--;	/* Don't count system default */
+
+#define NUM_COLS 4	/* Display in 4 columns */
+	pwLangTable = gtk_table_new(numLangs / NUM_COLS + 1, NUM_COLS, TRUE);
+
+	for (i = 0; i < numLangs; i++)
+	{
+		GtkWidget *flag = GetFlagWidget(aaszLang[i + 1][0], aaszLang[i + 1][1], aaszLang[i + 1][2]);
+		int row = i / NUM_COLS;
+		int col = i - row * NUM_COLS;
+		gtk_table_attach(GTK_TABLE(pwLangTable), flag, col, col + 1, row, row + 1, 0, 0, 0, 0);
+		if (!strcasecmp(szLang, aaszLang[i + 1][1]))
+		selLang = flag;
+	}
+	pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwLangTable, FALSE, FALSE, 20);
+
+	if (selLang == NULL)
+		defclick(0, 0, pwLangTable);
+	else
+	{
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwLangRadio2), TRUE);
+		FlagClicked(selLang);
+	}
+	g_signal_connect(G_OBJECT(pwLangRadio1), "button_press_event", G_CALLBACK(defclick), pwLangTable);
+	g_signal_connect(G_OBJECT(pwLangRadio2), "button_press_event", G_CALLBACK(selclick), pwLangTable);
+}
+
+char *newLang;
+
+void SetLangOk(void)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwLangRadio1)))
+		newLang = aaszLang[0][1];
+	else
+		newLang = (char*)g_object_get_data(G_OBJECT(curSel), "lang");
+
+	gtk_widget_destroy(pwLangDialog);
+}
+
+static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
+{
+	GList *pl;
+
+	pwLangDialog = GTKCreateDialog( NULL, DT_QUESTION, NULL, DIALOG_FLAG_MODAL, SetLangOk, NULL );
+
+	pl = gtk_container_children( GTK_CONTAINER( DialogArea( pwLangDialog, DA_BUTTONS ) ) );
+	SetWidgetLabelLang(GTK_WIDGET(pl->data), N_("OK"));
+	SetWidgetLabelLang(GTK_WIDGET(pl->next->data), N_("Cancel"));
+	g_list_free(pl);
+
+	curSel = NULL;
+	newLang = NULL;
+
+	AddLangWidgets(DialogArea(pwLangDialog, DA_MAIN));
+	gtk_widget_show_all(pwLangDialog);
+
+	gtk_main();
+
+	if (newLang)
+	{	/* Set new language (after dialog has closed) */
+		char sz[100];
+		sprintf(sz, "set lang %s", newLang);
+		UserCommand( sz );
+	}
+}

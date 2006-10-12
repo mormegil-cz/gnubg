@@ -233,6 +233,7 @@ extern void SetAnnotation( moverecord *pmr );
 extern void GTKTextWindow( const char *szOutput, const char *title, const int type  );
 extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
+extern void GtkChangeLanguage();
 
 #if USE_BOARD3D
 extern void SetSwitchModeMenuText();

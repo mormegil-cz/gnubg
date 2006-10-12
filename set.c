@@ -4657,8 +4657,8 @@ CommandSetRatingOffset( char *sz ) {
 
 }
 
-extern void CommandSetLang( char *sz ) {
-
+extern void CommandSetLang( char *sz )
+{
     if( !sz || !*sz ) {
 	outputl( _( "You must give `system' or a language code "
 		    "as an argument." ) );
@@ -4675,12 +4675,12 @@ extern void CommandSetLang( char *sz ) {
     }
 
     strcpy( szLang, sz );
+	SetupLanguage(szLang);
 
-    outputf( _( "The language preference has been set to `%s'.\n"
-		"Please remember to save settings.\n"
-		"The new setting will only take effect on the next start "
-		"of gnubg.\n" ), sz );
-
+#if USE_GTK
+	if (fX)
+		GtkChangeLanguage();
+#endif
 }
 
 extern void CommandSetPanelWidth( char *sz )
