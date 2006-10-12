@@ -46,11 +46,7 @@
 #include "md5.h"
 #include <glib/gi18n.h>
 
-#ifdef _MSC_VER
-#include <direct.h>
-#undef IGNORE	// Ignore msdev define
-#endif
-#define IGNORE __attribute__ ((unused))
+#define UNUSED_PARAM __attribute__ ((unused))
 
 static PyObject *
 BoardToPy( int anBoard[ 2 ][ 25 ] )
@@ -351,7 +347,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
 
 
 static PyObject *
-PythonCubeInfo(PyObject* self IGNORE, PyObject* args) {
+PythonCubeInfo(PyObject* self UNUSED_PARAM, PyObject* args) {
 
   cubeinfo ci;
   int nCube = ms.nCube;
@@ -384,7 +380,7 @@ PythonCubeInfo(PyObject* self IGNORE, PyObject* args) {
 
 
 static PyObject *
-PythonNextTurn( PyObject *self IGNORE, PyObject *args ) {
+PythonNextTurn( PyObject *self UNUSED_PARAM, PyObject *args ) {
 
   fNextTurn = TRUE;
   while( fNextTurn ) {
@@ -398,7 +394,7 @@ PythonNextTurn( PyObject *self IGNORE, PyObject *args ) {
 
 
 static PyObject *
-PythonEvalContext( PyObject* self IGNORE, PyObject *args ) {
+PythonEvalContext( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   evalcontext ec;
   int fCubeful = 0, nPlies = 0, nReduced = 0, fDeterministic = 1;
@@ -421,7 +417,7 @@ PythonEvalContext( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonCommand( PyObject* self IGNORE, PyObject *args ) {
+PythonCommand( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   char *pch;
   char *sz;
@@ -453,7 +449,7 @@ PythonCommand( PyObject* self IGNORE, PyObject *args ) {
 
 
 static PyObject *
-PythonBoard( PyObject* self IGNORE, PyObject *args ) {
+PythonBoard( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   if ( ! PyArg_ParseTuple( args, ":board" ) )
     return NULL;
@@ -468,7 +464,7 @@ PythonBoard( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonLuckRating( PyObject* self IGNORE, PyObject *args ) {
+PythonLuckRating( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   float r;
   if ( ! PyArg_ParseTuple( args, "f", &r ) )
@@ -479,7 +475,7 @@ PythonLuckRating( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonErrorRating( PyObject* self IGNORE, PyObject *args ) {
+PythonErrorRating( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   float r;
   if ( ! PyArg_ParseTuple( args, "f", &r ) )
@@ -490,7 +486,7 @@ PythonErrorRating( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonEvaluate( PyObject* self IGNORE, PyObject *args ) {
+PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   PyObject *pyCubeInfo = NULL;
@@ -534,7 +530,7 @@ PythonEvaluate( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonEvaluateCubeful( PyObject* self IGNORE, PyObject *args ) {
+PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   PyObject *pyCubeInfo = NULL;
@@ -585,7 +581,7 @@ PythonEvaluateCubeful( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonFindBestMove( PyObject* self IGNORE, PyObject *args ) {
+PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyDice = NULL;
   PyObject *pyBoard = NULL;
@@ -689,7 +685,7 @@ METPre( float aar[ MAXSCORE ][ MAXSCORE ], const int n ) {
 
 
 static PyObject *
-PythonMET( PyObject* self IGNORE, PyObject *args ) {
+PythonMET( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   int n = ms.nMatchTo ? ms.nMatchTo : MAXSCORE;
   int i;
@@ -733,7 +729,7 @@ PythonMET( PyObject* self IGNORE, PyObject *args ) {
 
 
 static PyObject *
-PythonEq2mwc( PyObject* self IGNORE, PyObject *args ) {
+PythonEq2mwc( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyCubeInfo = NULL;
   float r = 0.0f;
@@ -813,7 +809,7 @@ extern char* GameAsString()
 }
 
 extern PyObject *
-PythonMatchChecksum( PyObject* self IGNORE, PyObject *args )
+PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *args )
 {
 	unsigned char auch[16];
 	char auchHex[33];
@@ -830,7 +826,7 @@ PythonMatchChecksum( PyObject* self IGNORE, PyObject *args )
 }
 
 static PyObject *
-PythonMwc2eq( PyObject* self IGNORE, PyObject *args ) {
+PythonMwc2eq( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyCubeInfo = NULL;
   float r = 0.0f;
@@ -849,7 +845,7 @@ PythonMwc2eq( PyObject* self IGNORE, PyObject *args ) {
 
 
 static PyObject *
-PythonPositionID( PyObject* self IGNORE, PyObject *args ) {
+PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   int anBoard[ 2 ][ 25 ];
@@ -867,7 +863,7 @@ PythonPositionID( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonPositionFromID( PyObject* self IGNORE, PyObject *args )
+PythonPositionFromID( PyObject* self UNUSED_PARAM, PyObject *args )
 {
   char* sz = NULL;
   int anBoard[ 2 ][ 25 ];
@@ -891,7 +887,7 @@ PythonPositionFromID( PyObject* self IGNORE, PyObject *args )
 
 
 static PyObject *
-PythonPositionKey( PyObject* self IGNORE, PyObject *args ) {
+PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
   int anBoard[ 2 ][ 25 ];
@@ -918,7 +914,7 @@ PythonPositionKey( PyObject* self IGNORE, PyObject *args ) {
 }
 
 static PyObject *
-PythonPositionFromKey( PyObject* self IGNORE, PyObject *args ) {
+PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   int anBoard[ 2 ][ 25 ];
   int i;
@@ -953,7 +949,7 @@ PythonPositionFromKey( PyObject* self IGNORE, PyObject *args ) {
 
 
 static PyObject *
-PythonPositionBearoff( PyObject* self IGNORE, PyObject *args )
+PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
 {
   PyObject *pyBoard = NULL;
   int nChequers = 15;
@@ -973,7 +969,7 @@ PythonPositionBearoff( PyObject* self IGNORE, PyObject *args )
 }
 
 static PyObject *
-PythonPositionFromBearoff( PyObject* self IGNORE, PyObject *args ) {
+PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   int anBoard[ 25 ];
   int iPos = 0;
@@ -1983,7 +1979,7 @@ addProperty(PyObject* dict, const char* name, const char* val)
 }
   
 static PyObject*
-PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
+PythonMatch(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
 {
   /* take match info from first game */
   const list* firstGame = lMatch.plNext->p;
@@ -2161,7 +2157,7 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 
 
 static PyObject*
-PythonNavigate(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
+PythonNavigate(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
 {
   int nextRecord = INT_MIN;
   int nextGame = INT_MIN;
