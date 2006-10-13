@@ -2347,6 +2347,7 @@ extern void RunGTK( GtkWidget *pwSplash )
 #endif
 
 		DestroySplash ( pwSplash );
+		pwSplash = NULL;
 
 		/* Display any other windows now */
 		DisplayWindows();
