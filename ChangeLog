@@ -1,3 +1,9 @@
+Mon Oct 16 15:45:49 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: Correct locales. Call language changes directly instead
+	of through UserCommand.
+	* gnubg.c: Use environment locale. Replace putenv by setenv.
+
 Thu Oct  12 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkoptions.c, flags dir: Added new dialog to set language

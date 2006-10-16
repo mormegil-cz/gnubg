@@ -9676,15 +9676,15 @@ GtkWidget *pwLangDialog, *pwLangRadio1, *pwLangRadio2, *pwLangTable;
 static char *aaszLang[][ 3 ] = {
     { N_("System default"), "system", NULL },
     { N_("Czech"),	    "cs_CZ", "czech" },
-    { N_("Danish"),	    "da_DA", "denmark" },
-    { N_("English (UK)"),   "en_UK", "england" },
+    { N_("Danish"),	    "da_DK", "denmark" },
+    { N_("English (GB)"),   "en_GB", "england" },
     { N_("English (US)"),   "en_US", "usa" },
     { N_("French"),	    "fr_FR", "france" },
     { N_("German"),	    "de_DE", "germany" },
     { N_("Icelandic"),      "is_IS", "iceland" },
     { N_("Italian"),	    "it_IT", "italy" },
     { N_("Japanese"),	    "ja_JP", "japan" },
-	{ N_("Russian"),	    "ru_RU", "russia" },
+    { N_("Russian"),	    "ru_RU", "russia" },
     { N_("Turkish"),	    "tr_TR", "turkey" },
     { NULL, NULL, NULL }
 };
@@ -9912,8 +9912,7 @@ static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
 
 	if (newLang)
 	{	/* Set new language (after dialog has closed) */
-		char sz[100];
-		sprintf(sz, "set lang %s", newLang);
-		UserCommand( sz );
+                SetupLanguage(newLang);
+		GtkChangeLanguage();
 	}
 }

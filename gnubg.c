@@ -165,6 +165,8 @@ int fReadline = TRUE;
 
 /* CommandSetLang trims the selection to 31 max and copies */
 char szLang[32] = "system";
+char *orgLangCode;
+void SetupLanguageFirstRun(void);
 
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
@@ -7164,6 +7166,8 @@ int main(int argc, char *argv[] ) {
 	FILE *pf;
 
 	outputoff();
+        SetupLanguageFirstRun();
+
     
 #define AUTORC "/.gnubgautorc"
 
@@ -7199,7 +7203,6 @@ int main(int argc, char *argv[] ) {
 	}
     
 	free (szFile);
-
 	outputon();
     }
 
@@ -8791,17 +8794,25 @@ extern void CommandSetImportFileType(char *sz)
  	outputl(_("Invalid file type specified"));
 }
 
-void SetupLanguage(char *newLangCode)
-{	/* Set LANG env var and bind new text domain */
-	char *lang = malloc (strlen ("LANG=") + strlen(newLangCode) + 1);
-	sprintf(lang, "LANG=%s", newLangCode);
-	putenv(lang);
-	free(lang);
+void
+SetupLanguage (char *newLangCode)
+{
+  if (newLangCode)
+    {
+      if (!strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
+	setenv ("LC_ALL", orgLangCode, TRUE);
+      else
+	setenv ("LC_ALL", newLangCode, TRUE);
+    }
+  setlocale (LC_ALL, "");
+}
 
-	setlocale (LC_ALL, "");
-	bindtextdomain (PACKAGE, LOCALEDIR);
-	textdomain (PACKAGE);
+void
+SetupLanguageFirstRun (void)
+{
+  orgLangCode = g_strdup (setlocale (LC_ALL, ""));
 
-	bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );
-	//bind_textdomain_codeset( PACKAGE, "ASCII" );
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+  bind_textdomain_codeset (PACKAGE, GNUBG_CHARSET);
 }
