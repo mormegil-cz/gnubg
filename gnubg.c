@@ -8800,9 +8800,9 @@ SetupLanguage (char *newLangCode)
   if (newLangCode)
     {
       if (!strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
-	setenv ("LC_ALL", orgLangCode, TRUE);
+	g_setenv ("LC_ALL", orgLangCode, TRUE);
       else
-	setenv ("LC_ALL", newLangCode, TRUE);
+	g_setenv ("LC_ALL", newLangCode, TRUE);
     }
   setlocale (LC_ALL, "");
 }
