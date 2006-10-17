@@ -1,3 +1,7 @@
+Tue Oct 17 15:03:08 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* drawboard.c: avoid assuming length of translated strings
+
 Mon Oct 16 15:45:49 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: Correct locales. Call language changes directly instead
