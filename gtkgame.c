@@ -9714,9 +9714,15 @@ void SetLangDialogText()
    TranslateWidgets(pwLangDialog);
 }
 
-int FlagClicked(GtkWidget *pw)
-{	/* Manually highlight clicked flag */
+void SetLangOk(void);
+
+gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
+{
+	/* Manually highlight clicked flag */
 	GtkWidget *frame, *eb;
+
+	if (event && event->type == GDK_2BUTTON_PRESS && curSel == pw)
+		SetLangOk();
 
 	if (curSel == pw)
 		return FALSE;
@@ -9784,6 +9790,7 @@ GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
 		}
 	}
 	lab1 = gtk_label_new(NULL);
+	gtk_widget_set_size_request(lab1, 80, -1);
 	gtk_box_pack_start (GTK_BOX (vbox), lab1, FALSE, FALSE, 0);
 	g_object_set_data(G_OBJECT(lab1), "lang", language);
 
@@ -9873,7 +9880,7 @@ void AddLangWidgets(GtkWidget *cont)
 	else
 	{
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwLangRadio2), TRUE);
-		FlagClicked(selLang);
+		FlagClicked(selLang, 0, 0);
 	}
 	g_signal_connect(G_OBJECT(pwLangRadio1), "button_press_event", G_CALLBACK(defclick), pwLangTable);
 	g_signal_connect(G_OBJECT(pwLangRadio2), "button_press_event", G_CALLBACK(selclick), pwLangTable);
@@ -9911,8 +9918,5 @@ static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
 	gtk_main();
 
 	if (newLang)
-	{	/* Set new language (after dialog has closed) */
-                SetupLanguage(newLang);
-		GtkChangeLanguage();
-	}
+		CommandSetLang(newLang);	/* Set new language (after dialog has closed) */
 }
