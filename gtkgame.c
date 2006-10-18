@@ -9675,17 +9675,17 @@ GtkWidget *pwLangDialog, *pwLangRadio1, *pwLangRadio2, *pwLangTable;
 /* Language screen name, code and flag name */
 static char *aaszLang[][ 3 ] = {
     { N_("System default"), "system", NULL },
-    { N_("Czech"),	    "cs_CZ", "czech" },
-    { N_("Danish"),	    "da_DK", "denmark" },
-    { N_("English (GB)"),   "en_GB", "england" },
-    { N_("English (US)"),   "en_US", "usa" },
-    { N_("French"),	    "fr_FR", "france" },
-    { N_("German"),	    "de_DE", "germany" },
-    { N_("Icelandic"),      "is_IS", "iceland" },
-    { N_("Italian"),	    "it_IT", "italy" },
-    { N_("Japanese"),	    "ja_JP", "japan" },
-    { N_("Russian"),	    "ru_RU", "russia" },
-    { N_("Turkish"),	    "tr_TR", "turkey" },
+    { N_("Czech"),	    "cs_CZ", "flags/czech.png" },
+    { N_("Danish"),	    "da_DK", "flags/denmark.png" },
+    { N_("English (GB)"),   "en_GB", "flags/england.png" },
+    { N_("English (US)"),   "en_US", "flags/usa.png" },
+    { N_("French"),	    "fr_FR", "flags/france.png" },
+    { N_("German"),	    "de_DE", "flags/germany.png" },
+    { N_("Icelandic"),      "is_IS", "flags/iceland.png" },
+    { N_("Italian"),	    "it_IT", "flags/italy.png" },
+    { N_("Japanese"),	    "ja_JP", "flags/japan.png" },
+    { N_("Russian"),	    "ru_RU", "flags/russia.png" },
+    { N_("Turkish"),	    "tr_TR", "flags/turkey.png" },
     { NULL, NULL, NULL }
 };
 
@@ -9755,7 +9755,7 @@ GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
 {	/* Create a flag */
 	GtkWidget *eb, *eb2, *vbox, *lab1;
 	GtkWidget *frame;
-	char file[1024];
+	char *file;
 	GdkPixbuf *pixbuf;
 	GtkWidget *image;
 	GError *pix_error = NULL;
@@ -9776,9 +9776,8 @@ GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
 
 	if (flagfilename)
 	{
-		strcpy(file, "./flags/");
-		strcat(file, flagfilename);
-		strcat(file, ".png");
+
+                file = PathSearch(flagfilename, szDataDirectory);
 		pixbuf = gdk_pixbuf_new_from_file(file, &pix_error);
 
 		if (pix_error)
@@ -9788,6 +9787,7 @@ GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
 			image = gtk_image_new_from_pixbuf(pixbuf);
 			gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
 		}
+                free(file);
 	}
 	lab1 = gtk_label_new(NULL);
 	gtk_widget_set_size_request(lab1, 80, -1);

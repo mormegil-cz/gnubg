@@ -61,7 +61,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts
+SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h

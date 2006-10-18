@@ -1,3 +1,8 @@
+Wed Oct 18 14:54:34 CEST 2006 Christian  Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, gtkgame.c, flags/.cvsignore,
+	flags/Makefile.am: automake and install stuff for the new flags
+
 Wed Oct 18 09:31:12 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gnubg.c, gtkgame.c, postscript.c, sgf.c: charset
