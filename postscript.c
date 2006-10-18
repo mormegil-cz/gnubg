@@ -34,6 +34,7 @@
 #include "drawboard.h"
 #include "positionid.h"
 #include <glib/gi18n.h>
+#include <glib.h>
 #include "format.h"
 #include "export.h"
 #include "matchid.h"
@@ -118,7 +119,7 @@ static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
 
     unsigned char *pch, *sz;
 
-    pch = sz = Convert( pchIn, "ISO-8859-1", GNUBG_CHARSET );
+    pch = sz = g_convert (pchIn, -1, "ISO-8859-1", "UTF-8", NULL, NULL, NULL);
     
     while( *pch ) {
 	switch( *pch ) {
@@ -141,7 +142,7 @@ static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
 	pch++;
     }
 
-    free( sz );
+    g_free( sz );
 }
 
 static void PSStartPage( FILE *pf ) {
@@ -744,7 +745,7 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
     if( !pch || !*pch )
 	return;
 
-    pch = sz = Convert( pch, "ISO-8859-1", GNUBG_CHARSET );
+    pch = sz = g_convert (pch, -1, "ISO-8859-1", "UTF-8", NULL, NULL, NULL);
     
     if ( nSkip )
       Skip( pf, nSkip );
@@ -799,7 +800,7 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
 	pch = pchBreak + 1;
     }
 
-    free( sz );
+    g_free( sz );
 }
 
 static void

@@ -34,9 +34,6 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#if HAVE_LANGINFO_H
-#include <langinfo.h>
-#endif
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -2189,7 +2186,7 @@ static psighandler shInterruptOld;
 int lastImportType = -1;
 int lastExportType = -1;
 
-char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
+char *szHomeDirectory, *szDataDirectory;
 
 char *aszBuildInfo[] = {
 #if USE_PYTHON
@@ -3468,9 +3465,9 @@ static char *FormatPromptConvert( void ) {
     static char sz[ 128 ];
     char *pch;
 
-    pch = Convert( FormatPrompt(), szTerminalCharset, GNUBG_CHARSET );
+    pch = locale_from_utf8(FormatPrompt());
     strcpy( sz, pch );
-    free( pch );
+    g_free( pch );
     
     return sz;
 }
@@ -6188,9 +6185,8 @@ extern void Prompt( void ) {
 
 #if USE_GTK
 #if HAVE_LIBREADLINE
-static void ProcessInput( char *sz) {
+extern void ProcessInput( char *sz) {
 
-    char *szConverted;
     char *pchExpanded;
 
     rl_callback_handler_remove();
@@ -6214,10 +6210,8 @@ static void ProcessInput( char *sz) {
     if( fX )
 	GTKDisallowStdin();
 
-    szConverted = Convert( pchExpanded, GNUBG_CHARSET, szTerminalCharset );
+    HandleCommand( pchExpanded, acTop );
     free( pchExpanded );
-    HandleCommand( szConverted, acTop );
-    free( szConverted );
     
     if( fX )
 	GTKAllowStdin();
@@ -6234,14 +6228,9 @@ static void ProcessInput( char *sz) {
 	fNeedPrompt = TRUE;
     else {
 	ProgressEnd();
-	rl_callback_handler_install( FormatPromptConvert(), HandleInput );
+	rl_callback_handler_install( FormatPromptConvert(), ProcessInput );
 	fReadingCommand = TRUE;
     }
-}
-
-extern void HandleInput( char *sz ) {
-
-    ProcessInput( sz);
 }
 
 #endif
@@ -6262,10 +6251,8 @@ extern void UserCommand( char *szCommand ) {
 
     if( !fTTY ) {
 	fInterrupt = FALSE;
-	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
 	HandleCommand( sz, acTop );
 	ResetInterrupt();
-
 	return;
     }
 
@@ -6276,9 +6263,9 @@ extern void UserCommand( char *szCommand ) {
 	nOldEnd = rl_end;
 	rl_end = 0;
 	rl_redisplay();
-	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+	pchTranslated = locale_from_utf8(sz);
 	puts( pchTranslated );
-	free( pchTranslated );
+	g_free( pchTranslated );
 	ProcessInput( sz);
 	return;
     }
@@ -6287,9 +6274,9 @@ extern void UserCommand( char *szCommand ) {
     if( fInteractive ) {
 	putchar( '\n' );
 	Prompt();
-	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+	pchTranslated = locale_from_utf8(sz);
 	puts( pchTranslated );
-	free( pchTranslated );
+	g_free( pchTranslated );
     }
     
     fInterrupt = FALSE;
@@ -6316,7 +6303,7 @@ extern gint NextTurnNotify( gpointer p )
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
 	    ProgressEnd();
-	    rl_callback_handler_install( FormatPromptConvert(), HandleInput );
+	    rl_callback_handler_install( FormatPromptConvert(), ProcessInput );
 	    fReadingCommand = TRUE;
 	} else
 #endif
@@ -6365,7 +6352,7 @@ extern char *GetInput( char *szPrompt ) {
 	if( fInterrupt )
 	    return NULL;
 	
-	pchConverted = Convert( sz, GNUBG_CHARSET, szTerminalCharset );
+	pchConverted = locale_to_utf8(sz);
 	free( sz );
 	return pchConverted;
     }
@@ -6398,7 +6385,7 @@ extern char *GetInput( char *szPrompt ) {
     if( ( pch = strchr( sz, '\n' ) ) )
 	*pch = 0;
     
-    pchConverted = Convert( sz, GNUBG_CHARSET, szTerminalCharset );
+    pchConverted = locale_to_utf8(sz);
     free( sz );
     return pchConverted;
 }
@@ -6424,14 +6411,14 @@ extern int GetInputYN( char *szPrompt ) {
 	    switch( *pch ) {
 	    case 'y':
 	    case 'Y':
-		free( pch );
+		g_free( pch );
 		return TRUE;
 	    case 'n':
 	    case 'N':
-		free( pch );
+		g_free( pch );
 		return FALSE;
 	    default:
-		free( pch );
+		g_free( pch );
 	    }
 
 	if( fInterrupt )
@@ -6473,7 +6460,7 @@ extern void output( const char *sz ) {
 	return;
     }
 #endif
-    pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+    pch = locale_from_utf8(sz);
     fputs( pch, stdout );
 
     if( !isatty( STDOUT_FILENO ) ) 
@@ -6504,11 +6491,11 @@ extern void outputl( const char *sz ) {
 	return;
     }
 #endif
-    pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+    pch = locale_from_utf8(sz);
     puts( pch );
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
-    free( pch );
+    g_free( pch );
 }
     
 /* Write a character to stdout/status bar/popup window */
@@ -6566,11 +6553,11 @@ extern void outputerrv( const char *sz, va_list val ) {
     char *pch;
     char *szFormatted;
     szFormatted = g_strdup_vprintf( sz, val );
-    pch = Convert( szFormatted, szTerminalCharset, GNUBG_CHARSET );
+    pch = locale_from_utf8(szFormatted);
     fputs( pch, stderr );
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
-    free( pch );
+    g_free( pch );
     putc( '\n', stderr );
 #if USE_GTK
     if( fX )
@@ -7018,7 +7005,7 @@ ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
       printf( "return '%s'\n", pchToken );
       return pchToken;
     }
-    free( pch );
+    g_free( pch );
   }
 
   printf( "nada...\n");
@@ -7260,43 +7247,6 @@ int main(int argc, char *argv[] ) {
 	}
 
 #endif /* USE_GTK */
-
-#if HAVE_LANGINFO_CODESET
- {
-   char *cs = nl_langinfo( CODESET );
-   char *cset;
-   int	 i = 0;
-
-   if( cs ) {
-     cset  = malloc ( 2 + strlen( cs ) );
-
-     if( !strncmp( cs, "ISO", 3 ) ) {
-       switch ( cs[ 3 ] ) {
-       case '_': /* convert ISO_8859-1 to ISO-8859-1 */
-       case '-': /* no work needed */
-	 i = 4;
-	 break;
-	 
-       default:  /* convert ISO8859-1 to ISO-8859-1 */
-	 i = 3;
-	 break;
-       }
-
-       sprintf( cset, "ISO-%s", cs + i );
-     } else {
-       /* not ISOxxx */
-       strcpy( cset, cs );
-     }
-
-     szTerminalCharset = cset;
-   } else {
-     /* nl_lang_info failed */
-     szTerminalCharset = "ISO-8859-1"; /* best guess */
-   }
- }
-#else
-    szTerminalCharset = "ISO-8859-1"; /* best guess */
-#endif
 
 #if USE_GTK
 
@@ -7772,12 +7722,15 @@ int main(int argc, char *argv[] ) {
 	if( fReadline ) {
 
           char *pchExpanded;
+          char *szInput;
 
-	    while( !( sz = readline( FormatPromptConvert() ) ) ) {
+	    while( !( szInput = readline( FormatPromptConvert() ) ) ) {
 		outputc( '\n' );
 		PromptForExit();
 	    }
-	    
+            sz = locale_to_utf8(szInput);
+            free(szInput);
+
 	    fInterrupt = FALSE;
 
             history_expand( sz, &pchExpanded );
@@ -7788,7 +7741,7 @@ int main(int argc, char *argv[] ) {
 	    HandleCommand( pchExpanded, acTop );
 	    
             free( pchExpanded );
-	    free( sz );
+	    g_free( sz );
 	} else
 #endif
 	    {
@@ -8795,6 +8748,27 @@ extern void CommandSetImportFileType(char *sz)
 	}
 
  	outputl(_("Invalid file type specified"));
+}
+
+extern char * locale_from_utf8 ( const char *sz) {
+    char *ret;
+    GError *error=NULL; 
+    if (!sz) return NULL;
+    ret = g_locale_from_utf8 (sz, strlen(sz), NULL, NULL, &error);
+    if (error) {
+        printf("locale_from_utf8 failed\nfrom '%s'\nto\n '%s'\nThe error was: %s\n", sz, ret, error -> message);
+    }
+    return ret;
+}
+extern char * locale_to_utf8 ( const char *sz) {
+    char *ret;
+    GError *error=NULL; 
+    if (!sz) return NULL;
+    ret = g_locale_to_utf8 (sz, strlen(sz), NULL, NULL, &error);
+    if (error) {
+        printf("locale_to_utf8 failed\nfrom '%s'\nto '%s'\nThe reason was, %s\n", sz, ret, error -> message);
+    }
+    return ret;
 }
 
 void setlangenv(char *newLangCode)

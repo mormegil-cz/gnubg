@@ -2322,7 +2322,7 @@ extern void RunGTK( GtkWidget *pwSplash )
 #if HAVE_LIBREADLINE
 		if( fReadline ) {
 			fReadingCommand = TRUE;
-			rl_callback_handler_install( FormatPrompt(), HandleInput );
+			rl_callback_handler_install( FormatPrompt(), ProcessInput );
 			atexit( rl_callback_handler_remove );
 		} else
 #endif

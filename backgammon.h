@@ -615,7 +615,7 @@ extern void UserCommand( char* sz );
 extern void HandleXAction( void );
 #if HAVE_LIBREADLINE
 extern int fReadingCommand;
-extern void HandleInput( char* sz );
+extern void ProcessInput( char* sz );
 #endif
 extern void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 extern void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
@@ -674,8 +674,7 @@ InvalidateStoredCube( void );
 #define VERSION_STRING "GNU Backgammon " VERSION
 
 extern char *GetBuildInfoString();
-extern char *szHomeDirectory, *szDataDirectory,
-    *szTerminalCharset;
+extern char *szHomeDirectory, *szDataDirectory;
 
 extern char* aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];
@@ -1244,9 +1243,9 @@ extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 
 #define GNUBG_CHARSET "UTF-8"
 
-extern char *
-Convert ( const char* sz, 
-          const char* szSourceCharset, const char* szDestCharset );
+extern char * locale_from_utf8 (const char * sz);
+
+extern char * locale_to_utf8 (const char * sz);
 
 extern void
 OptimumRoll ( int anBoard[ 2 ][ 25 ], 

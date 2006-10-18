@@ -1,3 +1,8 @@
+Wed Oct 18 09:31:12 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, gtkgame.c, postscript.c, sgf.c: charset
+	conversion cleanup
+
 Tue Oct 17 15:03:08 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* drawboard.c: avoid assuming length of translated strings

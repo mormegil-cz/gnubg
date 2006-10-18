@@ -155,14 +155,14 @@ static list *LoadCollection(char *sz)
     return plCollection;
 }
 
-static void CopyName(int i, char *sz, char *szCharset)
+static void CopyName(int i, char *sz)
 {
 
     char *pc;
 
     /* FIXME sanity check the name as in CommandSetPlayerName */
 
-    pc = Convert(sz, GNUBG_CHARSET, szCharset);
+    pc = strdup(sz);
 
     if (strlen(pc) > 31)
 	pc[31] = 0;
@@ -319,11 +319,10 @@ static void RestoreGS(list * pl, statcontext * psc)
     AddStatcontext(psc, &scMatch);
 }
 
-static char *CopyEscapedString(const char *pchOrig, const char *szCharset)
+static char *CopyEscapedString(const char *pchOrig)
 {
 
     char *sz, *pch;
-    char *pc;
 
     for (pch = sz = malloc(strlen(pchOrig) + 1); *pchOrig; pchOrig++) {
 	if (*pchOrig == '\\') {
@@ -344,14 +343,11 @@ static char *CopyEscapedString(const char *pchOrig, const char *szCharset)
 
     *pch = 0;
 
-    pc = Convert(sz, GNUBG_CHARSET, szCharset);
-    free(sz);
-
-    return pc;
+    return sz;
 
 }
 
-static void RestoreText(char *sz, char **ppch, const char *szCharset)
+static void RestoreText(char *sz, char **ppch)
 {
 
     if (!sz || !*sz)
@@ -360,7 +356,7 @@ static void RestoreText(char *sz, char **ppch, const char *szCharset)
     if (*ppch)
 	free(*ppch);
 
-    *ppch = CopyEscapedString(sz, szCharset);
+    *ppch = CopyEscapedString(sz);
 }
 
 static void RestoreRules(xmovegameinfo * pmgi, const char *sz)
@@ -403,7 +399,7 @@ static void RestoreRules(xmovegameinfo * pmgi, const char *sz)
 
 
 
-static void RestoreRootNode(list * pl, char *szCharset)
+static void RestoreRootNode(list * pl)
 {
 
     property *pp;
@@ -439,15 +435,12 @@ static void RestoreRootNode(list * pl, char *szCharset)
 	if (pp->ach[0] == 'M' && pp->ach[1] == 'I')
 	    /* MI - Match info property */
 	    RestoreMI(pp->pl, pmr);
-	else if (pp->ach[0] == 'C' && pp->ach[1] == 'A')
-	    /* CA - charset property */
-	    strcpy(szCharset, (const char *) pp->pl->plNext->p);
 	else if (pp->ach[0] == 'P' && pp->ach[1] == 'B')
 	    /* PB - Black player property */
-	    CopyName(1, pp->pl->plNext->p, szCharset);
+	    CopyName(1, pp->pl->plNext->p);
 	else if (pp->ach[0] == 'P' && pp->ach[1] == 'W')
 	    /* PW - White player property */
-	    CopyName(0, pp->pl->plNext->p, szCharset);
+	    CopyName(0, pp->pl->plNext->p);
 	else if (pp->ach[0] == 'R' && pp->ach[1] == 'E') {
 	    /* RE - Result property */
 	    pch = pp->pl->plNext->p;
@@ -485,10 +478,10 @@ static void RestoreRootNode(list * pl, char *szCharset)
 	    RestoreGS(pp->pl, &pmr->g.sc);
 	else if (pp->ach[0] == 'W' && pp->ach[1] == 'R')
 	    /* WR - White rank */
-	    RestoreText(pp->pl->plNext->p, &mi.pchRating[0], szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchRating[0]);
 	else if (pp->ach[0] == 'B' && pp->ach[1] == 'R')
 	    /* BR - Black rank */
-	    RestoreText(pp->pl->plNext->p, &mi.pchRating[1], szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchRating[1]);
 	else if (pp->ach[0] == 'D' && pp->ach[1] == 'T') {
 	    /* DT - Date */
 	    int nYear, nMonth, nDay;
@@ -502,19 +495,19 @@ static void RestoreRootNode(list * pl, char *szCharset)
 	    }
 	} else if (pp->ach[0] == 'E' && pp->ach[1] == 'V')
 	    /* EV - Event */
-	    RestoreText(pp->pl->plNext->p, &mi.pchEvent, szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchEvent);
 	else if (pp->ach[0] == 'R' && pp->ach[1] == 'O')
 	    /* RO - Round */
-	    RestoreText(pp->pl->plNext->p, &mi.pchRound, szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchRound);
 	else if (pp->ach[0] == 'P' && pp->ach[1] == 'C')
 	    /* PC - Place */
-	    RestoreText(pp->pl->plNext->p, &mi.pchPlace, szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchPlace);
 	else if (pp->ach[0] == 'A' && pp->ach[1] == 'N')
 	    /* AN - Annotator */
-	    RestoreText(pp->pl->plNext->p, &mi.pchAnnotator, szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchAnnotator);
 	else if (pp->ach[0] == 'G' && pp->ach[1] == 'C')
 	    /* GC - Game comment */
-	    RestoreText(pp->pl->plNext->p, &mi.pchComment, szCharset);
+	    RestoreText(pp->pl->plNext->p, &mi.pchComment);
 
     AddMoveRecord(pmr);
 }
@@ -1130,7 +1123,7 @@ static void PointList(list * pl, int an[])
     }
 }
 
-static void RestoreNode(list * pl, char *szCharset)
+static void RestoreNode(list * pl)
 {
 
     property *pp, *ppDA = NULL, *ppA = NULL, *ppC = NULL;
@@ -1350,7 +1343,7 @@ static void RestoreNode(list * pl, char *szCharset)
 #endif
 
     if (pmr && ppC)
-	pmr->sz = CopyEscapedString(ppC->pl->plNext->p, szCharset);
+	pmr->sz = CopyEscapedString(ppC->pl->plNext->p);
 
     if (pmr) {
 
@@ -1398,33 +1391,33 @@ static void RestoreNode(list * pl, char *szCharset)
     }
 }
 
-static void RestoreSequence(list * pl, int fRoot, char *szCharset)
+static void RestoreSequence(list * pl, int fRoot)
 {
 
     pl = pl->plNext;
     if (fRoot)
-	RestoreRootNode(pl->p, szCharset);
+	RestoreRootNode(pl->p);
     else
-	RestoreNode(pl->p, szCharset);
+	RestoreNode(pl->p);
 
     while (pl = pl->plNext, pl->p)
-	RestoreNode(pl->p, szCharset);
+	RestoreNode(pl->p);
 }
 
-static void RestoreTree(list * pl, int fRoot, char *szCharset)
+static void RestoreTree(list * pl, int fRoot)
 {
 
     pl = pl->plNext;
-    RestoreSequence(pl->p, fRoot, szCharset);
+    RestoreSequence(pl->p, fRoot);
 
     pl = pl->plNext;
     if (pl->p)
-	RestoreTree(pl->p, FALSE, szCharset);
+	RestoreTree(pl->p, FALSE);
 
     /* FIXME restore other variations, once we can handle them */
 }
 
-static void RestoreGame(list * pl, char *szCharset)
+static void RestoreGame(list * pl)
 {
 
     moverecord *pmr, *pmrResign;
@@ -1447,7 +1440,7 @@ static void RestoreGame(list * pl, char *szCharset)
     ms.gc.pc[0].tc.timing = ms.gc.pc[1].tc.timing = TC_NONE;
 #endif
 
-    RestoreTree(pl, TRUE, szCharset);
+    RestoreTree(pl, TRUE);
 
     pmr = plGame->plNext->p;
     assert(pmr->mt == MOVE_GAMEINFO);
@@ -1484,7 +1477,6 @@ extern void CommandLoadGame(char *sz)
 {
 
     list *pl;
-    char szCharset[80] = "ISO-8859-1";
 
     sz = NextToken(&sz);
 
@@ -1517,7 +1509,7 @@ extern void CommandLoadGame(char *sz)
 
 	/* FIXME if pl contains multiple games, ask which one to load */
 
-	RestoreGame(pl->plNext->p, szCharset);
+	RestoreGame(pl->plNext->p);
 
 	FreeGameTreeSeq(pl);
 
@@ -1544,7 +1536,6 @@ extern void CommandLoadPosition(char *sz)
 {
 
     list *pl;
-    char szCharset[80] = "ISO-8859-1";
 
     sz = NextToken(&sz);
 
@@ -1577,7 +1568,7 @@ extern void CommandLoadPosition(char *sz)
 
 	/* FIXME if pl contains multiple games, ask which one to load */
 
-	RestoreGame(pl->plNext->p, szCharset);
+	RestoreGame(pl->plNext->p);
 
 	FreeGameTreeSeq(pl);
 
@@ -1601,7 +1592,6 @@ extern void CommandLoadMatch(char *sz)
 {
 
     list *pl;
-    char szCharset[80];
 
     sz = NextToken(&sz);
 
@@ -1635,8 +1625,7 @@ extern void CommandLoadMatch(char *sz)
 	ClearMatch();
 
 	for (pl = pl->plNext; pl->p; pl = pl->plNext) {
-	    strcpy(szCharset, "ISO-8859-1");
-	    RestoreGame(pl->p, szCharset);
+	    RestoreGame(pl->p);
 	}
 
 	FreeGameTreeSeq(pl);
@@ -1687,18 +1676,8 @@ static void WriteEscapedString(FILE * pf, char *pch, int fEscapeColons)
 
     *pc++ = 0;
 
-
-    /* convert string */
-
-    pc = Convert(sz, "UTF-8", GNUBG_CHARSET);
-
-    if (pc) {
-	fputs(pc, pf);
-	free(pc);
-    }
-
+    fputs(sz, pf);
     free(sz);
-
 }
 
 static void WriteEvalContext(FILE * pf, const evalcontext * pec)
