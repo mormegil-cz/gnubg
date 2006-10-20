@@ -2056,7 +2056,7 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
 	{ N_("/_Settings/Paths..."), NULL, Command, CMD_SHOW_PATH, NULL },
-	{ N_("/_Settings/Language..."), NULL, SetLanguage, 0, NULL },
+	{ N_("/_Settings/_Language..."), NULL, SetLanguage, 0, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL },
