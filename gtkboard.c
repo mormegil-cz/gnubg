@@ -873,6 +873,10 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 	int iDestLegal = TRUE;
 	int bar = bd->drag_colour == bd->colour ? bd->bar : 25 - bd->bar; /* determine point number of bar */
 
+	if (bd->valid_move && bd->valid_move->cMoves == bd->move_list.cMaxMoves
+		    && bd->valid_move->cPips == bd->move_list.cMaxPips)
+		return FALSE;	/* Complete move already made */
+
 	/* initialise */
 	for (i = 0; i <= 3; ++i)
 		iDestPoints[i] = -1;
