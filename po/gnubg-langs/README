@@ -1,0 +1,13 @@
+After a .po file has been modified you should run
+
+./collect-gettext-statistics.sh
+
+to update the __catstatus.php, and submit this file to the gnubg.org website.
+
+To update the list of translatable strings run "make gnubg.pot-update" and
+"make update-po" in ../po. Then run
+
+./collect-gettext-statistics.sh
+
+to update the __catstatus.php, and submit this file to the gnubg.org website.
+

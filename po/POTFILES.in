@@ -73,6 +73,7 @@ gtkprefs.c
 gtkprefs.h
 gtkrace.c
 gtkrace.h
+gtkrelational.c
 gtkrolls.c
 gtkrolls.h
 gtksplash.c

@@ -1,3 +1,8 @@
+Mon Oct 23 12:11:44 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.pot, *.po: merge and update.
+	* gnubg-langs: new directory.
+
 Sun Sep 24 05:24:40 2006 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* ja.po: Update fuzzy entries.
