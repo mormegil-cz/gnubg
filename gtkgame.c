@@ -6916,7 +6916,7 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_PREV_GAME ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 				      pif, "/Game/Match information..." ),
-				  TRUE );
+				  !ListEmpty( &lMatch ) );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
 			 ms.gs == GAME_PLAYING );
@@ -7961,10 +7961,54 @@ static void UpdateMatchinfo( const char *pch, char *szParam, char **ppch ) {
     g_free( szCommand );
 }
 
-static void MatchInfoOK( GtkWidget *pw, int *pf ) {
+/* Variables for match info dialog */
+GtkWidget *apwRating[ 2 ], *pwDate, *pwEvent,
+		*pwRound, *pwPlace, *pwAnnotator;
+GtkTextBuffer *buffer;
 
-    *pf = TRUE;
-    gtk_main_quit();
+extern void MatchInfoOK( GtkWidget *pw, int *pf )
+{
+    GtkTextIter begin, end;
+	unsigned int nYear, nMonth, nDay;
+	char *pch;
+	
+	outputpostpone();
+
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 0 ] ) ),
+			 "rating 0", &mi.pchRating[ 0 ] );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 1 ] ) ),
+			 "rating 1", &mi.pchRating[ 1 ] );
+	
+	gtk_calendar_get_date( GTK_CALENDAR( pwDate ), &nYear, &nMonth,
+			       &nDay );
+	nMonth++;
+	if( mi.nYear && !nDay )
+	    UserCommand( "set matchinfo date" );
+	else if( nDay && ( !mi.nYear || mi.nYear != nYear ||
+			   mi.nMonth != nMonth || mi.nDay != nDay ) ) {
+	    char sz[ 64 ];
+	    sprintf( sz, "set matchinfo date %04d-%02d-%02d", nYear, nMonth,
+		     nDay );
+	    UserCommand( sz );
+	}
+	    
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwEvent ) ),
+			 "event", &mi.pchEvent );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwRound ) ),
+			 "round", &mi.pchRound );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwPlace ) ),
+			 "place", &mi.pchPlace );
+	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwAnnotator ) ),
+			 "annotator", &mi.pchAnnotator );
+
+        gtk_text_buffer_get_bounds (buffer, &begin, &end);
+        pch = gtk_text_buffer_get_text(buffer, &begin, &end, FALSE);
+	UpdateMatchinfo( pch, "comment", &mi.pchComment );
+	g_free( pch );
+
+	outputresume();
+
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
 static void AddToTable(GtkWidget* pwTable, char* str, int x, int y)
@@ -7979,20 +8023,11 @@ static void AddToTable(GtkWidget* pwTable, char* str, int x, int y)
 extern void GTKMatchInfo( void )
 {
     int fOK = FALSE;
-    GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Match information"),
-		DT_QUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( MatchInfoOK ), &fOK ),
-	*pwTable, *apwRating[ 2 ], *pwDate, *pwEvent, *pwRound, *pwPlace,
-	*pwAnnotator, *pwComment;
-    char sz[ 128 ], *pch;
-    gulong id;
-    GtkTextBuffer *buffer;
-    GtkTextIter begin, end;
+    GtkWidget *pwDialog, *pwTable, *pwComment;
+    char sz[ 128 ];
     
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    id = gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			     GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    pwDialog = GTKCreateDialog( _("GNU Backgammon - Match information"),
+		DT_QUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(MatchInfoOK), &fOK ),
 
     pwTable = gtk_table_new( 5, 7, FALSE );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -8069,46 +8104,6 @@ extern void GTKMatchInfo( void )
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
-
-    if( fOK ) {
-	unsigned int nYear, nMonth, nDay;
-	
-	outputpostpone();
-
-	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 0 ] ) ),
-			 "rating 0", &mi.pchRating[ 0 ] );
-	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( apwRating[ 1 ] ) ),
-			 "rating 1", &mi.pchRating[ 1 ] );
-	
-	gtk_calendar_get_date( GTK_CALENDAR( pwDate ), &nYear, &nMonth,
-			       &nDay );
-	nMonth++;
-	if( mi.nYear && !nDay )
-	    UserCommand( "set matchinfo date" );
-	else if( nDay && ( !mi.nYear || mi.nYear != nYear ||
-			   mi.nMonth != nMonth || mi.nDay != nDay ) ) {
-	    char sz[ 64 ];
-	    sprintf( sz, "set matchinfo date %04d-%02d-%02d", nYear, nMonth,
-		     nDay );
-	    UserCommand( sz );
-	}
-	    
-	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwEvent ) ),
-			 "event", &mi.pchEvent );
-	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwRound ) ),
-			 "round", &mi.pchRound );
-	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwPlace ) ),
-			 "place", &mi.pchPlace );
-	UpdateMatchinfo( gtk_entry_get_text( GTK_ENTRY( pwAnnotator ) ),
-			 "annotator", &mi.pchAnnotator );
-
-        gtk_text_buffer_get_bounds (buffer, &begin, &end);
-        pch = gtk_text_buffer_get_text(buffer, &begin, &end, FALSE);
-	UpdateMatchinfo( pch, "comment", &mi.pchComment );
-	g_free( pch );
-
-	outputresume();
-    }
 }
 
 static void CalibrationOK( GtkWidget *pw, GtkWidget **ppw ) {
