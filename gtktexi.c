@@ -1083,7 +1083,7 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
 static void Characters( void *pv, const xmlChar *pchIn, int cch ) {
 
     GtkTexi *pw = pv;
-    VARIABLE_ARRAY(char, sz, cch)
+    VARIABLE_ARRAY(char, sz, cch + 1)
     char *pch;
 
 #if DEBUG_XML
