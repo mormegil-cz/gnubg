@@ -582,7 +582,7 @@ static void ScanErr( void *pv, const char *msg, ... )
 static xmlEntity xmlEntityCprt = {
     NULL, XML_ENTITY_DECL, BAD_CAST "copyright",
     NULL, NULL, NULL, NULL, NULL, NULL, 
-    BAD_CAST "©", BAD_CAST "©", 1,
+    BAD_CAST "Â©", BAD_CAST "Â©", 1,
     XML_INTERNAL_PREDEFINED_ENTITY,
     NULL, NULL, NULL, NULL
 };
@@ -596,14 +596,14 @@ static xmlEntity xmlEntityBullet = {
 static xmlEntity xmlEntityLdQuo = {
     NULL, XML_ENTITY_DECL, BAD_CAST "ldqu",
     NULL, NULL, NULL, NULL, NULL, NULL, 
-    BAD_CAST "‘", BAD_CAST "‘", 1,
+    BAD_CAST "Â«", BAD_CAST "Â«", 1,
     XML_INTERNAL_PREDEFINED_ENTITY,
     NULL, NULL, NULL, NULL
 };
 static xmlEntity xmlEntityRdQuo = {
     NULL, XML_ENTITY_DECL, BAD_CAST "rdqu",
     NULL, NULL, NULL, NULL, NULL, NULL, 
-    BAD_CAST "’", BAD_CAST "’", 1,
+    BAD_CAST "Â»", BAD_CAST "Â»", 1,
     XML_INTERNAL_PREDEFINED_ENTITY,
     NULL, NULL, NULL, NULL
 };
