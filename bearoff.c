@@ -733,7 +733,6 @@ ReadSconyers15x15( bearoffcontext *pbc,
   long lPos;
   unsigned char ac[ 16 ];
   float ar[ 4 ];
-  float *pr;
   long l;
   int i;
   int h = -1;
@@ -869,8 +868,12 @@ ReadSconyers15x15( bearoffcontext *pbc,
       ( ac[ 4 * i + 1 ] << 8 ) |
       ( ac[ 4 * i + 2 ] << 16 ) |
       ( ac[ 4 * i + 3 ] << 24 );
-    pr = (float *) &l;
-    ar[ i ] = *pr;
+    /* the commented code is strange and causes compiler warnings
+     * float* pr; 
+     * pr = (float *) &l; 
+     * ar[ i ] = *pr; 
+     * and is therefore replaced by */
+    ar[ i ] = (float)l;
   }
 
   /* Save equities */
