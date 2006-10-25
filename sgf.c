@@ -1521,7 +1521,7 @@ extern void CommandLoadGame(char *sz)
 	    GTKSet(ap);
 	}
 
-	setDefaultFileName(sz, PATH_SGF);
+	setDefaultFileName(sz);
 
 #endif
 
@@ -1580,7 +1580,7 @@ extern void CommandLoadPosition(char *sz)
 	    GTKSet(ap);
 	}
 
-	setDefaultFileName(sz, PATH_SGF);
+	setDefaultFileName(sz);
 
 #endif
 
@@ -1639,7 +1639,7 @@ extern void CommandLoadMatch(char *sz)
 	}
 #endif
 
-	setDefaultFileName(sz, PATH_SGF);
+	setDefaultFileName(sz);
 
 	if (fGotoFirstGame)
 	    CommandFirstGame(NULL);
@@ -2486,7 +2486,7 @@ extern void CommandSaveGame(char *sz)
     if (pf != stdout)
 	fclose(pf);
 
-    setDefaultFileName(sz, PATH_SGF);
+    setDefaultFileName(sz);
 
 }
 
@@ -2527,7 +2527,7 @@ extern void CommandSaveMatch(char *sz)
     if (pf != stdout)
 	fclose(pf);
 
-    setDefaultFileName(sz, PATH_SGF);
+    setDefaultFileName(sz);
 
 }
 
@@ -2648,5 +2648,5 @@ extern void CommandSavePosition(char *sz)
     free(pmscv);
     free(pmscp);
 
-    setDefaultFileName(sz, PATH_SGF);
+    setDefaultFileName(sz);
 }

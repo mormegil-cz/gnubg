@@ -58,7 +58,7 @@ annealing.png: annealing.eps
 	$(PSTOPNM) -portrait -xsize 1024 $<; \
 	$(PNMSCALE) 0.5 < annealing.eps001.ppm | $(PNMTOPNG) > \
 		$(srcdir)/annealing.png; fi
-	-rm annealing.eps001.ppm
+	-rm -f annealing.eps001.ppm
 
 .png.eps:
 	if [ -n "$(PNGTOPNM)" -a -n "$(PNMTOPS)" ]; then \
@@ -76,4 +76,3 @@ annealing.png: annealing.eps
 ## worrying about them, so we ignore failures.
 .texi.xml:
 	-cd $(srcdir) && $(MAKEINFO) --xml `echo $< | sed 's,.*/,,'` -o $@ 
-	-cp $(datadir)/texinfo/texinfo.dtd $(srcdir)/

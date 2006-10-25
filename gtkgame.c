@@ -65,6 +65,7 @@
 #endif
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -81,6 +82,7 @@
 #include "gtktexi.h"
 #include "gtkrelational.h"
 #include <glib/gi18n.h>
+#include "gtkfile.h"
 #include "matchequity.h"
 #include "openurl.h"
 #include "path.h"
@@ -95,6 +97,7 @@
 #include "credits.h"
 #include "matchid.h"
 #include "gtkwindows.h"
+#include "export.h"
 
 #if USE_TIMECONTROL
 #include "timecontrol.h"
@@ -236,7 +239,6 @@ typedef enum _gnubgcommand {
     CMD_SHOW_MANUAL_WEB,
     CMD_SHOW_ONECHEQUER,
     CMD_SHOW_ONESIDEDROLLOUT,
-    CMD_SHOW_PATH,
     CMD_SHOW_PIPCOUNT,
     CMD_SHOW_ROLLS,
     CMD_SHOW_STATISTICS_GAME,
@@ -325,7 +327,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show manual web",
     "show onechequer",
     "show onesidedrollout",
-    "show path",
     "show pipcount",
     "show rolls",
     "show statistics game",
@@ -357,10 +358,6 @@ static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw );
 #endif
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void NewClicked( gpointer *p, guint n, GtkWidget *pw );
-static void OpenClicked( gpointer *p, guint n, GtkWidget *pw );
-static void SaveClicked( gpointer *p, guint n, GtkWidget *pw );
-static void ImportClicked( gpointer *p, guint n, GtkWidget *pw );
-static void ExportClicked( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
 static void SetLanguage( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
@@ -1828,15 +1825,14 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
 		"<StockItem>", GTK_STOCK_NEW
 	},
-	{ N_("/_File/_Open..."), "<control>O", OpenClicked, 0, 
+	{ N_("/_File/_Open..."), "<control>O", GTKOpen, 0, 
 		"<StockItem>", GTK_STOCK_OPEN
 	},
-	{ N_("/_File/Open _Commands..."), NULL, LoadCommands, 0, NULL },
-	{ N_("/_File/_Save..."), "<control>S", SaveClicked, 0, 
+	{ N_("/_File/_Load _Commands File..."), NULL, LoadCommands, 0, NULL },
+	{ N_("/_File/_Save..."), "<control>S", GTKSave, 0, 
 		"<StockItem>", GTK_STOCK_SAVE
 	},
-	{ N_("/_File/_Import..."), NULL, ImportClicked, 0, NULL },
-	{ N_("/_File/_Export..."), NULL, ExportClicked, 0, NULL },
+	{ N_("/_File/_Export..."), NULL, GTKExport, 0, NULL },
 	{ N_("/_File/Generate _HTML Images..."), NULL, ExportHTMLImages, 0,
 	  NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
@@ -2055,7 +2051,6 @@ GtkItemFactoryEntry aife[] = {
 #endif
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
-	{ N_("/_Settings/Paths..."), NULL, Command, CMD_SHOW_PATH, NULL },
 	{ N_("/_Settings/_Language..."), NULL, SetLanguage, 0, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Save settings"), 
@@ -3123,79 +3118,6 @@ static void NewClicked( gpointer *p, guint n, GtkWidget *pw ) {
   GTKNew();
 }
 
-static void OpenClicked( gpointer *p, guint n, GtkWidget *pw ) {
-  GTKOpen();
-}
-
-static void SaveClicked( gpointer *p, guint n, GtkWidget *pw ) {
-  GTKSave();
-}
-
-static void ImportClicked( gpointer *p, guint n, GtkWidget *pw ) {
-  GTKImport();
-}
-
-static void ExportClicked( gpointer *p, guint n, GtkWidget *pw ) {
-  GTKExport();
-}
-
-extern void 
-GTKOpen( void ) {
-
-  char *sz = getDefaultPath ( PATH_SGF );
-
-  GTKFileCommand(_("Open match, session, game or position"), 
-		   sz, "load match", "sgf", FDT_NONE_OPEN, PATH_SGF);
-  if ( sz ) 
-    free ( sz );
-}
-
-extern void 
-GTKSave( void ) {
-
-  char *sz = getDefaultFileName ( PATH_SGF );
-  GTKFileCommand(_("Save match, session, game or position"), 
-		   sz, "save", "sgf", FDT_SAVE, PATH_SGF);
-  if ( sz ) 
-    free ( sz );
-}
-
-extern void 
-GTKImport( void ) {
-
-	/* Order of import types in menu */
-	int impTypes[] = {PATH_BKG, PATH_MAT, PATH_POS, PATH_OLDMOVES, PATH_SGG,
-		PATH_TMG, PATH_MAT, PATH_SNOWIE_TXT};
-	char* sz = NULL;
-
-	if (lastImportType != -1)
-		sz = getDefaultPath(impTypes[lastImportType]);
-
-	GTKFileCommand(_("Import match, session, game or position"), 
-		   sz, "import", "N", FDT_IMPORT, impTypes[lastImportType]);
-
-	if (sz)
-		free(sz);
-}
-
-extern void 
-GTKExport( void ) {
-
-	/* Order of export types in menu */
-	int expTypes[] = {PATH_HTML, PATH_GAM, PATH_POS, PATH_MAT, PATH_GAM, 
-		PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, -1, PATH_TEXT, -1, PATH_SNOWIE_TXT};
-	char* sz = NULL;
-
-	if (lastExportType != -1 && expTypes[lastExportType] != -1)
-		sz = getDefaultPath(expTypes[lastExportType]);
-
-	GTKFileCommand(_("Export match, session, game or position"), 
-		   sz, "export", "N", FDT_EXPORT_FULL, expTypes[lastExportType]);
-
-	if (sz)
-		free(sz);
-}
-
 extern void GTKNew( void ){
 	
   GtkWidget *pwDialog, *pwPage;
@@ -3216,465 +3138,38 @@ extern void GTKNew( void ){
 
 }
 
-typedef struct _filethings {
-	GtkWidget *pwom;
-	GtkWidget *pwRBMatch, *pwRBGame, *pwRBPosition;
-	filedialogtype fdt;
-	int n;
-	char *pch;
-} filethings;
-
-static GtkWidget *
-get_menu_item( GtkWidget *pwMenu, const gint index ) {
-
-   GList *children = GTK_MENU_SHELL( pwMenu )->children;
-   GList *child = g_list_nth( children, index );
-   return GTK_WIDGET( child->data );
-}
-
-static void
-ClickedRadioButton(GtkWidget *pw, filethings *pft) {
-  
-  GtkWidget *pwMenu = gtk_option_menu_get_menu(GTK_OPTION_MENU(pft->pwom));
-  int i;
-  int afSens[13][3] = { { TRUE, TRUE, TRUE },     /* HTML */
-                        { FALSE, FALSE, TRUE },   /* GammOnLine */
-                        { FALSE, FALSE, TRUE },   /* .pos */
-                        { TRUE, FALSE, FALSE },   /* .mat */
-                        { FALSE, TRUE, FALSE },   /* .gam */
-                        { TRUE, TRUE, FALSE  },   /* LaTeX */
-                        { TRUE, TRUE, FALSE  },   /* PDF */
-                        { TRUE, TRUE, FALSE  },   /* PostScript */
-                        { FALSE, FALSE, TRUE },   /* EPS */
-                        { FALSE, FALSE, TRUE },   /* PNG */
-			{ TRUE, TRUE, TRUE },     /* Text */
-			{ TRUE, TRUE, FALSE },    /* Eq. evolution */
-                        { FALSE, FALSE, TRUE }};  /* Snowie txt position */
-
-  if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pft->pwRBMatch)))
-    for (i = 0; i < 13; i++)
-      gtk_widget_set_sensitive(GTK_WIDGET( get_menu_item( pwMenu, i )),
-	    afSens[i][0]);
-
-  if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pft->pwRBGame)))
-    for (i = 0; i < 13; i++)
-      gtk_widget_set_sensitive(GTK_WIDGET( get_menu_item( pwMenu, i )),
-	    afSens[i][1]);
-
-  if ( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pft->pwRBPosition)))
-    for (i = 0; i < 13; i++)
-      gtk_widget_set_sensitive(GTK_WIDGET( get_menu_item( pwMenu, i )),
-	    afSens[i][2]);
-}
-  
-static void FileOK( GtkWidget *pw, filethings *pft ) {
-	
-    static char *aszImpFormat[] = { "bkg", "mat", "pos", "oldmoves", "sgg",
-	    "tmg", "mat", "snowietxt"};
-    static char *aszExpFormat[] = { "html", "gammonline", "pos", "mat", "gam",
-	    "latex", "pdf", "postscript", "eps", "png", "text" ,
-            "equityevolution", "snowietxt" };
-
-    GtkWidget *pwFile = gtk_widget_get_toplevel( pw );
-    
-    switch( pft->fdt) {
-      case FDT_NONE:
-      case FDT_NONE_OPEN:
-      case FDT_EXPORT:
-        pft->pch = g_strdup_printf("\"%s\"",
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-	break;
-
-      case FDT_IMPORT:
-		pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
-		lastImportType = pft->n;
-		pft->pch = g_strdup_printf("%s \"%s\"", aszImpFormat[pft->n], 
-		gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-        break;
-
-      case FDT_SAVE:
-      case FDT_NONE_SAVE:
-        if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBMatch )))
-           pft->pch = g_strdup_printf("match \"%s\"",  
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-	
-	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBGame)))
-           pft->pch = g_strdup_printf("game \"%s\"",  
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBPosition )))
-           pft->pch = g_strdup_printf("position \"%s\"",  
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-
-        break;
-      case FDT_EXPORT_FULL:
-        pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
-        lastExportType = pft->n;
-        if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBMatch )))
-           pft->pch = g_strdup_printf("match %s \"%s\"", aszExpFormat[pft->n],  
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-	
-	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBGame)))
-           pft->pch = g_strdup_printf("game %s \"%s\"",  aszExpFormat[pft->n], 
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBPosition )))
-           pft->pch = g_strdup_printf("position %s \"%s\"", aszExpFormat[pft->n], 
-             gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-
-    }
-    
-    gtk_widget_destroy( pwFile );
-}
-static void 
-GetDefaultFilename ( GtkWidget *pw, filethings *pft ) {
-
-  GtkWidget *pwFileDialog = gtk_widget_get_toplevel(pw);
-  char *sz;
-  pathformat apf[13] = { PATH_HTML, PATH_HTML, PATH_POS, PATH_MAT, PATH_GAM,
-	  PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, PATH_PNG, PATH_TEXT,
-	  PATH_TEXT, PATH_SNOWIE_TXT };
-	  
-  pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
-
-  sz = getDefaultFileName ( apf[pft->n] );
-  if( sz )
-     gtk_file_selection_set_filename( GTK_FILE_SELECTION( pwFileDialog ), sz );
-  
-  if( sz )
-    free ( sz );
-}
-
-static void 
-GetDefaultPath ( GtkWidget *pw, filethings *pft ) {
-
-  GtkWidget *pwFileDialog = gtk_widget_get_toplevel(pw);
-  char *sz;
-  pathformat apf[8] = { PATH_BKG, PATH_MAT, PATH_POS, PATH_OLDMOVES, PATH_SGG,
-	  PATH_TMG, PATH_MAT, PATH_SNOWIE_TXT };
-	  
-  pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
-
-  sz = getDefaultPath ( apf[pft->n] );
-  if( sz )
-     gtk_file_selection_set_filename( GTK_FILE_SELECTION( pwFileDialog ), sz );
-  
-  if( sz )
-    free ( sz );
-}
-static void SetDefaultPathFromImportExport( GtkWidget *pw, filethings *pft ) {
-
-    char *pch;
-    char *pc;
-    char *szFile = g_strdup ( gtk_file_selection_get_filename(
-			       GTK_FILE_SELECTION( gtk_widget_get_ancestor(
-                               pw, GTK_TYPE_FILE_SELECTION ) ) ) );
-    char sz[1028];
-    static char *aszImport[8] = { "bgk", "mat" , "pos", "oldmoves", "sgg",
-      "tmg", "mat", "snowietxt" };
-    static char *aszExport[13] = { "html", "html", "pos", "mat", "gam",
-	    "latex", "pdf", "postscript", "eps", "png", "text" ,
-            "text", "snowietxt" };
-
-	    
-    pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
-    
-    if (pft->fdt == FDT_IMPORT)
-       sprintf(sz, "%s", aszImport[pft->n]);
-    if (pft->fdt == FDT_EXPORT_FULL)
-       sprintf(sz, "%s", aszExport[pft->n]);
-    
-    if ( ( pc = strrchr ( szFile, DIR_SEPARATOR ) ) )
-      *pc = 0;
-
-    pch = g_strdup_printf( "set path %s \"%s\"", sz, szFile );
-    g_free ( szFile );
-
-    UserCommand( pch );
-    g_free( pch );
-}
-
-static void SetDefaultPath( GtkWidget *pw, char *sz ) {
-
-    char *pch;
-    char *pc;
-    char *szFile = g_strdup ( gtk_file_selection_get_filename(
-			       GTK_FILE_SELECTION( gtk_widget_get_ancestor(
-                               pw, GTK_TYPE_FILE_SELECTION ) ) ) );
-
-    if ( ( pc = strrchr ( szFile, DIR_SEPARATOR ) ) )
-      *pc = 0;
-
-    pch = g_strdup_printf( "set path %s \"%s\"", sz, szFile );
-    g_free ( szFile );
-
-    UserCommand( pch );
-    g_free( pch );
-}
-
-extern char *SelectFile( char *szTitle, char *szDefault, char *szPath,
-		filedialogtype fdt ) {
-
-    GtkWidget *pw = gtk_file_selection_new( szTitle ),
-	*pwButton, *pwExpSet; 
-
-    filethings ft;
-    ft.pch = NULL;
-    ft.fdt = fdt;
-    ft.n = 0;
-    ft.pwom = NULL;
-    
-    if( szPath ) {
-	pwButton = gtk_button_new_with_mnemonic( _("Set Default _Path") );
-	
-	gtk_widget_show( pwButton );
-	gtk_container_add( GTK_CONTAINER(
-			       gtk_widget_get_parent(
-				   GTK_FILE_SELECTION( pw )->fileop_c_dir ) ),
-			   pwButton );
-	if ((fdt == FDT_IMPORT) || (fdt == FDT_EXPORT_FULL))
-	    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-			    GTK_SIGNAL_FUNC( SetDefaultPathFromImportExport ),
-			    &ft );
-        else
-	    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-			    GTK_SIGNAL_FUNC( SetDefaultPath ), szPath );
-	
-    }
-    
-    if( (fdt == FDT_EXPORT) || (fdt == FDT_EXPORT_FULL) ) {
-	    
-	pwExpSet = gtk_button_new_with_label( _("Export settings...") );
-	
-	gtk_container_set_border_width(GTK_CONTAINER(pwExpSet), 5);
-	
-	gtk_widget_show( pwExpSet );
-	gtk_container_add( GTK_CONTAINER(
-			       gtk_widget_get_parent(
-				   GTK_FILE_SELECTION( pw )->ok_button ) ),
-			   pwExpSet );
-	gtk_signal_connect( GTK_OBJECT( pwExpSet ), "clicked",
-			    GTK_SIGNAL_FUNC( CommandShowExport ), szPath );
-    }
-    
-    if( fdt == FDT_SAVE ) {
-	GtkWidget *pwFrame, *pwVbox;
-
-	pwFrame = gtk_frame_new(ms.nMatchTo ? _("Save match, game or position") :
-			_("Save session, game or position"));
-	ft.pwRBMatch = gtk_radio_button_new_with_label( NULL, 
-			ms.nMatchTo ? _("Match") : _("Session"));
-	ft.pwRBGame = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(ft.pwRBMatch), _("Game")); 
-	ft.pwRBPosition = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(ft.pwRBMatch), _("Position")); 
-
-	pwVbox = gtk_vbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(pwVbox), ft.pwRBMatch);
-	gtk_container_add(GTK_CONTAINER(pwVbox), ft.pwRBGame);
-	gtk_container_add(GTK_CONTAINER(pwVbox), ft.pwRBPosition);
-	gtk_container_add(GTK_CONTAINER(pwFrame), pwVbox);
-
-        gtk_container_add( GTK_CONTAINER( 
-            gtk_widget_get_parent(gtk_widget_get_parent(
-	    GTK_FILE_SELECTION( pw )->ok_button ) )), pwFrame);
-	gtk_widget_show_all(pwFrame);
-    }
-    
-    if( fdt == FDT_EXPORT_FULL ) {
-	GtkWidget *pwFrame, *pwHbox, *pwVbox, *pwGetDefault, *pwm, *pwMI;
-        char **ppch;
-        static char *aszExportFormats[] = { N_("HTML"),
-	      N_("GammOnLine (HTML)"), N_(".pos"),
-	      N_(".mat"), N_(".gam"),
-	      N_("LaTeX"), N_("PDF"), 
-	      N_("PostScript"),
-	      N_("Encapsulated PostScript"),
-	      N_("PNG"),
-	      N_("Text"),
-	      N_("Equity evolution"),
-	      N_("Snowie .txt position file"),
-              NULL };
-
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	
-	pwFrame = gtk_frame_new(ms.nMatchTo ? _("Save match, game or position") :
-			_("Save session, game or position"));
-	ft.pwRBMatch = gtk_radio_button_new_with_label( NULL, 
-			ms.nMatchTo ? _("Match") : _("Session"));
-	ft.pwRBGame = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(ft.pwRBMatch), _("Game")); 
-	ft.pwRBPosition = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(ft.pwRBMatch), _("Position")); 
-
-
-	gtk_signal_connect(GTK_OBJECT(ft.pwRBMatch), "clicked",
-			GTK_SIGNAL_FUNC(ClickedRadioButton), &ft);
-
-	gtk_signal_connect(GTK_OBJECT(ft.pwRBGame), "clicked",
-			GTK_SIGNAL_FUNC(ClickedRadioButton), &ft);
-
-	gtk_signal_connect(GTK_OBJECT(ft.pwRBPosition), "clicked",
-			GTK_SIGNAL_FUNC(ClickedRadioButton), &ft);
-
-	pwVbox = gtk_vbox_new(FALSE, 0);
-	pwVbox = gtk_vbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(pwVbox), ft.pwRBMatch);
-	gtk_container_add(GTK_CONTAINER(pwVbox), ft.pwRBGame);
-	gtk_container_add(GTK_CONTAINER(pwVbox), ft.pwRBPosition);
-	gtk_container_add(GTK_CONTAINER(pwFrame), pwVbox);
-	gtk_container_add(GTK_CONTAINER(pwHbox), pwFrame);
-
-	pwVbox = gtk_vbox_new(FALSE, 0);
-        gtk_box_pack_start(GTK_BOX(pwVbox), 
-		gtk_label_new(_("Export to format: ")), FALSE, FALSE, 0);
-	
-        ft.pwom = gtk_option_menu_new ();
-	
-	gtk_container_set_border_width(GTK_CONTAINER(ft.pwom), 5);
-
-	gtk_box_pack_start( GTK_BOX ( pwVbox ), ft.pwom, 
-					  FALSE, FALSE, 4);
-	pwm = gtk_menu_new ();
-	for( ppch = aszExportFormats; *ppch; ++ppch )
-		gtk_menu_append( GTK_MENU( pwm ),
-			pwMI = gtk_menu_item_new_with_label(
-			gettext( *ppch ) ) );
-
-	gtk_widget_show_all( pwm );
-	gtk_option_menu_set_menu( GTK_OPTION_MENU ( ft.pwom ), pwm );
-	if (lastExportType != -1)
-		gtk_option_menu_set_history( GTK_OPTION_MENU ( ft.pwom ), lastExportType );
-
-	/* Get the sensitivities right */
-	ClickedRadioButton( NULL, &ft );
-
-	pwGetDefault = gtk_button_new_with_label(_("Get default filename"));
-	gtk_container_set_border_width(GTK_CONTAINER(pwGetDefault), 5);
-	gtk_signal_connect( GTK_OBJECT( pwGetDefault ), "clicked",
-			    GTK_SIGNAL_FUNC( GetDefaultFilename ), &ft );
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwGetDefault, FALSE, FALSE, 2 );
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox, FALSE, FALSE, 0 );
-	
-        gtk_container_add( GTK_CONTAINER( 
-            gtk_widget_get_parent(gtk_widget_get_parent(
-	    GTK_FILE_SELECTION( pw )->ok_button ) )), pwHbox);
-	gtk_widget_show_all(pwHbox);
-    }
-    
-    if(fdt == FDT_IMPORT){
-	    
-      GtkWidget *pwhbox, *pwMI, *pwm, *pwGetPath; 
-      char **ppch;
-      static char *aszImportFormats[] = { N_("BKG session"),
-	      N_(".mat match"), N_(".pos position"),
-	      N_("FIBS oldmoves"), N_("GamesGrid .sgg"), 
-	      N_("TrueMoneyGames .tmg match"),
-	      N_("Snowie standard text format"),
-	      N_("Snowie .txt position file"),
-              NULL };
-      
-      pwhbox = gtk_hbox_new(FALSE,0);
-      gtk_box_pack_start(GTK_BOX(pwhbox), 
-		gtk_label_new(_("Import from format: ")), FALSE, FALSE, 0);
-      ft.pwom = gtk_option_menu_new ();
-      gtk_box_pack_start( GTK_BOX ( pwhbox ), ft.pwom, 
-                          FALSE, FALSE, 0);
-
-      pwm = gtk_menu_new ();
-      for( ppch = aszImportFormats; *ppch; ++ppch )
-	gtk_menu_append( GTK_MENU( pwm ),
-			 pwMI = gtk_menu_item_new_with_label(
-			     gettext( *ppch ) ) );
-      
-      gtk_widget_show_all( pwm );
-      gtk_option_menu_set_menu( GTK_OPTION_MENU ( ft.pwom ), pwm );
-      if (lastImportType != -1)
-		gtk_option_menu_set_history( GTK_OPTION_MENU ( ft.pwom ), lastImportType );
-
-      pwGetPath = gtk_button_new_with_label(_("Go to default path"));
-      gtk_container_set_border_width(GTK_CONTAINER(pwGetPath), 5);
-      gtk_signal_connect( GTK_OBJECT( pwGetPath ), "clicked",
-			    GTK_SIGNAL_FUNC( GetDefaultPath ), &ft );
-	gtk_box_pack_start(GTK_BOX(pwhbox), pwGetPath, FALSE, FALSE, 2 );
-      
-      gtk_container_add( GTK_CONTAINER( 
-          gtk_widget_get_parent(gtk_widget_get_parent(
-          GTK_FILE_SELECTION( pw )->ok_button ) )), pwhbox);
-      gtk_widget_show_all(pwhbox);
-    }
-
-    if( szDefault )
-	gtk_file_selection_set_filename( GTK_FILE_SELECTION( pw ), szDefault );
-
-    gtk_signal_connect( GTK_OBJECT( GTK_FILE_SELECTION( pw )->ok_button ),
-			"clicked", GTK_SIGNAL_FUNC( FileOK ), &ft );
-    gtk_signal_connect_object( GTK_OBJECT( GTK_FILE_SELECTION( pw )->
-					   cancel_button ), "clicked",
-			       GTK_SIGNAL_FUNC( gtk_widget_destroy ),
-			       GTK_OBJECT( pw ) );
-    
-    gtk_window_set_modal( GTK_WINDOW( pw ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pw ), GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pw ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show( pw );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    return ft.pch;
-}
-
-extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
-                       char *szPath, filedialogtype fdt, pathformat pathId ) {
-
-  char *pch;
-
-  if (fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE) {
-    GTKFileCommand24(szPrompt, szDefault, szCommand, szPath, fdt, pathId);
-    return;
-  }
-
-  if (pathId == PATH_NULL || fdt == FDT_NONE_OPEN || fdt == FDT_NONE_SAVE)
-                     fdt = FDT_NONE;
-
-    if( ( pch = SelectFile( szPrompt, szDefault, szPath, fdt ) ) ) {
-	char *sz = g_alloca( strlen( pch ) + strlen( szCommand ) + 4 );
-	sprintf( sz, "%s %s", szCommand, pch );
-	UserCommand( sz );
-
-	g_free( pch );
+static void LoadCommands(gpointer * p, guint n, GtkWidget * pw)
+{
+    gchar *filename, *command;
+    filename =
+	GTKFileSelect(_("Open commands"), NULL, NULL, NULL,
+		      GTK_FILE_CHOOSER_ACTION_OPEN);
+    if (filename) {
+	command = g_strconcat("load commands \"", filename, "\"", NULL);
+	UserCommand(command);
+	g_free(command);
+	g_free(filename);
     }
 }
 
-static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
+extern void
+SetMET (GtkWidget * pw, gpointer p)
+{
+  gchar *filename, *command;
 
-    GTKFileCommand( _("Open commands"), NULL, "load commands", NULL, FDT_NONE_OPEN, PATH_NULL );
-}
-
-extern void SetMET( GtkWidget *pw, gpointer p ) {
-
-    char *pchMet = NULL, *pch = NULL;
-
-    pchMet = getDefaultPath( PATH_MET );
-    if ( pchMet && *pchMet )
-	pch = PathSearch( ".", pchMet );
-    else
-	pch = PathSearch( "met/", szDataDirectory );
-
-    if( pch && access( pch, R_OK ) ) {
-	free( pch );
-	pch = NULL;
+  filename =
+    GTKFileSelect (_("Set match equity table"), "*.xml",
+		   PKGDATADIR "/met", NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+  if (filename)
+    {
+      command = g_strconcat ("set matchequitytable \"", filename, "\"", NULL);
+      UserCommand (command);
+      g_free (command);
+      g_free (filename);
+      /* update filename on option page */
+      if (p && GTK_WIDGET_VISIBLE (p))
+	gtk_label_set_text (GTK_LABEL (p), (char *) miCurrent.szFileName);
     }
-    
-    GTKFileCommand( _("Set match equity table"), pch, "set matchequitytable ",
-		 "met", FDT_NONE_OPEN, PATH_MET );
-
-    /* update filename on option page */
-    if ( p && GTK_WIDGET_VISIBLE ( p ) )
-        gtk_label_set_text ( GTK_LABEL ( p ), ( char * ) miCurrent.szFileName );
-
-    if( pch )
-	free( pch );
-    if( pchMet )
-	free( pchMet );
 }
 
 static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3693,12 +3188,66 @@ static void CopyAsIDs(gpointer *p, guint n, GtkWidget *pw)
   GTKTextToClipboard(buffer);
 }
 
-static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
+static void
+ExportHTMLImages (gpointer * p, guint n, GtkWidget * pw)
+{
+  GtkWidget *fc;
+  gchar *message, *expfolder, *folder, *command;
+  gint ok = FALSE;
+  fc = gtk_file_chooser_dialog_new (_("Select top folder for html export"), NULL,
+				    GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+				    GTK_STOCK_CANCEL,
+				    GTK_RESPONSE_CANCEL,
+				    GTK_STOCK_OPEN,
+				    GTK_RESPONSE_ACCEPT, NULL);
+  gtk_window_set_modal (GTK_WINDOW (fc), TRUE);
+  gtk_window_set_transient_for (GTK_WINDOW (fc), GTK_WINDOW (pwMain));
 
-    char *sz = strdup( PKGDATADIR "/html-images" );
-    GTKFileCommand( _("Export HTML images"), sz, "export htmlimages", NULL, FDT_EXPORT, PATH_NULL );
-    if ( sz ) 
-	free ( sz );
+  while (!ok)
+    {
+      if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_CANCEL)
+	{
+	  gtk_widget_destroy (fc);
+	  return;
+	}
+      folder = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+      if (folder)
+	{
+	  expfolder =
+	    g_build_filename (folder, exsExport.szHTMLPictureURL, NULL);
+	  if (g_file_test (expfolder, G_FILE_TEST_IS_DIR))
+	    {
+	      message =
+		g_strdup_printf (_
+				 ("Folder %s exists\nin %s\nOK to overwrite images?"),
+				 exsExport.szHTMLPictureURL, folder);
+	      ok = GTKGetInputYN (message);
+	      g_free (message);
+	    }
+	  else if (g_mkdir (expfolder, S_IRWXU) == 0)
+	    {
+	      ok = TRUE;
+	    }
+	  else
+	    {
+	      message =
+		g_strdup_printf (_("Folder %s can't be created\nin %s"),
+				 expfolder, folder);
+	      GTKMessage (message, DT_ERROR);
+	      g_free (message);
+	    }
+	  if (ok)
+	    {
+	      command =
+		g_strconcat ("export htmlimages \"", expfolder, "\"", NULL);
+	      UserCommand (command);
+	      g_free (command);
+	    }
+	  g_free (expfolder);
+	  g_free (folder);
+	}
+    }
+  gtk_widget_destroy (fc);
 }
 
 typedef struct _evalwidget {

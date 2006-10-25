@@ -950,7 +950,7 @@ extern void CommandExportGameText( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz, PATH_TEXT );
+    setDefaultFileName ( sz);
 }
 
 
@@ -987,7 +987,7 @@ extern void CommandExportMatchText( char *sz ) {
         if ( ! confirmOverwrite ( sz, fConfirmSave ) )
           return;
 
-        setDefaultFileName ( sz, PATH_TEXT );
+        setDefaultFileName ( sz);
 
       }
 
@@ -1073,7 +1073,7 @@ extern void CommandExportPositionText( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz, PATH_TEXT );
+    setDefaultFileName ( sz);
 
 }
 

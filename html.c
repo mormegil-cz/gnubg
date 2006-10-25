@@ -3525,7 +3525,7 @@ extern void CommandExportGameHtml( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz, PATH_HTML );
+    setDefaultFileName ( sz);
     
     /* external stylesheet */
 
@@ -3639,7 +3639,7 @@ extern void CommandExportMatchHtml( char *sz ) {
           return;
 		}
 
-        setDefaultFileName ( sz, PATH_HTML );
+        setDefaultFileName ( sz);
 
       }
 
@@ -3746,7 +3746,7 @@ extern void CommandExportPositionHtml( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz, PATH_HTML );
+    setDefaultFileName ( sz);
 
     /* external stylesheet */
 

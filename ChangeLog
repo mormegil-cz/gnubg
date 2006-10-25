@@ -1,4 +1,13 @@
-Wed Oct 18 14:54:34 CEST 2006 Christian  Anthon <anthon@kiku.dk>
+Wed Oct 25 11:36:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, export.c, gnubg.c, gnubgmodule.c,
+	gtkfile.c, gtkgame.c, gtkgame.h, gtkoptions.c, gtkprefs.c,
+	gtktoolbar.c, html.c, latex.c, postscript.c, set.c, sgf.c, show.c,
+	text.c: Moved file dialogs to gtk_file_chooser
+	* gtkfile.h: new file
+	* gtkpath.c gtkpath.h: removed
+
+Wed Oct 18 14:54:34 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, gtkgame.c, flags/.cvsignore,
 	flags/Makefile.am: automake and install stuff for the new flags

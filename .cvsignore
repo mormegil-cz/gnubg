@@ -40,3 +40,4 @@ sgfp.c
 sgfp.h
 stamp-*
 texinfo.dtd
+config.options

@@ -77,11 +77,6 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
-#if HAVE_ICONV
-#include <iconv.h>
-#endif
-
-
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -168,13 +163,6 @@ char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
-static char *aszExportTypes[] = {"html", "gol", "pos", "mat", "gam",
-	"latex", "pdf", "postscript", "eps", "png", "text",
-        "equity", "snowietxt", ""};
-
-static char *aszImportTypes[] = {"bkg", "mat", "pos", "oldmoves", "sgg",
-	"tmg", "snowiemat", "snowietext", ""};
-
 matchstate ms = {
     {{0}, {0}}, /* anBoard */
     {0}, /* anDice */
@@ -241,28 +229,32 @@ char szPathSconyers15x15Disk[ BIG_PATH ];/* Path to Sconyers's databases */
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
 
-char aaszPaths[ NUM_PATHS ][ 2 ][ BIG_PATH ];
 char *szCurrentFileName = NULL;
-char *aszExtensions [ NUM_PATHS ] = {
-  "eps",
-  "gam",
-  "html",
-  "tex",
-  "mat",
-  "fibs",
-  "pdf",
-  "png",
-  "pos",
-  "ps",
-  "sgf",
-  "sgg",
-  "txt",
-  "xml",
-  "tmg",
-  "bkg",
-  "txt"
+char *szCurrentFolder = NULL;
+
+
+/* char *extension; char *description; char *clname;
+ * gboolean canimport; gboolean canexport; gboolean exports[3]; */
+FileFormat file_format[] = {
+  {".sgf", N_("Gnu Backgammon Format"), "sgf", TRUE, TRUE, {TRUE, TRUE, TRUE}}, /*must be the first element*/
+  {".eps", N_("Encapsulated Postscript"), "eps", FALSE, TRUE, {FALSE, FALSE, TRUE}},
+  {".fibs", N_("Fibs Oldmoves"), "oldmoves", FALSE, FALSE, {FALSE, FALSE, FALSE}},
+  {".sgg", N_("Gamesgrid Save Game"), "sgg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".bkg", N_("Hans Berliner's BKG Format"), "bkg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".html", N_("HTML"), "html", FALSE, TRUE, {TRUE, TRUE, TRUE}},
+  {".gam", N_("Jellyfish Game"), "gam", FALSE, TRUE, {FALSE, TRUE, FALSE}},
+  {".mat", N_("Jellyfish Match"), "mat", TRUE, TRUE, {TRUE, FALSE, FALSE}},
+  {".pos", N_("Jellyfish Position"), "pos", TRUE, TRUE, {FALSE, FALSE, TRUE}},
+  {".tex", N_("LaTeX"), "latex", FALSE, TRUE, {TRUE, TRUE, FALSE}},
+  {".pdf", N_("PDF"), "pdf", FALSE, TRUE, {TRUE, TRUE, FALSE}},
+  {".txt", N_("Plain Text"), "text", FALSE, TRUE, {TRUE, TRUE, TRUE}},
+  {".png", N_("Portable Network Graphics"), "pdf", FALSE, TRUE, {FALSE, FALSE, TRUE}},
+  {".ps", N_("PostScript"), "postscript", FALSE, TRUE, {TRUE, TRUE, FALSE}},
+  {".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE, {FALSE, FALSE, TRUE}},
+  {".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
 };
 
+gint n_file_formats = G_N_ELEMENTS(file_format);
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
@@ -619,7 +611,7 @@ static char szDICE[] = N_("<die> <die>"),
     szURL[] = N_("<URL>"),
     szMAXERR[] = N_("<fraction>"),
     szMINGAMES[] = N_("<minimum games to rollout>"),
-    szFILETYPE[] = N_("<filetype>"),
+    szFOLDER[] = N_("<folder>"),
 #if USE_TIMECONTROL
     szSETTC[] = N_("[<timecontrol>|off]"),
     szSETTCTYPE[] = N_("plain|bronstein|fischer|hourglass"),
@@ -1566,8 +1558,8 @@ command cER = {
       szVALUE, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 }, acSetExport[] = {
-  { "filetype", CommandSetExportFileType, N_("Set default filetype "
-      "for export"), szFILETYPE, &cFilename },
+  { "folder", CommandSetExportFolder, N_("Set default folder "
+      "for export"), szFOLDER, &cFilename },
   { "html", NULL,
     N_("Set options for HTML export"), NULL, acSetExportHTML },
   { "include", NULL,
@@ -1583,67 +1575,14 @@ command cER = {
     N_("Control display of cube in exports"), NULL, acSetExportCube },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetImport[] = {
-  { "filetype", CommandSetImportFileType, N_("Set default filetype "
-      "for import"), szFILETYPE, &cFilename },
+  { "folder", CommandSetImportFolder, N_("Set default folder "
+      "for import"), szFOLDER, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetInvert[] = {
   { "matchequitytable", CommandSetInvertMatchEquityTable,
     N_("invert match equity table"), szONOFF, &cOnOff },
   { "met", CommandSetInvertMatchEquityTable,
     N_("alias for 'set invert matchequitytable'"), szONOFF, &cOnOff },
-  { NULL, NULL, NULL, NULL, NULL }    
-}, acSetPath[] = {
-  { "eps", CommandSetPathEPS,
-    N_("Set default path for exporting Encapsulated PostScript files"), 
-    szFILENAME, &cFilename },
-  { "gam", CommandSetPathGam,
-    N_("Set default path for importing or exporting Jellyfish .gam files"), 
-    szFILENAME, &cFilename },
-  { "html", CommandSetPathHTML,
-    N_("Set default path for exporting HTML files"), 
-    szFILENAME, &cFilename },
-  { "latex", CommandSetPathLaTeX,
-    N_("Set default path for exporting LaTeX files"), 
-    szFILENAME, &cFilename },
-  { "mat", CommandSetPathMat,
-    N_("Set default path for importing or exporting Jellyfish .mat files"), 
-    szFILENAME, &cFilename },
-  { "oldmoves", CommandSetPathOldMoves,
-    N_("Set default path for importing FIBS oldmoves files"), 
-    szFILENAME, &cFilename },
-  { "pdf", CommandSetPathPDF,
-    N_("Set default path for exporting PDF files"), 
-    szFILENAME, &cFilename },
-  { "png", CommandSetPathPNG,
-    N_("Set default path for exporting PNG positions"), 
-    szFILENAME, &cFilename },
-  { "pos", CommandSetPathPos,
-    N_("Set default path for importing Jellyfish .pos files"), 
-    szFILENAME, &cFilename },
-  { "postscript", CommandSetPathPostScript,
-    N_("Set default path for exporting PostScript files"), 
-    szFILENAME, &cFilename },
-  { "sgf", CommandSetPathSGF,
-    N_("Set default path for loading and saving SGF files"), 
-    szFILENAME, &cFilename },
-  { "sgg", CommandSetPathSGG,
-    N_("Set default path for importing GamesGrid SGG files"), 
-    szFILENAME, &cFilename },
-  { "text", CommandSetPathText,
-    N_("Set default path for export of text files"), 
-    szFILENAME, &cFilename },
-  { "met", CommandSetPathMET,
-    N_("Set default path for loading match equity files"), 
-    szFILENAME, &cFilename },
-  { "tmg", CommandSetPathTMG,
-    N_("Set default path for loading TrueMoneyGames .tmg files"), 
-    szFILENAME, &cFilename },
-  { "bkg", CommandSetPathBKG,
-    N_("Set default path for loading BKG files"), 
-    szFILENAME, &cFilename },
-  { "snowietxt", CommandSetPathSnowieTxt,
-    N_("Set default path for import of Snowie .txt files"), 
-    szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetPriority[] = {
   { "abovenormal", CommandSetPriorityAboveNormal,
@@ -1661,6 +1600,10 @@ command cER = {
   { "timecritical", CommandSetPriorityTimeCritical,
     N_("Set priority to time critical"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
+}, acSetSGF[] = {
+  { "folder", CommandSetSGFFolder, N_("Set default folder "
+      "for import"), szFOLDER, &cFilename },
+  { NULL, NULL, NULL, NULL, NULL }    
 #if USE_SOUND
 }, acSetSoundSystem[] = {
   { "artsc", CommandSetSoundSystemArtsc, 
@@ -1839,6 +1782,7 @@ command cER = {
       acSetGUI },
 #endif
     { "import", NULL, N_("Set settings for import"), NULL, acSetImport },
+    { "sgf", NULL, N_("Set settings for sgf"), NULL, acSetSGF },
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1866,8 +1810,6 @@ command cER = {
 #endif
     { "panelwidth", CommandSetPanelWidth, N_("Set the width of the docked panels"),
       szVALUE, NULL },
-    { "path", NULL, N_("Set default path when saving, loading, importing, "
-      "and exporting files."), NULL, acSetPath },
     { "player", CommandSetPlayer, N_("Change options for one or both "
       "players"), szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
@@ -2029,8 +1971,6 @@ command cER = {
       N_("Show misc race theory"), NULL, NULL },
     { "output", CommandShowOutput, N_("Show how results will be formatted"),
       NULL, NULL },
-    { "path", CommandShowPath, N_("Show default paths for save, load, export, "
-      "and import"), NULL, NULL },
     { "pipcount", CommandShowPipCount, 
       N_("Count the number of pips each player must move to bear off"), 
       szOPTPOSITION, NULL },
@@ -2183,8 +2123,9 @@ command cER = {
 static int iProgressMax, iProgressValue, fInProgress;
 static char *pcProgress;
 static psighandler shInterruptOld;
-int lastImportType = -1;
-int lastExportType = -1;
+char *default_import_folder = NULL;
+char *default_export_folder = NULL;
+char *default_sgf_folder = NULL;
 
 char *szHomeDirectory, *szDataDirectory;
 
@@ -4836,7 +4777,7 @@ extern void CommandImportBKG( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz, PATH_BKG );
+        setDefaultFileName ( sz );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4862,7 +4803,7 @@ extern void CommandImportJF( char *sz ) {
           /* no file imported */
           return;
 	fclose( pf );
-        setDefaultFileName ( sz, PATH_POS );
+        setDefaultFileName ( sz );
     } else
 	outputerr( sz );
 
@@ -4888,7 +4829,7 @@ extern void CommandImportMat( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz, PATH_MAT );
+        setDefaultFileName ( sz );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4914,7 +4855,7 @@ extern void CommandImportOldmoves( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz, PATH_OLDMOVES );
+        setDefaultFileName ( sz );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4941,7 +4882,7 @@ extern void CommandImportSGG( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz, PATH_SGG );
+        setDefaultFileName ( sz );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4967,7 +4908,7 @@ extern void CommandImportTMG( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz, PATH_TMG );
+        setDefaultFileName ( sz );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4993,7 +4934,7 @@ extern void CommandImportSnowieTxt( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz, PATH_SNOWIE_TXT );
+        setDefaultFileName ( sz );
     } else
 	outputerr( sz );
 }
@@ -5139,7 +5080,7 @@ extern void CommandExportGameGam( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz, PATH_GAM );
+    setDefaultFileName ( sz );
 
 }
 
@@ -5184,7 +5125,7 @@ extern void CommandExportMatchMat( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz, PATH_MAT );
+    setDefaultFileName ( sz );
 
 }
 
@@ -5684,16 +5625,13 @@ extern void CommandSaveSettings( char *szParam ) {
     SaveRNGSettings ( pf, "set", rngCurrent, rngctxCurrent );
 
     SaveRolloutSettings( pf, "set rollout", &rcRollout );
-    
-    /* save import settings */
 
-	if (lastImportType != -1)
-		fprintf(pf, "set import filetype %s\n", aszImportTypes[lastImportType]);
-
-    /* save export settings */
-
-	if (lastExportType != -1)
-		fprintf(pf, "set export filetype %s\n", aszExportTypes[lastExportType]);
+    if (default_import_folder && *default_import_folder)
+	fprintf (pf, "set import folder \"%s\"\n", default_import_folder);
+    if (default_export_folder && *default_export_folder)
+	fprintf (pf, "set export folder \"%s\"\n", default_export_folder);
+    if (default_sgf_folder && *default_sgf_folder)
+	fprintf (pf, "set sgf folder \"%s\"\n", default_sgf_folder);
 
     fprintf ( pf, 
               "set export include annotations %s\n"
@@ -5781,14 +5719,6 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf ( pf, 
               "set invert matchequitytable %s\n",
               fInvertMET ? "on" : "off" );
-
-    /* paths */
-
-    for ( i = 0; i < NUM_PATHS; i++ )
-      if ( strlen ( aaszPaths[ i ][ 0 ] ) )
-        fprintf ( pf,
-                  "set path %s \"%s\"\n",
-                  acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
 
     /* geometries */
     /* "set gui windowpositions" must come first */
@@ -6880,7 +6810,7 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if ( USE_GTK || USE_SOUND ) && defined(SIGIO)
+#if USE_GTK  && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
 #if USE_GTK
     /* NB: It is safe to write to fAction even if it cannot be read
@@ -7086,7 +7016,6 @@ int main(int argc, char *argv[] ) {
     char ch, *pch, *pchCommands = NULL;
     char *pchPythonScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
-    int i, j;
     int fSplash = TRUE;
 
 #ifdef WIN32
@@ -7410,28 +7339,6 @@ int main(int argc, char *argv[] ) {
        could happen if InitRNG had to use the current time as a seed) -- mix
        it up a little bit */
     rcRollout.nSeed ^= 0x792A584B;
-
-    /* initialise paths */
-
-    for ( i = 0; i < NUM_PATHS; i++ )
-      for ( j = 0; j < 2; j++ )
-        strcpy ( aaszPaths[ i ][ j ], "" );
-
-    /* special setup for a few paths */
-
-#if WIN32
-
-    if ( ( pc = getenv( "ProgramFiles" ) ) ) {
-
-      strcpy( aaszPaths[ PATH_SGG ][ 0 ], pc );
-      strcat( aaszPaths[ PATH_SGG ][ 0 ], "\\GamesGrid\\SaveGame\\" );
-
-      strcpy( aaszPaths[ PATH_TMG ][ 0 ], pc );
-      strcat( aaszPaths[ PATH_TMG ][ 0 ], "\\TMG\\SavedGames\\" );
-
-    }
-
-#endif
 
     /* initalize some html export options */
 
@@ -8036,186 +7943,34 @@ confirmOverwrite ( const char *sz, const int f ) {
 
 }
 
-
-
 extern void
-setDefaultPath ( const char *sz, const pathformat f ) {
-
-  char *pc;
-
-  /* set path up last slash as 'current path' */
-  
-  strcpy ( aaszPaths[ f ][ 1 ], sz );
-  pc = strrchr ( aaszPaths[ f ][ 1 ], DIR_SEPARATOR );
-  if ( ! pc )
-    pc = aaszPaths[ f ][ 1 ];
-  *pc = 0;
-
-}
-
-
-
-extern void
-setDefaultFileName ( const char *sz, const pathformat f ) {
-
-  char *pc;
-  char *pcdot;
-
-  /* set path up last slash as 'current path' */
-
-  setDefaultPath ( sz, f );
-  
-  /* garbage collect */
-
-  if ( szCurrentFileName )
-    free ( szCurrentFileName );
-
-  if ( ( pc = strrchr ( sz, DIR_SEPARATOR ) ) ) {
-    szCurrentFileName = strdup ( pc + 1 );
-    if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
-      *pcdot = 0; /* remove extension */
-  }
-  else if ( strlen ( sz ) ) {
-    szCurrentFileName = strdup ( sz );
-    if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
-      *pcdot = 0; /* remove extension */
-  }
-  else
-    szCurrentFileName = NULL;
-
-}
-
-
-
-/*
- * Return default file name for saving a file with the specified
- * extension.
- *
- * Input:
- *   f: the type of the file (SGF, SGG, HTML, etc etc)
- *
- * Returns:
- *   file name (pointer must be freed by caller if not null)
- *
- * Garbage collect:
- *   Returned pointer must be freed by caller if not NULL).
- *
- */
-
-extern char *
-getDefaultFileName ( const pathformat f ) {
-
-  int l;
-  char *sz, *pc, *szPath;
-  char *szExt = aszExtensions [ f ];
-  time_t t;
-
-  /* get default path */
-
-  szPath = getDefaultPath ( f );
-
-  if ( szCurrentFileName && *szCurrentFileName ) {
-
-    /* use current filename */
-
-    l = ( szPath ? ( 1 + strlen ( szPath ) ) : 0 ) + 
-      strlen ( szCurrentFileName ) + 1 + 1 + strlen ( szExt );
-    sz = (char *) malloc ( l );
-
-    if ( szPath ) {
-      strcpy ( sz, szPath );
-      strcat ( sz, DIR_SEPARATOR_S );
-    }
-    else
-      strcpy ( sz, "" );
-    
-    strcat ( sz, szCurrentFileName );
-    strcat ( sz, "." );
-    strcat ( sz, szExt );
-
-  }
-  else {
-
-    /* Generate new filename */
-
-    /* "timestamp"-"name for player 0"-"name for player 1"-"length".ext */
-
-    l = 15 + 1 + strlen ( ap[ 0 ].szName ) + 1 +
-      strlen ( ap[ 1 ].szName ) + 1 + 5 + 1 + 
-      strlen ( szExt ) + ( szPath ? ( 1 + strlen ( szPath ) ) : 0 );
-
-    sz = (char *) malloc ( l );
-
-    if ( szPath ) {
-      strcpy ( sz, szPath );
-      strcat ( sz, DIR_SEPARATOR_S );
-    }
-    else
-      strcpy ( sz, "" );
-
-    pc = strchr ( sz, 0 );
-    
-    if( mi.nYear )
-	sprintf( pc, "%04d-%02d-%02d", mi.nYear, mi.nMonth, mi.nDay );
-    else {
-	time ( &t );
-	strftime ( pc, l, _("%Y-%m-%d-%H%M"), localtime ( &t ) );
-    }
-    
-    pc = strchr ( pc, 0 );
-    strcat ( pc, "-" );
-
-    pc = strchr ( pc, 0 );
-    strcat ( pc, ap[ 0 ].szName );
-
-    pc = strchr ( pc, 0 );
-    strcat (pc, "-" );
-
-    pc = strchr ( pc, 0 );
-    strcat (pc, ap [ 1 ].szName );
-
-    pc = strchr ( pc, 0 );
-    strcat (pc, "-" );
-
-    pc = strchr ( pc, 0 );
-    sprintf ( pc, "%d", ms.nMatchTo );
-
-    pc = strchr ( pc, 0 );
-    strcat (pc, "." );
-    
-    pc = strchr ( pc, 0 );
-    strcat (pc, szExt );
-
-  }
-
-  return sz;
-
-}
-
-static char * getPath(char *path)
+setDefaultFileName (char *path)
 {
-  char *pc;
-
-  if (strlen(path))
-  {
-    pc = strchr ( path, 0 ) - 1;
-    if ( *pc != DIR_SEPARATOR )
-		strcat ( path, DIR_SEPARATOR_S );
-
-    return PathSearch ( path, szDataDirectory );
-  }
-  else 
-    return NULL;
+  g_free (szCurrentFolder);
+  g_free (szCurrentFileName);
+  DisectPath (path, NULL, &szCurrentFileName, &szCurrentFolder);
+#if USE_GTK
+  gchar *title = g_strdup_printf(_("GNU Backgammon (%s)"), szCurrentFileName);  
+  gtk_window_set_title(GTK_WINDOW(pwMain), title);
+  g_free(title);
+#endif
 }
 
-extern char *
-getDefaultPath ( const pathformat f ) {
-
-  char* r = getPath(aaszPaths[ f ][ 1 ]);
-  if (!r)
-	r = getPath(aaszPaths[ f ][ 0 ]);
-  return r;
+extern void
+DisectPath (char *path, char *extension, char **name, char **folder)
+{
+  char *fnn, *pc;
+  if (!path)
+    return;
+  *folder = g_path_get_dirname (path);
+  fnn = g_path_get_basename (path);
+  pc = strrchr (fnn, '.');
+  if (pc)
+    *pc = '\0';
+  *name = g_strconcat (fnn, extension, NULL);
+  g_free (fnn);
 }
+
 
 extern void
 InvalidateStoredMoves ( void ) {
@@ -8704,51 +8459,6 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
 }
 
-extern void CommandSetExportFileType(char *sz)
-{
-	int num = 0;
-
-	if (!sz || !*sz)
-	{
-		outputl(_("No file type specified"));
-		return;
-	}
-
-	while (*aszExportTypes[num])
-	{
-		if (!strncasecmp(sz, aszExportTypes[num], strlen(sz)))
-		{
-			lastExportType = num;
-			return;
-		}
-		num++;
-	}
-
- 	outputl(_("Invalid file type specified"));
-}
-
-extern void CommandSetImportFileType(char *sz)
-{
-	int num = 0;
-
-	if (!sz || !*sz)
-	{
-		outputl(_("No file type specified"));
-		return;
-	}
-
-	while (*aszImportTypes[num])
-	{
-		if (!strncasecmp(sz, aszImportTypes[num], strlen(sz)))
-		{
-			lastImportType = num;
-			return;
-		}
-		num++;
-	}
-
- 	outputl(_("Invalid file type specified"));
-}
 
 extern char * locale_from_utf8 ( const char *sz) {
     char *ret;

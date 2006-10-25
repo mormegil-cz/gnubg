@@ -42,6 +42,7 @@
 #include "gtkboard.h"
 #include "gtkcolour.h"
 #include "gtkgame.h"
+#include "gtkfile.h"
 #include "gtkprefs.h"
 #include <glib/gi18n.h>
 #include "path.h"
@@ -2388,9 +2389,9 @@ static void ExportDesign ( GtkWidget *pw, gpointer data )
 	boarddesign *pbde;
 	renderdata rdNew;
 
-	if (!( pch = szFile = 
-         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE_SAVE ) ) )
-		return;
+        if (! (pch = szFile =
+                                GTKFileSelect(_("Export Design"), NULL, NULL, NULL,
+                                        GTK_FILE_CHOOSER_ACTION_SAVE))) return;
 
 	szFile = NextToken( &szFile );
 
@@ -2472,9 +2473,9 @@ static void ImportDesign ( GtkWidget *pw, gpointer data )
 	gint old_length;
 	gint num_added;
 
-	if ( !( pch = szFile = 
-         SelectFile( _("Export Design"), NULL, NULL, FDT_NONE_OPEN ) ) )
-		return;
+        if (! (pch = szFile =
+                                GTKFileSelect(_("Import Design"), NULL, NULL, NULL,
+                                        GTK_FILE_CHOOSER_ACTION_OPEN))) return;
 
 	szFile = NextToken( &szFile );
 

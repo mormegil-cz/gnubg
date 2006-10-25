@@ -452,7 +452,7 @@ CommandExportPositionSnowieTxt (char *sz)
   if (pf != stdout)
     fclose (pf);
 
-  setDefaultFileName (sz, PATH_SNOWIE_TXT);
+  setDefaultFileName (sz);
 
 }
 
@@ -638,7 +638,7 @@ CommandExportPositionJF (char *sz)
 
   fclose (fp);
 
-  setDefaultFileName (sz, PATH_POS);
+  setDefaultFileName (sz);
 
   return;
 }

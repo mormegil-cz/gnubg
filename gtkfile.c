@@ -27,368 +27,377 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
-#include "gtk/gtk.h"
+#include <glib/gi18n.h>
+#include <gtk/gtk.h>
 #include "backgammon.h"
+#include "gtkfile.h"
 #include "gtkgame.h"
 
-/* --------------------------------------------------------------------------------------------- */
+static char *
+GetFilename (void)
+{
+  char *sz, tstr[15];
+  time_t t;
 
-
-/* This is a temporary hack and will move and mutate. Too many places where things
-   are hardcoded or omplicated to access -- this clumsy switch is my dynamic copy.
-   I'm not convinced a giant switch statement and pseudo-object orientation are the final
-   solution, but for the time being it's easy to maintain.
-   Disclaimer: This is not optimized or even written with performance as #1 priority (yet),
-   and BETA anyway ...
-*/
-
-typedef struct {
-	char		*description_long,		/* Description of the media type for use in e.g. Bubble Help */
-				*description_short,		/* Description of the media type for use in e.g. a label */
-				*path_current,			/* Path where the last file operation on this media type took place */
-										/* or NULL if none happened during the lifetime of this gnubg */
-				*path_default,			/* Path where operations on this media type should be started if */
-										/* none happened during the lifetime of this gnubg so far */
-				*file_suffix,			/* the file extension used this type */
-				*command;				/* corresponding no-gui command FIXME: immature */
-	pathformat	path_format;			/* LEGACY: existing enumeration, De-facto ID. */
-	int			capabilities;			/* What degree of import / export this format offers? */
-
-
-} External_IO_Format;
-
-#define External_IO_none		(1<<0)
-#define External_IO_position	(1<<1)
-#define External_IO_game		(1<<2)
-#define External_IO_match		(1<<3)
-#define External_IO_session		(1<<4)
-#define External_IO_import		(1<<29)
-#define External_IO_export		(1<<30)
-#define External_IO_all_game_types (External_IO_position | External_IO_game | External_IO_match | External_IO_session)
-
-External_IO_Format *External_IO_Format_new (pathformat id) {
-
-	External_IO_Format eiof;
-	External_IO_Format *result;
-
-	switch (id) {
-		case PATH_EPS: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Encapsulated Postscript";
-			eiof.path_current			= aaszPaths[ PATH_EPS ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_EPS ][ 1 ];
-			eiof.path_format			= PATH_EPS;
-			eiof.file_suffix			= aszExtensions [PATH_EPS];
-			eiof.capabilities			= External_IO_position | External_IO_export;
-			break;
-					   }
-		case PATH_GAM: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Jellyfish Game";
-			eiof.path_current			= aaszPaths[ PATH_GAM ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_GAM ][ 1 ];
-			eiof.path_format			= PATH_GAM;
-			eiof.file_suffix			= aszExtensions [PATH_GAM];
-			eiof.capabilities			= External_IO_game | External_IO_import;
-			break;
-					   }
-		case PATH_HTML:{
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Hypertext Markup Language";
-			eiof.path_current			= aaszPaths[ PATH_HTML ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_HTML ][ 1 ];
-			eiof.path_format			= PATH_HTML;
-			eiof.file_suffix			= aszExtensions [PATH_HTML];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export;
-			break;
-					   }
-		case PATH_LATEX: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "LaTeX";
-			eiof.path_current			= aaszPaths[ PATH_LATEX ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_LATEX ][ 1 ];
-			eiof.path_format			= PATH_LATEX;
-			eiof.file_suffix			= aszExtensions [PATH_LATEX];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export;
-			break;
-						 }
-		case PATH_MAT: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Jellyfish Match";
-			eiof.path_current			= aaszPaths[ PATH_MAT ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_MAT ][ 1 ];
-			eiof.path_format			= PATH_MAT;
-			eiof.file_suffix			= aszExtensions [PATH_MAT];
-			eiof.capabilities			= External_IO_match | External_IO_import;
-			break;
-					   }
-		case PATH_OLDMOVES: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Fibs Oldmoves";
-			eiof.path_current			= aaszPaths[ PATH_OLDMOVES ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_OLDMOVES ][ 1 ];
-			eiof.path_format			= PATH_OLDMOVES;
-			eiof.file_suffix			= aszExtensions [PATH_OLDMOVES];
-			eiof.capabilities			= External_IO_match | External_IO_import; /*? */
-			break;
-							}
-		case PATH_PDF: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Portable Document Format";
-			eiof.path_current			= aaszPaths[ PATH_PDF ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_PDF ][ 1 ];
-			eiof.path_format			= PATH_PDF;
-			eiof.file_suffix			= aszExtensions [PATH_PDF];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export;
-			break;
-					   }
-		case PATH_PNG: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Portable Network Graphics";
-			eiof.path_current			= aaszPaths[ PATH_PNG ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_PNG ][ 1 ];
-			eiof.path_format			= PATH_PNG;
-			eiof.file_suffix			= aszExtensions [PATH_PNG];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export;
-			break;
-					   } 
-		case PATH_POS: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Jellyfish Position";
-			eiof.path_current			= aaszPaths[ PATH_POS ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_POS ][ 1 ];
-			eiof.path_format			= PATH_POS;
-			eiof.file_suffix			= aszExtensions [PATH_POS];
-			eiof.capabilities			= External_IO_position | External_IO_import;
-			break;
-					   }
-		case PATH_POSTSCRIPT: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "PostScript";
-			eiof.path_current			= aaszPaths[ PATH_POSTSCRIPT ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_POSTSCRIPT ][ 1 ];
-			eiof.path_format			= PATH_POSTSCRIPT;
-			eiof.file_suffix			= aszExtensions [PATH_POSTSCRIPT];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export;
-			break;
-							  }
-		case PATH_SGF: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Gnu Backgammon Savegame Format";
-			eiof.path_current			= aaszPaths[ PATH_SGF ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_SGF ][ 1 ];
-			eiof.path_format			= PATH_SGF;
-			eiof.file_suffix			= aszExtensions [PATH_SGF];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export | External_IO_import;
-			break;
-					   }
-		case PATH_SGG: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Gamesgrind Save Game";
-			eiof.path_current			= aaszPaths[ PATH_SGG ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_SGG ][ 1 ];
-			eiof.path_format			= PATH_SGG;
-			eiof.file_suffix			= aszExtensions [PATH_SGG];
-			eiof.capabilities			= External_IO_game | External_IO_import;
-			break;
-					   }
-		case PATH_TEXT: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Plain Text";
-			eiof.path_current			= aaszPaths[ PATH_TEXT ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_TEXT ][ 1 ];
-			eiof.path_format			= PATH_TEXT;
-			eiof.file_suffix			= aszExtensions [PATH_TEXT];
-			eiof.capabilities			= External_IO_all_game_types | External_IO_export;
-			break;
-						}
-		case PATH_MET: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Match Equity Table";
-			eiof.path_current			= aaszPaths[ PATH_MET ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_MET ][ 1 ];
-			eiof.path_format			= PATH_MET;
-			eiof.file_suffix			= aszExtensions [PATH_MET];
-			eiof.capabilities			= External_IO_none | External_IO_import;
-			break;
-					   }
-		case PATH_TMG: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "True Moneygames";
-			eiof.path_current			= aaszPaths[ PATH_TMG ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_TMG ][ 1 ];
-			eiof.path_format			= PATH_TMG;
-			eiof.file_suffix			= aszExtensions [PATH_TMG];
-			eiof.capabilities			= External_IO_match | External_IO_import; /* ? */
-			break;
-					   }
-		case PATH_BKG: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Hans Berliner's BKG Format";
-			eiof.path_current			= aaszPaths[ PATH_BKG ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_BKG ][ 1 ];
-			eiof.path_format			= PATH_BKG;
-			eiof.file_suffix			= aszExtensions [PATH_BKG];
-			eiof.capabilities			= External_IO_match | External_IO_import; /* ? */
-			break;
-		  }
-		case PATH_SNOWIE_TXT: {
-			eiof.description_long		= "FIXME";
-			eiof.description_short		= "Snowie Text";
-			eiof.path_current			= aaszPaths[ PATH_SNOWIE_TXT ][ 0 ];
-			eiof.path_default			= aaszPaths[ PATH_SNOWIE_TXT ][ 1 ];
-			eiof.path_format			= PATH_SNOWIE_TXT;
-			eiof.file_suffix			= aszExtensions [PATH_SNOWIE_TXT ];
-			eiof.capabilities			= External_IO_match | External_IO_import; /* ? */
-			break;
-							  } 
-		case NUM_PATHS:
-		case PATH_NULL:
-		default: {
-			eiof.description_long		= "NUM_PATHS is an error and PATH_NULL a hack";
-			eiof.description_short		= "error";
-			eiof.path_current			= "";
-			eiof.path_default			= "";
-			eiof.path_format			= PATH_NULL;
-			eiof.file_suffix			= "";
-			eiof.capabilities			= External_IO_none;
-			break;
-			}
-		}
-
-		result = malloc(sizeof(External_IO_Format));
-		memset(result, 0, sizeof(External_IO_Format));
-
-		/*
-		result->description_long = malloc(strlen(eiof.description_long));
-		result->description_short = malloc(strlen(eiof.description_short));
-		result->path_current = malloc(strlen(eiof.path_current));
-		result->path_default = malloc(strlen(eiof.path_default));
-		result->path_format = eiof.path_format;
-		result->file_suffix = malloc(strlen(eiof.file_suffix));
-		result->capabilities = eiof.capabilities;
-
-		strcpy(result->description_long, eiof.description_long);
-		strcpy(result->description_short, eiof.description_short);
-		strcpy(result->path_current, eiof.path_current);
-		strcpy(result->path_default, eiof.path_default);
-		strcpy(result->file_suffix, eiof.file_suffix);
-		*/
-
-		/* no need to copy a lot, everything is static already ... */
-
-		result->description_long = eiof.description_long;
-		result->description_short = eiof.description_short;
-		result->path_current = eiof.path_current;
-		result->path_default = eiof.path_default;
-		result->path_format = eiof.path_format;
-		result->file_suffix = eiof.file_suffix;
-		result->capabilities = eiof.capabilities;
-
-
-		return result;
+  if (szCurrentFileName && *szCurrentFileName)
+    sz = g_strdup_printf ("%s.sgf", szCurrentFileName);
+  else
+    {
+      if (mi.nYear)
+	sprintf (tstr, "%04d-%02d-%02d", mi.nYear, mi.nMonth, mi.nDay);
+      else
+	{
+	  time (&t);
+	  strftime (tstr, 14, _("%Y-%m-%d-%H%M"), localtime (&t));
+	}
+      sz =
+	g_strdup_printf ("%s-%s_%dp_%s.sgf", ap[0].szName, ap[1].szName,
+			 ms.nMatchTo, tstr);
+    }
+  return sz;
 }
 
-void External_IO_Format_destroy (External_IO_Format *eiof) {
 
-	if (eiof) {
-		/*
-		if (eiof->description_long) free(eiof->description_long);
-		if (eiof->description_short) free(eiof->description_short);
-		if (eiof->path_current) free(eiof->path_current);
-		if (eiof->path_default) free(eiof->path_default);
-		if (eiof->file_suffix) free(eiof->file_suffix);
-		*/
-		free(eiof);
-	}
+static int
+FormatFromDescription (const gchar * text)
+{
+  gint i;
+  if (!text)
+    return -1;
+  for (i = 0; i < n_file_formats; i++)
+    {
+      if (!strcasecmp (text, file_format[i].description))
+	break;
+    }
+  return i;
 }
 
-extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
-                              char *szPath, filedialogtype fdt, pathformat pathId) {
-
-  	char *filename;				/* the result */
-	External_IO_Format *eiof;	/* a bunch of data on a file format */
-
-	GtkWidget *filechooser;
-
-	char *dialogTitle;
-
-	/* Determine dialog title */
-	if (szPrompt) {								/* FIXME: When the eiof type ist is complete, all */
-		dialogTitle = szPrompt;					/* titles should be generated.  */
-	} else if (fdt == FDT_NONE_SAVE) {
-		dialogTitle = "GNU Backgammon - Save File";
-	} else {
-		dialogTitle = "GNU Backgammon - Open File";
-	}
-
-	/* Creaze dialog */
-	filechooser= gtk_file_chooser_dialog_new (
-					  dialogTitle,										/* Window Text */
-				      NULL,												/* Parent Window */
-					  (fdt == FDT_NONE_OPEN)
-							? GTK_FILE_CHOOSER_ACTION_OPEN				/* Action */
-							: GTK_FILE_CHOOSER_ACTION_SAVE,
-					  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,			/* List of Buttons */
-				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-				      NULL);
-	gtk_window_set_modal( GTK_WINDOW( filechooser ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( filechooser ), GTK_WINDOW( pwMain ) );
-	/* Our DAO */
-
-	eiof = External_IO_Format_new(pathId);
-
-	/* Set default path on dialog */
-	gtk_file_chooser_set_current_folder((GtkFileChooser *) filechooser, eiof->path_current);
-
-	
-	if (fdt == FDT_NONE_SAVE) { /* Case: we want to save */
-		/* Set default filename */
-		gtk_file_chooser_set_current_name((GtkFileChooser *) filechooser, getDefaultFileName(pathId));
-
-	} else { /* FTD_NONE_OPEN, we want to load */
-
-		/* Create 2 File Filters: *.* and *.suffix */
-
-		char *suffixGlobber;
-		char *filterDescription; 
-
-		GtkFileFilter *anyFileFilter, *suffixFileFilter;
-
-		filterDescription = g_strconcat ("Show ", eiof->description_short, " files (*.", eiof->file_suffix, ") only", NULL);
-		suffixGlobber = g_strconcat("*.", eiof->file_suffix, NULL );
-
-		suffixFileFilter = gtk_file_filter_new();
-		anyFileFilter =  gtk_file_filter_new();
-		gtk_file_filter_add_pattern (suffixFileFilter, suffixGlobber);
-		gtk_file_filter_add_pattern (anyFileFilter, "*");
-		gtk_file_filter_set_name    (anyFileFilter, "Show all Files (*)");
-		gtk_file_filter_set_name    (suffixFileFilter, filterDescription);
-		/* Only show *.suffix filter if suffix is not empty */
-		if (*eiof->file_suffix)
-			gtk_file_chooser_add_filter ((GtkFileChooser *) filechooser, suffixFileFilter);
-		gtk_file_chooser_add_filter ((GtkFileChooser *) filechooser, anyFileFilter);
-
-		if (filterDescription) g_free(filterDescription);
-		if (suffixGlobber) g_free(suffixGlobber);
-
-	}
-	
-	/* launch dialog */
-	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
-	    filename = gtk_file_chooser_get_filename ((GtkFileChooser *)  filechooser);
-
-		if (filename) {
-			VARIABLE_ARRAY(char, sz, strlen( filename ) + strlen( szCommand ) + 4)
-			/* and actually do the requested IO */
-			sprintf( sz, "%s \"%s\"", szCommand, filename );
-			UserCommand( sz );
-			g_free (filename);
-		}
-	}
-	/* Cleanup */
-
-	gtk_widget_destroy (filechooser);
-	External_IO_Format_destroy(eiof);
+static void
+FilterAdd (char *fn, char *pt, GtkFileChooser * fc)
+{
+  GtkFileFilter *aff = gtk_file_filter_new ();
+  gtk_file_filter_set_name (aff, fn);
+  gtk_file_filter_add_pattern (aff, pt);
+  gtk_file_chooser_add_filter (fc, aff);
 }
-/* ------------------------------------------------------------------------------------------ */
+
+static GtkWidget *
+GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
+		 GtkFileChooserAction action)
+{
+  GtkWidget *fc;
+  switch (action)
+    {
+    case GTK_FILE_CHOOSER_ACTION_OPEN:
+      fc = gtk_file_chooser_dialog_new (prompt, NULL,
+					GTK_FILE_CHOOSER_ACTION_OPEN,
+					GTK_STOCK_CANCEL,
+					GTK_RESPONSE_CANCEL,
+					GTK_STOCK_OPEN,
+					GTK_RESPONSE_ACCEPT, NULL);
+      break;
+    case GTK_FILE_CHOOSER_ACTION_SAVE:
+      fc = gtk_file_chooser_dialog_new (prompt, NULL,
+					GTK_FILE_CHOOSER_ACTION_SAVE,
+					GTK_STOCK_CANCEL,
+					GTK_RESPONSE_CANCEL,
+					GTK_STOCK_SAVE,
+					GTK_RESPONSE_ACCEPT, NULL);
+      break;
+    default:
+      return NULL;
+      break;
+    }
+  gtk_window_set_modal (GTK_WINDOW (fc), TRUE);
+  gtk_window_set_transient_for (GTK_WINDOW (fc), GTK_WINDOW (pwMain));
+
+  if (folder && *folder)
+    gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (fc), folder);
+  if (name && *name)
+    gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
+
+#if WIN32
+  if ((pc = getenv ("ProgramFiles")))
+    {
+      tmp = g_strdup_printf ("%s\\TMG\\SavedGames", pc);
+      gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+      g_free (tmp);
+      tmp = g_strdup_printf ("%s\\GamesGrid\\SaveGame\\", pc);
+      gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+      g_free (tmp);
+    }
+#endif
+  return fc;
+}
+
+extern char *
+GTKFileSelect (gchar * prompt, gchar * extension, gchar * folder,
+	       gchar * name, GtkFileChooserAction action)
+{
+  gchar *sz, *filename=NULL;
+  GtkWidget *fc = GnuBGFileDialog (prompt, folder, name, action);
+  if (extension && *extension)
+    {
+      sz = g_strdup_printf (_("Supported files (%s)"), extension);
+      FilterAdd (sz, extension, GTK_FILE_CHOOSER (fc));
+      FilterAdd (_("All Files"), "*", GTK_FILE_CHOOSER (fc));
+      g_free(sz);
+    }
+
+  if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+    filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+  gtk_widget_destroy (fc);
+  return filename;
+}
+
+typedef struct _SaveOptions
+{
+  GtkWidget *fc, *description, *type, *upext;
+} SaveOptions;
+
+static void
+SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
+{
+  gchar *description, *fn, *fnn, *fnd;
+  gint format, type;
+
+  description =
+    gtk_combo_box_get_active_text (GTK_COMBO_BOX (pso->description));
+  format = FormatFromDescription (description);
+  type = gtk_combo_box_get_active (GTK_COMBO_BOX (pso->type));
+  gtk_dialog_set_response_sensitive (GTK_DIALOG (pso->fc),
+				     GTK_RESPONSE_ACCEPT,
+				     file_format[format].exports[type]);
+  if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (pso->upext)))
+    {
+      if ((fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pso->fc))))
+	{
+	  DisectPath (fn, file_format[format].extension, &fnn, &fnd);
+	  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (pso->fc),
+					       fnd);
+	  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (pso->fc), fnn);
+	  g_free (fn);
+	  g_free (fnn);
+	  g_free (fnd);
+	}
+    }
+}
+
+
+static void
+SaveCommon (guint f, gchar * prompt)
+{
+
+  GtkWidget *hbox;
+  guint i, j, format;
+  SaveOptions so;
+  static gint last_export_format = 0;
+  static gint last_export_type = 0;
+  static gchar *last_save_folder = NULL;
+  static gchar *last_export_folder = NULL;
+  gchar *fn = GetFilename ();
+  gchar *folder = NULL;
+
+  if (f == 1)
+    folder = last_save_folder ? last_save_folder : default_sgf_folder;
+  else
+    folder = last_export_folder ? last_export_folder : default_export_folder;
+
+  so.fc = GnuBGFileDialog (prompt, folder, fn, GTK_FILE_CHOOSER_ACTION_SAVE);
+  g_free (fn);
+
+  so.description = gtk_combo_box_new_text ();
+  for (j = i = 0; i < f; ++i)
+    {
+      if (!file_format[i].canexport)
+	continue;
+      gtk_combo_box_append_text (GTK_COMBO_BOX (so.description),
+				 file_format[i].description);
+      if (i == last_export_format)
+	gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), j);
+      j++;
+    }
+  if (f == 1)
+    gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), 0);
+
+  so.type = gtk_combo_box_new_text ();
+  gtk_combo_box_append_text (GTK_COMBO_BOX (so.type), _("match"));
+  gtk_combo_box_append_text (GTK_COMBO_BOX (so.type), _("game"));
+  gtk_combo_box_append_text (GTK_COMBO_BOX (so.type), _("position"));
+  gtk_combo_box_set_active (GTK_COMBO_BOX (so.type), last_export_type);
+
+  so.upext = gtk_check_button_new_with_label (_("Update extension"));
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (so.upext), TRUE);
+
+  hbox = gtk_hbox_new (FALSE, 10);
+  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.type);
+  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.description);
+  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.upext);
+  gtk_widget_show_all (hbox);
+  gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (so.fc), hbox);
+
+  g_signal_connect (G_OBJECT (so.description), "changed",
+		    G_CALLBACK (SaveOptionsCallBack), &so);
+  g_signal_connect (G_OBJECT (so.type), "changed",
+		    G_CALLBACK (SaveOptionsCallBack), &so);
+
+  SaveOptionsCallBack (so.fc, &so);
+
+  if (gtk_dialog_run (GTK_DIALOG (so.fc)) == GTK_RESPONSE_ACCEPT)
+    {
+      fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (so.fc));
+      if (fn)
+	{
+	  gchar *ft =
+	    gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.description));
+	  gchar *et = gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.type));
+	  gchar *cmd = NULL;
+	  format = FormatFromDescription (ft);
+	  if (format)
+	    {
+	      cmd =
+		g_strdup_printf ("export %s %s \"%s\"", et,
+				 file_format[format].clname, fn);
+	      last_export_format = format;
+	      last_export_type =
+		gtk_combo_box_get_active (GTK_COMBO_BOX (so.type));
+	      g_free (last_export_folder);
+	      last_export_folder =
+		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER
+						     (so.fc));
+	    }
+	  else
+	    {
+	      cmd = g_strdup_printf ("save %s \"%s\"", et, fn);
+	      last_export_type =
+		gtk_combo_box_get_active (GTK_COMBO_BOX (so.type));
+	      g_free (last_save_folder);
+	      last_save_folder =
+		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER
+						     (so.fc));
+	    }
+	  if (cmd)
+	    {
+	      UserCommand (cmd);
+	      g_free (cmd);
+	    }
+	  g_free (fn);
+	}
+    }
+  gtk_widget_destroy (so.fc);
+}
+
+static void
+OpenCommon (guint f, gchar * prompt)
+{
+
+  gchar *fn, *sg, *cmd = NULL;
+  guint format, i, j;
+  GtkFileFilter *aff;
+  GtkWidget *desc, *fc;
+  static gint last_import_format = 0;
+  static gchar *last_load_folder = NULL;
+  static gchar *last_import_folder = NULL;
+  gchar *folder = NULL;
+
+  if (f == 1)
+    folder = last_load_folder ? last_load_folder : default_sgf_folder;
+  else
+    folder = last_import_folder ? last_import_folder : default_import_folder;
+
+  fc = GnuBGFileDialog (prompt, folder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+
+  aff = gtk_file_filter_new ();
+  gtk_file_filter_set_name (aff, _("Supported files"));
+  for (i = 0; i < f; ++i)
+    {
+      if (!file_format[i].canimport)
+	continue;
+      sg = g_strdup_printf ("*%s", file_format[i].extension);
+      gtk_file_filter_add_pattern (aff, sg);
+      g_free (sg);
+    }
+  gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fc), aff);
+  FilterAdd (_("All Files"), "*", GTK_FILE_CHOOSER (fc));
+  for (i = 0; i < f; ++i)
+    {
+      if (!file_format[i].canimport)
+	continue;
+      sg = g_strdup_printf ("*%s", file_format[i].extension);
+      FilterAdd (file_format[i].description, sg, GTK_FILE_CHOOSER (fc));
+      g_free (sg);
+    }
+
+  desc = gtk_combo_box_new_text ();
+  for (j = i = 0; i < f; ++i)
+    {
+      if (!file_format[i].canimport)
+	continue;
+      gtk_combo_box_append_text (GTK_COMBO_BOX
+				 (desc), file_format[i].description);
+      if (i == last_import_format)
+	gtk_combo_box_set_active (GTK_COMBO_BOX (desc), j);
+      j++;
+    }
+  if (f == 1)
+    gtk_combo_box_set_active (GTK_COMBO_BOX (desc), 0);
+  gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (fc), desc);
+  if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+    {
+      fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+      if (fn)
+	{
+	  format =
+	    FormatFromDescription
+	    (gtk_combo_box_get_active_text (GTK_COMBO_BOX (desc)));
+	  if (format)
+	    {
+	      cmd =
+		g_strdup_printf ("import %s \"%s\"",
+				 file_format[format].clname, fn);
+	      last_import_format = format;
+	      g_free (last_import_folder);
+	      last_import_folder =
+		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+	    }
+	  else
+	    {
+	      cmd = g_strdup_printf ("load match \"%s\"", fn);
+	      g_free (last_load_folder);
+	      last_load_folder =
+		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+	    }
+	  if (cmd)
+	    {
+	      UserCommand (cmd);
+	      g_free (cmd);
+	    }
+	  g_free (fn);
+	}
+    }
+  gtk_widget_destroy (fc);
+}
+
+extern void
+GTKExport (gpointer * p, guint n, GtkWidget * pw)
+{
+  SaveCommon (n_file_formats, _("Export to foreign formats"));
+}
+
+extern void
+GTKSave (gpointer * p, guint n, GtkWidget * pw)
+{
+  SaveCommon (1, _("Save in native gnubg .sgf format"));
+}
+
+extern void
+GTKImport (gpointer * p, guint n, GtkWidget * pw)
+{
+  OpenCommon (n_file_formats, _("Import from foreign formats"));
+}
+
+extern void
+GTKOpen (gpointer * p, guint n, GtkWidget * pw)
+{
+  OpenCommon (1, _("Open gnubg .sgf formated file"));
+}
