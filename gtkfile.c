@@ -27,9 +27,9 @@
 #endif
 #include <stdlib.h>
 #include <string.h>
+#include "backgammon.h"
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
-#include "backgammon.h"
 #include "gtkfile.h"
 #include "gtkgame.h"
 
@@ -85,6 +85,9 @@ static GtkWidget *
 GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
 		 GtkFileChooserAction action)
 {
+#if WIN32
+char *pc, *tmp;
+#endif
   GtkWidget *fc;
   switch (action)
     {

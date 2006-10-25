@@ -7020,7 +7020,6 @@ int main(int argc, char *argv[] ) {
 
 #ifdef WIN32
 	char szInvokingDirectory[ BIG_PATH ] = {0};  /* current dir when GNUbg was started */
-    char *pc;
 #endif
 	char szQuoted[ BIG_PATH ];
 
