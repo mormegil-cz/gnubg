@@ -3222,8 +3222,12 @@ ExportHTMLImages (gpointer * p, guint n, GtkWidget * pw)
 	      ok = GTKGetInputYN (message);
 	      g_free (message);
 	    }
-	  else if (g_mkdir (expfolder, S_IRWXU) == 0)
-	    {
+	  else if (mkdir (expfolder
+#ifndef WIN32
+                 , S_IRWXU
+#endif
+                 ) == 0 )
+	  {
 	      ok = TRUE;
 	    }
 	  else
