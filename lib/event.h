@@ -10,7 +10,7 @@
 #define _EVENT_H_
 
 #include <list.h>
-#if defined HAVE_SYS_TIME_H || !defined HAVE_CONFIG_H
+#if defined HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
