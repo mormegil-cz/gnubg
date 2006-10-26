@@ -225,7 +225,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     char **ppch, **ppchTip;
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
-	*pwLabelFile;
+	*pwLabelFile, *table, *label;
     int cCache;
     int i, nRandom;
 
@@ -1448,8 +1448,6 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                             "colours depending on their analysis"),
                           NULL );
 
-
-    GtkWidget *table, *label;
     table = gtk_table_new (2, 3, FALSE);
     
     label = gtk_label_new (_("Default SGF folder:"));
@@ -1507,7 +1505,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   int n, cCache;
   int i;
   char *pch;
-  gchar *filename, *command;
+  gchar *filename, *command, *tmp, *newfolder;
   BoardData *bd = BOARD( pwBoard )->board_data;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
@@ -1832,8 +1830,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE( pow->pwGotoFirstGame, fGotoFirstGame, "set gotofirstgame %s" )
   CHECKUPDATE( pow->pwGameListStyles, fStyledGamelist, "set styledgamelist %s" )
 
-  gchar *tmp, *newfolder;
-  
   newfolder =
   gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pow->pwDefaultSGFFolder));
   if (newfolder && (!default_sgf_folder || strcmp (newfolder, default_sgf_folder)))

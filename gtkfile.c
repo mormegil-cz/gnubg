@@ -120,7 +120,7 @@ char *pc, *tmp;
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
 #if WIN32
-  if ((pc = getenv ("ProgramFiles")))
+  if ((pc = getenv ("ProgramFiles")) != NULL)
     {
       tmp = g_strdup_printf ("%s\\TMG\\SavedGames", pc);
       gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
@@ -173,7 +173,7 @@ SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
 				     file_format[format].exports[type]);
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (pso->upext)))
     {
-      if ((fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pso->fc))))
+      if ((fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pso->fc))) != NULL)
 	{
 	  DisectPath (fn, file_format[format].extension, &fnn, &fnd);
 	  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (pso->fc),
@@ -194,7 +194,7 @@ SaveCommon (guint f, gchar * prompt)
   GtkWidget *hbox;
   guint i, j, format;
   SaveOptions so;
-  static gint last_export_format = 0;
+  static guint last_export_format = 0;
   static gint last_export_type = 0;
   static gchar *last_save_folder = NULL;
   static gchar *last_export_folder = NULL;
@@ -298,7 +298,7 @@ OpenCommon (guint f, gchar * prompt)
   guint format, i, j;
   GtkFileFilter *aff;
   GtkWidget *desc, *fc;
-  static gint last_import_format = 0;
+  static guint last_import_format = 0;
   static gchar *last_load_folder = NULL;
   static gchar *last_import_folder = NULL;
   gchar *folder = NULL;
