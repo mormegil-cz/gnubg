@@ -54,7 +54,7 @@ MatchFromID ( int anDice[ 2 ],
               int *pnMatchTo,
               int anScore[ 2 ],
               int *pnCube,
-              int *pgs,
+              gamestate *pgs,
               const char *szMatchID );
 
 extern int
@@ -68,7 +68,7 @@ MatchFromKey ( int anDice[ 2 ],
                int *pnMatchTo,
                int anScore[ 2 ],
                int *pnCube,
-               int *pgs,
+               gamestate *pgs,
                const unsigned char *auchKey );
 
 extern char *

@@ -158,6 +158,7 @@ static float e[100] = {
    exponentials comparatively fast, but still about 30% slower than
    the lookup table used here. */
 
+/* NB. can't be inlined as now used in sse file as well */
 extern /*inline*/ float sigmoid_original(float const xin) {
     
     if( !signbit( xin ) ) { /* signbit() can be faster than a compare to 0.0 */

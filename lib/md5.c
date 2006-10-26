@@ -29,9 +29,7 @@
    under Term 3 of the GNU LGPL) by Gary Wong for distribution
    with GNU Backgammon. */
 
-#ifdef HAVE_CONFIG_H
 # include <config.h>
-#endif
 
 #include <sys/types.h>
 

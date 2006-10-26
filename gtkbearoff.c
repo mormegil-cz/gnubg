@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <gtk/gtk.h>
 
@@ -112,7 +110,7 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 
   buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pbw->pwText));
 
-  pch = g_malloc( 2000 );
+  pch = (char*)malloc( 2000 );
   strcpy( pch, "" );
   ShowBearoff( pch, &pbw->ms, pbw->pbc );
 
@@ -121,7 +119,7 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
   pango_font_description_free (font_desc);
   gtk_text_buffer_set_text(buffer, pch, -1);
 
-  g_free( pch );
+  free( pch );
 
 }
 

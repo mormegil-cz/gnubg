@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
@@ -195,10 +193,9 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
   pexs->szHTMLPictureURL = 
     strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
 
-  pexs->het = gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
+  pexs->het = (htmlexporttype)gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
 
-  pexs->hecss = 
-    gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLCSS));
+  pexs->hecss = (htmlexportcss)gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLCSS));
 
   /* sizes */
   pexs->nPNGSize = (int)pew->adjPNGSize->value;
@@ -487,7 +484,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   exportwidget *pew;
 
-  pew = malloc ( sizeof ( exportwidget ) );
+  pew = (exportwidget*)malloc ( sizeof ( exportwidget ) );
 
   pew->pexs = pexs;
 

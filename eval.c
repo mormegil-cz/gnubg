@@ -2286,7 +2286,7 @@ enum {
  */
 static int nContext[3] = {-1, -1, -1};
 
-static inline NNEvalType
+static inline_hint NNEvalType
 NNevalAction(positionclass const p)
 {
   {                     assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }

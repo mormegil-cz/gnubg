@@ -56,7 +56,7 @@ typedef enum _font {
   FONT_TT_BOLD,
   FONT_TT_OBLIQUE,
   FONT_TT_BOLD_OBLIQUE,
-  NUM_FONTS,
+  NUM_FONTS
 } font;
 static char *aszFont[ NUM_FONTS ] = { 
   NULL, 
@@ -115,9 +115,9 @@ static void EndObject( FILE *pf ) {
     fputs( "endobj\n", pf );
 }
 
-static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
+static void PostScriptEscape( FILE *pf, char *pchIn ) {
 
-    unsigned char *pch, *sz;
+    char *pch, *sz;
 
     pch = sz = g_convert (pchIn, -1, "ISO-8859-1", "UTF-8", NULL, NULL, NULL);
     
@@ -707,16 +707,16 @@ static short acxTimesRoman[ 256 ] = {
     500, 500, 500, 500, 500, 500, 500, 500  /* 248 to 255 */
 };
 
-static int StringWidth( unsigned char *sz ) {
+static int StringWidth( char *sz ) {
 
-    unsigned char *pch;
+    char *pch;
     int c;
     
     switch( fn ) {
     case FONT_RM:
 	for( c = 0, pch = sz; *pch; pch++ )
 	    if( isprint( *pch ) )
-		c += acxTimesRoman[ *pch ];
+		c += acxTimesRoman[ (int)(*pch) ];
 	break;
 	
     case FONT_TT:
@@ -735,12 +735,12 @@ static int StringWidth( unsigned char *sz ) {
 /* Typeset a line of text.  We're not TeX, so we don't do any kerning,
    hyphenation or justification.  Word wrapping will have to do. */
 
-static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch, 
+static void PrintPostScriptLineWithSkip( FILE *pf, char *pch, 
                                          const int nSkip,
                                          font fn, int nSize ) {
 
     int x;
-    unsigned char *sz, *pchStart, *pchBreak;
+    char *sz, *pchStart, *pchBreak;
     
     if( !pch || !*pch )
 	return;
@@ -756,7 +756,7 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
 	pchBreak = NULL;
 	pchStart = pch;
 	
-	for( x = 0; x < 451 * 1000 / nSize; x += acxTimesRoman[ *pch++ ] )
+	for( x = 0; x < 451 * 1000 / nSize; x += acxTimesRoman[ (int)(*pch++) ] )
 	    if( !*pch ) {
 		/* finished; break here */
 		pchBreak = pch;
@@ -804,14 +804,14 @@ static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch,
 }
 
 static void
-PrintPostScriptLine ( FILE *pf, unsigned char *pch ) {
+PrintPostScriptLine ( FILE *pf, char *pch ) {
 
   PrintPostScriptLineWithSkip ( pf, pch, 0, FONT_RM, 10 );
 
 }
 
 static void
-PrintPostScriptLineFont ( FILE *pf, unsigned char *pch, 
+PrintPostScriptLineFont ( FILE *pf, char *pch, 
                           font fn, int nSize ) {
 
   PrintPostScriptLineWithSkip ( pf, pch, 0, fn, nSize );
@@ -821,7 +821,7 @@ PrintPostScriptLineFont ( FILE *pf, unsigned char *pch,
 
 
 static void
-PrintPostScriptComment ( FILE *pf, unsigned char *pch ) {
+PrintPostScriptComment ( FILE *pf, char *pch ) {
 
   PrintPostScriptLineWithSkip ( pf, pch, 6, FONT_RM, 10 );
 

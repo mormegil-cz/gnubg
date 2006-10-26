@@ -343,7 +343,7 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 			col3d.textureInfo = 0;
 		else
 		{
-			BoardData *bd = BOARD(pwPrevBoard)->board_data;
+			BoardData *bd = (BOARD(pwPrevBoard))->board_data;
 			ClearTextures(&bd->bd3d);
 			GetTextures(&bd->bd3d, bd->rd);
 		}
@@ -484,7 +484,7 @@ extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind)
 	CreatePreview();
 }
 
-GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, int texture)
+GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType texture)
 {
 	GtkWidget *pixmapwid, *button;
 	GdkPixmap *pixmap;

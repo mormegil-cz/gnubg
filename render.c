@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <assert.h>
 #include <stdio.h>
@@ -201,7 +199,7 @@ renderdata rdDefault = {
 #endif
 };
 
-static inline unsigned char clamp( int n ) {
+static inline_hint unsigned char clamp( int n ) {
 
     if( n < 0 )
 	return 0;
@@ -218,7 +216,7 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
 }
 
-static inline double ssqrt( double x ) {
+static inline_hint double ssqrt( double x ) {
 
     return x < 0.0 ? 0.0 : sqrt( x );
 }
@@ -1042,16 +1040,22 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 	s = prd->nSize;
     unsigned char a[ 3 ];
     float rx, rz, cos_theta, rDiffuseTop, rHeight, rDiffuse;
-#if __GNUC__ || !HAVE_ALLOCA
+#if (__GNUC__ && !__STRICT_ANSI__) || !HAVE_ALLOCA
 	int anSpecular[4][s];
 	float arDiffuse[4][s];
 	float arHeight[s];
 #else
-	int *anSpecularData = alloca( 4 * s * sizeof( int ) );
-	int *anSpecular[4] = { anSpecularData, anSpecularData + s, anSpecularData + 2 * s, anSpecularData + 3 * s };
-	float *arDiffuseData = alloca( 4 * s * sizeof( float ) );
-	float *arDiffuse[4] = { arDiffuseData, arDiffuseData + s, arDiffuseData + 2 * s, arDiffuseData + 3 * s };
+	int *anSpecular[4], *anSpecularData = alloca( 4 * s * sizeof( int ) );
+	float *arDiffuse[4], *arDiffuseData = alloca( 4 * s * sizeof( float ) );
 	float *arHeight = alloca( s * sizeof( float ) );
+	anSpecular[0] = anSpecularData;
+	anSpecular[1] = anSpecularData + s;
+	anSpecular[2] = anSpecularData + 2 * s;
+	anSpecular[3] = anSpecularData + 3 * s;
+	arDiffuse[0] = arDiffuseData;
+	arDiffuse[1] = arDiffuseData + s;
+	arDiffuse[2] = arDiffuseData + 2 * s;
+	arDiffuse[3] = arDiffuseData + 3 * s;
 #endif
 
 
@@ -1267,11 +1271,14 @@ static void HingePixel( renderdata *prd, float xNorm, float yNorm,
     float arReflection[ 3 ], arAuxLight[ 2 ][ 3 ] = {
 	{ 0.6, 0.7, 0.5 },
 	{ 0.5, -0.6, 0.7 } };
-    float *arLight[ 3 ] = { prd->arLight, arAuxLight[ 0 ], arAuxLight[ 1 ] };
     float zNorm, zEye;
     float diffuse, specular = 0, cos_theta;
     float l;
     int i;
+    float *arLight[ 3 ];
+	arLight[ 0 ] = prd->arLight;
+	arLight[ 1 ] = arAuxLight[ 0 ];
+	arLight[ 2 ] = arAuxLight[ 1 ];
 
     zNorm = ssqrt( 1.0 - xNorm * xNorm - yNorm * yNorm );
     

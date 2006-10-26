@@ -22,9 +22,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <gtk/gtk.h>
 
@@ -409,8 +407,8 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
       g_free( ptmw->achDice[ i ] );
       g_free( ptmw->achPips[ i ] );
 
-      ptmw->achDice[ i ] = g_malloc ( nSizeDie * nSizeDie * 7 * 7 * 4 );
-      ptmw->achPips[ i ] = g_malloc ( nSizeDie * nSizeDie * 3 );
+      ptmw->achDice[ i ] = (unsigned char*)g_malloc ( nSizeDie * nSizeDie * 7 * 7 * 4 );
+      ptmw->achPips[ i ] = (unsigned char*)g_malloc ( nSizeDie * nSizeDie * 3 );
     }
 
     RenderDice( &rd, ptmw->achDice[ 0 ], ptmw->achDice[ 1 ], nSizeDie * 7 * 4 );

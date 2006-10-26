@@ -9,6 +9,7 @@
 #define _NEURALNET_H_
 
 #include <stdio.h>
+#include "common.h"
 
 #define SIGMOID_BAUR 0
 #define SIGMOID_JTH 0
@@ -18,7 +19,7 @@
 #elif SIGMOID_JTH
 #define sigmoid sigmoid_jth
 #else
-extern /*inline*/ float sigmoid_original(float const xin);
+extern float sigmoid_original(float const xin);
 #define sigmoid sigmoid_original
 #endif
 

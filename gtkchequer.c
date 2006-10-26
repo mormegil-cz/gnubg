@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
@@ -77,20 +75,21 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
   /* setup rollout dialog */
   {
-	move **ppm = malloc( c * sizeof (move *));
-	cubeinfo** ppci = malloc( c * sizeof (cubeinfo *));
-	char ( *asz )[ 40 ] = malloc( 40 * c );
+	move **ppm = (move**)malloc( c * sizeof (move *));
+	cubeinfo** ppci = (cubeinfo**)malloc( c * sizeof (cubeinfo *));
+	char **asz = (char**)malloc(sizeof(char*) * c);
 
   for( i =  0, pl = plSelList; i < c; pl = pl->next, i++ )
   {
     m = ppm[ i ] = MoveListGetMove(phd, pl);
     ppci[ i ] = &ci;
+    asz[i] = (char*)malloc(40);
     FormatMove ( asz[ i ], ms.anBoard, m->anMove );
   }
 	MoveListFreeSelectionList(plSelList);
 
 	GTKSetCurrentParent(pw);
-  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
+  RolloutProgressStart( &ci, c, NULL, &rcRollout, (char(*)[40])asz, &p );
 
   if ( fAction )
     HandleXAction();
@@ -99,9 +98,15 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 
   RolloutProgressEnd( &p );
 
+	while (i > 0)
+	{
+		i--;
+		free(asz[i]);
+	}
+
+	free(asz);
 	free(ppm);
 	free(ppci);
-	free(asz);
 
 	if (res < 0)
 		return;
@@ -280,7 +285,7 @@ MoveListEval ( GtkWidget *pw, hintdata *phd )
 static void
 MoveListEvalPly ( GtkWidget *pw, hintdata *phd )
 {
-  char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+  char *szPly = (char*)gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
 #if defined (REDUCTION_CODE)
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
 #else
@@ -330,8 +335,8 @@ static char *MoveListCopyData ( hintdata *phd )
 	GList *plSelList = MoveListGetSelectionList(phd);
 	c = g_list_length(plSelList);
 
-	an = malloc( c * sizeof( an[ 0 ] ) );
-	sz = malloc( c * 9 * 80 );
+	an = (int*)malloc( c * sizeof( an[ 0 ] ) );
+	sz = (char*)malloc( c * 9 * 80 );
 
 	*sz = 0;
 

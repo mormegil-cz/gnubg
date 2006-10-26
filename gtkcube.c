@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
@@ -783,7 +781,7 @@ EvalCube ( cubehintdata *pchd, evalcontext *pec ) {
 static void
 CubeAnalysisEvalPly ( GtkWidget *pw, cubehintdata *pchd ) {
 
-  char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+  char *szPly = (char*)gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
   evalcontext ec = {0, 0, 0, TRUE, 0.0};
 
   ec.fCubeful = esAnalysisCube.ec.fCubeful;

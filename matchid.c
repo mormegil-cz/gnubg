@@ -187,9 +187,9 @@ MatchFromKey ( int anDice[ 2 ],
                int *pnMatchTo,
                int anScore[ 2 ],
                int *pnCube,
-               int *pgs,
+               gamestate *pgs,
                const unsigned char *auchKey ) {
-
+	int temp;
   GetBits ( auchKey, 0, 4, pnCube );
   *pnCube = 0x1 << *pnCube;
 
@@ -199,7 +199,8 @@ MatchFromKey ( int anDice[ 2 ],
 
   GetBits ( auchKey, 6, 1, pfMove );
   GetBits ( auchKey, 7, 1, pfCrawford );
-  GetBits ( auchKey, 8, 3, pgs );
+  GetBits ( auchKey, 8, 3, &temp );
+  *pgs = (gamestate)temp;
   GetBits ( auchKey, 11, 1, pfTurn );
   GetBits ( auchKey, 12, 1, pfDoubled );
   GetBits ( auchKey, 13, 2, pfResigned );
@@ -247,7 +248,7 @@ MatchFromID ( int anDice[ 2 ],
               int *pnMatchTo,
               int anScore[ 2 ],
               int *pnCube,
-              int *pgs,
+              gamestate *pgs,
               const char *szMatchID ) {
 
   unsigned char auchKey[ 9 ];

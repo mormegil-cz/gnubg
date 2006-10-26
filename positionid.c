@@ -41,8 +41,9 @@
 #include <errno.h>
 #include <string.h>
 #include "positionid.h"
+#include "common.h"
 
-static inline void
+static inline_hint void
 addBits(unsigned char auchKey[10], int const bitPos, int const nBits)
 {
   int const k = bitPos / 8;

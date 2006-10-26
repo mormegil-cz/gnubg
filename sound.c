@@ -23,9 +23,8 @@
  * $Id$
  */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
+
 #include <assert.h>
 #include <sys/types.h>
 #if HAVE_SYS_AUDIOIO_H

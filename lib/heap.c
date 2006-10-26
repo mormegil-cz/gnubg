@@ -12,7 +12,7 @@
 
 extern int HeapCreate( heap *ph, int c, heapcomparefunc phcf ) {
 
-    if( ( ph->ap = malloc( c * sizeof( void * ) ) ) == NULL )
+    if( ( ph->ap = (void**)malloc( c * sizeof( void * ) ) ) == NULL )
 	return -1;
     
     ph->cp = 0;
@@ -35,7 +35,7 @@ extern int HeapInsert( heap *ph, void *p ) {
     void *pTemp;
     
     if( ph->cp == ph->cpAlloc ) {
-	if( ( ph->ap = realloc( ph->ap, ( ph->cpAlloc << 1 ) *
+	if( ( ph->ap = (void**)realloc( ph->ap, ( ph->cpAlloc << 1 ) *
 				 sizeof( void * ) ) ) == NULL )
 	    return -1;
 
@@ -83,7 +83,7 @@ static int DeleteItem( heap *ph, int i ) {
     }
 
     if( ph->cpAlloc > 1 && ( ph->cp << 1 < ph->cpAlloc ) )
-	return (( ph->ap = realloc( ph->ap, ( ph->cpAlloc >>= 1 ) *
+	return (( ph->ap = (void**)realloc( ph->ap, ( ph->cpAlloc >>= 1 ) *
 				   sizeof( void * ) ) ) == NULL) ? 0 : -1;
 
     return 0;

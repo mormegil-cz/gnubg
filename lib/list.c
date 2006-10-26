@@ -21,7 +21,7 @@ list *ListInsert( list *pl, void *p ) {
 
     list *plNew;
 
-    if ( (plNew = malloc( sizeof( *plNew ))) == NULL )
+    if ( (plNew = (list*)malloc( sizeof( *plNew ))) == NULL )
 	return NULL;
 
     plNew->p = p;

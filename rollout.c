@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
@@ -353,7 +351,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
   /* Make local copy of cubeinfo struct, since it
      may be modified */
-#if __GNUC__
+#if __GNUC__ && !__STRICT_ANSI__
   cubeinfo pciLocal[ cci ];
   int pfFinished[ cci ];
   float aarVarRedn[ cci ][ NUM_ROLLOUT_OUTPUTS ];
@@ -1655,23 +1653,25 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   
 
   evalsetup esLocal;
-  int (* apBoard[2])[2][25] = { (int (*)[2][25]) anBoard, 
-				(int (*)[2][25]) anBoard};
-  float (* apOutput[2])[ NUM_ROLLOUT_OUTPUTS ] = 
-	 { (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput, 
-	   (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput + 1};
-  float (* apStdDev[2])[ NUM_ROLLOUT_OUTPUTS ] = 
-	 { (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[0], 
-	   (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[1]};
   evalsetup (* apes[2]);
   cubeinfo aci[ 2 ];
-  const cubeinfo (* apci[2]) = { &aci[ 0 ], &aci[ 1 ] };
-
-
+  const cubeinfo (* apci[2]);
   int cGames;
   int afCubeDecTop[] = { FALSE, FALSE }; /* no cube decision in 
                                             iTurn = 0 */
-  int (* apCubeDecTop[2]) = { afCubeDecTop, afCubeDecTop};
+  int (* apBoard[2])[2][25];
+  float (* apOutput[2])[ NUM_ROLLOUT_OUTPUTS ];
+  float (* apStdDev[2])[ NUM_ROLLOUT_OUTPUTS ];
+  int (* apCubeDecTop[2]);
+  apCubeDecTop[0] = afCubeDecTop;
+  apCubeDecTop[1] = afCubeDecTop;
+  apStdDev[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[0];
+  apStdDev[1] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[1];
+  apci[0] = &aci[ 0 ];
+  apci[1] = &aci[ 1 ];
+  apBoard[0] = apBoard[1] = (int (*)[2][25]) anBoard;
+  apOutput[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput;
+  apOutput[1] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput + 1;
 
   if (pes == 0) {
     /* force rollout from sratch */

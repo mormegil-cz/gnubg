@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
@@ -100,12 +98,11 @@ UpdateAllTables ( metwidget *pmw ) {
   mettable *pmt;
   int i;
 
-  pmt = gtk_object_get_user_data ( GTK_OBJECT ( pmw->pwPreCrawford ) );
+  pmt = (mettable*)gtk_object_get_user_data ( GTK_OBJECT ( pmw->pwPreCrawford ) );
   UpdateTable ( pmt, aafMET, &miCurrent, pmw->nMatchTo, pmw->nMatchTo, FALSE );
 
   for ( i = 0; i < 2; ++i ) {
-    pmt = 
-      gtk_object_get_user_data ( GTK_OBJECT ( pmw->apwPostCrawford[ i ] ) );
+    pmt = (mettable*)gtk_object_get_user_data ( GTK_OBJECT ( pmw->apwPostCrawford[ i ] ) );
     UpdateTable ( pmt, (float (*)[ MAXSCORE ]) aafMETPostCrawford[ i ], 
                   &miCurrent, pmw->nMatchTo, 1, TRUE );
   }

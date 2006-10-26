@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
@@ -196,9 +194,7 @@ static void
 SetupSettingsMenuActivate ( GtkWidget *pwItem,
                             movefiltersetupwidget *pfmsw ) {
 
-  int *piSelected;
-  
-  piSelected = gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
+  int *piSelected = (int*)gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
 
   if ( *piSelected == NUM_MOVEFILTER_SETTINGS )
     return; /* user defined */
@@ -358,7 +354,7 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
                         pwItem = gtk_menu_item_new_with_label (
                                     _("user defined") ) );
 
-    pi = g_malloc ( sizeof ( int ) );
+    pi = (int*)g_malloc ( sizeof ( int ) );
     *pi = i;
     gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
                               pi, g_free );
@@ -420,7 +416,7 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 static void
 MoveFilterSetupOK ( GtkWidget *pw, GtkWidget *pwMoveFilterSetup ) {
 
-  movefiltersetupwidget *pmfsw = 
+  movefiltersetupwidget *pmfsw = (movefiltersetupwidget *)
     gtk_object_get_user_data ( GTK_OBJECT ( pwMoveFilterSetup ) );
 
                                
@@ -472,9 +468,7 @@ static void
 SettingsMenuActivate ( GtkWidget *pwItem,
                        movefilterwidget *pmfw ) {
 
-  int *piSelected;
-  
-  piSelected = gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
+  int *piSelected = (int*)gtk_object_get_data ( GTK_OBJECT ( pwItem ), "user_data" );
 
   if ( *piSelected == NUM_MOVEFILTER_SETTINGS )
     return; /* user defined */
@@ -556,7 +550,7 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
                         pwItem = gtk_menu_item_new_with_label (
                                     _("user defined") ) );
 
-    pi = g_malloc ( sizeof ( int ) );
+    pi = (int*)g_malloc ( sizeof ( int ) );
     *pi = i;
     gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
                               pi, g_free );
@@ -637,7 +631,7 @@ MoveFilterSetPredefined ( GtkWidget *pwMoveFilter,
                           const int i ) {
 
 
-  movefilterwidget *pmfw = 
+  movefilterwidget *pmfw = (movefilterwidget *)
     gtk_object_get_user_data ( GTK_OBJECT ( pwMoveFilter ) );
 
   if ( i < 0 )

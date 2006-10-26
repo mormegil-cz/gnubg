@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #if USE_BOARD3D
 #include "board3d/inc3d.h"
@@ -5966,7 +5964,7 @@ static int ShowManualSection( char *szTitle, char *szNode )
     }
     
     pw = gtk_texi_new();
-    g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer) &pw );
+    g_object_add_weak_pointer( G_OBJECT( pw ), (void*)&pw );
     gtk_window_set_title( GTK_WINDOW( pw ), _(szTitle) );
     gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
     gtk_widget_show_all( pw );
@@ -6219,7 +6217,7 @@ extern void GTKHelp( char *sz )
 	GTKHelpAdd( pts, NULL, acTop );
 	
 	pw = GTKCreateDialog(_("Help - command reference"), DT_INFO, NULL, DIALOG_FLAG_NONE, NULL, NULL);
-	g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer ) &pw );
+	g_object_add_weak_pointer( G_OBJECT( pw ), (void*) &pw );
 	gtk_window_set_title( GTK_WINDOW( pw ), _("Help - command reference") );
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
 	gtk_dialog_add_button(GTK_DIALOG(pw), GTK_STOCK_CLOSE, 
@@ -7867,9 +7865,9 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
     GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
     int i;
     char **apXPM[3];
-    char *asz[3] = { _("Resign normal"),
-		 _("Resign gammon"),
-		 _("Resign backgammon") };
+    char *asz[3] = { N_("Resign normal"),
+		 N_("Resign gammon"),
+		 N_("Resign backgammon") };
 		 
 #include "xpm/resigns.xpm"
     apXPM[0] = resign_n_xpm;
@@ -7886,7 +7884,7 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
 	gtk_container_add(GTK_CONTAINER(pwButtons), pwHbox); 
     	gtk_box_pack_start(GTK_BOX(pwHbox), 
 		image_from_xpm_d(apXPM[i], pwButtons), FALSE,FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(asz[i]), TRUE, TRUE, 10);
+	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(_(asz[i])), TRUE, TRUE, 10);
 	gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
 	gtk_signal_connect(GTK_OBJECT(pwButtons), "clicked",
 		GTK_SIGNAL_FUNC( CallbackResign ), GINT_TO_POINTER(i) );
@@ -7894,51 +7892,6 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
 
     gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwVbox);
     gtk_widget_show_all(pwDialog);
-    
-    gtk_main();
-}
-// remove...
-extern void GTKResignOld( gpointer *p, guint n, GtkWidget *pw )
-{
-    GtkWidget *pwWindow, *pwVbox, *pwHbox, *pwButtons;
-    int i;
-    char **apXPM[3];
-    char *asz[3] = { _("Resign normal"),
-		 _("Resign gammon"),
-		 _("Resign backgammon") };
-		 
-#include "xpm/resigns.xpm"
-
-    apXPM[0] = resign_n_xpm;
-    apXPM[1] = resign_g_xpm;
-    apXPM[2] = resign_bg_xpm;
-
-    pwWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(pwWindow), _("Resign"));
-
-    pwVbox = gtk_vbox_new(TRUE, 5);
-
-    for (i = 0; i < 3 ; i++){
-	pwButtons = gtk_button_new();
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(pwButtons), pwHbox); 
-    	gtk_box_pack_start(GTK_BOX(pwHbox), 
-		image_from_xpm_d(apXPM[i], pwButtons), FALSE,FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(asz[i]), TRUE, TRUE, 10);
-	gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
-	gtk_signal_connect(GTK_OBJECT(pwButtons), "clicked",
-		GTK_SIGNAL_FUNC( CallbackResign ), GINT_TO_POINTER(i) );
-    }
-
-    pwButtons = gtk_button_new_with_label(_("Cancel"));
-    gtk_container_add(GTK_CONTAINER(pwVbox), pwButtons);
-    gtk_signal_connect(GTK_OBJECT(pwButtons), "clicked",
-		GTK_SIGNAL_FUNC( CallbackResign ), (int *) -1 );
-    gtk_signal_connect(GTK_OBJECT(pwWindow), "destroy",
-		GTK_SIGNAL_FUNC( CallbackResign ), (int *) -1 );
-
-    gtk_container_add(GTK_CONTAINER(pwWindow), pwVbox);
-    gtk_widget_show_all(pwWindow);
     
     gtk_main();
 }

@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <assert.h>
 #include <gtk/gtk.h>
@@ -2525,7 +2523,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	int redrawNeeded = 0;
 	int dummy;
     
-#if __GNUC__
+#if __GNUC__ && !__STRICT_ANSI__
     int *match_settings[] = { &bd->match_to, &bd->score,
 			      &bd->score_opponent };
     int *game_settings[] = { &bd->turn, 

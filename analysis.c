@@ -83,7 +83,8 @@ GetRating ( const float rError ) {
   int i;
 
   for ( i = RAT_SUPERNATURAL; i >= 0; i-- )
-    if ( rError < arThrsRating[ i ] ) return i;
+    if ( rError < arThrsRating[ i ] )
+		return (ratingtype)i;
 
   return RAT_UNDEFINED;
 }

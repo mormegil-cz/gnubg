@@ -53,9 +53,10 @@ extern int nGUIAnimSpeed, fGUIBeep, fGUIHighDieFirst,
     fGUIIllegal, fGUIShowPips, fGUISetWindowPos,
     fGUIDragTargetHelp, fGUIUseStatsPanel, fGUIShowEPCs;
 
+struct _BoardData;      /* Forward declaration for use in Board */
 typedef struct _Board {
     GtkVBox vbox;
-    gpointer board_data;
+    struct _BoardData *board_data;
 } Board;
 
 typedef struct _BoardClass {

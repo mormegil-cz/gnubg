@@ -6,15 +6,13 @@
 #define __attribute__(X)
 #endif
 
-#ifdef HUGE_VALF
-#define ERR_VAL (-HUGE_VALF)
-#elif defined (HUGE_VAL)
+#ifdef HUGE_VAL
 #define ERR_VAL (-HUGE_VAL)
 #else
 #define ERR_VAL (-FLT_MAX)
 #endif
 
-#if __GNUC__
+#if __GNUC__ && !__STRICT_ANSI__
 	#define VARIABLE_ARRAY(atype,var,count) atype var[count];
 #elif HAVE_ALLOCA
 	#define VARIABLE_ARRAY(atype,var,count) atype *var = (atype *)alloca(count * sizeof(atype));
@@ -56,6 +54,19 @@ typedef RETSIGTYPE (*psighandler)( int );
 		#include <limits.h>
 	#endif
 	#define BIG_PATH PATH_MAX
+#endif
+
+/* NB. Use inline_hint rather than inline in code to help portability */
+#if defined( __GNUC__ )
+	#ifndef __STRICT_ANSI__
+		#define inline_hint inline
+	#else
+		#define inline_hint __inline__
+	#endif
+#elif _MSC_VER
+	#define inline_hint __inline
+#else
+	#define inline_hint
 #endif
 
 #endif

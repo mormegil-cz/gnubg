@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <gtk/gtk.h>
 
@@ -133,7 +131,7 @@ PushSplash ( GtkWidget *pwSplash,
   if ( ! pwSplash )
     return;
   
-  pgs = gtk_object_get_data ( GTK_OBJECT ( pwSplash ),
+  pgs = (gtksplash *)gtk_object_get_data ( GTK_OBJECT ( pwSplash ),
                                          "user_data" );
 
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 0 ] ), szText0 );

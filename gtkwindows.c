@@ -32,9 +32,6 @@
 #include <glib/gi18n.h>
 #include "gtktoolbar.h"
 
-// remove this...
-extern void OK( GtkWidget *pw, int *pf );
-
 static char *aszStockItem[ NUM_DIALOG_TYPES ] =
 {
 	GTK_STOCK_DIALOG_INFO,

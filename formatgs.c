@@ -227,8 +227,6 @@ formatGS( const statcontext *psc, const int nMatchTo,
         N_("Doubles"),
         N_("Takes"),
         N_("Passes") };
-      const int *ai[ 5 ] = { psc->anTotalCube, psc->anCloseCube,
-                             psc->anDouble, psc->anTake, psc->anPass };
 
       static char *asz2[] = {
         N_("Missed doubles (below CP)"),
@@ -238,27 +236,36 @@ formatGS( const statcontext *psc, const int nMatchTo,
         N_("Wrong takes"),
         N_("Wrong passes") };
 
-      const int *ai2[ 6 ] = { psc->anCubeMissedDoubleDP,
-                              psc->anCubeMissedDoubleTG,
-                              psc->anCubeWrongDoubleDP,
-                              psc->anCubeWrongDoubleTG,
-                              psc->anCubeWrongTake,
-                              psc->anCubeWrongPass };
-      const float *af2[ 2 ][ 6 ] = {
-        { psc->arErrorMissedDoubleDP[ 0 ],
-          psc->arErrorMissedDoubleTG[ 0 ],
-          psc->arErrorWrongDoubleDP[ 0 ],
-          psc->arErrorWrongDoubleTG[ 0 ],
-          psc->arErrorWrongTake[ 0 ],
-          psc->arErrorWrongPass[ 0 ] },
-        { psc->arErrorMissedDoubleDP[ 1 ],
-          psc->arErrorMissedDoubleTG[ 1 ],
-          psc->arErrorWrongDoubleDP[ 1 ],
-          psc->arErrorWrongDoubleTG[ 1 ],
-          psc->arErrorWrongTake[ 1 ],
-          psc->arErrorWrongPass[ 1 ] } };
-
       int i, j;
+
+      const int *ai[ 5 ], *ai2[ 6 ];
+      const float *af2[ 2 ][ 6 ];
+
+		ai[ 0 ] = psc->anTotalCube;
+		ai[ 1 ] = psc->anCloseCube;
+		ai[ 2 ] = psc->anDouble;
+		ai[ 3 ] = psc->anTake;
+		ai[ 4 ] = psc->anPass;
+		
+		ai2[ 0 ] = psc->anCubeMissedDoubleDP;
+		ai2[ 1 ] = psc->anCubeMissedDoubleTG;
+		ai2[ 2 ] = psc->anCubeWrongDoubleDP;
+		ai2[ 3 ] = psc->anCubeWrongDoubleTG;
+		ai2[ 4 ] = psc->anCubeWrongTake;
+		ai2[ 5 ] = psc->anCubeWrongPass;
+
+		af2[0][0] = psc->arErrorMissedDoubleDP[ 0 ];
+		af2[0][1] = psc->arErrorMissedDoubleTG[ 0 ];
+		af2[0][2] = psc->arErrorWrongDoubleDP[ 0 ];
+		af2[0][3] = psc->arErrorWrongDoubleTG[ 0 ];
+		af2[0][4] = psc->arErrorWrongTake[ 0 ];
+		af2[0][5] = psc->arErrorWrongPass[ 0 ];
+		af2[1][0] = psc->arErrorMissedDoubleDP[ 1 ];
+		af2[1][1] = psc->arErrorMissedDoubleTG[ 1 ];
+		af2[1][2] = psc->arErrorWrongDoubleDP[ 1 ];
+		af2[1][3] = psc->arErrorWrongDoubleTG[ 1 ];
+		af2[1][4] = psc->arErrorWrongTake[ 1 ];
+		af2[1][5] = psc->arErrorWrongPass[ 1 ];
 
       for ( i = 0; i < 5; ++i )
         list = g_list_append( list, 
@@ -570,10 +577,12 @@ formatGS( const statcontext *psc, const int nMatchTo,
             /* xgettext: no-c-format */
             N_("95% confidence interval (ppg)") }
 	};
-        const float *af[ 2 ][ 2 ] = { 
-          { psc->arActualResult, psc->arVarianceActual },
-          { psc->arLuckAdj, psc->arVarianceLuckAdj } };
         int i, j;
+        const float *af[ 2 ][ 2 ];
+			af[0][0] = psc->arActualResult;
+			af[0][1] = psc->arVarianceActual;
+			af[1][0] = psc->arLuckAdj;
+			af[1][1] = psc->arVarianceLuckAdj;
 
         for ( i = 0; i < 2; ++i ) {
 

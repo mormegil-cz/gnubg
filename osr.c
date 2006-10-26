@@ -66,11 +66,7 @@ OSRQuasiRandomDice( const int iTurn, const int iGame, const int cGames,
 /* Fill aaProb with one sided bearoff probabilities for position with */
 /* bearoff id n.                                                      */
 
-static 
-#if defined( __GNUC__ )
-inline
-#endif
-void
+static inline_hint void
 getBearoffProbs(const unsigned int n, unsigned short int aaProb[32])
 {
 

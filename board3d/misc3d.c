@@ -351,7 +351,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 			strcpy(text.name, file);
 			text.type = TT_NONE;	/* Don't show in lists */
 
-			*textureInfo = malloc(sizeof(TextureInfo));
+			*textureInfo = (TextureInfo*)malloc(sizeof(TextureInfo));
 			**textureInfo = text;
 			ListInsert(&textures, *textureInfo);
 
@@ -478,7 +478,7 @@ void LoadTextureInfo(int FirstPass)
 
 		if (!err)
 		{	/* Add texture type */
-			TextureInfo* pNewText = malloc(sizeof(TextureInfo));
+			TextureInfo* pNewText = (TextureInfo*)malloc(sizeof(TextureInfo));
 			*pNewText = text;
 			ListInsert(&textures, pNewText);
 		}
@@ -593,7 +593,7 @@ void GetTextures(BoardData3d* bd3d, renderdata *prd)
 void CreateDotTexture(int *pDotTexture)
 {
 	int i, j;
-	unsigned char* data = malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
+	unsigned char* data = (unsigned char*)malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
 	unsigned char* pData = data;
 
 	for (i = 0; i < DOT_SIZE; i++)
@@ -1014,7 +1014,7 @@ void circleRevTex(float radius, float height, int accuracy, Texture* texture)
 	glEnd();
 }
 
-void drawBox(boxType type, float x, float y, float z, float w, float h, float d, Texture* texture)
+void drawBox(int type, float x, float y, float z, float w, float h, float d, Texture* texture)
 {	/* Draw a box with normals and optional textures */
 	float repX, repY;
 	float normX, normY, normZ;
@@ -2254,7 +2254,7 @@ void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename)
 	if (LoadTexture(&bd3d->textureList[bd3d->numTextures], filename))
 	{
 		/* Remeber name */
-		bd3d->textureName[bd3d->numTextures] = malloc(strlen(nameStart) + 1);
+		bd3d->textureName[bd3d->numTextures] = (char*)malloc(strlen(nameStart) + 1);
 		strcpy(bd3d->textureName[bd3d->numTextures], nameStart);
 
 		pMat->pTexture = &bd3d->textureList[bd3d->numTextures];

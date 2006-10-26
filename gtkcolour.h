@@ -43,7 +43,7 @@ typedef struct UpdateDetails_T
 	TextureType texture;
 } UpdateDetails;
 
-GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, int texture);
+GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType texture);
 #endif
 
 #define GTK_TYPE_COLOUR_PICKER (gtk_colour_picker_get_type())
@@ -64,7 +64,7 @@ typedef struct _GtkColourPickerClass GtkColourPickerClass;
 /*  Previous broken type  (YH)
     typedef GtkSignalFunc ColorPickerFunc;
 */
-typedef void  (*ColorPickerFunc)(GtkWidget **);
+typedef void  (*ColorPickerFunc)(GtkWidget *);
 
 struct _GtkColourPicker {
   GtkButton parent_instance;

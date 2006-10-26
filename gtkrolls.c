@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <gtk/gtk.h>
 
@@ -347,7 +345,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   GtkAdjustment *padj;
   int n;
 
-  rollswidget *prw = g_malloc ( sizeof ( rollswidget ) );
+  rollswidget *prw = (rollswidget *)g_malloc ( sizeof ( rollswidget ) );
 
   prw->closing = FALSE;
   prw->pDialog = GTKCreateDialog( _("Distribution of rolls"), DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );

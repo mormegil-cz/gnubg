@@ -19,9 +19,7 @@
  * $Id$
  */
 
-#if HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #if USE_PYTHON
 #include "gnubgmodule.h"
@@ -1013,7 +1011,7 @@ PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args ) {
 #define CHARP_HACK
 #endif
 
-static inline void
+static inline_hint void
 DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
 {
   int const s = PyDict_SetItemString(dict, CHARP_HACK key, val);  

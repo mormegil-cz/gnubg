@@ -75,7 +75,7 @@ typedef struct _rolloutprogress {
 
 #if USE_GTK
 void AllocTextList(rolloutprogress *prp)
-{	// 2d array to cache displayed widget text
+{	/* 2d array to cache displayed widget text */
 	int i;
 	int lines = prp->n;
 	prp->pListText = malloc(sizeof(char*) * lines * 2);
@@ -90,7 +90,7 @@ void AllocTextList(rolloutprogress *prp)
 }
 
 void FreeTextList(rolloutprogress *prp)
-{	// destroy list
+{	/* destroy list */
 	int i;
 	int lines = prp->n;
 
@@ -103,7 +103,7 @@ void FreeTextList(rolloutprogress *prp)
 }
 
 void SetRolloutText(rolloutprogress *prp, int x, int y, char* sz)
-{	// Cache set text to reduce flicker (and speed things up a bit)
+{	/* Cache set text to reduce flicker (and speed things up a bit) */
 	if (!prp->pListText[x][y] || strcmp(prp->pListText[x][y - 1], sz))
 	{
 		gtk_clist_set_text(GTK_CLIST(prp->pwRolloutResult), x, y, sz);
@@ -700,7 +700,7 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
   
   rolloutprogress *prp = (rolloutprogress *) data;
   rolloutstat *prs = prp->prs;
-  // int cGames = gtk_progress_get_value ( GTK_PROGRESS( prp->pwRolloutProgress ) );
+  /* int cGames = gtk_progress_get_value ( GTK_PROGRESS( prp->pwRolloutProgress ) ); */
   int cGames = prp->nGamesDone;
   int nRollouts = GTK_CLIST( prp->pwRolloutResult )->rows / 2;
   int i;

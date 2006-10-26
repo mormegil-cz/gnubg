@@ -215,6 +215,7 @@ extern void GTKTextWindow( const char *szOutput, const char *title, const int ty
 extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
 extern void GtkChangeLanguage();
+extern void OK( GtkWidget *pw, int *pf );
 
 #if USE_BOARD3D
 extern void SetSwitchModeMenuText();

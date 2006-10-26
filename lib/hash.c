@@ -27,7 +27,7 @@ extern int HashCreate( hash *ph, int c, hashcomparefunc phcf ) {
     for( i = 0; ac[ i + 1 ] && c > ac[ i ]; i++ )
 	;
     
-    if( ( ph->aphn = calloc( ac[ i ], sizeof( hashnode * ) ) ) == NULL )
+    if( ( ph->aphn = (hashnode**)calloc( ac[ i ], sizeof( hashnode * ) ) ) == NULL )
 	return -1;
     
     ph->c = 0;
@@ -324,7 +324,7 @@ CacheCreate(cache* pc, unsigned int s)
 
   pc->size = ( s < pc->size ) ? 2*s : s;
   
-  pc->m = malloc(pc->size * sizeof(*pc->m));
+  pc->m = (cacheNode*)malloc(pc->size * sizeof(*pc->m));
 
   if( pc->m == 0 ) {
     return -1;

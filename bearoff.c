@@ -868,11 +868,6 @@ ReadSconyers15x15( bearoffcontext *pbc,
       ( ac[ 4 * i + 1 ] << 8 ) |
       ( ac[ 4 * i + 2 ] << 16 ) |
       ( ac[ 4 * i + 3 ] << 24 );
-    /* the commented code is strange and causes compiler warnings
-     * float* pr; 
-     * pr = (float *) &l; 
-     * ar[ i ] = *pr; 
-     * and is therefore replaced by */
     ar[ i ] = (float)l;
   }
 
