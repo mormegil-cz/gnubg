@@ -1786,8 +1786,10 @@ extern void RenderChequers( renderdata *prd, unsigned char *puch0,
 			1 / ( 1 - prd->rRound ) + 1;
 		s = ssqrt( 1 - r * r );
 		s1 = ssqrt( 1 - r1 * r1 );
-		
-		theta = atanf( r1 / s1 );
+		if (s1 != 0)
+			theta = atanf( r1 / s1 );
+		else
+			theta = 0;
 		
 		for( f = 0; f < 2; f++ ) {
 		    b = asinf( sinf( theta ) / prd->arRefraction[ f ] );
