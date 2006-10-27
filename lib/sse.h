@@ -15,8 +15,8 @@
 
 #define sse_aligned(ar) (!(((int)ar) % ALIGN_SIZE))
 
-extern void *sse_malloc(size_t size);
-extern void sse_free(void* ptr);
+extern float *sse_malloc(size_t size);
+extern void sse_free(float* ptr);
 
 #else
 

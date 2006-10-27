@@ -14,7 +14,7 @@ extern int HeapCreate( heap *ph, int c, heapcomparefunc phcf ) {
 
     if( ( ph->ap = (void**)malloc( c * sizeof( void * ) ) ) == NULL )
 	return -1;
-    
+
     ph->cp = 0;
     ph->cpAlloc = c;
     ph->phcf = phcf;

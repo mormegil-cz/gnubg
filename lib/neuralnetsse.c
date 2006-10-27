@@ -35,15 +35,15 @@
 
 #define HIDDEN_NODES 128
 
-void *sse_malloc(size_t size)
+float *sse_malloc(size_t size)
 {
 	if (SSE_Supported())
-		return _mm_malloc(size, ALIGN_SIZE);
+		return (float *)_mm_malloc(size, ALIGN_SIZE);
 	else
-		return malloc(size);
+		return (float *)malloc(size);
 }
 
-void sse_free(void* ptr)
+void sse_free(float* ptr)
 {
 	if (SSE_Supported())
 		_mm_free(ptr);

@@ -358,7 +358,7 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
     return ck1;
   }
 
-  if( ck1->nEvalContext != (unsigned int)-1 ) {
+  if( ck1->nEvalContext != -1 ) {
     cacheNode* ck2 = pc->m + (l+1);
     if( (ck2->nEvalContext == e->nEvalContext &&
 	 memcmp(e->auchKey, ck2->auchKey, sizeof(e->auchKey)) == 0) ) {
@@ -383,7 +383,7 @@ CacheAdd(cache* pc, cacheNode* e, unsigned long l)
 
   ++pc->nAdds;
   
-  if( ck1->nEvalContext != (unsigned int)-1 ) {
+  if( ck1->nEvalContext != -1 ) {
     pc->m[l+1] = *ck1;
   }
   *ck1 = *e;

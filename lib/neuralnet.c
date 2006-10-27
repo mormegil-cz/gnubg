@@ -830,7 +830,7 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     CheckRC();
     
     if( cHidden != pnn->cHidden ) {
-	if( ( pnn->arHiddenThreshold = realloc( pnn->arHiddenThreshold,
+	if( ( pnn->arHiddenThreshold = (float*)realloc( pnn->arHiddenThreshold,
 		cHidden * sizeof( float ) ) ) == NULL )
 	    return -1;
 
@@ -862,7 +862,7 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     }
 	
     if( cOutput != pnn->cOutput ) {
-	if( ( pnn->arOutputThreshold = realloc( pnn->arOutputThreshold,
+	if( ( pnn->arOutputThreshold = (float*)realloc( pnn->arOutputThreshold,
 		cOutput * sizeof( float ) ) ) == NULL )
 	    return -1;
 
