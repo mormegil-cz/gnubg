@@ -1815,8 +1815,8 @@ baseInputs(int anBoard[2][25], float arInput[])
     {
       int nc = board[ 24 ];
       
-      afInput[ 24 * 4 + 0 ] = (nc == 1) ? 1.0f : 0.0f;
-      afInput[ 24 * 4 + 1 ] = (nc >= 2) ? 1.0f : 0.0f;	/* is this correct? */
+      afInput[ 24 * 4 + 0 ] = (nc >= 1) ? 1.0f : 0.0f;
+      afInput[ 24 * 4 + 1 ] = (nc >= 2) ? 1.0f : 0.0f;
       afInput[ 24 * 4 + 2 ] = (nc >= 3) ? 1.0f : 0.0f;
       afInput[ 24 * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0f : 0.0f;
     }
