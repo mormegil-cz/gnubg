@@ -7949,11 +7949,13 @@ setDefaultFileName (char *path)
   g_free (szCurrentFileName);
   DisectPath (path, NULL, &szCurrentFileName, &szCurrentFolder);
 #if USE_GTK
-{
-  gchar *title = g_strdup_printf(_("GNU Backgammon (%s)"), szCurrentFileName);  
-  gtk_window_set_title(GTK_WINDOW(pwMain), title);
-  g_free(title);
-}
+  if (fX)
+    {
+      gchar *title =
+	g_strdup_printf (_("GNU Backgammon (%s)"), szCurrentFileName);
+      gtk_window_set_title (GTK_WINDOW (pwMain), title);
+      g_free (title);
+    }
 #endif
 }
 
