@@ -673,7 +673,8 @@ InvalidateStoredCube( void );
 #define VERSION_STRING "GNU Backgammon " VERSION
 
 extern char *GetBuildInfoString();
-extern char *szHomeDirectory, *szDataDirectory;
+extern const char *szHomeDirectory;
+extern char *szDataDirectory;
 
 extern char* aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];

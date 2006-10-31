@@ -38,9 +38,6 @@
 #include <limits.h>
 #endif
 #include <math.h>
-#if HAVE_PWD_H
-#include <pwd.h>
-#endif
 #include <signal.h>
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -83,7 +80,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "drawboard.h"
 #include "eval.h"
 #include "export.h"
-#include "getopt.h"
 #include "import.h"
 #include <glib/gi18n.h>
 #include <locale.h>
@@ -2127,7 +2123,8 @@ char *default_import_folder = NULL;
 char *default_export_folder = NULL;
 char *default_sgf_folder = NULL;
 
-char *szHomeDirectory, *szDataDirectory;
+const char *szHomeDirectory;
+char *szDataDirectory;
 
 char *aszBuildInfo[] = {
 #if USE_PYTHON
@@ -6838,52 +6835,6 @@ static void BearoffProgress( int i ) {
     fflush( stdout );
 }
 
-static void usage( char *argv0 ) {
-
-#if USE_GTK
-
-    printf(
-_("Usage: %s [options] [saved-game-file]\n"
-"Options:\n"
-"  -b, --no-bearoff          Do not use bearoff database\n"
-"  -c FILE, --commands FILE  Read commands from FILE and exit\n"
-"  -d DIR, --datadir DIR     Read database and weight files from directory "
-"DIR\n"
-"  -h, --help                Display usage and exit\n"
-"  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
-"  -q, --quiet               Disable sound effects\n"
-"  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
-"  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
-"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
-"  -t, --tty                 Start on tty instead of using window system\n"
-"  -v, --version             Show version information and exit\n"
-"  -w, --window-system-only  Ignore tty input when using window system\n"
-"\n"
-"For more information, type `help' from within gnubg.\n"
-"Please report bugs to <bug-gnubg@gnu.org>.\n"), argv0 );
-#else
-
-    printf(
-_("Usage: %s [options] [saved-game-file]\n"
-"Options:\n"
-"  -b, --no-bearoff          Do not use bearoff database\n"
-"  -c FILE, --commands FILE  Read commands from FILE and exit\n"
-"  -d DIR, --datadir DIR     Read database and weight files from directory "
-"DIR\n"
-"  -h, --help                Display usage and exit\n"
-"  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
-"  -q, --quiet               Disable sound effects\n"
-"  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
-"  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
-"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
-"  -v, --version             Show version information and exit\n"
-"\n"
-"For more information, type `help' from within gnubg.\n"
-"Please report bugs to <bug-gnubg@gnu.org>.\n"), argv0 );
-#endif
-
-}
-
 static void version( void ) {
 
     char *pch;
@@ -7011,291 +6962,218 @@ char* getenvvalue(char* str)
 #endif /* WIN32 */
 
 
-int main(int argc, char *argv[] ) {
+int
+main (int argc, char *argv[])
+{
 
-    char ch, *pch, *pchCommands = NULL;
-    char *pchPythonScript = NULL;
-    int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
-    int fSplash = TRUE;
+  char *pch;
+  char *szFile, szTemp[4096];
+  FILE *pf;
+  char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
+  int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
+    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY = FALSE, show_version =
+    FALSE;
 
 #ifdef WIN32
-	char szInvokingDirectory[ BIG_PATH ] = {0};  /* current dir when GNUbg was started */
+  char szInvokingDirectory[BIG_PATH] = { 0 };	/* current dir when GNUbg was started */
 #endif
-	char szQuoted[ BIG_PATH ];
-
-    static struct option ao[] = {
-	{ "no-bearoff", no_argument, NULL, 'b' },
-	{ "no-rc", no_argument, NULL, 'r' },
-	{ "new-weights", optional_argument, NULL, 'n' },
-	{ "quiet", no_argument, NULL, 'q' },
-	{ "window-system-only", no_argument, NULL, 'w' },
-        { "no-splash", no_argument, NULL, 'S' },
-	/* these options must come last -- see below. */
-	{ "lang", required_argument, NULL, 'l'},
-	{ "datadir", required_argument, NULL, 'd' },
-	{ "commands", required_argument, NULL, 'c' },
-        { "help", no_argument, NULL, 'h' },
-	{ "script", required_argument, NULL, 's' },
-	{ "python", required_argument, NULL, 'p' },
-        { "tty", no_argument, NULL, 't' },
-        { "version", no_argument, NULL, 'v' },
-        { NULL, 0, NULL, 0 }
-    };
-#if HAVE_GETPWUID
-    struct passwd *ppwd;
-#endif
+  char szQuoted[BIG_PATH];
 #if HAVE_LIBREADLINE
-    char *sz;
+  char *sz;
 #endif
 #if USE_GTK
-    GtkWidget *pwSplash = NULL;
+  GtkWidget *pwSplash = NULL;
 #endif
+  GOptionEntry ao[] = {
+    {"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff, N_("Do not use bearoff database"), NULL},
+    {"commands", 'c', 0, G_OPTION_ARG_FILENAME, &pchCommands, N_("Evaluate commands in FILE and exit"), "FILE"},
+    {"datadir", 'd', 0, G_OPTION_ARG_FILENAME, &szDataDirectory, N_("Read database and weight files from DIR"), "DIR"},
+    {"lang", 'l', 0, G_OPTION_ARG_STRING, &lang, N_("Set language to LANG"), "LANG"},
+    {"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights, N_("Create new neural net (of size N)"), "N"},
+    {"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript, N_("Evaluate Python code in FILE and exit"), "FILE"},
+    {"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet, N_("Disable sound effects"), NULL},
+    {"no-rc", 'r', 0, G_OPTION_ARG_NONE, &fNoRC, N_("Do not read .gnubgrc and .gnubgautorc commands"), NULL},
+    {"no-splash", 'S', 0, G_OPTION_ARG_NONE, &fNoSplash, N_("Don't show gtk splash screen"), NULL},
+    {"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX, N_("Start on tty instead of using window system"), NULL},
+    {"version", 'v', 0, G_OPTION_ARG_NONE, &show_version, N_("Show version information and exit"), NULL},
+    {"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY, N_("Ignore tty input when using window system"), NULL},
+    {NULL}
+  };
+  GError *error = NULL;
+  GOptionContext *context;
 
-#if defined(_MSC_VER) && HAVE_LIBXML2
-	xmlMemSetup(free, malloc, realloc, strdup);
-#endif
-
-#if !WIN32
-	szHomeDirectory = getenv( "HOME" );
-#else
-	szHomeDirectory = getenvvalue( "%HOME%" );
-#endif
-	if (!szHomeDirectory)
-		szHomeDirectory = ".";
-
+  szHomeDirectory = g_get_home_dir ();
 #if WIN32
 
-	/* data directory: initialise to the path where gnubg is installed */
-	szDataDirectory = getInstallDir();
-	if (!strcmp(szHomeDirectory, ".") && szDataDirectory)
-		szHomeDirectory = szDataDirectory;
+  /* data directory: initialise to the path where gnubg is installed */
+  szDataDirectory = getInstallDir ();
+  if (!strcmp (szHomeDirectory, ".") && szDataDirectory)
+    szHomeDirectory = szDataDirectory;
 
 #endif /* WIN32 */
+#if defined(_MSC_VER) && HAVE_LIBXML2
+  xmlMemSetup (free, malloc, realloc, strdup);
+#endif
 
+  orgLangCode = g_strdup (setlocale (LC_ALL, ""));
 
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+  bind_textdomain_codeset (PACKAGE, GNUBG_CHARSET);
+
+  context = g_option_context_new ("[file.sgf]");
+  g_option_context_add_main_entries (context, ao, PACKAGE);
+#if USE_GTK
+  g_option_context_add_group (context, gtk_get_option_group (FALSE));
+#endif
+  g_option_context_parse (context, &argc, &argv, &error);
+
+  if (error)
     {
-	/* set language */
+      g_print ("%s\n", error->message);
+      exit(EXIT_FAILURE);
+    }
 
-	char *szFile, szTemp[ 4096 ], *pch;
-	FILE *pf;
+  /* set language */
 
-	outputoff();
+  outputoff ();
 
-	orgLangCode = g_strdup (setlocale (LC_ALL, ""));
-
-	bindtextdomain (PACKAGE, LOCALEDIR);
-	textdomain (PACKAGE);
-	bind_textdomain_codeset (PACKAGE, GNUBG_CHARSET);
-
+  if (!lang)
+    {
 #define AUTORC "/.gnubgautorc"
 
-	szFile = malloc (1 + strlen(szHomeDirectory)+strlen(AUTORC));
-	sprintf( szFile, "%s%s", szHomeDirectory, AUTORC );
+      szFile = malloc (1 + strlen (szHomeDirectory) + strlen (AUTORC));
+      sprintf (szFile, "%s%s", szHomeDirectory, AUTORC);
 
-	if( ( pf = fopen( szFile, "r" ) ) ) {
+      if ((pf = fopen (szFile, "r")))
+	{
 
-	    for (;;) {
+	  for (;;)
+	    {
 
-		szTemp[ 0 ] = 0;
-		fgets( szTemp, sizeof( szTemp ), pf );
+	      szTemp[0] = 0;
+	      fgets (szTemp, sizeof (szTemp), pf);
 
-		if( ( pch = strchr( szTemp, '\n' ) ) )
-		    *pch = 0;
+	      if ((pch = strchr (szTemp, '\n')))
+		*pch = 0;
 
-		if ( ferror( pf ) ) {
-		    outputerr( szFile );
-		    break;
+	      if (ferror (pf))
+		{
+		  outputerr (szFile);
+		  break;
 		}
 
-		if ( feof( pf ) ) {
-		    break;
+	      if (feof (pf))
+		{
+		  break;
 		}
 
-		if ( ! strncmp( "set lang", szTemp, 8 ) ) {
-		    HandleCommand( szTemp, acTop );
-		    break;
+	      if (!strncmp ("set lang", szTemp, 8))
+		{
+		  HandleCommand (szTemp, acTop);
+		  break;
 		}
 	    }
 
-	    fclose( pf );
+	  fclose (pf);
 	}
-    
-	free (szFile);
-	outputon();
+      free (szFile);
+      outputon ();
+    }
+  else
+    SetupLanguage (lang);
+
+  if (show_version)
+    {
+      version ();
+      exit (EXIT_SUCCESS);
     }
 
-#if USE_GTK
-    /* The GTK interface is fairly grotty; it makes it impossible to
-       separate argv handling from attempting to open the display, so
-       we have to check for -t before the other options to avoid connecting
-       to the X server if it is specified.
-
-       We use the last eight elements of ao to get the "--help", "--tty",
-       "--commands", "--script", "--datadir" and "--version" options only. */
-    
-    opterr = 0;
-    
-    while( ( ch = getopt_long( argc, argv, "cd:hsptvl:", ao + sizeof( ao ) /
-			       sizeof( ao[ 0 ] ) - 9, NULL ) ) != (char) -1 )
-	switch( ch ) {
-	case 'c': /* commands */
-        case 'p': /* python script */
-	case 't': /* tty */
 #ifdef WIN32
-         /* Bad hack */
-            fX = TRUE;
-            MessageBox (NULL,
-              TEXT (_("Sorry, this build does not support the -tty option")),
-              TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
-#else /* WIN32 */
-	    fX = FALSE;
-#endif /* ! WIN32 */
-	    break;
-	case 'h': /* help */
-            usage( argv[ 0 ] );
-	    exit( EXIT_SUCCESS );
+  if (szDataDirectory)
+    _getcwd (szInvokingDirectory, _MAX_PATH);
+  _chdir (szDataDirectory);
+#endif
 
-	case 'd': /* datadir */
-	    szDataDirectory = optarg;
 
-#ifdef WIN32
-	    _getcwd( szInvokingDirectory, _MAX_PATH );
-	    _chdir( szDataDirectory );
-#endif /* WIN32 */
-
-	    break;
-
-	case 'v': /* version */
-	    version();
-	    exit( EXIT_SUCCESS );
-
-	case 'l': {
-		SetupLanguage(optarg);
-	  }
-	}
-
-#endif /* USE_GTK */
-
+  if (pchCommands || pchPythonScript || fNoX)
 #if USE_GTK
-
-    optind = 0;
-    opterr = 1;
-
-    if( fX )
-	fX = InitGTK( &argc, &argv );
-
-#ifndef WIN32
-        /* look for DISPLAY on unix systems */
-        if( !getenv( "DISPLAY" ) )
-	    fX = FALSE;
-#endif /* ! WIN32 */
-    if( fX ) {
 #if WIN32
-	/* The MS Windows port cannot support multiplexed GUI/TTY input;
-	   disable the TTY (as if the -w option was specified). */
-	fTTY = FALSE;
+    {
+      MessageBox (NULL,
+		  TEXT (_("You shold use the CLI for running scripts")),
+		  TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
+      exit (EXIT_FAILURE);
+    }
+#else
+    fX = FALSE;
 #endif
-	fInteractive = fShowProgress = TRUE;
+#endif
+
+  if (pchPythonScript)
+#if !USE_PYTHON
+    {
+      fprintf (stderr, _("%s: option `-p' requires Python\n"), argv[0]);
+      exit (EXIT_FAILURE);
+    }
+#else
+    fInteractive = FALSE;
+#endif
+
+  if (pchCommands)
+    fInteractive = FALSE;
+
+#if USE_GTK
+  if (fX)
+    fX = InitGTK (&argc, &argv);
+#if !WIN32
+  if (fX && fNoTTY)
+    fTTY = FALSE;
+#endif
+  if (fX)
+    {
+#if WIN32
+      /* The MS Windows port cannot support multiplexed GUI/TTY input;
+         disable the TTY (as if the -w option was specified). */
+      fTTY = FALSE;
+#endif
+      fInteractive = fShowProgress = TRUE;
 #if HAVE_LIBREADLINE
-	fReadline = isatty( STDIN_FILENO );
+      fReadline = isatty (STDIN_FILENO);
 #endif
-    } else 
+    }
+  else
 #endif /* USE_GTK */
-	{
+    {
 #if HAVE_LIBREADLINE
-	    fReadline =
+      fReadline =
 #endif
-		fInteractive = isatty( STDIN_FILENO );
-	    fShowProgress = isatty( STDOUT_FILENO );
-	}
+	fInteractive = isatty (STDIN_FILENO);
+      fShowProgress = isatty (STDOUT_FILENO);
+    }
 
 #if HAVE_FSTAT && HAVE_SETVBUF
-    {
-	/* Use line buffering if stdout/stderr are pipes or sockets;
-	   Jens Hoefkens points out that buffering causes problems
-	   for other processes issuing gnubg commands via IPC. */
-	struct stat st;
-	
-	if( !fstat( STDOUT_FILENO, &st ) && ( S_ISFIFO( st.st_mode )
+  {
+    /* Use line buffering if stdout/stderr are pipes or sockets;
+       Jens Hoefkens points out that buffering causes problems
+       for other processes issuing gnubg commands via IPC. */
+    struct stat st;
+
+    if (!fstat (STDOUT_FILENO, &st) && (S_ISFIFO (st.st_mode)
 #ifdef S_ISSOCK
-					      || S_ISSOCK( st.st_mode )
+					|| S_ISSOCK (st.st_mode)
 #endif
-	    ) )
-	    setvbuf( stdout, NULL, _IOLBF, 0 );
-	
-	if( !fstat( STDERR_FILENO, &st ) && ( S_ISFIFO( st.st_mode )
+	))
+      setvbuf (stdout, NULL, _IOLBF, 0);
+
+    if (!fstat (STDERR_FILENO, &st) && (S_ISFIFO (st.st_mode)
 #ifdef S_ISSOCK
-					      || S_ISSOCK( st.st_mode )
+					|| S_ISSOCK (st.st_mode)
 #endif
-	    ) )
-	    setvbuf( stderr, NULL, _IOLBF, 0 );
-    }
+	))
+      setvbuf (stderr, NULL, _IOLBF, 0);
+  }
 #endif
-
-
-    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwSl:", ao, NULL ) ) !=
-           (char) -1 )
-	switch( ch ) {
-	case 'b': /* no-bearoff */
-	    fNoBearoff = TRUE;
-	    break;
-	case 'c': /* commands */
-	    pchCommands = optarg;
-	    fInteractive = FALSE;
-	    break;
-	case 'd': /* datadir */
-	    break;
-	case 'h': /* help */
-            usage( argv[ 0 ] );
-	    exit( EXIT_SUCCESS );
-	case 'n': /* new-weights */
-	    if( optarg )
-		nNewWeights = atoi( optarg );
-
-	    if( nNewWeights < 1 )
-		nNewWeights = DEFAULT_NET_SIZE;
-
-	    break;
-	case 'q': /* quiet */
-	    fQuiet = TRUE;
-	    break;
-	case 'r': /* no-rc */
-	    fNoRC = TRUE;
-	    break;
-        case 'p': /* python script */
-#if !USE_PYTHON
-            fprintf( stderr, 
-                     _("%s: option `-p' requires Python\n"), argv[ 0 ] );
-            exit( EXIT_FAILURE );
-#endif
-            pchPythonScript = optarg;
-            fInteractive = FALSE;
-            break;
-	case 't':
-	    /* silently ignore (if it was relevant, it was handled earlier). */
-	    break;
-	case 'v': /* version */
-	    version();
-	    exit( EXIT_SUCCESS );
-	case 'w':
-#if USE_GTK
-	    if( fX )
-		fTTY = FALSE;
-#else
-	    /* silently ignore */
-#endif
-	    break;
-        case 'S': /* no splash screen */
-          fSplash = FALSE;
-          break;
-
-	case 'l':
-	  break;
-
-	default:
-	    usage( argv[ 0 ] );
-	    exit( EXIT_FAILURE );
-	}
 
 #if USE_GTK
     if( fTTY )
@@ -7315,7 +7193,7 @@ int main(int argc, char *argv[] ) {
     }
 
 #if USE_GTK
-    if ( fX && fSplash )
+    if ( fX && !fNoSplash )
       pwSplash = CreateSplash ();
 #endif
 
@@ -7426,20 +7304,7 @@ int main(int argc, char *argv[] ) {
 
     RenderInitialise();
 
-    if( ( pch = getenv( "LOGNAME" ) ) )
-	strcpy( ap[ 1 ].szName, pch );
-    else if( ( pch = getenv( "USER" ) ) )
-	strcpy( ap[ 1 ].szName, pch );
-    else if( ( pch = getenv( "USERNAME" ) ) ) /* it's username on Win 2000 / XP ... */
-	strcpy( ap[ 1 ].szName, pch );
-#if HAVE_GETLOGIN
-    else if( ( pch = getlogin() ) )
-	strcpy( ap[ 1 ].szName, pch );
-#endif
-#if HAVE_GETPWUID
-    else if( ( ppwd = getpwuid( getuid() ) ) )
-	strcpy( ap[ 1 ].szName, ppwd->pw_name );
-#endif
+    strcpy( ap[ 1 ].szName, g_get_user_name() );
     
     ListCreate( &lMatch );
     IniStatcontext( &scMatch );
@@ -7556,20 +7421,20 @@ int main(int argc, char *argv[] ) {
         _chdir( szInvokingDirectory );
 #endif
 
-    if( optind < argc && *argv[ optind ] ) {
+    if( argc>1 && *argv[ 1 ] ) {
 #if USE_GTK
       PushSplash ( pwSplash, 
                    _("Loading"), _("Specified Match"), 500 );
 #endif    
-	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
+	if( strcspn( argv[ 1 ], " \t\n\r\v\f" ) ) {
 	    /* quote filename with whitespace so that function
 	     * NextToken in CommandLoadCommands doesn't split it
          */
-	    sprintf( szQuoted, "'%s'", argv[ optind ] );
+	    sprintf( szQuoted, "'%s'", argv[ 1 ] );
 	    CommandLoadMatch( szQuoted );
 	}
 	else
-	    CommandLoadMatch( argv[ optind ] );
+	    CommandLoadMatch( argv[ 1 ] );
     }
 
 #ifdef WIN32

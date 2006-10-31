@@ -1,3 +1,9 @@
+Wed Nov  1 00:52:26 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, backgammon.h, Makefile.am: Move option parser to glib
+	option parser, since it facilitates the integration of gnubg options
+	with gtk options. getopt*.[ch] still needed for utility programs.
+
 Wed Oct 25 11:36:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, backgammon.h, export.c, gnubg.c, gnubgmodule.c,
