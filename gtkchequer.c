@@ -77,19 +77,18 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   {
 	move **ppm = (move**)malloc( c * sizeof (move *));
 	cubeinfo** ppci = (cubeinfo**)malloc( c * sizeof (cubeinfo *));
-	char **asz = (char**)malloc(sizeof(char*) * c);
+	char (*asz)[40] = (char(*)[40])malloc(40 * c);
 
   for( i =  0, pl = plSelList; i < c; pl = pl->next, i++ )
   {
     m = ppm[ i ] = MoveListGetMove(phd, pl);
     ppci[ i ] = &ci;
-    asz[i] = (char*)malloc(40);
     FormatMove ( asz[ i ], ms.anBoard, m->anMove );
   }
 	MoveListFreeSelectionList(plSelList);
 
 	GTKSetCurrentParent(pw);
-  RolloutProgressStart( &ci, c, NULL, &rcRollout, (char(*)[40])asz, &p );
+  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
 
   if ( fAction )
     HandleXAction();
@@ -97,12 +96,6 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   res = ScoreMoveRollout ( ppm, (const cubeinfo**)ppci, c, RolloutProgress, p );
 
   RolloutProgressEnd( &p );
-
-	while (i > 0)
-	{
-		i--;
-		free(asz[i]);
-	}
 
 	free(asz);
 	free(ppm);
