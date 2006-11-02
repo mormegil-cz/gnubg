@@ -18,7 +18,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	render rollout set sgf non-src/sgfl non-src/sgfp show sound strdup \
 	text osr gtksplash gtkcolour renderprefs speed openurl \
 	gtkrolls boardpos gtktempmap progress format gtktoolbar \
-	gtkpath gtkbearoff gtkoptions formatgs \
+	gtkbearoff gtkoptions formatgs \
 	timecontrol timer mec relational gtkgamelist \
 	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
 	gtkmovelist gtkmovelistctrl gtkwindows
