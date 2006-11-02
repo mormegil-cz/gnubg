@@ -95,8 +95,8 @@ typedef struct _BoardData {
     GtkWidget *take, *drop, *redouble;
     GtkWidget *vbox_ids;
     GtkWidget *pipcount0, *pipcount1;
-    GtkWidget *epclabel0, *epclabel1;
-    GtkWidget *epc0, *epc1;
+    GtkWidget *pipcountlabel0, *pipcountlabel1;
+
 #if USE_TIMECONTROL
     GtkWidget *clock0, *clock1;
 #endif

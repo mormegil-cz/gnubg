@@ -576,15 +576,37 @@ void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
   int anPip[ 2 ];
   char *pc;
   int f;
-  int fl;
+  float arEPC[ 2 ];
 
   if ( fGUIShowPips ) {
 
-    /* show pip count */
-
     PipCount ( points, anPip );
-
     f = ( bd->turn > 0 );
+
+    /* EPC display enabled AND Valid EPCs found */ 
+    if (( fGUIShowEPCs && ms.gs != GAME_NONE ) && 
+       (EPC( points, arEPC, NULL, NULL, NULL, TRUE ) == 0)) {
+ 
+      /* Show:       pipcount + wastage = epc  (pip lead, epc lead) */       
+      pc = g_strdup_printf( " %d + %.2f = %.2f (%+d, %+.2f)", 
+                            anPip[ !f ], arEPC[ !f ] - anPip[ !f ],
+                            arEPC[ !f ], anPip[ !f ] - anPip[ f ],
+                            arEPC[ !f ] - arEPC[ f ] );
+      gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), pc );
+      g_free( pc );
+      
+      pc = g_strdup_printf( " %d + %.2f = %.2f (%+d, %+.2f)", 
+                            anPip[ f ], arEPC[ f ] - anPip[ f ],
+                            arEPC[ f ], anPip[ f ] - anPip[ !f ],
+                            arEPC[ f ] - arEPC[ !f ] );
+      gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), pc );
+      g_free( pc );
+      
+      gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel0 ), _("EPC: ") );
+      gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel1 ), _("EPC: ") );
+    }
+    /* no EPCs available; show pip count only */
+    else {
     
     pc = g_strdup_printf ( "%d (%+d)", anPip[ !f ], anPip[ !f ] - anPip[ f ] );
     gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), pc );
@@ -593,53 +615,20 @@ void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
     pc = g_strdup_printf ( "%d (%+d)", anPip[ f ], anPip[ f ] - anPip[ ! f ] );
     gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), pc );
     g_free ( pc );
-
+      
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel0 ), _("Pips: ") );
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel1 ), _("Pips: ") );
+    }
   }
   else {
 
     /* don't show pip count */
-
     gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), _("n/a") );
     gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), _("n/a") );
-
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel0 ), _("Pips: ") );
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel1 ), _("Pips: ") );
   }
-
-  if ( fGUIShowEPCs && ms.gs != GAME_NONE ) {
-
-    float arEPC[ 2 ];
-
-    if ( EPC( points, arEPC, NULL, NULL, NULL, TRUE ) ) {
-      /* no EPCs avaiable */
-      gtk_label_set_text ( GTK_LABEL ( bd->epclabel0 ), "" );
-      gtk_label_set_text ( GTK_LABEL ( bd->epclabel1 ), "" );
-      gtk_label_set_text ( GTK_LABEL ( bd->epc0 ), "" );
-      gtk_label_set_text ( GTK_LABEL ( bd->epc1 ), "" );
-    }
-    else {
-      f = ( bd->turn > 0 );
-      fl = arEPC[ 0 ] >= 100.0f || arEPC[ 1 ] >= 100.0f;
-      gtk_label_set_text ( GTK_LABEL ( bd->epclabel0 ), _("epc: ") );
-      gtk_label_set_text ( GTK_LABEL ( bd->epclabel1 ), _("epc: ") );
-      pc = g_strdup_printf( fl ? "%.2f (%+.2f)" : "%.2f (%+.2f)", 
-                           arEPC[ !f ], arEPC[ !f ] - arEPC[ f ] );
-      gtk_label_set_text ( GTK_LABEL ( bd->epc0 ), pc );
-      g_free( pc );
-      pc = g_strdup_printf( fl ? "%.2f (%+.2f)" : "%.2f (%+.2f)", 
-                           arEPC[ f ], arEPC[ f ] - arEPC[ ! f ] );
-      gtk_label_set_text ( GTK_LABEL ( bd->epc1 ), pc );
-      g_free( pc );
-    }
-
-  }
-  else {
-    
-    gtk_label_set_text ( GTK_LABEL ( bd->epclabel0 ), "" );
-    gtk_label_set_text ( GTK_LABEL ( bd->epclabel1 ), "" );
-    gtk_label_set_text ( GTK_LABEL ( bd->epc0 ), "" );
-    gtk_label_set_text ( GTK_LABEL ( bd->epc1 ), "" );
-
-  }
-
+   
   UpdateTheoryData(bd, TT_PIPCOUNT | TT_EPC | TT_KLEINCOUNT, points);
 }
 
@@ -3760,7 +3749,6 @@ static void board_init( Board *board ) {
     GtkWidget *pw;
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
-    GtkWidget *pwt;
     
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
@@ -3901,20 +3889,16 @@ static void board_init( Board *board ) {
     gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->lscore0 );
     gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->score0 );
 
-    /* third row: pack pip count and epc in a table */
+    /* third row: pip count and epc */
 
-    pwt = gtk_table_new( 1, 2, TRUE );
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwt, FALSE, FALSE, 0 );
-
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
 
     /* pip count label */
 
-    pw = gtk_hbox_new ( FALSE, 0 );
-    gtk_table_attach_defaults( GTK_TABLE( pwt ), pw,
-                               0, 1, 0, 1 ); 
-
     gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         gtk_label_new ( _("Pips:") ), FALSE, FALSE, 0 );
+                         bd->pipcountlabel0 = 
+                         gtk_label_new ( NULL ), FALSE, FALSE, 0 );
 
     /* pip count */
 
@@ -3922,25 +3906,9 @@ static void board_init( Board *board ) {
                          bd->pipcount0 = gtk_label_new ( NULL ), 
                          FALSE, FALSE, 0 );
 
-    /* epc label */
-
-    pw = gtk_hbox_new ( FALSE, 0 );
-    gtk_table_attach_defaults( GTK_TABLE( pwt ), pw,
-                               1, 2, 0, 1 );
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->epclabel0 = 
-                         gtk_label_new ( NULL ), FALSE, FALSE, 0 );
-
-    /* epc */
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->epc0 = gtk_label_new ( NULL ), 
-                         FALSE, FALSE, 0 );
-
 
 #if USE_TIMECONTROL 
-    /* third row: clock */
+    /* fourth row: clock */
 
     pw = gtk_hbox_new ( FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
@@ -4011,20 +3979,16 @@ static void board_init( Board *board ) {
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->lscore1 );
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->score1 );
 
-    /* third row: pack pip count and epc in a table */
+    /* third row: pip count and epc */
 
-    pwt = gtk_table_new( 1, 2, TRUE );
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwt, FALSE, FALSE, 0 );
-
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
 
     /* pip count label */
 
-    pw = gtk_hbox_new ( FALSE, 0 );
-    gtk_table_attach_defaults( GTK_TABLE( pwt ), pw,
-                               0, 1, 0, 1 ); 
-
     gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         gtk_label_new ( _("Pips:") ), FALSE, FALSE, 0 );
+                         bd->pipcountlabel1 = 
+                         gtk_label_new ( NULL ), FALSE, FALSE, 0 );
 
     /* pip count */
 
@@ -4032,23 +3996,9 @@ static void board_init( Board *board ) {
                          bd->pipcount1 = gtk_label_new ( NULL ), 
                          FALSE, FALSE, 0 );
 
-    /* epc label */
 
-    pw = gtk_hbox_new ( FALSE, 0 );
-    gtk_table_attach_defaults( GTK_TABLE( pwt ), pw,
-                               1, 2, 0, 1 );
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->epclabel1 = 
-                         gtk_label_new ( NULL ), FALSE, FALSE, 0 );
-
-    /* epc */
-
-    gtk_box_pack_start ( GTK_BOX ( pw ), 
-                         bd->epc1 = gtk_label_new ( NULL ), 
-                         FALSE, FALSE, 0 );
 #if USE_TIMECONTROL 
-    /* third row: clock */
+    /* fourth row: clock */
 
     pw = gtk_hbox_new ( FALSE, 0 );
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
