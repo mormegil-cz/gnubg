@@ -44,7 +44,6 @@ typedef struct _toolbarwidget {
 
   GtkWidget *pwNew;        /* button for "New" */
   GtkWidget *pwOpen;       /* button for "Open" */
-  GtkWidget *pwImport;       /* button for "Roll" */
   GtkWidget *pwSave;     /* button for "Double" */
   GtkWidget *pwExport;    /* button for "Double" */
   GtkWidget *pwRedouble;   /* button for "Redouble" */
@@ -308,7 +307,6 @@ ToolbarNew ( void ) {
 #include "xpm/hint_alt.xpm"
 #include "xpm/stock_new.xpm"
 #include "xpm/stock_open.xpm"
-#include "xpm/stock_import.xpm"
 #include "xpm/stock_save.xpm"
 #include "xpm/stock_export.xpm"
 #include "xpm/stock_ok.xpm"
@@ -358,14 +356,6 @@ ToolbarNew ( void ) {
                                NULL,
 			       image_from_xpm_d ( stock_open_xpm, pwToolbar),
                                GTK_SIGNAL_FUNC( GTKOpen ), NULL );
-
-    /* Import button */
-  gtk_toolbar_append_item ( GTK_TOOLBAR ( pwToolbar ),
-			       _("Import"),
-                               _("Import game, match or position"), 
-                               NULL,
-			       image_from_xpm_d ( stock_import_xpm, pwToolbar),
-                               GTK_SIGNAL_FUNC( GTKImport ), NULL );
 
 #define TB_BUTTON_ADD(pointer,icon,label,cb,arg,tooltip,tooltip2) \
   pointer = gtk_button_new(); \

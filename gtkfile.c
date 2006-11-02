@@ -26,6 +26,10 @@
 
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <ctype.h>
 #include "backgammon.h"
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -93,18 +97,20 @@ char *pc, *tmp;
     case GTK_FILE_CHOOSER_ACTION_OPEN:
       fc = gtk_file_chooser_dialog_new (prompt, NULL,
 					GTK_FILE_CHOOSER_ACTION_OPEN,
+					GTK_STOCK_OPEN,
+					GTK_RESPONSE_ACCEPT,
 					GTK_STOCK_CANCEL,
 					GTK_RESPONSE_CANCEL,
-					GTK_STOCK_OPEN,
-					GTK_RESPONSE_ACCEPT, NULL);
+					NULL);
       break;
     case GTK_FILE_CHOOSER_ACTION_SAVE:
       fc = gtk_file_chooser_dialog_new (prompt, NULL,
 					GTK_FILE_CHOOSER_ACTION_SAVE,
+					GTK_STOCK_SAVE,
+					GTK_RESPONSE_ACCEPT,
 					GTK_STOCK_CANCEL,
 					GTK_RESPONSE_CANCEL,
-					GTK_STOCK_SAVE,
-					GTK_RESPONSE_ACCEPT, NULL);
+					NULL);
       break;
     default:
       return NULL;
@@ -289,29 +295,377 @@ SaveCommon (guint f, gchar * prompt)
   gtk_widget_destroy (so.fc);
 }
 
-static void
-OpenCommon (guint f, gchar * prompt)
-{
+/* Data structures and functions for getting file type data */
 
+typedef struct _FilePreviewData
+{
+	FileFormat *format;
+} FilePreviewData;
+
+typedef struct _FileHelper
+{
+	FILE *fp;
+	int dataRead;
+	int dataPos;
+	char* data;
+} FileHelper;
+
+FileHelper *OpenFileHelper(char *filename)
+{
+	FileHelper *fh;
+	if (access(filename, R_OK))
+		return NULL;	/* File not found */
+
+	fh = malloc(sizeof(FileHelper));
+	fh->fp = fopen(filename, "r");
+	if (!fh->fp)
+	{	/* Failed to open file */
+		free(fh);
+		return NULL;
+	}
+	fh->dataRead = 0;
+	fh->dataPos = 0;
+	fh->data = NULL;
+	return fh;
+}
+
+void CloseFileHelper(FileHelper *fh)
+{
+	fclose(fh->fp);
+	free(fh->data);
+}
+
+void fhReset(FileHelper *fh)
+{	/* Reset data pointer to start of file */
+	fh->dataPos = 0;
+}
+
+void fhDataGetChar(FileHelper *fh)
+{
+	int read;
+	if (fh->dataPos < fh->dataRead)
+		return;
+
+#define BLOCK_SIZE 1024
+#define MAX_READ_SIZE 5000
+	fh->data = realloc(fh->data, fh->dataRead + BLOCK_SIZE);
+	if (fh->dataRead > MAX_READ_SIZE)
+		read = 0;	/* Too big - should have worked things out by now! */
+	else
+		read = fread(fh->data + fh->dataRead, 1, BLOCK_SIZE, fh->fp);
+	if (read < BLOCK_SIZE)
+		(fh->data + fh->dataRead)[read] = '\0';
+	fh->dataRead += BLOCK_SIZE;
+}
+
+char fhPeekNextChar(FileHelper *fh)
+{
+	fhDataGetChar(fh);
+	return fh->data[fh->dataPos];
+}
+
+int fhEOF(FileHelper *fh)
+{
+	return fhPeekNextChar(fh) == '\0';
+}
+
+char fhReadNextChar(FileHelper *fh)
+{
+	fhDataGetChar(fh);
+	return fh->data[fh->dataPos++];
+}
+
+int fhPeekNextIsWS(FileHelper *fh)
+{
+	char c = fhPeekNextChar(fh);
+	return (c == ' ' || c == '\t' || c == '\n');
+}
+
+void fhSkipWS(FileHelper *fh)
+{
+	while(fhPeekNextIsWS(fh))
+		fhReadNextChar(fh);
+}
+
+int fhSkipToEOL(FileHelper *fh)
+{
+	char c;
+	do
+	{
+		c = fhReadNextChar(fh);
+		if (c == '\n')
+			return TRUE;
+	} while (c != '\0');
+
+	return (c != '\0');
+}
+
+int fhReadString(FileHelper *fh, char *str)
+{	/* Check file has str next */
+	while (*str)
+	{
+		if (fhReadNextChar(fh) != *str)
+			return FALSE;
+		str++;
+	}
+	return TRUE;
+}
+
+int fhReadStringNC(FileHelper *fh, char *str)
+{	/* Check file has str next (ignoring case) */
+	while (*str)
+	{
+		char c = fhReadNextChar(fh);
+		if (tolower(c) != *str)
+			return FALSE;
+		str++;
+	}
+	return TRUE;
+}
+
+int fhPeekStringNC(FileHelper *fh, char *str)
+{	/* Check file has str next (ignoring case) but don't move */
+	int pos = fh->dataPos;
+	int ret = TRUE;
+	while (*str)
+	{
+		char c = fhReadNextChar(fh);
+		if (tolower(c) != *str)
+		{
+			ret = FALSE;
+			break;
+		}
+		str++;
+	}
+	fh->dataPos = pos;
+	return ret;
+}
+
+int fhReadNumber(FileHelper *fh)
+{	/* Check file has str next */
+	int anyNumbers = FALSE;
+	do
+	{
+		char c = fhPeekNextChar(fh);
+		if (!isdigit(c))
+			return anyNumbers;
+		anyNumbers = TRUE;
+	} while (fhReadNextChar(fh) != '\0');
+
+	return TRUE;
+}
+
+int fhReadAnyAlphNumString(FileHelper *fh)
+{
+	do
+	{
+		char c = fhPeekNextChar(fh);
+		if (!isalnum(c))
+			return FALSE;
+	} while (fhReadNextChar(fh) != '\0');
+	return TRUE;
+}
+
+int IsSGFFile(FileHelper *fh)
+{
+	char *elements[] = {"(", ";", "FF", "[", "4", "]", "GM", "[", "6", "]", ""};
+	char **test = elements;
+
+	fhReset(fh);
+	while (**test)
+	{
+		fhSkipWS(fh);
+		if (!fhReadString(fh, *test))
+			return FALSE;
+		test++;
+	}
+	return TRUE;
+}
+
+int IsSGGFile(FileHelper *fh)
+{
+	fhReset(fh);
+	fhSkipWS(fh);
+
+	if (fhReadAnyAlphNumString(fh))
+	{
+		fhSkipWS(fh);
+		if (!fhReadString(fh, "vs."))
+			return FALSE;
+		fhSkipWS(fh);
+		if (fhReadAnyAlphNumString(fh))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+int IsMATFile(FileHelper *fh)
+{
+	fhReset(fh);
+	while (!fhEOF(fh))
+	{
+		char c;
+		fhSkipWS(fh);
+		c = fhPeekNextChar(fh);
+		if (isalnum(c))
+		{
+			if (fhReadNumber(fh))
+			{
+				fhSkipWS(fh);
+				if (fhReadStringNC(fh, "point"))
+				{
+					fhSkipWS(fh);
+					if (fhReadStringNC(fh, "match"))
+						return TRUE;
+				}
+			}
+			return FALSE;
+		}
+		fhSkipToEOL(fh);
+	}
+	return FALSE;
+}
+
+int IsTMGFile(FileHelper *fh)
+{
+	fhReset(fh);
+	do
+	{
+		fhSkipWS(fh);
+		if (fhPeekStringNC(fh, "game"))
+		{
+			fhReadStringNC(fh, "game");
+			fhSkipWS(fh);
+			return fhReadNumber(fh) && (fhPeekNextChar(fh) == ':');
+		}
+		fhReadAnyAlphNumString(fh);
+		if (fhPeekNextChar(fh) != ':')
+			return FALSE;
+	} while (fhSkipToEOL(fh));
+
+	return FALSE;
+}
+
+int IsTXTFile(FileHelper *fh)
+{
+	fhReset(fh);
+	fhSkipWS(fh);
+	if (fhReadNumber(fh) && fhReadNextChar(fh) == ';')
+	{
+		fhSkipWS(fh);
+		if (fhReadNumber(fh) && fhReadNextChar(fh) == ';')
+			return TRUE;
+	}
+	return FALSE;
+}
+
+int IsJFPFile(FileHelper *fh)
+{
+	fhReset(fh);
+	if ((fhReadNextChar(fh) == 126) && (fhReadNextChar(fh) == '\0') &&
+		(fhReadNextChar(fh) == '\0') && (fhReadNextChar(fh) == '\0'))
+		return TRUE;
+
+	return FALSE;
+}
+
+int IsBKGFile(FileHelper *fh)
+{
+	fhReset(fh);
+	fhSkipWS(fh);
+	if (fhReadString(fh, "Black"))
+		return TRUE;
+	fhReset(fh);
+	fhSkipWS(fh);
+	if (fhReadString(fh, "White"))
+		return TRUE;
+
+	return FALSE;
+}
+
+FilePreviewData *ReadFilePreview(char *filename)
+{
+	FilePreviewData *fpd;
+	FileHelper *fh = OpenFileHelper(filename);
+	if (!fh)
+		return 0;
+
+	fpd = malloc(sizeof(FilePreviewData));
+	fpd->format = NULL;
+
+	if (IsSGFFile(fh))
+		fpd->format = &file_format[0];
+	else if (IsSGGFile(fh))
+		fpd->format = &file_format[3];
+	else if (IsTXTFile(fh))
+		fpd->format = &file_format[14];
+	else if (IsTMGFile(fh))
+		fpd->format = &file_format[15];
+	else if (IsMATFile(fh))
+		fpd->format = &file_format[7];
+	else if (IsJFPFile(fh))
+		fpd->format = &file_format[8];
+	else if (IsBKGFile(fh))
+		fpd->format = &file_format[4];
+
+	CloseFileHelper(fh);
+	return fpd;
+}
+
+static void
+update_preview_cb (GtkFileChooser *file_chooser, gpointer data)
+{
+	GtkWidget *preview = GTK_WIDGET (data);
+	char *filename = gtk_file_chooser_get_preview_filename (file_chooser);
+	FilePreviewData *fdp = ReadFilePreview(filename);
+	char *label = "";
+
+	gtk_dialog_set_response_sensitive(GTK_DIALOG(file_chooser), GTK_RESPONSE_ACCEPT, FALSE);
+	if (fdp)
+	{
+		if (!fdp->format)
+			label = "not a backgmamon file";
+		else
+		{
+			label = fdp->format->description;
+			gtk_dialog_set_response_sensitive(GTK_DIALOG(file_chooser), GTK_RESPONSE_ACCEPT, TRUE);
+		}
+
+		free(fdp);
+	}
+	gtk_label_set_text(GTK_LABEL(preview), label);
+}
+
+extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
+{
   gchar *fn, *sg, *cmd = NULL;
-  guint format, i, j;
+  int i;
   GtkFileFilter *aff;
-  GtkWidget *desc, *fc;
-  static guint last_import_format = 0;
+  GtkWidget *fc, *preview;
   static gchar *last_load_folder = NULL;
   static gchar *last_import_folder = NULL;
   gchar *folder = NULL;
 
-  if (f == 1)
-    folder = last_load_folder ? last_load_folder : default_sgf_folder;
-  else
-    folder = last_import_folder ? last_import_folder : default_import_folder;
+  folder = last_import_folder ? last_import_folder : default_import_folder;
 
-  fc = GnuBGFileDialog (prompt, folder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+  fc = GnuBGFileDialog (_("Open backgammon file"), folder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+
+{	/* For testing - remove or add some useful data */
+PangoRectangle logical_rect;
+PangoLayout *layout;
+layout = gtk_widget_create_pango_layout(fc, _(file_format[0].description));
+pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
+g_object_unref (layout);
+
+preview = gtk_label_new("");
+gtk_widget_set_size_request(preview, logical_rect.width, -1);
+gtk_file_chooser_set_preview_widget (GTK_FILE_CHOOSER(fc), preview);
+g_signal_connect (GTK_FILE_CHOOSER(fc), "update-preview", G_CALLBACK (update_preview_cb), preview);
+}
 
   aff = gtk_file_filter_new ();
   gtk_file_filter_set_name (aff, _("Supported files"));
-  for (i = 0; i < f; ++i)
+  for (i = 0; i < n_file_formats; ++i)
     {
       if (!file_format[i].canimport)
 	continue;
@@ -321,7 +675,7 @@ OpenCommon (guint f, gchar * prompt)
     }
   gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fc), aff);
   FilterAdd (_("All Files"), "*", GTK_FILE_CHOOSER (fc));
-  for (i = 0; i < f; ++i)
+  for (i = 0; i < n_file_formats; ++i)
     {
       if (!file_format[i].canimport)
 	continue;
@@ -330,54 +684,34 @@ OpenCommon (guint f, gchar * prompt)
       g_free (sg);
     }
 
-  desc = gtk_combo_box_new_text ();
-  for (j = i = 0; i < f; ++i)
-    {
-      if (!file_format[i].canimport)
-	continue;
-      gtk_combo_box_append_text (GTK_COMBO_BOX
-				 (desc), file_format[i].description);
-      if (i == last_import_format)
-	gtk_combo_box_set_active (GTK_COMBO_BOX (desc), j);
-      j++;
-    }
-  if (f == 1)
-    gtk_combo_box_set_active (GTK_COMBO_BOX (desc), 0);
-  gtk_file_chooser_set_extra_widget (GTK_FILE_CHOOSER (fc), desc);
-  if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
-    {
-      fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-      if (fn)
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
 	{
-	  format =
-	    FormatFromDescription
-	    (gtk_combo_box_get_active_text (GTK_COMBO_BOX (desc)));
-	  if (format)
-	    {
-	      cmd =
-		g_strdup_printf ("import %s \"%s\"",
-				 file_format[format].clname, fn);
-	      last_import_format = format;
-	      g_free (last_import_folder);
-	      last_import_folder =
-		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
-	    }
-	  else
-	    {
-	      cmd = g_strdup_printf ("load match \"%s\"", fn);
-	      g_free (last_load_folder);
-	      last_load_folder =
-		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
-	    }
-	  if (cmd)
-	    {
-	      UserCommand (cmd);
-	      g_free (cmd);
-	    }
-	  g_free (fn);
+		fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
+		if (fn)
+		{
+			FilePreviewData *fdp = ReadFilePreview(fn);
+
+			if (fdp && fdp->format && (fdp->format != &file_format[0]))
+			{
+				cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
+				g_free (last_import_folder);
+				last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+			}
+			else
+			{
+				cmd = g_strdup_printf ("load match \"%s\"", fn);
+				g_free (last_load_folder);
+				last_load_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+			}
+			if (cmd)
+			{
+				UserCommand (cmd);
+				g_free (cmd);
+			}
+			g_free (fn);
+		}
 	}
-    }
-  gtk_widget_destroy (fc);
+	gtk_widget_destroy (fc);
 }
 
 extern void
@@ -390,16 +724,4 @@ extern void
 GTKSave (gpointer * p, guint n, GtkWidget * pw)
 {
   SaveCommon (1, _("Save in native gnubg .sgf format"));
-}
-
-extern void
-GTKImport (gpointer * p, guint n, GtkWidget * pw)
-{
-  OpenCommon (n_file_formats, _("Import from foreign formats"));
-}
-
-extern void
-GTKOpen (gpointer * p, guint n, GtkWidget * pw)
-{
-  OpenCommon (1, _("Open gnubg .sgf formated file"));
 }

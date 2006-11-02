@@ -1,6 +1,12 @@
+Show 3 decimals for epc and include wastage (By Ian Shaw)
 Thu Nov  2 20:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
-	* gtkgame.c + .h: Show 3 decimals for epc and include wastage
+	* gtkfile.c + .h: Removed import option and now open
+		any file type automatically.
+
+Thu Nov  2 20:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c + .h: Show 3 decimals for epc and include wastage.
 	(By Ian Shaw)
 
 Wed Nov  1 00:52:26 CET 2006 Christian Anthon <anthon@kiku.dk>
