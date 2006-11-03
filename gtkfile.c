@@ -354,8 +354,11 @@ void fhDataGetChar(FileHelper *fh)
 	else
 		read = fread(fh->data + fh->dataRead, 1, BLOCK_SIZE, fh->fp);
 	if (read < BLOCK_SIZE)
+	{
 		(fh->data + fh->dataRead)[read] = '\0';
-	fh->dataRead += BLOCK_SIZE;
+		read++;
+	}
+	fh->dataRead += read;
 }
 
 char fhPeekNextChar(FileHelper *fh)
@@ -397,7 +400,7 @@ int fhSkipToEOL(FileHelper *fh)
 			return TRUE;
 	} while (c != '\0');
 
-	return (c != '\0');
+	return FALSE;
 }
 
 int fhReadString(FileHelper *fh, char *str)
@@ -502,12 +505,12 @@ int IsSGGFile(FileHelper *fh)
 int IsMATFile(FileHelper *fh)
 {
 	fhReset(fh);
-	while (!fhEOF(fh))
+	do
 	{
 		char c;
 		fhSkipWS(fh);
 		c = fhPeekNextChar(fh);
-		if (isalnum(c))
+		if (isdigit(c))
 		{
 			if (fhReadNumber(fh))
 			{
@@ -521,8 +524,7 @@ int IsMATFile(FileHelper *fh)
 			}
 			return FALSE;
 		}
-		fhSkipToEOL(fh);
-	}
+	} while (fhSkipToEOL(fh));
 	return FALSE;
 }
 
