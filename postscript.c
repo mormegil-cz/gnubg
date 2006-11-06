@@ -56,7 +56,7 @@ typedef enum _font {
   FONT_TT_BOLD,
   FONT_TT_OBLIQUE,
   FONT_TT_BOLD_OBLIQUE,
-  NUM_FONTS
+  NUM_FONTS,
 } font;
 static char *aszFont[ NUM_FONTS ] = { 
   NULL, 
@@ -115,9 +115,9 @@ static void EndObject( FILE *pf ) {
     fputs( "endobj\n", pf );
 }
 
-static void PostScriptEscape( FILE *pf, char *pchIn ) {
+static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
 
-    char *pch, *sz;
+    unsigned char *pch, *sz;
 
     pch = sz = g_convert (pchIn, -1, "ISO-8859-1", "UTF-8", NULL, NULL, NULL);
     
@@ -707,16 +707,16 @@ static short acxTimesRoman[ 256 ] = {
     500, 500, 500, 500, 500, 500, 500, 500  /* 248 to 255 */
 };
 
-static int StringWidth( char *sz ) {
+static int StringWidth( unsigned char *sz ) {
 
-    char *pch;
+    unsigned char *pch;
     int c;
     
     switch( fn ) {
     case FONT_RM:
 	for( c = 0, pch = sz; *pch; pch++ )
 	    if( isprint( *pch ) )
-		c += acxTimesRoman[ (int)(*pch) ];
+		c += acxTimesRoman[ *pch ];
 	break;
 	
     case FONT_TT:
@@ -735,12 +735,12 @@ static int StringWidth( char *sz ) {
 /* Typeset a line of text.  We're not TeX, so we don't do any kerning,
    hyphenation or justification.  Word wrapping will have to do. */
 
-static void PrintPostScriptLineWithSkip( FILE *pf, char *pch, 
+static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch, 
                                          const int nSkip,
                                          font fn, int nSize ) {
 
     int x;
-    char *sz, *pchStart, *pchBreak;
+    unsigned char *sz, *pchStart, *pchBreak;
     
     if( !pch || !*pch )
 	return;
@@ -756,7 +756,7 @@ static void PrintPostScriptLineWithSkip( FILE *pf, char *pch,
 	pchBreak = NULL;
 	pchStart = pch;
 	
-	for( x = 0; x < 451 * 1000 / nSize; x += acxTimesRoman[ (int)(*pch++) ] )
+	for( x = 0; x < 451 * 1000 / nSize; x += acxTimesRoman[ *pch++ ] )
 	    if( !*pch ) {
 		/* finished; break here */
 		pchBreak = pch;
@@ -804,14 +804,14 @@ static void PrintPostScriptLineWithSkip( FILE *pf, char *pch,
 }
 
 static void
-PrintPostScriptLine ( FILE *pf, char *pch ) {
+PrintPostScriptLine ( FILE *pf, unsigned char *pch ) {
 
   PrintPostScriptLineWithSkip ( pf, pch, 0, FONT_RM, 10 );
 
 }
 
 static void
-PrintPostScriptLineFont ( FILE *pf, char *pch, 
+PrintPostScriptLineFont ( FILE *pf, unsigned char *pch, 
                           font fn, int nSize ) {
 
   PrintPostScriptLineWithSkip ( pf, pch, 0, fn, nSize );
@@ -821,7 +821,7 @@ PrintPostScriptLineFont ( FILE *pf, char *pch,
 
 
 static void
-PrintPostScriptComment ( FILE *pf, char *pch ) {
+PrintPostScriptComment ( FILE *pf, unsigned char *pch ) {
 
   PrintPostScriptLineWithSkip ( pf, pch, 6, FONT_RM, 10 );
 
@@ -1336,7 +1336,7 @@ static void ExportGameGeneral( int f, char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz );
+    setDefaultFileName ( sz, f ? PATH_PDF : PATH_POSTSCRIPT );
 
 }
 
@@ -1399,7 +1399,7 @@ static void ExportMatchGeneral( int f, char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz );
+    setDefaultFileName ( sz, f ? PATH_PDF : PATH_POSTSCRIPT );
 
 }
 
@@ -1452,6 +1452,6 @@ extern void CommandExportPositionEPS( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz);
+    setDefaultFileName ( sz, PATH_EPS );
 
 }

@@ -22,7 +22,9 @@
  * $Id$
  */
 
+#if HAVE_CONFIG_H
 #include <config.h>
+#endif
 
 
 #include <stdio.h>
@@ -37,7 +39,6 @@
 #include "dice.h"
 #include "gtkgame.h"
 #include <glib/gi18n.h>
-#include "gtkfile.h"
 #include "sound.h"
 #include "drawboard.h"
 #include "matchequity.h"
@@ -86,9 +87,6 @@ typedef struct _optionswidget {
   GtkWidget *pwPathSconyers15x15DVDModify;
   GtkWidget *pwPathSconyers15x15DiskModify;
 
-  GtkWidget *pwDefaultSGFFolder;
-  GtkWidget *pwDefaultImportFolder;
-  GtkWidget *pwDefaultExportFolder;
   GtkAdjustment *padjDigits;
   GtkWidget *pwDigits;
   int fChanged;
@@ -225,7 +223,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     char **ppch, **ppchTip;
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
-	*pwLabelFile, *table, *label;
+	*pwLabelFile;
     int cCache;
     int i, nRandom;
 
@@ -1448,45 +1446,6 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                             "colours depending on their analysis"),
                           NULL );
 
-    table = gtk_table_new (2, 3, FALSE);
-    
-    label = gtk_label_new (_("Default SGF folder:"));
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-    gtk_table_attach_defaults (GTK_TABLE (table), label, 0, 1, 0, 1);
-    pow->pwDefaultSGFFolder =
-    gtk_file_chooser_button_new (NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    if (default_sgf_folder)
-      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (pow->pwDefaultSGFFolder),
-    				 default_sgf_folder);
-    gtk_table_attach_defaults (GTK_TABLE (table), pow->pwDefaultSGFFolder, 1, 2,
-    			   0, 1);
-    
-    label = gtk_label_new (_("Default Import folder:"));
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-    gtk_table_attach_defaults (GTK_TABLE (table), label, 0, 1, 1, 2);
-    pow->pwDefaultImportFolder =
-    gtk_file_chooser_button_new (NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    if (default_import_folder)
-      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER
-    				 (pow->pwDefaultImportFolder),
-    				 default_import_folder);
-    gtk_table_attach_defaults (GTK_TABLE (table), pow->pwDefaultImportFolder, 1,
-    			   2, 1, 2);
-    
-    label = gtk_label_new (_("Default Export folder:"));
-    gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
-    gtk_table_attach_defaults (GTK_TABLE (table), label, 0, 1, 2, 3);
-    pow->pwDefaultExportFolder =
-    gtk_file_chooser_button_new (NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
-    if (default_export_folder)
-      gtk_file_chooser_set_filename (GTK_FILE_CHOOSER
-    				 (pow->pwDefaultExportFolder),
-    				 default_export_folder);
-    gtk_table_attach_defaults (GTK_TABLE (table), pow->pwDefaultExportFolder, 1,
-    			   2, 2, 3);
-    
-    gtk_box_pack_start (GTK_BOX (pwvbox), table, FALSE, FALSE, 3);
-
     /* return notebook */
 
     return pwn;    
@@ -1505,7 +1464,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   int n, cCache;
   int i;
   char *pch;
-  gchar *filename, *command, *tmp, *newfolder;
   BoardData *bd = BOARD( pwBoard )->board_data;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
@@ -1669,16 +1627,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
         UserCommand("set rng user");
       break;
     case 8:
-      filename =
-	      GTKFileSelect (_("Select file with dice"), NULL, NULL, NULL,
-			      GTK_FILE_CHOOSER_ACTION_OPEN);
-      if (filename)
-      {
-	      command = g_strconcat ("set rng file \"", filename, "\"", NULL);
-	      UserCommand (command);
-	      g_free (command);
-	      g_free (filename);
-      }
+      GTKFileCommand( _("Select file with dice"), NULL, 
+                      "set rng file", NULL, FDT_NONE_OPEN, PATH_NULL );
       break;
     default:
       break;
@@ -1829,36 +1779,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   CHECKUPDATE( pow->pwGotoFirstGame, fGotoFirstGame, "set gotofirstgame %s" )
   CHECKUPDATE( pow->pwGameListStyles, fStyledGamelist, "set styledgamelist %s" )
-
-  newfolder =
-  gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pow->pwDefaultSGFFolder));
-  if (newfolder && (!default_sgf_folder || strcmp (newfolder, default_sgf_folder)))
-    {
-      tmp = g_strdup_printf ("set sgf folder \"%s\"", newfolder);
-      UserCommand (tmp);
-      g_free (tmp);
-    }
-  g_free (newfolder);
-  
-  newfolder =
-  gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pow->pwDefaultImportFolder));
-  if (newfolder && (!default_import_folder || strcmp (newfolder, default_import_folder)))
-    {
-      tmp = g_strdup_printf ("set import folder \"%s\"", newfolder);
-      UserCommand (tmp);
-      g_free (tmp);
-    }
-  g_free (newfolder);
-  
-  newfolder =
-  gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pow->pwDefaultExportFolder));
-  if (newfolder && (!default_export_folder || strcmp (newfolder, default_export_folder)))
-    {
-      tmp = g_strdup_printf ("set export folder \"%s\"", newfolder);
-      UserCommand (tmp);
-      g_free (tmp);
-    }
-  g_free (newfolder);
       
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );

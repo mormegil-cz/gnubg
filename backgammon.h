@@ -37,7 +37,6 @@
 #include <winsock2.h>
 #endif
 
-#include <glib.h>
 #if USE_GTK
 #include <gtk/gtk.h>
 extern GtkWidget* pwBoard;
@@ -432,21 +431,16 @@ extern int fSconyers15x15Disk;
 extern char szPathSconyers15x15Disk[ BIG_PATH ];      
 extern char szLang[ 32 ];   
 
-extern char *szCurrentFileName, *szCurrentFolder;
+typedef enum _pathformat {
+  PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
+  PATH_PDF, PATH_PNG, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
+  PATH_MET, PATH_TMG, PATH_BKG, PATH_SNOWIE_TXT,
+  NUM_PATHS, PATH_NULL } 
+pathformat;
 
-typedef struct _FileFormat FileFormat;
-struct _FileFormat {
-    char *extension;
-    char *description;
-    char *clname;
-    int canimport;
-    int canexport;
-    int exports[3];
-};
-extern FileFormat file_format[];
-extern gint n_file_formats;
-
-extern gchar *default_import_folder, *default_export_folder, *default_sgf_folder;
+extern char aaszPaths[ NUM_PATHS ][ 2 ][ BIG_PATH ];
+extern char* aszExtensions[ NUM_PATHS ];
+extern char* szCurrentFileName;
 
 extern evalcontext ecTD;
 extern evalcontext ecLuck;
@@ -641,9 +635,16 @@ extern int
 confirmOverwrite ( const char* sz, const int f );
 
 extern void
-setDefaultFileName ( char* sz );
+setDefaultPath ( const char* sz, const pathformat f );
 
-extern void DisectPath (char *path, char *extension, char **name, char **folder);
+extern void
+setDefaultFileName ( const char* sz, const pathformat f );
+
+extern char *
+getDefaultFileName ( const pathformat f );
+
+extern char *
+getDefaultPath ( const pathformat f );
 
 extern char* GetLuckAnalysis( matchstate* pms, float rLuck );
 
@@ -673,8 +674,7 @@ InvalidateStoredCube( void );
 #define VERSION_STRING "GNU Backgammon " VERSION
 
 extern char *GetBuildInfoString();
-extern const char *szHomeDirectory;
-extern char *szDataDirectory;
+extern char *szHomeDirectory, *szDataDirectory;
 
 extern char* aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];
@@ -907,8 +907,7 @@ extern void CommandAccept( char * ),
     CommandSetEvalCubedecision ( char * ),
     CommandSetEvalMoveFilter ( char * ),
     CommandSetEgyptian( char * ),
-    CommandSetExportFormat(char *sz),
-    CommandSetExportFolder(char *sz),
+    CommandSetExportFileType(char *sz),
     CommandSetExportIncludeAnnotations ( char * ),
     CommandSetExportIncludeAnalysis ( char * ),
     CommandSetExportIncludeStatistics ( char * ),
@@ -979,8 +978,7 @@ extern void CommandAccept( char * ),
     CommandSetGUIDragTargetHelp( char * ),
     CommandSetGUIUseStatsPanel( char * ),
     CommandSetGUIMoveListDetail( char * ),
-    CommandSetImportFormat(char *sz),
-    CommandSetImportFolder(char *sz),
+    CommandSetImportFileType(char *sz),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
     CommandSetLang( char * ),
@@ -1100,7 +1098,6 @@ extern void CommandAccept( char * ),
     CommandSetRolloutVarRedn( char * ),
     CommandSetScore( char * ),
     CommandSetSeed( char * ),
-    CommandSetSGFFolder(char *sz),
     CommandSetSoundEnable ( char * ),
     CommandSetSoundSystemArtsc ( char * ),
     CommandSetSoundSystemCommand ( char * ),

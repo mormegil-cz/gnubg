@@ -1,40 +1,4 @@
-Mon Nov  6 15:11:40 CET 2006  Christian Anthon <anthon@kiku.dk>
-	
-	* render.c, board3d/font3d.c, board3d/widget3d.c: Allow fallback when
-	no stencil buffer and make vera fonts work in 3d.
-
-Mon Nov  6 13:28:52 CET 2006  Christian Anthon <anthon@kiku.dk>
-
-	* Makefile.am, configure.in, render.c, board3d/font3d.c, R luxi.c, A
-	fonts/: Use the free bitstream vera fonts instead of the non-free
-	luxi.c
-
-Thu Nov  2 20:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
-
-	* gtkfile.c + .h: Removed import option and now open
-		any file type automatically.
-
-Thu Nov  2 20:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
-
-	* gtkgame.c + .h: Show 3 decimals for epc and include wastage.
-	(By Ian Shaw)
-
-Wed Nov  1 00:52:26 CET 2006 Christian Anthon <anthon@kiku.dk>
-
-	* gnubg.c, backgammon.h, Makefile.am: Move option parser to glib
-	option parser, since it facilitates the integration of gnubg options
-	with gtk options. getopt*.[ch] still needed for utility programs.
-
-Wed Oct 25 11:36:58 CEST 2006 Christian Anthon <anthon@kiku.dk>
-
-	* Makefile.am, backgammon.h, export.c, gnubg.c, gnubgmodule.c,
-	gtkfile.c, gtkgame.c, gtkgame.h, gtkoptions.c, gtkprefs.c,
-	gtktoolbar.c, html.c, latex.c, postscript.c, set.c, sgf.c, show.c,
-	text.c: Moved file dialogs to gtk_file_chooser
-	* gtkfile.h: new file
-	* gtkpath.c gtkpath.h: removed
-
-Wed Oct 18 14:54:34 CEST 2006 Christian Anthon <anthon@kiku.dk>
+Wed Oct 18 14:54:34 CEST 2006 Christian  Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, gtkgame.c, flags/.cvsignore,
 	flags/Makefile.am: automake and install stuff for the new flags

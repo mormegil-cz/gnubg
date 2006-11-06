@@ -1037,7 +1037,7 @@ RefreshGeometries ( void )
 {
 	int i;
 	for (i = 0; i < NUM_WINDOWS; i++)
-		getWindowGeometry((gnubgwindow)i);
+		getWindowGeometry(i);
 }
 
 extern void CommandSetAnnotation( char *sz ) {

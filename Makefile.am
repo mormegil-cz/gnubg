@@ -32,6 +32,12 @@ else
 BR1_SOURCES =
 endif
 
+if USE_FREETYPE
+FONT_SOURCES = luxi.c
+else
+FONT_SOURCES =
+endif
+
 if EXTERNAL_BR1
 BR1DATA = gnubg_os0.bd
 else
@@ -55,7 +61,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags fonts
+SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
@@ -70,7 +76,7 @@ COMMON_LIBS = -Llib -levent @LIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 
 COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
-		 eval.h eval.c play.c \
+		 getopt.h getopt.c getopt1.c eval.h eval.c play.c \
 		 positionid.h positionid.c drawboard.h drawboard.c \
 		 pub_eval.c set.c show.c dice.c dice.h rollout.c \
 		 rollout.h kleinman.c matchequity.c matchequity.h \
@@ -96,7 +102,7 @@ gnubg_LDFLAGS= @PYTHON_LDFLAGS@
 if USE_GTK
 ## --- GTK
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) $(BOARD3D_INCS) @CAIRO_CFLAGS@
-gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
+gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c \
 	gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
@@ -105,9 +111,9 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
         gtktempmap.c gtktempmap.h \
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
-	gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
+	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
 	gtkmovelist.c gtkmovelistctrl.c gtkwindows.c gtkrelational.c \
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) $(PNG_LIBS) \
         $(BOARD3D_LIBS) @THREAD_LIBS@ @CAIRO_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
@@ -115,7 +121,7 @@ else
 ## --- Plain
 INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-	$(PYTHON_SOURCES) $(TIME_SOURCES)
+	$(FONT_SOURCES)  $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
 
 
@@ -124,7 +130,7 @@ endif
 
 
 pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ \
-	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql gnubg.gtkrc
+	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql
 
 man_MANS = gnubg.6
 

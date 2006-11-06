@@ -4272,7 +4272,7 @@ SetMatchID ( const char *szMatchID ) {
   int anScore[ 2 ], anDice[ 2 ];
   int nMatchTo, fCubeOwner, fMove, fCrawford, nCube;
   int fTurn, fDoubled, fResigned;
-  gamestate gs;
+  int gs;
   
   char szID[ 15 ];
 
@@ -4297,7 +4297,7 @@ SetMatchID ( const char *szMatchID ) {
                "match length %d, score %d-%d, cube %d, game state %d\n"),
              anDice[ 0 ], anDice[ 1 ], fMove, fTurn, fResigned, fDoubled,
              fCubeOwner, fCrawford, nMatchTo, anScore[ 0 ], anScore[ 1 ],
-             nCube, (int) gs );
+             nCube, gs );
     outputx();
     return;
 

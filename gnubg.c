@@ -38,6 +38,9 @@
 #include <limits.h>
 #endif
 #include <math.h>
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
 #include <signal.h>
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -74,12 +77,18 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
+#if HAVE_ICONV
+#include <iconv.h>
+#endif
+
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
 #include "eval.h"
 #include "export.h"
+#include "getopt.h"
 #include "import.h"
 #include <glib/gi18n.h>
 #include <locale.h>
@@ -159,6 +168,13 @@ char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
+static char *aszExportTypes[] = {"html", "gol", "pos", "mat", "gam",
+	"latex", "pdf", "postscript", "eps", "png", "text",
+        "equity", "snowietxt", ""};
+
+static char *aszImportTypes[] = {"bkg", "mat", "pos", "oldmoves", "sgg",
+	"tmg", "snowiemat", "snowietext", ""};
+
 matchstate ms = {
     {{0}, {0}}, /* anBoard */
     {0}, /* anDice */
@@ -225,32 +241,28 @@ char szPathSconyers15x15Disk[ BIG_PATH ];/* Path to Sconyers's databases */
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
 
+char aaszPaths[ NUM_PATHS ][ 2 ][ BIG_PATH ];
 char *szCurrentFileName = NULL;
-char *szCurrentFolder = NULL;
-
-
-/* char *extension; char *description; char *clname;
- * gboolean canimport; gboolean canexport; gboolean exports[3]; */
-FileFormat file_format[] = {
-  {".sgf", N_("Gnu Backgammon Format"), "sgf", TRUE, TRUE, {TRUE, TRUE, TRUE}}, /*must be the first element*/
-  {".eps", N_("Encapsulated Postscript"), "eps", FALSE, TRUE, {FALSE, FALSE, TRUE}},
-  {".fibs", N_("Fibs Oldmoves"), "oldmoves", FALSE, FALSE, {FALSE, FALSE, FALSE}},
-  {".sgg", N_("Gamesgrid Save Game"), "sgg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
-  {".bkg", N_("Hans Berliner's BKG Format"), "bkg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
-  {".html", N_("HTML"), "html", FALSE, TRUE, {TRUE, TRUE, TRUE}},
-  {".gam", N_("Jellyfish Game"), "gam", FALSE, TRUE, {FALSE, TRUE, FALSE}},
-  {".mat", N_("Jellyfish Match"), "mat", TRUE, TRUE, {TRUE, FALSE, FALSE}},
-  {".pos", N_("Jellyfish Position"), "pos", TRUE, TRUE, {FALSE, FALSE, TRUE}},
-  {".tex", N_("LaTeX"), "latex", FALSE, TRUE, {TRUE, TRUE, FALSE}},
-  {".pdf", N_("PDF"), "pdf", FALSE, TRUE, {TRUE, TRUE, FALSE}},
-  {".txt", N_("Plain Text"), "text", FALSE, TRUE, {TRUE, TRUE, TRUE}},
-  {".png", N_("Portable Network Graphics"), "pdf", FALSE, TRUE, {FALSE, FALSE, TRUE}},
-  {".ps", N_("PostScript"), "postscript", FALSE, TRUE, {TRUE, TRUE, FALSE}},
-  {".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE, {FALSE, FALSE, TRUE}},
-  {".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+char *aszExtensions [ NUM_PATHS ] = {
+  "eps",
+  "gam",
+  "html",
+  "tex",
+  "mat",
+  "fibs",
+  "pdf",
+  "png",
+  "pos",
+  "ps",
+  "sgf",
+  "sgg",
+  "txt",
+  "xml",
+  "tmg",
+  "bkg",
+  "txt"
 };
 
-gint n_file_formats = G_N_ELEMENTS(file_format);
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
@@ -607,7 +619,7 @@ static char szDICE[] = N_("<die> <die>"),
     szURL[] = N_("<URL>"),
     szMAXERR[] = N_("<fraction>"),
     szMINGAMES[] = N_("<minimum games to rollout>"),
-    szFOLDER[] = N_("<folder>"),
+    szFILETYPE[] = N_("<filetype>"),
 #if USE_TIMECONTROL
     szSETTC[] = N_("[<timecontrol>|off]"),
     szSETTCTYPE[] = N_("plain|bronstein|fischer|hourglass"),
@@ -1554,8 +1566,8 @@ command cER = {
       szVALUE, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 }, acSetExport[] = {
-  { "folder", CommandSetExportFolder, N_("Set default folder "
-      "for export"), szFOLDER, &cFilename },
+  { "filetype", CommandSetExportFileType, N_("Set default filetype "
+      "for export"), szFILETYPE, &cFilename },
   { "html", NULL,
     N_("Set options for HTML export"), NULL, acSetExportHTML },
   { "include", NULL,
@@ -1571,14 +1583,67 @@ command cER = {
     N_("Control display of cube in exports"), NULL, acSetExportCube },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetImport[] = {
-  { "folder", CommandSetImportFolder, N_("Set default folder "
-      "for import"), szFOLDER, &cFilename },
+  { "filetype", CommandSetImportFileType, N_("Set default filetype "
+      "for import"), szFILETYPE, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetInvert[] = {
   { "matchequitytable", CommandSetInvertMatchEquityTable,
     N_("invert match equity table"), szONOFF, &cOnOff },
   { "met", CommandSetInvertMatchEquityTable,
     N_("alias for 'set invert matchequitytable'"), szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetPath[] = {
+  { "eps", CommandSetPathEPS,
+    N_("Set default path for exporting Encapsulated PostScript files"), 
+    szFILENAME, &cFilename },
+  { "gam", CommandSetPathGam,
+    N_("Set default path for importing or exporting Jellyfish .gam files"), 
+    szFILENAME, &cFilename },
+  { "html", CommandSetPathHTML,
+    N_("Set default path for exporting HTML files"), 
+    szFILENAME, &cFilename },
+  { "latex", CommandSetPathLaTeX,
+    N_("Set default path for exporting LaTeX files"), 
+    szFILENAME, &cFilename },
+  { "mat", CommandSetPathMat,
+    N_("Set default path for importing or exporting Jellyfish .mat files"), 
+    szFILENAME, &cFilename },
+  { "oldmoves", CommandSetPathOldMoves,
+    N_("Set default path for importing FIBS oldmoves files"), 
+    szFILENAME, &cFilename },
+  { "pdf", CommandSetPathPDF,
+    N_("Set default path for exporting PDF files"), 
+    szFILENAME, &cFilename },
+  { "png", CommandSetPathPNG,
+    N_("Set default path for exporting PNG positions"), 
+    szFILENAME, &cFilename },
+  { "pos", CommandSetPathPos,
+    N_("Set default path for importing Jellyfish .pos files"), 
+    szFILENAME, &cFilename },
+  { "postscript", CommandSetPathPostScript,
+    N_("Set default path for exporting PostScript files"), 
+    szFILENAME, &cFilename },
+  { "sgf", CommandSetPathSGF,
+    N_("Set default path for loading and saving SGF files"), 
+    szFILENAME, &cFilename },
+  { "sgg", CommandSetPathSGG,
+    N_("Set default path for importing GamesGrid SGG files"), 
+    szFILENAME, &cFilename },
+  { "text", CommandSetPathText,
+    N_("Set default path for export of text files"), 
+    szFILENAME, &cFilename },
+  { "met", CommandSetPathMET,
+    N_("Set default path for loading match equity files"), 
+    szFILENAME, &cFilename },
+  { "tmg", CommandSetPathTMG,
+    N_("Set default path for loading TrueMoneyGames .tmg files"), 
+    szFILENAME, &cFilename },
+  { "bkg", CommandSetPathBKG,
+    N_("Set default path for loading BKG files"), 
+    szFILENAME, &cFilename },
+  { "snowietxt", CommandSetPathSnowieTxt,
+    N_("Set default path for import of Snowie .txt files"), 
+    szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetPriority[] = {
   { "abovenormal", CommandSetPriorityAboveNormal,
@@ -1596,10 +1661,6 @@ command cER = {
   { "timecritical", CommandSetPriorityTimeCritical,
     N_("Set priority to time critical"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
-}, acSetSGF[] = {
-  { "folder", CommandSetSGFFolder, N_("Set default folder "
-      "for import"), szFOLDER, &cFilename },
-  { NULL, NULL, NULL, NULL, NULL }    
 #if USE_SOUND
 }, acSetSoundSystem[] = {
   { "artsc", CommandSetSoundSystemArtsc, 
@@ -1778,7 +1839,6 @@ command cER = {
       acSetGUI },
 #endif
     { "import", NULL, N_("Set settings for import"), NULL, acSetImport },
-    { "sgf", NULL, N_("Set settings for sgf"), NULL, acSetSGF },
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1806,6 +1866,8 @@ command cER = {
 #endif
     { "panelwidth", CommandSetPanelWidth, N_("Set the width of the docked panels"),
       szVALUE, NULL },
+    { "path", NULL, N_("Set default path when saving, loading, importing, "
+      "and exporting files."), NULL, acSetPath },
     { "player", CommandSetPlayer, N_("Change options for one or both "
       "players"), szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
@@ -1967,6 +2029,8 @@ command cER = {
       N_("Show misc race theory"), NULL, NULL },
     { "output", CommandShowOutput, N_("Show how results will be formatted"),
       NULL, NULL },
+    { "path", CommandShowPath, N_("Show default paths for save, load, export, "
+      "and import"), NULL, NULL },
     { "pipcount", CommandShowPipCount, 
       N_("Count the number of pips each player must move to bear off"), 
       szOPTPOSITION, NULL },
@@ -2119,12 +2183,10 @@ command cER = {
 static int iProgressMax, iProgressValue, fInProgress;
 static char *pcProgress;
 static psighandler shInterruptOld;
-char *default_import_folder = NULL;
-char *default_export_folder = NULL;
-char *default_sgf_folder = NULL;
+int lastImportType = -1;
+int lastExportType = -1;
 
-const char *szHomeDirectory;
-char *szDataDirectory;
+char *szHomeDirectory, *szDataDirectory;
 
 char *aszBuildInfo[] = {
 #if USE_PYTHON
@@ -4774,7 +4836,7 @@ extern void CommandImportBKG( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_BKG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4800,7 +4862,7 @@ extern void CommandImportJF( char *sz ) {
           /* no file imported */
           return;
 	fclose( pf );
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_POS );
     } else
 	outputerr( sz );
 
@@ -4826,7 +4888,7 @@ extern void CommandImportMat( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_MAT );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4852,7 +4914,7 @@ extern void CommandImportOldmoves( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_OLDMOVES );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4879,7 +4941,7 @@ extern void CommandImportSGG( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_SGG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4905,7 +4967,7 @@ extern void CommandImportTMG( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_TMG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
     } else
@@ -4931,7 +4993,7 @@ extern void CommandImportSnowieTxt( char *sz ) {
         if ( rc )
           /* no file imported */
           return;
-        setDefaultFileName ( sz );
+        setDefaultFileName ( sz, PATH_SNOWIE_TXT );
     } else
 	outputerr( sz );
 }
@@ -5077,7 +5139,7 @@ extern void CommandExportGameGam( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz );
+    setDefaultFileName ( sz, PATH_GAM );
 
 }
 
@@ -5122,7 +5184,7 @@ extern void CommandExportMatchMat( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    setDefaultFileName ( sz );
+    setDefaultFileName ( sz, PATH_MAT );
 
 }
 
@@ -5622,13 +5684,16 @@ extern void CommandSaveSettings( char *szParam ) {
     SaveRNGSettings ( pf, "set", rngCurrent, rngctxCurrent );
 
     SaveRolloutSettings( pf, "set rollout", &rcRollout );
+    
+    /* save import settings */
 
-    if (default_import_folder && *default_import_folder)
-	fprintf (pf, "set import folder \"%s\"\n", default_import_folder);
-    if (default_export_folder && *default_export_folder)
-	fprintf (pf, "set export folder \"%s\"\n", default_export_folder);
-    if (default_sgf_folder && *default_sgf_folder)
-	fprintf (pf, "set sgf folder \"%s\"\n", default_sgf_folder);
+	if (lastImportType != -1)
+		fprintf(pf, "set import filetype %s\n", aszImportTypes[lastImportType]);
+
+    /* save export settings */
+
+	if (lastExportType != -1)
+		fprintf(pf, "set export filetype %s\n", aszExportTypes[lastExportType]);
 
     fprintf ( pf, 
               "set export include annotations %s\n"
@@ -5716,6 +5781,14 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf ( pf, 
               "set invert matchequitytable %s\n",
               fInvertMET ? "on" : "off" );
+
+    /* paths */
+
+    for ( i = 0; i < NUM_PATHS; i++ )
+      if ( strlen ( aaszPaths[ i ][ 0 ] ) )
+        fprintf ( pf,
+                  "set path %s \"%s\"\n",
+                  acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
 
     /* geometries */
     /* "set gui windowpositions" must come first */
@@ -6807,7 +6880,7 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if USE_GTK  && defined(SIGIO)
+#if ( USE_GTK || USE_SOUND ) && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
 #if USE_GTK
     /* NB: It is safe to write to fAction even if it cannot be read
@@ -6833,6 +6906,52 @@ static void BearoffProgress( int i ) {
     putchar( "\\|/-"[ ( i / 1000 ) % 4 ] );
     putchar( '\r' );
     fflush( stdout );
+}
+
+static void usage( char *argv0 ) {
+
+#if USE_GTK
+
+    printf(
+_("Usage: %s [options] [saved-game-file]\n"
+"Options:\n"
+"  -b, --no-bearoff          Do not use bearoff database\n"
+"  -c FILE, --commands FILE  Read commands from FILE and exit\n"
+"  -d DIR, --datadir DIR     Read database and weight files from directory "
+"DIR\n"
+"  -h, --help                Display usage and exit\n"
+"  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
+"  -q, --quiet               Disable sound effects\n"
+"  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
+"  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
+"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
+"  -t, --tty                 Start on tty instead of using window system\n"
+"  -v, --version             Show version information and exit\n"
+"  -w, --window-system-only  Ignore tty input when using window system\n"
+"\n"
+"For more information, type `help' from within gnubg.\n"
+"Please report bugs to <bug-gnubg@gnu.org>.\n"), argv0 );
+#else
+
+    printf(
+_("Usage: %s [options] [saved-game-file]\n"
+"Options:\n"
+"  -b, --no-bearoff          Do not use bearoff database\n"
+"  -c FILE, --commands FILE  Read commands from FILE and exit\n"
+"  -d DIR, --datadir DIR     Read database and weight files from directory "
+"DIR\n"
+"  -h, --help                Display usage and exit\n"
+"  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
+"  -q, --quiet               Disable sound effects\n"
+"  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
+"  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
+"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
+"  -v, --version             Show version information and exit\n"
+"\n"
+"For more information, type `help' from within gnubg.\n"
+"Please report bugs to <bug-gnubg@gnu.org>.\n"), argv0 );
+#endif
+
 }
 
 static void version( void ) {
@@ -6962,220 +7081,293 @@ char* getenvvalue(char* str)
 #endif /* WIN32 */
 
 
-int
-main (int argc, char *argv[])
-{
+int main(int argc, char *argv[] ) {
 
-  char *pch;
-  char *szFile, szTemp[4096];
-  FILE *pf;
-  char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-  int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
-    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY = FALSE, show_version =
-    FALSE;
+    char ch, *pch, *pchCommands = NULL;
+    char *pchPythonScript = NULL;
+    int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
+    int i, j;
+    int fSplash = TRUE;
 
 #ifdef WIN32
-  char szInvokingDirectory[BIG_PATH] = { 0 };	/* current dir when GNUbg was started */
+	char szInvokingDirectory[ BIG_PATH ] = {0};  /* current dir when GNUbg was started */
+    char *pc;
 #endif
-  char szQuoted[BIG_PATH];
+	char szQuoted[ BIG_PATH ];
+
+    static struct option ao[] = {
+	{ "no-bearoff", no_argument, NULL, 'b' },
+	{ "no-rc", no_argument, NULL, 'r' },
+	{ "new-weights", optional_argument, NULL, 'n' },
+	{ "quiet", no_argument, NULL, 'q' },
+	{ "window-system-only", no_argument, NULL, 'w' },
+        { "no-splash", no_argument, NULL, 'S' },
+	/* these options must come last -- see below. */
+	{ "lang", required_argument, NULL, 'l'},
+	{ "datadir", required_argument, NULL, 'd' },
+	{ "commands", required_argument, NULL, 'c' },
+        { "help", no_argument, NULL, 'h' },
+	{ "script", required_argument, NULL, 's' },
+	{ "python", required_argument, NULL, 'p' },
+        { "tty", no_argument, NULL, 't' },
+        { "version", no_argument, NULL, 'v' },
+        { NULL, 0, NULL, 0 }
+    };
+#if HAVE_GETPWUID
+    struct passwd *ppwd;
+#endif
 #if HAVE_LIBREADLINE
-  char *sz;
+    char *sz;
 #endif
 #if USE_GTK
-  GtkWidget *pwSplash = NULL;
+    GtkWidget *pwSplash = NULL;
 #endif
-  GOptionEntry ao[] = {
-    {"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff, N_("Do not use bearoff database"), NULL},
-    {"commands", 'c', 0, G_OPTION_ARG_FILENAME, &pchCommands, N_("Evaluate commands in FILE and exit"), "FILE"},
-    {"datadir", 'd', 0, G_OPTION_ARG_FILENAME, &szDataDirectory, N_("Read database and weight files from DIR"), "DIR"},
-    {"lang", 'l', 0, G_OPTION_ARG_STRING, &lang, N_("Set language to LANG"), "LANG"},
-    {"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights, N_("Create new neural net (of size N)"), "N"},
-    {"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript, N_("Evaluate Python code in FILE and exit"), "FILE"},
-    {"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet, N_("Disable sound effects"), NULL},
-    {"no-rc", 'r', 0, G_OPTION_ARG_NONE, &fNoRC, N_("Do not read .gnubgrc and .gnubgautorc commands"), NULL},
-    {"no-splash", 'S', 0, G_OPTION_ARG_NONE, &fNoSplash, N_("Don't show gtk splash screen"), NULL},
-    {"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX, N_("Start on tty instead of using window system"), NULL},
-    {"version", 'v', 0, G_OPTION_ARG_NONE, &show_version, N_("Show version information and exit"), NULL},
-    {"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY, N_("Ignore tty input when using window system"), NULL},
-    {NULL}
-  };
-  GError *error = NULL;
-  GOptionContext *context;
 
-  szHomeDirectory = g_get_home_dir ();
+#if defined(_MSC_VER) && HAVE_LIBXML2
+	xmlMemSetup(free, malloc, realloc, strdup);
+#endif
+
+#if !WIN32
+	szHomeDirectory = getenv( "HOME" );
+#else
+	szHomeDirectory = getenvvalue( "%HOME%" );
+#endif
+	if (!szHomeDirectory)
+		szHomeDirectory = ".";
+
 #if WIN32
 
-  /* data directory: initialise to the path where gnubg is installed */
-  szDataDirectory = getInstallDir ();
-  if (!strcmp (szHomeDirectory, ".") && szDataDirectory)
-    szHomeDirectory = szDataDirectory;
+	/* data directory: initialise to the path where gnubg is installed */
+	szDataDirectory = getInstallDir();
+	if (!strcmp(szHomeDirectory, ".") && szDataDirectory)
+		szHomeDirectory = szDataDirectory;
 
 #endif /* WIN32 */
-#if defined(_MSC_VER) && HAVE_LIBXML2
-  xmlMemSetup (free, malloc, realloc, strdup);
-#endif
 
-  orgLangCode = g_strdup (setlocale (LC_ALL, ""));
 
-  bindtextdomain (PACKAGE, LOCALEDIR);
-  textdomain (PACKAGE);
-  bind_textdomain_codeset (PACKAGE, GNUBG_CHARSET);
-
-  context = g_option_context_new ("[file.sgf]");
-  g_option_context_add_main_entries (context, ao, PACKAGE);
-#if USE_GTK
-  g_option_context_add_group (context, gtk_get_option_group (FALSE));
-#endif
-  g_option_context_parse (context, &argc, &argv, &error);
-  g_option_context_free (context);
-
-  if (error)
     {
-      g_print ("%s\n", error->message);
-      exit (EXIT_FAILURE);
-    }
+	/* set language */
 
-  /* set language */
+	char *szFile, szTemp[ 4096 ], *pch;
+	FILE *pf;
 
-  outputoff ();
+	outputoff();
 
-  if (!lang)
-    {
+	orgLangCode = g_strdup (setlocale (LC_ALL, ""));
+
+	bindtextdomain (PACKAGE, LOCALEDIR);
+	textdomain (PACKAGE);
+	bind_textdomain_codeset (PACKAGE, GNUBG_CHARSET);
+
 #define AUTORC "/.gnubgautorc"
 
-      szFile = malloc (1 + strlen (szHomeDirectory) + strlen (AUTORC));
-      sprintf (szFile, "%s%s", szHomeDirectory, AUTORC);
+	szFile = malloc (1 + strlen(szHomeDirectory)+strlen(AUTORC));
+	sprintf( szFile, "%s%s", szHomeDirectory, AUTORC );
 
-      if ((pf = fopen (szFile, "r")))
-	{
+	if( ( pf = fopen( szFile, "r" ) ) ) {
 
-	  for (;;)
-	    {
+	    for (;;) {
 
-	      szTemp[0] = 0;
-	      fgets (szTemp, sizeof (szTemp), pf);
+		szTemp[ 0 ] = 0;
+		fgets( szTemp, sizeof( szTemp ), pf );
 
-	      if ((pch = strchr (szTemp, '\n')))
-		*pch = 0;
+		if( ( pch = strchr( szTemp, '\n' ) ) )
+		    *pch = 0;
 
-	      if (ferror (pf))
-		{
-		  outputerr (szFile);
-		  break;
+		if ( ferror( pf ) ) {
+		    outputerr( szFile );
+		    break;
 		}
 
-	      if (feof (pf))
-		{
-		  break;
+		if ( feof( pf ) ) {
+		    break;
 		}
 
-	      if (!strncmp ("set lang", szTemp, 8))
-		{
-		  HandleCommand (szTemp, acTop);
-		  break;
+		if ( ! strncmp( "set lang", szTemp, 8 ) ) {
+		    HandleCommand( szTemp, acTop );
+		    break;
 		}
 	    }
 
-	  fclose (pf);
+	    fclose( pf );
 	}
-      free (szFile);
-      outputon ();
+    
+	free (szFile);
+	outputon();
     }
-  else
-    SetupLanguage (lang);
 
-  if (show_version)
-    {
-      version ();
-      exit (EXIT_SUCCESS);
-    }
+#if USE_GTK
+    /* The GTK interface is fairly grotty; it makes it impossible to
+       separate argv handling from attempting to open the display, so
+       we have to check for -t before the other options to avoid connecting
+       to the X server if it is specified.
+
+       We use the last eight elements of ao to get the "--help", "--tty",
+       "--commands", "--script", "--datadir" and "--version" options only. */
+    
+    opterr = 0;
+    
+    while( ( ch = getopt_long( argc, argv, "cd:hsptvl:", ao + sizeof( ao ) /
+			       sizeof( ao[ 0 ] ) - 9, NULL ) ) != (char) -1 )
+	switch( ch ) {
+	case 'c': /* commands */
+        case 'p': /* python script */
+	case 't': /* tty */
+#ifdef WIN32
+         /* Bad hack */
+            fX = TRUE;
+            MessageBox (NULL,
+              TEXT (_("Sorry, this build does not support the -tty option")),
+              TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
+#else /* WIN32 */
+	    fX = FALSE;
+#endif /* ! WIN32 */
+	    break;
+	case 'h': /* help */
+            usage( argv[ 0 ] );
+	    exit( EXIT_SUCCESS );
+
+	case 'd': /* datadir */
+	    szDataDirectory = optarg;
 
 #ifdef WIN32
-  if (szDataDirectory)
-    _getcwd (szInvokingDirectory, _MAX_PATH);
-  _chdir (szDataDirectory);
-#endif
+	    _getcwd( szInvokingDirectory, _MAX_PATH );
+	    _chdir( szDataDirectory );
+#endif /* WIN32 */
 
+	    break;
 
-#if USE_GTK
-  if (pchCommands || pchPythonScript || fNoX)
-#if WIN32
-    {
-      MessageBox (NULL,
-		  TEXT (_("You shold use the CLI for running scripts")),
-		  TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
-      exit (EXIT_FAILURE);
-    }
-#else
-    fX = FALSE;
-#endif
-#endif
+	case 'v': /* version */
+	    version();
+	    exit( EXIT_SUCCESS );
 
-#if USE_GTK
-  if (fX)
-    fX = InitGTK (&argc, &argv);
-#if !WIN32
-  if (fX && fNoTTY)
-    fTTY = FALSE;
-#endif
-  if (fX)
-    {
-#if WIN32
-      /* The MS Windows port cannot support multiplexed GUI/TTY input;
-         disable the TTY (as if the -w option was specified). */
-      fTTY = FALSE;
-#endif
-      fInteractive = fShowProgress = TRUE;
-#if HAVE_LIBREADLINE
-      fReadline = isatty (STDIN_FILENO);
-#endif
-    }
-  else
+	case 'l': {
+		SetupLanguage(optarg);
+	  }
+	}
+
 #endif /* USE_GTK */
-    {
-      fInteractive = isatty (STDIN_FILENO);
-      fShowProgress = isatty (STDOUT_FILENO);
-    }
 
-  if (pchPythonScript)
-#if !USE_PYTHON
-    {
-      fprintf (stderr, _("%s: option `-p' requires Python\n"), argv[0]);
-      exit (EXIT_FAILURE);
-    }
-#else
-    fInteractive = FALSE;
+#if USE_GTK
+
+    optind = 0;
+    opterr = 1;
+
+    if( fX )
+	fX = InitGTK( &argc, &argv );
+
+#ifndef WIN32
+        /* look for DISPLAY on unix systems */
+        if( !getenv( "DISPLAY" ) )
+	    fX = FALSE;
+#endif /* ! WIN32 */
+    if( fX ) {
+#if WIN32
+	/* The MS Windows port cannot support multiplexed GUI/TTY input;
+	   disable the TTY (as if the -w option was specified). */
+	fTTY = FALSE;
 #endif
-
-  if (pchCommands)
-    fInteractive = FALSE;
-
+	fInteractive = fShowProgress = TRUE;
 #if HAVE_LIBREADLINE
-  fReadline = fInteractive;
+	fReadline = isatty( STDIN_FILENO );
 #endif
+    } else 
+#endif /* USE_GTK */
+	{
+#if HAVE_LIBREADLINE
+	    fReadline =
+#endif
+		fInteractive = isatty( STDIN_FILENO );
+	    fShowProgress = isatty( STDOUT_FILENO );
+	}
 
 #if HAVE_FSTAT && HAVE_SETVBUF
-  {
-    /* Use line buffering if stdout/stderr are pipes or sockets;
-       Jens Hoefkens points out that buffering causes problems
-       for other processes issuing gnubg commands via IPC. */
-    struct stat st;
-
-    if (!fstat (STDOUT_FILENO, &st) && (S_ISFIFO (st.st_mode)
+    {
+	/* Use line buffering if stdout/stderr are pipes or sockets;
+	   Jens Hoefkens points out that buffering causes problems
+	   for other processes issuing gnubg commands via IPC. */
+	struct stat st;
+	
+	if( !fstat( STDOUT_FILENO, &st ) && ( S_ISFIFO( st.st_mode )
 #ifdef S_ISSOCK
-					|| S_ISSOCK (st.st_mode)
+					      || S_ISSOCK( st.st_mode )
 #endif
-	))
-      setvbuf (stdout, NULL, _IOLBF, 0);
-
-    if (!fstat (STDERR_FILENO, &st) && (S_ISFIFO (st.st_mode)
+	    ) )
+	    setvbuf( stdout, NULL, _IOLBF, 0 );
+	
+	if( !fstat( STDERR_FILENO, &st ) && ( S_ISFIFO( st.st_mode )
 #ifdef S_ISSOCK
-					|| S_ISSOCK (st.st_mode)
+					      || S_ISSOCK( st.st_mode )
 #endif
-	))
-      setvbuf (stderr, NULL, _IOLBF, 0);
-  }
+	    ) )
+	    setvbuf( stderr, NULL, _IOLBF, 0 );
+    }
 #endif
+
+
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwSl:", ao, NULL ) ) !=
+           (char) -1 )
+	switch( ch ) {
+	case 'b': /* no-bearoff */
+	    fNoBearoff = TRUE;
+	    break;
+	case 'c': /* commands */
+	    pchCommands = optarg;
+	    fInteractive = FALSE;
+	    break;
+	case 'd': /* datadir */
+	    break;
+	case 'h': /* help */
+            usage( argv[ 0 ] );
+	    exit( EXIT_SUCCESS );
+	case 'n': /* new-weights */
+	    if( optarg )
+		nNewWeights = atoi( optarg );
+
+	    if( nNewWeights < 1 )
+		nNewWeights = DEFAULT_NET_SIZE;
+
+	    break;
+	case 'q': /* quiet */
+	    fQuiet = TRUE;
+	    break;
+	case 'r': /* no-rc */
+	    fNoRC = TRUE;
+	    break;
+        case 'p': /* python script */
+#if !USE_PYTHON
+            fprintf( stderr, 
+                     _("%s: option `-p' requires Python\n"), argv[ 0 ] );
+            exit( EXIT_FAILURE );
+#endif
+            pchPythonScript = optarg;
+            fInteractive = FALSE;
+            break;
+	case 't':
+	    /* silently ignore (if it was relevant, it was handled earlier). */
+	    break;
+	case 'v': /* version */
+	    version();
+	    exit( EXIT_SUCCESS );
+	case 'w':
+#if USE_GTK
+	    if( fX )
+		fTTY = FALSE;
+#else
+	    /* silently ignore */
+#endif
+	    break;
+        case 'S': /* no splash screen */
+          fSplash = FALSE;
+          break;
+
+	case 'l':
+	  break;
+
+	default:
+	    usage( argv[ 0 ] );
+	    exit( EXIT_FAILURE );
+	}
 
 #if USE_GTK
     if( fTTY )
@@ -7195,7 +7387,7 @@ main (int argc, char *argv[])
     }
 
 #if USE_GTK
-    if ( fX && !fNoSplash )
+    if ( fX && fSplash )
       pwSplash = CreateSplash ();
 #endif
 
@@ -7218,6 +7410,28 @@ main (int argc, char *argv[])
        could happen if InitRNG had to use the current time as a seed) -- mix
        it up a little bit */
     rcRollout.nSeed ^= 0x792A584B;
+
+    /* initialise paths */
+
+    for ( i = 0; i < NUM_PATHS; i++ )
+      for ( j = 0; j < 2; j++ )
+        strcpy ( aaszPaths[ i ][ j ], "" );
+
+    /* special setup for a few paths */
+
+#if WIN32
+
+    if ( ( pc = getenv( "ProgramFiles" ) ) ) {
+
+      strcpy( aaszPaths[ PATH_SGG ][ 0 ], pc );
+      strcat( aaszPaths[ PATH_SGG ][ 0 ], "\\GamesGrid\\SaveGame\\" );
+
+      strcpy( aaszPaths[ PATH_TMG ][ 0 ], pc );
+      strcat( aaszPaths[ PATH_TMG ][ 0 ], "\\TMG\\SavedGames\\" );
+
+    }
+
+#endif
 
     /* initalize some html export options */
 
@@ -7306,7 +7520,20 @@ main (int argc, char *argv[])
 
     RenderInitialise();
 
-    strcpy( ap[ 1 ].szName, g_get_user_name() );
+    if( ( pch = getenv( "LOGNAME" ) ) )
+	strcpy( ap[ 1 ].szName, pch );
+    else if( ( pch = getenv( "USER" ) ) )
+	strcpy( ap[ 1 ].szName, pch );
+    else if( ( pch = getenv( "USERNAME" ) ) ) /* it's username on Win 2000 / XP ... */
+	strcpy( ap[ 1 ].szName, pch );
+#if HAVE_GETLOGIN
+    else if( ( pch = getlogin() ) )
+	strcpy( ap[ 1 ].szName, pch );
+#endif
+#if HAVE_GETPWUID
+    else if( ( ppwd = getpwuid( getuid() ) ) )
+	strcpy( ap[ 1 ].szName, ppwd->pw_name );
+#endif
     
     ListCreate( &lMatch );
     IniStatcontext( &scMatch );
@@ -7423,20 +7650,20 @@ main (int argc, char *argv[])
         _chdir( szInvokingDirectory );
 #endif
 
-    if( argc>1 && *argv[ 1 ] ) {
+    if( optind < argc && *argv[ optind ] ) {
 #if USE_GTK
       PushSplash ( pwSplash, 
                    _("Loading"), _("Specified Match"), 500 );
 #endif    
-	if( strcspn( argv[ 1 ], " \t\n\r\v\f" ) ) {
+	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
 	    /* quote filename with whitespace so that function
 	     * NextToken in CommandLoadCommands doesn't split it
          */
-	    sprintf( szQuoted, "'%s'", argv[ 1 ] );
+	    sprintf( szQuoted, "'%s'", argv[ optind ] );
 	    CommandLoadMatch( szQuoted );
 	}
 	else
-	    CommandLoadMatch( argv[ 1 ] );
+	    CommandLoadMatch( argv[ optind ] );
     }
 
 #ifdef WIN32
@@ -7809,38 +8036,186 @@ confirmOverwrite ( const char *sz, const int f ) {
 
 }
 
+
+
 extern void
-setDefaultFileName (char *path)
-{
-  g_free (szCurrentFolder);
-  g_free (szCurrentFileName);
-  DisectPath (path, NULL, &szCurrentFileName, &szCurrentFolder);
-#if USE_GTK
-  if (fX)
-    {
-      gchar *title =
-	g_strdup_printf (_("GNU Backgammon (%s)"), szCurrentFileName);
-      gtk_window_set_title (GTK_WINDOW (pwMain), title);
-      g_free (title);
+setDefaultPath ( const char *sz, const pathformat f ) {
+
+  char *pc;
+
+  /* set path up last slash as 'current path' */
+  
+  strcpy ( aaszPaths[ f ][ 1 ], sz );
+  pc = strrchr ( aaszPaths[ f ][ 1 ], DIR_SEPARATOR );
+  if ( ! pc )
+    pc = aaszPaths[ f ][ 1 ];
+  *pc = 0;
+
+}
+
+
+
+extern void
+setDefaultFileName ( const char *sz, const pathformat f ) {
+
+  char *pc;
+  char *pcdot;
+
+  /* set path up last slash as 'current path' */
+
+  setDefaultPath ( sz, f );
+  
+  /* garbage collect */
+
+  if ( szCurrentFileName )
+    free ( szCurrentFileName );
+
+  if ( ( pc = strrchr ( sz, DIR_SEPARATOR ) ) ) {
+    szCurrentFileName = strdup ( pc + 1 );
+    if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
+      *pcdot = 0; /* remove extension */
+  }
+  else if ( strlen ( sz ) ) {
+    szCurrentFileName = strdup ( sz );
+    if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
+      *pcdot = 0; /* remove extension */
+  }
+  else
+    szCurrentFileName = NULL;
+
+}
+
+
+
+/*
+ * Return default file name for saving a file with the specified
+ * extension.
+ *
+ * Input:
+ *   f: the type of the file (SGF, SGG, HTML, etc etc)
+ *
+ * Returns:
+ *   file name (pointer must be freed by caller if not null)
+ *
+ * Garbage collect:
+ *   Returned pointer must be freed by caller if not NULL).
+ *
+ */
+
+extern char *
+getDefaultFileName ( const pathformat f ) {
+
+  int l;
+  char *sz, *pc, *szPath;
+  char *szExt = aszExtensions [ f ];
+  time_t t;
+
+  /* get default path */
+
+  szPath = getDefaultPath ( f );
+
+  if ( szCurrentFileName && *szCurrentFileName ) {
+
+    /* use current filename */
+
+    l = ( szPath ? ( 1 + strlen ( szPath ) ) : 0 ) + 
+      strlen ( szCurrentFileName ) + 1 + 1 + strlen ( szExt );
+    sz = (char *) malloc ( l );
+
+    if ( szPath ) {
+      strcpy ( sz, szPath );
+      strcat ( sz, DIR_SEPARATOR_S );
     }
-#endif
+    else
+      strcpy ( sz, "" );
+    
+    strcat ( sz, szCurrentFileName );
+    strcat ( sz, "." );
+    strcat ( sz, szExt );
+
+  }
+  else {
+
+    /* Generate new filename */
+
+    /* "timestamp"-"name for player 0"-"name for player 1"-"length".ext */
+
+    l = 15 + 1 + strlen ( ap[ 0 ].szName ) + 1 +
+      strlen ( ap[ 1 ].szName ) + 1 + 5 + 1 + 
+      strlen ( szExt ) + ( szPath ? ( 1 + strlen ( szPath ) ) : 0 );
+
+    sz = (char *) malloc ( l );
+
+    if ( szPath ) {
+      strcpy ( sz, szPath );
+      strcat ( sz, DIR_SEPARATOR_S );
+    }
+    else
+      strcpy ( sz, "" );
+
+    pc = strchr ( sz, 0 );
+    
+    if( mi.nYear )
+	sprintf( pc, "%04d-%02d-%02d", mi.nYear, mi.nMonth, mi.nDay );
+    else {
+	time ( &t );
+	strftime ( pc, l, _("%Y-%m-%d-%H%M"), localtime ( &t ) );
+    }
+    
+    pc = strchr ( pc, 0 );
+    strcat ( pc, "-" );
+
+    pc = strchr ( pc, 0 );
+    strcat ( pc, ap[ 0 ].szName );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, "-" );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, ap [ 1 ].szName );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, "-" );
+
+    pc = strchr ( pc, 0 );
+    sprintf ( pc, "%d", ms.nMatchTo );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, "." );
+    
+    pc = strchr ( pc, 0 );
+    strcat (pc, szExt );
+
+  }
+
+  return sz;
+
 }
 
-extern void
-DisectPath (char *path, char *extension, char **name, char **folder)
+static char * getPath(char *path)
 {
-  char *fnn, *pc;
-  if (!path)
-    return;
-  *folder = g_path_get_dirname (path);
-  fnn = g_path_get_basename (path);
-  pc = strrchr (fnn, '.');
-  if (pc)
-    *pc = '\0';
-  *name = g_strconcat (fnn, extension, NULL);
-  g_free (fnn);
+  char *pc;
+
+  if (strlen(path))
+  {
+    pc = strchr ( path, 0 ) - 1;
+    if ( *pc != DIR_SEPARATOR )
+		strcat ( path, DIR_SEPARATOR_S );
+
+    return PathSearch ( path, szDataDirectory );
+  }
+  else 
+    return NULL;
 }
 
+extern char *
+getDefaultPath ( const pathformat f ) {
+
+  char* r = getPath(aaszPaths[ f ][ 1 ]);
+  if (!r)
+	r = getPath(aaszPaths[ f ][ 0 ]);
+  return r;
+}
 
 extern void
 InvalidateStoredMoves ( void ) {
@@ -7957,6 +8332,97 @@ extern int GiveAdvice( skilltype Skill ) {
 	  return (TRUE);
 
 	return GetAdviceAnswer( sz );
+}
+
+extern char *
+Convert ( const char *sz, 
+          const char *szDestCharset, const char *szSourceCharset )
+{
+#if HAVE_ICONV
+  iconv_t id;
+  size_t lIn, lOut, l, rc;
+  int nUsed;
+#if WIN32
+  const char *pchIn;
+#else
+  char *pchIn;
+#endif
+  char *pchOut, *pchDest;  int fError = FALSE;
+
+  if ( ! strcmp ( szSourceCharset, szDestCharset ) )
+    /* no need for conversion */
+    return strdup ( sz );
+
+  id = iconv_open ( szDestCharset, szSourceCharset );
+
+  if ( id == (iconv_t) -1 ) {
+    perror ( "iconv_open" );
+    return strdup ( sz );
+  }
+
+  
+  lIn = strlen ( sz );
+  pchIn = (char *) sz;
+
+  l = lOut = lIn + 1;
+  pchOut = pchDest = (char *) malloc ( lOut );
+
+  while ( lIn && ! fError ) {
+
+    rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
+
+    if ( rc == (size_t)(-1) ) 
+      switch ( errno ) {
+      case EINVAL:
+        /* incomplete text, do not report an error */
+        break;
+      case E2BIG:
+        /* output buffer too small */
+        nUsed = pchOut - pchDest;
+
+        lOut *= 2;
+        pchDest = (char *) realloc ( pchDest, lOut );
+
+        pchOut = pchDest + nUsed;
+        l = lOut - nUsed - 1;
+        continue;
+
+      case EILSEQ:
+	  /* Officially this should be an illegal byte sequence in the
+	     input, but glibc 2.2 also gives this error when the character
+	     is legal but does not exist in the destination character set,
+	     so we'll try to cope as well as we can. */
+	  pchIn++;
+	  lIn--;
+	  continue;
+	
+      default:
+        outputerr ( "iconv" );
+        fError = TRUE;
+        break;
+
+      }
+
+  }
+
+  if ( fError ) {
+    free ( pchDest );
+    return NULL;
+  }
+
+  *pchOut = 0;
+
+  if ( iconv_close ( id ) )
+    outputerr ( "iconv_close" );
+
+  return pchDest;
+
+#else /* HAVE_ICONV */
+
+  return strdup( sz );
+
+#endif /* ! HAVE_ICONV */
+
 }
 
 extern void TextToClipboard(const char *sz)
@@ -8238,6 +8704,51 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
 }
 
+extern void CommandSetExportFileType(char *sz)
+{
+	int num = 0;
+
+	if (!sz || !*sz)
+	{
+		outputl(_("No file type specified"));
+		return;
+	}
+
+	while (*aszExportTypes[num])
+	{
+		if (!strncasecmp(sz, aszExportTypes[num], strlen(sz)))
+		{
+			lastExportType = num;
+			return;
+		}
+		num++;
+	}
+
+ 	outputl(_("Invalid file type specified"));
+}
+
+extern void CommandSetImportFileType(char *sz)
+{
+	int num = 0;
+
+	if (!sz || !*sz)
+	{
+		outputl(_("No file type specified"));
+		return;
+	}
+
+	while (*aszImportTypes[num])
+	{
+		if (!strncasecmp(sz, aszImportTypes[num], strlen(sz)))
+		{
+			lastImportType = num;
+			return;
+		}
+		num++;
+	}
+
+ 	outputl(_("Invalid file type specified"));
+}
 
 extern char * locale_from_utf8 ( const char *sz) {
     char *ret;

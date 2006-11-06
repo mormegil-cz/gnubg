@@ -2929,6 +2929,8 @@ extern void CommandSetMET( char *sz ) {
   }
 
   InitMatchEquity ( sz, szDataDirectory );
+  setDefaultPath ( sz, PATH_MET );
+
   /* Cubeful evaluation get confused withh entries from another table */
   EvalCacheFlush();
 
@@ -3717,6 +3719,152 @@ CommandSetInvertMatchEquityTable ( char *sz ) {
 
   if ( fOldInvertMET != fInvertMET )
     SetInvertMET();
+}
+
+
+static void
+SetPath ( char *sz, pathformat f ) {
+
+  sz = NextToken ( &sz );
+
+  if ( ! sz || ! *sz ) {
+    outputl ( _("You must specify a path.") );
+    return;
+  }
+
+  strcpy ( aaszPaths[ f ][ 0 ], sz );
+
+}
+
+
+extern void
+CommandSetPathSnowieTxt ( char *sz ) {
+
+  SetPath ( sz, PATH_SNOWIE_TXT );
+
+}
+
+
+extern void
+CommandSetPathGam ( char *sz ) {
+
+  SetPath ( sz, PATH_GAM );
+
+}
+
+
+extern void
+CommandSetPathHTML ( char *sz ) {
+
+  SetPath ( sz, PATH_HTML );
+
+}
+
+
+extern void
+CommandSetPathLaTeX ( char *sz ) {
+
+  SetPath ( sz, PATH_LATEX );
+
+}
+
+
+extern void
+CommandSetPathMat ( char *sz ) {
+
+  SetPath ( sz, PATH_MAT );
+
+}
+
+
+extern void
+CommandSetPathOldMoves ( char *sz ) {
+
+  SetPath ( sz, PATH_OLDMOVES );
+
+}
+
+
+extern void
+CommandSetPathPDF ( char *sz ) {
+
+  SetPath ( sz, PATH_PDF );
+
+}
+
+
+extern void
+CommandSetPathPos ( char *sz ) {
+
+  SetPath ( sz, PATH_POS );
+
+}
+
+extern void
+CommandSetPathPNG ( char *sz ) {
+
+  SetPath ( sz, PATH_PNG );
+
+}
+
+extern void
+CommandSetPathEPS ( char *sz ) {
+
+  SetPath ( sz, PATH_EPS );
+
+}
+
+
+extern void
+CommandSetPathPostScript ( char *sz ) {
+
+  SetPath ( sz, PATH_POSTSCRIPT );
+
+}
+
+
+extern void
+CommandSetPathSGF ( char *sz ) {
+
+  SetPath ( sz, PATH_SGF );
+
+}
+
+
+extern void
+CommandSetPathSGG ( char *sz ) {
+
+  SetPath ( sz, PATH_SGG );
+
+}
+
+
+extern void
+CommandSetPathMET ( char *sz ) {
+
+  SetPath ( sz, PATH_MET );
+
+}
+
+extern void
+CommandSetPathTMG ( char *sz ) {
+
+  SetPath ( sz, PATH_TMG );
+
+}
+
+extern void
+CommandSetPathText ( char *sz ) {
+
+  SetPath ( sz, PATH_TEXT );
+
+}
+
+extern void
+CommandSetPathBKG ( char *sz ) {
+
+  SetPath ( sz, PATH_BKG );
+
 }
 
 
@@ -4567,30 +4715,4 @@ CommandSetOutputErrorRateFactor( char *sz ) {
 
 
 
-}
-
-static void
-SetFolder (char **folder, char *sz)
-{
-  g_free (*folder);
-  if (sz && *sz)
-    *folder = g_strdup (sz);
-  else
-    *folder = NULL;
-}
-
-extern void
-CommandSetExportFolder (char *sz)
-{
-  SetFolder (&default_export_folder, NextToken (&sz));
-}
-extern void
-CommandSetImportFolder (char *sz)
-{
-  SetFolder (&default_import_folder, NextToken (&sz));
-}
-extern void
-CommandSetSGFFolder (char *sz)
-{
-  SetFolder (&default_sgf_folder, NextToken (&sz));
 }
