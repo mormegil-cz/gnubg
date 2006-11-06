@@ -1528,7 +1528,6 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
     char *file;
 
     file = PathSearch(FONT_VERA_BOLD, szDataDirectory);
-    printf ("file %s", file);
     if( FT_New_Face( ftl, file, 0, &ftf ) )
 	{
 		RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );

@@ -30,9 +30,9 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#define FONT_VERA "/Vera.ttf"
-#define FONT_VERA_SERIF_BOLD "/VeraSeBd.ttf"
-#define FONT_VERA_BOLD "/VeraBd.ttf"
+#define FONT_VERA "fonts/Vera.ttf"
+#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
+#define FONT_VERA_BOLD "fonts/VeraBd.ttf"
 
 #define FONT_SIZE (base_unit / 20.0f)
 #define CUBE_FONT_SIZE (base_unit / 24.0f)

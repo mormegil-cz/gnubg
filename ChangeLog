@@ -1,3 +1,8 @@
+Mon Nov  6 15:11:40 CET 2006  Christian Anthon <anthon@kiku.dk>
+	
+	* render.c, board3d/font3d.c, board3d/widget3d.c: Allow fallback when
+	no stencil buffer and make vera fonts work in 3d.
+
 Mon Nov  6 13:28:52 CET 2006  Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, render.c, board3d/font3d.c, R luxi.c, A
