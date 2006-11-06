@@ -1,4 +1,9 @@
-Show 3 decimals for epc and include wastage (By Ian Shaw)
+Mon Nov  6 13:28:52 CET 2006  Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, render.c, board3d/font3d.c, R luxi.c, A
+	fonts/: Use the free bitstream vera fonts instead of the non-free
+	luxi.c
+
 Thu Nov  2 20:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkfile.c + .h: Removed import option and now open

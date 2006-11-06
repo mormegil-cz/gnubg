@@ -32,12 +32,6 @@ else
 BR1_SOURCES =
 endif
 
-if USE_FREETYPE
-FONT_SOURCES = luxi.c
-else
-FONT_SOURCES =
-endif
-
 if EXTERNAL_BR1
 BR1DATA = gnubg_os0.bd
 else
@@ -61,7 +55,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags
+SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags fonts
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
@@ -113,7 +107,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 	gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
 	gtkmovelist.c gtkmovelistctrl.c gtkwindows.c gtkrelational.c \
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) $(PNG_LIBS) \
         $(BOARD3D_LIBS) @THREAD_LIBS@ @CAIRO_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
@@ -121,7 +115,7 @@ else
 ## --- Plain
 INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-	$(FONT_SOURCES)  $(PYTHON_SOURCES) $(TIME_SOURCES)
+	$(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
 
 

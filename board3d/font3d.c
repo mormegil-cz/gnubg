@@ -26,17 +26,16 @@
 #include "inc3d.h"
 #include "gtkboard.h"
 #include <assert.h>
+#include "path.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#define FONT_VERA "/Vera.ttf"
+#define FONT_VERA_SERIF_BOLD "/VeraSeBd.ttf"
+#define FONT_VERA_BOLD "/VeraBd.ttf"
 
 #define FONT_SIZE (base_unit / 20.0f)
 #define CUBE_FONT_SIZE (base_unit / 24.0f)
-
-extern unsigned char auchLuxiSR[];
-extern unsigned int cbLuxiSR;
-extern unsigned char auchLuxiRB[];
-extern unsigned int cbLuxiRB;
 
 typedef struct _Point
 {
@@ -65,7 +64,7 @@ typedef struct _Mesh
 	GArray *tesselations;
 } Mesh;
 
-int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, unsigned char *pBufferBytes, unsigned int bufferSizeInBytes, int pointSize, float scale);
+int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale);
 void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline);
 void TidyMemory(Vectoriser* pVect, Mesh* pMesh);
 void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int numberOfPoints);
@@ -75,18 +74,23 @@ int MakeGlyph(FT_Outline* pOutline, int list);
 int BuildFont3d(BoardData3d* bd3d)
 {
 	FT_Library ftLib;
+        char *file;
 	if (FT_Init_FreeType(&ftLib))
 		return 0;
 
-	if (!CreateOGLFont(ftLib, &bd3d->numberFont, auchLuxiSR, cbLuxiSR, 24, FONT_SIZE))
+        file = PathSearch(FONT_VERA, szDataDirectory);
+        if (!CreateOGLFont(ftLib, &bd3d->numberFont, file, 24, FONT_SIZE))
 		return 0;
-	if (!CreateOGLFont(ftLib, &bd3d->cubeFont, auchLuxiRB, cbLuxiRB, 44, CUBE_FONT_SIZE))
+        free(file);
+        file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
+        if (!CreateOGLFont(ftLib, &bd3d->cubeFont, file, 44, CUBE_FONT_SIZE))
 		return 0;
+        free(file);
 
 	return !FT_Done_FreeType(ftLib);
 }
 
-int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, unsigned char *pBufferBytes, unsigned int bufferSizeInBytes, int pointSize, float scale)
+int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale)
 {
 	int i, j;
 	FT_Face face;
@@ -94,7 +98,7 @@ int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, unsigned char *pBufferBytes,
 	memset(pFont, 0, sizeof(OGLFont));
 	pFont->scale = scale;
 
-	if (FT_New_Memory_Face(ftLib, (FT_Byte *)pBufferBytes, bufferSizeInBytes, 0, &face))
+        if (FT_New_Face(ftLib, pPath, 0, &face))
 		return 0;
 
 	if (FT_Set_Char_Size(face, 0, pointSize * 64 /* 26.6 fractional points */, 0, 0))
