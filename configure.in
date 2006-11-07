@@ -19,7 +19,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 AC_REVISION($Revision$)
-AC_INIT([GNU Backgammon],[0.14.3-devel],[bug-gnubg@gnu.org],[gnubg])
+AC_INIT([GNU Backgammon],[0.15],[bug-gnubg@gnu.org],[gnubg])
 AC_CONFIG_SRCDIR(gnubg.c)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
