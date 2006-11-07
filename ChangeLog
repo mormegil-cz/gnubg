@@ -1,3 +1,8 @@
+Tue Nov  7 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* font3d.c, render.c : Minor changes to 3d cube font and 2d point
+		number font to make them look slightly better.
+
 Mon Nov  6 15:11:40 CET 2006  Christian Anthon <anthon@kiku.dk>
 	
 	* render.c, board3d/font3d.c, board3d/widget3d.c: Allow fallback when

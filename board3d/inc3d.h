@@ -48,6 +48,7 @@ typedef struct _OGLFont
 	int advance;
 	int kern[10][10];
 	float scale;
+	float heightRatio;
 	float height;
 } OGLFont;
 

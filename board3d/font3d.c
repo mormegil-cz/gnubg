@@ -30,12 +30,6 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#define FONT_VERA "fonts/Vera.ttf"
-#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
-#define FONT_VERA_BOLD "fonts/VeraBd.ttf"
-
-#define FONT_SIZE (base_unit / 20.0f)
-#define CUBE_FONT_SIZE (base_unit / 24.0f)
 
 typedef struct _Point
 {
@@ -64,12 +58,20 @@ typedef struct _Mesh
 	GArray *tesselations;
 } Mesh;
 
-int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale);
+int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float size, float heightRatio);
 void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline);
 void TidyMemory(Vectoriser* pVect, Mesh* pMesh);
 void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int numberOfPoints);
 void PopulateMesh(Vectoriser* pVect, Mesh* pMesh);
 int MakeGlyph(FT_Outline* pOutline, int list);
+
+#define FONT_PITCH 24
+#define FONT_SIZE (base_unit / 20.0f)
+#define FONT_HEIGHT_RATIO 1
+
+#define CUBE_FONT_PITCH 34
+#define CUBE_FONT_SIZE (base_unit / 24.0f)
+#define CUBE_FONT_HEIGHT_RATIO 1.25f
 
 int BuildFont3d(BoardData3d* bd3d)
 {
@@ -78,25 +80,27 @@ int BuildFont3d(BoardData3d* bd3d)
 	if (FT_Init_FreeType(&ftLib))
 		return 0;
 
-        file = PathSearch(FONT_VERA, szDataDirectory);
-        if (!CreateOGLFont(ftLib, &bd3d->numberFont, file, 24, FONT_SIZE))
+	file = PathSearch(FONT_VERA, szDataDirectory);
+	if (!CreateOGLFont(ftLib, &bd3d->numberFont, file, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
 		return 0;
-        free(file);
-        file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
-        if (!CreateOGLFont(ftLib, &bd3d->cubeFont, file, 44, CUBE_FONT_SIZE))
+	free(file);
+
+	file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
+	if (!CreateOGLFont(ftLib, &bd3d->cubeFont, file, CUBE_FONT_PITCH, CUBE_FONT_SIZE, CUBE_FONT_HEIGHT_RATIO))
 		return 0;
-        free(file);
+	free(file);
 
 	return !FT_Done_FreeType(ftLib);
 }
 
-int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale)
+int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale, float heightRatio)
 {
 	int i, j;
 	FT_Face face;
 
 	memset(pFont, 0, sizeof(OGLFont));
 	pFont->scale = scale;
+	pFont->heightRatio = heightRatio;
 
         if (FT_New_Face(ftLib, pPath, 0, &face))
 		return 0;
@@ -113,7 +117,7 @@ int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int point
 			(face->glyph->format != ft_glyph_format_outline))
 			return 0;
 
-		pFont->height = (float)face->glyph->metrics.height * scale / 64;
+		pFont->height = (float)face->glyph->metrics.height * scale * heightRatio / 64;
 		pFont->advance = face->glyph->advance.x;
 	}
 
@@ -225,7 +229,7 @@ extern float getTextLen3d(OGLFont *pFont, const char* str)
 
 extern int RenderString3d(OGLFont *pFont, const char* str)
 {
-	glScalef(pFont->scale, pFont->scale, 1);
+	glScalef(pFont->scale, pFont->scale * pFont->heightRatio, 1);
 
 	while (*str)
 	{
