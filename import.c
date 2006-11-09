@@ -705,6 +705,8 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
 	    AddMoveRecord( pmr );
 	}
+    } else if( !strncasecmp( sz, "resign", 6 ) ) {
+		return;	/* Ignore this .gam line */
     } else if( !fWarned ) {
 	outputf( _("Unrecognised move \"%s\" in .mat file.\n"), sz );
 	fWarned = TRUE;
@@ -3150,4 +3152,113 @@ ImportSnowieTxt( FILE *pf ) {
 
   return 0;
 
+}
+
+extern int ImportGAM(FILE *fp, char *szFilename )
+{
+	char *pch, *pchLeft, *pchRight, *szLine;
+	moverecord *pmgi;
+
+#if USE_GTK
+	if( fX )
+	{	/* Clear record to avoid ugly updates */
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
+#endif
+
+	FreeMatch();
+	ClearMatch();
+
+	while((szLine = GetMatLine(fp)))
+	{
+		szLine += strspn(szLine, " \t" );
+
+		if (!strncasecmp(szLine, "win", 3))
+			continue;	/* Skip this line (in between games) */
+
+		/* Read player names */
+		pchRight = szLine;
+		while (*pchRight != ' ' && *pchRight != '\t')
+			pchRight++;
+		*pchRight = '\0';
+		strcpy( ap[ 0 ].szName, szLine );
+
+		pchLeft = pchRight + 1;
+		while (*pchLeft == ' ' || *pchLeft == '\t')
+			pchLeft++;
+		pchRight = pchLeft;
+		while (*pchRight != ' ' && *pchRight != '\t' && *pchRight != '\n')
+			pchRight++;
+		*pchRight = '\n';
+		strcpy( ap[ 1 ].szName, pchLeft );
+
+		InitBoard( ms.anBoard, ms.bgv );
+		ClearMoveRecord();
+		ListInsert( &lMatch, plGame );
+
+		/* Game info */
+
+		pmgi = NewMoveRecord();
+
+		pmgi->mt = MOVE_GAMEINFO;
+		pmgi->g.i = ms.cGames;
+		pmgi->g.nMatch = 0;
+		pmgi->g.anScore[ 0 ] = ms.anScore[0];
+		pmgi->g.anScore[ 1 ] = ms.anScore[1];
+		pmgi->g.fCrawford = FALSE;
+		pmgi->g.fCrawfordGame = FALSE;
+		pmgi->g.fJacoby = FALSE;
+		pmgi->g.fWinner = -1;
+		pmgi->g.nPoints = 0;
+		pmgi->g.fResigned = FALSE;
+		pmgi->g.nAutoDoubles = 0;
+		pmgi->g.bgv = VARIATION_STANDARD; /* assume standard backgammon */
+		pmgi->g.fCubeUse = TRUE;          /* assume use of cube */
+		IniStatcontext( &pmgi->g.sc );
+
+		AddMoveRecord( pmgi );
+
+		/* Read game */
+		while((szLine = GetMatLine(fp)))
+		{
+			pchRight = pchLeft = NULL;
+
+			if( ( pch = strpbrk( szLine, "\n\r" ) ) )
+				*pch = 0;
+
+			if( ( pchLeft = strchr( szLine, ':' ) ) &&
+				( pchRight = strchr( pchLeft + 1, ':' ) ) && pchRight > szLine + 3 )
+				*( ( pchRight -= 2 ) - 1 ) = 0;
+			else if( strlen( szLine ) > 15 && ( pchRight = strstr( szLine + 15, "  " ) ) )
+				*pchRight++ = 0;
+
+			if( ( pchLeft = strchr( szLine, ')' ) ) )
+				pchLeft++;
+			else
+				pchLeft = szLine;
+
+			ParseMatMove( pchLeft, 0 );
+
+			if( pchRight )
+				ParseMatMove( pchRight, 1 );
+
+			if (ms.gs != GAME_PLAYING)
+			{
+				AddGame( pmgi );
+				break;
+			}
+		}
+	}
+
+	UpdateSettings();
+
+#if USE_GTK
+	if( fX ){
+		GTKThaw();
+		GTKSet(ap);
+	}
+#endif
+
+	return TRUE;
 }

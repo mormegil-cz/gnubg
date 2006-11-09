@@ -248,6 +248,7 @@ FileFormat file_format[] = {
   {".ps", N_("PostScript"), "postscript", FALSE, TRUE, {TRUE, TRUE, FALSE}},
   {".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE, {FALSE, FALSE, TRUE}},
   {".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".gam", N_("GammonEmpire Game"), "gam", TRUE, FALSE, {FALSE, FALSE, FALSE}},
 };
 
 gint n_file_formats = G_N_ELEMENTS(file_format);
@@ -851,6 +852,8 @@ command cER = {
     { "mat", CommandImportMat, N_("Import a Jellyfish match"), szFILENAME,
       &cFilename },
     { "oldmoves", CommandImportOldmoves, N_("Import a FIBS oldmoves file"),
+      szFILENAME, &cFilename },
+    { "gam", CommandImportGAM, N_("Import a GammonEmpire game file"),
       szFILENAME, &cFilename },
     { "pos", CommandImportJF, 
       N_("Import a Jellyfish position file"), szFILENAME,
@@ -4936,6 +4939,32 @@ extern void CommandImportSnowieTxt( char *sz ) {
 	outputerr( sz );
 }
 
+extern void CommandImportGAM(char *sz)
+{
+    FILE *pf;
+    int rc;
+
+    sz = NextToken( &sz );
+
+    if (!sz || !*sz)
+	{
+		outputl( _("You must specify a GammonEmpire file to import (see `help "
+		 "import gam').") );
+	return;
+    }
+
+    if ((pf = fopen( sz, "r" )))
+	{
+		int res = ImportGAM(pf, sz);
+		fclose(pf);
+        if (!res)
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+    }
+	else
+		outputerr(sz);
+}
 
 extern void CommandCopy (char *sz)
 {
