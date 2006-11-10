@@ -77,11 +77,6 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
-#if HAVE_ICONV
-#include <iconv.h>
-#endif
-
-
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -8332,97 +8327,6 @@ extern int GiveAdvice( skilltype Skill ) {
 	  return (TRUE);
 
 	return GetAdviceAnswer( sz );
-}
-
-extern char *
-Convert ( const char *sz, 
-          const char *szDestCharset, const char *szSourceCharset )
-{
-#if HAVE_ICONV
-  iconv_t id;
-  size_t lIn, lOut, l, rc;
-  int nUsed;
-#if WIN32
-  const char *pchIn;
-#else
-  char *pchIn;
-#endif
-  char *pchOut, *pchDest;  int fError = FALSE;
-
-  if ( ! strcmp ( szSourceCharset, szDestCharset ) )
-    /* no need for conversion */
-    return strdup ( sz );
-
-  id = iconv_open ( szDestCharset, szSourceCharset );
-
-  if ( id == (iconv_t) -1 ) {
-    perror ( "iconv_open" );
-    return strdup ( sz );
-  }
-
-  
-  lIn = strlen ( sz );
-  pchIn = (char *) sz;
-
-  l = lOut = lIn + 1;
-  pchOut = pchDest = (char *) malloc ( lOut );
-
-  while ( lIn && ! fError ) {
-
-    rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
-
-    if ( rc == (size_t)(-1) ) 
-      switch ( errno ) {
-      case EINVAL:
-        /* incomplete text, do not report an error */
-        break;
-      case E2BIG:
-        /* output buffer too small */
-        nUsed = pchOut - pchDest;
-
-        lOut *= 2;
-        pchDest = (char *) realloc ( pchDest, lOut );
-
-        pchOut = pchDest + nUsed;
-        l = lOut - nUsed - 1;
-        continue;
-
-      case EILSEQ:
-	  /* Officially this should be an illegal byte sequence in the
-	     input, but glibc 2.2 also gives this error when the character
-	     is legal but does not exist in the destination character set,
-	     so we'll try to cope as well as we can. */
-	  pchIn++;
-	  lIn--;
-	  continue;
-	
-      default:
-        outputerr ( "iconv" );
-        fError = TRUE;
-        break;
-
-      }
-
-  }
-
-  if ( fError ) {
-    free ( pchDest );
-    return NULL;
-  }
-
-  *pchOut = 0;
-
-  if ( iconv_close ( id ) )
-    outputerr ( "iconv_close" );
-
-  return pchDest;
-
-#else /* HAVE_ICONV */
-
-  return strdup( sz );
-
-#endif /* ! HAVE_ICONV */
-
 }
 
 extern void TextToClipboard(const char *sz)

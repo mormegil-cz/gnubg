@@ -1,14 +1,22 @@
-Tue Nov  7 14:12:40 CET 2006 Christian  Anthon <anthon@kiku.dk>
+Fri Nov 10 12:23:52 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, configure.in, render.c,
+	board3d/font3d.c,board3d/inc3d.h, fonts/ : added vera fonts 
+	* gnubg.c: removed Convert function
+	* render.c: fixed talisman crash bug
+	* gnubgmodule.c: hopefully fixed AMD64 relational database crash
+
+Tue Nov  7 14:12:40 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c: update to eval.c 1.295
 
-Tue Nov  7 12:21:01 CET 2006 Christian  Anthon <anthon@kiku.dk>
+Tue Nov  7 12:21:01 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* po/: updated gnubg.pot and .po files. Removed fuzzy.
 	* configure.in: version updated to 0.15
 	* flags/: added dir
 
-Wed Oct 18 14:54:34 CEST 2006 Christian  Anthon <anthon@kiku.dk>
+Wed Oct 18 14:54:34 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, gtkgame.c, flags/.cvsignore,
 	flags/Makefile.am: automake and install stuff for the new flags
