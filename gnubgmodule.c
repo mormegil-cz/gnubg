@@ -1551,7 +1551,7 @@ PyGameStats(const statcontext* sc, const int fIsMatch, const int nMatchTo)
     int side;
     for(side = 0; side < 2; ++side) {
       PyObject* d =
-	Py_BuildValue("{s:f,s:f,s:f,s:f,s:f}",
+	Py_BuildValue("{s:f,s:f,s:f,s:f}",
 		      "luck", sc->arLuck[side][0],
 		      "luck-cost", sc->arLuck[side][1], 
                       "actual-result", sc->arActualResult[side],
