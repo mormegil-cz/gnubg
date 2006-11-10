@@ -1,3 +1,8 @@
+Fri Nov 10 15:38:52 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* fonts/Makefile.am, flags/Makefile.am: Add flags and fonts to
+	EXTRA_DIST
+
 Fri Nov 10 12:23:52 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, backgammon.h, configure.in, render.c,
