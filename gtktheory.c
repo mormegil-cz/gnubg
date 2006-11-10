@@ -263,13 +263,13 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
     N_ ("Initial Double Point (IDP)"),
     N_ ("Redouble Point (RDP)"),
     N_ ("Cash Point (CP)"),
-    N_ ("Too good Point (TP)") };
+    N_ ("Too Good point (TG)") };
 
   const char *aszMatchPlayLabel[] = {
     N_ ("Take Point (TP)"),
     N_ ("Double point (DP)"),
     N_ ("Cash Point (CP)"),
-    N_ ("Too good Point (TP)") };
+    N_ ("Too Good point (TG)") };
 
   /* get values */
 
