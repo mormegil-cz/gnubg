@@ -23,7 +23,6 @@
 
 #if USE_PYTHON
 #include <gtk/gtk.h>
-#include <glib/gi18n.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +30,7 @@
 #include "gtkrelational.h"
 #include "relational.h"
 #include "gtkwindows.h"
+#include <glib/gi18n.h>
 
 
 enum
