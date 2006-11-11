@@ -3190,7 +3190,7 @@ extern int ImportGAM(FILE *fp, char *szFilename )
 		pchRight = pchLeft;
 		while (*pchRight != ' ' && *pchRight != '\t' && *pchRight != '\n')
 			pchRight++;
-		*pchRight = '\n';
+		*pchRight = '\0';
 		strcpy( ap[ 1 ].szName, pchLeft );
 
 		InitBoard( ms.anBoard, ms.bgv );
