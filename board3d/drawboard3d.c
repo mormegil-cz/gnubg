@@ -364,7 +364,7 @@ void renderDice(renderdata* prd)
 	float latitude;
 	float new_radius;
 	float radius;
-	float angle, step;
+	float angle, step = 0;
 	float size = getDiceSize(prd);
 
 	int corner_steps = (prd->curveAccuracy / 4) + 1;
@@ -397,8 +397,8 @@ void renderDice(renderdata* prd)
 		new_radius = Dist2d(radius, latitude);
 
 		ns = (prd->curveAccuracy / 4) - i;
-
-		step = ((float)PI / 2 - lat_angle) / (ns);
+		if (ns > 0)
+			step = ((float)PI / 2 - lat_angle) / (ns);
 		angle = 0;
 
 		for (j = 0; j <= ns; j++)

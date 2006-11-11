@@ -1507,7 +1507,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 	float latitude;
 	float new_radius;
 	float angle;
-	float step;
+	float step = 0;
 	int corner_steps = (accuracy / 4) + 1;
 	*boardPoints = Alloc3d(corner_steps, corner_steps, 3);
 
@@ -1522,7 +1522,8 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 
 		angle = 0;
 		ns = (accuracy / 4) - i;
-		step = (2 * (float)PI) / (ns * 4);
+		if (ns > 0)
+			step = (2 * (float)PI) / (ns * 4);
 
 		for (j = 0; j <= ns; j++)
 		{
