@@ -149,7 +149,7 @@ read_board_designs ( void ) {
 
   plSystem = ParseBoardDesigns ( "boards.xml", FALSE );
 
-  sz = g_strdup_printf ( "%s/.gnubg/boards.xml", szHomeDirectory );
+  sz = g_build_filename(szHomeDirectory, ".gnubg/boards.xml", NULL);
   plUser = ParseBoardDesigns ( sz, TRUE );
   g_free ( sz );
 
@@ -1990,7 +1990,7 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
   FILE *pf;
   GList **pplBoardDesigns = (GList **) data;
 
-  szFile = g_strdup_printf ( "%s/.gnubg/boards.xml", szHomeDirectory );
+  szFile = g_build_filename ( szHomeDirectory, ".gnubg/boards.xml", NULL);
   BackupFile ( szFile );
 
   if ( ! ( pf = fopen ( szFile, "w+" ) ) ) {
@@ -3446,14 +3446,19 @@ ParseBoardDesigns ( const char *szFile, const int fDeletable ) {
   /* create parser context */
 
   if ( ! ( pch = PathSearch ( szFile, szDataDirectory ) ) )
-    return NULL;
-  if( access( pch, R_OK ) )
-    return NULL;
+  {
+          outputerr(pch);
+          return NULL;
+  }
 
   pxpc = xmlCreateFileParserCtxt ( pch );
-  free ( pch );
   if ( ! pxpc )
-    return NULL;
+  {
+          outputerr(pch);
+          free ( pch );
+          return NULL;
+  }
+  free ( pch );
 
   pxpc->sax = &xsaxScan;
   pxpc->userData = &pc;

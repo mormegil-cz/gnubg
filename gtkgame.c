@@ -1571,9 +1571,9 @@ extern void GTKUpdateAnnotations( void ) {
 
 extern void GTKSaveSettings( void ) {
 
-    char *sz = g_alloca( strlen( szHomeDirectory ) + 15 );
-    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+    char *sz = g_build_filename(szHomeDirectory, GNUBGMENURC, NULL);
     gtk_accel_map_save( sz );
+    g_free(sz);
 }
 
 static gboolean main_delete( GtkWidget *pw ) {
@@ -2213,17 +2213,14 @@ extern int InitGTK( int *argc, char ***argv )
 {
     int anBoardTemp[ 2 ][ 25 ];
     int i;
-    char *sz = g_alloca( strlen( szHomeDirectory ) + 15 );
+    char *sz = g_build_filename(szHomeDirectory, ".gnubg.gtkrc", NULL );
 
     gtk_set_locale ();
 
-    sprintf( sz, "%s/.gnubg.gtkrc", szHomeDirectory );
-    if( !access( sz, R_OK ) )
-	gtk_rc_add_default_file( sz );
-    else if( !access( PKGDATADIR "/gnubg.gtkrc", R_OK ) )
-	gtk_rc_add_default_file( PKGDATADIR "/gnubg.gtkrc" );
-    else
-	gtk_rc_add_default_file( "gnubg.gtkrc" );
+    gtk_rc_add_default_file( PKGDATADIR "/gnubg.gtkrc" );
+    gtk_rc_add_default_file( sz );
+    gtk_rc_add_default_file( "gnubg.gtkrc" );
+    g_free(sz);
     
     if( !gtk_init_check( argc, argv ) )
 	return FALSE;
@@ -2256,8 +2253,9 @@ extern int InitGTK( int *argc, char ***argv )
 
     ptt = gtk_tooltips_new();
 
-    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+    sz = g_build_filename (szHomeDirectory, GNUBGMENURC, NULL);
     gtk_accel_map_load( sz );
+    g_free(sz);
 
 	CreateMainWindow();
 
@@ -7208,18 +7206,19 @@ static void RecordErase( GtkWidget *pw, recordwindowinfo *prwi ) {
 static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
 
     FILE *pf;
-    char *sz = g_alloca( strlen( szHomeDirectory ) + 10 );
+    char *sz = g_build_filename (szHomeDirectory, ".gnubgpr", NULL);
     
     UserCommand( "record eraseall" );
 
     /* FIXME this is a horrible hack to determine whether the records were
        really erased */
     
-    sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
-    if( ( pf = fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) ) {
 	fclose( pf );
+        g_free( sz );
 	return;
     }
+    g_free(sz);
 
     gtk_clist_clear( GTK_CLIST( prwi->pwList ) );
 }

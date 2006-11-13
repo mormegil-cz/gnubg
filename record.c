@@ -38,7 +38,9 @@
 #if USE_GTK
 #include "gtkgame.h"
 #endif
+#include <glib.h>
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 #include "record.h"
 
 static int anAvg[ NUM_AVG - 1 ] = { 20, 100, 500 };
@@ -186,20 +188,11 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 
     int n;
+    int tmpfile;
     playerrecord pr;
     FILE *pfIn;
-    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
-
-    *ppchOut = malloc( strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 8 );
-    sprintf( *ppchOut, "%s/%s%06d", szHomeDirectory, GNUBGPR, 
-#if HAVE_GETPID
-	     (int) getpid() % 1000000
-#else
-	     (int) time( NULL ) % 1000000
-#endif
-	);
-
-    if( !( *ppfOut = fopen( *ppchOut, "w" ) ) ) {
+    char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
+    if ( !( tmpfile = g_file_open_tmp("gnubgprXXXXXX", ppchOut, NULL) ) || ! (*ppfOut = fdopen( tmpfile, "w" ))) {
 	outputerr( *ppchOut );
 	free( *ppchOut );
 	return -1;
@@ -211,10 +204,11 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 	return -1;
     }
     
-    sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
-    if( !( pfIn = fopen( sz, "r" ) ) )
+    if( !( pfIn = g_fopen( sz, "r" ) ) ) {
+        g_free(sz);
 	/* could not read existing records; assume empty */
 	return 0;
+    }
 
     while( !( n = RecordReadItem( pfIn, sz, &pr ) ) )
 	if( !CompareNames( pr.szName, apr[ 0 ].szName ) )
@@ -225,6 +219,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 	    n = -1;
 	    break;
 	}
+    g_free(sz);
 
     fclose( pfIn );
     
@@ -233,7 +228,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 
 static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
 
-    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
+    char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
 
     if( RecordWriteItem( pfOut, pchOut, &apr[ 0 ] ) ||
 	RecordWriteItem( pfOut, pchOut, &apr[ 1 ] ) ) {
@@ -243,29 +238,35 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
     
     if( fclose( pfOut ) ) {
 	outputerr( pchOut );
-	free( pchOut );
+	g_free( pchOut );
+        g_free( sz );
 	return -1;
     }
     
-    sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
+    if( g_rename( pchOut, sz ) ) {
+            if ( g_unlink ( sz ) && errno != ENOENT ) {
+                    /* do not complain if file is not found */
+                    outputerr ( sz );
+                    g_free ( pchOut );
+                    g_free( sz );
+                    return -1;
+            }
+            int c;                    
+            FILE *IPFile, *OPFile;
+            IPFile = fopen(pchOut,"r");
+            OPFile = fopen(sz,"w");
+            while ((c = fgetc(IPFile)) != EOF)
+                    fputc(c, OPFile);
 
-#ifdef WIN32
-    /* experiment */
-    if ( unlink ( sz ) && errno != ENOENT ) {
-      /* do not complain if file is not found */
-      outputerr ( sz );
-      free ( pchOut );
-      return -1;
+            fclose(IPFile);
+            fclose(OPFile);
+            free( pchOut );
+            g_free( sz );
+            return -1;
     }
-#endif
+    g_free( pchOut );
+    g_free( sz );
 
-    if( rename( pchOut, sz ) ) {
-	outputerr( sz );
-	free( pchOut );
-	return -1;
-    }
-
-    free( pchOut );
     return 0;
 }
 
@@ -478,19 +479,19 @@ extern void CommandRecordErase( char *szPlayer ) {
 
 extern void CommandRecordEraseAll( char *szIgnore ) {
 
-    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
+    char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
     
     if( fConfirmSave && !GetInputYN( _("Are you sure you want to erase all "
 				       "player records?") ) )
 	return;
 
-    sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
-
-    if( unlink( sz ) && errno != ENOENT ) {
+    if( g_unlink( sz ) && errno != ENOENT ) {
 	/* do not complain if file is not found */
 	outputerr( sz );
+        g_free(sz);
 	return;
     }
+    g_free(sz);
 
     outputl( _("All player records erased.") );
 }
@@ -500,14 +501,14 @@ extern void CommandRecordShow( char *szPlayer ) {
     FILE *pfIn;
     int f = FALSE;
     playerrecord pr;
-    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
+    char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
     
-    sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
-    if( !( pfIn = fopen( sz, "r" ) ) ) {
+    if( !( pfIn = g_fopen( sz, "r" ) ) ) {
 	if( errno == ENOENT )
 	    outputl( _("No player records found.") );
 	else
 	    outputerr( sz );
+        g_free(sz);
 	return;
     }
 
@@ -550,6 +551,7 @@ extern void CommandRecordShow( char *szPlayer ) {
     }
     
     fclose( pfIn );
+    g_free(sz);
 }
 
 extern playerrecord *
@@ -557,10 +559,9 @@ GetPlayerRecord( char *szPlayer ) {
 
     FILE *pfIn;
     static playerrecord pr;
-    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + strlen ( GNUBGPR ) + 2)
+    char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
     
-    sprintf( sz, "%s/%s", szHomeDirectory, GNUBGPR );
-    if( !( pfIn = fopen( sz, "r" ) ) ) 
+    if( !( pfIn = g_fopen( sz, "r" ) ) ) 
       return NULL;
 
     while( !RecordReadItem( pfIn, sz, &pr ) )
@@ -571,6 +572,7 @@ GetPlayerRecord( char *szPlayer ) {
       }
     
     fclose( pfIn );
+    g_free(sz);
 
     return NULL;
 }

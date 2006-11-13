@@ -82,6 +82,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "export.h"
 #include "import.h"
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 #include <locale.h>
 #include "matchequity.h"
 #include "matchid.h"
@@ -4213,12 +4214,10 @@ extern void PromptForExit( void ) {
 
 #if HAVE_LIBREADLINE
         {
-          char temp[ BIG_PATH ];
-          strcpy( temp, szHomeDirectory );
-          strcat( temp, DIR_SEPARATOR_S );
-          strcat( temp, GNUBG_HISTORY_FILE );
+          char *temp = g_build_filename(szHomeDirectory, GNUBG_HISTORY_FILE, NULL );
           using_history ();
           write_history( temp );
+          g_free(temp);
         }
 #endif /* HAVE_READLINE */
 
@@ -4942,7 +4941,6 @@ extern void CommandImportSnowieTxt( char *sz ) {
 extern void CommandImportGAM(char *sz)
 {
     FILE *pf;
-    int rc;
 
     sz = NextToken( &sz );
 
@@ -5052,24 +5050,25 @@ extern void CommandCopy (char *sz)
 
 static void LoadRCFiles( void ) {
 
-    VARIABLE_ARRAY(char, sz, strlen( szHomeDirectory ) + 14)
+    char *sz = g_build_filename(szHomeDirectory, ".gnubgautorc", NULL);
     FILE *pf;
 
     outputoff();
     
-    sprintf( sz, "%s/.gnubgautorc", szHomeDirectory );
 
-    if( ( pf = fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) ) {
 	LoadCommands( pf, sz );
 	fclose( pf );
     }
+    g_free(sz);
     
-    sprintf( sz, "%s/.gnubgrc", szHomeDirectory );
+    sz = g_build_filename(szHomeDirectory, ".gnubgrc", NULL);
 
-    if( ( pf = fopen( sz, "r" ) ) ) {
+    if( ( pf = g_fopen( sz, "r" ) ) ) {
 	LoadCommands( pf, sz );
 	fclose( pf );
     }
+    g_free(sz);
 
     outputon();
 }
@@ -5413,23 +5412,23 @@ extern void CommandSaveSettings( char *szParam ) {
     
     if ( !szParam || ! *szParam ) {
       /* no filename parameter given -- save to default location */
-      szFile = malloc ( strlen ( szHomeDirectory ) + 14 );
-      sprintf( szFile, "%s/.gnubgautorc", szHomeDirectory ); 
+      szFile = g_build_filename(szHomeDirectory, ".gnubgautorc", NULL);
     }
     else 
-      szFile = strdup ( szParam );
+      szFile = g_strdup ( szParam );
       
 
     if( ! strcmp( szFile, "-" ) )
       pf = stdout;
     else 
-      pf = fopen( szFile, "w" );
+      pf = g_fopen( szFile, "w" );
 
     if ( ! pf ) {
-      free ( szFile );
+      g_free ( szFile );
       outputerr( szFile );
       return;
     }
+    g_free(szFile);
 
     errno = 0;
 
@@ -6778,56 +6777,23 @@ extern void ProgressEnd( void ) {
 static int
 CreateGnubgDirectory ( void ) {
 
-  char *sz;
+  char *sz = g_build_filename(szHomeDirectory, ".gnubg", NULL);
 
-  if ( ! ( sz = (char *) malloc ( strlen ( szHomeDirectory ) + 8 ) ) ) {
-    outputerr ( "CreateGnubgDirectory" );
-    return -1;
-  }
-
-  sprintf ( sz, "%s/.gnubg", szHomeDirectory );
-
-  if ( access ( sz, F_OK ) ) {
-
-    /* create the directory */
-
-    if ( mkdir ( sz
-#ifndef WIN32
-                 , S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH 
-#endif
-                 ) < 0 ) {
+  if ( !g_file_test(sz, G_FILE_TEST_IS_DIR) ) {
+    if ( g_mkdir ( sz, 0700)  < 0 ) {
       outputerr ( sz );
-      free ( sz );
+      g_free ( sz );
       return -1;
     }
     
   }
 
-  free ( sz );
+  g_free ( sz );
 
   return 0;
 
 
 }
-
-
-static void
-MoveGnubgpr ( void ) {
-
-    VARIABLE_ARRAY(char, szOld, strlen( szHomeDirectory ) + 10)
-    VARIABLE_ARRAY(char, szNew, strlen (szHomeDirectory ) + 2 + strlen ( GNUBGPR ))
-
-  sprintf ( szOld, "%s/.gnubgpr", szHomeDirectory );
-  sprintf ( szNew, "%s/%s", szHomeDirectory, GNUBGPR );
-
-  if ( ! access ( szOld, R_OK ) )
-    /* old file exists */
-    if ( rename ( szOld, szNew ) ) 
-      outputerr ( szOld );
-
-}
-
-
 
 extern RETSIGTYPE HandleInterrupt( int idSignal ) {
 
@@ -7036,8 +7002,6 @@ main (int argc, char *argv[])
 
   /* data directory: initialise to the path where gnubg is installed */
   szDataDirectory = getInstallDir ();
-  if (!strcmp (szHomeDirectory, ".") && szDataDirectory)
-    szHomeDirectory = szDataDirectory;
 
 #endif /* WIN32 */
 #if defined(_MSC_VER) && HAVE_LIBXML2
@@ -7070,12 +7034,9 @@ main (int argc, char *argv[])
 
   if (!lang)
     {
-#define AUTORC "/.gnubgautorc"
+      szFile = g_build_filename(szHomeDirectory, ".gnubgautorc", NULL);
 
-      szFile = malloc (1 + strlen (szHomeDirectory) + strlen (AUTORC));
-      sprintf (szFile, "%s%s", szHomeDirectory, AUTORC);
-
-      if ((pf = fopen (szFile, "r")))
+      if ((pf = g_fopen (szFile, "r")))
 	{
 
 	  for (;;)
@@ -7107,8 +7068,8 @@ main (int argc, char *argv[])
 
 	  fclose (pf);
 	}
-      free (szFile);
       outputon ();
+      g_free(szFile);
     }
   else
     SetupLanguage (lang);
@@ -7364,13 +7325,11 @@ main (int argc, char *argv[])
 #endif
             /* setup history */
             {
-              char temp[ BIG_PATH ];
+              char *temp = g_build_filename( szHomeDirectory, GNUBG_HISTORY_FILE, NULL );
               char *pch;
               int i;
-              strcpy( temp, szHomeDirectory );
-              strcat( temp, DIR_SEPARATOR_S );
-              strcat( temp, GNUBG_HISTORY_FILE );
               read_history( temp );
+              g_free(temp);
               using_history();
               if ( ( pch = getenv( "HISTSIZE" ) ) &&
                    ( ( i = atoi( pch ) ) > 0 ) )
@@ -7402,12 +7361,6 @@ main (int argc, char *argv[])
 	exit( EXIT_FAILURE );
     }
 
-    /* move .gnubgpr into gnubg directory */
-    /*  FIXME: this code can be removed when all users have had their
-        .gnubgpr move */
-
-    MoveGnubgpr();
-    
     /* load rc files */
 
 #if USE_GTK

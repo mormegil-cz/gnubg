@@ -137,21 +137,12 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
 makebearoff_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-<<<<<<< Makefile.am
-makebearoff_DEPENDENCIES = $(COMMON_DEPS)
-
-=======
->>>>>>> 1.155.2.4
 
 makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
 makebearoff1_LDADD = @GTK_LIBS@ 
 
 makeweights_SOURCES = makeweights.c
 makeweights_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-<<<<<<< Makefile.am
-makeweights_DEPENDENCIES = $(COMMON_DEPS)
-=======
->>>>>>> 1.155.2.4
 
 makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
@@ -160,10 +151,6 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         drawboard.c drawboard.h format.c format.h mec.h mec.c \
 	$(BR1_SOURCES)
 makehyper_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-<<<<<<< Makefile.am
-makehyper_DEPENDENCIES = $(COMMON_DEPS)
-=======
->>>>>>> 1.155.2.4
 
 bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
@@ -171,11 +158,6 @@ bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
 bearoffdump_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-<<<<<<< Makefile.am
-bearoffdump_DEPENDENCIES = $(COMMON_DEPS)
-
-=======
->>>>>>> 1.155.2.4
 
 erftest_SOURCES = erftest.c
 
