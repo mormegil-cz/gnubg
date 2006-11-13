@@ -4,8 +4,8 @@
 ##
 
 
-noinst_LIBRARIES = libevent.a
-libevent_a_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
+noinst_LTLIBRARIES = libevent.la
+libevent_la_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
 	neuralnet.c mt19937ar.c isaac.c md5.c neuralnetsse.c sse.h mm_malloc.h
 
 #neuralnetsse_o_CFLAGS = $(SSE_CFLAGS)
@@ -19,8 +19,10 @@ noinst_HEADERS = buffer.h cache.h dynarray.h event.h fifo.h hash.h heap.h \
 noinst_TEXINFOS = event.texi
 
 check_PROGRAMS = hashtest md5test
-hashtest_SOURCES = hashtest.c hash.c
+hashtest_SOURCES = hashtest.c
+hashtest_LDADD = libevent.la
 
-md5test_SOURCES = md5test.c md5.c md5.h
+md5test_SOURCES = md5test.c
+md5test_LDADD = libevent.la
 
 TESTS = hashtest md5test
