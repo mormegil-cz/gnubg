@@ -55,7 +55,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags fonts
+SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags fonts non-src
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
@@ -85,7 +85,7 @@ COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 progress.c progress.h format.c format.h formatgs.c \
 		 formatgs.h boarddim.h timer.c external_y.y \
 		 external_l.l openurl.c openurl.h mec.h \
-		 mec.c relational.h relational.c
+		 mec.c relational.h relational.c common.h
 
 COMMON_DEPS =  lib/libevent.a @LIBOBJS@
 
@@ -106,7 +106,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
         gtktempmap.c gtktempmap.h \
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 	gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
-	gtkmovelist.c gtkmovelistctrl.c gtkwindows.c gtkrelational.c \
+	gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h\
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) $(PNG_LIBS) \
         $(BOARD3D_LIBS) @THREAD_LIBS@ @CAIRO_LIBS@
@@ -175,10 +175,13 @@ distcheck-hook:
 	chmod -R a+w $(distdir)
 	-cp $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = config.rpath  userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 \
+EXTRA_DIST = config.rpath  userrng.c copying.awk gnubgtest gnubg.6 \
 	gnubg.gtkrc credits.sh \
-	ABOUT-NLS boards.xml external_l.l external_y.y gnubg.game.sql \
+	external_l.c external_y.c external_y.h sgfp.c sgfp.h sgfl.c \
+	external_l.l external_y.y sgf.l sgf.y \
+	ABOUT-NLS boards.xml gnubg.game.sql autogen.sh gnubg.weights\
 	$(BOARD3D_TEXTURE_FILES)
+
 
 DISTCLEANFILES=gnubg.wd
 

@@ -6,15 +6,15 @@
 
 noinst_LIBRARIES = libevent.a
 libevent_a_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
-	neuralnet.c mt19937ar.c isaac.c md5.c neuralnetsse.c
+	neuralnet.c mt19937ar.c isaac.c md5.c neuralnetsse.c sse.h mm_malloc.h
 
 #neuralnetsse_o_CFLAGS = $(SSE_CFLAGS)
-neuralnetsse.o: neuralnetsse.c
+neuralnetsse.o: neuralnetsse.c sse.h mm_malloc.h
 	if $(COMPILE) $(SSE_CFLAGS) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
 	then mv -f "$(DEPDIR)/$*.Tpo" "$(DEPDIR)/$*.Po"; else rm -f "$(DEPDIR)/$*.Tpo"; exit 1; fi
 
 noinst_HEADERS = buffer.h cache.h dynarray.h event.h fifo.h hash.h heap.h \
-	list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h ../eval.h
+	list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h ../eval.h sse.h mm_malloc.h
 
 noinst_TEXINFOS = event.texi
 

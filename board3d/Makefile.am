@@ -11,7 +11,7 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
 noinst_LIBRARIES = libboard3d.a
 libboard3d_a_SOURCES = drawboard3d.c matrix.h \
 	misc3d.c  widget3d.c gtkcolour3d.c \
-        matrix.c model.c shadow.c font3d.c graph.c
+        matrix.c model.c shadow.c font3d.c graph.c model.h fun3d.h font3d.h
 
 
 noinst_HEADERS = shadow.h inc3d.h
