@@ -4,3 +4,5 @@ Makefile
 config.status
 hashtest
 md5test
+*.lo
+*.la

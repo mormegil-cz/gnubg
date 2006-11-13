@@ -42,7 +42,7 @@ BOARD3D_TEXTURE_FILES = textures.txt
 
 if USE_BOARD3D
 BOARD3D_DIR=board3d textures
-BOARD3D_DEPS=board3d/libboard3d.a
+BOARD3D_DEPS=board3d/libboard3d.la
 BOARD3D_LIBS=-L$(srcdir)/board3d -lboard3d @GTKGLEXT_LIBS@
 BOARD3D_INCS=@GTKGLEXT_CFLAGS@
 BOARD3DDATA=$(BOARD3D_TEXTURE_FILES)
@@ -66,7 +66,7 @@ endif
 COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
               -DLOCALEDIR=\"$(localedir)\" \
               @FT2_CFLAGS@ @PYTHON_CFLAGS@ @GLIB_CFLAGS@
-COMMON_LIBS = -Llib -levent @LIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
+COMMON_LIBS = -Llib -levent @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 
 COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
@@ -87,7 +87,7 @@ COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 external_l.l openurl.c openurl.h mec.h \
 		 mec.c relational.h relational.c common.h
 
-COMMON_DEPS =  lib/libevent.a @LIBOBJS@
+COMMON_DEPS =  lib/libevent.la @LTLIBOBJS@
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
 
@@ -138,17 +138,12 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
 makebearoff_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-makebearoff_DEPENDENCIES = lib/libevent.a
-
 
 makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
 makebearoff1_LDADD = @GTK_LIBS@ 
-makebearoff1_DEPENDENCIES = 
-
 
 makeweights_SOURCES = makeweights.c
 makeweights_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-makeweights_DEPENDENCIES = lib/libevent.a
 
 makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
@@ -156,9 +151,7 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
         drawboard.c drawboard.h format.c format.h mec.h mec.c \
 	$(BR1_SOURCES)
-
 makehyper_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-makehyper_DEPENDENCIES = lib/libevent.a
 
 bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
@@ -166,8 +159,6 @@ bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
 bearoffdump_LDADD = $(COMMON_LIBS) @GTK_LIBS@
-bearoffdump_DEPENDENCIES = lib/libevent.a
-
 
 erftest_SOURCES = erftest.c
 

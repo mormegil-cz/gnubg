@@ -1,3 +1,8 @@
+Mon Nov 13 18:50:22 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, board3d/.cvsignore, board3d/Makefile.am,
+	lib/.cvsignore, lib/Makefile.am: Use libtool static libs.
+
 Mon Nov 13 12:16:54 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, board3d/Makefile.am, lib/Makefile.am,
