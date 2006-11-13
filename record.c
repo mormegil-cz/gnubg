@@ -253,8 +253,8 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
             }
             int c;                    
             FILE *IPFile, *OPFile;
-            IPFile = fopen(pchOut,"r");
-            OPFile = fopen(sz,"w");
+            IPFile = g_fopen(pchOut,"r");
+            OPFile = g_fopen(sz,"w");
             while ((c = fgetc(IPFile)) != EOF)
                     fputc(c, OPFile);
 
