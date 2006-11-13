@@ -5428,7 +5428,6 @@ extern void CommandSaveSettings( char *szParam ) {
       outputerr( szFile );
       return;
     }
-    g_free(szFile);
 
     errno = 0;
 
@@ -5813,7 +5812,7 @@ extern void CommandSaveSettings( char *szParam ) {
       outputf( _("Settings saved to %s.\n"),
                ( ! strcmp ( szFile, "-" ) ) ? _("standard output stream") :
                szFile );
-    free ( szFile );
+    g_free ( szFile );
 
 #if USE_GTK
     if( fX )
