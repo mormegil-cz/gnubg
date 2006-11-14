@@ -5724,7 +5724,7 @@ extern void GTKShowScoreSheet( void )
 	gtk_clist_select_row(GTK_CLIST(pwList), numRows - 1, 1);
 
 	gtk_signal_connect(GTK_OBJECT(pwList), "realize",
-			GTK_SIGNAL_FUNC(MoveListIntoView), GINT_TO_POINTER(numRows - 1) );
+			GTK_SIGNAL_FUNC(MoveListIntoView), &numRows );
 
 	gtk_widget_show_all(pwDialog);
 	gtk_main();

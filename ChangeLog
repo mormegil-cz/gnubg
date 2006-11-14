@@ -1,3 +1,8 @@
+Tue Nov 14 21:17:55 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c = GTKShowScoreSheet callback to MoveListIntoView 
+	  2nd parameter is pointer to int, not int
+
 Mon Nov 13 22:32:37 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in,g gnubg.c , gtkbearoff.c , gtkgame.c ,
