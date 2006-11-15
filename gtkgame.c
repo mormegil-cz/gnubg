@@ -8048,11 +8048,12 @@ static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
 	GtkWidget* pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
 
 	fFullScreen = GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
-	bd->rd->fShowGameInfo = !fFullScreen;
 
 	if (fFullScreen)
 	{
 		GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
+
+		bd->rd->fShowGameInfo = FALSE;
 
 		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP) && GTK_WIDGET_IS_SENSITIVE(pmiRP))
 			changedRP = TRUE;
@@ -8093,6 +8094,7 @@ static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
 	}
 	else
 	{
+		bd->rd->fShowGameInfo = TRUE;
 		gtk_widget_show(pwMenuBar);
 		gtk_widget_show(pwToolbar);
 		gtk_widget_show(pwHandle);
