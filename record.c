@@ -244,6 +244,9 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
     }
     
     if( g_rename( pchOut, sz ) ) {
+            int c;                    
+            FILE *IPFile, *OPFile;
+
             if ( g_unlink ( sz ) && errno != ENOENT ) {
                     /* do not complain if file is not found */
                     outputerr ( sz );
@@ -251,8 +254,7 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
                     g_free( sz );
                     return -1;
             }
-            int c;                    
-            FILE *IPFile, *OPFile;
+
             IPFile = g_fopen(pchOut,"r");
             OPFile = g_fopen(sz,"w");
             while ((c = fgetc(IPFile)) != EOF)
