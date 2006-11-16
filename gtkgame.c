@@ -1594,7 +1594,7 @@ static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
 }
 
 GtkWidget *hpaned, *pwGameBox, *pwPanelGameBox, *pwEventBox;
-int panelSize = 410;
+int panelSize = 325;
 
 extern int GetPanelSize()
 {
