@@ -6811,6 +6811,7 @@ move_rc_files (void)
 	  }
 	file = g_dir_read_name (dir);
       }
+    g_dir_close(gnubgdir);
   }
 #endif
 
