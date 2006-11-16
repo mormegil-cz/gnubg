@@ -6792,29 +6792,25 @@ move_rc_files (void)
   g_free (oldfile);
   g_free (newfile);
 
-#if WIN32
+#if 0
   {
     GDir *dir;
     const char *file;
     char *gnubgdir = g_build_filename (olddir, ".gnubg", NULL);
-    g_free (newfile);
     if ((dir = g_dir_open (gnubgdir, 0, NULL)))
       {
 	file = g_dir_read_name (dir);
 	while (file != NULL)
 	  {
-	    newfile =
-	      g_build_filename (szHomeDirectory,
-				g_path_get_basename (file), NULL);
+	    newfile = g_build_filename (szHomeDirectory, file, NULL);
 	    g_rename (file, newfile);
 	    g_free (newfile);
+	    file = g_dir_read_name (dir);
 	  }
-	file = g_dir_read_name (dir);
+	g_dir_close (dir);
       }
-    g_dir_close(gnubgdir);
   }
 #endif
-
 }
 
 /*
