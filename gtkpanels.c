@@ -98,7 +98,7 @@ windowobject woPanel[NUM_WINDOWS] =
 	/* analysis */
 	{
 		"analysis",
-		FALSE, TRUE, TRUE, TRUE,
+		TRUE, TRUE, TRUE, TRUE,
 		ShowAnalysis, DeleteAnalysis,
 		0,
 		{ 0, 400, 20, 20 }

@@ -390,8 +390,8 @@ extern void CommandSetAnalysisLimit( char *sz ) {
     
     int n;
     
-    if( ( n = ParseNumber( &sz ) ) <= 0 ) {
-	cAnalysisMoves = -1;
+    if( ( n = ParseNumber( &sz ) ) <= 1 ) {
+	cAnalysisMoves = 1;
 	outputl( _("Every legal move will be analysed.") );
     } else if( n >= 2 ) {
 	cAnalysisMoves = n;

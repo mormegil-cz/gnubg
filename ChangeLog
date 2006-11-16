@@ -1,3 +1,11 @@
+Wed Nov 15 16:53:19 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, set.c, show.c: in fresh installs: g11.xml, more sensible
+	rollout settings, infinite number of moves analysed.
+	* gtkboard.c, gtkgame.c, gtkpanels.c: docked panels wider by default.
+	gnubg starts maximized(make this an option?). Attempt to fix ugly
+	resizes in player/score frames.
+
 Thu Nov 16 15:27:32 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkgame.c, record.c, record.h, gtkprefs.c: Move all

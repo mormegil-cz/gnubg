@@ -193,7 +193,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fCubeUse = TRUE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
     nBeavers = 3, fOutputRawboard = FALSE, 
-    cAnalysisMoves = 20, fAnalyseCube = TRUE,
+    cAnalysisMoves = 1, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
     nDefaultLength = 7, nToolbarStyle = 2, fStyledGamelist = TRUE, fFullScreen = FALSE;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
@@ -281,13 +281,13 @@ evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
 evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
 
+/* this is the "normal" movefilter*/
 #define MOVEFILTER \
-{ \
- { { 8, 0, 0.0f }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
- { { 2, 3, 0.10f }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
- { { 16, 0, 0.0f }, { 4, 0, 0 }, { 0, 0, 0.0f }, { 0, 0, 0 } }, \
- { { 8, 0, 0.0f }, { 0, 0, 0 }, { 2, 3, 0.1f }, { 0, 0, 0.0f } } , \
-}
+  { { { 0,  8, 0.16f }, {  0, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
+    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 0, 0    }, {  0, 0, 0 } } , \
+    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, {  0, 0, 0 } }, \
+    { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } } , \
+  }
 
 #if defined (REDUCTION_CODE)
 void *rngctxRollout = NULL;
@@ -295,28 +295,28 @@ rolloutcontext rcRollout =
 { 
   {
 	/* player 0/1 cube decision */
-        { FALSE, 0, 0, TRUE, 0.0 },
-	{ FALSE, 0, 0, TRUE, 0.0 }
+        { TRUE, 0, 0, TRUE, 0.0 },
+	{ TRUE, 0, 0, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 chequerplay */
-	{ FALSE, 0, 0, TRUE, 0.0 },
-	{ FALSE, 0, 0, TRUE, 0.0 }
+	{ TRUE, 0, 0, TRUE, 0.0 },
+	{ TRUE, 0, 0, TRUE, 0.0 }
   }, 
 
   {
 	/* player 0/1 late cube decision */
-	{ FALSE, 0, 0, TRUE, 0.0 },
-	{ FALSE, 0, 0, TRUE, 0.0 }
+	{ TRUE, 0, 0, TRUE, 0.0 },
+	{ TRUE, 0, 0, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 late chequerplay */
-	{ FALSE, 0, 0, TRUE, 0.0 },
-	{ FALSE, 0, 0, TRUE, 0.0 } 
+	{ TRUE, 0, 0, TRUE, 0.0 },
+	{ TRUE, 0, 0, TRUE, 0.0 } 
   }, 
   /* truncation point cube and chequerplay */
-  { FALSE, 0, 0, TRUE, 0.0 },
-  { FALSE, 0, 0, TRUE, 0.0 },
+  { TRUE, 0, 0, TRUE, 0.0 },
+  { TRUE, 0, 0, TRUE, 0.0 },
 
   /* move filters */
   { MOVEFILTER, MOVEFILTER },
@@ -329,7 +329,7 @@ rolloutcontext rcRollout =
   TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   FALSE, /* late evaluations */
-  TRUE,  /* Truncation enabled */
+  FALSE,  /* Truncation disabled */
   FALSE,  /* no stop on STD */
   FALSE,  /* no stop on JSD */
   FALSE,  /* no move stop on JSD */
@@ -405,41 +405,41 @@ rolloutcontext rcRollout =
 { 
   {
 	/* player 0/1 cube decision */
-        { FALSE, 0, TRUE, TRUE, 0.0 },
-	{ FALSE, 0, TRUE, TRUE, 0.0 }
+        { TRUE, 0, TRUE, TRUE, 0.0 },
+	{ TRUE, 0, TRUE, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 chequerplay */
-	{ FALSE, 0, TRUE, TRUE, 0.0 },
-	{ FALSE, 0, TRUE, TRUE, 0.0 }
+	{ TRUE, 0, TRUE, TRUE, 0.0 },
+	{ TRUE, 0, TRUE, TRUE, 0.0 }
   }, 
 
   {
 	/* player 0/1 late cube decision */
-	{ FALSE, 0, TRUE, TRUE, 0.0 },
-	{ FALSE, 0, TRUE, TRUE, 0.0 }
+	{ TRUE, 0, TRUE, TRUE, 0.0 },
+	{ TRUE, 0, TRUE, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 late chequerplay */
-	{ FALSE, 0, TRUE, TRUE, 0.0 },
-	{ FALSE, 0, TRUE, TRUE, 0.0 } 
+	{ TRUE, 0, TRUE, TRUE, 0.0 },
+	{ TRUE, 0, TRUE, TRUE, 0.0 } 
   }, 
   /* truncation point cube and chequerplay */
-  { FALSE, 0, TRUE, TRUE, 0.0 },
-  { FALSE, 0, TRUE, TRUE, 0.0 },
+  { TRUE, 0, TRUE, TRUE, 0.0 },
+  { TRUE, 0, TRUE, TRUE, 0.0 },
 
   /* move filters */
   { MOVEFILTER, MOVEFILTER },
   { MOVEFILTER, MOVEFILTER },
 
-  FALSE, /* cubeful */
+  TRUE, /* cubeful */
   TRUE, /* variance reduction */
   FALSE, /* initial position */
   TRUE, /* rotate */
   TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   FALSE, /* late evaluations */
-  TRUE,  /* Truncation enabled */
+  FALSE,  /* Truncation enabled */
   FALSE,  /* no stop on STD */
   FALSE,  /* no stop on JSD */
   FALSE,  /* no move stop on JSD */
@@ -7274,7 +7274,7 @@ main (int argc, char *argv[])
                  _("Initialising"), _("match equity table"), 500 );
 #endif    
 
-    InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
+    InitMatchEquity ( "met/g11.xml", szDataDirectory );
     
 #if USE_GTK
     PushSplash ( pwSplash, 
