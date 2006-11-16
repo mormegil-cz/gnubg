@@ -263,6 +263,7 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
             fclose(IPFile);
             fclose(OPFile);
             free( pchOut );
+            g_unlink(pchOut);
             g_free( sz );
             return -1;
     }

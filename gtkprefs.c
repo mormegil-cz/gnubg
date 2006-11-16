@@ -151,7 +151,7 @@ read_board_designs ( void ) {
 
   plSystem = ParseBoardDesigns ( "boards.xml", FALSE );
 
-  sz = g_build_filename(szHomeDirectory, ".gnubg", "boards.xml", NULL);
+  sz = g_build_filename(szHomeDirectory, "boards.xml", NULL);
   plUser = ParseBoardDesigns ( sz, TRUE );
   g_free ( sz );
 
@@ -1992,7 +1992,7 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
   FILE *pf;
   GList **pplBoardDesigns = (GList **) data;
 
-  szFile = g_build_filename ( szHomeDirectory, ".gnubg/boards.xml", NULL);
+  szFile = g_build_filename ( szHomeDirectory, "boards.xml", NULL);
   BackupFile ( szFile );
 
   if ( ! ( pf = g_fopen ( szFile, "w+" ) ) ) {

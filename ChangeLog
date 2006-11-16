@@ -1,3 +1,8 @@
+Thu Nov 16 15:27:32 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkgame.c, record.c, record.h, gtkprefs.c: Move all
+	rc files to g_get_home_dir()/.gnubg (both windows and unix).
+
 Tue Nov 14 21:17:55 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c = GTKShowScoreSheet callback to MoveListIntoView 

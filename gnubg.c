@@ -4214,7 +4214,7 @@ extern void PromptForExit( void ) {
 
 #if HAVE_LIBREADLINE
         {
-          char *temp = g_build_filename(szHomeDirectory, GNUBG_HISTORY_FILE, NULL );
+          char *temp = g_build_filename(szHomeDirectory, "history", NULL );
           using_history ();
           write_history( temp );
           g_free(temp);
@@ -5050,7 +5050,7 @@ extern void CommandCopy (char *sz)
 
 static void LoadRCFiles( void ) {
 
-    char *sz = g_build_filename(szHomeDirectory, ".gnubgautorc", NULL);
+    char *sz = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
     FILE *pf;
 
     outputoff();
@@ -5062,7 +5062,7 @@ static void LoadRCFiles( void ) {
     }
     g_free(sz);
     
-    sz = g_build_filename(szHomeDirectory, ".gnubgrc", NULL);
+    sz = g_build_filename(szHomeDirectory, "gnubgrc", NULL);
 
     if( ( pf = g_fopen( sz, "r" ) ) ) {
 	LoadCommands( pf, sz );
@@ -5412,7 +5412,7 @@ extern void CommandSaveSettings( char *szParam ) {
     
     if ( !szParam || ! *szParam ) {
       /* no filename parameter given -- save to default location */
-      szFile = g_build_filename(szHomeDirectory, ".gnubgautorc", NULL);
+      szFile = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
     }
     else 
       szFile = g_strdup ( szParam );
@@ -6768,31 +6768,79 @@ extern void ProgressEnd( void ) {
 
 }
 
+static void
+move_rc_files (void)
+{
+  /* Move files to the new location. Remove this part when all users have had
+   * their files moved.*/
+  char *olddir, *oldfile, *newfile;
+#if WIN32
+  olddir = g_strdup (szDataDirectory);
+#else
+  olddir = g_build_filename (szHomeDirectory, "..", NULL);
+#endif
+
+  newfile = g_build_filename (szHomeDirectory, "gnubgautorc", NULL);
+  oldfile = g_build_filename (olddir, ".gnubgautorc", NULL);
+  g_rename (oldfile, newfile);
+  g_free (oldfile);
+  g_free (newfile);
+
+  newfile = g_build_filename (szHomeDirectory, "gnubgrc", NULL);
+  oldfile = g_build_filename (olddir, ".gnubgrc", NULL);
+  g_rename (oldfile, newfile);
+  g_free (oldfile);
+  g_free (newfile);
+
+#if WIN32
+  {
+    GDir *dir;
+    const char *file;
+    char *gnubgdir = g_build_filename (olddir, ".gnubg", NULL);
+    g_free (newfile);
+    if ((dir = g_dir_open (gnubgdir, 0, NULL)))
+      {
+	file = g_dir_read_name (dir);
+	while (file != NULL)
+	  {
+	    newfile =
+	      g_build_filename (szHomeDirectory,
+				g_path_get_basename (file), NULL);
+	    g_rename (file, newfile);
+	    g_free (newfile);
+	  }
+	file = g_dir_read_name (dir);
+      }
+  }
+#endif
+
+}
+
 /*
  * Create $HOME/.gnubg if not existing
  *
  */
 
 static int
-CreateGnubgDirectory ( void ) {
+CreateGnubgDirectory (void)
+{
+  char *newfile;
 
-  char *sz = g_build_filename(szHomeDirectory, ".gnubg", NULL);
-
-  if ( !g_file_test(sz, G_FILE_TEST_IS_DIR) ) {
-    if ( g_mkdir ( sz, 0700)  < 0 ) {
-      outputerr ( sz );
-      g_free ( sz );
-      return -1;
+  if (!g_file_test (szHomeDirectory, G_FILE_TEST_IS_DIR))
+    {
+      if (g_mkdir (szHomeDirectory, 0700) < 0)
+	{
+	  outputerr (szHomeDirectory);
+	  return -1;
+	}
     }
-    
-  }
-
-  g_free ( sz );
-
+  newfile = g_build_filename (szHomeDirectory, "gnubgautorc", NULL);
+  if (!g_file_test (newfile, G_FILE_TEST_IS_REGULAR))
+    move_rc_files ();
+  g_free (newfile);
   return 0;
-
-
 }
+
 
 extern RETSIGTYPE HandleInterrupt( int idSignal ) {
 
@@ -6996,16 +7044,8 @@ main (int argc, char *argv[])
   GError *error = NULL;
   GOptionContext *context;
 
-  szHomeDirectory = g_build_filename(g_get_home_dir(), "gnubg", NULL);
-	/* Make sure directory exists (or create it) */
-	if (!g_file_test(szHomeDirectory, G_FILE_TEST_IS_DIR) )
-	{
-		if ( g_mkdir ( szHomeDirectory, 0700) < 0 ) 
-		{
-			outputerr ( szHomeDirectory );
-			return -1;
-		}
-	}
+  szHomeDirectory = g_build_filename(g_get_home_dir(), ".gnubg", NULL);
+  /* create gnubg directory if non-existing */
 
 #if WIN32
 
@@ -7013,6 +7053,11 @@ main (int argc, char *argv[])
   szDataDirectory = getInstallDir ();
 
 #endif /* WIN32 */
+  if ( CreateGnubgDirectory () ) {
+          Shutdown();
+          exit( EXIT_FAILURE );
+  }
+
 #if defined(_MSC_VER) && HAVE_LIBXML2
   xmlMemSetup (free, malloc, realloc, strdup);
 #endif
@@ -7043,7 +7088,7 @@ main (int argc, char *argv[])
 
   if (!lang)
     {
-      szFile = g_build_filename(szHomeDirectory, ".gnubgautorc", NULL);
+      szFile = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
 
       if ((pf = g_fopen (szFile, "r")))
 	{
@@ -7334,7 +7379,7 @@ main (int argc, char *argv[])
 #endif
             /* setup history */
             {
-              char *temp = g_build_filename( szHomeDirectory, GNUBG_HISTORY_FILE, NULL );
+              char *temp = g_build_filename( szHomeDirectory, "history", NULL );
               char *pch;
               int i;
               read_history( temp );
@@ -7363,12 +7408,6 @@ main (int argc, char *argv[])
 
     fnTick = CallbackProgress;
     
-    /* create gnubg directory if non-existing */
-
-    if ( CreateGnubgDirectory () ) {
-	Shutdown();
-	exit( EXIT_FAILURE );
-    }
 
     /* load rc files */
 
