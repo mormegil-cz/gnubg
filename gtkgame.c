@@ -6048,9 +6048,10 @@ int colWidth;
 
 void MoveListIntoView(GtkWidget *pwList, int *row)
 {
-  if (gtk_clist_row_is_visible(GTK_CLIST(pwList), *row) != GTK_VISIBILITY_FULL)
+        printf("row %d\n", (*row-1));
+  if (gtk_clist_row_is_visible(GTK_CLIST(pwList), (*row-1)) != GTK_VISIBILITY_FULL)
   {
-    gtk_clist_moveto(GTK_CLIST(pwList), *row, 0, 0, 0);
+    gtk_clist_moveto(GTK_CLIST(pwList), (*row-1), 0, 0, 0);
     gtk_widget_set_usize(GTK_WIDGET(pwList), colWidth * 2 + 50, -1);
   }
 }
@@ -6175,7 +6176,7 @@ extern void GTKShowScoreSheet( void )
 	gtk_clist_select_row(GTK_CLIST(pwList), numRows - 1, 1);
 
 	gtk_signal_connect(GTK_OBJECT(pwList), "realize",
-			GTK_SIGNAL_FUNC(MoveListIntoView), GINT_TO_POINTER(numRows - 1) );
+			GTK_SIGNAL_FUNC(MoveListIntoView), &numRows );
 
 	gtk_widget_show_all(pwDialog);
 	gtk_main();
@@ -8543,11 +8544,12 @@ static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
 	GtkWidget* pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
 
 	fFullScreen = GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
-	bd->rd->fShowGameInfo = !fFullScreen;
 
 	if (fFullScreen)
 	{
 		GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
+
+		bd->rd->fShowGameInfo = FALSE;
 
 		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP) && GTK_WIDGET_IS_SENSITIVE(pmiRP))
 			changedRP = TRUE;
@@ -8588,6 +8590,7 @@ static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
 	}
 	else
 	{
+		bd->rd->fShowGameInfo = TRUE;
 		gtk_widget_show(pwMenuBar);
 		gtk_widget_show(pwToolbar);
 		gtk_widget_show(pwHandle);
