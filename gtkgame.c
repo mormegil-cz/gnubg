@@ -6048,7 +6048,6 @@ int colWidth;
 
 void MoveListIntoView(GtkWidget *pwList, int *row)
 {
-        printf("row %d\n", (*row-1));
   if (gtk_clist_row_is_visible(GTK_CLIST(pwList), (*row-1)) != GTK_VISIBILITY_FULL)
   {
     gtk_clist_moveto(GTK_CLIST(pwList), (*row-1), 0, 0, 0);
