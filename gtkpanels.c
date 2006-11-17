@@ -995,10 +995,9 @@ setWindowGeometry(gnubgwindow window)
                     ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
 
   if (pwo->wg.max)
-    gtk_window_maximize(GTK_WINDOW( pwo->pwWin ));
-
-
-
+    gtk_window_maximize(GTK_WINDOW(pwo->pwWin));
+  else
+    gtk_window_unmaximize(GTK_WINDOW(pwo->pwWin));
 }
 
 void ShowHidePanel(gnubgwindow panel)
