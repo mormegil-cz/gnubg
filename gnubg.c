@@ -7042,15 +7042,6 @@ main (int argc, char *argv[])
   GOptionContext *context;
 
   szHomeDirectory = g_build_filename(g_get_home_dir(), ".gnubg", NULL);
-	/* Make sure directory exists (or create it) */
-	if (!g_file_test(szHomeDirectory, G_FILE_TEST_IS_DIR) )
-	{
-		if ( g_mkdir ( szHomeDirectory, 0700) < 0 ) 
-		{
-			outputerr ( szHomeDirectory );
-			return -1;
-		}
-	}
 
 #if WIN32
 
