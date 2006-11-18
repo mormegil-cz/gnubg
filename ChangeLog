@@ -1,3 +1,7 @@
+Sat Nov 18 14:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c: Fix bug in saving/exporting custom designs
+
 Wed Nov 15 16:53:19 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, set.c, show.c: in fresh installs: g11.xml, more sensible

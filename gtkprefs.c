@@ -2100,8 +2100,9 @@ DesignAddTitle ( boarddesign *pbde ) {
 
 void WriteDesignString(boarddesign *pbde, renderdata *prd)
 {
-  char szTemp[2048];
-  gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+  char szTemp[2048], *pTemp;
+  gchar buf1[G_ASCII_DTOSTR_BUF_SIZE], buf2[G_ASCII_DTOSTR_BUF_SIZE],
+	  buf3[G_ASCII_DTOSTR_BUF_SIZE], buf4[G_ASCII_DTOSTR_BUF_SIZE];
 
   float rElevation = (float)(asinf( prd->arLight[ 2 ] ) * 180 / PI);
   float rAzimuth = ( fabs ( prd->arLight[ 2 ] - 1.0f ) < 1e-5 ) ? 0.0f : 
@@ -2111,24 +2112,105 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
   if( prd->arLight[ 1 ] < 0 )
     rAzimuth = 360 - rAzimuth;
 
-	sprintf(szTemp,
+  pTemp = szTemp;
+  pTemp += sprintf(pTemp,
             "\n"
             "         board=#%02X%02X%02X;%sf\n"
-            "         border=#%02X%02X%02X\n"
+            "         border=#%02X%02X%02X\n",
+            /* board */
+            prd->aanBoardColour[ 0 ][ 0 ], prd->aanBoardColour[ 0 ][ 1 ], 
+            prd->aanBoardColour[ 0 ][ 2 ],
+	    g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 0 ] / 128.0f ),
+            /* border */
+            prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
+            prd->aanBoardColour[ 1 ][ 2 ]);
+
+  pTemp += sprintf(pTemp,
             "         wood=%s\n"
             "         hinges=%c\n"
             "         light=%s;%s\n"
-            "         shape=%s\n"
-            "         chequers0=#%02X%02X%02X;%s;%s;%s;%s\n"
-            "         chequers1=#%02X%02X%02X;%s;%s;%s;%s\n"
-            "         dice0=#%02X%02X%02X;%s;%s;%c\n"
-            "         dice1=#%02X%02X%02X;%s;%s;%c\n"
+            "         shape=%s\n",
+            /* wood ... */
+            aszWoodName[ prd->wt ],
+            prd->fHinges ? 'y' : 'n',
+            g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.0f", rAzimuth),
+	    g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%0.0f", rElevation),
+	    g_ascii_formatd(buf3, G_ASCII_DTOSTR_BUF_SIZE, "%0.1f", 1.0 - prd->rRound));
+
+  pTemp += sprintf(pTemp,
+            "         chequers0=#%02X%02X%02X;%s;%s;%s;%s\n",
+			/* chequers0 */
+			(int) ( prd->aarColour[ 0 ][ 0 ] * 0xFF ),
+			(int) ( prd->aarColour[ 0 ][ 1 ] * 0xFF ), 
+			(int) ( prd->aarColour[ 0 ][ 2 ] * 0xFF ), 
+			g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aarColour[ 0 ][ 3 ]),
+			g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arRefraction[ 0 ]), 
+			g_ascii_formatd(buf3, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arCoefficient[ 0 ]),
+			g_ascii_formatd(buf4, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arExponent[ 0 ]));
+	  
+  pTemp += sprintf(pTemp,
+            "         chequers1=#%02X%02X%02X;%s;%s;%s;%s\n",
+			/* chequers1 */
+			(int) ( prd->aarColour[ 1 ][ 0 ] * 0xFF ),
+			(int) ( prd->aarColour[ 1 ][ 1 ] * 0xFF ), 
+			(int) ( prd->aarColour[ 1 ][ 2 ] * 0xFF ), 
+			g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aarColour[ 1 ][ 3 ] ),
+			g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arRefraction[ 1 ] ),  
+			g_ascii_formatd(buf3, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arCoefficient[ 1 ] ),
+			g_ascii_formatd(buf4, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arExponent[ 1 ] ));
+
+  pTemp += sprintf(pTemp,
+            "         dice0=#%02X%02X%02X;%s;%s;%c\n",
+             /* dice0 */
+             (int) ( prd->aarDiceColour[ 0 ][ 0 ] * 0xFF ),
+	     (int) ( prd->aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
+	     (int) ( prd->aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
+             g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceCoefficient[ 0 ] ),
+	     g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceExponent[ 0 ] ),
+             prd->afDieColour[ 0 ] ? 'y' : 'n');
+
+  pTemp += sprintf(pTemp,
+            "         dice1=#%02X%02X%02X;%s;%s;%c\n",
+             /* dice1 */
+	     (int) ( prd->aarDiceColour[ 1 ][ 0 ] * 0xFF ),
+	     (int) ( prd->aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
+	     (int) ( prd->aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
+             g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceCoefficient[ 1 ] ),
+	     g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceExponent[ 1 ] ),
+             prd->afDieColour[ 1 ] ? 'y' : 'n');
+
+  pTemp += sprintf(pTemp,
             "         dot0=#%02X%02X%02X\n"
             "         dot1=#%02X%02X%02X\n"
-            "         cube=#%02X%02X%02X\n"
+            "         cube=#%02X%02X%02X\n",
+             /* dot0 */
+	     (int) ( prd->aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
+	     (int) ( prd->aarDiceDotColour[ 0 ][ 1 ] * 0xFF ), 
+	     (int) ( prd->aarDiceDotColour[ 0 ][ 2 ] * 0xFF ), 
+             /* dot1 */
+	     (int) ( prd->aarDiceDotColour[ 1 ][ 0 ] * 0xFF ),
+	     (int) ( prd->aarDiceDotColour[ 1 ][ 1 ] * 0xFF ), 
+	     (int) ( prd->aarDiceDotColour[ 1 ][ 2 ] * 0xFF ), 
+             /* cube */
+	     (int) ( prd->arCubeColour[ 0 ] * 0xFF ),
+	     (int) ( prd->arCubeColour[ 1 ] * 0xFF ), 
+	     (int) ( prd->arCubeColour[ 2 ] * 0xFF ));
+
+
+  pTemp += sprintf(pTemp,
             "         points0=#%02X%02X%02X;%s\n"
-            "         points1=#%02X%02X%02X;%s\n"
+            "         points1=#%02X%02X%02X;%s\n",
+             /* points0 */
+	     prd->aanBoardColour[ 2 ][ 0 ], prd->aanBoardColour[ 2 ][ 1 ], 
+	     prd->aanBoardColour[ 2 ][ 2 ],
+	     g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 2 ] / 128.0f),
+             /* points1 */
+	     prd->aanBoardColour[ 3 ][ 0 ], prd->aanBoardColour[ 3 ][ 1 ], 
+	     prd->aanBoardColour[ 3 ][ 2 ],
+	     g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 3 ] / 128.0f ));
+
 #if USE_BOARD3D
+  pTemp += sprintf(pTemp,
             "         hinges3d=%c\n"
             "         piecetype=%d\n"
             "         piecetexturetype=%d\n"
@@ -2153,73 +2235,7 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 			"         hinge3d=%s\n"
 			"         numbers3d=%s\n"
 			"         background3d=%s\n"
-#endif
             "\n",
-            /* board */
-            prd->aanBoardColour[ 0 ][ 0 ], prd->aanBoardColour[ 0 ][ 1 ], 
-            prd->aanBoardColour[ 0 ][ 2 ],
-	    g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 0 ] / 128.0f ),
-            /* border */
-            prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
-            prd->aanBoardColour[ 1 ][ 2 ],
-            /* wood ... */
-            aszWoodName[ prd->wt ],
-            prd->fHinges ? 'y' : 'n',
-            g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.0f", rAzimuth),
-	    g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.0f", rElevation),
-	    g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.1f", 1.0 - prd->rRound),
-             /* chequers0 */
-             (int) ( prd->aarColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( prd->aarColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( prd->aarColour[ 0 ][ 2 ] * 0xFF ), 
-             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aarColour[ 0 ][ 3 ]),
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arRefraction[ 0 ]), 
-             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arCoefficient[ 0 ]),
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arExponent[ 0 ]),
-             /* chequers1 */
-	     (int) ( prd->aarColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( prd->aarColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( prd->aarColour[ 1 ][ 2 ] * 0xFF ), 
-             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aarColour[ 1 ][ 3 ] ),
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arRefraction[ 1 ] ),  
-             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arCoefficient[ 1 ] ),
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arExponent[ 1 ] ),
-             /* dice0 */
-             (int) ( prd->aarDiceColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( prd->aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( prd->aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
-             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceCoefficient[ 0 ] ),
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceExponent[ 0 ] ),
-             prd->afDieColour[ 0 ] ? 'y' : 'n',
-             /* dice1 */
-	     (int) ( prd->aarDiceColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( prd->aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( prd->aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
-             g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceCoefficient[ 1 ] ),
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->arDiceExponent[ 1 ] ),
-             prd->afDieColour[ 1 ] ? 'y' : 'n',
-             /* dot0 */
-	     (int) ( prd->aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
-	     (int) ( prd->aarDiceDotColour[ 0 ][ 1 ] * 0xFF ), 
-	     (int) ( prd->aarDiceDotColour[ 0 ][ 2 ] * 0xFF ), 
-             /* dot1 */
-	     (int) ( prd->aarDiceDotColour[ 1 ][ 0 ] * 0xFF ),
-	     (int) ( prd->aarDiceDotColour[ 1 ][ 1 ] * 0xFF ), 
-	     (int) ( prd->aarDiceDotColour[ 1 ][ 2 ] * 0xFF ), 
-             /* cube */
-	     (int) ( prd->arCubeColour[ 0 ] * 0xFF ),
-	     (int) ( prd->arCubeColour[ 1 ] * 0xFF ), 
-	     (int) ( prd->arCubeColour[ 2 ] * 0xFF ), 
-             /* points0 */
-	     prd->aanBoardColour[ 2 ][ 0 ], prd->aanBoardColour[ 2 ][ 1 ], 
-	     prd->aanBoardColour[ 2 ][ 2 ],
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 2 ] / 128.0f),
-             /* points1 */
-	     prd->aanBoardColour[ 3 ][ 0 ], prd->aanBoardColour[ 3 ][ 1 ], 
-	     prd->aanBoardColour[ 3 ][ 2 ],
-	     g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.2f", prd->aSpeckle[ 3 ] / 128.0f )
-#if USE_BOARD3D
-			, 
             prd->fHinges3d ? 'y' : 'n',
 			prd->pieceType,
 			prd->pieceTextureType,
@@ -2227,9 +2243,9 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 			prd->bgInTrays ? 'y' : 'n',
 			prd->roundedPoints ? 'y' : 'n',
 			prd->lightType == LT_POSITIONAL ? 'p' : 'd',
-			g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[0] ),
-		       	g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[1]),
-			g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[2]),
+			g_ascii_formatd(buf1, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[0]),
+		    g_ascii_formatd(buf2, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[1]),
+			g_ascii_formatd(buf3, G_ASCII_DTOSTR_BUF_SIZE, "%f", prd->lightPos[2]),
 			prd->lightLevels[0], prd->lightLevels[1], prd->lightLevels[2],
 			WriteMaterial(&prd->ChequerMat[0]),
 			WriteMaterial(&prd->ChequerMat[1]),
@@ -2245,12 +2261,11 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
 			WriteMaterial(&prd->BoxMat),
 			WriteMaterial(&prd->HingeMat),
 			WriteMaterial(&prd->PointNumberMat),
-			WriteMaterial(&prd->BackGroundMat)
+			WriteMaterial(&prd->BackGroundMat));
 #endif
-	);
-    pbde->szBoardDesign = g_malloc(strlen(szTemp) + 1);
-	strcpy(pbde->szBoardDesign, szTemp);
 
+  pbde->szBoardDesign = g_malloc(strlen(szTemp) + 1);
+  strcpy(pbde->szBoardDesign, szTemp);
 }
 
 void ShowSelectedRow()
@@ -2827,9 +2842,9 @@ static void GetPrefs ( renderdata* prd ) {
 	}
 
     for( i = 0; i < 2; i++ ) {
-	prd->arRefraction[ i ] = (float)apadj[ i ]->value;
-	prd->arCoefficient[ i ] = (float)apadjCoefficient[ i ]->value;
-	prd->arExponent[ i ] = (float)apadjExponent[ i ]->value;
+	prd->arRefraction[ i ] = (float)gtk_adjustment_get_value(apadj[ i ]);
+	prd->arCoefficient[ i ] = (float)gtk_adjustment_get_value(apadjCoefficient[ i ]);
+	prd->arExponent[ i ] = (float)gtk_adjustment_get_value(apadjExponent[ i ]);
 
         prd->arDiceCoefficient[ i ] = (float)apadjDiceCoefficient[ i ]->value;
 	prd->arDiceExponent[ i ] = (float)apadjDiceExponent[ i ]->value;
