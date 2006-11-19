@@ -3892,8 +3892,6 @@ static void board_init( Board *board ) {
     /* third row: pip count and epc */
 
     pw = gtk_hbox_new ( FALSE, 0 );
-    if (gdk_screen_width()>863)
-            gtk_widget_set_size_request(pw, 270, -1);
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
 
     /* pip count label */
