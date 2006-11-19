@@ -2063,6 +2063,7 @@ DesignAddTitle ( boarddesign *pbde ) {
                        FALSE, FALSE, 4 );
 
   pwDesignAddTitle = gtk_entry_new ();
+  gtk_entry_set_activates_default(GTK_ENTRY(pwDesignAddTitle), TRUE);
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignAddTitle, 
                        FALSE, FALSE, 4 );
 
@@ -2080,6 +2081,7 @@ DesignAddTitle ( boarddesign *pbde ) {
                        FALSE, FALSE, 4 );
 
   pwDesignAddAuthor = gtk_entry_new ();
+  gtk_entry_set_activates_default(GTK_ENTRY(pwDesignAddAuthor), TRUE);
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignAddAuthor, 
                        FALSE, FALSE, 4 );
 
@@ -2649,12 +2651,15 @@ AddDesignRow ( gpointer data, gpointer user_data ) {
 static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused ) {
 
-    if (GTK_WIDGET_IS_SENSITIVE(pwDesignAdd) &&
-    	!GetInputYN(_("Select new design and lose current changes?")))
+    if (GTK_WIDGET_IS_SENSITIVE(pwDesignAdd))
 	{
-		pbdeModified = gtk_clist_get_row_data(GTK_CLIST(pwDesignList), nRow);
-		gtk_widget_set_sensitive(GTK_WIDGET(pwDesignUpdate), pbdeModified->fDeletable);
-		return;
+		GTKSetCurrentParent(GTK_WIDGET(pw));
+    	if (!GetInputYN(_("Select new design and lose current changes?")))
+		{
+			pbdeModified = gtk_clist_get_row_data(GTK_CLIST(pwDesignList), nRow);
+			gtk_widget_set_sensitive(GTK_WIDGET(pwDesignUpdate), pbdeModified->fDeletable);
+			return;
+		}
 	}
 
     pbdeSelected = gtk_clist_get_row_data ( GTK_CLIST ( pwDesignList ),

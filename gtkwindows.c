@@ -50,10 +50,37 @@ void quitter(GtkWidget *widget, GtkWidget *parent)
 	  gtk_window_present(GTK_WINDOW(parent));
 }
 
+typedef struct _CallbackStruct
+{
+	void (*DialogFun)(GtkWidget*, void*);
+	gpointer data;
+} CallbackStruct;
+
+static void DialogResponse(GtkWidget *dialog, gint response, CallbackStruct *data)
+{
+	if (response == GTK_RESPONSE_OK || response == GTK_RESPONSE_CLOSE)
+	{
+		if (data->DialogFun)
+			data->DialogFun(dialog, data->data);
+		else
+			OK(dialog, data->data);
+	}
+	else if (response == GTK_RESPONSE_CANCEL)
+	{
+		gtk_widget_destroy(dialog);
+	}
+	else
+	{	/* Ignore response */
+	}
+	if (data)
+		free(data);
+}
+
 extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt, 
 	 GtkWidget *parent, int flags, GtkSignalFunc okFun, void *okFunData)
 {
-    GtkWidget *pwDialog, *pwOK, *pwCancel, *pwHbox, *pwButtons, *pwPixmap;
+	CallbackStruct* cbData;
+    GtkWidget *pwDialog, *pwHbox, *pwPixmap;
     GtkAccelGroup *pag;
     int fQuestion = (dt == DT_QUESTION || dt == DT_AREYOUSURE);
 
@@ -80,41 +107,30 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
     gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ), pwHbox );
 
 	if (flags & DIALOG_FLAG_CUSTOM_PICKMAP)
+	{
 		pwPixmap = image_from_xpm_d ((char**)okFunData, pwDialog);
+		okFunData = NULL;	/* Don't use pixmap below */
+	}
 	else
 	    pwPixmap = gtk_image_new_from_stock( aszStockItem[ dt ], GTK_ICON_SIZE_DIALOG );
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwPixmap, FALSE, FALSE, 0);
 
-	pwButtons = gtk_hbutton_box_new(),
-    gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ), GTK_BUTTONBOX_SPREAD );
-    gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ), pwButtons );
+	cbData = (CallbackStruct*)malloc(sizeof(CallbackStruct));
+	cbData->DialogFun = (void*)okFun;
+	cbData->data = okFunData;
+	g_signal_connect(pwDialog, "response", GTK_SIGNAL_FUNC(DialogResponse), cbData);
 
 	if ((flags & DIALOG_FLAG_NOOK) == 0)
 	{
-		if (flags & DIALOG_FLAG_MODAL && (flags & DIALOG_FLAG_CLOSEBUTTON) == 0)
-			pwOK = gtk_button_new_with_label( _("OK") );
-		else
-			pwOK = gtk_button_new_with_label( _("Close") );
-		gtk_container_add( GTK_CONTAINER( pwButtons ), pwOK );
-		gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", okFun ? okFun : GTK_SIGNAL_FUNC( OK ), okFunData );
-		GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
-		gtk_widget_grab_default( pwOK );
+		int OkButton = (flags & DIALOG_FLAG_MODAL && (flags & DIALOG_FLAG_CLOSEBUTTON) == 0);
 
-		if (!fQuestion)
-			gtk_widget_add_accelerator(pwOK, "clicked", pag, GDK_Escape, 0, 0 );
+		gtk_dialog_add_button(GTK_DIALOG( pwDialog ), OkButton ? _("OK") : _("Close"), OkButton ? GTK_RESPONSE_OK : GTK_RESPONSE_CLOSE);
+		gtk_dialog_set_default_response(GTK_DIALOG( pwDialog ), OkButton ? GTK_RESPONSE_OK : GTK_RESPONSE_CLOSE);
 	}
 
     if( fQuestion )
-	{
-		pwCancel = gtk_button_new_with_label( _("Cancel") ),
-
-		gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
-		gtk_signal_connect_object( GTK_OBJECT( pwCancel ), "clicked",
-				   GTK_SIGNAL_FUNC( gtk_widget_destroy ), GTK_OBJECT( pwDialog ) );
-
-		gtk_widget_add_accelerator(pwCancel, "clicked", pag, GDK_Escape, 0, 0 );
-    }
+		gtk_dialog_add_button(GTK_DIALOG( pwDialog ), _("Cancel"), GTK_RESPONSE_CANCEL);
 
 	if (flags & DIALOG_FLAG_MODAL)
 		gtk_window_set_modal(GTK_WINDOW(pwDialog), TRUE);
@@ -122,29 +138,35 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
     return pwDialog;
 }
 
-extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
-
+extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
+{
     GList *pl;
     GtkWidget *pwChild;
-    
-    switch( da ) {
+
+	switch( da ) {
     case DA_MAIN:
+		pl = gtk_container_children(GTK_CONTAINER(GTK_DIALOG(pw)->vbox));
+		pwChild = pl->data;
+		g_list_free( pl );
+		return pwChild;
+
     case DA_BUTTONS:
-	pl = gtk_container_children( GTK_CONTAINER(
-	    da == DA_MAIN ? GTK_DIALOG( pw )->vbox :
-	    GTK_DIALOG( pw )->action_area ) );
-	pwChild = pl->data;
-	g_list_free( pl );
-	return pwChild;
+		return GTK_DIALOG( pw )->action_area;
 
     case DA_OK:
-	pl = gtk_container_children( GTK_CONTAINER( DialogArea( pw, DA_BUTTONS ) ) );
-	pwChild = pl->data;
-	g_list_free( pl );
-	return pwChild;
+		pl = gtk_container_children( GTK_CONTAINER( GTK_DIALOG( pw )->action_area ) );
+		while (pl)
+		{
+			pwChild = pl->data;
+			if (!strcmp(gtk_button_get_label(GTK_BUTTON(pwChild)), _("OK")))
+				break;
+			pl = pl->next;
+		}
+		g_list_free( pl );
+		return pwChild;
 	
     default:
-	abort();
+		abort();
     }
 }
 
