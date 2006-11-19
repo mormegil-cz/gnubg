@@ -600,7 +600,7 @@ void drawDCNumbers(BoardData* bd, diceTest* dt)
 	char* sides[] = {"4", "16", "32", "64", "8", "2"};
 	int side;
 
-	glLineWidth(1);
+	glLineWidth(.5f);
 	glPushMatrix();
 	for (c = 0; c < 6; c++)
 	{
