@@ -3061,7 +3061,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 	InitBoardPreview(bd);
 	RollDice2d(bd);
 
-    pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL,
+    pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), pwBoard );
 
 #if USE_BOARD3D

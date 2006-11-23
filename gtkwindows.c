@@ -85,6 +85,8 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
     int fQuestion = (dt == DT_QUESTION || dt == DT_AREYOUSURE);
 
 	pwDialog = gtk_dialog_new();
+	if (flags & DIALOG_FLAG_MINMAXBUTTONS)
+		gtk_window_set_type_hint(GTK_WINDOW(pwDialog), GDK_WINDOW_TYPE_HINT_NORMAL);
 	gtk_window_set_title(GTK_WINDOW(pwDialog), szTitle);
 
 	if (parent == NULL)
@@ -127,6 +129,9 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 
 		gtk_dialog_add_button(GTK_DIALOG( pwDialog ), OkButton ? _("OK") : _("Close"), OkButton ? GTK_RESPONSE_OK : GTK_RESPONSE_CLOSE);
 		gtk_dialog_set_default_response(GTK_DIALOG( pwDialog ), OkButton ? GTK_RESPONSE_OK : GTK_RESPONSE_CLOSE);
+
+		if (!fQuestion)
+			gtk_widget_add_accelerator(DialogArea(pwDialog, DA_OK), "clicked", pag, GDK_Escape, 0, 0 );
 	}
 
     if( fQuestion )

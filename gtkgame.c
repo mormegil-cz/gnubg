@@ -5746,7 +5746,8 @@ extern void GTKShowVersion( void )
 #include "xpm/gnubg-big.xpm"
 	GtkWidget *pwDialog, *pwButtonBox, *pwButton;
 
-	pwDialog = GTKCreateDialog(_("About GNU Backgammon"), DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CUSTOM_PICKMAP, NULL, gnubg_big_xpm);
+	pwDialog = GTKCreateDialog(_("About GNU Backgammon"), DT_INFO, NULL,
+		DIALOG_FLAG_MODAL | DIALOG_FLAG_CUSTOM_PICKMAP | DIALOG_FLAG_CLOSEBUTTON, NULL, gnubg_big_xpm);
     gtk_window_set_policy(GTK_WINDOW(pwDialog), FALSE, FALSE, FALSE);
 
 	/* Buttons on right side */
