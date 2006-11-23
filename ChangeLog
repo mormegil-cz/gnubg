@@ -1,3 +1,7 @@
+Thu Nov 23 18:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkfile.c: Add warning if trying to import PartyGammon game files
+
 Sat Nov 18 14:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Fix bug in saving/exporting custom designs

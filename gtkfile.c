@@ -35,6 +35,42 @@
 #include <gtk/gtk.h>
 #include "gtkfile.h"
 #include "gtkgame.h"
+#include "gtkwindows.h"
+
+typedef struct _FileFormat FileFormat;
+struct _FileFormat {
+    char *extension;
+    char *description;
+    char *clname;
+    int canimport;
+    int canexport;
+    int exports[3];
+};
+
+/* char *extension; char *description; char *clname;
+ * gboolean canimport; gboolean canexport; gboolean exports[3]; */
+FileFormat file_format[] = {
+  {".sgf", N_("Gnu Backgammon File"), "sgf", TRUE, TRUE, {TRUE, TRUE, TRUE}}, /*must be the first element*/
+  {".eps", N_("Encapsulated Postscript"), "eps", FALSE, TRUE, {FALSE, FALSE, TRUE}},
+  {".fibs", N_("Fibs Oldmoves"), "oldmoves", FALSE, FALSE, {FALSE, FALSE, FALSE}},
+  {".sgg", N_("Gamesgrid Save Game"), "sgg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".bkg", N_("Hans Berliner's BKG Format"), "bkg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".html", N_("HTML"), "html", FALSE, TRUE, {TRUE, TRUE, TRUE}},
+  {".gam", N_("Jellyfish Game"), "gam", FALSE, TRUE, {FALSE, TRUE, FALSE}},
+  {".mat", N_("Jellyfish Match"), "mat", TRUE, TRUE, {TRUE, FALSE, FALSE}},
+  {".pos", N_("Jellyfish Position"), "pos", TRUE, TRUE, {FALSE, FALSE, TRUE}},
+  {".tex", N_("LaTeX"), "latex", FALSE, TRUE, {TRUE, TRUE, FALSE}},
+  {".pdf", N_("PDF"), "pdf", FALSE, TRUE, {TRUE, TRUE, FALSE}},
+  {".txt", N_("Plain Text"), "text", FALSE, TRUE, {TRUE, TRUE, TRUE}},
+  {".png", N_("Portable Network Graphics"), "pdf", FALSE, TRUE, {FALSE, FALSE, TRUE}},
+  {".ps", N_("PostScript"), "postscript", FALSE, TRUE, {TRUE, TRUE, FALSE}},
+  {".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE, {FALSE, FALSE, TRUE}},
+  {".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".gam", N_("GammonEmpire Game"), "gam", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".gam", N_("PartyGammon Game"), "gam", FALSE, FALSE, {FALSE, FALSE, FALSE}}	/* Can't import */
+};
+
+gint n_file_formats = G_N_ELEMENTS(file_format);
 
 static char *
 GetFilename (void)
@@ -606,6 +642,21 @@ int IsGAMFile(FileHelper *fh)
 	return FALSE;
 }
 
+int IsPARFile(FileHelper *fh)
+{
+	fhReset(fh);
+	fhSkipWS(fh);
+
+	if (fhReadStringNC(fh, "boardid="))
+	{
+		fhSkipToEOL(fh);
+		if (fhReadStringNC(fh, "creator="))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 FilePreviewData *ReadFilePreview(char *filename)
 {
 	FilePreviewData *fpd;
@@ -632,6 +683,8 @@ FilePreviewData *ReadFilePreview(char *filename)
 		fpd->format = &file_format[4];
 	else if (IsGAMFile(fh))
 		fpd->format = &file_format[16];
+	else if (IsPARFile(fh))
+		fpd->format = &file_format[17];
 
 	CloseFileHelper(fh);
 	return fpd;
@@ -709,9 +762,16 @@ extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
 
 			if (fdp && fdp->format && (fdp->format != &file_format[0]))
 			{
-				cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
-				g_free (last_import_folder);
-				last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+				if (fdp->format == &file_format[17])
+				{
+					GTKMessage(_("Native format PartyGammon files aren't supported, export your games as text files in PartyGammon"), DT_WARNING);
+				}
+				else
+				{
+					cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
+					g_free (last_import_folder);
+					last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+				}
 			}
 			else
 			{

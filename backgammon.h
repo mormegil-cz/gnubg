@@ -434,18 +434,6 @@ extern char szLang[ 32 ];
 
 extern char *szCurrentFileName, *szCurrentFolder;
 
-typedef struct _FileFormat FileFormat;
-struct _FileFormat {
-    char *extension;
-    char *description;
-    char *clname;
-    int canimport;
-    int canexport;
-    int exports[3];
-};
-extern FileFormat file_format[];
-extern gint n_file_formats;
-
 extern gchar *default_import_folder, *default_export_folder, *default_sgf_folder;
 
 extern evalcontext ecTD;
