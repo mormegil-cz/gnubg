@@ -134,7 +134,7 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 
 void board_beep( BoardData *bd )
 {
-    if( fGUIIllegal && fGUIBeep)
+    if(fGUIBeep)
 	gdk_beep();
 }
 
@@ -727,7 +727,7 @@ int update_move(BoardData *bd)
 			  GTK_STATE_NORMAL );
     gtk_label_set_text( GTK_LABEL( bd->wmove ), move );
 
-    return fIllegal ? -1 : 0;
+    return (fIllegal && !fGUIIllegal) ? -1 : 0;
 }
 
 void Confirm( BoardData *bd ) {
@@ -1345,7 +1345,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
 
 
     if( source != dest ) { 
-        if( update_move( bd ) && !fGUIIllegal ) {
+        if( update_move( bd ) ) {
 	    /* the move was illegal; undo it */
 	    bd->points[ source ] += bd->drag_colour;
 	    board_invalidate_point( bd, source );
@@ -1969,6 +1969,8 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 		   rolled, or they're editing the board. */
 		if (bd->diceShown != DICE_ON_BOARD && !editing)
 		{
+			outputl("You must roll the dice before moving pieces");
+			outputx();
 			board_beep(bd);
 			bd->drag_point = -1;
 			
