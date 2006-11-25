@@ -3282,41 +3282,48 @@ void WritePartyGame(FILE *fp, char *gameStr)
 		}
 
 		move = strchr(move, ' ') + 1;
-		move = strchr(move, ' ') + 1;
-		move = strchr(move, ' ') + 1;
-		roll = move;
-		move = strchr(move, ' ');
-		if (move)
+		if (isdigit(*move))
 		{
-			char *dest, *src;
-			*move = '\0';
-			moveStr = move + 1;
-			/* Change bar -> 25, off -> 0 */
-			src = dest = moveStr;
-			while (*src)
+			move = strchr(move, ' ') + 1;
+			move = strchr(move, ' ') + 1;
+			roll = move;
+			move = strchr(move, ' ');
+			if (move)
 			{
-				if (*src == 'b')
+				char *dest, *src;
+				*move = '\0';
+				moveStr = move + 1;
+				/* Change bar -> 25, off -> 0 */
+				src = dest = moveStr;
+				while (*src)
 				{
-					*dest++ = '2';
-					*dest++ = '5';
-					src += 3;
+					if (*src == 'b')
+					{
+						*dest++ = '2';
+						*dest++ = '5';
+						src += 3;
+					}
+					else if (*src == 'o')
+					{
+						*dest++ = '0';
+						src += 3;
+					}
+					else
+					{
+						*dest = *src;
+						dest++, src++;
+					}
 				}
-				else if (*src == 'o')
-				{
-					*dest++ = '0';
-					src += 3;
-				}
-				else
-				{
-					*dest = *src;
-					dest++, src++;
-				}
+				*dest = '\0';
 			}
-			*dest = '\0';
+			else
+				moveStr = "";
+
+			sprintf(buf, "%s: %s", roll, moveStr);
 		}
 		else
-			moveStr = "";
-		sprintf(buf, "%s: %s", roll, moveStr);
+			strcpy(buf, move);	/* Double/Take */
+
 		if (side == 0)
 			fprintf(fp, "%-28s", buf);
 		else
@@ -3337,6 +3344,7 @@ typedef struct _PartyGame
 int ConvertPartyGammonFileToMat(char *partyFile, char *matFile)
 {
 	PartyGame pg;
+	int matchLen = -1;
 	char p1[MAX_NAME_LEN], p2[MAX_NAME_LEN];
 	GList *games = NULL;
 	char buffer[1024 * 10];
@@ -3382,10 +3390,12 @@ int ConvertPartyGammonFileToMat(char *partyFile, char *matFile)
 					games = g_list_append(games, newGame);
 				}
 			}
+			if (!strcasecmp(key, "MATCHLENGTH"))
+				matchLen = atoi(value);
 		}
 	}
 	fclose(partyFP);
-	if (g_list_length(games) > 0)
+	if (g_list_length(games) > 0 || matchLen == -1)
 	{	/* Write out mat file */
 		unsigned int i;
 		int s1 = 0, s2 = 0;
@@ -3394,7 +3404,7 @@ int ConvertPartyGammonFileToMat(char *partyFile, char *matFile)
 		if (!matFP)
 			return FALSE;
 
-		fprintf(matFP, " %d point match\n", g_list_length(games));
+		fprintf(matFP, " %d point match\n", matchLen);
 		for (i = 0, pl = g_list_first(games); i < g_list_length(games); i++, pl = g_list_next(pl))
 		{
 			int pts;
