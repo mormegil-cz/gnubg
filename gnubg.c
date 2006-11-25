@@ -309,7 +309,7 @@ rolloutcontext rcRollout =
   FALSE,  /* no stop on STD */
   FALSE,  /* no stop on JSD */
   FALSE,  /* no move stop on JSD */
-  11, /* truncation */
+  10, /* truncation */
   1296, /* number of trials */
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
@@ -362,7 +362,7 @@ rolloutcontext rcRollout =
   FALSE,  /* no stop on STD */ \
   FALSE,  /* no stop on JSD */ \
   FALSE,  /* no move stop on JSD */ \
-  11, /* truncation */ \
+  10, /* truncation */ \
   36, /* number of trials */ \
   5,  /* late evals start here */ \
   RNG_MERSENNE, /* RNG */ \
@@ -419,7 +419,7 @@ rolloutcontext rcRollout =
   FALSE,  /* no stop on STD */
   FALSE,  /* no stop on JSD */
   FALSE,  /* no move stop on JSD */
-  11, /* truncation */
+  10, /* truncation */
   1296, /* number of trials */
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
@@ -472,7 +472,7 @@ rolloutcontext rcRollout =
   FALSE,  /* no stop on STD */ \
   FALSE,  /* no stop on JSD */ \
   FALSE,  /* no move stop on JSD */ \
-  11, /* truncation */ \
+  10, /* truncation */ \
   1296, /* number of trials */ \
   5,  /* late evals start here */ \
   RNG_MERSENNE, /* RNG */ \
