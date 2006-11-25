@@ -37,6 +37,8 @@
 #include "gtkgame.h"
 #include "gtkwindows.h"
 
+extern int ConvertPartyGammonFileToMat(char *partyFile, char *matFile);
+
 typedef struct _FileFormat FileFormat;
 struct _FileFormat {
     char *extension;
@@ -67,7 +69,7 @@ FileFormat file_format[] = {
   {".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE, {FALSE, FALSE, TRUE}},
   {".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
   {".gam", N_("GammonEmpire Game"), "gam", TRUE, FALSE, {FALSE, FALSE, FALSE}},
-  {".gam", N_("PartyGammon Game"), "gam", FALSE, FALSE, {FALSE, FALSE, FALSE}}	/* Can't import */
+  {".gam", N_("PartyGammon Game"), "gam", TRUE, FALSE, {FALSE, FALSE, FALSE}}
 };
 
 gint n_file_formats = G_N_ELEMENTS(file_format);
@@ -758,31 +760,49 @@ extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
 		fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
 		if (fn)
 		{
+			char *tempFile = NULL;
 			FilePreviewData *fdp = ReadFilePreview(fn);
 
-			if (fdp && fdp->format && (fdp->format != &file_format[0]))
+			if (fdp && fdp->format)
 			{
-				if (fdp->format == &file_format[17])
+				if (fdp->format == &file_format[0])
 				{
-					GTKMessage(_("Native format PartyGammon files aren't supported, export your games as text files in PartyGammon"), DT_WARNING);
+					cmd = g_strdup_printf ("load match \"%s\"", fn);
+					g_free (last_load_folder);
+					last_load_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
 				}
 				else
 				{
-					cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
-					g_free (last_import_folder);
-					last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+					if (fdp->format == &file_format[17])	/* PartyGammon file */
+					{
+						tempFile = (char *)g_malloc(strlen(fn) + strlen(".mat") + 1);
+						strcpy(tempFile, fn);
+						strcat(tempFile, ".mat");
+						if (ConvertPartyGammonFileToMat(fn, tempFile))
+						{	/* Import match file */
+							fdp->format = &file_format[7];
+							g_free(fn);
+							fn = tempFile;
+						}
+						else
+							fdp->format = NULL;	/* Conversion failed */
+					}
+					if (fdp->format)
+					{
+						cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
+						g_free (last_import_folder);
+						last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+					}
 				}
 			}
-			else
-			{
-				cmd = g_strdup_printf ("load match \"%s\"", fn);
-				g_free (last_load_folder);
-				last_load_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
-			}
+			free(fdp);
+
 			if (cmd)
 			{
 				UserCommand (cmd);
 				g_free (cmd);
+				if (tempFile)
+					unlink(tempFile);	/* Remove temporary PartyGammon mat file */
 			}
 			g_free (fn);
 		}

@@ -1,3 +1,8 @@
+Sat Nov 25 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* import.c: First try at PartyGammon import
+		(based on convert-to-mat script by gunnar bluth and achim mueller)
+
 Thu Nov 23 18:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkfile.c: Add warning if trying to import PartyGammon game files

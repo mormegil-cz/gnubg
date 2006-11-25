@@ -3262,3 +3262,156 @@ extern int ImportGAM(FILE *fp, char *szFilename )
 
 	return TRUE;
 }
+
+void WritePartyGame(FILE *fp, char *gameStr)
+{
+	char *move;
+	char *data = gameStr;
+	int moveNum = 1;
+	int side = -1;
+	while ((move = NextTokenGeneral(&data, "#")) != NULL)
+	{
+		char *roll, *moveStr, buf[100];
+		side = (move[0] == '2');
+		if ((side == 0) || (moveNum == 1 && side == 1))
+		{
+			fprintf(fp, "%3d) ", moveNum);
+			if (moveNum == 1 && side == 1)
+				fprintf(fp, "%28s", " ");
+			moveNum++;
+		}
+
+		move = strchr(move, ' ') + 1;
+		move = strchr(move, ' ') + 1;
+		move = strchr(move, ' ') + 1;
+		roll = move;
+		move = strchr(move, ' ');
+		if (move)
+		{
+			char *dest, *src;
+			*move = '\0';
+			moveStr = move + 1;
+			/* Change bar -> 25, off -> 0 */
+			src = dest = moveStr;
+			while (*src)
+			{
+				if (*src == 'b')
+				{
+					*dest++ = '2';
+					*dest++ = '5';
+					src += 3;
+				}
+				else if (*src == 'o')
+				{
+					*dest++ = '0';
+					src += 3;
+				}
+				else
+				{
+					*dest = *src;
+					dest++, src++;
+				}
+			}
+			*dest = '\0';
+		}
+		else
+			moveStr = "";
+		sprintf(buf, "%s: %s", roll, moveStr);
+		if (side == 0)
+			fprintf(fp, "%-28s", buf);
+		else
+			fprintf(fp, "%s\n", buf);
+	}
+	if (side == 0)
+		fprintf(fp, "\n");
+	else
+		fprintf(fp, "%34s", " ");
+}
+
+typedef struct _PartyGame
+{
+	int s1, s2;
+	char *gameStr;
+} PartyGame;
+
+int ConvertPartyGammonFileToMat(char *partyFile, char *matFile)
+{
+	PartyGame pg;
+	char p1[MAX_NAME_LEN], p2[MAX_NAME_LEN];
+	GList *games = NULL;
+	char buffer[1024 * 10];
+	FILE *partyFP = fopen(partyFile, "r");
+	if (!partyFP)
+		return FALSE;
+
+	while (!feof(partyFP))
+	{
+		char *value, *key;
+		fgets(buffer, sizeof(buffer), partyFP);
+		value = buffer;
+		key = NextTokenGeneral(&value, "=");
+		if (key)
+		{
+			if (!strncasecmp(key, "GAME_", strlen("GAME_")))
+			{
+				key += strlen("GAME_");
+				do
+					key++;
+				while(key[-1] != '_');
+				if (value[strlen(value) - 1] == '\n')
+					value[strlen(value) - 1] = '\0';
+
+				if (!strcasecmp(key, "PLAYER_1"))
+					strcpy(p1, value);
+				else if (!strcasecmp(key, "PLAYER_2"))
+					strcpy(p2, value);
+				else if (!strcasecmp(key, "GAMEPLAY"))
+				{
+					pg.gameStr = (char*)malloc(strlen(value) + 1);
+					strcpy(pg.gameStr, value);
+				}
+				else if (!strcasecmp(key, "SCORE1"))
+					pg.s1 = atoi(value);
+				else if (!strcasecmp(key, "SCORE2"))
+				{
+					PartyGame *newGame;
+					pg.s2 = atoi(value);
+					/* Add this game */
+					newGame = malloc(sizeof(PartyGame));
+					memcpy(newGame, &pg, sizeof(PartyGame));
+					games = g_list_append(games, newGame);
+				}
+			}
+		}
+	}
+	fclose(partyFP);
+	if (g_list_length(games) > 0)
+	{	/* Write out mat file */
+		unsigned int i;
+		int s1 = 0, s2 = 0;
+		GList *pl;
+		FILE *matFP = fopen(matFile, "w");
+		if (!matFP)
+			return FALSE;
+
+		fprintf(matFP, " %d point match\n", g_list_length(games));
+		for (i = 0, pl = g_list_first(games); i < g_list_length(games); i++, pl = g_list_next(pl))
+		{
+			int pts;
+			PartyGame *pGame = (PartyGame*)(pl->data);
+			fprintf(matFP, "\n Game %d\n", i + 1);
+			fprintf(matFP, " %s : %d %14s %s : %d\n", p1, s1, " ", p2, s2);
+			WritePartyGame(matFP, pGame->gameStr);
+			pts = pGame->s2 - s2 + pGame->s1 - s1;
+			fprintf(matFP, "Wins %d point%s\n\n", pts, (pts == 1) ? "" : "s");
+			s1 += pGame->s1;
+			s2 += pGame->s2;
+			free(pGame->gameStr);
+			free(pGame);
+		}
+		g_list_free(pl);
+		fclose(matFP);
+		return TRUE;
+	}
+	return FALSE;
+}
