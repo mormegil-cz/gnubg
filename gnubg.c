@@ -4986,8 +4986,8 @@ extern void CommandImportParty(char *sz)
     }
     else
             outputerrf("Failed to convert gam to mat\n");
-    g_free(tmpfile);
     g_unlink(tmpfile);
+    g_free(tmpfile);
 }
 
 extern void CommandCopy (char *sz)
