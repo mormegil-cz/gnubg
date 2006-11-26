@@ -162,7 +162,7 @@ char *programdir, *pc, *tmp;
 
 #if WIN32
   programdir = g_strdup(szDataDirectory);
-  if ((pc = strrchr(programdir, G_DIR_SEPARATOR))) {
+  if ((pc = strrchr(programdir, G_DIR_SEPARATOR)) != NULL) {
           *pc = '\0';
 
           tmp = g_build_filename(programdir, "GamesGrid", "SaveGame", NULL);
