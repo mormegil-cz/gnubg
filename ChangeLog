@@ -1,3 +1,9 @@
+Sun Nov 26 16:59:28 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, gtkfile.c, import.c, import.h: "import gam",
+	"import party" and "import empire", respectively imports, jellyfish .gam,
+	partygammon .gam and gammonempire .gam. 
+
 Sun Nov 26 16:24:30 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c: Default folders on win32
@@ -30,7 +36,7 @@ Thu Nov 16 15:27:32 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 Tue Nov 14 21:17:55 GMT 2006 Jim Segrave <jes@jes-2.demon.nl>
 
-	* gtkgame.c = GTKShowScoreSheet callback to MoveListIntoView 
+	* gtkgame.c : GTKShowScoreSheet callback to MoveListIntoView 
 	  2nd parameter is pointer to int, not int
 
 Mon Nov 13 22:32:37 CET 2006 Christian Anthon <anthon@kiku.dk>

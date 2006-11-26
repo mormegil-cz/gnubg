@@ -29,5 +29,6 @@ extern int ImportTMG( FILE *pf, const char *szFilename );
 extern int ImportBKG( FILE *pf, const char *szFilename );
 extern int ImportSnowieTxt( FILE *pf );
 extern int ImportGAM( FILE *pf, char *szFilename );
+extern int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP);
 
 #endif

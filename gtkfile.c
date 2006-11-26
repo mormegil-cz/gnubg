@@ -37,8 +37,6 @@
 #include "gtkgame.h"
 #include "gtkwindows.h"
 
-extern int ConvertPartyGammonFileToMat(char *partyFile, char *matFile);
-
 typedef struct _FileFormat FileFormat;
 struct _FileFormat {
     char *extension;
@@ -68,8 +66,8 @@ FileFormat file_format[] = {
   {".ps", N_("PostScript"), "postscript", FALSE, TRUE, {TRUE, TRUE, FALSE}},
   {".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE, {FALSE, FALSE, TRUE}},
   {".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE, {FALSE, FALSE, FALSE}},
-  {".gam", N_("GammonEmpire Game"), "gam", TRUE, FALSE, {FALSE, FALSE, FALSE}},
-  {".gam", N_("PartyGammon Game"), "gam", TRUE, FALSE, {FALSE, FALSE, FALSE}}
+  {".gam", N_("GammonEmpire Game"), "empire", TRUE, FALSE, {FALSE, FALSE, FALSE}},
+  {".gam", N_("PartyGammon Game"), "party", TRUE, FALSE, {FALSE, FALSE, FALSE}}
 };
 
 gint n_file_formats = G_N_ELEMENTS(file_format);
@@ -788,26 +786,9 @@ extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
 				}
 				else
 				{
-					if (fdp->format == &file_format[17])	/* PartyGammon file */
-					{
-						tempFile = (char *)g_malloc(strlen(fn) + strlen(".mat") + 1);
-						strcpy(tempFile, fn);
-						strcat(tempFile, ".mat");
-						if (ConvertPartyGammonFileToMat(fn, tempFile))
-						{	/* Import match file */
-							fdp->format = &file_format[7];
-							g_free(fn);
-							fn = tempFile;
-						}
-						else
-							fdp->format = NULL;	/* Conversion failed */
-					}
-					if (fdp->format)
-					{
 						cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
 						g_free (last_import_folder);
 						last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
-					}
 				}
 			}
 			free(fdp);
