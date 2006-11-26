@@ -127,7 +127,7 @@ GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
 		 GtkFileChooserAction action)
 {
 #if WIN32
-char *pc, *tmp;
+char *programdir, *pc, *tmp;
 #endif
   GtkWidget *fc;
   switch (action)
@@ -163,15 +163,31 @@ char *pc, *tmp;
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
 #if WIN32
-  if ((pc = getenv ("ProgramFiles")) != NULL)
-    {
-      tmp = g_strdup_printf ("%s\\TMG\\SavedGames", pc);
-      gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
-      g_free (tmp);
-      tmp = g_strdup_printf ("%s\\GamesGrid\\SaveGame\\", pc);
-      gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
-      g_free (tmp);
-    }
+  programdir = g_strdup(szDataDirectory);
+  if ((pc = strrchr(programdir, G_DIR_SEPARATOR))) {
+          *pc = '\0';
+
+          tmp = g_build_filename(programdir, "GamesGrid", "SaveGame", NULL);
+          gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+          g_free(tmp);
+
+          tmp = g_build_filename(programdir, "GammonEmpire", "savedgames", NULL);
+          gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+          g_free(tmp);
+
+          tmp = g_build_filename(programdir, "PartyGaming", "PartyGammon", "SavedGames", NULL);
+          gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+          g_free(tmp);
+
+          tmp = g_build_filename(programdir, "Play65", "savedgames", NULL);
+          gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+          g_free(tmp);
+
+          tmp = g_build_filename(programdir, "TrueMoneyGames", "SavedGames", NULL);
+          gtk_file_chooser_add_shortcut_folder (GTK_FILE_CHOOSER (fc), tmp, NULL);
+          g_free(tmp);
+  }
+  g_free(programdir);
 #endif
   return fc;
 }
@@ -704,7 +720,7 @@ update_preview_cb (GtkFileChooser *file_chooser, gpointer data)
 	if (fdp)
 	{
 		if (!fdp->format)
-			label = _("not a backgmamon file");
+			label = _("not a backgammon file");
 		else
 		{
 			label = gettext(fdp->format->description);
@@ -722,7 +738,6 @@ extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
   int i;
   GtkFileFilter *aff;
   GtkWidget *fc, *preview;
-  static gchar *last_load_folder = NULL;
   static gchar *last_import_folder = NULL;
   gchar *folder = NULL;
 
@@ -768,8 +783,8 @@ extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
 				if (fdp->format == &file_format[0])
 				{
 					cmd = g_strdup_printf ("load match \"%s\"", fn);
-					g_free (last_load_folder);
-					last_load_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+					g_free (last_import_folder);
+					last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
 				}
 				else
 				{

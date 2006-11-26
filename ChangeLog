@@ -1,3 +1,7 @@
+Sun Nov 26 16:24:30 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c: Default folders on win32
+
 Sat Nov 25 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* import.c: First try at PartyGammon import
