@@ -76,6 +76,7 @@
 #include "drawboard.h"
 #include "format.h"
 #include "boarddim.h"
+#include "sound.h"
 
 #include <glib/gi18n.h>
 
@@ -3909,146 +3910,122 @@ CommandSetSoundSystemQuickTime ( char *sz ) {
 
 }
 
-static void
-SetSound ( const gnubgsound gs, const char *szFilename ) {
-
-  SoundFlushCache( gs );
-    
-  if ( ! szFilename || ! *szFilename ) {
-
-    strcpy ( aszSound[ gs ], "" );
-    outputf ( _("No sound played for: %s\n"), 
-              gettext ( aszSoundDesc[ gs ] ) );
-
-  }
-  else {
-
-    strncpy ( aszSound[ gs ], szFilename, sizeof ( aszSound[ gs ] ) - 1 );
-    aszSound[ gs ][ sizeof ( aszSound[ gs ] ) - 1 ] = 0;
-    outputf ( _("Sound for: %s: %s\n"), 
-              gettext ( aszSoundDesc[ gs ] ),
-              aszSound[ gs ] );
-  }
-
-}
-
-
 extern void
 CommandSetSoundSoundAgree ( char *sz ) {
 
-  SetSound ( SOUND_AGREE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_AGREE, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundAnalysisFinished ( char *sz ) {
 
-  SetSound ( SOUND_ANALYSIS_FINISHED, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_ANALYSIS_FINISHED, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundBotDance ( char *sz ) {
 
-  SetSound ( SOUND_BOT_DANCE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_BOT_DANCE, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundBotWinGame ( char *sz ) {
 
-  SetSound ( SOUND_BOT_WIN_GAME, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_BOT_WIN_GAME, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundBotWinMatch ( char *sz ) {
 
-  SetSound ( SOUND_BOT_WIN_MATCH, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_BOT_WIN_MATCH, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundDouble ( char *sz ) {
 
-  SetSound ( SOUND_DOUBLE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_DOUBLE, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundDrop ( char *sz ) {
 
-  SetSound ( SOUND_DROP, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_DROP, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundExit ( char *sz ) {
 
-  SetSound ( SOUND_EXIT, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_EXIT, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundHumanDance ( char *sz ) {
 
-  SetSound ( SOUND_HUMAN_DANCE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_HUMAN_DANCE, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundHumanWinGame ( char *sz ) {
 
-  SetSound ( SOUND_HUMAN_WIN_GAME, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_HUMAN_WIN_GAME, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundHumanWinMatch ( char *sz ) {
 
-  SetSound ( SOUND_HUMAN_WIN_MATCH, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_HUMAN_WIN_MATCH, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundMove ( char *sz ) {
 
-  SetSound ( SOUND_MOVE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_MOVE, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundRedouble ( char *sz ) {
 
-  SetSound ( SOUND_REDOUBLE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_REDOUBLE, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundResign ( char *sz ) {
 
-  SetSound ( SOUND_RESIGN, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_RESIGN, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundRoll ( char *sz ) {
 
-  SetSound ( SOUND_ROLL, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_ROLL, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundStart ( char *sz ) {
 
-  SetSound ( SOUND_START, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_START, NextToken ( &sz ) );
 
 }
 
 extern void
 CommandSetSoundSoundTake ( char *sz ) {
 
-  SetSound ( SOUND_TAKE, NextToken ( &sz ) );
+  SetSoundFile ( SOUND_TAKE, NextToken ( &sz ) );
 
 }
 

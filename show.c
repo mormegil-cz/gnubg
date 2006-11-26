@@ -59,6 +59,7 @@
 #include "gtkrolls.h"
 #include "gtktempmap.h"
 #include "gtkbearoff.h"
+#include "gtkoptions.h"
 #else
 #include <glib.h>
 #endif
@@ -2042,8 +2043,8 @@ CommandShowSound ( char *sz ) {
 #if USE_GTK
 
   if ( fX ) {
-    /* GTKSound(); */
-    /* return */;
+    GTKSound();
+    return;
   }
 
 #endif /* USE_GTK */
@@ -2055,14 +2056,17 @@ CommandShowSound ( char *sz ) {
 
   outputl ( _("Sounds for:") );
 
-  for ( i = 0; i < NUM_SOUNDS; ++i ) 
-    if ( ! *aszSound[ i ] )
+  for ( i = 0; i < NUM_SOUNDS; ++i )
+  {
+	  char *sound = GetSoundFile(i);
+    if (!*sound)
       outputf ( _("   %-30.30s : no sound\n"),
                 gettext ( aszSoundDesc[ i ] ) );
     else
       outputf ( _("   %-30.30s : \"%s\"\n"),
                 gettext ( aszSoundDesc[ i ] ),
-                aszSound[ i ] );
+                sound);
+  }
 }
 
 #endif /* USE_SOUND */

@@ -5792,8 +5792,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     for ( i = 0; i < NUM_SOUNDS; ++i ) 
       fprintf ( pf, "set sound sound %s \"%s\"\n",
-                aszSoundCommand [ i ],
-                aszSound[ i ] );
+				aszSoundCommand [ i ], GetSoundFile(i));
     
 
 #endif /* USE_SOUND */

@@ -66,7 +66,6 @@ typedef enum _soundsystem {
   NUM_SOUND_SYSTEMS
 } soundsystem;
 
-extern char aszSound[ NUM_SOUNDS ][ 80 ];
 extern char *aszSoundDesc[ NUM_SOUNDS ];
 extern char *aszSoundCommand[ NUM_SOUNDS ];
 
@@ -87,6 +86,11 @@ extern void SoundWait( void );
 #ifdef SIGIO
 extern RETSIGTYPE SoundSIGIO( int idSignal );
 #endif
+
+extern char *GetDefaultSoundFile(int sound);
+extern int playSoundFile(const gnubgsound gs, char *file);
+extern void SetSoundFile(const gnubgsound gs, const char *szFilename);
+extern char *GetSoundFile(gnubgsound sound);
 
 #else /* USE_SOUND */
 

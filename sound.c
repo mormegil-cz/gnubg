@@ -145,34 +145,6 @@ char *aszSoundCommand[ NUM_SOUNDS ] = {
 #endif
 };
 
-char aszSound[ NUM_SOUNDS ][ 80 ] = {
-  /* start and exit */
-  "sounds/fanfare.wav",
-  "sounds/haere-ra.wav",
-  /* commands */
-  "sounds/drop.wav",
-  "sounds/double.wav",
-  "sounds/drop.wav",
-  "sounds/chequer.wav",
-  "sounds/move.wav",
-  "sounds/double.wav",
-  "sounds/resign.wav",
-  "sounds/roll.wav",
-  "sounds/take.wav",
-  /* events */
-  "sounds/dance.wav",
-  "sounds/gameover.wav",
-  "sounds/matchover.wav",
-  "sounds/dance.wav",
-  "sounds/gameover.wav",
-  "sounds/matchover.wav",
-  "sounds/fanfare.wav"
-#if USE_TIMECONTROL
-  , "sounds/humantimeout.wav"
-  , "sounds/bottimeout.wav"
-#endif
-};
-
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";
 
 #  if defined (__APPLE__)
@@ -1042,7 +1014,7 @@ void PrintWinError()
 }
 #endif
 
-static void 
+static int 
 play_file_child(soundcache *psc, const char *filename) {
 
     switch ( ssSoundSystem ) {
@@ -1123,10 +1095,8 @@ play_file_child(soundcache *psc, const char *filename) {
 
 #ifdef WIN32
 	if (access(filename, F_OK))
-	{
-		g_print("Missing sound file: %s\n", filename);
-		return;
-	}
+		return FALSE;
+
 	SetLastError(0);
 	while (!PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT))
 	{
@@ -1139,7 +1109,7 @@ play_file_child(soundcache *psc, const char *filename) {
 		{	/* No sound card found - disable sound */
 			g_print("No soundcard found - sounds disabled\n");
 			fSound = FALSE;
-			return;
+			return FALSE;
 		}
 		/* Check for errors */
 		if (GetLastError())
@@ -1147,7 +1117,7 @@ play_file_child(soundcache *psc, const char *filename) {
 			g_print("Error playing sound file: %s\n", filename);
 			PrintWinError();
 			SetLastError(0);
-			return;
+			return FALSE;
 		}
 		Sleep(1);	/* Wait (1ms) for current sound to finish */
 	}
@@ -1173,10 +1143,10 @@ play_file_child(soundcache *psc, const char *filename) {
       break;
 
     }
-
+	return TRUE;
 }
 
-static void 
+static int
 play_file(soundcache *psc, const char *filename) {
 
 #ifndef WIN32
@@ -1190,7 +1160,7 @@ play_file(soundcache *psc, const char *filename) {
         (in a regular Mac OS application, this should be done 
         in the event loop, which we obviously don't have here) */
       play_file_child( psc, filename );
-      return;
+      return TRUE;
   }
 #endif
 
@@ -1198,7 +1168,7 @@ play_file(soundcache *psc, const char *filename) {
   if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {
       /* we can play directly without forking */
       play_file_child( psc, filename );
-      return;
+      return TRUE;
   }
 #endif
   
@@ -1207,7 +1177,7 @@ play_file(soundcache *psc, const char *filename) {
 
   if (pid < 0)
     /* parent */
-    return;
+    return TRUE;
   else if (pid == 0) {
     /* child */
           
@@ -1220,38 +1190,34 @@ play_file(soundcache *psc, const char *filename) {
 
 #endif
 
-    play_file_child( psc, filename );
+    return play_file_child( psc, filename );
     
-#ifndef WIN32
+}
 
-    _exit(0);
-
-  }
-
-#else
-
-  /* we didn't fork */
-
-#endif
-
+int playSoundFile(const gnubgsound gs, char *file)
+{
+    char *szFile = PathSearch(file, szDataDirectory );
+    int res = play_file( asc + gs, szFile );
+    free( szFile );
+	return res;
 }
 
 extern void
-playSound ( const gnubgsound gs ) {
+playSound ( const gnubgsound gs )
+{
+	char *sound = GetSoundFile(gs);
 
-    char *szFile;
-    
     if ( ! fSound )
 	/* no sounds for this user */
 	return;
     
-    if ( ! *aszSound[ gs ] )
+    if ( ! *sound )
 	/* no sound defined for event */
 	return;
 
-    szFile = PathSearch( aszSound[ gs ], szDataDirectory );
-    play_file( asc + gs, szFile );
-    free( szFile );
+	if (!playSoundFile( gs, sound ))
+	/* failed to play sound */
+	return;
 }
 
 extern void SoundFlushCache( const gnubgsound gs ) {
@@ -1304,4 +1270,73 @@ extern void SoundWait( void ) {
 	return;
     }
 }
+
+char aszSoundFile[ NUM_SOUNDS ][ 80 ];
+soundSet[NUM_SOUNDS] = {0};
+
+extern char *GetDefaultSoundFile(int sound)
+{
+  static char aszDefaultSound[ NUM_SOUNDS ][ 80 ] = {
+  /* start and exit */
+  "sounds/fanfare.wav",
+  "sounds/haere-ra.wav",
+  /* commands */
+  "sounds/drop.wav",
+  "sounds/double.wav",
+  "sounds/drop.wav",
+  "sounds/chequer.wav",
+  "sounds/move.wav",
+  "sounds/double.wav",
+  "sounds/resign.wav",
+  "sounds/roll.wav",
+  "sounds/take.wav",
+  /* events */
+  "sounds/dance.wav",
+  "sounds/gameover.wav",
+  "sounds/matchover.wav",
+  "sounds/dance.wav",
+  "sounds/gameover.wav",
+  "sounds/matchover.wav",
+  "sounds/fanfare.wav"
+#if USE_TIMECONTROL
+  , "sounds/humantimeout.wav"
+  , "sounds/bottimeout.wav"
+#endif
+  };
+
+	return aszDefaultSound[sound];
+}
+
+extern char *GetSoundFile(gnubgsound sound)
+{
+	if (!soundSet[sound])
+		return GetDefaultSoundFile(sound);
+	return aszSoundFile[sound];
+}
+
+extern void SetSoundFile(gnubgsound sound, const char *file)
+{
+	if (!file)
+		file = "";
+
+	if (!strcmp(file, GetSoundFile(sound)))
+		return;	/* No change */
+	
+	if (!*file)
+	{
+		outputf ( _("No sound played for: %s\n"), 
+				gettext(aszSoundDesc[sound]));
+		strcpy(aszSoundFile[sound], "");
+	}
+	else
+	{
+		strncpy(aszSoundFile[sound], file, sizeof(aszSoundFile[sound]) - 1);
+		aszSoundFile[sound][sizeof(aszSoundFile[sound]) - 1 ] = '\0';
+		outputf ( _("Sound for: %s: %s\n"), 
+              gettext(aszSoundDesc[sound]), aszSoundFile[sound]);
+	}
+	SoundFlushCache(sound);
+	soundSet[sound] = TRUE;
+}
+
 #endif

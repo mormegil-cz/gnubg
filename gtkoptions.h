@@ -24,5 +24,6 @@
 
 extern void
 GTKSetOptions( void );
+extern void GTKSound();
 
 #endif /* _GTKOPTIONS_H_ */
