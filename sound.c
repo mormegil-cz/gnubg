@@ -1032,7 +1032,6 @@ play_file_child(soundcache *psc, const char *filename) {
         args[2] = command;
         args[3] = NULL;
         execvp(args[0], args);
-        _exit(0);
       }
 #else
       assert( FALSE );
@@ -1043,8 +1042,7 @@ play_file_child(soundcache *psc, const char *filename) {
 
 #if HAVE_ESD
 
-      if (esd_play_file(NULL, filename, 1) )
-        _exit(0);
+      esd_play_file(NULL, filename, 1);
 
 #else
       assert ( FALSE );
@@ -1056,8 +1054,7 @@ play_file_child(soundcache *psc, const char *filename) {
 
 #if HAVE_ARTSC
 
-      if (artsc_play_file(filename))
-        _exit(0);
+      artsc_play_file(filename);
 #else
       assert ( FALSE );
 #endif
@@ -1066,8 +1063,7 @@ play_file_child(soundcache *psc, const char *filename) {
 
 #if HAVE_NAS
 
-      if (play_nas_file(filename))
-        _exit(0);
+      play_nas_file(filename);
 
 #else
       assert ( FALSE );
@@ -1081,9 +1077,6 @@ play_file_child(soundcache *psc, const char *filename) {
 	char *pch;
 	if( ( pch = can_play_audio() ) ) {
 	    play_audio_file(psc,filename, pch);
-#ifndef SIGIO
-	    _exit(0);
-#endif
 	}
     }
 #else
@@ -1150,48 +1143,39 @@ static int
 play_file(soundcache *psc, const char *filename) {
 
 #ifndef WIN32
-
   int pid;
-
-#ifdef __APPLE__
-  if( ssSoundSystem == SOUND_SYSTEM_QUICKTIME) {
-        /* we don't need to fork, but launch a thread that will
-        give time to QuickTime to play the sound to completion
-        (in a regular Mac OS application, this should be done 
-        in the event loop, which we obviously don't have here) */
-      play_file_child( psc, filename );
-      return TRUE;
-  }
 #endif
 
 #ifdef SIGIO
-  if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {
-      /* we can play directly without forking */
+  if(( ssSoundSystem == SOUND_SYSTEM_QUICKTIME) || (ssSoundSystem == SOUND_SYSTEM_WINDOWS) || ( ssSoundSystem == SOUND_SYSTEM_NORMAL)) {
+#else
+  if(( ssSoundSystem == SOUND_SYSTEM_QUICKTIME) || (ssSoundSystem == SOUND_SYSTEM_WINDOWS)) {
+#endif
       play_file_child( psc, filename );
       return TRUE;
   }
-#endif
-  
-  /* fork, so we don't have to wait for the sound to finish */
+
+#ifndef WIN32
   pid = fork();
 
-  if (pid < 0)
+  if (pid < 0) {
+    outputerr("fork failed: ");
+    return FALSE;
+  }
+  else if (pid > 0)
+  {
     /* parent */
     return TRUE;
-  else if (pid == 0) {
+  }
+  else {
     /* child */
-          
     /* kill after 30 secs */
     alarm(30);
-
-#else
-
-    /* don't fork with windows as PlaySound can play async. */
-
+    play_file_child( psc, filename );
+    _exit(0);
+  }
 #endif
-
-    return play_file_child( psc, filename );
-    
+  assert(FALSE);
 }
 
 int playSoundFile(const gnubgsound gs, char *file)
@@ -1272,7 +1256,7 @@ extern void SoundWait( void ) {
 }
 
 char aszSoundFile[ NUM_SOUNDS ][ 80 ];
-soundSet[NUM_SOUNDS] = {0};
+int soundSet[NUM_SOUNDS] = {0};
 
 extern char *GetDefaultSoundFile(int sound)
 {
