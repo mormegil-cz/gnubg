@@ -1,3 +1,8 @@
+Thu Nov 30 23:43:03 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c, gtkgame.c: remove meaningless data from evaluation window
+	and fix window size
+
 Thu Nov 30 22:17:24 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkwindows.c: fix sizing problem in messages window

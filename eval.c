@@ -4245,6 +4245,7 @@ static void
 DumpAnyContact(int anBoard[ 2 ][ 25 ], char* szOutput,
 	       const bgvariation bgv, int isCrashed )
 {
+#if 0
   float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
     arDerivative[ NUM_INPUTS * NUM_OUTPUTS ],
     ardEdI[ NUM_INPUTS ], *p;
@@ -4320,6 +4321,7 @@ DumpAnyContact(int anBoard[ 2 ][ 25 ], char* szOutput,
 	   player[ I_BACKG1 ], dPlayer[ I_BACKG1 ],
 	   player[ I_FREEPIP ], dPlayer[ I_FREEPIP ] );
   }
+#endif
 }
 
 static int

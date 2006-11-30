@@ -228,7 +228,7 @@ GTKMessage( char *sz, dialogtype dt )
 	gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, TRUE, TRUE );
 
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), -1, MIN(400,
-                            req.height+100) );
+                            req.height+50) );
 
     gtk_widget_show_all( pwDialog );
 
