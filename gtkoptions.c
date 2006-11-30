@@ -1944,7 +1944,7 @@ static void AddSoundWidgets(GtkWidget *container)
 	pwhboxTop = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start(GTK_BOX(pwvboxMain), pwhboxTop, TRUE, TRUE, 0);
 	pwvboxTop = gtk_vbox_new( FALSE, 0 );
-    gtk_box_pack_start(GTK_BOX(pwhboxTop), pwvboxTop, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(pwhboxTop), pwvboxTop, TRUE, TRUE, 0);
 
     soundBeepIllegal = gtk_check_button_new_with_label(_("Beep on invalid input"));
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundBeepIllegal), fGUIBeep);
@@ -1961,7 +1961,7 @@ static void AddSoundWidgets(GtkWidget *container)
 	GtkWidget *pwf, *pwb;
 
     soundSettings = gtk_vbox_new( FALSE, 0 );
-    gtk_box_pack_start(GTK_BOX(pwhboxTop), soundSettings, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(pwhboxTop), soundSettings, TRUE, TRUE, 0);
     gtk_widget_set_sensitive(soundSettings,
 #if USE_SOUND
 			      fSound
@@ -2120,7 +2120,6 @@ static void AddSoundWidgets(GtkWidget *container)
 	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(soundList)), GTK_SELECTION_BROWSE);
 	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(soundList), -1, _("Sound Event"), renderer, "text", SOUND_COL, NULL);
 	gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(soundList), FALSE);
-	gtk_widget_set_size_request(soundList, 170, 170);
 	g_signal_connect(soundList, "cursor-changed", GTK_SIGNAL_FUNC(SoundSelected), NULL);
 	g_signal_connect(soundList, "map_event", GTK_SIGNAL_FUNC(SoundGrabFocus), NULL);
     g_signal_connect(soundList, "destroy", GTK_SIGNAL_FUNC(SoundTidy), NULL);
