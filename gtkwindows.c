@@ -212,29 +212,23 @@ GTKMessage( char *sz, dialogtype dt )
     GtkWidget *pwPrompt = gtk_label_new( sz );
     GtkRequisition req;
 
+
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
     gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
 
     gtk_widget_size_request( GTK_WIDGET( pwPrompt ), &req );
-
-    if ( req.height > 500 ) {
 	psw = gtk_scrolled_window_new( NULL, NULL );
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 			   psw );
 	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( psw ),
 					       pwPrompt );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-					GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
-	gtk_window_set_default_size( GTK_WINDOW( pwDialog ),
-				     req.width, req.height );
+					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
 	gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, TRUE, TRUE );
-    }
-    else {
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwPrompt );
-    gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, FALSE, FALSE );
-    }
+
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), -1, MIN(400,
+                            req.height+100) );
 
     gtk_widget_show_all( pwDialog );
 

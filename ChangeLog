@@ -1,6 +1,10 @@
+Thu Nov 30 22:17:24 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkwindows.c: fix sizing problem in messages window
+
 Thu Nov 30 20:14:05 CET 2006 Christian Anthon <anthon@kiku.dk>
 
-	* gtkoptions.c: gtk sizing problem in sound options.
+	* gtkoptions.c: fix gtk sizing problem in sound options.
 
 Tue Nov 28 23:59:09 CET 2006  Christian Anthon <anthon@kiku.dk>
 
