@@ -1794,6 +1794,8 @@ SoundDeatil soundDetails[NUM_SOUNDS];
 GtkWidget *soundFrame, *soundEnabled, *soundPath, *soundPathButton, *soundPlayButton,
 	*soundDefaultButton, *soundBeepIllegal, *soundsEnabled, *soundSettings, *soundList;
 int selSound, SoundSkipUpdate;
+GtkWidget *pwSoundArtsC, *pwSoundCommand, *pwSoundESD,
+	*pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundQuickTime;
 
 static void SetSoundSettings()
 {
@@ -1809,6 +1811,22 @@ static void SetSoundSettings()
 		else
 			SetSoundFile(i, NULL);
 	}
+#ifndef _WIN32
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundArtsC)))
+		UserCommand( "set sound system artsc" );
+	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundCommand)))
+		UserCommand( "set sound system command /bin/true" ); /* FIXME */
+	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundESD)))
+		UserCommand( "set sound system esd" );
+	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundNAS)))
+		UserCommand( "set sound system nas" );
+	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundNormal)))
+		UserCommand( "set sound system normal" );
+	else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwSoundWindows)))
+		UserCommand( "set sound system windows" );
+	else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwSoundQuickTime)))
+		UserCommand( "set sound system quicktime" );
+#endif
 	outputon();
 }
 
@@ -1940,8 +1958,7 @@ static void AddSoundWidgets(GtkWidget *container)
     gtk_signal_connect(GTK_OBJECT(soundsEnabled), "toggled", GTK_SIGNAL_FUNC(SoundToggled), NULL);
 #ifndef _WIN32
 {
-	GtkWidget *pwf, *pwb, *pwSoundArtsC, *pwSoundCommand, *pwSoundESD,
-		*pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundQuickTime;
+	GtkWidget *pwf, *pwb;
 
     soundSettings = gtk_vbox_new( FALSE, 0 );
     gtk_box_pack_start(GTK_BOX(pwhboxTop), soundSettings, FALSE, FALSE, 0);
