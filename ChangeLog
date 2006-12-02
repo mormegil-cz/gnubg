@@ -1,3 +1,8 @@
+Sat Dec  2 21:52:04 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c, progress.c: Disable view rollout statistics after
+	close/reopen. Add drops to won games in rollout statistics.
+
 Thu Nov 30 23:43:03 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c, gtkgame.c: remove meaningless data from evaluation window

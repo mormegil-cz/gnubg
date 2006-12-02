@@ -189,6 +189,7 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
   static char *aszRow[ 7 ];
   int i;
   int anTotal[ 6 ];
+  int cGamesCount=0;
 
   pw = gtk_vbox_new ( FALSE, 0 );
 
@@ -250,6 +251,8 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
     gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
 
   }
+  
+
 
 
   sprintf ( aszRow[ 0 ], _("Total") );
@@ -259,14 +262,18 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 
 
   sprintf ( aszRow[ 0 ], "%%" );
-  for ( i = 0; i < 6; i++ )
+  for ( i = 0; i < 6; i++ ) {
     sprintf ( aszRow[ i + 1 ], "%6.2f%%",
 	      100.0 * (float) anTotal[ i ] / (float) cGames );
+    cGamesCount+=anTotal[i];
+  }
   gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
 
 
   for ( i = 0; i < 7; i++ ) free ( aszRow[ i ] );
 
+  /* allow for one missing (could just be a stopped rollout) */
+  if (cGamesCount < (cGames-1)) outputerrf (_("Win statistics invalid due to (race) truncation, or  (%d != %d)"), cGamesCount, cGames);
 
   return pw;
 
@@ -817,7 +824,7 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
 
   gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutStop );
     
-  if ( aars )
+  if ( aars && (prc->nGamesDone == 0) )
     gtk_container_add( GTK_CONTAINER( pwButtons ), prp->pwRolloutViewStat );
 
   gtk_widget_set_sensitive( prp->pwRolloutOK, FALSE );

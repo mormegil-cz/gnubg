@@ -537,8 +537,12 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
             /* update statistics */
 
 	    if( aarsStatistics )
+            {
 		aarsStatistics[ ici ]
 		    [ pci->fMove ].acDoubleDrop[ LogCube ( pci->nCube ) ]++; 
+                aarsStatistics[ ici ][ pci->fMove ].
+                        acWin[ LogCube ( pci->nCube )]++;
+            };
 
             break;
 
