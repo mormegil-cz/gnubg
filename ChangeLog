@@ -1,3 +1,7 @@
+Mon Dec  4 10:10:29 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gtkoptions.c: hide sound options when compile without USE_SOUND
+
 Sat Dec  2 21:52:04 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c, progress.c: Disable view rollout statistics after

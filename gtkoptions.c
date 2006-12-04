@@ -46,8 +46,10 @@
 #include "renderprefs.h"
 #include "gtkwindows.h"
 
+#if USE_SOUND
 static void SetSoundSettings();
 static void AddSoundWidgets(GtkWidget *container);
+#endif
 
 typedef struct _optionswidget {
 
@@ -817,12 +819,13 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_widget_set_sensitive( pow->pwLoadMET, fCubeUse );
     gtk_widget_set_sensitive( pow->pwCubeInvert, fCubeUse );
   
+#if USE_SOUND
     /* Sound options */
     pwp = gtk_vbox_new (FALSE, 0);
     gtk_notebook_append_page( GTK_NOTEBOOK( pwn ), pwp,
 			      gtk_label_new( _("Sound") ) );
     AddSoundWidgets(pwp);
-
+#endif
 	/* Dice options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -1784,7 +1787,7 @@ GTKSetOptions( void ) {
  
   gtk_main();
 }
-
+#if USE_SOUND
 typedef struct _SoundDetail
 {
 	int Enabled;
@@ -1962,13 +1965,7 @@ static void AddSoundWidgets(GtkWidget *container)
 
     soundSettings = gtk_vbox_new( FALSE, 0 );
     gtk_box_pack_start(GTK_BOX(pwhboxTop), soundSettings, TRUE, TRUE, 0);
-    gtk_widget_set_sensitive(soundSettings,
-#if USE_SOUND
-			      fSound
-#else
-			      FALSE
-#endif
-	);
+    gtk_widget_set_sensitive(soundSettings, fSound);
 
     pwf = gtk_frame_new (_("Sound system"));
     gtk_box_pack_start (GTK_BOX (soundSettings), pwf, TRUE, TRUE, 0);
@@ -1985,10 +1982,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundArtsC ),
 				  ssSoundSystem == SOUND_SYSTEM_ARTSC );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundArtsC,
 			  _("Use the ArtsC sound system."), NULL );
 						     
@@ -2002,10 +1997,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundCommand ),
 				  ssSoundSystem == SOUND_SYSTEM_COMMAND );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundCommand,
 			  _("Use an external program to play sounds."), NULL );
 						     
@@ -2019,10 +2012,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundESD ),
 				  ssSoundSystem == SOUND_SYSTEM_ESD );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundESD,
 			  _("Play sounds through the Enlightenment Sound "
 			    "Daemon."), NULL );
@@ -2037,10 +2028,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundNAS ),
 				  ssSoundSystem == SOUND_SYSTEM_NAS );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundNAS,
 			  _("Use the Network Audio System."), NULL );
 						     
@@ -2054,10 +2043,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundNormal ),
 				  ssSoundSystem == SOUND_SYSTEM_NORMAL );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundNormal,
 			  _("Use the OSS /dev/dsp device for sound (falling "
 			    "back to /dev/audio if necessary)."), NULL );
@@ -2072,10 +2059,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundWindows ),
 				  ssSoundSystem == SOUND_SYSTEM_WINDOWS );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundWindows,
 			  _("Play sounds on the MS Windows platform."), NULL );
 						         
@@ -2089,10 +2074,8 @@ static void AddSoundWidgets(GtkWidget *container)
 			      FALSE
 #endif
 	);
-#if USE_SOUND
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundQuickTime ),
 				  ssSoundSystem == SOUND_SYSTEM_QUICKTIME );
-#endif
     gtk_tooltips_set_tip( ptt, pwSoundQuickTime,
 			  _("Play sounds using QuickTime."), NULL );
 	}
@@ -2164,12 +2147,7 @@ static void AddSoundWidgets(GtkWidget *container)
 
 	gtk_container_add(GTK_CONTAINER(container), pwvboxMain);
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundsEnabled), TRUE);	/* Set true so event fired */
-#if USE_SOUND
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundsEnabled), fSound);
-#else
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundsEnabled), FALSE);
-    gtk_widget_set_sensitive(soundsEnabled, FALSE);
-#endif
 	}
 }
 
@@ -2184,3 +2162,4 @@ extern void GTKSound()
 	gtk_widget_show_all(pwDialog);
 	gtk_main();
 }
+#endif
