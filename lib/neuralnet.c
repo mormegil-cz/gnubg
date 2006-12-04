@@ -21,9 +21,7 @@
 
 #include "config.h"
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
+#include <glib.h>
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>
@@ -639,7 +637,7 @@ static int EvaluateFromBaseBlas( neuralnet *pnn, float arInputDif[], float ar[],
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
-    VARIABLE_ARRAY(float, ar, pnn->cHidden)
+    float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
     switch( t ) {
       case NNEVAL_NONE:
       {
@@ -686,9 +684,9 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
  */
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
-    VARIABLE_ARRAY(float, ar, pnn->cHidden)
-    VARIABLE_ARRAY(float, arIDelta, pnn->cInput)
-    VARIABLE_ARRAY(float, arODelta, pnn->cOutput)
+    float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
+    float *arIDelta = (float*) g_alloca(pnn->cInput * sizeof(float));
+    float *arODelta = (float*) g_alloca(pnn->cOutput * sizeof(float));
     int i, j;
 
     Evaluate( pnn, arInput, ar, arOutput, 0 );
@@ -728,8 +726,8 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 #if 0
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
-    VARIABLE_ARRAY(float, ar, pnn->cHidden)
-    VARIABLE_ARRAY(float, ardOdSigmaI, pnn->cHidden * pnn->cOutput)
+    float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
+    float *ardOdSigmaI = (float*) g_alloca(pnn->cHidden * pnn->cOutput * sizeof(float));
     int i, j, k;
     float rdOdSigmaH, *prWeight, *prdOdSigmaI, *prdOdI;
     
@@ -769,9 +767,9 @@ extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 			   float arDesired[], float rAlpha ) {
     int i, j;    
     float *pr, *prWeight;
-    VARIABLE_ARRAY(float, ar, pnn->cHidden)
-    VARIABLE_ARRAY(float, arOutputError, pnn->cOutput)
-    VARIABLE_ARRAY(float, arHiddenError, pnn->cHidden)
+    float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
+    float *arOutputError = (float*) g_alloca(pnn->cOutput * sizeof(float));
+    float *arHiddenError = (float*) g_alloca(pnn->cHidden * sizeof(float));
     
     Evaluate( pnn, arInput, ar, arOutput, 0 );
 

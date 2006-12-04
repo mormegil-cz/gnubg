@@ -24,10 +24,6 @@
 #if USE_BOARD3D
 #include "board3d/inc3d.h"
 #endif
-
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 #include <assert.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>

@@ -8,9 +8,7 @@
 
 #include "config.h"
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
+#include <glib.h>
 #include <buffer.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -231,7 +229,7 @@ int BufferWritef( buffer *pb, char *szFormat, ... ) {
     va_list val;
     /* FIXME this is terrible... there's no limit on the vsprintf()
        buffer size!!  If vsnprintf() is available, we can do better. */
-    VARIABLE_ARRAY(char, sz, FifoRemaining( &pb->fWrite ) > 65536 ? FifoRemaining( &pb->fWrite ) : 65536)
+    char *sz = (char *) g_alloca(FifoRemaining( &pb->fWrite ) > 65536 ? FifoRemaining( &pb->fWrite ) : 65536);
     
     int cch;
     

@@ -34,9 +34,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 
 #include "render.h"
 #include "renderprefs.h"
@@ -657,7 +654,7 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
 				int nStride ) {
     int i, ix;
     float x, z, cos_theta, diffuse, specular;
-	VARIABLE_ARRAY(unsigned char, colours, 4 * 3 * prd->nSize)
+	unsigned char *colours = (unsigned char*) g_alloca(4 * 3 * prd->nSize * sizeof(unsigned char));
 
     diffuse = 0.8 * prd->arLight[ 2 ] + 0.2;
     specular = pow( prd->arLight[ 2 ], 20 ) * 0.6;
@@ -1037,14 +1034,9 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 	s = prd->nSize;
     unsigned char a[ 3 ];
     float rx, rz, cos_theta, rDiffuseTop, rHeight, rDiffuse;
-#if (__GNUC__ && !__STRICT_ANSI__) || !HAVE_ALLOCA
-	int anSpecular[4][s];
-	float arDiffuse[4][s];
-	float arHeight[s];
-#else
-	int *anSpecular[4], *anSpecularData = alloca( 4 * s * sizeof( int ) );
-	float *arDiffuse[4], *arDiffuseData = alloca( 4 * s * sizeof( float ) );
-	float *arHeight = alloca( s * sizeof( float ) );
+	int *anSpecular[4], *anSpecularData = g_alloca( 4 * s * sizeof( int ) );
+	float *arDiffuse[4], *arDiffuseData = g_alloca( 4 * s * sizeof( float ) );
+	float *arHeight = g_alloca( s * sizeof( float ) );
 	anSpecular[0] = anSpecularData;
 	anSpecular[1] = anSpecularData + s;
 	anSpecular[2] = anSpecularData + 2 * s;
@@ -1053,7 +1045,6 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 	arDiffuse[1] = arDiffuseData + s;
 	arDiffuse[2] = arDiffuseData + 2 * s;
 	arDiffuse[3] = arDiffuseData + 3 * s;
-#endif
 
 
     nSpecularTop = pow( prd->arLight[ 2 ], 20 ) * 0.6 * 0x100;

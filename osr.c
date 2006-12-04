@@ -25,9 +25,6 @@
 #include <assert.h>
 #include <string.h>
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 
 #include "config.h"
 
@@ -634,7 +631,7 @@ rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
   int i, n, m;
   int iGame;
   
-  VARIABLE_ARRAY(int, anCounts, nMaxGammonProbs)
+  int *anCounts = (int*) g_alloca(nMaxGammonProbs * sizeof(int));
 
   memset(anCounts, 0, sizeof(int) * nMaxGammonProbs);
 

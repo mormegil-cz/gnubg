@@ -1,3 +1,11 @@
+Tue Dec  5 00:44:07 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* common.h, configure.in, dice.c, eval.c, export.c, gnubg.c,
+	gtkchequer.c, gtkcube.c, gtkexport.c, gtkgame.c, gtkmet.c,
+	gtkmovefilter.c, gtkrace.c, gtktexi.c, gtktheory.c, osr.c, path.c,
+	render.c, rollout.c, lib/Makefile.am, lib/buffer.c, lib/neuralnet.c:
+	alloca cleanup (we allways have g_alloca).
+
 Mon Dec  4 10:10:29 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gtkoptions.c: hide sound options when compile without USE_SOUND

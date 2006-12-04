@@ -20,10 +20,6 @@
  */
 
 #include <config.h>
-
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 #include <gtk/gtk.h>
 
 #include <stdio.h>

@@ -21,16 +21,6 @@
 
 #include <config.h>
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
-
-#if HAVE_ALLOCA
-#ifndef alloca
-#define alloca __builtin_alloca
-#endif
-#endif
-
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>
@@ -351,20 +341,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
   /* Make local copy of cubeinfo struct, since it
      may be modified */
-#if __GNUC__ && !__STRICT_ANSI__
-  cubeinfo pciLocal[ cci ];
-  int pfFinished[ cci ];
-  float aarVarRedn[ cci ][ NUM_ROLLOUT_OUTPUTS ];
-#elif HAVE_ALLOCA
-  cubeinfo *pciLocal = alloca( cci * sizeof ( cubeinfo ) );
-  int *pfFinished = alloca( cci * sizeof( int ) );
+  cubeinfo *pciLocal = g_alloca( cci * sizeof ( cubeinfo ) );
+  int *pfFinished = g_alloca( cci * sizeof( int ) );
   float (*aarVarRedn)[ NUM_ROLLOUT_OUTPUTS ] =
-    alloca ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-#else
-  cubeinfo pciLocal[ MAX_ROLLOUT_CUBEINFO ];
-  int pfFinished[ MAX_ROLLOUT_CUBEINFO ];
-  float aarVarRedn[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-#endif
+    g_alloca ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
   /* variables for variance reduction */
 
@@ -989,38 +969,23 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
                 int fInvert, int fCubeRollout,
                 rolloutprogressfunc *pfProgress, void *pUserData ) {   
   
-#if HAVE_ALLOCA
   int (* aanBoardEval )[ 2 ][ 25 ] = 
-    alloca( alternatives * 50 * sizeof( int ) );
+    g_alloca( alternatives * 50 * sizeof( int ) );
   float (* aar )[ NUM_ROLLOUT_OUTPUTS ] = 
-	alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+	g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
   float (* aarMu )[ NUM_ROLLOUT_OUTPUTS ] = 
-	alloca( alternatives * NUM_ROLLOUT_OUTPUTS *sizeof ( float ) );
+	g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS *sizeof ( float ) );
   float (* aarSigma )[ NUM_ROLLOUT_OUTPUTS ] = 
-	alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+	g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
   double (* aarResult )[ NUM_ROLLOUT_OUTPUTS ] = 
-	alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
+	g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
   double (* aarVariance )[ NUM_ROLLOUT_OUTPUTS ] = 
-	alloca( alternatives * NUM_ROLLOUT_OUTPUTS *  sizeof ( double ) );
-  cubeinfo *aciLocal = alloca ( alternatives * sizeof ( cubeinfo ) );
-  jsdinfo * ajiJSD = alloca ( alternatives * sizeof ( jsdinfo ));
-  unsigned int *nGamesDone = alloca ( alternatives * sizeof ( unsigned int ));
-  int *fNoMore =  alloca ( alternatives * sizeof ( int ));
+	g_alloca( alternatives * NUM_ROLLOUT_OUTPUTS *  sizeof ( double ) );
+  cubeinfo *aciLocal = g_alloca ( alternatives * sizeof ( cubeinfo ) );
+  jsdinfo * ajiJSD = g_alloca ( alternatives * sizeof ( jsdinfo ));
+  unsigned int *nGamesDone = g_alloca ( alternatives * sizeof ( unsigned int ));
+  int *fNoMore =  g_alloca ( alternatives * sizeof ( int ));
 
-#else
-  int aanBoardEval[ MAX_ROLLOUT_CUBEINFO ][ 2 ][ 25 ];
-  float aar[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarMu[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarSigma[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-  double aarResult[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-  double aarVariance[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-  cubeinfo aciLocal[ MAX_ROLLOUT_CUBEINFO ];
-  jsdinfo ajiJSD[MAX_ROLLOUT_CUBEINFO];
-  unsigned int nGamesDone[MAX_ROLLOUT_CUBEINFO];
-  int fNoMore[MAX_ROLLOUT_CUBEINFO];
-
-#endif
-  
   int j, alt;
   unsigned int i;
   int anBoardOrig[ 2 ][ 25 ];
@@ -2064,31 +2029,16 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
   int nGamesDone;
   rolloutcontext *prc;
 
-#if HAVE_ALLOCA
-  int (* anBoard)[ 2 ][ 25 ] = alloca (cMoves * 2 * 25 * sizeof (int));
-  int (** apBoard)[2][25] = alloca (cMoves * sizeof (float));
+  int (* anBoard)[ 2 ][ 25 ] = g_alloca (cMoves * 2 * 25 * sizeof (int));
+  int (** apBoard)[2][25] = g_alloca (cMoves * sizeof (float));
   float (** apOutput)[ NUM_ROLLOUT_OUTPUTS ] = 
-    alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
+    g_alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
   float (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ] =
-    alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
-  evalsetup (** apes) = alloca (cMoves * sizeof (evalsetup *));
-  const cubeinfo (** apci) = alloca (cMoves * sizeof (cubeinfo *));
-  cubeinfo (* aci) = alloca (cMoves * sizeof (cubeinfo));
-  int (** apCubeDecTop) = alloca (cMoves * sizeof (int *));
-#else
-  int 	      anBoard[10][2][25];
-  int         (*apBoard[10])[2][25];
-  float       (*apOutput[10])[2][25];
-  float       (*apStdDev[10])[2][25];
-  evalsetup   (*apes[10]);
-  const cubeinfo* apci[10];
-  cubeinfo    aci[ 10 ];
-  int         (*apCubeDecTop[10]);
-
-  if (cMoves > 10)
-    cMoves = 10;
-
-#endif
+    g_alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
+  evalsetup (** apes) = g_alloca (cMoves * sizeof (evalsetup *));
+  const cubeinfo (** apci) = g_alloca (cMoves * sizeof (cubeinfo *));
+  cubeinfo (* aci) = g_alloca (cMoves * sizeof (cubeinfo));
+  int (** apCubeDecTop) = g_alloca (cMoves * sizeof (int *));
   
   /* initialise the arrays we'll need */
   for (i = 0; i < cMoves; ++i) {

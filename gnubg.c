@@ -25,9 +25,6 @@
 #include <gnubgmodule.h>
 #endif
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -122,12 +119,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #if USE_TIMECONTROL
 #include "timecontrol.h"
-#endif
-
-#if HAVE_ALLOCA
-#ifndef alloca
-#define alloca __builtin_alloca
-#endif
 #endif
 
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
@@ -4320,15 +4311,9 @@ CommandRollout( char *sz ) {
   }
 
 
-#if HAVE_ALLOCA
-    aan = alloca( 50 * c * sizeof( int ) );
-    asz = alloca( 40 * c );
+    aan = g_alloca( 50 * c * sizeof( int ) );
+    asz = g_alloca( 40 * c );
 
-#else
-    if( c > 10 )
-	c = 10;
-#endif
-    
     for( i = 0; i < c; i++ ) {
       if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
 		return;
@@ -4368,7 +4353,6 @@ CommandRollout( char *sz ) {
       evalsetup NoEs;
       int false = FALSE;
       void *p;
-#if HAVE_ALLOCA
       int         (** apBoard)[2][25];
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
       float       (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ];
@@ -4377,24 +4361,13 @@ CommandRollout( char *sz ) {
       int         (** apCubeDecTop);
       move	  (** apMoves);
 
-      apBoard = alloca (c * sizeof (int *));
-      apOutput = alloca (c * sizeof (float *));
-      apStdDev = alloca (c * sizeof (float *));
-      apes = alloca (c * sizeof (evalsetup *));
-      apci = alloca (c * sizeof (cubeinfo *));
-      apCubeDecTop = alloca (c * sizeof (int *));
-      apMoves = alloca (c * sizeof (move *));
-
-#else
-      int         (*apBoard[10])[2][25];
-      float       (*apOutput[10])[NUM_ROLLOUT_OUTPUTS];
-      float       (*apStdDev[10])[NUM_ROLLOUT_OUTPUTS];
-      evalsetup   (*apes[10]);
-      const cubeinfo    (*apci[10]);
-      int         (*apCubeDecTop[10]);
-      move        (*apMoves[10]);
-
-#endif
+      apBoard = g_alloca (c * sizeof (int *));
+      apOutput = g_alloca (c * sizeof (float *));
+      apStdDev = g_alloca (c * sizeof (float *));
+      apes = g_alloca (c * sizeof (evalsetup *));
+      apci = g_alloca (c * sizeof (cubeinfo *));
+      apCubeDecTop = g_alloca (c * sizeof (int *));
+      apMoves = g_alloca (c * sizeof (move *));
 
       for( i = 0; i < c; i++ ) {
 	/* set up to call RolloutGeneral for all the moves at once */
@@ -6065,7 +6038,7 @@ static char *PlayerCompletionBoth( const char *sz, int nState ) {
 
 static command *FindContext( command *pc, char *szOrig, int ich ) {
 
-    VARIABLE_ARRAY(char, sz, strlen( szOrig ) + 1)
+    char *sz = (char*) g_alloca(strlen( szOrig )  * sizeof(char) + 1);
     char *pch, *pchCurrent;
     command *pcResume = NULL;
     
@@ -6222,7 +6195,7 @@ extern void UserCommand( char *szCommand ) {
 #endif
     int cch = strlen( szCommand ) + 1;
     char *pchTranslated;
-    VARIABLE_ARRAY(char, sz, cch)
+    char *sz = (char*) g_alloca(cch * sizeof(char));
     
     /* Unfortunately we need to copy the command, because it might be in
        read-only storage and HandleCommand might want to modify it. */

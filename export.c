@@ -130,7 +130,7 @@ WritePNG (const char *sz, unsigned char *puch, int nStride,
   png_write_info (ppng, pinfo);
 
   {
-    VARIABLE_ARRAY(png_bytep, aprow, nSizeY);
+    png_bytep *aprow = (png_bytep*) g_alloca(nSizeY * sizeof(png_bytep));;
     for (i = 0; i < nSizeY; ++i)
       aprow[i] = puch + nStride * i;
 

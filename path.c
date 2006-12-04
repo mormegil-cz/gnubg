@@ -21,9 +21,7 @@
 
 #include "config.h"
 
-#if HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
+#include <glib.h>
 #include <cache.h>
 #include <errno.h>
 #if HAVE_FCNTL_H
@@ -107,7 +105,7 @@ extern int
 PathOpen( const char *szFile, const char *szDir, const int f ) {
 
     int h, idFirstError = 0;
-    VARIABLE_ARRAY(char, szPath, strlen( PKGDATADIR ) + ( szDir ? strlen( szDir ) : 0 ) + strlen( szFile ) + 2)
+    char *szPath = (char *) g_alloca (strlen( PKGDATADIR ) + ( szDir ? strlen( szDir ) : 0 ) + strlen( szFile ) + 2);
     
     if( szDir ) {
 	sprintf( szPath, "%s%c%s", szDir, DIR_SEPARATOR, szFile );

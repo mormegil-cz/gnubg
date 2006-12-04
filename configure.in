@@ -179,7 +179,6 @@ AC_DEFINE(socklen_t,int, [Define to `int' if <sys/socket.h> does not define.])
 ])
 
 dnl Checks for library functions.
-AC_FUNC_ALLOCA
 AC_FUNC_MMAP
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
