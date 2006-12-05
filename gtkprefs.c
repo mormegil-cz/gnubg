@@ -3306,7 +3306,7 @@ static void Err( void *pv, const char *msg, ... ) {
   ppc->err = TRUE;
   
   va_start(args, msg);
-  vprintf(msg, args);
+  g_vprintf(msg, args);
   va_end(args);
   
 }

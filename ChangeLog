@@ -1,3 +1,8 @@
+Tue Dec  5 09:53:54 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* ChangeLog, configure.in, gnubg.c, gtkprefs.c, gtktexi.c,
+	matchequity.c, rollout.c: vprintf cleanup
+
 Tue Dec  5 00:44:07 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* common.h, configure.in, dice.c, eval.c, export.c, gnubg.c,

@@ -22,6 +22,10 @@
 * $Id$
 */
 
+#include "config.h"
+
+#include <glib.h>
+#include <glib/gprintf.h>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
@@ -29,7 +33,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "config.h"
 #include "list.h"
 #include "path.h"
 #include "mec.h"
@@ -1318,7 +1321,7 @@ static void validateWarning ( void *ctx,
   va_list ap;
   
   va_start ( ap, msg );
-  vprintf ( msg, ap );
+  g_vprintf ( msg, ap );
   va_end ( ap );
 
 }
@@ -1330,7 +1333,7 @@ static void validateError ( void *ctx,
   va_list ap;
 
   va_start ( ap, msg );
-  vprintf ( msg, ap );
+  g_vprintf ( msg, ap );
   va_end ( ap );
 
 }

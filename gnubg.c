@@ -4244,13 +4244,8 @@ CommandRollout( char *sz ) {
     cubeinfo ci;
     move *pm = 0;
 
-#if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
-#else
-    int aan[ 10 ][ 2 ][ 25 ];
-    char asz[ 10 ][ 40 ];
-#endif
 
   if( !( c = CountTokens( sz ) ) ) {
     if( ms.gs != GAME_PLAYING ) {

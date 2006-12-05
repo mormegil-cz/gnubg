@@ -1002,13 +1002,6 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   int show_jsds = 1;
   char *log_name = 0;
 
-#if !(__GNUC__ || HAVE_ALLOCA)
-  if (alternatives > MAX_ROLLOUT_CUBEINFO) {
-    errno = EINVAL;
-    return -1;
-  }
-#endif
-
   if( alternatives < 1 ) {
     errno = EINVAL;
     return -1;
