@@ -24,7 +24,7 @@
 #include "config.h"
 
 #include <gtk/gtk.h>
-#include <assert.h>
+#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -94,7 +94,7 @@ void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev, gpoin
     	return;
 
     for( pl = plGame->plPrev; pl != plGame; pl = pl->plPrev ) {
-    	assert( pl->p );
+    	g_assert( pl->p );
     	if( pl == plGame->plPrev && pl->p == pmr && pmr->mt == MOVE_SETDICE )
     	break;
 
@@ -440,7 +440,7 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	return;
     
     if( pmr == plGame->plNext->p ) {
-	assert( pmr->mt == MOVE_GAMEINFO );
+	g_assert( pmr->mt == MOVE_GAMEINFO );
 	yCurrent = 0;
 	
 	if( plGame->plNext->plNext->p ) {

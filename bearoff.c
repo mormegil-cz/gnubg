@@ -25,14 +25,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <errno.h>
-#include <math.h>
 #include <glib.h>
-
-#if HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -42,6 +36,7 @@
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+
 
 #include "positionid.h"
 #include "eval.h"
@@ -104,7 +99,7 @@ setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
     tot1 += anBoard[1][i];
   }
 
-  {                                       assert( tot0 == 15 || tot1 == 15 ); }
+  {                                       g_assert( tot0 == 15 || tot1 == 15 ); }
 
   *g0 = 0.0;
   *g1 = 0.0;
@@ -178,7 +173,7 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 	c = 4;
     } else {
 	/* non-doubles */
-	assert( anRoll[ 0 ] > anRoll[ 1 ] );
+	g_assert( anRoll[ 0 ] > anRoll[ 1 ] );
 	
 	anDice[ 0 ] = anRoll[ 0 ];
 	anDice[ 1 ] = anRoll[ 1 ];
@@ -233,8 +228,8 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 		n = iSearch;
 
     lbl_move:
-	assert( n >= 0 );
-	assert( anBoard[ n ] );
+	g_assert( n >= 0 );
+	g_assert( anBoard[ n ] );
 	anBoard[ n ]--;
 
 	if( n >= anDice[ i ] )
@@ -257,8 +252,8 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
 	    PositionFromBearoff( anBoard, nId, 6, 15 );
 	    iBest = HeuristicBearoff( anBoard, anRoll );
 
-	    assert( iBest >= 0 );
-	    assert( iBest < nId );
+	    g_assert( iBest >= 0 );
+	    g_assert( iBest < nId );
 	    
 	    if( anRoll[ 0 ] == anRoll[ 1 ] )
 		for( i = 0; i < 31; i++ )
@@ -523,7 +518,7 @@ BearoffCubeful ( bearoffcontext *pbc,
 
   case BEAROFF_SCONYERS:
 
-    assert( aus == NULL );
+    g_assert( aus == NULL );
 
     switch( pbc->hsdb ) {
     case HS_15x15_ON_DISK:
@@ -531,14 +526,14 @@ BearoffCubeful ( bearoffcontext *pbc,
       return ReadSconyers15x15( pbc, iPos, NULL, ar );
       break;
     default:
-      assert( FALSE );
+      g_assert( FALSE );
       break;
     }
     break;
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }
@@ -811,7 +806,7 @@ ReadSconyers15x15( bearoffcontext *pbc,
 
   default:
 
-    assert( FALSE );
+    g_assert( FALSE );
 
   }
 
@@ -906,7 +901,7 @@ BearoffEvalSconyers( bearoffcontext *pbc,
     return ReadSconyers15x15( pbc, iPos, arOutput, NULL );
     break;
   default:
-    assert( FALSE );
+    g_assert( FALSE );
     break;
   }
 
@@ -946,13 +941,13 @@ BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
   case BEAROFF_EXACT_BEAROFF:
 
-    assert ( pbc->bt == BEAROFF_TWOSIDED );
+    g_assert ( pbc->bt == BEAROFF_TWOSIDED );
     return BearoffEvalTwoSided ( pbc, anBoard, arOutput );
     break;
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }
@@ -1325,13 +1320,13 @@ BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
       return BearoffDumpSconyers15x15( pbc, anBoard, sz );
       break;
     default:
-      assert( FALSE );
+      g_assert( FALSE );
     }
     break;
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }
@@ -1375,13 +1370,8 @@ ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const int nSize ) {
 
   pbc->fMalloc = TRUE;
 
-#if HAVE_MMAP
   if ( ( pbc->p = mmap ( NULL, nSize, PROT_READ, 
                            MAP_SHARED, pbc->h, iOffset ) ) == (void *) -1 ) {
-    /* perror ( "mmap" ); */
-    /* mmap failed */
-#endif /* HAVE_MMAP */
-
     /* allocate memory for database */
 
     if ( ! ( pbc->p = malloc ( nSize ) ) ) {
@@ -1406,11 +1396,9 @@ ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const int nSize ) {
       return -1;
     }
 
-#if HAVE_MMAP
   }
   else
     pbc->fMalloc = FALSE;
-#endif /* HAVE_MMAP */
 
   return 0;
 
@@ -1546,7 +1534,7 @@ BearoffInitSconyers( const char *szFilename, const char *szDir,
   }
   else {
 
-    assert ( FALSE );
+    g_assert ( FALSE );
 
   }
 
@@ -2083,7 +2071,7 @@ GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
              "Offset %lu, dist size %u (offset %u), "
              "gammon dist size %u (offset %u)\n",
              pbc->szFilename, (unsigned long) iOffset, nz, ioff, nzg, ioffg );
-    assert( FALSE );
+    g_assert( FALSE );
   }
 
   /* read prob + gammon probs */
@@ -2226,7 +2214,7 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
   switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
 
-    assert ( pbc->bt == BEAROFF_ONESIDED );
+    g_assert ( pbc->bt == BEAROFF_ONESIDED );
 
     if ( pbc->fND ) 
       return ReadBearoffOneSidedND ( pbc, nPosID, arProb, arGammonProb, ar,
@@ -2237,7 +2225,7 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
     break;
 
   default:
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
   }
 

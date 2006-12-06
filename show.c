@@ -21,16 +21,13 @@
 
 #include "config.h"
 
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
 
 #include "backgammon.h"
@@ -344,7 +341,7 @@ ShowEvalSetup ( const evalsetup *pes ) {
     ShowRollout ( &pes->rc );
     break;
   default:
-    assert ( FALSE );
+    g_assert ( FALSE );
 
   }
 
@@ -2260,7 +2257,7 @@ CommandShowBearoff( char *sz ) {
 
   default:
 
-    assert( FALSE );
+    g_assert( FALSE );
 
   }
     
@@ -2293,7 +2290,7 @@ ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc ) {
     char szMove[ 33 ];
     static int aiPerm[ 4 ] = { 0, 3, 2, 1 };
 
-    assert ( pms->bgv <= VARIATION_NACKGAMMON );
+    g_assert ( pms->bgv <= VARIATION_NACKGAMMON );
     
     GenerateMoves ( &ml, pms->anBoard, 
                     pms->anDice[ 0 ], pms->anDice[ 1 ], FALSE );
@@ -2381,7 +2378,7 @@ CommandShowMatchResult( char *sz ) {
   
       pmr = (moverecord *) ( (list *) pl->p )->plNext->p;
       pmgi = &pmr->g;
-      assert( pmr->mt == MOVE_GAMEINFO );
+      g_assert( pmr->mt == MOVE_GAMEINFO );
       
       psc = &pmgi->sc;
       

@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <glib.h>
 #include <time.h>
 
 #include "backgammon.h"
@@ -807,7 +807,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       pci->anScore, pci->fCrawford,
                       pci->fJacoby, pci->fBeavers, pci->bgv );
 
-        assert ( cUnfinished >= 0 );
+        g_assert ( cUnfinished >= 0 );
 
 
       }

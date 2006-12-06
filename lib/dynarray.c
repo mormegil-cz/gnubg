@@ -5,6 +5,7 @@
  * $Id$
  */
 
+#include <glib.h>
 #include <assert.h>
 #include <errno.h>
 #include <stddef.h>

@@ -1,3 +1,7 @@
+2006-12-06  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.15.
+
 Mon Oct 23 12:11:44 CEST 2006 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.pot, *.po: merge and update.

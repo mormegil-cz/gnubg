@@ -36,14 +36,14 @@
  */
 
 #include "config.h"
-#include <assert.h>
+#include <glib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
 #include "positionid.h"
 #include "common.h"
 
-static inline_hint void
+static inline void
 addBits(unsigned char auchKey[10], int const bitPos, int const nBits)
 {
   int const k = bitPos / 8;
@@ -320,10 +320,10 @@ static int InitCombination( void ) {
 
 extern int Combination( const int n, const int r ) {
 
-    assert( n > 0 );
-    assert( r > 0 );
-    assert( n <= MAX_N );
-    assert( r <= MAX_R );
+    g_assert( n > 0 );
+    g_assert( r > 0 );
+    g_assert( n <= MAX_N );
+    g_assert( r <= MAX_R );
 
     if( !fCalculated )
         InitCombination();

@@ -8,11 +8,8 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <errno.h>
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
 #include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,10 +57,10 @@ extern int EventHandlerReady( event *pev, int fReady, long nTimeout ) {
     event *pevSearch;
     struct timezone tz;
 
-    assert( pev );
+    g_assert( pev );
 
-    assert( pev->h >= -1 );
-    assert( pev->h < cDescriptors );
+    g_assert( pev->h >= -1 );
+    g_assert( pev->h < cDescriptors );
 
     if( !fReady && !pev->fHandlerReady )
 	return 0;

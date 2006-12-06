@@ -7194,7 +7194,7 @@ struct GroupInfo info[63] = {
 /*  63 111111 */
 { {0,0,0,36}, 0, 0, 0}, 
 };
-#include <assert.h>
+#include <glib.h>
 #include "positionid.h"
 
 extern struct GammonProbs*
@@ -7222,7 +7222,7 @@ getBearoffGammonProbs(int board[6])
     
     for(k = 0; k < 6; ++k) {
       if( (group & (0x1 << k)) ) {
-	{                                               assert( board[k] > 0 ); }
+	{                                               g_assert( board[k] > 0 ); }
       
 	b1[grpSize] = board[k] - 1;
 	++grpSize;
@@ -7231,8 +7231,8 @@ getBearoffGammonProbs(int board[6])
 
     index = PositionIndex(grpSize, b1);
 
-    {             assert( index >= in->base && index - in->base < in->size ); }
-    {      assert( in->info[index - in->base] < sizeof(all)/sizeof(all[0]) ); }
+    {             g_assert( index >= in->base && index - in->base < in->size ); }
+    {      g_assert( in->info[index - in->base] < sizeof(all)/sizeof(all[0]) ); }
   
     return &all[in->info[index - in->base]];
   }
@@ -7808,7 +7808,7 @@ getRaceBGprobs(int board[6])
   unsigned int tot = 0;
   int group = 0;
   int i;
-  {                                                 assert( board[5] == 0 ); }
+  {                                                 g_assert( board[5] == 0 ); }
   
   for(i = 4; i >= 0; --i) { 
     group += (0x1 << i) * !!board[i];
@@ -7826,7 +7826,7 @@ getRaceBGprobs(int board[6])
 
     for(k = 0; k < 5; ++k) {
       if( (group & (0x1 << k)) ) {
-	{                                            assert( board[k] > 0 ); }
+	{                                            g_assert( board[k] > 0 ); }
       
 	b1[grpSize] = board[k] - 1;
 	++grpSize;

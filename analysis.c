@@ -21,12 +21,10 @@
 
 #include "config.h"
 
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <string.h>
-#include <assert.h>
-#include <math.h>
+#include <stdlib.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -42,7 +40,6 @@
 #include "export.h"
 #include "formatgs.h"
 
-#include <glib/gi18n.h>
 
 const char *aszRating [ RAT_UNDEFINED + 1 ] = {
   N_("Awful!"), 
@@ -1089,7 +1086,7 @@ AnalyzeGame ( list *plGame ) {
     moverecord *pmrx = (moverecord *) plGame->plNext->p; 
     matchstate msAnalyse;
 
-    assert( pmrx->mt == MOVE_GAMEINFO );
+    g_assert( pmrx->mt == MOVE_GAMEINFO );
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
@@ -1329,7 +1326,7 @@ extern void CommandAnalyseMatch( char *sz ) {
 	  break;
       }
       pmr = (moverecord *) ( (list *) pl->p )->plNext->p;
-      assert( pmr->mt == MOVE_GAMEINFO );
+      g_assert( pmr->mt == MOVE_GAMEINFO );
       AddStatcontext( &pmr->g.sc, &scMatch );
   }
   
@@ -1709,7 +1706,7 @@ CommandShowStatisticsGame ( char *sz )
 
   pmr = plGame->plNext->p;
 
-  assert( pmr->mt == MOVE_GAMEINFO );
+  g_assert( pmr->mt == MOVE_GAMEINFO );
     
 #if USE_GTK
   if ( fX ) {
@@ -1818,7 +1815,7 @@ updateStatisticsGame ( const list* plGame ) {
   moverecord *pmrx = plGame->plNext->p;
   matchstate msAnalyse;
   
-  assert( pmrx->mt == MOVE_GAMEINFO );
+  g_assert( pmrx->mt == MOVE_GAMEINFO );
     
   for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
     
@@ -1851,7 +1848,7 @@ updateStatisticsMatch ( list *plMatch ) {
     updateStatisticsGame( pl->p );
     
     pmr = ( (list *) pl->p )->plNext->p;
-    assert( pmr->mt == MOVE_GAMEINFO );
+    g_assert( pmr->mt == MOVE_GAMEINFO );
     AddStatcontext( &pmr->g.sc, &scMatch );
 
   }

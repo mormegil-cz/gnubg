@@ -32,11 +32,9 @@
 
 #ifndef WIN32
 
-#include <assert.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
@@ -215,7 +213,7 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
     return sock;
 
 #if 0 
-    assert( FALSE );
+    g_assert( FALSE );
 #endif /* 0 */
 
 }
@@ -288,7 +286,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
     p[ cch - 1 ] = 0;
     return 0;
 #if 0
-    assert( FALSE );
+    g_assert( FALSE );
 #endif
 }
 #endif /* HAVE_SOCKETS */
@@ -341,7 +339,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 
     return 0;
 #if 0
-    assert( FALSE );
+    g_assert( FALSE );
 #endif
 }
 #endif /* HAVE_SOCKETS */

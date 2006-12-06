@@ -22,7 +22,7 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
+#include <glib.h>
 #include <string.h>
 
 
@@ -63,11 +63,11 @@ OSRQuasiRandomDice( const int iTurn, const int iGame, const int cGames,
 /* Fill aaProb with one sided bearoff probabilities for position with */
 /* bearoff id n.                                                      */
 
-static inline_hint void
+static inline void
 getBearoffProbs(const unsigned int n, unsigned short int aaProb[32])
 {
 
-  assert( pbc1 );
+  g_assert( pbc1 );
   BearoffDist ( pbc1, n, NULL, NULL, NULL, aaProb, NULL );
 
 }
@@ -138,12 +138,12 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
     --anBoard[ ifar ];
     --anBoard[ inear ];
-    assert ( checkboard ( anBoard ) );
+    g_assert ( checkboard ( anBoard ) );
     anBoard[ 5 ] += 2;
 
     *pnOut -= 2;
-    assert ( *pnOut >= 0 );
-    assert ( *pnOut == chequersout ( anBoard ) );
+    g_assert ( *pnOut >= 0 );
+    g_assert ( *pnOut == chequersout ( anBoard ) );
 
     return;
 
@@ -160,11 +160,11 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
     --anBoard[ iboth ];
     ++anBoard[ 5 ];
-    assert ( checkboard ( anBoard ) );
+    g_assert ( checkboard ( anBoard ) );
 
     --*pnOut;
-    assert ( *pnOut >= 0 );
-    assert ( *pnOut == chequersout ( anBoard ) );
+    g_assert ( *pnOut >= 0 );
+    g_assert ( *pnOut == chequersout ( anBoard ) );
 
     return;
 
@@ -183,11 +183,11 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
       --anBoard[ 5 + anDice[ i ] ];
       ++anBoard[ 5 ];
-    assert ( checkboard ( anBoard ) );
+    g_assert ( checkboard ( anBoard ) );
 
       --*pnOut;
-      assert ( *pnOut >= 0 );
-    assert ( *pnOut == chequersout ( anBoard ) );
+      g_assert ( *pnOut >= 0 );
+    g_assert ( *pnOut == chequersout ( anBoard ) );
 
       ++iused;
 
@@ -214,7 +214,7 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
         --anBoard[ j ];
         ++anBoard[ j - anDice[ i ] ];
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         ++iused;
         found = TRUE;
         /* FIXME: increment lc if needed */
@@ -238,15 +238,15 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
           --anBoard[ j ];
           ++anBoard[ j - anDice[ i ] ];
-          assert ( checkboard ( anBoard ) );
+          g_assert ( checkboard ( anBoard ) );
           ++iused;
 
           if ( j - anDice[ i ] < 6 )
             /* we've moved inside home quadrant */
             --*pnOut;
 
-          assert ( *pnOut >= 0 );
-          assert ( *pnOut == chequersout ( anBoard ) );
+          g_assert ( *pnOut >= 0 );
+          g_assert ( *pnOut == chequersout ( anBoard ) );
 
           break;
 
@@ -266,7 +266,7 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
     if ( anBoard[ anDice[ 1 ] - 1 ] ) {
       /* bear-off */
       --anBoard[ anDice[ 1 ] - 1 ];
-    assert ( checkboard ( anBoard ) );
+    g_assert ( checkboard ( anBoard ) );
       return;
     }
 
@@ -280,7 +280,7 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
         --anBoard[ j ];
         ++anBoard[ j - anDice[ 1 ] ];
 
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         return;
         
       }
@@ -302,7 +302,7 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
         /* else */
         /*   bearoff */
 
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         return;
 
       }
@@ -311,7 +311,7 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
   }
 
-  assert ( iused == 2 );
+  g_assert ( iused == 2 );
   return;
 
 }
@@ -344,12 +344,12 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
 
     --anBoard[ 5 + nDice ];
     ++anBoard[ 5 ];
-    assert ( checkboard ( anBoard ) );
+    g_assert ( checkboard ( anBoard ) );
 
     --nd;
     --*pnOut;
-    assert ( *pnOut >= 0 );
-    assert ( *pnOut == chequersout ( anBoard ) );
+    g_assert ( *pnOut >= 0 );
+    g_assert ( *pnOut == chequersout ( anBoard ) );
 
   }
 
@@ -365,12 +365,12 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
         
         --anBoard[ i ];
         ++anBoard[ 5 ];
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         
         nd -= n;
         --*pnOut;
-        assert ( *pnOut >= 0 );
-        assert ( *pnOut == chequersout ( anBoard ) );
+        g_assert ( *pnOut >= 0 );
+        g_assert ( *pnOut == chequersout ( anBoard ) );
         
         n =nd; /* restart loop */
         
@@ -404,14 +404,14 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
             
             --anBoard[ i ];
             ++anBoard[ i - nDice ];
-            assert ( checkboard ( anBoard ) );
+            g_assert ( checkboard ( anBoard ) );
             
             if ( i - nDice < 6 )
               /* we move into homeland */
               --*pnOut;
             
-            assert ( *pnOut >= 0 );
-            assert ( *pnOut == chequersout ( anBoard ) );
+            g_assert ( *pnOut >= 0 );
+            g_assert ( *pnOut == chequersout ( anBoard ) );
             
             --nd;
             
@@ -442,13 +442,13 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
 
             --anBoard[ i ];
             ++anBoard[ i - nDice ];
-            assert ( checkboard ( anBoard ) );
+            g_assert ( checkboard ( anBoard ) );
 
             if ( i - nDice < 6 )
               --*pnOut;
             
-            assert ( *pnOut >= 0 );
-            assert ( *pnOut == chequersout ( anBoard ) );
+            g_assert ( *pnOut >= 0 );
+            g_assert ( *pnOut == chequersout ( anBoard ) );
 
             --nd;
 
@@ -473,7 +473,7 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
         /* perfect bear-off */
         --anBoard[ nDice - 1 ];
         --nd;
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         continue;
       }
 
@@ -481,7 +481,7 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
         /* bear  double 1s, 2s, and 3s off, e.g., 4/2/0 */
         --anBoard[ 2 * nDice - 1 ];
         nd -= 2;
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         continue;
       }
 
@@ -490,7 +490,7 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
            double 2s off from 6 point (6/4/2/0) */
         --anBoard[ 3 * nDice - 1 ];
         nd -= 3;
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         continue;
       }
 
@@ -498,7 +498,7 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
         /* hmmm, this should not be possible... */
         /* bear off double 1s: 4/3/2/1/0 */
         --anBoard[ 4 * nDice - 1 ];
-        assert ( checkboard ( anBoard ) );
+        g_assert ( checkboard ( anBoard ) );
         nd -= 4;
       }
 
@@ -519,7 +519,7 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
 
           if ( i - nDice > -1 )
             ++anBoard[ i - nDice ];
-          assert ( checkboard ( anBoard ) );
+          g_assert ( checkboard ( anBoard ) );
 
         }
 

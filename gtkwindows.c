@@ -146,7 +146,7 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 {
     GList *pl;
-    GtkWidget *pwChild;
+    GtkWidget *pwChild=NULL;
 
 	switch( da ) {
     case DA_MAIN:

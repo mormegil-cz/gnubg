@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+#include <glib.h>
 
 #include "backgammon.h"
 #include "gtktoolbar.h"
@@ -221,7 +221,7 @@ ToolbarGetStopParent ( GtkWidget *pwToolbar ) {
 	
   toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
 
-  assert ( ptw );
+  g_assert ( ptw );
 
   return ptw->pwStopParent;
 }
@@ -237,7 +237,7 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   toolbarcontrol c;
   int fEdit = ToolbarIsEditing( pwToolbar );
 
-  assert ( ptw );
+  g_assert ( ptw );
 
   c = C_NONE;
 

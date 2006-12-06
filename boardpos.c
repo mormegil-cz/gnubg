@@ -21,12 +21,12 @@
 
 #include <config.h>
 
-#include <assert.h>
+#include <glib.h>
 #include <stdlib.h>
+#include <glib/gi18n.h>
 
 #include "boarddim.h"
 #include "boardpos.h"
-#include <glib/gi18n.h>
 
 extern void
 ChequerPosition( const int clockwise, 
@@ -132,9 +132,9 @@ ArrowPosition( const int clockwise, const int nSize, int *px, int *py ) {
     PointArea( clockwise, nSize, POINT_UNUSED1, 
                &Point29_x, &Point29_y, &Point29_dx, &Point29_dy );
 
-    assert( Point28_x == Point29_x );
-    assert( Point28_dx == Point29_dx );
-    assert( Point28_dy == Point29_dy );
+    g_assert( Point28_x == Point29_x );
+    g_assert( Point28_dx == Point29_dx );
+    g_assert( Point28_dy == Point29_dy );
 
     if ( px ) *px = Point29_x + Point29_dx / 2
 			- nSize * ARROW_SIZE / 2;

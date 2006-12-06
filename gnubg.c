@@ -25,41 +25,8 @@
 #include <gnubgmodule.h>
 #endif
 
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#if HAVE_SYS_FILE_H
-#include <sys/file.h>
-#endif
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
-#include <math.h>
+#include <glib.h>
 #include <signal.h>
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <locale.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if TIME_WITH_SYS_TIME
-#include <sys/time.h>
-#include <time.h>
-#else
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-#endif
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
@@ -113,8 +80,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "gtksplash.h"
 #include "gtkchequer.h"
 #include "gtkwindows.h"
-#else
-#include <glib.h>
 #endif
 
 #if USE_TIMECONTROL
@@ -1582,7 +1547,6 @@ command cER = {
   { "command", CommandSetSoundSystemCommand, 
     N_("Specify external command for playing sounds"), szCOMMAND, NULL },
   { "esd", CommandSetSoundSystemESD, N_("Use ESD sound system"), NULL, NULL },
-  { "nas", CommandSetSoundSystemNAS, N_("Use NAS sound system"), NULL, NULL },
   { "normal", CommandSetSoundSystemNormal, 
     N_("Play sounds to /dev/dsp or /dev/audio"), NULL, NULL },
   { "windows", CommandSetSoundSystemWindows, 
@@ -2134,9 +2098,6 @@ char *aszBuildInfo[] = {
 #if HAVE_ESD
     N_("  ESD sound system"),
 #endif
-#if HAVE_NAS
-    N_("  NAS sound system"),
-#endif
     N_("  /dev/dsp"),
 #endif
 #endif /* USE_SOUND */
@@ -2311,9 +2272,9 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 
     *pchSave = 0;
 
-    assert( pchSave <= pchEnd );
-    assert( *ppch <= pchEnd );
-    assert( pch <= pchEnd );
+    g_assert( pchSave <= pchEnd );
+    g_assert( *ppch <= pchEnd );
+    g_assert( pch <= pchEnd );
     
     return pch;
 
@@ -2959,7 +2920,7 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
     
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }
@@ -4603,7 +4564,7 @@ static void LoadCommands( FILE *pf, char *szFile ) {
             GTKDisallowStdin();
 #  endif
 
-          assert( FALSE ); /* FIXME... */
+          g_assert( FALSE ); /* FIXME... */
 
 #if USE_GTK
           if( fX )
@@ -6083,13 +6044,6 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
     return NULL;
 }
 
-#if !HAVE_RL_COMPLETION_MATCHES
-    /* assume obselete version of readline */
-#define rl_completion_matches( text, func ) \
-	completion_matches( (char *) (text), (func) )
-#define rl_filename_completion_function filename_completion_function
-#endif
-
 static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
     if( fReadingOther )
@@ -6278,7 +6232,7 @@ extern char *GetInput( char *szPrompt ) {
     char *pch;
     char *pchConverted;
 #if USE_GTK
-    assert( fTTY && !fX );
+    g_assert( fTTY && !fX );
 #endif
 
 #if HAVE_LIBREADLINE
@@ -6546,7 +6500,7 @@ extern void outputoff( void ) {
 /* Enable output */
 extern void outputon( void ) {
 
-    assert( cOutputDisabled );
+    g_assert( cOutputDisabled );
 
     cOutputDisabled--;
 }
@@ -6560,7 +6514,7 @@ extern void outputpostpone( void ) {
 /* Re-enable outputx() calls */
 extern void outputresume( void ) {
 
-    assert( cOutputPostponed );
+    g_assert( cOutputPostponed );
 
     if( !--cOutputPostponed )
 	outputx();
@@ -7357,15 +7311,9 @@ main (int argc, char *argv[])
 	    rl_basic_word_break_characters = rl_filename_quote_characters =
 		szCommandSeparators;
 	    rl_completer_quote_characters = "\"'";
-#if HAVE_RL_COMPLETION_MATCHES
 	    /* assume readline 4.2 or later */
 	    rl_completion_entry_function = NullGenerator;
 	    rl_attempted_completion_function = CompleteKeyword;
-#else
-	    /* assume old readline */
-	    rl_completion_entry_function = (Function *) NullGenerator;
-	    rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
-#endif
             /* setup history */
             {
               char *temp = g_build_filename( szHomeDirectory, "history", NULL );

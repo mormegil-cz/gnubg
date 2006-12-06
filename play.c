@@ -21,20 +21,10 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
-#include <math.h>
-#include <signal.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -288,7 +278,7 @@ ApplyGameOver(matchstate* pms, const list* plGame)
   moverecord *pmr = (moverecord *) plGame->plNext->p;
   xmovegameinfo* pmgi = &pmr->g;
 
-  assert( pmr->mt == MOVE_GAMEINFO );
+  g_assert( pmr->mt == MOVE_GAMEINFO );
 
   if( pmgi->fWinner < 0 )
     return;
@@ -314,7 +304,7 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 	pms->gc.pc[1].tvStamp.tv_sec %1000, pms->gc.pc[1].tvStamp.tv_usec / 1000); 
 #endif
 
-    assert( pmr->mt == MOVE_GAMEINFO || pmrx->mt == MOVE_GAMEINFO );
+    g_assert( pmr->mt == MOVE_GAMEINFO || pmrx->mt == MOVE_GAMEINFO );
 
     pmgi = &pmrx->g;
     
@@ -540,7 +530,7 @@ CalculateBoard( void )
   do {
     pl = pl->plNext;
 
-    assert( pl->p );
+    g_assert( pl->p );
 
     ApplyMoveRecord( &ms, plGame, pl->p );
 
@@ -656,44 +646,44 @@ fAddingMoveRecord=1;
 
     moverecord *pmr = pv, *pmrOld;
 
-    assert( pmr->esChequer.et >= EVAL_NONE &&
+    g_assert( pmr->esChequer.et >= EVAL_NONE &&
             pmr->esChequer.et <= EVAL_ROLLOUT );
-    assert( pmr->CubeDecPtr->esDouble.et >= EVAL_NONE &&
+    g_assert( pmr->CubeDecPtr->esDouble.et >= EVAL_NONE &&
             pmr->CubeDecPtr->esDouble.et <= EVAL_ROLLOUT );
-    assert( pmr->fPlayer >= 0 && pmr->fPlayer <= 1 );
-    assert( pmr->ml.cMoves >= 0 && pmr->ml.cMoves < MAX_MOVES );
-    assert( pmr->lt >= LUCK_VERYBAD && pmr->lt <= LUCK_VERYGOOD );
-    assert( 0 <= pmr->stCube && pmr->stCube < N_SKILLS );
-    assert( pmr->CubeDecPtr->esDouble.et >= EVAL_NONE &&
+    g_assert( pmr->fPlayer >= 0 && pmr->fPlayer <= 1 );
+    g_assert( pmr->ml.cMoves >= 0 && pmr->ml.cMoves < MAX_MOVES );
+    g_assert( pmr->lt >= LUCK_VERYBAD && pmr->lt <= LUCK_VERYGOOD );
+    g_assert( 0 <= pmr->stCube && pmr->stCube < N_SKILLS );
+    g_assert( pmr->CubeDecPtr->esDouble.et >= EVAL_NONE &&
             pmr->CubeDecPtr->esDouble.et <= EVAL_ROLLOUT );
 
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
-	assert( pmr->g.nMatch >= 0 );
-	assert( pmr->g.i >= 0 );
+	g_assert( pmr->g.nMatch >= 0 );
+	g_assert( pmr->g.i >= 0 );
 	if( pmr->g.nMatch ) {
-	    assert( pmr->g.i <= pmr->g.nMatch * 2 + 1 );
-	    assert( pmr->g.anScore[ 0 ] < pmr->g.nMatch );
-	    assert( pmr->g.anScore[ 1 ] < pmr->g.nMatch );
+	    g_assert( pmr->g.i <= pmr->g.nMatch * 2 + 1 );
+	    g_assert( pmr->g.anScore[ 0 ] < pmr->g.nMatch );
+	    g_assert( pmr->g.anScore[ 1 ] < pmr->g.nMatch );
 	}
 	if( !pmr->g.fCrawford )
-	    assert( !pmr->g.fCrawfordGame );
-        assert ( pmr->g.bgv >= VARIATION_STANDARD &&
+	    g_assert( !pmr->g.fCrawfordGame );
+        g_assert ( pmr->g.bgv >= VARIATION_STANDARD &&
                  pmr->g.bgv < NUM_VARIATIONS );
 	
 	break;
 	
     case MOVE_NORMAL:
 	if( pmr->ml.cMoves )
-	    assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->ml.cMoves );
-	assert( 0 <= pmr->n.stMove && pmr->n.stMove < N_SKILLS );
+	    g_assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->ml.cMoves );
+	g_assert( 0 <= pmr->n.stMove && pmr->n.stMove < N_SKILLS );
 	break;
 	
 	break;
 	
     case MOVE_RESIGN:
-	assert( pmr->r.nResigned >= 1 && pmr->r.nResigned <= 3 );
-        assert( pmr->r.esResign.et >= EVAL_NONE &&
+	g_assert( pmr->r.nResigned >= 1 && pmr->r.nResigned <= 3 );
+        g_assert( pmr->r.esResign.et >= EVAL_NONE &&
                 pmr->r.esResign.et <= EVAL_ROLLOUT );
 	break;
 	
@@ -708,7 +698,7 @@ fAddingMoveRecord=1;
 	break;
 	
     default:
-	assert( FALSE );
+	g_assert( FALSE );
     }
     
     /* Delete all games after plGame, and all records after plLastMove. */
@@ -810,7 +800,7 @@ static void ResetDelayTimer( void ) {
 
 extern void AddGame( moverecord *pmr ) {
    
-    assert( pmr->mt == MOVE_GAMEINFO );
+    g_assert( pmr->mt == MOVE_GAMEINFO );
 
 #if USE_GTK
     if( fX )
@@ -934,8 +924,8 @@ static int NewGame( void ) {
 	goto reroll;
     }
 
-    assert( ms.nCube <= MAX_CUBE );
-    assert( ms.anDice[ 1 ] != ms.anDice[ 0 ] );
+    g_assert( ms.nCube <= MAX_CUBE );
+    g_assert( ms.anDice[ 1 ] != ms.anDice[ 0 ] );
 
     outputx();
 
@@ -1177,7 +1167,7 @@ extern int ComputerTurn( void ) {
 
         default:
 
-          assert ( FALSE );
+          g_assert ( FALSE );
           
         } /* switch cubedecision */
 
@@ -1229,7 +1219,7 @@ extern int ComputerTurn( void ) {
 
         default:
 
-          assert ( FALSE );
+          g_assert ( FALSE );
 
         } /* switch cubedecision */
 
@@ -1372,7 +1362,7 @@ extern int ComputerTurn( void ) {
 	    
           default:
 
-            assert ( FALSE );
+            g_assert ( FALSE );
             break;
 
           }
@@ -1706,7 +1696,7 @@ extern int ComputerTurn( void ) {
       ;
   }
   
-  assert( FALSE );
+  g_assert( FALSE );
   return -1;
 }
 
@@ -1793,7 +1783,7 @@ static int TryBearoff( void ) {
 
 extern int NextTurn( int fPlayNext ) {
     int n;
-    assert( !fComputing );
+    g_assert( !fComputing );
 	
 #if USE_GTK
     if( fX ) {
@@ -1932,7 +1922,7 @@ extern int NextTurn( int fPlayNext ) {
     }
 #endif
 
-    assert( ms.gs == GAME_PLAYING );
+    g_assert( ms.gs == GAME_PLAYING );
     
     if( fDisplay || ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
@@ -4766,7 +4756,7 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 					_("Beaver to %d") : _("Raccoon to %d"), ms.nCube << 2 );
 			break;
 		default:
-			assert ( FALSE );
+			g_assert ( FALSE );
 			break;
 		}
 		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
@@ -4816,7 +4806,7 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 	break;
 
 	default:
-		assert( FALSE );
+		g_assert( FALSE );
 	}
 	return pch;
 }

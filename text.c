@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include <assert.h>
+#include <glib.h>
 #include <stdarg.h>
 
 #include "backgammon.h"
@@ -408,7 +408,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
 
 
   }

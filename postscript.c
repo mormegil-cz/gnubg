@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
 #include <dynarray.h>
 #include <stdio.h>
@@ -94,14 +94,14 @@ static dynarray daXRef, daPages;
 
 static int AllocateObject( void ) {
 
-    assert( fPDF );
+    g_assert( fPDF );
     
     return DynArrayAdd( &daXRef, (void *) -1 );
 }
 
 static void StartObject( FILE *pf, int i ) {
 
-    assert( fPDF );
+    g_assert( fPDF );
 
     DynArraySet( &daXRef, i, (void *) ftell( pf ) );
 
@@ -110,7 +110,7 @@ static void StartObject( FILE *pf, int i ) {
 
 static void EndObject( FILE *pf ) {
 
-    assert( fPDF );
+    g_assert( fPDF );
 
     fputs( "endobj\n", pf );
 }
@@ -226,7 +226,7 @@ static void ReleaseFont( FILE *pf ) {
 
 static void Ensure( FILE *pf, int cy ) {
 
-    assert( cy <= 648 );
+    g_assert( cy <= 648 );
     
     if( y < cy ) {
 	PSEndPage( pf );
@@ -238,7 +238,7 @@ static void Consume( FILE *pf, int cy ) {
 
     y -= cy;
 
-    assert( y >= 0 );
+    g_assert( y >= 0 );
 }
 
 static void Advance( FILE *pf, int cy ) {
@@ -1275,7 +1275,7 @@ static void PostScriptEpilogue( FILE *pf ) {
 	fputs( "0000000000 65535 f \n", pf );
 	
 	for( i = 1; i < daXRef.iFinish; i++ ) {
-	    assert( daXRef.ap[ i ] );
+	    g_assert( daXRef.ap[ i ] );
 	    
 	    fprintf( pf, "%010ld 00000 n \n", (long) daXRef.ap[ i ] );
 	}

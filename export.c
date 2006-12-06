@@ -21,12 +21,9 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <stdlib.h>
-#include <time.h>
-#include <assert.h>
-#include <stdarg.h>
 
 #if HAVE_LIBPNG
 #include <png.h>
@@ -40,7 +37,6 @@
 #include "positionid.h"
 #include "renderprefs.h"
 #include "matchid.h"
-#include <glib/gi18n.h>
 #include "boardpos.h"
 #include "boarddim.h"
 
@@ -303,7 +299,7 @@ CommandExportPositionPNG (char *sz)
 	{
 		rd.nSize = exsExport.nPNGSize;
 
-		assert (rd.nSize >= 1);
+		g_assert (rd.nSize >= 1);
 
 		RenderImages (&rd, &ri);
 

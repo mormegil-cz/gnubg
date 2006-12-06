@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <glib.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -630,7 +630,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
 
     /* This function should only be called when the game state matches
        the move list. */
-    assert( ms.fMove == 0 || ms.fMove == 1 );
+    g_assert( ms.fMove == 0 || ms.fMove == 1 );
 
     phd->piHighlight = piHighlight;
     phd->pml = pml;

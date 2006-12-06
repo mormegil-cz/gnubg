@@ -30,9 +30,10 @@
 #include <unistd.h>
 #endif
 #include <ctype.h>
-#include "backgammon.h"
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
+
+#include "backgammon.h"
 #include "gtkfile.h"
 #include "gtkgame.h"
 #include "gtkwindows.h"

@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -526,7 +526,7 @@ extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 
 static char *FormatPoint( char *pch, int n ) {
 
-    assert( n >= 0 );
+    g_assert( n >= 0 );
     
     /*don't translate 'off' and 'bar' as these may be used in UserCommand at a later
      * point */
@@ -546,7 +546,7 @@ static char *FormatPoint( char *pch, int n ) {
 
 static char *FormatPointPlain( char *pch, int n ) {
 
-    assert( n >= 0 );
+    g_assert( n >= 0 );
     
     if( n > 9 )
         *pch++ = n / 10 + '0';

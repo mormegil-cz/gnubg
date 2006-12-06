@@ -21,18 +21,11 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
 #include <errno.h>
 
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif /* HAVE_LIMITS_H */
-
-#include <math.h>
-
 #if HAVE_SYS_RESOURCE_H
-#include <sys/time.h>
 #include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
 
@@ -1881,8 +1874,8 @@ CommandSetRolloutRNG ( char *sz ) {
 static void
 SetRolloutEvaluationContextBoth ( char *sz, evalcontext  *pec[] ) {
 
-  assert (pec [0] != 0);
-  assert (pec [1] != 0);
+  g_assert (pec [0] != 0);
+  g_assert (pec [1] != 0);
 
   pecSet = pec[ 0 ];
 
@@ -1962,8 +1955,8 @@ CommandSetRolloutLateChequerplay ( char *sz ) {
 static void
 SetRolloutEvaluationContext ( char *sz, evalcontext *pec[], int iPlayer ) {
 
-    assert ((iPlayer == 0) || (iPlayer == 1));
-    assert (pec [ iPlayer ] != 0);
+    g_assert ((iPlayer == 0) || (iPlayer == 1));
+    g_assert (pec [ iPlayer ] != 0);
 
     pecSet = pec [ iPlayer ];
 
@@ -2506,7 +2499,7 @@ extern void CommandSetScore( char *sz ) {
     if( ms.gs < GAME_OVER && plGame && 
         ( pmr = (moverecord *) plGame->plNext->p ) &&
         ( pmgi = &pmr->g ) ) {
-	assert( pmr->mt == MOVE_GAMEINFO );
+	g_assert( pmr->mt == MOVE_GAMEINFO );
 	pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
 	pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
 	pmgi->fCrawfordGame = ms.fCrawford;
@@ -2698,7 +2691,7 @@ extern void CommandSetCrawford( char *sz ) {
 	  CancelCubeAction();
       
       if( plGame && ( pmr = plGame->plNext->p ) && ( pmgi = &pmr->g ) ) {
-	  assert( pmr->mt == MOVE_GAMEINFO );
+	  g_assert( pmr->mt == MOVE_GAMEINFO );
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
@@ -2732,7 +2725,7 @@ extern void CommandSetPostCrawford( char *sz ) {
 	  CancelCubeAction();
       
       if( plGame && ( pmr = plGame->plNext->p ) && ( pmgi = &pmr->g ) ) {
-	  assert( pmr->mt == MOVE_GAMEINFO );
+	  g_assert( pmr->mt == MOVE_GAMEINFO );
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
@@ -3839,23 +3832,6 @@ CommandSetSoundSystemESD ( char *sz ) {
               "the ESD sound system" ) );
 
 #endif /* HAVE_ESD */
-
-}
-
-extern void
-CommandSetSoundSystemNAS ( char *sz ) {
-
-#if HAVE_NAS
-
-  ssSoundSystem = SOUND_SYSTEM_NAS;
-  outputl ( _("GNU Backgammon will use the NAS sound system" ) );
-
-#else
-
-  outputl ( _("GNU Backgammon was compiled without support for "
-              "the NAS sound system" ) );
-
-#endif /* HAVE_NAS */
 
 }
 

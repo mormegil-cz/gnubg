@@ -31,7 +31,7 @@
 #endif
 
 #include <stdio.h>
-#include <assert.h>
+#include <glib.h>
 #include <glib.h>
 #include <stdlib.h>
 
@@ -163,7 +163,7 @@ int GameOver()
 		const moverecord* pmr = firstGame->plNext->p;
 		if (pmr)
 		{
-			assert(pmr->mt == MOVE_GAMEINFO);
+			g_assert(pmr->mt == MOVE_GAMEINFO);
 			nMatch = pmr->g.nMatch;
 			if (ms.nMatchTo)
 			{	/* Match - check someone has won */
@@ -361,7 +361,7 @@ int MoveAnalysed(moverecord *pmr, matchstate *pms, list *plGame,
     case MOVE_SETCUBEPOS:
       break;
 	default:
-		assert(0);
+		g_assert(0);
     }
 
 	ApplyMoveRecord(pms, plGame, pmr);
@@ -375,7 +375,7 @@ int GameAnalysed(list *plGame)
 	moverecord *pmrx = (moverecord *) plGame->plNext->p; 
 	matchstate msAnalyse;
 
-	assert(pmrx->mt == MOVE_GAMEINFO);
+	g_assert(pmrx->mt == MOVE_GAMEINFO);
 
 	for (pl = plGame->plNext; pl != plGame; pl = pl->plNext)
 	{

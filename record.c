@@ -21,26 +21,19 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if !HAVE_GETPID
-#include <time.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include <errno.h>
+#include <glib.h>
+#include <glib/gi18n.h>
+#include <glib/gstdio.h>
 
 #include "backgammon.h"
 #if USE_GTK
 #include "gtkgame.h"
 #endif
-#include <glib.h>
-#include <glib/gi18n.h>
-#include <glib/gstdio.h>
 #include "record.h"
 
 static int anAvg[ NUM_AVG - 1 ] = { 20, 100, 500 };
@@ -288,7 +281,7 @@ static int RecordAddGame( list *plGame, playerrecord apr[ 2 ] ) {
     expaverage ea;
     float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
     
-    assert( pmr->mt == MOVE_GAMEINFO );
+    g_assert( pmr->mt == MOVE_GAMEINFO );
     
     if( !pmgi->sc.fMoves || !pmgi->sc.fCube || !pmgi->sc.fDice )
 	/* game is not completely analysed */

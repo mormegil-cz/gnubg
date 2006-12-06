@@ -23,22 +23,19 @@
 
 #include <ctype.h>
 #include <gtk/gtk.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <time.h>
+#include <glib/gi18n.h>
 
 #if HAVE_LIBXML2
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
 #endif
 
-#include <glib.h>
-#include <glib/gstdio.h>
 #include "backgammon.h"
 #include "drawboard.h"
 #include "gtkboard.h"
@@ -46,7 +43,6 @@
 #include "gtkgame.h"
 #include "gtkfile.h"
 #include "gtkprefs.h"
-#include <glib/gi18n.h>
 #include "path.h"
 #include "render.h"
 #include "renderprefs.h"

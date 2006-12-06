@@ -8,9 +8,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 if  USE_SOUND 
 SOUND_SOURCES = sound.c
-SOUND_INCS = @ESD_CFLAGS@ @NAS_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ \
+SOUND_INCS = @ESD_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ \
 	@WINMMSND_CFLAGS@
-SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
+SOUND_LIBS = @ESD_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
 	@WINMMSND_LIBS@ @APPLE_QTIME_LIBS@
 else
 SOUND_INCS = 
@@ -65,9 +65,9 @@ endif
 
 COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
               -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @PYTHON_CFLAGS@ @GLIB_CFLAGS@
+              @FREETYPE2_CFLAGS@ @PYTHON_CSPEC@ @GLIB_CFLAGS@ @LIBPNG_CFLAGS@
 COMMON_LIBS = -Llib -levent @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
+              @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@
 
 COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 eval.h eval.c play.c \
@@ -91,8 +91,6 @@ COMMON_DEPS =  lib/libevent.la @LTLIBOBJS@
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
 
-gnubg_LDFLAGS= @PYTHON_LDFLAGS@
-
 if USE_GTK
 ## --- GTK
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) $(BOARD3D_INCS) @CAIRO_CFLAGS@
@@ -108,8 +106,8 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
 	gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h\
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) $(PNG_LIBS) \
-        $(BOARD3D_LIBS) @THREAD_LIBS@ @CAIRO_LIBS@
+gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) @LIBPNG_LIBS@ \
+        $(BOARD3D_LIBS) @CAIRO_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
 ## --- Plain
@@ -123,7 +121,7 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 
 
-pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ \
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
 	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql gnubg.gtkrc
 
 man_MANS = gnubg.6

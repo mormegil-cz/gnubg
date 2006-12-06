@@ -21,14 +21,14 @@
 
 #include "config.h"
 
-#include <stdio.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <string.h>
 
 #include "backgammon.h"
 #include "eval.h"
 #include "format.h"
 
-#include <glib/gi18n.h>
 #include "export.h"
 
 

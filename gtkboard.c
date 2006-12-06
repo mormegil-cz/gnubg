@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#include <assert.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <isaac.h>
 #include <math.h>
@@ -274,7 +274,7 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
     int x, y, cx, cy;
     unsigned char *puch;
 
-    assert( GTK_IS_DRAWING_AREA( drawing_area ) );
+    g_assert( GTK_IS_DRAWING_AREA( drawing_area ) );
     
     if( bd->rd->nSize <= 0 )
 	return TRUE;
@@ -319,7 +319,7 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y,
 				   int cx, int cy, BoardData *bd ) {
     
-    assert( GTK_IS_DRAWING_AREA( drawing_area ) );
+    g_assert( GTK_IS_DRAWING_AREA( drawing_area ) );
     
     {
 	GdkRectangle r;
@@ -2024,7 +2024,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 				if ( UpdateMove( bd, anBoard ) ) {
 					/* should not happen as ForcedMove and GreadyBearoff
 					   always return legal moves */
-					assert(FALSE);
+					g_assert(FALSE);
 				}
 				/* Play a sound if any chequers have moved */
 				if (memcmp(old_points, bd->points, sizeof old_points))

@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
+#include <glib.h>
 
 #include <gtk/gtk.h>
 
@@ -485,7 +485,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	for( ppch = aszTutor; *ppch; ppch++ ) {
 		gtk_combo_box_append_text (GTK_COMBO_BOX (pow->pwTutorSkill), gettext( *ppch ));
 	}
-	assert(nTutorSkillCurrent >= 0 && nTutorSkillCurrent <= 2) ;
+	g_assert(nTutorSkillCurrent >= 0 && nTutorSkillCurrent <= 2) ;
     gtk_tooltips_set_tip (ptt, pwev,
 			  _("Specify how bad GNU Backgammon must think a "
 			    "decision is before questioning you about a "
@@ -1382,7 +1382,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 			if (TutorSkill != SKILL_VERYBAD)
 				UserCommand ("set tutor skill very bad");
 		} else {
-			/* assert(FALSE); Unknown Selection, defaulting */
+			/* g_assert(FALSE); Unknown Selection, defaulting */
 			if (TutorSkill != SKILL_DOUBTFUL)
 				UserCommand ("set tutor skill doubtful");
 		}
@@ -1798,7 +1798,7 @@ GtkWidget *soundFrame, *soundEnabled, *soundPath, *soundPathButton, *soundPlayBu
 	*soundDefaultButton, *soundBeepIllegal, *soundsEnabled, *soundSettings, *soundList;
 int selSound, SoundSkipUpdate;
 GtkWidget *pwSoundArtsC, *pwSoundCommand, *pwSoundESD,
-	*pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundQuickTime;
+	*pwSoundNormal, *pwSoundWindows, *pwSoundQuickTime;
 
 static void SetSoundSettings()
 {
@@ -1821,8 +1821,6 @@ static void SetSoundSettings()
 		UserCommand( "set sound system command /bin/true" ); /* FIXME */
 	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundESD)))
 		UserCommand( "set sound system esd" );
-	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundNAS)))
-		UserCommand( "set sound system nas" );
 	else if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwSoundNormal)))
 		UserCommand( "set sound system normal" );
 	else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwSoundWindows)))
@@ -2017,21 +2015,6 @@ static void AddSoundWidgets(GtkWidget *container)
     gtk_tooltips_set_tip( ptt, pwSoundESD,
 			  _("Play sounds through the Enlightenment Sound "
 			    "Daemon."), NULL );
-						     
-    pwSoundNAS = gtk_radio_button_new_with_label_from_widget(
-	GTK_RADIO_BUTTON( pwSoundArtsC ), _("NAS") );
-    gtk_box_pack_start( GTK_BOX( pwb ), pwSoundNAS, FALSE, FALSE, 0 );
-    gtk_widget_set_sensitive( pwSoundNAS,
-#if HAVE_NAS
-			      TRUE
-#else
-			      FALSE
-#endif
-	);
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwSoundNAS ),
-				  ssSoundSystem == SOUND_SYSTEM_NAS );
-    gtk_tooltips_set_tip( ptt, pwSoundNAS,
-			  _("Use the Network Audio System."), NULL );
 						     
     pwSoundNormal = gtk_radio_button_new_with_label_from_widget(
 	GTK_RADIO_BUTTON( pwSoundArtsC ), _("Raw device") );

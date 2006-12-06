@@ -6,7 +6,7 @@
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
 	-I$(top_srcdir)/lib @LIBXML2_CFLAGS@ \
 	-I$(top_srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-	@FT2_CFLAGS@ @GTKGLEXT_CFLAGS@
+	@FREETYPE2_CFLAGS@ @GTKGLEXT_CFLAGS@
 
 noinst_LTLIBRARIES = libboard3d.la
 libboard3d_la_SOURCES = drawboard3d.c matrix.h \

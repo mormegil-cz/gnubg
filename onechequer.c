@@ -29,7 +29,7 @@
 #include <stdio.h>
 #endif
 #include <math.h>
-#include <assert.h>
+#include <glib.h>
 
 #include "onechequer.h"
 #include "bearoff.h"

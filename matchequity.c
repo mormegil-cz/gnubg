@@ -27,7 +27,7 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <stdio.h>
-#include <assert.h>
+#include <glib.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -199,7 +199,7 @@ initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
       + (1.0 - rG) * 0.5 * 
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
 
-    assert( afMETPostCrawford[ i ] >= 0.0f &&
+    g_assert( afMETPostCrawford[ i ] >= 0.0f &&
             afMETPostCrawford[ i ] <= 1.0f && 
             "insane post crawford equity" );
     /*
@@ -210,14 +210,14 @@ initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
     if ( i == 1 )
       afMETPostCrawford[ i ] -= rFD2;
 
-    assert( afMETPostCrawford[ i ] >= 0.0f &&
+    g_assert( afMETPostCrawford[ i ] >= 0.0f &&
             afMETPostCrawford[ i ] <= 1.0f && 
             "insane post crawford equity(1)" );
 
     if ( i == 3 )
       afMETPostCrawford[ i ] -= rFD4;
 
-    assert( afMETPostCrawford[ i ] >= 0.0f &&
+    g_assert( afMETPostCrawford[ i ] >= 0.0f &&
             afMETPostCrawford[ i ] <= 1.0f && 
             "insane post crawford equity(2)" );
 
@@ -823,7 +823,7 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
         sqrt ( rStddev0 * rStddev0 + rStddev1 * rStddev1 )
         * sqrt ( rGames );
 
-      assert ( 6.0f * rSigma > nScore1 - nScore0 );
+      g_assert ( 6.0f * rSigma > nScore1 - nScore0 );
 
       aafMET[ i ][ j ] =
         1.0f - NormalDistArea ( (float)(nScore1 - nScore0), 6.0f * rSigma,
@@ -1652,10 +1652,10 @@ getGammonPrice ( float arGammonPrice[ 4 ],
   if ( arGammonPrice[ 3 ] <= 0 )
     arGammonPrice[ 3 ] = 0.0;
 
-  assert( arGammonPrice[ 0 ] >= 0 );
-  assert( arGammonPrice[ 1 ] >= 0 );
-  assert( arGammonPrice[ 2 ] >= 0 );
-  assert( arGammonPrice[ 3 ] >= 0 );
+  g_assert( arGammonPrice[ 0 ] >= 0 );
+  g_assert( arGammonPrice[ 1 ] >= 0 );
+  g_assert( arGammonPrice[ 2 ] >= 0 );
+  g_assert( arGammonPrice[ 3 ] >= 0 );
 
 }
 
@@ -1904,7 +1904,7 @@ getME ( const int nScore0, const int nScore1, const int nMatchTo,
     /* non-post-Crawford games */
     return ( fPlayer ) ? 1.0 - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
 
-  assert ( FALSE );
+  g_assert ( FALSE );
   return 0.0f;
 
 }
@@ -1950,7 +1950,7 @@ getMEAtScore( const int nScore0, const int nScore1, const int nMatchTo,
     /* non-post-Crawford games */
     return ( fPlayer ) ? 1.0 - aafMET[ n0 ][ n1 ] : aafMET[ n0 ][ n1 ];
 
-  assert ( FALSE );
+  g_assert ( FALSE );
   return 0.0f;
 
 }

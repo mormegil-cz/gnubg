@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -178,7 +178,7 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
 
       default:
 
-        assert ( FALSE );
+        g_assert ( FALSE );
         break;
 
       }
@@ -228,7 +228,7 @@ StartFromDatabase( hyperequity ahe[], const int nC,
       for ( k = 0; k < NUM_OUTPUTS; ++k ) {
         us = ac[ 3 * k ] | ( ac[ 3 * k + 1 ] ) << 8 | ( ac[ 3 * k + 2 ] ) << 16;
         r = us / 16777215.0;
-        assert( r >= 0 && r <= 1 );
+        g_assert( r >= 0 && r <= 1 );
         ahe[ i * nPos + j ].arOutput[ k ] = r;
       }
 
@@ -236,7 +236,7 @@ StartFromDatabase( hyperequity ahe[], const int nC,
         us = ac[ 15 + 3 * k ] | ( ac[ 15 + 3 * k + 1 ] ) << 8 |  
            ( ac[ 15 + 3 * k + 2 ] ) << 16;
         r = ( us / 16777215.0f - 0.5f ) * 6.0f;
-        assert( r >= -3 && r <= 3 );
+        g_assert( r >= -3 && r <= 3 );
         ahe[ i * nPos + j ].arEquity[ k + 1 ] = r;
       }
 
@@ -371,9 +371,9 @@ HyperEquity ( const int nUs, const int nThem,
             nUsNew = PositionBearoff( anBoardTemp[ 1 ], 25, nC );
             nThemNew = PositionBearoff( anBoardTemp[ 0 ], 25, nC );
           
-            assert ( nUsNew >= 0 );
-            assert ( nUsNew < nUs );
-            assert ( nThemNew >= 0 );
+            g_assert ( nUsNew >= 0 );
+            g_assert ( nUsNew < nUs );
+            g_assert ( nThemNew >= 0 );
 
             /* cubeless */
 

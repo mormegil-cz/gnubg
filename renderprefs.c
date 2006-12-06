@@ -24,13 +24,10 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdlib.h>
-#if HAVE_STRING_H
 #include <string.h>
-#endif
-
-#include "backgammon.h"
 #include <glib.h>
 #include <glib/gi18n.h>
+#include "backgammon.h"
 #include "render.h"
 #include "renderprefs.h"
 #if USE_GTK

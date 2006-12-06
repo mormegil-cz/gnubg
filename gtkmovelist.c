@@ -200,7 +200,7 @@ if (!psHighlight)
 
   /* This function should only be called when the game state matches
      the move list. */
-  assert( ms.fMove == 0 || ms.fMove == 1 );
+  g_assert( ms.fMove == 0 || ms.fMove == 1 );
     
   GetMatchStateCubeInfo( &ci, &ms );
   rBest = pml->amMoves[ 0 ].rScore;
@@ -328,7 +328,7 @@ move *MoveListGetMove(const hintdata *phd, GList *pl)
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(phd->pwMoves));
 
 	gboolean check = gtk_tree_model_get_iter(model, &iter, (GtkTreePath*)(pl->data));
-	assert(check);
+	g_assert(check);
 
 	if (showWLTree)
 		col = 0;

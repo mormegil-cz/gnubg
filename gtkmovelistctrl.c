@@ -191,7 +191,7 @@ custom_cell_renderer_movelist_get_property (GObject    *object,
                                             GParamSpec *pspec)
 {
 	CustomCellRendererMovelist  *cellprogress = CUSTOM_CELL_RENDERER_MOVELIST(object);
-	assert(param_id == 1);
+	g_assert(param_id == 1);
 
 	g_value_set_pointer(value, cellprogress->pml);
 }

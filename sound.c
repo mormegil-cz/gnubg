@@ -25,16 +25,13 @@
 
 #include <config.h>
 
-#include <assert.h>
+#include <glib.h>
 #include <sys/types.h>
 #if HAVE_SYS_AUDIOIO_H
 #include <sys/audioio.h>
 #endif
 #include <errno.h>
 #include <fcntl.h>
-#if HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
 #include <signal.h>
 #if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
@@ -43,17 +40,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#ifdef SIGIO
-  #ifdef HAVE_STROPTS_H
-  #include <stropts.h>
-#endif
-
 #endif
 
 #if HAVE_ESD
@@ -63,10 +51,6 @@
 #if HAVE_ARTSC
 #include <artsc.h>
 #include <glib.h>
-#endif
-
-#if HAVE_NAS
-#include <audio/audiolib.h>
 #endif
 
 #if HAVE_AUDIOFILE
@@ -155,8 +139,6 @@ soundsystem ssSoundSystem = SOUND_SYSTEM_NORMAL;
 soundsystem ssSoundSystem = SOUND_SYSTEM_ESD;
 #  elif defined (HAVE_ARTSC)
 soundsystem ssSoundSystem = SOUND_SYSTEM_ARTSC;
-#  elif defined (HAVE_NAS)
-soundsystem ssSoundSystem = SOUND_SYSTEM_NAS;
 #  elif defined (WIN32)
 soundsystem ssSoundSystem = SOUND_SYSTEM_WINDOWS;
 #  else
@@ -170,7 +152,6 @@ char *aszSoundSystem[ NUM_SOUND_SYSTEMS ] = {
   N_("ArtsC"), 
   N_("External command"),
   N_("ESD"),
-  N_("NAS"),
   N_("/dev/dsp"), /* with fallback to /dev/audio */
   N_("MS Windows"),
   N_("Apple QuickTime")
@@ -180,7 +161,6 @@ char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
   "artsc", 
   "command",
   "esd",
-  "nas",
   "normal",
   "windows",
   "quicktime"
@@ -773,104 +753,6 @@ static int artsc_play_file(const char *file)
 
 #endif /* HAVE_ARTSC */
 
-#if HAVE_NAS
-
-char nas_server[] = "localhost";
-AuServer *nas_serv = NULL;
-
-static AuBool NasEventHandler(AuServer * aud, AuEvent * ev, AuEventHandlerRec * handler)
-{
-  AuElementNotifyEvent *event = (AuElementNotifyEvent *) ev;
-
-  if (ev->type == AuEventTypeElementNotify) {
-    switch (event->kind) {
-    case AuElementNotifyKindState:
-      switch (event->cur_state) {
-      case AuStateStop:
-        _exit(0);
-      }
-      break;
-    }
-  }
-  return AuTrue;
-}
-
-
-static int play_nas(unsigned char *data, int size)
-{
-  AuDeviceID device = AuNone;
-  AuFlowID flow;
-  AuElement elements[3];
-  int i, n, w;
-
-  /* look for an output device */
-  for (i = 0; i < AuServerNumDevices(nas_serv); i++) {
-    if ((AuDeviceKind(AuServerDevice(nas_serv, i)) ==
-         AuComponentKindPhysicalOutput) &&
-        AuDeviceNumTracks(AuServerDevice(nas_serv, i)) == 1) {
-      device = AuDeviceIdentifier(AuServerDevice(nas_serv, i));
-      break;
-    }
-  }
-
-  if (device == AuNone)
-    return 0;
-
-  if (!(flow = AuCreateFlow(nas_serv, NULL)))
-    return 0;
-
-
-  AuMakeElementImportClient(&elements[0], 8012, AuFormatULAW8, 1, AuTrue, size, size / 2, 0, NULL);
-  AuMakeElementExportDevice(&elements[1], 0, device, 8012, AuUnlimitedSamples, 0, NULL);
-  AuSetElements(nas_serv, flow, AuTrue, 2, elements, NULL);
-
-  AuStartFlow(nas_serv, flow, NULL);
-
-  AuWriteElement(nas_serv, flow, 0, size, data, AuTrue, NULL);
-
-  AuRegisterEventHandler(nas_serv, AuEventHandlerIDMask, 0, flow, NasEventHandler, NULL);
-
-  while (1) {
-    AuHandleEvents(nas_serv);
-  }
-
-  return 1;
-}
-
-static int can_play_nas()
-{
-  if ((nas_serv = AuOpenServer(NULL, 0, NULL, 0, NULL, NULL)))
-    return 1;
-  return 0;
-}
-
-static int play_nas_file(char *file)
-{
-  struct stat stat_buf;
-  char *buf;
-  int ret;
-  int fd = open(file, O_RDONLY);
-  if (fd <= 0)
-    return 0;
-
-  if (!can_play_nas())
-    return 0;
-
-  if (stat(file, &stat_buf))
-    return 0;
-
-  if (!stat_buf.st_size)
-    return 0;
-
-  buf = malloc(stat_buf.st_size);
-  read(fd, buf, stat_buf.st_size);
-  ret = play_nas(buf, stat_buf.st_size);
-  free(buf);
-  return ret;
-}
-
-#endif /* HAVE_NAS */
-
 #ifdef __APPLE__
 
 #include <QuickTime/QuickTime.h>
@@ -1034,7 +916,7 @@ play_file_child(soundcache *psc, const char *filename) {
         execvp(args[0], args);
       }
 #else
-      assert( FALSE );
+      g_assert( FALSE );
 #endif
       break;
 
@@ -1045,7 +927,7 @@ play_file_child(soundcache *psc, const char *filename) {
       esd_play_file(NULL, filename, 1);
 
 #else
-      assert ( FALSE );
+      g_assert ( FALSE );
 #endif
 
       break;
@@ -1056,19 +938,9 @@ play_file_child(soundcache *psc, const char *filename) {
 
       artsc_play_file(filename);
 #else
-      assert ( FALSE );
+      g_assert ( FALSE );
 #endif
 
-    case SOUND_SYSTEM_NAS:
-
-#if HAVE_NAS
-
-      play_nas_file(filename);
-
-#else
-      assert ( FALSE );
-#endif
-      
       break;
 
     case SOUND_SYSTEM_NORMAL:
@@ -1080,7 +952,7 @@ play_file_child(soundcache *psc, const char *filename) {
 	}
     }
 #else
-      assert( FALSE );
+      g_assert( FALSE );
 #endif
       break;
 
@@ -1116,7 +988,7 @@ play_file_child(soundcache *psc, const char *filename) {
 	}
 
 #else
-      assert ( FALSE );
+      g_assert ( FALSE );
 #endif
       break;
     
@@ -1125,9 +997,9 @@ play_file_child(soundcache *psc, const char *filename) {
         PlaySound_QuickTime (filename);
 #elif defined(WIN32)
         /* add Quicktime For Windows code here */
-        assert (FALSE);
+        g_assert (FALSE);
 #else
-        assert (FALSE);
+        g_assert (FALSE);
 #endif
         break;
 
@@ -1175,7 +1047,7 @@ play_file(soundcache *psc, const char *filename) {
     _exit(0);
   }
 #endif
-  assert(FALSE);
+  g_assert(FALSE);
 }
 
 int playSoundFile(const gnubgsound gs, char *file)

@@ -21,22 +21,19 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <sys/types.h>
 #include <math.h>
 #include <errno.h>
-#include <stdarg.h>
 #include "eval.h"
 #include "positionid.h"
 #include "getopt.h"
-#include <glib/gi18n.h>
 #include "bearoff.h"
 
 #if WIN32
@@ -215,7 +212,7 @@ OSLookup ( const unsigned int iPos,
   int i, j;
   unsigned char ac[ 128 ];
 
-  assert ( pfOutput != stdin );
+  g_assert ( pfOutput != stdin );
 
   if ( fCompress ) {
 
@@ -468,8 +465,8 @@ static void BearOff( int nId, int nPoints,
 
 		j = PositionBearoff( anBoardTemp[ 1 ], nPoints, 15 );
 
-		assert( j >= 0 );
-		assert( j < nId );
+		g_assert( j >= 0 );
+		g_assert( j < nId );
 
 
                 if ( ! j ) {
@@ -506,8 +503,8 @@ static void BearOff( int nId, int nPoints,
 
 	    }
 
-	    assert( iBest >= 0 );
-            assert( iGammonBest >= 0 );
+	    g_assert( iBest >= 0 );
+            g_assert( iGammonBest >= 0 );
 
 	    if( anRoll[ 0 ] == anRoll[ 1 ] ) {
               for( i = 0; i < 31; i++ ) {
@@ -879,8 +876,8 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
 
       }
 
-      assert ( iBest >= 0 );
-      assert ( iGammonBest >= 0 );
+      g_assert ( iBest >= 0 );
+      g_assert ( iGammonBest >= 0 );
       
       rMean = 1.0f + arBest[ 0 ];
 
@@ -1180,8 +1177,8 @@ static void BearOff2( int nUs, int nThem,
 
 		j = PositionBearoff( anBoardTemp[ 1 ], nTSP, nTSC );
 
-		assert( j >= 0 );
-		assert( j < nUs ); 
+		g_assert( j >= 0 );
+		g_assert( j < nUs ); 
 
                 if ( ! nThem ) {
                   psij = asij;
@@ -1236,10 +1233,10 @@ static void BearOff2( int nUs, int nThem,
 
 	    }
 
-	    assert( aiBest[ 0 ] >= 0 );
-	    assert( ! fCubeful || aiBest[ 1 ] >= 0 );
-	    assert( ! fCubeful || aiBest[ 2 ] >= 0 );
-	    assert( ! fCubeful || aiBest[ 3 ] >= 0 );
+	    g_assert( aiBest[ 0 ] >= 0 );
+	    g_assert( ! fCubeful || aiBest[ 1 ] >= 0 );
+	    g_assert( ! fCubeful || aiBest[ 2 ] >= 0 );
+	    g_assert( ! fCubeful || aiBest[ 3 ] >= 0 );
 	    
             if ( anRoll[ 0 ] == anRoll[ 1 ] )
               for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )

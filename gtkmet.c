@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <glib.h>
 
 #include "backgammon.h"
 #include "eval.h"
@@ -79,7 +79,7 @@ UpdateTable ( mettable *pmt,
       else
         nBytes = sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
 
-      assert( nBytes < STRINGLENGTH );
+      g_assert( nBytes < STRINGLENGTH );
 
       gtk_label_set_text ( GTK_LABEL ( pmt->aapwLabel[ i ][ j ] ), sz );
 

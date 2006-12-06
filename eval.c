@@ -21,39 +21,20 @@
 
 #include "config.h"
 
-#include <assert.h>
-#include <cache.h>
-#include <errno.h>
-#if HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#include <isaac.h>
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
-#include <math.h>
-#include <md5.h>
-#if HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
-#include <neuralnet.h>
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#include <stdio.h>
-#include <stdlib.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <string.h>
-#include <time.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include <errno.h>
+#include <cache.h>
 
+#include "isaac.h"
+#include "neuralnet.h"
+#include <md5.h>
 #include "eval.h"
 #include "bearoffgammon.h"
 #include "positionid.h"
 #include "matchid.h"
 #include "matchequity.h"
-#include <glib/gi18n.h>
 #include "bearoff.h"
 #include "path.h"
 #include "format.h"
@@ -828,7 +809,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
                                "are %.2f)\n"), 
                      szWeights, WEIGHTS_VERSION, r );
 	else {
-#if HAVE_MMAP && ! USE_SSE_VECTORIZE
+#if ! USE_SSE_VECTORIZE
 	    struct stat st;
 	    void *p;
 
@@ -1107,7 +1088,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
     if( anBoard[ i ] )
       n += ( i + 1 - nOppBack ) * anBoard[ i ];
 
-  {                                                              assert( n ); }
+  {                                                              g_assert( n ); }
     
   afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
 
@@ -1620,7 +1601,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
       }
 
       if( nAc > 1 ) {
-	/* assert( tot >= 4 ); */
+	/* g_assert( tot >= 4 ); */
       
 	afInput[I_BACKG] = (tot - 3) / 4.0;
       } else if( nAc == 1 ) {
@@ -1644,7 +1625,7 @@ CalculateRaceInputs(int anBoard[2][25], float inputs[])
 
     unsigned int menOff = 15;
     
-    {                             assert( board[23] == 0 && board[24] == 0 ); }
+    {                             g_assert( board[23] == 0 && board[24] == 0 ); }
     
     /* Points */
     for(i = 0; i < 23; ++i) {
@@ -1856,7 +1837,7 @@ menOffNonCrashed(const int* anBoard, float* afInput)
   for(i = 0; i < 25; ++i) {
     menOff -= anBoard[i];
   }
-  {                                                   assert( menOff <= 8 ); }
+  {                                                   g_assert( menOff <= 8 ); }
     
   if( menOff > 5 ) {
     afInput[ 0 ] = 1.0;
@@ -2164,7 +2145,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }
@@ -2175,7 +2156,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
 static int
 EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
 {
-  assert ( pbc2 );
+  g_assert ( pbc2 );
 
   return BearoffEval ( pbc2, anBoard, arOutput );
 }
@@ -2283,10 +2264,10 @@ enum {
  */
 static int nContext[3] = {-1, -1, -1};
 
-static inline_hint NNEvalType
+static inline NNEvalType
 NNevalAction(positionclass const p)
 {
-  {                     assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
+  {                     g_assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
   
   switch( nContext[p - CLASS_RACE] ) {
     case -1:
@@ -2310,7 +2291,7 @@ NNevalAction(positionclass const p)
   }
 
   /* never reached */
-  assert(0);
+  g_assert(0);
   return 0;   /* for the picky compiler */
 }
 
@@ -3185,7 +3166,7 @@ EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
 
   positionclass pc = ClassifyPosition ( anBoard, bgv );
  
-  assert ( pc <= CLASS_PERFECT );
+  g_assert ( pc <= CLASS_PERFECT );
 
   switch ( pc ) {
   case CLASS_BEAROFF2:
@@ -3198,7 +3179,7 @@ EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
     return PerfectCubeful( pbc15x15, anBoard, arEquity );
     break;
   default:
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
   }
 
@@ -3653,7 +3634,7 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     
     pml->cMoves++;
 
-    assert( pml->cMoves < MAX_INCOMPLETE_MOVES );
+    g_assert( pml->cMoves < MAX_INCOMPLETE_MOVES );
 }
 
 static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
@@ -4177,7 +4158,7 @@ static int
 DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput,
               const bgvariation bgv ) {
 
-  assert ( pbc1 );
+  g_assert ( pbc1 );
   return BearoffDump ( pbc1, anBoard, szOutput );
 
 }
@@ -4186,7 +4167,7 @@ static int
 DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput,
               const bgvariation bgv ) {
 
-  assert( pbc2 );
+  g_assert( pbc2 );
 
   if ( BearoffDump ( pbc2, anBoard, szOutput ) )
     return -1;
@@ -4204,7 +4185,7 @@ static int
 DumpBearoffOS ( int anBoard[ 2 ][ 25 ], 
                 char *szOutput, const bgvariation bgv ) {
 
-  assert ( pbcOS );
+  g_assert ( pbcOS );
   return BearoffDump ( pbcOS, anBoard, szOutput );
 
 }
@@ -4214,7 +4195,7 @@ static int
 DumpBearoffTS ( int anBoard[ 2 ][ 25 ], 
                 char *szOutput, const bgvariation bgv ) {
 
-  assert ( pbcTS );
+  g_assert ( pbcTS );
   return BearoffDump ( pbcTS, anBoard, szOutput );
 
 }
@@ -4224,7 +4205,7 @@ static int
 DumpBearoff15x15 ( int anBoard[ 2 ][ 25 ], 
                    char *szOutput, const bgvariation bgv ) {
 
-  assert ( pbc15x15 );
+  g_assert ( pbc15x15 );
   return BearoffDump ( pbc15x15, anBoard, szOutput );
 
 }
@@ -4339,7 +4320,7 @@ static int
 DumpHypergammon1 ( int anBoard[ 2 ][ 25 ], char *szOutput,
                    const bgvariation bgv ) {
 
-  assert ( apbcHyper[ 0 ] );
+  g_assert ( apbcHyper[ 0 ] );
   return BearoffDump ( apbcHyper[ 0 ], anBoard, szOutput );
 
 }
@@ -4348,7 +4329,7 @@ static int
 DumpHypergammon2 ( int anBoard[ 2 ][ 25 ], char *szOutput,
                    const bgvariation bgv ) {
 
-  assert ( apbcHyper[ 1 ] );
+  g_assert ( apbcHyper[ 1 ] );
   return BearoffDump ( apbcHyper[ 1 ], anBoard, szOutput );
 
 }
@@ -4357,7 +4338,7 @@ static int
 DumpHypergammon3 ( int anBoard[ 2 ][ 25 ], char *szOutput,
                    const bgvariation bgv ) {
 
-  assert ( apbcHyper[ 2 ] );
+  g_assert ( apbcHyper[ 2 ] );
   return BearoffDump ( apbcHyper[ 2 ], anBoard, szOutput );
 
 }
@@ -5175,7 +5156,7 @@ MoneyLive( const float rW, const float rL, const float p,
 
   }
 
-  assert ( FALSE );
+  g_assert ( FALSE );
   return 0;
 
 }
@@ -5656,7 +5637,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
     break;
 
   default:
-    assert( FALSE );
+    g_assert( FALSE );
     break;
 
   }
@@ -6603,7 +6584,7 @@ cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 ) {
   case EVAL_ROLLOUT: return cmp_rolloutcontext ( &pes1->rc, &pes2->rc );
 
   default:
-    assert ( FALSE );
+    g_assert ( FALSE );
   }
 
   return 0;
@@ -7168,7 +7149,7 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
 
     break;
 
@@ -7236,7 +7217,7 @@ getPercent ( const cubedecision cd,
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
 
   }
 

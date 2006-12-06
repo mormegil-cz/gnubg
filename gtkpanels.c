@@ -24,9 +24,6 @@
 #include "config.h"
 
 #include <stdlib.h>
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
 #include <ctype.h>
 #include "backgammon.h"
 #include <glib/gi18n.h>

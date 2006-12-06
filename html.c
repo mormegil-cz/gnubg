@@ -21,17 +21,11 @@
 
 #include "config.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
-#include <assert.h>
-#include <stdarg.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <stdlib.h>
-#include <glib.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -2411,7 +2405,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
 
 
   }

@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <assert.h>
+#include <glib.h>
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
@@ -1443,7 +1443,7 @@ static void RestoreGame(list * pl)
     RestoreTree(pl, TRUE);
 
     pmr = plGame->plNext->p;
-    assert(pmr->mt == MOVE_GAMEINFO);
+    g_assert(pmr->mt == MOVE_GAMEINFO);
 
     AddGame(pmr);
 
@@ -1879,7 +1879,7 @@ static void WriteDoubleAnalysis(FILE * pf,
 	break;
 
     default:
-	assert(FALSE);
+	g_assert(FALSE);
     }
 
     fputc(']', pf);
@@ -1975,7 +1975,7 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 
 
 	default:
-	    assert(FALSE);
+	    g_assert(FALSE);
 	}
 
 	fputc(']', pf);
@@ -2219,7 +2219,7 @@ static void SaveGame(FILE * pf, list * plGame)
 
     pl = plGame->plNext;
     pmr = pl->p;
-    assert(pmr->mt == MOVE_GAMEINFO);
+    g_assert(pmr->mt == MOVE_GAMEINFO);
 
     /* Fixed header */
     fputs("(;FF[4]GM[6]CA[UTF-8]AP[GNU Backgammon:" VERSION "]", pf);
@@ -2436,7 +2436,7 @@ static void SaveGame(FILE * pf, list * plGame)
 #endif
 
 	default:
-	    assert(FALSE);
+	    g_assert(FALSE);
 	}
 
 	if (pmr->sz) {

@@ -24,9 +24,6 @@
 
 #include <stdio.h>
 #include <time.h>
-#if HAVE_SYS_TIME
-#include <sys/time.h>
-#endif
 
 #if USE_GTK
 #include <gtk/gtk.h>

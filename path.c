@@ -24,26 +24,10 @@
 #include <glib.h>
 #include <cache.h>
 #include <errno.h>
-#if HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
-#include <isaac.h>
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
-#include <math.h>
-#include <md5.h>
-#if HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
-
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

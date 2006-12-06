@@ -24,18 +24,15 @@
 #if USE_PYTHON
 #include "gnubgmodule.h"
 
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <signal.h>
-#include <assert.h>
-#include <string.h>
-#include <math.h>
 
 #if HAVE_LIBREADLINE
 #include <readline/history.h>
 #include <readline/readline.h>
 #endif
 
-#include <stdio.h>
-#include <glib.h>
 #include "backgammon.h"
 #include "eval.h"
 #include "matchequity.h"
@@ -43,7 +40,6 @@
 #include "positionid.h"
 #include "analysis.h"
 #include "md5.h"
-#include <glib/gi18n.h>
 
 #define UNUSED_PARAM __attribute__ ((unused))
 
@@ -229,7 +225,7 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
       
     default:
 
-      assert( FALSE );
+      g_assert( FALSE );
 
     }
 
@@ -333,7 +329,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
 
     default:
 
-      assert( FALSE );
+      g_assert( FALSE );
 
     }
 
@@ -1011,11 +1007,11 @@ PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args ) {
 #define CHARP_HACK
 #endif
 
-static inline_hint void
+static inline void
 DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
 {
   int const s = PyDict_SetItemString(dict, CHARP_HACK key, val);  
-  {                                                         assert( s == 0 ); }
+  {                                                         g_assert( s == 0 ); }
   Py_DECREF(val);
 }
 
@@ -1194,7 +1190,7 @@ PyMove(const int move[8])
   }
 
   if( i < 4 ) {
-    int s = _PyTuple_Resize(&moveTuple, i);                  assert(s != -1);
+    int s = _PyTuple_Resize(&moveTuple, i);                  g_assert(s != -1);
   }
   
   return moveTuple;
@@ -1210,7 +1206,7 @@ luckString(lucktype const lt, int const ignoreNone)
     case LUCK_GOOD: return "good";
     case LUCK_VERYGOOD: return "verygood";
   }
-  assert(0);
+  g_assert(0);
   return 0;
 }
     
@@ -1224,7 +1220,7 @@ skillString(skilltype const st, int const ignoreNone)
     case SKILL_NONE:        return ignoreNone ? 0 : "unmarked";
     case SKILL_GOOD:        return "good";
   }
-  assert(0);
+  g_assert(0);
   return 0;
 }
 
@@ -1346,7 +1342,7 @@ PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
 
         case EVAL_NONE: break;
 
-        default: assert( 0 );
+        default: g_assert( 0 );
       }
 
       if( v ) {
@@ -1436,7 +1432,7 @@ PyDoubleAnalysis(const evalsetup* pes,
       break;
     }
     default:
-      assert( 0 );
+      g_assert( 0 );
   }
 
   return dict;
@@ -1687,7 +1683,7 @@ PythonGame(const list*    plGame,
   PyObject* gameDict = PyDict_New();
   PyObject* gameInfoDict = PyDict_New();
 
-  {                                       assert( pmr->mt == MOVE_GAMEINFO ); }
+  {                                       g_assert( pmr->mt == MOVE_GAMEINFO ); }
 
   if( ! (gameDict && gameInfoDict) ) {
     PyErr_SetString(PyExc_MemoryError, "");
@@ -1800,7 +1796,7 @@ PythonGame(const list*    plGame,
                                  GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
 				 ms, verbose);
 	      {
-		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
+		int s = PyDict_Merge(analysis, d, 1);     g_assert( s != -1 );
 	      }
 	      Py_DECREF(d);
 	    }
@@ -1839,7 +1835,7 @@ PythonGame(const list*    plGame,
 	      PyObject* d = PyDoubleAnalysis(&c->esDouble, c->aarOutput,
 					     c->aarStdDev, ms, verbose);
 	      {
-		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
+		int s = PyDict_Merge(analysis, d, 1);     g_assert( s != -1 );
 	      }
 	      Py_DECREF(d);
 	    }
@@ -1930,7 +1926,7 @@ PythonGame(const list*    plGame,
 
 	default:
 	{
-	  assert(0);
+	  g_assert(0);
 	}
       }
 
@@ -2000,7 +1996,7 @@ PythonMatch(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
   }
   
   pmr = firstGame->plNext->p;
-  assert( pmr->mt == MOVE_GAMEINFO );
+  g_assert( pmr->mt == MOVE_GAMEINFO );
   g = &pmr->g;
 
   if( !PyArg_ParseTupleAndKeywords(args, keywds, "|iiii", kwlist,
@@ -2022,7 +2018,7 @@ PythonMatch(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
       PyErr_SetString(PyExc_StandardError, "First game missing from match");
 	  return 0;
   }
-  assert( g->i == 0 );
+  g_assert( g->i == 0 );
 
   /* W,X,0 
      B,O,1 */
@@ -2194,7 +2190,7 @@ PythonNavigate(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
       for( ; pl->p != plGame && pl != &lMatch; pl = pl->plNext)
 	;	
 
-      {                                            assert( pl->p == plGame ); }
+      {                                            g_assert( pl->p == plGame ); }
       {
 	int n = nextGame;
 	if( n > 0 ) {

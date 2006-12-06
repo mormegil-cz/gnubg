@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#include <assert.h>
+#include <glib.h>
 #include <stdio.h>
 #include <string.h>
 #if HAVE_FREETYPE
@@ -193,7 +193,7 @@ renderdata rdDefault = {
 #endif
 };
 
-static inline_hint unsigned char clamp( int n ) {
+static inline unsigned char clamp( int n ) {
 
     if( n < 0 )
 	return 0;
@@ -210,7 +210,7 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
 }
 
-static inline_hint double ssqrt( double x ) {
+static inline double ssqrt( double x ) {
 
     return x < 0.0 ? 0.0 : sqrt( x );
 }
@@ -1021,7 +1021,7 @@ static void WoodPixel( float x, float y, float z, unsigned char auch[ 3 ],
 	break;
 	
     default:
-	assert( FALSE );
+	g_assert( FALSE );
     }
 }
 
@@ -1423,7 +1423,7 @@ static void RenderGlyph( unsigned char *puch, int nStride, FT_Glyph pftg,
     FT_Bitmap *pb;
     int x, y, x0 = 0, y0 = 0;
     
-    assert( pftg->format == FT_GLYPH_FORMAT_BITMAP );
+    g_assert( pftg->format == FT_GLYPH_FORMAT_BITMAP );
 
     pftbg = (FT_BitmapGlyph) pftg;
     pb = &pftbg->bitmap;
@@ -1441,7 +1441,7 @@ static void RenderGlyph( unsigned char *puch, int nStride, FT_Glyph pftg,
 	yOff = 0;
     }
     
-    assert( pb->pixel_mode == FT_PIXEL_MODE_GRAY );
+    g_assert( pb->pixel_mode == FT_PIXEL_MODE_GRAY );
 
     puch += yOff * nStride + xOff * 3;
     nStride -= 3 * pb->width;
@@ -2710,7 +2710,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
                     ARROW_WIDTH * prd->nSize, ARROW_HEIGHT * prd->nSize ) ) {
 
-	assert( anArrowPosition );
+	g_assert( anArrowPosition );
 
 	AlphaBlendClip2( puch, nStride,
 			 anArrowPosition[ 0 ] - x, anArrowPosition[ 1 ] - y,

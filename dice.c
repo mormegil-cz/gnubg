@@ -24,34 +24,15 @@
 #if HAVE_LIBDL
 #include <dlfcn.h>
 #endif
-#if HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
-#if HAVE_GMP_H
+#if HAVE_LIBGMP
 #include <gmp.h>
 #endif
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-
-#if TIME_WITH_SYS_TIME
-#include <sys/time.h>
-#include <time.h>
-#else
-#if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-#endif
-
+#include <glib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdlib.h>
 
 #if HAVE_SOCKETS
 #ifndef WIN32
@@ -612,7 +593,7 @@ extern void InitRNGSeed( int n, const rng rngx, void *p ) {
 
     case RNG_BBS:
 #if HAVE_LIBGMP
-	assert( rngctx->fZInit );
+	g_assert( rngctx->fZInit );
 	mpz_set_ui( rngctx->zSeed, n );
 	BBSCheckInitialSeed( rngctx );
 	break;
@@ -685,7 +666,7 @@ static void InitRNGSeedMP( mpz_t n, rng rng, void *p ) {
 	break;
 	    
     case RNG_BBS:
-	assert( rngctx->fZInit );
+	g_assert( rngctx->fZInit );
 	mpz_set( rngctx->zSeed, n );
 	BBSCheckInitialSeed( rngctx );
 	break;
@@ -1079,7 +1060,7 @@ extern int RollDice( int anDice[ 2 ], const rng rngx, void *p ) {
 
 #else /* HAVE_SOCKETS */
 
-      assert ( FALSE );
+      g_assert ( FALSE );
 
 #endif /* !HAVE_SOCKETS */
 

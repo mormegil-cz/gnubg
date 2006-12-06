@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <glib.h>
 #include <glib.h>
 
 #include "backgammon.h"
@@ -2062,7 +2062,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       outputf ( "Unknown variant in SGG file\n"
                 "Please send the SGG file to bug-gnubg@gnubg.org!\n" );
       outputx();
-      assert ( FALSE );
+      g_assert ( FALSE );
     }
 
     break;
@@ -2303,7 +2303,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       outputf ( "Unknown variation in TMG file\n"
                 "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
       outputx();
-      assert ( FALSE );
+      g_assert ( FALSE );
       return -1;
       break;
     }
@@ -2594,7 +2594,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
           outputf ( "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
           outputx();
-          assert ( FALSE );
+          g_assert ( FALSE );
 
           break;
 

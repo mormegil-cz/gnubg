@@ -39,18 +39,4 @@ typedef RETSIGTYPE (*psighandler)( int );
 	#endif
 	#define BIG_PATH PATH_MAX
 #endif
-
-/* NB. Use inline_hint rather than inline in code to help portability */
-#if defined( __GNUC__ )
-	#ifndef __STRICT_ANSI__
-		#define inline_hint inline
-	#else
-		#define inline_hint __inline__
-	#endif
-#elif _MSC_VER
-	#define inline_hint __inline
-#else
-	#define inline_hint
-#endif
-
 #endif

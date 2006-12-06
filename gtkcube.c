@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+#include <glib.h>
 
 #include "backgammon.h"
 #include "eval.h"
@@ -208,7 +208,7 @@ TakeAnalysis( const movetype mt,
 
     default:
 
-      assert ( FALSE );
+      g_assert ( FALSE );
       break;
 
     }
@@ -661,7 +661,7 @@ UpdateCubeAnalysis ( cubehintdata *pchd ) {
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }
@@ -1050,7 +1050,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   default:
 
-    assert ( FALSE );
+    g_assert ( FALSE );
     break;
 
   }

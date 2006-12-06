@@ -24,24 +24,13 @@
 #if USE_BOARD3D
 #include "board3d/inc3d.h"
 #endif
-#include <assert.h>
-#if HAVE_FCNTL_H
+#include <glib.h>
+#include <glib/gstdio.h>
 #include <fcntl.h>
-#endif
-#include <gtk/gtk.h>
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtktext.h>
-
-#if HAVE_STROPTS_H
-#include <stropts.h>  /* I_SETSIG, S_RDNORM under solaris */
-#endif
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <time.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -57,9 +46,6 @@
 #if HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
-
-#include <glib.h>
-#include <glib/gstdio.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -442,7 +428,7 @@ extern void GTKSuspendInput()
 
 extern void GTKResumeInput()
 {
-	assert(suspendCount > 0);
+	g_assert(suspendCount > 0);
 	suspendCount--;
 	if (suspendCount == 0)
 	{
@@ -712,7 +698,7 @@ extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer ) {
     if( fAutoCommentaryChange )
 	return;
 
-    assert( pmrAnnotation );
+    g_assert( pmrAnnotation );
 
     /* FIXME Copying the entire text every time it's changed is horribly
        inefficient, but the only alternatives seem to be lazy copying
@@ -1442,7 +1428,7 @@ static void SelectGame( GtkWidget *pw, void *p ) {
     int i = GPOINTER_TO_INT( p );
     list *pl;
     
-    assert( plGame );
+    g_assert( plGame );
 
     for( pl = lMatch.plNext; i && pl->plNext->p; i--, pl = pl->plNext )
 	;
@@ -4002,7 +3988,7 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
 		pplw->ap[ i ].pt = apt[ j ];
 		break;
 	    }
-	assert( j < 4 );
+	g_assert( j < 4 );
 
 	EvalOK( pplw->apwEvalChequer[ i ], pplw->apwEvalChequer[ i ] );
 	EvalOK( pplw->apwEvalCube[ i ], pplw->apwEvalCube[ i ] );
@@ -8170,7 +8156,7 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
 		  panel = WINDOW_COMMAND;
 		break;
 	  default:
-		  assert(FALSE);
+		  g_assert(FALSE);
   }
   if (f)
 	PanelShow(panel);
@@ -8246,7 +8232,7 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 		return;
 	}
 
-	assert(r.rows == 2);	/* Should be exactly one entry */
+	g_assert(r.rows == 2);	/* Should be exactly one entry */
 
 	curRow = y;
 	curPlayerId = atoi(r.data[1][0]);
