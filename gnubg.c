@@ -4879,9 +4879,9 @@ extern void CommandImportEmpire(char *sz)
 
 extern void CommandImportParty(char *sz)
 {
-    FILE *gamf, *matf;
+    FILE *gamf, *matf, *pf;
     char *tmpfile;
-    char *cmd;
+    int rc;
 
     sz = NextToken( &sz );
 
@@ -4913,9 +4913,17 @@ extern void CommandImportParty(char *sz)
     }
 
     if (ConvertPartyGammonFileToMat(gamf, matf)) {
-            cmd = g_strdup_printf("import mat '%s'", tmpfile);
-            UserCommand(cmd);
-            g_free(cmd);
+            if( ( pf = fopen( tmpfile, "r" ) ) ) {
+                    rc = ImportMat( pf, tmpfile );
+                    fclose( pf );
+                    if ( !rc )
+                    {
+                            setDefaultFileName ( tmpfile );
+                            if ( fGotoFirstGame )
+                                    CommandFirstGame( NULL );
+                    }
+            } else
+                    outputerr( tmpfile );
     }
     else
             outputerrf("Failed to convert gam to mat\n");
