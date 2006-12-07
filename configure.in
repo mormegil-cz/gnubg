@@ -145,6 +145,7 @@ dnl
 dnl Checks for library functions.
 dnl
 
+AC_FUNC_MMAP
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
 AC_CHECK_FUNCS(fork fstat getdtablesize gettimeofday isatty random readv select setvbuf setpriority)

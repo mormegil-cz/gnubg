@@ -374,6 +374,7 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 
     return 0;
 }
+#if HAVE_MMAP
 extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
  
    float *fp;
@@ -415,6 +416,7 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
 
    return fp;
 }
+#endif
 
 extern int
 NeuralNetDestroy( neuralnet *pnn )
