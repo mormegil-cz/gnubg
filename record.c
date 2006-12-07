@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #include <glib.h>
 #include <ctype.h>
@@ -30,7 +31,6 @@
 #include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
-#include "backgammon.h"
 #if USE_GTK
 #include "gtkgame.h"
 #endif

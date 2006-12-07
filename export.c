@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #include <glib.h>
 #include <glib/gi18n.h>
@@ -30,7 +31,6 @@
 #endif
 
 #include "analysis.h"
-#include "backgammon.h"
 #include "drawboard.h"
 #include "export.h"
 #include "eval.h"

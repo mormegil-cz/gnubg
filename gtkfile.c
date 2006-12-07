@@ -23,6 +23,7 @@
  */
 
 #include <config.h>
+#include "backgammon.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +34,6 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#include "backgammon.h"
 #include "gtkfile.h"
 #include "gtkgame.h"
 #include "gtkwindows.h"

@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #include <ctype.h>
 #include <math.h>
@@ -27,7 +28,6 @@
 #include <string.h>
 #include <glib.h>
 #include <glib/gi18n.h>
-#include "backgammon.h"
 #include "render.h"
 #include "renderprefs.h"
 #if USE_GTK

@@ -20,13 +20,13 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
 #if USE_GTK

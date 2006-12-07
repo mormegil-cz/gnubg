@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #if USE_PYTHON
 #include "gnubgmodule.h"
@@ -33,7 +34,6 @@
 #include <readline/readline.h>
 #endif
 
-#include "backgammon.h"
 #include "eval.h"
 #include "matchequity.h"
 #include "path.h"

@@ -27,6 +27,7 @@
 #include <string.h>
 #include <errno.h>
 #include <glib.h>
+#include <fcntl.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -1369,7 +1370,7 @@ static int
 ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const int nSize ) {
 
   pbc->fMalloc = TRUE;
-
+#if !WIN32
   if ( ( pbc->p = mmap ( NULL, nSize, PROT_READ, 
                            MAP_SHARED, pbc->h, iOffset ) ) == (void *) -1 ) {
     /* allocate memory for database */
@@ -1398,6 +1399,7 @@ ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const int nSize ) {
 
   }
   else
+#endif
     pbc->fMalloc = FALSE;
 
   return 0;

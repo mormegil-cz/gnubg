@@ -30,6 +30,10 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
+#include <ctype.h>
+#if WIN32
+#include <io.h>
+#endif
 
 #if HAVE_LIBREADLINE
 #include <readline/history.h>

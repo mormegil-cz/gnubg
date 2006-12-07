@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #if HAVE_LIBDL
 #include <dlfcn.h>
@@ -90,7 +91,6 @@
 #endif /* #ifndef WIN32 */
 #endif /* #if HAVE_SOCKETS */
 
-#include "backgammon.h"
 #include "dice.h"
 #include "md5.h"
 #include "mt19937ar.h"

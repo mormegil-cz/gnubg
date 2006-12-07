@@ -9,11 +9,11 @@ TARGET = gnubg.exe
 
 SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	dice drawboard erf eval export external \
-	getopt getopt1 gnubg gtk-multiview \
+	gnubg gtk-multiview \
 	gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
 	play gtkprefs gtkmovefilter gtkrace gtktexi gtktheory \
 	htmlimages onechequer \
-	html import kleinman latex luxi matchequity \
+	html import kleinman latex matchequity \
 	matchid path positionid postscript pub_eval record \
 	render rollout set sgf non-src/sgfl non-src/sgfp show sound strdup \
 	text osr gtksplash gtkcolour renderprefs speed openurl \
@@ -21,7 +21,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	gtkbearoff gtkoptions formatgs \
 	timecontrol timer mec relational gtkgamelist \
 	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
-	gtkmovelist gtkmovelistctrl gtkwindows
+	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
@@ -111,5 +111,4 @@ clean:
 	@del .\obj\non-src\*.o
 	@del "$(TARGET)"
 	@del makebearoff.exe
-	@del gnubg_os0.bd gnubg_ts0.bd
 	@echo $(TARGET) clean

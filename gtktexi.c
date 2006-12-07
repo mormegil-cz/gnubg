@@ -20,9 +20,9 @@
  */
 
 #include <config.h>
+#include "backgammon.h"
 #include <glib.h>
 #include <glib/gi18n.h>
-#include "backgammon.h"
 #include "openurl.h"
 
 #include "gtktexi.h"

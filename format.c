@@ -20,12 +20,12 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <string.h>
 
-#include "backgammon.h"
 #include "eval.h"
 #include "format.h"
 

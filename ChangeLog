@@ -1,3 +1,7 @@
+Thu Dec  7 00:59:04 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* various: mingw fixes of autotool changes
+
 Thu Dec  7 00:10:46 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* too many to list: major autotools/library cleanup. Likely some

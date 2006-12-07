@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 
 #include <ctype.h>
 #include <gtk/gtk.h>
@@ -36,7 +37,6 @@
 #include <libxml/parserInternals.h>
 #endif
 
-#include "backgammon.h"
 #include "drawboard.h"
 #include "gtkboard.h"
 #include "gtkcolour.h"

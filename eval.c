@@ -26,6 +26,7 @@
 #include <string.h>
 #include <errno.h>
 #include <cache.h>
+#include <fcntl.h>
 
 #include "isaac.h"
 #include "neuralnet.h"

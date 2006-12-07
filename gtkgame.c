@@ -2205,7 +2205,7 @@ extern int InitGTK( int *argc, char ***argv )
     
     if( !gtk_init_check( argc, argv ) )
 	return FALSE;
-    
+
 #if USE_BOARD3D
 	/* Initialize openGL widget library */
 	InitGTK3d(argc, argv);
