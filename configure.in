@@ -120,7 +120,7 @@ dnl
 dnl Checks for header files.
 dnl
 
-AC_CHECK_HEADERS(limits.h sys/mman.h sys/resource.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h sys/utsname.h)
+AC_CHECK_HEADERS(limits.h sys/mman.h sys/resource.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h sys/utsname.h stropts.h)
 
 dnl
 dnl Checks for typedefs, structures, and compiler characteristics.

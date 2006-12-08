@@ -43,6 +43,9 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_STROPTS_H
+#include <stropts.h>
+#endif
 
 #if HAVE_ESD
 #include <esd.h>
