@@ -1037,7 +1037,7 @@ extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
 }
 #if USE_SSE_VECTORIZE
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(DISABLE_SSE_TEST)
 
 int SSE_Supported()
 {
