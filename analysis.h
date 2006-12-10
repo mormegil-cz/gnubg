@@ -40,7 +40,7 @@ typedef enum _skilltype {
 
 #define N_SKILLS (SKILL_GOOD + 1)
 
-typedef struct {
+typedef struct _statcontext {
   int fMoves, fCube, fDice; /* which statistics have been computed? */
     
   int anUnforcedMoves[ 2 ];

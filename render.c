@@ -44,9 +44,16 @@
 #include <gtk/gtk.h>
 #include <cairo.h>
 #endif
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 
 static randctx rc;
 #define RAND irand( &rc )
+
+#define FONT_VERA "fonts/Vera.ttf"
+#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
+#define FONT_VERA_BOLD "fonts/VeraBd.ttf"
 
 /* aaanPositions[Clockwise][x][point number][x, y. deltay] */
 int positions[ 2 ][ 30 ][ 3 ] = { {
@@ -2896,7 +2903,7 @@ int MaterialTextCompare(Material* pMat1, Material* pMat2)
 	return MaterialCompare(pMat1, pMat2) &&
 		((!pMat1->textureInfo && !pMat2->textureInfo) ||
 			(pMat1->textureInfo && pMat2->textureInfo &&
-			!strcmp(pMat1->textureInfo->name, pMat2->textureInfo->name)));
+			!strcmp(MaterialGetTextureFilename(pMat1), MaterialGetTextureFilename(pMat2))));
 }
 #endif
 

@@ -50,34 +50,6 @@ extern void GTKUpdateClock(void);
 
 #define MAX_CUBE ( 1 << 12 )
 
-/* position of windows: main window, game list, and annotation */
-
-typedef enum _gnubgwindow {
-  WINDOW_MAIN = 0,
-  WINDOW_GAME,
-  WINDOW_ANALYSIS,
-  WINDOW_ANNOTATION,
-  WINDOW_HINT,
-  WINDOW_MESSAGE,
-  WINDOW_COMMAND,
-  WINDOW_THEORY,
-  NUM_WINDOWS
-} gnubgwindow;
-
-typedef struct _windowgeometry {
-  int nWidth, nHeight;
-  int nPosX, nPosY, max;
-} windowgeometry;
-
-extern void SaveWindowSettings(FILE* pf);
-extern void HidePanel(gnubgwindow window);
-extern void getWindowGeometry(gnubgwindow window);
-extern int PanelShowing(gnubgwindow window);
-extern void ClosePanels();
-
-extern int GetPanelSize();
-extern void SetPanelWidth(int size);
-
 typedef struct _command {
   /* Command name (NULL indicates end of list) */
   char* sz; 
@@ -96,8 +68,6 @@ typedef struct _command {
 typedef enum _playertype {
     PLAYER_EXTERNAL, PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL
 } playertype;
-
-#define MAX_NAME_LEN 32
 
 typedef struct _player {
   /* For all player types: */
@@ -1265,9 +1235,5 @@ extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] );
 
 extern void SetupLanguage(char *newLangCode);
-
-#define FONT_VERA "fonts/Vera.ttf"
-#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
-#define FONT_VERA_BOLD "fonts/VeraBd.ttf"
 
 #endif

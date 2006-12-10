@@ -1051,6 +1051,7 @@ play_file(soundcache *psc, const char *filename) {
   }
 #endif
   g_assert(FALSE);
+  return -1;
 }
 
 int playSoundFile(const gnubgsound gs, char *file)

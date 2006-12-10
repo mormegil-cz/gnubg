@@ -21,30 +21,18 @@
 * $Id$
 */
 
-#include "config.h"
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <memory.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#else
-#include <io.h>
-#endif
 #include "inc3d.h"
-#include "shadow.h"
 #include "renderprefs.h"
 #include "sound.h"
-#include "backgammon.h"
-#include "path.h"
-#include "export.h"
-#include <glib/gi18n.h>
-#include "drawboard.h"
-#include "font3d.h"
+
+extern int WritePNG( const char *sz, unsigned char *puch, int nStride,
+		     const int nSizeX, const int nSizeY );
 
 int stopNextTime;
 int slide_move;
 double animStartTime = 0;
+
+#define MAX_FRAMES 10
 
 void CreateDotTexture(int *pDotTexture);
 
@@ -63,14 +51,14 @@ idleFunc *pIdleFun;
 static gboolean idle(BoardData* bd)
 {
 	if (pIdleFun(bd))
-		gtk_widget_queue_draw(bd->bd3d.drawing_area3d);
+		DrawScene3d(bd->bd3d);
 
 	return TRUE;
 }
 
 void StopIdle3d(BoardData* bd)
 {	/* Animation has finished (or could have been interruptted) */
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	if (bd3d->shakingDice)
 	{
 		bd3d->shakingDice = 0;
@@ -241,7 +229,7 @@ void InitGL(BoardData *bd)
 
 	if (bd)
 	{
-		BoardData3d *bd3d = &bd->bd3d;
+		BoardData3d *bd3d = bd->bd3d;
 		/* Setup some 3d things */
 		if (!BuildFont3d(bd3d))
 			g_print("Error creating fonts\n");
@@ -292,19 +280,19 @@ int IsSet(int flags, int bit)
 
 /* Texture functions */
 
-list textures;
+GList *textures;
 
 char* TextureTypeStrs[TT_COUNT] = {"general", "piece", "hinge"};
 
 GList *GetTextureList(int type)
 {
 	GList *glist = NULL;
-	list *pl;
+	GList *pl;
 	glist = g_list_append(glist, NO_TEXTURE_STRING);
 
-	for (pl = textures.plNext; pl->p; pl = pl->plNext)
+	for (pl = textures; pl; pl = pl->next)
 	{
-		TextureInfo* text = (TextureInfo*)pl->p;
+		TextureInfo* text = (TextureInfo*)pl->data;
 		if (IsSet(type, text->type))
 			glist = g_list_append(glist, text->name);
 	}
@@ -313,10 +301,10 @@ GList *GetTextureList(int type)
 
 void FindNamedTexture(TextureInfo** textureInfo, char* name)
 {
-	list *pl;
-	for (pl = textures.plNext; pl->p; pl = pl->plNext)
+	GList *pl;
+	for (pl = textures; pl; pl = pl->next)
 	{
-		TextureInfo* text = (TextureInfo*)pl->p;
+		TextureInfo* text = (TextureInfo*)pl->data;
 		if (!strcasecmp(text->name, name))
 		{
 			*textureInfo = text;
@@ -325,16 +313,16 @@ void FindNamedTexture(TextureInfo** textureInfo, char* name)
 	}
 	*textureInfo = 0;
 	/* Only warn user if textures.txt file has been loaded */
-	if (!ListEmpty(&textures))
+	if (g_list_length(textures) > 0)
 		g_print("Texture %s not in texture info file\n", name);
 }
 
 void FindTexture(TextureInfo** textureInfo, char* file)
 {
-	list *pl;
-	for (pl = textures.plNext; pl->p; pl = pl->plNext)
+	GList *pl;
+	for (pl = textures; pl; pl = pl->next)
 	{
-		TextureInfo* text = (TextureInfo*)pl->p;
+		TextureInfo* text = (TextureInfo*)pl->data;
 		if (!strcasecmp(text->file, file))
 		{
 			*textureInfo = text;
@@ -353,7 +341,8 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 
 			*textureInfo = (TextureInfo*)malloc(sizeof(TextureInfo));
 			**textureInfo = text;
-			ListInsert(&textures, *textureInfo);
+
+			textures = g_list_append(textures, *textureInfo);
 
 			free( szFile );
 			return;
@@ -377,8 +366,8 @@ void LoadTextureInfo(int FirstPass)
 	char buf[BUF_SIZE];
 
 	if (FirstPass)
-		ListCreate(&textures);
-	else if (!ListEmpty(&textures))
+		textures = NULL;
+	else if (g_list_length(textures) > 0)
 		return;	/* Ignore multiple calls after a successful load */
 
 	szFile = PathSearch( TEXTURE_FILE, szDataDirectory );
@@ -480,7 +469,7 @@ void LoadTextureInfo(int FirstPass)
 		{	/* Add texture type */
 			TextureInfo* pNewText = (TextureInfo*)malloc(sizeof(TextureInfo));
 			*pNewText = text;
-			ListInsert(&textures, pNewText);
+			textures = g_list_append(textures, pNewText);
 		}
 	} while (!feof(fp));
 }
@@ -660,7 +649,7 @@ void CopySettings3d(BoardData* from, BoardData* to)
 {	/* Just copy the whole thing (for now?) */
 	memcpy(to, from, sizeof(BoardData));
 	/* Shallow copy, so reset allocated data */
-	to->bd3d.boardPoints = 0;
+	to->bd3d->boardPoints = 0;
 }
 
 /* Return v position, d distance along path segment */
@@ -1862,7 +1851,7 @@ int idleAnimate(BoardData* bd)
 	float elapsedTime = (float)((get_time() - animStartTime) / 1000.0f);
 	float vel = .2f + nGUIAnimSpeed * .3f;
 	float animateDistance = elapsedTime * vel;
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
 
 	if (stopNextTime)
@@ -2047,7 +2036,7 @@ void AnimateMove3d(BoardData *bd, BoardData3d *bd3d)
 
 int idleWaveFlag(BoardData* bd)
 {
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	float elapsedTime = (float)(get_time() - animStartTime);
 	bd3d->flagWaved = elapsedTime / 200;
 	updateFlagOccPos(bd, bd3d);
@@ -2076,7 +2065,7 @@ void ShowFlag3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 
 int idleCloseBoard(BoardData* bd)
 {
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	float elapsedTime = (float)(get_time() - animStartTime);
 	if (bd3d->State == BOARD_CLOSED)
 	{	/* finished */
@@ -2131,7 +2120,7 @@ void EmptyPos(BoardData *bd)
 {	/* All checkers home */
 	int ip[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,-15};
 	memcpy(bd->points, ip, sizeof(bd->points));
-	updatePieceOccPos(bd, &bd->bd3d);
+	updatePieceOccPos(bd, bd->bd3d);
 }
 
 void CloseBoard3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
@@ -2293,7 +2282,7 @@ void ClearTextures(BoardData3d* bd3d)
 	if (!bd3d->numTextures)
 		return;
 
-	MakeCurrent3d(bd3d->drawing_area3d);
+	MakeCurrent3d(bd3d);
 
 	for (i = 0; i < bd3d->numTextures; i++)
 	{
@@ -2301,6 +2290,11 @@ void ClearTextures(BoardData3d* bd3d)
 		free(bd3d->textureName[i]);
 	}
 	bd3d->numTextures = 0;
+}
+
+void DeleteTextureList()
+{
+	g_list_free(textures);
 }
 
 void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
@@ -2330,6 +2324,7 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 	bd3d->numTextures = 0;
 
 	bd3d->boardPoints = NULL;
+	bd3d->numberFont = bd3d->cubeFont = NULL;
 
 	memset(bd3d->modelMatrix, 0, sizeof(float[16]));
 }
@@ -2370,3 +2365,28 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 }
 
 #endif
+
+extern GtkWidget *GetDrawingArea3d(BoardData3d* bd3d)
+{
+	return bd3d->drawing_area3d;
+}
+
+extern char *MaterialGetTextureFilename(Material* pMat)
+{
+	return pMat->textureInfo->file;
+}
+
+extern void TidyCurveAccuracy3d(BoardData3d* bd3d, int accuracy)
+{
+	freeEigthPoints(&bd3d->boardPoints, accuracy);
+}
+
+extern void DrawScene3d(BoardData3d* bd3d)
+{
+	gtk_widget_queue_draw(bd3d->drawing_area3d);
+}
+
+extern int Animating3d(BoardData3d* bd3d)
+{
+	return (bd3d->shakingDice || bd3d->moving);
+}

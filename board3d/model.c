@@ -21,14 +21,7 @@
 * $Id$
 */
 
-#include "config.h"
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include "matrix.h"
 #include "inc3d.h"
-#include "shadow.h"
-#include <string.h>
 
 #define TOP_EDGE -2
 

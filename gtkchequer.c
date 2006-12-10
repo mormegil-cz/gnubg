@@ -41,6 +41,9 @@
 #include "gtkwindows.h"
 #include "progress.h"
 #include "format.h"
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 
 extern moverecord *pmrCurAnn;
 int showMoveListDetail = 1;

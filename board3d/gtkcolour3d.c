@@ -21,17 +21,9 @@
 * $Id$
 */
 
-#include "config.h"
-#include <string.h>
 #include "inc3d.h"
-#include <gdk/gdkkeysyms.h>
-#include "gtkboard.h"
-#include <glib/gi18n.h>
-
-#include <gtk/gtkgl.h>
 
 #include "gtkcolour.h"
-#include "gtkwindows.h"
 
 extern void UpdatePreview(GtkWidget **ppw);
 static void RenderPreview(Material* pMat, unsigned char* buf);
@@ -344,8 +336,8 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 		else
 		{
 			BoardData *bd = (BOARD(pwPrevBoard))->board_data;
-			ClearTextures(&bd->bd3d);
-			GetTextures(&bd->bd3d, bd->rd);
+			ClearTextures(bd->bd3d);
+			GetTextures(bd->bd3d, bd->rd);
 		}
 	}
 	gc = gdk_gc_new(pDetails->pixmap);

@@ -28,12 +28,6 @@
 #pragma interface
 #endif
 
-#if defined(__cplusplus)
-#define CONST const
-#else
-#define CONST
-#endif
-
 /* pack for space */
 struct GammonProbs {
   unsigned int p1 : 16;  /* 0 - 36^2 */
@@ -46,10 +40,10 @@ struct GammonProbs {
 extern "C" {
 #endif
 
-extern CONST struct GammonProbs*
+extern struct GammonProbs*
 getBearoffGammonProbs(int b[6]);
 
-extern CONST long*
+extern long*
 getRaceBGprobs(int board[6]);
 
 #if defined( __cplusplus )

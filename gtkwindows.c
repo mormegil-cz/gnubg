@@ -280,3 +280,44 @@ extern char* GTKGetInput(char* title, char* prompt)
 	GTKAllowStdin();
 	return inputString;
 }
+
+GtkWidget *pwTick;
+
+static void
+WarningOK ( GtkWidget *pw, warnings warning )
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwTick)))
+	{	/* if tick set, disable warning */
+		char cmd[200];
+		sprintf(cmd, "set warning %s off", warningNames[warning]);
+		UserCommand(cmd);
+	}
+	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+}
+
+extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
+{
+	if (warningEnabled[warning])
+	{
+		GtkWidget *pwDialog, *pwMsg, *pwv;
+		
+		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), DT_WARNING,
+			pwParent, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( WarningOK ), (void*)warning );
+
+		pwv = gtk_vbox_new ( FALSE, 8 );
+		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
+
+                pwMsg = gtk_label_new( gettext( warningStrings[warning] ) );
+		gtk_box_pack_start( GTK_BOX( pwv ), pwMsg, TRUE, TRUE, 0 );
+
+		pwTick = gtk_check_button_new_with_label (_("Don't show this again"));
+		gtk_tooltips_set_tip(ptt, pwTick, _("If set, this message won't appear again"), 0);
+		gtk_box_pack_start( GTK_BOX( pwv ), pwTick, TRUE, TRUE, 0 );
+
+		gtk_widget_show_all( pwDialog );
+
+		GTKDisallowStdin();
+		gtk_main();
+		GTKAllowStdin();
+	}
+}

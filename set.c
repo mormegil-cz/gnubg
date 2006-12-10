@@ -60,6 +60,7 @@
 #include "gtkgame.h"
 #include "gtkprefs.h"
 #include "gtkchequer.h"
+#include "gtkwindows.h"
 #endif /* USE_GTK */
 
 #include "matchequity.h"
@@ -77,6 +78,9 @@
 
 #if USE_TIMECONTROL
 #include "timecontrol.h"
+#endif
+#if USE_BOARD3D
+#include "fun3d.h"
 #endif
 
 #if WIN32

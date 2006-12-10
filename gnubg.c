@@ -89,6 +89,9 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #if USE_TIMECONTROL
 #include "timecontrol.h"
 #endif
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
 #define NO_BACKSLASH_ESCAPES 1
@@ -2626,12 +2629,12 @@ extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
     sa.sa_handler = p;
     sigemptyset( &sa.sa_mask );
     sa.sa_flags =
-# if SA_RESTART
+#if SA_RESTART
 	( fRestart ? SA_RESTART : 0 ) |
-# endif
-# if SA_NOCLDSTOP
+#endif
+#if SA_NOCLDSTOP
 	SA_NOCLDSTOP |
-# endif
+#endif
 	0;
     sigaction( nSignal, p ? &sa : NULL, pOld );
 #elif HAVE_SIGVEC
@@ -4126,7 +4129,7 @@ extern void PromptForExit( void ) {
 
 #if USE_BOARD3D
 	if (fX && bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
-		CloseBoard3d(bd, &bd->bd3d, bd->rd);
+		CloseBoard3d(bd, bd->bd3d, bd->rd);
 #endif
 #if USE_GTK
     if( fX ) {
@@ -4144,7 +4147,7 @@ extern void PromptForExit( void ) {
 		board_free_pixmaps(bd);
 #if USE_BOARD3D
 	if (fX)
-		Tidy3dObjects(&bd->bd3d, bd->rd);
+		Tidy3dObjects(bd->bd3d, bd->rd);
 #endif
 #endif
 
@@ -7343,16 +7346,16 @@ main (int argc, char *argv[])
 	}
     
 #ifdef SIGIO
-# if USE_GTK
+ #if USE_GTK
     if( fX )
 	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
-#  if USE_SOUND
+  #if USE_SOUND
     else
-#  endif
-# endif
-# if USE_SOUND
+  #endif
+ #endif
+#if USE_SOUND
 	PortableSignal( SIGIO, SoundSIGIO, NULL, TRUE );
-# endif
+#endif
 #endif
 
     fnTick = CallbackProgress;

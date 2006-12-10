@@ -130,25 +130,25 @@ tctransition transitions[] = {
 
 #ifndef timeradd
 #define timeradd(tvp, uvp, vvp)						\
-	do {								\
+	{								\
 		(vvp)->tv_sec = (tvp)->tv_sec + (uvp)->tv_sec;		\
 		(vvp)->tv_usec = (tvp)->tv_usec + (uvp)->tv_usec;	\
 		if ((vvp)->tv_usec >= 1000000) {			\
 			(vvp)->tv_sec++;				\
 			(vvp)->tv_usec -= 1000000;			\
 		}							\
-	} while (0)
+	}
 #endif
 #ifndef timersub
 #define timersub(a, b, result)						      \
-  do {									      \
+  {									      \
     (result)->tv_sec = (a)->tv_sec - (b)->tv_sec;			      \
     (result)->tv_usec = (a)->tv_usec - (b)->tv_usec;			      \
     if ((result)->tv_usec < 0) {					      \
       --(result)->tv_sec;						      \
       (result)->tv_usec += 1000000;					      \
     }									      \
-  } while (0)
+  }
 #endif
 
 static tcnode *tcHead = 0;
@@ -220,14 +220,14 @@ static void tcCopy(timecontrol *dst, timecontrol *src)
     if (src->szNextB) dst->szNextB = strdup(src->szNextB);
     srcNode=src->pTransitions;
     if (srcNode)
-	dstNode = dst->pTransitions=malloc(sizeof(tctransition));
+	dstNode = dst->pTransitions = (tctransitionnode*)malloc(sizeof(tctransitionnode));
     while (srcNode)
     {
 	dstNode->ptrans = srcNode->ptrans;
 	dstNode->szNext = strdup(srcNode->szNext);
 	srcNode = srcNode->next;
 	if (srcNode)
-	    dstNode = dstNode->next = malloc(sizeof(tctransition));
+	    dstNode = dstNode->next = (tctransitionnode*)malloc(sizeof(tctransitionnode));
 	else
 	    dstNode->next = 0;
     }
@@ -299,7 +299,7 @@ static void setNameModified( )
     if (0 == strcmp(tc.szName+strlen(tc.szName) - strlen(_("(modified)")),
 	_("(modified)")) ) 
 	return;
-    p = malloc(strlen(tc.szName)+12);
+    p = malloc(strlen(tc.szName) + strlen(_("(modified)")) + 2);	/* + 2 as " " in string (and eol) */
     sprintf(p, "%s %s", tc.szName, _("(modified)"));
     free (tc.szName);
     tc.szName = p;
@@ -321,7 +321,7 @@ static void nameTimeControl( char *sz )
     else if ( fX )
 	GTKRemoveTimeControl(ptc->szName);
 #endif
-    if (ptc && (pNode = calloc(sizeof(tcnode), 1)))
+    if (ptc && ((pNode = calloc(sizeof(tcnode), 1)) != NULL))
     {
 	free (tc.szName);
 	tc.szName = strdup(sz);
@@ -540,7 +540,7 @@ extern void CommandSetTimeControl( char *sz ) {
   if ((strcasecmp(sz, "off")))
     {
 	timecontrol *ptc;
-	if ((ptc = findTimeControl(sz)))
+	if ((ptc = findTimeControl(sz)) != NULL)
 	{
 	    outputf(_("Time control set to %s\n"), ptc->szName);
 	    tcCopy( &tc, ptc);
@@ -804,14 +804,14 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 	    }
 	}
 
-	if (szNextPlayer && (newtc = findTimeControl(szNextPlayer))) 
+	if (szNextPlayer && ((newtc = findTimeControl(szNextPlayer)) != NULL)) 
 	{
 	    pgcPlayer->tc= *newtc;
 	    pgcPlayer->tvTimeleft.tv_sec = (int)( pgcPlayer->tvTimeleft.tv_sec * pgcPlayer->tc.dMultiplier);
 	    pgcPlayer->tvTimeleft.tv_sec += pgcPlayer->tc.nAddedTime;
 	}
 
-	if (szNextOpp && (newtc = findTimeControl(szNextOpp))) 
+	if (szNextOpp && ((newtc = findTimeControl(szNextOpp)) != NULL)) 
 	{
 	    pgcOpp->tc= *newtc;
 	    pgcOpp->tvTimeleft.tv_sec = (int)( pgcOpp->tvTimeleft.tv_sec * pgcOpp->tc.dMultiplier);
@@ -890,7 +890,8 @@ static char staticBuf[20];
     long sec=ptl->tv_sec;
     int h,m,s;
     int neg;
-    if ((neg=(sec<0))) sec = -sec;
+    if ((neg = (sec < 0)) != 0)
+		sec = -sec;
     s = sec%60;
     sec/=60;
     m = sec%60;

@@ -31,6 +31,9 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "positionid.h"
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 
 extern GtkItemFactory *pif;
 extern GtkWidget *pom;
@@ -838,7 +841,7 @@ ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 	/* Hide for smoother appearance */
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D)
-		gtk_widget_hide(bd->bd3d.drawing_area3d);
+		gtk_widget_hide(GetDrawingArea3d(bd->bd3d));
 	else
 #endif
 		gtk_widget_hide(bd->drawing_area);
@@ -865,7 +868,7 @@ ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D)
-		gtk_widget_show(bd->bd3d.drawing_area3d);
+		gtk_widget_show(GetDrawingArea3d(bd->bd3d));
 	else
 #endif
 		gtk_widget_show(bd->drawing_area);
@@ -883,7 +886,7 @@ HideAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 	/* Hide for smoother appearance */
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D)
-		gtk_widget_hide(bd->bd3d.drawing_area3d);
+		gtk_widget_hide(GetDrawingArea3d(bd->bd3d));
 	else
 #endif
 		gtk_widget_hide(bd->drawing_area);
@@ -916,7 +919,7 @@ HideAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D)
-		gtk_widget_show(bd->bd3d.drawing_area3d);
+		gtk_widget_show(GetDrawingArea3d(bd->bd3d));
 	else
 #endif
 		gtk_widget_show(bd->drawing_area);

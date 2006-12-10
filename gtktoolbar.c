@@ -38,6 +38,10 @@
 #include <glib/gi18n.h>
 #include "drawboard.h"
 #include "renderprefs.h"
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
+
 extern void NewDialog( gpointer *p, guint n, GtkWidget *pw ); 
 
 typedef struct _toolbarwidget {

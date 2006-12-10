@@ -22,11 +22,14 @@
 #ifndef _GTKBOARD_H_
 #define _GTKBOARD_H_
 
+#include <gtk/gtk.h>
+#include "eval.h"
+#include "gtkpanels.h"
+#include "common.h"
 #include "render.h"
-#include "backgammon.h"
 
 #if USE_BOARD3D
-#include "board3d/inc3d.h"
+#include "types3d.h"
 #endif
 
 #ifdef __cplusplus
@@ -139,7 +142,7 @@ typedef struct _BoardData {
 	int iTargetHelpPoints[4];	/* Drag target position */
 
 #if USE_BOARD3D
-	BoardData3d bd3d;	/* extra members for 3d board */
+	BoardData3d *bd3d;	/* extra members for 3d board */
 #endif
 	renderdata* rd;	/* The board colour settings */
 } BoardData;
@@ -183,9 +186,5 @@ extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#if USE_BOARD3D
-#include "board3d/fun3d.h"
-#endif
 
 #endif

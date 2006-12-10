@@ -1,4 +1,11 @@
 
+#ifndef _FUN3D_H
+#define _FUN3D_H
+
+#include "types3d.h"
+#include "gtkboard.h"
+#include "analysis.h"
+
 /* Setup functions */
 void InitGL(BoardData *bd);
 
@@ -9,18 +16,6 @@ float getBoardWidth();
 float getBoardHeight();
 void calculateBackgroundSize(BoardData3d *bd3d, int viewport[4]);
 
-typedef struct _ClipBox
-{
-	float x;
-	float y;
-	float xx;
-	float yy;
-} ClipBox;
-
-#define MAX_FRAMES 10
-extern ClipBox cb[MAX_FRAMES];
-extern int numRestrictFrames;
-
 void RestrictiveRender(BoardData *bd, BoardData3d *bd3d, renderdata *prd);
 void RestrictiveDrawFrame(float pos[3], float width, float height, float depth);
 void RestrictiveDraw(ClipBox* pCb, float pos[3], float width, float height, float depth);
@@ -29,22 +24,12 @@ void RestrictiveDrawFlag(BoardData* bd);
 
 extern void getPiecePos(int point, int pos, int swap, float v[3]);
 
-/* Clipping planes */
-#define zNear .1f
-#define zFar 70
-
 /* Graph functions*/
-typedef struct _GraphData
-{
-	float ***data;
-	int numGames;
-	float maxY;
-} GraphData;
-
 GtkWidget* StatGraph(GraphData* pgd);
 void SetNumGames(GraphData* pgd, int numGames);
 void AddGameData(GraphData* pgd, int game, statcontext *psc);
 void TidyGraphData(GraphData* pgd);
+GraphData *CreateGraphData();
 
 /* Misc functions */
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
@@ -60,6 +45,8 @@ void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(BoardData* bd, BoardData3d* bd3d);
 void LoadTextureInfo(int FirstPass);
 GList *GetTextureList(int type);
+extern void FindTexture(TextureInfo** textureInfo, char* file);
+extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
 int IsSet(int flags, int bit);
 float Dist2d(float a, float b);
 float ***Alloc3d(int x, int y, int z);
@@ -75,8 +62,8 @@ extern void freeEigthPoints(float ****boardPoints, int accuracy);
 extern void SetupVisual();
 extern void SetupViewingVolume3d(BoardData *bd, BoardData3d* bd3d, renderdata *prd);
 extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata* prd);
-extern GtkWidget* CreateGLWidget(BoardData* bd);
-extern int DoAcceleratedCheck(GtkWidget* board, GtkWidget* pwParent);
+extern void CreateGLWidget(BoardData* bd);
+extern int DoAcceleratedCheck(BoardData3d* bd3d, GtkWidget* pwParent);
 
 extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
 extern void RollDice3d(BoardData *bd, BoardData3d* bd3d, renderdata *prd);
@@ -92,9 +79,10 @@ extern void Tidy3dObjects(BoardData3d* bd3d, renderdata *prd);
 extern float TestPerformance3d(BoardData* bd);
 extern void Set3dSettings(renderdata *prdnew, const renderdata *prd);
 extern void CopySettings3d(BoardData* from, BoardData* to);
-extern void MakeCurrent3d(GtkWidget *widget);
+extern void MakeCurrent3d(BoardData3d *bd3d);
 extern void GetTextures(BoardData3d* bd3d, renderdata *prd);
 extern void ClearTextures(BoardData3d* bd3d);
+extern void DeleteTextureList();
 
 extern void PlaceMovingPieceRotation(BoardData *bd, BoardData3d *bd3d, int dest, int src);
 extern void SetMovingPieceRotation(BoardData *bd, BoardData3d *bd3d, int pt);
@@ -115,3 +103,22 @@ extern void RestrictiveDrawBoardNumbers(BoardData3d *bd3d);
 
 extern void setDicePos(BoardData *bd, BoardData3d *bd3d);
 extern int DiceTooClose(BoardData3d *bd3d, renderdata *prd);
+
+void shadowInit(BoardData3d *bd3d, renderdata *prd);
+void shadowDisplay(void (*drawScene)(BoardData *, BoardData3d *, renderdata *), BoardData* bd);
+
+/* font functions */
+void glPrintPointNumbers(BoardData3d* bd3d, const char *text);
+void glPrintCube(BoardData3d* bd3d, const char *text);
+void glPrintNumbersRA(BoardData3d* bd3d, const char *text);
+int BuildFont3d(BoardData3d* bd3d);
+float GetFontHeight3d(OGLFont *font);
+
+GtkWidget *GetDrawingArea3d(BoardData3d* bd3d);
+extern int MaterialCompare(Material* pMat1, Material* pMat2);
+extern char *MaterialGetTextureFilename(Material* pMat);
+extern void TidyCurveAccuracy3d(BoardData3d* bd3d, int accuracy);
+extern void DrawScene3d(BoardData3d* bd3d);
+extern int Animating3d(BoardData3d* bd3d);
+
+#endif

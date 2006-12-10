@@ -23,13 +23,23 @@
 #define _RENDER_H_
 
 #if USE_BOARD3D
-#include "board3d/inc3d.h"
+#include "types3d.h"
+struct _Material
+{
+	float ambientColour[4];
+	float diffuseColour[4];
+	float specularColour[4];
+	int shine;
+	int alphaBlend;
+	TextureInfo* textureInfo;
+	Texture* pTexture;
+};
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-    
+
 typedef enum _woodtype {
     WOOD_ALDER, WOOD_ASH, WOOD_BASSWOOD, WOOD_BEECH, WOOD_CEDAR,
     WOOD_EBONY, WOOD_FIR, WOOD_MAPLE, WOOD_OAK, WOOD_PINE, WOOD_REDWOOD,

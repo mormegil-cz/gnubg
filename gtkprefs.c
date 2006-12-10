@@ -50,6 +50,7 @@
 #include "gtkwindows.h"
 
 #if USE_BOARD3D
+#include "fun3d.h"
 #define NUM_NONPREVIEW_PAGES 2
 #else
 #define NUM_NONPREVIEW_PAGES 1
@@ -273,7 +274,7 @@ void UpdatePreview(GtkWidget *ppw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 #if USE_BOARD3D
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
 
 	if (prd->fDisplayType == DT_3D)
@@ -284,7 +285,7 @@ void UpdatePreview(GtkWidget *ppw)
 			prd->ChequerMat[1].pTexture = prd->ChequerMat[0].pTexture;
 			UpdateColPreview(pcChequer2);
 			/* Change to main area and recreate piece display lists */
-			MakeCurrent3d(bd3d->drawing_area3d);
+			MakeCurrent3d(bd3d);
 			preDraw3d(bd, bd3d, prd);
 		}
 		if (prd->afDieColour3d[0] &&
@@ -350,13 +351,13 @@ void option_changed(GtkWidget *widget, GtkWidget *pw)
 
 {
 #if USE_BOARD3D
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
 
 	if (prd->fDisplayType == DT_3D)
 	{
 		ClearTextures(bd3d);
-		freeEigthPoints(&bd3d->boardPoints, rdPrefs.curveAccuracy);
+		TidyCurveAccuracy3d(bd->bd3d, rdPrefs.curveAccuracy);
 
 		GetPrefs(&rdPrefs);
 		GetTextures(bd3d, prd);
@@ -390,8 +391,8 @@ void DiceSizeChanged(GtkWidget *pw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	bd->rd->diceSize = (float)padjDiceSize->value;
-	if (DiceTooClose(&bd->bd3d, bd->rd))
-		setDicePos(bd, &bd->bd3d);
+	if (DiceTooClose(bd->bd3d, bd->rd))
+		setDicePos(bd, bd->bd3d);
 	option_changed(0, 0);
 }
 
@@ -1040,11 +1041,11 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 	redrawChange = FALSE;
 	rdPrefs.quickDraw = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw));
 
-	freeEigthPoints(&bd->bd3d.boardPoints, bd->rd->curveAccuracy);
+	TidyCurveAccuracy3d(bd->bd3d, bd->rd->curveAccuracy);
 	if (rdPrefs.fDisplayType == DT_3D)
 	{
 		/* Delete old objects */
-		ClearTextures(&bd->bd3d);
+		ClearTextures(bd->bd3d);
 	}
 	else
 #endif
@@ -1066,7 +1067,7 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 
 #if USE_BOARD3D
 {
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
 
 	DisplayCorrectBoardType(bd, bd3d, prd);
@@ -1074,7 +1075,7 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 
 	if (prd->fDisplayType == DT_3D)
 	{
-		MakeCurrent3d(bd3d->drawing_area3d);
+		MakeCurrent3d(bd3d);
 		GetTextures(bd3d, prd);
 		preDraw3d(bd, bd3d, prd);
 		SetupViewingVolume3d(bd, bd3d, prd);
@@ -1170,9 +1171,9 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 		/* Make sure 3d code is initialized */
 		Init3d();
 
-		DoAcceleratedCheck(bd->bd3d.drawing_area3d, widget);
+		DoAcceleratedCheck(bd->bd3d, widget);
 
-		updateDiceOccPos(bd, &bd->bd3d);
+		updateDiceOccPos(bd, bd->bd3d);
 	}
 	else
 	{
@@ -1184,7 +1185,7 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	gtk_widget_set_sensitive(pwTestPerformance, (rdPrefs.fDisplayType == DT_3D));
 
 #if USE_BOARD3D
-	DisplayCorrectBoardType(bd, &bd->bd3d, bd->rd);
+	DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
 #endif
 	/* Make sure everything is correctly sized */
 	gtk_widget_queue_resize(gtk_widget_get_toplevel(pwNotebook));
@@ -1728,7 +1729,7 @@ UseDesign ( void ) {
 
 #if USE_BOARD3D
   if (rdPrefs.fDisplayType == DT_3D)
-    ClearTextures(&bd->bd3d);
+    ClearTextures(bd->bd3d);
 #endif
 
   ParsePreferences(pbdeSelected, &newPrefs);
@@ -1739,7 +1740,7 @@ UseDesign ( void ) {
 	if (rdPrefs.fDisplayType == DT_3D)
 	{
 		Set3dSettings(&rdPrefs, &newPrefs);
-		GetTextures(&bd->bd3d, bd->rd);
+		GetTextures(bd->bd3d, bd->rd);
 
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (newPrefs.lightType == LT_POSITIONAL));
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (newPrefs.lightType == LT_DIRECTIONAL));
@@ -3003,7 +3004,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 			bd->turn = -1;
 #if USE_BOARD3D
 			if (rdPrefs.fDisplayType == DT_3D)
-				updateDiceOccPos(bd, &bd->bd3d);
+				updateDiceOccPos(bd, bd->bd3d);
 			else
 #endif
 				RollDice2d(bd);
@@ -3018,7 +3019,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 			bd->turn = 1;
 #if USE_BOARD3D
 			if (rdPrefs.fDisplayType == DT_3D)
-				updateDiceOccPos(bd, &bd->bd3d);
+				updateDiceOccPos(bd, bd->bd3d);
 			else
 #endif
 				RollDice2d(bd);
@@ -3102,7 +3103,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
     gtk_widget_show_all( pwDialog );
 
 #if USE_BOARD3D
-	DisplayCorrectBoardType(bd, &bd->bd3d, bd->rd);
+	DisplayCorrectBoardType(bd, bd->bd3d, bd->rd);
 	redrawChange = FALSE;
 	bd->rd->quickDraw = FALSE;
 #endif
@@ -3130,7 +3131,7 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard )
 		board_create_pixmaps( pwBoard, bd );
 {
 #if USE_BOARD3D
-		BoardData3d *bd3d = &bd->bd3d;
+		BoardData3d *bd3d = bd->bd3d;
 		renderdata *prd = bd->rd;
 
 		DisplayCorrectBoardType(bd, bd3d, prd);

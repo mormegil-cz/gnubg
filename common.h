@@ -40,3 +40,5 @@ typedef RETSIGTYPE (*psighandler)( int );
 	#define BIG_PATH PATH_MAX
 #endif
 #endif
+
+#define MAX_NAME_LEN 32

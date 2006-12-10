@@ -45,7 +45,9 @@
 #include "gtkboard.h"
 #include "renderprefs.h"
 #include "gtkwindows.h"
-
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 #if USE_SOUND
 static void SetSoundSettings();
 static void AddSoundWidgets(GtkWidget *container);
@@ -1587,7 +1589,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 {
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D)
-		updateDiceOccPos(bd, &bd->bd3d);
+		updateDiceOccPos(bd, bd->bd3d);
 	else
 #endif
 	if( GTK_WIDGET_REALIZED( pwBoard ) )

@@ -21,13 +21,7 @@
 * $Id$
 */
 
-#include "config.h"
-#include <math.h>
-#include <stdio.h>
-#include <memory.h>
-
-#include "matrix.h"
-#include "common.h"
+#include "inc3d.h"
 
 void setIdMatrix(float m[4][4])
 {

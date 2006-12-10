@@ -21,15 +21,24 @@
 * $Id$
 */
 
-#include "config.h"
-
 #include "inc3d.h"
-#include "gtkboard.h"
-#include <assert.h>
-#include "path.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+#define FONT_VERA "fonts/Vera.ttf"
+#define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
+#define FONT_VERA_BOLD "fonts/VeraBd.ttf"
+
+struct _OGLFont
+{
+	int glyphs;
+	int advance;
+	int kern[10][10];
+	float scale;
+	float heightRatio;
+	float height;
+};
 
 typedef struct _Point
 {
@@ -73,6 +82,8 @@ int MakeGlyph(FT_Outline* pOutline, int list);
 #define CUBE_FONT_SIZE (base_unit / 24.0f)
 #define CUBE_FONT_HEIGHT_RATIO 1.25f
 
+extern char *szDataDirectory;
+
 int BuildFont3d(BoardData3d* bd3d)
 {
 	FT_Library ftLib;
@@ -80,13 +91,17 @@ int BuildFont3d(BoardData3d* bd3d)
 	if (FT_Init_FreeType(&ftLib))
 		return 0;
 
+	free(bd3d->numberFont);
+	bd3d->numberFont = (OGLFont*)malloc(sizeof(OGLFont));
 	file = PathSearch(FONT_VERA, szDataDirectory);
-	if (!CreateOGLFont(ftLib, &bd3d->numberFont, file, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
+	if (!CreateOGLFont(ftLib, bd3d->numberFont, file, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
 		return 0;
 	free(file);
 
+	free(bd3d->cubeFont);
+	bd3d->cubeFont = (OGLFont*)malloc(sizeof(OGLFont));
 	file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
-	if (!CreateOGLFont(ftLib, &bd3d->cubeFont, file, CUBE_FONT_PITCH, CUBE_FONT_SIZE, CUBE_FONT_HEIGHT_RATIO))
+	if (!CreateOGLFont(ftLib, bd3d->cubeFont, file, CUBE_FONT_PITCH, CUBE_FONT_SIZE, CUBE_FONT_HEIGHT_RATIO))
 		return 0;
 	free(file);
 
@@ -499,20 +514,25 @@ void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
 extern void glPrintPointNumbers(BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally */
-	glTranslatef(-getTextLen3d(&bd3d->numberFont, text) / 2.0f, 0, 0);
-	RenderString3d(&bd3d->numberFont, text);
+	glTranslatef(-getTextLen3d(bd3d->numberFont, text) / 2.0f, 0, 0);
+	RenderString3d(bd3d->numberFont, text);
 }
 
 extern void glPrintCube(BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally and vertically */
-	glTranslatef(-getTextLen3d(&bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont.height / 2.0f, 0);
-	RenderString3d(&bd3d->cubeFont, text);
+	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont->height / 2.0f, 0);
+	RenderString3d(bd3d->cubeFont, text);
 }
 
 extern void glPrintNumbersRA(BoardData3d* bd3d, const char *text)
 {
 	/* Right align */
-	glTranslatef(-getTextLen3d(&bd3d->numberFont, text), 0, 0);
-	RenderString3d(&bd3d->numberFont, text);
+	glTranslatef(-getTextLen3d(bd3d->numberFont, text), 0, 0);
+	RenderString3d(bd3d->numberFont, text);
+}
+
+extern float GetFontHeight3d(OGLFont *font)
+{
+	return font->height;
 }

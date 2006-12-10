@@ -21,9 +21,6 @@
 
 #include <config.h>
 
-#if USE_BOARD3D
-#include "board3d/inc3d.h"
-#endif
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <fcntl.h>
@@ -78,9 +75,11 @@
 #include "matchid.h"
 #include "gtkwindows.h"
 #include "export.h"
-
 #if USE_TIMECONTROL
 #include "timecontrol.h"
+#endif
+#if USE_BOARD3D
+#include "fun3d.h"
 #endif
 
 #define KEY_ESCAPE -229
@@ -2310,7 +2309,7 @@ extern void RunGTK( GtkWidget *pwSplash )
 #if USE_BOARD3D
 	{
 		BoardData *bd = BOARD( pwBoard )->board_data;
-		BoardData3d *bd3d = &bd->bd3d;
+		BoardData3d *bd3d = bd->bd3d;
 		renderdata *prd = bd->rd;
 
 		SetSwitchModeMenuText();
@@ -6553,7 +6552,7 @@ extern void GTKSet( void *p ) {
 #if USE_BOARD3D
 		/* If in 3d mode may need to update sizes */
 		if (bd->rd->fDisplayType == DT_3D)
-			SetupViewingVolume3d(bd, &bd->bd3d, bd->rd);
+			SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 		else
 #endif
 		{    
@@ -7003,9 +7002,9 @@ extern void GTKDumpStatcontext( int game )
 	GtkWidget *copyMenu, *menu_item, *pvbox;
 #if USE_BOARD3D
 	int i;
-	GraphData gd;
 	GtkWidget *pw;
 	list *pl;
+	GraphData *gd = CreateGraphData();
 #endif
 	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
 
@@ -7045,7 +7044,7 @@ extern void GTKDumpStatcontext( int game )
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwStatDialog, DA_MAIN ) ), pvbox );
 
 #if USE_BOARD3D
-	SetNumGames(&gd, numStatGames);
+	SetNumGames(gd, numStatGames);
 
 	pl = lMatch.plNext;
 	for (i = 0; i < numStatGames; i++)
@@ -7053,13 +7052,13 @@ extern void GTKDumpStatcontext( int game )
 		list *plGame = pl->p;
 		moverecord *mr = plGame->plNext->p;
 		xmovegameinfo *pmgi = &mr->g;
-		AddGameData(&gd, i, &pmgi->sc);
+		AddGameData(gd, i, &pmgi->sc);
 		pl = pl->plNext;
 	}
 	/* Total values */
-	AddGameData(&gd, i, &scMatch);
+	AddGameData(gd, i, &scMatch);
 
-	pw = StatGraph(&gd);
+	pw = StatGraph(gd);
 	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), pw,
 					  gtk_label_new(_("Graph")));
     gtk_tooltips_set_tip( ptt, pw, _("This graph shows the total error rates per game for each player."
@@ -7122,7 +7121,7 @@ extern void GTKDumpStatcontext( int game )
 	GTKAllowStdin();
 
 #if USE_BOARD3D
-	TidyGraphData(&gd);
+	TidyGraphData(gd);
 #endif
 }
 
@@ -7896,47 +7895,6 @@ static void PythonShell(gpointer * p, guint n, GtkWidget * pw)
 	free(pch);
 }
 
-GtkWidget *pwTick;
-
-static void
-WarningOK ( GtkWidget *pw, warnings warning )
-{
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwTick)))
-	{	/* if tick set, disable warning */
-		char cmd[200];
-		sprintf(cmd, "set warning %s off", warningNames[warning]);
-		UserCommand(cmd);
-	}
-	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-}
-
-extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
-{
-	if (warningEnabled[warning])
-	{
-		GtkWidget *pwDialog, *pwMsg, *pwv;
-		
-		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), DT_WARNING,
-			pwParent, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( WarningOK ), (void*)warning );
-
-		pwv = gtk_vbox_new ( FALSE, 8 );
-		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
-
-                pwMsg = gtk_label_new( gettext( warningStrings[warning] ) );
-		gtk_box_pack_start( GTK_BOX( pwv ), pwMsg, TRUE, TRUE, 0 );
-
-		pwTick = gtk_check_button_new_with_label (_("Don't show this again"));
-		gtk_tooltips_set_tip(ptt, pwTick, _("If set, this message won't appear again"), 0);
-		gtk_box_pack_start( GTK_BOX( pwv ), pwTick, TRUE, TRUE, 0 );
-
-		gtk_widget_show_all( pwDialog );
-
-		GTKDisallowStdin();
-		gtk_main();
-		GTKAllowStdin();
-	}
-}
-
 #if USE_BOARD3D
 
 void SetSwitchModeMenuText()
@@ -7955,14 +7913,14 @@ static void
 SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
-	BoardData3d *bd3d = &bd->bd3d;
+	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
 
 	if (prd->fDisplayType == DT_2D)
 	{
 		prd->fDisplayType = DT_3D;
 		/* Reset 3d settings */
-		MakeCurrent3d(bd3d->drawing_area3d);
+		MakeCurrent3d(bd3d);
 		preDraw3d(bd, bd3d, prd);
 		updateOccPos(bd);	/* Make sure shadows are in correct place */
 		if (bd->diceShown == DICE_ON_BOARD)

@@ -21,19 +21,7 @@
 * $Id$
 */
 
-#include "config.h"
-
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <memory.h>
-
 #include "inc3d.h"
-#include "matrix.h"
-#include "shadow.h"
-#include "font3d.h"
-#include "gtkboard.h"
-#include "drawboard.h"
 #include "boardpos.h"
 
 /* Used to calculate correct viewarea for board/fov angles */
@@ -143,8 +131,6 @@ float getBoardWidth() {return TOTAL_WIDTH;}
 float getBoardHeight() {return TOTAL_HEIGHT;}
 float getDiceSize(renderdata* prd) {return prd->diceSize * base_unit;}
 
-extern list textures;
-
 void TidyShadows(BoardData3d* bd3d)
 {
 	freeOccluder(&bd3d->Occluders[OCC_BOARD]);
@@ -171,7 +157,7 @@ void Tidy3dObjects(BoardData3d* bd3d, renderdata *prd)
 
 	TidyShadows(bd3d);
 	ClearTextures(bd3d);
-	ListDeleteAll(&textures);
+	DeleteTextureList();
 }
 
 void preDrawPiece0(renderdata* prd)
@@ -322,21 +308,21 @@ void preDrawPiece1(renderdata* prd)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
-void preDrawPiece(BoardData* bd)
+void preDrawPiece(BoardData3d *bd3d, renderdata *prd)
 {
-	if (bd->bd3d.pieceList)
-		glDeleteLists(bd->bd3d.pieceList, 1);
+	if (bd3d->pieceList)
+		glDeleteLists(bd3d->pieceList, 1);
 
-	bd->bd3d.pieceList = glGenLists(1);
-	glNewList(bd->bd3d.pieceList, GL_COMPILE);
+	bd3d->pieceList = glGenLists(1);
+	glNewList(bd3d->pieceList, GL_COMPILE);
 
-	switch(bd->rd->pieceType)
+	switch(prd->pieceType)
 	{
 	case PT_ROUNDED:
-		preDrawPiece0(bd->rd);
+		preDrawPiece0(prd);
 		break;
 	case PT_FLAT:
-		preDrawPiece1(bd->rd);
+		preDrawPiece1(prd);
 		break;
 	default:
 		g_print("Error: Unhandled piece type\n");
@@ -622,7 +608,7 @@ void drawDCNumbers(BoardData* bd, diceTest* dt)
 			glPushMatrix();
 			glTranslatef(0, 0, depth + !nice * LIFT_OFF);
 
-			glPrintCube(&bd->bd3d, sides[side]);
+			glPrintCube(bd->bd3d, sides[side]);
 
 			glPopMatrix();
 			if (nice)
@@ -782,11 +768,11 @@ void getDicePos(BoardData* bd, int num, float v[3])
 	}
 	else
 	{
-		v[0] = bd->bd3d.dicePos[num][0];
+		v[0] = bd->bd3d->dicePos[num][0];
 		if (bd->turn == 1)
 			v[0] = TOTAL_WIDTH - v[0];	/* Dice on right side */
 
-		v[1] = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f + bd->bd3d.dicePos[num][1];
+		v[1] = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f + bd->bd3d->dicePos[num][1];
 		v[2] = BASE_DEPTH + LIFT_OFF + size / 2.0f;
 	}
 }
@@ -799,7 +785,7 @@ void moveToDicePos(BoardData* bd, int num)
 
 	if (bd->diceShown == DICE_ON_BOARD)
 	{	/* Spin dice to required rotation if on board */
-		glRotatef(bd->bd3d.dicePos[num][2], 0, 0, 1);
+		glRotatef(bd->bd3d->dicePos[num][2], 0, 0, 1);
 	}
 }
 
@@ -822,7 +808,7 @@ void drawDice(BoardData* bd, int num)
 	if (bd->diceShown == DICE_BELOW_BOARD)
 		z = 0;
 	else
-		z = ((int)bd->bd3d.dicePos[num][2] + 45) / 90;
+		z = ((int)bd->bd3d->dicePos[num][2] + 45) / 90;
 
 	/* Orientate dice correctly */
 	glRotatef(90.0f * rotDice[value][0], 1, 0, 0);
@@ -838,32 +824,32 @@ void drawDice(BoardData* bd, int num)
 
 		/* Draw dice */
 		setMaterial(pDiceMat);
-		glCallList(bd->bd3d.diceList);
+		glCallList(bd->bd3d->diceList);
 
 		/* Place back dots inside dice */
 		setMaterial(&bd->rd->DiceDotMat[diceCol]);
 		glEnable(GL_BLEND);	/* NB. Disabled in diceList */
 		glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
-		drawDots(&bd->bd3d, diceSize, -LIFT_OFF, &dt, 0, 0);
+		drawDots(bd->bd3d, diceSize, -LIFT_OFF, &dt, 0, 0);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glCullFace(GL_BACK);
 	}
 	/* Draw dice */
 	setMaterial(&bd->rd->DiceMat[diceCol]);
-	glCallList(bd->bd3d.diceList);
+	glCallList(bd->bd3d->diceList);
 
 	/* Draw (front) dots */
 	glEnable(GL_BLEND);
 	/* First blank out space for dots */
 	setMaterial(&whiteMat);
 	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-	drawDots(&bd->bd3d, diceSize, LIFT_OFF, &dt, 1, 0);
+	drawDots(bd->bd3d, diceSize, LIFT_OFF, &dt, 1, 0);
 
 	/* Now fill space with coloured dots */
 	setMaterial(&bd->rd->DiceDotMat[diceCol]);
 	glBlendFunc(GL_ONE, GL_ONE);
-	drawDots(&bd->bd3d, diceSize, LIFT_OFF, &dt, 1, 0);
+	drawDots(bd->bd3d, diceSize, LIFT_OFF, &dt, 1, 0);
 
 	/* Restore blending defaults */
 	glDisable(GL_BLEND);
@@ -1097,7 +1083,7 @@ void DrawNumbers(BoardData* bd, int sides)
 	int i;
 	char num[3];
 	float x;
-	float textHeight = bd->bd3d.numberFont.height;
+	float textHeight = GetFontHeight3d(bd->bd3d->numberFont);
 	int n;
 
 	glPushMatrix();
@@ -1123,7 +1109,7 @@ void DrawNumbers(BoardData* bd, int sides)
 				n = 25 - n;
 
 			sprintf(num, "%d", n);
-			glPrintPointNumbers(&bd->bd3d, num);
+			glPrintPointNumbers(bd->bd3d, num);
 			glPopMatrix();
 		}
 	}
@@ -1151,7 +1137,7 @@ void DrawNumbers(BoardData* bd, int sides)
 				n = 25 - n;
 
 			sprintf(num, "%d", n);
-			glPrintPointNumbers(&bd->bd3d, num);
+			glPrintPointNumbers(bd->bd3d, num);
 			glPopMatrix();
 		}
 	}
@@ -2290,7 +2276,7 @@ void drawPick(BoardData* bd)
 	{
 		glLoadName(i);
 		for (j = 1; j <= abs(bd->points[i]); j++)
-			drawPiece(&bd->bd3d, i, j);
+			drawPiece(bd->bd3d, i, j);
 	}
 
 	/* points */
@@ -2551,7 +2537,7 @@ int BoardPoint3d(BoardData* bd, BoardData3d* bd3d, renderdata* prd, int x, int y
 
 	if (bd->resigned)
 	{	/* Flag showing - just pick this */
-		drawFlagPick(bd, &bd->bd3d, bd->rd);
+		drawFlagPick(bd, bd->bd3d, bd->rd);
 	}
 	else
 	{
@@ -3266,7 +3252,7 @@ void renderFlag(BoardData *bd, BoardData3d *bd3d, int curveAccuracy)
 		glScalef(1.3f, 1.3f, 1);
 
 		glLineWidth(.5f);
-		glPrintCube(&bd->bd3d, flagValue);
+		glPrintCube(bd->bd3d, flagValue);
 
 		glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	}
@@ -3478,9 +3464,9 @@ void updateHingeOccPos(BoardData3d* bd3d, int show3dHinges)
 
 void updateOccPos(BoardData* bd)
 {	/* Make sure shadows are in correct place */
-	updateCubeOccPos(bd, &bd->bd3d);
-	updateDiceOccPos(bd, &bd->bd3d);
-	updatePieceOccPos(bd, &bd->bd3d);
+	updateCubeOccPos(bd, bd->bd3d);
+	updateDiceOccPos(bd, bd->bd3d);
+	updatePieceOccPos(bd, bd->bd3d);
 }
 
 void MakeShadowModel(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
@@ -3595,7 +3581,7 @@ void preDraw3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 		freeEigthPoints(&bd3d->boardPoints, prd->curveAccuracy);
 	calculateEigthPoints(&bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
 
-	preDrawPiece(bd);
+	preDrawPiece(bd3d, prd);
 	preDrawDice(bd3d, prd);
 
 	MakeShadowModel(bd, bd3d, prd);
@@ -3687,7 +3673,7 @@ void RestrictiveDrawBoardNumbers(BoardData3d *bd3d)
 {
 #define NUMBER_WIDTH (TOTAL_WIDTH - (2 * TRAY_WIDTH))
 	float pos[3] = {TRAY_WIDTH + (NUMBER_WIDTH / 2.0f), TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT / 2.0f), BASE_DEPTH + EDGE_DEPTH};
-	float textHeight = bd3d->numberFont.height;;
+	float textHeight = GetFontHeight3d(bd3d->numberFont);
 
 	RestrictiveDrawFrame(pos, NUMBER_WIDTH, textHeight, LIFT_OFF);
 	pos[1] = EDGE_HEIGHT / 2.0f;

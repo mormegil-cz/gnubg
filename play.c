@@ -45,6 +45,9 @@
 #if USE_TIMECONTROL
 #include "timecontrol.h"
 #endif
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 
 char *aszGameResult[] = { 
   N_ ("single game"), 

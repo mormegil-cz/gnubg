@@ -21,16 +21,7 @@
 * $Id$
 */
 
-#include "config.h"
-
-#include <assert.h>
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-
-#include "shadow.h"
-#include "model.h"
-#include "matrix.h"
+#include "inc3d.h"
 
 int midStencilVal;
 
@@ -132,20 +123,20 @@ void shadowDisplay(void (*drawScene)(BoardData *, BoardData3d *, renderdata *), 
 	glGetLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, zero);
 
-	drawScene(bd, &bd->bd3d, prd);
+	drawScene(bd, bd->bd3d, prd);
 
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 
 	/* Create shadow volume in stencil buffer */
 	glEnable(GL_STENCIL_TEST);
-	draw_shadow_volume_to_stencil(&bd->bd3d);
+	draw_shadow_volume_to_stencil(bd->bd3d);
 
 	/* Pass 2: Redraw model, full light in non-shadowed areas */
 	glStencilFunc(GL_EQUAL, midStencilVal, (GLuint)~0);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-	drawScene(bd, &bd->bd3d, prd);
+	drawScene(bd, bd->bd3d, prd);
 
 	glDisable(GL_STENCIL_TEST);
 }

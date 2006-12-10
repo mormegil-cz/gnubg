@@ -23,11 +23,19 @@
 #ifndef _INC3D_H_
 #define _INC3D_H_
 
+
+#include "config.h"
+
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include <gtk/gtk.h>
-
-#include "model.h"
-
+#include <assert.h>
 
 #if defined(WIN32) && (defined(__INTEL_COMPILER) || defined(_MSC_VER))
 /* MS gl.h needs windows.h to be included first */
@@ -38,19 +46,30 @@
 #include <GL/glu.h>
 
 #if !defined(WIN32)
-/* x-windows include */
-#include <GL/glx.h>
+#include <GL/glx.h>	/* x-windows file */
 #endif
 
-typedef struct _OGLFont
-{
-	int glyphs;
-	int advance;
-	int kern[10][10];
-	float scale;
-	float heightRatio;
-	float height;
-} OGLFont;
+#include <gtk/gtkgl.h>
+
+#include "fun3d.h"
+#include "gtkboard.h"
+#include "matrix.h"
+#include "path.h"
+#include "gtkwindows.h"
+#include "common.h"
+
+#include "model.h"
+#include "render.h"
+#include "backgammon.h"
+
+#include <glib/gi18n.h>
+
+/* Clipping planes */
+#define zNear .1f
+#define zFar 70
+
+extern int fClockwise;
+extern int numRestrictFrames;
 
 typedef struct _DiceRotation
 {
@@ -71,78 +90,37 @@ typedef enum _PathType
 	PATH_LINE, PATH_CURVE_9TO12, PATH_CURVE_12TO3, PATH_PARABOLA, PATH_PARABOLA_12TO3
 } PathType;
 
-typedef struct _Path
+struct _Path
 {
 	float pts[MAX_PATHS + 1][3];
 	PathType pathType[MAX_PATHS];
 	int state;
 	float mileStone;
 	int numSegments;
-} Path;
+};
 
-typedef enum _OcculderType {
-	OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE
-} OcculderType;
+enum OcculderType {OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE};
 #define LAST_PIECE (OCC_PIECE + 29)
-
 #define NUM_OCC (LAST_PIECE + 1)
 
-typedef enum _displaytype {
-    DT_2D, DT_3D
-} displaytype;
-
-typedef enum _lighttype {
-    LT_POSITIONAL, LT_DIRECTIONAL
-} lighttype;
-
-typedef struct _Texture
+struct _Texture
 {
 	int texID;
 	int width;
 	int height;
-} Texture;
+};
 
 #define FILENAME_SIZE 15
 #define NAME_SIZE 20
 
-typedef enum _TextureType
-{
-	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
-} TextureType;
-
-typedef struct _TextureInfo
+struct _TextureInfo
 {
 	char file[FILENAME_SIZE + 1];
 	char name[NAME_SIZE + 1];
 	TextureType type;
-} TextureInfo;
+};
 
-typedef struct _Material
-{
-	float ambientColour[4];
-	float diffuseColour[4];
-	float specularColour[4];
-	int shine;
-	int alphaBlend;
-	TextureInfo* textureInfo;
-	Texture* pTexture;
-} Material;
-
-typedef enum _PieceType
-{
-	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
-} PieceType;
-
-typedef enum _PieceTextureType
-{
-	PTT_TOP, PTT_ALL, NUM_TEXTURE_TYPES
-} PieceTextureType;
-
-extern void FindTexture(TextureInfo** textureInfo, char* file);
-extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
-extern int MaterialCompare(Material* pMat1, Material* pMat2);
-
-typedef struct _BoardData3d
+struct _BoardData3d
 {
 	GtkWidget *drawing_area3d;	/* main 3d widget */
 
@@ -176,7 +154,7 @@ typedef struct _BoardData3d
 
 	float flagWaved;	/* How much has flag waved */
 
-	OGLFont numberFont, cubeFont;	/* OpenGL fonts */
+	OGLFont *numberFont, *cubeFont;	/* OpenGL fonts */
 
 	/* Saved viewing values (used for picking) */
 	float vertFrustrum, horFrustrum;
@@ -208,7 +186,7 @@ typedef struct _BoardData3d
 	char* textureName[MAX_TEXTURES];
 	int numTextures;
 	int dotTexture;	/* Holds texture used to draw dots on dice */
-} BoardData3d;
+};
 
 /* Define relative sizes of objects from arbitrary unit .05 */
 #define base_unit .05f
@@ -239,5 +217,13 @@ typedef struct _diceTest
 {
 	int top, bottom, side[4];
 } diceTest;
+
+struct _ClipBox
+{
+	float x;
+	float y;
+	float xx;
+	float yy;
+};
 
 #endif

@@ -20,6 +20,7 @@
  */
 
 #include "render.h"
+#include "list.h"
 
 #ifndef _EXPORT_H_
 #define _EXPORT_H_

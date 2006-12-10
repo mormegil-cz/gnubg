@@ -21,18 +21,18 @@
 * $Id$
 */
 
-#include <config.h>
-#include <gtk/gtkgl.h>
-#include <gtk/gtkglwidget.h>
-
-#include <gtk/gtk.h>
-#include <stdlib.h>
 #include "inc3d.h"
+
 #include "renderprefs.h"
-#include "gtkboard.h"
-#include "font3d.h"
 
 extern GdkGLConfig *getGlConfig();
+
+struct _GraphData
+{
+	float ***data;
+	int numGames;
+	float maxY;
+};
 
 #define BAR_WIDTH 5
 #define MID_GAP 1
@@ -46,7 +46,7 @@ extern GdkGLConfig *getGlConfig();
 #define TOT_WIDTH (NUM_HEIGHT * 3)
 
 float modelWidth, modelHeight;
-BoardData fonts;
+BoardData3d fonts;
 Texture total;
 
 extern GdkGLConfig *getGlConfig();
@@ -96,7 +96,7 @@ static void realize(GtkWidget *widget, void* arg)
 	/* Deep blue background colour */
 	glClearColor(.2f, .2f, .4f, 1);
 
-	BuildFont3d(&fonts.bd3d);
+	BuildFont3d(&fonts);
 
 	total.texID = 0;
 	LoadTexture(&total, TEXTURE_PATH"total.bmp");
@@ -179,7 +179,7 @@ void PrintBottomNumber(int num, float width, float height, float x, float y)
 	glColor3f(1, 1, 1);
 	glScalef(width, height, 1);
 	glLineWidth(.5f);
-	glPrintCube(&fonts.bd3d, numStr);
+	glPrintCube(&fonts, numStr);
 	glPopMatrix();
 }
 
@@ -193,7 +193,7 @@ void PrintSideNumber(int num, float width, float height, float x, float y)
 
 	glScalef(width, height, 1);
 	glLineWidth(.5f);
-	glPrintNumbersRA(&fonts.bd3d, numStr);
+	glPrintNumbersRA(&fonts, numStr);
 	glPopMatrix();
 }
 
@@ -340,9 +340,15 @@ void SetNumGames(GraphData* pgd, int numGames)
 	pgd->data = Alloc3d(numGames + 1, 2, 2);
 }
 
+GraphData *CreateGraphData()
+{
+	return (GraphData*)malloc(sizeof(GraphData));
+}
+
 void TidyGraphData(GraphData* pgd)
 {
 	Free3d(pgd->data, pgd->numGames, 2);
+	free(pgd);
 }
 
 void AddGameData(GraphData* pgd, int game, statcontext *psc)

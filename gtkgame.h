@@ -27,11 +27,7 @@
 #include "backgammon.h"
 #include "rollout.h"
 #include "relational.h"
-
-typedef enum _warnings { 
-  WARN_FULLSCREEN_EXIT=0, WARN_QUICKDRAW_MODE, WARN_SET_SHADOWS, 
-	  WARN_UNACCELERATED, WARN_NUM_WARNINGS
-} warnings;
+#include "gtkpanels.h"
 
 #define NUM_CMD_HISTORY 10
 struct CommandEntryData_T
@@ -51,11 +47,6 @@ extern void CommandOK( GtkWidget *pw, struct CommandEntryData_T *pData );
 extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData);
 extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct CommandEntryData_T *pData);
 extern void PopulateCommandHistory(struct CommandEntryData_T *pData);
-
-extern void GTKShowWarning(warnings warning, GtkWidget *pwParent);
-extern char* warningStrings[WARN_NUM_WARNINGS];
-extern char* warningNames[WARN_NUM_WARNINGS];
-extern int warningEnabled[WARN_NUM_WARNINGS];
 
 extern GtkWidget *pwMain, *pwMenuBar;
 extern GtkWidget *pwToolbar;
