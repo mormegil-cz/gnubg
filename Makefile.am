@@ -63,7 +63,7 @@ else
 PYTHON_SOURCES=
 endif
 
-COMMON_INCS = -I$(srcdir)/lib @LIBXML2_CFLAGS@ \
+COMMON_INCS = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
               -DLOCALEDIR=\"$(localedir)\" \
               @FREETYPE2_CFLAGS@ @PYTHON_CSPEC@ @GLIB_CFLAGS@ @LIBPNG_CFLAGS@
 COMMON_LIBS = -Llib -levent @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \

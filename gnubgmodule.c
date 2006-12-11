@@ -20,10 +20,10 @@
  */
 
 #include "config.h"
-#include "backgammon.h"
 
 #if USE_PYTHON
 #include "gnubgmodule.h"
+#include "backgammon.h"
 
 #include <glib.h>
 #include <glib/gi18n.h>
