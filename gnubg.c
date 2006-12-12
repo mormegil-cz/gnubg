@@ -5233,7 +5233,7 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 }
 
 
-static void
+extern void
 SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
 
   char *pch;
@@ -5394,8 +5394,8 @@ extern void CommandSaveSettings( char *szParam ) {
       pf = g_fopen( szFile, "w" );
 
     if ( ! pf ) {
-      g_free ( szFile );
       outputerr( szFile );
+      g_free ( szFile );
       return;
     }
 

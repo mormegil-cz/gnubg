@@ -1,3 +1,7 @@
+Tue Dec 12 15:54:22 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkgame.c: Save/Load rollout settings added to gtk interface
+
 Sun Dec 10 17:27:29 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in, lib/neuralnet.c: configure option to disable the sse

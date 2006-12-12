@@ -1235,5 +1235,6 @@ extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] );
 
 extern void SetupLanguage(char *newLangCode);
+extern void SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc );
 
 #endif

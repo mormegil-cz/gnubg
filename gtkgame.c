@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -4441,6 +4442,8 @@ typedef struct _rolloutwidget {
   GtkWidget *RolloutNotebook;    
   int  fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
   int *pfOK;
+  int *psaveAs;
+  int *ploadRS;
 } rolloutwidget;
 /*
 int fCubeEqualChequer = 1;
@@ -4454,10 +4457,9 @@ int fTruncEqualPlayer0 = 1;
  *****  such that previous .sgf files won't be able to extend rollouts
  *****
  ***************************************************************************/
-static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
+static void GetRolloutSettings( GtkWidget *pw, rolloutwidget *prw ) {
   int   p0, p1, i;
   int fCubeEqChequer, fPlayersAreSame, nTruncPlies;
-  *prw->pfOK = TRUE;
 
   prw->rcRollout.nTrials = (int)prw->prwGeneral->padjTrials->value;
   nTruncPlies = prw->rcRollout.nTruncate = (int)prw->prwGeneral->padjTruncPlies->value;
@@ -4557,6 +4559,21 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
+}
+
+static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
+  *prw->pfOK = TRUE;
+  GetRolloutSettings(pw, prw);
+}
+
+static void save_rollout_as_clicked (GtkWidget *pw, rolloutwidget *prw ) {
+  *prw->psaveAs = TRUE;
+  GetRolloutSettings(pw, prw);
+}
+
+static void load_rs_clicked (GtkWidget *pw, rolloutwidget *prw ) {
+  *prw->ploadRS = TRUE;
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
 /* create one page for rollout settings  for playes & truncation */
@@ -4984,10 +5001,73 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   return pwPage;
 }
 
+static void gtk_save_rollout_settings(void)
+{
+	char *filename;
+	char *folder;
+	folder = g_build_filename(szHomeDirectory, "rol", NULL);
+	if (!g_file_test(folder, G_FILE_TEST_IS_DIR)) {
+		g_mkdir(folder, 0700);
+		if (!g_file_test(folder, G_FILE_TEST_IS_DIR)) {
+			outputerrf(_("Failed to create %s"), folder);
+			return;
+		}
+	}
+	filename =
+	    GTKFileSelect(_("Save Rollout Settings As (*.rol)"), "*.rol", folder,
+			  NULL, GTK_FILE_CHOOSER_ACTION_SAVE);
+	if (!filename)
+		return;
+
+	if (!g_str_has_suffix(filename, ".rol")) {
+		char *tmp = g_strdup(filename);
+		g_free(filename);
+		filename = g_strconcat(tmp, ".rol", NULL);
+                g_free(tmp);
+	}
+
+	errno = 0;
+	FILE *pf = g_fopen(filename, "w");
+	if (!pf) {
+		outputerr(filename);
+		g_free(filename);
+		return;
+	}
+	SaveRolloutSettings(pf, "set rollout", &rcRollout);
+	fclose(pf);
+	if (errno)
+		outputerr(filename);
+	g_free(filename);
+	return;
+}
+
+static void gtk_load_rollout_settings(void)
+{
+
+    gchar *filename, *command, *folder;
+    folder = g_build_filename(szHomeDirectory, "rol", NULL);
+    filename =
+	GTKFileSelect(_("Open rollout settings (*.rol)"), "*.rol", folder, NULL,
+		      GTK_FILE_CHOOSER_ACTION_OPEN);
+    if (filename) {
+	command = g_strconcat("load commands \"", filename, "\"", NULL);
+        outputoff();
+	UserCommand(command);
+        outputon();
+	g_free(command);
+	g_free(filename);
+    }
+}
+
+
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
 {
   GtkWidget *pwDialog;
+  GtkWidget *saveAsButton;
+  GtkWidget *loadRSButton;
   int fOK = FALSE;
+  int saveAs = TRUE;
+  int loadRS = TRUE;
   rolloutwidget rw;
   rolloutpagegeneral RPGeneral;
   rolloutpagewidget  RPPlayer0, RPPlayer1, RPPlayer0Late, RPPlayer1Late,
@@ -4996,6 +5076,8 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
   int  i;
   const float epsilon = 1.0e-6f;
 
+  while (saveAs || loadRS)
+  {
   memcpy (&rw.rcRollout, &rcRollout, sizeof (rcRollout));
   rw.prwGeneral = &RPGeneral;
   rw.prpwPages[0] = &RPPlayer0;
@@ -5007,6 +5089,8 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
   rw.fPlayersAreSame = fPlayersAreSame;
   rw.fTruncEqualPlayer0 = fTruncEqualPlayer0;
   rw.pfOK = &fOK;
+  rw.psaveAs = &saveAs;
+  rw.ploadRS = &loadRS;
 
   RPPlayer0.precCube = &rw.rcRollout.aecCube[0];
   RPPlayer0.precCheq = &rw.rcRollout.aecChequer[0];
@@ -5027,8 +5111,18 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
   RPTrunc.precCube = &rw.rcRollout.aecCubeTrunc;
   RPTrunc.precCheq = &rw.rcRollout.aecChequerTrunc;
 
+  saveAs = FALSE;
+  loadRS = FALSE;
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Rollouts"), DT_QUESTION,
                            NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
+
+  gtk_container_add(GTK_CONTAINER( DialogArea(pwDialog, DA_BUTTONS ) ),
+                  saveAsButton = gtk_button_new_with_label(_("Save As")));
+  g_signal_connect(saveAsButton, "clicked", GTK_SIGNAL_FUNC(save_rollout_as_clicked), &rw);
+
+  gtk_container_add(GTK_CONTAINER( DialogArea(pwDialog, DA_BUTTONS ) ),
+                  loadRSButton = gtk_button_new_with_label(_("Load")));
+  g_signal_connect(loadRSButton, "clicked", GTK_SIGNAL_FUNC(load_rs_clicked), &rw);
 
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                      rw.RolloutNotebook = gtk_notebook_new() );
@@ -5076,9 +5170,9 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
 
   GTKAllowStdin();
 
-  if( fOK ) {
+  if( fOK || saveAs ) {
     int fCubeful;
-    outputpostpone();
+    outputoff();
 
     if((fCubeful = rw.rcRollout.fCubeful) != rcRollout.fCubeful ) {
       sprintf( sz, "set rollout cubeful %s",
@@ -5281,7 +5375,14 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
 	  UserCommand( sz );
 	}
 
-    outputresume();
+    outputon();
+    if (saveAs)
+            gtk_save_rollout_settings();
+    else if (fOK) 
+            break;
+  }
+  if (loadRS)
+          gtk_load_rollout_settings();
   }	
 }
 
