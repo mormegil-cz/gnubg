@@ -5005,6 +5005,7 @@ static void gtk_save_rollout_settings(void)
 {
 	char *filename;
 	char *folder;
+	FILE *pf;
 	folder = g_build_filename(szHomeDirectory, "rol", NULL);
 	if (!g_file_test(folder, G_FILE_TEST_IS_DIR)) {
 		g_mkdir(folder, 0700);
@@ -5027,7 +5028,7 @@ static void gtk_save_rollout_settings(void)
 	}
 
 	errno = 0;
-	FILE *pf = g_fopen(filename, "w");
+	pf = g_fopen(filename, "w");
 	if (!pf) {
 		outputerr(filename);
 		g_free(filename);
