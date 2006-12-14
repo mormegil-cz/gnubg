@@ -6612,6 +6612,8 @@ ProgressStartValue ( char *sz, int iMax ) {
   iProgressValue = 0;
   pcProgress = sz;
 
+  fInProgress = TRUE;
+
 #if USE_GTK
   if( fX ) {
     GTKProgressStartValue( sz, iMax );
@@ -6688,15 +6690,19 @@ extern void Progress( void ) {
 static void CallbackProgress( void ) {
 
 #if USE_GTK
-    if( fX ) {
+	if( fX )
+	{
+		GTKDisallowStdin();
+		if (fInProgress)
+			SuspendInput();
 
-	GTKDisallowStdin();
-    
-	while( gtk_events_pending() )
-	    gtk_main_iteration();
-	
-	GTKAllowStdin();
-    }
+		while( gtk_events_pending() )
+			gtk_main_iteration();
+
+		if (fInProgress)
+			ResumeInput();
+		GTKAllowStdin();
+	}
 #endif
 
     if( fInProgress && !iProgressMax )

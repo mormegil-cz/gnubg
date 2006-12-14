@@ -2,6 +2,7 @@ Thu Dec 14 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkmovelist.c: Fix for bug #17845 multiple highlights in hint
 	* import.c: Small partygammon fix
+	* gnubg.c: Fix for bug #12131 menus while analysing games
 
 Tue Dec 12 15:54:22 CET 2006 Christian Anthon <anthon@kiku.dk>
 
