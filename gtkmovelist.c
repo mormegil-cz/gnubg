@@ -292,6 +292,8 @@ if (!psHighlight)
 		sprintf(buf, "#%02x%02x%02x", psHighlight->fg[GTK_STATE_SELECTED].red / 256, psHighlight->fg[GTK_STATE_SELECTED].green / 256, psHighlight->fg[GTK_STATE_SELECTED].blue / 256);
 		gtk_list_store_set(store, &iter, ML_COL_FGCOL + offset, buf, -1);
 	}
+	else
+		gtk_list_store_set(store, &iter, ML_COL_FGCOL + offset, NULL, -1);
 skipoldcode:	/* Messy as 3 copies of code at moment... */
 	gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
   }
