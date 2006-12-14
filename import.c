@@ -3325,7 +3325,7 @@ void WritePartyGame(FILE *fp, char *gameStr)
 			strcpy(buf, move);	/* Double/Take */
 
 		if (side == 0)
-			fprintf(fp, "%-28s", buf);
+			fprintf(fp, "%-30s ", buf);
 		else
 			fprintf(fp, "%s\n", buf);
 	}
