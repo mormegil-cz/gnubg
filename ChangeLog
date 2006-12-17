@@ -1,3 +1,7 @@
+Sun Dec 16 20:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkmovelist.c: Fix for bug #18526 s
+
 Thu Dec 14 17:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkmovelist.c: Fix for bug #17845 multiple highlights in hint

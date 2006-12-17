@@ -226,16 +226,18 @@ if (!psHighlight)
 	{
 		/* Lets count how many moves are possible to see if this is the last move */
 		movelist ml;
-		if (!ms.anDice[0])
+		int dice[2];
+		memcpy(dice, ms.anDice, sizeof(dice));
+		if (!dice[0])
 		{	/* If the dice have got lost, try to find them */
 			moverecord* pmr = (moverecord*)plLastMove->p;
 			if (pmr)
 			{
-				ms.anDice[0] = pmr->anDice[0];
-				ms.anDice[1] = pmr->anDice[1];
+				dice[0] = pmr->anDice[0];
+				dice[1] = pmr->anDice[1];
 			}
 		}
-		GenerateMoves(&ml, ms.anBoard, ms.anDice[0], ms.anDice[1], FALSE);
+		GenerateMoves(&ml, ms.anBoard, dice[0], dice[1], FALSE);
 		if (i < ml.cMoves - 1)
 			rankKnown = 0;
 	}
