@@ -1,3 +1,8 @@
+Mon 18 Dev 16:51:24 2006 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c: initialise unused ptrs in SelectFile, check for
+	  pointer before access (Save Design core dumped)
+	
 Sat Nov 25 14:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Merge fix for bug in saving/exporting custom designs from 0.16

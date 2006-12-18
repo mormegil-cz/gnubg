@@ -3294,14 +3294,18 @@ static void FileOK( GtkWidget *pw, filethings *pft ) {
 
       case FDT_SAVE:
       case FDT_NONE_SAVE:
-        if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBMatch )))
+	
+        if(pft->pwRBMatch &&
+	   gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBMatch )))
            pft->pch = g_strdup_printf("match \"%s\"",  
              gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
 	
-	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBGame)))
+	else if(pft->pwRBGame &&
+		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBGame)))
            pft->pch = g_strdup_printf("game \"%s\"",  
              gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
-	else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBPosition )))
+	else if(pft->pwRBPosition &&
+		gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pft->pwRBPosition )))
            pft->pch = g_strdup_printf("position \"%s\"",  
              gtk_file_selection_get_filename( GTK_FILE_SELECTION( pwFile ) ) );
 
@@ -3421,7 +3425,10 @@ extern char *SelectFile( char *szTitle, char *szDefault, char *szPath,
     ft.fdt = fdt;
     ft.n = 0;
     ft.pwom = NULL;
-    
+    ft.pwRBMatch = NULL;
+    ft.pwRBGame = NULL;
+    ft.pwRBPosition = NULL;
+
     if( szPath ) {
 	pwButton = gtk_button_new_with_mnemonic( _("Set Default _Path") );
 	
