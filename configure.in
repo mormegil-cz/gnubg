@@ -102,7 +102,7 @@ dnl
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6.0], , [AC_MSG_ERROR("You need to have glib2 to compile GNU backgammon")])
 PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you want to use libxml2 to parse XML.), [])
 PKG_CHECK_MODULES(FREETYPE2, [freetype2], AC_DEFINE(HAVE_FREETYPE, 1, Define if you have freetype2), [])
-PKG_CHECK_MODULES(LIBPNG, [libpng], AC_DEFINE(HAVE_LIBPNG, 1, Define if you have libpng), [])
+PKG_CHECK_MODULES(LIBPNG, [libpng12], AC_DEFINE(HAVE_LIBPNG, 1, Define if you have libpng), [])
 
 dnl
 dnl Checks for libraries.
@@ -196,7 +196,7 @@ dnl
 dnl Check for Python
 dnl
 
-AC_ARG_WITH(python,[  --with-python       provide Python script availabity inside gnubg])
+AZ_PYTHON_WITH()
 if test "$with_python" != "no"; then
   AZ_PYTHON_PATH()
   AZ_PYTHON_VERSION_ENSURE([2.2])
