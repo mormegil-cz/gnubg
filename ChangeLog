@@ -1,3 +1,8 @@
+Tue Dec 19 12:03:14 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in, common.h, render.c, lib/neuralnet.c: declare signbit
+	and lrint as macros if undeclared
+
 Mon Dec 18 23:58:05 2006 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* analysis.c - fix casts and parens in relativeFibsRating

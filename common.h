@@ -42,3 +42,14 @@ typedef RETSIGTYPE (*psighandler)( int );
 #endif
 
 #define MAX_NAME_LEN 32
+
+#if !HAVE_DECL_LRINT
+/* define lrint as macro if not available */    
+#define lrint(x) ((long) ((x)+0.5))     
+#endif
+
+#if !HAVE_DECL_SIGNBIT
+/* define signbit as macro if not available */    
+#define signbit(x) ( (x) < 0.0 )     
+#endif
+

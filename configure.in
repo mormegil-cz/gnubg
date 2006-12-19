@@ -150,7 +150,6 @@ AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
 AC_CHECK_FUNCS(fork fstat getdtablesize gettimeofday isatty random readv select setvbuf setpriority)
 
-AC_CHECK_FUNCS(lrint, , AC_DEFINE(lrint(x), ((long) ((x)+0.5)), [define lrint as macro]))
 AC_CHECK_FUNCS(acosf, , AC_DEFINE(acosf, acos, [set acosf to acos if undefined]),)
 AC_CHECK_FUNCS(asinf, , AC_DEFINE(asinf, asin, [set asinf to asin if undefined]),)
 AC_CHECK_FUNCS(atanf, , AC_DEFINE(atanf, atan, [set atanf to atan if undefined]),)
@@ -165,6 +164,7 @@ dnl Checks for declarations
 dnl
 
 AC_CHECK_DECLS(signbit, , ,[#include <math.h>]) 
+AC_CHECK_DECLS(lrint, , , [#include <math.h>])
 
 dnl *******************
 dnl optional components
