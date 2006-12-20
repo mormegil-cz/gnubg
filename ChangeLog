@@ -1,3 +1,7 @@
+Wed Dec 20 09:25:49 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* non-src/: updated the flex/bison files to versions supplied by Ingo
+
 Tue Dec 19 23:30:58 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in: fix small python and png problems
