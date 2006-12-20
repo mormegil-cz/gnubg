@@ -6,3 +6,4 @@ hashtest
 md5test
 *.lo
 *.la
+.libs

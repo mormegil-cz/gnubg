@@ -1,3 +1,7 @@
+Wed Dec 20 10:06:46 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* */: add some filenames to .cvsignore
+
 Wed Dec 20 09:25:49 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* non-src/: updated the flex/bison files to versions supplied by Ingo
