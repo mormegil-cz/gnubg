@@ -1249,7 +1249,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
 static void PostScriptEpilogue( FILE *pf ) {
 
-    int i;
+    unsigned int i;
     long lXRef;
     
     PSEndPage( pf );

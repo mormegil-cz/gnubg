@@ -22,7 +22,7 @@
 #ifndef _ANALYSIS_H_
 #define _ANALYSIS_H_
 
-#include <list.h>
+#include "lib/list.h"
 
 typedef enum _lucktype {
     LUCK_VERYBAD, LUCK_BAD, LUCK_NONE, LUCK_GOOD, LUCK_VERYGOOD
@@ -150,7 +150,7 @@ absoluteFibsRatingCube( const float rCube, const int n );
 #define NORMALISED   0
 #define UNNORMALISED 1
 
-extern float
+extern void
 getMWCFromError ( const statcontext* psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] );
 
 extern skilltype

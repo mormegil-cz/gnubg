@@ -65,15 +65,15 @@ CommandExportMatchEquityEvolution (char *sz)
    as defined in boarddim.h */
 
 extern int
-WritePNG (const char *sz, unsigned char *puch, int nStride,
-	  const int nSizeX, const int nSizeY)
+WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
+	  unsigned int nSizeX, unsigned int nSizeY)
 {
 
   FILE *pf;
   png_structp ppng;
   png_infop pinfo;
   png_text atext[3];
-  int i;
+  unsigned int i;
 
   if (!(pf = fopen (sz, "wb")))
     return -1;

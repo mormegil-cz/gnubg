@@ -30,12 +30,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <gtk/gtk.h>
-#include <assert.h>
 
 #if defined(WIN32) && (defined(__INTEL_COMPILER) || defined(_MSC_VER))
 /* MS gl.h needs windows.h to be included first */
@@ -100,12 +100,12 @@ struct _Path
 };
 
 enum OcculderType {OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE};
-#define LAST_PIECE (OCC_PIECE + 29)
+#define LAST_PIECE ((int)OCC_PIECE + 29)
 #define NUM_OCC (LAST_PIECE + 1)
 
 struct _Texture
 {
-	int texID;
+	unsigned int texID;
 	int width;
 	int height;
 };
@@ -185,7 +185,7 @@ struct _BoardData3d
 	Texture textureList[MAX_TEXTURES];
 	char* textureName[MAX_TEXTURES];
 	int numTextures;
-	int dotTexture;	/* Holds texture used to draw dots on dice */
+	unsigned int dotTexture;	/* Holds texture used to draw dots on dice */
 };
 
 /* Define relative sizes of objects from arbitrary unit .05 */
@@ -199,7 +199,7 @@ struct _BoardData3d
 #define TEXTURE_SCALE (10.0f / base_unit)
 
 #define copyPoint(to, from) memcpy(to, from, sizeof(float[3]))
-#define SGN(x) (x / abs(x))
+#define SGN(x) (x / (int)abs(x))
 
 #define TEXTURE_PATH "textures/"
 #define NO_TEXTURE_STRING _("No texture")

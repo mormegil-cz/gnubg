@@ -31,8 +31,6 @@
 
 # include <config.h>
 
-#include <sys/types.h>
-
 #if STDC_HEADERS
 # include <stdlib.h>
 # include <string.h>
@@ -61,6 +59,7 @@
 /* This array contains the bytes used to pad the buffer to the next
    64-byte boundary.  (RFC 1321, 3.1: Step 1)  */
 /* But this isn't used ???? */
+/*lint -e{785}  Ignore not enough initilizer warning */
 static const unsigned char fillbuf[64] = { 0x80, 0 /* , 0, 0, ...  */ };
 
 
@@ -142,7 +141,7 @@ md5_stream (FILE *stream, void *resblock)
   md5_init_ctx (&ctx);
 
   /* Iterate over full file contents.  */
-  while (1)
+  for(;;)
     {
       /* We read the file in blocks of BLOCKSIZE bytes.  One call of the
 	 computation function processes the whole buffer so that with the
@@ -151,7 +150,7 @@ md5_stream (FILE *stream, void *resblock)
       sum = 0;
 
       /* Read block.  Take care for partial reads.  */
-      do
+	do
 	{
 	  n = fread (buffer + sum, 1, BLOCKSIZE - sum, stream);
 
@@ -163,7 +162,7 @@ md5_stream (FILE *stream, void *resblock)
 
       /* If end of file is reached, end the loop.  */
       if (n == 0)
-	break;
+		break;
 
       /* Process buffer with BLOCKSIZE bytes.  Note that
 			BLOCKSIZE % 64 == 0
@@ -219,14 +218,14 @@ md5_process_bytes (const void *buffer, size_t len, struct md5_ctx *ctx)
       ctx->buflen += (md5_uint32)add;
 
       if (ctx->buflen > 64)
-	{
-	  md5_process_block (ctx->buffer, ctx->buflen & ~63, ctx);
+      {
+		md5_process_block (ctx->buffer, ctx->buflen & ~63, ctx);
 
-	  ctx->buflen &= 63;
-	  /* The regions in the following copy operation cannot overlap.  */
-	  memcpy (ctx->buffer, &ctx->buffer[(left_over + add) & ~63],
-		  ctx->buflen);
-	}
+		ctx->buflen &= 63;
+		/* The regions in the following copy operation cannot overlap.  */
+		memcpy (ctx->buffer, &ctx->buffer[(left_over + add) & ~63],
+			ctx->buflen);
+      }
 
       buffer = (const char *) buffer + add;
       len -= add;
@@ -248,11 +247,11 @@ md5_process_bytes (const void *buffer, size_t len, struct md5_ctx *ctx)
       memcpy (&ctx->buffer[left_over], buffer, len);
       left_over += len;
       if (left_over >= 64)
-	{
-	  md5_process_block (ctx->buffer, 64, ctx);
-	  left_over -= 64;
-	  memcpy (ctx->buffer, &ctx->buffer[64], left_over);
-	}
+      {
+		md5_process_block (ctx->buffer, 64, ctx);
+		left_over -= 64;
+		memcpy (ctx->buffer, &ctx->buffer[64], left_over);
+      }
       ctx->buflen = (md5_uint32)left_over;
     }
 }
@@ -327,6 +326,7 @@ md5_process_block (const void *buffer, size_t len, struct md5_ctx *ctx)
        */
 
       /* Round 1.  */
+	  /*lint --e{123, 717}  Ignore macro warning */
       OP (A, B, C, D,  7, 0xd76aa478);
       OP (D, A, B, C, 12, 0xe8c7b756);
       OP (C, D, A, B, 17, 0x242070db);

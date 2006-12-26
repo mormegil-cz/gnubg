@@ -24,11 +24,14 @@
 
 #if USE_SSE_VECTORIZE
 
+#define DEBUG_SSE 0
+
 #include "sse.h"
-#include "eval.h"
 #include "neuralnet.h"
 #include <string.h>
+#if DEBUG_SSE
 #include <assert.h>
+#endif
 
 #include <xmmintrin.h>
 #include <mm_malloc.h>
@@ -51,11 +54,11 @@ void sse_free(float* ptr)
 		free(ptr);
 }
 
-static int
-Evaluate128( neuralnet *pnn, float arInput[], float ar[],
+static void
+Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
                         float arOutput[], float *saveAr ) {
 
-    int i, j;
+    unsigned int i, j;
     float *prWeight;
     __m128 vec0, vec1, vec3, scalevec, sum;
     
@@ -102,7 +105,7 @@ Evaluate128( neuralnet *pnn, float arInput[], float ar[],
       memcpy( saveAr, ar, HIDDEN_NODES * sizeof( *saveAr));
     
     for( i = 0; i < HIDDEN_NODES; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+		ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
     
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
@@ -127,14 +130,12 @@ Evaluate128( neuralnet *pnn, float arInput[], float ar[],
 
        arOutput[ i ] = sigmoid( -pnn->rBetaOutput * (r + pnn->arOutputThreshold[ i ]));
     }
-
-    return 0;
 }
 
-static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
+static void EvaluateFromBase128( const neuralnet *pnn, const float arInputDif[], float ar[],
 		     float arOutput[] ) {
 
-    int i, j;
+    unsigned int i, j;
     float *prWeight;
     __m128 vec0, vec1, vec3, scalevec, sum;
 
@@ -153,30 +154,29 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
                    sum =  _mm_add_ps(vec0, vec1);
                    _mm_store_ps(pr, sum);
 		}
-	    else
-            if(ari == -1.0f)
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
+	    else if(ari == -1.0f)
+			for( j = 32; j; j--, pr += 4, prWeight += 4 ){
                    vec0 = _mm_load_ps( pr );  
                    vec1 = _mm_load_ps( prWeight );  
                    sum =  _mm_sub_ps(vec0, vec1);
                    _mm_store_ps(pr, sum);
-		}
+			}
 	    else {
-		scalevec = _mm_set1_ps( ari );
-		for( j = 32; j; j--, pr += 4, prWeight += 4 ){
-                   vec0 = _mm_load_ps( pr );  
-	           vec1 = _mm_load_ps( prWeight ); 
-		   vec3 = _mm_mul_ps( vec1, scalevec );
-                   sum =  _mm_add_ps( vec0, vec3 );
-                   _mm_store_ps ( pr, sum );
-		}
+			scalevec = _mm_set1_ps( ari );
+			for( j = 32; j; j--, pr += 4, prWeight += 4 ){
+					vec0 = _mm_load_ps( pr );  
+					vec1 = _mm_load_ps( prWeight ); 
+					vec3 = _mm_mul_ps( vec1, scalevec );
+					sum =  _mm_add_ps( vec0, vec3 );
+					_mm_store_ps ( pr, sum );
+			}
 	    }
 	} else
 	    prWeight += HIDDEN_NODES;
     }
     
     for( i = 0; i < HIDDEN_NODES; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+		ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
 
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
@@ -201,21 +201,18 @@ static int EvaluateFromBase128( neuralnet *pnn, float arInputDif[], float ar[],
 
 	   arOutput[ i ] = sigmoid( -pnn->rBetaOutput * (r + pnn->arOutputThreshold[ i ]));
     }
-
-    return 0;
-
 }
 
-extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
+extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
 
     SSE_ALIGN(float ar[HIDDEN_NODES]);
-#if DEBUG_SSE	
+#if DEBUG_SSE
 	/* Removed as not 64bit robust (pointer truncation) and caused strange crash */
     assert(sse_aligned(ar));
     assert(sse_aligned(arInput));
-#endif
     assert(pnn->cHidden == HIDDEN_NODES);
+#endif
 
     switch( t ) {
       case NNEVAL_NONE:
@@ -231,7 +228,7 @@ extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
       }
       case NNEVAL_FROMBASE:
       {
-        int i;
+        unsigned int i;
         
         memcpy(ar, pnn->savedBase, HIDDEN_NODES * sizeof(*ar));
   
@@ -240,7 +237,7 @@ extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
           float* s = pnn->savedIBase;
          
           for(i = 0; i < pnn->cInput; ++i, ++r, ++s) {
-            if( *r != *s ) {
+            if( *r != *s /*lint --e(777) */) {
               *r -= *s;
             } else {
               *r = 0.0;

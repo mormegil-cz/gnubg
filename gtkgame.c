@@ -97,7 +97,8 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
     
     GtkWidget *active_widget;
   
-    g_return_val_if_fail (GTK_IS_OPTION_MENU (option_menu), -1);
+    if (!GTK_IS_OPTION_MENU (option_menu))
+		return -1;
 
     if (option_menu->menu) {
 	active_widget = gtk_menu_get_active (GTK_MENU (option_menu->menu));

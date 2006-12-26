@@ -29,7 +29,7 @@ void setIdMatrix(float m[4][4])
 	copyMatrix(m, id);
 }
 
-void mult_matrix_vec(float mat[4][4], float src[4], float dst[4])
+void mult_matrix_vec(const float mat[4][4], const float src[4], float dst[4])
 {
     dst[0] = (src[0] * mat[0][0] + src[1] * mat[0][1] +
 		src[2] * mat[0][2] + src[3] * mat[0][3]);
@@ -44,7 +44,7 @@ void mult_matrix_vec(float mat[4][4], float src[4], float dst[4])
 		src[2] * mat[3][2] + src[3] * mat[3][3]);
 }
 
-void matrixmult(float m[4][4], float b[4][4])
+void matrixmult(float m[4][4], const float b[4][4])
 {
 	int i, j, c;
 	float a[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
@@ -63,7 +63,7 @@ void matrixmult(float m[4][4], float b[4][4])
 	copyMatrix(m, a);
 }
 
-void makeInverseTransposeMatrix(float m[4][4], float v[3])
+void makeInverseTransposeMatrix(float m[4][4], const float v[3])
 {
 	setIdMatrix(m);
 	m[0][3] = -v[0];
@@ -75,8 +75,8 @@ void makeInverseTransposeMatrix(float m[4][4], float v[3])
 void makeInverseRotateMatrixX(float m[4][4], float degRot)
 {
 	float radRot = -(degRot * (float)PI) / 180.0f; 
-	float cosRot = (float)cos(radRot);
-	float sinRot = (float)sin(radRot);
+	float cosRot = cosf(radRot);
+	float sinRot = sinf(radRot);
 
 	setIdMatrix(m);
 	m[1][1] = cosRot;
@@ -88,8 +88,8 @@ void makeInverseRotateMatrixX(float m[4][4], float degRot)
 void makeInverseRotateMatrixY(float m[4][4], float degRot)
 {
 	float radRot = -(degRot * (float)PI) / 180.0f; 
-	float cosRot = (float)cos(radRot);
-	float sinRot = (float)sin(radRot);
+	float cosRot = cosf(radRot);
+	float sinRot = sinf(radRot);
 
 	setIdMatrix(m);
 	m[0][0] = cosRot;
@@ -101,8 +101,8 @@ void makeInverseRotateMatrixY(float m[4][4], float degRot)
 void makeInverseRotateMatrixZ(float m[4][4], float degRot)
 {
 	float radRot = -(degRot * (float)PI) / 180.0f; 
-	float cosRot = (float)cos(radRot);
-	float sinRot = (float)sin(radRot);
+	float cosRot = cosf(radRot);
+	float sinRot = sinf(radRot);
 
 	setIdMatrix(m);
 	m[0][0] = cosRot;
@@ -120,7 +120,7 @@ void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, floa
 	float q[4];
 
 	radRot *= 0.5f;
-	sin_theta = (float)sin(radRot);
+	sin_theta = sinf(radRot);
 
 	if (sqnorm != 1) 
 		sin_theta /= (float)sqrt(sqnorm);
@@ -128,7 +128,7 @@ void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, floa
 	q[0] = sin_theta * x;
 	q[1] = sin_theta * y;
 	q[2] = sin_theta * z;
-	q[3] = (float)cos(radRot);
+	q[3] = cosf(radRot);
 
 {
     float s, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
@@ -174,7 +174,7 @@ void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, floa
 }
 
 /* Test function */
-void dumpMatrix(float m[4][4])
+void dumpMatrix(const float m[4][4])
 {
 	static int create = 1;
 	int i, j;
@@ -189,6 +189,8 @@ void dumpMatrix(float m[4][4])
 	{
 		fp = fopen("test.txt", "a");
 	}
+	if (!fp)
+		return;
 
 	for (i = 0; i < 4; i++)
 	{

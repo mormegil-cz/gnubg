@@ -11,10 +11,12 @@ MODIFIED:
   $Id$
 */
 
+/*lint --e{661,662}	 Ignore warnings of out of bounds array access (as ok) */
+
 #include "isaacs.h"
 #include "isaac.h"
 
-#define ind(mm,x)  ((mm)[(x>>2)&(RANDSIZ-1)])
+#define ind(mm,x)  ((mm)[((x)>>2)&(RANDSIZ-1)])
 #define rngstep(mix,a,b,mm,m,m2,r,x) \
 { \
   x = *m;  \

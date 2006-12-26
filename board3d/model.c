@@ -21,6 +21,8 @@
 * $Id$
 */
 
+/*lint -esym(818, pMod, pOcc) */
+
 #include "inc3d.h"
 
 #define TOP_EDGE -2
@@ -37,7 +39,7 @@ typedef struct _plane
 
 typedef struct _winged_edge
 {
-	int e[2];  /* vertex index */
+	unsigned int e[2];  /* vertex index */
 	int w[2];  /* plane index */
 } winged_edge;
 
@@ -64,26 +66,26 @@ void freeOccluder(Occluder* pOcc)
 	}
 }
 
-void copyOccluder(Occluder* fromOcc, Occluder* toOcc)
+void copyOccluder(const Occluder* fromOcc, Occluder* toOcc)
 {
 	toOcc->handle = fromOcc->handle;
 	toOcc->show = fromOcc->show;
 	toOcc->rotator = fromOcc->rotator;
 }
 
-void moveToOcc(Occluder* pOcc)
+void moveToOcc(const Occluder* pOcc)
 {
 	glTranslatef(pOcc->trans[0], pOcc->trans[1], pOcc->trans[2]);
 
 	if (pOcc->rotator)
 	{
-		glRotatef(pOcc->rot[0], 0, 1, 0);
-		glRotatef(pOcc->rot[1], 1, 0, 0);
-		glRotatef(pOcc->rot[2], 0, 0, 1);
+		glRotatef(pOcc->rot[0], 0.f, 1.f, 0.f);
+		glRotatef(pOcc->rot[1], 1.f, 0.f, 0.f);
+		glRotatef(pOcc->rot[2], 0.f, 0.f, 1.f);
 	}
 }
 
-int AddPos(OccModel* pMod, float a, float b, float c)
+static unsigned int AddPos(OccModel* pMod, float a, float b, float c)
 {
 	unsigned int index;
 	position pos;
@@ -101,7 +103,7 @@ int AddPos(OccModel* pMod, float a, float b, float c)
 	return pMod->points->len - 1;
 }
 
-void CreatePlane(plane* p, position* p1, position* p2, position* p3)
+static void CreatePlane(plane* p, const position* p1, const position* p2, const position* p3)
 {
 	float v0[3];
 	float v1[3];
@@ -134,7 +136,7 @@ void CreatePlane(plane* p, position* p1, position* p2, position* p3)
 	p->d = -(p->a * p1->x + p->b * p1->y + p->c * p1->z);
 }
 
-int AddPlane(OccModel* pMod, position* a, position* b, position* c)
+static unsigned int AddPlane(OccModel* pMod, const position* a, const position* b, const position* c)
 {
 	unsigned int index;
 	plane p;
@@ -150,10 +152,9 @@ int AddPlane(OccModel* pMod, position* a, position* b, position* c)
 	return pMod->planes->len - 1;
 }
 
-void GenerateShadowEdges(Occluder* pOcc)
+void GenerateShadowEdges(const Occluder* pOcc)
 {	/* For testing */
-	int i;
-	int numEdges = pOcc->handle->edges->len;
+	unsigned int i, numEdges = pOcc->handle->edges->len;
 	for (i = 0; i < numEdges; i++)
 	{
 		winged_edge *we = &g_array_index(pOcc->handle->edges, winged_edge, i);
@@ -189,17 +190,16 @@ void GenerateShadowEdges(Occluder* pOcc)
 	}
 }
 
-float sqdDist(OccModel* pMod, int pIndex, float point[4])
+static float sqdDist(OccModel* pMod, int pIndex, const float point[4])
 {
 	plane* p = &g_array_index(pMod->planes, plane, pIndex);
 	return (p->a * point[0] + p->b * point[1] + p->c * point[2] + p->d * point[3]);
 }
 
-void GenerateShadowVolume(Occluder* pOcc, float olight[4])
+void GenerateShadowVolume(const Occluder* pOcc, const float olight[4])
 {
-	int edgeOrder[2];
-	int i;
-	int numEdges = pOcc->handle->edges->len;
+	unsigned int edgeOrder[2];
+	unsigned int i, numEdges = pOcc->handle->edges->len;
 
 	for (i = 0; i < numEdges; i++)
 	{
@@ -242,21 +242,20 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 			glVertex4f(pn1->x * olight[3] - olight[0],
 				pn1->y * olight[3] - olight[1],
 				pn1->z * olight[3] - olight[2],
-				0);
+				0.f);
 
 			glVertex4f(pn0->x * olight[3] - olight[0],
 				pn0->y * olight[3] - olight[1],
 				pn0->z * olight[3] - olight[2],
-				0);
+				0.f);
 		}
 	}
 }
 
 /* pair up edges */
-void AddEdge(OccModel* pMod, winged_edge* we)
+static void AddEdge(OccModel* pMod, const winged_edge* we)
 {
-	int i;
-	int numEdges = pMod->edges->len;
+	unsigned int i, numEdges = pMod->edges->len;
 	for (i = 0; i < numEdges; i++)
 	{
 		winged_edge *we0 = &g_array_index(pMod->edges, winged_edge, i);
@@ -274,38 +273,38 @@ void AddEdge(OccModel* pMod, winged_edge* we)
 	g_array_append_val(pMod->edges, *we);  /* otherwise, add the new edge */
 }
 
-void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)
+static void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)
 {
 	winged_edge we;
-	int plane;
-	int p1 = AddPos(pOcc->handle, x, y, z);
-	int p2 = AddPos(pOcc->handle, x2, y2, z2);
+	int planeNum;
+	unsigned int p1 = AddPos(pOcc->handle, x, y, z);
+	unsigned int p2 = AddPos(pOcc->handle, x2, y2, z2);
 
 	position pn3;
 	pn3.x = x3;
 	pn3.y = y3;
 	pn3.z = z3;
 
-	plane = AddPlane(pOcc->handle, &g_array_index(pOcc->handle->points, position, p1), &g_array_index(pOcc->handle->points, position, p2), &pn3);
+	planeNum = (int)AddPlane(pOcc->handle, &g_array_index(pOcc->handle->points, position, p1), &g_array_index(pOcc->handle->points, position, p2), &pn3);
 
 	we.e[0] = p1;
 	we.e[1] = p2;
-	we.w[0] = plane;
+	we.w[0] = planeNum;
 	we.w[1] = otherEdge;  /* subsequent attempt to add this edge will replace w[1] */
 	AddEdge(pOcc->handle, &we);
 }
 
-void addLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3)
+static void addLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3)
 {
 	addALine(pOcc, x, y, z, x2, y2, z2, x3, y3, z3, -1);
 }
 
-void addLineV(Occluder* pOcc, float v1[3], float v2[3], float v3[3])
+static void addLineV(Occluder* pOcc, const float v1[3], const float v2[3], const float v3[3])
 {
 	 addLine(pOcc, v1[0], v1[1], v1[2], v2[0], v2[1], v2[2], v3[0], v3[1], v3[2]);
 }
 
-void addTopLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2)
+static void addTopLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2)
 {
 	float z3;
 	z3 = z - .1f;
@@ -447,23 +446,24 @@ void addCubeCentered(Occluder* pOcc, float x, float y, float z, float w, float h
 	addCube(pOcc, x, y, z, w, h, d);
 }
 
-void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, int numSteps)
+void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, unsigned int numSteps)
 {
 	float step = (2 * (float)PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);
 	float *yPts = (float *)malloc(sizeof(float) * numSteps);
-	int i;
+	unsigned int i;
+	assert(xPts && yPts);
 
 	for (i = 0; i < numSteps; i++)
 	{
 		float ang = step * i + (step / 2.0f);
-		xPts[i] = (float)sin(ang) * r;
-		yPts[i] = (float)cos(ang) * r;
+		xPts[i] = sinf(ang) * r;
+		yPts[i] = cosf(ang) * r;
 	}
 	for (i = 0; i < numSteps; i++)
 	{
-		int next = ((i + 1) == numSteps) ? 0 : i + 1;
-		int prev = (i == 0) ? numSteps - 1 : i - 1;
+		unsigned int next = ((i + 1) == numSteps) ? 0 : i + 1;
+		unsigned int prev = (i == 0) ? numSteps - 1 : i - 1;
 
 		addLine(pOcc, x + xPts[next], y + yPts[next], z + d, x + xPts[i], y + yPts[i], z + d, 
 				x + xPts[next], y + yPts[next], z + d - .1f);
@@ -482,45 +482,46 @@ void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, in
 	free(yPts);
 }
 
-void addHalfTube(Occluder* pOcc, float r, float h, int numSteps)
+void addHalfTube(Occluder* pOcc, float r, float h, unsigned int numSteps)
 {
 	float step = ((2 * (float)PI) / numSteps) / 2.0f;
 	float *xPts = (float *)malloc(sizeof(float) * (numSteps + 1));
 	float *yPts = (float *)malloc(sizeof(float) * (numSteps + 1));
-	int i;
+	unsigned int i;
+	assert(xPts && yPts);
 
 	for (i = 0; i <= numSteps; i++)
 	{
 		float ang = step * i - ((float)PI / 2.0f);
-		xPts[i] = (float)sin(ang) * r;
-		yPts[i] = (float)cos(ang) * r;
+		xPts[i] = sinf(ang) * r;
+		yPts[i] = cosf(ang) * r;
 	}
 	for (i = 0; i < numSteps; i++)
 	{
 		addLine(pOcc, xPts[i + 1], h, yPts[i + 1], xPts[i], h, yPts[i], xPts[i + 1], h - .1f, yPts[i + 1]);
-		addLine(pOcc, xPts[i], h, yPts[i], xPts[i + 1], h, yPts[i + 1], 0, h, 0);
+		addLine(pOcc, xPts[i], h, yPts[i], xPts[i + 1], h, yPts[i + 1], 0.f, h, 0.f);
 
-		addLine(pOcc, xPts[i], 0, yPts[i], xPts[i + 1], 0, yPts[i + 1], xPts[i], .1f, yPts[i]);
-		addLine(pOcc, xPts[i + 1], 0, yPts[i + 1], xPts[i], 0, yPts[i], 0, 0, 0);
+		addLine(pOcc, xPts[i], 0.f, yPts[i], xPts[i + 1], 0.f, yPts[i + 1], xPts[i], .1f, yPts[i]);
+		addLine(pOcc, xPts[i + 1], 0.f, yPts[i + 1], xPts[i], 0.f, yPts[i], 0.f, 0.f, 0.f);
 
 		if (i == 0)
-			addLine(pOcc, xPts[i], 0, yPts[i], xPts[i], h, yPts[i], xPts[i], 0, yPts[i] - .1f);
+			addLine(pOcc, xPts[i], 0.f, yPts[i], xPts[i], h, yPts[i], xPts[i], 0.f, yPts[i] - .1f);
 		else
-			addLine(pOcc, xPts[i], 0, yPts[i], xPts[i], h, yPts[i], xPts[i - 1], 0, yPts[i - 1]);
+			addLine(pOcc, xPts[i], 0.f, yPts[i], xPts[i], h, yPts[i], xPts[i - 1], 0.f, yPts[i - 1]);
 
-		addLine(pOcc, xPts[i], h, yPts[i], xPts[i], 0, yPts[i], xPts[i + 1], 0, yPts[i + 1]);
+		addLine(pOcc, xPts[i], h, yPts[i], xPts[i], 0.f, yPts[i], xPts[i + 1], 0.f, yPts[i + 1]);
 	}
-	addLine(pOcc, xPts[i], 0, yPts[i], xPts[i], h, yPts[i], xPts[i - 1], 0, yPts[i - 1]);
-	addLine(pOcc, xPts[i], h, yPts[i], xPts[i], 0, yPts[i], xPts[i], 0, yPts[i] - .1f);
+	addLine(pOcc, xPts[i], 0.f, yPts[i], xPts[i], h, yPts[i], xPts[i - 1], 0.f, yPts[i - 1]);
+	addLine(pOcc, xPts[i], h, yPts[i], xPts[i], 0.f, yPts[i], xPts[i], 0.f, yPts[i] - .1f);
 
 	free(xPts);
 	free(yPts);
 }
 
-float GetValue(float x, float y, float d, int c, int a, int b)
+static float GetValue(float x, float y, float d, unsigned int c, unsigned int a, unsigned int b)
 {	/* Map (x, y, d) to corner c, face a return b co-ord */
-	int i = c / 4, j = (c / 2) % 2, k = c % 2;
-	int minus, val;
+	unsigned int i = c / 4, j = (c / 2) % 2, k = c % 2;
+	unsigned int minus, val;
 	if ((i + j + k) % 2)
 		val = ((7 - (b + a)) % 3) + 1;
 	else
@@ -536,11 +537,12 @@ float GetValue(float x, float y, float d, int c, int a, int b)
 		return minus ? -y : y;
 	case 3:
 		return minus ? -d : d;
+	default:
+		return 0;
 	}
-	return 0;
 }
 
-void GetCoords(float x, float y, float d, int c, int f, float v[3])
+static void GetCoords(float x, float y, float d, unsigned int c, unsigned int f, float v[3])
 {	/* Map (x, y, d) to corner c, face f put result in v */
 	v[0] = GetValue(x, y, d, c, f, 0);
 	v[1] = GetValue(x, y, d, c, f, 1);
@@ -549,17 +551,18 @@ void GetCoords(float x, float y, float d, int c, int f, float v[3])
 
 void addDice(Occluder* pOcc, float size)
 {	/* Hard-coded numSteps to keep model simple + doesn't work correctly when > 8... */
-	int numSteps = 8;
+	unsigned int numSteps = 8;
 	float step = (2 * (float)PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);
 	float *yPts = (float *)malloc(sizeof(float) * numSteps);
-	int i, c, f;
+	unsigned int i, c, f;
+	assert(xPts && yPts);
 
 	for (i = 0; i < numSteps; i++)
 	{
 		float ang = step * i;
-		xPts[i] = (float)sin(ang) * size;
-		yPts[i] = (float)cos(ang) * size;
+		xPts[i] = sinf(ang) * size;
+		yPts[i] = cosf(ang) * size;
 	}
 
 	for (c = 0; c < 8; c++)
@@ -568,15 +571,15 @@ void addDice(Occluder* pOcc, float size)
 		{
 			for (i = 0; i < numSteps / 4; i++)
 			{
-				int prevFace = (f + 2) % 3;
-				int nextFace = (f + 1) % 3;
-				int oppPoint = numSteps / 4 - i;
+				unsigned int prevFace = (f + 2) % 3;
+				unsigned int nextFace = (f + 1) % 3;
+				unsigned int oppPoint = numSteps / 4 - i;
 
 				float v1[3], v2[3], v3[3];
 				GetCoords(xPts[i], yPts[i], size, c, f, v1);
 				GetCoords(xPts[i + 1], yPts[i + 1], size, c, f, v2);
 
-				GetCoords(0, 0, size, c, f, v3);
+				GetCoords(0.f, 0.f, size, c, f, v3);
 				addLineV(pOcc, v1, v2, v3);
 
 				if (i == 0)

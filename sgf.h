@@ -22,7 +22,7 @@
 #ifndef _SGF_H_
 #define _SGF_H_
 
-#include <list.h>
+#include "list.h"
 #include <stdio.h>
 
 typedef struct _property {

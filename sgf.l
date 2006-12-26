@@ -21,7 +21,7 @@
 
 %{
 #include <ctype.h>
-#include <list.h>
+#include "list.h"
 #include <string.h>
 
 #include "sgf.h"

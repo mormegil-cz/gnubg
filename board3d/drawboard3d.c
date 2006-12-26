@@ -21,6 +21,8 @@
 * $Id$
 */
 
+/*lint --e{834} ignore potentially confusing operators */
+
 #include "inc3d.h"
 #include "boardpos.h"
 
@@ -43,27 +45,27 @@ static int LogCube( const int n )
 }
 
 /* Helper functions in misc3d */
-void cylinder(float radius, float height, int accuracy, Texture* texture);
-void circle(float radius, float height, int accuracy);
-void circleRev(float radius, float height, int accuracy);
-void circleTex(float radius, float height, int accuracy, Texture* texture);
-void circleRevTex(float radius, float height, int accuracy, Texture* texture);
-void circleOutlineOutward(float radius, float height, int accuracy);
-void circleOutline(float radius, float height, int accuracy);
-void drawBox(int boxType, float x, float y, float z, float w, float h, float d, Texture* texture);
+void cylinder(float radius, float height, unsigned int accuracy, const Texture* texture);
+void circle(float radius, float height, unsigned int accuracy);
+void circleRev(float radius, float height, unsigned int accuracy);
+void circleTex(float radius, float height, unsigned int accuracy, const Texture* texture);
+void circleRevTex(float radius, float height, unsigned int accuracy, const Texture* texture);
+void circleOutlineOutward(float radius, float height, unsigned int accuracy);
+void circleOutline(float radius, float height, unsigned int accuracy);
+void drawBox(int boxType, float x, float y, float z, float w, float h, float d, const Texture* texture);
 void drawCube(float size);
-void drawRect(float x, float y, float z, float w, float h, Texture* texture);
-void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture);
-void drawChequeredRect(float x, float y, float z, float w, float h, int across, int down, Texture* texture);
-void QuarterCylinder(float radius, float len, int accuracy, Texture* texture);
-void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture);
-void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* texture);
-void drawCornerEigth(float ***boardPoints, float radius, int accuracy);
-void calculateEigthPoints(float ****boardPoints, float radius, int accuracy);
+void drawRect(float x, float y, float z, float w, float h, const Texture* texture);
+void drawSplitRect(float x, float y, float z, float w, float h, const Texture* texture);
+void drawChequeredRect(float x, float y, float z, float w, float h, int across, int down, const Texture* texture);
+void QuarterCylinder(float radius, float len, unsigned int accuracy, const Texture* texture);
+void QuarterCylinderSplayed(float radius, float len, unsigned int accuracy, const Texture* texture);
+void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, const Texture* texture);
+void drawCornerEigth(float ** const *boardPoints, float radius, unsigned int accuracy);
+void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accuracy);
 
 /* Other functions */
-void initPath(Path* p, float start[3]);
-void addPathSegment(Path* p, PathType type, float point[3]);
+void initPath(Path* p, const float start[3]);
+void addPathSegment(Path* p, PathType type, const float point[3]);
 void initDT(diceTest* dt, int x, int y, int z);
 
 /* All the board element sizes - based on base_unit size */
@@ -129,9 +131,9 @@ void initDT(diceTest* dt, int x, int y, int z);
 
 float getBoardWidth() {return TOTAL_WIDTH;}
 float getBoardHeight() {return TOTAL_HEIGHT;}
-float getDiceSize(renderdata* prd) {return prd->diceSize * base_unit;}
+float getDiceSize(const renderdata* prd) {return prd->diceSize * base_unit;}
 
-void TidyShadows(BoardData3d* bd3d)
+static void TidyShadows(BoardData3d* bd3d)
 {
 	freeOccluder(&bd3d->Occluders[OCC_BOARD]);
 	freeOccluder(&bd3d->Occluders[OCC_CUBE]);
@@ -141,7 +143,7 @@ void TidyShadows(BoardData3d* bd3d)
 	freeOccluder(&bd3d->Occluders[OCC_PIECE]);
 }
 
-void Tidy3dObjects(BoardData3d* bd3d, renderdata *prd)
+void Tidy3dObjects(BoardData3d* bd3d, const renderdata *prd)
 {
 	glDeleteLists(bd3d->pieceList, 1);
 	glDeleteLists(bd3d->diceList, 1);
@@ -160,14 +162,14 @@ void Tidy3dObjects(BoardData3d* bd3d, renderdata *prd)
 	DeleteTextureList();
 }
 
-void preDrawPiece0(renderdata* prd)
+static void preDrawPiece0(const renderdata* prd)
 {
-	int i, j;
+	unsigned int i, j;
 	float angle, angle2, step;
 
 	float latitude;
-	float new_radius;
 
+	float new_radius;
 	float radius = PIECE_HOLE / 2.0f;
 	float discradius = radius * 0.8f;
 	float lip = radius - discradius;
@@ -273,12 +275,11 @@ void preDrawPiece0(renderdata* prd)
 	Free3d(n, prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1);
 }
 
-void preDrawPiece1(renderdata* prd)
+static void preDrawPiece1(const renderdata* prd)
 {
-	float pieceRad, pieceBorder;
+	float pieceRad;
 
 	pieceRad = PIECE_HOLE / 2.0f;
-	pieceBorder = pieceRad * .9f;
 
 	/* Draw top/bottom of piece */
 	circleTex(pieceRad, PIECE_DEPTH, prd->curveAccuracy, prd->ChequerMat[0].pTexture);
@@ -308,7 +309,7 @@ void preDrawPiece1(renderdata* prd)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
-void preDrawPiece(BoardData3d *bd3d, renderdata *prd)
+static void preDrawPiece(BoardData3d *bd3d, const renderdata *prd)
 {
 	if (bd3d->pieceList)
 		glDeleteLists(bd3d->pieceList, 1);
@@ -326,12 +327,13 @@ void preDrawPiece(BoardData3d *bd3d, renderdata *prd)
 		break;
 	default:
 		g_print("Error: Unhandled piece type\n");
+		/*lint -e(788)*/
 	}
 
 	glEndList();
 }
 
-void UnitNormal(float x, float y, float z)
+static void UnitNormal(float x, float y, float z)
 {
 	/* Calculate the length of the vector */
 	float length = (float)sqrt((x * x) + (y * y) + (z * z));
@@ -340,20 +342,18 @@ void UnitNormal(float x, float y, float z)
 	glNormal3f(x / length, y / length, z / length);
 }
 
-void renderDice(renderdata* prd)
+static void renderDice(const renderdata* prd)
 {
-	int ns, lns;
-	int i, j;
+	unsigned int ns, lns;
+	unsigned int i, j;
 	int c;
 	float lat_angle;
 	float lat_step;
-	float latitude;
-	float new_radius;
 	float radius;
 	float angle, step = 0;
 	float size = getDiceSize(prd);
 
-	int corner_steps = (prd->curveAccuracy / 4) + 1;
+	unsigned int corner_steps = (prd->curveAccuracy / 4) + 1;
 	float ***corner_points = Alloc3d(corner_steps, corner_steps, 3);
 
 	radius = size / 2.0f;
@@ -379,9 +379,6 @@ void renderDice(renderdata* prd)
 	/* Calculate corner points */
 	for (i = 0; i < lns + 1; i++)
 	{
-		latitude = (float)sin(lat_angle) * radius;
-		new_radius = Dist2d(radius, latitude);
-
 		ns = (prd->curveAccuracy / 4) - i;
 		if (ns > 0)
 			step = ((float)PI / 2 - lat_angle) / (ns);
@@ -403,11 +400,11 @@ void renderDice(renderdata* prd)
 	{
 		glPushMatrix();
 
-		glRotatef((float)(c * 90), 0, 0, 1);
+		glRotatef((float)c * 90, 0, 0, 1);
 
 		for (i = 0; i < prd->curveAccuracy / 4; i++)
 		{
-			ns = (prd->curveAccuracy / 4) - i - 1;
+			ns = (prd->curveAccuracy / 4) - (i + 1);
 
 			glBegin(GL_TRIANGLE_STRIP);
 				UnitNormal(corner_points[i][0][0], corner_points[i][0][1], corner_points[i][0][2]);
@@ -451,7 +448,7 @@ void renderDice(renderdata* prd)
 	Free3d(corner_points, corner_steps, corner_steps);
 }
 
-void renderCube(renderdata* prd, float size)
+static void renderCube(const renderdata* prd, float size)
 {
 	int i, c;
 	float ***corner_points;
@@ -480,7 +477,7 @@ void renderCube(renderdata* prd, float size)
 		for (i = 0; i < 2; i++)
 		{
 			glPushMatrix();
-			glRotatef((float)(i * 90), 0, 0, 1);
+			glRotatef((float)i * 90, 0, 0, 1);
 
 			glTranslatef(hds, -hds, -radius);
 			QuarterCylinder(radius, ds, prd->curveAccuracy, 0);
@@ -501,7 +498,7 @@ void renderCube(renderdata* prd, float size)
 		glPushMatrix();
 		glTranslatef(0, 0, hds + radius);
 
-		glRotatef((float)(c * 90), 0, 0, 1);
+		glRotatef((float)c * 90, 0, 0, 1);
 
 		glTranslatef(hds, -hds, -radius);
 		glRotatef(-90, 0, 0, 1);
@@ -517,7 +514,7 @@ void renderCube(renderdata* prd, float size)
 	freeEigthPoints(&corner_points, prd->curveAccuracy);
 }
 
-void preDrawDice(BoardData3d* bd3d, renderdata* prd)
+static void preDrawDice(BoardData3d* bd3d, const renderdata* prd)
 {
 	if (bd3d->diceList)
 		glDeleteLists(bd3d->diceList, 1);
@@ -536,7 +533,7 @@ void preDrawDice(BoardData3d* bd3d, renderdata* prd)
 	glEndList();
 }
 
-void getDoubleCubePos(BoardData* bd, float v[3])
+static void getDoubleCubePos(const BoardData* bd, float v[3])
 {
 	if (bd->doubled != 0)
 	{
@@ -559,7 +556,7 @@ void getDoubleCubePos(BoardData* bd, float v[3])
 			v[1] = EDGE_HEIGHT + DOUBLECUBE_SIZE / 2.0f;
 			break;
 		case 1:
-			v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - DOUBLECUBE_SIZE / 2.0f;
+			v[1] = (TOTAL_HEIGHT - EDGE_HEIGHT) - DOUBLECUBE_SIZE / 2.0f;
 			break;
 		default:
 		  v[1] = 0;	/* error */
@@ -568,14 +565,14 @@ void getDoubleCubePos(BoardData* bd, float v[3])
 	}
 }
 
-void moveToDoubleCubePos(BoardData* bd)
+static void moveToDoubleCubePos(const BoardData* bd)
 {
 	float v[3];
 	getDoubleCubePos(bd, v);
 	glTranslatef(v[0], v[1], v[2]);
 }
 
-void drawDCNumbers(BoardData* bd, diceTest* dt)
+static void drawDCNumbers(const BoardData* bd, const diceTest* dt)
 {
 	int c, nice;
 	float radius = DOUBLECUBE_SIZE / 7.0f;
@@ -583,7 +580,7 @@ void drawDCNumbers(BoardData* bd, diceTest* dt)
 	float hds = (ds / 2);
 	float depth = hds + radius;
 
-	char* sides[] = {"4", "16", "32", "64", "8", "2"};
+	const char* sides[] = {"4", "16", "32", "64", "8", "2"};
 	int side;
 
 	glLineWidth(.5f);
@@ -606,7 +603,7 @@ void drawDCNumbers(BoardData* bd, diceTest* dt)
 				glDisable(GL_DEPTH_TEST);
 
 			glPushMatrix();
-			glTranslatef(0, 0, depth + !nice * LIFT_OFF);
+			glTranslatef(0, 0, depth + (nice ? 0 : LIFT_OFF));
 
 			glPrintCube(bd->bd3d, sides[side]);
 
@@ -622,7 +619,7 @@ void drawDCNumbers(BoardData* bd, diceTest* dt)
 	glPopMatrix();
 }
 
-void DrawDCNumbers(BoardData* bd)
+static void DrawDCNumbers(const BoardData* bd)
 {
 	diceTest dt;
 	int extraRot = 0;
@@ -653,7 +650,7 @@ void DrawDCNumbers(BoardData* bd)
 	drawDCNumbers(bd, &dt);
 }
 
-void drawDC(BoardData* bd, BoardData3d* bd3d, renderdata* prd)
+static void drawDC(const BoardData* bd, const BoardData3d* bd3d, const renderdata* prd)
 {
 	glPushMatrix();
 	moveToDoubleCubePos(bd);
@@ -667,16 +664,16 @@ void drawDC(BoardData* bd, BoardData3d* bd3d, renderdata* prd)
 }
 
 /* Define position of dots on dice */
-int dots1[] = {2, 2, 0};
-int dots2[] = {1, 1, 3, 3, 0};
-int dots3[] = {1, 3, 2, 2, 3, 1, 0};
-int dots4[] = {1, 1, 1, 3, 3, 1, 3, 3, 0};
-int dots5[] = {1, 1, 1, 3, 2, 2, 3, 1, 3, 3, 0};
-int dots6[] = {1, 1, 1, 3, 2, 1, 2, 3, 3, 1, 3, 3, 0};
-int *dots[6] = {dots1, dots2, dots3, dots4, dots5, dots6};
-int dot_pos[] = {0, 20, 50, 80};	/* percentages across face */
+static int dots1[] = {2, 2, 0};
+static int dots2[] = {1, 1, 3, 3, 0};
+static int dots3[] = {1, 3, 2, 2, 3, 1, 0};
+static int dots4[] = {1, 1, 1, 3, 3, 1, 3, 3, 0};
+static int dots5[] = {1, 1, 1, 3, 2, 2, 3, 1, 3, 3, 0};
+static int dots6[] = {1, 1, 1, 3, 2, 1, 2, 3, 3, 1, 3, 3, 0};
+static int *dots[6] = {dots1, dots2, dots3, dots4, dots5, dots6};
+static int dot_pos[] = {0, 20, 50, 80};	/* percentages across face */
 
-void drawDots(BoardData3d *bd3d, float diceSize, float dotOffset, diceTest* dt, int showFront, int drawOutline)
+static void drawDots(const BoardData3d *bd3d, float diceSize, float dotOffset, const diceTest* dt, int showFront)
 {
 	int dot;
 	int c, nd;
@@ -752,7 +749,7 @@ void drawDots(BoardData3d *bd3d, float diceSize, float dotOffset, diceTest* dt, 
 	glPopMatrix();
 }
 
-void getDicePos(BoardData* bd, int num, float v[3])
+static void getDicePos(const BoardData* bd, int num, float v[3])
 {
 	float size = getDiceSize(bd->rd);
 	if (bd->diceShown == DICE_BELOW_BOARD)
@@ -777,7 +774,7 @@ void getDicePos(BoardData* bd, int num, float v[3])
 	}
 }
 
-void moveToDicePos(BoardData* bd, int num)
+static void moveToDicePos(const BoardData* bd, int num)
 {
 	float v[3];
 	getDicePos(bd, num, v);
@@ -789,7 +786,7 @@ void moveToDicePos(BoardData* bd, int num)
 	}
 }
 
-void drawDice(BoardData* bd, int num)
+static void drawDice(const BoardData* bd, int num)
 {
 	int value;
 	int rotDice[6][2] = {{0, 0}, {0, 1}, {3, 0}, {1, 0}, {0, 3}, {2, 0}};
@@ -830,7 +827,7 @@ void drawDice(BoardData* bd, int num)
 		setMaterial(&bd->rd->DiceDotMat[diceCol]);
 		glEnable(GL_BLEND);	/* NB. Disabled in diceList */
 		glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
-		drawDots(bd->bd3d, diceSize, -LIFT_OFF, &dt, 0, 0);
+		drawDots(bd->bd3d, diceSize, -LIFT_OFF, &dt, 0);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glCullFace(GL_BACK);
@@ -844,25 +841,25 @@ void drawDice(BoardData* bd, int num)
 	/* First blank out space for dots */
 	setMaterial(&whiteMat);
 	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-	drawDots(bd->bd3d, diceSize, LIFT_OFF, &dt, 1, 0);
+	drawDots(bd->bd3d, diceSize, LIFT_OFF, &dt, 1);
 
 	/* Now fill space with coloured dots */
 	setMaterial(&bd->rd->DiceDotMat[diceCol]);
 	glBlendFunc(GL_ONE, GL_ONE);
-	drawDots(bd->bd3d, diceSize, LIFT_OFF, &dt, 1, 0);
+	drawDots(bd->bd3d, diceSize, LIFT_OFF, &dt, 1);
 
 	/* Restore blending defaults */
 	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void getPiecePos(int point, int pos, int swap, float v[3])
+void getPiecePos(unsigned int point, unsigned int pos, int swapDir, float v[3])
 {
 	if (point == 0 || point == 25)
 	{	/* bars */
 		v[0] = TOTAL_WIDTH / 2.0f;
 		v[1] = TOTAL_HEIGHT / 2.0f;
-		v[2] = BASE_DEPTH + EDGE_DEPTH + ((pos - 1) / 3) * PIECE_DEPTH;
+		v[2] = BASE_DEPTH + EDGE_DEPTH + (int)((pos - 1) / 3) * PIECE_DEPTH;
 		pos = ((pos - 1) % 3) + 1;
 
 		if (point == 25)
@@ -878,7 +875,7 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 	else if (point >= 26)
 	{	/* homes */
 		v[2] = BASE_DEPTH;
-		if (swap)
+		if (swapDir)
 			v[0] = TRAY_WIDTH / 2.0f;
 		else
 			v[0] = TOTAL_WIDTH - TRAY_WIDTH / 2.0f;
@@ -890,11 +887,11 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 	}
 	else
 	{
-		v[2] = BASE_DEPTH + ((pos - 1) / 5) * PIECE_DEPTH;
+		v[2] = BASE_DEPTH + (int)((pos - 1) / 5) * PIECE_DEPTH;
 
 		if (point < 13)
 		{
-			if (swap)
+			if (swapDir)
 				point = 13 - point;
 
 			if (pos > 10)
@@ -911,7 +908,7 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 		}
 		else
 		{
-			if (swap)
+			if (swapDir)
 				point = (24 + 13) - point;
 
 			if (pos > 10)
@@ -943,14 +940,14 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 	}
 }
 
-void renderSpecialPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void renderSpecialPieces(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	if (bd->drag_point >= 0)
 	{
 		glPushMatrix();
 		glTranslated(bd3d->dragPos[0], bd3d->dragPos[1], bd3d->dragPos[2]);
 		glRotatef((float)bd3d->movingPieceRotation, 0, 0, 1);
-		setMaterial(&prd->ChequerMat[bd->drag_colour == 1]);
+		setMaterial(&prd->ChequerMat[(bd->drag_colour == 1) ? 1 : 0]);
 		glCallList(bd3d->pieceList);
 		glPopMatrix();
 	}
@@ -962,13 +959,13 @@ void renderSpecialPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 		if (bd3d->rotateMovingPiece > 0)
 			glRotatef(-90 * bd3d->rotateMovingPiece * bd->turn, 1, 0, 0);
 		glRotatef((float)bd3d->movingPieceRotation, 0, 0, 1);
-		setMaterial(&prd->ChequerMat[bd->turn == 1]);
+		setMaterial(&prd->ChequerMat[(bd->turn == 1) ? 1 : 0]);
 		glCallList(bd3d->pieceList);
 		glPopMatrix();
 	}
 }
 
-void drawSpecialPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void drawSpecialPieces(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {	/* Draw animated or dragged pieces */
 	int blend = (prd->ChequerMat[0].alphaBlend) || (prd->ChequerMat[1].alphaBlend);
 
@@ -986,7 +983,7 @@ void drawSpecialPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 		glDisable(GL_BLEND);
 }
 
-void drawPiece(BoardData3d* bd3d, int point, int pos)
+static void drawPiece(const BoardData3d* bd3d, unsigned int point, unsigned int pos)
 {
 	float v[3];
 	glPushMatrix();
@@ -1006,9 +1003,10 @@ void drawPiece(BoardData3d* bd3d, int point, int pos)
 	glPopMatrix();
 }
 
-void drawPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
-	int i, j;
+	unsigned int i;
+	unsigned int j;
 	int blend = (prd->ChequerMat[0].alphaBlend) || (prd->ChequerMat[1].alphaBlend);
 
 	if (blend)
@@ -1018,19 +1016,27 @@ void drawPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 		setMaterial(&prd->ChequerMat[0]);
 		for (i = 0; i < 28; i++)
 		{
-			for (j = 1; j <= -bd->points[i]; j++)
+			if (bd->points[i] < 0)
 			{
-				glEnable(GL_BLEND);
-				drawPiece(bd3d, i, j);
+				unsigned int numPieces = (unsigned int)(-bd->points[i]);
+				for (j = 1; j <= numPieces; j++)
+				{
+					glEnable(GL_BLEND);
+					drawPiece(bd3d, i, j);
+				}
 			}
 		}
 		setMaterial(&prd->ChequerMat[1]);
 		for (i = 0; i < 28; i++)
 		{
-			for (j = 1; j <= bd->points[i]; j++)
+			if (bd->points[i] > 0)
 			{
-				glEnable(GL_BLEND);
-				drawPiece(bd3d, i, j);
+				unsigned int numPieces = (unsigned int)bd->points[i];
+				for (j = 1; j <= numPieces; j++)
+				{
+					glEnable(GL_BLEND);
+					drawPiece(bd3d, i, j);
+				}
 			}
 		}
 		glCullFace(GL_BACK);
@@ -1039,21 +1045,29 @@ void drawPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	setMaterial(&prd->ChequerMat[0]);
 	for (i = 0; i < 28; i++)
 	{
-		for (j = 1; j <= -bd->points[i]; j++)
+		if (bd->points[i] < 0)
 		{
-			if (blend)
-				glEnable(GL_BLEND);
-			drawPiece(bd3d, i, j);
+			unsigned int numPieces = (unsigned int)(-bd->points[i]);
+			for (j = 1; j <= numPieces; j++)
+			{
+				if (blend)
+					glEnable(GL_BLEND);
+				drawPiece(bd3d, i, j);
+			}
 		}
 	}
 	setMaterial(&prd->ChequerMat[1]);
 	for (i = 0; i < 28; i++)
 	{
-		for (j = 1; j <= bd->points[i]; j++)
+		if (bd->points[i] > 0)
 		{
-			if (blend)
-				glEnable(GL_BLEND);
-			drawPiece(bd3d, i, j);
+			unsigned int numPieces = (unsigned int)bd->points[i];
+			for (j = 1; j <= numPieces; j++)
+			{
+				if (blend)
+					glEnable(GL_BLEND);
+				drawPiece(bd3d, i, j);
+			}
 		}
 	}
 	if (blend)
@@ -1071,14 +1085,14 @@ void drawPieces(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 			{	/* Make sure texturing is disabled */
 				if (prd->ChequerMat[0].pTexture)
 					glDisable(GL_TEXTURE_2D);
-				drawPiece(bd3d, target, abs(bd->points[target]) + 1);
+				drawPiece(bd3d, (unsigned int)target, abs(bd->points[target]) + 1);
 			}
 		}
 		glPolygonMode(GL_FRONT, GL_FILL);
 	}
 }
 
-void DrawNumbers(BoardData* bd, int sides)
+static void DrawNumbers(const BoardData* bd, int sides)
 {
 	int i;
 	char num[3];
@@ -1144,7 +1158,7 @@ void DrawNumbers(BoardData* bd, int sides)
 	glPopMatrix();
 }
 
-void drawNumbers(BoardData* bd, int sides)
+static void drawNumbers(const BoardData* bd, int sides)
 {
 	/* No need to depth test as on top of board (depth test could cause alias problems too) */
 	glDisable(GL_DEPTH_TEST);
@@ -1157,7 +1171,7 @@ void drawNumbers(BoardData* bd, int sides)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void drawPoint(renderdata* prd, float tuv, int i, int p, int outline)
+static void drawPoint(const renderdata* prd, float tuv, unsigned int i, int p, int outline)
 {	/* Draw point with correct texture co-ords */
 	float w = PIECE_HOLE;
 	float h = POINT_HEIGHT;
@@ -1200,18 +1214,18 @@ void drawPoint(renderdata* prd, float tuv, int i, int p, int outline)
 
 		/* Draw rounded semi-circle end of point (with correct texture co-ords) */
 		{
-			int i;
+			unsigned int j;
 			float angle, step;
 			float radius = w / 2.0f;
 
 			step = (2 * (float)PI) / prd->curveAccuracy;
-			angle = -step * (prd->curveAccuracy / 4);
+			angle = -step * (int)(prd->curveAccuracy / 4);
 			glNormal3f(0, 0, 1);
 			glBegin(outline ? GL_LINE_STRIP : GL_TRIANGLE_FAN);
 			glTexCoord2f(xoff* tuv, y* tuv);
 			 
 			glVertex3f(xoff, y, 0);
-			for (i = 0; i <= prd->curveAccuracy / 2; i++)
+			for (j = 0; j <= prd->curveAccuracy / 2; j++)
 			{
 				glTexCoord2f((xoff + (float)sin(angle) * radius) * tuv, (y + (float)cos(angle) * radius) * tuv);
 				glVertex3f(xoff + (float)sin(angle) * radius, y + (float)cos(angle) * radius, 0);
@@ -1239,7 +1253,7 @@ void drawPoint(renderdata* prd, float tuv, int i, int p, int outline)
 	glPopMatrix();
 }
 
-void drawPoints(renderdata* prd)
+static void drawPoints(const renderdata* prd)
 {
 	/* texture unit value */
 	float tuv;
@@ -1312,7 +1326,7 @@ void drawPoints(renderdata* prd)
 	glDepthMask(GL_TRUE);
 }
 
-void drawBase(renderdata* prd, int sides)
+static void drawBase(const renderdata* prd, int sides)
 {
 	if (sides & 1)
 		drawPoints(prd);
@@ -1328,7 +1342,7 @@ void drawBase(renderdata* prd, int sides)
 	}
 }
 
-void drawHinge(BoardData3d *bd3d, renderdata *prd, float height)
+static void drawHinge(const BoardData3d *bd3d, const renderdata *prd, float height)
 {
 	setMaterial(&prd->HingeMat);
 
@@ -1352,7 +1366,7 @@ void drawHinge(BoardData3d *bd3d, renderdata *prd, float height)
 	glPopMatrix();
 }
 
-void tidyEdges(renderdata* prd)
+static void tidyEdges(const renderdata* prd)
 {	/* Anti-alias board edges */
 	setMaterial(&prd->BoxMat);
 
@@ -1458,7 +1472,7 @@ void tidyEdges(renderdata* prd)
 	glDisable(GL_LINE_SMOOTH);
 }
 
-void getMoveIndicatorPos(BoardData* bd, float pos[3])
+static void getMoveIndicatorPos(const BoardData* bd, float pos[3])
 {
 	if (!fClockwise)
 		pos[0] = TOTAL_WIDTH - TRAY_WIDTH + ARROW_SIZE / 2.0f;
@@ -1473,13 +1487,13 @@ void getMoveIndicatorPos(BoardData* bd, float pos[3])
 	pos[2] = BASE_DEPTH + EDGE_DEPTH;
 }
 
-void showMoveIndicator(BoardData* bd)
+static void showMoveIndicator(const BoardData* bd)
 {
 	float pos[3];
 /* ARROW_UNIT used to draw sub-bits of arrow */
 #define ARROW_UNIT (ARROW_SIZE / 4.0f)
 
-	setMaterial(&bd->rd->ChequerMat[(bd->turn == 1)]);
+	setMaterial(&bd->rd->ChequerMat[(bd->turn == 1) ? 1 : 0]);
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
@@ -1527,13 +1541,13 @@ void showMoveIndicator(BoardData* bd)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void ClearScreen(renderdata *prd)
+static void ClearScreen(const renderdata *prd)
 {
 	glClearColor(prd->BackGroundMat.ambientColour[0], prd->BackGroundMat.ambientColour[1], prd->BackGroundMat.ambientColour[2], 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void RotateClosingBoard(BoardData3d* bd3d, renderdata *prd)
+static void RotateClosingBoard(const BoardData3d* bd3d, const renderdata *prd)
 {
 	float rotAngle = 90;
 	float trans = getBoardHeight() * .4f;
@@ -1563,53 +1577,53 @@ void RotateClosingBoard(BoardData3d* bd3d, renderdata *prd)
 #define DrawBottom(x, y, z, w, h)\
 	glNormal3f(0, -1, 0);\
 	glBegin(GL_QUADS);\
-	if (tuv) glTexCoord2f((x) * tuv, (y + BOARD_FILLET - curveTextOff - (h)) * tuv);\
+	if (tuv) glTexCoord2f((x) * tuv, ((y) + BOARD_FILLET - curveTextOff - (h)) * tuv);\
 	glVertex3f(x, y, z);\
-	if (tuv) glTexCoord2f((x + w) * tuv, (y + BOARD_FILLET - curveTextOff - (h)) * tuv);\
-	glVertex3f(x + w, y, z);\
-	if (tuv) glTexCoord2f((x + w) * tuv, (y + BOARD_FILLET - curveTextOff) * tuv);\
-	glVertex3f(x + w, y, z + h);\
-	if (tuv) glTexCoord2f((x) * tuv, (y + BOARD_FILLET - curveTextOff) * tuv);\
-	glVertex3f(x, y, z + h);\
+	if (tuv) glTexCoord2f(((x) + (w)) * tuv, ((y) + BOARD_FILLET - curveTextOff - (h)) * tuv);\
+	glVertex3f((x) + (w), y, z);\
+	if (tuv) glTexCoord2f(((x) + (w)) * tuv, ((y) + BOARD_FILLET - curveTextOff) * tuv);\
+	glVertex3f((x) + (w), y, z + (h));\
+	if (tuv) glTexCoord2f((x) * tuv, ((y) + BOARD_FILLET - curveTextOff) * tuv);\
+	glVertex3f(x, y, z + (h));\
 	glEnd();
 
 #define DrawTop(x, y, z, w, h)\
 	glNormal3f(0, 1, 0);\
 	glBegin(GL_QUADS);\
-	if (tuv) glTexCoord2f((x) * tuv, (y - (BOARD_FILLET - curveTextOff) + (h)) * tuv);\
+	if (tuv) glTexCoord2f((x) * tuv, ((y) - (BOARD_FILLET - curveTextOff) + (h)) * tuv);\
 	glVertex3f(x, y, z);\
-	if (tuv) glTexCoord2f((x) * tuv, (y - (BOARD_FILLET - curveTextOff)) * tuv);\
-	glVertex3f(x, y, z + h);\
-	if (tuv) glTexCoord2f((x + w) * tuv, (y - (BOARD_FILLET - curveTextOff)) * tuv);\
-	glVertex3f(x + w, y, z + h);\
-	if (tuv) glTexCoord2f((x + w) * tuv, (y - (BOARD_FILLET - curveTextOff) + (h)) * tuv);\
-	glVertex3f(x + w, y, z);\
+	if (tuv) glTexCoord2f((x) * tuv, ((y) - (BOARD_FILLET - curveTextOff)) * tuv);\
+	glVertex3f(x, y, z + (h));\
+	if (tuv) glTexCoord2f(((x) + (w)) * tuv, ((y) - (BOARD_FILLET - curveTextOff)) * tuv);\
+	glVertex3f((x) + (w), y, z + (h));\
+	if (tuv) glTexCoord2f(((x) + (w)) * tuv, ((y) - (BOARD_FILLET - curveTextOff) + (h)) * tuv);\
+	glVertex3f((x) + (w), y, z);\
 	glEnd();
 
 #define DrawLeft(x, y, z, w, h)\
 	glNormal3f(-1, 0, 0);\
 	glBegin(GL_QUADS);\
-	if (tuv) glTexCoord2f((x + BOARD_FILLET - curveTextOff - (h)) * tuv, (y) * tuv);\
+	if (tuv) glTexCoord2f(((x) + BOARD_FILLET - curveTextOff - (h)) * tuv, (y) * tuv);\
 	glVertex3f(x, y, z);\
-	if (tuv) glTexCoord2f((x + BOARD_FILLET - curveTextOff) * tuv, (y) * tuv);\
-	glVertex3f(x, y, z + h);\
-	if (tuv) glTexCoord2f((x + BOARD_FILLET - curveTextOff) * tuv, (y + w) * tuv);\
-	glVertex3f(x, y + w, z + h);\
-	if (tuv) glTexCoord2f((x + BOARD_FILLET - curveTextOff - (h)) * tuv, (y + w) * tuv);\
-	glVertex3f(x, y + w, z);\
+	if (tuv) glTexCoord2f(((x) + BOARD_FILLET - curveTextOff) * tuv, (y) * tuv);\
+	glVertex3f(x, y, (z) + (h));\
+	if (tuv) glTexCoord2f(((x) + BOARD_FILLET - curveTextOff) * tuv, ((y) + (w)) * tuv);\
+	glVertex3f(x, (y) + (w), (z) + (h));\
+	if (tuv) glTexCoord2f(((x) + BOARD_FILLET - curveTextOff - (h)) * tuv, ((y) + (w)) * tuv);\
+	glVertex3f(x, (y) + (w), z);\
 	glEnd();
 
 #define DrawRight(x, y, z, w, h)\
 	glNormal3f(1, 0, 0);\
 	glBegin(GL_QUADS);\
-	if (tuv) glTexCoord2f((x - (BOARD_FILLET - curveTextOff) + (h)) * tuv, (y) * tuv);\
+	if (tuv) glTexCoord2f(((x) - (BOARD_FILLET - curveTextOff) + (h)) * tuv, (y) * tuv);\
 	glVertex3f(x, y, z);\
-	if (tuv) glTexCoord2f((x - (BOARD_FILLET - curveTextOff) + (h)) * tuv, (y + w) * tuv);\
-	glVertex3f(x, y + w, z);\
-	if (tuv) glTexCoord2f((x - (BOARD_FILLET - curveTextOff)) * tuv, (y + w) * tuv);\
-	glVertex3f(x, y + w, z + h);\
-	if (tuv) glTexCoord2f((x - (BOARD_FILLET - curveTextOff)) * tuv, (y) * tuv);\
-	glVertex3f(x, y, z + h);\
+	if (tuv) glTexCoord2f(((x) - (BOARD_FILLET - curveTextOff) + (h)) * tuv, ((y) + (w)) * tuv);\
+	glVertex3f(x, (y) + (w), z);\
+	if (tuv) glTexCoord2f(((x) - (BOARD_FILLET - curveTextOff)) * tuv, ((y) + (w)) * tuv);\
+	glVertex3f(x, (y) + (w), z + (h));\
+	if (tuv) glTexCoord2f(((x) - (BOARD_FILLET - curveTextOff)) * tuv, (y) * tuv);\
+	glVertex3f(x, y, z + (h));\
 	glEnd();
 
 #define TextureOffset(s, t) if (tuv)\
@@ -1628,9 +1642,9 @@ void RotateClosingBoard(BoardData3d* bd3d, renderdata *prd)
 }
 
 /* texture unit value */
-float tuv;
+static float tuv;
 
-void InsideFillet(float x, float y, float z, float w, float h, float radius, int accuracy, Texture* texture, float curveTextOff)
+static void InsideFillet(float x, float y, float z, float w, float h, float radius, unsigned int accuracy, const Texture* texture, float curveTextOff)
 {
 	/* Left */
 	DrawRight(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH, h, EDGE_DEPTH - BOARD_FILLET);
@@ -1690,7 +1704,7 @@ void InsideFillet(float x, float y, float z, float w, float h, float radius, int
 	TextureReset
 }
 
-void drawTable(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void drawTable(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	float st, ct, dInc, curveTextOff = 0;
 	tuv = 0;
@@ -1716,288 +1730,288 @@ void drawTable(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	if (!prd->bgInTrays)
 		drawSplitRect(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT * 2, prd->BoxMat.pTexture);
 
-if (prd->roundedEdges)
-{
-	if (prd->BoxMat.pTexture)
+	if (prd->roundedEdges)
 	{
-		tuv = (TEXTURE_SCALE) / prd->BoxMat.pTexture->width;
-		st = (float)sin((2 * PI) / prd->curveAccuracy) * BOARD_FILLET;
-		ct = ((float)cos((2 * PI) / prd->curveAccuracy) - 1) * BOARD_FILLET;
-		dInc = (float)sqrt(st * st + ct * ct);
-		curveTextOff = (prd->curveAccuracy / 4) * dInc;
-	}
+		if (prd->BoxMat.pTexture)
+		{
+			tuv = (TEXTURE_SCALE) / prd->BoxMat.pTexture->width;
+			st = (float)sin((2 * PI) / prd->curveAccuracy) * BOARD_FILLET;
+			ct = ((float)cos((2 * PI) / prd->curveAccuracy) - 1) * BOARD_FILLET;
+			dInc = (float)sqrt(st * st + ct * ct);
+			curveTextOff = (int)(prd->curveAccuracy / 4) * dInc;
+		}
 
-	/* Right edge */
-	glBegin(GL_QUADS);
-		/* Front Face */
-		glNormal3f(0, 0, 1);
-
-		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-
-		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-	glEnd();
-
-	/* Right face */
-	DrawRight(TOTAL_WIDTH, BOARD_FILLET, 0, TOTAL_HEIGHT - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-
-	if (tuv)
-	{
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glTranslatef((TOTAL_WIDTH - BOARD_FILLET) * tuv, (BOARD_FILLET - curveTextOff - (BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)) * tuv, 0);
-		glRotatef(90, 0, 0, 1);
-		glMatrixMode(GL_MODELVIEW);
-	}
-	glPushMatrix();
-	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, 0);
-	glRotatef(90, 1, 0, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
-	glPopMatrix();
-	TextureReset
-
-	if (tuv)
-	{
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glTranslatef((TOTAL_WIDTH - BOARD_FILLET) * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv, 0);
-		glRotatef(90, 0, 0, 1);
-		glMatrixMode(GL_MODELVIEW);
-	}
-	glPushMatrix();
-	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(-90, 1, 0, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
-	glPopMatrix();
-	TextureReset
-
-	if (tuv)
-	{
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glTranslatef((TOTAL_WIDTH - BOARD_FILLET + curveTextOff) * tuv, (TOTAL_HEIGHT - BOARD_FILLET) * tuv, 0);
-		glRotatef(-90, 0, 0, 1);
-		glMatrixMode(GL_MODELVIEW);
-	}
-	glPushMatrix();
-	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(-180, 1, 0, 0);
-	glRotatef(90, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
-	glPopMatrix();
-	TextureReset
-
-	glPushMatrix();
-	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(-90, 0, 0, 1);
-	drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
-	glPopMatrix();
-
-	/* Top + bottom edges */
-	if (!prd->fHinges3d)
-	{
+		/* Right edge */
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 
-			M_Z(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		glEnd();
 
-		DrawBottom(BOARD_FILLET, 0, 0, TOTAL_WIDTH - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		/* Right face */
+		DrawRight(TOTAL_WIDTH, BOARD_FILLET, 0, TOTAL_HEIGHT - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 
-		glBegin(GL_QUADS);
-			/* Front Face */
-			glNormal3f(0, 0, 1);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-
-			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glEnd();
-		/* Top Face */
-		DrawTop(BOARD_FILLET, TOTAL_HEIGHT, 0, TOTAL_WIDTH - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-
-		TextureOffset(BOARD_FILLET * tuv, BOARD_FILLET * tuv);
+		if (tuv)
+		{
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			glTranslatef((TOTAL_WIDTH - BOARD_FILLET) * tuv, (BOARD_FILLET - curveTextOff - (BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)) * tuv, 0);
+			glRotatef(90, 0, 0, 1);
+			glMatrixMode(GL_MODELVIEW);
+		}
 		glPushMatrix();
-		glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
+		glTranslatef(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, 0);
+		glRotatef(90, 1, 0, 0);
+		QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
 		glPopMatrix();
 		TextureReset
 
-		TextureOffset(BOARD_FILLET * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv);
+		if (tuv)
+		{
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			glTranslatef((TOTAL_WIDTH - BOARD_FILLET) * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv, 0);
+			glRotatef(90, 0, 0, 1);
+			glMatrixMode(GL_MODELVIEW);
+		}
 		glPushMatrix();
-		glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 1, 0, 0);
-		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
+		QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
 		glPopMatrix();
 		TextureReset
-	}
-	else
-	{
-		glBegin(GL_QUADS);
-			/* Front Face */
-			glNormal3f(0, 0, 1);
-			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glEnd();
 
-		DrawBottom((TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		if (tuv)
+		{
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			glTranslatef((TOTAL_WIDTH - BOARD_FILLET + curveTextOff) * tuv, (TOTAL_HEIGHT - BOARD_FILLET) * tuv, 0);
+			glRotatef(-90, 0, 0, 1);
+			glMatrixMode(GL_MODELVIEW);
+		}
+		glPushMatrix();
+		glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		glRotatef(-180, 1, 0, 0);
+		glRotatef(90, 0, 1, 0);
+		QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
+		glPopMatrix();
+		TextureReset
 
-		glBegin(GL_QUADS);
-			/* Front Face */
-			glNormal3f(0, 0, 1);
-			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		glEnd();
+		glPushMatrix();
+		glTranslatef(TOTAL_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		glRotatef(-90, 0, 0, 1);
+		drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(TOTAL_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
+		glPopMatrix();
+
+		/* Top + bottom edges */
+		if (!prd->fHinges3d)
+		{
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+
+				M_Z(TOTAL_WIDTH / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
+
+			DrawBottom(BOARD_FILLET, 0, 0, TOTAL_WIDTH - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+
+				M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
 			/* Top Face */
-		DrawTop((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)
+			DrawTop(BOARD_FILLET, TOTAL_HEIGHT, 0, TOTAL_WIDTH - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 
-		glBegin(GL_QUADS);
+			TextureOffset(BOARD_FILLET * tuv, BOARD_FILLET * tuv);
+			glPushMatrix();
+			glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			glRotatef(-90, 0, 0, 1);
+			QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
+			glPopMatrix();
+			TextureReset
 
-			if (bd3d->State != BOARD_OPEN)
-			{
-				/* Cover up back when closing */
-				glNormal3f(-1, 0, 0);
-				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, 0);
-				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
-				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
-			}
-		glEnd();
+			TextureOffset(BOARD_FILLET * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv);
+			glPushMatrix();
+			glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			glRotatef(-90, 1, 0, 0);
+			glRotatef(-90, 0, 0, 1);
+			QuarterCylinder(BOARD_FILLET, TOTAL_WIDTH - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
+			glPopMatrix();
+			TextureReset
+		}
+		else
+		{
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
 
-		TextureOffset(((TOTAL_WIDTH + HINGE_GAP) / 2.0f) * tuv, BOARD_FILLET * tuv);
-		glPushMatrix();
-		glTranslatef((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
-		glPopMatrix();
-		TextureReset
+			DrawBottom((TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 
-		TextureOffset(((TOTAL_WIDTH + HINGE_GAP) / 2.0f) * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv);
-		glPushMatrix();
-		glTranslatef((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glRotatef(-90, 1, 0, 0);
-		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
-		glPopMatrix();
-		TextureReset
-	}
-	/* Bar */
-	if (!prd->fHinges3d)
-	{
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
+				/* Top Face */
+			DrawTop((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)
+
+			glBegin(GL_QUADS);
+
+				if (bd3d->State != BOARD_OPEN)
+				{
+					/* Cover up back when closing */
+					glNormal3f(-1, 0, 0);
+					M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, 0);
+					M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
+					M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+					M_X(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
+				}
+			glEnd();
+
+			TextureOffset(((TOTAL_WIDTH + HINGE_GAP) / 2.0f) * tuv, BOARD_FILLET * tuv);
+			glPushMatrix();
+			glTranslatef((TOTAL_WIDTH + HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			glRotatef(-90, 0, 0, 1);
+			QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
+			glPopMatrix();
+			TextureReset
+
+			TextureOffset(((TOTAL_WIDTH + HINGE_GAP) / 2.0f) * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv);
+			glPushMatrix();
+			glTranslatef((TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			glRotatef(-90, 1, 0, 0);
+			glRotatef(-90, 0, 0, 1);
+			QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
+			glPopMatrix();
+			TextureReset
+		}
+		/* Bar */
+		if (!prd->fHinges3d)
+		{
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
+		}
+		else
+		{
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
+		}
+		/* Bear-off edge */
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		glEnd();
-	}
-	else
-	{
+
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		glEnd();
-	}
-	/* Bear-off edge */
-	glBegin(GL_QUADS);
-		/* Front Face */
-		glNormal3f(0, 0, 1);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-	glEnd();
+		InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
+		InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
 
-	glBegin(GL_QUADS);
-		/* Front Face */
-		glNormal3f(0, 0, 1);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - EDGE_WIDTH + BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-	glEnd();
-
-	InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
-	InsideFillet(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
-
-	InsideFillet(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
-}
-else
-{
-	/* Right edge */
-	drawBox(BOX_SPLITTOP, TOTAL_WIDTH - EDGE_WIDTH, 0, 0, EDGE_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-
-	/* Top + bottom edges */
-	if (!prd->fHinges3d)
-	{
-		drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE_WIDTH, 0, 0, TOTAL_WIDTH - EDGE_WIDTH * 2, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-		drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0, TOTAL_WIDTH - EDGE_WIDTH * 2, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+		InsideFillet(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
 	}
 	else
 	{
-		drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-		drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+		/* Right edge */
+		drawBox(BOX_SPLITTOP, TOTAL_WIDTH - EDGE_WIDTH, 0, 0, EDGE_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+
+		/* Top + bottom edges */
+		if (!prd->fHinges3d)
+		{
+			drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE_WIDTH, 0, 0, TOTAL_WIDTH - EDGE_WIDTH * 2, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+			drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0, TOTAL_WIDTH - EDGE_WIDTH * 2, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+		}
+		else
+		{
+			drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+			drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+		}
+
+		/* Bar */
+		if (!prd->fHinges3d)
+			drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, prd->BoxMat.pTexture);
+		else
+			drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+
+		/* Bear-off edge */
+		drawBox(BOX_NOENDS | BOX_SPLITTOP, TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, prd->BoxMat.pTexture);
+		drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, prd->BoxMat.pTexture);
 	}
-
-	/* Bar */
-	if (!prd->fHinges3d)
-		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, prd->BoxMat.pTexture);
-	else
-		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-
-	/* Bear-off edge */
-	drawBox(BOX_NOENDS | BOX_SPLITTOP, TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, prd->BoxMat.pTexture);
-	drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, prd->BoxMat.pTexture);
-}
 
 	if (prd->fLabels)
 		drawNumbers(bd, 2);
@@ -2044,200 +2058,200 @@ else
 		setMaterial(&prd->BoxMat);
 	}
 
-if (prd->roundedEdges)
-{
-	/* Left edge */
-	glBegin(GL_QUADS);
-		/* Front Face */
-		glNormal3f(0, 0, 1);
-		M_Z(BOARD_FILLET - LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-
-		M_Z(BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-	glEnd();
-	/* Left Face */
-	DrawLeft(0, BOARD_FILLET, 0, TOTAL_HEIGHT - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-
-	if (tuv)
+	if (prd->roundedEdges)
 	{
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glTranslatef(BOARD_FILLET * tuv, (BOARD_FILLET - curveTextOff) * tuv, 0);
-		glRotatef(-90, 0, 0, 1);
-		glMatrixMode(GL_MODELVIEW);
-	}
-	glPushMatrix();
-	glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(-90, 1, 0, 0);
-	glRotatef(180, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
-	glPopMatrix();
-	TextureReset
-
-	if (tuv)
-	{
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glTranslatef((BOARD_FILLET - curveTextOff) * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv, 0);
-		glRotatef(90, 0, 0, 1);
-		glMatrixMode(GL_MODELVIEW);
-	}
-	glPushMatrix();
-	glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(-90, 1, 0, 0);
-	glRotatef(-90, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
-	glPopMatrix();
-	TextureReset
-
-	if (tuv)
-	{
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glTranslatef((BOARD_FILLET - curveTextOff) * tuv, BOARD_FILLET * tuv, 0);
-		glRotatef(90, 0, 0, 1);
-	}
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(-90, 0, 1, 0);
-	QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
-	glPopMatrix();
-	TextureReset
-
-	glPushMatrix();
-	glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(180, 0, 0, 1);
-	drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-	glRotatef(90, 0, 0, 1);
-	drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
-	glPopMatrix();
-
-	if (prd->fHinges3d)
-	{	/* Top + bottom edges and bar */
+		/* Left edge */
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(BOARD_FILLET - LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+			M_Z(BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		glEnd();
+		/* Left Face */
+		DrawLeft(0, BOARD_FILLET, 0, TOTAL_HEIGHT - BOARD_FILLET * 2, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 
-		DrawBottom(BOARD_FILLET, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-
-		glBegin(GL_QUADS);
-			/* Front Face */
-			glNormal3f(0, 0, 1);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			/* Top Face */
-		glEnd();
-
-		DrawTop(BOARD_FILLET, TOTAL_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)
-
-		glBegin(GL_QUADS);
-			if (bd3d->State != BOARD_OPEN)
-			{
-				/* Cover up back when closing */
-				glNormal3f(1, 0, 0);
-				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0);
-				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
-				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-				M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
-			}
-		glEnd();
-
-		TextureOffset(BOARD_FILLET * tuv, BOARD_FILLET * tuv);
+		if (tuv)
+		{
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			glTranslatef(BOARD_FILLET * tuv, (BOARD_FILLET - curveTextOff) * tuv, 0);
+			glRotatef(-90, 0, 0, 1);
+			glMatrixMode(GL_MODELVIEW);
+		}
 		glPushMatrix();
 		glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
-		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
+		glRotatef(-90, 1, 0, 0);
+		glRotatef(180, 0, 1, 0);
+		QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
 		glPopMatrix();
 		TextureReset
 
-		TextureOffset(BOARD_FILLET * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv);
+		if (tuv)
+		{
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			glTranslatef((BOARD_FILLET - curveTextOff) * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv, 0);
+			glRotatef(90, 0, 0, 1);
+			glMatrixMode(GL_MODELVIEW);
+		}
 		glPushMatrix();
 		glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
 		glRotatef(-90, 1, 0, 0);
-		glRotatef(-90, 0, 0, 1);
-		QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
+		glRotatef(-90, 0, 1, 0);
+		QuarterCylinder(BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
 		glPopMatrix();
 		TextureReset
+
+		if (tuv)
+		{
+			glMatrixMode(GL_TEXTURE);
+			glPushMatrix();
+			glTranslatef((BOARD_FILLET - curveTextOff) * tuv, BOARD_FILLET * tuv, 0);
+			glRotatef(90, 0, 0, 1);
+		}
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		glRotatef(-90, 0, 1, 0);
+		QuarterCylinder(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET * 2, prd->curveAccuracy, prd->BoxMat.pTexture);
+		glPopMatrix();
+		TextureReset
+
+		glPushMatrix();
+		glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		glRotatef(180, 0, 0, 1);
+		drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+		glRotatef(90, 0, 0, 1);
+		drawCornerEigth(bd3d->boardPoints, BOARD_FILLET, prd->curveAccuracy);
+		glPopMatrix();
+
+		if (prd->fHinges3d)
+		{	/* Top + bottom edges and bar */
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
+
+			DrawBottom(BOARD_FILLET, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(EDGE_WIDTH - BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				/* Top Face */
+			glEnd();
+
+			DrawTop(BOARD_FILLET, TOTAL_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET)
+
+			glBegin(GL_QUADS);
+				if (bd3d->State != BOARD_OPEN)
+				{
+					/* Cover up back when closing */
+					glNormal3f(1, 0, 0);
+					M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0);
+					M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, 0);
+					M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+					M_X((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
+				}
+			glEnd();
+
+			TextureOffset(BOARD_FILLET * tuv, BOARD_FILLET * tuv);
+			glPushMatrix();
+			glTranslatef(BOARD_FILLET, BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			glRotatef(-90, 0, 0, 1);
+			QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
+			glPopMatrix();
+			TextureReset
+
+			TextureOffset(BOARD_FILLET * tuv, (TOTAL_HEIGHT - (BOARD_FILLET - curveTextOff)) * tuv);
+			glPushMatrix();
+			glTranslatef(BOARD_FILLET, TOTAL_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH - BOARD_FILLET);
+			glRotatef(-90, 1, 0, 0);
+			glRotatef(-90, 0, 0, 1);
+			QuarterCylinder(BOARD_FILLET, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture);
+			glPopMatrix();
+			TextureReset
+
+			glBegin(GL_QUADS);
+				/* Front Face */
+				glNormal3f(0, 0, 1);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+				M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			glEnd();
+		}
+
+	/* Bear-off edge */
+		glBegin(GL_QUADS);
+			/* Front Face */
+			glNormal3f(0, 0, 1);
+			M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+
+			M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+		glEnd();
 
 		glBegin(GL_QUADS);
 			/* Front Face */
 			glNormal3f(0, 0, 1);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-			M_Z(TRAY_WIDTH + BOARD_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
+			M_Z(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
 		glEnd();
+
+		InsideFillet(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
+		InsideFillet(EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
+
+		InsideFillet(TRAY_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
 	}
+	else
+	{
+		/* Left edge */
+		drawBox(BOX_SPLITTOP, 0, 0, 0, EDGE_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
 
-/* Bear-off edge */
-	glBegin(GL_QUADS);
-		/* Front Face */
-		glNormal3f(0, 0, 1);
-		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+		if (prd->fHinges3d)
+		{	/* Top + bottom edges and bar */
+			drawBox(BOX_ALL, EDGE_WIDTH, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+			drawBox(BOX_ALL, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+		}
 
-		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - BOARD_FILLET + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET - LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-	glEnd();
+		if (prd->fHinges3d)
+			drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
 
-	glBegin(GL_QUADS);
-		/* Front Face */
-		glNormal3f(0, 0, 1);
-		M_Z(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(TRAY_WIDTH - EDGE_WIDTH + BOARD_FILLET + LIFT_OFF * 2, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-		M_Z(EDGE_WIDTH - LIFT_OFF - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH);
-	glEnd();
-
-	InsideFillet(EDGE_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
-	InsideFillet(EDGE_WIDTH - BOARD_FILLET, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
-
-	InsideFillet(TRAY_WIDTH - BOARD_FILLET, EDGE_HEIGHT - BOARD_FILLET, BASE_DEPTH + EDGE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BOARD_FILLET, prd->curveAccuracy, prd->BoxMat.pTexture, curveTextOff);
-}
-else
-{
-	/* Left edge */
-	drawBox(BOX_SPLITTOP, 0, 0, 0, EDGE_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-
-	if (prd->fHinges3d)
-	{	/* Top + bottom edges and bar */
-		drawBox(BOX_ALL, EDGE_WIDTH, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-		drawBox(BOX_ALL, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
+		/* Bear-off edge */
+		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, prd->BoxMat.pTexture);
+		drawBox(BOX_NOSIDES, EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, prd->BoxMat.pTexture);
 	}
-
-	if (prd->fHinges3d)
-		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BASE_DEPTH + EDGE_DEPTH, prd->BoxMat.pTexture);
-
-	/* Bear-off edge */
-	drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, prd->BoxMat.pTexture);
-	drawBox(BOX_NOSIDES, EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, prd->BoxMat.pTexture);
-}
 
 	if (prd->fHinges3d)
 	{
@@ -2260,15 +2274,15 @@ else
 		showMoveIndicator(bd);
 }
 
-int DiceShowing(BoardData* bd)
+static int DiceShowing(const BoardData* bd)
 {
 	return ((bd->diceShown == DICE_ON_BOARD && bd->diceRoll[0]) ||
 		(bd->rd->fDiceArea && bd->diceShown == DICE_BELOW_BOARD));
 }
 
-void drawPick(BoardData* bd)
+static void drawPick(const BoardData* bd)
 {	/* Draw all the objects on the board to see if any have been selected */
-	int i, j;
+	unsigned int i, j;
 	float barHeight;
 
 	/* pieces */
@@ -2342,7 +2356,7 @@ void drawPick(BoardData* bd)
 	glPopMatrix();
 }
 
-int NearestHit(int hits, GLuint* ptr)
+static int NearestHit(int hits, const GLuint* ptr)
 {
 	int i, sel = -1;
 	GLuint names;
@@ -2356,25 +2370,29 @@ int NearestHit(int hits, GLuint* ptr)
 		if (i == 0 || depth < minDepth)
 		{	/* if closer */
 			minDepth = depth;
-			sel = *ptr;
+			sel = (int)*ptr;
 		}
 		ptr += names;
 	}
 	return sel;
 }
 
-void getProjectedPos(int x, int y, float atDepth, float pos[3])
+static void getProjectedPos(int x, int y, float atDepth, float pos[3])
 {	/* Work out where point (x, y) projects to at depth atDepth */
 	GLint viewport[4];
 	GLdouble mvmatrix[16], projmatrix[16];
-	double nX, nY, nZ, fX, fY, fZ, zRange;
+	double nX, nY, nZ, /*lint -e(578)*/fX, fY, fZ, zRange;
 
 	glGetIntegerv (GL_VIEWPORT, viewport);
 	glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
 	glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
 
-	gluUnProject ((GLdouble)x, (GLdouble)y, 0.0, mvmatrix, projmatrix, viewport, &nX, &nY, &nZ);
-	gluUnProject ((GLdouble)x, (GLdouble)y, 1.0, mvmatrix, projmatrix, viewport, &fX, &fY, &fZ);
+	if ((gluUnProject ((GLdouble)x, (GLdouble)y, 0.0, mvmatrix, projmatrix, viewport, &nX, &nY, &nZ) == GL_FALSE) ||
+		(gluUnProject ((GLdouble)x, (GLdouble)y, 1.0, mvmatrix, projmatrix, viewport, &fX, &fY, &fZ) == GL_FALSE))
+	{
+		g_print("gluUnProject failed!\n");
+		return;
+	}
 
 	zRange = (fabs(nZ) - atDepth) / (fabs(fZ) + fabs(nZ));
 	pos[0] = (float)(nX - (-fX + nX) * zRange);
@@ -2387,7 +2405,7 @@ void getProjectedPieceDragPos(int x, int y, float pos[3])
 	getProjectedPos(x, y, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE + LIFT_OFF * 3, pos);
 }
 
-void calculateBackgroundSize(BoardData3d *bd3d, int viewport[4])
+void calculateBackgroundSize(BoardData3d *bd3d, const int viewport[4])
 {
 	float pos1[3], pos2[3], pos3[3];
 
@@ -2401,7 +2419,7 @@ void calculateBackgroundSize(BoardData3d *bd3d, int viewport[4])
 	bd3d->backGroundSize[1] = pos1[1] - pos3[1];
 }
 
-void getFlagPos(BoardData* bd, float v[3])
+static void getFlagPos(const BoardData* bd, float v[3])
 {
 	v[0] = (TRAY_WIDTH + BOARD_WIDTH) / 2.0f;
 	v[1] = TOTAL_HEIGHT / 2.0f;
@@ -2421,7 +2439,7 @@ void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag)
 			ctlpoints[i][j][2] = (float)sin((GLfloat)i + wag) * FLAG_WAG;
 }
 
-void drawFlagPick(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	int s;
 	float v[3];
@@ -2456,12 +2474,12 @@ void drawFlagPick(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	glPopMatrix();
 }
 
-static void drawPointPick(int point)
+static void drawPointPick(unsigned int point)
 {	/* Draw sub parts of point to work out which part of point clicked */
-	int i;
+	unsigned int i;
 	float pos[3];
 
-	if (point >= 0 && point <= 25)
+	if (point <= 25)
 	{	/* Split first point into 2 parts for zero and one selection */
 #define SPLIT_PERCENT .40f
 #define SPLIT_HEIGHT (PIECE_HOLE * SPLIT_PERCENT)
@@ -2501,13 +2519,14 @@ static void drawPointPick(int point)
 			pos[1] = pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP_HEIGHT;
 			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1], pos[2], PIECE_HOLE, EDGE_HEIGHT + POINT_HEIGHT - pos[1], 0);
 		}
-*/	}
+*/
+	}
 }
 
 /* 20 allows for 5 hit records (more than enough) */
 #define BUFSIZE 20
 
-int BoardPoint3d(BoardData* bd, BoardData3d* bd3d, renderdata* prd, int x, int y, int point)
+int BoardPoint3d(const BoardData* bd, const BoardData3d* bd3d, const renderdata* prd, int x, int y, int point)
 {	/* Identify if anything is below point (x,y) */
 	GLuint selectBuf[BUFSIZE];
 	GLint hits;
@@ -2545,7 +2564,7 @@ int BoardPoint3d(BoardData* bd, BoardData3d* bd3d, renderdata* prd, int x, int y
 		if (point == -1)
 			drawPick(bd);
 		else
-			drawPointPick(point);
+			drawPointPick((unsigned int)point);
 	}
 
 	glPopName();
@@ -2559,7 +2578,7 @@ int BoardPoint3d(BoardData* bd, BoardData3d* bd3d, renderdata* prd, int x, int y
 	return NearestHit(hits, (GLuint*)selectBuf);
 }
 
-void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromPoint, int fromDepth, int toPoint, int toDepth)
+void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsigned int fromPoint, unsigned int fromDepth, unsigned int toPoint, unsigned int toDepth)
 {	/* Work out the animation path for a moving piece */
 	float point[3];
 	float w, h, xDist, yDist;
@@ -2567,24 +2586,24 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	float bar1Dist, bar1Ratio;
 	float bar2Dist, bar2Ratio;
 	float start[3], end[3], obj1, obj2, objHeight;
-	int fromBoard = (fromPoint + 5) / 6;
-	int toBoard = (toPoint - 1) / 6 + 1;
+	unsigned int fromBoard = (fromPoint + 5) / 6;
+	unsigned int toBoard = (toPoint - 1) / 6 + 1;
 	int yDir = 0;
 
 	/* First work out were piece has to move */
 	/* Get start and end points */
-	getPiecePos(fromPoint, fromDepth, fClockwise, start);
-	getPiecePos(toPoint, toDepth, fClockwise, end);
+	getPiecePos(fromPoint, fromDepth, clockwise, start);
+	getPiecePos(toPoint, toDepth, clockwise, end);
 
 	/* Only rotate piece going home */
 	*pRotate = -1;
 
 	/* Swap boards if displaying other way around */
-	if (fClockwise)
+	if (clockwise)
 	{
-		int swap[] = {0, 2, 1, 4, 3, 5};
-		fromBoard = swap[fromBoard];
-		toBoard = swap[toBoard];
+		unsigned int swapBoard[] = {0, 2, 1, 4, 3, 5};
+		fromBoard = swapBoard[fromBoard];
+		toBoard = swapBoard[toBoard];
 	}
 
 	/* Work out what obstacle needs to be avoided */
@@ -2618,7 +2637,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	{
 		if (fromBoard <= 2)
 		{
-			if (fClockwise)
+			if (clockwise)
 			{
 				fromPoint = 13 - fromPoint;
 				toPoint = 13 - toPoint;
@@ -2634,7 +2653,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 		}
 		else
 		{
-			if (fClockwise)
+			if (clockwise)
 			{
 				fromPoint = 24 + 13 - fromPoint;
 				toPoint = 24 + 13 - toPoint;
@@ -2661,7 +2680,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	{
 		if (fromPoint == 0 || fromPoint == 25)
 		{	/* Move from bar */
-			if (!fClockwise)
+			if (!clockwise)
 			{
 				obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH;
 				if (fromPoint == 0)
@@ -2697,7 +2716,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 		}
 		else
 		{	/* Move home */
-			if (!fClockwise)
+			if (!clockwise)
 			{
 				if (toPoint == 26)
 					obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH + PIECE_HOLE * (7 - fromPoint);
@@ -2712,7 +2731,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 					obj1 = TRAY_WIDTH + PIECE_HOLE * (24 - fromPoint);
 			}
 
-			if (!fClockwise)
+			if (!clockwise)
 				obj2 = TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH;
 			else
 				obj2 = TRAY_WIDTH - EDGE_WIDTH;
@@ -2832,7 +2851,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	addPathSegment(p, PATH_CURVE_12TO3, end);
 }
 
-void setupDicePath(int num, float stepSize, Path* p, BoardData* bd)
+static void setupDicePath(int num, float stepSize, Path* p, const BoardData* bd)
 {
 	float point[3];
 	getDicePos(bd, num, point);
@@ -2850,7 +2869,7 @@ void setupDicePath(int num, float stepSize, Path* p, BoardData* bd)
 	addPathSegment(p, PATH_PARABOLA, point);
 }
 
-void randomDiceRotation(Path* p, DiceRotation* diceRotation, int dir)
+static void randomDiceRotation(const Path* p, DiceRotation* diceRotation, int dir)
 {
 /* Dice rotation range values */
 #define XROT_MIN 1
@@ -2874,31 +2893,33 @@ void randomDiceRotation(Path* p, DiceRotation* diceRotation, int dir)
 	}
 }
 
-void setupDicePaths(BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2])
+void setupDicePaths(const BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2])
 {
 	int firstDie = (bd->turn == 1);
+	int secondDie = !firstDie;
 	int dir = (bd->turn == 1) ? -1 : 1;
 
 	setupDicePath(firstDie, dir * DICE_STEP_SIZE0, &dicePaths[firstDie], bd);
-	setupDicePath(!firstDie, dir * DICE_STEP_SIZE1, &dicePaths[!firstDie], bd);
+	setupDicePath(secondDie, dir * DICE_STEP_SIZE1, &dicePaths[secondDie], bd);
 
 	randomDiceRotation(&dicePaths[firstDie], &diceRotation[firstDie], dir);
-	randomDiceRotation(&dicePaths[!firstDie], &diceRotation[!firstDie], dir);
+	randomDiceRotation(&dicePaths[secondDie], &diceRotation[secondDie], dir);
 
 	copyPoint(diceMovingPos[0], dicePaths[0].pts[0]);
 	copyPoint(diceMovingPos[1], dicePaths[1].pts[0]);
 }
 
-int DiceTooClose(BoardData3d *bd3d, renderdata *prd)
+int DiceTooClose(const BoardData3d *bd3d, const renderdata *prd)
 {
 	float dist;
 	float orgX[2];
 	int firstDie = bd3d->dicePos[0][0] > bd3d->dicePos[1][0];
+	int secondDie = !firstDie;
 
 	orgX[0] = bd3d->dicePos[firstDie][0] - DICE_STEP_SIZE0 * 5;
-	orgX[1] = bd3d->dicePos[!firstDie][0] - DICE_STEP_SIZE1 * 5;
+	orgX[1] = bd3d->dicePos[secondDie][0] - DICE_STEP_SIZE1 * 5;
 	dist = (float)sqrt((orgX[1] - orgX[0]) * (orgX[1] - orgX[0])
-			+ (bd3d->dicePos[!firstDie][1] - bd3d->dicePos[firstDie][1]) * (bd3d->dicePos[!firstDie][1] - bd3d->dicePos[firstDie][1]));
+			+ (bd3d->dicePos[secondDie][1] - bd3d->dicePos[firstDie][1]) * (bd3d->dicePos[secondDie][1] - bd3d->dicePos[firstDie][1]));
 	return (dist < getDiceSize(prd) * 1.1f);
 }
 
@@ -2908,6 +2929,7 @@ void setDicePos(BoardData *bd, BoardData3d *bd3d)
 	float diceSize = getDiceSize(bd->rd);
 	float firstX = TRAY_WIDTH + DICE_STEP_SIZE0 * 3 + diceSize * .75f;
 	int firstDie = (bd->turn == 1);
+	int secondDie = !firstDie;
 
 	bd3d->dicePos[firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - diceSize * 2);
 	bd3d->dicePos[firstDie][1] = randRange(DICE_AREA_HEIGHT);
@@ -2917,22 +2939,22 @@ void setDicePos(BoardData *bd, BoardData3d *bd3d)
 		if (iter++ > 20)
 		{	/* Trouble placing 2nd dice - replace 1st dice */
 			setDicePos(bd, bd3d);
-			return;;
+			return;
 		}
 
 		firstX = bd3d->dicePos[firstDie][0] + diceSize;
-		bd3d->dicePos[!firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - diceSize * .7f);
-		bd3d->dicePos[!firstDie][1] = randRange(DICE_AREA_HEIGHT);
+		bd3d->dicePos[secondDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - diceSize * .7f);
+		bd3d->dicePos[secondDie][1] = randRange(DICE_AREA_HEIGHT);
 	}
 	while (DiceTooClose(bd3d, bd->rd));
 
 	bd3d->dicePos[firstDie][2] = (float)(rand() % 360);
-	bd3d->dicePos[!firstDie][2] = (float)(rand() % 360);
+	bd3d->dicePos[secondDie][2] = (float)(rand() % 360);
 
 	updateDiceOccPos(bd, bd3d);
 }
 
-void drawDie(BoardData* bd, BoardData3d *bd3d, int num)
+static void drawDie(const BoardData* bd, const BoardData3d *bd3d, int num)
 {
 	glPushMatrix();
 	/* Move to correct position for die */
@@ -2951,29 +2973,29 @@ void drawDie(BoardData* bd, BoardData3d *bd3d, int num)
 	glPopMatrix();
 }
 
-void initViewArea(viewArea* pva)
+static void initViewArea(viewArea* pva)
 {	/* Initialize values to extremes */
 	pva->top = -base_unit * 1000;
 	pva->bottom = base_unit * 1000;
 	pva->width = 0;
 }
 
-float getViewAreaHeight(viewArea* pva)
+static float getViewAreaHeight(const viewArea* pva)
 {
 	return pva->top - pva->bottom;
 }
 
-float getViewAreaWidth(viewArea* pva)
+static float getViewAreaWidth(const viewArea* pva)
 {
 	return pva->width;
 }
 
-float getAreaRatio(viewArea* pva)
+static float getAreaRatio(const viewArea* pva)
 {
 	return getViewAreaWidth(pva) / getViewAreaHeight(pva);
 }
 
-void addViewAreaHeightPoint(viewArea* pva, float halfRadianFOV, float boardRadAngle, float inY, float inZ)
+static void addViewAreaHeightPoint(viewArea* pva, float halfRadianFOV, float boardRadAngle, float inY, float inZ)
 {	/* Rotate points by board angle */
 	float adj;
 	float y, z;
@@ -2995,7 +3017,7 @@ void addViewAreaHeightPoint(viewArea* pva, float halfRadianFOV, float boardRadAn
 		pva->bottom = y;
 }
 
-void workOutWidth(viewArea* pva, float halfRadianFOV, float boardRadAngle, float aspectRatio, float ip[3])
+static void workOutWidth(viewArea* pva, float halfRadianFOV, float boardRadAngle, float aspectRatio, const float ip[3])
 {
 	float halfRadianXFOV;
 	float w = getViewAreaHeight(pva) * aspectRatio;
@@ -3021,7 +3043,7 @@ void workOutWidth(viewArea* pva, float halfRadianFOV, float boardRadAngle, float
 		pva->width = p[0] * 2;
 }
 
-float GetFOVAngle(BoardData* bd)
+static float GetFOVAngle(const BoardData* bd)
 {
 	float temp = bd->rd->boardAngle / 20.0f;
 	float skewFactor = (bd->rd->skewFactor / 100.0f) * (4 - .6f) + .6f;
@@ -3029,7 +3051,7 @@ float GetFOVAngle(BoardData* bd)
 	return (47 - 2.3f * temp * temp) / skewFactor;
 }
 
-void WorkOutViewArea(BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float aspectRatio, int AssumeCubeAtTop)
+static void WorkOutViewArea(const BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float aspectRatio, int AssumeCubeAtTop)
 {
 	float p[3];
 	float boardRadAngle;
@@ -3070,7 +3092,7 @@ void WorkOutViewArea(BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float 
 	workOutWidth(pva, *pHalfRadianFOV, boardRadAngle, aspectRatio, p);
 }
 
-void SetupPerspVolume(BoardData* bd, BoardData3d* bd3d, renderdata* prd, int viewport[4])
+void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, int viewport[4])
 {
 	float aspectRatio = (float)viewport[2]/(float)(viewport[3]);
 	if (!prd->planView)
@@ -3186,7 +3208,7 @@ void setupFlag(BoardData3d *bd3d)
 	}
 }
 
-void renderFlag(BoardData *bd, BoardData3d *bd3d, int curveAccuracy)
+static void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigned int curveAccuracy)
 {
 	/* Simple knots i.e. no weighting */
 	float s_knots[S_NUMKNOTS] = {0, 0, 0, 0, 1, 1, 1, 1};
@@ -3252,7 +3274,7 @@ void renderFlag(BoardData *bd, BoardData3d *bd3d, int curveAccuracy)
 		glScalef(1.3f, 1.3f, 1);
 
 		glLineWidth(.5f);
-		glPrintCube(bd->bd3d, flagValue);
+		glPrintCube(bd3d, flagValue);
 
 		glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	}
@@ -3261,7 +3283,7 @@ void renderFlag(BoardData *bd, BoardData3d *bd3d, int curveAccuracy)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void drawFlag(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void drawFlag(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	float v[4];
 	int isStencil = glIsEnabled(GL_STENCIL_TEST);
@@ -3283,7 +3305,7 @@ void drawFlag(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 		glEnable(GL_STENCIL_TEST);
 }
 
-void updateDieOccPos(BoardData* bd, BoardData3d* bd3d, Occluder* pOcc, int num)
+static void updateDieOccPos(const BoardData* bd, const BoardData3d* bd3d, Occluder* pOcc, int num)
 {
 	float id[4][4];
 
@@ -3328,7 +3350,7 @@ void updateDieOccPos(BoardData* bd, BoardData3d* bd3d, Occluder* pOcc, int num)
 	}
 }
 
-void updateDiceOccPos(BoardData* bd, BoardData3d* bd3d)
+void updateDiceOccPos(const BoardData* bd, BoardData3d* bd3d)
 {
 	int show = DiceShowing(bd);
 
@@ -3340,7 +3362,7 @@ void updateDiceOccPos(BoardData* bd, BoardData3d* bd3d)
 	}
 }
 
-void updateCubeOccPos(BoardData* bd, BoardData3d* bd3d)
+static void updateCubeOccPos(const BoardData* bd, BoardData3d* bd3d)
 {
 	getDoubleCubePos(bd, bd3d->Occluders[OCC_CUBE].trans);
 	makeInverseTransposeMatrix(bd3d->Occluders[OCC_CUBE].invMat, bd3d->Occluders[OCC_CUBE].trans);
@@ -3348,7 +3370,7 @@ void updateCubeOccPos(BoardData* bd, BoardData3d* bd3d)
 	bd3d->Occluders[OCC_CUBE].show = (bd->cube_use && !bd->crawford_game);
 }
 
-void updateMovingPieceOccPos(BoardData* bd, BoardData3d* bd3d)
+void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 {
 	if (bd->drag_point >= 0)
 	{
@@ -3374,9 +3396,9 @@ void updateMovingPieceOccPos(BoardData* bd, BoardData3d* bd3d)
 	}
 }
 
-void updatePieceOccPos(BoardData* bd, BoardData3d* bd3d)
+void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 {
-	int i, j, p = OCC_PIECE;
+	unsigned int i, j, p = OCC_PIECE;
 
 	for (i = 0; i < 28; i++)
 	{
@@ -3414,7 +3436,7 @@ void updatePieceOccPos(BoardData* bd, BoardData3d* bd3d)
 	}
 }
 
-void updateFlagOccPos(BoardData* bd, BoardData3d* bd3d)
+void updateFlagOccPos(const BoardData* bd, BoardData3d* bd3d)
 {
 	if (bd->resigned)
 	{
@@ -3462,14 +3484,14 @@ void updateHingeOccPos(BoardData3d* bd3d, int show3dHinges)
 	bd3d->Occluders[OCC_HINGE1].show = bd3d->Occluders[OCC_HINGE2].show = show3dHinges;
 }
 
-void updateOccPos(BoardData* bd)
+void updateOccPos(const BoardData* bd)
 {	/* Make sure shadows are in correct place */
 	updateCubeOccPos(bd, bd->bd3d);
 	updateDiceOccPos(bd, bd->bd3d);
 	updatePieceOccPos(bd, bd->bd3d);
 }
 
-void MakeShadowModel(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+static void MakeShadowModel(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	int i;
 	TidyShadows(bd3d);
@@ -3546,10 +3568,9 @@ void MakeShadowModel(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	updateFlagOccPos(bd, bd3d);
 }
 
-void getCheqSize(renderdata* prd)
+static void getCheqSize(renderdata* prd)
 {
-	int accuracy = (prd->curveAccuracy / 4) - 1;
-	int i;
+	unsigned int i, accuracy = (prd->curveAccuracy / 4) - 1;
 	prd->acrossCheq = prd->downCheq = 1;
 	for (i = 1; i < accuracy; i++)
 	{
@@ -3560,7 +3581,7 @@ void getCheqSize(renderdata* prd)
 	}
 }
 
-void preDraw3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+void preDraw3d(const BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 {
 	if (!bd3d->qobjTex)
 	{
@@ -3589,7 +3610,7 @@ void preDraw3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 	getCheqSize(prd);
 }
 
-void RestrictiveDrawPiece(int pos, int depth)
+void RestrictiveDrawPiece(unsigned int pos, unsigned int depth)
 {
 	float newPos[3];
 	getPiecePos(pos, depth, fClockwise, newPos);
@@ -3669,7 +3690,7 @@ void RestrictiveDrawMoveIndicator(BoardData* bd)
 	RestrictiveDrawFrame(pos, ARROW_SIZE, ARROW_SIZE, LIFT_OFF);
 }
 
-void RestrictiveDrawBoardNumbers(BoardData3d *bd3d)
+void RestrictiveDrawBoardNumbers(const BoardData3d *bd3d)
 {
 #define NUMBER_WIDTH (TOTAL_WIDTH - (2 * TRAY_WIDTH))
 	float pos[3] = {TRAY_WIDTH + (NUMBER_WIDTH / 2.0f), TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT / 2.0f), BASE_DEPTH + EDGE_DEPTH};
@@ -3680,7 +3701,7 @@ void RestrictiveDrawBoardNumbers(BoardData3d *bd3d)
 	RestrictiveDrawFrame(pos, NUMBER_WIDTH, textHeight, LIFT_OFF);
 }
 
-void RestrictiveDrawFlag(BoardData* bd)
+void RestrictiveDrawFlag(const BoardData* bd)
 {
 	float v[4];
 	getFlagPos(bd, v);
@@ -3689,7 +3710,7 @@ void RestrictiveDrawFlag(BoardData* bd)
 	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
 }
 
-void drawBoard(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
+void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	drawTable(bd, bd3d, prd);
 

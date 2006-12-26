@@ -2,6 +2,8 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+extern double get_time(void);
+
 #if !defined (__GNUC__) && !defined (__attribute__)
 #define __attribute__(X)
 #endif
@@ -43,12 +45,12 @@ typedef RETSIGTYPE (*psighandler)( int );
 
 #define MAX_NAME_LEN 32
 
-#if !HAVE_DECL_LRINT
+#if !HAVE_LRINT
 /* define lrint as macro if not available */    
 #define lrint(x) ((long) ((x)+0.5))     
 #endif
 
-#if !HAVE_DECL_SIGNBIT
+#if !HAVE_SIGNBIT
 /* define signbit as macro if not available */    
 #define signbit(x) ( (x) < 0.0 )     
 #endif

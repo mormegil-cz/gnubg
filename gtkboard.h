@@ -83,6 +83,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player );
 extern void board_set_clock(Board *board, gchar *c0, gchar *c1);
 extern void board_set_scores(Board *board, int s0, int s1);
 #endif
+extern unsigned int convert_point( int i, int player );
 
 /* private data */
 typedef struct _BoardData {

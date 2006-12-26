@@ -1,3 +1,8 @@
+Tue Dec 26 11:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* lib/board3d: Run through lint, added consts to pointers and
+		made some int's unsigned.
+
 Wed Dec 20 10:06:46 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* */: add some filenames to .cvsignore

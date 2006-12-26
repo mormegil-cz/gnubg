@@ -25,21 +25,12 @@
 #include <glib.h>
 #include <errno.h>
 #include <isaac.h>
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <assert.h>
-
-#if HAVE_LIBATLAS
-#warning "LIBATLAS processing..."
-#include <cblas.h>
-#endif /* HAVE_LIBATLAS */
 
 #include "neuralnet.h"
 #include "sse.h"
-#include "common.h"
 
 /* e[k] = exp(k/10) / 10 */
 static float e[100] = {
@@ -169,7 +160,7 @@ extern /*inline*/ float sigmoid_original(float const xin) {
 	    const float x1 = 10.0f * xin;
 	    const int i = (int)x1;
 	    
-		return 1 / (1 + e[i] * (10 - i + x1));
+		return 1 / (1 + e[i] * ((10 - i) + x1));
  	} else
 	    return 1.0f / 19931.370438230298f;
     } else {
@@ -177,7 +168,7 @@ extern /*inline*/ float sigmoid_original(float const xin) {
 	    const float x1 = -10.0f * xin;
 	    const int i = (int)x1;
 	    
-		return 1 - 1 / (1 + e[i] * (10 - i + x1));
+		return 1 - 1 / (1 + e[i] * ((10 - i) + x1));
 	} else
 	    return 19930.370438230298f / 19931.370438230298f;	
     }
@@ -281,7 +272,6 @@ sigmoid_jth( const float x ) {
       float d = sigmoid_original(x);
       if ( fabs(s-d) > 2.0e-3 ) {
         printf( "%f %f %f %f %f %f %f \n", x, x2, x0, fx0, dfx0, s, d );
-        assert(0);
         }*/
       return s;
     }
@@ -319,10 +309,10 @@ static void CheckRC( void ) {
     }
 }
 
-extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
-			    int cOutput, float rBetaHidden,
+extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
+			    unsigned int cOutput, float rBetaHidden,
 			    float rBetaOutput ) {
-    int i;
+    unsigned int i;
     float *pf;
     
     pnn->cInput = cInput;
@@ -335,25 +325,25 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
    
     if( ( pnn->arHiddenWeight = sse_malloc( cHidden * cInput *
 					 sizeof( float ) ) ) == NULL )
-	return -1;
+		return -1;
 
     if( ( pnn->arOutputWeight = sse_malloc( cOutput * cHidden *
 					 sizeof( float ) ) ) == NULL ) {
-	sse_free( pnn->arHiddenWeight );
-	return -1;
+		sse_free( pnn->arHiddenWeight );
+		return -1;
     }
     
     if( ( pnn->arHiddenThreshold = sse_malloc( cHidden * sizeof( float ) ) ) == NULL ) {
-	sse_free( pnn->arOutputWeight );
-	sse_free( pnn->arHiddenWeight );
-	return -1;
+		sse_free( pnn->arOutputWeight );
+		sse_free( pnn->arHiddenWeight );
+		return -1;
     }
 	   
     if( ( pnn->arOutputThreshold = sse_malloc( cOutput * sizeof( float ) ) ) == NULL ) {
-	sse_free( pnn->arHiddenThreshold );
-	sse_free( pnn->arOutputWeight );
-	sse_free( pnn->arHiddenWeight );
-	return -1;
+		sse_free( pnn->arHiddenThreshold );
+		sse_free( pnn->arOutputWeight );
+		sse_free( pnn->arHiddenWeight );
+		return -1;
     }
 
     CheckRC();
@@ -362,16 +352,16 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     pnn->savedIBase = sse_malloc( cInput * sizeof( float ) ); 
  
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
+		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
     for( i = cOutput * cHidden, pf = pnn->arOutputWeight; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
+		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
     for( i = cHidden, pf = pnn->arHiddenThreshold; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
+		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
     for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
-	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
+		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
 
     return 0;
 }
@@ -435,18 +425,15 @@ NeuralNetDestroy( neuralnet *pnn )
   return 0;
 }
 
-static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
+static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
                         float arOutput[], float *saveAr ) {
 
-#if HAVE_LIBATLAS
-	return EvaluateBlas( pnn, arInput, ar, arOutput, saveAr );
-#else
-    int i, j;
+    unsigned int i, j;
     float *prWeight;
 
     /* Calculate activity at hidden nodes */
     for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = pnn->arHiddenThreshold[ i ];
+		ar[ i ] = pnn->arHiddenThreshold[ i ];
 
     prWeight = pnn->arHiddenWeight;
     
@@ -471,82 +458,25 @@ static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
 
 
     for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+		ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
 
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
 
     for( i = 0; i < pnn->cOutput; i++ ) {
-	float r = pnn->arOutputThreshold[ i ];
+		float r = pnn->arOutputThreshold[ i ];
 	
-	for( j = 0; j < pnn->cHidden; j++ )
-	    r += ar[ j ] * *prWeight++;
+		for( j = 0; j < pnn->cHidden; j++ )
+			r += ar[ j ] * *prWeight++;
 
-	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
+		arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
     }
-
-    return 0;
-
-#endif /* HAVE_LIBATLAS */
 }
 
-#if HAVE_LIBATLAS
-static int EvaluateBlas( neuralnet *pnn, float arInput[], float ar[],
-		     float arOutput[], float *saveAr ) {
-
-    int i;
-
-    /* BLAS implementation */
-
-    /* ar = t(hidden) */
-    memcpy( ar, pnn->arHiddenThreshold, 
-            pnn->cHidden * sizeof ( float ) );
-
-    /* activity at hidden nodes: ar = W(hidden) * i + t(hidden) */
-
-    cblas_sgemv( CblasColMajor, CblasNoTrans,
-                 pnn->cHidden, pnn->cInput, 1.0f,
-                 pnn->arHiddenWeight, pnn->cHidden,
-                 arInput, 1,
-                 1.0f, ar, 1 );
-
-    /* save result for later use */
-    
-    if( saveAr)
-      memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
-
-    /* apply sigmoid */
-
-    for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
-
-    /* calculate output: arOutput = W(output) * ar + t(output) */
-
-    memcpy( arOutput, pnn->arOutputThreshold, 
-            pnn->cOutput * sizeof ( float ) );
-
-    cblas_sgemv( CblasRowMajor, CblasNoTrans,
-                 pnn->cOutput, pnn->cHidden, 1.0f,
-                 pnn->arOutputWeight, pnn->cHidden,
-                 ar, 1,
-                 1.0f, arOutput, 1 );
-
-    /* apply sigmoid */
-
-    for( i = 0; i < pnn->cOutput; i++ )
-	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * arOutput[ i ] );
-
-    return 0;
-}
-#endif /* HAVE_LIBATLAS */
-
-static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
+static void EvaluateFromBase( const neuralnet *pnn, const float arInputDif[], float ar[],
 		     float arOutput[] ) {
 
-#if HAVE_LIBATLAS
-	EvaluateFromBaseBlas( pnn, arInputDif, ar, arOutput );
-#else
-    int i, j;
+    unsigned int i, j;
     float *prWeight;
 
     /* Calculate activity at hidden nodes */
@@ -569,74 +499,29 @@ static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
               for(j = pnn->cHidden; j; j-- ) 
                 *pr++ -= *prWeight++;
             else
-		for( j = pnn->cHidden; j; j-- )
-		    *pr++ += *prWeight++ * ari;
+				for( j = pnn->cHidden; j; j-- )
+					*pr++ += *prWeight++ * ari;
 	} else
 	    prWeight += pnn->cHidden;
     }
     
     for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+		ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
 
     /* Calculate activity at output nodes */
     prWeight = pnn->arOutputWeight;
 
     for( i = 0; i < pnn->cOutput; i++ ) {
-	float r = pnn->arOutputThreshold[ i ];
-	
-	for( j = 0; j < pnn->cHidden; j++ )
-	    r += ar[ j ] * *prWeight++;
+		float r = pnn->arOutputThreshold[ i ];
+		
+		for( j = 0; j < pnn->cHidden; j++ )
+			r += ar[ j ] * *prWeight++;
 
-	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
+		arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
     }
-
-    return 0;
-
-#endif /* HAVE_LIBATLAS */
 }
 
-#if HAVE_LIBATLAS
-static int EvaluateFromBaseBlas( neuralnet *pnn, float arInputDif[], float ar[],
-		     float arOutput[] ) {
-
-    int i;
-
-    /* BLAS implementation */
-
-    /* activity at hidden nodes: ar = W(hidden) * i + t(hidden) */
-
-    cblas_sgemv( CblasColMajor, CblasNoTrans,
-                 pnn->cHidden, pnn->cInput, 1.0f,
-                 pnn->arHiddenWeight, pnn->cHidden,
-                 arInputDif, 1,
-                 1.0f, ar, 1 );
-    
-    /* apply sigmoid */
-
-    for( i = 0; i < pnn->cHidden; i++ )
-	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
-
-    /* calculate output: arOutput = W(output) * ar + t(output) */
-
-    memcpy( arOutput, pnn->arOutputThreshold, 
-            pnn->cOutput * sizeof ( float ) );
-
-    cblas_sgemv( CblasRowMajor, CblasNoTrans,
-                 pnn->cOutput, pnn->cHidden, 1.0f,
-                 pnn->arOutputWeight, pnn->cHidden,
-                 ar, 1,
-                 1.0f, arOutput, 1 );
-
-    /* apply sigmoid */
-
-    for( i = 0; i < pnn->cOutput; i++ )
-	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * arOutput[ i ] );
-    
-    return 0;
-}
-#endif /* HAVE_LIBATLAS */
-
-extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
+extern int NeuralNetEvaluate( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t ) {
     float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
     switch( t ) {
@@ -653,7 +538,7 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
       }
       case NNEVAL_FROMBASE:
       {
-        int i;
+        unsigned int i;
         
         memcpy(ar, pnn->savedBase, pnn->cHidden * sizeof(*ar));
   
@@ -662,7 +547,7 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
           float* s = pnn->savedIBase;
          
           for(i = 0; i < pnn->cInput; ++i, ++r, ++s) {
-            if( *r != *s ) {
+            if( *r != *s /*lint --e(777) */) {
               *r -= *s;
             } else {
               *r = 0.0;
@@ -683,27 +568,27 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
  * Note: this is a numerical approximation to the derivative.  There is
  * an analytical solution below, with an explanation of why it is not used.
  */
-extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
+extern int NeuralNetDifferentiate( const neuralnet *pnn, const float arInput[],
 				   float arOutput[], float arDerivative[] ) {
     float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
     float *arIDelta = (float*) g_alloca(pnn->cInput * sizeof(float));
     float *arODelta = (float*) g_alloca(pnn->cOutput * sizeof(float));
-    int i, j;
+    unsigned int i, j;
 
     Evaluate( pnn, arInput, ar, arOutput, 0 );
 
     memcpy( arIDelta, arInput, sizeof( arIDelta ) );
     
     for( i = 0; i < pnn->cInput; i++ ) {
-	arIDelta[ i ] = arInput[ i ] + 0.001f;
-	if( i )
-	    arIDelta[ i - 1 ] = arInput[ i - 1 ];
-	
-	Evaluate( pnn, arIDelta, ar, arODelta, 0 );
+		arIDelta[ i ] = arInput[ i ] + 0.001f;
+		if( i )
+			arIDelta[ i - 1 ] = arInput[ i - 1 ];
+		
+		Evaluate( pnn, arIDelta, ar, arODelta, 0 );
 
-	for( j = 0; j < pnn->cOutput; j++ )
-	    arDerivative[ j * pnn->cInput + i ] =
-		( arODelta[ j ] - arOutput[ j ] ) * 1000.0f;
+		for( j = 0; j < pnn->cOutput; j++ )
+			arDerivative[ j * pnn->cInput + i ] =
+			( arODelta[ j ] - arOutput[ j ] ) * 1000.0f;
     }
 
     return 0;
@@ -729,7 +614,7 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] ) {
     float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
     float *ardOdSigmaI = (float*) g_alloca(pnn->cHidden * pnn->cOutput * sizeof(float));
-    int i, j, k;
+    unsigned int i, j, k;
     float rdOdSigmaH, *prWeight, *prdOdSigmaI, *prdOdI;
     
     Evaluate( pnn, arInput, ar, arOutput );
@@ -764,9 +649,9 @@ extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 }
 #endif
 
-extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
-			   float arDesired[], float rAlpha ) {
-    int i, j;    
+extern int NeuralNetTrain( neuralnet *pnn, const float arInput[], float arOutput[],
+			   const float arDesired[], float rAlpha ) {
+    unsigned int i, j;    
     float *pr, *prWeight;
     float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
     float *arOutputError = (float*) g_alloca(pnn->cOutput * sizeof(float));
@@ -776,62 +661,62 @@ extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 
     /* Calculate error at output nodes */
     for( i = 0; i < pnn->cOutput; i++ )
-	arOutputError[ i ] = ( arDesired[ i ] - arOutput[ i ] ) *
-	    pnn->rBetaOutput * arOutput[ i ] * ( 1 - arOutput[ i ] );
+		arOutputError[ i ] = ( arDesired[ i ] - arOutput[ i ] ) *
+		    pnn->rBetaOutput * arOutput[ i ] * ( 1 - arOutput[ i ] );
 
     /* Calculate error at hidden nodes */
     for( i = 0; i < pnn->cHidden; i++ )
-	arHiddenError[ i ] = 0.0;
+		arHiddenError[ i ] = 0.0;
 
     prWeight = pnn->arOutputWeight;
     
     for( i = 0; i < pnn->cOutput; i++ )
-	for( j = 0; j < pnn->cHidden; j++ )
-	    arHiddenError[ j ] += arOutputError[ i ] * *prWeight++;
+		for( j = 0; j < pnn->cHidden; j++ )
+			arHiddenError[ j ] += arOutputError[ i ] * *prWeight++;
 
     for( i = 0; i < pnn->cHidden; i++ )
-	arHiddenError[ i ] *= pnn->rBetaHidden * ar[ i ] * ( 1 - ar[ i ] );
+		arHiddenError[ i ] *= pnn->rBetaHidden * ar[ i ] * ( 1 - ar[ i ] );
 
     /* Adjust weights at output nodes */
     prWeight = pnn->arOutputWeight;
     
     for( i = 0; i < pnn->cOutput; i++ ) {
-	for( j = 0; j < pnn->cHidden; j++ )
-	    *prWeight++ += rAlpha * arOutputError[ i ] * ar[ j ];
+		for( j = 0; j < pnn->cHidden; j++ )
+			*prWeight++ += rAlpha * arOutputError[ i ] * ar[ j ];
 
-	pnn->arOutputThreshold[ i ] += rAlpha * arOutputError[ i ];
+		pnn->arOutputThreshold[ i ] += rAlpha * arOutputError[ i ];
     }
 
     /* Adjust weights at hidden nodes */
     for( i = 0; i < pnn->cInput; i++ )
-	if( arInput[ i ] == 1.0 )
-	    for( prWeight = pnn->arHiddenWeight + i * pnn->cHidden,
-		     j = pnn->cHidden, pr = arHiddenError; j; j-- )
-		*prWeight++ += rAlpha * *pr++;
-	else if( arInput[ i ] )
-	    for( prWeight = pnn->arHiddenWeight + i * pnn->cHidden,
-		     j = pnn->cHidden, pr = arHiddenError; j; j-- )
-		*prWeight++ += rAlpha * *pr++ * arInput[ i ];
+		if( arInput[ i ] == 1.0 )
+		    for( prWeight = pnn->arHiddenWeight + i * pnn->cHidden,
+					 j = pnn->cHidden, pr = arHiddenError; j; j-- )
+				*prWeight++ += rAlpha * *pr++;
+		else if( arInput[ i ] )
+		    for( prWeight = pnn->arHiddenWeight + i * pnn->cHidden,
+					 j = pnn->cHidden, pr = arHiddenError; j; j-- )
+				*prWeight++ += rAlpha * *pr++ * arInput[ i ];
 
     for( i = 0; i < pnn->cHidden; i++ )
-	pnn->arHiddenThreshold[ i ] += rAlpha * arHiddenError[ i ];
+		pnn->arHiddenThreshold[ i ] += rAlpha * arHiddenError[ i ];
 
     pnn->nTrained++;
     
     return 0;
 }
 
-extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
-			    int cOutput ) {
-    int i, j;
+extern int NeuralNetResize( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
+			    unsigned int cOutput ) {
+    unsigned int i, j;
     float *pr, *prNew;
 
     CheckRC();
     
     if( cHidden != pnn->cHidden ) {
-	if( ( pnn->arHiddenThreshold = (float*)realloc( pnn->arHiddenThreshold,
-		cHidden * sizeof( float ) ) ) == NULL )
-	    return -1;
+		if( ( pnn->arHiddenThreshold = (float*)realloc( pnn->arHiddenThreshold,
+				cHidden * sizeof( float ) ) ) == NULL )
+			return -1;
 
 	for( i = pnn->cHidden; i < cHidden; i++ )
 	    pnn->arHiddenThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
@@ -839,57 +724,57 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     }
     
     if( cHidden != pnn->cHidden || cInput != pnn->cInput ) {
-	if( ( pr = sse_malloc( cHidden * cInput * sizeof( float ) ) ) == NULL )
-	    return -1;
+		if( ( pr = sse_malloc( cHidden * cInput * sizeof( float ) ) ) == NULL )
+			return -1;
 
-	prNew = pr;
-	
-	for( i = 0; i < cInput; i++ )
-	    for( j = 0; j < cHidden; j++ )
-		if( j >= pnn->cHidden )
-		    *prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
-			131072.0f;
-		else if( i >= pnn->cInput )
-		    *prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
-			131072.0f;
-		else
-		    *prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
-		    
-	sse_free( pnn->arHiddenWeight );
+		prNew = pr;
+		
+		for( i = 0; i < cInput; i++ )
+			for( j = 0; j < cHidden; j++ )
+			if( j >= pnn->cHidden )
+				*prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
+				131072.0f;
+			else if( i >= pnn->cInput )
+				*prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
+				131072.0f;
+			else
+				*prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
+			    
+		sse_free( pnn->arHiddenWeight );
 
-	pnn->arHiddenWeight = pr;
+		pnn->arHiddenWeight = pr;
     }
 	
     if( cOutput != pnn->cOutput ) {
-	if( ( pnn->arOutputThreshold = (float*)realloc( pnn->arOutputThreshold,
-		cOutput * sizeof( float ) ) ) == NULL )
-	    return -1;
+		if( ( pnn->arOutputThreshold = (float*)realloc( pnn->arOutputThreshold,
+			cOutput * sizeof( float ) ) ) == NULL )
+			return -1;
 
-	for( i = pnn->cOutput; i < cOutput; i++ )
-	    pnn->arOutputThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
-					    0x8000 ) / 131072.0f;
+		for( i = pnn->cOutput; i < cOutput; i++ )
+			pnn->arOutputThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
+							0x8000 ) / 131072.0f;
     }
     
     if( cOutput != pnn->cOutput || cHidden != pnn->cHidden ) {
-	if( ( pr = sse_malloc( cOutput * cHidden * sizeof( float ) ) ) == NULL )
-	    return -1;
+		if( ( pr = sse_malloc( cOutput * cHidden * sizeof( float ) ) ) == NULL )
+			return -1;
 
-	prNew = pr;
-	
-	for( i = 0; i < cHidden; i++ )
-	    for( j = 0; j < cOutput; j++ )
-		if( j >= pnn->cOutput )
-		    *prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
-			131072.0f;
-		else if( i >= pnn->cHidden )
-		    *prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
-			131072.0f;
-		else
-		    *prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
+		prNew = pr;
+		
+		for( i = 0; i < cHidden; i++ )
+			for( j = 0; j < cOutput; j++ )
+			if( j >= pnn->cOutput )
+				*prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
+				131072.0f;
+			else if( i >= pnn->cHidden )
+				*prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
+				131072.0f;
+			else
+				*prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
 
-	sse_free( pnn->arOutputWeight );
+		sse_free( pnn->arOutputWeight );
 
-	pnn->arOutputWeight = pr;
+		pnn->arOutputWeight = pr;
     }
 
     pnn->cInput = cInput;
@@ -901,7 +786,8 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 
 extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
 
-    int i, nTrained;
+    unsigned int i;
+	int nTrained;
     float *pr;
 
     if( fscanf( pf, "%d %d %d %d %f %f\n", &pnn->cInput, &pnn->cHidden,
@@ -909,14 +795,13 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
 		&pnn->rBetaOutput ) < 5 || pnn->cInput < 1 ||
 	pnn->cHidden < 1 || pnn->cOutput < 1 || nTrained < 0 ||
 	pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
-	errno = EINVAL;
-
-	return -1;
+		errno = EINVAL;
+		return -1;
     }
 
     if( NeuralNetCreate( pnn, pnn->cInput, pnn->cHidden, pnn->cOutput,
 			 pnn->rBetaHidden, pnn->rBetaOutput ) )
-	return -1;
+		return -1;
 
     pnn->nTrained = nTrained;
     
@@ -947,7 +832,8 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
 
 extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
 
-    int nTrained, i;
+    unsigned int i;
+	int nTrained;
 
 #define FREAD( p, c ) \
     if( fread( (p), sizeof( *(p) ), (c), pf ) < (unsigned int)(c) ) return -1;
@@ -960,15 +846,14 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
     FREAD( &pnn->rBetaOutput, 1 );
 
     if( pnn->cInput < 1 || pnn->cHidden < 1 || pnn->cOutput < 1 ||
-	nTrained < 0 || pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
-	errno = EINVAL;
-
-	return -1;
+			nTrained < 0 || pnn->rBetaHidden <= 0.0 || pnn->rBetaOutput <= 0.0 ) {
+		errno = EINVAL;
+		return -1;
     }
 
     if( NeuralNetCreate( pnn, pnn->cInput, pnn->cHidden, pnn->cOutput,
 			 pnn->rBetaHidden, pnn->rBetaOutput ) )
-	return -1;
+		return -1;
 
     pnn->nTrained = nTrained;
     
@@ -987,15 +872,15 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
     return 0;
 }
 
-extern int NeuralNetSave( neuralnet *pnn, FILE *pf ) {
+extern int NeuralNetSave( const neuralnet *pnn, FILE *pf ) {
 
-    int i;
+    unsigned int i;
     float *pr;
     
     if( fprintf( pf, "%d %d %d %d %11.7f %11.7f\n", pnn->cInput, pnn->cHidden,
-		 pnn->cOutput, pnn->nTrained, pnn->rBetaHidden,
-		 pnn->rBetaOutput ) < 0 )
-	return -1;
+			 pnn->cOutput, pnn->nTrained, pnn->rBetaHidden,
+			 pnn->rBetaOutput ) < 0 )
+		return -1;
 
     for( i = pnn->cInput * pnn->cHidden, pr = pnn->arHiddenWeight; i; i-- )
 	if( fprintf( pf, "%11.7f\n", *pr++ ) < 0 )
@@ -1016,7 +901,7 @@ extern int NeuralNetSave( neuralnet *pnn, FILE *pf ) {
     return 0;
 }
 
-extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf ) {
+extern int NeuralNetSaveBinary( const neuralnet *pnn, FILE *pf ) {
 
 #define FWRITE( p, c ) \
     if( fwrite( (p), sizeof( *(p) ), (c), pf ) < (unsigned int)(c) ) return -1;

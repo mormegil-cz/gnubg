@@ -23,7 +23,7 @@
 
 #include "inc3d.h"
 
-int midStencilVal;
+static int midStencilVal;
 
 void shadowInit(BoardData3d *bd3d, renderdata *prd)
 {
@@ -46,7 +46,7 @@ void shadowInit(BoardData3d *bd3d, renderdata *prd)
 	midStencilVal = (int)pow(2, stencilBits - 1);
 	glClearStencil(midStencilVal);
 }
-
+#if 0  /* Used for testing */
 void draw_shadow_volume_edges(Occluder* pOcc)
 {
 	if (pOcc->show)
@@ -57,8 +57,8 @@ void draw_shadow_volume_edges(Occluder* pOcc)
 		glPopMatrix();
 	}
 }
-
-void draw_shadow_volume_extruded_edges(Occluder* pOcc, float light_position[4], int prim)
+#endif
+static void draw_shadow_volume_extruded_edges(const Occluder* pOcc, const float light_position[4], unsigned int prim)
 {
 	if (pOcc->show)
 	{
@@ -74,7 +74,7 @@ void draw_shadow_volume_extruded_edges(Occluder* pOcc, float light_position[4], 
 	}
 }
 
-void draw_shadow_volume_to_stencil(BoardData3d* bd3d)
+static void draw_shadow_volume_to_stencil(const BoardData3d* bd3d)
 {
 	int i;
 
@@ -107,14 +107,13 @@ void draw_shadow_volume_to_stencil(BoardData3d* bd3d)
 	glDepthMask(GL_TRUE);
 }
 
-void shadowDisplay(void (*drawScene)(BoardData *, BoardData3d *, renderdata *), BoardData* bd)
+void shadowDisplay(void (*drawScene)(const BoardData *, BoardData3d *, const renderdata *), const BoardData* bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	/* Pass 1: Draw model, ambient light only (some diffuse to vary shadow darkness) */
 	float zero[4] = {0,0,0,0};
 	float d1[4];
 	float specular[4];
 	float diffuse[4];
-	renderdata *prd = bd->rd;
 
 	glGetLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 	d1[0] = d1[1] = d1[2] = d1[3] = prd->dimness;
@@ -123,20 +122,20 @@ void shadowDisplay(void (*drawScene)(BoardData *, BoardData3d *, renderdata *), 
 	glGetLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, zero);
 
-	drawScene(bd, bd->bd3d, prd);
+	drawScene(bd, bd3d, prd);
 
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 
 	/* Create shadow volume in stencil buffer */
 	glEnable(GL_STENCIL_TEST);
-	draw_shadow_volume_to_stencil(bd->bd3d);
+	draw_shadow_volume_to_stencil(bd3d);
 
 	/* Pass 2: Redraw model, full light in non-shadowed areas */
 	glStencilFunc(GL_EQUAL, midStencilVal, (GLuint)~0);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-	drawScene(bd, bd->bd3d, prd);
+	drawScene(bd, bd3d, prd);
 
 	glDisable(GL_STENCIL_TEST);
 }

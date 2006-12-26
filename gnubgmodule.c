@@ -809,7 +809,7 @@ PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *args )
 	unsigned char auch[16];
 	char auchHex[33];
 	int i;
-	// Work out md5 checksum
+	/* Work out md5 checksum */
 	char* gameStr = GameAsString();
 	md5_buffer(gameStr, strlen(gameStr), auch);
 	free(gameStr);

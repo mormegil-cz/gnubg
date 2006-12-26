@@ -1412,7 +1412,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   }
 
-#if (LIBXML_VERSION > 20507)
+#if (LIBXML_VERSION > 20412)
   /* validate against the DTD */
   ctxt = xmlNewValidCtxt();
   ctxt->error = validateError;

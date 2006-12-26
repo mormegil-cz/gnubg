@@ -114,15 +114,6 @@ static void AddDesignRow ( gpointer data, gpointer user_data );
 static void AddDesignRowIfNew ( gpointer data, gpointer user_data );
 #endif
 
-#if USE_BOARD3D
-void ResetPreviews();
-void UpdateColPreviews();
-int GetPreviewId();
-void UpdateColPreview(int ID);
-void SetPreviewLightLevel(int levels[3]);
-void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind);
-#endif
-
 #if HAVE_LIBXML2
 
 static GList *
@@ -267,7 +258,7 @@ void SetTitle()
 	gtk_window_set_title( GTK_WINDOW( pwDialog ),  title);
 }
 
-void UpdatePreview(GtkWidget *ppw)
+void UpdatePreview(GtkWidget *notused)
 {
 	if (!fUpdate)
 		return;
@@ -3138,7 +3129,7 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard )
 		if (prd->fDisplayType == DT_3D)
 			updateOccPos(bd);
 		else
-			StopIdle3d(bd);
+			StopIdle3d(bd, bd->bd3d);
 
 		if (prd->fDisplayType == DT_2D)
 #endif

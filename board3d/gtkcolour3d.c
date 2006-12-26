@@ -24,32 +24,27 @@
 #include "inc3d.h"
 
 #include "gtkcolour.h"
+#include "gtkprefs.h"
 
-extern void UpdatePreview(GtkWidget **ppw);
 static void RenderPreview(Material* pMat, unsigned char* buf);
 
-#define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( GTK_COLOUR_PICKER( \
-	pcp )->pwColourSel )
-#define COLOUR_SEL( pcp ) GTK_COLOR_SELECTION( COLOUR_SEL_DIA(pcp)->colorsel )
-
-GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
-GtkAdjustment *padjShine, *padjOpacity;
-GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureCombo;
-Material col3d;
-Material cancelValue;
-GdkPixmap *xppm = 0;
-int useOpacity, useTexture;
-float opacityValue;
-int bUpdate = TRUE;
-GLUquadricObj *qobj;
-char lastTextureStr[NAME_SIZE + 1];
-GtkWidget* dialogParent;
-GdkWindow* refWind;
+static GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
+static GtkAdjustment *padjShine, *padjOpacity;
+static GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureCombo;
+static Material col3d;
+static Material cancelValue;
+static GdkPixmap *xppm = 0;
+static int useOpacity, useTexture;
+static float opacityValue;
+static int bUpdate = TRUE;
+static GLUquadricObj *qobj;
+static char lastTextureStr[NAME_SIZE + 1];
+static GdkWindow* refWind;
 
 /* Store the previews details here */
 #define MAX_DETAILS 15
-UpdateDetails details[MAX_DETAILS];
-int curDetail;
+static UpdateDetails details[MAX_DETAILS];
+static int curDetail;
 
 /* Size of screen widget */
 #define PREVIEW_WIDTH 200
@@ -59,18 +54,16 @@ int curDetail;
 #define STRIP_WIDTH 100
 #define STRIP_HEIGHT 10
 
-unsigned char auch[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
+static unsigned char auch[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
 
-extern GtkWidget *pwPrevBoard;
+static int previewLightLevels[3];
 
-int previewLightLevels[3];
-
-void SetPreviewLightLevel(int levels[3])
+void SetPreviewLightLevel(const int levels[3])
 {
 	memcpy(previewLightLevels, levels, sizeof(int[3]));
 }
 
-void SetupLight()
+static void SetupLight()
 {
 	float al[4], dl[4], sl[4];
 	float lp[4] = {PREVIEW_WIDTH / 2, PREVIEW_HEIGHT / 2, 50, 1};
@@ -102,7 +95,8 @@ static void Draw(Material* pMat)
 		char buf[100];
 		strcpy(buf, TEXTURE_PATH);
 		strcat(buf, pMat->textureInfo->file);
-		LoadTexture(&texture, buf);
+		if (!LoadTexture(&texture, buf))
+			return;
 
 		gluQuadricTexture(qobj, GL_TRUE);
 
@@ -152,7 +146,7 @@ static void Draw(Material* pMat)
 		glDisable(GL_BLEND);
 }
 
-static void UpdatePreviewBar(Material* pMat, GdkPixmap *pixmap)
+static void UpdatePreviewBar(const Material* pMat, GdkPixmap *pixmap)
 {
 	GdkGC *gc;
 	Material Copy = *pMat;
@@ -165,7 +159,7 @@ static void UpdatePreviewBar(Material* pMat, GdkPixmap *pixmap)
 	gdk_gc_unref( gc );
 }
 
-void UpdateColourPreview(void *arg)
+static void UpdateColourPreview(void *notused)
 {
 	double ambient[4], diffuse[4], specular[4];
 
@@ -189,7 +183,7 @@ void UpdateColourPreview(void *arg)
 	gtk_widget_queue_draw(pwPreview);
 }
 
-void SetupColourPreview()
+static void SetupColourPreview()
 {
 	InitGL(0);
 	glClearColor(0,0,0,1);
@@ -206,12 +200,12 @@ void SetupColourPreview()
 	glLoadIdentity();
 }
 
-GdkGLConfig *getglconfigSingle();
+GdkGLConfig *getglconfigSingle(void);
 
-GdkGLPixmap *glpixmap;
+static GdkGLPixmap *glpixmap;
 static GdkGLContext *glPixmapContext = NULL;
 
-void CreatePreview()
+static void CreatePreview()
 {
 	GdkGLDrawable *gldrawable;
 	glpixmap = gdk_pixmap_set_gl_capability(xppm, getglconfigSingle(), NULL);
@@ -243,7 +237,7 @@ static void RenderPreview(Material* pMat, unsigned char* buf)
 	/*** OpenGL END ***/
 }
 
-void TextureChange(GtkList *list, gpointer user_data)
+static void TextureChange(void)
 {
 	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
 
@@ -260,7 +254,7 @@ void TextureChange(GtkList *list, gpointer user_data)
 	}
 }
 
-void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
+static void AddWidgets(GtkWidget *window)
 {
 	GtkWidget *table, *label, *scale;
 	table = gtk_table_new(5, 4, TRUE);
@@ -319,7 +313,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
 
-static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
+static gboolean OkClicked(GtkWidget *pw, const UpdateDetails* pDetails)
 {	/* Apply new settings */
 	char* texStr;
 	GdkGC *gc;
@@ -354,7 +348,7 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 	return TRUE;
 }
 
-void setCol(GtkColourPicker* pCP, float val[4])
+static void setCol(GtkColourPicker* pCP, const float val[4])
 {
 	double dval[4];
 	int i;
@@ -364,14 +358,14 @@ void setCol(GtkColourPicker* pCP, float val[4])
 	gtk_colour_picker_set_colour(pCP, dval);
 }
 
-static void UpdateColour3d(GtkWidget *pw, UpdateDetails* pDetails)
+static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 {
 	GtkWidget* pwColourDialog3d = GTKCreateDialog(_("3d Colour selection"), DT_QUESTION, 
 		pDetails->preview, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(OkClicked), pDetails);
 
 	gtk_signal_connect(GTK_OBJECT(pwColourDialog3d), "realize", GTK_SIGNAL_FUNC(UpdateColourPreview), 0 );
 
-	AddWidgets(pDetails->preview->window, DialogArea(pwColourDialog3d, DA_MAIN));
+	AddWidgets(DialogArea(pwColourDialog3d, DA_MAIN));
 
 	col3d = *pDetails->pMat;
 
@@ -467,9 +461,8 @@ void UpdateColPreviews()
 		UpdatePreviewBar(details[i].pMat, details[i].pixmap);
 }
 
-extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind)
+void Setup3dColourPicker(GtkWidget* notused, GdkWindow* wind)
 {
-	dialogParent = parent;
 	refWind = wind;
 	if (!xppm)
 		xppm = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);

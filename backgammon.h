@@ -24,7 +24,7 @@
 
 
 #include <float.h>
-#include <list.h>
+#include "list.h"
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -562,9 +562,9 @@ extern void outputoff( void );
 extern void outputon( void );
 
 /* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput();
+extern void SuspendInput(void);
 /* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput();
+extern void ResumeInput(void);
 
 extern void ProgressStart( char* sz );
 extern void ProgressStartValue( char* sz, int iMax );

@@ -61,15 +61,15 @@ CacheResize(cache *pc, unsigned int cNew);
 
 /* l is filled with a value which is passed to CacheAdd */
 cacheNode*
-CacheLookup(cache* pc, cacheNode* e, unsigned long* l);
+CacheLookup(cache* pc, const cacheNode* e, unsigned long* l);
 
-void CacheAdd(cache* pc, cacheNode* e, unsigned long l);
-void CacheFlush(cache* pc);
-void CacheDestroy(cache* pc);
-void CacheStats(cache* pc, int* pcLookup, int* pcHit);
+void CacheAdd(cache* pc, const cacheNode* e, unsigned long l);
+void CacheFlush(const cache* pc);
+void CacheDestroy(const cache* pc);
+void CacheStats(const cache* pc, unsigned int* pcLookup, unsigned int* pcHit);
 
 extern unsigned long
-keyToLong(unsigned char k[10], int np);
+keyToLong(const unsigned char k[10], unsigned int np);
 
 #endif
 

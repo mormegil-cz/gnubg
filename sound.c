@@ -760,7 +760,7 @@ static int artsc_play_file(const char *file)
 
 #include <QuickTime/QuickTime.h>
 #include <pthread.h>
-#include "lib/list.h"
+#include "list.h"
 
 static int		fQTInitialised = FALSE;
 static int 		fQTPlaying = FALSE;

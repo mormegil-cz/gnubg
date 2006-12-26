@@ -12,15 +12,15 @@ typedef int ( *heapcomparefunc )( void *p0, void *p1 );
 
 typedef struct _heap {
     void **ap;
-    int cp, cpAlloc;
+    unsigned int cp, cpAlloc;
     heapcomparefunc phcf;
 } heap;
 
-extern int HeapCreate( heap *ph, int c, heapcomparefunc phcf );
-extern int HeapDestroy( heap *ph );
+extern int HeapCreate( heap *ph, unsigned int c, heapcomparefunc phcf );
+extern void HeapDestroy( const heap *ph );
 extern int HeapInsert( heap *ph, void *p );
 extern void *HeapDelete( heap *ph );
-extern int HeapDeleteItem( heap *ph, void *p );
-extern void *HeapLookup( heap *ph );
+extern int HeapDeleteItem( heap *ph, const void *p );
+extern void *HeapLookup( const heap *ph );
 
 #endif

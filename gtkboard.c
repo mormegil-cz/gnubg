@@ -297,10 +297,10 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 	y = 0;
     }
 
-    if( y + cy > BOARD_HEIGHT * bd->rd->nSize )
+    if( y + cy > BOARD_HEIGHT * (int)bd->rd->nSize )
 	cy = BOARD_HEIGHT * bd->rd->nSize - y;
 
-    if( x + cx > BOARD_WIDTH * bd->rd->nSize )
+    if( x + cx > BOARD_WIDTH * (int)bd->rd->nSize )
 	cx = BOARD_WIDTH * bd->rd->nSize - x;
 
     if( cx <= 0 || cy <= 0 )
@@ -332,7 +332,8 @@ static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y,
 	r.width = cx;
 	r.height = cy;
 	
-	gdk_window_invalidate_rect( drawing_area->window, &r, FALSE );
+	if (drawing_area->window)
+		gdk_window_invalidate_rect( drawing_area->window, &r, FALSE );
     }
 }
 
@@ -1908,7 +1909,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 #if USE_BOARD3D
 		if (bd->rd->fDisplayType == DT_3D)
 		{
-			StopIdle3d(bd);
+			StopIdle3d(bd, bd->bd3d);
 			/* clicked on resignation symbol */
 			updateFlagOccPos(bd, bd->bd3d);
 		}
@@ -2889,7 +2890,7 @@ static gint board_set( Board *board, const gchar *board_text,
     return 0;
 }
 
-int convert_point( int i, int player ) {
+unsigned int convert_point( int i, int player ) {
 
     if( player )
 	return ( i < 0 ) ? 26 : i + 1;

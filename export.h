@@ -101,11 +101,11 @@ getMoveNumber ( const list *plGame, const void *p );
 extern char *
 HTMLFilename ( const char *szBase, const int iGame );
 
-extern int WritePNG( const char *sz, unsigned char *puch, int nStride,
-		     const int nSizeX, const int nSizeY );
+extern int WritePNG( const char *sz, unsigned char *puch, unsigned int nStride,
+		     unsigned int nSizeX, unsigned int nSizeY );
 
 #if USE_BOARD3D
-void GenerateImage3d(renderdata *prd, const char* szName, const int nSize, const int nSizeX, const int nSizeY);
+void GenerateImage3d(renderdata *prd, const char* szName, unsigned int nSize, unsigned int nSizeX, unsigned int nSizeY);
 #endif
 
 #endif

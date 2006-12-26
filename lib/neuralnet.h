@@ -24,14 +24,15 @@ extern float sigmoid_original(float const xin);
 #endif
 
 typedef struct _neuralnet {
-    int cInput, cHidden, cOutput, nTrained, fDirect;
+    unsigned int cInput, cHidden, cOutput, fDirect;
+	int nTrained;
     float rBetaHidden, rBetaOutput, *arHiddenWeight, *arOutputWeight,
 	*arHiddenThreshold, *arOutputThreshold;
     float *savedBase, *savedIBase;
 } neuralnet;
 
-extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
-			    int cOutput, float rBetaHidden,
+extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
+			    unsigned int cOutput, float rBetaHidden,
 			    float rBetaOutput );
 
 extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p );
@@ -44,28 +45,28 @@ typedef enum  {
   NNEVAL_FROMBASE
 } NNEvalType;
 
-extern int (*NeuralNetEvaluateFn)( neuralnet *pnn, float arInput[],
+extern int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t);
 
-extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
+extern int NeuralNetEvaluate( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t);
-extern int NeuralNetEvaluate128( neuralnet *pnn, float arInput[],
+extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t);
-extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
+extern int NeuralNetDifferentiate( const neuralnet *pnn, const float arInput[],
 				   float arOutput[], float arDerivative[] );
-extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
-			   float arDesired[], float rAlpha );
-extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
-			    int cOutput );
+extern int NeuralNetTrain( neuralnet *pnn, const float arInput[], float arOutput[],
+			   const float arDesired[], float rAlpha );
+extern int NeuralNetResize( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
+			    unsigned int cOutput );
 
 extern int NeuralNetLoad( neuralnet *pnn, FILE *pf );
 extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf );
-extern int NeuralNetSave( neuralnet *pnn, FILE *pf );
-extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf );
+extern int NeuralNetSave( const neuralnet *pnn, FILE *pf );
+extern int NeuralNetSaveBinary( const neuralnet *pnn, FILE *pf );
 
 extern void 
 ComputeSigTable (void);
 
-extern int SSE_Supported();
+extern int SSE_Supported(void);
 
 #endif

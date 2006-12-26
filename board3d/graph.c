@@ -25,38 +25,36 @@
 
 #include "renderprefs.h"
 
-extern GdkGLConfig *getGlConfig();
+extern GdkGLConfig *getGlConfig(void);
 
 struct _GraphData
 {
 	float ***data;
-	int numGames;
+	unsigned int numGames;
 	float maxY;
 };
 
-#define BAR_WIDTH 5
+#define COL_WIDTH 5
 #define MID_GAP 1
 #define INTER_GAP 4
 #define TOTAL_GAP 5
-#define RES_WIDTH (2 * BAR_WIDTH + MID_GAP + INTER_GAP)
+#define RES_WIDTH (2 * COL_WIDTH + MID_GAP + INTER_GAP)
 #define NUM_WIDTH (modelWidth * NUM_WIDTH_PER)
 #define NUM_WIDTH_PER .1f
 #define NUM_HEIGHT (modelHeight * NUM_HEIGHT_PER)
 #define NUM_HEIGHT_PER .15f
 #define TOT_WIDTH (NUM_HEIGHT * 3)
 
-float modelWidth, modelHeight;
-BoardData3d fonts;
-Texture total;
+static float modelWidth, modelHeight;
+static BoardData3d fonts;
+static Texture total;
 
-extern GdkGLConfig *getGlConfig();
-
-static gboolean graph_button_press_event(GtkWidget *board, GdkEventButton *event, void* arg)
+static gboolean graph_button_press_event(void)
 {
 	return FALSE;
 }
 
-static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, GraphData* gd)
+static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, const GraphData* gd)
 {
 	int width, height;
 	float maxY, maxX;
@@ -68,8 +66,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, G
 
 	width = widget->allocation.width;
 	height = widget->allocation.height;
-
-	maxX = (float)(gd->numGames * RES_WIDTH + RES_WIDTH + TOTAL_GAP);
+	maxX = (float)gd->numGames * RES_WIDTH + RES_WIDTH + TOTAL_GAP;
 	modelWidth = maxX * (1 + NUM_WIDTH_PER);
 
 	maxY = gd->maxY * 1.05f + 1;
@@ -87,7 +84,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, G
 	return TRUE;
 }
 
-static void realize(GtkWidget *widget, void* arg)
+static void realize(GtkWidget *widget, void* notused)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
@@ -96,10 +93,12 @@ static void realize(GtkWidget *widget, void* arg)
 	/* Deep blue background colour */
 	glClearColor(.2f, .2f, .4f, 1);
 
-	BuildFont3d(&fonts);
+	if (!BuildFont3d(&fonts))
+		g_print("Error creating fonts\n");
 
 	total.texID = 0;
-	LoadTexture(&total, TEXTURE_PATH"total.bmp");
+	if (!LoadTexture(&total, TEXTURE_PATH"total.bmp"))
+		g_print("Total bitmap not found\n");
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -107,7 +106,7 @@ static void realize(GtkWidget *widget, void* arg)
 	/*** OpenGL END ***/
 }
 
-void DrawBar(float col[4], float x, float y, float first, float second)
+static void DrawBar(const float col[4], float x, float y, float first, float second)
 {
 	glPushMatrix();
 	glTranslatef(x, y, 0);
@@ -115,14 +114,14 @@ void DrawBar(float col[4], float x, float y, float first, float second)
 	glBegin(GL_QUADS);
 		glColor3f(0, 1, 0);
 		glVertex2f(0, 0);
-		glVertex2f(BAR_WIDTH, 0);
-		glVertex2f(BAR_WIDTH, first);
+		glVertex2f(COL_WIDTH, 0);
+		glVertex2f(COL_WIDTH, first);
 		glVertex2f(0, first);
 
 		glColor3f(0, 0, 1);
 		glVertex2f(0, first);
-		glVertex2f(BAR_WIDTH, first);
-		glVertex2f(BAR_WIDTH, first + second);
+		glVertex2f(COL_WIDTH, first);
+		glVertex2f(COL_WIDTH, first + second);
 		glVertex2f(0, first + second);
 	glEnd();
 
@@ -131,19 +130,19 @@ void DrawBar(float col[4], float x, float y, float first, float second)
 	glBegin(GL_LINE_STRIP);
 		glVertex2f(0, 0);
 		glVertex2f(0, first + second);
-		glVertex2f(BAR_WIDTH, first + second);
-		glVertex2f(BAR_WIDTH, 0);
+		glVertex2f(COL_WIDTH, first + second);
+		glVertex2f(COL_WIDTH, 0);
 	glEnd();
 	glLineWidth(1);
 	glBegin(GL_POINTS);
 		glVertex2f(0, first + second);
-		glVertex2f(BAR_WIDTH, first + second);
+		glVertex2f(COL_WIDTH, first + second);
 	glEnd();
 
 	glPopMatrix();
 }
 
-static void DrawColourBar(int player, float x, float y, float first, float second)
+static void DrawColourBar(int playerCol, float x, float y, float first, float second)
 {
 	float col[4];
 	int i;
@@ -151,24 +150,24 @@ static void DrawColourBar(int player, float x, float y, float first, float secon
 	for (i = 0; i < 4; i++)
 	{
 		if (prd->fDisplayType == DT_2D)
-			col[i] = (float)prd->aarColour[player][i];
+			col[i] = (float)prd->aarColour[playerCol][i];
 		else
-			col[i] = prd->ChequerMat[player].ambientColour[i];
+			col[i] = prd->ChequerMat[playerCol].ambientColour[i];
 	}
 	DrawBar(col, x, y, first, second);
 }
 
-static void DrawBars(int num, float **values, int total)
+static void DrawBars(unsigned int num, float * const *values, int totalBar)
 {
-	float x = NUM_WIDTH + RES_WIDTH * num;
-	if (total)
+	float x = NUM_WIDTH + RES_WIDTH * (float)num;
+	if (totalBar)
 		x += TOTAL_GAP;
 
 	DrawColourBar(0, x + INTER_GAP / 2.0f, NUM_HEIGHT, values[0][0], values[0][1]);
-	DrawColourBar(1, x + INTER_GAP / 2.0f + BAR_WIDTH + MID_GAP, NUM_HEIGHT, values[1][0], values[1][1]);
+	DrawColourBar(1, x + INTER_GAP / 2.0f + COL_WIDTH + MID_GAP, NUM_HEIGHT, values[1][0], values[1][1]);
 }
 
-void PrintBottomNumber(int num, float width, float height, float x, float y)
+static void PrintBottomNumber(unsigned int num, float width, float height, float x, float y)
 {
 	char numStr[10];
 	sprintf(numStr, "%d", num);
@@ -183,7 +182,7 @@ void PrintBottomNumber(int num, float width, float height, float x, float y)
 	glPopMatrix();
 }
 
-void PrintSideNumber(int num, float width, float height, float x, float y)
+static void PrintSideNumber(int num, float width, float height, float x, float y)
 {
 	char numStr[10];
 	sprintf(numStr, "%d", num);
@@ -197,13 +196,13 @@ void PrintSideNumber(int num, float width, float height, float x, float y)
 	glPopMatrix();
 }
 
-void DrawLeftAxis(GraphData *pgd)
+static void DrawLeftAxis(const GraphData *pgd)
 {
 	int scale[] = {1, 5, 10, 20, 50, 100, 0};
 	int* pScale = scale;
 	int i, numPoints, pointInc;
 
-	while (pScale[1] && pgd->maxY > *pScale * 5)
+	while (pScale[1] && pgd->maxY > *pScale * 5.f)
 		pScale++;
 
 	pointInc = *pScale;
@@ -214,7 +213,7 @@ void DrawLeftAxis(GraphData *pgd)
 	for (i = 1; i <= numPoints; i++)
 	{
 		float y = NUM_HEIGHT;
-		y += i * pointInc;
+		y += (float)i * pointInc;
 		glColor3f(1, 1, 1);
 		PrintSideNumber(i * pointInc, NUM_WIDTH * 10, NUM_HEIGHT * 10, NUM_WIDTH - 1, y);
 
@@ -229,9 +228,9 @@ void DrawLeftAxis(GraphData *pgd)
 	}
 }
 
-void DrawGraph(GraphData *gd)
+static void DrawGraph(const GraphData *gd)
 {
-	int i;
+	unsigned int i;
 	float lastx = 0;
 
 	if (total.texID)
@@ -240,13 +239,13 @@ void DrawGraph(GraphData *gd)
 		glBindTexture(GL_TEXTURE_2D, total.texID);
 
 		glPushMatrix();
-		glTranslatef(NUM_WIDTH + RES_WIDTH * gd->numGames + TOTAL_GAP + (INTER_GAP + MID_GAP) / 2.0f,
+		glTranslatef(NUM_WIDTH + RES_WIDTH * (float)gd->numGames + TOTAL_GAP + (INTER_GAP + MID_GAP) / 2.0f,
 			NUM_HEIGHT / 2.0f - TOT_WIDTH / 6.0f, 0);
 
 		glBegin(GL_QUADS);
 			glTexCoord2f(0, 0); glVertex3f(0, 0, 0);
-			glTexCoord2f(1, 0); glVertex3f(BAR_WIDTH * 2, 0, 0);
-			glTexCoord2f(1, 1); glVertex3f(BAR_WIDTH * 2, TOT_WIDTH, 0);
+			glTexCoord2f(1, 0); glVertex3f(COL_WIDTH * 2, 0, 0);
+			glTexCoord2f(1, 1); glVertex3f(COL_WIDTH * 2, TOT_WIDTH, 0);
 			glTexCoord2f(0, 1); glVertex3f(0, TOT_WIDTH, 0);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
@@ -257,7 +256,7 @@ void DrawGraph(GraphData *gd)
 
 	for (i = 0; i < gd->numGames; i++)
 	{
-		float x = NUM_WIDTH + RES_WIDTH * i + BAR_WIDTH + (INTER_GAP + MID_GAP) / 2.0f;
+		float x = NUM_WIDTH + RES_WIDTH * (float)i + COL_WIDTH + (INTER_GAP + MID_GAP) / 2.0f;
 
 		DrawBars(i, gd->data[i], 0);
 
@@ -284,7 +283,7 @@ void DrawGraph(GraphData *gd)
 	glEnd();
 }
 
-static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, GraphData* gd)
+static gboolean expose_event(GtkWidget *widget, GdkEventExpose *notused, const GraphData* gd)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
@@ -311,12 +310,10 @@ GtkWidget* StatGraph(GraphData* pgd)
 	/* Drawing area for OpenGL */
 	pw = gtk_drawing_area_new();
 	/* Set OpenGL-capability to the widget - no list sharing */
-	gtk_widget_set_gl_capability(pw, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE);
-
-	if (pw == NULL)
+	if ((pw == NULL) || !gtk_widget_set_gl_capability(pw, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE))
 	{
-		g_print("Can't create opengl drawing widget\n");
-		return 0;
+		g_print("Can't create opengl capable widget\n");
+		return NULL;
 	}
 
 	f1 = pgd->data[pgd->numGames][0][0] + pgd->data[pgd->numGames][0][1];
@@ -334,7 +331,7 @@ GtkWidget* StatGraph(GraphData* pgd)
 	return pw;
 }
 
-void SetNumGames(GraphData* pgd, int numGames)
+void SetNumGames(GraphData* pgd, unsigned int numGames)
 {
 	pgd->numGames = numGames;
 	pgd->data = Alloc3d(numGames + 1, 2, 2);
@@ -351,7 +348,7 @@ void TidyGraphData(GraphData* pgd)
 	free(pgd);
 }
 
-void AddGameData(GraphData* pgd, int game, statcontext *psc)
+void AddGameData(/*lint -e{818}*/GraphData* pgd, int game, const statcontext *psc)
 {
 	float aaaar[3][2][2][2];
 	float f1, s1, f2, s2;

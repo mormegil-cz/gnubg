@@ -23,8 +23,8 @@ typedef struct _hash {
     unsigned long int cSize, cHits, cMisses, cLookups;
 } hash;
 
-extern int HashCreate( hash *ph, int c, hashcomparefunc phcf );
-extern int HashDestroy( hash *ph );
+extern int HashCreate( hash *ph, unsigned int c, hashcomparefunc phcf );
+extern int HashDestroy( const hash *ph );
 extern int HashAdd( hash *ph, unsigned long l, void *p );
 extern int HashDelete( hash *ph, unsigned long l, void *p );
 extern void *HashLookup( hash *ph, unsigned long l, void *p );

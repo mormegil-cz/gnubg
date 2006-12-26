@@ -5,30 +5,27 @@
  * $Id$
  */
 
-#include <assert.h>
-#include <errno.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "cache.h"
 #include "hash.h"
 
-static int ac[] = { 2, 3, 7, 13, 31, 61, 127, 251, 509, 1021, 2039, 4093,
+static unsigned int ac[] = { 2, 3, 7, 13, 31, 61, 127, 251, 509, 1021, 2039, 4093,
 		    8191, 16381, 32749, 65521, 131071, 262139, 524287,
 		    1048573, 2097143, 4194301, 8388593, 16777213, 33554393,
 		    67108859, 134217689, 268435399, 536870909, 1073741789, 0 };
 
-extern int HashCreate( hash *ph, int c, hashcomparefunc phcf ) {
+extern int HashCreate( hash *ph, unsigned int c, hashcomparefunc phcf ) {
 
     int i;
     
     for( i = 0; ac[ i + 1 ] && c > ac[ i ]; i++ )
-	;
+		;
     
     if( ( ph->aphn = (hashnode**)calloc( ac[ i ], sizeof( hashnode * ) ) ) == NULL )
-	return -1;
+		return -1;
     
     ph->c = 0;
     ph->icp = i;
@@ -39,34 +36,36 @@ extern int HashCreate( hash *ph, int c, hashcomparefunc phcf ) {
     return 0;
 }
 
-extern int HashDestroy( hash *ph ) {
+extern int HashDestroy( const hash *ph ) {
 
-    hashnode *phn, *phnNext;
-    int i;
-    
-    for( i = 0; i < ac[ ph->icp ]; i++ ) {
-	phn = ph->aphn[ i ];
+	hashnode *phn, *phnNext;
+	unsigned int i;
 
-	while( phn ) {
-	    phnNext = phn->phnNext;
+	for( i = 0; i < ac[ ph->icp ]; i++ ) {
+		phn = ph->aphn[ i ];
 
-	    free( phn );
+		while( phn ) {
+			phnNext = phn->phnNext;
 
-	    phn = phnNext;
+			free( phn );
+
+			phn = phnNext;
+		}
 	}
-    }
 
-    free( ph->aphn );
-    
-    return 0;
+	free( ph->aphn );
+
+	return 0;
 }
 
 extern int HashAdd( hash *ph, unsigned long l, void *p ) {
 
     /* FIXME check for rehash */
 
-    hashnode *phn = (hashnode *) malloc( sizeof( *phn ) ),
-	**pphn = ph->aphn + l % ac[ ph->icp ];
+	hashnode **pphn = ph->aphn + l % ac[ ph->icp ];
+    hashnode *phn = (hashnode *) malloc( sizeof( hashnode ) );
+	if (!phn)
+		return -1;
     
     phn->phnNext = *pphn;
     phn->l = l;
@@ -124,7 +123,7 @@ extern long StringHash( char *sz ) {
     char *pch;
 
     for( pch = sz; *pch; pch++ )
-	l = ( ( l << 8 ) % 8388593 ) ^ *pch;
+		l = /*lint --e(703) */( ( l << 8 ) % 8388593 ) ^ *pch;
 
     return l;
 }
@@ -260,7 +259,7 @@ extern int CacheStats( cache *pc, int *pcLookup, int *pcHit ) {
    
 --------------------------------------------------------------------
 lookup2.c, by Bob Jenkins, December 1996, Public Domain.
-hash(), hash2(), hash3, and mix() are externally useful functions.
+hash(), hash2(), hash3, and hashmix() are externally useful functions.
 Routines to test the hash are included if SELF_TEST is defined.
 You can use this free for any purpose.  It has no warranty.
 --------------------------------------------------------------------
@@ -269,7 +268,7 @@ You can use this free for any purpose.  It has no warranty.
 
 typedef  unsigned long   ub4;
 
-#define mix(a,b,c) \
+#define hashmix(a,b,c) \
 { \
   a -= b; a -= c; a ^= (c>>13); \
   b -= c; b -= a; b ^= (a<<8); \
@@ -283,7 +282,7 @@ typedef  unsigned long   ub4;
 }
 
 extern unsigned long
-keyToLong(unsigned char k[10], int np)
+keyToLong(const unsigned char k[10], unsigned int np)
 {
   ub4 a = 0x9e3779b9;  /* the golden ratio; an arbitrary value */
   ub4 b = a;
@@ -302,7 +301,7 @@ keyToLong(unsigned char k[10], int np)
   a += ((ub4)k[1]<<8);
   a += k[0];
 
-  mix(a,b,c);
+  hashmix(a,b,c);
 
   return c;
 }
@@ -336,10 +335,10 @@ CacheCreate(cache* pc, unsigned int s)
 }
 
 cacheNode*
-CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
+CacheLookup(cache* pc, const cacheNode* e, unsigned long* m)
 {
   unsigned int size = pc->size;
-  unsigned long l = keyToLong(e->auchKey, e->nEvalContext);
+  unsigned long l = keyToLong(e->auchKey, (unsigned int)e->nEvalContext);
   
   l = (l & ((size >> 1)-1)) << 1;
 
@@ -377,7 +376,7 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
 }
 
 void
-CacheAdd(cache* pc, cacheNode* e, unsigned long l)
+CacheAdd(cache* pc, const cacheNode* e, unsigned long l)
 {
   cacheNode* ck1 = pc->m + l;
 
@@ -391,17 +390,17 @@ CacheAdd(cache* pc, cacheNode* e, unsigned long l)
 
 
 void
-CacheDestroy(cache* pc)
+CacheDestroy(const cache* pc)
 {
   free(pc->m);
 }
 
 void
-CacheFlush(cache* pc)
+CacheFlush(const cache* pc)
 {
   unsigned int k;
   for(k = 0; k < pc->size; ++k) {
-    pc->m[k].nEvalContext = (unsigned int)-1;
+    pc->m[k].nEvalContext = -1;
   }
 }
 
@@ -417,7 +416,7 @@ CacheResize( cache *pc, unsigned int cNew )
 }
 
 void
-CacheStats(cache* pc, int* pcLookup, int* pcHit)
+CacheStats(const cache* pc, unsigned int* pcLookup, unsigned int* pcHit)
 {
    if ( pcLookup )
       *pcLookup = pc->cLookup;

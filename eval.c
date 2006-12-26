@@ -701,7 +701,7 @@ EvalShutdown ( void ) {
 }
 
 
-int (*NeuralNetEvaluateFn)( neuralnet *pnn, float arInput[],
+int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNEvalType t) = 0;
 
 extern int

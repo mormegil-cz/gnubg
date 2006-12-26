@@ -47,8 +47,6 @@
    $Id$
 */
 
-#include <stdio.h>
-
 #include "mt19937ar.h"
 /* Period parameters */  
 /* #define N 624 */
@@ -67,7 +65,7 @@ void init_genrand(unsigned long s, int *mti, unsigned long mt[ N ] )
     mt[0]= s & 0xffffffffUL;
     for (*mti=1; *mti<N; (*mti)++) {
         mt[*mti] = 
-	    (1812433253UL * (mt[*mti-1] ^ (mt[*mti-1] >> 30)) + *mti); 
+	    /*lint --e(737) */ (1812433253UL * (mt[*mti-1] ^ (mt[*mti-1] >> 30)) + *mti); 
         /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
         /* In the previous versions, MSBs of the seed affect   */
         /* only MSBs of the array mt[].                        */

@@ -4114,7 +4114,7 @@ extern void PromptForExit( void ) {
 #if USE_BOARD3D
     if (fX && (bd->rd->fDisplayType == DT_3D))
 	{	/* Stop any 3d animations */
-		StopIdle3d(bd);
+		StopIdle3d(bd, bd->bd3d);
 	}
 #endif
 #if HAVE_SOCKETS

@@ -39,7 +39,7 @@ makebearoff_LIBS = \
 	-lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
 	-lart_lgpl_2 -llibintl -lcairo -lcomctl32
 
-INCLUDE = -I. -I./lib -I./non-src \
+INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	-I$(MINGW)/include/gtk-2.0 \
 	-I$(MINGW)/lib/gtk-2.0/include \
 	-I$(MINGW)/include/cairo \

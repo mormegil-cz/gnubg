@@ -20,13 +20,12 @@
  */
 
 #include "config.h"
-#include "backgammon.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
 #include <string.h>
 #include <stdlib.h>
 
+#include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
 #if USE_GTK
@@ -39,7 +38,7 @@
 #include "matchequity.h"
 #include "export.h"
 #include "formatgs.h"
-
+#include <glib/gi18n.h>
 
 const char *aszRating [ RAT_UNDEFINED + 1 ] = {
   N_("Awful!"), 
@@ -1478,11 +1477,10 @@ absoluteFibsRating ( const float rChequer, const float rCube,
 }
 
 
-extern float
+extern void
 getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
 
   int i, j;
-  float r;
 
   for ( i = 0; i < 2; i++ ) 
     for ( j = 0; j < 2; j++ ) {
@@ -1528,18 +1526,6 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
         aaaar[ COMBINED ][ PERMOVE ][ i ][ j ] = 0.0f;
 
     }
-
-  r =0.50f
-    - aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-    + aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ];
-
-  if ( r < 0.0f )
-    return 0.0f;
-  else if ( r > 1.0f )
-    return 1.0f;
-  else
-    return r;
-
 }
 
 extern float

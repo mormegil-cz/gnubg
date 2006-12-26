@@ -27,56 +27,58 @@ extern GdkGLConfig *getGlConfig()
 {
 	static GdkGLConfig *glconfig = NULL;
 	if (!glconfig)
-                glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
-        if (!glconfig)
-        {
-                glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE);
-                g_warning("Stencil buffer not available, no shadows\n");
-        }
-        if (!glconfig)
-        {
-                g_warning ("*** No appropriate OpenGL-capable visual found.\n");
-        }
+		glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
+	if (!glconfig)
+	{
+		glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE);
+		g_warning("Stencil buffer not available, no shadows\n");
+	}
+	if (!glconfig)
+	{
+		g_warning ("*** No appropriate OpenGL-capable visual found.\n");
+	}
 	return glconfig;
 }
 
-void Draw(BoardData* bd)
+static void Draw(const BoardData* bd)
 {	/* Render board - need multiple passes for shadows */
 	if (bd->rd->showShadows)
-		shadowDisplay(drawBoard, bd);
+		shadowDisplay(drawBoard, bd, bd->bd3d, bd->rd);
 	else
 		drawBoard(bd, bd->bd3d, bd->rd);
 }
 
-static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, BoardData* bd)
+static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, void* data)
 {
+	BoardData *bd = (BoardData*)data;
 	if (bd->rd->fDisplayType == DT_3D)
-  {
-    static int oldHeight = -1, oldWidth = -1;
-  	int width = widget->allocation.width, height = widget->allocation.height;
-  	if (width != oldWidth || height != oldHeight)
-    {
-      oldWidth = width, oldHeight = height;
-	  {
-    	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
-    
-    	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
-    		return FALSE;
-  
-    	glViewport(0, 0, width, height);
-    	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
-    
-    	RestrictiveRedraw();
+	{
+		static int oldHeight = -1, oldWidth = -1;
+		int width = widget->allocation.width, height = widget->allocation.height;
+		if (width != oldWidth || height != oldHeight)
+		{
+			oldWidth = width, oldHeight = height;
+			{
+			GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
-    	gdk_gl_drawable_gl_end(gldrawable);
-	  }
-    }
-  }
+			if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
+    			return FALSE;
+
+			glViewport(0, 0, width, height);
+			SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
+
+			RestrictiveRedraw();
+
+			gdk_gl_drawable_gl_end(gldrawable);
+			}
+		}
+	}
 	return TRUE;
 }
 
-void realize(GtkWidget *widget, BoardData* bd)
+static void realize(GtkWidget *widget, void* data)
 {
+	BoardData *bd = (BoardData*)data;
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
@@ -90,13 +92,14 @@ void realize(GtkWidget *widget, BoardData* bd)
 	gdk_gl_drawable_gl_end(gldrawable);
 }
 
-void MakeCurrent3d(BoardData3d *bd3d)
+void MakeCurrent3d(const BoardData3d *bd3d)
 {
 	GtkWidget *widget = bd3d->drawing_area3d;
-	gdk_gl_drawable_make_current(gtk_widget_get_gl_drawable(widget), gtk_widget_get_gl_context(widget));
+	if (!gdk_gl_drawable_make_current(gtk_widget_get_gl_drawable(widget), gtk_widget_get_gl_context(widget)))
+		g_print("gdk_gl_drawable_make_current failed!\n");
 }
 
-static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData* bd)
+static gboolean expose_event(GtkWidget *widget, GdkEventExpose *notused, const BoardData* bd)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
@@ -133,7 +136,11 @@ extern void CreateGLWidget(BoardData* bd)
 	/* Drawing area for OpenGL */
 	bd->bd3d->drawing_area3d = gtk_drawing_area_new();
 	/* Set OpenGL-capability to the widget - no list sharing */
-	gtk_widget_set_gl_capability(bd->bd3d->drawing_area3d, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE);
+	if (!gtk_widget_set_gl_capability(bd->bd3d->drawing_area3d, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE))
+	{
+		g_print("Can't create opengl capable widget\n");
+		return;
+	}
 
 	if (bd->bd3d->drawing_area3d == NULL)
 	{
@@ -252,7 +259,7 @@ static int CheckAccelerated(GtkWidget* board)
 
 #else
 
-static int CheckAccelerated(GtkWidget* board)
+static int CheckAccelerated(GtkWidget* notused)
 {
 /* Commented out check for non-windows systems,
 	as doesn't work very well... */
@@ -271,7 +278,7 @@ static int CheckAccelerated(GtkWidget* board)
 
 #endif
 
-int DoAcceleratedCheck(BoardData3d* bd3d, GtkWidget* pwParent)
+int DoAcceleratedCheck(const BoardData3d* bd3d, GtkWidget* pwParent)
 {
 	if (!CheckAccelerated(bd3d->drawing_area3d))
 	{	/* Display warning message as performance may be bad */
@@ -284,17 +291,17 @@ int DoAcceleratedCheck(BoardData3d* bd3d, GtkWidget* pwParent)
 
 /* Drawing direct to pixmap */
 
-GdkGLContext *glPixmapContext = NULL;
+static GdkGLContext *glPixmapContext = NULL;
 
-void SetupPreview(BoardData* bd, renderdata* prd)
+static void SetupPreview(const BoardData* bd, renderdata* prd)
 {
 	ClearTextures(bd->bd3d);
-	GetTextures(bd->bd3d, bd->rd);
-	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
-	preDraw3d(bd, bd->bd3d, bd->rd);
+	GetTextures(bd->bd3d, prd);
+	SetupViewingVolume3d(bd, bd->bd3d, prd);
+	preDraw3d(bd, bd->bd3d, prd);
 }
 
-GdkGLConfig *glconfigSingle = NULL;
+static GdkGLConfig *glconfigSingle = NULL;
 
 GdkGLConfig *getglconfigSingle()
 {
@@ -328,7 +335,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 	return glpixmap;
 }
 
-void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
+void RenderBoard3d(const BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
 {
 	GLint viewport[4];
 	/*** OpenGL BEGIN ***/

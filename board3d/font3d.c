@@ -28,11 +28,10 @@
 
 #define FONT_VERA "fonts/Vera.ttf"
 #define FONT_VERA_SERIF_BOLD "fonts/VeraSeBd.ttf"
-#define FONT_VERA_BOLD "fonts/VeraBd.ttf"
 
 struct _OGLFont
 {
-	int glyphs;
+	unsigned int glyphs;
 	int advance;
 	int kern[10][10];
 	float scale;
@@ -53,7 +52,7 @@ typedef struct _Contour
 typedef struct _Vectoriser
 {
 	GArray *contours;
-	int numPoints;
+	unsigned int numPoints;
 } Vectoriser;
 
 typedef struct _Tesselation
@@ -67,12 +66,12 @@ typedef struct _Mesh
 	GArray *tesselations;
 } Mesh;
 
-int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float size, float heightRatio);
-void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline);
-void TidyMemory(Vectoriser* pVect, Mesh* pMesh);
-void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int numberOfPoints);
-void PopulateMesh(Vectoriser* pVect, Mesh* pMesh);
-int MakeGlyph(FT_Outline* pOutline, int list);
+static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float size, float heightRatio);
+static void PopulateVectoriser(Vectoriser* pVect, const FT_Outline* pOutline);
+static void TidyMemory(const Vectoriser* pVect, const Mesh* pMesh);
+static void PopulateContour(Contour* pContour, const FT_Vector* points, const char* pointTags, int numberOfPoints);
+static void PopulateMesh(const Vectoriser* pVect, Mesh* pMesh);
+static int MakeGlyph(const FT_Outline* pOutline, unsigned int displayList);
 
 #define FONT_PITCH 24
 #define FONT_SIZE (base_unit / 20.0f)
@@ -81,8 +80,6 @@ int MakeGlyph(FT_Outline* pOutline, int list);
 #define CUBE_FONT_PITCH 34
 #define CUBE_FONT_SIZE (base_unit / 24.0f)
 #define CUBE_FONT_HEIGHT_RATIO 1.25f
-
-extern char *szDataDirectory;
 
 int BuildFont3d(BoardData3d* bd3d)
 {
@@ -95,36 +92,42 @@ int BuildFont3d(BoardData3d* bd3d)
 	bd3d->numberFont = (OGLFont*)malloc(sizeof(OGLFont));
 	file = PathSearch(FONT_VERA, szDataDirectory);
 	if (!CreateOGLFont(ftLib, bd3d->numberFont, file, FONT_PITCH, FONT_SIZE, FONT_HEIGHT_RATIO))
+	{
+		g_print("Failed to create font %s\n", file);
 		return 0;
+	}
 	free(file);
 
 	free(bd3d->cubeFont);
 	bd3d->cubeFont = (OGLFont*)malloc(sizeof(OGLFont));
 	file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
 	if (!CreateOGLFont(ftLib, bd3d->cubeFont, file, CUBE_FONT_PITCH, CUBE_FONT_SIZE, CUBE_FONT_HEIGHT_RATIO))
+	{
+		g_print("Failed to create font %s\n", file);
 		return 0;
+	}
 	free(file);
 
 	return !FT_Done_FreeType(ftLib);
 }
 
-int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale, float heightRatio)
+static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float scale, float heightRatio)
 {
-	int i, j;
+	unsigned int i, j;
 	FT_Face face;
 
 	memset(pFont, 0, sizeof(OGLFont));
 	pFont->scale = scale;
 	pFont->heightRatio = heightRatio;
 
-        if (FT_New_Face(ftLib, pPath, 0, &face))
+	if (FT_New_Face(ftLib, pPath, 0, &face))
 		return 0;
 
 	if (FT_Set_Char_Size(face, 0, pointSize * 64 /* 26.6 fractional points */, 0, 0))
 		return 0;
 
 	{	/* Find height of "1" */
-		int glyphIndex = FT_Get_Char_Index(face, '1');
+		unsigned int glyphIndex = FT_Get_Char_Index(face, '1');
 		if (!glyphIndex)
 			return 0;
 
@@ -141,7 +144,7 @@ int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int point
 
 	for (i = 0; i < 10; i++)
 	{
-		int glyphIndex = FT_Get_Char_Index(face, '0' + i);
+		unsigned int glyphIndex = FT_Get_Char_Index(face, '0' + i);
 		if (!glyphIndex)
 			return 0;
 
@@ -156,7 +159,7 @@ int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int point
 		for (j = 0; j < 10; j++)
 		{
 			FT_Vector kernAdvance;
-			int nextGlyphIndex = FT_Get_Char_Index(face, '0' + j);
+			unsigned int nextGlyphIndex = FT_Get_Char_Index(face, '0' + j);
 			if (!nextGlyphIndex || FT_Get_Kerning(face, glyphIndex, nextGlyphIndex, ft_kerning_unfitted, &kernAdvance))
 				return 0;
 			pFont->kern[i][j] = kernAdvance.x;
@@ -166,7 +169,7 @@ int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int point
 	return !FT_Done_Face(face);
 }
 
-int MakeGlyph(FT_Outline* pOutline, int list)
+static int MakeGlyph(const FT_Outline* pOutline, unsigned int displayList)
 {
 	Vectoriser vect;
 	Mesh mesh;
@@ -177,7 +180,7 @@ int MakeGlyph(FT_Outline* pOutline, int list)
 	if ((vect.contours->len < 1) || (vect.numPoints < 3))
 		return 0;
 
-	glNewList(list, GL_COMPILE);
+	glNewList(displayList, GL_COMPILE);
 
 	/* Solid font */
 	PopulateMesh(&vect, &mesh);
@@ -223,7 +226,7 @@ int MakeGlyph(FT_Outline* pOutline, int list)
 	return 1;
 }
 
-int GetKern(OGLFont *pFont, char cur, char next)
+static int GetKern(const OGLFont *pFont, char cur, char next)
 {
 	if (next)
 		return pFont->kern[cur - '0'][next - '0'];
@@ -231,7 +234,7 @@ int GetKern(OGLFont *pFont, char cur, char next)
 		return 0;
 }
 
-extern float getTextLen3d(OGLFont *pFont, const char* str)
+static float getTextLen3d(const OGLFont *pFont, const char* str)
 {
 	int len = 0;
 	while (*str)
@@ -239,29 +242,29 @@ extern float getTextLen3d(OGLFont *pFont, const char* str)
 		len += pFont->advance + GetKern(pFont, str[0], str[1]);
 		str++;
 	}
-	return len / 64.0f * pFont->scale;
+	return (len / 64.0f) * pFont->scale;
 }
 
-extern int RenderString3d(OGLFont *pFont, const char* str)
+static void RenderString3d(const OGLFont *pFont, const char* str)
 {
 	glScalef(pFont->scale, pFont->scale * pFont->heightRatio, 1);
 
 	while (*str)
 	{
+		int offset = *str - '0';
 		/* Draw character */
-		glCallList(pFont->glyphs + (*str - '0'));
+		glCallList(pFont->glyphs + (unsigned int)offset);
 
 		/* Move on to next place */
 		glTranslatef((pFont->advance + GetKern(pFont, str[0], str[1])) / 64.0f, 0, 0);
 
 		str++;
 	}
-	return 1;
 }
 
-GList *combineList;
+static GList *combineList;
 
-void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
+static void PopulateVectoriser(Vectoriser* pVect, const FT_Outline* pOutline)
 {
 	int startIndex = 0;
 	int endIndex;
@@ -288,12 +291,12 @@ void PopulateVectoriser(Vectoriser* pVect, FT_Outline* pOutline)
 	}
 }
 
-void AddPoint(Contour* pContour, double x, double y)
+static void AddPoint(/*lint -e{818}*/Contour* pContour, double x, double y)
 {
 	if (pContour->conPoints->len > 0)
 	{	/* Ignore duplicate contour points */
 		Point* point = &g_array_index(pContour->conPoints, Point, pContour->conPoints->len - 1);
-		if (point->data[0] == x && point->data[1] == y)
+		if (/*lint --e(777)*/point->data[0] == x && point->data[1] == y)
 			return;
 	}
 
@@ -309,9 +312,9 @@ void AddPoint(Contour* pContour, double x, double y)
 
 #define BEZIER_STEPS 5
 #define BEZIER_STEP_SIZE 0.2f
-double controlPoints[4][2]; /* 2D array storing values of de Casteljau algorithm */
+static double controlPoints[4][2]; /* 2D array storing values of de Casteljau algorithm */
 
-void evaluateQuadraticCurve(Contour* pContour)
+static void evaluateQuadraticCurve(Contour* pContour)
 {
 	int i;
 	for (i = 0; i <= BEZIER_STEPS; i++)
@@ -333,7 +336,7 @@ void evaluateQuadraticCurve(Contour* pContour)
 	}
 }
 
-void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int numberOfPoints)
+static void PopulateContour(Contour* pContour, const FT_Vector* points, const char* pointTags, int numberOfPoints)
 {
 	int pointIndex;
 
@@ -399,20 +402,19 @@ void PopulateContour(Contour* pContour, FT_Vector* points, char* pointTags, int 
 #define TESS_CALLBACK
 #endif
 
-#if __GNUC__
+#ifdef __GNUC__
 #define GLUFUN(X) (_GLUfuncptr)X
 #else
 #define GLUFUN(X) X
 #endif
 
-Tesselation curTess;
-
-void TESS_CALLBACK tcbError(GLenum errCode, Mesh* mesh)
-{
-	assert(0);	/* This is very unlikely to happen... */
+static Tesselation curTess;
+static void TESS_CALLBACK tcbError(GLenum error)
+{	/* This is very unlikely to happen... */
+	g_print("Tesselation error! (%d)\n", error);
 }
 
-void TESS_CALLBACK tcbVertex(void* data, Mesh* pMesh)
+static void TESS_CALLBACK tcbVertex(void* data, Mesh* notused)
 {
 	double* vertex = (double*)data;
 	Point newPoint;
@@ -424,28 +426,30 @@ void TESS_CALLBACK tcbVertex(void* data, Mesh* pMesh)
 	g_array_append_val(curTess.tessPoints, newPoint);
 }
 
-void TESS_CALLBACK tcbCombine(double coords[3], void* vertex_data[4], GLfloat weight[4], void** outData, Mesh* pMesh)
+/*lint -e{715, 818} Ignore some of the callback arguments*/
+static void TESS_CALLBACK tcbCombine(const double coords[3], void* vertex_data[4], GLfloat weight[4], void** outData)
 {
 	/* Just return vertex position (colours etc. not required) */
 	Point *newEle = (Point*)malloc(sizeof(Point));
+	assert(newEle);
 	memcpy(newEle->data, coords, sizeof(double[3]));
 
 	combineList = g_list_append(combineList, newEle);
 	*outData = newEle;
 }
 
-void TESS_CALLBACK tcbBegin(GLenum type, Mesh* pMesh)
+static void TESS_CALLBACK tcbBegin(GLenum type, Mesh* notused)
 {
 	curTess.tessPoints = g_array_new(FALSE, FALSE, sizeof(Point));
 	curTess.meshType = type;
 }
 
-void TESS_CALLBACK tcbEnd(Mesh* pMesh)
+static void TESS_CALLBACK tcbEnd(/*lint -e{818}*/Mesh* pMesh)
 {
 	g_array_append_val(pMesh->tesselations, curTess);
 }
 
-void PopulateMesh(Vectoriser* pVect, Mesh* pMesh)
+static void PopulateMesh(const Vectoriser* pVect, Mesh* pMesh)
 {
 	unsigned int c, p;
 	GLUtesselator* tobj = gluNewTess();
@@ -456,9 +460,9 @@ void PopulateMesh(Vectoriser* pVect, Mesh* pMesh)
 
 	gluTessCallback( tobj, GLU_TESS_BEGIN_DATA, GLUFUN(tcbBegin));
 	gluTessCallback( tobj, GLU_TESS_VERTEX_DATA, GLUFUN(tcbVertex));
-	gluTessCallback( tobj, GLU_TESS_COMBINE_DATA, GLUFUN(tcbCombine));
+	gluTessCallback( tobj, GLU_TESS_COMBINE, GLUFUN(tcbCombine));
 	gluTessCallback( tobj, GLU_TESS_END_DATA, GLUFUN(tcbEnd));
-	gluTessCallback( tobj, GLU_TESS_ERROR_DATA, GLUFUN(tcbError));
+	gluTessCallback( tobj, GLU_TESS_ERROR, GLUFUN(tcbError));
 
 	gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
 
@@ -486,7 +490,7 @@ void PopulateMesh(Vectoriser* pVect, Mesh* pMesh)
 	gluDeleteTess( tobj);
 }
 
-void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
+static void TidyMemory(const Vectoriser* pVect, const Mesh* pMesh)
 {
 	GList *pl;
 	unsigned int c, i;
@@ -511,28 +515,28 @@ void TidyMemory(Vectoriser* pVect, Mesh* pMesh)
 	g_list_free(combineList);
 }
 
-extern void glPrintPointNumbers(BoardData3d* bd3d, const char *text)
+extern void glPrintPointNumbers(const BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally */
 	glTranslatef(-getTextLen3d(bd3d->numberFont, text) / 2.0f, 0, 0);
 	RenderString3d(bd3d->numberFont, text);
 }
 
-extern void glPrintCube(BoardData3d* bd3d, const char *text)
+extern void glPrintCube(const BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally and vertically */
 	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont->height / 2.0f, 0);
 	RenderString3d(bd3d->cubeFont, text);
 }
 
-extern void glPrintNumbersRA(BoardData3d* bd3d, const char *text)
+extern void glPrintNumbersRA(const BoardData3d* bd3d, const char *text)
 {
 	/* Right align */
 	glTranslatef(-getTextLen3d(bd3d->numberFont, text), 0, 0);
 	RenderString3d(bd3d->numberFont, text);
 }
 
-extern float GetFontHeight3d(OGLFont *font)
+extern float GetFontHeight3d(const OGLFont *font)
 {
 	return font->height;
 }
