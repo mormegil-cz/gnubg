@@ -1,3 +1,9 @@
+Thu Dec 28 10:03:36 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* common.h, board3d/matrix.c, board3d/matrix.h, lib/fifo.c,
+	lib/fifo.h, lib/neuralnet.c: small linux compile fixes after last
+	commit.
+
 Tue Dec 26 11:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* lib/board3d: Run through lint, added consts to pointers and
