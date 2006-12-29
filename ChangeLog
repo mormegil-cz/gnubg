@@ -1,3 +1,8 @@
+Fri Dec 29 12:51:42 CET 2006 Christian Anthon <anthon@kiku.dk>
+
+	* lib/Makefile.am, lib/fifo.[ch], lib/buffer.[ch]: removed as they are
+	not used anymore.
+
 Thu Dec 28 10:03:36 CET 2006 Christian Anthon <anthon@kiku.dk>
 
 	* common.h, board3d/matrix.c, board3d/matrix.h, lib/fifo.c,
