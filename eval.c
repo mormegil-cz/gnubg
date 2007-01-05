@@ -44,6 +44,9 @@
 #include "path.h"
 #include "format.h"
 #include "sse.h"
+#ifdef USE_MULTITHREAD
+#include "multithread.h"
+#endif
 
 #if WIN32
 #define BINARY O_BINARY
@@ -285,7 +288,7 @@ bgvariation bgvDefault = VARIATION_STANDARD;
 
 int anChequers[ NUM_VARIATIONS ] = { 15, 15, 1, 2, 3 };
 
-char *aszVariations[ NUM_VARIATIONS ] = {
+const char *aszVariations[ NUM_VARIATIONS ] = {
   N_("Standard backgammon"),
   N_("Standard backgammon with Nackgammon starting position"),
   N_("1-chequer hypergammon"),
@@ -293,7 +296,7 @@ char *aszVariations[ NUM_VARIATIONS ] = {
   N_("3-chequer hypergammon") 
 };
 
-char *aszVariationCommands[ NUM_VARIATIONS ] = {
+const char *aszVariationCommands[ NUM_VARIATIONS ] = {
   "standard", 
   "nackgammon", 
   "1-chequer-hypergammon",
@@ -305,7 +308,7 @@ char *aszVariationCommands[ NUM_VARIATIONS ] = {
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
                         { 1.0, 1.0, 1.0, 1.0 }, VARIATION_STANDARD };
 
-char *aszEvalType[] = 
+const char *aszEvalType[] = 
    { 
      N_ ("No evaluation"), 
      N_ ("Neural net evaluation"), 
@@ -521,7 +524,7 @@ movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES 
 };
 
 
-char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
+const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
   N_("Double"),
   N_("Beaver"),
   N_("Raccoon")
@@ -547,21 +550,21 @@ static void ComputeTable0( void )
 	
     for( n0 = 0; n0 <= 5; n0++ )
       for( n1 = 0; n1 <= n0; n1++ )
-	if( !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
-	    !( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) )
-	  c += ( n0 == n1 ) ? 1 : 2;
+		if( !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
+		    !( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) )
+		  c += ( n0 == n1 ) ? 1 : 2;
 	
     anEscapes[ i ] = c;
   }
 }
 
-static int Escapes( int anBoard[ 25 ], int n ) {
+static int Escapes( const int anBoard[ 25 ], int n ) {
     
     int i, af = 0;
     
     for( i = 0; i < 12 && i < n; i++ )
-	if( anBoard[ 24 - n + i ] > 1 )
-	    af |= ( 1 << i );
+		if( anBoard[ 24 - n + i ] > 1 )
+		    af |= ( 1 << i );
     
     return anEscapes[ af ];
 }
@@ -583,18 +586,18 @@ static void ComputeTable1( void )
     for( n0 = 0; n0 <= 5; n0++ )
       for( n1 = 0; n1 <= n0; n1++ ) {
 	
-	if( (n0 + n1 + 1 > low) &&
-	    !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
-	    !( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) ) {
-	  c += ( n0 == n1 ) ? 1 : 2;
-	}
+		if( (n0 + n1 + 1 > low) &&
+		    !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
+			!( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) ) {
+		  c += ( n0 == n1 ) ? 1 : 2;
+		}
       }
 	
     anEscapes1[ i ] = c;
   }
 }
 
-static int Escapes1( int anBoard[ 25 ], int n ) {
+static int Escapes1( const int anBoard[ 25 ], int n ) {
     
     int i, af = 0;
     
@@ -674,6 +677,10 @@ EvalShutdown ( void ) {
 
   int i;
 
+#ifdef USE_MULTITHREAD
+MT_Close();
+#endif
+
   /* close bearoff databases */
 
   BearoffClose( &pbc1 );
@@ -707,7 +714,7 @@ int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		int fNoBearoff, 
-		char *szDir, int nSize,
+		const char *szDir, int nSize,
 		void (*pfProgress)( int ) )
 {
     FILE *pfWeights;
@@ -717,6 +724,10 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     static int fInitialised = FALSE;
 
     if( !fInitialised ) {
+
+#ifdef USE_MULTITHREAD
+		MT_InitThreads();
+#endif
 
 #if USE_SSE_VECTORIZE
 		if (SSE_Supported())
@@ -734,10 +745,10 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 			 (cachecomparefunc) EvalCacheCompare ) )
 	    return -1;
 #else
-	cCache = 0x1 << 16;
-	if( CacheCreate( &cEval, cCache ) ) {
-	  return -1;
-	}
+		cCache = 0x1 << 16;
+		if( CacheCreate( &cEval, cCache ) ) {
+		return -1;
+		}
 
 #if defined( PRUNE_CACHE )
 	if( CacheCreate( &cpEval, 0x1 << 16) ) {
@@ -747,14 +758,14 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	
 #endif
 	    
-	ComputeTable();
+		ComputeTable();
 
-	rc.randrsl[ 0 ] = time( NULL );
-	for( i = 0; i < RANDSIZ; i++ )
-	    rc.randrsl[ i ] = rc.randrsl[ 0 ];
-	irandinit( &rc, TRUE );
-	
-	fInitialised = TRUE;
+		rc.randrsl[ 0 ] = time( NULL );
+		for( i = 0; i < RANDSIZ; i++ )
+			rc.randrsl[ i ] = rc.randrsl[ 0 ];
+		irandinit( &rc, TRUE );
+		
+		fInitialised = TRUE;
     }
 
     if( ! fNoBearoff ) {
@@ -856,7 +867,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		   !NeuralNetLoadBinary(&nnpContact, pfWeights ) &&
 		   !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) &&
 		   !NeuralNetLoadBinary(&nnpRace, pfWeights ) ) ) { 
-		perror( szWeightsBinary );
+			perror( szWeightsBinary );
 	    }
 	    
 	    fclose( pfWeights );
@@ -878,7 +889,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
                          szWeights, WEIGHTS_VERSION, szFileVersion );
 	    else {
 
-		if( !( fReadWeights =
+		 if( !( fReadWeights =
 		       !NeuralNetLoad( &nnContact, pfWeights ) &&
 		       !NeuralNetLoad( &nnRace, pfWeights ) &&
 		       !NeuralNetLoad( &nnCrashed, pfWeights ) &&
@@ -889,36 +900,39 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		       ) )
 		    perror( szWeights );
 
-		fclose( pfWeights );
+		 fclose( pfWeights );
 	    }
 	}
     }
 
     if( fReadWeights ) {
-	if( nnContact.cInput != NUM_INPUTS ||
-	    nnContact.cOutput != NUM_OUTPUTS )
-	    NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden,
-			     NUM_OUTPUTS );
-	
-	if( nnCrashed.cInput != NUM_INPUTS ||
-	    nnCrashed.cOutput != NUM_OUTPUTS )
-	    NeuralNetResize( &nnCrashed, NUM_INPUTS, nnCrashed.cHidden,
-			     NUM_OUTPUTS );
-	
-	if( nnRace.cInput != NUM_RACE_INPUTS ||
-	    nnRace.cOutput != NUM_OUTPUTS )
-	    NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
-			     NUM_OUTPUTS );
+		if( nnContact.cInput != NUM_INPUTS ||
+			nnContact.cOutput != NUM_OUTPUTS )
+			if (NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden,
+					NUM_OUTPUTS ) == -1)
+					return -1;
+		
+		if( nnCrashed.cInput != NUM_INPUTS ||
+			nnCrashed.cOutput != NUM_OUTPUTS )
+			if (NeuralNetResize( &nnCrashed, NUM_INPUTS, nnCrashed.cHidden,
+					NUM_OUTPUTS ) == -1)
+					return -1;
+		
+		if( nnRace.cInput != NUM_RACE_INPUTS ||
+			nnRace.cOutput != NUM_OUTPUTS )
+			if (NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
+					NUM_OUTPUTS ) == -1)
+					return -1;
 
-	return 0;
+		return 0;
     } else {
-	CreateWeights( nSize );
+		CreateWeights( nSize );
 
-	return 1;
-    }
+		return 1;
+	}
 }
 
-extern int EvalSave( char *szWeights ) {
+extern int EvalSave( const char *szWeights ) {
     
   FILE *pfWeights;
     
@@ -927,13 +941,19 @@ extern int EvalSave( char *szWeights ) {
     
   fprintf( pfWeights, "GNU Backgammon %s\n", WEIGHTS_VERSION );
 
-  NeuralNetSave( &nnContact, pfWeights );
-  NeuralNetSave( &nnRace, pfWeights );
-  NeuralNetSave( &nnCrashed, pfWeights );
+  if (NeuralNetSave( &nnContact, pfWeights ) == -1)
+	  return -1;
+  if (NeuralNetSave( &nnRace, pfWeights ) == -1)
+	  return -1;
+  if (NeuralNetSave( &nnCrashed, pfWeights ) == -1)
+	  return -1;
 
-  NeuralNetSave( &nnpContact, pfWeights );
-  NeuralNetSave( &nnpCrashed, pfWeights );
-  NeuralNetSave( &nnpRace, pfWeights );
+  if (NeuralNetSave( &nnpContact, pfWeights ) == -1)
+	  return -1;
+  if (NeuralNetSave( &nnpCrashed, pfWeights ) == -1)
+	  return -1;
+  if (NeuralNetSave( &nnpRace, pfWeights ) == -1)
+	  return -1;
   
   fclose( pfWeights );
 
@@ -1102,7 +1122,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
     
     for( i = 0; i < nOppBack; i++ ) {
       if( anBoard[i] )
-	p += (i+1) * anBoard[i];
+		p += (i+1) * anBoard[i];
     }
     
     afInput[I_FREEPIP] = p / 100.0;
@@ -1118,9 +1138,9 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
       
     for( i = 23;  i >= 12 && i > nOppBack; --i ) {
       if( anBoard[i] && anBoard[i] != 2 ) {
-	int n = ((anBoard[i] > 2) ? (anBoard[i] - 2) : 1);
-	no += n;
-	t += i * n;
+		int n = ((anBoard[i] > 2) ? (anBoard[i] - 2) : 1);
+		no += n;
+		t += i * n;
       }
     }
 
@@ -2177,8 +2197,10 @@ MaxTurns( int id )
   BearoffDist ( pbc1, id, NULL, NULL, NULL, aus, NULL );
 
   for( i = 31; i >= 0; i-- )
+  {
     if( aus[i] )
       return i;
+  }
 
   abort();
 }

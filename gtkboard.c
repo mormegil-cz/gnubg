@@ -675,7 +675,8 @@ extern void board_set_scores(Board *board, int s0, int s1)
 int update_move(BoardData *bd)
 {
     char *move = _("Illegal move"), move_buf[ 40 ];
-    gint i, points[ 2 ][ 25 ];
+    unsigned int i;
+	int points[ 2 ][ 25 ];
     guchar key[ 10 ];
     int fIncomplete = TRUE, fIllegal = TRUE;
     
@@ -856,8 +857,8 @@ gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int iCol
 gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 
 	int i;
-	int anPipsBeforeMove[ 2 ];
-	int anCurPipCount[ 2 ];
+	unsigned int anPipsBeforeMove[ 2 ];
+	unsigned int anCurPipCount[ 2 ];
 	int iCanMove = 0;		/* bits set => could make a move with this die */
 	int iDestCount = 0;
 	int iDestPt = -1;
@@ -975,7 +976,7 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 	}
 	else {
 	/* normal roll: up to 3 possibilities */
-		int iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
+		unsigned int iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
 		for ( i = 0; i <= 1; ++i ) {
 			if ( ( iUnusedPips < bd->diceRoll[i] ) ||		/* not possible to move with this die (anymore) */
 			     ( ( bd->valid_move ) && ( bd->diceRoll[i] == ( bd->valid_move->anMove[0] - bd->valid_move->anMove[1] ) ) ) ||		/* this die has been used already */
@@ -1271,8 +1272,8 @@ gboolean place_chequer_or_revert(BoardData *bd,
                     }
             }
         } else {
-          if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || (
-              dest > 25 && ABS (source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
+          if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || 
+			  (dest > 25 && ABS (source - dest2) > MAX(bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
               ) 
             for (i = 0; i < 2; i++) {
                     passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;
@@ -1694,7 +1695,7 @@ static int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
   movelist ml;
-  int i, iMove, cMoves;
+  unsigned int i, iMove, cMoves;
   
   /* check for all chequers inside home quadrant */
 
@@ -4394,7 +4395,7 @@ void InitBoardData(BoardData* bd)
 
 		/* Set dice so 3d roll happens */
 		bd->diceShown = DICE_NOT_SHOWN;
-		bd->diceRoll[0] = bd->diceRoll[1] = -1;
+		bd->diceRoll[0] = bd->diceRoll[1] = 0;
 
 		updateOccPos(bd);
 		updateFlagOccPos(bd, bd->bd3d);

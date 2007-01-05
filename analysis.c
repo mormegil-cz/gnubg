@@ -39,6 +39,9 @@
 #include "export.h"
 #include "formatgs.h"
 #include <glib/gi18n.h>
+#ifdef USE_MULTITHREAD
+#include "multithread.h"
+#endif
 
 const char *aszRating [ RAT_UNDEFINED + 1 ] = {
   N_("Awful!"), 
@@ -304,7 +307,7 @@ updateStatcontext(statcontext*       psc,
   cubeinfo ci;
   static unsigned char auch[ 10 ];
   float rSkill, rChequerSkill, rCost;
-  int i;
+  unsigned int i;
   int anBoardMove[ 2 ][ 25 ];
   float arDouble[ 4 ];
   const xmovegameinfo* pmgi = &((moverecord *) plGame->plNext->p)->g;
@@ -637,26 +640,29 @@ updateStatcontext(statcontext*       psc,
 
 }
 
-
 extern int
-AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
-              evalsetup *pesChequer, evalsetup *pesCube,
-              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
-	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
+AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
+		statcontext *psc, const evalsetup *pesChequer, evalsetup *pesCube,
+		/* const */ movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ], const int analysePlayers[ 2 ] )
+{
+    int anBoardMove[ 2 ][ 25 ];
+    cubeinfo ci;
+    float rSkill, rChequerSkill;
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+			  
+/* shared between the double and subsequent take/drop */
+/* First one - esDouble - not used, just set as a flag to show
+that double has been evaluated (i.e. that the second - arDouble - is valid */
+#ifndef USE_MULTITHREAD	/* Removed for now - needs to be sorted */
+static evalsetup esDouble; 
+#endif
+static float arDouble[ NUM_CUBEFUL_OUTPUTS ];
+/****************************************/
 
-    static int anBoardMove[ 2 ][ 25 ];
-    static unsigned char auch[ 10 ];
-    static cubeinfo ci;
-    static float rSkill, rChequerSkill;
-    static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    static rolloutstat aarsStatistics[ 2 ][ 2 ];
-    static evalsetup esDouble; /* shared between the
-				  double and subsequent take/drop */
-    static float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
     doubletype dt;
     taketype tt;
-    const xmovegameinfo* pmgi = &((moverecord *) plGame->plNext->p)->g;
+    const xmovegameinfo* pmgi = &((moverecord *) plParentGame->plNext->p)->g;
     int    is_initial_position = 1;
 
     /* analyze this move */
@@ -675,241 +681,238 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
 
-        if ( fUpdateStatistics ) {
+        if ( psc ) {
           IniStatcontext( psc );
-          updateStatcontext ( psc, pmr, pms, plGame );
+          updateStatcontext ( psc, pmr, pms, plParentGame );
         }
-
-	break;
+		break;
       
     case MOVE_NORMAL:
-	if( pmr->fPlayer != pms->fMove ) {
-	    SwapSides( pms->anBoard );
-	    pms->fMove = pmr->fPlayer;
-	}
+		if( pmr->fPlayer != pms->fMove ) {
+			SwapSides( pms->anBoard );
+			pms->fMove = pmr->fPlayer;
+		}
 
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
-          break;
-      
-	rSkill = rChequerSkill = 0.0f;
-	GetMatchStateCubeInfo( &ci, pms );
-      
-	/* cube action? */
-      
-	if ( ! is_initial_position && fAnalyseCube && 
-	     pmgi->fCubeUse && GetDPEq ( NULL, NULL, &ci ) ) {
-          
-          if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 ) {
-            
-	    if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics, 
-				       pms->anBoard, &ci,
-				       pesCube, NULL, NULL  ) < 0 )
-              return -1;
-            
-            
-	    pmr->CubeDecPtr->esDouble = *pesCube;
+		if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
+			break;
 
-            memcpy ( pmr->CubeDecPtr->aarOutput, 
-                     aarOutput, sizeof ( aarOutput ) );
-            memcpy ( pmr->CubeDecPtr->aarStdDev, 
-                     aarStdDev, sizeof ( aarStdDev ) );
-            
-          }
-          
-          FindCubeDecision( arDouble, 
-                            GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
-          
-          rSkill = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_OPTIMAL ];
-          pmr->stCube = Skill( rSkill );
+		rSkill = rChequerSkill = 0.0f;
+		GetMatchStateCubeInfo( &ci, pms );
 
-	} else
-          pmr->CubeDecPtr->esDouble.et = EVAL_NONE;
+		/* cube action? */
+
+		if ( ! is_initial_position && fAnalyseCube && 
+				pmgi->fCubeUse && GetDPEq ( NULL, NULL, &ci ) )
+		{
+			if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 )
+			{
+				if ( GeneralCubeDecision ( aarOutput, aarStdDev, NULL, 
+					pms->anBoard, &ci, pesCube, NULL, NULL  ) < 0 )
+					return -1;
+
+				pmr->CubeDecPtr->esDouble = *pesCube;
+
+				memcpy ( pmr->CubeDecPtr->aarOutput, 
+					aarOutput, sizeof ( aarOutput ) );
+				memcpy ( pmr->CubeDecPtr->aarStdDev, 
+					aarStdDev, sizeof ( aarStdDev ) );
+			}
+
+			FindCubeDecision( arDouble, GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
+
+			rSkill = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_OPTIMAL ];
+			pmr->stCube = Skill( rSkill );
+
+		}
+		else
+			pmr->CubeDecPtr->esDouble.et = EVAL_NONE;
 
         /* luck analysis */
       
-	if( fAnalyseDice ) {
-	    pmr->rLuck = LuckAnalysis( pms->anBoard,
-					 pmr->anDice[ 0 ],
-					 pmr->anDice[ 1 ],
-					 &ci, is_initial_position );
-	    pmr->lt = Luck( pmr->rLuck );
-	  
-	}
-      
-	/* evaluate move */
-      
-	if( fAnalyseMove ) {
-	    /* evaluate move */
-
-	    memcpy( anBoardMove, pms->anBoard,
-		    sizeof( anBoardMove ) );
-	    ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
-	    PositionKey ( anBoardMove, auch );
-	  
-            if ( cmp_evalsetup ( pesChequer,
-                                 &pmr->esChequer ) > 0 ) {
-
-              if( pmr->ml.cMoves )
-		free( pmr->ml.amMoves );
-	  
-              /* find best moves */
-	  
-              if( FindnSaveBestMoves ( &(pmr->ml), pmr->anDice[ 0 ],
-                                       pmr->anDice[ 1 ],
-                                       pms->anBoard, auch, 
-                                       arSkillLevel[ SKILL_DOUBTFUL ],
-                                       &ci, &pesChequer->ec, aamf ) < 0 )
-		return -1;
-
-            }
-	  
-	    for( pmr->n.iMove = 0; pmr->n.iMove < pmr->ml.cMoves;
-		 pmr->n.iMove++ )
-		if( EqualKeys( auch,
-			       pmr->ml.amMoves[ pmr->n.iMove ].auch ) ) {
-		    rChequerSkill = pmr->ml.amMoves[ pmr->n.iMove ].
-			rScore - pmr->ml.amMoves[ 0 ].rScore;
-		  
-		    break;
+		if( fAnalyseDice )
+		{
+			pmr->rLuck = LuckAnalysis( pms->anBoard,
+						pmr->anDice[ 0 ],
+						pmr->anDice[ 1 ],
+						&ci, is_initial_position );
+			pmr->lt = Luck( pmr->rLuck );
 		}
-	  
-	    pmr->n.stMove = Skill( rChequerSkill );
-	  
-	    if( cAnalysisMoves >= 2 &&
-		pmr->ml.cMoves > cAnalysisMoves ) {
-		/* There are more legal moves than we want;
-		   throw some away. */
-		if( pmr->n.iMove >= cAnalysisMoves ) {
-		    /* The move made wasn't in the top n; move it up so it
-		       won't be discarded. */
-		    memcpy( pmr->ml.amMoves + cAnalysisMoves - 1,
-			    pmr->ml.amMoves + pmr->n.iMove,
-			    sizeof( move ) );
-		    pmr->n.iMove = cAnalysisMoves - 1;
-		}
+      
+		/* evaluate move */
 	      
-                pmr->ml.amMoves = (move *)
-                  realloc( pmr->ml.amMoves,
-                           cAnalysisMoves * sizeof( move ) );
-		pmr->ml.cMoves = cAnalysisMoves;
-	    }
+		if( fAnalyseMove )
+		{
+			unsigned char auch[ 10 ];
 
-            pmr->esChequer = *pesChequer;
-            
-	}
+			/* evaluate move */
+
+			memcpy( anBoardMove, pms->anBoard,
+				sizeof( anBoardMove ) );
+			ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
+			PositionKey ( anBoardMove, auch );
+		  
+				if ( cmp_evalsetup ( pesChequer,
+									&pmr->esChequer ) > 0 ) {
+
+				if( pmr->ml.cMoves )
+					free( pmr->ml.amMoves );
+		  
+				/* find best moves */
+		  
+				if( FindnSaveBestMoves ( &(pmr->ml), pmr->anDice[ 0 ],
+										pmr->anDice[ 1 ],
+										pms->anBoard, auch, 
+										arSkillLevel[ SKILL_DOUBTFUL ],
+										&ci, &pesChequer->ec, aamf ) < 0 )
+						return -1;
+
+				}
+		  
+			for( pmr->n.iMove = 0; pmr->n.iMove < pmr->ml.cMoves;
+			pmr->n.iMove++ )
+			if( EqualKeys( auch,
+					pmr->ml.amMoves[ pmr->n.iMove ].auch ) ) {
+				rChequerSkill = pmr->ml.amMoves[ pmr->n.iMove ].
+				rScore - pmr->ml.amMoves[ 0 ].rScore;
+			  
+				break;
+			}
+		  
+			pmr->n.stMove = Skill( rChequerSkill );
+		  
+			if( cAnalysisMoves >= 2 &&
+			pmr->ml.cMoves > cAnalysisMoves ) {
+				/* There are more legal moves than we want;
+				throw some away. */
+				if( pmr->n.iMove >= cAnalysisMoves ) {
+					/* The move made wasn't in the top n; move it up so it
+					won't be discarded. */
+					memcpy( pmr->ml.amMoves + cAnalysisMoves - 1,
+						pmr->ml.amMoves + pmr->n.iMove,
+						sizeof( move ) );
+					pmr->n.iMove = cAnalysisMoves - 1;
+				}
+			      
+				pmr->ml.amMoves = (move *)realloc( pmr->ml.amMoves,
+								cAnalysisMoves * sizeof( move ) );
+				pmr->ml.cMoves = cAnalysisMoves;
+			}
+
+			pmr->esChequer = *pesChequer;
+		}
       
-        if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms, plGame );
+		if ( psc )
+		      updateStatcontext ( psc, pmr, pms, plParentGame );
 	  
-	break;
+		break;
       
     case MOVE_DOUBLE:
 
-      /* always analyse MOVE_DOUBLEs as they are shared with the subsequent
-         MOVE_TAKEs or MOVE_DROPs. */
+		/* always analyse MOVE_DOUBLEs as they are shared with the subsequent
+		MOVE_TAKEs or MOVE_DROPs. */
 
-        dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+		dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
 
-        if ( dt != DT_NORMAL )
-          break;
+		if ( dt != DT_NORMAL )
+			break;
 
-	/* cube action */	    
-	if( fAnalyseCube && pmgi->fCubeUse ) {
-	    GetMatchStateCubeInfo( &ci, pms );
-	  
-	    if ( GetDPEq ( NULL, NULL, &ci ) ||
-                 ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove ) {
-	      
-              if ( cmp_evalsetup ( pesCube, 
-				   &pmr->CubeDecPtr->esDouble ) > 0 ) {
+		/* cube action */	    
+		if( fAnalyseCube && pmgi->fCubeUse )
+		{
+			GetMatchStateCubeInfo( &ci, pms );
+		  
+			if ( GetDPEq ( NULL, NULL, &ci ) ||
+					ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove )
+			{
+				if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 )
+				{
+					if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
+							NULL, pms->anBoard, &ci,
+							pesCube, NULL, NULL ) < 0 )
+						return -1;
 
-		if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
-                                           aarsStatistics, pms->anBoard, &ci,
-					   pesCube, NULL, NULL ) < 0 )
-		    return -1;
-		
-		pmr->CubeDecPtr->esDouble = *pesCube;
+					pmr->CubeDecPtr->esDouble = *pesCube;
+				}
+				else
+				{
+					memcpy ( aarOutput, pmr->CubeDecPtr->aarOutput, 
+						sizeof ( aarOutput ) );
+					memcpy ( aarStdDev, pmr->CubeDecPtr->aarStdDev, 
+						sizeof ( aarStdDev ) );
+				}
 
-              }
-              else {
-                memcpy ( aarOutput, pmr->CubeDecPtr->aarOutput, 
-						 sizeof ( aarOutput ) );
-                memcpy ( aarStdDev, pmr->CubeDecPtr->aarStdDev, 
-						 sizeof ( aarStdDev ) );
-              }
-	      
-                FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
-	      
-		esDouble = pmr->CubeDecPtr->esDouble;
-	      
-                memcpy ( pmr->CubeDecPtr->aarOutput, aarOutput, 
-						 sizeof ( aarOutput ) );
-                memcpy ( pmr->CubeDecPtr->aarStdDev, aarStdDev, 
-						 sizeof ( aarStdDev ) );
-	      
-		rSkill = arDouble[ OUTPUT_TAKE ] <
-		    arDouble[ OUTPUT_DROP ] ?
-		    arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_OPTIMAL ] :
-		    arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_OPTIMAL ];
-	      
-		pmr->stCube = Skill( rSkill );
-	      
-	    } else
-		esDouble.et = EVAL_NONE;
-	}
-      
-        if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms, plGame );
+				FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
+#ifndef USE_MULTITHREAD
+				esDouble = pmr->CubeDecPtr->esDouble;
+#endif
+				memcpy ( pmr->CubeDecPtr->aarOutput, aarOutput, 
+					sizeof ( aarOutput ) );
+				memcpy ( pmr->CubeDecPtr->aarStdDev, aarStdDev, 
+					sizeof ( aarStdDev ) );
 
-	break;
+				rSkill = arDouble[ OUTPUT_TAKE ] <
+				arDouble[ OUTPUT_DROP ] ?
+				arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_OPTIMAL ] :
+				arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_OPTIMAL ];
+
+				pmr->stCube = Skill( rSkill );
+			}
+#ifndef USE_MULTITHREAD
+			else
+				esDouble.et = EVAL_NONE;
+#endif		
+		}
+
+		if ( psc )
+			updateStatcontext ( psc, pmr, pms, plParentGame );
+	
+		break;
       
     case MOVE_TAKE:
 
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+        if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
           /* we do not analyse this player */
           break;
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
         if ( tt != TT_NORMAL )
           break;
-      
-	if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE ) {
+#ifndef USE_MULTITHREAD
+		if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE )
+		{
+			GetMatchStateCubeInfo( &ci, pms );
 
-	    GetMatchStateCubeInfo( &ci, pms );
-	  
-            pmr->stCube = Skill ( -arDouble[ OUTPUT_TAKE ] - 
-                                -arDouble[ OUTPUT_DROP ] );
-	      
-	}
+			pmr->stCube = Skill ( -arDouble[ OUTPUT_TAKE ] - 
+								-arDouble[ OUTPUT_DROP ] );
+		}
+#endif
+		if ( psc )
+			updateStatcontext ( psc, pmr, pms, plParentGame );
 
-        if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms, plGame );
-
-	break;
+		break;
       
     case MOVE_DROP:
       
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+        if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
           /* we do not analyse this player */
           break;
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
         if ( tt != TT_NORMAL )
           break;
-      
-	if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE ) {
-	    GetMatchStateCubeInfo( &ci, pms );
-	  
-	    pmr->stCube = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
-                               -arDouble[ OUTPUT_TAKE ] );
-	      
-	}
+#ifndef USE_MULTITHREAD
+		if( fAnalyseCube && pmgi->fCubeUse && esDouble.et != EVAL_NONE ) {
+			GetMatchStateCubeInfo( &ci, pms );
 
+			rSkill = -arDouble[ OUTPUT_DROP ] - -arDouble[ OUTPUT_TAKE ];
+			pmr->stCube = Skill( rSkill );
+		}
+#endif
 
-        if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms, plGame );
+        if ( psc )
+          updateStatcontext ( psc, pmr, pms, plParentGame );
 
-	break;
+		break;
       
     case MOVE_RESIGN:
 
@@ -920,20 +923,19 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
         pms->fMove = pmr->fPlayer;
       }
       
-      if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+      if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
         /* we do not analyse this player */
         break;
       
       if ( pesCube->et != EVAL_NONE ) {
         
-        int nResign;
         float rBefore, rAfter;
 
         GetMatchStateCubeInfo ( &ci, pms );
 
         if ( cmp_evalsetup ( pesCube, &pmr->r.esResign ) > 0 ) {
-          nResign =
-            getResignation ( pmr->r.arResign, pms->anBoard, 
+
+			getResignation ( pmr->r.arResign, pms->anBoard, 
                              &ci, pesCube );
           
         }
@@ -963,36 +965,36 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       break;
       
     case MOVE_SETDICE:
-	if( pmr->fPlayer != pms->fMove ) {
-	    SwapSides( pms->anBoard );
-	    pms->fMove = pmr->fPlayer;
-	}
+		if( pmr->fPlayer != pms->fMove ) {
+			SwapSides( pms->anBoard );
+			pms->fMove = pmr->fPlayer;
+		}
       
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+        if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
           /* we do not analyse this player */
           break;
       
-	GetMatchStateCubeInfo( &ci, pms );
-      
-	if( fAnalyseDice ) {
-	    pmr->rLuck = LuckAnalysis( pms->anBoard,
-					  pmr->anDice[ 0 ],
-					  pmr->anDice[ 1 ],
-					  &ci, is_initial_position );
-	    pmr->lt = Luck( pmr->rLuck );
-	}
+		GetMatchStateCubeInfo( &ci, pms );
+	      
+		if( fAnalyseDice ) {
+			pmr->rLuck = LuckAnalysis( pms->anBoard,
+						pmr->anDice[ 0 ],
+						pmr->anDice[ 1 ],
+						&ci, is_initial_position );
+			pmr->lt = Luck( pmr->rLuck );
+		}
 
-        if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms, plGame);
+        if ( psc )
+          updateStatcontext ( psc, pmr, pms, plParentGame);
 
-	break;
+		break;
 
     case MOVE_TIME: 
 
       {
         
 #if USE_TIMECONTROL
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+        if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
           /* we do not analyse this player */
           break;
 
@@ -1050,8 +1052,8 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
         /* update statistics */
       
-        if ( fUpdateStatistics )
-          updateStatcontext ( psc, pmr, pms, plGame );
+        if ( psc )
+          updateStatcontext ( psc, pmr, pms, plParentGame );
       
 #endif /* USE_TIMECONTROL */
       
@@ -1062,12 +1064,12 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_SETBOARD:	  
     case MOVE_SETCUBEVAL:
     case MOVE_SETCUBEPOS:
-	break;
+		break;
     }
   
-    ApplyMoveRecord( pms, plGame, pmr );
+    ApplyMoveRecord( pms, plParentGame, pmr );
   
-    if ( fUpdateStatistics ) {
+    if ( psc ) {
       psc->fMoves = fAnalyseMove;
       psc->fCube = fAnalyseCube;
       psc->fDice = fAnalyseDice;
@@ -1076,10 +1078,68 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     return fInterrupt ? -1 : 0;
 }
 
+static int NumberMovesGame ( list *plGame );
 
 static int
-AnalyzeGame ( list *plGame ) {
+AnalyzeGame ( list *plGame )
+#ifdef USE_MULTITHREAD
+{
+	int result;
+	unsigned int i;
+    list *pl = plGame->plNext;
+    moverecord *pmr = pl->p;
+	statcontext *psc = &pmr->g.sc;
+    matchstate msAnalyse;
+	unsigned int numMoves = NumberMovesGame(plGame);
+	AnalyseMoveTask *pt;
 
+	void ( *fnOld )( void ) = fnTick;
+	fnTick = NULL;
+
+	/* Analyse first move record (gameinfo) */
+    g_assert( pmr->mt == MOVE_GAMEINFO );
+    if	(AnalyzeMove(pmr, &msAnalyse, plGame, psc,
+                        &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, afAnalysePlayers ) < 0 )
+		return -1;	/* Interupted */
+
+	numMoves--;	/* Done one - the gameinfo */
+
+
+    for (i = 0; i < numMoves; i++)
+	{
+		pl = pl->plNext;
+		pmr = pl->p;
+
+		pt = (AnalyseMoveTask*)malloc(sizeof(AnalyseMoveTask));
+		pt->type = TT_ANALYSEMOVE;
+		pt->pmr = pmr;
+		pt->plGame = plGame;
+		pt->psc = psc;
+		memcpy(&pt->ms, &msAnalyse, sizeof(msAnalyse));
+		MT_AddTask((Task*)pt);
+
+		FixMatchState(&msAnalyse, pmr);
+		if ((pmr->fPlayer != msAnalyse.fMove) && (pmr->mt == MOVE_NORMAL || pmr->mt == MOVE_RESIGN || pmr->mt == MOVE_SETDICE))
+		{
+			SwapSides( msAnalyse.anBoard );
+			msAnalyse.fMove = pmr->fPlayer;
+		}
+		ApplyMoveRecord(&msAnalyse, plGame, pmr);
+
+	}
+	g_assert(pl->plNext == plGame);
+
+	result = MT_WaitForTasks();
+
+	fnTick = fnOld;
+
+	if (result == -1)
+	    IniStatcontext( psc );
+
+    return result;
+}
+#else
+{
     list *pl;
     moverecord *pmr;
     moverecord *pmrx = (moverecord *) plGame->plNext->p; 
@@ -1094,7 +1154,7 @@ AnalyzeGame ( list *plGame ) {
 
         if( AnalyzeMove ( pmr, &msAnalyse, plGame, &pmrx->g.sc, 
                           &esAnalysisChequer,
-                          &esAnalysisCube, aamfAnalysis, TRUE, 
+                          &esAnalysisCube, aamfAnalysis,
                           afAnalysePlayers ) < 0 ) {
 	    /* analysis incomplete; erase partial summary */
 	    IniStatcontext( &pmrx->g.sc );
@@ -1104,6 +1164,7 @@ AnalyzeGame ( list *plGame ) {
     
     return 0;
 }
+#endif
 
 
 static void
@@ -1296,8 +1357,8 @@ extern void CommandAnalyseGame( char *sz ) {
 }
 
 
-extern void CommandAnalyseMatch( char *sz ) {
-
+extern void CommandAnalyseMatch( char *sz )
+{
   list *pl;
   moverecord *pmr;
   int nMoves;
@@ -1337,7 +1398,6 @@ extern void CommandAnalyseMatch( char *sz ) {
 #endif
 
   playSound( SOUND_ANALYSIS_FINISHED );
-
 }
 
 extern void CommandAnalyseSession( char *sz ) {
@@ -1727,7 +1787,7 @@ CommandAnalyseMove ( char *sz )
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
     AnalyzeMove ( plLastMove->plNext->p, &msx, plGame, NULL, 
                   &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, 
-                  FALSE, NULL );
+                  NULL );
     ProgressEnd();
 
 #if USE_GTK

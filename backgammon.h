@@ -127,7 +127,7 @@ TC_POINT, TC_LOSS
 } tcpenalty;
 
 typedef struct _tctransition {
-   char *szName; 
+   const char *szName; 
    int (*pfDecision)(int);
 } tctransition;
 
@@ -238,7 +238,7 @@ typedef struct _movenormal {
   int anMove[ 8 ];
 
   /* index into the movelist of the move that was made */
-  int iMove; 
+  unsigned int iMove; 
 
   skilltype stMove;
 } xmovenormal;
@@ -385,9 +385,10 @@ extern int fNextTurn, fComputing;
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fDisplay, fAutoBearoff, fShowProgress,
     nBeavers, fJacoby,
-    fOutputRawboard, cAnalysisMoves, fAnalyseCube,
+    fOutputRawboard, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord,
 	nDefaultLength, nToolbarStyle, fStyledGamelist, fFullScreen;
+extern unsigned int cAnalysisMoves;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
@@ -501,7 +502,7 @@ extern int ComputerTurn( void );
 extern void ClearMatch( void );
 extern void FreeMatch( void );
 extern void SetMatchDate( matchinfo* pmi );
-extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms);
+extern void GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms);
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char* sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char* pchDesc );
@@ -590,10 +591,10 @@ extern int fReadline;
 #endif
 
 extern int
-AnalyzeMove ( moverecord* pmr, matchstate* pms, list* plGame, statcontext* psc,
-              evalsetup* pesChequer, evalsetup* pesCube,
+AnalyzeMove ( moverecord* pmr, matchstate* pms, const list* plGame, statcontext* psc,
+              const evalsetup* pesChequer, evalsetup* pesCube,
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
-	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] );
+	      const int afAnalysePlayers[ 2 ] );
 
 extern int
 confirmOverwrite ( const char* sz, const int f );
@@ -1101,6 +1102,9 @@ extern void CommandAccept( char * ),
     CommandSetTimeControl( char * ),
 #endif
     CommandSetTheoryWindow ( char * ),
+#ifdef USE_MULTITHREAD
+    CommandSetThreads( char * ),
+#endif
     CommandSetToolbar( char * ),
     CommandSetTrainingAlpha( char * ),
     CommandSetTrainingAnneal( char * ),

@@ -410,7 +410,7 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
 }
 #endif
 
-extern int
+extern void
 NeuralNetDestroy( neuralnet *pnn )
 {
   if( !pnn->fDirect ) {
@@ -422,8 +422,6 @@ NeuralNetDestroy( neuralnet *pnn )
 
   sse_free(pnn->savedBase); pnn->savedBase = 0;
   sse_free(pnn->savedIBase); pnn->savedIBase = 0;
-  
-  return 0;
 }
 
 static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],

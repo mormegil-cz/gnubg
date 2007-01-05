@@ -82,6 +82,9 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
+#ifdef USE_MULTITHREAD
+#include "multithread.h"
+#endif
 
 #if WIN32
 /* Needed for thread priority defines */
@@ -710,6 +713,22 @@ extern void CommandSetCache( char *sz ) {
     }
 
 }
+
+#ifdef USE_MULTITHREAD
+extern void CommandSetThreads( char *sz )
+{
+    int n;
+
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	outputl( _("You must specify the number of threads to use.") );
+
+	return;
+    }
+
+	MT_SetNumThreads(n);
+	outputf( _("The number of threads has been set to %d.\n"), n );
+}
+#endif
 
 extern void CommandSetCalibration( char *sz ) {
 

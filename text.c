@@ -435,7 +435,7 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
   char szBuf[ 1024 ];
   char sz[ 64 ];
-  int i;
+  unsigned int i;
 
   cubeinfo ci;
 

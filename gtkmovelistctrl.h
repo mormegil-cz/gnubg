@@ -48,7 +48,7 @@ struct _CustomCellRendererMovelist
 {
 	GtkCellRenderer parent;
 	move* pml;
-	int rank;
+	unsigned int rank;
 };
 
 

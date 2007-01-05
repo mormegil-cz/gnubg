@@ -1006,7 +1006,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
     list *pl;
     moverecord *pmr;
     matchstate msExport;
-    int fTook = FALSE, i, cx;
+    int fTook = FALSE, cx; 
+	unsigned int i;
     char sz[ 1024 ], *pch;
     int iMove = 0;
 

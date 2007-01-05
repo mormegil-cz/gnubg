@@ -76,10 +76,6 @@ extern void GTKThaw( void );
 extern void GTKSuspendInput();
 extern void GTKResumeInput();
 
-#if USE_TIMECONTROL
-extern void GTKUpdateClock();
-#endif
-
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( GtkWidget *pwSplash );
 extern void GTKAllowStdin( void );
@@ -175,7 +171,7 @@ extern void Undo();
 #if USE_TIMECONTROL
 extern void GTKAddTimeControl( char *szName) ;
 extern void GTKRemoveTimeControl( char *szName) ;
-extern void GTKCheckTimeControl( char *szName) ;
+extern void GTKCheckTimeControl( const char *szName) ;
 #endif
 
 extern void SetToolbarStyle(int value);

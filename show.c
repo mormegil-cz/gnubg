@@ -500,7 +500,7 @@ extern void CommandShowBoard( char *sz ) {
 
 #if USE_GTK
     if( fX )
-      game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1, FALSE,
+      game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, 0, 0, FALSE,
                 anChequers[ ms.bgv ] );
     else
 #endif
@@ -2280,7 +2280,7 @@ ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc ) {
     float arBest[ 4 ];
     float arEquity[ 4 ];
     int anBoard[ 2 ][ 25 ];
-    int i, j;
+    unsigned int i, j;
     static char *aszCube[] = {
       N_("No cube"),
       N_("Owned cube"),

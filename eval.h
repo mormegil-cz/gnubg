@@ -190,8 +190,8 @@ typedef enum {
 extern bgvariation bgvDefault;
 
 extern int anChequers[ NUM_VARIATIONS ];
-extern char *aszVariations[ NUM_VARIATIONS ];
-extern char *aszVariationCommands[ NUM_VARIATIONS ];
+extern const char *aszVariations[ NUM_VARIATIONS ];
+extern const char *aszVariationCommands[ NUM_VARIATIONS ];
 
 
 /*
@@ -257,7 +257,7 @@ typedef enum {
   TT_BEAVER
 } taketype;
 
-extern char* aszDoubleTypes[ NUM_DOUBLE_TYPES ];
+extern const char* aszDoubleTypes[ NUM_DOUBLE_TYPES ];
 
 
 /*
@@ -287,7 +287,7 @@ extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER
 typedef struct {
   int anMove[ 8 ];
   unsigned char auch[ 10 ];
-  int cMoves, cPips;
+  unsigned int cMoves, cPips;
   /* scores for this move */
   float rScore, rScore2; 
   /* evaluation for this move */
@@ -301,7 +301,7 @@ extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
 extern void ( *fnTick )( void );
 extern cubeinfo ciCubeless;
-extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
+extern const char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
 extern int fUse15x15;
 
@@ -314,8 +314,8 @@ extern bearoffcontext *pbc15x15;
 extern bearoffcontext *pbc15x15_dvd;
 
 typedef struct {
-    int cMoves; /* and current move when building list */
-    int cMaxMoves, cMaxPips;
+    unsigned int cMoves; /* and current move when building list */
+    unsigned int cMaxMoves, cMaxPips;
     int iMoveBest;
     float rBestScore;
     move* amMoves;
@@ -364,7 +364,7 @@ typedef enum  {
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		int fNoBearoff, 
-                char *szDir, int nSize,
+                const char *szDir, int nSize,
 		void (*pfProgress)( int ) );
 
 extern int
@@ -375,7 +375,7 @@ extern void EvalStatus( char *szOutput );
 extern int EvalNewWeights( int nSize );
 
 extern int 
-EvalSave( char *szWeights );
+EvalSave( const char *szWeights );
 
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],

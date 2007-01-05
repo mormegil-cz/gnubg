@@ -34,12 +34,12 @@ typedef struct _hintdata {
   movelist *pml;
   int fButtonsValid;
   int fDestroyOnMove;
-  int *piHighlight;
+  unsigned int *piHighlight;
   int fDetails;
 } hintdata;
 
 extern GtkWidget *
-CreateMoveList( movelist *pml, int *piHighlight, 
+CreateMoveList( movelist *pml, unsigned int *piHighlight, 
                 const int fButtonsValid, const int fDestroyOnMove,
                 const int fDetails );
 

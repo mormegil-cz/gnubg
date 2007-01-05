@@ -48,7 +48,7 @@ int setup_timer()
 
 double get_time()
 {	/* Return elapsed time in milliseconds */
-	LARGE_INTEGER time;
+	LARGE_INTEGER timer;
 
 	if (!perFreq)
 	{
@@ -56,8 +56,8 @@ double get_time()
 			return clock() / 1000.0;
 	}
 
-	QueryPerformanceCounter(&time);
-	return time.QuadPart / perFreq;
+	QueryPerformanceCounter(&timer);
+	return timer.QuadPart / perFreq;
 }
 
 #else

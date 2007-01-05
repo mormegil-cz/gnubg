@@ -2263,7 +2263,7 @@ extern int InitGTK( int *argc, char ***argv )
 	/* Clear board at startup */
 	for( i = 0; i < 25; i++ )
 		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
-	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, -1, -1, FALSE, anChequers[ms.bgv]);
+	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, 0, 0, FALSE, anChequers[ms.bgv]);
 
     return TRUE;
 }
@@ -9054,7 +9054,7 @@ static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
 
 #if USE_TIMECONTROL
 
-extern void GTKCheckTimeControl( char *szName) {
+extern void GTKCheckTimeControl( const char *szName) {
    char path[128];
    sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(

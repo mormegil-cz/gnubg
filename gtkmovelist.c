@@ -80,7 +80,7 @@ void MoveListCreate(hintdata *phd)
         N_("Diff."), 
         N_("Move")
     };
-	int i;
+	unsigned int i;
 	int showWLTree = showMoveListDetail && !phd->fDetails;
 
 /* Create list widget */
@@ -172,7 +172,7 @@ void MoveListRefreshSize()
  */
 void MoveListUpdate ( const hintdata *phd )
 {
-  int i, j, colNum;
+  unsigned int i, j, colNum;
   char sz[ 32 ];
   cubeinfo ci;
   movelist *pml = phd->pml;

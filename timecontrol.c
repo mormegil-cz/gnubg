@@ -31,7 +31,6 @@
 #include "eval.h"
 
 #include <glib/gi18n.h>
-#include "sound.h"
 #include "timecontrol.h"
 
 #if USE_GTK
@@ -47,40 +46,40 @@
 #if USE_TIMECONTROL
 
 timecontrol tc=
-	{ 0, 0, 0, 0, 0, 0,  0, 1, 0, 0, 0};
+	{ NULL, TC_NONE, TC_POINT, 0, 0, 0,  0, 1, NULL, NULL, NULL};
 
 /* Key values */
-static char szTCPLAIN[] = N_("plain")
-	, szTCFISCHER[] = N_("fischer")
-	, szTCBRONSTEIN[] = N_("bronstein")
-	, szTCHOURGLASS[] = N_("hourglass")
-	, szTCNONE[] = N_("none")
-	, szTCTIME[] = N_("tctime")
-	, szTCPOINT[] = N_("tcpoint") /* time per point */
-	, szTCMOVE[] = N_("tcmove") /* time per move */
-	, szTCPENALTY[] = N_("tcpenalty")
-	, szTCMULT[] = N_("tcmult") /* time multiplier */
-	, szTCOFF[] = "Time control off"
+static const char *szTCPLAIN = N_("plain")
+	, *szTCFISCHER = N_("fischer")
+	, *szTCBRONSTEIN = N_("bronstein")
+	, *szTCHOURGLASS = N_("hourglass")
+	, *szTCNONE = N_("none")
+	, *szTCTIME = N_("tctime")
+	, *szTCPOINT = N_("tcpoint") /* time per point */
+	, *szTCMOVE = N_("tcmove") /* time per move */
+	, *szTCPENALTY = N_("tcpenalty")
+	, *szTCMULT = N_("tcmult") /* time multiplier */
+	, *szTCOFF = "Time control off"
 	;
 
-int dmpscoreDecision( int fPlayer)
+int dmpscoreDecision(int notused)
 {
     return (ms.anScore[0] == ms.anScore[1] &&
     	ms.anScore[0] == ms.nMatchTo-1);
 }
 
-int dmpDecision( int fPlayer)
+int dmpDecision(int notused)
 {
     return (ms.anScore[0] + ms.nCube >= ms.nMatchTo &&
     	ms.anScore[1] + ms.nCube >= ms.nMatchTo);
 }
 
-int crawfordDecision( int fPlayer)
+int crawfordDecision(int notused)
 {
     return (ms.fCrawford);
 }
 
-int postcrawfordDecision( int fPlayer)
+int postcrawfordDecision(int notused)
 {
     return (ms.fPostCrawford);
 }
@@ -102,18 +101,18 @@ int ginDecision(int fPlayer)
     int i;
 
     for (i=0;i<NUM_ROLLOUT_OUTPUTS;i++)
-	arOutputs[i] = 0.5; 
+		arOutputs[i] = 0.5; 
     SanityCheck(ms.anBoard, arOutputs);
     if (fPlayer==ms.fMove) 
-	return  (ms.anScore[fPlayer] + ms.nCube *
-		((arOutputs[OUTPUT_WIN] == 1.0f) +
-		(arOutputs[OUTPUT_WINGAMMON] == 1.0f) +
-		(arOutputs[OUTPUT_WINBACKGAMMON] == 1.0f))) >= ms.nMatchTo ;
+		return  ((ms.anScore[fPlayer] + ms.nCube *
+			((arOutputs[OUTPUT_WIN] == 1.0f) +
+			(arOutputs[OUTPUT_WINGAMMON] == 1.0f) +
+			(arOutputs[OUTPUT_WINBACKGAMMON] == 1.0f))) >= ms.nMatchTo) ? 1 : 0;
     else
-	return  (ms.anScore[fPlayer] + ms.nCube *
-		((arOutputs[OUTPUT_WIN] == 0.0f) +
-		(arOutputs[OUTPUT_LOSEGAMMON] == 1.0f) +
-		(arOutputs[OUTPUT_LOSEBACKGAMMON] == 1.0f))) >= ms.nMatchTo ;
+		return  ((ms.anScore[fPlayer] + ms.nCube *
+			((arOutputs[OUTPUT_WIN] == 0.0f) +
+			(arOutputs[OUTPUT_LOSEGAMMON] == 1.0f) +
+			(arOutputs[OUTPUT_LOSEBACKGAMMON] == 1.0f))) >= ms.nMatchTo) ? 1 : 0;
 }
 
 tctransition transitions[] = {
@@ -159,7 +158,7 @@ static int str2time( char *sz ) {
     char *pch=sz;
 
     if( !sz  )
-	return 0;
+		return 0;
 
     for( ; *sz ; sz++ )
     {
@@ -201,7 +200,7 @@ static char *time2str(int t, char *sz)
 	return sz;
 }
 
-static void tcCopy(timecontrol *dst, timecontrol *src)
+static void tcCopy(timecontrol *dst, const timecontrol *src)
 {
     tctransitionnode *srcNode, *dstNode, *nextNode;
 
@@ -210,9 +209,9 @@ static void tcCopy(timecontrol *dst, timecontrol *src)
     free(dst->szNextB);
     for (dstNode=dst->pTransitions;dstNode;dstNode=nextNode)
     {
-	nextNode=dstNode->next;
-	free(dstNode->szNext);
-	free(dstNode);
+		nextNode=dstNode->next;
+		free(dstNode->szNext);
+		free(dstNode);
     }
     *dst=*src;
     if (src->szName) dst->szName = strdup(src->szName);
@@ -220,21 +219,24 @@ static void tcCopy(timecontrol *dst, timecontrol *src)
     if (src->szNextB) dst->szNextB = strdup(src->szNextB);
     srcNode=src->pTransitions;
     if (srcNode)
-	dstNode = dst->pTransitions = (tctransitionnode*)malloc(sizeof(tctransitionnode));
-    while (srcNode)
-    {
-	dstNode->ptrans = srcNode->ptrans;
-	dstNode->szNext = strdup(srcNode->szNext);
-	srcNode = srcNode->next;
-	if (srcNode)
-	    dstNode = dstNode->next = (tctransitionnode*)malloc(sizeof(tctransitionnode));
-	else
-	    dstNode->next = 0;
-    }
+	{
+		dstNode = dst->pTransitions = (tctransitionnode*)malloc(sizeof(tctransitionnode));
+		g_assert(dstNode);
+		do
+		{
+			dstNode->ptrans = srcNode->ptrans;
+			dstNode->szNext = strdup(srcNode->szNext);
+			srcNode = srcNode->next;
+			if (srcNode)
+				dstNode = dstNode->next = (tctransitionnode*)malloc(sizeof(tctransitionnode));
+			else
+				dstNode->next = 0;
+		} while (srcNode);
+	}
 }
 
 
-static timecontrol *findOrDeleteTimeControl( char *sz, int del )
+static int DeleteTimeControl( const char *sz )
 {
     tcnode **ppNode, **ppRefNode;
     tctransitionnode *pNode, *nextNode;
@@ -244,104 +246,117 @@ static timecontrol *findOrDeleteTimeControl( char *sz, int del )
     ppRefNode=0;
     while (*ppNode)
     {
-	if (0 == strcasecmp(sz, (*ppNode)->ptc->szName) )
-	{
-		ppRefNode=ppNode; 
-		break; /* exact match */
-	}
-	else if ( 0 == strncasecmp(sz, (*ppNode)->ptc->szName, strlen(sz)) )
-		ppRefNode=ppNode; /* partial match */
-	ppNode = &((*ppNode)->next);
+		if (0 == strcasecmp(sz, (*ppNode)->ptc->szName) )
+		{
+			ppRefNode=ppNode; 
+			break; /* exact match */
+		}
+		else if ( 0 == strncasecmp(sz, (*ppNode)->ptc->szName, strlen(sz)) )
+			ppRefNode=ppNode; /* partial match */
+		ppNode = &((*ppNode)->next);
     }
 
-    if (!ppRefNode) return 0;
+    if (!ppRefNode)
+		return 0;
 
-    if (del)
     {
-    tcnode *next;
+		tcnode *next;
 #if USE_GTK
-    if ( fX )
-      GTKRemoveTimeControl((*ppRefNode)->ptc->szName);
+		if ( fX )
+			GTKRemoveTimeControl((*ppRefNode)->ptc->szName);
 #endif
-    next=(*ppRefNode)->next;
-    free((*ppRefNode)->ptc->szName);
-    free((*ppRefNode)->ptc->szNext);
-    free((*ppRefNode)->ptc->szNextB);
-    for (pNode=(*ppRefNode)->ptc->pTransitions;pNode;pNode=nextNode)
-    {
-	nextNode=pNode->next;
-	free(pNode->szNext);
-	free(pNode);
+		next=(*ppRefNode)->next;
+		free((*ppRefNode)->ptc->szName);
+		free((*ppRefNode)->ptc->szNext);
+		free((*ppRefNode)->ptc->szNextB);
+		for (pNode=(*ppRefNode)->ptc->pTransitions;pNode;pNode=nextNode)
+		{
+			nextNode=pNode->next;
+			free(pNode->szNext);
+			free(pNode);
+		}
+		free((*ppRefNode)->ptc);
+		free(*ppRefNode);
+		*ppRefNode = next;
+		return 1;
     }
-    free((*ppRefNode)->ptc);
-    free(*ppRefNode);
-    *ppRefNode = next;
-	return 0;
-    }
-    else
-	return (*ppRefNode)->ptc;
-} 
-
-static timecontrol *findTimeControl( char *sz )
-{
-    return findOrDeleteTimeControl( sz, 0 );
 }
 
-static void unnameTimeControl( char *sz )
+static timecontrol *FindTimeControl( const char *sz )
 {
-    findOrDeleteTimeControl( sz, 1 );
+    tcnode **ppNode, **ppRefNode;
+
+    if (!sz || !*sz ) return 0;
+    ppNode=&tcHead;
+    ppRefNode=0;
+    while (*ppNode)
+    {
+		if (0 == strcasecmp(sz, (*ppNode)->ptc->szName) )
+		{
+			ppRefNode=ppNode; 
+			break; /* exact match */
+		}
+		else if ( 0 == strncasecmp(sz, (*ppNode)->ptc->szName, strlen(sz)) )
+			ppRefNode=ppNode; /* partial match */
+		ppNode = &((*ppNode)->next);
+    }
+
+    if (!ppRefNode)
+		return 0;
+	else
+		return (*ppRefNode)->ptc;
 }
 
 static void setNameModified( )
 {
 	char *p;
     if (!tc.szName) return;
-    if (0 == strcmp(tc.szName+strlen(tc.szName) - strlen(_("(modified)")),
-	_("(modified)")) ) 
-	return;
+    if (0 == strcmp(tc.szName+strlen(tc.szName) - strlen(_("(modified)")), _("(modified)")) ) 
+		return;
     p = malloc(strlen(tc.szName) + strlen(_("(modified)")) + 2);	/* + 2 as " " in string (and eol) */
+	g_assert(p);
     sprintf(p, "%s %s", tc.szName, _("(modified)"));
     free (tc.szName);
     tc.szName = p;
 }
   	 
-static void nameTimeControl( char *sz )
+static void nameTimeControl( const char *sz )
 {
     tcnode *pNode;
 	timecontrol *ptc;
 
     if (!sz || !*sz) return;
 
-    ptc = findTimeControl( sz );
+    ptc = FindTimeControl( sz );
     if (!ptc || strcmp(ptc->szName, sz))
     {
-	ptc = calloc(sizeof(timecontrol), 1);
+		ptc = calloc(sizeof(timecontrol), 1);
     }
 #if USE_GTK
     else if ( fX )
-	GTKRemoveTimeControl(ptc->szName);
+		GTKRemoveTimeControl(ptc->szName);
 #endif
     if (ptc && ((pNode = calloc(sizeof(tcnode), 1)) != NULL))
     {
-	free (tc.szName);
-	tc.szName = strdup(sz);
+		free (tc.szName);
+		tc.szName = strdup(sz);
         tcCopy(ptc , &tc);
-	pNode->next = tcHead;
-	pNode->ptc = ptc;
-	tcHead = pNode;
+		pNode->next = tcHead;
+		pNode->ptc = ptc;
+		tcHead = pNode;
 #if USE_GTK
-	if ('.' != ptc->szName[0] && fX )
-	    GTKAddTimeControl(ptc->szName);
+		if ('.' != ptc->szName[0] && fX )
+		    GTKAddTimeControl(ptc->szName);
 #endif
     }
 }
 
-static void showTimeControl( timecontrol *ptc, int level, int levels )
+static void showTimeControl( const timecontrol *ptc, int level, int levels )
 {
     if (TC_NONE == ptc->timing )
     {
-	outputf("%s\n", _(szTCOFF));
-	return;
+		outputf("%s\n", _(szTCOFF));
+		return;
     }
 
     outputf(_("Time control: %s\n"), ptc->szName);
@@ -349,17 +364,19 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
     switch (ptc->timing)
     {
     case TC_PLAIN:
-	outputf(_("%*sPlain timing\n"), 2*level,"");
-	break;
+		outputf(_("%*sPlain timing\n"), 2*level,"");
+		break;
     case TC_FISCHER:
-	outputf(_("%*sFischer timing\n"), 2*level,"");
-	break;
+		outputf(_("%*sFischer timing\n"), 2*level,"");
+		break;
     case TC_BRONSTEIN:
-	outputf(_("%*sBronstein timing\n"), 2*level,"");
-	break;
+		outputf(_("%*sBronstein timing\n"), 2*level,"");
+		break;
     case TC_HOURGLASS:
-	outputf(_("%*sHourglass timing\n"), 2*level,"");
-	break;
+		outputf(_("%*sHourglass timing\n"), 2*level,"");
+		break;
+	case TC_NONE:
+	case TC_UNKNOWN:
     default:
       /* ignore */
       break;
@@ -369,9 +386,9 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
 		"Penalty points",
 		szTCPENALTY);
     if (TC_LOSS == ptc->penalty)
-	outputf(_("lose match\n"));
+		outputf(_("lose match\n"));
     else
-	outputf("%9d\n", ptc->nPenalty);
+		outputf("%9d\n", ptc->nPenalty);
 
     /* if (ptc->nAddedTime) */
 	outputf("%*s%-*s (%s): %9s\n", 2*level,"",
@@ -380,51 +397,53 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
 		szTCTIME,
 		time2str( ptc->nAddedTime, 0 ) );
     if (ptc->nPointAllowance)
-	outputf("%*s%-*s (%s): %9s\n", 2*level,"",
-		(int)(30-strlen(szTCPOINT)),
-		"Time per point",
-		szTCPOINT,
-		time2str(ptc->nPointAllowance, 0));
-    if (ptc->nMoveAllowance ||
-	TC_FISCHER == ptc->timing ||
-	TC_BRONSTEIN == ptc->timing)
-	outputf("%*s%-*s (%s): %9s\n", 2*level,"",
-		(int)(30-strlen(szTCMOVE)),
-		"Time per move",
-		szTCMOVE,
-		time2str(ptc->nMoveAllowance, 0));
+		outputf("%*s%-*s (%s): %9s\n", 2*level,"",
+			(int)(30-strlen(szTCPOINT)),
+			"Time per point",
+			szTCPOINT,
+			time2str(ptc->nPointAllowance, 0));
+    if (ptc->nMoveAllowance || TC_FISCHER == ptc->timing || TC_BRONSTEIN == ptc->timing)
+		outputf("%*s%-*s (%s): %9s\n", 2*level,"",
+			(int)(30-strlen(szTCMOVE)),
+			"Time per move",
+			szTCMOVE,
+			time2str(ptc->nMoveAllowance, 0));
     if (ptc->dMultiplier != 1.0) 
-	outputf("%*s%-*s (%s): %9s\n", 2*level,"",
-		(int)(30-strlen(szTCMULT)),
-		"Scale old time by:",
-		szTCMULT,
-		time2str((int)ptc->dMultiplier, 0)
-		);
+		outputf("%*s%-*s (%s): %9s\n", 2*level,"",
+			(int)(30-strlen(szTCMULT)),
+			"Scale old time by:",
+			szTCMULT,
+			time2str((int)ptc->dMultiplier, 0)
+			);
 
 
     if (ptc->szNext) {
-    	timecontrol *stc = findTimeControl( ptc->szNext);	
+    	timecontrol *stc = FindTimeControl( ptc->szNext);	
     	if (stc)  { 
-	    if (level==levels)
-	    {
-		outputf(_("%*sNext Time Control: %s\n"), 2*level,"", stc->szName);
-	    } else {
-		outputf("%*sNext ", 2*level,"");
-		showTimeControl(stc, level+1, levels);
-	    }
-	}
+			if (level==levels)
+			{
+				outputf(_("%*sNext Time Control: %s\n"), 2*level,"", stc->szName);
+			}
+			else
+			{
+				outputf("%*sNext ", 2*level,"");
+				showTimeControl(stc, level+1, levels);
+			}
+		}
     }
     if (ptc->szNextB) {
-    	timecontrol *stc = findTimeControl( ptc->szNextB);	
+    	timecontrol *stc = FindTimeControl( ptc->szNextB);	
     	if (stc) { 
-	    if (level==levels)
-	    {
-		outputf(_("%*sOpponent's Next Time Control: %s\n"), 2*level,"", stc->szName);
-	    } else {
-		outputf("%*sOpponent's Next", 2*level,"");
-		showTimeControl(stc, level+1, levels);
-	    }
-	}
+			if (level==levels)
+			{
+				outputf(_("%*sOpponent's Next Time Control: %s\n"), 2*level,"", stc->szName);
+			}
+			else
+			{
+				outputf("%*sOpponent's Next", 2*level,"");
+				showTimeControl(stc, level+1, levels);
+			}
+		}
     }
     {
 	tctransitionnode *pNode;
@@ -442,29 +461,30 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
 extern void CommandSetTCName( char *sz ) {
     char *pch = NextToken ( &sz );
     if (pch)
-	nameTimeControl(pch);
+		nameTimeControl(pch);
 }
 
 extern void CommandSetTCUnname( char *sz ) {
     char *pch = NextToken ( &sz );
     if (pch)
-        unnameTimeControl(pch);
+        if (!DeleteTimeControl(pch))
+			g_print("Unknown time control %s\n", sz);
 }
 
 extern void CommandSetTCType( char *sz ) {
     char *pch = NextToken ( &sz );
     if (0 == strncasecmp(pch, szTCPLAIN, strlen(pch)))
-	tc.timing=TC_PLAIN;
+		tc.timing=TC_PLAIN;
     else if (0 == strncasecmp(pch, szTCFISCHER, strlen(pch)))
-	tc.timing=TC_FISCHER;
+		tc.timing=TC_FISCHER;
     else if (0 == strncasecmp(pch, szTCBRONSTEIN, strlen(pch)))
-	tc.timing=TC_BRONSTEIN;
+		tc.timing=TC_BRONSTEIN;
     else if (0 == strncasecmp(pch, szTCHOURGLASS, strlen(pch)))
-	tc.timing=TC_HOURGLASS;
+		tc.timing=TC_HOURGLASS;
     else if (0 == strncasecmp(pch, szTCNONE, strlen(pch)))
-	tc.timing=TC_NONE;
+		tc.timing=TC_NONE;
     else
-	return;
+		return;
     setNameModified();
 } 
 
@@ -491,22 +511,22 @@ extern void CommandSetTCPenalty( char *sz ) {
     char *pch = NextToken ( &sz );
     if (0 == strncasecmp(pch, "lose", strlen(pch)))
     {
-	tc.nPenalty=0;
-	tc.penalty=TC_LOSS;
+		tc.nPenalty=0;
+		tc.penalty=TC_LOSS;
     }
     else
     {
         tc.nPenalty=atoi(pch);
-	tc.penalty=TC_POINT;
+		tc.penalty=TC_POINT;
     }
     setNameModified();
 }
 
 extern void CommandSetTCMultiplier( char *sz ) {
     tc.dMultiplier = ParseReal ( &sz );
-    if (ERR_VAL == tc.dMultiplier)
+    if (ERR_VAL == tc.dMultiplier /*lint --e(777) Comparing floats */)
     {
-	tc.dMultiplier = 1.0;
+		tc.dMultiplier = 1.0;
     }
     setNameModified();
 }
@@ -517,21 +537,21 @@ extern void CommandSetTCNext( char *sz ) {
     free (tc.szNextB);
     if (pch)
     {
-	tc.szNext = strdup(pch);
+		tc.szNext = strdup(pch);
     }
     else
     {
-	tc.szNext = 0;
+		tc.szNext = 0;
     }
 
     pch = NextToken ( &sz );
     if (pch)
     {
-	tc.szNextB = strdup(pch);
+		tc.szNextB = strdup(pch);
     }
     else
     {
-	tc.szNextB = 0;
+		tc.szNextB = 0;
     }
     setNameModified();
 }
@@ -540,7 +560,7 @@ extern void CommandSetTimeControl( char *sz ) {
   if ((strcasecmp(sz, "off")))
     {
 	timecontrol *ptc;
-	if ((ptc = findTimeControl(sz)) != NULL)
+	if ((ptc = FindTimeControl(sz)) != NULL)
 	{
 	    outputf(_("Time control set to %s\n"), ptc->szName);
 	    tcCopy( &tc, ptc);
@@ -552,22 +572,22 @@ extern void CommandSetTimeControl( char *sz ) {
 	else
 	{
 	    if (strlen(sz))
-		outputerrf("No such time control: %s\n", sz);
+			outputerrf("No such time control: %s\n", sz);
 	    else
-		CommandShowTCList( sz );
+			CommandShowTCList( sz );
 	}
 	
-   }
-   else
-   {
-	outputl(_(szTCOFF));
-	tc.timing = TC_NONE;
+	}
+	else
+	{
+		outputl(_(szTCOFF));
+		tc.timing = TC_NONE;
 #if USE_GTK
         if ( fX )
           GTKCheckTimeControl("Off");
 #endif
-   }
-    outputx();
+	}
+	outputx();
 }
 
 extern void CommandSetTCTransition( char *sz ) {
@@ -579,8 +599,9 @@ extern void CommandSetTCTransition( char *sz ) {
 
     while (strcmp(pch,ptr->szName))
     {
-	if (!ptr->szName) return;
-	ptr++;
+		if (!ptr->szName)
+			return;
+		ptr++;
     }
 
     pch = NextToken ( &sz );
@@ -588,8 +609,8 @@ extern void CommandSetTCTransition( char *sz ) {
 
     for (pNode = tc.pTransitions;pNode;pNode=pNode->next)
     {
-	if (pNode->ptrans == ptr) break;
-	ppRef = &pNode->next;
+		if (pNode->ptrans == ptr) break;
+		ppRef = &pNode->next;
     }
 
     if (pNode)
@@ -599,21 +620,21 @@ extern void CommandSetTCTransition( char *sz ) {
 	    free (pNode->szNext);
 	    if (strcasecmp(pch, "off"))
 	    {
-		pNode->szNext=strdup(pch);
+			pNode->szNext=strdup(pch);
 	    }
 	    else
 	    {
-		*ppRef = pNode->next;
-		free(pNode);
+			*ppRef = pNode->next;
+			free(pNode);
 	    }
 	}
     }
     else
     {
-	*ppRef = malloc(sizeof(tctransitionnode));
-	(*ppRef)->ptrans = ptr;
-	(*ppRef)->szNext=strdup(pch);
-	(*ppRef)->next=0;
+		*ppRef = malloc(sizeof(tctransitionnode));
+		(*ppRef)->ptrans = ptr;
+		(*ppRef)->szNext=strdup(pch);
+		(*ppRef)->next=0;
     }
     setNameModified();
 }
@@ -623,11 +644,11 @@ extern void CommandShowTimeControl( char *sz ) {
      char *name = NextToken ( &sz );
      int level = ParseNumber ( &sz );
      if (INT_MIN == level) level=1;
-     ptc = findTimeControl(name);
+     ptc = FindTimeControl(name);
      if (ptc)
-	showTimeControl(ptc, 1, level);
+		showTimeControl(ptc, 1, level);
      else
-	showTimeControl(&tc, 1, level);
+		showTimeControl(&tc, 1, level);
 }
 
 extern void CommandShowTCList( char *sz ) {
@@ -639,7 +660,7 @@ extern void CommandShowTCList( char *sz ) {
    while (node)
    {
 	if (all || '.' != *(node->ptc->szName))
-	outputf("  %s\n", node->ptc->szName);
+		outputf("  %s\n", node->ptc->szName);
 	node=node->next;
    }
    outputx();
@@ -665,17 +686,17 @@ static int applyPenalty(matchstate *pms)
 		timerclear(&pgcPlayer->tvTimeleft); /*  not to reiterate applyPenalty */
 		return pms->nMatchTo - pms->anScore[!pms->fTurn];
 	default:
-	  g_assert (1 == 0);
+	  g_print("Unknown penatly!\n");;
 	  return 0;
 	}
 
-	newtc = findTimeControl(pgcPlayer->tc.szNextB);
+	newtc = FindTimeControl(pgcPlayer->tc.szNextB);
 	if (newtc) 
 		pgcOpp->tc= *newtc;
 	pgcOpp->tvTimeleft.tv_sec = (int)( pgcOpp->tvTimeleft.tv_sec * pgcOpp->tc.dMultiplier);
 	pgcOpp->tvTimeleft.tv_sec += pgcOpp->tc.nAddedTime;
 
-	newtc = findTimeControl(pgcPlayer->tc.szNext);
+	newtc = FindTimeControl(pgcPlayer->tc.szNext);
 	if (newtc) 
 		pgcPlayer->tc= *newtc;
 	pgcPlayer->tvTimeleft.tv_sec = (int)( pgcPlayer->tvTimeleft.tv_sec * pgcPlayer->tc.dMultiplier);
@@ -685,7 +706,7 @@ static int applyPenalty(matchstate *pms)
 }
 
 
-extern void InitGameClock(gameclock *pgc, timecontrol *ptc, int nPoints)
+extern void InitGameClock(gameclock *pgc, const timecontrol *ptc, int nPoints)
 {
 #ifdef TCDEBUG
 printf("InitgameClock (match to: %d)\n", nPoints);
@@ -693,11 +714,11 @@ printf("InitgameClock (match to: %d)\n", nPoints);
     int i;
     for (i=0;i<2;i++)
     {
-        timerclear(&pgc->pc[i].tvStamp);
-	pgc->pc[i].tvTimeleft.tv_sec = nPoints * ptc->nPointAllowance;
-	pgc->pc[i].tvTimeleft.tv_sec += ptc->nAddedTime; 
-	pgc->pc[i].tvTimeleft.tv_usec = 0; 
-	pgc->pc[i].tc = *ptc;
+		timerclear(&pgc->pc[i].tvStamp);
+		pgc->pc[i].tvTimeleft.tv_sec = nPoints * ptc->nPointAllowance;
+		pgc->pc[i].tvTimeleft.tv_sec += ptc->nAddedTime; 
+		pgc->pc[i].tvTimeleft.tv_usec = 0; 
+		pgc->pc[i].tc = *ptc;
     }
     timerclear(&pgc->pausedtime);
 }
@@ -716,44 +737,38 @@ printf("HitGameClock: state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n",
 
     if ( pms->gs != GAME_PLAYING ||  pms->fTurn < 0 )
     {
-	if timercmp(&pms->gc.pc[0].tvStamp, &pms->gc.pc[1].tvStamp, >)
-	    pms->gc.pc[1].tvStamp = pms->gc.pc[0].tvStamp;
-	else
-	    pms->gc.pc[0].tvStamp = pms->gc.pc[1].tvStamp;
-	return;
+		if timercmp(&pms->gc.pc[0].tvStamp, &pms->gc.pc[1].tvStamp, >)
+			pms->gc.pc[1].tvStamp = pms->gc.pc[0].tvStamp;
+		else
+			pms->gc.pc[0].tvStamp = pms->gc.pc[1].tvStamp;
+		return;
     }
 
     if (timercmp(&pms->gc.pc[!pms->fTurn].tvStamp, &pms->gc.pc[pms->fTurn].tvStamp, > ))
-	return; /* rehit for same player */
+		return; /* rehit for same player */
 
     pms->gc.pc[!pms->fTurn].tvStamp = pms->gc.pc[pms->fTurn].tvStamp ;
 
-    switch ( pms->gc.pc[pms->fTurn].tc.timing ) {
-    case TC_FISCHER:
-	pms->gc.pc[pms->fTurn].tvTimeleft.tv_sec += pms->gc.pc[pms->fTurn].tc.nMoveAllowance;
-	break;
-    default:
-	break;
-    }
+    if (pms->gc.pc[pms->fTurn].tc.timing == TC_FISCHER)
+		pms->gc.pc[pms->fTurn].tvTimeleft.tv_sec += pms->gc.pc[pms->fTurn].tc.nMoveAllowance;
 }
 
 
-extern void PauseGameClock(matchstate *pms)
+extern void PauseGameClock(matchstate *notused)
 {
     fprintf(stderr, "Not yet implemented\n");
     g_assert (0);
 }
 
 #if WIN32
-double get_time();
 
-int gettimeofday (struct timeval *tv, void * arg)
+int gettimeofday (struct timeval *tv, void * notused)
 {
-	double ms = get_time();
+	double millisec = get_time();
 
-	tv->tv_sec = (long) ms / 1000;
+	tv->tv_sec = (long) millisec / 1000;
 	/* micro seconds */
-	tv->tv_usec = (long) ((ms - (tv->tv_sec * 1000)) * 1000);
+	tv->tv_usec = (long) ((millisec - (tv->tv_sec * 1000.f)) * 1000.f);
 
 	return 0;
 }
@@ -767,8 +782,8 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 
     if (0 == tvp)
     {
-	tvp = &ts;
-	gettimeofday(tvp,0);
+		tvp = &ts;
+		gettimeofday(tvp,0);
     }
 
     if ( pms->gs != GAME_PLAYING  || pms->gc.fPlayer < 0 )
@@ -791,27 +806,27 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 	{
 	    if ( (*pNode->ptrans->pfDecision)(pms->gc.fPlayer) )
 	    {
-		szNextPlayer = pNode->szNext;
-		break;
+			szNextPlayer = pNode->szNext;
+			break;
 	    }
 	}
 	for(pNode=pgcOpp->tc.pTransitions;pNode;pNode=pNode->next)
 	{
 	    if ( (*pNode->ptrans->pfDecision)(!pms->gc.fPlayer) )
 	    {
-		szNextOpp= pNode->szNext;
-		break;
+			szNextOpp= pNode->szNext;
+			break;
 	    }
 	}
 
-	if (szNextPlayer && ((newtc = findTimeControl(szNextPlayer)) != NULL)) 
+	if (szNextPlayer && ((newtc = FindTimeControl(szNextPlayer)) != NULL)) 
 	{
 	    pgcPlayer->tc= *newtc;
 	    pgcPlayer->tvTimeleft.tv_sec = (int)( pgcPlayer->tvTimeleft.tv_sec * pgcPlayer->tc.dMultiplier);
 	    pgcPlayer->tvTimeleft.tv_sec += pgcPlayer->tc.nAddedTime;
 	}
 
-	if (szNextOpp && ((newtc = findTimeControl(szNextOpp)) != NULL)) 
+	if (szNextOpp && ((newtc = FindTimeControl(szNextOpp)) != NULL)) 
 	{
 	    pgcOpp->tc= *newtc;
 	    pgcOpp->tvTimeleft.tv_sec = (int)( pgcOpp->tvTimeleft.tv_sec * pgcOpp->tc.dMultiplier);
@@ -820,7 +835,7 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
    }
 
 /* Subtract time and check for fallen flag */
-    {
+   {
 	struct timeval used;
 
 
@@ -843,54 +858,56 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
     switch ( pgcPlayer->tc.timing ) {
     case TC_BRONSTEIN:
 	{
-	struct timeval ref= pgcPlayer->tvStamp;
-	ref.tv_sec += pgcPlayer->tc.nMoveAllowance;
-	if ( timercmp(tvp, &ref, <) ) {
-		timerclear(&used);
-	} else if ( timercmp(&pgcOpp->tvStamp, &ref, <) ) {
-	    timersub(tvp, &ref, &used);
+		struct timeval ref= pgcPlayer->tvStamp;
+		ref.tv_sec += pgcPlayer->tc.nMoveAllowance;
+		if ( timercmp(tvp, &ref, <) ) {
+			timerclear(&used);
+		} else if ( timercmp(&pgcOpp->tvStamp, &ref, <) ) {
+			timersub(tvp, &ref, &used);
+		}
+		break;
 	}
-	}
-	break;
     case TC_HOURGLASS:
-	timeradd(&pgcOpp->tvTimeleft, &used, &pgcOpp->tvTimeleft);
-	break;
+		timeradd(&pgcOpp->tvTimeleft, &used, &pgcOpp->tvTimeleft);
+		break;
     case TC_FISCHER:
     case TC_PLAIN:
+	case TC_NONE:
+	case TC_UNKNOWN:
     default:
-	break;
+		break;
     }
     timersub(&pgcPlayer->tvTimeleft, &used, &pgcPlayer->tvTimeleft);
     while ( pgcPlayer->tvTimeleft.tv_sec < 0 )
-	pen += applyPenalty(pms);
+		pen += applyPenalty(pms);
 
     pms->tvTimeleft[0] = pms->gc.pc[0].tvTimeleft;
     pms->tvTimeleft[1] = pms->gc.pc[1].tvTimeleft;
     pgcOpp->tvStamp = *tvp;
 
     if (pen) {
-        moverecord *pmr = NewMoveRecord();
+		moverecord *pmr = NewMoveRecord();
 
-	pmr->mt = MOVE_TIME;
-	pmr->fPlayer = ms.fTurn;
-	pmr->tl[0] = ms.gc.pc[0].tvTimeleft;
-	pmr->tl[1] = ms.gc.pc[1].tvTimeleft;
-	pmr->t.nPoints = pen;
+		pmr->mt = MOVE_TIME;
+		pmr->fPlayer = ms.fTurn;
+		pmr->tl[0] = ms.gc.pc[0].tvTimeleft;
+		pmr->tl[1] = ms.gc.pc[1].tvTimeleft;
+		pmr->t.nPoints = pen;
 
-	AddMoveRecord( pmr );
-   }
-   return pen;
+		AddMoveRecord( pmr );
+	}
+	return pen;
 }
 }
 
-extern char *FormatClock(struct timeval *ptl, char *buf)
+extern char *FormatClock(const struct timeval *ptl, char *buf)
 {
 static char staticBuf[20];
     char *szClock = buf ? buf :  staticBuf;
     long sec=ptl->tv_sec;
     int h,m,s;
-    int neg;
-    if ((neg = (sec < 0)) != 0)
+    int neg = (sec < 0);
+    if (neg != 0)
 		sec = -sec;
     s = sec%60;
     sec/=60;
@@ -902,14 +919,14 @@ static char staticBuf[20];
 
 
 #if USE_GTK
-extern gboolean UpdateClockNotify(gpointer *p)
+extern gboolean UpdateClockNotify(gpointer *notused)
 #else
-extern int UpdateClockNotify(void *p)
+extern int UpdateClockNotify(void *notused)
 #endif
 {
  /* not last move - don't update */
     if (!plLastMove || plLastMove->plNext != plGame)
-	return 1;
+		return 1;
 
 #ifdef TCDEBUG
 printf("UpdateClockNotify - game state: %d\n", ms.gs);
@@ -921,7 +938,7 @@ printf("UpdateClockNotify - game state: %d\n", ms.gs);
 
 #if USE_GTK
     if (fX)
-	GTKUpdateClock();
+		GTKUpdateClock();
 #endif
 	return 1;
 }
@@ -929,63 +946,64 @@ printf("UpdateClockNotify - game state: %d\n", ms.gs);
 extern void SaveTimeControlSettings( FILE *pf )
 {
 	tcnode *pNode;
-   if ( NULL == pf ) 
-	return;
+	if ( NULL == pf ) 
+		return;
 
     pNode=tcHead;
     while (pNode)
-    {
-        tctransitionnode *tNode;
+	{
+		tctransitionnode *tNode;
 
-	if (TC_LOSS == pNode->ptc->penalty)
-	    fprintf(pf, "set tcpenalty lose\n");
-	else
-	    fprintf(pf, "set tcpenalty %d\n", pNode->ptc->nPenalty);
-	switch ( pNode->ptc->timing ) {
-	case TC_PLAIN:
-	    fprintf(pf, "set tctype plain \n");
-	    break;
-	case TC_BRONSTEIN:
-	    fprintf(pf, "set tctype bronstein\n");
-	    break;
-	case TC_FISCHER:
-	    fprintf(pf, "set tctype fischer\n");
-	    break;
-	case TC_HOURGLASS:
-	    fprintf(pf, "set tctype hourglass\n");
-	    break;
-	case TC_NONE:
-	default:
-	    fprintf(pf, "set tctype none\n");
-	    break;
+		if (TC_LOSS == pNode->ptc->penalty)
+			fprintf(pf, "set tcpenalty lose\n");
+		else
+			fprintf(pf, "set tcpenalty %d\n", pNode->ptc->nPenalty);
+		switch ( pNode->ptc->timing ) {
+		case TC_PLAIN:
+			fprintf(pf, "set tctype plain \n");
+			break;
+		case TC_BRONSTEIN:
+			fprintf(pf, "set tctype bronstein\n");
+			break;
+		case TC_FISCHER:
+			fprintf(pf, "set tctype fischer\n");
+			break;
+		case TC_HOURGLASS:
+			fprintf(pf, "set tctype hourglass\n");
+			break;
+		case TC_NONE:
+		case TC_UNKNOWN:
+		default:
+			fprintf(pf, "set tctype none\n");
+			break;
+		}
+
+		/* save transitions */
+		for (tNode=pNode->ptc->pTransitions; tNode; tNode=tNode->next)
+		{
+			fprintf(pf, "set tctransition %s %s\n", tNode->ptrans->szName, tNode->szNext);
+		}
+
+		fprintf(pf, "set tctime %d\n"
+			"set tcpointtime %d\n"
+			"set tcmultiplier %f\n"
+			"set tcmovetime %d\n"
+			"set tcnext %s %s\n"
+			"set tcname %s\n",
+			pNode->ptc->nAddedTime,
+			pNode->ptc->nPointAllowance,
+			pNode->ptc->dMultiplier,
+			pNode->ptc->nMoveAllowance,
+			(pNode->ptc->szNext)? pNode->ptc->szNext : "" ,
+			(pNode->ptc->szNext)? pNode->ptc->szNextB : "",
+			pNode->ptc->szName);
+			pNode = pNode->next;
 	}
-	
-	/* save transitions */
-        for (tNode=pNode->ptc->pTransitions; tNode; tNode=tNode->next)
-        {
-	    fprintf(pf, "set tctransition %s %s\n", tNode->ptrans->szName, tNode->szNext);
-	}
-	
-	fprintf(pf, "set tctime %d\n"
-		"set tcpointtime %d\n"
-		"set tcmultiplier %f\n"
-		"set tcmovetime %d\n"
-		"set tcnext %s %s\n"
-		"set tcname %s\n",
-		pNode->ptc->nAddedTime,
-		pNode->ptc->nPointAllowance,
-		pNode->ptc->dMultiplier,
-		pNode->ptc->nMoveAllowance,
-		(pNode->ptc->szNext)? pNode->ptc->szNext : "" ,
-		(pNode->ptc->szNext)? pNode->ptc->szNextB : "",
-		pNode->ptc->szName);
-	pNode = pNode->next;
-    }
 
     if (TC_NONE == tc.timing)
-	fprintf(pf, "set tc off\n");
+		fprintf(pf, "set tc off\n");
     else
-	fprintf(pf, "set tc %s\n", tc.szName);
+		fprintf(pf, "set tc %s\n", tc.szName);
 	
 }
 
@@ -994,4 +1012,3 @@ extern void SetDefaultTC ()
 	;
 }
 #endif
-

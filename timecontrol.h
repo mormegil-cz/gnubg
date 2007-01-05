@@ -40,7 +40,7 @@ extern timecontrol tc;
  * @param ptc pointer to timecontrol to use
  * @param nPoints length of match
  */
-extern void InitGameClock(gameclock *pgc, timecontrol *ptc, int nPoints);
+extern void InitGameClock(gameclock *pgc, const timecontrol *ptc, int nPoints);
 
 /* Start the game clock for fPlayer 
  * Proper sequence for hitting the clock is :
@@ -68,7 +68,7 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp);
  *	but this is rewritten on subsequent calls to FormatClock
  * @return Remaining clock time on the format h:mm:ss 
  */
-extern char *FormatClock(struct timeval * ptl , char *buf);
+extern char *FormatClock(const struct timeval * ptl , char *buf);
 
 /* Force a (real time) update to the clock which again will 
  * issue a 
@@ -87,7 +87,6 @@ extern int UpdateClockNotify(void *p);
 
 extern void SetDefaultTC ();
 extern void SaveTimeControlSettings( FILE *pf );
-extern void CommandShowTCTutorial ();
 
 #endif /* USE_TIMECONTROL */
 #endif /* _TIMECONTROL_H_ */

@@ -52,6 +52,9 @@
 static void SetSoundSettings();
 static void AddSoundWidgets(GtkWidget *container);
 #endif
+#ifdef USE_MULTITHREAD
+#include "multithread.h"
+#endif
 
 typedef struct _optionswidget {
 
@@ -71,7 +74,7 @@ typedef struct _optionswidget {
   GtkWidget *pwMETFrame, *pwLoadMET, *pwSeed;
 
   GtkWidget *pwRecordGames, *pwDisplay;
-  GtkAdjustment *padjCache, *padjDelay, *padjSeed;
+  GtkAdjustment *padjCache, *padjDelay, *padjSeed, *padjThreads;
   GtkAdjustment *padjLearning, *padjAnnealing, *padjThreshold;
 
   GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips, *pwShowEPCs,
@@ -1321,6 +1324,25 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     
     gtk_box_pack_start (GTK_BOX (pwvbox), table, FALSE, FALSE, 3);
 
+#ifdef USE_MULTITHREAD
+    pwev = gtk_event_box_new();
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
+
+    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Eval Threads:") ),
+			FALSE, FALSE, 0);
+    pow->padjThreads = GTK_ADJUSTMENT(gtk_adjustment_new (MT_GetNumThreads(), 0, 32, 1, 1, 1));
+    pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjThreads), 1, 0);
+    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
+    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("entries") ),
+			FALSE, FALSE, 0);
+    gtk_tooltips_set_tip (ptt, pwev,
+			  _("The number of threads to use in multi-threaded operations,"
+			  " this should be set to the number of logical processing units avaliable"), NULL );
+#endif
     /* return notebook */
 
     return pwn;    
@@ -1533,6 +1555,13 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
     sprintf(sz, "set cache %d", n );
     UserCommand(sz); 
   }
+
+#ifdef USE_MULTITHREAD
+  if((n = (int)pow->padjThreads->value) != (int)MT_GetNumThreads()) {
+    sprintf(sz, "set threads %d", n );
+    UserCommand(sz); 
+  }
+#endif
 
   if((n = (int)pow->padjDelay->value) != nDelay) {
     sprintf(sz, "set delay %d", n );

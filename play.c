@@ -1725,7 +1725,7 @@ extern void CancelCubeAction( void ) {
 static int TryBearoff( void ) {
 
     movelist ml;
-    int i, iMove, cMoves;
+    unsigned int i, iMove, cMoves;
     moverecord *pmr;
     
     if( ClassifyPosition( ms.anBoard, VARIATION_STANDARD ) > CLASS_RACE )
@@ -2906,7 +2906,7 @@ static skilltype GoodMove (moverecord *pmr) {
   ProgressStart( _("Considering move...") );
   if (AnalyzeMove ( pmr, &msx, plGame, NULL, pesChequer, pesChequer,
                     fTutorAnalysis ? aamfAnalysis : aamfEval, 
-		    FALSE, NULL ) < 0) {
+		    NULL ) < 0) {
     fAnalyseMove = fAnalyseMoveSaved;
     ProgressEnd();
     ResumeInput();
@@ -2928,7 +2928,8 @@ static skilltype GoodMove (moverecord *pmr) {
 extern void 
 CommandMove( char *sz ) {
 
-    int c, i, j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ], an[ 8 ];
+    int j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ], an[ 8 ];
+	unsigned int i, c;
     movelist ml;
     moverecord *pmr;
     

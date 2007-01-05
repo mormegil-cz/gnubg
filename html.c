@@ -2433,7 +2433,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                         const htmlexporttype het, const htmlexportcss hecss ) {
 
   char sz[ 64 ];
-  int i;
+  unsigned int i;
   float rEq, rEqTop;
 
   cubeinfo ci;

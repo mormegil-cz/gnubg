@@ -2020,14 +2020,13 @@ CopyBytes ( unsigned short int aus[ 64 ],
 
 
 static unsigned short int *
-GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
+GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const unsigned int nPosID ) {
 
   unsigned char *puch;
   unsigned char ac[ 128 ];
   off_t iOffset;
   int nBytes;
   int nPos = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-  static unsigned short int aus[ 64 ];
       
   unsigned int ioff, nz, ioffg, nzg;
 
@@ -2124,10 +2123,9 @@ GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
 
 
 static unsigned short int *
-GetDistUncompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
+GetDistUncompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const unsigned int nPosID ) {
 
   unsigned char ac[ 128 ];
-  static unsigned short int aus[ 64 ];
   unsigned char *puch;
   int iOffset;
 
@@ -2161,6 +2159,7 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
                            unsigned short int ausProb[ 32 ], 
                            unsigned short int ausGammonProb[ 32 ] ) {
 
+  unsigned short int aus[ 64 ];
   unsigned short int *pus = NULL;
 
   /* look in cache */
@@ -2177,11 +2176,12 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
   }
 
   /* get distribution */
-  if ( ! pus ) {
+  if ( ! pus ) 
+  {
     if ( pbc->fCompressed )
-      pus = GetDistCompressed ( pbc, nPosID );
+      pus = GetDistCompressed ( aus, pbc, nPosID );
     else
-      pus = GetDistUncompressed ( pbc, nPosID );
+      pus = GetDistUncompressed ( aus, pbc, nPosID );
 
     if ( ! pus ) {
       printf ( "argh!\n" );

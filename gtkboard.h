@@ -127,7 +127,7 @@ typedef struct _BoardData {
     gint match_to, score, score_opponent;
     gint points[ 28 ]; /* 0 and 25 are the bars */
     gint turn; /* -1 is X, 1 is O, 0 if game over */
-    gint diceRoll[ 2 ]; /* 0, 0 if not rolled */
+    unsigned int diceRoll[ 2 ]; /* 0, 0 if not rolled */
     gint cube;
     gint can_double, opponent_can_double; /* allowed to double */
     gint doubled; /* -1 if X is doubling, 1 if O is doubling */

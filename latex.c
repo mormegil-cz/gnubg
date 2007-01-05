@@ -380,7 +380,8 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
     list *pl;
     moverecord *pmr;
     matchstate msExport;
-    int fTook = FALSE, i;
+    int fTook = FALSE;
+	unsigned int i;
     char sz[ 1024 ];
 
     updateStatisticsGame ( plGame );

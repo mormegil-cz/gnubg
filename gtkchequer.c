@@ -623,7 +623,7 @@ CheckHintButtons( hintdata *phd )
 }
 
 extern GtkWidget *
-CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
+CreateMoveList( movelist *pml, unsigned int *piHighlight, const int fButtonsValid,
                 const int fDestroyOnMove, const int fDetails )
 {
     GtkWidget *pw;

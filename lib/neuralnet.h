@@ -37,7 +37,7 @@ extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cH
 
 extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p );
 
-extern int NeuralNetDestroy( neuralnet *pnn );
+extern void NeuralNetDestroy( neuralnet *pnn );
 
 typedef enum  {
   NNEVAL_NONE,

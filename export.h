@@ -64,7 +64,7 @@ typedef struct _exportsetup {
 
   /* moves */
 
-  int nMoves; /* show at most nMoves */
+  unsigned int nMoves; /* show at most nMoves */
   int fMovesDetailProb; /* show detailed probabilities */
   int afMovesParameters[ 2 ]; /* detailed parameters */
   int afMovesDisplay[ 7 ];    /* display moves */
