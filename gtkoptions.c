@@ -1333,7 +1333,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("Eval Threads:") ),
 			FALSE, FALSE, 0);
-    pow->padjThreads = GTK_ADJUSTMENT(gtk_adjustment_new (MT_GetNumThreads(), 0, 32, 1, 1, 1));
+    pow->padjThreads = GTK_ADJUSTMENT(gtk_adjustment_new (MT_GetNumThreads(), 0, MAX_NUMTHREADS, 1, 1, 1));
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjThreads), 1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);

@@ -1,6 +1,8 @@
 
 #include "backgammon.h"
 
+#define MAX_NUMTHREADS 16
+
 typedef enum _TaskType {TT_ANALYSEMOVE, TT_TEST, TT_CLOSE} TaskType;
 
 typedef struct _Task
@@ -25,3 +27,5 @@ void MT_AddTask(Task *pt);
 int MT_WaitForTasks();
 unsigned int MT_GetNumThreads();
 void MT_SetNumThreads(unsigned int num);
+void MT_Exclusive(void);
+void MT_Release(void);

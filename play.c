@@ -1290,7 +1290,7 @@ extern int ComputerTurn( void ) {
 
         /* Determine market window */
 
-        if ( EvaluatePosition ( anBoardMove, arOutput, &ci, &ecDH ) )
+        if ( EvaluatePosition ( NULL, anBoardMove, arOutput, &ci, &ecDH ) )
           return -1;
 
         rDoublePoint = 

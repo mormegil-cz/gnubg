@@ -2096,7 +2096,7 @@ ScoreMoveGeneral ( move *pm, const cubeinfo* pci, const evalsetup* pes,
 
   switch ( pes->et ) {
   case EVAL_EVAL:
-    return ScoreMove ( pm, pci, &pes->ec, pes->ec.nPlies );
+    return ScoreMove ( NULL, pm, pci, &pes->ec, pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
     return ScoreMoveRollout ( &pm, &pci, 1, pf, p );

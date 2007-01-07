@@ -77,7 +77,7 @@ static float
 EvalEfficiency( int anBoard[2][25], positionclass pc );
 
 static int 
-EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
+EvaluatePositionCubeful4( int *nContext, int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
@@ -88,7 +88,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 static int MaxTurns( int i );
 
 typedef int ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[],
-                                 const bgvariation bgv );
+                                 const bgvariation bgv, int *nContext );
 
 typedef int ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput,
                                  const bgvariation bgv );
@@ -972,7 +972,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
      How many ways to hit from a distance of n pips.
      Each number is an index into aIntermediate below. 
   */
-  static int aanCombination[ 24 ][ 5 ] = {
+  static const int aanCombination[ 24 ][ 5 ] = {
     {  0, -1, -1, -1, -1 }, /*  1 */
     {  1,  2, -1, -1, -1 }, /*  2 */
     {  3,  4,  5, -1, -1 }, /*  3 */
@@ -1000,7 +1000,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
   };
     
   /* One way to hit */ 
-  static struct {
+  typedef struct _Inter {
     /* if true, all intermediate points (if any) are required;
        if false, one of two intermediate points are required.
        Set to true for a direct hit, but that can be checked with
@@ -1016,11 +1016,11 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
 
     /* Number of pips used to hit */
     int nPips;
-  } *pi,
-
+  } Inter;
+  
+  const Inter *pi;
       /* All ways to hit */
-	
-      aIntermediate[ 39 ] = {
+  static const Inter aIntermediate[ 39 ] = {
 	{ 1, { 0, 0, 0 }, 1, 1 }, /*  0: 1x hits 1 */
 	{ 1, { 0, 0, 0 }, 1, 2 }, /*  1: 2x hits 2 */
 	{ 1, { 1, 0, 0 }, 2, 2 }, /*  2: 11 hits 2 */
@@ -1066,7 +1066,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
      Each entry is an index into aIntermediate above.
   */
     
-  static int aaRoll[ 21 ][ 4 ] = {
+  const static int aaRoll[ 21 ][ 4 ] = {
     {  0,  2,  5,  9 }, /* 11 */
     {  0,  1,  4, -1 }, /* 21 */
     {  1,  8, 17, 24 }, /* 22 */
@@ -1113,7 +1113,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
     if( anBoard[ i ] )
       n += ( i + 1 - nOppBack ) * anBoard[ i ];
 
-  {                                                              g_assert( n ); }
+	  g_assert( n );
     
   afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
 
@@ -2179,7 +2179,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
 }
 
 static int
-EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext )
 {
   g_assert ( pbc2 );
 
@@ -2207,7 +2207,7 @@ MaxTurns( int id )
 
 static int
 EvalBearoffOS( int anBoard[ 2 ][ 25 ], 
-               float arOutput[], const bgvariation bgv ) {
+               float arOutput[], const bgvariation bgv, int *nContext ) {
 
   return BearoffEval ( pbcOS, anBoard, arOutput );
 
@@ -2216,7 +2216,7 @@ EvalBearoffOS( int anBoard[ 2 ][ 25 ],
 
 static int
 EvalBearoffTS( int anBoard[ 2 ][ 25 ], 
-               float arOutput[], const bgvariation bgv ) {
+               float arOutput[], const bgvariation bgv, int *nContext ) {
 
   return BearoffEval ( pbcTS, anBoard, arOutput );
 
@@ -2224,7 +2224,7 @@ EvalBearoffTS( int anBoard[ 2 ][ 25 ],
 
 static int
 EvalBearoff15x15( int anBoard[ 2 ][ 25 ], 
-                  float arOutput[], const bgvariation bgv ) {
+                  float arOutput[], const bgvariation bgv, int *nContext ) {
 
   return BearoffEval ( pbc15x15, anBoard, arOutput );
 
@@ -2232,7 +2232,7 @@ EvalBearoff15x15( int anBoard[ 2 ][ 25 ],
 
 static int
 EvalHypergammon1( int anBoard[ 2 ][ 25 ],
-                  float arOutput[], const bgvariation bgv ) {
+                  float arOutput[], const bgvariation bgv, int *nContext ) {
 
   return BearoffEval ( apbcHyper[ 0 ], anBoard, arOutput );
 
@@ -2240,7 +2240,7 @@ EvalHypergammon1( int anBoard[ 2 ][ 25 ],
 
 static int
 EvalHypergammon2( int anBoard[ 2 ][ 25 ],
-                  float arOutput[], const bgvariation bgv ) {
+                  float arOutput[], const bgvariation bgv, int *nContext ) {
 
   return BearoffEval ( apbcHyper[ 1 ], anBoard, arOutput );
 
@@ -2248,7 +2248,7 @@ EvalHypergammon2( int anBoard[ 2 ][ 25 ],
 
 static int
 EvalHypergammon3( int anBoard[ 2 ][ 25 ],
-                  float arOutput[], const bgvariation bgv ) {
+                  float arOutput[], const bgvariation bgv, int *nContext ) {
 
   return BearoffEval ( apbcHyper[ 2 ], anBoard, arOutput );
 
@@ -2265,7 +2265,7 @@ EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
 extern int
 EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
-              const bgvariation bgv ) {
+              const bgvariation bgv, int *nContext ) {
 
   return BearoffEval( pbc1, anBoard, arOutput );
 
@@ -2289,12 +2289,14 @@ enum {
     0: save base
     1: from base
  */
-static int nContext[3] = {-1, -1, -1};
 
 static inline NNEvalType
-NNevalAction(positionclass const p)
+NNevalAction(positionclass const p, int *nContext)
 {
-  {                     g_assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
+	if (!nContext)
+		return NNEVAL_NONE;
+
+{g_assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
   
   switch( nContext[p - CLASS_RACE] ) {
     case -1:
@@ -2389,9 +2391,9 @@ raceBGprob(int anBoard[2][25], int side, const bgvariation bgv)
       
       if( PositionBearoff( dummy[0], 6, 15 ) > 923 ||
 	  PositionBearoff( dummy[1], 6, 15 ) > 923 ) {
-	EvalBearoff1(dummy, p, bgv);
+	EvalBearoff1(dummy, p, bgv, NULL);
       } else {
-	EvalBearoff2(dummy, p, bgv);
+	EvalBearoff2(dummy, p, bgv, NULL);
       }
 
       return side == 1 ? p[0] : 1 - p[0];
@@ -2400,14 +2402,14 @@ raceBGprob(int anBoard[2][25], int side, const bgvariation bgv)
 }  
 
 static int
-EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext )
 {
   SSE_ALIGN(float arInput[ NUM_INPUTS ]);
 
   CalculateRaceInputs( anBoard, arInput );
 
   if ( NeuralNetEvaluateFn( &nnRace, arInput, arOutput, 
-                          NNevalAction( CLASS_RACE ) ) )
+                          NNevalAction( CLASS_RACE, nContext ) ) )
     return -1;
   
   /* anBoard[1] is on roll */
@@ -2501,29 +2503,29 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
 
 
 static int
-EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
+EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext)
 {
   SSE_ALIGN(float arInput[ NUM_INPUTS ]);
     
   CalculateContactInputs( anBoard, arInput );
     
   return NeuralNetEvaluateFn(&nnContact, arInput, arOutput,
-                           NNevalAction( CLASS_CONTACT ) );
+                           NNevalAction( CLASS_CONTACT, nContext ) );
 }
 
 static int
-EvalCrashed(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
+EvalCrashed(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext)
 {
   SSE_ALIGN(float arInput[ NUM_INPUTS ]);
 
   CalculateCrashedInputs( anBoard, arInput );
     
   return NeuralNetEvaluateFn( &nnCrashed, arInput, arOutput,
-                            NNevalAction( CLASS_CRASHED ) );
+                            NNevalAction( CLASS_CRASHED, nContext ) );
 }
 
 extern int
-EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext )
 {
   int i, c;
   int n = anChequers[ bgv ];
@@ -2668,7 +2670,7 @@ static float Noise( const evalcontext* pec, int anBoard[ 2 ][ 25 ],
 }
 
 static int 
-EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
+EvaluatePositionCache( int *nContext, int anBoard[ 2 ][ 25 ], float arOutput[],
                        const cubeinfo* pci, const evalcontext* pecx,
 		       int nPlies, positionclass pc );
 
@@ -2686,10 +2688,10 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
 #if !defined(REDUCTION_CODE)
 
 #define nPruneMoves 10
-static int cubefullPrune = 1;
+static const int cubefullPrune = 1;
 
 static void
-FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
+FindBestMoveInEval(int *nContext, int const nDice0, int const nDice1, int anBoard[2][25],
 		   const cubeinfo* const pci, const evalcontext* pec)
 {
   unsigned int i;
@@ -2829,7 +2831,7 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
 #endif
 	  positionclass pc = ClassifyPosition(anBoard, VARIATION_STANDARD);
 
-	  acef[pc](anBoard, arOutput, VARIATION_STANDARD);
+	  acef[pc](anBoard, arOutput, VARIATION_STANDARD, nContext);
 	  if ( pc > CLASS_PERFECT )
 	    SanityCheck(anBoard, arOutput);
 
@@ -2856,7 +2858,7 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
 #endif
 
 static int 
-EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
+EvaluatePositionFull( int *nContext, int anBoard[ 2 ][ 25 ], float arOutput[],
                       const cubeinfo* pci, const evalcontext* pec, int nPlies,
                       positionclass pc ) {
   int i, n0, n1;
@@ -2934,7 +2936,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 #if !defined(REDUCTION_CODE)
       if( usePrune ) {
-	FindBestMoveInEval(n0, n1, anBoardNew, pci, pec);
+	FindBestMoveInEval(nContext, n0, n1, anBoardNew, pci, pec);
       } else {
 #endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
@@ -2950,7 +2952,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
                     pci->fJacoby, pci->fBeavers, pci->bgv );
 
       /* Evaluate at 0-ply */
-      if( EvaluatePositionCache( anBoardNew, arVariationOutput,
+      if( EvaluatePositionCache( nContext, anBoardNew, arVariationOutput,
                                  &ciOpp, pec, nPlies - 1, 
                                  ClassifyPosition( anBoardNew, ciOpp.bgv ) ) )
         return -1;
@@ -2996,7 +2998,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   else {
     /* at leaf node; use static evaluation */
     
-    if( acef[ pc ]( anBoard, arOutput, pci->bgv ) )
+    if( acef[ pc ]( anBoard, arOutput, pci->bgv, nContext ) )
       return -1;
 
     if( pec->rNoise )
@@ -3121,7 +3123,7 @@ EvalKey ( const evalcontext *pec, const int nPlies,
 
 
 static int 
-EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
+EvaluatePositionCache( int *nContext, int anBoard[ 2 ][ 25 ], float arOutput[],
                        const cubeinfo* pci, const evalcontext* pecx,
 		       int nPlies, positionclass pc ) {
     evalcache ec, *pec;
@@ -3138,7 +3140,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 
     if( !cCache || ( pecx->rNoise != 0.0f && !pecx->fDeterministic ) )
 	/* non-deterministic noisy evaluations; cannot cache */
-	return EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies,
+	return EvaluatePositionFull( nContext, anBoard, arOutput, pci, pecx, nPlies,
 				     pc );
     
     PositionKey( anBoard, ec.auchKey );
@@ -3158,7 +3160,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 	return 0;
     }
     
-    if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
+    if( EvaluatePositionFull( nContext, anBoard, arOutput, pci, pecx, nPlies, pc ) )
 	return -1;
     
     memcpy( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
@@ -3217,12 +3219,12 @@ EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
 
 
 extern int 
-EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
+EvaluatePosition( int *nContext, int anBoard[ 2 ][ 25 ], float arOutput[],
 		  const cubeinfo* pci, const evalcontext* pec ) {
     
   positionclass pc = ClassifyPosition( anBoard, pci->bgv );
     
-  return EvaluatePositionCache( anBoard, arOutput, pci, 
+  return EvaluatePositionCache( nContext, anBoard, arOutput, pci, 
 				pec ? pec : &ecBasic,
 				pec ? pec->nPlies : 0, pc );
 }
@@ -3284,7 +3286,7 @@ GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
   if( ClassifyPosition( anBoard, bgv ) != CLASS_OVER )
     return 0;
 
-  EvalOver( anBoard, ar, bgv );
+  EvalOver( anBoard, ar, bgv, NULL );
 
   if( ar[ OUTPUT_WINBACKGAMMON ] || ar[ OUTPUT_LOSEBACKGAMMON ] )
     return 3;
@@ -3627,31 +3629,34 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     PositionKey( anBoard, auch );
     
     for( i = 0; i < pml->cMoves; i++ )
-	if( EqualKeys( auch, pml->amMoves[ i ].auch ) ) {
-	    if( cMoves > pml->amMoves[ i ].cMoves ||
-		cPip > pml->amMoves[ i ].cPips ) {
-		for( j = 0; j < cMoves * 2; j++ )
-		    pml->amMoves[ i ].anMove[ j ] = anMoves[ j ] > -1 ?
-			anMoves[ j ] : -1;
-    
-		if( cMoves < 4 )
-		    pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;
+	{
+		if( EqualKeys( auch, pml->amMoves[ i ].auch ) )
+		{
+			if( cMoves > pml->amMoves[ i ].cMoves ||
+				cPip > pml->amMoves[ i ].cPips )
+			{
+				for( j = 0; j < cMoves * 2; j++ )
+					pml->amMoves[ i ].anMove[ j ] = anMoves[ j ] > -1 ? anMoves[ j ] : -1;
+			
+				if( cMoves < 4 )
+					pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;
 
-		pml->amMoves[ i ].cMoves = cMoves;
-		pml->amMoves[ i ].cPips = cPip;
-	    }
-	    
-	    return;
+				pml->amMoves[ i ].cMoves = cMoves;
+				pml->amMoves[ i ].cPips = cPip;
+			}
+		    
+			return;
+		}
 	}
     
     for( i = 0; i < cMoves * 2; i++ )
-	pm->anMove[ i ] = anMoves[ i ] > -1 ? anMoves[ i ] : -1;
+		pm->anMove[ i ] = anMoves[ i ] > -1 ? anMoves[ i ] : -1;
     
     if( cMoves < 4 )
-	pm->anMove[ cMoves * 2 ] = -1;
+		pm->anMove[ cMoves * 2 ] = -1;
     
     for( i = 0; i < 10; i++ )
-	pm->auch[ i ] = auch[ i ];
+		pm->auch[ i ] = auch[ i ];
 
     pm->cMoves = cMoves;
     pm->cPips = cPip;
@@ -3757,7 +3762,7 @@ static int CompareMovesGeneral( const move *pm0, const move *pm1 ) {
 }
 
 extern int 
-ScoreMove( move *pm, const cubeinfo *pci, const evalcontext *pec, int nPlies)
+ScoreMove(int *nContext, move *pm, const cubeinfo *pci, const evalcontext *pec, int nPlies)
 {
     int anBoardTemp[ 2 ][ 25 ];
     float arEval[ NUM_ROLLOUT_OUTPUTS ];
@@ -3771,7 +3776,7 @@ ScoreMove( move *pm, const cubeinfo *pci, const evalcontext *pec, int nPlies)
     memcpy ( &ci, pci, sizeof (ci) );
     ci.fMove = ! ci.fMove;
 
-    if ( GeneralEvaluationEPlied ( arEval, anBoardTemp, &ci, 
+    if ( GeneralEvaluationEPlied (nContext, arEval, anBoardTemp, &ci, 
                                    pec, nPlies ) )
       return -1;
 
@@ -3807,6 +3812,8 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
   int i;
   /* return value */
   int r = 0;
+
+	int nContext[3] = {-1, -1, -1};
   
   pml->rBestScore = -99999.9f;
 
@@ -3816,7 +3823,7 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
   }
     
   for( i = 0; i < pml->cMoves; i++ ) {
-    if( ScoreMove( pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
+    if( ScoreMove(nContext, pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
       r = -1;
       break;
     }
@@ -3843,7 +3850,12 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
                int n0, int n1, int fPartial ) {
 
   int anRoll[ 4 ], anMoves[ 8 ];
+#ifdef USE_MULTITHREAD
+  static int curArray = 0;
+  static move amMoves[MAX_NUMTHREADS][ MAX_INCOMPLETE_MOVES ];
+#else
   static move amMoves[ MAX_INCOMPLETE_MOVES ];
+#endif
 
     anRoll[ 0 ] = n0;
     anRoll[ 1 ] = n1;
@@ -3851,9 +3863,17 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
     anRoll[ 2 ] = anRoll[ 3 ] = ( ( n0 == n1 ) ? n0 : 0 );
 
     pml->cMoves = pml->cMaxMoves = pml->cMaxPips = pml->iMoveBest = 0;
+#ifdef USE_MULTITHREAD
+	MT_Exclusive();
+	pml->amMoves = amMoves[curArray];
+	curArray++;
+	if (curArray == MAX_NUMTHREADS)
+		curArray = 0;
+	MT_Release();
+#else
     pml->amMoves = amMoves; /* use static array for top-level search, since
 			       it doesn't need to be re-entrant */
-    
+#endif    
     GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves,fPartial );
 
     if( anRoll[ 0 ] != anRoll[ 1 ] ) {
@@ -3862,7 +3882,7 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 	GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves, fPartial );
     }
 
-    return pml->cMoves;
+	return pml->cMoves;
 }
 
 static movefilter NullFilter = {0, 0, 0.0};
@@ -4026,7 +4046,7 @@ FindnSaveBestMoves( movelist *pml,
         /* ensure top move is evaluted at deepest ply */
 
         if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
-          ScoreMove( pml->amMoves + i, pci, pec, nMaxPly );
+          ScoreMove( NULL, pml->amMoves + i, pci, pec, nMaxPly );
           fResort = TRUE;
         }
 
@@ -4036,8 +4056,8 @@ FindnSaveBestMoves( movelist *pml,
 
           /* this is en error/blunder: re-analyse at top-ply */
           
-          ScoreMove( pml->amMoves, pci, pec, pec->nPlies );
-          ScoreMove( pml->amMoves + i, pci, pec, pec->nPlies );
+          ScoreMove( NULL, pml->amMoves, pci, pec, pec->nPlies );
+          ScoreMove( NULL, pml->amMoves + i, pci, pec, pec->nPlies );
           cOldMoves = 1; /* only one move scored at deepest ply */
           fResort = TRUE;
           
@@ -4159,7 +4179,7 @@ static int DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput,
 
     float ar[ NUM_OUTPUTS ] = { 0, 0, 0, 0, 0}; /* NUM_OUTPUTS is 5 */
     
-    if ( EvalOver( anBoard, ar, bgv ) )
+    if ( EvalOver( anBoard, ar, bgv, NULL ) )
       return -1;
 
     if( ar[ OUTPUT_WIN ] > 0.0 )
@@ -5871,7 +5891,7 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   aciCubePos[ 1 ].fCubeOwner = ! aciCubePos[ 1 ].fMove;
   aciCubePos[ 1 ].nCube *= 2;
 
-  if ( EvaluatePositionCubeful3 ( anBoard, 
+  if ( EvaluatePositionCubeful3 ( NULL, anBoard, 
                                   arOutput, 
                                   arCubeful,
                                   aciCubePos, 2,
@@ -5907,21 +5927,21 @@ GeneralEvaluationE( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                     int anBoard[ 2 ][ 25 ],
                     const cubeinfo* pci, const evalcontext *pec) {
 
-  return GeneralEvaluationEPlied ( arOutput, anBoard,
+  return GeneralEvaluationEPlied ( NULL, arOutput, anBoard,
                                    pci, pec, pec->nPlies );
 
 }
 
 
 extern int 
-GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationEPliedCubeful ( int *nContext, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  int anBoard[ 2 ][ 25 ],
                                  const cubeinfo* pci, const evalcontext* pec,
                                  int nPlies ) {
 
   float rCubeful;
 
-  if ( EvaluatePositionCubeful3 ( anBoard, 
+  if ( EvaluatePositionCubeful3 ( nContext, anBoard, 
                                   arOutput, 
                                   &rCubeful,
                                   pci, 1,
@@ -5937,21 +5957,21 @@ GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
 
 
 extern int
-GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationEPlied (int *nContext, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
                           const cubeinfo* pci, const evalcontext* pec,
 			  int nPlies ) {
 
   if ( pec->fCubeful ) {
 
-    if ( GeneralEvaluationEPliedCubeful ( arOutput, anBoard, pci,
+    if ( GeneralEvaluationEPliedCubeful ( nContext, arOutput, anBoard, pci,
                                           pec, nPlies ) )
       return -1;
 
   } 
   else {
 
-    if ( EvaluatePositionCache ( anBoard, arOutput, pci, pec,
+    if ( EvaluatePositionCache ( nContext, anBoard, arOutput, pci, pec,
                                  nPlies, 
                                  ClassifyPosition ( anBoard, pci->bgv ) ) )
       return -1;
@@ -6085,7 +6105,7 @@ MakeCubePos( const cubeinfo aciCubePos[], const int cci,
    first checks the cache, and then calls ...Cubeful3 */
 
 extern int 
-EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
+EvaluatePositionCubeful3( int *nContext, int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
@@ -6099,7 +6119,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 
   if( !cCache || ( pec->rNoise != 0.0f && !pec->fDeterministic ) )
       /* non-deterministic evaluation; never cache */
-      return EvaluatePositionCubeful4( anBoard, arOutput, arCubeful,
+      return EvaluatePositionCubeful4( nContext, anBoard, arOutput, arCubeful,
 				       aciCubePos, cci, pciMove, pec,
 				       nPlies, fTop );
   
@@ -6142,7 +6162,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   if ( ! fAll ) {
 
     /* cache miss */
-    if ( EvaluatePositionCubeful4 ( anBoard, arOutput, arCubeful, 
+    if ( EvaluatePositionCubeful4 ( nContext, anBoard, arOutput, arCubeful, 
                                     aciCubePos, 
                                     cci, pciMove, pec, nPlies, fTop ) )
       return -1;
@@ -6180,7 +6200,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 #include "drawboard.h"
   
 static int 
-EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
+EvaluatePositionCubeful4( int *nContext, int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
@@ -6286,7 +6306,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
 #if !defined( REDUCTION_CODE )
       if( usePrune ) {
-	FindBestMoveInEval(n0, n1, anBoardNew, pciMove, pec);
+	FindBestMoveInEval(nContext, n0, n1, anBoardNew, pciMove, pec);
 #if 0
 	int anBoardSave[ 2 ][ 25 ];
         memcpy(anBoardSave[ 0 ] , anBoardNew[ 0 ], 25 * sizeof(int));
@@ -6325,7 +6345,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                     pciMove->fJacoby, pciMove->fBeavers, pciMove->bgv );
 
       /* Evaluate at 0-ply */
-      if( EvaluatePositionCubeful3( anBoardNew,
+      if( EvaluatePositionCubeful3( nContext, anBoardNew,
                                     ar,
                                     arCfTemp,
                                     aci,
@@ -6429,7 +6449,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
       /* evaluate with neural net */
       
-      if( EvaluatePosition ( anBoard, arOutput, pciMove, NULL ) )
+      if( EvaluatePosition ( nContext, anBoard, arOutput, pciMove, NULL ) )
         return -1;
       
       if( pec->rNoise )
@@ -6770,7 +6790,7 @@ getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
                         cubeinfo *pci,
                         evalcontext *pec ) {
 
-  if( EvaluatePosition( anBoard, arOutput, pci, pec ) < 0 )
+  if( EvaluatePosition( NULL, anBoard, arOutput, pci, pec ) < 0 )
       return -1;
 
   calculate_gammon_rates( aarRates, arOutput, pci );

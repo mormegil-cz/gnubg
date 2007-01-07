@@ -378,7 +378,7 @@ extern int
 EvalSave( const char *szWeights );
 
 extern int 
-EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
+EvaluatePosition( int *nContext, int anBoard[ 2 ][ 25 ], float arOutput[],
                   const cubeinfo* pci, const evalcontext* pec );
 
 extern int
@@ -490,10 +490,10 @@ SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
 extern int
 EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
-              const bgvariation bgv );
+              const bgvariation bgv, int *nContext );
 
 extern int
-EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv );
+EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext );
 
 extern float 
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
@@ -543,13 +543,13 @@ GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      const cubeinfo* pci, const evalcontext* pec );
 
 extern int
-GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationEPlied ( int *nContext, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
                           const cubeinfo* pci, const evalcontext* pec,
 			  int nPlies );
 
 extern int 
-EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
+EvaluatePositionCubeful3( int *nContext, int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
@@ -557,7 +557,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 			  int nPlies, int fTop );
 
 extern int 
-GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationEPliedCubeful ( int *nContext, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  int anBoard[ 2 ][ 25 ],
                                  const cubeinfo* pci, const evalcontext* pec,
                                  int nPlies );
@@ -616,7 +616,7 @@ extern void
 RefreshMoveList ( movelist *pml, int *ai );
 
 extern int 
-ScoreMove( move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
+ScoreMove( int *nContext, move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
 
 extern void
 CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );

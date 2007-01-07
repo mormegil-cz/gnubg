@@ -240,7 +240,7 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 
 	for(pl = plSelList; pl; pl = pl->next)
 	{
-    if ( ScoreMove (MoveListGetMove(phd, pl), &ci, pec, pec->nPlies ) < 0 ) {
+    if ( ScoreMove (NULL, MoveListGetMove(phd, pl), &ci, pec, pec->nPlies ) < 0 ) {
       ProgressEnd ();
 		MoveListFreeSelectionList(plSelList);
       return;

@@ -92,6 +92,9 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
+#ifdef USE_MULTITHREAD
+#include "multithread.h"
+#endif
 
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
 #define NO_BACKSLASH_ESCAPES 1
@@ -5859,7 +5862,7 @@ extern void CommandTrainTD( char *sz ) {
 	    
 	    SwapSides( anBoardTrain );
 	    
-	    EvaluatePosition( anBoardTrain, ar, &ciCubeless, &ecTD );
+	    EvaluatePosition( NULL, anBoardTrain, ar, &ciCubeless, &ecTD );
 	    
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar, rAlpha, rAnneal, 

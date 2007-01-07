@@ -10,7 +10,7 @@
 #define MULTITHREADED 1
 
 #ifdef MULTITHREADED
-#define TRY_COUTING_PROCEESING_UNITS 1
+#define TRY_COUTING_PROCEESING_UNITS 0
 #ifndef WIN32
 #define GLIB_THREADS
 #endif
@@ -22,12 +22,14 @@ typedef struct _ThreadData
 {
 #if MULTITHREADED
 #ifdef GLIB_THREADS
+	GMutex* threadLock;
 	GMutex* queueLock;
 	GMutex* condMutex;
 	GCond* activity;
 	int active;
 	GCond* alldone;
 #else
+	HANDLE threadLock;
 	HANDLE queueLock;
 	HANDLE activity;
 	HANDLE alldone;
@@ -141,6 +143,7 @@ void MT_InitThreads()
 	td.totalTasks = td.addedTasks = td.doneTasks = 0;
 #ifdef GLIB_THREADS
 	td.queueLock = g_mutex_new();
+	td.threadLock = g_mutex_new();
 	td.condMutex = g_mutex_new();
 	td.activity = g_cond_new();
 	td.alldone = g_cond_new();
@@ -149,6 +152,7 @@ void MT_InitThreads()
 	td.activity = CreateEvent(NULL, TRUE, FALSE, NULL);
 	td.alldone = CreateEvent(NULL, FALSE, FALSE, NULL);
 	td.queueLock = CreateMutex(NULL, FALSE, NULL);
+	td.threadLock = CreateMutex(NULL, FALSE, NULL);
  #endif
 
 	CreateThreads();
@@ -325,6 +329,7 @@ int MT_WaitForTasks()
 		{
 #endif
 				doneTasks = td.doneTasks - count;
+
 				if (doneTasks > 0)
 				{
 					ProgressValueAdd( doneTasks );
@@ -376,5 +381,19 @@ void MT_Close()
 	CloseHandle(td.alldone);
 #endif
 
+#endif
+}
+
+void MT_Exclusive(void)
+{
+#if MULTITHREADED
+	MT_GetLock(td.threadLock);
+#endif
+}
+
+void MT_Release(void)
+{
+#if MULTITHREADED
+	MT_ReleaseLock(td.threadLock);
 #endif
 }

@@ -96,7 +96,7 @@ extern void CommandCalibrate( char *sz ) {
 	}
 
 	for( i = 0; i < EVALS_PER_ITERATION; i++ ) {
-            EvaluatePosition( aanBoard[ i ], ar, &ciCubeless, NULL );
+            EvaluatePosition( NULL, aanBoard[ i ], ar, &ciCubeless, NULL );
 	    if( fInterrupt )
 		break;
 	}
