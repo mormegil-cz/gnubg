@@ -8,17 +8,16 @@ typedef enum _TaskType {TT_ANALYSEMOVE, TT_TEST, TT_CLOSE} TaskType;
 typedef struct _Task
 {
 	TaskType type;
+	struct _Task *pLinkedTask;
 } Task;
 
 typedef struct _AnalyseMoveTask
 {
-	TaskType type;
-
-moverecord *pmr;
-list *plGame;
-statcontext *psc;
-matchstate ms;
-
+	Task task;
+	moverecord *pmr;
+	list *plGame;
+	statcontext *psc;
+	matchstate ms;
 } AnalyseMoveTask;
 
 void MT_InitThreads();

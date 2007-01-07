@@ -594,7 +594,7 @@ extern int
 AnalyzeMove ( moverecord* pmr, matchstate* pms, const list* plGame, statcontext* psc,
               const evalsetup* pesChequer, evalsetup* pesCube,
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
-	      const int afAnalysePlayers[ 2 ] );
+	      const int afAnalysePlayers[ 2 ], float *doubleError );
 
 extern int
 confirmOverwrite ( const char* sz, const int f );

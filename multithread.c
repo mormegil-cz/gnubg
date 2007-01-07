@@ -51,14 +51,14 @@ unsigned int MT_GetNumThreads()
 	return numThreads;
 }
 
-static void CreateThreads(void);
-static void CloseThreads(void);
+static void MT_CreateThreads(void);
+static void MT_CloseThreads(void);
 
 void MT_SetNumThreads(unsigned int num)
 {
-	CloseThreads();
+	MT_CloseThreads();
 	numThreads = num;
-	CreateThreads();
+	MT_CreateThreads();
 }
 
 int MT_DoTask();
@@ -93,7 +93,7 @@ void MT_WorkerThreadFunction(void *notused)
 }
 #endif
 
-static void CreateThreads(void)
+static void MT_CreateThreads(void)
 {
 #if MULTITHREADED
 	unsigned int i;
@@ -109,7 +109,7 @@ static void CreateThreads(void)
 #endif
 }
 
-static void CloseThreads(void)
+static void MT_CloseThreads(void)
 {
 #if MULTITHREADED
 	unsigned int i;
@@ -117,6 +117,7 @@ static void CloseThreads(void)
 	{
 		Task *pt = (Task*)malloc(sizeof(Task));
 		pt->type = TT_CLOSE;
+		pt->pLinkedTask = NULL;
 		MT_AddTask(pt);
 	}
 	MT_WaitForTasks();
@@ -155,7 +156,7 @@ void MT_InitThreads()
 	td.threadLock = CreateMutex(NULL, FALSE, NULL);
  #endif
 
-	CreateThreads();
+	MT_CreateThreads();
 #endif
 }
 
@@ -195,7 +196,7 @@ Task *MT_GetTask(void)
 	return task;
 }
 
-void AbortTasks(void)
+void MT_AbortTasks(void)
 {
 	Task *task;
 #if MULTITHREADED
@@ -229,17 +230,26 @@ int MT_DoTask()
 		{
 		case TT_ANALYSEMOVE:
 		{
-			AnalyseMoveTask *amt = (AnalyseMoveTask *)task;
+			float doubleError;
+			AnalyseMoveTask *amt;
+AnalyzeDoubleDecison:
+			amt = (AnalyseMoveTask *)task;
 
 			if (AnalyzeMove (amt->pmr, &amt->ms, amt->plGame, amt->psc,
-                          &esAnalysisChequer,
-                          &esAnalysisCube, aamfAnalysis,
-                          afAnalysePlayers ) < 0 ) {
-				AbortTasks();
+						&esAnalysisChequer,
+						&esAnalysisCube, aamfAnalysis,
+						afAnalysePlayers, &doubleError ) < 0 )
+			{
+				MT_AbortTasks();
 				td.result = -1;
 			}
+			if (task->pLinkedTask)
+			{	/* Need to analyze take/drop decision in sequence */
+				task = task->pLinkedTask;
+				goto AnalyzeDoubleDecison;
+			}
 			break;
-	    }
+		}
 
 		case TT_TEST:
 			printf("Test: waiting for a second");
@@ -273,6 +283,7 @@ void MT_TaskDone(Task *pt)
 #endif
 }
 #endif
+	free(pt->pLinkedTask);		
 	free(pt);
 }
 
@@ -368,7 +379,7 @@ int MT_WaitForTasks()
 void MT_Close()
 {
 #if MULTITHREADED
-	CloseThreads();
+	MT_CloseThreads();
 
 #ifdef GLIB_THREADS
 	g_mutex_free(td.queueLock);

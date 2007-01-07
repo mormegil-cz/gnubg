@@ -24,6 +24,10 @@ extern double get_time(void);
 #define MAX(A,B) (((A) > (B)) ? (A) : (B))
 #endif
 
+#ifndef SGN
+#define SGN(x) (x / (int)abs(x))
+#endif
+
 #if HAVE_SIGACTION
 typedef struct sigaction psighandler;
 #elif HAVE_SIGVEC

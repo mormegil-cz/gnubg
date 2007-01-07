@@ -199,7 +199,6 @@ struct _BoardData3d
 #define TEXTURE_SCALE (10.0f / base_unit)
 
 #define copyPoint(to, from) memcpy(to, from, sizeof(float[3]))
-#define SGN(x) (x / (int)abs(x))
 
 #define TEXTURE_PATH "textures/"
 #define NO_TEXTURE_STRING _("No texture")

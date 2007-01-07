@@ -27,6 +27,7 @@
 
 #include "boarddim.h"
 #include "boardpos.h"
+#include "common.h"
 
 extern void
 ChequerPosition( const int clockwise, 
@@ -102,10 +103,10 @@ extern void
 ResignPosition( const int resigned, int *px, int *py, int *porient ) {
 
   if( resigned ) {
-    if ( px ) *px = (resigned / abs ( resigned ) < 0) ? 
+    if ( px ) *px = (SGN(resigned) < 0) ? 
 		CUBE_RESIGN_LEFT_X : CUBE_RESIGN_RIGHT_X;
     if ( py ) *py = CUBE_CENTRE_Y;
-    if( porient ) *porient = - resigned / abs ( resigned );
+    if( porient ) *porient = - SGN(resigned);
   }
   else {
     /* no resignation */

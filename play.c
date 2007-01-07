@@ -517,10 +517,12 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 #if USE_TIMECONTROL
 	pms->tvTimeleft[0] = pmr->tl[0];
 	pms->tvTimeleft[1] = pmr->tl[1];
-#if USE_GTK
+ #if USE_GTK
+  #ifndef USE_MULTITHREAD	/* Temprorarily remove as not in correct place */
     if( fX )
 	GTKUpdateClock();
-#endif
+  #endif
+ #endif
 #endif
 }
 
@@ -2906,7 +2908,7 @@ static skilltype GoodMove (moverecord *pmr) {
   ProgressStart( _("Considering move...") );
   if (AnalyzeMove ( pmr, &msx, plGame, NULL, pesChequer, pesChequer,
                     fTutorAnalysis ? aamfAnalysis : aamfEval, 
-		    NULL ) < 0) {
+		    NULL, NULL ) < 0) {
     fAnalyseMove = fAnalyseMoveSaved;
     ProgressEnd();
     ResumeInput();

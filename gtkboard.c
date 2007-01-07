@@ -1618,7 +1618,7 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
 		i = current + 1;
     
     /* Clear chequers of the other colour from this point */
-    if (current && (bd->points[n] / abs(bd->points[n])) != colour)
+    if (current && ((SGN(bd->points[n])) != colour))
 	{
 		bd->points[opponent_off] += current * -colour;
 		bd->points[n] = 0;
