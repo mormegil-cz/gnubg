@@ -24,6 +24,7 @@
 
 #include "dice.h"
 #include "bearoff.h"
+#include "neuralnet.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -378,7 +379,7 @@ extern int
 EvalSave( const char *szWeights );
 
 extern int 
-EvaluatePosition( int *nContext, int anBoard[ 2 ][ 25 ], float arOutput[],
+EvaluatePosition( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput[],
                   const cubeinfo* pci, const evalcontext* pec );
 
 extern int
@@ -490,10 +491,10 @@ SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
 extern int
 EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
-              const bgvariation bgv, int *nContext );
+              const bgvariation bgv, NNState *nnStates );
 
 extern int
-EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, int *nContext );
+EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, NNState *nnStates );
 
 extern float 
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
@@ -543,13 +544,13 @@ GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      const cubeinfo* pci, const evalcontext* pec );
 
 extern int
-GeneralEvaluationEPlied ( int *nContext, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationEPlied ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
                           const cubeinfo* pci, const evalcontext* pec,
 			  int nPlies );
 
 extern int 
-EvaluatePositionCubeful3( int *nContext, int anBoard[ 2 ][ 25 ],
+EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
@@ -557,7 +558,7 @@ EvaluatePositionCubeful3( int *nContext, int anBoard[ 2 ][ 25 ],
 			  int nPlies, int fTop );
 
 extern int 
-GeneralEvaluationEPliedCubeful ( int *nContext, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationEPliedCubeful ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  int anBoard[ 2 ][ 25 ],
                                  const cubeinfo* pci, const evalcontext* pec,
                                  int nPlies );
@@ -616,7 +617,7 @@ extern void
 RefreshMoveList ( movelist *pml, int *ai );
 
 extern int 
-ScoreMove( int *nContext, move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
+ScoreMove( NNState *nnStates, move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
 
 extern void
 CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );

@@ -1337,11 +1337,13 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjThreads), 1, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
     gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("entries") ),
+    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new( _("threads") ),
 			FALSE, FALSE, 0);
     gtk_tooltips_set_tip (ptt, pwev,
 			  _("The number of threads to use in multi-threaded operations,"
 			  " this should be set to the number of logical processing units avaliable"), NULL );
+
+	gtk_widget_set_sensitive(pw, MT_Enabled());
 #endif
     /* return notebook */
 

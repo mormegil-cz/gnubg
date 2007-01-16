@@ -54,6 +54,39 @@ void sse_free(float* ptr)
 		free(ptr);
 }
 
+static inline NNEvalType
+NNevalAction(NNState *pnState)
+{
+	if (!pnState)
+		return NNEVAL_NONE;
+
+	switch(pnState->state)
+	{
+    case NNSTATE_NONE:
+    {
+      /* incremental evaluation not useful */
+      return NNEVAL_NONE;
+    }
+    case NNSTATE_INCREMENTAL:
+    {
+      /* next call should return FROMBASE */
+		pnState->state = NNSTATE_DONE;
+      
+      /* starting a new context; save base in the hope it will be useful */
+      return NNEVAL_SAVE;
+    }
+    case NNSTATE_DONE:
+    {
+      /* context hit!  use the previously computed base */
+      return NNEVAL_FROMBASE;
+    }
+  }
+
+  /* never reached */
+  assert(0);
+  return 0;   /* for the picky compiler */
+}
+
 static void
 Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
                         float arOutput[], float *saveAr ) {
@@ -204,8 +237,8 @@ static void EvaluateFromBase128( const neuralnet *pnn, const float arInputDif[],
 }
 
 extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNEvalType t ) {
-
+			      float arOutput[], NNState *pnState )
+{
     SSE_ALIGN(float ar[HIDDEN_NODES]);
 #if DEBUG_SSE
 	/* Removed as not 64bit robust (pointer truncation) and caused strange crash */
@@ -214,7 +247,7 @@ extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
     assert(pnn->cHidden == HIDDEN_NODES);
 #endif
 
-    switch( t ) {
+	 switch( NNevalAction(pnState) ) {
       case NNEVAL_NONE:
       {
         Evaluate128(pnn, arInput, ar, arOutput, 0);
@@ -222,19 +255,19 @@ extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
       }
       case NNEVAL_SAVE:
       {
-        memcpy(pnn->savedIBase, arInput, pnn->cInput * sizeof(*ar));
-        Evaluate128(pnn, arInput, ar, arOutput, pnn->savedBase);
+        memcpy(pnState->savedIBase, arInput, pnn->cInput * sizeof(*ar));
+        Evaluate128(pnn, arInput, ar, arOutput, pnState->savedBase);
         break;
       }
       case NNEVAL_FROMBASE:
       {
         unsigned int i;
         
-        memcpy(ar, pnn->savedBase, HIDDEN_NODES * sizeof(*ar));
+        memcpy(ar, pnState->savedBase, HIDDEN_NODES * sizeof(*ar));
   
         {
           float* r = arInput;
-          float* s = pnn->savedIBase;
+          float* s = pnState->savedIBase;
          
           for(i = 0; i < pnn->cInput; ++i, ++r, ++s) {
             if( *r != *s /*lint --e(777) */) {

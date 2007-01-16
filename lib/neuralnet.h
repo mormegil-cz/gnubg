@@ -28,7 +28,6 @@ typedef struct _neuralnet {
 	int nTrained;
     float rBetaHidden, rBetaOutput, *arHiddenWeight, *arOutputWeight,
 	*arHiddenThreshold, *arOutputThreshold;
-    float *savedBase, *savedIBase;
 } neuralnet;
 
 extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
@@ -45,13 +44,25 @@ typedef enum  {
   NNEVAL_FROMBASE
 } NNEvalType;
 
+typedef enum  {
+  NNSTATE_NONE = -1,
+  NNSTATE_INCREMENTAL,
+  NNSTATE_DONE
+} NNStateType;
+
+typedef struct _NNState
+{
+	NNStateType state;
+    float *savedBase, *savedIBase;
+} NNState;
+
 extern int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNEvalType t);
+			      float arOutput[], NNState *pnState);
 
 extern int NeuralNetEvaluate( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNEvalType t);
+			      float arOutput[], NNState *pnState);
 extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNEvalType t);
+			      float arOutput[], NNState *pnState);
 extern int NeuralNetDifferentiate( const neuralnet *pnn, const float arInput[],
 				   float arOutput[], float arDerivative[] );
 extern int NeuralNetTrain( neuralnet *pnn, const float arInput[], float arOutput[],

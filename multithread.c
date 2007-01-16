@@ -22,14 +22,14 @@ typedef struct _ThreadData
 {
 #if MULTITHREADED
 #ifdef GLIB_THREADS
-	GMutex* threadLock;
 	GMutex* queueLock;
 	GMutex* condMutex;
 	GCond* activity;
 	int active;
 	GCond* alldone;
+	pthread_key_t tlsKey;
 #else
-	HANDLE threadLock;
+	DWORD tlsIndex;
 	HANDLE queueLock;
 	HANDLE activity;
 	HANDLE alldone;
@@ -48,7 +48,20 @@ unsigned int numThreads = 0;
 
 unsigned int MT_GetNumThreads()
 {
+#if MULTITHREADED
 	return numThreads;
+#else
+	return 1;
+#endif
+}
+
+int MT_Enabled(void)
+{
+#if MULTITHREADED
+	return TRUE;
+#else
+	return FALSE;
+#endif
 }
 
 static void MT_CreateThreads(void);
@@ -67,10 +80,17 @@ void MT_TaskDone(Task *pt);
 #if MULTITHREADED
 #ifdef GLIB_THREADS
 gpointer MT_WorkerThreadFunction(gpointer notused)
-#else
-void MT_WorkerThreadFunction(void *notused)
-#endif
 {
+#else
+void MT_WorkerThreadFunction(void *id)
+{
+ #ifdef GLIB_THREADS
+	pthread_setspecific(tlsKey, 1);
+ #else
+	TlsSetValue(td.tlsIndex, id);
+ #endif
+#endif
+	MT_TaskDone(NULL);	/* Thread created */
 	do
 	{
 #ifdef GLIB_THREADS
@@ -97,16 +117,36 @@ static void MT_CreateThreads(void)
 {
 #if MULTITHREADED
 	unsigned int i;
+	td.totalTasks = numThreads;	/* Use to monitor number created */
 	for (i = 0; i < numThreads; i++)
 	{
 #ifdef GLIB_THREADS
 		if (!g_thread_create(MT_WorkerThreadFunction, NULL, FALSE, NULL))
 #else
-		if (_beginthread(MT_WorkerThreadFunction, 0, NULL) == 0)
+		if (_beginthread(MT_WorkerThreadFunction, 0, (void*)(i + 1)) == 0)
 #endif
 			printf("Failed to create thread\n");
 	}
+	if (td.doneTasks != td.totalTasks)
+	{
+/* Wait for all the threads to be created (timeout after 20 seconds) */
+#ifdef GLIB_THREADS
+		g_mutex_lock(td.condMutex);
+		GTimeVal tv = {0, 0};
+		g_get_current_time (&tv);
+		g_time_val_add (&tv, 20 * 1000 * 1000);
+		if (g_cond_timed_wait(td.alldone, td.condMutex, &tv) == TRUE)
+#else
+		if (WaitForSingleObject(td.alldone, 20 * 1000) == WAIT_TIMEOUT)
 #endif
+			printf("Not sure all threads created!\n");
+#endif
+#ifdef GLIB_THREADS
+		g_mutex_unlock(td.condMutex);
+#endif
+	}
+	/* Reset counters */
+	td.totalTasks = td.doneTasks = 0;
 }
 
 static void MT_CloseThreads(void)
@@ -144,17 +184,22 @@ void MT_InitThreads()
 	td.totalTasks = td.addedTasks = td.doneTasks = 0;
 #ifdef GLIB_THREADS
 	td.queueLock = g_mutex_new();
-	td.threadLock = g_mutex_new();
 	td.condMutex = g_mutex_new();
 	td.activity = g_cond_new();
 	td.alldone = g_cond_new();
 	td.active = FALSE;
+	if (pthread_key_create(&td.tlsKey, NULL) != 0)
+		printf("Thread local store failed\n");
+	pthread_setspecific(tlsKey, 1);
 #else
 	td.activity = CreateEvent(NULL, TRUE, FALSE, NULL);
 	td.alldone = CreateEvent(NULL, FALSE, FALSE, NULL);
 	td.queueLock = CreateMutex(NULL, FALSE, NULL);
-	td.threadLock = CreateMutex(NULL, FALSE, NULL);
- #endif
+	td.tlsIndex = TlsAlloc();
+	if (td.tlsIndex == TLS_OUT_OF_INDEXES)
+		printf("Thread local store failed\n");
+	TlsSetValue(td.tlsIndex, (void*)1);
+#endif
 
 	MT_CreateThreads();
 #endif
@@ -275,16 +320,19 @@ void MT_TaskDone(Task *pt)
 #if MULTITHREADED
 	td.doneTasks++;
 	if (td.doneTasks == td.totalTasks)
-{
+	{
 #ifdef GLIB_THREADS
 		g_cond_signal(td.alldone);
 #else
 		SetEvent(td.alldone);
 #endif
-}
+	}
 #endif
-	free(pt->pLinkedTask);		
-	free(pt);
+	if (pt)
+	{
+		free(pt->pLinkedTask);		
+		free(pt);
+	}
 }
 
 void MT_AddTask(Task *pt)
@@ -386,25 +434,28 @@ void MT_Close()
 	g_mutex_free(td.condMutex);
 	g_cond_free(td.activity);
 	g_cond_free(td.alldone);
+	pthread_key_delete(td.tlsKey);
 #else
 	CloseHandle(td.queueLock);
 	CloseHandle(td.activity);
 	CloseHandle(td.alldone);
+	TlsFree(td.tlsIndex);
 #endif
 
 #endif
 }
 
-void MT_Exclusive(void)
+int MT_GetThreadID()
 {
 #if MULTITHREADED
-	MT_GetLock(td.threadLock);
-#endif
-}
-
-void MT_Release(void)
-{
-#if MULTITHREADED
-	MT_ReleaseLock(td.threadLock);
+	int ret;
+ #ifdef GLIB_THREADS
+	ret = (int)pthread_getspecific(td.tlsKey);
+ #else
+	ret = (int)TlsGetValue(td.tlsIndex);
+ #endif
+	return ret - 1;
+#else
+	return 0;
 #endif
 }

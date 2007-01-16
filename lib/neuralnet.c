@@ -310,6 +310,45 @@ static void CheckRC( void ) {
     }
 }
 
+/* separate context for race, crashed, contact
+   -1: regular eval
+    0: save base
+    1: from base
+ */
+
+static inline NNEvalType
+NNevalAction(NNState *pnState)
+{
+	if (!pnState)
+		return NNEVAL_NONE;
+
+	switch(pnState->state)
+	{
+    case NNSTATE_NONE:
+    {
+      /* incremental evaluation not useful */
+      return NNEVAL_NONE;
+    }
+    case NNSTATE_INCREMENTAL:
+    {
+      /* next call should return FROMBASE */
+		pnState->state = NNSTATE_DONE;
+      
+      /* starting a new context; save base in the hope it will be useful */
+      return NNEVAL_SAVE;
+    }
+    case NNSTATE_DONE:
+    {
+      /* context hit!  use the previously computed base */
+      return NNEVAL_FROMBASE;
+    }
+  }
+
+  /* never reached */
+  g_assert(0);
+  return 0;   /* for the picky compiler */
+}
+
 extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,
 			    unsigned int cOutput, float rBetaHidden,
 			    float rBetaOutput ) {
@@ -349,9 +388,6 @@ extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cH
 
     CheckRC();
 
-    pnn->savedBase = sse_malloc( cHidden * sizeof( float ) ); 
-    pnn->savedIBase = sse_malloc( cInput * sizeof( float ) ); 
- 
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
 		*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0f;
     
@@ -419,9 +455,6 @@ NeuralNetDestroy( neuralnet *pnn )
     sse_free( pnn->arHiddenThreshold ); pnn->arHiddenThreshold = 0;
     sse_free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
   }
-
-  sse_free(pnn->savedBase); pnn->savedBase = 0;
-  sse_free(pnn->savedIBase); pnn->savedIBase = 0;
 }
 
 static void Evaluate( const neuralnet *pnn, const float arInput[], float ar[],
@@ -521,9 +554,10 @@ static void EvaluateFromBase( const neuralnet *pnn, const float arInputDif[], fl
 }
 
 extern int NeuralNetEvaluate( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNEvalType t ) {
+			      float arOutput[], NNState *pnState )
+{
     float *ar = (float*) g_alloca(pnn->cHidden * sizeof(float));
-    switch( t ) {
+    switch( NNevalAction(pnState) ) {
       case NNEVAL_NONE:
       {
         Evaluate(pnn, arInput, ar, arOutput, 0);
@@ -531,19 +565,19 @@ extern int NeuralNetEvaluate( const neuralnet *pnn, float arInput[],
       }
       case NNEVAL_SAVE:
       {
-        memcpy(pnn->savedIBase, arInput, pnn->cInput * sizeof(*ar));
-        Evaluate(pnn, arInput, ar, arOutput, pnn->savedBase);
+        memcpy(pnState->savedIBase, arInput, pnn->cInput * sizeof(*ar));
+        Evaluate(pnn, arInput, ar, arOutput, pnState->savedBase);
         break;
       }
       case NNEVAL_FROMBASE:
       {
         unsigned int i;
         
-        memcpy(ar, pnn->savedBase, pnn->cHidden * sizeof(*ar));
+        memcpy(ar, pnState->savedBase, pnn->cHidden * sizeof(*ar));
   
         {
           float* r = arInput;
-          float* s = pnn->savedIBase;
+          float* s = pnState->savedIBase;
          
           for(i = 0; i < pnn->cInput; ++i, ++r, ++s) {
             if( *r != *s /*lint --e(777) */) {
@@ -820,18 +854,11 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
 	if( fscanf( pf, "%f\n", pr++ ) < 1 )
 	    return -1;
 
-    for(i = 0; i < pnn->cHidden; ++i)
-      pnn->savedBase[i] = 0.0;
-
-    for(i = 0; i < pnn->cInput; ++i) 
-      pnn->savedIBase[i] = 0.0;
- 
     return 0;
 }
 
 extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
 
-    unsigned int i;
 	int nTrained;
 
 #define FREAD( p, c ) \
@@ -862,12 +889,6 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf ) {
     FREAD( pnn->arOutputThreshold, pnn->cOutput );
 #undef FREAD
 
-    for(i = 0; i < pnn->cHidden; ++i)
-      pnn->savedBase[i] = 0.0;
-
-    for(i = 0; i < pnn->cInput; ++i) 
-      pnn->savedIBase[i] = 0.0;
- 
     return 0;
 }
 

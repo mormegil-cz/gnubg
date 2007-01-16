@@ -6394,7 +6394,7 @@ extern void output( const char *sz ) {
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
 
-    free( pch );
+    g_free( pch );
 }
 
 /* Write a string to stdout/status bar/popup window, and append \n */
