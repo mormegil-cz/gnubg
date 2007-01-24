@@ -1,3 +1,6 @@
+Wed 24 Jan 20:34:15 2007 CET  Jim Segrave <jes@jes-2.demon.nl>
+	* gnubg.c - restore some code dropped some revisions ago
+	
 Mon 18 Dev 16:51:24 2006 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c: initialise unused ptrs in SelectFile, check for

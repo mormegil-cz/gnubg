@@ -4480,12 +4480,13 @@ CommandRollout( char *sz ) {
 	if (pm) {
 	  apOutput[ i ] = &pm->arEvalMove;
 	  apStdDev[ i ] = &pm->arEvalStdDev;
+	  apes[ i ] = &pm->esMove;
 	} else {
 	  apOutput[ i ] = &aarNoOutput;
 	  apStdDev[ i ] = &aarNoStdDev;
 	  apes[ i ] = &NoEs;
+	  memcpy (&NoEs.rc, &rcRollout, sizeof (rolloutcontext));
 	}
-	memcpy (&NoEs.rc, &rcRollout, sizeof (rolloutcontext));
 	apci[ i ] = &ci;
 	apCubeDecTop[ i ] = &false;
       }
