@@ -113,7 +113,7 @@ ClassifyHyper ( int anBoard[ 2 ][ 25 ] ) {
 static void
 HyperOver ( int anBoard[ 2 ][ 25 ], float ar[ NUM_OUTPUTS ], const int nC ) {
 
-  EvalOver( anBoard, ar, VARIATION_HYPERGAMMON_1 + nC - 1 );
+  EvalOver( anBoard, ar, VARIATION_HYPERGAMMON_1 + nC - 1, NULL );
 
 }
 

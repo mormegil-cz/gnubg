@@ -439,9 +439,6 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
    pnn->arOutputThreshold = fp;
    fp += pnn->cOutput;
 
-   pnn->savedBase = sse_malloc( pnn->cHidden * sizeof( float ) ); 
-   pnn->savedIBase = sse_malloc( pnn->cInput * sizeof( float ) ); 
-
    return fp;
 }
 #endif

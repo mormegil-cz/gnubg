@@ -29,9 +29,7 @@
 #include "sse.h"
 #include "neuralnet.h"
 #include <string.h>
-#if DEBUG_SSE
-#include <assert.h>
-#endif
+#include <glib.h>
 
 #include <xmmintrin.h>
 #include <mm_malloc.h>
@@ -83,7 +81,7 @@ NNevalAction(NNState *pnState)
   }
 
   /* never reached */
-  assert(0);
+  g_assert_not_reached();
   return 0;   /* for the picky compiler */
 }
 
