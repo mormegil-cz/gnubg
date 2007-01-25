@@ -1,3 +1,6 @@
+Thu 25 Jan 09:43:30 2007 GMT Jim Segrave <jes@j-e-s.net>
+	* gnubg.c - restore some code dropped some revisions ago
+	
 Sun Jan 05 10:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* eval.c: Fix some concurrency problems.
