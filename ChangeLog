@@ -1,3 +1,9 @@
+Wed Jan 31 12:49:00 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, eval.c, gnubg.c, multithread.c,
+	multithread.h, lib/neuralnet.c, lib/neuralnetsse.c: various changes to
+	make gnubg compile with ./configure --enable-threads
+
 Thu Jan 25 20:27:53 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* makehyper.c, lib/neuralnet*.c: small fixes needed to compile without
@@ -5,7 +11,7 @@ Thu Jan 25 20:27:53 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 Thu 25 Jan 09:43:30 2007 GMT Jim Segrave <jes@j-e-s.net>
 
-	* gnubg.c - restore some code dropped some revisions ago
+	* gnubg.c: restore some code dropped some revisions ago
 	
 Sun Jan 05 10:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 

@@ -1,11 +1,16 @@
 
 #include "config.h"
 
+#ifdef WIN32
 #include <windows.h>
 #include <process.h>
+#endif
+#include <stdlib.h>
 #include <stdio.h>
 #include "multithread.h"
 #include <glib.h>
+#include <glib/gthread.h>
+#include <pthread.h>
 
 #define MULTITHREADED 1
 
@@ -13,10 +18,15 @@
 #define TRY_COUTING_PROCEESING_UNITS 0
 #ifndef WIN32
 #define GLIB_THREADS
-#endif
-#endif
 
+int GetLogicalProcssingUnitCount(void) {
+        return 2;
+}
+
+#else
 extern int GetLogicalProcssingUnitCount(void);
+#endif
+#endif
 
 typedef struct _ThreadData
 {
@@ -79,16 +89,13 @@ void MT_TaskDone(Task *pt);
 
 #if MULTITHREADED
 #ifdef GLIB_THREADS
-gpointer MT_WorkerThreadFunction(gpointer notused)
+gpointer MT_WorkerThreadFunction(gpointer id)
 {
+	pthread_setspecific(td.tlsKey, id);
 #else
 void MT_WorkerThreadFunction(void *id)
 {
- #ifdef GLIB_THREADS
-	pthread_setspecific(tlsKey, 1);
- #else
 	TlsSetValue(td.tlsIndex, id);
- #endif
 #endif
 	MT_TaskDone(NULL);	/* Thread created */
 	do
@@ -121,7 +128,7 @@ static void MT_CreateThreads(void)
 	for (i = 0; i < numThreads; i++)
 	{
 #ifdef GLIB_THREADS
-		if (!g_thread_create(MT_WorkerThreadFunction, NULL, FALSE, NULL))
+		if (!g_thread_create(MT_WorkerThreadFunction, GINT_TO_POINTER(i + 1), FALSE, NULL))
 #else
 		if (_beginthread(MT_WorkerThreadFunction, 0, (void*)(i + 1)) == 0)
 #endif
@@ -135,7 +142,7 @@ static void MT_CreateThreads(void)
 		GTimeVal tv = {0, 0};
 		g_get_current_time (&tv);
 		g_time_val_add (&tv, 20 * 1000 * 1000);
-		if (g_cond_timed_wait(td.alldone, td.condMutex, &tv) == TRUE)
+		if (g_cond_timed_wait(td.alldone, td.condMutex, &tv) == FALSE)
 #else
 		if (WaitForSingleObject(td.alldone, 20 * 1000) == WAIT_TIMEOUT)
 #endif
@@ -164,7 +171,7 @@ static void MT_CloseThreads(void)
 #endif
 }
 
-void MT_InitThreads()
+extern void MT_InitThreads()
 {
 #if MULTITHREADED
 
@@ -190,7 +197,7 @@ void MT_InitThreads()
 	td.active = FALSE;
 	if (pthread_key_create(&td.tlsKey, NULL) != 0)
 		printf("Thread local store failed\n");
-	pthread_setspecific(tlsKey, 1);
+	pthread_setspecific(td.tlsKey, NULL);
 #else
 	td.activity = CreateEvent(NULL, TRUE, FALSE, NULL);
 	td.alldone = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -298,7 +305,7 @@ AnalyzeDoubleDecison:
 
 		case TT_TEST:
 			printf("Test: waiting for a second");
-			Sleep(1000);
+			g_usleep(1000000);
 			break;
 		case TT_CLOSE:
 			alive = FALSE;
@@ -424,7 +431,7 @@ int MT_WaitForTasks()
 }
 #endif
 
-void MT_Close()
+extern void MT_Close()
 {
 #if MULTITHREADED
 	MT_CloseThreads();
@@ -450,7 +457,7 @@ int MT_GetThreadID()
 #if MULTITHREADED
 	int ret;
  #ifdef GLIB_THREADS
-	ret = (int)pthread_getspecific(td.tlsKey);
+	ret = 1+GPOINTER_TO_INT(pthread_getspecific(td.tlsKey));
  #else
 	ret = (int)TlsGetValue(td.tlsIndex);
  #endif

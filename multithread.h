@@ -20,8 +20,8 @@ typedef struct _AnalyseMoveTask
 	matchstate ms;
 } AnalyseMoveTask;
 
-void MT_InitThreads();
-void MT_Close();
+extern void MT_InitThreads();
+extern void MT_Close();
 void MT_AddTask(Task *pt);
 int MT_WaitForTasks();
 unsigned int MT_GetNumThreads();

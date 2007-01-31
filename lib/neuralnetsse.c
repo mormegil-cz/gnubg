@@ -33,6 +33,7 @@
 
 #include <xmmintrin.h>
 #include <mm_malloc.h>
+#include <glib.h>
 
 #define HIDDEN_NODES 128
 

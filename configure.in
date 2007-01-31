@@ -100,6 +100,7 @@ dnl check for pkg-config controlled libs
 dnl
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6.0], , [AC_MSG_ERROR("You need to have glib2 to compile GNU backgammon")])
+PKG_CHECK_MODULES(GTHREAD, [gthread-2.0], have_gthread="yes", [AC_MSG_WARN("No thread support in glib")])
 PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you want to use libxml2 to parse XML.), [])
 PKG_CHECK_MODULES(FREETYPE2, [freetype2], AC_DEFINE(HAVE_FREETYPE, 1, Define if you have freetype2), [])
 PKG_CHECK_MODULES(LIBPNG, [libpng12], AC_DEFINE(HAVE_LIBPNG, 1, Define if you have libpng), [])
@@ -112,6 +113,7 @@ AC_CHECK_LIB(m,sqrt)
 AC_CHECK_LIB(dl,dlopen)
 AC_CHECK_LIB(readline,readline)
 AC_CHECK_LIB(gmp, __gmpz_import)
+AC_CHECK_LIB(pthread, pthread_join, have_pthread="yes", [], [])
 AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
 AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AF_LOCAL sockets.))
@@ -279,6 +281,26 @@ if test "$ssecpu" != "no"; then
 fi
 
 AC_SUBST(SSE_CFLAGS)
+
+dnl
+dnl Threads
+dnl
+
+AC_ARG_ENABLE( threads, [ --enable-threads  enable multithread support], threadson=$enableval, threadson=no)
+AM_CONDITIONAL(USE_MULTITHREAD, test "$threadson" != "no" )
+if test "$threadson" != "no"; then
+        if test "$have_gthread" != "yes"; then
+                AC_MSG_ERROR("Threads enabled but glib doesn't seem to have gthread support")
+        fi
+        if test "$have_pthread" != "yes"; then
+                AC_MSG_ERROR("Threads enabled but pthreads not found")
+        fi
+        PTHREAD_LIBS="-lpthread"
+        PTHREAD_CFLAGS="-pthread"
+        AC_DEFINE(USE_MULTITHREAD, 1, Define if you want to have multithread support)
+fi
+AC_SUBST(PTHREAD_LIBS)
+AC_SUBST(PTHREAD_CFLAGS)
 
 
 dnl *************

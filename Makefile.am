@@ -4,8 +4,18 @@ localedir = $(datadir)/locale
 
 ACLOCAL_AMFLAGS = -I m4
 
-## sounds
+## threads
+if USE_MULTITHREAD
+THREAD_SOURCES = multithread.c multithread.h
+THREAD_INCS = @GTHREAD_CFLAGS@ @PTHREAD_CFLAGS@
+THREAD_LIBS = @GTHREAD_LIBS@ @PTHREAD_LIBS@
+else
+THREAD_SOURCES =
+THREAD_INCS =
+THREAD_LIBS =
+endif
 
+## sounds
 if  USE_SOUND 
 SOUND_SOURCES = sound.c
 SOUND_INCS = @ESD_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ \
@@ -26,6 +36,7 @@ else
 TIME_SOURCES =
 endif
 
+## static bearof db
 if COMPILE_BR1
 BR1_SOURCES = br1.c
 else
@@ -105,16 +116,16 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkf
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 	gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
 	gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h\
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES) $(THREAD_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) @LIBPNG_LIBS@ \
-        $(BOARD3D_LIBS) @CAIRO_LIBS@
+        $(BOARD3D_LIBS) @CAIRO_LIBS@ $(THREAD_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
 ## --- Plain
-INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
+INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(THREAD_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-	$(PYTHON_SOURCES) $(TIME_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
+	$(PYTHON_SOURCES) $(TIME_SOURCES) $(THREAD_SOURCES)
+gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) $(THREAD_LIBS)
 
 
 gnubg_DEPENDENCIES = $(COMMON_DEPS)

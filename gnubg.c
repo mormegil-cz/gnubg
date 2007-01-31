@@ -4078,6 +4078,7 @@ Shutdown( void ) {
   FreeMatch();
   ClearMatch();
 
+  MT_Close();
   EvalShutdown();
 
 #if USE_PYTHON
@@ -7260,6 +7261,10 @@ main (int argc, char *argv[])
     PushSplash ( pwSplash, 
                  _("Initialising"), _("neural nets"), 500 );
 #endif    
+
+#ifdef USE_MULTITHREAD
+		MT_InitThreads();
+#endif
 
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
 			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
