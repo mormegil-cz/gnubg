@@ -4078,7 +4078,9 @@ Shutdown( void ) {
   FreeMatch();
   ClearMatch();
 
+#if USE_MULTITHREAD
   MT_Close();
+#endif
   EvalShutdown();
 
 #if USE_PYTHON
