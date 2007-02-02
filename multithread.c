@@ -157,7 +157,7 @@ void MT_WorkerThreadFunction(void *id)
 {
 #endif
 #ifdef GLIB_THREADS
-	pthread_setspecific(tlsKey, id);
+	pthread_setspecific(td.tlsKey, id);
 #else
 	TlsSetValue(td.tlsIndex, id);
 #endif
@@ -173,9 +173,6 @@ void MT_WorkerThreadFunction(void *id)
 		}
 #endif
 	} while (MT_DoTask());
-#ifdef GLIB_THREADS
-	return NULL;
-#endif
 }
 #endif
 
@@ -497,10 +494,10 @@ extern void MT_Close()
 #ifdef GLIB_THREADS
 	g_mutex_free(td.queueLock);
 	g_mutex_free(td.condMutex);
-	g_cond_free(td.activity);
+	g_cond_free(td.activity.cond);
 	g_cond_free(td.alldone);
-	g_cond_free(td.lockContention);
-	g_cond_free(td.contentionCleared);
+	g_cond_free(td.lockContention.cond);
+	g_cond_free(td.contentionCleared.cond);
 
 	pthread_key_delete(td.tlsKey);
 #else
@@ -531,10 +528,10 @@ int MT_GetThreadID()
 void MT_Lock(long *lock)
 {
 #ifdef GLIB_THREADS
-	while (g_atomic_int_exchange_and_add(lock, 1) != 0)
+	while (g_atomic_int_exchange_and_add((gint*)lock, 1) != 0)
 	{
 		WaitForManualEvent(&td.lockContention);
-		if (g_atomic_int_dec_and_test(lock) == TRUE)
+		if (g_atomic_int_dec_and_test((gint*)lock) == TRUE)
 		{	/* Found something that's cleared */
 			SetManualEvent(&td.contentionCleared);
 			ResetManualEvent(&td.lockContention);
@@ -563,9 +560,9 @@ void MT_Lock(long *lock)
 void MT_Release(long *lock)
 {
 #ifdef GLIB_THREADS
-	if (g_atomic_int_dec_and_test(lock) != TRUE)
+	if (g_atomic_int_dec_and_test((gint*)lock) != TRUE)
 	{	/* Clear contention */
-		ResetManualEventEvent(&td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
+		ResetManualEvent(&td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
 		SetManualEvent(&td.lockContention);	/* Release any waiting threads */
 	}
 #else

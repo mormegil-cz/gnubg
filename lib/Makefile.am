@@ -12,7 +12,7 @@ libneuralnetsse_la_SOURCES = neuralnetsse.c
 libneuralnetsse_la_CFLAGS = $(SSE_CFLAGS)
 
 libevent_la_SOURCES = dynarray.c event.c hash.c heap.c list.c \
-	neuralnet.c mt19937ar.c isaac.c md5.c sse.h mm_malloc.h
+	neuralnet.c mt19937ar.c isaac.c md5.c sse.h mm_malloc.h cache.c
 libevent_la_LIBADD = libneuralnetsse.la
 
 
