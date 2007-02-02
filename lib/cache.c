@@ -16,7 +16,7 @@
 
 #include "cache.h"
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 extern void MT_Lock(long *lock);
 extern void MT_Release(long *lock);
 #else
