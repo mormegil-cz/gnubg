@@ -6,7 +6,7 @@ FLAGS= -Wall $(COMPOPT) $(DEFS)
 TARGET = libevent.a
 MINGW=$(GNU)/mingw
 
-SOURCE=	dynarray hash heap \
+SOURCE=	dynarray hash heap cache \
 	list neuralnet neuralnetsse mt19937ar isaac md5
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
