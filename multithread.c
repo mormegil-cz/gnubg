@@ -10,21 +10,32 @@
 #include "multithread.h"
 #include <glib.h>
 #include <glib/gthread.h>
-#include <pthread.h>
 
 #define MULTITHREADED 1
 
-#ifdef MULTITHREADED
-#define TRY_COUTING_PROCEESING_UNITS 0
-#ifndef WIN32
-#define GLIB_THREADS
+#if MULTITHREADED
+ #define TRY_COUTING_PROCEESING_UNITS 0
+ #if __GNUC__
+  #define GCC_ALIGN_HACK 1
+ #endif
+ #ifndef WIN32
+  #define GLIB_THREADS
+ #endif
+#endif
 
-int GetLogicalProcssingUnitCount(void) {
-        return 2;
-}
+#ifdef GLIB_THREADS
+#include <pthread.h>
+#endif
 
-#else
 extern int GetLogicalProcssingUnitCount(void);
+
+#ifdef GLIB_THREADS
+#if MULTITHREADED
+typedef struct _ManualEvent
+{
+	GCond* cond;
+	int signalled;
+} ManualEvent;
 #endif
 #endif
 
@@ -34,15 +45,18 @@ typedef struct _ThreadData
 #ifdef GLIB_THREADS
 	GMutex* queueLock;
 	GMutex* condMutex;
-	GCond* activity;
-	int active;
+	ManualEvent activity;
 	GCond* alldone;
 	pthread_key_t tlsKey;
+	ManualEvent lockContention;
+	ManualEvent contentionCleared;
 #else
 	DWORD tlsIndex;
 	HANDLE queueLock;
 	HANDLE activity;
 	HANDLE alldone;
+	HANDLE lockContention;
+	HANDLE contentionCleared;
 #endif
 	int addedTasks;
 	int doneTasks;
@@ -53,6 +67,42 @@ typedef struct _ThreadData
 } ThreadData;
 
 ThreadData td;
+
+#ifdef GLIB_THREADS
+#if MULTITHREADED
+
+void InitManualEvent(ManualEvent *pME)
+{
+	pME->cond = g_cond_new();
+	pME->signalled = FALSE;
+}
+
+void WaitForManualEvent(ManualEvent *pME)
+{
+	g_mutex_lock(td.condMutex);
+	if (!pME->signalled)
+		g_cond_wait(pME->cond, td.condMutex);
+
+	g_mutex_unlock(td.condMutex);
+}
+
+void ResetManualEvent(ManualEvent *pME)
+{
+	g_mutex_lock(td.condMutex);
+	pME->signalled = FALSE;
+	g_mutex_unlock(td.condMutex);
+}
+
+void SetManualEvent(ManualEvent *pME)
+{
+	g_mutex_lock(td.condMutex);
+	pME->signalled = TRUE;
+	g_cond_broadcast(pME->cond);
+	g_mutex_unlock(td.condMutex);
+}
+
+#endif
+#endif
 
 unsigned int numThreads = 0;
 
@@ -88,25 +138,34 @@ int MT_DoTask();
 void MT_TaskDone(Task *pt);
 
 #if MULTITHREADED
-#ifdef GLIB_THREADS
+
+#if GCC_ALIGN_HACK
+
+void MT_ActualWorkerThreadFunction(void *id);
+
 gpointer MT_WorkerThreadFunction(gpointer id)
+{	/* Align stack and call actual function */
+  asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
+  MT_ActualWorkerThreadFunction(id);
+  return NULL;
+}
+
+void MT_ActualWorkerThreadFunction(void *id)
 {
-	pthread_setspecific(td.tlsKey, id);
 #else
 void MT_WorkerThreadFunction(void *id)
 {
+#endif
+#ifdef GLIB_THREADS
+	pthread_setspecific(tlsKey, id);
+#else
 	TlsSetValue(td.tlsIndex, id);
 #endif
 	MT_TaskDone(NULL);	/* Thread created */
 	do
 	{
 #ifdef GLIB_THREADS
-		if (!td.active)
-		{
-			g_mutex_lock(td.condMutex);
-			g_cond_wait(td.activity, td.condMutex);
-			g_mutex_unlock(td.condMutex);
-		}
+		WaitForManualEvent(&td.activity);
 #else
 		if (WaitForSingleObject(td.activity, INFINITE) != WAIT_OBJECT_0)
 		{
@@ -147,13 +206,13 @@ static void MT_CreateThreads(void)
 		if (WaitForSingleObject(td.alldone, 20 * 1000) == WAIT_TIMEOUT)
 #endif
 			printf("Not sure all threads created!\n");
-#endif
 #ifdef GLIB_THREADS
 		g_mutex_unlock(td.condMutex);
 #endif
 	}
 	/* Reset counters */
 	td.totalTasks = td.doneTasks = 0;
+#endif
 }
 
 static void MT_CloseThreads(void)
@@ -192,15 +251,19 @@ extern void MT_InitThreads()
 #ifdef GLIB_THREADS
 	td.queueLock = g_mutex_new();
 	td.condMutex = g_mutex_new();
-	td.activity = g_cond_new();
+	InitManualEvent(&td.activity);
 	td.alldone = g_cond_new();
-	td.active = FALSE;
+	InitManualEvent(&td.lockContention);
+	InitManualEvent(&td.contentionCleared);
 	if (pthread_key_create(&td.tlsKey, NULL) != 0)
 		printf("Thread local store failed\n");
 	pthread_setspecific(td.tlsKey, NULL);
 #else
 	td.activity = CreateEvent(NULL, TRUE, FALSE, NULL);
 	td.alldone = CreateEvent(NULL, FALSE, FALSE, NULL);
+	td.lockContention = CreateEvent(NULL, TRUE, FALSE, NULL);
+	td.contentionCleared = CreateEvent(NULL, TRUE, FALSE, NULL);
+
 	td.queueLock = CreateMutex(NULL, FALSE, NULL);
 	td.tlsIndex = TlsAlloc();
 	if (td.tlsIndex == TLS_OUT_OF_INDEXES)
@@ -235,9 +298,7 @@ Task *MT_GetTask(void)
 		if (g_list_length(td.tasks) == 0)
 		{
 #ifdef GLIB_THREADS
-			g_mutex_lock(td.condMutex);
-			td.active = FALSE;
-			g_mutex_unlock(td.condMutex);
+			ResetManualEvent(&td.activity);
 #else
 			ResetEvent(td.activity);
 #endif
@@ -355,10 +416,7 @@ void MT_AddTask(Task *pt)
 		td.result = 0;
 #if MULTITHREADED
 #ifdef GLIB_THREADS
-		g_mutex_lock(td.condMutex);
-		td.active = TRUE;
-		g_cond_broadcast(td.activity);
-		g_mutex_unlock(td.condMutex);
+		SetManualEvent(&td.activity);
 #else
 		SetEvent(td.activity);
 #endif
@@ -441,6 +499,9 @@ extern void MT_Close()
 	g_mutex_free(td.condMutex);
 	g_cond_free(td.activity);
 	g_cond_free(td.alldone);
+	g_cond_free(td.lockContention);
+	g_cond_free(td.contentionCleared);
+
 	pthread_key_delete(td.tlsKey);
 #else
 	CloseHandle(td.queueLock);
@@ -464,5 +525,54 @@ int MT_GetThreadID()
 	return ret - 1;
 #else
 	return 0;
+#endif
+}
+
+void MT_Lock(long *lock)
+{
+#ifdef GLIB_THREADS
+	while (g_atomic_int_exchange_and_add(lock, 1) != 0)
+	{
+		WaitForManualEvent(&td.lockContention);
+		if (g_atomic_int_dec_and_test(lock) == TRUE)
+		{	/* Found something that's cleared */
+			SetManualEvent(&td.contentionCleared);
+			ResetManualEvent(&td.lockContention);
+		}
+		else
+		{
+			WaitForManualEvent(&td.contentionCleared);
+		}
+#else
+	while (InterlockedIncrement(lock) != 1)
+	{	/* Contention - wait for something to finish */
+		WaitForSingleObject(td.lockContention, INFINITE);
+		if (InterlockedDecrement(lock) == 0)
+		{	/* Found something that's cleared */
+			SetEvent(td.contentionCleared);
+			ResetEvent(td.lockContention);
+		}
+		else
+		{
+			WaitForSingleObject(td.contentionCleared, INFINITE);
+		}
+	}
+#endif
+}
+
+void MT_Release(long *lock)
+{
+#ifdef GLIB_THREADS
+	if (g_atomic_int_dec_and_test(lock) != TRUE)
+	{	/* Clear contention */
+		ResetManualEventEvent(&td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
+		SetManualEvent(&td.lockContention);	/* Release any waiting threads */
+	}
+#else
+	if (InterlockedDecrement(lock) != 0)
+	{	/* Clear contention */
+		ResetEvent(td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
+		SetEvent(td.lockContention);	/* Release any waiting threads */
+	}
 #endif
 }

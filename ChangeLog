@@ -1,3 +1,8 @@
+Fri Feb 02 18:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* multithread.c/.h, lib/neuralnet.c, lib/neuralnetsse.c, lib/cache.c (new) : syncronize cache
+		access, fix mis-aligned mingw thread stack, remove frombase optimisation for SSE.
+
 Wed Jan 31 12:49:00 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in, eval.c, gnubg.c, multithread.c,

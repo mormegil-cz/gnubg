@@ -52,7 +52,7 @@
 static void SetSoundSettings();
 static void AddSoundWidgets(GtkWidget *container);
 #endif
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 #include "multithread.h"
 #endif
 
@@ -1324,7 +1324,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     
     gtk_box_pack_start (GTK_BOX (pwvbox), table, FALSE, FALSE, 3);
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
     pwev = gtk_event_box_new();
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
     gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
@@ -1558,7 +1558,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
     UserCommand(sz); 
   }
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
   if((n = (int)pow->padjThreads->value) != (int)MT_GetNumThreads()) {
     sprintf(sz, "set threads %d", n );
     UserCommand(sz); 

@@ -1102,7 +1102,7 @@ extern void CommandAccept( char * ),
     CommandSetTimeControl( char * ),
 #endif
     CommandSetTheoryWindow ( char * ),
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
     CommandSetThreads( char * ),
 #endif
     CommandSetToolbar( char * ),

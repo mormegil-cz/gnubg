@@ -39,7 +39,7 @@
 #include "export.h"
 #include "formatgs.h"
 #include <glib/gi18n.h>
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 #include "multithread.h"
 #endif
 
@@ -1072,7 +1072,7 @@ static int NumberMovesGame ( list *plGame );
 
 static int
 AnalyzeGame ( list *plGame )
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 {
 	int result;
 	unsigned int i;

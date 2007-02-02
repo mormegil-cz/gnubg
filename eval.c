@@ -44,7 +44,7 @@
 #include "path.h"
 #include "format.h"
 #include "sse.h"
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 #include "multithread.h"
 #endif
 
@@ -328,14 +328,6 @@ defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
   { { 0,  8, 0.16f }, { -1, 0, 0 }, { 0, 2, 0.04f }, { -1, 0, 0 } },
 };
 
-#if defined( GARY_CACHE )
-typedef struct _evalcache {
-    unsigned char auchKey[ 10 ];
-    int nEvalContext;
-    float ar[ NUM_OUTPUTS ];
-} evalcache;
-#endif
-
 #if defined( REDUCTION_CODE )
 static int nReductionGroup   = 0;
 
@@ -460,14 +452,14 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
 
 #else
 evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { TRUE, 0, FALSE, TRUE, 0.060 }, /* casual play */
-  { TRUE, 0, FALSE, TRUE, 0.050 }, /* beginner */
-  { TRUE, 0, FALSE, TRUE, 0.040 }, /* intermediate */
-  { TRUE, 0, FALSE, TRUE, 0.015 }, /* advanced */
-  { TRUE, 0, FALSE, TRUE, 0.0 }, /* expert */
-  { TRUE, 2, TRUE, TRUE, 0.0 }, /* world class */
-  { TRUE, 2, TRUE, TRUE, 0.0 }, /* supremo */
-  { TRUE, 3, TRUE, TRUE, 0.0 }, /* grand master */
+  { TRUE, 0, FALSE, TRUE, 0.060f }, /* casual play */
+  { TRUE, 0, FALSE, TRUE, 0.050f }, /* beginner */
+  { TRUE, 0, FALSE, TRUE, 0.040f }, /* intermediate */
+  { TRUE, 0, FALSE, TRUE, 0.015f }, /* advanced */
+  { TRUE, 0, FALSE, TRUE, 0.0f }, /* expert */
+  { TRUE, 2, TRUE, TRUE, 0.0f }, /* world class */
+  { TRUE, 2, TRUE, TRUE, 0.0f }, /* supremo */
+  { TRUE, 3, TRUE, TRUE, 0.0f }, /* grand master */
 };
 #endif
 /* which move filter does the predefined settings use */
@@ -613,28 +605,8 @@ static void ComputeTable( void )
   ComputeTable1();
 }
 
-#if defined( GARY_CACHE )
-static int EvalCacheCompare( evalcache *p0, evalcache *p1 ) {
 
-    return !EqualKeys( p0->auchKey, p1->auchKey ) ||
-	p0->nEvalContext != p1->nEvalContext;
-}
-
-static unsigned long EvalCacheHash( evalcache *pec ) {
-
-    unsigned long l;
-    int i;
-    
-    l = pec->nEvalContext;
-
-    for( i = 0; i < 10; i++ )
-	l = ( ( l << 8 ) % 8388593 ) ^ pec->auchKey[ i ];
-
-    return l;    
-}
-#endif
-
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 	static NNState nnStatesStorage[MAX_NUMTHREADS][3] = {
 		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
 		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
@@ -697,18 +669,18 @@ EvalShutdown ( void ) {
 
   int i;
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 	int j;
 	for (j = 0; j < MAX_NUMTHREADS; j++)
 #endif
 	for (i = 0; i < 3; i++)
 	{
-#ifdef USE_MULTITHREAD
-		sse_free(nnStatesStorage[j][i].savedBase); 
-		sse_free(nnStatesStorage[j][i].savedIBase);
+#if USE_MULTITHREAD
+		free(nnStatesStorage[j][i].savedBase); 
+		free(nnStatesStorage[j][i].savedIBase);
 #else
-		sse_free(nnStatesStorage[i].savedBase); 
-		sse_free(nnStatesStorage[i].savedIBase);
+		free(nnStatesStorage[i].savedBase); 
+		free(nnStatesStorage[i].savedIBase);
 #endif
 	}
 
@@ -768,11 +740,6 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 
       ComputeSigTable();
 
-#if defined( GARY_CACHE )
-	if( CacheCreate( &cEval, cCache = 8192,
-			 (cachecomparefunc) EvalCacheCompare ) )
-	    return -1;
-#else
 		cCache = 0x1 << 16;
 		if( CacheCreate( &cEval, cCache ) ) {
 		return -1;
@@ -782,8 +749,6 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( CacheCreate( &cpEval, 0x1 << 16) ) {
 	  return -1;
 	}
-#endif
-	
 #endif
 	    
 		ComputeTable();
@@ -959,26 +924,26 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		ret = 1;
 	}
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 {
 	int j;
 	for (j = 0; j < MAX_NUMTHREADS; j++)
 	{
-		nnStatesStorage[j][CLASS_RACE - CLASS_RACE].savedBase = sse_malloc( nnRace.cHidden * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_RACE - CLASS_RACE].savedIBase = sse_malloc( nnRace.cInput * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CRASHED - CLASS_RACE].savedBase = sse_malloc( nnCrashed.cHidden * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CRASHED - CLASS_RACE].savedIBase = sse_malloc( nnCrashed.cInput * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedBase = sse_malloc( nnContact.cHidden * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedIBase = sse_malloc( nnContact.cInput * sizeof( float ) ); 
+		nnStatesStorage[j][CLASS_RACE - CLASS_RACE].savedBase = malloc( nnRace.cHidden * sizeof( float ) ); 
+		nnStatesStorage[j][CLASS_RACE - CLASS_RACE].savedIBase = malloc( nnRace.cInput * sizeof( float ) ); 
+		nnStatesStorage[j][CLASS_CRASHED - CLASS_RACE].savedBase = malloc( nnCrashed.cHidden * sizeof( float ) ); 
+		nnStatesStorage[j][CLASS_CRASHED - CLASS_RACE].savedIBase = malloc( nnCrashed.cInput * sizeof( float ) ); 
+		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedBase = malloc( nnContact.cHidden * sizeof( float ) ); 
+		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedIBase = malloc( nnContact.cInput * sizeof( float ) ); 
 	}
 }
 #else
-	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedBase = sse_malloc( nnRace.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedIBase = sse_malloc( nnRace.cInput * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedBase = sse_malloc( nnCrashed.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedIBase = sse_malloc( nnCrashed.cInput * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedBase = sse_malloc( nnContact.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedIBase = sse_malloc( nnContact.cInput * sizeof( float ) ); 
+	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedBase = malloc( nnRace.cHidden * sizeof( float ) ); 
+	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedIBase = malloc( nnRace.cInput * sizeof( float ) ); 
+	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedBase = malloc( nnCrashed.cHidden * sizeof( float ) ); 
+	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedIBase = malloc( nnCrashed.cInput * sizeof( float ) ); 
+	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedBase = malloc( nnContact.cHidden * sizeof( float ) ); 
+	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedIBase = malloc( nnContact.cInput * sizeof( float ) ); 
 #endif
 
 	return ret;
@@ -2745,16 +2710,14 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, int an
 	    }
 	  }
 
-#if !defined(GARY_CACHE) && defined(PRUNE_CACHE)
+#if defined(PRUNE_CACHE)
 {
 	  evalcache ec, *pec;
 	  unsigned long l;
 	  memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
 	  ec.nEvalContext = 0;
-	  if( ( pec = CacheLookup( &cpEval, &ec, &l ) ) ) {
-	    memcpy( arOutput, pec->ar, sizeof(float) * NUM_OUTPUTS );
-	  } else {
-    
+	  if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
+   
 #endif
 	    baseInputs(anBoard, arInput);
 	    {
@@ -2765,7 +2728,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, int an
 	      NeuralNetEvaluate(n, arInput, arOutput, nnStates);
 	      SanityCheck(anBoard, arOutput);
 	    }
-#if !defined(GARY_CACHE) && defined(PRUNE_CACHE)
+#if defined(PRUNE_CACHE)
 	    memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
 	    CacheAdd(&cpEval, &ec, l);
 	  }
@@ -2822,34 +2785,29 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, int an
 	} else {
 
     nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
-    rBestScore = 99999.9;
+    rBestScore = 99999.9f;
     for(i = 0; (int)i < ml.cMoves; i++) {
       int const j = use ? bmovesi[i] : i;
       const move* const pm = &ml.amMoves[j];
 	
       PositionFromKey(anBoard, pm->auch);
       SwapSides(anBoard);
-#if !defined(GARY_CACHE)
       {
 	evalcache ec, *pec;
 	unsigned long l;
 	memcpy(ec.auchKey, pm->auch, sizeof(ec.auchKey));
 	ec.nEvalContext =  pci->fMove << 14;
-	if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) {
-	  memcpy( arOutput, pec->ar, sizeof(float) * NUM_OUTPUTS );
-	} else {
-#endif
+
+	if ( ( l = CacheLookup( &cpEval, &ec, arOutput, NULL ) ) != CACHEHIT ) {
 	  positionclass pc = ClassifyPosition(anBoard, VARIATION_STANDARD);
 
 	  acef[pc](anBoard, arOutput, VARIATION_STANDARD, nnStates);
 	  if ( pc > CLASS_PERFECT )
 	    SanityCheck(anBoard, arOutput);
 
-#if !defined(GARY_CACHE)
 	  memcpy( ec.ar, arOutput, sizeof(float) * NUM_OUTPUTS );
 	  CacheAdd(&cEval, &ec, l);
 	}
-#endif
 	rScore = UtilityME(arOutput, pci);
 	if( rScore < rBestScore ) {
 	  rBestScore = rScore;
@@ -3023,7 +2981,6 @@ EvaluatePositionFull( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput[
   return 0;
 }
 
-
 static int
 EvalKey ( const evalcontext *pec, const int nPlies,
           const cubeinfo *pci, int fCubefulEquity ) {
@@ -3138,7 +3095,6 @@ EvaluatePositionCache( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput
 		       int nPlies, positionclass pc ) {
     evalcache ec, *pec;
     unsigned long l;
-
     /* This should be a part of the code that is called in all
        time-consuming operations at a relatively steady rate, so is a
        good choice for a callback function. */
@@ -3157,29 +3113,16 @@ EvaluatePositionCache( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput
 
     ec.nEvalContext = EvalKey ( pecx, nPlies, pci, FALSE );
     
-#if defined( GARY_CACHE )
-    l = EvalCacheHash( &ec );
-    
-    if( ( pec = CacheLookup( &cEval, l, &ec ) ) )
-#else
-    if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) 
-#endif
-      {
-	memcpy( arOutput, pec->ar, sizeof ( float ) * NUM_OUTPUTS );
-	
+	if ( ( l = CacheLookup( &cEval, &ec, arOutput, NULL ) ) == CACHEHIT ) {
 	return 0;
     }
-    
-    if( EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc ) )
+
+	if( EvaluatePositionFull( nnStates, anBoard, arOutput, pci, pecx, nPlies, pc ) )
 	return -1;
-    
+
     memcpy( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
-#if defined( GARY_CACHE )
-    return CacheAdd( &cEval, l, &ec, sizeof ec );
-#else
     CacheAdd(&cEval, &ec, l);
     return 0;
-#endif
 }
 
 
@@ -3820,7 +3763,7 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
 	int i;
 	int r = 0;	/* return value */
 	NNState *nnStates;
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 	nnStates = nnStatesStorage[MT_GetThreadID()];
 #else
 	nnStates = nnStatesStorage;
@@ -3832,6 +3775,7 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
     /* start incremental evaluations */
 	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
   }
+
 
   for( i = 0; i < pml->cMoves; i++ ) {
     if( ScoreMove(nnStates, pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
@@ -3851,7 +3795,7 @@ ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
   if( nPlies == 0 ) {
     /* reset to none */
 	
-	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNEVAL_NONE;
+	  nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_NONE;
   }
     
   return r;
@@ -3862,7 +3806,7 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
                int n0, int n1, int fPartial ) {
 
   int anRoll[ 4 ], anMoves[ 8 ];
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
   static move amMoves[MAX_NUMTHREADS][ MAX_INCOMPLETE_MOVES ];
 #else
   static move amMoves[ MAX_INCOMPLETE_MOVES ];
@@ -3874,7 +3818,7 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
     anRoll[ 2 ] = anRoll[ 3 ] = ( ( n0 == n1 ) ? n0 : 0 );
 
     pml->cMoves = pml->cMaxMoves = pml->cMaxPips = pml->iMoveBest = 0;
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 	pml->amMoves = amMoves[MT_GetThreadID()];
 #else
     pml->amMoves = amMoves; /* use static array for top-level search, since
@@ -4688,24 +4632,11 @@ extern int EvalCacheResize( unsigned int cNew ) {
 
 extern int EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup,
 			   int *pcHit ) {
-    if( pcUsed )
-      *pcUsed = 
-#if defined( GARY_CACHE )
-	cEval.c
-#else
-	cEval.nAdds
-#endif
-	;
-
     if( pcSize )
 	*pcSize = cCache;
 	    
-#if defined( GARY_CACHE )
-    return CacheStats( &cEval, pcLookup, pcHit );
-#else
-    CacheStats( &cEval, pcLookup, pcHit );
+    CacheStats( &cEval, pcLookup, pcHit, pcUsed );
     return 0;
-#endif
 }
 
 extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
@@ -5961,7 +5892,6 @@ GeneralEvaluationEPliedCubeful ( NNState *nnStates, float arOutput [ NUM_ROLLOUT
 
 }
 
-
 extern int
 GeneralEvaluationEPlied (NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
@@ -6124,10 +6054,12 @@ EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
 
   if( !cCache || ( pec->rNoise != 0.0f && !pec->fDeterministic ) )
       /* non-deterministic evaluation; never cache */
+{
       return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
 				       aciCubePos, cci, pciMove, pec,
 				       nPlies, fTop );
-  
+}
+
   PositionKey ( anBoard, ec.auchKey );
 
   /* check cache for existence for earlier calculation */
@@ -6137,8 +6069,9 @@ EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
   for ( ici = 0; ici < cci && fAll; ++ici ) {
 
       if ( aciCubePos[ ici ].nCube < 0 )
+	  {
         continue;
-
+	  }
       /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
          the score, so a score of -20,-20 is treated identical to
          -4,-4.... */
@@ -6146,20 +6079,10 @@ EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
 
 
       ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-#if defined( GARY_CACHE )
-      l = EvalCacheHash( &ec );
-    
-      if( ( pecx = CacheLookup( &cEval, l, &ec ) ) ) {
-#else      
-      if ( ( pecx = CacheLookup ( &cEval, &ec, &l ) ) ) {
-#endif
-        /* cache hit */
-        memcpy ( arOutput, pecx->ar, sizeof ( float ) * NUM_OUTPUTS );
-        arCubeful[ ici ] = pecx->ar[ OUTPUT_CUBEFUL_EQUITY ];
-        
-      }
-      else
+
+	  if ( ( l = CacheLookup( &cEval, &ec, arOutput, arCubeful + ici ) ) != CACHEHIT ) {
         fAll = FALSE;
+	  }
   }
 
   /* get equities */
@@ -6180,19 +6103,12 @@ EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
         if ( aciCubePos[ ici ].nCube < 0 )
           continue;
         
-        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-        l = keyToLong ( ec.auchKey, ec.nEvalContext );
-#if !defined( GARY_CACHE )
-        l = (l & ((cEval.size >> 1)-1)) << 1;
-#endif
         memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
         ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
         
-#if defined( GARY_CACHE )
-	CacheAdd( &cEval, l, &ec, sizeof ec );
-#else
-	CacheAdd ( &cEval, &ec, l );
-#endif
+        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
+
+	CacheAddNoKey( &cEval, &ec);
 
       }
     }
@@ -6313,27 +6229,6 @@ EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
 #if !defined( REDUCTION_CODE )
       if( usePrune ) {
 	FindBestMoveInEval(nnStates, n0, n1, anBoardNew, pciMove, pec);
-#if 0
-	int anBoardSave[ 2 ][ 25 ];
-        memcpy(anBoardSave[ 0 ] , anBoardNew[ 0 ], 25 * sizeof(int));
-        memcpy(anBoardSave[ 1 ] , anBoardNew[ 1 ], 25 * sizeof(int));
-
-        memcpy(anBoardNew[ 0 ] , anBoard[ 0 ], 25 * sizeof(int));
-        memcpy(anBoardNew[ 1 ] , anBoard[ 1 ], 25 * sizeof(int));
-	FindBestMovePlied( NULL, n0, n1, anBoardNew,
-			   pciMove, pec, 0, defaultFilters );
-        if( memcmp(anBoardNew[ 0 ] , anBoardSave[ 0 ], 25 * sizeof(int)) != 0 ||
-	    memcmp(anBoardNew[ 1 ] , anBoardSave[ 1 ], 25 * sizeof(int)) != 0 ) {
-	  char szBoard[ 2048 ];
-	  char *asz[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,NULL };
-	  char* matchd = "AQHgARAAKAAA";
-	  outputl( DrawBoard(szBoard, anBoard, 0, asz, matchd, 0) );
-	  printf("Dice %d %d\n", n0, n1);
-	  outputl( DrawBoard(szBoard, anBoardSave, 0, asz, matchd, 0) );
-	  outputl( DrawBoard(szBoard, anBoardNew, 0, asz, matchd, 0) );
-	}
-#endif
-	
       } else {
 #endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew,
@@ -6598,7 +6493,8 @@ EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
   
   return 0;
 
-}
+}  
+
 
 
 /*

@@ -332,7 +332,8 @@ move *MoveListGetMove(const hintdata *phd, GList *pl)
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(phd->pwMoves));
 
 	gboolean check = gtk_tree_model_get_iter(model, &iter, (GtkTreePath*)(pl->data));
-	g_assert(check);
+	if (check == 0)
+		printf("Error in move list!\n");
 
 	if (showWLTree)
 		col = 0;

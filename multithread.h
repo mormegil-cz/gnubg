@@ -22,9 +22,9 @@ typedef struct _AnalyseMoveTask
 
 extern void MT_InitThreads();
 extern void MT_Close();
-void MT_AddTask(Task *pt);
-int MT_WaitForTasks();
-unsigned int MT_GetNumThreads();
-void MT_SetNumThreads(unsigned int num);
-int MT_Enabled(void);
-int MT_GetThreadID();
+extern void MT_AddTask(Task *pt);
+extern int MT_WaitForTasks();
+extern unsigned int MT_GetNumThreads();
+extern void MT_SetNumThreads(unsigned int num);
+extern int MT_Enabled(void);
+extern int MT_GetThreadID();

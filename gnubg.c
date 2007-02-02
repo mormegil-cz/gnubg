@@ -92,7 +92,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 #include "multithread.h"
 #endif
 
@@ -1799,7 +1799,7 @@ command cER = {
     { "theorywindow", CommandSetTheoryWindow, N_("Display game theory in window"),
       szONOFF, &cOnOff },
 #endif
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
     { "threads", CommandSetThreads, N_("Set the number of calculation threads"),
       szSIZE, NULL },
 #endif
@@ -5506,7 +5506,7 @@ extern void CommandSaveSettings( char *szParam ) {
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     fprintf( pf, "set cache %d\n", cCache );
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
     fprintf( pf, "set threads %d\n", MT_GetNumThreads() );
 #endif
 
@@ -7264,7 +7264,7 @@ main (int argc, char *argv[])
                  _("Initialising"), _("neural nets"), 500 );
 #endif    
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 		MT_InitThreads();
 #endif
 

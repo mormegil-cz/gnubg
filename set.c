@@ -82,7 +82,7 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 #include "multithread.h"
 #endif
 
@@ -714,7 +714,7 @@ extern void CommandSetCache( char *sz ) {
 
 }
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 extern void CommandSetThreads( char *sz )
 {
     int n;
