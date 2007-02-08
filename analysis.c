@@ -1070,9 +1070,14 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
 
 static int NumberMovesGame ( list *plGame );
 
-static int
-AnalyzeGame ( list *plGame )
 #if USE_MULTITHREAD
+
+static void UpdateProgressBar()
+{
+	ProgressValue(MT_GetDoneTasks());
+}
+
+static int AnalyzeGame ( list *plGame )
 {
 	int result;
 	unsigned int i;
@@ -1141,7 +1146,7 @@ AnalyzeGame ( list *plGame )
 	}
 	g_assert(pl->plNext == plGame);
 
-	result = MT_WaitForTasks();
+	result = MT_WaitForTasks(UpdateProgressBar, 250);
 
 	fnTick = fnOld;
 
@@ -1150,7 +1155,10 @@ AnalyzeGame ( list *plGame )
 
     return result;
 }
+
 #else
+
+static int AnalyzeGame ( list *plGame )
 {
     list *pl;
     moverecord *pmr;

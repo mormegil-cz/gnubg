@@ -1005,7 +1005,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
     /* why doesn't type casting work? */
     gsz = g_strdup_printf( "%d/%d (%.0f%%)" ,
 		    iGame + 1 , prc->nTrials, 100 * frac );
-    prp->nGamesDone = iGame + 1;
+    prp->nGamesDone = iGame;
      
     gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR( prp->pwRolloutProgress),
 		    frac );
@@ -1164,7 +1164,7 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
   /* write progress 1/10th trial */
 
-  if ( iGame == prp->iNextGame && iAlternative == prp->iNextAlternative ) {
+  if ( iGame >= prp->iNextGame && iAlternative == prp->iNextAlternative ) {
 
     if ( ! iAlternative )
       outputl( "" );

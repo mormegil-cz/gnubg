@@ -18,10 +18,10 @@
 
 #if USE_MULTITHREAD
 extern void MT_Lock(long *lock);
-extern void MT_Release(long *lock);
+extern void MT_Unlock(long *lock);
 #else
 #define MT_Lock(x)
-#define MT_Release(x)
+#define MT_Unlock(x)
 #endif
 
 /* Adapted from
@@ -121,7 +121,7 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 		if ((pc->m[l + 1].nEvalContext != e->nEvalContext ||
 			memcmp(pc->m[l + 1].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 		{	/* Cache miss */
-			MT_Release(&pc->locks[l]);
+			MT_Unlock(&pc->locks[l]);
 			return l;
 		}
 		else
@@ -140,7 +140,7 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 	if (arCubeful)
 		*arCubeful = pc->m[l].ar[6/*OUTPUT_CUBEFUL_EQUITY*/];
 
-	MT_Release(&pc->locks[l]);
+	MT_Unlock(&pc->locks[l]);
 
     return CACHEHIT;
 }
@@ -152,7 +152,7 @@ void CacheAdd(cache* pc, cacheNode* e, unsigned long l)
 	pc->m[l + 1] = pc->m[l];
 	pc->m[l] = *e;
 
-	MT_Release(&pc->locks[l]);
+	MT_Unlock(&pc->locks[l]);
 
 #if CACHE_STATS
   ++pc->nAdds;

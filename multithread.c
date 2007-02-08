@@ -11,6 +11,8 @@
 #include <glib.h>
 #include <glib/gthread.h>
 
+#if USE_MULTITHREAD
+
 #define MULTITHREADED 1
 
 #if MULTITHREADED
@@ -28,6 +30,7 @@
 #endif
 
 extern int GetLogicalProcssingUnitCount(void);
+extern void RolloutLoopMT();
 
 #ifdef GLIB_THREADS
 #if MULTITHREADED
@@ -50,6 +53,7 @@ typedef struct _ThreadData
 	pthread_key_t tlsKey;
 	ManualEvent lockContention;
 	ManualEvent contentionCleared;
+	GMutex* multiLock;
 #else
 	DWORD tlsIndex;
 	HANDLE queueLock;
@@ -57,6 +61,7 @@ typedef struct _ThreadData
 	HANDLE alldone;
 	HANDLE lockContention;
 	HANDLE contentionCleared;
+	HANDLE multiLock;
 #endif
 	int addedTasks;
 	int doneTasks;
@@ -223,7 +228,7 @@ static void MT_CloseThreads(void)
 		pt->pLinkedTask = NULL;
 		MT_AddTask(pt);
 	}
-	MT_WaitForTasks();
+	MT_WaitForTasks(NULL, 0);
 #endif
 }
 
@@ -246,6 +251,7 @@ extern void MT_InitThreads()
 	td.tasks = NULL;
 	td.totalTasks = td.addedTasks = td.doneTasks = 0;
 #ifdef GLIB_THREADS
+	td.multiLock = g_mutex_new();
 	td.queueLock = g_mutex_new();
 	td.condMutex = g_mutex_new();
 	InitManualEvent(&td.activity);
@@ -261,6 +267,7 @@ extern void MT_InitThreads()
 	td.lockContention = CreateEvent(NULL, TRUE, FALSE, NULL);
 	td.contentionCleared = CreateEvent(NULL, TRUE, FALSE, NULL);
 
+	td.multiLock = CreateMutex(NULL, FALSE, NULL);
 	td.queueLock = CreateMutex(NULL, FALSE, NULL);
 	td.tlsIndex = TlsAlloc();
 	if (td.tlsIndex == TLS_OUT_OF_INDEXES)
@@ -360,6 +367,9 @@ AnalyzeDoubleDecison:
 			}
 			break;
 		}
+		case TT_ROLLOUTLOOP:
+			RolloutLoopMT();
+			break;
 
 		case TT_TEST:
 			printf("Test: waiting for a second");
@@ -425,9 +435,12 @@ void MT_AddTask(Task *pt)
 }
 
 #if MULTITHREADED
-int MT_WaitForTasks()
+int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
 {
-	int doneTasks, count = 0, done = FALSE;
+	int done = FALSE;
+#define UI_UPDATETIME 250
+	int callbackLoops = callbackTime / UI_UPDATETIME;
+	int waits = 0;
 
 	MT_GetLock(td.queueLock);
 	td.totalTasks = td.addedTasks;
@@ -446,25 +459,22 @@ int MT_WaitForTasks()
 			if (g_cond_timed_wait(td.alldone, td.condMutex, &tv) == TRUE)
 				break;
 #else
-		while (WaitForSingleObject(td.alldone, 250) == WAIT_TIMEOUT)
+		while (WaitForSingleObject(td.alldone, UI_UPDATETIME) == WAIT_TIMEOUT)
 		{
 #endif
-				doneTasks = td.doneTasks - count;
+			waits++;
+			if (pCallback && waits == callbackLoops)
+			{
+				waits = 0;
+				pCallback();
+			}
 
-				if (doneTasks > 0)
-				{
-					ProgressValueAdd( doneTasks );
-					count += doneTasks;
-				}
-				else
-				{
-					SuspendInput();
+			SuspendInput();
 
-					while( gtk_events_pending() )
-					gtk_main_iteration();
+			while( gtk_events_pending() )
+			gtk_main_iteration();
 
-					ResumeInput();
-				}
+			ResumeInput();
 		}
 #ifdef GLIB_THREADS
 		g_mutex_unlock(td.condMutex);
@@ -476,7 +486,7 @@ int MT_WaitForTasks()
 	return td.result;
 }
 #else
-int MT_WaitForTasks()
+int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
 {
 	while(MT_DoTask() != -1)
 	{
@@ -558,7 +568,7 @@ void MT_Lock(long *lock)
 #endif
 }
 
-void MT_Release(long *lock)
+void MT_Unlock(long *lock)
 {
 #ifdef GLIB_THREADS
 	if (g_atomic_int_dec_and_test((gint*)lock) != TRUE)
@@ -574,3 +584,20 @@ void MT_Release(long *lock)
 	}
 #endif
 }
+
+extern void MT_Exclusive()
+{
+	MT_GetLock(td.multiLock);
+}
+
+extern void MT_Release()
+{
+	MT_ReleaseLock(td.multiLock);
+}
+
+extern int MT_GetDoneTasks()
+{
+	return td.doneTasks;
+}
+
+#endif

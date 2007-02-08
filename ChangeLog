@@ -1,3 +1,7 @@
+Thu Feb 08 19:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* multithread.c, rollout.c : Multi-thread rollouts.
+
 Fri Feb 02 18:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* multithread.c/.h, lib/neuralnet.c, lib/neuralnetsse.c, lib/cache.c (new) : syncronize cache
