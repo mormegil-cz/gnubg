@@ -540,6 +540,7 @@ void MT_Lock(long *lock)
 		{
 			WaitForManualEvent(&td.contentionCleared);
 		}
+        }
 #else
 	while (InterlockedIncrement(lock) != 1)
 	{	/* Contention - wait for something to finish */
