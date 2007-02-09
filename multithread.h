@@ -34,8 +34,8 @@ extern int MT_GetThreadID();
   #define MT_SafeInc(x) InterlockedIncrement(&x)
   #define MT_SafeAdd(x, y) InterlockedExchangeAdd(&x, y)
  #else
-  #define MT_SafeInc(x) (++x)	/* Need to sort this out */
-  #define MT_SafeAdd(x, y) (x += y)	/* Need to sort this out */
+  #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(&x, 1) + 1)
+  #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(&x, y) + y)
  #endif
 #else
  #define MT_SafeInc(x) (++x)

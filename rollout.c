@@ -41,9 +41,7 @@
 #include "rollout.h"
 #include <glib/gi18n.h>
 #include "format.h"
-#if USE_MULTITHREAD
 #include "multithread.h"
-#endif
 
 int log_rollouts = 0;
 static FILE *logfp;
