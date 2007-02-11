@@ -45,6 +45,19 @@ char *aszRNG[];
 char *aszSkillType[ 1 ]; 
 int exsExport;
 int ap;
+extern void MT_Lock(long *lock)
+{
+}
+
+extern void MT_Unlock(long *lock)
+{
+}
+
+extern int MT_GetThreadID()
+{
+  return (0);
+}
+
 /* end ugly fixes */
 
 typedef enum _hyperclass {

@@ -35,6 +35,19 @@ char *aszSkillType[ 1 ];
 int exsExport;
 int ap;
 
+extern void MT_Lock(long *lock)
+{
+}
+
+extern void MT_Unlock(long *lock)
+{
+}
+
+extern int MT_GetThreadID()
+{
+  return (0);
+}
+
 extern bearoffcontext *
 BearoffInitBuiltin ( void ) {
 

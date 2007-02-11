@@ -973,7 +973,7 @@ extern void RolloutLoopMT()
 	int active_alternatives;
 	unsigned int i, j;
 	int alt;
-	rolloutcontext *prc;
+	rolloutcontext *prc = NULL;
 	perArray dicePerms;
 	dicePerms.nPermutationSeed = -1;
 
