@@ -31,11 +31,13 @@ extern int MT_GetThreadID();
 
 #if USE_MULTITHREAD
  #ifdef WIN32
-  #define MT_SafeInc(x) InterlockedIncrement(&x)
-  #define MT_SafeAdd(x, y) InterlockedExchangeAdd(&x, y)
+  #define MT_SafeInc(x) InterlockedIncrement((long*)x)
+  #define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
+  #define MT_SafeDec(x) (InterlockedDecrement((long*)x) == 0)
  #else
-  #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(&x, 1) + 1)
-  #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(&x, y) + y)
+  #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
+  #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(x, y) + y)
+  #define MT_SafeDec(x) (g_atomic_int_dec_and_test((gint*)lock) == TRUE)
  #endif
 #else
  #define MT_SafeInc(x) (++x)

@@ -1,3 +1,7 @@
+Mon Feb 12 21:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* multithread.c : Remove pthread tls code and reduce #ifs/tidy win32 code
+
 Sun Feb 11 22:18:33 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* bearoffdump.c, eval.c, makebearoff.c, makehyper.c, rollout.c: small fixes
