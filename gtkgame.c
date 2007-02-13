@@ -2287,8 +2287,6 @@ extern void RunGTK( GtkWidget *pwSplash )
 		PushSplash ( pwSplash, 
 					_("Rendering"), _("Board"), 0 );
 
-		ShowBoard();
-
 		GTKAllowStdin();
 	    
 		if( fTTY ) {
