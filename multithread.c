@@ -527,7 +527,7 @@ void MT_Lock(int *lock)
     }
 }
 
-void MT_Unlock(long *lock)
+void MT_Unlock(int *lock)
 {
     if (!MT_SafeDec(lock))
     {    /* Clear contention */
