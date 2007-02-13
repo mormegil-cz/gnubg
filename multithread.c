@@ -16,9 +16,6 @@
 #if __GNUC__
 #define GCC_ALIGN_HACK 1
 #endif
-#ifndef WIN32
-#define GLIB_THREADS
-#endif
 
 extern int GetLogicalProcssingUnitCount(void);
 extern void RolloutLoopMT();
@@ -64,15 +61,21 @@ ThreadData td;
 
 void TLSCreate(TLSItem *pItem)
 {
-    *pItem = g_private_new(NULL);
+    *pItem = g_private_new(free);
+}
+
+void TLSFree(TLSItem pItem)
+{	/* Done automaticaly by glib */
 }
 
 void TLSSetValue(TLSItem pItem, int value)
 {
-    g_private_set(pItem, (gpointer)value);
+	int *pNew = (int*)malloc(sizeof(int));
+	*pNew = value;
+    g_private_set(pItem, (gpointer)pNew);
 }
 
-#define TLSGet(item) (int)g_private_get(item)
+#define TLSGet(item) *((int*)g_private_get(item))
 
 void InitEvent(Event *pEvent)
 {
@@ -159,12 +162,20 @@ void TLSCreate(TLSItem *ppItem)
     *ppItem = TlsAlloc();
 }
 
-void TLSSetValue(TLSItem pItem, int value)
+void TLSFree(TLSItem pItem)
 {
-    TlsSetValue(pItem, (void*)value);
+	free(TlsGetValue(pItem));
+	TlsFree(pItem);
 }
 
-#define TLSGet(item) (int)TlsGetValue(item)
+void TLSSetValue(TLSItem pItem, int value)
+{
+	int *pNew = (int*)malloc(sizeof(int));
+	*pNew = value;
+    TlsSetValue(pItem, pNew);
+}
+
+#define TLSGet(item) *((int*)TlsGetValue(item))
 
 void InitEvent(Event *pEvent)
 {
@@ -246,9 +257,9 @@ void MT_ActualWorkerThreadFunction(void *id);
 
 gpointer MT_WorkerThreadFunction(gpointer id)
 {    /* Align stack and call actual function */
- asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
- MT_ActualWorkerThreadFunction(id);
- return NULL;
+	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
+	MT_ActualWorkerThreadFunction(id);
+	return NULL;
 }
 
 void MT_ActualWorkerThreadFunction(void *id)
@@ -257,7 +268,9 @@ void MT_ActualWorkerThreadFunction(void *id)
 void MT_WorkerThreadFunction(void *id)
 {
 #endif
-    TLSSetValue(td.tlsItem, (int)id);
+	int *pID = (int*)id;
+    TLSSetValue(td.tlsItem, *pID);
+    free(pID);
     MT_TaskDone(NULL);    /* Thread created */
     do
     {
@@ -271,10 +284,12 @@ static void MT_CreateThreads(void)
     td.totalTasks = numThreads;    /* Use to monitor number created */
     for (i = 0; i < numThreads; i++)
     {
+    	int *pID = (int*)malloc(sizeof(int));
+    	*pID = i;
 #ifdef GLIB_THREADS
-        if (!g_thread_create(MT_WorkerThreadFunction, GINT_TO_POINTER(i + 1), FALSE, NULL))
+        if (!g_thread_create(MT_WorkerThreadFunction, pID, FALSE, NULL))
 #else
-        if (_beginthread(MT_WorkerThreadFunction, 0, (void*)(i + 1)) == 0)
+        if (_beginthread(MT_WorkerThreadFunction, 0, pID) == 0)
 #endif
             printf("Failed to create thread\n");
     }
@@ -320,6 +335,7 @@ extern void MT_InitThreads()
     InitManualEvent(&td.lockContention);
     InitManualEvent(&td.contentionCleared);
     TLSCreate(&td.tlsItem);
+	TLSSetValue(td.tlsItem, 0);	/* Main thread shares id 0 */
     InitEvent(&td.alldone);
     InitMutex(&td.multiLock);
     InitMutex(&td.queueLock);
@@ -486,6 +502,7 @@ extern void MT_Close()
     FreeEvent(td.alldone);
     FreeMutex(td.multiLock);
     FreeMutex(td.queueLock);
+    TLSFree(td.tlsItem);
 }
 
 int MT_GetThreadID()
@@ -493,7 +510,7 @@ int MT_GetThreadID()
     return TLSGet(td.tlsItem);
 }
 
-void MT_Lock(long *lock)
+void MT_Lock(int *lock)
 {
     while (MT_SafeInc(lock) != 1)
     {
@@ -514,8 +531,8 @@ void MT_Unlock(long *lock)
 {
     if (!MT_SafeDec(lock))
     {    /* Clear contention */
-        ResetManualEvent(td.contentionCleared);    /* Force multiple threads to wait for contention reduction */
-        SetManualEvent(td.lockContention);    /* Release any waiting threads */
+        ResetManualEvent(td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
+        SetManualEvent(td.lockContention);	/* Release any waiting threads */
     }
 }
 

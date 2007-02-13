@@ -24,7 +24,7 @@ typedef cacheNode evalcache;
 typedef struct _cache
 {
   cacheNode*	m;
-  long *locks;
+  int *locks;
   
   unsigned int size;
   unsigned int hashMask;

@@ -1,6 +1,10 @@
 
 #include "backgammon.h"
 
+//#ifndef WIN32
+#define GLIB_THREADS
+//#endif
+
 #define MAX_NUMTHREADS 16
 
 typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_CLOSE} TaskType;
@@ -30,18 +34,19 @@ extern int MT_Enabled(void);
 extern int MT_GetThreadID();
 
 #if USE_MULTITHREAD
- #ifdef WIN32
+ #ifdef GLIB_THREADS
+  #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
+  #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(x, y) + y)
+  #define MT_SafeDec(x) (g_atomic_int_dec_and_test(x) == TRUE)
+ #else
   #define MT_SafeInc(x) InterlockedIncrement((long*)x)
   #define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
   #define MT_SafeDec(x) (InterlockedDecrement((long*)x) == 0)
- #else
-  #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
-  #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(x, y) + y)
-  #define MT_SafeDec(x) (g_atomic_int_dec_and_test((gint*)lock) == TRUE)
  #endif
 #else
  #define MT_SafeInc(x) (++x)
  #define MT_SafeAdd(x, y) (x += y)
+ #define MT_SafeDec(x) (--x) == 0)
 #endif
 
 extern void MT_Exclusive();
