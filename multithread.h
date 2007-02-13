@@ -1,9 +1,9 @@
 
 #include "backgammon.h"
 
-//#ifndef WIN32
+#ifndef WIN32
 #define GLIB_THREADS
-//#endif
+#endif
 
 #define MAX_NUMTHREADS 16
 

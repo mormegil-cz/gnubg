@@ -70,7 +70,7 @@ CacheCreate(cache* pc, unsigned int s)
   pc->hashMask = (pc->size >> 1) - 1;
 
   pc->m = (cacheNode*)malloc(pc->size * sizeof(*pc->m));
-  pc->locks = (long*)malloc(pc->size * sizeof(*pc->locks));
+  pc->locks = (int*)malloc(pc->size * sizeof(*pc->locks));
 
   if( pc->m == 0 ) {
     return -1;
