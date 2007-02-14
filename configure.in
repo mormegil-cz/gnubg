@@ -113,7 +113,6 @@ AC_CHECK_LIB(m,sqrt)
 AC_CHECK_LIB(dl,dlopen)
 AC_CHECK_LIB(readline,readline)
 AC_CHECK_LIB(gmp, __gmpz_import)
-AC_CHECK_LIB(pthread, pthread_join, have_pthread="yes", [], [])
 AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
 AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AF_LOCAL sockets.))
@@ -292,15 +291,8 @@ if test "$threadson" != "no"; then
         if test "$have_gthread" != "yes"; then
                 AC_MSG_ERROR("Threads enabled but glib doesn't seem to have gthread support")
         fi
-        if test "$have_pthread" != "yes"; then
-                AC_MSG_ERROR("Threads enabled but pthreads not found")
-        fi
-        PTHREAD_LIBS="-lpthread"
-        PTHREAD_CFLAGS="-pthread"
         AC_DEFINE(USE_MULTITHREAD, 1, Define if you want to have multithread support)
 fi
-AC_SUBST(PTHREAD_LIBS)
-AC_SUBST(PTHREAD_CFLAGS)
 
 
 dnl *************

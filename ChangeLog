@@ -1,3 +1,7 @@
+Wed Feb 14 10:03:35 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in: remove pthread
+
 Mon Feb 12 21:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* multithread.c : Remove pthread tls code and reduce #ifs/tidy win32 code
