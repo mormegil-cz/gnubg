@@ -1,3 +1,8 @@
+Wed Feb 14 11:07:07 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* multithread.h: first argument to MT_Safe* is pointer not value also
+	when compiled without threads
+
 Wed Feb 14 10:03:35 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in: remove pthread
