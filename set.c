@@ -719,11 +719,17 @@ extern void CommandSetThreads( char *sz )
 {
     int n;
 
-    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+    if( ( n = ParseNumber( &sz ) ) <= 0 ) {
 	outputl( _("You must specify the number of threads to use.") );
 
 	return;
     }
+	if (n > MAX_NUMTHREADS)
+	{
+		outputf( _("%d is the maximum number of threads supported"), MAX_NUMTHREADS );
+		output("\n");
+		return;
+	}
 
 	MT_SetNumThreads(n);
 	outputf( _("The number of threads has been set to %d.\n"), n );

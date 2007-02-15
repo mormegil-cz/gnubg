@@ -30,20 +30,73 @@
 #include "gtkgame.h"
 #endif
 #include <glib/gi18n.h>
+#include "multithread.h"
 
 #define EVALS_PER_ITERATION 1024
 
-extern void CommandCalibrate( char *sz ) {
+randctx rc;
+double timeTaken;
 
-    int iIter, i, j, k, n = -1;
-    int aanBoard[ EVALS_PER_ITERATION ][ 2 ][ 25 ];
-    randctx rc;
-    clock_t c0, c1, c = 0;
-    float ar[ NUM_OUTPUTS ];
+void RunEvals()
+{
+	int aanBoard[ EVALS_PER_ITERATION ][ 2 ][ 25 ];
+    int i, j, k;
+	double t;
+	float ar[ NUM_OUTPUTS ];
+
+#if USE_MULTITHREAD
+	MT_Exclusive();
+#endif
+	for( i = 0; i < EVALS_PER_ITERATION; i++ ) {
+	    /* Generate a random board.  Don't allow chequers on the bar
+	       or borne off, so we can trivially guarantee the position
+	       is legal. */
+	    for( j = 0; j < 25; j++ )
+		aanBoard[ i ][ 0 ][ j ] =
+		    aanBoard[ i ][ 1 ][ j ] = 0;
+
+	    for( j = 0; j < 15; j++ ) {
+		do
+		{
+		    k = irand( &rc ) % 24;
+		} while( aanBoard[ i ][ 1 ][ 23 - k ] );
+		aanBoard[ i ][ 0 ][ k ]++;
+
+		do
+		{
+		    k = irand( &rc ) % 24;
+		} while( aanBoard[ i ][ 0 ][ 23 - k ] );
+		aanBoard[ i ][ 1 ][ k ]++;
+	    }
+	}
+
+#if USE_MULTITHREAD
+	MT_Release();
+	MT_Sync();
+#else
+	t = get_time();
+#endif
+
+	for( i = 0; i < EVALS_PER_ITERATION; i++ )
+	{
+		EvaluatePosition( NULL, aanBoard[ i ], ar, &ciCubeless, NULL );
+	}
+
+#if USE_MULTITHREAD
+	if ((t = MT_Sync()) != 0)
+		timeTaken += t;
+#else
+	timeTaken += (get_time() - t);
+#endif
+}
+
+extern void CommandCalibrate( char *sz )
+{
+	int i, iIter, n = -1, c = 0;
 #if USE_GTK
     void *pcc = NULL;
 #endif
-    
+
     if( sz && *sz ) {
 	n = ParseNumber( &sz );
 
@@ -53,6 +106,12 @@ extern void CommandCalibrate( char *sz ) {
 	    return;
 	}
     }
+
+	if (clock() < 0)
+	{
+	    outputl( _("Calibration not available.") );
+		return;
+	}
 
     rc.randrsl[ 0 ] = time( NULL );
     for( i = 0; i < RANDSIZ; i++ )
@@ -64,69 +123,41 @@ extern void CommandCalibrate( char *sz ) {
 	pcc = GTKCalibrationStart();
 #endif
     
-    for( iIter = 0; iIter < n || n < 0; iIter++ ) {
-	for( i = 0; i < EVALS_PER_ITERATION; i++ ) {
-	    /* Generate a random board.  Don't allow chequers on the bar
-	       or borne off, so we can trivially guarantee the position
-	       is legal. */
-	    for( j = 0; j < 25; j++ )
-		aanBoard[ i ][ 0 ][ j ] =
-		    aanBoard[ i ][ 1 ][ j ] = 0;
+	timeTaken = 0;
+    for( iIter = 0; iIter < n || n < 0; )
+	{
+		float spd;
+		if (fInterrupt)
+			break;
 
-	    for( j = 0; j < 15; j++ ) {
-		do
-		    k = irand( &rc ) % 24;
-		while( aanBoard[ i ][ 1 ][ 23 - k ] );
-		aanBoard[ i ][ 0 ][ k ]++;
-
-		do
-		    k = irand( &rc ) % 24;
-		while( aanBoard[ i ][ 0 ][ 23 - k ] );
-		aanBoard[ i ][ 1 ][ k ]++;
-	    }
-	}
-
-	if( ( c0 = clock() ) < 0 ) {
-	    outputl( _("Calibration not available.") );
-#if USE_GTK
-	    if( fX )
-		GTKCalibrationEnd( pcc );
+#if USE_MULTITHREAD
+		for (i = 0; i < MT_GetNumThreads(); i++)
+		{
+			Task *pt = (Task*)malloc(sizeof(Task));
+			pt->type = TT_RUNCALIBRATIONEVALS;
+			pt->pLinkedTask = NULL;
+			MT_AddTask((Task*)pt);
+		}
+		MT_WaitForTasks(NULL, 0);
+		iIter += MT_GetNumThreads();
+#else
+		RunEvals();
+		iIter++;
 #endif
-	    return;
-	}
 
-	for( i = 0; i < EVALS_PER_ITERATION; i++ ) {
-            EvaluatePosition( NULL, aanBoard[ i ], ar, &ciCubeless, NULL );
-	    if( fInterrupt )
-		break;
-	}
-	
-	if( fInterrupt )
-	    break;
-	
-	if( ( c1 = clock() ) < 0 ) {
-	    outputl( _("Calibration not available.") );
+		if (timeTaken == 0)
+			spd = 0;
+		else
+			spd = iIter * EVALS_PER_ITERATION * CLOCKS_PER_SEC / timeTaken;
 #if USE_GTK
-	    if( fX )
-		GTKCalibrationEnd( pcc );
+		if( fX )
+			GTKCalibrationUpdate(pcc, spd);
+		else
 #endif
-	    return;
-	}
-	
-	c += c1 - c0;
-
-#if USE_GTK
-	if( fX )
-	    GTKCalibrationUpdate( pcc, ( iIter + 1.0f ) * EVALS_PER_ITERATION *
-				  CLOCKS_PER_SEC / c );
-	else
-#endif
-	if( fShowProgress && c ) {
-	    outputf( "        \rCalibrating: %.0f static evaluations/second",
-		     ( iIter + 1.0 ) * EVALS_PER_ITERATION *
-		     CLOCKS_PER_SEC / c );
-	    fflush( stdout );
-	}
+		if( fShowProgress ) {
+			outputf( "        \rCalibrating: %.0f static evaluations/second", spd);
+			fflush( stdout );
+		}
     }
     
 #if USE_GTK
@@ -134,9 +165,9 @@ extern void CommandCalibrate( char *sz ) {
 	GTKCalibrationEnd( pcc );
 #endif
 
-    if( c ) {
+    if( timeTaken ) {
 	rEvalsPerSec = (float) iIter * EVALS_PER_ITERATION *
-	    CLOCKS_PER_SEC / c;
+	    CLOCKS_PER_SEC / timeTaken;
 	outputf( "\rCalibration result: %.0f static evaluations/second.\n",
 		 rEvalsPerSec );
     } else

@@ -19,6 +19,7 @@
 
 extern int GetLogicalProcssingUnitCount(void);
 extern void RolloutLoopMT();
+extern void RunEvals();
 
 #ifdef GLIB_THREADS
 typedef struct _ManualEvent
@@ -46,6 +47,7 @@ typedef struct _ThreadData
     Event alldone;
     Mutex queueLock;
     Mutex multiLock;
+	Event synced;
 
     int addedTasks;
     int doneTasks;
@@ -265,7 +267,7 @@ gpointer MT_WorkerThreadFunction(gpointer id)
 void MT_ActualWorkerThreadFunction(void *id)
 {
 #else
-void MT_WorkerThreadFunction(void *id)
+unsigned int MT_WorkerThreadFunction(void *id)
 {
 #endif
 	int *pID = (int*)id;
@@ -276,6 +278,8 @@ void MT_WorkerThreadFunction(void *id)
     {
         WaitForManualEvent(td.activity);
     } while (MT_DoTask());
+
+	return 0;
 }
 
 static void MT_CreateThreads(void)
@@ -339,6 +343,7 @@ extern void MT_InitThreads()
     InitEvent(&td.alldone);
     InitMutex(&td.multiLock);
     InitMutex(&td.queueLock);
+	InitEvent(&td.synced);
 #ifdef GLIB_THREADS
     if (condMutex == NULL)
         condMutex = g_mutex_new();
@@ -410,7 +415,9 @@ AnalyzeDoubleDecison:
         case TT_ROLLOUTLOOP:
             RolloutLoopMT();
             break;
-
+		case TT_RUNCALIBRATIONEVALS:
+			RunEvals();
+			break;
         case TT_TEST:
             printf("Test: waiting for a second");
             g_usleep(1000000);
@@ -502,6 +509,7 @@ extern void MT_Close()
     FreeEvent(td.alldone);
     FreeMutex(td.multiLock);
     FreeMutex(td.queueLock);
+	FreeEvent(td.synced);
     TLSFree(td.tlsItem);
 }
 
@@ -549,6 +557,29 @@ extern void MT_Release()
 extern int MT_GetDoneTasks()
 {
     return td.doneTasks;
+}
+
+extern double MT_Sync()
+{
+	static int count = 0;
+	static double lastTime = 0;
+	int now, ret = 0;
+	/* Wait for all threads to get here */
+	if (MT_SafeInc(&count) == numThreads)
+	{
+		count = 0;
+		now = get_time();
+		if (lastTime)
+			ret = now - lastTime;
+		lastTime = now;
+		SignalEvent(td.synced);
+		return ret;
+	}
+	else
+	{
+		WaitForEvent(td.synced, 100 * 1000);
+		return 0;
+	}
 }
 
 #endif

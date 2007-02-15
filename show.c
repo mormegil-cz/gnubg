@@ -1130,6 +1130,18 @@ extern void CommandShowKleinman( char *sz ) {
                  ap[ ms.fMove ].szName, fKC );
  }
 
+#if USE_MULTITHREAD
+extern void CommandShowThreads(char *sz)
+{
+	int c = MT_GetNumThreads();
+	if (c == 1)
+		outputf(_("1 calculation thread."));
+	else
+		outputf(_("%d calculation threads."), c);
+	output ( "\n" );
+}
+#endif
+
 extern void CommandShowThorp( char *sz ) {
 
     int an[ 2 ][ 25 ];

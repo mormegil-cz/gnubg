@@ -1,3 +1,7 @@
+Mon Feb 12 21:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* speed.c : Make calibration test multi-threaded
+
 Wed Feb 14 11:07:07 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* multithread.h: first argument to MT_Safe* is pointer not value also

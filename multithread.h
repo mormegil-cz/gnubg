@@ -7,7 +7,7 @@
 
 #define MAX_NUMTHREADS 16
 
-typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_CLOSE} TaskType;
+typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_RUNCALIBRATIONEVALS, TT_CLOSE} TaskType;
 
 typedef struct _Task
 {
@@ -44,12 +44,13 @@ extern int MT_GetThreadID();
   #define MT_SafeDec(x) (InterlockedDecrement((long*)x) == 0)
  #endif
 #else
- #define MT_SafeInc(x) (++*x)
- #define MT_SafeAdd(x, y) (*x += y)
- #define MT_SafeDec(x) (--*x) == 0)
+ #define MT_SafeInc(x) (++(*x))
+ #define MT_SafeAdd(x, y) ((*x) += y)
+ #define MT_SafeDec(x) (--(*x)) == 0)
 #endif
 
 extern void MT_Exclusive();
 extern void MT_Release();
 
 extern int MT_GetDoneTasks();
+extern double MT_Sync();

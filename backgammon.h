@@ -1187,6 +1187,9 @@ extern void CommandAccept( char * ),
     CommandShowTimeControl( char * ),
 #endif
     CommandShowTemperatureMap( char * ),
+#if USE_MULTITHREAD
+	CommandShowThreads( char *),
+#endif
     CommandShowThorp( char * ),
     CommandShowTraining( char * ),
     CommandShowTurn( char * ),

@@ -1952,6 +1952,10 @@ command cER = {
     { "temperaturemap", CommandShowTemperatureMap, 
       N_("Show temperature map (graphic overview of dice distribution)"), 
       NULL, NULL },
+#if USE_MULTITHREAD
+    { "threads", CommandShowThreads, N_("Show number of calculation threads"),
+	NULL, NULL },
+#endif
     { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
       "position"), szOPTPOSITION, NULL },
 #if USE_TIMECONTROL
@@ -2117,6 +2121,9 @@ char *aszBuildInfo[] = {
     N_("  /dev/dsp"),
 #endif
 #endif /* USE_SOUND */
+#if USE_MULTITHREAD
+    N_("Multiple threads supported."),
+#endif
     NULL,
 };
 
