@@ -97,6 +97,10 @@ extern void CommandCalibrate( char *sz )
     void *pcc = NULL;
 #endif
 
+#if USE_MULTITHREAD
+	MT_SyncInit();
+#endif
+
     if( sz && *sz ) {
 	n = ParseNumber( &sz );
 

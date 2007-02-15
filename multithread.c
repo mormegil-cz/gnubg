@@ -562,6 +562,12 @@ extern int MT_GetDoneTasks()
     return td.doneTasks;
 }
 
+extern void MT_SyncInit()
+{
+	ResetManualEvent(td.syncStart);
+	ResetManualEvent(td.syncEnd);
+}
+
 double start;
 extern void MT_SyncStart()
 {

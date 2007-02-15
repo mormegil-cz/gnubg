@@ -53,5 +53,6 @@ extern void MT_Exclusive();
 extern void MT_Release();
 
 extern int MT_GetDoneTasks();
+extern void MT_SyncInit();
 extern void MT_SyncStart();
 extern double MT_SyncEnd();
