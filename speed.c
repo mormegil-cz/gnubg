@@ -72,7 +72,7 @@ void RunEvals()
 
 #if USE_MULTITHREAD
 	MT_Release();
-	MT_Sync();
+	MT_SyncStart();
 #else
 	t = get_time();
 #endif
@@ -83,7 +83,7 @@ void RunEvals()
 	}
 
 #if USE_MULTITHREAD
-	if ((t = MT_Sync()) != 0)
+	if ((t = MT_SyncEnd()) != 0)
 		timeTaken += t;
 #else
 	timeTaken += (get_time() - t);

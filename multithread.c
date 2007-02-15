@@ -47,7 +47,8 @@ typedef struct _ThreadData
     Event alldone;
     Mutex queueLock;
     Mutex multiLock;
-	Event synced;
+	ManualEvent syncStart;
+	ManualEvent syncEnd;
 
     int addedTasks;
     int doneTasks;
@@ -343,7 +344,8 @@ extern void MT_InitThreads()
     InitEvent(&td.alldone);
     InitMutex(&td.multiLock);
     InitMutex(&td.queueLock);
-	InitEvent(&td.synced);
+	InitManualEvent(&td.syncStart);
+	InitManualEvent(&td.syncEnd);
 #ifdef GLIB_THREADS
     if (condMutex == NULL)
         condMutex = g_mutex_new();
@@ -509,7 +511,8 @@ extern void MT_Close()
     FreeEvent(td.alldone);
     FreeMutex(td.multiLock);
     FreeMutex(td.queueLock);
-	FreeEvent(td.synced);
+	FreeManualEvent(td.syncStart);
+	FreeManualEvent(td.syncEnd);
     TLSFree(td.tlsItem);
 }
 
@@ -559,25 +562,45 @@ extern int MT_GetDoneTasks()
     return td.doneTasks;
 }
 
-extern double MT_Sync()
+double start;
+extern void MT_SyncStart()
+{
+	static int count = 0;
+
+	/* Wait for all threads to get here */
+	if (MT_SafeInc(&count) == numThreads)
+	{
+		count--;
+		start = get_time();
+		SetManualEvent(td.syncStart);
+	}
+	else
+	{
+		WaitForManualEvent(td.syncStart);
+		if (MT_SafeDec(&count))
+			ResetManualEvent(td.syncStart);
+	}
+}
+
+extern double MT_SyncEnd()
 {
 	static int count = 0;
 	static double lastTime = 0;
 	int now, ret = 0;
+
 	/* Wait for all threads to get here */
 	if (MT_SafeInc(&count) == numThreads)
 	{
-		count = 0;
 		now = get_time();
-		if (lastTime)
-			ret = now - lastTime;
-		lastTime = now;
-		SignalEvent(td.synced);
-		return ret;
+		count--;
+		SetManualEvent(td.syncEnd);
+		return now - start;
 	}
 	else
 	{
-		WaitForEvent(td.synced, 100 * 1000);
+		WaitForManualEvent(td.syncEnd);
+		if (MT_SafeDec(&count))
+			ResetManualEvent(td.syncEnd);
 		return 0;
 	}
 }
