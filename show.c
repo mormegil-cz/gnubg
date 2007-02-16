@@ -61,6 +61,7 @@
 #include <glib.h>
 #endif
 #include "openurl.h"
+#include "multithread.h"
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 

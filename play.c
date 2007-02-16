@@ -2931,7 +2931,8 @@ extern void
 CommandMove( char *sz ) {
 
     int j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ], an[ 8 ];
-	unsigned int i, c;
+	unsigned int i;
+	int c;
     movelist ml;
     moverecord *pmr;
     

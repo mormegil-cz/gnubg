@@ -256,16 +256,22 @@ void MT_TaskDone(Task *pt);
 
 #if GCC_ALIGN_HACK
 
-void MT_ActualWorkerThreadFunction(void *id);
-
-gpointer MT_WorkerThreadFunction(gpointer id)
+unsigned int MT_ActualWorkerThreadFunction(void *id);
+#ifdef GLIB_THREADS
+gpointer
+#else
+void 
+#endif
+MT_WorkerThreadFunction(gpointer id)
 {    /* Align stack and call actual function */
 	asm  __volatile__  ("andl $-16, %%esp" : : : "%esp");
 	MT_ActualWorkerThreadFunction(id);
-	return NULL;
+#ifdef GLIB_THREADS
+return NULL;
+#endif
 }
 
-void MT_ActualWorkerThreadFunction(void *id)
+unsigned int MT_ActualWorkerThreadFunction(void *id)
 {
 #else
 unsigned int MT_WorkerThreadFunction(void *id)
@@ -487,12 +493,14 @@ int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
                 pCallback();
             }
 
+#if USE_GTK
             SuspendInput();
 
             while( gtk_events_pending() )
             gtk_main_iteration();
 
             ResumeInput();
+#endif
         }
     }
     /* Reset counters */
@@ -591,8 +599,7 @@ extern void MT_SyncStart()
 extern double MT_SyncEnd()
 {
 	static int count = 0;
-	static double lastTime = 0;
-	int now, ret = 0;
+	int now;
 
 	/* Wait for all threads to get here */
 	if (MT_SafeInc(&count) == numThreads)

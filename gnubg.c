@@ -235,7 +235,6 @@ evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
 void *rngctxRollout = NULL;
 
 #if defined (REDUCTION_CODE)
-void *rngctxRollout = NULL;
 rolloutcontext rcRollout =
 {
   {

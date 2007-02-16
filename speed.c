@@ -92,7 +92,7 @@ void RunEvals()
 
 extern void CommandCalibrate( char *sz )
 {
-	int i, iIter, n = -1, c = 0;
+	int i, iIter, n = -1;
 #if USE_GTK
     void *pcc = NULL;
 #endif
