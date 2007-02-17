@@ -2294,10 +2294,12 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
 
     *pchSave = 0;
 
+#ifndef NDEBUG
     g_assert( pchSave <= pchEnd );
     g_assert( *ppch <= pchEnd );
     g_assert( pch <= pchEnd );
-    
+#endif
+
     return pch;
 
 }
