@@ -152,7 +152,7 @@ extern void CommandCalibrate( char *sz )
 		if (timeTaken == 0)
 			spd = 0;
 		else
-			spd = iIter * EVALS_PER_ITERATION * CLOCKS_PER_SEC / timeTaken;
+			spd = iIter * (EVALS_PER_ITERATION * CLOCKS_PER_SEC / timeTaken);
 #if USE_GTK
 		if( fX )
 			GTKCalibrationUpdate(pcc, spd);
