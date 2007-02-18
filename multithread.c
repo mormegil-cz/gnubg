@@ -582,7 +582,7 @@ extern void MT_SyncStart()
 	static int count = 0;
 
 	/* Wait for all threads to get here */
-	if (MT_SafeInc(&count) == numThreads)
+	if (MT_SafeInc(&count) == (int)numThreads)
 	{
 		count--;
 		start = get_time();
@@ -599,10 +599,10 @@ extern void MT_SyncStart()
 extern double MT_SyncEnd()
 {
 	static int count = 0;
-	int now;
+	double now;
 
 	/* Wait for all threads to get here */
-	if (MT_SafeInc(&count) == numThreads)
+	if (MT_SafeInc(&count) == (int)numThreads)
 	{
 		now = get_time();
 		count--;

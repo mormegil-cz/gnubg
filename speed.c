@@ -92,7 +92,8 @@ void RunEvals()
 
 extern void CommandCalibrate( char *sz )
 {
-	int i, iIter, n = -1;
+	int iIter, n = -1;
+	unsigned int i;
 #if USE_GTK
     void *pcc = NULL;
 #endif
@@ -130,7 +131,7 @@ extern void CommandCalibrate( char *sz )
 	timeTaken = 0;
     for( iIter = 0; iIter < n || n < 0; )
 	{
-		float spd;
+		double spd;
 		if (fInterrupt)
 			break;
 
@@ -155,7 +156,7 @@ extern void CommandCalibrate( char *sz )
 			spd = iIter * (EVALS_PER_ITERATION * CLOCKS_PER_SEC / timeTaken);
 #if USE_GTK
 		if( fX )
-			GTKCalibrationUpdate(pcc, spd);
+			GTKCalibrationUpdate(pcc, (float)spd);
 		else
 #endif
 		if( fShowProgress ) {
@@ -170,8 +171,8 @@ extern void CommandCalibrate( char *sz )
 #endif
 
     if( timeTaken ) {
-	rEvalsPerSec = (float) iIter * EVALS_PER_ITERATION *
-	    CLOCKS_PER_SEC / timeTaken;
+	rEvalsPerSec = iIter * (float)(EVALS_PER_ITERATION *
+	    CLOCKS_PER_SEC / timeTaken);
 	outputf( "\rCalibration result: %.0f static evaluations/second.\n",
 		 rEvalsPerSec );
     } else

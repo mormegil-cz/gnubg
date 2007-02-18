@@ -3048,7 +3048,7 @@ CommandMove( char *sz ) {
 	    anBoardNew[ 1 ][ i ] = ms.anBoard[ 1 ][ i ];
 	}
 	
-	for( i = 0; i < c; i++ ) {
+	for( i = 0; (int)i < c; i++ ) {
 	    anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
 	    if( an[ ( i << 1 ) | 1 ] > 0 ) {
 		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;

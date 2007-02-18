@@ -984,7 +984,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     }
 
-    if (fShowRanks && iGame > 1) {
+    if (fShowRanks && iGame > 2) {
 	  sprintf (sz, "%d %s", nRank, fStopped ? "s" : "r");
 	  SetRolloutText(prp, iAlternative * 2, i + 1, sz);
 	  if (nRank != 1)
