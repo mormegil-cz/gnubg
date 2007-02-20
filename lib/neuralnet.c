@@ -954,6 +954,10 @@ int CheckSSE()
 {
 	int result = 0;
 
+#ifdef __x86_64
+	result = 1;
+#else
+
 	asm (
 		/* Check if cpuid is supported (can bit 21 of flags be changed) */
 		"mov $1, %%eax\n\t"
@@ -1003,6 +1007,7 @@ int CheckSSE()
 "4:"
 
 			: "=b"(result) : : "%eax", "%ecx", "%edx");
+#endif
 	
 	switch (result)
 	{

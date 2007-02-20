@@ -1,3 +1,7 @@
+Tue Feb 20 21:25:01 GMT 2007  Jim Segrave <jes@j-e-s.net>
+
+	* neuralnet.c: skip sse check if __x86_64 is defined
+	
 Fri Apr 29 21:16:41 CEST 2004  Jon Kinsey
 
 	* neualnetsse.c: Split out SSE code to seperate file
