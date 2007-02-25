@@ -1092,7 +1092,7 @@ extern void RolloutLoopMT()
         /* 1) For each move, calculate the cubeful (or cubeless if
            that's what we're doing) equity  */
 
-        if (rcRollout.fCubeful) {
+        if (ro_apes[0]->ec.fCubeful) {
           v = aarMu[ alt ][ OUTPUT_CUBEFUL_EQUITY ];
           s = aarSigma[ alt ][ OUTPUT_CUBEFUL_EQUITY ];
           

@@ -1,3 +1,12 @@
+Sun 25 Feb 12:11:40 2007 GMT Jim Segrave <jes@j-e-s.net>
+
+	* rollout.c - if settings were for cubeful rollouts, then
+	  extending rollouts used cubeful equity. Threading aggravates
+	  the problem, this is not a complete fix (rcRollout
+	  is used globally but needs to be modified to match the set of
+	  moves being rolled out. Ensuring it's put back for all
+	  sequences which might terminate a rollout is non-trivial
+	
 Mon Feb 12 21:56:45 2006 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* speed.c : Make calibration test multi-threaded
