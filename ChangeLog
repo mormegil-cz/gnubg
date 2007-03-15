@@ -1,11 +1,16 @@
-Tue Mar 13 14:31:38 CET 2007 Christian Anthon <anthon@kiku.dk>
+Fri Mar 16 00:04:44 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkgame.c, gtkwindows.c, play.c: replace gtk_idle with
+	g_idle.
+
+Fri Mar 16 00:04:29 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* <many> : silence a bunch of intel c compiler warnings (recomitting
 	after savannah crash)
 
 Fri 15 Mar 21:47:53 2007 GMT Jim Segrave <jes@j-e-s.net>
 
-	* rollout.c - was using the 'this is a cube rollout' flag to
+	* rollout.c: was using the 'this is a cube rollout' flag to
           decide whether to calculate JSDs from cubeful or cubeless equities
 
 Sun 25 Feb 12:11:40 2007 GMT Jim Segrave <jes@j-e-s.net>

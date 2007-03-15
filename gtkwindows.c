@@ -197,7 +197,7 @@ GtkWidget *GTKGetCurrentParent()
 extern int 
 GTKMessage( char *sz, dialogtype dt )
 {
-    int f = FALSE, fRestoreNextTurn;
+    int f = FALSE;
     static char *aszTitle[ NUM_DIALOG_TYPES - 1 ] = {
 	N_("GNU Backgammon - Message"),
 	N_("GNU Backgammon - Question"),
@@ -234,15 +234,15 @@ GTKMessage( char *sz, dialogtype dt )
 
     /* This dialog should be REALLY modal -- disable "next turn" idle
        processing and stdin handler, to avoid reentrancy problems. */
-    if( ( fRestoreNextTurn = nNextTurn ) )
-	gtk_idle_remove( nNextTurn );
+    if( nNextTurn ) 
+      g_source_remove( nNextTurn );
 	    
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
 
-    if( fRestoreNextTurn )
-	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+    if( nNextTurn ) 
+      nNextTurn = g_idle_add( NextTurnNotify, NULL );
     
     return f;
 }

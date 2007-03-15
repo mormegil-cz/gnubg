@@ -2696,7 +2696,7 @@ extern void ResetInterrupt( void ) {
 	
 #if USE_GTK
 	if( nNextTurn ) {
-	    gtk_idle_remove( nNextTurn );
+	    g_source_remove( nNextTurn );
 	    nNextTurn = 0;
 	}
 #endif

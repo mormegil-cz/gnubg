@@ -2444,7 +2444,7 @@ TutorRethink ( GtkWidget *pw, void *unused ) {
 
 extern int GtkTutor ( char *sz )
 {
-    int f = FALSE, fRestoreNextTurn;
+    int f = FALSE;
     GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor,
           *pwButtons, *pwPrompt, *pwHint;
 
@@ -2485,15 +2485,15 @@ extern int GtkTutor ( char *sz )
     
     /* This dialog should be REALLY modal -- disable "next turn" idle
        processing and stdin handler, to avoid reentrancy problems. */
-    if( ( fRestoreNextTurn = nNextTurn ) )
-      gtk_idle_remove( nNextTurn );
+    if( nNextTurn ) 
+      g_source_remove( nNextTurn );
     
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
     
-    if( fRestoreNextTurn )
-      nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+    if( nNextTurn ) 
+      nNextTurn = g_idle_add( NextTurnNotify, NULL );
     
     /* if tutor mode was disabled, update the checklist */
     if ( !fTutor) {

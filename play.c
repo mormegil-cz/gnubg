@@ -1793,7 +1793,7 @@ extern int NextTurn( int fPlayNext ) {
 #if USE_GTK
     if( fX ) {
 	if( nNextTurn ) {
-	    gtk_idle_remove( nNextTurn );
+	    g_source_remove( nNextTurn );
 	    nNextTurn = 0;
 	} else
 	    return -1;
@@ -1969,7 +1969,7 @@ extern int NextTurn( int fPlayNext ) {
 #if USE_GTK
     if( fX ) {
 	if( !ComputerTurn() && !nNextTurn )
-	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+	    nNextTurn = g_idle_add( NextTurnNotify, NULL );
     } else
 #endif
 	fNextTurn = !ComputerTurn();
@@ -1983,7 +1983,7 @@ extern void TurnDone( void ) {
 #if USE_GTK
     if( fX ) {
 	if( !nNextTurn )
-	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+	    nNextTurn = g_idle_add( NextTurnNotify, NULL );
     } else
 #endif
 	fNextTurn = TRUE;
