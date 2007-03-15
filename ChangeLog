@@ -1,3 +1,8 @@
+Fri 15 Mar 21:47:53 2007 GMT Jim Segrave <jes@j-e-s.net>
+
+	* rollout.c - was using the 'this is a cube rollout' flag to
+          decide whether to calculate JSDs from cubeful or cubeless equities
+
 Sun 25 Feb 12:11:40 2007 GMT Jim Segrave <jes@j-e-s.net>
 
 	* rollout.c - if settings were for cubeful rollouts, then
