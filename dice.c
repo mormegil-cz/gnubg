@@ -173,7 +173,7 @@ static int
 ReadDiceFile( rngcontext *rngctx );
 
 
-static int GetManualDice( int anDice[ 2 ] ) {
+static int GetManualDice( unsigned int anDice[ 2 ] ) {
 
   char *sz, *pz;
   int i;
@@ -955,7 +955,7 @@ getDiceRandomDotOrg ( void ) {
 #endif /* HAVE_SOCKETS */
 
 
-extern int RollDice( int anDice[ 2 ], const rng rngx, void *p ) {
+extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, void *p ) {
 
     rngcontext *rngctx = (rngcontext *) p;
 

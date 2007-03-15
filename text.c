@@ -61,7 +61,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
 #else
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 #endif
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
 
   memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
 

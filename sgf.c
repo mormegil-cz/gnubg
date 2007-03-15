@@ -979,7 +979,7 @@ static void RestoreDoubleAnalysis(property * pp,
 
 
 static void RestoreMoveAnalysis(property * pp, int fPlayer,
-				movelist * pml, int *piMove,
+				movelist * pml, unsigned int *piMove,
 				evalsetup * pesChequer,
 				const matchstate * pms)
 {

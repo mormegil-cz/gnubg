@@ -65,7 +65,7 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i, j, nDiff, nSum;
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   char *sz;
   
   gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -189,7 +189,7 @@ KeithPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i, j, nLeader, nTrailer;
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   float fL;
   char *sz;
   
@@ -262,7 +262,7 @@ ThorpPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i, j, nLeader, nTrailer, nDiff;
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   char *sz;
   
   gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -422,7 +422,7 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
 
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   float arMu[ 2 ];
   float arSigma[ 2 ];
   int i, j;
@@ -542,7 +542,7 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
   float ar[ 5 ];
   int i, j;
   char sz[ 16 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
               5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
               1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;

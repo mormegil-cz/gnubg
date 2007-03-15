@@ -404,7 +404,7 @@ static int fWarned, fPostCrawford;
 
 static int
 ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
-             const int anDice[ 2 ] ) {
+             const unsigned int anDice[ 2 ] ) {
 
   int i, j, k;
   int c = *pc;

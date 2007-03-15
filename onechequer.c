@@ -169,7 +169,7 @@ GWCFromDist( const float arDist0[], const float arDist1[], const int n ) {
  */
 
 extern float
-GWCFromPipCount( const int anPips[ 2 ], float *arMu, float *arSigma ) {
+GWCFromPipCount( const unsigned int anPips[ 2 ], float *arMu, float *arSigma ) {
 
   float *table;
   float aarDist[ 2 ][ 32 ];

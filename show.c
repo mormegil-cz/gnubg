@@ -559,7 +559,8 @@ extern void CommandShowDelay( char *sz ) {
 
 extern void CommandShowCache( char *sz ) {
 
-    int c, cLookup, cHit;
+    unsigned int c, cHit;
+    unsigned int cLookup;
 
     EvalCacheStats( &c, NULL, &cLookup, &cHit );
 
@@ -812,7 +813,8 @@ extern void CommandShowMatchLength( char *sz ) {
 
 extern void CommandShowPipCount( char *sz ) {
 
-    int anPips[ 2 ], an[ 2 ][ 25 ];
+    int an[ 2 ][ 25 ];
+    unsigned int anPips[ 2 ]; 
 
     if( !*sz && ms.gs == GAME_NONE ) {
 	outputl( _("No position specified and no game in progress.") );
@@ -1103,7 +1105,8 @@ extern void CommandShowWarranty( char *sz ) {
 
 extern void CommandShowKleinman( char *sz ) {
 
-    int anPips[ 2 ], an[ 2 ][ 25 ];
+    int an[ 2 ][ 25 ];
+    unsigned int anPips[ 2 ];
     float fKC;
 
     if( !*sz && ms.gs == GAME_NONE ) {
@@ -1298,7 +1301,7 @@ writeMET ( float aafMET[][ MAXSCORE ],
 
 
 static void
-EffectivePipCount( const float arMu[ 2 ], const int anPips[ 2 ] ) {
+EffectivePipCount( const float arMu[ 2 ], const unsigned int anPips[ 2 ] ) {
 
   int i;
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
@@ -1327,7 +1330,7 @@ extern void
 CommandShowOneChequer ( char *sz ) {
 
   int anBoard[ 2 ][ 25 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   float arMu[ 2 ];
   float arSigma[ 2 ];
   int i, j;
@@ -1383,7 +1386,7 @@ CommandShowOneSidedRollout ( char *sz ) {
   int nTrials = 576;
   float arMu[ 2 ];
   float ar[ 5 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
 
   if( !*sz && ms.gs == GAME_NONE ) {
     outputl( _("No position specified and no game in progress.") );

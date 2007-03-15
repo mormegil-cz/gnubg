@@ -417,7 +417,7 @@ TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[], float rAlpha,
 	       float rAnneal, const bgvariation bgv );
 
 extern int 
-PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
+PipCount( int anBoard[ 2 ][ 25 ], unsigned int anPips[ 2 ] );
 
 extern int 
 ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer );
@@ -443,7 +443,7 @@ extern int
 EvalCacheResize( unsigned int cNew );
 
 extern int 
-EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup, int *pcHit );
+EvalCacheStats( unsigned int *pcUsed, unsigned int *pcSize, unsigned int *pcLookup, unsigned int *pcHit );
 
 extern int 
 GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
@@ -483,6 +483,9 @@ SetCubeInfo ( cubeinfo *pci, const int nCube, const int fCubeOwner,
               const int fCrawford, const int fJacoby, const int fBeavers, 
               const bgvariation bgv );
  
+extern void 
+swap_us( unsigned int *p0, unsigned int *p1 );
+
 extern void 
 swap( int *p0, int *p1 );
 

@@ -141,7 +141,7 @@ extern char
 
 
 extern char*
-MatchID ( const int anDice[ 2 ],
+MatchID ( const unsigned int anDice[ 2 ],
           const int fTurn,
           const int fResigned,
           const int fDoubled,

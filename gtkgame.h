@@ -100,14 +100,14 @@ extern void GTKBearoffProgress( int i );
 extern void GTKDumpStatcontext( int game );
 extern void GTKEval( char *szOutput );
 extern void 
-GTKHint( movelist *pmlOrig, const int iMove );
+GTKHint( movelist *pmlOrig, const unsigned int iMove );
 extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 const evalsetup *pes );
 
 extern void GTKSet( void *p );
 extern void GTKUpdateAnnotations( void );
-extern int GTKGetManualDice( int an[ 2 ] );
+extern int GTKGetManualDice( unsigned int an[ 2 ] );
 extern void GTKShowVersion( void );
 extern void GTKShowCalibration( void );
 extern void *GTKCalibrationStart( void ),

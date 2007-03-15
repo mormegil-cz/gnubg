@@ -140,7 +140,7 @@ NewMoveRecord( void ) {
 }
 
 static int
-CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest );
+CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest );
 
 
 static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, int anBoard[ 2 ][ 25], 
@@ -656,7 +656,7 @@ fAddingMoveRecord=1;
     g_assert( pmr->CubeDecPtr->esDouble.et >= EVAL_NONE &&
             pmr->CubeDecPtr->esDouble.et <= EVAL_ROLLOUT );
     g_assert( pmr->fPlayer >= 0 && pmr->fPlayer <= 1 );
-    g_assert( pmr->ml.cMoves >= 0 && pmr->ml.cMoves < MAX_MOVES );
+    g_assert( pmr->ml.cMoves < MAX_MOVES );
     g_assert( pmr->lt >= LUCK_VERYBAD && pmr->lt <= LUCK_VERYGOOD );
     g_assert( 0 <= pmr->stCube && pmr->stCube < N_SKILLS );
     g_assert( pmr->CubeDecPtr->esDouble.et >= EVAL_NONE &&
@@ -680,7 +680,7 @@ fAddingMoveRecord=1;
 	
     case MOVE_NORMAL:
 	if( pmr->ml.cMoves )
-	    g_assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->ml.cMoves );
+	    g_assert( pmr->n.iMove <= pmr->ml.cMoves );
 	g_assert( 0 <= pmr->n.stMove && pmr->n.stMove < N_SKILLS );
 	break;
 	
@@ -1759,7 +1759,7 @@ static int TryBearoff( void ) {
                   CopyMoveList ( &pmr->ml, &sm.ml );
                   pmr->n.iMove = locateMove ( ms.anBoard, pmr->n.anMove, 
                                             &pmr->ml );
-		  if ((pmr->n.iMove < 0) || (pmr->n.iMove > pmr->ml.cMoves)) {
+		  if ( (pmr->n.iMove > pmr->ml.cMoves)) {
 		    free (pmr->ml.amMoves);
 		    pmr->ml.cMoves = 0;
 		    pmr->ml.amMoves = NULL;
@@ -2996,7 +2996,7 @@ CommandMove( char *sz ) {
               CopyMoveList ( &pmr->ml, &sm.ml );
               pmr->n.iMove = locateMove ( ms.anBoard, pmr->n.anMove, 
                                         &pmr->ml );
-              if ((pmr->n.iMove < 0) || (pmr->n.iMove > pmr->ml.cMoves)) {
+              if ( (pmr->n.iMove > pmr->ml.cMoves)) {
 		free (pmr->ml.amMoves);
 		pmr->ml.cMoves = 0;
 		pmr->ml.amMoves = NULL;
@@ -3090,7 +3090,7 @@ CommandMove( char *sz ) {
                   CopyMoveList ( &pmr->ml, &sm.ml );
                   pmr->n.iMove = locateMove ( ms.anBoard, pmr->n.anMove, 
                                             &pmr->ml );
-		  if ((pmr->n.iMove < 0) || (pmr->n.iMove > pmr->ml.cMoves)) {
+		  if ( (pmr->n.iMove > pmr->ml.cMoves)) {
 		    free (pmr->ml.amMoves);
 		    pmr->ml.cMoves = 0;
 		    pmr->ml.amMoves = NULL;
@@ -4547,9 +4547,13 @@ getCurrentMoveRecord ( int *pfHistory ) {
 
 }
 
+static void
+OptimumRoll ( int anBoard[ 2 ][ 25 ], 
+              const cubeinfo *pci, const evalcontext *pec,
+              const int fBest, unsigned int anDice[ 2 ] );
 
 static int
-CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest ) {
+CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest ) {
 
 #if defined (REDUCTION_CODE)
   static evalcontext ec0ply = { FALSE, 0, 0, TRUE, 0.0 };
@@ -4594,10 +4598,10 @@ CompareRollEquity( const void *p1, const void *p2 ) {
 
 }
 
-extern void
+static void
 OptimumRoll ( int anBoard[ 2 ][ 25 ], 
               const cubeinfo *pci, const evalcontext *pec,
-              const int fBest, int anDice[ 2 ] ) {
+              const int fBest, unsigned int anDice[ 2 ] ) {
 
   int i, j, k;
   float ar[ NUM_ROLLOUT_OUTPUTS ];

@@ -577,7 +577,7 @@ ReturnHits( int anBoard[ 2 ][ 25 ] ) {
 
 void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
-  int anPip[ 2 ];
+  unsigned int anPip[ 2 ];
   char *pc;
   int f;
   float arEPC[ 2 ];
@@ -788,7 +788,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd,
    for player 1 (colour == 1) in anPips[1]
    assumes that a chequer has been picked up already from bd->drag_point,
    works on board representation in bd->points[] */
-gboolean CurrentPipCount( BoardData *bd, int anPips[ 2 ] ) {
+gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] ) {
 
 	int i;
 	
@@ -815,16 +815,6 @@ gboolean CurrentPipCount( BoardData *bd, int anPips[ 2 ] ) {
 	return 0;
 }
 
-/* SwapInts: swap two integer values */
-gboolean SwapInts( int *val1, int *val2 ) {
-
-	int tmp = *val1;
-	*val1 = *val2;
-	*val2 = tmp;
-
-	return 0;
-}
-
 /* PointsAreEmpty: checks if there are chequers of player <iColour> between two points */
 gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int iColour ) {
 
@@ -832,7 +822,7 @@ gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int iCol
 
 	if ( iColour > 0 ) {
 		if ( iStartPoint > iEndPoint )
-			SwapInts( &iStartPoint, &iEndPoint );
+			swap( &iStartPoint, &iEndPoint );
 		for ( i = iStartPoint; i <= iEndPoint; ++i )
 			if ( bd->points[i] > 0 ) {
 				return FALSE;
@@ -840,7 +830,7 @@ gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int iCol
 	}
 	else {
 		if ( iStartPoint < iEndPoint )
-			SwapInts( &iStartPoint, &iEndPoint );
+			swap( &iStartPoint, &iEndPoint );
 		for ( i = iStartPoint; i >= iEndPoint; --i )
 			if ( bd->points[i] < 0 ) {
 				return FALSE;
@@ -879,7 +869,7 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 	/* pip count before move */
 	PipCount( bd->old_board, anPipsBeforeMove );
 	if ( bd->turn < 0 )
-		SwapInts( &anPipsBeforeMove[ 0 ], &anPipsBeforeMove[ 1 ] );
+		swap_us( &anPipsBeforeMove[ 0 ], &anPipsBeforeMove[ 1 ] );
 
 	/* current pip count */
 	CurrentPipCount( bd, anCurPipCount );
@@ -1675,7 +1665,7 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
 	updateBoard(board, bd);
 }
 
-static int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+static int ForcedMove ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] ) {
 
   movelist ml;
 
@@ -1692,7 +1682,7 @@ static int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
 }
 
-static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] ) {
 
   movelist ml;
   unsigned int i, iMove, cMoves;
@@ -1938,7 +1928,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 		}
 	    else 
 		{	/* Other buttons on dice swaps positions. */
-			swap(bd->diceRoll, bd->diceRoll + 1);
+			swap_us(bd->diceRoll, bd->diceRoll + 1);
 
 			/* Display swapped dice */
 #if USE_BOARD3D
@@ -2505,6 +2495,19 @@ static void SetCrawfordToggle(BoardData* bd)
 	}
 }
 
+static int board_text_to_setting (const gchar **board_text, gint *failed)
+{
+	if (*failed)
+		return 0;
+
+	if( *(*board_text)++ != ':' )
+	{
+		*failed = 1;
+		return 0;
+	}
+	return strtol( *board_text, (char **) board_text, 10 );
+}
+
 static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use ) {
 
@@ -2516,55 +2519,22 @@ static gint board_set( Board *board, const gchar *board_text,
     int old_resigned;
     int old_xResign, old_yResign;
     int old_turn;
-	int redrawNeeded = 0;
-	int dummy;
+    int redrawNeeded = 0;
+    gint failed = 0;
     
-#if __GNUC__ && !__STRICT_ANSI__
-    int *match_settings[] = { &bd->match_to, &bd->score,
-			      &bd->score_opponent };
-    int *game_settings[] = { &bd->turn, 
-		       bd->diceRoll, bd->diceRoll + 1, &dummy, &dummy,
-		       &bd->cube, &bd->can_double, &bd->opponent_can_double,
-		       &bd->doubled, &bd->colour, &bd->direction,
-		       &bd->home, &bd->bar, &bd->off, &bd->off_opponent,
-		       &bd->on_bar, &bd->on_bar_opponent, &bd->to_move,
-		       &bd->forced, &bd->crawford_game, &bd->redoubles };
-    int old_dice[] = {bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]};
-#else
-    int *match_settings[ 3 ], *game_settings[ 21 ], old_dice[ 2 ];
+    int *match_settings[ 3 ], old_dice[ 2 ];
 
     match_settings[ 0 ] = &bd->match_to;
     match_settings[ 1 ] = &bd->score;
     match_settings[ 2 ] = &bd->score_opponent;
 
-    game_settings[ 0 ] = &bd->turn;
-    game_settings[ 1 ] = bd->diceRoll;
-    game_settings[ 2 ] = bd->diceRoll + 1;
-    game_settings[ 3 ] = &dummy;
-    game_settings[ 4 ] = &dummy;
-    game_settings[ 5 ] = &bd->cube;
-    game_settings[ 6 ] = &bd->can_double;
-    game_settings[ 7 ] = &bd->opponent_can_double;
-    game_settings[ 8 ] = &bd->doubled;
-    game_settings[ 9 ] = &bd->colour;
-    game_settings[ 10 ] = &bd->direction;
-    game_settings[ 11 ] = &bd->home;
-    game_settings[ 12 ] = &bd->bar;
-    game_settings[ 13 ] = &bd->off;
-    game_settings[ 14 ] = &bd->off_opponent;
-    game_settings[ 15 ] = &bd->on_bar;
-    game_settings[ 16 ] = &bd->on_bar_opponent;
-    game_settings[ 17 ] = &bd->to_move;
-    game_settings[ 18 ] = &bd->forced;
-    game_settings[ 19 ] = &bd->crawford_game;
-    game_settings[ 20 ] = &bd->redoubles;
 
     old_dice[ 0 ] = bd->diceRoll[ 0 ];
     old_dice[ 1 ] = bd->diceRoll[ 1 ];
-#endif
     old_turn = bd->turn;
     
     editing = bd->playing && ToolbarIsEditing( pwToolbar );
+
 
     if( strncmp( board_text, "board:", 6 ) )
 	return -1;
@@ -2592,19 +2562,17 @@ static gint board_set( Board *board, const gchar *board_text,
 	return -1;
 
     for( i = 3, ppn = match_settings; i--; ) {
-	if( *board_text++ != ':' ) /* FIXME should check end of string */
-	    return -1;
-
-	**ppn++ = strtol( board_text, (char **) &board_text, 10 );
+	**ppn++ =  board_text_to_setting (&board_text, &failed);
     }
+    if (failed)
+	return -1;
 
     for( i = 0, pn = bd->points; i < 26; i++ ) {
 	old_board[ i ] = *pn;
-	if( *board_text++ != ':' )
-	    return -1;
-
-	*pn++ = strtol( board_text, (char **) &board_text, 10 );
+	*pn++ = board_text_to_setting (&board_text, &failed);
     }
+    if (failed)
+	return -1;
 
     old_board[ 26 ] = bd->points[ 26 ];
     old_board[ 27 ] = bd->points[ 27 ];
@@ -2619,12 +2587,29 @@ static gint board_set( Board *board, const gchar *board_text,
     resign_position( bd, &old_xResign, &old_yResign, NULL );
     bd->resigned = resigned;
     
-    for( i = 21, ppn = game_settings; i--; ) {
-	if( *board_text++ != ':' )
+    bd->turn = board_text_to_setting (&board_text, &failed);
+    bd->diceRoll[0] = board_text_to_setting (&board_text, &failed);
+    bd->diceRoll[1] = board_text_to_setting (&board_text, &failed);
+    board_text_to_setting (&board_text, &failed);
+    board_text_to_setting (&board_text, &failed);
+    bd->cube = board_text_to_setting (&board_text, &failed);
+    bd->can_double = board_text_to_setting (&board_text, &failed);
+    bd->opponent_can_double = board_text_to_setting (&board_text, &failed);
+    bd->doubled = board_text_to_setting (&board_text, &failed);
+    bd->colour = board_text_to_setting (&board_text, &failed);
+    bd->direction = board_text_to_setting (&board_text, &failed);
+    bd->home = board_text_to_setting (&board_text, &failed);
+    bd->bar = board_text_to_setting (&board_text, &failed);
+    bd->off = board_text_to_setting (&board_text, &failed);
+    bd->off_opponent = board_text_to_setting (&board_text, &failed);
+    bd->on_bar = board_text_to_setting (&board_text, &failed);
+    bd->on_bar_opponent = board_text_to_setting (&board_text, &failed);
+    bd->to_move = board_text_to_setting (&board_text, &failed);
+    bd->forced = board_text_to_setting (&board_text, &failed);
+    bd->crawford_game = board_text_to_setting (&board_text, &failed);
+    bd->redoubles = board_text_to_setting (&board_text, &failed);
+    if (failed)
 	    return -1;
-
-	**ppn++ = strtol( board_text, (char **) &board_text, 10 );
-    }
 
     if( bd->colour < 0 )
 	bd->off = -bd->off;
@@ -2679,7 +2664,7 @@ static gint board_set( Board *board, const gchar *board_text,
     update_move( bd );
 	
     if (fGUIHighDieFirst && bd->diceRoll[ 0 ] < bd->diceRoll[ 1 ] )
-	    swap( bd->diceRoll, bd->diceRoll + 1 );
+	    swap_us( bd->diceRoll, bd->diceRoll + 1 );
 
 	if (bd->diceRoll[0] != old_dice[0] ||
 		bd->diceRoll[1] != old_dice[1] ||
@@ -3580,8 +3565,7 @@ void board_edit( BoardData *bd ) {
             for ( i = 0; i < 2; ++i )
               if ( anScoreNew[ i ] > nMatchToNew )
                 anScoreNew[ i ] = 0;
-	  if ((bd->diceRoll[0] < 0) || (bd->diceRoll[1] < 0) ||
-	      (bd->diceRoll[0] > 6) || (bd->diceRoll[1] > 6)) {
+	  if ( (bd->diceRoll[0] > 6) || (bd->diceRoll[1] > 6)) {
 	    bd->diceRoll[0] = bd->diceRoll[1] = 0;
 	  }
 

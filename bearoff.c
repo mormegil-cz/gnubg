@@ -1094,7 +1094,7 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   int i;
   float aarProb[ 2 ][ 32 ], aarGammonProb[ 2 ][ 32 ];
   int f0, f1, f2, f3;
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
               5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
               1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;

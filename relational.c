@@ -348,7 +348,7 @@ int MoveAnalysed(moverecord *pmr, matchstate *pms, list *plGame,
 	    pms->fMove = pmr->fPlayer;
 	}
       
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->fPlayer ] )
+        if ( ! afAnalysePlayers[ pmr->fPlayer ] )
           /* we do not analyse this player */
           break;
       

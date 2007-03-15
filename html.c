@@ -562,7 +562,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
                     const htmlexportcss hecss ) {
 
   int anBoard[ 2 ][ 25 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   int acOff[ 2 ];
   int i, j;
   char sz[ 1024 ];
@@ -816,7 +816,7 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
                      "b-xdie4", "b-xdie5", "b-xdie6" };
 
   int anBoard[ 2 ][ 25 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
 
   memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
 
@@ -1187,7 +1187,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   int i, j;
 
   int anBoard[ 2 ][ 25 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   int acOff[ 2 ];
 
   memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );

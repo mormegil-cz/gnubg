@@ -23,7 +23,7 @@
 #define _ONECHEQUER_H_
 
 extern float
-GWCFromPipCount( const int anPips[ 2 ], float *arMu, float *arSigma );
+GWCFromPipCount( const unsigned int anPips[ 2 ], float *arMu, float *arSigma );
 
 extern float
 GWCFromMuSigma( const float arMu[ 2 ], const float arSigma[ 2 ] );

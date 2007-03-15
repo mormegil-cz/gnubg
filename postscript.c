@@ -554,7 +554,7 @@ static void
 PostScriptPipCounts ( FILE *pf, int anBoard[ 2 ][ 25 ], int fMove ) {
 
   int an[ 2 ][ 25 ];
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
 
   memcpy ( an, anBoard, sizeof ( an ) );
 

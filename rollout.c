@@ -215,7 +215,7 @@ static int nSkip;
 
 static int RolloutDice( int iTurn, int iGame, int cGames,
                             int fInitial,
-                            int anDice[ 2 ],
+                            unsigned int anDice[ 2 ],
                             const rng rngx,
                             void *rngctx,
                             const int fRotate, perArray *dicePerms ) {
@@ -316,7 +316,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       rolloutstat aarsStatistics[][ 2 ],
 		      int nBasisCube, perArray *dicePerms) {
 
-  int anDice [ 2 ], cUnfinished = cci;
+  unsigned int anDice [ 2 ];
+  int cUnfinished = cci;
   cubeinfo *pci;
   cubedecision cd;
   int *pf, ici, i, j, k;
@@ -324,7 +325,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
   positionclass pc, pcBefore;
   int nPipsBefore = 0, nPipsAfter, nPipsDice;
-  int anPips [ 2 ];
+  unsigned int anPips [ 2 ];
   int afClosedBoard[ 2 ];
 
   float arDouble[ NUM_CUBEFUL_OUTPUTS ];
@@ -558,7 +559,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       return -1;
 
     if( anDice[ 0 ] < anDice[ 1 ] )
-	    swap( anDice, anDice + 1 );
+	    swap_us( anDice, anDice + 1 );
 
 
     for ( ici = 0, pci = pciLocal, pf = pfFinished;

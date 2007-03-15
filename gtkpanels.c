@@ -243,7 +243,7 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, int points[2][25])
 		if (ms.gs != GAME_NONE)
 		{
 			int diff;
-			int anPip[ 2 ];
+			unsigned int anPip[ 2 ];
 			PipCount(points, anPip);
 
 			diff = anPip[0] - anPip[1];
@@ -301,7 +301,7 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, int points[2][25])
 		if (ms.gs != GAME_NONE)
 		{
 			float fKC;
-			int anPip[ 2 ];
+			unsigned int anPip[ 2 ];
 			PipCount(points, anPip);
 
 			fKC = KleinmanCount(anPip[1], anPip[0]);

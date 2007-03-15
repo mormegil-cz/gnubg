@@ -3265,7 +3265,7 @@ extern char *FormatPrompt( void ) {
 
     static char sz[ 128 ]; /* FIXME check for overflow in rest of function */
     char *pch = szPrompt, *pchDest = sz;
-    int anPips[ 2 ];
+    unsigned int anPips[ 2 ];
 
     while( *pch )
 	if( *pch == '\\' ) {
@@ -5379,7 +5379,8 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
-    int i, cCache; 
+    int i;
+    unsigned int cCache; 
     char *szFile;
     char szTemp[ 4096 ];
 #if USE_GTK
@@ -5483,13 +5484,13 @@ extern void CommandSaveSettings( char *szParam ) {
              "set bearoff sconyers 15x15 dvd enable %s\n"
              "set bearoff sconyers 15x15 dvd path \"%s\"\n",
              fSconyers15x15DVD ? "yes" : "no",
-             szPathSconyers15x15DVD ? szPathSconyers15x15DVD : "" );
+             szPathSconyers15x15DVD);
 
     fprintf( pf,
              "set bearoff sconyers 15x15 disk enable %s\n"
              "set bearoff sconyers 15x15 disk path \"%s\"\n",
              fSconyers15x15Disk ? "yes" : "no",
-             szPathSconyers15x15Disk ? szPathSconyers15x15Disk : "" );
+             szPathSconyers15x15Disk);
 
     /* Render preferences */
 
@@ -5829,65 +5830,6 @@ extern void CommandSaveWeights( char *sz ) {
 	outputerr( sz );
     else
 	outputf( _("Evaluator weights saved to %s.\n"), sz );
-}
-
-extern void CommandTrainTD( char *sz ) {
-
-    int c = 0, n;
-    int anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ];
-    int anDiceTrain[ 2 ];
-    float ar[ NUM_OUTPUTS ];
-    
-    if( sz && *sz ) {
-	if( ( n = ParseNumber( &sz ) ) < 1 ) {
-	    outputl( _("If you specify a parameter to `train td', it\n"
-		     "must be a number of positions to train on.") );
-	    return;
-	}
-    } else
-	n = 0;
-
-    ProgressStart( _("Training...") );
-    
-    while( ( !n || c <= n ) && !fInterrupt ) {
-	InitBoard( anBoardTrain, ciCubeless.bgv );
-	
-	do {    
-	    if( !( ++c % 100 ) )
-		Progress();
-	    
-	    RollDice( anDiceTrain, rngCurrent, rngctxCurrent );
-	    
-	    if( fInterrupt )
-		break;
-	    
-	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
-	    
-	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-			  anBoardTrain, &ciCubeless, &ecTD,
-                          defaultFilters );
-	    
-	    if( fAction )
-		fnAction();
-	
-	    if( fInterrupt )
-		break;
-	    
-	    SwapSides( anBoardTrain );
-	    
-	    EvaluatePosition( NULL, anBoardTrain, ar, &ciCubeless, &ecTD );
-	    
-	    InvertEvaluation( ar );
-	    if( TrainPosition( anBoardOld, ar, rAlpha, rAnneal, 
-                               ciCubeless.bgv ) )
-		break;
-	    
-	    /* FIXME can stop as soon as perfect */
-	} while( ( !n || c <= n ) && !fInterrupt &&
-		 !GameStatus( anBoardTrain, ciCubeless.bgv ) );
-    }
-
-    ProgressEnd();
 }
 
 #if HAVE_LIBREADLINE
@@ -7991,7 +7933,7 @@ void
 CommandDiceRolls (char *sz) {
   int    n;
   char	*pch;
-  int	 anDice[2];
+  unsigned int	 anDice[2];
 
   if ( (pch = NextToken( &sz ) ) ) {
     n = ParseNumber( &pch );
@@ -8160,7 +8102,7 @@ LinearInterpolation( const float x0, const float y0,
 extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
-  int anPips[ 2 ];
+  unsigned int anPips[ 2 ];
   float arEPC[ 2 ];
   int f;
   char *sz;
@@ -8172,7 +8114,7 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
   int i, j;
   float aar[ 2 ][ 2 ];
   float ar[ 2 ];
-  int an[ 2 ];
+  unsigned int an[ 2 ];
   float arMu[ 2 ];
   float arSigma[ 2 ];
 

@@ -1,3 +1,8 @@
+Tue Mar 13 14:31:38 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* <many> : silence a bunch of intel c compiler warnings (recomitting
+	after savannah crash)
+
 Fri 15 Mar 21:47:53 2007 GMT Jim Segrave <jes@j-e-s.net>
 
 	* rollout.c - was using the 'this is a cube rollout' flag to
@@ -5,7 +10,7 @@ Fri 15 Mar 21:47:53 2007 GMT Jim Segrave <jes@j-e-s.net>
 
 Sun 25 Feb 12:11:40 2007 GMT Jim Segrave <jes@j-e-s.net>
 
-	* rollout.c - if settings were for cubeful rollouts, then
+	* rollout.c : if settings were for cubeful rollouts, then
 	  extending rollouts used cubeful equity. Threading aggravates
 	  the problem, this is not a complete fix (rcRollout
 	  is used globally but needs to be modified to match the set of

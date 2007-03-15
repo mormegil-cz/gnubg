@@ -199,9 +199,9 @@ initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
       + (1.0 - rG) * 0.5 * 
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
 
+    /*"insane post crawford equity" */
     g_assert( afMETPostCrawford[ i ] >= 0.0f &&
-            afMETPostCrawford[ i ] <= 1.0f && 
-            "insane post crawford equity" );
+            afMETPostCrawford[ i ] <= 1.0f);
     /*
      * add 1.5% at 1-away, 2-away for the free drop
      * add 0.4% at 1-away, 4-away for the free drop
@@ -209,17 +209,15 @@ initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
 
     if ( i == 1 )
       afMETPostCrawford[ i ] -= rFD2;
-
+    /*"insane post crawford equity(1)" */
     g_assert( afMETPostCrawford[ i ] >= 0.0f &&
-            afMETPostCrawford[ i ] <= 1.0f && 
-            "insane post crawford equity(1)" );
+            afMETPostCrawford[ i ] <= 1.0f);
 
     if ( i == 3 )
       afMETPostCrawford[ i ] -= rFD4;
-
+    /*"insane post crawford equity(2)" */
     g_assert( afMETPostCrawford[ i ] >= 0.0f &&
-            afMETPostCrawford[ i ] <= 1.0f && 
-            "insane post crawford equity(2)" );
+            afMETPostCrawford[ i ] <= 1.0f);
 
   }
 

@@ -151,7 +151,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
 	       const int nSize, const int nSizeX, const int nSizeY,
 	       const int nOffsetX, const int nOffsetY,
 	       const int fMove, const int fTurn, const int fCube,
-	       const int anDice[2], const int nCube, const int fDoubled,
+	       const unsigned int anDice[2], const int nCube, const int fDoubled,
 	       const int fCubeOwner)
 {
 

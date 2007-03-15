@@ -48,7 +48,7 @@ extern int
 RNGSystemSeed( const rng rngx, void *p, int *pnSeed );
 
 extern int 
-RollDice( int anDice[ 2 ], const rng rngx, void *rngctx );
+RollDice( unsigned int anDice[ 2 ], const rng rngx, void *rngctx );
 
 #if HAVE_LIBGMP
 extern int InitRNGSeedLong( char *sz, rng rng, void *rngctx );

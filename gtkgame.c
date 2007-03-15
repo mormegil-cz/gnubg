@@ -598,7 +598,7 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
     }
 }
 
-extern int GTKGetManualDice( int an[ 2 ] ) {
+extern int GTKGetManualDice( unsigned int an[ 2 ] ) {
 
     GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Dice"),
 					DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_CLOSEBUTTON, NULL, NULL ),
@@ -624,7 +624,7 @@ extern int GTKGetManualDice( int an[ 2 ] ) {
 
 extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw ) {
 
-    int an[ 2 ];
+    unsigned int an[ 2 ];
     char sz[ 13 ]; /* "set dice x y" */
 
     if( !GTKGetManualDice( an ) ) {
@@ -5568,11 +5568,11 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
 }
 
 extern void 
-GTKHint( movelist *pmlOrig, const int iMove) {
+GTKHint( movelist *pmlOrig, const unsigned int iMove) {
 
     GtkWidget *pwMoves, *pwHint;
     movelist *pml;
-    static int n;
+    static unsigned int n;
     
     if (GetPanelWidget(WINDOW_HINT))
 	gtk_widget_destroy(GetPanelWidget(WINDOW_HINT));
@@ -5584,7 +5584,7 @@ GTKHint( movelist *pmlOrig, const int iMove) {
     memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
 
     n = iMove;
-    pwMoves = CreateMoveList( pml, ( n < 0 ) ? NULL : &n, TRUE, TRUE, TRUE );
+    pwMoves = CreateMoveList( pml, &n, TRUE, TRUE, TRUE );
 
     /* create dialog */
 
@@ -5606,6 +5606,11 @@ GTKHint( movelist *pmlOrig, const int iMove) {
 
 static void SetMouseCursor(GdkCursorType cursorType)
 {
+	if (!GDK_IS_WINDOW(pwMain->window))
+	{
+		g_print("no window\n");
+		return;
+	}
 	if (cursorType)
 	{
 		GdkCursor *cursor;

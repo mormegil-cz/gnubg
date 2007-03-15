@@ -299,7 +299,7 @@ typedef struct _moverecord {
   /* luck analysis (shared between MOVE_SETDICE and MOVE_NORMAL) */
 
   /* dice rolled */
-  int anDice[ 2 ];
+  unsigned int anDice[ 2 ];
 
   /* classification of luck */
   lucktype lt;
@@ -357,7 +357,9 @@ typedef enum {
    offered).  anDice indicate the roll to be played (0,0 indicates the
    roll has not been made). */
 typedef struct {
-    int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned,
+    int anBoard[ 2 ][ 25 ];
+    unsigned int anDice[ 2 ];
+    int fTurn, fResigned,
 	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
 	fPostCrawford, nMatchTo, anScore[ 2 ], nCube, cBeavers;
     bgvariation bgv;
@@ -1199,8 +1201,7 @@ extern void CommandAccept( char * ),
     CommandShowWarning( char * ),
     CommandShowWarranty( char * ),
     CommandSwapPlayers ( char * ),
-    CommandTake( char * ),
-    CommandTrainTD( char * );
+    CommandTake( char * );
 
 
 extern int fTutor, fTutorCube, fTutorChequer, nTutorSkillCurrent;
@@ -1216,11 +1217,6 @@ extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 extern char * locale_from_utf8 (const char * sz);
 
 extern char * locale_to_utf8 (const char * sz);
-
-extern void
-OptimumRoll ( int anBoard[ 2 ][ 25 ], 
-              const cubeinfo* pci, const evalcontext* pec,
-              const int fBest, int anDice[ 2 ] );
 
 extern void
 SetMatchInfo( char **ppch, char* sz, char* szMessage );
