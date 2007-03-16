@@ -5,82 +5,20 @@ localedir = $(datadir)/locale
 ACLOCAL_AMFLAGS = -I m4
 
 ## threads
-if USE_MULTITHREAD
-THREAD_SOURCES = multithread.c multithread.h
-THREAD_INCS = @GTHREAD_CFLAGS@
-THREAD_LIBS = @GTHREAD_LIBS@
-else
-THREAD_SOURCES =
-THREAD_INCS =
-THREAD_LIBS =
-endif
-
-## sounds
-if  USE_SOUND 
-SOUND_SOURCES = sound.c
-SOUND_INCS = @ESD_CFLAGS@ @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ \
-	@WINMMSND_CFLAGS@
-SOUND_LIBS = @ESD_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
-	@WINMMSND_LIBS@ @APPLE_QTIME_LIBS@
-else
-SOUND_INCS = 
-SOUND_SOURCES =
-SOUND_LIBS = 
-endif
 
 
-## timecontrol
-if USE_TIMECONTROL
-TIME_SOURCES = timecontrol.h timecontrol.c tctutorial.h
-else
-TIME_SOURCES =
-endif
 
-## static bearof db
-if COMPILE_BR1
-BR1_SOURCES = br1.c
-else
-BR1_SOURCES =
-endif
+SUBDIRS = lib doc met po m4 xpm sounds board3d textures scripts flags fonts non-src
 
-if EXTERNAL_BR1
-BR1DATA = gnubg_os0.bd
-else
-BR1DATA =
-endif
+bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
+noinst_PROGRAMS = makeweights makebearoff1
 
-BOARD3D_TEXTURE_FILES = textures.txt
+INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
+	   -DLOCALEDIR=\"$(localedir)\" @FREETYPE2_CFLAGS@ @PYTHON_CSPEC@ @GLIB_CFLAGS@ \
+	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @GTHREAD_CFLAGS@ @ESD_CFLAGS@ \
+	   @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@
 
-if USE_BOARD3D
-BOARD3D_DIR=board3d textures
-BOARD3D_DEPS=board3d/libboard3d.la
-BOARD3D_LIBS=-L$(srcdir)/board3d -lboard3d @GTKGLEXT_LIBS@
-BOARD3D_INCS=@GTKGLEXT_CFLAGS@
-BOARD3DDATA=$(BOARD3D_TEXTURE_FILES)
-else
-BOARD3D_DIR=
-BOARD3D_DEPS=
-BOARD3D_LIBS=
-BOARD3D_INCS=
-BOARD3DDATA=
-endif
-
-
-SUBDIRS = lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts flags fonts non-src
-
-if USE_PYTHON
-PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
-else
-PYTHON_SOURCES=
-endif
-
-COMMON_INCS = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
-              -DLOCALEDIR=\"$(localedir)\" \
-              @FREETYPE2_CFLAGS@ @PYTHON_CSPEC@ @GLIB_CFLAGS@ @LIBPNG_CFLAGS@
-COMMON_LIBS = -Llib -levent @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
-              @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@
-
-COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
+gnubg_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 eval.h eval.c play.c \
 		 positionid.h positionid.c drawboard.h drawboard.c \
 		 pub_eval.c set.c show.c dice.c dice.h rollout.c \
@@ -96,91 +34,93 @@ COMMON_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 progress.c progress.h format.c format.h formatgs.c \
 		 formatgs.h boarddim.h timer.c external_y.y \
 		 external_l.l openurl.c openurl.h mec.h \
-		 mec.c relational.h relational.c common.h
+		 mec.c relational.h relational.c common.h sound.c
 
-COMMON_DEPS =  lib/libevent.la @LTLIBOBJS@
+if USE_MULTITHREAD
+gnubg_SOURCES +=  multithread.c multithread.h
+endif
 
-bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
+if USE_TIMECONTROL
+gnubg_SOURCES += timecontrol.h timecontrol.c tctutorial.h
+endif
+
+if COMPILE_BR1
+gnubg_SOURCES += br1.c
+endif
+
+if USE_PYTHON
+gnubg_SOURCES += gnubgmodule.c gnubgmodule.h
+endif
 
 if USE_GTK
-## --- GTK
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) $(BOARD3D_INCS) @CAIRO_CFLAGS@
-gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
-	gtkprefs.c gtkprefs.h gtk-multiview.c \
-	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
-	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
-	gtkrace.c gtkrace.h \
-	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
-	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
-        gtktempmap.c gtktempmap.h \
-	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
-	gtktoolbar.h gtktoolbar.c gtkgamelist.c gtkpanels.c \
-	gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h\
-	$(BR1_SOURCES) $(SOUND_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES) $(THREAD_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS) @GTK_LIBS@ $(SOUND_LIBS) @LIBPNG_LIBS@ \
-        $(BOARD3D_LIBS) @CAIRO_LIBS@ $(THREAD_LIBS)
-gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
-else
-## --- Plain
-INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(THREAD_INCS)
-gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-	$(PYTHON_SOURCES) $(TIME_SOURCES) $(THREAD_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) $(THREAD_LIBS)
+gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
+		 gtkprefs.c gtkprefs.h gtk-multiview.c gtk-multiview.h gtktheory.c \
+		 gtktheory.h gtktexi.c gtktexi.h gtkexport.c gtkexport.h gtkcube.c gtkcube.h \
+		 gtkchequer.c gtkchequer.h gtkrace.c gtkrace.h gtkmovefilter.c \
+		 gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c gtkcolour.h gtksplash.c \
+		 gtksplash.h gtkrolls.c gtkrolls.h gtktempmap.c gtktempmap.h gtkbearoff.c \
+		 gtkbearoff.h gtkoptions.h gtkoptions.c gtktoolbar.h gtktoolbar.c \
+		 gtkgamelist.c gtkpanels.c gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h \
+		 gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h gtkpanels.h
+endif
+
+gnubg_LDADD = -Llib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ \
+	      @GTHREAD_LIBS@ @ESD_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
+	      @WINMMSND_LIBS@ @APPLE_QTIME_LIBS@ @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
+	      @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@
 
 
-gnubg_DEPENDENCIES = $(COMMON_DEPS)
+if USE_BOARD3D
+gnubg_LDADD += -L$(srcdir)/board3d board3d/libboard3d.la @GTKGLEXT_LIBS@
 endif
 
 
-pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
-	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql gnubg.gtkrc
-
-man_MANS = gnubg.6
-
-noinst_PROGRAMS = makeweights makebearoff1
-check_PROGRAMS = erftest
-
-makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
+UTILSOURCES = eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
 	format.c format.h mec.h mec.c
-makebearoff_LDADD = $(COMMON_LIBS) @GTK_LIBS@
+
+makebearoff_SOURCES = makebearoff.c $(UTILSOURCES)
+makebearoff_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
+
+makehyper_SOURCES = makehyper.c $(UTILSOURCES) $(BR1_SOURCES)
+if COMPILE_BR1
+makehyper_SOURCES += br1.c
+endif
+makehyper_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
+
+bearoffdump_SOURCES = bearoffdump.c $(UTILSOURCES)
+bearoffdump_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
 
 makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
-makebearoff1_LDADD = @GTK_LIBS@ 
+makebearoff1_LDADD = -Llib lib/libevent.la
 
 makeweights_SOURCES = makeweights.c
-makeweights_LDADD = $(COMMON_LIBS) @GTK_LIBS@
+makeweights_LDADD = -Llib lib/libevent.la @GLIB_LIBS@ 
 
-makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
-        pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-        getopt.c getopt.h getopt1.c osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-        drawboard.c drawboard.h format.c format.h mec.h mec.c \
-	$(BR1_SOURCES)
-makehyper_LDADD = $(COMMON_LIBS) @GTK_LIBS@
+if USE_BOARD3D
+BOARD3DDATA=textures.txt
+endif
 
-bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
-	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-        getopt.c getopt.h getopt1.c osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h mec.h mec.c
-bearoffdump_LDADD = $(COMMON_LIBS) @GTK_LIBS@
+if EXTERNAL_BR1
+BR1DATA = gnubg_os0.bd
+endif
 
-erftest_SOURCES = erftest.c
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
+	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql gnubg.gtkrc
 
-TESTS = gnubgtest erftest
+
 distcheck-hook:
 	chmod -R a+w $(distdir)
 	-cp $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = config.rpath  userrng.c copying.awk gnubgtest gnubg.6 \
+EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.6 \
 	gnubg.gtkrc credits.sh \
 	external_l.c external_y.c external_y.h sgfp.c sgfp.h sgfl.c \
 	external_l.l external_y.y sgf.l sgf.y \
 	ABOUT-NLS boards.xml gnubg.game.sql autogen.sh gnubg.weights\
-	$(BOARD3D_TEXTURE_FILES)
+	textures.txt
 
 
 DISTCLEANFILES=gnubg.wd

@@ -1,78 +1,57 @@
+gnubg_helpdir = $(pkgdatadir)/doc
+gnubg_help_DATA =  gnubg.html gnubg.xml
+
+man_MANS = gnubg.6
+
+gnubg_imagedir =  $(pkgdatadir)/doc/images
+gnubg_image_DATA = images/*.png
+
+EXTRA_DIST = gnubgdb.xml gnubgman.xml images/*.png images/*.txt gnubg/gnubg.6 \
+	     gnubg/gnubg.html gnubg/gnubg.texi gnubg/gnubg.info gnubg/gnubg.xml
+
+man6_MANS = gnubg.6
+
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = \
-absrating.texi additional.texi analyse.texi bearoff.texi cubeful.texi \
-export.texi faq.texi fdl.texi id.texi impatient.texi \
-import.texi install.texi intro.texi movefilters.texi opening.texi \
-playing.texi rules.texi saving.texi scripting.texi settings.texi \
-starting.texi training.texi version.texi
 
-subdir = doc
-docfiles = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png  rulfig4.png rulfig5.png annealing.png
-docdir = $(pkgdatadir)/doc
-doc_DATA = ${docfiles}
+all: 
 
-EXTRA_DIST = ${docfiles} rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
-	annealing.gp annealing.txt fdl.texi \
-	annealing.eps \
-	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
-	mptp.gp mptp.png mptp.eps mptp.txt \
-	mgcd.gp mgcd.png mgcd.eps mgcd.txt \
-	d11.png d23.png d3.png d5.png d7.png fita2.png \
-	fitb.png lsqcoeff.png r11.png r1.png r23.png r3.png r5.png \
-	r7.png rallfitted.png rall.png
+gnubg.6: gnubg/gnubg.6
+	-cp gnubg/gnubg.6 .
 
-SUFFIXES = .png .eps .texi .html .txt .xml
-EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
-	annealing.eps
-TXTFILES = rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
-	annealing.txt
-CLEANFILES = $(EPSFILES) anneal.txt
+gnubg.html: gnubg/gnubg.html
+	-cp gnubg/gnubg.html .
 
-txt: gnubg.txt
+gnubg.texi: gnubg/gnubg.texi
+	-cp gnubg/gnubg.texi .
 
-ps: gnubg.ps
+gnubg.info: gnubg/gnubg.info
+	-cp gnubg/gnubg.info .
 
-html: gnubg.html
+gnubg.xml: gnubg/gnubg.xml
+	-cp gnubg/gnubg.xml .
 
-xml: gnubg.xml
+gnubg:
+	mkdir gnubg
 
-gnubg.dvi: $(EPSFILES)
+gnubg/gnubg.6: 
+	-docbook2man gnubgman.xml
+	-cp gnubg.6 gnubg/
 
-gnubg.html: $(TXTFILES) annealing.png mgtp.png
+gnubg/gnubg.html: gnubgdb.xml gnubg
+	-xsltproc -o gnubg/gnubg.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl gnubgdb.xml
 
-gnubg.info: $(TXTFILES)
+gnubg/gnubg.texi: gnubgdb.xml  gnubg
+	-docbook2texi --encoding=UTF-8 gnubgdb.xml
+	-cp gnubg.texi gnubg/
 
-gnubg.ps: $(EPSFILES)
+gnubg/gnubg.xml: gnubg.texi gnubg
+	-sed '/@detailmenu/,/@end detailmenu/ d' gnubg.texi | makeinfo -o gnubg/gnubg.xml --xml
 
-gnubg.txt: $(TXTFILES)
 
-gnubg.xml: $(TXTFILES) annealing.png mgtp.png
+install-data-local: gnubg.html gnubg.xml gnubg.info images/*.png
+	$(mkinstalldirs) $(gnubg_helpdir)/images
+	-for file in gnubg.html gnubg.xml gnubgdb.xml gnubg.info; do \
+	basefile=`basename $$file`; \
+	$(INSTALL_DATA) $(srcdir)/$$file $(gnubg_helpdir)/$$basefile; \
+	done
 
-annealing.txt annealing.eps: annealing.gp
-	if [ -n "$(GNUPLOT)" ]; then \
-	$(GNUPLOT) $< && \
-	$(TR) -d '\f' < anneal.txt > $(srcdir)/annealing.txt; fi
-
-annealing.png: annealing.eps
-	if [ -n "$(PSTOPNM)" -a -n "$(PNMSCALE)" -a -n "$(PNMTOPNG)" ]; then \
-	$(PSTOPNM) -portrait -xsize 1024 $<; \
-	$(PNMSCALE) 0.5 < annealing.eps001.ppm | $(PNMTOPNG) > \
-		$(srcdir)/annealing.png; fi
-	-rm -f annealing.eps001.ppm
-
-.png.eps:
-	if [ -n "$(PNGTOPNM)" -a -n "$(PNMTOPS)" ]; then \
-	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | \
-	$(PNMTOPS) -noturn > $@; fi
-
-.texi.html:
-	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'` -o $@
-
-.texi.txt:
-	cd $(srcdir) && \
-	$(MAKEINFO) --no-split --no-headers `echo $< | sed 's,.*/,,'` -o $@
-
-## Old versions of makeinfo don't support --xml, and there's not much point
-## worrying about them, so we ignore failures.
-.texi.xml:
-	-cd $(srcdir) && $(MAKEINFO) --xml `echo $< | sed 's,.*/,,'` -o $@ 

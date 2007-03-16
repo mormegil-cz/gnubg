@@ -1,0 +1,1 @@
+To roll the dice the CL version type 'roll'.
