@@ -21,8 +21,6 @@
 * $Id$
 */
 
-/*lint -esym(818, pMod, pOcc) */
-
 #include "inc3d.h"
 
 #define TOP_EDGE -2
@@ -85,7 +83,7 @@ void moveToOcc(const Occluder* pOcc)
 	}
 }
 
-static unsigned int AddPos(OccModel* pMod, float a, float b, float c)
+static unsigned int AddPos(GArray *points, float a, float b, float c)
 {
 	unsigned int index;
 	position pos;
@@ -93,14 +91,14 @@ static unsigned int AddPos(OccModel* pMod, float a, float b, float c)
 	pos.y = b;
 	pos.z = c;
 
-	for (index = 0; index < pMod->points->len; index++)
+	for (index = 0; index < points->len; index++)
 	{
-		if (!memcmp(&pos, &g_array_index(pMod->points, position, index), sizeof(position)))
+		if (!memcmp(&pos, &g_array_index(points, position, index), sizeof(position)))
 			return index;
 	}
 
-	g_array_append_val(pMod->points, pos);
-	return pMod->points->len - 1;
+	g_array_append_val(points, pos);
+	return points->len - 1;
 }
 
 static void CreatePlane(plane* p, const position* p1, const position* p2, const position* p3)
@@ -122,7 +120,7 @@ static void CreatePlane(plane* p, const position* p1, const position* p2, const 
 	cr[1] = v0[2] * v1[0] - v0[0] * v1[2];
 	cr[2] = v0[0] * v1[1] - v0[1] * v1[0];
 	
-	l = (float)sqrt(cr[0] * cr[0] + cr[1] * cr[1] + cr[2] * cr[2]);
+	l = sqrtf(cr[0] * cr[0] + cr[1] * cr[1] + cr[2] * cr[2]);
 	if(l == 0) /* degenerate triangle */
 	{
 		p->a = p->b = p->c = p->d = 0;
@@ -136,24 +134,26 @@ static void CreatePlane(plane* p, const position* p1, const position* p2, const 
 	p->d = -(p->a * p1->x + p->b * p1->y + p->c * p1->z);
 }
 
-static unsigned int AddPlane(OccModel* pMod, const position* a, const position* b, const position* c)
+static unsigned int AddPlane(GArray *planes, const position* a, const position* b, const position* c)
 {
 	unsigned int index;
 	plane p;
 	CreatePlane(&p, a, b, c);
 
-	for (index = 0; index < pMod->planes->len; index++)
+	for (index = 0; index < planes->len; index++)
 	{
-		if (!memcmp(&p, &g_array_index(pMod->planes, plane, index), sizeof(plane)))
+		if (!memcmp(&p, &g_array_index(planes, plane, index), sizeof(plane)))
 			return index;
 	}
 
-	g_array_append_val(pMod->planes, p);
-	return pMod->planes->len - 1;
+	g_array_append_val(planes, p);
+	return planes->len - 1;
 }
 
+/* For testing */
+#if 0
 void GenerateShadowEdges(const Occluder* pOcc)
-{	/* For testing */
+{
 	unsigned int i, numEdges = pOcc->handle->edges->len;
 	for (i = 0; i < numEdges; i++)
 	{
@@ -189,10 +189,11 @@ void GenerateShadowEdges(const Occluder* pOcc)
 		}
 	}
 }
+#endif
 
-static float sqdDist(OccModel* pMod, int pIndex, const float point[4])
+static float sqdDist(const GArray *planes, int pIndex, const float point[4])
 {
-	plane* p = &g_array_index(pMod->planes, plane, pIndex);
+	plane* p = &g_array_index(planes, plane, pIndex);
 	return (p->a * point[0] + p->b * point[1] + p->c * point[2] + p->d * point[3]);
 }
 
@@ -205,10 +206,10 @@ void GenerateShadowVolume(const Occluder* pOcc, const float olight[4])
 	{
 		winged_edge *we = &g_array_index(pOcc->handle->edges, winged_edge, i);
 
-		float f0 = sqdDist(pOcc->handle, we->w[0], olight);
+		float f0 = sqdDist(pOcc->handle->planes, we->w[0], olight);
 		float f1;
 		if(we->w[1] >= 0)
-			f1 = sqdDist(pOcc->handle, we->w[1], olight);
+			f1 = sqdDist(pOcc->handle->planes, we->w[1], olight);
 		else
 		{
 			if (we->w[1] == TOP_EDGE && f0 < 0)
@@ -253,12 +254,12 @@ void GenerateShadowVolume(const Occluder* pOcc, const float olight[4])
 }
 
 /* pair up edges */
-static void AddEdge(OccModel* pMod, const winged_edge* we)
+static void AddEdge(GArray *edges, const winged_edge* we)
 {
-	unsigned int i, numEdges = pMod->edges->len;
+	unsigned int i, numEdges = edges->len;
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we0 = &g_array_index(pMod->edges, winged_edge, i);
+		winged_edge *we0 = &g_array_index(edges, winged_edge, i);
 		/* facingness different between polys on edge! */
 		g_assert((we0->e[0] != we->e[0] || we0->e[1] != we->e[1]));
 
@@ -271,28 +272,28 @@ static void AddEdge(OccModel* pMod, const winged_edge* we)
 			return;
 		}
 	}
-	g_array_append_val(pMod->edges, *we);  /* otherwise, add the new edge */
+	g_array_append_val(edges, *we);  /* otherwise, add the new edge */
 }
 
-static void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)
+static void addALine(/*lint -e{818}*/Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)	/* Declaring pOcc as constant isn't useful as pointer member is modified (error 818) */
 {
 	winged_edge we;
 	int planeNum;
-	unsigned int p1 = AddPos(pOcc->handle, x, y, z);
-	unsigned int p2 = AddPos(pOcc->handle, x2, y2, z2);
+	unsigned int p1 = AddPos(pOcc->handle->points, x, y, z);
+	unsigned int p2 = AddPos(pOcc->handle->points, x2, y2, z2);
 
 	position pn3;
 	pn3.x = x3;
 	pn3.y = y3;
 	pn3.z = z3;
 
-	planeNum = (int)AddPlane(pOcc->handle, &g_array_index(pOcc->handle->points, position, p1), &g_array_index(pOcc->handle->points, position, p2), &pn3);
+	planeNum = (int)AddPlane(pOcc->handle->planes, &g_array_index(pOcc->handle->points, position, p1), &g_array_index(pOcc->handle->points, position, p2), &pn3);
 
 	we.e[0] = p1;
 	we.e[1] = p2;
 	we.w[0] = planeNum;
 	we.w[1] = otherEdge;  /* subsequent attempt to add this edge will replace w[1] */
-	AddEdge(pOcc->handle, &we);
+	AddEdge(pOcc->handle->edges, &we);
 }
 
 static void addLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3)
@@ -438,6 +439,7 @@ void addCube(Occluder* pOcc, float x, float y, float z, float w, float h, float 
 	addLine(pOcc, x + w, y, z + d, x, y, z + d, x + w, y + .1f, z + d);
 }
 
+#if 0	/* No longer used */
 void addCubeCentered(Occluder* pOcc, float x, float y, float z, float w, float h, float d)
 {
 	x -= w / 2.0f;
@@ -446,6 +448,7 @@ void addCubeCentered(Occluder* pOcc, float x, float y, float z, float w, float h
 
 	addCube(pOcc, x, y, z, w, h, d);
 }
+#endif
 
 void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, unsigned int numSteps)
 {

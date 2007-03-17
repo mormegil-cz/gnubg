@@ -44,7 +44,7 @@ void mult_matrix_vec(const float mat[4][4], const float src[4], float dst[4])
 		src[2] * mat[3][2] + src[3] * mat[3][3]);
 }
 
-void matrixmult(float m[4][4], float b[4][4])
+void matrixmult(float m[4][4], const float b[4][4])
 {
 	int i, j, c;
 	float a[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
@@ -111,7 +111,9 @@ void makeInverseRotateMatrixZ(float m[4][4], float degRot)
 	m[1][0] = sinRot;
 }
 
-/* Generic rotation matrix - just used for testing */
+/* Test functions */
+#if 0
+/* Generic rotation matrix - for comparisions */
 void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, float z)
 {
 	float radRot = -(degRot * (float)PI) / 180.0f; 
@@ -123,7 +125,7 @@ void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, floa
 	sin_theta = sinf(radRot);
 
 	if (sqnorm != 1) 
-		sin_theta /= (float)sqrt(sqnorm);
+		sin_theta /= sqrtf(sqnorm);
 
 	q[0] = sin_theta * x;
 	q[1] = sin_theta * y;
@@ -173,7 +175,6 @@ void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, floa
 
 }
 
-/* Test function */
 void dumpMatrix(const float m[4][4])
 {
 	static int create = 1;
@@ -201,3 +202,4 @@ void dumpMatrix(const float m[4][4])
 	fprintf(fp, "\n");
 	fclose(fp);
 }
+#endif

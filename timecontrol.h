@@ -59,8 +59,9 @@ extern void HitGameClock(matchstate *pms);
  * @param pms pointer to matchstate
  * @param tvp timestamp for hit
  * @return how many penalty points to apply
+ NB. Return not checked anywhere so set to void (needs to be looked at)
  */
-extern int CheckGameClock(matchstate *pms, struct timeval *tvp);
+extern void CheckGameClock(matchstate *pms, struct timeval *tvp);
 
 /* Make a formatted string for the given player.
  * @param ptl pointer to  time to format

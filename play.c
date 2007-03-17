@@ -351,8 +351,10 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 	/* If this is the movegameinfo of a game being replayed, hit the 
 	 * clock for the first roll (the dice roll is collapsed into the move */
         if (&(pmr->g) == pmgi)
-            pms->fMove = pms->fTurn = 
-              ((moverecord *) (plGame->plNext->plNext->p))->fPlayer;
+		{
+			moverecord *m = (moverecord *)(plGame->plNext->plNext->p);
+			pms->fMove = pms->fTurn = m ? m->fPlayer : 0;
+		}
 #endif
 	break;
 	

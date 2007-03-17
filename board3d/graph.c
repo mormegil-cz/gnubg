@@ -34,7 +34,7 @@ struct _GraphData
 	float maxY;
 };
 
-#define COL_WIDTH 5
+#define COL_WIDTH 5.f
 #define MID_GAP 1
 #define INTER_GAP 4
 #define TOTAL_GAP 5
@@ -75,7 +75,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, c
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, modelWidth, 0, modelHeight, -1, 0);
+	glOrtho(0.0, (double)modelWidth, 0.0, (double)modelHeight, -1.0, 0.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
@@ -91,7 +91,7 @@ static void realize(GtkWidget *widget, void* notused)
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return;
 	/* Deep blue background colour */
-	glClearColor(.2f, .2f, .4f, 1);
+	glClearColor(.2f, .2f, .4f, 1.f);
 
 	if (!BuildFont3d(&fonts))
 		g_print("Error creating fonts\n");
@@ -109,33 +109,33 @@ static void realize(GtkWidget *widget, void* notused)
 static void DrawBar(const float col[4], float x, float y, float first, float second)
 {
 	glPushMatrix();
-	glTranslatef(x, y, 0);
+	glTranslatef(x, y, 0.f);
 
 	glBegin(GL_QUADS);
-		glColor3f(0, 1, 0);
-		glVertex2f(0, 0);
-		glVertex2f(COL_WIDTH, 0);
+		glColor3f(0.f, 1.f, 0.f);
+		glVertex2f(0.f, 0.f);
+		glVertex2f(COL_WIDTH, 0.f);
 		glVertex2f(COL_WIDTH, first);
-		glVertex2f(0, first);
+		glVertex2f(0.f, first);
 
-		glColor3f(0, 0, 1);
-		glVertex2f(0, first);
+		glColor3f(0.f, 0.f, 1.f);
+		glVertex2f(0.f, first);
 		glVertex2f(COL_WIDTH, first);
 		glVertex2f(COL_WIDTH, first + second);
-		glVertex2f(0, first + second);
+		glVertex2f(0.f, first + second);
 	glEnd();
 
-	glLineWidth(3);
+	glLineWidth(3.f);
 	glColor3f(col[0], col[1], col[2]);
 	glBegin(GL_LINE_STRIP);
-		glVertex2f(0, 0);
-		glVertex2f(0, first + second);
+		glVertex2f(0.f, 0.f);
+		glVertex2f(0.f, first + second);
 		glVertex2f(COL_WIDTH, first + second);
-		glVertex2f(COL_WIDTH, 0);
+		glVertex2f(COL_WIDTH, 0.f);
 	glEnd();
-	glLineWidth(1);
+	glLineWidth(1.f);
 	glBegin(GL_POINTS);
-		glVertex2f(0, first + second);
+		glVertex2f(0.f, first + second);
 		glVertex2f(COL_WIDTH, first + second);
 	glEnd();
 
@@ -173,10 +173,10 @@ static void PrintBottomNumber(unsigned int num, float width, float height, float
 	sprintf(numStr, "%d", num);
 
 	glPushMatrix();
-	glTranslatef(x, y, 0);
+	glTranslatef(x, y, 0.f);
 
-	glColor3f(1, 1, 1);
-	glScalef(width, height, 1);
+	glColor3f(1.f, 1.f, 1.f);
+	glScalef(width, height, 1.f);
 	glLineWidth(.5f);
 	glPrintCube(&fonts, numStr);
 	glPopMatrix();
@@ -188,9 +188,9 @@ static void PrintSideNumber(int num, float width, float height, float x, float y
 	sprintf(numStr, "%d", num);
 
 	glPushMatrix();
-	glTranslatef(x, y, 0);
+	glTranslatef(x, y, 0.f);
 
-	glScalef(width, height, 1);
+	glScalef(width, height, 1.f);
 	glLineWidth(.5f);
 	glPrintNumbersRA(&fonts, numStr);
 	glPopMatrix();
@@ -214,7 +214,7 @@ static void DrawLeftAxis(const GraphData *pgd)
 	{
 		float y = NUM_HEIGHT;
 		y += (float)i * pointInc;
-		glColor3f(1, 1, 1);
+		glColor3f(1.f, 1.f, 1.f);
 		PrintSideNumber(i * pointInc, NUM_WIDTH * 10, NUM_HEIGHT * 10, NUM_WIDTH - 1, y);
 
 		glColor3f(.5f, .5f, .5f);
@@ -240,13 +240,13 @@ static void DrawGraph(const GraphData *gd)
 
 		glPushMatrix();
 		glTranslatef(NUM_WIDTH + RES_WIDTH * (float)gd->numGames + TOTAL_GAP + (INTER_GAP + MID_GAP) / 2.0f,
-			NUM_HEIGHT / 2.0f - TOT_WIDTH / 6.0f, 0);
+			NUM_HEIGHT / 2.0f - TOT_WIDTH / 6.0f, 0.f);
 
 		glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex3f(0, 0, 0);
-			glTexCoord2f(1, 0); glVertex3f(COL_WIDTH * 2, 0, 0);
-			glTexCoord2f(1, 1); glVertex3f(COL_WIDTH * 2, TOT_WIDTH, 0);
-			glTexCoord2f(0, 1); glVertex3f(0, TOT_WIDTH, 0);
+			glTexCoord2f(0.f, 0.f); glVertex3f(0.f, 0.f, 0.f);
+			glTexCoord2f(1.f, 0.f); glVertex3f(COL_WIDTH * 2, 0.f, 0.f);
+			glTexCoord2f(1.f, 1.f); glVertex3f(COL_WIDTH * 2, TOT_WIDTH, 0.f);
+			glTexCoord2f(0.f, 1.f); glVertex3f(0.f, TOT_WIDTH, 0.f);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
@@ -271,7 +271,7 @@ static void DrawGraph(const GraphData *gd)
 	DrawBars(i, gd->data[i], 1);
 
 	/* Axis */
-	glColor3f(1, 1, 1);
+	glColor3f(1.f, 1.f, 1.f);
 	glBegin(GL_LINES);
 		glVertex2f(NUM_WIDTH, NUM_HEIGHT);
 		glVertex2f(modelWidth - 1, NUM_HEIGHT);

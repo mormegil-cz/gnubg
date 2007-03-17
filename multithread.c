@@ -557,12 +557,12 @@ void MT_Unlock(int *lock)
 
 extern void MT_Exclusive()
 {
-    Mutex_Lock(td.multiLock);
+	Mutex_Lock(td.multiLock);
 }
 
 extern void MT_Release()
 {
-    Mutex_Release(td.multiLock);
+	Mutex_Release(td.multiLock);
 }
 
 extern int MT_GetDoneTasks()

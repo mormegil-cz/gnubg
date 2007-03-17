@@ -69,13 +69,13 @@ typedef struct _Mesh
 static int CreateOGLFont(FT_Library ftLib, OGLFont *pFont, const char *pPath, int pointSize, float size, float heightRatio);
 static void PopulateVectoriser(Vectoriser* pVect, const FT_Outline* pOutline);
 static void TidyMemory(const Vectoriser* pVect, const Mesh* pMesh);
-static void PopulateContour(Contour* pContour, const FT_Vector* points, const char* pointTags, int numberOfPoints);
+static void PopulateContour(GArray *contour, const FT_Vector* points, const char* pointTags, int numberOfPoints);
 static void PopulateMesh(const Vectoriser* pVect, Mesh* pMesh);
 static int MakeGlyph(const FT_Outline* pOutline, unsigned int displayList);
 
 #define FONT_PITCH 24
 #define FONT_SIZE (base_unit / 20.0f)
-#define FONT_HEIGHT_RATIO 1
+#define FONT_HEIGHT_RATIO 1.f
 
 #define CUBE_FONT_PITCH 34
 #define CUBE_FONT_SIZE (base_unit / 24.0f)
@@ -247,7 +247,7 @@ static float getTextLen3d(const OGLFont *pFont, const char* str)
 
 static void RenderString3d(const OGLFont *pFont, const char* str)
 {
-	glScalef(pFont->scale, pFont->scale * pFont->heightRatio, 1);
+	glScalef(pFont->scale, pFont->scale * pFont->heightRatio, 1.f);
 
 	while (*str)
 	{
@@ -256,7 +256,7 @@ static void RenderString3d(const OGLFont *pFont, const char* str)
 		glCallList(pFont->glyphs + (unsigned int)offset);
 
 		/* Move on to next place */
-		glTranslatef((pFont->advance + GetKern(pFont, str[0], str[1])) / 64.0f, 0, 0);
+		glTranslatef((pFont->advance + GetKern(pFont, str[0], str[1])) / 64.0f, 0.f, 0.f);
 
 		str++;
 	}
@@ -283,7 +283,8 @@ static void PopulateVectoriser(Vectoriser* pVect, const FT_Outline* pOutline)
 		endIndex = pOutline->contours[contourIndex];
 		contourLength = (endIndex - startIndex) + 1;
 
-		PopulateContour(&newContour, pointList, tagList, contourLength);
+		newContour.conPoints = g_array_new(FALSE, FALSE, sizeof(Point));
+		PopulateContour(newContour.conPoints, pointList, tagList, contourLength);
 		pVect->numPoints += newContour.conPoints->len;
 		g_array_append_val(pVect->contours, newContour);
 
@@ -291,11 +292,13 @@ static void PopulateVectoriser(Vectoriser* pVect, const FT_Outline* pOutline)
 	}
 }
 
-static void AddPoint(/*lint -e{818}*/Contour* pContour, double x, double y)
+static void AddPoint(GArray *points, double x, double y)
 {
-	if (pContour->conPoints->len > 0)
+	if (points->len > 0)
 	{	/* Ignore duplicate contour points */
-		Point* point = &g_array_index(pContour->conPoints, Point, pContour->conPoints->len - 1);
+		Point* point = &g_array_index(points, Point, points->len - 1);
+		/* See if point is duplicated (often happens when tesselating)
+		   so suppress lint error 777 (testing floats for equality) */
 		if (/*lint --e(777)*/point->data[0] == x && point->data[1] == y)
 			return;
 	}
@@ -306,7 +309,7 @@ static void AddPoint(/*lint -e{818}*/Contour* pContour, double x, double y)
 		newPoint.data[1] = y;
 		newPoint.data[2] = 0;
 
-		g_array_append_val(pContour->conPoints, newPoint);
+		g_array_append_val(points, newPoint);
 	}
 }
 
@@ -314,7 +317,7 @@ static void AddPoint(/*lint -e{818}*/Contour* pContour, double x, double y)
 #define BEZIER_STEP_SIZE 0.2f
 static double controlPoints[4][2]; /* 2D array storing values of de Casteljau algorithm */
 
-static void evaluateQuadraticCurve(Contour* pContour)
+static void evaluateQuadraticCurve(GArray *points)
 {
 	int i;
 	for (i = 0; i <= BEZIER_STEPS; i++)
@@ -332,15 +335,13 @@ static void evaluateQuadraticCurve(Contour* pContour)
 		bezierValues[0][0] = (1.0f - t) * bezierValues[0][0] + t * bezierValues[1][0];
 		bezierValues[0][1] = (1.0f - t) * bezierValues[0][1] + t * bezierValues[1][1];
 
-		AddPoint(pContour, bezierValues[0][0], bezierValues[0][1]);
+		AddPoint(points, bezierValues[0][0], bezierValues[0][1]);
 	}
 }
 
-static void PopulateContour(Contour* pContour, const FT_Vector* points, const char* pointTags, int numberOfPoints)
+static void PopulateContour(GArray *contour, const FT_Vector* points, const char* pointTags, int numberOfPoints)
 {
 	int pointIndex;
-
-	pContour->conPoints = g_array_new(FALSE, FALSE, sizeof(Point));
 
 	for (pointIndex = 0; pointIndex < numberOfPoints; pointIndex++)
 	{
@@ -348,7 +349,7 @@ static void PopulateContour(Contour* pContour, const FT_Vector* points, const ch
 
 		if (pointTag == FT_Curve_Tag_On || numberOfPoints < 2)
 		{
-			AddPoint(pContour, points[pointIndex].x, points[pointIndex].y);
+			AddPoint(contour, (double)points[pointIndex].x, (double)points[pointIndex].y);
 		}
 		else
 		{
@@ -373,7 +374,7 @@ static void PopulateContour(Contour* pContour, const FT_Vector* points, const ch
 				controlPoints[1][0] = controlPoint.data[0];		controlPoints[1][1] = controlPoint.data[1];
 				controlPoints[2][0] = nextPoint.data[0];		controlPoints[2][1] = nextPoint.data[1];
 				
-				evaluateQuadraticCurve(pContour);
+				evaluateQuadraticCurve(contour);
 
 				pointIndex++;
 				previousPoint = nextPoint;
@@ -388,7 +389,7 @@ static void PopulateContour(Contour* pContour, const FT_Vector* points, const ch
 			controlPoints[1][0] = controlPoint.data[0];		controlPoints[1][1] = controlPoint.data[1];
 			controlPoints[2][0] = nextPoint.data[0];		controlPoints[2][1] = nextPoint.data[1];
 			
-			evaluateQuadraticCurve(pContour);
+			evaluateQuadraticCurve(contour);
 		}
 	}
 }
@@ -426,8 +427,7 @@ static void TESS_CALLBACK tcbVertex(void* data, Mesh* notused)
 	g_array_append_val(curTess.tessPoints, newPoint);
 }
 
-/*lint -e{715, 818} Ignore some of the callback arguments*/
-static void TESS_CALLBACK tcbCombine(const double coords[3], void* vertex_data[4], GLfloat weight[4], void** outData)
+static void TESS_CALLBACK tcbCombine(const double coords[3], void* notused/*vertex_data*/[4], GLfloat notused2/*weight*/[4], void** outData)
 {
 	/* Just return vertex position (colours etc. not required) */
 	Point *newEle = (Point*)malloc(sizeof(Point));
@@ -444,7 +444,7 @@ static void TESS_CALLBACK tcbBegin(GLenum type, Mesh* notused)
 	curTess.meshType = type;
 }
 
-static void TESS_CALLBACK tcbEnd(/*lint -e{818}*/Mesh* pMesh)
+static void TESS_CALLBACK tcbEnd(/*lint -e{818}*/Mesh* pMesh)	/* Declaring pMesh as constant isn't useful as pointer member is modified (error 818) */
 {
 	g_array_append_val(pMesh->tesselations, curTess);
 }
@@ -464,9 +464,9 @@ static void PopulateMesh(const Vectoriser* pVect, Mesh* pMesh)
 	gluTessCallback( tobj, GLU_TESS_END_DATA, GLUFUN(tcbEnd));
 	gluTessCallback( tobj, GLU_TESS_ERROR, GLUFUN(tcbError));
 
-	gluTessProperty( tobj, GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
+	gluTessProperty( tobj, GLU_TESS_WINDING_RULE, (double)GLU_TESS_WINDING_ODD);
 
-	gluTessNormal( tobj, 0, 0, 1);
+	gluTessNormal( tobj, 0.0, 0.0, 1.0);
 
 	gluTessBeginPolygon( tobj, pMesh);
 
@@ -518,21 +518,21 @@ static void TidyMemory(const Vectoriser* pVect, const Mesh* pMesh)
 extern void glPrintPointNumbers(const BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally */
-	glTranslatef(-getTextLen3d(bd3d->numberFont, text) / 2.0f, 0, 0);
+	glTranslatef(-getTextLen3d(bd3d->numberFont, text) / 2.0f, 0.f, 0.f);
 	RenderString3d(bd3d->numberFont, text);
 }
 
 extern void glPrintCube(const BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally and vertically */
-	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont->height / 2.0f, 0);
+	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont->height / 2.0f, 0.f);
 	RenderString3d(bd3d->cubeFont, text);
 }
 
 extern void glPrintNumbersRA(const BoardData3d* bd3d, const char *text)
 {
 	/* Right align */
-	glTranslatef(-getTextLen3d(bd3d->numberFont, text), 0, 0);
+	glTranslatef(-getTextLen3d(bd3d->numberFont, text), 0.f, 0.f);
 	RenderString3d(bd3d->numberFont, text);
 }
 

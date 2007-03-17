@@ -20,7 +20,6 @@
  */
 
 #include "config.h"
-#include "common.h"
 
 #include <glib.h>
 #include <errno.h>
@@ -343,11 +342,11 @@ NNevalAction(NNState *pnState)
       /* context hit!  use the previously computed base */
       return NNEVAL_FROMBASE;
     }
-  }
+	}
 
   /* never reached */
   g_assert(0);
-  return 0;   /* for the picky compiler */
+  return NNEVAL_NONE;   /* for the picky compiler */
 }
 
 extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,

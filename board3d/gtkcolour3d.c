@@ -52,11 +52,16 @@ static int curDetail;
 
 /* World sizes */
 #define STRIP_WIDTH 100
-#define STRIP_HEIGHT 10
+#define STRIP_HEIGHT 10.f
 
 static unsigned char auch[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
 
 static int previewLightLevels[3];
+
+static int IsFlagSet(int flags, int bit)
+{
+	return ((flags & bit) == bit) ? TRUE : FALSE;
+}
 
 void SetPreviewLightLevel(const int levels[3])
 {
@@ -106,12 +111,12 @@ static void Draw(Material* pMat)
 		glPushMatrix();
 		if (pMat->textureInfo->type == TT_HINGE)
 		{
-			glScalef(1, HINGE_SEGMENTS, 1);
+			glScalef(1.f, HINGE_SEGMENTS, 1.f);
 		}
 		else
 		{
-			glRotatef(-90, 0, 0, 1);
-			glScalef(TEXTURE_SCALE / texture.width, TEXTURE_SCALE / texture.height, 1);
+			glRotatef(-90.f, 0.f, 0.f, 1.f);
+			glScalef(TEXTURE_SCALE / texture.width, TEXTURE_SCALE / texture.height, 1.f);
 		}
 		glMatrixMode(GL_MODELVIEW);
 	}
@@ -129,10 +134,10 @@ static void Draw(Material* pMat)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
-	glTranslatef(edge, STRIP_HEIGHT / 2, 0);
-	glRotatef(90, 0, 1, 0);
+	glTranslatef(edge, STRIP_HEIGHT / 2, 0.f);
+	glRotatef(90.f, 0.f, 1.f, 0.f);
 	/* -edge to give a black outline */
-	gluCylinder(qobj, STRIP_HEIGHT / 2 - edge, STRIP_HEIGHT / 2 - edge, STRIP_WIDTH - edge * 2, 36, 36);
+	gluCylinder(qobj, (double)STRIP_HEIGHT / 2 - edge, (double)STRIP_HEIGHT / 2 - edge, (double)STRIP_WIDTH - edge * 2, 36, 36);
 	glPopMatrix();
 
 	if (pMat->textureInfo)
@@ -186,7 +191,7 @@ static void UpdateColourPreview(void *notused)
 static void SetupColourPreview()
 {
 	InitGL(0);
-	glClearColor(0,0,0,1);
+	glClearColor(0.f, 0.f, 0.f, 1.f);
 
 	qobj = gluNewQuadric();
 	gluQuadricDrawStyle(qobj, GLU_FILL);
@@ -195,7 +200,7 @@ static void SetupColourPreview()
 	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, STRIP_WIDTH, 0, STRIP_HEIGHT, -STRIP_HEIGHT, 0);
+	glOrtho(0.0, (double)STRIP_WIDTH, 0.0, (double)STRIP_HEIGHT, (double)-STRIP_HEIGHT, 0.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -277,7 +282,7 @@ static void AddWidgets(GtkWidget *window)
 
 	label = gtk_label_new(_("Shine:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 1, 2);
-	padjShine = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 128, 1, 10, 0));
+	padjShine = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 128.0, 1.0, 10.0, 0.0));
 	gtk_signal_connect_object( GTK_OBJECT( padjShine ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
@@ -288,7 +293,7 @@ static void AddWidgets(GtkWidget *window)
 
 	pOpacitylabel = gtk_label_new(_("Opacity:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), pOpacitylabel, 0, 1, 2, 3);
-	padjOpacity = GTK_ADJUSTMENT(gtk_adjustment_new(0, 1, 100, 1, 10, 0));
+	padjOpacity = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 1.0, 100.0, 1.0, 10.0, 0.0));
 	gtk_signal_connect_object( GTK_OBJECT( padjOpacity ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
@@ -377,27 +382,27 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 	setCol(GTK_COLOUR_PICKER(pcpDiffuse), col3d.diffuseColour);
 	setCol(GTK_COLOUR_PICKER(pcpSpecular), col3d.specularColour);
 
-	gtk_adjustment_set_value (padjShine, (float)col3d.shine);
-	if (IsSet(pDetails->opacity, DF_VARIABLE_OPACITY))
+	gtk_adjustment_set_value (padjShine, (double)col3d.shine);
+	if (IsFlagSet(pDetails->opacity, DF_VARIABLE_OPACITY))
 	{
 		useOpacity = 1;
 		gtk_adjustment_set_value(padjOpacity, 
-			col3d.alphaBlend ? (col3d.ambientColour[3] + .001f) * 100 : 100);
+			col3d.alphaBlend ? (col3d.ambientColour[3] + .001) * 100 : 100.0);
 	}
 	else
 	{
 		useOpacity = 0;
-		if (IsSet(pDetails->opacity, DF_FULL_ALPHA))
+		if (IsFlagSet(pDetails->opacity, DF_FULL_ALPHA))
 			opacityValue = 1;
 		else
 			opacityValue = 0;
 	}
 
-	if (IsSet(pDetails->texture, TT_NONE))
+	if (IsFlagSet(pDetails->textureType, TT_NONE))
 		useTexture = 0;
 	else
 	{
-		GList *glist = GetTextureList(pDetails->texture);
+		GList *glist = GetTextureList(pDetails->textureType);
 		*lastTextureStr = '\0';	/* Don't update values */
 		gtk_combo_set_popdown_strings(GTK_COMBO(textureCombo), glist);
 		g_list_free(glist);
@@ -410,8 +415,7 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 		else
 			strcpy(lastTextureStr, NO_TEXTURE_STRING);
 		useTexture = 1;
-
-		gtk_widget_set_sensitive(GTK_WIDGET(textureCombo), !IsSet(pDetails->texture, TT_DISABLED));
+		gtk_widget_set_sensitive(GTK_WIDGET(textureCombo), !IsFlagSet(pDetails->textureType, TT_DISABLED));
 	}
 
 	/* Copy material - to reset if cancel pressed */
@@ -469,7 +473,7 @@ void Setup3dColourPicker(GtkWidget* notused, GdkWindow* wind)
 	CreatePreview();
 }
 
-GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType texture)
+GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType textureType)
 {
 	GtkWidget *pixmapwid, *button;
 	GdkPixmap *pixmap;
@@ -488,7 +492,7 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType text
 	details[curDetail].pixmap = pixmap;
 	details[curDetail].preview = button;
 	details[curDetail].opacity = opacity;
-	details[curDetail].texture = texture;
+	details[curDetail].textureType = textureType;
 
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 				   GTK_SIGNAL_FUNC(UpdateColour3d), &details[curDetail]);

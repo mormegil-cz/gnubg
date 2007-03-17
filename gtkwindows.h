@@ -6,7 +6,7 @@
 #define GTK_STOCK_DIALOG_GNU_QUESTION "gtk-dialog-gnuquestion" /* stock gnu head icon with question mark */
 #define GTK_STOCK_DIALOG_GNU_BIG "gtk-dialog-gnubig" /* large gnu icon */
 
-typedef enum _dialogflag {
+enum {	/* Dialog flags */
 	DIALOG_FLAG_NONE = 0,
 	DIALOG_FLAG_MODAL = 1,
 	DIALOG_FLAG_CUSTOM_PICKMAP = 2,
@@ -14,7 +14,7 @@ typedef enum _dialogflag {
 	DIALOG_FLAG_CLOSEBUTTON = 8,
 	DIALOG_FLAG_NOTIDY = 16,
 	DIALOG_FLAG_MINMAXBUTTONS = 32
-} dialogflag;
+};
 
 typedef enum _dialogarea {
     DA_MAIN,

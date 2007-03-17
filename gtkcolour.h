@@ -40,10 +40,10 @@ typedef struct UpdateDetails_T
 	GtkWidget* preview;
 	GtkWidget** parentPreview;
 	int opacity;
-	TextureType texture;
+	TextureType textureType;
 } UpdateDetails;
 
-GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType texture);
+GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType textureType);
 #endif
 
 #define GTK_TYPE_COLOUR_PICKER (gtk_colour_picker_get_type())

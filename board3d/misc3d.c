@@ -97,7 +97,7 @@ static void CheckNormal()
 	GLfloat norms[3];
 	glGetFloatv(GL_CURRENT_NORMAL, norms);
 
-	len = (float)sqrt(norms[0] * norms[0] + norms[1] * norms[1] + norms[2] * norms[2]);
+	len = sqrtf(norms[0] * norms[0] + norms[1] * norms[1] + norms[2] * norms[2]);
 	if (fabs(len - 1) > 0.000001)
 		len=len; /*break here*/
 	norms[0] *= .1f;
@@ -264,14 +264,9 @@ float Dist2d(float a, float b)
 {	/* Find 3rd side size */
 	float sqdD = a * a - b * b;
 	if (sqdD > 0)
-		return (float)sqrt(sqdD);
+		return sqrtf(sqdD);
 	else
 		return 0;
-}
-
-int IsSet(int flags, int bit)
-{
-	return ((flags & bit) == bit) ? 1 : 0;
 }
 
 /* Texture functions */
@@ -280,7 +275,7 @@ static GList *textures;
 
 static const char* TextureTypeStrs[TT_COUNT] = {"general", "piece", "hinge"};
 
-GList *GetTextureList(int type)
+GList *GetTextureList(TextureType type)
 {
 	GList *glist = NULL;
 	GList *pl;
@@ -289,7 +284,7 @@ GList *GetTextureList(int type)
 	for (pl = textures; pl; pl = pl->next)
 	{
 		TextureInfo* text = (TextureInfo*)pl->data;
-		if (IsSet(type, text->type))
+		if (text->type == type)
 			glist = g_list_append(glist, text->name);
 	}
 	return glist;
@@ -532,8 +527,8 @@ int LoadTexture(Texture* texture, const char* filename)
 		return 0;	/* failed to load file */
 	}
 	/* Check size is a power of 2 */
-	frexp(texture->width, &n);
-	if (texture->width != pow(2, n - 1))
+	frexp((double)texture->width, &n);
+	if (texture->width != powi(2, n - 1))
 	{
 		g_print("Failed to load texture %s, size (%d) isn't a power of 2\n",
 			filename, texture->width);
@@ -661,7 +656,7 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 		float yDiff = end[1] - start[1];
 		float zDiff = end[2] - start[2];
 
-		lineLen = (float)sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+		lineLen = sqrtf(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
 		if (d <= lineLen)
 		{
 			per = d / lineLen;
@@ -675,7 +670,7 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 	else if (type == PATH_PARABOLA)
 	{
 		float dist = end[0] - start[0];
-		lineLen = (float)fabs(dist);
+		lineLen = fabsf(dist);
 		if (d <= lineLen)
 		{
 			v[0] = start[0] + d * (dist / lineLen);
@@ -688,7 +683,7 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 	else if (type == PATH_PARABOLA_12TO3)
 	{
 		float dist = end[0] - start[0];
-		lineLen = (float)fabs(dist);
+		lineLen = fabsf(dist);
 		if (d <= lineLen)
 		{
 			v[0] = start[0] + d * (dist / lineLen);
@@ -705,7 +700,7 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 
 		xRad = end[0] - start[0];
 		zRad = end[2] - start[2];
-		lineLen = (float)PI * (((float)fabs(xRad) + (float)fabs(zRad)) / 2.0f) / 2.0f;
+		lineLen = (float)PI * ((fabsf(xRad) + fabsf(zRad)) / 2.0f) / 2.0f;
 		if (d <= lineLen)
 		{
 			per = d / lineLen;
@@ -716,26 +711,26 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 			{
 				xCent = end[0];
 				zCent = start[2];
-				yOff = yDiff * (float)cos((PI / 2.0f) * per);
+				yOff = yDiff * cosf((PI / 2.0f) * per);
 			}
 			else
 			{
 				xCent = start[0];
 				zCent = end[2];
-				yOff = yDiff * (float)sin((PI / 2.0f) * per);
+				yOff = yDiff * sinf((PI / 2.0f) * per);
 			}
 
 			if (type == PATH_CURVE_9TO12)
 			{
-				v[0] = xCent - xRad * (float)cos((PI / 2.0f) * per);
+				v[0] = xCent - xRad * cosf((PI / 2.0f) * per);
 				v[1] = end[1] - yOff;
-				v[2] = zCent + zRad * (float)sin((PI / 2.0f) * per);
+				v[2] = zCent + zRad * sinf((PI / 2.0f) * per);
 			}
 			else
 			{
-				v[0] = xCent + xRad * (float)sin((PI / 2.0f) * per);
+				v[0] = xCent + xRad * sinf((PI / 2.0f) * per);
 				v[1] = start[1] + yOff;
-				v[2] = zCent - zRad * (float)cos((PI / 2.0f) * per);
+				v[2] = zCent - zRad * cosf((PI / 2.0f) * per);
 			}
 			return -1;
 		}
@@ -865,14 +860,14 @@ void cylinder(float radius, float height, unsigned int accuracy, const Texture* 
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy + 1; i++)
 	{
-		glNormal3f((float)sin(angle), (float)cos(angle), 0);
+		glNormal3f(sinf(angle), cosf(angle), 0.f);
 		if (texture)
-			glTexCoord2f(circum * i / (radius * 2), 0);
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, 0);
+			glTexCoord2f(circum * i / (radius * 2), 0.f);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, 0.f);
 
 		if (texture)
 			glTexCoord2f(circum * i / (radius * 2), height / (radius * 2));
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 
 		angle += step;
 	}
@@ -886,12 +881,12 @@ void circleOutlineOutward(float radius, float height, unsigned int accuracy)
 
 	step = (2 * (float)PI) / accuracy;
 	angle = 0;
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_LINE_STRIP);
 	for (i = 0; i <= accuracy; i++)
 	{
-		glNormal3f((float)sin(angle), (float)cos(angle), 0);
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glNormal3f(sinf(angle), cosf(angle), 0.f);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 		angle -= step;
 	}
 	glEnd();
@@ -904,11 +899,11 @@ void circleOutline(float radius, float height, unsigned int accuracy)
 
 	step = (2 * (float)PI) / accuracy;
 	angle = 0;
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_LINE_STRIP);
 	for (i = 0; i <= accuracy; i++)
 	{
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 		angle -= step;
 	}
 	glEnd();
@@ -921,12 +916,12 @@ void circle(float radius, float height, unsigned int accuracy)
 
 	step = (2 * (float)PI) / accuracy;
 	angle = 0;
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
-	glVertex3f(0, 0, height);
+	glVertex3f(0.f, 0.f, height);
 	for (i = 0; i <= accuracy; i++)
 	{
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 		angle -= step;
 	}
 	glEnd();
@@ -939,12 +934,12 @@ void circleRev(float radius, float height, unsigned int accuracy)
 
 	step = (2 * (float)PI) / accuracy;
 	angle = 0;
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
-	glVertex3f(0, 0, height);
+	glVertex3f(0.f, 0.f, height);
 	for (i = 0; i <= accuracy; i++)
 	{
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 		angle += step;
 	}
 	glEnd();
@@ -963,14 +958,14 @@ void circleTex(float radius, float height, unsigned int accuracy, const Texture*
 
 	step = (2 * (float)PI) / accuracy;
 	angle = 0;
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
 	glTexCoord2f(.5f, .5f);
-	glVertex3f(0, 0, height);
+	glVertex3f(0.f, 0.f, height);
 	for (i = 0; i <= accuracy; i++)
 	{
-		glTexCoord2f((float)(sin(angle) * radius + radius) / (radius * 2), ((float)cos(angle) * radius + radius) / (radius * 2));
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glTexCoord2f((sinf(angle) * radius + radius) / (radius * 2), (cosf(angle) * radius + radius) / (radius * 2));
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 		angle -= step;
 	}
 	glEnd();
@@ -989,14 +984,14 @@ void circleRevTex(float radius, float height, unsigned int accuracy, const Textu
 
 	step = (2 * (float)PI) / accuracy;
 	angle = 0;
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
 	glTexCoord2f(.5f, .5f);
-	glVertex3f(0, 0, height);
+	glVertex3f(0.f, 0.f, height);
 	for (i = 0; i <= accuracy; i++)
 	{
-		glTexCoord2f((float)(sin(angle) * radius + radius) / (radius * 2), ((float)cos(angle) * radius + radius) / (radius * 2));
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		glTexCoord2f((sinf(angle) * radius + radius) / (radius * 2), (cosf(angle) * radius + radius) / (radius * 2));
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, height);
 		angle += step;
 	}
 	glEnd();
@@ -1025,136 +1020,136 @@ void drawBox(int type, float x, float y, float z, float w, float h, float d, con
 		repY = (h * TEXTURE_SCALE) / texture->height;
 	 
 		/* Front Face */
-		glNormal3f(0, 0, normZ);
+		glNormal3f(0.f, 0.f, normZ);
 		if (type & BOX_SPLITTOP)
 		{
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, 1);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, 1);
-			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 1);
-			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 1);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, -1.f, 1.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, -1.f, 1.f);
+			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1.f, 0.f, 1.f);
+			glTexCoord2f(0.f, repY / 2.0f); glVertex3f(-1.f, 0.f, 1.f);
 
-			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 1);
-			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 1);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, 1);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, 1);
+			glTexCoord2f(0.f, repY / 2.0f); glVertex3f(-1.f, 0.f, 1.f);
+			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1.f, 0.f, 1.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, 1.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, 1.f);
 		}
 		else
 		if (type & BOX_SPLITWIDTH)
 		{
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, 1);
-			glTexCoord2f(repX / 2.0f, 0); glVertex3f(0, -1, 1);
-			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0, 1, 1);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, 1);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, -1.f, 1.f);
+			glTexCoord2f(repX / 2.0f, 0.f); glVertex3f(0.f, -1.f, 1.f);
+			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0.f, 1.f, 1.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, 1.f);
 
-			glTexCoord2f(repX / 2.0f, 0); glVertex3f(0, -1, 1);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, 1);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, 1);
-			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0, 1, 1);
+			glTexCoord2f(repX / 2.0f, 0.f); glVertex3f(0.f, -1.f, 1.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, -1.f, 1.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, 1.f);
+			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0.f, 1.f, 1.f);
 		}
 		else
 		{
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, 1);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, 1);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, 1);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, 1);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, -1.f, 1.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, -1.f, 1.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, 1.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, 1.f);
 		}
 		if (!(type & BOX_NOENDS))
 		{
 			/* Top Face */
-			glNormal3f(0, normY, 0);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, -1);
-			glTexCoord2f(0, 0); glVertex3f(-1, 1, 1);
-			glTexCoord2f(repX, 0); glVertex3f(1, 1, 1);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, -1);
+			glNormal3f(0.f, normY, 0.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, -1.f);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, 1.f, 1.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, 1.f, 1.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, -1.f);
 			/* Bottom Face */
-			glNormal3f(0, -normY, 0);
-			glTexCoord2f(repX, repY); glVertex3f(-1, -1, -1);
-			glTexCoord2f(0, repY); glVertex3f(1, -1, -1);
-			glTexCoord2f(0, 0); glVertex3f(1, -1, 1);
-			glTexCoord2f(repX, 0); glVertex3f(-1, -1, 1);
+			glNormal3f(0.f, -normY, 0.f);
+			glTexCoord2f(repX, repY); glVertex3f(-1.f, -1.f, -1.f);
+			glTexCoord2f(0.f, repY); glVertex3f(1.f, -1.f, -1.f);
+			glTexCoord2f(0.f, 0.f); glVertex3f(1.f, -1.f, 1.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(-1.f, -1.f, 1.f);
 		}
 		if (!(type & BOX_NOSIDES))
 		{
 			/* Right face */
-			glNormal3f(normX, 0, 0);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, -1);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, -1);
-			glTexCoord2f(0, repY); glVertex3f(1, 1, 1);
-			glTexCoord2f(0, 0); glVertex3f(1, -1, 1);
+			glNormal3f(normX, 0.f, 0.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, -1.f, -1.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, -1.f);
+			glTexCoord2f(0.f, repY); glVertex3f(1.f, 1.f, 1.f);
+			glTexCoord2f(0.f, 0.f); glVertex3f(1.f, -1.f, 1.f);
 			/* Left Face */
-			glNormal3f(-normX, 0, 0);
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, -1);
-			glTexCoord2f(repX, 0); glVertex3f(-1, -1, 1);
-			glTexCoord2f(repX, repY); glVertex3f(-1, 1, 1);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, -1);
+			glNormal3f(-normX, 0.f, 0.f);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, -1.f, -1.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(-1.f, -1.f, 1.f);
+			glTexCoord2f(repX, repY); glVertex3f(-1.f, 1.f, 1.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, -1.f);
 		}
 	}
 	else
 	{	/* no texture co-ords */
 		/* Front Face */
-		glNormal3f(0, 0, normZ);
+		glNormal3f(0.f, 0.f, normZ);
 		if (type & BOX_SPLITTOP)
 		{
-			glVertex3f(-1, -1, 1);
-			glVertex3f(1, -1, 1);
-			glVertex3f(1, 0, 1);
-			glVertex3f(-1, 0, 1);
+			glVertex3f(-1.f, -1.f, 1.f);
+			glVertex3f(1.f, -1.f, 1.f);
+			glVertex3f(1.f, 0.f, 1.f);
+			glVertex3f(-1.f, 0.f, 1.f);
 
-			glVertex3f(-1, 0, 1);
-			glVertex3f(1, 0, 1);
-			glVertex3f(1, 1, 1);
-			glVertex3f(-1, 1, 1);
+			glVertex3f(-1.f, 0.f, 1.f);
+			glVertex3f(1.f, 0.f, 1.f);
+			glVertex3f(1.f, 1.f, 1.f);
+			glVertex3f(-1.f, 1.f, 1.f);
 		}
 		else
 		if (type & BOX_SPLITWIDTH)
 		{
-			glVertex3f(-1, -1, 1);
-			glVertex3f(0, -1, 1);
-			glVertex3f(0, 1, 1);
-			glVertex3f(-1, 1, 1);
+			glVertex3f(-1.f, -1.f, 1.f);
+			glVertex3f(0.f, -1.f, 1.f);
+			glVertex3f(0.f, 1.f, 1.f);
+			glVertex3f(-1.f, 1.f, 1.f);
 
-			glVertex3f(0, -1, 1);
-			glVertex3f(1, -1, 1);
-			glVertex3f(1, 1, 1);
-			glVertex3f(0, 1, 1);
+			glVertex3f(0.f, -1.f, 1.f);
+			glVertex3f(1.f, -1.f, 1.f);
+			glVertex3f(1.f, 1.f, 1.f);
+			glVertex3f(0.f, 1.f, 1.f);
 		}
 		else
 		{
-			glVertex3f(-1, -1, 1);
-			glVertex3f(1, -1, 1);
-			glVertex3f(1, 1, 1);
-			glVertex3f(-1, 1, 1);
+			glVertex3f(-1.f, -1.f, 1.f);
+			glVertex3f(1.f, -1.f, 1.f);
+			glVertex3f(1.f, 1.f, 1.f);
+			glVertex3f(-1.f, 1.f, 1.f);
 		}
 
 		if (!(type & BOX_NOENDS))
 		{
 			/* Top Face */
-			glNormal3f(0, normY, 0);
-			glVertex3f(-1, 1, -1);
-			glVertex3f(-1, 1, 1);
-			glVertex3f(1, 1, 1);
-			glVertex3f(1, 1, -1);
+			glNormal3f(0.f, normY, 0.f);
+			glVertex3f(-1.f, 1.f, -1.f);
+			glVertex3f(-1.f, 1.f, 1.f);
+			glVertex3f(1.f, 1.f, 1.f);
+			glVertex3f(1.f, 1.f, -1.f);
 			/* Bottom Face */
-			glNormal3f(0, -normY, 0);
-			glVertex3f(-1, -1, -1);
-			glVertex3f(1, -1, -1);
-			glVertex3f(1, -1, 1);
-			glVertex3f(-1, -1, 1);
+			glNormal3f(0.f, -normY, 0.f);
+			glVertex3f(-1.f, -1.f, -1.f);
+			glVertex3f(1.f, -1.f, -1.f);
+			glVertex3f(1.f, -1.f, 1.f);
+			glVertex3f(-1.f, -1.f, 1.f);
 		}
 		if (!(type & BOX_NOSIDES))
 		{
 			/* Right face */
-			glNormal3f(normX, 0, 0);
-			glVertex3f(1, -1, -1);
-			glVertex3f(1, 1, -1);
-			glVertex3f(1, 1, 1);
-			glVertex3f(1, -1, 1);
+			glNormal3f(normX, 0.f, 0.f);
+			glVertex3f(1.f, -1.f, -1.f);
+			glVertex3f(1.f, 1.f, -1.f);
+			glVertex3f(1.f, 1.f, 1.f);
+			glVertex3f(1.f, -1.f, 1.f);
 			/* Left Face */
-			glNormal3f(-normX, 0, 0);
-			glVertex3f(-1, -1, -1);
-			glVertex3f(-1, -1, 1);
-			glVertex3f(-1, 1, 1);
-			glVertex3f(-1, 1, -1);
+			glNormal3f(-normX, 0.f, 0.f);
+			glVertex3f(-1.f, -1.f, -1.f);
+			glVertex3f(-1.f, -1.f, 1.f);
+			glVertex3f(-1.f, 1.f, 1.f);
+			glVertex3f(-1.f, 1.f, -1.f);
 		}
 	}
 	glEnd();
@@ -1168,30 +1163,30 @@ void drawCube(float size)
 
 	glBegin(GL_QUADS);
 		/* Front Face */
-		glVertex3f(-1, -1, 1);
-		glVertex3f(1, -1, 1);
-		glVertex3f(1, 1, 1);
-		glVertex3f(-1, 1, 1);
+		glVertex3f(-1.f, -1.f, 1.f);
+		glVertex3f(1.f, -1.f, 1.f);
+		glVertex3f(1.f, 1.f, 1.f);
+		glVertex3f(-1.f, 1.f, 1.f);
 		/* Top Face */
-		glVertex3f(-1, 1, -1);
-		glVertex3f(-1, 1, 1);
-		glVertex3f(1, 1, 1);
-		glVertex3f(1, 1, -1);
+		glVertex3f(-1.f, 1.f, -1.f);
+		glVertex3f(-1.f, 1.f, 1.f);
+		glVertex3f(1.f, 1.f, 1.f);
+		glVertex3f(1.f, 1.f, -1.f);
 		/* Bottom Face */
-		glVertex3f(-1, -1, -1);
-		glVertex3f(1, -1, -1);
-		glVertex3f(1, -1, 1);
-		glVertex3f(-1, -1, 1);
+		glVertex3f(-1.f, -1.f, -1.f);
+		glVertex3f(1.f, -1.f, -1.f);
+		glVertex3f(1.f, -1.f, 1.f);
+		glVertex3f(-1.f, -1.f, 1.f);
 		/* Right face */
-		glVertex3f(1, -1, -1);
-		glVertex3f(1, 1, -1);
-		glVertex3f(1, 1, 1);
-		glVertex3f(1, -1, 1);
+		glVertex3f(1.f, -1.f, -1.f);
+		glVertex3f(1.f, 1.f, -1.f);
+		glVertex3f(1.f, 1.f, 1.f);
+		glVertex3f(1.f, -1.f, 1.f);
 		/* Left Face */
-		glVertex3f(-1, -1, -1);
-		glVertex3f(-1, -1, 1);
-		glVertex3f(-1, 1, 1);
-		glVertex3f(-1, 1, -1);
+		glVertex3f(-1.f, -1.f, -1.f);
+		glVertex3f(-1.f, -1.f, 1.f);
+		glVertex3f(-1.f, 1.f, 1.f);
+		glVertex3f(-1.f, 1.f, -1.f);
 	glEnd();
 
 	glPopMatrix();
@@ -1203,8 +1198,8 @@ void drawRect(float x, float y, float z, float w, float h, const Texture* textur
 	
 	glPushMatrix();
 	glTranslatef(x + w / 2, y + h / 2, z);
-	glScalef(w / 2.0f, h / 2.0f, 1);
-	glNormal3f(0, 0, 1);
+	glScalef(w / 2.0f, h / 2.0f, 1.f);
+	glNormal3f(0.f, 0.f, 1.f);
 	
 	if (texture)
 	{
@@ -1213,19 +1208,19 @@ void drawRect(float x, float y, float z, float w, float h, const Texture* textur
 		repY = h * tuv;
 
 		glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, 0);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, 0);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, 0);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, 0);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, -1.f, 0.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, -1.f, 0.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, 0.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, 0.f);
 		glEnd();
 	}
 	else
 	{
 		glBegin(GL_QUADS);
-			glVertex3f(-1, -1, 0);
-			glVertex3f(1, -1, 0);
-			glVertex3f(1, 1, 0);
-			glVertex3f(-1, 1, 0);
+			glVertex3f(-1.f, -1.f, 0.f);
+			glVertex3f(1.f, -1.f, 0.f);
+			glVertex3f(1.f, 1.f, 0.f);
+			glVertex3f(-1.f, 1.f, 0.f);
 		glEnd();
 	}
 
@@ -1238,8 +1233,8 @@ void drawSplitRect(float x, float y, float z, float w, float h, const Texture* t
 
 	glPushMatrix();
 	glTranslatef(x + w / 2, y + h / 2, z);
-	glScalef(w / 2.0f, h / 2.0f, 1);
-	glNormal3f(0, 0, 1);
+	glScalef(w / 2.0f, h / 2.0f, 1.f);
+	glNormal3f(0.f, 0.f, 1.f);
 	
 	if (texture)
 	{
@@ -1248,29 +1243,29 @@ void drawSplitRect(float x, float y, float z, float w, float h, const Texture* t
 		repY = h * tuv;
 
 		glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, 0);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, 0);
-			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 0);
-			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 0);
+			glTexCoord2f(0.f, 0.f); glVertex3f(-1.f, -1.f, 0.f);
+			glTexCoord2f(repX, 0.f); glVertex3f(1.f, -1.f, 0.f);
+			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1.f, 0.f, 0.f);
+			glTexCoord2f(0.f, repY / 2.0f); glVertex3f(-1.f, 0.f, 0.f);
 
-			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 0);
-			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 0);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, 0);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, 0);
+			glTexCoord2f(0.f, repY / 2.0f); glVertex3f(-1.f, 0.f, 0.f);
+			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1.f, 0.f, 0.f);
+			glTexCoord2f(repX, repY); glVertex3f(1.f, 1.f, 0.f);
+			glTexCoord2f(0.f, repY); glVertex3f(-1.f, 1.f, 0.f);
 		glEnd();
 	}
 	else
 	{
 		glBegin(GL_QUADS);
-			glVertex3f(-1, -1, 0);
-			glVertex3f(1, -1, 0);
-			glVertex3f(1, 0, 0);
-			glVertex3f(-1, 0, 0);
+			glVertex3f(-1.f, -1.f, 0.f);
+			glVertex3f(1.f, -1.f, 0.f);
+			glVertex3f(1.f, 0.f, 0.f);
+			glVertex3f(-1.f, 0.f, 0.f);
 
-			glVertex3f(-1, 0, 0);
-			glVertex3f(1, 0, 0);
-			glVertex3f(1, 1, 0);
-			glVertex3f(-1, 1, 0);
+			glVertex3f(-1.f, 0.f, 0.f);
+			glVertex3f(1.f, 0.f, 0.f);
+			glVertex3f(1.f, 1.f, 0.f);
+			glVertex3f(-1.f, 1.f, 0.f);
 		glEnd();
 	}
 
@@ -1285,25 +1280,25 @@ void drawChequeredRect(float x, float y, float z, float w, float h, int across, 
 
 	glPushMatrix();
 	glTranslatef(x, y, z);
-	glNormal3f(0, 0, 1);
+	glNormal3f(0.f, 0.f, 1.f);
 
 	if (texture)
 	{
 		float tuv = TEXTURE_SCALE / texture->width;
 		float tw = ww * tuv;
 		float th = hh * tuv;
-		float ty = 0;
+		float ty = 0.f;
 
 		for (i = 0; i < down; i++)
 		{
 			float xx = 0, tx = 0;
 			glPushMatrix();
-			glTranslatef(0, hh * i, 0);
+			glTranslatef(0.f, hh * i, 0.f);
 			glBegin(GL_QUAD_STRIP);
 			for (j = 0; j <= across; j++)
 			{
 				glTexCoord2f(tx, ty + th); glVertex2f(xx, hh);
-				glTexCoord2f(tx, ty); glVertex2f(xx, 0);
+				glTexCoord2f(tx, ty); glVertex2f(xx, 0.f);
 				xx += ww;
 				tx += tw;
 			}
@@ -1318,12 +1313,12 @@ void drawChequeredRect(float x, float y, float z, float w, float h, int across, 
 		{
 			float xx = 0;
 			glPushMatrix();
-			glTranslatef(0, hh * i, 0);
+			glTranslatef(0.f, hh * i, 0.f);
 			glBegin(GL_QUAD_STRIP);
 			for (j = 0; j <= across; j++)
 			{
 				glVertex2f(xx, hh);
-				glVertex2f(xx, 0);
+				glVertex2f(xx, 0.f);
 				xx += ww;
 			}
 			glEnd();
@@ -1345,9 +1340,9 @@ void QuarterCylinder(float radius, float len, unsigned int accuracy, const Textu
 	float tuv;
 	if (texture)
 	{
-		float st = (float)sin((2 * PI) / accuracy) * radius;
-		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-		dInc = (float)sqrt(st * st + ct * ct);
+		float st = sinf((2 * PI) / accuracy) * radius;
+		float ct = (cosf((2 * PI) / accuracy) - 1) * radius;
+		dInc = sqrtf(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
 	else
@@ -1358,10 +1353,10 @@ void QuarterCylinder(float radius, float len, unsigned int accuracy, const Textu
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
 		angle = ((float)i * 2.f * (float)PI) / accuracy;
-		glNormal3f((float)sin(angle), 0, (float)cos(angle));
+		glNormal3f(sinf(angle), 0.f, cosf(angle));
 
-		sar = (float)sin(angle) * radius;
-		car = (float)cos(angle) * radius;
+		sar = sinf(angle) * radius;
+		car = cosf(angle) * radius;
 
 		if (tuv)
 			glTexCoord2f(len * tuv, d * tuv);
@@ -1369,10 +1364,10 @@ void QuarterCylinder(float radius, float len, unsigned int accuracy, const Textu
 
 		if (tuv)
 		{
-			glTexCoord2f(0, d * tuv);
+			glTexCoord2f(0.f, d * tuv);
 			d -= dInc;
 		}
-		glVertex3f(sar, 0, car);
+		glVertex3f(sar, 0.f, car);
 	}
 	glEnd();
 }
@@ -1389,9 +1384,9 @@ void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, c
 	float tuv;
 	if (texture)
 	{
-		float st = (float)sin((2 * PI) / accuracy) * radius;
-		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-		dInc = (float)sqrt(st * st + ct * ct);
+		float st = sinf((2 * PI) / accuracy) * radius;
+		float ct = (cosf((2 * PI) / accuracy) - 1) * radius;
+		dInc = sqrtf(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
 	else
@@ -1402,10 +1397,10 @@ void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, c
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
 		angle = ((float)i * 2.f * (float)PI) / accuracy;
-		glNormal3f((float)sin(angle), 0, (float)cos(angle));
+		glNormal3f(sinf(angle), 0.f, cosf(angle));
 
-		sar = (float)sin(angle) * radius;
-		car = (float)cos(angle) * radius;
+		sar = sinf(angle) * radius;
+		car = cosf(angle) * radius;
 
 		if (tuv)
 			glTexCoord2f((len + car) * tuv, d * tuv);
@@ -1433,9 +1428,9 @@ void QuarterCylinderSplayed(float radius, float len, unsigned int accuracy, cons
 	float tuv;
 	if (texture)
 	{
-		float st = (float)sin((2 * PI) / accuracy) * radius;
-		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-		dInc = (float)sqrt(st * st + ct * ct);
+		float st = sinf((2 * PI) / accuracy) * radius;
+		float ct = (cosf((2 * PI) / accuracy) - 1) * radius;
+		dInc = sqrtf(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
 	else
@@ -1446,10 +1441,10 @@ void QuarterCylinderSplayed(float radius, float len, unsigned int accuracy, cons
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
 		angle = ((float)i * 2.f * (float)PI) / accuracy;
-		glNormal3f((float)sin(angle), 0, (float)cos(angle));
+		glNormal3f(sinf(angle), 0.f, cosf(angle));
 
-		sar = (float)sin(angle) * radius;
-		car = (float)cos(angle) * radius;
+		sar = sinf(angle) * radius;
+		car = cosf(angle) * radius;
 
 		if (tuv)
 			glTexCoord2f((len - car) * tuv, d * tuv);
@@ -1506,7 +1501,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accu
 	/* Calculate corner 1/8th sphere points */
 	for (i = 0; i < (accuracy / 4) + 1; i++)
 	{
-		latitude = (float)sin(lat_angle) * radius;
+		latitude = sinf(lat_angle) * radius;
 		new_radius = Dist2d(radius, latitude);
 
 		angle = 0;
@@ -1516,9 +1511,9 @@ void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accu
 
 		for (j = 0; j <= ns; j++)
 		{
-			(*boardPoints)[i][j][0] = (float)sin(angle) * new_radius;
+			(*boardPoints)[i][j][0] = sinf(angle) * new_radius;
 			(*boardPoints)[i][j][1] = latitude;
-			(*boardPoints)[i][j][2] = (float)cos(angle) * new_radius;
+			(*boardPoints)[i][j][2] = cosf(angle) * new_radius;
 
 			angle += step;
 		}
@@ -1714,12 +1709,12 @@ void RestrictiveRender(const BoardData *bd, BoardData3d *bd3d, const renderdata 
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		gluPickMatrix(BoxMidWidth(&cb[numRestrictFrames]), BoxMidHeight(&cb[numRestrictFrames]),
-			BoxWidth(&cb[numRestrictFrames]), BoxHeight(&cb[numRestrictFrames]), viewport);
+		gluPickMatrix((double)BoxMidWidth(&cb[numRestrictFrames]), (double)BoxMidHeight(&cb[numRestrictFrames]),
+			(double)BoxWidth(&cb[numRestrictFrames]), (double)BoxHeight(&cb[numRestrictFrames]), viewport);
 
 		/* Setup projection matrix - using saved values */
 		if (prd->planView)
-			glOrtho(-bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, 0, 5);
+			glOrtho(-bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, 0.0, 5.0);
 		else
 			glFrustum(-bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, zNear, zFar);
 
@@ -1938,8 +1933,7 @@ static int idleAnimate(BoardData3d* bd3d)
 		if (prd->quickDraw && numRestrictFrames != -1)
 		{
 			RestrictiveDrawFrame(old_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
-			/*lint -e(645)	temp is initilized */
-			EnlargeCurrentToBox(&temp);
+			EnlargeCurrentToBox(/*lint -e(645)*/&temp);	/* temp is initilized above (lint error 645) */
 		}
 	}
 
@@ -2202,12 +2196,12 @@ void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, flo
 
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a)
 {
-	SetupMat(pMat, r, g, b, r, g, b, 0, 0, 0, 0, a);
+	SetupMat(pMat, r, g, b, r, g, b, 0.f, 0.f, 0.f, 0, a);
 }
 
 void SetupSimpleMat(Material* pMat, float r, float g, float b)
 {
-	SetupMat(pMat, r, g, b, r, g, b, 0, 0, 0, 0, 0);
+	SetupMat(pMat, r, g, b, r, g, b, 0.f, 0.f, 0.f, 0, 0.f);
 }
 
 static
@@ -2316,10 +2310,10 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 	bd->DragTargetHelp = 0;
 	setDicePos(bd, bd3d);
 
-	SetupSimpleMat(&bd3d->gapColour, 0, 0, 0);
-	SetupSimpleMat(&bd3d->logoMat, 1, 1, 1);
-	SetupMat(&bd3d->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
-	SetupMat(&bd3d->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 1);
+	SetupSimpleMat(&bd3d->gapColour, 0.f, 0.f, 0.f);
+	SetupSimpleMat(&bd3d->logoMat, 1.f, 1.f, 1.f);
+	SetupMat(&bd3d->flagMat, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 50, 0.f);
+	SetupMat(&bd3d->flagNumberMat, 0.f, 0.f, .4f, 0.f, 0.f, .4f, 1.f, 1.f, 1.f, 100, 1.f);
 
 	bd3d->diceList = bd3d->DCList = bd3d->pieceList = 0;
 	bd3d->qobjTex = bd3d->qobj = 0;

@@ -43,7 +43,7 @@ void shadowInit(BoardData3d *bd3d, renderdata *prd)
 		g_print("No stencil buffer - no shadows\n");
 		return;
 	}
-	midStencilVal = (int)pow(2, stencilBits - 1);
+	midStencilVal = powi(2, stencilBits - 1);
 	glClearStencil(midStencilVal);
 }
 #if 0  /* Used for testing */

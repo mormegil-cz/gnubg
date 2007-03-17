@@ -774,7 +774,7 @@ int gettimeofday (struct timeval *tv, void * notused)
 }
 #endif
 
-extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
+extern void CheckGameClock(matchstate *pms, struct timeval *tvp)
 {
     int pen=0;
     struct timeval ts;
@@ -789,7 +789,7 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
     if ( pms->gs != GAME_PLAYING  || pms->gc.fPlayer < 0 )
     {
 	 pms->gc.pc[0].tvStamp = pms->gc.pc[1].tvStamp = *tvp;
-	 return 0;
+	 return;
     }
 
     pgcPlayer=&pms->gc.pc[pms->gc.fPlayer];
@@ -840,12 +840,12 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 
 
 	if  (TC_NONE == pgcPlayer->tc.timing)
-	    return 0;
+	    return;
 	if (TC_UNKNOWN == pgcPlayer->tc.timing) 
 	{
 	    pms->gc.pc[0].tvTimeleft = pms->tvTimeleft[0];
 	    pms->gc.pc[1].tvTimeleft = pms->tvTimeleft[1];
-	    return 0;
+	    return;
 	}
 
 	/* Player's timestamp is reference for last hit.
@@ -896,7 +896,7 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 
 		AddMoveRecord( pmr );
 	}
-	return pen;
+	return;
 }
 }
 

@@ -52,23 +52,25 @@
 #include <gtk/gtkgl.h>
 
 #include "fun3d.h"
-#include "gtkboard.h"
 #include "matrix.h"
 #include "path.h"
 #include "gtkwindows.h"
-#include "common.h"
 
 #include "model.h"
-#include "render.h"
 #include "backgammon.h"
+#include "drawboard.h"	/* for fClockwise decl */
 
 #include <glib/gi18n.h>
 
-/* Clipping planes */
-#define zNear .1f
-#define zFar 70
+/* float versions (to quiet compiler warnings) */
+#define sqrtf(arg) (float)sqrt((double)(arg))
+#define powi(arg1, arg2) (int)pow((double)(arg1), (double)(arg2))
+#define fabsf(arg) (float)fabs((double)(arg))
 
-extern int fClockwise;
+/* Clipping planes */
+#define zNear .1
+#define zFar 70.0
+
 extern int numRestrictFrames;
 
 typedef struct _DiceRotation
@@ -100,6 +102,7 @@ struct _Path
 };
 
 enum OcculderType {OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE};
+#define FIRST_PIECE (int)OCC_PIECE
 #define LAST_PIECE ((int)OCC_PIECE + 29)
 #define NUM_OCC (LAST_PIECE + 1)
 
@@ -157,7 +160,7 @@ struct _BoardData3d
 	OGLFont *numberFont, *cubeFont;	/* OpenGL fonts */
 
 	/* Saved viewing values (used for picking) */
-	float vertFrustrum, horFrustrum;
+	double vertFrustrum, horFrustrum;
 	float modelMatrix[16];
 
 	/* Display list ids and quadratics */
@@ -203,13 +206,10 @@ struct _BoardData3d
 #define TEXTURE_PATH "textures/"
 #define NO_TEXTURE_STRING _("No texture")
 
-#define HINGE_SEGMENTS 6
+#define HINGE_SEGMENTS 6.f
 
 /* Draw board parts (boxes) specially */
-typedef enum _boxType
-{
-	BOX_ALL = 0, BOX_NOSIDES = 1, BOX_NOENDS = 2, BOX_SPLITTOP = 4, BOX_SPLITWIDTH = 8
-} boxType;
+enum /*boxType*/ {BOX_ALL = 0, BOX_NOSIDES = 1, BOX_NOENDS = 2, BOX_SPLITTOP = 4, BOX_SPLITWIDTH = 8};
 
 /* Work out which sides of dice to draw */
 typedef struct _diceTest

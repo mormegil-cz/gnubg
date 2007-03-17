@@ -21,7 +21,7 @@ typedef enum _lighttype {
 
 typedef enum _PieceType
 {
-	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
+	PT_ROUNDED, PT_FLAT
 } PieceType;
 
 typedef enum _PieceTextureType
@@ -31,7 +31,8 @@ typedef enum _PieceTextureType
 
 typedef enum _TextureType
 {
-	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
+	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16
 } TextureType;
+#define TT_COUNT 3	/* 3 texture types: general, piece and hinge */
 
 #endif
