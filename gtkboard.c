@@ -59,9 +59,10 @@
 #define HINT_TIME 150
 
 animation animGUI = ANIMATE_SLIDE;
-int nGUIAnimSpeed = 4, fGUIBeep = TRUE,
+int fGUIBeep = TRUE,
     fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE,
     fGUIShowPips = TRUE, fGUIDragTargetHelp = TRUE, fGUIShowEPCs = TRUE;
+unsigned int nGUIAnimSpeed = 4;
 
 static GtkVBoxClass *parent_class = NULL;
 

@@ -35,7 +35,7 @@
 int fOutputMWC = TRUE;
 int fOutputWinPC = FALSE;
 int fOutputMatchPC = TRUE;
-int fOutputDigits = 3;
+unsigned int fOutputDigits = 3;
 float rErrorRateFactor = 1000.0f;
 
 

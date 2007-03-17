@@ -22,7 +22,8 @@
 #ifndef _FORMAT_H_
 #define _FORMAT_H_
 
-extern int fOutputDigits, fOutputMWC, fOutputWinPC, fOutputMatchPC;
+extern int fOutputMWC, fOutputWinPC, fOutputMatchPC;
+extern unsigned int fOutputDigits;
 extern float rErrorRateFactor;
 
 /* misc. output routines used by text and HTML export */

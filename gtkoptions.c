@@ -1363,7 +1363,7 @@ int checkupdate_n;
 static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   char sz[128];
-  int n;
+  unsigned int n;
   unsigned int cCache;
   int i;
   char *pch;
@@ -1435,7 +1435,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwOutputGWC,fOutputWinPC, "set output winpc %s")
   CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
 
-  if(( n = (int)pow->padjDigits->value ) != fOutputDigits ){
+  if(( n = (unsigned int)pow->padjDigits->value ) != fOutputDigits ){
     sprintf(sz, "set output digits %d", n );
     UserCommand(sz); 
   }
@@ -1473,17 +1473,17 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwConfStart,fConfirm, "set confirm new %s")
   CHECKUPDATE(pow->pwConfOverwrite,fConfirmSave, "set confirm save %s")
   
-  if(( n = (int)pow->padjCubeAutomatic->value ) != cAutoDoubles){
+  if(( n = (unsigned int)pow->padjCubeAutomatic->value ) != cAutoDoubles){
     sprintf(sz, "set automatic doubles %d", n );
     UserCommand(sz); 
   }
 
-  if(( n = (int)pow->padjCubeBeaver->value ) != nBeavers){
+  if(( n = (unsigned int)pow->padjCubeBeaver->value ) != nBeavers){
     sprintf(sz, "set beavers %d", n );
     UserCommand(sz); 
   }
   
-  if(( n = (int)pow->padjLength->value ) != nDefaultLength){
+  if(( n = (unsigned int)pow->padjLength->value ) != nDefaultLength){
     sprintf(sz, "set matchlength %d", n );
     UserCommand(sz); 
   }
@@ -1551,19 +1551,19 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   EvalCacheStats( NULL, &cCache, NULL, NULL );
 
-  if((n = (int)pow->padjCache->value) != cCache) {
+  if((n = (unsigned int)pow->padjCache->value) != cCache) {
     sprintf(sz, "set cache %d", n );
     UserCommand(sz); 
   }
 
 #if USE_MULTITHREAD
-  if((n = (int)pow->padjThreads->value) != (int)MT_GetNumThreads()) {
+  if((n = (unsigned int)pow->padjThreads->value) != MT_GetNumThreads()) {
     sprintf(sz, "set threads %d", n );
     UserCommand(sz); 
   }
 #endif
 
-  if((n = (int)pow->padjDelay->value) != nDelay) {
+  if((n = (unsigned int)pow->padjDelay->value) != nDelay) {
     sprintf(sz, "set delay %d", n );
     UserCommand(sz); 
   }
@@ -1594,7 +1594,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   
   if( pow->fChanged == 1 ) 
   { 
-     n = (int)pow->padjSeed->value;
+     n = (unsigned int)pow->padjSeed->value;
      sprintf(sz, "set seed %d", n); 
      UserCommand(sz); 
   }
@@ -1639,7 +1639,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
       && animGUI != ANIMATE_SLIDE )
       UserCommand( "set gui animation slide" );
 
-  if( ( n = (int)pow->padjSpeed->value ) != nGUIAnimSpeed ) {
+  if( ( n = (unsigned int)pow->padjSpeed->value ) != nGUIAnimSpeed ) {
       sprintf( sz, "set gui animation speed %d", n );
       UserCommand( sz );
   }

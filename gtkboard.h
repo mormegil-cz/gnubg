@@ -52,9 +52,10 @@ typedef enum _animation {
 } animation;
 
 extern animation animGUI;
-extern int nGUIAnimSpeed, fGUIBeep, fGUIHighDieFirst,
+extern int fGUIBeep, fGUIHighDieFirst,
     fGUIIllegal, fGUIShowPips, fGUISetWindowPos,
     fGUIDragTargetHelp, fGUIUseStatsPanel, fGUIShowEPCs;
+extern unsigned int nGUIAnimSpeed;
 
 struct _BoardData;      /* Forward declaration for use in Board */
 typedef struct _Board {

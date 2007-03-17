@@ -41,7 +41,8 @@
 #if USE_GTK
 #include <gtk/gtk.h>
 extern GtkWidget* pwBoard;
-extern int fX, nDelay, fNeedPrompt;
+extern int fX, fNeedPrompt;
+extern unsigned int nDelay;
 extern guint nNextTurn; /* GTK idle function */
 #if USE_TIMECONTROL
 extern void GTKUpdateClock(void);
@@ -361,7 +362,8 @@ typedef struct {
     unsigned int anDice[ 2 ];
     int fTurn, fResigned,
 	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
-	fPostCrawford, nMatchTo, anScore[ 2 ], nCube, cBeavers;
+	fPostCrawford, nMatchTo, anScore[ 2 ], nCube;
+	unsigned int cBeavers;
     bgvariation bgv;
     int fCubeUse;
     int fJacoby;
@@ -384,20 +386,20 @@ extern matchinfo mi;
 extern int fNextTurn, fComputing;
 
 /* User settings. */
-extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
+extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford,
     fCubeUse, fDisplay, fAutoBearoff, fShowProgress,
-    nBeavers, fJacoby,
+    fJacoby,
     fOutputRawboard, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord,
-	nDefaultLength, nToolbarStyle, fStyledGamelist, fFullScreen;
-extern unsigned int cAnalysisMoves;
+	nToolbarStyle, fStyledGamelist, fFullScreen;
+extern unsigned int cAnalysisMoves, nBeavers, nDefaultLength, cAutoDoubles;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ N_SKILLS ], rEvalsPerSec;
 extern int nThreadPriority;
-extern int fCheat;
-extern int afCheatRoll[ 2 ];
+extern unsigned int fCheat;
+extern unsigned int afCheatRoll[ 2 ];
 extern int fGotoFirstGame;
 extern int fSconyers15x15DVD;
 extern char szPathSconyers15x15DVD[ BIG_PATH ];      

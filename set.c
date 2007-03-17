@@ -563,7 +563,7 @@ extern void CommandSetAutoCrawford( char *sz ) {
 
 extern void CommandSetAutoDoubles( char *sz ) {
 
-    int n;
+    unsigned int n;
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	outputl( _("You must specify how many automatic doubles to use "
@@ -1171,9 +1171,9 @@ extern void CommandSetGUIAnimationSlide( char *sz ) {
 
 extern void CommandSetGUIAnimationSpeed( char *sz ) {
     
-    int n = ParseNumber( &sz );
+    unsigned int n = ParseNumber( &sz );
 
-    if( n < 0 || n > 7 ) {
+    if (n > 7) {
 	outputl( _("You must specify a speed between 0 and 7 -- try "
 		   "`help set speed'.") );
 
@@ -2865,7 +2865,7 @@ extern void CommandShowWarning( char *sz )
 
 extern void CommandSetBeavers( char *sz ) {
 
-    int n;
+    unsigned int n;
 
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	outputl( _("You must specify the number of beavers to allow.") );
@@ -2886,7 +2886,7 @@ extern void CommandSetBeavers( char *sz ) {
 extern void
 CommandSetOutputDigits( char *sz ) {
 
-  int n = ParseNumber( &sz );
+  unsigned int n = ParseNumber( &sz );
 
   if ( n < 0 || n > 6 ) {
     outputl( _("You must specify a number between 1 and 6.\n") );
@@ -3243,7 +3243,7 @@ extern void CommandSetMatchEvent( char *sz ) {
 
 extern void CommandSetMatchLength( char *sz ) {
 
-    int n = ParseNumber( &sz );
+    unsigned int n = ParseNumber( &sz );
 
     if( n < 1 ) {
 	outputl( _("You must specify a valid match length (1 or longer).") );

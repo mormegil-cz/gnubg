@@ -100,7 +100,7 @@ BearoffUpdated( GtkWidget *pw, bearoffwidget *pbw ) {
 
   if ( f ) 
     /* player on roll */
-    pbw->ms.anDice[ 0 ] = pbw->ms.anDice[ 1 ] = -1;
+    pbw->ms.anDice[ 0 ] = pbw->ms.anDice[ 1 ] = 0;
   else
     /* player has rolled */
     for ( i = 0; i < 2; ++i )

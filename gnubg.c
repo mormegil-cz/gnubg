@@ -102,7 +102,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #if USE_GTK
 int fX = TRUE; /* use X display */
-int nDelay = 300;
+unsigned int nDelay = 300;
 int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
 int fReadingCommand;
@@ -155,14 +155,14 @@ matchstate ms = {
 matchinfo mi;
 
 int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
-    fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
+    fAutoCrawford = 1, fAutoRoll = TRUE,
     fCubeUse = TRUE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
-    nBeavers = 3, fOutputRawboard = FALSE, 
+    fOutputRawboard = FALSE, 
     fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
-    nDefaultLength = 7, nToolbarStyle = 2, fStyledGamelist = TRUE, fFullScreen = FALSE;
-unsigned int cAnalysisMoves = 1;
+    nToolbarStyle = 2, fStyledGamelist = TRUE, fFullScreen = FALSE;
+unsigned int cAnalysisMoves = 1, cAutoDoubles = 0, nDefaultLength = 7, nBeavers = 3;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
 	fTruncEqualPlayer0 =TRUE;
 int fInvertMET = FALSE;
@@ -170,8 +170,8 @@ int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int nThreadPriority = 0;
-int fCheat = FALSE;
-int afCheatRoll[ 2 ] = { 0, 0 };
+unsigned int fCheat = FALSE;
+unsigned int afCheatRoll[ 2 ] = { 0, 0 };
 int fGotoFirstGame = FALSE;
 float rRatingOffset = 2050;
 
