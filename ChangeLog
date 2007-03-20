@@ -1,3 +1,8 @@
+Wed Mar 21 00:21:08 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* import.c: Allow import of nackgammon mat files. (thx,  Joerg Picard
+	<joerg.picard@gmail.com>)
+
 Tue Mar 20 19:28:06 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* <many>: Removed gtktexi. Added Albert Silver's 'All about GNU'.

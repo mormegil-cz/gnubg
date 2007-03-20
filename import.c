@@ -27,7 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include <glib.h>
+#include <time.h>
+#include <sys/stat.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -60,6 +61,72 @@ IsValidMove ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
   else
     return 0;
 
+}
+
+
+static int
+IsValidNackMove( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
+
+    int result = 0;
+
+    if ( !anBoard[ 0 ][ 1 ] && !anBoard[ 1 ][ 1 ]         /* opponents checkers on nack point? */
+        && anBoard[ 0 ][ 5 ] && anBoard[ 1 ][ 5 ]         /* need spare checkers on 6 and 12   */
+        && anBoard[ 0 ][ 12 ] && anBoard[ 1 ][ 12 ] ) {
+
+      anBoard[ 0 ][ 22 ] += 2;                            /* move checkers to nack point       */
+      anBoard[ 1 ][ 22 ] += 2;
+      --anBoard[ 0 ][ 5 ];
+      --anBoard[ 1 ][ 5 ];
+      --anBoard[ 0 ][ 12 ];
+      --anBoard[ 1 ][ 12 ];
+
+      result = IsValidMove( anBoard, anMove );
+
+      anBoard[ 0 ][ 22 ] -= 2;                            /* move checkers back                */
+      anBoard[ 1 ][ 22 ] -= 2;
+      ++anBoard[ 0 ][ 5 ];
+      ++anBoard[ 1 ][ 5 ];
+      ++anBoard[ 0 ][ 12 ];
+      ++anBoard[ 1 ][ 12 ];
+    }
+    return result;
+}
+
+
+static void
+ParseSetDate ( char *szFilename ) {
+    /* Gamesgrid mat files contain date in filename.
+       for other files use last file access date
+    */
+
+    char *pch;
+    struct stat filestat;
+    struct tm   *matchdate;
+    struct tm   mdate;
+
+    matchdate = NULL;
+    for ( pch = szFilename; *pch != '\0'; pch++ ); /* goto end of filename */
+    while ( pch != szFilename ) {
+        if ( *--pch == '-' ) {                     /* go backwards until '-' */
+             /* check if 8 digits before - are valid date */
+            if ( strptime( pch-8, "%Y%m%d", &mdate ) == pch ) {
+                matchdate = &mdate;
+                SetMatchInfo( &mi.pchPlace, "GamesGrid", NULL );
+            }
+        }
+    }
+    /* date could not be parsed out of filename, use last access date */
+    if ( matchdate == NULL ) {
+        if ( stat( szFilename, &filestat ) == 0 ) {
+            matchdate = localtime ( &filestat.st_mtime );
+        }
+    }
+
+    if ( matchdate != NULL ) {
+        mi.nYear  = matchdate->tm_year + 1900;
+        mi.nMonth = matchdate->tm_mon + 1;
+        mi.nDay   = matchdate->tm_mday;
+    }
 }
 
 
@@ -399,7 +466,7 @@ ImportJF( FILE * fp, char *szFileName) {
 
 }  
 
-static int fWarned, fPostCrawford;
+static int fWarned, fPostCrawford, fTryNackgammon;
 
 
 static int
@@ -591,10 +658,17 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             
             /* check if move is valid */
             
-            if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) ) {
-              outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"),
-                        sz + 3 );
-              return;
+           if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) ) {
+               if ( !fTryNackgammon ) {
+                   if ( IsValidNackMove( ms.anBoard, pmr->n.anMove ) ) {
+                       fTryNackgammon = 1;     /* try Nackgammon import next time */
+                   }
+                }
+                if ( !fTryNackgammon ) {
+                    /* only give warning if Nack didn't work either */
+                    outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"), sz + 3 );
+                }
+                return;
             }
             
             AddMoveRecord( pmr );
@@ -730,7 +804,7 @@ char* GetMatLine(FILE* fp)
 }
 
 static int 
-ImportGame( FILE *fp, int iGame, int nLength ) {
+ImportGame( FILE *fp, int iGame, int nLength, bgvariation bgVariation ) {
 
     char sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ], *pch, *pchLeft, *pchRight = NULL, *szLine;
     int n0, n1;
@@ -779,7 +853,7 @@ ImportGame( FILE *fp, int iGame, int nLength ) {
 	/* match is already over -- ignore extra games */
 	return 1;
     
-    InitBoard( ms.anBoard, ms.bgv );
+    InitBoard( ms.anBoard, bgVariation );
 
     ClearMoveRecord();
 
@@ -792,6 +866,10 @@ ImportGame( FILE *fp, int iGame, int nLength ) {
     for( ; pch >= sz0; pch-- )
 	if( isspace( *pch ) )
 	    *pch = '_';
+        else if ( *pch == ',' ) {    /* GamesGrid mat files have ratings */
+            *pch = '\0';             /* after player name                */
+            SetMatchInfo( &mi.pchRating[ 0 ], pch+1, NULL );
+        }
     strcpy( ap[ 0 ].szName, sz0 );
     
     for( pch = sz1; *pch; pch++ )
@@ -801,6 +879,10 @@ ImportGame( FILE *fp, int iGame, int nLength ) {
     for( ; pch >= sz1; pch-- )
 	if( isspace( *pch ) )
 	    *pch = '_';
+        else if ( *pch == ',' ) {    /* GamesGrid mat files have ratings */
+            *pch = '\0';             /* after player name                */
+            SetMatchInfo( &mi.pchRating[ 1 ], pch+1, NULL );
+        }
     strcpy( ap[ 1 ].szName, sz1 );
     
     pmr = NewMoveRecord();
@@ -818,7 +900,7 @@ ImportGame( FILE *fp, int iGame, int nLength ) {
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
-    pmr->g.bgv = VARIATION_STANDARD; /* always standard backgammon */
+    pmr->g.bgv = bgVariation;
     pmr->g.fCubeUse = fCubeUse; 
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
@@ -856,7 +938,7 @@ ImportGame( FILE *fp, int iGame, int nLength ) {
 
 }
 
-extern int ImportMat( FILE *fp, char *szFilename ) {
+static int ImportMatVariation( FILE *fp, char *szFilename, bgvariation bgVariation ) {
 
     int n = 0, nLength, game;
     char ch;
@@ -919,6 +1001,8 @@ extern int ImportMat( FILE *fp, char *szFilename ) {
     FreeMatch();
     ClearMatch();
 
+    ParseSetDate ( szFilename );
+
     if ( pchComment ) 
       mi.pchComment = strdup( pchComment ); /* no need to free mi.pchComment 
                                                as it's already done in 
@@ -934,7 +1018,7 @@ extern int ImportMat( FILE *fp, char *szFilename ) {
 			if (!game)
 				outputf( _("WARNING! Unrecognized line in mat file: '%s'\n"), szLine);
 			{
-				if (ImportGame(fp, game - 1, nLength))
+				if (ImportGame(fp, game - 1, nLength, bgVariation))
 					break;  /* match is over; avoid multiple matches in same .mat file */
 			}
 		}
@@ -955,6 +1039,39 @@ extern int ImportMat( FILE *fp, char *szFilename ) {
     return 0;
 
 }
+
+
+extern int
+ImportMat( FILE *fp, char *szFilename ) {
+
+    int result;
+
+    fTryNackgammon = 0;
+
+    /* try to import standard backgammon first */
+    result = ImportMatVariation( fp, szFilename, VARIATION_STANDARD );
+
+    if ( fTryNackgammon && result == 0 ) {
+        if ( fseek( fp, 0L, SEEK_SET ) == 0 ) {
+
+            /* if nackgammon did the trick during standard import try it */
+            result = ImportMatVariation( fp, szFilename, VARIATION_NACKGAMMON );
+            if ( result != 0 ) {
+
+                /* nack didn't work either, use standard again */
+                if ( fseek( fp, 0L, SEEK_SET ) == 0 ) {
+                    result = ImportMatVariation( fp, szFilename, VARIATION_STANDARD );
+                } else {
+                    result = -1;    /* fseek failed */ 
+                }
+            }
+        } else {
+            result = -1;    /* fseek failed */
+        }
+    }
+    return result;
+}
+
 
 static int
 isAscending( const int anMove[ 8 ] ) {
