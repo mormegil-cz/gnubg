@@ -1,5 +1,10 @@
+Wed Mar 21 00:46:14 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c: fix rating bug already fixed in MAIN
+
 Wed 24 Jan 20:34:15 2007 CET  Jim Segrave <jes@jes-2.demon.nl>
-	* gnubg.c - restore some code dropped some revisions ago
+
+	* gnubg.c: restore some code dropped some revisions ago
 	
 Mon 18 Dev 16:51:24 2006 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
