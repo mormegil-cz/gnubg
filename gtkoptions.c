@@ -45,6 +45,7 @@
 #include "gtkboard.h"
 #include "renderprefs.h"
 #include "gtkwindows.h"
+#include "openurl.h"
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -75,7 +76,6 @@ typedef struct _optionswidget {
 
   GtkWidget *pwRecordGames, *pwDisplay;
   GtkAdjustment *padjCache, *padjDelay, *padjSeed, *padjThreads;
-  GtkAdjustment *padjLearning, *padjAnnealing, *padjThreshold;
 
   GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips, *pwShowEPCs,
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide,
@@ -95,6 +95,7 @@ typedef struct _optionswidget {
   GtkWidget *pwDefaultSGFFolder;
   GtkWidget *pwDefaultImportFolder;
   GtkWidget *pwDefaultExportFolder;
+  GtkWidget *pwWebBrowser;
   GtkAdjustment *padjDigits;
   GtkWidget *pwDigits;
   int fChanged;
@@ -986,77 +987,6 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     ManualDiceToggled( NULL, pow );
 
-    /* Training options */
-    pwp = gtk_alignment_new( 0, 0, 0, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwn ), pwp,
-			      gtk_label_new( _("Training") ) );
-    pwvbox = gtk_vbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
-
-    pwev = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
-    pwhbox = gtk_hbox_new( FALSE, 4 );
-    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
-
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new(
-			    _("Learning rate:") ),
-			FALSE, FALSE, 0);
-    pow->padjLearning = GTK_ADJUSTMENT (gtk_adjustment_new (rAlpha, 0, 1,
-							     0.01, 10, 10) );
-    pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjLearning), 1 , 2);
-    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
-    gtk_tooltips_set_tip (ptt, pwev,
-			  _("Control the rate at which the neural net weights "
-			    "are modified during training.  Higher values "
-			    "may speed up learning, but lower values "
-			    "will retain more existing knowledge."), NULL );
-
-    pwev = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
-    pwhbox = gtk_hbox_new( FALSE, 4 );
-    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
-
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new(
-			    _("Annealing rate:") ),
-			FALSE, FALSE, 0);
-    pow->padjAnnealing = GTK_ADJUSTMENT (gtk_adjustment_new (rAnneal, -5, 5,
-							     0.1, 10, 10) );
-    pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjAnnealing), 
-			      1, 2);
-    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
-    gtk_tooltips_set_tip (ptt, pwev,
-			  _("Control the rate at which the learning parameter "
-			    "decreases during training.  Higher values "
-			    "may speed up learning, but lower values "
-			    "will be better at escaping local minima."),
-			  NULL );
-    
-    pwev = gtk_event_box_new();
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
-    pwhbox = gtk_hbox_new( FALSE, 4 );
-    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
-
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new(
-			    _("Threshold:") ),
-			FALSE, FALSE, 0);
-    pow->padjThreshold = GTK_ADJUSTMENT (gtk_adjustment_new (rThreshold, 0, 6,
-							     0.01, 0.1, 0.1) );
-    pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjThreshold), 
-			      1, 2);
-    gtk_box_pack_start (GTK_BOX (pwhbox), pw, TRUE, TRUE, 0);
-    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
-    gtk_tooltips_set_tip (ptt, pwev,
-			  _("Specify how much 0-ply and 1-ply evalations "
-			    "must disagree before adding a position to "
-			    "the database.  Lower values will admit more "
-			    "positions."), NULL );
-
     /* Bearoff options */
 
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
@@ -1321,8 +1251,18 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     				 default_export_folder);
     gtk_table_attach_defaults (GTK_TABLE (table), pow->pwDefaultExportFolder, 1,
     			   2, 2, 3);
-    
+
     gtk_box_pack_start (GTK_BOX (pwvbox), table, FALSE, FALSE, 3);
+
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    label = gtk_label_new (_("Web browser:"));
+    gtk_box_pack_start (GTK_BOX (pwhbox), label, FALSE, FALSE, 0);
+
+    pow->pwWebBrowser = gtk_entry_new ();
+    gtk_entry_set_text (GTK_ENTRY (pow->pwWebBrowser), get_web_browser());
+    gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwWebBrowser, TRUE, TRUE, 0);
+
+    gtk_box_pack_start (GTK_BOX (pwvbox), pwhbox, FALSE, FALSE, 3);
 
 #if USE_MULTITHREAD
     pwev = gtk_event_box_new();
@@ -1368,6 +1308,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   int i;
   char *pch;
   gchar *filename, *command, *tmp, *newfolder;
+  const gchar *new_browser;
   BoardData *bd = BOARD( pwBoard )->board_data;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
@@ -1568,30 +1509,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
     UserCommand(sz); 
   }
 
-  if( pow->padjLearning->value != rAlpha ) 
-  { 
-     gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
-     sprintf(sz, "set training alpha %s", 
-       g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", pow->padjLearning->value)); 
-     UserCommand(sz); 
-  }
-
-  if( pow->padjAnnealing->value != rAnneal ) 
-  { 
-     gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
-     sprintf(sz, "set training anneal %s",
-       g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", pow->padjAnnealing->value)); 
-     UserCommand(sz); 
-  }
-
-  if( pow->padjThreshold->value != rThreshold ) 
-  { 
-     gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
-     sprintf(sz, "set training threshold %s", 
-       g_ascii_formatd( buf, G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", pow->padjThreshold->value)); 
-     UserCommand(sz); 
-  }
-  
   if( pow->fChanged == 1 ) 
   { 
      n = (unsigned int)pow->padjSeed->value;
@@ -1694,6 +1611,14 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
       g_free (tmp);
     }
   g_free (newfolder);
+
+  new_browser = gtk_entry_get_text(GTK_ENTRY(pow->pwWebBrowser));
+  if (new_browser && (!get_web_browser() || strcmp (new_browser, get_web_browser())))
+    {
+      tmp = g_strdup_printf ("set browser \"%s\"", new_browser);
+      UserCommand (tmp);
+      g_free (tmp);
+    }
       
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );

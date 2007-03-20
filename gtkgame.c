@@ -57,7 +57,6 @@
 #include "gtkmovefilter.h"
 #include "gtkprefs.h"
 #include "gtksplash.h"
-#include "gtktexi.h"
 #include "gtkrelational.h"
 #include <glib/gi18n.h>
 #include "gtkfile.h"
@@ -214,7 +213,7 @@ typedef enum _gnubgcommand {
     CMD_SHOW_MATCHEQUITYTABLE,
     CMD_SHOW_KEITH,
     CMD_SHOW_KLEINMAN,
-    CMD_SHOW_MANUAL_GUI,
+    CMD_SHOW_MANUAL_ABOUT,
     CMD_SHOW_MANUAL_WEB,
     CMD_SHOW_ONECHEQUER,
     CMD_SHOW_ONESIDEDROLLOUT,
@@ -302,7 +301,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show matchequitytable",
     "show keith",
     "show kleinman",
-    "show manual gui",
+    "show manual about",
     "show manual web",
     "show onechequer",
     "show onesidedrollout",
@@ -342,7 +341,6 @@ static void SetLanguage( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
-static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
 static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw );
@@ -2069,11 +2067,10 @@ GtkItemFactoryEntry aife[] = {
 	},
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
-	{ N_("/_Help/gnubg _Manual"), NULL, Command, 
-          CMD_SHOW_MANUAL_GUI, NULL },
-	{ N_("/_Help/gnubg M_anual (web)"), NULL, Command, 
+	{ N_("/_Help/gnubg M_anual (all about)"), NULL, Command, 
+          CMD_SHOW_MANUAL_ABOUT, NULL },
+	{ N_("/_Help/gnubg _Manual (web)"), NULL, Command, 
           CMD_SHOW_MANUAL_WEB, NULL },
-	{ N_("/_Help/_Frequently Asked Questions"), NULL, ShowFAQ, 0, NULL },
 	{ N_("/_Help/Co_pying gnubg"), NULL, Command, CMD_SHOW_COPYING, NULL },
 	{ N_("/_Help/gnubg _Warranty"), NULL, Command, CMD_SHOW_WARRANTY,
 	  NULL },
@@ -6034,75 +6031,6 @@ extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
 	gtk_main();
 }
 
-#if HAVE_GTKTEXI
-static int ShowManualSection( char *szTitle, char *szNode )
-{
-    static GtkWidget *pw = NULL;
-    char *pch;
-    
-    if( pw ) {
-	gtk_window_present( GTK_WINDOW( pw ) );
-	gtk_texi_render_node( GTK_TEXI( pw ), szNode );
-	return 0;
-    }
-
-    if( !( pch = PathSearch( "doc/gnubg.xml", szDataDirectory ) ) )
-	return -1;
-    else if( access( pch, R_OK ) ) {
-	outputerr( pch );
-	free( pch );
-	return -1;
-    }
-    
-    pw = gtk_texi_new();
-    g_object_add_weak_pointer( G_OBJECT( pw ), (void*)&pw );
-    gtk_window_set_title( GTK_WINDOW( pw ), _(szTitle) );
-    gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
-    gtk_widget_show_all( pw );
-
-    gtk_texi_load( GTK_TEXI( pw ), pch );
-    gtk_texi_render_node( GTK_TEXI( pw ), szNode );
-
-    free( pch );
-    return 0;
-}
-#endif
-
-static void NoManual( void ) {
-    
-    outputl( _("The online manual is not available with this installation of "
-	     "GNU Backgammon.  You can view the manual on the WWW at:\n"
-	     "\n"
-	     "    http://www.gnubg.org/win32/gnubg/gnubg.html") );
-    /* Temporary place of manual, while Oystein is fixing the web system.
-       (Work in progress) */
-    
-    outputx();
-}
-
-static void NoFAQ( void ) {
-    
-    outputl( _("The Frequently Asked Questions are not available with this "
-	       "installation of GNU Backgammon.  You can view them on "
-	       "the WWW at:\n"
-	       "\n"
-	       "    http://www.gnubg.org/docs/faq/") );
-
-    outputx();
-}
-
-extern void
-GTKShowManual( void ) {
-
-#if HAVE_GTKTEXI
-    if( !ShowManualSection( _("GNU Backgammon - Manual"), "Top" ) )
-	return;
-#endif
-
-    NoManual();
-}
-
-
 static void
 ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
 
@@ -6207,16 +6135,6 @@ ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
 }
 
 
-static void ShowFAQ( gpointer *p, guint n, GtkWidget *pwEvent ) {
-#if HAVE_GTKTEXI
-    if( !ShowManualSection( _("GNU Backgammon - Frequently Asked Questions"),
-			    "Frequently Asked Questions" ) )
-	return;
-#endif
-
-    NoFAQ();
-}
-
 static GtkWidget *pwHelpTree, *pwHelpLabel;
 
 static void GTKHelpAdd( GtkTreeStore *pts, GtkTreeIter *ptiParent,
@@ -6311,8 +6229,6 @@ extern void GTKHelp( char *sz )
 	g_object_add_weak_pointer( G_OBJECT( pw ), (void*) &pw );
 	gtk_window_set_title( GTK_WINDOW( pw ), _("Help - command reference") );
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
-	gtk_dialog_add_button(GTK_DIALOG(pw), GTK_STOCK_CLOSE, 
-			GTK_RESPONSE_CLOSE);
 
 	g_signal_connect_swapped (pw, "response",
 			G_CALLBACK (gtk_widget_destroy), pw);

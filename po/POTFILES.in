@@ -35,7 +35,6 @@ gtkrelational.c
 gtkrolls.c
 gtksplash.c
 gtktempmap.c
-gtktexi.c
 gtktheory.c
 gtktoolbar.c
 gtkwindows.c

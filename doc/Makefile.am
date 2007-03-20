@@ -1,19 +1,36 @@
 gnubg_helpdir = $(pkgdatadir)/doc
-gnubg_help_DATA =  gnubg.html gnubg.xml
+gnubg_help_DATA =  gnubg.html
 
 man_MANS = gnubg.6
 
 gnubg_imagedir =  $(pkgdatadir)/doc/images
 gnubg_image_DATA = images/*.png
 
-EXTRA_DIST = gnubgdb.xml gnubgman.xml images/*.png images/*.txt gnubg/gnubg.6 \
-	     gnubg/gnubg.html gnubg/gnubg.texi gnubg/gnubg.info gnubg/gnubg.xml
+EXTRA_DIST = *.xml gnubg/* images/*.png images/*.txt
 
 man6_MANS = gnubg.6
 
-info_TEXINFOS = gnubg.texi
+all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info
 
-all: 
+gnubg:
+	mkdir gnubg
+
+gnubg/gnubg.6: gnubgman.xml gnubg
+	-docbook2man gnubgman.xml 2>.gnubgman.err
+	-cp gnubg.6 gnubg/
+
+gnubg/gnubg.html: gnubgdb.xml gnubg images/*.png
+	xsltproc -o gnubg/gnubg.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl gnubgdb.xml
+
+gnubg/allabout.html: allabout.xml gnubg images/*.png
+	xsltproc -o gnubg/allabout.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl allabout.xml
+
+gnubg/gnubg.texi: gnubgdb.xml gnubg
+	-docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err
+	-cp gnubg.texi gnubg/
+
+gnubg/gnubg.info: gnubg.texi
+	-makeinfo gnubg.texi -o gnubg/gnubg.info 2>.gnubginfo.err
 
 gnubg.6: gnubg/gnubg.6
 	-cp gnubg/gnubg.6 .
@@ -21,37 +38,24 @@ gnubg.6: gnubg/gnubg.6
 gnubg.html: gnubg/gnubg.html
 	-cp gnubg/gnubg.html .
 
+allabout.html: gnubg/allabout.html
+	-cp gnubg/allabout.html .
+
 gnubg.texi: gnubg/gnubg.texi
 	-cp gnubg/gnubg.texi .
 
 gnubg.info: gnubg/gnubg.info
 	-cp gnubg/gnubg.info .
 
-gnubg.xml: gnubg/gnubg.xml
-	-cp gnubg/gnubg.xml .
-
-gnubg:
-	mkdir gnubg
-
-gnubg/gnubg.6: 
-	-docbook2man gnubgman.xml
-	-cp gnubg.6 gnubg/
-
-gnubg/gnubg.html: gnubgdb.xml gnubg
-	-xsltproc -o gnubg/gnubg.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl gnubgdb.xml
-
-gnubg/gnubg.texi: gnubgdb.xml  gnubg
-	-docbook2texi --encoding=UTF-8 gnubgdb.xml
-	-cp gnubg.texi gnubg/
-
-gnubg/gnubg.xml: gnubg.texi gnubg
-	-sed '/@detailmenu/,/@end detailmenu/ d' gnubg.texi | makeinfo -o gnubg/gnubg.xml --xml
-
-
-install-data-local: gnubg.html gnubg.xml gnubg.info images/*.png
+install-data-local: gnubg.html allabout.html gnubg.info images/*.png
 	$(mkinstalldirs) $(gnubg_helpdir)/images
-	-for file in gnubg.html gnubg.xml gnubgdb.xml gnubg.info; do \
+	-for file in gnubg.html allabout.html gnubgdb.xml allabout.xml gnubg.info; do \
 	basefile=`basename $$file`; \
 	$(INSTALL_DATA) $(srcdir)/$$file $(gnubg_helpdir)/$$basefile; \
 	done
 
+CLEANFILES=*.html
+DISTCLEANFILES=gnubg.texi gnubg.info gnubg.6
+
+distclean-local:
+	-rm -rd gnubg

@@ -71,6 +71,7 @@
 #include "format.h"
 #include "boarddim.h"
 #include "sound.h"
+#include "openurl.h"
 
 #include <glib/gi18n.h>
 
@@ -735,6 +736,17 @@ extern void CommandSetThreads( char *sz )
 	outputf( _("The number of threads has been set to %d.\n"), n );
 }
 #endif
+
+extern void
+CommandSetBrowser ( char *sz ) {
+
+  if ( ! sz || ! *sz ) {
+    outputl ( _("You must specify a command. "
+                "See `help set sound system command'") );
+    return;
+  }
+  set_web_browser(NextToken( &sz ));
+}
 
 extern void CommandSetCalibration( char *sz ) {
 

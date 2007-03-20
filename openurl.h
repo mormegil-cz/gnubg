@@ -23,7 +23,8 @@
 #define _OPENURL_H_
 
 
-extern void
-OpenURL( const char *szURL );
+extern void OpenURL( const char *szURL );
+extern char *set_web_browser (const char *sz);
+extern char *get_web_browser (void);
 
 #endif /* _OPENURL_H_ */

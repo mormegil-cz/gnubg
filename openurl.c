@@ -19,102 +19,71 @@
  *
  * $Id$
  */
-
 #include "config.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
-
 #include "backgammon.h"
 #include <glib/gi18n.h>
 #include "openurl.h"
-
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include "windows.h"
 #include "shellapi.h"
 #endif /* WIN32 */
+static gchar *web_browser = NULL;
 
-
-#ifndef WIN32
-
-static int
-RunCommand( const gchar *szCmd ) {
-
-  if ( system( szCmd ) < 0 ) {
-     outputerr( _("Error launching browser\n") );
-     return -1;
-  }
-
-  return 0;
-
+extern gchar *
+get_web_browser (void)
+{
+  const gchar *pch;
+#ifdef WIN32
+  if (!web_browser)
+    return NULL;
+#endif
+  if (web_browser && *web_browser)
+    return web_browser;
+  if (!(pch = g_getenv ("BROWSER")))
+#ifdef __APPLE__
+    pch = g_strdup ("open");
+#else
+    pch = g_strdup ("firefox");
+#endif
+  set_web_browser (pch);
+  return web_browser;
 }
 
-#endif
 
+extern char *
+set_web_browser (const char *sz)
+{
+  g_free (web_browser);
+  web_browser = g_strdup (sz ? sz : "");
+  return web_browser;
+};
 
 extern void
-OpenURL( const char *szURL ) {
-
+OpenURL (const char *szURL)
+{
+  gchar *command;
+  GError *error = NULL;
+  gchar *browser = get_web_browser ();
 #ifdef WIN32
-
-  ShellExecute( NULL, TEXT("open"), szURL, NULL, ".\\", SW_SHOWMAXIMIZED );
-
-#else /* ! WIN32 */
-
-  gchar *pchBrowser;
-  gchar **ppchCommands;
-  gchar *pchTemp;
-  gchar *pchCommand;
-  const gchar *pch;
-  int i;
-  int rc;
-
-  /*
-   * Launch browser
-   *
-   * Respect $BROWSER
-   * (http://www.catb.org/~esr/BROWSER/index.html)
-   */
-
-  if ( ( pch = g_getenv( "BROWSER" ) ) )
-    /* found $BROWSER */
-    pchBrowser = g_strdup( pch );
-  else {
-    /* use default */
-#ifdef __APPLE__
-    pchBrowser = g_strdup( "open %s" );
-#else
-    pchBrowser = g_strdup( "mozilla \"%s\":lynx \"%s\"" );
-#endif
-  }
-
-  /* loop through commands */
-
-  ppchCommands = g_strsplit( pchBrowser, ":", -1 );
-
-  for ( i = 0; ( pchCommand = ppchCommands[ i ] ); ++i ) {
-
-    if ( ! strstr( pchCommand, "%s" ) ) {
-      /* no "%s" in string: add %s */
-      gchar *pch = g_strconcat( pchCommand, " \"%s\"", NULL );
-      pchTemp = g_strdup_printf( pch, szURL );
-      g_free( pch );
+  if (!(browser) || !(*browser))
+    {
+      ShellExecute (NULL, TEXT ("open"), szURL, NULL, ".\\",
+		    SW_SHOWMAXIMIZED);
+      return;
     }
-    else
-      pchTemp = g_strdup_printf( pchCommand, szURL );
-    rc = RunCommand( pchTemp );
-    g_free( pchTemp );
-
-    if ( !rc )
-      break;
-
-  }
-
-  g_strfreev( ppchCommands );
-
-#endif /* ! WIN32 */
-
+#else
+  command = g_strdup_printf ("%s %s", browser, szURL);
+  if (!g_spawn_command_line_async (command, &error))
+    {
+      g_printerr ("browser couldn't open file (%s): %s\n",
+		  command, error->message);
+      g_error_free (error);
+    }
+  return;
+#endif
 }

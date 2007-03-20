@@ -45,6 +45,7 @@
 #include "positionid.h"
 #include "boarddim.h"
 #include "credits.h"
+#include "path.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -2493,22 +2494,13 @@ CommandShowEPC( char *sz ) {
 
 
 extern void
-CommandShowManualWeb( char *sz ) {
-
-  OpenURL( "http://www.gnubg.org/win32/gnubg/gnubg.html" );
-
+CommandShowManualWeb (char *sz)
+{
+  OpenURL (PathSearch ("doc/gnubg.html", szDataDirectory));
 }
 
-#if USE_GTK
 extern void
-CommandShowManualGUI( char *sz ) {
-
-  if ( fX ) {
-    GTKShowManual();
-  }
-  else
-    outputl( _("`show manual gui' does not work in command line mode.\n"
-               "Please use `show manual web' instead.") );
-
+CommandShowManualAbout (char *sz)
+{
+  OpenURL (PathSearch ("doc/allabout.html", szDataDirectory));
 }
-#endif /* USE_GTK */

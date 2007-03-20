@@ -44,7 +44,11 @@ void mult_matrix_vec(const float mat[4][4], const float src[4], float dst[4])
 		src[2] * mat[3][2] + src[3] * mat[3][3]);
 }
 
+/*
 void matrixmult(float m[4][4], const float b[4][4])
+Causes compiler warnings on gcc/linux
+*/
+void matrixmult(float m[4][4], float b[4][4])
 {
 	int i, j, c;
 	float a[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};

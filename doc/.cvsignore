@@ -17,3 +17,6 @@ gnubg.xml
 version.texi
 gnubg.6
 gnubg.texi
+.gnubginfo.err
+.gnubgman.err
+.gnubgtexi.err
