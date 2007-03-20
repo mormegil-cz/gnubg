@@ -398,7 +398,7 @@ extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ N_SKILLS ], rEvalsPerSec;
 extern int nThreadPriority;
-extern unsigned int fCheat;
+extern int fCheat;
 extern unsigned int afCheatRoll[ 2 ];
 extern int fGotoFirstGame;
 extern int fSconyers15x15DVD;
@@ -1068,13 +1068,7 @@ extern void CommandAccept( char * ),
     CommandSetSeed( char * ),
     CommandSetSGFFolder(char *sz),
     CommandSetSoundEnable ( char * ),
-    CommandSetSoundSystemArtsc ( char * ),
     CommandSetSoundSystemCommand ( char * ),
-    CommandSetSoundSystemESD ( char * ),
-    CommandSetSoundSystemNAS ( char * ),
-    CommandSetSoundSystemNormal ( char * ),
-    CommandSetSoundSystemWindows ( char * ),
-    CommandSetSoundSystemQuickTime ( char * ),
     CommandSetSoundSoundAgree ( char * ),
     CommandSetSoundSoundAnalysisFinished ( char * ),
     CommandSetSoundSoundBotDance ( char * ),

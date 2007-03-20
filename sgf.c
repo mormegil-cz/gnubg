@@ -1705,7 +1705,7 @@ static void WriteEvalContext(FILE * pf, const evalcontext * pec)
 
 static void
 WriteMoveFilters(FILE * pf,
-		 const movefilter mf[MAX_FILTER_PLIES][MAX_FILTER_PLIES],
+		 movefilter mf[MAX_FILTER_PLIES][MAX_FILTER_PLIES],
 		 int nPlies)
 {
     int i;

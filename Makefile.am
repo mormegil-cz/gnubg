@@ -4,10 +4,6 @@ localedir = $(datadir)/locale
 
 ACLOCAL_AMFLAGS = -I m4
 
-## threads
-
-
-
 SUBDIRS = lib doc met po m4 xpm sounds board3d textures scripts flags fonts non-src .
 
 bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
@@ -16,7 +12,7 @@ noinst_PROGRAMS = makeweights makebearoff1
 INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
 	   -DLOCALEDIR=\"$(localedir)\" @FREETYPE2_CFLAGS@ @PYTHON_CSPEC@ @GLIB_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @GTHREAD_CFLAGS@ @ESD_CFLAGS@ \
-	   @ARTSC_CFLAGS@ @AUDIOFILE_CFLAGS@ @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@
+	   @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@
 
 gnubg_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 eval.h eval.c play.c \
@@ -65,8 +61,8 @@ gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
 endif
 
 gnubg_LDADD = -Llib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ \
-	      @GTHREAD_LIBS@ @ESD_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
-	      @WINMMSND_LIBS@ @APPLE_QTIME_LIBS@ @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
+	      @GTHREAD_LIBS@ @ESD_LIBS@ \
+	      @WINMMSND_LIBS@ @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
 	      @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@
 
 

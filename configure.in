@@ -37,14 +37,13 @@ dnl
 dnl host specifics
 dnl 
 
-darwinppc=no
+darwin=no
 win32=no
 AC_MSG_CHECKING([for host])
 case "$host" in
-  powerpc-apple-darwin*)
-    LDFLAGS="$LDFLAGS -L/sw/lib -bind_at_load"
-    LIBS="$LIBS -lmx -lstdc++"
-    darwinppc=yes;
+  *-apple-darwin*)
+    LDFLAGS="$LDFLAGS -bind_at_load"
+    darwin=yes;
     ;;
   *-*-mingw*)
     win32=yes
@@ -104,6 +103,7 @@ PKG_CHECK_MODULES(GTHREAD, [gthread-2.0], have_gthread="yes", [AC_MSG_WARN("No t
 PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you want to use libxml2 to parse XML.), [])
 PKG_CHECK_MODULES(FREETYPE2, [freetype2], AC_DEFINE(HAVE_FREETYPE, 1, Define if you have freetype2), [])
 PKG_CHECK_MODULES(LIBPNG, [libpng12], AC_DEFINE(HAVE_LIBPNG, 1, Define if you have libpng), [])
+PKG_CHECK_MODULES(ESD, [esound], AC_DEFINE(HAVE_ESD, 1, Define if you have esound), [AC_MSG_WARN("No esound support")])
 
 dnl
 dnl Checks for libraries.
@@ -149,7 +149,7 @@ dnl
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fork fstat getdtablesize gettimeofday isatty random readv select setvbuf setpriority)
+AC_CHECK_FUNCS(fstat getdtablesize gettimeofday isatty random readv select setvbuf setpriority)
 
 AC_CHECK_FUNCS(acosf, , AC_DEFINE(acosf, acos, [set acosf to acos if undefined]),)
 AC_CHECK_FUNCS(asinf, , AC_DEFINE(asinf, asin, [set asinf to asin if undefined]),)
@@ -201,11 +201,16 @@ AZ_PYTHON_WITH()
 if test "$with_python" != "no"; then
   AZ_PYTHON_PATH()
   AZ_PYTHON_VERSION_ENSURE([2.2])
-  AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
 fi
 AZ_PYTHON_CSPEC
 AZ_PYTHON_LSPEC
-AM_CONDITIONAL(USE_PYTHON, test "$no_python" != "yes" )
+if test "x$az_python_cspec" != "x"; then
+        AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
+        AM_CONDITIONAL(USE_PYTHON, test "$no_python" != "yes" )
+        if test "x$darwin" != "xno"; then
+                LDFLAGS = "$LDFLAGS -framework Python"
+        fi
+fi
 
 dnl
 dnl obsolete: bearoff database
@@ -220,38 +225,16 @@ fi
 
 
 dnl
-dnl Sounds
+dnl windows Sounds
 dnl
 
-AC_ARG_WITH(sound,[  --with-sound            use sounds with GNU Backgammon])
-
-AM_CONDITIONAL(USE_SOUND, test "$with_sound" != "no" )
-if test "$with_sound" != "no"; then
-
-  AC_CHECK_HEADERS(sys/audioio.h  sys/soundcard.h)
-
-  AC_DEFINE(USE_SOUND,1,Define if you want to use sounds with GNU Backgammon)
-  if test "$win32" != "yes"; then
-    AM_PATH_ESD(,AC_DEFINE(HAVE_ESD,1,[Define if you have the ESD sound system]))
-    AM_PATH_ARTSC(,AC_DEFINE(HAVE_ARTSC,1,[Define if you have ArtsC sound system]))
-
-    AM_PATH_AUDIOFILE(0.2.0,AC_DEFINE(HAVE_AUDIOFILE,1, [Define if you have the audiofile library]))
-    AC_CHECK_LIB(audiofile,_af_ulaw2linear,AC_DEFINE(HAVE_AF_ULAW2LINEAR,1,[Define if your version of audiofile has _af_u2law2linear]))
-
-    if test "$darwinppc" = "yes"; then
-      APPLE_QTIME_LIBS="-framework QuickTime"
-    fi
-
-  else
-    AC_DEFINE(USE_WINMMSND,1,Define if you wish to use the Win32 WINMM sound system)
+if test "$win32" != "no"; then
     WINMMSND_LIBS="-lwinmm"
     WINMMSND_CFLAGS=
-  fi
 fi
 AM_CONDITIONAL(HAVE_WINMMSND, test "$win32" != "no" )
 AC_SUBST(WINMMSND_LIBS)
 AC_SUBST(WINMMSND_CFLAGS)
-AC_SUBST(APPLE_QTIME_LIBS)
 
 dnl
 dnl Clocks

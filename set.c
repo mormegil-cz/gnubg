@@ -3809,8 +3809,6 @@ extern void CommandSetTutorSkillVeryBad( char * sz) {
  * Sounds
  */
 
-#if USE_SOUND
-
 /* enable/disable sounds */
 
 extern void
@@ -3823,108 +3821,14 @@ CommandSetSoundEnable ( char *sz ) {
 }
 
 /* sound system */
-
-extern void
-CommandSetSoundSystemArtsc ( char *sz ) {
-
-#if HAVE_ARTSC
-
-  ssSoundSystem = SOUND_SYSTEM_ARTSC;
-  outputl ( _("GNU Backgammon will use the ArtsC sound system" ) );
-
-#else
-
-  outputl ( _("GNU Backgammon was compiled without support for "
-              "the ArtsC sound system" ) );
-
-#endif /* HAVE_ARTSC */
-
-}
-
 extern void
 CommandSetSoundSystemCommand ( char *sz ) {
-
   if ( ! sz || ! *sz ) {
     outputl ( _("You must specify a command. "
                 "See `help set sound system command'") );
     return;
   }
-
-  strncpy ( szSoundCommand, sz, sizeof ( szSoundCommand ) - 1 );
-  szSoundCommand[ sizeof ( szSoundCommand ) - 1 ] = 0;
-
-  ssSoundSystem = SOUND_SYSTEM_COMMAND;
-  outputf ( _("GNU Backgammon will use an external command to play sounds:\n"
-              "%s\n"), sz );
-
-}
-
-extern void
-CommandSetSoundSystemESD ( char *sz ) {
-
-#if HAVE_ESD
-
-  ssSoundSystem = SOUND_SYSTEM_ESD;
-  outputl ( _("GNU Backgammon will use the ESD sound system" ) );
-
-#else
-
-  outputl ( _("GNU Backgammon was compiled without support for "
-              "the ESD sound system" ) );
-
-#endif /* HAVE_ESD */
-
-}
-
-extern void
-CommandSetSoundSystemNormal ( char *sz ) {
-
-#ifndef WIN32
-
-  ssSoundSystem = SOUND_SYSTEM_NORMAL;
-  outputl ( _("GNU Backgammon will play sounds to /dev/dsp" ) );
-
-#else
-
-  outputl ( _("GNU Backgammon was compiled without support for "
-              "playing sounds to /dev/dsp" ) );
-
-#endif /* !WIN32 */
-
-}
-
-extern void
-CommandSetSoundSystemWindows ( char *sz ) {
-
-#ifdef WIN32
-
-  ssSoundSystem = SOUND_SYSTEM_WINDOWS;
-  outputl ( _("GNU Backgammon will use the MS Windows sound system" ) );
-
-#else
-
-  outputl ( _("GNU Backgammon was compiled without support for "
-              "the MS Windows sound system" ) );
-
-#endif /* WIN32 */
-
-}
-
-extern void
-CommandSetSoundSystemQuickTime ( char *sz ) {
-
-#ifdef __APPLE__
-
-  ssSoundSystem = SOUND_SYSTEM_QUICKTIME;
-  outputl ( _("GNU Backgammon will use the Apple QuickTime sound system" ) );
-
-#else
-
-  outputl ( _("GNU Backgammon was compiled without support for "
-              "the Apple QuickTime sound system" ) );
-
-#endif /* __APPLE__ */
-
+  sound_set_command(sz);
 }
 
 extern void
@@ -3973,13 +3877,6 @@ extern void
 CommandSetSoundSoundDrop ( char *sz ) {
 
   SetSoundFile ( SOUND_DROP, NextToken ( &sz ) );
-
-}
-
-extern void
-CommandSetSoundSoundExit ( char *sz ) {
-
-  SetSoundFile ( SOUND_EXIT, NextToken ( &sz ) );
 
 }
 
@@ -4046,7 +3943,6 @@ CommandSetSoundSoundTake ( char *sz ) {
 
 }
 
-#endif /* USE_SOUND */
 
 static void SetPriority( int n ) {
 

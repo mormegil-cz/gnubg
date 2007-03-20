@@ -89,7 +89,7 @@ static void ShowMoveFilter ( const movefilter *pmf, const int ply) {
 
 
 static void
-ShowMoveFilters ( const movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+ShowMoveFilters ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   int i, j;
 
@@ -197,7 +197,7 @@ show_evals ( const char *text,
 
 
 static void
-show_movefilters ( const movefilter aaamf[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+show_movefilters ( movefilter aaamf[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   if ( equal_movefilters ( (movefilter (*)[MAX_FILTER_PLIES]) aaamf[ 0 ], 
                            (movefilter (*)[MAX_FILTER_PLIES]) aaamf[ 1 ] ) ) 
@@ -2047,7 +2047,6 @@ outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
 
 }
 
-#if USE_SOUND
 
 extern void
 CommandShowSound ( char *sz ) {
@@ -2063,10 +2062,8 @@ CommandShowSound ( char *sz ) {
 
 #endif /* USE_GTK */
 
-  outputf ( _("Sounds are enabled          : %s\n"
-              "Sound system                : %s\n"),
-            fSound ? _("yes") : _("no"),
-            gettext ( aszSoundSystem[ ssSoundSystem ] ) );
+  outputf ( _("Sounds are enabled          : %s\n"),
+            fSound ? _("yes") : _("no"));
 
   outputl ( _("Sounds for:") );
 
@@ -2083,7 +2080,6 @@ CommandShowSound ( char *sz ) {
   }
 }
 
-#endif /* USE_SOUND */
 
 
 extern void

@@ -171,7 +171,7 @@ int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int nThreadPriority = 0;
-unsigned int fCheat = FALSE;
+int fCheat = FALSE;
 unsigned int afCheatRoll[ 2 ] = { 0, 0 };
 int fGotoFirstGame = FALSE;
 float rRatingOffset = 2050;
@@ -1552,19 +1552,9 @@ command cER = {
   { "folder", CommandSetSGFFolder, N_("Set default folder "
       "for import"), szFOLDER, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
-#if USE_SOUND
 }, acSetSoundSystem[] = {
-  { "artsc", CommandSetSoundSystemArtsc, 
-    N_("Use ESD sound system"), NULL, NULL },
   { "command", CommandSetSoundSystemCommand, 
     N_("Specify external command for playing sounds"), szCOMMAND, NULL },
-  { "esd", CommandSetSoundSystemESD, N_("Use ESD sound system"), NULL, NULL },
-  { "normal", CommandSetSoundSystemNormal, 
-    N_("Play sounds to /dev/dsp or /dev/audio"), NULL, NULL },
-  { "windows", CommandSetSoundSystemWindows, 
-    N_("Use MS Windows API for playing sounds"), NULL, NULL },
-  { "quicktime", CommandSetSoundSystemQuickTime, 
-    N_("Use Apple QuickTime API for playing sounds"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetSoundSound[] = {
   { "agree", CommandSetSoundSoundAgree, 
@@ -1581,8 +1571,6 @@ command cER = {
     N_("Double"), szOPTFILENAME, &cFilename },
   { "drop", CommandSetSoundSoundDrop, 
     N_("Drop"), szOPTFILENAME, &cFilename },
-  { "exit", CommandSetSoundSoundExit, 
-    N_("Exiting of GNU Backgammon"), szOPTFILENAME, &cFilename },
   { "humanfans", CommandSetSoundSoundHumanDance, 
     N_("Human fans"), szOPTFILENAME, &cFilename },
   { "humanwinsgame", CommandSetSoundSoundHumanWinGame, 
@@ -1610,7 +1598,6 @@ command cER = {
   { "system", NULL, 
     N_("Select sound system"), NULL, acSetSoundSystem },
   { NULL, NULL, NULL, NULL, NULL }    
-#endif /* USE_SOUND */
 }, acSetTutorSkill[] = {
   { "doubtful", CommandSetTutorSkillDoubtful, N_("Warn about `doubtful' play"),
     NULL, NULL },
@@ -1779,10 +1766,8 @@ command cER = {
       szSCORE, NULL },
     { "seed", CommandSetSeed, 
       N_("Set the dice generator seed"), szOPTSEED, NULL },
-#if USE_SOUND
     { "sound", NULL, 
       N_("Control audio parameters"), NULL, acSetSound },
-#endif /* USE_SOUND */
     { "styledgamelist", CommandSetStyledGameList, N_("Display colours for marked moves in game window"),
       szONOFF, &cOnOff },
 #if USE_TIMECONTROL
@@ -1945,10 +1930,8 @@ command cER = {
       N_("View the score sheet for the match or session"), NULL, NULL },
     { "seed", CommandShowSeed, N_("Show the dice generator seed"), 
       NULL, NULL },
-#if USE_SOUND
     { "sound", CommandShowSound, N_("Show information abount sounds"), 
       NULL, NULL },
-#endif /* USE_SOUND */
     { "statistics", NULL, N_("Show statistics"), NULL, acShowStatistics },
     { "temperaturemap", CommandShowTemperatureMap, 
       N_("Show temperature map (graphic overview of dice distribution)"), 
@@ -2108,20 +2091,13 @@ char *aszBuildInfo[] = {
 #if HAVE_SOCKETS
     N_("External commands supported."),
 #endif
-#if USE_SOUND
 #ifdef WIN32
     N_("Windows sound system supported."),
 #else
-    N_("Sound systems supported:"),
-#if HAVE_ARTSC
-    N_("  ArtsC sound system"),
-#endif
 #if HAVE_ESD
-    N_("  ESD sound system"),
+    N_("ESD sound system supported."),
 #endif
-    N_("  /dev/dsp"),
 #endif
-#endif /* USE_SOUND */
 #if USE_MULTITHREAD
     N_("Multiple threads supported."),
 #endif
@@ -2705,113 +2681,6 @@ extern void ResetInterrupt( void ) {
     }
 }
 
-#if USE_GTK && HAVE_FORK
-static int fChildDied;
-
-static RETSIGTYPE HandleChild( int n ) {
-
-    fChildDied = TRUE;
-}
-#endif
-
-static void ShellEscape( char *pch ) {
-#if HAVE_FORK
-    pid_t pid;
-    char *pchShell;
-    psighandler shQuit;
-#if USE_GTK
-    psighandler shChild;
-    
-    PortableSignal( SIGCHLD, HandleChild, &shChild, TRUE );
-#endif
-    PortableSignal( SIGQUIT, SIG_IGN, &shQuit, TRUE );
-    
-    if( ( pid = fork() ) < 0 ) {
-	/* Error */
-	outputerr( "fork" );
-
-#if USE_GTK
-	PortableSignalRestore( SIGCHLD, &shChild );
-#endif
-	PortableSignalRestore( SIGQUIT, &shQuit );
-	
-	return;
-    } else if( !pid ) {
-	/* Child */
-	PortableSignalRestore( SIGQUIT, &shQuit );	
-	
-	if( pch && *pch )
-	    execl( "/bin/sh", "sh", "-c", pch, NULL );
-	else {
-	    if( !( pchShell = getenv( "SHELL" ) ) )
-		pchShell = "/bin/sh";
-	    execl( pchShell, pchShell, NULL );
-	}
-	_exit( EXIT_FAILURE );
-    }
-    
-    /* Parent */
-#if USE_GTK
- TryAgain:
-#if HAVE_SIGPROCMASK
-    {
-	sigset_t ss, ssOld;
-
-	sigemptyset( &ss );
-	sigaddset( &ss, SIGCHLD );
-	sigaddset( &ss, SIGIO );
-	sigprocmask( SIG_BLOCK, &ss, &ssOld );
-	
-	while( !fChildDied ) {
-	    sigsuspend( &ssOld );
-	    if( fAction )
-		HandleXAction();
-	}
-
-	fChildDied = FALSE;
-	sigprocmask( SIG_UNBLOCK, &ss, NULL );
-    }
-#elif HAVE_SIGBLOCK
-    {
-	int n;
-	
-	n = sigblock( sigmask( SIGCHLD ) | sigmask( SIGIO ) );
-
-	while( !fChildDied ) {
-	    sigpause( n );
-	    if( fAction )
-		HandleXAction();
-	}
-	fChildDied = FALSE;
-	sigsetmask( n );
-    }
-#else
-    /* NB: Without reliable signal handling semantics (sigsuspend or
-       sigpause), we can't avoid a race condition here because the
-       test of fChildDied and pause() are not atomic. */
-    while( !fChildDied ) {
-	pause();
-	if( fAction )
-	    HandleXAction();
-    }
-    fChildDied = FALSE;
-#endif
-    
-    if( !waitpid( pid, NULL, WNOHANG ) )
-	/* Presumably the child is stopped and not dead. */
-	goto TryAgain;
-    
-    PortableSignalRestore( SIGCHLD, &shChild );
-#else
-    while( !waitpid( pid, NULL, 0 ) )
-	;
-#endif
-
-    PortableSignalRestore( SIGCHLD, &shQuit );
-#else
-    outputl( _("This system does not support shell escapes.") );
-#endif
-}
 
 extern void HandleCommand( char *sz, command *ac ) {
 
@@ -2822,20 +2691,11 @@ extern void HandleCommand( char *sz, command *ac ) {
     if( ac == acTop ) {
 	outputnew();
     
-	if( *sz == '#' ) /* Comment */
-          return;
-
-	if( *sz == '!' ) {
-	    /* Shell escape */
-	    for( pch = sz + 1; isspace( *pch ); pch++ )
-		;
-
-	    ShellEscape( pch );
-	    outputx();
-	    return;
-	} else if( *sz == ':' ) {
-	    return;
-	}
+        if( *sz == '#' ) /* Comment */
+                return;
+        else if( *sz == ':' ) {
+                return;
+        }
         else if ( *sz == '>' ) {
 
           while ( *sz == '>' )
@@ -4104,7 +3964,6 @@ Shutdown( void ) {
 #endif
 #endif
 
-  SoundWait();
 }
 
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
@@ -4147,8 +4006,6 @@ extern void PromptForExit( void ) {
 		closesocket( ap[1].h );
 #endif
 
-    playSound ( SOUND_EXIT );
-
 #if USE_BOARD3D
 	if (fX && bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
 		CloseBoard3d(bd, bd->bd3d, bd->rd);
@@ -4158,7 +4015,6 @@ extern void PromptForExit( void ) {
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
     }
-	SoundWait();	/* Wait for sound to finish before final close */
 #endif
 
     if( fInteractive )
@@ -5754,20 +5610,15 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
 
     /* sounds */
-
-#if USE_SOUND
-
     fprintf ( pf, "set sound enable %s\n", 
               fSound ? "yes" : "no" );
-    fprintf ( pf, "set sound system %s\n",
-              aszSoundSystemCommand[ ssSoundSystem ] );
+    fprintf ( pf, "set sound system command %s\n",
+              sound_get_command());
 
     for ( i = 0; i < NUM_SOUNDS; ++i ) 
       fprintf ( pf, "set sound sound %s \"%s\"\n",
 				aszSoundCommand [ i ], GetSoundFile(i));
     
-
-#endif /* USE_SOUND */
 
     fprintf( pf, "set browser %s\n", get_web_browser());
 
@@ -6794,9 +6645,6 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 	fAction = TRUE;
 #endif
 
-#if USE_SOUND
-    SoundSIGIO( idSignal );
-#endif
 }
 #endif
 
@@ -6823,20 +6671,6 @@ static void version( void ) {
     while((pch = GetBuildInfoString()))
       puts(gettext(pch));
 }
-
-#if HAVE_FORK
-
-static RETSIGTYPE SoundChild ( int n ) {
-    
-   int status;
-   pid_t pid;
-
-   while ( ( pid = waitpid ( -1, &status, WNOHANG ) ) > 0 )
-      ;
-
-}
-
-#endif /* HAVE_FORK */
 
 
 static char *
@@ -7326,17 +7160,9 @@ main (int argc, char *argv[])
 #endif
 	}
     
-#ifdef SIGIO
- #if USE_GTK
+#if defined(SIGIO) && USE_GTK
     if( fX )
 	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
-  #if USE_SOUND
-    else
-  #endif
- #endif
-#if USE_SOUND
-	PortableSignal( SIGIO, SoundSIGIO, NULL, TRUE );
-#endif
 #endif
 
     fnTick = CallbackProgress;
@@ -7372,10 +7198,8 @@ main (int argc, char *argv[])
                    _("Doing"), _("nothing in particular"), 0 );
 #endif    
 
-#if USE_SOUND
     if( fQuiet )
 	fSound = FALSE;
-#endif
     
 #ifdef WIN32
     /* change back to directory where GNUbg was started from
@@ -7433,13 +7257,6 @@ main (int argc, char *argv[])
     }
 #endif /* USE_PYTHON */
 
-#if HAVE_FORK
-
-    /* make sure that forked children are terminated */
-    PortableSignal( SIGCHLD, SoundChild, NULL, FALSE );
-
-#endif
-   
     /* start-up sound */
     playSound ( SOUND_START );
     
