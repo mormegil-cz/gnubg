@@ -7321,11 +7321,11 @@ isMissedDouble ( float arDouble[],
                  
 
 
-extern int
+extern unsigned int
 locateMove ( int anBoard[ 2 ][ 25 ], 
              const int anMove[ 8 ], const movelist *pml ) {
 
-  int i;
+  unsigned int i;
   unsigned char auch[ 10 ];
   unsigned char key[ 10 ];
 
@@ -7341,7 +7341,7 @@ locateMove ( int anBoard[ 2 ][ 25 ],
 
   }
 
-  return -1;
+  return 0;
 
 }
 

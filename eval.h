@@ -634,7 +634,7 @@ isMissedDouble ( float arDouble[],
                  const int fDouble, 
                  const cubeinfo *pci );
 
-extern int
+extern unsigned int
 locateMove ( int anBoard[ 2 ][ 25 ], 
              const int anMove[ 8 ], const movelist *pml );
 
