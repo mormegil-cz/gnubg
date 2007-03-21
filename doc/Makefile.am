@@ -12,20 +12,17 @@ man6_MANS = gnubg.6
 
 all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info
 
-gnubg:
-	mkdir gnubg
-
-gnubg/gnubg.6: gnubgman.xml gnubg
+gnubg/gnubg.6: gnubgman.xml
 	-docbook2man gnubgman.xml 2>.gnubgman.err
 	-cp gnubg.6 gnubg/
 
-gnubg/gnubg.html: gnubgdb.xml gnubg images/*.png
+gnubg/gnubg.html: gnubgdb.xml images/*.png
 	xsltproc -o gnubg/gnubg.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl gnubgdb.xml
 
-gnubg/allabout.html: allabout.xml gnubg images/*.png
+gnubg/allabout.html: allabout.xml images/*.png
 	xsltproc -o gnubg/allabout.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl allabout.xml
 
-gnubg/gnubg.texi: gnubgdb.xml gnubg
+gnubg/gnubg.texi: gnubgdb.xml
 	-docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err
 	-cp gnubg.texi gnubg/
 
