@@ -105,6 +105,7 @@ ParseSetDate ( char *szFilename ) {
     struct tm   mdate;
 
     matchdate = NULL;
+#if HAVE_STRPTIME
     for ( pch = szFilename; *pch != '\0'; pch++ ); /* goto end of filename */
     while ( pch != szFilename ) {
         if ( *--pch == '-' ) {                     /* go backwards until '-' */
@@ -115,6 +116,7 @@ ParseSetDate ( char *szFilename ) {
             }
         }
     }
+#endif
     /* date could not be parsed out of filename, use last access date */
     if ( matchdate == NULL ) {
         if ( stat( szFilename, &filestat ) == 0 ) {
