@@ -39,7 +39,7 @@ get_web_browser (void)
 {
   const gchar *pch;
 #ifdef WIN32
-  if (!web_browser)
+  if (!web_browser || !*web_browser)
     return NULL;
 #endif
   if (web_browser && *web_browser)
@@ -66,17 +66,19 @@ set_web_browser (const char *sz)
 extern void
 OpenURL (const char *szURL)
 {
-  gchar *command;
-  GError *error = NULL;
   gchar *browser = get_web_browser ();
 #ifdef WIN32
   if (!(browser) || !(*browser))
     {
-      ShellExecute (NULL, TEXT ("open"), szURL, NULL, ".\\",
+      gchar *url =g_strdup_printf("file://%s", szURL);
+      ShellExecute (NULL, TEXT ("open"), url, NULL, ".\\",
 		    SW_SHOWMAXIMIZED);
+      g_free(url);
       return;
     }
 #else
+  gchar *command;
+  GError *error = NULL;
   command = g_strdup_printf ("%s %s", browser, szURL);
   if (!g_spawn_command_line_async (command, &error))
     {

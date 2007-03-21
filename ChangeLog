@@ -1,3 +1,8 @@
+Thu Mar 22 00:22:47 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* import.c, openurl.c, sound.c, doc/Makefile.am: a few compile fixes
+	after previous checkins
+
 Wed Mar 21 00:23:10 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* <many>: Sound system cleanup. We now allow only an external command

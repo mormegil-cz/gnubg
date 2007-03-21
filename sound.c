@@ -25,6 +25,7 @@
 
 #include <config.h>
 
+#include "backgammon.h"
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <string.h>
@@ -40,7 +41,6 @@
 #include <mmsystem.h>
 #endif
 
-#include "backgammon.h"
 #include "eval.h"
 #include "sound.h"
 #include "path.h"
@@ -155,15 +155,14 @@ playSoundFile (char *file)
 	    {			/* No sound card found - disable sound */
 		g_print ("No soundcard found - sounds disabled\n");
 		fSound = FALSE;
-		return FALSE;
+		return;
 	    }
 	  /* Check for errors */
 	  if (GetLastError ())
 	    {
-		g_print ("Error playing sound file: %s\n", filename);
 		PrintWinError ();
 		SetLastError (0);
-		return FALSE;
+		return;
 	    }
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
@@ -193,7 +192,6 @@ extern void SoundWait( void ) {
     if (!fSound)
         return;
 #ifdef WIN32
-    case SOUND_SYSTEM_WINDOWS:
     	/* Wait 1/10 of a second to make sure sound has started */
     	Sleep(100);
       while (!PlaySound(NULL, NULL, SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT))
