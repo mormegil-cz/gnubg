@@ -1,3 +1,7 @@
+Mon Mar 26 17:05:29 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* configure.in, m4/az_python.m4: OS/X changes
+
 Thu Mar 22 00:22:47 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* import.c, openurl.c, sound.c, doc/Makefile.am: a few compile fixes

@@ -37,14 +37,9 @@ dnl
 dnl host specifics
 dnl 
 
-darwin=no
 win32=no
 AC_MSG_CHECKING([for host])
 case "$host" in
-  *-apple-darwin*)
-    LDFLAGS="$LDFLAGS -bind_at_load"
-    darwin=yes;
-    ;;
   *-*-mingw*)
     win32=yes
     CFLAGS="$CFLAGS -mms-bitfields"
@@ -207,9 +202,6 @@ AZ_PYTHON_LSPEC
 if test "x$az_python_cspec" != "x"; then
         AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
         AM_CONDITIONAL(USE_PYTHON, test "$no_python" != "yes" )
-        if test "x$darwin" != "xno"; then
-                LDFLAGS = "$LDFLAGS -framework Python"
-        fi
 fi
 
 dnl

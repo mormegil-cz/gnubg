@@ -264,38 +264,41 @@ AC_DEFUN([AZ_PYTHON_LSPEC],
     then
         AZ_PYTHON_RUN([
 import sys
-import distutils.sysconfig
-strUseFrameWork = "--enable-framework"
-dictConfig = distutils.sysconfig.get_config_vars( )
-strConfigArgs = dictConfig.get("CONFIG_ARGS")
-strLinkSpec =  dictConfig.get('LDFLAGS')
-if -1 ==  strConfigArgs.find(strUseFrameWork):
-    strLibPL = dictConfig.get("LIBPL")
-    if strLibPL and (strLibPL != ""):
-        strLinkSpec += " -L%s" % (strLibPL)
-    strSys = dictConfig.get("SYSLIBS")
-    if strSys and (strSys != ""):
-        strLinkSpec += " %s" % (strSys)
-    strSHL = dictConfig.get("SHLIBS")
-    if strSHL and (strSHL != ""):
-        strLinkSpec += " %s" % (strSHL)
-    # Construct the Python Library Name.
-    strTmplte = " -lpython%d.%d"
-    if (sys.platform == "win32") or (sys.platform == "os2emx"):
-        strTmplte = " -lpython%d%d"
-    strWrk = strTmplte % ( (sys.hexversion >> 24),
-                            ((sys.hexversion >> 16) & 0xff))
-    strLinkSpec += strWrk
+if (sys.platform == "darwin"):
+    strLinkSpec = "-framework Python"
 else:
-    # This is not ideal since it changes the search path
-    # for Frameworks which could have side-effects on
-    # other included Frameworks.  However, it is necessary
-    # where someone has installed more than one frameworked
-    # Python.  Frameworks are really only used in MacOSX.
-    strLibFW = dictConfig.get("PYTHONFRAMEWORKPREFIX")
-    if strLibFW and (strLibFW != ""):
-        strLinkSpec += " -F%s" % (strLibFW)
-strLinkSpec += " %s" % (dictConfig.get('LINKFORSHARED'))
+    import distutils.sysconfig
+    strUseFrameWork = "--enable-framework"
+    dictConfig = distutils.sysconfig.get_config_vars( )
+    strConfigArgs = dictConfig.get("CONFIG_ARGS")
+    strLinkSpec =  dictConfig.get('LDFLAGS')
+    if -1 ==  strConfigArgs.find(strUseFrameWork):
+        strLibPL = dictConfig.get("LIBPL")
+        if strLibPL and (strLibPL != ""):
+            strLinkSpec += " -L%s" % (strLibPL)
+        strSys = dictConfig.get("SYSLIBS")
+        if strSys and (strSys != ""):
+            strLinkSpec += " %s" % (strSys)
+        strSHL = dictConfig.get("SHLIBS")
+        if strSHL and (strSHL != ""):
+            strLinkSpec += " %s" % (strSHL)
+        # Construct the Python Library Name.
+        strTmplte = " -lpython%d.%d"
+        if (sys.platform == "win32") or (sys.platform == "os2emx"):
+            strTmplte = " -lpython%d%d"
+        strWrk = strTmplte % ( (sys.hexversion >> 24),
+                            ((sys.hexversion >> 16) & 0xff))
+        strLinkSpec += strWrk
+    else:
+        # This is not ideal since it changes the search path
+        # for Frameworks which could have side-effects on
+        # other included Frameworks.  However, it is necessary
+        # where someone has installed more than one frameworked
+        # Python.  Frameworks are really only used in MacOSX.
+        strLibFW = dictConfig.get("PYTHONFRAMEWORKPREFIX")
+        if strLibFW and (strLibFW != ""):
+            strLinkSpec += " -F%s" % (strLibFW)
+    strLinkSpec += " %s" % (dictConfig.get('LINKFORSHARED'))
 print strLinkSpec
         ])
         AC_SUBST([PYTHON_LSPEC], [${az_python_output}])
