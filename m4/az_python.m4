@@ -1,111 +1,3 @@
-dnl @synopsis AZ_PYTHON_DEFAULT
-dnl @synopsis AZ_PYTHON_ENABLE
-dnl @synopsis AZ_PYTHON_WITH
-dnl @synopsis AZ_PYTHON_PATH
-dnl @synopsis AZ_PYTHON_VERSION_ENSURE( [2.2] )
-dnl @synopsis AZ_PYTHON_CSPEC
-dnl @synopsis AZ_PYTHON_LSPEC
-dnl
-dnl @summary New and revised Python support.
-dnl
-dnl This file provides autoconf support for those applications that
-dnl want to embed python. It supports all pythons >= 2.2 which is the
-dnl first official release containing distutils. Version 2.2 of python
-dnl was released December 21, 2001. Since it actually executes the
-dnl python, cross platform configuration will probably not work. Also,
-dnl most of the platforms supported are consistent until you look into
-dnl MacOSX. The python included with it is installed as a framework
-dnl which is a very different environment to set up the normal tools
-dnl such as gcc and libtool to deal with. Therefore, once we establish
-dnl which python that we are going to use, we use its distutils to
-dnl actually compile and link our modules or applications.
-dnl
-dnl At this time, it does NOT support linking with Python statically.
-dnl It does support dynamic linking.
-dnl
-dnl This set of macros help define $PYTHON, $PYTHON_USE, $PYTHON_CSPEC
-dnl and $PYTHON_LSPEC. $PYTHON defines the full executable path for the
-dnl Python being linked to and is used within these macros to determine
-dnl if that has been specified or found. These macros do execute this
-dnl python version so it must be present on the system at configure
-dnl time.
-dnl
-dnl $PYTHON_USE is an automake variable that defines whether Python
-dnl support should be included or not in your application.
-dnl $PYTHON_CSPEC is a variable that supplies additional CFLAGS for the
-dnl compilation of the application/shared library. $PYTHON_LSPEC is a
-dnl variable that supplies additional LDFLAGS for linking the
-dnl application/shared library.
-dnl
-dnl The following is an example of how to set up for python usage
-dnl within your application in your configure.in:
-dnl
-dnl   AZ_PYTHON_DEFAULT( )
-dnl   AZ_PYTHON_ENABLE( )             # Optional
-dnl   AZ_PYTHON_WITH( )               # Optional
-dnl   AZ_PYTHON_PATH( )               # or AZ_PYTHON_INSIST( )
-dnl   # if $PYTHON is not defined, then the following do nothing.
-dnl   AZ_PYTHON_VERSION_ENSURE( [2.2] )
-dnl   AZ_PYTHON_CSPEC
-dnl   AZ_PYTHON_LSPEC
-dnl
-dnl The AZ_PYTHON_DEFAULT sets the $PYTHON_USE to false. Thereby,
-dnl excluding it if it was optional.
-dnl
-dnl The AZ_PYTHON_ENABLE looks for the optional configure parameters of
-dnl --enable-python/--disable-python and establishes the $PYTHON and
-dnl $PYTHON_USE variables accordingly.
-dnl
-dnl The AZ_PYTHON_WITH looks for the optional configure parameters of
-dnl --with-python/--without-python and establishes the $PYTHON and
-dnl $PYTHON_USE variables accordingly.
-dnl
-dnl The AZ_PYTHON_PATH looks for python assuming that none has been
-dnl previously found or defined and issues an error if it does not find
-dnl it. If it does find it, it establishes the $PYTHON and $PYTHON_USE
-dnl variables accordingly. AZ_PYTHON_INSIST could be used here instead
-dnl if you want to insist that Python support be included using the
-dnl --enable-python or --with-python checks previously done.
-dnl
-dnl The AZ_PYTHON_VERSION_ENSURE issues an error if the Python
-dnl previously found is not of version 2.2 or greater.
-dnl
-dnl Once that these macros have be run, we can use PYTHON_USE within
-dnl the makefile.am file to conditionally add the Python support such
-dnl as:
-dnl
-dnl Makefile.am example showing optional inclusion of directories:
-dnl
-dnl  if PYTHON_USE
-dnl  plugins = plugins
-dnl  src = src
-dnl  else
-dnl  plugins =
-dnl  src =
-dnl  endif
-dnl
-dnl  SUBDIRS = . $(plugins) $(src)
-dnl
-dnl Makefile.am example showing optional shared library build:
-dnl
-dnl  if PYTHON_USE
-dnl  lib_LTLIBRARIES        = libElemList.la
-dnl  libElemList_la_SOURCES = libElemList.c
-dnl  libElemList_la_CFLAGS  = @PYTHON_CSPEC@
-dnl  libElemList_la_LDFLAGS = @PYTHON_LSPEC@
-dnl  endif
-dnl
-dnl Makefile.am example showing optional program build:
-dnl
-dnl  if PYTHON_USE
-dnl  bin_PROGRAMS    = runFunc
-dnl  runFunc_SOURCES = runFunc.c
-dnl  runFunc_CFLAGS  = @PYTHON_CSPEC@
-dnl  runFunc_LDFLAGS = @PYTHON_LSPEC@
-dnl  endif
-dnl
-dnl The above compiles the modules only if PYTHON_USE was specified as
-dnl true. Also, the else portion of the if was optional.
 dnl
 dnl @category InstalledPackages
 dnl @author Robert White <kranki@mac.com>
@@ -119,89 +11,8 @@ dnl @license GPLWithACException
 
 AC_DEFUN([AZ_PYTHON_DEFAULT],
 [
-    az_python_use=false
-    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+    az_use_python=true
 ])
-
-
-
-# AZ_PYTHON_ENABLE( [path] )
-# -----------------------------------------------------------------
-# Handles the various --enable-python commands.
-# Input:
-#   $1 is the optional search path for the python executable if needed
-# Ouput:
-#   PYTHON_USE (AM_CONDITIONAL) is true if python executable found
-#   and --enable-python was requested; otherwise false.
-#   $PYTHON contains the full executable path to python if PYTHON_ENABLE_USE
-#   is true.
-#
-# Example:
-#   AZ_PYTHON_ENABLE( )
-#   or
-#   AZ_PYTHON_ENABLE( "/usr/bin" )
-
-AC_DEFUN([AZ_PYTHON_ENABLE],
-[
-    AC_ARG_VAR([PYTHON],[Python Executable Path])
-
-    # unless PYTHON was supplied to us (as a precious variable),
-    # see if --enable-python[=PythonExecutablePath], --enable-python,
-    # --disable-python or --enable-python=no was given.
-    if test -z "$PYTHON"
-    then
-        AC_MSG_CHECKING(for --enable-python)
-        AC_ARG_ENABLE(
-            python,
-            AC_HELP_STRING([--enable-python@<:@=PYTHON@:>@],
-                [absolute path name of Python executable]
-            ),
-            [
-                if test "$enableval" = "yes"
-                then
-                    # "yes" was specified, but we don't have a path
-                    # for the executable.
-                    # So, let's searth the PATH Environment Variable.
-                    AC_MSG_RESULT(yes)
-                    AC_PATH_PROG(
-                        [PYTHON],
-                        python,
-                        [],
-                        $1
-                    )
-                    if test -z "$PYTHON"
-                    then
-                        AC_MSG_ERROR(no path to python found)
-                    fi
-                    az_python_use=true
-                    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
-                    AZ_PYTHON_PREFIX( )
-                elif test "$enableval" = "no"
-                then
-                    AC_MSG_RESULT(no)
-                    az_python_use=false
-                    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
-                else
-                    # $enableval must be the executable path then.
-                    AC_SUBST([PYTHON], ["${enableval}"])
-                    AC_MSG_RESULT($withval)
-                    az_python_use=true
-                    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
-                    AZ_PYTHON_PREFIX( )
-                fi
-            ],
-            [
-                # --with-python was not specified.
-                AC_MSG_RESULT(no)
-                az_python_use=false
-                AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
-            ]
-        )
-    fi
-
-])
-
-
 
 # AZ_PYTHON_CSPEC( )
 # -----------------
@@ -232,24 +43,6 @@ AC_DEFUN([AZ_PYTHON_CSPEC],
         AC_MSG_NOTICE([PYTHON_CSPEC=${az_python_cspec}])
     fi
 ])
-
-
-
-# AZ_PYTHON_INSIST( )
-# -----------------
-# Look for Python and set the output variable 'PYTHON'
-# to 'python' if found, empty otherwise.
-
-AC_DEFUN([AZ_PYTHON_PATH],
-[
-    AC_ARG_VAR( [PYTHON], [Python Executable Path] )
-    if test -z "$PYTHON"
-    then
-        AC_MSG_ERROR([Python Executable not found])
-    fi
-])
-
-
 
 # AZ_PYTHON_LSPEC( )
 # -----------------
@@ -307,7 +100,6 @@ print strLinkSpec
 ])
 
 
-
 # AZ_PYTHON_PATH( )
 # -----------------
 # Look for Python and set the output variable 'PYTHON'
@@ -320,13 +112,8 @@ AC_DEFUN([AZ_PYTHON_PATH],
     if test -z "$PYTHON"
     then
         AC_MSG_ERROR([Python Executable not found])
-    else
-        az_python_use=true
     fi
-    AM_CONDITIONAL(PYTHON_USE, test "$az_python_use" = "true")
 ])
-
-
 
 # AZ_PYTHON_PREFIX( )
 # -------------------
@@ -438,9 +225,9 @@ AC_DEFUN([AZ_PYTHON_VERSION_ENSURE],
 # Input:
 #   $1 is the optional search path for the python executable if needed
 # Ouput:
-#   PYTHON_USE (AM_CONDITIONAL) is true if python executable found
+#   USE_PYTHON (AM_CONDITIONAL) is true if python executable found
 #   and --with-python was requested; otherwise false.
-#   $PYTHON contains the full executable path to python if PYTHON_USE
+#   $PYTHON contains the full executable path to python if USE_PYTHON
 #   is true.
 #
 # Example:
@@ -467,41 +254,40 @@ AC_DEFUN([AZ_PYTHON_WITH],
                 if test "$withval" = "yes"
                 then
                     # "yes" was specified, but we don't have a path
-                    # for the executable.
-                    # So, let's searth the PATH Environment Variable.
                     AC_MSG_RESULT(yes)
-                    AC_PATH_PROG(
-                        [PYTHON],
-                        python,
-                        [],
-                        $1
-                    )
-                    if test -z "$PYTHON"
-                    then
-                        AC_MSG_ERROR(no path to python found)
-                    fi
-                    az_python_use=true
-                    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+                    AZ_PYTHON_PATH()
                     AZ_PYTHON_PREFIX( )
+                    az_use_python=true
+                    AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
+                    AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
                 elif test "$withval" = "no"
                 then
                     AC_MSG_RESULT(no)
-                    az_python_use=false
-                    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+                    az_use_python=false
+                    AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
                 else
                     # $withval must be the executable path then.
                     AC_SUBST([PYTHON], ["${withval}"])
                     AC_MSG_RESULT($withval)
-                    az_python_use=true
-                    AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+                    az_use_python=true
+                    AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
+                    AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
                     AZ_PYTHON_PREFIX( )
                 fi
             ],
             [
                 # --with-python was not specified.
-                AC_MSG_RESULT(no)
-                az_python_use=false
-                AM_CONDITIONAL(PYTHON_USE, test x"$az_python_use" = x"true")
+                if test "x$az_use_python" = "xtrue"
+                then
+                    AC_MSG_RESULT(enabled by default)
+                    AZ_PYTHON_PATH( )
+                    AZ_PYTHON_PREFIX( )
+                    AC_DEFINE(USE_PYTHON,1,[Define if you want to use Python inside gnubg])
+                else
+                     AC_MSG_RESULT(no)
+                     az_use_python=false
+                fi
+                AM_CONDITIONAL(USE_PYTHON, test x"$az_use_python" = x"true")
             ]
         )
     fi

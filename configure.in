@@ -192,11 +192,9 @@ dnl
 dnl Check for Python
 dnl
 
+AZ_PYTHON_DEFAULT()
 AZ_PYTHON_WITH()
-if test "$with_python" != "no"; then
-  AZ_PYTHON_PATH()
-  AZ_PYTHON_VERSION_ENSURE([2.2])
-fi
+AZ_PYTHON_VERSION_ENSURE([2.2])
 AZ_PYTHON_CSPEC
 AZ_PYTHON_LSPEC
 if test "x$az_python_cspec" != "x"; then
