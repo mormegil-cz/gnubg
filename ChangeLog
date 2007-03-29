@@ -1,3 +1,7 @@
+Thu Mar 29 17:57:17 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* board3d/Makefile.am: fix --without-board3d
+
 Thu Mar 29 09:51:40 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in, m4/az_python.m4: Fix --without-python
