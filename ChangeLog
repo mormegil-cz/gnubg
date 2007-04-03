@@ -1,3 +1,7 @@
+Wed Apr  4 00:07:07 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c: fix the fnd function, which was messed up by a typecast.
+
 Thu Mar 29 17:57:17 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* board3d/Makefile.am: fix --without-board3d

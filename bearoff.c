@@ -1888,7 +1888,7 @@ fnd ( const float x, const float mu, const float sigma  ) {
 
      float xm = ( x - mu ) / sigma;
 
-     return 1.0f / (float)(( sigma * sqrt ( 2.0 * PI ) ) * exp ( - xm * xm / 2.0 ));
+     return 1.0f / ( sigma * sqrt ( 2.0 * PI ) ) * ((float)(exp ( - xm * xm / 2.0 )));
 
    }
 
