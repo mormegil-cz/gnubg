@@ -42,8 +42,8 @@ float rErrorRateFactor = 1000.0f;
 extern char *
 OutputRolloutResult( const char *szIndent,
 		     char asz[][ 1024 ],
-		     const  float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-		     const float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+		     float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+		     float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 		     const cubeinfo aci[],
 		     const int cci,
 		     const int fCubeful ) {
@@ -764,8 +764,8 @@ OutputPercents ( const float ar[], const int f ) {
  */
 
 extern char *
-OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                         float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                          const evalsetup* pes, const cubeinfo* pci,
                          int fDouble, int fTake,
                          skilltype stDouble,
@@ -909,8 +909,8 @@ OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 }
 
 extern char *
-OutputCubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                    const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                     const evalsetup* pes, const cubeinfo* pci ) {
 
   static char sz[ 4096 ];

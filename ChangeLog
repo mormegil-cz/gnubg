@@ -1,3 +1,10 @@
+Sun Apr  8 18:44:45 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, eval.c, eval.h, external.c, format.c, format.h, gnubg.c,
+	gnubgmodule.c, gtkcube.c, gtkwindows.c, html.c, latex.c, makebearoff.c,
+	play.c, postscript.c, progress.c, rollout.c, set.c, sgf.c, show.c, text.c:
+	icc compiler fixes
+
 Sun Apr  8 13:40:34 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, eval.c, eval.h, gnubg.c, gtkgame.c, gtkrace.c, gtkrace.h,

@@ -362,7 +362,7 @@ updateStatcontext(statcontext*       psc,
          fAnalyseCube && pmgi->fCubeUse ) {
 
       FindCubeDecision( arDouble, 
-                        GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
+                        pmr->CubeDecPtr->aarOutput, &ci );
 
       psc->anTotalCube[ pmr->fPlayer ]++;
 
@@ -480,7 +480,7 @@ updateStatcontext(statcontext*       psc,
          pmr->CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
       FindCubeDecision( arDouble, 
-                        GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
+                        pmr->CubeDecPtr->aarOutput, &ci );
 
       rSkill = arDouble[ OUTPUT_TAKE ] <
         arDouble[ OUTPUT_DROP ] ?
@@ -522,7 +522,7 @@ updateStatcontext(statcontext*       psc,
          pmr->CubeDecPtr->esDouble.et != EVAL_NONE ) {
 
       FindCubeDecision( arDouble, 
-                        GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
+                        pmr->CubeDecPtr->aarOutput, &ci );
 
       psc->anTotalCube[ pmr->fPlayer ]++;
       psc->anTake[ pmr->fPlayer ]++;
@@ -552,7 +552,7 @@ updateStatcontext(statcontext*       psc,
         pmr->CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	  
       FindCubeDecision( arDouble, 
-                        GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
+                        pmr->CubeDecPtr->aarOutput, &ci );
 
       psc->anTotalCube[ pmr->fPlayer ]++;
       psc->anPass[ pmr->fPlayer ]++;
@@ -712,7 +712,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
 					aarStdDev, sizeof ( aarStdDev ) );
 			}
 
-			FindCubeDecision( arDouble, GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, &ci );
+			FindCubeDecision( arDouble, pmr->CubeDecPtr->aarOutput, &ci );
 
 			rSkill = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_OPTIMAL ];
 			pmr->stCube = Skill( rSkill );
@@ -837,7 +837,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
 						sizeof ( aarStdDev ) );
 				}
 
-				FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
+				FindCubeDecision ( arDouble,  aarOutput, &ci );
 				if (doubleError)
 					*doubleError = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
 

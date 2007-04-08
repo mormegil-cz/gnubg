@@ -468,7 +468,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                                       pecCube[ pci->fMove ], 0 ) < 0 ) 
             return -1;
 
-          cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aar, pci );
+          cd = FindCubeDecision ( arDouble,  aar, pci );
 
           switch ( cd ) {
 

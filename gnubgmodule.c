@@ -560,7 +560,7 @@ PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
     return NULL;
   }
 
-  cp = FindCubeDecision ( arCube, GCCCONSTAHACK aarOutput, &ci );
+  cp = FindCubeDecision ( arCube,  aarOutput, &ci );
 
   {
     PyObject* p = PyTuple_New( NUM_CUBEFUL_OUTPUTS + 2 );
@@ -1356,8 +1356,8 @@ PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
 
 static PyObject*
 PyDoubleAnalysis(const evalsetup* pes,
-		 const float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-		 const float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+		 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+		 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 		 PyMatchState* ms,
 		 int const verbose)
 {
@@ -1792,8 +1792,8 @@ PythonGame(const list*    plGame,
 	    if( pmr->CubeDecPtr->esDouble.et != EVAL_NONE ) {
 	      PyObject* d =
 		PyDoubleAnalysis(&pmr->CubeDecPtr->esDouble,   
-                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
-                                 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                  (float (*)[ NUM_ROLLOUT_OUTPUTS ])pmr->CubeDecPtr->aarOutput, 
+                                  (float (*)[ NUM_ROLLOUT_OUTPUTS ])pmr->CubeDecPtr->aarStdDev,
 				 ms, verbose);
 	      {
 		int s = PyDict_Merge(analysis, d, 1);     g_assert( s != -1 );
@@ -1832,8 +1832,8 @@ PythonGame(const list*    plGame,
 	  if( analysis ) {
 	    const cubedecisiondata* c = pmr->CubeDecPtr;
 	    if( c->esDouble.et != EVAL_NONE ) {
-	      PyObject* d = PyDoubleAnalysis(&c->esDouble, c->aarOutput,
-					     c->aarStdDev, ms, verbose);
+	      PyObject* d = PyDoubleAnalysis(&c->esDouble, (float (*)[ NUM_ROLLOUT_OUTPUTS ])c->aarOutput,
+					     (float (*)[ NUM_ROLLOUT_OUTPUTS ])c->aarStdDev, ms, verbose);
 	      {
 		int s = PyDict_Merge(analysis, d, 1);     g_assert( s != -1 );
 	      }

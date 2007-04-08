@@ -494,7 +494,7 @@ ExtFIBSBoard( extcmd *pec ) {
                                &esEvalCube, NULL, NULL ) < 0 )
         return NULL;
 	  
-      switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
+      switch( FindCubeDecision( arDouble,  aarOutput, &ci )) {
       case DOUBLE_PASS:
       case TOOGOOD_PASS:
       case REDOUBLE_PASS:
@@ -552,7 +552,7 @@ ExtFIBSBoard( extcmd *pec ) {
                                &esEvalCube, NULL, NULL ) < 0 )
         return NULL;
 		
-      switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
+      switch( FindCubeDecision( arDouble,  aarOutput, &ci )) {
       case DOUBLE_TAKE:
       case DOUBLE_PASS:
       case DOUBLE_BEAVER:

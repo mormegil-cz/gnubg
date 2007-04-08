@@ -1996,12 +1996,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
 
-  cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
+  cd = FindCubeDecision ( arDouble,  aarOutput, pci );
 
   fActual = fDouble > 0;
   fClose = isCloseCubedecision ( arDouble ); 
   fMissed =  fDouble > -1 &&
-    isMissedDouble ( arDouble, GCCCONSTAHACK aarOutput, fDouble, pci );
+    isMissedDouble ( arDouble,  aarOutput, fDouble, pci );
 
   fDisplay = 
     ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
@@ -2228,7 +2228,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
 
   }
 
-  getCubeDecisionOrdering ( ai, arDouble, GCCCONSTAHACK aarOutput, pci );
+  getCubeDecisionOrdering ( ai, arDouble,  aarOutput, pci );
 
   for ( i = 0; i < 3; i++ ) {
 

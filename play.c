@@ -1107,7 +1107,7 @@ extern int ComputerTurn( void ) {
       UpdateStoredCube( aarOutput, aarStdDev, 
                         &ap[ ms.fTurn ].esCube, &ms );
 
-      cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
+      cd = FindCubeDecision ( arDouble,  aarOutput, &ci );
 
       fComputerDecision = TRUE;
 
@@ -1322,7 +1322,7 @@ extern int ComputerTurn( void ) {
           UpdateStoredCube( aarOutput, aarStdDev, 
                             &ap[ ms.fTurn ].esCube, &ms );
 
-          cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
+          cd = FindCubeDecision ( arDouble,  aarOutput, &ci );
 
           switch ( cd ) {
 
@@ -1835,9 +1835,9 @@ extern int NextTurn( int fPlayNext ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
 
-    if( ( n = GameStatus( ms.anBoard, ms.bgv ) ) ||
-	( ms.gs == GAME_DROP && ( ( n = 1 ) ) ) ||
-	( ms.gs == GAME_RESIGNED && ( ( n = ms.fResigned ) ) ) ) {
+    if ( GameStatus( ms.anBoard, ms.bgv )  ||
+	ms.gs == GAME_DROP ||
+	ms.gs == GAME_RESIGNED)  {
 	moverecord *pmr = (moverecord *) plGame->plNext->p;
 	xmovegameinfo *pmgi = &pmr->g;
 
@@ -1845,6 +1845,14 @@ extern int NextTurn( int fPlayNext ) {
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
+    else if (ms.gs == GAME_DROP)
+        n = 1;
+    else if ( ms.gs == GAME_RESIGNED)
+        n = ms.fResigned;
+    else
+        n = GameStatus( ms.anBoard, ms.bgv );
+
+
 
 	playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ?
 		    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
@@ -2467,7 +2475,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
 
   /* find skill */
 
-  cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );  
+  cd = FindCubeDecision ( arDouble,  aarOutput, &ci );  
 
   switch ( cd ) {
 	case NODOUBLE_TAKE:
@@ -2665,7 +2673,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
         pmr->stCube = SKILL_NONE;
 
 	    
-	cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );  
+	cd = FindCubeDecision ( arDouble,  aarOutput, &ci );  
 
 	switch ( cd ) {
 	case DOUBLE_TAKE:
@@ -4071,7 +4079,7 @@ static skilltype ShouldDouble ( void ) {
                            &es, &ms );
 
 	    
-	cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );  
+	cd = FindCubeDecision ( arDouble,  aarOutput, &ci );  
 
 	switch ( cd ) {
 	case DOUBLE_TAKE:

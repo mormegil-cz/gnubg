@@ -1171,8 +1171,10 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     pch = OutputRolloutResult( NULL, 
                                (char(*) [1024]) prp->ppch[ iAlternative ], 
-                               GCCCONSTAHACK aarOutput[ iAlternative ],
-                               GCCCONSTAHACK aarStdDev[ iAlternative ],
+                               ( float (*)[NUM_ROLLOUT_OUTPUTS] )
+                                aarOutput[ iAlternative ],
+                                ( float (*)[NUM_ROLLOUT_OUTPUTS] )
+                                aarStdDev[ iAlternative ],
                                &aci[ iAlternative ], 1, prc->fCubeful );
 
     if ( fShowRanks && iGame > 1 ) {

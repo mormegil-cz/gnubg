@@ -303,13 +303,13 @@ ShowRollout ( const rolloutcontext *prc ) {
 
   if ( fLateEvals ) {
     outputf ( _("Move filter for first %d plies:\n"), nLate );
-    show_movefilters ( prc->aaamfChequer );
+    show_movefilters ( (movefilter (*)[4][4])prc->aaamfChequer );
     outputf ( _("Move filter after %d plies:\n"), nLate );
-    show_movefilters ( prc->aaamfLate );
+    show_movefilters ( (movefilter (*)[4][4])prc->aaamfLate );
   }
   else {
     outputf ( _("Move filter:\n") );
-    show_movefilters ( prc->aaamfChequer );
+    show_movefilters ( (movefilter (*)[4][4])prc->aaamfChequer );
   }
 
   if (fDoTruncate) {
@@ -453,7 +453,7 @@ extern void CommandShowAnalysis( char *sz ) {
              "following evaluation parameters:") );
   outputl( _("    Chequer play:") );
   ShowEvalSetup ( &esAnalysisChequer );
-  ShowMoveFilters ( (const movefilter (*)[MAX_FILTER_PLIES]) aamfAnalysis );
+  ShowMoveFilters ( aamfAnalysis );
   outputl( _("    Cube decisions:") );
   ShowEvalSetup ( &esAnalysisCube );
 
@@ -734,7 +734,7 @@ extern void CommandShowEvaluation( char *sz ) {
     outputl( _("    Chequer play:") );
     ShowEvalSetup ( &esEvalChequer );
     outputl( _("    Move filters:") );
-    ShowMoveFilters ( (const movefilter (*)[MAX_FILTER_PLIES]) aamfEval );
+    ShowMoveFilters ( aamfEval );
     outputl( _("    Cube decisions:") );
     ShowEvalSetup ( &esEvalCube );
 
@@ -857,7 +857,7 @@ extern void CommandShowPlayer( char *sz ) {
             outputl( _("    Checker play:") );
             ShowEvalSetup ( &ap[ i ].esChequer );
             outputl( _("    Move filters:") );
-            ShowMoveFilters ( (const movefilter (*)[MAX_FILTER_PLIES]) ap[ i ].aamf );
+            ShowMoveFilters ( ap[ i ].aamf );
             outputl( _("    Cube decisions:") );
             ShowEvalSetup ( &ap[ i ].esCube );
 	    break;

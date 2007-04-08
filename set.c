@@ -564,7 +564,7 @@ extern void CommandSetAutoCrawford( char *sz ) {
 
 extern void CommandSetAutoDoubles( char *sz ) {
 
-    unsigned int n;
+    int n;
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	outputl( _("You must specify how many automatic doubles to use "
@@ -578,7 +578,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
 	return;
     }
 	
-    if( ( cAutoDoubles = n ) > 1 )
+    if( ( cAutoDoubles = (unsigned int)n ) > 1 )
 	outputf( _("Automatic doubles will be used "
                    "(up to a limit of %d).\n"), n );
     else if( cAutoDoubles )
@@ -2877,7 +2877,7 @@ extern void CommandShowWarning( char *sz )
 
 extern void CommandSetBeavers( char *sz ) {
 
-    unsigned int n;
+    int n;
 
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	outputl( _("You must specify the number of beavers to allow.") );
@@ -2885,7 +2885,7 @@ extern void CommandSetBeavers( char *sz ) {
 	return;
     }
 
-    nBeavers = n;
+    nBeavers = (unsigned int)n;
 
     if( nBeavers > 1 )
 	outputf( _("%d beavers/raccoons allowed in money sessions.\n"), nBeavers );
@@ -2898,14 +2898,14 @@ extern void CommandSetBeavers( char *sz ) {
 extern void
 CommandSetOutputDigits( char *sz ) {
 
-  unsigned int n = ParseNumber( &sz );
+  int n = ParseNumber( &sz );
 
   if ( n < 0 || n > 6 ) {
     outputl( _("You must specify a number between 1 and 6.\n") );
     return;
   }
 
-  fOutputDigits = n;
+  fOutputDigits = (unsigned int)n;
 
   outputf( _("Probabilities and equities will be shown with %d digits "
              "after the decimal separator\n"), fOutputDigits );

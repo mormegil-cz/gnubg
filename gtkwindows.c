@@ -119,7 +119,10 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwPixmap, FALSE, FALSE, 0);
 
 	cbData = (CallbackStruct*)malloc(sizeof(CallbackStruct));
-	cbData->DialogFun = (void*)okFun;
+
+    typedef void (*dialog_func_ty)(GtkWidget *, void*);
+    cbData->DialogFun = (dialog_func_ty) okFun;
+
 	cbData->data = okFunData;
 	g_signal_connect(pwDialog, "response", GTK_SIGNAL_FUNC(DialogResponse), cbData);
 

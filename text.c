@@ -298,8 +298,8 @@ TextEpilogue ( FILE *pf, const matchstate *pms ) {
 
 static void
 TextPrintCubeAnalysisTable ( FILE *pf, 
-                             const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                             const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              int fPlayer,
                              const evalsetup* pes, const cubeinfo* pci,
                              int fDouble, int fTake,
@@ -314,11 +314,11 @@ TextPrintCubeAnalysisTable ( FILE *pf,
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
 
-  FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
+  FindCubeDecision ( arDouble,  aarOutput, pci );
 
   fActual = fDouble;
   fClose = isCloseCubedecision ( arDouble ); 
-  fMissed = isMissedDouble ( arDouble, GCCCONSTAHACK aarOutput, fDouble, pci );
+  fMissed = isMissedDouble ( arDouble,  aarOutput, fDouble, pci );
 
   fDisplay = 
     ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
@@ -369,8 +369,8 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     /* cube analysis from move */
 
     TextPrintCubeAnalysisTable ( pf, 
-                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
-				 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                  pmr->CubeDecPtr->aarOutput,
+				  pmr->CubeDecPtr->aarStdDev,
                                  pmr->fPlayer,
                                  &pmr->CubeDecPtr->esDouble, &ci, FALSE, -1,
                                  pmr->stCube, SKILL_NONE );
@@ -380,8 +380,8 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
   case MOVE_DOUBLE:
 
     TextPrintCubeAnalysisTable ( pf, 
-                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
-				 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                  pmr->CubeDecPtr->aarOutput, 
+				  pmr->CubeDecPtr->aarStdDev,
                                  pmr->fPlayer,
                                  &pmr->CubeDecPtr->esDouble, 
 								 &ci, TRUE, -1,
@@ -395,8 +395,8 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     /* cube analysis from double, {take, drop, beaver} */
 
     TextPrintCubeAnalysisTable ( pf, 
-                                 GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
-				 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev,
+                                  pmr->CubeDecPtr->aarOutput, 
+				  pmr->CubeDecPtr->aarStdDev,
                                  pmr->fPlayer,
                                  &pmr->CubeDecPtr->esDouble, 
 								 &ci, TRUE, 

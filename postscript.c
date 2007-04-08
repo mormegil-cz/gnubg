@@ -832,8 +832,8 @@ PrintPostScriptComment ( FILE *pf, char *pch ) {
 static void 
 PrintPostScriptCubeAnalysis( FILE *pf, const matchstate *pms,
                              int const fPlayer, 
-                             const float aarOutput[2][ NUM_ROLLOUT_OUTPUTS ], 
-                             const float aarStdDev[2][ NUM_ROLLOUT_OUTPUTS ], 
+                             float aarOutput[2][ NUM_ROLLOUT_OUTPUTS ], 
+                             float aarStdDev[2][ NUM_ROLLOUT_OUTPUTS ], 
                              const evalsetup* pes ) { 
     cubeinfo ci;
     char *sz, *pch, *pchNext;
@@ -1073,8 +1073,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    }
 	    
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->fPlayer,
-                                         GCCCONSTAHACK pmr->CubeDecPtr->aarOutput,
-					 GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev, 
+                                          pmr->CubeDecPtr->aarOutput,
+                                          pmr->CubeDecPtr->aarStdDev, 
                                          &pmr->CubeDecPtr->esDouble );
 	    
 	    Advance( pf, 10 );
@@ -1137,8 +1137,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptBoard( pf, &msExport, pmr->fPlayer );
 
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->fPlayer,
-                                         GCCCONSTAHACK pmr->CubeDecPtr->aarOutput, 
-                                         GCCCONSTAHACK pmr->CubeDecPtr->aarStdDev, 
+                                          pmr->CubeDecPtr->aarOutput, 
+                                          pmr->CubeDecPtr->aarStdDev, 
                                          &pmr->CubeDecPtr->esDouble );
 
 	    Advance( pf, 10 );

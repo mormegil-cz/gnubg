@@ -1745,7 +1745,7 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 	WriteEvalContext(pf, &prc->aecChequer[i]);
 	if (prc->aecChequer[i].nPlies) {
 	    fprintf(pf, " filt%d ", i);
-	    WriteMoveFilters(pf, prc->aaamfChequer[i],
+	    WriteMoveFilters(pf, (movefilter (*)[4])prc->aaamfChequer[i],
 			     prc->aecChequer[i].nPlies);
 	}
     }
@@ -1759,7 +1759,7 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 	WriteEvalContext(pf, &prc->aecChequerLate[i]);
 	if (prc->aecChequerLate[i].nPlies) {
 	    fprintf(pf, " latefilt%d ", i);
-	    WriteMoveFilters(pf, prc->aaamfLate[i],
+	    WriteMoveFilters(pf, (movefilter (*)[4])prc->aaamfLate[i],
 			     prc->aecChequerLate[i].nPlies);
 	}
     }

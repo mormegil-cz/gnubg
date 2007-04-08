@@ -4432,7 +4432,7 @@ DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
 
     /* Calculate cube decision */
 
-    cd = FindCubeDecision(arDouble, GCCCONSTAHACK aarOutput, pci);
+    cd = FindCubeDecision(arDouble,  aarOutput, pci);
     
     /* Print %'s and equities */
 
@@ -4470,7 +4470,7 @@ DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
 
     strcat( szOutput, "\n\n" );
     strcat( szOutput,
-	    OutputCubeAnalysis( GCCCONSTAHACK aarOutput, NULL, &es, pci ) );
+	    OutputCubeAnalysis(  aarOutput, NULL, &es, pci ) );
 
   }
 
@@ -4810,7 +4810,7 @@ winGammon ( const float arOutput[ NUM_ROLLOUT_OUTPUTS ] ) {
  
 extern cubedecision
 FindBestCubeDecision ( float arDouble[], 
-                       const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        const cubeinfo *pci ) {
 
 /*
@@ -4982,7 +4982,7 @@ FindBestCubeDecision ( float arDouble[],
 
 extern cubedecision
 FindCubeDecision ( float arDouble[],
-                   const float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                    const cubeinfo* pci )
 {
   GetDPEq ( NULL, &arDouble[ OUTPUT_DROP ], pci );
@@ -7018,7 +7018,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 extern void
 getCubeDecisionOrdering ( int aiOrder[ 3 ],
                           float arDouble[ 4 ], 
-                          const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                          float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                           const cubeinfo* pci ) {
 
   cubedecision cd;
@@ -7289,7 +7289,7 @@ isCloseCubedecision ( const float arDouble[] ) {
 
 extern int
 isMissedDouble ( float arDouble[], 
-                 const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                  const int fDouble, 
                  const cubeinfo *pci ) {
 
