@@ -188,9 +188,87 @@ KeithPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, j, nLeader, nTrailer;
+  int i, j;
+  int pn[2];
   unsigned int anPips[ 2 ];
   float fL;
+  char *sz;
+  
+  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+
+  /* 
+   * pip counts, diffs and sum 
+   */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
+
+  /* pip counts */
+
+  PipCount ( anBoard, anPips );
+
+  /* Keith count */
+
+  KeithCount ( anBoard, pn);
+
+  for ( i = 0; i < 2; ++i ) {
+
+    j = fMove ? i : !i;
+
+    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       pw = gtk_label_new ( sz ),
+                       0, 1, i, i + 1, 
+                       0, 0, 4, 4 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    g_free ( sz );
+
+    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       gtk_label_new ( sz ),
+                       1, 2, i, i + 1, 
+                       0, 0, 4, 4 );
+    g_free ( sz );
+
+  }
+
+  /* separator */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       gtk_hseparator_new() , FALSE, FALSE, 4 );
+
+
+  fL = (float) pn[1]*8.0f /7.0f;
+
+  sz = g_strdup_printf ( "L = %d (%.1f)  T = %d -> %s, %s", 
+                         pn[1], fL, pn[0],
+                         ( pn[0] >= ( fL -3 ) ? _("Redouble") :
+                           ( ( pn[0] >= ( fL -4 ) ) ? _("Double") : 
+                             _("No double") ) ),
+                         ( pn[0] >= ( fL - 2 ) ) ? 
+                         _("drop") : _("take") );
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pw = gtk_label_new ( sz ),
+                       FALSE, FALSE, 4 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+  g_free ( sz );
+
+  return pwp;
+
+}
+
+static GtkWidget *
+Pip8912Page ( int anBoard[ 2 ][ 25 ], const int fMove ) {
+
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
+  GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
+  GtkWidget *pw;
+  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
+  int i, j;
+  float r, arMu[2], arSigma[2];
+  float ahead;
+  unsigned int anPips[ 2 ];
   char *sz;
   
   gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -232,18 +310,35 @@ KeithPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                        gtk_hseparator_new() , FALSE, FALSE, 4 );
 
-  /* Keith count */
+  r = GWCFromPipCount( anPips, arMu, arSigma );
 
-  KeithCount ( anBoard, &nLeader, &nTrailer );
+  sz =  g_strdup_printf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%\n\n"), 
+            ap[ ms.fMove ].szName, r * 100.0f );
 
-  fL = (float) nLeader*8.0f /7.0f;
-  sz = g_strdup_printf ( "L = %d(%.1f)  T = %d -> %s, %s", 
-                         nLeader, fL, nTrailer,
-                         ( nTrailer >= ( fL -3 ) ? _("Redouble") :
-                           ( ( nTrailer >= ( fL -4 ) ) ? _("Double") : 
-                             _("No double") ) ),
-                         ( nTrailer >= ( fL - 2 ) ) ? 
-                         _("drop") : _("take") );
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pw = gtk_label_new ( sz ),
+                       FALSE, FALSE, 4 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+  g_free ( sz );
+
+  /* Thorp count */
+ ahead = (1.0f - (float)anPips[1]/(float)anPips[0])*100.0f;
+  sz = g_strdup_printf ( "L = %d  T = %d (T = L + %.1f%%) -> ", 
+                  anPips[1], anPips[0], ahead);
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pw = gtk_label_new ( sz ),
+                       FALSE, FALSE, 4 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+  g_free ( sz );
+
+  if (ahead > 12.0f)
+      sz = g_strdup  ( _("Double, Drop\n"));
+  else if (ahead > 9.0f)
+      sz = g_strdup ( _("Double, Take\n"));
+  else if (ahead > 8.0f)
+      sz = g_strdup ( _("Redouble, Take\n"));
+  else
+      sz =  g_strdup ( _("No double, Take\n"));
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                        pw = gtk_label_new ( sz ),
                        FALSE, FALSE, 4 );
@@ -681,14 +776,10 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
  * - thorp
  * - one chequer race
  * - one sided rollout
- *
- * Input:
- *   fActivePage: with notebook page should recieve focus.
- *
  */
 
 extern void
-GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
+GTKShowRace ( int anBoard[ 2 ][ 25 ] ) {
 
   GtkWidget *pwDialog;
   GtkWidget *pwNotebook;
@@ -712,17 +803,17 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwNotebook ), 4 );
 
+  /* 8-9-12 */
+
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                             Pip8912Page ( anBoard, prw->fMove ),
+                             gtk_label_new ( _("8912 Rule") ) );
+
   /* Kleinman */
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              KleinmanPage ( anBoard, prw->fMove ),
-                             gtk_label_new ( _("Kleinman Count") ) );
-
-  /* one chequer */
-
-  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             OneChequerPage ( anBoard, prw->fMove ),
-                             gtk_label_new ( _("One chequer bearoff") ) );
+                             gtk_label_new ( _("Kleinman Formula") ) );
 
   /* Thorp */
 
@@ -736,11 +827,17 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
                              KeithPage ( anBoard, prw->fMove ),
                              gtk_label_new ( _("Keith Count") ) );
 
+  /* one chequer */
+
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                             OneChequerPage ( anBoard, prw->fMove ),
+                             gtk_label_new ( _("One-Chequer Bearoff") ) );
+
   /* One sided rollout */
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              OSRPage ( anBoard, prw ),
-                             gtk_label_new ( _("One sided rollout") ) );
+                             gtk_label_new ( _("One-Sided Rollout") ) );
 
   /* show dialog */
 
@@ -748,8 +845,7 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
 
   PerformOSR ( NULL, prw );
   
-  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ),
-                          fActivePage );
+  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ), 0 );
 
   GTKDisallowStdin();
   gtk_main();

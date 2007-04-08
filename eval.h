@@ -423,7 +423,7 @@ extern int
 ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer );
 
 extern int
-KeithCount(int anBoard[2][25], int *pnL, int *pnT);
+KeithCount(int anBoard[2][25], int pn[2]);
 
 extern int 
 DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,

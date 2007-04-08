@@ -194,15 +194,6 @@ ToolbarIsEditing( GtkWidget *pwToolbar ) {
   return editing;
 }
 
-extern void
-ToolbarActivateEdit( GtkWidget *pwToolbar ) {
-  /* This is only used fot the New->Position option */
-	
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ), TRUE );
-}
-
-
 static void 
 ToolbarStop( GtkWidget *pw, gpointer unused ) {
 
@@ -278,7 +269,7 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   gtk_widget_set_sensitive ( ptw->pwExport,  plGame != NULL);
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
-  gtk_widget_set_sensitive ( ptw->pwEdit, plGame != NULL );
+  gtk_widget_set_sensitive ( ptw->pwEdit, TRUE );
 
   return c;
 

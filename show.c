@@ -1120,7 +1120,7 @@ extern void CommandShowKleinman( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-      GTKShowRace ( 0, an );
+      GTKShowRace ( an );
       return;
     }
 #endif
@@ -1163,7 +1163,7 @@ extern void CommandShowThorp( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-      GTKShowRace ( 2, an );
+      GTKShowRace ( an );
       return;
     }
 #endif
@@ -1195,10 +1195,59 @@ extern void CommandShowThorp( char *sz ) {
 
 }
 
+
+extern void CommandShow8912(char *sz)
+{
+
+  int anBoard[ 2 ][ 25 ];
+  unsigned int anPips[ 2 ];
+  float arMu[ 2 ];
+  float arSigma[ 2 ];
+  int i, j;
+  float r;
+  float ahead;
+
+  if( !*sz && ms.gs == GAME_NONE ) {
+    outputl( _("No position specified and no game in progress.") );
+    return;
+  }
+  
+  if( ParsePosition( anBoard, &sz, NULL ) < 0 )
+    return;
+     
+
+#if USE_GTK
+  if ( fX ) {
+    GTKShowRace ( anBoard );
+    return;
+  }
+#endif
+
+  /* calculate from one chequer bearoff */
+
+  PipCount ( anBoard, anPips );
+
+  r = GWCFromPipCount( anPips, arMu, arSigma );
+
+  outputf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%\n\n"), 
+            ap[ ms.fMove ].szName, r * 100.0f );
+
+  ahead = (float)(anPips[0]-anPips[1])/anPips[1]*100.0f;
+  outputf ( _("Leader is %.1f%% ahead\n"), ahead );
+
+  if (ahead > 12.0f)
+      outputf ( _("Double, Drop\n"));
+  else if (ahead > 9.0f)
+      outputf ( _("Double, Take\n"));
+  else if (ahead > 8.0f)
+      outputf ( _("Redouble, Take\n"));
+}
+
+
 extern void CommandShowKeith( char *sz ) {
 
     int an[ 2 ][ 25 ];
-    int nLeader, nTrailer;
+    int pn[2];
     float fL;
 
     if( !*sz && ms.gs == GAME_NONE ) {
@@ -1211,22 +1260,22 @@ extern void CommandShowKeith( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-      GTKShowRace ( 3, an );
+      GTKShowRace ( an );
       return;
     }
 #endif
 
-    KeithCount ( an, &nLeader, &nTrailer );
-    fL = (float) nLeader*8.0f /7.0f;
-    outputf("L = %d(%.1f)  T = %d  -> ", nLeader, fL, nTrailer);
-    if (nTrailer >= (fL - 3))
+    KeithCount ( an, pn);
+    fL = (float) pn[1]*8.0f /7.0f;
+    outputf("L = %d (%.1f)  T = %d  -> ", pn[1], fL, pn[0]);
+    if (pn[0] >= (fL - 3))
       output(_("Redouble, "));
-    else if (nTrailer >= (fL - 4))
+    else if (pn[0] >= (fL - 4))
       output(_("Double, "));
     else
       output(_("No double, "));
     
-    if (nTrailer >= (fL - 2))
+    if (pn[0] >= (fL - 2))
       outputl(_("Drop"));
     else
       outputl(_("Take"));
@@ -1348,7 +1397,7 @@ CommandShowOneChequer ( char *sz ) {
 
 #if USE_GTK
   if ( fX ) {
-    GTKShowRace ( 1, anBoard );
+    GTKShowRace ( anBoard );
     return;
   }
 #endif
@@ -1400,7 +1449,7 @@ CommandShowOneSidedRollout ( char *sz ) {
 
 #if USE_GTK
   if ( fX ) {
-    GTKShowRace ( 3, anBoard );
+    GTKShowRace ( anBoard );
     return;
   }
 #endif

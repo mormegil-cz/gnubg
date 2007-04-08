@@ -4047,11 +4047,10 @@ FindnSaveBestMoves( movelist *pml,
 
 }
 
-extern int KeithCount(int anBoard[2][25], int *pnL, int *pnT)
+extern int KeithCount(int anBoard[2][25], int pn[2])
 {
     unsigned int anPips[2];
     int i, x;
-    int pn[2];
     PipCount(anBoard, anPips);
     for (i = 0; i < 2; i++) {
 	pn[i] = anPips[i];
@@ -4062,8 +4061,6 @@ extern int KeithCount(int anBoard[2][25], int *pnL, int *pnT)
 	    if (!anBoard[i][x])
 		pn[i]++;
     }
-    *pnT = pn[0];
-    *pnL = pn[1];
     return 0;
 }
 

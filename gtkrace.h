@@ -23,6 +23,6 @@
 #define _GTKRACE_H_
 
 extern void
-GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] );
+GTKShowRace ( int anBoard[ 2 ][ 25 ] );
 
 #endif

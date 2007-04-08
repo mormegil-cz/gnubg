@@ -1,3 +1,9 @@
+Sun Apr  8 13:40:34 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, eval.c, eval.h, gnubg.c, gtkgame.c, gtkrace.c, gtkrace.h,
+	gtktoolbar.c, show.c: race theory update and simplification of analyse
+	menu.
+
 Wed Apr  4 00:07:07 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c: fix the fnd function, which was messed up by a typecast.
