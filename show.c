@@ -1203,7 +1203,6 @@ extern void CommandShow8912(char *sz)
   unsigned int anPips[ 2 ];
   float arMu[ 2 ];
   float arSigma[ 2 ];
-  int i, j;
   float r;
   float ahead;
 

@@ -31,6 +31,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <glib/gi18n.h>
 #include "gtktoolbar.h"
+typedef void (*dialog_func_ty)(GtkWidget *, void*);
 
 static char *aszStockItem[ NUM_DIALOG_TYPES ] =
 {
@@ -95,12 +96,10 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 		parent = gtk_widget_get_toplevel(parent);
 	if (parent && !GTK_WIDGET_REALIZED(parent))
 		parent = NULL;
-	if (parent != NULL && (flags & DIALOG_FLAG_MODAL))
-	{
-		if ((flags & DIALOG_FLAG_NOTIDY) == 0)
-			gtk_signal_connect(GTK_OBJECT(pwDialog), "destroy", GTK_SIGNAL_FUNC(quitter), parent);
+	if (parent != NULL)
 		gtk_window_set_transient_for(GTK_WINDOW(pwDialog), GTK_WINDOW(parent));
-	}
+        if (flags & DIALOG_FLAG_MODAL)
+			gtk_signal_connect(GTK_OBJECT(pwDialog), "destroy", GTK_SIGNAL_FUNC(quitter), parent);
 
 	pag = gtk_accel_group_new();
 	gtk_window_add_accel_group(GTK_WINDOW(pwDialog), pag);
@@ -120,7 +119,6 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 
 	cbData = (CallbackStruct*)malloc(sizeof(CallbackStruct));
 
-    typedef void (*dialog_func_ty)(GtkWidget *, void*);
     cbData->DialogFun = (dialog_func_ty) okFun;
 
 	cbData->data = okFunData;

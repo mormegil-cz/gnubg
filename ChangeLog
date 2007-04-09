@@ -1,3 +1,11 @@
+Tue Apr 10 00:41:03 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, configure.in, gnubg.c, gnubgmodule.c, gtkgame.c,
+	gtkgame.h, gtkwindows.c, show.c, doc/.cvsignore: cleanup of the main
+	function. Fix problem with error messages during startup. Postpone
+	efectuation of -p and -c options so that they may be used under gtk.
+	Fix problem with readline not being detected under redhat.
+
 Sun Apr  8 18:44:45 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, eval.c, eval.h, external.c, format.c, format.h, gnubg.c,

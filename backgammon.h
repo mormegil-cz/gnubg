@@ -590,10 +590,6 @@ extern void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 extern void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 #endif
 
-#if HAVE_LIBREADLINE
-extern int fReadline;
-#endif
-
 extern int
 AnalyzeMove ( moverecord* pmr, matchstate* pms, const list* plGame, statcontext* psc,
               const evalsetup* pesChequer, evalsetup* pesCube,

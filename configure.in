@@ -106,11 +106,27 @@ dnl
 
 AC_CHECK_LIB(m,sqrt)
 AC_CHECK_LIB(dl,dlopen)
-AC_CHECK_LIB(readline,readline)
 AC_CHECK_LIB(gmp, __gmpz_import)
 AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
 AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AF_LOCAL sockets.))
+
+dnl
+dnl Check for readline
+dnl
+
+bcrl=n
+AC_CHECK_LIB(ncurses,tparm,TERMLIB=-lncurses, AC_CHECK_LIB(termcap,tgetent,TERMLIB=-ltermcap))
+LDSAVE=$LDFLAGS
+LDFLAGS="$LDFLAGS $TERMLIB"
+AC_CHECK_LIB(readline,readline,
+             [AC_CHECK_HEADER(readline/readline.h,
+              READLINELIB="-lreadline $TERMLIB";bcrl=y)],
+              READLINELIB="")
+if test "$bcrl" = "y" ; then
+    AC_DEFINE([HAVE_LIBREADLINE],1,Define if you have libreadline)
+    fi
+LDFLAGS="$LDSAVE $READLINELIB"
 
 dnl
 dnl Checks for header files.

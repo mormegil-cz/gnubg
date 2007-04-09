@@ -36,6 +36,7 @@
 #endif
 
 #if HAVE_LIBREADLINE
+static char *gnubg_histfile;
 #include <readline/history.h>
 #include <readline/readline.h>
 static int fReadingOther;
@@ -110,18 +111,13 @@ int fReadingCommand;
 #endif
 #endif
 
-#define GNUBG_HISTORY_FILE ".gnubg/history"
-#if HAVE_LIBREADLINE
-int fReadline = TRUE;
-#endif
-
 #if !defined(SIGIO) && defined(SIGPOLL)
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
 /* CommandSetLang trims the selection to 31 max and copies */
 char szLang[32] = "system";
-char *orgLangCode;
+static char *orgLangCode;
 
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
@@ -181,7 +177,7 @@ float rRatingOffset = 2050;
 
 /* The DVD variables are used for the "show bearoff" command */
 
-int fSconyers15x15DVD = TRUE;            /* TRUE if you have Hugh's dvds */
+int fSconyers15x15DVD = FALSE;            /* TRUE if you have Hugh's dvds */
 char szPathSconyers15x15DVD[ BIG_PATH ]; /* Path to Sconyers' databases */
 
 int fSconyers15x15Disk = FALSE;          /* TRUE if you have copied Hugh's
@@ -4032,12 +4028,7 @@ extern void PromptForExit( void ) {
 #endif
 
 #if HAVE_LIBREADLINE
-        {
-          char *temp = g_build_filename(szHomeDirectory, "history", NULL );
-          using_history ();
-          write_history( temp );
-          g_free(temp);
-        }
+        write_history( gnubg_hist_file );
 #endif /* HAVE_READLINE */
 
 #if USE_GTK
@@ -4899,29 +4890,22 @@ extern void CommandCopy (char *sz)
   TextToClipboard (szOut);
 }
 
-static void LoadRCFiles( void ) {
+static void LoadRCFiles(void)
+{
+	char *sz;
 
-    char *sz = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
-    FILE *pf;
+	outputoff();
+	sz = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
+	if (g_file_test(sz, G_FILE_TEST_EXISTS))
+		CommandLoadCommands(sz);
+	g_free(sz);
 
-    outputoff();
-    
+	sz = g_build_filename(szHomeDirectory, "gnubgrc", NULL);
+	if (g_file_test(sz, G_FILE_TEST_EXISTS))
+		CommandLoadCommands(sz);
+	g_free(sz);
 
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
-	LoadCommands( pf, sz );
-	fclose( pf );
-    }
-    g_free(sz);
-    
-    sz = g_build_filename(szHomeDirectory, "gnubgrc", NULL);
-
-    if( ( pf = g_fopen( sz, "r" ) ) ) {
-	LoadCommands( pf, sz );
-	fclose( pf );
-    }
-    g_free(sz);
-
-    outputon();
+	outputon();
 }
 
 extern void CommandExportGameGam( char *sz ) {
@@ -5999,7 +5983,7 @@ extern void UserCommand( char *szCommand ) {
     /* Note that the command is always echoed to stdout; the output*()
        functions are bypassed. */
 #if HAVE_LIBREADLINE
-    if( fReadline ) {
+    if( fInteractive ) {
 	nOldEnd = rl_end;
 	rl_end = 0;
 	rl_redisplay();
@@ -6041,7 +6025,7 @@ extern gint NextTurnNotify( gpointer p )
     if( fNeedPrompt )
     {
 #if HAVE_LIBREADLINE
-	if( fReadline ) {
+	if( fInteractive ) {
 	    ProgressEnd();
 	    rl_callback_handler_install( FormatPromptConvert(), ProcessInput );
 	    fReadingCommand = TRUE;
@@ -6075,7 +6059,7 @@ extern char *GetInput( char *szPrompt ) {
 #endif
 
 #if HAVE_LIBREADLINE
-    if( fReadline ) {
+    if( fInteractive ) {
 	/* Using readline, but not X. */
 	if( fInterrupt )
 	    return NULL;
@@ -6356,7 +6340,9 @@ extern void outputresume( void ) {
     g_assert( cOutputPostponed );
 
     if( !--cOutputPostponed )
+    {
 	outputx();
+    }
 }
 
 /* Temporarily ignore TTY/GUI input. */
@@ -6584,25 +6570,6 @@ move_rc_files (void)
   g_free (oldfile);
   g_free (newfile);
 
-#if 0
-  {
-    GDir *dir;
-    const char *file;
-    char *gnubgdir = g_build_filename (olddir, ".gnubg", NULL);
-    if ((dir = g_dir_open (gnubgdir, 0, NULL)))
-      {
-	file = g_dir_read_name (dir);
-	while (file != NULL)
-	  {
-	    newfile = g_build_filename (szHomeDirectory, file, NULL);
-	    g_rename (file, newfile);
-	    g_free (newfile);
-	    file = g_dir_read_name (dir);
-	  }
-	g_dir_close (dir);
-      }
-  }
-#endif
 }
 
 /*
@@ -6640,13 +6607,10 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
 
 #if USE_GTK  && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
-#if USE_GTK
     /* NB: It is safe to write to fAction even if it cannot be read
        atomically, because it is only used to hold a binary value. */
     if( fX )
 	fAction = TRUE;
-#endif
-
 }
 #endif
 
@@ -6663,17 +6627,25 @@ static void BearoffProgress( int i ) {
     fflush( stdout );
 }
 
-static void version( void ) {
+static void version(void)
+{
 
-    char *pch;
+	char *pch;
+	printf(_(VERSION_STRING));
+	printf(" %s\n", _(aszCOPYRIGHT));
+	printf(_("GNU Backgammon is free software, covered by the GNU "
+		 "General Public License\n"
+		 "version 2, and you are welcome to change it and/or "
+		 "distribute copies of it\n"
+		 "under certain conditions.  Type \"show copying\" to see "
+		 "the conditions.\n"
+		 "There is absolutely no warranty for GNU Backgammon.  "
+		 "Type \"show warranty\" for\n" "details.\n"));
+        puts("");
 
-	puts(VERSION_STRING);
-	puts("");
-
-    while((pch = GetBuildInfoString()))
-      puts(gettext(pch));
+	while ((pch = GetBuildInfoString()))
+		puts(gettext(pch));
 }
-
 
 static char *
 ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
@@ -6723,625 +6695,496 @@ getInstallDir( void ) {
 	  *p = '\0';
   return strdup(buf);
 }
-
-/* expand any environment variables in str into ret */
-void explode(char* str, char* ret)
-{
-	char *start, *end;
-	if (!str)
-		return;
-	/* Find start of variable */
-	while ((start = strchr(str, '%')))
-	{
-		if (start)
-		{
-			int len;
-			char *ptoken;
-			/* Copy first part of string */
-			len = strlen(ret);
-			strncpy(ret + len, str, start - str);
-			ret[len + start - str] = '\0';
-
-			/* Find end of variable marker */
-			end = strchr(start + 1, '%');
-			if (!end)
-				break;
-			len = ((int)(end - start)) - 1;
-
-			/* Get token and expand */
-			ptoken = (char*)malloc(len + 1);
-			strncpy(ptoken, start + 1, len);
-			ptoken[len] = '\0';
-			explode(getenv(ptoken), ret);
-			free(ptoken);
-
-			str = end + 1;
-		}
-	}
-	strcat(ret, str);
-}
-
-/* Expand (possibly recursive) enviornment variable */
-char* getenvvalue(char* str)
-{
-	static char ret[1024];
-	*ret = '\0';
-	explode(str, ret);
-	if (*ret)
-		return ret;
-	else
-		return NULL;
-}
-
-#endif /* WIN32 */
-
-
-int
-main (int argc, char *argv[])
-{
-
-  char *pch;
-  char *szFile, szTemp[4096];
-  FILE *pf;
-  char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-  int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
-    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY = FALSE, show_version =
-    FALSE;
-
-#ifdef WIN32
-  char szInvokingDirectory[BIG_PATH] = { 0 };	/* current dir when GNUbg was started */
 #endif
-  char szQuoted[BIG_PATH];
+
 #if HAVE_LIBREADLINE
-  char *sz;
+static char *get_readline()
+{
+	char *pchExpanded;
+	char *szInput;
+	char *sz;
+
+	while (!(szInput = readline(FormatPromptConvert()))) {
+		outputc('\n');
+		PromptForExit();
+	}
+#if USE_TIMECONTROL
+	UpdateClockNotify(0);
 #endif
-#if USE_GTK
-  GtkWidget *pwSplash = NULL;
-#endif
-  GOptionEntry ao[] = {
-    {"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff, N_("Do not use bearoff database"), NULL},
-    {"commands", 'c', 0, G_OPTION_ARG_FILENAME, &pchCommands, N_("Evaluate commands in FILE and exit"), "FILE"},
-    {"datadir", 'd', 0, G_OPTION_ARG_FILENAME, &szDataDirectory, N_("Read database and weight files from DIR"), "DIR"},
-    {"lang", 'l', 0, G_OPTION_ARG_STRING, &lang, N_("Set language to LANG"), "LANG"},
-    {"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights, N_("Create new neural net (of size N)"), "N"},
-    {"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript, N_("Evaluate Python code in FILE and exit"), "FILE"},
-    {"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet, N_("Disable sound effects"), NULL},
-    {"no-rc", 'r', 0, G_OPTION_ARG_NONE, &fNoRC, N_("Do not read .gnubgrc and .gnubgautorc commands"), NULL},
-    {"no-splash", 'S', 0, G_OPTION_ARG_NONE, &fNoSplash, N_("Don't show gtk splash screen"), NULL},
-    {"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX, N_("Start on tty instead of using window system"), NULL},
-    {"version", 'v', 0, G_OPTION_ARG_NONE, &show_version, N_("Show version information and exit"), NULL},
-    {"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY, N_("Ignore tty input when using window system"), NULL},
-    {NULL}
-  };
-  GError *error = NULL;
-  GOptionContext *context;
-
-  szHomeDirectory = g_build_filename(g_get_home_dir(), ".gnubg", NULL);
-
-#if WIN32
-
-  /* data directory: initialise to the path where gnubg is installed */
-  szDataDirectory = getInstallDir ();
-
-#endif /* WIN32 */
-  if ( CreateGnubgDirectory () ) {
-          Shutdown();
-          exit( EXIT_FAILURE );
-  }
-
-#if defined(_MSC_VER) && HAVE_LIBXML2
-  xmlMemSetup (free, malloc, realloc, strdup);
+	sz = locale_to_utf8(szInput);
+	free(szInput);
+	fInterrupt = FALSE;
+	history_expand(sz, &pchExpanded);
+	g_free(sz);
+	if (*pchExpanded)
+		add_history(pchExpanded);
+	return pchExpanded;
+}
 #endif
 
-  orgLangCode = g_strdup (setlocale (LC_ALL, ""));
+static char *get_stdin_line()
+{
+	char sz[2048], *pch;
 
-  bindtextdomain (PACKAGE, LOCALEDIR);
-  textdomain (PACKAGE);
-  bind_textdomain_codeset (PACKAGE, GNUBG_CHARSET);
+	sz[0] = 0;
+	Prompt();
 
-  context = g_option_context_new ("[file.sgf]");
-  g_option_context_add_main_entries (context, ao, PACKAGE);
-#if USE_GTK
-  g_option_context_add_group (context, gtk_get_option_group (FALSE));
+	clearerr(stdin);
+
+	/* FIXME shouldn't restart sys calls on signals during this
+	   fgets */
+	fgets(sz, sizeof(sz), stdin);
+
+#if USE_TIMECONTROL
+	UpdateClockNotify(0);
 #endif
-  g_option_context_parse (context, &argc, &argv, &error);
-  g_option_context_free (context);
-
-  if (error)
-    {
-      g_print ("%s\n", error->message);
-      exit (EXIT_FAILURE);
-    }
-
-  /* set language */
-
-  outputoff ();
-
-  if (!lang)
-    {
-      szFile = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
-
-      if ((pf = g_fopen (szFile, "r")))
-	{
-
-	  for (;;)
-	    {
-
-	      szTemp[0] = 0;
-	      fgets (szTemp, sizeof (szTemp), pf);
-
-	      if ((pch = strchr (szTemp, '\n')))
+	if ((pch = strchr(sz, '\n')))
 		*pch = 0;
 
-	      if (ferror (pf))
-		{
-		  outputerr (szFile);
-		  break;
+
+	if (feof(stdin)) {
+		if (!isatty(STDIN_FILENO)) {
+			Shutdown();
+			exit(EXIT_SUCCESS);
 		}
 
-	      if (feof (pf))
-		{
-		  break;
-		}
+		outputc('\n');
 
-	      if (!strncmp ("set lang", szTemp, 8))
-		{
-		  HandleCommand (szTemp, acTop);
-		  break;
-		}
-	    }
-
-	  fclose (pf);
+		if (!sz[0])
+			PromptForExit();
+		return NULL;
 	}
-      outputon ();
-      g_free(szFile);
-    }
-  else
-    SetupLanguage (lang);
 
-  if (show_version)
-    {
-      version ();
-      exit (EXIT_SUCCESS);
-    }
-
-#ifdef WIN32
-  if (szDataDirectory)
-    _getcwd (szInvokingDirectory, _MAX_PATH);
-  _chdir (szDataDirectory);
-#endif
+	fInterrupt = FALSE;
+    return g_strdup(sz);
+}
 
 
-#if USE_GTK
-  if (pchCommands || pchPythonScript || fNoX)
-#if WIN32
-    {
-      MessageBox (NULL,
-		  TEXT (_("You shold use the CLI for running scripts")),
-		  TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
-      exit (EXIT_FAILURE);
-    }
-#else
-    fX = FALSE;
-#endif
-#endif
 
-#if USE_GTK
-  if (fX)
-    fX = InitGTK (&argc, &argv);
-#if !WIN32
-  if (fX && fNoTTY)
-    fTTY = FALSE;
-#endif
-  if (fX)
-    {
-#if WIN32
-      /* The MS Windows port cannot support multiplexed GUI/TTY input;
-         disable the TTY (as if the -w option was specified). */
-      fTTY = FALSE;
-#endif
-      fInteractive = fShowProgress = TRUE;
-#if HAVE_LIBREADLINE
-      fReadline = isatty (STDIN_FILENO);
-#endif
-    }
-  else
-#endif /* USE_GTK */
-    {
-      fInteractive = isatty (STDIN_FILENO);
-      fShowProgress = isatty (STDOUT_FILENO);
-    }
-
-  if (pchPythonScript)
-#if !USE_PYTHON
-    {
-      fprintf (stderr, _("%s: option `-p' requires Python\n"), argv[0]);
-      exit (EXIT_FAILURE);
-    }
-#else
-    fInteractive = FALSE;
-#endif
-
-  if (pchCommands)
-    fInteractive = FALSE;
-
-#if HAVE_LIBREADLINE
-  fReadline = fInteractive;
-#endif
-
-#if HAVE_FSTAT && HAVE_SETVBUF
-  {
-    /* Use line buffering if stdout/stderr are pipes or sockets;
-       Jens Hoefkens points out that buffering causes problems
-       for other processes issuing gnubg commands via IPC. */
-    struct stat st;
-
-    if (!fstat (STDOUT_FILENO, &st) && (S_ISFIFO (st.st_mode)
-#ifdef S_ISSOCK
-					|| S_ISSOCK (st.st_mode)
-#endif
-	))
-      setvbuf (stdout, NULL, _IOLBF, 0);
-
-    if (!fstat (STDERR_FILENO, &st) && (S_ISFIFO (st.st_mode)
-#ifdef S_ISSOCK
-					|| S_ISSOCK (st.st_mode)
-#endif
-	))
-      setvbuf (stderr, NULL, _IOLBF, 0);
-  }
-#endif
-
-#if USE_GTK
-    if( fTTY )
-#endif
-    {
-      printf( _(VERSION_STRING));
-      printf( "%s\n", _(aszCOPYRIGHT));
-      printf( _("GNU Backgammon is free software, covered by the GNU "
-                "General Public License\n"
-                "version 2, and you are welcome to change it and/or "
-                "distribute copies of it\n"
-                "under certain conditions.  Type \"show copying\" to see "
-                "the conditions.\n"
-                "There is absolutely no warranty for GNU Backgammon.  "
-                "Type \"show warranty\" for\n"
-                "details.\n"));
-    }
-
-#if USE_GTK
-    if ( fX && !fNoSplash )
-      pwSplash = CreateSplash ();
-#endif
-
-#if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Initialising"), _("Random number generator"), 500 );
-#endif    
-    
-    if ( ! ( rngctxCurrent = InitRNG( NULL, NULL, TRUE, rngCurrent ) ) ) {
-      printf( _("Failure setting up RNG\n") );
-      exit( EXIT_FAILURE );
-    }
-    if ( ! ( rngctxRollout = InitRNG( &rcRollout.nSeed, NULL, 
-                                      TRUE, rcRollout.rngRollout ) ) ) {
-      printf( _("Failure setting up RNG for rollout.\n" ) );
-      exit( EXIT_FAILURE );
-    }
-
-    /* we don't want rollouts to use the same seed as normal dice (which
-       could happen if InitRNG had to use the current time as a seed) -- mix
-       it up a little bit */
-    rcRollout.nSeed ^= 0x792A584B;
-
-    /* initalize some html export options */
-
-    exsExport.szHTMLPictureURL = strdup ( "html-images/" );
-    exsExport.szHTMLExtension = strdup ( "png" );
-
-    SetMatchDate( &mi );
-    
-    /* init met */
-    
-#if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Initialising"), _("match equity table"), 500 );
-#endif    
-
-    InitMatchEquity ( "met/g11.xml", szDataDirectory );
-    
-#if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Initialising"), _("neural nets"), 500 );
-#endif    
-
-#if USE_MULTITHREAD
-		MT_InitThreads();
-#endif
-
-    if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
-			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			      fNoBearoff,
-			      szDataDirectory, nNewWeights,
-			      fShowProgress ? BearoffProgress : NULL ) ) < 0 )
-	exit( EXIT_FAILURE );
-    else if( n > 0 && !nNewWeights ) {
-      outputl( _("WARNING: No neural net weights were found.  "
-                 "GNU Backgammon will create an\n"
-		 "initial random network, but this will be unsuitable for "
-		 "use until training\n"
-		 "is complete.  Please consult the manual for information "
-		 "about training, or\n"
-		 "directions for obtaining a pre-trained network.") );
-	outputx();
-    }
-
-    /* extra bearoff databases */
-
-    /* Hugh Sconyers 15x15 bearoff database */
-
-    if ( fSconyers15x15Disk )
-      pbc15x15 = BearoffInit( NULL, szPathSconyers15x15Disk, 
-                              BO_SCONYERS_15x15 | BO_ON_DISK, NULL );
-
-    if( fSconyers15x15DVD )
-      pbc15x15_dvd = BearoffInit( NULL, szPathSconyers15x15DVD, 
-                                  BO_SCONYERS_15x15 | BO_ON_DVDS, 
-                                  (void (*)())ChangeDisk );
-
-#ifdef WIN32
-#if HAVE_SOCKETS
-
-#if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Initialising"), _("Windows sockets"), 500 );
-#endif /* USE_GTK */
-
-    /* init Winsock */
-    {
-	short wVersionRequested;
-	WSADATA wsaData;
-	wVersionRequested = MAKEWORD (1, 1);
-	if (WSAStartup (wVersionRequested, &wsaData) != 0) {
-	    outputerr( "Windows sockets initialisation" );
-	}
-    }
-
-#endif /* HAVE_SOCKETS */
-#endif /* WIN32 */
-
-#if USE_PYTHON
-#  if USE_GTK
-    PushSplash( pwSplash,
-                _("Initialising"), _("Python"), 500 );
-#  endif
-    PythonInitialise( szDataDirectory );
-#endif
-
-#if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Initialising"), _("Board Images"), 500 );
-#endif    
-
-    RenderInitialise();
-
-    strcpy( ap[ 1 ].szName, g_get_user_name() );
-    
-    ListCreate( &lMatch );
-    IniStatcontext( &scMatch );
-    
-    /* setup readline */
-    
-#if USE_GTK
-    if( fTTY )
-#endif
-	if( fInteractive ) {
-	    PortableSignal( SIGINT, HandleInterrupt, &shInterruptOld, FALSE );
-	    
-#if HAVE_LIBREADLINE
-	    rl_readline_name = "gnubg";
-	    rl_basic_word_break_characters = rl_filename_quote_characters =
-		szCommandSeparators;
-	    rl_completer_quote_characters = "\"'";
-	    /* assume readline 4.2 or later */
-	    rl_completion_entry_function = NullGenerator;
-	    rl_attempted_completion_function = CompleteKeyword;
-            /* setup history */
-            {
-              char *temp = g_build_filename( szHomeDirectory, "history", NULL );
-              char *pch;
-              int i;
-              read_history( temp );
-              g_free(temp);
-              using_history();
-              if ( ( pch = getenv( "HISTSIZE" ) ) &&
-                   ( ( i = atoi( pch ) ) > 0 ) )
-                stifle_history( i );
-
-            }
-#endif
-	}
-    
-#if defined(SIGIO) && USE_GTK
-    if( fX )
-	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
-#endif
-
-    fnTick = CallbackProgress;
-    
-
-    /* load rc files */
-
-#if USE_GTK
-    PushSplash ( pwSplash, 
-                 _("Loading"), _("User Settings"), 500 );
-#endif    
-    if( !fNoRC )
-	LoadRCFiles();
-
-#if USE_TIMECONTROL
-    SetDefaultTC();
-#endif
-#if USE_BOARD3D
+static void run_cl()
 {
-    if (fX) {
-	BoardData* bd = BOARD(pwBoard)->board_data;
-	/* If using 3d board initilize 3d widget */
-	if (bd->rd->fDisplayType == DT_3D)
-		Init3d();
-	/* If no 3d settings loaded, set appearance to first design */
-	Default3dSettings(bd);
-    }
+	char *line;
+	for (;;) {
+#if HAVE_LIBREADLINE
+		if (fInteractive) {
+			line = get_readline();
+			HandleCommand(line, acTop);
+			free(line);
+		} else
+#endif
+		{
+			line = get_stdin_line();
+			HandleCommand(line, acTop);
+			g_free(line);
+		}
+		while (fNextTurn)
+			NextTurn(TRUE);
+		ResetInterrupt();
+	}
+}
+static void init_language(char *lang)
+{
+	char *szFile, szTemp[4096];
+	char *pch;
+	FILE *pf;
+
+
+	if (lang) {
+		SetupLanguage(lang);
+		return;
+	}
+
+	outputoff();
+	szFile = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
+
+	if ((pf = g_fopen(szFile, "r"))) {
+
+		for (;;) {
+
+			szTemp[0] = 0;
+			fgets(szTemp, sizeof(szTemp), pf);
+
+			if ((pch = strchr(szTemp, '\n')))
+				*pch = 0;
+
+			if (ferror(pf)) {
+				outputerr(szFile);
+				break;
+			}
+
+			if (feof(pf)) {
+				break;
+			}
+
+			if (!strncmp("set lang", szTemp, 8)) {
+				HandleCommand(szTemp, acTop);
+				break;
+			}
+		}
+
+		fclose(pf);
+	}
+	outputon();
+	g_free(szFile);
+}
+
+static void setup_readline()
+{
+#if HAVE_LIBREADLINE
+	gnubg_histfile = g_build_filename(szHomeDirectory, "history", NULL);
+	char *pch;
+	int i;
+	rl_readline_name = "gnubg";
+	rl_basic_word_break_characters =
+	    rl_filename_quote_characters = szCommandSeparators;
+	rl_completer_quote_characters = "\"'";
+	/* assume readline 4.2 or later */
+	rl_completion_entry_function = NullGenerator;
+	rl_attempted_completion_function = CompleteKeyword;
+	/* setup history */
+	read_history(gnubg_histfile);
+	using_history();
+	if ((pch = getenv("HISTSIZE")) && ((i = atoi(pch)) > 0))
+		stifle_history(i);
+#endif
+}
+
+#ifndef USE_GTK
+static void PushSplash(char *unused, char *heading, char *message)
+{
 }
 #endif
 
-#if USE_GTK
-      PushSplash ( pwSplash, 
-                   _("Doing"), _("nothing in particular"), 0 );
-#endif    
 
-    if( fQuiet )
-	fSound = FALSE;
-    
-#ifdef WIN32
-    /* change back to directory where GNUbg was started from
-     * in case the match filename comes without an absolute
-     * path
-     */
-    if( szInvokingDirectory && *szInvokingDirectory )
-        _chdir( szInvokingDirectory );
-#endif
+static void init_nets(int nNewWeights, int fNoBearoff)
+{
+	int n;
 
-    if( argc>1 && *argv[ 1 ] ) {
-#if USE_GTK
-      PushSplash ( pwSplash, 
-                   _("Loading"), _("Specified Match"), 500 );
-#endif    
-	if( strcspn( argv[ 1 ], " \t\n\r\v\f" ) ) {
-	    /* quote filename with whitespace so that function
-	     * NextToken in CommandLoadCommands doesn't split it
-         */
-	    sprintf( szQuoted, "'%s'", argv[ 1 ] );
-	    CommandLoadMatch( szQuoted );
+	n = EvalInitialise(nNewWeights ? NULL : GNUBG_WEIGHTS,
+			   nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
+			   fNoBearoff, szDataDirectory, nNewWeights,
+			   fShowProgress ? BearoffProgress : NULL);
+
+	if (n < 0)
+		exit(EXIT_FAILURE);
+	if (n > 0 && !nNewWeights) {
+		outputl(_("WARNING: No neural net weights were found.  "
+			  "GNU Backgammon will create an\n"
+			  "initial random network, but this will be unsuitable for "
+			  "use until training\n"
+			  "is complete.  Please consult the manual for information "
+			  "about training, or\n"
+			  "directions for obtaining a pre-trained network."));
+		outputx();
 	}
-	else
-	    CommandLoadMatch( argv[ 1 ] );
-    }
+}
 
+static void init_rng()
+{
+	if (!(rngctxCurrent = InitRNG(NULL, NULL, TRUE, rngCurrent))) {
+		printf(_("Failure setting up RNG\n"));
+		exit(EXIT_FAILURE);
+	}
+	if (!(rngctxRollout = InitRNG(&rcRollout.nSeed, NULL,
+				      TRUE, rcRollout.rngRollout))) {
+		printf(_("Failure setting up RNG for rollout.\n"));
+		exit(EXIT_FAILURE);
+	}
+
+	/* we don't want rollouts to use the same seed as normal dice (which
+	   could happen if InitRNG had to use the current time as a seed) -- mix
+	   it up a little bit */
+	rcRollout.nSeed ^= 0x792A584B;
+}
+
+#if defined(WIN32) && HAVE_SOCKETS
+static void init_winsock()
+{
+		short wVersionRequested;
+		WSADATA wsaData;
+		wVersionRequested = MAKEWORD(1, 1);
+		if (WSAStartup(wVersionRequested, &wsaData) != 0) {
+			outputerr("Windows sockets initialisation");
+		}
+}
+#endif
+
+static char *matchfile_from_argv(char *sz)
+{
+	char *pchMatch;
 #ifdef WIN32
-    if( szDataDirectory && *szDataDirectory )
-        _chdir( szDataDirectory );
+	if (g_path_is_absolute(sz))
+		pchMatch = g_strdup_printf("'%s'", sz);
+	else {
+		char *tmp =
+		    g_build_filename(g_get_current_dir(), sz, NULL);
+		pchMatch = g_strdup_printf("'%s'", tmp);
+		g_free(tmp);
+	}
+#else
+	pchMatch = g_strdup_printf("'%s'", sz);
 #endif
+	return pchMatch;
+}
 
-    fflush( stdout );
-    fflush( stderr );
-
-    if( pchCommands ) {
-#if USE_GTK
-        DestroySplash ( pwSplash );
+static void init_linebuffering()
+{
+#if HAVE_FSTAT && HAVE_SETVBUF
+	/* Use line buffering if stdout/stderr are pipes or sockets;
+	   Jens Hoefkens points out that buffering causes problems
+	   for other processes issuing gnubg commands via IPC. */
+#if !defined(S_ISSOCK)
+#define S_ISSOCK FALSE
 #endif
-	CommandLoadCommands( pchCommands );
-        Shutdown();
-	exit( EXIT_SUCCESS );
-    }
+	struct stat st;
 
-#if USE_PYTHON
-    if( pchPythonScript ) {
-      FILE *pf = fopen( pchPythonScript, "r" );
-      if ( ! pf ) {
-        outputerr( pchPythonScript );
-        Shutdown();
-        exit( EXIT_FAILURE );
-      }
-      PyRun_AnyFile( pf, pchPythonScript );
-      Shutdown();
-      exit( EXIT_SUCCESS );
-    }
-#endif /* USE_PYTHON */
-
-    /* start-up sound */
-    playSound ( SOUND_START );
-    
-#if USE_GTK
-    if( fX ) {
-      
-	RunGTK( pwSplash );
-
-	Shutdown();
-	gtk_exit ( EXIT_SUCCESS );
-    }
+	if (!fstat(STDOUT_FILENO, &st)
+	    && (S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode)))
+		setvbuf(stdout, NULL, _IOLBF, 0);
+	if (!fstat(STDERR_FILENO, &st)
+	    && (S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode)))
+		setvbuf(stderr, NULL, _IOLBF, 0);
 #endif
-    
-    for(;;) {
-#if HAVE_LIBREADLINE
-	if( fReadline ) {
+}
 
-          char *pchExpanded;
-          char *szInput;
+static void init_defaults()
+{
+	/* init some html export options */
 
-	    while( !( szInput = readline( FormatPromptConvert() ) ) ) {
-		outputc( '\n' );
-		PromptForExit();
-	    }
-            sz = locale_to_utf8(szInput);
-            free(szInput);
+	exsExport.szHTMLPictureURL = strdup("html-images/");
+	exsExport.szHTMLExtension = strdup("png");
 
-	    fInterrupt = FALSE;
+	SetMatchDate(&mi);
 
-            history_expand( sz, &pchExpanded );
-	    
-	    if( *pchExpanded )
-		add_history( pchExpanded );
-	    
-	    HandleCommand( pchExpanded, acTop );
-	    
-            free( pchExpanded );
-	    g_free( sz );
-	} else
-#endif
-	    {
-		char sz[ 2048 ], *pch;
-	
-		sz[ 0 ] = 0;
-		Prompt();
-		
-		clearerr( stdin );		    
+	strcpy(ap[1].szName, g_get_user_name());
 
-		/* FIXME shouldn't restart sys calls on signals during this
-		   fgets */
-		fgets( sz, sizeof( sz ), stdin );
+	ListCreate(&lMatch);
+	IniStatcontext(&scMatch);
+
+	szHomeDirectory =
+	    g_build_filename(g_get_home_dir(), ".gnubg", NULL);
 
 #if USE_TIMECONTROL
-		UpdateClockNotify(0);
+	SetDefaultTC();
 #endif
-		if( ( pch = strchr( sz, '\n' ) ) )
-		    *pch = 0;
-		
-		
-		if( feof( stdin ) ) {
-		    if( !isatty( STDIN_FILENO ) ) {
-                        Shutdown();
-			exit( EXIT_SUCCESS );
-                    }
-		    
-		    outputc( '\n' );
-		    
-		    if( !sz[ 0 ] )
-			PromptForExit();
-		    
-		    continue;
-		}	
-		
-		fInterrupt = FALSE;
-	
-		HandleCommand( sz, acTop );
-	    }
+}
 
-	while( fNextTurn )
-	    NextTurn( TRUE );
-	ResetInterrupt();
-    }
-    return EXIT_FAILURE;
+static void init_sconyers()
+{
+	/* Hugh Sconyers 15x15 bearoff database */
+	if (fSconyers15x15Disk)
+		pbc15x15 = BearoffInit(NULL, szPathSconyers15x15Disk,
+				       BO_SCONYERS_15x15 | BO_ON_DISK,
+				       NULL);
+	if (fSconyers15x15DVD)
+		pbc15x15_dvd = BearoffInit(NULL, szPathSconyers15x15DVD,
+					   BO_SCONYERS_15x15 | BO_ON_DVDS,
+					   (void (*)()) ChangeDisk);
+}
+
+int main(int argc, char *argv[])
+{
+#if USE_GTK
+	GtkWidget *pwSplash = NULL;
+#else
+        char *pwSplash = NULL
+#endif
+	char *pchMatch = NULL;
+
+	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
+	int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
+	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
+	    FALSE, show_version = FALSE;
+
+	GOptionEntry ao[] = {
+		{"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff,
+		 N_("Do not use bearoff database"), NULL},
+		{"commands", 'c', 0, G_OPTION_ARG_FILENAME, &pchCommands,
+		 N_("Evaluate commands in FILE and exit"), "FILE"},
+		{"datadir", 'd', 0, G_OPTION_ARG_FILENAME,
+		 &szDataDirectory,
+		 N_("Read database and weight files from DIR"), "DIR"},
+		{"lang", 'l', 0, G_OPTION_ARG_STRING, &lang,
+		 N_("Set language to LANG"), "LANG"},
+		{"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights,
+		 N_("Create new neural net (of size N)"), "N"},
+		{"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript,
+		 N_("Evaluate Python code in FILE and exit"), "FILE"},
+		{"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet,
+		 N_("Disable sound effects"), NULL},
+		{"no-rc", 'r', 0, G_OPTION_ARG_NONE, &fNoRC,
+		 N_("Do not read .gnubgrc and .gnubgautorc commands"),
+		 NULL},
+		{"no-splash", 'S', 0, G_OPTION_ARG_NONE, &fNoSplash,
+		 N_("Don't show gtk splash screen"), NULL},
+		{"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX,
+		 N_("Start on tty instead of using window system"), NULL},
+		{"version", 'v', 0, G_OPTION_ARG_NONE, &show_version,
+		 N_("Show version information and exit"), NULL},
+		{"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY,
+		 N_("Ignore tty input when using window system"), NULL},
+		{NULL}
+	};
+	GError *error = NULL;
+	GOptionContext *context;
+
+        
+
+	/* set language */
+	orgLangCode = g_strdup(setlocale(LC_ALL, ""));
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
+	bind_textdomain_codeset(PACKAGE, GNUBG_CHARSET);
+	init_language(lang);
+
+        /* parse command line options*/
+	context = g_option_context_new("[file.sgf]");
+	g_option_context_add_main_entries(context, ao, PACKAGE);
+#if USE_GTK
+	g_option_context_add_group(context, gtk_get_option_group(FALSE));
+#endif
+	g_option_context_parse(context, &argc, &argv, &error);
+	g_option_context_free(context);
+	if (error) {
+		outputerrf("%s\n", error->message);
+		exit(EXIT_FAILURE);
+	}
+	if (argc > 1 && *argv[1])
+		pchMatch = matchfile_from_argv(argv[1]);
+
+#ifdef WIN32
+	/* data directory: initialise to the path where gnubg is installed */
+	szDataDirectory = getInstallDir();
+	_chdir(szDataDirectory);
+#if defined(_MSC_VER) && HAVE_LIBXML2
+	xmlMemSetup(free, malloc, realloc, strdup);
+#endif
+#endif
+
+       /* print version and exit if -v option given */
+        version();
+	if (show_version)
+		exit(EXIT_SUCCESS);
+
+        /* -q option given */
+	if (fQuiet)
+		fSound = FALSE;
+
+        init_defaults();
+	if (CreateGnubgDirectory())
+		exit(EXIT_FAILURE);
+
+#if WIN32
+        fNoTTY = TRUE;
+#endif
+#if USE_GTK
+        /* fX is set to TRUE in InitGTK */
+        fX = FALSE;
+        /* -t option not given*/
+	if (!fNoX)
+		InitGTK(&argc, &argv);
+        if (fX)
+        {
+                fTTY = !fNoTTY;
+                fInteractive = fShowProgress = TRUE;
+                if (!fNoSplash)
+                        pwSplash = CreateSplash();
+#if defined(SIGIO)
+                PortableSignal(SIGIO, HandleIO, NULL, TRUE);
+#endif
+	} else
+#endif
+	{
+		fInteractive = isatty(STDIN_FILENO);
+		fShowProgress = isatty(STDOUT_FILENO);
+	}
+
+        if (fInteractive) {
+                PortableSignal(SIGINT, HandleInterrupt,
+                                &shInterruptOld, FALSE);
+                setup_readline();
+        }
+#if HAVE_FSTAT && HAVE_SETVBUF
+        init_linebuffering();
+#endif
+	fnTick = CallbackProgress;
+
+	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 500);
+        init_rng();
+
+	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 500);
+	InitMatchEquity("met/g11.xml", szDataDirectory);
+
+#ifdef USE_MULTITHREAD
+	PushSplash(pwSplash, _("Initialising"), _("threads"), 500);
+	MT_InitThreads();
+#endif
+        /* init nets */
+	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 500);
+        init_nets(nNewWeights, fNoBearoff);
+
+#if defined(WIN32) && HAVE_SOCKETS
+	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 500);
+        init_winsock();
+#endif
+
+#if USE_PYTHON
+	PushSplash(pwSplash, _("Initialising"), _("Python"), 500);
+	PythonInitialise(szDataDirectory);
+#endif
+
+	PushSplash(pwSplash, _("Initialising"), _("Board Images"), 500);
+	RenderInitialise();
+
+        /* -r option given */
+        if (!fNoRC)
+        {
+                PushSplash(pwSplash, _("Loading"), _("User Settings"), 500);
+                LoadRCFiles();
+        }
+
+	if (pchMatch) {
+		PushSplash(pwSplash,
+			   _("Loading"), _("Specified Match"), 500);
+			CommandLoadMatch(pchMatch);
+	}
+
+	fflush(stdout);
+	fflush(stderr);
+	/* start-up sound */
+	playSound(SOUND_START);
+
+
+#if USE_GTK
+	if (fX)
+        {
+		RunGTK(pwSplash, pchCommands, pchPythonScript, pchMatch);
+                Shutdown();
+                exit(EXIT_SUCCESS);
+        }
+#endif
+        /* -c option given */
+	if (pchCommands) {
+		fInteractive = FALSE;
+		CommandLoadCommands(pchCommands);
+		Shutdown();
+		exit(EXIT_SUCCESS);
+	}
+
+        /* -p option given */
+	if (pchPythonScript) {
+#if USE_PYTHON
+		fInteractive = FALSE;
+		CommandLoadPython(pchPythonScript);
+		Shutdown();
+		exit(EXIT_SUCCESS);
+#else
+		outputerrf(_("GNU Backgammon build without Python.\n"));
+		exit(EXIT_FAILURE);
+#endif				/* USE_PYTHON */
+	}
+	run_cl();
+	return (EXIT_FAILURE);
 }
 
 

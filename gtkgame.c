@@ -434,16 +434,14 @@ static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     char sz[ 2048 ], *pch;
     
 #if HAVE_LIBREADLINE
-    if( fReadline ) {
-	/* Handle "next turn" processing before more input (otherwise we might
-	   not even have a readline handler installed!) */
-	while( nNextTurn )
-	    NextTurnNotify( NULL );
-	
-	rl_callback_read_char();
+    /* Handle "next turn" processing before more input (otherwise we might
+       not even have a readline handler installed!) */
+    while( nNextTurn )
+            NextTurnNotify( NULL );
 
-	return;
-    }
+    rl_callback_read_char();
+
+    return;
 #endif
 
     while( nNextTurn )
@@ -2167,7 +2165,7 @@ void CreateMainWindow()
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 }
 
-extern int InitGTK( int *argc, char ***argv )
+extern void InitGTK( int *argc, char ***argv )
 {
     int anBoardTemp[ 2 ][ 25 ];
     int i;
@@ -2179,13 +2177,14 @@ extern int InitGTK( int *argc, char ***argv )
     gtk_rc_add_default_file( sz );
     gtk_rc_add_default_file( "gnubg.gtkrc" );
     g_free(sz);
-    
-    if( !gtk_init_check( argc, argv ) )
-	return FALSE;
+
+    fX = gtk_init_check( argc, argv ); 
+    if(!fX)
+	return;
 
 #if USE_BOARD3D
 	/* Initialize openGL widget library */
-	InitGTK3d(argc, argv);
+    InitGTK3d(argc, argv);
 #endif
 
     fnAction = HandleXAction;
@@ -2241,14 +2240,34 @@ extern int InitGTK( int *argc, char ***argv )
 		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
 	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, 0, 0, FALSE, anChequers[ms.bgv]);
 
-    return TRUE;
+#if USE_BOARD3D
+    BoardData *bd = BOARD(pwBoard)->board_data;
+    /* If using 3d board initilize 3d widget */
+    if (bd->rd->fDisplayType == DT_3D)
+            Init3d();
+    /* If no 3d settings loaded, set appearance to first design */
+    Default3dSettings(bd);
+#endif
+}
+
+static gint python_run_file (gpointer file)
+{ 
+        g_assert(file);
+	char *pch;
+        pch = g_strdup_printf(">import sys;"
+		   "sys.argv=['','-n', '%s'];"
+		   "import idlelib.PyShell;" "idlelib.PyShell.main()", (char *)file);
+	UserCommand(pch);
+	g_free(pch);
+        g_free(file);
+        return FALSE;
 }
 
 enum {RE_NONE, RE_LANGUAGE_CHANGE};
 
 int reasonExited;
 
-extern void RunGTK( GtkWidget *pwSplash )
+extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, char *match )
 {
 	do
 	{
@@ -2267,13 +2286,12 @@ extern void RunGTK( GtkWidget *pwSplash )
 	    
 		if( fTTY ) {
 #if HAVE_LIBREADLINE
-		if( fReadline ) {
 			fReadingCommand = TRUE;
 			rl_callback_handler_install( FormatPrompt(), ProcessInput );
 			atexit( rl_callback_handler_remove );
-		} else
-#endif
+#else
 			Prompt();
+#endif
 		}
 
 		/* Show everything */
@@ -2324,6 +2342,31 @@ extern void RunGTK( GtkWidget *pwSplash )
 			FullScreenMode(TRUE);
 			warningEnabled[WARN_FULLSCREEN_EXIT] = temp;
 		}
+
+                if (match)
+                {
+                        CommandLoadMatch(match);
+                        g_free(match);
+                        match = NULL;
+                }
+
+                if (commands)
+                {
+                        CommandLoadCommands(commands);
+                        g_free(commands);
+                        commands = NULL;
+                }
+
+                if (python_script)
+                {
+#ifdef WIN32
+                        outputerrf(_("The windows gtk interface doesn't support the '-p' option. Use the cl interface instead"));
+#else
+                        g_idle_add( python_run_file, g_strdup(python_script) );
+#endif
+                        g_free(python_script);
+                        python_script = NULL;
+                }
 
 		gtk_main();
 
