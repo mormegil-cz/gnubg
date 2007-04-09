@@ -4028,7 +4028,7 @@ extern void PromptForExit( void ) {
 #endif
 
 #if HAVE_LIBREADLINE
-        write_history( gnubg_hist_file );
+        write_history( gnubg_histfile );
 #endif /* HAVE_READLINE */
 
 #if USE_GTK
