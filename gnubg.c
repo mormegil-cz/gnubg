@@ -6850,7 +6850,7 @@ static void setup_readline()
 }
 
 #ifndef USE_GTK
-static void PushSplash(char *unused, char *heading, char *message)
+static void PushSplash(char *unused, char *heading, char *message, int wait)
 {
 }
 #endif
@@ -6987,7 +6987,7 @@ int main(int argc, char *argv[])
 #if USE_GTK
 	GtkWidget *pwSplash = NULL;
 #else
-        char *pwSplash = NULL
+        char *pwSplash = NULL;
 #endif
 	char *pchMatch = NULL;
 
