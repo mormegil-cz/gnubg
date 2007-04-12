@@ -2359,7 +2359,7 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	if (!WritePNG(szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize))
 		g_print("WritePNG failed!\n");
 
-	gdk_pixmap_unref(ppm);
+	g_object_unref(ppm);
 	free(puch);
 }
 
