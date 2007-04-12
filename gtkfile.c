@@ -74,12 +74,12 @@ FileFormat file_format[] = {
 gint n_file_formats = G_N_ELEMENTS(file_format);
 
 static char *
-GetFilename (void)
+GetFilename (int CheckForCurrent)
 {
   char *sz, tstr[15];
   time_t t;
 
-  if (szCurrentFileName && *szCurrentFileName)
+  if (CheckForCurrent && szCurrentFileName && *szCurrentFileName)
     sz = g_strdup_printf ("%s.sgf", szCurrentFileName);
   else
     {
@@ -256,7 +256,7 @@ SaveCommon (guint f, gchar * prompt)
   static gint last_export_type = 0;
   static gchar *last_save_folder = NULL;
   static gchar *last_export_folder = NULL;
-  gchar *fn = GetFilename ();
+  gchar *fn = GetFilename (TRUE);
   gchar *folder = NULL;
 
   if (f == 1)
@@ -817,4 +817,74 @@ extern void
 GTKSave (gpointer * p, guint n, GtkWidget * pw)
 {
   SaveCommon (1, _("Save in native gnubg .sgf format"));
+}
+
+static void
+BatchAnalyse( gpointer elem, gpointer user_data){
+
+	gchar *fn, *sg, *cmd = NULL;
+	gchar *filename = (gchar *) elem;
+	FilePreviewData *fdp = ReadFilePreview(filename);
+
+	if ( !fdp->format || !fdp ){
+		g_printf("%s \t\tUnknown format... skipping\n", filename );
+		free(fdp);
+		return;
+	}
+	
+	if (fdp->format == &file_format[0])	{
+		cmd = g_strdup_printf ("load match \"%s\"", filename);
+	}
+	else
+	{
+		cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, filename);
+	}
+	if (cmd){
+		char *fn = GetFilename(FALSE);	
+		gchar *savecmd = g_strdup_printf("save match \"%s\"", fn);
+	   UserCommand (cmd);
+       g_printf("Analysing file: %s ... \n", filename );
+	   UserCommand ("analyse match");
+	   UserCommand(savecmd);
+	   g_free(fn);
+	   g_free(savecmd);
+	}
+
+	g_free(cmd);
+	g_free(filename);
+		
+    free(fdp);
+	return;
+}
+
+extern void
+GTKBatchAnalyse( gpointer *p, guint n, GtkWidget *pw)
+{
+	/* FIXME : What happens if fConfirm is TRUE? Will it ask for
+	 *    confirmation for each match?
+	 * What about the sound? Can we temporary set the analysisfinished
+	 *    sound to None? Not really nice, though....
+	 * What happens if someone cancels the analysis... ?
+	 *
+	 * Anyone? */
+
+	/* FIXME : Should use GnuBGFileDialog ? */
+	GtkWidget *fc = gtk_file_chooser_dialog_new( _("Select files to analyse"), NULL,
+					GTK_FILE_CHOOSER_ACTION_OPEN,
+                    _("Analyse selected files"),
+                    GTK_RESPONSE_ACCEPT,
+					GTK_STOCK_CANCEL,
+					GTK_RESPONSE_CANCEL,
+		   			NULL );
+
+	gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER(fc), TRUE);
+
+	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT){
+    	GSList *filenames = gtk_file_chooser_get_filenames (GTK_FILE_CHOOSER (fc));
+		
+		gtk_widget_hide (fc);
+		g_slist_foreach( filenames, BatchAnalyse, NULL);
+		g_slist_free(filenames);
+	}
+	gtk_widget_destroy (fc);
 }

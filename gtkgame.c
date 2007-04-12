@@ -1907,6 +1907,9 @@ GtkItemFactoryEntry aife[] = {
           NULL, Command, CMD_ANALYSE_MATCH, NULL },
 	{ N_("/_Analyse/Analyse session"), 
           NULL, Command, CMD_ANALYSE_SESSION, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
         { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>" },
         { N_("/_Analyse/Clear analysis/Move"), 
           NULL, Command, CMD_ANALYSE_CLEAR_MOVE, 
@@ -5951,7 +5954,7 @@ static void AddTitle(GtkWidget* pwBox, char* Title)
 	pango_font_description_set_family_static( ps->font_desc, "serif" );
 	pango_font_description_set_size( ps->font_desc, 16 * PANGO_SCALE );    
 	gtk_widget_modify_style( pwTitle, ps );
-	gtk_rc_style_unref( ps );
+	g_object_unref( ps );
 
 	gtk_box_pack_start(GTK_BOX(pwHBox), pwTitle, TRUE, FALSE, 0);
 }
@@ -6496,6 +6499,9 @@ extern void GTKSet( void *p ) {
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
 			 ms.gs == GAME_PLAYING );
+
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget( pif,
+                              "/Analyse/Batch analyse..." ), TRUE );
 
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
             pif, CMD_ANALYSE_MOVE ), 
