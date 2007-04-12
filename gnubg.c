@@ -4892,18 +4892,22 @@ extern void CommandCopy (char *sz)
 
 static void LoadRCFiles(void)
 {
-	char *sz;
+	char *sz, *szz;
 
 	outputoff();
 	sz = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
+	szz = g_strdup_printf("'%s'", sz);
 	if (g_file_test(sz, G_FILE_TEST_EXISTS))
-		CommandLoadCommands(sz);
+		CommandLoadCommands(szz);
 	g_free(sz);
+	g_free(szz);
 
 	sz = g_build_filename(szHomeDirectory, "gnubgrc", NULL);
+	szz = g_strdup_printf("'%s'", sz);
 	if (g_file_test(sz, G_FILE_TEST_EXISTS))
-		CommandLoadCommands(sz);
+		CommandLoadCommands(szz);
 	g_free(sz);
+	g_free(szz);
 
 	outputon();
 }
@@ -6992,7 +6996,7 @@ int main(int argc, char *argv[])
 	char *pchMatch = NULL;
 
 	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-	int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
+	int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
 	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE;
 
@@ -7104,9 +7108,7 @@ int main(int argc, char *argv[])
                                 &shInterruptOld, FALSE);
                 setup_readline();
         }
-#if HAVE_FSTAT && HAVE_SETVBUF
         init_linebuffering();
-#endif
 	fnTick = CallbackProgress;
 
 	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 500);
@@ -7119,9 +7121,9 @@ int main(int argc, char *argv[])
 	PushSplash(pwSplash, _("Initialising"), _("threads"), 500);
 	MT_InitThreads();
 #endif
-        /* init nets */
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 500);
         init_nets(nNewWeights, fNoBearoff);
+        init_sconyers();
 
 #if defined(WIN32) && HAVE_SOCKETS
 	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 500);

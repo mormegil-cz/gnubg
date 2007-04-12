@@ -1,3 +1,7 @@
+Thu Apr 12 16:57:39 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: init_sconyers unused, protect spaces in LoadRC
+
 Tue Apr 10 00:41:03 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, configure.in, gnubg.c, gnubgmodule.c, gtkgame.c,
