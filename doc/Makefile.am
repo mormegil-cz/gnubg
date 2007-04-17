@@ -1,4 +1,4 @@
-gnubg_helpdir = $(pkgdatadir)/doc
+gnubg_helpdir = $(DESTDIR)$(pkgdatadir)/doc
 gnubg_help_DATA =  gnubg.html
 
 man_MANS = gnubg.6

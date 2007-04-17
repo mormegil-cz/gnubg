@@ -1,3 +1,7 @@
+Tue Apr 17 09:08:36 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* doc/Makefile.am: DESTDIR support
+
 Thu Apr 12 20:43:03 2007 Øystein Johansen <oystein@gnubg.org>
 
 	* gtkfile.[ch], gtkgame.c: New feature: Batch analysis (still buggy)
