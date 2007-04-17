@@ -1,3 +1,7 @@
+Tue Apr 17 09:13:43 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: swap r ratings when swapping players
+
 Tue Apr 17 09:08:36 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* doc/Makefile.am: DESTDIR support

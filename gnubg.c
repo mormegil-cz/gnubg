@@ -7368,6 +7368,12 @@ extern void CommandSwapPlayers ( char *sz ) {
   strcpy ( ap[ 1 ].szName, pc );
   free ( pc );
 
+  /* swap player ratings */
+
+  pc = mi.pchRating[ 0 ];
+  mi.pchRating[ 0 ] = mi.pchRating[ 1 ];
+  mi.pchRating[ 1 ] = pc;
+
   /* swap current matchstate */
 
   if ( ms.fTurn > -1 )
