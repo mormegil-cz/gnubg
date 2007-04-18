@@ -775,7 +775,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			gtk_label_new( _("Default match length:") ),
 			FALSE, FALSE, 0);
 
-    pow->padjLength = GTK_ADJUSTMENT( gtk_adjustment_new (nDefaultLength, 1,
+    pow->padjLength = GTK_ADJUSTMENT( gtk_adjustment_new (nDefaultLength, 0,
 							  99, 1, 1, 1 ) );
     pw = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjLength),
 			      1, 0);

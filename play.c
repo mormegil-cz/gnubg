@@ -3253,9 +3253,8 @@ extern void CommandNewMatch( char *sz ) {
 	n = ParseNumber( &sz );
 
     if( n == 0 ) {
-	outputl( _("You must specify a valid match length (1 or longer).") );
-
-	return;
+        CommandNewSession(NULL);
+        return;
     }
 
     /* Check that match equity table is large enough */

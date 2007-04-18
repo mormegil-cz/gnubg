@@ -31,6 +31,7 @@
 #endif
 #include <glib/gi18n.h>
 #include "multithread.h"
+#include <stdlib.h>
 
 #define EVALS_PER_ITERATION 1024
 

@@ -203,6 +203,7 @@ extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
 extern void GtkChangeLanguage();
 extern void OK( GtkWidget *pw, int *pf );
+extern int edit_new(int length);
 
 #if USE_BOARD3D
 extern void SetSwitchModeMenuText();

@@ -169,23 +169,29 @@ ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
 
 }
 
+extern void click_edit()
+{
+        toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+        gtk_button_clicked( GTK_BUTTON( ptw->pwEdit ));
+}
 
 int editing = FALSE;
 
-static void
-ToolbarToggleEdit( GtkWidget *pw, toolbarwidget *ptw ) {
+static void ToolbarToggleEdit(GtkWidget * pw, toolbarwidget * ptw)
+{
 
-  BoardData *pbd = BOARD( pwBoard )->board_data;
+	BoardData *pbd = BOARD(pwBoard)->board_data;
 
-  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( ptw->pwEdit ) ))
-  { /* Undo any partial move that may have been made when entering edit mode */
-    Undo();
-    editing = TRUE;
-  }
-  else
-    editing = FALSE;
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ptw->pwEdit))) {
+		editing = TRUE;
+		if (ms.gs == GAME_NONE)
+                        edit_new(nDefaultLength);
+		/* Undo any partial move that may have been made when entering edit mode */
+		Undo();
+	} else
+		editing = FALSE;
 
-  board_edit( pbd );
+	board_edit(pbd);
 }
 
 extern int

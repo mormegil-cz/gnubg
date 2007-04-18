@@ -3257,12 +3257,6 @@ extern void CommandSetMatchLength( char *sz ) {
 
     unsigned int n = ParseNumber( &sz );
 
-    if( n < 1 ) {
-	outputl( _("You must specify a valid match length (1 or longer).") );
-
-	return;
-    }
-
     nDefaultLength = n;
 
     outputf( n == 1 ? _("New matches will default to %d point.\n") :

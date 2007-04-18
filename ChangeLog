@@ -1,3 +1,9 @@
+Wed Apr 18 20:52:26 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.h, gtktoolbar.c, gtktoolbar.h, play.c, speed.c: hack to make
+	edit start a new game if gameste is none. Added an edit new position
+	button to the new game widget.
+
 Tue Apr 17 09:13:43 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: swap r ratings when swapping players

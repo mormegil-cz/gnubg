@@ -2136,7 +2136,7 @@ void CreateMainWindow()
     
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
 		      TRUE, TRUE, 0 );
-    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), FALSE );
+    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), TRUE );
     /* It's a bit naughty to access pwStatus->label, but its default alignment
        is ugly, and GTK gives us no other way to change it. */
     gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
@@ -2577,9 +2577,11 @@ extern void GTKOutputX( void ) {
       strcat ( sz, "\n" );
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
       gtk_text_buffer_get_end_iter (buffer, &iter);
-      gtk_text_buffer_insert( buffer, &iter, sz, -1);
-      gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(pwMessageText), &iter, 0.0, FALSE, 0.0, 1.0 );
-    }
+      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
+      gtk_text_buffer_insert( buffer, &iter, g_strchomp(sz), -1);
+      gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW(pwMessageText),
+                      gtk_text_buffer_create_mark (buffer, "last", &iter, FALSE),
+                      0.0, TRUE, 0.0, 1.0 ); }
       
     cchOutput = 0;
     g_free( sz );
@@ -2870,9 +2872,8 @@ extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct C
 }	
 
 typedef struct _newwidget {
-  GtkWidget *pwG, *pwM, *pwS, *pwP, *pwCPS, *pwGNUvsHuman,
+  GtkWidget *pwCPS, *pwML, *pwGNUvsHuman,
       *pwHumanHuman, *pwManualDice, *pwTutorMode;
-  GtkAdjustment *padjML;
 } newwidget;
 
 static GtkWidget *
@@ -2946,12 +2947,71 @@ static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   UserCommand(sz);
 }
+static char *get_player_type (int i) {
+	switch( ap[ i ].pt ) {
+	case PLAYER_GNU:
+            return("gnubg");
+	    break;
+	case PLAYER_HUMAN:
+            return("human");
+        default:
+            return(NULL);
+	}
+}
+
+extern int edit_new(int length)
+{
+	char sz[40];
+	char *pt[2];
+	int i;
+	int err = 0;
+	int fDisplay_save;
+
+	outputoff();
+	for (i = 0; i < 2; i++) {
+		pt[i] = get_player_type(i);
+		if (!pt[i])
+			err = 1;
+		sprintf(sz, "set player %d human", i);
+		UserCommand(sz);
+	}
+	outputon();
+	if (!err) {
+		fDisplay_save = fDisplay;
+		fDisplay = 0;
+		sprintf(sz, "new match %d", length);
+		UserCommand(sz);
+		fDisplay = fDisplay_save;
+	} else {
+		outputerrf(_
+			   ("Edit new position only allowed with human and gnubg players"));
+	}
+	outputoff();
+	for (i = 0; i < 2; i++) {
+		if (pt[i]) {
+			sprintf(sz, "set player %d %s", i, pt[i]);
+			UserCommand(sz);
+		}
+	}
+	outputon();
+	return (err);
+}
+
+static void edit_new_clicked(GtkWidget * pw, newwidget * pnw)
+{
+	int length =
+	    (int) gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+	edit_new(length);
+	if (!ToolbarIsEditing(NULL))
+		click_edit();
+}
 
 static GtkWidget *NewWidget( newwidget *pnw){
   int i, j = 1 ;
   char **apXPM[10];
   GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwToolbar;
-  GtkWidget *pwSpin, *pwButtons, *pwFrame, *pwVbox2; 
+  GtkWidget *pwButtons, *pwFrame, *pwVbox2; 
 #include "xpm/stock_new_all.xpm"
 #include "xpm/stock_new_money.xpm"
   pwVbox = gtk_vbox_new(FALSE, 0);
@@ -2965,6 +3025,17 @@ static GtkWidget *NewWidget( newwidget *pnw){
   gtk_container_add( GTK_CONTAINER( pwFrame ), pwToolbar);
   gtk_container_set_border_width( GTK_CONTAINER( pwToolbar ), 4);
   
+  /* Edit button */
+  pwButtons = gtk_button_new();
+  gtk_container_add ( GTK_CONTAINER ( pwButtons ), gtk_image_new_from_stock(GTK_STOCK_EDIT, GTK_ICON_SIZE_LARGE_TOOLBAR));
+  gtk_widget_show(pwButtons);
+
+  gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
+                   pwButtons, _("Edit position"), NULL );
+  g_signal_connect(pwButtons, "clicked", GTK_SIGNAL_FUNC(edit_new_clicked), pnw);
+
+  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+
   pwButtons = button_from_image( image_from_xpm_d ( stock_new_money_xpm,
                                                       pwToolbar ) );
   gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
@@ -3003,37 +3074,19 @@ static GtkWidget *NewWidget( newwidget *pnw){
      gtk_signal_connect( GTK_OBJECT( pwButtons ), "clicked",
 		    GTK_SIGNAL_FUNC( ToolButtonPressed ), pnw );
   }
-  pnw->pwG = gtk_radio_button_new_with_label(NULL, _("Game"));
-  pnw->pwM =
-       gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pnw->pwG),
-      _("Match"));
-  pnw->pwS =
-       gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pnw->pwG),
-       _("Money game session"));
-  pnw->pwP =
-       gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pnw->pwG),
-       _("Position"));
-  
-  gtk_box_pack_start ( GTK_BOX ( pwVbox ), pnw->pwG, FALSE, TRUE, 0);
-  pwHbox = gtk_hbox_new(TRUE, 0);
-  
-  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pnw->pwM, FALSE, TRUE, 0);
-  
-  gtk_box_pack_start ( GTK_BOX ( pwHbox ),
-		  pwLabel = gtk_label_new(_("Match length:")), TRUE, TRUE, 0);
-  
-  pnw->padjML = GTK_ADJUSTMENT( gtk_adjustment_new( nDefaultLength, 
-			  1, 99, 1, 10, 10 ) );
-  
-  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
-  pwSpin = gtk_spin_button_new (GTK_ADJUSTMENT(pnw->padjML), 1, 0);
-  
-  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwSpin , FALSE, TRUE, 0);
-  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
 
-  gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, TRUE, 0);
-  gtk_box_pack_start ( GTK_BOX ( pwVbox ), pnw->pwS, FALSE, TRUE, 0);
-  gtk_box_pack_start ( GTK_BOX ( pwVbox ), pnw->pwP, FALSE, TRUE, 0);
+  pwFrame = gtk_frame_new(_("Match settings"));
+  pwHbox = gtk_hbox_new(FALSE, 0);
+
+  pwLabel = gtk_label_new(_("Length:")), TRUE, TRUE, 0;
+  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+  pnw->pwML = gtk_spin_button_new_with_range (0, MAXSCORE, 1);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pnw->pwML), TRUE);
+
+  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwLabel, FALSE, TRUE, 0);
+  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pnw->pwML, FALSE, TRUE, 0);
+  gtk_container_add(GTK_CONTAINER(pwFrame), pwHbox);
+  gtk_container_add(GTK_CONTAINER(pwVbox), pwFrame);
 
   /* Here the simplified player settings starts */
   
@@ -3078,37 +3131,22 @@ static GtkWidget *NewWidget( newwidget *pnw){
 
 static void NewOK( GtkWidget *pw, newwidget *pnw ) {
   
-  int G = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwG));
-  int M = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwM));
-  int S = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwS));
-  int P = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwP));
-  int Mlength = (int)pnw->padjML->value; 
+  int Mlength = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
 
   UpdatePlayerSettings(pnw);
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
-  if (G)
-	  UserCommand("new game");
-  else if(M){
-	  char sz[40];
-	  sprintf(sz, "new match %d", Mlength );
-	  UserCommand(sz);
-  }
-  else if(S)
-	  UserCommand("new session");
-  else if(P){
-	  /* FIXME */
-  }
-
+  char sz[40];
+  sprintf(sz, "new match %d", Mlength );
+  UserCommand(sz);
 }
 
 static void NewSet( newwidget *pnw) {
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwM ), TRUE );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwTutorMode ),
                                 fTutor );
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice), rngCurrent == RNG_MANUAL);
-  gtk_adjustment_set_value( GTK_ADJUSTMENT( pnw->padjML ), nDefaultLength );
+  gtk_spin_button_set_value( GTK_SPIN_BUTTON( pnw->pwML ), nDefaultLength );
 
 }
 
