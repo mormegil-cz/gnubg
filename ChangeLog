@@ -1,3 +1,8 @@
+Fri Apr 20 18:00:10 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c, gtkgame.c: compiler warnings and fixed problem with
+	extension not being remembered when exporting.
+
 Wed Apr 18 20:52:26 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.h, gtktoolbar.c, gtktoolbar.h, play.c, speed.c: hack to make

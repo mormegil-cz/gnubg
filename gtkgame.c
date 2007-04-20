@@ -3078,7 +3078,7 @@ static GtkWidget *NewWidget( newwidget *pnw){
   pwFrame = gtk_frame_new(_("Match settings"));
   pwHbox = gtk_hbox_new(FALSE, 0);
 
-  pwLabel = gtk_label_new(_("Length:")), TRUE, TRUE, 0;
+  pwLabel = gtk_label_new(_("Length:"));
   gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
   pnw->pwML = gtk_spin_button_new_with_range (0, MAXSCORE, 1);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pnw->pwML), TRUE);
