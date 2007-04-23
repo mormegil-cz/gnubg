@@ -1,3 +1,8 @@
+Mon Apr 23 13:52:56 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c: fixed problem with . being added to filename on eache
+	export.
+
 Fri Apr 20 18:00:10 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c, gtkgame.c: compiler warnings and fixed problem with

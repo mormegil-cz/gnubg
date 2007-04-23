@@ -81,7 +81,7 @@ GetFilename (int CheckForCurrent, int format)
   time_t t;
 
   if (CheckForCurrent && szCurrentFileName && *szCurrentFileName)
-    sz = g_strdup_printf ("%s.%s", szCurrentFileName,
+    sz = g_strdup_printf ("%s%s", szCurrentFileName,
 		    file_format[format].extension);
   else
     {
