@@ -63,14 +63,7 @@ dnl
 AC_PROG_AWK
 AC_PROG_LN_S
 AC_CHECK_PROG(CSOUND, csound, csound, true)
-AC_CHECK_PROG(GNUPLOT, gnuplot, gnuplot)
-AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
-AC_CHECK_PROG(PNMSCALE, pnmscale, pnmscale)
-AC_CHECK_PROG(PNMTOPNG, pnmtopng, pnmtopng)
-AC_CHECK_PROG(PNMTOPS, pnmtops, pnmtops)
-AC_CHECK_PROG(PSTOPNM, pstopnm, pstopnm)
 AC_CHECK_PROG(SRCONV, srconv, srconv, true)
-AC_CHECK_PROG(TR, tr, tr)
 
 dnl
 dnl Setup libtool
@@ -160,7 +153,7 @@ dnl
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fstat getdtablesize strptime isatty random readv select setvbuf setpriority)
+AC_CHECK_FUNCS(fstat getdtablesize strptime isatty random select setvbuf setpriority)
 
 AC_CHECK_FUNCS(acosf, , AC_DEFINE(acosf, acos, [set acosf to acos if undefined]),)
 AC_CHECK_FUNCS(asinf, , AC_DEFINE(asinf, asin, [set asinf to asin if undefined]),)
