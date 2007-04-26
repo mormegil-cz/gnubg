@@ -1644,8 +1644,6 @@ command cER = {
 #endif
     { "evaluation", NULL, N_("Control position evaluation "
       "parameters"), NULL, acSetEval },
-    { "egyptian", CommandSetEgyptian, 
-      N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
     { "fullscreen", CommandSetFullScreen, N_("Change to full screen mode"),
       szONOFF, &cOnOff },
@@ -1814,8 +1812,6 @@ command cER = {
       N_("Redisplay the board position"), szOPTPOSITION, NULL },
     { "gammonvalues", CommandShowGammonValues, N_("Show gammon values"),
       NULL, NULL },
-    { "egyptian", CommandShowEgyptian,
-      N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
 #if USE_GTK
@@ -5311,7 +5307,6 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set delay %d\n"
 #endif
 	     "set display %s\n"
-	     "set egyptian %s\n",
 	     fClockwise ? "on" : "off", 
 			 fTutor ? "on" : "off",
 			 fTutorCube ? "on" : "off",
@@ -5325,7 +5320,6 @@ extern void CommandSaveSettings( char *szParam ) {
 #if USE_GTK
 	     nDelay,
 #endif
-	     fDisplay ? "on" : "off", fEgyptian ? "on" : "off" );
 
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );

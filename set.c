@@ -2683,18 +2683,6 @@ extern void CommandSetTurn( char *sz ) {
     outputf( _("`%s' is now on roll.\n"), ap[ i ].szName );
 }
 
-extern void CommandSetEgyptian( char *sz ) {
-
-    if( SetToggle( "egyptian", &fEgyptian, sz,
-                   _("Will use the Egyptian rule."),
-                   _("Will not use the Egyptian rule.") ) ) {
-        outputl( _("Note: most likely the database and weights are not "
-                 "tuned for Egyptian play.\nRegenerating them with "
-                 "the rule set may give better results.") );
-        return;
-    } ;
-}
-
 extern void CommandSetJacoby( char *sz ) {
 
     if( SetToggle( "jacoby", &fJacoby, sz, 

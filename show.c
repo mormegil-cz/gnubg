@@ -740,15 +740,6 @@ extern void CommandShowEvaluation( char *sz ) {
 
 }
 
-extern void CommandShowEgyptian( char *sz ) {
-
-    if ( fEgyptian )
-      outputl( _("Sessions are played with the Egyptian rule.") );
-    else
-      outputl( _("Sessions are played without the Egyptian rule.") );
-
-}
-
 extern void CommandShowJacoby( char *sz ) {
 
   if ( ! ms.nMatchTo )

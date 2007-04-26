@@ -272,7 +272,6 @@ static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
 static int iTick;
-int fEgyptian = FALSE;
 
 /* variation of backgammon used by gnubg */
 
@@ -3533,13 +3532,6 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     int i, j;
     move *pm;
     unsigned char auch[ 10 ];
-
-	if (fEgyptian)
-	{	/* Check no point has more than 5 chequers */
-		for (i = 1; i < 25; i++)
-			if (anBoard[0][i] > 5 || anBoard[1][i] > 5)
-				return;
-	}
 
 	if( fPartial ) {
 	/* Save all moves, even incomplete ones */
