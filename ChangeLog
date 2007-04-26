@@ -1,3 +1,8 @@
+Thu Apr 26 23:06:04 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* dice.c, gnubg.c, configure.in: replace gettimeofday by
+	g_get_current_time
+
 Mon Apr 23 13:52:56 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c: fixed problem with . being added to filename on eache

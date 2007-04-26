@@ -784,15 +784,9 @@ RNGSystemSeed( const rng rngx, void *p, int *pnSeed ) {
     }
 
     if( !f ) {
-#if HAVE_GETTIMEOFDAY
-	struct timeval tv;
-	struct timezone tz;
-
-	if( !gettimeofday( &tv, &tz ) )
+	    GTimeVal tv;
+	    g_get_current_time(&tv);
 	    n = tv.tv_sec ^ tv.tv_usec;
-	else
-#endif
-	    n = time( NULL );
     }
 
     InitRNGSeed( n, rngx, rngctx );

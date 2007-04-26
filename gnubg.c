@@ -6367,14 +6367,11 @@ extern void ResumeInput() {
 #endif
 }
 
-#if HAVE_GETTIMEOFDAY
-static struct timeval tvProgress;
+static GTimeVal tvProgress;
 
 static int ProgressThrottle( void ) {
-
-    struct timeval tv, tvDiff;
-    
-    gettimeofday( &tv, NULL );
+    GTimeVal tv, tvDiff;
+    g_get_current_time(&tv);
     
     tvDiff.tv_sec = tv.tv_sec - tvProgress.tv_sec;
     if( ( tvDiff.tv_usec = tv.tv_usec + 1000000 - tvProgress.tv_usec ) >=
@@ -6393,7 +6390,6 @@ static int ProgressThrottle( void ) {
     /* insufficient time elapsed */
     return -1;
 }
-#endif
 
 extern void ProgressStart( char *sz ) {
 
@@ -6451,10 +6447,8 @@ ProgressValue ( int iValue ) {
 
   iProgressValue = iValue;
 
-#if HAVE_GETTIMEOFDAY
   if( ProgressThrottle() )
       return;
-#endif  
 #if USE_GTK
   if( fX ) {
     GTKProgressValue( iValue, iProgressMax );
@@ -6484,10 +6478,8 @@ extern void Progress( void ) {
     if( !fShowProgress )
 	return;
 
-#if HAVE_GETTIMEOFDAY
     if( ProgressThrottle() )
 	return;
-#endif 
 #if USE_GTK
     if( fX ) {
 	GTKProgress();
