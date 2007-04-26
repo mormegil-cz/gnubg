@@ -1,3 +1,10 @@
+Thu Apr 26 23:52:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkbearoff.c, gtkbearoff.h, Makefile.am, backgammon.h, bearoff.c,
+	bearoff.h, eval.c, eval.h, gnubg.c, gtkgame.c, gtkoptions.c,
+	gtkrace.c, onechequer.c, onechequer.h, set.c, show.c: race cleanup.
+	Removed Sconyers support.
+
 Thu Apr 26 23:06:04 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* dice.c, gnubg.c, configure.in: replace gettimeofday by

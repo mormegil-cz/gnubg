@@ -262,8 +262,6 @@ bearoffcontext *pbcTS = NULL;
 bearoffcontext *pbc1 = NULL;
 bearoffcontext *pbc2 = NULL;
 bearoffcontext *apbcHyper[ 3 ] = { NULL, NULL, NULL };
-bearoffcontext *pbc15x15 = NULL;
-bearoffcontext *pbc15x15_dvd = NULL;
 
 static cache cEval;
 #define PRUNE_CACHE
@@ -275,8 +273,6 @@ volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
 static int iTick;
 int fEgyptian = FALSE;
-int fUse15x15 = TRUE;
-
 
 /* variation of backgammon used by gnubg */
 
@@ -690,8 +686,6 @@ EvalShutdown ( void ) {
   BearoffClose( &pbc2 );
   BearoffClose( &pbcOS );
   BearoffClose( &pbcTS );
-  BearoffClose( &pbc15x15 );
-  BearoffClose( &pbc15x15_dvd );
   for ( i = 0; i < 3; ++i )
     BearoffClose( &apbcHyper[ i ] );
 
@@ -2177,9 +2171,6 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
       if ( isBearoff ( pbcTS, anBoard ) )
         return CLASS_BEAROFF_TS;
 
-      if ( isBearoff( pbc15x15, anBoard ) )
-        return CLASS_BEAROFF_15x15;
-
       if ( isBearoff ( pbc1, anBoard ) )
         return CLASS_BEAROFF1;
 
@@ -2243,14 +2234,6 @@ EvalBearoffTS( int anBoard[ 2 ][ 25 ],
                float arOutput[], const bgvariation bgv, NNState *nnStates ) {
 
   return BearoffEval ( pbcTS, anBoard, arOutput );
-
-}
-
-static int
-EvalBearoff15x15( int anBoard[ 2 ][ 25 ], 
-                  float arOutput[], const bgvariation bgv, NNState *nnStates ) {
-
-  return BearoffEval ( pbc15x15, anBoard, arOutput );
 
 }
 
@@ -2591,7 +2574,7 @@ static classevalfunc acef[ N_CLASSES ] = {
     EvalHypergammon1,
     EvalHypergammon2,
     EvalHypergammon3,
-    EvalBearoff2, EvalBearoffTS, EvalBearoff15x15,
+    EvalBearoff2, EvalBearoffTS,
     EvalBearoff1, EvalBearoffOS, 
     EvalRace, EvalCrashed, EvalContact
 };
@@ -3149,7 +3132,7 @@ PerfectCubeful ( bearoffcontext *pbc,
 }
 
 
-extern int
+static int
 EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
                          const bgvariation bgv ) {
 
@@ -3163,9 +3146,6 @@ EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
     break;
   case CLASS_BEAROFF_TS:
     return PerfectCubeful( pbcTS, anBoard, arEquity );
-    break;
-  case CLASS_BEAROFF_15x15:
-    return PerfectCubeful( pbc15x15, anBoard, arEquity );
     break;
   default:
     g_assert ( FALSE );
@@ -4047,6 +4027,22 @@ FindnSaveBestMoves( movelist *pml,
 
 }
 
+
+extern float
+KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
+{
+  int nDiff, nSum;
+  double rK;
+
+  nDiff = nPipNotOnRoll - nPipOnRoll;
+  nSum = nPipNotOnRoll + nPipOnRoll;
+
+  rK = (double) (nDiff + 4) / (2 * sqrt( nSum - 4 ));
+
+  return 0.5f * (1.0f + (float)erf( rK ));
+}
+
+
 extern int KeithCount(int anBoard[2][25], int pn[2])
 {
     unsigned int anPips[2];
@@ -4065,7 +4061,7 @@ extern int KeithCount(int anBoard[2][25], int pn[2])
 }
 
 extern int
-ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer ) {
+ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, float *adjusted, int *pnTrailer ) {
   
   int anCovered[2], anMenLeft[2];
   int x;
@@ -4094,15 +4090,11 @@ ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer ) {
   *pnLeader += 2*anMenLeft[1];
   *pnLeader += anBoard[1][0];
   *pnLeader -= anCovered[1];
-  
-  if (*pnLeader > 30) {
-    if ((*pnLeader % 10) > 5) {
-        *pnLeader = (int)(*pnLeader * 1.1);
-        *pnLeader += 1;
-    }
-    else
-      *pnLeader = (int)(*pnLeader * 1.1);
-  }
+  if (*pnLeader > 30)
+      *adjusted = (float)(*pnLeader * 1.1f);
+  else
+      *adjusted = (float)*pnLeader;
+
   *pnTrailer = anPips[0];
   *pnTrailer += 2*anMenLeft[0];
   *pnTrailer += anBoard[0][0];
@@ -4198,16 +4190,6 @@ DumpBearoffTS ( int anBoard[ 2 ][ 25 ],
 
   g_assert ( pbcTS );
   return BearoffDump ( pbcTS, anBoard, szOutput );
-
-}
-
-
-static int 
-DumpBearoff15x15 ( int anBoard[ 2 ][ 25 ], 
-                   char *szOutput, const bgvariation bgv ) {
-
-  g_assert ( pbc15x15 );
-  return BearoffDump ( pbc15x15, anBoard, szOutput );
 
 }
 
@@ -4347,7 +4329,7 @@ DumpHypergammon3 ( int anBoard[ 2 ][ 25 ], char *szOutput,
 static classdumpfunc acdf[ N_CLASSES ] = {
   DumpOver, 
   DumpHypergammon1, DumpHypergammon2, DumpHypergammon3,
-  DumpBearoff2, DumpBearoffTS, DumpBearoff15x15,
+  DumpBearoff2, DumpBearoffTS,
   DumpBearoff1, DumpBearoffOS,
   DumpRace, DumpCrashed, DumpContact
 };
@@ -4371,7 +4353,6 @@ DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
     N_("HYPERGAMMON-3"),
     N_("BEAROFF2"),
     N_("BEAROFF-TS"),
-    N_("BEAROFF-SCONYERS-15x15"),
     N_("BEAROFF1"),
     N_("BEAROFF-OS"),
     N_("RACE"),
@@ -4546,14 +4527,10 @@ static void StatusTS ( char *sz ) {
   BearoffStatus ( pbcTS, sz );
 }
 
-static void Status15x15 ( char *sz ) {
-  BearoffStatus ( pbc15x15, sz );
-}
-
 static classstatusfunc acsf[ N_CLASSES ] = {
   NULL, 
   StatusHypergammon1, StatusHypergammon2, StatusHypergammon3,
-  StatusBearoff2, StatusTS, Status15x15,
+  StatusBearoff2, StatusTS,
   StatusBearoff1, StatusOS, 
   StatusRace, StatusCrashed, StatusContact
 };
@@ -5619,7 +5596,6 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
   case CLASS_BEAROFF2:
   case CLASS_BEAROFF_TS:
-  case CLASS_BEAROFF_15x15:
 
     return 0.0f; /* not used */
     break;
@@ -6395,7 +6371,6 @@ EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
 
           case CLASS_BEAROFF2:
           case CLASS_BEAROFF_TS:
-          case CLASS_BEAROFF_15x15:
             /* exact bearoff equities */
 
             arCf[ ici ] = CFMONEY( arEquity, &aci[ ici ] );
@@ -6448,7 +6423,6 @@ EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
 
           case CLASS_BEAROFF2:
           case CLASS_BEAROFF_TS:
-          case CLASS_BEAROFF_15x15:
             /* use exact money equities to guess cube efficiency */
 
             SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,

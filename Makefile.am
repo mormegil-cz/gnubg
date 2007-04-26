@@ -18,13 +18,13 @@ gnubg_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 eval.h eval.c play.c \
 		 positionid.h positionid.c drawboard.h drawboard.c \
 		 pub_eval.c set.c show.c dice.c dice.h rollout.c \
-		 rollout.h kleinman.c matchequity.c matchequity.h \
+		 rollout.h matchequity.c matchequity.h \
 		 analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h \
 		 sgfl.c import.c import.h external.c external.h \
 		 latex.c postscript.c html.c export.h matchid.c \
 		 matchid.h text.c export.c sound.h record.c record.h \
 		 osr.c osr.h bearoffgammon.c bearoffgammon.h bearoff.c \
-		 bearoff.h onechequer.c onechequer.h path.c path.h \
+		 bearoff.h path.c path.h \
 		 render.c render.h htmlimages.c speed.c \
 		 renderprefs.c renderprefs.h boardpos.c boardpos.h \
 		 progress.c progress.h format.c format.h formatgs.c \
@@ -54,8 +54,8 @@ gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
 		 gtktheory.h gtkexport.c gtkexport.h gtkcube.c gtkcube.h \
 		 gtkchequer.c gtkchequer.h gtkrace.c gtkrace.h gtkmovefilter.c \
 		 gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c gtkcolour.h gtksplash.c \
-		 gtksplash.h gtkrolls.c gtkrolls.h gtktempmap.c gtktempmap.h gtkbearoff.c \
-		 gtkbearoff.h gtkoptions.h gtkoptions.c gtktoolbar.h gtktoolbar.c \
+		 gtksplash.h gtkrolls.c gtkrolls.h gtktempmap.c gtktempmap.h \
+		 gtkoptions.h gtkoptions.c gtktoolbar.h gtktoolbar.c \
 		 gtkgamelist.c gtkpanels.c gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h \
 		 gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h gtkpanels.h
 endif

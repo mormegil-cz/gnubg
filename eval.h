@@ -304,15 +304,12 @@ extern void ( *fnTick )( void );
 extern cubeinfo ciCubeless;
 extern const char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
-extern int fUse15x15;
 
 extern bearoffcontext *pbc1;
 extern bearoffcontext *pbc2;
 extern bearoffcontext *pbcOS;
 extern bearoffcontext *pbcTS;
 extern bearoffcontext *apbcHyper[ 3 ];
-extern bearoffcontext *pbc15x15;
-extern bearoffcontext *pbc15x15_dvd;
 
 typedef struct {
     unsigned int cMoves; /* and current move when building list */
@@ -341,7 +338,6 @@ typedef enum  {
     CLASS_HYPERGAMMON3, /* hypergammon with 3 chequers */
     CLASS_BEAROFF2,     /* Two-sided bearoff database (in memory) */
     CLASS_BEAROFF_TS,   /* Two-sided bearoff database (on disk) */
-    CLASS_BEAROFF_15x15,/* Hugh Sconyers complete bearoff database */
     CLASS_BEAROFF1,     /* One-sided bearoff database (in memory) */
     CLASS_BEAROFF_OS,   /* One-sided bearoff database /on disk) */
     CLASS_RACE,         /* Race neural network */
@@ -351,7 +347,7 @@ typedef enum  {
 
 #define N_CLASSES (CLASS_CONTACT + 1)
 
-#define CLASS_PERFECT CLASS_BEAROFF_15x15 
+#define CLASS_PERFECT CLASS_BEAROFF_TS
 
 #define CFMONEY(arEquity,pci) \
    ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
@@ -381,10 +377,6 @@ EvalSave( const char *szWeights );
 extern int 
 EvaluatePosition( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput[],
                   const cubeinfo* pci, const evalcontext* pec );
-
-extern int
-EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
-                         const bgvariation bgv );
 
 extern void
 InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS], const cubeinfo* pci);
@@ -420,7 +412,7 @@ extern int
 PipCount( int anBoard[ 2 ][ 25 ], unsigned int anPips[ 2 ] );
 
 extern int 
-ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer );
+ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, float *adjusted, int *pnTrailer );
 
 extern int
 KeithCount(int anBoard[2][25], int pn[2]);
@@ -499,7 +491,7 @@ EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[],
 extern int
 EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, NNState *nnStates );
 
-extern float 
+extern float
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
 
 extern int 

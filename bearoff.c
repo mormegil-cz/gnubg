@@ -75,15 +75,8 @@ typedef int ( *hcmpfunc ) ( void *p1, void *p2 );
 char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
   N_("GNU Backgammon"),
   N_("ExactBearoff"),
-  N_("Hugh Sconyers"),
   N_("Unknown program")
 };
-
-
-static int 
-ReadSconyers15x15( bearoffcontext *pbc,
-                   const unsigned int iPos,
-                   float arOutput[], float arEquity[] );
 
 
 static void
@@ -517,21 +510,6 @@ BearoffCubeful ( bearoffcontext *pbc,
     return ReadExactBearoff ( pbc, iPos, ar, aus );
     break;
 
-  case BEAROFF_SCONYERS:
-
-    g_assert( aus == NULL );
-
-    switch( pbc->hsdb ) {
-    case HS_15x15_ON_DISK:
-    case HS_15x15_ON_DVDS:
-      return ReadSconyers15x15( pbc, iPos, NULL, ar );
-      break;
-    default:
-      g_assert( FALSE );
-      break;
-    }
-    break;
-
   default:
 
     g_assert ( FALSE );
@@ -717,200 +695,6 @@ BearoffEvalHypergammon ( bearoffcontext *pbc,
 
 }
 
-static int 
-ReadSconyers15x15( bearoffcontext *pbc,
-                   const unsigned int iPos,
-                   float arOutput[], float arEquity[] ) {
-
-  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-  int nFile = ( iPos / n ) / 1250;
-  char sz[ 15 ];
-  char *pch, *pch2;
-  long lPos;
-  unsigned char ac[ 16 ];
-  float ar[ 4 ];
-  long l;
-  int i;
-  int h = -1;
-
-  switch( pbc->hsdb ) {
-  case HS_15x15_ON_DVDS:
-
-    if ( pbc->nCurrentFile != nFile ) {
-
-      if ( pbc->nCurrentFile != -1 ) 
-        close( pbc->h );
-      
-      sprintf( sz, "bg15_%d.dat", nFile + 1 );
-      if ( ( pbc->h = PathOpen( sz, pbc->szDir, BINARY ) ) < 0 ) {
-        /* could not open file... */
-        do {
-          
-          pch = (*pbc->pfDJ)( _("Please insert disk with file %s"), 
-                              TRUE, sz );
-
-          if ( fInterrupt ) {
-            pbc->nCurrentFile = -1;
-            return -1;
-          }
-
-          if ( pch ) {
-            /* new path */
-          
-            /* FIXME: redo this... */
-          
-            pch2 = strdup( pch );
-          
-            if( pbc->szDir )
-              g_free( pbc->szDir );
-
-            pbc->szDir = g_path_get_dirname( pch );
-
-            free( pch );
-            free( pch2 );
-
-          }
-          
-          printf( "attempt to open '%s' '%s'\n",
-                  sz, pbc->szDir );
-          if ( ( pbc->h = PathOpen( sz, pbc->szDir, BINARY ) ) >= 0 )
-            break;
-          
-        } while( 1 );
-
-      }
-      
-    }
-
-    pbc->nCurrentFile = nFile;
-    h = pbc->h;
-
-    break;
-
-  case HS_15x15_ON_DISK:
-
-    if ( ( h = pbc->ah[ nFile ] ) < 0 ) {
-
-      /* file not open: open it */
-      
-      sprintf( sz, "bg15_%d.dat", nFile + 1 );
-      if ( ( h = pbc->ah[ nFile ] = PathOpen( sz, pbc->szDir, 
-                                              BINARY ) ) < 0 ) {
-        perror( sz );
-      return -1;
-      }
-
-    }
-
-    break;
-
-
-  default:
-
-    g_assert( FALSE );
-
-  }
-
-  /* Position number */
-
-  lPos = iPos;
-
-  /* printf( "lPos %ld, disk no. %d\n", lPos, nFile ); */
-
-  /* 
-   * Hugh does not score positions will all chequers off:
-   * gnubg calculate position# as 54264 * nUs + nThem.
-   * Hugh uses                    54263 * ( nUs -1 ) + ( nThem - 1 )
-   * The difference is:           nUs + 54263 + 1
-   */
-
-  lPos -= ( ( iPos / 54264 ) + ( n - 1 ) + 1 );
-
-  /*
-   * Each disk contains 1250 * 54263 positions.
-   * Subtract disk number minus 1 times the number of positions per disk.
-   */
-
-  lPos -= nFile * 1250 * ( n - 1 );
-
-  /* Each position uses 16 bytes (4 floats of 4 bytes each) */
-
-  /* printf( "modified lPos %ld\n", lPos ); */
-
-  lPos *= 16L;
-
-  /* Seek to calculated offset */
-
-  if ( ( l = lseek( h, lPos, SEEK_SET ) ) < 0 ) {
-    perror( "lseek (15x15)" );
-    return -1;
-  }
-
-  /* printf( "new offset %ld\n", l );  */
-
-  /* Read the 16 bytes for this position */
-
-  if ( ( l = read( h, ac, 16 ) ) < 16 ) {
-    printf( "bytes read: %ld, expected %d\n", l, 16 );
-    if ( errno )
-      perror( "read (15x15)" );
-    return -1;
-  }
-
-
-  for ( i = 0; i < 4; ++i ) {
-    /* FIXME: handle little endian/big endian */
-    l = ac[ 4 * i + 0 ] | 
-      ( ac[ 4 * i + 1 ] << 8 ) |
-      ( ac[ 4 * i + 2 ] << 16 ) |
-      ( ac[ 4 * i + 3 ] << 24 );
-    ar[ i ] = (float)l;
-  }
-
-  /* Save equities */
-
-  if ( arEquity )
-    memcpy( arEquity, ar, 4 * sizeof ( float ) );
-
-  if ( arOutput ) {
-    memset( arOutput, 0, 5 * sizeof ( float ) );
-    arOutput[ 0 ] = ar[ 0 ] / 2.0f + 0.5f;
-    /* FIXME: what do we do when gammons are possible??? */
-  }
-
-  ++pbc->nReads;
-
-  return 0;
-
-}
-
-
-static int
-BearoffEvalSconyers( bearoffcontext *pbc, 
-                     int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-
-  unsigned int nUs = 
-    PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-  unsigned int nThem = 
-    PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
-  unsigned int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-  int iPos = nUs * n + nThem;
-
-  switch( pbc->hsdb ) {
-  case HS_15x15_ON_DISK:
-  case HS_15x15_ON_DVDS:
-    return ReadSconyers15x15( pbc, iPos, arOutput, NULL );
-    break;
-  default:
-    g_assert( FALSE );
-    break;
-  }
-
-  /* code not reachable */
-  return 0;
-
-}
-
 
 extern int
 BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
@@ -933,11 +717,6 @@ BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
       break;
     }
 
-    break;
-
-  case BEAROFF_SCONYERS:
-
-    return BearoffEvalSconyers( pbc, anBoard, arOutput );
     break;
 
   case BEAROFF_EXACT_BEAROFF:
@@ -1251,43 +1030,6 @@ BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
 }
 
-
-extern int
-BearoffDumpSconyers15x15( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ],
-                          char *sz ) {
-
-  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
-  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-  int iPos = nUs * n + nThem;
-  float ar[ 4 ];
-  int i;
-  static char *aszEquity[] = {
-    N_("Cubeless"),
-    N_("Owned cube"),
-    N_("Centered cube"),
-    N_("Opponent owns cube")
-  };
-
-
-  if ( ReadSconyers15x15( pbc, iPos, NULL, ar ) )
-    return -1;
-
-  sprintf ( strchr ( sz, 0 ),
-            "             Player       Opponent\n"
-            "Position %12d  %12d\n\n", 
-            nUs, nThem );
-
-  for ( i = 0; i < 4 ; ++i )
-    sprintf ( strchr ( sz, 0 ),
-              "%-30.30s: %+7.4f\n", 
-              gettext ( aszEquity[ i ] ), ar[ i ] );
-
-  return 0;
-
-}
-
-
 extern int
 BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
@@ -1311,18 +1053,6 @@ BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   case BEAROFF_EXACT_BEAROFF:
 
     return BearoffDumpTwoSided ( pbc, anBoard, sz );
-    break;
-
-  case BEAROFF_SCONYERS:
-
-    switch( pbc->hsdb ) {
-    case HS_15x15_ON_DISK:
-    case HS_15x15_ON_DVDS:
-      return BearoffDumpSconyers15x15( pbc, anBoard, sz );
-      break;
-    default:
-      g_assert( FALSE );
-    }
     break;
 
   default:
@@ -1459,9 +1189,6 @@ BearoffAlloc( void ) {
   pbc->nOffsetA = -1;
   pbc->puchA = NULL;
   pbc->fCubeful = TRUE;
-  pbc->hsdb = -1;
-  pbc->pfDJ = NULL;
-  pbc->nCurrentFile = -1;
   pbc->p = NULL;
   pbc->ph = NULL;
 
@@ -1469,86 +1196,6 @@ BearoffAlloc( void ) {
 
 }
 
-
-
-/*
- * Setup a bearoff context for Hugh Sconyers bearoff databases.
- * So far only the huuuuge 15x15 database is supported.
- * The pointer p is a function to be called when a new disk should
- * be inserted.
- *
- */
-
-static bearoffcontext *
-BearoffInitSconyers( const char *szFilename, const char *szDir,
-                     const int bo, void (*p)() ) {
-
-  bearoffcontext *pbc;
-  int i;
-  char  sz[ 15 ];
-
-  if ( ! ( pbc = BearoffAlloc() ) )
-    return NULL;
-
-  if ( ( bo & BO_SCONYERS_15x15 ) && ( bo & BO_ON_DISK ) ) {
-
-    pbc->bt = BEAROFF_TWOSIDED;
-    pbc->bc = BEAROFF_SCONYERS;
-    pbc->nPoints = 6;
-    pbc->nChequers = 15;
-    pbc->fInMemory = FALSE; /* are you nuts? 47 Gigs :-) */
-    pbc->fCubeful = TRUE; /* yup, it has cubeful equities as well */
-    pbc->hsdb = HS_15x15_ON_DISK;
-    pbc->nCurrentFile = -1;
-    pbc->pfDJ = NULL;
-    pbc->szDir = szDir ? strdup( szDir ) : NULL;
-    pbc->szFilename = NULL;
-    pbc->ph = NULL;
-    pbc->ah = (int *) malloc( 44 * sizeof( int ) );
-    /* open all 44 files... */
-    /* FIXME: considering just checking that all files are there */
-    for ( i = 0; i < 44; ++i ) {
-      sprintf( sz, "bg15_%d.dat", i + 1 );
-      if ( ( pbc->ah[ i ] = PathOpen( sz, pbc->szDir, BINARY ) ) < 0 ) {
-        /* could not open file */
-        perror( sz );
-        BearoffClose( &pbc );
-        return NULL;
-      }
-    }
-
-
-    return pbc;
-
-  }
-  else if ( ( bo & BO_SCONYERS_15x15 ) && ( bo & BO_ON_DVDS ) ) {
-
-    pbc->bt = BEAROFF_TWOSIDED;
-    pbc->bc = BEAROFF_SCONYERS;
-    pbc->nPoints = 6;
-    pbc->nChequers = 15;
-    pbc->fInMemory = FALSE; /* are you nuts? 47 Gigs :-) */
-    pbc->fCubeful = TRUE; /* yup, it has cubeful equities as well */
-    pbc->hsdb = HS_15x15_ON_DVDS;
-    pbc->nCurrentFile = -1;
-    pbc->pfDJ = (diskjockeyfunc *)p; /* pointer to the disk jockey function */
-    pbc->szDir = szDir ? strdup( szDir ) : NULL;
-    pbc->szFilename = NULL;
-    pbc->ph = NULL;
-    pbc->ah = NULL;
-
-    return pbc;
-
-  }
-  else {
-
-    g_assert ( FALSE );
-
-  }
-
-  return NULL;
-
-}
 
 
 /*
@@ -1574,9 +1221,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
   char sz[ 41 ];
   int nSize = -1;
   int iOffset = 0;
-
-  if ( bo & BO_SCONYERS_15x15 ) 
-    return BearoffInitSconyers( szFilename, szDir, bo, p );
 
   if ( bo & BO_HEURISTIC ) {
     
@@ -1752,21 +1396,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
     iOffset = 0;
     nSize = -1;
 
-    /*
-      fprintf ( stderr, "Database:\n"
-              "two-sided: %d\n"
-              "points   : %d\n"
-              "chequers : %d\n"
-              "compress : %d\n"
-              "gammon   : %d\n"
-              "cubeful  : %d\n"
-              "normaldis: %d\n"
-              "in memory: %d\n",
-                pbc->bt,
-              pbc->nPoints, pbc->nChequers,
-              pbc->fCompressed, pbc->fGammon, pbc->fCubeful, pbc->fND,
-                pbc->fInMemory );*/
-    
     break;
 
   case BEAROFF_EXACT_BEAROFF: 

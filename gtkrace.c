@@ -33,408 +33,82 @@
 #include "gtkrace.h"
 #include "gtkgame.h"
 #include <glib/gi18n.h>
-#include "onechequer.h"
 #include "osr.h"
 #include "format.h"
 #include "gtkwindows.h"
 
 #if !HAVE_ERF
-extern double erf( double x );
+extern double erf(double x);
 #endif
 
 
 typedef struct _epcwidget {
-  GtkWidget *apwEPC[ 2 ];
-  GtkWidget *apwWastage[ 2 ];
+	GtkWidget *apwEPC[2];
+	GtkWidget *apwWastage[2];
 } epcwidget;
 
 typedef struct _racewidget {
-  GtkAdjustment *padjTrials;
-  GtkWidget *pwRollout, *pwOutput;
-  int anBoard[ 2 ][ 25 ];
-  epcwidget epcwOSR;
-  int fMove;
+	GtkAdjustment *padjTrials;
+	GtkWidget *pwRollout, *pwOutput;
+	int anBoard[2][25];
+	epcwidget epcwOSR;
+	int fMove;
 } racewidget;
 
+GtkWidget *monospace_text(const char *szOutput)
+{
 
-static GtkWidget *
-KleinmanPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
+	GtkWidget *pwText;
+	GtkTextBuffer *buffer;
+	GtkTextIter iter;
 
-  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
-  GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
-  GtkWidget *pw;
-  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, j, nDiff, nSum;
-  unsigned int anPips[ 2 ];
-  char *sz;
-  
-  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+	pwText = gtk_text_view_new();
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(pwText), GTK_WRAP_NONE);
 
-  /* 
-   * pip counts, diffs and sum 
-   */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
-
-  /* pip counts */
-
-  PipCount ( anBoard, anPips );
-
-  for ( i = 0; i < 2; ++i ) {
-
-    j = fMove ? i : !i;
-
-    sz = g_strdup_printf ( _("Player %s"), ap[  i ].szName );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       pw = gtk_label_new ( sz ),
-                       0, 1, i, i + 1, 
-                       0, 0, 4, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       1, 2, i, i + 1, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-  }
-
-  /* difference */
-
-  nDiff = anPips[ 0 ] - anPips[ 1 ];
-
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     pw = gtk_label_new ( _("Difference:") ),
-                     0, 1, 2, 3,
-                     0, 0, 4, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-
-  sz = g_strdup_printf ( _("%d"), nDiff );
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     gtk_label_new ( sz ),
-                     1, 2, 2, 3,
-                     0, 0, 4, 4 );
-  g_free ( sz );
-
-  /* sum */
-
-  nSum = anPips[ 0 ] + anPips[ 1 ];
-
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     pw = gtk_label_new ( _("Sum:") ),
-                     0, 1, 3, 4,
-                     0, 0, 4, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-
-  sz = g_strdup_printf ( _("%d"), nSum );
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     gtk_label_new ( sz ),
-                     1, 2, 3, 4,
-                     0, 0, 4, 4 );
-  g_free ( sz );
-
-  /* separator */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       gtk_hseparator_new() , FALSE, FALSE, 4 );
-  
-  /* kleinman count */
-
-  if ( nDiff < -4 ) {
-
-    /* position not eligible for Kleinman count */
-
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         pw = gtk_label_new ( _("Position not eligible for "
-                                                "Kleinman count as "
-                                                "diff < -4" ) ), 
-                         FALSE, FALSE, 4 );
-
-  }
-  else {
-
-    double rK = (double) ( nDiff + 4 ) / ( 2 * sqrt ( nSum -4 ) );
-
-    sz = g_strdup_printf ( _("K = (diff+4)/(2 sqrt(sum-4)) = %8.4g"), rK );
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         pw = gtk_label_new ( sz ),
-                         FALSE, FALSE, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( _("Cubeless winning chance (%s on roll) = "
-                             "0.5 (1+erf(K)) = %8.4g%%"), 
-                           ap[ fMove ].szName,
-                           100.0 * ( 0.5 * ( 1.0 + erf ( rK ) ) ) );
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         pw = gtk_label_new ( sz ),
-                         FALSE, FALSE, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-  }
-
-  return pwp;
-
+	buffer = gtk_text_buffer_new(NULL);
+	gtk_text_buffer_create_tag(buffer, "monospace", "family",
+				   "monospace", NULL);
+	gtk_text_buffer_get_end_iter(buffer, &iter);
+	gtk_text_buffer_insert_with_tags_by_name(buffer, &iter, szOutput,
+						 -1, "monospace", NULL);
+	gtk_text_view_set_buffer(GTK_TEXT_VIEW(pwText), buffer);
+	return pwText;
 }
 
-static GtkWidget *
-KeithPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
-
-  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
-  GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
-  GtkWidget *pw;
-  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, j;
-  int pn[2];
-  unsigned int anPips[ 2 ];
-  float fL;
-  char *sz;
-  
-  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
-
-  /* 
-   * pip counts, diffs and sum 
-   */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
-
-  /* pip counts */
-
-  PipCount ( anBoard, anPips );
-
-  /* Keith count */
-
-  KeithCount ( anBoard, pn);
-
-  for ( i = 0; i < 2; ++i ) {
-
-    j = fMove ? i : !i;
-
-    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       pw = gtk_label_new ( sz ),
-                       0, 1, i, i + 1, 
-                       0, 0, 4, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       1, 2, i, i + 1, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-  }
-
-  /* separator */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       gtk_hseparator_new() , FALSE, FALSE, 4 );
-
-
-  fL = (float) pn[1]*8.0f /7.0f;
-
-  sz = g_strdup_printf ( "L = %d (%.1f)  T = %d -> %s, %s", 
-                         pn[1], fL, pn[0],
-                         ( pn[0] >= ( fL -3 ) ? _("Redouble") :
-                           ( ( pn[0] >= ( fL -4 ) ) ? _("Double") : 
-                             _("No double") ) ),
-                         ( pn[0] >= ( fL - 2 ) ) ? 
-                         _("drop") : _("take") );
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  return pwp;
-
+static GtkWidget *KleinmanPage(int anBoard[2][25], const int fMove)
+{
+	char sz[500];
+	show_kleinman(anBoard, sz);
+	return monospace_text(sz);
 }
 
-static GtkWidget *
-Pip8912Page ( int anBoard[ 2 ][ 25 ], const int fMove ) {
-
-  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
-  GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
-  GtkWidget *pw;
-  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, j;
-  float r, arMu[2], arSigma[2];
-  float ahead;
-  unsigned int anPips[ 2 ];
-  char *sz;
-  
-  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
-
-  /* 
-   * pip counts, diffs and sum 
-   */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
-
-  /* pip counts */
-
-  PipCount ( anBoard, anPips );
-
-  for ( i = 0; i < 2; ++i ) {
-
-    j = fMove ? i : !i;
-
-    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       pw = gtk_label_new ( sz ),
-                       0, 1, i, i + 1, 
-                       0, 0, 4, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       1, 2, i, i + 1, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-  }
-
-  /* separator */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       gtk_hseparator_new() , FALSE, FALSE, 4 );
-
-  r = GWCFromPipCount( anPips, arMu, arSigma );
-
-  sz =  g_strdup_printf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%\n\n"), 
-            ap[ ms.fMove ].szName, r * 100.0f );
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  /* Thorp count */
- ahead = (1.0f - (float)anPips[1]/(float)anPips[0])*100.0f;
-  sz = g_strdup_printf ( "L = %d  T = %d (T = L + %.1f%%) -> ", 
-                  anPips[1], anPips[0], ahead);
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  if (ahead > 12.0f)
-      sz = g_strdup  ( _("Double, Drop\n"));
-  else if (ahead > 9.0f)
-      sz = g_strdup ( _("Double, Take\n"));
-  else if (ahead > 8.0f)
-      sz = g_strdup ( _("Redouble, Take\n"));
-  else
-      sz =  g_strdup ( _("No double, Take\n"));
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  return pwp;
-
+static GtkWidget *TwoSidedPage(int anBoard[2][25], const int fMove)
+{
+	char sz[500];
+	show_bearoff(anBoard, sz);
+	return monospace_text(sz);
 }
 
-static GtkWidget *
-ThorpPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
-
-  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
-  GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
-  GtkWidget *pw;
-  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-  int i, j, nLeader, nTrailer, nDiff;
-  unsigned int anPips[ 2 ];
-  char *sz;
-  
-  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
-
-  /* 
-   * pip counts, diffs and sum 
-   */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
-
-  /* pip counts */
-
-  PipCount ( anBoard, anPips );
-
-  for ( i = 0; i < 2; ++i ) {
-
-    j = fMove ? i : !i;
-
-    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       pw = gtk_label_new ( sz ),
-                       0, 1, i, i + 1, 
-                       0, 0, 4, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       1, 2, i, i + 1, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-  }
-
-  /* separator */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       gtk_hseparator_new() , FALSE, FALSE, 4 );
-
-  /* Thorp count */
-
-  ThorpCount ( anBoard, &nLeader, &nTrailer );
-
-  sz = g_strdup_printf ( "L = %d  T = %d -> %s, %s", 
-                         nLeader, nTrailer,
-                         ( nTrailer >= ( nLeader -1 ) ? _("Redouble") :
-                           ( ( nTrailer >= ( nLeader -2 ) ) ? _("Double") : 
-                             _("No double") ) ),
-                         ( nTrailer >= ( nLeader + 2 ) ) ? 
-                         _("drop") : _("take") );
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  /* Bower's interpolation */
-
-  if( ( nDiff = nTrailer - nLeader ) > 13 )
-    nDiff = 13;
-  else if( nDiff < -37 )
-    nDiff = -37;
-  sz = g_strdup_printf ( _("Bower's interpolation: "
-                           "%d%% cubeless gwc (%s on roll)"), 
-                         74 + 2 * nDiff, ap[ fMove ].szName );
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  return pwp;
-
+static GtkWidget *KeithPage(int anBoard[2][25], const int fMove)
+{
+	char sz[500];
+	show_keith(anBoard, sz);
+	return monospace_text(sz);
 }
 
+static GtkWidget *Pip8912Page(int anBoard[2][25], const int fMove)
+{
+	char sz[500];
+	show_8912(anBoard, sz);
+	return monospace_text(sz);
+}
+
+static GtkWidget *ThorpPage(int anBoard[2][25], const int fMove)
+{
+	char sz[500];
+	show_thorp(anBoard, sz);
+	return monospace_text(sz);
+}
 static GtkWidget *
 EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
                    const int fInvert, epcwidget *pepcw ) {
@@ -509,126 +183,6 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
 
 }
 
-static GtkWidget *
-OneChequerPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
-
-  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
-  GtkWidget *pwTable = gtk_table_new ( 3, 4, FALSE );
-  GtkWidget *pw;
-  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
-
-  unsigned int anPips[ 2 ];
-  float arMu[ 2 ];
-  float arSigma[ 2 ];
-  int i, j;
-  char *sz;
-  float r;
-  int an[ 2 ][ 25 ];
-  float arEPC[ 2 ];
-  float arWastage[ 2 ];
-  const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
-              5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
-              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0f;
-
-  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
-
-  /* calculate one chequer bearoff */
-
-  memcpy( an, anBoard, 2 * 25 *sizeof ( int ) );
-
-  PipCount ( an, anPips );
-
-  r = GWCFromPipCount( anPips, arMu, arSigma );
-
-  /* build widget */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( _("Number of rolls to bear off, "
-                                              "assuming each player has one "
-                                              "chequer only.") ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-
-  /* table */
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
-
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     pw = gtk_label_new ( _("Pips") ),
-                     1, 2, 0, 1,
-                     0, 0, 4, 4 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     pw = gtk_label_new ( _("Avg. rolls") ),
-                     2, 3, 0, 1,
-                     0, 0, 4, 4 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                     pw = gtk_label_new ( _("Std.dev") ),
-                     3, 4, 0, 1,
-                     0, 0, 4, 4 );
-
-  for ( i = 0; i < 2; ++i ) {
-
-    j = fMove ? i : !i;
-
-    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       pw = gtk_label_new ( sz ),
-                       0, 1, i + 1, i + 2, 
-                       0, 0, 4, 4 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( _("%d pips"), anPips[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       1, 2, i + 1, i + 2, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( "%7.3f", arMu[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       2, 3, i + 1, i + 2, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-    sz = g_strdup_printf ( "%7.3f", arSigma[ j ] );
-    gtk_table_attach ( GTK_TABLE ( pwTable ), 
-                       gtk_label_new ( sz ),
-                       3, 4, i + 1, i + 2, 
-                       0, 0, 4, 4 );
-    g_free ( sz );
-
-  }
-
-  /* cubeless gwc */
-
-  sz = g_strdup_printf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%"),
-                         ap[ fMove ].szName, r * 100.0f );
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       pw = gtk_label_new ( sz ),
-                       FALSE, FALSE, 4 );
-  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-  g_free ( sz );
-
-  /* 
-   * effective pip count 
-   */
-
-  for ( i = 0; i < 2; ++i ) {
-    arEPC[ i ] = arMu[ i ] * x;
-    arWastage[ i ] = arEPC[ i ] - anPips[ i ];
-  }
-
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       EffectivePipCount( arEPC, arWastage, !fMove, NULL ),
-                       FALSE, FALSE, 4 );
-
-  return pwp;
-
-}
-
 static void
 PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
@@ -700,7 +254,7 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
   gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
   gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
-  prw->padjTrials = GTK_ADJUSTMENT(gtk_adjustment_new(576, 1, 
+  prw->padjTrials = GTK_ADJUSTMENT(gtk_adjustment_new(5760, 1, 
                                                       1296 * 1296, 36, 36, 0 ));
   pw = gtk_hbox_new( FALSE, 0 );
   gtk_box_pack_start( GTK_BOX( pwvbox), pw, FALSE, FALSE, 4 );
@@ -827,17 +381,17 @@ GTKShowRace ( int anBoard[ 2 ][ 25 ] ) {
                              KeithPage ( anBoard, prw->fMove ),
                              gtk_label_new ( _("Keith Count") ) );
 
-  /* one chequer */
-
-  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                             OneChequerPage ( anBoard, prw->fMove ),
-                             gtk_label_new ( _("One-Chequer Bearoff") ) );
-
   /* One sided rollout */
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              OSRPage ( anBoard, prw ),
-                             gtk_label_new ( _("One-Sided Rollout") ) );
+                             gtk_label_new ( _("One-Sided Rollout/Database") ) );
+
+  /* Two-sided database */
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                             TwoSidedPage ( anBoard, prw->fMove ),
+                             gtk_label_new ( _("Two-Sided Database") ) );
+
 
   /* show dialog */
 

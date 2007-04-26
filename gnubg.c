@@ -65,7 +65,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "progress.h"
 #include "osr.h"
 #include "format.h"
-#include "onechequer.h"
 #include "relational.h"
 #include "credits.h"
 #include "external.h"
@@ -171,20 +170,6 @@ int fCheat = FALSE;
 unsigned int afCheatRoll[ 2 ] = { 0, 0 };
 int fGotoFirstGame = FALSE;
 float rRatingOffset = 2050;
-
-
-/* Setup for Hugh Sconyers 15x15 full bearoff */
-
-/* The DVD variables are used for the "show bearoff" command */
-
-int fSconyers15x15DVD = FALSE;            /* TRUE if you have Hugh's dvds */
-char szPathSconyers15x15DVD[ BIG_PATH ]; /* Path to Sconyers' databases */
-
-int fSconyers15x15Disk = FALSE;          /* TRUE if you have copied Hugh's
-                                            bearoff database to disk and
-                                            want to use it for evaluations and
-                                            analysis */
-char szPathSconyers15x15Disk[ BIG_PATH ];/* Path to Sconyers's databases */
 
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
@@ -532,7 +517,6 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTSEED[] = N_("[seed]"),
     szOPTSIZE[] = N_("[size]"),
     szOPTVALUE[] = N_("[value]"),
-    szPATH[] = N_("<path>"),
     szPLAYER[] = N_("<player>"),
     szPLAYEROPTRATING[] = N_("<player> [rating]"),
     szPLIES[] = N_("<plies>"),
@@ -957,40 +941,6 @@ command cER = {
     { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, N_("Specify the "
       "equity loss for a very unlucky roll"), szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acSetBearoffSconyers15x15Disk[] = {
-  { "enable", CommandSetBearoffSconyers15x15DiskEnable, 
-    N_("Enable use of Hugh Sconyers' full bearoff database in evaluations"),
-    szONOFF, &cOnOff },
-  { "path", CommandSetBearoffSconyers15x15DiskPath, 
-    N_("Set path to Hugh Sconyers' bearoff databases"),
-    szPATH, NULL },
-  { NULL, NULL, NULL, NULL, NULL }
-}, acSetBearoffSconyers15x15DVD[] = {
-  { "enable", CommandSetBearoffSconyers15x15DVDEnable, 
-    N_("Enable use of Hugh Sconyers' full bearoff database (browse only)"),
-    szONOFF, &cOnOff },
-  { "path", CommandSetBearoffSconyers15x15DVDPath, 
-    N_("Set path to Hugh Sconyers' bearoff databases"),
-    szPATH, NULL },
-  { NULL, NULL, NULL, NULL, NULL }
-}, acSetBearoffSconyers15x15[] = {
-  { "disk", NULL, 
-    N_("Usage of Hugh Sconyer's full bearoff database for analysis "
-       "and evaluations"), NULL, acSetBearoffSconyers15x15Disk },
-  { "dvd", NULL, 
-    N_("Usage of Hugh Sconyer's full bearoff database (browse only) "),
-    NULL, acSetBearoffSconyers15x15DVD },
-  { NULL, NULL, NULL, NULL, NULL }
-}, acSetBearoffSconyers[] = {
-  { "15x15", NULL, 
-    N_("Parameters for Hugh Sconyer's full bearoff database"),
-    NULL, acSetBearoffSconyers15x15 },
-  { NULL, NULL, NULL, NULL, NULL }
-}, acSetBearoff[] = {
-  { "sconyers", NULL, N_("Control parameters for gnubg's use of "
-                         "Hugh Sconyers' bearoff databases"),
-    NULL, acSetBearoffSconyers },
-  { NULL, NULL, NULL, NULL, NULL }
 }, acSetEvalParam[] = {
   { "type", CommandSetEvalParamType,
     N_("Specify type (evaluation or rollout)"), szER, &cER },
@@ -1652,8 +1602,6 @@ command cER = {
       "graphical interface"), szKEYVALUE, NULL },
     { "automatic", NULL, N_("Perform certain functions without user input"),
       NULL, acSetAutomatic },
-    { "bearoff", NULL, N_("Control parameters for bearoff databases"),
-      NULL, acSetBearoff },
     { "beavers", CommandSetBeavers, 
       N_("Set whether beavers are allowed in money game or not"), 
       szVALUE, NULL },
@@ -1868,8 +1816,6 @@ command cER = {
       NULL, NULL },
     { "egyptian", CommandShowEgyptian,
       N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
-    { "epc", CommandShowEPC,
-      N_("Show Effective Pip Count for position"), szPOSITION, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
 #if USE_GTK
@@ -1900,8 +1846,6 @@ command cER = {
          "and the entire match"), NULL, NULL },
     { "met", CommandShowMatchEquityTable, 
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
-    { "onechequer", CommandShowOneChequer, 
-      N_("Show misc race theory"), NULL, NULL },
     { "onesidedrollout", CommandShowOneSidedRollout, 
       N_("Show misc race theory"), NULL, NULL },
     { "output", CommandShowOutput, N_("Show how results will be formatted"),
@@ -5326,20 +5270,6 @@ extern void CommandSaveSettings( char *szParam ) {
       fprintf( pf, "set analysis player %d analyse %s\n",
                i, afAnalysePlayers[ i ] ? "yes" : "no" );
 
-    /* Bearoff Settings */
-
-    fprintf( pf,
-             "set bearoff sconyers 15x15 dvd enable %s\n"
-             "set bearoff sconyers 15x15 dvd path \"%s\"\n",
-             fSconyers15x15DVD ? "yes" : "no",
-             szPathSconyers15x15DVD);
-
-    fprintf( pf,
-             "set bearoff sconyers 15x15 disk enable %s\n"
-             "set bearoff sconyers 15x15 disk path \"%s\"\n",
-             fSconyers15x15Disk ? "yes" : "no",
-             szPathSconyers15x15Disk);
-
     /* Render preferences */
 
     fputs( RenderPreferencesCommand( GetMainAppearance(), szTemp ), pf );
@@ -6643,39 +6573,6 @@ static void version(void)
 		puts(gettext(pch));
 }
 
-static char *
-ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
-
-  char *pch;
-  char *pchToken;
-
-#if USE_GTK
-  if ( fX )
-    return GTKChangeDisk( szMsg, fChange, szMissingFile );
-
-#endif
-
-  outputf( szMsg, szMissingFile );
-  outputl( "" );
-
-  if ( ( pch = GetInput( _("Enter new path or press "
-                           "[enter] if unchanged") ) ) ) {
-    printf( "path returned: '%s'\n", pch );
-    pchToken = pch;
-    if ( NextToken( &pchToken ) ) {
-      pchToken = strdup( pchToken );
-      free( pch );
-      printf( "return '%s'\n", pchToken );
-      return pchToken;
-    }
-    g_free( pch );
-  }
-
-  printf( "nada...\n");
-  return NULL;
-
-}
-
 
 #if WIN32
 
@@ -6965,19 +6862,6 @@ static void init_defaults()
 #endif
 }
 
-static void init_sconyers()
-{
-	/* Hugh Sconyers 15x15 bearoff database */
-	if (fSconyers15x15Disk)
-		pbc15x15 = BearoffInit(NULL, szPathSconyers15x15Disk,
-				       BO_SCONYERS_15x15 | BO_ON_DISK,
-				       NULL);
-	if (fSconyers15x15DVD)
-		pbc15x15_dvd = BearoffInit(NULL, szPathSconyers15x15DVD,
-					   BO_SCONYERS_15x15 | BO_ON_DVDS,
-					   (void (*)()) ChangeDisk);
-}
-
 int main(int argc, char *argv[])
 {
 #if USE_GTK
@@ -7115,7 +6999,6 @@ int main(int argc, char *argv[])
 #endif
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 500);
         init_nets(nNewWeights, fNoBearoff);
-        init_sconyers();
 
 #if defined(WIN32) && HAVE_SOCKETS
 	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 500);
@@ -7723,7 +7606,7 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 
     /* one-sided rollout */
 
-    int nTrials = 576;
+    int nTrials = 5760;
     float arMux[ 2 ];
     float ar[ 5 ];
     int i;
@@ -7751,118 +7634,6 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 
 
 }
-
-
-static float
-LinearInterpolation( const float x0, const float y0,
-                     const float x1, const float y1,
-                     const float x ) {
-
-  return ( x - x0 ) * ( y1 - y0 ) / ( x1 - x0 ) + y0;
-
-}
-
-
-
-
-extern char *
-ShowEPC( int anBoard[ 2 ][ 25 ] ) {
-
-  unsigned int anPips[ 2 ];
-  float arEPC[ 2 ];
-  int f;
-  char *sz;
-  char *szx;
-  char *szy;
-  char *szz;
-
-  float r;
-  int i, j;
-  float aar[ 2 ][ 2 ];
-  float ar[ 2 ];
-  unsigned int an[ 2 ];
-  float arMu[ 2 ];
-  float arSigma[ 2 ];
-
-  if ( EPC( anBoard, arEPC, arMu, arSigma, &f, FALSE ) ) {
-    sz = g_strdup( _("Sorry, EPCs cannot be calculated for this position") );
-    return sz;
-  }
-
-  PipCount( anBoard, anPips );
-
-  szx = g_strdup_printf( _("Effective pip count from %s:\n\n"),
-                         !f ? _("one-sided bearoff database") : 
-                         _("one-sided rollout") );
-    
-  szy = g_strdup_printf( "         %-10.10s %-10.10s\n"
-                         "%-10.10s %7.3f   %7.3f\n\n"
-                         "%-10.10s %3d       %3d\n"
-                         "%-10.10s %7.3f   %7.3f\n\n"
-                         ,
-                         _("Player"), _("Opponent"),
-                         _("EPC"), arEPC[ 1 ], arEPC[ 0 ],
-                         _("Pip count"), anPips[ 1 ], anPips[ 0 ],
-                         _("Wastage"), 
-                         arEPC[ 1 ] - anPips[ 1 ], arEPC[ 0 ] - anPips[ 0 ] );
-  
-  /* estimate gwc */
-
-  for ( i = 0; i < 2; ++i )
-    for ( j = 0; j < 2; ++j ) {
-      an[ 0 ] = (int)arEPC[ 0 ] + i;
-      an[ 1 ] = (int)arEPC[ 1 ] + j;
-      aar[ i ][ j ] = GWCFromPipCount( an, NULL, NULL );
-    }
-
-  /* Some spiffy linear interpolation in two dimensions. This is 
-     probably not correct, but it's the best we can do for now. */
-
-  an[ 0 ] = (int)arEPC[ 0 ];
-  an[ 1 ] = (int)arEPC[ 0 ] + 1;
-
-  ar[ 0 ] = LinearInterpolation( (float)an[ 0 ], aar[ 0 ][ 0 ], 
-                                 (float)an[ 1 ], aar[ 1 ][ 0 ], 
-                                 arEPC[ 0 ] );
-
-  ar[ 1 ] = LinearInterpolation( (float)an[ 0 ], aar[ 0 ][ 1 ], 
-                                 (float)an[ 1 ], aar[ 1 ][ 1 ], 
-                                 arEPC[ 0 ] );
-
-  an[ 0 ] = (int)arEPC[ 1 ];
-  an[ 1 ] = (int)arEPC[ 1 ] + 1;
-
-  r = LinearInterpolation( (float)an[ 0 ], ar[ 0 ], (float)an[ 1 ], ar[ 1 ], arEPC[ 1 ] );
-
-  szz = g_strdup_printf( _("Estimated gwc: %8.4f (one chequer approximation)\n"), r );
-
-  sz = g_strconcat( szx, szy, szz, NULL );
-
-  g_free( szx );
-  g_free( szy );
-  g_free( szz );
-
-  /* GWC from mu and sigma */
-
-  if ( arSigma[ 0 ] >= 0.0f ) {
-
-    szx = sz;
-    szy = g_strdup_printf( _("Estimated gwc: %8.4f (from mean and std.dev)\n"),
-                           GWCFromMuSigma( arMu, arSigma ) );
-    sz = g_strconcat( szx, szy, NULL );
-    g_free( szx );
-
-  }
-  
-  szx = sz;
-  sz = g_strconcat( sz, _("\nEPC = 8.167 * Average rolls\n"
-                          "Wastage = EPC - pips\n\n" ), NULL );
-  g_free( szx );
-
-  return sz;
-
-}
-
 
 extern char * locale_from_utf8 ( const char *sz) {
     char *ret;

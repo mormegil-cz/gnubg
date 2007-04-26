@@ -29,6 +29,8 @@
 #endif
 #include <glib.h>
 #include <ctype.h>
+#include <math.h>
+
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -40,7 +42,6 @@
 #include "matchid.h"
 #include <glib/gi18n.h>
 #include "sound.h"
-#include "onechequer.h"
 #include "osr.h"
 #include "positionid.h"
 #include "boarddim.h"
@@ -56,7 +57,6 @@
 #include "gtkmet.h"
 #include "gtkrolls.h"
 #include "gtktempmap.h"
-#include "gtkbearoff.h"
 #include "gtkoptions.h"
 #else
 #include <glib.h>
@@ -1104,36 +1104,60 @@ extern void CommandShowWarranty( char *sz ) {
 	ShowPaged( aszWarranty );
 }
 
-extern void CommandShowKleinman( char *sz ) {
 
-    int an[ 2 ][ 25 ];
-    unsigned int anPips[ 2 ];
-    float fKC;
+#if !HAVE_ERF
+extern double erf( double x );
+#endif
 
-    if( !*sz && ms.gs == GAME_NONE ) {
-        outputl( _("No position specified and no game in progress.") );
-        return;
-    }
- 
-    if( ParsePosition( an, &sz, NULL ) < 0 )
-	return;
+extern void show_kleinman( int an[2][25], char *sz)
+{
+	unsigned int anPips[2];
+	float fKC;
+	double rK;
+	int diff, sum;
+
+	PipCount(an, anPips);
+	sprintf(sz, _("Leader Pip Count : %d\n"), anPips[1]);
+	sprintf(strchr(sz, 0), _("Trailer Pip Count: %d\n\n"), anPips[0]);
+
+	sum = anPips[0] + anPips[1];
+	diff = anPips[0] - anPips[1];
+
+	sprintf(strchr(sz, 0), _("sum              : %d\n"), sum);
+	sprintf(strchr(sz, 0), _("diff             : %d\n\n"), diff);
+	rK = (double) (diff + 4) / (2 * sqrt(sum - 4));
+	sprintf(strchr(sz, 0), _("K = (diff+4)/(2 sqrt(sum-4)) = %8.4g\n"), rK);
+
+	fKC = KleinmanCount(anPips[1], anPips[0]);
+
+	sprintf(strchr(sz, 0), _("Cubeless Winning Chance: %.4f\n\n"),
+		fKC);
+}
+
+
+extern void CommandShowKleinman(char *sz)
+{
+	char out[500];
+	int an[ 2 ][ 25 ];
+
+	if (!*sz && ms.gs == GAME_NONE) {
+		outputl(_
+			("No position specified and no game in progress."));
+		return;
+	}
+
+	if (ParsePosition(an, &sz, NULL) < 0)
+		return;
 
 #if USE_GTK
-    if ( fX ) {
-      GTKShowRace ( an );
-      return;
-    }
+	if (fX) {
+		GTKShowRace(an);
+		return;
+	}
 #endif
-     
-    PipCount( an, anPips );
- 
-    fKC = KleinmanCount (anPips[1], anPips[0]);
-    if (fKC == -1.0)
-        outputf (_("Pipcount unsuitable for Kleinman Count.\n"));
-    else
-        outputf (_("Cubeless Winning Chance (%s on roll): %.4f\n"), 
-                 ap[ ms.fMove ].szName, fKC );
- }
+	show_kleinman(an, out);
+	outputf(out);
+}
 
 #if USE_MULTITHREAD
 extern void CommandShowThreads(char *sz)
@@ -1147,138 +1171,138 @@ extern void CommandShowThreads(char *sz)
 }
 #endif
 
-extern void CommandShowThorp( char *sz ) {
+extern void show_thorp(int an[2][25], char *sz)
+{
+	int nLeader, nTrailer;
+	float adjusted;
 
-    int an[ 2 ][ 25 ];
-    int nLeader, nTrailer;
-    int nDiff;
+	ThorpCount(an, &nLeader, &adjusted, &nTrailer);
+	sprintf(sz, _("Thorp Count Leader            : %d\n"), nLeader);
+	sprintf(strchr(sz,0), _("Thorp Count Leader(+1/10)    L: %.1f\n"), adjusted);
+	sprintf(strchr(sz,0), _("Thorp Count Trailer          T: %d\n\n"), nTrailer);
 
-    if( !*sz && ms.gs == GAME_NONE ) {
-        outputl( _("No position specified and no game in progress.") );
-        return;
-    }
+	if (nTrailer >= (adjusted + 2))
+		sprintf(strchr(sz,0), _("Double, Drop (since L <= T - 2)\n"));
+        else if (nTrailer >= (adjusted - 1))
+		sprintf(strchr(sz,0), _("Redouble, Take (since L <= T + 1 )\n"));
+	else if (nTrailer >= (adjusted - 2))
+		sprintf(strchr(sz,0), _("Double, Take (since L <= T + 2)\n"));
+	else
+		sprintf(strchr(sz,0), _("No Double, Take (since L > T + 2)\n"));
+}
 
-    if( ParsePosition( an, &sz, NULL ) < 0 )
-	return;
+extern void CommandShowThorp(char *sz)
+{
+	char out[500];
+        int an[2][25];
+
+	if (!*sz && ms.gs == GAME_NONE) {
+		outputl(_
+			("No position specified and no game in progress."));
+		return;
+	}
+
+	if (ParsePosition(an, &sz, NULL) < 0)
+		return;
 
 #if USE_GTK
-    if ( fX ) {
-      GTKShowRace ( an );
-      return;
-    }
+	if (fX) {
+		GTKShowRace(an);
+		return;
+	}
 #endif
-     
-    ThorpCount ( an, &nLeader, &nTrailer );
-
-    outputf("L = %d  T = %d  -> ", nLeader, nTrailer);
-
-    if (nTrailer >= (nLeader - 1))
-      output(_("Redouble, "));
-    else if (nTrailer >= (nLeader - 2))
-      output(_("Double, "));
-    else
-      output(_("No double, "));
-    
-    if (nTrailer >= (nLeader + 2))
-      outputl(_("drop"));
-    else
-      outputl(_("take"));
-    
-    if( ( nDiff = nTrailer - nLeader ) > 13 )
-      nDiff = 13;
-    else if( nDiff < -37 )
-      nDiff = -37;
-    
-    outputf(_("Bower's interpolation: %d%% cubeless winning "
-              "chance (%s on roll)\n"), 
-            74 + 2 * nDiff, ap[ ms.fMove ].szName );
+	show_thorp(an, out);
+	g_print(out);
 
 }
 
+extern void show_8912(int anBoard[2][25], char *sz)
+{
+	unsigned int anPips[2];
+	float ahead;
+	PipCount(anBoard, anPips);
+	sprintf(sz, _("Leader Pip Count : %d\n"), anPips[1]);
+	sprintf(strchr(sz,0), _("Trailer Pip Count: %d\n\n"), anPips[0]);
+	ahead = ((float)anPips[0] - (float)anPips[1]) / (float)anPips[1] * 100.0f;
+	sprintf(strchr(sz,0), _("Leader is %.1f percent ahead\n"), ahead);
+
+	if (ahead > 12.0f)
+		sprintf(strchr(sz,0), _("Double, Drop (ahead > 12 percent)\n"));
+	else if (ahead > 9.0f)
+		sprintf(strchr(sz,0), _("Double, Take (12 percent > ahead > 9 percent)\n"));
+	else if (ahead > 8.0f)
+		sprintf(strchr(sz,0), _("Redouble, Take (12 percent > ahead > 8 percent)\n"));
+	else
+		sprintf(strchr(sz,0), _("NoDouble (8 percent > ahead)\n"));
+}
 
 extern void CommandShow8912(char *sz)
 {
 
-  int anBoard[ 2 ][ 25 ];
-  unsigned int anPips[ 2 ];
-  float arMu[ 2 ];
-  float arSigma[ 2 ];
-  float r;
-  float ahead;
+	int anBoard[2][25];
+	char out[500];
 
-  if( !*sz && ms.gs == GAME_NONE ) {
-    outputl( _("No position specified and no game in progress.") );
-    return;
-  }
-  
-  if( ParsePosition( anBoard, &sz, NULL ) < 0 )
-    return;
-     
+	if (!*sz && ms.gs == GAME_NONE) {
+		outputl(_
+			("No position specified and no game in progress."));
+		return;
+	}
+
+	if (ParsePosition(anBoard, &sz, NULL) < 0)
+		return;
 
 #if USE_GTK
-  if ( fX ) {
-    GTKShowRace ( anBoard );
-    return;
-  }
+	if (fX) {
+		GTKShowRace(anBoard);
+		return;
+	}
 #endif
+	show_8912(anBoard, out);
+	outputl(out);
+}
 
-  /* calculate from one chequer bearoff */
+extern void show_keith( int an[2][25], char *sz)
+{
+	int pn[2];
+	float fL;
 
-  PipCount ( anBoard, anPips );
+	KeithCount ( an, pn);
 
-  r = GWCFromPipCount( anPips, arMu, arSigma );
+	fL = (float) pn[1]*8.0f /7.0f;
+	sprintf(sz, _("Keith Count Leader            : %d\n"), pn[1]);
+	sprintf(strchr(sz,0), _("Keith Count Leader(+1/7)     L: %.1f\n"), fL);
+	sprintf(strchr(sz,0), _("Keith Count Trailer          T: %d\n\n"), pn[0]);
 
-  outputf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%\n\n"), 
-            ap[ ms.fMove ].szName, r * 100.0f );
-
-  ahead = (float)(anPips[0]-anPips[1])/anPips[1]*100.0f;
-  outputf ( _("Leader is %.1f%% ahead\n"), ahead );
-
-  if (ahead > 12.0f)
-      outputf ( _("Double, Drop\n"));
-  else if (ahead > 9.0f)
-      outputf ( _("Double, Take\n"));
-  else if (ahead > 8.0f)
-      outputf ( _("Redouble, Take\n"));
+	if ((float)pn[0] >= (fL - 2.0f))
+		sprintf(strchr(sz,0), _("Double, Drop (since L <= T+2)"));
+	else if ((float)pn[0] >= (fL - 3.0f))
+		sprintf(strchr(sz,0), _("Redouble, Take (since L <= T+3)"));
+	else if ((float)pn[0] >= (fL - 4.0f))
+		sprintf(strchr(sz,0), _("Double, Take (since L <= T + 4)"));
+	else
+		sprintf(strchr(sz,0), _("No Double, Take (since L > T + 4)"));
 }
 
 
 extern void CommandShowKeith( char *sz ) {
+	char out[500];
+	int an[ 2 ][ 25 ];
+	if( !*sz && ms.gs == GAME_NONE ) {
+		outputl( _("No position specified and no game in progress.") );
+		return;
+	}
 
-    int an[ 2 ][ 25 ];
-    int pn[2];
-    float fL;
-
-    if( !*sz && ms.gs == GAME_NONE ) {
-        outputl( _("No position specified and no game in progress.") );
-        return;
-    }
-
-    if( ParsePosition( an, &sz, NULL ) < 0 )
-	return;
+	if( ParsePosition( an, &sz, NULL ) < 0 )
+		return;
 
 #if USE_GTK
-    if ( fX ) {
-      GTKShowRace ( an );
-      return;
-    }
+	if ( fX ) {
+		GTKShowRace ( an );
+		return;
+	}
 #endif
-
-    KeithCount ( an, pn);
-    fL = (float) pn[1]*8.0f /7.0f;
-    outputf("L = %d (%.1f)  T = %d  -> ", pn[1], fL, pn[0]);
-    if (pn[0] >= (fL - 3))
-      output(_("Redouble, "));
-    else if (pn[0] >= (fL - 4))
-      output(_("Double, "));
-    else
-      output(_("No double, "));
-    
-    if (pn[0] >= (fL - 2))
-      outputl(_("Drop"));
-    else
-      outputl(_("Take"));
-    
+	show_keith(an, out);
+	output(out);
 }
 
 extern void CommandShowBeavers( char *sz ) {
@@ -1374,65 +1398,11 @@ EffectivePipCount( const float arMu[ 2 ], const unsigned int anPips[ 2 ] ) {
            
 }
 
-
-extern void
-CommandShowOneChequer ( char *sz ) {
-
-  int anBoard[ 2 ][ 25 ];
-  unsigned int anPips[ 2 ];
-  float arMu[ 2 ];
-  float arSigma[ 2 ];
-  int i, j;
-  float r;
-
-  if( !*sz && ms.gs == GAME_NONE ) {
-    outputl( _("No position specified and no game in progress.") );
-    return;
-  }
-  
-  if( ParsePosition( anBoard, &sz, NULL ) < 0 )
-    return;
-     
-
-#if USE_GTK
-  if ( fX ) {
-    GTKShowRace ( anBoard );
-    return;
-  }
-#endif
-
-  /* calculate one chequer bearoff */
-
-  PipCount ( anBoard, anPips );
-
-  r = GWCFromPipCount( anPips, arMu, arSigma );
-
-  outputl ( _("Number of rolls to bear off, assuming each player has one "
-              "chequer only." ) );
-  outputl ( _("                       "
-              "Pips     Avg. rolls   Std.dev.") );
-  for ( i = 0; i < 2; ++i ) {
-    j = ms.fMove ? i : !i;
-    outputf ( _("%-20.20s   %4d     %7.3f       %7.3f\n"),
-              ap[ i ].szName,
-              anPips[ j ], arMu[ j ], arSigma[ j ] );
-  }
-
-  outputf ( _("Estimated cubeless gwc (%s on roll): %8.4f%%\n\n"), 
-            ap[ ms.fMove ].szName, r * 100.0f );
-
-  /* effective pip count */
-
-  EffectivePipCount( arMu, anPips );
-
-}
-
-
 extern void
 CommandShowOneSidedRollout ( char *sz ) {
 
   int anBoard[ 2 ][ 25 ];
-  int nTrials = 576;
+  int nTrials = 5760;
   float arMu[ 2 ];
   float ar[ 5 ];
   unsigned int anPips[ 2 ];
@@ -2256,165 +2226,63 @@ CommandShowCubeEfficiency( char *sz ) {
 
 }
 
+extern void show_bearoff( int an[2][25], char *szTemp)
+{
+        strcpy(szTemp, _("The following numbers are for money games only.\n\n"));
+        switch( ms.bgv ) {
+                case VARIATION_STANDARD:
+                case VARIATION_NACKGAMMON:
+                        if ( isBearoff( pbcTS, an ) ) {
+                                BearoffDump( pbcTS, an, szTemp );
+                        } 
+                        else if ( isBearoff( pbc2, an ) ) {
+                                BearoffDump( pbc2, an, szTemp );
+                        }
+                        else
+                                strcpy(szTemp, _("Position not in any two-sided database\n"));
+                        break;
 
-extern void
-CommandShowBearoff( char *sz ) {
+                case VARIATION_HYPERGAMMON_1:
+                case VARIATION_HYPERGAMMON_2:
+                case VARIATION_HYPERGAMMON_3:
 
-  char szTemp[ 4096 ];
+                        if ( isBearoff( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], 
+                                                an ) ) {
+                                BearoffDump( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], an, szTemp );
+                                outputl( szTemp );
+                        }
 
-	if( ms.gs != GAME_PLAYING )
-	{
-		outputl( _("No game is being played.") );
-		return;
-	}
+                        break;
 
+                default:
+
+                        g_assert( FALSE );
+
+        }
+
+}
+
+extern void CommandShowBearoff( char *sz ) {
+        char out[500];
+	int an[ 2 ][ 25 ];
+
+        if( ms.gs != GAME_PLAYING )
+        {
+                outputl( _("No game is being played.") );
+                return;
+        }
+
+        if (ParsePosition(an, &sz, NULL) < 0)
+                return;
 #if USE_GTK
-  if ( fX ) {
-    GTKShowBearoff( &ms );
-    return;
-  }
-
-#endif  
-
-
-  switch( ms.bgv ) {
-  case VARIATION_STANDARD:
-  case VARIATION_NACKGAMMON:
-    
-    /* Sconyer's huge database */
-    if ( isBearoff( pbc15x15_dvd, ms.anBoard ) ) {
-      strcpy( szTemp, "" );
-      ShowBearoff( szTemp, &ms, pbc15x15_dvd );
-      outputl( szTemp );
-    } 
-    
-    /* gnubg's own databases */
-    if ( isBearoff( pbcTS, ms.anBoard ) ) {
-      strcpy( szTemp, "" );
-      ShowBearoff( szTemp, &ms, pbcTS );
-      outputl( szTemp );
-    } 
-    else if ( isBearoff( pbc2, ms.anBoard ) ) {
-      strcpy( szTemp, "" );
-      ShowBearoff( szTemp, &ms, pbc2 );
-      outputl( szTemp );
-    }
-
-    break;
-
-  case VARIATION_HYPERGAMMON_1:
-  case VARIATION_HYPERGAMMON_2:
-  case VARIATION_HYPERGAMMON_3:
-
-    if ( isBearoff( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], 
-                    ms.anBoard ) ) {
-      strcpy( szTemp, "" );
-      ShowBearoff( szTemp, &ms, 
-                    apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ] );
-      outputl( szTemp );
-    }
-
-    break;
-
-  default:
-
-    g_assert( FALSE );
-
-  }
-    
+        if (fX) {
+                GTKShowRace(an);
+                return;
+        }
+#endif
+        show_bearoff(an, out);
 }
 
-extern void
-ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc ) {
-
-  if ( pms->anDice[ 0 ] <= 0 ) {
-    /* no dice rolled */
-    if ( isBearoff( pbc, pms->anBoard ) )
-      BearoffDump( pbc, pms->anBoard, sz );
-    else
-      sprintf( sz, _("Position not in database") );
-  }
-  else {
-    /* dice rolled */
-    movelist ml;
-    int aiBest[ 4 ];
-    float arBest[ 4 ];
-    float arEquity[ 4 ];
-    int anBoard[ 2 ][ 25 ];
-    unsigned int i, j;
-    static char *aszCube[] = {
-      N_("No cube"),
-      N_("Owned cube"),
-      N_("Centered cube"),
-      N_("Opponent owns cube")
-    };
-    char szMove[ 33 ];
-    static int aiPerm[ 4 ] = { 0, 3, 2, 1 };
-
-    g_assert ( pms->bgv <= VARIATION_NACKGAMMON );
-    
-    GenerateMoves ( &ml, pms->anBoard, 
-                    pms->anDice[ 0 ], pms->anDice[ 1 ], FALSE );
-
-    if ( ! ml.cMoves ) {
-      sprintf( sz, _("No legal moves!") );
-      return;
-    }
-
-    /* find best move */
-
-    for ( i = 0; i < 4; ++i ) {
-      aiBest[ i ] = -1;
-      arBest[ i ] = -9999.0f;
-    }
-    
-    for ( i = 0; i < ml.cMoves; ++i ) {
-
-      PositionFromKey( anBoard, ml.amMoves[ i ].auch );
-      SwapSides( anBoard );
-
-      if ( isBearoff( pbc, anBoard ) ) {
-        if ( PerfectCubeful( pbc, anBoard, arEquity ) ) {
-          sprintf( sz, _("Interrupted!") );
-          return;
-        }
-      }
-      else {
-        /* whoops, the resulting position is not in the bearoff database */
-        sprintf( sz, _("The position %s is not in the bearoff database"),
-                 PositionID( anBoard ) );
-        return;
-      }
-
-      for ( j = 0; j < 4; ++j )
-        if ( -arEquity[ j ] > arBest[ j ] ) {
-          arBest[ j ] = - arEquity[ j ];
-          aiBest[ j ] = i;
-        }
-    }
-
-    /* output */
-
-    sprintf( sz, _("Equities after rolling %d%d:\n\n"),
-             pms->anDice[ 0 ], pms->anDice[ 1 ] );
-    sprintf( strchr( sz, 0 ),
-             "%-20.20s %-10.10s %-32.32s\n",
-             _("Cube Position"), _("Equity"), _("Best Move") );
-
-    for ( i = 0; i < 4; ++i ) {
-
-      j = aiPerm[ i ];
-      sprintf( strchr( sz, 0 ), "%-20.20s %+7.4f    %-32.32s\n",
-               gettext( aszCube[ i ] ),
-               arBest[ j ],
-               FormatMove( szMove, pms->anBoard, 
-                           ml.amMoves[ aiBest[ j ] ].anMove ) );
-
-    }
-
-  }
-
-}
 
 
 extern void
@@ -2507,34 +2375,6 @@ extern void CommandShowTCTutorial( char *sz ) {
 	ShowPaged(aszTcTutorial);
 }
 #endif
-
-
-extern void
-CommandShowEPC( char *sz ) {
-
-  int anBoard[ 2 ][ 25 ];
-
-  if( ms.gs != GAME_PLAYING ) {
-    outputl( _("There must be a game in progress to set show "
-               "effective pip count.") );
-    return;
-  }
-
-  if ( ParsePosition( anBoard, &sz, NULL ) ) 
-    outputl( _("Illegal board") );
-
-#if USE_GTK
-  if ( fX )
-    GTKShowEPC( anBoard );
-  else
-#endif /* USE_GTK */
-    {
-      char *sz = ShowEPC( anBoard );
-      output( sz );
-      g_free( sz );
-    }
-
-}
 
 
 extern void
