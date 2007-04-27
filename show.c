@@ -2353,19 +2353,6 @@ CommandShowMatchResult( char *sz ) {
             
 }
 
-#if USE_TIMECONTROL
-
-#include "tctutorial.h"
-
-extern void CommandShowTCTutorial( char *sz ) {
-#if USE_GTK
-    if ( fX )	/* This should be converted to texi and added to the manual */
-	ShowList( aszTcTutorial, _("Time Control Tutorial"), NULL );
-    else
-#endif
-	ShowPaged(aszTcTutorial);
-}
-#endif
 
 
 extern void

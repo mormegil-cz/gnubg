@@ -86,9 +86,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "gtkwindows.h"
 #endif
 
-#if USE_TIMECONTROL
-#include "timecontrol.h"
-#endif
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -142,11 +139,6 @@ matchstate ms = {
     TRUE, /* fCubeUse */
     TRUE, /* fJacoby */
     GAME_NONE /* gs */
-#if USE_TIMECONTROL
-	, {{{{0}, {0}, {0}}, {{0}, {0}, {0}}}, {0}, 0}, /* gc */
-	{{0}, {0}}, /* timeleft */
-	{0, 0} /* timeouts */
-#endif
 };
 matchinfo mi;
 
@@ -534,21 +526,6 @@ static char szDICE[] = N_("<die> <die>"),
     szMAXERR[] = N_("<fraction>"),
     szMINGAMES[] = N_("<minimum games to rollout>"),
     szFOLDER[] = N_("<folder>"),
-#if USE_TIMECONTROL
-    szSETTC[] = N_("[<timecontrol>|off]"),
-    szSETTCTYPE[] = N_("plain|bronstein|fischer|hourglass"),
-    szSETTCTIME[] = N_("<time>"),
-    szSETTCTRANSITION[] = N_("<criterion> <time control>"),
-    szSETTCPOINT[] = N_("<time per point>"),
-    szSETTCMOVE[] = N_("<time per move>"),
-    szSETTCMULT[] = N_("<factor>"),
-    szSETTCPENALTY[] = N_("<points>|lose"),
-    szSETTCNEXT[] = N_("<next time control> [<opponent's next time control>]"),
-    szSETTCNAME[] = N_("<name>"),
-    szSETTCUNNAME[] = N_("<name>"),
-    szSHOWTC[] = N_("[<name> [<levels>]]"),
-    szSHOWTCLIST[] = N_("[all]"),
-#endif
 #if USE_GTK
 	szWARN[] = N_("[<warning>]"),
 	szWARNYN[] = N_("<warning> on|off"),
@@ -1712,19 +1689,6 @@ command cER = {
       N_("Control audio parameters"), NULL, acSetSound },
     { "styledgamelist", CommandSetStyledGameList, N_("Display colours for marked moves in game window"),
       szONOFF, &cOnOff },
-#if USE_TIMECONTROL
-    { "tc", CommandSetTimeControl, N_("Select time control to use"), szSETTC, NULL}, 
-    { "tcmovetime", CommandSetTCMove, N_("Set time per move"), szSETTCMOVE, NULL}, 
-    { "tcmultiplier", CommandSetTCMultiplier, N_("Set how much of remaining time to keep"), szSETTCMULT, NULL}, 
-    { "tcname", CommandSetTCName, N_("Name this time control setting"), szSETTCNAME, NULL}, 
-    { "tcnext", CommandSetTCNext, N_("Set next time control(s)"), szSETTCNEXT, NULL}, 
-    { "tcpenalty", CommandSetTCPenalty, N_("Set penalty type"), szSETTCPENALTY, NULL}, 
-    { "tcpointtime", CommandSetTCPoint, N_("Set total time per point in match"), szSETTCPOINT, NULL}, 
-    { "tctime", CommandSetTCTime, N_("Set total (added) time for entire match"), szSETTCTIME, NULL}, 
-    { "tctransition", CommandSetTCTransition, N_("Set time control transition"), szSETTCTRANSITION, NULL}, 
-    { "tctype", CommandSetTCType, N_("Set time control type"), szSETTCTYPE, NULL}, 
-    { "tcunname", CommandSetTCUnname, N_("Undefine a named time control setting"), szSETTCUNNAME, NULL}, 
-#endif
 #if USE_GTK
     { "theorywindow", CommandSetTheoryWindow, N_("Display game theory in window"),
       szONOFF, &cOnOff },
@@ -1880,14 +1844,6 @@ command cER = {
 #endif
     { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
       "position"), szOPTPOSITION, NULL },
-#if USE_TIMECONTROL
-    { "tc", CommandShowTimeControl, N_("Show time control information"),
-      szSHOWTC, NULL },
-    { "tclist", CommandShowTCList, N_("Show list of defined time controls"),
-      szSHOWTCLIST, NULL },
-    { "tctutorial", CommandShowTCTutorial, N_("Show time control tutorial"),
-      NULL, NULL },
-#endif
     { "training", CommandShowTraining, N_("Display the training parameters"),
       NULL, NULL },
     { "turn", CommandShowTurn, 
@@ -1908,11 +1864,6 @@ command cER = {
 }, acSwap[] = {
     { "players", CommandSwapPlayers, N_("Swap players"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-#if USE_TIMECONTROL
-}, acTc[] = {
-    { "show", CommandShowTimeControl, N_("alt show"), NULL, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
-#endif
 }, acTop[] = {
     { "accept", CommandAccept, N_("Accept a cube or resignation"),
       NULL, NULL },
@@ -2600,9 +2551,6 @@ extern void PortableSignalRestore( int nSignal, psighandler *p ) {
    the user if processing had been interrupted. */
 extern void ResetInterrupt( void ) {
     if( fInterrupt ) {
-#if USE_TIMECONTROL
-	if (ms.gs != GAME_TIMEOUT)
-#endif
 	{
 	outputl( _("(Interrupted)") );
 	outputx();
@@ -2759,45 +2707,6 @@ extern void GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms ) {
 			pms->fJacoby, nBeavers, pms->bgv );
 }
 
-#if USE_TIMECONTROL
-
-static void
-DisplayTimeAnalysis( const moverecord *pmr, const matchstate *pms )
-{
-  cubeinfo ci;
-  const xmovetime *pmt = &pmr->t;
-
-  if ( pmt->es.et == EVAL_NONE )
-    /* no analysis */
-    return ;
-
-  GetMatchStateCubeInfo ( &ci, pms );
-
-  outputf( ngettext( "Time penalty: %s loses %d point\n",
-		     "Time penalty: %s loses %d points\n",
-		     pmt->nPoints ),
-	   ap[ pmr->fPlayer ].szName, pmt->nPoints );
-
-  outputf( _("%-30.30s %s\n"),
-           _("Equity before time penalty:"),
-           OutputMWC( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], 
-                      &ci, TRUE ) );
-
-  outputf( _("%-30.30s %s\n"),
-           _("Equity after time penalty:"),
-           OutputMWC( pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], 
-                      &ci, TRUE ) );
-
-  outputf( _("%-30.30s %s\n"),
-           _("Lose from penalty:"),
-           OutputMWCDiff( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] , 
-                          pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], 
-                          &ci ) );
-
-}
-
-#endif /* USE_TIMECONTROL */
-
 static void
 DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 		     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
@@ -2878,15 +2787,6 @@ static void DisplayAnalysis( moverecord *pmr ) {
                      GetLuckAnalysis( &ms, pmr->rLuck ) );
 	break;
 
-#if USE_TIMECONTROL
-    case MOVE_TIME:
-
-      DisplayTimeAnalysis( pmr, &ms );
-
-      break;
-
-#endif /* USE_TIMECONTROL */
-	
     default:
 	break;
     }
@@ -2897,12 +2797,7 @@ extern void ShowBoard( void )
     char szBoard[ 2048 ];
     char sz[ 50 ], szCube[ 50 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
 	szScore0[ 50 ], szScore1[ 50 ], szMatch[ 50 ];
-#if USE_TIMECONTROL
-    char szTime0[20], szTime1[20];
-    char *apch[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-#else
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-#endif
 
     moverecord *pmr;
     
@@ -3001,14 +2896,6 @@ extern void ShowBoard( void )
 			     ms.nMatchTo );
 	    }
 	}
-#if USE_TIMECONTROL
-	apch[7] = apch[8] = 0;
-	if (ms.gc.pc[0].tc.timing != TC_NONE)
-		 apch[7] = FormatClock(&ms.tvTimeleft[0], szTime0);
-	if (ms.gc.pc[1].tc.timing != TC_NONE)
-		 apch[8] = FormatClock(&ms.tvTimeleft[1], szTime1);
-#endif
-    
 	if( ms.fResigned )
 	    /* FIXME it's not necessarily the player on roll that resigned */
 	    sprintf( strchr( sz, 0 ), _(", resigns %s"),
@@ -3097,9 +2984,6 @@ extern char *FormatPrompt( void ) {
 		    strcpy( pchDest, ap[ ms.fTurn ].szName );
 		    break;
 
-#if USE_TIMECONTROL
-		case GAME_TIMEOUT:
-#endif
 		case GAME_OVER:
 		case GAME_RESIGNED:
 		case GAME_DROP:
@@ -3114,27 +2998,6 @@ extern char *FormatPrompt( void ) {
 		sprintf( pchDest, "%d:%d", ms.anScore[ 0 ], ms.anScore[ 1 ] );
 		break;
 
-#if USE_TIMECONTROL
-	    case 't':
-	    case 'T':
-		/* Time */
-		switch( ms.gs ) {
-		case GAME_NONE:
-		    strcpy( pchDest, _("No game") );
-		    break;
-		case GAME_TIMEOUT:
-		case GAME_OVER:
-		case GAME_RESIGNED:
-		case GAME_DROP:
-		    strcpy( pchDest, _("Game over") );
-		    break;
-		case GAME_PLAYING:
-		    sprintf(pchDest, "%s - ", FormatClock(&ms.tvTimeleft[0], 0));
-		    FormatClock(&ms.tvTimeleft[1], pchDest+strlen(pchDest));
-		    break;
-		}
-		break;
-#endif
 	    case 'v':
 	    case 'V':
 		/* Version */
@@ -4748,11 +4611,7 @@ extern void CommandImportParty(char *sz)
 
 extern void CommandCopy (char *sz)
 {
-#if USE_TIMECONTROL
-    char *aps[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-#else
     char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-#endif
   char szOut[2048];
   char szCube[32], szPlayer0[MAX_NAME_LEN + 3], szPlayer1[MAX_NAME_LEN + 3],
     szScore0[35], szScore1[35], szMatch[35];
@@ -5295,31 +5154,32 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
 
     fprintf( pf, "set clockwise %s\n"
-		 "set tutor mode %s\n"
-		 "set tutor cube %s\n"
-		 "set tutor chequer %s\n"
-		 "set tutor eval %s\n"
-		 "set tutor skill %s\n"
-	     "set confirm new %s\n"
-	     "set confirm save %s\n"
-	     "set cube use %s\n"
+		    "set tutor mode %s\n"
+		    "set tutor cube %s\n"
+		    "set tutor chequer %s\n"
+		    "set tutor eval %s\n"
+		    "set tutor skill %s\n"
+		    "set confirm new %s\n"
+		    "set confirm save %s\n"
+		    "set cube use %s\n"
 #if USE_GTK
-	     "set delay %d\n"
+		    "set delay %d\n"
 #endif
-	     "set display %s\n"
-	     fClockwise ? "on" : "off", 
-			 fTutor ? "on" : "off",
-			 fTutorCube ? "on" : "off",
-			 fTutorChequer ? "on" : "off",
-			 fTutorAnalysis ? "on" : "off",
-             ((TutorSkill == SKILL_VERYBAD) ? "very bad" :
-             (TutorSkill == SKILL_BAD) ? "bad" : "doubtful"),
-             fConfirm ? "on" : "off",
-             fConfirmSave ? "on" : "off",
-	     fCubeUse ? "on" : "off",
+		    "set display %s\n",
+		    fClockwise ? "on" : "off", 
+		    fTutor ? "on" : "off",
+		    fTutorCube ? "on" : "off",
+		    fTutorChequer ? "on" : "off",
+		    fTutorAnalysis ? "on" : "off",
+		    ((TutorSkill == SKILL_VERYBAD) ? "very bad" :
+		     (TutorSkill == SKILL_BAD) ? "bad" : "doubtful"),
+		    fConfirm ? "on" : "off",
+		    fConfirmSave ? "on" : "off",
+		    fCubeUse ? "on" : "off",
 #if USE_GTK
-	     nDelay,
+		    nDelay
 #endif
+			    );
 
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
@@ -5542,10 +5402,6 @@ extern void CommandSaveSettings( char *szParam ) {
     
     fprintf( pf, "set ratingoffset %s\n",
        g_ascii_formatd(buf, G_ASCII_DTOSTR_BUF_SIZE, "%f", rRatingOffset ));
-#if USE_TIMECONTROL
-     SaveTimeControlSettings( pf );
-#endif
-
 	/* warnings */
 #if USE_GTK
 	for (i = 0; i < WARN_NUM_WARNINGS; i++)
@@ -6595,9 +6451,6 @@ static char *get_readline()
 		outputc('\n');
 		PromptForExit();
 	}
-#if USE_TIMECONTROL
-	UpdateClockNotify(0);
-#endif
 	sz = locale_to_utf8(szInput);
 	free(szInput);
 	fInterrupt = FALSE;
@@ -6622,9 +6475,6 @@ static char *get_stdin_line()
 	   fgets */
 	fgets(sz, sizeof(sz), stdin);
 
-#if USE_TIMECONTROL
-	UpdateClockNotify(0);
-#endif
 	if ((pch = strchr(sz, '\n')))
 		*pch = 0;
 
@@ -6851,9 +6701,6 @@ static void init_defaults()
 	szHomeDirectory =
 	    g_build_filename(g_get_home_dir(), ".gnubg", NULL);
 
-#if USE_TIMECONTROL
-	SetDefaultTC();
-#endif
 }
 
 int main(int argc, char *argv[])
@@ -7157,14 +7004,6 @@ swapGame ( list *plGame ) {
       
     pmr = pl->p;
 
-#if USE_TIMECONTROL
-    {
-	struct timeval tv;
-	tv = pmr->tl[0];
-	pmr->tl[0] = pmr->tl[1];
-	pmr->tl[1] = tv;
-    }
-#endif
     switch ( pmr->mt ) {
     case MOVE_GAMEINFO:
 
@@ -7254,24 +7093,6 @@ extern void CommandSwapPlayers ( char *sz ) {
   n = ms.anScore[ 0 ];
   ms.anScore[ 1 ] = ms.anScore[ 0 ];
   ms.anScore[ 0 ] = n;
-#if USE_TIMECONTROL
-  {
-  playerclock pc;
-  struct timeval tv;
-  
-    pc = ms.gc.pc[0];
-    ms.gc.pc[0] = ms.gc.pc[1];
-    ms.gc.pc[1] = pc;
-    if (ms.gc.fPlayer > -1)
-	ms.gc.fPlayer = ! ms.gc.fPlayer;
-    tv = ms.tvTimeleft[0];
-    ms.tvTimeleft[0] = ms.tvTimeleft[1];
-    ms.tvTimeleft[1] = tv;
-    n = ms.nTimeouts[0];
-    ms.nTimeouts[0] = ms.nTimeouts[1];
-    ms.nTimeouts[1] = n;
-  }
-#endif
   SwapSides ( ms.anBoard );
 
 

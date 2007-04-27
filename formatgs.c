@@ -614,45 +614,6 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       }
 
-      /* time penalties */
-
-#if USE_TIMECONTROL
-
-      if ( psc->anTimePenalties[ 0 ] || psc->anTimePenalties[ 1 ] ) {
-        
-        int j;
-
-        /* show time penalty statistics */
-
-        /* number of penalties */
-
-        aasz = g_malloc( 3 * sizeof ( *aasz ) );
-        aasz[ 0 ] = g_strdup( _("Number of time penalties" ) );
-      
-        for ( j = 0; j < 2; ++j ) 
-          aasz[ j + 1 ] = 
-            g_strdup_printf( "%d", psc->anTimePenalties[ j ] );
-        
-        list = g_list_append( list, aasz );
-
-        /* loss */
-
-        aasz = g_malloc( 3 * sizeof ( *aasz ) );
-
-        aasz[ 0 ] = g_strdup( _("Loss from time pen. (total)") );
-
-        for ( i = 0; i < 2; ++i )
-          aasz[ i + 1 ] = errorRate( -psc->aarTimeLoss[ i ][ 0 ],
-                                     -psc->aarTimeLoss[ i ][ 1 ], nMatchTo );
-        
-        list = g_list_append( list, aasz );
-
-
-      }
-
-#endif /* TIME_CONTROL */      
-
-
     }
     
     break;

@@ -2694,19 +2694,6 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
         case TMG_OUT_OF_TIME:
 	case TMG_OUT_OF_TIME_1:
-#if USE_TIMECONTROL
-          pmr = NewMoveRecord();
-          pmr->mt = MOVE_TIME;
-          pmr->fPlayer = fPlayer;
-          /* pmr->t.tl[ 0 ] = pmr->t.tl[ 1 ] = 0; */
-          pmr->t.nPoints = ms.nMatchTo;
-
-          AddMoveRecord( pmr );
-
-          goto finished;
-#else
-          /* ignore ??? */
-#endif /* USE_TIMECONTROL */
           break;
 
         default:

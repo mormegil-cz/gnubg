@@ -199,17 +199,6 @@ static void RestoreMI(list * pl, moverecord * pmr)
 		pmgi->i = 0;
 	} else if (!strncmp(pch, "ws:", 3) || !strncmp(pch, "bs:", 3))
 	    SetScore(pmgi, *pch == 'b', atoi(pch + 3));
-#if USE_TIMECONTROL
-	else if (!strncmp(pch, "wtime:", 6)) {
-	    pmr->tl[0].tv_sec = atoi(pch + 6);
-	} else if (!strncmp(pch, "btime:", 6)) {
-	    pmr->tl[1].tv_sec = atoi(pch + 6);
-	} else if (!strncmp(pch, "wtimeouts:", 10)) {
-	    pmgi->nTimeouts[0] = atoi(pch + 10);
-	} else if (!strncmp(pch, "btimeouts:", 10)) {
-	    pmgi->nTimeouts[1] = atoi(pch + 10);
-	}
-#endif
 
 }
 
@@ -424,11 +413,6 @@ static void RestoreRootNode(list * pl)
     pmr->g.nAutoDoubles = 0;
     pmr->g.bgv = VARIATION_STANDARD;
     pmr->g.fCubeUse = TRUE;
-#if USE_TIMECONTROL
-    pmr->tl[0].tv_sec = pmr->tl[1].tv_sec = 0;
-    pmr->tl[0].tv_usec = pmr->tl[1].tv_usec = 0;
-    pmr->g.nTimeouts[0] = pmr->g.nTimeouts[1] = 0;
-#endif
     IniStatcontext(&pmr->g.sc);
 
     for (pl = pl->plNext; (pp = pl->p); pl = pl->plNext)
@@ -1134,9 +1118,6 @@ static void RestoreNode(list * pl)
     lucktype lt = LUCK_NONE;
     float rLuck = ERR_VAL;
 
-#if USE_TIMECONTROL
-    int fTimeset = 0;
-#endif
 
     for (pl = pl->plNext; (pp = pl->p); pl = pl->plNext) {
 	if (pp->ach[1] == 0 && (pp->ach[0] == 'B' || pp->ach[0] == 'W')) {
@@ -1307,23 +1288,6 @@ static void RestoreNode(list * pl)
 	    /* good for white */
 	    lt = *((char *) pp->pl->plNext->p) == '2' ? LUCK_VERYBAD :
 		LUCK_BAD;
-#if USE_TIMECONTROL
-	else if (pp->ach[0] == 'W' && pp->ach[1] == 'L') {
-	    pmr->tl[0].tv_sec = atoi((char *) pp->pl->plNext->p);
-	    fTimeset |= 1;
-	} else if (pp->ach[0] == 'B' && pp->ach[1] == 'L') {
-	    pmr->tl[1].tv_sec = atoi((char *) pp->pl->plNext->p);
-	    fTimeset |= 2;
-	} else if ((pp->ach[0] == 'W' || pp->ach[0] == 'B')
-		   && pp->ach[1] == 'X') {
-	    pmr = NewMoveRecord();
-
-	    pmr->mt = MOVE_TIME;
-	    pmr->fPlayer = (pp->ach[0] == 'W');
-
-	    pmr->t.nPoints = atoi((char *) pp->pl->plNext->p);
-	}
-#endif
     }
 
     if (fSetBoard && !pmr) {
@@ -1333,14 +1297,6 @@ static void RestoreNode(list * pl)
 	ClosestLegalPosition(ms.anBoard);
 	PositionKey(ms.anBoard, pmr->sb.auchKey);
     }
-#if USE_TIMECONTROL
-    /* Compensate for mising timestamps */
-    if (pmr && !(fTimeset & 1))
-	pmr->tl[0] = ((moverecord *) (plLastMove->p))->tl[0];
-
-    if (pmr && !(fTimeset & 2))
-	pmr->tl[1] = ((moverecord *) (plLastMove->p))->tl[1];
-#endif
 
     if (pmr && ppC)
 	pmr->sz = CopyEscapedString(ppC->pl->plNext->p);
@@ -1435,10 +1391,6 @@ static void RestoreGame(list * pl)
     ms.nCube = 1;
     ms.fTurn = ms.fMove = ms.fCubeOwner = -1;
     ms.gs = GAME_NONE;
-#if USE_TIMECONTROL
-    ms.nTimeouts[0] = ms.nTimeouts[1] = 0;
-    ms.gc.pc[0].tc.timing = ms.gc.pc[1].tc.timing = TC_NONE;
-#endif
 
     RestoreTree(pl, TRUE);
 
@@ -1447,10 +1399,6 @@ static void RestoreGame(list * pl)
 
     AddGame(pmr);
 
-#if USE_TIMECONTROL
-    if (pmr->tl[0].tv_sec && pmr->tl[1].tv_sec)
-	ms.gc.pc[0].tc.timing = ms.gc.pc[1].tc.timing = TC_UNKNOWN;
-#endif
     if (pmr->g.fResigned) {
 	/* setting fTurn = fMove = -1 results in the board being
 	   inverted when shown. /jth 2003-10-12 
@@ -2228,17 +2176,8 @@ static void SaveGame(FILE * pf, list * plGame)
     /* FIXME: isn't it always appropriate to write this? */
     /* If not, money games will be loaded without score and game number */
     /* if( pmr->g.nMatch ) */
-#if USE_TIMECONTROL
-    fprintf(pf, "MI[length:%d][game:%d][ws:%d][bs:%d]"
-	    "[wtime:%d][btime:%d][wtimeouts:%d][btimeouts:%d]",
-	    pmr->g.nMatch, pmr->g.i,
-	    pmr->g.anScore[0], pmr->g.anScore[1],
-	    (int) pmr->tl[0].tv_sec, (int) pmr->tl[1].tv_sec,
-	    pmr->g.nTimeouts[0], pmr->g.nTimeouts[1]);
-#else
     fprintf(pf, "MI[length:%d][game:%d][ws:%d][bs:%d]",
 	    pmr->g.nMatch, pmr->g.i, pmr->g.anScore[0], pmr->g.anScore[1]);
-#endif
 
     /* Names */
     fputs("PW[", pf);
@@ -2307,10 +2246,6 @@ static void SaveGame(FILE * pf, list * plGame)
 	    WriteMove(pf, pmr->fPlayer, pmr->n.anMove);
 	    putc(']', pf);
 
-#if USE_TIMECONTROL
-	    fprintf(pf, "WL[%d]BL[%d]",
-		    (int) pmr->tl[0].tv_sec, (int) pmr->tl[1].tv_sec);
-#endif
 	    if (pmr->CubeDecPtr->esDouble.et != EVAL_NONE)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
@@ -2331,10 +2266,6 @@ static void SaveGame(FILE * pf, list * plGame)
 	case MOVE_DOUBLE:
 	    fprintf(pf, "\n;%c[double]", pmr->fPlayer ? 'B' : 'W');
 
-#if USE_TIMECONTROL
-	    fprintf(pf, "WL[%d]BL[%d]",
-		    (int) pmr->tl[0].tv_sec, (int) pmr->tl[1].tv_sec);
-#endif
 	    if (pmr->CubeDecPtr->esDouble.et != EVAL_NONE)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
@@ -2348,10 +2279,6 @@ static void SaveGame(FILE * pf, list * plGame)
 	case MOVE_TAKE:
 	    fprintf(pf, "\n;%c[take]", pmr->fPlayer ? 'B' : 'W');
 
-#if USE_TIMECONTROL
-	    fprintf(pf, "WL[%d]BL[%d]",
-		    (int) pmr->tl[0].tv_sec, (int) pmr->tl[1].tv_sec);
-#endif
 	    if (pmr->CubeDecPtr->esDouble.et != EVAL_NONE)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
@@ -2365,10 +2292,6 @@ static void SaveGame(FILE * pf, list * plGame)
 	case MOVE_DROP:
 	    fprintf(pf, "\n;%c[drop]", pmr->fPlayer ? 'B' : 'W');
 
-#if USE_TIMECONTROL
-	    fprintf(pf, "WL[%d]BL[%d]", (int) pmr->tl[0].tv_sec,
-		    (int) pmr->tl[1].tv_sec);
-#endif
 	    if (pmr->CubeDecPtr->esDouble.et != EVAL_NONE)
 		WriteDoubleAnalysis(pf,
 				    pmr->CubeDecPtr->aarOutput,
@@ -2425,15 +2348,6 @@ static void SaveGame(FILE * pf, list * plGame)
 	case MOVE_SETCUBEPOS:
 	    fprintf(pf, "\n;CP[%c]", "cwb"[pmr->scp.fCubeOwner + 1]);
 	    break;
-
-#if USE_TIMECONTROL
-	case MOVE_TIME:
-	    fprintf(pf, "\n;%cX[%d]", !pmr->fPlayer ? 'B' : 'W',
-		    pmr->t.nPoints);
-	    fprintf(pf, "WL[%d]BL[%d]",
-		    (int) pmr->tl[0].tv_sec, (int) pmr->tl[1].tv_sec);
-	    break;
-#endif
 
 	default:
 	    g_assert(FALSE);

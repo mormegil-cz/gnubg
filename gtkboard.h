@@ -80,10 +80,6 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gint computer_turn, gint nchequers );
 extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
-#if USE_TIMECONTROL
-extern void board_set_clock(Board *board, gchar *c0, gchar *c1);
-extern void board_set_scores(Board *board, int s0, int s1);
-#endif
 extern unsigned int convert_point( int i, int player );
 
 /* private data */
@@ -102,9 +98,6 @@ typedef struct _BoardData {
     GtkWidget *pipcount0, *pipcount1;
     GtkWidget *pipcountlabel0, *pipcountlabel1;
 
-#if USE_TIMECONTROL
-    GtkWidget *clock0, *clock1;
-#endif
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *appmKey[ 2 ];
     

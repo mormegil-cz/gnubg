@@ -1,3 +1,10 @@
+Fri Apr 27 10:50:01 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, analysis.c, analysis.h, backgammon.h, configure.in,
+	drawboard.c, formatgs.c, gnubg.c, gnubgmodule.c, gtkboard.c,
+	gtkboard.h, gtkgame.c, gtkgame.h, import.c, play.c, set.c, sgf.c,
+	show.c, sound.c, sound.h, text.c: removed timecontrol
+
 Fri Apr 27 01:35:36 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* configure.in: cleanup

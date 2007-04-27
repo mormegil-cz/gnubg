@@ -75,9 +75,6 @@
 #include "matchid.h"
 #include "gtkwindows.h"
 #include "export.h"
-#if USE_TIMECONTROL
-#include "timecontrol.h"
-#endif
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -223,10 +220,6 @@ typedef enum _gnubgcommand {
     CMD_TAKE,
     CMD_TRAIN_DATABASE,
     CMD_TRAIN_TD,
-#if USE_TIMECONTROL
-    CMD_SET_TC_OFF,
-    CMD_SET_TC,
-#endif
     NUM_CMDS
 } gnubgcommand;
    
@@ -303,10 +296,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "take",
     "train database",
     "train td"
-#if USE_TIMECONTROL
-    , "set tc off"
-    , "set tc"
-#endif
 };
 enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE, TOGGLE_THEORY, TOGGLE_COMMAND };
 
@@ -330,9 +319,6 @@ static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw );
 #if USE_BOARD3D
 static void SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw );
-#endif
-#if USE_TIMECONTROL
-static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw );
 #endif
 static void TogglePanel ( gpointer *p, guint n, GtkWidget *pw );
 
@@ -367,27 +353,6 @@ int frozen = FALSE;
 static guint nStdin, nDisabledCount = 1;
 
 
-#if USE_TIMECONTROL
-extern void GTKUpdateClock(void)
-{
-char szTime0[20], szTime1[20];
-    sprintf(szTime0, (TC_NONE == ms.gc.pc[0].tc.timing) ?  _("n/a") :
-	(0 == ms.nTimeouts[0]) ? "%s" :
-	(1 == ms.nTimeouts[0]) ? "%s F" : "%s Fx%d",
-	 FormatClock(&ms.tvTimeleft[0], 0), ms.nTimeouts[0]);
-    sprintf(szTime1, (TC_NONE == ms.gc.pc[1].tc.timing) ?  _("n/a") :
-	(0 == ms.nTimeouts[1]) ? "%s" :
-	(1 == ms.nTimeouts[1]) ? "%s F" : "%s Fx%d",
-	 FormatClock(&ms.tvTimeleft[1], 0), ms.nTimeouts[1]);
-	
-    board_set_clock(BOARD( pwBoard ),  szTime0, szTime1);
-}
-
-extern void GTKUpdateScores(void)
-{
-    board_set_scores(BOARD( pwBoard ),  ms.anScore[0], ms.anScore[1]);
-}
-#endif
 
 int grabIdSignal;
 int suspendCount = 0;
@@ -566,12 +531,6 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
 	UserCommand( sz );
 	return;	
 	
-#if USE_TIMECONTROL
-    case CMD_SET_TC:
-	sprintf( sz, "%s %s", aszCommands[ iCommand ], (char*)p);
-	UserCommand( sz );
-	break;
-#endif
 
     default:
 	UserCommand( aszCommands[ iCommand ] );
@@ -766,108 +725,6 @@ SkillMenu(skilltype stSelect, char* szAnno)
 }
 
 
-#if USE_TIMECONTROL
-
-/*
- * Display time penalty
- *
- * Parameters: pmr (move time)
- *             pms (match state)
- *
- * Returns:    gtk widget
- *
- */
-
-static GtkWidget *
-TimeAnalysis( const moverecord *pmr, const matchstate *pms )
-{
-  cubeinfo ci;
-  GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
-  GtkWidget *pwLabel;
-
-  char *sz;
-
-  if ( pmr->t.es.et == EVAL_NONE )
-    return NULL;
-
-  GetMatchStateCubeInfo ( &ci, pms );
-
-  sz = g_strdup_printf( ngettext("Time penalty: %s loses %d point",
-				 "Time penalty: %s loses %d points",
-				 pmr->t.nPoints),
-			ap[ pmr->fPlayer ].szName, pmr->t.nPoints );
-  pwLabel = gtk_label_new ( sz );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-		     pwLabel,
-		     0, 2, 0, 1,
-		     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-		     8, 2 );
-
-  g_free( sz );
-
-  /* First column with text */
-
-  pwLabel = gtk_label_new ( _("Equity before time penalty:") );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     0, 1, 1, 2,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
-
-  pwLabel = gtk_label_new ( _("Equity after time penalty:") );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     0, 1, 2, 3,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
-
-  pwLabel = gtk_label_new ( _("Loss from penalty:") );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     0, 1, 3, 4,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
-
-  /* Second column: equities/mwc */
-
-  pwLabel = 
-    gtk_label_new ( OutputMWC( pmr->t.aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], &ci, TRUE ) );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     1, 2, 1, 2,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
-
-
-  pwLabel = 
-    gtk_label_new ( OutputMWC( pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci , TRUE ) );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     1, 2, 2, 3,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
-
-  pwLabel = 
-    gtk_label_new ( OutputMWCDiff( pmr->t.aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] , pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci ) );
-  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
-  gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     1, 2, 3, 4,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
-
-
-  return pwTable;
-
-}
-
-#endif /* USE_TIMECONTROL */
 
 static GtkWidget *
 ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
@@ -1364,14 +1221,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 				       pmr->rLuck, pmr->lt );
 	    break;
 
-#if USE_TIMECONTROL
-
-        case MOVE_TIME:
-
-          pwAnalysis = TimeAnalysis( pmr, &ms );
-          break;
-
-#endif /* USE_TIMECONTROL */
 
 	default:
 	    break;
@@ -1992,12 +1841,6 @@ GtkItemFactoryEntry aife[] = {
           NULL },
 	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL },
 	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL },
-#if USE_TIMECONTROL
-	{ N_("/_Settings/_Time Control"), NULL, NULL, 0, "<Branch>"},
-	{ N_("/_Settings/Time Control/_Define..."), NULL, DefineTimeControl, 0, NULL },
-	{ N_("/_Settings/Time Control/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Settings/Time Control/Off"), NULL, Command, CMD_SET_TC_OFF, "<RadioItem>"},
-#endif
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
 	{ N_("/_Settings/_Language..."), NULL, SetLanguage, 0, NULL },
@@ -9029,167 +8872,6 @@ static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
 }
 #endif
 
-#if USE_TIMECONTROL
-
-extern void GTKCheckTimeControl( const char *szName) {
-   char path[128];
-   sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
-   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
-	   gtk_item_factory_get_widget( pif, path)), TRUE);
-}
-
-extern void GTKAddTimeControl( char *szName) {
-    char path[128];
-    GtkItemFactoryEntry newEntry  = { NULL, NULL, Command, CMD_SET_TC, "/Settings/Time Control/Off"};
-    sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
-    newEntry.path = path;
-    gtk_item_factory_create_items(pif, 1, &newEntry, szName); 
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
-	   gtk_item_factory_get_widget( pif, path)), TRUE);
-} 
-
-extern void GTKRemoveTimeControl( char *szName) {
-    char path[128];
-    sprintf(path ,"%s%s", N_("/Settings/Time Control/"), szName);
-    gtk_item_factory_delete_item(pif, path);
-} 
-
-typedef struct _definetcwidget {
-	GtkWidget *pwName, *pwType, *pwTime, *pwPoint,
-		*pwMove, *pwMult,  *pwPenalty,
-		*pwNext, *pwNextB ;
-} definetcwidget;
-
-static GtkWidget *DefineTCWidget( definetcwidget *pdtcw) 
-{
-  GtkWidget *pwVbox, *pwHbox, *pwLabel;
-  GtkWidget *pwFrame, *pwVbox2; 
-  GtkWidget *pwMenu;
-
-  pwVbox = gtk_vbox_new(FALSE, 0);
-  gtk_container_add( GTK_CONTAINER ( pwVbox ),
-	pwFrame = gtk_frame_new(_("Not implemented - work in progress") ));
-  gtk_container_add( GTK_CONTAINER ( pwFrame),
-  	pwVbox2 = gtk_vbox_new(FALSE, 0));
-  gtk_container_set_border_width( GTK_CONTAINER( pwVbox2 ), 8 );
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Time control name (tcname):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwName= gtk_entry_new() );
-
-  pwMenu = gtk_menu_new();
-  
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("None")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Plain")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Bronstein")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Fischer")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Hourglass")));
-  gtk_widget_show_all(pwMenu);
-  pdtcw->pwType = gtk_option_menu_new();
-  gtk_option_menu_set_menu( GTK_OPTION_MENU( pdtcw->pwType ), pwMenu );
-
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Time control type (tctype):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ), pdtcw->pwType );
-
-  pwMenu = gtk_menu_new();
-  
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("Lose")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("1 point")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("2 points")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("3 points")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("4 points")));
-  gtk_menu_append(GTK_MENU(pwMenu), (GtkWidget *) gtk_menu_item_new_with_label(_("5 points")));
-  gtk_widget_show_all(pwMenu);
-  pdtcw->pwPenalty = gtk_option_menu_new();
-  gtk_option_menu_set_menu( GTK_OPTION_MENU( pdtcw->pwPenalty ), pwMenu );
-
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Penalty type (tctype):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ), pdtcw->pwPenalty );
-
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Time to add (tctime):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwTime = gtk_entry_new() );
-
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Time to add (tctime):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwTime = gtk_entry_new() );
-
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Time to add / point (tcpoint):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwPoint = gtk_entry_new() );
-
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Time to add / move (tcmove):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwMove = gtk_entry_new() );
-  
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Scale old time by (tcmult):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwMult = gtk_entry_new() );
-  
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Next time control (tcnext):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwNext = gtk_entry_new() );
-  
-  gtk_container_add( GTK_CONTAINER ( pwVbox2 ),
-  	pwHbox = gtk_hbox_new(FALSE, 0));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pwLabel = gtk_label_new(_("Opponent's next time control (tcnext):")));
-  gtk_container_add( GTK_CONTAINER ( pwHbox ),
-	pdtcw->pwNextB = gtk_entry_new() );
-  
-  return pwVbox;
-}
-
-static void DefineTCOK( GtkWidget *pw, definetcwidget *pdtcw ) {
-printf("Name is: %s\n", gtk_entry_get_text(GTK_ENTRY(pdtcw->pwName) ) );
-     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-
-static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw ) {
-    
-  GtkWidget *pwDialog, *pwPage;
-  definetcwidget dtcw;
-
-  pwDialog = GTKCreateDialog( _("GNU Backgammon - Define Time Control"), DT_QUESTION,
-	  NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( DefineTCOK ), &dtcw );
-
-  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                        pwPage = DefineTCWidget(&dtcw));
-
-  gtk_widget_show_all( pwDialog );
-
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
-}
-
-#endif
 
 /* Language selection code */
 

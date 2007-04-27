@@ -77,9 +77,6 @@
 
 #include "sound.h"
 
-#if USE_TIMECONTROL
-#include "timecontrol.h"
-#endif
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -2668,10 +2665,6 @@ extern void CommandSetTurn( char *sz ) {
     fNextTurn = FALSE;
     ms.anDice[ 0 ] = ms.anDice[ 1 ] = 0;
 
-#if USE_TIMECONTROL
-    CheckGameClock(&ms, 0);
-    HitGameClock(&ms);
-#endif
 
     UpdateSetting( &ms.fTurn );
 

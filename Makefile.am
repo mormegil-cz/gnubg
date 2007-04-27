@@ -36,10 +36,6 @@ if USE_MULTITHREAD
 gnubg_SOURCES +=  multithread.c multithread.h
 endif
 
-if USE_TIMECONTROL
-gnubg_SOURCES += timecontrol.h timecontrol.c tctutorial.h
-endif
-
 if COMPILE_BR1
 gnubg_SOURCES += br1.c
 endif

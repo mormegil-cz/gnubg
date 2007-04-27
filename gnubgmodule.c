@@ -1575,21 +1575,6 @@ PyGameStats(const statcontext* sc, const int fIsMatch, const int nMatchTo)
     }
   }
 
-#if USE_TIMECONTROL
-  {
-     int side;
-     for ( side = 0; side < 2; ++side ) {
-        PyObject *d =
-            Py_BuildValue( "{s:i,s:f,s:f}",
-                           "time-penalty", sc->anTimePenalties[ side ],
-                           "time-penalty-skill", sc->aarTimeLoss[ side ][ 0 ],
-                           "time-penalty-cost", sc->aarTimeLoss[ side ][ 1 ] );
-
-         DictSetItemSteal( p[ side ], "time", d );
-      }
-  }
-#endif /* USE_TIMECONTROL */
-
   /* advantage */
 
   if ( sc->fDice && fIsMatch && !nMatchTo && sc->nGames > 1 ) {

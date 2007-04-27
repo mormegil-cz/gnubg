@@ -601,37 +601,6 @@ updateStatcontext(statcontext*       psc,
 
     break;
 
-  case MOVE_TIME:
-
-#if USE_TIMECONTROL
-
-    if ( pmr->t.es.et != EVAL_NONE ) {
-
-      float d = 
-        pmr->t.aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] -
-        pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ];
-      float r;
-
-      GetMatchStateCubeInfo ( &ci, pms );
-
-      if ( pms->nMatchTo )
-        r = 
-          mwc2eq( pmr->t.aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], &ci ) -
-          mwc2eq( pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci );
-      else
-        r = pms->nCube * d;
-
-      psc->anTimePenalties[ pmr->fPlayer ]++;
-
-      psc->aarTimeLoss[ pmr->fPlayer ][ 0 ] += r;
-      psc->aarTimeLoss[ pmr->fPlayer ][ 1 ] += d;
-
-    }
-
-#endif /* USE_TIMECONTROL */
-
-    break;
-
   default:
 
     break;
@@ -979,78 +948,6 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
 
 		break;
 
-    case MOVE_TIME: 
-
-      {
-        
-#if USE_TIMECONTROL
-        if ( analysePlayers && ! analysePlayers[ pmr->fPlayer ] )
-          /* we do not analyse this player */
-          break;
-
-        /* analyse position before loss of points */
-
-        memcpy( &pmr->t.es, pesCube, sizeof ( evalsetup ) );
-
-        GetMatchStateCubeInfo ( &ci, pms );
-
-        if ( GeneralEvaluation ( pmr->t.aarOutput[ 0 ], pmr->t.aarStdDev[ 0 ],
-                                 NULL,
-                                 pms->anBoard,
-                                 &ci, pesCube, NULL, NULL ) < 0 )
-          return -1;
-
-        /* analyse position after loss of points */
-      
-        ci.anScore[ !pmr->fPlayer ] += pmr->t.nPoints;
-
-        if ( ci.anScore[ !pmr->fPlayer ] >= ci.nMatchTo ) {
-
-          /* the match is lost */
-
-          /* copy w/g/bg distribution from "before" */
-
-          memcpy( pmr->t.aarOutput[ 1 ], pmr->t.aarOutput[ 0 ], 
-                  NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-          memcpy( pmr->t.aarStdDev[ 1 ], pmr->t.aarStdDev[ 0 ], 
-                  NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-
-          /* MWC after loss is nil */
-
-          if ( pms->nMatchTo ) 
-                                 pmr->t.aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = 
-            ( pmr->fPlayer == ci.fMove ) ? 0.0f : 1.0f;
-          pmr->t.aarStdDev[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = 0.0;
-
-        }
-        else {
-
-          /* the match continues */
-
-          SetCubeInfo( &ci, ci.nCube, ci.fCubeOwner, ci.fMove, ci.nMatchTo,
-                       ci.anScore, ci.fCrawford, 
-                       ci.fJacoby, ci.fBeavers, ci.bgv );
-      
-          if ( GeneralEvaluation ( pmr->t.aarOutput[ 1 ], 
-                                   pmr->t.aarStdDev[ 1 ],
-                                   NULL,
-                                   pms->anBoard,
-                                   &ci, pesCube, NULL, NULL ) < 0 )
-            return -1;
-
-        }
-      
-        /* update statistics */
-      
-        if ( psc )
-          updateStatcontext ( psc, pmr, pms, plParentGame );
-      
-#endif /* USE_TIMECONTROL */
-      
-      }
-
-      break;
-      
     case MOVE_SETBOARD:	  
     case MOVE_SETCUBEVAL:
     case MOVE_SETCUBEPOS:
@@ -1232,10 +1129,6 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
   
   for ( i = 0; i < 2; i++ ) {
 
-#if USE_TIMECONTROL
-    pscB->anTimePenalties[ i ] += pscA->anTimePenalties[ i ];
-#endif /* USE_TIMECONTROL */
-
     pscB->anUnforcedMoves[ i ] += pscA->anUnforcedMoves[ i ];
     pscB->anTotalMoves[ i ] += pscA->anTotalMoves[ i ];
     
@@ -1276,10 +1169,6 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
         pscA->arErrorWrongPass [ i ][ j ];
       pscB->arLuck [ i ][ j ] +=
         pscA->arLuck [ i ][ j ];
-
-#if USE_TIMECONTROL
-      pscB->aarTimeLoss[ i ][ j ] += pscA->aarTimeLoss[ i ][ j ];
-#endif /* USE_TIMECONTROL */
 
     }
 
@@ -1472,20 +1361,12 @@ IniStatcontext ( statcontext *psc ) {
       psc->arErrorWrongPass[ i ][ j ] = 0.0;
       psc->arLuck[ i ][ j ] = 0.0;
 
-#if USE_TIMECONTROL
-      psc->aarTimeLoss[ i ][ j ] = 0.0f;
-#endif /* USE_TIMECONTROL */
-
     }
 
     psc->arActualResult[ i ] = 0.0f;
     psc->arLuckAdj[ i ] = 0.0f;
     psc->arVarianceActual[ i ] = 0.0f;
     psc->arVarianceLuckAdj[ i ] = 0.0f;
-
-#if USE_TIMECONTROL
-    psc->anTimePenalties[ i ] = 0;
-#endif /* USE_TIMECONTROL */
 
   }
 
