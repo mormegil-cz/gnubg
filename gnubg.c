@@ -5174,12 +5174,12 @@ extern void CommandSaveSettings( char *szParam ) {
 		    ((TutorSkill == SKILL_VERYBAD) ? "very bad" :
 		     (TutorSkill == SKILL_BAD) ? "bad" : "doubtful"),
 		    fConfirm ? "on" : "off",
-		    fConfirmSave ? "on" : "off",
-		    fCubeUse ? "on" : "off",
+                    fConfirmSave ? "on" : "off",
+                    fCubeUse ? "on" : "off",
 #if USE_GTK
-		    nDelay
+                    nDelay,
 #endif
-			    );
+                    fDisplay ? "on" : "off");
 
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
