@@ -652,10 +652,6 @@ TextPrintComment ( FILE *pf, const moverecord *pmr ) {
   case MOVE_SETCUBEPOS:
     sz = pmr->sz;
     break;
-  case MOVE_TIME:
-	  /* ignore */
-	  break;
-
   }
 
   if ( sz ) {

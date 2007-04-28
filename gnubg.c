@@ -4148,9 +4148,6 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	case MOVE_SETDICE:
 	    /* ignore */
 	    break;
-	case MOVE_TIME:
-	    /* ignore */
-	    break;
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
 	case MOVE_SETCUBEPOS:
@@ -7030,7 +7027,6 @@ swapGame ( list *plGame ) {
     case MOVE_NORMAL:
     case MOVE_RESIGN:
     case MOVE_SETDICE:
-    case MOVE_TIME:
 
       pmr->fPlayer = ! pmr->fPlayer;
       break;

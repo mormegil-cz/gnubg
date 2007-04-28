@@ -1736,7 +1736,6 @@ updateStatisticsMove( const moverecord* pmr,
 
   case MOVE_TAKE:
   case MOVE_DROP:
-  case MOVE_TIME:
 
     updateStatcontext ( psc, pmr, pms, plGame );
     break;

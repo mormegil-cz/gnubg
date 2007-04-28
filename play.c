@@ -452,8 +452,6 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 	pms->fDoubled = FALSE;
 	pms->fTurn = pms->fMove;
 	break;
-    case MOVE_TIME:
-      break;
     }
 
 }
@@ -631,7 +629,6 @@ fAddingMoveRecord=1;
     case MOVE_SETBOARD:
     case MOVE_SETCUBEVAL:
     case MOVE_SETCUBEPOS:
-    case MOVE_TIME:
 	break;
 	
     default:

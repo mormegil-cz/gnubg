@@ -355,7 +355,6 @@ int MoveAnalysed(moverecord *pmr, matchstate *pms, list *plGame,
 	GetMatchStateCubeInfo( &ci, pms );
 	break;
 
-    case MOVE_TIME: 
     case MOVE_SETBOARD:	  
     case MOVE_SETCUBEVAL:
     case MOVE_SETCUBEPOS:

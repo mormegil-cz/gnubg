@@ -88,7 +88,6 @@ typedef enum _movetype {
     MOVE_SETDICE,
     MOVE_SETCUBEVAL,
     MOVE_SETCUBEPOS,
-    MOVE_TIME
 } movetype;
 
 
