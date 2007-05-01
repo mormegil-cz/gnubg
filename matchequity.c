@@ -34,7 +34,6 @@
 #include <stdarg.h>
 
 #include "list.h"
-#include "path.h"
 #include "mec.h"
 
 #if HAVE_LIBXML2
@@ -55,6 +54,7 @@ extern double erf( double x );
 
 #include "eval.h"
 #include "matchequity.h"
+#include "backgammon.h"
 #include <glib/gi18n.h>
 
 

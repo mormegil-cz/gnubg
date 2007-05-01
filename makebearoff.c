@@ -45,6 +45,22 @@ DlgProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam);
 
 HWND hdlg;
 int CancelPressed = FALSE;
+
+extern char * getInstallDir( void ) {
+
+  char buf[_MAX_PATH];
+  char *p;
+  static char *ret = NULL;
+  if (ret)
+	  return (ret);
+  GetModuleFileName(NULL, buf, sizeof(buf));
+  p = MAX(strrchr(buf, '/'), strrchr(buf, '\\'));
+  if (p)
+	  *p = '\0';
+  ret = g_strdup(buf);
+  return ret;
+}
+
 #endif
 
 typedef struct _xhashent {

@@ -2038,7 +2038,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = g_build_filename(PKGDATADIR, FONT_VERA_SERIF_BOLD, FONT_VERA, NULL);
+    file = g_build_filename(PKGDATADIR, FONT_VERA_SERIF_BOLD, NULL);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 4.5 * prd->nSize ) ) {
 	fFreetype = TRUE;

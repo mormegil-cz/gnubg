@@ -1091,4 +1091,9 @@ ShowEPC( int anBoard[ 2 ][ 25 ] );
 extern void SetupLanguage(char *newLangCode);
 extern void SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc );
 
+#ifdef WIN32
+extern char * getInstallDir( void );
+#define PKGDATADIR getInstallDir()
+#endif
+
 #endif

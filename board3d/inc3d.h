@@ -53,7 +53,6 @@
 
 #include "fun3d.h"
 #include "matrix.h"
-#include "path.h"
 #include "gtkwindows.h"
 
 #include "model.h"

@@ -2006,11 +2006,15 @@ extern void InitGTK( int *argc, char ***argv )
 {
     int anBoardTemp[ 2 ][ 25 ];
     int i;
-    char *sz = g_build_filename(szHomeDirectory, "gnubg.gtkrc", NULL );
+    char *sz;
 
     gtk_set_locale ();
 
-    gtk_rc_add_default_file( PKGDATADIR "/gnubg.gtkrc" );
+    sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
+    gtk_rc_add_default_file( sz  );
+    g_free(sz);
+
+    sz = g_build_filename(szHomeDirectory, "gnubg.gtkrc", NULL );
     gtk_rc_add_default_file( sz );
     g_free(sz);
 
@@ -3026,9 +3030,12 @@ SetMET (GtkWidget * pw, gpointer p)
 {
   gchar *filename, *command;
 
+  gchar *met_dir = g_build_filename(PKGDATADIR,  "met", NULL);
   filename =
     GTKFileSelect (_("Set match equity table"), "*.xml",
-		   PKGDATADIR "/met", NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+		   met_dir, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+  g_free(met_dir);
+
   if (filename)
     {
       command = g_strconcat ("set matchequitytable \"", filename, "\"", NULL);

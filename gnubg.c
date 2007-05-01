@@ -6391,17 +6391,19 @@ static void version(void)
 
 #if WIN32
 
-static char *
-getInstallDir( void ) {
+extern char * getInstallDir( void ) {
 
   char buf[_MAX_PATH];
   char *p;
-
+  static char *ret = NULL;
+  if (ret)
+	  return (ret);
   GetModuleFileName(NULL, buf, sizeof(buf));
   p = MAX(strrchr(buf, '/'), strrchr(buf, '\\'));
   if (p)
 	  *p = '\0';
-  return strdup(buf);
+  ret = g_strdup(buf);
+  return ret;
 }
 #endif
 
@@ -6742,9 +6744,10 @@ int main(int argc, char *argv[])
 
 #ifdef WIN32
 	/* data directory: initialise to the path where gnubg is installed */
-	szDataDirectory = getInstallDir();
+	{
+	char *szDataDirectory = getInstallDir();
 	_chdir(szDataDirectory);
-#define PKGDATADIR getInstallDir()
+	}
 #if defined(_MSC_VER) && HAVE_LIBXML2
 	xmlMemSetup(free, malloc, realloc, strdup);
 #endif
