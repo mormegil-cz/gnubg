@@ -122,7 +122,7 @@ main( int argc, char **argv ) {
     printf( "Position number : %d\n", id );
   }
 
-  if (  ! ( pbc = BearoffInit ( filename, NULL, BO_NONE, NULL ) ) ) {
+  if (  ! ( pbc = BearoffInit ( filename, BO_NONE, NULL ) ) ) {
     printf( "Failed to initialise bearoff database %s\n", filename );
     exit(-1);
   }

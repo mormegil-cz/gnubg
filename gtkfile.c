@@ -164,7 +164,7 @@ char *programdir, *pc, *tmp;
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
 #if WIN32
-  programdir = g_strdup(szDataDirectory);
+  programdir = g_strdup(PKGDATADIR);
   if ((pc = strrchr(programdir, G_DIR_SEPARATOR)) != NULL) {
           *pc = '\0';
 

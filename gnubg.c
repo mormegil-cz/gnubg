@@ -55,7 +55,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <locale.h>
 #include "matchequity.h"
 #include "matchid.h"
-#include "path.h"
 #include "positionid.h"
 #include "render.h"
 #include "renderprefs.h"
@@ -882,9 +881,6 @@ command cER = {
       "to a file"), szFILENAME, &cFilename },
     { "settings", CommandSaveSettings, N_("Use the current settings in future "
       "sessions"), NULL, NULL },
-    { "weights", CommandSaveWeights, 
-      N_("Write the neural net weights to a file"),
-      szOPTFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysisPlayer[] = {
     { "analyse", CommandSetAnalysisPlayerAnalyse, 
@@ -1956,7 +1952,6 @@ char *default_export_folder = NULL;
 char *default_sgf_folder = NULL;
 
 const char *szHomeDirectory;
-char *szDataDirectory;
 
 char *aszBuildInfo[] = {
 #if USE_PYTHON
@@ -4265,62 +4260,48 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 }
 
 
-extern void
-CommandLoadPython( char * sz ) {
+extern void CommandLoadPython(char *sz)
+{
 
 #if !USE_PYTHON
-  output( _("This build of GNU Backgammon does not support Python"));
-  return;
+	output(_("This build of GNU Backgammon does not support Python"));
+	return;
 #else
-  FILE *pf;
-  char *pch;
+	FILE *pf;
+	char *path = NULL;
 
-  sz = NextToken( &sz );
-    
-  if( !sz || !*sz ) {
-    outputl( _("You must specify a file to load from (see `help load "
-               "python').") );
-    return;
-  }
+	sz = NextToken(&sz);
 
-  pch = PathSearch( sz, NULL );
-  pf = pch ? fopen( pch, "r" ) : NULL;
-  if( !pf ) {
-    /* Couldn't find file, have a look in the scripts dir */
-    char scriptDir[BIG_PATH];
-    scriptDir[0] = 0;
-    free(pch);
-    pch = 0;
-    
-    if( szDataDirectory && *szDataDirectory ) {
-      strcpy(scriptDir, szDataDirectory);
-      strcat(scriptDir, "/scripts");
-      pch = PathSearch(sz, scriptDir);
-      pf = fopen( pch, "r" );
-      if( ! pf ) {
-        free(pch);
-      	pch = 0;
-      }
-    }
-    /* Look in scripts/file, same as met */
-    if( ! pch ) {
-      strcpy(scriptDir, "scripts/");
-      strcat(scriptDir, sz);
-      pch = PathSearch(scriptDir, 0);
-      if( pch ) {
-	pf = fopen( pch, "r" );
-      }
-    }
-  }
+	if (!sz || !*sz) {
+		outputl(_
+			("You must specify a file to load from (see `help load "
+			 "python')."));
+		return;
+	}
 
-  if( pf ) {
-    PyRun_AnyFile( pf, pch );
-    fclose( pf );
-  }
-  else
-    outputerr( sz );
+	if (g_file_test(sz, G_FILE_TEST_EXISTS))
+		path = g_strdup(sz);
+	else {
+		path = g_build_filename(PKGDATADIR, "/scripts", sz, NULL);
+		if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+			g_free(path);
+			path = g_build_filename("scripts", sz, NULL);
+		}
+	}
+	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+		g_free(path);
+		outputerrf("Python file (%s) not found\n", path);
+		return;
+	}
 
-  free( pch );
+	pf = fopen(path, "r");
+
+	if (pf) {
+		PyRun_AnyFile(pf, path);
+		fclose(pf);
+	} else
+		outputerr(path);
+	g_free(path);
 
 #endif
 }
@@ -5387,9 +5368,12 @@ extern void CommandSaveSettings( char *szParam ) {
               sound_get_command());
 
     for ( i = 0; i < NUM_SOUNDS; ++i ) 
-      fprintf ( pf, "set sound sound %s \"%s\"\n",
-				aszSoundCommand [ i ], GetSoundFile(i));
-    
+    {
+       char *file =  GetSoundFile(i);
+       fprintf ( pf, "set sound sound %s \"%s\"\n",
+		       sound_command [ i ], file);
+       g_free(file);
+    }
 
     fprintf( pf, "set browser %s\n", get_web_browser());
 
@@ -5436,22 +5420,6 @@ extern void CommandSaveSettings( char *szParam ) {
 	GTKSaveSettings();
 #endif
 
-}
-
-extern void CommandSaveWeights( char *sz ) {
-
-    sz = NextToken( &sz );
-    
-    if( !sz || !*sz )
-	sz = GNUBG_WEIGHTS;
-
-    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
-      return;
-
-    if( EvalSave( sz ) )
-	outputerr( sz );
-    else
-	outputf( _("Evaluator weights saved to %s.\n"), sz );
 }
 
 #if HAVE_LIBREADLINE
@@ -6326,7 +6294,7 @@ move_rc_files (void)
    * their files moved.*/
   char *olddir, *oldfile, *newfile;
 #if WIN32
-  olddir = g_strdup (szDataDirectory);
+  olddir = g_strdup (PKGDATADIR);
 #else
   olddir = g_build_filename (szHomeDirectory, "..", NULL);
 #endif
@@ -6594,10 +6562,14 @@ static void init_nets(int nNewWeights, int fNoBearoff)
 {
 	int n;
 
-	n = EvalInitialise(nNewWeights ? NULL : GNUBG_WEIGHTS,
-			   nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			   fNoBearoff, szDataDirectory, nNewWeights,
+	char *gnubg_weights = g_build_filename(PKGDATADIR, "gnubg.weights", NULL);
+	char *gnubg_weights_binary =  g_build_filename(PKGDATADIR, "gnubg.wd", NULL);
+	n = EvalInitialise(nNewWeights ? NULL : gnubg_weights,
+			   nNewWeights ? NULL : gnubg_weights_binary,
+			   fNoBearoff, nNewWeights,
 			   fShowProgress ? BearoffProgress : NULL);
+	g_free(gnubg_weights);
+	g_free(gnubg_weights_binary);
 
 	if (n < 0)
 		exit(EXIT_FAILURE);
@@ -6708,6 +6680,7 @@ int main(int argc, char *argv[])
         char *pwSplash = NULL;
 #endif
 	char *pchMatch = NULL;
+	char *met = NULL;
 
 	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
 	int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
@@ -6719,9 +6692,6 @@ int main(int argc, char *argv[])
 		 N_("Do not use bearoff database"), NULL},
 		{"commands", 'c', 0, G_OPTION_ARG_FILENAME, &pchCommands,
 		 N_("Evaluate commands in FILE and exit"), "FILE"},
-		{"datadir", 'd', 0, G_OPTION_ARG_FILENAME,
-		 &szDataDirectory,
-		 N_("Read database and weight files from DIR"), "DIR"},
 		{"lang", 'l', 0, G_OPTION_ARG_STRING, &lang,
 		 N_("Set language to LANG"), "LANG"},
 		{"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights,
@@ -6774,6 +6744,7 @@ int main(int argc, char *argv[])
 	/* data directory: initialise to the path where gnubg is installed */
 	szDataDirectory = getInstallDir();
 	_chdir(szDataDirectory);
+#define PKGDATADIR getInstallDir()
 #if defined(_MSC_VER) && HAVE_LIBXML2
 	xmlMemSetup(free, malloc, realloc, strdup);
 #endif
@@ -6829,7 +6800,9 @@ int main(int argc, char *argv[])
         init_rng();
 
 	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 500);
-	InitMatchEquity("met/g11.xml", szDataDirectory);
+	met = g_build_filename(PKGDATADIR, "met", "g11.xml", NULL);
+	InitMatchEquity(met);
+	g_free(met);
 
 #ifdef USE_MULTITHREAD
 	PushSplash(pwSplash, _("Initialising"), _("threads"), 500);
@@ -6845,7 +6818,7 @@ int main(int argc, char *argv[])
 
 #if USE_PYTHON
 	PushSplash(pwSplash, _("Initialising"), _("Python"), 500);
-	PythonInitialise(szDataDirectory);
+	PythonInitialise();
 #endif
 
 	PushSplash(pwSplash, _("Initialising"), _("Board Images"), 500);

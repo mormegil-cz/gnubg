@@ -43,9 +43,8 @@
 
 #include "eval.h"
 #include "sound.h"
-#include "path.h"
 
-char *aszSoundDesc[ NUM_SOUNDS ] = {
+char *sound_description[ NUM_SOUNDS ] = {
   N_("Starting GNU Backgammon"),
   N_("Agree"),
   N_("Doubling"),
@@ -65,7 +64,7 @@ char *aszSoundDesc[ NUM_SOUNDS ] = {
   N_("Analysis is finished")
 };
 
-char *aszSoundCommand[ NUM_SOUNDS ] = {
+char *sound_command[ NUM_SOUNDS ] = {
   "start",
   "agree",
   "double",
@@ -107,18 +106,17 @@ void PrintWinError()
 void
 playSoundFile (char *file)
 {
-    char *szFile = PathSearch (file, szDataDirectory);
     char *command;
     GError *error = NULL;
-    if (!g_file_test(szFile, G_FILE_TEST_EXISTS))
+    if (!g_file_test(file, G_FILE_TEST_EXISTS))
     {
-            outputerrf("The sound file (%s) couldn't be found", szFile);
+            outputerrf("The sound file (%s) couldn't be found", file);
             return;
     }
 
     if (sound_cmd && *sound_cmd)
       {
-	  command = g_strdup_printf ("%s %s", sound_cmd, szFile);
+	  command = g_strdup_printf ("%s %s", sound_cmd, file);
 	  if (!g_spawn_command_line_async (command, &error))
 	    {
 		outputerrf ("sound command (%s) could not be launched: %s\n",
@@ -129,13 +127,13 @@ playSoundFile (char *file)
       }
 
 #if HAVE_ESD
-    esd_play_file (NULL, szFile, 1);
+    esd_play_file (NULL, file, 1);
 #endif
 
 #ifdef WIN32
     SetLastError (0);
     while (!PlaySound
-	   (szFile, NULL,
+	   (file, NULL,
 	    SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT))
       {
 	  static int soundDeviceAttached = -1;
@@ -159,7 +157,7 @@ playSoundFile (char *file)
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
 #endif
-    free (szFile);
+    free (file);
 }
 
 extern void
@@ -193,8 +191,7 @@ extern void SoundWait( void ) {
 
 }
 
-char aszSoundFile[ NUM_SOUNDS ][ 80 ];
-int soundSet[NUM_SOUNDS] = {0};
+char *sound_file[ NUM_SOUNDS ] = {0};
 
 extern char *GetDefaultSoundFile(int sound)
 {
@@ -221,38 +218,36 @@ extern char *GetDefaultSoundFile(int sound)
   "sounds/fanfare.wav"
   };
 
-	return aszDefaultSound[sound];
+	return g_build_filename(PKGDATADIR, aszDefaultSound[sound], NULL);
 }
 
 extern char *GetSoundFile(gnubgsound sound)
 {
-	if (!soundSet[sound])
+	if (!sound_file[sound])
 		return GetDefaultSoundFile(sound);
-	return aszSoundFile[sound];
+	return g_strdup(sound_file[sound]);
 }
 
 extern void SetSoundFile(gnubgsound sound, const char *file)
 {
-	if (!file)
-		file = "";
+	char *old_file =  GetSoundFile(sound);
+	if (!file || !strcmp(file, old_file))
+	{
+		g_free(old_file);
+		return;		/* No change */
+	}
+	g_free(old_file);
 
-	if (!strcmp(file, GetSoundFile(sound)))
-		return;	/* No change */
-	
-	if (!*file)
-	{
-		outputf ( _("No sound played for: %s\n"), 
-				gettext(aszSoundDesc[sound]));
-		strcpy(aszSoundFile[sound], "");
+	if (!*file) {
+		outputf(_("No sound played for: %s\n"),
+			gettext(sound_description[sound]));
+	} else {
+		outputf(_("Sound for: %s: %s\n"),
+			gettext(sound_description[sound]),
+			file);
 	}
-	else
-	{
-		strncpy(aszSoundFile[sound], file, sizeof(aszSoundFile[sound]) - 1);
-		aszSoundFile[sound][sizeof(aszSoundFile[sound]) - 1 ] = '\0';
-		outputf ( _("Sound for: %s: %s\n"), 
-              gettext(aszSoundDesc[sound]), aszSoundFile[sound]);
-	}
-	soundSet[sound] = TRUE;
+	g_free(sound_file[sound]);
+	sound_file[sound] = g_strdup(file);
 }
 
 extern char *sound_get_command(void)

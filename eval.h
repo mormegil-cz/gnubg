@@ -65,11 +65,6 @@ typedef enum {
   N_CUBEFUL_OUTPUTS
 } CubefulOutputs;
 
-#define GNUBG_WEIGHTS "gnubg.weights"
-#define GNUBG_WEIGHTS_BINARY "gnubg.wd"
-#define GNUBG_BEAROFF "gnubg.bd"
-#define GNUBG_BEAROFF_OS "gnubg_os.bd"
-
 /* A trivial upper bound on the number of (complete or incomplete)
  * legal moves of a single roll: if all 15 chequers are spread out,
  * then there are 18 C 4 + 17 C 3 + 16 C 2 + 15 C 1 = 3875
@@ -361,7 +356,7 @@ typedef enum  {
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		int fNoBearoff, 
-                const char *szDir, int nSize,
+                int nSize,
 		void (*pfProgress)( int ) );
 
 extern int

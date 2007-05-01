@@ -1,3 +1,12 @@
+Wed May  2 00:00:38 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, bearoff.c, bearoff.h, bearoffdump.c,
+	dice.c, eval.c, eval.h, gnubg.c, gnubgmodule.c, gnubgmodule.h,
+	gtkfile.c, gtkgame.c, gtkoptions.c, gtkprefs.c, html.c, makebearoff.c,
+	matchequity.c, matchequity.h, openurl.c, path.c, path.h, render.c,
+	set.c, show.c, sound.c, sound.h, board3d/font3d.c, board3d/misc3d.c:
+	remove path.[ch]
+
 Sun Apr 29 01:18:40 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c ,backgammon.h ,gnubg.c ,html.c ,latex.c ,play.c

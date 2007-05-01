@@ -1720,7 +1720,7 @@ extern int main( int argc, char **argv ) {
     }
 
     if ( szOldBearoff &&
-         ! ( pbc = BearoffInit ( szOldBearoff, NULL, BO_NONE, NULL ) ) ) {
+         ! ( pbc = BearoffInit ( szOldBearoff, BO_NONE, NULL ) ) ) {
       dsplerr ( _("Error initialising old bearoff database!\n" ) );
       exit( 2 );
     }
@@ -1814,7 +1814,7 @@ extern int main( int argc, char **argv ) {
     dlgprintf(127, "Initialising old bearoff database." );
 #endif
     if ( szOldBearoff &&
-         ! ( pbc = BearoffInit ( szOldBearoff, NULL, BO_NONE, NULL ) ) ) {
+         ! ( pbc = BearoffInit ( szOldBearoff, BO_NONE, NULL ) ) ) {
       dsplerr ( _("Error initialising old bearoff database!\n" ) );
       exit( 2 );
     }

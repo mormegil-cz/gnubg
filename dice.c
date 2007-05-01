@@ -97,7 +97,6 @@
 #include "isaac.h"
 #include <glib/gi18n.h>
 #include "external.h"
-#include "path.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -1173,7 +1172,7 @@ OpenDiceFile( void *p, const char *sz ) {
 
   strcpy( rngctx->szDiceFilename, sz );
 
-  return ( rngctx->hDice = PathOpen( sz, NULL, 0 ) );
+  return ( rngctx->hDice = open(sz, O_RDONLY));
 
 }
 

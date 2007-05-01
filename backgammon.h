@@ -507,7 +507,7 @@ InvalidateStoredCube( void );
 
 extern char *GetBuildInfoString();
 extern const char *szHomeDirectory;
-extern char *szDataDirectory;
+
 
 extern char* aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];

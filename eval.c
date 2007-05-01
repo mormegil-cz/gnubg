@@ -41,7 +41,6 @@
 #include "matchid.h"
 #include "matchequity.h"
 #include "bearoff.h"
-#include "path.h"
 #include "format.h"
 #include "sse.h"
 #if USE_MULTITHREAD
@@ -703,22 +702,77 @@ EvalShutdown ( void ) {
 
 }
 
+int binary_weights_failed(char * filename, FILE * weights)
+{
+	float r;
+
+	if (!weights)
+	{
+		g_print(filename);
+		return -1;
+	}
+	if (fread(&r, sizeof r, 1, weights) < 1) {
+		g_print(filename);
+		return -2;
+	}
+	if (r != WEIGHTS_MAGIC_BINARY) {
+		g_print(_("%s: not a weights file\n"), filename);
+		return -3;
+	}
+	if (fread(&r, sizeof r, 1, weights) < 1) {
+		g_print(filename);
+		return -4;
+	}
+	if (r != WEIGHTS_VERSION_BINARY) {
+		g_print(_("%s: incorrect weights version (version %s "
+			     " is required, but these weights "
+			     "are %.2f)\n"), filename, WEIGHTS_VERSION,
+			   r);
+		return -5;
+	}
+
+	return 0;
+}
+
+int weights_failed(char * filename, FILE * weights)
+{
+	char file_version[16];
+	if (!weights)
+	{
+		g_print(filename);
+		return -1;
+	}
+
+	if( fscanf( weights, "GNU Backgammon %15s\n",
+				file_version ) != 1 )
+	{
+		g_print(_("%s: not a weights file\n"), filename );
+		return -2;
+	}
+	if( strcmp( file_version, WEIGHTS_VERSION ) )
+	{
+		g_print(_("%s: incorrect weights version (version "
+					"%s is required,\nbut these weights "
+					"are %s)\n"), 
+				filename, WEIGHTS_VERSION, file_version );
+		return -3;
+	}
+	return 0;
+}
 
 int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNState *pnState) = 0;
 
-extern int
-EvalInitialise( char *szWeights, char *szWeightsBinary,
-		int fNoBearoff, 
-		const char *szDir, int nSize,
-		void (*pfProgress)( int ) )
+extern int EvalInitialise(char *szWeights, char *szWeightsBinary,
+			  int fNoBearoff, int nSize,
+			  void (*pfProgress) (int))
 {
-    FILE *pfWeights;
+    FILE *pfWeights = NULL;
     int h, i, fReadWeights = FALSE;
-    char szFileVersion[ 16 ];
-    float r;
     static int fInitialised = FALSE;
-	int ret;
+    int ret;
+    char *gnubg_bearoff;
+    char *gnubg_bearoff_os;
 
     if( !fInitialised ) {
 
@@ -759,15 +813,18 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
       /* read one-sided db from gnubg.bd */
 	pbc1 = BearoffInitBuiltin();
 #endif
+	gnubg_bearoff = g_build_filename(PKGDATADIR, "gnubg.bd", NULL);
+	gnubg_bearoff_os = g_build_filename(PKGDATADIR, "gnubg_os.bd", NULL);
 	if( !pbc1 )
-	    pbc1 = BearoffInit( "gnubg_os0.bd", szDir, BO_IN_MEMORY, NULL );
+	    pbc1 = BearoffInit( gnubg_bearoff_os, BO_IN_MEMORY, NULL );
 
 	if( !pbc1 )
-	    pbc1 = BearoffInit ( NULL, NULL, BO_HEURISTIC, pfProgress );
+	    pbc1 = BearoffInit ( NULL, BO_HEURISTIC, pfProgress );
+	g_free(gnubg_bearoff);
+	g_free(gnubg_bearoff_os);
 	
 	/* read two-sided db from gnubg.bd */
-	pbc2 = BearoffInit ( "gnubg_ts0.bd", szDir, 
-			     BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
+	pbc2 = BearoffInit ( gnubg_bearoff, BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
 	
 	if ( ! pbc2 )
 	    fprintf ( stderr, 
@@ -781,114 +838,61 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		      "README for more details\n\n" );
 	
 	/* init one-sided db */
-	pbcOS = BearoffInit ( "gnubg_os.bd", szDir, BO_NONE, NULL );
+	pbcOS = BearoffInit ( "gnubg_os.bd", BO_NONE, NULL );
 	
 	/* init two-sided db */
-	pbcTS = BearoffInit ( "gnubg_ts.bd", szDir, BO_NONE, NULL );
+	pbcTS = BearoffInit ( "gnubg_ts.bd", BO_NONE, NULL );
 
         /* hyper-gammon databases */
 
         for ( i = 0; i < 3; ++i ) {
           char sz[ 10 ];
           sprintf( sz, "hyper%1d.bd", i + 1 );
-          apbcHyper[ i ] = BearoffInit( sz, szDir, BO_NONE, NULL );
+          apbcHyper[ i ] = BearoffInit( sz, BO_NONE, NULL );
         }
 
     }
 
-    if( szWeightsBinary &&
-	( h = PathOpen( szWeightsBinary, szDir, BINARY ) ) >= 0 &&
-	( pfWeights = fdopen( h, "rb" ) ) ) {
-	if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
-	    perror( szWeightsBinary );
-	else if( r != WEIGHTS_MAGIC_BINARY )
-	    fprintf( stderr, _("%s: not a weights file\n"), szWeightsBinary );
-	else if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
-	    perror( szWeightsBinary );
-	else if( r != WEIGHTS_VERSION_BINARY )
-	    fprintf( stderr, _("%s: incorrect weights version (version %s "
-                               " is required, but these weights "
-                               "are %.2f)\n"), 
-                     szWeights, WEIGHTS_VERSION, r );
-	else {
-#if HAVE_MMAP && ! USE_SSE_VECTORIZE
-	    struct stat st;
-	    void *p;
+    if( szWeightsBinary)
+    { 
+	    h = open( szWeightsBinary, O_RDONLY | BINARY );
+	    if (h)
+		    pfWeights = fdopen( h, "rb" );
+	    if (!binary_weights_failed(szWeightsBinary, pfWeights))
+	    {
+		    if( !fReadWeights && !( fReadWeights =
+					    !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
+					    !NeuralNetLoadBinary(&nnRace, pfWeights ) &&
+					    !NeuralNetLoadBinary(&nnCrashed, pfWeights ) &&
 
-	    /* Attempt to mmap() the weights file, instead of reading it,
-	       so that the virtual memory can be shared if there are
-	       multiple gnubg processes running concurrently.
-
-	       We don't bother making any arrangements to munmap() the
-	       region if the neural net is destroyed: technically this
-	       is a leak, but it doesn't really matter, because (a) this
-	       function is only ever called once, (b) in the normal
-	       case these nets will live for the lifetime of the
-	       process, and (c) normally the weights will never be
-	       changed, and so this region will remain clean and not
-	       waste any virtual memory. */
-	    if( !fstat( h, &st ) &&
-		( p = mmap( NULL, st.st_size, PROT_READ | PROT_WRITE,
-			    MAP_PRIVATE, h, 0 ) ) ) {
-		/* gcc 4 doesn't support casts as lvalues.
-		   -- rra, 2006-01-14 */
-		float *pf = p;
-		pf += 2;              /* skip magic number and version */
-		p = pf;
-		fReadWeights =
-		  ( p = NeuralNetCreateDirect( &nnContact, p ) ) &&
-		  ( p = NeuralNetCreateDirect( &nnRace, p ) ) &&
-		  ( p = NeuralNetCreateDirect( &nnCrashed, p ) )  &&
-				    
-		  ( p = NeuralNetCreateDirect(&nnpContact, p) ) &&
-		  ( p = NeuralNetCreateDirect(&nnpCrashed, p) ) &&
-		  ( p = NeuralNetCreateDirect(&nnpRace, p ) );
+					    !NeuralNetLoadBinary(&nnpContact, pfWeights ) &&
+					    !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) &&
+					    !NeuralNetLoadBinary(&nnpRace, pfWeights ) ) ) { 
+			    perror( szWeightsBinary );
+		    }
 	    }
-#endif
-	    if( !fReadWeights && !( fReadWeights =
-		   !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnRace, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnCrashed, pfWeights ) &&
-				    
-		   !NeuralNetLoadBinary(&nnpContact, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnpRace, pfWeights ) ) ) { 
-			perror( szWeightsBinary );
-	    }
-	    
 	    fclose( pfWeights );
-	}
     }
 
     if( !fReadWeights && szWeights ) {
-	if( ( h = PathOpen( szWeights, szDir, 0 ) ) < 0 ||
-	    !( pfWeights = fdopen( h, "r" ) ) )
-	    perror( szWeights );
-	else {
-	    if( fscanf( pfWeights, "GNU Backgammon %15s\n",
-			szFileVersion ) != 1 )
-		fprintf( stderr, _("%s: not a weights file\n"), szWeights );
-	    else if( strcmp( szFileVersion, WEIGHTS_VERSION ) )
-                fprintf( stderr, _("%s: incorrect weights version (version "
-                                   "%s is required,\nbut these weights "
-                                   "are %s)\n"), 
-                         szWeights, WEIGHTS_VERSION, szFileVersion );
-	    else {
+	    h = open( szWeights, O_RDONLY);
+	    if (h)
+		    pfWeights = fdopen( h, "r" );
+	    if (!binary_weights_failed(szWeights, pfWeights))
+	    {
+		    if( !( fReadWeights =
+					    !NeuralNetLoad( &nnContact, pfWeights ) &&
+					    !NeuralNetLoad( &nnRace, pfWeights ) &&
+					    !NeuralNetLoad( &nnCrashed, pfWeights ) &&
 
-		 if( !( fReadWeights =
-		       !NeuralNetLoad( &nnContact, pfWeights ) &&
-		       !NeuralNetLoad( &nnRace, pfWeights ) &&
-		       !NeuralNetLoad( &nnCrashed, pfWeights ) &&
-		       
-		       !NeuralNetLoad( &nnpContact, pfWeights ) &&
-		       !NeuralNetLoad( &nnpCrashed, pfWeights ) &&
-		       !NeuralNetLoad( &nnpRace, pfWeights ) 
-		       ) )
-		    perror( szWeights );
+					    !NeuralNetLoad( &nnpContact, pfWeights ) &&
+					    !NeuralNetLoad( &nnpCrashed, pfWeights ) &&
+					    !NeuralNetLoad( &nnpRace, pfWeights ) 
+			 ) )
+			    perror( szWeights );
 
-		 fclose( pfWeights );
 	    }
-	}
+	    fclose( pfWeights );
     }
 
     if( fReadWeights ) {

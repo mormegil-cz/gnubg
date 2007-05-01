@@ -48,8 +48,8 @@ typedef enum _gnubgsound {
   NUM_SOUNDS
 } gnubgsound;
 
-extern char *aszSoundDesc[ NUM_SOUNDS ];
-extern char *aszSoundCommand[ NUM_SOUNDS ];
+extern char *sound_description[ NUM_SOUNDS ];
+extern char *sound_command[ NUM_SOUNDS ];
 
 extern char szSoundCommand[ 80 ];
 

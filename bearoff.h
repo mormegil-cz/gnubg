@@ -48,7 +48,6 @@ typedef struct _bearoffcontext {
   int nChequers;  /* number of chequers for one-sided database */
   int fInMemory;  /* Is database entirely read into memory? */
   int fMalloc;    /* is data malloc'ed? */
-  char *szDir;    /* directory */
   char *szFilename; /* filename */
 
   /* one sided dbs */
@@ -80,8 +79,7 @@ enum _bearoffoptions {
 };
 
 extern bearoffcontext *
-BearoffInit ( const char *szFilename, const char *szDir,
-              const int bo, void (*p)() );
+BearoffInit ( const char *szFilename, const int bo, void (*p)() );
 
 extern bearoffcontext *
 BearoffInitBuiltin ( void );

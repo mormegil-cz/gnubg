@@ -79,7 +79,7 @@ getMEAtScore( const int nScore0, const int nScore1, const int nMatchTo,
 /* Initialise match equity table */
 
 void
-InitMatchEquity ( const char *szFileName, const char *szDir );
+InitMatchEquity ( const char *szFileName );
 
 /* Get double points */
 

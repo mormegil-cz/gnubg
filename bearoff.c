@@ -44,7 +44,6 @@
 #include "bearoff.h"
 #include <glib/gi18n.h>
 #include "bearoffgammon.h"
-#include "path.h"
 #include "common.h"
 
 #if WIN32
@@ -1078,9 +1077,6 @@ BearoffClose ( bearoffcontext **ppbc ) {
   else if ( (*ppbc)->p && (*ppbc)->fMalloc )
     free ( (*ppbc)->p );
 
-  if ( (*ppbc)->szDir )
-    free( (*ppbc)->szDir );
-
   if ( (*ppbc)->szFilename )
     free( (*ppbc)->szFilename );
 
@@ -1178,7 +1174,6 @@ BearoffAlloc( void ) {
   pbc->nChequers = -1;
   pbc->fInMemory = FALSE;
   pbc->fMalloc = FALSE;
-  pbc->szDir = NULL;
   pbc->szFilename = NULL;
   pbc->fCompressed = TRUE;
   pbc->fGammon = TRUE;
@@ -1214,7 +1209,7 @@ BearoffAlloc( void ) {
  */
 
 extern bearoffcontext *
-BearoffInit ( const char *szFilename, const char *szDir,
+BearoffInit ( const char *szFilename,
               const int bo, void (*p)() ) {
 
   bearoffcontext *pbc;
@@ -1245,7 +1240,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
     pbc->fMalloc = TRUE;
     pbc->p = HeuristicDatabase ( p );
     pbc->ph = NULL;
-    pbc->szDir = szDir ? strdup( szDir ) : NULL;
     pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
     return pbc;
@@ -1273,7 +1267,7 @@ BearoffInit ( const char *szFilename, const char *szDir,
    * Open bearoff file
    */
 
-  if ( ( pbc->h = PathOpen ( szFilename, szDir, BINARY ) ) < 0 ) {
+  if ( ( pbc->h = open(szFilename, O_RDONLY | BINARY ) ) < 0 ) {
     /* open failed */
     free ( pbc );
     return NULL;
@@ -1306,7 +1300,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
   else
     pbc->bc = BEAROFF_UNKNOWN;
 
-  pbc->szDir = szDir ? strdup( szDir ) : NULL;
   pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
   switch ( pbc->bc ) {
@@ -1434,7 +1427,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
       pbc->fHeuristic = FALSE;
       pbc->fMalloc = FALSE;
       pbc->p = NULL;
-      pbc->szDir = szDir ? strdup( szDir ) : NULL;
       pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
       iOffset = 0;

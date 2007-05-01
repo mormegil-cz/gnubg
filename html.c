@@ -36,7 +36,6 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "record.h"
-#include "path.h"
 #include "formatgs.h"
 
 #include <glib/gi18n.h>

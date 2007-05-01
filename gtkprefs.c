@@ -43,7 +43,6 @@
 #include "gtkgame.h"
 #include "gtkfile.h"
 #include "gtkprefs.h"
-#include "path.h"
 #include "render.h"
 #include "renderprefs.h"
 #include "boarddim.h"
@@ -1981,7 +1980,6 @@ DesignSave ( GtkWidget *pw, gpointer data ) {
   GList **pplBoardDesigns = (GList **) data;
 
   szFile = g_build_filename ( szHomeDirectory, "boards.xml", NULL);
-  BackupFile ( szFile );
 
   if ( ! ( pf = g_fopen ( szFile, "w+" ) ) ) {
     outputerr ( szFile );

@@ -29,7 +29,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
-#include "path.h"
 #endif
 #include <isaac.h>
 #include <math.h>
@@ -1522,11 +1521,11 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
     FT_Glyph aftg[ 10 ];
     char *file;
 
-    file = PathSearch(FONT_VERA, szDataDirectory);
+    file = g_build_filename(PKGDATADIR, FONT_VERA, NULL);
     if( FT_New_Face( ftl, file, 0, &ftf ) )
 	{
 		RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
-                free(file);
+                g_free(file);
 		return;
 	}
     free(file);
@@ -1859,7 +1858,7 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = PathSearch(FONT_VERA, szDataDirectory);
+    file = g_build_filename(PKGDATADIR, FONT_VERA, NULL);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 2 * prd->nSize ) ) {
 	fFreetype = TRUE;
@@ -1870,7 +1869,7 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
 
 	FT_Done_Face( ftf );
     }
-    free(file);
+    g_free(file);
 #endif
 
     for( i = 0; i < 12; i++ ) {
@@ -2039,7 +2038,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
+    file = g_build_filename(PKGDATADIR, FONT_VERA_SERIF_BOLD, FONT_VERA, NULL);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 4.5 * prd->nSize ) ) {
 	fFreetype = TRUE;
@@ -2058,7 +2057,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 	
 	FT_Done_Face( ftf );
     }
-    free(file);
+    g_free(file);
 #endif
     
     for( i = 0; i < 6; i++ ) {
@@ -2122,7 +2121,7 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = PathSearch(FONT_VERA_SERIF_BOLD, szDataDirectory);
+    file = g_build_filename(PKGDATADIR, FONT_VERA_SERIF_BOLD, FONT_VERA, NULL);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 5 * prd->nSize ) ) {
 	fFreetype = TRUE;
@@ -2141,7 +2140,7 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
 	
 	FT_Done_Face( ftf );
     }
-    free(file);
+    g_free(file);
 #endif
     
     for( i = 0; i < 3; i++ ) {

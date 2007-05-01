@@ -1338,23 +1338,27 @@ static void validateError ( void *ctx,
 
 #endif
 
-static int readMET ( metdata *pmd, const char *szFileName,
-		     const char *szDir ) {
+static int readMET ( metdata *pmd, const char *szFileName ) {
 
-  xmlDocPtr doc;
+  xmlDocPtr doc = NULL;
   xmlNodePtr root, cur;
 
-  xmlChar *pc, *pch;
-
+  xmlChar *pc;
   int fError;
 
   fError = 0;
 
   /* parse document */
+  if (g_file_test(szFileName, G_FILE_TEST_EXISTS))
+	  doc = xmlParseFile( szFileName );
+  else
+  {
+	  char *tmp = g_build_filename(PKGDATADIR, szFileName, NULL);
+	  doc = xmlParseFile( tmp );
+	  g_free(tmp);
+  }
 
-  doc = xmlParseFile( (char*) (pch = BAD_CAST PathSearch( szFileName, szDir )) );
-  free( pch );
-  
+
   /* check root */
 
   root = xmlDocGetRootElement ( doc );
@@ -1373,62 +1377,55 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
 /* libxml2 version 2.4.3 introduced xml catalogs, it dates 25th august 2001 ... */
 /* older versions used SGML format catalogs, but it's not clear when the default behaviour changed */
-#if (LIBXML_VERSION > 20412)
-{
-  xmlValidCtxtPtr ctxt;
-  xmlDtdPtr dtd;
+  {
+	  xmlValidCtxtPtr ctxt;
+	  xmlDtdPtr dtd;
+	  char *pch;
 
-  /* load catalog */
+	  /* load catalog */
 
-  	xmlInitializeCatalog();
-	pch = NULL;
-	
-	if (0 == xmlLoadCatalog((char*) (pch = BAD_CAST PathSearch( "met/catalog.xml", szDir )))) {}
-	else if ( 0 == xmlLoadCatalog(PKGDATADIR "/met/catalog.xml")) {}
-	else if ( 0 == xmlLoadCatalog ( "./met/catalog.xml" )) {}
-	else if ( 0 == xmlLoadCatalog ( "./catalog.xml" )) {}
-    else {
-      printf ( _("Error reading \"catalog.xml\". File not found or parse error.") );
-	      fError = 1;
+	  xmlInitializeCatalog();
+	  pch = g_build_filename(PKGDATADIR, "met", "catalog.xml", NULL);
+	  if (xmlLoadCatalog(pch))
+	  {
+		  g_print ( _("Error reading %s. File not found or parse error."), pch );
+		  fError = 1;
 		  if (pch)  free( pch );
 		  goto finish;
+	  }
+	  g_free( pch );
+
+	  /* load dtd */
+
+	  dtd = xmlParseDTD(XML_PUBLIC_ID, NULL);
+	  if (!dtd) {
+		  xmlChar* tmp = xmlCatalogResolvePublic(XML_PUBLIC_ID);
+		  dtd = xmlParseDTD(NULL, tmp);
+		  if (tmp) free(tmp);
+	  }
+	  if (!dtd) {
+		  printf ( _("Error resolving DTD for public ID %s"), XML_PUBLIC_ID );
+		  fError = 1;
+		  goto finish;
+
+	  }
+
+	  /* validate against the DTD */
+	  ctxt = xmlNewValidCtxt();
+	  ctxt->error = validateError;
+	  ctxt->warning = validateWarning;
+
+	  if ( !(xmlValidateDtd(ctxt, doc, dtd) && xmlValidateDtdFinal(ctxt, doc)) ) {
+
+		  printf ( _("Error reading XML file (%s): not valid!\n"), szFileName );
+		  fError = 1;
+		  goto finish;
+
+	  }
+
+	  if (ctxt) xmlFreeValidCtxt(ctxt);
+	  if (dtd) xmlFreeDtd(dtd);
   }
-  if (pch) free( pch );
-
-  /* load dtd */
-
-  dtd = xmlParseDTD(XML_PUBLIC_ID, NULL);
-  if (!dtd) {
-	  pch = xmlCatalogResolvePublic(XML_PUBLIC_ID);
-	  dtd = xmlParseDTD(NULL, pch);
-	  if (pch) free(pch);
-  }
-  if (!dtd) {
-    printf ( _("Error resolving DTD for public ID %s"), XML_PUBLIC_ID );
-    fError = 1;
-    goto finish;
-
-  }
-
-#if (LIBXML_VERSION > 20412)
-  /* validate against the DTD */
-  ctxt = xmlNewValidCtxt();
-  ctxt->error = validateError;
-  ctxt->warning = validateWarning;
-
-  if ( !(xmlValidateDtd(ctxt, doc, dtd) && xmlValidateDtdFinal(ctxt, doc)) ) {
-
-    printf ( _("Error reading XML file (%s): not valid!\n"), szFileName );
-    fError = 1;
-    goto finish;
-
-  }
-
-  if (ctxt) xmlFreeValidCtxt(ctxt);
-  if (dtd) xmlFreeDtd(dtd);
-#endif /* XMLVERSION > 20507 */
-}
-#endif /* XMLVERSION */
 
   /* initialise data */
 
@@ -1701,7 +1698,7 @@ calcGammonPrices ( float aafMET[ MAXSCORE ][ MAXSCORE ],
 }
 
 extern void
-InitMatchEquity ( const char *szFileName, const char *szDir ) {
+InitMatchEquity ( const char *szFileName) {
 
   int i,j;
   metdata md;
@@ -1713,7 +1710,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
    * Read match equity table from XML file
    */
 
-  if ( readMET ( &md, szFileName, szDir ) ) {
+  if ( readMET ( &md, szFileName ) ) {
 
     if ( ! fTableLoaded ) {
 

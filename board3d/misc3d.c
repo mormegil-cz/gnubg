@@ -321,7 +321,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		}
 	}
 	{	/* Not in texture list, see if old texture on disc */
-		char *szFile = PathSearch( file, szDataDirectory );
+		char *szFile =g_build_filename(PKGDATADIR, file, NULL);
 		if (szFile && !access(szFile, R_OK))
 		{
 			/* Add entry for unknown texture */
@@ -335,9 +335,9 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 
 			textures = g_list_append(textures, *textureInfo);
 
-			free( szFile );
 			return;
 		}
+		g_free( szFile );
 	}
 
 	*textureInfo = 0;
@@ -361,9 +361,9 @@ void LoadTextureInfo(int FirstPass)
 	else if (g_list_length(textures) > 0)
 		return;	/* Ignore multiple calls after a successful load */
 
-	szFile = PathSearch( TEXTURE_FILE, szDataDirectory );
+	szFile = g_build_filename( PKGDATADIR, TEXTURE_FILE, NULL );
 	fp = fopen(szFile, "r");
-	free(szFile);
+	g_free(szFile);
 	if (!fp)
 	{
 		if (!FirstPass)
@@ -489,22 +489,25 @@ int LoadTexture(Texture* texture, const char* filename)
 {
 	unsigned char* bits = 0;
 	int n;
-	char *szFile = PathSearch( filename, szDataDirectory );
 	GError *pix_error = NULL;
 	GdkPixbuf *fpixbuf, *pixbuf;
 	
-	if (!szFile)
+	if (!filename)
 		return 0;
- 
-	fpixbuf = gdk_pixbuf_new_from_file(szFile, &pix_error);
 
-	if (pix_error) {
-		g_print("Failed to open texture: %s\n", szFile );
-		free( szFile );
-		return 0;	/* failed to load file */
+	if (g_file_test(filename, G_FILE_TEST_EXISTS))
+		fpixbuf = gdk_pixbuf_new_from_file(filename, &pix_error);
+	else
+	{
+		char *tmp = g_build_filename(PKGDATADIR, filename, NULL);
+		fpixbuf = gdk_pixbuf_new_from_file(tmp, &pix_error);
+		g_free(tmp);
 	}
 
-	free( szFile );
+	if (pix_error) {
+		g_print("Failed to open texture: %s\n", filename );
+		return 0;	/* failed to load file */
+	}
 
 	pixbuf = gdk_pixbuf_flip(fpixbuf, FALSE);
 	g_object_unref(fpixbuf);

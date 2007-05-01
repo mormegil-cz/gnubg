@@ -1549,10 +1549,10 @@ static void SetSoundSettings()
 	CHECKUPDATE(soundsEnabled, fSound, "set sound enable %s");
 	for (i = 0; i < NUM_SOUNDS; i++) 
 	{
-		if (soundDetails[i].Enabled)
+		if (*soundDetails[i].Path)
 			SetSoundFile(i, soundDetails[i].Path);
 		else
-			SetSoundFile(i, NULL);
+			SetSoundFile(i, "");
 	}
   sound_set_command(gtk_entry_get_text(GTK_ENTRY(pwSoundCommand)));
 	outputon();
@@ -1587,7 +1587,6 @@ void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
 	if (!GTK_WIDGET_REALIZED(soundEnabled) || !GTK_WIDGET_SENSITIVE(soundEnabled))
 		return;
 	enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundEnabled));
-	soundDetails[selSound].Enabled = enabled;
 	gtk_widget_set_sensitive(soundPath, enabled);
 	gtk_widget_set_sensitive(soundPathButton, enabled);
 	gtk_widget_set_sensitive(soundPlayButton, enabled);
@@ -1648,10 +1647,10 @@ void SoundSelected(GtkTreeView *treeview, gpointer userdata)
 	gtk_tree_view_get_cursor(GTK_TREE_VIEW(treeview), &path, NULL);
 	selSound = gtk_tree_path_get_indices(path)[0];
 
-	gtk_frame_set_label(GTK_FRAME(soundFrame), aszSoundDesc[selSound]);
+	gtk_frame_set_label(GTK_FRAME(soundFrame), sound_description[selSound]);
 	SoundSkipUpdate = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(soundPath), soundDetails[selSound].Path);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundEnabled), soundDetails[selSound].Enabled);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundEnabled), (*soundDetails[selSound].Path) ? TRUE:FALSE);
 }
 
 static void SoundGrabFocus(GtkWidget *pw, void *dummy)
@@ -1708,14 +1707,11 @@ AddSoundWidgets (GtkWidget * container)
     for (i = 0; i < NUM_SOUNDS; i++)
       {
 	  /* Copy sound path data to be used in dialog */
-	  char *sound = GetSoundFile (i);
-	  soundDetails[i].Path = (char *) g_malloc (strlen (sound) + 1);
-	  strcpy (soundDetails[i].Path, sound);
-	  soundDetails[i].Enabled = (*sound != 0);
+	  soundDetails[i].Path = GetSoundFile (i);
 
 	  gtk_list_store_append (store, &iter);
 	  gtk_list_store_set (store, &iter, SOUND_COL,
-			      gettext (aszSoundDesc[i]), -1);
+			      gettext (sound_description[i]), -1);
       }
 
     soundList = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));

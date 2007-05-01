@@ -31,7 +31,6 @@
 
 #include "eval.h"
 #include "matchequity.h"
-#include "path.h"
 #include "positionid.h"
 #include "analysis.h"
 #include "md5.h"
@@ -2402,7 +2401,7 @@ PyMethodDef gnubgMethods[] = {
 };
 
 extern void
-PythonInitialise( const char *szDir ) {
+PythonInitialise() {
 
   char *pch;
   static char workingDir[BIG_PATH];

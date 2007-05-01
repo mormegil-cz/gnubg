@@ -35,7 +35,7 @@
 #include "config.h"
 
 extern void
-PythonInitialise( const char *szDir );
+PythonInitialise();
 
 extern void
 PythonShutdown();

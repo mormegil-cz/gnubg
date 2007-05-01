@@ -82,7 +82,7 @@ OpenURL (const char *szURL)
   command = g_strdup_printf ("%s %s", browser, szURL);
   if (!g_spawn_command_line_async (command, &error))
     {
-      g_printerr ("browser couldn't open file (%s): %s\n",
+      outputerrf(_("Browser couldn't open file (%s): %s\n"),
 		  command, error->message);
       g_error_free (error);
     }

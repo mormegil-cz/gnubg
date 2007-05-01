@@ -2944,7 +2944,7 @@ extern void CommandSetMET( char *sz ) {
     return;
   }
 
-  InitMatchEquity ( sz, szDataDirectory );
+  InitMatchEquity ( sz );
   /* Cubeful evaluation get confused withh entries from another table */
   EvalCacheFlush();
 
