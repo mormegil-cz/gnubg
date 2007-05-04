@@ -6834,12 +6834,6 @@ int main(int argc, char *argv[])
                 LoadRCFiles();
         }
 
-	if (pchMatch) {
-		PushSplash(pwSplash,
-			   _("Loading"), _("Specified Match"), 500);
-			CommandLoadMatch(pchMatch);
-	}
-
 	fflush(stdout);
 	fflush(stderr);
 	/* start-up sound */
@@ -6854,6 +6848,10 @@ int main(int argc, char *argv[])
                 exit(EXIT_SUCCESS);
         }
 #endif
+
+	if (pchMatch)
+		CommandLoadMatch(pchMatch);
+
         /* -c option given */
 	if (pchCommands) {
 		fInteractive = FALSE;

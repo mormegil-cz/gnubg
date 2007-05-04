@@ -1,7 +1,9 @@
 
 #include "backgammon.h"
 
-#ifndef WIN32
+#ifdef WIN32
+#include <windows.h>
+#else
 #define GLIB_THREADS
 #endif
 

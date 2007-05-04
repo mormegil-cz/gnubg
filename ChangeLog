@@ -1,3 +1,9 @@
+Fri May  4 10:21:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: fix issue with matches loaded twice from command line
+	* analysis.c: fix issue with progress bar when running multithreaded
+	* export.c, multithread.c: fix WIN32 compiler warnings
+
 Wed May  2 00:00:38 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, backgammon.h, bearoff.c, bearoff.h, bearoffdump.c,

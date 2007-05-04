@@ -25,6 +25,7 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <stdlib.h>
+#include <string.h>
 
 #if HAVE_LIBPNG
 #include <png.h>

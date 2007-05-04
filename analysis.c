@@ -965,23 +965,27 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
     return fInterrupt ? -1 : 0;
 }
 
+/* used by mulithread code */
+static int progress_offset;
+
 static int NumberMovesGame ( list *plGame );
 
 #if USE_MULTITHREAD
 
+
 static void UpdateProgressBar()
 {
-	ProgressValue(MT_GetDoneTasks());
+	ProgressValue(progress_offset + MT_GetDoneTasks());
 }
 
 static int AnalyzeGame ( list *plGame )
 {
 	int result;
 	unsigned int i;
-    list *pl = plGame->plNext;
-    moverecord *pmr = pl->p;
+	list *pl = plGame->plNext;
+	moverecord *pmr = pl->p;
 	statcontext *psc = &pmr->g.sc;
-    matchstate msAnalyse;
+	matchstate msAnalyse;
 	unsigned int numMoves = NumberMovesGame(plGame);
 	AnalyseMoveTask *pt = NULL, *pParentTask = NULL;
 
@@ -989,15 +993,15 @@ static int AnalyzeGame ( list *plGame )
 	fnTick = NULL;
 
 	/* Analyse first move record (gameinfo) */
-    g_assert( pmr->mt == MOVE_GAMEINFO );
-    if	(AnalyzeMove(pmr, &msAnalyse, plGame, psc,
-                        &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, afAnalysePlayers, NULL ) < 0 )
+	g_assert( pmr->mt == MOVE_GAMEINFO );
+	if	(AnalyzeMove(pmr, &msAnalyse, plGame, psc,
+				&esAnalysisChequer, &esAnalysisCube, aamfAnalysis, afAnalysePlayers, NULL ) < 0 )
 		return -1;	/* Interupted */
 
 	numMoves--;	/* Done one - the gameinfo */
 
 
-    for (i = 0; i < numMoves; i++)
+	for (i = 0; i < numMoves; i++)
 	{
 		pl = pl->plNext;
 		pmr = pl->p;
@@ -1014,9 +1018,9 @@ static int AnalyzeGame ( list *plGame )
 
 		if (pmr->mt == MOVE_DOUBLE)
 		{
-		    moverecord *pNextmr = (moverecord *)pl->plNext->p;
+			moverecord *pNextmr = (moverecord *)pl->plNext->p;
 			if (pNextmr &&
-				(pNextmr->mt == MOVE_DROP || pNextmr->mt == MOVE_TAKE))
+					(pNextmr->mt == MOVE_DROP || pNextmr->mt == MOVE_TAKE))
 			{	/* Need to link the two tasks so executed together */
 				pParentTask = pt;
 				pt = (AnalyseMoveTask*)malloc(sizeof(AnalyseMoveTask));
@@ -1048,9 +1052,9 @@ static int AnalyzeGame ( list *plGame )
 	fnTick = fnOld;
 
 	if (result == -1)
-	    IniStatcontext( psc );
+		IniStatcontext( psc );
 
-    return result;
+	return result;
 }
 
 #else
@@ -1283,6 +1287,7 @@ extern void CommandAnalyseMatch( char *sz )
 
   nMoves = NumberMovesMatch ( &lMatch );
 
+  progress_offset = 0;
   ProgressStartValue( _("Analysing match; move:"), nMoves );
 
   IniStatcontext( &scMatch );
@@ -1295,6 +1300,7 @@ extern void CommandAnalyseMatch( char *sz )
 	  IniStatcontext( &scMatch );
 	  break;
       }
+      progress_offset += NumberMovesGame ( pl -> p);
       pmr = (moverecord *) ( (list *) pl->p )->plNext->p;
       g_assert( pmr->mt == MOVE_GAMEINFO );
       AddStatcontext( &pmr->g.sc, &scMatch );
