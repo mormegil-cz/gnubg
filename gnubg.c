@@ -112,7 +112,6 @@ int fReadingCommand;
 
 /* CommandSetLang trims the selection to 31 max and copies */
 char szLang[32] = "system";
-static char *orgLangCode;
 
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
@@ -6486,22 +6485,16 @@ static void run_cl()
 		ResetInterrupt();
 	}
 }
-static void init_language(char *lang)
+static void init_language(char **lang)
 {
 	char *szFile, szTemp[4096];
 	char *pch;
 	FILE *pf;
 
-
-	if (lang) {
-		SetupLanguage(lang);
-		return;
-	}
-
 	outputoff();
 	szFile = g_build_filename(szHomeDirectory, "gnubgautorc", NULL);
 
-	if ((pf = g_fopen(szFile, "r"))) {
+	if (!*lang && (pf = g_fopen(szFile, "r"))) {
 
 		for (;;) {
 
@@ -6521,15 +6514,17 @@ static void init_language(char *lang)
 			}
 
 			if (!strncmp("set lang", szTemp, 8)) {
-				HandleCommand(szTemp, acTop);
+				*lang = g_strdup(szTemp+9);
 				break;
 			}
 		}
 
 		fclose(pf);
 	}
-	outputon();
 	g_free(szFile);
+	CommandSetLang(*lang);
+	g_free(*lang);
+	outputon();
 }
 
 static void setup_readline()
@@ -6719,13 +6714,15 @@ int main(int argc, char *argv[])
 	GOptionContext *context;
 
         
-
 	/* set language */
-	orgLangCode = g_strdup(setlocale(LC_ALL, ""));
+        init_defaults();
+#if USE_GTK
+	gtk_disable_setlocale();
+#endif
+	init_language(&lang);
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
 	bind_textdomain_codeset(PACKAGE, GNUBG_CHARSET);
-	init_language(lang);
 
         /* parse command line options*/
 	context = g_option_context_new("[file.sgf]");
@@ -6762,7 +6759,6 @@ int main(int argc, char *argv[])
 	if (fQuiet)
 		fSound = FALSE;
 
-        init_defaults();
 	if (CreateGnubgDirectory())
 		exit(EXIT_FAILURE);
 
@@ -7441,27 +7437,10 @@ extern char * locale_to_utf8 ( const char *sz) {
     return ret;
 }
 
-void setlangenv(char *newLangCode)
-{	/* Different functions needed on different platforms ! */
-#if WIN32
-    char *lang = malloc (strlen ("LANG=") + strlen(newLangCode) + 1);
-    sprintf(lang, "LANG=%s", newLangCode);
-    putenv(lang);
-    free(lang);
-#else
-	setenv ("LC_ALL", newLangCode, TRUE);
-#endif
-}
-
-void
-SetupLanguage (char *newLangCode)
+void SetupLanguage (char *newLangCode)
 {
-	if (newLangCode)
-	{
-		if (!strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
-			setlangenv(orgLangCode);
-		else
-			setlangenv(newLangCode);
-	}
-	setlocale (LC_ALL, "");
+	if (!newLangCode || !strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
+		setlocale (LC_ALL, "");
+	else
+		setlocale (LC_ALL, newLangCode);
 }

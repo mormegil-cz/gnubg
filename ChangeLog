@@ -1,3 +1,8 @@
+Mon May  7 23:29:33 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: fix problem with lang settings not being loaded.
+	* po/: now fuzzy matching, since po files are ill maintained.
+
 Fri May  4 10:21:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: fix issue with matches loaded twice from command line

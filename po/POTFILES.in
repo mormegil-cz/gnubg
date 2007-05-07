@@ -2,8 +2,6 @@ analysis.c
 bearoff.c
 board3d/gtkcolour3d.c
 board3d/inc3d.h
-br1.c
-credits.c
 dice.c
 drawboard.c
 eval.c
@@ -15,7 +13,6 @@ formatgs.c
 getopt.c
 gnubg.c
 gnubgmodule.c
-gtkbearoff.c
 gtkboard.c
 gtkchequer.c
 gtkcolour.c
@@ -69,4 +66,3 @@ show.c
 sound.c
 speed.c
 text.c
-timecontrol.c

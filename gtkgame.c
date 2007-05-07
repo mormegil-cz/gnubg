@@ -2008,8 +2008,6 @@ extern void InitGTK( int *argc, char ***argv )
     int i;
     char *sz;
 
-    gtk_set_locale ();
-
     sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
     gtk_rc_add_default_file( sz  );
     g_free(sz);
