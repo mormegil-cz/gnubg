@@ -7565,13 +7565,13 @@ extern void GTKMatchInfo( void )
     GTKAllowStdin();
 }
 
-static void CalibrationOK( GtkWidget *pw, GtkWidget **ppw ) {
+static void CalibrationOK( GtkWidget *pw, GtkWidget *ppw ) {
 
     char sz[ 128 ];
     GtkAdjustment *padj = gtk_spin_button_get_adjustment(
-	GTK_SPIN_BUTTON( *ppw ) );
+	GTK_SPIN_BUTTON( ppw ) );
     
-    if( GTK_WIDGET_IS_SENSITIVE( *ppw ) ) {
+    if( GTK_WIDGET_IS_SENSITIVE( ppw ) ) {
 	if( padj->value != rEvalsPerSec ) {
 	    sprintf( sz, "set calibration %.0f", padj->value );
 	    UserCommand( sz );
@@ -7609,8 +7609,14 @@ extern void GTKShowCalibration( void )
     GtkWidget *pwDialog, *pwvbox, *pwhbox, *pwenable, *pwspin, *pwbutton,
 	*apw[ 2 ];
     
+    padj = GTK_ADJUSTMENT( gtk_adjustment_new( rEvalsPerSec > 0 ?
+					       rEvalsPerSec : 10000,
+					       2, G_MAXFLOAT, 100,
+					       1000, 0 ) );
+    pwspin = gtk_spin_button_new( padj, 100, 0 );
+    /* FIXME should be modal but presently causes crash and/or killing of the main window */
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Speed estimate"), DT_QUESTION,
-		NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( CalibrationOK ), &pwspin );
+		NULL, 0, GTK_SIGNAL_FUNC( CalibrationOK ), pwspin );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwvbox = gtk_vbox_new( FALSE, 8 ) );
     gtk_container_set_border_width( GTK_CONTAINER( pwvbox ), 8 );
@@ -7622,11 +7628,6 @@ extern void GTKShowCalibration( void )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwenable ),
 				  rEvalsPerSec > 0 );
     
-    padj = GTK_ADJUSTMENT( gtk_adjustment_new( rEvalsPerSec > 0 ?
-					       rEvalsPerSec : 10000,
-					       2, G_MAXFLOAT, 100,
-					       1000, 0 ) );
-    pwspin = gtk_spin_button_new( padj, 100, 0 );
     gtk_container_add( GTK_CONTAINER( pwhbox ), pwspin );
     gtk_widget_set_sensitive( pwspin, rEvalsPerSec > 0 );
     
@@ -7662,8 +7663,10 @@ extern void *GTKCalibrationStart( void ) {
 
     GtkWidget *pwDialog, *pwhbox, *pwResult;
     
+    /* FIXME should be modal but presently causes crash and/or killing of the
+     * main window. FLAG_NOTIDY is not used for anything. */
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Calibration"), DT_INFO,
-		NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
+		NULL, DIALOG_FLAG_NOTIDY, GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwhbox = gtk_hbox_new( FALSE, 8 ) );
     gtk_container_set_border_width( GTK_CONTAINER( pwhbox ), 8 );

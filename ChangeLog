@@ -1,3 +1,9 @@
+Tue May  8 02:22:42 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c, rollout.c: solved problem with calibration widget causing
+	crash. Modality disabled, because of an unresolved issue.
+	DIALOG_FLAG_NOTIDY is unused??
+
 Mon May  7 23:29:33 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: fix problem with lang settings not being loaded.
