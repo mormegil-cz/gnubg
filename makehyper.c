@@ -59,6 +59,7 @@ extern int MT_GetThreadID()
 }
 
 #if WIN32
+#include <windows.h>
 extern char * getInstallDir( void ) {
 
   char buf[_MAX_PATH];
