@@ -1,3 +1,8 @@
+Mon May 14 01:18:33 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* makehyper.c: rename WriteFile to WriteHyperFile to avoid conflict
+	with windows.h
+
 Mon May 14 01:10:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkgame.c, set.c: Fix problems in SetupLang

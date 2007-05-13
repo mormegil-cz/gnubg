@@ -570,7 +570,7 @@ WriteProb ( FILE *pf, const float r ) {
 
 
 static void
-WriteFile ( const char *szFilename, const hyperequity ahe[], 
+WriteHyperFile ( const char *szFilename, const hyperequity ahe[], 
             const int nC ) {
 
   int nPos = Combination( 25 + nC, nC );
@@ -775,7 +775,7 @@ main ( int argc, char **argv ) {
 
       sprintf ( szFilename, "%s.tmp", szOutput );
       if ( rNorm > rEpsilon )
-        WriteFile ( szFilename, aheEquity, nC );
+        WriteHyperFile ( szFilename, aheEquity, nC );
       else
         unlink( szFilename );
 
@@ -790,7 +790,7 @@ main ( int argc, char **argv ) {
 
   time ( &t0 );
 
-  WriteFile ( szOutput, aheEquity, nC );
+  WriteHyperFile ( szOutput, aheEquity, nC );
 
   time ( &t1 );
 
