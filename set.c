@@ -4306,23 +4306,12 @@ CommandSetRatingOffset( char *sz ) {
 
 extern void CommandSetLang( char *sz )
 {
-    if( !sz || !*sz ) {
-	outputl( _( "You must give `system' or a language code "
-		    "as an argument." ) );
-	return;
-    }
-
-    if( strlen( sz ) > 31 )
-	sz[ 31 ] = 0;
-
-    if( ! strcmp( sz, szLang ) ) {
-	outputf( _("The current language preference is already set to "
-		   "%s.\n"), sz );
-	return;
-    }
-
-    strcpy( szLang, sz );
-	SetupLanguage(szLang);
+	if( sz) {
+		if( strlen( sz ) > 31 )
+			sz[ 31 ] = 0;
+		strcpy( szLang, sz );
+	}
+	SetupLanguage(sz);
 
 #if USE_GTK
 	if (fX)

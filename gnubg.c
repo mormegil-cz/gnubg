@@ -7436,7 +7436,23 @@ extern char * locale_to_utf8 ( const char *sz) {
     }
     return ret;
 }
-
+#ifdef WIN32 
+/* WIN32 setlocale must be manipulated through putenv to be gettext compatible */
+void SetupLanguage (char *newLangCode)
+{
+	static char *org_lang=NULL;
+	char *lang;
+	if (!org_lang)
+		org_lang = g_win32_getlocale();
+	if (!newLangCode || !strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
+		lang = g_strdup_printf("LANG=%s", org_lang);
+	else
+		lang = g_strdup_printf("LANG=%s", newLangCode);
+	putenv(lang); 	 
+	g_free(lang);
+	setlocale(LC_ALL, "");
+}
+#else
 void SetupLanguage (char *newLangCode)
 {
 	if (!newLangCode || !strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
@@ -7444,3 +7460,4 @@ void SetupLanguage (char *newLangCode)
 	else
 		setlocale (LC_ALL, newLangCode);
 }
+#endif
