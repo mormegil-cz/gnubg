@@ -28,34 +28,8 @@
 #include "getopt.h"
 #include "positionid.h"
 #include "bearoff.h"
+#include "util.h"
 
-/* ugly fixes */
-char *aszRNG[ 1 ];
-char *aszSkillType[ 1 ];
-int exsExport;
-int ap;
-
-extern void MT_Lock(long *lock)
-{
-}
-
-extern void MT_Unlock(long *lock)
-{
-}
-
-extern int MT_GetThreadID()
-{
-  return (0);
-}
-
-extern bearoffcontext *
-BearoffInitBuiltin ( void ) {
-
-  printf ( "Make makebearoff build (avoid resursive rules Makefile :-)\n" );
-  return NULL;
-
-}
-/* end ugly fixes */
 
 static void
 show_usage( const char *arg0 ) {

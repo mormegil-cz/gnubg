@@ -36,48 +36,10 @@
 #include <locale.h>
 #include "bearoff.h"
 #include "drawboard.h"
+#include "util.h"
 
 static cubeinfo ci;
 static cubeinfo ciJacoby;
-
-/* ugly fixes */
-char *aszRNG[]; 
-char *aszSkillType[ 1 ]; 
-int exsExport;
-int ap;
-extern void MT_Lock(long *lock)
-{
-}
-
-extern void MT_Unlock(long *lock)
-{
-}
-
-extern int MT_GetThreadID()
-{
-  return (0);
-}
-
-#if WIN32
-#include <windows.h>
-extern char * getInstallDir( void ) {
-
-  char buf[_MAX_PATH];
-  char *p;
-  static char *ret = NULL;
-  if (ret)
-	  return (ret);
-  GetModuleFileName(NULL, buf, sizeof(buf));
-  p = MAX(strrchr(buf, '/'), strrchr(buf, '\\'));
-  if (p)
-	  *p = '\0';
-  ret = g_strdup(buf);
-  return ret;
-}
-#endif
-
-
-/* end ugly fixes */
 
 typedef enum _hyperclass {
   HYPER_OVER,
