@@ -806,7 +806,7 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   AllocTextList(prp);
 
   prp->pwRolloutDialog = GTKCreateDialog( _("GNU Backgammon - Rollout"), DT_INFO, NULL,
-	  DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, NULL, NULL );
+	  DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS | DIALOG_FLAG_NOTIDY, NULL, NULL );
   prp->pwRolloutViewStat = gtk_button_new_with_label ( _("View statistics") );
   prp->pwRolloutStop = gtk_button_new_with_label( _("Stop") );
     
