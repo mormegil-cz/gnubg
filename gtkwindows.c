@@ -94,11 +94,13 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 		parent = GTKGetCurrentParent();
 	if (!GTK_IS_WINDOW(parent))
 		parent = gtk_widget_get_toplevel(parent);
+	if (GTK_IS_WINDOW(parent))
+		gtk_window_present(GTK_WINDOW(parent));
 	if (parent && !GTK_WIDGET_REALIZED(parent))
 		parent = NULL;
 	if (parent != NULL)
 		gtk_window_set_transient_for(GTK_WINDOW(pwDialog), GTK_WINDOW(parent));
-        if (flags & DIALOG_FLAG_MODAL)
+        if (flags & DIALOG_FLAG_MODAL && !( flags & DIALOG_FLAG_NOTIDY))
 			gtk_signal_connect(GTK_OBJECT(pwDialog), "destroy", GTK_SIGNAL_FUNC(quitter), parent);
 
 	pag = gtk_accel_group_new();

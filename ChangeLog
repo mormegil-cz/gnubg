@@ -1,3 +1,11 @@
+Thu May 17 15:53:42 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c, gtkwindows.c, progress.c: fix problem with
+	DIALOG_FLAG_NOTIDY not being used. Make sure that the parent of the
+	dialog is present.
+
+	* util.c, board3d/matrix.c, board3d/matrix.h: compiler warnings
+
 Mon May 14 12:21:13 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* util.[ch]: new files. Keeps the common parts of the ugly fixes of

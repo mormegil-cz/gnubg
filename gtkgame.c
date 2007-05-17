@@ -7665,10 +7665,8 @@ extern void *GTKCalibrationStart( void ) {
 
     GtkWidget *pwDialog, *pwhbox, *pwResult;
     
-    /* FIXME should be modal but presently causes crash and/or killing of the
-     * main window. FLAG_NOTIDY is not used for anything. */
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Calibration"), DT_INFO,
-		NULL, DIALOG_FLAG_NOTIDY, GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
+		NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_NOTIDY, GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwhbox = gtk_hbox_new( FALSE, 8 ) );
     gtk_container_set_border_width( GTK_CONTAINER( pwhbox ), 8 );

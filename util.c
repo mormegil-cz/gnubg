@@ -18,7 +18,7 @@
  *
  * $Id$
  */
-char *aszRNG[]; 
+char *aszRNG[1]; 
 char *aszSkillType[ 1 ]; 
 int exsExport;
 int ap;
