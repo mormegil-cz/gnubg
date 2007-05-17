@@ -1,3 +1,7 @@
+Thu May 17 21:35:00 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* util.c: win32 fixes
+
 Thu May 17 15:53:42 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c, gtkwindows.c, progress.c: fix problem with

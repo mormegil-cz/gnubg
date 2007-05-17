@@ -24,6 +24,8 @@ int exsExport;
 int ap;
 #if WIN32
 #include <windows.h>
+#include <glib/glib.h>
+#include <glib/gstdio.h>
 extern char * getInstallDir( void ) {
 
   char buf[_MAX_PATH];
