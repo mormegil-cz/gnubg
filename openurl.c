@@ -63,29 +63,31 @@ set_web_browser (const char *sz)
   return web_browser;
 };
 
-extern void
-OpenURL (const char *szURL)
+extern void OpenURL(const char *szURL)
 {
-  gchar *browser = get_web_browser ();
+	gchar *browser = get_web_browser();
+	gchar *command;
+	GError *error = NULL;
+	if (!(browser) || !(*browser)) {
 #ifdef WIN32
-  if (!(browser) || !(*browser))
-    {
-      gchar *url =g_strdup_printf("file://%s", szURL);
-      ShellExecute (NULL, TEXT ("open"), url, NULL, ".\\",
-		    SW_SHOWMAXIMIZED);
-      g_free(url);
-      return;
-    }
-#else
-  gchar *command;
-  GError *error = NULL;
-  command = g_strdup_printf ("%s %s", browser, szURL);
-  if (!g_spawn_command_line_async (command, &error))
-    {
-      outputerrf(_("Browser couldn't open file (%s): %s\n"),
-		  command, error->message);
-      g_error_free (error);
-    }
-  return;
+		int win_error;
+		gchar *url = g_strdup_printf("file://%s", szURL);
+		win_error =
+		    (int) ShellExecute(NULL, TEXT("open"), url, NULL,
+				       ".\\", SW_SHOWNORMAL);
+		if (win_error < 33)
+			outputerrf(_("Failed to perform default action on "
+				     "%s. Error code was %d"), url,
+				   win_error);
+		g_free(url);
+		return;
 #endif
+	}
+	command = g_strdup_printf("%s %s", browser, szURL);
+	if (!g_spawn_command_line_async(command, &error)) {
+		outputerrf(_("Browser couldn't open file (%s): %s\n"),
+			   command, error->message);
+		g_error_free(error);
+	}
+	return;
 }

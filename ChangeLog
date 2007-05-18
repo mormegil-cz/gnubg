@@ -1,3 +1,7 @@
+Fri May 18 21:02:50 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* openurl.c: small win32 improvement
+
 Thu May 17 21:35:00 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* util.c: win32 fixes
