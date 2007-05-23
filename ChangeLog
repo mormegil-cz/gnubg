@@ -1,3 +1,8 @@
+Wed May 23 22:44:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* render.c: malloc more space for the labels to avoid crashes on small
+	board sizes.
+
 Wed May 23 17:12:54 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* file.c, file.h, Makefile.am, backgammon.h, export.c, export.h,

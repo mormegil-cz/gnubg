@@ -2736,7 +2736,7 @@ extern void
 RenderBoardLabels( renderdata *prd, 
                    unsigned char *achLo, unsigned char *achHi, int nStride ) {
 
-    unsigned char *achTemp = malloc( BOARD_WIDTH * prd->nSize * 3 * prd->nSize * 3 );
+    unsigned char *achTemp = malloc( BOARD_WIDTH * prd->nSize * 5 * prd->nSize * 5 );
 
     /* 12 11 10 9 8 7 - 6 5 4 3 2 1 */
     
@@ -2770,22 +2770,22 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
 				   CHEQUER_HEIGHT * 4 );
     pri->achChequer[ 1 ] = malloc( nSize * nSize * CHEQUER_WIDTH * 
 				   CHEQUER_HEIGHT * 4 );
-    pri->achChequerLabels = malloc( nSize * nSize * CHEQUER_LABEL_WIDTH *
-				    CHEQUER_LABEL_HEIGHT * 3 * 12 );
+    pri->achChequerLabels = malloc( nSize * nSize * CHEQUER_WIDTH *
+				    CHEQUER_HEIGHT * 3 * 12 );
     pri->achDice[ 0 ] = malloc( nSize * nSize * DIE_WIDTH * DIE_HEIGHT * 4 );
     pri->achDice[ 1 ] = malloc( nSize * nSize * DIE_WIDTH * DIE_HEIGHT * 4 );
     pri->achPip[ 0 ] = malloc( nSize * nSize * 3 );
     pri->achPip[ 1 ] = malloc( nSize * nSize * 3 );
     pri->achCube = malloc( nSize * nSize * CUBE_WIDTH * CUBE_HEIGHT * 4 );
-    pri->achCubeFaces = malloc( nSize * nSize * CUBE_LABEL_WIDTH *
-				CUBE_LABEL_HEIGHT * 3 * 12 );
+    pri->achCubeFaces = malloc( nSize * nSize * CUBE_WIDTH *
+				CUBE_HEIGHT * 3 * 12 );
     pri->asRefract[ 0 ] = malloc( nSize * nSize * CHEQUER_WIDTH * CHEQUER_HEIGHT *
 				  sizeof (unsigned short) );
     pri->asRefract[ 1 ] = malloc( nSize * nSize * CHEQUER_WIDTH * CHEQUER_HEIGHT *
 				  sizeof (unsigned short) );
     pri->achResign = malloc ( nSize * nSize * RESIGN_WIDTH * RESIGN_HEIGHT * 4 );
-    pri->achResignFaces = malloc ( nSize * nSize * RESIGN_LABEL_WIDTH * 
-				   RESIGN_LABEL_HEIGHT * 3 * 3 );
+    pri->achResignFaces = malloc ( nSize * nSize * RESIGN_WIDTH * 
+				   RESIGN_HEIGHT * 3 * 3 );
 #if USE_GTK
     pri->auchArrow[0] = malloc(prd->nSize * prd->nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
     pri->auchArrow[1] = malloc(prd->nSize * prd->nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
