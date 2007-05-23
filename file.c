@@ -64,7 +64,7 @@ FileFormat file_format[] = {
 	 {FALSE, FALSE, FALSE}}
 };
 
-extern gint n_file_formats = G_N_ELEMENTS(file_format);
+gint n_file_formats = G_N_ELEMENTS(file_format);
 
 typedef struct _FileHelper {
 	FILE *fp;
@@ -143,11 +143,6 @@ static char fhPeekNextChar(FileHelper * fh)
 	return fh->data[fh->dataPos];
 }
 
-static int fhEOF(FileHelper * fh)
-{
-	return fhPeekNextChar(fh) == '\0';
-}
-
 static char fhReadNextChar(FileHelper * fh)
 {
 	fhDataGetChar(fh);
@@ -192,7 +187,7 @@ static int fhReadStringNC(FileHelper * fh, char *str)
 {				/* Check file has str next (ignoring case) */
 	while (*str) {
 		char c = fhReadNextChar(fh);
-		if (tolower(c) != *str)
+		if (g_ascii_tolower(c) != *str)
 			return FALSE;
 		str++;
 	}
@@ -205,7 +200,7 @@ static int fhPeekStringNC(FileHelper * fh, char *str)
 	int ret = TRUE;
 	while (*str) {
 		char c = fhReadNextChar(fh);
-		if (tolower(c) != *str) {
+		if (g_ascii_tolower(c) != *str) {
 			ret = FALSE;
 			break;
 		}
@@ -231,11 +226,11 @@ static int fhReadNumber(FileHelper * fh)
 static int fhReadAnyAlphNumString(FileHelper * fh)
 {
 	char c = fhPeekNextChar(fh);
-	if (!isalnum(c))
+	if (!g_ascii_isalnum(c))
 		return FALSE;
 	do {
 		char c = fhPeekNextChar(fh);
-		if (!isalnum(c) && c != '_')
+		if (!g_ascii_isalnum(c) && c != '_')
 			return fhPeekNextIsWS(fh);
 	} while (fhReadNextChar(fh) != '\0');
 	return TRUE;
