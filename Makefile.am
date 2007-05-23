@@ -30,7 +30,7 @@ gnubg_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
 		 progress.c progress.h format.c format.h formatgs.c \
 		 formatgs.h boarddim.h timer.c external_y.y \
 		 external_l.l openurl.c openurl.h mec.h \
-		 mec.c relational.h relational.c common.h sound.c
+		 mec.c relational.h relational.c common.h sound.c file.c file.h
 
 if USE_MULTITHREAD
 gnubg_SOURCES +=  multithread.c multithread.h

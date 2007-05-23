@@ -1,3 +1,10 @@
+Wed May 23 17:12:54 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* file.c, file.h, Makefile.am, backgammon.h, export.c, export.h,
+	gnubg.c, gtkfile.c, gtkgame.c, html.c, import.c, import.h, sgf.h: move
+	some import/export/load/save functions for consistency. New files
+	file.[ch] to allow the new cl command "import auto".
+
 Fri May 18 21:02:50 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* openurl.c: small win32 improvement

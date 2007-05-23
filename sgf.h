@@ -26,11 +26,11 @@
 #include <stdio.h>
 
 typedef struct _property {
-    char ach[ 2 ]; /* 2 character tag; ach[ 1 ] = 0 for 1 character tags */
-    list *pl; /* Values */
+	char ach[2];		/* 2 character tag; ach[ 1 ] = 0 for 1 character tags */
+	list *pl;		/* Values */
 } property;
 
-extern void ( *SGFErrorHandler )( char *szMessage, int fParseError );
+extern void (*SGFErrorHandler) (char *szMessage, int fParseError);
 
 /* Parse an SGF file, and return a syntax tree.  The tree is saved as a list
    of game trees; each game tree is a list where the first element is the
@@ -42,7 +42,7 @@ extern void ( *SGFErrorHandler )( char *szMessage, int fParseError );
 
    If there are any errors in the file, SGFParse calls SGFErrorHandler
    (if set), or complains to stderr (otherwise). */
-extern list *SGFParse( FILE *pf );
+extern list *SGFParse(FILE * pf);
 
 /* The following properties are defined for GNU Backgammon SGF files:
 
@@ -115,6 +115,12 @@ extern list *SGFParse( FILE *pf );
    WR (GI) - white rank (general SGF) (not currently used)
    WT (GI) - white team (general SGF) (not currently used)
    
-*/   
+*/
+extern void CommandLoadGame(char *);
+extern void CommandLoadMatch(char *);
+extern void CommandLoadPosition(char *);
+extern void CommandSaveGame(char *);
+extern void CommandSaveMatch(char *);
+extern void CommandSavePosition(char *);
+extern void CommandSaveSettings(char *);
 #endif
-

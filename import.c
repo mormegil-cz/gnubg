@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -37,6 +38,7 @@
 #include "gtkgame.h"
 #endif
 #include "import.h"
+#include "file.h"
 #include "positionid.h"
 #include <glib/gi18n.h>
 
@@ -3523,4 +3525,296 @@ extern int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+extern void CommandImportBKG( char *sz ) {
+    
+    FILE *pf;
+    int rc;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a BKG session file to import (see `help "
+		 "import bkg').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+        rc = ImportBKG( pf, sz );
+	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
+    } else
+	outputerr( sz );
+}
+
+extern void CommandImportJF( char *sz ) {
+
+    FILE *pf;
+    int rc;
+
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a position file to import (see `help "
+		 "import pos').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "rb" ) ) ) {
+        rc = ImportJF( pf, sz );
+        if ( rc )
+          /* no file imported */
+          return;
+	fclose( pf );
+        setDefaultFileName ( sz );
+    } else
+	outputerr( sz );
+
+    ShowBoard();
+}
+
+extern void CommandImportMat( char *sz ) {
+
+    FILE *pf;
+    int rc;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a match file to import (see `help "
+		 "import mat').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+        rc = ImportMat( pf, sz );
+	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
+    } else
+	outputerr( sz );
+}
+
+extern void CommandImportOldmoves( char *sz ) {
+
+    FILE *pf;
+    int rc;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify an oldmoves file to import (see `help "
+		 "import oldmoves').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	rc = ImportOldmoves( pf, sz );
+	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
+    } else
+	outputerr( sz );
+}
+
+
+extern void CommandImportSGG( char *sz ) {
+
+    FILE *pf;
+    int rc;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify an SGG file to import (see `help "
+		 "import sgg').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	rc = ImportSGG( pf, sz );
+	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
+    } else
+	outputerr( sz );
+}
+
+extern void CommandImportTMG( char *sz ) {
+
+    FILE *pf;
+    int rc;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify an TMG file to import (see `help "
+		 "import tmg').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	rc = ImportTMG( pf, sz );
+	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+        if ( fGotoFirstGame )
+          CommandFirstGame( NULL );
+    } else
+	outputerr( sz );
+}
+
+extern void CommandImportSnowieTxt( char *sz ) {
+
+    FILE *pf;
+    int rc;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a Snowie Text file to import (see `help "
+		 "import snowietxt').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	rc = ImportSnowieTxt( pf );
+	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+    } else
+	outputerr( sz );
+}
+
+extern void CommandImportEmpire(char *sz)
+{
+    FILE *pf;
+
+    sz = NextToken( &sz );
+
+    if (!sz || !*sz)
+	{
+		outputl( _("You must specify a GammonEmpire file to import (see `help "
+		 "import empire').") );
+	return;
+    }
+
+    if ((pf = fopen( sz, "r" )))
+	{
+		int res = ImportGAM(pf, sz);
+		fclose(pf);
+        if (!res)
+          /* no file imported */
+          return;
+        setDefaultFileName ( sz );
+    }
+	else
+		outputerr(sz);
+}
+
+extern void CommandImportParty(char *sz)
+{
+    FILE *gamf, *matf, *pf;
+    char *tmpfile;
+    int rc;
+
+    sz = NextToken( &sz );
+
+    if (!sz || !*sz)
+	{
+		outputl( _("You must specify a PartyGammon file to import (see `help "
+		 "import party').") );
+	return;
+    }
+
+    if (! (gamf = fopen( sz, "r" ))) {
+            outputerr(sz);
+            return;
+    }
+
+    tmpfile = g_strdup_printf("%s.mat", sz);
+    if (g_file_test(tmpfile, G_FILE_TEST_EXISTS)){
+            outputerrf("%s is in the way. Cannot import %s\n", tmpfile, sz);
+            g_free(tmpfile);
+            fclose(gamf);
+            return;
+    }
+
+    if (! (matf = fopen( tmpfile, "w" ))) {
+            outputerr(tmpfile);
+            g_free(tmpfile);
+            fclose(gamf);
+            return;
+    }
+
+    if (ConvertPartyGammonFileToMat(gamf, matf)) {
+            if( ( pf = fopen( tmpfile, "r" ) ) ) {
+                    rc = ImportMat( pf, tmpfile );
+                    fclose( pf );
+                    if ( !rc )
+                    {
+                            setDefaultFileName ( tmpfile );
+                            if ( fGotoFirstGame )
+                                    CommandFirstGame( NULL );
+                    }
+            } else
+                    outputerr( tmpfile );
+    }
+    else
+	    outputerrf("Failed to convert gam to mat\n");
+    g_unlink(tmpfile);
+    g_free(tmpfile);
+}
+
+extern void CommandImportAuto(char *sz)
+{
+	FilePreviewData *fdp;
+	gchar *cmd;
+
+	sz = NextToken(&sz);
+
+	if (!sz || !*sz) {
+		outputerrf(_
+			   ("You must specify a file to import (see `help "
+			    "import auto')."));
+		return;
+	}
+	fdp = ReadFilePreview(sz);
+
+	if (!fdp || !fdp->format) {
+		outputerrf(_("%s is not a backgammon file"), sz);
+		g_free(fdp);
+		return;
+	}
+	if (fdp->format == &file_format[0]) {
+		cmd = g_strdup_printf("load match \"%s\"", sz);
+	} else {
+		cmd =
+		    g_strdup_printf("import %s \"%s\"",
+				    fdp->format->clname, sz);
+	}
+	HandleCommand(cmd, acTop);
+	g_free(cmd);
 }

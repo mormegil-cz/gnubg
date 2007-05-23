@@ -21,14 +21,14 @@
 #ifndef _IMPORT_H_
 #define _IMPORT_H_
 
-extern int ImportJF( FILE * fp, char *szFileName);
-extern int ImportMat( FILE *fp, char *szFilename );
-extern int ImportOldmoves( FILE *pf, char *szFilename );
-extern int ImportSGG( FILE *pf, char *szFilename );
-extern int ImportTMG( FILE *pf, const char *szFilename );
-extern int ImportBKG( FILE *pf, const char *szFilename );
-extern int ImportSnowieTxt( FILE *pf );
-extern int ImportGAM( FILE *pf, char *szFilename );
-extern int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP);
-
+extern void CommandImportBKG(char *);
+extern void CommandImportEmpire(char *);
+extern void CommandImportJF(char *);
+extern void CommandImportMat(char *);
+extern void CommandImportOldmoves(char *);
+extern void CommandImportParty(char *);
+extern void CommandImportSGG(char *);
+extern void CommandImportSnowieTxt(char *);
+extern void CommandImportTMG(char *);
+extern void CommandImportAuto(char *);
 #endif

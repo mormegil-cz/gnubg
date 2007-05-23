@@ -47,6 +47,7 @@
 
 #include "analysis.h"
 #include "backgammon.h"
+#include "sgf.h"
 #include "dice.h"
 #include "drawboard.h"
 #include "gtkboard.h"

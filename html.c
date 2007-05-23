@@ -3814,8 +3814,7 @@ ExportPositionGammOnLine( FILE *pf )
 }
 
 
-extern void
-CommandExportPositionGammOnLine ( char *sz ) {
+extern void CommandExportPositionGammOnLine ( char *sz ) {
 
     FILE *pf;
     
@@ -3850,8 +3849,7 @@ CommandExportPositionGammOnLine ( char *sz ) {
 }
 
 
-extern void
-CommandExportPositionGOL2Clipboard( char *sz ) {
+extern void CommandExportPositionGOL2Clipboard( char *sz ) {
 
     char *szClipboard;
     long l;

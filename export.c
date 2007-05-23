@@ -42,8 +42,7 @@
 #include "boarddim.h"
 
 
-extern void
-CommandExportGameEquityEvolution (char *sz)
+extern void CommandExportGameEquityEvolution (char *sz)
 {
 
   CommandNotImplemented( sz );
@@ -51,8 +50,7 @@ CommandExportGameEquityEvolution (char *sz)
 }
 
 
-extern void
-CommandExportMatchEquityEvolution (char *sz)
+extern void CommandExportMatchEquityEvolution (char *sz)
 {
 
   CommandNotImplemented( sz );
@@ -65,8 +63,7 @@ CommandExportMatchEquityEvolution (char *sz)
 /* size of html images in steps of BOARD_WIDTH x BOARD_HEIGHT
    as defined in boarddim.h */
 
-extern int
-WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
+extern int WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
 	  unsigned int nSizeX, unsigned int nSizeY)
 {
 
@@ -261,8 +258,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
   return 0;
 }
 
-extern void
-CommandExportPositionPNG (char *sz)
+extern void CommandExportPositionPNG (char *sz)
 {
 
   renderimages ri;
@@ -412,8 +408,7 @@ ExportSnowieTxt (FILE * pf, const matchstate * pms)
 }
 
 
-extern void
-CommandExportPositionSnowieTxt (char *sz)
+extern void CommandExportPositionSnowieTxt (char *sz)
 {
 
   FILE *pf;
@@ -480,8 +475,7 @@ WriteInt16 (FILE * pf, int n)
 #endif
 }
 
-extern void
-CommandExportPositionJF (char *sz)
+extern void CommandExportPositionJF (char *sz)
 {
   /* I think this function works now correctly. If there is some
    * inconsistencies between import pos and export pos, it's probably a
@@ -638,4 +632,194 @@ CommandExportPositionJF (char *sz)
   setDefaultFileName (sz);
 
   return;
+}
+
+static void ExportGameJF( FILE *pf, list *plGame, int iGame,
+			  int anScore[ 2 ] ) {
+    list *pl;
+    moverecord *pmr;
+    char sz[ 128 ];
+    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
+
+    /* FIXME It would be nice if this function was updated to use the
+       new matchstate struct and ApplyMoveRecord()... but otherwise
+       it's not broken, so I won't fix it. */
+    
+    if( iGame >= 0 )
+	fprintf( pf, " Game %d\n", iGame + 1 );
+
+    if( anScore ) {
+	sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
+	fprintf( pf, " %-31s%s : %d\n", sz, ap[ 1 ].szName, anScore[ 1 ] );
+    } else
+	fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
+
+    
+    InitBoard( anBoard, ms.bgv );
+    
+    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+	pmr = pl->p;
+	switch( pmr->mt ) {
+	case MOVE_GAMEINFO:
+	    /* no-op */
+	    /* FIXME what about automatic doubles? */
+          continue;
+	    break;
+	case MOVE_NORMAL:
+	    sprintf( sz, "%d%d: ", pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
+	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
+	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
+	    SwapSides( anBoard );
+         /*   if (( sz[ strlen(sz)-1 ] == ' ') && (strlen(sz) > 5 ))
+              sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
+	    break;
+	case MOVE_DOUBLE:
+	    sprintf( sz, " Doubles => %d", nFileCube <<= 1 );
+	    break;
+	case MOVE_TAKE:
+	    strcpy( sz, " Takes" ); /* FIXME beavers? */
+	    break;
+	case MOVE_DROP:
+            sprintf( sz, " Drops%sWins %d point%s",
+                   (i & 1) ? "\n      " : "                       ",
+                   nFileCube / 2, (nFileCube == 2) ? "" :"s" );
+	    if( anScore )
+		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
+	    break;
+        case MOVE_RESIGN:
+            if (pmr->fPlayer)
+              sprintf( sz, "%s      Wins %d point%s\n", (i & 1) ? "\n" : "",
+                       pmr->r.nResigned * nFileCube,
+                       ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
+            else
+              sprintf( sz, "%sWins %d point%s\n", (i & 1) ? " " :
+                        "                                  ",
+                        pmr->r.nResigned * nFileCube,
+                        ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
+            if( anScore )
+                anScore[ !pmr->fPlayer ] += pmr->r.nResigned * nFileCube;
+            break;
+	case MOVE_SETDICE:
+	    /* ignore */
+	    break;
+	case MOVE_SETBOARD:
+	case MOVE_SETCUBEVAL:
+	case MOVE_SETCUBEPOS:
+	    if( !fWarned ) {
+		fWarned = TRUE;
+		outputl( _("Warning: this game was edited during play and "
+			 "cannot be recorded in this format.") );
+	    }
+	    break;
+	}
+
+	if( !i && pmr->mt == MOVE_NORMAL && pmr->fPlayer ) {
+	    fputs( "  1)                             ", pf );
+	    i++;
+	}
+
+	if(( i & 1 ) || (pmr->mt == MOVE_RESIGN)) {
+	    fputs( sz, pf );
+	    fputc( '\n', pf );
+	} else 
+	    fprintf( pf, "%3d) %-27s ", ( i >> 1 ) + 1, sz );
+
+        if ( pmr->mt == MOVE_DROP ) {
+          fputc( '\n', pf );
+          if ( ! ( i & 1 ) )
+            fputc( '\n', pf );
+        }
+
+	if( ( n = GameStatus( anBoard, ms.bgv ) ) ) {
+	    fprintf( pf, "%sWins %d point%s%s\n\n",
+		   i & 1 ? "                                  " : "\n      ",
+		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
+		   "" /* FIXME " and the match" if appropriate */ );
+
+	    if( anScore )
+		anScore[ i & 1 ] += n * nFileCube;
+	}
+	
+	i++;
+    }
+}
+extern void CommandExportGameGam( char *sz ) {
+    
+    FILE *pf;
+
+    sz = NextToken( &sz );
+    
+    if( !plGame ) {
+	outputl( _("No game in progress (type `new game' to start one).") );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to export to (see `help export"
+		 "game gam').") );
+	return;
+    }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	outputerr( sz );
+	return;
+    }
+
+    ExportGameJF( pf, plGame, -1, NULL );
+    
+    if( pf != stdout )
+	fclose( pf );
+
+    setDefaultFileName ( sz );
+
+}
+
+extern void CommandExportMatchMat( char *sz ) {
+
+    FILE *pf;
+    int i, anScore[ 2 ];
+    list *pl;
+
+    /* FIXME what should be done if nMatchTo == 0? */
+    
+    sz = NextToken( &sz );
+    
+    if( !plGame ) {
+	outputl( _("No game in progress (type `new game' to start one).") );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to export to (see `help export "
+		 "match mat').") );
+	return;
+    }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	outputerr( sz );
+	return;
+    }
+
+    fprintf( pf, " %d point match\n\n", ms.nMatchTo );
+
+    anScore[ 0 ] = anScore[ 1 ] = 0;
+    
+    for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
+	ExportGameJF( pf, pl->p, i, anScore );
+    
+    if( pf != stdout )
+	fclose( pf );
+
+    setDefaultFileName ( sz );
+
 }
