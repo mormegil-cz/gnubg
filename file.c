@@ -19,12 +19,12 @@
  */
 
 #include "config.h"
+#include "backgammon.h"
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <string.h>
 #include <stdlib.h>
 //#include <glib/gstdio.h>
-#include "backgammon.h"
 #include "file.h"
 
 /* char *extension; char *description; char *clname;

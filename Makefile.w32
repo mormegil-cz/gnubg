@@ -2,7 +2,7 @@
 
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
-FLAGS= -Wall $(COMPOPT) $(DEFS)
+FLAGS= -Wall -MD $(COMPOPT) $(DEFS)
 MINGW=$(GNU)/mingw
 
 TARGET = gnubg.exe
@@ -13,7 +13,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
 	play gtkprefs gtkmovefilter gtkrace gtktheory \
 	htmlimages \
-	html import latex matchequity \
+	html import multithread latex matchequity \
 	matchid positionid postscript pub_eval record \
 	render rollout set sgf non-src/sgfl non-src/sgfp show sound \
 	strdup text osr gtksplash gtkcolour renderprefs speed openurl \
@@ -21,13 +21,13 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	gtkoptions formatgs \
 	timer mec relational gtkgamelist \
 	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
-	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational
+	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
 makebearoff_SOURCE = makebearoff eval positionid pub_eval matchequity \
 		     matchid getopt getopt1 osr bearoffgammon bearoff \
-		     format mec
+		     format mec util
 
 makebearoff_OBJECTS=$(patsubst %,obj/%.o,$(makebearoff_SOURCE))
 
@@ -60,7 +60,7 @@ LIBS = \
        -liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
        -lopengl32 -lglu32 -lglut32 -lwsock32 \
        -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
-       -lart_lgpl_2 -llibintl -lcairo
+       -lart_lgpl_2 -llibintl -lcairo -lgthread-2.0.dll
 
 LIBEVENT = lib\libevent.a
 LIBBOARD3D = board3d\libboard3d.a

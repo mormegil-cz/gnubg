@@ -71,7 +71,7 @@ extern void OpenURL(const char *szURL)
 	if (!(browser) || !(*browser)) {
 #ifdef WIN32
 		int win_error;
-		gchar *url = g_strdup_printf("file://%s", szURL);
+		gchar *url = g_filename_to_uri(szURL, NULL, NULL);
 		win_error =
 		    (int) ShellExecute(NULL, TEXT("open"), url, NULL,
 				       ".\\", SW_SHOWNORMAL);
