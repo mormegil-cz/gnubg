@@ -1,3 +1,7 @@
+Fri May 25 17:56:41 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c, show.c, gtkoptions.c: fix small sound setting problem
+
 Wed May 23 22:44:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* render.c: malloc more space for the labels to avoid crashes on small

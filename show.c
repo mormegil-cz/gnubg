@@ -2085,6 +2085,7 @@ CommandShowSound ( char *sz ) {
       outputf ( _("   %-30.30s : \"%s\"\n"),
                 gettext ( sound_description[ i ] ),
                 sound);
+    g_free(sound);
   }
 }
 

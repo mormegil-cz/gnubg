@@ -20,6 +20,12 @@
  */
 
 #include "config.h"
+#include <stdlib.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#include <errno.h>
+#include <stdio.h>
 
 #if USE_PYTHON
 #include <gnubgmodule.h>
@@ -6977,6 +6983,7 @@ extern char * locale_from_utf8 ( const char *sz) {
     ret = g_locale_from_utf8 (sz, strlen(sz), NULL, NULL, &error);
     if (error) {
         printf("locale_from_utf8 failed\nfrom '%s'\nto\n '%s'\nThe error was: %s\n", sz, ret, error -> message);
+	g_error_free(error);
     }
     return ret;
 }
@@ -6987,6 +6994,7 @@ extern char * locale_to_utf8 ( const char *sz) {
     ret = g_locale_to_utf8 (sz, strlen(sz), NULL, NULL, &error);
     if (error) {
         printf("locale_to_utf8 failed\nfrom '%s'\nto '%s'\nThe reason was, %s\n", sz, ret, error -> message);
+	g_error_free(error);
     }
     return ret;
 }

@@ -157,23 +157,20 @@ playSoundFile (char *file)
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
 #endif
-    free (file);
 }
 
-extern void
-playSound ( const gnubgsound gs )
+extern void playSound ( const gnubgsound gs )
 {
-	char *sound = GetSoundFile(gs);
+	char *sound;
 
-    if ( ! fSound )
-	/* no sounds for this user */
-	return;
-    
-    if ( ! *sound )
-	/* no sound defined for event */
-	return;
-
-	playSoundFile( sound );
+	if ( ! fSound )
+		/* no sounds for this user */
+		return;
+	
+	sound = GetSoundFile(gs);
+	if ( *sound )
+		playSoundFile( sound );
+	g_free(sound);
 }
 
 
