@@ -222,7 +222,10 @@ extern char *GetSoundFile(gnubgsound sound)
 {
 	if (!sound_file[sound])
 		return GetDefaultSoundFile(sound);
-	return g_strdup(sound_file[sound]);
+	if (g_path_is_absolute(sound_file[sound]))
+		return g_strdup(sound_file[sound]);
+	else
+		return g_build_filename(PKGDATADIR, sound_file[sound], NULL);
 }
 
 extern void SetSoundFile(gnubgsound sound, const char *file)

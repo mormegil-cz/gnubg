@@ -1,3 +1,7 @@
+Mon May 28 23:37:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c: fix small sound setting problem
+
 Fri May 25 17:56:41 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c, show.c, gtkoptions.c: fix small sound setting problem
