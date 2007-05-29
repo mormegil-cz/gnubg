@@ -1,3 +1,7 @@
+Tue May 29 20:37:13 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkoptions.c: removed bearoff options
+
 Mon May 28 23:37:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c: fix small sound setting problem

@@ -953,16 +953,6 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     ManualDiceToggled( NULL, pow );
 
-    /* Bearoff options */
-
-    pwp = gtk_alignment_new( 0, 0, 0, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwn ), pwp,
-			      gtk_label_new( _("Bearoff") ) );
-
-    pwvbox = gtk_vbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
-
     /* Other options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
