@@ -110,7 +110,7 @@ playSoundFile (char *file)
     GError *error = NULL;
     if (!g_file_test(file, G_FILE_TEST_EXISTS))
     {
-            outputerrf("The sound file (%s) couldn't be found", file);
+            outputf("The sound file (%s) couldn't be found", file);
             return;
     }
 
@@ -119,7 +119,7 @@ playSoundFile (char *file)
 	  command = g_strdup_printf ("%s %s", sound_cmd, file);
 	  if (!g_spawn_command_line_async (command, &error))
 	    {
-		outputerrf ("sound command (%s) could not be launched: %s\n",
+		outputf ("sound command (%s) could not be launched: %s\n",
 			    command, error->message);
 		g_error_free (error);
 	    }

@@ -1,3 +1,8 @@
+Wed May 30 16:43:08 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c: print to stdout instead of stderr in case of missing sound
+	files, etc.
+
 Tue May 29 20:37:13 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkoptions.c: removed bearoff options
