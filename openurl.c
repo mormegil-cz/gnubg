@@ -34,29 +34,28 @@
 #endif /* WIN32 */
 static gchar *web_browser = NULL;
 
-extern gchar *
-get_web_browser (void)
+extern const gchar * get_web_browser (void)
 {
-  const gchar *pch;
+	const gchar *pch;
 #ifdef WIN32
-  if (!web_browser || !*web_browser)
-    return NULL;
+	if (!web_browser || !*web_browser)
+		return("");
 #endif
-  if (web_browser && *web_browser)
-    return web_browser;
-  if (!(pch = g_getenv ("BROWSER")))
+	if (web_browser && *web_browser)
+		return web_browser;
+	if (!(pch = g_getenv ("BROWSER")))
+	{
 #ifdef __APPLE__
-    pch = g_strdup ("open");
+		pch = "open";
 #else
-    pch = g_strdup ("firefox");
+		pch = "firefox";
 #endif
-  set_web_browser (pch);
-  return web_browser;
+	}
+	return pch;
 }
 
 
-extern char *
-set_web_browser (const char *sz)
+extern char * set_web_browser (const char *sz)
 {
   g_free (web_browser);
   web_browser = g_strdup (sz ? sz : "");
@@ -65,7 +64,7 @@ set_web_browser (const char *sz)
 
 extern void OpenURL(const char *szURL)
 {
-	gchar *browser = get_web_browser();
+	const gchar *browser = get_web_browser();
 	gchar *command;
 	GError *error = NULL;
 	if (!(browser) || !(*browser)) {

@@ -734,15 +734,11 @@ extern void CommandSetThreads( char *sz )
 }
 #endif
 
-extern void
-CommandSetBrowser ( char *sz ) {
+extern void CommandSetBrowser ( char *sz ) {
 
-  if ( ! sz || ! *sz ) {
-    outputl ( _("You must specify a command. "
-                "See `help set sound system command'") );
-    return;
-  }
-  set_web_browser(NextToken( &sz ));
+	if ( ! sz || ! *sz )
+		set_web_browser("");
+	set_web_browser(NextToken( &sz ));
 }
 
 extern void CommandSetCalibration( char *sz ) {

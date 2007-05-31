@@ -965,6 +965,11 @@ ShowAuthors( const credEntry ace[], const char *title ) {
 
 }
 
+extern void CommandShowBrowser( char *sz )
+{
+	outputf(_("The current browser is %s\n"), get_web_browser());
+}
+
 extern void CommandShowBuildInfo( char *sz )
 {
     char *pch;

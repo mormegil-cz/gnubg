@@ -20,16 +20,17 @@
  */
 
 #include "config.h"
+#if USE_PYTHON
+#undef HAVE_FSTAT
+#include <Python.h>
+#endif
+
 #include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <errno.h>
 #include <stdio.h>
-
-#if USE_PYTHON
-#include <gnubgmodule.h>
-#endif
 
 #include <glib.h>
 #include <signal.h>
@@ -75,6 +76,10 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "credits.h"
 #include "external.h"
 #include "neuralnet.h"
+
+#if USE_PYTHON
+#include "gnubgmodule.h"
+#endif
 
 #ifdef WIN32
 #if HAVE_SOCKETS
@@ -1746,6 +1751,8 @@ command cER = {
       N_("Redisplay the board position"), szOPTPOSITION, NULL },
     { "buildinfo", CommandShowBuildInfo, 
       N_("Display details of this build of gnubg"), NULL, NULL },
+    { "browser", CommandShowBrowser, 
+      N_("Display the currently used web browser"), NULL, NULL },
     { "cache", CommandShowCache, N_("Display statistics on the evaluation "
       "cache"), NULL, NULL },
     { "calibration", CommandShowCalibration,
@@ -4924,7 +4931,7 @@ extern void CommandSaveSettings( char *szParam ) {
        g_free(file);
     }
 
-    fprintf( pf, "set browser %s\n", get_web_browser());
+    fprintf( pf, "set browser \"%s\"\n", get_web_browser());
 
     fprintf( pf, "set priority nice %d\n", nThreadPriority );
 
@@ -5266,7 +5273,6 @@ extern void UserCommand( char *szCommand ) {
     int nOldEnd;
 #endif
     int cch = strlen( szCommand ) + 1;
-    char *pchTranslated;
     char *sz = (char*) g_alloca(cch * sizeof(char));
     
     /* Unfortunately we need to copy the command, because it might be in
@@ -5471,8 +5477,6 @@ extern char *strcpyn( char *szDest, const char *szSrc, int cch ) {
 /* Write a string to stdout/status bar/popup window */
 extern void output( const char *sz ) {
 
-    char *pch;
-    
     if( cOutputDisabled )
 	return;
     

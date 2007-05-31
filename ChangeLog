@@ -1,3 +1,8 @@
+Fri Jun  1 00:27:53 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, openurl.c, openurl.h, set.c, show.c: fix some
+	problems with setting the web browser
+
 Thu May 31 11:43:08 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, sound.c: update a few strings.
