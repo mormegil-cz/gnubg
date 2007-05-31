@@ -1,3 +1,7 @@
+Thu May 31 11:43:08 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, sound.c: update a few strings.
+
 Thu May 31 23:22:37 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, dice.c: fix a few text mode locale problems
