@@ -1,3 +1,13 @@
+Thu May 31 23:22:37 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, dice.c: fix a few text mode locale problems
+
+Thu May 31 22:11:00 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* sound.c: minor bug
+	* gtkboard.c, gtkgame.c: make pasting of position and match id's work
+	in edit mode and before starting a new match.
+
 Wed May 30 16:43:08 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* sound.c: print to stdout instead of stderr in case of missing sound

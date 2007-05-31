@@ -3023,20 +3023,6 @@ extern char *FormatPrompt( void ) {
     return sz;
 }
 
-#if HAVE_LIBREADLINE
-static char *FormatPromptConvert( void ) {
-
-    static char sz[ 128 ];
-    char *pch;
-
-    pch = locale_from_utf8(FormatPrompt());
-    strcpy( sz, pch );
-    g_free( pch );
-    
-    return sz;
-}
-#endif
-
 extern void CommandEval( char *sz ) {
 
     char szOutput[ 4096 ];
@@ -5211,7 +5197,7 @@ extern void Prompt( void ) {
 
     ProgressEnd();
     
-    output( FormatPrompt() );
+    g_print( FormatPrompt() );
     fflush( stdout );    
 }
 
@@ -5259,9 +5245,11 @@ extern void ProcessInput( char *sz) {
     if( nNextTurn )
 	fNeedPrompt = TRUE;
     else {
-	ProgressEnd();
-	rl_callback_handler_install( FormatPromptConvert(), ProcessInput );
-	fReadingCommand = TRUE;
+	    char *sz = locale_from_utf8(FormatPrompt());
+	    ProgressEnd();
+	    rl_callback_handler_install( sz, ProcessInput );
+	    g_free(sz);
+	    fReadingCommand = TRUE;
     }
 }
 
@@ -5295,9 +5283,7 @@ extern void UserCommand( char *szCommand ) {
 	nOldEnd = rl_end;
 	rl_end = 0;
 	rl_redisplay();
-	pchTranslated = locale_from_utf8(sz);
-	puts( pchTranslated );
-	g_free( pchTranslated );
+	g_print("%s\n", sz);
 	ProcessInput( sz);
 	return;
     }
@@ -5306,9 +5292,7 @@ extern void UserCommand( char *szCommand ) {
     if( fInteractive ) {
 	putchar( '\n' );
 	Prompt();
-	pchTranslated = locale_from_utf8(sz);
-	puts( pchTranslated );
-	g_free( pchTranslated );
+	g_print("%s\n", sz);
     }
     
     fInterrupt = FALSE;
@@ -5334,8 +5318,10 @@ extern gint NextTurnNotify( gpointer p )
     {
 #if HAVE_LIBREADLINE
 	if( fInteractive ) {
+	    char *sz = locale_from_utf8(FormatPrompt());
 	    ProgressEnd();
-	    rl_callback_handler_install( FormatPromptConvert(), ProcessInput );
+	    rl_callback_handler_install( sz, ProcessInput );
+	    g_free(sz);
 	    fReadingCommand = TRUE;
 	} else
 #endif
@@ -5356,12 +5342,10 @@ extern gint NextTurnNotify( gpointer p )
  * with malloc (as with readline()). */
 extern char *GetInput( char *szPrompt ) {
 
-    /* FIXME handle interrupts and EOF in this function (looks like it's
-       done already). */
-    
     char *sz;
     char *pch;
     char *pchConverted;
+    char *prompt;
 #if USE_GTK
     g_assert( fTTY && !fX );
 #endif
@@ -5374,10 +5358,12 @@ extern char *GetInput( char *szPrompt ) {
 	
 	fReadingOther = TRUE;
 	
-	while( !( sz = readline( szPrompt ) ) ) {
+	prompt =  locale_from_utf8(szPrompt);
+	while( !( sz = readline( prompt ) ) ) {
 	    outputc( '\n' );
 	    PromptForExit();
 	}
+	g_free(prompt);
 	
 	fReadingOther = FALSE;
 	
@@ -5393,7 +5379,7 @@ extern char *GetInput( char *szPrompt ) {
     if( fInterrupt )
 	return NULL;
 
-    output( szPrompt );
+    g_print( szPrompt );
     fflush( stdout );
 
     sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */
@@ -5492,19 +5478,15 @@ extern void output( const char *sz ) {
 	return;
     }
 #endif
-    pch = locale_from_utf8(sz);
-    fputs( pch, stdout );
-
+    g_print("%s\n", sz);
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
 
-    g_free( pch );
 }
 
 /* Write a string to stdout/status bar/popup window, and append \n */
 extern void outputl( const char *sz ) {
 
-    char *pch;
     
     if( cOutputDisabled )
 	return;
@@ -5523,11 +5505,9 @@ extern void outputl( const char *sz ) {
 	return;
     }
 #endif
-    pch = locale_from_utf8(sz);
-    puts( pch );
+    g_print("%s\n", sz);
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
-    g_free( pch );
 }
     
 /* Write a character to stdout/status bar/popup window */
@@ -5582,14 +5562,11 @@ extern void outputerrf( const char *sz, ... ) {
 /* Write an error message, vfprintf() style */
 extern void outputerrv( const char *sz, va_list val ) {
 
-    char *pch;
     char *szFormatted;
     szFormatted = g_strdup_vprintf( sz, val );
-    pch = locale_from_utf8(szFormatted);
-    fputs( pch, stderr );
+    g_printerr("%s\n", szFormatted);
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
-    g_free( pch );
     putc( '\n', stderr );
 #if USE_GTK
     if( fX )
@@ -5931,20 +5908,19 @@ static void version(void)
 {
 
 	char *pch;
-	printf(_(VERSION_STRING));
-	printf(" %s\n", _(aszCOPYRIGHT));
-	printf(_("GNU Backgammon is free software, covered by the GNU "
+	g_print(_(VERSION_STRING));
+	g_print("\n%s\n", _(aszCOPYRIGHT));
+	g_print(_("GNU Backgammon is free software, covered by the GNU "
 		 "General Public License\n"
 		 "version 2, and you are welcome to change it and/or "
 		 "distribute copies of it\n"
 		 "under certain conditions.  Type \"show copying\" to see "
 		 "the conditions.\n"
 		 "There is absolutely no warranty for GNU Backgammon.  "
-		 "Type \"show warranty\" for\n" "details.\n"));
-        puts("");
+		 "Type \"show warranty\" for\n" "details.\n\n"));
 
 	while ((pch = GetBuildInfoString()))
-		puts(gettext(pch));
+		g_print("%s\n", gettext(pch));
 }
 
 
@@ -5972,11 +5948,12 @@ static char *get_readline()
 	char *pchExpanded;
 	char *szInput;
 	char *sz;
-
-	while (!(szInput = readline(FormatPromptConvert()))) {
+	char *prompt = locale_from_utf8(FormatPrompt());
+	while (!(szInput = readline(prompt))) {
 		outputc('\n');
 		PromptForExit();
 	}
+	g_free(prompt);
 	sz = locale_to_utf8(szInput);
 	free(szInput);
 	fInterrupt = FALSE;
@@ -6976,27 +6953,33 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 
 }
 
-extern char * locale_from_utf8 ( const char *sz) {
-    char *ret;
-    GError *error=NULL; 
-    if (!sz) return NULL;
-    ret = g_locale_from_utf8 (sz, strlen(sz), NULL, NULL, &error);
-    if (error) {
-        printf("locale_from_utf8 failed\nfrom '%s'\nto\n '%s'\nThe error was: %s\n", sz, ret, error -> message);
-	g_error_free(error);
-    }
-    return ret;
+#if HAVE_LIBREADLINE
+extern char *locale_from_utf8(const char *sz)
+{
+	char *ret;
+	GError *error = NULL;
+	g_assert(sz);
+	ret = g_locale_from_utf8(sz, strlen(sz), NULL, NULL, &error);
+	if (error) {
+		g_print("locale_from_utf8 failed: %s\n", error->message);
+		g_error_free(error);
+		ret = g_strdup(sz);
+	}
+	return ret;
 }
-extern char * locale_to_utf8 ( const char *sz) {
-    char *ret;
-    GError *error=NULL; 
-    if (!sz) return NULL;
-    ret = g_locale_to_utf8 (sz, strlen(sz), NULL, NULL, &error);
-    if (error) {
-        printf("locale_to_utf8 failed\nfrom '%s'\nto '%s'\nThe reason was, %s\n", sz, ret, error -> message);
-	g_error_free(error);
-    }
-    return ret;
+#endif
+extern char *locale_to_utf8(const char *sz)
+{
+	char *ret;
+	GError *error = NULL;
+	g_assert(sz);
+	ret = g_locale_to_utf8(sz, strlen(sz), NULL, NULL, &error);
+	if (error) {
+		g_print("locale_to_utf8 failed: %s\n", error->message);
+		g_error_free(error);
+		ret = g_strdup(sz);
+	}
+	return ret;
 }
 #ifdef WIN32 
 /* WIN32 setlocale must be manipulated through putenv to be gettext compatible */

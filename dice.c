@@ -174,7 +174,8 @@ ReadDiceFile( rngcontext *rngctx );
 
 static int GetManualDice( unsigned int anDice[ 2 ] ) {
 
-  char *sz, *pz;
+  char *pz;
+  char *sz=NULL;
   int i;
 
 #if USE_GTK
@@ -197,6 +198,7 @@ static int GetManualDice( unsigned int anDice[ 2 ] ) {
       sz = GetInput( _("Enter dice: ") );
 
       if( fInterrupt ) {
+          g_free( sz );
 	  anDice[ 0 ] = anDice[ 1 ] = 0;
 	  return -1;
       }
@@ -219,7 +221,7 @@ static int GetManualDice( unsigned int anDice[ 2 ] ) {
 	  pz++;
       }
 
-      free( sz );
+      g_free( sz );
       return 0;
   }
 }
