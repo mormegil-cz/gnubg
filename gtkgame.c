@@ -2822,7 +2822,7 @@ extern int edit_new(int length)
 		fDisplay = fDisplay_save;
 	} else {
 		outputerrf(_
-			   ("Edit new position only allowed with human and gnubg players"));
+			   ("Edit new position only allowed with human and computer players"));
 	}
 	outputoff();
 	for (i = 0; i < 2; i++) {

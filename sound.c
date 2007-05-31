@@ -222,32 +222,35 @@ extern char *GetSoundFile(gnubgsound sound)
 {
 	if (!sound_file[sound])
 		return GetDefaultSoundFile(sound);
+	if (!(*sound_file[sound]))
+		return g_strdup("");
 	if (g_path_is_absolute(sound_file[sound]))
 		return g_strdup(sound_file[sound]);
-	else
-		return g_build_filename(PKGDATADIR, sound_file[sound], NULL);
+
+	return g_build_filename(PKGDATADIR, sound_file[sound], NULL);
 }
 
 extern void SetSoundFile(gnubgsound sound, const char *file)
 {
 	char *old_file =  GetSoundFile(sound);
-	if (!file || !strcmp(file, old_file))
+	const char *new_file = file ? file : "";
+	if (!strcmp(new_file, old_file))
 	{
 		g_free(old_file);
 		return;		/* No change */
 	}
 	g_free(old_file);
 
-	if (!*file) {
+	if (!*new_file) {
 		outputf(_("No sound played for: %s\n"),
 			gettext(sound_description[sound]));
 	} else {
 		outputf(_("Sound for: %s: %s\n"),
 			gettext(sound_description[sound]),
-			file);
+			new_file);
 	}
 	g_free(sound_file[sound]);
-	sound_file[sound] = g_strdup(file);
+	sound_file[sound] = g_strdup(new_file);
 }
 
 extern char *sound_get_command(void)

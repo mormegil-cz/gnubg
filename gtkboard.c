@@ -63,16 +63,19 @@ int fGUIBeep = TRUE,
     fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE,
     fGUIShowPips = TRUE, fGUIDragTargetHelp = TRUE, fGUIShowEPCs = TRUE;
 unsigned int nGUIAnimSpeed = 4;
+int animate_player, *animate_move_list, animation_finished;
 
 static GtkVBoxClass *parent_class = NULL;
-
 static randctx rc;
+static void board_set_crawford( GtkWidget *pw, BoardData *bd );
+static unsigned char *TTachCube, *TTachCubeFaces, *TTachDice[2], *TTachPip[2];
 #define RAND irand( &rc )
 
 static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use );
 
-extern GtkWidget *board_new(renderdata* prd) {
+extern GtkWidget *board_new(renderdata* prd)
+{
 
 	/* Create widget */
 	GtkWidget* board = GTK_WIDGET( gtk_type_new( board_get_type() ) );
@@ -103,7 +106,7 @@ extern GtkWidget *board_new(renderdata* prd) {
 	return board;
 }
 
-void InitialPos(BoardData *bd)
+static void InitialPos(BoardData *bd)
 {	/* Set up initial board position */
 	int ip[] = {0,-2,0,0,0,0,5,0,3,0,0,0,-5,5,0,0,0,-3,0,-5,0,0,0,0,2,0,0,0};
 	memcpy(bd->points, ip, sizeof(bd->points));
@@ -112,7 +115,7 @@ void InitialPos(BoardData *bd)
 #endif
 }
 
-void InitBoardPreview(BoardData *bd)
+extern void InitBoardPreview(BoardData *bd)
 {
 #if USE_BOARD3D
 	InitBoard3d(bd, bd->bd3d);
@@ -129,20 +132,22 @@ void InitBoardPreview(BoardData *bd)
 	bd->turn = 1;
 }
 
-static int intersects( int x0, int y0, int cx0, int cy0,
-		       int x1, int y1, int cx1, int cy1 ) {
+static int intersects( int x0, int y0, int cx0, int cy0, int x1, int y1, int
+		cx1, int cy1 )
+{
 
     return ( y1 + cy1 > y0 ) && ( y1 < y0 + cy0 ) &&
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
 }
 
-void board_beep( BoardData *bd )
+extern void board_beep( BoardData *bd )
 {
     if(fGUIBeep)
 	gdk_beep();
 }
 
-void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] )
+{
 
     gint i;
 
@@ -158,9 +163,9 @@ void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 }
 
 
-static void
-write_points ( gint points[ 28 ], const gint turn, const gint nchequers, 
-               int anBoard[ 2 ][ 25 ] ) {
+static void write_points ( gint points[ 28 ], const gint turn, const gint
+		nchequers, int anBoard[ 2 ][ 25 ] )
+{
 
   gint i;
   gint anOff[ 2 ];
@@ -199,20 +204,23 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
 
 }
 
-void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
+extern void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] )
+{
 
   write_points( bd->points, bd->turn,  bd->nchequers, anBoard );
 
 }
 
-static void chequer_position( int point, int chequer, int *px, int *py ) {
+static void chequer_position( int point, int chequer, int *px, int *py )
+{
 
   ChequerPosition( fClockwise, point, chequer, px, py );
 
 }
 
-static void point_area( BoardData *bd, int n, int *px, int *py,
-			int *pcx, int *pcy ) {
+static void point_area( BoardData *bd, int n, int *px, int *py, int *pcx, int
+		*pcy )
+{
 
   PointArea( fClockwise, bd->rd->nSize, n, px, py, pcx, pcy );
     
@@ -222,27 +230,31 @@ static void point_area( BoardData *bd, int n, int *px, int *py,
    position (in board units -- multiply by nSize to get
    pixels) and *porient returns the rotation (1 = facing the top, 0 = facing
    the side, -1 = facing the bottom). */
-static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
+static void cube_position( BoardData *bd, int *px, int *py, int *porient )
+{
 
   CubePosition( bd->crawford_game, bd->cube_use, bd->doubled,
                 bd->cube_owner, px, py, porient );
 
 }
 
-static void resign_position( BoardData *bd, int *px, int *py, int *porient ) {
+static void resign_position( BoardData *bd, int *px, int *py, int *porient )
+{
 
   ResignPosition( bd->resigned, px, py, porient );
 
 }
 
-static void Arrow_Position( BoardData *bd, int *px, int *py ) {
+static void Arrow_Position( BoardData *bd, int *px, int *py )
+{
 
   ArrowPosition( fClockwise, bd->rd->nSize, px, py );
 
 }
 
-static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
-			int cx, int cy ) {
+static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y, int
+		cx, int cy )
+{
     
     int anBoard[ 2 ][ 25 ], anOff[ 2 ], anDice[ 2 ], anDicePosition[ 2 ][ 2 ],
 	anCubePosition[ 2 ], anArrowPosition[ 2 ], nOrient;
@@ -273,7 +285,8 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
 }
 
 static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
-			      BoardData *bd ) {
+		BoardData *bd )
+{
     
     int x, y, cx, cy;
     unsigned char *puch;
@@ -320,8 +333,9 @@ static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
     return TRUE;
 }
 
-static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y,
-				   int cx, int cy, BoardData *bd ) {
+static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y, int
+		cx, int cy, BoardData *bd )
+{
     
     g_assert( GTK_IS_DRAWING_AREA( drawing_area ) );
     
@@ -338,7 +352,8 @@ static void board_invalidate_rect( GtkWidget *drawing_area, int x, int y,
     }
 }
 
-static void board_invalidate_point( BoardData *bd, int n ) {
+static void board_invalidate_point( BoardData *bd, int n )
+{
 
     int x, y, cx, cy;
 
@@ -350,7 +365,8 @@ static void board_invalidate_point( BoardData *bd, int n ) {
     board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
 }
 
-static void board_invalidate_dice( BoardData *bd ) {
+static void board_invalidate_dice( BoardData *bd )
+{
 
     int x, y, cx, cy;
     
@@ -367,8 +383,8 @@ static void board_invalidate_dice( BoardData *bd ) {
     board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
 }
 
-static void
-board_invalidate_labels( BoardData *bd ) {
+static void board_invalidate_labels( BoardData *bd )
+{
 
   int x, y, cx, cy;
     
@@ -388,7 +404,8 @@ board_invalidate_labels( BoardData *bd ) {
 
 }
 
-static void board_invalidate_cube( BoardData *bd ) {
+static void board_invalidate_cube( BoardData *bd )
+{
 
     int x, y, orient;
     
@@ -400,7 +417,8 @@ static void board_invalidate_cube( BoardData *bd ) {
 			   CUBE_HEIGHT * bd->rd->nSize, bd );
 }
 
-static void board_invalidate_resign( BoardData *bd ) {
+static void board_invalidate_resign( BoardData *bd )
+{
 
     int x, y, orient;
     
@@ -412,7 +430,8 @@ static void board_invalidate_resign( BoardData *bd ) {
 			   RESIGN_HEIGHT * bd->rd->nSize, bd );
 }
 
-static void board_invalidate_arrow( BoardData *bd ) {
+static void board_invalidate_arrow( BoardData *bd )
+{
 
     int x, y;
     
@@ -423,7 +442,8 @@ static void board_invalidate_arrow( BoardData *bd ) {
 			   ARROW_HEIGHT * bd->rd->nSize, bd );
 }
 
-static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
+static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 )
+{
 
     int i, x, y, cx, cy, xCube, yCube;
 
@@ -471,7 +491,8 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
     return -1;
 }
 
-static void update_match_id( BoardData *bd ) {
+static void update_match_id( BoardData *bd )
+{
   
   int anScore[ 2 ];
   int fCubeOwner;
@@ -504,13 +525,14 @@ static void update_match_id( BoardData *bd ) {
 }
 
 
-void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+extern void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] )
+{
 
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
-extern char *
-ReturnHits( int anBoard[ 2 ][ 25 ] ) {
+extern char * ReturnHits( int anBoard[ 2 ][ 25 ] )
+{
 
   int aiHit[ 15 ];
   int i, j, k, l, m, n, c;
@@ -576,7 +598,8 @@ ReturnHits( int anBoard[ 2 ][ 25 ] ) {
 
 }
 
-void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+extern void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] )
+{
 
   unsigned int anPip[ 2 ];
   char *pc;
@@ -703,7 +726,8 @@ int update_move(BoardData *bd)
     return (fIllegal && !fGUIIllegal) ? -1 : 0;
 }
 
-void Confirm( BoardData *bd ) {
+extern void Confirm( BoardData *bd )
+{
 
     char move[ 40 ];
     int points[ 2 ][ 25 ];
@@ -723,8 +747,9 @@ void Confirm( BoardData *bd ) {
 	board_beep( bd );
 }
 
-static void board_start_drag( GtkWidget *widget, BoardData *bd,
-			      int drag_point, int x, int y ) {
+static void board_start_drag( GtkWidget *widget, BoardData *bd, int
+		drag_point, int x, int y )
+{
 
     bd->drag_point = drag_point;
     bd->drag_colour = bd->points[ drag_point ] < 0 ? -1 : 1;
@@ -756,7 +781,8 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd,
    for player 1 (colour == 1) in anPips[1]
    assumes that a chequer has been picked up already from bd->drag_point,
    works on board representation in bd->points[] */
-gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] ) {
+gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] )
+{
 
 	int i;
 	
@@ -783,8 +809,11 @@ gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] ) {
 	return 0;
 }
 
-/* PointsAreEmpty: checks if there are chequers of player <iColour> between two points */
-gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int iColour ) {
+/* PointsAreEmpty: checks if there are chequers of player <iColour> between
+ * two points */
+gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int
+		iColour )
+{
 
 	int i;
 
@@ -812,7 +841,8 @@ gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int iCol
    works on board representation in bd->points[],
    returns TRUE if there are possible moves and fills iDestPoints[] with
    the destination points or -1 */
-gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
+gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
+{
 
 	int i;
 	unsigned int anPipsBeforeMove[ 2 ];
@@ -1068,7 +1098,8 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 	return iDestCount ? TRUE : FALSE;
 }
 
-static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
+static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
+{
 
     unsigned char *puch, *puchNew, *puchChequer;
     int s = bd->rd->nSize;
@@ -1129,7 +1160,8 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y ) {
     bd->y_drag = y;
 }
 
-static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
+static void board_end_drag( GtkWidget *widget, BoardData *bd )
+{
     
     unsigned char *puch;
     int s = bd->rd->nSize;
@@ -1154,8 +1186,7 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
  * has been picked up.  If the move fails, that pickup will be reverted.
  */
 
-gboolean place_chequer_or_revert(BoardData *bd, 
-					 int dest )
+gboolean place_chequer_or_revert(BoardData *bd, int dest )
 {
     /* This procedure has grown more complicated than I like
      * We might want to discard most of it and use a calculated 
@@ -1357,8 +1388,9 @@ gboolean place_chequer_or_revert(BoardData *bd,
 
 /* jsc: Special version :( of board_point which also allows clicking on a
    small border and all bearoff trays */
-static int board_point_with_border( GtkWidget *board, BoardData *bd, 
-				    int x0, int y0 ) {
+static int board_point_with_border( GtkWidget *board, BoardData *bd, int x0,
+		int y0 )
+{
     int i, x, y, cx, cy, xCube, yCube;
 
     x0 /= bd->rd->nSize;
@@ -1419,8 +1451,9 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 /* jsc: Given (x0,y0) which is ASSUMED to intersect point, return a
    non-negative integer i representing the ith chequer position which
    intersects (x0, y0).  On failure, return -1 */
-static int board_chequer_number( GtkWidget *board, BoardData *bd, 
-				 int point, int x0, int y0 ) {
+static int board_chequer_number( GtkWidget *board, BoardData *bd, int point,
+		int x0, int y0 )
+{
     int i, x, y, cx, cy, dy, c_chequer;
 
     if( point < 0 || point > 27 )
@@ -1486,7 +1519,8 @@ static void updateBoard(GtkWidget *board, BoardData* bd)
    bearoff tray, no chequers will be added.  This may be a point of
    confusion during usage.  Clicking on the outside border of a point
    corresponds to i=0, i.e. remove all chequers from that point. */
-void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int dragging)
+static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
+		int dragging)
 {
     int current, delta, c_chequer;
     int off, opponent_off;
@@ -1633,7 +1667,8 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
 	updateBoard(board, bd);
 }
 
-static int ForcedMove ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] ) {
+static int ForcedMove ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] )
+{
 
   movelist ml;
 
@@ -1650,7 +1685,8 @@ static int ForcedMove ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] ) {
 
 }
 
-static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] ) {
+static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] )
+{
 
   movelist ml;
   unsigned int i, iMove, cMoves;
@@ -1693,8 +1729,8 @@ static void RestrictiveDrawTargetHelp(BoardData* bd)
 }
 #endif
 
-extern int
-UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
+extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] )
+{
 
   int old_points[ 28 ];
   int i, j;
@@ -1743,7 +1779,7 @@ UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 
 }
 
-void ShowBoardPopup(GdkEventButton* event)
+static void ShowBoardPopup(GdkEventButton* event)
 {
 	static GtkWidget *boardMenu = NULL;
 	if (!boardMenu)
@@ -1768,7 +1804,8 @@ void ShowBoardPopup(GdkEventButton* event)
 	gtk_menu_popup(GTK_MENU(boardMenu), NULL, NULL, NULL, NULL, event->button, event->time);
 }
 
-gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd)
+extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
+		BoardData* bd)
 {
 	int x = (int)event->x;
 	int y = (int)event->y;
@@ -2137,7 +2174,8 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	return FALSE;
 }
 
-gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData* bd)
+extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
+		BoardData* bd)
 {
 	int x = (int)event->x;
 	int y = (int)event->y;
@@ -2278,7 +2316,8 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 	return TRUE;
 }
 
-gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData* bd)
+extern gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event,
+		BoardData* bd)
 {
 	int x = (int)event->x;
 	int y = (int)event->y;
@@ -2354,8 +2393,8 @@ gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData*
 	return TRUE;
 }
 
-static void
-score_changed( GtkAdjustment *adj, BoardData *bd ) {
+static void score_changed( GtkAdjustment *adj, BoardData *bd )
+{
 
   gchar buf[ 32 ];
   int nMatchLen = (int)GTK_SPIN_BUTTON( bd->match )->adjustment->value;
@@ -2399,7 +2438,7 @@ score_changed( GtkAdjustment *adj, BoardData *bd ) {
 
 }
 
-void RollDice2d(BoardData* bd)
+extern void RollDice2d(BoardData* bd)
 {
 	int iAttempt = 0, iPoint, x, y, cx, cy;
 
@@ -2449,7 +2488,6 @@ void RollDice2d(BoardData* bd)
 	}
 }
 
-static void board_set_crawford( GtkWidget *pw, BoardData *bd );
 
 static void SetCrawfordToggle(BoardData* bd)
 {
@@ -2476,8 +2514,9 @@ static int board_text_to_setting (const gchar **board_text, gint *failed)
 	return strtol( *board_text, (char **) board_text, 10 );
 }
 
-static gint board_set( Board *board, const gchar *board_text,
-                       const gint resigned, const gint cube_use ) {
+static gint board_set( Board *board, const gchar *board_text, const gint
+		resigned, const gint cube_use )
+{
 
     BoardData *bd = board->board_data;
     gchar *dest, buf[ 32 ];
@@ -2844,7 +2883,8 @@ static gint board_set( Board *board, const gchar *board_text,
     return 0;
 }
 
-unsigned int convert_point( int i, int player ) {
+unsigned int convert_point( int i, int player )
+{
 
     if( player )
 	return ( i < 0 ) ? 26 : i + 1;
@@ -2852,9 +2892,9 @@ unsigned int convert_point( int i, int player ) {
 	return ( i < 0 ) ? 27 : 24 - i;
 }
 
-int animate_player, *animate_move_list, animation_finished;
 
-static gint board_blink_timeout( gpointer p ) {
+static gint board_blink_timeout( gpointer p )
+{
 
     Board *board = p;
     BoardData *pbd = board->board_data;
@@ -2908,7 +2948,8 @@ static gint board_blink_timeout( gpointer p ) {
     return TRUE;
 }
 
-static gint board_slide_timeout( gpointer p ) {
+static gint board_slide_timeout( gpointer p )
+{
 
     Board *board = p;
     BoardData *bd = board->board_data;
@@ -3039,7 +3080,8 @@ static gint board_slide_timeout( gpointer p ) {
     return TRUE;
 }
 
-extern void board_animate( Board *board, int move[ 8 ], int player ) {
+extern void board_animate( Board *board, int move[ 8 ], int player )
+{
 
     int n;
 #if USE_BOARD3D
@@ -3084,16 +3126,16 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 }
 }
 
-extern void board_set_playing( Board *board, gboolean f ) {
+extern void board_set_playing( Board *board, gboolean f )
+{
 
     BoardData *bd = board->board_data;
 
     bd->playing = f;
-    gtk_widget_set_sensitive( bd->position_id, f );
-    gtk_widget_set_sensitive( bd->match_id, f );
 }
 
-static void update_buttons( BoardData *bd ) {
+static void update_buttons( BoardData *bd )
+{
 
 	toolbarcontrol c;
 
@@ -3116,7 +3158,8 @@ static void update_buttons( BoardData *bd ) {
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,
-		      gint computer_turn, gint nchequers ) {
+		      gint computer_turn, gint nchequers )
+{
     gchar board_str[ 256 ];
     BoardData *bd = board->board_data;
     int old_points[ 2 ][ 25 ];
@@ -3169,7 +3212,8 @@ else
 }
 
 /* Create all of the size/colour-dependent pixmaps. */
-extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
+extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
+{
 
     unsigned char auch[ 20 * 20 * 3 ],
 	auchBoard[ BOARD_WIDTH * 3 * BOARD_HEIGHT * 3 * 3 ],
@@ -3253,14 +3297,16 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 #endif
 }
 
-extern void board_free_pixmaps( BoardData *bd ) {
+extern void board_free_pixmaps( BoardData *bd )
+{
 
     FreeImages( &bd->ri );
 }
 
 #if USE_BOARD3D
 
-extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata* prd)
+extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d,
+		renderdata* prd)
 {
 	if (bd->rd->fDisplayType == DT_3D)
 	{
@@ -3278,8 +3324,8 @@ extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata
 }
 #endif
 
-static void board_size_allocate( GtkWidget *board,
-				 GtkAllocation *allocation ) {
+static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
+{
 
     BoardData *bd = BOARD( board )->board_data;
     gint old_size = bd->rd->nSize, new_size;
@@ -3373,7 +3419,8 @@ static void board_size_allocate( GtkWidget *board,
 		}
 }
 
-static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
+static void AddChild( GtkWidget *pw, GtkRequisition *pr )
+{
 
     GtkRequisition r;
 
@@ -3385,7 +3432,8 @@ static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
     pr->height += r.height;
 }
 
-static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
+static void board_size_request( GtkWidget *pw, GtkRequisition *pr )
+{
 
     BoardData *bd;
     
@@ -3410,7 +3458,8 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
     pr->height += BOARD_HEIGHT + 2;
 }
 
-static void board_realize( GtkWidget *board ) {
+static void board_realize( GtkWidget *board )
+{
 
     BoardData *bd = BOARD( board )->board_data;
     
@@ -3420,27 +3469,42 @@ static void board_realize( GtkWidget *board ) {
     board_create_pixmaps( board, bd );
 }
 
-extern void board_set_position( GtkWidget *pw, BoardData *bd ) {
+extern void board_set_position(GtkWidget * pw, BoardData * bd)
+{
+	char *sz = g_strdup_printf("set board %s",
+				   gtk_entry_get_text(GTK_ENTRY
+						      (bd->position_id)));
+	if (ms.gs != GAME_PLAYING)
+		SetMatchID("cIkaAAAAAAAA");
+	int editing = ToolbarIsEditing(pwToolbar);
 
-  char *sz = g_strdup_printf ( "set board %s",
-                  gtk_entry_get_text( GTK_ENTRY( bd->position_id ) ) );
+	if (editing)
+		click_edit();
+	UserCommand(sz);
+	g_free(sz);
+	if (editing)
+		click_edit();
+}
 
-  UserCommand( sz );
-  g_free ( sz );
+extern void board_set_matchid(GtkWidget * pw, BoardData * bd)
+{
+	int editing = ToolbarIsEditing(pwToolbar);
+
+	if (editing)
+		click_edit();
+
+	char *sz = g_strdup_printf("set matchid %s",
+				   gtk_entry_get_text(GTK_ENTRY
+						      (bd->match_id)));
+	UserCommand(sz);
+	g_free(sz);
+	if (editing)
+		click_edit();
 
 }
 
-extern void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
-
-  char *sz = g_strdup_printf ( "set matchid %s",
-            gtk_entry_get_text ( GTK_ENTRY ( bd->match_id ) ) );
-  UserCommand ( sz );
-  g_free ( sz );
-
-}
-
-static void board_show_child( GtkWidget *pwChild, BoardData *pbd ) {
-
+static void board_show_child( GtkWidget *pwChild, BoardData *pbd )
+{
   if( pwChild != pbd->dice_area && !GTK_IS_HBUTTON_BOX( pwChild ) ) 
 	gtk_widget_show_all( pwChild );
 
@@ -3448,7 +3512,8 @@ static void board_show_child( GtkWidget *pwChild, BoardData *pbd ) {
 
 /* Show all children except the dice area; that one hides and shows
    itself. */
-static void board_show_all( GtkWidget *pw ) {
+static void board_show_all( GtkWidget *pw )
+{
     
     BoardData *bd = BOARD( pw )->board_data;
 
@@ -3468,7 +3533,8 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd )
 	}
 }
 
-void board_edit( BoardData *bd ) {
+extern void board_edit( BoardData *bd )
+{
 
     int f = ToolbarIsEditing( pwToolbar );
 									
@@ -3581,7 +3647,8 @@ void board_edit( BoardData *bd ) {
 
 static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 			    unsigned char *puchSrc, int nStride,
-			    int cx, int cy ) {
+			    int cx, int cy )
+{
     
     unsigned char *puch, *puchDest, *auch = g_alloca( cx * cy * 4 );
     int ix, iy;
@@ -3613,10 +3680,10 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
     g_object_unref( G_OBJECT( ppb ) );
 }    
 
-extern void
-DrawDie( GdkDrawable *pd, 
-         unsigned char *achDice[ 2 ], unsigned char *achPip[ 2 ],
-         const int s, GdkGC *gc, int x, int y, int fColour, int n ) {
+extern void DrawDie( GdkDrawable *pd, unsigned char *achDice[ 2 ], unsigned
+		char *achPip[ 2 ], const int s, GdkGC *gc, int x, int y, int
+		fColour, int n )
+{
 
     int ix, iy, afPip[ 9 ];
 
@@ -3639,7 +3706,8 @@ DrawDie( GdkDrawable *pd,
 }
 
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
-                             BoardData *bd ) {
+                             BoardData *bd )
+{
 
 	if (bd->rd->nSize <= 0 || bd->diceShown == DICE_NOT_SHOWN)
 		return TRUE;
@@ -3656,7 +3724,8 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
 }
 
 static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
-			    BoardData *bd ) {
+			    BoardData *bd )
+{
 
     UserCommand( "roll" );
     
@@ -3664,7 +3733,8 @@ static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
 }
 
 static gboolean key_press( GtkWidget *pw, GdkEvent *event,
-			   void *p ) {
+			   void *p )
+{
 
     UserCommand( p ? "set turn 1" : "set turn 0" );
     
@@ -3673,7 +3743,8 @@ static gboolean key_press( GtkWidget *pw, GdkEvent *event,
 
 /* Create a widget to display a single chequer (used as a key in the
    player table). */
-static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
+static GtkWidget *chequer_key_new( int iPlayer, Board *board )
+{
 
     GtkWidget *pw = gtk_event_box_new(), *pwImage;
     BoardData *bd = board->board_data;
@@ -3699,7 +3770,8 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
     return pw;
 }
 
-static void board_init( Board *board ) {
+static void board_init( Board *board )
+{
 
     BoardData *bd = g_malloc( sizeof( *bd ) );
     GdkColormap *cmap = gtk_widget_get_colormap( GTK_WIDGET( board ) );
@@ -4031,7 +4103,8 @@ static void board_init( Board *board ) {
 
 }
 
-static void board_class_init( BoardClass *c ) {
+static void board_class_init( BoardClass *c )
+{
 
     parent_class = gtk_type_class( GTK_TYPE_VBOX );
     
@@ -4041,7 +4114,8 @@ static void board_class_init( BoardClass *c ) {
     ( (GtkWidgetClass *) c )->show_all = board_show_all;
 }
 
-extern GtkType board_get_type( void ) {
+extern GtkType board_get_type( void )
+{
 
     static GtkType board_type = 0;
     static const GtkTypeInfo board_info = {
@@ -4061,7 +4135,6 @@ extern GtkType board_get_type( void ) {
     return board_type;
 }
 
-unsigned char *TTachCube, *TTachCubeFaces, *TTachDice[2], *TTachPip[2];
 
 static int GetSetSize()
 {
@@ -4069,7 +4142,8 @@ static int GetSetSize()
 }
 
 static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
-				    BoardData *bd ) {
+				    BoardData *bd )
+{
 
     int n, nValue;
     unsigned char *puch;
@@ -4107,7 +4181,8 @@ static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
 }
 
 static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
-				   BoardData *bd ) {
+				   BoardData *bd )
+{
 
     GtkWidget *pwTable = cube->parent;
     int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( cube ) ));
@@ -4187,7 +4262,8 @@ extern GtkWidget *board_cube_widget( Board *board )
 
 
 static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
-				    BoardData *bd ) {
+		BoardData *bd )
+{
 
     int setSize = GetSetSize();
 
@@ -4201,8 +4277,9 @@ static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
     return TRUE;
 }
 
-static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event,
-			    BoardData *bd ) {
+static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event, BoardData
+		*bd )
+{
 
     GtkWidget *pwTable = dice->parent;
     int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( dice ) ));
@@ -4297,7 +4374,7 @@ extern GtkWidget *board_dice_widget( Board *board )
 }
 
 #if USE_BOARD3D
-void InitBoardData(BoardData* bd)
+extern void InitBoardData(BoardData* bd)
 {	/* Initialize some BoardData settings on new game start */
 	/* Only needed for 3d board */
 	if (bd->rd->fDisplayType == DT_3D)
