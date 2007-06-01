@@ -5389,13 +5389,13 @@ extern char *GetInput( char *szPrompt )
     char *sz;
     char *pch;
     char *pchConverted;
-    char *prompt;
 #if USE_GTK
     g_assert( fTTY && !fX );
 #endif
 
 #if HAVE_LIBREADLINE
     if( fInteractive ) {
+        char *prompt;
 	/* Using readline, but not X. */
 	if( fInterrupt )
 	    return NULL;

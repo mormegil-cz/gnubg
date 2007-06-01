@@ -58,7 +58,7 @@ void draw_shadow_volume_edges(Occluder* pOcc)
 	}
 }
 #endif
-static void draw_shadow_volume_extruded_edges(const Occluder* pOcc, const float light_position[4], unsigned int prim)
+static void draw_shadow_volume_extruded_edges(Occluder* pOcc, const float light_position[4], unsigned int prim)
 {
 	if (pOcc->show)
 	{
@@ -74,7 +74,7 @@ static void draw_shadow_volume_extruded_edges(const Occluder* pOcc, const float 
 	}
 }
 
-static void draw_shadow_volume_to_stencil(const BoardData3d* bd3d)
+static void draw_shadow_volume_to_stencil(BoardData3d* bd3d)
 {
 	int i;
 
