@@ -2197,7 +2197,8 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
    Output:
        null terminated token if found or NULL if no tokens present.
 */
-extern char *NextToken( char **ppch ) {
+extern char *NextToken( char **ppch )
+{
 
   return NextTokenGeneral( ppch, " \t\n\r\v\f" ); 
 
@@ -2232,7 +2233,8 @@ static int CountTokens( char *pch ) {
    ERR_VAL (a very large negative double.
 */
 
-extern double ParseReal( char **ppch ) {
+extern double ParseReal( char **ppch )
+{
 
     char *pch, *pchOrig;
     double r;
@@ -2250,7 +2252,8 @@ extern double ParseReal( char **ppch ) {
    handle negative integers. On failure, one token (if any were available
    will have been consumed, it is not pushed back into the input.
 */
-extern int ParseNumber( char **ppch ) {
+extern int ParseNumber( char **ppch )
+{
 
     char *pch, *pchOrig;
 
@@ -2269,7 +2272,8 @@ extern int ParseNumber( char **ppch ) {
    Note - this is not a token extracting routine, it expects to be handed
    an already extracted token
 */
-extern int ParsePlayer( char *sz ) {
+extern int ParsePlayer( char *sz )
+{
 
     int i;
 
@@ -2303,7 +2307,8 @@ extern int ParsePlayer( char *sz ) {
    
    Returns -1 on failure, 0 on success, or 1 on success if the position
    specified has the opponent on roll (e.g. because it used "=n" notation). */
-extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
+extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc )
+{
 
     int i;
     char *pch;
@@ -2411,7 +2416,8 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
    The key is returned in apch[ 0 ], and the value in apch[ 1 ].
    The function return value is the number of parts successfully read
    (0 = no key was found, 1 = key only, 2 = both key and value). */
-extern int ParseKeyValue( char **ppch, char *apch[ 2 ] ) {
+extern int ParseKeyValue( char **ppch, char *apch[ 2 ] )
+{
 
     if( !ppch || !( apch[ 0 ] = NextToken( ppch ) ) )
 	return 0;
@@ -2426,7 +2432,8 @@ extern int ParseKeyValue( char **ppch, char *apch[ 2 ] ) {
 
 /* Compare player names.  Performed case insensitively, and with all
    whitespace characters and underscore considered identical. */
-extern int CompareNames( char *sz0, char *sz1 ) {
+extern int CompareNames( char *sz0, char *sz1 )
+{
 
     static char ach[] = " \t\r\n\f\v_";
     
@@ -2438,14 +2445,16 @@ extern int CompareNames( char *sz0, char *sz1 ) {
     return 0;
 }
 
-extern void UpdateSetting( void *p ) {
+extern void UpdateSetting( void *p )
+{
 #if USE_GTK
     if( fX )
 	GTKSet( p );
 #endif
 }
 
-extern void UpdateSettings( void ) {
+extern void UpdateSettings( void )
+{
 
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
@@ -2551,7 +2560,8 @@ extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
 #endif
 }
 
-extern void PortableSignalRestore( int nSignal, psighandler *p ) {
+extern void PortableSignalRestore( int nSignal, psighandler *p )
+{
 #if HAVE_SIGACTION
     sigaction( nSignal, p, NULL );
 #elif HAVE_SIGVEC
@@ -2563,7 +2573,8 @@ extern void PortableSignalRestore( int nSignal, psighandler *p ) {
 
 /* Reset the SIGINT handler, on return to the main command loop.  Notify
    the user if processing had been interrupted. */
-extern void ResetInterrupt( void ) {
+extern void ResetInterrupt( void )
+{
     if( fInterrupt ) {
 	{
 	outputl( _("(Interrupted)") );
@@ -2582,7 +2593,8 @@ extern void ResetInterrupt( void ) {
 }
 
 
-extern void HandleCommand( char *sz, command *ac ) {
+extern void HandleCommand( char *sz, command *ac )
+{
 
     command *pc;
     char *pch;
@@ -2672,7 +2684,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 	HandleCommand( sz, pc->pc );
 }
 
-extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
+extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
+{
 
   int i, j;
 
@@ -2714,7 +2727,8 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 }
 
 
-extern void GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms ) {
+extern void GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms )
+{
 
     SetCubeInfo( pci, pms->nCube, pms->fCubeOwner, pms->fMove,
 			pms->nMatchTo, pms->anScore, pms->fCrawford,
@@ -2736,7 +2750,8 @@ DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     outputl( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ) );
 }
 
-extern char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
+extern char *GetLuckAnalysis( matchstate *pms, float rLuck )
+{
 
     static char sz[ 16 ];
     cubeinfo ci;
@@ -2962,7 +2977,8 @@ extern void ShowBoard( void )
 
 }
 
-extern char *FormatPrompt( void ) {
+extern char *FormatPrompt( void )
+{
 
     static char sz[ 128 ]; /* FIXME check for overflow in rest of function */
     char *pch = szPrompt, *pchDest = sz;
@@ -3034,7 +3050,8 @@ extern char *FormatPrompt( void ) {
     return sz;
 }
 
-extern void CommandEval( char *sz ) {
+extern void CommandEval( char *sz )
+{
 
     char szOutput[ 4096 ];
     int n, an[ 2 ][ 25 ];
@@ -3139,7 +3156,8 @@ extern char* CheckCommand(char *sz, command *ac)
 	}
 }
 
-extern void CommandHelp( char *sz ) {
+extern void CommandHelp( char *sz )
+{
 
     command *pc, *pcFull;
     char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
@@ -3701,7 +3719,8 @@ HintChequer( char *sz ) {
 
 
 
-extern void CommandHint( char *sz ) {
+extern void CommandHint( char *sz )
+{
 
   if( ms.gs != GAME_PLAYING ) {
     outputl( _("You must set up a board first.") );
@@ -3771,7 +3790,8 @@ Shutdown( void ) {
    etc.  If stdin is not a TTY, this should always exit immediately (to
    avoid enless loops on EOF).  If stdin is a TTY, and fConfirm is set,
    and a game is in progress, then we ask the user if they're sure. */
-extern void PromptForExit( void ) {
+extern void PromptForExit( void )
+{
 
     static int fExiting = FALSE;
 #if USE_GTK
@@ -3845,12 +3865,14 @@ extern void PromptForExit( void ) {
 	}
 }
 
-extern void CommandNotImplemented( char *sz ) {
+extern void CommandNotImplemented( char *sz )
+{
 
     outputl( _("That command is not yet implemented.") );
 }
 
-extern void CommandQuit( char *sz ) {
+extern void CommandQuit( char *sz )
+{
 
     PromptForExit();
 }
@@ -3885,11 +3907,13 @@ CommandRollout( char *sz ) {
     int i, c, n, fOpponent = FALSE, cGames;
     cubeinfo ci;
     move *pm = 0;
+    int num_args;
 
     int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
 
-  if( !( c = CountTokens( sz ) ) ) {
+    num_args = c = CountTokens( sz );
+  if( !c ) {
     if( ms.gs != GAME_PLAYING ) {
       outputl( _("No position specified and no game in progress.") );
       return;
@@ -3988,7 +4012,10 @@ CommandRollout( char *sz ) {
       float aarNoOutput[ NUM_ROLLOUT_OUTPUTS ];
       float aarNoStdDev[ NUM_ROLLOUT_OUTPUTS ];
       evalsetup NoEs;
-      int false = FALSE;
+
+      /* only allow doubling before first dice roll when rolling out moves*/
+      int fCubeDecTop = num_args ? TRUE : FALSE;
+
       void *p;
       int         (** apBoard)[2][25];
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
@@ -4023,7 +4050,7 @@ CommandRollout( char *sz ) {
 	  memcpy (&NoEs.rc, &rcRollout, sizeof (rolloutcontext));
 	}
 	apci[ i ] = &ci;
-	apCubeDecTop[ i ] = &false;
+	apCubeDecTop[ i ] = &fCubeDecTop;
       }
 
       RolloutProgressStart (&ci, c, NULL, &rcRollout, asz, &p);
@@ -4203,7 +4230,8 @@ extern void CommandLoadPython(char *sz)
 }
 
 
-extern void CommandLoadCommands( char *sz ) {
+extern void CommandLoadCommands( char *sz )
+{
 
     FILE *pf;
 
@@ -4326,7 +4354,8 @@ static void LoadRCFiles(void)
 }
 
 
-extern void CommandNewWeights( char *sz ) {
+extern void CommandNewWeights( char *sz )
+{
 
     int n;
     
@@ -4558,7 +4587,8 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 }
 
-extern void CommandSaveSettings( char *szParam ) {
+extern void CommandSaveSettings( char *szParam )
+{
     FILE *pf;
     int i;
     unsigned int cCache; 
@@ -5199,7 +5229,8 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 }
 #endif
 
-extern void Prompt( void ) {
+extern void Prompt( void )
+{
 
 #if HAVE_LIBREADLINE
     if( !fInteractive || !isatty( STDIN_FILENO ) )
@@ -5214,7 +5245,8 @@ extern void Prompt( void ) {
 
 #if USE_GTK
 #if HAVE_LIBREADLINE
-extern void ProcessInput( char *sz) {
+extern void ProcessInput( char *sz)
+{
 
     char *pchExpanded;
 
@@ -5267,7 +5299,8 @@ extern void ProcessInput( char *sz) {
 #endif
 
 /* Handle a command as if it had been typed by the user. */
-extern void UserCommand( char *szCommand ) {
+extern void UserCommand( char *szCommand )
+{
 
 #if HAVE_LIBREADLINE
     int nOldEnd;
@@ -5350,7 +5383,8 @@ extern gint NextTurnNotify( gpointer p )
  * commands will not work.  Therefore, it should not be used for
  * reading top level commands.  The line it returns has been allocated
  * with malloc (as with readline()). */
-extern char *GetInput( char *szPrompt ) {
+extern char *GetInput( char *szPrompt )
+{
 
     char *sz;
     char *pch;
@@ -5420,7 +5454,8 @@ extern char *GetInput( char *szPrompt ) {
 
 /* Ask a yes/no question.  Interrupting the question is considered a "no"
    answer. */
-extern int GetInputYN( char *szPrompt ) {
+extern int GetInputYN( char *szPrompt )
+{
 
     char *pch;
 
@@ -5457,7 +5492,8 @@ extern int GetInputYN( char *szPrompt ) {
 }
 
 /* Like strncpy, except it does the right thing */
-extern char *strcpyn( char *szDest, const char *szSrc, int cch ) {
+extern char *strcpyn( char *szDest, const char *szSrc, int cch )
+{
 
     char *pchDest = szDest;
     const char *pchSrc = szSrc;
@@ -5475,7 +5511,8 @@ extern char *strcpyn( char *szDest, const char *szSrc, int cch ) {
 }
 
 /* Write a string to stdout/status bar/popup window */
-extern void output( const char *sz ) {
+extern void output( const char *sz )
+{
 
     if( cOutputDisabled )
 	return;
@@ -5493,7 +5530,8 @@ extern void output( const char *sz ) {
 }
 
 /* Write a string to stdout/status bar/popup window, and append \n */
-extern void outputl( const char *sz ) {
+extern void outputl( const char *sz )
+{
 
     
     if( cOutputDisabled )
@@ -5519,7 +5557,8 @@ extern void outputl( const char *sz ) {
 }
     
 /* Write a character to stdout/status bar/popup window */
-extern void outputc( const char ch ) {
+extern void outputc( const char ch )
+{
 
     char sz[2];
 	sz[0] = ch;
@@ -5529,7 +5568,8 @@ extern void outputc( const char ch ) {
 }
     
 /* Write a string to stdout/status bar/popup window, printf style */
-extern void outputf( const char *sz, ... ) {
+extern void outputf( const char *sz, ... )
+{
 
     va_list val;
 
@@ -5539,7 +5579,8 @@ extern void outputf( const char *sz, ... ) {
 }
 
 /* Write a string to stdout/status bar/popup window, vprintf style */
-extern void outputv( const char *sz, va_list val ) {
+extern void outputv( const char *sz, va_list val )
+{
 
     char *szFormatted;
     if( cOutputDisabled )
@@ -5550,7 +5591,8 @@ extern void outputv( const char *sz, va_list val ) {
 }
 
 /* Write an error message, perror() style */
-extern void outputerr( const char *sz ) {
+extern void outputerr( const char *sz )
+{
 
     /* FIXME we probably shouldn't convert the charset of strerror() - yuck! */
     
@@ -5558,7 +5600,8 @@ extern void outputerr( const char *sz ) {
 }
 
 /* Write an error message, fprintf() style */
-extern void outputerrf( const char *sz, ... ) {
+extern void outputerrf( const char *sz, ... )
+{
 
     va_list val;
 
@@ -5568,7 +5611,8 @@ extern void outputerrf( const char *sz, ... ) {
 }
 
 /* Write an error message, vfprintf() style */
-extern void outputerrv( const char *sz, va_list val ) {
+extern void outputerrv( const char *sz, va_list val )
+{
 
     char *szFormatted;
     szFormatted = g_strdup_vprintf( sz, val );
@@ -5584,7 +5628,8 @@ extern void outputerrv( const char *sz, va_list val ) {
 }
 
 /* Signifies that all output for the current command is complete */
-extern void outputx( void ) {
+extern void outputx( void )
+{
     
     if( cOutputDisabled || cOutputPostponed )
 	return;
@@ -5596,7 +5641,8 @@ extern void outputx( void ) {
 }
 
 /* Signifies that subsequent output is for a new command */
-extern void outputnew( void ) {
+extern void outputnew( void )
+{
     
     if( cOutputDisabled )
 	return;
@@ -5608,13 +5654,15 @@ extern void outputnew( void ) {
 }
 
 /* Disable output */
-extern void outputoff( void ) {
+extern void outputoff( void )
+{
 
     cOutputDisabled++;
 }
 
 /* Enable output */
-extern void outputon( void ) {
+extern void outputon( void )
+{
 
     g_assert( cOutputDisabled );
 
@@ -5622,13 +5670,15 @@ extern void outputon( void ) {
 }
 
 /* Temporarily disable outputx() calls */
-extern void outputpostpone( void ) {
+extern void outputpostpone( void )
+{
 
     cOutputPostponed++;
 }
 
 /* Re-enable outputx() calls */
-extern void outputresume( void ) {
+extern void outputresume( void )
+{
 
     g_assert( cOutputPostponed );
 
@@ -5639,7 +5689,8 @@ extern void outputresume( void ) {
 }
 
 /* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput() {
+extern void SuspendInput()
+{
 
 #if USE_GTK
     if ( fX )
@@ -5648,7 +5699,8 @@ extern void SuspendInput() {
 }
 
 /* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput() {
+extern void ResumeInput()
+{
 
 #if USE_GTK
     if ( fX )
@@ -5680,7 +5732,8 @@ static int ProgressThrottle( void ) {
     return -1;
 }
 
-extern void ProgressStart( char *sz ) {
+extern void ProgressStart( char *sz )
+{
 
     if( !fShowProgress )
 	return;
@@ -5759,7 +5812,8 @@ ProgressValueAdd ( int iValue ) {
 }
 
 
-extern void Progress( void ) {
+extern void Progress( void )
+{
 
     static int i = 0;
     static char ach[ 4 ] = "/-\\|";
@@ -5804,7 +5858,8 @@ static void CallbackProgress( void ) {
 	Progress();
 }
 
-extern void ProgressEnd( void ) {
+extern void ProgressEnd( void )
+{
 
     int i;
     
@@ -5883,7 +5938,8 @@ CreateGnubgDirectory (void)
 }
 
 
-extern RETSIGTYPE HandleInterrupt( int idSignal ) {
+extern RETSIGTYPE HandleInterrupt( int idSignal )
+{
 
     /* NB: It is safe to write to fInterrupt even if it cannot be read
        atomically, because it is only used to hold a binary value. */
@@ -5934,7 +5990,8 @@ static void version(void)
 
 #if WIN32
 
-extern char * getInstallDir( void ) {
+extern char * getInstallDir( void )
+{
 
   char buf[_MAX_PATH];
   char *p;
@@ -6433,7 +6490,8 @@ int main(int argc, char *argv[])
  *
  */
 
-extern void CommandEq2MWC ( char *sz ) {
+extern void CommandEq2MWC ( char *sz )
+{
 
   float rEq;
   cubeinfo ci;
@@ -6476,7 +6534,8 @@ extern void CommandEq2MWC ( char *sz ) {
  *
  */
 
-extern void CommandMWC2Eq ( char *sz ) {
+extern void CommandMWC2Eq ( char *sz )
+{
 
   float rMwc;
   cubeinfo ci;
@@ -6566,7 +6625,8 @@ swapGame ( list *plGame ) {
 
 
 
-extern void CommandSwapPlayers ( char *sz ) {
+extern void CommandSwapPlayers ( char *sz )
+{
 
   list *pl;
   char *pc;
@@ -6761,7 +6821,8 @@ static int GetAdviceAnswer( char *sz ) {
     }
 }
 
-extern int GiveAdvice( skilltype Skill ) {
+extern int GiveAdvice( skilltype Skill )
+{
 
   char *sz;
 

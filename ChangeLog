@@ -1,3 +1,9 @@
+Fri Jun  1 08:43:07 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c: fix rollout problem in cl interface. Allow doubling before
+	rolling the dice when positions are obtained from the move hint list,
+	but not when rolling out a single position.
+
 Fri Jun  1 00:27:53 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gnubg.c, openurl.c, openurl.h, set.c, show.c: fix some
