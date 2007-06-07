@@ -40,8 +40,7 @@
 #include "gtkwindows.h"
 #include "file.h"
 
-static void
-FilterAdd (char *fn, char *pt, GtkFileChooser * fc)
+static void FilterAdd (char *fn, char *pt, GtkFileChooser * fc)
 {
   GtkFileFilter *aff = gtk_file_filter_new ();
   gtk_file_filter_set_name (aff, fn);
@@ -49,8 +48,7 @@ FilterAdd (char *fn, char *pt, GtkFileChooser * fc)
   gtk_file_chooser_add_filter (fc, aff);
 }
 
-static GtkWidget *
-GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
+static GtkWidget * GnuBGFileDialog (gchar * prompt, gchar * folder, gchar * name,
 		 GtkFileChooserAction action)
 {
 #if WIN32
@@ -119,8 +117,7 @@ char *programdir, *pc, *tmp;
   return fc;
 }
 
-extern char *
-GTKFileSelect (gchar * prompt, gchar * extension, gchar * folder,
+extern char * GTKFileSelect (gchar * prompt, gchar * extension, gchar * folder,
 	       gchar * name, GtkFileChooserAction action)
 {
   gchar *sz, *filename=NULL;
@@ -144,8 +141,7 @@ typedef struct _SaveOptions
   GtkWidget *fc, *description, *type, *upext;
 } SaveOptions;
 
-static void
-SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
+static void SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
 {
   gchar *description, *fn, *fnn, *fnd;
   gint format, type;
@@ -172,9 +168,7 @@ SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
     }
 }
 
-
-static void
-SaveCommon (guint f, gchar * prompt)
+static void SaveCommon (guint f, gchar * prompt)
 {
 
   GtkWidget *hbox;
@@ -276,8 +270,7 @@ SaveCommon (guint f, gchar * prompt)
   gtk_widget_destroy (so.fc);
 }
 
-static void
-update_preview_cb (GtkFileChooser *file_chooser, gpointer data)
+static void update_preview_cb (GtkFileChooser *file_chooser, gpointer data)
 {
 	GtkWidget *preview = GTK_WIDGET (data);
 	char *filename = gtk_file_chooser_get_preview_filename (file_chooser);
@@ -299,160 +292,345 @@ update_preview_cb (GtkFileChooser *file_chooser, gpointer data)
 	gtk_label_set_text(GTK_LABEL(preview), label);
 }
 
-extern void GTKOpen (gpointer * p, guint n, GtkWidget * pw)
+static void add_import_filters (GtkFileChooser *fc)
 {
-  gchar *fn, *sg, *cmd = NULL;
-  int i;
-  GtkFileFilter *aff;
-  GtkWidget *fc, *preview;
-  static gchar *last_import_folder = NULL;
-  gchar *folder = NULL;
+	GtkFileFilter *aff = gtk_file_filter_new ();
+	gint i;
+	gchar *sg;
 
-  folder = last_import_folder ? last_import_folder : default_import_folder;
-
-  fc = GnuBGFileDialog (_("Open backgammon file"), folder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
-
-  preview = gtk_label_new("");
-  gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), preview);
-  g_signal_connect (GTK_FILE_CHOOSER(fc), "update-preview", G_CALLBACK (update_preview_cb), preview);
-
-  aff = gtk_file_filter_new ();
-  gtk_file_filter_set_name (aff, _("Supported files"));
-  for (i = 0; i < n_file_formats; ++i)
-    {
-      if (!file_format[i].canimport)
-	continue;
-      sg = g_strdup_printf ("*%s", file_format[i].extension);
-      gtk_file_filter_add_pattern (aff, sg);
-      g_free (sg);
-    }
-  gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fc), aff);
-  FilterAdd (_("All Files"), "*", GTK_FILE_CHOOSER (fc));
-  for (i = 0; i < n_file_formats; ++i)
-    {
-      if (!file_format[i].canimport)
-	continue;
-      sg = g_strdup_printf ("*%s", file_format[i].extension);
-      FilterAdd (file_format[i].description, sg, GTK_FILE_CHOOSER (fc));
-      g_free (sg);
-    }
-
-	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT)
+	gtk_file_filter_set_name (aff, _("Supported files"));
+	for (i = 0; i < n_file_formats; ++i)
 	{
-		fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-		if (fn)
-		{
+		if (!file_format[i].canimport)
+			continue;
+		sg = g_strdup_printf ("*%s", file_format[i].extension);
+		gtk_file_filter_add_pattern (aff, sg);
+		g_free (sg);
+	}
+	gtk_file_chooser_add_filter (GTK_FILE_CHOOSER (fc), aff);
+
+	FilterAdd (_("All Files"), "*", GTK_FILE_CHOOSER (fc));
+
+	for (i = 0; i < n_file_formats; ++i)
+	{
+		if (!file_format[i].canimport)
+			continue;
+		sg = g_strdup_printf ("*%s", file_format[i].extension);
+		FilterAdd (file_format[i].description, sg, GTK_FILE_CHOOSER (fc));
+		g_free (sg);
+	}
+}
+
+extern void GTKOpen(gpointer * p, guint n, GtkWidget * pw)
+{
+	gchar *fn, *cmd = NULL;
+	GtkWidget *fc, *preview;
+	static gchar *last_import_folder = NULL;
+	gchar *folder = NULL;
+
+	folder =
+	    last_import_folder ? last_import_folder :
+	    default_import_folder;
+
+	fc = GnuBGFileDialog(_("Open backgammon file"), folder, NULL,
+			     GTK_FILE_CHOOSER_ACTION_OPEN);
+
+	preview = gtk_label_new("");
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), preview);
+	g_signal_connect(GTK_FILE_CHOOSER(fc), "update-preview",
+			 G_CALLBACK(update_preview_cb), preview);
+
+	add_import_filters(GTK_FILE_CHOOSER(fc));
+
+	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
+		fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+		if (fn) {
 			char *tempFile = NULL;
 			FilePreviewData *fdp = ReadFilePreview(fn);
 
-			if (fdp && fdp->format)
-			{
-				if (fdp->format == &file_format[0])
-				{
-					cmd = g_strdup_printf ("load match \"%s\"", fn);
-					g_free (last_import_folder);
-					last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
-				}
-				else
-				{
-						cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, fn);
-						g_free (last_import_folder);
-						last_import_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (fc));
+			if (fdp && fdp->format) {
+				if (fdp->format == &file_format[0]) {
+					cmd =
+					    g_strdup_printf
+					    ("load match \"%s\"", fn);
+					g_free(last_import_folder);
+					last_import_folder =
+					    gtk_file_chooser_get_current_folder
+					    (GTK_FILE_CHOOSER(fc));
+				} else {
+					cmd =
+					    g_strdup_printf
+					    ("import %s \"%s\"",
+					     fdp->format->clname, fn);
+					g_free(last_import_folder);
+					last_import_folder =
+					    gtk_file_chooser_get_current_folder
+					    (GTK_FILE_CHOOSER(fc));
 				}
 			}
 			g_free(fdp);
 
-			if (cmd)
-			{
-				UserCommand (cmd);
-				g_free (cmd);
+			if (cmd) {
+				UserCommand(cmd);
+				g_free(cmd);
 				if (tempFile)
 					unlink(tempFile);	/* Remove temporary PartyGammon mat file */
 			}
-			g_free (fn);
+			g_free(fn);
 		}
 	}
-	gtk_widget_destroy (fc);
+	gtk_widget_destroy(fc);
 }
 
-extern void
-GTKExport (gpointer * p, guint n, GtkWidget * pw)
+extern void GTKExport (gpointer * p, guint n, GtkWidget * pw)
 {
   SaveCommon (n_file_formats, _("Export to foreign formats"));
 }
 
-extern void
-GTKSave (gpointer * p, guint n, GtkWidget * pw)
+extern void GTKSave (gpointer * p, guint n, GtkWidget * pw)
 {
   SaveCommon (1, _("Save in native gnubg .sgf format"));
 }
 
-static void
-BatchAnalyse( gpointer elem, gpointer user_data){
+enum {
+	COL_RESULT = 0,
+	COL_DESC,
+	COL_FILE,
+	COL_PATH,
+	NUM_COLS
+};
 
-	gchar *cmd = NULL;
-	gchar *filename = (gchar *) elem;
-	FilePreviewData *fdp = ReadFilePreview(filename);
+static char *batch_analyse(void)
+{
+	gchar *save;
+	gchar *savecmd;
+	gchar *dir;
 
-	if ( !fdp->format || !fdp ){
-		g_printf("%s \t\tUnknown format... skipping\n", filename );
-		g_free(fdp);
-		return;
-	}
-	
-	if (fdp->format == &file_format[0])	{
-		cmd = g_strdup_printf ("load match \"%s\"", filename);
-	}
-	else
+	dir = g_build_filename(szCurrentFolder, "analysed", NULL);
+	if (!g_file_test(dir, G_FILE_TEST_EXISTS))
+		g_mkdir(dir, 0700);
+	if (!g_file_test(dir, G_FILE_TEST_IS_DIR))
 	{
-		cmd = g_strdup_printf ("import %s \"%s\"", fdp->format->clname, filename);
-	}
-	if (cmd){
-		char *fn = GetFilename(FALSE, 0);	
-		gchar *savecmd = g_strdup_printf("save match \"%s\"", fn);
-	   UserCommand (cmd);
-       g_printf("Analysing file: %s ... \n", filename );
-	   UserCommand ("analyse match");
-	   UserCommand(savecmd);
-	   g_free(fn);
-	   g_free(savecmd);
+		g_free(dir);
+		return (_("Failed to make directory"));
 	}
 
-	g_free(cmd);
-	g_free(filename);
-		
-    g_free(fdp);
-	return;
+	save = g_strconcat(dir, G_DIR_SEPARATOR_S, szCurrentFileName, ".sgf",
+			NULL);
+	g_free(dir);
+	if (g_file_test((save), G_FILE_TEST_EXISTS))
+		return(_("Previous"));
+
+	UserCommand("analysis clear match");
+	UserCommand("analyse match");
+
+	if (!MatchAnalysed())
+		return(_("Cancelled"));
+
+	savecmd = g_strdup_printf("save match \"%s\"", save);
+	UserCommand(savecmd);
+	g_free(savecmd);
+	return (_("Done"));
 }
 
-extern void
-GTKBatchAnalyse( gpointer *p, guint n, GtkWidget *pw)
+static void batch_do_all(gpointer batch_model)
 {
-	/* FIXME : What happens if fConfirm is TRUE? Will it ask for
-	 *    confirmation for each match?
-	 * What about the sound? Can we temporary set the analysisfinished
-	 *    sound to None? Not really nice, though....
-	 * What happens if someone cancels the analysis... ?
-	 *
-	 * Anyone? */
+	gchar *cmd;
+	gchar *result;
+	GtkTreeIter iter;
+	gboolean valid;
 
-	/* FIXME : Should use GnuBGFileDialog ? */
-	GtkWidget *fc = gtk_file_chooser_dialog_new( _("Select files to analyse"), NULL,
-					GTK_FILE_CHOOSER_ACTION_OPEN,
-                    _("Analyse selected files"),
-                    GTK_RESPONSE_ACCEPT,
-					GTK_STOCK_CANCEL,
-					GTK_RESPONSE_CANCEL,
-		   			NULL );
+	g_return_if_fail(batch_model != NULL);
 
-	gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER(fc), TRUE);
+	valid = gtk_tree_model_get_iter_first(batch_model, &iter);
 
-	if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_ACCEPT){
-    	GSList *filenames = gtk_file_chooser_get_filenames (GTK_FILE_CHOOSER (fc));
-		
-		gtk_widget_hide (fc);
-		g_slist_foreach( filenames, BatchAnalyse, NULL);
-		g_slist_free(filenames);
+	while (valid) {
+		gchar *filename;
+		gint cancelled;
+		gtk_tree_model_get(batch_model, &iter, COL_PATH, &filename,
+				   -1);
+
+		g_free(szCurrentFileName);
+		szCurrentFileName = NULL;
+
+		cmd = g_strdup_printf("import auto \"%s\"", filename);
+		UserCommand(cmd);
+		g_free(cmd);
+		if (!szCurrentFileName)
+			result = g_strdup(_("Failed import"));
+		else
+				result = batch_analyse();
+		gtk_list_store_set(batch_model, &iter, COL_RESULT, result,
+				   -1);
+
+		cancelled = GPOINTER_TO_INT(g_object_get_data(batch_model,
+					"cancelled"));
+		if (cancelled)
+			break;
+		valid = gtk_tree_model_iter_next(batch_model, &iter);
 	}
-	gtk_widget_destroy (fc);
+}
+
+static void batch_cancel (GtkWidget *pw, gpointer model)
+{
+    pwGrab = pwOldGrab;
+    fInterrupt = TRUE;
+}
+
+
+static void batch_stop(GtkWidget * pw, gpointer p) 
+{
+	fInterrupt = TRUE;
+	g_object_set_data(G_OBJECT(p), "cancelled", GINT_TO_POINTER(1));
+}
+
+static void batch_skip_file(GtkWidget * pw, gpointer p) 
+{
+	fInterrupt = TRUE;
+}
+
+static GtkTreeModel *batch_create_model(GSList * filenames)
+{
+	GtkListStore *store;
+	GtkTreeIter tree_iter;
+	GSList *iter;
+	FilePreviewData *fdp;
+
+	store =
+	    gtk_list_store_new(NUM_COLS, G_TYPE_STRING, G_TYPE_STRING,
+			       G_TYPE_STRING, G_TYPE_STRING);
+
+	for (iter = filenames; iter != NULL; iter = iter->next) {
+		char *desc;
+		char *folder;
+		char *file;
+		char *filename = (char *) iter->data;
+
+		gtk_list_store_append(store, &tree_iter);
+
+		fdp = ReadFilePreview(filename);
+		if (!fdp->format || !fdp)
+			desc = g_strdup(_("Unknown"));
+		else
+			desc = g_strdup(fdp->format->description);
+		free(fdp);
+		gtk_list_store_set(store, &tree_iter, COL_DESC, desc, -1);
+
+		DisectPath(filename, NULL, &file, &folder);
+		gtk_list_store_set(store, &tree_iter, COL_FILE, file, -1);
+		g_free(file);
+		g_free(folder);
+
+		gtk_list_store_set(store, &tree_iter, COL_PATH, filename,
+				   -1);
+
+	}
+	return GTK_TREE_MODEL(store);
+}
+
+static GtkWidget *batch_create_view(GSList * filenames)
+{
+	GtkCellRenderer *renderer;
+	GtkTreeModel *model;
+	GtkWidget *view;
+
+	view = gtk_tree_view_new();
+
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view),
+						    -1, _("Result"),
+						    renderer, "text",
+						    COL_RESULT, NULL);
+
+	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view),
+						    -1, _("Type"),
+						    renderer, "text",
+						    COL_DESC, NULL);
+
+	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(view),
+						    -1, ("File"), renderer,
+						    "text", COL_FILE,
+						    NULL);
+	model = batch_create_model(filenames);
+
+	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
+
+	g_object_unref(model);
+	return view;
+}
+
+static void batch_create_dialog_and_run(GSList * filenames)
+{
+	GtkWidget *dialog;
+	GtkWidget *buttons;
+	GtkWidget *view;
+	GtkWidget *ok_button;
+	GtkWidget *skip_button;
+	GtkWidget *stop_button;
+	GtkTreeModel *model;
+
+	view = batch_create_view(filenames);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(view));
+	g_object_set_data(G_OBJECT(model), "cancelled",
+			  GINT_TO_POINTER(0));
+
+	dialog = GTKCreateDialog(_("Batch analyse files"), DT_INFO, NULL,
+			DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS |
+			DIALOG_FLAG_NOTIDY, NULL, NULL);
+
+	pwOldGrab = pwGrab;
+	pwGrab = dialog;
+
+	g_signal_connect(G_OBJECT(dialog), "destroy",
+			 G_CALLBACK(batch_cancel), model);
+	gtk_container_add(GTK_CONTAINER(DialogArea(dialog, DA_MAIN)),
+			  view);
+
+	buttons = DialogArea(dialog, DA_BUTTONS);
+
+	ok_button = DialogArea(dialog, DA_OK);
+	gtk_widget_set_sensitive(ok_button, FALSE);
+
+	skip_button = gtk_button_new_with_label(_("Skip"));
+	stop_button = gtk_button_new_with_label(_("Stop"));
+
+	gtk_container_add(GTK_CONTAINER(buttons), skip_button);
+	gtk_container_add(GTK_CONTAINER(buttons), stop_button);
+
+	g_signal_connect(G_OBJECT(skip_button), "clicked",
+			 G_CALLBACK(batch_skip_file), model);
+	g_signal_connect(G_OBJECT(stop_button), "clicked",
+			 G_CALLBACK(batch_stop), model);
+	gtk_widget_show_all(dialog);
+	batch_do_all(model);
+	gtk_widget_set_sensitive(ok_button, TRUE);
+}
+
+extern void GTKBatchAnalyse(gpointer * p, guint n, GtkWidget * pw)
+{
+	gchar *folder = NULL;
+	GSList *filenames = NULL;
+	GtkWidget *fc;
+	static gchar *last_folder = NULL;
+
+	folder = last_folder ? last_folder : default_import_folder;
+
+	fc = GnuBGFileDialog(_("Select files to analyse"), folder, NULL,
+			     GTK_FILE_CHOOSER_ACTION_OPEN);
+	gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(fc), TRUE);
+	add_import_filters(GTK_FILE_CHOOSER(fc));
+
+	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
+		filenames =
+		    gtk_file_chooser_get_filenames(GTK_FILE_CHOOSER(fc));
+	}
+	if (filenames) {
+		g_free(last_folder);
+		last_folder =
+		    gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER
+							(fc));
+		gtk_widget_destroy(fc);
+		batch_create_dialog_and_run(filenames);
+	} else
+		gtk_widget_destroy(fc);
 }

@@ -847,9 +847,6 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   gtk_clist_column_titles_passive( GTK_CLIST( prp->pwRolloutResult ) );
     
   prp->pwRolloutProgress = gtk_progress_bar_new();
-#if !USE_GTK
-  gtk_progress_set_show_text ( GTK_PROGRESS ( prp->pwRolloutProgress ), TRUE );
-#endif
   
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutResult, TRUE, TRUE, 0 );
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutProgress, FALSE, FALSE,
@@ -872,12 +869,6 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                         _("Standard error") );
   }
 
-#if !USE_GTK
-  gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ), 0, 0, 
-                          prc->nTrials );
-  gtk_progress_set_format_string( GTK_PROGRESS( prp->pwRolloutProgress ),
-                                  "%v/%u (%p%%)" );
-#endif
   
   /* time elapsed and left */
 
@@ -997,10 +988,6 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 	  SetRolloutText(prp, iAlternative * 2, i + 1, "n/a");
 	}
 	  
-#if !USE_GTK
-    gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ),
-                            iGame + 1, 0, prc->nTrials );
-#else
     frac = (iGame + 1) * 1.0 / (prc->nTrials * 1.0); 
     /* why doesn't type casting work? */
     gsz = g_strdup_printf( "%d/%d (%.0f%%)" ,
@@ -1011,7 +998,6 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 		    frac );
     gtk_progress_bar_set_text(GTK_PROGRESS_BAR( prp->pwRolloutProgress), gsz );
     g_free( gsz );
-#endif
     
     /* calculate estimate time left */
 

@@ -1,3 +1,8 @@
+Fri Jun  8 00:07:30 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, analysis.h, gnubg.c, gtkfile.c, progress.c,
+	relational.c: make a gtkwidget for batch_analysis
+
 Fri Jun  1 08:43:07 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c: fix rollout problem in cl interface. Allow doubling before

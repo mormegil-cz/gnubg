@@ -5395,7 +5395,7 @@ extern char *GetInput( char *szPrompt )
 
 #if HAVE_LIBREADLINE
     if( fInteractive ) {
-        char *prompt;
+	char *prompt;
 	/* Using readline, but not X. */
 	if( fInterrupt )
 	    return NULL;
@@ -6725,7 +6725,11 @@ DisectPath (char *path, char *extension, char **name, char **folder)
 {
   char *fnn, *pc;
   if (!path)
-    return;
+  {
+	  *folder = NULL;
+	  *name = NULL;
+	  return;
+  }
   *folder = g_path_get_dirname (path);
   fnn = g_path_get_basename (path);
   pc = strrchr (fnn, '.');
