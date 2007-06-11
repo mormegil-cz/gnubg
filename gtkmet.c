@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -269,10 +269,10 @@ extern void GTKShowMatchEquityTable( const int nMatchTo,
   }
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );
-  gtk_signal_connect( GTK_OBJECT( pwInvertButton ), "toggled",
-                      GTK_SIGNAL_FUNC( invertMETlocal ), &mw );
-  gtk_signal_connect( GTK_OBJECT( pwLoad ), "clicked",
-                      GTK_SIGNAL_FUNC ( loadMET ), &mw );
+  g_signal_connect( G_OBJECT( pwInvertButton ), "toggled",
+                      G_CALLBACK( invertMETlocal ), &mw );
+  g_signal_connect( G_OBJECT( pwLoad ), "clicked",
+                      G_CALLBACK ( loadMET ), &mw );
 
   UpdateAllTables ( &mw );
     

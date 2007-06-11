@@ -21,6 +21,7 @@
 * $Id$
 */
 
+#include "config.h"
 #include "inc3d.h"
 
 #include "gtkcolour.h"
@@ -283,10 +284,9 @@ static void AddWidgets(GtkWidget *window)
 	label = gtk_label_new(_("Shine:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 1, 2);
 	padjShine = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 0.0, 128.0, 1.0, 10.0, 0.0));
-	gtk_signal_connect_object( GTK_OBJECT( padjShine ),
+	g_signal_connect( G_OBJECT( padjShine ),
 			       "value-changed",
-			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
-			       0 );
+			       G_CALLBACK( UpdateColourPreview ), NULL);
 	scale = gtk_hscale_new(padjShine);
 	gtk_scale_set_digits( GTK_SCALE( scale ), 0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), scale, 3, 4, 1, 2);
@@ -294,10 +294,9 @@ static void AddWidgets(GtkWidget *window)
 	pOpacitylabel = gtk_label_new(_("Opacity:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), pOpacitylabel, 0, 1, 2, 3);
 	padjOpacity = GTK_ADJUSTMENT(gtk_adjustment_new(0.0, 1.0, 100.0, 1.0, 10.0, 0.0));
-	gtk_signal_connect_object( GTK_OBJECT( padjOpacity ),
+	g_signal_connect( G_OBJECT( padjOpacity ),
 			       "value-changed",
-			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
-			       0 );
+			       G_CALLBACK( UpdateColourPreview ), NULL);
 	psOpacity = gtk_hscale_new(padjOpacity);
 	gtk_scale_set_digits( GTK_SCALE( psOpacity ), 0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), psOpacity, 1, 2, 2, 3);
@@ -307,8 +306,8 @@ static void AddWidgets(GtkWidget *window)
 	textureCombo = gtk_combo_new();
 	gtk_combo_set_value_in_list(GTK_COMBO(textureCombo), TRUE, FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(GTK_COMBO(textureCombo)->entry), FALSE);
-	gtk_signal_connect(GTK_OBJECT(GTK_COMBO(textureCombo)->list), "selection-changed",
-							GTK_SIGNAL_FUNC(TextureChange), 0);
+	g_signal_connect(G_OBJECT(GTK_COMBO(textureCombo)->list), "selection-changed",
+							G_CALLBACK(TextureChange), 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), textureCombo, 2, 4, 3, 4);
 
 	label = gtk_label_new(_("Preview:"));
@@ -366,9 +365,9 @@ static void setCol(GtkColourPicker* pCP, const float val[4])
 static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 {
 	GtkWidget* pwColourDialog3d = GTKCreateDialog(_("3d Colour selection"), DT_QUESTION, 
-		pDetails->preview, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(OkClicked), pDetails);
+		pDetails->preview, DIALOG_FLAG_MODAL, G_CALLBACK(OkClicked), pDetails);
 
-	gtk_signal_connect(GTK_OBJECT(pwColourDialog3d), "realize", GTK_SIGNAL_FUNC(UpdateColourPreview), 0 );
+	g_signal_connect(G_OBJECT(pwColourDialog3d), "realize", G_CALLBACK(UpdateColourPreview), 0 );
 
 	AddWidgets(DialogArea(pwColourDialog3d, DA_MAIN));
 
@@ -494,8 +493,8 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType text
 	details[curDetail].opacity = opacity;
 	details[curDetail].textureType = textureType;
 
-	gtk_signal_connect(GTK_OBJECT(button), "clicked",
-				   GTK_SIGNAL_FUNC(UpdateColour3d), &details[curDetail]);
+	g_signal_connect(G_OBJECT(button), "clicked",
+				   G_CALLBACK(UpdateColour3d), &details[curDetail]);
 
 	UpdatePreviewBar(pMat, pixmap);
 	curDetail++;

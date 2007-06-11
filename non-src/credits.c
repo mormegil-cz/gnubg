@@ -1,6 +1,7 @@
 /* Do not modify this file!  It is created automatically by credits.sh.
    Modify credits.sh instead. */
 
+#include "config.h"
 #include <glib/gi18n.h>
 #include "credits.h"
 

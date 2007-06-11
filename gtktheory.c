@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -685,16 +685,16 @@ GTKShowTheory ( const int fActivePage ) {
                       GTK_RADIO_BUTTON ( ptw->apwRadio[ 0 ] ), 
                       _("Money game") ) );
 
-  gtk_signal_connect( GTK_OBJECT( ptw->apwRadio[ 0 ] ), "toggled",
-                      GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
-  gtk_signal_connect( GTK_OBJECT( ptw->apwRadio[ 1 ] ), "toggled",
-                      GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+  g_signal_connect( G_OBJECT( ptw->apwRadio[ 0 ] ), "toggled",
+                      G_CALLBACK( TheoryUpdated ), ptw );
+  g_signal_connect( G_OBJECT( ptw->apwRadio[ 1 ] ), "toggled",
+                      G_CALLBACK( TheoryUpdated ), ptw );
 
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
                       ptw->pwReset = gtk_button_new_with_label ( _("Reset") ) );
-  gtk_signal_connect( GTK_OBJECT( ptw->pwReset ), "clicked",
-                      GTK_SIGNAL_FUNC( ResetTheory ), ptw );
+  g_signal_connect( G_OBJECT( ptw->pwReset ), "clicked",
+                      G_CALLBACK( ResetTheory ), ptw );
 
   /* match score widget */
 
@@ -740,8 +740,8 @@ GTKShowTheory ( const int fActivePage ) {
                        4, 0 );
     gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
 
-    gtk_signal_connect( GTK_OBJECT( ptw->apwScoreAway[ i ] ), "value-changed",
-			GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+    g_signal_connect( G_OBJECT( ptw->apwScoreAway[ i ] ), "value-changed",
+			G_CALLBACK( TheoryUpdated ), ptw );
 
   }
 
@@ -752,8 +752,8 @@ GTKShowTheory ( const int fActivePage ) {
                       ptw->pwCrawford = gtk_check_button_new_with_label (
                           _("Crawford game") ) );
 
-  gtk_signal_connect( GTK_OBJECT( ptw->pwCrawford ), "toggled",
-                      GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+  g_signal_connect( G_OBJECT( ptw->pwCrawford ), "toggled",
+                      G_CALLBACK( TheoryUpdated ), ptw );
 
   ptw->pwCubeFrame = gtk_frame_new ( _("Cube") );
   gtk_container_add ( GTK_CONTAINER ( pw ), ptw->pwCubeFrame );
@@ -777,8 +777,8 @@ GTKShowTheory ( const int fActivePage ) {
                           GTK_RADIO_BUTTON ( ptw->apwCube[ 0 ] ), 
                           sz ) );
 
-    gtk_signal_connect( GTK_OBJECT( ptw->apwCube[ i ] ), "toggled",
-                        GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+    g_signal_connect( G_OBJECT( ptw->apwCube[ i ] ), "toggled",
+                        G_CALLBACK( TheoryUpdated ), ptw );
 
     j *= 2;
 
@@ -817,16 +817,16 @@ GTKShowTheory ( const int fActivePage ) {
                       ptw->pwJacoby = gtk_check_button_new_with_label (
                           _("Jacoby rule") ) );
 
-  gtk_signal_connect( GTK_OBJECT( ptw->pwJacoby ), "toggled",
-                      GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+  g_signal_connect( G_OBJECT( ptw->pwJacoby ), "toggled",
+                      G_CALLBACK( TheoryUpdated ), ptw );
 
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
                       ptw->pwBeavers = gtk_check_button_new_with_label (
                           _("Beavers allowed") ) );
 
-  gtk_signal_connect( GTK_OBJECT( ptw->pwBeavers ), "toggled",
-                      GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+  g_signal_connect( G_OBJECT( ptw->pwBeavers ), "toggled",
+                      G_CALLBACK( TheoryUpdated ), ptw );
 
   /* gammon and backgammon percentages */
 
@@ -877,9 +877,9 @@ GTKShowTheory ( const int fActivePage ) {
                          GTK_EXPAND | GTK_FILL,
                          4, 0 );
 
-      gtk_signal_connect( GTK_OBJECT( ptw->aapwRates[ i ][ j ] ), 
+      g_signal_connect( G_OBJECT( ptw->aapwRates[ i ][ j ] ), 
                           "value-changed", 
-                          GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
+                          G_CALLBACK( TheoryUpdated ), ptw );
 
     }
 
@@ -909,8 +909,8 @@ GTKShowTheory ( const int fActivePage ) {
 
     gtk_box_pack_start( GTK_BOX( pwz ), ptw->apwPly[ i ], FALSE, FALSE, 4 );
 
-    gtk_signal_connect( GTK_OBJECT( ptw->apwPly[ i ] ), "toggled", 
-                        GTK_SIGNAL_FUNC( PlyClicked ), ptw );
+    g_signal_connect( G_OBJECT( ptw->apwPly[ i ] ), "toggled", 
+                        G_CALLBACK( PlyClicked ), ptw );
 
   }
 
@@ -971,8 +971,8 @@ GTKShowTheory ( const int fActivePage ) {
       gtk_widget_set_name( ptw->apwGraph[ i ], "gnubg-doubling-window-graph" );
       gtk_container_set_border_width( GTK_CONTAINER( pwAlign ), 4 );
       gtk_widget_set_usize( ptw->apwGraph[ i ], -1, 48 );
-      gtk_signal_connect( GTK_OBJECT( ptw->apwGraph[ i ] ), "expose_event",
-			  GTK_SIGNAL_FUNC( GraphExpose ), ptw );
+      g_signal_connect( G_OBJECT( ptw->apwGraph[ i ] ), "expose_event",
+			  G_CALLBACK( GraphExpose ), ptw );
   }
 
   /* gammon prices */

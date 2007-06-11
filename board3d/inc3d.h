@@ -24,8 +24,6 @@
 #define _INC3D_H_
 
 
-#include "config.h"
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

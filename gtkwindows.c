@@ -21,7 +21,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -101,7 +101,7 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 	if (parent != NULL)
 		gtk_window_set_transient_for(GTK_WINDOW(pwDialog), GTK_WINDOW(parent));
         if (flags & DIALOG_FLAG_MODAL && !( flags & DIALOG_FLAG_NOTIDY))
-			gtk_signal_connect(GTK_OBJECT(pwDialog), "destroy", GTK_SIGNAL_FUNC(quitter), parent);
+			g_signal_connect(G_OBJECT(pwDialog), "destroy", G_CALLBACK(quitter), parent);
 
 	pag = gtk_accel_group_new();
 	gtk_window_add_accel_group(GTK_WINDOW(pwDialog), pag);
@@ -124,7 +124,7 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
     cbData->DialogFun = (dialog_func_ty) okFun;
 
 	cbData->data = okFunData;
-	g_signal_connect(pwDialog, "response", GTK_SIGNAL_FUNC(DialogResponse), cbData);
+	g_signal_connect(pwDialog, "response", G_CALLBACK(DialogResponse), cbData);
 
 	if ((flags & DIALOG_FLAG_NOOK) == 0)
 	{
@@ -267,7 +267,7 @@ extern char* GTKGetInput(char* title, char* prompt)
 	GtkWidget *pwDialog, *pwHbox, *pwEntry;
 	pwEntry = gtk_entry_new();
 	inputString = NULL;
-	pwDialog = GTKCreateDialog(title, DT_QUESTION, NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(GetInputOk), pwEntry );
+	pwDialog = GTKCreateDialog(title, DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(GetInputOk), pwEntry );
 
 	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
 		pwHbox = gtk_hbox_new(FALSE, 0));
@@ -305,7 +305,7 @@ extern void GTKShowWarning(warnings warning, GtkWidget *pwParent)
 		GtkWidget *pwDialog, *pwMsg, *pwv;
 		
 		pwDialog = GTKCreateDialog( _("GNU Backgammon - Warning"), DT_WARNING,
-			pwParent, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( WarningOK ), (void*)warning );
+			pwParent, DIALOG_FLAG_MODAL, G_CALLBACK ( WarningOK ), (void*)warning );
 
 		pwv = gtk_vbox_new ( FALSE, 8 );
 		gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );

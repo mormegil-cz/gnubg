@@ -22,6 +22,7 @@
    under Term 3 of the GNU LGPL) by Gary Wong for distribution
    with GNU Backgammon. */
 
+#include "config.h"
 #include <gtk/gtk.h>
 #include "gtk-multiview.h"
 

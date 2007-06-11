@@ -1,3 +1,24 @@
+Mon Jun 11 20:54:35 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* boardpos.c, copying.awk, corecount.c, credits.sh, erf.c, erftest.c,
+	external_l.l, getopt.c, getopt1.c, gnubgmodule.h, gtk-multiview.c,
+	gtkboard.c, gtkchequer.c, gtkcolour.c, gtkcube.c, gtkexport.c,
+	gtkfile.c, gtkgame.c, gtkgamelist.c, gtkmet.c, gtkmovefilter.c,
+	gtkmovelist.c, gtkoptions.c, gtkpanels.c, gtkprefs.c, gtkrace.c,
+	gtkrelational.c, gtkrolls.c, gtksplash.c, gtktempmap.c, gtktheory.c,
+	gtktoolbar.c, gtkwindows.c, htmlimages.c, progress.c, pub_eval.c,
+	rollout.c, sgf.l, sound.c, speed.c, userrng.c, util.c,
+	board3d/drawboard3d.c, board3d/font3d.c, board3d/graph.c,
+	board3d/gtkcolour3d.c, board3d/inc3d.h, board3d/matrix.c,
+	board3d/misc3d.c, board3d/model.c, board3d/shadow.c,
+	board3d/widget3d.c, lib/cache.c, lib/dynarray.c, lib/hash.c,
+	lib/heap.c, lib/isaac.c, lib/list.c, lib/md5.c, lib/md5test.c,
+	lib/mt19937ar.c, non-src/copying.c, non-src/credits.c,
+	non-src/external_l.c, non-src/sgfl.c: replace deprecated gtk_signal
+	functions with g_signal functions. Make sure that config.h is included
+	at the top of all .c files and not in .h files for better control (e.g. #define
+	GTK_DISABLE_DEPRECATED).
+
 Fri Jun  8 00:07:30 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, analysis.h, gnubg.c, gtkfile.c, progress.c,

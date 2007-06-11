@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <stdlib.h>
 
@@ -349,14 +349,14 @@ ToolbarNew ( void ) {
                                _("Start new game, match, session or position"),
                                NULL,
 			       image_from_xpm_d ( stock_new_xpm, pwToolbar),
-                               GTK_SIGNAL_FUNC( GTKNew ), NULL );
+                               G_CALLBACK( GTKNew ), NULL );
   /* Open button */
   gtk_toolbar_append_item ( GTK_TOOLBAR ( pwToolbar ),
 			       _("Open"),
                               _("Open game, match, session or position"),
                                NULL,
 			       image_from_xpm_d ( stock_open_xpm, pwToolbar),
-                               GTK_SIGNAL_FUNC( GTKOpen ), NULL );
+                               G_CALLBACK( GTKOpen ), NULL );
 
 #define TB_BUTTON_ADD(pointer,icon,label,cb,arg,tooltip,tooltip2) \
   pointer = gtk_button_new(); \
@@ -366,8 +366,8 @@ ToolbarNew ( void ) {
   gtk_container_add(GTK_CONTAINER(pwvbox), \
 		  gtk_label_new(label)); \
   gtk_container_add(GTK_CONTAINER(pointer), pwvbox); \
-  gtk_signal_connect(GTK_OBJECT(pointer), "clicked", \
-		  GTK_SIGNAL_FUNC( cb ), arg ); \
+  g_signal_connect(G_OBJECT(pointer), "clicked", \
+		  G_CALLBACK( cb ), arg ); \
   gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), \
 			    pointer, tooltip, tooltip2 ); \
   gtk_button_set_relief( GTK_BUTTON(pointer), \
@@ -381,8 +381,8 @@ ToolbarNew ( void ) {
   gtk_container_add(GTK_CONTAINER(pwvbox), \
 		  gtk_label_new(label)); \
   gtk_container_add(GTK_CONTAINER(pointer), pwvbox); \
-  gtk_signal_connect(GTK_OBJECT(pointer), "toggled", \
-		  GTK_SIGNAL_FUNC( cb ), arg ); \
+  g_signal_connect(G_OBJECT(pointer), "toggled", \
+		  G_CALLBACK( cb ), arg ); \
   gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), \
 			    pointer, tooltip, tooltip2 ); \
   gtk_button_set_relief( GTK_BUTTON(pointer), \
@@ -459,8 +459,8 @@ ToolbarNew ( void ) {
 		  image_from_xpm_d( tb_clockwise_xpm, pwToolbar),
                   _("Direction"));
 
-  gtk_signal_connect(GTK_OBJECT(ptw->pwButtonClockwise), "toggled", 
-		  GTK_SIGNAL_FUNC( ToolbarToggleClockwise ), ptw );
+  g_signal_connect(G_OBJECT(ptw->pwButtonClockwise), "toggled", 
+		  G_CALLBACK( ToolbarToggleClockwise ), ptw );
   gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), 
 			    ptw->pwButtonClockwise,
 			    _("Reverse direction of play"), NULL ); 
@@ -482,8 +482,8 @@ ToolbarNew ( void ) {
   gtk_container_add(GTK_CONTAINER(pwvbox), 
 		  gtk_label_new(_("Stop")));
   gtk_container_add(GTK_CONTAINER(ptw->pwStop), pwvbox); 
-  gtk_signal_connect(GTK_OBJECT(ptw->pwStop), "clicked", 
-		  GTK_SIGNAL_FUNC( ToolbarStop ), NULL );
+  g_signal_connect(G_OBJECT(ptw->pwStop), "clicked", 
+		  G_CALLBACK( ToolbarStop ), NULL );
   gtk_toolbar_append_widget( GTK_TOOLBAR ( pwToolbar ), 
 			    ptw->pwStopParent, _("Stop the current operation"),
 			    NULL);

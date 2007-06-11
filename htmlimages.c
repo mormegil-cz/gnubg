@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 #include <errno.h>
 
 #if HAVE_SYS_STAT_H

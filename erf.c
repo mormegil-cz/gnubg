@@ -22,6 +22,7 @@
  * $Id$
  */
  
+#include "config.h"
 #include <math.h>
 
 extern double erf( double x ) {

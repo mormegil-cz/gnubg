@@ -13,6 +13,7 @@ MODIFIED:
 
 /*lint --e{661,662}	 Ignore warnings of out of bounds array access (as ok) */
 
+#include "config.h"
 #include "isaac.h"
 
 #define ind(mm,x)  ((mm)[((x)>>2)&(RANDSIZ-1)])

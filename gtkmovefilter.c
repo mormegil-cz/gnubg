@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -222,9 +222,9 @@ MoveFilterPage ( const int i, const int j,
   gtk_box_pack_start ( GTK_BOX ( pwPage ), pmfsw->aapwEnable[ i ][ j ], 
                        FALSE, FALSE, 0 );
 
-  gtk_signal_connect ( GTK_OBJECT ( pmfsw->aapwEnable[ i ][ j ] ),
+  g_signal_connect( G_OBJECT ( pmfsw->aapwEnable[ i ][ j ] ),
                        "toggled", 
-                       GTK_SIGNAL_FUNC ( EnableToggled ), pmfsw );
+                       G_CALLBACK ( EnableToggled ), pmfsw );
 
   /* accept */
 
@@ -251,9 +251,9 @@ MoveFilterPage ( const int i, const int j,
                        gtk_label_new ( _("moves.") ),
                        FALSE, FALSE, 0 );
 
-  gtk_signal_connect( GTK_OBJECT( pmfsw->aapadjAccept[ i ][ j ] ), 
+  g_signal_connect( G_OBJECT( pmfsw->aapadjAccept[ i ][ j ] ), 
                       "value-changed",
-                      GTK_SIGNAL_FUNC( AcceptChanged ), pmfsw );
+                      G_CALLBACK( AcceptChanged ), pmfsw );
 
   /* extra */
 
@@ -276,9 +276,9 @@ MoveFilterPage ( const int i, const int j,
 
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pw, FALSE, FALSE, 0 );
 
-  gtk_signal_connect( GTK_OBJECT( pmfsw->aapadjExtra[ i ][ j ] ), 
+  g_signal_connect( G_OBJECT( pmfsw->aapadjExtra[ i ][ j ] ), 
                       "value-changed",
-                      GTK_SIGNAL_FUNC( AcceptChanged ), pmfsw );
+                      G_CALLBACK( AcceptChanged ), pmfsw );
 
   /* threshold */
 
@@ -299,9 +299,9 @@ MoveFilterPage ( const int i, const int j,
 
   gtk_box_pack_start ( GTK_BOX ( pwhbox ), pw, TRUE, TRUE, 0 );
 
-  gtk_signal_connect( GTK_OBJECT( pmfsw->aapadjThreshold[ i ][ j ] ), 
+  g_signal_connect( G_OBJECT( pmfsw->aapadjThreshold[ i ][ j ] ), 
                       "value-changed",
-                      GTK_SIGNAL_FUNC( AcceptChanged ), pmfsw );
+                      G_CALLBACK( AcceptChanged ), pmfsw );
 
   
 
@@ -356,8 +356,8 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
     gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
                               pi, g_free );
 
-    gtk_signal_connect ( GTK_OBJECT ( pwItem ), "activate",
-                         GTK_SIGNAL_FUNC ( SetupSettingsMenuActivate ),
+    g_signal_connect( G_OBJECT ( pwItem ), "activate",
+                         G_CALLBACK ( SetupSettingsMenuActivate ),
                          (void *) pmfsw );
 
     }
@@ -491,7 +491,7 @@ ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Move filter setup"), 
 			DT_QUESTION, pw, DIALOG_FLAG_MODAL,
-            GTK_SIGNAL_FUNC( MoveFilterSetupOK ), pwMoveFilterSetup );
+            G_CALLBACK( MoveFilterSetupOK ), pwMoveFilterSetup );
 
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                      pwMoveFilterSetup );
@@ -552,8 +552,8 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
     gtk_object_set_data_full( GTK_OBJECT( pwItem ), "user_data", 
                               pi, g_free );
 
-    gtk_signal_connect ( GTK_OBJECT ( pwItem ), "activate",
-                         GTK_SIGNAL_FUNC ( SettingsMenuActivate ),
+    g_signal_connect( G_OBJECT ( pwItem ), "activate",
+                         G_CALLBACK ( SettingsMenuActivate ),
                          (void *) pmfw );
 
     }
@@ -569,8 +569,8 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK,
   gtk_box_pack_end ( GTK_BOX ( pw ), pwButton, FALSE, FALSE, 0 );
 
   
-  gtk_signal_connect ( GTK_OBJECT ( pwButton ), "clicked",
-                       GTK_SIGNAL_FUNC ( ClickButton ), pmfw );
+  g_signal_connect( G_OBJECT ( pwButton ), "clicked",
+                       G_CALLBACK ( ClickButton ), pmfw );
 
   /* save movefilterwidget */
 

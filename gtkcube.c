@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -920,8 +920,8 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
     gtk_box_pack_start ( GTK_BOX ( pw ), pwply, TRUE, TRUE, 0 );
 
-    gtk_signal_connect( GTK_OBJECT( pwply ), "clicked",
-                        GTK_SIGNAL_FUNC( CubeAnalysisEvalPly ), pchd );
+    g_signal_connect( G_OBJECT( pwply ), "clicked",
+                        G_CALLBACK( CubeAnalysisEvalPly ), pchd );
 
     gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, g_free );
 
@@ -958,20 +958,20 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   /* signals */
 
-  gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
-                      GTK_SIGNAL_FUNC( CubeAnalysisRollout ), pchd );
-  gtk_signal_connect( GTK_OBJECT( pwEval ), "clicked",
-                      GTK_SIGNAL_FUNC( CubeAnalysisEval ), pchd );
-  gtk_signal_connect( GTK_OBJECT( pwEvalSettings ), "clicked",
-                      GTK_SIGNAL_FUNC( CubeAnalysisEvalSettings ), NULL );
-  gtk_signal_connect( GTK_OBJECT( pwRolloutSettings ), "clicked",
-                      GTK_SIGNAL_FUNC( CubeAnalysisRolloutSettings ), NULL );
-  gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
-                      GTK_SIGNAL_FUNC( CubeAnalysisMWC ), pchd );
-  gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
-                      GTK_SIGNAL_FUNC( CubeAnalysisCopy ), pchd );
-  gtk_signal_connect( GTK_OBJECT( pwTempMap ), "clicked",
-                      GTK_SIGNAL_FUNC( CubeAnalysisTempMap ), pchd );
+  g_signal_connect( G_OBJECT( pwRollout ), "clicked",
+                      G_CALLBACK( CubeAnalysisRollout ), pchd );
+  g_signal_connect( G_OBJECT( pwEval ), "clicked",
+                      G_CALLBACK( CubeAnalysisEval ), pchd );
+  g_signal_connect( G_OBJECT( pwEvalSettings ), "clicked",
+                      G_CALLBACK( CubeAnalysisEvalSettings ), NULL );
+  g_signal_connect( G_OBJECT( pwRolloutSettings ), "clicked",
+                      G_CALLBACK( CubeAnalysisRolloutSettings ), NULL );
+  g_signal_connect( G_OBJECT( pwMWC ), "toggled",
+                      G_CALLBACK( CubeAnalysisMWC ), pchd );
+  g_signal_connect( G_OBJECT( pwCopy ), "clicked",
+                      G_CALLBACK( CubeAnalysisCopy ), pchd );
+  g_signal_connect( G_OBJECT( pwTempMap ), "clicked",
+                      G_CALLBACK( CubeAnalysisTempMap ), pchd );
 
   /* tool tips */
 

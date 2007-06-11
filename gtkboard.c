@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -1790,7 +1790,7 @@ static void ShowBoardPopup(GdkEventButton* event)
 		menu_item = gtk_menu_item_new_with_label ("Undo Move");
 		gtk_menu_shell_append(GTK_MENU_SHELL(boardMenu), menu_item);
 		gtk_widget_show(menu_item);
-		gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(Undo), NULL);
+		g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(Undo), NULL);
 
 		menu_item = gtk_menu_item_new();
 		gtk_menu_shell_append(GTK_MENU_SHELL(boardMenu), menu_item);
@@ -1799,7 +1799,7 @@ static void ShowBoardPopup(GdkEventButton* event)
 		menu_item = gtk_menu_item_new_with_label ("Score Sheet");
 		gtk_menu_shell_append(GTK_MENU_SHELL(boardMenu), menu_item);
 		gtk_widget_show(menu_item);
-		gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(GTKShowScoreSheet), NULL);
+		g_signal_connect(G_OBJECT(menu_item), "activate", G_CALLBACK(GTKShowScoreSheet), NULL);
 	}
 	gtk_menu_popup(GTK_MENU(boardMenu), NULL, NULL, NULL, NULL, event->button, event->time);
 }
@@ -2494,10 +2494,10 @@ static void SetCrawfordToggle(BoardData* bd)
 	if (bd->crawford_game != gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->crawford)))
 	{
 		/* Block handler to stop warning message in click handler */
-		gtk_signal_handler_block_by_func(GTK_OBJECT(bd->crawford), GTK_SIGNAL_FUNC( board_set_crawford ), bd);
+		g_signal_handlers_block_by_func(G_OBJECT(bd->crawford), G_CALLBACK( board_set_crawford ), bd);
 		gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
 				      bd->crawford_game );
-		gtk_signal_handler_unblock_by_func(GTK_OBJECT(bd->crawford), GTK_SIGNAL_FUNC( board_set_crawford ), bd);
+		g_signal_handlers_unblock_by_func(G_OBJECT(bd->crawford), G_CALLBACK( board_set_crawford ), bd);
 	}
 }
 
@@ -3761,8 +3761,8 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board )
     
     gtk_widget_add_events( pw, GDK_BUTTON_PRESS_MASK );
     
-    gtk_signal_connect( GTK_OBJECT( pw ), "button_press_event",
-			GTK_SIGNAL_FUNC( key_press ), iPlayer ? pw : NULL );
+    g_signal_connect( G_OBJECT( pw ), "button_press_event",
+			G_CALLBACK( key_press ), iPlayer ? pw : NULL );
 
     sprintf( sz, _("Set player %d on roll."), iPlayer );
     gtk_tooltips_set_tip( ptt, pw, sz, NULL );
@@ -4058,8 +4058,8 @@ static void board_init( Board *board )
                         bd->crawford =
                         gtk_check_button_new_with_label( _("Crawford game") ),
                         FALSE, FALSE, 0 );
-    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
-			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
+    g_signal_connect( G_OBJECT( bd->crawford ), "toggled",
+			G_CALLBACK( board_set_crawford ), bd );
 
 
     /* dice drawing area */
@@ -4071,35 +4071,35 @@ static void board_init( Board *board )
     gtk_widget_add_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
 
-    gtk_signal_connect( GTK_OBJECT( bd->position_id ), "activate",
-			GTK_SIGNAL_FUNC( board_set_position ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->position_id ), "paste-clipboard",
-			GTK_SIGNAL_FUNC( board_set_position ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->match_id ), "activate",
-			GTK_SIGNAL_FUNC( board_set_matchid ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->match_id ), "paste-clipboard",
-			GTK_SIGNAL_FUNC( board_set_matchid ), bd );
+    g_signal_connect( G_OBJECT( bd->position_id ), "activate",
+			G_CALLBACK( board_set_position ), bd );
+    g_signal_connect( G_OBJECT( bd->position_id ), "paste-clipboard",
+			G_CALLBACK( board_set_position ), bd );
+    g_signal_connect( G_OBJECT( bd->match_id ), "activate",
+			G_CALLBACK( board_set_matchid ), bd );
+    g_signal_connect( G_OBJECT( bd->match_id ), "paste-clipboard",
+			G_CALLBACK( board_set_matchid ), bd );
 
-    gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "expose_event",
-			GTK_SIGNAL_FUNC( board_expose ), bd );    
-    gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "button_press_event",
-			GTK_SIGNAL_FUNC( button_press_event ), bd );    
-    gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "button_release_event",
-			GTK_SIGNAL_FUNC( button_release_event ), bd );    
-    gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "motion_notify_event",
-			GTK_SIGNAL_FUNC( motion_notify_event ), bd );
+    g_signal_connect( G_OBJECT( bd->drawing_area ), "expose_event",
+			G_CALLBACK( board_expose ), bd );    
+    g_signal_connect( G_OBJECT( bd->drawing_area ), "button_press_event",
+			G_CALLBACK( button_press_event ), bd );    
+    g_signal_connect( G_OBJECT( bd->drawing_area ), "button_release_event",
+			G_CALLBACK( button_release_event ), bd );    
+    g_signal_connect( G_OBJECT( bd->drawing_area ), "motion_notify_event",
+			G_CALLBACK( motion_notify_event ), bd );
 
-    gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "expose_event",
-			GTK_SIGNAL_FUNC( dice_expose ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "button_press_event",
-			GTK_SIGNAL_FUNC( dice_press ), bd );
+    g_signal_connect( G_OBJECT( bd->dice_area ), "expose_event",
+			G_CALLBACK( dice_expose ), bd );
+    g_signal_connect( G_OBJECT( bd->dice_area ), "button_press_event",
+			G_CALLBACK( dice_press ), bd );
 
-    gtk_signal_connect( GTK_OBJECT( bd->amatch ), "value-changed",
-                        GTK_SIGNAL_FUNC( score_changed ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->ascore0 ), "value-changed",
-                        GTK_SIGNAL_FUNC( score_changed ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->ascore1 ), "value-changed",
-                        GTK_SIGNAL_FUNC( score_changed ), bd );
+    g_signal_connect( G_OBJECT( bd->amatch ), "value-changed",
+                        G_CALLBACK( score_changed ), bd );
+    g_signal_connect( G_OBJECT( bd->ascore0 ), "value-changed",
+                        G_CALLBACK( score_changed ), bd );
+    g_signal_connect( G_OBJECT( bd->ascore1 ), "value-changed",
+                        G_CALLBACK( score_changed ), bd );
 
 }
 
@@ -4244,10 +4244,10 @@ extern GtkWidget *board_cube_widget( Board *board )
 						CUBE_WIDTH * setSize,
 						CUBE_HEIGHT * setSize );
 			gtk_widget_add_events( pwCube, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
-			gtk_signal_connect( GTK_OBJECT( pwCube ), "expose_event",
-					GTK_SIGNAL_FUNC( cube_widget_expose ), bd );
-			gtk_signal_connect( GTK_OBJECT( pwCube ), "button_press_event",
-					GTK_SIGNAL_FUNC( cube_widget_press ), bd );
+			g_signal_connect( G_OBJECT( pwCube ), "expose_event",
+					G_CALLBACK( cube_widget_expose ), bd );
+			g_signal_connect( G_OBJECT( pwCube ), "button_press_event",
+					G_CALLBACK( cube_widget_press ), bd );
 			gtk_table_attach_defaults( GTK_TABLE( pw ), pwCube,
 							x, x + 1, y, y + 1 );
 		}
@@ -4357,10 +4357,10 @@ extern GtkWidget *board_dice_widget( Board *board )
 			gtk_widget_add_events( pwDice, GDK_EXPOSURE_MASK |
 						GDK_BUTTON_PRESS_MASK |
 						GDK_STRUCTURE_MASK );
-			gtk_signal_connect( GTK_OBJECT( pwDice ), "expose_event",
-					GTK_SIGNAL_FUNC( dice_widget_expose ), bd );
-			gtk_signal_connect( GTK_OBJECT( pwDice ), "button_press_event",
-					GTK_SIGNAL_FUNC( dice_widget_press ), bd );
+			g_signal_connect( G_OBJECT( pwDice ), "expose_event",
+					G_CALLBACK( dice_widget_expose ), bd );
+			g_signal_connect( G_OBJECT( pwDice ), "button_press_event",
+					G_CALLBACK( dice_widget_press ), bd );
 			gtk_table_attach_defaults( GTK_TABLE( pw ), pwDice,
 							x, x + 1, y, y + 1 );
 		}

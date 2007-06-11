@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#include <config.h>
+#include "config.h"
 
 #define erf erftest
 #include "erf.c"

@@ -22,7 +22,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -615,9 +615,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
           gtk_object_set_data_full( GTK_OBJECT( ptm->aapwDA[ i ][ j ] ),
                                     "user_data", pi, g_free );
           
-          gtk_signal_connect( GTK_OBJECT( ptm->aapwDA[ i ][ j ] ),
+          g_signal_connect( G_OBJECT( ptm->aapwDA[ i ][ j ] ),
                               "expose_event",
-                              GTK_SIGNAL_FUNC( ExposeQuadrant ), ptmw );
+                              G_CALLBACK( ExposeQuadrant ), ptmw );
 
         }
 
@@ -636,9 +636,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
         gtk_object_set_data_full( GTK_OBJECT( pw ),
                                   "user_data", pi, g_free );
         
-        gtk_signal_connect( GTK_OBJECT( pw ),
+        g_signal_connect( G_OBJECT( pw ),
                             "expose_event",
-                            GTK_SIGNAL_FUNC( ExposeDie ),
+                            G_CALLBACK( ExposeDie ),
                             ptmw );
         /* die */
     
@@ -655,9 +655,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
         gtk_object_set_data_full( GTK_OBJECT( pw ),
                                   "user_data", pi, g_free );
         
-        gtk_signal_connect( GTK_OBJECT( pw ),
+        g_signal_connect( G_OBJECT( pw ),
                             "expose_event",
-                            GTK_SIGNAL_FUNC( ExposeDie ),
+                            G_CALLBACK( ExposeDie ),
                             ptmw );
     
       }
@@ -683,9 +683,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
       gtk_object_set_data_full( GTK_OBJECT( ptm->pwAverage ),
                                 "user_data", pi, g_free );
       
-      gtk_signal_connect( GTK_OBJECT( ptm->pwAverage ),
+      g_signal_connect( G_OBJECT( ptm->pwAverage ),
                           "expose_event",
-                          GTK_SIGNAL_FUNC( ExposeQuadrant ),
+                          G_CALLBACK( ExposeQuadrant ),
                           ptmw );
 
      }
@@ -712,9 +712,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
     
     gtk_object_set_data( GTK_OBJECT( pw ), "user_data", NULL );
     
-    gtk_signal_connect( GTK_OBJECT( pw ),
+    g_signal_connect( G_OBJECT( pw ),
                         "expose_event",
-                        GTK_SIGNAL_FUNC( ExposeQuadrant ), NULL );
+                        G_CALLBACK( ExposeQuadrant ), NULL );
     
     UpdateStyle( pw, 1.0f * i / 15.0f );
     
@@ -755,8 +755,8 @@ GTKShowTempMap( const matchstate ams[], const int n,
     gtk_object_set_data_full( GTK_OBJECT( pw ),
                               "user_data", pi, g_free );
     
-    gtk_signal_connect( GTK_OBJECT( pw ), "toggled", 
-                        GTK_SIGNAL_FUNC( TempMapPlyToggled ), ptmw );
+    g_signal_connect( G_OBJECT( pw ), "toggled", 
+                        G_CALLBACK( TempMapPlyToggled ), ptmw );
                         
   }
 
@@ -771,15 +771,15 @@ GTKShowTempMap( const matchstate ams[], const int n,
   pw = gtk_check_button_new_with_label( _("Show equities") );
   gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
   
-  gtk_signal_connect( GTK_OBJECT( pw ), "toggled",
-                      GTK_SIGNAL_FUNC( ShowEquityToggled ), ptmw );
+  g_signal_connect( G_OBJECT( pw ), "toggled",
+                      G_CALLBACK( ShowEquityToggled ), ptmw );
 
 
   pw = gtk_check_button_new_with_label( _("Show best move") );
   gtk_box_pack_end( GTK_BOX( pwh ), pw, FALSE, FALSE, 0 );
   
-  gtk_signal_connect( GTK_OBJECT( pw ), "toggled",
-                      GTK_SIGNAL_FUNC( ShowBestMoveToggled ), ptmw );
+  g_signal_connect( G_OBJECT( pw ), "toggled",
+                      G_CALLBACK( ShowBestMoveToggled ), ptmw );
 
 
   /* update */

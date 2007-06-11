@@ -1,6 +1,7 @@
 /* Do not modify this file!  It is created automatically by
    copying.awk.  Modify copying.awk instead. */
 
+#include "config.h"
 char *aszCopying[] = {
   "		    GNU GENERAL PUBLIC LICENSE",
   "		       Version 2, June 1991",

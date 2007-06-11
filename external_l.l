@@ -21,6 +21,7 @@
  * $Id$
  */
 
+#include "config.h"
 #include <string.h>
 
 #include "external_y.h"

@@ -22,7 +22,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 
 #include <stdio.h>
@@ -320,8 +320,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "conditions players may offer to raise the stakes "
 			    "of the game by using the \"double\" command."),
 			  NULL );
-    gtk_signal_connect( GTK_OBJECT ( pow->pwCubeUsecube ), "toggled",
-			GTK_SIGNAL_FUNC( UseCubeToggled ), pow );
+    g_signal_connect( G_OBJECT ( pow->pwCubeUsecube ), "toggled",
+			G_CALLBACK( UseCubeToggled ), pow );
 
     pow->pwAutoCrawford = gtk_check_button_new_with_label(
 	_("Use Crawford rule"));
@@ -409,8 +409,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "you if it thinks you are making a mistake."),
 			  NULL );
     
-    gtk_signal_connect ( GTK_OBJECT ( pow->pwTutor ), "toggled",
-			 GTK_SIGNAL_FUNC ( TutorToggled ), pow );
+    g_signal_connect( G_OBJECT ( pow->pwTutor ), "toggled",
+			 G_CALLBACK ( TutorToggled ), pow );
 
     pow->pwTutorCube = gtk_check_button_new_with_label (_("Cube Decisions"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwTutorCube, FALSE, FALSE, 0);
@@ -620,8 +620,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			  _("Control the rate at which blinking or sliding "
 			    "chequers are displayed."), NULL );
     
-    gtk_signal_connect( GTK_OBJECT( pow->pwAnimateNone ), "toggled",
-			GTK_SIGNAL_FUNC( ToggleAnimation ), pwSpeed );
+    g_signal_connect( G_OBJECT( pow->pwAnimateNone ), "toggled",
+			G_CALLBACK( ToggleAnimation ), pwSpeed );
     ToggleAnimation( pow->pwAnimateNone, pwSpeed );
 
     pow->pwDragTargetHelp = gtk_check_button_new_with_label(
@@ -779,8 +779,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			  _("Read a file containing a match equity table."),
 			  NULL );
 
-    gtk_signal_connect ( GTK_OBJECT ( pow->pwLoadMET ), "clicked",
-			 GTK_SIGNAL_FUNC ( SetMET ), (gpointer) pwLabelFile );
+    g_signal_connect( G_OBJECT ( pow->pwLoadMET ), "clicked",
+			 G_CALLBACK ( SetMET ), (gpointer) pwLabelFile );
 
     pow->pwCubeInvert = gtk_check_button_new_with_label (_("Invert table"));
     gtk_box_pack_start (GTK_BOX (pwb), pow->pwCubeInvert, FALSE, FALSE, 0);
@@ -835,11 +835,11 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pow->pwDicePRNG),
 				  (rngCurrent != RNG_MANUAL));
 
-    gtk_signal_connect ( GTK_OBJECT ( pow->pwDiceManual ), "toggled",
-			 GTK_SIGNAL_FUNC ( ManualDiceToggled ), pow );
+    g_signal_connect( G_OBJECT ( pow->pwDiceManual ), "toggled",
+			 G_CALLBACK ( ManualDiceToggled ), pow );
 
-    gtk_signal_connect ( GTK_OBJECT ( pow->pwDicePRNG ), "toggled",
-			 GTK_SIGNAL_FUNC ( ManualDiceToggled ), pow );
+    g_signal_connect( G_OBJECT ( pow->pwDicePRNG ), "toggled",
+			 G_CALLBACK ( ManualDiceToggled ), pow );
 
     pwhbox = gtk_hbox_new (FALSE, 4);
     gtk_box_pack_start (GTK_BOX (pwvbox), pwhbox, TRUE, TRUE, 0);
@@ -879,8 +879,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_widget_set_sensitive( pow->pwPRNGMenu, (rngCurrent != RNG_MANUAL));
     gtk_widget_set_sensitive( pow->pwSeed,  (rngCurrent != RNG_MANUAL));
     pow->fChanged = 0;
-    gtk_signal_connect ( GTK_OBJECT ( pw ), "changed",
-			 GTK_SIGNAL_FUNC ( SeedChanged ), &pow->fChanged );   
+    g_signal_connect( G_OBJECT ( pw ), "changed",
+			 G_CALLBACK ( SeedChanged ), &pow->fChanged );   
     
 
     /* dice manipulation */
@@ -1510,7 +1510,7 @@ GTKSetOptions( void ) {
   optionswidget ow;
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - General options"), DT_QUESTION,
-			     NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC( OptionsOK ), &ow );
+			     NULL, DIALOG_FLAG_MODAL, G_CALLBACK( OptionsOK ), &ow );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwOptions = OptionsPages( &ow ) );
   gtk_widget_show_all( pwDialog );
@@ -1697,8 +1697,8 @@ AddSoundWidgets (GtkWidget * container)
 			  _
 			  ("Have GNU Backgammon make sound effects when various events occur."),
 			  NULL);
-    gtk_signal_connect (GTK_OBJECT (soundsEnabled), "toggled",
-			GTK_SIGNAL_FUNC (SoundToggled), NULL);
+    g_signal_connect(G_OBJECT (soundsEnabled), "toggled",
+			G_CALLBACK (SoundToggled), NULL);
 #define SOUND_COL 0
     for (i = 0; i < NUM_SOUNDS; i++)
       {
@@ -1717,10 +1717,10 @@ AddSoundWidgets (GtkWidget * container)
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (soundList), -1, _("Sound Event"), renderer, "text", SOUND_COL, NULL);
     gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (soundList), FALSE);
     g_signal_connect (soundList, "cursor-changed",
-		      GTK_SIGNAL_FUNC (SoundSelected), NULL);
+		      G_CALLBACK (SoundSelected), NULL);
     g_signal_connect (soundList, "map_event",
-		      GTK_SIGNAL_FUNC (SoundGrabFocus), NULL);
-    g_signal_connect (soundList, "destroy", GTK_SIGNAL_FUNC (SoundTidy), NULL);
+		      G_CALLBACK (SoundGrabFocus), NULL);
+    g_signal_connect (soundList, "destroy", G_CALLBACK (SoundTidy), NULL);
 
     g_object_unref (G_OBJECT (store));	/* The view now holds a reference.  We can get rid of our own reference */
 
@@ -1739,28 +1739,28 @@ AddSoundWidgets (GtkWidget * container)
     gtk_container_set_border_width (GTK_CONTAINER (pwvboxDetails), 4);
     soundEnabled = gtk_check_button_new_with_label ("Enabled");
     g_signal_connect (soundEnabled, "clicked",
-		      GTK_SIGNAL_FUNC (SoundEnabledClicked), NULL);
+		      G_CALLBACK (SoundEnabledClicked), NULL);
     gtk_box_pack_start (GTK_BOX (pwvboxDetails), soundEnabled, FALSE, FALSE, 0);
 
     pwhbox = gtk_hbox_new (FALSE, 0);
     gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new (_("Path:")), FALSE, FALSE, 0);
     soundPath = gtk_entry_new ();
-    g_signal_connect (soundPath, "changed", GTK_SIGNAL_FUNC (PathChanged), NULL);
+    g_signal_connect (soundPath, "changed", G_CALLBACK (PathChanged), NULL);
     gtk_box_pack_start (GTK_BOX (pwhbox), soundPath, TRUE, TRUE, 0);
     soundPathButton = gtk_button_new_with_label ("Browse");
     g_signal_connect (soundPathButton, "clicked",
-		      GTK_SIGNAL_FUNC (SoundChangePathClicked), NULL);
+		      G_CALLBACK (SoundChangePathClicked), NULL);
     gtk_box_pack_start (GTK_BOX (pwhbox), soundPathButton, FALSE, FALSE, 0);
     gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
 
     pwhbox = gtk_hbox_new (FALSE, 4);
     soundPlayButton = gtk_button_new_with_label ("Play Sound");
     g_signal_connect (soundPlayButton, "clicked",
-		      GTK_SIGNAL_FUNC (SoundPlayClicked), NULL);
+		      G_CALLBACK (SoundPlayClicked), NULL);
     gtk_box_pack_start (GTK_BOX (pwhbox), soundPlayButton, FALSE, FALSE, 0);
     soundDefaultButton = gtk_button_new_with_label ("Reset Default");
     g_signal_connect (soundDefaultButton, "clicked",
-		      GTK_SIGNAL_FUNC (SoundDefaultClicked), NULL);
+		      G_CALLBACK (SoundDefaultClicked), NULL);
     gtk_box_pack_start (GTK_BOX (pwhbox), soundDefaultButton, FALSE, FALSE, 0);
     gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
 
@@ -1775,7 +1775,7 @@ extern void GTKSound()
 {
 	GtkWidget *pwDialog;
 	pwDialog = GTKCreateDialog(_("GNU Backgammon - Sound options"), DT_QUESTION,
-			NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC(SoundOK), NULL);
+			NULL, DIALOG_FLAG_MODAL, G_CALLBACK(SoundOK), NULL);
 
 	AddSoundWidgets(DialogArea(pwDialog, DA_MAIN));
 

@@ -20,6 +20,7 @@
  */
 
 %{
+#include "config.h"
 #include <ctype.h>
 #include "list.h"
 #include <string.h>

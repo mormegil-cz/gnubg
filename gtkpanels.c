@@ -360,9 +360,9 @@ static GtkWidget *CreateCommandWindow( void )
 
 	PopulateCommandHistory(&cedPanel);
 
-	gtk_signal_connect(GTK_OBJECT(cedPanel.pwEntry), "changed", GTK_SIGNAL_FUNC(CommandTextChange), &cedPanel);
-	gtk_signal_connect(GTK_OBJECT(cedPanel.pwEntry), "key-press-event", GTK_SIGNAL_FUNC(CommandKeyPress), &cedPanel);
-	gtk_signal_connect(GTK_OBJECT(cedPanel.pwEntry), "activate", GTK_SIGNAL_FUNC(CommandOK), &cedPanel);
+	g_signal_connect(G_OBJECT(cedPanel.pwEntry), "changed", G_CALLBACK(CommandTextChange), &cedPanel);
+	g_signal_connect(G_OBJECT(cedPanel.pwEntry), "key-press-event", G_CALLBACK(CommandKeyPress), &cedPanel);
+	g_signal_connect(G_OBJECT(cedPanel.pwEntry), "activate", G_CALLBACK(CommandOK), &cedPanel);
 
 	pwhbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwhbox, FALSE, FALSE, 0);
@@ -371,10 +371,10 @@ static GtkWidget *CreateCommandWindow( void )
 
 	pwShowHelp = gtk_toggle_button_new_with_label( _("Help") );
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwShowHelp), cedPanel.showHelp);
-	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "toggled", GTK_SIGNAL_FUNC(ShowHelpToggled), &cedPanel);
+	g_signal_connect(G_OBJECT(pwShowHelp), "toggled", G_CALLBACK(ShowHelpToggled), &cedPanel);
 
 	gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwShowHelp, FALSE, FALSE, 5);
-	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "focus-in-event", GTK_SIGNAL_FUNC(CommandFocusIn), &cedPanel);
+	g_signal_connect(G_OBJECT(pwShowHelp), "focus-in-event", G_CALLBACK(CommandFocusIn), &cedPanel);
 
 	return woPanel[WINDOW_COMMAND].pwWin;
 }
@@ -430,8 +430,8 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 
 	if (!woPanel[WINDOW_ANALYSIS].docked)
 	{
-	    gtk_signal_connect( GTK_OBJECT( woPanel[WINDOW_ANALYSIS].pwWin ), "delete_event",
-			GTK_SIGNAL_FUNC(woPanel[WINDOW_ANALYSIS].hideFun), NULL );
+	    g_signal_connect( G_OBJECT( woPanel[WINDOW_ANALYSIS].pwWin ), "delete_event",
+			G_CALLBACK(woPanel[WINDOW_ANALYSIS].hideFun), NULL );
 		return woPanel[WINDOW_ANALYSIS].pwWin;
 	}
 	else
@@ -459,8 +459,8 @@ static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
     pwButton = gtk_button_new();
     gtk_container_add( GTK_CONTAINER( pwButton ), pw );
     
-    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonCommand ), szCommand );
+    g_signal_connect( G_OBJECT( pwButton ), "clicked",
+			G_CALLBACK( ButtonCommand ), szCommand );
     
     return pwButton;
 }
@@ -549,8 +549,8 @@ static void CreateGameWindow( void ) {
 
 	if (!woPanel[WINDOW_GAME].docked)
 	{
-	    gtk_signal_connect( GTK_OBJECT( woPanel[WINDOW_GAME].pwWin ), "delete_event",
-			GTK_SIGNAL_FUNC(woPanel[WINDOW_GAME].hideFun), NULL );
+	    g_signal_connect( G_OBJECT( woPanel[WINDOW_GAME].pwWin ), "delete_event",
+			G_CALLBACK(woPanel[WINDOW_GAME].hideFun), NULL );
 	}
 	else
 		woPanel[WINDOW_GAME].pwWin = pvbox;
@@ -740,7 +740,7 @@ static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, 
 		gtk_container_add(GTK_CONTAINER(woPanel[window].pwWin), pWidget);
 		gtk_window_add_accel_group(GTK_WINDOW(woPanel[window].pwWin), pagMain);
 
-		gtk_signal_connect(GTK_OBJECT(woPanel[window].pwWin), "delete_event", GTK_SIGNAL_FUNC(woPanel[window].hideFun), NULL);
+		g_signal_connect(G_OBJECT(woPanel[window].pwWin), "delete_event", G_CALLBACK(woPanel[window].hideFun), NULL);
 	}
 	else
 		woPanel[window].pwWin = pWidget;

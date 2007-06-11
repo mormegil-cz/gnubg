@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -455,8 +455,8 @@ CreateMoveListTools ( hintdata *phd )
 
     gtk_box_pack_start ( GTK_BOX ( phd->pwEvalPly ), pwply, TRUE, TRUE, 0 );
 
-    gtk_signal_connect( GTK_OBJECT( pwply ), "clicked",
-                        GTK_SIGNAL_FUNC( MoveListEvalPly ), phd );
+    g_signal_connect( G_OBJECT( pwply ), "clicked",
+                        G_CALLBACK( MoveListEvalPly ), phd );
 
     gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, g_free );
 
@@ -511,27 +511,27 @@ CreateMoveListTools ( hintdata *phd )
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwDetails), showMoveListDetail);
   /* signals */
 
-  gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListRolloutClicked ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwEval ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListEval ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwEvalSettings ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListEvalSettings ), NULL );
-  gtk_signal_connect( GTK_OBJECT( pwRolloutSettings ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListRolloutSettings ), NULL );
-  gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
-                      GTK_SIGNAL_FUNC( MoveListMWC ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListMove ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwShow ), "toggled",
-                      GTK_SIGNAL_FUNC( MoveListShowToggledClicked ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListCopy ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwTempMap ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListTempMapClicked ), phd );
+  g_signal_connect( G_OBJECT( pwRollout ), "clicked",
+                      G_CALLBACK( MoveListRolloutClicked ), phd );
+  g_signal_connect( G_OBJECT( pwEval ), "clicked",
+                      G_CALLBACK( MoveListEval ), phd );
+  g_signal_connect( G_OBJECT( pwEvalSettings ), "clicked",
+                      G_CALLBACK( MoveListEvalSettings ), NULL );
+  g_signal_connect( G_OBJECT( pwRolloutSettings ), "clicked",
+                      G_CALLBACK( MoveListRolloutSettings ), NULL );
+  g_signal_connect( G_OBJECT( pwMWC ), "toggled",
+                      G_CALLBACK( MoveListMWC ), phd );
+  g_signal_connect( G_OBJECT( pwMove ), "clicked",
+                      G_CALLBACK( MoveListMove ), phd );
+  g_signal_connect( G_OBJECT( pwShow ), "toggled",
+                      G_CALLBACK( MoveListShowToggledClicked ), phd );
+  g_signal_connect( G_OBJECT( pwCopy ), "clicked",
+                      G_CALLBACK( MoveListCopy ), phd );
+  g_signal_connect( G_OBJECT( pwTempMap ), "clicked",
+                      G_CALLBACK( MoveListTempMapClicked ), phd );
   if ( !phd->fDetails )
-    gtk_signal_connect( GTK_OBJECT( pwDetails ), "clicked",
-                        GTK_SIGNAL_FUNC( MoveListDetailsClicked ), phd );
+    g_signal_connect( G_OBJECT( pwDetails ), "clicked",
+                        G_CALLBACK( MoveListDetailsClicked ), phd );
 
   /* tool tips */
 

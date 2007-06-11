@@ -32,7 +32,7 @@
 #define _NO_PROTO
 #endif
 
-#include <config.h>
+#include "config.h"
 
 #if !defined (__STDC__) || !__STDC__
 /* This is a separate conditional since some stdc systems

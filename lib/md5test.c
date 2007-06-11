@@ -1,3 +1,4 @@
+#include "config.h"
 #include <string.h>
 #include "md5.h"
 /* $Id$ */

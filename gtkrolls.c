@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include <gtk/gtk.h>
 
@@ -392,12 +392,12 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   gtk_range_set_update_policy( GTK_RANGE( prw->pScale ), GTK_UPDATE_DISCONTINUOUS );
 
   prw->pCancel = gtk_button_new_with_label( _("Cancel") );
-  gtk_signal_connect( GTK_OBJECT( prw->pCancel ), "clicked", 
-			GTK_SIGNAL_FUNC( CancelRolls ), NULL );
+  g_signal_connect( G_OBJECT( prw->pCancel ), "clicked", 
+			G_CALLBACK( CancelRolls ), NULL );
   gtk_box_pack_start ( GTK_BOX ( hbox ), prw->pCancel, FALSE, FALSE, 4 );
 
-  gtk_signal_connect ( GTK_OBJECT ( prw->pScale ), "value-changed",
-                       GTK_SIGNAL_FUNC ( DepthChanged ), prw );
+  g_signal_connect( G_OBJECT ( prw->pScale ), "value-changed",
+                       G_CALLBACK ( DepthChanged ), prw );
 
   /* tree  */
 
@@ -408,8 +408,8 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   
   gtk_window_set_default_size( GTK_WINDOW( prw->pDialog ), 560, 400 ); 
   gtk_widget_show_all( prw->pDialog );
-  gtk_signal_connect( GTK_OBJECT( prw->pDialog ), "delete_event",
-                      GTK_SIGNAL_FUNC(RollsClose), prw );	/* In case closed mid calculation */
+  g_signal_connect( G_OBJECT( prw->pDialog ), "delete_event",
+                      G_CALLBACK(RollsClose), prw );	/* In case closed mid calculation */
 
   GTKDisallowStdin();
   gtk_main();

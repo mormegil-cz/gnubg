@@ -21,6 +21,7 @@
 //					must ensure BIOS settings is not configured to restrict CPUID functionalities.
 //-------------------------------------------------------------------------------------------------
 
+#include "config.h"
 #define HWD_MT_BIT         0x10000000     // EDX[28]  Bit 28 is set if HT or multi-core is supported
 #define NUM_LOGICAL_BITS   0x00FF0000     // EBX[23:16] Bit 16-23 in ebx contains the number of logical
                                           // processors per physical processor when execute cpuid with 

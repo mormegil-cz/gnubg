@@ -22,6 +22,7 @@ char *aszRNG[1];
 char *aszSkillType[ 1 ]; 
 int exsExport;
 int ap;
+#include "config.h"
 #if WIN32
 #include <windows.h>
 #include <glib.h>

@@ -21,6 +21,7 @@
 * $Id$
 */
 
+#include "config.h"
 #include "inc3d.h"
 
 #include <ft2build.h>

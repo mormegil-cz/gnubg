@@ -47,6 +47,7 @@
    $Id$
 */
 
+#include "config.h"
 #include "mt19937ar.h"
 /* Period parameters */  
 /* #define N 624 */

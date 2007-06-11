@@ -32,7 +32,6 @@
 #undef HAVE_SETVBUF
 #undef HAVE_LIMITS_H
 #undef HAVE_FSTAT
-#include "config.h"
 
 extern void
 PythonInitialise();

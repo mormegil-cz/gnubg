@@ -21,6 +21,7 @@
 * $Id$
 */
 
+#include "config.h"
 #include "inc3d.h"
 
 extern GdkGLConfig *getGlConfig()
@@ -150,12 +151,12 @@ extern void CreateGLWidget(BoardData* bd)
 
 	gtk_widget_set_events(bd->bd3d->drawing_area3d, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
 			GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
-	gtk_signal_connect(GTK_OBJECT(bd->bd3d->drawing_area3d), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), bd);
-	gtk_signal_connect(GTK_OBJECT(bd->bd3d->drawing_area3d), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), bd);
-	gtk_signal_connect(GTK_OBJECT(bd->bd3d->drawing_area3d), "motion_notify_event", GTK_SIGNAL_FUNC(motion_notify_event), bd);
-	gtk_signal_connect(GTK_OBJECT(bd->bd3d->drawing_area3d), "realize", GTK_SIGNAL_FUNC(realize), bd);
-	gtk_signal_connect(GTK_OBJECT(bd->bd3d->drawing_area3d), "configure_event", GTK_SIGNAL_FUNC(configure_event), bd);
-	gtk_signal_connect(GTK_OBJECT(bd->bd3d->drawing_area3d), "expose_event", GTK_SIGNAL_FUNC(expose_event), bd);
+	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "button_press_event", G_CALLBACK(button_press_event), bd);
+	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "button_release_event", G_CALLBACK(button_release_event), bd);
+	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "motion_notify_event", G_CALLBACK(motion_notify_event), bd);
+	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "realize", G_CALLBACK(realize), bd);
+	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "configure_event", G_CALLBACK(configure_event), bd);
+	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "expose_event", G_CALLBACK(expose_event), bd);
 }
 
 void InitGTK3d(int *argc, char ***argv)

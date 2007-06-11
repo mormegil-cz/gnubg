@@ -19,7 +19,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -487,7 +487,7 @@ GTKShowExport ( exportsetup *pexs ) {
   /* create dialog */
 
   pwDialog = GTKCreateDialog ( _("GNU Backgammon - Export Settings"), DT_QUESTION,
-	  NULL, DIALOG_FLAG_MODAL, GTK_SIGNAL_FUNC ( ExportOK ), pew );
+	  NULL, DIALOG_FLAG_MODAL, G_CALLBACK ( ExportOK ), pew );
 
   pwTable = gtk_table_new ( 3, 2, FALSE );
   gtk_container_add ( GTK_CONTAINER ( DialogArea ( pwDialog, DA_MAIN ) ),
@@ -798,8 +798,8 @@ GTKShowExport ( exportsetup *pexs ) {
 
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHScale, FALSE, FALSE, 0);
 
-  gtk_signal_connect ( GTK_OBJECT ( pew->adjPNGSize ), "value-changed",
-                       GTK_SIGNAL_FUNC ( SizeChanged ), pew->pwPNGSize );
+  g_signal_connect( G_OBJECT ( pew->adjPNGSize ), "value-changed",
+                       G_CALLBACK ( SizeChanged ), pew->pwPNGSize );
 
   /* Html size */
   pwHBox = gtk_hbox_new ( FALSE, 0 );
@@ -819,8 +819,8 @@ GTKShowExport ( exportsetup *pexs ) {
   gtk_scale_set_digits( GTK_SCALE( pwHScale ), 0 );
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHScale, FALSE, FALSE, 0);
 
-  gtk_signal_connect ( GTK_OBJECT ( pew->adjHtmlSize ), "value-changed",
-                       GTK_SIGNAL_FUNC ( SizeChanged ), pew->pwHtmlSize );
+  g_signal_connect( G_OBJECT ( pew->adjHtmlSize ), "value-changed",
+                       G_CALLBACK ( SizeChanged ), pew->pwHtmlSize );
 
   /* show dialog */
 

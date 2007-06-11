@@ -23,7 +23,7 @@
  * $Id$
  */
 
-#include <config.h>
+#include "config.h"
 
 #include "backgammon.h"
 #include <glib.h>

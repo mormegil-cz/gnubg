@@ -281,8 +281,8 @@ GtkWidget* GL_Create()
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 1, nMaxWidth - 30);
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 2, nMaxWidth - 30);
     
-    gtk_signal_connect( GTK_OBJECT( pwGameList ), "select-row",
-			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
+    g_signal_connect( G_OBJECT( pwGameList ), "select-row",
+			G_CALLBACK( GameListSelectRow ), NULL );
 
     return pwGameList;
 }
