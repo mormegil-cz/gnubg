@@ -1,3 +1,7 @@
+Thu Jun 28 21:20:45 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* import.c: Fix TMG post-Crawford import bug
+
 Mon Jun 11 20:54:35 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* boardpos.c, copying.awk, corecount.c, credits.sh, erf.c, erftest.c,
