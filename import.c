@@ -2445,18 +2445,17 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
 
 static int ParseTMGGame(const char *sz, int *piGame, int *pn0, int *pn1,
-			int *pfCrawford, const int nLength)
+			int *pfCrawford, int *post_crawford, const int nLength)
 {
 
-	static int post_crawford = FALSE;
 	int i = sscanf(sz, "Game %d: %d-%d", piGame, pn0, pn1) == 3;
 
 	if (!i)
 		return FALSE;
 
 	if (nLength) {
-		if (!post_crawford)
-			post_crawford = *pfCrawford = (*pn0 == (nLength - 1))
+		if (!*post_crawford)
+			*post_crawford = *pfCrawford = (*pn0 == (nLength - 1))
 			    || (*pn1 == (nLength - 1));
 		else
 			*pfCrawford = FALSE;
@@ -2741,6 +2740,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   int fCubeUse = TRUE;
   int n0, n1;
   int i, j;
+  int post_crawford = FALSE;
   char sz[ 80 ];
   bgvariation bgv;
 
@@ -2770,7 +2770,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   /* search for options (until first game is found) */
 
   while ( fgets ( sz, 80, pf ) ) {
-    if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, nLength ) )
+    if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, &post_crawford, nLength ) )
       break;
       
     ParseTMGOptions ( sz, &mi, &fCrawfordRule, 
@@ -2786,7 +2786,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
                    fCrawfordRule, fAutoDoubles, fJacobyRule, bgv, fCubeUse );
 	
     while( fgets( sz, 80, pf ) )
-      if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, nLength ) )
+      if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, &post_crawford, nLength ) )
         break;
 
   }
