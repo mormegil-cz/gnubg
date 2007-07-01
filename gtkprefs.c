@@ -136,7 +136,9 @@ read_board_designs ( void ) {
   GList *plUser, *plSystem, *plFinal;
   gchar *sz;
 
-  plSystem = ParseBoardDesigns ( "boards.xml", FALSE );
+  sz = g_build_filename(PKGDATADIR, "boards.xml", NULL);
+  plSystem = ParseBoardDesigns ( sz, FALSE );
+  g_free ( sz );
 
   sz = g_build_filename(szHomeDirectory, "boards.xml", NULL);
   plUser = ParseBoardDesigns ( sz, TRUE );
