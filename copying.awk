@@ -27,7 +27,7 @@ BEGIN {
   exit;
 }
 
-/^[ \t]*NO WARRANTY[ \t]*$/ {
+/^[ \t]*15. Disclaimer of Warranty.*$/ {
   print "  0\n}, *aszWarranty[] = {";
 }
 
