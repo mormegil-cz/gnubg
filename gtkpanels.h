@@ -1,4 +1,4 @@
- * This program is free software; you can redistribute it and/or modify
+/* This program is free software; you can redistribute it and/or modify
  * it under the terms of version 3 or later of the GNU General Public License as
  * published by the Free Software Foundation.
  *
@@ -12,10 +12,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 
+* position of windows: main window, game list, and annotation */
+
 #ifndef _GTKPANELS_H_
 #define _GTKPANELS_H_
-
-/* position of windows: main window, game list, and annotation */
 
 typedef enum _gnubgwindow {
   WINDOW_MAIN = 0,
