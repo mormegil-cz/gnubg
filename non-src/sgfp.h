@@ -7,7 +7,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   the Free Software Foundation; either version 3 or later, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -31,7 +31,7 @@
    License without this special exception.
 
    This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
+   version 3 or later.2 of Bison.  */
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE

@@ -7,7 +7,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   the Free Software Foundation; either version 3 or later, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -31,7 +31,7 @@
    License without this special exception.
 
    This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
+   version 3 or later.2 of Bison.  */
 
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
@@ -590,7 +590,7 @@ static const yytype_uint8 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
+   Once GCC version 3 or later has supplanted version 1, this can go.  */
 
 #define YYFAIL		goto yyerrlab
 
