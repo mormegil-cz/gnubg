@@ -11,7 +11,7 @@
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
-   Free Software Foundation; either version 2, or (at your option) any
+   Free Software Foundation; either version 3 or later, or (at your option) any
    later version.
 
    This program is distributed in the hope that it will be useful,
@@ -228,7 +228,7 @@ my_index (str, chr)
    That was relevant to code that was here before.  */
 #if !defined (__STDC__) || !__STDC__
 /* gcc with -traditional declares the built-in strlen to return int,
-   and has done so at least since version 2.4.5. -- rms.  */
+   and has done so at least since version 3 or later.4.5. -- rms.  */
 extern int strlen (const char *);
 #endif /* not __STDC__ */
 #endif /* __GNUC__ */

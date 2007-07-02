@@ -4,7 +4,7 @@
  * by Gary Wong <gtw@gnu.org>, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of version 2 of the GNU General Public License as
+ * it under the terms of version 3 or later of the GNU General Public License as
  * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
@@ -5811,7 +5811,7 @@ extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 
 	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new(
 	_("GNU Backgammon is free software, covered by the GNU General Public "
-	"License version 2, and you are welcome to change it and/or "
+	"License version 3 or later, and you are welcome to change it and/or "
 	"distribute copies of it under certain conditions.  There is "
 	"absolutely no warranty for GNU Backgammon.") ), FALSE, FALSE, 4 );
 	gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );

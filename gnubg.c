@@ -4,7 +4,7 @@
  * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001, 2002, 2003.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of version 2 of the GNU General Public License as
+ * it under the terms of version 3 or later of the GNU General Public License as
  * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
@@ -5976,7 +5976,7 @@ static void version(void)
 	g_print("\n%s\n", _(aszCOPYRIGHT));
 	g_print(_("GNU Backgammon is free software, covered by the GNU "
 		 "General Public License\n"
-		 "version 2, and you are welcome to change it and/or "
+		 "version 3 or later, and you are welcome to change it and/or "
 		 "distribute copies of it\n"
 		 "under certain conditions.  Type \"show copying\" to see "
 		 "the conditions.\n"

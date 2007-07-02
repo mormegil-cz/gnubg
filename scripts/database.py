@@ -9,7 +9,7 @@
 # The modules use the DB API V2 python modules. 
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of version 2 of the GNU General Public License as
+# it under the terms of version 3 or later of the GNU General Public License as
 # published by the Free Software Foundation.
 #
 # This program is distributed in the hope that it will be useful,
