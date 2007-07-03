@@ -13,6 +13,7 @@ configure
 copying.c
 credits.c
 credits.h
+depcomp
 .deps
 external_l.c
 external_y.c
@@ -20,6 +21,7 @@ external_y.h
 gnubg
 gnubg-*.tar.gz
 gnubg.wd
+install-sh
 .libs
 libtool
 ltmain.sh
@@ -29,7 +31,9 @@ Makefile
 Makefile.in
 makehyper
 makeweights
+missing
 sgfl.c
 sgfp.c
 sgfp.h
 stamp-*
+ylwrap
