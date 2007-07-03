@@ -1,3 +1,8 @@
+Wed Jul  4 00:01:48 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* : Updated GNU Backgammon to use GPL version 3. Achim did the work.
+	I'm removing a few obsoleted and autotools related files.
+
 Sun Jul  1 13:05:02 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkprefs.c: fix bug with default board designs not being loaded

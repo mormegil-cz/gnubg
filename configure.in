@@ -162,8 +162,6 @@ AC_CHECK_FUNCS(cosf, , AC_DEFINE(cosf, cos, [set cosf to cos if undefined]),)
 AC_CHECK_FUNCS(sinf, , AC_DEFINE(sinf, sin, [set sinf to sin if undefined]),)
 AC_CHECK_FUNCS(tanf, , AC_DEFINE(tanf, tan, [set tanf to tan if undefined]),)
 
-AC_REPLACE_FUNCS(erf)
-
 dnl
 dnl Checks for declarations
 dnl
