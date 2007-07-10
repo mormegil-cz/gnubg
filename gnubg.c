@@ -7078,8 +7078,6 @@ char *SetupLanguage (char *newLangCode)
 	if (!org_lang)
 		org_lang=g_strdup(setlocale(LC_ALL, ""));
 
-	g_print("org_lang %s\n", org_lang);
-
 	if (!newLangCode || !strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
 	{
 		g_setenv("LC_ALL", org_lang, TRUE);

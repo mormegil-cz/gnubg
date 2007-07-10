@@ -279,7 +279,7 @@ extern int nThreadPriority;
 extern int fCheat;
 extern unsigned int afCheatRoll[ 2 ];
 extern int fGotoFirstGame;
-extern char szLang[ 32 ];   
+extern char *szLang;   
 
 extern char *szCurrentFileName, *szCurrentFolder;
 
@@ -1047,7 +1047,7 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] );
 
-extern void SetupLanguage(char *newLangCode);
+extern char *SetupLanguage(char *newLangCode);
 extern void SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc );
 
 #ifdef WIN32

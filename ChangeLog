@@ -1,3 +1,7 @@
+Tue Jul 10 17:22:33 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* set.c, show.c, gnubg.c: Fix a language setting problem
+
 Tue Jul 10 10:42:39 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* progress.c, rollout.c: Fix counting bug in multithreaded code for cube
