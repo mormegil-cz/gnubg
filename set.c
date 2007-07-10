@@ -4302,17 +4302,27 @@ CommandSetRatingOffset( char *sz ) {
 
 extern void CommandSetLang( char *sz )
 {
-	if( sz) {
-		if( strlen( sz ) > 31 )
-			sz[ 31 ] = 0;
-		strcpy( szLang, sz );
+	char *new_lang = NULL;
+	if (sz && szLang && !strcmp(sz, szLang))
+	{
+		outputf(_("Language unchanged\n"));
+		return;
 	}
-	SetupLanguage(sz);
+	g_free(szLang);
+	szLang = (sz) ? g_strdup(sz) : g_strdup(""); 
 
+	new_lang = SetupLanguage(szLang);
+	if (!new_lang)
+	{
+		outputerrf(_("Language change failed"));
+		return;
+	}
+	outputf(_("Language is now %s\n"), new_lang);
 #if USE_GTK
 	if (fX)
 		GtkChangeLanguage();
 #endif
+
 }
 
 extern void CommandSetPanelWidth( char *sz )

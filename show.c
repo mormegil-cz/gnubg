@@ -757,8 +757,10 @@ extern void CommandShowJacoby( char *sz ) {
 
 extern void CommandShowLang( char *sz ) {
 
-  outputf( _("Your language preference is set to %s.\n"), szLang );
-    
+	if (szLang)
+		outputf(_("Your language preference is set to %s.\n"), szLang );
+	else
+		outputerrf(_("Language not set"));
 }
 
 extern void CommandShowMatchInfo( char *sz ) {

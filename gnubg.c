@@ -122,8 +122,7 @@ int fReadingCommand;
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
-/* CommandSetLang trims the selection to 31 max and copies */
-char szLang[32] = "system";
+char *szLang=NULL;
 
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
@@ -7056,7 +7055,7 @@ extern char *locale_to_utf8(const char *sz)
 }
 #ifdef WIN32 
 /* WIN32 setlocale must be manipulated through putenv to be gettext compatible */
-void SetupLanguage (char *newLangCode)
+char * SetupLanguage (char *newLangCode)
 {
 	static char *org_lang=NULL;
 	char *lang;
@@ -7068,14 +7067,28 @@ void SetupLanguage (char *newLangCode)
 		lang = g_strdup_printf("LANG=%s", newLangCode);
 	putenv(lang); 	 
 	g_free(lang);
-	setlocale(LC_ALL, "");
+	return(setlocale(LC_ALL, ""));
 }
 #else
-void SetupLanguage (char *newLangCode)
+char *SetupLanguage (char *newLangCode)
 {
+	static char *org_lang=NULL;
+	char *lang;
+
+	if (!org_lang)
+		org_lang=g_strdup(setlocale(LC_ALL, ""));
+
+	g_print("org_lang %s\n", org_lang);
+
 	if (!newLangCode || !strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
-		setlocale (LC_ALL, "");
+	{
+		g_setenv("LC_ALL", org_lang, TRUE);
+		return(setlocale (LC_ALL, org_lang));
+	}
 	else
-		setlocale (LC_ALL, newLangCode);
+	{
+		g_setenv("LC_ALL", newLangCode, TRUE);
+		return(setlocale (LC_ALL, newLangCode));
+	}
 }
 #endif
