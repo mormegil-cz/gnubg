@@ -1,3 +1,9 @@
+Tue Jul 10 10:42:39 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* progress.c, rollout.c: Fix counting bug in multithreaded code for cube
+	rollouts. Revert changes in progress.c so that the displayed number of
+	games i correct for both non-threaded and multi-threaded code.
+
 Wed Jul  4 00:01:48 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* : Updated GNU Backgammon to use GPL version 3. Achim did the work.

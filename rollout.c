@@ -991,7 +991,7 @@ extern void RolloutLoopMT()
 		prc = &ro_apes[ alt ]->rc;
 
 		/* skip this one if it's already finished */
-		if (fNoMore[alt] || MT_SafeInc(&altGameCount[alt]) <= prc->nGamesDone)
+		if (fNoMore[alt])
 			continue;
 
 		/* get the dice generator set up... */
@@ -1008,10 +1008,6 @@ extern void RolloutLoopMT()
                sizeof( aanBoardEval ));
 
       /* roll something out */
-#if 0
-      printf ("rollout game %d alt %d\n", i, alt);
-#endif
-
       if (log_rollouts && log_name) {
 	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
 	log_game_start (log_name, ro_apci[ alt ], prc->fCubeful, 
@@ -1045,15 +1041,15 @@ extern void RolloutLoopMT()
         float rMuNew, rDelta;
       
         aarResult[ alt ][ j ] += aar[ j ];
-        rMuNew = (float)aarResult[ alt ][ j ] / ( prc->nGamesDone + 1 );
+        rMuNew = (float)aarResult[ alt ][ j ] / ( altGameCount[alt] + 1 );
       
-        if ( prc->nGamesDone > 0 )
+        if ( altGameCount[alt] > 0 )
 		{	/* for i == 0 aarVariance is not defined */
 
           rDelta = rMuNew - aarMu[ alt ][ j ];
       
           aarVariance[ alt ][ j ] =
-            aarVariance[ alt ][ j ] * ( 1.0 - 1.0 / prc->nGamesDone ) + ( prc->nGamesDone + 1 ) * rDelta * rDelta;
+            aarVariance[ alt ][ j ] * ( 1.0 - 1.0 / altGameCount[alt] ) + ( altGameCount[alt] + 1 ) * rDelta * rDelta;
         }
       
         aarMu[ alt ][ j ] = rMuNew;
@@ -1065,11 +1061,21 @@ extern void RolloutLoopMT()
             aarMu[ alt ][ j ] = 1.0f;
         }
       
-        aarSigma[ alt ][ j ] = (float)sqrt( aarVariance[ alt ][ j ] / ( prc->nGamesDone + 1 ) );
+        aarSigma[ alt ][ j ] = (float)sqrt( aarVariance[ alt ][ j ] / ( altGameCount[alt] + 1 ) );
       } /* for (j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) */
 
-	  if (!cubeDec || alt == 1)
-		  prc->nGamesDone++;
+      altGameCount[alt]++;
+      if (altGameCount[alt] >= cGames)
+      {
+	      fNoMore[alt] = TRUE;
+	      g_assert (altGameCount[alt] == cGames);
+      }
+      /* For normal alternatives nGamesDone and altGameCount will be equal.
+       * For cube decisions, however, the two may differ by the number of
+       * threads minus 1. So we cheat a little bit, but it would be better if
+       * the double and nodouble alternatives weren't linked */
+      if (prc -> nGamesDone < altGameCount[alt])
+	      prc -> nGamesDone = altGameCount[alt];
 
 	  MT_Release();
 
@@ -1268,7 +1274,7 @@ void UpdateProgress()
 		for (alt = 0; alt < ro_alternatives; ++alt)
 		{
 			prc = &ro_apes[ alt ]->rc;
-			(*ro_pfProgress)( aarMu, aarSigma, prc, aciLocal, prc->nGamesDone, alt, ajiJSD[ alt ].nRank + 1,
+			(*ro_pfProgress)( aarMu, aarSigma, prc, aciLocal, altGameCount[alt]-1, alt, ajiJSD[ alt ].nRank + 1,
 				ajiJSD[ alt ].rJSD, fNoMore[ alt ], show_jsds, ro_pUserData );
 		}
 
@@ -1382,7 +1388,8 @@ fnTick = NULL;
       memcpy (prc, &rcRollout, sizeof (rolloutcontext));
       prc->nGamesDone = 0;
       prc->nSkip = 0;
-      nFirstTrial = 0;
+      nFirstTrial = ~0;
+      altGameCount[alt] = 0;
 
       if (aarsStatistics) {
         initRolloutstat ( &aarsStatistics[ alt ][ 0 ] );
@@ -1409,6 +1416,7 @@ fnTick = NULL;
 	  prc->aecCubeLate[ i ].fCubeful = 
 	  prc->aecChequerLate[ i] .fCubeful = (prc->fCubeful || fCubeRollout);
 
+      altGameCount[alt] = nGames;
       if (nGames < nFirstTrial)
         nFirstTrial = nGames;
       /* restore internal variables from input values */
@@ -1438,9 +1446,6 @@ fnTick = NULL;
     }
 
   }
-
-  for ( alt = 0; alt < alternatives; ++alt)
-	altGameCount[alt] = nFirstTrial;
 
   /* we can't do JSD tricks if some rollouts are cubeful and some not */
   if (nIsCubeful && nIsCubeless)

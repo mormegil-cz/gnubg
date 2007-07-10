@@ -251,8 +251,6 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
     gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
 
   }
-  
-
 
 
   sprintf ( aszRow[ 0 ], _("Total") );
@@ -707,7 +705,6 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
   
   rolloutprogress *prp = (rolloutprogress *) data;
   rolloutstat *prs = prp->prs;
-  /* int cGames = gtk_progress_get_value ( GTK_PROGRESS( prp->pwRolloutProgress ) ); */
   int cGames = prp->nGamesDone;
   int nRollouts = GTK_CLIST( prp->pwRolloutResult )->rows / 2;
   int i;
@@ -933,10 +930,8 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     char sz[ 32 ];
     int i;
-#if USE_GTK
     gchar *gsz;
     double frac;
-#endif
 
     if( !prp ||  !prp->pwRolloutResult )
       return;
@@ -975,7 +970,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     }
 
-    if (fShowRanks && iGame > 2) {
+    if (fShowRanks && iGame > 1) {
 	  sprintf (sz, "%d %s", nRank, fStopped ? "s" : "r");
 	  SetRolloutText(prp, iAlternative * 2, i + 1, sz);
 	  if (nRank != 1)
@@ -992,7 +987,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
     /* why doesn't type casting work? */
     gsz = g_strdup_printf( "%d/%d (%.0f%%)" ,
 		    iGame + 1 , prc->nTrials, 100 * frac );
-    prp->nGamesDone = iGame;
+    prp->nGamesDone = iGame + 1;
      
     gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR( prp->pwRolloutProgress),
 		    frac );
@@ -1001,7 +996,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
     
     /* calculate estimate time left */
 
-    if ( iAlternative == ( prp->n - 1 ) ) {
+    if ( (iAlternative == ( prp->n - 1 )) && iGame > 10 ) {
       /* The code in estimatedTimeLeft allows that it's called on every
          iAlternative, but it gives a lot of updates on the gui. If someone
          thinks otherwise, we can consider removing the if-condition above */
@@ -1049,9 +1044,7 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
 static void GTKRolloutProgressEnd( void **pp ) {
     
-#if USE_GTK
     gchar *gsz;
-#endif
 
     rolloutprogress *prp = *pp;
 
