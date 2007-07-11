@@ -1,3 +1,8 @@
+Wed Jul 11 15:37:49 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.w32: Delete a few unused files
+	* eval.c: Fix startup bug when gnubg.wd was missing
+
 Tue Jul 10 17:22:33 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* set.c, show.c, gnubg.c: Fix a language setting problem

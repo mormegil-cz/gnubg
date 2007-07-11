@@ -871,14 +871,16 @@ extern int EvalInitialise(char *szWeights, char *szWeightsBinary,
 			    perror( szWeightsBinary );
 		    }
 	    }
-	    fclose( pfWeights );
+	    if (pfWeights)
+		    fclose( pfWeights );
+	    pfWeights = NULL;
     }
 
     if( !fReadWeights && szWeights ) {
 	    h = open( szWeights, O_RDONLY);
 	    if (h)
 		    pfWeights = fdopen( h, "r" );
-	    if (!binary_weights_failed(szWeights, pfWeights))
+	    if (!weights_failed(szWeights, pfWeights))
 	    {
 		    if( !( fReadWeights =
 					    !NeuralNetLoad( &nnContact, pfWeights ) &&
@@ -892,7 +894,9 @@ extern int EvalInitialise(char *szWeights, char *szWeightsBinary,
 			    perror( szWeights );
 
 	    }
-	    fclose( pfWeights );
+	    if (pfWeights)
+		    fclose( pfWeights );
+	    pfWeights = NULL;
     }
 
     if( fReadWeights ) {

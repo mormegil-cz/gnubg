@@ -8,7 +8,7 @@ MINGW=$(GNU)/mingw
 TARGET = gnubg.exe
 
 SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
-	dice drawboard erf eval export external \
+	dice drawboard eval export external \
 	gnubg gtk-multiview \
 	gtkboard gtkcube gtkchequer gtkexport gtkgame gtkmet \
 	play gtkprefs gtkmovefilter gtkrace gtktheory \
@@ -16,7 +16,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	html import multithread latex matchequity \
 	matchid positionid postscript pub_eval record \
 	render rollout set sgf non-src/sgfl non-src/sgfp show sound \
-	strdup text osr gtksplash gtkcolour renderprefs speed openurl \
+	text osr gtksplash gtkcolour renderprefs speed openurl \
 	gtkrolls boardpos gtktempmap progress format gtktoolbar \
 	gtkoptions formatgs \
 	timer mec relational gtkgamelist \
