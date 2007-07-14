@@ -3794,11 +3794,6 @@ CommandSetSoundEnable ( char *sz ) {
 /* sound system */
 extern void
 CommandSetSoundSystemCommand ( char *sz ) {
-  if ( ! sz || ! *sz ) {
-    outputl ( _("You must specify a command. "
-                "See `help set sound system command'") );
-    return;
-  }
   sound_set_command(sz);
 }
 
@@ -3834,6 +3829,13 @@ extern void
 CommandSetSoundSoundBotWinMatch ( char *sz ) {
 
   SetSoundFile ( SOUND_BOT_WIN_MATCH, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundChequer ( char *sz ) {
+
+  SetSoundFile ( SOUND_CHEQUER, NextToken ( &sz ) );
 
 }
 

@@ -1498,6 +1498,8 @@ command cER = {
     N_("Bot wins game"), szOPTFILENAME, &cFilename },
   { "botwinsmatch", CommandSetSoundSoundBotWinMatch, 
     N_("Bot wins match"), szOPTFILENAME, &cFilename },
+  { "chequer", CommandSetSoundSoundChequer, 
+    N_("Chequer movement"), szOPTFILENAME, &cFilename },
   { "double", CommandSetSoundSoundDouble, 
     N_("Double"), szOPTFILENAME, &cFilename },
   { "drop", CommandSetSoundSoundDrop, 

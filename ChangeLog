@@ -1,3 +1,7 @@
+Sat Jul 14 22:47:19 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, set.c: Fix a couple of set sound options.
+
 Sat Jul 14 22:41:22 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.w32, Makefile.am, bearoffdump.c, getopt*, makebearoff.c,
