@@ -1,3 +1,7 @@
+Sat Jul 14 22:53:32 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkchequer.[ch]: Add quick rollout buttons
+
 Sat Jul 14 22:50:07 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* export.c, import.c: Fix two Jellyfish MAT format bugs. One import and

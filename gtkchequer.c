@@ -312,6 +312,33 @@ MoveListRolloutSettings ( GtkWidget *pw, void *unused )
   gtk_window_present ( GTK_WINDOW ( gtk_widget_get_toplevel( pw ) ) );
 }
 
+static void MoveListRolloutPresets(GtkWidget * pw, hintdata * phd)
+{
+	const gchar *preset;
+	gchar *file=NULL;
+	gchar *path=NULL;
+	gchar *command=NULL;
+
+	preset = (const gchar *) gtk_object_get_data(GTK_OBJECT(pw), "user_data");
+	file = g_strdup_printf("%s.rol", preset);
+	path = g_build_filename(szHomeDirectory, "rol", file, NULL);
+	if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
+		command = g_strdup_printf("load commands \"%s\"", path);
+		outputoff();
+		UserCommand(command);
+		outputon();
+		MoveListRolloutClicked(pw, phd);
+	}
+	else
+	{
+		outputerrf(_("You need to save a preset as \"%s\""), file);
+		MoveListRolloutSettings(pw, NULL);
+	}
+        g_free(file);
+        g_free(path);
+	g_free(command);
+}
+
 typedef int ( *cfunc )( const void *, const void * );
 
 static int CompareInts( int *p0, int *p1 ) {
@@ -466,27 +493,56 @@ CreateMoveListTools ( hintdata *phd )
 
   }
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 3, 4, 0, 1,
+  gtk_table_attach (GTK_TABLE (pwTools), pwShow, 3, 4, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 4, 5, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 4, 5, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 5, 6, 0, 1,
+  if ( !phd->fDetails ) 
+    gtk_table_attach (GTK_TABLE (pwTools), pwDetails, 5, 6, 0, 1,
+                      (GtkAttachOptions) (GTK_FILL),
+                      (GtkAttachOptions) (GTK_FILL), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 1, 2,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  phd->pwRolloutPresets = gtk_hbox_new ( FALSE, 0 );
+  gtk_table_attach (GTK_TABLE (pwTools), phd->pwRolloutPresets, 2, 3, 1, 2, 
+                   (GtkAttachOptions) (GTK_FILL),
+                  (GtkAttachOptions) (0), 0, 0);
+
+  for ( i = 0; i < 5; ++i ) {
+	  GtkWidget *ro_preset;
+	  sz = g_strdup_printf ( "%c", i+'a' ); /* string is freed by set_data_full */
+	  ro_preset = gtk_button_new_with_label ( sz );
+
+	  gtk_box_pack_start ( GTK_BOX ( phd->pwRolloutPresets ), ro_preset, TRUE, TRUE, 0 );
+
+	  g_signal_connect( G_OBJECT( ro_preset ), "clicked",
+			  G_CALLBACK( MoveListRolloutPresets ), phd );
+
+	  gtk_object_set_data_full ( GTK_OBJECT ( ro_preset ), "user_data", sz, g_free );
+
+	  sz = g_strdup_printf ( _("Rollout preset %c"), i+'a' );
+	  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), ro_preset, sz, sz );
+	  g_free ( sz );
+
+  }
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 3, 4, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwShow, 2, 3, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 3, 5, 1, 2,
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 4, 5, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
@@ -494,10 +550,6 @@ CreateMoveListTools ( hintdata *phd )
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  if ( !phd->fDetails ) 
-    gtk_table_attach (GTK_TABLE (pwTools), pwDetails, 6, 7, 0, 2,
-                      (GtkAttachOptions) (GTK_FILL),
-                      (GtkAttachOptions) (GTK_FILL), 0, 0);
   
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   gtk_widget_set_sensitive( pwMove, FALSE );
@@ -616,6 +668,7 @@ CheckHintButtons( hintdata *phd )
     gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwTempMap, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwRolloutPresets, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEvalPly, c && phd->fButtonsValid );
 
