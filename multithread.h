@@ -65,6 +65,7 @@ extern int MT_GetThreadID();
 #endif
 
 extern void MT_Exclusive();
+extern void MT_Lock();
 extern void MT_Release();
 
 extern int MT_GetDoneTasks();

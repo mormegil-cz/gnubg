@@ -44,7 +44,8 @@ typedef struct _ManualEvent
 typedef GPrivate* TLSItem;
 typedef GCond* Event;
 typedef GMutex* Mutex;
-GMutex* condMutex;    /* Extra mutex needed for waiting */
+GMutex* condMutex=NULL;    /* Extra mutex needed for waiting */
+GAsyncQueue *async_queue=NULL; /* Needed for async waiting */
 #else
 typedef HANDLE ManualEvent;
 typedef DWORD TLSItem;
@@ -76,16 +77,16 @@ ThreadData td;
 
 #ifdef GLIB_THREADS
 
-void TLSCreate(TLSItem *pItem)
+static void TLSCreate(TLSItem *pItem)
 {
     *pItem = g_private_new(free);
 }
 
-void TLSFree(TLSItem pItem)
+static void TLSFree(TLSItem pItem)
 {	/* Done automaticaly by glib */
 }
 
-void TLSSetValue(TLSItem pItem, int value)
+static void TLSSetValue(TLSItem pItem, int value)
 {
 	int *pNew = (int*)malloc(sizeof(int));
 	*pNew = value;
@@ -94,34 +95,30 @@ void TLSSetValue(TLSItem pItem, int value)
 
 #define TLSGet(item) *((int*)g_private_get(item))
 
-void InitEvent(Event *pEvent)
+static void InitEvent(Event *pEvent)
 {
     *pEvent = g_cond_new();
 }
 
-int WaitForEvent(Event event, int time)
+static gpointer WaitForAllTasks(int time)
 {
-    int result;
+    gpointer result;
     GTimeVal tv = {0, 0};
-    g_mutex_lock(condMutex);
     g_get_current_time(&tv);
     g_time_val_add(&tv, time * 1000);
-    result = g_cond_timed_wait(event, condMutex, &tv);
-    g_mutex_unlock(condMutex);
+    /* we wait for the alldone data to be pushed by MT_TaskDone, by using an
+     * g_async_queue instead of a g_cond we don't need to worry about not
+     * being here when the signal is sent */
+    result = g_async_queue_timed_pop(async_queue, &tv);
     return result;
 }
 
-void SignalEvent(Event event)
-{
-    g_cond_signal(event);
-}
-
-void FreeEvent(Event event)
+static void FreeEvent(Event event)
 {
     g_cond_free(event);
 }
 
-void InitManualEvent(ManualEvent *pME)
+static void InitManualEvent(ManualEvent *pME)
 {
     ManualEvent pNewME = malloc(sizeof(*pNewME));
     pNewME->cond = g_cond_new();
@@ -129,13 +126,13 @@ void InitManualEvent(ManualEvent *pME)
     *pME = pNewME;
 }
 
-void FreeManualEvent(ManualEvent ME)
+static void FreeManualEvent(ManualEvent ME)
 {
     g_cond_free(ME->cond);
     free(ME);
 }
 
-void WaitForManualEvent(ManualEvent ME)
+static void WaitForManualEvent(ManualEvent ME)
 {
     g_mutex_lock(condMutex);
     if (!ME->signalled)
@@ -144,14 +141,14 @@ void WaitForManualEvent(ManualEvent ME)
     g_mutex_unlock(condMutex);
 }
 
-void ResetManualEvent(ManualEvent ME)
+static void ResetManualEvent(ManualEvent ME)
 {
     g_mutex_lock(condMutex);
     ME->signalled = FALSE;
     g_mutex_unlock(condMutex);
 }
 
-void SetManualEvent(ManualEvent ME)
+static void SetManualEvent(ManualEvent ME)
 {
     g_mutex_lock(condMutex);
     ME->signalled = TRUE;
@@ -159,12 +156,12 @@ void SetManualEvent(ManualEvent ME)
     g_mutex_unlock(condMutex);
 }
 
-void InitMutex(Mutex *pMutex)
+static void InitMutex(Mutex *pMutex)
 {
     *pMutex = g_mutex_new();
 }
 
-void FreeMutex(Mutex mutex)
+static void FreeMutex(Mutex mutex)
 {
     g_mutex_free(mutex);
 }
@@ -174,18 +171,18 @@ void FreeMutex(Mutex mutex)
 
 #else    /* win32 */
 
-void TLSCreate(TLSItem *ppItem)
+static void TLSCreate(TLSItem *ppItem)
 {
     *ppItem = TlsAlloc();
 }
 
-void TLSFree(TLSItem pItem)
+static void TLSFree(TLSItem pItem)
 {
 	free(TlsGetValue(pItem));
 	TlsFree(pItem);
 }
 
-void TLSSetValue(TLSItem pItem, int value)
+static void TLSSetValue(TLSItem pItem, int value)
 {
 	int *pNew = (int*)malloc(sizeof(int));
 	*pNew = value;
@@ -194,32 +191,27 @@ void TLSSetValue(TLSItem pItem, int value)
 
 #define TLSGet(item) *((int*)TlsGetValue(item))
 
-void InitEvent(Event *pEvent)
+static void InitEvent(Event *pEvent)
 {
     *pEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
-int WaitForEvent(Event event, int time)
+static int WaitForEvent(Event event, int time)
 {
     return (WaitForSingleObject(event, time) != WAIT_TIMEOUT);
 }
 
-void SignalEvent(Event event)
-{
-    SetEvent(event);
-}
-
-void FreeEvent(Event event)
+static void FreeEvent(Event event)
 {
     CloseHandle(event);
 }
 
-void InitManualEvent(ManualEvent *pME)
+static void InitManualEvent(ManualEvent *pME)
 {
     *pME = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
-void FreeManualEvent(ManualEvent ME)
+static void FreeManualEvent(ManualEvent ME)
 {
     CloseHandle(ME);
 }
@@ -228,12 +220,12 @@ void FreeManualEvent(ManualEvent ME)
 #define ResetManualEvent(ME) ResetEvent(ME)
 #define SetManualEvent(ME) SetEvent(ME)
 
-void InitMutex(Mutex *pMutex)
+static void InitMutex(Mutex *pMutex)
 {
     *pMutex = CreateMutex(NULL, FALSE, NULL);
 }
 
-void FreeMutex(Mutex mutex)
+static void FreeMutex(Mutex mutex)
 {
     CloseHandle(mutex);
 }
@@ -243,7 +235,7 @@ void FreeMutex(Mutex mutex)
 
 #endif
 
-unsigned int numThreads = 0;
+static unsigned int numThreads = 0;
 
 unsigned int MT_GetNumThreads()
 {
@@ -265,16 +257,16 @@ void MT_SetNumThreads(unsigned int num)
     MT_CreateThreads();
 }
 
-int MT_DoTask();
-void MT_TaskDone(Task *pt);
+static int MT_DoTask();
+static void MT_TaskDone(Task *pt);
 
 #if GCC_ALIGN_HACK
 
-unsigned int MT_ActualWorkerThreadFunction(void *id);
+static unsigned int MT_ActualWorkerThreadFunction(void *id);
 #ifdef GLIB_THREADS
-gpointer
+static gpointer
 #else
-void 
+static void 
 #endif
 MT_WorkerThreadFunction(gpointer id)
 {    /* Align stack and call actual function */
@@ -286,11 +278,10 @@ return NULL;
 }
 
 unsigned int MT_ActualWorkerThreadFunction(void *id)
-{
 #else
-unsigned int MT_WorkerThreadFunction(void *id)
-{
+static unsigned int MT_WorkerThreadFunction(void *id)
 #endif
+{
 	int *pID = (int*)id;
     TLSSetValue(td.tlsItem, *pID);
     free(pID);
@@ -320,7 +311,7 @@ static void MT_CreateThreads(void)
     }
     if (td.doneTasks != td.totalTasks)
     {    /* Wait for all the threads to be created (timeout after 20 seconds) */
-        if (!WaitForEvent(td.alldone, 20 * 1000))
+        if (!WaitForAllTasks(20 * 1000))
             printf("Not sure all threads created!\n");
     }
     /* Reset counters */
@@ -370,6 +361,8 @@ extern void MT_InitThreads()
     if (condMutex == NULL)
         condMutex = g_mutex_new();
 #endif
+    if (async_queue == NULL)
+	    async_queue = g_async_queue_new();
 
     MT_CreateThreads();
 }
@@ -389,7 +382,7 @@ Task *MT_GetTask(void)
     return task;
 }
 
-void MT_AbortTasks(void)
+static void MT_AbortTasks(void)
 {
     Task *task;
     Mutex_Lock(td.queueLock);
@@ -401,7 +394,7 @@ void MT_AbortTasks(void)
     Mutex_Release(td.queueLock);
 }
 
-int MT_DoTask()
+static int MT_DoTask()
 {
     int alive = TRUE;
     Task *task;
@@ -457,11 +450,11 @@ AnalyzeDoubleDecison:
         return -1;
 }
 
-void MT_TaskDone(Task *pt)
+static void MT_TaskDone(Task *pt)
 {
     td.doneTasks++;
     if (td.doneTasks == td.totalTasks)
-        SignalEvent(td.alldone);
+	    g_async_queue_push(async_queue, td.alldone);
 
     if (pt)
     {
@@ -498,7 +491,7 @@ int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
     Mutex_Release(td.queueLock);
     if (!done)
     {
-        while (WaitForEvent(td.alldone, UI_UPDATETIME) == FALSE)
+        while (!WaitForAllTasks(UI_UPDATETIME))
         {
             waits++;
             if (pCallback && waits == callbackLoops)
@@ -532,9 +525,16 @@ extern void MT_Close()
     FreeManualEvent(td.contentionCleared);
     FreeEvent(td.alldone);
     FreeMutex(td.multiLock);
+    g_async_queue_unref(async_queue);
+
+    /* queueLock is locked around MT_TaskDone and may not be released in time
+     * unless we wait for it here before we free the mutex */
+    Mutex_Lock(td.queueLock);
+    Mutex_Release(td.queueLock);
     FreeMutex(td.queueLock);
-	FreeManualEvent(td.syncStart);
-	FreeManualEvent(td.syncEnd);
+
+    FreeManualEvent(td.syncStart);
+    FreeManualEvent(td.syncEnd);
     TLSFree(td.tlsItem);
 }
 
@@ -590,7 +590,7 @@ extern void MT_SyncInit()
 	ResetManualEvent(td.syncEnd);
 }
 
-double start;
+static double start;
 extern void MT_SyncStart()
 {
 	static int count = 0;

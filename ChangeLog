@@ -1,3 +1,9 @@
+Sat Jul 14 22:54:29 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* multithread.c: Fix hangup when all task done signal was missed and fix a
+	closing bug for gthreads. Win32 threads are likely a bit messed up after
+	these changes.
+
 Sat Jul 14 22:53:32 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkchequer.[ch]: Add quick rollout buttons
