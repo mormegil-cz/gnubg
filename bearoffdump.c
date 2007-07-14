@@ -25,21 +25,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "getopt.h"
 #include "positionid.h"
 #include "bearoff.h"
 #include "util.h"
-
-
-static void
-show_usage( const char *arg0 ) {
-
-  printf( "Usage: %s file -n id | -p PosID\n"
-          "where file is a bearoff database and id is the number "
-          "of the position to dump. Alternatively, give a "
-          "position ID.\n", arg0 );
-
-}
 
 
 extern int
@@ -53,43 +41,43 @@ main( int argc, char **argv ) {
   int nUs;
   int nThem;
   int anBoard[ 2 ][ 25 ];
-  int fIsPosID = FALSE;
 
-  const struct option ao[] = {
-    { "index", required_argument, NULL, 'n' },
-    { "posid", required_argument, NULL, 'p' },
-    { "help", no_argument, NULL, 'h' },
-    { NULL, 0, NULL, 0 }
+  GOptionEntry ao[] = {
+    {"index", 'n', 0, G_OPTION_ARG_INT, &id,
+      "index", NULL},
+    {"posid", 'p', 0, G_OPTION_ARG_STRING, &szPosID,
+      "Position ID", NULL},
+    {NULL}
   };
+  GError *error = NULL;
+  GOptionContext *context;
 
-  if ( argc != 4 ) {
-    show_usage( argv[ 0 ] );
-    exit( 1 );
+  context = g_option_context_new("file");
+  g_option_context_add_main_entries(context, ao, PACKAGE);
+  g_option_context_parse(context, &argc, &argv, &error);
+  g_option_context_free(context);
+  if (error) {
+  	g_printerr("%s\n", error->message);
+  	exit(EXIT_FAILURE);
   }
 
+  if ((szPosID && id) || (!szPosID && !id))
+  {
+	  g_printerr("Either Position ID or index is required. Not Both.\n"
+                     "For more help try `bearoffdump --help'\n");
+	  exit(EXIT_FAILURE);
+  }
+
+  if (argc != 2)
+  {
+	  g_printerr("A bearoff database file should be given as an"
+	     	     "argument\nFor more help try `bearoffdump --help'\n");
+	  exit(EXIT_FAILURE);
+  }
   filename = argv[ 1 ];
 
-  while ( ( ch = getopt_long( argc, argv, "n:p:h", ao, NULL ) )
-          != (char) -1 )
-  switch( ch ) {
-  case 'n': /* position index in db */
-    id = atoi( optarg );
-    break;
-  case 'p': /* position index in db */
-    szPosID = optarg;
-    fIsPosID = TRUE;
-    break;
-  case 'h': /* help */
-    show_usage( argv[ 0 ] );
-    exit( 0 );
-    break;
-  default:
-    show_usage( argv[ 0 ] );
-    exit( 1 );
-}
-
   printf( "Bearoff database: %s\n", filename );
-  if ( fIsPosID ) {
+  if ( !id ) {
     printf( "Position ID     : %s\n", szPosID );
   }
   else {
@@ -114,7 +102,7 @@ main( int argc, char **argv ) {
 
   memset( anBoard, 0, sizeof anBoard );
 
-  if ( fIsPosID ) {
+  if ( !id ) {
     printf( "\n"
             "Dump of position ID: %s\n\n", szPosID );
 

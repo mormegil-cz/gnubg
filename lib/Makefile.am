@@ -21,11 +21,3 @@ noinst_HEADERS = cache.h dynarray.h event.h hash.h heap.h \
 
 noinst_TEXINFOS = event.texi
 
-check_PROGRAMS = hashtest md5test
-hashtest_SOURCES = hashtest.c
-hashtest_LDADD = libevent.la
-
-md5test_SOURCES = md5test.c
-md5test_LDADD = libevent.la
-
-TESTS = hashtest md5test

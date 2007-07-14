@@ -33,7 +33,6 @@
 #include <errno.h>
 #include "eval.h"
 #include "positionid.h"
-#include "getopt.h"
 #include "bearoff.h"
 #include "util.h"
 
@@ -1433,64 +1432,6 @@ generate_ts ( const int nTSP, const int nTSC,
 
 
 static void
-usage ( char *arg0 ) {
-#ifndef WIN32
-  printf ( "Usage: %s [options] -f filename\n"
-           "Options:\n"
-           "  -f, --outfile filename\n"
-           "                      Output to file\n"
-           "  -t, --two-sided PxC Number of points and number of chequers\n"
-           "                      for two-sided database\n"
-           "  -o, --one-sided P   Number of points for one-sided database\n"
-           "  -s, --xhash-size N   Use cache of size N bytes\n"
-           "  -O, --old-bearoff filename\n"
-           "                      Reuse already generated bearoff database\n"
-           "  -H, --no-header     Do not write header\n"
-           "  -C, --no-cubeful    Do not calculate cubeful equities for\n"
-           "                      two-sided databases\n"
-           "  -c, --no-compress   Do not use compression scheme "
-                                  "for one-sided databases\n"
-           "  -g, --no-gammons    Include gammon distribution for one-sided"
-                                  " databases\n"
-           "  -n, --normal-dist   Approximate one-sided bearoff database\n"
-           "                      with normal distributions\n"
-           "  -v, --version       Show version information and exit\n"
-           "  -h, --help          Display usage and exit\n"
-           "\n"
-           "To generate gnubg_os0.bd:\n"
-           "%s -o 6 -f gnubg_os0.bd\n"
-           "\n",
-           arg0, arg0 );
-#else
-    MessageBox (NULL, 
-           "Usage: makebearoff [options] -f filename\n\n"
-           "Options:\n"
-           "  -f, --outfile filename\tOutput to file\n"
-           "  -t, --two-sided PxC   \tNumber of points and number of chequers"
-           " for two-sided database\n"
-           "  -o, --one-sided P     \tNumber of points for one-sided database\n"
-           "  -s, --xhash-size N    \tUse cache of size N bytes\n"
-           "  -O, --old-bearoff filename\tReuse already generated bearoff database\n"
-           "  -H, --no-header       \tDo not write header\n"
-           "  -C, --no-cubeful      \tDo not calculate cubeful equities for"
-           " two-sided databases\n"
-           "  -c, --no-compress     \tDo not use compression scheme "
-                                  "for one-sided databases\n"
-           "  -g, --no-gammons      \tInclude gammon distribution for one-sided"
-                                  " databases\n"
-           "  -n, --normal-dist     \tApproximate one-sided bearoff database"
-           " with normal distributions\n"
-           "  -v, --version         \t\tShow version information and exit\n"
-           "  -h, --help            \t\tDisplay usage and exit\n"
-           "\n"
-           "To generate gnubg_os0.bd:\n"
-           "makebearoff -o 6 -f gnubg_os0.bd\n"
-           "\n",
-		     "Makebearoff", MB_OK);
-#endif
-}
-
-static void
 version ( void ) {
 #ifndef WIN32
   printf ( "makebearoff $Revision$\n" );
@@ -1516,6 +1457,9 @@ extern int main( int argc, char **argv ) {
   FILE *output = stdout;
   char *szOutput = NULL;
   double r;
+  char *szTwoSided = NULL;
+  int show_version=0;
+
 #if WIN32
   int i;
   char *aszOS[] = {"Number of points:",
@@ -1539,74 +1483,58 @@ extern int main( int argc, char **argv ) {
                 "Reuse old bearoff database:",
                 " ", " "};
 #endif
-
-  static struct option ao[] = {
-    { "two-sided", required_argument, NULL, 't' },
-    { "one-sided", required_argument, NULL, 'o' },
-    { "xhash-size", required_argument, NULL, 's' },
-    { "old-bearoff", required_argument, NULL, 'O' },
-    { "no-header", no_argument, NULL, 'H' },
-    { "no-cubeful", no_argument, NULL, 'C' },
-    { "no-compress", no_argument, NULL, 'c' },
-    { "no-gammon", no_argument, NULL, 'g' },
-    { "normal-dist", no_argument, NULL, 'n' },
-    { "help", no_argument, NULL, 'h' },
-    { "version", no_argument, NULL, 'v' },
-    { NULL, 0, NULL, 0 }
+           
+  GOptionEntry ao[] = {
+	  { "two-sided", 't', 0, G_OPTION_ARG_STRING, &szTwoSided, 
+		  "Number of points (P) and number of chequers (C) for two-sided database", "PxC"},
+	  { "one-sided", 'o', 0, G_OPTION_ARG_INT, &nOS, 
+		  "Number of points (P) for one-sided database", "P"},
+	  { "xhash-size", 's', 0, G_OPTION_ARG_INT, &nHashSize, 
+		  "Use cache of size N bytes", "N"},
+	  { "old-bearoff", 'O', 0, G_OPTION_ARG_STRING, &szOldBearoff, 
+		  "Reuse already generated bearoff database \"filename\"", "filename"},
+	  { "no-header", 'H', G_OPTION_FLAG_REVERSE,  G_OPTION_ARG_NONE, &fHeader, 
+		  "Do not write header", NULL},
+	  { "no-cubeful", 'C', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fCubeful, 
+		  "Do not calculate cubeful equities for two-sided databases", NULL},
+	  { "no-compress", 'c', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fCompress, 
+		  "Do not use compression scheme for one-sided databases", NULL},
+	  { "no-gammon", 'g', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fGammon,
+		  "Include gammon distribution for one-sided databases", NULL},
+	  { "normal-dist", 'n', 0, G_OPTION_ARG_NONE, &fND, 
+		  "Approximate one-sided bearoff database with normal distributions", NULL},
+	  { "version", 'v', 0, G_OPTION_ARG_NONE, &show_version, 
+		  "Prints version and exits", NULL},
+	  { "outfile", 'f', 0, G_OPTION_ARG_STRING, &szOutput, 
+		  "Required output filename", "filename"}, 
+	  {NULL}
   };
 
-  while ( ( ch = getopt_long ( argc, argv, "t:o:s:O:f:HCcgnhv", ao, NULL ) ) !=
-          (char) -1 ) {
-    switch ( ch ) {
-    case 't': /* size of two-sided */
-      sscanf ( optarg, "%dx%d", &nTSP, &nTSC );
-      break;
-    case 'o': /* size of one-sided */
-      nOS = atoi ( optarg );
-      break;
-    case 's': /* xhash size */
-      nHashSize = atoi ( optarg );
-      break;
-    case 'O': /* old database */
-      szOldBearoff = strdup ( optarg );
-      break;
-    case 'H': /* no header */
-      fHeader = FALSE;
-      break;
-    case 'C': /* cubeful */
-      fCubeful = FALSE;
-      break;
-    case 'c': /* compress */
-      fCompress = FALSE;
-      break;
-    case 'g': /* no gammons */
-      fGammon = FALSE;
-      break;
-    case 'n': /* normal dist */
-      fND = TRUE;
-      break;
-    case 'h': /* help */
-      usage ( argv[ 0 ] );
-      exit ( 0 );
-      break;
-    case 'v': /* version */
-      version ();
-      exit ( 0 );
-      break;
-    case 'f':
-      szOutput = strdup ( optarg );
-      break;
-    default:
-      usage ( argv[ 0 ] );
-      exit ( 1 );
-    }
+  GError *error = NULL;
+  GOptionContext *context;
+
+  context = g_option_context_new(NULL);
+  g_option_context_add_main_entries(context, ao, PACKAGE);
+  g_option_context_parse(context, &argc, &argv, &error);
+  g_option_context_free(context);
+  if (error) {
+  	g_printerr("%s\n", error->message);
+  	exit(EXIT_FAILURE);
   }
 
-  /* open output file */
+
+  if (szTwoSided)
+      sscanf ( szTwoSided, "%dx%d", &nTSP, &nTSC );
+
+  if (show_version)
+  {
+	  version();
+	  exit(0);
+  }
 
   if ( ! szOutput ) {
-    usage ( argv[ 0 ] );
-    return EXIT_FAILURE;
+	  g_printerr("Required argument -f missing\n");
+    exit(EXIT_FAILURE);
   }
 
   if ( ! ( output = fopen ( szOutput, "w+b" ) ) ) {

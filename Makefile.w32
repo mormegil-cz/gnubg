@@ -26,7 +26,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
 makebearoff_SOURCE = makebearoff eval positionid pub_eval matchequity \
-		     matchid getopt getopt1 osr bearoffgammon bearoff \
+		     matchid osr bearoffgammon bearoff \
 		     format mec util
 
 makebearoff_OBJECTS=$(patsubst %,obj/%.o,$(makebearoff_SOURCE))

@@ -31,7 +31,6 @@
 
 #include "eval.h"
 #include "positionid.h"
-#include "getopt.h"
 #include <glib/gi18n.h>
 #include <locale.h>
 #include "bearoff.h"
@@ -571,31 +570,6 @@ version ( void ) {
 
 }
 
-static void
-usage( const char *arg0 ) {
-
-  printf ( _("Usage: %s [options] -f filename\n"
-             "Options:\n"
-             "  -f, --outfile filename\n"
-             "                      Output to file.\n"
-             "  -r, --restart filename\n"
-             "                      Restart calculation of database from "
-             "given file.\n"
-             "                      Default start guess is zero-vector.\n"
-             "  -c, --chequers number\n"
-             "                      The number of chequers. Default is 3 "
-             "corresponding to\n"
-             "                      normal 3-chequer hypergammon.\n"
-             "  -n, --no-checkpoint\n"
-             "                      Do not write a checkpoint file after "
-             "each iteration.\n"
-             "  -t, --threshold     The convergens threshold. Default is "
-             "1e-5\n"
-             "  -v, --version       Show version information and exit\n"
-             "  -h, --help          Display usage and exit\n"),
-           arg0 );
-
-}
 
 extern int
 main ( int argc, char **argv ) {
@@ -614,18 +588,26 @@ main ( int argc, char **argv ) {
   char *szRestart = NULL;
   char ch;
   int fCheckPoint = TRUE;
+  int show_version=0;
 
-  static struct option ao[] = {
-    { "chequers", required_argument, NULL, 'c' },
-    { "restart", required_argument, NULL, 'r' },
-    { "outfile", required_argument, NULL, 'f' },
-    { "threshold", required_argument, NULL, 't' },
-    { "no-checkpoint", no_argument, NULL, 'n' },
-    { "help", no_argument, NULL, 'h' },
-    { "version", no_argument, NULL, 'v' },
-    { NULL, 0, NULL, 0 }
+  GOptionEntry ao[] = {
+    { "chequers", 'c', 0, G_OPTION_ARG_INT, &nC, 
+	    "The number of chequers(0<C<4). Default is 3." , "C"},
+    { "restart", 'r', 0, G_OPTION_ARG_FILENAME, &szRestart, 
+	    "Restart calculation of database from \"filename\"", "filename"},
+    { "threshold", 't', 0, G_OPTION_ARG_DOUBLE, &rEpsilon, 
+	    "The convergens threshold (T). Default is 1e-5", "T"},
+    { "no-checkpoint", 'n', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fCheckPoint, 
+	    "Do not write a checkpoint file after each iteration.", NULL},
+    { "version", 'v', 0, G_OPTION_ARG_NONE, &show_version, 
+	    "Print version info and exit", NULL},
+    { "outfile", 'f', 0, G_OPTION_ARG_STRING, &szOutput, 
+	    "Required output filename", "filename"}, 
+    { NULL}
   };
 
+  GError *error = NULL;
+  GOptionContext *context;
 
   /* i18n */
 
@@ -633,43 +615,26 @@ main ( int argc, char **argv ) {
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  /* parse options */
+  context = g_option_context_new(NULL);
+  g_option_context_add_main_entries(context, ao, PACKAGE);
+  g_option_context_parse(context, &argc, &argv, &error);
+  g_option_context_free(context);
 
-  while ( ( ch = getopt_long ( argc, argv, "c:r:f:t:nhv", ao, NULL ) ) !=
-          (char) -1 ) {
-    switch ( ch ) {
-    case 'h': /* help */
-      usage ( argv[ 0 ] );
-      exit ( 0 );
-      break;
-    case 'v': /* version */
+  if (error) {
+  	g_printerr("%s\n", error->message);
+  	exit(EXIT_FAILURE);
+  }
+
+  /* parse options */
+  if (show_version)
+  {
       version ();
       exit ( 0 );
-      break;
-    case 'f': /* output file */
-      szOutput = strdup ( optarg );
-      break;
-    case 'r': /* restart file */
-      szRestart = strdup ( optarg );
-      break;
-    case 'c': /* number of chequers */
-      nC = atoi( optarg );
-      break;
-    case 'n': /* no check point files */
-      fCheckPoint = FALSE;
-      break;
-    case 't': /* convergense threshold */
-      rEpsilon = atof ( optarg );
-      break;
-    default:
-      usage ( argv[ 0 ] );
-      exit ( 1 );
-    }
   }
 
   if ( ! szOutput || nC < 1 || nC > 3 ) {
-    /* illegal options */
-    usage( argv[ 0 ] );
+	  g_printerr("Illegal options. Try `makehyper --help' for usage "
+			  "information\n");
     exit(1);
   }
 
