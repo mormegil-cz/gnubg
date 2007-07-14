@@ -700,7 +700,8 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
                 anScore[ !pmr->fPlayer ] += pmr->r.nResigned * nFileCube;
             break;
 	case MOVE_SETDICE:
-	    /* ignore */
+	    /* Could be rolled dice just before resign */
+	    sprintf( sz, "%d%d: ", pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 	    break;
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:

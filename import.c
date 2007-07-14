@@ -486,10 +486,10 @@ ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
 
       int an[ 8 ];
 
-      /* consolidated move */
+      /* consolidated move, e.g. 61: 11/4. Let's hope that the notation cannot
+       * be as bad as 61: 11/4* meaning 11/5* 5/4 */
 
       for ( i = 0; i < 2; ++i ) {
-
         an[ 0 ] = anMove[ 0 ];
         an[ 1 ] = an[ 0 ] - anDice[ i ];
         
@@ -498,6 +498,10 @@ ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
 
         an[ 4 ] = -1;
         an[ 5 ] = -1;
+
+	/* no hits on the first part of the move*/
+	if (anBoard[0][23-an[1]] != 0)
+		continue;
 
         if ( IsValidMove ( anBoard, an ) ) {
           memcpy ( anMove, an, sizeof ( an ) );
