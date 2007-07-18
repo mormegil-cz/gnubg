@@ -1709,7 +1709,7 @@ extern int NextTurn( int fPlayNext ) {
 		{
 #if USE_BOARD3D
 			BoardData *bd = BOARD( pwBoard )->board_data;
-			if (ms.fResigned && bd->rd->fDisplayType == DT_3D)
+			if (ms.fResigned && display_is_3d(bd->rd))
 				StopIdle3d(bd, bd->bd3d);	/* Stop flag waving */
 #endif
 			ShowBoard();

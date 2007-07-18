@@ -122,7 +122,7 @@ void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev, gpoin
        ms.anDice[ 1 ] = pmr->anDice[ 1 ];
    }
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{	/* Make sure dice are shown (and not rolled) */
 		bd->diceShown = DICE_ON_BOARD;
 		bd->diceRoll[0] = !ms.anDice[0];

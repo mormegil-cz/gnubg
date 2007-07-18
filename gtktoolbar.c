@@ -207,7 +207,7 @@ ToolbarStop( GtkWidget *pw, gpointer unused ) {
 #if USE_BOARD3D
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		StopIdle3d(bd, bd->bd3d);
 		RestrictiveRedraw();

@@ -2910,7 +2910,7 @@ int MaterialTextCompare(Material* pMat1, Material* pMat2)
 extern int PreferenceCompare(renderdata *prd1, renderdata *prd2)
 {
 #if USE_BOARD3D
-	if (prd1->fDisplayType == DT_3D)
+	if (display_is_3d(prd1))
 	{	/* 3d settings */
 		return (prd1->pieceType == prd2->pieceType &&
 			prd1->fHinges3d == prd2->fHinges3d &&

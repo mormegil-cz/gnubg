@@ -202,5 +202,6 @@ extern int edit_new(int length);
 
 #if USE_BOARD3D
 extern void SetSwitchModeMenuText();
+extern gboolean gtk_gl_init_success;
 #endif
 #endif

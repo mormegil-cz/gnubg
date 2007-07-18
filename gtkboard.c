@@ -100,7 +100,8 @@ extern GtkWidget *board_new(renderdata* prd)
               "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0", 0, TRUE );
 
 #if USE_BOARD3D
-	InitBoard3d(bd, bd->bd3d);
+	if (gtk_gl_init_success)
+		InitBoard3d(bd, bd->bd3d);
 #endif
 
 	return board;
@@ -111,14 +112,16 @@ static void InitialPos(BoardData *bd)
 	int ip[] = {0,-2,0,0,0,0,5,0,3,0,0,0,-5,5,0,0,0,-3,0,-5,0,0,0,0,2,0,0,0};
 	memcpy(bd->points, ip, sizeof(bd->points));
 #if USE_BOARD3D
-	updatePieceOccPos(bd, bd->bd3d);
+	if (gtk_gl_init_success)
+		updatePieceOccPos(bd, bd->bd3d);
 #endif
 }
 
 extern void InitBoardPreview(BoardData *bd)
 {
 #if USE_BOARD3D
-	InitBoard3d(bd, bd->bd3d);
+	if (gtk_gl_init_success)
+		InitBoard3d(bd, bd->bd3d);
 #endif
 	/* Show set position */
 	InitialPos(bd);
@@ -757,7 +760,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd, int
     bd->points[ drag_point ] -= bd->drag_colour;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		SetMovingPieceRotation(bd, bd->bd3d, bd->drag_point);
 		updatePieceOccPos(bd, bd->bd3d);
@@ -1105,7 +1108,7 @@ static void board_drag( GtkWidget *widget, BoardData *bd, int x, int y )
     int s = bd->rd->nSize;
     
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		if (MouseMove3d(bd, bd->bd3d, bd->rd, x, y))
 			gtk_widget_queue_draw(widget);
@@ -1373,14 +1376,14 @@ gboolean place_chequer_or_revert(BoardData *bd, int dest )
     board_invalidate_point( bd, placed ? dest : source );
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)
+	if (display_is_3d(bd->rd) && bd->rd->quickDraw)
 	{
 		if (placed)
 			RestrictiveEndMouseMove(dest, abs(bd->points[dest]));
 		if (placed && hit)
 			RestrictiveDrawPiece(bar, abs(bd->points[bar]));
 	}
-	if (placed && bd->rd->fDisplayType == DT_3D)
+	if (placed && display_is_3d(bd->rd))
 		PlaceMovingPieceRotation(bd, bd->bd3d, dest, source);
 #endif
     return placed;
@@ -1501,7 +1504,7 @@ static void updateBoard(GtkWidget *board, BoardData* bd)
 	update_pipcount(bd, points);
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		gtk_widget_queue_draw(board);
 		updatePieceOccPos(bd, bd->bd3d);
@@ -1530,7 +1533,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 	int colour = bd->drag_button == 1 ? 1 : -1;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 		n = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
     else
 #endif
@@ -1557,7 +1560,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 			write_board( bd, anBoard );
 		}
 #if USE_BOARD3D
-		if (bd->rd->fDisplayType == DT_3D)
+		if (display_is_3d(bd->rd))
 			RestrictiveRedraw();
 		else
 #endif
@@ -1595,7 +1598,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
     
     /* Given n, map (x, y) to the ith checker position on point n*/
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 		i = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, n);
 	else
 #endif
@@ -1617,7 +1620,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 		current = 0;
 
 #if USE_BOARD3D
-		if (bd->rd->fDisplayType == DT_3D)
+		if (display_is_3d(bd->rd))
 		{
 			gtk_widget_queue_draw(board);
 			updatePieceOccPos(bd, bd->bd3d);
@@ -1655,7 +1658,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
     }
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 		RestrictiveRedraw();
 	else
 #endif
@@ -1751,7 +1754,7 @@ extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] )
 
 	/* Show move */
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		if (bd->rd->quickDraw)
 		{
@@ -1817,7 +1820,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 		return TRUE;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{	/* Ignore clicks when animating */
 		if (Animating3d(bd->bd3d))
 			return TRUE;
@@ -1903,7 +1906,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 
 	case POINT_RESIGN:
 #if USE_BOARD3D
-		if (bd->rd->fDisplayType == DT_3D)
+		if (display_is_3d(bd->rd))
 		{
 			StopIdle3d(bd, bd->bd3d);
 			/* clicked on resignation symbol */
@@ -1919,7 +1922,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 
 	case POINT_DICE:
 #if USE_BOARD3D
-		if (bd->rd->fDisplayType == DT_3D && bd->diceShown == DICE_BELOW_BOARD)
+		if (display_is_3d(bd->rd) && bd->diceShown == DICE_BELOW_BOARD)
 		{	/* Click on dice (below board) - shake */
 			bd->drag_point = -1;
 			UserCommand("roll");
@@ -1937,7 +1940,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 
 			/* Display swapped dice */
 #if USE_BOARD3D
-			if (bd->rd->fDisplayType == DT_3D)
+			if (display_is_3d(bd->rd))
 				gtk_widget_queue_draw(board);
 			else
 #endif
@@ -2103,7 +2106,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 				if (!update_move(bd))
 				{	/* Show Move */
 #if USE_BOARD3D
-					if (bd->rd->fDisplayType == DT_3D)
+					if (display_is_3d(bd->rd))
 					{
 						if (bd->rd->quickDraw)
 						{	/* Redraw 2 start positions, end position and perhaps bar */
@@ -2183,7 +2186,7 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 	int dest;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{	/* Reverse screen y coords for OpenGL */
 		y = board->allocation.height - y;
 	}
@@ -2193,7 +2196,7 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 		return TRUE;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 		dest = BoardPoint3d(bd, bd->bd3d, bd->rd, x, y, -1);
 	else
 #endif
@@ -2212,7 +2215,7 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 			dest = bd->drag_point;
 			place_chequer_or_revert(bd, dest);
 #if USE_BOARD3D
-			if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)
+			if (display_is_3d(bd->rd) && bd->rd->quickDraw)
 				RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
 #endif
 		}
@@ -2240,7 +2243,7 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 				   to redo the pickup since we got reverted. */
 				bd->points[ bd->drag_point ] -= bd->drag_colour;
 #if USE_BOARD3D
-				if (bd->rd->fDisplayType == DT_2D)
+				if (display_is_2d(bd->rd))
 #endif
 					board_invalidate_point(bd, bd->drag_point);
 				
@@ -2258,7 +2261,7 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 				else 
 				{
 #if USE_BOARD3D
-					if (bd->rd->fDisplayType == DT_3D)
+					if (display_is_3d(bd->rd))
 					{
 						if (bd->rd->quickDraw)
 							RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
@@ -2279,14 +2282,14 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 		{
 			board_beep(bd);
 #if USE_BOARD3D
-			if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)
+			if (display_is_3d(bd->rd) && bd->rd->quickDraw)
 				RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
 #endif
 		}
 	}
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		/* Update 3d Display */
 		updatePieceOccPos(bd, bd->bd3d);
@@ -2324,7 +2327,7 @@ extern gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event,
 	int editing = ToolbarIsEditing( pwToolbar );
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{	/* Reverse screen y coords for openGL */
 		y = board->allocation.height - y;
 	}
@@ -2356,7 +2359,7 @@ extern gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event,
 		}
 	}
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_2D)
+	if (display_is_2d(bd->rd))
 #endif
 	{
 		if (bd->DragTargetHelp)
@@ -2681,7 +2684,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 
 		if( bd->x_dice[ 0 ] > 0
 #if USE_BOARD3D
-			 && bd->rd->fDisplayType == DT_2D
+			 && display_is_2d(bd->rd)
 #endif
 			)
 		{
@@ -2720,7 +2723,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 		else
 		{
 #if USE_BOARD3D
-			if (bd->rd->fDisplayType == DT_3D)
+			if (display_is_3d(bd->rd))
 			{
 				/* Has been shaken, so roll dice */
 				if (bd->diceShown == DICE_ROLLING)
@@ -2742,7 +2745,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 			bd->diceShown = DICE_ON_BOARD;
 		}
 #if USE_BOARD3D
-		if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)
+		if (display_is_3d(bd->rd) && bd->rd->quickDraw)
 			RestrictiveDrawDice(bd);
 #endif
 	}
@@ -2798,7 +2801,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	bd->cube_use = cube_use;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		SetupViewingVolume3d(bd, bd->bd3d, bd->rd);	/* Cube may be out of top of screen */
 		if (bd->rd->quickDraw)
@@ -2839,7 +2842,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
                                8 * bd->rd->nSize,
 			       8 * bd->rd->nSize, bd );
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 		ShowFlag3d(bd, bd->bd3d, bd->rd);
 #endif
     }
@@ -2859,7 +2862,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     }
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D && redrawNeeded)
+	if (display_is_3d(bd->rd) && redrawNeeded)
 		DrawScene3d(bd->bd3d);
 	else
 #endif
@@ -3103,7 +3106,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player )
     animation_finished = FALSE;
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		BoardData *bd = board->board_data;
 		AnimateMove3d(bd, bd->bd3d);
@@ -3144,7 +3147,7 @@ static void update_buttons( BoardData *bd )
 
     if ( bd->rd->fDiceArea
 #if USE_BOARD3D
-    && (bd->rd->fDisplayType == DT_2D)
+    && (display_is_2d(bd->rd))
 #endif
      ) {
       if ( c == C_ROLLDOUBLE ) 
@@ -3195,7 +3198,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     update_buttons( bd );
 
 #if USE_BOARD3D
-if (bd->rd->fDisplayType == DT_3D)
+if (display_is_3d(bd->rd))
 {
 	DrawScene3d(bd->bd3d);
 	updateOccPos(bd);	/* Make sure shadows are in correct place */
@@ -3229,7 +3232,7 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
 	double aarDiceColourTemp[ 2 ][ 4 ];
 	double aarDiceDotColourTemp[ 2 ][ 4 ];
 
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{	/* As settings currently separate, copy 3d colours so 2d dialog colours (small chequers, dice etc.) are correct */
 		memcpy(aarColourTemp, bd->rd->aarColour, sizeof(bd->rd->aarColour));
 		memcpy(aanBoardColourTemp, bd->rd->aanBoardColour[0], sizeof(double[4]));
@@ -3286,7 +3289,7 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd )
 
     }
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{	/* Restore 2d colours */
 		memcpy(bd->rd->aarColour, aarColourTemp, sizeof(bd->rd->aarColour));
 		memcpy(bd->rd->aanBoardColour[0], aanBoardColourTemp, sizeof(double[4]));
@@ -3308,7 +3311,7 @@ extern void board_free_pixmaps( BoardData *bd )
 extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d,
 		renderdata* prd)
 {
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		gtk_widget_hide(bd->drawing_area);
 		gtk_widget_show(GetDrawingArea3d(bd->bd3d));
@@ -3317,7 +3320,8 @@ extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d,
 	}
 	else
 	{
-		gtk_widget_hide(GetDrawingArea3d(bd->bd3d));
+		if (gtk_gl_init_success)
+			gtk_widget_hide(GetDrawingArea3d(bd->bd3d));
 		gtk_widget_show(bd->drawing_area);
 		gtk_widget_queue_draw(bd->drawing_area);
 	}
@@ -3363,7 +3367,7 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
        bigger */
     if ( bd->rd->fDiceArea
 #if USE_BOARD3D
-    && (bd->rd->fDisplayType == DT_2D)
+    && (display_is_2d(bd->rd))
 #endif
 	) {
       new_size = MIN( allocation->width / BOARD_WIDTH,
@@ -3392,7 +3396,8 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
 	child_allocation.height = allocation->height;
 	child_allocation.x = allocation->x;
 	child_allocation.y = allocation->y;
-	gtk_widget_size_allocate(GetDrawingArea3d(bd->bd3d), &child_allocation);
+	if (gtk_gl_init_success)
+		gtk_widget_size_allocate(GetDrawingArea3d(bd->bd3d), &child_allocation);
 #endif
 
     child_allocation.width = BOARD_WIDTH * bd->rd->nSize;
@@ -3407,7 +3412,7 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
 
     if ( bd->rd->fDiceArea
 #if USE_BOARD3D
-    && (bd->rd->fDisplayType == DT_2D)
+    && (display_is_2d(bd->rd))
 #endif
 	) {
       child_allocation.width = ( 2 * DIE_WIDTH + 1 ) * bd->rd->nSize;
@@ -3826,8 +3831,11 @@ static void board_init( Board *board )
 
 #if USE_BOARD3D
 	/* 3d board drawing area */
-	CreateGLWidget(bd);
-	gtk_container_add(GTK_CONTAINER(board), GetDrawingArea3d(bd->bd3d));
+    if (gtk_gl_init_success)
+    {
+	    CreateGLWidget(bd);
+	    gtk_container_add(GTK_CONTAINER(board), GetDrawingArea3d(bd->bd3d));
+    }
 #endif
 
     /* Position and match ID */
@@ -4221,7 +4229,7 @@ extern GtkWidget *board_cube_widget( Board *board )
 	CopyAppearance(&rd);
 	rd.nSize = setSize;
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		for (x = 0; x < 4; x++)
 			rd.arCubeColour[x] = bd->rd->CubeMat.ambientColour[x];
@@ -4305,7 +4313,7 @@ extern void DestroySetDice(GtkObject *po, GtkWidget *pw)
 #if USE_BOARD3D
 extern void Copy3dDiceColour(renderdata* prd)
 {
-	if (prd->fDisplayType == DT_3D)
+	if (display_is_3d(prd))
 	{
 		int i, j;
 		for (j = 0; j < 4; j++)
@@ -4377,7 +4385,7 @@ extern GtkWidget *board_dice_widget( Board *board )
 extern void InitBoardData(BoardData* bd)
 {	/* Initialize some BoardData settings on new game start */
 	/* Only needed for 3d board */
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 	{
 		/* Move cube back to center */
 		bd->cube = 0;

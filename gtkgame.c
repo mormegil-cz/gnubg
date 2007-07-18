@@ -2084,7 +2084,7 @@ extern void InitGTK( int *argc, char ***argv )
 #if USE_BOARD3D
     BoardData *bd = BOARD(pwBoard)->board_data;
     /* If using 3d board initilize 3d widget */
-    if (bd->rd->fDisplayType == DT_3D)
+    if (display_is_3d(bd->rd))
             Init3d();
     /* If no 3d settings loaded, set appearance to first design */
     Default3dSettings(bd);
@@ -6481,7 +6481,7 @@ extern void GTKSet( void *p ) {
 	{
 #if USE_BOARD3D
 		/* If in 3d mode may need to update sizes */
-		if (bd->rd->fDisplayType == DT_3D)
+		if (display_is_3d(bd->rd))
 			SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 		else
 #endif
@@ -7833,11 +7833,12 @@ void SetSwitchModeMenuText()
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	GtkWidget *pMenuItem = gtk_item_factory_get_widget_by_action(pif, TOOLBAR_ACTION_OFFSET + MENU_OFFSET);
 	char *text;
-	if (bd->rd->fDisplayType == DT_2D)
+	if (display_is_2d(bd->rd))
 		text = _("Switch to 3D view");
 	else
 		text = _("Switch to 2D view");
 	gtk_label_set_text(GTK_LABEL(gtk_bin_get_child(GTK_BIN(pMenuItem))), text);
+	gtk_widget_set_sensitive(pMenuItem, gtk_gl_init_success);
 }
 
 static void
@@ -7847,7 +7848,7 @@ SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
 	BoardData3d *bd3d = bd->bd3d;
 	renderdata *prd = bd->rd;
 
-	if (prd->fDisplayType == DT_2D)
+	if (display_is_2d(prd))
 	{
 		prd->fDisplayType = DT_3D;
 		/* Reset 3d settings */
@@ -7973,10 +7974,10 @@ static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
 		gtk_widget_show(pwHandle);
 		gtk_widget_show(GTK_WIDGET(bd->table));
 #if USE_BOARD3D
-	/* Only show 2d dice below board if in 2d */
-  	if (bd->rd->fDisplayType == DT_2D)
+		/* Only show 2d dice below board if in 2d */
+		if (display_is_2d(bd->rd))
 #endif
-		  gtk_widget_show(GTK_WIDGET(bd->dice_area));
+			gtk_widget_show(GTK_WIDGET(bd->dice_area));
 		gtk_widget_show(pwStatus);
 		gtk_widget_show(pwProgress);
 

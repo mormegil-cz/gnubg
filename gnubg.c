@@ -3815,7 +3815,7 @@ extern void PromptForExit( void )
     }
 
 #if USE_BOARD3D
-    if (fX && (bd->rd->fDisplayType == DT_3D))
+    if (fX && (display_is_3d(bd->rd)))
 	{	/* Stop any 3d animations */
 		StopIdle3d(bd, bd->bd3d);
 	}
@@ -3829,7 +3829,7 @@ extern void PromptForExit( void )
 #endif
 
 #if USE_BOARD3D
-	if (fX && bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
+	if (fX && display_is_3d(bd->rd) && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
 		CloseBoard3d(bd, bd->bd3d, bd->rd);
 #endif
 #if USE_GTK
@@ -3846,7 +3846,7 @@ extern void PromptForExit( void )
 	if (fX)
 		board_free_pixmaps(bd);
 #if USE_BOARD3D
-	if (fX)
+	if (fX && gtk_gl_init_success)
 		Tidy3dObjects(bd->bd3d, bd->rd);
 #endif
 #endif

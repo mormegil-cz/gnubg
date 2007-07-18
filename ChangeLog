@@ -1,3 +1,10 @@
+Wed Jul 18 14:35:32 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkboard.c, gtkgame.c, gtkgame.h, gtkgamelist.c, gtkoptions.c,
+	gtkpanels.c, gtkprefs.c, gtktoolbar.c, play.c, render.c, renderprefs.c,
+	board3d/fun3d.h, board3d/graph.c, board3d/misc3d.c, board3d/widget3d.c:
+	Allow startup in 2D mode if gtk_gl_init_check fails
+
 Sat Jul 14 22:54:29 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* multithread.c: Fix hangup when all task done signal was missed and fix a

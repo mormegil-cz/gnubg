@@ -1328,7 +1328,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
 {
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
+	if (display_is_3d(bd->rd))
 		updateDiceOccPos(bd, bd->bd3d);
 	else
 #endif

@@ -31,7 +31,9 @@
 #include "render.h"
 #include "renderprefs.h"
 #if USE_GTK
+#include <gtk/gtk.h>
 #include "gtkboard.h"
+#include "gtkgame.h"
 #endif
 #if USE_BOARD3D
 #include "fun3d.h"
@@ -372,11 +374,21 @@ SetWood (char *sz, woodtype * pbw)
 }
 #endif
 
+#if USE_BOARD3D
+displaytype check_for_board3d (char *szValue)
+{
+	if (*szValue == '2')
+		return DT_2D;
+	else if ( !fX || gtk_gl_init_success)
+		return DT_3D;
+	return DT_2D;
+}
+#endif
 extern void
 RenderPreferencesParam (renderdata * prd, char *szParam, char *szValue)
 {
 #if USE_GTK
-  int c, fValueError = FALSE;
+int c, fValueError = FALSE;
 
   if (!szParam || !*szParam)
     return;
@@ -479,6 +491,8 @@ RenderPreferencesParam (renderdata * prd, char *szParam, char *szValue)
   else if (!strncasecmp (szParam, "moveindicator", c))
     prd->showMoveIndicator = toupper (*szValue) == 'Y';
 #if USE_BOARD3D
+  else if (!strncasecmp (szParam, "boardtype", c))
+     prd->fDisplayType = check_for_board3d(szValue);
   else if (!strncasecmp (szParam, "hinges3d", c))
     prd->fHinges3d = toupper (*szValue) == 'Y';
   else if (!strncasecmp (szParam, "boardshadows", c))
@@ -493,8 +507,6 @@ RenderPreferencesParam (renderdata * prd, char *szParam, char *szValue)
     prd->closeBoardOnExit = toupper (*szValue) == 'Y';
   else if (!strncasecmp (szParam, "quickdraw", c))
     prd->quickDraw = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "boardtype", c))
-    prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
   else if (!strncasecmp (szParam, "curveaccuracy", c))
     prd->curveAccuracy = atoi (szValue);
   else if (!strncasecmp (szParam, "lighttype", c))
@@ -595,8 +607,6 @@ RenderPreferencesParam (renderdata * prd, char *szParam, char *szValue)
             prd->aanBoardColour[szParam[c - 1] - '0' +
               2],
             &prd->aSpeckle[szParam[c - 1] - '0' + 2]);
-  else
-    outputf (_("Unknown setting `%s'.\n"), szParam);
 
   if (fValueError)
     outputf (_("`%s' is not a legal value for parameter `%s'.\n"), szValue,
@@ -680,7 +690,7 @@ RenderPreferencesCommand (renderdata * prd, char *sz)
 #if USE_BOARD3D
 
   strcat (sz, g_strdup_printf ("boardtype=%c ",
-         prd->fDisplayType == DT_2D ? '2' : '3'));
+         display_is_2d(prd) ? '2' : '3'));
   strcat (sz, g_strdup_printf ("hinges3d=%c ",
          prd->fHinges3d ? 'y' : 'n'));
   strcat (sz, g_strdup_printf ("boardshadows=%c ",
