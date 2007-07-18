@@ -482,7 +482,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
             /* update statistics */
 	    if( aarsStatistics )
-		MT_SafeInc(&aarsStatistics[ ici ]
+		(void)MT_SafeInc(&aarsStatistics[ ici ]
 		    [ pci->fMove ].acDoubleTake[ LogCube ( pci->nCube ) ]); 
 
             SetCubeInfo ( pci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
@@ -523,8 +523,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	    if( aarsStatistics )
             {
-				MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acDoubleDrop[ LogCube ( pci->nCube ) ]); 
-				MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWin[ LogCube ( pci->nCube )]);
+				(void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acDoubleDrop[ LogCube ( pci->nCube ) ]); 
+				(void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWin[ LogCube ( pci->nCube )]);
             };
 
             break;
@@ -712,8 +712,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 #if 0
 	  printf ("Game %d Turn %d Player %d hit\n",iGame, iTurn, pci->fMove);
 #endif
-          MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nOpponentHit);
-          MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].rOpponentHitMove, iTurn);
+          (void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nOpponentHit);
+          (void)MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].rOpponentHitMove, iTurn);
           afHit[ pci->fMove ] = TRUE;
 
         }
@@ -736,8 +736,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 	  nPipsDice = anDice[ 0 ] + anDice[ 1 ];
 	  if ( anDice[ 0 ] == anDice[ 1 ] ) nPipsDice *= 2;
 
-	  MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nBearoffMoves);
-	  MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].nBearoffPipsLost, nPipsDice - ( nPipsBefore - nPipsAfter ));
+	  (void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nBearoffMoves);
+	  (void)MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].nBearoffPipsLost, nPipsDice - ( nPipsBefore - nPipsAfter ));
 
 	}
 
@@ -751,8 +751,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 	  ClosedBoard ( afClosedBoard, aanBoard[ ici ] );
 
 	  if ( afClosedBoard[ pci->fMove ] ) {
-	    MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nOpponentClosedOut);
-	    MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].rOpponentClosedOutMove, iTurn);
+	    (void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nOpponentClosedOut);
+	    (void)MT_SafeAdd(&aarsStatistics[ ici ][ pci->fMove ].rOpponentClosedOutMove, iTurn);
 	    afClosedOut[ pci->fMove ] = TRUE;
 	  }
 
@@ -784,13 +784,13 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 	  if( aarsStatistics )
 	      switch ( GameStatus ( aanBoard[ ici ], pci->bgv ) ) {
 	      case 1:
-		  MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWin[ LogCube ( pci->nCube )]);
+		  (void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWin[ LogCube ( pci->nCube )]);
 		  break;
 	      case 2:
-		  MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWinGammon[ LogCube ( pci->nCube )]);
+		  (void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWinGammon[ LogCube ( pci->nCube )]);
 		  break;
 	      case 3:
-		  MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWinBackgammon[ LogCube ( pci->nCube )]);
+		  (void)MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWinBackgammon[ LogCube ( pci->nCube )]);
 		  break;
 	      }
 
@@ -975,7 +975,6 @@ extern void RolloutLoopMT()
 	unsigned int i, j;
 	int alt;
 	rolloutcontext *prc = NULL;
-	int cubeDec = (ro_alternatives == 2) && (&ro_apes[0]->rc == &ro_apes[1]->rc);
 	perArray dicePerms;
 	dicePerms.nPermutationSeed = -1;
 

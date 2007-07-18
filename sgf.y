@@ -167,7 +167,7 @@ ValueCharSeq:	/* empty */
 
 extern list *SGFParse( FILE *pf ) {
 
-    extern FILE *sgfin;
+    FILE *sgfin;
     
     sgfin = pf;
     plCollection = NULL;

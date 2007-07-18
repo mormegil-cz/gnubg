@@ -7075,7 +7075,6 @@ char * SetupLanguage (char *newLangCode)
 char *SetupLanguage (char *newLangCode)
 {
 	static char *org_lang=NULL;
-	char *lang;
 
 	if (!org_lang)
 		org_lang=g_strdup(setlocale(LC_ALL, ""));

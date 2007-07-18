@@ -34,6 +34,9 @@
 #include "drawboard.h"
 #include "positionid.h"
 #include "gtkgame.h"
+#if USE_BOARD3D
+#include "fun3d.h"
+#endif
 
 static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
 {

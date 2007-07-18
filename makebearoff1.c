@@ -125,20 +125,12 @@ PrintCode ( FILE *pf ) {
 }
 
 
-static void
-version ( void ) {
-
-  printf ( "version:\n" );
-
-}
-
 extern int
 main ( int argc, char **argv ) {
 
   char *szOutput = NULL;
   char *szInput = NULL;
   FILE *pfOut, *pfIn;
-  char ch;
   char ac[ 128 ];
   int n, i;
 

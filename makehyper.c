@@ -586,7 +586,6 @@ main ( int argc, char **argv ) {
   time_t t0, t1, t2, t3;
   char *szOutput = NULL;
   char *szRestart = NULL;
-  char ch;
   int fCheckPoint = TRUE;
   int show_version=0;
 

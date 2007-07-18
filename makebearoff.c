@@ -1446,7 +1446,6 @@ extern int main( int argc, char **argv ) {
   int nTSP = 0, nTSC = 0;
   int nOS = 0;
   int fHeader = TRUE;
-  char ch;
   int fCompress = TRUE;
   int fGammon = TRUE;
   int nHashSize = 100000000;

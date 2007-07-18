@@ -33,7 +33,7 @@
 extern int
 main( int argc, char **argv ) {
 
-  char ch, *filename, *szPosID = NULL;
+  char *filename, *szPosID = NULL;
   int id = 0;
   bearoffcontext *pbc;
   char sz[ 4096 ];
