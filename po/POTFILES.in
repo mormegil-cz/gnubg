@@ -23,7 +23,6 @@ board3d/widget3d.c
 boarddim.h
 boardpos.c
 boardpos.h
-br1.c
 common.h
 config.h
 copying.c
