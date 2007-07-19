@@ -579,6 +579,7 @@ main ( int argc, char **argv ) {
   int nPos;
   float rNorm;
   float rEpsilon = 1.0e-5;
+  gchar *szEpsilon = NULL;
   bearoffcontext *pbc = NULL;
   int it;
   char szFilename[ 20 ];
@@ -594,7 +595,7 @@ main ( int argc, char **argv ) {
 	    "The number of chequers(0<C<4). Default is 3." , "C"},
     { "restart", 'r', 0, G_OPTION_ARG_FILENAME, &szRestart, 
 	    "Restart calculation of database from \"filename\"", "filename"},
-    { "threshold", 't', 0, G_OPTION_ARG_DOUBLE, &rEpsilon, 
+    { "threshold", 't', 0, G_OPTION_ARG_STRING, &szEpsilon, 
 	    "The convergens threshold (T). Default is 1e-5", "T"},
     { "no-checkpoint", 'n', G_OPTION_FLAG_REVERSE, G_OPTION_ARG_NONE, &fCheckPoint, 
 	    "Do not write a checkpoint file after each iteration.", NULL},
@@ -631,6 +632,14 @@ main ( int argc, char **argv ) {
       exit ( 0 );
   }
 
+  if (szEpsilon)
+	  rEpsilon = g_strtod (szEpsilon, NULL);
+  if (rEpsilon >1.0 || rEpsilon < 0.0)
+  {
+	  g_printerr("Valid threadholds are 0.0 - 1.0\n");
+	  exit(1);
+  }
+	  
   if ( ! szOutput || nC < 1 || nC > 3 ) {
 	  g_printerr("Illegal options. Try `makehyper --help' for usage "
 			  "information\n");
