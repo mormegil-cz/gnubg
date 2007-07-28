@@ -1295,7 +1295,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   unsigned int j;
   int alt;
   unsigned int i;
-  unsigned int nFirstTrial;
+  int nFirstTrial;
   int trialsDone;
   rolloutcontext *prc = NULL, rcRolloutSave;
   evalsetup *pes;
@@ -1351,7 +1351,7 @@ fnTick = NULL;
 		log_name = NULL;
 
   cGames = rcRollout.nTrials;
-  nFirstTrial = ~0;
+  nFirstTrial = 0;
 
   for ( alt = 0; alt < alternatives; ++alt) {
     pes = apes[ alt ];
@@ -1387,7 +1387,7 @@ fnTick = NULL;
       memcpy (prc, &rcRollout, sizeof (rolloutcontext));
       prc->nGamesDone = 0;
       prc->nSkip = 0;
-      nFirstTrial = ~0;
+      nFirstTrial = 0;
       altGameCount[alt] = 0;
 
       if (aarsStatistics) {
@@ -1624,7 +1624,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   }
 
   cGames = rcRollout.nTrials;
-  nFirstTrial = ~0 ;
+  nFirstTrial = 0 ;
 
   for ( alt = 0; alt < alternatives; ++alt) {
     pes = apes[ alt ];

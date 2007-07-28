@@ -100,17 +100,15 @@ static void InitEvent(Event *pEvent)
     *pEvent = g_cond_new();
 }
 
-static gpointer WaitForAllTasks(int time)
+static gboolean WaitForAllTasks(int time)
 {
-    gpointer result;
-    GTimeVal tv = {0, 0};
-    g_get_current_time(&tv);
-    g_time_val_add(&tv, time * 1000);
-    /* we wait for the alldone data to be pushed by MT_TaskDone, by using an
-     * g_async_queue instead of a g_cond we don't need to worry about not
-     * being here when the signal is sent */
-    result = g_async_queue_timed_pop(async_queue, &tv);
-    return result;
+	int j=0;
+	while (td.doneTasks != td.totalTasks && j++ < 10)
+		g_usleep(100*time);
+	if (td.doneTasks == td.totalTasks)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 static void FreeEvent(Event event)
@@ -310,8 +308,8 @@ static void MT_CreateThreads(void)
             printf("Failed to create thread\n");
     }
     if (td.doneTasks != td.totalTasks)
-    {    /* Wait for all the threads to be created (timeout after 20 seconds) */
-        if (!WaitForAllTasks(20 * 1000))
+    {    /* Wait for all the threads to be created (timeout after 2 seconds) */
+        if (!WaitForAllTasks(2000))
             printf("Not sure all threads created!\n");
     }
     /* Reset counters */
@@ -361,9 +359,6 @@ extern void MT_InitThreads()
     if (condMutex == NULL)
         condMutex = g_mutex_new();
 #endif
-    if (async_queue == NULL)
-	    async_queue = g_async_queue_new();
-
     MT_CreateThreads();
 }
 
@@ -452,10 +447,7 @@ AnalyzeDoubleDecison:
 
 static void MT_TaskDone(Task *pt)
 {
-    td.doneTasks++;
-    if (td.doneTasks == td.totalTasks)
-	    g_async_queue_push(async_queue, td.alldone);
-
+    (void)MT_SafeInc(&td.doneTasks);
     if (pt)
     {
         free(pt->pLinkedTask);
@@ -525,7 +517,6 @@ extern void MT_Close()
     FreeManualEvent(td.contentionCleared);
     FreeEvent(td.alldone);
     FreeMutex(td.multiLock);
-    g_async_queue_unref(async_queue);
 
     /* queueLock is locked around MT_TaskDone and may not be released in time
      * unless we wait for it here before we free the mutex */
