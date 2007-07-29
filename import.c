@@ -3808,18 +3808,19 @@ extern void CommandImportAuto(char *sz)
 	}
 	fdp = ReadFilePreview(sz);
 
-	if (!fdp || !fdp->format) {
+	if (!fdp) {
 		outputerrf(_("%s is not a backgammon file"), sz);
 		g_free(fdp);
 		return;
 	}
-	if (fdp->format == &file_format[0]) {
+	if (fdp->type == IMPORT_SGF) {
 		cmd = g_strdup_printf("load match \"%s\"", sz);
 	} else {
 		cmd =
 		    g_strdup_printf("import %s \"%s\"",
-				    fdp->format->clname, sz);
+				    import_format[fdp->type].clname, sz);
 	}
 	HandleCommand(cmd, acTop);
 	g_free(cmd);
+	g_free(fdp);
 }

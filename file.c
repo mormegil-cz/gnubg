@@ -27,44 +27,34 @@
 //#include <glib/gstdio.h>
 #include "file.h"
 
-/* char *extension; char *description; char *clname;
- * gboolean canimport; gboolean canexport; gboolean exports[3]; */
-FileFormat file_format[] = {
-	{".sgf", N_("Gnu Backgammon File"), "sgf", TRUE, TRUE, {TRUE, TRUE, TRUE}},	/*must be the first element */
-	{".eps", N_("Encapsulated Postscript"), "eps", FALSE, TRUE,
-	 {FALSE, FALSE, TRUE}},
-	{".fibs", N_("Fibs Oldmoves"), "oldmoves", FALSE, FALSE,
-	 {FALSE, FALSE, FALSE}},
-	{".sgg", N_("Gamesgrid Save Game"), "sgg", TRUE, FALSE,
-	 {FALSE, FALSE, FALSE}},
-	{".bkg", N_("Hans Berliner's BKG Format"), "bkg", TRUE, FALSE,
-	 {FALSE, FALSE, FALSE}},
-	{".html", N_("HTML"), "html", FALSE, TRUE, {TRUE, TRUE, TRUE}},
-	{".gam", N_("Jellyfish Game"), "gam", FALSE, TRUE,
-	 {FALSE, TRUE, FALSE}},
-	{".mat", N_("Jellyfish Match"), "mat", TRUE, TRUE,
-	 {TRUE, FALSE, FALSE}},
-	{".pos", N_("Jellyfish Position"), "pos", TRUE, TRUE,
-	 {FALSE, FALSE, TRUE}},
-	{".tex", N_("LaTeX"), "latex", FALSE, TRUE, {TRUE, TRUE, FALSE}},
-	{".pdf", N_("PDF"), "pdf", FALSE, TRUE, {TRUE, TRUE, FALSE}},
-	{".txt", N_("Plain Text"), "text", FALSE, TRUE,
-	 {TRUE, TRUE, TRUE}},
-	{".png", N_("Portable Network Graphics"), "png", FALSE, TRUE,
-	 {FALSE, FALSE, TRUE}},
-	{".ps", N_("PostScript"), "postscript", FALSE, TRUE,
-	 {TRUE, TRUE, FALSE}},
-	{".txt", N_("Snowie Text"), "snowietxt", TRUE, TRUE,
-	 {FALSE, FALSE, TRUE}},
-	{".tmg", N_("True Moneygames"), "tmg", TRUE, FALSE,
-	 {FALSE, FALSE, FALSE}},
-	{".gam", N_("GammonEmpire Game"), "empire", TRUE, FALSE,
-	 {FALSE, FALSE, FALSE}},
-	{".gam", N_("PartyGammon Game"), "party", TRUE, FALSE,
-	 {FALSE, FALSE, FALSE}}
+ExportFormat export_format[] = {
+	{EXPORT_SGF, ".sgf", N_("Gnu Backgammon File"), "sgf", {TRUE, TRUE, TRUE}},	/*must be the first element */
+	{EXPORT_EPS, ".eps", N_("Encapsulated Postscript"), "eps", {FALSE, FALSE, TRUE}},
+	{EXPORT_HTML, ".html", N_("HTML"), "html", {TRUE, TRUE, TRUE}},
+	{EXPORT_GAM, ".gam", N_("Jellyfish Game"), "gam", {FALSE, TRUE, FALSE}},
+	{EXPORT_MAT, ".mat", N_("Jellyfish Match"), "mat", {TRUE, FALSE, FALSE}},
+	{EXPORT_POS, ".pos", N_("Jellyfish Position"), "pos", {FALSE, FALSE, TRUE}},
+	{EXPORT_LATEX, ".tex", N_("LaTeX"), "latex", {TRUE, TRUE, FALSE}},
+	{EXPORT_PDF, ".pdf", N_("PDF"), "pdf", {TRUE, TRUE, FALSE}},
+	{EXPORT_TEXT, ".txt", N_("Plain Text"), "text", {TRUE, TRUE, TRUE}},
+	{EXPORT_PNG, ".png", N_("Portable Network Graphics"), "png", {FALSE, FALSE, TRUE}},
+	{EXPORT_PS, ".ps", N_("PostScript"), "postscript", {TRUE, TRUE, FALSE}},
+	{EXPORT_SNOWIETXT, ".txt", N_("Snowie Text"), "snowietxt", {FALSE, FALSE, TRUE}},
 };
 
-gint n_file_formats = G_N_ELEMENTS(file_format);
+ImportFormat import_format[] = {
+	{IMPORT_SGF, ".sgf", N_("Gnu Backgammon File"), "sgf"},	/*must be the first element */
+	{IMPORT_SGG, ".sgg", N_("Gamesgrid Save Game"), "sgg"},
+	{IMPORT_BKG, ".bkg", N_("Hans Berliner's BKG Format"), "bkg"},
+	{IMPORT_MAT, ".mat", N_("Jellyfish Match"), "mat"},
+	{IMPORT_OLDMOVES, ".fibs", N_("FIBS oldmoves format"), "oldmoves"},
+	{IMPORT_POS, ".pos", N_("Jellyfish Position"), "pos"},
+	{IMPORT_SNOWIETXT, ".txt", N_("Snowie Text"), "snowietxt"},
+	{IMPORT_TMG, ".tmg", N_("True Moneygames"), "tmg"},
+	{IMPORT_EMPIRE, ".gam", N_("GammonEmpire Game"), "empire"},
+	{IMPORT_PARTY, ".gam", N_("PartyGammon Game"), "party"},
+	{N_IMPORT_TYPES, NULL, N_("Unknown file format"), NULL}
+};
 
 typedef struct _FileHelper {
 	FILE *fp;
@@ -72,18 +62,6 @@ typedef struct _FileHelper {
 	int dataPos;
 	char *data;
 } FileHelper;
-
-extern int FormatFromDescription(const gchar * text)
-{
-	gint i;
-	if (!text)
-		return -1;
-	for (i = 0; i < n_file_formats; i++) {
-		if (!strcasecmp(text, file_format[i].description))
-			break;
-	}
-	return i;
-}
 
 /* Data structures and functions for getting file type data */
 
@@ -377,43 +355,44 @@ static int IsPARFile(FileHelper * fh)
 
 extern FilePreviewData *ReadFilePreview(char *filename)
 {
-	FilePreviewData *fpd;
+	FilePreviewData *fpd = g_new0(FilePreviewData, 1);
 	FileHelper *fh = OpenFileHelper(filename);
-	if (!fh)
-		return 0;
 
-	fpd = g_new0(FilePreviewData, 1);
+	fpd -> type = N_IMPORT_TYPES;
+
+	if (!fh)
+		return(fpd);
 
 	if (IsSGFFile(fh))
-		fpd->format = &file_format[0];
+		fpd->type = IMPORT_SGF;
 	else if (IsSGGFile(fh))
-		fpd->format = &file_format[3];
+		fpd->type = IMPORT_SGG;
 	else if (IsTXTFile(fh))
-		fpd->format = &file_format[14];
+		fpd->type = IMPORT_SNOWIETXT;
 	else if (IsTMGFile(fh))
-		fpd->format = &file_format[15];
+		fpd->type = IMPORT_TMG;
 	else if (IsMATFile(fh))
-		fpd->format = &file_format[7];
+		fpd->type = IMPORT_MAT;
 	else if (IsJFPFile(fh))
-		fpd->format = &file_format[8];
+		fpd->type = IMPORT_POS;
 	else if (IsBKGFile(fh))
-		fpd->format = &file_format[4];
+		fpd->type = IMPORT_BKG;
 	else if (IsGAMFile(fh))
-		fpd->format = &file_format[16];
+		fpd->type = IMPORT_EMPIRE;
 	else if (IsPARFile(fh))
-		fpd->format = &file_format[17];
+		fpd->type = IMPORT_PARTY;
 
 	CloseFileHelper(fh);
 	return fpd;
 }
-extern char *GetFilename(int CheckForCurrent, int format)
+extern char *GetFilename(int CheckForCurrent, ExportType type)
 {
 	char *sz, tstr[15];
 	time_t t;
 
 	if (CheckForCurrent && szCurrentFileName && *szCurrentFileName)
 		sz = g_strdup_printf("%s%s", szCurrentFileName,
-				     file_format[format].extension);
+				     export_format[type].extension);
 	else {
 		if (mi.nYear)
 			sprintf(tstr, "%04d-%02d-%02d", mi.nYear,

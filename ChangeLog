@@ -1,3 +1,8 @@
+Sun Jul 29 08:27:41 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* file.c, file.h, gtkfile.c, import.c: allow manual setting of the import
+	file format in the GUI
+
 Sun Jul 29 08:24:22 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* html.c: export html-images dir if non-existing

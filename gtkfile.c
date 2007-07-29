@@ -143,21 +143,19 @@ typedef struct _SaveOptions
 
 static void SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
 {
-  gchar *description, *fn, *fnn, *fnd;
+  gchar *fn, *fnn, *fnd;
   gint format, type;
 
-  description =
-    gtk_combo_box_get_active_text (GTK_COMBO_BOX (pso->description));
-  format = FormatFromDescription (description);
+  format = gtk_combo_box_get_active(GTK_COMBO_BOX (pso->description));
   type = gtk_combo_box_get_active (GTK_COMBO_BOX (pso->type));
   gtk_dialog_set_response_sensitive (GTK_DIALOG (pso->fc),
 				     GTK_RESPONSE_ACCEPT,
-				     file_format[format].exports[type]);
+				     export_format[format].exports[type]);
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (pso->upext)))
     {
       if ((fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pso->fc))) != NULL)
 	{
-	  DisectPath (fn, file_format[format].extension, &fnn, &fnd);
+	  DisectPath (fn, export_format[format].extension, &fnn, &fnd);
 	  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (pso->fc),
 					       fnd);
 	  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (pso->fc), fnn);
@@ -192,10 +190,8 @@ static void SaveCommon (guint f, gchar * prompt)
   so.description = gtk_combo_box_new_text ();
   for (j = i = 0; i < f; ++i)
     {
-      if (!file_format[i].canexport)
-	continue;
       gtk_combo_box_append_text (GTK_COMBO_BOX (so.description),
-				 file_format[i].description);
+				 export_format[i].description);
       if (i == last_export_format)
 	gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), j);
       j++;
@@ -231,16 +227,14 @@ static void SaveCommon (guint f, gchar * prompt)
       fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (so.fc));
       if (fn)
 	{
-	  gchar *ft =
-	    gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.description));
 	  gchar *et = gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.type));
 	  gchar *cmd = NULL;
-	  format = FormatFromDescription (ft);
+	  format = gtk_combo_box_get_active (GTK_COMBO_BOX (so.description));
 	  if (format)
 	    {
 	      cmd =
 		g_strdup_printf ("export %s %s \"%s\"", et,
-				 file_format[format].clname, fn);
+				 export_format[format].clname, fn);
 	      last_export_format = format;
 	      last_export_type =
 		gtk_combo_box_get_active (GTK_COMBO_BOX (so.type));
@@ -270,26 +264,15 @@ static void SaveCommon (guint f, gchar * prompt)
   gtk_widget_destroy (so.fc);
 }
 
-static void update_preview_cb (GtkFileChooser *file_chooser, gpointer data)
+static void update_preview_cb (GtkFileChooser *file_chooser, GtkComboBox *preview)
 {
-	GtkWidget *preview = GTK_WIDGET (data);
 	char *filename = gtk_file_chooser_get_preview_filename (file_chooser);
-	FilePreviewData *fdp = ReadFilePreview(filename);
+	FilePreviewData *fpd = ReadFilePreview(filename);
 	char *label = "";
 
-	gtk_dialog_set_response_sensitive(GTK_DIALOG(file_chooser), GTK_RESPONSE_ACCEPT, FALSE);
-	if (fdp)
-	{
-		if (!fdp->format)
-			label = _("not a backgammon file");
-		else
-		{
-			label = gettext(fdp->format->description);
-			gtk_dialog_set_response_sensitive(GTK_DIALOG(file_chooser), GTK_RESPONSE_ACCEPT, TRUE);
-		}
-		g_free(fdp);
-	}
-	gtk_label_set_text(GTK_LABEL(preview), label);
+	label = gettext((import_format[fpd->type]).description);
+	gtk_combo_box_set_active(preview, fpd->type);
+	g_free(fpd);
 }
 
 static void add_import_filters (GtkFileChooser *fc)
@@ -299,11 +282,9 @@ static void add_import_filters (GtkFileChooser *fc)
 	gchar *sg;
 
 	gtk_file_filter_set_name (aff, _("Supported files"));
-	for (i = 0; i < n_file_formats; ++i)
+	for (i = 0; i < N_IMPORT_TYPES; ++i)
 	{
-		if (!file_format[i].canimport)
-			continue;
-		sg = g_strdup_printf ("*%s", file_format[i].extension);
+		sg = g_strdup_printf ("*%s", import_format[i].extension);
 		gtk_file_filter_add_pattern (aff, sg);
 		g_free (sg);
 	}
@@ -311,22 +292,55 @@ static void add_import_filters (GtkFileChooser *fc)
 
 	FilterAdd (_("All Files"), "*", GTK_FILE_CHOOSER (fc));
 
-	for (i = 0; i < n_file_formats; ++i)
+	for (i = 0; i < N_IMPORT_TYPES; ++i)
 	{
-		if (!file_format[i].canimport)
-			continue;
-		sg = g_strdup_printf ("*%s", file_format[i].extension);
-		FilterAdd (file_format[i].description, sg, GTK_FILE_CHOOSER (fc));
+		sg = g_strdup_printf ("*%s", import_format[i].extension);
+		FilterAdd (import_format[i].description, sg, GTK_FILE_CHOOSER (fc));
 		g_free (sg);
 	}
 }
 
+static GtkWidget* import_types_combo(void)
+{
+	gint i;
+	GtkWidget *type_combo = gtk_combo_box_new_text();
+
+	for (i = 0; i <= N_IMPORT_TYPES; ++i)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo),
+				import_format[i].description);
+	return type_combo;
+}
+
+
+void do_import_file(gint import_type, gchar * fn)
+{
+	gchar *cmd = NULL;
+
+	if (!fn)
+		return;
+	if (import_type == N_IMPORT_TYPES)
+		outputerrf(_("Unable to import. Unrecognized file type"));
+	else if (import_type == IMPORT_SGF) {
+		cmd = g_strdup_printf("load match \"%s\"", fn);
+	} else {
+		cmd =
+		    g_strdup_printf("import %s \"%s\"",
+				    import_format[import_type].clname, fn);
+	}
+	if (cmd)
+		UserCommand(cmd);
+	g_free(cmd);
+
+}
+
 extern void GTKOpen(gpointer * p, guint n, GtkWidget * pw)
 {
-	gchar *fn, *cmd = NULL;
-	GtkWidget *fc, *preview;
-	static gchar *last_import_folder = NULL;
+	GtkWidget *fc;
+	GtkWidget *type_combo;
+	gchar *fn;
 	gchar *folder = NULL;
+	gint import_type;
+	static gchar *last_import_folder = NULL;
 
 	folder =
 	    last_import_folder ? last_import_folder :
@@ -335,56 +349,31 @@ extern void GTKOpen(gpointer * p, guint n, GtkWidget * pw)
 	fc = GnuBGFileDialog(_("Open backgammon file"), folder, NULL,
 			     GTK_FILE_CHOOSER_ACTION_OPEN);
 
-	preview = gtk_label_new("");
-	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), preview);
+	type_combo = import_types_combo();
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc),
+					  type_combo);
 	g_signal_connect(GTK_FILE_CHOOSER(fc), "update-preview",
-			 G_CALLBACK(update_preview_cb), preview);
+			 G_CALLBACK(update_preview_cb), type_combo);
 
 	add_import_filters(GTK_FILE_CHOOSER(fc));
 
 	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
 		fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-		if (fn) {
-			char *tempFile = NULL;
-			FilePreviewData *fdp = ReadFilePreview(fn);
-
-			if (fdp && fdp->format) {
-				if (fdp->format == &file_format[0]) {
-					cmd =
-					    g_strdup_printf
-					    ("load match \"%s\"", fn);
-					g_free(last_import_folder);
-					last_import_folder =
-					    gtk_file_chooser_get_current_folder
-					    (GTK_FILE_CHOOSER(fc));
-				} else {
-					cmd =
-					    g_strdup_printf
-					    ("import %s \"%s\"",
-					     fdp->format->clname, fn);
-					g_free(last_import_folder);
-					last_import_folder =
-					    gtk_file_chooser_get_current_folder
-					    (GTK_FILE_CHOOSER(fc));
-				}
-			}
-			g_free(fdp);
-
-			if (cmd) {
-				UserCommand(cmd);
-				g_free(cmd);
-				if (tempFile)
-					unlink(tempFile);	/* Remove temporary PartyGammon mat file */
-			}
-			g_free(fn);
-		}
+		import_type =
+		    gtk_combo_box_get_active(GTK_COMBO_BOX(type_combo));;
+		do_import_file(import_type, fn);
+		g_free(last_import_folder);
+		last_import_folder =
+		    gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER
+							(fc));
+		g_free(fn);
 	}
 	gtk_widget_destroy(fc);
 }
 
 extern void GTKExport (gpointer * p, guint n, GtkWidget * pw)
 {
-  SaveCommon (n_file_formats, _("Export to foreign formats"));
+  SaveCommon (N_EXPORT_TYPES, _("Export to foreign formats"));
 }
 
 extern void GTKSave (gpointer * p, guint n, GtkWidget * pw)
@@ -494,7 +483,7 @@ static GtkTreeModel *batch_create_model(GSList * filenames)
 	GtkListStore *store;
 	GtkTreeIter tree_iter;
 	GSList *iter;
-	FilePreviewData *fdp;
+	FilePreviewData *fpd;
 
 	store =
 	    gtk_list_store_new(NUM_COLS, G_TYPE_STRING, G_TYPE_STRING,
@@ -508,12 +497,9 @@ static GtkTreeModel *batch_create_model(GSList * filenames)
 
 		gtk_list_store_append(store, &tree_iter);
 
-		fdp = ReadFilePreview(filename);
-		if (!fdp->format || !fdp)
-			desc = g_strdup(_("Unknown"));
-		else
-			desc = g_strdup(fdp->format->description);
-		free(fdp);
+		fpd = ReadFilePreview(filename);
+		desc = g_strdup(import_format[fpd->type].description);
+		g_free(fpd);
 		gtk_list_store_set(store, &tree_iter, COL_DESC, desc, -1);
 
 		DisectPath(filename, NULL, &file, &folder);

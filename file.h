@@ -12,23 +12,62 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-typedef struct _FileFormat FileFormat;
-struct _FileFormat {
+typedef enum
+{
+	EXPORT_SGF,
+	EXPORT_EPS,
+	EXPORT_HTML,
+	EXPORT_GAM,
+	EXPORT_MAT,
+	EXPORT_POS,
+	EXPORT_LATEX,
+	EXPORT_PDF,
+	EXPORT_TEXT,
+	EXPORT_PNG,
+	EXPORT_PS,
+	EXPORT_SNOWIETXT,
+	N_EXPORT_TYPES
+}ExportType;
+
+typedef enum
+{
+	IMPORT_SGF,
+	IMPORT_SGG,
+	IMPORT_BKG,
+	IMPORT_MAT,
+	IMPORT_OLDMOVES,
+	IMPORT_POS,
+	IMPORT_SNOWIETXT,
+	IMPORT_TMG,
+	IMPORT_EMPIRE,
+	IMPORT_PARTY,
+	N_IMPORT_TYPES
+}ImportType;
+
+typedef struct _ExportFormat ExportFormat;
+struct _ExportFormat {
+	ExportType type;
 	char *extension;
 	char *description;
 	char *clname;
-	int canimport;
-	int canexport;
 	int exports[3];
 };
 
+typedef struct _ImportFormat ImportFormat;
+struct _ImportFormat {
+	ImportType type;
+	char *extension;
+	char *description;
+	char *clname;
+};
+
+extern ExportFormat export_format[];
+extern ImportFormat import_format[];
+
 typedef struct _FilePreviewData {
-	FileFormat *format;
+	ImportType type;
 } FilePreviewData;
 
-extern FileFormat file_format[];
-extern gint n_file_formats;
-
-extern int FormatFromDescription(const gchar * text);
-extern char *GetFilename(int CheckForCurrent, int format);
+extern char *GetFilename(int CheckForCurrent, ExportType type);
 extern FilePreviewData *ReadFilePreview(char *filename);
+
