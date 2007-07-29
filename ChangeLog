@@ -1,3 +1,8 @@
+Sun Jul 29 08:24:22 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* html.c: export html-images dir if non-existing
+	* gtkgame.c: always export images to html-images/
+
 Sun Jul 29 00:42:50 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* multithread.c: another attempt to fix the check for all tasks done

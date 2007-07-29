@@ -3478,6 +3478,25 @@ OpenCSS( const char *sz ) {
 }
 
 
+static void check_for_html_images(gchar *path)
+{
+	gchar *folder;
+	gchar *img;
+	gchar *cmd;
+
+	folder  = g_path_get_dirname(path);
+	img = g_build_filename(folder, "html-images", NULL);
+	if (! g_file_test(img, G_FILE_TEST_EXISTS))
+	{
+		cmd = g_strdup_printf("export htmlimages \"%s\"", img);
+		UserCommand(cmd);
+		g_free(cmd);
+	}
+	g_free(img);
+	g_free(folder);
+}
+
+
 extern void CommandExportGameHtml( char *sz ) {
 
     FILE *pf;
@@ -3504,6 +3523,9 @@ extern void CommandExportGameHtml( char *sz ) {
 	outputerr( sz );
 	return;
     }
+
+    if ( exsExport.het == HTML_EXPORT_TYPE_GNU )
+	    check_for_html_images(sz);
 
     ExportGameHTML( pf, plGame,
                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension, 
@@ -3591,6 +3613,9 @@ extern void CommandExportMatchHtml( char *sz ) {
 		 "match html').") );
 	return;
     }
+
+    if ( exsExport.het == HTML_EXPORT_TYPE_GNU )
+	    check_for_html_images(sz);
 
     /* Find number of games in match */
 
@@ -3699,6 +3724,9 @@ extern void CommandExportPositionHtml( char *sz ) {
 	outputerr( sz );
 	return;
     }
+
+    if ( exsExport.het == HTML_EXPORT_TYPE_GNU )
+	    check_for_html_images(sz);
 
     HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL, 
                    exsExport.het, exsExport.hecss );

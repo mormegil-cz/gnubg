@@ -3074,10 +3074,9 @@ ExportHTMLImages (gpointer * p, guint n, GtkWidget * pw)
   gint ok = FALSE;
   fc = gtk_file_chooser_dialog_new (_("Select top folder for html export"), NULL,
 				    GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-				    GTK_STOCK_CANCEL,
-				    GTK_RESPONSE_CANCEL,
-				    GTK_STOCK_OPEN,
-				    GTK_RESPONSE_ACCEPT, NULL);
+				    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+				    NULL);
   gtk_window_set_modal (GTK_WINDOW (fc), TRUE);
   gtk_window_set_transient_for (GTK_WINDOW (fc), GTK_WINDOW (pwMain));
 
@@ -3092,13 +3091,13 @@ ExportHTMLImages (gpointer * p, guint n, GtkWidget * pw)
       if (folder)
 	{
 	  expfolder =
-	    g_build_filename (folder, exsExport.szHTMLPictureURL, NULL);
+		  g_build_filename (folder, "html-images", NULL);
 	  if (g_file_test (expfolder, G_FILE_TEST_IS_DIR))
 	    {
 	      message =
 		g_strdup_printf (_
-				 ("Folder %s exists\nin %s\nOK to overwrite images?"),
-				 exsExport.szHTMLPictureURL, folder);
+				 ("Folder html-images exists\nin %s\nOK to overwrite images?"),
+				 folder);
 	      ok = GTKGetInputYN (message);
 	      g_free (message);
 	    }
@@ -3113,8 +3112,9 @@ ExportHTMLImages (gpointer * p, guint n, GtkWidget * pw)
 	  else
 	    {
 	      message =
-		g_strdup_printf (_("Folder %s can't be created\nin %s"),
-				 expfolder, folder);
+		g_strdup_printf (_
+				 ("Folder html-images can't be created\nin %s"),
+				 folder);
 	      GTKMessage (message, DT_ERROR);
 	      g_free (message);
 	    }
