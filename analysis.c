@@ -1034,7 +1034,7 @@ static int AnalyzeGame ( list *plGame )
 				pt = pParentTask;
 				pParentTask = NULL;
 			}
-			MT_AddTask((Task*)pt);
+			MT_AddTask((Task*)pt, TRUE);
 		}
 
 		FixMatchState(&msAnalyse, pmr);

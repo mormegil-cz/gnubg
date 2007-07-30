@@ -137,13 +137,7 @@ extern void CommandCalibrate( char *sz )
 			break;
 
 #if USE_MULTITHREAD
-		for (i = 0; i < MT_GetNumThreads(); i++)
-		{
-			Task *pt = (Task*)malloc(sizeof(Task));
-			pt->type = TT_RUNCALIBRATIONEVALS;
-			pt->pLinkedTask = NULL;
-			MT_AddTask((Task*)pt);
-		}
+		mt_add_tasks(MT_GetNumThreads(), TT_RUNCALIBRATIONEVALS, NULL);
 		MT_WaitForTasks(NULL, 0);
 		iIter += MT_GetNumThreads();
 #else

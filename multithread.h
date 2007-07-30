@@ -16,8 +16,6 @@
 
 #ifdef WIN32
 #include <windows.h>
-#else
-#define GLIB_THREADS
 #endif
 
 #define MAX_NUMTHREADS 16
@@ -41,12 +39,13 @@ typedef struct _AnalyseMoveTask
 
 extern void MT_InitThreads();
 extern void MT_Close();
-extern void MT_AddTask(Task *pt);
+extern void MT_AddTask(Task *pt, gboolean lock);
 extern int MT_WaitForTasks(void (*pCallback)(), int callbackTime);
 extern unsigned int MT_GetNumThreads();
 extern void MT_SetNumThreads(unsigned int num);
 extern int MT_Enabled(void);
 extern int MT_GetThreadID();
+extern void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked);
 
 #if USE_MULTITHREAD
  #ifdef GLIB_THREADS

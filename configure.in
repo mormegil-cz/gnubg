@@ -262,6 +262,7 @@ if test "$threadson" != "no"; then
                 AC_MSG_ERROR("Threads enabled but glib doesn't seem to have gthread support")
         fi
         AC_DEFINE(USE_MULTITHREAD, 1, Define if you want to have multithread support)
+        AC_DEFINE(GLIB_THREADS, 1, Define if you wish to use glib threads)
 fi
 
 

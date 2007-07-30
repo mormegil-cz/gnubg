@@ -100,17 +100,6 @@ static void InitEvent(Event *pEvent)
     *pEvent = g_cond_new();
 }
 
-static gboolean WaitForAllTasks(int time)
-{
-	int j=0;
-	while (td.doneTasks != td.totalTasks && j++ < 10)
-		g_usleep(100*time);
-	if (td.doneTasks == td.totalTasks)
-		return TRUE;
-	else
-		return FALSE;
-}
-
 static void FreeEvent(Event event)
 {
     g_cond_free(event);
@@ -292,6 +281,17 @@ static unsigned int MT_WorkerThreadFunction(void *id)
 	return 0;
 }
 
+static gboolean WaitForAllTasks(int time)
+{
+	int j=0;
+	while (td.doneTasks != td.totalTasks && j++ < 10)
+		g_usleep(100*time);
+	if (td.doneTasks == td.totalTasks)
+		return TRUE;
+	else
+		return FALSE;
+}
+
 static void MT_CreateThreads(void)
 {
     unsigned int i;
@@ -318,14 +318,7 @@ static void MT_CreateThreads(void)
 
 static void MT_CloseThreads(void)
 {
-    unsigned int i;
-    for (i = 0; i < numThreads; i++)
-    {
-        Task *pt = (Task*)malloc(sizeof(Task));
-        pt->type = TT_CLOSE;
-        pt->pLinkedTask = NULL;
-        MT_AddTask(pt);
-    }
+    mt_add_tasks(numThreads, TT_CLOSE, NULL);
     MT_WaitForTasks(NULL, 0);
 }
 
@@ -333,8 +326,7 @@ extern void MT_InitThreads()
 {
 #ifdef GLIB_THREADS
     g_thread_init(NULL);
-    if (!g_thread_supported())
-        printf("Glib threads not supported!\n");
+    g_assert(g_thread_supported());
 #endif
 
     if (numThreads == 0)
@@ -454,19 +446,34 @@ static void MT_TaskDone(Task *pt)
         free(pt);
     }
 }
-
-void MT_AddTask(Task *pt)
+void MT_AddTask(Task *pt, gboolean lock)
 {
-    Mutex_Lock(td.queueLock);
+	if (lock)
+		Mutex_Lock(td.queueLock);
+	td.addedTasks++;
+	td.tasks = g_list_append(td.tasks, pt);
+	if (g_list_length(td.tasks) == 1)
+	{    /* First task */
+		td.result = 0;
+		SetManualEvent(td.activity);
+	}
+	if (lock)
+		Mutex_Release(td.queueLock);
+}
 
-    td.addedTasks++;
-    td.tasks = g_list_append(td.tasks, pt);
-    if (g_list_length(td.tasks) == 1)
-    {    /* First task */
-        td.result = 0;
-        SetManualEvent(td.activity);
-    }
-    Mutex_Release(td.queueLock);
+void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked)
+{
+	int i;
+    	Mutex_Lock(td.queueLock);
+	td.totalTasks = num_tasks;
+	for (i = 0; i < num_tasks; i++)
+	{
+		Task *pt = (Task*)malloc(sizeof(Task));
+		pt->type = tt;
+		pt->pLinkedTask = linked;
+		MT_AddTask((Task*)pt, FALSE);
+	}
+    	Mutex_Release(td.queueLock);
 }
 
 int MT_WaitForTasks(void (*pCallback)(), int callbackTime)

@@ -3482,16 +3482,11 @@ static void check_for_html_images(gchar *path)
 {
 	gchar *folder;
 	gchar *img;
-	gchar *cmd;
 
 	folder  = g_path_get_dirname(path);
 	img = g_build_filename(folder, "html-images", NULL);
 	if (! g_file_test(img, G_FILE_TEST_EXISTS))
-	{
-		cmd = g_strdup_printf("export htmlimages \"%s\"", img);
-		UserCommand(cmd);
-		g_free(cmd);
-	}
+		CommandExportHTMLImages(img);
 	g_free(img);
 	g_free(folder);
 }

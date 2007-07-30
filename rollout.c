@@ -1465,13 +1465,7 @@ fnTick = NULL;
 	ro_fInvert = fInvert;
 	ro_NextTrail = nFirstTrial;
 
-	for (i = 0; i < MT_GetNumThreads(); i++)
-	{	/* Get each thread to run through the rollout trials */
-		Task *pt = (Task*)malloc(sizeof(Task));
-		pt->type = TT_ROLLOUTLOOP;
-		pt->pLinkedTask = NULL;
-		MT_AddTask((Task*)pt);
-	}
+	mt_add_tasks(MT_GetNumThreads(), TT_ROLLOUTLOOP, NULL);
 
 	ro_pfProgress = pfProgress;
 	ro_pUserData = pUserData;
