@@ -1900,7 +1900,8 @@ GtkItemFactoryEntry aife[] = {
 
 void CreateMainWindow()
 {
-    GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
+	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
+
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_maximize(GTK_WINDOW(pwMain));
@@ -2009,6 +2010,7 @@ extern void InitGTK( int *argc, char ***argv )
     int anBoardTemp[ 2 ][ 25 ];
     int i;
     char *sz;
+	gchar *iconf;
 
     gtk_set_locale();
     sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
@@ -2054,6 +2056,11 @@ extern void InitGTK( int *argc, char ***argv )
     sz = g_build_filename (szHomeDirectory, "gnubgmenurc", NULL);
     gtk_accel_map_load( sz );
     g_free(sz);
+
+	/* Set default icon for all windows */
+	iconf = g_build_filename(PKGDATADIR, "gnubg.svg", NULL);
+	gtk_window_set_default_icon_from_file(iconf, NULL);
+	g_free(iconf);
 
 	CreateMainWindow();
 
