@@ -1291,7 +1291,7 @@ extern void GTKAddGame( moverecord *pmr ) {
 	     pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
     pw = gtk_menu_item_new_with_label( sz );
 	
-    pl = gtk_container_children( GTK_CONTAINER( pwMenu ) );
+    pl = gtk_container_get_children( GTK_CONTAINER( pwMenu ) );
 
     g_signal_connect( G_OBJECT( pw ), "activate",
 			G_CALLBACK( SelectGame ),
@@ -1311,7 +1311,7 @@ extern void GTKPopGame( int i ) {
     GtkWidget *pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
     GList *pl, *plOrig;
 
-    plOrig = pl = gtk_container_children( GTK_CONTAINER( pwMenu ) );
+    plOrig = pl = gtk_container_get_children( GTK_CONTAINER( pwMenu ) );
 
     while( i-- )
 	pl = pl->next;
@@ -1505,7 +1505,7 @@ static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
 GtkWidget* firstChild(GtkWidget* widget)
 {
-	return g_list_nth_data(gtk_container_children(GTK_CONTAINER(widget)), 0);
+	return g_list_nth_data(gtk_container_get_children(GTK_CONTAINER(widget)), 0);
 }
 
 static void SetToolbarItemStyle(gpointer data, gpointer user_data)
@@ -1522,7 +1522,7 @@ static void SetToolbarItemStyle(gpointer data, gpointer user_data)
 	if (GTK_IS_EVENT_BOX(widget))
 		widget = firstChild(widget);
 	buttonParent = firstChild(widget);
-	buttonParts = gtk_container_children(GTK_CONTAINER(buttonParent));
+	buttonParts = gtk_container_get_children(GTK_CONTAINER(buttonParent));
 	icon = g_list_nth_data(buttonParts, 0);
 	text = g_list_nth_data(buttonParts, 1);
 
@@ -1544,7 +1544,7 @@ extern void SetToolbarStyle(int value)
 {
 	GtkWidget* pwMainToolbar = firstChild(pwToolbar);
 	/* Set each toolbar item separately */
-	GList* toolbarItems = gtk_container_children(GTK_CONTAINER(pwMainToolbar));
+	GList* toolbarItems = gtk_container_get_children(GTK_CONTAINER(pwMainToolbar));
 	g_list_foreach(toolbarItems, SetToolbarItemStyle, GINT_TO_POINTER(value));
 	g_list_free(toolbarItems);
 
@@ -2348,7 +2348,7 @@ extern int GtkTutor ( char *sz )
     gtk_container_add( GTK_CONTAINER( DialogArea( pwTutorDialog, DA_MAIN ) ),
 		       pwPrompt );
     
-    gtk_window_set_policy( GTK_WINDOW( pwTutorDialog ), FALSE, FALSE, FALSE );
+    gtk_window_set_resizable( GTK_WINDOW( pwTutorDialog ), FALSE);
     gtk_widget_show_all( pwTutorDialog );
     
     /* This dialog should be REALLY modal -- disable "next turn" idle
@@ -5746,7 +5746,7 @@ extern void GTKShowVersion( void )
 
 	pwDialog = GTKCreateDialog(_("About GNU Backgammon"), DT_INFO, NULL,
 		DIALOG_FLAG_MODAL | DIALOG_FLAG_CUSTOM_PICKMAP | DIALOG_FLAG_CLOSEBUTTON, NULL, gnubg_big_xpm);
-    gtk_window_set_policy(GTK_WINDOW(pwDialog), FALSE, FALSE, FALSE);
+	gtk_window_set_resizable(GTK_WINDOW(pwDialog), FALSE);
 
 	/* Buttons on right side */
 	pwButtonBox = gtk_vbox_new( FALSE, 0 );
@@ -9126,7 +9126,7 @@ static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
 
 	pwLangDialog = GTKCreateDialog( NULL, DT_QUESTION, NULL, DIALOG_FLAG_MODAL, SetLangOk, NULL );
 
-	pl = gtk_container_children( GTK_CONTAINER( DialogArea( pwLangDialog, DA_BUTTONS ) ) );
+	pl = gtk_container_get_children( GTK_CONTAINER( DialogArea( pwLangDialog, DA_BUTTONS ) ) );
 	SetWidgetLabelLang(GTK_WIDGET(pl->data), N_("Cancel"));
 	SetWidgetLabelLang(GTK_WIDGET(pl->next->data), N_("OK"));
 	g_list_free(pl);

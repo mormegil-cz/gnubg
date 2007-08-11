@@ -153,7 +153,7 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 
 	switch( da ) {
     case DA_MAIN:
-		pl = gtk_container_children(GTK_CONTAINER(GTK_DIALOG(pw)->vbox));
+		pl = gtk_container_get_children(GTK_CONTAINER(GTK_DIALOG(pw)->vbox));
 		pwChild = pl->data;
 		g_list_free( pl );
 		return pwChild;
@@ -162,7 +162,7 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 		return GTK_DIALOG( pw )->action_area;
 
     case DA_OK:
-		pl = gtk_container_children( GTK_CONTAINER( GTK_DIALOG( pw )->action_area ) );
+		pl = gtk_container_get_children( GTK_CONTAINER( GTK_DIALOG( pw )->action_area ) );
 		while (pl)
 		{
 			pwChild = pl->data;
@@ -228,7 +228,7 @@ GTKMessage( char *sz, dialogtype dt )
 					       pwPrompt );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
 					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-	gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, TRUE, TRUE );
+	gtk_window_set_resizable( GTK_WINDOW( pwDialog ), FALSE);
 
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), -1, MIN(400,
                             req.height+50) );

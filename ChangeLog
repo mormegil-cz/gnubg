@@ -1,3 +1,8 @@
+Sat Aug 11 21:09:41 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkwindows.c, gtkgame.c: update deprecated gtk_window_set_policy and
+	gtk_container_children
+
 Sat Aug 11 20:58:02 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* play.c, gtkboard.c: update deprecated gtk_timeout*
