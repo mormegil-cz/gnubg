@@ -3115,10 +3115,10 @@ extern void board_animate( Board *board, int move[ 8 ], int player )
 #endif
 {    
     if( animGUI == ANIMATE_BLINK )
-	n = gtk_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout,
+	n = g_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout,
 			     board );
     else /* ANIMATE_SLIDE */
-	n = gtk_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout,
+	n = g_timeout_add( 0x100 >> nGUIAnimSpeed, board_slide_timeout,
 			     board );
 
     while( !animation_finished ) {

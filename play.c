@@ -705,9 +705,9 @@ static void ResetDelayTimer( void ) {
 
     if( fX && nDelay && fDisplay ) {
       if( nTimeout )
-        gtk_timeout_remove( nTimeout );
+        g_source_remove( nTimeout );
 
-	nTimeout = gtk_timeout_add( nDelay, DelayTimeout, NULL );
+	nTimeout = g_timeout_add( nDelay, DelayTimeout, NULL );
     }
 }
 #else
@@ -2395,7 +2395,7 @@ extern void CommandDouble( char *sz ) {
 #if USE_GTK
     /* There's no point delaying here. */
     if( nTimeout ) {
-	gtk_timeout_remove( nTimeout );
+	g_source_remove( nTimeout );
 	nTimeout = 0;
     }
 #endif
@@ -2908,7 +2908,7 @@ CommandMove( char *sz ) {
 #if USE_GTK
 		/* There's no point delaying here. */
 		if( nTimeout ) {
-		    gtk_timeout_remove( nTimeout );
+		    g_source_remove( nTimeout );
 		    nTimeout = 0;
 		}
 		
