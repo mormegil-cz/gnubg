@@ -1,3 +1,8 @@
+Sat Aug 11 20:26:54 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* board3d/fun3d.h, board3d/misc3d.c: make export position png work
+	when using board3d
+
 Wed Aug  1 20:57:30 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: set default icon for all windows

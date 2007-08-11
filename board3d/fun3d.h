@@ -14,6 +14,7 @@
 #ifndef _FUN3D_H
 #define _FUN3D_H
 
+#include "inc3d.h"
 #include "types3d.h"
 #include "gtkboard.h"
 #include "analysis.h"
@@ -140,5 +141,6 @@ extern void SetPreviewLightLevel(const int levels[3]);
 extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind);
 extern gboolean display_is_2d (renderdata *prd);
 extern gboolean display_is_3d (renderdata *prd);
+extern GdkGLConfig *getglconfigSingle();
 
 #endif
