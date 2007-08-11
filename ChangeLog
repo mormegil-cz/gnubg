@@ -1,3 +1,7 @@
+Sat Aug 11 21:30:46 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkboard.c: update deprecated gtk_entry_new_with_max_length
+
 Sat Aug 11 21:09:41 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkwindows.c, gtkgame.c: update deprecated gtk_window_set_policy and

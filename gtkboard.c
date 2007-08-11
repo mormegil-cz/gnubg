@@ -3900,7 +3900,8 @@ static void board_init( Board *board )
     bd->mname0 = gtk_multiview_new ();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mname0, FALSE, FALSE, 8 );
 
-    bd->name0 = gtk_entry_new_with_max_length( MAX_NAME_LEN );
+    bd->name0 = gtk_entry_new();
+    gtk_entry_set_max_length(GTK_ENTRY(bd->name0), MAX_NAME_LEN);
     bd->lname0 = gtk_label_new( NULL );
     gtk_misc_set_alignment( GTK_MISC( bd->lname0 ), 0, 0.5 );
     gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->lname0 );
@@ -3972,7 +3973,8 @@ static void board_init( Board *board )
     bd->mname1 = gtk_multiview_new ();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mname1, FALSE, FALSE, 8 );
 
-    bd->name1 = gtk_entry_new_with_max_length( MAX_NAME_LEN );
+    bd->name1 = gtk_entry_new();
+    gtk_entry_set_max_length(GTK_ENTRY(bd->name1), MAX_NAME_LEN );
     bd->lname1 = gtk_label_new( NULL );
     gtk_misc_set_alignment( GTK_MISC( bd->lname1 ), 0, 0.5 );
     gtk_container_add( GTK_CONTAINER( bd->mname1 ), bd->lname1 );
