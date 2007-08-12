@@ -95,11 +95,12 @@ UpdateAllTables ( metwidget *pmw ) {
   mettable *pmt;
   int i;
 
-  pmt = (mettable*)gtk_object_get_user_data ( GTK_OBJECT ( pmw->pwPreCrawford ) );
+  pmt = (mettable*)g_object_get_data ( G_OBJECT ( pmw->pwPreCrawford ),
+		  "mettable" );
   UpdateTable ( pmt, aafMET, &miCurrent, pmw->nMatchTo, pmw->nMatchTo, FALSE );
 
   for ( i = 0; i < 2; ++i ) {
-    pmt = (mettable*)gtk_object_get_user_data ( GTK_OBJECT ( pmw->apwPostCrawford[ i ] ) );
+    pmt = (mettable*)g_object_get_data ( G_OBJECT ( pmw->apwPostCrawford[ i ] ), "mettable" );
     UpdateTable ( pmt, (float (*)[ MAXSCORE ]) aafMETPostCrawford[ i ], 
                   &miCurrent, pmw->nMatchTo, 1, TRUE );
   }
@@ -193,7 +194,7 @@ static GtkWidget
                                   GTK_POLICY_AUTOMATIC,
                                   GTK_POLICY_AUTOMATIC );
 
-  gtk_object_set_data_full ( GTK_OBJECT ( pwBox ), "user_data", pmt, g_free );
+  g_object_set_data_full ( G_OBJECT ( pwBox ), "mettable", pmt, g_free );
 
   return pwBox;
 

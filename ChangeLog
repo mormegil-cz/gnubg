@@ -1,3 +1,8 @@
+Sun Aug 12 10:45:16 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkcube.c, gtkmet.c, gtkrolls.c, gtksplash.c, gtktheory.c,
+	gtktoolbar.c: update deprecated gtk_object_set_data
+
 Sat Aug 11 21:30:46 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: update deprecated gtk_entry_new_with_max_length

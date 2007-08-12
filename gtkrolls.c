@@ -358,7 +358,9 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   vbox = gtk_vbox_new ( FALSE, 8 );
   gtk_container_set_border_width ( GTK_CONTAINER ( vbox ), 8);
   gtk_container_add ( GTK_CONTAINER (DialogArea( prw->pDialog, DA_MAIN ) ), vbox );
-  gtk_object_set_data_full ( GTK_OBJECT ( vbox ), "user_data",
+
+  /* hook to free rollswidget on widget destruction */
+  g_object_set_data_full ( G_OBJECT ( vbox ), "rollswidget",
                              prw, g_free );
 
   /* scrolled window to hold tree widget */

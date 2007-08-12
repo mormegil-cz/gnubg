@@ -125,7 +125,7 @@ toggle_button_from_images( GtkWidget *pwImageOff,
   gtk_container_add( GTK_CONTAINER( pw ), pwvbox);
 
   
-  gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", aapw, g_free );
+  g_object_set_data_full( G_OBJECT( pw ), "toggle_images", aapw, g_free );
 
   return pw;
   
@@ -134,7 +134,8 @@ toggle_button_from_images( GtkWidget *pwImageOff,
 extern void
 ToolbarSetPlaying( GtkWidget *pwToolbar, const int f ) {
 
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ),
+		  "toolbarwidget" );
   
   gtk_widget_set_sensitive( ptw->pwReset, f );
 
@@ -144,7 +145,8 @@ ToolbarSetPlaying( GtkWidget *pwToolbar, const int f ) {
 extern void
 ToolbarSetClockwise( GtkWidget *pwToolbar, const int f ) {
 
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ),
+		  "toolbarwidget" );
   
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->pwButtonClockwise ), f );
 
@@ -152,11 +154,8 @@ ToolbarSetClockwise( GtkWidget *pwToolbar, const int f ) {
   
 static void
 ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
-
-	/* FIXME This function makes gnubg crash when pressing 
-	 * the direction button in the toolbar. */
   GtkWidget **aapw = 
-    (GtkWidget **) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+    (GtkWidget **) g_object_get_data( G_OBJECT( pw ), "toggle_images" );
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
   
   gtk_multiview_set_current( GTK_MULTIVIEW( aapw[ 2 ] ), aapw[ f ] );
@@ -171,7 +170,7 @@ ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
 
 extern void click_edit()
 {
-        toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+        toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ), "toolbarwidget" );
         gtk_button_clicked( GTK_BUTTON( ptw->pwEdit ));
 }
 
@@ -220,7 +219,8 @@ ToolbarStop( GtkWidget *pw, gpointer unused ) {
 extern GtkWidget *
 ToolbarGetStopParent ( GtkWidget *pwToolbar ) {
 	
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ),
+		  "toolbarwidget" );
 
   g_assert ( ptw );
 
@@ -234,7 +234,8 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
                 const int fComputerTurn,
                 const int fPlaying ) {
 
-  toolbarwidget *ptw = gtk_object_get_user_data ( GTK_OBJECT ( pwToolbar ) );
+  toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ),
+		  "toolbarwidget" );
   toolbarcontrol c;
   int fEdit = ToolbarIsEditing( pwToolbar );
 
@@ -330,7 +331,7 @@ ToolbarNew ( void ) {
 
   vbox_toolbar = gtk_vbox_new (FALSE, 0);
   
-  gtk_object_set_data_full ( GTK_OBJECT ( vbox_toolbar ), "user_data",
+  g_object_set_data_full ( G_OBJECT ( vbox_toolbar ), "toolbarwidget",
                              ptw, g_free );
   pwToolbar = gtk_toolbar_new ();
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),

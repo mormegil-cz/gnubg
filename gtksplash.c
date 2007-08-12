@@ -92,7 +92,7 @@ CreateSplash () {
 
   /* signals */
 
-  gtk_object_set_data_full ( GTK_OBJECT ( pgs->pwWindow ), "user_data", 
+  g_object_set_data_full ( G_OBJECT ( pgs->pwWindow ), "gtksplash", 
                              pgs, g_free );
 
   gtk_widget_show_all ( GTK_WIDGET ( pgs->pwWindow ) );
@@ -128,8 +128,8 @@ PushSplash ( GtkWidget *pwSplash,
   if ( ! pwSplash )
     return;
   
-  pgs = (gtksplash *)gtk_object_get_data ( GTK_OBJECT ( pwSplash ),
-                                         "user_data" );
+  pgs = (gtksplash *)g_object_get_data ( G_OBJECT ( pwSplash ),
+                                         "gtksplash");
 
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 0 ] ), szText0 );
   gtk_label_set_text ( GTK_LABEL ( pgs->apwStatus[ 1 ] ), szText1 );

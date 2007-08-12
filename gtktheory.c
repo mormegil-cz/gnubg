@@ -578,7 +578,7 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
 static void
 PlyClicked( GtkWidget *pw, theorywidget *ptw ) {
 
-  int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "ply" );
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
   cubeinfo ci;
   float aarRates[ 2 ][ 2 ];
@@ -904,8 +904,8 @@ GTKShowTheory ( const int fActivePage ) {
     pi = (int *) g_malloc( sizeof ( int ) );
     *pi = i;
     
-    gtk_object_set_data_full( GTK_OBJECT( ptw->apwPly[ i ] ),
-                              "user_data", pi, g_free );
+    g_object_set_data_full( G_OBJECT( ptw->apwPly[ i ] ),
+                              "ply", pi, g_free );
 
     gtk_box_pack_start( GTK_BOX( pwz ), ptw->apwPly[ i ], FALSE, FALSE, 4 );
 
