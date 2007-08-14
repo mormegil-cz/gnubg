@@ -100,7 +100,7 @@ BR1DATA = gnubg_os0.bd
 endif
 
 pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
-	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql gnubg.gtkrc gnubg.svg
+	$(BR1DATA) $(BOARD3DDATA) gnubg.game.sql gnubg.gtkrc gnubg.svg gnubg.png
 
 
 distcheck-hook:

@@ -13,9 +13,12 @@
    id="svg2160"
    sodipodi:version="0.32"
    inkscape:version="0.45.1"
-   sodipodi:docbase="/home/anthon/gnubg/gnubg"
+   sodipodi:docbase="/home/anthon/gnubg/gnubg-threads"
    sodipodi:docname="gnubg.svg"
-   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="/home/anthon/gnubg/gnubg-threads/gnubg.png"
+   inkscape:export-xdpi="67.5"
+   inkscape:export-ydpi="67.5">
   <defs
      id="defs2162" />
   <sodipodi:namedview
@@ -33,9 +36,9 @@
      inkscape:document-units="px"
      inkscape:grid-bbox="true"
      inkscape:window-width="1280"
-     inkscape:window-height="948"
+     inkscape:window-height="945"
      inkscape:window-x="0"
-     inkscape:window-y="25" />
+     inkscape:window-y="27" />
   <metadata
      id="metadata2165">
     <rdf:RDF>
@@ -214,15 +217,15 @@
     <text
        xml:space="preserve"
        style="font-size:22.61943054px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Liberation Sans"
-       x="7.0648904"
-       y="39.815941"
+       x="4.340127"
+       y="39.997929"
        id="text2188"
        sodipodi:linespacing="100%"
        transform="scale(1.0009208,0.9990801)"><tspan
          sodipodi:role="line"
          id="tspan2190"
-         x="7.0648904"
-         y="39.815941"
+         x="4.340127"
+         y="39.997929"
          style="font-size:22.61943054px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;font-family:Liberation Sans">GNU</tspan></text>
   </g>
 </svg>

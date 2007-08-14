@@ -2005,12 +2005,28 @@ void CreateMainWindow()
 			G_CALLBACK( gtk_main_quit ), NULL );
 }
 
+static void gnubg_set_default_icon()
+{
+	 gchar *iconA, *iconB;
+	 GError *error=NULL;
+	
+	iconA = g_build_filename(PKGDATADIR, "gnubg.svg", NULL);
+	iconB = g_build_filename(PKGDATADIR, "gnubg.png", NULL);
+	gtk_window_set_default_icon_from_file(iconA, &error);
+	if (error)
+	{
+		gtk_window_set_default_icon_from_file(iconB, NULL);
+		g_error_free(error);
+	}
+	g_free(iconA);
+	g_free(iconB);
+}
+
 extern void InitGTK( int *argc, char ***argv )
 {
     int anBoardTemp[ 2 ][ 25 ];
     int i;
     char *sz;
-	gchar *iconf;
 
     gtk_set_locale();
     sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
@@ -2057,11 +2073,7 @@ extern void InitGTK( int *argc, char ***argv )
     gtk_accel_map_load( sz );
     g_free(sz);
 
-	/* Set default icon for all windows */
-	iconf = g_build_filename(PKGDATADIR, "gnubg.svg", NULL);
-	gtk_window_set_default_icon_from_file(iconf, NULL);
-	g_free(iconf);
-
+    gnubg_set_default_icon();
 	CreateMainWindow();
 
     ListCreate( &lOutput );

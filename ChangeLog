@@ -1,3 +1,8 @@
+Tue Aug 14 15:10:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c, gnubg.svg, gnubg.png: Add png file in case svg load
+	unsupported.
+
 Sun Aug 12 10:45:16 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkcube.c, gtkmet.c, gtkrolls.c, gtksplash.c, gtktheory.c,
