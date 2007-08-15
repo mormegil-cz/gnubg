@@ -112,7 +112,7 @@ EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.6 \
 	external_l.c external_y.c external_y.h sgfp.c sgfp.h sgfl.c \
 	external_l.l external_y.y sgf.l sgf.y \
 	ABOUT-NLS boards.xml gnubg.game.sql autogen.sh gnubg.weights\
-	textures.txt
+	textures.txt gnubg.png gnubg.svg
 
 
 DISTCLEANFILES=gnubg.wd
