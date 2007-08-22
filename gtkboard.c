@@ -3579,15 +3579,15 @@ extern void board_edit( BoardData *bd )
 	outputpostpone();
 
 	/* NB: these comparisons are case-sensitive, and do not use
-	   CompareNames(), so that the user can modify the case of names. */
-	if( strcmp( pch0, ap[ 0 ].szName ) ) {
-	    sprintf( sz, "set player 0 name %s", pch0 );
-	    UserCommand( sz );
-	}
-	
-	if( strcmp( pch1, ap[ 1 ].szName ) ) {
-	    sprintf( sz, "set player 1 name %s", pch1 );
-	    UserCommand( sz );
+	 * CompareNames(), so that the user can modify the case of names. We
+	 * need to change the names together, because set player 0 name changes
+	 * the contents of the player 1 gtk_entry and thereby pch1. */
+	if (strcmp(pch0, ap[0].szName) || strcmp(pch1, ap[1].szName)) {
+		char sz0[64], sz1[64];
+		sprintf(sz0, "set player 0 name %s", pch0);
+		sprintf(sz1, "set player 1 name %s", pch1);
+		UserCommand(sz0);
+		UserCommand(sz1);
 	}
 
 	if( bd->playing && !EqualBoards( ms.anBoard, points ) ) {
