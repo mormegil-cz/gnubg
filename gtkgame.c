@@ -86,8 +86,6 @@
 #define TOOLBAR_ACTION_OFFSET 10000
 #define MENU_OFFSET 50
 
-static gboolean init_gtk_failed=TRUE;
-
 void DockPanels();
 
 #if !HAVE_GTK_OPTION_MENU_GET_HISTORY
@@ -2024,11 +2022,6 @@ static void gnubg_set_default_icon()
 	g_free(iconB);
 }
 
-extern int init_gtk_ok(void)
-{
-	return (!init_gtk_failed);
-}
-
 extern void InitGTK( int *argc, char ***argv )
 {
     int anBoardTemp[ 2 ][ 25 ];
@@ -2047,8 +2040,6 @@ extern void InitGTK( int *argc, char ***argv )
     fX = gtk_init_check( argc, argv ); 
     if(!fX)
 	return;
-
-    init_gtk_failed=FALSE;
 
 #if USE_BOARD3D
 	/* Initialize openGL widget library */

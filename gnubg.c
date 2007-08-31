@@ -110,7 +110,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
 #if USE_GTK
-int fX = TRUE; /* use X display */
+int fX = FALSE; /* use X display */
 unsigned int nDelay = 300;
 int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
@@ -5519,7 +5519,7 @@ extern void output( const char *sz )
 	return;
     
 #if USE_GTK
-    if( fX && init_gtk_ok() ) {
+    if( fX ) {
 	GTKOutput( g_strdup( sz ) );
 	return;
     }
@@ -5539,7 +5539,7 @@ extern void outputl( const char *sz )
 	return;
     
 #if USE_GTK
-    if( fX && init_gtk_ok() ) {
+    if( fX ) {
 	int cch;
 	char *pch;
 
@@ -5622,7 +5622,7 @@ extern void outputerrv( const char *sz, va_list val )
        fflush( stdout );
     putc( '\n', stderr );
 #if USE_GTK
-    if( fX && init_gtk_ok() )
+    if( fX )
 	GTKOutputErr( szFormatted );
 #endif
     g_free( szFormatted );
@@ -5636,7 +5636,7 @@ extern void outputx( void )
 	return;
 
 #if USE_GTK
-    if( fX && init_gtk_ok() )
+    if( fX )
 	GTKOutputX();
 #endif
 }
@@ -5649,7 +5649,7 @@ extern void outputnew( void )
 	return;
     
 #if USE_GTK
-    if( fX && init_gtk_ok() )
+    if( fX )
 	GTKOutputNew();
 #endif
 }
@@ -6369,8 +6369,6 @@ int main(int argc, char *argv[])
         fNoTTY = TRUE;
 #endif
 #if USE_GTK
-        /* fX is set to TRUE in InitGTK */
-        fX = FALSE;
         /* -t option not given*/
 	if (!fNoX)
 		InitGTK(&argc, &argv);
