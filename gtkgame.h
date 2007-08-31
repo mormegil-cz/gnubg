@@ -76,6 +76,7 @@ extern void GTKThaw( void );
 extern void GTKSuspendInput();
 extern void GTKResumeInput();
 
+extern int init_gtk_ok(void);
 extern void InitGTK( int *argc, char ***argv );
 extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, char *match );
 extern void GTKAllowStdin( void );

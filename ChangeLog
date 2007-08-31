@@ -1,3 +1,9 @@
+Fri Aug 31 23:36:49 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtkgame.c, set.c, gtkgame.h: make sure that GTKOutput calls
+	are rejected if the gtk interface isn't up and running. Fix a few
+	potential language setting problems.
+
 Wed Aug 22 22:59:26 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: fix player name setting bug

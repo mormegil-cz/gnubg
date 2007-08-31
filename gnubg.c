@@ -5519,7 +5519,7 @@ extern void output( const char *sz )
 	return;
     
 #if USE_GTK
-    if( fX ) {
+    if( fX && init_gtk_ok() ) {
 	GTKOutput( g_strdup( sz ) );
 	return;
     }
@@ -5539,7 +5539,7 @@ extern void outputl( const char *sz )
 	return;
     
 #if USE_GTK
-    if( fX ) {
+    if( fX && init_gtk_ok() ) {
 	int cch;
 	char *pch;
 
@@ -5622,7 +5622,7 @@ extern void outputerrv( const char *sz, va_list val )
        fflush( stdout );
     putc( '\n', stderr );
 #if USE_GTK
-    if( fX )
+    if( fX && init_gtk_ok() )
 	GTKOutputErr( szFormatted );
 #endif
     g_free( szFormatted );
@@ -5636,7 +5636,7 @@ extern void outputx( void )
 	return;
 
 #if USE_GTK
-    if( fX )
+    if( fX && init_gtk_ok() )
 	GTKOutputX();
 #endif
 }
@@ -5649,7 +5649,7 @@ extern void outputnew( void )
 	return;
     
 #if USE_GTK
-    if( fX )
+    if( fX && init_gtk_ok() )
 	GTKOutputNew();
 #endif
 }

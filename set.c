@@ -4305,21 +4305,20 @@ CommandSetRatingOffset( char *sz ) {
 extern void CommandSetLang( char *sz )
 {
 	char *new_lang = NULL;
-	if (sz && szLang && !strcmp(sz, szLang))
-	{
-		outputf(_("Language unchanged\n"));
-		return;
-	}
+
 	g_free(szLang);
 	szLang = (sz) ? g_strdup(sz) : g_strdup(""); 
 
 	new_lang = SetupLanguage(szLang);
+
 	if (!new_lang)
 	{
-		outputerrf(_("Language change failed"));
+		outputerrf(_("Language change to '%s' failed"), szLang);
+		g_free(szLang);
+		szLang=NULL;
 		return;
 	}
-	outputf(_("Language is now %s\n"), new_lang);
+
 #if USE_GTK
 	if (fX)
 		GtkChangeLanguage();

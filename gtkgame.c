@@ -86,6 +86,8 @@
 #define TOOLBAR_ACTION_OFFSET 10000
 #define MENU_OFFSET 50
 
+static gboolean init_gtk_failed=TRUE;
+
 void DockPanels();
 
 #if !HAVE_GTK_OPTION_MENU_GET_HISTORY
@@ -2022,6 +2024,11 @@ static void gnubg_set_default_icon()
 	g_free(iconB);
 }
 
+extern int init_gtk_ok(void)
+{
+	return (!init_gtk_failed);
+}
+
 extern void InitGTK( int *argc, char ***argv )
 {
     int anBoardTemp[ 2 ][ 25 ];
@@ -2040,6 +2047,8 @@ extern void InitGTK( int *argc, char ***argv )
     fX = gtk_init_check( argc, argv ); 
     if(!fX)
 	return;
+
+    init_gtk_failed=FALSE;
 
 #if USE_BOARD3D
 	/* Initialize openGL widget library */
@@ -2249,6 +2258,8 @@ void GtkChangeLanguage()
 		getWindowGeometry(WINDOW_MAIN);
 		DestroyPanel(WINDOW_MAIN);
 		pom = NULL;
+		pwProgress = NULL;
+
 	}
 }
 
@@ -5595,6 +5606,8 @@ extern void GTKProgress( void ) {
 
 extern void GTKProgressEnd( void ) {
 
+	if (!pwProgress) /*safe guard on language change*/
+		return;
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
     gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
