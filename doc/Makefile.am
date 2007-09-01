@@ -17,13 +17,23 @@ gnubg.6: gnubgman.xml
 	cp gnubg/gnubg.6 .
 
 gnubg.html: gnubgdb.xml images/*.png
-	xsltproc -o gnubg.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl gnubgdb.xml || \
-	cp gnubg/gnubg.html .
+	xsltproc \
+		--stringparam chunker.output.encoding ISO8859-1 \
+		--stringparam  use.id.as.filename 1 \
+		--stringparam  root.filename  '' \
+		--nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/onechunk.xsl \
+		gnubgdb.xml || \
+		cp gnubg/gnubg.html .
 
 
 allabout.html: allabout.xml images/*.png
-	xsltproc -o allabout.html --nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/docbook.xsl allabout.xml || \
-	cp gnubg/allabout.html .
+	xsltproc \
+		--stringparam chunker.output.encoding ISO8859-1 \
+		--stringparam  use.id.as.filename 1 \
+		--stringparam  root.filename  '' \
+		--nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/onechunk.xsl \
+		allabout.xml || \
+		cp gnubg/allabout.html .
 
 gnubg.texi: gnubgdb.xml
 	docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err || \

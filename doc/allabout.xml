@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.docbook.org/xml/4.4/docbookx.dtd">
-<article lang="en">
+<article id="allabout" lang="en">
   <articleinfo>
     <title>All about GNU Backgammon</title>
     <copyright>
@@ -68,7 +68,7 @@
   </articleinfo>
   <sect1 id="Acknowledgments" xreflabel="Acknowledgments">
     <title>Acknowledgments</title>
-    <para>This manual is largely identical to Albert Silver's excellent <ulink url="http:http://www.bkgm.com/gnu/AllAboutGNU.html">introduction</ulink> to GNU Backgammon, which may be found on Tom Keith's <ulink url="http://www.bkgm.com">backgammon site</ulink>.</para>
+    <para>This manual is largely identical to Albert Silver's excellent <ulink url="http://www.bkgm.com/gnu/AllAboutGNU.html">introduction</ulink> to GNU Backgammon, which may be found on Tom Keith's <ulink url="http://www.bkgm.com">backgammon site</ulink>.</para>
   </sect1>
   <sect1 id="Introduction" xreflabel="Introduction">
     <title>Introduction</title>

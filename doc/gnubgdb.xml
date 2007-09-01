@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.docbook.org/xml/4.4/docbookx.dtd">
-<article lang="en">
+<article id="gnubg" lang="en">
   <articleinfo>
     <title><application moreinfo="none">GNU Backgammon</application> Manual
       V0.16</title>
@@ -3460,7 +3460,7 @@ Correct cube action: No double, beaver
           equity is much more difficult; it can either be estimated from the
           cubeless equity by using transformations as outlined by Rick Janowski
           or by constructing a neural net that directly outputs cubeful
-          equities. GNU Backgammon uses the former approach (see chapter <ulink url="http://www.gnubg.org/documentation/doku.php?id=appendix#7">Cubeful equities</ulink>).</para>
+	  equities. GNU Backgammon uses the former approach (<xref linkend="gnubg-tech_equities_cubeful"/>).</para>
       </sect3>
       <sect3 id="gnubg-tech_equities_match">
         <title>Match Winning Chance</title>
@@ -5084,9 +5084,7 @@ Correct cube action: No double, beaver
       </sect3>
       <sect3 id="gnubg-faq_abbr_epc">
         <title>epc?</title>
-        <para>See <ulink url="http://www.gnubg.org/documentation/doku.php?id=gnu_backgammon_faq#52">What does </ulink>
-          <ulink url="http://www.gnubg.org/documentation/doku.php?id=gnu_backgammon_faq#52"><emphasis>epc</emphasis></ulink>
-          <ulink url="http://www.gnubg.org/documentation/doku.php?id=gnu_backgammon_faq#52"> mean?</ulink>
+	<para>See <xref linkend="gnubg-faq_analysing_epc"/>
         </para>
         <para>
           <emphasis>This should be an internal link, not an external one. But I
