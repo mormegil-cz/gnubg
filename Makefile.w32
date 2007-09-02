@@ -1,7 +1,7 @@
 # Windows makefile
 
 CC=gcc
-DEFS = -DHAVE_CONFIG_H
+DEFS = -DHAVE_CONFIG_H -g -O3 -Wall
 FLAGS= -Wall -MD $(COMPOPT) $(DEFS)
 MINGW=$(GNU)/mingw
 
@@ -37,7 +37,7 @@ makebearoff_LIBS = \
 		   -liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
 		   -lopengl32 -lglu32 -lglut32 -lwsock32 \
 		   -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
-		   -lart_lgpl_2 -llibintl -lcairo -lcomctl32
+		   -lart_lgpl_2 -llibintl -lcairo -lcomctl32 -lgthread-2.0
 
 INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	  -I$(MINGW)/include/gtk-2.0 \
@@ -50,7 +50,9 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	  -I$(MINGW)/include/pango-1.0 \
 	  -I$(MINGW)/../Python23/include \
 	  -I$(MINGW)/include/freetype2 \
-	  -I$(MINGW)/include/libart-2.0
+	  -I$(MINGW)/include/libart-2.0 \
+	-I$(MINGW)/include/gtkglext-1.0 \
+	-I$(MINGW)/lib/gtkglext-1.0/include
 
 LIBPATH = -L./lib -L./board3d
 

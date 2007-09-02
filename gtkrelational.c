@@ -20,7 +20,7 @@
  */
 
 #include "config.h"
-
+#if USE_PYTHON
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1193,4 +1193,4 @@ extern void GtkManageRelationalEnvs(gpointer * p, guint n, GtkWidget * pw)
 	gtk_main();
 	GTKAllowStdin();
 }
-
+#endif
