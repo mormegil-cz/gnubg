@@ -1,6 +1,12 @@
+Mon Sep  3 01:18:12 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: fix buffer overflow on 64 bit platforms
+	* analysis.c, gnubg.c, multithread.c, rollout.c: add a new --debug
+	option to turn on debugging for multithreaded code.
+
 Sun Sep  2 22:20:43 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
-	*  board3d/misc3d.h, speed.h: newfiles
+	*  board3d/misc3d.h, speed.h: new files
 	* analysis.c, analysis.h, backgammon.h, board3d/drawboard3d.c,
 	board3d/fun3d.h, board3d/graph.c, board3d/gtkcolour3d.c,
 	board3d/Makefile.am, board3d/misc3d.c, board3d/widget3d.c, dice.c,

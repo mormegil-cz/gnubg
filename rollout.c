@@ -1030,6 +1030,7 @@ extern void RolloutLoopMT(void)
       if( fInterrupt )
         return;
 
+      g_debug("exclusive lock: update result for alternative");
 	  MT_Exclusive();
 
 	  if( ro_fInvert ) 
@@ -1077,6 +1078,7 @@ extern void RolloutLoopMT(void)
 	      prc -> nGamesDone = altGameCount[alt];
 
 	  MT_Release();
+      g_debug("exclusive release: update result for alternative");
 
     } /* for (alt = 0; alt < ro_alternatives; ++alt) */
 
@@ -1088,6 +1090,7 @@ extern void RolloutLoopMT(void)
        with the best move in the list. 
     */
 
+	g_debug("exclusive lock: rollout cycle update");
 	MT_Exclusive();
 
     if (show_jsds) {
@@ -1250,11 +1253,12 @@ extern void RolloutLoopMT(void)
       } /* alt = 0; alt < ro_alternatives; ++alt) */
 
     } /* if (rcRollout.fStopOnSTD && (i >= rcRollout.nMinimumGames)) */
-
-	MT_Release();
-
     if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
       break;
+
+	MT_Release();
+	g_debug("exclusive release: rollout cycle update");
+
 	}
 }
 
@@ -1268,6 +1272,7 @@ static void UpdateProgress(void)
 		int alt;
 		rolloutcontext *prc;
 
+		g_debug("exclusive lock: update progress");
 		MT_Exclusive();
 
 		for (alt = 0; alt < ro_alternatives; ++alt)
@@ -1278,6 +1283,7 @@ static void UpdateProgress(void)
 		}
 
 		MT_Release();
+		g_debug("exclusive release: update progress");
 	}
 }
 
@@ -1465,11 +1471,13 @@ fnTick = NULL;
 	ro_fInvert = fInvert;
 	ro_NextTrail = nFirstTrial;
 
+	g_debug("rollout adding tasks");
 	mt_add_tasks(MT_GetNumThreads(), TT_ROLLOUTLOOP, NULL);
 
 	ro_pfProgress = pfProgress;
 	ro_pUserData = pUserData;
 
+	g_debug("rollout waiting for tasks to complete");
 	MT_WaitForTasks(UpdateProgress, 2000);
 
 	/* Make sure final output is upto date */
@@ -2606,7 +2614,7 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
   rolloutcontext *prc;
 
   int (* anBoard)[ 2 ][ 25 ] = g_alloca (cMoves * 2 * 25 * sizeof (int));
-  int (** apBoard)[2][25] = g_alloca (cMoves * sizeof (float));
+  int (** apBoard)[2][25] = g_alloca (cMoves * sizeof (int*));
   float (** apOutput)[ NUM_ROLLOUT_OUTPUTS ] = 
     g_alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
   float (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ] =

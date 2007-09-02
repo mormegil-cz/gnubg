@@ -983,7 +983,7 @@ NumberMovesGame ( list *plGame ) {
 
 #if USE_MULTITHREAD
 
-static void UpdateProgressBar()
+static void UpdateProgressBar(void)
 {
 	ProgressValue(progress_offset + MT_GetDoneTasks());
 }
@@ -1044,6 +1044,7 @@ static int AnalyzeGame ( list *plGame )
 				pt = pParentTask;
 				pParentTask = NULL;
 			}
+			g_debug("add task: analysis");
 			MT_AddTask((Task*)pt, TRUE);
 		}
 
@@ -1057,6 +1058,7 @@ static int AnalyzeGame ( list *plGame )
 	}
 	g_assert(pl->plNext == plGame);
 
+	g_debug("wait for all task: analysis");
 	result = MT_WaitForTasks(UpdateProgressBar, 250);
 
 	fnTick = fnOld;

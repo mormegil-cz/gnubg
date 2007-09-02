@@ -6272,6 +6272,10 @@ static void init_defaults()
 
 }
 
+static void null_debug (const gchar* dom, GLogLevelFlags logflags, const gchar* message, gpointer unused)
+{
+};
+
 int main(int argc, char *argv[])
 {
 #if USE_GTK
@@ -6285,7 +6289,7 @@ int main(int argc, char *argv[])
 	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
 	int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
 	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
-	    FALSE, show_version = FALSE;
+	    FALSE, show_version = FALSE, debug = FALSE;
 
 	GOptionEntry ao[] = {
 		{"no-bearoff", 'b', 0, G_OPTION_ARG_NONE, &fNoBearoff,
@@ -6311,6 +6315,8 @@ int main(int argc, char *argv[])
 		 N_("Show version information and exit"), NULL},
 		{"window-system-only", 'w', 0, G_OPTION_ARG_NONE, &fNoTTY,
 		 N_("Ignore tty input when using window system"), NULL},
+		{"debug", 'd', 0, G_OPTION_ARG_NONE, &debug,
+		 N_("Turn on debug"), NULL},
 		{NULL}
 	};
 	GError *error = NULL;
@@ -6341,6 +6347,9 @@ int main(int argc, char *argv[])
 	}
 	if (argc > 1 && *argv[1])
 		pchMatch = matchfile_from_argv(argv[1]);
+
+	if (!debug)
+		g_log_set_handler(NULL, G_LOG_LEVEL_DEBUG, &null_debug, NULL);
 
 #ifdef WIN32
 	/* data directory: initialise to the path where gnubg is installed */
