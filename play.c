@@ -724,7 +724,7 @@ extern void AddGame( moverecord *pmr ) {
 #endif
 }
 
-void DiceRolled()
+static void DiceRolled(void)
 {
 	playSound ( SOUND_ROLL );
     

@@ -454,7 +454,7 @@ extern void AlphaBlendClip( unsigned char *puchDest, int nDestStride,
 		cx, cy );
 }
 
-extern void AlphaBlend2( unsigned char *puchDest, int nDestStride,
+static void AlphaBlend2( unsigned char *puchDest, int nDestStride,
 			 unsigned char *puchBack, int nBackStride,
 			 unsigned char *puchFore, int nForeStride,
 			 int cx, int cy ) {
@@ -2011,7 +2011,7 @@ RenderBasicCube ( const float arLight[ 3 ], const int nSize,
 
 
 
-extern void
+static void
 RenderResign( renderdata *prd, unsigned char *puch, int nStride ) {
 
   const double arColour[ 4 ] = { 1.0, 1.0, 1.0, 0.0 }; /* white */
@@ -2110,7 +2110,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 }
 
 
-extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
+static void RenderResignFaces( renderdata *prd, unsigned char *puch,
 			     int nStride, unsigned char *puchCube,
 			     int nStrideCube ) {
     int i;
@@ -2865,12 +2865,12 @@ extern void RenderFinalise( void )
 #endif
 }
 
-int TolComp(double f1, double f2)
+static int TolComp(double f1, double f2)
 {
 	return fabs(f1 - f2) < .005;
 }
 
-int ColourCompare(double c1[4], double c2[4])
+static int ColourCompare(double c1[4], double c2[4])
 {
 	return TolComp(c1[0], c2[0]) &&
 		TolComp(c1[1], c2[1]) &&
@@ -2898,7 +2898,7 @@ int MaterialCompare(Material* pMat1, Material* pMat2)
 		pMat1->alphaBlend == pMat2->alphaBlend;
 }
 
-int MaterialTextCompare(Material* pMat1, Material* pMat2)
+static int MaterialTextCompare(Material* pMat1, Material* pMat2)
 {
 	return MaterialCompare(pMat1, pMat2) &&
 		((!pMat1->textureInfo && !pMat2->textureInfo) ||

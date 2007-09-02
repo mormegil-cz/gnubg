@@ -20,6 +20,7 @@
  */
 
 #include "config.h"
+#include "speed.h"
 
 #include <isaac.h>
 #include <time.h>
@@ -38,7 +39,7 @@
 randctx rc;
 double timeTaken;
 
-void RunEvals()
+extern void RunEvals(void)
 {
 	int aanBoard[ EVALS_PER_ITERATION ][ 2 ][ 25 ];
     int i, j, k;

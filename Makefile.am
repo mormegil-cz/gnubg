@@ -14,26 +14,89 @@ INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @GTHREAD_CFLAGS@ @ESD_CFLAGS@ \
 	   @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@
 
-gnubg_SOURCES = credits.h credits.c copying.c backgammon.h gnubg.c \
-		 eval.h eval.c play.c \
-		 positionid.h positionid.c drawboard.h drawboard.c \
-		 pub_eval.c set.c show.c dice.c dice.h rollout.c \
-		 rollout.h matchequity.c matchequity.h \
-		 analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h \
-		 sgfl.c import.c import.h external.c external.h \
-		 latex.c postscript.c html.c export.h matchid.c \
-		 matchid.h text.c export.c sound.h record.c record.h \
-		 osr.c osr.h bearoffgammon.c bearoffgammon.h bearoff.c \
-		 bearoff.h \
-		 render.c render.h htmlimages.c speed.c \
-		 renderprefs.c renderprefs.h boardpos.c boardpos.h \
-		 progress.c progress.h format.c format.h formatgs.c \
-		 formatgs.h boarddim.h timer.c external_y.y \
-		 external_l.l openurl.c openurl.h mec.h \
-		 mec.c relational.h relational.c common.h sound.c file.c file.h
+gnubg_SOURCES = \
+		analysis.c \
+		analysis.h \
+		backgammon.h \
+		bearoff.c \
+		bearoffgammon.c \
+		bearoffgammon.h \
+		bearoff.h \
+		boarddim.h \
+		boardpos.c \
+		boardpos.h \
+		common.h \
+		copying.c \
+		credits.c \
+		credits.h \
+		dice.c \
+		dice.h \
+		drawboard.c \
+		drawboard.h \
+		eval.c \
+		eval.h \
+		export.c \
+		export.h \
+		external.c \
+		external.h \
+		external_l.l \
+		external_y.y \
+		file.c \
+		file.h \
+		format.c \
+		formatgs.c \
+		formatgs.h \
+		format.h \
+		gnubg.c \
+		html.c \
+		htmlimages.c \
+		import.c \
+		import.h \
+		latex.c \
+		matchequity.c \
+		matchequity.h \
+		matchid.c \
+		matchid.h \
+		mec.c \
+		mec.h \
+		multithread.h \
+		openurl.c \
+		openurl.h \
+		osr.c \
+		osr.h \
+		play.c \
+		positionid.c \
+		positionid.h \
+		postscript.c \
+		progress.c \
+		progress.h \
+		pub_eval.c \
+		record.c \
+		record.h \
+		relational.c \
+		relational.h \
+		render.c \
+		render.h \
+		renderprefs.c \
+		renderprefs.h \
+		rollout.c \
+		rollout.h \
+		set.c \
+		sgf.c \
+		sgf.h \
+		sgfl.c \
+		sgfp.c \
+		sgfp.h \
+		show.c \
+		sound.c \
+		sound.h \
+		speed.c \
+		speed.h \
+		text.c \
+		timer.c
 
 if USE_MULTITHREAD
-gnubg_SOURCES +=  multithread.c multithread.h
+gnubg_SOURCES +=  multithread.c
 endif
 
 if COMPILE_BR1
@@ -53,7 +116,10 @@ gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
 		 gtksplash.h gtkrolls.c gtkrolls.h gtktempmap.c gtktempmap.h \
 		 gtkoptions.h gtkoptions.c gtktoolbar.h gtktoolbar.c \
 		 gtkgamelist.c gtkpanels.c gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h \
-		 gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h gtkpanels.h
+		 gtkwindows.c gtkwindows.h
+if USE_PYTHON
+gnubg_SOURCES += gtkrelational.c gtkrelational.h
+endif
 endif
 
 gnubg_LDADD = -Llib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ \

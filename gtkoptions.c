@@ -49,11 +49,10 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
-static void SetSoundSettings();
-static void AddSoundWidgets(GtkWidget *container);
 #if USE_MULTITHREAD
 #include "multithread.h"
 #endif
+#include "gtkoptions.h"
 
 typedef struct _optionswidget {
 
@@ -91,6 +90,26 @@ typedef struct _optionswidget {
   GtkWidget *pwDigits;
   int fChanged;
 } optionswidget;   
+
+typedef struct _SoundDetail
+{
+	int Enabled;
+	char *Path;
+} SoundDeatil;
+SoundDeatil soundDetails[NUM_SOUNDS];
+static GtkWidget *soundFrame;
+static GtkWidget *soundEnabled;
+static GtkWidget *soundPath;
+static GtkWidget *soundPathButton;
+static GtkWidget *soundPlayButton;
+static GtkWidget *soundDefaultButton;
+static GtkWidget *soundBeepIllegal;
+static GtkWidget *soundsEnabled;
+static GtkWidget *soundList;
+static GtkWidget *pwSoundCommand;
+static int selSound;
+static int SoundSkipUpdate;
+
 
 
 static void
@@ -148,6 +167,223 @@ static void ToggleAnimation( GtkWidget *pw, GtkWidget *pwSpeed ) {
 static char *aszTutor[] = {
 	N_("Doubtful"), N_("Bad"), N_("Very bad"), NULL
 };
+
+static void SoundDefaultClicked(GtkWidget *widget, gpointer userdata)
+{
+	char *defaultSound = GetDefaultSoundFile(selSound);
+	SoundSkipUpdate = TRUE;
+	gtk_entry_set_text(GTK_ENTRY(soundPath), defaultSound);
+	g_free(soundDetails[selSound].Path);
+	soundDetails[selSound].Path = g_strdup(defaultSound);
+}
+
+static void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
+{
+	int enabled;
+	if (!GTK_WIDGET_REALIZED(soundEnabled) || !GTK_WIDGET_SENSITIVE(soundEnabled))
+		return;
+	enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundEnabled));
+	gtk_widget_set_sensitive(soundPath, enabled);
+	gtk_widget_set_sensitive(soundPathButton, enabled);
+	gtk_widget_set_sensitive(soundPlayButton, enabled);
+	gtk_widget_set_sensitive(soundDefaultButton, enabled);
+	if (!enabled) {
+		g_free(soundDetails[selSound].Path);
+		soundDetails[selSound].Path = g_strdup("");
+	}
+	else if (!*soundDetails[selSound].Path)
+		SoundDefaultClicked(0, 0);
+}
+
+static void SoundToggled(GtkWidget *pw, optionswidget *pow)
+{
+	int enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundsEnabled));
+    gtk_widget_set_sensitive(soundFrame, enabled);
+    gtk_widget_set_sensitive(soundList, enabled);
+	gtk_widget_set_sensitive(soundEnabled, enabled);
+	gtk_widget_set_sensitive(soundPath, enabled);
+	gtk_widget_set_sensitive(soundPathButton, enabled);
+	gtk_widget_set_sensitive(soundPlayButton, enabled);
+	gtk_widget_set_sensitive(soundDefaultButton, enabled);
+	if (enabled)
+	{
+		gtk_widget_grab_focus(soundList);
+		SoundEnabledClicked(0, 0);
+	}
+}
+
+static void SoundSelected(GtkTreeView *treeview, gpointer userdata)
+{
+	GtkTreePath *path;
+	gtk_tree_view_get_cursor(GTK_TREE_VIEW(treeview), &path, NULL);
+	selSound = gtk_tree_path_get_indices(path)[0];
+
+	gtk_frame_set_label(GTK_FRAME(soundFrame), sound_description[selSound]);
+	SoundSkipUpdate = TRUE;
+	gtk_entry_set_text(GTK_ENTRY(soundPath), soundDetails[selSound].Path);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundEnabled), (*soundDetails[selSound].Path) ? TRUE:FALSE);
+}
+
+static void SoundGrabFocus(GtkWidget *pw, void *dummy)
+{
+	gtk_widget_grab_focus(soundList);
+	SoundEnabledClicked(0, 0);
+}
+
+static void SoundTidy(GtkWidget *pw, void *dummy)
+{
+	unsigned int i;
+	for (i = 0; i < NUM_SOUNDS; i++) 
+	{	/* Tidy allocated memory */
+		g_free(soundDetails[i].Path);
+	}
+}
+
+static void PathChanged(GtkWidget *widget, gpointer userdata)
+{
+	if (!SoundSkipUpdate)
+	{
+		g_free(soundDetails[selSound].Path);
+		soundDetails[selSound].Path = gtk_editable_get_chars(GTK_EDITABLE(widget), 0, -1);
+	}
+	else
+		SoundSkipUpdate = FALSE;
+}
+
+static void SoundChangePathClicked(GtkWidget *widget, gpointer userdata)
+{
+	static char *lastSoundFolder = NULL;
+	char *filename = GTKFileSelect(_("Select soundfile"), "*.wav", lastSoundFolder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+	if (filename)
+	{
+		lastSoundFolder = g_path_get_dirname(filename);
+		SoundSkipUpdate = TRUE;
+		gtk_entry_set_text(GTK_ENTRY(soundPath), filename);
+		g_free(soundDetails[selSound].Path);
+		soundDetails[selSound].Path = filename;
+	}
+}
+
+static void SoundPlayClicked(GtkWidget *widget, gpointer userdata)
+{
+        playSoundFile(soundDetails[selSound].Path);
+}
+
+static void
+AddSoundWidgets (GtkWidget * container)
+{
+    GtkWidget *pwvboxMain, *pwhboxTop, *pwvboxTop;
+    gint i;
+    GtkWidget *pwScrolled, *pwhbox, *pwvboxDetails, *pwLabel;
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new ();
+    GtkListStore *store = gtk_list_store_new (1, G_TYPE_STRING);
+    GtkTreeIter iter;
+
+    pwvboxMain = gtk_vbox_new (FALSE, 0);
+    pwhboxTop = gtk_hbox_new (FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwvboxMain), pwhboxTop, TRUE, TRUE, 0);
+    pwvboxTop = gtk_vbox_new (FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwhboxTop), pwvboxTop, TRUE, TRUE, 0);
+
+    pwhbox = gtk_hbox_new (FALSE, 0);
+    pwLabel = gtk_label_new (_("Sound command:"));
+    gtk_box_pack_start (GTK_BOX (pwhbox), pwLabel, FALSE, FALSE, 0);
+    pwSoundCommand = gtk_entry_new ();
+    gtk_entry_set_text (GTK_ENTRY (pwSoundCommand), sound_get_command ());
+    gtk_box_pack_start (GTK_BOX (pwhbox), pwSoundCommand, TRUE, TRUE, 0);
+
+    gtk_box_pack_start (GTK_BOX (pwvboxTop), pwhbox, FALSE, FALSE, 0);
+
+    soundBeepIllegal =
+	gtk_check_button_new_with_label (_("Beep on invalid input"));
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundBeepIllegal),
+				  fGUIBeep);
+    gtk_box_pack_start (GTK_BOX (pwvboxTop), soundBeepIllegal, FALSE, FALSE, 0);
+    gtk_tooltips_set_tip (ptt, soundBeepIllegal,
+			  _
+			  ("Emit a warning beep if invalid moves are attempted."),
+			  NULL);
+
+    soundsEnabled =
+	gtk_check_button_new_with_label (_("Enable sound effects"));
+    gtk_box_pack_start (GTK_BOX (pwvboxTop), soundsEnabled, FALSE, FALSE, 0);
+    gtk_tooltips_set_tip (ptt, soundsEnabled,
+			  _
+			  ("Have GNU Backgammon make sound effects when various events occur."),
+			  NULL);
+    g_signal_connect(G_OBJECT (soundsEnabled), "toggled",
+			G_CALLBACK (SoundToggled), NULL);
+#define SOUND_COL 0
+    for (i = 0; i < NUM_SOUNDS; i++)
+      {
+	  /* Copy sound path data to be used in dialog */
+	  soundDetails[i].Path = GetSoundFile (i);
+
+	  gtk_list_store_append (store, &iter);
+	  gtk_list_store_set (store, &iter, SOUND_COL,
+			      gettext (sound_description[i]), -1);
+      }
+
+    soundList = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
+    gtk_tree_selection_set_mode (gtk_tree_view_get_selection
+				 (GTK_TREE_VIEW (soundList)),
+				 GTK_SELECTION_BROWSE);
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (soundList), -1, _("Sound Event"), renderer, "text", SOUND_COL, NULL);
+    gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (soundList), FALSE);
+    g_signal_connect (soundList, "cursor-changed",
+		      G_CALLBACK (SoundSelected), NULL);
+    g_signal_connect (soundList, "map_event",
+		      G_CALLBACK (SoundGrabFocus), NULL);
+    g_signal_connect (soundList, "destroy", G_CALLBACK (SoundTidy), NULL);
+
+    g_object_unref (G_OBJECT (store));	/* The view now holds a reference.  We can get rid of our own reference */
+
+    pwScrolled = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pwScrolled),
+				    GTK_POLICY_AUTOMATIC,
+				    GTK_POLICY_AUTOMATIC);
+    gtk_container_add (GTK_CONTAINER (pwScrolled), soundList);
+
+    gtk_box_pack_start (GTK_BOX (pwvboxTop), pwScrolled, TRUE, TRUE, 0);
+
+    soundFrame = gtk_frame_new (NULL);
+    gtk_box_pack_start (GTK_BOX (pwvboxMain), soundFrame, FALSE, FALSE, 0);
+
+    pwvboxDetails = gtk_vbox_new (FALSE, 4);
+    gtk_container_set_border_width (GTK_CONTAINER (pwvboxDetails), 4);
+    soundEnabled = gtk_check_button_new_with_label ("Enabled");
+    g_signal_connect (soundEnabled, "clicked",
+		      G_CALLBACK (SoundEnabledClicked), NULL);
+    gtk_box_pack_start (GTK_BOX (pwvboxDetails), soundEnabled, FALSE, FALSE, 0);
+
+    pwhbox = gtk_hbox_new (FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new (_("Path:")), FALSE, FALSE, 0);
+    soundPath = gtk_entry_new ();
+    g_signal_connect (soundPath, "changed", G_CALLBACK (PathChanged), NULL);
+    gtk_box_pack_start (GTK_BOX (pwhbox), soundPath, TRUE, TRUE, 0);
+    soundPathButton = gtk_button_new_with_label ("Browse");
+    g_signal_connect (soundPathButton, "clicked",
+		      G_CALLBACK (SoundChangePathClicked), NULL);
+    gtk_box_pack_start (GTK_BOX (pwhbox), soundPathButton, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
+
+    pwhbox = gtk_hbox_new (FALSE, 4);
+    soundPlayButton = gtk_button_new_with_label ("Play Sound");
+    g_signal_connect (soundPlayButton, "clicked",
+		      G_CALLBACK (SoundPlayClicked), NULL);
+    gtk_box_pack_start (GTK_BOX (pwhbox), soundPlayButton, FALSE, FALSE, 0);
+    soundDefaultButton = gtk_button_new_with_label ("Reset Default");
+    g_signal_connect (soundDefaultButton, "clicked",
+		      G_CALLBACK (SoundDefaultClicked), NULL);
+    gtk_box_pack_start (GTK_BOX (pwhbox), soundDefaultButton, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
+
+    gtk_container_add (GTK_CONTAINER (soundFrame), pwvboxDetails);
+
+    gtk_container_add (GTK_CONTAINER (container), pwvboxMain);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundsEnabled), TRUE);	/* Set true so event fired */
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundsEnabled), fSound);
+}
 
 
 static GtkWidget *OptionsPages( optionswidget *pow ) {
@@ -1125,6 +1361,24 @@ int checkupdate_n;
            UserCommand(checkupdate_sz); \
    }
 
+static void SetSoundSettings(void)
+{
+	int i;
+	outputoff();
+	fGUIBeep = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundBeepIllegal));
+	CHECKUPDATE(soundBeepIllegal, fGUIBeep, "set gui beep %s");
+	CHECKUPDATE(soundsEnabled, fSound, "set sound enable %s");
+	for (i = 0; i < NUM_SOUNDS; i++) 
+	{
+		if (*soundDetails[i].Path)
+			SetSoundFile(i, soundDetails[i].Path);
+		else
+			SetSoundFile(i, "");
+	}
+  sound_set_command(gtk_entry_get_text(GTK_ENTRY(pwSoundCommand)));
+	outputon();
+}
+
 static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   char sz[128];
@@ -1519,34 +1773,6 @@ GTKSetOptions( void ) {
  
   gtk_main();
 }
-typedef struct _SoundDetail
-{
-	int Enabled;
-	char *Path;
-} SoundDeatil;
-SoundDeatil soundDetails[NUM_SOUNDS];
-GtkWidget *soundFrame, *soundEnabled, *soundPath, *soundPathButton, *soundPlayButton,
-	*soundDefaultButton, *soundBeepIllegal, *soundsEnabled, *soundSettings, *soundList;
-int selSound, SoundSkipUpdate;
-GtkWidget *pwSoundCommand;
-
-static void SetSoundSettings()
-{
-	int i;
-	outputoff();
-	fGUIBeep = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundBeepIllegal));
-	CHECKUPDATE(soundBeepIllegal, fGUIBeep, "set gui beep %s");
-	CHECKUPDATE(soundsEnabled, fSound, "set sound enable %s");
-	for (i = 0; i < NUM_SOUNDS; i++) 
-	{
-		if (*soundDetails[i].Path)
-			SetSoundFile(i, soundDetails[i].Path);
-		else
-			SetSoundFile(i, "");
-	}
-  sound_set_command(gtk_entry_get_text(GTK_ENTRY(pwSoundCommand)));
-	outputon();
-}
 
 static void SoundOK(GtkWidget *pw, void *dummy)
 {
@@ -1554,224 +1780,7 @@ static void SoundOK(GtkWidget *pw, void *dummy)
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 }
 
-static void SoundTidy(GtkWidget *pw, void *dummy)
-{
-	unsigned int i;
-	for (i = 0; i < NUM_SOUNDS; i++) 
-	{	/* Tidy allocated memory */
-		g_free(soundDetails[i].Path);
-	}
-}
-
-void SoundDefaultClicked(GtkWidget *widget, gpointer userdata)
-{
-	char *defaultSound = GetDefaultSoundFile(selSound);
-	SoundSkipUpdate = TRUE;
-	gtk_entry_set_text(GTK_ENTRY(soundPath), defaultSound);
-	g_free(soundDetails[selSound].Path);
-	soundDetails[selSound].Path = g_strdup(defaultSound);
-}
-
-void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
-{
-	int enabled;
-	if (!GTK_WIDGET_REALIZED(soundEnabled) || !GTK_WIDGET_SENSITIVE(soundEnabled))
-		return;
-	enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundEnabled));
-	gtk_widget_set_sensitive(soundPath, enabled);
-	gtk_widget_set_sensitive(soundPathButton, enabled);
-	gtk_widget_set_sensitive(soundPlayButton, enabled);
-	gtk_widget_set_sensitive(soundDefaultButton, enabled);
-	if (!enabled) {
-		g_free(soundDetails[selSound].Path);
-		soundDetails[selSound].Path = g_strdup("");
-	}
-	else if (!*soundDetails[selSound].Path)
-		SoundDefaultClicked(0, 0);
-}
-
-static void SoundToggled(GtkWidget *pw, optionswidget *pow)
-{
-	int enabled = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(soundsEnabled));
-    gtk_widget_set_sensitive(soundFrame, enabled);
-    gtk_widget_set_sensitive(soundList, enabled);
-	gtk_widget_set_sensitive(soundEnabled, enabled);
-	gtk_widget_set_sensitive(soundPath, enabled);
-	gtk_widget_set_sensitive(soundPathButton, enabled);
-	gtk_widget_set_sensitive(soundPlayButton, enabled);
-	gtk_widget_set_sensitive(soundDefaultButton, enabled);
-	if (enabled)
-	{
-		gtk_widget_grab_focus(soundList);
-		SoundEnabledClicked(0, 0);
-	}
-}
-
-void SoundPlayClicked(GtkWidget *widget, gpointer userdata)
-{
-        playSoundFile(soundDetails[selSound].Path);
-}
-
-void PathChanged(GtkWidget *widget, gpointer userdata)
-{
-	if (!SoundSkipUpdate)
-	{
-		g_free(soundDetails[selSound].Path);
-		soundDetails[selSound].Path = gtk_editable_get_chars(GTK_EDITABLE(widget), 0, -1);
-	}
-	else
-		SoundSkipUpdate = FALSE;
-}
-
-void SoundChangePathClicked(GtkWidget *widget, gpointer userdata)
-{
-	static char *lastSoundFolder = NULL;
-	char *filename = GTKFileSelect(_("Select soundfile"), "*.wav", lastSoundFolder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
-	if (filename)
-	{
-		lastSoundFolder = g_path_get_dirname(filename);
-		SoundSkipUpdate = TRUE;
-		gtk_entry_set_text(GTK_ENTRY(soundPath), filename);
-		g_free(soundDetails[selSound].Path);
-		soundDetails[selSound].Path = filename;
-	}
-}
-
-void SoundSelected(GtkTreeView *treeview, gpointer userdata)
-{
-	GtkTreePath *path;
-	gtk_tree_view_get_cursor(GTK_TREE_VIEW(treeview), &path, NULL);
-	selSound = gtk_tree_path_get_indices(path)[0];
-
-	gtk_frame_set_label(GTK_FRAME(soundFrame), sound_description[selSound]);
-	SoundSkipUpdate = TRUE;
-	gtk_entry_set_text(GTK_ENTRY(soundPath), soundDetails[selSound].Path);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(soundEnabled), (*soundDetails[selSound].Path) ? TRUE:FALSE);
-}
-
-static void SoundGrabFocus(GtkWidget *pw, void *dummy)
-{
-	gtk_widget_grab_focus(soundList);
-	SoundEnabledClicked(0, 0);
-}
-
-static void
-AddSoundWidgets (GtkWidget * container)
-{
-    GtkWidget *pwvboxMain, *pwhboxTop, *pwvboxTop;
-    gint i;
-    GtkWidget *pwScrolled, *pwhbox, *pwvboxDetails, *pwLabel;
-    GtkCellRenderer *renderer = gtk_cell_renderer_text_new ();
-    GtkListStore *store = gtk_list_store_new (1, G_TYPE_STRING);
-    GtkTreeIter iter;
-
-    pwvboxMain = gtk_vbox_new (FALSE, 0);
-    pwhboxTop = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (pwvboxMain), pwhboxTop, TRUE, TRUE, 0);
-    pwvboxTop = gtk_vbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (pwhboxTop), pwvboxTop, TRUE, TRUE, 0);
-
-    pwhbox = gtk_hbox_new (FALSE, 0);
-    pwLabel = gtk_label_new (_("Sound command:"));
-    gtk_box_pack_start (GTK_BOX (pwhbox), pwLabel, FALSE, FALSE, 0);
-    pwSoundCommand = gtk_entry_new ();
-    gtk_entry_set_text (GTK_ENTRY (pwSoundCommand), sound_get_command ());
-    gtk_box_pack_start (GTK_BOX (pwhbox), pwSoundCommand, TRUE, TRUE, 0);
-
-    gtk_box_pack_start (GTK_BOX (pwvboxTop), pwhbox, FALSE, FALSE, 0);
-
-    soundBeepIllegal =
-	gtk_check_button_new_with_label (_("Beep on invalid input"));
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundBeepIllegal),
-				  fGUIBeep);
-    gtk_box_pack_start (GTK_BOX (pwvboxTop), soundBeepIllegal, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, soundBeepIllegal,
-			  _
-			  ("Emit a warning beep if invalid moves are attempted."),
-			  NULL);
-
-    soundsEnabled =
-	gtk_check_button_new_with_label (_("Enable sound effects"));
-    gtk_box_pack_start (GTK_BOX (pwvboxTop), soundsEnabled, FALSE, FALSE, 0);
-    gtk_tooltips_set_tip (ptt, soundsEnabled,
-			  _
-			  ("Have GNU Backgammon make sound effects when various events occur."),
-			  NULL);
-    g_signal_connect(G_OBJECT (soundsEnabled), "toggled",
-			G_CALLBACK (SoundToggled), NULL);
-#define SOUND_COL 0
-    for (i = 0; i < NUM_SOUNDS; i++)
-      {
-	  /* Copy sound path data to be used in dialog */
-	  soundDetails[i].Path = GetSoundFile (i);
-
-	  gtk_list_store_append (store, &iter);
-	  gtk_list_store_set (store, &iter, SOUND_COL,
-			      gettext (sound_description[i]), -1);
-      }
-
-    soundList = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
-    gtk_tree_selection_set_mode (gtk_tree_view_get_selection
-				 (GTK_TREE_VIEW (soundList)),
-				 GTK_SELECTION_BROWSE);
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (soundList), -1, _("Sound Event"), renderer, "text", SOUND_COL, NULL);
-    gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (soundList), FALSE);
-    g_signal_connect (soundList, "cursor-changed",
-		      G_CALLBACK (SoundSelected), NULL);
-    g_signal_connect (soundList, "map_event",
-		      G_CALLBACK (SoundGrabFocus), NULL);
-    g_signal_connect (soundList, "destroy", G_CALLBACK (SoundTidy), NULL);
-
-    g_object_unref (G_OBJECT (store));	/* The view now holds a reference.  We can get rid of our own reference */
-
-    pwScrolled = gtk_scrolled_window_new (NULL, NULL);
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pwScrolled),
-				    GTK_POLICY_AUTOMATIC,
-				    GTK_POLICY_AUTOMATIC);
-    gtk_container_add (GTK_CONTAINER (pwScrolled), soundList);
-
-    gtk_box_pack_start (GTK_BOX (pwvboxTop), pwScrolled, TRUE, TRUE, 0);
-
-    soundFrame = gtk_frame_new (NULL);
-    gtk_box_pack_start (GTK_BOX (pwvboxMain), soundFrame, FALSE, FALSE, 0);
-
-    pwvboxDetails = gtk_vbox_new (FALSE, 4);
-    gtk_container_set_border_width (GTK_CONTAINER (pwvboxDetails), 4);
-    soundEnabled = gtk_check_button_new_with_label ("Enabled");
-    g_signal_connect (soundEnabled, "clicked",
-		      G_CALLBACK (SoundEnabledClicked), NULL);
-    gtk_box_pack_start (GTK_BOX (pwvboxDetails), soundEnabled, FALSE, FALSE, 0);
-
-    pwhbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (pwhbox), gtk_label_new (_("Path:")), FALSE, FALSE, 0);
-    soundPath = gtk_entry_new ();
-    g_signal_connect (soundPath, "changed", G_CALLBACK (PathChanged), NULL);
-    gtk_box_pack_start (GTK_BOX (pwhbox), soundPath, TRUE, TRUE, 0);
-    soundPathButton = gtk_button_new_with_label ("Browse");
-    g_signal_connect (soundPathButton, "clicked",
-		      G_CALLBACK (SoundChangePathClicked), NULL);
-    gtk_box_pack_start (GTK_BOX (pwhbox), soundPathButton, FALSE, FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
-
-    pwhbox = gtk_hbox_new (FALSE, 4);
-    soundPlayButton = gtk_button_new_with_label ("Play Sound");
-    g_signal_connect (soundPlayButton, "clicked",
-		      G_CALLBACK (SoundPlayClicked), NULL);
-    gtk_box_pack_start (GTK_BOX (pwhbox), soundPlayButton, FALSE, FALSE, 0);
-    soundDefaultButton = gtk_button_new_with_label ("Reset Default");
-    g_signal_connect (soundDefaultButton, "clicked",
-		      G_CALLBACK (SoundDefaultClicked), NULL);
-    gtk_box_pack_start (GTK_BOX (pwhbox), soundDefaultButton, FALSE, FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
-
-    gtk_container_add (GTK_CONTAINER (soundFrame), pwvboxDetails);
-
-    gtk_container_add (GTK_CONTAINER (container), pwvboxMain);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundsEnabled), TRUE);	/* Set true so event fired */
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (soundsEnabled), fSound);
-}
-
-extern void GTKSound()
+extern void GTKSound(void)
 {
 	GtkWidget *pwDialog;
 	pwDialog = GTKCreateDialog(_("GNU Backgammon - Sound options"), DT_QUESTION,

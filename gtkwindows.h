@@ -55,7 +55,7 @@ extern char* GTKGetInput(char* title, char* prompt);
 
 extern int GTKMessage( char *sz, dialogtype dt );
 extern void GTKSetCurrentParent(GtkWidget *parent);
-extern GtkWidget *GTKGetCurrentParent();
+extern GtkWidget *GTKGetCurrentParent(void);
 
 typedef enum _warnings { 
   WARN_FULLSCREEN_EXIT=0, WARN_QUICKDRAW_MODE, WARN_SET_SHADOWS, 

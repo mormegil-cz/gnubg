@@ -57,9 +57,10 @@ struct _CustomCellRendererMovelistClass
 	GtkCellRendererClass parent_class;
 };
 
+extern GtkCellRenderer * custom_cell_renderer_movelist_new (void);
 
-GType                custom_cell_renderer_movelist_get_type (void);
-GtkCellRenderer     *custom_cell_renderer_movelist_new (void);
-void custom_cell_renderer_invalidate_size();
+extern GtkStyle *psHighlight;
+extern float rBest;
 
+extern void custom_cell_renderer_invalidate_size(void);
 #endif /* _custom_cell_renderer_movelistbar_included_ */

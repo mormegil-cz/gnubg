@@ -315,7 +315,7 @@ static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 	}
 }
 
-void CancelRolls(GtkWidget* pButton)
+static void CancelRolls(GtkWidget* pButton)
 {
 	fInterrupt = TRUE;
 	gtk_widget_set_sensitive(pButton, FALSE);

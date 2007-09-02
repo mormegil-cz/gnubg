@@ -34,13 +34,6 @@
 #include "common.h"
 
 #include <glib.h>
-#if USE_GTK
-#include <gtk/gtk.h>
-extern GtkWidget* pwBoard;
-extern int fX, fNeedPrompt;
-extern unsigned int nDelay;
-extern guint nNextTurn; /* GTK idle function */
-#endif
 
 #define MAX_CUBE ( 1 << 12 )
 
@@ -452,18 +445,6 @@ extern void ProgressValue ( int iValue );
 extern void ProgressValueAdd ( int iValue );
 extern void ProgressEnd( void );
 
-extern void UserCommand( char* sz );
-#if USE_GTK
-extern gint NextTurnNotify( gpointer p );
-extern void HandleXAction( void );
-#if HAVE_LIBREADLINE
-extern int fReadingCommand;
-extern void ProcessInput( char* sz );
-#endif
-extern void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
-extern void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
-#endif
-
 extern int
 AnalyzeMove ( moverecord* pmr, matchstate* pms, const list* plGame, statcontext* psc,
               const evalsetup* pesChequer, evalsetup* pesCube,
@@ -505,7 +486,7 @@ InvalidateStoredCube( void );
 
 #define VERSION_STRING "GNU Backgammon " VERSION
 
-extern char *GetBuildInfoString();
+extern char *GetBuildInfoString(void);
 extern const char *szHomeDirectory;
 
 
@@ -1056,4 +1037,11 @@ extern char * getInstallDir( void );
 #define PKGDATADIR getInstallDir()
 #endif
 
+
+extern double get_time(void);
+
+extern char* CheckCommand(char *sz, command *ac);
+extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
+extern command *FindHelpCommand( command *pcBase, char *sz,
+				 char *pchCommand, char *pchUsage );
 #endif

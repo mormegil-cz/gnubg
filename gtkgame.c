@@ -86,7 +86,7 @@
 #define TOOLBAR_ACTION_OFFSET 10000
 #define MENU_OFFSET 50
 
-void DockPanels();
+char *newLang;
 
 #if !HAVE_GTK_OPTION_MENU_GET_HISTORY
 extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
@@ -106,25 +106,6 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
 	    return -1;
     } else
 	return -1;
-}
-#endif
-
-#if USE_PYTHON
-static void ClearText(GtkTextView* pwText)
-{
-  gtk_text_buffer_set_text(gtk_text_view_get_buffer(pwText), "", -1);
-}
-
-static char* GetText(GtkTextView* pwText)
-{
-  GtkTextIter start, end;
-  GtkTextBuffer *buffer = gtk_text_view_get_buffer(pwText);
-	char *pch;
-
-  gtk_text_buffer_get_start_iter(buffer, &start);
-  gtk_text_buffer_get_end_iter(buffer, &end);
-	pch = gtk_text_buffer_get_text(buffer, &start, &end, FALSE);
-  return pch;
 }
 #endif
 
@@ -299,46 +280,37 @@ static char *aszCommands[ NUM_CMDS ] = {
 };
 enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE, TOGGLE_THEORY, TOGGLE_COMMAND };
 
-static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw );
-static void CopyAsIDs( gpointer *p, guint n, GtkWidget *pw );
-static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw );
-#if USE_PYTHON
-static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw );
-static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw );
-static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw );
-#endif
-static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
-static void NewClicked( gpointer *p, guint n, GtkWidget *pw );
-static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
-static void SetLanguage( gpointer *p, guint n, GtkWidget *pw );
-static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
-static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
-static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
-static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
-static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
-static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw );
-#if USE_BOARD3D
-static void SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw );
-#endif
-static void TogglePanel ( gpointer *p, guint n, GtkWidget *pw );
+typedef struct _analysiswidget {
 
-/* Game list functions */
-extern void GL_Freeze();
-extern void GL_Thaw();
-extern void GL_SetNames();
+  evalsetup esChequer;
+  evalsetup esCube; 
+  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+
+  GtkAdjustment *padjMoves;
+  GtkAdjustment *apadjSkill[5], *apadjLuck[4];
+  GtkWidget *pwMoves, *pwCube, *pwLuck;
+  GtkWidget *pwEvalCube, *pwEvalChequer;
+  GtkWidget *apwAnalysePlayers[ 2 ];
+    
+} analysiswidget;
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 GtkWidget *pwGrab;
 GtkWidget *pwOldGrab;
 
-GtkWidget *pwBoard, *pwMain = NULL, *pwMenuBar;
+GtkWidget *pwBoard;
+GtkWidget *pwMain = NULL;
+GtkWidget *pwMenuBar;
 GtkWidget *pwToolbar;
 
 GtkWidget *pom = 0;
-static GtkWidget *pwStatus, *pwProgress;
-GtkWidget *pwMessageText, *pwPanelVbox, *pwAnalysis, *pwCommentary;
+static GtkWidget *pwStatus;
+static GtkWidget *pwProgress;
+GtkWidget *pwMessageText;
+GtkWidget *pwPanelVbox;
+GtkWidget *pwAnalysis;
+GtkWidget *pwCommentary;
 static moverecord *pmrAnnotation;
-moverecord *pmrCurAnn;
 GtkAccelGroup *pagMain;
 GtkTooltips *ptt;
 GtkItemFactory *pif;
@@ -352,13 +324,27 @@ int frozen = FALSE;
 
 static guint nStdin, nDisabledCount = 1;
 
+/* Save state of windows for full screen */
+int showingPanels, showingIDs, maximised;
 
 
-int grabIdSignal;
-int suspendCount = 0;
-GtkWidget* grabbedWidget;	/* for testing */
+static int grabIdSignal;
+static int suspendCount = 0;
+static GtkWidget* grabbedWidget;	/* for testing */
 
-extern void GTKSuspendInput()
+/* Language selection code */
+static GtkWidget *curSel;
+static GtkWidget *pwLangDialog, *pwLangRadio1, *pwLangRadio2, *pwLangTable;
+
+static GtkWidget *pwHelpTree, *pwHelpLabel;
+
+GtkWidget *hpaned;
+static GtkWidget *pwGameBox;
+static GtkWidget *pwPanelGameBox;
+static GtkWidget *pwEventBox;
+static int panelSize = 325;
+
+extern void GTKSuspendInput(void)
 {
 	if (suspendCount == 0)
 	{	/* Grab events so that the board window knows this is a re-entrant
@@ -374,7 +360,7 @@ extern void GTKSuspendInput()
 	suspendCount++;
 }
 
-extern void GTKResumeInput()
+extern void GTKResumeInput(void)
 {
 	g_assert(suspendCount > 0);
 	suspendCount--;
@@ -1406,10 +1392,7 @@ static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
 	fFinishedPopping = TRUE;
 }
 
-GtkWidget *hpaned, *pwGameBox, *pwPanelGameBox, *pwEventBox;
-int panelSize = 325;
-
-extern int GetPanelSize()
+extern int GetPanelSize(void)
 {
     if (!fFullScreen && fX && GTK_WIDGET_REALIZED(pwMain))
 	{
@@ -1503,7 +1486,7 @@ static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
 }
 
-GtkWidget* firstChild(GtkWidget* widget)
+static GtkWidget* firstChild(GtkWidget* widget)
 {
 	return g_list_nth_data(gtk_container_get_children(GTK_CONTAINER(widget)), 0);
 }
@@ -1629,1529 +1612,372 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 	return FALSE;
 }
 
-GtkItemFactoryEntry aife[] = {
-	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
-		"<StockItem>", GTK_STOCK_NEW
-	},
-	{ N_("/_File/_Open..."), "<control>O", GTKOpen, 0, 
-		"<StockItem>", GTK_STOCK_OPEN
-	},
-	{ N_("/_File/_Load _Commands File..."), NULL, LoadCommands, 0, NULL },
-	{ N_("/_File/_Save..."), "<control>S", GTKSave, 0, 
-		"<StockItem>", GTK_STOCK_SAVE
-	},
-	{ N_("/_File/_Export..."), NULL, GTKExport, 0, NULL },
-	{ N_("/_File/Generate _HTML Images..."), NULL, ExportHTMLImages, 0,
-	  NULL },
-	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT,
-		"<StockItem>", GTK_STOCK_QUIT
-	},
-	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, 
-		"<StockItem>", GTK_STOCK_UNDO
-	},
-	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
-
-	{ N_("/_Edit/_Copy"), "<control>C", CopyText, 0,
-		"<StockItem>", GTK_STOCK_COPY
-	},
-
-	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Edit/Copy as/Position as ASCII"), NULL,
-	  CommandCopy, 0, NULL },
-	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
-	  CopyAsGOL, 0, NULL },
-	{ N_("/_Edit/Copy as/Position and Match IDs"), NULL,
-	  CopyAsIDs, 0, NULL },
-
-	{ N_("/_Edit/_Paste"), "<control>V", PasteText, 0,
-		"<StockItem>", GTK_STOCK_PASTE
-	},
-	{ N_("/_View"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_View/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
-	  "<CheckItem>" },
-	{ N_("/_View/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
-	  "<CheckItem>" },
-	{ N_("/_View/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
-	  "<CheckItem>" },
-	{ N_("/_View/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
-	  "<CheckItem>" },
-	{ N_("/_View/_Theory"), NULL, TogglePanel, TOGGLE_THEORY,
-	  "<CheckItem>" },
-	{ N_("/_View/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
-	  "<CheckItem>" },
-        { N_("/_View/_Python shell (IDLE)..."),  
-                           NULL, PythonShell, 0, NULL },
-	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_View/_Dock panels"), NULL, ToggleDockPanels, 0, "<CheckItem>" },
-	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL },
-	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL },
-	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>"},
-	{ N_("/_View/_Toolbar/Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
-	  "<RadioItem>" },
-	{ N_("/_View/_Toolbar/Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
-	  "/View/Toolbar/Text only" },
-	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
-	  "/View/Toolbar/Text only" },
-	{ N_("/_View/Full screen"), NULL, DoFullScreenMode, 0, "<CheckItem>" },
-#if USE_BOARD3D
-	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_View/Switch to xD view"), NULL, SwitchDisplayMode, TOOLBAR_ACTION_OFFSET + MENU_OFFSET, NULL },
-#endif
-	{ N_("/_Game"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL },
-	{ N_("/_Game/_Finish move"), "<control>F", FinishMove, 0, NULL },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL },
-	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE,
-		"<StockItem>", GTK_STOCK_APPLY
-	},
-	{ N_("/_Game/Dro_p"), "<control>P", Command, CMD_DROP,
-		"<StockItem>", GTK_STOCK_CANCEL
-	},
-	{ N_("/_Game/B_eaver"), NULL, Command, CMD_REDOUBLE, NULL },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/Re_sign"), NULL, GTKResign, 0, NULL },
-        { N_("/_Game/_Agree to resignation"), NULL, Command, CMD_AGREE,
-		"<StockItem>", GTK_STOCK_APPLY
-	},
-	{ N_("/_Game/De_cline resignation"), 
-          NULL, Command, CMD_DECLINE,
-		"<StockItem>", GTK_STOCK_CANCEL
-	},
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/Play computer turn"), NULL, Command, CMD_PLAY, NULL },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/Swap players"), NULL, Command, CMD_SWAP_PLAYERS, NULL },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/Set cube..."), NULL, GTKSetCube, 0, NULL },
-	{ N_("/_Game/Set _dice..."), NULL, GTKSetDice, 0, NULL },
-	{ N_("/_Game/Set _turn"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Game/Set turn/0"), 
-          NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
-	{ N_("/_Game/Set turn/1"), NULL, Command, CMD_SET_TURN_1,
-	  "/Game/Set turn/0" },
-	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Game/Match information..."), NULL, GTKMatchInfo, 0, NULL },
-	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
-	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
-		"<StockItem>", GTK_STOCK_DIALOG_INFO
-	},
-	{ N_("/_Analyse/_Rollout"), NULL, Command, CMD_ROLLOUT, NULL },
-	{ N_("/_Analyse/Rollout _cube decision"), 
-          NULL, Command, CMD_ROLLOUT_CUBE, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/Analyse move"), 
-          NULL, Command, CMD_ANALYSE_MOVE, NULL },
-	{ N_("/_Analyse/Analyse game"), 
-          NULL, Command, CMD_ANALYSE_GAME, NULL },
-	{ N_("/_Analyse/Analyse match"), 
-          NULL, Command, CMD_ANALYSE_MATCH, NULL },
-	{ N_("/_Analyse/Analyse session"), 
-          NULL, Command, CMD_ANALYSE_SESSION, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-        { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>" },
-        { N_("/_Analyse/Clear analysis/Move"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_MOVE, 
-		"<StockItem>", GTK_STOCK_CLEAR
-	},
-        { N_("/_Analyse/Clear analysis/_Game"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_GAME,
-		"<StockItem>", GTK_STOCK_CLEAR
-	},
-        { N_("/_Analyse/Clear analysis/_Match"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_MATCH,
-		"<StockItem>", GTK_STOCK_CLEAR
-	},
-        { N_("/_Analyse/Clear analysis/_Session"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_SESSION,
-		"<StockItem>", GTK_STOCK_CLEAR
-	},
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/Game statistics"), NULL, Command,
-          CMD_SHOW_STATISTICS_GAME, NULL },
-	{ N_("/_Analyse/Match statistics"), NULL, Command,
-          CMD_SHOW_STATISTICS_MATCH, NULL },
-	{ N_("/_Analyse/Session statistics"), NULL, Command,
-          CMD_SHOW_STATISTICS_SESSION, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/Player records"), NULL, Command,
-	  CMD_RECORD_SHOW, NULL },
-	{ N_("/_Analyse/Add to player records"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Analyse/Add to player records/Game statistics"), NULL, Command,
-	  CMD_RECORD_ADD_GAME,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-	{ N_("/_Analyse/Add to player records/Match statistics"), NULL,
-	  Command, CMD_RECORD_ADD_MATCH,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
-	  Command, CMD_RECORD_ADD_SESSION,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-#if USE_PYTHON
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-        { N_("/_Analyse/Relational database/Add match or session"), NULL,
-          GtkRelationalAddMatch, 0,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-        { N_("/_Analyse/Relational database/Show Records"), NULL,
-          GtkShowRelational, 0, NULL },
-        { N_("/_Analyse/Relational database/Manage Environments"), NULL,
-          GtkManageRelationalEnvs, 0, NULL },
-        { N_("/_Analyse/Relational database/Test"), NULL,
-          Command, CMD_RELATIONAL_TEST, NULL },
-        { N_("/_Analyse/Relational database/Help"), NULL,
-          Command, CMD_RELATIONAL_HELP, NULL },
-        { N_("/_Analyse/Relational database/Show Stats"), NULL,
-          GtkRelationalShowStats, 0, NULL },
-#endif
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/Distribution of rolls"), NULL, Command, 
-          CMD_SHOW_ROLLS, NULL },
-	{ N_("/_Analyse/Temperature Map"), NULL, Command, 
-          CMD_SHOW_TEMPERATURE_MAP, NULL },
-	{ N_("/_Analyse/Temperature Map (cube decision)"), NULL, Command, 
-          CMD_SHOW_TEMPERATURE_MAP_CUBE, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/_Race Theory"), 
-          NULL, Command, CMD_SHOW_KLEINMAN, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/_Market window"), NULL, Command, CMD_SHOW_MARKETWINDOW,
-	  NULL },
-	{ N_("/_Analyse/M_atch equity table"), NULL, Command,
-	  CMD_SHOW_MATCHEQUITYTABLE, NULL },
-	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Analyse/Evaluation engine"), NULL, Command,
-	  CMD_SHOW_ENGINE, NULL },
-	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
-	  CMD_SHOW_CALIBRATION, NULL },
-	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL },
-	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
-	  NULL },
-	{ N_("/_Settings/_Evaluation..."), NULL, SetEvaluation, 0, NULL },
-        { N_("/_Settings/E_xport..."), NULL, Command, CMD_SHOW_EXPORT,
-          NULL },
-	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL },
-	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL },
-	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
-	{ N_("/_Settings/_Language..."), NULL, SetLanguage, 0, NULL },
-	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Settings/Save settings"), 
-          NULL, Command, CMD_SAVE_SETTINGS, NULL },
-	{ N_("/_Go"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Go/Previous rol_l"), "Page_Up", 
-          Command, CMD_PREV_ROLL,
-		"<StockItem>", GTK_STOCK_GO_BACK
-	},
-	{ N_("/_Go/Next _roll"), "Page_Down",
-	  Command, CMD_NEXT_ROLL, 
-		"<StockItem>", GTK_STOCK_GO_FORWARD
-	},
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
-          Command, CMD_PREV, NULL },
-	{ N_("/_Go/Next _move"), "<shift>Page_Down", 
-          Command, CMD_NEXT, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/Previous chequer _play"), "<alt>Page_Up",
-	  Command, CMD_PREV_ROLLED, NULL },
-	{ N_("/_Go/Next _chequer play"), "<alt>Page_Down",
-	  Command, CMD_NEXT_ROLLED, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
-          Command, CMD_PREV_MARKED, NULL },
-	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
-          Command, CMD_NEXT_MARKED, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
-          Command, CMD_PREV_GAME,
-		"<StockItem>", GTK_STOCK_GOTO_FIRST
-	},
-	{ N_("/_Go/Next _game"), "<control>Page_Down",
-	  Command, CMD_NEXT_GAME,
-		"<StockItem>", GTK_STOCK_GOTO_LAST
-	},
-	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
-	{ N_("/_Help/gnubg M_anual (all about)"), NULL, Command, 
-          CMD_SHOW_MANUAL_ABOUT, NULL },
-	{ N_("/_Help/gnubg _Manual (web)"), NULL, Command, 
-          CMD_SHOW_MANUAL_WEB, NULL },
-	{ N_("/_Help/Co_pying gnubg"), NULL, Command, CMD_SHOW_COPYING, NULL },
-	{ N_("/_Help/gnubg _Warranty"), NULL, Command, CMD_SHOW_WARRANTY,
-	  NULL },
-	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Help/_Report bug"), NULL, ReportBug, 0, NULL },
-	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
-		"<StockItem>", GTK_STOCK_ABOUT
-	}
-};
-
-void CreateMainWindow()
+static void NewClicked(gpointer * p, guint n, GtkWidget * pw)
 {
-	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
-
-
-    pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-    gtk_window_maximize(GTK_WINDOW(pwMain));
-	SetPanelWidget(WINDOW_MAIN, pwMain);
-    gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
-    gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
-			      GDK_WINDOW_TYPE_HINT_NORMAL );
-    /* NB: the following call to gtk_object_set_user_data is needed
-       to work around a nasty bug in GTK+ (the problem is that calls to
-       gtk_object_get_user_data relies on a side effect from a previous
-       call to gtk_object_set_data).  Adding a call here guarantees that
-       gtk_object_get_user_data will work as we expect later.
-       FIXME: this can eventually be removed once GTK+ is fixed. */
-    gtk_object_set_user_data( GTK_OBJECT( pwMain ), NULL );
-    
-    gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
-    /* FIXME add an icon */
-    gtk_container_add( GTK_CONTAINER( pwMain ),
-		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
-
-    pagMain = gtk_accel_group_new();
-    pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pagMain );
-
-    gtk_item_factory_set_translate_func ( pif, GTKTranslate, NULL, NULL );
-
-    gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
-				   aife, NULL );
-    gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
-
-    gtk_box_pack_start( GTK_BOX( pwVbox ),
-			pwHandle = gtk_handle_box_new(),
-			FALSE, FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwHandle ),
-			pwMenuBar = gtk_item_factory_get_widget( pif,
-								 "<main>" ));
-
-   gtk_box_pack_start( GTK_BOX( pwVbox ),
-                       pwHandle = gtk_handle_box_new(), FALSE, TRUE, 0 );
-   gtk_container_add( GTK_CONTAINER( pwHandle ),
-                       pwToolbar = ToolbarNew() );
-    
-   pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
-
-   gtk_box_pack_start( GTK_BOX( pwVbox ),
-			pwGameBox = gtk_hbox_new(FALSE, 0),
-			TRUE, TRUE, 0 );
-   gtk_box_pack_start( GTK_BOX( pwVbox ),
-			hpaned = gtk_hpaned_new(),
-			TRUE, TRUE, 0 );
-
-   gtk_paned_add1(GTK_PANED(hpaned), pwPanelGameBox = gtk_hbox_new(FALSE, 0));
-   gtk_container_add(GTK_CONTAINER(pwPanelGameBox), pwEventBox = gtk_event_box_new());
-	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwEventBox), FALSE);
-
-   gtk_container_add(GTK_CONTAINER(pwEventBox), pwBoard = board_new(GetMainAppearance()));
-   g_signal_connect(G_OBJECT(pwEventBox), "button-press-event", G_CALLBACK(button_press_event),
-	   BOARD(pwBoard)->board_data);
-
-   pwPanelHbox = gtk_hbox_new(FALSE, 0);
-   gtk_paned_add2(GTK_PANED(hpaned), pwPanelHbox);
-   gtk_box_pack_start( GTK_BOX( pwPanelHbox ), pwPanelVbox = gtk_vbox_new( FALSE, 1 ), TRUE, TRUE, 0);
-
-   DockPanels();
-
-   /* Status bar */
-					
-   gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
-		      FALSE, FALSE, 0 );
-    
-    gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
-		      TRUE, TRUE, 0 );
-    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), TRUE );
-    /* It's a bit naughty to access pwStatus->label, but its default alignment
-       is ugly, and GTK gives us no other way to change it. */
-    gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
-			    0.0f, 0.5f );
-    idOutput = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
-					     "gnubg output" );
-    idProgress = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
-					       "progress" );
-    g_signal_connect( G_OBJECT( pwStatus ), "text-popped",
-			G_CALLBACK( TextPopped ), NULL );
-    
-    gtk_box_pack_start( GTK_BOX( pwHbox ),
-			pwProgress = gtk_progress_bar_new(),
-			FALSE, FALSE, 0 );
-    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
-    /* This is a kludge to work around an ugly bug in GTK: we don't want to
-       show text in the progress bar yet, but we might later.  So we have to
-       pretend we want text in order to be sized correctly, and then set the
-       format string to something so we don't get the default text. */
-    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
-
-    g_signal_connect(G_OBJECT(pwMain), "configure_event",
-			G_CALLBACK(configure_event), NULL);
-    g_signal_connect( G_OBJECT( pwMain ), "size-request",
-			G_CALLBACK( MainSize ), NULL );
-    g_signal_connect( G_OBJECT( pwMain ), "delete_event",
-			G_CALLBACK( main_delete ), NULL );
-    g_signal_connect( G_OBJECT( pwMain ), "destroy",
-			G_CALLBACK( gtk_main_quit ), NULL );
-}
-
-static void gnubg_set_default_icon()
-{
-	 gchar *iconA, *iconB;
-	 GError *error=NULL;
-	
-	iconA = g_build_filename(PKGDATADIR, "gnubg.svg", NULL);
-	iconB = g_build_filename(PKGDATADIR, "gnubg.png", NULL);
-	gtk_window_set_default_icon_from_file(iconA, &error);
-	if (error)
-	{
-		gtk_window_set_default_icon_from_file(iconB, NULL);
-		g_error_free(error);
-	}
-	g_free(iconA);
-	g_free(iconB);
-}
-
-extern void InitGTK( int *argc, char ***argv )
-{
-    int anBoardTemp[ 2 ][ 25 ];
-    int i;
-    char *sz;
-
-    gtk_set_locale();
-    sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
-    gtk_rc_add_default_file( sz  );
-    g_free(sz);
-
-    sz = g_build_filename(szHomeDirectory, "gnubg.gtkrc", NULL );
-    gtk_rc_add_default_file( sz );
-    g_free(sz);
-
-    fX = gtk_init_check( argc, argv ); 
-    if(!fX)
-	return;
-
-#if USE_BOARD3D
-	/* Initialize openGL widget library */
-    InitGTK3d(argc, argv);
-#endif
-
-    fnAction = HandleXAction;
-
-    gdk_rgb_init();
-    gdk_rgb_set_min_colors( 2 * 2 * 2 );
-    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
-    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
-
-    {
-#include "xpm/gnu.xpm"
-#include "xpm/question.xpm"
-
-	GtkIconFactory *pif = gtk_icon_factory_new();
-
-	gtk_icon_factory_add_default( pif );
-
-	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
-		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)gnu_xpm)));
-	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU_QUESTION,
-		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)question_xpm)));
-	}
-
-    ptt = gtk_tooltips_new();
-
-    sz = g_build_filename (szHomeDirectory, "gnubgmenurc", NULL);
-    gtk_accel_map_load( sz );
-    g_free(sz);
-
-    gnubg_set_default_icon();
-	CreateMainWindow();
-
-    ListCreate( &lOutput );
-
-    cedDialog.showHelp = 0;
-    cedDialog.numHistory = 0;
-    cedDialog.completing = 0;
-    cedDialog.modal = TRUE;
-
-    cedPanel.showHelp = 0;
-    cedPanel.numHistory = 0;
-    cedPanel.completing = 0;
-    cedPanel.modal = FALSE;
-
-{
-  GdkAtom cb = gdk_atom_intern("CLIPBOARD", TRUE);
-  clipboard = gtk_clipboard_get(cb);
-  if (!clipboard)
-    printf("Failed to get clipboard!\n");
-}
-
-	/* Clear board at startup */
-	for( i = 0; i < 25; i++ )
-		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
-	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, 0, 0, FALSE, anChequers[ms.bgv]);
-
-#if USE_BOARD3D
-    BoardData *bd = BOARD(pwBoard)->board_data;
-    /* If using 3d board initilize 3d widget */
-    if (display_is_3d(bd->rd))
-            Init3d();
-    /* If no 3d settings loaded, set appearance to first design */
-    Default3dSettings(bd);
-#endif
-}
-
-static gint python_run_file (gpointer file)
-{ 
-        g_assert(file);
-	char *pch;
-        pch = g_strdup_printf(">import sys;"
-		   "sys.argv=['','-n', '%s'];"
-		   "import idlelib.PyShell;" "idlelib.PyShell.main()", (char *)file);
-	UserCommand(pch);
-	g_free(pch);
-        g_free(file);
-        return FALSE;
-}
-
-enum {RE_NONE, RE_LANGUAGE_CHANGE};
-
-int reasonExited;
-
-extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, char *match )
-{
-	do
-	{
-		reasonExited = RE_NONE;
-
-		GTKSet( &ms.fCubeOwner );
-		GTKSet( &ms.nCube );
-		GTKSet( ap );
-		GTKSet( &ms.fTurn );
-		GTKSet( &ms.gs );
-	    
-		PushSplash ( pwSplash, 
-					_("Rendering"), _("Board"), 0 );
-
-		GTKAllowStdin();
-	    
-		if( fTTY ) {
-#if HAVE_LIBREADLINE
-			fReadingCommand = TRUE;
-			rl_callback_handler_install( FormatPrompt(), ProcessInput );
-			atexit( rl_callback_handler_remove );
-#else
-			Prompt();
-#endif
-		}
-
-		/* Show everything */
-		gtk_widget_show_all( pwMain );
-
-		/* Make sure toolbar looks correct */
-		SetToolbarStyle(nToolbarStyle);
-
-#if USE_BOARD3D
-	{
-		BoardData *bd = BOARD( pwBoard )->board_data;
-		BoardData3d *bd3d = bd->bd3d;
-		renderdata *prd = bd->rd;
-
-		SetSwitchModeMenuText();
-		DisplayCorrectBoardType(bd, bd3d, prd);
-	}
-#endif
-
-		DestroySplash ( pwSplash );
-		pwSplash = NULL;
-
-		/* Display any other windows now */
-		DisplayWindows();
-
-		/* Make sure some things stay hidden */
-		if (!ArePanelsDocked())
-		{
-			gtk_widget_hide(hpaned);
-			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
-			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
-			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
-		}
-		else if (ArePanelsShowing())
-			gtk_widget_hide(pwGameBox);
-
-		/* Make sure main window is on top */
-		gdk_window_raise(pwMain->window);
-
-		/* force update of board; needed to display board correctly if user
-			has special settings, e.g., clockwise or nackgammon */
-		ShowBoard();
-
-		if (fFullScreen)
-		{	/* Change to full screen (but hide warning) */
-			int temp = warningEnabled[WARN_FULLSCREEN_EXIT];
-			warningEnabled[WARN_FULLSCREEN_EXIT] = FALSE;
-			FullScreenMode(TRUE);
-			warningEnabled[WARN_FULLSCREEN_EXIT] = temp;
-		}
-
-                if (match)
-                {
-                        CommandLoadMatch(match);
-                        g_free(match);
-                        match = NULL;
-                }
-
-                if (commands)
-                {
-                        CommandLoadCommands(commands);
-                        g_free(commands);
-                        commands = NULL;
-                }
-
-                if (python_script)
-                {
-#ifdef WIN32
-                        outputerrf(_("The windows gtk interface doesn't support the '-p' option. Use the cl interface instead"));
-#else
-                        g_idle_add( python_run_file, g_strdup(python_script) );
-#endif
-                        g_free(python_script);
-                        python_script = NULL;
-                }
-
-		gtk_main();
-
-		if (reasonExited == RE_LANGUAGE_CHANGE)
-		{	/* Recreate main window with new language */
-			CreateMainWindow();
-			setWindowGeometry(WINDOW_MAIN);
-		}
-	} while (reasonExited != RE_NONE);
-}
-
-void GtkChangeLanguage()
-{
-	gtk_set_locale();
-	if (pwMain && GTK_WIDGET_REALIZED(pwMain))
-	{
-		reasonExited = RE_LANGUAGE_CHANGE;
-
-		ClosePanels();
-		getWindowGeometry(WINDOW_MAIN);
-		DestroyPanel(WINDOW_MAIN);
-		pom = NULL;
-		pwProgress = NULL;
-
-	}
-}
-
-extern void ShowList( char *psz[], char *szTitle, GtkWidget *parent)
-{
-    GtkWidget *pwDialog, *pwList, *pwScroll;
-
-	pwDialog = GTKCreateDialog(szTitle, DT_INFO, parent, DIALOG_FLAG_MODAL, NULL, NULL);
-
-    pwList = gtk_list_new();
-    while( *psz )
-	gtk_container_add( GTK_CONTAINER( pwList ),
-			   gtk_list_item_new_with_label( *psz++ ) );
-    
-	pwScroll = gtk_scrolled_window_new( NULL, NULL );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScroll ),
-				    GTK_POLICY_AUTOMATIC,
-				    GTK_POLICY_AUTOMATIC );
-    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScroll ),
-					   pwList );
-    
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwScroll);
-    
-	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
-
-    gtk_widget_show_all( pwDialog );
-	gtk_main();
-}
-
-extern void OK( GtkWidget *pw, int *pf ) {
-
-    if( pf )
-	*pf = TRUE;
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-
-/*
- * put up a tutor window with a message about how bad the intended
- * play is. Allow selections:
- * Continue (play it anyway)
- * Cancel   (rethink)
- * returns TRUE if play it anyway
- */
-
-static void TutorEnd( GtkWidget *pw, int *pf ) {
-
-    if( pf )
-	*pf = TRUE;
-    
-	fTutor = FALSE;
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-
-static void
-TutorHint ( GtkWidget *pw, void *unused ) {
-
-  gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
-  UserCommand ( "hint" );
-
-}
-
-static void
-TutorRethink ( GtkWidget *pw, void *unused ) {
-
-#if USE_BOARD3D
-	RestrictiveRedraw();
-#endif
-  gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
-  ShowBoard ();
-
-}
-
-extern int GtkTutor ( char *sz )
-{
-    int f = FALSE;
-    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor,
-          *pwButtons, *pwPrompt, *pwHint;
-
-	pwTutorDialog = GTKCreateDialog( _("GNU Backgammon - Tutor"),
-		DT_GNUQUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(OK), (void*)&f);
-
-	pwOK = DialogArea(pwTutorDialog, DA_OK);
-	gtk_button_set_label(GTK_BUTTON(pwOK), _("Play Anyway"));
-
-	pwCancel = gtk_button_new_with_label( _("Rethink") );
-	pwEndTutor = gtk_button_new_with_label ( _("End Tutor Mode") );
-	pwHint = gtk_button_new_with_label ( _("Hint") );
-	pwButtons = DialogArea(pwTutorDialog, DA_BUTTONS);
-
-	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
-	g_signal_connect( G_OBJECT( pwCancel ), "clicked",
-				   G_CALLBACK( TutorRethink ),
-				   (void *) &f );
-
-	gtk_container_add( GTK_CONTAINER( pwButtons ), pwEndTutor );
-	g_signal_connect( G_OBJECT( pwEndTutor ), "clicked",
-				   G_CALLBACK( TutorEnd ), (void *) &f );
-
-	gtk_container_add( GTK_CONTAINER( pwButtons ), pwHint );
-	g_signal_connect( G_OBJECT( pwHint ), "clicked",
-				   G_CALLBACK( TutorHint ), (void *) &f );
-    
-    pwPrompt = gtk_label_new( sz );
-
-    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
-    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwTutorDialog, DA_MAIN ) ),
-		       pwPrompt );
-    
-    gtk_window_set_resizable( GTK_WINDOW( pwTutorDialog ), FALSE);
-    gtk_widget_show_all( pwTutorDialog );
-    
-    /* This dialog should be REALLY modal -- disable "next turn" idle
-       processing and stdin handler, to avoid reentrancy problems. */
-    if( nNextTurn ) 
-      g_source_remove( nNextTurn );
-    
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-    
-    if( nNextTurn ) 
-      nNextTurn = g_idle_add( NextTurnNotify, NULL );
-    
-    /* if tutor mode was disabled, update the checklist */
-    if ( !fTutor) {
-      GTKSet ( (void *) &fTutor);
-    }
-    
-    return f;
-}
-
-extern void GTKOutput( char *sz ) {
-
-    if( !sz || !*sz )
-	return;
-    
-    cchOutput += strlen( sz );
-
-    ListInsert( &lOutput, sz );
-}
-
-extern void GTKOutputX( void ) {
-
-    char *sz, *pchSrc, *pchDest;
-    list *pl;
-    GtkTextBuffer *buffer;
-    GtkTextIter iter;
-
-    if( !cchOutput )
-	return;
-    
-    pchDest = sz = g_malloc( cchOutput + 2 );	/* + 2 as /n/0 may be added */
-
-    for( pl = lOutput.plNext; pl != &lOutput; pl = pl->plNext ) {
-	pchSrc = pl->p;
-
-	while( *pchSrc )
-	    *pchDest++ = *pchSrc++;
-
-	g_free( pl->p );
-    }
-
-    while( lOutput.plNext != &lOutput )
-	ListDelete( lOutput.plNext );
-
-    while( pchDest > sz && pchDest[ -1 ] == '\n' )
-	pchDest--;
-    
-    *pchDest = 0;
-
-    if( cchOutput > 80 || strchr( sz, '\n' ) ) {
-      /* Long message; display in dialog. */
-      if (!PanelShowing(WINDOW_MESSAGE))
-        GTKMessage( sz, DT_INFO );
-    }
-    else
-      /* Short message; display in status bar. */
-      gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
-    
-    if (PanelShowing(WINDOW_MESSAGE) && *sz ) {
-      strcat ( sz, "\n" );
-      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
-      gtk_text_buffer_get_end_iter (buffer, &iter);
-      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
-      gtk_text_buffer_insert( buffer, &iter, g_strchomp(sz), -1);
-      gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW(pwMessageText),
-                      gtk_text_buffer_create_mark (buffer, "last", &iter, FALSE),
-                      0.0, TRUE, 0.0, 1.0 ); }
-      
-    cchOutput = 0;
-    g_free( sz );
-}
-
-extern void GTKOutputErr( char *sz ) {
-
-    GtkTextBuffer *buffer;
-    GtkTextIter iter;
-    GTKMessage( sz, DT_ERROR );
-    
-    if (PanelShowing(WINDOW_MESSAGE)) {
-      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
-      gtk_text_buffer_get_end_iter (buffer, &iter);
-      gtk_text_buffer_insert( buffer, &iter, sz, -1);
-      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
-      gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(pwMessageText), &iter, 0.0, FALSE, 0.0, 1.0 );
-    }
-}
-
-extern void GTKOutputNew( void ) {
-
-    /* This is horribly ugly, but fFinishedPopping will never be set if
-       the progress bar leaves a message in the status stack.  There should
-       be at most one message, so we get rid of it here. */
-    gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
-    
-    fFinishedPopping = FALSE;
-    
-    do
-	gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idOutput );
-    while( !fFinishedPopping );
-}
-
-/* Show dynamic help as command entered */
-
-extern command *FindHelpCommand( command *pcBase, char *sz,
-				 char *pchCommand, char *pchUsage );
-extern char* CheckCommand(char *sz, command *ac);
-
-/* Display help for command (pStr) in widget (pwText) */
-extern void ShowHelp(GtkWidget *pwText, char* pStr)
-{
-	command *pc, *pcFull;
-	char szCommand[128], szUsage[128], szBuf[255], *cc, *pTemp;
-	command cTop = { NULL, NULL, NULL, NULL, acTop };
-        GtkTextBuffer *buffer;
-        GtkTextIter iter;
-
-	/* Copy string as token striping corrupts string */
-	pTemp = malloc(strlen(pStr) + 1);
-	strcpy(pTemp, pStr);
-	cc = CheckCommand(pTemp, acTop);
-
-        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwText));
-
-	if (cc)
-	{
-		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
-                gtk_text_buffer_set_text(buffer, szBuf, -1);
-	}
-	else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage)))
-	{
-                gtk_text_buffer_set_text(buffer, "", -1);
-                gtk_text_buffer_get_end_iter (buffer, &iter);
-		if (!*pStr)
-		{
-                        gtk_text_buffer_insert( buffer, &iter,
-				_("Available commands:\n"), -1);
-		}
-		else
-		{
-			if(!pc->szHelp )
-			{	/* The command is an abbreviation, search for the full version */
-				for( pcFull = acTop; pcFull->sz; pcFull++ )
-				{
-					if( pcFull->pf == pc->pf && pcFull->szHelp )
-					{
-						pc = pcFull;
-						strcpy(szCommand, pc->sz);
-						break;
-					}
-				}
-			}
-
-			sprintf(szBuf, "Command: %s\n", szCommand);
-                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
-                        gtk_text_buffer_insert( buffer, &iter, gettext ( pc->szHelp ), -1);
-			sprintf(szBuf, "\n\nUsage: %s", szUsage);
-                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
-
-			if(!( pc->pc && pc->pc->sz ))
-                                gtk_text_buffer_insert( buffer, &iter, "\n", -1);
-			else
-			{
-                                gtk_text_buffer_insert( buffer, &iter, _("<subcommand>\n"), -1);
-                                gtk_text_buffer_insert( buffer, &iter,
-					_("Available subcommands:\n"), -1);
-			}
-		}
-
-		pc = pc->pc;
-
-		while(pc && pc->sz)
-		{
-			if( pc->szHelp )
-			{
-				sprintf(szBuf, "%-15s\t%s\n", pc->sz, gettext ( pc->szHelp ) );
-                                gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
-			}
-			pc++;
-		}
-	}
-	free(pTemp);
-}
-
-extern void PopulateCommandHistory(struct CommandEntryData_T *pData)
-{
-	GList *glist;
-	int i;
-
-	glist = NULL;
-	for (i = 0; i < pData->numHistory; i++)
-		glist = g_list_append(glist, pData->cmdHistory[i]);
-	if (glist)
-	{
-		gtk_combo_set_popdown_strings(GTK_COMBO(pData->cmdEntryCombo), glist);
-		g_list_free(glist);
-	}
-}
-
-extern void CommandOK( GtkWidget *pw, struct CommandEntryData_T *pData )
-{
-	int i, found = -1;
-	pData->cmdString = gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 );
-
-	/* Update command history */
-
-	/* See if already in history */
-	for (i = 0; i < pData->numHistory; i++)
-	{
-		if (!strcasecmp(pData->cmdString, pData->cmdHistory[i]))
-		{
-			found = i;
-			break;
-		}
-	}
-	if (found != -1)
-	{	/* Remove old entry */
-		free(pData->cmdHistory[found]);
-		pData->numHistory--;
-		for (i = found; i < pData->numHistory; i++)
-			pData->cmdHistory[i] = pData->cmdHistory[i + 1];
-	}
-
-	if (pData->numHistory == NUM_CMD_HISTORY)
-	{
-		free(pData->cmdHistory[NUM_CMD_HISTORY - 1]);
-		pData->numHistory--;
-	}
-	for (i = pData->numHistory; i > 0; i--)
-		pData->cmdHistory[i] = pData->cmdHistory[i - 1];
-
-	pData->cmdHistory[0] = malloc(strlen(pData->cmdString) + 1);
-	strcpy(pData->cmdHistory[0], pData->cmdString);
-	pData->numHistory++;
-
-	if (pData->modal)
-		gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-	else
-	{
-		PopulateCommandHistory(pData);
-		gtk_entry_set_text(GTK_ENTRY(pData->pwEntry), "");
-	}
-
-	if (pData->cmdString)
-	{
-		UserCommand(pData->cmdString);
-		g_free(pData->cmdString);
-	}
-}
-
-extern void CommandTextChange(GtkEntry *entry, struct CommandEntryData_T *pData)
-{
-	if (pData->showHelp)
-	{
-		if (!pData->modal)
-		{	/* Make sure the message window is showing */
-			if (!PanelShowing(WINDOW_MESSAGE))
-				PanelShow(WINDOW_MESSAGE);
-		}
-		ShowHelp(pData->pwHelpText, gtk_editable_get_chars(GTK_EDITABLE(entry), 0, -1));
-	}
-}
-
-static void CreateHelpText(struct CommandEntryData_T *pData)
-{
-        GtkWidget *psw;
-	pData->pwHelpText = gtk_text_view_new ();
-	gtk_widget_set_usize(pData->pwHelpText, 400, 300);
-	psw = gtk_scrolled_window_new( NULL, NULL );
-        gtk_container_add(GTK_CONTAINER(psw), pData->pwHelpText);
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-	CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
-}
-
-extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData)
-{
-	if (!pData->pwHelpText)
-		CreateHelpText(pData);
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-	{
-		pData->showHelp = 1;
-		if (pData->modal)
-		{
-			gtk_widget_show(pData->pwHelpText);
-		}
-		CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
-	}
-	else
-	{
-		pData->showHelp = 0;
-		if (pData->modal)
-		{
-			gtk_widget_hide(pData->pwHelpText);
-		}
-	}
-	gtk_widget_grab_focus(pData->pwEntry);
-}
-
-/* Capitalize first letter of each word */
-static void Capitalize(char* str)
-{
-	int cap = 1;
-	while (*str)
-	{
-		if (cap)
-		{
-			if (*str >= 'a' && *str <= 'z')
-				*str += 'A' - 'a';
-			cap = 0;
-		}
-		else
-		{
-			if (*str == ' ')
-				cap = 1;
-			if (*str >= 'A' && *str <= 'Z')
-				*str -= 'A' - 'a';
-		}
-		str++;
-	}
-}
-
-extern gboolean CommandKeyPress(GtkWidget *widget, GdkEventKey *event, struct CommandEntryData_T *pData)
-{
-	short k = event->keyval;
-
-	if (k == KEY_TAB)
-	{	/* Tab press - auto complete */
-		command *pc;
-		char szCommand[128], szUsage[128];
-		command cTop = { NULL, NULL, NULL, NULL, acTop };
-		if ((pc = FindHelpCommand(&cTop, gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 ), szCommand, szUsage)))
-		{
-			Capitalize(szCommand);
-			gtk_entry_set_text( GTK_ENTRY( pData->pwEntry ), szCommand );
-		}
-		/* Gtk 1 not good at stoping focus moving - so just move back later */
-		pData->completing = 1;
-	}
-	return FALSE;
-}
-
-extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct CommandEntryData_T *pData)
-{
-	if (pData->completing)
-	{
-		/* Gtk 1 not good at stoping focus moving - so just move back now */
-		pData->completing = 0;
-		gtk_widget_grab_focus( pData->pwEntry );
-		gtk_editable_set_position(GTK_EDITABLE(pData->pwEntry), strlen(gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 )));
-		return TRUE;
-	}
-	else
-		return FALSE;
-}	
-
-typedef struct _newwidget {
-  GtkWidget *pwCPS, *pwML, *pwGNUvsHuman,
-      *pwHumanHuman, *pwManualDice, *pwTutorMode;
-} newwidget;
-
-static GtkWidget *
-button_from_image ( GtkWidget *pwImage ) {
-
-  GtkWidget *pw = gtk_button_new ();
-
-  gtk_container_add ( GTK_CONTAINER ( pw ), pwImage );
-
-  return pw;
-
-}
-static void UpdatePlayerSettings( newwidget *pnw ) {
-	
-  int fManDice = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice));
-  int fTM = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwTutorMode));
-  int fCPS = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwCPS));
-  int fGH = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwGNUvsHuman));
-  int fHH = 
-	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwHumanHuman));
-  
-  if(!fCPS){
-	  if (fGH){
-		  UserCommand("set player 0 gnubg");
-		  UserCommand("set player 1 human");
-	  }
-	  if (fHH){
-		  UserCommand("set player 0 human");
-		  UserCommand("set player 1 human");
-	  }
-  }
-
-  
-  if((fManDice) && (rngCurrent != RNG_MANUAL))
-	  UserCommand("set rng manual");
-  
-  if((!fManDice) && (rngCurrent == RNG_MANUAL))
-	  UserCommand("set rng mersenne");
-  
-  if((fTM) && (!fTutor))
-	  UserCommand("set tutor mode on");
-
-  if((!fTM) && (fTutor))
-	  UserCommand("set tutor mode off");
-
-}
-
-static void SettingsPressed( GtkWidget *pw, gpointer data )
-{
-	GTKSetCurrentParent(pw);
-	SetPlayers( NULL, 0, NULL);
-}
-
-static void ToolButtonPressedMS( GtkWidget *pw, newwidget *pnw ) {
-  UpdatePlayerSettings( pnw ); 
-  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-  UserCommand("new session");
-}
-
-static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
-  char sz[40];
-  int *pi;
-
-  pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pw ) );
-  sprintf(sz, "new match %d", *pi);
-  UpdatePlayerSettings( pnw );
-  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-  UserCommand(sz);
-}
-static char *get_player_type (int i) {
-	switch( ap[ i ].pt ) {
-	case PLAYER_GNU:
-            return("gnubg");
-	    break;
-	case PLAYER_HUMAN:
-            return("human");
-        default:
-            return(NULL);
-	}
-}
-
-extern int edit_new(int length)
-{
-	char sz[40];
-	char *pt[2];
-	int i;
-	int err = 0;
-	int fDisplay_save;
-
-	outputoff();
-	for (i = 0; i < 2; i++) {
-		pt[i] = get_player_type(i);
-		if (!pt[i])
-			err = 1;
-		sprintf(sz, "set player %d human", i);
-		UserCommand(sz);
-	}
-	outputon();
-	if (!err) {
-		fDisplay_save = fDisplay;
-		fDisplay = 0;
-		sprintf(sz, "new match %d", length);
-		UserCommand(sz);
-		fDisplay = fDisplay_save;
-	} else {
-		outputerrf(_
-			   ("Edit new position only allowed with human and computer players"));
-	}
-	outputoff();
-	for (i = 0; i < 2; i++) {
-		if (pt[i]) {
-			sprintf(sz, "set player %d %s", i, pt[i]);
-			UserCommand(sz);
-		}
-	}
-	outputon();
-	return (err);
-}
-
-static void edit_new_clicked(GtkWidget * pw, newwidget * pnw)
-{
-	int length =
-	    (int) gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
-	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-	edit_new(length);
-	if (!ToolbarIsEditing(NULL))
-		click_edit();
-}
-
-static GtkWidget *NewWidget( newwidget *pnw){
-  int i, j = 1 ;
-  char **apXPM[10];
-  GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwToolbar;
-  GtkWidget *pwButtons, *pwFrame, *pwVbox2; 
-#include "xpm/stock_new_all.xpm"
-#include "xpm/stock_new_money.xpm"
-  pwVbox = gtk_vbox_new(FALSE, 0);
-  pwToolbar = gtk_toolbar_new ();
-  gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
-                                GTK_ORIENTATION_HORIZONTAL );
-  gtk_toolbar_set_style ( GTK_TOOLBAR ( pwToolbar ),
-                          GTK_TOOLBAR_ICONS );
-  pwFrame = gtk_frame_new(_("Shortcut buttons"));
-  gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwFrame, TRUE, TRUE, 0);
-  gtk_container_add( GTK_CONTAINER( pwFrame ), pwToolbar);
-  gtk_container_set_border_width( GTK_CONTAINER( pwToolbar ), 4);
-  
-  /* Edit button */
-  pwButtons = gtk_button_new();
-  gtk_container_add ( GTK_CONTAINER ( pwButtons ), gtk_image_new_from_stock(GTK_STOCK_EDIT, GTK_ICON_SIZE_LARGE_TOOLBAR));
-  gtk_widget_show(pwButtons);
-
-  gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
-                   pwButtons, _("Edit position"), NULL );
-  g_signal_connect(pwButtons, "clicked", G_CALLBACK(edit_new_clicked), pnw);
-
-  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
-
-  pwButtons = button_from_image( image_from_xpm_d ( stock_new_money_xpm,
-                                                      pwToolbar ) );
-  gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
-                   pwButtons, _("Start a new money game session"), NULL );
-  g_signal_connect( G_OBJECT( pwButtons ), "clicked",
-	    G_CALLBACK( ToolButtonPressedMS ), pnw );
-
-  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
-
-  apXPM[0] = stock_new_xpm;
-  apXPM[1] = stock_new1_xpm;
-  apXPM[2] = stock_new3_xpm;
-  apXPM[3] = stock_new5_xpm;
-  apXPM[4] = stock_new7_xpm;
-  apXPM[5] = stock_new9_xpm;
-  apXPM[6] = stock_new11_xpm;
-  apXPM[7] = stock_new13_xpm;
-  apXPM[8] = stock_new15_xpm;
-  apXPM[9] = stock_new17_xpm;
-  
-  for(i = 1; i < 19; i=i+2, j++ ){			     
-     char sz[40];
-     int *pi;
-
-     sprintf(sz, _("Start a new %d point match"), i);
-     pwButtons = button_from_image( image_from_xpm_d ( apXPM[j],
-                                                      pwToolbar ) );
-     gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
-                             pwButtons, sz, NULL );
-     
-      pi = malloc ( sizeof ( int ) );
-      *pi = i;
-     gtk_object_set_data_full( GTK_OBJECT( pwButtons ), "user_data",
-                                  pi, free );
-
-     g_signal_connect( G_OBJECT( pwButtons ), "clicked",
-		    G_CALLBACK( ToolButtonPressed ), pnw );
-  }
-
-  pwFrame = gtk_frame_new(_("Match settings"));
-  pwHbox = gtk_hbox_new(FALSE, 0);
-
-  pwLabel = gtk_label_new(_("Length:"));
-  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
-  pnw->pwML = gtk_spin_button_new_with_range (0, MAXSCORE, 1);
-  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pnw->pwML), TRUE);
-
-  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwLabel, FALSE, TRUE, 0);
-  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pnw->pwML, FALSE, TRUE, 0);
-  gtk_container_add(GTK_CONTAINER(pwFrame), pwHbox);
-  gtk_container_add(GTK_CONTAINER(pwVbox), pwFrame);
-
-  /* Here the simplified player settings starts */
-  
-  pwFrame = gtk_frame_new(_("Player settings"));
-  
-  pwHbox = gtk_hbox_new(FALSE, 0);
-  pwVbox2 = gtk_vbox_new(FALSE, 0);
-
-  gtk_container_add(GTK_CONTAINER(pwHbox), pwVbox2);
-
-  pnw->pwCPS = gtk_radio_button_new_with_label( NULL, _("Current player settings"));
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwCPS, FALSE, FALSE, 0);
-  
-  pnw->pwGNUvsHuman = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS), _("GNU Backgammon vs. Human"));
-  pnw->pwHumanHuman = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS), _("Human vs. Human"));
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwGNUvsHuman, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwHumanHuman, FALSE, FALSE, 0);
-  
-  pwButtons = gtk_button_new_with_label(_("Modify player settings..."));
-  gtk_container_set_border_width(GTK_CONTAINER(pwButtons), 10);
-  
-  gtk_container_add(GTK_CONTAINER(pwVbox2), pwButtons );
-
-  g_signal_connect(G_OBJECT(pwButtons), "clicked",
-      G_CALLBACK( SettingsPressed ), NULL );
-
-  pwVbox2 = gtk_vbox_new( FALSE, 0);
-  
-  gtk_container_add(GTK_CONTAINER(pwHbox), pwVbox2);
-
-  pnw->pwManualDice = gtk_check_button_new_with_label(_("Manual dice"));
-  pnw->pwTutorMode = gtk_check_button_new_with_label(_("Tutor mode"));
-
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwManualDice, FALSE, FALSE, 0);
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwTutorMode, FALSE, FALSE, 0);
-  gtk_container_add(GTK_CONTAINER(pwFrame), pwHbox);
-  gtk_container_add(GTK_CONTAINER(pwVbox), pwFrame);
-  
-  return pwVbox;
-  
-} 
-
-static void NewOK( GtkWidget *pw, newwidget *pnw ) {
-  
-  int Mlength = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
-
-  UpdatePlayerSettings(pnw);
-
-  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-
-  char sz[40];
-  sprintf(sz, "new match %d", Mlength );
-  UserCommand(sz);
-}
-
-static void NewSet( newwidget *pnw) {
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwTutorMode ),
-                                fTutor );
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice), rngCurrent == RNG_MANUAL);
-  gtk_spin_button_set_value( GTK_SPIN_BUTTON( pnw->pwML ), nDefaultLength );
-
-}
-
-static void NewClicked( gpointer *p, guint n, GtkWidget *pw ) {
-  GTKNew();
-}
-
-extern void GTKNew( void ){
-	
-  GtkWidget *pwDialog, *pwPage;
-  newwidget nw;
-
-  pwDialog = GTKCreateDialog( _("GNU Backgammon - New"),
-			   DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK( NewOK ), &nw );
-  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
- 		        pwPage = NewWidget(&nw));
-
-  gtk_widget_show_all( pwDialog );
-
-  NewSet( &nw );
- 
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
-
+	GTKNew();
 }
 
 static void LoadCommands(gpointer * p, guint n, GtkWidget * pw)
 {
-    gchar *filename, *command;
-    filename =
-	GTKFileSelect(_("Open commands"), NULL, NULL, NULL,
-		      GTK_FILE_CHOOSER_ACTION_OPEN);
-    if (filename) {
-	command = g_strconcat("load commands \"", filename, "\"", NULL);
-	UserCommand(command);
-	g_free(command);
-	g_free(filename);
-    }
+	gchar *filename, *command;
+	filename =
+	    GTKFileSelect(_("Open commands"), NULL, NULL, NULL,
+			  GTK_FILE_CHOOSER_ACTION_OPEN);
+	if (filename) {
+		command =
+		    g_strconcat("load commands \"", filename, "\"", NULL);
+		UserCommand(command);
+		g_free(command);
+		g_free(filename);
+	}
 }
 
-extern void
-SetMET (GtkWidget * pw, gpointer p)
+static void ExportHTMLImages(gpointer * p, guint n, GtkWidget * pw)
 {
-  gchar *filename, *command;
+	GtkWidget *fc;
+	gchar *message, *expfolder, *folder, *command;
+	gint ok = FALSE;
+	fc = gtk_file_chooser_dialog_new(_
+					 ("Select top folder for html export"),
+					 NULL,
+					 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+					 GTK_STOCK_CANCEL,
+					 GTK_RESPONSE_CANCEL,
+					 GTK_STOCK_OPEN,
+					 GTK_RESPONSE_ACCEPT, NULL);
+	gtk_window_set_modal(GTK_WINDOW(fc), TRUE);
+	gtk_window_set_transient_for(GTK_WINDOW(fc), GTK_WINDOW(pwMain));
 
-  gchar *met_dir = g_build_filename(PKGDATADIR,  "met", NULL);
-  filename =
-    GTKFileSelect (_("Set match equity table"), "*.xml",
-		   met_dir, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
-  g_free(met_dir);
-
-  if (filename)
-    {
-      command = g_strconcat ("set matchequitytable \"", filename, "\"", NULL);
-      UserCommand (command);
-      g_free (command);
-      g_free (filename);
-      /* update filename on option page */
-      if (p && GTK_WIDGET_VISIBLE (p))
-	gtk_label_set_text (GTK_LABEL (p), (char *) miCurrent.szFileName);
-    }
+	while (!ok) {
+		if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_CANCEL) {
+			gtk_widget_destroy(fc);
+			return;
+		}
+		folder =
+		    gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+		if (folder) {
+			expfolder =
+			    g_build_filename(folder, "html-images", NULL);
+			if (g_file_test(expfolder, G_FILE_TEST_IS_DIR)) {
+				message =
+				    g_strdup_printf(_
+						    ("Folder html-images exists\nin %s\nOK to overwrite images?"),
+						    folder);
+				ok = GTKGetInputYN(message);
+				g_free(message);
+			} else if (mkdir(expfolder
+#ifndef WIN32
+					 , S_IRWXU
+#endif
+				   ) == 0) {
+				ok = TRUE;
+			} else {
+				message =
+				    g_strdup_printf(_
+						    ("Folder html-images can't be created\nin %s"),
+						    folder);
+				GTKMessage(message, DT_ERROR);
+				g_free(message);
+			}
+			if (ok) {
+				command =
+				    g_strconcat("export htmlimages \"",
+						expfolder, "\"", NULL);
+				UserCommand(command);
+				g_free(command);
+			}
+			g_free(expfolder);
+			g_free(folder);
+		}
+	}
+	gtk_widget_destroy(fc);
 }
 
-static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw ) {
+static void CopyAsGOL(gpointer * p, guint n, GtkWidget * pw)
+{
 
-  UserCommand("export position gol2clipboard");
+	UserCommand("export position gol2clipboard");
 
 }
 
-static void CopyAsIDs(gpointer *p, guint n, GtkWidget *pw)
-{ /* Copy the position and match ids to the clipboard */
-  char buffer[1024];
+static void CopyAsIDs(gpointer * p, guint n, GtkWidget * pw)
+{				/* Copy the position and match ids to the clipboard */
+	char buffer[1024];
 
-  sprintf(buffer, "%s %s\n%s %s\n", _("Position ID:"), PositionID(ms.anBoard),
-    _("Match ID:"), MatchIDFromMatchState(&ms));
+	sprintf(buffer, "%s %s\n%s %s\n", _("Position ID:"),
+		PositionID(ms.anBoard), _("Match ID:"),
+		MatchIDFromMatchState(&ms));
 
-  GTKTextToClipboard(buffer);
+	GTKTextToClipboard(buffer);
+}
+
+static void TogglePanel(gpointer * p, guint n, GtkWidget * pw)
+{
+	int f;
+	gnubgwindow panel = 0;
+
+	g_assert(GTK_IS_CHECK_MENU_ITEM(pw));
+
+	f = GTK_CHECK_MENU_ITEM(pw)->active;
+	switch (n) {
+	case TOGGLE_ANALYSIS:
+		panel = WINDOW_ANALYSIS;
+		break;
+	case TOGGLE_COMMENTARY:
+		panel = WINDOW_ANNOTATION;
+		break;
+	case TOGGLE_GAMELIST:
+		panel = WINDOW_GAME;
+		break;
+	case TOGGLE_MESSAGE:
+		panel = WINDOW_MESSAGE;
+		break;
+	case TOGGLE_THEORY:
+		panel = WINDOW_THEORY;
+		break;
+	case TOGGLE_COMMAND:
+		panel = WINDOW_COMMAND;
+		break;
+	default:
+		g_assert(FALSE);
+	}
+	if (f)
+		PanelShow(panel);
+	else
+		PanelHide(panel);
+
+	/* Resize screen */
+	SetMainWindowSize();
+}
+
+/* PyShell expects sys.argv to be defined. '-n' makes PyShell run without a
+ * subshell, which is needed because of some conflict with the gnubg module. */
+static void PythonShell(gpointer * p, guint n, GtkWidget * pw)
+{
+	char *pch;
+	pch =
+	    strdup(">import sys;"
+		   "sys.argv=['','-n'];"
+		   "import idlelib.PyShell;" "idlelib.PyShell.main()");
+	UserCommand(pch);
+	free(pch);
+}
+
+extern void Undo(void)
+{
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
+
+	ShowBoard();
+
+        UpdateTheoryData(BOARD( pwBoard )->board_data, TT_RETURNHITS, ms.anBoard);
+}
+
+#if USE_BOARD3D
+
+extern void SetSwitchModeMenuText(void)
+{	/* Update menu text */
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	GtkWidget *pMenuItem = gtk_item_factory_get_widget_by_action(pif, TOOLBAR_ACTION_OFFSET + MENU_OFFSET);
+	char *text;
+	if (display_is_2d(bd->rd))
+		text = _("Switch to 3D view");
+	else
+		text = _("Switch to 2D view");
+	gtk_label_set_text(GTK_LABEL(gtk_bin_get_child(GTK_BIN(pMenuItem))), text);
+	gtk_widget_set_sensitive(pMenuItem, gtk_gl_init_success);
 }
 
 static void
-ExportHTMLImages (gpointer * p, guint n, GtkWidget * pw)
+SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
 {
-  GtkWidget *fc;
-  gchar *message, *expfolder, *folder, *command;
-  gint ok = FALSE;
-  fc = gtk_file_chooser_dialog_new (_("Select top folder for html export"), NULL,
-				    GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-				    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-		                    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-				    NULL);
-  gtk_window_set_modal (GTK_WINDOW (fc), TRUE);
-  gtk_window_set_transient_for (GTK_WINDOW (fc), GTK_WINDOW (pwMain));
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	BoardData3d *bd3d = bd->bd3d;
+	renderdata *prd = bd->rd;
 
-  while (!ok)
-    {
-      if (gtk_dialog_run (GTK_DIALOG (fc)) == GTK_RESPONSE_CANCEL)
+	if (display_is_2d(prd))
 	{
-	  gtk_widget_destroy (fc);
-	  return;
+		prd->fDisplayType = DT_3D;
+		/* Reset 3d settings */
+		MakeCurrent3d(bd3d);
+		preDraw3d(bd, bd3d, prd);
+		updateOccPos(bd);	/* Make sure shadows are in correct place */
+		if (bd->diceShown == DICE_ON_BOARD)
+			setDicePos(bd, bd3d);	/* Make sure dice appear ok */
+		RestrictiveRedraw();
 	}
-      folder = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (fc));
-      if (folder)
+	else
 	{
-	  expfolder =
-		  g_build_filename (folder, "html-images", NULL);
-	  if (g_file_test (expfolder, G_FILE_TEST_IS_DIR))
-	    {
-	      message =
-		g_strdup_printf (_
-				 ("Folder html-images exists\nin %s\nOK to overwrite images?"),
-				 folder);
-	      ok = GTKGetInputYN (message);
-	      g_free (message);
-	    }
-	  else if (mkdir (expfolder
-#ifndef WIN32
-                 , S_IRWXU
-#endif
-                 ) == 0 )
-	  {
-	      ok = TRUE;
-	    }
-	  else
-	    {
-	      message =
-		g_strdup_printf (_
-				 ("Folder html-images can't be created\nin %s"),
-				 folder);
-	      GTKMessage (message, DT_ERROR);
-	      g_free (message);
-	    }
-	  if (ok)
-	    {
-	      command =
-		g_strconcat ("export htmlimages \"", expfolder, "\"", NULL);
-	      UserCommand (command);
-	      g_free (command);
-	    }
-	  g_free (expfolder);
-	  g_free (folder);
+		prd->fDisplayType = DT_2D;
+		/* Make sure 2d pixmaps are correct */
+		board_free_pixmaps(bd);
+		board_create_pixmaps(pwBoard, bd);
+		/* Make sure dice are visible if rolled */
+		if (bd->diceShown == DICE_ON_BOARD && bd->x_dice[0] <= 0)
+			RollDice2d(bd);
 	}
-    }
-  gtk_widget_destroy (fc);
+
+	DisplayCorrectBoardType(bd, bd3d, prd);
+	SetSwitchModeMenuText();
 }
+
+#endif
+static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+	short k = event->keyval;
+
+	if (k == KEY_ESCAPE)
+		FullScreenMode(FALSE);
+
+	return FALSE;
+}
+
+static void SetFullscreenWindowSettings(int panels, int ids, int maxed)
+{
+	showingPanels = panels;
+	showingIDs = ids;
+	maximised = maxed;
+}
+
+static void DoFullScreenMode(gpointer * p, guint n, GtkWidget * pw)
+{
+	BoardData *bd = BOARD(pwBoard)->board_data;
+	GtkWindow *ptl =
+	    GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
+	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
+	int showingPanels;
+	int maximised;
+	static gulong id;
+	static int changedRP, changedDP;
+
+	GtkWidget *pmiRP =
+	    gtk_item_factory_get_widget(pif, "/View/Restore panels");
+	GtkWidget *pmiDP =
+	    gtk_item_factory_get_widget(pif, "/View/Dock panels");
+
+	fFullScreen =
+	    GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget
+				(pif, "/View/Full screen"))->active;
+
+	if (fFullScreen) {
+		GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
+
+		bd->rd->fShowGameInfo = FALSE;
+
+		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP)
+		    && GTK_WIDGET_IS_SENSITIVE(pmiRP))
+			changedRP = TRUE;
+		if (pmiDP && GTK_WIDGET_VISIBLE(pmiDP)
+		    && GTK_WIDGET_IS_SENSITIVE(pmiDP))
+			changedDP = TRUE;
+
+		/* Check if window is maximized */
+		{
+			GdkWindowState state =
+			    gdk_window_get_state(GTK_WIDGET(ptl)->window);
+			maximised =
+			    ((state & GDK_WINDOW_STATE_MAXIMIZED) ==
+			     GDK_WINDOW_STATE_MAXIMIZED);
+			SetFullscreenWindowSettings(ArePanelsShowing(),
+						    bd->rd->fShowIDs,
+						    maximised);
+		}
+
+		id = g_signal_connect(G_OBJECT(ptl), "key-press-event",
+				      G_CALLBACK(EndFullScreen), 0);
+
+		gtk_widget_hide(GTK_WIDGET(bd->table));
+		gtk_widget_hide(GTK_WIDGET(bd->dice_area));
+		gtk_widget_hide(pwStatus);
+		gtk_widget_hide(pwProgress);
+
+		fFullScreen = FALSE;
+		HideAllPanels(NULL, 0, NULL);
+		fFullScreen = TRUE;
+		bd->rd->fShowIDs = 0;
+
+		gtk_widget_hide(pwToolbar);
+		gtk_widget_hide(pwHandle);
+
+		/* Make window maximal - need to restore first (so title bar is removed) */
+		if (maximised)
+			gtk_window_unmaximize(ptl);
+		gtk_window_set_decorated(ptl, FALSE);
+		gtk_window_maximize(ptl);
+		if (pmiRP)
+			gtk_widget_set_sensitive(pmiRP, FALSE);
+		if (pmiDP)
+			gtk_widget_set_sensitive(pmiDP, FALSE);
+	} else {
+		bd->rd->fShowGameInfo = TRUE;
+		gtk_widget_show(pwMenuBar);
+		gtk_widget_show(pwToolbar);
+		gtk_widget_show(pwHandle);
+		gtk_widget_show(GTK_WIDGET(bd->table));
+#if USE_BOARD3D
+		/* Only show 2d dice below board if in 2d */
+		if (display_is_2d(bd->rd))
+#endif
+			gtk_widget_show(GTK_WIDGET(bd->dice_area));
+		gtk_widget_show(pwStatus);
+		gtk_widget_show(pwProgress);
+
+		GetFullscreenWindowSettings(&showingPanels,
+					    &bd->rd->fShowIDs, &maximised);
+
+		if (g_signal_handler_is_connected(G_OBJECT(ptl), id))
+			g_signal_handler_disconnect(G_OBJECT(ptl), id);
+
+		/* Restore window */
+		if (!maximised)
+			gtk_window_unmaximize(ptl);
+		gtk_window_set_decorated(ptl, TRUE);
+
+		if (showingPanels)
+			ShowAllPanels(NULL, 0, NULL);
+
+		if (changedRP) {
+			gtk_widget_set_sensitive(pmiRP, TRUE);
+			changedRP = FALSE;
+		}
+		if (changedDP) {
+			gtk_widget_set_sensitive(pmiDP, TRUE);
+			changedDP = FALSE;
+		}
+	}
+	UpdateSetting(&bd->rd->fShowIDs);
+}
+
+extern void FullScreenMode(int state)
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	GtkWidget *pw = gtk_item_factory_get_widget(pif, "/View/Full screen");
+	if (GTK_WIDGET_REALIZED(bd->table))
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pw), state);
+}
+
+void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed)
+{
+	*panels = showingPanels;
+	*ids = showingIDs;
+	*maxed = maximised;
+}
+
+static void FinishMove(gpointer * p, guint n, GtkWidget * pw)
+{
+
+	int anMove[8];
+	char sz[65];
+
+	if (!GTKGetMove(anMove))
+		/* no valid move */
+		return;
+
+	UserCommand(FormatMove(sz, ms.anBoard, anMove));
+
+}
+
 
 typedef struct _evalwidget {
     evalcontext *pec;
@@ -3775,262 +2601,7 @@ SetEvaluation ( gpointer *p, guint n, GtkWidget *pw )
     }
 }
 
-typedef struct _playerswidget {
-    int *pfOK;
-    player *ap;
-    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEvalCube[ 2 ], *apwEvalChequer[ 2 ],
-	*apwSocket[ 2 ], *apwExternal[ 2 ];
-    char aszSocket[ 2 ][ 128 ];
-} playerswidget;
 
-static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
-
-    int i;
-
-    for( i = 0; i < 2; i++ ) {
-	gtk_widget_set_sensitive(
-	    ppw->apwEvalCube[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
-	gtk_widget_set_sensitive(
-	    ppw->apwEvalChequer[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
-	gtk_widget_set_sensitive(
-	    ppw->apwExternal[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 3 ] ) ) );
-    }
-}
-
-static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
-
-    GtkWidget *pwPage, *pw;
-    static int aiRadioButton[ PLAYER_PUBEVAL + 1 ] = { 3, 0, 1, 2 };
-    GtkWidget *pwHBox;
-    GtkWidget *pwFrame;
-    GtkWidget *pwvbox;
-
-    pwPage = gtk_vbox_new( FALSE, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
-    
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Name:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       ppw->apwName[ i ] = gtk_entry_new() );
-    gtk_entry_set_text( GTK_ENTRY( ppw->apwName[ i ] ),
-			(ppw->ap[ i ].szName) );
-    
-    gtk_container_add( GTK_CONTAINER( pwPage ),
-		       ppw->apwRadio[ i ][ 0 ] =
-		       gtk_radio_button_new_with_label( NULL, _("Human") ) );
-    
-    gtk_container_add( GTK_CONTAINER( pwPage ),
-		       ppw->apwRadio[ i ][ 1 ] =
-		       gtk_radio_button_new_with_label_from_widget(
-			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
-			   _("GNU Backgammon") ) );
-
-    pwHBox = gtk_hbox_new ( FALSE, 4 );
-    gtk_container_add ( GTK_CONTAINER ( pwPage ), pwHBox );
-
-    pwFrame = gtk_frame_new ( _("Chequer play") );
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
-
-    gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalChequer[ i ] =
-		       EvalWidget( &ppw->ap[ i ].esChequer.ec, 
-                                   (movefilter *) ppw->ap[ i ].aamf, 
-                                   NULL, TRUE ) );
-    gtk_widget_set_sensitive( ppw->apwEvalChequer[ i ],
-			      ap[ i ].pt == PLAYER_GNU );
-
-    
-    pwFrame = gtk_frame_new ( _("Cube decisions") );
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
-
-    pwvbox = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
-    
-    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         ppw->apwEvalCube[ i ] = 
-                            EvalWidget( &ppw->ap[ i ].esCube.ec, 
-                                        NULL, NULL, FALSE ),
-                         FALSE, FALSE, 0 );
-    gtk_widget_set_sensitive( ppw->apwEvalCube[ i ],
-			      ap[ i ].pt == PLAYER_GNU );
-
-    
-    gtk_container_add( GTK_CONTAINER( pwPage ),
-		       ppw->apwRadio[ i ][ 2 ] =
-		       gtk_radio_button_new_with_label_from_widget(
-			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
-			   _("Pubeval") ) );
-    
-    gtk_container_add( GTK_CONTAINER( pwPage ),
-		       ppw->apwRadio[ i ][ 3 ] =
-		       gtk_radio_button_new_with_label_from_widget(
-			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
-			   _("External") ) );
-    ppw->apwExternal[ i ] = pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
-    gtk_widget_set_sensitive( pw, ap[ i ].pt == PLAYER_EXTERNAL );
-    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Socket:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       ppw->apwSocket[ i ] = gtk_entry_new() );
-    if( ap[ i ].szSocket )
-	gtk_entry_set_text( GTK_ENTRY( ppw->apwSocket[ i ] ),
-			    ap[ i ].szSocket );
-    
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(
-	ppw->apwRadio[ i ][ aiRadioButton[ ap[ i ].pt ] ] ), TRUE );
-
-    g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 1 ] ), "toggled",
-			G_CALLBACK( PlayerTypeToggled ), ppw );
-    g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 3 ] ), "toggled",
-			G_CALLBACK( PlayerTypeToggled ), ppw );
-    
-    return pwPage;
-}
-
-static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
-
-    int i,j ;
-    static playertype apt[ 4 ] = { PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL,
-				   PLAYER_EXTERNAL };
-    *pplw->pfOK = TRUE;
-
-    for( i = 0; i < 2; i++ ) {
-	strcpyn( pplw->ap[ i ].szName, gtk_entry_get_text(
-	    GTK_ENTRY( pplw->apwName[ i ] ) ), MAX_NAME_LEN );
-	
-	for( j = 0; j < 4; j++ )
-	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
-		pplw->apwRadio[ i ][ j ] ) ) ) {
-		pplw->ap[ i ].pt = apt[ j ];
-		break;
-	    }
-	g_assert( j < 4 );
-
-	EvalOK( pplw->apwEvalChequer[ i ], pplw->apwEvalChequer[ i ] );
-	EvalOK( pplw->apwEvalCube[ i ], pplw->apwEvalCube[ i ] );
-
-	strcpyn( pplw->aszSocket[ i ], gtk_entry_get_text(
-	    GTK_ENTRY( pplw->apwSocket[ i ] ) ), 128 );
-    }
-
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-
-static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
-
-    GtkWidget *pwDialog, *pwNotebook;
-    int i, fOK = FALSE;
-    player apTemp[ 2 ];
-    playerswidget plw;
-    char sz[ 256 ];
-    
-    memcpy( apTemp, ap, sizeof ap );
-    plw.ap = apTemp;
-    plw.pfOK = &fOK;
-    
-    pwDialog = GTKCreateDialog( _("GNU Backgammon - Players"), DT_QUESTION,
-			     NULL, DIALOG_FLAG_MODAL, G_CALLBACK( PlayersOK ), &plw );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwNotebook = gtk_notebook_new() );
-    gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      PlayersPage( &plw, 0 ),
-			      gtk_label_new( _("Player 0") ) );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      PlayersPage( &plw, 1 ),
-			      gtk_label_new( _("Player 1") ) );
-    
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    if( fOK ) {
-	outputpostpone();
-
-	if (!CompareNames(apTemp[0].szName, ap[1].szName) && 
-		CompareNames(apTemp[0].szName, apTemp[1].szName))
-	{	/* Trying to swap names - change current name to avoid error */
-		sprintf(ap[1].szName, "_%s", apTemp[0].szName);
-	}
-	for( i = 0; i < 2; i++ ) {
-	    /* NB: this comparison is case-sensitive, and does not use
-	       CompareNames(), so that the user can modify the case of
-	       names. */
-	    if( strcmp( ap[ i ].szName, apTemp[ i ].szName ) ) {
-		sprintf( sz, "set player %d name %s", i, apTemp[ i ].szName );
-		UserCommand( sz );
-	    }
-	    
-	    switch( apTemp[ i ].pt ) {
-	    case PLAYER_HUMAN:
-		if( ap[ i ].pt != PLAYER_HUMAN ) {
-		    sprintf( sz, "set player %d human", i );
-		    UserCommand( sz );
-		}
-		break;
-		
-	    case PLAYER_GNU:
-		if( ap[ i ].pt != PLAYER_GNU ) {
-		    sprintf( sz, "set player %d gnubg", i );
-		    UserCommand( sz );
-		}
-
-		/* FIXME another temporary hack (should be some way to set
-		   chequer and cube parameters independently) */
-		sprintf( sz, "set player %d chequer evaluation", i );
-		SetEvalCommands( sz, &apTemp[ i ].esChequer.ec,
-				 &ap[ i ].esChequer.ec );
-                sprintf ( sz, "set player %d movefilter", i );
-                SetMovefilterCommands ( sz, apTemp[ i ].aamf, ap[ i ].aamf );
-		sprintf( sz, "set player %d cube evaluation", i );
-		SetEvalCommands( sz, &apTemp[ i ].esCube.ec,
-				 &ap[ i ].esCube.ec );
-		break;
-		
-	    case PLAYER_PUBEVAL:
-		if( ap[ i ].pt != PLAYER_PUBEVAL ) {
-		    sprintf( sz, "set player %d pubeval", i );
-		    UserCommand( sz );
-		}
-		break;
-		
-	    case PLAYER_EXTERNAL:
-		if( ap[ i ].pt != PLAYER_EXTERNAL ||
-		    strcmp( ap[ i ].szSocket, plw.aszSocket[ i ] ) ) {
-		    sprintf( sz, "set player %d external %s", i,
-			     plw.aszSocket[ i ] );
-		    UserCommand( sz );
-		}
-		break;
-	    }
-	}
-    
-	outputresume();
-    }
-}
-
-typedef struct _analysiswidget {
-
-  evalsetup esChequer;
-  evalsetup esCube; 
-  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
-
-  GtkAdjustment *padjMoves;
-  GtkAdjustment *apadjSkill[5], *apadjLuck[4];
-  GtkWidget *pwMoves, *pwCube, *pwLuck;
-  GtkWidget *pwEvalCube, *pwEvalChequer;
-  GtkWidget *apwAnalysePlayers[ 2 ];
-    
-} analysiswidget;
 
 static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
 
@@ -4312,26 +2883,2067 @@ static void AnalysisSet( analysiswidget *paw) {
 		 arLuckLevel[LUCK_VERYBAD] );
 }  
 
-static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw )
+static void SetAnalysis(gpointer * p, guint n, GtkWidget * pw)
 {
-  GtkWidget *pwDialog;
-  analysiswidget aw;
+	GtkWidget *pwDialog;
+	analysiswidget aw;
 
-  memcpy( &aw.esCube, &esAnalysisCube, sizeof( aw.esCube ) );
-  memcpy( &aw.esChequer, &esAnalysisChequer, sizeof( aw.esChequer ) );
-  memcpy( &aw.aamf, aamfAnalysis, sizeof( aw.aamf ) );
+	memcpy(&aw.esCube, &esAnalysisCube, sizeof(aw.esCube));
+	memcpy(&aw.esChequer, &esAnalysisChequer, sizeof(aw.esChequer));
+	memcpy(&aw.aamf, aamfAnalysis, sizeof(aw.aamf));
 
-  pwDialog = GTKCreateDialog( _("GNU Backgammon - Analysis Settings"),
-			   DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK( AnalysisOK ), &aw );
+	pwDialog = GTKCreateDialog(_("GNU Backgammon - Analysis Settings"),
+				   DT_QUESTION, NULL, DIALOG_FLAG_MODAL,
+				   G_CALLBACK(AnalysisOK), &aw);
 
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
+			  AnalysisPage(&aw));
+	gtk_widget_show_all(pwDialog);
+
+	AnalysisSet(&aw);
+
+	gtk_main();
+}
+
+typedef struct _playerswidget {
+    int *pfOK;
+    player *ap;
+    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEvalCube[ 2 ], *apwEvalChequer[ 2 ],
+	*apwSocket[ 2 ], *apwExternal[ 2 ];
+    char aszSocket[ 2 ][ 128 ];
+} playerswidget;
+
+static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
+
+    int i;
+
+    for( i = 0; i < 2; i++ ) {
+	gtk_widget_set_sensitive(
+	    ppw->apwEvalCube[ i ], gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
+	gtk_widget_set_sensitive(
+	    ppw->apwEvalChequer[ i ], gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
+	gtk_widget_set_sensitive(
+	    ppw->apwExternal[ i ], gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 3 ] ) ) );
+    }
+}
+
+static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
+
+    GtkWidget *pwPage, *pw;
+    static int aiRadioButton[ PLAYER_PUBEVAL + 1 ] = { 3, 0, 1, 2 };
+    GtkWidget *pwHBox;
+    GtkWidget *pwFrame;
+    GtkWidget *pwvbox;
+
+    pwPage = gtk_vbox_new( FALSE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
+    
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( _("Name:") ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       ppw->apwName[ i ] = gtk_entry_new() );
+    gtk_entry_set_text( GTK_ENTRY( ppw->apwName[ i ] ),
+			(ppw->ap[ i ].szName) );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 0 ] =
+		       gtk_radio_button_new_with_label( NULL, _("Human") ) );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 1 ] =
+		       gtk_radio_button_new_with_label_from_widget(
+			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
+			   _("GNU Backgammon") ) );
+
+    pwHBox = gtk_hbox_new ( FALSE, 4 );
+    gtk_container_add ( GTK_CONTAINER ( pwPage ), pwHBox );
+
+    pwFrame = gtk_frame_new ( _("Chequer play") );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
+
+    gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalChequer[ i ] =
+		       EvalWidget( &ppw->ap[ i ].esChequer.ec, 
+                                   (movefilter *) ppw->ap[ i ].aamf, 
+                                   NULL, TRUE ) );
+    gtk_widget_set_sensitive( ppw->apwEvalChequer[ i ],
+			      ap[ i ].pt == PLAYER_GNU );
+
+    
+    pwFrame = gtk_frame_new ( _("Cube decisions") );
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
+
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
+    
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                         ppw->apwEvalCube[ i ] = 
+                            EvalWidget( &ppw->ap[ i ].esCube.ec, 
+                                        NULL, NULL, FALSE ),
+                         FALSE, FALSE, 0 );
+    gtk_widget_set_sensitive( ppw->apwEvalCube[ i ],
+			      ap[ i ].pt == PLAYER_GNU );
+
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 2 ] =
+		       gtk_radio_button_new_with_label_from_widget(
+			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
+			   _("Pubeval") ) );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 3 ] =
+		       gtk_radio_button_new_with_label_from_widget(
+			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
+			   _("External") ) );
+    ppw->apwExternal[ i ] = pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+    gtk_widget_set_sensitive( pw, ap[ i ].pt == PLAYER_EXTERNAL );
+    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( _("Socket:") ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       ppw->apwSocket[ i ] = gtk_entry_new() );
+    if( ap[ i ].szSocket )
+	gtk_entry_set_text( GTK_ENTRY( ppw->apwSocket[ i ] ),
+			    ap[ i ].szSocket );
+    
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(
+	ppw->apwRadio[ i ][ aiRadioButton[ ap[ i ].pt ] ] ), TRUE );
+
+    g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 1 ] ), "toggled",
+			G_CALLBACK( PlayerTypeToggled ), ppw );
+    g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 3 ] ), "toggled",
+			G_CALLBACK( PlayerTypeToggled ), ppw );
+    
+    return pwPage;
+}
+
+static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
+
+    int i,j ;
+    static playertype apt[ 4 ] = { PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL,
+				   PLAYER_EXTERNAL };
+    *pplw->pfOK = TRUE;
+
+    for( i = 0; i < 2; i++ ) {
+	strcpyn( pplw->ap[ i ].szName, gtk_entry_get_text(
+	    GTK_ENTRY( pplw->apwName[ i ] ) ), MAX_NAME_LEN );
+	
+	for( j = 0; j < 4; j++ )
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+		pplw->apwRadio[ i ][ j ] ) ) ) {
+		pplw->ap[ i ].pt = apt[ j ];
+		break;
+	    }
+	g_assert( j < 4 );
+
+	EvalOK( pplw->apwEvalChequer[ i ], pplw->apwEvalChequer[ i ] );
+	EvalOK( pplw->apwEvalCube[ i ], pplw->apwEvalCube[ i ] );
+
+	strcpyn( pplw->aszSocket[ i ], gtk_entry_get_text(
+	    GTK_ENTRY( pplw->apwSocket[ i ] ) ), 128 );
+    }
+
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void SetPlayers(gpointer * p, guint n, GtkWidget * pw)
+{
+
+	GtkWidget *pwDialog, *pwNotebook;
+	int i, fOK = FALSE;
+	player apTemp[2];
+	playerswidget plw;
+	char sz[256];
+
+	memcpy(apTemp, ap, sizeof ap);
+	plw.ap = apTemp;
+	plw.pfOK = &fOK;
+
+	pwDialog =
+	    GTKCreateDialog(_("GNU Backgammon - Players"), DT_QUESTION,
+			    NULL, DIALOG_FLAG_MODAL, G_CALLBACK(PlayersOK),
+			    &plw);
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
+			  pwNotebook = gtk_notebook_new());
+	gtk_container_set_border_width(GTK_CONTAINER(pwNotebook), 4);
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwNotebook),
+				 PlayersPage(&plw, 0),
+				 gtk_label_new(_("Player 0")));
+	gtk_notebook_append_page(GTK_NOTEBOOK(pwNotebook),
+				 PlayersPage(&plw, 1),
+				 gtk_label_new(_("Player 1")));
+
+	gtk_widget_show_all(pwDialog);
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+
+	if (fOK) {
+		outputpostpone();
+
+		if (!CompareNames(apTemp[0].szName, ap[1].szName) && CompareNames(apTemp[0].szName, apTemp[1].szName)) {	/* Trying to swap names - change current name to avoid error */
+			sprintf(ap[1].szName, "_%s", apTemp[0].szName);
+		}
+		for (i = 0; i < 2; i++) {
+			/* NB: this comparison is case-sensitive, and does not use
+			   CompareNames(), so that the user can modify the case of
+			   names. */
+			if (strcmp(ap[i].szName, apTemp[i].szName)) {
+				sprintf(sz, "set player %d name %s", i,
+					apTemp[i].szName);
+				UserCommand(sz);
+			}
+
+			switch (apTemp[i].pt) {
+			case PLAYER_HUMAN:
+				if (ap[i].pt != PLAYER_HUMAN) {
+					sprintf(sz, "set player %d human",
+						i);
+					UserCommand(sz);
+				}
+				break;
+
+			case PLAYER_GNU:
+				if (ap[i].pt != PLAYER_GNU) {
+					sprintf(sz, "set player %d gnubg",
+						i);
+					UserCommand(sz);
+				}
+
+				/* FIXME another temporary hack (should be some way to set
+				   chequer and cube parameters independently) */
+				sprintf(sz,
+					"set player %d chequer evaluation",
+					i);
+				SetEvalCommands(sz,
+						&apTemp[i].esChequer.ec,
+						&ap[i].esChequer.ec);
+				sprintf(sz, "set player %d movefilter", i);
+				SetMovefilterCommands(sz, apTemp[i].aamf,
+						      ap[i].aamf);
+				sprintf(sz,
+					"set player %d cube evaluation",
+					i);
+				SetEvalCommands(sz, &apTemp[i].esCube.ec,
+						&ap[i].esCube.ec);
+				break;
+
+			case PLAYER_PUBEVAL:
+				if (ap[i].pt != PLAYER_PUBEVAL) {
+					sprintf(sz,
+						"set player %d pubeval",
+						i);
+					UserCommand(sz);
+				}
+				break;
+
+			case PLAYER_EXTERNAL:
+				if (ap[i].pt != PLAYER_EXTERNAL ||
+				    strcmp(ap[i].szSocket,
+					   plw.aszSocket[i])) {
+					sprintf(sz,
+						"set player %d external %s",
+						i, plw.aszSocket[i]);
+					UserCommand(sz);
+				}
+				break;
+			}
+		}
+
+		outputresume();
+	}
+}
+
+static void SetOptions(gpointer * p, guint n, GtkWidget * pw)
+{
+
+	GTKSetOptions();
+
+}
+
+/* Language screen name, code and flag name */
+static char *aaszLang[][ 3 ] = {
+    { N_("System default"), "system", NULL },
+    { N_("Czech"),	    "cs_CZ", "flags/czech.png" },
+    { N_("Danish"),	    "da_DK", "flags/denmark.png" },
+    { N_("English (GB)"),   "en_GB", "flags/england.png" },
+    { N_("English (US)"),   "en_US", "flags/usa.png" },
+    { N_("French"),	    "fr_FR", "flags/france.png" },
+    { N_("German"),	    "de_DE", "flags/germany.png" },
+    { N_("Icelandic"),      "is_IS", "flags/iceland.png" },
+    { N_("Italian"),	    "it_IT", "flags/italy.png" },
+    { N_("Japanese"),	    "ja_JP", "flags/japan.png" },
+    { N_("Russian"),	    "ru_RU", "flags/russia.png" },
+    { N_("Turkish"),	    "tr_TR", "flags/turkey.png" },
+    { NULL, NULL, NULL }
+};
+
+static void TranslateWidgets(GtkWidget *p)
+{
+	if (GTK_IS_CONTAINER(p))
+	{
+		GList *pl = gtk_container_get_children(GTK_CONTAINER(p));
+		while(pl)
+		{
+			TranslateWidgets(pl->data);
+			pl = pl->next;
+		}
+		g_list_free(pl);
+	}
+	if (GTK_IS_LABEL(p))
+	{
+		char *name = (char*)g_object_get_data(G_OBJECT(p), "lang");
+		gtk_label_set_text(GTK_LABEL(p), _(name));
+	}
+}
+
+static void SetLangDialogText(void)
+{
+   gtk_window_set_title(GTK_WINDOW(pwLangDialog), _("Select language"));
+   TranslateWidgets(pwLangDialog);
+}
+
+static void SetLangOk(void)
+{
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwLangRadio1)))
+		newLang = aaszLang[0][1];
+	else
+		newLang = (char*)g_object_get_data(G_OBJECT(curSel), "lang");
+
+	gtk_widget_destroy(pwLangDialog);
+}
+
+static gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
+{
+	/* Manually highlight clicked flag */
+	GtkWidget *frame, *eb;
+
+	if (event && event->type == GDK_2BUTTON_PRESS && curSel == pw)
+		SetLangOk();
+
+	if (curSel == pw)
+		return FALSE;
+
+	if (curSel)
+	{	/* Reset old item */
+		frame = gtk_bin_get_child(GTK_BIN(curSel));
+		eb = gtk_bin_get_child(GTK_BIN(frame));
+		gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
+		gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, NULL);
+	}
+
+	curSel = pw;
+	frame = gtk_bin_get_child(GTK_BIN(pw));
+	eb = gtk_bin_get_child(GTK_BIN(frame));
+
+	gtk_frame_set_shadow_type(GTK_FRAME(gtk_bin_get_child(GTK_BIN(pw))), GTK_SHADOW_ETCHED_OUT);
+	gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, &pwMain->style->bg[GTK_STATE_SELECTED]);
+
+	/* Immediately translate this dialog */
+	SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
+	SetLangDialogText();
+
+	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
+
+	return FALSE;
+}
+
+static GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
+{	/* Create a flag */
+	GtkWidget *eb, *eb2, *vbox, *lab1;
+	GtkWidget *frame;
+	char *file;
+	GdkPixbuf *pixbuf;
+	GtkWidget *image;
+	GError *pix_error = NULL;
+
+	eb = gtk_event_box_new();
+	gtk_widget_modify_bg(eb, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
+	frame = gtk_frame_new(NULL);
+	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
+	gtk_container_add( GTK_CONTAINER( eb ), frame );
+
+	eb2 = gtk_event_box_new();
+	gtk_widget_modify_bg(eb2, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
+	gtk_container_add( GTK_CONTAINER( frame ), eb2 );
+
+	vbox = gtk_vbox_new( FALSE, 5 );
+	gtk_container_set_border_width( GTK_CONTAINER(vbox), 5);
+	gtk_container_add( GTK_CONTAINER( eb2 ), vbox );
+
+	if (flagfilename)
+	{
+
+                file = g_build_filename(PKGDATADIR, flagfilename, NULL);
+		pixbuf = gdk_pixbuf_new_from_file(file, &pix_error);
+
+		if (pix_error)
+			outputerrf("Failed to open flag: %s\n", file);
+		else
+		{
+			image = gtk_image_new_from_pixbuf(pixbuf);
+			gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
+		}
+                g_free(file);
+	}
+	lab1 = gtk_label_new(NULL);
+	gtk_widget_set_size_request(lab1, 80, -1);
+	gtk_box_pack_start (GTK_BOX (vbox), lab1, FALSE, FALSE, 0);
+	g_object_set_data(G_OBJECT(lab1), "lang", language);
+
+	g_signal_connect(G_OBJECT(eb), "button_press_event", G_CALLBACK(FlagClicked), NULL);
+
+	g_object_set_data(G_OBJECT(eb), "lang", langCode);
+
+	return eb;
+}
+
+static int defclick(GtkWidget *pw, void *dummy, GtkWidget *table)
+{
+	gtk_widget_set_sensitive(table, FALSE);
+	SetupLanguage("");
+	SetLangDialogText();
+	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
+	return FALSE;
+}
+
+static int selclick(GtkWidget *pw, void *dummy, GtkWidget *table)
+{
+	gtk_widget_set_sensitive(table, TRUE);
+	if (curSel)
+	{
+		SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
+		SetLangDialogText();
+	}
+	else
+		gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), FALSE);
+
+	return FALSE;
+}
+
+static void SetWidgetLabelLang(GtkWidget *pw, char *text)
+{
+	if (GTK_IS_CONTAINER(pw))
+	{
+		GList *pl = gtk_container_get_children(GTK_CONTAINER(pw));
+		while(pl)
+		{
+			SetWidgetLabelLang(pl->data, text);
+			pl = pl->next;
+		}
+		g_list_free(pl);
+	}
+	if (GTK_IS_LABEL(pw))
+		g_object_set_data(G_OBJECT(pw), "lang", text);
+}
+
+static void AddLangWidgets(GtkWidget *cont)
+{
+	int i, numLangs;
+	GtkWidget *pwVbox, *pwHbox, *selLang = NULL;
+	pwVbox = gtk_vbox_new( FALSE, 0 );
+	gtk_container_add( GTK_CONTAINER( cont ), pwVbox );
+
+	pwLangRadio1 = gtk_radio_button_new_with_label(NULL, "");
+	SetWidgetLabelLang(pwLangRadio1, N_("System default"));
+	pwLangRadio2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pwLangRadio1), "");
+	SetWidgetLabelLang(pwLangRadio2, N_("Select language"));
+	gtk_box_pack_start (GTK_BOX (pwVbox), pwLangRadio1, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (pwVbox), pwLangRadio2, FALSE, FALSE, 0);
+
+	numLangs = 0;
+	while (*aaszLang[numLangs])
+		numLangs++;
+	numLangs--;	/* Don't count system default */
+
+#define NUM_COLS 4	/* Display in 4 columns */
+	pwLangTable = gtk_table_new(numLangs / NUM_COLS + 1, NUM_COLS, TRUE);
+
+	for (i = 0; i < numLangs; i++)
+	{
+		GtkWidget *flag = GetFlagWidget(aaszLang[i + 1][0], aaszLang[i + 1][1], aaszLang[i + 1][2]);
+		int row = i / NUM_COLS;
+		int col = i - row * NUM_COLS;
+		gtk_table_attach(GTK_TABLE(pwLangTable), flag, col, col + 1, row, row + 1, 0, 0, 0, 0);
+		if (!strcasecmp(szLang, aaszLang[i + 1][1]))
+		selLang = flag;
+	}
+	pwHbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwLangTable, FALSE, FALSE, 20);
+
+	if (selLang == NULL)
+		defclick(0, 0, pwLangTable);
+	else
+	{
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwLangRadio2), TRUE);
+		FlagClicked(selLang, 0, 0);
+	}
+	g_signal_connect(G_OBJECT(pwLangRadio1), "button_press_event", G_CALLBACK(defclick), pwLangTable);
+	g_signal_connect(G_OBJECT(pwLangRadio2), "button_press_event", G_CALLBACK(selclick), pwLangTable);
+}
+
+
+static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
+{
+	GList *pl;
+
+	pwLangDialog = GTKCreateDialog( NULL, DT_QUESTION, NULL, DIALOG_FLAG_MODAL, SetLangOk, NULL );
+
+	pl = gtk_container_get_children( GTK_CONTAINER( DialogArea( pwLangDialog, DA_BUTTONS ) ) );
+	SetWidgetLabelLang(GTK_WIDGET(pl->data), N_("Cancel"));
+	SetWidgetLabelLang(GTK_WIDGET(pl->next->data), N_("OK"));
+	g_list_free(pl);
+
+	curSel = NULL;
+	newLang = NULL;
+
+	AddLangWidgets(DialogArea(pwLangDialog, DA_MAIN));
+	gtk_widget_show_all(pwLangDialog);
+
+	gtk_main();
+
+	if (newLang)
+		CommandSetLang(newLang);	/* Set new language (after dialog has closed) */
+	else
+		SetupLanguage(szLang);	/* If cancelled make sure language stays the same */
+}
+
+
+static void ReportBug(gpointer * p, guint n, GtkWidget * pwEvent)
+{
+
+	char *pchOS = "109";
+	char sz[1024];
+
+#if WIN32
+
+	OSVERSIONINFO VersionInfo;
+
+	memset(&VersionInfo, 0, sizeof(OSVERSIONINFO));
+	VersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&VersionInfo);
+
+	switch (VersionInfo.dwPlatformId) {
+	case VER_PLATFORM_WIN32s:
+		break;
+	case VER_PLATFORM_WIN32_WINDOWS:
+	case VER_PLATFORM_WIN32_NT:
+		switch (VersionInfo.dwMajorVersion) {
+		case 3:
+			/* Windows  NT 3.51 */
+			pchOS = "106";
+			break;
+		case 4:
+			switch (VersionInfo.dwMinorVersion) {
+			case 0:
+				switch (VersionInfo.dwPlatformId) {
+				case VER_PLATFORM_WIN32_WINDOWS:
+					/* Windows  95 */
+					pchOS = "104";
+					break;
+				case VER_PLATFORM_WIN32_NT:
+					/* Windows NT 4.0 */
+					pchOS = "106";
+					break;
+				}
+				break;
+			case 10:
+				if (VersionInfo.szCSDVersion[1] == 'A')
+					/* Windows  98 SE */
+					pchOS = "110";
+				else
+					/* Windows  98 */
+					pchOS = "105";
+				break;
+			case 90:
+				/* Windows  Me */
+				pchOS = "105";
+				break;
+			}
+			break;
+		case 5:
+			switch (VersionInfo.dwMinorVersion) {
+			case 0:
+				/* Windows  2000 */
+				pchOS = "107";
+				break;
+			case 1:
+				/* Windows XP */
+				pchOS = "108";
+				break;
+			case 2:
+				/* Windows Server 2003 */
+				pchOS = "109";
+				break;
+			}
+			break;
+		}
+		break;
+	}
+#elif HAVE_SYS_UTSNAME_H	/* WIN32 */
+
+	{
+		struct utsname u;
+
+		if (uname(&u))
+			pchOS = "";
+		else {
+
+			if (!strcasecmp(u.sysname, "linux"))
+				pchOS = "101";
+			else if (!strcasecmp(u.sysname, "sunos"))
+				pchOS = "102";
+			else if (!strcasecmp(u.sysname, "freebsd"))
+				pchOS = "103";
+			else if (!strcasecmp(u.sysname, "rhapsody") ||
+				 !strcasecmp(u.sysname, "darwin"))
+				pchOS = "112";
+
+		}
+
+	}
+
+#endif				/* HAVE_SYS_UTSNAME_H */
+
+	sprintf(sz,
+		"http://savannah.gnu.org/bugs/?func=additem&group=gnubg"
+		"&release_id=" "110" "&custom_tf1=" __DATE__
+		"&platform_version_id=%s", pchOS);
+	OpenURL(sz);
+}
+
+GtkItemFactoryEntry aife[] = {
+	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
+		"<StockItem>", GTK_STOCK_NEW
+	},
+	{ N_("/_File/_Open..."), "<control>O", GTKOpen, 0, 
+		"<StockItem>", GTK_STOCK_OPEN
+	},
+	{ N_("/_File/_Load _Commands File..."), NULL, LoadCommands, 0, NULL },
+	{ N_("/_File/_Save..."), "<control>S", GTKSave, 0, 
+		"<StockItem>", GTK_STOCK_SAVE
+	},
+	{ N_("/_File/_Export..."), NULL, GTKExport, 0, NULL },
+	{ N_("/_File/Generate _HTML Images..."), NULL, ExportHTMLImages, 0,
+	  NULL },
+	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT,
+		"<StockItem>", GTK_STOCK_QUIT
+	},
+	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, 
+		"<StockItem>", GTK_STOCK_UNDO
+	},
+	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
+
+	{ N_("/_Edit/_Copy"), "<control>C", CopyText, 0,
+		"<StockItem>", GTK_STOCK_COPY
+	},
+
+	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Edit/Copy as/Position as ASCII"), NULL,
+	  CommandCopy, 0, NULL },
+	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
+	  CopyAsGOL, 0, NULL },
+	{ N_("/_Edit/Copy as/Position and Match IDs"), NULL,
+	  CopyAsIDs, 0, NULL },
+
+	{ N_("/_Edit/_Paste"), "<control>V", PasteText, 0,
+		"<StockItem>", GTK_STOCK_PASTE
+	},
+	{ N_("/_View"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_View/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
+	  "<CheckItem>" },
+	{ N_("/_View/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
+	  "<CheckItem>" },
+	{ N_("/_View/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
+	  "<CheckItem>" },
+	{ N_("/_View/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
+	  "<CheckItem>" },
+	{ N_("/_View/_Theory"), NULL, TogglePanel, TOGGLE_THEORY,
+	  "<CheckItem>" },
+	{ N_("/_View/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
+	  "<CheckItem>" },
+        { N_("/_View/_Python shell (IDLE)..."),  
+                           NULL, PythonShell, 0, NULL },
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/_Dock panels"), NULL, ToggleDockPanels, 0, "<CheckItem>" },
+	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL },
+	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL },
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>"},
+	{ N_("/_View/_Toolbar/Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
+	  "<RadioItem>" },
+	{ N_("/_View/_Toolbar/Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
+	  "/View/Toolbar/Text only" },
+	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
+	  "/View/Toolbar/Text only" },
+	{ N_("/_View/Full screen"), NULL, DoFullScreenMode, 0, "<CheckItem>" },
+#if USE_BOARD3D
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/Switch to xD view"), NULL, SwitchDisplayMode, TOOLBAR_ACTION_OFFSET + MENU_OFFSET, NULL },
+#endif
+	{ N_("/_Game"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL },
+	{ N_("/_Game/_Finish move"), "<control>F", FinishMove, 0, NULL },
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL },
+	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE,
+		"<StockItem>", GTK_STOCK_APPLY
+	},
+	{ N_("/_Game/Dro_p"), "<control>P", Command, CMD_DROP,
+		"<StockItem>", GTK_STOCK_CANCEL
+	},
+	{ N_("/_Game/B_eaver"), NULL, Command, CMD_REDOUBLE, NULL },
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/Re_sign"), NULL, GTKResign, 0, NULL },
+        { N_("/_Game/_Agree to resignation"), NULL, Command, CMD_AGREE,
+		"<StockItem>", GTK_STOCK_APPLY
+	},
+	{ N_("/_Game/De_cline resignation"), 
+          NULL, Command, CMD_DECLINE,
+		"<StockItem>", GTK_STOCK_CANCEL
+	},
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/Play computer turn"), NULL, Command, CMD_PLAY, NULL },
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/Swap players"), NULL, Command, CMD_SWAP_PLAYERS, NULL },
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/Set cube..."), NULL, GTKSetCube, 0, NULL },
+	{ N_("/_Game/Set _dice..."), NULL, GTKSetDice, 0, NULL },
+	{ N_("/_Game/Set _turn"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Game/Set turn/0"), 
+          NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
+	{ N_("/_Game/Set turn/1"), NULL, Command, CMD_SET_TURN_1,
+	  "/Game/Set turn/0" },
+	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Game/Match information..."), NULL, GTKMatchInfo, 0, NULL },
+	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
+	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
+		"<StockItem>", GTK_STOCK_DIALOG_INFO
+	},
+	{ N_("/_Analyse/_Rollout"), NULL, Command, CMD_ROLLOUT, NULL },
+	{ N_("/_Analyse/Rollout _cube decision"), 
+          NULL, Command, CMD_ROLLOUT_CUBE, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Analyse move"), 
+          NULL, Command, CMD_ANALYSE_MOVE, NULL },
+	{ N_("/_Analyse/Analyse game"), 
+          NULL, Command, CMD_ANALYSE_GAME, NULL },
+	{ N_("/_Analyse/Analyse match"), 
+          NULL, Command, CMD_ANALYSE_MATCH, NULL },
+	{ N_("/_Analyse/Analyse session"), 
+          NULL, Command, CMD_ANALYSE_SESSION, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Batch analyse..."), NULL, GTKBatchAnalyse, 0, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+        { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>" },
+        { N_("/_Analyse/Clear analysis/Move"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_MOVE, 
+		"<StockItem>", GTK_STOCK_CLEAR
+	},
+        { N_("/_Analyse/Clear analysis/_Game"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_GAME,
+		"<StockItem>", GTK_STOCK_CLEAR
+	},
+        { N_("/_Analyse/Clear analysis/_Match"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_MATCH,
+		"<StockItem>", GTK_STOCK_CLEAR
+	},
+        { N_("/_Analyse/Clear analysis/_Session"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_SESSION,
+		"<StockItem>", GTK_STOCK_CLEAR
+	},
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Game statistics"), NULL, Command,
+          CMD_SHOW_STATISTICS_GAME, NULL },
+	{ N_("/_Analyse/Match statistics"), NULL, Command,
+          CMD_SHOW_STATISTICS_MATCH, NULL },
+	{ N_("/_Analyse/Session statistics"), NULL, Command,
+          CMD_SHOW_STATISTICS_SESSION, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Player records"), NULL, Command,
+	  CMD_RECORD_SHOW, NULL },
+	{ N_("/_Analyse/Add to player records"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Analyse/Add to player records/Game statistics"), NULL, Command,
+	  CMD_RECORD_ADD_GAME,
+		"<StockItem>", GTK_STOCK_ADD
+	},
+	{ N_("/_Analyse/Add to player records/Match statistics"), NULL,
+	  Command, CMD_RECORD_ADD_MATCH,
+		"<StockItem>", GTK_STOCK_ADD
+	},
+	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
+	  Command, CMD_RECORD_ADD_SESSION,
+		"<StockItem>", GTK_STOCK_ADD
+	},
+#if USE_PYTHON
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+        { N_("/_Analyse/Relational database/Add match or session"), NULL,
+          GtkRelationalAddMatch, 0,
+		"<StockItem>", GTK_STOCK_ADD
+	},
+        { N_("/_Analyse/Relational database/Show Records"), NULL,
+          GtkShowRelational, 0, NULL },
+        { N_("/_Analyse/Relational database/Manage Environments"), NULL,
+          GtkManageRelationalEnvs, 0, NULL },
+        { N_("/_Analyse/Relational database/Test"), NULL,
+          Command, CMD_RELATIONAL_TEST, NULL },
+        { N_("/_Analyse/Relational database/Help"), NULL,
+          Command, CMD_RELATIONAL_HELP, NULL },
+        { N_("/_Analyse/Relational database/Show Stats"), NULL,
+          GtkRelationalShowStats, 0, NULL },
+#endif
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Distribution of rolls"), NULL, Command, 
+          CMD_SHOW_ROLLS, NULL },
+	{ N_("/_Analyse/Temperature Map"), NULL, Command, 
+          CMD_SHOW_TEMPERATURE_MAP, NULL },
+	{ N_("/_Analyse/Temperature Map (cube decision)"), NULL, Command, 
+          CMD_SHOW_TEMPERATURE_MAP_CUBE, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/_Race Theory"), 
+          NULL, Command, CMD_SHOW_KLEINMAN, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/_Market window"), NULL, Command, CMD_SHOW_MARKETWINDOW,
+	  NULL },
+	{ N_("/_Analyse/M_atch equity table"), NULL, Command,
+	  CMD_SHOW_MATCHEQUITYTABLE, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Evaluation engine"), NULL, Command,
+	  CMD_SHOW_ENGINE, NULL },
+	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
+	  CMD_SHOW_CALIBRATION, NULL },
+	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL },
+	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
+	  NULL },
+	{ N_("/_Settings/_Evaluation..."), NULL, SetEvaluation, 0, NULL },
+        { N_("/_Settings/E_xport..."), NULL, Command, CMD_SHOW_EXPORT,
+          NULL },
+	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL },
+	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL },
+	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
+	{ N_("/_Settings/_Language..."), NULL, SetLanguage, 0, NULL },
+	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Settings/Save settings"), 
+          NULL, Command, CMD_SAVE_SETTINGS, NULL },
+	{ N_("/_Go"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Go/Previous rol_l"), "Page_Up", 
+          Command, CMD_PREV_ROLL,
+		"<StockItem>", GTK_STOCK_GO_BACK
+	},
+	{ N_("/_Go/Next _roll"), "Page_Down",
+	  Command, CMD_NEXT_ROLL, 
+		"<StockItem>", GTK_STOCK_GO_FORWARD
+	},
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
+          Command, CMD_PREV, NULL },
+	{ N_("/_Go/Next _move"), "<shift>Page_Down", 
+          Command, CMD_NEXT, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Previous chequer _play"), "<alt>Page_Up",
+	  Command, CMD_PREV_ROLLED, NULL },
+	{ N_("/_Go/Next _chequer play"), "<alt>Page_Down",
+	  Command, CMD_NEXT_ROLLED, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
+          Command, CMD_PREV_MARKED, NULL },
+	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
+          Command, CMD_NEXT_MARKED, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
+          Command, CMD_PREV_GAME,
+		"<StockItem>", GTK_STOCK_GOTO_FIRST
+	},
+	{ N_("/_Go/Next _game"), "<control>Page_Down",
+	  Command, CMD_NEXT_GAME,
+		"<StockItem>", GTK_STOCK_GOTO_LAST
+	},
+	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
+	{ N_("/_Help/gnubg M_anual (all about)"), NULL, Command, 
+          CMD_SHOW_MANUAL_ABOUT, NULL },
+	{ N_("/_Help/gnubg _Manual (web)"), NULL, Command, 
+          CMD_SHOW_MANUAL_WEB, NULL },
+	{ N_("/_Help/Co_pying gnubg"), NULL, Command, CMD_SHOW_COPYING, NULL },
+	{ N_("/_Help/gnubg _Warranty"), NULL, Command, CMD_SHOW_WARRANTY,
+	  NULL },
+	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Help/_Report bug"), NULL, ReportBug, 0, NULL },
+	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
+		"<StockItem>", GTK_STOCK_ABOUT
+	}
+};
+
+static void CreateMainWindow(void)
+{
+	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
+
+
+    pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    gtk_window_maximize(GTK_WINDOW(pwMain));
+	SetPanelWidget(WINDOW_MAIN, pwMain);
+    gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
+    gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
+			      GDK_WINDOW_TYPE_HINT_NORMAL );
+    /* NB: the following call to gtk_object_set_user_data is needed
+       to work around a nasty bug in GTK+ (the problem is that calls to
+       gtk_object_get_user_data relies on a side effect from a previous
+       call to gtk_object_set_data).  Adding a call here guarantees that
+       gtk_object_get_user_data will work as we expect later.
+       FIXME: this can eventually be removed once GTK+ is fixed. */
+    gtk_object_set_user_data( GTK_OBJECT( pwMain ), NULL );
+    
+    gtk_window_set_title( GTK_WINDOW( pwMain ), _("GNU Backgammon") );
+    /* FIXME add an icon */
+    gtk_container_add( GTK_CONTAINER( pwMain ),
+		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
+
+    pagMain = gtk_accel_group_new();
+    pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pagMain );
+
+    gtk_item_factory_set_translate_func ( pif, GTKTranslate, NULL, NULL );
+
+    gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
+				   aife, NULL );
+    gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
+
+    gtk_box_pack_start( GTK_BOX( pwVbox ),
+			pwHandle = gtk_handle_box_new(),
+			FALSE, FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwHandle ),
+			pwMenuBar = gtk_item_factory_get_widget( pif,
+								 "<main>" ));
+
+   gtk_box_pack_start( GTK_BOX( pwVbox ),
+                       pwHandle = gtk_handle_box_new(), FALSE, TRUE, 0 );
+   gtk_container_add( GTK_CONTAINER( pwHandle ),
+                       pwToolbar = ToolbarNew() );
+    
+   pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
+
+   gtk_box_pack_start( GTK_BOX( pwVbox ),
+			pwGameBox = gtk_hbox_new(FALSE, 0),
+			TRUE, TRUE, 0 );
+   gtk_box_pack_start( GTK_BOX( pwVbox ),
+			hpaned = gtk_hpaned_new(),
+			TRUE, TRUE, 0 );
+
+   gtk_paned_add1(GTK_PANED(hpaned), pwPanelGameBox = gtk_hbox_new(FALSE, 0));
+   gtk_container_add(GTK_CONTAINER(pwPanelGameBox), pwEventBox = gtk_event_box_new());
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwEventBox), FALSE);
+
+   gtk_container_add(GTK_CONTAINER(pwEventBox), pwBoard = board_new(GetMainAppearance()));
+   g_signal_connect(G_OBJECT(pwEventBox), "button-press-event", G_CALLBACK(button_press_event),
+	   BOARD(pwBoard)->board_data);
+
+   pwPanelHbox = gtk_hbox_new(FALSE, 0);
+   gtk_paned_add2(GTK_PANED(hpaned), pwPanelHbox);
+   gtk_box_pack_start( GTK_BOX( pwPanelHbox ), pwPanelVbox = gtk_vbox_new( FALSE, 1 ), TRUE, TRUE, 0);
+
+   DockPanels();
+
+   /* Status bar */
+					
+   gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
+		      FALSE, FALSE, 0 );
+    
+    gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
+		      TRUE, TRUE, 0 );
+    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), TRUE );
+    /* It's a bit naughty to access pwStatus->label, but its default alignment
+       is ugly, and GTK gives us no other way to change it. */
+    gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
+			    0.0f, 0.5f );
+    idOutput = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
+					     "gnubg output" );
+    idProgress = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
+					       "progress" );
+    g_signal_connect( G_OBJECT( pwStatus ), "text-popped",
+			G_CALLBACK( TextPopped ), NULL );
+    
+    gtk_box_pack_start( GTK_BOX( pwHbox ),
+			pwProgress = gtk_progress_bar_new(),
+			FALSE, FALSE, 0 );
+    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
+    /* This is a kludge to work around an ugly bug in GTK: we don't want to
+       show text in the progress bar yet, but we might later.  So we have to
+       pretend we want text in order to be sized correctly, and then set the
+       format string to something so we don't get the default text. */
+    gtk_progress_bar_set_text( GTK_PROGRESS_BAR( pwProgress ), " " );
+
+    g_signal_connect(G_OBJECT(pwMain), "configure_event",
+			G_CALLBACK(configure_event), NULL);
+    g_signal_connect( G_OBJECT( pwMain ), "size-request",
+			G_CALLBACK( MainSize ), NULL );
+    g_signal_connect( G_OBJECT( pwMain ), "delete_event",
+			G_CALLBACK( main_delete ), NULL );
+    g_signal_connect( G_OBJECT( pwMain ), "destroy",
+			G_CALLBACK( gtk_main_quit ), NULL );
+}
+
+static void gnubg_set_default_icon()
+{
+	 gchar *iconA, *iconB;
+	 GError *error=NULL;
+	
+	iconA = g_build_filename(PKGDATADIR, "gnubg.svg", NULL);
+	iconB = g_build_filename(PKGDATADIR, "gnubg.png", NULL);
+	gtk_window_set_default_icon_from_file(iconA, &error);
+	if (error)
+	{
+		gtk_window_set_default_icon_from_file(iconB, NULL);
+		g_error_free(error);
+	}
+	g_free(iconA);
+	g_free(iconB);
+}
+
+extern void InitGTK( int *argc, char ***argv )
+{
+    int anBoardTemp[ 2 ][ 25 ];
+    int i;
+    char *sz;
+
+    gtk_set_locale();
+    sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
+    gtk_rc_add_default_file( sz  );
+    g_free(sz);
+
+    sz = g_build_filename(szHomeDirectory, "gnubg.gtkrc", NULL );
+    gtk_rc_add_default_file( sz );
+    g_free(sz);
+
+    fX = gtk_init_check( argc, argv ); 
+    if(!fX)
+	return;
+
+#if USE_BOARD3D
+	/* Initialize openGL widget library */
+    InitGTK3d(argc, argv);
+#endif
+
+    fnAction = HandleXAction;
+
+    gdk_rgb_init();
+    gdk_rgb_set_min_colors( 2 * 2 * 2 );
+    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
+    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
+
+    {
+#include "xpm/gnu.xpm"
+#include "xpm/question.xpm"
+
+	GtkIconFactory *pif = gtk_icon_factory_new();
+
+	gtk_icon_factory_add_default( pif );
+
+	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
+		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)gnu_xpm)));
+	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU_QUESTION,
+		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)question_xpm)));
+	}
+
+    ptt = gtk_tooltips_new();
+
+    sz = g_build_filename (szHomeDirectory, "gnubgmenurc", NULL);
+    gtk_accel_map_load( sz );
+    g_free(sz);
+
+    gnubg_set_default_icon();
+	CreateMainWindow();
+
+    ListCreate( &lOutput );
+
+    cedDialog.showHelp = 0;
+    cedDialog.numHistory = 0;
+    cedDialog.completing = 0;
+    cedDialog.modal = TRUE;
+
+    cedPanel.showHelp = 0;
+    cedPanel.numHistory = 0;
+    cedPanel.completing = 0;
+    cedPanel.modal = FALSE;
+
+{
+  GdkAtom cb = gdk_atom_intern("CLIPBOARD", TRUE);
+  clipboard = gtk_clipboard_get(cb);
+  if (!clipboard)
+    printf("Failed to get clipboard!\n");
+}
+
+	/* Clear board at startup */
+	for( i = 0; i < 25; i++ )
+		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
+	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, 0, 0, FALSE, anChequers[ms.bgv]);
+
+#if USE_BOARD3D
+    BoardData *bd = BOARD(pwBoard)->board_data;
+    /* If using 3d board initilize 3d widget */
+    if (display_is_3d(bd->rd))
+            Init3d();
+    /* If no 3d settings loaded, set appearance to first design */
+    Default3dSettings(bd);
+#endif
+}
+
+static gint python_run_file (gpointer file)
+{ 
+        g_assert(file);
+	char *pch;
+        pch = g_strdup_printf(">import sys;"
+		   "sys.argv=['','-n', '%s'];"
+		   "import idlelib.PyShell;" "idlelib.PyShell.main()", (char *)file);
+	UserCommand(pch);
+	g_free(pch);
+        g_free(file);
+        return FALSE;
+}
+
+enum {RE_NONE, RE_LANGUAGE_CHANGE};
+
+int reasonExited;
+
+extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, char *match )
+{
+	do
+	{
+		reasonExited = RE_NONE;
+
+		GTKSet( &ms.fCubeOwner );
+		GTKSet( &ms.nCube );
+		GTKSet( ap );
+		GTKSet( &ms.fTurn );
+		GTKSet( &ms.gs );
+	    
+		PushSplash ( pwSplash, 
+					_("Rendering"), _("Board"), 0 );
+
+		GTKAllowStdin();
+	    
+		if( fTTY ) {
+#if HAVE_LIBREADLINE
+			fReadingCommand = TRUE;
+			rl_callback_handler_install( FormatPrompt(), ProcessInput );
+			atexit( rl_callback_handler_remove );
+#else
+			Prompt();
+#endif
+		}
+
+		/* Show everything */
+		gtk_widget_show_all( pwMain );
+
+		/* Make sure toolbar looks correct */
+		SetToolbarStyle(nToolbarStyle);
+
+#if USE_BOARD3D
+	{
+		BoardData *bd = BOARD( pwBoard )->board_data;
+		BoardData3d *bd3d = bd->bd3d;
+		renderdata *prd = bd->rd;
+
+		SetSwitchModeMenuText();
+		DisplayCorrectBoardType(bd, bd3d, prd);
+	}
+#endif
+
+		DestroySplash ( pwSplash );
+		pwSplash = NULL;
+
+		/* Display any other windows now */
+		DisplayWindows();
+
+		/* Make sure some things stay hidden */
+		if (!ArePanelsDocked())
+		{
+			gtk_widget_hide(hpaned);
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+			gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
+		}
+		else if (ArePanelsShowing())
+			gtk_widget_hide(pwGameBox);
+
+		/* Make sure main window is on top */
+		gdk_window_raise(pwMain->window);
+
+		/* force update of board; needed to display board correctly if user
+			has special settings, e.g., clockwise or nackgammon */
+		ShowBoard();
+
+		if (fFullScreen)
+		{	/* Change to full screen (but hide warning) */
+			int temp = warningEnabled[WARN_FULLSCREEN_EXIT];
+			warningEnabled[WARN_FULLSCREEN_EXIT] = FALSE;
+			FullScreenMode(TRUE);
+			warningEnabled[WARN_FULLSCREEN_EXIT] = temp;
+		}
+
+                if (match)
+                {
+                        CommandLoadMatch(match);
+                        g_free(match);
+                        match = NULL;
+                }
+
+                if (commands)
+                {
+                        CommandLoadCommands(commands);
+                        g_free(commands);
+                        commands = NULL;
+                }
+
+                if (python_script)
+                {
+#ifdef WIN32
+                        outputerrf(_("The windows gtk interface doesn't support the '-p' option. Use the cl interface instead"));
+#else
+                        g_idle_add( python_run_file, g_strdup(python_script) );
+#endif
+                        g_free(python_script);
+                        python_script = NULL;
+                }
+
+		gtk_main();
+
+		if (reasonExited == RE_LANGUAGE_CHANGE)
+		{	/* Recreate main window with new language */
+			CreateMainWindow();
+			setWindowGeometry(WINDOW_MAIN);
+		}
+	} while (reasonExited != RE_NONE);
+}
+
+extern void GtkChangeLanguage(void)
+{
+	gtk_set_locale();
+	if (pwMain && GTK_WIDGET_REALIZED(pwMain))
+	{
+		reasonExited = RE_LANGUAGE_CHANGE;
+
+		ClosePanels();
+		getWindowGeometry(WINDOW_MAIN);
+		DestroyPanel(WINDOW_MAIN);
+		pom = NULL;
+		pwProgress = NULL;
+
+	}
+}
+
+extern void ShowList( char *psz[], char *szTitle, GtkWidget *parent)
+{
+    GtkWidget *pwDialog, *pwList, *pwScroll;
+
+	pwDialog = GTKCreateDialog(szTitle, DT_INFO, parent, DIALOG_FLAG_MODAL, NULL, NULL);
+
+    pwList = gtk_list_new();
+    while( *psz )
+	gtk_container_add( GTK_CONTAINER( pwList ),
+			   gtk_list_item_new_with_label( *psz++ ) );
+    
+	pwScroll = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScroll ),
+				    GTK_POLICY_AUTOMATIC,
+				    GTK_POLICY_AUTOMATIC );
+    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScroll ),
+					   pwList );
+    
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwScroll);
+    
+	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
+
+    gtk_widget_show_all( pwDialog );
+	gtk_main();
+}
+
+extern void OK( GtkWidget *pw, int *pf ) {
+
+    if( pf )
+	*pf = TRUE;
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+/*
+ * put up a tutor window with a message about how bad the intended
+ * play is. Allow selections:
+ * Continue (play it anyway)
+ * Cancel   (rethink)
+ * returns TRUE if play it anyway
+ */
+
+static void TutorEnd( GtkWidget *pw, int *pf ) {
+
+    if( pf )
+	*pf = TRUE;
+    
+	fTutor = FALSE;
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void
+TutorHint ( GtkWidget *pw, void *unused ) {
+
+  gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
+  UserCommand ( "hint" );
+
+}
+
+static void
+TutorRethink ( GtkWidget *pw, void *unused ) {
+
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
+  gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
+  ShowBoard ();
+
+}
+
+extern int GtkTutor ( char *sz )
+{
+    int f = FALSE;
+    GtkWidget *pwTutorDialog, *pwOK, *pwCancel, *pwEndTutor,
+          *pwButtons, *pwPrompt, *pwHint;
+
+	pwTutorDialog = GTKCreateDialog( _("GNU Backgammon - Tutor"),
+		DT_GNUQUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(OK), (void*)&f);
+
+	pwOK = DialogArea(pwTutorDialog, DA_OK);
+	gtk_button_set_label(GTK_BUTTON(pwOK), _("Play Anyway"));
+
+	pwCancel = gtk_button_new_with_label( _("Rethink") );
+	pwEndTutor = gtk_button_new_with_label ( _("End Tutor Mode") );
+	pwHint = gtk_button_new_with_label ( _("Hint") );
+	pwButtons = DialogArea(pwTutorDialog, DA_BUTTONS);
+
+	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
+	g_signal_connect( G_OBJECT( pwCancel ), "clicked",
+				   G_CALLBACK( TutorRethink ),
+				   (void *) &f );
+
+	gtk_container_add( GTK_CONTAINER( pwButtons ), pwEndTutor );
+	g_signal_connect( G_OBJECT( pwEndTutor ), "clicked",
+				   G_CALLBACK( TutorEnd ), (void *) &f );
+
+	gtk_container_add( GTK_CONTAINER( pwButtons ), pwHint );
+	g_signal_connect( G_OBJECT( pwHint ), "clicked",
+				   G_CALLBACK( TutorHint ), (void *) &f );
+    
+    pwPrompt = gtk_label_new( sz );
+
+    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
+    gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
+    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwTutorDialog, DA_MAIN ) ),
+		       pwPrompt );
+    
+    gtk_window_set_resizable( GTK_WINDOW( pwTutorDialog ), FALSE);
+    gtk_widget_show_all( pwTutorDialog );
+    
+    /* This dialog should be REALLY modal -- disable "next turn" idle
+       processing and stdin handler, to avoid reentrancy problems. */
+    if( nNextTurn ) 
+      g_source_remove( nNextTurn );
+    
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+    
+    if( nNextTurn ) 
+      nNextTurn = g_idle_add( NextTurnNotify, NULL );
+    
+    /* if tutor mode was disabled, update the checklist */
+    if ( !fTutor) {
+      GTKSet ( (void *) &fTutor);
+    }
+    
+    return f;
+}
+
+extern void GTKOutput( char *sz ) {
+
+    if( !sz || !*sz )
+	return;
+    
+    cchOutput += strlen( sz );
+
+    ListInsert( &lOutput, sz );
+}
+
+extern void GTKOutputX( void ) {
+
+    char *sz, *pchSrc, *pchDest;
+    list *pl;
+    GtkTextBuffer *buffer;
+    GtkTextIter iter;
+
+    if( !cchOutput )
+	return;
+    
+    pchDest = sz = g_malloc( cchOutput + 2 );	/* + 2 as /n/0 may be added */
+
+    for( pl = lOutput.plNext; pl != &lOutput; pl = pl->plNext ) {
+	pchSrc = pl->p;
+
+	while( *pchSrc )
+	    *pchDest++ = *pchSrc++;
+
+	g_free( pl->p );
+    }
+
+    while( lOutput.plNext != &lOutput )
+	ListDelete( lOutput.plNext );
+
+    while( pchDest > sz && pchDest[ -1 ] == '\n' )
+	pchDest--;
+    
+    *pchDest = 0;
+
+    if( cchOutput > 80 || strchr( sz, '\n' ) ) {
+      /* Long message; display in dialog. */
+      if (!PanelShowing(WINDOW_MESSAGE))
+        GTKMessage( sz, DT_INFO );
+    }
+    else
+      /* Short message; display in status bar. */
+      gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
+    
+    if (PanelShowing(WINDOW_MESSAGE) && *sz ) {
+      strcat ( sz, "\n" );
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
+      gtk_text_buffer_get_end_iter (buffer, &iter);
+      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
+      gtk_text_buffer_insert( buffer, &iter, g_strchomp(sz), -1);
+      gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW(pwMessageText),
+                      gtk_text_buffer_create_mark (buffer, "last", &iter, FALSE),
+                      0.0, TRUE, 0.0, 1.0 ); }
+      
+    cchOutput = 0;
+    g_free( sz );
+}
+
+extern void GTKOutputErr( char *sz ) {
+
+    GtkTextBuffer *buffer;
+    GtkTextIter iter;
+    GTKMessage( sz, DT_ERROR );
+    
+    if (PanelShowing(WINDOW_MESSAGE)) {
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
+      gtk_text_buffer_get_end_iter (buffer, &iter);
+      gtk_text_buffer_insert( buffer, &iter, sz, -1);
+      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
+      gtk_text_view_scroll_to_iter (GTK_TEXT_VIEW(pwMessageText), &iter, 0.0, FALSE, 0.0, 1.0 );
+    }
+}
+
+extern void GTKOutputNew( void ) {
+
+    /* This is horribly ugly, but fFinishedPopping will never be set if
+       the progress bar leaves a message in the status stack.  There should
+       be at most one message, so we get rid of it here. */
+    gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
+    
+    fFinishedPopping = FALSE;
+    
+    do
+	gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idOutput );
+    while( !fFinishedPopping );
+}
+
+/* Show dynamic help as command entered */
+
+extern command *FindHelpCommand( command *pcBase, char *sz,
+				 char *pchCommand, char *pchUsage );
+
+/* Display help for command (pStr) in widget (pwText) */
+static void ShowHelp(GtkWidget *pwText, char* pStr)
+{
+	command *pc, *pcFull;
+	char szCommand[128], szUsage[128], szBuf[255], *cc, *pTemp;
+	command cTop = { NULL, NULL, NULL, NULL, acTop };
+        GtkTextBuffer *buffer;
+        GtkTextIter iter;
+
+	/* Copy string as token striping corrupts string */
+	pTemp = malloc(strlen(pStr) + 1);
+	strcpy(pTemp, pStr);
+	cc = CheckCommand(pTemp, acTop);
+
+        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwText));
+
+	if (cc)
+	{
+		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
+                gtk_text_buffer_set_text(buffer, szBuf, -1);
+	}
+	else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage)))
+	{
+                gtk_text_buffer_set_text(buffer, "", -1);
+                gtk_text_buffer_get_end_iter (buffer, &iter);
+		if (!*pStr)
+		{
+                        gtk_text_buffer_insert( buffer, &iter,
+				_("Available commands:\n"), -1);
+		}
+		else
+		{
+			if(!pc->szHelp )
+			{	/* The command is an abbreviation, search for the full version */
+				for( pcFull = acTop; pcFull->sz; pcFull++ )
+				{
+					if( pcFull->pf == pc->pf && pcFull->szHelp )
+					{
+						pc = pcFull;
+						strcpy(szCommand, pc->sz);
+						break;
+					}
+				}
+			}
+
+			sprintf(szBuf, "Command: %s\n", szCommand);
+                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
+                        gtk_text_buffer_insert( buffer, &iter, gettext ( pc->szHelp ), -1);
+			sprintf(szBuf, "\n\nUsage: %s", szUsage);
+                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
+
+			if(!( pc->pc && pc->pc->sz ))
+                                gtk_text_buffer_insert( buffer, &iter, "\n", -1);
+			else
+			{
+                                gtk_text_buffer_insert( buffer, &iter, _("<subcommand>\n"), -1);
+                                gtk_text_buffer_insert( buffer, &iter,
+					_("Available subcommands:\n"), -1);
+			}
+		}
+
+		pc = pc->pc;
+
+		while(pc && pc->sz)
+		{
+			if( pc->szHelp )
+			{
+				sprintf(szBuf, "%-15s\t%s\n", pc->sz, gettext ( pc->szHelp ) );
+                                gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
+			}
+			pc++;
+		}
+	}
+	free(pTemp);
+}
+
+extern void PopulateCommandHistory(struct CommandEntryData_T *pData)
+{
+	GList *glist;
+	int i;
+
+	glist = NULL;
+	for (i = 0; i < pData->numHistory; i++)
+		glist = g_list_append(glist, pData->cmdHistory[i]);
+	if (glist)
+	{
+		gtk_combo_set_popdown_strings(GTK_COMBO(pData->cmdEntryCombo), glist);
+		g_list_free(glist);
+	}
+}
+
+extern void CommandOK( GtkWidget *pw, struct CommandEntryData_T *pData )
+{
+	int i, found = -1;
+	pData->cmdString = gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 );
+
+	/* Update command history */
+
+	/* See if already in history */
+	for (i = 0; i < pData->numHistory; i++)
+	{
+		if (!strcasecmp(pData->cmdString, pData->cmdHistory[i]))
+		{
+			found = i;
+			break;
+		}
+	}
+	if (found != -1)
+	{	/* Remove old entry */
+		free(pData->cmdHistory[found]);
+		pData->numHistory--;
+		for (i = found; i < pData->numHistory; i++)
+			pData->cmdHistory[i] = pData->cmdHistory[i + 1];
+	}
+
+	if (pData->numHistory == NUM_CMD_HISTORY)
+	{
+		free(pData->cmdHistory[NUM_CMD_HISTORY - 1]);
+		pData->numHistory--;
+	}
+	for (i = pData->numHistory; i > 0; i--)
+		pData->cmdHistory[i] = pData->cmdHistory[i - 1];
+
+	pData->cmdHistory[0] = malloc(strlen(pData->cmdString) + 1);
+	strcpy(pData->cmdHistory[0], pData->cmdString);
+	pData->numHistory++;
+
+	if (pData->modal)
+		gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+	else
+	{
+		PopulateCommandHistory(pData);
+		gtk_entry_set_text(GTK_ENTRY(pData->pwEntry), "");
+	}
+
+	if (pData->cmdString)
+	{
+		UserCommand(pData->cmdString);
+		g_free(pData->cmdString);
+	}
+}
+
+extern void CommandTextChange(GtkEntry *entry, struct CommandEntryData_T *pData)
+{
+	if (pData->showHelp)
+	{
+		if (!pData->modal)
+		{	/* Make sure the message window is showing */
+			if (!PanelShowing(WINDOW_MESSAGE))
+				PanelShow(WINDOW_MESSAGE);
+		}
+		ShowHelp(pData->pwHelpText, gtk_editable_get_chars(GTK_EDITABLE(entry), 0, -1));
+	}
+}
+
+static void CreateHelpText(struct CommandEntryData_T *pData)
+{
+        GtkWidget *psw;
+	pData->pwHelpText = gtk_text_view_new ();
+	gtk_widget_set_usize(pData->pwHelpText, 400, 300);
+	psw = gtk_scrolled_window_new( NULL, NULL );
+        gtk_container_add(GTK_CONTAINER(psw), pData->pwHelpText);
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
+	CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
+}
+
+extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData)
+{
+	if (!pData->pwHelpText)
+		CreateHelpText(pData);
+
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+	{
+		pData->showHelp = 1;
+		if (pData->modal)
+		{
+			gtk_widget_show(pData->pwHelpText);
+		}
+		CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
+	}
+	else
+	{
+		pData->showHelp = 0;
+		if (pData->modal)
+		{
+			gtk_widget_hide(pData->pwHelpText);
+		}
+	}
+	gtk_widget_grab_focus(pData->pwEntry);
+}
+
+/* Capitalize first letter of each word */
+static void Capitalize(char* str)
+{
+	int cap = 1;
+	while (*str)
+	{
+		if (cap)
+		{
+			if (*str >= 'a' && *str <= 'z')
+				*str += 'A' - 'a';
+			cap = 0;
+		}
+		else
+		{
+			if (*str == ' ')
+				cap = 1;
+			if (*str >= 'A' && *str <= 'Z')
+				*str -= 'A' - 'a';
+		}
+		str++;
+	}
+}
+
+extern gboolean CommandKeyPress(GtkWidget *widget, GdkEventKey *event, struct CommandEntryData_T *pData)
+{
+	short k = event->keyval;
+
+	if (k == KEY_TAB)
+	{	/* Tab press - auto complete */
+		command *pc;
+		char szCommand[128], szUsage[128];
+		command cTop = { NULL, NULL, NULL, NULL, acTop };
+		if ((pc = FindHelpCommand(&cTop, gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 ), szCommand, szUsage)))
+		{
+			Capitalize(szCommand);
+			gtk_entry_set_text( GTK_ENTRY( pData->pwEntry ), szCommand );
+		}
+		/* Gtk 1 not good at stoping focus moving - so just move back later */
+		pData->completing = 1;
+	}
+	return FALSE;
+}
+
+extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct CommandEntryData_T *pData)
+{
+	if (pData->completing)
+	{
+		/* Gtk 1 not good at stoping focus moving - so just move back now */
+		pData->completing = 0;
+		gtk_widget_grab_focus( pData->pwEntry );
+		gtk_editable_set_position(GTK_EDITABLE(pData->pwEntry), strlen(gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 )));
+		return TRUE;
+	}
+	else
+		return FALSE;
+}	
+
+typedef struct _newwidget {
+  GtkWidget *pwCPS, *pwML, *pwGNUvsHuman,
+      *pwHumanHuman, *pwManualDice, *pwTutorMode;
+} newwidget;
+
+static GtkWidget *
+button_from_image ( GtkWidget *pwImage ) {
+
+  GtkWidget *pw = gtk_button_new ();
+
+  gtk_container_add ( GTK_CONTAINER ( pw ), pwImage );
+
+  return pw;
+
+}
+static void UpdatePlayerSettings( newwidget *pnw ) {
+	
+  int fManDice = 
+	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice));
+  int fTM = 
+	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwTutorMode));
+  int fCPS = 
+	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwCPS));
+  int fGH = 
+	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwGNUvsHuman));
+  int fHH = 
+	  gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pnw->pwHumanHuman));
+  
+  if(!fCPS){
+	  if (fGH){
+		  UserCommand("set player 0 gnubg");
+		  UserCommand("set player 1 human");
+	  }
+	  if (fHH){
+		  UserCommand("set player 0 human");
+		  UserCommand("set player 1 human");
+	  }
+  }
+
+  
+  if((fManDice) && (rngCurrent != RNG_MANUAL))
+	  UserCommand("set rng manual");
+  
+  if((!fManDice) && (rngCurrent == RNG_MANUAL))
+	  UserCommand("set rng mersenne");
+  
+  if((fTM) && (!fTutor))
+	  UserCommand("set tutor mode on");
+
+  if((!fTM) && (fTutor))
+	  UserCommand("set tutor mode off");
+
+}
+
+static void SettingsPressed( GtkWidget *pw, gpointer data )
+{
+	GTKSetCurrentParent(pw);
+	SetPlayers( NULL, 0, NULL);
+}
+
+static void ToolButtonPressedMS( GtkWidget *pw, newwidget *pnw ) {
+  UpdatePlayerSettings( pnw ); 
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+  UserCommand("new session");
+}
+
+static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
+  char sz[40];
+  int *pi;
+
+  pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pw ) );
+  sprintf(sz, "new match %d", *pi);
+  UpdatePlayerSettings( pnw );
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+  UserCommand(sz);
+}
+static char *get_player_type (int i) {
+	switch( ap[ i ].pt ) {
+	case PLAYER_GNU:
+            return("gnubg");
+	    break;
+	case PLAYER_HUMAN:
+            return("human");
+        default:
+            return(NULL);
+	}
+}
+
+extern int edit_new(int length)
+{
+	char sz[40];
+	char *pt[2];
+	int i;
+	int err = 0;
+	int fDisplay_save;
+
+	outputoff();
+	for (i = 0; i < 2; i++) {
+		pt[i] = get_player_type(i);
+		if (!pt[i])
+			err = 1;
+		sprintf(sz, "set player %d human", i);
+		UserCommand(sz);
+	}
+	outputon();
+	if (!err) {
+		fDisplay_save = fDisplay;
+		fDisplay = 0;
+		sprintf(sz, "new match %d", length);
+		UserCommand(sz);
+		fDisplay = fDisplay_save;
+	} else {
+		outputerrf(_
+			   ("Edit new position only allowed with human and computer players"));
+	}
+	outputoff();
+	for (i = 0; i < 2; i++) {
+		if (pt[i]) {
+			sprintf(sz, "set player %d %s", i, pt[i]);
+			UserCommand(sz);
+		}
+	}
+	outputon();
+	return (err);
+}
+
+static void edit_new_clicked(GtkWidget * pw, newwidget * pnw)
+{
+	int length =
+	    (int) gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+	edit_new(length);
+	if (!ToolbarIsEditing(NULL))
+		click_edit();
+}
+
+static GtkWidget *NewWidget( newwidget *pnw){
+  int i, j = 1 ;
+  char **apXPM[10];
+  GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwToolbar;
+  GtkWidget *pwButtons, *pwFrame, *pwVbox2; 
+#include "xpm/stock_new_all.xpm"
+#include "xpm/stock_new_money.xpm"
+  pwVbox = gtk_vbox_new(FALSE, 0);
+  pwToolbar = gtk_toolbar_new ();
+  gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
+                                GTK_ORIENTATION_HORIZONTAL );
+  gtk_toolbar_set_style ( GTK_TOOLBAR ( pwToolbar ),
+                          GTK_TOOLBAR_ICONS );
+  pwFrame = gtk_frame_new(_("Shortcut buttons"));
+  gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwFrame, TRUE, TRUE, 0);
+  gtk_container_add( GTK_CONTAINER( pwFrame ), pwToolbar);
+  gtk_container_set_border_width( GTK_CONTAINER( pwToolbar ), 4);
+  
+  /* Edit button */
+  pwButtons = gtk_button_new();
+  gtk_container_add ( GTK_CONTAINER ( pwButtons ), gtk_image_new_from_stock(GTK_STOCK_EDIT, GTK_ICON_SIZE_LARGE_TOOLBAR));
+  gtk_widget_show(pwButtons);
+
+  gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
+                   pwButtons, _("Edit position"), NULL );
+  g_signal_connect(pwButtons, "clicked", G_CALLBACK(edit_new_clicked), pnw);
+
+  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+
+  pwButtons = button_from_image( image_from_xpm_d ( stock_new_money_xpm,
+                                                      pwToolbar ) );
+  gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
+                   pwButtons, _("Start a new money game session"), NULL );
+  g_signal_connect( G_OBJECT( pwButtons ), "clicked",
+	    G_CALLBACK( ToolButtonPressedMS ), pnw );
+
+  gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
+
+  apXPM[0] = stock_new_xpm;
+  apXPM[1] = stock_new1_xpm;
+  apXPM[2] = stock_new3_xpm;
+  apXPM[3] = stock_new5_xpm;
+  apXPM[4] = stock_new7_xpm;
+  apXPM[5] = stock_new9_xpm;
+  apXPM[6] = stock_new11_xpm;
+  apXPM[7] = stock_new13_xpm;
+  apXPM[8] = stock_new15_xpm;
+  apXPM[9] = stock_new17_xpm;
+  
+  for(i = 1; i < 19; i=i+2, j++ ){			     
+     char sz[40];
+     int *pi;
+
+     sprintf(sz, _("Start a new %d point match"), i);
+     pwButtons = button_from_image( image_from_xpm_d ( apXPM[j],
+                                                      pwToolbar ) );
+     gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
+                             pwButtons, sz, NULL );
+     
+      pi = malloc ( sizeof ( int ) );
+      *pi = i;
+     gtk_object_set_data_full( GTK_OBJECT( pwButtons ), "user_data",
+                                  pi, free );
+
+     g_signal_connect( G_OBJECT( pwButtons ), "clicked",
+		    G_CALLBACK( ToolButtonPressed ), pnw );
+  }
+
+  pwFrame = gtk_frame_new(_("Match settings"));
+  pwHbox = gtk_hbox_new(FALSE, 0);
+
+  pwLabel = gtk_label_new(_("Length:"));
+  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+  pnw->pwML = gtk_spin_button_new_with_range (0, MAXSCORE, 1);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pnw->pwML), TRUE);
+
+  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwLabel, FALSE, TRUE, 0);
+  gtk_box_pack_start ( GTK_BOX ( pwHbox ), pnw->pwML, FALSE, TRUE, 0);
+  gtk_container_add(GTK_CONTAINER(pwFrame), pwHbox);
+  gtk_container_add(GTK_CONTAINER(pwVbox), pwFrame);
+
+  /* Here the simplified player settings starts */
+  
+  pwFrame = gtk_frame_new(_("Player settings"));
+  
+  pwHbox = gtk_hbox_new(FALSE, 0);
+  pwVbox2 = gtk_vbox_new(FALSE, 0);
+
+  gtk_container_add(GTK_CONTAINER(pwHbox), pwVbox2);
+
+  pnw->pwCPS = gtk_radio_button_new_with_label( NULL, _("Current player settings"));
+  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwCPS, FALSE, FALSE, 0);
+  
+  pnw->pwGNUvsHuman = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS), _("GNU Backgammon vs. Human"));
+  pnw->pwHumanHuman = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS), _("Human vs. Human"));
+  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwGNUvsHuman, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwHumanHuman, FALSE, FALSE, 0);
+  
+  pwButtons = gtk_button_new_with_label(_("Modify player settings..."));
+  gtk_container_set_border_width(GTK_CONTAINER(pwButtons), 10);
+  
+  gtk_container_add(GTK_CONTAINER(pwVbox2), pwButtons );
+
+  g_signal_connect(G_OBJECT(pwButtons), "clicked",
+      G_CALLBACK( SettingsPressed ), NULL );
+
+  pwVbox2 = gtk_vbox_new( FALSE, 0);
+  
+  gtk_container_add(GTK_CONTAINER(pwHbox), pwVbox2);
+
+  pnw->pwManualDice = gtk_check_button_new_with_label(_("Manual dice"));
+  pnw->pwTutorMode = gtk_check_button_new_with_label(_("Tutor mode"));
+
+  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwManualDice, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwTutorMode, FALSE, FALSE, 0);
+  gtk_container_add(GTK_CONTAINER(pwFrame), pwHbox);
+  gtk_container_add(GTK_CONTAINER(pwVbox), pwFrame);
+  
+  return pwVbox;
+  
+} 
+
+static void NewOK( GtkWidget *pw, newwidget *pnw ) {
+  
+  int Mlength = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+
+  UpdatePlayerSettings(pnw);
+
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+  char sz[40];
+  sprintf(sz, "new match %d", Mlength );
+  UserCommand(sz);
+}
+
+static void NewSet( newwidget *pnw) {
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwTutorMode ),
+                                fTutor );
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice), rngCurrent == RNG_MANUAL);
+  gtk_spin_button_set_value( GTK_SPIN_BUTTON( pnw->pwML ), nDefaultLength );
+
+}
+
+extern void GTKNew( void ){
+	
+  GtkWidget *pwDialog, *pwPage;
+  newwidget nw;
+
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - New"),
+			   DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK( NewOK ), &nw );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
- 		         AnalysisPage( &aw ) );
+ 		        pwPage = NewWidget(&nw));
+
   gtk_widget_show_all( pwDialog );
 
-  AnalysisSet ( &aw );
+  NewSet( &nw );
  
+  GTKDisallowStdin();
   gtk_main();
+  GTKAllowStdin();
+
 }
+
+extern void
+SetMET (GtkWidget * pw, gpointer p)
+{
+  gchar *filename, *command;
+
+  gchar *met_dir = g_build_filename(PKGDATADIR,  "met", NULL);
+  filename =
+    GTKFileSelect (_("Set match equity table"), "*.xml",
+		   met_dir, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
+  g_free(met_dir);
+
+  if (filename)
+    {
+      command = g_strconcat ("set matchequitytable \"", filename, "\"", NULL);
+      UserCommand (command);
+      g_free (command);
+      g_free (filename);
+      /* update filename on option page */
+      if (p && GTK_WIDGET_VISIBLE (p))
+	gtk_label_set_text (GTK_LABEL (p), (char *) miCurrent.szFileName);
+    }
+}
+
 
 typedef struct _rolloutpagewidget {
   int *pfOK;
@@ -5608,7 +6220,7 @@ extern void GTKProgressEnd( void ) {
 
 int colWidth;
 
-void MoveListIntoView(GtkWidget *pwList, int *row)
+static void MoveListIntoView(GtkWidget *pwList, int *row)
 {
   if (gtk_clist_row_is_visible(GTK_CLIST(pwList), (*row-1)) != GTK_VISIBILITY_FULL)
   {
@@ -5743,14 +6355,12 @@ extern void GTKShowScoreSheet( void )
 	gtk_main();
 }
 
-extern char *aszCopying[], *aszWarranty[];
-
-void GtkShowCopying(GtkWidget *pwWidget)
+static void GtkShowCopying(GtkWidget *pwWidget)
 {
 	ShowList( aszCopying, _("Copying"), pwWidget );
 }
 
-void GtkShowWarranty(GtkWidget *pwWidget)
+static void GtkShowWarranty(GtkWidget *pwWidget)
 {
 	ShowList( aszWarranty, _("Warranty"), pwWidget );
 }
@@ -5796,7 +6406,7 @@ extern void GTKShowVersion( void )
 	gtk_main();
 }
 
-GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
+static GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
 {
 	GtkWidget* pwLabel = gtk_label_new(text);
 	gtk_label_set_selectable(GTK_LABEL(pwLabel), TRUE);
@@ -5959,111 +6569,8 @@ extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
 	gtk_main();
 }
 
-static void
-ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
-
-	char *pchOS = "109";
-        char sz[ 1024 ];
-
-#if WIN32
-
-	OSVERSIONINFO VersionInfo;
-
-	memset( &VersionInfo, 0, sizeof( OSVERSIONINFO ) );
-	VersionInfo.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
-	GetVersionEx( &VersionInfo );
-
-	switch ( VersionInfo.dwPlatformId ) {
-		case VER_PLATFORM_WIN32s:
-			break;
-		case VER_PLATFORM_WIN32_WINDOWS:
-		case VER_PLATFORM_WIN32_NT:
-			switch ( VersionInfo.dwMajorVersion ) {
-				case 3:
-					/* Windows  NT 3.51 */
-					pchOS = "106";
-					break;
-				case 4:
-					switch ( VersionInfo.dwMinorVersion ) {
-						case 0:
-							switch ( VersionInfo.dwPlatformId ) {
-								case VER_PLATFORM_WIN32_WINDOWS:
-									/* Windows  95 */
-									pchOS = "104";
-									break;
-								case VER_PLATFORM_WIN32_NT:
-									/* Windows NT 4.0 */
-									pchOS = "106";
-									break;
-							}
-							break;
-						case 10:
-							if ( VersionInfo.szCSDVersion[1] == 'A' )
-								/* Windows  98 SE */
-								pchOS = "110";
-							else
-								/* Windows  98 */
-								pchOS = "105";
-							break;
-						case 90:
-							/* Windows  Me */
-							pchOS = "105";
-							break;
-					}
-					break;
-				case 5:
-					switch ( VersionInfo.dwMinorVersion ) {
-						case 0:
-							/* Windows  2000 */
-							pchOS = "107";
-							break;
-						case 1:
-							/* Windows XP */
-							pchOS = "108";
-							break;
-						case 2:
-							/* Windows Server 2003 */
-							pchOS = "109";
-							break;
-					}
-					break;
-			}
-			break;
-	}
-#elif HAVE_SYS_UTSNAME_H /* WIN32 */
-
- {
-   struct utsname u;
-
-   if ( uname( &u ) )
-     pchOS = "";
-   else {
-
-     if ( ! strcasecmp( u.sysname, "linux" ) )
-       pchOS = "101";
-     else if ( ! strcasecmp( u.sysname, "sunos" ) )
-       pchOS = "102";
-     else if ( ! strcasecmp( u.sysname, "freebsd" ) )
-       pchOS = "103";
-     else if ( ! strcasecmp( u.sysname, "rhapsody" ) ||
-               ! strcasecmp( u.sysname, "darwin" ) ) 
-       pchOS = "112";
-
-   }
-
- }
-
-#endif /* HAVE_SYS_UTSNAME_H */
-
-	sprintf( sz, "http://savannah.gnu.org/bugs/?func=additem&group=gnubg"
-		     "&release_id="	"110"
-		     "&custom_tf1="	__DATE__
-		     "&platform_version_id=%s", pchOS );
- 	OpenURL( sz );
-}
 
 
-static GtkWidget *pwHelpTree, *pwHelpLabel;
 
 static void GTKHelpAdd( GtkTreeStore *pts, GtkTreeIter *ptiParent,
 			command *pc ) {
@@ -6304,14 +6811,7 @@ extern void GTKBearoffProgress( int i ) {
 	gtk_main_iteration();
 }
 
-static void enable_menu( GtkWidget *pw, int f );
-
-static void enable_sub_menu( GtkWidget *pw, int f ) {
-
-    GtkMenuShell *pms = GTK_MENU_SHELL( pw );
-
-    g_list_foreach( pms->children, (GFunc) enable_menu, GINT_TO_POINTER(f) );
-}
+static void enable_sub_menu( GtkWidget *pw, int f ); /* for recursion */
 
 static void enable_menu( GtkWidget *pw, int f ) {
 
@@ -6321,6 +6821,13 @@ static void enable_menu( GtkWidget *pw, int f ) {
 	enable_sub_menu( pmi->submenu, f );
     else
 	gtk_widget_set_sensitive( pw, f );
+}
+
+static void enable_sub_menu( GtkWidget *pw, int f ) {
+
+    GtkMenuShell *pms = GTK_MENU_SHELL( pw );
+
+    g_list_foreach( pms->children, (GFunc) enable_menu, GINT_TO_POINTER(f) );
 }
 
 /* A global setting has changed; update entry in Settings menu if necessary. */
@@ -6679,7 +7186,7 @@ static void SetStats(const statcontext *psc)
 	FillStats( psc, &ms, FORMATGS_OVERALL, pwList );
 }
 
-const statcontext *GetStatContext(int game)
+static const statcontext *GetStatContext(int game)
 {
 	xmovegameinfo *pmgi;
 	int i;
@@ -6850,7 +7357,7 @@ static void AddNavigation(GtkWidget* pvbox)
     gtk_box_pack_start( GTK_BOX( phbox ), statPom, TRUE, TRUE, 4 );
 }
 
-void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
+static void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
 {
 	fGUIUseStatsPanel = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 
@@ -6866,7 +7373,7 @@ void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
 	}
 }
 
-gint 
+static gint 
 compare_func( gconstpointer a, gconstpointer b ) {
 
   gint i = GPOINTER_TO_INT( a );
@@ -7076,12 +7583,6 @@ extern void GTKDumpStatcontext( int game )
 #if USE_BOARD3D
 	TidyGraphData(gd);
 #endif
-}
-
-static void SetOptions( gpointer *p, guint n, GtkWidget *pw ) {
-
-  GTKSetOptions();
-
 }
 
 extern int
@@ -7452,7 +7953,7 @@ GtkWidget *apwRating[ 2 ], *pwDate, *pwEvent,
 		*pwRound, *pwPlace, *pwAnnotator;
 GtkTextBuffer *buffer;
 
-extern void MatchInfoOK( GtkWidget *pw, int *pf )
+static void MatchInfoOK( GtkWidget *pw, int *pf )
 {
     GtkTextIter begin, end;
 	unsigned int nYear, nMonth, nDay;
@@ -7773,19 +8274,6 @@ GTKChangeDisk( const char *szMsg, const int fChange,
 }
 
 
-static void 
-FinishMove( gpointer *p, guint n, GtkWidget *pw ) {
-
-  int anMove[ 8 ];
-  char sz[ 65 ];
-
-  if ( ! GTKGetMove( anMove ) )
-    /* no valid move */
-    return;
-
-  UserCommand( FormatMove( sz, ms.anBoard, anMove ) );
-
-}
 
 static void CallbackResign(GtkWidget *pw, gpointer data)
 {
@@ -7836,1327 +8324,3 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
     gtk_main();
 }
 
-/* PyShell expects sys.argv to be defined. '-n' makes PyShell run without a
- * subshell, which is needed because of some conflict with the gnubg module. */
-static void PythonShell(gpointer * p, guint n, GtkWidget * pw)
-{
-	char *pch;
-	pch =
-	    strdup(">import sys;"
-		   "sys.argv=['','-n'];"
-		   "import idlelib.PyShell;" "idlelib.PyShell.main()");
-	UserCommand(pch);
-	free(pch);
-}
-
-#if USE_BOARD3D
-
-void SetSwitchModeMenuText()
-{	/* Update menu text */
-	BoardData *bd = BOARD( pwBoard )->board_data;
-	GtkWidget *pMenuItem = gtk_item_factory_get_widget_by_action(pif, TOOLBAR_ACTION_OFFSET + MENU_OFFSET);
-	char *text;
-	if (display_is_2d(bd->rd))
-		text = _("Switch to 3D view");
-	else
-		text = _("Switch to 2D view");
-	gtk_label_set_text(GTK_LABEL(gtk_bin_get_child(GTK_BIN(pMenuItem))), text);
-	gtk_widget_set_sensitive(pMenuItem, gtk_gl_init_success);
-}
-
-static void
-SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
-{
-	BoardData *bd = BOARD( pwBoard )->board_data;
-	BoardData3d *bd3d = bd->bd3d;
-	renderdata *prd = bd->rd;
-
-	if (display_is_2d(prd))
-	{
-		prd->fDisplayType = DT_3D;
-		/* Reset 3d settings */
-		MakeCurrent3d(bd3d);
-		preDraw3d(bd, bd3d, prd);
-		updateOccPos(bd);	/* Make sure shadows are in correct place */
-		if (bd->diceShown == DICE_ON_BOARD)
-			setDicePos(bd, bd3d);	/* Make sure dice appear ok */
-		RestrictiveRedraw();
-	}
-	else
-	{
-		prd->fDisplayType = DT_2D;
-		/* Make sure 2d pixmaps are correct */
-		board_free_pixmaps(bd);
-		board_create_pixmaps(pwBoard, bd);
-		/* Make sure dice are visible if rolled */
-		if (bd->diceShown == DICE_ON_BOARD && bd->x_dice[0] <= 0)
-			RollDice2d(bd);
-	}
-
-	DisplayCorrectBoardType(bd, bd3d, prd);
-	SetSwitchModeMenuText();
-}
-#endif
-
-extern void FullScreenMode(int state)
-{
-	BoardData *bd = BOARD( pwBoard )->board_data;
-	GtkWidget *pw = gtk_item_factory_get_widget(pif, "/View/Full screen");
-	if (GTK_WIDGET_REALIZED(bd->table))
-		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(pw), state);
-}
-
-static gboolean EndFullScreen(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
-{
-	short k = event->keyval;
-
-	if (k == KEY_ESCAPE)
-		FullScreenMode(FALSE);
-
-	return FALSE;
-}
-
-/* Save state of windows for full screen */
-int showingPanels, showingIDs, maximised;
-void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed)
-{
-	*panels = showingPanels;
-	*ids = showingIDs;
-	*maxed = maximised;
-}
-void SetFullscreenWindowSettings(int panels, int ids, int maxed)
-{
-	showingPanels = panels;
-	showingIDs = ids;
-	maximised = maxed;
-}
-
-static void DoFullScreenMode( gpointer *p, guint n, GtkWidget *pw )
-{
-	BoardData *bd = BOARD( pwBoard )->board_data;
-	GtkWindow* ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
-	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
-	int showingPanels;
-	int maximised;
-	static gulong id;
-	static int changedRP, changedDP;
-
-	GtkWidget* pmiRP = gtk_item_factory_get_widget(pif, "/View/Restore panels");
-	GtkWidget* pmiDP = gtk_item_factory_get_widget(pif, "/View/Dock panels");
-
-	fFullScreen = GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif, "/View/Full screen"))->active;
-
-	if (fFullScreen)
-	{
-		GTKShowWarning(WARN_FULLSCREEN_EXIT, NULL);
-
-		bd->rd->fShowGameInfo = FALSE;
-
-		if (pmiRP && GTK_WIDGET_VISIBLE(pmiRP) && GTK_WIDGET_IS_SENSITIVE(pmiRP))
-			changedRP = TRUE;
-		if (pmiDP && GTK_WIDGET_VISIBLE(pmiDP) && GTK_WIDGET_IS_SENSITIVE(pmiDP))
-			changedDP = TRUE;
-
-		/* Check if window is maximized */
-		{
-		GdkWindowState state = gdk_window_get_state(GTK_WIDGET(ptl)->window);
-		maximised = ((state & GDK_WINDOW_STATE_MAXIMIZED) == GDK_WINDOW_STATE_MAXIMIZED);
-		SetFullscreenWindowSettings(ArePanelsShowing(), bd->rd->fShowIDs, maximised);
-		}
-
-		id = g_signal_connect(G_OBJECT(ptl), "key-press-event", G_CALLBACK(EndFullScreen), 0);
-
-		gtk_widget_hide(GTK_WIDGET(bd->table));
-		gtk_widget_hide(GTK_WIDGET(bd->dice_area));
-		gtk_widget_hide(pwStatus);
-		gtk_widget_hide(pwProgress);
-
-		fFullScreen = FALSE;
-		HideAllPanels(NULL, 0, NULL);
-		fFullScreen = TRUE;
-		bd->rd->fShowIDs = 0;
-
-		gtk_widget_hide(pwToolbar);
-		gtk_widget_hide(pwHandle);
-
-		/* Make window maximal - need to restore first (so title bar is removed) */
-		if (maximised)
-			gtk_window_unmaximize(ptl);
-		gtk_window_set_decorated(ptl, FALSE);
-		gtk_window_maximize(ptl);
-		if (pmiRP)
-			gtk_widget_set_sensitive(pmiRP, FALSE);
-		if (pmiDP)
-			gtk_widget_set_sensitive(pmiDP, FALSE);
-	}
-	else
-	{
-		bd->rd->fShowGameInfo = TRUE;
-		gtk_widget_show(pwMenuBar);
-		gtk_widget_show(pwToolbar);
-		gtk_widget_show(pwHandle);
-		gtk_widget_show(GTK_WIDGET(bd->table));
-#if USE_BOARD3D
-		/* Only show 2d dice below board if in 2d */
-		if (display_is_2d(bd->rd))
-#endif
-			gtk_widget_show(GTK_WIDGET(bd->dice_area));
-		gtk_widget_show(pwStatus);
-		gtk_widget_show(pwProgress);
-
-		GetFullscreenWindowSettings(&showingPanels, &bd->rd->fShowIDs, &maximised);
-
-		if (g_signal_handler_is_connected(G_OBJECT(ptl), id))
-			g_signal_handler_disconnect(G_OBJECT(ptl), id);
-
-		/* Restore window */
-		if (!maximised)
-			gtk_window_unmaximize(ptl);
-		gtk_window_set_decorated(ptl, TRUE);
-
-		if (showingPanels)
-			ShowAllPanels(NULL, 0, NULL);
-
-		if (changedRP)
-		{
-			gtk_widget_set_sensitive(pmiRP, TRUE);
-			changedRP = FALSE;
-		}
-		if (changedDP)
-		{
-			gtk_widget_set_sensitive(pmiDP, TRUE);
-			changedDP = FALSE;
-		}
-	}
-	UpdateSetting(&bd->rd->fShowIDs);
-}
-
-extern void Undo()
-{
-#if USE_BOARD3D
-	RestrictiveRedraw();
-#endif
-
-	ShowBoard();
-
-        UpdateTheoryData(BOARD( pwBoard )->board_data, TT_RETURNHITS, ms.anBoard);
-}
-
-static void
-TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
-  int f;
-  gnubgwindow panel = 0;
-
-  g_assert( GTK_IS_CHECK_MENU_ITEM( pw ) );
-  
-  f = GTK_CHECK_MENU_ITEM( pw )->active ;
-  switch( n ) {
-	  case TOGGLE_ANALYSIS:
-		  panel = WINDOW_ANALYSIS;
-		break;
-	  case TOGGLE_COMMENTARY:
-		  panel = WINDOW_ANNOTATION;
-		break;
-	  case TOGGLE_GAMELIST:
-		  panel = WINDOW_GAME;
-		break;
-	  case TOGGLE_MESSAGE:
-		  panel = WINDOW_MESSAGE;
-		break;
-	  case TOGGLE_THEORY:
-		  panel = WINDOW_THEORY;
-		break;
-	  case TOGGLE_COMMAND:
-		  panel = WINDOW_COMMAND;
-		break;
-	  default:
-		  g_assert(FALSE);
-  }
-  if (f)
-	PanelShow(panel);
-  else
-	PanelHide(panel);
-
-  /* Resize screen */
-  SetMainWindowSize();
-}
-
-#if USE_PYTHON
-static GtkWidget* GetRelList(RowSet* pRow)
-{
-	int i;
-	PangoRectangle logical_rect;
-	PangoLayout *layout;
-	GtkWidget *pwList = gtk_clist_new(pRow->cols);
-	gtk_clist_column_titles_show(GTK_CLIST(pwList));
-	gtk_clist_column_titles_passive(GTK_CLIST(pwList));
-	for (i = 0; i < pRow->cols; i++)
-	{
-		char* widthStr = malloc(pRow->widths[i] + 1);
-		int width;
-		memset(widthStr, 'a', pRow->widths[i]);
-		widthStr[pRow->widths[i]] = '\0';
-
-		layout = gtk_widget_create_pango_layout(pwList, widthStr);
-		pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
-		g_object_unref (layout);
-		width = logical_rect.width;
-		gtk_clist_set_column_title(GTK_CLIST(pwList), i, pRow->data[0][i]);
-
-		gtk_clist_set_column_width( GTK_CLIST( pwList ), i, width);
-		gtk_clist_set_column_resizeable(GTK_CLIST(pwList), i, FALSE);
-	}
-	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
-
-	for (i = 1; i < pRow->rows; i++)
-	{
-		gtk_clist_append(GTK_CLIST(pwList), pRow->data[i]);
-	}
-	return pwList;
-}
-
-int curPlayerId, curRow;
-GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *pwQueryBox,
-	*aliases, *pwAliasList;
-
-static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
-{
-	char *pName, *pEnv;
-	RowSet r, r2;
-	char query[1024];
-	int i;
-
-	gtk_clist_get_text(GTK_CLIST(pw), y, 0, &pName);
-	gtk_clist_get_text(GTK_CLIST(pw), y, 1, &pEnv);
-
-	sprintf(query, "person.person_id, person.name, person.notes"
-		" FROM nick INNER JOIN env ON nick.env_id = env.env_id"
-		" INNER JOIN person"
-		" ON nick.person_id = person.person_id"
-		" WHERE nick.name = '%s' AND env.place = '%s'",
-		pName, pEnv);
-
-	ClearText(GTK_TEXT_VIEW(pwPlayerNotes));
-	if( pwAliasList ) {
-	  ClearText(GTK_TEXT_VIEW(pwAliasList));
-	}
-	if (!RunQuery(&r, query))
-	{
-		gtk_entry_set_text(GTK_ENTRY(pwPlayerName), "");
-		return;
-	}
-
-	g_assert(r.rows == 2);	/* Should be exactly one entry */
-
-	curRow = y;
-	curPlayerId = atoi(r.data[1][0]);
-	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), r.data[1][1]);
-  gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwPlayerNotes)), r.data[1][2], -1);
-
-	sprintf(query, _("%s is:"), r.data[1][1]);
-	if( aliases )
-	  gtk_label_set_text(GTK_LABEL(aliases), query);
-
-	sprintf(query, "nick.name, env.place"
-		" FROM nick INNER JOIN env ON nick.env_id = env.env_id"
-		" INNER JOIN person"
-		" ON nick.person_id = person.person_id"
-		" WHERE person.person_id = %d", curPlayerId);
-
-	if (!RunQuery(&r2, query)) {
-		return;
-	}
-
-	if( pwAliasList)
-  {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwAliasList));
-    GtkTextIter it;
-    gtk_text_buffer_get_end_iter(buffer, &it);
-  	for (i = 1; i < r2.rows; i++)
-  	{
-  		char line[100];
-  		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
-  		  gtk_text_buffer_insert(buffer, &it, line, -1);
-  	}
-	}
-	FreeRowset(&r);
-	FreeRowset(&r2);
-
-}
-
-static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
-{
-	RowSet r;
-	char *pch, *query;
-
-  pch = GetText(GTK_TEXT_VIEW(pwQueryText));
-
-	if (!strncasecmp("select ", pch, strlen("select ")))
-		query = pch + strlen("select ");
-	else
-		query = pch;
-
-	if (RunQuery(&r, query))
-	{
-		gtk_widget_destroy(pwQueryResult);
-		pwQueryResult = GetRelList(&r);
-		gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, TRUE, TRUE, 0);
-		gtk_widget_show(pwQueryResult);
-		FreeRowset(&r);
-	}
-
-	g_free(pch);
-}
-
-static void UpdatePlayerDetails(GtkWidget *pw, int *dummy)
-{
-	char *pch;
-	if (curPlayerId == -1)
-		return;
-		
-  pch = GetText(GTK_TEXT_VIEW(pwPlayerNotes));
-	RelationalUpdatePlayerDetails(curPlayerId, gtk_entry_get_text(GTK_ENTRY(pwPlayerName)), pch);
-	g_free(pch);
-}
-
-char envString[100], curEnvString[100], linkPlayer[100];
-int currentLinkRow;
-
-static void LinkPlayerSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, void* null)
-{
-	currentLinkRow = y;
-}
-
-static void SelectLinkOK(GtkWidget *pw, GtkWidget *pwList)
-{
-	char* current;
-	if (currentLinkRow != -1)
-	{
-		gtk_clist_get_text(GTK_CLIST(pwList), currentLinkRow, 0, &current);
-		strcpy(linkPlayer, current);
-		gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-	}
-}
-
-static void RelationalLinkPlayers(GtkWidget *pw, GtkWidget *pwRelList)
-{
-	char query[1024];
-	RowSet r;
-	GtkWidget *pwDialog, *pwList;
-	char *linkNick, *linkEnv;
-	if (curPlayerId == -1)
-		return;
-
-	gtk_clist_get_text(GTK_CLIST(pwRelList), curRow, 0, &linkNick);
-	gtk_clist_get_text(GTK_CLIST(pwRelList), curRow, 1, &linkEnv);
-
-	/* Pick suitable linking players with this query... */
-	sprintf(query, "person.name AS Player FROM person WHERE person_id NOT IN"
-		" (SELECT person.person_id FROM nick" 
-		" INNER JOIN env ON nick.env_id = env.env_id"
-		" INNER JOIN person ON nick.person_id = person.person_id"
-		" WHERE env.env_id IN"
-		" (SELECT env_id FROM nick INNER JOIN person"
-		" ON nick.person_id = person.person_id"
-		" WHERE person.name = '%s'))",
-		gtk_entry_get_text(GTK_ENTRY(pwPlayerName)));
-	if (!RunQuery(&r, query))
-		return;
-
-	if (r.rows < 2)
-	{
-		GTKMessage("No players to link to", DT_ERROR);
-		FreeRowset(&r);
-		return;
-	}
-
-	pwList = GetRelList(&r);
-	FreeRowset(&r);
-
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Linked Player"), DT_QUESTION,
-		pw, DIALOG_FLAG_MODAL, G_CALLBACK(SelectLinkOK), pwList);
-
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwList);
-	g_signal_connect( G_OBJECT( pwList ), "select-row",
-							G_CALLBACK( LinkPlayerSelect ), pwList );
-
-	gtk_widget_show_all( pwDialog );
-
-	*linkPlayer = '\0';
-	currentLinkRow = -1;
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
-
-	if (*linkPlayer)
-	{
-		RelationalLinkNick(linkNick, linkEnv, linkPlayer);
-		ShowRelationalSelect(pwRelList, curRow, 0, 0, 0);
-		/* update new details list...
-		   >> change query so person not picked if nick in selected env!
-		*/
-	}
-}
-
-static void RelationalOpen(GtkWidget *pw, GtkWidget* pwList)
-{
-    char *player, *env;
-	char buf[200];
-
-	if (curPlayerId == -1)
-		return;
-
-	/* Get player name and env from list */
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 1, &env);
-
-	sprintf(buf, "Open (%s, %s)", player, env);
-	output(buf);
-	outputx();
-}
-
-static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
-{
-    char *player, *env;
-	char buf[200];
-
-	if (curPlayerId == -1)
-		return;
-
-	/* Get player name and env from list */
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 1, &env);
-
-	sprintf(buf, _("Remove all data for %s?"), player);
-	if(!GetInputYN(buf))
-	    return;
-
-	sprintf(buf, "\"%s\" \"%s\"", player, env);
-	CommandRelationalErase(buf);
-
-	gtk_clist_remove(GTK_CLIST(pwList), curRow);
-}
-
-char envString[100], curEnvString[100];
-GtkWidget *envP1, *envP2;
-RowSet *pNick1Envs, *pNick2Envs, *pEnvRows;
-
-static void SelectEnvOK(GtkWidget *pw, GtkWidget *pwCombo)
-{
-	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pwCombo)->entry));
-	strcpy(envString, current);
-	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-}
-
-void SelEnvChange(GtkList *list, GtkWidget* pwCombo)
-{
-	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pwCombo)->entry));
-	if (current && *current && (!*curEnvString || strcmp(current, curEnvString)))
-	{
-		int i, id;
-		strcpy(curEnvString, current);
-
-		/* Get id from selected string */
-		i = 1;
-		while (strcmp(pEnvRows->data[i][1], curEnvString))
-			i++;
-		id = atoi(pEnvRows->data[i][0]);
-
-		/* Set player names for env (if available) */
-		for (i = 1; i < pNick1Envs->rows; i++)
-		{
-			if (atoi(pNick1Envs->data[i][0]) == id)
-				break;
-		}
-		if (i < pNick1Envs->rows)
-			gtk_label_set_text(GTK_LABEL(envP1), pNick1Envs->data[i][1]);
-		else
-			gtk_label_set_text(GTK_LABEL(envP1), "[new to env]");
-
-		for (i = 1; i < pNick2Envs->rows; i++)
-		{
-			if (atoi(pNick2Envs->data[i][0]) == id)
-				break;
-		}
-		if (i < pNick2Envs->rows)
-			gtk_label_set_text(GTK_LABEL(envP2), pNick2Envs->data[i][1]);
-		else
-			gtk_label_set_text(GTK_LABEL(envP2), "[new to env]");
-	}
-}
-
-static int GtkGetEnv(char* env)
-{	/* Get an environment for the match to be added */
-	int envID;
-	/* See if more than one env (if not no choice) */
-	RowSet envRows;
-	char *query = "env_id, place FROM env ORDER BY env_id";
-
-	if (!RunQuery(&envRows, query))
-	{
-		GTKMessage(_("Database error getting environment"), DT_ERROR);
-		return -1;
-	}
-
-	if (envRows.rows == 2)
-	{	/* Just one env */
-		strcpy(env, envRows.data[1][1]);
-	}
-	else
-	{
-		/* find out what envs players nicks are in */
-		int found, cur1, cur2, i, NextEnv;
-		RowSet nick1, nick2;
-		char query[1024];
-		char *queryText = "env_id, person.name"
-				" FROM nick INNER JOIN person"
-				" ON nick.person_id = person.person_id"
-				" WHERE nick.name = '%s' ORDER BY env_id";
-		
-		pNick1Envs = &nick1;
-		pNick2Envs = &nick2;
-		pEnvRows = &envRows;
-
-		sprintf(query, queryText, ap[0].szName);
-		if (!RunQuery(&nick1, query))
-		{
-			GTKMessage(_("Database error getting environment"), DT_ERROR);
-			return -1;
-		}
-
-		sprintf(query, queryText, ap[1].szName);
-		if (!RunQuery(&nick2, query))
-		{
-			GTKMessage(_("Database error getting environment"), DT_ERROR);
-			return -1;
-		}
-
-		/* pick best (first with both players or first with either player) */
-		found = 0;
-		cur1 = cur2 = 1;
-		envID = atoi(envRows.data[1][0]);
-
-		for (i = 1; i < envRows.rows; i++)
-		{
-			int oneFound = FALSE;
-			int curID = atoi(envRows.data[i][0]);
-			if (nick1.rows > cur1)
-			{
-				NextEnv = atoi(nick1.data[cur1][0]);
-				if (NextEnv == curID)
-				{
-					if (found == 0)
-					{	/* Found at least one */
-						found = 1;
-						envID = curID;
-					}
-					oneFound = TRUE;
-					cur1++;
-				}
-			}
-			if (nick2.rows > cur2)
-			{
-				NextEnv = atoi(nick2.data[cur2][0]);
-				if (NextEnv == curID)
-				{
-					if (found == 0)
-					{	/* Found at least one */
-						found = 1;
-						envID = curID;
-					}
-					if (oneFound == 1)
-					{	/* Found env with both nicks */
-						envID = curID;
-						break;
-					}
-				}
-			}
-		}
-		/* show dialog to select env */
-		{
-			GList *glist;
-			GtkWidget *pwEnvCombo, *pwDialog, *pwHbox, *pwVbox;
-			pwEnvCombo = gtk_combo_new();
-
-			pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Environment"), DT_QUESTION,
-				NULL, DIALOG_FLAG_MODAL, G_CALLBACK(SelectEnvOK), pwEnvCombo);
-
-			gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
-				pwHbox = gtk_hbox_new(FALSE, 0));
-
-			gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
-			gtk_box_pack_start(GTK_BOX(pwVbox), gtk_label_new(_("Environment")), FALSE, FALSE, 0);
-
-			gtk_combo_set_value_in_list(GTK_COMBO(pwEnvCombo), TRUE, FALSE);
-			glist = NULL;
-			for (i = 1; i < envRows.rows; i++)
-				glist = g_list_append(glist, envRows.data[i][1]);
-			gtk_combo_set_popdown_strings(GTK_COMBO(pwEnvCombo), glist);
-			g_list_free(glist);
-			gtk_box_pack_start(GTK_BOX(pwVbox), pwEnvCombo, FALSE, FALSE, 0);
-
-			/* Select best env */
-			i = 1;
-			while (atoi(envRows.data[i][0]) != envID)
-				i++;
-
-			*curEnvString = '\0';
-			gtk_widget_set_sensitive(GTK_WIDGET(GTK_COMBO(pwEnvCombo)->entry), FALSE);
-			g_signal_connect(G_OBJECT(GTK_COMBO(pwEnvCombo)->list), "selection-changed",
-							G_CALLBACK(SelEnvChange), pwEnvCombo);
-
-			gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 10);
-			gtk_box_pack_start(GTK_BOX(pwVbox), gtk_label_new(ap[0].szName), FALSE, FALSE, 0);
-			envP1 = gtk_label_new(NULL);
-			gtk_box_pack_start(GTK_BOX(pwVbox), envP1, FALSE, FALSE, 0);
-
-			gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 10);
-			gtk_box_pack_start(GTK_BOX(pwVbox), gtk_label_new(ap[1].szName), FALSE, FALSE, 0);
-			envP2 = gtk_label_new(NULL);
-			gtk_box_pack_start(GTK_BOX(pwVbox), envP2, FALSE, FALSE, 0);
-
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pwEnvCombo)->entry), envRows.data[i][1]);
-
-			gtk_widget_show_all( pwDialog );
-
-			*envString = '\0';
-
-			GTKDisallowStdin();
-			gtk_main();
-			GTKAllowStdin();
-
-			if (*envString)
-			{
-				strcpy(env, envString);
-			}
-			else
-				*env = '\0';
-		}
-
-		FreeRowset(&nick1);
-		FreeRowset(&nick2);
-	}
-
-	FreeRowset(&envRows);
-	return 0;
-}
-
-static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
-{
-	char env[100];
-	char buf[200];
-	int exists = RelationalMatchExists();
-	if (exists == -1 ||
-		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
-		return;
-
-	if (GtkGetEnv(env) < 0)
-		return;
-
-	/* Pass in env id and force addition */
-	sprintf(buf, "\"%s\" Yes", env);
-	CommandRelationalAddMatch(buf);
-
-	outputx();
-}
-
-#define PACK_OFFSET 4
-#define OUTSIDE_FRAME_GAP PACK_OFFSET
-#define INSIDE_FRAME_GAP PACK_OFFSET
-#define NAME_NOTES_VGAP PACK_OFFSET
-#define BUTTON_GAP PACK_OFFSET
-#define QUERY_BORDER 1
-
-static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
-{
-	RowSet r;
-	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
-		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen, *pwn,
-		*pwLabel, *pwLink, *pwScrolled;
-	int multipleEnv;
-
-
-	pwAliasList = 0;
-	aliases = 0;
-
-	/* See if there's more than one environment */
-	if (!RunQuery(&r, "env_id FROM env"))
-	{
-		GTKMessage(_("Database error"), DT_ERROR);
-		return;
-	}
-	multipleEnv = (r.rows > 2);
-	FreeRowset(&r);
-
-	curPlayerId = -1;
-
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Relational Database"), DT_INFO,
-		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
-
-	pwn = gtk_notebook_new();
-  gtk_container_set_border_width(GTK_CONTAINER(pwn), 0);
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwn);
-
-/*******************************************************
-** Start of (left hand side) of player screen...
-*******************************************************/
-
-  pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwHbox, gtk_label_new(_("Players")));
-
-	pwVbox = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox, FALSE, FALSE, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
-
-	if (!RunQuery(&r, "name AS Nickname, place AS env FROM nick INNER JOIN env"
-		" ON nick.env_id = env.env_id ORDER BY name"))
-		return;
-
-	if (r.rows < 2)
-	{
-		GTKMessage(_("No data in database"), DT_ERROR);
-		return;
-	}
-
-	pwList = GetRelList(&r);
-	g_signal_connect( G_OBJECT( pwList ), "select-row",
-							G_CALLBACK( ShowRelationalSelect ), pwList );
-	FreeRowset(&r);
-
-	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
-				GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
-		gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
-
-
-	pwHbox2 = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
-
-	pwOpen = gtk_button_new_with_label( "Open" );
-	g_signal_connect(G_OBJECT(pwOpen), "clicked",
-				G_CALLBACK(RelationalOpen), pwList);
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwOpen, FALSE, FALSE, 0);
-
-	pwErase = gtk_button_new_with_label( "Erase" );
-	g_signal_connect(G_OBJECT(pwErase), "clicked",
-				G_CALLBACK(RelationalErase), pwList);
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwErase, FALSE, FALSE, BUTTON_GAP);
-
-/*******************************************************
-** Start of right hand side of player screen...
-*******************************************************/
-
-	pwPlayerFrame = gtk_frame_new("Player");
-	gtk_container_set_border_width(GTK_CONTAINER(pwPlayerFrame), OUTSIDE_FRAME_GAP);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwPlayerFrame, TRUE, TRUE, 0);
-
-	pwVbox = gtk_vbox_new(FALSE, NAME_NOTES_VGAP);
-	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
-	gtk_container_add(GTK_CONTAINER(pwPlayerFrame), pwVbox);
-
-	pwHbox2 = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
-
-  pwLabel = gtk_label_new("Name");
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwLabel, FALSE, FALSE, 0);
-	pwPlayerName = gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwPlayerName, TRUE, TRUE, 0);
-
-	pwVbox2 = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwVbox2, TRUE, TRUE, 0);
-
-	pwLabel = gtk_label_new("Notes");
-	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(pwVbox2), pwLabel, FALSE, FALSE, 0);
-
-	pwPlayerNotes = gtk_text_view_new();
-  gtk_text_view_set_editable(GTK_TEXT_VIEW(pwPlayerNotes), TRUE);
-
-  pwScrolled = gtk_scrolled_window_new (NULL, NULL);
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-  gtk_container_add(GTK_CONTAINER(pwScrolled), pwPlayerNotes);
-	gtk_box_pack_start(GTK_BOX(pwVbox2), pwScrolled, TRUE, TRUE, 0);
-
-	pwHbox2 = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
-	
-	pwUpdate = gtk_button_new_with_label("Update Details");
-	gtk_box_pack_start(GTK_BOX(pwHbox2), pwUpdate, FALSE, FALSE, 0);
-	g_signal_connect(G_OBJECT(pwUpdate), "clicked", G_CALLBACK(UpdatePlayerDetails), NULL);
-
-/*******************************************************
-** End of right hand side of player screen...
-*******************************************************/
-
-	/* If more than one environment, show linked nicknames */
-	if (multipleEnv)
-	{	/* Multiple environments */
-		gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
-		aliases = gtk_label_new(NULL);
-		gtk_misc_set_alignment(GTK_MISC(aliases), 0, 0);
-		gtk_box_pack_start(GTK_BOX(pwVbox), aliases, FALSE, FALSE, 0);
-
-		pwAliasList = gtk_text_view_new();
-		gtk_text_view_set_editable(GTK_TEXT_VIEW(pwAliasList), FALSE);
-		gtk_box_pack_start(GTK_BOX(pwVbox), pwAliasList, TRUE, TRUE, 0);
-
-		pwLink = gtk_button_new_with_label(_("Link players"));
-		g_signal_connect(G_OBJECT(pwLink), "clicked",
-			G_CALLBACK(RelationalLinkPlayers), pwList);
-		gtk_box_pack_start(GTK_BOX(pwVbox), pwLink, FALSE, TRUE, 0);
-	}
-
-	/* Query sheet */
-  pwVbox = gtk_vbox_new(FALSE, 0);
-	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwVbox, gtk_label_new(_("Query")));
-	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
-
-	pwLabel = gtk_label_new("Query text");
-	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwLabel, FALSE, FALSE, 0);
-
-	pwQueryText = gtk_text_view_new();
-  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_TOP, QUERY_BORDER);
-  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_RIGHT, QUERY_BORDER);
-  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_BOTTOM, QUERY_BORDER);
-  gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText), GTK_TEXT_WINDOW_LEFT, QUERY_BORDER);
-  gtk_text_view_set_editable(GTK_TEXT_VIEW(pwQueryText), TRUE);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryText, FALSE, FALSE, 0);
-	gtk_widget_set_usize(pwQueryText, 250, 80);
-
-  pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox, FALSE, FALSE, 0);
-	pwLabel = gtk_label_new("Result");
-	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwLabel, TRUE, TRUE, 0);
-
-	pwRun = gtk_button_new_with_label( "Run Query" );
-	g_signal_connect(G_OBJECT(pwRun), "clicked",
-				G_CALLBACK(RelationalQuery), pwVbox);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwRun, FALSE, FALSE, 0);
-
-	pwQueryResult = gtk_clist_new(1);
-	gtk_clist_set_column_title(GTK_CLIST(pwQueryResult), 0, " ");
-	gtk_clist_column_titles_show(GTK_CLIST(pwQueryResult));
-	gtk_clist_column_titles_passive(GTK_CLIST(pwQueryResult));
-
-	pwQueryBox = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, TRUE, TRUE, 0);
-
-	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
-				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(pwScrolled), pwQueryBox);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
-
-	gtk_widget_show_all( pwDialog );
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
-}
-
-extern void GtkShowQuery(RowSet* pRow)
-{
-	GtkWidget *pwDialog;
-
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Database Result"), DT_INFO,
-		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
-	
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       GetRelList(pRow));
-
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-}
-
-int curEnvRow, numEnvRows;
-GtkWidget *pwRemoveEnv, *pwRenameEnv;
-
-static void ManageEnvSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
-{
-	gtk_widget_set_sensitive(pwRemoveEnv, TRUE);
-	gtk_widget_set_sensitive(pwRenameEnv, TRUE);
-
-	curEnvRow = y;
-}
-
-extern int env_added;
-
-static void RelationalNewEnv(GtkWidget *pw, GtkWidget* pwList)
-{
-    char *newName;
-
-	if ((newName = GTKGetInput(_("New Environment"), _("Enter name"))))
-	{
-		char *aszRow[1];
-		CommandRelationalAddEnvironment(newName);
-
-		if (env_added)
-		{
-			aszRow[0] = newName;
-			gtk_clist_append(GTK_CLIST(pwList), aszRow);
-			free(newName);
-
-			gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
-			gtk_widget_set_sensitive(pwRenameEnv, FALSE);
-
-			numEnvRows++;
-		}
-	}
-}
-
-extern int env_deleted;
-
-static void RelationalRemoveEnv(GtkWidget *pw, GtkWidget* pwList)
-{
-    char *pch;
-
-	if (numEnvRows == 1)
-	{
-		GTKMessage(_("You must have at least one environment"), DT_WARNING);
-		return;
-	}
-
-	gtk_clist_get_text(GTK_CLIST(pwList), curEnvRow, 0, &pch);
-
-	CommandRelationalEraseEnv(pch);
-
-	if (env_deleted)
-	{
-		gtk_clist_remove(GTK_CLIST(pwList), curEnvRow);
-		gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
-		gtk_widget_set_sensitive(pwRenameEnv, FALSE);
-
-		numEnvRows--;
-	}
-}
-
-static void RelationalRenameEnv(GtkWidget *pw, GtkWidget* pwList)
-{
-    char *pch, *newName;
-	gtk_clist_get_text(GTK_CLIST(pwList), curEnvRow, 0, &pch);
-
-	if ((newName = GTKGetInput(_("Rename Environment"), _("Enter new name"))))
-	{
-		char str[1024];
-		sprintf(str, "\"%s\" \"%s\"", pch, newName);
-		CommandRelationalRenameEnv(str);
-		gtk_clist_set_text(GTK_CLIST(pwList), curEnvRow, 0, newName);
-		free(newName);
-	}
-}
-
-static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
-{
-	RowSet r;
-	GtkWidget *pwList, *pwDialog, *pwHbox, *pwVbox, *pwBut;
-
-	pwDialog = GTKCreateDialog( _("GNU Backgammon - Manage Environments"), DT_INFO,
-		NULL, DIALOG_FLAG_MODAL, NULL, NULL );
-
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
-		pwHbox = gtk_hbox_new(FALSE, 0));
-
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
-
-	if (!RunQuery(&r, "place as environment FROM env"))
-		return;
-
-	numEnvRows = r.rows - 1; /* -1 as header row counted */
-
-	pwList = GetRelList(&r);
-	g_signal_connect( G_OBJECT( pwList ), "select-row",
-							G_CALLBACK( ManageEnvSelect ), pwList );
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwList, TRUE, TRUE, 0);
-	FreeRowset(&r);
-
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
-
-	pwBut = gtk_button_new_with_label( _("New Env" ) );
-	g_signal_connect(G_OBJECT(pwBut), "clicked",
-				G_CALLBACK(RelationalNewEnv), pwList);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwBut, FALSE, FALSE, 4);
-
-	pwRemoveEnv = gtk_button_new_with_label( _("Remove Env" ) );
-	g_signal_connect(G_OBJECT(pwRemoveEnv), "clicked",
-				G_CALLBACK(RelationalRemoveEnv), pwList);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwRemoveEnv, FALSE, FALSE, 4);
-
-	pwRenameEnv = gtk_button_new_with_label( _("Rename Env" ) );
-	g_signal_connect(G_OBJECT(pwRenameEnv), "clicked",
-				G_CALLBACK(RelationalRenameEnv), pwList);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwRenameEnv, FALSE, FALSE, 4);
-
-	gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
-	gtk_widget_set_sensitive(pwRenameEnv, FALSE);
-
-	gtk_widget_show_all( pwDialog );
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
-}
-#endif
-
-
-/* Language selection code */
-
-GtkWidget *curSel;
-GtkWidget *pwLangDialog, *pwLangRadio1, *pwLangRadio2, *pwLangTable;
-
-/* Language screen name, code and flag name */
-static char *aaszLang[][ 3 ] = {
-    { N_("System default"), "system", NULL },
-    { N_("Czech"),	    "cs_CZ", "flags/czech.png" },
-    { N_("Danish"),	    "da_DK", "flags/denmark.png" },
-    { N_("English (GB)"),   "en_GB", "flags/england.png" },
-    { N_("English (US)"),   "en_US", "flags/usa.png" },
-    { N_("French"),	    "fr_FR", "flags/france.png" },
-    { N_("German"),	    "de_DE", "flags/germany.png" },
-    { N_("Icelandic"),      "is_IS", "flags/iceland.png" },
-    { N_("Italian"),	    "it_IT", "flags/italy.png" },
-    { N_("Japanese"),	    "ja_JP", "flags/japan.png" },
-    { N_("Russian"),	    "ru_RU", "flags/russia.png" },
-    { N_("Turkish"),	    "tr_TR", "flags/turkey.png" },
-    { NULL, NULL, NULL }
-};
-
-void TranslateWidgets(GtkWidget *p)
-{
-	if (GTK_IS_CONTAINER(p))
-	{
-		GList *pl = gtk_container_get_children(GTK_CONTAINER(p));
-		while(pl)
-		{
-			TranslateWidgets(pl->data);
-			pl = pl->next;
-		}
-		g_list_free(pl);
-	}
-	if (GTK_IS_LABEL(p))
-	{
-		char *name = (char*)g_object_get_data(G_OBJECT(p), "lang");
-		gtk_label_set_text(GTK_LABEL(p), _(name));
-	}
-}
-
-void SetLangDialogText()
-{
-   gtk_window_set_title(GTK_WINDOW(pwLangDialog), _("Select language"));
-   TranslateWidgets(pwLangDialog);
-}
-
-void SetLangOk(void);
-
-gboolean FlagClicked(GtkWidget *pw, GdkEventButton *event, void* dummy)
-{
-	/* Manually highlight clicked flag */
-	GtkWidget *frame, *eb;
-
-	if (event && event->type == GDK_2BUTTON_PRESS && curSel == pw)
-		SetLangOk();
-
-	if (curSel == pw)
-		return FALSE;
-
-	if (curSel)
-	{	/* Reset old item */
-		frame = gtk_bin_get_child(GTK_BIN(curSel));
-		eb = gtk_bin_get_child(GTK_BIN(frame));
-		gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-		gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, NULL);
-	}
-
-	curSel = pw;
-	frame = gtk_bin_get_child(GTK_BIN(pw));
-	eb = gtk_bin_get_child(GTK_BIN(frame));
-
-	gtk_frame_set_shadow_type(GTK_FRAME(gtk_bin_get_child(GTK_BIN(pw))), GTK_SHADOW_ETCHED_OUT);
-	gtk_widget_modify_bg(eb, GTK_STATE_NORMAL, &pwMain->style->bg[GTK_STATE_SELECTED]);
-
-	/* Immediately translate this dialog */
-	SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
-	SetLangDialogText();
-
-	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
-
-	return FALSE;
-}
-
-GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilename)
-{	/* Create a flag */
-	GtkWidget *eb, *eb2, *vbox, *lab1;
-	GtkWidget *frame;
-	char *file;
-	GdkPixbuf *pixbuf;
-	GtkWidget *image;
-	GError *pix_error = NULL;
-
-	eb = gtk_event_box_new();
-	gtk_widget_modify_bg(eb, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
-	frame = gtk_frame_new(NULL);
-	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_NONE);
-	gtk_container_add( GTK_CONTAINER( eb ), frame );
-
-	eb2 = gtk_event_box_new();
-	gtk_widget_modify_bg(eb2, GTK_STATE_INSENSITIVE, &pwMain->style->bg[GTK_STATE_NORMAL]);
-	gtk_container_add( GTK_CONTAINER( frame ), eb2 );
-
-	vbox = gtk_vbox_new( FALSE, 5 );
-	gtk_container_set_border_width( GTK_CONTAINER(vbox), 5);
-	gtk_container_add( GTK_CONTAINER( eb2 ), vbox );
-
-	if (flagfilename)
-	{
-
-                file = g_build_filename(PKGDATADIR, flagfilename, NULL);
-		pixbuf = gdk_pixbuf_new_from_file(file, &pix_error);
-
-		if (pix_error)
-			outputerrf("Failed to open flag: %s\n", file);
-		else
-		{
-			image = gtk_image_new_from_pixbuf(pixbuf);
-			gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
-		}
-                g_free(file);
-	}
-	lab1 = gtk_label_new(NULL);
-	gtk_widget_set_size_request(lab1, 80, -1);
-	gtk_box_pack_start (GTK_BOX (vbox), lab1, FALSE, FALSE, 0);
-	g_object_set_data(G_OBJECT(lab1), "lang", language);
-
-	g_signal_connect(G_OBJECT(eb), "button_press_event", G_CALLBACK(FlagClicked), NULL);
-
-	g_object_set_data(G_OBJECT(eb), "lang", langCode);
-
-	return eb;
-}
-
-int defclick(GtkWidget *pw, void *dummy, GtkWidget *table)
-{
-	gtk_widget_set_sensitive(table, FALSE);
-	SetupLanguage("");
-	SetLangDialogText();
-	gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), TRUE);
-	return FALSE;
-}
-
-int selclick(GtkWidget *pw, void *dummy, GtkWidget *table)
-{
-	gtk_widget_set_sensitive(table, TRUE);
-	if (curSel)
-	{
-		SetupLanguage((char*)g_object_get_data(G_OBJECT(curSel), "lang"));
-		SetLangDialogText();
-	}
-	else
-		gtk_widget_set_sensitive(DialogArea(pwLangDialog, DA_OK), FALSE);
-
-	return FALSE;
-}
-
-void SetWidgetLabelLang(GtkWidget *pw, char *text)
-{
-	if (GTK_IS_CONTAINER(pw))
-	{
-		GList *pl = gtk_container_get_children(GTK_CONTAINER(pw));
-		while(pl)
-		{
-			SetWidgetLabelLang(pl->data, text);
-			pl = pl->next;
-		}
-		g_list_free(pl);
-	}
-	if (GTK_IS_LABEL(pw))
-		g_object_set_data(G_OBJECT(pw), "lang", text);
-}
-
-void AddLangWidgets(GtkWidget *cont)
-{
-	int i, numLangs;
-	GtkWidget *pwVbox, *pwHbox, *selLang = NULL;
-	pwVbox = gtk_vbox_new( FALSE, 0 );
-	gtk_container_add( GTK_CONTAINER( cont ), pwVbox );
-
-	pwLangRadio1 = gtk_radio_button_new_with_label(NULL, "");
-	SetWidgetLabelLang(pwLangRadio1, N_("System default"));
-	pwLangRadio2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(pwLangRadio1), "");
-	SetWidgetLabelLang(pwLangRadio2, N_("Select language"));
-	gtk_box_pack_start (GTK_BOX (pwVbox), pwLangRadio1, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (pwVbox), pwLangRadio2, FALSE, FALSE, 0);
-
-	numLangs = 0;
-	while (*aaszLang[numLangs])
-		numLangs++;
-	numLangs--;	/* Don't count system default */
-
-#define NUM_COLS 4	/* Display in 4 columns */
-	pwLangTable = gtk_table_new(numLangs / NUM_COLS + 1, NUM_COLS, TRUE);
-
-	for (i = 0; i < numLangs; i++)
-	{
-		GtkWidget *flag = GetFlagWidget(aaszLang[i + 1][0], aaszLang[i + 1][1], aaszLang[i + 1][2]);
-		int row = i / NUM_COLS;
-		int col = i - row * NUM_COLS;
-		gtk_table_attach(GTK_TABLE(pwLangTable), flag, col, col + 1, row, row + 1, 0, 0, 0, 0);
-		if (!strcasecmp(szLang, aaszLang[i + 1][1]))
-		selLang = flag;
-	}
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pwHbox), pwLangTable, FALSE, FALSE, 20);
-
-	if (selLang == NULL)
-		defclick(0, 0, pwLangTable);
-	else
-	{
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwLangRadio2), TRUE);
-		FlagClicked(selLang, 0, 0);
-	}
-	g_signal_connect(G_OBJECT(pwLangRadio1), "button_press_event", G_CALLBACK(defclick), pwLangTable);
-	g_signal_connect(G_OBJECT(pwLangRadio2), "button_press_event", G_CALLBACK(selclick), pwLangTable);
-}
-
-char *newLang;
-
-void SetLangOk(void)
-{
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwLangRadio1)))
-		newLang = aaszLang[0][1];
-	else
-		newLang = (char*)g_object_get_data(G_OBJECT(curSel), "lang");
-
-	gtk_widget_destroy(pwLangDialog);
-}
-
-static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
-{
-	GList *pl;
-
-	pwLangDialog = GTKCreateDialog( NULL, DT_QUESTION, NULL, DIALOG_FLAG_MODAL, SetLangOk, NULL );
-
-	pl = gtk_container_get_children( GTK_CONTAINER( DialogArea( pwLangDialog, DA_BUTTONS ) ) );
-	SetWidgetLabelLang(GTK_WIDGET(pl->data), N_("Cancel"));
-	SetWidgetLabelLang(GTK_WIDGET(pl->next->data), N_("OK"));
-	g_list_free(pl);
-
-	curSel = NULL;
-	newLang = NULL;
-
-	AddLangWidgets(DialogArea(pwLangDialog, DA_MAIN));
-	gtk_widget_show_all(pwLangDialog);
-
-	gtk_main();
-
-	if (newLang)
-		CommandSetLang(newLang);	/* Set new language (after dialog has closed) */
-	else
-		SetupLanguage(szLang);	/* If cancelled make sure language stays the same */
-}

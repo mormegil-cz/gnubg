@@ -968,10 +968,20 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
 /* used by mulithread code */
 static int progress_offset;
 
-static int NumberMovesGame ( list *plGame );
+static int
+NumberMovesGame ( list *plGame ) {
+
+  int nMoves = 0;
+  list *pl;
+
+  for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) 
+    nMoves++;
+
+  return nMoves;
+
+}
 
 #if USE_MULTITHREAD
-
 
 static void UpdateProgressBar()
 {
@@ -1211,19 +1221,6 @@ static int CheckSettings( void ) {
     }
 
     return 0;
-}
-
-static int
-NumberMovesGame ( list *plGame ) {
-
-  int nMoves = 0;
-  list *pl;
-
-  for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) 
-    nMoves++;
-
-  return nMoves;
-
 }
 
 
@@ -1495,20 +1492,6 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
 
     }
 }
-
-extern float
-calcFibsRating( const float rMWC, const int nMatchTo ) {
-
-  float r;
-
-  r = 0.50f - rMWC;
-  if ( r < 0.0f )
-    r = 0.0f;
-
-  return 2100 + relativeFibsRating( r, nMatchTo );
-
-}
-
 
 extern void
 DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const char * op, const char * sz,
@@ -2158,7 +2141,7 @@ static int GameAnalysed(list * plGame)
 	return TRUE;
 }
 
-extern int MatchAnalysed()
+extern int MatchAnalysed(void)
 {
 	list *pl;
 

@@ -45,18 +45,8 @@
 #include "fun3d.h"
 #endif
 
-extern moverecord *pmrCurAnn;
 int showMoveListDetail = 1;
-extern void MoveListCreate(hintdata *phd);
-extern void MoveListUpdate(const hintdata *phd);
-extern GList* MoveListGetSelectionList(const hintdata *phd);
-extern void MoveListFreeSelectionList(GList *pl);
-extern move *MoveListGetMove(const hintdata *phd, GList *pl);
-extern gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintdata *phd );
-extern void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd);
-extern int MoveListGetSelectionCount(const hintdata *phd);
-
-static void MoveListCopy(GtkWidget *pw, hintdata *phd);
+moverecord *pmrCurAnn;
 
 static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 {
@@ -122,7 +112,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   MoveListUpdate ( phd );
 }
 
-void ShowMove ( hintdata *phd, const int f )
+extern void ShowMove ( hintdata *phd, const int f )
 {
   char *sz;
   int anBoard[ 2 ][ 25 ];
@@ -428,6 +418,13 @@ MoveListDetailsClicked( GtkWidget *pw, hintdata *phd )
 
 GtkWidget *pwDetails;
 
+static void MoveListCopy(GtkWidget *pw, hintdata *phd)
+{
+  char *pc = MoveListCopyData(phd);
+  if ( pc )
+    TextToClipboard( pc );
+}
+
 static GtkWidget *
 CreateMoveListTools ( hintdata *phd )
 {
@@ -624,7 +621,7 @@ CreateMoveListTools ( hintdata *phd )
   return pwTools;
 }
 
-void HintDoubleClick(GtkTreeView        *treeview,
+extern void HintDoubleClick(GtkTreeView        *treeview,
                        GtkTreePath        *path,
                        GtkTreeViewColumn  *col,
                        hintdata *phd)
@@ -632,7 +629,7 @@ void HintDoubleClick(GtkTreeView        *treeview,
 	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
 }
 
-void HintSelect(GtkTreeSelection *selection, hintdata *phd)
+extern void HintSelect(GtkTreeSelection *selection, hintdata *phd)
 {
 	CheckHintButtons( phd );
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(phd->pwShow)))
@@ -650,13 +647,6 @@ void HintSelect(GtkTreeSelection *selection, hintdata *phd)
 		break;
 		}
 	}
-}
-
-static void MoveListCopy(GtkWidget *pw, hintdata *phd)
-{
-  char *pc = MoveListCopyData(phd);
-  if ( pc )
-    TextToClipboard( pc );
 }
 
 extern int 

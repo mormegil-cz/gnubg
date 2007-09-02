@@ -33,11 +33,9 @@
 #undef HAVE_LIMITS_H
 #undef HAVE_FSTAT
 
-extern void
-PythonInitialise();
+extern void PythonInitialise(void);
 
-extern void
-PythonShutdown();
+extern void PythonShutdown(void);
 
 extern PyObject *PythonMatchChecksum( PyObject* self, PyObject *args );
 

@@ -439,7 +439,7 @@ static int BBSCheckInitialSeed( rngcontext *rngctx ) {
 }
 #endif
 
-extern void
+static void
 PrintRNGWarning( void ) {
 
   outputl( _("WARNING: this number may not be correct if the same \n"

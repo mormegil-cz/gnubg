@@ -74,7 +74,7 @@ typedef struct _rolloutprogress {
 } rolloutprogress;
 
 #if USE_GTK
-void AllocTextList(rolloutprogress *prp)
+static void AllocTextList(rolloutprogress *prp)
 {	/* 2d array to cache displayed widget text */
 	int i;
 	int lines = prp->n;
@@ -89,7 +89,7 @@ void AllocTextList(rolloutprogress *prp)
 	}
 }
 
-void FreeTextList(rolloutprogress *prp)
+static void FreeTextList(rolloutprogress *prp)
 {	/* destroy list */
 	int i;
 	int lines = prp->n;
@@ -102,7 +102,7 @@ void FreeTextList(rolloutprogress *prp)
 	free(prp->pListText);
 }
 
-void SetRolloutText(rolloutprogress *prp, int x, int y, char* sz)
+static void SetRolloutText(rolloutprogress *prp, int x, int y, char* sz)
 {	/* Cache set text to reduce flicker (and speed things up a bit) */
 	if (!prp->pListText[x][y] || strcmp(prp->pListText[x][y - 1], sz))
 	{

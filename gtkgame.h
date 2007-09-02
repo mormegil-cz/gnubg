@@ -23,11 +23,18 @@
 #define _GTKGAME_H_
 
 #include <stdio.h>
+#include <gtk/gtk.h>
 
 #include "backgammon.h"
 #include "rollout.h"
 #include "relational.h"
 #include "gtkpanels.h"
+#include "gtkchequer.h"
+
+extern GtkWidget* pwBoard;
+extern int fX, fNeedPrompt;
+extern unsigned int nDelay;
+extern guint nNextTurn; /* GTK idle function */
 
 #define NUM_CMD_HISTORY 10
 struct CommandEntryData_T
@@ -73,8 +80,8 @@ extern void GTKRegenerateGames( void );
 extern void GTKFreeze( void );
 extern void GTKThaw( void );
 
-extern void GTKSuspendInput();
-extern void GTKResumeInput();
+extern void GTKSuspendInput(void);
+extern void GTKResumeInput(void);
 
 extern void InitGTK( int *argc, char ***argv );
 extern void RunGTK( GtkWidget *pwSplash, char *commands, char *python_script, char *match );
@@ -82,7 +89,7 @@ extern void GTKAllowStdin( void );
 extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle, GtkWidget* pwParent );
-extern void GTKUpdateScores();
+extern void GTKUpdateScores(void);
 
 extern void GTKOutput( char *sz );
 extern void GTKOutputErr( char *sz );
@@ -166,7 +173,7 @@ extern int
 GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
                int nMin, int nMax, int nInc );
 
-extern void Undo();
+extern void Undo(void);
 
 
 extern void SetToolbarStyle(int value);
@@ -179,10 +186,10 @@ extern void GtkShowQuery(RowSet* pRow);
 
 extern void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase);
 extern void ToggleDockPanels( gpointer *p, guint n, GtkWidget *pw );
-extern void DisplayWindows();
-extern int DockedPanelsShowing();
-extern int ArePanelsShowing();
-extern int ArePanelsDocked();
+extern void DisplayWindows(void);
+extern int DockedPanelsShowing(void);
+extern int ArePanelsShowing(void);
+extern int ArePanelsDocked(void);
 extern int IsPanelDocked(gnubgwindow window);
 extern int GetPanelWidth(gnubgwindow panel);
 extern void SetPanelWidget(gnubgwindow window, GtkWidget* pWin);
@@ -190,18 +197,56 @@ extern GtkWidget* GetPanelWidget(gnubgwindow window);
 extern void PanelShow(gnubgwindow panel);
 extern void PanelHide(gnubgwindow panel);
 extern int IsPanelShowVar(gnubgwindow panel, void *p);
-extern int SetMainWindowSize();
+extern int SetMainWindowSize(void);
 extern void ShowHidePanel(gnubgwindow panel);
 extern void SetAnnotation( moverecord *pmr );
 extern void GTKTextWindow( const char *szOutput, const char *title, const int type  );
 extern void FullScreenMode(int state);
 extern void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed);
-extern void GtkChangeLanguage();
+extern void GtkChangeLanguage(void);
 extern void OK( GtkWidget *pw, int *pf );
 extern int edit_new(int length);
+extern char *ReturnHits( int anBoard[ 2 ][ 25 ] );
 
 #if USE_BOARD3D
-extern void SetSwitchModeMenuText();
+extern void SetSwitchModeMenuText(void);
 extern gboolean gtk_gl_init_success;
 #endif
+
+extern gint NextTurnNotify( gpointer p );
+extern void HandleXAction( void );
+#if HAVE_LIBREADLINE
+extern int fReadingCommand;
+extern void ProcessInput( char* sz );
+#endif
+extern void UserCommand( char* sz );
+extern void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
+extern void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
+extern void GL_Freeze( void );
+extern void GL_Thaw( void );
+extern void GL_SetNames(void);
+void DockPanels(void);
+extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm,
+				void (*fn)());
+extern GtkWidget* GL_Create(void);
+extern GList *MoveListGetSelectionList(const hintdata *phd);
+extern move *MoveListGetMove(const hintdata *phd, GList *pl);
+extern void MoveListFreeSelectionList(GList *pl);
+extern void MoveListUpdate ( const hintdata *phd );
+extern gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintdata *phd );
+extern moverecord *pmrCurAnn;
+extern void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd);
+extern void MoveListCreate(hintdata *phd);
+extern void HintDoubleClick(GtkTreeView        *treeview,
+                       GtkTreePath        *path,
+                       GtkTreeViewColumn  *col,
+                       hintdata *phd);
+extern void HintSelect(GtkTreeSelection *selection, hintdata *phd);
+extern GtkWidget *pwMoveAnalysis;
+extern GdkColor wlCol;
+extern GtkItemFactory *pif;
+extern void ShowMove ( hintdata *phd, const int f );
+extern struct CommandEntryData_T cedPanel;
+extern GtkWidget *pom;
+extern GtkWidget *hpaned;
 #endif

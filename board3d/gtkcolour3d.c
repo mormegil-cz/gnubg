@@ -441,12 +441,12 @@ static void UpdateColour3d(GtkWidget *notused, UpdateDetails* pDetails)
 	gtk_main();
 }
 
-void ResetPreviews()
+extern void ResetPreviews(void)
 {
 	curDetail = 0;
 }
 
-int GetPreviewId()
+extern int GetPreviewId(void)
 {
 	return curDetail - 1;
 }
@@ -457,7 +457,7 @@ void UpdateColPreview(int ID)
 	gtk_widget_queue_draw(details[ID].preview);
 }
 
-void UpdateColPreviews()
+extern void UpdateColPreviews(void)
 {
 	int i;
 	for (i = 0; i < curDetail; i++)

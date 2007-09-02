@@ -2008,7 +2008,7 @@ char *aszBuildInfo[] = {
     NULL,
 };
 
-char *GetBuildInfoString()
+extern char *GetBuildInfoString(void)
 {
 	static char **ppch = aszBuildInfo;
 

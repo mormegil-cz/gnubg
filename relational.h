@@ -29,11 +29,13 @@ typedef struct _RowSet
 	int *widths;
 } RowSet;
 
-extern int RelationalMatchExists();
+extern int env_deleted;
+extern int RelationalMatchExists(void);
 extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
 										  const char* newNotes);
 extern int RunQuery(RowSet* pRow, char *sz);
 extern void FreeRowset(RowSet* pRow);
 extern void RelationalLinkNick(char* nick, char* env, char* player);
 
+extern int env_added;	/* Horrid flag to see if next function worked... */
 #endif /* _RELATIONAL_H_ */

@@ -22,6 +22,7 @@
 */
 
 #include "config.h"
+#include "backgammon.h"
 #include <time.h>
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -64,7 +65,7 @@ double get_time()
 
 #if 1
 
-double get_time()
+double get_time(void)
 {	/* Return elapsed time in milliseconds */
 	struct timeval tv;
 	gettimeofday(&tv, 0);

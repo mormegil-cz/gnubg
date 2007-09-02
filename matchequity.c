@@ -42,10 +42,6 @@
 #include <libxml/catalog.h>
 #endif
 
-#if !HAVE_ERF
-extern double erf( double x );
-#endif
-
 #define DELTA         0.08
 #define DELTABAR      0.06
 #define G1            0.25

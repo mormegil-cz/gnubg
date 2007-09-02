@@ -19,7 +19,7 @@
  * $Id$
  */
 
-extern int MT_GetThreadID();
+extern int MT_GetThreadID(void);
 extern void MT_Unlock(long *lock);
 extern void MT_Lock(long *lock);
 extern char * getInstallDir( void );

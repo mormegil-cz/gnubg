@@ -37,11 +37,6 @@
 #include "format.h"
 #include "gtkwindows.h"
 
-#if !HAVE_ERF
-extern double erf(double x);
-#endif
-
-
 typedef struct _epcwidget {
 	GtkWidget *apwEPC[2];
 	GtkWidget *apwWastage[2];
@@ -55,7 +50,7 @@ typedef struct _racewidget {
 	int fMove;
 } racewidget;
 
-GtkWidget *monospace_text(const char *szOutput)
+static GtkWidget *monospace_text(const char *szOutput)
 {
 
 	GtkWidget *pwText;

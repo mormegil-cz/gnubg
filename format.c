@@ -160,7 +160,7 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
            n = index of predefined setting if it's a match or
                if the eval context matches and it's 0 ply
  */
-extern int
+static int
 GetPredefinedChequerplaySetting( const evalcontext *pec,
                                  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
@@ -224,7 +224,7 @@ GetPredefinedChequerplaySetting( const evalcontext *pec,
   return -1;
 }
 
-extern char *
+static char *
 OutputMoveFilterPly( const char *szIndent, 
                      const int nPlies,
                      movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {

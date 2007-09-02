@@ -30,8 +30,6 @@
 #include "string.h"
 
 
-extern float rBest;
-extern GtkStyle *psHighlight;
 GdkColor wlCol;
 
 static void     custom_cell_renderer_movelist_init       (CustomCellRendererMovelist      *cellprogress);
@@ -69,7 +67,7 @@ static   gpointer parent_class;
  *
  ***************************************************************************/
 
-GType
+static GType
 custom_cell_renderer_movelist_get_type (void)
 {
   static GType cell_progress_type = 0;
@@ -232,7 +230,7 @@ custom_cell_renderer_movelist_new (void)
 
 static int fontheight = -1, minWidth;
 
-void custom_cell_renderer_invalidate_size()
+extern void custom_cell_renderer_invalidate_size(void)
 {
 	fontheight = -1;
 }

@@ -345,7 +345,7 @@ ParseJF( FILE *fp,
 
 }
 
-extern int
+static int
 ImportJF( FILE * fp, char *szFileName) {
 
   moverecord *pmr;
@@ -798,7 +798,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 #define START_STRING " Game "
 #define START_STRING_LEN 6
 
-char* GetMatLine(FILE* fp)
+static char* GetMatLine(FILE* fp)
 {
 	static char szLine[1024];
 
@@ -1049,7 +1049,7 @@ static int ImportMatVariation( FILE *fp, char *szFilename, bgvariation bgVariati
 }
 
 
-extern int
+static int
 ImportMat( FILE *fp, char *szFilename ) {
 
     int result;
@@ -1475,7 +1475,7 @@ static char *FindScoreIs( FILE *pf, char *buffer ) {
   return 0;
 }
     
-extern int ImportOldmoves( FILE *pf, char *szFilename ) {
+static int ImportOldmoves( FILE *pf, char *szFilename ) {
     char buffer[1024];
     char *p;
     int n, n0, n1, nLength, i;
@@ -2207,7 +2207,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 }
 
 
-extern int ImportSGG( FILE *pf, char *szFilename ) {
+static int ImportSGG( FILE *pf, char *szFilename ) {
 
     char sz[ 80 ], sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ];
     int n0, n1, nLength, i, fCrawford;
@@ -2733,7 +2733,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 }
 
-extern int
+static int
 ImportTMG ( FILE *pf, const char *szFilename ) {
 
   int fCrawfordRule = TRUE;
@@ -2932,7 +2932,7 @@ uglyloop:
 	goto uglyloop;	/* The logic here should be rewritten */
 }
 
-extern int ImportBKG( FILE *pf, const char *szFilename ) {
+static int ImportBKG( FILE *pf, const char *szFilename ) {
 
     int i;
 
@@ -3126,7 +3126,7 @@ ParseSnowieTxt( char *sz,
  *
  */
 
-extern int
+static int
 ImportSnowieTxt( FILE *pf ) {
 
   char sz[ 2048 ];
@@ -3267,7 +3267,7 @@ ImportSnowieTxt( FILE *pf ) {
 
 }
 
-extern int ImportGAM(FILE *fp, char *szFilename )
+static int ImportGAM(FILE *fp, char *szFilename )
 {
 	char *pch, *pchLeft, *pchRight, *szLine;
 	moverecord *pmgi;
@@ -3376,7 +3376,7 @@ extern int ImportGAM(FILE *fp, char *szFilename )
 	return TRUE;
 }
 
-void WritePartyGame(FILE *fp, char *gameStr)
+static void WritePartyGame(FILE *fp, char *gameStr)
 {
 	char *move;
 	char *data = gameStr;
@@ -3454,7 +3454,7 @@ typedef struct _PartyGame
 	char *gameStr;
 } PartyGame;
 
-extern int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
+static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 {
 	PartyGame pg;
 	int matchLen = -1;

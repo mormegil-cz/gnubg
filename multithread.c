@@ -13,27 +13,24 @@
  */
 
 #include "config.h"
-
 #ifdef WIN32
 #include <windows.h>
 #include <process.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
-#include "multithread.h"
 #include <glib.h>
 #include <glib/gthread.h>
+#include <gtk/gtk.h>
 
-#if USE_MULTITHREAD
+#include "multithread.h"
+#include "speed.h"
+#include "rollout.h"
 
-#define TRY_COUTING_PROCEESING_UNITS 0
+#define TRY_COUNTING_PROCEESING_UNITS 0
 #if __GNUC__
 #define GCC_ALIGN_HACK 1
 #endif
-
-extern int GetLogicalProcssingUnitCount(void);
-extern void RolloutLoopMT();
-extern void RunEvals();
 
 #ifdef GLIB_THREADS
 typedef struct _ManualEvent
@@ -74,6 +71,9 @@ typedef struct _ThreadData
 } ThreadData;
 
 ThreadData td;
+
+static double start; /* used for timekeeping */
+static unsigned int numThreads = 0;
 
 #ifdef GLIB_THREADS
 
@@ -222,30 +222,115 @@ static void FreeMutex(Mutex mutex)
 
 #endif
 
-static unsigned int numThreads = 0;
 
-unsigned int MT_GetNumThreads()
+extern unsigned int MT_GetNumThreads(void)
 {
     return numThreads;
 }
 
-int MT_Enabled(void)
+extern int MT_Enabled(void)
 {
     return TRUE;
 }
 
-static void MT_CreateThreads(void);
-static void MT_CloseThreads(void);
-
-void MT_SetNumThreads(unsigned int num)
+static void MT_CloseThreads(void)
 {
-    MT_CloseThreads();
-    numThreads = num;
-    MT_CreateThreads();
+    mt_add_tasks(numThreads, TT_CLOSE, NULL);
+    MT_WaitForTasks(NULL, 0);
 }
 
-static int MT_DoTask();
-static void MT_TaskDone(Task *pt);
+static void MT_TaskDone(Task *pt)
+{
+    (void)MT_SafeInc(&td.doneTasks);
+    if (pt)
+    {
+        free(pt->pLinkedTask);
+        free(pt);
+    }
+}
+
+static Task *MT_GetTask(void)
+{
+    Task *task = NULL;
+    if (g_list_length(td.tasks) > 0)
+    {
+        task = (Task*)g_list_first(td.tasks)->data;
+        td.tasks = g_list_delete_link(td.tasks, g_list_first(td.tasks));
+        if (g_list_length(td.tasks) == 0)
+        {
+            ResetManualEvent(td.activity);
+        }
+    }
+    return task;
+}
+
+static void MT_AbortTasks(void)
+{
+    Task *task;
+    Mutex_Lock(td.queueLock);
+
+    /* Remove tasks from list */
+    while ((task = MT_GetTask()) != NULL)
+        MT_TaskDone(task);
+
+    Mutex_Release(td.queueLock);
+}
+
+static int MT_DoTask(void)
+{
+    int alive = TRUE;
+    Task *task;
+    Mutex_Lock(td.queueLock);
+    task = MT_GetTask();
+    Mutex_Release(td.queueLock);
+
+    if (task)
+    {
+        switch (task->type)
+        {
+        case TT_ANALYSEMOVE:
+        {
+            float doubleError;
+            AnalyseMoveTask *amt;
+AnalyzeDoubleDecison:
+            amt = (AnalyseMoveTask *)task;
+            if (AnalyzeMove (amt->pmr, &amt->ms, amt->plGame, amt->psc,
+                        &esAnalysisChequer,
+                        &esAnalysisCube, aamfAnalysis,
+                        afAnalysePlayers, &doubleError ) < 0 )
+            {
+                MT_AbortTasks();
+                td.result = -1;
+            }
+            if (task->pLinkedTask)
+            {    /* Need to analyze take/drop decision in sequence */
+                task = task->pLinkedTask;
+                goto AnalyzeDoubleDecison;
+            }
+            break;
+        }
+        case TT_ROLLOUTLOOP:
+            RolloutLoopMT();
+            break;
+		case TT_RUNCALIBRATIONEVALS:
+			RunEvals();
+			break;
+        case TT_TEST:
+            printf("Test: waiting for a second");
+            g_usleep(1000000);
+            break;
+        case TT_CLOSE:
+            alive = FALSE;
+            break;
+        }
+        Mutex_Lock(td.queueLock);
+        MT_TaskDone(task);
+        Mutex_Release(td.queueLock);
+        return alive;
+    }
+    else
+        return -1;
+}
 
 #if GCC_ALIGN_HACK
 
@@ -316,13 +401,14 @@ static void MT_CreateThreads(void)
     td.totalTasks = td.doneTasks = 0;
 }
 
-static void MT_CloseThreads(void)
+void MT_SetNumThreads(unsigned int num)
 {
-    mt_add_tasks(numThreads, TT_CLOSE, NULL);
-    MT_WaitForTasks(NULL, 0);
+    MT_CloseThreads();
+    numThreads = num;
+    MT_CreateThreads();
 }
 
-extern void MT_InitThreads()
+extern void MT_InitThreads(void)
 {
 #ifdef GLIB_THREADS
     g_thread_init(NULL);
@@ -330,7 +416,7 @@ extern void MT_InitThreads()
 #endif
 
     if (numThreads == 0)
-#if TRY_COUTING_PROCEESING_UNITS
+#if TRY_COUNTING_PROCEESING_UNITS
         numThreads = GetLogicalProcssingUnitCount();
 #else
         numThreads = 1;
@@ -354,98 +440,7 @@ extern void MT_InitThreads()
     MT_CreateThreads();
 }
 
-Task *MT_GetTask(void)
-{
-    Task *task = NULL;
-    if (g_list_length(td.tasks) > 0)
-    {
-        task = (Task*)g_list_first(td.tasks)->data;
-        td.tasks = g_list_delete_link(td.tasks, g_list_first(td.tasks));
-        if (g_list_length(td.tasks) == 0)
-        {
-            ResetManualEvent(td.activity);
-        }
-    }
-    return task;
-}
 
-static void MT_AbortTasks(void)
-{
-    Task *task;
-    Mutex_Lock(td.queueLock);
-
-    /* Remove tasks from list */
-    while ((task = MT_GetTask()) != NULL)
-        MT_TaskDone(task);
-
-    Mutex_Release(td.queueLock);
-}
-
-static int MT_DoTask()
-{
-    int alive = TRUE;
-    Task *task;
-    Mutex_Lock(td.queueLock);
-    task = MT_GetTask();
-    Mutex_Release(td.queueLock);
-
-    if (task)
-    {
-        switch (task->type)
-        {
-        case TT_ANALYSEMOVE:
-        {
-            float doubleError;
-            AnalyseMoveTask *amt;
-AnalyzeDoubleDecison:
-            amt = (AnalyseMoveTask *)task;
-            if (AnalyzeMove (amt->pmr, &amt->ms, amt->plGame, amt->psc,
-                        &esAnalysisChequer,
-                        &esAnalysisCube, aamfAnalysis,
-                        afAnalysePlayers, &doubleError ) < 0 )
-            {
-                MT_AbortTasks();
-                td.result = -1;
-            }
-            if (task->pLinkedTask)
-            {    /* Need to analyze take/drop decision in sequence */
-                task = task->pLinkedTask;
-                goto AnalyzeDoubleDecison;
-            }
-            break;
-        }
-        case TT_ROLLOUTLOOP:
-            RolloutLoopMT();
-            break;
-		case TT_RUNCALIBRATIONEVALS:
-			RunEvals();
-			break;
-        case TT_TEST:
-            printf("Test: waiting for a second");
-            g_usleep(1000000);
-            break;
-        case TT_CLOSE:
-            alive = FALSE;
-            break;
-        }
-        Mutex_Lock(td.queueLock);
-        MT_TaskDone(task);
-        Mutex_Release(td.queueLock);
-        return alive;
-    }
-    else
-        return -1;
-}
-
-static void MT_TaskDone(Task *pt)
-{
-    (void)MT_SafeInc(&td.doneTasks);
-    if (pt)
-    {
-        free(pt->pLinkedTask);
-        free(pt);
-    }
-}
 void MT_AddTask(Task *pt, gboolean lock)
 {
 	if (lock)
@@ -515,7 +510,7 @@ int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
     return td.result;
 }
 
-extern void MT_Close()
+extern void MT_Close(void)
 {
     MT_CloseThreads();
 
@@ -536,12 +531,12 @@ extern void MT_Close()
     TLSFree(td.tlsItem);
 }
 
-int MT_GetThreadID()
+extern int MT_GetThreadID(void)
 {
     return TLSGet(td.tlsItem);
 }
 
-void MT_Lock(int *lock)
+extern void MT_Lock(int *lock)
 {
     while (MT_SafeInc(lock) != 1)
     {
@@ -558,7 +553,7 @@ void MT_Lock(int *lock)
     }
 }
 
-void MT_Unlock(int *lock)
+extern void MT_Unlock(int *lock)
 {
     if (!MT_SafeDec(lock))
     {    /* Clear contention */
@@ -567,29 +562,28 @@ void MT_Unlock(int *lock)
     }
 }
 
-extern void MT_Exclusive()
+extern void MT_Exclusive(void)
 {
 	Mutex_Lock(td.multiLock);
 }
 
-extern void MT_Release()
+extern void MT_Release(void)
 {
 	Mutex_Release(td.multiLock);
 }
 
-extern int MT_GetDoneTasks()
+extern int MT_GetDoneTasks(void)
 {
     return td.doneTasks;
 }
 
-extern void MT_SyncInit()
+extern void MT_SyncInit(void)
 {
 	ResetManualEvent(td.syncStart);
 	ResetManualEvent(td.syncEnd);
 }
 
-static double start;
-extern void MT_SyncStart()
+extern void MT_SyncStart(void)
 {
 	static int count = 0;
 
@@ -608,7 +602,7 @@ extern void MT_SyncStart()
 	}
 }
 
-extern double MT_SyncEnd()
+extern double MT_SyncEnd(void)
 {
 	static int count = 0;
 	double now;
@@ -630,4 +624,3 @@ extern double MT_SyncEnd()
 	}
 }
 
-#endif

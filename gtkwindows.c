@@ -44,7 +44,7 @@ static char *aszStockItem[ NUM_DIALOG_TYPES ] =
 	GTK_STOCK_DIALOG_GNU_QUESTION
 };
 
-void quitter(GtkWidget *widget, GtkWidget *parent)
+static void quitter(GtkWidget *widget, GtkWidget *parent)
 {
   gtk_main_quit();
   if (parent)
@@ -181,11 +181,12 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
 /* Use to temporarily set the parent dialog for nested dialogs
 	Note that passing a control of a window is ok (and common) */
 GtkWidget *pwCurrentParent = NULL;
-void GTKSetCurrentParent(GtkWidget *parent)
+
+extern void GTKSetCurrentParent(GtkWidget *parent)
 {
 	pwCurrentParent = parent;
 }
-GtkWidget *GTKGetCurrentParent()
+extern GtkWidget *GTKGetCurrentParent(void)
 {
 	if (pwCurrentParent)
 	{

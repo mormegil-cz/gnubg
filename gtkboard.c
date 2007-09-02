@@ -67,7 +67,6 @@ int animate_player, *animate_move_list, animation_finished;
 
 static GtkVBoxClass *parent_class = NULL;
 static randctx rc;
-static void board_set_crawford( GtkWidget *pw, BoardData *bd );
 static unsigned char *TTachCube, *TTachCubeFaces, *TTachDice[2], *TTachPip[2];
 #define RAND irand( &rc )
 
@@ -784,7 +783,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd, int
    for player 1 (colour == 1) in anPips[1]
    assumes that a chequer has been picked up already from bd->drag_point,
    works on board representation in bd->points[] */
-gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] )
+static gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] )
 {
 
 	int i;
@@ -814,7 +813,7 @@ gboolean CurrentPipCount( BoardData *bd, unsigned int anPips[ 2 ] )
 
 /* PointsAreEmpty: checks if there are chequers of player <iColour> between
  * two points */
-gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int
+static gboolean PointsAreEmpty( BoardData *bd, int iStartPoint, int iEndPoint, int
 		iColour )
 {
 
@@ -2491,6 +2490,8 @@ extern void RollDice2d(BoardData* bd)
 	}
 }
 
+static void board_set_crawford( GtkWidget *pw, BoardData *bd ); /* recursion
+								 */
 
 static void SetCrawfordToggle(BoardData* bd)
 {

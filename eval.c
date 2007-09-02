@@ -53,38 +53,6 @@
 #define BINARY 0
 #endif
 
-/* From pub_eval.c: */
-extern float pubeval( int race, int pos[] );
-
-static float
-Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
-
-static float
-Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
-
-static float
-Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
-
-static float
-Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
-
-static float
-Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX );
-
-static float
-EvalEfficiency( int anBoard[2][25], positionclass pc );
-
-static int 
-EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
-                          float arOutput[ NUM_OUTPUTS ],
-                          float arCubeful[],
-                          const cubeinfo aciCubePos[], int cci, 
-                          const cubeinfo* pciMove,
-                          const evalcontext* pec, 
-                          int nPlies, int fTop );
-
-static int MaxTurns( int i );
-
 typedef int ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[],
                                  const bgvariation bgv, NNState *nnStates );
 
@@ -702,7 +670,7 @@ EvalShutdown ( void ) {
 
 }
 
-int binary_weights_failed(char * filename, FILE * weights)
+static int binary_weights_failed(char * filename, FILE * weights)
 {
 	float r;
 
@@ -734,7 +702,7 @@ int binary_weights_failed(char * filename, FILE * weights)
 	return 0;
 }
 
-int weights_failed(char * filename, FILE * weights)
+static int weights_failed(char * filename, FILE * weights)
 {
 	char file_version[16];
 	if (!weights)
@@ -1971,6 +1939,25 @@ extern void SwapSides( int anBoard[ 2 ][ 25 ] ) {
     }
 }
 
+/* An upper bound on the number of turns it can take to complete a bearoff
+   from bearoff position ID i. */
+static int
+MaxTurns( int id )
+{
+  unsigned short int aus[ 32 ];
+  int i;
+    
+  BearoffDist ( pbc1, id, NULL, NULL, NULL, aus, NULL );
+
+  for( i = 31; i >= 0; i-- )
+  {
+    if( aus[i] )
+      return i;
+  }
+
+  abort();
+}
+
 extern void
 SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] )
 {
@@ -2206,25 +2193,6 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, N
   g_assert ( pbc2 );
 
   return BearoffEval ( pbc2, anBoard, arOutput );
-}
-
-/* An upper bound on the number of turns it can take to complete a bearoff
-   from bearoff position ID i. */
-static int
-MaxTurns( int id )
-{
-  unsigned short int aus[ 32 ];
-  int i;
-    
-  BearoffDist ( pbc1, id, NULL, NULL, NULL, aus, NULL );
-
-  for( i = 31; i >= 0; i-- )
-  {
-    if( aus[i] )
-      return i;
-  }
-
-  abort();
 }
 
 static int
@@ -5166,34 +5134,118 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
 
 }
 
-
 static float
-Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
+Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
 
-  /* Check if this requires a cubeful evaluation */
+  /* normalized score */
 
-  if ( ! fDoCubeful ( pci ) ) {
+  float rG0, rBG0, rG1, rBG1;
+  float arCP[ 2 ];
 
-    /* cubeless eval */
+  float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
+  float rMWCOppCash, rMWCCash, rOppTG, rTG;
+  float aarMETResult[2][DTLBP1 + 1];
 
-    return eq2mwc ( Utility ( arOutput, pci ), pci );
+  /* Centered cube */
 
-  } /* fDoCubeful */
+  /* Calculate normal, gammon, and backgammon ratios */
+
+  if ( arOutput[ 0 ] > 0.0 ) {
+    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
+    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  }
   else {
-
-    /* cubeful eval */
-
-    if ( pci->fCubeOwner == -1 ) 
-      return Cl2CfMatchCentered ( arOutput, pci, rCubeX );
-    else if ( pci->fCubeOwner == pci->fMove )
-      return Cl2CfMatchOwned ( arOutput, pci, rCubeX );
-    else
-      return Cl2CfMatchUnavailable ( arOutput, pci, rCubeX );
-
+    rG0 = 0.0;
+    rBG0 = 0.0;
   }
 
+  if ( arOutput[ 0 ] < 1.0 ) {
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+  }
+  else {
+    rG1 = 0.0;
+    rBG1 = 0.0;
+  }
+
+  /* MWC(dead cube) = cubeless equity */
+
+  rMWCDead = eq2mwc ( Utility ( arOutput, pci ), pci );
+
+  /* Get live cube cash points */
+
+  GetPoints ( arOutput, pci, arCP );
+
+  getMEMultiple ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+				  pci->nCube, -1, -1, pci->fCrawford,
+				  aafMET, aafMETPostCrawford,
+				  aarMETResult[0], aarMETResult[1]);
+
+  rMWCCash = aarMETResult[pci->fMove][NDW];
+
+  rMWCOppCash = aarMETResult[pci->fMove][NDL];
+
+  rOppTG = 1.0 - arCP[ ! pci->fMove ];
+  rTG = arCP[ pci->fMove ];
+
+  if ( arOutput[ 0 ] <= rOppTG ) {
+
+    /* Opp too good to double */
+
+    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+      + rG1 * aarMETResult[pci->fMove][NDLG]
+      + rBG1 * aarMETResult[pci->fMove][NDLB];
+
+    if ( rOppTG > 0.0 ) 
+      /* avoid division by zero */
+      rMWCLive = rMWCLose + 
+        ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+    else
+      rMWCLive = rMWCLose;
+      
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  }
+  else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] < rTG ) {
+
+    /* In double window */
+
+    rMWCLive = 
+      rMWCOppCash + 
+      (rMWCCash - rMWCOppCash) * ( arOutput[ 0 ] - rOppTG ) / ( rTG - rOppTG); 
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  } else {
+
+    /* I'm too good to double */
+
+    /* MWC(live cube) linear interpolation between the
+       points:
+
+       p = TG, MWC = I win 1 point
+       p = 1, MWC = I win (normal, gammon, or backgammon)
+	 
+    */
+
+    rMWCWin = ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+      + rG0 * aarMETResult[pci->fMove][NDWG]
+	  + rBG0 * aarMETResult[pci->fMove][NDWB];
+
+    if ( rTG < 1.0 )
+      rMWCLive = rMWCCash + 
+        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+    else
+      rMWCLive = rMWCWin;
+
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  } 
+
 }
-  
 
 static float
 Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
@@ -5413,117 +5465,33 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCu
 
 
 static float
-Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
+Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci, float rCubeX ) {
 
-  /* normalized score */
+  /* Check if this requires a cubeful evaluation */
 
-  float rG0, rBG0, rG1, rBG1;
-  float arCP[ 2 ];
+  if ( ! fDoCubeful ( pci ) ) {
 
-  float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
-  float rMWCOppCash, rMWCCash, rOppTG, rTG;
-  float aarMETResult[2][DTLBP1 + 1];
+    /* cubeless eval */
 
-  /* Centered cube */
+    return eq2mwc ( Utility ( arOutput, pci ), pci );
 
-  /* Calculate normal, gammon, and backgammon ratios */
-
-  if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
-    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
-  }
+  } /* fDoCubeful */
   else {
-    rG0 = 0.0;
-    rBG0 = 0.0;
-  }
 
-  if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
-    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
-  }
-  else {
-    rG1 = 0.0;
-    rBG1 = 0.0;
-  }
+    /* cubeful eval */
 
-  /* MWC(dead cube) = cubeless equity */
-
-  rMWCDead = eq2mwc ( Utility ( arOutput, pci ), pci );
-
-  /* Get live cube cash points */
-
-  GetPoints ( arOutput, pci, arCP );
-
-  getMEMultiple ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-				  pci->nCube, -1, -1, pci->fCrawford,
-				  aafMET, aafMETPostCrawford,
-				  aarMETResult[0], aarMETResult[1]);
-
-  rMWCCash = aarMETResult[pci->fMove][NDW];
-
-  rMWCOppCash = aarMETResult[pci->fMove][NDL];
-
-  rOppTG = 1.0 - arCP[ ! pci->fMove ];
-  rTG = arCP[ pci->fMove ];
-
-  if ( arOutput[ 0 ] <= rOppTG ) {
-
-    /* Opp too good to double */
-
-    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
-      + rG1 * aarMETResult[pci->fMove][NDLG]
-      + rBG1 * aarMETResult[pci->fMove][NDLB];
-
-    if ( rOppTG > 0.0 ) 
-      /* avoid division by zero */
-      rMWCLive = rMWCLose + 
-        ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+    if ( pci->fCubeOwner == -1 ) 
+      return Cl2CfMatchCentered ( arOutput, pci, rCubeX );
+    else if ( pci->fCubeOwner == pci->fMove )
+      return Cl2CfMatchOwned ( arOutput, pci, rCubeX );
     else
-      rMWCLive = rMWCLose;
-      
-    /* (1-x) MWC(dead) + x MWC(live) */
-
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+      return Cl2CfMatchUnavailable ( arOutput, pci, rCubeX );
 
   }
-  else if ( rOppTG < arOutput[ 0 ] && arOutput[ 0 ] < rTG ) {
-
-    /* In double window */
-
-    rMWCLive = 
-      rMWCOppCash + 
-      (rMWCCash - rMWCOppCash) * ( arOutput[ 0 ] - rOppTG ) / ( rTG - rOppTG); 
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
-
-  } else {
-
-    /* I'm too good to double */
-
-    /* MWC(live cube) linear interpolation between the
-       points:
-
-       p = TG, MWC = I win 1 point
-       p = 1, MWC = I win (normal, gammon, or backgammon)
-	 
-    */
-
-    rMWCWin = ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
-      + rG0 * aarMETResult[pci->fMove][NDWG]
-	  + rBG0 * aarMETResult[pci->fMove][NDWB];
-
-    if ( rTG < 1.0 )
-      rMWCLive = rMWCCash + 
-        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
-    else
-      rMWCLive = rMWCWin;
-
-    /* (1-x) MWC(dead) + x MWC(live) */
-
-    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
-
-  } 
 
 }
+  
+
 
 static float
 EvalEfficiency( int anBoard[2][25], positionclass pc ){
@@ -6016,90 +5984,6 @@ MakeCubePos( const cubeinfo aciCubePos[], const int cci,
 }
 
 
-/* EvaluatePositionCubeful3 is now just a wrapper for ....Cubeful4, which
-   first checks the cache, and then calls ...Cubeful3 */
-
-extern int 
-EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
-                          float arOutput[ NUM_OUTPUTS ],
-                          float arCubeful[],
-                          const cubeinfo aciCubePos[], int cci, 
-                          const cubeinfo* pciMove, const evalcontext *pec, 
-                          int nPlies, int fTop ) {
-
-  int ici;
-  int fAll = TRUE;
-  evalcache ec;
-  unsigned long l;
-
-  if( !cCache || ( pec->rNoise != 0.0f && !pec->fDeterministic ) )
-      /* non-deterministic evaluation; never cache */
-{
-      return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
-				       aciCubePos, cci, pciMove, pec,
-				       nPlies, fTop );
-}
-
-  PositionKey ( anBoard, ec.auchKey );
-
-  /* check cache for existence for earlier calculation */
-
-  fAll = ! fTop; /* FIXME: fTop should be a part of EvalKey */
-
-  for ( ici = 0; ici < cci && fAll; ++ici ) {
-
-      if ( aciCubePos[ ici ].nCube < 0 )
-	  {
-        continue;
-	  }
-      /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
-         the score, so a score of -20,-20 is treated identical to
-         -4,-4.... */
-
-
-
-      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-
-	  if ( ( l = CacheLookup( &cEval, &ec, arOutput, arCubeful + ici ) ) != CACHEHIT ) {
-        fAll = FALSE;
-	  }
-  }
-
-  /* get equities */
-  
-  if ( ! fAll ) {
-
-    /* cache miss */
-    if ( EvaluatePositionCubeful4 ( nnStates, anBoard, arOutput, arCubeful, 
-                                    aciCubePos, 
-                                    cci, pciMove, pec, nPlies, fTop ) )
-      return -1;
-    
-    /* add to cache */
-    
-    if ( ! fTop ) {
-
-      for ( ici = 0; ici < cci; ++ici ) {
-        if ( aciCubePos[ ici ].nCube < 0 )
-          continue;
-        
-        memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
-        ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
-        
-        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-
-	CacheAddNoKey( &cEval, &ec);
-
-      }
-    }
-  }
-
-  return 0;
-  
-}
-
-#include "drawboard.h"
-  
 static int 
 EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
@@ -6472,6 +6356,90 @@ EvaluatePositionCubeful4( NNState *nnStates, int anBoard[ 2 ][ 25 ],
   return 0;
 
 }  
+/* EvaluatePositionCubeful3 is now just a wrapper for ....Cubeful4, which
+   first checks the cache, and then calls ...Cubeful3 */
+
+extern int 
+EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
+                          float arOutput[ NUM_OUTPUTS ],
+                          float arCubeful[],
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove, const evalcontext *pec, 
+                          int nPlies, int fTop ) {
+
+  int ici;
+  int fAll = TRUE;
+  evalcache ec;
+  unsigned long l;
+
+  if( !cCache || ( pec->rNoise != 0.0f && !pec->fDeterministic ) )
+      /* non-deterministic evaluation; never cache */
+{
+      return EvaluatePositionCubeful4( nnStates, anBoard, arOutput, arCubeful,
+				       aciCubePos, cci, pciMove, pec,
+				       nPlies, fTop );
+}
+
+  PositionKey ( anBoard, ec.auchKey );
+
+  /* check cache for existence for earlier calculation */
+
+  fAll = ! fTop; /* FIXME: fTop should be a part of EvalKey */
+
+  for ( ici = 0; ici < cci && fAll; ++ici ) {
+
+      if ( aciCubePos[ ici ].nCube < 0 )
+	  {
+        continue;
+	  }
+      /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
+         the score, so a score of -20,-20 is treated identical to
+         -4,-4.... */
+
+
+
+      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
+
+	  if ( ( l = CacheLookup( &cEval, &ec, arOutput, arCubeful + ici ) ) != CACHEHIT ) {
+        fAll = FALSE;
+	  }
+  }
+
+  /* get equities */
+  
+  if ( ! fAll ) {
+
+    /* cache miss */
+    if ( EvaluatePositionCubeful4 ( nnStates, anBoard, arOutput, arCubeful, 
+                                    aciCubePos, 
+                                    cci, pciMove, pec, nPlies, fTop ) )
+      return -1;
+    
+    /* add to cache */
+    
+    if ( ! fTop ) {
+
+      for ( ici = 0; ici < cci; ++ici ) {
+        if ( aciCubePos[ ici ].nCube < 0 )
+          continue;
+        
+        memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
+        ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
+        
+        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
+
+	CacheAddNoKey( &cEval, &ec);
+
+      }
+    }
+  }
+
+  return 0;
+  
+}
+
+#include "drawboard.h"
+  
 
 
 

@@ -149,6 +149,6 @@ getMWCFromError ( const statcontext* psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] );
 extern skilltype
 Skill( float r );
 
-extern int MatchAnalysed();
+extern int MatchAnalysed(void);
 
 #endif

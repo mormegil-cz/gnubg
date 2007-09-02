@@ -22,8 +22,7 @@
 #ifndef _GTKOPTIONS_H_
 #define _GTKOPTIONS_H_
 
-extern void
-GTKSetOptions( void );
-extern void GTKSound();
+extern void GTKSetOptions( void );
+extern void GTKSound(void);
 
 #endif /* _GTKOPTIONS_H_ */

@@ -34,15 +34,6 @@
 #include "gtkgame.h"
 #include "drawboard.h"
 
-extern void HintDoubleClick(GtkTreeView        *treeview,
-                       GtkTreePath        *path,
-                       GtkTreeViewColumn  *col,
-                       hintdata *phd);
-extern void HintSelect(GtkTreeSelection *selection, hintdata *phd);
-
-extern GdkColor wlCol;
-void ShowMove ( hintdata *phd, const int f );
-
 #define DETAIL_COLUMN_COUNT 11
 #define MIN_COLUMN_COUNT 5
 
@@ -65,7 +56,7 @@ enum
 
 void MoveListUpdate ( const hintdata *phd );
 
-void MoveListCreate(hintdata *phd)
+extern void MoveListCreate(hintdata *phd)
 {
     static char *aszTitleDetails[] = {
 	N_("Rank"), 
@@ -153,9 +144,7 @@ float rBest;
 
 GtkStyle *psHighlight = NULL;
 
-extern GtkWidget *pwMoveAnalysis;
-
-void MoveListRefreshSize()
+extern void MoveListRefreshSize(void)
 {
 	custom_cell_renderer_invalidate_size();
 	if (pwMoveAnalysis)
@@ -170,7 +159,7 @@ void MoveListRefreshSize()
  * For example, after new evaluations, rollouts or toggle of MWC/Equity.
  *
  */
-void MoveListUpdate ( const hintdata *phd )
+extern void MoveListUpdate ( const hintdata *phd )
 {
   unsigned int i, j, colNum;
   char sz[ 32 ];
@@ -305,25 +294,20 @@ skipoldcode:	/* Messy as 3 copies of code at moment... */
   UpdateStoredMoves ( pml, &ms );
 }
 
-int MoveListGetSelectionCount(const hintdata *phd)
-{
-	return gtk_tree_selection_count_selected_rows(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)));
-}
-
-GList *MoveListGetSelectionList(const hintdata *phd)
+extern GList *MoveListGetSelectionList(const hintdata *phd)
 {
 	GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(phd->pwMoves));
 	GtkTreeSelection* sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves));
 	return gtk_tree_selection_get_selected_rows(sel, &model);
 }
 
-void MoveListFreeSelectionList(GList *pl)
+extern void MoveListFreeSelectionList(GList *pl)
 {
 	g_list_foreach (pl, (GFunc)gtk_tree_path_free, NULL);
 	g_list_free(pl);
 }
 
-move *MoveListGetMove(const hintdata *phd, GList *pl)
+extern move *MoveListGetMove(const hintdata *phd, GList *pl)
 {
 	move *m;
 	int showWLTree = showMoveListDetail && !phd->fDetails;
@@ -343,7 +327,7 @@ move *MoveListGetMove(const hintdata *phd, GList *pl)
 	return m;
 }
 
-void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd)
+extern void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd)
 {
 	int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
 	if (f)
@@ -354,7 +338,7 @@ void MoveListShowToggledClicked(GtkWidget *pw, hintdata *phd)
 	ShowMove(phd, f);
 }
 
-gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintdata *phd )
+extern gint MoveListClearSelection( GtkWidget *pw, GdkEventSelection *pes, hintdata *phd )
 {
 	gtk_tree_selection_unselect_all(gtk_tree_view_get_selection(GTK_TREE_VIEW(phd->pwMoves)));
     return TRUE;

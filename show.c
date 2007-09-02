@@ -63,7 +63,6 @@
 #include "openurl.h"
 #include "multithread.h"
 
-extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
 static void ShowMoveFilter ( const movefilter *pmf, const int ply) {
   
@@ -1101,10 +1100,6 @@ extern void CommandShowWarranty( char *sz ) {
 	ShowPaged( aszWarranty );
 }
 
-
-#if !HAVE_ERF
-extern double erf( double x );
-#endif
 
 extern void show_kleinman( int an[2][25], char *sz)
 {

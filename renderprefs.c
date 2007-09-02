@@ -375,7 +375,7 @@ SetWood (char *sz, woodtype * pbw)
 #endif
 
 #if USE_BOARD3D
-displaytype check_for_board3d (char *szValue)
+static displaytype check_for_board3d (char *szValue)
 {
 	if (*szValue == '2')
 		return DT_2D;

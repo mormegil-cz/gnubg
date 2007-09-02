@@ -27,20 +27,27 @@
 #include "sound.h"
 #include "export.h"
 #include "gtkgame.h"
+#include "misc3d.h"
+
+#define MAX_FRAMES 10
+#define DOT_SIZE 32
+#define MAX_DIST ((DOT_SIZE / 2) * (DOT_SIZE / 2))
+#define MIN_DIST ((DOT_SIZE / 2) * .70f * (DOT_SIZE / 2) * .70f)
+#define TEXTURE_FILE "textures.txt"
+#define TEXTURE_FILE_VERSION 3
+#define BUF_SIZE 100
+
+/* Performance test data */
+static double testStartTime;
+static int numFrames;
+#define TEST_TIME 3000.0f
+
+
 
 static int stopNextTime;
 static int slide_move;
 static double animStartTime = 0;
 
-#define MAX_FRAMES 10
-
-static void CreateDotTexture(unsigned int *pDotTexture);
-
-extern void setupFlag(BoardData3d *bd3d);
-extern void setupDicePaths(const BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);
-extern void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag);
-extern float getDiceSize(const renderdata* prd);
-static void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename);
 
 typedef int idleFunc(BoardData3d* bd3d);
 static guint idleId = 0;
@@ -192,6 +199,47 @@ static int extensionSupported(const char *extension)
 #define GL_SEPARATE_SPECULAR_COLOR_EXT      0x81FA
 #endif
 #endif
+
+static void CreateTexture(unsigned int* pID, int width, int height, const unsigned char* bits)
+{
+	/* Create texture */
+	glGenTextures(1, (GLuint *) pID);
+	glBindTexture(GL_TEXTURE_2D, *pID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	/* Read bits */
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
+}
+
+static void CreateDotTexture(unsigned int *pDotTexture)
+{
+	unsigned int i, j;
+	unsigned char* data = (unsigned char*)malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
+	unsigned char* pData = data;
+	assert(pData);
+
+	for (i = 0; i < DOT_SIZE; i++)
+	{
+		for (j = 0; j < DOT_SIZE; j++)
+		{
+			float xdiff = ((float)i) + .5f - DOT_SIZE / 2;
+			float ydiff = ((float)j) + .5f - DOT_SIZE / 2;
+			float dist = xdiff * xdiff + ydiff * ydiff;
+			float percentage = 1 - ((dist - MIN_DIST) / (MAX_DIST - MIN_DIST));
+			unsigned char value;
+			if (percentage <= 0)
+				value = 0;
+			else if (percentage >= 1)
+				value = 255;
+			else
+				value = (unsigned char)(255 * percentage);
+			pData[0] = pData[1] = pData[2] = value;
+			pData += 3;
+		}
+	}
+	CreateTexture(pDotTexture, DOT_SIZE, DOT_SIZE, data);
+	free(data);
+}
 
 void InitGL(const BoardData *bd)
 {
@@ -348,14 +396,10 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		g_print("Texture %s not in texture info file\n", file);
 }
 
-#define TEXTURE_FILE "textures.txt"
-#define TEXTURE_FILE_VERSION 3
-
 void LoadTextureInfo(int FirstPass)
 {	/* May be called several times, no errors shown on first pass */
 	FILE* fp;
 	char *szFile;
-	#define BUF_SIZE 100
 	char buf[BUF_SIZE];
 
 	if (FirstPass)
@@ -476,17 +520,6 @@ static void DeleteTexture(Texture* texture)
 	texture->texID = 0;
 }
 
-static void CreateTexture(unsigned int* pID, int width, int height, const unsigned char* bits)
-{
-	/* Create texture */
-	glGenTextures(1, (GLuint *) pID);
-	glBindTexture(GL_TEXTURE_2D, *pID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	/* Read bits */
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
-}
-
 int LoadTexture(Texture* texture, const char* filename)
 {
 	unsigned char* bits = 0;
@@ -547,6 +580,52 @@ int LoadTexture(Texture* texture, const char* filename)
 	return 1;
 }
 
+static
+void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename)
+{
+	/* See if already loaded */
+	int i;
+	const char* nameStart = filename;
+	/* Find start of name in filename */
+	const char* newStart = 0;
+
+	do
+	{
+		if ((newStart = strchr(nameStart, '\\')) == NULL)
+			newStart = strchr(nameStart, '/');
+
+		if (newStart)
+			nameStart = newStart + 1;
+	} while(newStart);
+
+	/* Search for name in cached list */
+	for (i = 0; i < bd3d->numTextures; i++)
+	{
+		if (!strcasecmp(nameStart, bd3d->textureName[i]))
+		{	/* found */
+			pMat->pTexture = &bd3d->textureList[i];
+			return;
+		}
+	}
+
+	/* Not found - Load new texture */
+	if (bd3d->numTextures == MAX_TEXTURES - 1)
+	{
+		g_print("Error: Too many textures loaded...\n");
+		return;
+	}
+
+	if (LoadTexture(&bd3d->textureList[bd3d->numTextures], filename))
+	{
+		/* Remeber name */
+		bd3d->textureName[bd3d->numTextures] = (char*)malloc(strlen(nameStart) + 1);
+		strcpy(bd3d->textureName[bd3d->numTextures], nameStart);
+
+		pMat->pTexture = &bd3d->textureList[bd3d->numTextures];
+		bd3d->numTextures++;
+	}
+}
+
 static void GetTexture(BoardData3d* bd3d, Material* pMat)
 {
 	if (pMat->textureInfo)
@@ -570,40 +649,6 @@ void GetTextures(BoardData3d* bd3d, renderdata *prd)
 	GetTexture(bd3d, &prd->BoxMat);
 	GetTexture(bd3d, &prd->HingeMat);
 	GetTexture(bd3d, &prd->BackGroundMat);
-}
-
-#define DOT_SIZE 32
-#define MAX_DIST ((DOT_SIZE / 2) * (DOT_SIZE / 2))
-#define MIN_DIST ((DOT_SIZE / 2) * .70f * (DOT_SIZE / 2) * .70f)
-
-static void CreateDotTexture(unsigned int *pDotTexture)
-{
-	unsigned int i, j;
-	unsigned char* data = (unsigned char*)malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
-	unsigned char* pData = data;
-	assert(pData);
-
-	for (i = 0; i < DOT_SIZE; i++)
-	{
-		for (j = 0; j < DOT_SIZE; j++)
-		{
-			float xdiff = ((float)i) + .5f - DOT_SIZE / 2;
-			float ydiff = ((float)j) + .5f - DOT_SIZE / 2;
-			float dist = xdiff * xdiff + ydiff * ydiff;
-			float percentage = 1 - ((dist - MIN_DIST) / (MAX_DIST - MIN_DIST));
-			unsigned char value;
-			if (percentage <= 0)
-				value = 0;
-			else if (percentage >= 1)
-				value = 255;
-			else
-				value = (unsigned char)(255 * percentage);
-			pData[0] = pData[1] = pData[2] = value;
-			pData += 3;
-		}
-	}
-	CreateTexture(pDotTexture, DOT_SIZE, DOT_SIZE, data);
-	free(data);
 }
 
 void Set3dSettings(renderdata *prdnew, const renderdata *prd)
@@ -2087,11 +2132,6 @@ static int idleCloseBoard(BoardData3d* bd3d)
 	return 1;
 }
 
-/* Performance test data */
-static double testStartTime;
-static int numFrames;
-#define TEST_TIME 3000.0f
-
 static int idleTestPerformance(BoardData3d* bd3d)
 {
 	BoardData *bd = pIdleBD;
@@ -2207,52 +2247,6 @@ void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a)
 void SetupSimpleMat(Material* pMat, float r, float g, float b)
 {
 	SetupMat(pMat, r, g, b, r, g, b, 0.f, 0.f, 0.f, 0, 0.f);
-}
-
-static
-void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename)
-{
-	/* See if already loaded */
-	int i;
-	const char* nameStart = filename;
-	/* Find start of name in filename */
-	const char* newStart = 0;
-
-	do
-	{
-		if ((newStart = strchr(nameStart, '\\')) == NULL)
-			newStart = strchr(nameStart, '/');
-
-		if (newStart)
-			nameStart = newStart + 1;
-	} while(newStart);
-
-	/* Search for name in cached list */
-	for (i = 0; i < bd3d->numTextures; i++)
-	{
-		if (!strcasecmp(nameStart, bd3d->textureName[i]))
-		{	/* found */
-			pMat->pTexture = &bd3d->textureList[i];
-			return;
-		}
-	}
-
-	/* Not found - Load new texture */
-	if (bd3d->numTextures == MAX_TEXTURES - 1)
-	{
-		g_print("Error: Too many textures loaded...\n");
-		return;
-	}
-
-	if (LoadTexture(&bd3d->textureList[bd3d->numTextures], filename))
-	{
-		/* Remeber name */
-		bd3d->textureName[bd3d->numTextures] = (char*)malloc(strlen(nameStart) + 1);
-		strcpy(bd3d->textureName[bd3d->numTextures], nameStart);
-
-		pMat->pTexture = &bd3d->textureList[bd3d->numTextures];
-		bd3d->numTextures++;
-	}
 }
 
 /* Not currently used

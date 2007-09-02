@@ -12,6 +12,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "config.h"
+#if USE_MULTITHREAD
 #include "backgammon.h"
 
 #ifdef WIN32
@@ -37,37 +39,40 @@ typedef struct _AnalyseMoveTask
 	matchstate ms;
 } AnalyseMoveTask;
 
-extern void MT_InitThreads();
-extern void MT_Close();
+extern unsigned int MT_GetNumThreads(void);
+extern void MT_InitThreads(void);
+extern void MT_Close(void);
 extern void MT_AddTask(Task *pt, gboolean lock);
 extern int MT_WaitForTasks(void (*pCallback)(), int callbackTime);
-extern unsigned int MT_GetNumThreads();
 extern void MT_SetNumThreads(unsigned int num);
 extern int MT_Enabled(void);
-extern int MT_GetThreadID();
+extern int MT_GetThreadID(void);
 extern void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked);
+extern void MT_Exclusive(void);
+extern void MT_Release(void);
+extern int MT_GetDoneTasks(void);
+extern void MT_SyncInit(void);
+extern void MT_SyncStart(void);
+extern double MT_SyncEnd(void);
+extern void MT_Exclusive(void);
+extern void MT_Unlock(int *lock);
+extern void MT_Lock(int *lock);
 
-#if USE_MULTITHREAD
- #ifdef GLIB_THREADS
+#ifdef GLIB_THREADS
   #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
   #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(x, y) + y)
   #define MT_SafeDec(x) (g_atomic_int_dec_and_test(x) == TRUE)
- #else
+#else
   #define MT_SafeInc(x) InterlockedIncrement((long*)x)
   #define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
   #define MT_SafeDec(x) (InterlockedDecrement((long*)x) == 0)
- #endif
-#else
- #define MT_SafeInc(x) (++(*x))
- #define MT_SafeAdd(x, y) ((*x) += y)
- #define MT_SafeDec(x) (--(*x)) == 0)
 #endif
 
-extern void MT_Exclusive();
-extern void MT_Lock();
-extern void MT_Release();
-
-extern int MT_GetDoneTasks();
-extern void MT_SyncInit();
-extern void MT_SyncStart();
-extern double MT_SyncEnd();
+#else /*USE_MULTITHREAD*/
+#define MT_SafeInc(x) (++(*x))
+#define MT_SafeAdd(x, y) ((*x) += y)
+#define MT_SafeDec(x) (--(*x)) == 0)
+#define MT_Lock(x) void
+#define MT_UnLock(x) void
+#define MT_GetThreadID(x) 0
+#endif

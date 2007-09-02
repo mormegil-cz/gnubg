@@ -619,7 +619,7 @@ extern void CommandSetAutoRoll( char *sz ) {
                _("Will not automatically roll the dice.") );
 }
 
-int CorrectNumberOfChequers(int anBoard[2][25], int numCheq)
+static int CorrectNumberOfChequers(int anBoard[2][25], int numCheq)
 {    /* Check players don't have too many chequers (esp. for hypergammon) */
 	int ac[2], i;
 	ac[0] = ac[1] = 0;
@@ -2759,7 +2759,7 @@ extern void CommandSetPostCrawford( char *sz ) {
 }
 
 #if USE_GTK
-warnings ParseWarning(char* str)
+static warnings ParseWarning(char* str)
 {
 	int i;
 

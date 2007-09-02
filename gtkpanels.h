@@ -38,9 +38,9 @@ extern void SaveWindowSettings(FILE* pf);
 extern void HidePanel(gnubgwindow window);
 extern void getWindowGeometry(gnubgwindow window);
 extern int PanelShowing(gnubgwindow window);
-extern void ClosePanels();
+extern void ClosePanels(void);
 
-extern int GetPanelSize();
+extern int GetPanelSize(void);
 extern void SetPanelWidth(int size);
 
 #endif

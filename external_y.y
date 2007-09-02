@@ -143,7 +143,7 @@ exterror( const char *s ) {
 }
 
 static void
-reset_command() {
+reset_command(void) {
 
   ec.ct = COMMAND_NONE;
   ec.nPlies = 0;

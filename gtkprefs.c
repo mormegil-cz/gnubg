@@ -177,7 +177,7 @@ static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
 static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused );
 
-void ParsePreferences(boarddesign *pbde, renderdata* prdNew)
+static void ParsePreferences(boarddesign *pbde, renderdata* prdNew)
 {
 	char *apch[2];
 	gchar *sz, *pch;
@@ -208,7 +208,7 @@ static boarddesign* FindDesign (renderdata* prdDesign)
 }
 #endif /* HAVE_LIBXML2 */
 
-void SetTitle()
+static void SetTitle(void)
 {	/* Update dialog title to include design name + author */
 #if HAVE_LIBXML2
 	boarddesign *pbde;
@@ -310,7 +310,7 @@ void UpdatePreview(GtkWidget *notused)
 	gtk_widget_queue_draw(pwPrevBoard);
 }
 
-void DieColourChanged (GtkWidget *pw, gpointer pf)
+static void DieColourChanged (GtkWidget *pw, gpointer pf)
 {
 	int f = GPOINTER_TO_INT(pf);
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw));
@@ -335,7 +335,7 @@ void DieColourChanged (GtkWidget *pw, gpointer pf)
 	UpdatePreview(0);
 }
 
-void option_changed(GtkWidget *widget, GtkWidget *pw)
+static void option_changed(GtkWidget *widget, GtkWidget *pw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	if (!fUpdate)
@@ -369,7 +369,7 @@ void option_changed(GtkWidget *widget, GtkWidget *pw)
 
 #if USE_BOARD3D
 
-void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
+static void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
 {	/* Update 3d colour previews */
 	if (!fUpdate)
 		return;
@@ -379,7 +379,7 @@ void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
 	UpdateColPreviews();
 }
 
-void DiceSizeChanged(GtkWidget *pw)
+static void DiceSizeChanged(GtkWidget *pw)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
 	bd->rd->diceSize = (float)padjDiceSize->value;
@@ -388,7 +388,7 @@ void DiceSizeChanged(GtkWidget *pw)
 	option_changed(0, 0);
 }
 
-void HingeChanged (GtkWidget *pw)
+static void HingeChanged (GtkWidget *pw)
 {
 	gtk_widget_set_sensitive(pmHingeCol, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwHinges)));
 	option_changed(0, 0);
@@ -1087,7 +1087,7 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 	gtk_widget_queue_draw(bd->table);
 }
 
-void WorkOut2dLight(renderdata* prd)
+static void WorkOut2dLight(renderdata* prd)
 {
     prd->arLight[ 2 ] = (float)sinf( paElevation->value / 180 * PI );
     prd->arLight[ 0 ] = (float)(cosf( paAzimuth->value / 180 * PI ) *
@@ -1147,7 +1147,7 @@ static void MoveIndicatorToggled( GtkWidget *pwWidget, void* data )
 
 #if USE_BOARD3D
 
-void toggle_display_type(GtkWidget *widget, BoardData* bd)
+static void toggle_display_type(GtkWidget *widget, BoardData* bd)
 {
 	int i;
 	int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
@@ -1188,7 +1188,7 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	SetTitle();
 }
 
-void toggle_quick_draw(GtkWidget *widget, int init)
+static void toggle_quick_draw(GtkWidget *widget, int init)
 {
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(pwShowShadows, !set);
@@ -1203,7 +1203,7 @@ void toggle_quick_draw(GtkWidget *widget, int init)
 	}
 }
 
-void toggle_show_shadows(GtkWidget *widget, int init)
+static void toggle_show_shadows(GtkWidget *widget, int init)
 {
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(lightLab, set);
@@ -1215,7 +1215,7 @@ void toggle_show_shadows(GtkWidget *widget, int init)
 	option_changed(0, 0);
 }
 
-void toggle_planview(GtkWidget *widget, GtkWidget *pw)
+static void toggle_planview(GtkWidget *widget, GtkWidget *pw)
 {
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(pwSkewFactor, !set);
@@ -1226,7 +1226,7 @@ void toggle_planview(GtkWidget *widget, GtkWidget *pw)
 	option_changed(0, 0);
 }
 
-void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
+static void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 {
 	BoardData *bd = BOARD(board)->board_data;
 	char str[255];
@@ -1275,7 +1275,7 @@ void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 
 #endif
 
-void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
+static void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
 {
     float rAzimuth, rElevation;
 	GtkWidget* pScale;
@@ -1324,21 +1324,19 @@ void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
 	/* FIXME add settings for ambient light */
 }
 
-GtkWidget *LightingPage(BoardData *bd)
+#if USE_BOARD3D
+static GtkWidget *LightingPage(BoardData *bd)
 {
     GtkWidget *dtBox, *pwx;
-#if USE_BOARD3D
 	GtkWidget *vbox, *vbox2, *frameBox, *hBox, *lab,
 		*pwLightPosX, *pwLightLevelAmbient, *pwLightLevelDiffuse, *pwLightLevelSpecular,
 		*pwLightPosY, *pwLightPosZ, *dtLightSourceFrame;
-#endif
 
 	pwx = gtk_hbox_new ( FALSE, 0);
 	
 	dtBox = gtk_vbox_new (FALSE, 4);
 	gtk_box_pack_start(GTK_BOX(pwx), dtBox, FALSE, FALSE, 0);
 
-#if USE_BOARD3D
 	if (display_is_3d(&rdPrefs))
 	{
 		dtBox = gtk_vbox_new (FALSE, 0);
@@ -1477,13 +1475,14 @@ GtkWidget *LightingPage(BoardData *bd)
 		gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelSpecular, TRUE, TRUE, 0);
 	}
 	else
-#endif
 		Add2dLightOptions(dtBox, bd->rd);
 
 	gtk_widget_show_all(pwx);
 
 	return pwx;
 }
+
+#endif
 
 static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 
@@ -2093,7 +2092,7 @@ DesignAddTitle ( boarddesign *pbde ) {
   GTKAllowStdin();
 }
 
-void WriteDesignString(boarddesign *pbde, renderdata *prd)
+static void WriteDesignString(boarddesign *pbde, renderdata *prd)
 {
   char szTemp[2048], *pTemp;
   gchar buf1[G_ASCII_DTOSTR_BUF_SIZE], buf2[G_ASCII_DTOSTR_BUF_SIZE],
@@ -2263,7 +2262,7 @@ void WriteDesignString(boarddesign *pbde, renderdata *prd)
   strcpy(pbde->szBoardDesign, szTemp);
 }
 
-void ShowSelectedRow()
+static void ShowSelectedRow(void)
 {
 	int row = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ), pbdeSelected);
 	if( gtk_clist_row_is_visible(GTK_CLIST( pwDesignList ), row) == GTK_VISIBILITY_NONE )
@@ -2272,7 +2271,7 @@ void ShowSelectedRow()
 
 #if USE_BOARD3D
 
-void Set2dColour(double newcol[4], Material* pMat)
+static void Set2dColour(double newcol[4], Material* pMat)
 {
 	newcol[0] = (pMat->ambientColour[0] + pMat->diffuseColour[0]) / 2;
 	newcol[1] = (pMat->ambientColour[1] + pMat->diffuseColour[1]) / 2;
@@ -2280,7 +2279,7 @@ void Set2dColour(double newcol[4], Material* pMat)
 	newcol[3] = (pMat->ambientColour[3] + pMat->diffuseColour[3]) / 2;
 }
 
-void Set2dColourChar(unsigned char newcol[4], Material* pMat)
+static void Set2dColourChar(unsigned char newcol[4], Material* pMat)
 {
 	newcol[0] = (unsigned char)(((pMat->ambientColour[0] + pMat->diffuseColour[0]) / 2) * 255);
 	newcol[1] = (unsigned char)(((pMat->ambientColour[1] + pMat->diffuseColour[1]) / 2) * 255);
@@ -2288,7 +2287,7 @@ void Set2dColourChar(unsigned char newcol[4], Material* pMat)
 	newcol[3] = (unsigned char)(((pMat->ambientColour[3] + pMat->diffuseColour[3]) / 2) * 255);
 }
 
-void Set3dColour(Material* pMat, double col[4])
+static void Set3dColour(Material* pMat, double col[4])
 {
 	pMat->ambientColour[0] = pMat->diffuseColour[0] = (float)col[0];
 	pMat->ambientColour[1] = pMat->diffuseColour[1] = (float)col[1];
@@ -2296,7 +2295,7 @@ void Set3dColour(Material* pMat, double col[4])
 	pMat->ambientColour[3] = pMat->diffuseColour[3] = 1;
 }
 
-void Set3dColourChar(Material* pMat, unsigned char col[4])
+static void Set3dColourChar(Material* pMat, unsigned char col[4])
 {
 	pMat->ambientColour[0] = pMat->diffuseColour[0] = ((float)col[0]) / 255;
 	pMat->ambientColour[1] = pMat->diffuseColour[1] = ((float)col[1]) / 255;
@@ -2304,7 +2303,7 @@ void Set3dColourChar(Material* pMat, unsigned char col[4])
 	pMat->ambientColour[3] = pMat->diffuseColour[3] = 1;
 }
 
-void CopyNewSettingsToOtherDimension(renderdata* prd)
+static void CopyNewSettingsToOtherDimension(renderdata* prd)
 {
 	if (display_is_3d(prd))
 	{	/* Create rough 2d settings based on new 3d settings */
@@ -2979,7 +2978,7 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 	}
 }
 
-void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page, 
+static void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page, 
 				guint page_num, gpointer user_data)
 {
 	BoardData *bd = BOARD(pwPrevBoard)->board_data;
@@ -3152,14 +3151,14 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard )
 
 #if USE_BOARD3D
 
-int IsWhiteColour3d(Material* pMat)
+static int IsWhiteColour3d(Material* pMat)
 {
 	return (pMat->ambientColour[0] == 1) && (pMat->ambientColour[1] == 1) && (pMat->ambientColour[2] == 1) &&
 		(pMat->diffuseColour[0] == 1) && (pMat->diffuseColour[1] == 1) && (pMat->diffuseColour[2] == 1) &&
 		(pMat->specularColour[0] == 1) && (pMat->specularColour[1] == 1) && (pMat->specularColour[2] == 1);
 }
 
-int IsBlackColour3d(Material* pMat)
+static int IsBlackColour3d(Material* pMat)
 {
 	return (pMat->ambientColour[0] == 0) && (pMat->ambientColour[1] == 0) && (pMat->ambientColour[2] == 0) &&
 		(pMat->diffuseColour[0] == 0) && (pMat->diffuseColour[1] == 0) && (pMat->diffuseColour[2] == 0) &&

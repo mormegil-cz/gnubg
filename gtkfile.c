@@ -312,7 +312,7 @@ static GtkWidget* import_types_combo(void)
 }
 
 
-void do_import_file(gint import_type, gchar * fn)
+static void do_import_file(gint import_type, gchar * fn)
 {
 	gchar *cmd = NULL;
 

@@ -23,6 +23,7 @@ char *aszSkillType[ 1 ];
 int exsExport;
 int ap;
 #include "config.h"
+#include "util.h"
 #if WIN32
 #include <windows.h>
 #include <glib.h>
@@ -52,7 +53,7 @@ extern void MT_Unlock(long *lock)
 {
 }
 
-extern int MT_GetThreadID()
+extern int MT_GetThreadID(void)
 {
   return (0);
 }

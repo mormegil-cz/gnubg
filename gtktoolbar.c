@@ -168,7 +168,7 @@ ToolbarToggleClockwise( GtkWidget *pw, toolbarwidget *ptw ) {
 
 }
 
-extern void click_edit()
+extern void click_edit(void)
 {
         toolbarwidget *ptw = g_object_get_data ( G_OBJECT ( pwToolbar ), "toolbarwidget" );
         gtk_button_clicked( GTK_BUTTON( ptw->pwEdit ));

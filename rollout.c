@@ -51,13 +51,13 @@ char *log_file_name = 0;
  * name template to work with
  */
 
-void 
+static void 
 log_cube (char *action, int player) {
   fprintf (logfp, ";%s[%s]\n", player ? "B" : "W", action);
 }
 
 
-void
+static void
 log_move (int *anMove, int player, int die0, int die1) {
   int i;
 
@@ -104,7 +104,7 @@ static void board_to_sgf (int anBoard[25], int direction) {
 
     
 
-void log_game_start (char *name, const cubeinfo *pci, int fCubeful,
+static void log_game_start (char *name, const cubeinfo *pci, int fCubeful,
 		     int anBoard[2][25]) {
   time_t     t = time (0);
   struct tm  *now = localtime (&t);
@@ -158,7 +158,7 @@ void log_game_start (char *name, const cubeinfo *pci, int fCubeful,
   fprintf (logfp, "\n");
 }
 
-void log_game_over (void) {
+static void log_game_over (void) {
   if (logfp) {
     fprintf (logfp, ")" );
     fclose (logfp);
@@ -965,7 +965,7 @@ int ro_fInvert;
 int ro_NextTrail;
 int *altGameCount;
 
-extern void RolloutLoopMT()
+extern void RolloutLoopMT(void)
 {
 	int aanBoardEval[ 2 ][ 25 ];
 	float aar[ NUM_ROLLOUT_OUTPUTS ];
@@ -1261,7 +1261,7 @@ extern void RolloutLoopMT()
 rolloutprogressfunc *ro_pfProgress;
 void *ro_pUserData;
 
-void UpdateProgress()
+static void UpdateProgress(void)
 {
 	if(fShowProgress) 
 	{
@@ -1524,9 +1524,7 @@ fnTick = fnOld;
 
 #else
 
-extern double get_time();
-
-int UpdateTimePassed()
+static int UpdateTimePassed(void)
 {
 	static double lasttime = -1;
 	double current = get_time();

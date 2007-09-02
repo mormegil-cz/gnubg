@@ -1,3 +1,21 @@
+Sun Sep  2 22:20:43 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	*  board3d/misc3d.h, speed.h: newfiles
+	* analysis.c, analysis.h, backgammon.h, board3d/drawboard3d.c,
+	board3d/fun3d.h, board3d/graph.c, board3d/gtkcolour3d.c,
+	board3d/Makefile.am, board3d/misc3d.c, board3d/widget3d.c, dice.c,
+	eval.c, eval.h, external_y.y, format.c, gnubg.c, gnubgmodule.c,
+	gnubgmodule.h, gtkboard.c, gtkchequer.c, gtkchequer.h, gtkfile.c,
+	gtkgame.c, gtkgame.h, gtkgamelist.c, gtkmovelist.c, gtkmovelistctrl.c,
+	gtkmovelistctrl.h, gtkoptions.c, gtkoptions.h, gtkpanels.c,
+	gtkpanels.h, gtkprefs.c, gtkrace.c, gtkrelational.c, gtkrelational.h,
+	gtkrolls.c, gtktoolbar.c, gtktoolbar.h, gtkwindows.c, gtkwindows.h,
+	import.c, lib/cache.c, Makefile.am, matchequity.c, multithread.c,
+	multithread.h, play.c, progress.c, pub_eval.c, relational.c,
+	relational.h, render.c, renderprefs.c, rollout.c, rollout.h, set.c,
+	show.c, speed.c, timer.c, userrng.c, util.c, util.h: make sure that
+	functions are either static or declared in an appropriate header. 
+	
 Fri Aug 31 23:36:49 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtkgame.c, set.c, gtkgame.h: make sure that GTKOutput calls

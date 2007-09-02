@@ -147,7 +147,7 @@ static int
 PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
 
   PyObject *pyKey, *pyValue;
-  int iPos = 0;
+  ssize_t iPos = 0;
   char *pchKey;
   static char *aszKeys[] = {
     "jacoby", "crawford", "move", "beavers", "cube", "matchto",
@@ -252,7 +252,7 @@ static int
 PyToEvalContext( PyObject *p, evalcontext *pec ) {
 
   PyObject *pyKey, *pyValue;
-  int iPos = 0;
+  ssize_t iPos = 0;
   char *pchKey;
   static char *aszKeys[] = {
     "cubeful", "plies", "reduced", "deterministic", "noise", NULL };
@@ -738,7 +738,7 @@ PythonEq2mwc( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
 #define STRBUF_SIZE 1024
 
-void AddString(list* buffers, char* str)
+static void AddString(list* buffers, char* str)
 {
 	list* pCurrent = buffers->plPrev;
 	if (!pCurrent->p || strlen(str) + strlen(pCurrent->p) > STRBUF_SIZE)
@@ -750,7 +750,7 @@ void AddString(list* buffers, char* str)
 	strcat(pCurrent->p, str);
 }
 
-extern char* GameAsString()
+static char* GameAsString()
 {
 	char *ret;
 	int size;
@@ -2401,7 +2401,7 @@ PyMethodDef gnubgMethods[] = {
 };
 
 extern void
-PythonInitialise() {
+PythonInitialise(void) {
 
   char *pch;
   static char workingDir[BIG_PATH];

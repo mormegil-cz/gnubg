@@ -123,7 +123,7 @@ static void Disconnect(PyObject *r)
 	Py_DECREF(r);
 }
 
-extern int RelationalMatchExists()
+extern int RelationalMatchExists(void)
 {
   int ret = -1;
   PyObject *v, *r;
@@ -153,7 +153,7 @@ extern int RelationalMatchExists()
   return ret;
 }
 
-int GameOver()
+static int GameOver(void)
 {
   	int anFinalScore[2];
 	int nMatch;
@@ -723,7 +723,7 @@ extern void FreeRowset(RowSet* pRow)
 	pRow->widths = NULL;
 }
 
-void MallocRowset(RowSet* pRow, int rows, int cols)
+static void MallocRowset(RowSet* pRow, int rows, int cols)
 {
 	int i;
 	pRow->widths = malloc(cols * sizeof(int));
@@ -740,7 +740,7 @@ void MallocRowset(RowSet* pRow, int rows, int cols)
 	pRow->rows = rows;
 }
 
-extern int UpdateQuery(char *sz)
+static int UpdateQuery(char *sz)
 {
 	PyObject *v, *r;
 

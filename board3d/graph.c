@@ -23,10 +23,10 @@
 
 #include "config.h"
 #include "inc3d.h"
+#include "misc3d.h"
 
 #include "renderprefs.h"
 
-extern GdkGLConfig *getGlConfig(void);
 
 struct _GraphData
 {
@@ -338,7 +338,7 @@ void SetNumGames(GraphData* pgd, unsigned int numGames)
 	pgd->data = Alloc3d(numGames + 1, 2, 2);
 }
 
-GraphData *CreateGraphData()
+extern GraphData *CreateGraphData(void)
 {
 	return (GraphData*)malloc(sizeof(GraphData));
 }

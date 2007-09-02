@@ -647,4 +647,7 @@ baseInputs(int anBoard[2][25], float arInput[]);
 extern void 
 CalculateRaceInputs(int anBoard[2][25], float inputs[]);
 
+/* From pub_eval.c: */
+extern float pubeval( int race, int pos[] );
+
 #endif

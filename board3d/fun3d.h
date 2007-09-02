@@ -42,7 +42,7 @@ GtkWidget* StatGraph(GraphData* pgd);
 void SetNumGames(GraphData* pgd, unsigned int numGames);
 void AddGameData(GraphData* pgd, int game, const statcontext *psc);
 void TidyGraphData(GraphData* pgd);
-GraphData *CreateGraphData();
+GraphData *CreateGraphData(void);
 
 /* Misc functions */
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
@@ -68,7 +68,7 @@ void CheckOpenglError(void);
 
 /* Functions for 3d board */
 extern void InitGTK3d(int *argc, char ***argv);
-extern void Init3d();
+extern void Init3d(void);
 extern void InitBoard3d(BoardData *bd, BoardData3d *bd3d);
 extern void freeEigthPoints(float ****boardPoints, unsigned int accuracy);
 extern void SetupVisual();
@@ -133,14 +133,14 @@ extern void TidyCurveAccuracy3d(BoardData3d* bd3d, unsigned int accuracy);
 extern void DrawScene3d(const BoardData3d* bd3d);
 extern int Animating3d(const BoardData3d* bd3d);
 
-extern void ResetPreviews();
-extern void UpdateColPreviews();
-extern int GetPreviewId();
+extern void ResetPreviews(void);
+extern void UpdateColPreviews(void);
+extern int GetPreviewId(void);
 extern void UpdateColPreview(int ID);
 extern void SetPreviewLightLevel(const int levels[3]);
 extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind);
 extern gboolean display_is_2d (renderdata *prd);
 extern gboolean display_is_3d (renderdata *prd);
-extern GdkGLConfig *getglconfigSingle();
+extern GdkGLConfig *getglconfigSingle(void);
 
 #endif
