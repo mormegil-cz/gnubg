@@ -13,8 +13,9 @@ man6_MANS = gnubg.6
 all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info
 
 gnubg.6: gnubgman.xml
-	-docbook2man gnubgman.xml 2>.gnubgman.err || \
-	cp gnubg/gnubg.6 .
+	db2x_docbook2man gnubgman.xml 2>.gnubgman.err || \
+		docbook2man gnubgman.xml 2>.gnubgman.err || \
+		cp gnubg/gnubg.6 .
 
 gnubg.html: gnubgdb.xml images/*.png
 	xsltproc \
@@ -36,6 +37,7 @@ allabout.html: allabout.xml images/*.png
 		cp gnubg/allabout.html .
 
 gnubg.texi: gnubgdb.xml
+	db2x_docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err || \
 	docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err || \
 	cp gnubg/gnubg.texi .
 
@@ -50,5 +52,5 @@ install-data-local: gnubg.html allabout.html gnubg.info images/*.png
 	$(INSTALL_DATA) $(srcdir)/$$file $(gnubg_helpdir)/$$basefile; \
 	done
 
-CLEANFILES=*.html
+MOSTLYCLEANFILES=*.html gnubg.6 gnubg.info gnubg.texi manpage.links manpage.refs
 DISTCLEANFILES=gnubg.texi gnubg.info gnubg.6
