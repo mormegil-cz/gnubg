@@ -187,7 +187,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
     char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
     if ( !( tmpfile = g_file_open_tmp("gnubgprXXXXXX", ppchOut, NULL) ) || ! (*ppfOut = fdopen( tmpfile, "w" ))) {
 	outputerr( *ppchOut );
-	free( *ppchOut );
+	g_free( *ppchOut );
 	return -1;
     }
 

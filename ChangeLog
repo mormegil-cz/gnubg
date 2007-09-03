@@ -1,3 +1,8 @@
+Mon Sep  3 11:40:07 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* html.c: fix tmpfile creation problem to allow export of gammonline
+	to clipboard under MS Vista.
+
 Mon Sep  3 01:18:12 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: fix buffer overflow on 64 bit platforms

@@ -3877,6 +3877,8 @@ extern void CommandExportPositionGOL2Clipboard( char *sz ) {
     char *szClipboard;
     long l;
     FILE *pf;
+    char *tmpfile;
+    int tmpd;
 
     if( ms.gs == GAME_NONE ) {
       outputl( _("No game in progress (type `new game' to start one).") );
@@ -3885,7 +3887,9 @@ extern void CommandExportPositionGOL2Clipboard( char *sz ) {
     
     /* get tmp file name */
 
-    if ( ! ( pf = tmpfile() ) ) {
+    tmpd = g_file_open_tmp(NULL, &tmpfile, NULL); 
+    if ( tmpd < 0 || ! ( pf = fdopen(tmpd, "w+" ))) {
+	    g_free(tmpfile);
       outputerr("temporary file");
       return;
     }
@@ -3920,6 +3924,7 @@ extern void CommandExportPositionGOL2Clipboard( char *sz ) {
     free( szClipboard );
 
     fclose( pf );
-
+    g_unlink(tmpfile);
+    g_free(tmpfile);
 }
 
