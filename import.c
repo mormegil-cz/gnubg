@@ -3520,8 +3520,8 @@ static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 			WritePartyGame(matFP, pGame->gameStr);
 			pts = pGame->s2 - s2 + pGame->s1 - s1;
 			fprintf(matFP, "Wins %d point%s\n\n", pts, (pts == 1) ? "" : "s");
-			s1 += pGame->s1;
-			s2 += pGame->s2;
+			s1 = pGame->s1;
+			s2 = pGame->s2;
 			free(pGame->gameStr);
 			free(pGame);
 		}
