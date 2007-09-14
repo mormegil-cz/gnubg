@@ -126,7 +126,6 @@ lib/neuralnet.c
 lib/neuralnet.h
 lib/neuralnetsse.c
 lib/sse.h
-makebearoff1.c
 makebearoff.c
 makehyper.c
 makeweights.c

@@ -3032,13 +3032,6 @@
           size of the bearoff database to be generated). </para>
         <para>Other options for makebearoff are available, see makebearoff
           --help for the complete set. </para>
-        <para>At compile time the built-in one sided bearoff database is
-          generated with the command </para>
-        <para>makebearoff -o 6 | makebearoff1 -o br1.c</para>
-        <para>which generated a 6 point one sided bearoff database. The database
-          is piped into makebearoff1 that generates the C code for the database.
-          The resulting br1.c is more than 8MB, so it's not distributed with the
-          source for <application>GNU Backgammon</application>. </para>
         <para>The accompanying program makehyper is used to generate databases
           for Hypergammon. For example, to generate the 3-checker database issue
           the command </para>

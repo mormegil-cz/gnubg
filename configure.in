@@ -210,18 +210,6 @@ if test "x$az_python_cspec" != "x"; then
 fi
 
 dnl
-dnl obsolete: bearoff database
-dnl
-
-bearoff_database=external
-AM_CONDITIONAL(EXTERNAL_BR1, test "$bearoff_database" = "external")
-AM_CONDITIONAL(COMPILE_BR1, test "$bearoff_database" = "static")
-if test "$bearoff_database" = "static"; then
-  AC_DEFINE(USE_BUILTIN_BEAROFF,1,[Define if you have a bearoff database to link to GNU Backgammon])
-fi
-
-
-dnl
 dnl windows Sounds
 dnl
 

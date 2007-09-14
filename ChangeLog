@@ -1,3 +1,7 @@
+Fri Sep 14 23:40:14 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* remove unused makebearoff1 program
+
 Fri Sep 14 13:58:36 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, configure.in: remove need for fstat
