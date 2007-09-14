@@ -56,6 +56,7 @@ typedef enum _playertype {
     PLAYER_EXTERNAL, PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL
 } playertype;
 
+#define MAX_NAME_LEN 32
 typedef struct _player {
   /* For all player types: */
   char szName[ MAX_NAME_LEN ];
@@ -1044,4 +1045,5 @@ extern char* CheckCommand(char *sz, command *ac);
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 extern command *FindHelpCommand( command *pcBase, char *sz,
 				 char *pchCommand, char *pchUsage );
+extern double get_time(void);
 #endif

@@ -37,3 +37,6 @@ sgfp.c
 sgfp.h
 stamp-*
 ylwrap
+Doxyfile
+cscope.out
+doxygen

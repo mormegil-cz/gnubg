@@ -2405,7 +2405,7 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 	if (!up)
 	{	/* Rotate by 180 degrees */
 		cairo_translate(cr, .5, .5);
-		cairo_rotate(cr, PI);
+		cairo_rotate(cr, G_PI);
 		cairo_translate(cr, -.5, -.5);
 	}
 

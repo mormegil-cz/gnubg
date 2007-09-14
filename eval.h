@@ -26,14 +26,6 @@
 #include "bearoff.h"
 #include "neuralnet.h"
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
 #define WEIGHTS_VERSION "0.15"
 #define WEIGHTS_VERSION_BINARY 0.15f
 #define WEIGHTS_MAGIC_BINARY 472.3782f

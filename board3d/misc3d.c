@@ -750,7 +750,7 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 
 		xRad = end[0] - start[0];
 		zRad = end[2] - start[2];
-		lineLen = (float)PI * ((fabsf(xRad) + fabsf(zRad)) / 2.0f) / 2.0f;
+		lineLen = (float)G_PI * ((fabsf(xRad) + fabsf(zRad)) / 2.0f) / 2.0f;
 		if (d <= lineLen)
 		{
 			per = d / lineLen;
@@ -761,26 +761,26 @@ static float moveAlong(float d, PathType type, const float start[3], const float
 			{
 				xCent = end[0];
 				zCent = start[2];
-				yOff = yDiff * cosf((PI / 2.0f) * per);
+				yOff = yDiff * cosf((G_PI / 2.0f) * per);
 			}
 			else
 			{
 				xCent = start[0];
 				zCent = end[2];
-				yOff = yDiff * sinf((PI / 2.0f) * per);
+				yOff = yDiff * sinf((G_PI / 2.0f) * per);
 			}
 
 			if (type == PATH_CURVE_9TO12)
 			{
-				v[0] = xCent - xRad * cosf((PI / 2.0f) * per);
+				v[0] = xCent - xRad * cosf((G_PI / 2.0f) * per);
 				v[1] = end[1] - yOff;
-				v[2] = zCent + zRad * sinf((PI / 2.0f) * per);
+				v[2] = zCent + zRad * sinf((G_PI / 2.0f) * per);
 			}
 			else
 			{
-				v[0] = xCent + xRad * sinf((PI / 2.0f) * per);
+				v[0] = xCent + xRad * sinf((G_PI / 2.0f) * per);
 				v[1] = start[1] + yOff;
-				v[2] = zCent - zRad * cosf((PI / 2.0f) * per);
+				v[2] = zCent - zRad * cosf((G_PI / 2.0f) * per);
 			}
 			return -1;
 		}
@@ -905,8 +905,8 @@ void cylinder(float radius, float height, unsigned int accuracy, const Texture* 
 {
 	unsigned int i;
 	float angle = 0;
-	float circum = (float)PI * radius * 2 / (accuracy + 1);
-	float step = (2 * (float)PI) / accuracy;
+	float circum = (float)G_PI * radius * 2 / (accuracy + 1);
+	float step = (2 * (float)G_PI) / accuracy;
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy + 1; i++)
 	{
@@ -929,7 +929,7 @@ void circleOutlineOutward(float radius, float height, unsigned int accuracy)
 	unsigned int i;
 	float angle, step;
 
-	step = (2 * (float)PI) / accuracy;
+	step = (2 * (float)G_PI) / accuracy;
 	angle = 0;
 	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_LINE_STRIP);
@@ -947,7 +947,7 @@ void circleOutline(float radius, float height, unsigned int accuracy)
 	unsigned int i;
 	float angle, step;
 
-	step = (2 * (float)PI) / accuracy;
+	step = (2 * (float)G_PI) / accuracy;
 	angle = 0;
 	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_LINE_STRIP);
@@ -964,7 +964,7 @@ void circle(float radius, float height, unsigned int accuracy)
 	unsigned int i;
 	float angle, step;
 
-	step = (2 * (float)PI) / accuracy;
+	step = (2 * (float)G_PI) / accuracy;
 	angle = 0;
 	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
@@ -982,7 +982,7 @@ void circleRev(float radius, float height, unsigned int accuracy)
 	unsigned int i;
 	float angle, step;
 
-	step = (2 * (float)PI) / accuracy;
+	step = (2 * (float)G_PI) / accuracy;
 	angle = 0;
 	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
@@ -1006,7 +1006,7 @@ void circleTex(float radius, float height, unsigned int accuracy, const Texture*
 		return;
 	}
 
-	step = (2 * (float)PI) / accuracy;
+	step = (2 * (float)G_PI) / accuracy;
 	angle = 0;
 	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
@@ -1032,7 +1032,7 @@ void circleRevTex(float radius, float height, unsigned int accuracy, const Textu
 		return;
 	}
 
-	step = (2 * (float)PI) / accuracy;
+	step = (2 * (float)G_PI) / accuracy;
 	angle = 0;
 	glNormal3f(0.f, 0.f, 1.f);
 	glBegin(GL_TRIANGLE_FAN);
@@ -1390,8 +1390,8 @@ void QuarterCylinder(float radius, float len, unsigned int accuracy, const Textu
 	float tuv;
 	if (texture)
 	{
-		float st = sinf((2 * PI) / accuracy) * radius;
-		float ct = (cosf((2 * PI) / accuracy) - 1) * radius;
+		float st = sinf((2 * G_PI) / accuracy) * radius;
+		float ct = (cosf((2 * G_PI) / accuracy) - 1) * radius;
 		dInc = sqrtf(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
@@ -1402,7 +1402,7 @@ void QuarterCylinder(float radius, float len, unsigned int accuracy, const Textu
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
-		angle = ((float)i * 2.f * (float)PI) / accuracy;
+		angle = ((float)i * 2.f * (float)G_PI) / accuracy;
 		glNormal3f(sinf(angle), 0.f, cosf(angle));
 
 		sar = sinf(angle) * radius;
@@ -1434,8 +1434,8 @@ void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, c
 	float tuv;
 	if (texture)
 	{
-		float st = sinf((2 * PI) / accuracy) * radius;
-		float ct = (cosf((2 * PI) / accuracy) - 1) * radius;
+		float st = sinf((2 * G_PI) / accuracy) * radius;
+		float ct = (cosf((2 * G_PI) / accuracy) - 1) * radius;
 		dInc = sqrtf(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
@@ -1446,7 +1446,7 @@ void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, c
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
-		angle = ((float)i * 2.f * (float)PI) / accuracy;
+		angle = ((float)i * 2.f * (float)G_PI) / accuracy;
 		glNormal3f(sinf(angle), 0.f, cosf(angle));
 
 		sar = sinf(angle) * radius;
@@ -1478,8 +1478,8 @@ void QuarterCylinderSplayed(float radius, float len, unsigned int accuracy, cons
 	float tuv;
 	if (texture)
 	{
-		float st = sinf((2 * PI) / accuracy) * radius;
-		float ct = (cosf((2 * PI) / accuracy) - 1) * radius;
+		float st = sinf((2 * G_PI) / accuracy) * radius;
+		float ct = (cosf((2 * G_PI) / accuracy) - 1) * radius;
 		dInc = sqrtf(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
@@ -1490,7 +1490,7 @@ void QuarterCylinderSplayed(float radius, float len, unsigned int accuracy, cons
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < accuracy / 4 + 1; i++)
 	{
-		angle = ((float)i * 2.f * (float)PI) / accuracy;
+		angle = ((float)i * 2.f * (float)G_PI) / accuracy;
 		glNormal3f(sinf(angle), 0.f, cosf(angle));
 
 		sar = sinf(angle) * radius;
@@ -1546,7 +1546,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accu
 	*boardPoints = Alloc3d(corner_steps, corner_steps, 3);
 
 	lat_angle = 0;
-	lat_step = (2 * (float)PI) / accuracy;
+	lat_step = (2 * (float)G_PI) / accuracy;
 
 	/* Calculate corner 1/8th sphere points */
 	for (i = 0; i < (accuracy / 4) + 1; i++)
@@ -1557,7 +1557,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accu
 		angle = 0;
 		ns = (accuracy / 4) - i;
 		if (ns > 0)
-			step = (2.f * (float)PI) / (ns * 4.f);
+			step = (2.f * (float)G_PI) / (ns * 4.f);
 
 		for (j = 0; j <= ns; j++)
 		{

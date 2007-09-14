@@ -22,11 +22,6 @@
 #ifndef _BOARDPOS_H_
 #define _BOARDPOS_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-
 #define POINT_UNUSED0 28 /* the top unused bearoff tray */
 #define POINT_UNUSED1 29 /* the bottom unused bearoff tray */
 #define POINT_DICE 30
@@ -63,8 +58,4 @@ extern void
 ResignPosition( const int resigned, int *px, int *py, int *porient );
 
     
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
 #endif

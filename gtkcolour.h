@@ -22,10 +22,6 @@
 #ifndef _GTKCOLOUR_H_
 #define _GTKCOLOUR_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #if USE_BOARD3D
 #include "render.h"
 
@@ -96,8 +92,5 @@ gtk_colour_picker_set_colour( GtkColourPicker *pcp, gdouble *ar );
 extern void
 gtk_colour_picker_get_colour( GtkColourPicker *pcp, gdouble *ar );
     
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif

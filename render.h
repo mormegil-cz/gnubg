@@ -36,10 +36,6 @@ struct _Material
 };
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 typedef enum _woodtype {
     WOOD_ALDER, WOOD_ASH, WOOD_BASSWOOD, WOOD_BEECH, WOOD_CEDAR,
     WOOD_EBONY, WOOD_FIR, WOOD_MAPLE, WOOD_OAK, WOOD_PINE, WOOD_REDWOOD,
@@ -196,9 +192,5 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
                            int anArrowPosition[ 2 ],
 			   int fPlaying, int nPlayer,
 			   int x, int y, int cx, int cy );
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif

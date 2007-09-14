@@ -23,10 +23,6 @@
 #define _BOARDDIM_H_
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 /* fundamental constants */
 #define CHEQUER_WIDTH     6
 #define DIE_WIDTH         7
@@ -141,9 +137,5 @@ extern "C" {
                      2 * CHEQUER_HEIGHT + 1)
 
 extern int positions[ 2 ][ 30 ][ 3 ];
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif /* _BOARDDIM_H_ */

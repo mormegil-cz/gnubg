@@ -2404,26 +2404,29 @@ extern void
 PythonInitialise(void) {
 
   char *pch;
-  static char workingDir[BIG_PATH];
-  getcwd(workingDir, BIG_PATH);
+  char *working_dir = g_get_current_dir();
 
 #if WIN32
 {	/* Setup python to look in the pythonlib directory if present */
-	char pythonDir[BIG_PATH];
-	strcpy(pythonDir, workingDir);
-	strcat(pythonDir, "/PythonLib");
-	if (!access(pythonDir, F_OK))
+	char *python_dir;
+	python_dir = g_build_filename(working_dir, "/PythonLib");
+	if (access(python_dir, F_OK) == 0)
 	{	/* Set Pyton to use this directory */
-		char buf[BIG_PATH + 100];
-		sprintf(buf, "PYTHONPATH=%s", pythonDir);
+		char *buf;
+		buf = g_strdup_printf("PYTHONPATH=%s", python_dir);
 		_putenv(buf);
-		sprintf(buf, "PYTHONROOT=%s", pythonDir);
+		g_free(buf);
+		buf = g_strdup_printf("PYTHONROOT=%s", python_dir);
 		_putenv(buf);
+		g_free(buf);
 	}
+	g_free(python_dir);
 }
+
 #endif
 
-  Py_SetProgramName(workingDir);
+  Py_SetProgramName(working_dir);
+  g_free(working_dir);
   Py_Initialize();
 
   /* ensure that python know about our gnubg module */

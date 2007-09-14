@@ -79,7 +79,7 @@ void makeInverseTransposeMatrix(float m[4][4], const float v[3])
 /* Simple rotation matrices */
 void makeInverseRotateMatrixX(float m[4][4], float degRot)
 {
-	float radRot = -(degRot * (float)PI) / 180.0f; 
+	float radRot = -(degRot * (float)G_PI) / 180.0f; 
 	float cosRot = cosf(radRot);
 	float sinRot = sinf(radRot);
 
@@ -92,7 +92,7 @@ void makeInverseRotateMatrixX(float m[4][4], float degRot)
 
 void makeInverseRotateMatrixY(float m[4][4], float degRot)
 {
-	float radRot = -(degRot * (float)PI) / 180.0f; 
+	float radRot = -(degRot * (float)G_PI) / 180.0f; 
 	float cosRot = cosf(radRot);
 	float sinRot = sinf(radRot);
 
@@ -105,7 +105,7 @@ void makeInverseRotateMatrixY(float m[4][4], float degRot)
 
 void makeInverseRotateMatrixZ(float m[4][4], float degRot)
 {
-	float radRot = -(degRot * (float)PI) / 180.0f; 
+	float radRot = -(degRot * (float)G_PI) / 180.0f; 
 	float cosRot = cosf(radRot);
 	float sinRot = sinf(radRot);
 
@@ -121,7 +121,7 @@ void makeInverseRotateMatrixZ(float m[4][4], float degRot)
 /* Generic rotation matrix - for comparisions */
 void makeInverseRotateMatrix(float m[4][4], float degRot, float x, float y, float z)
 {
-	float radRot = -(degRot * (float)PI) / 180.0f; 
+	float radRot = -(degRot * (float)G_PI) / 180.0f; 
 	float sqnorm = x * x + y * y + z * z;
 	float sin_theta;
 	float q[4];

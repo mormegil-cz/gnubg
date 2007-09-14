@@ -453,7 +453,7 @@ void addCubeCentered(Occluder* pOcc, float x, float y, float z, float w, float h
 
 void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, unsigned int numSteps)
 {
-	float step = (2 * (float)PI) / numSteps;
+	float step = (2 * (float)G_PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);
 	float *yPts = (float *)malloc(sizeof(float) * numSteps);
 	unsigned int i;
@@ -489,7 +489,7 @@ void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, un
 
 void addHalfTube(Occluder* pOcc, float r, float h, unsigned int numSteps)
 {
-	float step = ((2 * (float)PI) / numSteps) / 2.0f;
+	float step = ((2 * (float)G_PI) / numSteps) / 2.0f;
 	float *xPts = (float *)malloc(sizeof(float) * (numSteps + 1));
 	float *yPts = (float *)malloc(sizeof(float) * (numSteps + 1));
 	unsigned int i;
@@ -497,7 +497,7 @@ void addHalfTube(Occluder* pOcc, float r, float h, unsigned int numSteps)
 
 	for (i = 0; i <= numSteps; i++)
 	{
-		float ang = step * i - ((float)PI / 2.0f);
+		float ang = step * i - ((float)G_PI / 2.0f);
 		xPts[i] = sinf(ang) * r;
 		yPts[i] = cosf(ang) * r;
 	}
@@ -557,7 +557,7 @@ static void GetCoords(float x, float y, float d, unsigned int c, unsigned int f,
 void addDice(Occluder* pOcc, float size)
 {	/* Hard-coded numSteps to keep model simple + doesn't work correctly when > 8... */
 	unsigned int numSteps = 8;
-	float step = (2 * (float)PI) / numSteps;
+	float step = (2 * (float)G_PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);
 	float *yPts = (float *)malloc(sizeof(float) * numSteps);
 	unsigned int i, c, f;

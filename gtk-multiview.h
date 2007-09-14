@@ -27,10 +27,6 @@
 
 #include <gtk/gtk.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 #define GTK_TYPE_MULTIVIEW			(gtk_multiview_get_type ())
 #define GTK_MULTIVIEW(obj)			(GTK_CHECK_CAST ((obj), GTK_TYPE_MULTIVIEW, GtkMultiview))
 #define GTK_MULTIVIEW_CLASS(klass)		(GTK_CHECK_CLASS_CAST ((klass), GTK_TYPE_MULTIVIEW, GtkMultiviewClass))
@@ -67,10 +63,6 @@ void       gtk_multiview_append_child  (GtkMultiview *multiview,
 void       gtk_multiview_set_current   (GtkMultiview *multiview,
 					GtkWidget    *child);
 
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 
 #endif /* __GTK_MULTIVIEW_H__ */

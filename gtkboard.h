@@ -22,6 +22,7 @@
 #ifndef _GTKBOARD_H_
 #define _GTKBOARD_H_
 
+#include "backgammon.h"
 #include <gtk/gtk.h>
 #include "eval.h"
 #include "gtkpanels.h"
@@ -31,10 +32,6 @@
 #if USE_BOARD3D
 #include "types3d.h"
 #endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
 #define TYPE_BOARD ( board_get_type() )
 #define BOARD( obj ) ( GTK_CHECK_CAST( (obj), TYPE_BOARD, Board ) )
@@ -177,9 +174,5 @@ DrawDie( GdkDrawable *pd,
          const int s, GdkGC *gc, int x, int y, int fColour, int n );
 
 extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif

@@ -24,10 +24,6 @@
 #if !defined( BEAROFFGAMMON_H )
 #define BEAROFFGAMMON_H
 
-#if defined( __GNUG__ )
-#pragma interface
-#endif
-
 /* pack for space */
 struct GammonProbs {
   unsigned int p1 : 16;  /* 0 - 36^2 */
@@ -36,24 +32,12 @@ struct GammonProbs {
   unsigned int p0 : 8;   /*  0 - 36 */
 };
 
-#if defined( __cplusplus )
-extern "C" {
-#endif
-
 extern struct GammonProbs*
 getBearoffGammonProbs(int b[6]);
 
 extern long*
 getRaceBGprobs(int board[6]);
 
-#if defined( __cplusplus )
-static unsigned int const RBG_NPROBS = 5;
-#else
 #define RBG_NPROBS 5
-#endif
-
-#if defined( __cplusplus )
-}
-#endif
 
 #endif
