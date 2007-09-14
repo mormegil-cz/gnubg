@@ -7082,19 +7082,25 @@ char * SetupLanguage (char *newLangCode)
 char *SetupLanguage (char *newLangCode)
 {
 	static char *org_lang=NULL;
+	char *result=NULL;
 
 	if (!org_lang)
-		org_lang=g_strdup(setlocale(LC_ALL, ""));
-
-	if (!newLangCode || !strcmp (newLangCode, "system") || !strcmp (newLangCode, ""))
 	{
-		g_setenv("LC_ALL", org_lang, TRUE);
-		return(setlocale (LC_ALL, org_lang));
+		if (!(org_lang=g_strdup(setlocale(LC_ALL, ""))))
+			org_lang="C";
 	}
-	else
+
+	if (newLangCode && *newLangCode && strcmp (newLangCode, "system") != 0)
 	{
 		g_setenv("LC_ALL", newLangCode, TRUE);
-		return(setlocale (LC_ALL, newLangCode));
+		result = setlocale (LC_ALL, newLangCode);
 	}
+
+	if (!result)
+	{
+		g_setenv("LC_ALL", org_lang, TRUE);
+		result = setlocale (LC_ALL, org_lang);
+	}
+	return(result);
 }
 #endif
