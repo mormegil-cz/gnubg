@@ -153,7 +153,7 @@ dnl
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fstat getdtablesize strptime isatty random select setvbuf setpriority)
+AC_CHECK_FUNCS(getdtablesize strptime isatty random select setvbuf setpriority)
 
 AC_CHECK_FUNCS(acosf, , AC_DEFINE(acosf, acos, [set acosf to acos if undefined]),)
 AC_CHECK_FUNCS(asinf, , AC_DEFINE(asinf, asin, [set asinf to asin if undefined]),)

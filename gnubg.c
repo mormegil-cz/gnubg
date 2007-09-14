@@ -6233,26 +6233,6 @@ static char *matchfile_from_argv(char *sz)
 	return pchMatch;
 }
 
-static void init_linebuffering()
-{
-#if HAVE_FSTAT && HAVE_SETVBUF
-	/* Use line buffering if stdout/stderr are pipes or sockets;
-	   Jens Hoefkens points out that buffering causes problems
-	   for other processes issuing gnubg commands via IPC. */
-#if !defined(S_ISSOCK)
-#define S_ISSOCK FALSE
-#endif
-	struct stat st;
-
-	if (!fstat(STDOUT_FILENO, &st)
-	    && (S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode)))
-		setvbuf(stdout, NULL, _IOLBF, 0);
-	if (!fstat(STDERR_FILENO, &st)
-	    && (S_ISFIFO(st.st_mode) || S_ISSOCK(st.st_mode)))
-		setvbuf(stderr, NULL, _IOLBF, 0);
-#endif
-}
-
 static void init_defaults()
 {
 	/* init some html export options */
@@ -6402,7 +6382,6 @@ int main(int argc, char *argv[])
                                 &shInterruptOld, FALSE);
                 setup_readline();
         }
-        init_linebuffering();
 	fnTick = CallbackProgress;
 
 	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 500);
