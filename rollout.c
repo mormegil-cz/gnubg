@@ -1068,7 +1068,8 @@ extern void RolloutLoopMT(void)
       if (altGameCount[alt] >= cGames)
       {
 	      fNoMore[alt] = TRUE;
-	      g_assert (altGameCount[alt] == cGames);
+	      if (altGameCount[alt] > cGames)
+		      outputerrf("Too many rollouts done for alternative %d. This is a bug. Please report as many details as possible to bug-gnubg@gnu.org");
       }
       /* For normal alternatives nGamesDone and altGameCount will be equal.
        * For cube decisions, however, the two may differ by the number of

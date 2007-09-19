@@ -1,3 +1,8 @@
+Wed Sep 19 22:15:09 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* rollout.c: change assertion to error message when mt_rollout results
+	in too many rollouts done.
+
 Sat Sep 15 14:30:36 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am: fix external_l.c dependency problem
