@@ -187,7 +187,9 @@ sgf.c: sgfp.c sgfp.h sgfl.c
 ##external_l.c includes external_y.h and automake doesn't track this dependency
 #
 external_l.c: external_l.l external_y.c
-	$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
+	$(LEXCOMPILE) $<
+	sed '/^#/ s|$(LEX_OUTPUT_ROOT)\.c|$@|' $(LEX_OUTPUT_ROOT).c >$@
+	rm -f $(LEX_OUTPUT_ROOT).c
 
 #
 ##credits.c target
