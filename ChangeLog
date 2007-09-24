@@ -1,3 +1,7 @@
+Mon Sep 24 22:56:56 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* makebearoff.c: fix tmp file creation problem
+
 Wed Sep 19 22:15:09 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* rollout.c: change assertion to error message when mt_rollout results

@@ -642,7 +642,8 @@ generate_os ( const int nOS, const int fHeader,
   FILE *pfTmp = NULL;
   time_t t;
   unsigned int npos;
-  char szTmp[ 11 ];
+  char *tmpfile;
+  int tmpd;
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
@@ -687,11 +688,10 @@ generate_os ( const int nOS, const int fHeader,
 #if WIN32
     dlgprintf(127, "Opening temporary file." );
 #endif
-    time ( &t );
-    sprintf ( szTmp, "t%06lu.bd", (unsigned long) t % 100000 );
-    if ( ! ( pfTmp = fopen ( szTmp, "w+b" ) ) ) {
-      perror ( szTmp );
-      exit ( 2 );
+    tmpd = g_file_open_tmp(NULL, &tmpfile, NULL); 
+    if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
+      perror("temporary file tmpfile");
+      g_free(tmpfile);
     }
 
   }
@@ -755,7 +755,7 @@ generate_os ( const int nOS, const int fHeader,
 
     fclose ( pfTmp );
 
-    unlink ( szTmp );
+    unlink ( tmpfile );
 
   }
 #if !WIN32
@@ -1269,10 +1269,10 @@ generate_ts ( const int nTSP, const int nTSC,
     int n;
     short int asiEquity[ 4 ];
     xhash h;
-    char szTmp[ 11 ];
     FILE *pfTmp;
-    time_t t;
     unsigned char ac[ 8 ];
+    char *tmpfile;
+    int tmpd;
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
@@ -1288,11 +1288,10 @@ generate_ts ( const int nTSP, const int nTSC,
 		  12, 300, 470, 20, hdlg, NULL, hInstance, NULL);
 #endif
 
-    time ( &t );
-    sprintf ( szTmp, "t%06lu.bd", (unsigned long) t % 100000 );
-    if ( ! ( pfTmp = fopen ( szTmp, "w+b" ) ) ) {
-      perror ( szTmp );
-      exit ( 2 );
+    tmpd = g_file_open_tmp(NULL, &tmpfile, NULL); 
+    if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
+      perror("temporary file tmpfile");
+      g_free(tmpfile);
     }
 
     /* initialise xhash */
@@ -1424,7 +1423,7 @@ generate_ts ( const int nTSP, const int nTSC,
 #endif
     fclose ( pfTmp );
 
-    unlink ( szTmp ); 
+    unlink ( tmpfile ); 
 
 }
 
