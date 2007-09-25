@@ -640,7 +640,6 @@ generate_os ( const int nOS, const int fHeader,
   unsigned short int aus[ 64 ];
   xhash h;
   FILE *pfTmp = NULL;
-  time_t t;
   unsigned int npos;
   char *tmpfile;
   int tmpd;
@@ -692,7 +691,7 @@ generate_os ( const int nOS, const int fHeader,
     if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
       perror("temporary file tmpfile");
       g_free(tmpfile);
-      return;
+      exit(2);
     }
 
   }
@@ -1293,7 +1292,7 @@ generate_ts ( const int nTSP, const int nTSC,
     if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
       perror("temporary file tmpfile");
       g_free(tmpfile);
-      return;
+      exit(2);
     }
 
     /* initialise xhash */
