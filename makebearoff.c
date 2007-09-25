@@ -692,6 +692,7 @@ generate_os ( const int nOS, const int fHeader,
     if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
       perror("temporary file tmpfile");
       g_free(tmpfile);
+      return;
     }
 
   }
@@ -1292,6 +1293,7 @@ generate_ts ( const int nTSP, const int nTSC,
     if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
       perror("temporary file tmpfile");
       g_free(tmpfile);
+      return;
     }
 
     /* initialise xhash */
