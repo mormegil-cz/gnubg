@@ -228,23 +228,26 @@ typedef enum {
     GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
 } gamestate; 
 
-/* The match state is represented by the board position (anBoard),
-   fTurn (indicating which player makes the next decision), fMove
-   (which indicates which player is on roll: normally the same as
-   fTurn, but occasionally different, e.g. if a double has been
-   offered).  anDice indicate the roll to be played (0,0 indicates the
-   roll has not been made). */
 typedef struct {
-    int anBoard[ 2 ][ 25 ];
-    unsigned int anDice[ 2 ];
-    int fTurn, fResigned,
-	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
-	fPostCrawford, nMatchTo, anScore[ 2 ], nCube;
+	int anBoard[2][25];
+	unsigned int anDice[2]; /* (0,0) for unrolled dice */
+	int fTurn; /* who makes the next decision */
+	int fResigned;
+	int fResignationDeclined;
+	int fDoubled;
+	int cGames;
+	int fMove; /* player on roll */
+	int fCubeOwner;
+	int fCrawford;
+	int fPostCrawford;
+	int nMatchTo;
+	int anScore[2];
+	int nCube;
 	unsigned int cBeavers;
-    bgvariation bgv;
-    int fCubeUse;
-    int fJacoby;
-    gamestate gs;
+	bgvariation bgv;
+	int fCubeUse;
+	int fJacoby;
+	gamestate gs;
 } matchstate;
 
 typedef struct _matchinfo { /* SGF match information */
@@ -788,7 +791,6 @@ extern void CommandAccept( char * ),
     CommandSetPathPNG( char * ),
     CommandSetPathPos( char * ),
     CommandSetPathGam( char * ),
-    CommandSetPathPostScript( char * ),
     CommandSetPathSnowieTxt( char * ),
     CommandSetPathText( char * ),
     CommandSetPathBKG( char * ),

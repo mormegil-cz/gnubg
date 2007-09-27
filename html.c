@@ -39,6 +39,8 @@
 #include "formatgs.h"
 
 #include <glib/gi18n.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 
 typedef enum _stylesheetclass {
   CLASS_MOVETABLE,

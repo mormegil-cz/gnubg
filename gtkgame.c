@@ -682,7 +682,6 @@ SkillMenu(skilltype stSelect, char* szAnno)
   skilltype st;
     
   for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
-    {
       const char* l = aszSkillType[st] ? gettext(aszSkillType[st]) : "";
       GtkWidget* pwItem = gtk_menu_item_new_with_label(l);
     
@@ -691,7 +690,6 @@ SkillMenu(skilltype stSelect, char* szAnno)
       g_signal_connect( G_OBJECT( pwItem ), "activate",
 			  G_CALLBACK( SkillMenuActivate ),
 			  GINT_TO_POINTER( st ) );
-    }
   }
     
   gtk_widget_show_all( pwMenu );

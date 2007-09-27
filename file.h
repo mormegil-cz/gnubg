@@ -15,7 +15,6 @@
 typedef enum
 {
 	EXPORT_SGF,
-	EXPORT_EPS,
 	EXPORT_HTML,
 	EXPORT_GAM,
 	EXPORT_MAT,
@@ -26,6 +25,7 @@ typedef enum
 	EXPORT_PNG,
 	EXPORT_PS,
 	EXPORT_SNOWIETXT,
+	EXPORT_SVG,
 	N_EXPORT_TYPES
 }ExportType;
 

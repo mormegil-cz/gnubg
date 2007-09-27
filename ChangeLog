@@ -1,3 +1,15 @@
+Fri Sep 28 00:28:34 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, bearoff.c, bearoff.h, ChangeLog, export.c, export.h,
+	file.c, file.h, formatgs.c, gnubg.c, gtkfile.c, gtkgame.c, html.c,
+	lib/.cvsignore, lib/Makefile.am, Makefile.am, matchid.h, rollout.c,
+	text.c: add a simple cairo board capable of exporting positions to
+	svg, pdf and postscript surfaces
+	* simpleboard.c, simpleboard.h: new files
+	* lib/dynarray.c, lib/dynarray.h, lib/event.c, lib/event.h,
+	lib/event.texi, lib/hash.c, lib/hash.h, lib/heap.c, lib/heap.h,
+	lib/stamp-vti, postscript.c: removed files
+
 Thu Sep 27 22:50:16 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, analysis.h, formatgs.c, gnubg.c, gnubgmodule.c,

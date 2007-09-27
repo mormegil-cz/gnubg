@@ -42,9 +42,6 @@
 
 /* "Color" of chequers */
 
-static char *aszColorName[] = { "O", "X" };
-
-
 static void
 printTextBoard ( FILE *pf, const matchstate *pms ) {
 
@@ -148,20 +145,22 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
  *
  */
 
-static void 
-TextBoardHeader ( FILE *pf, const matchstate *pms, 
+extern void 
+TextBoardHeader ( GString *gsz, const matchstate *pms, 
                   const int iGame, const int iMove ) {
 
   if ( iMove >= 0 )
-    fprintf ( pf, _("Move number %d: "), iMove + 1 );
+    g_string_append_printf(gsz, _("Move number %d: "), iMove + 1 );
 
   if ( pms->fResigned ) 
     
     /* resignation */
 
-    fprintf ( pf,
-              _("%s resigns %d points\n\n"), 
-              aszColorName[ pms->fTurn ],
+    g_string_append_printf(gsz,
+              ngettext( " %s resigns %d point",
+                        " %s resigns %d points",
+                        pms->fResigned * pms->nCube ), 
+              ap[ pms->fTurn ].szName,
               pms->fResigned * pms->nCube
             );
   
@@ -169,9 +168,9 @@ TextBoardHeader ( FILE *pf, const matchstate *pms,
 
     /* chequer play decision */
 
-    fprintf ( pf,
-              _("%s to play %d%d\n\n"),
-              aszColorName[ pms->fTurn ],
+    g_string_append_printf(gsz,
+              _(" %s to play %d%d"),
+              ap[ pms->fMove ].szName,
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -179,9 +178,9 @@ TextBoardHeader ( FILE *pf, const matchstate *pms,
 
     /* take decision */
 
-    fprintf ( pf,
-              _("%s doubles to %d\n\n"),
-              aszColorName[ pms->fMove ],
+    g_string_append_printf(gsz,
+              _(" %s doubles to %d"),
+              ap[ pms->fMove ].szName,
               pms->nCube * 2
             );
 
@@ -189,11 +188,9 @@ TextBoardHeader ( FILE *pf, const matchstate *pms,
 
     /* cube decision */
 
-    fprintf ( pf,
-              _("%s on roll, cube decision?\n\n"),
-              aszColorName[ pms->fTurn ]
-            );
-
+    g_string_append_printf(gsz,
+              _(" %s on roll, cube decision?"),
+              ap[ pms->fMove ].szName );
 
 }
 
@@ -207,10 +204,10 @@ TextBoardHeader ( FILE *pf, const matchstate *pms,
  *
  */
 
-static void 
-TextPrologue ( FILE *pf, const matchstate *pms, const int iGame ) {
+extern void 
+TextPrologue ( GString *gsz, const matchstate *pms, const int iGame ) {
 
-  fprintf( pf, pms->cGames == 1 ? 
+  g_string_append_printf( gsz, pms->cGames == 1 ? 
            _("The score (after %d game) is: %s %d, %s %d") :
            _("The score (after %d games) is: %s %d, %s %d"),
            pms->cGames, 
@@ -218,18 +215,18 @@ TextPrologue ( FILE *pf, const matchstate *pms, const int iGame ) {
            ap[ 1 ].szName, pms->anScore[ 1 ] );
 
   if ( pms->nMatchTo > 0 ) {
-    fprintf( pf,
+    g_string_append_printf( gsz,
              ngettext( " (match to %d point)", 
                        " (match to %d points)",
                        pms->nMatchTo ),
              pms->nMatchTo );
     if ( pms->fCrawford )
-       fputs( _(", Crawford game"), pf );
+       g_string_append(gsz,  _(", Crawford game"));
     if ( pms->fPostCrawford )
-       fputs( _(", post-Crawford play"), pf );
+       g_string_append(gsz, _(", post-Crawford play"));
   }
 
-  fputs( "\n", pf );
+  g_string_append(gsz, "\n");
 
 }
 
@@ -282,7 +279,7 @@ TextEpilogue ( FILE *pf, const matchstate *pms ) {
  */
 
 static void
-TextPrintCubeAnalysisTable ( FILE *pf, 
+TextPrintCubeAnalysisTable ( GString *gsz, 
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              int fPlayer,
@@ -315,13 +312,12 @@ TextPrintCubeAnalysisTable ( FILE *pf,
   if ( ! fDisplay )
     return;
 
-  fputs ( OutputCubeAnalysisFull ( aarOutput,
+  g_string_append(gsz, OutputCubeAnalysisFull ( aarOutput,
                                    aarStdDev,
                                    pes,
                                    pci,
                                    fDouble, fTake, 
-                                   stDouble, stTake ),
-          pf );
+                                   stDouble, stTake ));
 
 }
 
@@ -341,7 +337,7 @@ TextPrintCubeAnalysisTable ( FILE *pf,
  */
 
 static void
-TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
+TextPrintCubeAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
 
   cubeinfo ci;
 
@@ -353,7 +349,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* cube analysis from move */
 
-    TextPrintCubeAnalysisTable ( pf, 
+    TextPrintCubeAnalysisTable ( gsz, 
                                   pmr->CubeDecPtr->aarOutput,
 				  pmr->CubeDecPtr->aarStdDev,
                                  pmr->fPlayer,
@@ -364,7 +360,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
   case MOVE_DOUBLE:
 
-    TextPrintCubeAnalysisTable ( pf, 
+    TextPrintCubeAnalysisTable ( gsz, 
                                   pmr->CubeDecPtr->aarOutput, 
 				  pmr->CubeDecPtr->aarStdDev,
                                  pmr->fPlayer,
@@ -379,7 +375,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    TextPrintCubeAnalysisTable ( pf, 
+    TextPrintCubeAnalysisTable ( gsz, 
                                   pmr->CubeDecPtr->aarOutput, 
 				  pmr->CubeDecPtr->aarStdDev,
                                  pmr->fPlayer,
@@ -416,7 +412,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
  */
 
 static void
-TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
+TextPrintMoveAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
 
   char szBuf[ 1024 ];
   char sz[ 64 ];
@@ -437,16 +433,16 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* blunder or error */
 
-    fprintf ( pf, 
+    g_string_append_printf ( gsz, 
               _("Alert: %s move"),
               gettext ( aszSkillType[ pmr->n.stMove ] ) );
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
-      fprintf ( pf, " (%+7.3f)\n",
+      g_string_append_printf(gsz, " (%+7.3f)\n",
                 pmr->ml.amMoves[ pmr->n.iMove ].rScore -
                 pmr->ml.amMoves[ 0 ].rScore  );
     else
-      fprintf ( pf, " (%+6.3f%%)\n",
+      g_string_append_printf(gsz, " (%+6.3f%%)\n",
                 100.0f *
                 eq2mwc ( pmr->ml.amMoves[ pmr->n.iMove ].rScore, &ci ) - 
                 100.0f *
@@ -458,27 +454,27 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     /* joker */
 
-    fprintf ( pf, 
+    g_string_append_printf(gsz, 
               _("Alert: %s roll!"),
               gettext ( aszLuckType[ pmr->lt ] ) );
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
-      fprintf ( pf, " (%+7.3f)\n", pmr->rLuck );
+      g_string_append_printf(gsz, " (%+7.3f)\n", pmr->rLuck );
     else
-      fprintf ( pf, " (%+6.3f%%)\n",
+      g_string_append_printf(gsz, " (%+6.3f%%)\n",
                 100.0f * eq2mwc ( pmr->rLuck, &ci ) - 
                 100.0f * eq2mwc ( 0.0f, &ci ) );
 
   }
 
-  fputs ( "\n", pf );
+  g_string_append(gsz, "\n" );
 
-  fprintf( pf, _("Rolled %d%d"), pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
+  g_string_append_printf(gsz, _("Rolled %d%d"), pmr->anDice[ 0 ], pmr->anDice[ 1 ] );
 
   if( pmr->rLuck != ERR_VAL )
-    fprintf( pf, " (%s):\n", GetLuckAnalysis( pms, pmr->rLuck ) );
+    g_string_append_printf(gsz, " (%s):\n", GetLuckAnalysis( pms, pmr->rLuck ) );
   else
-    fprintf( pf, ":" );
+    g_string_append_printf(gsz, ":" );
 
   if ( pmr->ml.cMoves ) {
 	
@@ -486,15 +482,14 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
       if( i >= exsExport.nMoves && i != pmr->n.iMove )
         continue;
 
-      fputc( i == pmr->n.iMove ? '*' : ' ', pf );
-      fputs( FormatMoveHint( szBuf, pms, &pmr->ml, i,
+      g_string_append( gsz, i == pmr->n.iMove ? "*" : " " );
+      g_string_append(gsz,FormatMoveHint( szBuf, pms, &pmr->ml, i,
                              i != pmr->n.iMove ||
                              i != pmr->ml.cMoves - 1 ||
                              pmr->ml.cMoves == 1,
                              exsExport.fMovesDetailProb,
                              exsExport.afMovesParameters 
-                             [ pmr->ml.amMoves[ i ].esMove.et - 1 ] ), 
-             pf );
+                             [ pmr->ml.amMoves[ i ].esMove.et - 1 ] ) );
 
 
     }
@@ -504,19 +499,19 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
       /* no movelist saved */
-      fprintf ( pf,
+      g_string_append_printf(gsz,
                 "*    %s\n",
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
     else 
       /* no legal moves */
       /* FIXME: output equity?? */
-      fprintf ( pf,
+      g_string_append_printf(gsz,
                 "*    %s\n",
                 _("Cannot move" ) );
 
   }
 
-  fputs ( "\n\n", pf );
+  g_string_append(gsz, "\n\n");
 
   return;
 
@@ -536,8 +531,8 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
  *
  */
 
-static void
-TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
+extern void
+TextAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
 
 
   char sz[ 1024 ];
@@ -547,21 +542,21 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
   case MOVE_NORMAL:
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
-      fprintf ( pf,
+      g_string_append_printf( gsz, 
                 _("* %s moves %s"),
                 ap[ pmr->fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
     else if ( ! pmr->ml.cMoves )
-      fprintf ( pf,
+      g_string_append_printf ( gsz,
                 _("* %s cannot move"),
                 ap[ pmr->fPlayer ].szName );
 
-    fputs ( "\n", pf );
+    g_string_append (gsz, "\n" );
 
     if ( exsExport.fIncludeAnalysis ) {
-      TextPrintCubeAnalysis ( pf, pms, pmr );
+      TextPrintCubeAnalysis ( gsz, pms, pmr );
     
-      TextPrintMoveAnalysis ( pf, pms, pmr );
+      TextPrintMoveAnalysis ( gsz, pms, pmr );
     }
 
     break;
@@ -571,17 +566,17 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
   case MOVE_DROP:
 
     if ( pmr->mt == MOVE_DOUBLE ) 
-      fprintf ( pf,
+      g_string_append_printf(gsz,
                 "* %s doubles\n\n",
                 ap[ pmr->fPlayer ].szName );
     else
-      fprintf ( pf,
+      g_string_append_printf(gsz,
                 "* %s %s\n\n",
                 ap[ pmr->fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
     
     if ( exsExport.fIncludeAnalysis )
-      TextPrintCubeAnalysis ( pf, pms, pmr );
+      TextPrintCubeAnalysis ( gsz, pms, pmr );
 
     break;
 
@@ -788,6 +783,7 @@ static void ExportGameText ( FILE *pf, list *plGame,
     statcontext *psc = NULL;
     static statcontext scTotal;
     xmovegameinfo *pmgi = NULL;
+    GString *gsz;
 
     if ( ! iGame )
       IniStatcontext ( &scTotal );
@@ -806,7 +802,10 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
         ApplyMoveRecord ( &msExport, plGame, pmr );
 
-        TextPrologue( pf, &msExport, iGame );
+	gsz = g_string_new(NULL);
+        TextPrologue( gsz, &msExport, iGame );
+	fputs(gsz->str, pf);
+	g_string_free(gsz, TRUE);
 
         if ( exsExport.fIncludeMatchInfo )
           TextMatchInfo ( pf, &mi );
@@ -832,10 +831,16 @@ static void ExportGameText ( FILE *pf, list *plGame,
         msExport.anDice[ 0 ] = pmr->anDice[ 0 ];
         msExport.anDice[ 1 ] = pmr->anDice[ 1 ];
 
-        TextBoardHeader ( pf, &msExport, iGame, iMove );
+	gsz = g_string_new(NULL);
+        TextBoardHeader ( gsz, &msExport, iGame, iMove );
+	fputs(gsz->str, pf);
+        g_string_free(gsz, TRUE);
 
         printTextBoard( pf, &msExport );
-        TextAnalysis ( pf, &msExport, pmr );
+	gsz = g_string_new(NULL);
+        TextAnalysis ( gsz, &msExport, pmr );
+	fputs(gsz->str, pf);
+        g_string_free(gsz, TRUE);
         
         iMove++;
 
@@ -844,11 +849,18 @@ static void ExportGameText ( FILE *pf, list *plGame,
       case MOVE_TAKE:
       case MOVE_DROP:
 
-        TextBoardHeader ( pf,&msExport, iGame, iMove );
+	gsz = g_string_new(NULL);
+	TextBoardHeader ( gsz, &msExport, iGame, iMove );
+	fputs(gsz->str, pf);
+	g_string_free(gsz, TRUE);
+
 
         printTextBoard( pf, &msExport );
         
-        TextAnalysis ( pf, &msExport, pmr );
+	gsz = g_string_new(NULL);
+        TextAnalysis ( gsz, &msExport, pmr );
+	fputs(gsz->str, pf);
+        g_string_free(gsz, TRUE);
         
         iMove++;
 
@@ -998,6 +1010,7 @@ extern void CommandExportPositionText( char *sz ) {
     int fHistory;
     moverecord *pmr = getCurrentMoveRecord ( &fHistory );
     int iMove;
+    GString *gsz;
 	
     sz = NextToken( &sz );
     
@@ -1023,7 +1036,10 @@ extern void CommandExportPositionText( char *sz ) {
 	return;
     }
 
-    TextPrologue ( pf, &ms, getGameNumber ( plGame ) );
+    gsz = g_string_new(NULL);
+    TextPrologue ( gsz, &ms, getGameNumber ( plGame ) );
+    fputs(gsz->str, pf);
+    g_string_free(gsz, TRUE);
 
     if ( exsExport.fIncludeMatchInfo )
       TextMatchInfo ( pf, &mi );
@@ -1035,14 +1051,21 @@ extern void CommandExportPositionText( char *sz ) {
     else
       iMove = -1;
 
-    TextBoardHeader ( pf, &ms, 
-                      getGameNumber ( plGame ), iMove );
+    gsz = g_string_new(NULL);
+    TextBoardHeader ( gsz, &ms, 
+		    getGameNumber ( plGame ), iMove );
+    fputs(gsz->str, pf);
+    g_string_free(gsz, TRUE);
+
 
     printTextBoard( pf, &ms );
 
     if( pmr ) {
 
-      TextAnalysis ( pf, &ms, pmr );
+      gsz = g_string_new(NULL);
+      TextAnalysis ( gsz, &ms, pmr );
+      fputs(gsz->str, pf);
+      g_string_free(gsz, TRUE);
 
       if ( exsExport.fIncludeAnnotation )
         TextPrintComment ( pf, pmr );

@@ -24,6 +24,7 @@
 
 #include <glib.h>
 #include <glib/gi18n.h>
+#include <glib/gprintf.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -41,6 +42,174 @@
 #include "boardpos.h"
 #include "boarddim.h"
 
+#if HAVE_CAIRO
+#include <cairo.h>
+#include <cairo-svg.h>
+#include <cairo-pdf.h>
+#include <cairo-ps.h>
+#include "simpleboard.h"
+#endif
+
+static gchar *export_get_filename (char *sz)
+{
+	gchar *filename=NULL;
+
+	if (ms.gs == GAME_NONE) {
+		outputl(_
+				("No game in progress (type `new game' to start one)."));
+		return NULL;
+	}
+
+	filename = g_strdup(NextToken(&sz));
+
+	if (!filename || !*filename) {
+		outputl(_("You must specify a file to export to "
+					"(see `help export position simple')."));
+		g_free(filename);
+		return NULL;
+	}
+
+	if (!confirmOverwrite(filename, fConfirmSave)) {
+		g_free(filename);
+		return NULL;
+	}
+	return filename;
+}
+
+#define SIMPLE_BOARD_WIDTH 210.0/25.4*72.0
+#define SIMPLE_BOARD_HEIGHT 297.0/25.4*72.0
+
+static void draw_simple_board_on_surface(matchstate sb_ms, moverecord *sb_pmr, int move_nr, int game_nr, cairo_surface_t * surface)
+{
+	SimpleBoard *board;
+	GString *header = NULL;
+	GString *annotation = NULL;
+
+	g_return_if_fail(surface);
+
+	if (sb_ms.gs == GAME_NONE) {
+		outputerrf(_ ("No game in progress."));
+		return;
+	}
+
+	board = simple_board_new(&sb_ms, cairo_create(surface));
+	board->surface_x = SIMPLE_BOARD_WIDTH;
+	board->surface_y = SIMPLE_BOARD_HEIGHT;
+
+	header = g_string_new(NULL);
+	TextPrologue ( header, &sb_ms,game_nr );
+	TextBoardHeader ( header, &sb_ms, 
+			game_nr, move_nr );
+	board->header = header->str;
+
+	if (sb_pmr)
+	{
+		annotation = g_string_new(NULL);
+		TextAnalysis(annotation, &sb_ms, sb_pmr);
+		board->annotation = annotation->str;
+	}
+
+	simple_board_draw(board);
+	cairo_surface_destroy(surface);
+	cairo_destroy(board->cr);
+	g_free(board);
+	if (header)
+		g_string_free(header, TRUE);
+	if (annotation)
+		g_string_free(annotation, TRUE);
+	return;
+}
+
+extern void CommandExportPositionSVG(char *sz)
+{
+	gchar *filename;
+	int history;
+	int move_nr;
+	int game_nr;
+	moverecord* pmr;
+	cairo_surface_t *surface;
+
+	if (!(filename = export_get_filename(sz)))
+		return;
+
+	pmr = getCurrentMoveRecord(&history);
+	if ( history )
+		move_nr = getMoveNumber ( plGame, pmr ) - 1;
+	else if ( plLastMove )
+		move_nr = getMoveNumber ( plGame, plLastMove->p );
+	else
+		move_nr = -1;
+	game_nr = getGameNumber ( plGame );
+
+	surface = cairo_svg_surface_create(filename, SIMPLE_BOARD_WIDTH,
+			SIMPLE_BOARD_HEIGHT);
+
+	if (surface)
+		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
+	else
+		outputerrf(_("Failed to create svg surface for %s"),
+				filename);
+}
+
+extern void CommandExportPositionPDF(char *sz)
+{
+	gchar *filename;
+	int history;
+	int move_nr;
+	int game_nr;
+	moverecord* pmr;
+	cairo_surface_t *surface;
+
+	if (!(filename = export_get_filename(sz)))
+		return;
+
+	pmr = getCurrentMoveRecord(&history);
+	if ( history )
+		move_nr = getMoveNumber ( plGame, pmr ) - 1;
+	else if ( plLastMove )
+		move_nr = getMoveNumber ( plGame, plLastMove->p );
+	else
+		move_nr = -1;
+	game_nr = getGameNumber ( plGame );
+
+	surface = cairo_pdf_surface_create(filename, SIMPLE_BOARD_WIDTH,
+			SIMPLE_BOARD_HEIGHT);
+	if (surface)
+		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
+	else
+		outputerrf(_("Failed to create pdf surface for %s"),
+				filename);
+}
+
+extern void CommandExportPositionPS(char *sz)
+{
+	gchar *filename;
+	int history;
+	int move_nr;
+	int game_nr;
+	moverecord* pmr;
+	cairo_surface_t *surface;
+
+	if (!(filename = export_get_filename(sz)))
+		return;
+
+	pmr = getCurrentMoveRecord(&history);
+	if ( history )
+		move_nr = getMoveNumber ( plGame, pmr ) - 1;
+	else if ( plLastMove )
+		move_nr = getMoveNumber ( plGame, plLastMove->p );
+	else
+		move_nr = -1;
+	game_nr = getGameNumber ( plGame );
+
+	surface = cairo_ps_surface_create(filename, SIMPLE_BOARD_WIDTH,
+			SIMPLE_BOARD_HEIGHT);
+	if (surface)
+		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
+	else
+		outputerrf(_("Failed to create ps surface for %s"),
+				filename);
+}
 
 extern void CommandExportGameEquityEvolution (char *sz)
 {

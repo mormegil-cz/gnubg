@@ -22,7 +22,7 @@
 #ifndef _MATCHID_H_
 #define _MATCHID_H_
 
-#include "backgammon.h"
+//#include "backgammon.h"
 
 extern int
 LogCube ( const int n );

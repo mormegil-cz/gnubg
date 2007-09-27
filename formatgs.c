@@ -146,7 +146,7 @@ formatGS( const statcontext *psc, const int nMatchTo,
 
       static int ai[ 4 ] = { SKILL_NONE, SKILL_DOUBTFUL,
                              SKILL_BAD, SKILL_VERYBAD };
-      static char *asz[] = {
+      static char *asz[4] = {
         N_("Unmarked moves"),
         N_("Moves marked doubtful"),
         N_("Moves marked bad"),

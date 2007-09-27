@@ -52,22 +52,6 @@
 #define BINARY 0
 #endif
 
-typedef struct _hashentryonesided {
-  unsigned int nPosID;
-  unsigned short int aus[ 64 ];
-} hashentryonesided;
-
-typedef struct _hashentrytwosided {
-  unsigned int nPosID;
-  unsigned char auch[ 8 ];
-} hashentrytwosided;
-
-typedef struct _hashentryhypergammon {
-  unsigned int nPosID;
-  unsigned char auch[ 18 ];
-} hashentryhypergammon;
-
-
 typedef int ( *hcmpfunc ) ( void *p1, void *p2 );
 
 
@@ -288,11 +272,6 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)() ) {
 }
 
 
-static unsigned long
-HashTwoSided ( const unsigned int nPosID ) {
-  return nPosID;
-}
-
 
 
 /*
@@ -311,19 +290,6 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
   unsigned char *pc = NULL;
   unsigned short int us;
 
-  /* look up in cache */
-
-  if ( ! pbc->fInMemory && pbc->ph ) {
-
-    hashentrytwosided *phe;
-    hashentrytwosided he;
-    
-    he.nPosID = iPos;
-    if ( ( phe = HashLookup ( pbc->ph, HashTwoSided ( iPos ), &he ) ) ) 
-      pc = phe->auch;
-      
-  }
-
   if ( ! pc ) {
 
     if ( pbc->fInMemory )
@@ -336,17 +302,6 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
 
     /* add to cache */
 
-    if ( ! pbc->fInMemory && pbc->ph ) {
-      /* add to cache */
-      hashentrytwosided *phe = 
-        (hashentrytwosided *) malloc ( sizeof ( hashentrytwosided ) );
-      if ( phe ) {
-        phe->nPosID = iPos;
-        memcpy ( phe->auch, pc, sizeof ( phe->auch ) );
-        HashAdd ( pbc->ph, HashTwoSided ( iPos ), phe );
-      }
-      
-    }
     
   }
 
@@ -812,13 +767,6 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
 
   }
 
-  if ( pbc->ph )
-    sprintf ( strchr ( sz, 0 ),
-              _("   - cache: size %lu entries, %lu look-ups "
-                "(%lu hits, and %lu misses)\n"),
-              pbc->ph->cSize, pbc->ph->cLookups, 
-              pbc->ph->cHits, pbc->ph->cMisses );
-
 }
 
 
@@ -1185,7 +1133,6 @@ BearoffAlloc( void ) {
   pbc->puchA = NULL;
   pbc->fCubeful = TRUE;
   pbc->p = NULL;
-  pbc->ph = NULL;
 
   return pbc;
 
@@ -1239,7 +1186,6 @@ BearoffInit ( const char *szFilename,
     pbc->fHeuristic = TRUE;
     pbc->fMalloc = TRUE;
     pbc->p = HeuristicDatabase ( p );
-    pbc->ph = NULL;
     pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
     return pbc;
@@ -1477,19 +1423,6 @@ BearoffInit ( const char *szFilename,
   }
 
 
-  /* create cache */
-
-#if 0
-  if ( ! pbc->fInMemory ) {
-    if ( ! ( pbc->ph = (hash *) malloc ( sizeof ( hash ) ) ) ||
-         HashCreate ( pbc->ph, anCacheSize[ pbc->bt ], ahcmp[ pbc->bt ] ) < 0 )
-      pbc->ph = NULL;
-  }
-  else
-    pbc->ph = NULL;
-#endif
-  pbc->ph = NULL;
-  
   pbc->nReads = 0;
   
   return pbc;
@@ -1572,12 +1505,6 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
 
   return 0;
 
-}
-
-
-static unsigned long
-HashOneSided ( const unsigned int nPosID ) {
-  return nPosID;
 }
 
 
@@ -1783,19 +1710,6 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
   unsigned short int aus[ 64 ];
   unsigned short int *pus = NULL;
 
-  /* look in cache */
-
-  if ( ! pbc->fInMemory && pbc->ph ) {
-    
-    hashentryonesided *phe;
-    hashentryonesided he;
-    
-    he.nPosID = nPosID;
-    if ( ( phe = HashLookup ( pbc->ph, HashOneSided ( nPosID ), &he ) ) ) 
-      pus = phe->aus;
-
-  }
-
   /* get distribution */
   if ( ! pus ) 
   {
@@ -1807,18 +1721,6 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
     if ( ! pus ) {
       printf ( "argh!\n" );
       return -1;
-    }
-
-    if ( ! pbc->fInMemory && pbc->ph ) {
-      /* add to cache */
-      hashentryonesided *phe = 
-        (hashentryonesided *) malloc ( sizeof ( hashentryonesided ) );
-      if ( phe ) {
-        phe->nPosID = nPosID;
-        memcpy ( phe->aus, pus, sizeof ( phe->aus ) );
-        HashAdd ( pbc->ph, HashOneSided ( nPosID ), phe );
-      }
-
     }
 
   }

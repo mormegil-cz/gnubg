@@ -138,24 +138,24 @@ extern char * GTKFileSelect (gchar * prompt, gchar * extension, gchar * folder,
 
 typedef struct _SaveOptions
 {
-  GtkWidget *fc, *description, *type, *upext;
+  GtkWidget *fc, *description, *mgp, *upext;
 } SaveOptions;
 
 static void SaveOptionsCallBack (GtkWidget * pw, SaveOptions * pso)
 {
   gchar *fn, *fnn, *fnd;
-  gint format, type;
+  gint type, mgp;
 
-  format = gtk_combo_box_get_active(GTK_COMBO_BOX (pso->description));
-  type = gtk_combo_box_get_active (GTK_COMBO_BOX (pso->type));
+  type = gtk_combo_box_get_active(GTK_COMBO_BOX (pso->description));
+  mgp = gtk_combo_box_get_active (GTK_COMBO_BOX (pso->mgp));
   gtk_dialog_set_response_sensitive (GTK_DIALOG (pso->fc),
 				     GTK_RESPONSE_ACCEPT,
-				     export_format[format].exports[type]);
+				     export_format[type].exports[mgp]);
   if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (pso->upext)))
     {
       if ((fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (pso->fc))) != NULL)
 	{
-	  DisectPath (fn, export_format[format].extension, &fnn, &fnd);
+	  DisectPath (fn, export_format[type].extension, &fnn, &fnd);
 	  gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (pso->fc),
 					       fnd);
 	  gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (pso->fc), fnn);
@@ -170,13 +170,13 @@ static void SaveCommon (guint f, gchar * prompt)
 {
 
   GtkWidget *hbox;
-  guint i, j, format;
+  guint i, j, type;
   SaveOptions so;
-  static guint last_export_format = 0;
-  static gint last_export_type = 0;
+  static guint last_export_type = 0;
+  static guint last_export_mgp = 0;
   static gchar *last_save_folder = NULL;
   static gchar *last_export_folder = NULL;
-  gchar *fn = GetFilename (TRUE, (f == 1) ? 0 : last_export_format);
+  gchar *fn = GetFilename (TRUE, (f == 1) ? 0 : last_export_type);
   gchar *folder = NULL;
 
   if (f == 1)
@@ -192,24 +192,24 @@ static void SaveCommon (guint f, gchar * prompt)
     {
       gtk_combo_box_append_text (GTK_COMBO_BOX (so.description),
 				 export_format[i].description);
-      if (i == last_export_format)
+      if (i == last_export_type)
 	gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), j);
       j++;
     }
   if (f == 1)
     gtk_combo_box_set_active (GTK_COMBO_BOX (so.description), 0);
 
-  so.type = gtk_combo_box_new_text ();
-  gtk_combo_box_append_text (GTK_COMBO_BOX (so.type), _("match"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (so.type), _("game"));
-  gtk_combo_box_append_text (GTK_COMBO_BOX (so.type), _("position"));
-  gtk_combo_box_set_active (GTK_COMBO_BOX (so.type), last_export_type);
+  so.mgp = gtk_combo_box_new_text ();
+  gtk_combo_box_append_text (GTK_COMBO_BOX (so.mgp), _("match"));
+  gtk_combo_box_append_text (GTK_COMBO_BOX (so.mgp), _("game"));
+  gtk_combo_box_append_text (GTK_COMBO_BOX (so.mgp), _("position"));
+  gtk_combo_box_set_active (GTK_COMBO_BOX (so.mgp), last_export_mgp);
 
   so.upext = gtk_check_button_new_with_label (_("Update extension"));
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (so.upext), TRUE);
 
   hbox = gtk_hbox_new (FALSE, 10);
-  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.type);
+  gtk_box_pack_start_defaults (GTK_BOX (hbox), so.mgp);
   gtk_box_pack_start_defaults (GTK_BOX (hbox), so.description);
   gtk_box_pack_start_defaults (GTK_BOX (hbox), so.upext);
   gtk_widget_show_all (hbox);
@@ -217,7 +217,7 @@ static void SaveCommon (guint f, gchar * prompt)
 
   g_signal_connect (G_OBJECT (so.description), "changed",
 		    G_CALLBACK (SaveOptionsCallBack), &so);
-  g_signal_connect (G_OBJECT (so.type), "changed",
+  g_signal_connect (G_OBJECT (so.mgp), "changed",
 		    G_CALLBACK (SaveOptionsCallBack), &so);
 
   SaveOptionsCallBack (so.fc, &so);
@@ -227,39 +227,22 @@ static void SaveCommon (guint f, gchar * prompt)
       fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (so.fc));
       if (fn)
 	{
-	  gchar *et = gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.type));
+	  gchar *et = gtk_combo_box_get_active_text (GTK_COMBO_BOX (so.mgp));
 	  gchar *cmd = NULL;
-	  format = gtk_combo_box_get_active (GTK_COMBO_BOX (so.description));
-	  if (format)
-	    {
-	      cmd =
-		g_strdup_printf ("export %s %s \"%s\"", et,
-				 export_format[format].clname, fn);
-	      last_export_format = format;
-	      last_export_type =
-		gtk_combo_box_get_active (GTK_COMBO_BOX (so.type));
-	      g_free (last_export_folder);
-	      last_export_folder =
-		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER
-						     (so.fc));
-	    }
-	  else
-	    {
+	  type = gtk_combo_box_get_active (GTK_COMBO_BOX (so.description));
+	  if (type == EXPORT_SGF)
 	      cmd = g_strdup_printf ("save %s \"%s\"", et, fn);
-	      last_export_type =
-		gtk_combo_box_get_active (GTK_COMBO_BOX (so.type));
-	      g_free (last_save_folder);
-	      last_save_folder =
-		gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER
-						     (so.fc));
-	    }
-	  if (cmd)
-	    {
-	      UserCommand (cmd);
-	      g_free (cmd);
-	    }
-	  g_free (fn);
+	  else
+	      cmd = g_strdup_printf ("export %s %s \"%s\"", et,
+				 export_format[type].clname, fn);
+	  last_export_type = type;
+	  last_export_mgp = gtk_combo_box_get_active (GTK_COMBO_BOX (so.mgp));
+	  g_free (last_export_folder);
+	  last_export_folder = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (so.fc));
+	  UserCommand (cmd);
+	  g_free (cmd);
 	}
+      g_free (fn);
     }
   gtk_widget_destroy (so.fc);
 }

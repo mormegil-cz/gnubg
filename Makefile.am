@@ -70,7 +70,6 @@ gnubg_SOURCES = \
 		play.c \
 		positionid.c \
 		positionid.h \
-		postscript.c \
 		progress.c \
 		progress.h \
 		pub_eval.c \
@@ -91,6 +90,8 @@ gnubg_SOURCES = \
 		sgfp.c \
 		sgfp.h \
 		show.c \
+		simpleboard.c \
+		simpleboard.h \
 		sound.c \
 		sound.h \
 		speed.c \
