@@ -194,11 +194,6 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f, rEvalsPerSec = -1.0f,
 	0.08f, /* SKILL_BAD */
 	0.04f, /* SKILL_DOUBTFUL */
 	0,     /* SKILL_NONE */
- 	0,     /* SKILL_GOOD */
-	
-/* 	0, /\* SKILL_INTERESTING *\/ */
-/* 	0.02f, /\* SKILL_GOOD *\/ */
-/* 	0.04f /\* SKILL_VERYGOOD	*\/ */
     };
 
 #if defined (REDUCTION_CODE)
@@ -611,12 +606,7 @@ command cER = {
     { "clear", CommandAnnotateClearSkill, 
       N_("Remove annotations"), NULL, NULL },
     { "doubtful", CommandAnnotateDoubtful, N_("Mark as doubtful"), NULL, NULL },
-    { "good", CommandAnnotateGood, N_("Mark as good"), NULL, NULL },
-    /*{ "interesting", CommandAnnotateInteresting, N_("Mark as interesting"),
-    NULL, NULL }, */
     { "verybad", CommandAnnotateVeryBad, N_("Mark as very bad"), NULL, NULL },
-    /* { "verygood", CommandAnnotateVeryGood, 
-    N_("Mark as very good"), NULL, NULL }, */
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateRoll[] = {
     { "clear", CommandAnnotateClearLuck, 
@@ -903,11 +893,6 @@ command cER = {
       N_("Specify the equity loss for a bad move"), szVALUE, NULL },
     { "doubtful", CommandSetAnalysisThresholdDoubtful, 
       N_("Specify the equity loss for a doubtful move"), szVALUE, NULL },
-/*     { "good", CommandSetAnalysisThresholdGood,  */
-/*       N_("Specify the equity gain for a " */
-/*       "good move"), szVALUE, NULL }, */
-/*     { "interesting", CommandSetAnalysisThresholdInteresting, N_("Specify the " */
-/*       "equity gain for an interesting move"), szVALUE, NULL }, */
     { "lucky", CommandSetAnalysisThresholdLucky, 
       N_("Specify the equity gain for "
       "a lucky roll"), szVALUE, NULL },
@@ -917,9 +902,6 @@ command cER = {
     { "verybad", CommandSetAnalysisThresholdVeryBad, 
       N_("Specify the equity loss "
       "for a very bad move"), szVALUE, NULL },
-/*     { "verygood", CommandSetAnalysisThresholdVeryGood,  */
-/*       N_("Specify the equity " */
-/*       "gain for a very good move"), szVALUE, NULL }, */
     { "verylucky", CommandSetAnalysisThresholdVeryLucky, 
       N_("Specify the equity "
       "gain for a very lucky roll"), szVALUE, NULL },
@@ -1363,28 +1345,16 @@ command cER = {
     N_("show doubtful moves"), szONOFF, &cOnOff },
   { "unmarked", CommandSetExportMovesDisplayUnmarked,
     N_("show unmarked moves"), szONOFF, &cOnOff },
-/*   { "interesting", CommandSetExportMovesDisplayInteresting, */
-/*     N_("show interesting moves"), szONOFF, &cOnOff }, */
-   { "good", CommandSetExportMovesDisplayGood, 
-     N_("show good moves"), szONOFF, &cOnOff }, 
-/*   { "verygood", CommandSetExportMovesDisplayVeryGood, */
-/*     N_("show very good moves"), szONOFF, &cOnOff }, */
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportCubeDisplay[] = {
   { "actual", CommandSetExportCubeDisplayActual,
-    N_("show very good cube decisions"), szONOFF, &cOnOff },
+    N_("show actual cube decisions"), szONOFF, &cOnOff },
   { "bad", CommandSetExportCubeDisplayBad,
     N_("show bad cube decisions"), szONOFF, &cOnOff },
   { "close", CommandSetExportCubeDisplayClose,
     N_("show close cube decisions"), szONOFF, &cOnOff },
   { "doubtful", CommandSetExportCubeDisplayDoubtful,
     N_("show doubtful cube decisions"), szONOFF, &cOnOff },
-/*   { "verygood", CommandSetExportCubeDisplayVeryGood, */
-/*     N_("show very good cube decisions"), szONOFF, &cOnOff }, */
-/*   { "good", CommandSetExportCubeDisplayGood, */
-/*     N_("show good cube decisions"), szONOFF, &cOnOff }, */
-/*   { "interesting", CommandSetExportCubeDisplayInteresting, */
-/*     N_("show interesting cube decisions"), szONOFF, &cOnOff }, */
   { "missed", CommandSetExportCubeDisplayMissed,
     N_("show missed doubles"), szONOFF, &cOnOff },
   { "unmarked", CommandSetExportCubeDisplayUnmarked,
@@ -4603,12 +4573,9 @@ extern void CommandSaveSettings( char *szParam )
     
     g_ascii_formatd(aszThr[0], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arSkillLevel[ SKILL_BAD ]);
     g_ascii_formatd(aszThr[1], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arSkillLevel[ SKILL_DOUBTFUL ]);
-	     /* arSkillLevel[ SKILL_GOOD ], 
-	      arSkillLevel[ SKILL_INTERESTING ], */
     g_ascii_formatd(aszThr[2], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_GOOD ]);
     g_ascii_formatd(aszThr[3], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_BAD ]);
     g_ascii_formatd(aszThr[4], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arSkillLevel[ SKILL_VERYBAD ]);
-	     /* arSkillLevel[ SKILL_VERYGOOD ], */
     g_ascii_formatd(aszThr[5], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_VERYGOOD ]);
     g_ascii_formatd(aszThr[6], G_ASCII_DTOSTR_BUF_SIZE, "%0.3f", arLuckLevel[ LUCK_VERYBAD ] );
 
@@ -4668,12 +4635,9 @@ extern void CommandSaveSettings( char *szParam )
 
     fprintf( pf, "set analysis threshold bad %s\n"
 	     "set analysis threshold doubtful %s\n"
-	     /* "set analysis threshold good %.3f\n"
-	     "set analysis threshold interesting %.3f\n" */
 	     "set analysis threshold lucky %s\n"
 	     "set analysis threshold unlucky %s\n"
 	     "set analysis threshold verybad %s\n"
-	     /* "set analysis threshold verygood %.3f\n" */
 	     "set analysis threshold verylucky %s\n"
 	     "set analysis threshold veryunlucky %s\n", 
 	     aszThr[0], aszThr[1], aszThr[2], aszThr[3], aszThr[4], aszThr[5], aszThr[6]);

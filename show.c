@@ -427,10 +427,6 @@ extern void CommandShowAnalysis( char *sz ) {
 	     "  +%.3f %s\n"
 	     "  -%.3f %s\n"
 	     "  -%.3f %s\n",
-/* 	     arSkillLevel[ SKILL_VERYGOOD ],  */
-/*              gettext ( aszSkillType[ SKILL_VERYGOOD ] ), */
-/*              arSkillLevel[ SKILL_GOOD ],  */
-/*              gettext ( aszSkillType[ SKILL_GOOD ] ), */
 	     arSkillLevel[ SKILL_DOUBTFUL ], 
              gettext ( aszSkillType[ SKILL_DOUBTFUL ] ),
 	     arSkillLevel[ SKILL_BAD ], 

@@ -56,20 +56,12 @@ char *aszSkillType[] = {
   N_("bad"), 
   N_("doubtful"), 
   NULL,
-  N_("good"), 
-/*   N_("interesting"),  */
-/*   N_("good"),  */
-/*   N_("very good")  */
 };
 char *aszSkillTypeCommand[] = { 
   "verybad", 
   "bad", 
   "doubtful", 
   "none",
-  "good",
-/*   "interesting",  */
-/*   "good",  */
-/*   "verygood" */
  };
 char* aszSkillTypeAbbr[] = { "??", "? ", "?!", "  ", "  "};
 
@@ -2140,16 +2132,6 @@ extern void CommandAnnotateDoubtful( char *sz ) {
     AnnotateMove( SKILL_DOUBTFUL );
 }
 
-extern void CommandAnnotateGood( char *sz ) { 
-
-  AnnotateMove( SKILL_GOOD ); 
-}
-
-/* extern void CommandAnnotateInteresting( char *sz ) { */
-
-/*     AnnotateMove( SKILL_INTERESTING ); */
-/* } */
-
 extern void CommandAnnotateLucky( char *sz ) {
 
     AnnotateRoll( LUCK_GOOD );
@@ -2164,11 +2146,6 @@ extern void CommandAnnotateVeryBad( char *sz ) {
 
     AnnotateMove( SKILL_VERYBAD );
 }
-
-/* extern void CommandAnnotateVeryGood( char *sz ) { */
-
-/*     AnnotateMove( SKILL_VERYGOOD ); */
-/* } */
 
 extern void CommandAnnotateVeryLucky( char *sz ) {
 
@@ -2488,9 +2465,9 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
         case OPTIONAL_DOUBLE_BEAVER:
         case OPTIONAL_DOUBLE_TAKE:
         case OPTIONAL_REDOUBLE_TAKE:
-	  /* best response is take, player took - good move */
+	  /* best response is take, player took */
 	  if ( !fIsDrop )
-		return ( SKILL_GOOD );
+		return ( SKILL_NONE );
 
 	  /* equity loss for dropping when you shouldn't */
  	  rDeltaEquity =  arDouble [OUTPUT_DROP] - arDouble [OUTPUT_TAKE];
@@ -2502,9 +2479,9 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	case TOOGOODRE_PASS:
         case OPTIONAL_DOUBLE_PASS:
         case OPTIONAL_REDOUBLE_PASS:
-	  /* best response is drop, player dropped - good move */
+	  /* best response is drop, player dropped*/
 	  if ( fIsDrop )
-		return (SKILL_GOOD);
+		return (SKILL_NONE);
 
  	  rDeltaEquity = arDouble [OUTPUT_TAKE] - arDouble [OUTPUT_DROP];
 	  break;
@@ -3325,7 +3302,7 @@ static void ShowMark( moverecord *pmr ) {
 #endif
     /* Show the dice roll, if the chequer play is marked but the cube
        decision is not. */
-    if( pmr->mt == MOVE_NORMAL && (pmr->stCube == SKILL_NONE || pmr->stCube == SKILL_GOOD) &&
+    if( pmr->mt == MOVE_NORMAL && (pmr->stCube == SKILL_NONE ) &&
 	pmr->n.stMove != SKILL_NONE ) {
 	ms.gs = GAME_PLAYING;
 	ms.fMove = ms.fTurn = pmr->fPlayer;

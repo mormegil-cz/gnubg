@@ -471,20 +471,10 @@ extern void CommandSetAnalysisThresholdBad( char *sz ) {
     SetSkillThreshold( SKILL_BAD, sz );
 }
 
-/* extern void CommandSetAnalysisThresholdGood( char *sz ) { */
-
-/*     SetSkillThreshold( SKILL_GOOD, sz ); */
-/* } */
-
 extern void CommandSetAnalysisThresholdDoubtful( char *sz ) {
 
     SetSkillThreshold( SKILL_DOUBTFUL, sz );
 }
-
-/* extern void CommandSetAnalysisThresholdInteresting( char *sz ) { */
-
-/*     SetSkillThreshold( SKILL_INTERESTING, sz ); */
-/* } */
 
 extern void CommandSetAnalysisThresholdLucky( char *sz ) {
 
@@ -500,11 +490,6 @@ extern void CommandSetAnalysisThresholdVeryBad( char *sz ) {
 
     SetSkillThreshold( SKILL_VERYBAD, sz );
 }
-
-/* extern void CommandSetAnalysisThresholdVeryGood( char *sz ) { */
-
-/*     SetSkillThreshold( SKILL_VERYGOOD, sz ); */
-/* } */
 
 extern void CommandSetAnalysisThresholdVeryLucky( char *sz ) {
 
@@ -3480,37 +3465,6 @@ CommandSetExportMovesDisplayUnmarked ( char *sz ) {
 
 }
     
-/* extern void */
-/* CommandSetExportMovesDisplayInteresting ( char *sz ) { */
-
-/*   SetToggle( "export moves display interesting",  */
-/*              &exsExport.afMovesDisplay[ SKILL_INTERESTING ], sz, */
-/*              _("Export moves marked 'interesting'."), */
-/*              _("Do not export moves marked 'interesting'.") ); */
-  
-/* } */
-    
-extern void
-CommandSetExportMovesDisplayGood ( char *sz ) {
-  
-  SetToggle( "export moves display good",
-             &exsExport.afMovesDisplay[ SKILL_GOOD ], sz,
-             _("Export moves marked 'good'."),
-             _("Do not export moves marked 'good'.") );
-  
-}
-    
-/* extern void */
-/* CommandSetExportMovesDisplayVeryGood ( char *sz ) { */
-  
-/*   SetToggle( "export moves display very good",  */
-/*              &exsExport.afMovesDisplay[ SKILL_VERYGOOD ], sz, */
-/*              _("Export moves marked 'very good'."), */
-/*              _("Do not export moves marked 'very good'.") ); */
-  
-/* } */
-    
-
 extern void
 CommandSetExportCubeDisplayVeryBad ( char *sz ) {
   
@@ -3550,36 +3504,6 @@ CommandSetExportCubeDisplayUnmarked ( char *sz ) {
              _("Do not export unmarked cube decisions.") );
 
 }
-    
-/* extern void */
-/* CommandSetExportCubeDisplayInteresting ( char *sz ) { */
-  
-/*   SetToggle( "export cube display interesting",  */
-/*              &exsExport.afCubeDisplay[ SKILL_INTERESTING ], sz, */
-/*              _("Export cube decisions marked 'interesting'."), */
-/*              _("Do not export cube decisions marked 'interesting'.") ); */
-
-/* } */
-    
-/* extern void */
-/* CommandSetExportCubeDisplayGood ( char *sz ) { */
-  
-/*   SetToggle( "export cube display good",  */
-/*              &exsExport.afCubeDisplay[ SKILL_GOOD ], sz, */
-/*              _("Export cube decisions marked 'good'."), */
-/*              _("Do not export cube decisions marked 'good'.") ); */
-
-/* } */
-    
-/* extern void */
-/* CommandSetExportCubeDisplayVeryGood ( char *sz ) { */
-  
-/*   SetToggle( "export cube display very good",  */
-/*              &exsExport.afCubeDisplay[ SKILL_VERYGOOD ], sz, */
-/*              _("Export cube decisions marked 'very good'."), */
-/*              _("Do not export cube decisions marked 'very good'.") ); */
-
-/* } */
     
 extern void
 CommandSetExportCubeDisplayActual ( char *sz ) {

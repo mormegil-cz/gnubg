@@ -1212,7 +1212,6 @@ skillString(skilltype const st, int const ignoreNone)
     case SKILL_BAD:         return "bad";
     case SKILL_DOUBTFUL:    return "doubtful";
     case SKILL_NONE:        return ignoreNone ? 0 : "unmarked";
-    case SKILL_GOOD:        return "good";
   }
   g_assert(0);
   return 0;

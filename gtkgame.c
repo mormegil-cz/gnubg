@@ -287,7 +287,7 @@ typedef struct _analysiswidget {
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
   GtkAdjustment *padjMoves;
-  GtkAdjustment *apadjSkill[5], *apadjLuck[4];
+  GtkAdjustment *apadjSkill[3], *apadjLuck[4];
   GtkWidget *pwMoves, *pwCube, *pwLuck;
   GtkWidget *pwEvalCube, *pwEvalChequer;
   GtkWidget *apwAnalysePlayers[ 2 ];
@@ -662,7 +662,7 @@ extern void GTKThaw( void ) {
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
 
     static char* aszSkillCmd[ N_SKILLS ] = {
-      "verybad", "bad", "doubtful", "clear skill", "good",
+      "verybad", "bad", "doubtful", "clear skill",
     };
     char sz[ 64 ];
 
@@ -682,9 +682,6 @@ SkillMenu(skilltype stSelect, char* szAnno)
   skilltype st;
     
   for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
-    if( st == SKILL_GOOD ) {
-      continue;
-    }
     {
       const char* l = aszSkillType[st] ? gettext(aszSkillType[st]) : "";
       GtkWidget* pwItem = gtk_menu_item_new_with_label(l);
@@ -702,10 +699,6 @@ SkillMenu(skilltype stSelect, char* szAnno)
   pwOptionMenu = gtk_option_menu_new();
   gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
 
-  /* show only bad skills */
-  if( stSelect == SKILL_GOOD ) {
-    stSelect = SKILL_NONE;
-  }
   gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), stSelect );
 
   return pwOptionMenu;
@@ -1227,7 +1220,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 
     if ( pmr && pmr->mt == MOVE_NORMAL && pwMoveAnalysis && pwCubeAnalysis ) {
 
-      /* (FIXME) Not sure here about SKILL_GOOD */
       if ( badSkill(pmr->stCube) )
         gtk_notebook_set_page ( GTK_NOTEBOOK ( pw ), 1 );
 
@@ -2623,8 +2615,7 @@ static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
 
 static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 
-  char *aszSkillLabel[5] = { N_("Very good:"), N_("Good:"),
-	  N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
+  char *aszSkillLabel[N_SKILLS] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
   char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
 	  N_("Unlucky:"), N_("Very unlucky:") };
   int i;
@@ -2695,7 +2686,7 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   pwTable = gtk_table_new (5, 2, FALSE);
   gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
 
-  for (i = 0; i < 5; i++){
+  for (i = 0; i < 3; i++){
     pwLabel = gtk_label_new ( gettext ( aszSkillLabel[i] ) );
     gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -2704,16 +2695,12 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
     gtk_misc_set_alignment (GTK_MISC (pwLabel), 0, 0.5);
   }
   
-  for (i = 0; i < 5; i++){
+  for (i = 0; i < 3; i++){
     paw->apadjSkill[i] = 
 	  GTK_ADJUSTMENT( gtk_adjustment_new( 1, 0, 1, 0.01, 10, 10 ) );
 
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjSkill[i]), 1, 2);
-    /* Disable good and very good thresholds, as not used at the moment */
-    if (i == 0 || i == 1)
-      gtk_widget_set_sensitive(pwSpin, FALSE);
-    
     gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
                       (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                       (GtkAttachOptions) (0), 0, 0);
@@ -2818,11 +2805,9 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
     UserCommand(sz); 
   }
 
-/*   ADJUSTSKILLUPDATE( 0, SKILL_VERYGOOD, "set analysis threshold verygood %.3f" ) */
-/*   ADJUSTSKILLUPDATE( 1, SKILL_GOOD, "set analysis threshold good %.3f" ) */
-  ADJUSTSKILLUPDATE( 2, SKILL_DOUBTFUL, "set analysis threshold doubtful %s" )
-  ADJUSTSKILLUPDATE( 3, SKILL_BAD, "set analysis threshold bad %s" )
-  ADJUSTSKILLUPDATE( 4, SKILL_VERYBAD, "set analysis threshold verybad %s" )
+  ADJUSTSKILLUPDATE( 0, SKILL_DOUBTFUL, "set analysis threshold doubtful %s" )
+  ADJUSTSKILLUPDATE( 1, SKILL_BAD, "set analysis threshold bad %s" )
+  ADJUSTSKILLUPDATE( 2, SKILL_VERYBAD, "set analysis threshold verybad %s" )
 
   ADJUSTLUCKUPDATE( 0, LUCK_VERYGOOD, "set analysis threshold verylucky %s" )
   ADJUSTLUCKUPDATE( 1, LUCK_GOOD, "set analysis threshold lucky %s" )
@@ -2863,15 +2848,11 @@ static void AnalysisSet( analysiswidget *paw) {
 
   gtk_adjustment_set_value ( paw->padjMoves, cAnalysisMoves );
   
-/*   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ),  */
-/* 		 arSkillLevel[SKILL_VERYGOOD] ); */
-/*   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[1] ), */
-/* 		 arSkillLevel[SKILL_GOOD] ); */
-  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[2] ),
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ),
 		 arSkillLevel[SKILL_DOUBTFUL] );
-  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[3] ),
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[1] ),
 		 arSkillLevel[SKILL_BAD] );
-  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[4] ),
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[2] ),
 		 arSkillLevel[SKILL_VERYBAD] );
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjLuck[0] ),
 		 arLuckLevel[LUCK_VERYGOOD] );

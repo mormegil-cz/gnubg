@@ -408,7 +408,6 @@ CommandRelationalShowDetails (char *sz)
 			     "SUM(bad_moves),"
 			     "SUM(doubtful_moves),"
 			     "SUM(unmarked_moves),"
-			     "SUM(good_moves),"
 			     "SUM(very_unlucky_rolls),"
 			     "SUM(unlucky_rolls),"
 			     "SUM(unmarked_rolls),"
@@ -447,7 +446,6 @@ CommandRelationalShowDetails (char *sz)
       sc.anMoves[i][SKILL_BAD] = strtol (r.data[1][8], NULL, 0);
       sc.anMoves[i][SKILL_DOUBTFUL] = strtol (r.data[1][9], NULL, 0);
       sc.anMoves[i][SKILL_NONE] = strtol (r.data[1][10], NULL, 0);
-      sc.anMoves[i][SKILL_GOOD] = strtol (r.data[1][11], NULL, 0);
       sc.anLuck[i][LUCK_VERYBAD] = strtol (r.data[1][12], NULL, 0);
       sc.anLuck[i][LUCK_BAD] = strtol (r.data[1][13], NULL, 0);
       sc.anLuck[i][LUCK_NONE] = strtol (r.data[1][14], NULL, 0);

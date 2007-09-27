@@ -1,3 +1,10 @@
+Thu Sep 27 22:50:16 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, analysis.h, formatgs.c, gnubg.c, gnubgmodule.c,
+	gtkexport.c, gtkgame.c, play.c, relational.c, set.c, show.c: remove
+	SKILL_GOOD completely as the use was overlapping with that of
+	SKILL_NONE
+
 Thu Sep 27 16:22:08 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkfile.c: allow default extension to be .sgf when saving and last

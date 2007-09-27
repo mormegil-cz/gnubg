@@ -282,7 +282,7 @@ Skill( float r )
   else if( r < -arSkillLevel[ SKILL_DOUBTFUL ] )
     return SKILL_DOUBTFUL;
   else
-    return SKILL_GOOD;
+    return SKILL_NONE;
 }
 
 /*
@@ -909,13 +909,13 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
         if ( rAfter < rBefore ) {
           /* wrong resign */
           pmr->r.stResign = Skill ( rAfter - rBefore );
-          pmr->r.stAccept = SKILL_GOOD; /* VERYGOOD */
+          pmr->r.stAccept = SKILL_NONE;
         }
 
         if ( rBefore < rAfter ) {
           /* wrong accept */
           pmr->r.stAccept = Skill ( rBefore - rAfter );
-          pmr->r.stResign = SKILL_GOOD; /* VERYGOOD */
+          pmr->r.stResign = SKILL_NONE;
         }
 
 
@@ -2085,13 +2085,13 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, list * plGame,
 			if (rAfter < rBefore) {
 				/* wrong resign */
 				pmr->r.stResign = Skill(rAfter - rBefore);
-				pmr->r.stAccept = SKILL_GOOD;	/* VERYGOOD; */
+				pmr->r.stAccept = SKILL_NONE;
 			}
 
 			if (rBefore < rAfter) {
 				/* wrong accept */
 				pmr->r.stAccept = Skill(rBefore - rAfter);
-				pmr->r.stResign = SKILL_GOOD;	/* VERYGOOD; */
+				pmr->r.stResign = SKILL_NONE;
 			}
 
 

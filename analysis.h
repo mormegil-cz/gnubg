@@ -33,12 +33,11 @@ typedef enum _skilltype {
   SKILL_BAD,
   SKILL_DOUBTFUL,
   SKILL_NONE,
-  SKILL_GOOD
 } skilltype;
 
-#define badSkill(st)  ((st) != SKILL_NONE && (st) != SKILL_GOOD)
+#define badSkill(st)  ((st) < SKILL_NONE)
 
-#define N_SKILLS (SKILL_GOOD + 1)
+#define N_SKILLS (SKILL_NONE + 1)
 
 typedef struct _statcontext {
   int fMoves, fCube, fDice; /* which statistics have been computed? */
