@@ -1,3 +1,8 @@
+Thu Sep 27 16:22:08 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkfile.c: allow default extension to be .sgf when saving and last
+	used extension otherwise.
+
 Thu Sep 27 16:20:17 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* AUTHORS, INSTALL, Makefile.am, README, configure.in, credits.sh,

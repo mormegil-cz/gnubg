@@ -176,7 +176,7 @@ static void SaveCommon (guint f, gchar * prompt)
   static gint last_export_type = 0;
   static gchar *last_save_folder = NULL;
   static gchar *last_export_folder = NULL;
-  gchar *fn = GetFilename (TRUE, last_export_format);
+  gchar *fn = GetFilename (TRUE, (f == 1) ? 0 : last_export_format);
   gchar *folder = NULL;
 
   if (f == 1)
