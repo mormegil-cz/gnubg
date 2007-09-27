@@ -2615,7 +2615,7 @@ static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
 
 static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 
-  char *aszSkillLabel[N_SKILLS] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
+  char *aszSkillLabel[3] = { N_("Doubtful:"), N_("Bad:"), N_("Very bad:") };
   char *aszLuckLabel[4] = { N_("Very lucky:"), N_("Lucky:"),
 	  N_("Unlucky:"), N_("Very unlucky:") };
   int i;
