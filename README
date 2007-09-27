@@ -1,165 +1,72 @@
-GNU Backgammon 0.14.1
-=====================
+GNU Backgammon version 0.16-devel
 
-This is a pre-release version of GNU Backgammon (gnubg), a backgammon
-player and analysis tool.  Please send comments and suggestions to
-<bug-gnubg@gnu.org>.
+GNU Backgammon is developed under the GNU General Public License (GPL) and it's
+part of the GNU project. If you want to know more about GPL and the Free
+Software Foundation you can visit the FSF website. The conditions for copying
+may be found in the FILE `COPYING`
 
-Look for news and upcoming releases of GNU Backgammon at:
-    http://www.gnu.org/software/gnubg/gnubg.html
+Look for news and releases of GNU Backgammon at http://www.gnubg.org. Here you
+will also find ways to report bugs and give suggestions.
 
-For instructions on how to build gnubg, please read the file `INSTALL'
-and the other sections in this file; for other information, please see
-the GNU Backgammon manual in the `doc' directory.
+For instructions on how to build gnubg, please read the file `INSTALL' and the
+other sections in this file; for other information, please see the GNU
+Backgammon manual in the `doc' directory.
 
-There is also an tutorial written by Albert Silver available at 
-    http://www.bkgm.com/gnu/AllAboutGNU.html
+Introduction
+===========
+GNU Backgammon (gnubg) plays and analyzes backgammon games and matches. It is
+able to play and analyze both money games and tournament matches, evaluate and
+roll out positions, and more. Driven by a command-line interface, it displays
+an ASCII rendering of a board on text-only terminals, but also allows the user
+to play games and manipulate positions with a graphical GTK+ interface. GNU
+Backgammon is extensible on platforms which support Python.
 
-The tutorial is also available in Italian
-    http://members.xoom.virgilio.it/free_bgammon/allaboutgnu.htm
+GNU Backgammon is a world class opponent and rates at around 2000 on FIBS, the
+First Internet Backgammon Server – at its best, it is in the top 5 of over 6000
+rated players there). GNU Backgammon can be played on numerous other on-line
+backgammon servers.
 
-Current features:
------------------
+The following features can be found in the current release of GNU Backgammon.
 
- - Support for both 1-sided and 2-sided bearoff databases: 1-sided
-   bearoff database for 15 chequers on the first 6 points and optional
-   2-sided database kept in memory.  Optional larger 1-sided and 2-sided
-   databases stored on disk. 
- - Neural net functions for giving cubeless evaluations of all other
-   contact and race positions.
- - Functions to generate legal moves and evaluate positions at varying
-   search depths.
- - Tournament match and money session cube handling.
- - A command line interface (with full command editing features if GNU
-   readline is available) that lets you play matches and sessions against
-   gnubg.
- - Support for either a GTK+ interface with a graphical board window, or
-   a rough ASCII representation of a board on text terminals.
- - Automated rollouts of positions, with lookahead and race variance
-   reduction where appropriate. Rollouts may also be extended.
- - Both TD(0) and supervised training of neural net weights.
- - Position databases for supervised training (if GNU dbm is available).
- - Loading and saving .sgf games and matches (.sgf files are in the
-   Smart Game Format).
- - Exporting games and matches to HTML, LaTeX, .mat, PDF, PNG, PostScript 
-   and plain text formats.
- - Importing .bkg, .mat, .pos, .sgg, .tmg and FIBS "oldmoves" files.
- - Scripting ability (if Python is available).
- - Automatic and manual annotation (analysis and commentary) of games and
-   matches.
- - Record keeping of statistics of players in games and matches (both native
-   inside gnubg and externally using relational databases and Python).
- - Native language support; 10 languages (complete or in progress). See
-   table for status of your language:
+* A command line interface (with full command editing features if GNU
+  readline is available) that lets you play matches and sessions against GNU
+  Backgammon with a rough ASCII representation of the board on text terminals.
 
-                  Completed in 0.14.1
-   Czech (cs_CZ)      100%
-   Danish (da_DK)     >10%
-   English (en_GB)    100%
-   English (en_US)    100%
-   French (fr_FR)     >50%
-   German (de_DE)     >90%
-   Icelandic (is_IS)  >25%
-   Italian (it_IT)    >90%
-   Japanese (ja_JP)   >50%
-   Turkish (tr_TR)    >25%
-   
-   If you would like to add a translation from English to 
-   another language or contribute to one of the current translations, 
-   please contact <bug-gnubg@gnu.org>.
+* Support for a GTK+ interface with a graphical board window. Both 2D and
+  3D graphics are available.
 
-Bearoff databases:
-------------------
+* Tournament match and money session cube handling and cubeful play. All
+  governed by an underlying cubeless money game based neuralnet.
 
-  GNU Backgammon is designed to work with files containing databases
-of endgame positions, to evaluate moves and cube decisions during the
-bearoff.  These files may be several megabytes large, and are
-generally slow to generate, so they are not included in the
-distribution.
+* Support for both 1-sided and 2-sided bearoff databases: 1-sided bearoff
+  database for 15 checkers on the first 6 points and optional 2-sided database
+  kept in memory. Optional larger 1-sided and 2-sided databases stored on disk.
 
-If you wish to override the configuration for the one-sided 15 chequer,
-6 point database, you have several choices:
+* Automated rollouts of positions, with lookahead and race variance
+  reduction where appropriate. Rollouts may be extended.
 
-  1) Do not generate any database at compile time.  In this case, a
-     heuristic database will be used at runtime.  For this behaviour,
-     you should specify "--disable-bearoff" to "./configure" (see
-     the INSTALL file for more information about configuration options).
+* Automatic and manual annotation (analysis and commentary) of games and
+  matches.
 
-  2) Generate a database in a file which can be mapped or read into memory
-     at runtime.  This option is the default if the mmap() system call is
-     available on your system, and can be selected with the
-     "--enable-bearoff=external" configure option.
+* Record keeping of statistics of players in games and matches (both native
+  inside GNU Backgammon and externally using relational databases and Python).
 
-  3) Statically link the database directly into the GNU Backgammon
-     executable.  This option is the default if the mmap() system call is
-     not available on your system, and can be selected with the
-     "--enable-bearoff=static" configure option.
+* Loading and saving analyzed games and matches as .sgf files (Smart Game
+  Format).
 
-The "make" process will warn you if do not have "gnubg_ts0.bd", which is the
-2-sided database that is read into memory when GNU Backgammon starts.
-If you see this warning, you have three options:
+* Exporting positions, games and matches to: (.eps) Encapsulated
+  Postscript, (.gam) Jellyfish Game, (.html) HTML, (.mat) Jellyfish Match, (.pdf)
+  PDF, (.png) Portable Network Graphics, (.pos) Jellyfish Position, (.ps)
+  PostScript, (.sgf) Gnu Backgammon File, (.tex) LaTeX, (.txt) Plain Text, (.txt)
+  Snowie Text
 
-  1) Ignore the database file.  You can run gnubg without the 2-sided
-     database.
+* Import of matches and positions from a number of file formats: (.bkg)
+  Hans Berliner's BKG Format, (.gam) GammonEmpire Game, (.gam) PartyGammon Game,
+  (.mat) Jellyfish Match, (.pos) Jellyfish Position, (.sgf) Gnu Backgammon File,
+  (.sgg) GamesGrid Save Game, (.tmg) TrueMoneyGames, (.txt) Snowie Text
 
-  2) Generate the file yourself.  You can do this with the command
-     "make bearoff-database".  This procedure might take half an hour
-     or more, depending on the speed of your computer.
+* Python Scripting ability.
 
-  3) Obtain a copy of the database from the Internet.  It is available
-     by FTP from:
+* Native language support; 10 languages complete or in progress:
+  cs_CZ, da_DK, en_GB; en_US, fr_FR, de_DE, is_IS, it_IT, ja_JP, and tr_TR
 
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg_ts0.bd.gz
-
-     Make sure you decompress the file (with gunzip) once you have
-     retrieved it, and move it to the directory containing this README
-     file.
-
-You may also generate larger 1-sided and 2-sided bearoff databases that are
-stored on disk and not read into memory. If present, GNU Backgammon will
-read a 2-sided bearoff databases from the file "gnubg_ts.bd". You can 
-generate such a 2-sided database with "makebearoff", for example, up to 
-8 chequers on 6 points:
-
-   makebearoff -t 6x8 -f gnubg_ts.bd
-
-Note that this database is 72 megabytes and may take up to several hours to
-generate (depending on the speed of your computer). 
-
-Also, if present GNU Backgammon will use a 1-sided database from the file
-"gnubg_os.bd". You can generate a one-sided databases with 15 chequers on
-10 points with
-
-   makebearoff -o 10 -f gnubg_os.bd
-
-Note that this database is 118 megabtes and may take up to several hours
-to generate (depending on the speed of your computer).
-
-Larger bearoff databases are available for download at
-<URL:ftp://ftp.demon.nl/pub/games/gnubg/databases/>.
-
-
-The files `gnubg.weights' and `gnubg.wd':
------------------------------------------
-
-  The weights for gnubg's neural nets are stored in the files
-`gnubg.weights' and `gnubg.wd'.  `gnubg.weights' is in ASCII format,
-while `gnubg.wd' is a binary file.  However, both contain the same
-information; you only need one of the two.  The advantage of
-`gnubg.weights' is that it is platform independent; the advantage of
-`gnubg.wd' is that it is somewhat smaller and much faster to load.
-The build procedure will automatically generate `gnubg.wd' from
-`gnubg.weights', if you have it.
-
-  Although it is possible to run GNU Backgammon without a neural net
-weight file at all (it will generate random weights), we recommend
-that you obtain pre-trained weights; a file compatible with this
-pre-release is available at:
-
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg.weights-0.14.gz
-
-Make sure you decompress the file (with gunzip) and rename it to
-`gnubg.weights' in the same directory as this README file.
-
-
-Thanks for trying GNU Backgammon!

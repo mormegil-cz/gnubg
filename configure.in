@@ -181,8 +181,8 @@ no_gtk="yes"
 no_board3d="yes"
 no_gtkglext="yes"
 no_libcairo="yes"
-AC_ARG_WITH(gtk,[  --with-gtk             use GTK+ 2.0])
-AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
+AC_ARG_WITH(gtk,[  --with-gtk             use GTK+ 2.0 (Default if found)])
+AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards (Default if found)])
 if test "$with_gtk" != "no"; then
   no_gtk="no"
   PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.6.0], AC_DEFINE(USE_GTK, 1, Define if you want to use the gtk gui), no_gtk=yes)
@@ -226,7 +226,7 @@ dnl SSE
 dnl
 
 SSE_CFLAGS=''
-AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,no,cputest)], ssecpu=$enableval, ssecpu=cputest)
+AC_ARG_ENABLE( sse, [  --enable-sse=TYPE  enable SSE for newer cpus(TYPE=yes,no,cputest, default cputest)], ssecpu=$enableval, ssecpu=cputest)
 if test "$ssecpu" != "no"; then
         AC_DEFINE(USE_SSE_VECTORIZE,1,Define if you want to compile with SSE support)
         if test "$ssecpu" = "yes"; then
@@ -243,7 +243,7 @@ dnl
 dnl Threads
 dnl
 
-AC_ARG_ENABLE( threads, [ --enable-threads  enable multithread support], threadson=$enableval, threadson=no)
+AC_ARG_ENABLE( threads, [  --enable-threads  enable multithread support (Default disabled)], threadson=$enableval, threadson=no)
 AM_CONDITIONAL(USE_MULTITHREAD, test "$threadson" != "no" )
 if test "$threadson" != "no"; then
         if test "$have_gthread" != "yes"; then

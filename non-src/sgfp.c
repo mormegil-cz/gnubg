@@ -7,7 +7,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 or later, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -31,7 +31,7 @@
    License without this special exception.
 
    This special exception was added by the Free Software Foundation in
-   version 3 or later.2 of Bison.  */
+   version 2.2 of Bison.  */
 
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
@@ -86,10 +86,10 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 24 "..\\sgf.y"
+#line 24 "./sgf.y"
 
 #include "config.h"
-#include <list.h>
+#include "list.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -168,7 +168,7 @@ static char *Concatenate( list *pl ) {
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 90 "..\\sgf.y"
+#line 90 "./sgf.y"
 {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
@@ -590,7 +590,7 @@ static const yytype_uint8 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 3 or later has supplanted version 1, this can go.  */
+   Once GCC version 2 has supplanted version 1, this can go.  */
 
 #define YYFAIL		goto yyerrlab
 
@@ -1390,82 +1390,82 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 108 "..\\sgf.y"
-    { (yyval.pl) = plCollection = (yyvsp[(1) - (1)].pl); ;}
+#line 108 "./sgf.y"
+    { (yyval.pl) = plCollection = (yyvsp[(1) - (1)].pl); }
     break;
 
   case 3:
-#line 112 "..\\sgf.y"
-    { (yyval.pl) = NewList(); ;}
+#line 112 "./sgf.y"
+    { (yyval.pl) = NewList(); }
     break;
 
   case 4:
-#line 114 "..\\sgf.y"
-    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); ;}
+#line 114 "./sgf.y"
+    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 6:
-#line 119 "..\\sgf.y"
-    { ListInsert( (yyvsp[(3) - (4)].pl)->plNext, (yyvsp[(2) - (4)].pl) ); (yyval.pl) = (yyvsp[(3) - (4)].pl); ;}
+#line 119 "./sgf.y"
+    { ListInsert( (yyvsp[(3) - (4)].pl)->plNext, (yyvsp[(2) - (4)].pl) ); (yyval.pl) = (yyvsp[(3) - (4)].pl); }
     break;
 
   case 7:
-#line 123 "..\\sgf.y"
-    { (yyval.pl) = NewList(); ListInsert( (yyval.pl), (yyvsp[(1) - (1)].pl) ); ;}
+#line 123 "./sgf.y"
+    { (yyval.pl) = NewList(); ListInsert( (yyval.pl), (yyvsp[(1) - (1)].pl) ); }
     break;
 
   case 8:
-#line 125 "..\\sgf.y"
-    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); ;}
+#line 125 "./sgf.y"
+    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 10:
-#line 130 "..\\sgf.y"
-    { (yyval.pl) = (yyvsp[(2) - (2)].pl); ;}
+#line 130 "./sgf.y"
+    { (yyval.pl) = (yyvsp[(2) - (2)].pl); }
     break;
 
   case 11:
-#line 134 "..\\sgf.y"
-    { (yyval.pl) = NewList(); ;}
+#line 134 "./sgf.y"
+    { (yyval.pl) = NewList(); }
     break;
 
   case 12:
-#line 136 "..\\sgf.y"
-    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pp) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); ;}
+#line 136 "./sgf.y"
+    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pp) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 14:
-#line 143 "..\\sgf.y"
+#line 143 "./sgf.y"
     { 
 		    ListInsert( (yyvsp[(2) - (3)].pl), (yyvsp[(3) - (3)].pch) );
 		    (yyval.pp) = malloc( sizeof(property) ); (yyval.pp)->pl = (yyvsp[(2) - (3)].pl);
 		    (yyval.pp)->ach[ 0 ] = (yyvsp[(1) - (3)].ach)[ 0 ]; (yyval.pp)->ach[ 1 ] = (yyvsp[(1) - (3)].ach)[ 1 ];
-		;}
+		}
     break;
 
   case 15:
-#line 151 "..\\sgf.y"
-    { (yyval.pl) = NewList(); ;}
+#line 151 "./sgf.y"
+    { (yyval.pl) = NewList(); }
     break;
 
   case 16:
-#line 153 "..\\sgf.y"
-    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); ;}
+#line 153 "./sgf.y"
+    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 17:
-#line 157 "..\\sgf.y"
-    { (yyval.pch) = Concatenate( (yyvsp[(2) - (3)].pl) ); ;}
+#line 157 "./sgf.y"
+    { (yyval.pch) = Concatenate( (yyvsp[(2) - (3)].pl) ); }
     break;
 
   case 18:
-#line 161 "..\\sgf.y"
-    { (yyval.pl) = NewList(); ;}
+#line 161 "./sgf.y"
+    { (yyval.pl) = NewList(); }
     break;
 
   case 19:
-#line 163 "..\\sgf.y"
-    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); ;}
+#line 163 "./sgf.y"
+    { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
 
@@ -1684,7 +1684,7 @@ yyreturn:
 }
 
 
-#line 166 "..\\sgf.y"
+#line 166 "./sgf.y"
 
 
 extern list *SGFParse( FILE *pf ) {

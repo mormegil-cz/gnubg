@@ -1,7 +1,7 @@
                          GNU Backgammon was written by:
 
     Joseph Heled            David Montgomery        Gary Wong
-    Oystein Johansen        Jim Segrave
+    Oystein Johansen        Jim Segrave             Christian Anthon
     Jonathan Kinsey         Joern Thyssen
  
                                    Support by:
@@ -28,8 +28,7 @@
 
              Contributors (of bug reports and suggestions) include:
 
-    Misja Alma              Neil Kazaross           James Rech
-    Christian Anthon        Mathias Kegelmann       Jared Riley
+    Misja Alma              Mathias Kegelmann       Jared Riley
     Kazuaki Asai            Matija Kejzar           Klaus Rindholt
     Eric Augustine          Bert Van Kerckhove      Oliver Riordan
     Erik Barfoed            James F. Kibler         Alex Romosan
@@ -63,6 +62,7 @@
     Casey Hopkins           Petri Pitkanen          Anders Zachrison
     Martin Janke            Sam Pottle              Douglas Zare
     Nis Jorgensen           Henrik Ravn
+    Neil Kazaross           James Rech
 
 
   Credit is also due to those who have published information about backgammon

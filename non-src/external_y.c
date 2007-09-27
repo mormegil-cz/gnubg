@@ -7,7 +7,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 or later, or (at your option)
+   the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -31,7 +31,7 @@
    License without this special exception.
 
    This special exception was added by the Free Software Foundation in
-   version 3 or later.2 of Bison.  */
+   version 2.2 of Bison.  */
 
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
@@ -110,7 +110,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "..\\external_y.y"
+#line 1 "external_y.y"
 
 /*
  * external_y.y -- command parser for external interface
@@ -174,7 +174,7 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 48 "..\\external_y.y"
+#line 48 "external_y.y"
 {
   int number;
   char *sval;
@@ -604,7 +604,7 @@ static const yytype_uint8 yystos[] =
 
 /* Like YYERROR except do call yyerror.  This remains here temporarily
    to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 3 or later has supplanted version 1, this can go.  */
+   Once GCC version 2 has supplanted version 1, this can go.  */
 
 #define YYFAIL		goto yyerrlab
 
@@ -1404,74 +1404,74 @@ yyreduce:
   switch (yyn)
     {
         case 6:
-#line 71 "..\\external_y.y"
+#line 71 "external_y.y"
     {
   reset_command();
-;}
+}
     break;
 
   case 7:
-#line 76 "..\\external_y.y"
+#line 76 "external_y.y"
     { 
   ec.ct = COMMAND_FIBSBOARD;
   free( ec.szFIBSBoard );
   ec.szFIBSBoard = (yyvsp[(1) - (1)].sval);
-;}
+}
     break;
 
   case 8:
-#line 83 "..\\external_y.y"
+#line 83 "external_y.y"
     { 
   free( ec.szFIBSBoard );
   ec.szFIBSBoard = (yyvsp[(1) - (1)].sval);
-;}
+}
     break;
 
   case 9:
-#line 89 "..\\external_y.y"
-    { ec.nPlies = (yyvsp[(2) - (2)].number); ;}
+#line 89 "external_y.y"
+    { ec.nPlies = (yyvsp[(2) - (2)].number); }
     break;
 
   case 11:
-#line 93 "..\\external_y.y"
-    { ec.fCubeful = TRUE; ;}
+#line 93 "external_y.y"
+    { ec.fCubeful = TRUE; }
     break;
 
   case 12:
-#line 94 "..\\external_y.y"
-    { ec.fCubeful = FALSE; ;}
+#line 94 "external_y.y"
+    { ec.fCubeful = FALSE; }
     break;
 
   case 14:
-#line 98 "..\\external_y.y"
-    { ec.fCubeful = TRUE; ;}
+#line 98 "external_y.y"
+    { ec.fCubeful = TRUE; }
     break;
 
   case 16:
-#line 102 "..\\external_y.y"
-    { ec.fUsePrune = TRUE; ;}
+#line 102 "external_y.y"
+    { ec.fUsePrune = TRUE; }
     break;
 
   case 18:
-#line 106 "..\\external_y.y"
-    { ec.fCubeful = FALSE; ;}
+#line 106 "external_y.y"
+    { ec.fCubeful = FALSE; }
     break;
 
   case 20:
-#line 110 "..\\external_y.y"
-    { ec.rNoise = (yyvsp[(2) - (2)].number); ;}
+#line 110 "external_y.y"
+    { ec.rNoise = (yyvsp[(2) - (2)].number); }
     break;
 
   case 22:
-#line 114 "..\\external_y.y"
-    { ec.nReduced = (yyvsp[(2) - (2)].number); ;}
+#line 114 "external_y.y"
+    { ec.nReduced = (yyvsp[(2) - (2)].number); }
     break;
 
   case 25:
-#line 121 "..\\external_y.y"
+#line 121 "external_y.y"
     {
   ec.ct = COMMAND_EVALUATION;
-;}
+}
     break;
 
 
@@ -1690,7 +1690,7 @@ yyreturn:
 }
 
 
-#line 126 "..\\external_y.y"
+#line 126 "external_y.y"
 
 
 /* lexer interface */
@@ -1711,7 +1711,7 @@ exterror( const char *s ) {
 }
 
 static void
-reset_command() {
+reset_command(void) {
 
   ec.ct = COMMAND_NONE;
   ec.nPlies = 0;

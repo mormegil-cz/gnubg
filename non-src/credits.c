@@ -18,8 +18,7 @@
 #include <glib/gi18n.h>
 #include "credits.h"
 
-char aszCOPYRIGHT[] = N_("Copyright 1999, 2000, 2001, 2002, 2003, 2004 "
-			"by Gary Wong.");
+char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2007 GNU Backgammon is the legal property of its authors.");
 
 credEntry ceAuthors[] = {
   {"Joseph Heled", 0},
@@ -29,6 +28,7 @@ credEntry ceAuthors[] = {
   {"Jim Segrave", 0},
   {"Joern Thyssen", 0},
   {"Gary Wong", 0},
+  {"Christian Anthon", 0},
   {0, 0}
 };
 
@@ -68,7 +68,6 @@ credEntry ceTranslations[] = {
 credEntry ceCredits[] = {
   {"Fotis", 0},
   {"Misja Alma", 0},
-  {"Christian Anthon", 0},
   {"Kazuaki Asai", 0},
   {"Eric Augustine", 0},
   {"Steve Baedke", 0},
@@ -191,7 +190,7 @@ char aszAUTHORS[] =
 "                         GNU Backgammon was written by:\n"
 "\n"
 "    Joseph Heled            David Montgomery        Gary Wong\n"
-"    Oystein Johansen        Jim Segrave\n"
+"    Oystein Johansen        Jim Segrave             Christian Anthon\n"
 "    Jonathan Kinsey         Joern Thyssen\n"
 " \n"
 "                                   Support by:\n"
@@ -218,8 +217,7 @@ char aszAUTHORS[] =
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"
-"    Misja Alma              Neil Kazaross           James Rech\n"
-"    Christian Anthon        Mathias Kegelmann       Jared Riley\n"
+"    Misja Alma              Mathias Kegelmann       Jared Riley\n"
 "    Kazuaki Asai            Matija Kejzar           Klaus Rindholt\n"
 "    Eric Augustine          Bert Van Kerckhove      Oliver Riordan\n"
 "    Erik Barfoed            James F. Kibler         Alex Romosan\n"
@@ -253,6 +251,7 @@ char aszAUTHORS[] =
 "    Casey Hopkins           Petri Pitkanen          Anders Zachrison\n"
 "    Martin Janke            Sam Pottle              Douglas Zare\n"
 "    Nis Jorgensen           Henrik Ravn\n"
+"    Neil Kazaross           James Rech\n"
 "\n"
 "\n"
 "  Credit is also due to those who have published information about backgammon\n"

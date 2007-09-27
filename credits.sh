@@ -37,6 +37,7 @@ David Montgomery
 Jim Segrave
 Joern Thyssen
 Gary Wong
+Christian Anthon
 EOF
 
 cat > $contributors <<EOF
@@ -71,7 +72,6 @@ EOF
 
 cat > $credit <<EOF
 Misja Alma
-Christian Anthon
 Kazuaki Asai
 Eric Augustine
 Erik Barfoed
@@ -234,14 +234,26 @@ EOF
 
 cat > credits.c <<EOF
 /* Do not modify this file!  It is created automatically by credits.sh.
-   Modify credits.sh instead. */
+   Modify credits.sh instead. 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 3 or later of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
 
 #include "config.h"
 #include <glib/gi18n.h>
 #include "credits.h"
 
-char aszCOPYRIGHT[] = N_("Copyright 1999, 2000, 2001, 2002, 2003, 2004 "
-			"by Gary Wong.");
+char aszCOPYRIGHT[] = N_("Copyright, 1999-2004 by Gary Wong, 2004-2007 GNU Backgammon is the legal property of its authors.");
 
 credEntry ceAuthors[] = {
 EOF

@@ -1,3 +1,10 @@
+Thu Sep 27 16:20:17 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* AUTHORS, INSTALL, Makefile.am, README, configure.in, credits.sh,
+	non-src/credits.c, non-src/external_l.c, non-src/external_y.c,
+	non-src/external_y.h, non-src/sgfl.c, non-src/sgfp.c, non-src/sgfp.h:
+	cleanup of readme and install files and minor updates to the rest
+
 Mon Sep 24 22:56:56 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* makebearoff.c: fix tmp file creation problem

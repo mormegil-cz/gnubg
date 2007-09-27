@@ -4,43 +4,37 @@ Installation
 Installing gnubg is rather painless through the use of the GNU autoconf
 package.  Simply untar the gnubg distribution, and run the ``configure''
 script. Then ``make´´ and then as root ``make install´´.  If you have obtained
-the distribution from the CVS repository, run ``./autogen.sh'' first.  It will
-set up gnubg's build environment and add the files which are present in the tar
-balls, but not in the CVS repository.
+the distribution from the CVS repository, run ``./autogen.sh'' first.
 
-
-You are likely to want or need the following tools and libraries
+You are likely to want or need the following tools
 
 autoconf
 automake
 bison
+flex
 gcc
-gnuplot
 libtool
-make
+GNU make
 
-libartsc0-dev
-libatk1.0-dev
-libaudiofile-dev
-libcairo2-dev
-libesd0-dev
-libglib2.0-dev
-libgtk2.0-dev
-libgtkglext1-dev
-libpango1.0-dev
-libpng12-dev
-libreadline5-dev
-libxml2-dev
-python2.4-dev
+and development libraries
+
+cairo
+esound
+glib (_Required_)
+gtk
+gtkglext
+png
+readline
+xml2
+python
 
 In most cases, configure will automatically determine everything it needs to
 know in order to compile.  However, there are a few options to ``configure'' to
-help it out, or to disable a certain feature.
+help it out, or to disable a certain feature. See ``configure --help´´ for more
+info.
 
---enable-sse               enable SSE for newer cpus (recommended)
---without-board3d          don't provide 3D boards
---without-timecontrol      don't provide clocks (recommended)
---without-gdbm             don't use GNU dbm for databases (recommended)
---without-gtk2             don't use GTK+ 2.0 (the graphical interface)
---without-python           don't provide Python scripts inside gnubg
---without-sound            don't use sounds with GNU Backgammon
+  --enable-sse=TYPE       enable SSE for newer cpus(TYPE=yes,no,cputest, default cputest)
+  --enable-threads        enable multithread support (Default disabled)
+  --with-gtk              use GTK+ 2.0 (Default if found)
+  --with-board3d          compile with 3D boards (Default if found)
+  --with-python[=PYTHON]  absolute path name of Python executable

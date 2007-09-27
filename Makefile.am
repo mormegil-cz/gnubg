@@ -174,7 +174,9 @@ EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.6 \
 #
 ##sgf.y and sgf.l ought to be renamed sgf_y.y and sgf_l.l to avoid conflicts with sgf.c
 #
-sgfp.c sgfp.h: sgf.y
+sgfp.h: sgfp.c
+	@true
+sgfp.c: sgf.y
 	$(YACC) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
@@ -194,7 +196,9 @@ external_l.c: external_l.l external_y.c
 #
 ##credits.c target
 #
-credits.c credits.h: credits.sh
+credits.h: credits.c
+	@true
+credits.c: credits.sh
 	cd $(srcdir) && $(SHELL) ./credits.sh
 
 #
