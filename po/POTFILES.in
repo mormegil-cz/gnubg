@@ -15,6 +15,7 @@ board3d/inc3d.h
 board3d/matrix.c
 board3d/matrix.h
 board3d/misc3d.c
+board3d/misc3d.h
 board3d/model.c
 board3d/model.h
 board3d/shadow.c
@@ -104,14 +105,6 @@ import.h
 latex.c
 lib/cache.c
 lib/cache.h
-lib/dynarray.c
-lib/dynarray.h
-lib/event.c
-lib/event.h
-lib/hash.c
-lib/hash.h
-lib/heap.c
-lib/heap.h
 lib/isaac.c
 lib/isaac.h
 lib/isaacs.h
@@ -144,7 +137,6 @@ osr.h
 play.c
 positionid.c
 positionid.h
-postscript.c
 progress.c
 progress.h
 pub_eval.c
@@ -165,9 +157,12 @@ sgfl.c
 sgfp.c
 sgfp.h
 show.c
+simpleboard.c
+simpleboard.h
 sound.c
 sound.h
 speed.c
+speed.h
 text.c
 timer.c
 userrng.c

@@ -1,3 +1,9 @@
+Fri Sep 28 11:27:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am po/LINGUAS po/POTFILES.in po/da.po po/en_US.po
+	po/gnubg.pot po/is.po po/ru.po po/tr.po: make sure that "make dist"
+	works. Remove unmaintained languages.
+
 Fri Sep 28 00:28:34 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, bearoff.c, bearoff.h, ChangeLog, export.c, export.h,
