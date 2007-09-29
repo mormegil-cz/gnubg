@@ -2544,50 +2544,6 @@ extern void CommandSetSeed( char *sz ) {
 
 }
 
-extern void CommandSetTrainingAlpha( char *sz ) {
-
-    float r = (float)ParseReal( &sz );
-
-    if( r <= 0.0f || r > 1.0f ) {
-	outputl( _("You must specify a value for alpha which is greater than\n"
-		 "zero, and no more than one.") );
-	return;
-    }
-
-    rAlpha = r;
-    outputf( _("Alpha set to %f.\n"), r );
-}
-
-extern void CommandSetTrainingAnneal( char *sz ) {
-
-    double r = ParseReal( &sz );
-
-    if( r == ERR_VAL ) {
-	outputl( _("You must specify a valid annealing rate.") );
-	return;
-    }
-
-    rAnneal = (float)r;
-    outputf( _("Annealing rate set to %f.\n"), r );
-}
-
-extern void CommandSetTrainingThreshold( char *sz ) {
-
-    float r = (float)ParseReal( &sz );
-
-    if( r < 0.0f ) {
-	outputl( _("You must specify a valid error threshold.") );
-	return;
-    }
-
-    rThreshold = r;
-
-    if( rThreshold )
-	outputf( _("Error threshold set to %f.\n"), r );
-    else
-	outputl( _("Error threshold disabled.") );
-}
-
 extern void CommandSetToolbar( char *sz )
 {
 	int n = ParseNumber( &sz );

@@ -1501,21 +1501,6 @@ extern void CommandShowOutput( char *sz ) {
                _("Boards will be shown in ASCII.\n") );
 }
 
-extern void CommandShowTraining( char *sz ) {
-
-    outputf( _("Learning rate (alpha) %f,\n"), rAlpha );
-
-    if( rAnneal )
-	outputf( _("Annealing rate %f,\n"), rAnneal );
-    else
-	outputl( _("Annealing disabled,") );
-
-    if( rThreshold )
-	outputf( _("Error threshold %f.\n"), rThreshold );
-    else
-	outputl( _("Error threshold disabled.") );
-}
-
 extern void CommandShowVersion( char *sz )
 {
 #if USE_GTK

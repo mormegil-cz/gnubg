@@ -392,10 +392,6 @@ FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
 		 int anMove[ 8 ], const bgvariation bgv );
 
 extern int 
-TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[], float rAlpha,
-	       float rAnneal, const bgvariation bgv );
-
-extern int 
 PipCount( int anBoard[ 2 ][ 25 ], unsigned int anPips[ 2 ] );
 
 extern int 

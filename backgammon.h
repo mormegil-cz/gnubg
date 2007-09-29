@@ -270,7 +270,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford,
 extern unsigned int cAnalysisMoves, nBeavers, nDefaultLength, cAutoDoubles;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
-extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
+extern float arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ N_SKILLS ], rEvalsPerSec;
 extern int nThreadPriority;
 extern int fCheat;
@@ -501,7 +501,7 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], 
     acSetRollout[], acSetRolloutLate[], acSetRolloutLimit[], 
   acSetTruncation [], acSetRolloutJsd[],
-    acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
+    acSet[], acShow[], acTop[], acSetMET[], acSetEvalParam[],
     acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename;
 extern command acSetCheatPlayer[];
 extern command acSetAnalysisPlayer[];
@@ -549,13 +549,6 @@ extern void CommandAccept( char * ),
     CommandCalibrate( char* sz ),
     CommandClearHint( char * ),
     CommandCopy ( char * ),
-    CommandDatabaseDump( char * ),
-    CommandDatabaseExport( char * ),
-    CommandDatabaseImport( char * ),
-    CommandDatabaseRollout( char * ),
-    CommandDatabaseGenerate( char * ),
-    CommandDatabaseTrain( char * ),
-    CommandDatabaseVerify( char * ),
     CommandDecline( char * ),
     CommandDiceRolls( char * ),
     CommandDouble( char * ),
@@ -901,9 +894,6 @@ extern void CommandAccept( char * ),
     CommandSetThreads( char * ),
 #endif
     CommandSetToolbar( char * ),
-    CommandSetTrainingAlpha( char * ),
-    CommandSetTrainingAnneal( char * ),
-    CommandSetTrainingThreshold( char * ),
     CommandSetTurn( char * ),
     CommandSetTutorCube( char * ),
     CommandSetTutorEval( char* sz ),
@@ -983,7 +973,6 @@ extern void CommandAccept( char * ),
 	CommandShowThreads( char *),
 #endif
     CommandShowThorp( char * ),
-    CommandShowTraining( char * ),
     CommandShowTurn( char * ),
     CommandShowTutor( char * ), 
     CommandShowVariation( char * ),

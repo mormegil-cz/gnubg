@@ -617,16 +617,6 @@ DestroyWeights( void )
 }
 
 extern int
-EvalNewWeights(int nSize)
-{
-  DestroyWeights();
-  CreateWeights( nSize );
-    
-  return 0;
-}
-
-
-extern int
 EvalShutdown ( void ) {
 
   int i;
@@ -3209,47 +3199,6 @@ GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
   return 1;
 
-}
-
-extern int
-TrainPosition(int anBoard[ 2 ][ 25 ], float arDesired[],
-	      float rAlpha, float rAnneal,
-	      const bgvariation bgv )
-{
-  float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
-
-  int pc = ClassifyPosition( anBoard, bgv );
-  
-  neuralnet* nn;
-  
-  switch( pc ) {
-  case CLASS_CONTACT:
-  {
-    nn = &nnContact;
-    CalculateContactInputs(anBoard, arInput);
-    break;
-  }
-  case CLASS_RACE:
-  {
-    nn = &nnRace;
-    CalculateRaceInputs(anBoard, arInput);
-    break;
-  }
-  case CLASS_CRASHED:
-    CalculateCrashedInputs(anBoard, arInput);
-    nn = &nnCrashed;
-    break;
-  default:
-    errno = EDOM;
-    return -1;
-  }
-
-  SanityCheck(anBoard, arDesired);
-
-  NeuralNetTrain( nn, arInput, arOutput, arDesired, rAlpha /
-		  pow( nn->nTrained / 1000.0 + 1.0, rAnneal ) );
-    
-  return 0;
 }
 
 /*

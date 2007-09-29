@@ -182,8 +182,8 @@ char *szCurrentFolder = NULL;
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
-float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f, rEvalsPerSec = -1.0f,
-    arLuckLevel[] = {
+float rEvalsPerSec = -1.0f;
+float    arLuckLevel[] = {
 	0.6f, /* LUCK_VERYBAD */
 	0.3f, /* LUCK_BAD */
 	0, /* LUCK_NONE */
@@ -791,8 +791,6 @@ command cER = {
       N_("Play a new match to some number of points"), szOPTLENGTH, NULL },
     { "session", CommandNewSession, N_("Start a new (money) session"), NULL,
       NULL },
-    { "weights", CommandNewWeights, N_("Create new (random) neural net "
-      "weights"), szOPTSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acRecordAdd[] = {
     { "game", CommandRecordAddGame,
@@ -1269,15 +1267,6 @@ command cER = {
     { "plies", CommandSetRolloutTruncationPlies,
 	N_("End rollouts at a particular depth"), szPLIES, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acSetTraining[] = {
-    { "alpha", CommandSetTrainingAlpha, 
-      N_ ("Control magnitude of backpropagation of errors"), szVALUE, NULL },
-    { "anneal", CommandSetTrainingAnneal, N_("Decrease alpha as training "
-      "progresses"), szRATE, NULL },
-    { "threshold", CommandSetTrainingThreshold, 
-      N_("Require a minimum error in "
-      "position database generation"), szVALUE, NULL },
-    { NULL, NULL, NULL, NULL, NULL }    
 }, acSetEval[] = {
   { "chequerplay", CommandSetEvalChequerplay,
     N_("Set evaluation parameters for chequer play"), NULL,
@@ -1670,8 +1659,6 @@ command cER = {
 #endif
     { "toolbar", CommandSetToolbar, N_("Change if icons and/or text are shown on toolbar"),
       szVALUE, NULL },
-    { "training", NULL, 
-      N_("Control training parameters"), NULL, acSetTraining },
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
       &cPlayer },
     { "tutor", NULL, N_("Control tutor setup"), NULL, acSetTutor }, 
@@ -1817,8 +1804,6 @@ command cER = {
 #endif
     { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
       "position"), szOPTPOSITION, NULL },
-    { "training", CommandShowTraining, N_("Display the training parameters"),
-      NULL, NULL },
     { "turn", CommandShowTurn, 
       N_("Show which player is on roll"), NULL, NULL },
     { "version", CommandShowVersion, 
@@ -4309,26 +4294,6 @@ static void LoadRCFiles(void)
 	g_free(szz);
 
 	outputon();
-}
-
-
-extern void CommandNewWeights( char *sz )
-{
-
-    int n;
-    
-    if( sz && *sz ) {
-	if( ( n = ParseNumber( &sz ) ) < 1 ) {
-	    outputl( _("You must specify a valid number of hidden nodes "
-		     "(try `help new weights').\n") );
-	    return;
-	}
-    } else
-	n = DEFAULT_NET_SIZE;
-
-    EvalNewWeights( n );
-
-    outputf( _("A new neural net with %d hidden nodes has been created.\n"), n );
 }
 
 

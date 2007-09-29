@@ -1,3 +1,8 @@
+Sat Sep 29 23:10:12 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, eval.c, eval.h, gnubg.c, gtkgame.c, set.c, show.c:
+	remove unused training functions.
+
 Fri Sep 28 11:27:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am po/LINGUAS po/POTFILES.in po/da.po po/en_US.po

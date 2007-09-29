@@ -199,8 +199,6 @@ typedef enum _gnubgcommand {
     CMD_SHOW_WARRANTY,
     CMD_SWAP_PLAYERS,
     CMD_TAKE,
-    CMD_TRAIN_DATABASE,
-    CMD_TRAIN_TD,
     NUM_CMDS
 } gnubgcommand;
    
@@ -275,8 +273,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show warranty",
     "swap players",
     "take",
-    "train database",
-    "train td"
 };
 enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE, TOGGLE_THEORY, TOGGLE_COMMAND };
 
