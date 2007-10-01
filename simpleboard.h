@@ -1,3 +1,4 @@
+#if HAVE_CAIRO
 typedef struct _SimpleBoardColor SimpleBoardColor;
 
 /** \brief struct to hold the colors for points, dice, checkers, etc.*/
@@ -29,3 +30,4 @@ extern SimpleBoard *simple_board_new(matchstate * ms, cairo_t * cr);
 extern SimpleBoard *simple_board_new_from_ids(gchar * position_id, gchar * matchid, cairo_t * cr);
 
 extern void simple_board_destroy(SimpleBoard * board);
+#endif

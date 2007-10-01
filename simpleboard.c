@@ -17,6 +17,7 @@
 */
 
 #include "config.h"
+#if HAVE_CAIRO
 #include <math.h>
 #include <cairo.h>
 #include <pango/pangocairo.h>
@@ -26,6 +27,7 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "simpleboard.h"
+
 
 #define SIMPLE_BOARD_SIZE 400.
 
@@ -549,4 +551,5 @@ main(int argc, char *argv[])
 	cairo_destroy(board->cr);
 	g_free(board);
 }
+#endif
 #endif

@@ -1,3 +1,8 @@
+Mon Oct  1 23:06:52 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in, export.c, multithread.c, simpleboard.c,
+	simpleboard.h: make code compile without gtk, cairo or pangocairo
+
 Sat Sep 29 23:10:12 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, eval.c, eval.h, gnubg.c, gtkgame.c, set.c, show.c:

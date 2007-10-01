@@ -92,6 +92,8 @@ PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you wa
 PKG_CHECK_MODULES(FREETYPE2, [freetype2], AC_DEFINE(HAVE_FREETYPE, 1, Define if you have freetype2), [])
 PKG_CHECK_MODULES(LIBPNG, [libpng12], AC_DEFINE(HAVE_LIBPNG, 1, Define if you have libpng), [])
 PKG_CHECK_MODULES(ESD, [esound], AC_DEFINE(HAVE_ESD, 1, Define if you have esound), [AC_MSG_WARN("No esound support")])
+PKG_CHECK_MODULES(CAIRO, [cairo >= 1.2], AC_DEFINE(HAVE_CAIRO,1,Define if you want to use libcairo), [AC_MSG_WARN("No cairo support")])
+PKG_CHECK_MODULES(PANGOCAIRO, [pangocairo >= 1.0], AC_DEFINE(HAVE_PANGOCAIRO,1,Define if you want to use pangocairo), [AC_MSG_WARN("No pangocairo support")])
 
 dnl
 dnl Checks for libraries.
@@ -180,13 +182,11 @@ dnl
 no_gtk="yes"
 no_board3d="yes"
 no_gtkglext="yes"
-no_libcairo="yes"
 AC_ARG_WITH(gtk,[  --with-gtk             use GTK+ 2.0 (Default if found)])
 AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards (Default if found)])
 if test "$with_gtk" != "no"; then
   no_gtk="no"
   PKG_CHECK_MODULES(GTK, [gtk+-2.0 >= 2.6.0], AC_DEFINE(USE_GTK, 1, Define if you want to use the gtk gui), no_gtk=yes)
-  PKG_CHECK_MODULES(CAIRO, [cairo >= 0.9.0], AC_DEFINE(HAVE_CAIRO,1,Define if you want to use libcairo), no_libcairo=yes)
   if test  "$with_board3d" != "no"; then
     no_board3d="no"
     PKG_CHECK_MODULES(GTKGLEXT, [gtkglext-1.0 >= 1.0], AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards]), no_board3d="yes")

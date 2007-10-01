@@ -75,7 +75,7 @@ static gchar *export_get_filename (char *sz)
 	}
 	return filename;
 }
-
+#if HAVE_CAIRO
 #define SIMPLE_BOARD_WIDTH 210.0/25.4*72.0
 #define SIMPLE_BOARD_HEIGHT 297.0/25.4*72.0
 
@@ -119,9 +119,10 @@ static void draw_simple_board_on_surface(matchstate sb_ms, moverecord *sb_pmr, i
 		g_string_free(annotation, TRUE);
 	return;
 }
-
+#endif
 extern void CommandExportPositionSVG(char *sz)
 {
+#if HAVE_CAIRO
 	gchar *filename;
 	int history;
 	int move_nr;
@@ -147,12 +148,14 @@ extern void CommandExportPositionSVG(char *sz)
 	if (surface)
 		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
 	else
-		outputerrf(_("Failed to create svg surface for %s"),
-				filename);
+#endif
+		outputerrf(_("Failed to create SVG surface for %s"),
+				sz);
 }
 
 extern void CommandExportPositionPDF(char *sz)
 {
+#if HAVE_CAIRO
 	gchar *filename;
 	int history;
 	int move_nr;
@@ -177,12 +180,14 @@ extern void CommandExportPositionPDF(char *sz)
 	if (surface)
 		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
 	else
-		outputerrf(_("Failed to create pdf surface for %s"),
-				filename);
+#endif
+		outputerrf(_("Failed to create PDF surface for %s"),
+				sz);
 }
 
 extern void CommandExportPositionPS(char *sz)
 {
+#if HAVE_CAIRO
 	gchar *filename;
 	int history;
 	int move_nr;
@@ -207,8 +212,9 @@ extern void CommandExportPositionPS(char *sz)
 	if (surface)
 		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
 	else
-		outputerrf(_("Failed to create ps surface for %s"),
-				filename);
+#endif
+		outputerrf(_("Failed to create PS surface for %s"),
+				sz);
 }
 
 extern void CommandExportGameEquityEvolution (char *sz)
