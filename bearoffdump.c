@@ -47,7 +47,7 @@ main( int argc, char **argv ) {
       "index", NULL},
     {"posid", 'p', 0, G_OPTION_ARG_STRING, &szPosID,
       "Position ID", NULL},
-    {NULL}
+    {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
   GError *error = NULL;
   GOptionContext *context;

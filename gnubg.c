@@ -373,8 +373,8 @@ rolloutcontext rcRollout =
   0.1,	  /* stop when std's are under 10% of value */
   144,    /* minimum games  */
   1.96,   /* stop when best has j.s.d. for 95% confidence */
-  0
-
+  0,      /* nGamesDone */
+  0,      /* nSkip */
 };
 
 /* parameters for `eval' and `hint' */
@@ -426,6 +426,7 @@ rolloutcontext rcRollout =
   0.1,	  /* stop when std's are under 10% of value */ \
   144,    /* minimum games  */ \
   1.96,   /* stop when best has j.s.d. for 95% confidence */ \
+  0, \
   0 \
   } \
 } 
@@ -477,8 +478,8 @@ storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
 storedcube  sc; 
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP, MOVEFILTER },
-    { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER } 
+    { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL },
+    { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER, 0, NULL } 
 };
 
 /* Usage strings */
@@ -511,7 +512,6 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTNAME[] = N_("[name]"),
     szOPTPOSITION[] = N_("[position]"),
     szOPTSEED[] = N_("[seed]"),
-    szOPTSIZE[] = N_("[size]"),
     szOPTVALUE[] = N_("[value]"),
     szPLAYER[] = N_("<player>"),
     szPLAYEROPTRATING[] = N_("<player> [rating]"),
@@ -519,7 +519,6 @@ static char szDICE[] = N_("<die> <die>"),
     szPOSITION[] = N_("<position>"),
     szPRIORITY[] = N_("<priority>"),
     szPROMPT[] = N_("<prompt>"),
-    szRATE[] = N_("<rate>"),
     szSCORE[] = N_("<score>"),
     szSIZE[] = N_("<size>"),
     szSTEP[] = N_("[game|roll|rolled|marked] [count]"),
@@ -5119,7 +5118,8 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
     return NULL;
 }
 
-static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
+static char **CompleteKeyword( const char *szText, int iStart, int iEnd)
+{
 
     if( fReadingOther )
 	return rl_completion_matches( szText, NullGenerator );
@@ -6213,7 +6213,7 @@ int main(int argc, char *argv[])
 		 N_("Ignore tty input when using window system"), NULL},
 		{"debug", 'd', 0, G_OPTION_ARG_NONE, &debug,
 		 N_("Turn on debug"), NULL},
-		{NULL}
+		{NULL, 0, 0, 0, NULL, NULL, NULL}
 	};
 	GError *error = NULL;
 	GOptionContext *context;

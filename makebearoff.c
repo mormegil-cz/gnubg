@@ -1506,7 +1506,7 @@ extern int main( int argc, char **argv ) {
 		  "Prints version and exits", NULL},
 	  { "outfile", 'f', 0, G_OPTION_ARG_STRING, &szOutput, 
 		  "Required output filename", "filename"}, 
-	  {NULL}
+	  {NULL, 0, 0, 0, NULL, NULL, NULL}
   };
 
   GError *error = NULL;

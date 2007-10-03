@@ -55,7 +55,7 @@
 
 
 #if (LIBXML_VERSION > 20412)
-const static xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
+static const xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
 #endif
 
 typedef struct _parameter {

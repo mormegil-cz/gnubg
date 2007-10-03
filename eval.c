@@ -570,25 +570,25 @@ static void ComputeTable( void )
 
 #if USE_MULTITHREAD
 	static NNState nnStatesStorage[MAX_NUMTHREADS][3] = {
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}},
-		{{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}}
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL},},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}},
+		{{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}}
 	};
 #else
-	static NNState nnStatesStorage[3] = {{NNSTATE_NONE}, {NNSTATE_NONE}, {NNSTATE_NONE}};
+	static NNState nnStatesStorage[3] = {{NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}, {NNSTATE_NONE, NULL, NULL}};
 #endif
 
 static void
@@ -1042,7 +1042,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ], float afInput[] )
      Each entry is an index into aIntermediate above.
   */
     
-  const static int aaRoll[ 21 ][ 4 ] = {
+  static const int aaRoll[ 21 ][ 4 ] = {
     {  0,  2,  5,  9 }, /* 11 */
     {  0,  1,  4, -1 }, /* 21 */
     {  1,  8, 17, 24 }, /* 22 */
@@ -2264,7 +2264,7 @@ raceBGprob(int anBoard[2][25], int side, const bgvariation bgv)
 {
   int totMenHome = 0;
   int totPipsOp = 0;
-  int i;
+  unsigned int i;
   int dummy[2][25];
   
   for(i = 0; i < 6; ++i) {
@@ -2646,7 +2646,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, int an
       positionclass evalClass = 0;
       float arInput[200];
       
-      for(i = 0; (int)i < ml.cMoves; i++) {
+      for(i = 0; i < ml.cMoves; i++) {
 	move* const pm = &ml.amMoves[i];
 	
 	PositionFromKey(anBoard, pm->auch);
@@ -2724,7 +2724,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, int an
 	((cubeinfo*)pci)->fMove = !pci->fMove;
 	if( use ) {
 	move *amMoves = (move*) g_alloca(ml.cMoves * sizeof(move));
-	for(i = 0; (int)i < ml.cMoves; i++) {
+	for(i = 0; i < ml.cMoves; i++) {
 	int const j = bmovesi[i];
 	memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
 	bmovesi[i] = i;
@@ -2741,7 +2741,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, int an
 
     nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
     rBestScore = 99999.9f;
-    for(i = 0; (int)i < ml.cMoves; i++) {
+    for(i = 0; i < ml.cMoves; i++) {
       int const j = use ? bmovesi[i] : i;
       const move* const pm = &ml.amMoves[j];
 	
@@ -4123,83 +4123,7 @@ static void
 DumpAnyContact(int anBoard[ 2 ][ 25 ], char* szOutput,
 	       const bgvariation bgv, int isCrashed )
 {
-#if 0
-  float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
-    arDerivative[ NUM_INPUTS * NUM_OUTPUTS ],
-    ardEdI[ NUM_INPUTS ], *p;
-  int i, j;
-
-  if( isCrashed ) {
-    CalculateCrashedInputs( anBoard, arInput );
-  } else {
-    CalculateContactInputs( anBoard, arInput );
-  }
-    
-  NeuralNetDifferentiate( &nnContact, arInput, arOutput, arDerivative );
-
-  for( i = 0; i < NUM_INPUTS; i++ ) {
-    for( j = 0, p = arDerivative + i; j < NUM_OUTPUTS; p += NUM_INPUTS )
-	    arOutput[ j++ ] = *p;
-
-    ardEdI[ i ] = Utility( arOutput, &ciCubeless ) + 1.0f; 
-    /* FIXME this is a bit grotty -- need to
-       eliminate the constant 1 added by Utility */
-  }
-
-  {
-    float* player = arInput + (25 * MINPPERPOINT + MORE_INPUTS);
-    float* dPlayer = ardEdI + (25 * MINPPERPOINT + MORE_INPUTS);
-    
-  sprintf( szOutput,
-           "Input          \tValue             \t dE/dI\n"
-           "OFF1           \t%5.3f             \t%6.3f\n"
-           "OFF2           \t%5.3f             \t%6.3f\n"
-           "OFF3           \t%5.3f             \t%6.3f\n"
-           "BREAK_CONTACT  \t%5.3f             \t%6.3f\n"
-           "BACK_CHEQUER   \t%5.3f             \t%6.3f\n"
-           "BACK_ANCHOR    \t%5.3f             \t%6.3f\n"
-           "FORWARD_ANCHOR \t%5.3f             \t%6.3f\n"
-           "PIPLOSS        \t%5.3f (%5.3f avg)\t%6.3f\n"
-           "P1             \t%5.3f (%5.3f/36) \t%6.3f\n"
-           "P2             \t%5.3f (%5.3f/36) \t%6.3f\n"
-           "BACKESCAPES    \t%5.3f (%5.3f/36) \t%6.3f\n"
-           "ACONTAIN       \t%5.3f (%5.3f/36) \t%6.3f\n"
-           "CONTAIN        \t%5.3f (%5.3f/36) \t%6.3f\n"
-           "MOBILITY       \t%5.3f             \t%6.3f\n"
-           "MOMENT2        \t%5.3f             \t%6.3f\n"
-           "ENTER          \t%5.3f (%5.3f/12) \t%6.3f\n"
-	   "ENTER2         \t%5.3f             \t%6.3f\n"
-	   "TIMING         \t%5.3f             \t%6.3f\n"
-	   "BACKBONE       \t%5.3f             \t%6.3f\n"
-	   "BACKGAME       \t%5.3f             \t%6.3f\n"
-	   "BACKGAME1      \t%5.3f             \t%6.3f\n"
-	   "FREEPIP        \t%5.3f             \t%6.3f\n",
-           player[ I_OFF1 ], dPlayer[ I_OFF1 ],
-           player[ I_OFF2 ], dPlayer[ I_OFF2 ],
-           player[ I_OFF3 ], dPlayer[ I_OFF3 ],
-           player[ I_BREAK_CONTACT ], dPlayer[ I_BREAK_CONTACT ],
-           player[ I_BACK_CHEQUER ], dPlayer[ I_BACK_CHEQUER ],
-           player[ I_BACK_ANCHOR ], dPlayer[ I_BACK_ANCHOR ],
-           player[ I_FORWARD_ANCHOR ], dPlayer[ I_FORWARD_ANCHOR ],
-           player[ I_PIPLOSS ], 
-           player[ I_P1 ] ? player[ I_PIPLOSS ] / player[ I_P1 ] * 12.0 : 0.0,
-	   dPlayer[ I_PIPLOSS ],
-           player[ I_P1 ], player[ I_P1 ] * 36.0, dPlayer[ I_P1 ],
-           player[ I_P2 ], player[ I_P2 ] * 36.0, dPlayer[ I_P2 ],
-           player[ I_BACKESCAPES ], player[I_BACKESCAPES] * 36.0, dPlayer[ I_BACKESCAPES ],
-           player[ I_ACONTAIN ], player[ I_ACONTAIN ] * 36.0, dPlayer[ I_ACONTAIN ],
-           player[ I_CONTAIN ], player[ I_CONTAIN ] * 36.0, dPlayer[ I_CONTAIN ],
-           player[ I_MOBILITY ], dPlayer[ I_MOBILITY ],
-           player[ I_MOMENT2 ], dPlayer[ I_MOMENT2 ],
-           player[ I_ENTER ], player[ I_ENTER ] * 12.0, dPlayer[ I_ENTER ],
-	   player[ I_ENTER2 ], dPlayer[ I_ENTER2 ],
-	   player[ I_TIMING ], dPlayer[ I_TIMING ],
-	   player[ I_BACKBONE ], dPlayer[ I_BACKBONE ],
-	   player[ I_BACKG ], dPlayer[ I_BACKG ],
-	   player[ I_BACKG1 ], dPlayer[ I_BACKG1 ],
-	   player[ I_FREEPIP ], dPlayer[ I_FREEPIP ] );
-  }
-#endif
+	return;
 }
 
 static int

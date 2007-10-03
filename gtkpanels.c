@@ -74,7 +74,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		TRUE, FALSE, FALSE, FALSE,
 		NULL, NULL,
 		0,
-		{0, 0, 20, 20}
+		{0, 0, 20, 20, FALSE}
 	},
 	/* game list */
 	{
@@ -82,7 +82,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		TRUE, TRUE, TRUE, TRUE,
 		ShowGameWindow, DeleteGame,
 		0,
-		{ 250, 200, 20, 20 }
+		{ 250, 200, 20, 20, FALSE }
 	},
 	/* analysis */
 	{
@@ -90,7 +90,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		TRUE, TRUE, TRUE, TRUE,
 		ShowAnalysis, DeleteAnalysis,
 		0,
-		{ 0, 400, 20, 20 }
+		{ 0, 400, 20, 20, FALSE }
 	},
 	/* annotation */
 	{
@@ -98,7 +98,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		FALSE, TRUE, TRUE, FALSE,
 		ShowAnnotation, DeleteAnnotation,
 		0,
-		{ 0, 400, 20, 20 }
+		{ 0, 400, 20, 20, FALSE }
 	},
 	/* hint */
 	{
@@ -106,7 +106,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		FALSE, FALSE, FALSE, FALSE,
 		NULL, NULL,
 		0,
-		{ 0, 450, 20, 20 }
+		{ 0, 450, 20, 20, FALSE }
 	},
 	/* message */
 	{
@@ -114,7 +114,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		FALSE, TRUE, TRUE, TRUE,
 		ShowMessage, DeleteMessage,
 		0,
-		{ 0, 500, 20, 20 }
+		{ 0, 500, 20, 20, FALSE }
 	},
 	/* command */
 	{
@@ -122,7 +122,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		FALSE, TRUE, TRUE, TRUE,
 		ShowCommandWindow, DeleteCommandWindow,
 		0,
-		{ 0, 0, 20, 20 }
+		{ 0, 0, 20, 20, FALSE }
 	}, 
 	/* theory */
 	{
@@ -130,7 +130,7 @@ windowobject woPanel[NUM_WINDOWS] =
 		FALSE, TRUE, TRUE, TRUE,
 		ShowTheoryWindow, DeleteTheoryWindow,
 		0,
-		{ 0, 0, 20, 20 }
+		{ 0, 0, 20, 20, FALSE }
 	}
 };
 

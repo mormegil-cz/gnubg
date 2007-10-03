@@ -87,6 +87,7 @@ custom_cell_renderer_movelist_get_type (void)
       sizeof (CustomCellRendererMovelist),
       0,                                                        /* n_preallocs */
       (GInstanceInitFunc) custom_cell_renderer_movelist_init,
+      NULL
     };
 
     /* Derive from GtkCellRenderer */

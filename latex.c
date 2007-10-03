@@ -517,9 +517,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	ApplyMoveRecord( &msExport, plGame, pmr );
     }
     
-    if( ( GameStatus( msExport.anBoard, msExport.bgv ) ) )
 	/* FIXME print game result */
-	;
 }
 
 extern void CommandExportGameLaTeX( char *sz ) {
