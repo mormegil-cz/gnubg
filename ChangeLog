@@ -1,3 +1,7 @@
+Wed Oct  3 19:23:28 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* analysis.c, rollout.c: fix to minor mt problems
+
 Wed Oct  3 18:58:41 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* bearoffdump.c eval.c gnubg.c gtkgame.c gtkmovelistctrl.c gtkpanels.c

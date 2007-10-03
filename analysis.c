@@ -1254,6 +1254,7 @@ extern void CommandAnalyseGame( char *sz ) {
   
   nMoves = NumberMovesGame ( plGame );
 
+  progress_offset = 0;
   ProgressStartValue( _("Analysing game; move:"), nMoves );
     
   AnalyzeGame( plGame );

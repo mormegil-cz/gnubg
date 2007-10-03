@@ -1254,12 +1254,10 @@ extern void RolloutLoopMT(void)
       } /* alt = 0; alt < ro_alternatives; ++alt) */
 
     } /* if (rcRollout.fStopOnSTD && (i >= rcRollout.nMinimumGames)) */
-    if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
-      break;
-
 	MT_Release();
 	g_debug("exclusive release: rollout cycle update");
-
+	if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
+		break;
 	}
 }
 
