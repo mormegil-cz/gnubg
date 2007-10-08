@@ -1,3 +1,7 @@
+Mon Oct  8 15:46:22 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gtkcube.c: add rollout presets to cube tool
+
 Wed Oct  3 19:23:28 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, rollout.c: fix to minor mt problems

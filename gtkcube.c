@@ -821,6 +821,34 @@ CubeAnalysisRolloutSettings ( GtkWidget *pw, void *unused )
 
 }
 
+
+static void CubeRolloutPresets(GtkWidget * pw, cubehintdata * pchd)
+{
+	const gchar *preset;
+	gchar *file=NULL;
+	gchar *path=NULL;
+	gchar *command=NULL;
+
+	preset = (const gchar *) gtk_object_get_data(GTK_OBJECT(pw), "user_data");
+	file = g_strdup_printf("%s.rol", preset);
+	path = g_build_filename(szHomeDirectory, "rol", file, NULL);
+	if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
+		command = g_strdup_printf("load commands \"%s\"", path);
+		outputoff();
+		UserCommand(command);
+		outputon();
+		CubeAnalysisRollout(pw, pchd);
+	}
+	else
+	{
+		outputerrf(_("You need to save a preset as \"%s\""), file);
+		CubeAnalysisRolloutSettings(pw, NULL);
+	}
+        g_free(file);
+        g_free(path);
+	g_free(command);
+}
+
 static void
 CubeAnalysisMWC ( GtkWidget *pw, cubehintdata *pchd ) {
 
@@ -886,6 +914,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   GtkWidget *pwply;
   GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
+  GtkWidget *pwRolloutPresets = gtk_hbox_new ( FALSE, 0 );
   GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
@@ -931,26 +960,48 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   }
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 3, 4, 0, 1,
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 3, 4, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 4, 5, 0, 1,
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 4, 5, 0, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 2, 3, 1, 2,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 3, 5, 1, 2,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutPresets, 2, 3, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  for ( i = 0; i < 5; ++i ) {
+	  GtkWidget *ro_preset;
+	  sz = g_strdup_printf ( "%c", i+'a' ); /* string is freed by set_data_full */
+	  ro_preset = gtk_button_new_with_label ( sz );
+
+	  gtk_box_pack_start ( GTK_BOX ( pwRolloutPresets ), ro_preset, TRUE, TRUE, 0 );
+
+	  g_signal_connect( G_OBJECT( ro_preset ), "clicked",
+			  G_CALLBACK( CubeRolloutPresets ), pchd );
+
+	  gtk_object_set_data_full ( GTK_OBJECT ( ro_preset ), "user_data", sz, g_free );
+
+	  sz = g_strdup_printf ( _("Rollout preset %c"), i+'a' );
+	  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), ro_preset, sz, sz );
+	  g_free ( sz );
+
+  }
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 3, 4, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
   gtk_widget_set_sensitive( pwMWC, pchd->ms.nMatchTo );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
