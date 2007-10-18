@@ -21,6 +21,7 @@
 #ifndef _IMPORT_H_
 #define _IMPORT_H_
 
+extern void CommandImportBGRoom(char *);
 extern void CommandImportBKG(char *);
 extern void CommandImportEmpire(char *);
 extern void CommandImportJF(char *);

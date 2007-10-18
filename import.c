@@ -29,7 +29,9 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <time.h>
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 #include <sys/stat.h>
 
 #include "backgammon.h"
@@ -3823,4 +3825,192 @@ extern void CommandImportAuto(char *sz)
 	HandleCommand(cmd, acTop);
 	g_free(cmd);
 	g_free(fdp);
+}
+
+#define BGR_STRING "BGF version"
+int moveNum;
+
+void OutputMove(FILE *fpOut, int side, char *outBuf)
+{
+	if ((side == 0) || (moveNum == 1))
+	{
+		fprintf(fpOut, "%3d) ", moveNum);
+		if (side == 1)
+			fprintf(fpOut, "%28s", " ");
+		moveNum++;
+	}
+	if (side == 0)
+		fprintf(fpOut, "%-27s ", outBuf);
+	else
+		fprintf(fpOut, "%s\n", outBuf);
+}
+
+extern int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
+{
+	char player1[100], player2[100];
+	int p1Score = 0, p2Score = 0;
+	int dice1, dice2;
+	int doubled, stake, side = 0;
+	int gameCount = 0, moveCount;
+	char buffer[1024 * 4];
+
+	do
+	{
+		if (feof(bgrFP))
+			return FALSE;
+		fgets(buffer, sizeof(buffer), bgrFP);
+	} while (strncmp(buffer, BGR_STRING, strlen(BGR_STRING)));
+
+	while (!feof(bgrFP))
+	{
+		char *value, *ptr;
+
+		do
+		{
+			fgets(buffer, sizeof(buffer), bgrFP);
+			if (feof(bgrFP))
+				return FALSE;
+			if (strstr(buffer, "Win the Match"))
+				goto done;
+		} while (strncmp(buffer, "Game ", strlen("Game ")));
+
+		value = buffer + strlen("Game ");
+		gameCount++;
+		ptr = NextTokenGeneral(&value, " ");
+		g_assert(atoi(ptr) == gameCount);
+		ptr = NextTokenGeneral(&value, " ");	/* Skip '-' */
+		strcpy(player1, NextTokenGeneral(&value, " "));
+		ptr = NextTokenGeneral(&value, " ");	/* Skip '(0|X)' */
+		ptr = NextTokenGeneral(&value, " ");	/* Skip 'vs.' */
+		g_assert(!strcmp(ptr, "vs."));
+		strcpy(player2, NextTokenGeneral(&value, " "));
+
+		fgets(buffer, sizeof(buffer), bgrFP);
+		value = buffer;
+		ptr = NextTokenGeneral(&value, " ");
+		g_assert(!strcmp(ptr, "Single"));
+
+		fprintf(matFP, " 0 point match\n\n Game %d\n %s : %-22d %s : %d\n",
+			gameCount, player1, p1Score, player2, p2Score);
+
+		/* Game Moves */
+		moveCount = 0;
+		moveNum = 1;
+		doubled = FALSE;
+		stake = 1;
+		while (!feof(bgrFP))
+		{
+			char outBuf[100];
+			fgets(buffer, sizeof(buffer), bgrFP);
+			while (buffer[strlen(buffer) - 1] == '\n')
+				buffer[strlen(buffer) - 1] = '\0';
+			if (!*buffer)
+			{
+				if (doubled)
+				{	/* Drop */
+					side = !side;
+					OutputMove(matFP, side, " Drops");
+				}
+				fprintf(matFP, "      Wins %d points\n", stake);
+				break;	/* end of game */
+			}
+
+			moveCount++;
+			if (doubled)
+			{	/* Taken */
+				stake *= 2;
+				side = !side;
+				doubled = FALSE;
+				OutputMove(matFP, side, " Takes");
+			}
+
+			value = buffer;
+			ptr = NextTokenGeneral(&value, ".");
+			g_assert(atoi(ptr) == moveCount);
+
+			ptr = NextTokenGeneral(&value, ":");
+			if (!strcmp(ptr, "X"))
+				side = 0;
+			else if (!strcmp(ptr, "0"))
+				side = 1;
+			else
+			{
+				printf("Unrecognised data in file: %s", ptr);
+				continue;
+			}
+
+			if (!strcmp(value, "Double"))
+			{
+				doubled = TRUE;
+				sprintf(outBuf, " Doubles => %d", stake * 2);
+			}
+			else
+			{
+				g_assert(*value == '(');
+				value++;
+				ptr = NextTokenGeneral(&value, " ");
+				dice1 = atoi(ptr);
+				ptr = NextTokenGeneral(&value, ")");
+				dice2 = atoi(ptr);
+
+				if (!strcmp(value, "can't move"))
+					value[0] = '\0';
+
+				sprintf(outBuf, "%d%d: %s", dice1, dice2, value);
+			}
+			OutputMove(matFP, side, outBuf);
+		}
+	}
+done:
+	fclose(bgrFP);
+	fclose(matFP);
+
+	return TRUE;
+}
+
+extern void CommandImportBGRoom(char *sz)
+{
+    FILE *gamf, *matf, *pf;
+    char *matfile;
+    int rc;
+
+    sz = NextToken( &sz );
+
+    if (!sz || !*sz)
+	{
+		outputl( _("You must specify a BackGammonRoom file to import (see `help "
+		 "import bgroom').") );
+	return;
+    }
+
+    if (! (gamf = fopen( sz, "r" ))) {
+            outputerr(sz);
+            return;
+    }
+
+    matfile = g_strdup_printf("%s.mat", sz);
+    if (! (matf = fopen( matfile, "w" ))) {
+            outputerr(matfile);
+            g_free(matfile);
+            fclose(gamf);
+            return;
+    }
+
+    if (ConvertBackGammonRoomFileToMat(gamf, matf)) {
+            if( ( pf = fopen( matfile, "r" ) ) ) {
+                    rc = ImportMat( pf, matfile);
+                    fclose( pf );
+                    if ( !rc )
+                    {
+                            setDefaultFileName ( matfile );
+                            if ( fGotoFirstGame )
+                                    CommandFirstGame( NULL );
+                    }
+            } else
+                    outputerr( matfile );
+    }
+    else
+            outputerrf("Failed to convert gam to mat\n");
+
+    g_free(matfile);
 }

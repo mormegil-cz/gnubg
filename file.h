@@ -41,6 +41,7 @@ typedef enum
 	IMPORT_TMG,
 	IMPORT_EMPIRE,
 	IMPORT_PARTY,
+	IMPORT_BGROOM,
 	N_IMPORT_TYPES
 }ImportType;
 

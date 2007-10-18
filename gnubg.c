@@ -748,6 +748,8 @@ command cER = {
       szFILENAME, &cFilename },
     { "party", CommandImportParty, N_("Import a PartyGammon game file"),
       szFILENAME, &cFilename },
+    { "bgroom", CommandImportBGRoom, N_("Import a BackGammonRoom game file"),
+      szFILENAME, &cFilename },
     { "pos", CommandImportJF, 
       N_("Import a Jellyfish position file"), szFILENAME,
       &cFilename },
