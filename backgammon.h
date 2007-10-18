@@ -1026,6 +1026,7 @@ extern void SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc );
 
 #ifdef WIN32
 extern char * getInstallDir( void );
+#undef PKGDATADIR
 #define PKGDATADIR getInstallDir()
 #endif
 

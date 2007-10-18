@@ -14,14 +14,14 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	play gtkprefs gtkmovefilter gtkrace gtktheory \
 	htmlimages \
 	html import multithread latex matchequity \
-	matchid positionid postscript pub_eval record \
+	matchid positionid pub_eval record \
 	render rollout set sgf non-src/sgfl non-src/sgfp show sound \
 	text osr gtksplash gtkcolour renderprefs speed openurl \
 	gtkrolls boardpos gtktempmap progress format gtktoolbar \
 	gtkoptions formatgs \
 	timer mec relational gtkgamelist \
 	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
-	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file
+	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file simpleboard
 
 OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
 
@@ -59,7 +59,7 @@ LIBPATH = -L./lib -L./board3d
 LIBS = \
        -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
        -lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
-       -liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
+       -liconv -lpng -lz -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
        -lopengl32 -lglu32 -lglut32 -lwsock32 \
        -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
        -lart_lgpl_2 -llibintl -lcairo -lgthread-2.0.dll
@@ -101,6 +101,10 @@ obj\non-src:
 
 obj:
 	@mkdir obj
+
+obj/sgf.o:
+	@echo Compiling sgf.c
+	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c sgf.c
 
 obj/%.o: %.c
 	@echo Compiling $<

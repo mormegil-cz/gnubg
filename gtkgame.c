@@ -3986,6 +3986,7 @@ extern void InitGTK( int *argc, char ***argv )
 #endif
 }
 
+#ifndef WIN32
 static gint python_run_file (gpointer file)
 { 
         g_assert(file);
@@ -3998,6 +3999,7 @@ static gint python_run_file (gpointer file)
         g_free(file);
         return FALSE;
 }
+#endif
 
 enum {RE_NONE, RE_LANGUAGE_CHANGE};
 

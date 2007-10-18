@@ -50,6 +50,7 @@
 #include "simpleboard.h"
 #endif
 
+#if HAVE_CAIRO
 static gchar *export_get_filename (char *sz)
 {
 	gchar *filename=NULL;
@@ -75,7 +76,6 @@ static gchar *export_get_filename (char *sz)
 	}
 	return filename;
 }
-#if HAVE_CAIRO
 #define SIMPLE_BOARD_WIDTH 210.0/25.4*72.0
 #define SIMPLE_BOARD_HEIGHT 297.0/25.4*72.0
 
