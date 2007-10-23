@@ -36,25 +36,6 @@ extern int fX, fNeedPrompt;
 extern unsigned int nDelay;
 extern guint nNextTurn; /* GTK idle function */
 
-#define NUM_CMD_HISTORY 10
-struct CommandEntryData_T
-{
-	GtkWidget *pwEntry, *pwHelpText, *cmdEntryCombo;
-	int showHelp;
-	char* cmdHistory[NUM_CMD_HISTORY];
-	int numHistory;
-	int completing;
-	int modal;
-	char* cmdString;
-};
-
-extern gboolean CommandKeyPress(GtkWidget *widget, GdkEventKey *event, struct CommandEntryData_T *pData);
-extern void CommandTextChange(GtkEntry *entry, struct CommandEntryData_T *pData);
-extern void CommandOK( GtkWidget *pw, struct CommandEntryData_T *pData );
-extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData);
-extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct CommandEntryData_T *pData);
-extern void PopulateCommandHistory(struct CommandEntryData_T *pData);
-
 extern GtkWidget *pwMain, *pwMenuBar;
 extern GtkWidget *pwToolbar;
 extern GtkTooltips *ptt;
@@ -246,7 +227,6 @@ extern GtkWidget *pwMoveAnalysis;
 extern GdkColor wlCol;
 extern GtkItemFactory *pif;
 extern void ShowMove ( hintdata *phd, const int f );
-extern struct CommandEntryData_T cedPanel;
 extern GtkWidget *pom;
 extern GtkWidget *hpaned;
 #endif

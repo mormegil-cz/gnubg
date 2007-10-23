@@ -80,7 +80,6 @@
 #endif
 
 #define KEY_ESCAPE -229
-#define KEY_TAB -247
 
 /* Offset action to avoid predefined values */
 #define TOOLBAR_ACTION_OFFSET 10000
@@ -109,7 +108,6 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
 }
 #endif
 
-struct CommandEntryData_T cedDialog, cedPanel;
 
 char* warningStrings[WARN_NUM_WARNINGS] =
 {
@@ -1535,7 +1533,7 @@ static void ToolbarStyle(gpointer    callback_data,
 
 GtkClipboard *clipboard = NULL;
 
-static void CopyText()
+static void CopyText(void)
 {
 	GtkWidget *pFocus;
 	GtkTextIter start, end;
@@ -1557,7 +1555,7 @@ static void CopyText()
 	GTKTextToClipboard(text);
 }
 
-static void PasteText()
+static void PasteText(void)
 {
 	GtkWidget *pFocus;
 	GtkTextBuffer *buffer;
@@ -3881,7 +3879,7 @@ static void CreateMainWindow(void)
 			G_CALLBACK( gtk_main_quit ), NULL );
 }
 
-static void gnubg_set_default_icon()
+static void gnubg_set_default_icon(void)
 {
 	 gchar *iconA, *iconB;
 	 GError *error=NULL;
@@ -3898,99 +3896,75 @@ static void gnubg_set_default_icon()
 	g_free(iconB);
 }
 
-extern void InitGTK( int *argc, char ***argv )
+extern void InitGTK(int *argc, char ***argv)
 {
-    int anBoardTemp[ 2 ][ 25 ];
-    int i;
-    char *sz;
-
-    gtk_set_locale();
-    sz = g_build_filename(PKGDATADIR,  "gnubg.gtkrc", NULL);
-    gtk_rc_add_default_file( sz  );
-    g_free(sz);
-
-    sz = g_build_filename(szHomeDirectory, "gnubg.gtkrc", NULL );
-    gtk_rc_add_default_file( sz );
-    g_free(sz);
-
-    fX = gtk_init_check( argc, argv ); 
-    if(!fX)
-	return;
-
-#if USE_BOARD3D
-	/* Initialize openGL widget library */
-    InitGTK3d(argc, argv);
-#endif
-
-    fnAction = HandleXAction;
-
-    gdk_rgb_init();
-    gdk_rgb_set_min_colors( 2 * 2 * 2 );
-    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
-    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
-
-    {
 #include "xpm/gnu.xpm"
 #include "xpm/question.xpm"
+	char *sz;
+	GtkIconFactory *pif;
+	GdkAtom cb = gdk_atom_intern("CLIPBOARD", TRUE);
+	BoardData *bd;
 
-	GtkIconFactory *pif = gtk_icon_factory_new();
+	fX = gtk_init_check(argc, argv);
+	if (!fX)
+		return;
 
-	gtk_icon_factory_add_default( pif );
+	sz = g_build_filename(PKGDATADIR, "gnubg.gtkrc", NULL);
+	gtk_rc_add_default_file(sz);
+	g_free(sz);
 
-	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
-		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)gnu_xpm)));
-	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU_QUESTION,
-		gtk_icon_set_new_from_pixbuf(gdk_pixbuf_new_from_xpm_data((const char**)question_xpm)));
-	}
+	sz = g_build_filename(szHomeDirectory, "gnubg.gtkrc", NULL);
+	gtk_rc_add_default_file(sz);
+	g_free(sz);
 
-    ptt = gtk_tooltips_new();
-
-    sz = g_build_filename (szHomeDirectory, "gnubgmenurc", NULL);
-    gtk_accel_map_load( sz );
-    g_free(sz);
-
-    gnubg_set_default_icon();
-	CreateMainWindow();
-
-    ListCreate( &lOutput );
-
-    cedDialog.showHelp = 0;
-    cedDialog.numHistory = 0;
-    cedDialog.completing = 0;
-    cedDialog.modal = TRUE;
-
-    cedPanel.showHelp = 0;
-    cedPanel.numHistory = 0;
-    cedPanel.completing = 0;
-    cedPanel.modal = FALSE;
-
-{
-  GdkAtom cb = gdk_atom_intern("CLIPBOARD", TRUE);
-  clipboard = gtk_clipboard_get(cb);
-  if (!clipboard)
-    printf("Failed to get clipboard!\n");
-}
-
-	/* Clear board at startup */
-	for( i = 0; i < 25; i++ )
-		anBoardTemp[ 0 ][ i ] = anBoardTemp[ 1 ][ i ] = 0;
-	game_set(BOARD(pwBoard), anBoardTemp, 0, "", "", 0, 0, 0, 0, 0, FALSE, anChequers[ms.bgv]);
+	sz = g_build_filename(szHomeDirectory, "gnubgmenurc", NULL);
+	gtk_accel_map_load(sz);
+	g_free(sz);
 
 #if USE_BOARD3D
-    BoardData *bd = BOARD(pwBoard)->board_data;
-    /* If using 3d board initilize 3d widget */
-    if (display_is_3d(bd->rd))
-            Init3d();
-    /* If no 3d settings loaded, set appearance to first design */
-    Default3dSettings(bd);
+	InitGTK3d(argc, argv);
+#endif
+
+	/*function pointer to IO handler*/
+	fnAction = HandleXAction;
+
+	/*add two xpm based icons*/
+	pif = gtk_icon_factory_new();
+	gtk_icon_factory_add_default(pif);
+	gtk_icon_factory_add(pif, GTK_STOCK_DIALOG_GNU,
+			     gtk_icon_set_new_from_pixbuf
+			     (gdk_pixbuf_new_from_xpm_data
+			      ((const char **) gnu_xpm)));
+	gtk_icon_factory_add(pif, GTK_STOCK_DIALOG_GNU_QUESTION,
+			     gtk_icon_set_new_from_pixbuf
+			     (gdk_pixbuf_new_from_xpm_data
+			      ((const char **) question_xpm)));
+
+	ptt = gtk_tooltips_new();
+	
+	gnubg_set_default_icon();
+
+	CreateMainWindow();
+
+	/*Create list for handling messages from output* functions*/
+	ListCreate(&lOutput);
+
+	cb = gdk_atom_intern("CLIPBOARD", TRUE);
+	clipboard = gtk_clipboard_get(cb);
+
+#if USE_BOARD3D
+	bd = BOARD(pwBoard)->board_data;
+	if (display_is_3d(bd->rd))
+		Init3d();
+	Default3dSettings(bd);
 #endif
 }
 
 #ifndef WIN32
 static gint python_run_file (gpointer file)
 { 
-        g_assert(file);
 	char *pch;
+        g_assert(file);
         pch = g_strdup_printf(">import sys;"
 		   "sys.argv=['','-n', '%s'];"
 		   "import idlelib.PyShell;" "idlelib.PyShell.main()", (char *)file);
@@ -4354,260 +4328,6 @@ extern void GTKOutputNew( void ) {
     while( !fFinishedPopping );
 }
 
-/* Show dynamic help as command entered */
-
-extern command *FindHelpCommand( command *pcBase, char *sz,
-				 char *pchCommand, char *pchUsage );
-
-/* Display help for command (pStr) in widget (pwText) */
-static void ShowHelp(GtkWidget *pwText, char* pStr)
-{
-	command *pc, *pcFull;
-	char szCommand[128], szUsage[128], szBuf[255], *cc, *pTemp;
-	command cTop = { NULL, NULL, NULL, NULL, acTop };
-        GtkTextBuffer *buffer;
-        GtkTextIter iter;
-
-	/* Copy string as token striping corrupts string */
-	pTemp = malloc(strlen(pStr) + 1);
-	strcpy(pTemp, pStr);
-	cc = CheckCommand(pTemp, acTop);
-
-        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwText));
-
-	if (cc)
-	{
-		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
-                gtk_text_buffer_set_text(buffer, szBuf, -1);
-	}
-	else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage)))
-	{
-                gtk_text_buffer_set_text(buffer, "", -1);
-                gtk_text_buffer_get_end_iter (buffer, &iter);
-		if (!*pStr)
-		{
-                        gtk_text_buffer_insert( buffer, &iter,
-				_("Available commands:\n"), -1);
-		}
-		else
-		{
-			if(!pc->szHelp )
-			{	/* The command is an abbreviation, search for the full version */
-				for( pcFull = acTop; pcFull->sz; pcFull++ )
-				{
-					if( pcFull->pf == pc->pf && pcFull->szHelp )
-					{
-						pc = pcFull;
-						strcpy(szCommand, pc->sz);
-						break;
-					}
-				}
-			}
-
-			sprintf(szBuf, "Command: %s\n", szCommand);
-                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
-                        gtk_text_buffer_insert( buffer, &iter, gettext ( pc->szHelp ), -1);
-			sprintf(szBuf, "\n\nUsage: %s", szUsage);
-                        gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
-
-			if(!( pc->pc && pc->pc->sz ))
-                                gtk_text_buffer_insert( buffer, &iter, "\n", -1);
-			else
-			{
-                                gtk_text_buffer_insert( buffer, &iter, _("<subcommand>\n"), -1);
-                                gtk_text_buffer_insert( buffer, &iter,
-					_("Available subcommands:\n"), -1);
-			}
-		}
-
-		pc = pc->pc;
-
-		while(pc && pc->sz)
-		{
-			if( pc->szHelp )
-			{
-				sprintf(szBuf, "%-15s\t%s\n", pc->sz, gettext ( pc->szHelp ) );
-                                gtk_text_buffer_insert( buffer, &iter, szBuf, -1);
-			}
-			pc++;
-		}
-	}
-	free(pTemp);
-}
-
-extern void PopulateCommandHistory(struct CommandEntryData_T *pData)
-{
-	GList *glist;
-	int i;
-
-	glist = NULL;
-	for (i = 0; i < pData->numHistory; i++)
-		glist = g_list_append(glist, pData->cmdHistory[i]);
-	if (glist)
-	{
-		gtk_combo_set_popdown_strings(GTK_COMBO(pData->cmdEntryCombo), glist);
-		g_list_free(glist);
-	}
-}
-
-extern void CommandOK( GtkWidget *pw, struct CommandEntryData_T *pData )
-{
-	int i, found = -1;
-	pData->cmdString = gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 );
-
-	/* Update command history */
-
-	/* See if already in history */
-	for (i = 0; i < pData->numHistory; i++)
-	{
-		if (!strcasecmp(pData->cmdString, pData->cmdHistory[i]))
-		{
-			found = i;
-			break;
-		}
-	}
-	if (found != -1)
-	{	/* Remove old entry */
-		free(pData->cmdHistory[found]);
-		pData->numHistory--;
-		for (i = found; i < pData->numHistory; i++)
-			pData->cmdHistory[i] = pData->cmdHistory[i + 1];
-	}
-
-	if (pData->numHistory == NUM_CMD_HISTORY)
-	{
-		free(pData->cmdHistory[NUM_CMD_HISTORY - 1]);
-		pData->numHistory--;
-	}
-	for (i = pData->numHistory; i > 0; i--)
-		pData->cmdHistory[i] = pData->cmdHistory[i - 1];
-
-	pData->cmdHistory[0] = malloc(strlen(pData->cmdString) + 1);
-	strcpy(pData->cmdHistory[0], pData->cmdString);
-	pData->numHistory++;
-
-	if (pData->modal)
-		gtk_widget_destroy(gtk_widget_get_toplevel(pw));
-	else
-	{
-		PopulateCommandHistory(pData);
-		gtk_entry_set_text(GTK_ENTRY(pData->pwEntry), "");
-	}
-
-	if (pData->cmdString)
-	{
-		UserCommand(pData->cmdString);
-		g_free(pData->cmdString);
-	}
-}
-
-extern void CommandTextChange(GtkEntry *entry, struct CommandEntryData_T *pData)
-{
-	if (pData->showHelp)
-	{
-		if (!pData->modal)
-		{	/* Make sure the message window is showing */
-			if (!PanelShowing(WINDOW_MESSAGE))
-				PanelShow(WINDOW_MESSAGE);
-		}
-		ShowHelp(pData->pwHelpText, gtk_editable_get_chars(GTK_EDITABLE(entry), 0, -1));
-	}
-}
-
-static void CreateHelpText(struct CommandEntryData_T *pData)
-{
-        GtkWidget *psw;
-	pData->pwHelpText = gtk_text_view_new ();
-	gtk_widget_set_usize(pData->pwHelpText, 400, 300);
-	psw = gtk_scrolled_window_new( NULL, NULL );
-        gtk_container_add(GTK_CONTAINER(psw), pData->pwHelpText);
-	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-					GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-	CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
-}
-
-extern void ShowHelpToggled(GtkWidget *widget, struct CommandEntryData_T *pData)
-{
-	if (!pData->pwHelpText)
-		CreateHelpText(pData);
-
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
-	{
-		pData->showHelp = 1;
-		if (pData->modal)
-		{
-			gtk_widget_show(pData->pwHelpText);
-		}
-		CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
-	}
-	else
-	{
-		pData->showHelp = 0;
-		if (pData->modal)
-		{
-			gtk_widget_hide(pData->pwHelpText);
-		}
-	}
-	gtk_widget_grab_focus(pData->pwEntry);
-}
-
-/* Capitalize first letter of each word */
-static void Capitalize(char* str)
-{
-	int cap = 1;
-	while (*str)
-	{
-		if (cap)
-		{
-			if (*str >= 'a' && *str <= 'z')
-				*str += 'A' - 'a';
-			cap = 0;
-		}
-		else
-		{
-			if (*str == ' ')
-				cap = 1;
-			if (*str >= 'A' && *str <= 'Z')
-				*str -= 'A' - 'a';
-		}
-		str++;
-	}
-}
-
-extern gboolean CommandKeyPress(GtkWidget *widget, GdkEventKey *event, struct CommandEntryData_T *pData)
-{
-	short k = event->keyval;
-
-	if (k == KEY_TAB)
-	{	/* Tab press - auto complete */
-		command *pc;
-		char szCommand[128], szUsage[128];
-		command cTop = { NULL, NULL, NULL, NULL, acTop };
-		if ((pc = FindHelpCommand(&cTop, gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 ), szCommand, szUsage)))
-		{
-			Capitalize(szCommand);
-			gtk_entry_set_text( GTK_ENTRY( pData->pwEntry ), szCommand );
-		}
-		/* Gtk 1 not good at stoping focus moving - so just move back later */
-		pData->completing = 1;
-	}
-	return FALSE;
-}
-
-extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct CommandEntryData_T *pData)
-{
-	if (pData->completing)
-	{
-		/* Gtk 1 not good at stoping focus moving - so just move back now */
-		pData->completing = 0;
-		gtk_widget_grab_focus( pData->pwEntry );
-		gtk_editable_set_position(GTK_EDITABLE(pData->pwEntry), strlen(gtk_editable_get_chars( GTK_EDITABLE( pData->pwEntry ), 0, -1 )));
-		return TRUE;
-	}
-	else
-		return FALSE;
-}	
-
 typedef struct _newwidget {
   GtkWidget *pwCPS, *pwML, *pwGNUvsHuman,
       *pwHumanHuman, *pwManualDice, *pwTutorMode;
@@ -4736,8 +4456,7 @@ extern int edit_new(int length)
 
 static void edit_new_clicked(GtkWidget * pw, newwidget * pnw)
 {
-	int length =
-	    (int) gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+	int length = gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 	edit_new(length);
 	if (!ToolbarIsEditing(NULL))
@@ -4867,14 +4586,13 @@ static GtkWidget *NewWidget( newwidget *pnw){
 } 
 
 static void NewOK( GtkWidget *pw, newwidget *pnw ) {
-  
-  int Mlength = (int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+  char sz[40];
+  int Mlength = gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
 
   UpdatePlayerSettings(pnw);
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
-  char sz[40];
   sprintf(sz, "new match %d", Mlength );
   UserCommand(sz);
 }
@@ -7419,7 +7137,7 @@ static void StatcontextCopy(GtkWidget *pw, GtkWidget *pwList)
 }
 
 
-static GtkWidget *CreateList()
+static GtkWidget *CreateList(void)
 {
 	int i;
         static char *aszEmpty[] = { NULL, NULL, NULL };

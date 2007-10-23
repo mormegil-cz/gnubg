@@ -38,6 +38,25 @@
 static int fDisplayPanels = TRUE;
 static int fDockPanels = TRUE;
 
+#define NUM_CMD_HISTORY 10
+#define KEY_TAB -247
+
+typedef struct _CommandEntryData_T {
+	GtkWidget *pwEntry, *pwHelpText, *cmdEntryCombo;
+	int showHelp;
+	int numHistory;
+	int completing;
+	char *cmdString;
+	char *cmdHistory[NUM_CMD_HISTORY];
+} CommandEntryData_T;
+
+static CommandEntryData_T cedPanel = {
+	NULL, NULL, NULL, 0, 0, 0, NULL,
+	{NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}
+};
+
+
+
 typedef gboolean (*panelFun)();
 
 static gboolean DeleteMessage ( void );
@@ -347,6 +366,239 @@ static GtkWidget *CreateTheoryWindow( void )
 	return woPanel[WINDOW_THEORY].pwWin;
 }
 
+/* Display help for command (pStr) in widget (pwText) */
+static void ShowHelp(GtkWidget * pwText, char *pStr)
+{
+	command *pc, *pcFull;
+	char szCommand[128], szUsage[128], szBuf[255], *cc, *pTemp;
+	command cTop = { NULL, NULL, NULL, NULL, acTop };
+	GtkTextBuffer *buffer;
+	GtkTextIter iter;
+
+	/* Copy string as token striping corrupts string */
+	pTemp = malloc(strlen(pStr) + 1);
+	strcpy(pTemp, pStr);
+	cc = CheckCommand(pTemp, acTop);
+
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwText));
+
+	if (cc) {
+		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
+		gtk_text_buffer_set_text(buffer, szBuf, -1);
+	} else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage))) {
+		gtk_text_buffer_set_text(buffer, "", -1);
+		gtk_text_buffer_get_end_iter(buffer, &iter);
+		if (!*pStr) {
+			gtk_text_buffer_insert(buffer, &iter,
+					       _("Available commands:\n"),
+					       -1);
+		} else {
+			if (!pc->szHelp) {	/* The command is an abbreviation, search for the full version */
+				for (pcFull = acTop; pcFull->sz; pcFull++) {
+					if (pcFull->pf == pc->pf
+					    && pcFull->szHelp) {
+						pc = pcFull;
+						strcpy(szCommand, pc->sz);
+						break;
+					}
+				}
+			}
+
+			sprintf(szBuf, "Command: %s\n", szCommand);
+			gtk_text_buffer_insert(buffer, &iter, szBuf, -1);
+			gtk_text_buffer_insert(buffer, &iter,
+					       gettext(pc->szHelp), -1);
+			sprintf(szBuf, "\n\nUsage: %s", szUsage);
+			gtk_text_buffer_insert(buffer, &iter, szBuf, -1);
+
+			if (!(pc->pc && pc->pc->sz))
+				gtk_text_buffer_insert(buffer, &iter, "\n",
+						       -1);
+			else {
+				gtk_text_buffer_insert(buffer, &iter,
+						       _("<subcommand>\n"),
+						       -1);
+				gtk_text_buffer_insert(buffer, &iter,
+						       _
+						       ("Available subcommands:\n"),
+						       -1);
+			}
+		}
+
+		pc = pc->pc;
+
+		while (pc && pc->sz) {
+			if (pc->szHelp) {
+				sprintf(szBuf, "%-15s\t%s\n", pc->sz,
+					gettext(pc->szHelp));
+				gtk_text_buffer_insert(buffer, &iter,
+						       szBuf, -1);
+			}
+			pc++;
+		}
+	}
+	free(pTemp);
+}
+
+static void PopulateCommandHistory(CommandEntryData_T *pData)
+{
+	GList *glist;
+	int i;
+
+	glist = NULL;
+	for (i = 0; i < pData->numHistory; i++)
+		glist = g_list_append(glist, pData->cmdHistory[i]);
+	if (glist) {
+		gtk_combo_set_popdown_strings(GTK_COMBO
+					      (pData->cmdEntryCombo),
+					      glist);
+		g_list_free(glist);
+	}
+}
+
+static void CommandOK(GtkWidget * pw, CommandEntryData_T *pData)
+{
+	int i, found = -1;
+	pData->cmdString =
+	    gtk_editable_get_chars(GTK_EDITABLE(pData->pwEntry), 0, -1);
+
+	/* Update command history */
+
+	/* See if already in history */
+	for (i = 0; i < pData->numHistory; i++) {
+		if (!strcasecmp(pData->cmdString, pData->cmdHistory[i])) {
+			found = i;
+			break;
+		}
+	}
+	if (found != -1) {	/* Remove old entry */
+		free(pData->cmdHistory[found]);
+		pData->numHistory--;
+		for (i = found; i < pData->numHistory; i++)
+			pData->cmdHistory[i] = pData->cmdHistory[i + 1];
+	}
+
+	if (pData->numHistory == NUM_CMD_HISTORY) {
+		free(pData->cmdHistory[NUM_CMD_HISTORY - 1]);
+		pData->numHistory--;
+	}
+	for (i = pData->numHistory; i > 0; i--)
+		pData->cmdHistory[i] = pData->cmdHistory[i - 1];
+
+	pData->cmdHistory[0] = malloc(strlen(pData->cmdString) + 1);
+	strcpy(pData->cmdHistory[0], pData->cmdString);
+	pData->numHistory++;
+	PopulateCommandHistory(pData);
+	gtk_entry_set_text(GTK_ENTRY(pData->pwEntry), "");
+
+	if (pData->cmdString) {
+		UserCommand(pData->cmdString);
+		g_free(pData->cmdString);
+	}
+}
+
+static void CommandTextChange(GtkEntry * entry,
+			      CommandEntryData_T *pData)
+{
+	if (pData->showHelp) {
+		/* Make sure the message window is showing */
+		if (!PanelShowing(WINDOW_MESSAGE))
+			PanelShow(WINDOW_MESSAGE);
+
+		ShowHelp(pData->pwHelpText,
+			 gtk_editable_get_chars(GTK_EDITABLE(entry), 0,
+						-1));
+	}
+}
+
+static void CreateHelpText(CommandEntryData_T *pData)
+{
+	GtkWidget *psw;
+	pData->pwHelpText = gtk_text_view_new();
+	gtk_widget_set_usize(pData->pwHelpText, 400, 300);
+	psw = gtk_scrolled_window_new(NULL, NULL);
+	gtk_container_add(GTK_CONTAINER(psw), pData->pwHelpText);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(psw),
+				       GTK_POLICY_NEVER,
+				       GTK_POLICY_AUTOMATIC);
+	CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
+}
+
+static void ShowHelpToggled(GtkWidget * widget,
+			    CommandEntryData_T *pData)
+{
+	if (!pData->pwHelpText)
+		CreateHelpText(pData);
+
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget))) {
+		pData->showHelp = 1;
+		CommandTextChange(GTK_ENTRY(pData->pwEntry), pData);
+	} else
+		pData->showHelp = 0;
+	gtk_widget_grab_focus(pData->pwEntry);
+}
+
+/* Capitalize first letter of each word */
+static void Capitalize(char *str)
+{
+	int cap = 1;
+	while (*str) {
+		if (cap) {
+			if (*str >= 'a' && *str <= 'z')
+				*str += 'A' - 'a';
+			cap = 0;
+		} else {
+			if (*str == ' ')
+				cap = 1;
+			if (*str >= 'A' && *str <= 'Z')
+				*str -= 'A' - 'a';
+		}
+		str++;
+	}
+}
+
+static gboolean CommandKeyPress(GtkWidget * widget, GdkEventKey * event,
+				CommandEntryData_T *pData)
+{
+	short k = event->keyval;
+
+	if (k == KEY_TAB) {	/* Tab press - auto complete */
+		command *pc;
+		char szCommand[128], szUsage[128];
+		command cTop = { NULL, NULL, NULL, NULL, acTop };
+		if ((pc =
+		     FindHelpCommand(&cTop,
+				     gtk_editable_get_chars(GTK_EDITABLE
+							    (pData->
+							     pwEntry), 0,
+							    -1), szCommand,
+				     szUsage))) {
+			Capitalize(szCommand);
+			gtk_entry_set_text(GTK_ENTRY(pData->pwEntry),
+					   szCommand);
+		}
+		/* Gtk 1 not good at stoping focus moving - so just move back later */
+		pData->completing = 1;
+	}
+	return FALSE;
+}
+
+static gboolean CommandFocusIn(GtkWidget * widget, GdkEventFocus * event,
+			       CommandEntryData_T *pData)
+{
+	if (pData->completing) {
+		/* Gtk 1 not good at stoping focus moving - so just move back now */
+		pData->completing = 0;
+		gtk_widget_grab_focus(pData->pwEntry);
+		gtk_editable_set_position(GTK_EDITABLE(pData->pwEntry),
+					  strlen(gtk_editable_get_chars
+						 (GTK_EDITABLE
+						  (pData->pwEntry), 0,
+						  -1)));
+		return TRUE;
+	} else
+		return FALSE;
+}
 static GtkWidget *CreateCommandWindow( void )
 {
     GtkWidget *pwhbox;
@@ -578,7 +830,7 @@ static void CreateHeadWindow(gnubgwindow panel, const char* sz, GtkWidget* pwWid
 	woPanel[panel].pwWin = pwVbox;
 }
 
-static void CreatePanels()
+static void CreatePanels(void)
 {
    CreateGameWindow();
    gtk_box_pack_start( GTK_BOX( pwPanelVbox ), woPanel[WINDOW_GAME].pwWin, TRUE, TRUE, 0 );
@@ -994,7 +1246,7 @@ void ShowHidePanel(gnubgwindow panel)
 		woPanel[panel].hideFun();
 }
 
-int SetMainWindowSize()
+int SetMainWindowSize(void)
 {
 	if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
 	{
@@ -1263,17 +1515,17 @@ CommandShowGeometry ( char *sz )
 	}
 }
 
-int DockedPanelsShowing()
+int DockedPanelsShowing(void)
 {
 	return fDockPanels && fDisplayPanels;
 }
 
-int ArePanelsShowing()
+int ArePanelsShowing(void)
 {
 	return fDisplayPanels;
 }
 
-int ArePanelsDocked()
+int ArePanelsDocked(void)
 {
 	return fDockPanels;
 }

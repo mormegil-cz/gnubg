@@ -1,3 +1,8 @@
+Tue Oct 23 12:38:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* gktgame.c, gtkpanels.c: cleanup of InitGTK, move command widget to
+	gtkpanels.c
+
 Mon Oct  8 15:46:22 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gtkcube.c: add rollout presets to cube tool
