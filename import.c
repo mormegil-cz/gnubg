@@ -3830,7 +3830,7 @@ extern void CommandImportAuto(char *sz)
 #define BGR_STRING "BGF version"
 int moveNum;
 
-void OutputMove(FILE *fpOut, int side, char *outBuf)
+static void OutputMove(FILE *fpOut, int side, char *outBuf)
 {
 	if ((side == 0) || (moveNum == 1))
 	{
@@ -3845,7 +3845,7 @@ void OutputMove(FILE *fpOut, int side, char *outBuf)
 		fprintf(fpOut, "%s\n", outBuf);
 }
 
-extern int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
+static int ConvertBackGammonRoomFileToMat(FILE *bgrFP, FILE *matFP)
 {
 	char player1[100], player2[100];
 	int p1Score = 0, p2Score = 0;

@@ -60,7 +60,7 @@ LoadDatabasePy( void ) {
 
 }
 
-static PyObject *Connect()
+static PyObject *Connect(void)
 {
 	PyObject *m, *d, *v, *r;
 

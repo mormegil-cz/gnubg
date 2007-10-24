@@ -69,7 +69,7 @@ void SetPreviewLightLevel(const int levels[3])
 	memcpy(previewLightLevels, levels, sizeof(int[3]));
 }
 
-static void SetupLight()
+static void SetupLight(void)
 {
 	float al[4], dl[4], sl[4];
 	float lp[4] = {PREVIEW_WIDTH / 2, PREVIEW_HEIGHT / 2, 50, 1};
@@ -189,7 +189,7 @@ static void UpdateColourPreview(void *notused)
 	gtk_widget_queue_draw(pwPreview);
 }
 
-static void SetupColourPreview()
+static void SetupColourPreview(void)
 {
 	InitGL(0);
 	glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -211,7 +211,7 @@ GdkGLConfig *getglconfigSingle(void);
 static GdkGLPixmap *glpixmap;
 static GdkGLContext *glPixmapContext = NULL;
 
-static void CreatePreview()
+static void CreatePreview(void)
 {
 	GdkGLDrawable *gldrawable;
 	glpixmap = gdk_pixmap_set_gl_capability(xppm, getglconfigSingle(), NULL);

@@ -949,7 +949,7 @@ int SSE_Supported()
 
 #else
 
-int CheckSSE()
+static int CheckSSE(void)
 {
         int result;
 #ifdef __APPLE__
@@ -1034,7 +1034,7 @@ int CheckSSE()
 	return 0;
 }
 
-int SSE_Supported()
+int SSE_Supported(void)
 {
 	static int state = -1;
 

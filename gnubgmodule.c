@@ -750,7 +750,7 @@ static void AddString(list* buffers, char* str)
 	strcat(pCurrent->p, str);
 }
 
-static char* GameAsString()
+static char* GameAsString(void)
 {
 	char *ret;
 	int size;

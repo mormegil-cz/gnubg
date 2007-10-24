@@ -274,7 +274,7 @@ gtk_multiview_remove (GtkContainer *container,
 
 /* Public Functions */
 GtkWidget *
-gtk_multiview_new ()
+gtk_multiview_new (void)
 {
   return GTK_WIDGET (gtk_type_new (gtk_multiview_get_type ()));
 }

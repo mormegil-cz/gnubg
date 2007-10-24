@@ -41,7 +41,7 @@ typedef struct _gtksplash {
 
 
 extern GtkWidget *
-CreateSplash () {
+CreateSplash (void) {
 
   gtksplash *pgs;
   GtkWidget *pwvbox, *pwFrame, *pwb;

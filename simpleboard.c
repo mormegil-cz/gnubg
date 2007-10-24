@@ -242,14 +242,16 @@ static void draw_cube(SimpleBoard * board)
 
 static void draw_dice(SimpleBoard * board)
 {
-	gint move = board->ms.fMove;
-	guint *dice = board->ms.anDice;
-	cairo_t *cr = board->cr;
+	gint i, x, y, move;
+	guint *dice;
+	cairo_t *cr;
 
+	move = board->ms.fMove;
+	dice = board->ms.anDice;
+	cr = board->cr;
 	if (!dice[0] || !dice[1])
 		return;
 
-	gint i, x, y;
 	for (i = 0; i < 2; i++) {
 		x = (move ? 200 : 62) + i * 22;
 		y = 140 + i * 4;

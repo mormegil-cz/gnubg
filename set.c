@@ -2862,7 +2862,7 @@ extern void CommandSetOutputWinPC( char *sz ) {
 	       _("Game winning chances will be shown as probabilities.") );
 }
 
-static void SetInvertMET()
+static void SetInvertMET(void)
 {
     invertMET();
     /* Clear any stored results to stop previous table causing problems */

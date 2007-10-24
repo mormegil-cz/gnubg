@@ -124,7 +124,7 @@ static void CheckNormal()
 }
 #endif
 
-void CheckOpenglError()
+void CheckOpenglError(void)
 {
 	GLenum glErr = glGetError();
 	if (glErr != GL_NO_ERROR)
@@ -1684,7 +1684,7 @@ static void RationalizeBox(ClipBox* pCb)
 	pCb->yy = (float)(midY + maxYoff);
 }
 
-void RestrictiveRedraw()
+void RestrictiveRedraw(void)
 {
 	numRestrictFrames = -1;
 }
@@ -2289,7 +2289,7 @@ void ClearTextures(BoardData3d* bd3d)
 	bd3d->numTextures = 0;
 }
 
-void DeleteTextureList()
+void DeleteTextureList(void)
 {
 	g_list_free(textures);
 }

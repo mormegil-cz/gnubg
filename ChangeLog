@@ -1,3 +1,11 @@
+Wed Oct 24 17:17:50 CEST 2007 Christian Anthon <anthon@kiku.dk>
+
+	* external_y.y, file.c, gnubg.c, gnubgmodule.c, gtk-multiview.c,
+	gtkboard.c, gtkgame.c, gtksplash.c, htmlimages.c, import.c,
+	makebearoff.c, relational.c, renderprefs.c, set.c, sgf.y,
+	simpleboard.c, board3d/gtkcolour3d.c, board3d/misc3d.c,
+	lib/neuralnet.c: fix a bunch of minor compiler warnings
+
 Tue Oct 23 12:38:57 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* gktgame.c, gtkpanels.c: cleanup of InitGTK, move command widget to

@@ -5608,7 +5608,7 @@ extern void outputresume( void )
 }
 
 /* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput()
+extern void SuspendInput(void)
 {
 
 #if USE_GTK
@@ -5618,7 +5618,7 @@ extern void SuspendInput()
 }
 
 /* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput()
+extern void ResumeInput(void)
 {
 
 #if USE_GTK
@@ -5927,7 +5927,7 @@ extern char * getInstallDir( void )
 #endif
 
 #if HAVE_LIBREADLINE
-static char *get_readline()
+static char *get_readline(void)
 {
 	char *pchExpanded;
 	char *szInput;
@@ -5949,7 +5949,7 @@ static char *get_readline()
 }
 #endif
 
-static char *get_stdin_line()
+static char *get_stdin_line(void)
 {
 	char sz[2048], *pch;
 
@@ -5985,7 +5985,7 @@ static char *get_stdin_line()
 
 
 
-static void run_cl()
+static void run_cl(void)
 {
 	char *line;
 	for (;;) {
@@ -6048,12 +6048,12 @@ static void init_language(char **lang)
 	outputon();
 }
 
-static void setup_readline()
+static void setup_readline(void)
 {
 #if HAVE_LIBREADLINE
-	gnubg_histfile = g_build_filename(szHomeDirectory, "history", NULL);
 	char *pch;
 	int i;
+	gnubg_histfile = g_build_filename(szHomeDirectory, "history", NULL);
 	rl_readline_name = "gnubg";
 	rl_basic_word_break_characters =
 	    rl_filename_quote_characters = szCommandSeparators;
@@ -6103,7 +6103,7 @@ static void init_nets(int nNewWeights, int fNoBearoff)
 	}
 }
 
-static void init_rng()
+static void init_rng(void)
 {
 	if (!(rngctxCurrent = InitRNG(NULL, NULL, TRUE, rngCurrent))) {
 		printf(_("Failure setting up RNG\n"));
@@ -6151,7 +6151,7 @@ static char *matchfile_from_argv(char *sz)
 	return pchMatch;
 }
 
-static void init_defaults()
+static void init_defaults(void)
 {
 	/* init some html export options */
 

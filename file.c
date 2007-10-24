@@ -354,7 +354,7 @@ static int IsPARFile(FileHelper * fh)
 	return FALSE;
 }
 
-int IsBGRFile(FileHelper *fh)
+static int IsBGRFile(FileHelper *fh)
 {
 	fhReset(fh);
 	fhSkipWS(fh);

@@ -147,7 +147,7 @@ extern int exterror(const char *s);
 
 extcmd ec; 
 
-static void reset_command();
+static void reset_command(void);
 
 void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 

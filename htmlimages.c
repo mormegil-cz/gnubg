@@ -164,7 +164,7 @@ static void WriteBorder(char* file, unsigned char *auchSrc, unsigned char *auchB
 	Write(file, auchLabel, BOARD_WIDTH * s, BORDER_HEIGHT * s);
 }
 
-static void WriteImages()
+static void WriteImages(void)
 {
 	int i, j, k;
 	imagesWritten = 0;
@@ -602,7 +602,7 @@ static void WriteImages()
 			imagesWritten, NUM_IMAGES);
 }
 
-static void RenderObjects()
+static void RenderObjects(void)
 {
 	int clockwise;
 	renderdata rd;
@@ -669,7 +669,7 @@ static char* GetFilenameBase(char* sz)
 	return szFile;
 }
 
-static void AllocObjects()
+static void AllocObjects(void)
 {
 	int i, j, k;
 
@@ -710,7 +710,7 @@ static void AllocObjects()
 		asRefract[i] = malloc((CHEQUER_WIDTH * s * CHEQUER_HEIGHT * s) * sizeof(short));
 }
 
-static void TidyObjects()
+static void TidyObjects(void)
 {
 	int i, j, k;
 	free(auchMidlb);

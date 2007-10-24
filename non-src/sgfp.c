@@ -1687,9 +1687,9 @@ yyreturn:
 #line 166 "./sgf.y"
 
 
+extern FILE *sgfin;
 extern list *SGFParse( FILE *pf ) {
 
-    extern FILE *sgfin;
     
     sgfin = pf;
     plCollection = NULL;

@@ -3902,7 +3902,7 @@ extern void InitGTK(int *argc, char ***argv)
 #include "xpm/question.xpm"
 	char *sz;
 	GtkIconFactory *pif;
-	GdkAtom cb = gdk_atom_intern("CLIPBOARD", TRUE);
+	GdkAtom cb;
 	BoardData *bd;
 
 	fX = gtk_init_check(argc, argv);

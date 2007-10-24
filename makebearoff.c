@@ -176,8 +176,7 @@ XhashAdd ( xhash *ph, const unsigned int iKey,
 
 
 static void *
-XhashLookup ( xhash *ph, const unsigned int iKey,
-             void **data ) {
+XhashLookup ( xhash *ph, const unsigned int iKey ) {
 
 
   int l = XhashPosition ( ph, iKey );
@@ -187,7 +186,7 @@ XhashLookup ( xhash *ph, const unsigned int iKey,
   if ( ph->phe[ l ].p && ph->phe[ l ].iKey == iKey ) {
     /* hit */
     ++ph->nHits;
-    return (*data = ph->phe[ l].p);
+    return (ph->phe[ l].p);
   }
   else
     /* miss */
@@ -470,9 +469,10 @@ static void BearOff( int nId, int nPoints,
                   pusj[ 32 ] = 0xFFFF;
 
                 }
-                else if ( ! XhashLookup ( ph, j, (void **) &pusj ) ) {
+                else if ( ! (pusj = XhashLookup ( ph, j))) {
                   /* look up in file generated so far */
-                  OSLookup ( j, nPoints, pusj = ausj, fGammon, fCompress,
+		  pusj = ausj;
+                  OSLookup ( j, nPoints, pusj, fGammon, fCompress,
                              pfOutput, pfTmp );
 
                   XhashAdd ( ph, j, pusj, fGammon ? 128 : 64 );
@@ -847,8 +847,9 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
 
         j = PositionBearoff ( anBoardTemp[ 1 ], nPoints, 15 );
 
-        if ( ! XhashLookup ( ph, j, (void **) &prj ) ) {
-          NDBearoff ( j, nPoints, prj = arj, ph, pbc );
+        if ( ! (prj = XhashLookup ( ph, j ))) {
+	  prj = arj;
+          NDBearoff ( j, nPoints, prj, ph, pbc );
           XhashAdd ( ph, j, prj, 16 );
         }
 
@@ -1175,16 +1176,15 @@ static void BearOff2( int nUs, int nThem,
 		g_assert( j < nUs ); 
 
                 if ( ! nThem ) {
-                  psij = asij;
                   asij[ 0 ] = asij[ 1 ] = asij[ 2 ] = asij[ 3 ] = EQUITY_P1;
                 }
                 else if ( ! j ) {
-                  psij = asij;
                   asij[ 0 ] = asij[ 1 ] = asij[ 2 ] = asij[ 3 ] = EQUITY_M1;
                 }
-                if ( ! XhashLookup ( ph, n * nThem + j, (void **) &psij ) ) {
+                if ( ! (psij = XhashLookup ( ph, n * nThem + j)) ) {
                   /* lookup in file */
-                  TSLookup ( nThem, j, nTSP, nTSC, psij = asij, n,
+		  psij = asij;
+                  TSLookup ( nThem, j, nTSP, nTSC, psij, n,
                              fCubeful, pfTmp );
                   XhashAdd ( ph, n * nThem + j, psij, fCubeful ? 8 : 2 );
                 }

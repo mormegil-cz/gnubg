@@ -48,7 +48,7 @@ renderdata rdAppearance;
 
 /* Limit use of global... */
 extern renderdata *
-GetMainAppearance ()
+GetMainAppearance (void)
 {
   return &rdAppearance;
 }
