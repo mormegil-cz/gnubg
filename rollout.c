@@ -1068,7 +1068,7 @@ extern void RolloutLoopMT(void)
       if (altGameCount[alt] >= cGames)
       {
 	      fNoMore[alt] = TRUE;
-	      if (altGameCount[alt] >= cGames)
+	      if (altGameCount[alt] > cGames)
 		      g_warning("Too many rollouts done for alternative %d. This is a bug. Please report as many details as possible to bug-gnubg@gnu.org", alt);
       }
       /* For normal alternatives nGamesDone and altGameCount will be equal.
