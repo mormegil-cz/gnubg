@@ -3,35 +3,36 @@
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
 FLAGS= -Wall $(COMPOPT) $(DEFS)
-TARGET = libevent.a
+TARGET = ../../../bin/libevent.a
 MINGW=$(GNU)/mingw
+OBJDIR=../../../bin/obj/lib
 
 SOURCE= cache list neuralnet neuralnetsse mt19937ar isaac md5
 
-OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
+OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
 INCLUDE = -I. -I.. -I$(MINGW)/include/glib-2.0 -I$(MINGW)/lib/glib-2.0/include 
 
 all: $(TARGET)
 	@echo $(TARGET) done
 
-$(TARGET): obj $(OBJECTS)
+$(TARGET): $(OBJDIR) $(OBJECTS)
 	@echo creating lib
 	@ar cr $(TARGET) $(OBJECTS)
 	@ranlib $(TARGET)
 
-obj:
-	@mkdir $@
+$(OBJDIR):
+	@mkdir "$@"
 
-obj/neuralnetsse.o: neuralnetsse.c
+$(OBJDIR)/neuralnetsse.o: neuralnetsse.c
 	@echo Compiling neuralnetsse
 	@${CC} $(FLAGS) -msse $(INCLUDE) -o $@ -c $<
 
-obj/%.o: %.c
+$(OBJDIR)/%.o: %.c
 	@echo Compiling $<
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
 clean:
-	@del .\obj\*.o
+	@del $(OBJDIR)\*.o
 	@del $(TARGET)
 	@echo $(TARGET) clean

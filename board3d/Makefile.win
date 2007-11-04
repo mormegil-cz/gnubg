@@ -3,14 +3,14 @@
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
 FLAGS= -Wall $(COMPOPT) $(DEFS)
-TARGET = libboard3d.a
-
+TARGET = ../../../bin/libboard3d.a
 MINGW=$(GNU)/mingw
+OBJDIR=../../../bin/obj/board3d
 
 SOURCE=	drawboard3d misc3d font3d widget3d \
 	matrix model shadow gtkcolour3d graph
 
-OBJECTS=$(patsubst %,obj/%.o,$(SOURCE))
+OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
 INCLUDE = -I. -I.. -I../lib \
 	-I$(MINGW)/include/gtk-2.0 \
@@ -29,23 +29,23 @@ INCLUDE = -I. -I.. -I../lib \
 all: $(TARGET)
 	@echo $(TARGET) done
 
-$(TARGET): obj $(OBJECTS)
+$(TARGET): $(OBJDIR) $(OBJECTS)
 	@echo creating lib
 	@ar cr $(TARGET) $(OBJECTS)
 	@ranlib $(TARGET)
 
-obj:
-	@mkdir $@
+$(OBJDIR):
+	@mkdir "$@"
 
-obj/drawboard3d.o: drawboard3d.c
+$(OBJDIR)/drawboard3d.o: drawboard3d.c
 	@echo Compiling drawboard3d (non-sse)
 	@${CC} $(FLAGS) -mno-sse $(INCLUDE) -o $@ -c $<
 
-obj/%.o: %.c
+$(OBJDIR)/%.o: %.c
 	@echo Compiling $<
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
 clean:
-	@del .\obj\*.o
+	@del $(OBJDIR)\*.o
 	@del $(TARGET)
 	@echo $(TARGET) clean
