@@ -4,7 +4,7 @@
  * by Gary Wong <gary@cs.arizona.edu>, 2000.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of version 3 or later of the GNU General Public License as
+ * it under the terms of version 2 of the GNU General Public License as
  * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
@@ -32,38 +32,43 @@
 
 static void 
 usage (char *prog) {
-  fprintf (stderr, "Usage: %s [ -f filename]\n"
-	   "  -f filename  Output to file instead of stdout\n",
+  fprintf (stderr, "Usage: %s [[-f] outputfile [inputfile]]\n"
+	  "  outputfile: Output to file instead of stdout\n",
+	  "  inputfile: Input from file instead of stdin\n",
 	   prog);
 
   exit (1);
 }
 
-extern int main( int argc, char *argv[] ) {
-
+extern int main( int argc, char *argv[] )
+{
     neuralnet nn;
     char szFileVersion[ 16 ];
     static float ar[ 2 ] = { WEIGHTS_MAGIC_BINARY, WEIGHTS_VERSION_BINARY };
     int c;
-    FILE *output = stdout;
+    FILE *input = stdin, *output = stdout;
 
-    switch (argc) {
-    case 1:
-      break;
+	if (argc > 1)
+	{
+		int arg = 1;
+		if (!strcmp (argv[1], "-f"))
+			arg++;	// Skip
 
-    case 3:
-      if (strcmp (argv[1], "-f") != 0)
-	usage (argv[0]);
-
-      if ((output = fopen (argv[2], "wb")) == 0) {
-	perror ("Can't open output file");
-	exit (1);
-      }
-	
-      break;
-
-    default:
-      usage (argv[0]);
+		if (argc > arg + 2)
+			usage (argv[0]);
+		if ((output = fopen (argv[arg], "wb")) == 0)
+		{
+			perror ("Can't open output file");
+			exit (1);
+		}
+		if (argc == arg + 2)
+		{
+			if ((input = fopen(argv[arg + 1], "r")) == 0)
+			{
+				perror ("Can't open input file");
+				exit (1);
+			}
+		}
     }
 
     setlocale (LC_ALL, "C");
@@ -72,23 +77,24 @@ extern int main( int argc, char *argv[] ) {
 
     /* generate weights */
     
-    if( scanf( "GNU Backgammon %15s\n", szFileVersion ) != 1 ) {
-	fprintf( stderr, _("%s: invalid weights file\n"), argv[ 0 ] );
-	return EXIT_FAILURE;
+    if (fscanf(input, "GNU Backgammon %15s\n", szFileVersion ) != 1)
+	{
+		fprintf( stderr, _("%s: invalid weights file\n"), argv[ 0 ] );
+		return EXIT_FAILURE;
     }
 
-    if( strcmp( szFileVersion, WEIGHTS_VERSION ) ) {
-      fprintf( stderr, _("%s: incorrect weights version\n"
-                         "(version %s is required, "
-                         "but these weights are %s)\n" ),
-               argv[ 0 ], WEIGHTS_VERSION, szFileVersion );
-      return EXIT_FAILURE;
+    if (strcmp( szFileVersion, WEIGHTS_VERSION ) )
+	{
+		fprintf( stderr, _("%s: incorrect weights version\n"
+							"(version %s is required, "
+							"but these weights are %s)\n" ),
+				argv[ 0 ], WEIGHTS_VERSION, szFileVersion );
+		return EXIT_FAILURE;
     }
-
 	
     fwrite( ar, sizeof( ar[ 0 ] ), 2, output );
 
-    for( c = 0; !NeuralNetLoad( &nn, stdin ); c++ )
+    for( c = 0; !NeuralNetLoad( &nn, input ); c++ )
       if( NeuralNetSaveBinary( &nn, output ) )
 	    return EXIT_FAILURE;
 
