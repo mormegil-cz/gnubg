@@ -3,6 +3,8 @@ Makefile.in
 config.cache
 config.log
 config.status
+gnubg.pdf
+allabout.pdf
 gnubg.html
 gnubg.info*
 gnubg.log gnubg.dvi gnubg.aux gnubg.cp gnubg.fn gnubg.vr

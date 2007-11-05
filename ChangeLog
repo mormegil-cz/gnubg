@@ -1,3 +1,9 @@
+Mon Nov  5 21:31:24 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* doc/.cvsignore, doc/Makefile.am, doc/gnubg/allabout.pdf,
+	doc/gnubg/gnubg.pdf, doc/images/appearence.png,
+	doc/images/cubeful-ex1.png: build pdf files
+
 Wed Oct 24 17:17:50 CEST 2007 Christian Anthon <anthon@kiku.dk>
 
 	* external_y.y, file.c, gnubg.c, gnubgmodule.c, gtk-multiview.c,

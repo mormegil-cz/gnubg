@@ -10,12 +10,18 @@ EXTRA_DIST = *.xml gnubg/* images/*.png images/*.txt
 
 man6_MANS = gnubg.6
 
-all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info
+all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info gnubg.pdf allabout.pdf
 
 gnubg.6: gnubgman.xml
 	db2x_docbook2man gnubgman.xml 2>.gnubgman.err || \
 		docbook2man gnubgman.xml 2>.gnubgman.err || \
 		cp gnubg/gnubg.6 .
+
+gnubg.pdf: gnubgdb.xml images/*.png
+	dblatex gnubgdb.xml -o gnubg.pdf || cp gnubg/gnubg.pdf .
+
+allabout.pdf: allabout.xml images/*.png
+	dblatex allabout.xml -o allabout.pdf || cp gnubg/allabout.pdf .
 
 gnubg.html: gnubgdb.xml images/*.png
 	xsltproc \
