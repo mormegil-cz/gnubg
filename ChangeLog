@@ -1,3 +1,7 @@
+Thu Nov  8 01:29:47 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* text.c: fix small bug reported by Philippe
+
 Mon Nov  5 21:31:24 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* doc/.cvsignore, doc/Makefile.am, doc/gnubg/allabout.pdf,

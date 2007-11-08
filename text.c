@@ -169,7 +169,7 @@ TextBoardHeader ( GString *gsz, const matchstate *pms,
     /* chequer play decision */
 
     g_string_append_printf(gsz,
-              _(" %s to play %d%d"),
+              _(" %s to play %d%d\n\n"),
               ap[ pms->fMove ].szName,
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
