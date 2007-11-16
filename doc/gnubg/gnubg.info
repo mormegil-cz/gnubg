@@ -9,8 +9,8 @@ END-INFO-DIR-ENTRY
 
 File: gnubg.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
-GNU Backgammon Manual V0.16
-***************************
+GNU Backgammon Manual  V0.16
+****************************
 
 * Menu:
 
@@ -29,7 +29,7 @@ GNU Backgammon Manual V0.16
 * Frequently Asked Questions::
 * GNU Free Documentation License::
 
-— The Detailed Node Listing —
+--- The Detailed Node Listing ---
 
 Introduction
 
@@ -153,31 +153,32 @@ text-only terminals, but also allows the user to play games and
 manipulate positions with a graphical GTK+ interface. GNU Backgammon is
 extensible on platforms which support Python.
 
-            (joetrapper) new session
-            A new session has been started.
-            congoneser rolls 2, joetrapper rolls 5.
-            GNU Backgammon  Position ID: 4HPwATDgc/ABMA
-            Match ID   : cAkVAAAAAAAA
-            +13-14-15-16-17-18------19-20-21-22-23-24-+     O: congoneser
-            | X           O    |   | O              X |     0 points
-            | X           O    |   | O              X |
-            | X           O    |   | O                |
-            | X                |   | O                |
-            | X                |   | O                |
-           v|                  |BAR|                  |     (Cube: 1)
-            | O                |   | X                |
-            | O                |   | X                |
-            | O           X    |   | X                |
-            | O           X    |   | X              O |     Rolled 25
-            | O           X    |   | X              O |     0 points
-            +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: joetrapper
 
-            (joetrapper)
+     (No game) new game
+     gnubg rolls 3, anthon rolls 1.
+
+     GNU Backgammon  Positions ID: 4HPwATDgc/ABMA
+     Match ID   : MIEFAAAAAAAA
+      +12-11-10--9--8--7-------6--5--4--3--2--1-+     O: gnubg
+      | X           O    |   | O              X |     0 points
+      | X           O    |   | O              X |     Rolled 31
+      | X           O    |   | O                |
+      | X                |   | O                |
+      | X                |   | O                |
+     ^|                  |BAR|                  |     (Cube: 1)
+      | O                |   | X                |
+      | O                |   | X                |
+      | O           X    |   | X                |
+      | O           X    |   | X              O |
+      | O           X    |   | X              O |     0 points
+      +13-14-15-16-17-18------19-20-21-22-23-24-+     X: anthon
+
+     gnubg moves 8/5 6/5.
 
    GNU Backgammon is a world class opponent and rates at around 2000 on
-FIBS, the First Internet Backgammon Server – at its best, it is in
-the top 5 of over 6000 rated players there). GNU Backgammon can be
-played on numerous other on-line backgammon servers.
+FIBS, the First Internet Backgammon Server - at its best, it is in the
+top 5 of over 6000 rated players there). GNU Backgammon can be played
+on numerous other on-line backgammon servers.
 
    The following features can be found in the current release of GNU
 Backgammon.
@@ -289,21 +290,22 @@ called the bar.
 
    *A board with the checkers in their initial position.*
 
-     Outer Board           O's Home Board
- +13-14-15-16-17-18------19-20-21-22-23-24-+
- | X           O    |   | O              X |
- | X           O    |   | O              X |
- | X           O    |   | O                |
- | X                |   | O                |
- | X                |   | O                |
- |                  |BAR|                  |
- | O                |   | X                |
- | O                |   | X                |
- | O           X    |   | X                |
- | O           X    |   | X              O |
- | O           X    |   | X              O |
- +12-11-10--9--8--7-------6--5--4--3--2--1-+
-     Outer Board           X's Home Board
+
+          Outer Board           O's Home Board
+      +13-14-15-16-17-18------19-20-21-22-23-24-+
+      | X           O    |   | O              X |
+      | X           O    |   | O              X |
+      | X           O    |   | O                |
+      | X                |   | O                |
+      | X                |   | O                |
+      |                  |BAR|                  |
+      | O                |   | X                |
+      | O                |   | X                |
+      | O           X    |   | X                |
+      | O           X    |   | X              O |
+      | O           X    |   | X              O |
+      +12-11-10--9--8--7-------6--5--4--3--2--1-+
+          Outer Board           X's Home Board
 
    An alternate arrangement is the reverse of the one shown here, with
 the home board on the left and the outer board on the right.
@@ -334,19 +336,20 @@ all of his checkers wins the game.
    *Direction of movement of White's checkers. Red's checkers move in
 the opposite direction.*
 
-  +13-14-15-16-17-18------19-20-21-22-23-24-+
-  | X                |   |                X |
-/---X-----------------------------------  X |
-| | X                |   |                  |
-| | X                |   |                  |
-| | X                |   |                  |
-| |                  |BAR|                  |
-| |                  |   | X                |
-| |                  |   | X                |
-| |             X    |   | X                |
-\---------------X----------X-----------&gt;    |
-  |             X    |   | X                |
-  +12-11-10--9--8--7-------6--5--4--3--2--1-+
+
+       +13-14-15-16-17-18------19-20-21-22-23-24-+
+       | X                |   |                X |
+     /---X-----------------------------------  X |
+     | | X                |   |                  |
+     | | X                |   |                  |
+     | | X                |   |                  |
+     | |                  |BAR|                  |
+     | |                  |   | X                |
+     | |                  |   | X                |
+     | |             X    |   | X                |
+     \---------------X----------X----------->    |
+       |             X    |   | X                |
+       +12-11-10--9--8--7-------6--5--4--3--2--1-+
 
 
 File: gnubg.info,  Node: Movement of the Checkers,  Next: Hitting and Entering,  Prev: Object of the Game,  Up: Rules of the game
@@ -379,20 +382,21 @@ lower-numbered point. The following rules apply:
 
      *White opens the game with 53.*
 
-      +13-14-15-16-17-18------19-20-21-22-23-24-+
-      | X        ^  O    |   | O     .        X |
-      | X        +---------5---------^---3----X |
-      | X           O    |   | O                |
-      | X                |   | O                |
-      | X                |   | O                |
+
+           +13-14-15-16-17-18------19-20-21-22-23-24-+
+           | X        ^  O    |   | O     .        X |
+           | X        +---------5---------^---3----X |
+           | X           O    |   | O                |
+           | X                |   | O                |
+           | X                |   | O                |
 
 
-      | O                |   | X----3---+       |
-      | O                |   | X        |       |
-      | O           X---------------5---+       |
-      | O           X    |   | X        |     O |
-      | O           X    |   | X        |     O |
-      +12-11-10--9--8--7-------6--5--4--3--2--1-+
+           | O                |   | X----3---+       |
+           | O                |   | X        |       |
+           | O           X---------------5---+       |
+           | O           X    |   | X        |     O |
+           | O           X    |   | X        |     O |
+           +12-11-10--9--8--7-------6--5--4--3--2--1-+
 
   3. A player who rolls doubles plays the numbers shown on the dice
      twice. A roll of 6 and 6 means that the player has four sixes to
@@ -431,19 +435,20 @@ checkers.
 
    *White rolls 64 with a checker on the bar.*
 
- +13-14-15-16-17-18------19-20-21-22-23-24-+
- | X           O    |   | O  O  ^        X |
- | X           O    |   | O  O  |          |
- | X                |   | O     |          |
- | X                |   | O     |          |
- | X                | X-----4---+          |
- |                  |BAR|                  |
- | O                |   | X                |
- | O                |   | X                |
- | O           X    |   | X                |
- | O           X    |   | X              O |
- | O           X    |   | X              O |
- +12-11-10--9--8--7-------6--5--4--3--2--1-+
+
+      +13-14-15-16-17-18------19-20-21-22-23-24-+
+      | X           O    |   | O  O  ^        X |
+      | X           O    |   | O  O  |          |
+      | X                |   | O     |          |
+      | X                |   | O     |          |
+      | X                | X-----4---+          |
+      |                  |BAR|                  |
+      | O                |   | X                |
+      | O                |   | X                |
+      | O           X    |   | X                |
+      | O           X    |   | X              O |
+      | O           X    |   | X              O |
+      +12-11-10--9--8--7-------6--5--4--3--2--1-+
 
    If White rolls [64] with a checker on the bar, he must enter the
 checker onto Red's four point since Red's six point is not open. If
@@ -478,12 +483,13 @@ bear off if he can make an otherwise legal move.
 
    *White rolls 64 and bears off two checkers.*
 
- |                  |   |    +----6---------&gt;
- |                  |   |    |  +--4--------&gt;
- |                  |   |    |  |          |
- |                  |   |    |  X  X  X  X |
- |                  |   |    X  X  X  X  X |
- +12-11-10--9--8--7-------6--5--4--3--2--1-+
+
+      |                  |   |    +----6--------->
+      |                  |   |    |  +--4-------->
+      |                  |   |    |  |          |
+      |                  |   |    |  X  X  X  X |
+      |                  |   |    X  X  X  X  X |
+      +12-11-10--9--8--7-------6--5--4--3--2--1-+
 
    A player must have all of his active checkers in his home board in
 order to bear off. If a checker is hit during the bear-off process, the
@@ -578,19 +584,13 @@ Crawford game is won by the trailing player then the double cube becomes
 available in all subsequent games (and it's most often in the best
 interests of the trailing player to double immediately in these games).
 
-Match to 5               White                    Black
-Game 1: White wins 2     2                        0Doubling Allowed
-points                                            
-Game 2: Black wins 1     2                        1Doubling Allowed
-point                                             
-Game 3: White wins 2     4                        1Doubling Allowed
-points                                            
-Game 4: Black wins 1     4                        2Crawford Game
-point                                             
-Game 5: Black wins 2     4                        4Doubling Allowed
-points                                            
-Game 6: White wins 2     6                        4Doubling Allowed
-points                                            
+Match to 5         White              Black              Doubling
+White wins 2       2                  0                  Allowed
+Black wins 1       2                  1                  Allowed
+White wins 2       4                  1                  Allowed
+Black wins 1       4                  2                  Crawford Game
+Black wins 2       4                  4                  Allowed
+White wins 2       6                  4                  Allowed
 
    In this example, White and Black are playing a 5-point match. After
 three games White has 4 points, which is just one point short of what he
@@ -688,36 +688,36 @@ command line and GUI applications exist instead.
    *GNU Backgammon startup options*
 
 
-                 Usage:
-                 gnubg [OPTION...] [file.sgf]
+     Usage:
+     gnubg [OPTION...] [file.sgf]
 
-                 Help Options:
-                 -?, --help                   Show help options
-                 --help-all                   Show all help options
-                 --help-gtk                   Show GTK+ Options
+     Help Options:
+     -?, --help                   Show help options
+     --help-all                   Show all help options
+     --help-gtk                   Show GTK+ Options
 
-                 GTK+ Options
-                 --class=CLASS                Program class as used by the window manager
-                 --name=NAME                  Program name as used by the window manager
-                 --screen=SCREEN              X screen to use
-                 --sync                       Make X calls synchronous
-                 --gtk-module=MODULES         Load additional GTK+ modules
-                 --g-fatal-warnings           Make all warnings fatal
+     GTK+ Options
+     --class=CLASS                Program class as used by the window manager
+     --name=NAME                  Program name as used by the window manager
+     --screen=SCREEN              X screen to use
+     --sync                       Make X calls synchronous
+     --gtk-module=MODULES         Load additional GTK+ modules
+     --g-fatal-warnings           Make all warnings fatal
 
-                 Application Options:
-                 -b, --no-bearoff             Do not use bearoff database
-                 -c, --commands=FILE          Evaluate commands in FILE and exit
-                 -d, --datadir=DIR            Read database and weight files from DIR
-                 -l, --lang=LANG              Set language to LANG
-                 -n, --new-weights=N          Create new neural net (of size N)
-                 -p, --python=FILE            Evaluate Python code in FILE and exit
-                 -q, --quiet                  Disable sound effects
-                 -r, --no-rc                  Do not read .gnubgrc and .gnubgautorc commands
-                 -S, --no-splash              Don't show gtk splash screen
-                 -t, --tty                    Start on tty instead of using window system
-                 -v, --version                Show version information and exit
-                 -w, --window-system-only     Ignore tty input when using window system
-                 --display=DISPLAY            X display to use
+     Application Options:
+     -b, --no-bearoff             Do not use bearoff database
+     -c, --commands=FILE          Evaluate commands in FILE and exit
+     -d, --datadir=DIR            Read database and weight files from DIR
+     -l, --lang=LANG              Set language to LANG
+     -n, --new-weights=N          Create new neural net (of size N)
+     -p, --python=FILE            Evaluate Python code in FILE and exit
+     -q, --quiet                  Disable sound effects
+     -r, --no-rc                  Do not read .gnubgrc and .gnubgautorc commands
+     -S, --no-splash              Don't show gtk splash screen
+     -t, --tty                    Start on tty instead of using window system
+     -v, --version                Show version information and exit
+     -w, --window-system-only     Ignore tty input when using window system
+     --display=DISPLAY            X display to use
 
 
 File: gnubg.info,  Node: Playing a game,  Next: Getting hints and Tutor Mode,  Prev: Starting GNU Backgammon,  Up: Top
@@ -748,8 +748,9 @@ begin.
 
    *The dialog for starting a new match.*
 
-To start a new match in the CL version type 'new match' or
-'new session'.
+
+     To start a new match in the CL version type 'new match' or
+     'new session'.
 
    The shortcut buttons are the quickest way to start the game or
 match. If you click on the button with the $ sign, you will start a new
@@ -792,7 +793,8 @@ Game->Roll or with the keyboard shortcut <Ctrl><R>.
 
    *Click in the red rectangle to roll the dice.*
 
-To roll the dice the CL version type 'roll'.
+
+     To roll the dice the CL version type 'roll'.
 
    When you have moved your checkers to make the desired move, you
 complete your turn by clicking on the dice.
@@ -915,6 +917,8 @@ allowed.
 
    *The toolbar double buttons.*
 
+   [[cubebuttons.png]]
+
    There are also menu options from the drop down menu for all the cube
 actions. Click Game->Take from the menu, to accept an offered
 double(<Ctrl><T>). Click Game->Drop, from the menu, to to decline an
@@ -1003,6 +1007,8 @@ This will open a hint window.
 
    *The hint window*
 
+   [[hintwindow.png]]
+
    This Hint window shows a list of all possible moves for the position
 and dice roll. The different moves are sorted by how GNU Backgammon
 ranks each move; there is one move on each line in the list. The rest
@@ -1077,6 +1083,8 @@ decision.
 
 
    *The cube hint window*
+
+   [[hintcubewindow.png]]
 
    The first lines is the window dialog shows the evaluation depth, and
 the cubeless equity with the evaluated probabilities. This equity is
@@ -1171,6 +1179,8 @@ Tutor flag. Activate Tutor Mode by checking the Tutor mode check box.
 
    *The tutor window*
 
+   [[tutor.png]]
+
    In Tutor Mode, GNU Backgammon will analyze your moves and/or cube
 decisions and compare them with its choices. You set the threshold for
 its alerts, for example, if you set it for bad then it will only warn
@@ -1186,6 +1196,8 @@ checker play decisions, you can uncheck the box for the Cube decisions.
 
 
    *The tutor warning window*
+
+   [[tutorwarning.png]]
 
    In the above figure, you can see a warning dialog from the tutor
 mode. If you press the button labeled Play anyway, the move you made
@@ -1285,6 +1297,8 @@ the bearoff tray, all checkers will be moved to the bearoff.
    *Click in the one of the areas marked with a red ellipse to clear
 the board.*
 
+   [[clearboard.png]]
+
    You can also just as easy generate the initial position by clicking
 the opposite trays when in edit mode. Clicking in one of these trays
 puts all checkers back to the initial position.
@@ -1293,6 +1307,8 @@ puts all checkers back to the initial position.
 
    *Click in the one of the areas marked with a red ellipse to get to
 the initial position.*
+
+   [[initialboard.png]]
 
    Note that the bearoff trays change side when the board is displayed
 with clockwise movement.
@@ -1350,6 +1366,8 @@ the board. See figure below.
    *Clicking the White checker image will set White on turn, clicking
 the Black image will set Black in turn.*
 
+   [[initialboard.png]]
+
    Note that setting the turn sets the turn before the dice has been
 rolled. If there is a dice present at the board, setting the turn will
 remove the dice rolled. In this way you can set up a position to be a
@@ -1377,6 +1395,8 @@ on a dice pair.
 
    *Click inside the red rectangle to set the dice for Black. Click
 inside the green rectangle to set the dice for White.*
+
+   [[setdice.png]]
 
    Setting the dice in edit mode sets both dice and the player on turn.
 Setting the dice for player 0, will make player 0 on turn with that
@@ -1788,6 +1808,8 @@ Settings->Analysis.
 
    *Analyze settings dialog*
 
+   [[analysesettings.png]]
+
    In the top left frame in this dialog box, you can select what to
 analyze. GNU Backgammon is able to analyze three different properties
 in a match.
@@ -1851,6 +1873,8 @@ moves.
 
 
    *The Game record pane*
+
+   [[gamerecord.png]]
 
    The figure shows a typical game record list. The moves are shown in
 two columns. The left column shows the moves for player 0,the to
@@ -1923,6 +1947,8 @@ chapter.
 
 
    *The Analyze pane*
+
+   [[analasyepane.png]]
 
    In the figure you can see the analysis panel. At the top of the
 analysis panel you will see three pull-down menus. The leftmost
@@ -2232,16 +2258,16 @@ in it (it's a big urn), and many of the balls have win written on them,
 and some say gammon loss, and if we look hard enough there are a few
 that read backgammon win, and so on. ((Balls and urns are to
 probability theorists what teapots and checkerboards are to computer
-graphics researchers, or _squeamish ossifrage_ is to cryptographers –
+graphics researchers, or _squeamish ossifrage_ is to cryptographers -
 they seem to come with the territory.)) Instead of having the patience
 to count the googol balls, we just give the urn a really good shake and
 then pull 100 balls out without looking, and say for instance "Well, I
 got 53 wins, 31 losses, 9 gammon wins, 6 gammon losses, and a
-backgammon win – looks like my equity's roughly +0.26." and go home.
-If we were a bit more thorough, we could go a bit further and figure
-out that by cheating and measuring the sample proportions instead of
-the population proportions, we introduced a standard error of 0.06 into
-our result. (Of course, the trick is to select a sample size that's big
+backgammon win - looks like my equity's roughly +0.26." and go home. If
+we were a bit more thorough, we could go a bit further and figure out
+that by cheating and measuring the sample proportions instead of the
+population proportions, we introduced a standard error of 0.06 into our
+result. (Of course, the trick is to select a sample size that's big
 enough that you reduce the standard error to a tolerable level, but
 small enough that the answer arrives before you get bored.)
 
@@ -2570,6 +2596,8 @@ A typical evaluation settings dialog is shown in this figure.
 
    *The evaluation settings dialog*
 
+   [[evalsettings.png]]
+
    The dialog is consisting of two columns, the left column is for
 setting the checker play decision evaluation settings, and the right
 column is for setting the cube decision evaluation settings.
@@ -2690,6 +2718,8 @@ pruning at 1-ply.
 
    *Example of move filter settings*
 
+   [[movefilterex.png]]
+
    GNU Backgammon starts by finding all possible moves and evaluate
 those at 0-ply:
 
@@ -2775,6 +2805,8 @@ its moves to analyze and how many.
 
    *Move filter 1*
 
+   [[movefilter1.png]]
+
    If you are playing Expert level (this is what GGRaccoon is set at)
 or another 0-ply setting, the Move Filter settings will not change a
 thing, as Expert level automatically examines all moves. At Supremo
@@ -2804,11 +2836,15 @@ equity worse than the top choice, so it didn't bother analyzing them at
 
    *Move filter 2*
 
+   [[movefilter2.png]]
+
    Take a look at next figure.
 
 
 
    *Move filter 3*
+
+   [[movefilter3.png]]
 
    Here, the exact same settings were maintained, but the 1-ply filter
 was activated. This just means that those 16 moves selected from the
@@ -2841,6 +2877,8 @@ play evaluations are, you can take a look at this position:
 
    *Cubeful example*
 
+   [[cubeful-ex1.png]]
+
    In this position black has rolled 51 and he has a good position.  If
 the position is evaluated cubeless the best move is 13/7. Black can
 hope white does not roll 34 or 35 form the bar and has now a good
@@ -2856,6 +2894,8 @@ which assumes white will never redouble, black should play 13/8.
 
 
    *Cubeful example 2*
+
+   [[cubeful-ex2.png]]
 
    This is from a 5 point match where black has 1 point and white has 3
 points. Black wins the opening roll and considers playing 13/11 6/5 or
@@ -2917,7 +2957,7 @@ evaluations setting is the limit amount of noise that will be added to
 the evaluation.
 
    If noise is added to the evaluations GNU Backgammon will take a Box
-Müller transform of a point in the unit circle and add to each
+Mu"ller transform of a point in the unit circle and add to each
 possible outcome probability. This means that the addition is random,
 but distributed so that it's more likely to have an noise addition
 close to zero than a noise addition close to the limit. The noise
@@ -2951,6 +2991,8 @@ Settings->Appearance. This will open a dialog box like this:
 
 
    *The appearance dialog*
+
+   [[appearance.png]]
 
    In this dialog box you see a preview picture of the board at the
 right side, and you have notebook with options to the left.
@@ -3058,16 +3100,6 @@ bearoff database to be generated).
 
    Other options for makebearoff are available, see makebearoff -help
 for the complete set.
-
-   At compile time the built-in one sided bearoff database is generated
-with the command
-
-   makebearoff -o 6 | makebearoff1 -o br1.c
-
-   which generated a 6 point one sided bearoff database. The database
-is piped into makebearoff1 that generates the C code for the database.
-The resulting br1.c is more than 8MB, so it's not distributed with the
-source for GNU Backgammon.
 
    The accompanying program makehyper is used to generate databases for
 Hypergammon. For example, to generate the 3-checker database issue the
@@ -3178,11 +3210,15 @@ it's not possible to give MD5 checksum for these, as it depend heavily
 on your convergence threshold, the number of restarts, and rounding
 errors.
 
-   Below is a random position from the database. The equities and
-percentages in your own database should be very similar (if not
-identical):
+   A random position from the database is found in *Note Random
+position from hypergammon database::. The equities and percentages in
+your own database should be very similar (if not identical):
 
    GNU Backgammon Position ID: ADAAAQAkIAAAAA
+
+
+
+   *Random position from hypergammon database*
 
 
       GNU Backgammon  Position ID: ADAAAQAkIAAAAA
@@ -3493,8 +3529,8 @@ formula: 2*p(w)-1+2(p(wg)-p(lg))+3(p(wbg)-p(lbg)). Evaluating the
 cubeful equity is much more difficult; it can either be estimated from
 the cubeless equity by using transformations as outlined by Rick
 Janowski or by constructing a neural net that directly outputs cubeful
-equities. GNU Backgammon uses the former approach (see chapter Cubeful
-equities (http://www.gnubg.org/documentation/doku.php?id=appendix#7)).
+equities. GNU Backgammon uses the former approach (*Note Cubeful
+equities::).
 
 
 File: gnubg.info,  Node: Match Winning Chance,  Next: Normalized equity,  Prev: Money equity,  Up: Equities explained
@@ -3639,6 +3675,8 @@ for the following position
 
    *Cubeful example 1*
 
+   [[cubefuleq-ex1.png]]
+
    GNU Backgammon evaluates
 
              Win          W(g)         W(bg)        L(g)         L(bg)
@@ -3658,29 +3696,30 @@ points:
 
    *mgtp*
 
-Equity
-  1.5 ++------------+-------------+-------------+-------------+------------++
-      +             +             +             +           cubeless ****** +
-      |                                                    live cube####*****
-    1 ++                                                  ###cubeful*****$$++
-      |                                                ####$$$$ *****       |
-      |                                              ###$$ *****            |
-  0.5 ++                                          ###$ ****                ++
-      |                                        ###*****                     |
-      |                                     ##****                          |
-      |                                  *****                              |
-    0 ++                            *****#                                 ++
-      |                        ******##                                     |
-      |                    *****$###                                        |
- -0.5 ++               *****$$###                                          ++
-      |           *****  $$###                                              |
-      |       **** $$$$$###                                                 |
-   -1 ++ *****##########                                                   ++
-      ***#####                                                              |
-      +             +             +             +             +             +
- -1.5 ++------------+-------------+-------------+-------------+------------++
-      0            0.2           0.4           0.6           0.8            1
-                                       Wins
+
+     Equity
+       1.5 ++------------+-------------+-------------+-------------+------------++
+           +             +             +             +           cubeless ****** +
+           |                                                    live cube####*****
+         1 ++                                                  ###cubeful*****$$++
+           |                                                ####$$$$ *****       |
+           |                                              ###$$ *****            |
+       0.5 ++                                          ###$ ****                ++
+           |                                        ###*****                     |
+           |                                     ##****                          |
+           |                                  *****                              |
+         0 ++                            *****#                                 ++
+           |                        ******##                                     |
+           |                    *****$###                                        |
+      -0.5 ++               *****$$###                                          ++
+           |           *****  $$###                                              |
+           |       **** $$$$$###                                                 |
+        -1 ++ *****##########                                                   ++
+           ***#####                                                              |
+           +             +             +             +             +             +
+      -1.5 ++------------+-------------+-------------+-------------+------------++
+           0            0.2           0.4           0.6           0.8            1
+                                            Wins
 
    For match play there is no simple formula, since redoubles can only
 occur a limited number of times.
@@ -3720,29 +3759,30 @@ calculated as piecewise linear interpolation between (0%,22%),
 
    *mptp*
 
-MWC
- 0.42 ++------------+-------------+-------------+-------------+------------++
-      +             +             +             +           cubeless ********
-  0.4 ++                                                   live cube #****#++
- 0.38 ++                                                     cubeful**$$$$$++
-      |                                                     #*****          |
- 0.36 ++                                                #****              ++
-      |                                             *****                   |
- 0.34 ++                                        ****#                      ++
-      |                                    *****##                          |
- 0.32 ++                               *****###                            ++
-  0.3 ++                           *****####                               ++
-      |                        ****$####                                    |
- 0.28 ++                   ****$$$###                                      ++
-      |               ***** $$####                                          |
- 0.26 ++          ***** $$$###                                             ++
-      |       **** $$$$$####                                                |
- 0.24 ++  ****##########                                                   ++
- 0.22 ****####                                                             ++
-      +             +             +             +             +             +
-  0.2 ++------------+-------------+-------------+-------------+------------++
-      0            0.2           0.4           0.6           0.8            1
-                                       Wins
+
+     MWC
+      0.42 ++------------+-------------+-------------+-------------+------------++
+           +             +             +             +           cubeless ********
+       0.4 ++                                                   live cube #****#++
+      0.38 ++                                                     cubeful**$$$$$++
+           |                                                     #*****          |
+      0.36 ++                                                #****              ++
+           |                                             *****                   |
+      0.34 ++                                        ****#                      ++
+           |                                    *****##                          |
+      0.32 ++                               *****###                            ++
+       0.3 ++                           *****####                               ++
+           |                        ****$####                                    |
+      0.28 ++                   ****$$$###                                      ++
+           |               ***** $$####                                          |
+      0.26 ++          ***** $$$###                                             ++
+           |       **** $$$$$####                                                |
+      0.24 ++  ****##########                                                   ++
+      0.22 ****####                                                             ++
+           +             +             +             +             +             +
+       0.2 ++------------+-------------+-------------+-------------+------------++
+           0            0.2           0.4           0.6           0.8            1
+                                            Wins
 
 
 File: gnubg.info,  Node: 0-ply Cubeful equities,  Next: n-ply Cubeful equities,  Prev: Live cube equities,  Up: Cubeful equities
@@ -3857,29 +3897,30 @@ black's cube decisions in sample position from earlier.
 
    *mgcd*
 
-Equity
-  2.5 ++------------+-------------+-------------+-------------+-----------$##
-      +             +             +             +      centered cube$******#+
-    2 ++                                               O owns 2-cube#######++
-      |                                                X owns 2-cube#$$$$$$ |
-  1.5 ++                                             $$$$     ####         ++
-      |                                           $$$$    ####      *********
-    1 ++                                      $$$$     ###**********       ++
-      |                                    $$$$     ******                  |
-  0.5 ++                                $$$$  ******                       ++
-      |                             $$$$ ******##                           |
-    0 ++                          $$******###                              ++
- -0.5 ++                      ******   ###                                 ++
-      |                  *****     ####                                     |
-   -1 ++      ***********$$     ###                                        ++
-      ********      $$$      ###                                            |
- -1.5 ++         $$$     ####                                              ++
-      |      $$$$    ####                                                   |
-   -2 ++  $$$ #######                                                      ++
-      +#######      +             +             +             +             +
- -2.5 #+------------+-------------+-------------+-------------+------------++
-      0            0.2           0.4           0.6           0.8            1
-                                       Wins
+
+     Equity
+       2.5 ++------------+-------------+-------------+-------------+-----------$##
+           +             +             +             +      centered cube$******#+
+         2 ++                                               O owns 2-cube#######++
+           |                                                X owns 2-cube#$$$$$$ |
+       1.5 ++                                             $$$$     ####         ++
+           |                                           $$$$    ####      *********
+         1 ++                                      $$$$     ###**********       ++
+           |                                    $$$$     ******                  |
+       0.5 ++                                $$$$  ******                       ++
+           |                             $$$$ ******##                           |
+         0 ++                          $$******###                              ++
+      -0.5 ++                      ******   ###                                 ++
+           |                  *****     ####                                     |
+        -1 ++      ***********$$     ###                                        ++
+           ********      $$$      ###                                            |
+      -1.5 ++         $$$     ####                                              ++
+           |      $$$$    ####                                                   |
+        -2 ++  $$$ #######                                                      ++
+           +#######      +             +             +             +             +
+      -2.5 #+------------+-------------+-------------+-------------+------------++
+           0            0.2           0.4           0.6           0.8            1
+                                            Wins
 
    On 0-ply Black will double when the green curve (White owns 2-cube)
 is above the red curve (centered cube), and White will take as long as
@@ -4197,7 +4238,7 @@ Class                                Description
                                      table
 .result                              Style for the text indicating the
                                      outcome of the game or match, e.g.,
-                                     Jørn_ Thyssen wins 16 points_.
+                                     J�rn_ Thyssen wins 16 points_.
 .tiny                                Currently unused.
 .cubedecision                        The style applied to the entire
                                      cube decision table
@@ -4300,8 +4341,8 @@ site. Up to date source code can be accessed through CVS
 
 File: gnubg.info,  Node: What do I have to pay for GNU Backgammon?,  Next: This GNU stuff sounds interesting_,  Prev: Where do I get it?,  Up: General questions
 
-12.1.4 What do I have to pay for GNU Backgammon?
-------------------------------------------------
+12.1.4 What do I have to pay for GNU  Backgammon?
+-------------------------------------------------
 
 GNU Backgammon is _Free Software_ and is a part of the _GNU Project_.
 You may download it for free. For more information see the GNU General
@@ -4333,8 +4374,8 @@ an extensive link collection, go to Gammon Links.
 
 File: gnubg.info,  Node: Though I really read all the documentation I still have questions_,  Next: I want to make a few proposals_ I have new ideas_,  Prev: I want to learn more about backgammon_,  Up: General questions
 
-12.1.7 Though I really read all the documentation I still have questions.
--------------------------------------------------------------------------
+12.1.7 Though I really read all the documentation I still have  questions.
+--------------------------------------------------------------------------
 
 Send an email to the GNU backgammon mailing list.
 (mailto:bug-gnubg@gnu.org) If it is a bug, be sure to include the name
@@ -4370,8 +4411,8 @@ File: gnubg.info,  Node: How to install,  Next: Running GNU Backgammon,  Prev: G
 
 File: gnubg.info,  Node: Do I need some other software to run GNU Backgammon?,  Next: I want to install a newer version_,  Up: How to install
 
-12.2.1 Do I need some other software to run GNU Backgammon?
------------------------------------------------------------
+12.2.1 Do I need some other software to run GNU  Backgammon?
+------------------------------------------------------------
 
 No. Everything you need is included in the binaries.
 
@@ -4428,8 +4469,8 @@ have a clue, send a message to <bug-gnubg@gnu.org>.
 
 File: gnubg.info,  Node: On what CPU will GNU Backgammon run fastest?,  Prev: It does not compile_,  Up: How to install
 
-12.2.7 On what CPU will GNU Backgammon run fastest?
----------------------------------------------------
+12.2.7 On what CPU will GNU Backgammon run  fastest?
+----------------------------------------------------
 
 Here is a list of CPU and Evaluations per second ( Analyze->Evaluation
 Speed). Feel free to add your CPU:
@@ -4515,8 +4556,8 @@ items carefully:
 
 File: gnubg.info,  Node: GNU Backgammon complains about missing files_,  Next: Starting from the WinXP menu it plays like a beginner_,  Prev: I get an error message when starting_,  Up: Running GNU Backgammon
 
-12.3.2 GNU Backgammon complains about missing files.
-----------------------------------------------------
+12.3.2 GNU Backgammon complains about missing  files.
+-----------------------------------------------------
 
 GNU Backgammon reads several different files at start-up. It will first
 try to read a file called gnubg.wd.  This is a file which contains all
@@ -4556,8 +4597,8 @@ the working path.
 
 File: gnubg.info,  Node: My screen mixes up while starting GNU Backgammon_,  Next: I only get a command-line interface_ Where is the nice board?,  Prev: Starting from the WinXP menu it plays like a beginner_,  Up: Running GNU Backgammon
 
-12.3.4 My screen mixes up while starting GNU Backgammon.
---------------------------------------------------------
+12.3.4 My screen mixes up while starting GNU  Backgammon.
+---------------------------------------------------------
 
 Install the newest driver for your graphic card. Be sure that you have
 chosen at least a desktop resolution of 65535 (16 bit color depth). If
@@ -4580,16 +4621,16 @@ installed.
 
 File: gnubg.info,  Node: When I restart GNU Backgammon all my settings are gone_,  Next: I do not need this graphical stuff_ Where is the terminal for commands?,  Prev: I only get a command-line interface_ Where is the nice board?,  Up: Running GNU Backgammon
 
-12.3.6 When I restart GNU Backgammon all my settings are gone.
---------------------------------------------------------------
+12.3.6 When I restart GNU Backgammon all my  settings are gone.
+---------------------------------------------------------------
 
 Did you save your settings Settings->Save settings before you quit?
 
 
 File: gnubg.info,  Node: I do not need this graphical stuff_ Where is the terminal for commands?,  Prev: When I restart GNU Backgammon all my settings are gone_,  Up: Running GNU Backgammon
 
-12.3.7 I do not need this graphical stuff. Where is the terminal for commands?
-------------------------------------------------------------------------------
+12.3.7 I do not need this graphical stuff. Where is the terminal for  commands?
+-------------------------------------------------------------------------------
 
 For _GNU/Linux_ users: open a terminal and run `gnubg -t'.
 
@@ -4928,7 +4969,7 @@ File: gnubg.info,  Node: What does Pips mean?,  Next: What does epc mean?,  Prev
 The pip count is a measurement showing the total number of pips
 required for a player to bear off all checkers from the current
 position. It can be regarded as a rough estimate of the _raceness_ of
-the position – a player with a lower pip count may in many situations
+the position - a player with a lower pip count may in many situations
 want to try to race, whilst the opponent (with the higher pip count)
 may want to try blocking/holding.  See also the explanation on
 BackGammon Galore (http://www.bkgm.com/gloss/lookup.cgi?pip+count).
@@ -4945,7 +4986,7 @@ File: gnubg.info,  Node: What does epc mean?,  Prev: What does Pips mean?,  Up: 
 
 When bearing off checkers, you may notice a display showing the current
 _epc_ value (next to the display of _Pips_). The epc display can be
-turned on or off under menu _Settings —> Options —> Display_ (at
+turned on or off under menu _Settings --> Options --> Display_ (at
 least in the current version, as of June 2005).
 
    _epc_ stands for Effective Pip Count, and is an alternative
@@ -4957,7 +4998,7 @@ number of rolls_ each player needs to bear off hes checkers.
    The effective pip count is defined as this expected number of
 remaining rolls, multiplied with the average number of pips in a roll,
 which is 8.167. (The average number of pips in a roll would be 7 if
-rolling a double wouldn't yield a double pip count – i.e. a double-6
+rolling a double wouldn't yield a double pip count - i.e. a double-6
 yields 24 pips, not 12.)
 
    Thus, epc takes into account not only the current pip count, but
@@ -5073,6 +5114,8 @@ double-points will often look something like this (where TP*=CP):
 
    *The double line*
 
+   [[doubleline.png]]
+
    The double windows (intervals) are:
 
    [DP;CP] = Your double window! This window does not contain any
@@ -5101,12 +5144,7 @@ File: gnubg.info,  Node: epc?,  Prev: TG?,  Up: Abbreviations
 12.8.6 epc?
 -----------
 
-See What does
-(http://www.gnubg.org/documentation/doku.php?id=gnu_backgammon_faq#52)
-_epc_
-(http://www.gnubg.org/documentation/doku.php?id=gnu_backgammon_faq#52)
-mean?
-(http://www.gnubg.org/documentation/doku.php?id=gnu_backgammon_faq#52)
+See *Note What does epc mean?::
 
    _This should be an internal link, not an external one. But I can't
 figure out how to link internally to a subsection.  Anyone?_
@@ -5585,247 +5623,248 @@ their use in free software.
 
 Tag Table:
 Node: Top258
-Node: Introduction2836
-Node: GPL copying/warranty info7169
-Node: Rules of the game7530
-Node: Setup8118
-Ref: A board with the checkers in their initial position_8666
-Node: Object of the Game10147
-Ref: Direction of movement of White's checkers_ Red's checkers move in the opposite direction_10492
-Node: Movement of the Checkers11192
-Ref: White opens the game with 53_12496
-Node: Hitting and Entering13850
-Ref: White rolls 64 with a checker on the bar_14635
-Node: Bearing Off15782
-Ref: White rolls 64 and bears off two checkers_16658
-Node: Doubling17281
-Node: Gammons and Backgammons18306
-Node: Optional Rules18983
-Node: Rules for Match Play19949
-Node: Starting GNU Backgammon22494
-Node: Linux and Unix22746
-Node: Microsoft Windows23245
-Node: Mac OSX23987
-Node: Command line options24933
-Ref: GNU Backgammon startup options25330
-Node: Playing a game27225
-Node: Starting a new match27502
-Ref: The dialog for starting a new match_27862
-Node: Rolling the dice29282
-Ref: Click in the red rectangle to roll the dice_29638
-Node: Moving the checkers29849
-Node: Moving by drag and drop30127
-Node: Moving checkers by clicking30695
-Node: Undo a move31569
-Node: Some shortcuts32017
-Node: Using the double cube32850
-Node: Offering a double33086
-Node: Accepting or declining a cube33429
-Ref: The toolbar double buttons_33991
-Node: Resigning34322
-Node: Offering a resignation34518
-Node: Accepting or declining a resignation35092
-Node: Getting hints and Tutor Mode36093
-Node: Getting hints manually36320
-Node: Getting checker play hints while playing36607
-Ref: The hint window37020
-Node: Getting cube decision hints while playing39916
-Ref: The cube hint window40481
-Node: The hint tool buttons42039
-Node: Tutor mode44343
-Ref: The tutor window44688
-Ref: The tutor warning window45378
-Node: Time controls46147
-Node: Setting up a position46426
-Node: Entering Edit mode47326
-Node: Editing48284
-Node: Clearing the board48614
-Ref: Click in the one of the areas marked with a red ellipse to clear the board_49045
-Ref: Click in the one of the areas marked with a red ellipse to get to the initial position_49318
-Node: Quick edit49511
-Node: Editing by drag and drop50545
-Node: Setting the player on turn51391
-Ref: Clicking the White checker image will set White on turn; clicking the Black image will set Black in turn_51697
-Node: Setting the dice52238
-Ref: Click inside the red rectangle to set the dice for Black_ Click inside the green rectangle to set the dice for White_52860
-Node: Setting the cube53370
-Node: Setting the score53975
-Node: Exiting Edit mode54932
-Node: Analyzing the position55394
-Node: Working with matches56652
-Node: Retrieving and storing backgammon files56940
-Node: The Smart Game Format57337
-Node: Opening and importing matches57914
-Node: Saving and exporting positions; games or matches59607
-Node: HTML export62091
-Node: LaTeX export64773
-Node: Entering live tournament matches65618
-Node: Entering illegal moves68201
-Node: Analyzing matches69216
-Node: Analysis settings70368
-Ref: Analyze settings dialog70647
-Node: Reviewing matches72150
-Node: Game record72354
-Ref: The Game record pane72904
-Node: Analysis panel75676
-Ref: The Analyze pane76239
-Node: Statistics78878
-Node: Checker play statistics79433
-Node: Luck analysis81212
-Node: Cube statistics83048
-Node: Overall rating85771
-Node: Rollouts89375
-Node: Introduction to rollouts89579
-Node: Rollouts in GNU Backgammon91793
-Node: Quasi-Random Dice94528
-Node: Customizing GNU Backgammon97765
-Node: Evaluation settings97981
-Node: Introduction to evaluation settings98489
-Node: The depth to search and plies99569
-Node: Defining evaluation settings102385
-Node: Playing skill;102753
-Node: Hints;103124
-Node: Analysis;103870
-Node: Rollouts;104408
-Node: Changing evaluation settings105358
-Ref: The evaluation settings dialog105623
-Node: Predefined settings107359
-Node: Move filters108864
-Node: Introduction to move filters109100
-Ref: Example of move filter settings110412
-Node: Defining move filters114083
-Ref: Move filter 1114726
-Ref: Move filter 2116224
-Ref: Move filter 3116278
-Node: Cubeful vs_ Cubeless117209
-Ref: Cubeful example117662
-Ref: Cubeful example 2118331
-Node: Reduced evaluations119114
-Node: Pruning neural networks119752
-Node: Noise120518
-Node: Appearance121767
-Ref: The appearance dialog122234
-Node: Technical Notes123378
-Node: Obtaining bearoff databases123801
-Node: Generate your own124309
-Node: Download127415
-Node: Verification of databases128032
-Node: One-sided bearoff databases [compressed]128403
-Node: Two-sided bearoff databases [with cubeless and cubeful equities]130313
-Node: Two-sided databases for Hypergammon131981
-Node: Match Equity Tables134053
-Node: Python scripting134316
-Node: gnubg module functions134754
-Node: Match description136006
-Node: Match info136373
-Node: Python game137906
-Node: Game actions138515
-Node: Guile scripting138669
-Node: Equities explained138967
-Node: Introduction to equities139284
-Node: Money equity139818
-Node: Match Winning Chance140748
-Node: Normalized equity142251
-Node: Cubeful equities144077
-Node: Basic formula for cubeful equities144670
-Node: Live cube equities145608
-Ref: Cubeful example 1146270
-Ref: mgtp146904
-Ref: mptp149916
-Node: 0-ply Cubeful equities151616
-Node: n-ply Cubeful equities152330
-Node: The cube efficiency153687
-Node: Cube decisions155538
-Ref: mgcd156150
-Node: Beyond the simple model158350
-Node: A technical description of the Position ID159178
-Node: A technical description of the Match ID164944
-Node: Description of the CSS style sheet169496
-Node: Frequently Asked Questions174471
-Node: General questions174820
-Node: What is GNU Backgammon?175516
-Node: What operating systems are supported?175928
-Node: Where do I get it?176588
-Node: What do I have to pay for GNU Backgammon?177053
-Node: This GNU stuff sounds interesting_177782
-Node: I want to learn more about backgammon_178157
-Node: Though I really read all the documentation I still have questions_178622
-Node: I want to make a few proposals_ I have new ideas_179271
-Node: How to install179679
-Node: Do I need some other software to run GNU Backgammon?180310
-Node: I want to install a newer version_180841
-Node: I would like to compile it from the source code_181172
-Node: What software do I need for compiling under GNU/Linux?181591
-Node: What software do I need for compiling under MS Windows?182029
-Node: It does not compile_182466
-Node: On what CPU will GNU Backgammon run fastest?182898
-Node: Running GNU Backgammon186716
-Node: I get an error message when starting_187703
-Node: GNU Backgammon complains about missing files_188105
-Node: Starting from the WinXP menu it plays like a beginner_189873
-Node: My screen mixes up while starting GNU Backgammon_190452
-Node: I only get a command-line interface_ Where is the nice board?191072
-Node: When I restart GNU Backgammon all my settings are gone_191708
-Node: I do not need this graphical stuff_ Where is the terminal for commands?192167
-Node: Playing backgammon192836
-Node: What is the difference of a new game or match or session?193479
-Node: What the heck is a beaver in Backgammon?194121
-Node: How do I move the checkers?194664
-Node: Why am I allowed to place more than 5 checkers on a point?195449
-Node: GNU Backgammon plays poorly_196247
-Node: GNU Backgammon is too strong for me_196832
-Node: I think the bot is cheating_ It always gets good dice_197245
-Node: Settings197783
-Node: Where can I change the name of the human player?198132
-Node: How do I change the colors?198498
-Node: How do I stop the annoying beeps?"198856
-Node: What are Plies?199206
-Node: What is noise?201102
-Node: What is reduced evaluation?201392
-Node: Analyzing201689
-Node: What are these funny letters at the right bottom?202146
-Node: How do I set up a position manually?202688
-Node: Which formats must I use to import matches and positions?203594
-Node: How can I switch the players sides?204227
-Node: What do ! and ? mean?204542
-Node: How is the error rate determined?205460
-Node: What does Pips mean?206318
-Node: What does epc mean?207130
-Node: Databases209339
-Node: What is the `Database' menu for?209528
-Node: Abbreviations209741
-Node: GWC209933
-Node: MWC?210073
-Node: DP?210228
-Node: CP?210629
-Ref: The double line211371
-Node: TG?211767
-Node: epc?212105
-Node: GNU Free Documentation License212567
-Ref: gfdl212756
-Ref: fsf-copyright212758
-Node: PREAMBLE213350
-Node: APPLICABILITY AND DEFINITIONS214653
-Ref: gfdl-doc214859
-Ref: gfdl-mod-ver215416
-Ref: gfdl-secnd-sect215603
-Ref: gfdl-inv-sect216217
-Ref: gfdl-cov-text216660
-Ref: gfdl-transparent216940
-Ref: gfdl-title-page218382
-Ref: gfdl-entitled218772
-Node: VERBATIM COPYING219624
-Node: COPYING IN QUANTITY220528
-Node: MODIFICATIONS222700
-Ref: gfdl-modif-cond223288
-Node: COMBINING DOCUMENTS227851
-Node: COLLECTIONS OF DOCUMENTS229284
-Node: AGGREGATION WITH INDEPENDENT WORKS230133
-Node: TRANSLATION231293
-Node: TERMINATION232454
-Node: FUTURE REVISIONS OF THIS LICENSE233066
-Node: ADDENDUM; How to use this License for your documents234144
-Ref: copyright-sample234598
-Ref: inv-cover-sample235152
+Node: Introduction2838
+Node: GPL copying/warranty info6999
+Node: Rules of the game7360
+Node: Setup7948
+Ref: A board with the checkers in their initial position_8496
+Node: Object of the Game10053
+Ref: Direction of movement of White's checkers_ Red's checkers move in the opposite direction_10398
+Node: Movement of the Checkers11161
+Ref: White opens the game with 53_12465
+Node: Hitting and Entering13880
+Ref: White rolls 64 with a checker on the bar_14665
+Node: Bearing Off15878
+Ref: White rolls 64 and bears off two checkers_16754
+Node: Doubling17402
+Node: Gammons and Backgammons18427
+Node: Optional Rules19104
+Node: Rules for Match Play20070
+Node: Starting GNU Backgammon22310
+Node: Linux and Unix22562
+Node: Microsoft Windows23061
+Node: Mac OSX23803
+Node: Command line options24749
+Ref: GNU Backgammon startup options25146
+Node: Playing a game26717
+Node: Starting a new match26994
+Ref: The dialog for starting a new match_27354
+Node: Rolling the dice28785
+Ref: Click in the red rectangle to roll the dice_29141
+Node: Moving the checkers29358
+Node: Moving by drag and drop29636
+Node: Moving checkers by clicking30204
+Node: Undo a move31078
+Node: Some shortcuts31526
+Node: Using the double cube32359
+Node: Offering a double32595
+Node: Accepting or declining a cube32938
+Ref: The toolbar double buttons_33500
+Node: Resigning33855
+Node: Offering a resignation34051
+Node: Accepting or declining a resignation34625
+Node: Getting hints and Tutor Mode35626
+Node: Getting hints manually35853
+Node: Getting checker play hints while playing36140
+Ref: The hint window36553
+Node: Getting cube decision hints while playing39472
+Ref: The cube hint window40037
+Node: The hint tool buttons41622
+Node: Tutor mode43926
+Ref: The tutor window44271
+Ref: The tutor warning window44979
+Node: Time controls45773
+Node: Setting up a position46052
+Node: Entering Edit mode46952
+Node: Editing47910
+Node: Clearing the board48240
+Ref: Click in the one of the areas marked with a red ellipse to clear the board_48671
+Ref: Click in the one of the areas marked with a red ellipse to get to the initial position_48967
+Node: Quick edit49185
+Node: Editing by drag and drop50219
+Node: Setting the player on turn51065
+Ref: Clicking the White checker image will set White on turn; clicking the Black image will set Black in turn_51371
+Node: Setting the dice51937
+Ref: Click inside the red rectangle to set the dice for Black_ Click inside the green rectangle to set the dice for White_52559
+Node: Setting the cube53089
+Node: Setting the score53694
+Node: Exiting Edit mode54651
+Node: Analyzing the position55113
+Node: Working with matches56371
+Node: Retrieving and storing backgammon files56659
+Node: The Smart Game Format57056
+Node: Opening and importing matches57633
+Node: Saving and exporting positions; games or matches59326
+Node: HTML export61810
+Node: LaTeX export64492
+Node: Entering live tournament matches65337
+Node: Entering illegal moves67920
+Node: Analyzing matches68935
+Node: Analysis settings70087
+Ref: Analyze settings dialog70366
+Node: Reviewing matches71897
+Node: Game record72101
+Ref: The Game record pane72651
+Node: Analysis panel75446
+Ref: The Analyze pane76009
+Node: Statistics78673
+Node: Checker play statistics79228
+Node: Luck analysis81007
+Node: Cube statistics82843
+Node: Overall rating85566
+Node: Rollouts89170
+Node: Introduction to rollouts89374
+Node: Rollouts in GNU Backgammon91584
+Node: Quasi-Random Dice94319
+Node: Customizing GNU Backgammon97556
+Node: Evaluation settings97772
+Node: Introduction to evaluation settings98280
+Node: The depth to search and plies99360
+Node: Defining evaluation settings102176
+Node: Playing skill;102544
+Node: Hints;102915
+Node: Analysis;103661
+Node: Rollouts;104199
+Node: Changing evaluation settings105149
+Ref: The evaluation settings dialog105414
+Node: Predefined settings107175
+Node: Move filters108680
+Node: Introduction to move filters108916
+Ref: Example of move filter settings110228
+Node: Defining move filters113924
+Ref: Move filter 1114567
+Ref: Move filter 2116089
+Ref: Move filter 3116167
+Node: Cubeful vs_ Cubeless117122
+Ref: Cubeful example117575
+Ref: Cubeful example 2118268
+Node: Reduced evaluations119075
+Node: Pruning neural networks119713
+Node: Noise120479
+Node: Appearance121728
+Ref: The appearance dialog122195
+Node: Technical Notes123362
+Node: Obtaining bearoff databases123785
+Node: Generate your own124293
+Node: Download127024
+Node: Verification of databases127641
+Node: One-sided bearoff databases [compressed]128012
+Node: Two-sided bearoff databases [with cubeless and cubeful equities]129922
+Node: Two-sided databases for Hypergammon131590
+Ref: Random position from hypergammon database132311
+Node: Match Equity Tables133765
+Node: Python scripting134028
+Node: gnubg module functions134466
+Node: Match description135718
+Node: Match info136085
+Node: Python game137618
+Node: Game actions138227
+Node: Guile scripting138381
+Node: Equities explained138679
+Node: Introduction to equities138996
+Node: Money equity139530
+Node: Match Winning Chance140396
+Node: Normalized equity141899
+Node: Cubeful equities143725
+Node: Basic formula for cubeful equities144318
+Node: Live cube equities145256
+Ref: Cubeful example 1145918
+Ref: mgtp146578
+Ref: mptp149706
+Node: 0-ply Cubeful equities151522
+Node: n-ply Cubeful equities152236
+Node: The cube efficiency153593
+Node: Cube decisions155444
+Ref: mgcd156056
+Node: Beyond the simple model158372
+Node: A technical description of the Position ID159200
+Node: A technical description of the Match ID164966
+Node: Description of the CSS style sheet169518
+Node: Frequently Asked Questions174492
+Node: General questions174841
+Node: What is GNU Backgammon?175537
+Node: What operating systems are supported?175949
+Node: Where do I get it?176609
+Node: What do I have to pay for GNU Backgammon?177074
+Node: This GNU stuff sounds interesting_177805
+Node: I want to learn more about backgammon_178180
+Node: Though I really read all the documentation I still have questions_178645
+Node: I want to make a few proposals_ I have new ideas_179296
+Node: How to install179704
+Node: Do I need some other software to run GNU Backgammon?180335
+Node: I want to install a newer version_180868
+Node: I would like to compile it from the source code_181199
+Node: What software do I need for compiling under GNU/Linux?181618
+Node: What software do I need for compiling under MS Windows?182056
+Node: It does not compile_182493
+Node: On what CPU will GNU Backgammon run fastest?182925
+Node: Running GNU Backgammon186745
+Node: I get an error message when starting_187732
+Node: GNU Backgammon complains about missing files_188134
+Node: Starting from the WinXP menu it plays like a beginner_189904
+Node: My screen mixes up while starting GNU Backgammon_190483
+Node: I only get a command-line interface_ Where is the nice board?191105
+Node: When I restart GNU Backgammon all my settings are gone_191741
+Node: I do not need this graphical stuff_ Where is the terminal for commands?192202
+Node: Playing backgammon192873
+Node: What is the difference of a new game or match or session?193516
+Node: What the heck is a beaver in Backgammon?194158
+Node: How do I move the checkers?194701
+Node: Why am I allowed to place more than 5 checkers on a point?195486
+Node: GNU Backgammon plays poorly_196284
+Node: GNU Backgammon is too strong for me_196869
+Node: I think the bot is cheating_ It always gets good dice_197282
+Node: Settings197820
+Node: Where can I change the name of the human player?198169
+Node: How do I change the colors?198535
+Node: How do I stop the annoying beeps?"198893
+Node: What are Plies?199243
+Node: What is noise?201139
+Node: What is reduced evaluation?201429
+Node: Analyzing201726
+Node: What are these funny letters at the right bottom?202183
+Node: How do I set up a position manually?202725
+Node: Which formats must I use to import matches and positions?203631
+Node: How can I switch the players sides?204264
+Node: What do ! and ? mean?204579
+Node: How is the error rate determined?205497
+Node: What does Pips mean?206355
+Node: What does epc mean?207165
+Node: Databases209370
+Node: What is the `Database' menu for?209559
+Node: Abbreviations209772
+Node: GWC209964
+Node: MWC?210104
+Node: DP?210259
+Node: CP?210660
+Ref: The double line211402
+Node: TG?211821
+Node: epc?212159
+Node: GNU Free Documentation License212414
+Ref: gfdl212603
+Ref: fsf-copyright212605
+Node: PREAMBLE213197
+Node: APPLICABILITY AND DEFINITIONS214500
+Ref: gfdl-doc214706
+Ref: gfdl-mod-ver215263
+Ref: gfdl-secnd-sect215450
+Ref: gfdl-inv-sect216064
+Ref: gfdl-cov-text216507
+Ref: gfdl-transparent216787
+Ref: gfdl-title-page218229
+Ref: gfdl-entitled218619
+Node: VERBATIM COPYING219471
+Node: COPYING IN QUANTITY220375
+Node: MODIFICATIONS222547
+Ref: gfdl-modif-cond223135
+Node: COMBINING DOCUMENTS227698
+Node: COLLECTIONS OF DOCUMENTS229131
+Node: AGGREGATION WITH INDEPENDENT WORKS229980
+Node: TRANSLATION231140
+Node: TERMINATION232301
+Node: FUTURE REVISIONS OF THIS LICENSE232913
+Node: ADDENDUM; How to use this License for your documents233991
+Ref: copyright-sample234445
+Ref: inv-cover-sample234999
 
 End Tag Table

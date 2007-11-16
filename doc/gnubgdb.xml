@@ -96,8 +96,32 @@
     <screenshot>
       <mediaobject>
         <imageobject>
-          <imagedata fileref="images/gtkinterface.png"/>
+		<imagedata fileref="images/gtkinterface.png" width="100%"/>
         </imageobject>
+        <textobject role="texinfo">
+          <programlisting>
+(No game) new game
+gnubg rolls 3, anthon rolls 1.
+
+GNU Backgammon  Positions ID: 4HPwATDgc/ABMA
+Match ID   : MIEFAAAAAAAA
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     O: gnubg
+ | X           O    |   | O              X |     0 points
+ | X           O    |   | O              X |     Rolled 31
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+^|                  |BAR|                  |     (Cube: 1)
+ | O                |   | X                |    
+ | O                |   | X                |     
+ | O           X    |   | X                |     
+ | O           X    |   | X              O |     
+ | O           X    |   | X              O |     0 points
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     X: anthon
+
+gnubg moves 8/5 6/5.                                                           
+          </programlisting>
+        </textobject>
       </mediaobject>
     </screenshot>
     <para><application moreinfo="none">GNU Backgammon</application> is a world
@@ -207,6 +231,25 @@
           <imageobject>
             <imagedata fileref="images/rulfig1.png"/>
           </imageobject>
+          <textobject role="texinfo">
+            <programlisting>
+     Outer Board           O's Home Board
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+ |                  |BAR|                  |
+ | O                |   | X                |    
+ | O                |   | X                |     
+ | O           X    |   | X                |     
+ | O           X    |   | X              O |     
+ | O           X    |   | X              O |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+     Outer Board           X's Home Board
+            </programlisting>
+          </textobject>
         </mediaobject>
       </figure>
       <para>An alternate arrangement is the reverse of the one shown here, with
@@ -233,6 +276,23 @@
           <imageobject>
             <imagedata fileref="images/rulfig2.png"/>
           </imageobject>
+          <textobject role="texinfo">
+            <programlisting>
+  +13-14-15-16-17-18------19-20-21-22-23-24-+
+  | X                |   |                X |     
+/---X-----------------------------------  X |     
+| | X                |   |                  |     
+| | X                |   |                  |     
+| | X                |   |                  |    
+| |                  |BAR|                  |
+| |                  |   | X                |    
+| |                  |   | X                |     
+| |             X    |   | X                |     
+\---------------X----------X-----------&gt;    |     
+  |             X    |   | X                |
+  +12-11-10--9--8--7-------6--5--4--3--2--1-+
+            </programlisting>
+          </textobject>
         </mediaobject>
       </figure>
     </sect2>
@@ -265,6 +325,24 @@
               <imageobject>
                 <imagedata fileref="images/rulfig3.png"/>
               </imageobject>
+              <textobject role="texinfo">
+                <programlisting>
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X        ^  O    |   | O     .        X |     
+ | X        +---------5---------^---3----X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+
+
+ | O                |   | X----3---+       |    
+ | O                |   | X        |       |     
+ | O           X---------------5---+       |     
+ | O           X    |   | X        |     O |     
+ | O           X    |   | X        |     O |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+                </programlisting>
+              </textobject>
             </mediaobject>
           </figure>
         </listitem>
@@ -304,6 +382,23 @@
           <imageobject>
             <imagedata fileref="images/rulfig4.png"/>
           </imageobject>
+          <textobject role="texinfo">
+            <programlisting>
+ +13-14-15-16-17-18------19-20-21-22-23-24-+
+ | X           O    |   | O  O  ^        X |     
+ | X           O    |   | O  O  |          |     
+ | X                |   | O     |          |     
+ | X                |   | O     |          |     
+ | X                | X-----4---+          |    
+ |                  |BAR|                  |
+ | O                |   | X                |    
+ | O                |   | X                |     
+ | O           X    |   | X                |     
+ | O           X    |   | X              O |     
+ | O           X    |   | X              O |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+            </programlisting>
+          </textobject>
         </mediaobject>
       </figure>
       <para> If White rolls [64] with a checker on the bar, he must enter the
@@ -334,6 +429,16 @@
           <imageobject>
             <imagedata fileref="images/rulfig5.png"/>
           </imageobject>
+          <textobject role="texinfo">
+            <programlisting>
+ |                  |   |    +----6---------&gt;   
+ |                  |   |    |  +--4--------&gt;    
+ |                  |   |    |  |          |     
+ |                  |   |    |  X  X  X  X |     
+ |                  |   |    X  X  X  X  X |
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+
+            </programlisting>
+          </textobject>
         </mediaobject>
       </figure>
       <para>A player must have all of his active checkers in his home board in
@@ -415,47 +520,48 @@
         available in all subsequent games (and it's most often in the best
         interests of the trailing player to double immediately in these games).</para>
       <informaltable frame="all">
-        <tgroup cols="3">
+        <tgroup cols="4">
           <tbody>
             <row>
                     <entry>Match to 5</entry>
                     <entry>White</entry>
                     <entry>Black</entry>
+		    <entry>Doubling</entry>
                     </row> <row>
-              <entry>Game 1: White wins 2 points</entry>
+              <entry>White wins 2</entry>
               <entry>2</entry>
 <entry>0</entry>
-              <entry>Doubling Allowed</entry>
+              <entry>Allowed</entry>
 </row>
             <row>
-              <entry>Game 2: Black wins 1 point</entry>
+              <entry>Black wins 1 </entry>
               <entry>2</entry>
 <entry>1</entry>
-              <entry>Doubling Allowed</entry>
+              <entry>Allowed</entry>
 </row>
             <row>
-              <entry>Game 3: White wins 2 points</entry>
+              <entry>White wins 2 </entry>
               <entry>4</entry>
               <entry>1</entry>
-              <entry>Doubling Allowed</entry>
+              <entry>Allowed</entry>
 </row>
             <row>
-              <entry>Game 4: Black wins 1 point</entry>
+              <entry>Black wins 1 </entry>
               <entry>4</entry>
               <entry>2</entry>
               <entry>Crawford Game</entry>
 </row>
             <row>
-              <entry>Game 5: Black wins 2 points</entry>
+              <entry>Black wins 2 </entry>
               <entry>4</entry>
               <entry>4</entry>
-              <entry>Doubling Allowed</entry>
+              <entry>Allowed</entry>
 </row>
             <row>
-              <entry>Game 6: White wins 2 points</entry>
+              <entry>White wins 2 </entry>
               <entry>6</entry>
               <entry>4</entry>
-              <entry>Doubling Allowed</entry>
+              <entry>Allowed</entry>
 </row>
           </tbody>
         </tgroup>
@@ -545,36 +651,36 @@
       <example id="gnubg-options">
         <title>GNU Backgammon startup options</title>
         <programlisting format="linespecific">
-            Usage:
-            gnubg [OPTION...] [file.sgf]
+Usage:
+gnubg [OPTION...] [file.sgf]
 
-            Help Options:
-            -?, --help                   Show help options
-            --help-all                   Show all help options
-            --help-gtk                   Show GTK+ Options
+Help Options:
+-?, --help                   Show help options
+--help-all                   Show all help options
+--help-gtk                   Show GTK+ Options
 
-            GTK+ Options
-            --class=CLASS                Program class as used by the window manager
-            --name=NAME                  Program name as used by the window manager
-            --screen=SCREEN              X screen to use
-            --sync                       Make X calls synchronous
-            --gtk-module=MODULES         Load additional GTK+ modules
-            --g-fatal-warnings           Make all warnings fatal
+GTK+ Options
+--class=CLASS                Program class as used by the window manager
+--name=NAME                  Program name as used by the window manager
+--screen=SCREEN              X screen to use
+--sync                       Make X calls synchronous
+--gtk-module=MODULES         Load additional GTK+ modules
+--g-fatal-warnings           Make all warnings fatal
 
-            Application Options:
-            -b, --no-bearoff             Do not use bearoff database
-            -c, --commands=FILE          Evaluate commands in FILE and exit
-            -d, --datadir=DIR            Read database and weight files from DIR
-            -l, --lang=LANG              Set language to LANG
-            -n, --new-weights=N          Create new neural net (of size N)
-            -p, --python=FILE            Evaluate Python code in FILE and exit
-            -q, --quiet                  Disable sound effects
-            -r, --no-rc                  Do not read .gnubgrc and .gnubgautorc commands
-            -S, --no-splash              Don't show gtk splash screen
-            -t, --tty                    Start on tty instead of using window system
-            -v, --version                Show version information and exit
-            -w, --window-system-only     Ignore tty input when using window system
-            --display=DISPLAY            X display to use
+Application Options:
+-b, --no-bearoff             Do not use bearoff database
+-c, --commands=FILE          Evaluate commands in FILE and exit
+-d, --datadir=DIR            Read database and weight files from DIR
+-l, --lang=LANG              Set language to LANG
+-n, --new-weights=N          Create new neural net (of size N)
+-p, --python=FILE            Evaluate Python code in FILE and exit
+-q, --quiet                  Disable sound effects
+-r, --no-rc                  Do not read .gnubgrc and .gnubgautorc commands
+-S, --no-splash              Don't show gtk splash screen
+-t, --tty                    Start on tty instead of using window system
+-v, --version                Show version information and exit
+-w, --window-system-only     Ignore tty input when using window system
+--display=DISPLAY            X display to use
           </programlisting>
       </example>
     </sect2>
@@ -592,6 +698,12 @@
           <imageobject>
             <imagedata fileref="images/newbox.png"/>
           </imageobject>
+          <textobject role="texinfo">
+            <programlisting>
+To start a new match in the CL version type 'new match' or
+'new session'.
+            </programlisting>
+          </textobject>
         </mediaobject>
       </figure>
       <para>The shortcut buttons are the quickest way to start the game or
@@ -641,6 +753,11 @@
           <imageobject>
             <imagedata fileref="images/rolldice.png"/>
           </imageobject>
+          <textobject role="texinfo">
+            <programlisting>
+To roll the dice the CL version type 'roll'.
+            </programlisting>
+          </textobject>
         </mediaobject>
       </figure>
       <para>When you have moved your checkers to make the desired move, you
@@ -718,6 +835,9 @@
             <imageobject>
               <imagedata fileref="images/cubebuttons.png"/>
             </imageobject>
+	    <textobject>
+		    <phrase>[[cubebuttons.png]]</phrase>
+	    </textobject>
           </mediaobject>
         </figure>
         <para>There are also menu options from the drop down menu for all the
@@ -768,6 +888,9 @@
           <imageobject>
             <imagedata fileref="images/hintwindow.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[hintwindow.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>This Hint window shows a list of all possible moves for the position
@@ -864,6 +987,9 @@
           <imageobject>
             <imagedata fileref="images/hintcubewindow.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[hintcubewindow.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>The first lines is the window dialog shows the evaluation depth, and
@@ -967,6 +1093,9 @@
           <imageobject>
             <imagedata fileref="images/tutor.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[tutor.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>In Tutor Mode, <application>GNU Backgammon</application> will
@@ -985,6 +1114,9 @@
           <imageobject>
             <imagedata fileref="images/tutorwarning.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[tutorwarning.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>In the above figure, you can see a warning dialog from the tutor
@@ -1052,6 +1184,9 @@
           <imageobject>
             <imagedata fileref="images/clearboard.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[clearboard.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>You can also just as easy generate the initial position by clicking
@@ -1064,6 +1199,9 @@
           <imageobject>
             <imagedata fileref="images/initialboard.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[initialboard.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>Note that the bearoff trays change side when the board is displayed
@@ -1109,6 +1247,9 @@
           <imageobject>
             <imagedata fileref="images/setturn.png"/>
           </imageobject>
+	    <textobject>
+		    <phrase>[[initialboard.png]]</phrase>
+	    </textobject>
         </mediaobject>
       </figure>
       <para>Note that setting the turn sets the turn before the dice has been
@@ -1134,6 +1275,9 @@
           <imageobject>
             <imagedata fileref="images/setdice.png"/>
           </imageobject>
+	  <textobject>
+		  <phrase>[[setdice.png]]</phrase>
+	  </textobject>
         </mediaobject>
       </figure>
       <para>Setting the dice in edit mode sets both dice and the player on turn.
@@ -1549,6 +1693,9 @@
             <imageobject>
               <imagedata fileref="images/analysesettings.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[analysesettings.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>In the top left frame in this dialog box, you can select what to
@@ -1605,6 +1752,9 @@
             <imageobject>
               <imagedata fileref="images/gamerecord.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[gamerecord.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>The figure shows a typical game record list. The moves are shown
@@ -1723,6 +1873,9 @@
             <imageobject>
               <imagedata fileref="images/analysepane.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[analasyepane.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>In the figure you can see the analysis panel. At the top of the
@@ -2423,6 +2576,9 @@
             <imageobject>
               <imagedata fileref="images/evalsetting.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[evalsettings.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>The dialog is consisting of two columns, the left column is for
@@ -2541,6 +2697,9 @@
               <imageobject>
                 <imagedata fileref="images/movefilterex.png"/>
               </imageobject>
+	  <textobject>
+		  <phrase>[[movefilterex.png]]</phrase>
+	  </textobject>
             </mediaobject>
           </figure>
           <para><application>GNU Backgammon</application> starts by finding all
@@ -2806,6 +2965,9 @@
               <imageobject>
                 <imagedata fileref="images/movefilter1.png"/>
               </imageobject>
+	  <textobject>
+		  <phrase>[[movefilter1.png]]</phrase>
+	  </textobject>
             </mediaobject>
           </figure>
           <para>If you are playing Expert level (this is what GGRaccoon is set
@@ -2838,6 +3000,9 @@
               <imageobject>
                 <imagedata fileref="images/movefilter2.png"/>
               </imageobject>
+	  <textobject>
+		  <phrase>[[movefilter2.png]]</phrase>
+	  </textobject>
             </mediaobject>
           </figure>
           <para>Take a look at next figure.</para>
@@ -2847,6 +3012,9 @@
               <imageobject>
                 <imagedata fileref="images/movefilter3.png"/>
               </imageobject>
+	  <textobject>
+		  <phrase>[[movefilter3.png]]</phrase>
+	  </textobject>
             </mediaobject>
           </figure>
           <para>Here, the exact same settings were maintained, but the 1-ply
@@ -2877,6 +3045,9 @@
             <imageobject>
               <imagedata fileref="images/cubeful-ex1.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[cubeful-ex1.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>In this position black has rolled 51 and he has a good position.
@@ -2895,6 +3066,9 @@
             <imageobject>
               <imagedata fileref="images/cubeful-ex2.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[cubeful-ex2.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>This is from a 5 point match where black has 1 point and white has
@@ -2971,6 +3145,9 @@
           <imageobject>
             <imagedata fileref="images/appearence.png"/>
           </imageobject>
+	  <textobject>
+		  <phrase>[[appearance.png]]</phrase>
+	  </textobject>
         </mediaobject>
       </figure>
       <para>In this dialog box you see a preview picture of the board at the
@@ -3265,11 +3442,13 @@
           process it's not possible to give MD5 checksum for these, as it depend
           heavily on your convergence threshold, the number of restarts, and
           rounding errors. </para>
-        <para>Below is a random position from the database. The equities and
+  <para>A random position from the database is found in <xref linkend="gnubg-hypergammon"/>. The equities and
           percentages in your own database should be very similar (if not
           identical): </para>
         <para><application>GNU Backgammon</application> Position ID:
           ADAAAQAkIAAAAA</para>
+  <example id="gnubg-hypergammon">
+	  <title>Random position from hypergammon database</title>
   <programlisting>
  GNU Backgammon  Position ID: ADAAAQAkIAAAAA
                  Match ID   : cAkAAAAAAAAA
@@ -3305,6 +3484,7 @@ Double, take        : -0.710   (-0.491)
 
 Correct cube action: No double, beaver
 </programlisting>
+</example>
       </sect3>
     </sect2>
     <sect2 id="gnubg-tech_met">
@@ -3578,6 +3758,9 @@ Correct cube action: No double, beaver
             <imageobject>
               <imagedata fileref="images/cubefuleq-ex1.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[cubefuleq-ex1.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para><application>GNU Backgammon</application> evaluates</para>
@@ -3623,6 +3806,33 @@ Correct cube action: No double, beaver
             <imageobject>
               <imagedata fileref="images/mgtp.png"/>
             </imageobject>
+            <textobject role="texinfo">
+              <programlisting>
+Equity
+  1.5 ++------------+-------------+-------------+-------------+------------++
+      +             +             +             +           cubeless ****** +
+      |                                                    live cube####*****
+    1 ++                                                  ###cubeful*****$$++
+      |                                                ####$$$$ *****       |
+      |                                              ###$$ *****            |
+  0.5 ++                                          ###$ ****                ++
+      |                                        ###*****                     |
+      |                                     ##****                          |
+      |                                  *****                              |
+    0 ++                            *****#                                 ++
+      |                        ******##                                     |
+      |                    *****$###                                        |
+ -0.5 ++               *****$$###                                          ++
+      |           *****  $$###                                              |
+      |       **** $$$$$###                                                 |
+   -1 ++ *****##########                                                   ++
+      ***#####                                                              |
+      +             +             +             +             +             +
+ -1.5 ++------------+-------------+-------------+-------------+------------++
+      0            0.2           0.4           0.6           0.8            1
+                                       Wins
+              </programlisting>
+            </textobject>
           </mediaobject>
         </figure>
         <para>For match play there is no simple formula, since redoubles can
@@ -3681,6 +3891,33 @@ Correct cube action: No double, beaver
             <imageobject>
               <imagedata fileref="images/mptp.png"/>
             </imageobject>
+            <textobject role="texinfo">
+              <programlisting>
+MWC
+ 0.42 ++------------+-------------+-------------+-------------+------------++
+      +             +             +             +           cubeless ********
+  0.4 ++                                                   live cube #****#++
+ 0.38 ++                                                     cubeful**$$$$$++
+      |                                                     #*****          |
+ 0.36 ++                                                #****              ++
+      |                                             *****                   |
+ 0.34 ++                                        ****#                      ++
+      |                                    *****##                          |
+ 0.32 ++                               *****###                            ++
+  0.3 ++                           *****####                               ++
+      |                        ****$####                                    |
+ 0.28 ++                   ****$$$###                                      ++
+      |               ***** $$####                                          |
+ 0.26 ++          ***** $$$###                                             ++
+      |       **** $$$$$####                                                |
+ 0.24 ++  ****##########                                                   ++
+ 0.22 ****####                                                             ++
+      +             +             +             +             +             +
+  0.2 ++------------+-------------+-------------+-------------+------------++
+      0            0.2           0.4           0.6           0.8            1
+                                       Wins
+              </programlisting>
+            </textobject>
           </mediaobject>
         </figure>
       </sect4>
@@ -3797,6 +4034,33 @@ Correct cube action: No double, beaver
             <imageobject>
               <imagedata fileref="images/mgcd.png"/>
             </imageobject>
+            <textobject role="texinfo">
+              <programlisting>
+Equity
+  2.5 ++------------+-------------+-------------+-------------+-----------$##
+      +             +             +             +      centered cube$******#+
+    2 ++                                               O owns 2-cube#######++
+      |                                                X owns 2-cube#$$$$$$ |
+  1.5 ++                                             $$$$     ####         ++
+      |                                           $$$$    ####      *********
+    1 ++                                      $$$$     ###**********       ++
+      |                                    $$$$     ******                  |
+  0.5 ++                                $$$$  ******                       ++
+      |                             $$$$ ******##                           |
+    0 ++                          $$******###                              ++
+ -0.5 ++                      ******   ###                                 ++
+      |                  *****     ####                                     |
+   -1 ++      ***********$$     ###                                        ++
+      ********      $$$      ###                                            |
+ -1.5 ++         $$$     ####                                              ++
+      |      $$$$    ####                                                   |
+   -2 ++  $$$ #######                                                      ++
+      +#######      +             +             +             +             +
+ -2.5 #+------------+-------------+-------------+-------------+------------++
+      0            0.2           0.4           0.6           0.8            1
+                                       Wins
+              </programlisting>
+            </textobject>
           </mediaobject>
         </figure>
         <para>On 0-ply Black will double when the green curve (White owns
@@ -5057,6 +5321,9 @@ Correct cube action: No double, beaver
             <imageobject>
               <imagedata fileref="images/doubleline.png"/>
             </imageobject>
+	  <textobject>
+		  <phrase>[[doubleline.png]]</phrase>
+	  </textobject>
           </mediaobject>
         </figure>
         <para>The double windows (intervals) are:</para>

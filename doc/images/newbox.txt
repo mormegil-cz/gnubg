@@ -1,2 +1,0 @@
-To start a new match in the CL version type 'new match' or
-'new session'.

@@ -396,7 +396,7 @@
       <para>GNU offers a powerful Market Window/Gammon values tool (<menuchoice><guimenu>Analyze</guimenu><guimenuitem>Market Window</guimenuitem></menuchoice>) to the advanced or aspiring player. This tool will answer all questions on a position's take point, double point, etc. for both players at any match situation, including side-by-side dead-cube/live-cube scores. If you wish to see how other match scores would affect the figures, you can simply use the arrows, and you can change the cube value. And if it is a money game, then the respective double, beaver, raccoon, redouble values will be shown instead.</para>
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/234924dc.png" scale="99"/>
+          <imagedata align="center" fileref="images/234924dc.png"/>
         </imageobject>
       </mediaobject>
     </sect2>
@@ -405,7 +405,7 @@
       <para>Sho Sengoku conceived and developed the idea of the <ulink url="http://www46.pair.com/sengoku/TempMap/English/TempMap.html">Temperature Map</ulink>, which is now available to GNU users. Essentially what it does is allow you to see the possible consequences of a move or cube decision in a visual manner. It is available in the Analysis pane, and in the Hint window. The best way to understand this is to give an example. </para>
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/3658e0e8.png" scale="99"/>
+          <imagedata align="center" fileref="images/3658e0e8.png"/>
         </imageobject>
       </mediaobject>
       <para>Commenting on the position above, as can be seen in the Hint window below, GNU says that running off the anchor with 20/14 would lose 0.064 equity compared to the best move 6/5 6/1. </para>
@@ -437,7 +437,7 @@
       </tip>
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/m6e43baca.png" scale="99"/>
+          <imagedata align="center" fileref="images/m6e43baca.png"/>
         </imageobject>
       </mediaobject>
     </sect2>
@@ -587,141 +587,23 @@
       <para>Position ID: 0HPhATDg2+ABMA Match ID: MIHlAEAAAAAAPip counts: mamabear 160, KitWoolsey 162</para>
       <para>*mamabear moves 24/20*</para>
       <informaltable frame="all">
-        <tgroup cols="3">
+        <tgroup cols="4">
           <colspec colnum="1" colname="c1"/>
           <colspec colnum="2" colname="c2"/>
           <colspec colnum="3" colname="c3"/>
+          <colspec colnum="4" colname="c4"/>
           <tbody>
-            <row>
-              <entry namest="c1" nameend="c2">
-                <para>#</para>
-              </entry>
-              <entry>
-                <para>Ply</para>
-              </entry>
-              <entry>
-                <para>Move</para>
-              </entry>
-              <entry>
-                <para>Equity</para>
-              </entry>
-            </row>
-            <row>
-              <entry>
-                <para>*</para>
-              </entry>
-              <entry>
-                <para>1</para>
-              </entry>
-              <entry>
-                <para>2</para>
-              </entry>
-              <entry>
-                <para>24/20*</para>
-              </entry>
-              <entry>
-                <para>+0.206</para>
-              </entry>
-            </row>
-            <row>
-              <entry namest="c1" nameend="c3">
-              </entry>
-              <entry namest="c4" nameend="c5">
-                <para>60.6% 21.1% 1.7% - 39.4% 8.9% 0.2%</para>
-              </entry>
-            </row>
-            <row>
-              <entry>
-              </entry>
-              <entry>
-                <para>2</para>
-              </entry>
-              <entry>
-                <para>2</para>
-              </entry>
-              <entry>
-                <para>8/5 6/5</para>
-              </entry>
-              <entry>
-                <para>-0.067 ( -0.272)</para>
-              </entry>
-            </row>
-            <row>
-              <entry namest="c1" nameend="c3">
-              </entry>
-              <entry namest="c4" nameend="c5">
-                <para>55.2% 18.1% 1.1% - 44.8% 13.8% 0.6%</para>
-              </entry>
-            </row>
-            <row>
-              <entry>
-              </entry>
-              <entry>
-                <para>3</para>
-              </entry>
-              <entry>
-                <para>0</para>
-              </entry>
-              <entry>
-                <para>24/23 13/10</para>
-              </entry>
-              <entry>
-                <para>-0.244 ( -0.449)</para>
-              </entry>
-            </row>
-            <row>
-              <entry namest="c1" nameend="c3">
-              </entry>
-              <entry namest="c4" nameend="c5">
-                <para>50.2% 15.1% 0.9% - 49.8% 15.1% 0.6%</para>
-              </entry>
-            </row>
-            <row>
-              <entry>
-              </entry>
-              <entry>
-                <para>4</para>
-              </entry>
-              <entry>
-                <para>0</para>
-              </entry>
-              <entry>
-                <para>24/23 24/21</para>
-              </entry>
-              <entry>
-                <para>-0.256 ( -0.462)</para>
-              </entry>
-            </row>
-            <row>
-              <entry namest="c1" nameend="c3">
-              </entry>
-              <entry namest="c4" nameend="c5">
-                <para>49.8% 13.6% 0.8% - 50.2% 14.8% 0.4%</para>
-              </entry>
-            </row>
-            <row>
-              <entry>
-              </entry>
-              <entry>
-                <para>5</para>
-              </entry>
-              <entry>
-                <para>0</para>
-              </entry>
-              <entry>
-                <para>24/21 6/5</para>
-              </entry>
-              <entry>
-                <para>-0.285 ( -0.491)</para>
-              </entry>
-            </row>
-            <row>
-              <entry namest="c1" nameend="c3">
-              </entry>
-              <entry namest="c4" nameend="c5">
-                <para>49.7% 14.4% 1.0% - 50.3% 16.5% 0.7%</para>
-              </entry>
-            </row>
+            <row> <entry> <para>#</para> </entry> <entry> <para>Ply</para> </entry> <entry> <para>Move</para> </entry> <entry> <para>Equity</para> </entry> </row>
+            <row> <entry> <para>*1</para> </entry> <entry> <para>2</para> </entry> <entry> <para>24/20*</para> </entry> <entry> <para>+0.206</para> </entry> </row>
+            <row> <entry> </entry> <entry namest="c3" nameend="c4"> <para>60.6% 21.1% 1.7% - 39.4% 8.9% 0.2%</para> </entry> </row>
+            <row> <entry> <para>2</para> </entry> <entry> <para>2</para> </entry> <entry> <para>8/5 6/5</para> </entry> <entry> <para>-0.067 ( -0.272)</para> </entry> </row>
+            <row> <entry> </entry> <entry namest="c3" nameend="c4"> <para>55.2% 18.1% 1.1% - 44.8% 13.8% 0.6%</para> </entry> </row>
+            <row> <entry> <para>3</para> </entry> <entry> <para>0</para> </entry> <entry> <para>24/23 13/10</para> </entry> <entry> <para>-0.244 ( -0.449)</para> </entry> </row>
+            <row> <entry> </entry> <entry namest="c3" nameend="c4"> <para>50.2% 15.1% 0.9% - 49.8% 15.1% 0.6%</para> </entry> </row>
+            <row> <entry> <para>4</para> </entry> <entry> <para>0</para> </entry> <entry> <para>24/23 24/21</para> </entry> <entry> <para>-0.256 ( -0.462)</para> </entry> </row>
+            <row> <entry> </entry> <entry namest="c3" nameend="c4"> <para>49.8% 13.6% 0.8% - 50.2% 14.8% 0.4%</para> </entry> </row>
+            <row> <entry> <para>5</para> </entry> <entry> <para>0</para> </entry> <entry> <para>24/21 6/5</para> </entry> <entry> <para>-0.285 ( -0.491)</para> </entry> </row>
+            <row> <entry> </entry> <entry namest="c3" nameend="c4"> <para>49.7% 14.4% 1.0% - 50.3% 16.5% 0.7%</para> </entry> </row>
           </tbody>
         </tgroup>
       </informaltable>
@@ -839,7 +721,7 @@
     <para>You can keep track of the results obtained by yourself and your opponents using the Player Records. There you can store the statistics of your matches and keep records of the average results obtained such as checker play, cube decisions, and luck. It will also break down the results according to the last 20 games played, the last 100, etc.</para>
     <mediaobject>
       <imageobject>
-        <imagedata align="center" fileref="images/m7bf4f29.png" scale="99"/>
+        <imagedata align="center" fileref="images/m7bf4f29.png"/>
       </imageobject>
     </mediaobject>
     <para>To add results to an existing account, or simply create a new account in which to add the results (of course you must first have an analyzed match open), go to the Analyze menu, and select Add to Player Records and Match statistics. If the account doesn't already exist, GNU will create it automatically and add the results. If you wish to remove an account, then click on the name in the Player Records, and press the Erase button.</para>
@@ -1361,7 +1243,7 @@
       <para>Moving and setting up the checkers is quite easy and Snowie users will feel at home as the method is identical. To remove or add white checkers to a point for example, use the right mouse button and click on the point. You determine the number of checkers to be added or removed by the height of the point you press. For example, in the following diagram, </para>
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/6a6ae1b7.png" scale="99"/>
+          <imagedata align="center" fileref="images/6a6ae1b7.png"/>
         </imageobject>
       </mediaobject>
       <para>if you have 5 white checkers on the 19-point and only want to have 3, click with the right mouse button on the 3rd checker where the yellow arrow indicates and the top two will be removed. Adding checkers is the same, so if you wanted to add a red checker to the 6-point you would place the cursor where the green arrow indicates and left-click. If you want to quickly get the starting position, you can click on the area indicated by the blue ellipses on the left, and if you want to quickly clear the board of all checkers, click instead on the right side on the area indicated by the pink ellipses. Try it and experiment a little. It's much easier to do than to explain.</para>
@@ -1380,7 +1262,7 @@
       <para>The appearance of the boards can also be changed making use of a number of presets, or you can design your own. To make changes, go to the Settings menu and select Appearance. A window will appear, displaying a number of tabs at the top. Select Designs and you will see a list of the preset board designs, as well as thumbnails of what they look like. To choose one, just click on the name of the preset and press Ok. That's all there is to it.</para>
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/6e75aa33.png" scale="99"/>
+          <imagedata align="center" fileref="images/6e75aa33.png"/>
         </imageobject>
       </mediaobject>
       <para>If you'd like to enjoy a 3D board, go to the General tab, and select 3D board:</para>
@@ -1404,7 +1286,7 @@
       <para>You can also enjoy a full screen game, without panels, toolbars, or any other distractions, by going to the View menu, and selecting Full screen. If you have a large screen it can be quite an experience, and it can also be a nice way to play against a friend if you have no board nearby. </para>
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/5ada89e8.png" scale="99"/>
+          <imagedata align="center" fileref="images/5ada89e8.png" width="100%"/>
         </imageobject>
       </mediaobject>
       <para>To exit the Full Screen mode, just press the Esc key.</para>

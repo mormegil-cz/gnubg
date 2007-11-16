@@ -13,28 +13,28 @@ man6_MANS = gnubg.6
 all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info gnubg.pdf allabout.pdf
 
 gnubg.6: gnubgman.xml
-	db2x_docbook2man gnubgman.xml 2>.gnubgman.err || \
-		docbook2man gnubgman.xml 2>.gnubgman.err || \
+	$(DOCBOOK2MAN) gnubgman.xml || \
 		cp gnubg/gnubg.6 .
 
 gnubg.pdf: gnubgdb.xml images/*.png
-	dblatex gnubgdb.xml -o gnubg.pdf || cp gnubg/gnubg.pdf .
+	$(DBLATEX) gnubgdb.xml -o gnubg.pdf || cp gnubg/gnubg.pdf .
 
 allabout.pdf: allabout.xml images/*.png
-	dblatex allabout.xml -o allabout.pdf || cp gnubg/allabout.pdf .
+	$(DBLATEX) allabout.xml -o allabout.pdf || cp gnubg/allabout.pdf .
 
 gnubg.html: gnubgdb.xml images/*.png
-	xsltproc \
+	$(XSLTPROC) \
 		--stringparam chunker.output.encoding ISO8859-1 \
 		--stringparam  use.id.as.filename 1 \
 		--stringparam  root.filename  '' \
+		--stringparam  html.longdesc 0 \
 		--nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/onechunk.xsl \
 		gnubgdb.xml || \
 		cp gnubg/gnubg.html .
 
 
 allabout.html: allabout.xml images/*.png
-	xsltproc \
+	$(XSLTPROC) \
 		--stringparam chunker.output.encoding ISO8859-1 \
 		--stringparam  use.id.as.filename 1 \
 		--stringparam  root.filename  '' \
@@ -43,13 +43,15 @@ allabout.html: allabout.xml images/*.png
 		cp gnubg/allabout.html .
 
 gnubg.texi: gnubgdb.xml
-	db2x_docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err || \
-	docbook2texi --encoding=UTF-8 gnubgdb.xml 2>.gnubgtexi.err || \
+	$(DOCBOOK2TEXI) --encoding=ISO-8859-1 --string-param prefer-textobjects=1 gnubgdb.xml || \
 	cp gnubg/gnubg.texi .
 
 gnubg.info: gnubg.texi
 	makeinfo gnubg.texi -o gnubg.info 2>.gnubginfo.err || \
 	cp gnubg/gnubg.info .
+
+html_node: gnubg.texi
+	makeinfo --html gnubg.texi -o html_node
 
 install-data-local: gnubg.html allabout.html gnubg.info images/*.png
 	$(mkinstalldirs) $(gnubg_helpdir)/images
