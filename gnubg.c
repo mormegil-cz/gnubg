@@ -5731,7 +5731,7 @@ ProgressValueAdd ( int iValue ) {
 }
 
 
-extern void Progress( void )
+static void Progress( void )
 {
 
     static int i = 0;

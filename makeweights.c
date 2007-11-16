@@ -33,7 +33,7 @@
 static void 
 usage (char *prog) {
   fprintf (stderr, "Usage: %s [[-f] outputfile [inputfile]]\n"
-	  "  outputfile: Output to file instead of stdout\n",
+	  "  outputfile: Output to file instead of stdout\n"
 	  "  inputfile: Input from file instead of stdin\n",
 	   prog);
 

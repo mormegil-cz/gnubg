@@ -856,7 +856,7 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 		 FormatMove( sz, anBoard, anMove ) );
 }
 
-extern int ComputerTurn( void ) {
+static int ComputerTurn( void ) {
 
   moverecord *pmr;
   cubeinfo ci;
@@ -1532,6 +1532,19 @@ extern int ComputerTurn( void ) {
   return -1;
 }
 
+static void TurnDone( void ) {
+
+#if USE_GTK
+    if( fX ) {
+	if( !nNextTurn )
+	    nNextTurn = g_idle_add( NextTurnNotify, NULL );
+    } else
+#endif
+	fNextTurn = TRUE;
+
+    outputx();
+}
+
 extern void CancelCubeAction( void ) {
     
     if( ms.fDoubled ) {
@@ -1786,18 +1799,6 @@ extern int NextTurn( int fPlayNext ) {
     return 0;
 }
 
-extern void TurnDone( void ) {
-
-#if USE_GTK
-    if( fX ) {
-	if( !nNextTurn )
-	    nNextTurn = g_idle_add( NextTurnNotify, NULL );
-    } else
-#endif
-	fNextTurn = TRUE;
-
-    outputx();
-}
 
 extern void CommandAccept( char *sz ) {
 

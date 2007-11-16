@@ -21,15 +21,4 @@
 #ifndef _IMPORT_H_
 #define _IMPORT_H_
 
-extern void CommandImportBGRoom(char *);
-extern void CommandImportBKG(char *);
-extern void CommandImportEmpire(char *);
-extern void CommandImportJF(char *);
-extern void CommandImportMat(char *);
-extern void CommandImportOldmoves(char *);
-extern void CommandImportParty(char *);
-extern void CommandImportSGG(char *);
-extern void CommandImportSnowieTxt(char *);
-extern void CommandImportTMG(char *);
-extern void CommandImportAuto(char *);
 #endif

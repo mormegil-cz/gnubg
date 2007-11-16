@@ -13,6 +13,7 @@
  */
 
 #if USE_MULTITHREAD
+#include <glib.h>
 #include "backgammon.h"
 
 #ifdef WIN32
