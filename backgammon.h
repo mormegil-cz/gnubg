@@ -22,10 +22,8 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
-#include "list.h"
 #include "analysis.h"
 #include "eval.h"
-#include "common.h"
 
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_NAME_LEN 32

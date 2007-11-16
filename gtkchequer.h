@@ -21,6 +21,7 @@
 
 #ifndef _GTKCHEQUER_H_
 #define _GTKCHEQUER_H_
+#include "backgammon.h"
 
 typedef struct _hintdata {
   GtkWidget *pwMoves;     /* the movelist */

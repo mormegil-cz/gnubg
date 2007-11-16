@@ -21,6 +21,7 @@
 
 #ifndef _ROLLOUT_H_
 #define _ROLLOUT_H_
+#include "eval.h"
 
 #define MAXHIT 50 /* for statistics */
 #define STAT_MAXCUBE 10

@@ -1068,7 +1068,7 @@ void DockPanels(void)
 
 
 extern void
-ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw )
+ShowAllPanels ( gpointer p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1113,7 +1113,7 @@ ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 }
 
 extern void
-HideAllPanels ( gpointer *p, guint n, GtkWidget *pw )
+HideAllPanels ( gpointer p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	int i;
@@ -1163,7 +1163,7 @@ HideAllPanels ( gpointer *p, guint n, GtkWidget *pw )
 		gtk_widget_show(bd->drawing_area);
 }
 
-extern void ToggleDockPanels( gpointer *p, guint n, GtkWidget *pw )
+extern void ToggleDockPanels( gpointer p, guint n, GtkWidget *pw )
 {
 	int newValue = GTK_CHECK_MENU_ITEM( pw )->active;
 	if (fDockPanels != newValue)

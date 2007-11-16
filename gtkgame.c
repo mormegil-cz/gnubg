@@ -45,6 +45,7 @@
 #include <sys/utsname.h>
 #endif
 
+#include "rollout.h"
 #include "analysis.h"
 #include "backgammon.h"
 #include "sgf.h"
@@ -478,7 +479,7 @@ extern void HandleXAction( void ) {
 /* TRUE if gnubg is automatically setting the state of a menu item. */
 static int fAutoCommand;
 
-static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
+static void Command( gpointer p, guint iCommand, GtkWidget *widget ) {
 
     char sz[ 80 ];
 
@@ -542,7 +543,7 @@ extern int GTKGetManualDice( unsigned int an[ 2 ] ) {
     return an[ 0 ] ? 0 : -1;
 }
 
-extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw ) {
+extern void GTKSetDice( gpointer p, guint n, GtkWidget *pw ) {
 
     unsigned int an[ 2 ];
     char sz[ 13 ]; /* "set dice x y" */
@@ -553,7 +554,7 @@ extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw ) {
     }
 }
 
-extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
+extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
 
     int valChanged;
     int an[ 2 ];
@@ -1596,12 +1597,12 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 	return FALSE;
 }
 
-static void NewClicked(gpointer * p, guint n, GtkWidget * pw)
+static void NewClicked(gpointer p, guint n, GtkWidget * pw)
 {
 	GTKNew();
 }
 
-static void LoadCommands(gpointer * p, guint n, GtkWidget * pw)
+static void LoadCommands(gpointer p, guint n, GtkWidget * pw)
 {
 	gchar *filename, *command;
 	filename =
@@ -1616,7 +1617,7 @@ static void LoadCommands(gpointer * p, guint n, GtkWidget * pw)
 	}
 }
 
-static void ExportHTMLImages(gpointer * p, guint n, GtkWidget * pw)
+static void ExportHTMLImages(gpointer p, guint n, GtkWidget * pw)
 {
 	GtkWidget *fc;
 	gchar *message, *expfolder, *folder, *command;
@@ -1677,14 +1678,14 @@ static void ExportHTMLImages(gpointer * p, guint n, GtkWidget * pw)
 	gtk_widget_destroy(fc);
 }
 
-static void CopyAsGOL(gpointer * p, guint n, GtkWidget * pw)
+static void CopyAsGOL(gpointer p, guint n, GtkWidget * pw)
 {
 
 	UserCommand("export position gol2clipboard");
 
 }
 
-static void CopyAsIDs(gpointer * p, guint n, GtkWidget * pw)
+static void CopyAsIDs(gpointer p, guint n, GtkWidget * pw)
 {				/* Copy the position and match ids to the clipboard */
 	char buffer[1024];
 
@@ -1695,7 +1696,7 @@ static void CopyAsIDs(gpointer * p, guint n, GtkWidget * pw)
 	GTKTextToClipboard(buffer);
 }
 
-static void TogglePanel(gpointer * p, guint n, GtkWidget * pw)
+static void TogglePanel(gpointer p, guint n, GtkWidget * pw)
 {
 	int f;
 	gnubgwindow panel = 0;
@@ -1736,7 +1737,7 @@ static void TogglePanel(gpointer * p, guint n, GtkWidget * pw)
 
 /* PyShell expects sys.argv to be defined. '-n' makes PyShell run without a
  * subshell, which is needed because of some conflict with the gnubg module. */
-static void PythonShell(gpointer * p, guint n, GtkWidget * pw)
+static void PythonShell(gpointer p, guint n, GtkWidget * pw)
 {
 	char *pch;
 	pch =
@@ -1774,7 +1775,7 @@ extern void SetSwitchModeMenuText(void)
 }
 
 static void
-SwitchDisplayMode( gpointer *p, guint n, GtkWidget *pw )
+SwitchDisplayMode( gpointer p, guint n, GtkWidget *pw )
 {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	BoardData3d *bd3d = bd->bd3d;
@@ -1824,7 +1825,7 @@ static void SetFullscreenWindowSettings(int panels, int ids, int maxed)
 	maximised = maxed;
 }
 
-static void DoFullScreenMode(gpointer * p, guint n, GtkWidget * pw)
+static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 {
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	GtkWindow *ptl =
@@ -1948,7 +1949,7 @@ void GetFullscreenWindowSettings(int *panels, int *ids, int *maxed)
 	*maxed = maximised;
 }
 
-static void FinishMove(gpointer * p, guint n, GtkWidget * pw)
+static void FinishMove(gpointer p, guint n, GtkWidget * pw)
 {
 
 	int anMove[8];
@@ -2529,7 +2530,7 @@ EvaluationOK ( GtkWidget *pw, setevalwidget *psew ) {
 }
 
 extern void
-SetEvaluation ( gpointer *p, guint n, GtkWidget *pw )
+SetEvaluation ( gpointer p, guint n, GtkWidget *pw )
 {
     evalcontext ecChequer, ecCube;
     GtkWidget *pwDialog;
@@ -2856,7 +2857,7 @@ static void AnalysisSet( analysiswidget *paw) {
 		 arLuckLevel[LUCK_VERYBAD] );
 }  
 
-static void SetAnalysis(gpointer * p, guint n, GtkWidget * pw)
+static void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
 {
 	GtkWidget *pwDialog;
 	analysiswidget aw;
@@ -3025,7 +3026,7 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void SetPlayers(gpointer * p, guint n, GtkWidget * pw)
+static void SetPlayers(gpointer p, guint n, GtkWidget * pw)
 {
 
 	GtkWidget *pwDialog, *pwNotebook;
@@ -3135,7 +3136,7 @@ static void SetPlayers(gpointer * p, guint n, GtkWidget * pw)
 	}
 }
 
-static void SetOptions(gpointer * p, guint n, GtkWidget * pw)
+static void SetOptions(gpointer p, guint n, GtkWidget * pw)
 {
 
 	GTKSetOptions();
@@ -3365,7 +3366,7 @@ static void AddLangWidgets(GtkWidget *cont)
 }
 
 
-static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
+static void SetLanguage( gpointer p, guint n, GtkWidget *pw )
 {
 	GList *pl;
 
@@ -3391,7 +3392,7 @@ static void SetLanguage( gpointer *p, guint n, GtkWidget *pw )
 }
 
 
-static void ReportBug(gpointer * p, guint n, GtkWidget * pwEvent)
+static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 {
 
 	char *pchOS = "109";
@@ -5299,7 +5300,7 @@ static void gtk_load_rollout_settings(void)
 }
 
 
-extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore )
+extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
 {
   GtkWidget *pwDialog;
   GtkWidget *saveAsButton;
@@ -5800,10 +5801,6 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
-}
-
-extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
-   TextToClipboard( (char *) data);
 }
 
 extern void 
@@ -7947,38 +7944,6 @@ extern void GTKCalibrationEnd( void *context ) {
     pwGrab = pwOldGrab;
 }
 
-extern char *
-GTKChangeDisk( const char *szMsg, const int fChange, 
-               const char *szMissingFile ) {
-
-  GtkWidget *pwDialog;
-  gchar *pch;
-  int f = FALSE;
-
-  pwDialog = GTKCreateDialog( _("Change Disk"), DT_QUESTION, NULL, DIALOG_FLAG_MODAL, NULL, &f );
-
-  pch = g_strdup_printf( szMsg, szMissingFile );
-  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                     gtk_label_new( pch ) );
-  g_free( pch );
-
-  /* FIXME: add call to a file dialog for change of paths */
-  /* FIXME: handle interrupt */
-
-  gtk_widget_show_all( pwDialog );
-
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
-  
-  if ( !f )
-    fInterrupt = TRUE;
-  
-  return NULL;
-}
-
-
-
 static void CallbackResign(GtkWidget *pw, gpointer data)
 {
     int i = GPOINTER_TO_INT(data);
@@ -7992,7 +7957,7 @@ static void CallbackResign(GtkWidget *pw, gpointer data)
     return;
 }
     
-extern void GTKResign( gpointer *p, guint n, GtkWidget *pw )
+extern void GTKResign( gpointer p, guint n, GtkWidget *pw )
 {
     GtkWidget *pwDialog, *pwVbox, *pwHbox, *pwButtons;
     int i;

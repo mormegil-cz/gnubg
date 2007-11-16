@@ -536,7 +536,7 @@ static int GtkGetEnv(char *env)
 	return 0;
 }
 
-extern void GtkRelationalAddMatch(gpointer * p, guint n, GtkWidget * pw)
+extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw)
 {
 	char env[100];
 	char buf[200];
@@ -832,7 +832,7 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 }
 
 
-extern void GtkShowRelational(gpointer * p, guint n, GtkWidget * pw)
+extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 {
 	RowSet r;
 	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
@@ -1140,7 +1140,7 @@ static void RelationalRenameEnv(GtkWidget * pw, GtkWidget * pwList)
 	}
 }
 
-extern void GtkManageRelationalEnvs(gpointer * p, guint n, GtkWidget * pw)
+extern void GtkManageRelationalEnvs(gpointer p, guint n, GtkWidget * pw)
 {
 	RowSet r;
 	GtkWidget *pwList, *pwDialog, *pwHbox, *pwVbox, *pwBut;
