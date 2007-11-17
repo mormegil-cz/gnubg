@@ -1,3 +1,8 @@
+Sat Nov 17 11:27:28 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c eval.h gnubg.c lib/neuralnet.c lib/neuralnet.h: cleanup
+	neuralnet.[ch]
+
 Fri Nov 16 23:24:02 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gtkchequer.h, gtkgame.c, gtkgame.h, gtkpanels.c,

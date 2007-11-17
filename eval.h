@@ -345,10 +345,9 @@ typedef enum  {
      ( ( (pci)->fJacoby ) ? arEquity[ 2 ] : arEquity[ 1 ] ) : \
      ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 0 ] : arEquity[ 3 ] ) )
 
-extern int
+extern void
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		int fNoBearoff, 
-                int nSize,
 		void (*pfProgress)( int ) );
 
 extern int
@@ -357,9 +356,6 @@ EvalShutdown( void );
 extern void EvalStatus( char *szOutput );
 
 extern int EvalNewWeights( int nSize );
-
-extern int 
-EvalSave( const char *szWeights );
 
 extern int 
 EvaluatePosition( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput[],

@@ -6076,31 +6076,14 @@ static void PushSplash(char *unused, char *heading, char *message, int wait)
 #endif
 
 
-static void init_nets(int nNewWeights, int fNoBearoff)
+static void init_nets(int fNoBearoff)
 {
-	int n;
-
 	char *gnubg_weights = g_build_filename(PKGDATADIR, "gnubg.weights", NULL);
 	char *gnubg_weights_binary =  g_build_filename(PKGDATADIR, "gnubg.wd", NULL);
-	n = EvalInitialise(nNewWeights ? NULL : gnubg_weights,
-			   nNewWeights ? NULL : gnubg_weights_binary,
-			   fNoBearoff, nNewWeights,
+	EvalInitialise(gnubg_weights, gnubg_weights_binary, fNoBearoff, 
 			   fShowProgress ? BearoffProgress : NULL);
 	g_free(gnubg_weights);
 	g_free(gnubg_weights_binary);
-
-	if (n < 0)
-		exit(EXIT_FAILURE);
-	if (n > 0 && !nNewWeights) {
-		outputl(_("WARNING: No neural net weights were found.  "
-			  "GNU Backgammon will create an\n"
-			  "initial random network, but this will be unsuitable for "
-			  "use until training\n"
-			  "is complete.  Please consult the manual for information "
-			  "about training, or\n"
-			  "directions for obtaining a pre-trained network."));
-		outputx();
-	}
 }
 
 static void init_rng(void)
@@ -6185,7 +6168,7 @@ int main(int argc, char *argv[])
 	char *met = NULL;
 
 	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-	int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
+	int fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
 	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE, debug = FALSE;
 
@@ -6196,8 +6179,6 @@ int main(int argc, char *argv[])
 		 N_("Evaluate commands in FILE and exit"), "FILE"},
 		{"lang", 'l', 0, G_OPTION_ARG_STRING, &lang,
 		 N_("Set language to LANG"), "LANG"},
-		{"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights,
-		 N_("Create new neural net (of size N)"), "N"},
 		{"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript,
 		 N_("Evaluate Python code in FILE and exit"), "FILE"},
 		{"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet,
@@ -6315,7 +6296,7 @@ int main(int argc, char *argv[])
 	MT_InitThreads();
 #endif
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 500);
-        init_nets(nNewWeights, fNoBearoff);
+        init_nets(fNoBearoff);
 
 #if defined(WIN32) && HAVE_SOCKETS
 	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 500);

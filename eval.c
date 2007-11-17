@@ -592,19 +592,6 @@ static void ComputeTable( void )
 #endif
 
 static void
-CreateWeights(int nSize)
-{
-  NeuralNetCreate( &nnContact, NUM_INPUTS, nSize,
-		   NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
-	
-  NeuralNetCreate( &nnCrashed, NUM_INPUTS, nSize,
-		   NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
-  
-  NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, nSize,
-		   NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
-}
-
-static void
 DestroyWeights( void )
 {
   NeuralNetDestroy( &nnContact );
@@ -721,18 +708,16 @@ static int weights_failed(char * filename, FILE * weights)
 int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNState *pnState) = 0;
 
-extern int EvalInitialise(char *szWeights, char *szWeightsBinary,
-			  int fNoBearoff, int nSize,
-			  void (*pfProgress) (int))
+extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
+			   int fNoBearoff, void (*pfProgress) (int))
 {
-    FILE *pfWeights = NULL;
-    int h, i, fReadWeights = FALSE;
-    static int fInitialised = FALSE;
-    int ret;
-    char *gnubg_bearoff;
-    char *gnubg_bearoff_os;
+	FILE *pfWeights = NULL;
+	int h, i, fReadWeights = FALSE;
+	static int fInitialised = FALSE;
+	char *gnubg_bearoff;
+	char *gnubg_bearoff_os;
 
-    if( !fInitialised ) {
+	if (!fInitialised) {
 
 #if USE_SSE_VECTORIZE
 		if (SSE_Supported())
@@ -741,201 +726,186 @@ extern int EvalInitialise(char *szWeights, char *szWeightsBinary,
 #endif
 			NeuralNetEvaluateFn = NeuralNetEvaluate;
 
-      /* initialise table for sigmoid */
-
-      ComputeSigTable();
-
 		cCache = 0x1 << 16;
-		if( CacheCreate( &cEval, cCache ) ) {
-		return -1;
-		}
+		g_assert(!CacheCreate(&cEval, cCache));
 
 #if defined( PRUNE_CACHE )
-	if( CacheCreate( &cpEval, 0x1 << 16) ) {
-	  return -1;
-	}
+		g_assert(!CacheCreate(&cpEval, 0x1 << 16));
 #endif
-	    
+
 		ComputeTable();
 
-		rc.randrsl[ 0 ] = time( NULL );
-		for( i = 0; i < RANDSIZ; i++ )
-			rc.randrsl[ i ] = rc.randrsl[ 0 ];
-		irandinit( &rc, TRUE );
-		
+		rc.randrsl[0] = time(NULL);
+		for (i = 0; i < RANDSIZ; i++)
+			rc.randrsl[i] = rc.randrsl[0];
+		irandinit(&rc, TRUE);
+
 		fInitialised = TRUE;
-    }
-
-    if( ! fNoBearoff ) {
-#if USE_BUILTIN_BEAROFF
-      /* read one-sided db from gnubg.bd */
-	pbc1 = BearoffInitBuiltin();
-#endif
-	gnubg_bearoff_os = g_build_filename(PKGDATADIR, "gnubg_os0.bd", NULL);
-	if( !pbc1 )
-	    pbc1 = BearoffInit( gnubg_bearoff_os, BO_IN_MEMORY, NULL );
-	g_free(gnubg_bearoff_os);
-
-	if( !pbc1 )
-	    pbc1 = BearoffInit ( NULL, BO_HEURISTIC, pfProgress );
-	
-	/* read two-sided db from gnubg.bd */
-	gnubg_bearoff = g_build_filename(PKGDATADIR, "gnubg_ts0.bd", NULL);
-	pbc2 = BearoffInit ( gnubg_bearoff, BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
-        g_free(gnubg_bearoff);
-	
-	if ( ! pbc2 )
-	    fprintf ( stderr, 
-		      "\n***WARNING***\n\n" 
-		      "Note that gnubg does not use the gnubg.bd file.\n"
-		      "You should obtain the file gnubg_ts0.bd or generate\n"
-		      "it yourself using the program 'makebearoff'.\n"
-		      "You can generate the file with the command:\n"
-		      "makebearoff -t 6x6 -f gnubg_ts0.bd\n"
-		      "You can also generate other bearoff databases; see\n"
-		      "README for more details\n\n" );
-	
-	/* init one-sided db */
-	pbcOS = BearoffInit ( "gnubg_os.bd", BO_NONE, NULL );
-	
-	/* init two-sided db */
-	pbcTS = BearoffInit ( "gnubg_ts.bd", BO_NONE, NULL );
-
-        /* hyper-gammon databases */
-
-        for ( i = 0; i < 3; ++i ) {
-          char sz[ 10 ];
-          sprintf( sz, "hyper%1d.bd", i + 1 );
-          apbcHyper[ i ] = BearoffInit( sz, BO_NONE, NULL );
-        }
-
-    }
-
-    if( szWeightsBinary)
-    { 
-	    h = open( szWeightsBinary, O_RDONLY | BINARY );
-	    if (h)
-		    pfWeights = fdopen( h, "rb" );
-	    if (!binary_weights_failed(szWeightsBinary, pfWeights))
-	    {
-		    if( !fReadWeights && !( fReadWeights =
-					    !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
-					    !NeuralNetLoadBinary(&nnRace, pfWeights ) &&
-					    !NeuralNetLoadBinary(&nnCrashed, pfWeights ) &&
-
-					    !NeuralNetLoadBinary(&nnpContact, pfWeights ) &&
-					    !NeuralNetLoadBinary(&nnpCrashed, pfWeights ) &&
-					    !NeuralNetLoadBinary(&nnpRace, pfWeights ) ) ) { 
-			    perror( szWeightsBinary );
-		    }
-	    }
-	    if (pfWeights)
-		    fclose( pfWeights );
-	    pfWeights = NULL;
-    }
-
-    if( !fReadWeights && szWeights ) {
-	    h = open( szWeights, O_RDONLY);
-	    if (h)
-		    pfWeights = fdopen( h, "r" );
-	    if (!weights_failed(szWeights, pfWeights))
-	    {
-		    if( !( fReadWeights =
-					    !NeuralNetLoad( &nnContact, pfWeights ) &&
-					    !NeuralNetLoad( &nnRace, pfWeights ) &&
-					    !NeuralNetLoad( &nnCrashed, pfWeights ) &&
-
-					    !NeuralNetLoad( &nnpContact, pfWeights ) &&
-					    !NeuralNetLoad( &nnpCrashed, pfWeights ) &&
-					    !NeuralNetLoad( &nnpRace, pfWeights ) 
-			 ) )
-			    perror( szWeights );
-
-	    }
-	    if (pfWeights)
-		    fclose( pfWeights );
-	    pfWeights = NULL;
-    }
-
-    if( fReadWeights ) {
-		if( nnContact.cInput != NUM_INPUTS ||
-			nnContact.cOutput != NUM_OUTPUTS )
-			if (NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden,
-					NUM_OUTPUTS ) == -1)
-					return -1;
-		
-		if( nnCrashed.cInput != NUM_INPUTS ||
-			nnCrashed.cOutput != NUM_OUTPUTS )
-			if (NeuralNetResize( &nnCrashed, NUM_INPUTS, nnCrashed.cHidden,
-					NUM_OUTPUTS ) == -1)
-					return -1;
-		
-		if( nnRace.cInput != NUM_RACE_INPUTS ||
-			nnRace.cOutput != NUM_OUTPUTS )
-			if (NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
-					NUM_OUTPUTS ) == -1)
-					return -1;
-
-		ret = 0;
-    } else {
-		CreateWeights( nSize );
-
-		ret = 1;
 	}
+
+	if (!fNoBearoff) {
+#if USE_BUILTIN_BEAROFF
+		/* read one-sided db from gnubg.bd */
+		pbc1 = BearoffInitBuiltin();
+#endif
+		gnubg_bearoff_os =
+		    g_build_filename(PKGDATADIR, "gnubg_os0.bd", NULL);
+		if (!pbc1)
+			pbc1 =
+			    BearoffInit(gnubg_bearoff_os, BO_IN_MEMORY,
+					NULL);
+		g_free(gnubg_bearoff_os);
+
+		if (!pbc1)
+			pbc1 = BearoffInit(NULL, BO_HEURISTIC, pfProgress);
+
+		/* read two-sided db from gnubg.bd */
+		gnubg_bearoff =
+		    g_build_filename(PKGDATADIR, "gnubg_ts0.bd", NULL);
+		pbc2 =
+		    BearoffInit(gnubg_bearoff,
+				BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL);
+		g_free(gnubg_bearoff);
+
+		if (!pbc2)
+			fprintf(stderr,
+				"\n***WARNING***\n\n"
+				"Note that gnubg does not use the gnubg.bd file.\n"
+				"You should obtain the file gnubg_ts0.bd or generate\n"
+				"it yourself using the program 'makebearoff'.\n"
+				"You can generate the file with the command:\n"
+				"makebearoff -t 6x6 -f gnubg_ts0.bd\n"
+				"You can also generate other bearoff databases; see\n"
+				"README for more details\n\n");
+
+		/* init one-sided db */
+		pbcOS = BearoffInit("gnubg_os.bd", BO_NONE, NULL);
+
+		/* init two-sided db */
+		pbcTS = BearoffInit("gnubg_ts.bd", BO_NONE, NULL);
+
+		/* hyper-gammon databases */
+
+		for (i = 0; i < 3; ++i) {
+			char sz[10];
+			sprintf(sz, "hyper%1d.bd", i + 1);
+			apbcHyper[i] = BearoffInit(sz, BO_NONE, NULL);
+		}
+
+	}
+
+	if (szWeightsBinary) {
+		h = open(szWeightsBinary, O_RDONLY | BINARY);
+		if (h)
+			pfWeights = fdopen(h, "rb");
+		if (!binary_weights_failed(szWeightsBinary, pfWeights)) {
+			if (!fReadWeights && !(fReadWeights =
+					       !NeuralNetLoadBinary
+					       (&nnContact, pfWeights)
+					       &&
+					       !NeuralNetLoadBinary
+					       (&nnRace, pfWeights)
+					       &&
+					       !NeuralNetLoadBinary
+					       (&nnCrashed, pfWeights)
+					       &&
+					       !NeuralNetLoadBinary
+					       (&nnpContact, pfWeights)
+					       &&
+					       !NeuralNetLoadBinary
+					       (&nnpCrashed, pfWeights)
+					       &&
+					       !NeuralNetLoadBinary
+					       (&nnpRace, pfWeights))) {
+				perror(szWeightsBinary);
+			}
+		}
+		if (pfWeights)
+			fclose(pfWeights);
+		pfWeights = NULL;
+	}
+
+	if (!fReadWeights && szWeights) {
+		h = open(szWeights, O_RDONLY);
+		if (h)
+			pfWeights = fdopen(h, "r");
+		if (!weights_failed(szWeights, pfWeights)) {
+			if (!(fReadWeights =
+			      !NeuralNetLoad(&nnContact, pfWeights) &&
+			      !NeuralNetLoad(&nnRace, pfWeights) &&
+			      !NeuralNetLoad(&nnCrashed, pfWeights) &&
+			      !NeuralNetLoad(&nnpContact, pfWeights) &&
+			      !NeuralNetLoad(&nnpCrashed, pfWeights) &&
+			      !NeuralNetLoad(&nnpRace, pfWeights)
+			    ))
+				perror(szWeights);
+
+		}
+		if (pfWeights)
+			fclose(pfWeights);
+		pfWeights = NULL;
+	}
+
+	g_assert(fReadWeights);
+	if (nnContact.cInput != NUM_INPUTS ||
+	    nnContact.cOutput != NUM_OUTPUTS)
+		g_assert(NeuralNetResize
+			 (&nnContact, NUM_INPUTS, nnContact.cHidden,
+			  NUM_OUTPUTS) != -1);
+
+	if (nnCrashed.cInput != NUM_INPUTS ||
+	    nnCrashed.cOutput != NUM_OUTPUTS)
+		g_assert(NeuralNetResize
+			 (&nnCrashed, NUM_INPUTS, nnCrashed.cHidden,
+			  NUM_OUTPUTS) != -1);
+
+	if (nnRace.cInput != NUM_RACE_INPUTS ||
+	    nnRace.cOutput != NUM_OUTPUTS)
+		g_assert(NeuralNetResize
+			 (&nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
+			  NUM_OUTPUTS) != -1);
+
 
 #if USE_MULTITHREAD
-{
-	int j;
-	for (j = 0; j < MAX_NUMTHREADS; j++)
 	{
-		nnStatesStorage[j][CLASS_RACE - CLASS_RACE].savedBase = malloc( nnRace.cHidden * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_RACE - CLASS_RACE].savedIBase = malloc( nnRace.cInput * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CRASHED - CLASS_RACE].savedBase = malloc( nnCrashed.cHidden * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CRASHED - CLASS_RACE].savedIBase = malloc( nnCrashed.cInput * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedBase = malloc( nnContact.cHidden * sizeof( float ) ); 
-		nnStatesStorage[j][CLASS_CONTACT - CLASS_RACE].savedIBase = malloc( nnContact.cInput * sizeof( float ) ); 
+		int j;
+		for (j = 0; j < MAX_NUMTHREADS; j++) {
+			nnStatesStorage[j][CLASS_RACE -
+					   CLASS_RACE].savedBase =
+			    malloc(nnRace.cHidden * sizeof(float));
+			nnStatesStorage[j][CLASS_RACE -
+					   CLASS_RACE].savedIBase =
+			    malloc(nnRace.cInput * sizeof(float));
+			nnStatesStorage[j][CLASS_CRASHED -
+					   CLASS_RACE].savedBase =
+			    malloc(nnCrashed.cHidden * sizeof(float));
+			nnStatesStorage[j][CLASS_CRASHED -
+					   CLASS_RACE].savedIBase =
+			    malloc(nnCrashed.cInput * sizeof(float));
+			nnStatesStorage[j][CLASS_CONTACT -
+					   CLASS_RACE].savedBase =
+			    malloc(nnContact.cHidden * sizeof(float));
+			nnStatesStorage[j][CLASS_CONTACT -
+					   CLASS_RACE].savedIBase =
+			    malloc(nnContact.cInput * sizeof(float));
+		}
 	}
-}
 #else
-	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedBase = malloc( nnRace.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedIBase = malloc( nnRace.cInput * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedBase = malloc( nnCrashed.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedIBase = malloc( nnCrashed.cInput * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedBase = malloc( nnContact.cHidden * sizeof( float ) ); 
-	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedIBase = malloc( nnContact.cInput * sizeof( float ) ); 
+	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedBase =
+	    malloc(nnRace.cHidden * sizeof(float));
+	nnStatesStorage[CLASS_RACE - CLASS_RACE].savedIBase =
+	    malloc(nnRace.cInput * sizeof(float));
+	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedBase =
+	    malloc(nnCrashed.cHidden * sizeof(float));
+	nnStatesStorage[CLASS_CRASHED - CLASS_RACE].savedIBase =
+	    malloc(nnCrashed.cInput * sizeof(float));
+	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedBase =
+	    malloc(nnContact.cHidden * sizeof(float));
+	nnStatesStorage[CLASS_CONTACT - CLASS_RACE].savedIBase =
+	    malloc(nnContact.cInput * sizeof(float));
 #endif
 
-	return ret;
 }
-
-extern int EvalSave( const char *szWeights ) {
-    
-  FILE *pfWeights;
-    
-  if( !( pfWeights = fopen( szWeights, "w" ) ) )
-    return -1;
-    
-  fprintf( pfWeights, "GNU Backgammon %s\n", WEIGHTS_VERSION );
-
-  if (NeuralNetSave( &nnContact, pfWeights ) == -1)
-	  return -1;
-  if (NeuralNetSave( &nnRace, pfWeights ) == -1)
-	  return -1;
-  if (NeuralNetSave( &nnCrashed, pfWeights ) == -1)
-	  return -1;
-
-  if (NeuralNetSave( &nnpContact, pfWeights ) == -1)
-	  return -1;
-  if (NeuralNetSave( &nnpCrashed, pfWeights ) == -1)
-	  return -1;
-  if (NeuralNetSave( &nnpRace, pfWeights ) == -1)
-	  return -1;
-  
-  fclose( pfWeights );
-
-  return 0;
-}
-
 
 /* Calculates inputs for any contact position, for one player only. */
 
