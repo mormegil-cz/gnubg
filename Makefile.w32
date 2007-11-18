@@ -15,7 +15,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	play gtkprefs gtkmovefilter gtkrace gtktheory \
 	htmlimages \
 	html import multithread latex matchequity \
-	matchid positionid pub_eval record \
+	matchid positionid record \
 	render rollout set sgf non-src/sgfl non-src/sgfp show sound \
 	text osr gtksplash gtkcolour renderprefs speed openurl \
 	gtkrolls boardpos gtktempmap progress format gtktoolbar \
@@ -35,7 +35,7 @@ FONTFILES=$(patsubst fonts/%,../../bin/fonts/%,$(wildcard fonts/*.ttf))
 POFILES=$(patsubst po/%.po,../../bin/locale/%/LC_MESSAGES/gnubg.mo,$(wildcard po/*.po))
 EXTRA_FILES=../../bin/textures.txt ../../bin/gnubg.png  ../../bin/met/met.dtd ../../bin/boards.xml
 
-makebearoff_SOURCE = makebearoff eval positionid pub_eval matchequity \
+makebearoff_SOURCE = makebearoff eval positionid matchequity \
 		     matchid osr bearoffgammon bearoff \
 		     format mec util
 

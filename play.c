@@ -1320,47 +1320,6 @@ static int ComputerTurn( void ) {
       return 0;
     }
     
-  case PLAYER_PUBEVAL:
-    if( ms.fResigned == 3 ) {
-      fComputerDecision = TRUE;
-      CommandAgree( NULL );
-      fComputerDecision = FALSE;
-      return 0;
-    } else if( ms.fResigned ) {
-      fComputerDecision = TRUE;
-      CommandDecline( NULL );
-      fComputerDecision = FALSE;
-      return 0;
-    } else if( ms.fDoubled ) {
-      fComputerDecision = TRUE;
-      CommandTake( NULL );
-      fComputerDecision = FALSE;
-      return 0;
-    } else if( !ms.anDice[ 0 ] ) {
-      if ( ! fCheat || CheatDice ( ms.anDice, &ms, afCheatRoll[ ms.fMove ] ) )
-        if( RollDice ( ms.anDice, rngCurrent, rngctxCurrent ) < 0 )
-          return -1;
-
-		DiceRolled();      
-    }
-    
-    pmr = NewMoveRecord();
-
-    pmr->mt = MOVE_NORMAL;
-    pmr->anDice[ 0 ] = ms.anDice[ 0 ];
-    pmr->anDice[ 1 ] = ms.anDice[ 1 ];
-    pmr->fPlayer = ms.fTurn;
-    
-    FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, 
-                     pmr->n.anMove, ms.bgv );
-    
-    if( pmr->n.anMove[ 0 ] < 0 )
-	playSound ( SOUND_BOT_DANCE );
-      
-
-    AddMoveRecord( pmr );
-    return 0;
-
   case PLAYER_EXTERNAL:
 #if HAVE_SOCKETS
       fTurnOrig = ms.fTurn;

@@ -4744,10 +4744,6 @@ extern void CommandSaveSettings( char *szParam )
 	    fprintf( pf, "set player %d human\n", i );
 	    break;
 	    
-	case PLAYER_PUBEVAL:
-	    fprintf( pf, "set player %d pubeval\n", i );
-	    break;
-	    
 	case PLAYER_EXTERNAL:
 	    /* don't save external players */
 	    break;

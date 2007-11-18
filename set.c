@@ -147,9 +147,6 @@ command acSetEvaluation[] = {
       szFILTER, NULL},
     { "name", CommandSetPlayerName, 
       N_("Change a player's name"), szNAME, NULL },
-    { "pubeval", CommandSetPlayerPubeval, 
-      N_("Have pubeval make all moves for a "
-      "player"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -1528,19 +1525,6 @@ extern void CommandSetPlayerPlies( char *sz ) {
     else
 	outputf( _("Moves for %s will be played with %d ply lookahead.\n"),
 		ap[ iPlayerSet ].szName, n );
-}
-
-extern void CommandSetPlayerPubeval( char *sz ) {
-
-#if HAVE_SOCKETS
-    if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
-	closesocket( ap[ iPlayerSet ].h );
-#endif
-    
-    ap[ iPlayerSet ].pt = PLAYER_PUBEVAL;
-
-    outputf( _("Moves for %s will now be played by pubeval.\n"),
-	    ap[ iPlayerSet ].szName );
 }
 
 extern void CommandSetPlayer( char *sz ) {

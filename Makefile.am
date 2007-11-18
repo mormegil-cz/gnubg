@@ -72,7 +72,6 @@ gnubg_SOURCES = \
 		positionid.h \
 		progress.c \
 		progress.h \
-		pub_eval.c \
 		record.c \
 		record.h \
 		relational.c \
@@ -138,7 +137,7 @@ endif
 ##common sources for building the utility programs
 #
 UTILSOURCES = eval.h eval.c positionid.h positionid.c \
-	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+	matchequity.c matchequity.h matchid.h matchid.c \
 	osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	format.c format.h mec.h mec.c util.c util.h

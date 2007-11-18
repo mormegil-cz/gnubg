@@ -4434,62 +4434,6 @@ extern int EvalCacheStats( unsigned int *pcUsed, unsigned int *pcSize, unsigned 
     return 0;
 }
 
-extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-			    int anMove[ 8 ], const bgvariation bgv ) {
-
-  movelist ml;
-  int i, j, anBoardTemp[ 2 ][ 25 ], anPubeval[ 28 ], fRace;
-
-  for( i = 0; i < 8; i++ )
-      anMove[ i ] = -1;
-  
-  fRace = ClassifyPosition( anBoard, bgv ) <= CLASS_RACE;
-    
-  GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
-
-  if( !ml.cMoves )
-    /* no legal moves */
-    return 0;
-  else if( ml.cMoves == 1 )
-    /* forced move */
-    ml.iMoveBest = 0;
-  else {
-    /* choice of moves */
-    ml.rBestScore = -99999.9f;
-
-    for( i = 0; i < ml.cMoves; i++ ) {
-	    PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
-
-	    for( j = 0; j < 24; j++ )
-        if( anBoardTemp[ 1 ][ j ] )
-          anPubeval[ j + 1 ] = anBoardTemp[ 1 ][ j ];
-        else
-          anPubeval[ j + 1 ] = -anBoardTemp[ 0 ][ 23 - j ];
-
-	    anPubeval[ 0 ] = -anBoardTemp[ 0 ][ 24 ];
-	    anPubeval[ 25 ] = anBoardTemp[ 1 ][ 24 ];
-
-	    for( anPubeval[ 26 ] = 15, j = 0; j < 24; j++ )
-        anPubeval[ 26 ] -= anBoardTemp[ 1 ][ j ];
-
-	    for( anPubeval[ 27 ] = -15, j = 0; j < 24; j++ )
-        anPubeval[ 27 ] += anBoardTemp[ 0 ][ j ];
-
-	    if( ( ml.amMoves[ i ].rScore = pubeval( fRace, anPubeval ) ) >
-          ml.rBestScore ) {
-        ml.iMoveBest = i;
-        ml.rBestScore = ml.amMoves[ i ].rScore;
-	    }
-    }
-  }
-
-  if( anMove )
-      for( i = 0; i < ml.cMaxMoves * 2; i++ )
-	  anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
-  
-  return 0;
-}
-
 extern int 
 SetCubeInfoMoney( cubeinfo *pci, const int nCube, const int fCubeOwner,
                   const int fMove, const int fJacoby, const int fBeavers,

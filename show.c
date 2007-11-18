@@ -848,9 +848,6 @@ extern void CommandShowPlayer( char *sz ) {
             outputl( _("    Cube decisions:") );
             ShowEvalSetup ( &ap[ i ].esCube );
 	    break;
-	case PLAYER_PUBEVAL:
-	    outputl( _("pubeval\n") );
-	    break;
 	case PLAYER_HUMAN:
 	    outputl( _("human\n") );
 	    break;

@@ -2882,7 +2882,7 @@ static void SetAnalysis(gpointer p, guint n, GtkWidget * pw)
 typedef struct _playerswidget {
     int *pfOK;
     player *ap;
-    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEvalCube[ 2 ], *apwEvalChequer[ 2 ],
+    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 3 ], *apwEvalCube[ 2 ], *apwEvalChequer[ 2 ],
 	*apwSocket[ 2 ], *apwExternal[ 2 ];
     char aszSocket[ 2 ][ 128 ];
 } playerswidget;
@@ -2900,14 +2900,13 @@ static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
 		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
 	gtk_widget_set_sensitive(
 	    ppw->apwExternal[ i ], gtk_toggle_button_get_active(
-		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 3 ] ) ) );
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 2 ] ) ) );
     }
 }
 
 static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 
     GtkWidget *pwPage, *pw;
-    static int aiRadioButton[ PLAYER_PUBEVAL + 1 ] = { 3, 0, 1, 2 };
     GtkWidget *pwHBox;
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
@@ -2967,12 +2966,6 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 		       ppw->apwRadio[ i ][ 2 ] =
 		       gtk_radio_button_new_with_label_from_widget(
 			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
-			   _("Pubeval") ) );
-    
-    gtk_container_add( GTK_CONTAINER( pwPage ),
-		       ppw->apwRadio[ i ][ 3 ] =
-		       gtk_radio_button_new_with_label_from_widget(
-			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
 			   _("External") ) );
     ppw->apwExternal[ i ] = pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
@@ -2987,11 +2980,11 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 			    ap[ i ].szSocket );
     
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(
-	ppw->apwRadio[ i ][ aiRadioButton[ ap[ i ].pt ] ] ), TRUE );
+	ppw->apwRadio[ i ][ ap[ i ].pt ] ), TRUE );
 
     g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 1 ] ), "toggled",
 			G_CALLBACK( PlayerTypeToggled ), ppw );
-    g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 3 ] ), "toggled",
+    g_signal_connect( G_OBJECT( ppw->apwRadio[ i ][ 2 ] ), "toggled",
 			G_CALLBACK( PlayerTypeToggled ), ppw );
     
     return pwPage;
@@ -3000,18 +2993,16 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
 
     int i,j ;
-    static playertype apt[ 4 ] = { PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL,
-				   PLAYER_EXTERNAL };
     *pplw->pfOK = TRUE;
 
     for( i = 0; i < 2; i++ ) {
 	strcpyn( pplw->ap[ i ].szName, gtk_entry_get_text(
 	    GTK_ENTRY( pplw->apwName[ i ] ) ), MAX_NAME_LEN );
 	
-	for( j = 0; j < 4; j++ )
+	for( j = 0; j < 3; j++ )
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
 		pplw->apwRadio[ i ][ j ] ) ) ) {
-		pplw->ap[ i ].pt = apt[ j ];
+		pplw->ap[ i ].pt = j;
 		break;
 	    }
 	g_assert( j < 4 );
@@ -3108,15 +3099,6 @@ static void SetPlayers(gpointer p, guint n, GtkWidget * pw)
 					i);
 				SetEvalCommands(sz, &apTemp[i].esCube.ec,
 						&ap[i].esCube.ec);
-				break;
-
-			case PLAYER_PUBEVAL:
-				if (ap[i].pt != PLAYER_PUBEVAL) {
-					sprintf(sz,
-						"set player %d pubeval",
-						i);
-					UserCommand(sz);
-				}
 				break;
 
 			case PLAYER_EXTERNAL:

@@ -21,7 +21,7 @@
 
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
-
+#include <stdarg.h>
 #include "analysis.h"
 #include "eval.h"
 
@@ -43,7 +43,7 @@ typedef struct _command {
 } command;
 
 typedef enum _playertype {
-	PLAYER_EXTERNAL, PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL
+	PLAYER_HUMAN, PLAYER_GNU, PLAYER_EXTERNAL, 
 } playertype;
 
 typedef struct _player {
