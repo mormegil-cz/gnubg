@@ -1141,9 +1141,9 @@ static void BearOff2( int nUs, int nThem,
     /* look for position in bearoff file */
 
     if ( pbc && isBearoff ( pbc, anBoard ) ) {
-      unsigned short int nUsL = 
+      unsigned int nUsL = 
         PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-      unsigned short int nThemL = 
+      unsigned int nThemL = 
         PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
       int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
       unsigned int iPos = nUsL * nL + nThemL;

@@ -1,3 +1,8 @@
+Sun Nov 18 07:04:44 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c, makebearoff.c: Fix messed up evaluation of hypergammon.
+	Redirect loading of hyper databases to pkgdir.
+
 Sat Nov 17 11:27:28 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c eval.h gnubg.c lib/neuralnet.c lib/neuralnet.h: cleanup
