@@ -3378,18 +3378,16 @@ static int ImportGAM(FILE *fp, char *szFilename )
 	return TRUE;
 }
 
-static void WritePartyGame(FILE *fp, char *gameStr)
+static void WritePartyGame(FILE * fp, char *gameStr, int ns)
 {
 	char *move;
 	char *data = gameStr;
 	int moveNum = 1;
 	int side = -1;
-	while ((move = NextTokenGeneral(&data, "#")) != NULL)
-	{
+	while ((move = NextTokenGeneral(&data, "#")) != NULL) {
 		char *roll, *moveStr, buf[100];
 		side = (move[0] == '2');
-		if ((side == 0) || (moveNum == 1 && side == 1))
-		{
+		if ((side == 0) || (moveNum == 1 && side == 1)) {
 			fprintf(fp, "%3d) ", moveNum);
 			if (moveNum == 1 && side == 1)
 				fprintf(fp, "%28s", " ");
@@ -3397,46 +3395,36 @@ static void WritePartyGame(FILE *fp, char *gameStr)
 		}
 
 		move = strchr(move, ' ') + 1;
-		if (isdigit(*move))
-		{
+		if (isdigit(*move)) {
 			move = strchr(move, ' ') + 1;
 			move = strchr(move, ' ') + 1;
 			roll = move;
 			move = strchr(move, ' ');
-			if (move)
-			{
+			if (move) {
 				char *dest, *src;
 				*move = '\0';
 				moveStr = move + 1;
 				/* Change bar -> 25, off -> 0 */
 				src = dest = moveStr;
-				while (*src)
-				{
-					if (*src == 'b')
-					{
+				while (*src) {
+					if (*src == 'b') {
 						*dest++ = '2';
 						*dest++ = '5';
 						src += 3;
-					}
-					else if (*src == 'o')
-					{
+					} else if (*src == 'o') {
 						*dest++ = '0';
 						src += 3;
-					}
-					else
-					{
+					} else {
 						*dest = *src;
 						dest++, src++;
 					}
 				}
 				*dest = '\0';
-			}
-			else
+			} else
 				moveStr = "";
 
 			sprintf(buf, "%s: %s", roll, moveStr);
-		}
-		else
+		} else
 			strcpy(buf, move);	/* Double/Take */
 
 		if (side == 0)
@@ -3444,10 +3432,12 @@ static void WritePartyGame(FILE *fp, char *gameStr)
 		else
 			fprintf(fp, "%s\n", buf);
 	}
-	if (side == 0)
-		fprintf(fp, "\n");
-	else
-		fprintf(fp, "%34s", " ");
+	if (side == 0 && ns < 0)
+		fprintf(fp, "\n  ");
+	else if (side == 1 && ns > 0)
+		fprintf(fp, "%36s", " ");
+	fprintf(fp, "Wins %d point%s\n\n", abs(ns),
+		(abs(ns) == 1) ? "" : "s");
 }
 
 typedef struct _PartyGame
@@ -3519,9 +3509,8 @@ static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 			PartyGame *pGame = (PartyGame*)(pl->data);
 			fprintf(matFP, "\n Game %d\n", i + 1);
 			fprintf(matFP, " %s : %d %14s %s : %d\n", p1, s1, " ", p2, s2);
-			WritePartyGame(matFP, pGame->gameStr);
-			pts = pGame->s2 - s2 + pGame->s1 - s1;
-			fprintf(matFP, "Wins %d point%s\n\n", pts, (pts == 1) ? "" : "s");
+			pts = pGame->s2 - s2 - pGame->s1 + s1;
+			WritePartyGame(matFP, pGame->gameStr, pts);
 			s1 = pGame->s1;
 			s2 = pGame->s2;
 			free(pGame->gameStr);
