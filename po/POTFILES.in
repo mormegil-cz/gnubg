@@ -139,7 +139,6 @@ positionid.c
 positionid.h
 progress.c
 progress.h
-pub_eval.c
 record.c
 record.h
 relational.c

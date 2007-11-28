@@ -6,7 +6,7 @@ man_MANS = gnubg.6
 gnubg_imagedir =  $(pkgdatadir)/doc/images
 gnubg_image_DATA = images/*.png
 
-EXTRA_DIST = *.xml gnubg/* images/*.png images/*.txt
+EXTRA_DIST = *.xml gnubg/* images/*.png 
 
 man6_MANS = gnubg.6
 

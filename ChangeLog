@@ -1,3 +1,8 @@
+Wed Nov 28 09:43:59 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* po/POTFILES.in: remove pub_eval.c
+	* doc/Makefile.am: remove *.txt from EXTRA_DIST
+
 Sun Nov 25 12:09:04 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* import.c: fix partygammon import. Games terminated badly.
