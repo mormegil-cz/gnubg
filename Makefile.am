@@ -166,7 +166,7 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
 #
 ##files to add to the tarball when 'make dist'
 #
-EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.6 \
+EXTRA_DIST = config.rpath  userrng.c copying.awk \
 	gnubg.gtkrc credits.sh \
 	external_l.c external_y.c external_y.h sgfp.c sgfp.h sgfl.c \
 	external_l.l external_y.y sgf.l sgf.y \
