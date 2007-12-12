@@ -171,7 +171,7 @@ EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.6 \
 	external_l.c external_y.c external_y.h sgfp.c sgfp.h sgfl.c \
 	external_l.l external_y.y sgf.l sgf.y \
 	ABOUT-NLS boards.xml gnubg.game.sql autogen.sh gnubg.weights\
-	textures.txt gnubg.png gnubg.svg
+	textures.txt gnubg.png gnubg.svg corecount.c
 
 #
 ##sgf.y and sgf.l ought to be renamed sgf_y.y and sgf_l.l to avoid conflicts with sgf.c
