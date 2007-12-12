@@ -64,7 +64,7 @@ extern GtkWidget *StatsPixmapButton(GdkColormap * pcmap, char **xpm,
 extern int ArePanelsDocked(void);
 extern int ArePanelsShowing(void);
 extern int DockedPanelsShowing(void);
-extern int edit_new(int length);
+extern int edit_new(unsigned int length);
 extern int GetPanelWidth(gnubgwindow panel);
 extern int GTKGetManualDice(unsigned int an[2]);
 extern int GTKGetMove(int anMove[8]);

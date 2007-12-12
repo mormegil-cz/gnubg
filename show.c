@@ -477,7 +477,7 @@ extern void CommandShowAutomatic( char *sz ) {
 
 extern void CommandShowBoard( char *sz ) {
 
-    int an[ 2 ][ 25 ];
+    TanBoard an;
     char szOut[ 2048 ];
     char *ap[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     
@@ -508,7 +508,7 @@ extern void CommandShowBoard( char *sz ) {
 extern 
 void CommandShowFullBoard( char *sz ) {
 
-    int an[ 2 ][ 25 ];
+    TanBoard an;
     char szOut[ 2048 ];
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     
@@ -801,7 +801,7 @@ extern void CommandShowMatchLength( char *sz ) {
 
 extern void CommandShowPipCount( char *sz ) {
 
-    int an[ 2 ][ 25 ];
+    TanBoard an;
     unsigned int anPips[ 2 ]; 
 
     if( !*sz && ms.gs == GAME_NONE ) {
@@ -983,7 +983,7 @@ extern void CommandShowScoreSheet( char *sz )
 {
 	int i, width1, width2;
 	char *data[2];
-	list *pl;
+	listOLD *pl;
 
 	if( ms.gs == GAME_NONE ) {
 		outputl( _("No game in progress (type `new game' to start one).") );
@@ -1023,7 +1023,7 @@ extern void CommandShowScoreSheet( char *sz )
 	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
 	{
 		int score[2];
-		list *plGame = pl->plNext->p;
+		listOLD *plGame = pl->plNext->p;
 
 		if (plGame)
 		{
@@ -1034,7 +1034,7 @@ extern void CommandShowScoreSheet( char *sz )
 		else
 		{
 			moverecord *pmr;
-			list *plGame = pl->p;
+			listOLD *plGame = pl->p;
 			if (!plGame)
 			{
 				continue;
@@ -1094,7 +1094,7 @@ extern void CommandShowWarranty( char *sz ) {
 }
 
 
-extern void show_kleinman( int an[2][25], char *sz)
+extern void show_kleinman( TanBoard an, char *sz)
 {
 	unsigned int anPips[2];
 	float fKC;
@@ -1123,7 +1123,7 @@ extern void show_kleinman( int an[2][25], char *sz)
 extern void CommandShowKleinman(char *sz)
 {
 	char out[500];
-	int an[ 2 ][ 25 ];
+	TanBoard an;
 
 	if (!*sz && ms.gs == GAME_NONE) {
 		outputl(_
@@ -1156,7 +1156,7 @@ extern void CommandShowThreads(char *sz)
 }
 #endif
 
-extern void show_thorp(int an[2][25], char *sz)
+extern void show_thorp(TanBoard an, char *sz)
 {
 	int nLeader, nTrailer;
 	float adjusted;
@@ -1179,7 +1179,7 @@ extern void show_thorp(int an[2][25], char *sz)
 extern void CommandShowThorp(char *sz)
 {
 	char out[500];
-        int an[2][25];
+        TanBoard an;
 
 	if (!*sz && ms.gs == GAME_NONE) {
 		outputl(_
@@ -1201,7 +1201,7 @@ extern void CommandShowThorp(char *sz)
 
 }
 
-extern void show_8912(int anBoard[2][25], char *sz)
+extern void show_8912(TanBoard anBoard, char *sz)
 {
 	unsigned int anPips[2];
 	float ahead;
@@ -1224,7 +1224,7 @@ extern void show_8912(int anBoard[2][25], char *sz)
 extern void CommandShow8912(char *sz)
 {
 
-	int anBoard[2][25];
+	TanBoard anBoard;
 	char out[500];
 
 	if (!*sz && ms.gs == GAME_NONE) {
@@ -1246,7 +1246,7 @@ extern void CommandShow8912(char *sz)
 	outputl(out);
 }
 
-extern void show_keith( int an[2][25], char *sz)
+extern void show_keith( TanBoard an, char *sz)
 {
 	int pn[2];
 	float fL;
@@ -1271,7 +1271,7 @@ extern void show_keith( int an[2][25], char *sz)
 
 extern void CommandShowKeith( char *sz ) {
 	char out[500];
-	int an[ 2 ][ 25 ];
+	TanBoard an;
 	if( !*sz && ms.gs == GAME_NONE ) {
 		outputl( _("No position specified and no game in progress.") );
 		return;
@@ -1386,7 +1386,7 @@ EffectivePipCount( const float arMu[ 2 ], const unsigned int anPips[ 2 ] ) {
 extern void
 CommandShowOneSidedRollout ( char *sz ) {
 
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   int nTrials = 5760;
   float arMu[ 2 ];
   float ar[ 5 ];
@@ -2197,7 +2197,7 @@ CommandShowCubeEfficiency( char *sz ) {
 
 }
 
-extern void show_bearoff( int an[2][25], char *szTemp)
+extern void show_bearoff( TanBoard an, char *szTemp)
 {
         strcpy(szTemp, _("The following numbers are for money games only.\n\n"));
         switch( ms.bgv ) {
@@ -2235,7 +2235,7 @@ extern void show_bearoff( int an[2][25], char *szTemp)
 
 extern void CommandShowBearoff( char *sz ) {
         char out[500];
-	int an[ 2 ][ 25 ];
+	TanBoard an;
 
         if( ms.gs != GAME_PLAYING )
         {
@@ -2265,7 +2265,7 @@ CommandShowMatchResult( char *sz ) {
   moverecord *pmr;
   xmovegameinfo *pmgi;
   statcontext *psc;
-  list *pl;
+  listOLD *pl;
   float r;
 
   updateStatisticsMatch ( &lMatch );
@@ -2276,7 +2276,7 @@ CommandShowMatchResult( char *sz ) {
 
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext, ++n ) {
   
-      pmr = (moverecord *) ( (list *) pl->p )->plNext->p;
+      pmr = (moverecord *) ( (listOLD *) pl->p )->plNext->p;
       pmgi = &pmr->g;
       g_assert( pmr->mt == MOVE_GAMEINFO );
       

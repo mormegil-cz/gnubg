@@ -20,19 +20,24 @@
  */
 
 #include "config.h"
+
+#if USE_GTK
+#include "gtkgame.h"
+#else
+#include "backgammon.h"
+#endif
+#include <glib/gi18n.h>
+#if USE_MULTITHREAD
+#include "multithread.h"
+#endif
+#ifndef WIN32
+#include <stdlib.h>
+#endif
+
 #include "speed.h"
 
 #include <isaac.h>
 #include <time.h>
-
-#include "backgammon.h"
-#include "eval.h"
-#if USE_GTK
-#include "gtkgame.h"
-#endif
-#include <glib/gi18n.h>
-#include "multithread.h"
-#include <stdlib.h>
 
 #define EVALS_PER_ITERATION 1024
 
@@ -54,22 +59,22 @@ extern void RunEvals(void)
 	       or borne off, so we can trivially guarantee the position
 	       is legal. */
 	    for( j = 0; j < 25; j++ )
-		aanBoard[ i ][ 0 ][ j ] =
-		    aanBoard[ i ][ 1 ][ j ] = 0;
+			aanBoard[ i ][ 0 ][ j ] = aanBoard[ i ][ 1 ][ j ] = 0;
 
-	    for( j = 0; j < 15; j++ ) {
-		do
+	    for( j = 0; j < 15; j++ )
 		{
-		    k = irand( &rc ) % 24;
-		} while( aanBoard[ i ][ 1 ][ 23 - k ] );
-		aanBoard[ i ][ 0 ][ k ]++;
+			do
+			{
+				k = irand( &rc ) % 24;
+			} while( aanBoard[ i ][ 1 ][ 23 - k ] );
+			aanBoard[ i ][ 0 ][ k ]++;
 
-		do
-		{
-		    k = irand( &rc ) % 24;
-		} while( aanBoard[ i ][ 0 ][ 23 - k ] );
-		aanBoard[ i ][ 1 ][ k ]++;
-	    }
+			do
+			{
+				k = irand( &rc ) % 24;
+			} while( aanBoard[ i ][ 0 ][ 23 - k ] );
+			aanBoard[ i ][ 1 ][ k ]++;
+		}
 	}
 
 #if USE_MULTITHREAD
@@ -104,15 +109,16 @@ extern void CommandCalibrate( char *sz )
 	MT_SyncInit();
 #endif
 
-    if( sz && *sz ) {
-	n = ParseNumber( &sz );
+    if( sz && *sz )
+	{
+		n = ParseNumber( &sz );
 
-	if( n < 1 ) {
-	    outputl( _("If you specify a parameter to `calibrate', "
-		       "it must be a number of iterations to run.") );
-	    return;
+		if( n < 1 ) {
+			outputl( _("If you specify a parameter to `calibrate', "
+				"it must be a number of iterations to run.") );
+			return;
+		}
 	}
-    }
 
 	if (clock() < 0)
 	{
@@ -126,8 +132,8 @@ extern void CommandCalibrate( char *sz )
     irandinit( &rc, TRUE);
 
 #if USE_GTK
-    if( fX )
-	pcc = GTKCalibrationStart();
+	if( fX )
+		pcc = GTKCalibrationStart();
 #endif
     
 	timeTaken = 0;
@@ -162,15 +168,17 @@ extern void CommandCalibrate( char *sz )
     }
     
 #if USE_GTK
-    if( fX )
-	GTKCalibrationEnd( pcc );
+	if( fX )
+		GTKCalibrationEnd( pcc );
 #endif
 
-    if( timeTaken ) {
-	rEvalsPerSec = iIter * (float)(EVALS_PER_ITERATION *
-	    CLOCKS_PER_SEC / timeTaken);
-	outputf( "\rCalibration result: %.0f static evaluations/second.\n",
-		 rEvalsPerSec );
-    } else
-	outputl( _("Calibration incomplete.") );
+    if( timeTaken )
+	{
+		rEvalsPerSec = iIter * (float)(EVALS_PER_ITERATION *
+			CLOCKS_PER_SEC / timeTaken);
+		outputf( "\rCalibration result: %.0f static evaluations/second.\n",
+				rEvalsPerSec );
+    }
+	else
+		outputl( _("Calibration incomplete.") );
 }

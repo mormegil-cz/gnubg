@@ -3,9 +3,9 @@
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
 FLAGS= -Wall $(COMPOPT) $(DEFS)
-TARGET = ../../../bin/libevent.a
-MINGW=$(GNU)/mingw
-OBJDIR=../../../bin/obj/lib
+BINDIR=../../bin
+TARGET = $(BINDIR)/libevent.a
+OBJDIR=$(BINDIR)/obj/lib
 
 SOURCE= cache list neuralnet neuralnetsse mt19937ar isaac md5
 
@@ -33,6 +33,6 @@ $(OBJDIR)/%.o: %.c
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
 clean:
-	@del $(OBJDIR)\*.o
-	@del $(TARGET)
+	@if exist $(subst /,\,$(OBJDIR)\*.o) del $(subst /,\,$(OBJDIR)\*.o)
+	@if exist $(subst /,\,$(TARGET)) del $(subst /,\,$(TARGET))
 	@echo $(TARGET) clean

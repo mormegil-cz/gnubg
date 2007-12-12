@@ -33,10 +33,9 @@
 
 #include "config.h"
 #include <stdio.h>
-#include <stddef.h>
 #include <stdlib.h>
 
-#if !MEC_STANDALONE
+#ifndef MEC_STANDALONE
 #include "mec.h"
 #endif
 
@@ -63,7 +62,7 @@ dp dpt (int, int, int, double, double, double **);
      winning percentage (favorite)
  */
 
-#if MEC_STANDALONE
+#ifdef MEC_STANDALONE
 
 int main (int argc, char **argv)
 {
@@ -182,11 +181,11 @@ mec_pc( const float rGammonRate,
         const float rWinRate,
         float arMetPC[ MAXSCORE ] ) {
 
-  int i;
+  unsigned int i;
 
    /* match length */
 
-  int ml = 64;
+  const unsigned int ml = 64;
 
   /* gammon rate, i.e. how many of games won/lost will be gammons */
 
@@ -213,29 +212,32 @@ mec_pc( const float rGammonRate,
   double **E = (double **) malloc ((ml + 1) * sizeof (double *));
 
   double *ec = (double*) calloc ((ml + 1) * (ml + 1), sizeof (double));
-  
+
+  if (!E || !ec)
+	  exit(-1);	/* We're in trouble... */
+
   {
 
     /* Initialize E to point to correct positions */
 
     for (i = 0; i <= ml; i++)
-      {
-	E[i] = & ec[i * (ml + 1)];
-      }
+    {
+		E[i] = & ec[i * (ml + 1)];
+    }
     
     /* Initialize E for 0-away scores */
 
     for (i = 1;  i <= ml; i++)
-      {
-	E[0][i] = 1;
-	E[i][0] = 0;
-      }
+    {
+		E[0][i] = 1;
+		E[i][0] = 0;
+    }
   }
 
   /* Compute post crawford equities, given gammon rate, winning percentage
      for favorite (game), match length.  Fill in the equity table. */
 
-  post_crawford (gr, wpf, ml, E,rFreeDrop2Away,rFreeDrop4Away);
+  post_crawford (gr, wpf, ml, E, (double)rFreeDrop2Away, (double)rFreeDrop4Away);
 
   /* save post Crawford equities */
 
@@ -252,14 +254,14 @@ mec_pc( const float rGammonRate,
 extern void
 mec( const float rGammonRate, 
      const float rWinRate,
-     /* const */ float aarMetPC[ 2 ][ MAXSCORE ],
+     /* const */ /*lint -e{818}*/float aarMetPC[ 2 ][ MAXSCORE ],
      float aarMet[ MAXSCORE ][ MAXSCORE ] ) {
 
-  int i, j;
+  unsigned int i, j;
 
    /* match length */
 
-  int ml = 64;
+  const unsigned int ml = 64;
 
   /* gammon rate, i.e. how many of games won/lost will be gammons */
 
@@ -286,23 +288,26 @@ mec( const float rGammonRate,
   double **E = (double **) malloc ((ml + 1) * sizeof (double *));
 
   double *ec = (double*) calloc ((ml + 1) * (ml + 1), sizeof (double));
+
+  if (!E || !ec)
+	  exit(-1);	/* We're in trouble... */
   
   {
 
     /* Initialize E to point to correct positions */
 
     for (i = 0; i <= ml; i++)
-      {
-	E[i] = & ec[i * (ml + 1)];
-      }
+    {
+		E[i] = & ec[i * (ml + 1)];
+    }
     
     /* Initialize E for 0-away scores */
 
     for (i = 1;  i <= ml; i++)
-      {
-	E[0][i] = 1;
-	E[i][0] = 0;
-      }
+    {
+		E[0][i] = 1;
+		E[i][0] = 0;
+    }
   }
 
   /* Compute post crawford equities, given gammon rate, winning percentage
@@ -346,7 +351,7 @@ mec( const float rGammonRate,
 /* sq returns x if x is greater than zero, else it returns zero. */
 #define sq(x) ((x)>0?(x):0)
 
-void post_crawford (double gr, double wpf, int ml, double **E,
+void post_crawford (double gr, double wpf, int ml, /*lint -e{818}*/double **E,
                     double fd2, double fd4)
 {
   int i;
@@ -354,8 +359,8 @@ void post_crawford (double gr, double wpf, int ml, double **E,
   E[1][1] = wpf;
   
   for (i = 2; i <= ml; i++)
-    {
-      if (even (i))
+  {
+	if (even (i))
 	{
 	  /* Free drop condition exists */
 	  E[1][i] = E[1][i - 1];
@@ -372,7 +377,7 @@ void post_crawford (double gr, double wpf, int ml, double **E,
             E[i][1] += fd4;
           }
 	}
-      else
+    else
 	{
 	  E[1][i] =		/* Equity for favorite when 1-away, i-away */
 	    E[0][i] * wpf	/* Favorite wins */
@@ -384,10 +389,10 @@ void post_crawford (double gr, double wpf, int ml, double **E,
 	    + E[sq (i - 2)][1] * wpf * (1 - gr) /* Favorite wins single */
 	    + E[sq (i - 4)][1] * wpf * gr; /* Favorite wins gammon */
 	}
-    }
+  }
 }
 
-void crawford (double gr, double wpf, int ml, double **E)
+void crawford (double gr, double wpf, int ml, /*lint -e{818}*/double **E)
 {
   int i;
 
@@ -416,21 +421,20 @@ void pre_crawford (double gr, double wpf, int ml, double **E)
   double eq;
 
   for (i = 2; i <= ml; i++)
-    for (j = i; j <= ml; j++)
-      {
+   for (j = i; j <= ml; j++)
+   {
 	dpf = dpt (i, j, 2, gr, wpf, E);
 	dpu = dpt (j, i, 2, gr, 1 - wpf, E);
 
 	dpu.e = 1 - dpu.e;
 	dpu.w = 1 - dpu.w;
 
-	eq = dpu.e
-	  + (dpf.e - dpu.e) * (wpf - dpu.w) / (dpf.w - dpu.w);
+	eq = dpu.e + (dpf.e - dpu.e) * (wpf - dpu.w) / (dpf.w - dpu.w);
 
 	E[i][j] = eq;
 
 	if (i != j)
-	  {
+	{
 	    dpf = dpt (j, i, 2, gr, wpf, E);
 	    dpu = dpt (i, j, 2, gr, 1 - wpf, E);
 
@@ -441,8 +445,8 @@ void pre_crawford (double gr, double wpf, int ml, double **E)
 	      + (dpf.e - dpu.e) * (wpf - dpu.w) / (dpf.w - dpu.w);
 
 	    E[j][i] = eq;
-	  }
-      }
+     }
+   }
 }
 
 /* Compute point when p doubles o to c, assuming gammon rate gr,
@@ -452,7 +456,7 @@ void pre_crawford (double gr, double wpf, int ml, double **E)
 dp dpt (int p, int o, int c, double gr, double wpp, double **E)
 {
   dp dpo, dpp;
-  double e0, w0, edp, wdp;
+  double e0, edp, wdp;
 
   if (p <= c / 2)
     {
@@ -489,8 +493,6 @@ dp dpt (int p, int o, int c, double gr, double wpp, double **E)
 	+ E[o][sq (p - 2 * c)] * gr;
     }
 
-  w0 = 0;
-
   /* Find out o:s equity if o passes the double to c, i.e. loses c / 2 points. */
 
   if (wpp > 0.5)
@@ -507,7 +509,7 @@ dp dpt (int p, int o, int c, double gr, double wpp, double **E)
     }
 
   /* Find the winning percentage, which on the line from
-     (w0,e0) to (dpo.w,dpo.e) gives o an equity equal to O's
+     (w0?,e0) to (dpo.w,dpo.e) gives o an equity equal to O's
      equity  passing the double to c (i.e. losing c / 2 pts) */
 
   wdp = (edp - e0) * dpo.w / (dpo.e - e0);

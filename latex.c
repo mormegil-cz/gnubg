@@ -375,9 +375,9 @@ static char *PlayerSymbol( int fPlayer ) {
     return fPlayer ? "\\textbullet{}" : "\\textopenbullet{}";
 }
 
-static void ExportGameLaTeX( FILE *pf, list *plGame ) {
+static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
     
-    list *pl;
+    listOLD *pl;
     moverecord *pmr;
     matchstate msExport;
     int fTook = FALSE;
@@ -563,7 +563,7 @@ extern void CommandExportGameLaTeX( char *sz ) {
 extern void CommandExportMatchLaTeX( char *sz ) {
     
     FILE *pf;
-    list *pl;
+    listOLD *pl;
 
     sz = NextToken( &sz );
     

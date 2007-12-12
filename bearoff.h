@@ -22,6 +22,8 @@
 #ifndef _BEAROFF_H_
 #define _BEAROFF_H_
 
+#include "util.h"
+
 typedef enum _bearoffcreator {
   BEAROFF_GNUBG,
   BEAROFF_EXACT_BEAROFF,
@@ -71,7 +73,7 @@ enum _bearoffoptions {
   BO_IN_MEMORY         = 1,
   BO_MUST_BE_ONE_SIDED = 2,
   BO_MUST_BE_TWO_SIDED = 4,
-  BO_HEURISTIC         = 8,
+  BO_HEURISTIC         = 8
 };
 
 extern bearoffcontext *
@@ -81,13 +83,13 @@ extern bearoffcontext *
 BearoffInitBuiltin ( void );
 
 extern int
-BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] );
+BearoffEval ( bearoffcontext *pbc, TanBoard anBoard, float arOutput[] );
 
 extern void
 BearoffStatus ( bearoffcontext *pbc, char *sz );
 
 extern int
-BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz );
+BearoffDump ( bearoffcontext *pbc, TanBoard anBoard, char *sz );
 
 extern int
 BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
@@ -105,7 +107,7 @@ extern void
 BearoffClose ( bearoffcontext **ppbc );
 
 extern int
-isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] );
+isBearoff ( bearoffcontext *pbc, TanBoard anBoard );
 
 extern float
 fnd ( const float x, const float mu, const float sigma  );

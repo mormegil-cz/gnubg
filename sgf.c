@@ -52,7 +52,7 @@ static void ErrorHandler(char *sz, int fParseError)
     }
 }
 
-static void FreeList(list * pl, int nLevel)
+static void FreeList(listOLD * pl, int nLevel)
 {
     /* Levels are:
      *  0 - GameTreeSeq
@@ -84,16 +84,16 @@ static void FreeList(list * pl, int nLevel)
 	free(pl);
 }
 
-static void FreeGameTreeSeq(list * pl)
+static void FreeGameTreeSeq(listOLD * pl)
 {
 
     FreeList(pl, 0);
 }
 
-static list *LoadCollection(char *sz)
+static listOLD *LoadCollection(char *sz)
 {
 
-    list *plCollection, *pl, *plRoot, *plProp;
+    listOLD *plCollection, *pl, *plRoot, *plProp;
     FILE *pf;
     int fBackgammon;
     property *pp;
@@ -122,7 +122,7 @@ static list *LoadCollection(char *sz)
     if (plCollection) {
 	pl = plCollection->plNext;
 	while (pl != plCollection) {
-	    plRoot = ((list *) ((list *) pl->p)->plNext->p)->plNext->p;
+	    plRoot = ((listOLD *) ((listOLD *) pl->p)->plNext->p)->plNext->p;
 	    fBackgammon = FALSE;
 	    for (plProp = plRoot->plNext; plProp != plRoot;
 		 plProp = plProp->plNext) {
@@ -180,7 +180,7 @@ static void SetScore(xmovegameinfo * pmgi, int fBlack, int n)
 	pmgi->anScore[fBlack] = n;
 }
 
-static void RestoreMI(list * pl, moverecord * pmr)
+static void RestoreMI(listOLD * pl, moverecord * pmr)
 {
 
     char *pch;
@@ -202,7 +202,7 @@ static void RestoreMI(list * pl, moverecord * pmr)
 
 }
 
-static void RestoreGS(list * pl, statcontext * psc)
+static void RestoreGS(listOLD * pl, statcontext * psc)
 {
 
     char *pch;
@@ -388,7 +388,7 @@ static void RestoreRules(xmovegameinfo * pmgi, const char *sz)
 
 
 
-static void RestoreRootNode(list * pl)
+static void RestoreRootNode(listOLD * pl)
 {
 
     property *pp;
@@ -654,7 +654,7 @@ RestoreRolloutRolloutContext(rolloutcontext * prc, const char *sz)
     if (!pc)
 	return;
 
-    sscanf(pc, "RC %d %d %d %hu %u \"%[^\"]\" %d %d %d %d",
+    sscanf(pc, "RC %d %d %d %hu %u \"%[^\"]\" %ld %d %d %d",
 	   &fCubeful,
 	   &fVarRedn,
 	   &fInitial,
@@ -788,7 +788,7 @@ RestoreExtendedRolloutContext(rolloutcontext * prc, const char *sz)
     if (!pc)
 	return;
 
-    if (sscanf(pc, "RC %d %d %d %d %d %d %hu %d %d %hu \"%[^\"]\" %d",
+    if (sscanf(pc, "RC %d %d %d %d %d %d %hu %d %d %hu \"%[^\"]\" %ld",
 	       &fCubeful,
 	       &fVarRedn,
 	       &fInitial,
@@ -967,13 +967,13 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
 				evalsetup * pesChequer,
 				const matchstate * pms)
 {
-    list *pl = pp->pl->plNext;
+    listOLD *pl = pp->pl->plNext;
     const char *pc;
     char *pch;
     char ch;
     move *pm;
     int i, fDeterministic, nReduced, fUsePrune = 0;
-    int anBoardMove[2][25];
+    TanBoard anBoardMove;
     int ver;
     *piMove = atoi(pl->p);
 
@@ -1084,7 +1084,7 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
     }
 }
 
-static void PointList(list * pl, int an[])
+static void PointList(listOLD * pl, int an[])
 {
 
     int i;
@@ -1107,7 +1107,7 @@ static void PointList(list * pl, int an[])
     }
 }
 
-static void RestoreNode(list * pl)
+static void RestoreNode(listOLD * pl)
 {
 
     property *pp, *ppDA = NULL, *ppA = NULL, *ppC = NULL;
@@ -1347,7 +1347,7 @@ static void RestoreNode(list * pl)
     }
 }
 
-static void RestoreSequence(list * pl, int fRoot)
+static void RestoreSequence(listOLD * pl, int fRoot)
 {
 
     pl = pl->plNext;
@@ -1360,7 +1360,7 @@ static void RestoreSequence(list * pl, int fRoot)
 	RestoreNode(pl->p);
 }
 
-static void RestoreTree(list * pl, int fRoot)
+static void RestoreTree(listOLD * pl, int fRoot)
 {
 
     pl = pl->plNext;
@@ -1373,7 +1373,7 @@ static void RestoreTree(list * pl, int fRoot)
     /* FIXME restore other variations, once we can handle them */
 }
 
-static void RestoreGame(list * pl)
+static void RestoreGame(listOLD * pl)
 {
 
     moverecord *pmr, *pmrResign;
@@ -1424,7 +1424,7 @@ static void RestoreGame(list * pl)
 extern void CommandLoadGame(char *sz)
 {
 
-    list *pl;
+    listOLD *pl;
 
     sz = NextToken(&sz);
 
@@ -1483,7 +1483,7 @@ extern void CommandLoadGame(char *sz)
 extern void CommandLoadPosition(char *sz)
 {
 
-    list *pl;
+    listOLD *pl;
 
     sz = NextToken(&sz);
 
@@ -1539,7 +1539,7 @@ extern void CommandLoadPosition(char *sz)
 extern void CommandLoadMatch(char *sz)
 {
 
-    list *pl;
+    listOLD *pl;
 
     sz = NextToken(&sz);
 
@@ -2156,12 +2156,13 @@ static void AddRule(FILE * pf, const char *sz, int *pfFirst)
 
 }
 
-static void SaveGame(FILE * pf, list * plGame)
+static void SaveGame(FILE * pf, listOLD * plGame)
 {
 
-    list *pl;
+    listOLD *pl;
     moverecord *pmr;
-    int i, j, anBoard[2][25];
+    int i, j;
+	TanBoard anBoard;
 
     updateStatisticsGame(plGame);
 
@@ -2408,7 +2409,7 @@ extern void CommandSaveMatch(char *sz)
 {
 
     FILE *pf;
-    list *pl;
+    listOLD *pl;
 
     sz = NextToken(&sz);
 
@@ -2449,7 +2450,7 @@ extern void CommandSavePosition(char *sz)
 {
 
     FILE *pf;
-    list l;
+    listOLD l;
     moverecord *pmgi;
     moverecord *pmsb;
     moverecord *pmsd;

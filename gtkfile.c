@@ -40,7 +40,7 @@
 #include "gtkwindows.h"
 #include "file.h"
 
-static void FilterAdd (char *fn, char *pt, GtkFileChooser * fc)
+static void FilterAdd (const char *fn, const char *pt, GtkFileChooser * fc)
 {
   GtkFileFilter *aff = gtk_file_filter_new ();
   gtk_file_filter_set_name (aff, fn);

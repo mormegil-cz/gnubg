@@ -25,14 +25,15 @@ typedef struct _list {
   struct _list* plPrev;
   struct _list* plNext;
   void* p;
-} list;
+} listOLD;
+/* Renamed to listOLD - use GList instead (hopefullly replace existing usage eventually */
 
-extern int ListCreate( list *pl );
+extern int ListCreate( listOLD *pl );
 /* #define ListDestroy( pl ) ( assert( ListEmpty( pl ) ) ) */
 
 #define ListEmpty( pl ) ( (pl)->plNext == (pl) )
-extern list* ListInsert( list* pl, void* p );
-extern void ListDelete( list* pl );
-extern void ListDeleteAll( const list *pl );
+extern listOLD* ListInsert( listOLD* pl, void* p );
+extern void ListDelete( listOLD* pl );
+extern void ListDeleteAll( const listOLD *pl );
 
 #endif

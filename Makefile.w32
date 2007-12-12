@@ -1,12 +1,11 @@
 # Windows makefile
 
 CC=gcc
-DEFS = -DHAVE_CONFIG_H -g -O3 -Wall
-FLAGS= -Wall -MD $(COMPOPT) $(DEFS)
-MINGW=$(GNU)/mingw
-OBJDIR=../../bin/obj
+FLAGS= -MD $(COMPOPT) -DHAVE_CONFIG_H 
+BINDIR=../bin
+OBJDIR=$(BINDIR)/obj
 
-TARGET = ../../bin/gnubg.exe
+TARGET = $(BINDIR)/gnubg.exe
 
 SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	dice drawboard eval export external \
@@ -22,18 +21,19 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	gtkoptions formatgs \
 	timer mec relational gtkgamelist \
 	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
-	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file simpleboard
+	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file simpleboard \
+	util corecount
 
 OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
-BIN_DIRS=..\..\bin ..\..\bin\textures ..\..\bin\met ..\..\bin\fonts ..\..\bin\flags ..\..\bin\sounds
-TEXTURES=$(patsubst textures/%,../../bin/textures/%,$(wildcard textures/*.png)) $(patsubst textures/%,../../bin/textures/%,$(wildcard textures/*.bmp))
-FLAGPICS=$(patsubst flags/%,../../bin/flags/%,$(wildcard flags/*.png))
-SOUNDS=$(patsubst sounds/%,../../bin/sounds/%,$(wildcard sounds/*.wav))
-METFILES=$(patsubst met/%,../../bin/met/%,$(wildcard met/*.xml))
-FONTFILES=$(patsubst fonts/%,../../bin/fonts/%,$(wildcard fonts/*.ttf))
-POFILES=$(patsubst po/%.po,../../bin/locale/%/LC_MESSAGES/gnubg.mo,$(wildcard po/*.po))
-EXTRA_FILES=../../bin/textures.txt ../../bin/gnubg.png  ../../bin/met/met.dtd ../../bin/boards.xml
+BIN_DIRS=$(BINDIR) $(BINDIR)/textures $(BINDIR)/met $(BINDIR)/fonts $(BINDIR)/flags $(BINDIR)/sounds
+TEXTURES=$(patsubst textures/%,$(BINDIR)/textures/%,$(wildcard textures/*.png)) $(patsubst textures/%,$(BINDIR)/textures/%,$(wildcard textures/*.bmp))
+FLAGPICS=$(patsubst flags/%,$(BINDIR)/flags/%,$(wildcard flags/*.png))
+SOUNDS=$(patsubst sounds/%,$(BINDIR)/sounds/%,$(wildcard sounds/*.wav))
+METFILES=$(patsubst met/%,$(BINDIR)/met/%,$(wildcard met/*.xml))
+FONTFILES=$(patsubst fonts/%,$(BINDIR)/fonts/%,$(wildcard fonts/*.ttf))
+POFILES=$(patsubst po/%.po,$(BINDIR)/locale/%/LC_MESSAGES/gnubg.mo,$(wildcard po/*.po))
+EXTRA_FILES=$(BINDIR)/textures.txt $(BINDIR)/gnubg.png $(BINDIR)/met/met.dtd $(BINDIR)/gnubg.gtkrc $(BINDIR)/boards.xml
 
 makebearoff_SOURCE = makebearoff eval positionid matchequity \
 		     matchid osr bearoffgammon bearoff \
@@ -64,25 +64,24 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	-I$(MINGW)/include/gtkglext-1.0 \
 	-I$(MINGW)/lib/gtkglext-1.0/include
 
-LIBPATH = -L../../bin
+LIBPATH = -L$(BINDIR)
 
-LIBS = \
-       -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
+LIBS = -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
        -lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
        -liconv -lpng -lz -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
        -lopengl32 -lglu32 -lglut32 -lwsock32 \
        -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
        -lart_lgpl_2 -llibintl -lcairo -lgthread-2.0.dll
 
-LIBEVENT = ..\..\bin\libevent.a
-LIBBOARD3D = ..\..\bin\libboard3d.a
+LIBEVENT = $(BINDIR)/libevent.a
+LIBBOARD3D = $(BINDIR)/libboard3d.a
 Libraries = $(LIBEVENT) $(LIBBOARD3D)
 
-MAKEBEAROFFEXE = ../../bin/makebearoff.exe
-OSDB = ../../bin/gnubg_os0.bd
-TSDB = ../../bin/gnubg_ts0.bd
-MAKEWEIGHTS = ../../bin/makeweights.exe
-WEIGHTS = ../../bin/gnubg.wd
+MAKEBEAROFFEXE = $(BINDIR)/makebearoff.exe
+OSDB = $(BINDIR)/gnubg_os0.bd
+TSDB = $(BINDIR)/gnubg_ts0.bd
+MAKEWEIGHTS = $(BINDIR)/makeweights.exe
+WEIGHTS = $(BINDIR)/gnubg.wd
 
 all: objdirs $(BIN_DIRS) $(TEXTURES) $(FLAGPICS) $(SOUNDS) $(METFILES) $(POFILES) $(FONTFILES) $(EXTRA_FILES) \
 		$(WEIGHTS) BearOffDBs $(Libraries) $(TARGET)
@@ -95,14 +94,14 @@ $(LIBBOARD3D):
 
 BearOffDBs: $(MAKEBEAROFFEXE) $(OSDB) $(TSDB)
 
-../../bin/%: %
+$(BINDIR)/%: %
 	@echo copying $<
 	@copy $(subst /,\,"$<") "$@"
 
 %.mo:
 	@echo creating $@
 	@if NOT EXIST "$(patsubst %/gnubg.mo,%,$@)" mkdir "$(patsubst %/gnubg.mo,%,$@)"
-	@msgfmt -c -o "$@" "$(patsubst ../../bin/locale/%/LC_MESSAGES/gnubg.mo,po\\%.po,$@)"
+	@msgfmt -c -o "$@" "$(patsubst $(BINDIR)/locale/%/LC_MESSAGES/gnubg.mo,po\\%.po,$@)"
 
 $(OSDB):
 	@echo Generating one-sided bearoff database (this will take a while)
@@ -130,28 +129,27 @@ $(TARGET): $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
 
 objdirs: $(OBJDIR) $(OBJDIR)\non-src
 
-$(BIN_DIRS):
+$(BIN_DIRS) $(OBJDIR) $(OBJDIR)\non-src:
+	@echo mkdir $@
 	@mkdir "$@"
 
-$(OBJDIR)\non-src:
-	@mkdir "$@"
-
-$(OBJDIR):
-	@mkdir "$@"
-
-$(OBJDIR)/sgf.o:
+$(OBJDIR)/sgf.o:	# Avoid default action for sgf file
 	@echo Compiling sgf.c
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c sgf.c
+
+$(OBJDIR)/corecount.o: corecount.c	# Don't compile with optimisation (as crashes)
+	@echo Compiling $<
+	@${CC} -o $@ -c $<
 
 $(OBJDIR)/%.o: %.c
 	@echo Compiling $<
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
-clean: 
+clean:
 	@$(MAKE) --no-print-directory -fmakefile.win -C board3d clean
 	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib clean
-	@del $(OBJDIR)\*.o
-	@del $(OBJDIR)\non-src\*.o
-	@del "$(TARGET)"
-	@del makebearoff.exe
+	@if exist $(subst /,\,$(OBJDIR)\*.o) del $(subst /,\,$(OBJDIR)\*.o)
+	@if exist $(subst /,\,$(OBJDIR)\non-src\*.o) del $(subst /,\,$(OBJDIR)\non-src\*.o)
+	@if exist $(subst /,\,$(TARGET)) del $(subst /,\,$(TARGET))
+	@if exist $(subst /,\,$(MAKEBEAROFFEXE)) del $(subst /,\,$(MAKEBEAROFFEXE))
 	@echo $(TARGET) clean

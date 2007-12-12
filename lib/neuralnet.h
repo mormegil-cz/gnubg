@@ -20,8 +20,10 @@
 
 #ifndef _NEURALNET_H_
 #define _NEURALNET_H_
-#include "common.h"
+
 #include <stdio.h>
+#include "common.h"
+
 typedef struct _neuralnet {
 	unsigned int cInput;
 	unsigned int cHidden;
@@ -66,4 +68,5 @@ extern int NeuralNetLoad(neuralnet * pnn, FILE * pf);
 extern int NeuralNetLoadBinary(neuralnet * pnn, FILE * pf);
 extern int NeuralNetSaveBinary(const neuralnet * pnn, FILE * pf);
 extern int SSE_Supported(void);
+
 #endif

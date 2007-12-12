@@ -29,6 +29,7 @@ typedef struct Occluder_T
 	float rot[3];
 	int rotator;
 
+	GLuint shadow_list;
 	OccModel* handle;
 	int show;
 } Occluder;
@@ -48,5 +49,7 @@ extern void addWonkyCube(Occluder* pOcc, float x, float y, float z, float w, flo
 extern void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, unsigned int a);
 extern void addHalfTube(Occluder* pOcc, float r, float h, unsigned int a);
 extern void addDice(Occluder* pOcc, float size);
+
+extern void draw_shadow_volume_extruded_edges(Occluder* pOcc, const float light_position[4], unsigned int prim);
 
 #endif

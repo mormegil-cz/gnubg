@@ -47,4 +47,19 @@ typedef enum _TextureType
 } TextureType;
 #define TT_COUNT 3	/* 3 texture types: general, piece and hinge */
 
+typedef int idleFunc(BoardData3d* bd3d);
+
+/* Work out which sides of dice to draw */
+typedef struct _diceTest
+{
+	int top, bottom, side[4];
+} diceTest;
+
+typedef struct _DiceRotation
+{
+	float xRotStart, yRotStart;
+	float xRot, yRot;
+	float xRotFactor, yRotFactor;
+} DiceRotation;
+
 #endif

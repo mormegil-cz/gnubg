@@ -39,11 +39,9 @@
 #include "export.h"
 #include "formatgs.h"
 #include <glib/gi18n.h>
-#if USE_MULTITHREAD
 #include "multithread.h"
-#endif
 
-const char *aszRating [ RAT_UNDEFINED + 1 ] = {
+const char *aszRating [ N_RATINGS ] = {
   N_("Awful!"), 
   N_("Beginner"), 
   N_("Casual player"), 
@@ -89,10 +87,11 @@ GetRating ( const float rError ) {
 }
 
 static float
-LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
+LuckFirst ( TanBoard anBoard, const int n0, const int n1,
             const cubeinfo *pci, const evalcontext *pec ) {
 
-  int anBoardTemp[ 2 ][ 25 ], i, j;
+  TanBoard anBoardTemp;
+  int i, j;
   float aar[ 6 ][ 6 ], ar[ NUM_ROLLOUT_OUTPUTS ], rMean = 0.0f;
   cubeinfo ciOpp;
   movelist ml;
@@ -189,10 +188,11 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
 }
 
 static float
-LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
+LuckNormal ( TanBoard anBoard, const int n0, const int n1,
              const cubeinfo *pci, const evalcontext *pec ) {
   
-  int anBoardTemp[ 2 ][ 25 ], i, j;
+  TanBoard anBoardTemp;
+  int i, j;
   float aar[ 6 ][ 6 ], ar[ NUM_ROLLOUT_OUTPUTS ], rMean = 0.0f;
   cubeinfo ciOpp;
   movelist ml;
@@ -242,7 +242,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
 
 }
 
-static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
+static float LuckAnalysis( TanBoard anBoard, int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
 
   if( n0-- < n1-- )
@@ -302,13 +302,13 @@ static void
 updateStatcontext(statcontext*       psc,
 		  const moverecord*  pmr,
 		  const matchstate*  pms,
-                  const list *plGame )
+                  const listOLD *plGame )
 {
   cubeinfo ci;
   static unsigned char auch[ 10 ];
   float rSkill, rChequerSkill, rCost;
   unsigned int i;
-  int anBoardMove[ 2 ][ 25 ];
+  TanBoard anBoardMove;
   float arDouble[ 4 ];
   const xmovegameinfo* pmgi = &((moverecord *) plGame->plNext->p)->g;
 
@@ -610,12 +610,12 @@ updateStatcontext(statcontext*       psc,
 }
 
 extern int
-AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
+AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 		statcontext *psc, const evalsetup *pesChequer, evalsetup *pesCube,
 		/* const */ movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ], const int analysePlayers[ 2 ],
 		float *doubleError)
 {
-    int anBoardMove[ 2 ][ 25 ];
+    TanBoard anBoardMove;
     cubeinfo ci;
     float rSkill, rChequerSkill;
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
@@ -969,10 +969,10 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const list *plParentGame,
 static int progress_offset;
 
 static int
-NumberMovesGame ( list *plGame ) {
+NumberMovesGame ( listOLD *plGame ) {
 
   int nMoves = 0;
-  list *pl;
+  listOLD *pl;
 
   for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) 
     nMoves++;
@@ -988,11 +988,11 @@ static void UpdateProgressBar(void)
 	ProgressValue(progress_offset + MT_GetDoneTasks());
 }
 
-static int AnalyzeGame ( list *plGame )
+static int AnalyzeGame ( listOLD *plGame )
 {
 	int result;
 	unsigned int i;
-	list *pl = plGame->plNext;
+	listOLD *pl = plGame->plNext;
 	moverecord *pmr = pl->p;
 	statcontext *psc = &pmr->g.sc;
 	matchstate msAnalyse;
@@ -1071,9 +1071,9 @@ static int AnalyzeGame ( list *plGame )
 
 #else
 
-static int AnalyzeGame ( list *plGame )
+static int AnalyzeGame ( listOLD *plGame )
 {
-    list *pl;
+    listOLD *pl;
     moverecord *pmr;
     moverecord *pmrx = (moverecord *) plGame->plNext->p; 
     matchstate msAnalyse;
@@ -1227,10 +1227,10 @@ static int CheckSettings( void ) {
 
 
 static int
-NumberMovesMatch ( list *plMatch ) {
+NumberMovesMatch ( listOLD *plMatch ) {
 
   int nMoves = 0;
-  list *pl;
+  listOLD *pl;
 
   for ( pl = plMatch->plNext; pl != plMatch; pl = pl->plNext )
     nMoves += NumberMovesGame ( pl->p );
@@ -1273,7 +1273,7 @@ extern void CommandAnalyseGame( char *sz ) {
 
 extern void CommandAnalyseMatch( char *sz )
 {
-  list *pl;
+  listOLD *pl;
   moverecord *pmr;
   int nMoves;
   
@@ -1301,7 +1301,7 @@ extern void CommandAnalyseMatch( char *sz )
 	  break;
       }
       progress_offset += NumberMovesGame ( pl -> p);
-      pmr = (moverecord *) ( (list *) pl->p )->plNext->p;
+      pmr = (moverecord *) ( (listOLD *) pl->p )->plNext->p;
       g_assert( pmr->mt == MOVE_GAMEINFO );
       AddStatcontext( &pmr->g.sc, &scMatch );
   }
@@ -1696,7 +1696,7 @@ CommandAnalyseMove ( char *sz )
 
 static void
 updateStatisticsMove( const moverecord* pmr,
-		      matchstate* pms, const list* plGame,
+		      matchstate* pms, const listOLD* plGame,
 		      statcontext* psc )
 {
   FixMatchState ( pms, pmr );
@@ -1748,9 +1748,9 @@ updateStatisticsMove( const moverecord* pmr,
 
 
 extern void
-updateStatisticsGame ( const list* plGame ) {
+updateStatisticsGame ( const listOLD* plGame ) {
 
-  list *pl;
+  listOLD *pl;
   moverecord *pmr;
   moverecord *pmrx = plGame->plNext->p;
   matchstate msAnalyse;
@@ -1772,9 +1772,9 @@ updateStatisticsGame ( const list* plGame ) {
 
 
 extern void
-updateStatisticsMatch ( list *plMatch ) {
+updateStatisticsMatch ( listOLD *plMatch ) {
 
-  list *pl;
+  listOLD *pl;
   moverecord *pmr;
 
   if( ListEmpty( plMatch ) ) 
@@ -1787,7 +1787,7 @@ updateStatisticsMatch ( list *plMatch ) {
     
     updateStatisticsGame( pl->p );
     
-    pmr = ( (list *) pl->p )->plNext->p;
+    pmr = ( (listOLD *) pl->p )->plNext->p;
     g_assert( pmr->mt == MOVE_GAMEINFO );
     AddStatcontext( &pmr->g.sc, &scMatch );
 
@@ -1868,9 +1868,9 @@ AnalyseClearMove ( moverecord *pmr ) {
 }
 
 static void
-AnalyseClearGame ( list *plGame ) {
+AnalyseClearGame ( listOLD *plGame ) {
 
-  list *pl;
+  listOLD *pl;
 
   if ( ! plGame || ListEmpty ( plGame ) )
     return;
@@ -1916,7 +1916,7 @@ CommandAnalyseClearGame ( char *sz ) {
 extern void
 CommandAnalyseClearMatch ( char *sz ) {
 
-  list *pl;
+  listOLD *pl;
 
   if( ListEmpty( &lMatch ) ) {
     outputl( _("No match is being played.") );
@@ -1933,12 +1933,12 @@ CommandAnalyseClearMatch ( char *sz ) {
 
 }
 
-static int MoveAnalysed(moverecord * pmr, matchstate * pms, list * plGame,
+static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 			evalsetup * pesChequer, evalsetup * pesCube,
 			movefilter
 			aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES])
 {
-	static int anBoardMove[2][25];
+	static TanBoard anBoardMove;
 	static unsigned char auch[10];
 	static cubeinfo ci;
 	static float rSkill, rChequerSkill;
@@ -2126,9 +2126,9 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, list * plGame,
 	return TRUE;
 }
 
-static int GameAnalysed(list * plGame)
+static int GameAnalysed(listOLD * plGame)
 {
-	list *pl;
+	listOLD *pl;
 	moverecord *pmrx = (moverecord *) plGame->plNext->p;
 	matchstate msAnalyse;
 
@@ -2146,7 +2146,7 @@ static int GameAnalysed(list * plGame)
 
 extern int MatchAnalysed(void)
 {
-	list *pl;
+	listOLD *pl;
 
 	for (pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext) {
 		if (!GameAnalysed(pl->p))

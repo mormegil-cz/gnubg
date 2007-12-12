@@ -271,6 +271,7 @@ void UpdatePreview(GtkWidget *notused)
 
 	if (display_is_3d(prd))
 	{	/* Sort out chequer and dice special settings */
+		RerenderBase(bd3d);
 		if (prd->ChequerMat[0].textureInfo != prd->ChequerMat[1].textureInfo)
 		{	/* Make both chequers have the same texture */
 			prd->ChequerMat[1].textureInfo = prd->ChequerMat[0].textureInfo;
@@ -1024,8 +1025,8 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     return pwx;
 }
 
-static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
-
+static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard )
+{
 	BoardData *bd = BOARD(mainBoard)->board_data;
     GetPrefs(&rdPrefs);
 	
@@ -1125,7 +1126,7 @@ static void LabelsToggled( GtkWidget *pwWidget, void* data )
 		board_free_pixmaps( bd );
 		board_create_pixmaps( pwPrevBoard, bd );
 	}
-	UpdatePreview(0);
+	option_changed(0, 0);
 }
 
 static void MoveIndicatorToggled( GtkWidget *pwWidget, void* data )
@@ -1163,11 +1164,7 @@ static void toggle_display_type(GtkWidget *widget, BoardData* bd)
 
 	if (display_is_3d(&rdPrefs))
 	{
-		/* Make sure 3d code is initialized */
-		Init3d();
-
 		DoAcceleratedCheck(bd->bd3d, widget);
-
 		updateDiceOccPos(bd, bd->bd3d);
 	}
 	else
@@ -3059,8 +3056,9 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 #if USE_BOARD3D
     if (gtk_gl_init_success)
     {
+		Setup3dColourPicker(pwDialog, ((BoardData*)BOARD(pwBoard)->board_data)->drawing_area->window);
 	    SetPreviewLightLevel(bd->rd->lightLevels);
-	    Setup3dColourPicker(pwDialog, ((BoardData*)BOARD(pwBoard)->board_data)->drawing_area->window);
+		setDicePos(bd, bd->bd3d);
     }
 #endif
 

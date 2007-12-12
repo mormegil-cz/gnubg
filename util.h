@@ -19,7 +19,12 @@
  * $Id$
  */
 
-extern int MT_GetThreadID(void);
-extern void MT_Unlock(long *lock);
-extern void MT_Lock(long *lock);
+#ifndef _UTIL_H_
+#define _UTIL_H_
+
+typedef int TanBoard[2][25];
+
 extern char * getInstallDir( void );
+extern void PrintSystemError(const char* message);
+
+#endif

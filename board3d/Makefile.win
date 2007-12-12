@@ -3,12 +3,12 @@
 CC=gcc
 DEFS = -DHAVE_CONFIG_H
 FLAGS= -Wall $(COMPOPT) $(DEFS)
-TARGET = ../../../bin/libboard3d.a
-MINGW=$(GNU)/mingw
-OBJDIR=../../../bin/obj/board3d
+BINDIR=../../bin
+TARGET = $(BINDIR)/libboard3d.a
+OBJDIR=$(BINDIR)/obj/board3d
 
 SOURCE=	drawboard3d misc3d font3d widget3d \
-	matrix model shadow gtkcolour3d graph
+	matrix model shadow gtkcolour3d graph wglbuffer
 
 OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
@@ -46,6 +46,6 @@ $(OBJDIR)/%.o: %.c
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<
 
 clean:
-	@del $(OBJDIR)\*.o
-	@del $(TARGET)
+	@if exist $(subst /,\,$(OBJDIR)\*.o) del $(subst /,\,$(OBJDIR)\*.o)
+	@if exist $(subst /,\,$(TARGET)) del $(subst /,\,$(TARGET))
 	@echo $(TARGET) clean

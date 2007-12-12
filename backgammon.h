@@ -21,6 +21,7 @@
 
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
+
 #include <stdarg.h>
 #include "analysis.h"
 #include "eval.h"
@@ -69,7 +70,7 @@ typedef enum _movetype {
 	MOVE_SETBOARD,
 	MOVE_SETDICE,
 	MOVE_SETCUBEVAL,
-	MOVE_SETCUBEPOS,
+    MOVE_SETCUBEPOS
 } movetype;
 
 typedef struct _movegameinfo {
@@ -179,7 +180,7 @@ typedef enum {
 } gamestate;
 
 typedef struct {
-	int anBoard[2][25];
+	TanBoard anBoard;
 	unsigned int anDice[2];	/* (0,0) for unrolled dice */
 	int fTurn;		/* who makes the next decision */
 	int fResigned;
@@ -245,19 +246,19 @@ extern storedcube sc;
     lMatch.
     Typically the last game in the match).
 */
-extern list *plGame;
+extern listOLD *plGame;
 
 /* Current move inside plGame (typically the most recently
    one played, but "previous" and "next" commands navigate back and forth).
 */
-extern list *plLastMove;
+extern listOLD *plLastMove;
 
 /* The current match.
   A list of games. Each game is a list of moverecords.
   Note that the first list element is empty. The first game is in
   lMatch.plNext->p. Same is true for games.
 */
-extern list lMatch;
+extern listOLD lMatch;
 
 extern char *aszCopying[];
 extern char *aszGameResult[];
@@ -321,6 +322,10 @@ extern int log_rollouts;
 extern int nThreadPriority;
 extern int nToolbarStyle;
 extern int nTutorSkillCurrent;
+#if USE_BOARD3D
+extern int fSync;
+extern int fResetSync;
+#endif
 extern matchinfo mi;
 extern matchstate ms;
 extern movefilter aamfAnalysis[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
@@ -415,7 +420,7 @@ extern command *FindHelpCommand(command * pcBase, char *sz,
 				char *pchCommand, char *pchUsage);
 extern double ParseReal(char **ppch);
 extern int AnalyzeMove(moverecord * pmr, matchstate * pms,
-		       const list * plGame, statcontext * psc,
+		       const listOLD * plGame, statcontext * psc,
 		       const evalsetup * pesChequer, evalsetup * pesCube,
 		       movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES],
 		       const int afAnalysePlayers[2], float *doubleError);
@@ -441,14 +446,14 @@ extern moverecord *NewMoveRecord(void);
 extern RETSIGTYPE HandleInterrupt(int idSignal);
 extern void AddGame(moverecord * pmr);
 extern void AddMoveRecord(void *pmr);
-extern void ApplyMoveRecord(matchstate * pms, const list * plGame,
+extern void ApplyMoveRecord(matchstate * pms, const listOLD * plGame,
 			    const moverecord * pmr);
 extern void CalculateBoard(void);
 extern void CancelCubeAction(void);
-extern void ChangeGame(list * plGameNew);
+extern void ChangeGame(listOLD * plGameNew);
 extern void ClearMatch(void);
 extern void ClearMoveRecord(void);
-extern void DisectPath(char *path, char *extension, char **name,
+extern void DisectPath(const char *path, const char *extension, char **name,
 		       char **folder);
 extern void FixMatchState(matchstate * pms, const moverecord * pmr);
 extern void FreeMatch(void);
@@ -923,6 +928,7 @@ extern void CommandSetVariation2ChequerHypergammon(char *sz);
 extern void CommandSetVariation3ChequerHypergammon(char *sz);
 extern void CommandSetVariationNackgammon(char *sz);
 extern void CommandSetVariationStandard(char *sz);
+extern void CommandSetVsync3d(char * sz);
 extern void CommandSetWarning(char *);
 extern void CommandShow8912(char *);
 extern void CommandShowAnalysis(char *);

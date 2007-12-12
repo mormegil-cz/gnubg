@@ -140,12 +140,12 @@ typedef struct {
   unsigned int   nTrials; /* number of rollouts */
   unsigned short nLate; /* switch evaluations on move nLate of game */
   rng rngRollout;
-  int nSeed;
+  unsigned long nSeed;
   unsigned int nMinimumGames; /* but always do at least this many */
   double       rStdLimit;     /* stop when abs( value / std ) < this */
   unsigned int nMinimumJsdGames;
   double       rJsdLimit;
-  int          nGamesDone;
+  unsigned int nGamesDone;
   int          nSkip;
 } rolloutcontext;
 
@@ -289,7 +289,7 @@ extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
 extern void ( *fnTick )( void );
 extern cubeinfo ciCubeless;
-extern const char *aszEvalType[ EVAL_ROLLOUT + 1 ];
+extern const char *aszEvalType[ (int)EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
 
 extern bearoffcontext *pbc1;
@@ -345,20 +345,20 @@ typedef enum  {
      ( ( (pci)->fJacoby ) ? arEquity[ 2 ] : arEquity[ 1 ] ) : \
      ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 0 ] : arEquity[ 3 ] ) )
 
-extern void
-EvalInitialise( char *szWeights, char *szWeightsBinary,
-		int fNoBearoff, 
-		void (*pfProgress)( int ) );
+extern void EvalInitialise( char *szWeights, char *szWeightsBinary,
+		int fNoBearoff, void (*pfProgress)( int ) );
 
-extern int
-EvalShutdown( void );
+extern int EvalShutdown( void );
 
 extern void EvalStatus( char *szOutput );
 
 extern int EvalNewWeights( int nSize );
 
 extern int 
-EvaluatePosition( NNState *nnStates, int anBoard[ 2 ][ 25 ], float arOutput[],
+EvalSave( const char *szWeights );
+
+extern int 
+EvaluatePosition( NNState *nnStates, TanBoard anBoard, float arOutput[],
                   const cubeinfo* pci, const evalcontext* pec );
 
 extern void
@@ -372,36 +372,36 @@ InvertEvaluationCf( float ar[ 4 ] );
 
 extern 
 int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
-                  int anBoard[ 2 ][ 25 ], cubeinfo *pci,
+                  TanBoard anBoard, cubeinfo *pci,
                   evalcontext *pec,
                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ); 
 
 extern int 
 FindnSaveBestMoves( movelist *pml,
-                    int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+                    int nDice0, int nDice1, TanBoard anBoard,
                     unsigned char *auchMove, const float rThr,
                     const cubeinfo* pci, const evalcontext* pec,
                     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
-extern int 
-PipCount( int anBoard[ 2 ][ 25 ], unsigned int anPips[ 2 ] );
+extern void
+PipCount( TanBoard anBoard, unsigned int anPips[ 2 ] );
 
 extern int 
-ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, float *adjusted, int *pnTrailer );
+ThorpCount( TanBoard anBoard, int *pnLeader, float *adjusted, int *pnTrailer );
 
 extern int
-KeithCount(int anBoard[2][25], int pn[2]);
+KeithCount( TanBoard anBoard, int pn[2]);
 
 extern int 
-DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
+DumpPosition( TanBoard anBoard, char *szOutput,
               const evalcontext* pec, cubeinfo* pci, int fOutputMWC,
 	      int fOutputWinPC, int fOutputInvert, const char *szMatchID );
 
 extern void 
-SwapSides( int anBoard[ 2 ][ 25 ] );
+SwapSides( TanBoard anBoard );
 
 extern int 
-GameStatus( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
+GameStatus( TanBoard anBoard, const bgvariation bgv );
 
 extern void
 EvalCacheFlush(void);
@@ -413,18 +413,18 @@ extern int
 EvalCacheStats( unsigned int *pcUsed, unsigned int *pcSize, unsigned int *pcLookup, unsigned int *pcHit );
 
 extern int 
-GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
+GenerateMoves( movelist *pml, TanBoard anBoard,
                int n0, int n1, int fPartial );
 
 extern int 
-ApplyMove( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ],
+ApplyMove( TanBoard anBoard, const int anMove[ 8 ],
            const int fCheckLegal );
 
 extern positionclass 
-ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
+ClassifyPosition( TanBoard anBoard, const bgvariation bgv );
 
 /* internal use only */
-extern int EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
+extern int EvalBearoff1Full( TanBoard anBoard,
                              float arOutput[] );
 
 extern float
@@ -457,20 +457,20 @@ extern void
 swap( int *p0, int *p1 );
 
 extern void 
-SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
+SanityCheck( TanBoard anBoard, float arOutput[] );
 
 extern int
-EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
+EvalBearoff1( TanBoard anBoard, float arOutput[], 
               const bgvariation bgv, NNState *nnStates );
 
 extern int
-EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv, NNState *nnStates );
+EvalOver( TanBoard anBoard, float arOutput[], const bgvariation bgv, NNState *nnStates );
 
 extern float
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
 
 extern int 
-EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
+EvaluatePositionCubeful( TanBoard anBoard, float arCfOutput[],
                          float arClOutput[ NUM_OUTPUTS ],
                          cubeinfo *pci, evalcontext *pec, int nPlies );
 
@@ -499,23 +499,23 @@ FindCubeDecision ( float arDouble[],
 
 extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                       int anBoard[ 2 ][ 25 ],
+                       TanBoard anBoard,
                        const cubeinfo* pci, const evalcontext* pec,
 		       const evalsetup* pes );
 
 extern int
 GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                     int anBoard[ 2 ][ 25 ],
+                     TanBoard anBoard,
                      const cubeinfo* pci, const evalcontext* pec );
 
 extern int
 GeneralEvaluationEPlied ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                          int anBoard[ 2 ][ 25 ],
+                          TanBoard anBoard,
                           const cubeinfo* pci, const evalcontext* pec,
 			  int nPlies );
 
 extern int 
-EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
+EvaluatePositionCubeful3( NNState *nnStates, TanBoard anBoard,
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
                           const cubeinfo aciCubePos[], int cci, 
@@ -524,7 +524,7 @@ EvaluatePositionCubeful3( NNState *nnStates, int anBoard[ 2 ][ 25 ],
 
 extern int 
 GeneralEvaluationEPliedCubeful ( NNState *nnStates, float arOutput [ NUM_ROLLOUT_OUTPUTS ],
-                                 int anBoard[ 2 ][ 25 ],
+                                 TanBoard anBoard,
                                  const cubeinfo* pci, const evalcontext* pec,
                                  int nPlies );
 extern int
@@ -547,7 +547,7 @@ FindBestCubeDecision ( float arDouble[],
 extern int
 getCurrentGammonRates ( float aarRates[ 2 ][ 2 ], 
                         float arOutput[], 
-                        int anBoard[ 2 ][ 25 ],
+                        TanBoard anBoard,
                         cubeinfo *pci,
                         evalcontext *pec );
 
@@ -597,11 +597,11 @@ isMissedDouble ( float arDouble[],
                  const cubeinfo *pci );
 
 extern unsigned int
-locateMove ( int anBoard[ 2 ][ 25 ], 
+locateMove ( TanBoard anBoard, 
              const int anMove[ 8 ], const movelist *pml );
 
 extern int
-MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ], 
+MoveKey ( TanBoard anBoard, const int anMove[ 8 ], 
           unsigned char auch[ 10 ] );
 
 extern int
@@ -619,12 +619,12 @@ DoubleType ( const int fDoubled, const int fMove, const int fTurn );
 
 extern int
 PerfectCubeful ( bearoffcontext *pbc, 
-                 int anBoard[ 2 ][ 25 ], float arEquity[] );
+                 TanBoard anBoard, float arEquity[] );
 
 extern void
-baseInputs(int anBoard[2][25], float arInput[]);
+baseInputs(TanBoard anBoard, float arInput[]);
 
 extern void 
-CalculateRaceInputs(int anBoard[2][25], float inputs[]);
+CalculateRaceInputs(TanBoard anBoard, float inputs[]);
 
 #endif

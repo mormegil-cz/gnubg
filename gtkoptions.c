@@ -49,9 +49,7 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
-#if USE_MULTITHREAD
 #include "multithread.h"
-#endif
 #include "gtkoptions.h"
 
 typedef struct _optionswidget {
@@ -439,8 +437,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
 	*pwLabelFile, *table, *label;
-    unsigned int cCache;
-    int i, nRandom;
+    unsigned int i, cCache;
+    unsigned long nRandom;
 
     BoardData *bd = BOARD( pwBoard )->board_data;
 
@@ -523,7 +521,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                           FALSE, FALSE, 0 );
 
       gtk_toggle_button_set_active ( 
-               GTK_TOGGLE_BUTTON ( pow->apwVariations[ i ] ), bgvDefault == i );
+               GTK_TOGGLE_BUTTON ( pow->apwVariations[ i ] ), bgvDefault == (bgvariation)i );
 
       gtk_tooltips_set_tip( ptt, pow->apwVariations[ i ],
                             gettext ( aszVariationsTooltips[ i ] ), NULL );
@@ -1613,7 +1611,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   n = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( pow->pwCheat ) );
 
-  if ( n != fCheat ) {
+  if ( (int)n != fCheat ) {
     sprintf( sz, "set cheat enable %s", n ? "on" : "off" );
     UserCommand( sz );
   }

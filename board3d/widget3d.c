@@ -44,25 +44,15 @@ extern GdkGLConfig *getGlConfig(void)
 	return glconfig;
 }
 
-static void Draw(const BoardData* bd)
-{	/* Render board - need multiple passes for shadows */
-	if (bd->rd->showShadows)
-		shadowDisplay(drawBoard, bd, bd->bd3d, bd->rd);
-	else
-		drawBoard(bd, bd->bd3d, bd->rd);
-}
-
-static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, void* data)
+static gboolean configure_event_3d(GtkWidget *widget, GdkEventConfigure *notused, void* data)
 {
 	BoardData *bd = (BoardData*)data;
 	if (display_is_3d(bd->rd))
 	{
-		static int oldHeight = -1, oldWidth = -1;
+		static int curHeight = -1, curWidth = -1;
 		int width = widget->allocation.width, height = widget->allocation.height;
-		if (width != oldWidth || height != oldHeight)
+		if (width != curWidth || height != curHeight)
 		{
-			oldWidth = width, oldHeight = height;
-			{
 			GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 			if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
@@ -72,26 +62,34 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, v
 			SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 
 			RestrictiveRedraw();
+			RerenderBase(bd->bd3d);
 
 			gdk_gl_drawable_gl_end(gldrawable);
-			}
+			
+			curWidth = width, curHeight = height;
 		}
 	}
 	return TRUE;
 }
 
-static void realize(GtkWidget *widget, void* data)
+static void realize_3d(GtkWidget *widget, void* data)
 {
 	BoardData *bd = (BoardData*)data;
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
-
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return;
 
 	InitGL(bd);
-	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 	GetTextures(bd->bd3d, bd->rd);
 	preDraw3d(bd, bd->bd3d, bd->rd);
+	/* Make sure viewing area is correct (in preview) */
+	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
+
+	if (fResetSync)
+	{
+		fResetSync = FALSE;
+		(void)setVSync(fSync);
+	}
 
 	gdk_gl_drawable_gl_end(gldrawable);
 }
@@ -103,29 +101,19 @@ void MakeCurrent3d(const BoardData3d *bd3d)
 		g_print("gdk_gl_drawable_make_current failed!\n");
 }
 
-static gboolean expose_event(GtkWidget *widget, GdkEventExpose *notused, const BoardData* bd)
+static gboolean expose_event_3d(GtkWidget *widget, GdkEventExpose *notused, const BoardData* bd)
 {
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
-
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return TRUE;
 
 	CheckOpenglError();
 
-	if (!bd->rd->quickDraw)
-		Draw(bd);
-	else
-	{	/* Quick drawing mode */
-		if (numRestrictFrames > 0)
-		{
-			RestrictiveRender(bd, bd->bd3d, bd->rd);
-		}
-		else if (numRestrictFrames < 0)
-		{
-			Draw(bd);
-			numRestrictFrames = 0;
-		}
-	}
+#ifndef TEST_HARNESS
+	Draw3d(bd);
+#else
+	TestHarnessDraw(bd);
+#endif
 
 	gdk_gl_drawable_swap_buffers(gldrawable);
 
@@ -134,55 +122,44 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *notused, const B
 	return TRUE;
 }
 
-extern void CreateGLWidget(BoardData* bd)
+extern int CreateGLWidget(BoardData* bd)
 {
+	GtkWidget *p3dWidget;
 	bd->bd3d = (BoardData3d*)malloc(sizeof(BoardData3d));
+	InitBoard3d(bd, bd->bd3d);
 	/* Drawing area for OpenGL */
-	bd->bd3d->drawing_area3d = gtk_drawing_area_new();
+	p3dWidget = bd->bd3d->drawing_area3d = gtk_drawing_area_new();
+
 	/* Set OpenGL-capability to the widget - no list sharing */
-	if (!gtk_widget_set_gl_capability(bd->bd3d->drawing_area3d, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE))
+	if (!gtk_widget_set_gl_capability(p3dWidget, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE))
 	{
 		g_print("Can't create opengl capable widget\n");
-		return;
+		return FALSE;
 	}
 
-	if (bd->bd3d->drawing_area3d == NULL)
+	if (p3dWidget == NULL)
 	{
 		g_print("Can't create opengl drawing widget\n");
-		return;
+		return FALSE;
 	}
-
-	gtk_widget_set_events(bd->bd3d->drawing_area3d, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
+	/* set up events and signals for OpenGL widget */
+	gtk_widget_set_events(p3dWidget, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
 			GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
-	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "button_press_event", G_CALLBACK(button_press_event), bd);
-	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "button_release_event", G_CALLBACK(button_release_event), bd);
-	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "motion_notify_event", G_CALLBACK(motion_notify_event), bd);
-	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "realize", G_CALLBACK(realize), bd);
-	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "configure_event", G_CALLBACK(configure_event), bd);
-	g_signal_connect(G_OBJECT(bd->bd3d->drawing_area3d), "expose_event", G_CALLBACK(expose_event), bd);
+	g_signal_connect(G_OBJECT(p3dWidget), "button_press_event", G_CALLBACK(board_button_press), bd);
+	g_signal_connect(G_OBJECT(p3dWidget), "button_release_event", G_CALLBACK(board_button_release), bd);
+	g_signal_connect(G_OBJECT(p3dWidget), "motion_notify_event", G_CALLBACK(board_motion_notify), bd);
+	g_signal_connect(G_OBJECT(p3dWidget), "realize", G_CALLBACK(realize_3d), bd);
+	g_signal_connect(G_OBJECT(p3dWidget), "configure_event", G_CALLBACK(configure_event_3d), bd);
+	g_signal_connect(G_OBJECT(p3dWidget), "expose_event", G_CALLBACK(expose_event_3d), bd);
+
+	return TRUE;
 }
 
 void InitGTK3d(int *argc, char ***argv)
 {
 	gtk_gl_init_success = gtk_gl_init_check(argc, argv);
-
 	/* Call LoadTextureInfo to get texture details from textures.txt */
-	LoadTextureInfo(TRUE);
-}
-
-void Init3d(void)
-{	/* May be called several times - only init on first call */
-	static int initilized = FALSE;
-	if (initilized)
-		return;
-	initilized = TRUE;
-
-	/* Check for opengl support */
-	if (!getGlConfig())
-		g_print("*** Cannot find OpenGL-capable visual ***\n");
-
-	/* Second call to LoadTextureInfo to show any error messages */
-	LoadTextureInfo(FALSE);
+	LoadTextureInfo();
 }
 
 /* This doesn't seem to work even on windows anymore... */
@@ -299,7 +276,6 @@ static GdkGLContext *glPixmapContext = NULL;
 
 static void SetupPreview(const BoardData* bd, renderdata* prd)
 {
-	ClearTextures(bd->bd3d);
 	GetTextures(bd->bd3d, prd);
 	SetupViewingVolume3d(bd, bd->bd3d, prd);
 	preDraw3d(bd, bd->bd3d, prd);
@@ -317,17 +293,11 @@ extern GdkGLConfig *getglconfigSingle(void)
 	return glconfigSingle;
 }
 
-void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
+void *CreatePreviewBoard3d(const BoardData* bd, GdkPixmap *ppm)
 {
-	GdkGLPixmap *glpixmap;
-	
-	GdkGLDrawable *gldrawable;
-
-	glpixmap = gdk_pixmap_set_gl_capability(ppm, getglconfigSingle(), NULL);
-	gldrawable = GDK_GL_DRAWABLE(glpixmap);
+	GdkGLPixmap *glpixmap = gdk_pixmap_set_gl_capability(ppm, getglconfigSingle(), NULL);
+	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE(glpixmap);
 	glPixmapContext = gdk_gl_context_new (gldrawable, NULL, FALSE, GDK_GL_RGBA_TYPE);
-
-	InitBoard3d(bd, bd->bd3d);
 
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return 0;
@@ -350,7 +320,7 @@ void RenderBoard3d(const BoardData* bd, renderdata* prd, void *glpixmap, unsigne
 
 	SetupPreview(bd, prd);
 
-	Draw(bd);
+	Draw3d(bd);
 
 	glGetIntegerv (GL_VIEWPORT, viewport);
 	glReadPixels(0, 0, viewport[2], viewport[3], GL_RGB, GL_UNSIGNED_BYTE, buf);

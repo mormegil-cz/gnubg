@@ -30,7 +30,7 @@ void setIdMatrix(float m[4][4])
 	copyMatrix(m, id);
 }
 
-void mult_matrix_vec(float mat[4][4], const float src[4], float dst[4])
+void mult_matrix_vec(const float mat[4][4], const float src[4], float dst[4])
 {
     dst[0] = (src[0] * mat[0][0] + src[1] * mat[0][1] +
 		src[2] * mat[0][2] + src[3] * mat[0][3]);
@@ -49,7 +49,7 @@ void mult_matrix_vec(float mat[4][4], const float src[4], float dst[4])
 void matrixmult(float m[4][4], const float b[4][4])
 Causes compiler warnings on gcc/linux
 */
-void matrixmult(float m[4][4], float b[4][4])
+void matrixmult(float m[4][4], const float b[4][4])
 {
 	int i, j, c;
 	float a[4][4] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};

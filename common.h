@@ -18,7 +18,6 @@
 
 #ifndef _COMMON_H_
 #define _COMMON_H_
-#include "config.h"
 #include "math.h"
 
 #if !_GNU_SOURCE && !defined (__attribute__)
@@ -62,5 +61,7 @@ typedef RETSIGTYPE(*psighandler) (int);
 #if defined(HAVE_DECL_SIGNBIT) && !HAVE_DECL_SIGNBIT
 #define signbit(x) ( (x) < 0.0 )
 #endif
+
+#define sqrtf(arg) (float)sqrt((double)(arg))
 
 #endif

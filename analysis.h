@@ -22,7 +22,7 @@
 #ifndef _ANALYSIS_H_
 #define _ANALYSIS_H_
 
-#include "lib/list.h"
+#include "list.h"
 
 typedef enum _lucktype {
     LUCK_VERYBAD, LUCK_BAD, LUCK_NONE, LUCK_GOOD, LUCK_VERYGOOD
@@ -32,12 +32,13 @@ typedef enum _skilltype {
   SKILL_VERYBAD,
   SKILL_BAD,
   SKILL_DOUBTFUL,
-  SKILL_NONE,
+  SKILL_NONE
 } skilltype;
 
 #define badSkill(st)  ((st) < SKILL_NONE)
 
-#define N_SKILLS (SKILL_NONE + 1)
+#define N_SKILLS ((int)SKILL_NONE + 1)
+#define N_LUCKS ((int)LUCK_VERYGOOD + 1)
 
 typedef struct _statcontext {
   int fMoves, fCube, fDice; /* which statistics have been computed? */
@@ -53,7 +54,7 @@ typedef struct _statcontext {
 
   int anMoves[ 2 ][ N_SKILLS ];
 
-  int anLuck[ 2 ][ LUCK_VERYGOOD + 1 ];
+  int anLuck[ 2 ][ N_LUCKS ];
 
   int anCubeMissedDoubleDP[ 2 ];
   int anCubeMissedDoubleTG[ 2 ];
@@ -93,8 +94,9 @@ typedef enum {
   RAT_BEGINNER, RAT_CASUAL_PLAYER, RAT_INTERMEDIATE, RAT_ADVANCED,
   RAT_EXPERT, RAT_WORLD_CLASS, RAT_SUPERNATURAL, RAT_UNDEFINED
 } ratingtype;
+#define N_RATINGS ((int)RAT_UNDEFINED + 1)
 
-extern const char* aszRating [ RAT_UNDEFINED + 1 ];
+extern const char* aszRating [ N_RATINGS ];
 extern const char* aszLuckRating[ 7 ];
 
 extern int afAnalysePlayers[ 2 ];
@@ -108,10 +110,10 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * pl, const
                   const int fIsMatch );
 
 extern void
-updateStatisticsGame ( const list* plGame );
+updateStatisticsGame ( const listOLD* plGame );
 
 extern void
-updateStatisticsMatch ( list* plMatch );
+updateStatisticsMatch ( listOLD* plMatch );
 
 extern int getLuckRating(float rLuck);
 

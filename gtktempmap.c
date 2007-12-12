@@ -93,7 +93,7 @@ TempMapEquities( evalcontext *pec, matchstate *pms,
 
   int i, j;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   int aaan[ 6 ][ 6 ][ 8 ];
   float aar[ 6 ][ 6 ];
   cubeinfo ci;

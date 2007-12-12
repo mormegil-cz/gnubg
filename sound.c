@@ -31,20 +31,24 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef WIN32
+
+/* for PlaySound */
+#include "windows.h"
+#include <mmsystem.h>
+
+#else
+
 #if HAVE_ESD
 #include <esd.h>
 #endif
 
-#ifdef WIN32
-/* for PlaySound */
-#include "windows.h"
-#include <mmsystem.h>
 #endif
 
-#include "eval.h"
 #include "sound.h"
+#include "util.h"
 
-char *sound_description[ NUM_SOUNDS ] = {
+const char *sound_description[ NUM_SOUNDS ] = {
   N_("Starting GNU Backgammon"),
   N_("Agree"),
   N_("Doubling"),
@@ -64,7 +68,7 @@ char *sound_description[ NUM_SOUNDS ] = {
   N_("Analysis is finished")
 };
 
-char *sound_command[ NUM_SOUNDS ] = {
+const char *sound_command[ NUM_SOUNDS ] = {
   "start",
   "agree",
   "double",
@@ -87,26 +91,9 @@ char *sound_command[ NUM_SOUNDS ] = {
 int fSound = TRUE;
 static char *sound_cmd = NULL;
 
-#ifdef WIN32
-void PrintWinError()
-{
-	LPVOID lpMsgBuf;
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
-		NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf, 0, NULL);
-
-	g_print("Windows error: ");
-	g_print((LPCTSTR)lpMsgBuf);
-
-	LocalFree(lpMsgBuf);
-}
-#endif
-
 void
 playSoundFile (char *file)
 {
-    char *command;
     GError *error = NULL;
     if (!g_file_test(file, G_FILE_TEST_EXISTS))
     {
@@ -115,20 +102,18 @@ playSoundFile (char *file)
     }
 
     if (sound_cmd && *sound_cmd)
-      {
-	  command = g_strdup_printf ("%s %s", sound_cmd, file);
-	  if (!g_spawn_command_line_async (command, &error))
-	    {
-		outputf (_("sound command (%s) could not be launched: %s\n"),
-			    command, error->message);
-		g_error_free (error);
-	    }
-          return;
-      }
+	{
+		char *commandString;
 
-#if HAVE_ESD
-    esd_play_file (NULL, file, 1);
-#endif
+		commandString = g_strdup_printf ("%s %s", sound_cmd, file);
+		if (!g_spawn_command_line_async (commandString, &error))
+		{
+			outputf (_("sound command (%s) could not be launched: %s\n"),
+				commandString, error->message);
+			g_error_free (error);
+		}
+		return;
+	}
 
 #ifdef WIN32
     SetLastError (0);
@@ -139,7 +124,7 @@ playSoundFile (char *file)
 	  static int soundDeviceAttached = -1;
 	  if (soundDeviceAttached == -1)
 	    {			/* Check for sound card */
-		soundDeviceAttached = waveOutGetNumDevs ();
+		soundDeviceAttached = (int)waveOutGetNumDevs ();
 	    }
 	  if (!soundDeviceAttached)
 	    {			/* No sound card found - disable sound */
@@ -150,12 +135,18 @@ playSoundFile (char *file)
 	  /* Check for errors */
 	  if (GetLastError ())
 	    {
-		PrintWinError ();
+		PrintSystemError("Playing sound");
 		SetLastError (0);
 		return;
 	    }
 	  Sleep (1);		/* Wait (1ms) for current sound to finish */
       }
+#else
+
+#if HAVE_ESD
+    esd_play_file (NULL, file, 1);
+#endif
+
 #endif
 }
 
@@ -174,23 +165,22 @@ extern void playSound ( const gnubgsound gs )
 }
 
 
-extern void SoundWait( void ) {
-
-    if (!fSound)
-        return;
+extern void SoundWait( void )
+{
+	if (!fSound)
+		return;
 #ifdef WIN32
-    	/* Wait 1/10 of a second to make sure sound has started */
-    	Sleep(100);
-      while (!PlaySound(NULL, NULL, SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT))
-        Sleep(1);	/* Wait (1ms) for previous sound to finish */
-      return;
+	/* Wait 1/10 of a second to make sure sound has started */
+	Sleep(100);
+	while (!PlaySound(NULL, NULL, SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT))
+		Sleep(1);	/* Wait (1ms) for previous sound to finish */
+	return;
 #endif
-
 }
 
 char *sound_file[ NUM_SOUNDS ] = {0};
 
-extern char *GetDefaultSoundFile(int sound)
+extern char *GetDefaultSoundFile(gnubgsound sound)
 {
   static char aszDefaultSound[ NUM_SOUNDS ][ 80 ] = {
   /* start and exit */
@@ -253,15 +243,15 @@ extern void SetSoundFile(gnubgsound sound, const char *file)
 	sound_file[sound] = g_strdup(new_file);
 }
 
-extern char *sound_get_command(void)
+extern const char *sound_get_command(void)
 {
 	return (sound_cmd ? sound_cmd : "");
-};
+}
 
 extern char *sound_set_command(const char *sz)
 {
 	g_free(sound_cmd);
 	sound_cmd = g_strdup(sz ? sz : "");
 	return sound_cmd;
-};
+}
 

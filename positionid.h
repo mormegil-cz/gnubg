@@ -22,8 +22,10 @@
 #ifndef _POSITIONID_H_
 #define _POSITIONID_H_
 
-extern void PositionKey( int anBoard[ 2 ][ 25 ], unsigned char auchKey[ 10 ] );
-extern char *PositionID( int anBoard[ 2 ][ 25 ] );
+#include "util.h"
+
+extern void PositionKey( const TanBoard anBoard, unsigned char auchKey[ 10 ] );
+extern char *PositionID( const TanBoard anBoard );
 extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] );
 
 extern 
@@ -31,31 +33,28 @@ unsigned int PositionBearoff( const int anBoard[],
                               int nPoints,
                               int nChequers );
 
-extern void PositionFromKey(int anBoard[ 2 ][ 25 ], const unsigned char* puch);
+extern void PositionFromKey(TanBoard anBoard, const unsigned char* puch);
 
 /* Return 1 for success, 0 for invalid id */
-extern int PositionFromID( int anBoard[ 2 ][ 25 ], const char* szID );
+extern int PositionFromID( TanBoard anBoard, const char* szID );
 
 extern void 
 PositionFromBearoff(int anBoard[], unsigned int usID,
 		    int nPoints, int nChequers );
 
-extern unsigned short PositionIndex(int g, int anBoard[6]);
+extern unsigned short PositionIndex(int g, const int anBoard[6]);
 
-extern int 
-EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
-extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] );
+extern int EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
+extern int EqualBoards( const TanBoard anBoard0, const TanBoard anBoard1 );
 
 /* Return 1 for valid position, 0 for not */
-extern int CheckPosition( int anBoard[ 2 ][ 25 ] );
+extern int CheckPosition( const TanBoard anBoard );
 
-extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] );
+extern void ClosestLegalPosition( TanBoard anBoard );
 
-extern int
-Combination ( const int n, const int r );
+extern unsigned int Combination ( const int n, const int r );
 
-extern int
-Base64( const char ch );
+extern unsigned char Base64( const unsigned char ch );
 
 #endif
 

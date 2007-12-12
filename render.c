@@ -1528,7 +1528,7 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
                 g_free(file);
 		return;
 	}
-    free(file);
+    g_free(file);
 
     if( FT_Set_Pixel_Sizes( ftf, 0, prd->nSize * 5 / 2 ) )
 	{
@@ -2495,7 +2495,7 @@ static void DrawChequers( renderdata *prd, unsigned char *puch, int nStride,
 }
 
 extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
-			   renderimages *pri, int anBoard[ 2 ][ 25 ],
+			   renderimages *pri, TanBoard anBoard,
 			   int *anOff, int anDice[ 2 ],
 			   int anDicePosition[ 2 ][ 2 ],
 			   int fDiceColour, int anCubePosition[ 2 ],

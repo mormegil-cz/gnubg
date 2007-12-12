@@ -22,8 +22,6 @@
 #ifndef _MATCHID_H_
 #define _MATCHID_H_
 
-//#include "backgammon.h"
-
 extern int
 LogCube ( const int n );
 
@@ -38,7 +36,7 @@ MatchID ( const unsigned int anDice[ 2 ],
           const int nMatchTo,
           const int anScore[ 2 ],
           const int nCube,
-          const int gs );
+          const gamestate gs );
 
 extern char*
 MatchIDFromKey( unsigned char auchKey[ 8 ] );

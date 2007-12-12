@@ -97,7 +97,7 @@ int BuildFont3d(BoardData3d* bd3d)
 		g_print("Failed to create font %s\n", file);
 		return 0;
 	}
-	free(file);
+	g_free(file);
 
 	free(bd3d->cubeFont);
 	bd3d->cubeFont = (OGLFont*)malloc(sizeof(OGLFont));
@@ -107,7 +107,7 @@ int BuildFont3d(BoardData3d* bd3d)
 		g_print("Failed to create font %s\n", file);
 		return 0;
 	}
-	free(file);
+	g_free(file);
 
 	return !FT_Done_FreeType(ftLib);
 }

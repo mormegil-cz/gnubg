@@ -18,43 +18,56 @@
  *
  * $Id$
  */
-char *aszRNG[1]; 
-char *aszSkillType[ 1 ]; 
-int exsExport;
-int ap;
+
 #include "config.h"
 #include "util.h"
 #if WIN32
 #include <windows.h>
+#include <stdlib.h>
 #include <glib.h>
-#include <glib/gstdio.h>
-extern char * getInstallDir( void ) {
 
-  char buf[_MAX_PATH];
-  char *p;
+char *aszRNG[1]; 
+char *aszSkillType[ 1 ]; 
+int exsExport;
+int ap;
+
+extern char * getInstallDir( void )
+{
   static char *ret = NULL;
-  if (ret)
-	  return (ret);
-  GetModuleFileName(NULL, buf, sizeof(buf));
-  p = MAX(strrchr(buf, '/'), strrchr(buf, '\\'));
-  if (p)
-	  *p = '\0';
-  ret = g_strdup(buf);
+  if (!ret)
+  {
+	char buf[_MAX_PATH];
+	if (GetModuleFileName(NULL, buf, sizeof(buf)) != 0)
+	{
+		char *p1 = strrchr(buf, '/'), *p2 = strrchr(buf, '\\');
+		int pos1 = (p1 != NULL) ? p1 - buf : -1;
+		int pos2 = (p2 != NULL) ? p2 - buf : -1;
+		int pos = MAX(pos1, pos2);
+		if (pos > 0)
+			buf[pos] = '\0';
+		ret = g_strdup(buf);
+	}
+  }
   return ret;
 }
 
+extern void PrintSystemError(const char* message)
+{
+	LPVOID lpMsgBuf;
+	if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
+		NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR) &lpMsgBuf, 0, NULL) != 0)
+	{
+		g_print("** Windows error while %s **\n", message);
+		g_print(": %s", (LPCTSTR)lpMsgBuf);
+
+		LocalFree(lpMsgBuf);
+	}
+}
+#else
+extern void PrintSystemError(const char* message)
+{
+	printf("Unknown system error while %s!\n", message);
+}
 #endif
-
-extern void MT_Lock(long *lock)
-{
-}
-
-extern void MT_Unlock(long *lock)
-{
-}
-
-extern int MT_GetThreadID(void)
-{
-  return (0);
-}
-

@@ -25,8 +25,6 @@
 #ifndef __GTK_MULTIVIEW_H__
 #define __GTK_MULTIVIEW_H__
 
-#include <gtk/gtk.h>
-
 #define GTK_TYPE_MULTIVIEW			(gtk_multiview_get_type ())
 #define GTK_MULTIVIEW(obj)			(GTK_CHECK_CAST ((obj), GTK_TYPE_MULTIVIEW, GtkMultiview))
 #define GTK_MULTIVIEW_CLASS(klass)		(GTK_CHECK_CLASS_CAST ((klass), GTK_TYPE_MULTIVIEW, GtkMultiviewClass))

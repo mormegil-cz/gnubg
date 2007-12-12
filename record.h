@@ -23,16 +23,17 @@
 #define RECORD_H
 
 typedef enum _expaverage {
-    EXPAVG_TOTAL, EXPAVG_20, EXPAVG_100, EXPAVG_500, NUM_AVG
+    EXPAVG_TOTAL, EXPAVG_20, EXPAVG_100, EXPAVG_500
 } expaverage;
+#define NUM_AVG ((int)EXPAVG_500 + 1)
 
 typedef struct _playerrecord {
     char szName[ MAX_NAME_LEN ];
     int cGames;
-    float arErrorChequerplay[ NUM_AVG ];
-    float arErrorCube[ NUM_AVG ];
-    float arErrorCombined[ NUM_AVG ];
-    float arLuck[ NUM_AVG ];
+    double arErrorChequerplay[ NUM_AVG ];
+    double arErrorCube[ NUM_AVG ];
+    double arErrorCombined[ NUM_AVG ];
+    double arLuck[ NUM_AVG ];
 } playerrecord;
 
 extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr );

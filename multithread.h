@@ -13,8 +13,8 @@
  */
 
 #if USE_MULTITHREAD
-#include <glib.h>
 #include "backgammon.h"
+#include <glib.h>
 
 #ifdef WIN32
 #include <windows.h>
@@ -34,13 +34,14 @@ typedef struct _AnalyseMoveTask
 {
 	Task task;
 	moverecord *pmr;
-	list *plGame;
+	listOLD *plGame;
 	statcontext *psc;
 	matchstate ms;
 } AnalyseMoveTask;
 
 extern unsigned int MT_GetNumThreads(void);
 extern void MT_InitThreads(void);
+extern void MT_StartThreads(void);
 extern void MT_Close(void);
 extern void MT_AddTask(Task *pt, gboolean lock);
 extern int MT_WaitForTasks(void (*pCallback)(), int callbackTime);
@@ -48,7 +49,6 @@ extern void MT_SetNumThreads(unsigned int num);
 extern int MT_Enabled(void);
 extern int MT_GetThreadID(void);
 extern void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked);
-extern void MT_Exclusive(void);
 extern void MT_Release(void);
 extern int MT_GetDoneTasks(void);
 extern void MT_SyncInit(void);

@@ -29,5 +29,5 @@ void makeInverseRotateMatrixX(float m[4][4], float degRot);
 void makeInverseRotateMatrixY(float m[4][4], float degRot);
 void makeInverseRotateMatrixZ(float m[4][4], float degRot);
 
-void mult_matrix_vec(float mat[4][4], const float src[4], float dst[4]);
-void matrixmult(float m[4][4], float b[4][4]);
+void mult_matrix_vec(const float mat[4][4], const float src[4], float dst[4]);
+void matrixmult(float m[4][4], const float b[4][4]);

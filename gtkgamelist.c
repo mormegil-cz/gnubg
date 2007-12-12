@@ -39,7 +39,7 @@
 #endif
 
 static GtkWidget *pwGameList;
-static GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], *psLucky[LUCK_VERYGOOD + 1];
+static GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], *psLucky[N_LUCKS];
 
 static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
 {
@@ -68,8 +68,8 @@ static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev
 #endif
     gamelistrow *pglr;
     moverecord *pmr, *pmrPrev = NULL;
-    list *pl;
-    
+    listOLD *pl;
+
     if( x < 1 || x > 2 )
     	return;
 
@@ -115,7 +115,7 @@ static void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev
     	return;
     
     plLastMove = pl;
-    
+
     CalculateBoard();
 
     if ( pmr && pmr->mt == MOVE_NORMAL ) {

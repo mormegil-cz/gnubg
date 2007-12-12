@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-int ListCreate( list *pl ) {
+int ListCreate( listOLD *pl ) {
     
     pl->plPrev = pl->plNext = pl;
     pl->p = NULL;
@@ -31,11 +31,11 @@ int ListCreate( list *pl ) {
     return 0;
 }
 
-list *ListInsert( list *pl, void *p ) {
+listOLD *ListInsert( listOLD *pl, void *p ) {
 
-    list *plNew;
+    listOLD *plNew;
 
-    if ( (plNew = (list*)malloc( sizeof( *plNew ))) == NULL )
+    if ( (plNew = (listOLD*)malloc( sizeof( *plNew ))) == NULL )
 		return NULL;
 
     plNew->p = p;
@@ -49,7 +49,7 @@ list *ListInsert( list *pl, void *p ) {
     return plNew;
 }
 
-void ListDelete( list *pl ) {
+void ListDelete( listOLD *pl ) {
 
     pl->plPrev->plNext = pl->plNext;
     pl->plNext->plPrev = pl->plPrev;
@@ -57,7 +57,7 @@ void ListDelete( list *pl ) {
     free( pl );
 }
 
-void ListDeleteAll( const list *pl ) {
+void ListDeleteAll( const listOLD *pl ) {
 
 	while( pl->plNext->p )
 	{

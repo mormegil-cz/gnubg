@@ -21,16 +21,16 @@
  */
 #include "config.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <glib.h>
 #include "backgammon.h"
+#include <glib.h>
 #include <glib/gi18n.h>
 #include "openurl.h"
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN 1
 #include "windows.h"
 #include "shellapi.h"
+#else
+#include <string.h>
 #endif /* WIN32 */
 static gchar *web_browser = NULL;
 
@@ -43,7 +43,7 @@ extern const gchar * get_web_browser (void)
 #endif
 	if (web_browser && *web_browser)
 		return web_browser;
-	if (!(pch = g_getenv ("BROWSER")))
+	if ((pch = g_getenv ("BROWSER")) == NULL)
 	{
 #ifdef __APPLE__
 		pch = "open";
@@ -60,12 +60,12 @@ extern char * set_web_browser (const char *sz)
   g_free (web_browser);
   web_browser = g_strdup (sz ? sz : "");
   return web_browser;
-};
+}
 
 extern void OpenURL(const char *szURL)
 {
 	const gchar *browser = get_web_browser();
-	gchar *command;
+	gchar *commandString;
 	GError *error = NULL;
 	if (!(browser) || !(*browser)) {
 #ifdef WIN32
@@ -82,10 +82,10 @@ extern void OpenURL(const char *szURL)
 		return;
 #endif
 	}
-	command = g_strdup_printf("'%s' '%s'", browser, szURL);
-	if (!g_spawn_command_line_async(command, &error)) {
+	commandString = g_strdup_printf("'%s' '%s'", browser, szURL);
+	if (!g_spawn_command_line_async(commandString, &error)) {
 		outputerrf(_("Browser couldn't open file (%s): %s\n"),
-			   command, error->message);
+			   commandString, error->message);
 		g_error_free(error);
 	}
 	return;

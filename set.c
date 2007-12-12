@@ -24,6 +24,7 @@
 #include <glib.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #if HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -38,7 +39,6 @@
 #endif /* HAVE_SYS_SOCKET_H */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #else /* #ifndef WIN32 */
@@ -80,9 +80,7 @@
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
-#if USE_MULTITHREAD
 #include "multithread.h"
-#endif
 
 #if WIN32
 /* Needed for thread priority defines */
@@ -601,7 +599,7 @@ extern void CommandSetAutoRoll( char *sz ) {
                _("Will not automatically roll the dice.") );
 }
 
-static int CorrectNumberOfChequers(int anBoard[2][25], int numCheq)
+static int CorrectNumberOfChequers(TanBoard anBoard, int numCheq)
 {    /* Check players don't have too many chequers (esp. for hypergammon) */
 	int ac[2], i;
 	ac[0] = ac[1] = 0;
@@ -620,7 +618,7 @@ static int CorrectNumberOfChequers(int anBoard[2][25], int numCheq)
 
 extern void CommandSetBoard( char *sz ) {
 
-    int an[ 2 ][ 25 ];
+    TanBoard an;
     moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING ) {
@@ -715,6 +713,27 @@ extern void CommandSetThreads( char *sz )
 	outputf( _("The number of threads has been set to %d.\n"), n );
 }
 #endif
+
+extern void CommandSetVsync3d( char * sz )
+{
+#if USE_BOARD3D
+	SetToggle( "vsync", &fSync, sz, _("Set vsync on."), _("Set vsync off.") );
+	if (setVSync(fSync) == FALSE)
+	{
+		if (GTK_WIDGET_REALIZED(pwMain))
+		{
+			fSync = -1;
+			outputl( _("Unable to set vsync.") );
+			return;
+		}
+		else
+			fResetSync = TRUE;	/* Try again once main window is created */
+	}
+	fSync = (fSync != 0) ? 1 : 0;	/* Set to 1 or 0, (-1 == not set) */
+#else
+	outputl("This function is for the 3d board only");
+#endif
+}
 
 extern void CommandSetBrowser ( char *sz ) {
 

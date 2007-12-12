@@ -18,7 +18,6 @@
 
 #include "config.h"
 #if HAVE_CAIRO
-#include <math.h>
 #include <cairo.h>
 #include <pango/pangocairo.h>
 #include <glib.h>
@@ -27,7 +26,7 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "simpleboard.h"
-
+#include <glib.h>
 
 #define SIMPLE_BOARD_SIZE 400.
 
@@ -48,6 +47,7 @@ static gint checkers_from_bgv(bgvariation bgv)
 		return 3;
 	default:
 		g_assert_not_reached();
+		return 0;
 	}
 }
 
@@ -228,6 +228,7 @@ static void draw_cube(SimpleBoard * board)
 			y = 252;
 			break;
 		default:
+			y = 0;
 			g_assert_not_reached();
 		}
 	}
@@ -261,78 +262,78 @@ static void draw_dice(SimpleBoard * board)
 		switch (dice[i]) {
 		case 1:
 			cairo_move_to(cr, x + 9, y + 8);
-			cairo_arc(cr, x + 8, y + 8, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 8, y + 8, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			break;
 		case 2:
 			cairo_move_to(cr, x + 5, y + 4);
-			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 12);
-			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			break;
 		case 3:
 			cairo_move_to(cr, x + 5, y + 4);
-			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 9, y + 8);
-			cairo_arc(cr, x + 8, y + 8, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 8, y + 8, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 12);
 			cairo_close_path(cr);
-			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			break;
 		case 4:
 			cairo_move_to(cr, x + 5, y + 4);
-			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 12);
-			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 4);
-			cairo_arc(cr, x + 12, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 5, y + 12);
-			cairo_arc(cr, x + 4, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			break;
 		case 5:
 			cairo_move_to(cr, x + 5, y + 4);
-			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 12);
-			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 9, y + 8);
-			cairo_arc(cr, x + 8, y + 8, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 8, y + 8, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 4);
-			cairo_arc(cr, x + 12, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 5, y + 12);
-			cairo_arc(cr, x + 4, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			break;
 		case 6:
 			cairo_move_to(cr, x + 5, y + 4);
-			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 5, y + 8);
-			cairo_arc(cr, x + 4, y + 8, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 8, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 5, y + 12);
-			cairo_arc(cr, x + 4, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 4, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 4);
-			cairo_arc(cr, x + 12, y + 4, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 4, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 8);
-			cairo_arc(cr, x + 12, y + 8, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 8, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			cairo_move_to(cr, x + 13, y + 12);
-			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * M_PI);
+			cairo_arc(cr, x + 12, y + 12, 1, 0, 2 * G_PI);
 			cairo_close_path(cr);
 			break;
 		default:
@@ -366,7 +367,7 @@ static void draw_checkers_on_xy(cairo_t * cr, gint x, gint y,
 	for (p = 0; number > 0 && p < max; number--, p++) {
 		y += 20 * direction;
 		cairo_move_to(cr, x + 9, y);
-		cairo_arc(cr, x, y, 9, 0, 2 * M_PI);
+		cairo_arc(cr, x, y, 9, 0, 2 * G_PI);
 		cairo_close_path(cr);
 		fill_and_stroke(cr, color);
 	}

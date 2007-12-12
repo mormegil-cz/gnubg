@@ -49,6 +49,7 @@ void initOccluder(Occluder* pOcc)
 	pOcc->handle->edges = g_array_new(FALSE, FALSE, sizeof(winged_edge));
 	pOcc->handle->points = g_array_new(FALSE, FALSE, sizeof(position));
 
+	pOcc->shadow_list = glGenLists(1);
 	pOcc->rotator = 0;
 	pOcc->show = 1;
 }
@@ -62,6 +63,7 @@ void freeOccluder(Occluder* pOcc)
 		g_array_free(pOcc->handle->points, TRUE);
 		free(pOcc->handle);
 		pOcc->handle = 0;
+		glDeleteLists(pOcc->shadow_list, 1);
 	}
 }
 
@@ -70,6 +72,7 @@ void copyOccluder(const Occluder* fromOcc, Occluder* toOcc)
 	toOcc->handle = fromOcc->handle;
 	toOcc->show = fromOcc->show;
 	toOcc->rotator = fromOcc->rotator;
+	toOcc->shadow_list = glGenLists(1);
 }
 
 void moveToOcc(const Occluder* pOcc)
@@ -152,7 +155,7 @@ static unsigned int AddPlane(GArray *planes, const position* a, const position* 
 }
 
 /* For testing */
-#if 0
+#ifdef TEST_HARNESS
 void GenerateShadowEdges(const Occluder* pOcc)
 {
 	unsigned int i, numEdges = pOcc->handle->edges->len;

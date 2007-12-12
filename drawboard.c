@@ -53,12 +53,13 @@ int fClockwise = FALSE; /* Player 1 moves clockwise */
  *
  */
 
-static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
+static char *DrawBoardStd( char *sz, TanBoard anBoard, int fRoll,
                            char *asz[], char *szMatchID, 
                            int nChequers ) {
 
     char *pch = sz, *pchIn;
-    int x, y, an[ 2 ][ 25 ], cOffO = nChequers, cOffX = nChequers;
+    int x, y, cOffO = nChequers, cOffX = nChequers;
+	TanBoard an;
     static char achX[ 17 ] = "     X6789ABCDEF",
         achO[ 17 ] = "     O6789ABCDEF";
 
@@ -287,12 +288,13 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
  *
  */
 
-static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
+static char *DrawBoardCls( char *sz, TanBoard anBoard, int fRoll,
                            char *asz[], char *szMatchID,
                            int nChequers) {
 
     char *pch = sz, *pchIn;
-    int x, y, an[ 2 ][ 25 ], cOffO = nChequers, cOffX = nChequers;
+    int x, y, cOffO = nChequers, cOffX = nChequers;
+	TanBoard an;
     static char achX[ 17 ] = "     X6789ABCDEF",
         achO[ 17 ] = "     O6789ABCDEF";
 
@@ -503,7 +505,7 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     return sz;
 }
 
-extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
+extern char *DrawBoard( char *sz, TanBoard anBoard, int fRoll,
                         char *asz[], char *szMatchID, int nChequers ) {
     if( fClockwise == FALSE ) 
         return ( DrawBoardStd( sz, anBoard, fRoll, asz, 
@@ -545,7 +547,7 @@ static char *FormatPointPlain( char *pch, int n ) {
     return pch;
 }
 
-extern char *FormatMovePlain( char *sz, int anBoard[ 2 ][ 25 ],
+extern char *FormatMovePlain( char *sz, TanBoard anBoard,
                               int anMove[ 8 ] ) {
 
     char *pch = sz;
@@ -595,7 +597,7 @@ extern void CanonicalMoveOrder( int an[] ) {
     qsort( an, i, sizeof( int ) << 1, CompareMoves );
 }
 
-extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
+extern char *FormatMove( char *sz, const TanBoard anBoard, int anMove[ 8 ] ) {
 
     char *pch = sz;
     int aanMove[ 4 ][ 4 ], *pnSource[ 4 ], *pnDest[ 4 ], i, j;
@@ -923,7 +925,7 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
  *
  */
 
-extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
+extern char *FIBSBoard( char *pch, TanBoard anBoard, int fRoll,
 			char *szPlayer, char *szOpp, int nMatchTo,
 			int nScore, int nOpponent, int nDice0, int nDice1,
 			int nCube, int fCubeOwner, int fDoubled, int fTurn,
@@ -971,7 +973,7 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
     return pch;
 }
 
-extern int ParseFIBSBoard( char *pch, int anBoard[ 2 ][ 25 ],
+extern int ParseFIBSBoard( char *pch, TanBoard anBoard,
 			   char *szPlayer, char *szOpp, int *pnMatchTo,
 			   int *pnScore, int *pnScoreOpponent,
 			   int anDice[ 2 ], int *pnCube, int *pfCubeOwner,

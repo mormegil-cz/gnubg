@@ -1,3 +1,8 @@
+Wed Dec 12 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* movelistctrl: Fix spacing in German (reported by Thomas Steiner)
+	* bearoff.c: Fix multithreaded disk bearoff access (reported by Hugh Sconyers)
+	* list.h + others: list type renamed to listOLD (ideally replace with glist in future)
+
 Wed Dec 12 15:40:08 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, gnubg.6: manual now maintained in doc

@@ -93,9 +93,9 @@ typedef struct _exportsetup {
 
 extern exportsetup exsExport;
 
-extern int getGameNumber(const list * plGame);
+extern int getGameNumber(const listOLD * plGame);
 
-extern int getMoveNumber(const list * plGame, const void *p);
+extern int getMoveNumber(const listOLD * plGame, const void *p);
 
 extern char *HTMLFilename(const char *szBase, const int iGame);
 

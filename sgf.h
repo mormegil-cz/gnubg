@@ -27,7 +27,7 @@
 
 typedef struct _property {
 	char ach[2];		/* 2 character tag; ach[ 1 ] = 0 for 1 character tags */
-	list *pl;		/* Values */
+	listOLD *pl;		/* Values */
 } property;
 
 extern void (*SGFErrorHandler) (char *szMessage, int fParseError);
@@ -42,7 +42,7 @@ extern void (*SGFErrorHandler) (char *szMessage, int fParseError);
 
    If there are any errors in the file, SGFParse calls SGFErrorHandler
    (if set), or complains to stderr (otherwise). */
-extern list *SGFParse(FILE * pf);
+extern listOLD *SGFParse(FILE * pf);
 
 /* The following properties are defined for GNU Backgammon SGF files:
 

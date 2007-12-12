@@ -72,10 +72,10 @@ static unsigned char *TTachCube, *TTachCubeFaces, *TTachDice[2], *TTachPip[2];
 
 static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use );
+static void InitialPos(BoardData *bd);
 
 extern GtkWidget *board_new(renderdata* prd)
 {
-
 	/* Create widget */
 	GtkWidget* board = GTK_WIDGET( gtk_type_new( board_get_type() ) );
 	/* Initialize board data members */
@@ -93,15 +93,7 @@ extern GtkWidget *board_new(renderdata* prd)
 	bd->x_dice[ 0 ] = bd->y_dice[ 0 ] = 0;
 	bd->x_dice[ 1 ] = bd->y_dice[ 1 ] = 0;
 
-	/* setup initial board */
-	board_set(BOARD(board), "board:::1:0:0:"
-              "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
-              "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0", 0, TRUE );
-
-#if USE_BOARD3D
-	if (gtk_gl_init_success)
-		InitBoard3d(bd, bd->bd3d);
-#endif
+	InitialPos(bd);
 
 	return board;
 }
@@ -111,17 +103,13 @@ static void InitialPos(BoardData *bd)
 	int ip[] = {0,-2,0,0,0,0,5,0,3,0,0,0,-5,5,0,0,0,-3,0,-5,0,0,0,0,2,0,0,0};
 	memcpy(bd->points, ip, sizeof(bd->points));
 #if USE_BOARD3D
-	if (gtk_gl_init_success)
+	if (gtk_gl_init_success && ShadowsInitilised(bd->bd3d))
 		updatePieceOccPos(bd, bd->bd3d);
 #endif
 }
 
 extern void InitBoardPreview(BoardData *bd)
 {
-#if USE_BOARD3D
-	if (gtk_gl_init_success)
-		InitBoard3d(bd, bd->bd3d);
-#endif
 	/* Show set position */
 	InitialPos(bd);
 	bd->cube_use = 1;
@@ -148,7 +136,7 @@ extern void board_beep( BoardData *bd )
 	gdk_beep();
 }
 
-extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] )
+extern void read_board( BoardData *bd, TanBoard points )
 {
 
     gint i;
@@ -166,12 +154,12 @@ extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] )
 
 
 static void write_points ( gint points[ 28 ], const gint turn, const gint
-		nchequers, int anBoard[ 2 ][ 25 ] )
+		nchequers, TanBoard anBoard )
 {
 
   gint i;
   gint anOff[ 2 ];
-  int an[ 2 ][ 25 ];
+  TanBoard an;
 
   memcpy( an, anBoard, sizeof an );
 
@@ -206,7 +194,7 @@ static void write_points ( gint points[ 28 ], const gint turn, const gint
 
 }
 
-extern void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] )
+extern void write_board ( BoardData *bd, TanBoard anBoard )
 {
 
   write_points( bd->points, bd->turn,  bd->nchequers, anBoard );
@@ -258,7 +246,8 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y, int
 		cx, int cy )
 {
     
-    int anBoard[ 2 ][ 25 ], anOff[ 2 ], anDice[ 2 ], anDicePosition[ 2 ][ 2 ],
+    TanBoard anBoard;
+	int anOff[ 2 ], anDice[ 2 ], anDicePosition[ 2 ][ 2 ],
 	anCubePosition[ 2 ], anArrowPosition[ 2 ], nOrient;
     int anResignPosition[ 2 ], nResignOrientation;
 
@@ -289,7 +278,6 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y, int
 static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
 		BoardData *bd )
 {
-    
     int x, y, cx, cy;
     unsigned char *puch;
 
@@ -527,13 +515,13 @@ static void update_match_id( BoardData *bd )
 }
 
 
-extern void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] )
+extern void update_position_id( BoardData *bd, TanBoard points )
 {
 
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
-extern char * ReturnHits( int anBoard[ 2 ][ 25 ] )
+extern char * ReturnHits( TanBoard anBoard )
 {
 
   int aiHit[ 15 ];
@@ -600,9 +588,8 @@ extern char * ReturnHits( int anBoard[ 2 ][ 25 ] )
 
 }
 
-extern void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] )
+extern void update_pipcount ( BoardData *bd, TanBoard points )
 {
-
   unsigned int anPip[ 2 ];
   char *pc;
   int f;
@@ -658,10 +645,9 @@ extern void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] )
     gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel0 ), _("Pips: ") );
     gtk_label_set_text ( GTK_LABEL ( bd->pipcountlabel1 ), _("Pips: ") );
   }
-   
+
   UpdateTheoryData(bd, TT_PIPCOUNT | TT_EPC | TT_KLEINCOUNT, points);
 }
-
 
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
@@ -669,7 +655,7 @@ int update_move(BoardData *bd)
 {
     char *move = _("Illegal move"), move_buf[ 40 ];
     unsigned int i;
-	int points[ 2 ][ 25 ];
+	TanBoard points;
     guchar key[ 10 ];
     int fIncomplete = TRUE, fIllegal = TRUE;
     
@@ -704,7 +690,7 @@ int update_move(BoardData *bd)
         UpdateTheoryData(bd, TT_RETURNHITS, ms.anBoard);
 
         if ( bd->valid_move ) {
-          int anBoard[ 2 ][ 25 ];
+          TanBoard anBoard;
           char *pch;
           PositionFromKey( anBoard, bd->valid_move->auch );
           if ( ( pch = ReturnHits( anBoard ) ) ) {
@@ -732,7 +718,7 @@ extern void Confirm( BoardData *bd )
 {
 
     char move[ 40 ];
-    int points[ 2 ][ 25 ];
+    TanBoard points;
     
     read_board( bd, points );
 
@@ -1497,7 +1483,7 @@ static int board_chequer_number( GtkWidget *board, BoardData *bd, int point,
 
 static void updateBoard(GtkWidget *board, BoardData* bd)
 {
-	int points[2][25];
+	TanBoard points;
 	read_board(bd, points);
 	update_position_id(bd, points);
 	update_pipcount(bd, points);
@@ -1554,7 +1540,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 		}
 		else /* if (n == POINT_UNUSED0 || n == POINT_UNUSED1) */
 		{	/* click on unused bearoff tray in edit mode -- reset to starting position */
-			int anBoard[ 2 ][ 25 ];
+			TanBoard anBoard;
 			InitBoard( anBoard, ms.bgv );
 			write_board( bd, anBoard );
 		}
@@ -1669,7 +1655,7 @@ static void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y,
 	updateBoard(board, bd);
 }
 
-static int ForcedMove ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] )
+static int ForcedMove ( TanBoard anBoard, unsigned int anDice[ 2 ] )
 {
 
   movelist ml;
@@ -1687,7 +1673,7 @@ static int ForcedMove ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] )
 
 }
 
-static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], unsigned int anDice[ 2 ] )
+static int GreadyBearoff ( TanBoard anBoard, unsigned int anDice[ 2 ] )
 {
 
   movelist ml;
@@ -1731,7 +1717,7 @@ static void RestrictiveDrawTargetHelp(BoardData* bd)
 }
 #endif
 
-extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] )
+extern int UpdateMove( BoardData *bd, TanBoard anBoard )
 {
 
   int old_points[ 28 ];
@@ -1806,7 +1792,7 @@ static void ShowBoardPopup(GdkEventButton* event)
 	gtk_menu_popup(GTK_MENU(boardMenu), NULL, NULL, NULL, NULL, event->button, event->time);
 }
 
-extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
+extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 		BoardData* bd)
 {
 	int x = (int)event->x;
@@ -2009,7 +1995,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 		{
           /* user clicked on bear-off tray: try to bear-off chequers or
              show forced move */
-          int anBoard[ 2 ][ 25 ];
+          TanBoard anBoard;
           
           memcpy ( anBoard, ms.anBoard, sizeof anBoard );
 
@@ -2043,7 +2029,8 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 			(numOnPoint == 0 || numOnPoint == -bd->turn))
 		{
 			int n[2], bar, i;
-			int old_points[ 28 ], points[ 2 ][ 25 ];
+			int old_points[ 28 ];
+			TanBoard points;
 			unsigned char key[ 10 ];
 			
 			memcpy( old_points, bd->points, sizeof old_points );
@@ -2176,7 +2163,7 @@ extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event,
 	return FALSE;
 }
 
-extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
+extern gboolean board_button_release(GtkWidget *board, GdkEventButton *event,
 		BoardData* bd)
 {
 	int x = (int)event->x;
@@ -2318,7 +2305,7 @@ extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event,
 	return TRUE;
 }
 
-extern gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event,
+extern gboolean board_motion_notify(GtkWidget *board, GdkEventMotion *event,
 		BoardData* bd)
 {
 	int x = (int)event->x;
@@ -2539,13 +2526,11 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     match_settings[ 1 ] = &bd->score;
     match_settings[ 2 ] = &bd->score_opponent;
 
-
     old_dice[ 0 ] = bd->diceRoll[ 0 ];
     old_dice[ 1 ] = bd->diceRoll[ 1 ];
     old_turn = bd->turn;
     
     editing = bd->playing && ToolbarIsEditing( pwToolbar );
-
 
     if( strncmp( board_text, "board:", 6 ) )
 	return -1;
@@ -2647,7 +2632,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	gtk_entry_set_text( GTK_ENTRY( bd->name1 ), bd->name );
 	gtk_label_set_text( GTK_LABEL( bd->lname0 ), bd->name_opponent );
 	gtk_label_set_text( GTK_LABEL( bd->lname1 ), bd->name );
-    
+
 	if( bd->match_to ) {
 	    sprintf( buf, "%d", bd->match_to );
 	    gtk_label_set_text( GTK_LABEL( bd->lmatch ), buf );
@@ -2670,10 +2655,10 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	update_position_id( bd, bd->old_board );
         update_pipcount ( bd, bd->old_board );
     }
-    
+
     update_match_id ( bd );
     update_move( bd );
-	
+
     if (fGUIHighDieFirst && bd->diceRoll[ 0 ] < bd->diceRoll[ 1 ] )
 	    swap_us( bd->diceRoll, bd->diceRoll + 1 );
 
@@ -2863,8 +2848,11 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     }
 
 #if USE_BOARD3D
-	if (display_is_3d(bd->rd) && redrawNeeded)
-		DrawScene3d(bd->bd3d);
+	if (display_is_3d(bd->rd))
+	{
+		if (redrawNeeded)
+			DrawScene3d(bd->bd3d);
+	}
 	else
 #endif
 	{
@@ -3159,14 +3147,14 @@ static void update_buttons( BoardData *bd )
     } 
 }
 
-extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
+extern gint game_set( Board *board, TanBoard points, int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,
 		      gint computer_turn, gint nchequers )
 {
     gchar board_str[ 256 ];
     BoardData *bd = board->board_data;
-    int old_points[ 2 ][ 25 ];
+    TanBoard old_points;
     
     /* Treat a reset of the position to old_board as a no-op while
        in edit mode. */
@@ -3184,7 +3172,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	       ms.fTurn, ms.fCrawford, nchequers );
 
     board_set( board, board_str, -bd->turn * ms.fResigned, ms.fCubeUse );
-    
+
     /* FIXME update names, score, match length */
     if( bd->rd->nSize <= 0 )
 	return 0;
@@ -3565,7 +3553,8 @@ extern void board_edit( BoardData *bd )
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mmatch ), bd->match );
     } else {
 	/* Editing complete; set board. */
-        int points[ 2 ][ 25 ], anScoreNew[ 2 ], nMatchToNew, crawford;
+        TanBoard points;
+		int anScoreNew[ 2 ], nMatchToNew, crawford;
 	const char *pch0, *pch1;
 	char sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
 
@@ -3840,6 +3829,8 @@ static void board_init( Board *board )
 	    CreateGLWidget(bd);
 	    gtk_container_add(GTK_CONTAINER(board), GetDrawingArea3d(bd->bd3d));
     }
+	else
+		bd->bd3d = NULL;
 #endif
 
     /* Position and match ID */
@@ -4097,11 +4088,11 @@ static void board_init( Board *board )
     g_signal_connect( G_OBJECT( bd->drawing_area ), "expose_event",
 			G_CALLBACK( board_expose ), bd );    
     g_signal_connect( G_OBJECT( bd->drawing_area ), "button_press_event",
-			G_CALLBACK( button_press_event ), bd );    
+			G_CALLBACK( board_button_press ), bd );    
     g_signal_connect( G_OBJECT( bd->drawing_area ), "button_release_event",
-			G_CALLBACK( button_release_event ), bd );    
+			G_CALLBACK( board_button_release ), bd );    
     g_signal_connect( G_OBJECT( bd->drawing_area ), "motion_notify_event",
-			G_CALLBACK( motion_notify_event ), bd );
+			G_CALLBACK( board_motion_notify ), bd );
 
     g_signal_connect( G_OBJECT( bd->dice_area ), "expose_event",
 			G_CALLBACK( dice_expose ), bd );

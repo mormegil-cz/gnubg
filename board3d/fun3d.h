@@ -14,7 +14,6 @@
 #ifndef _FUN3D_H
 #define _FUN3D_H
 
-#include "inc3d.h"
 #include "types3d.h"
 #include "gtkboard.h"
 #include "analysis.h"
@@ -24,6 +23,7 @@ void InitGL(const BoardData *bd);
 
 /* Drawing functions */
 void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
+extern void Draw3d(const BoardData* bd);
 void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, int viewport[4]);
 float getBoardWidth(void);
 float getBoardHeight(void);
@@ -56,7 +56,7 @@ int movePath(Path* p, float d, float* pRotate, float v[3]);
 int finishedPath(const Path* p);
 void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d);
-void LoadTextureInfo(int FirstPass);
+void LoadTextureInfo();
 GList *GetTextureList(TextureType type);
 extern void FindTexture(TextureInfo** textureInfo, char* file);
 extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
@@ -68,16 +68,15 @@ void CheckOpenglError(void);
 
 /* Functions for 3d board */
 extern void InitGTK3d(int *argc, char ***argv);
-extern void Init3d(void);
 extern void InitBoard3d(BoardData *bd, BoardData3d *bd3d);
 extern void freeEigthPoints(float ****boardPoints, unsigned int accuracy);
 extern void SetupVisual();
 extern void SetupViewingVolume3d(const BoardData *bd, BoardData3d* bd3d, const renderdata *prd);
 extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata* prd);
-extern void CreateGLWidget(BoardData* bd);
+extern int CreateGLWidget(BoardData* bd);
 extern int DoAcceleratedCheck(const BoardData3d* bd3d, GtkWidget* pwParent);
 
-extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
+extern void *CreatePreviewBoard3d(const BoardData* bd, GdkPixmap *ppm);
 extern void RollDice3d(BoardData *bd, BoardData3d* bd3d, const renderdata *prd);
 extern void AnimateMove3d(BoardData *bd, BoardData3d *bd3d);
 extern void ShowFlag3d(BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
@@ -116,6 +115,7 @@ extern void RestrictiveDrawBoardNumbers(const BoardData3d *bd3d);
 extern void setDicePos(BoardData *bd, BoardData3d *bd3d);
 extern int DiceTooClose(const BoardData3d *bd3d, const renderdata *prd);
 
+extern int ShadowsInitilised(const BoardData3d *bd3d);
 void shadowInit(BoardData3d *bd3d, renderdata *prd);
 void shadowDisplay(void (*drawScene)(const BoardData *, BoardData3d *, const renderdata *), const BoardData* bd, BoardData3d *bd3d, const renderdata *prd);
 
@@ -139,8 +139,10 @@ extern int GetPreviewId(void);
 extern void UpdateColPreview(int ID);
 extern void SetPreviewLightLevel(const int levels[3]);
 extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind);
-extern gboolean display_is_2d (renderdata *prd);
-extern gboolean display_is_3d (renderdata *prd);
-extern GdkGLConfig *getglconfigSingle(void);
+extern gboolean display_is_2d (const renderdata *prd);
+extern gboolean display_is_3d (const renderdata *prd);
+extern void RerenderBase(BoardData3d* bd3d);
+extern int setVSync(int state);
+extern int extensionSupported(const char *extension);
 
 #endif

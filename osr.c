@@ -835,11 +835,11 @@ bgProb ( const int anBoard[ 25 ],
  */
 
 extern void
-raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
+raceProbs ( TanBoard anBoard, const int nGames,
             float arOutput[ NUM_OUTPUTS ],
             float arMu[ 2 ] ) {
   
-  int an[ 2 ][ 25 ];
+  TanBoard an;
   float aarProbs[ 2 ][ MAX_PROBS ];
   float aarGammonProbs[ 2 ][ MAX_PROBS ];
   float arG[ 2 ], arBG[ 2 ];

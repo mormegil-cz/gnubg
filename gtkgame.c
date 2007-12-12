@@ -45,7 +45,6 @@
 #include <sys/utsname.h>
 #endif
 
-#include "rollout.h"
 #include "analysis.h"
 #include "backgammon.h"
 #include "sgf.h"
@@ -76,6 +75,8 @@
 #include "matchid.h"
 #include "gtkwindows.h"
 #include "export.h"
+#include "gtkmovelistctrl.h"
+#include "rollout.h"
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -312,7 +313,7 @@ GtkItemFactory *pif;
 guint nNextTurn = 0; /* GTK idle function */
 static int cchOutput;
 static guint idOutput, idProgress;
-static list lOutput;
+static listOLD lOutput;
 int fTTY = TRUE;
 int fGUISetWindowPos = TRUE;
 int frozen = FALSE;
@@ -800,7 +801,7 @@ ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
 
-    static char *aszLuckCmd[ LUCK_VERYGOOD + 1 ] = {
+    static char *aszLuckCmd[ N_LUCKS ] = {
 	"veryunlucky", "unlucky", "clear luck", "lucky", "verylucky"
     };
     char sz[ 64 ];
@@ -862,7 +863,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 
     GtkWidget *pwParent = pwAnalysis->parent, *pw = NULL, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
-    list *pl;
+    listOLD *pl;
     char sz[ 64 ];
     GtkWidget *pwCubeAnalysis = NULL;
     doubletype dt;
@@ -1228,7 +1229,7 @@ static void MenuDelete( GtkWidget *pwChild, GtkWidget *pwMenu ) {
 static void SelectGame( GtkWidget *pw, void *p ) {
 
     int i = GPOINTER_TO_INT( p );
-    list *pl;
+    listOLD *pl;
     
     g_assert( plGame );
 
@@ -1304,7 +1305,7 @@ extern void GTKSetGame( int i ) {
    player names change, or the score a game was started at is modified). */
 extern void GTKRegenerateGames( void ) {
 
-    list *pl, *plGame;
+    listOLD *pl, *plGame;
     int i = gtk_option_menu_get_history( GTK_OPTION_MENU( pom ) );
 
     if( !fGameMenuUsed )
@@ -1329,7 +1330,7 @@ extern void GTKRegenerateGames( void ) {
    the entire game and annotation windows, just to be safe. */
 extern void GTKUpdateAnnotations( void ) {
 
-    list *pl;
+    listOLD *pl;
     
     if (!plGame)
     	return;
@@ -1395,11 +1396,6 @@ extern void SetPanelWidth(int size)
 	{
 		if (panelSize > pwMain->allocation.width * .8)
 			panelSize = (int)(pwMain->allocation.width * .8);
-		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
-		/* Wait while gtk resizes things and try again (in case window had to grow */
-		while(gtk_events_pending())
-			gtk_main_iteration();
-		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
 	}
 }
 
@@ -1412,7 +1408,8 @@ extern void SwapBoardToPanel(int ToPanel)
 		while(gtk_events_pending())
 			gtk_main_iteration();
 		gtk_widget_hide(pwGameBox);
-		SetPanelWidth(panelSize);
+		gtk_paned_set_position(GTK_PANED(hpaned), pwMain->allocation.width - panelSize);
+
 {	/* Hack to sort out widget positions - may be removed if works in later version of gtk */
 		GtkAllocation temp = pwMain->allocation;
 		temp.height++;
@@ -1597,7 +1594,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 	return FALSE;
 }
 
-static void NewClicked(gpointer p, guint n, GtkWidget * pw)
+static void NewClicked(gpointer  p, guint n, GtkWidget * pw)
 {
 	GTKNew();
 }
@@ -1920,7 +1917,11 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 		gtk_window_set_decorated(ptl, TRUE);
 
 		if (showingPanels)
+		{
+			fFullScreen = TRUE;	// Avoid panel sizing code
 			ShowAllPanels(NULL, 0, NULL);
+			fFullScreen = FALSE;
+		}
 
 		if (changedRP) {
 			gtk_widget_set_sensitive(pmiRP, TRUE);
@@ -3759,7 +3760,6 @@ static void CreateMainWindow(void)
 {
 	GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
 
-
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_maximize(GTK_WINDOW(pwMain));
 	SetPanelWidget(WINDOW_MAIN, pwMain);
@@ -3814,7 +3814,7 @@ static void CreateMainWindow(void)
 	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwEventBox), FALSE);
 
    gtk_container_add(GTK_CONTAINER(pwEventBox), pwBoard = board_new(GetMainAppearance()));
-   g_signal_connect(G_OBJECT(pwEventBox), "button-press-event", G_CALLBACK(button_press_event),
+   g_signal_connect(G_OBJECT(pwEventBox), "button-press-event", G_CALLBACK(board_button_press),
 	   BOARD(pwBoard)->board_data);
 
    pwPanelHbox = gtk_hbox_new(FALSE, 0);
@@ -3886,7 +3886,6 @@ extern void InitGTK(int *argc, char ***argv)
 	char *sz;
 	GtkIconFactory *pif;
 	GdkAtom cb;
-	BoardData *bd;
 
 	fX = gtk_init_check(argc, argv);
 	if (!fX)
@@ -3936,10 +3935,7 @@ extern void InitGTK(int *argc, char ***argv)
 	clipboard = gtk_clipboard_get(cb);
 
 #if USE_BOARD3D
-	bd = BOARD(pwBoard)->board_data;
-	if (display_is_3d(bd->rd))
-		Init3d();
-	Default3dSettings(bd);
+	Default3dSettings(BOARD(pwBoard)->board_data);
 #endif
 }
 
@@ -4079,7 +4075,7 @@ extern void GtkChangeLanguage(void)
 	if (pwMain && GTK_WIDGET_REALIZED(pwMain))
 	{
 		reasonExited = RE_LANGUAGE_CHANGE;
-
+		custom_cell_renderer_invalidate_size();	/* Recalulate widget sizes */
 		ClosePanels();
 		getWindowGeometry(WINDOW_MAIN);
 		DestroyPanel(WINDOW_MAIN);
@@ -4233,7 +4229,7 @@ extern void GTKOutput( char *sz ) {
 extern void GTKOutputX( void ) {
 
     char *sz, *pchSrc, *pchDest;
-    list *pl;
+    listOLD *pl;
     GtkTextBuffer *buffer;
     GtkTextIter iter;
 
@@ -4399,7 +4395,7 @@ static char *get_player_type (int i) {
 	}
 }
 
-extern int edit_new(int length)
+extern int edit_new(unsigned int length)
 {
 	char sz[40];
 	char *pt[2];
@@ -4439,14 +4435,15 @@ extern int edit_new(int length)
 
 static void edit_new_clicked(GtkWidget * pw, newwidget * pnw)
 {
-	int length = gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+	unsigned int length = (unsigned int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
 	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 	edit_new(length);
 	if (!ToolbarIsEditing(NULL))
 		click_edit();
 }
 
-static GtkWidget *NewWidget( newwidget *pnw){
+static GtkWidget *NewWidget( newwidget *pnw)
+{
   int i, j = 1 ;
   char **apXPM[10];
   GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwToolbar;
@@ -4455,6 +4452,7 @@ static GtkWidget *NewWidget( newwidget *pnw){
 #include "xpm/stock_new_money.xpm"
   pwVbox = gtk_vbox_new(FALSE, 0);
   pwToolbar = gtk_toolbar_new ();
+
   gtk_toolbar_set_orientation ( GTK_TOOLBAR ( pwToolbar ),
                                 GTK_ORIENTATION_HORIZONTAL );
   gtk_toolbar_set_style ( GTK_TOOLBAR ( pwToolbar ),
@@ -4565,31 +4563,34 @@ static GtkWidget *NewWidget( newwidget *pnw){
   gtk_container_add(GTK_CONTAINER(pwVbox), pwFrame);
   
   return pwVbox;
-  
 } 
 
-static void NewOK( GtkWidget *pw, newwidget *pnw ) {
+static void NewOK( GtkWidget *pw, newwidget *pnw )
+{
   char sz[40];
-  int Mlength = gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
+  unsigned int Mlength = (unsigned int)gtk_spin_button_get_value(GTK_SPIN_BUTTON(pnw->pwML));
 
   UpdatePlayerSettings(pnw);
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
+	if (ToolbarIsEditing(NULL))
+		click_edit();	// Come out of editing mode
+
   sprintf(sz, "new match %d", Mlength );
   UserCommand(sz);
 }
 
-static void NewSet( newwidget *pnw) {
+static void NewSet( newwidget *pnw)
+{
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pnw->pwTutorMode ),
                                 fTutor );
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pnw->pwManualDice), rngCurrent == RNG_MANUAL);
   gtk_spin_button_set_value( GTK_SPIN_BUTTON( pnw->pwML ), nDefaultLength );
-
 }
 
-extern void GTKNew( void ){
-	
+extern void GTKNew( void )
+{
   GtkWidget *pwDialog, *pwPage;
   newwidget nw;
 
@@ -4598,6 +4599,7 @@ extern void GTKNew( void ){
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwPage = NewWidget(&nw));
 
+  gtk_widget_grab_focus(DialogArea(pwDialog, DA_OK));
   gtk_widget_show_all( pwDialog );
 
   NewSet( &nw );
@@ -5720,8 +5722,8 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
 extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
-               cubeinfo *pci, int fMWC ) {
-    
+               cubeinfo *pci, int fMWC )
+{
     GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
 			NULL, DIALOG_FLAG_MODAL, NULL, NULL );
     GtkWidget *pw;
@@ -5786,8 +5788,8 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
 }
 
 extern void 
-GTKHint( movelist *pmlOrig, const unsigned int iMove) {
-
+GTKHint( movelist *pmlOrig, const unsigned int iMove)
+{
     GtkWidget *pwMoves, *pwHint;
     movelist *pml;
     static unsigned int n;
@@ -5840,28 +5842,26 @@ static void SetMouseCursor(GdkCursorType cursorType)
 		gdk_window_set_cursor(pwMain->window, NULL);
 }
 
-extern void GTKProgressStart( char *sz ) {
-
+extern void GTKProgressStart( char *sz )
+{
     if( sz )
-	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
+		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 
 	SetMouseCursor(GDK_WATCH);
 }
 
 
 extern void
-GTKProgressStartValue( char *sz, int iMax ) {
-
-
+GTKProgressStartValue( char *sz, int iMax )
+{
   if( sz )
     gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 
 	SetMouseCursor(GDK_WATCH);
 }
 
-extern void
-GTKProgressValue ( int iValue, int iMax ) {
-
+extern void GTKProgressValue ( int iValue, int iMax )
+{
     gchar *gsz;
     gdouble frac = 1.0 * iValue / (1.0 * iMax );
     gsz = g_strdup_printf("%d/%d (%.0f%%)", iValue, iMax, 100 * frac);
@@ -5878,8 +5878,8 @@ GTKProgressValue ( int iValue, int iMax ) {
 }
 
 
-extern void GTKProgress( void ) {
-
+extern void GTKProgress( void )
+{
     gtk_progress_bar_pulse( GTK_PROGRESS_BAR( pwProgress ) );
 
     SuspendInput();
@@ -5890,8 +5890,8 @@ extern void GTKProgress( void ) {
     ResumeInput();
 }
 
-extern void GTKProgressEnd( void ) {
-
+extern void GTKProgressEnd( void )
+{
 	if (!pwProgress) /*safe guard on language change*/
 		return;
     gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
@@ -5926,7 +5926,7 @@ extern void GTKShowScoreSheet( void )
 	char title[100];
 	char *titles[2];
 	char *data[2];
-	list *pl;
+	listOLD *pl;
 
 	sprintf(title, _("Score Sheet - "));
 	if ( ms.nMatchTo > 0 )
@@ -5975,7 +5975,7 @@ extern void GTKShowScoreSheet( void )
 	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
 	{
 		int score[2];
-		list *plGame = pl->plNext->p;
+		listOLD *plGame = pl->plNext->p;
 
 		if (plGame)
 		{
@@ -5986,7 +5986,7 @@ extern void GTKShowScoreSheet( void )
 		else
 		{
 			moverecord *pmr;
-			list *plGame = pl->p;
+			listOLD *plGame = pl->p;
 			if (!plGame)
 				continue;
 			pmr = plGame->plNext->p;
@@ -6137,7 +6137,7 @@ extern void GTKShowBuildInfo(GtkWidget *pw, GtkWidget *pwParent)
 }
 
 /* Stores names in credits so not duplicated in list at bottom */
-list names;
+listOLD names;
 
 static void AddTitle(GtkWidget* pwBox, char* Title)
 {
@@ -6167,9 +6167,9 @@ static void AddName(GtkWidget* pwBox, char* name, char* type)
 	ListInsert(&names, name);
 }
 
-static int FindName(list* pList, char* name)
+static int FindName(listOLD* pList, char* name)
 {
-	list *pl;
+	listOLD *pl;
 	for (pl = pList->plNext; pl != pList; pl = pl->plNext )
 	{
 		if (!strcmp(pl->p, name))
@@ -6351,11 +6351,8 @@ extern void GTKHelp( char *sz )
 	g_signal_connect_swapped (pw, "response",
 			G_CALLBACK (gtk_widget_destroy), pw);
 
-	gtk_container_add( GTK_CONTAINER( GTK_DIALOG(pw)->vbox ),
-			pwPaned = gtk_vpaned_new() );
+	gtk_container_add( GTK_CONTAINER(DialogArea( pw, DA_MAIN )), pwPaned = gtk_vpaned_new() );
 
-	gtk_paned_set_position( GTK_PANED( pwPaned ), 300 );
-	
 	gtk_paned_pack1( GTK_PANED( pwPaned ),
 			 pwScrolled = gtk_scrolled_window_new( NULL, NULL ),
 			 TRUE, FALSE );
@@ -6878,7 +6875,7 @@ static const statcontext *GetStatContext(int game)
 		return &scMatch;
 	else
 	{
-		list *plGame, *pl = lMatch.plNext;
+		listOLD *plGame, *pl = lMatch.plNext;
 		for (i = 1; i < game; i++)
 			pl = pl->plNext;
 
@@ -6962,7 +6959,7 @@ static void AddNavigation(GtkWidget* pvbox)
 	GtkWidget *phbox, *pm, *pw;
 	GdkColormap *pcmap;
     char sz[128];
-    list *pl;
+    listOLD *pl;
 
 #include "xpm/prevgame.xpm"
 #include "xpm/prevmove.xpm"
@@ -7018,7 +7015,7 @@ static void AddNavigation(GtkWidget* pvbox)
 	curStatGame = 0;
 	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
 	{
-		list *plGame = pl->p;
+		listOLD *plGame = pl->p;
 		moverecord *pmr = plGame->plNext->p;
 		numStatGames++;
 
@@ -7146,7 +7143,7 @@ extern void GTKDumpStatcontext( int game )
 #if USE_BOARD3D
 	int i;
 	GtkWidget *pw;
-	list *pl;
+	listOLD *pl;
 	GraphData *gd = CreateGraphData();
 #endif
 	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL, NULL );
@@ -7192,7 +7189,7 @@ extern void GTKDumpStatcontext( int game )
 	pl = lMatch.plNext;
 	for (i = 0; i < numStatGames; i++)
 	{
-		list *plGame = pl->p;
+		listOLD *plGame = pl->p;
 		moverecord *mr = plGame->plNext->p;
 		xmovegameinfo *pmgi = &mr->g;
 		AddGameData(gd, i, &pmgi->sc);
@@ -7580,19 +7577,19 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 17, sz );
 
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 18,
-			    gettext ( aszRating[ GetRating( pr.arErrorChequerplay[
+			    gettext ( aszRating[ GetRating( (float)pr.arErrorChequerplay[
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 19,
-			    gettext ( aszRating[ GetRating( pr.arErrorCube[
+			    gettext ( aszRating[ GetRating( (float)pr.arErrorCube[
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 20,
-			    gettext ( aszRating[ GetRating( pr.arErrorCombined[
+			    gettext ( aszRating[ GetRating( (float)pr.arErrorCombined[
 				EXPAVG_TOTAL ] ) ] ) );
 	
 	gtk_clist_set_text( GTK_CLIST( pwList ), i, 21,
-			    gettext ( aszLuckRating[ getLuckRating( pr.arLuck[
+			    gettext ( aszLuckRating[ getLuckRating( (float)pr.arLuck[
 				EXPAVG_TOTAL ] / 20 ) ] ) );
 	
 	if( !CompareNames( pr.szName, szPlayer ) )

@@ -48,18 +48,18 @@ typedef enum
 typedef struct _ExportFormat ExportFormat;
 struct _ExportFormat {
 	ExportType type;
-	char *extension;
-	char *description;
-	char *clname;
+	const char *extension;
+	const char *description;
+	const char *clname;
 	int exports[3];
 };
 
 typedef struct _ImportFormat ImportFormat;
 struct _ImportFormat {
 	ImportType type;
-	char *extension;
-	char *description;
-	char *clname;
+	const char *extension;
+	const char *description;
+	const char *clname;
 };
 
 extern ExportFormat export_format[];
@@ -70,5 +70,5 @@ typedef struct _FilePreviewData {
 } FilePreviewData;
 
 extern char *GetFilename(int CheckForCurrent, ExportType type);
-extern FilePreviewData *ReadFilePreview(char *filename);
+extern FilePreviewData *ReadFilePreview(const char *filename);
 

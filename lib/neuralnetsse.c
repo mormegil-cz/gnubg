@@ -134,8 +134,8 @@ Evaluate128( const neuralnet *pnn, const float arInput[], float ar[],
 }
 
 
-extern int NeuralNetEvaluate128( const neuralnet *pnn, float arInput[],
-			      float arOutput[], NNState *pnState )
+extern int NeuralNetEvaluate128( const neuralnet *pnn, /*lint -e{818}*/ float arInput[],
+			      float arOutput[], NNState *notused )
 {
     SSE_ALIGN(float ar[HIDDEN_NODES]);
 #if DEBUG_SSE

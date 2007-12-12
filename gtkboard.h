@@ -71,7 +71,7 @@ extern void DestroySetCube(GtkObject *po, GtkWidget *pw);
 extern void Copy3dDiceColour(renderdata* prd);
 extern GtkWidget *board_dice_widget( Board *board );
 extern void DestroySetDice(GtkObject *po, GtkWidget *pw);
-extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
+extern gint game_set( Board *board, TanBoard points, int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,
 		      gint computer_turn, gint nchequers );
@@ -100,9 +100,10 @@ typedef struct _BoardData {
     
     gboolean playing, computer_turn;
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
-	old_board[ 2 ][ 25 ], drag_button, click_time,
+	drag_button, click_time,
 	cube_use; /* roll showing on the off-board dice */
 	DiceShown diceShown;
+	TanBoard old_board;
 
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
     gint qedit_point; /* used to remember last point in quick edit mode */
@@ -148,21 +149,21 @@ extern void InitBoardPreview(BoardData *bd);
 extern int animate_player, *animate_move_list, animation_finished;
 
 enum TheoryTypes{TT_PIPCOUNT = 1, TT_EPC = 2, TT_RETURNHITS = 4, TT_KLEINCOUNT = 8};
-void UpdateTheoryData(BoardData* bd, int UpdateTypes, int points[2][25]);
+void UpdateTheoryData(BoardData* bd, int UpdateTypes, TanBoard points);
 
-extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] );
-extern void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] );
-extern void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] );
-extern void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] );
+extern void read_board( BoardData *bd, TanBoard points );
+extern void update_position_id( BoardData *bd, TanBoard points );
+extern void update_pipcount ( BoardData *bd, TanBoard points );
+extern void write_board ( BoardData *bd, TanBoard anBoard );
 extern void board_beep( BoardData *bd );
 extern void Confirm( BoardData *bd );
 extern int update_move(BoardData *bd);
 extern gboolean place_chequer_or_revert(BoardData *bd, int dest);
 extern gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] );
 extern void InitBoardData(BoardData* bd);
-extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
-extern gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, BoardData* bd);
-extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
+extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event, BoardData* bd);
+extern gboolean board_motion_notify(GtkWidget *widget, GdkEventMotion *event, BoardData* bd);
+extern gboolean board_button_release(GtkWidget *board, GdkEventButton *event, BoardData* bd);
 extern void RollDice2d(BoardData* bd);
 extern void DestroyPanel(gnubgwindow window);
 extern void board_set_matchid( GtkWidget *pw, BoardData *bd );
@@ -173,6 +174,6 @@ DrawDie( GdkDrawable *pd,
          unsigned char *achDice[ 2 ], unsigned char *achPip[ 2 ],
          const int s, GdkGC *gc, int x, int y, int fColour, int n );
 
-extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
+extern int UpdateMove( BoardData *bd, TanBoard anBoard );
 
 #endif

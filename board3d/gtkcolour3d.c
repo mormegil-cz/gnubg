@@ -167,6 +167,7 @@ static void UpdatePreviewBar(const Material* pMat, GdkPixmap *pixmap)
 
 static void UpdateColourPreview(void *notused)
 {
+	TextureInfo* tempTexture;
 	double ambient[4], diffuse[4], specular[4];
 
 	if (!bUpdate)
@@ -179,10 +180,12 @@ static void UpdateColourPreview(void *notused)
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpDiffuse), diffuse);
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpSpecular), specular);
 
+	tempTexture = col3d.textureInfo;	/* Remeber texture, as setupmat resets it */
 	SetupMat(&col3d, (float)ambient[0], (float)ambient[1], (float)ambient[2],
 		(float)diffuse[0], (float)diffuse[1], (float)diffuse[2],
 		(float)specular[0], (float)specular[1], (float)specular[2],
 		(int)padjShine->value, opacityValue);
+	col3d.textureInfo = tempTexture;
 
 	UpdatePreviewBar(&col3d, xppm);
 
@@ -205,8 +208,6 @@ static void SetupColourPreview(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
-
-GdkGLConfig *getglconfigSingle(void);
 
 static GdkGLPixmap *glpixmap;
 static GdkGLContext *glPixmapContext = NULL;
@@ -474,12 +475,9 @@ void Setup3dColourPicker(GtkWidget* notused, GdkWindow* wind)
 
 GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType textureType)
 {
-	GtkWidget *pixmapwid, *button;
-	GdkPixmap *pixmap;
-	pixmap = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
-
-	button = gtk_button_new();
-	pixmapwid = gtk_pixmap_new(pixmap, NULL);
+	GdkPixmap *pixmap = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
+	GtkWidget *button = gtk_button_new();
+	GtkWidget *pixmapwid = gtk_pixmap_new(pixmap, NULL);
 	gtk_container_add(GTK_CONTAINER(button), pixmapwid);
 
 	if (curDetail == MAX_DETAILS)
@@ -498,5 +496,6 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, TextureType text
 
 	UpdatePreviewBar(pMat, pixmap);
 	curDetail++;
+
 	return button;
 }

@@ -184,7 +184,7 @@ static void ToolbarToggleEdit(GtkWidget * pw, toolbarwidget * ptw)
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ptw->pwEdit))) {
 		editing = TRUE;
 		if (ms.gs == GAME_NONE)
-                        edit_new(nDefaultLength);
+			edit_new(nDefaultLength);
 		/* Undo any partial move that may have been made when entering edit mode */
 		Undo();
 	} else

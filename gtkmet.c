@@ -26,10 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glib.h>
 
 #include "backgammon.h"
-#include "eval.h"
 #include "gtkgame.h"
 #include <glib/gi18n.h>
 #include "matchequity.h"
@@ -55,7 +53,7 @@ typedef struct _metwidget {
 static void
 UpdateTable ( mettable *pmt, 
               float aafMET[ MAXSCORE ][ MAXSCORE ],
-              metinfo *pmi,
+              const metinfo *pmi,
               const int nRows, const int nCols, const int fInvert ) {
 
 #define STRINGLENGTH 64

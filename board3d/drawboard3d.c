@@ -24,6 +24,7 @@
 #include "config.h"
 #include "inc3d.h"
 #include "boardpos.h"
+#include "wglbuffer.h"
 #include "misc3d.h"
 
 /* Used to calculate correct viewarea for board/fov angles */
@@ -549,7 +550,7 @@ static void moveToDoubleCubePos(const BoardData* bd)
 	glTranslatef(v[0], v[1], v[2]);
 }
 
-static void drawDCNumbers(const BoardData* bd, const diceTest* dt)
+NTH_STATIC void drawDCNumbers(const BoardData* bd, const diceTest* dt)
 {
 	int c, nice;
 	float radius = DOUBLECUBE_SIZE / 7.0f;
@@ -627,7 +628,7 @@ static void DrawDCNumbers(const BoardData* bd)
 	drawDCNumbers(bd, &dt);
 }
 
-static void drawDC(const BoardData* bd, const BoardData3d* bd3d, const renderdata* prd)
+NTH_STATIC void drawDC(const BoardData* bd, const BoardData3d* bd3d, const renderdata* prd)
 {
 	glPushMatrix();
 	moveToDoubleCubePos(bd);
@@ -763,7 +764,7 @@ static void moveToDicePos(const BoardData* bd, int num)
 	}
 }
 
-static void drawDice(const BoardData* bd, int num)
+NTH_STATIC void drawDice(const BoardData* bd, int num)
 {
 	unsigned int value;
 	int rotDice[6][2] = {{0, 0}, {0, 1}, {3, 0}, {1, 0}, {0, 3}, {2, 0}};
@@ -980,7 +981,7 @@ static void drawPiece(const BoardData3d* bd3d, unsigned int point, unsigned int 
 	glPopMatrix();
 }
 
-static void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	unsigned int i;
 	unsigned int j;
@@ -1135,7 +1136,7 @@ static void DrawNumbers(const BoardData* bd, int sides)
 	glPopMatrix();
 }
 
-static void drawNumbers(const BoardData* bd, int sides)
+static void drawNumbers(const BoardData* bd)
 {
 	/* No need to depth test as on top of board (depth test could cause alias problems too) */
 	glDisable(GL_DEPTH_TEST);
@@ -1144,7 +1145,8 @@ static void drawNumbers(const BoardData* bd, int sides)
 	glNormal3f(0.f, 0.f, 1.f);
 
 	glLineWidth(1.f);
-	DrawNumbers(bd, sides);
+	DrawNumbers(bd, 1);
+	DrawNumbers(bd, 2);
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -1343,7 +1345,7 @@ static void drawHinge(const BoardData3d *bd3d, const renderdata *prd, float heig
 	glPopMatrix();
 }
 
-static void tidyEdges(const renderdata* prd)
+NTH_STATIC void tidyEdges(const renderdata* prd)
 {	/* Anti-alias board edges */
 	setMaterial(&prd->BoxMat);
 
@@ -1681,7 +1683,7 @@ static void InsideFillet(float x, float y, float z, float w, float h, float radi
 	TextureReset
 }
 
-static void drawTable(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+NTH_STATIC void drawTable(const BoardData3d *bd3d, const renderdata *prd)
 {
 	float st, ct, dInc, curveTextOff = 0;
 	tuv = 0;
@@ -1990,9 +1992,6 @@ static void drawTable(const BoardData *bd, const BoardData3d *bd3d, const render
 		drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, prd->BoxMat.pTexture);
 	}
 
-	if (prd->fLabels)
-		drawNumbers(bd, 2);
-
 	/* Left side of board*/
 	glPushMatrix();
 
@@ -2242,13 +2241,7 @@ static void drawTable(const BoardData *bd, const BoardData3d *bd3d, const render
 		}
 	}
 
-	if (prd->fLabels)
-		drawNumbers(bd, 1);
-
 	glPopMatrix();
-
-	if (prd->showMoveIndicator)
-		showMoveIndicator(bd);
 }
 
 static int DiceShowing(const BoardData* bd)
@@ -2257,7 +2250,7 @@ static int DiceShowing(const BoardData* bd)
 		(bd->rd->fDiceArea && bd->diceShown == DICE_BELOW_BOARD));
 }
 
-static void drawPick(const BoardData* bd)
+NTH_STATIC void drawPick(const BoardData* bd)
 {	/* Draw all the objects on the board to see if any have been selected */
 	unsigned int i, j;
 	float barHeight;
@@ -2416,7 +2409,7 @@ void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag)
 			ctlpoints[i][j][2] = sinf((GLfloat)i + wag) * FLAG_WAG;
 }
 
-static void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+NTH_STATIC void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	int s;
 	float v[3];
@@ -2451,7 +2444,7 @@ static void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const renderdat
 	glPopMatrix();
 }
 
-static void drawPointPick(unsigned int point)
+NTH_STATIC void drawPointPick(unsigned int point)
 {	/* Draw sub parts of point to work out which part of point clicked */
 	unsigned int i;
 	float pos[3];
@@ -2928,10 +2921,11 @@ void setDicePos(BoardData *bd, BoardData3d *bd3d)
 	bd3d->dicePos[firstDie][2] = (float)(rand() % 360);
 	bd3d->dicePos[secondDie][2] = (float)(rand() % 360);
 
-	updateDiceOccPos(bd, bd3d);
+	if (ShadowsInitilised(bd3d))
+		updateDiceOccPos(bd, bd3d);
 }
 
-static void drawDie(const BoardData* bd, const BoardData3d *bd3d, int num)
+NTH_STATIC void drawDie(const BoardData* bd, const BoardData3d *bd3d, int num)
 {
 	glPushMatrix();
 	/* Move to correct position for die */
@@ -3020,7 +3014,7 @@ static void workOutWidth(viewArea* pva, float halfRadianFOV, float boardRadAngle
 		pva->width = p[0] * 2;
 }
 
-static float GetFOVAngle(const BoardData* bd)
+NTH_STATIC float GetFOVAngle(const BoardData* bd)
 {
 	float temp = bd->rd->boardAngle / 20.0f;
 	float skewFactor = (bd->rd->skewFactor / 100.0f) * (4 - .6f) + .6f;
@@ -3185,7 +3179,7 @@ void setupFlag(BoardData3d *bd3d)
 	}
 }
 
-static void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigned int curveAccuracy)
+NTH_STATIC void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigned int curveAccuracy)
 {
 	/* Simple knots i.e. no weighting */
 	float s_knots[S_NUMKNOTS] = {0, 0, 0, 0, 1, 1, 1, 1};
@@ -3325,6 +3319,7 @@ static void updateDieOccPos(const BoardData* bd, const BoardData3d* bd3d, Occlud
 			copyMatrix(pOcc->invMat, id);
 		}
 	}
+	draw_shadow_volume_extruded_edges(pOcc, bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updateDiceOccPos(const BoardData* bd, BoardData3d* bd3d)
@@ -3339,12 +3334,13 @@ void updateDiceOccPos(const BoardData* bd, BoardData3d* bd3d)
 	}
 }
 
-static void updateCubeOccPos(const BoardData* bd, BoardData3d* bd3d)
+NTH_STATIC void updateCubeOccPos(const BoardData* bd, BoardData3d* bd3d)
 {
 	getDoubleCubePos(bd, bd3d->Occluders[OCC_CUBE].trans);
 	makeInverseTransposeMatrix(bd3d->Occluders[OCC_CUBE].invMat, bd3d->Occluders[OCC_CUBE].trans);
 
 	bd3d->Occluders[OCC_CUBE].show = (bd->cube_use && !bd->crawford_game);
+	draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_CUBE], bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d)
@@ -3371,6 +3367,7 @@ void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 		else
 			makeInverseTransposeMatrix(bd3d->Occluders[LAST_PIECE].invMat, bd3d->Occluders[LAST_PIECE].trans);
 	}
+	draw_shadow_volume_extruded_edges(&bd3d->Occluders[LAST_PIECE], bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
@@ -3403,12 +3400,15 @@ void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 				makeInverseTransposeMatrix(bd3d->Occluders[p].invMat, bd3d->Occluders[p].trans);
 				bd3d->Occluders[p].rotator = 0;
 			}
+			draw_shadow_volume_extruded_edges(&bd3d->Occluders[p], bd3d->shadow_light_position, GL_QUADS);
+
 			p++;
 		}
 	}
 	if (p == LAST_PIECE)
 	{
 		updateMovingPieceOccPos(bd, bd3d);
+		draw_shadow_volume_extruded_edges(&bd3d->Occluders[p], bd3d->shadow_light_position, GL_QUADS);
 		bd3d->Occluders[p].rotator = 0;
 	}
 }
@@ -3449,6 +3449,7 @@ void updateFlagOccPos(const BoardData* bd, BoardData3d* bd3d)
 			}
 			bd3d->ctlpoints[1][0][2] = p1x;
 		}
+		draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_FLAG], bd3d->shadow_light_position, GL_QUADS);
 	}
 	else
 	{
@@ -3459,6 +3460,8 @@ void updateFlagOccPos(const BoardData* bd, BoardData3d* bd3d)
 void updateHingeOccPos(BoardData3d* bd3d, int show3dHinges)
 {
 	bd3d->Occluders[OCC_HINGE1].show = bd3d->Occluders[OCC_HINGE2].show = show3dHinges;
+	draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_HINGE1], bd3d->shadow_light_position, GL_QUADS);
+	draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_HINGE2], bd3d->shadow_light_position, GL_QUADS);
 }
 
 void updateOccPos(const BoardData* bd)
@@ -3497,6 +3500,7 @@ static void MakeShadowModel(const BoardData *bd, BoardData3d *bd3d, const render
 	}
 	setIdMatrix(bd3d->Occluders[OCC_BOARD].invMat);
 	bd3d->Occluders[OCC_BOARD].trans[0] = bd3d->Occluders[OCC_BOARD].trans[1] = bd3d->Occluders[OCC_BOARD].trans[2] = 0;
+	draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_BOARD], bd3d->shadow_light_position, GL_QUADS);
 
 	initOccluder(&bd3d->Occluders[OCC_HINGE1]);
 	copyOccluder(&bd3d->Occluders[OCC_HINGE1], &bd3d->Occluders[OCC_HINGE2]);
@@ -3687,9 +3691,23 @@ void RestrictiveDrawFlag(const BoardData* bd)
 	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
 }
 
-void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
-	drawTable(bd, bd3d, prd);
+	drawTable(bd3d, prd);
+
+	if (prd->fLabels && !prd->fDynamicLabels)
+		drawNumbers(bd);
+
+	if (bd3d->State == BOARD_OPEN)
+		tidyEdges(prd);
+}
+
+void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+{
+	if (prd->fLabels && prd->fDynamicLabels)
+		drawNumbers(bd);
+	if (prd->showMoveIndicator)
+		showMoveIndicator(bd);
 
 	if (bd->cube_use && !bd->crawford_game)
 		drawDC(bd, bd3d, prd);
@@ -3697,9 +3715,6 @@ void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 	/* Draw things in correct order so transparency works correctly */
 	/* First pieces, then dice, then moving pieces */
 	drawPieces(bd, bd3d, prd);
-
-	if (bd3d->State == BOARD_OPEN)
-		tidyEdges(prd);
 
 	if (DiceShowing(bd))
 	{
@@ -3713,3 +3728,25 @@ void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 	if (bd->resigned)
 		drawFlag(bd, bd3d, prd);
 }
+
+void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+{
+	drawBoardBase(bd, bd3d, prd);
+	drawBoardTop(bd, bd3d, prd);
+}
+
+extern int renderingBase;
+void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+{
+	if (bd->rd->showShadows)
+	{
+		renderingBase = TRUE;
+		shadowDisplay(drawBoardBase, bd, bd->bd3d, bd->rd);
+		renderingBase = FALSE;
+	}
+	else
+		drawBoardBase(bd, bd3d, prd);
+
+	SaveBufferRegion(bd3d->wglBuffer, 0, 0, bd3d->drawing_area3d->allocation.width, bd3d->drawing_area3d->allocation.height);
+}
+

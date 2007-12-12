@@ -31,8 +31,8 @@
 #endif
 #include <errno.h>
 #include <stdio.h>
-
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <signal.h>
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -100,9 +100,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
-#if USE_MULTITHREAD
 #include "multithread.h"
-#endif
 #include "openurl.h"
 
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
@@ -171,7 +169,10 @@ int fCheat = FALSE;
 unsigned int afCheatRoll[ 2 ] = { 0, 0 };
 int fGotoFirstGame = FALSE;
 float rRatingOffset = 2050;
-
+#if USE_BOARD3D
+int fSync = -1;	/* Not set */
+int fResetSync = FALSE;	/* May need to wait for main window */
+#endif
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
@@ -1665,6 +1666,7 @@ command cER = {
     { "tutor", NULL, N_("Control tutor setup"), NULL, acSetTutor }, 
     { "variation", NULL, N_("Set which variation of backgammon is used"), 
       NULL, acSetVariation }, 
+    { "vsync3d", CommandSetVsync3d, N_("Turn vertical sync on/off"), szONOFF, &cOnOff },
 #if USE_GTK
     { "warning", CommandSetWarning, N_("Turn warnings on or off"), szWARNYN, NULL},
 #endif
@@ -2251,7 +2253,7 @@ extern int ParsePlayer( char *sz )
    
    Returns -1 on failure, 0 on success, or 1 on success if the position
    specified has the opponent on roll (e.g. because it used "=n" notation). */
-extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc )
+extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
 {
 
     int i;
@@ -2428,9 +2430,8 @@ extern void UpdateSettings( void )
              1 setting is now on
     acceptable tokens are on/off yes/no true/false
  */
-extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
-		       char *szOff ) {
-
+extern int SetToggle( char *szName, int *pf, char *sz, char *szOn, char *szOff )
+{
     char *pch = NextToken( &sz );
     int cch;
     
@@ -2445,7 +2446,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
     
     if( !strcasecmp( "on", pch ) || !strncasecmp( "yes", pch, cch ) ||
 	!strncasecmp( "true", pch, cch ) ) {
-	if( !*pf ) {
+	if( *pf != TRUE ) {
 	    *pf = TRUE;
 	    UpdateSetting( pf );
 	}
@@ -2457,7 +2458,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 
     if( !strcasecmp( "off", pch ) || !strncasecmp( "no", pch, cch ) ||
 	!strncasecmp( "false", pch, cch ) ) {
-	if( *pf ) {
+	if( *pf != FALSE ) {
 	    *pf = FALSE;
 	    UpdateSetting( pf );
 	}
@@ -2628,7 +2629,7 @@ extern void HandleCommand( char *sz, command *ac )
 	HandleCommand( sz, pc->pc );
 }
 
-extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
+extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
 {
 
   int i, j;
@@ -2780,7 +2781,7 @@ extern void ShowBoard( void )
     if( ms.gs == GAME_NONE ) {
 #if USE_GTK
 	if( fX ) {
-	    int anBoardTemp[ 2 ][ 25 ];
+	    TanBoard anBoardTemp;
 	    InitBoard( anBoardTemp, ms.bgv );
 
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
@@ -2998,7 +2999,8 @@ extern void CommandEval( char *sz )
 {
 
     char szOutput[ 4096 ];
-    int n, an[ 2 ][ 25 ];
+    int n;
+	TanBoard an;
     cubeinfo ci;
     
     if( !*sz && ms.gs == GAME_NONE ) {
@@ -3707,8 +3709,8 @@ Shutdown( void ) {
 
   RenderFinalise();
 
-  free(rngctxCurrent);
-  free(rngctxRollout);
+  g_free(rngctxCurrent);
+  g_free(rngctxRollout);
 
   FreeMatch();
   ClearMatch();
@@ -3823,11 +3825,11 @@ extern void CommandQuit( char *sz )
 
 
 static move *
-GetMove ( int anBoard[ 2 ][ 25 ] ) {
+GetMove ( TanBoard anBoard ) {
 
   int i;
   unsigned char auch[ 10 ];
-  int an[ 2 ][ 25 ];
+  TanBoard an;
 
   if ( memcmp ( &ms, &sm.ms, sizeof ( matchstate ) ) )
     return NULL;
@@ -4202,7 +4204,7 @@ extern void CommandCopy (char *sz)
   char szCube[32], szPlayer0[MAX_NAME_LEN + 3], szPlayer1[MAX_NAME_LEN + 3],
     szScore0[35], szScore1[35], szMatch[35];
   char szRolled[ 32 ];
-  int anBoardTemp[ 2 ][ 25 ];
+  TanBoard anBoardTemp;
     
   aps[0] = szPlayer0;
   aps[6] = szPlayer1;
@@ -4633,6 +4635,10 @@ extern void CommandSaveSettings( char *szParam )
 
 #if USE_MULTITHREAD
     fprintf( pf, "set threads %d\n", MT_GetNumThreads() );
+#endif
+#if USE_BOARD3D
+	if (fSync != -1)
+		fprintf( pf, "set vsync3d %s\n", fSync ? "yes" : "no" );
 #endif
 
     fprintf( pf, "set clockwise %s\n"
@@ -5727,7 +5733,7 @@ ProgressValueAdd ( int iValue ) {
 }
 
 
-static void Progress( void )
+extern void Progress( void )
 {
 
     static int i = 0;
@@ -5902,26 +5908,6 @@ static void version(void)
 		g_print("%s\n", gettext(pch));
 }
 
-
-#if WIN32
-
-extern char * getInstallDir( void )
-{
-
-  char buf[_MAX_PATH];
-  char *p;
-  static char *ret = NULL;
-  if (ret)
-	  return (ret);
-  GetModuleFileName(NULL, buf, sizeof(buf));
-  p = MAX(strrchr(buf, '/'), strrchr(buf, '\\'));
-  if (p)
-	  *p = '\0';
-  ret = g_strdup(buf);
-  return ret;
-}
-#endif
-
 #if HAVE_LIBREADLINE
 static char *get_readline(void)
 {
@@ -6072,8 +6058,10 @@ static void PushSplash(char *unused, char *heading, char *message, int wait)
 #endif
 
 
-static void init_nets(int fNoBearoff)
+static void init_nets(int nNewWeights, int fNoBearoff)
 {
+	int n;
+
 	char *gnubg_weights = g_build_filename(PKGDATADIR, "gnubg.weights", NULL);
 	char *gnubg_weights_binary =  g_build_filename(PKGDATADIR, "gnubg.wd", NULL);
 	EvalInitialise(gnubg_weights, gnubg_weights_binary, fNoBearoff, 
@@ -6164,7 +6152,7 @@ int main(int argc, char *argv[])
 	char *met = NULL;
 
 	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-	int fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
+	int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
 	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE, debug = FALSE;
 
@@ -6175,6 +6163,8 @@ int main(int argc, char *argv[])
 		 N_("Evaluate commands in FILE and exit"), "FILE"},
 		{"lang", 'l', 0, G_OPTION_ARG_STRING, &lang,
 		 N_("Set language to LANG"), "LANG"},
+		{"new-weights", 'n', 0, G_OPTION_ARG_INT, &nNewWeights,
+		 N_("Create new neural net (of size N)"), "N"},
 		{"python", 'p', 0, G_OPTION_ARG_FILENAME, &pchPythonScript,
 		 N_("Evaluate Python code in FILE and exit"), "FILE"},
 		{"quiet", 'q', 0, G_OPTION_ARG_NONE, &fQuiet,
@@ -6287,12 +6277,12 @@ int main(int argc, char *argv[])
 	InitMatchEquity(met);
 	g_free(met);
 
-#ifdef USE_MULTITHREAD
+#if USE_MULTITHREAD
 	PushSplash(pwSplash, _("Initialising"), _("threads"), 500);
 	MT_InitThreads();
 #endif
 	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 500);
-        init_nets(fNoBearoff);
+        init_nets(nNewWeights, fNoBearoff);
 
 #if defined(WIN32) && HAVE_SOCKETS
 	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 500);
@@ -6316,6 +6306,10 @@ int main(int argc, char *argv[])
 
 	fflush(stdout);
 	fflush(stderr);
+
+	/* Make sure threads started */
+	MT_StartThreads();
+
 	/* start-up sound */
 	playSound(SOUND_START);
 
@@ -6447,9 +6441,9 @@ extern void CommandMWC2Eq ( char *sz )
 }
 
 static void 
-swapGame ( list *plGame ) {
+swapGame ( listOLD *plGame ) {
 
-  list *pl;
+  listOLD *pl;
   moverecord *pmr;
   int n;
 
@@ -6510,7 +6504,7 @@ swapGame ( list *plGame ) {
 extern void CommandSwapPlayers ( char *sz )
 {
 
-  list *pl;
+  listOLD *pl;
   char *pc;
   int n;
 
@@ -6603,7 +6597,7 @@ setDefaultFileName (char *path)
 }
 
 extern void
-DisectPath (char *path, char *extension, char **name, char **folder)
+DisectPath (const char *path, const char *extension, char **name, char **folder)
 {
   char *fnn, *pc;
   if (!path)
@@ -6814,7 +6808,7 @@ CommandClearHint( char *sz ) {
  */
 
 extern int
-EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma, 
+EPC( TanBoard anBoard, float *arEPC, float *arMu, float *arSigma, 
      int *pfSource, const int fOnlyBearoff ) {
 
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +

@@ -27,7 +27,6 @@
 
 #if USE_GTK
 #include "gtkgame.h"
-#include "gtkrelational.h"
 #include "gtkwindows.h"
 #endif
 
@@ -158,7 +157,7 @@ static int GameOver(void)
 {
   	int anFinalScore[2];
 	int nMatch;
-	const list* firstGame = lMatch.plNext->p;
+	const listOLD* firstGame = lMatch.plNext->p;
 	if (firstGame)
 	{
 		const moverecord* pmr = firstGame->plNext->p;

@@ -45,7 +45,7 @@ typedef struct _epcwidget {
 typedef struct _racewidget {
 	GtkAdjustment *padjTrials;
 	GtkWidget *pwRollout, *pwOutput;
-	int anBoard[2][25];
+	TanBoard anBoard;
 	epcwidget epcwOSR;
 	int fMove;
 } racewidget;
@@ -70,35 +70,35 @@ static GtkWidget *monospace_text(const char *szOutput)
 	return pwText;
 }
 
-static GtkWidget *KleinmanPage(int anBoard[2][25], const int fMove)
+static GtkWidget *KleinmanPage(TanBoard anBoard, const int fMove)
 {
 	char sz[500];
 	show_kleinman(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *TwoSidedPage(int anBoard[2][25], const int fMove)
+static GtkWidget *TwoSidedPage(TanBoard anBoard, const int fMove)
 {
 	char sz[500];
 	show_bearoff(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *KeithPage(int anBoard[2][25], const int fMove)
+static GtkWidget *KeithPage(TanBoard anBoard, const int fMove)
 {
 	char sz[500];
 	show_keith(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *Pip8912Page(int anBoard[2][25], const int fMove)
+static GtkWidget *Pip8912Page(TanBoard anBoard, const int fMove)
 {
 	char sz[500];
 	show_8912(anBoard, sz);
 	return monospace_text(sz);
 }
 
-static GtkWidget *ThorpPage(int anBoard[2][25], const int fMove)
+static GtkWidget *ThorpPage(TanBoard anBoard, const int fMove)
 {
 	char sz[500];
 	show_thorp(anBoard, sz);
@@ -228,7 +228,7 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 }
 
 static GtkWidget *
-OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
+OSRPage ( TanBoard anBoard, racewidget *prw ) {
 
   GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pw;
@@ -328,7 +328,7 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
  */
 
 extern void
-GTKShowRace ( int anBoard[ 2 ][ 25 ] ) {
+GTKShowRace ( TanBoard anBoard ) {
 
   GtkWidget *pwDialog;
   GtkWidget *pwNotebook;

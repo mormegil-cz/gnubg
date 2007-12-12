@@ -319,7 +319,7 @@ extern int WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
 
 static int
 GenerateImage (renderimages * pri, renderdata * prd,
-	       int anBoard[2][25],
+	       TanBoard anBoard,
 	       const char *szName,
 	       const int nSize, const int nSizeX, const int nSizeY,
 	       const int nOffsetX, const int nOffsetY,
@@ -660,7 +660,7 @@ extern void CommandExportPositionJF (char *sz)
   FILE *fp;
   int i;
   unsigned char c;
-  int anBoard[2][25];
+  TanBoard anBoard;
 
   sz = NextToken (&sz);
 
@@ -809,12 +809,13 @@ extern void CommandExportPositionJF (char *sz)
   return;
 }
 
-static void ExportGameJF( FILE *pf, list *plGame, int iGame,
+static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
 			  int anScore[ 2 ] ) {
-    list *pl;
+    listOLD *pl;
     moverecord *pmr;
     char sz[ 128 ];
-    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
+    int i = 0, n, nFileCube = 1, fWarned = FALSE;
+	TanBoard anBoard;
 
     /* FIXME It would be nice if this function was updated to use the
        new matchstate struct and ApplyMoveRecord()... but otherwise
@@ -959,7 +960,7 @@ extern void CommandExportMatchMat( char *sz ) {
 
     FILE *pf;
     int i, anScore[ 2 ];
-    list *pl;
+    listOLD *pl;
 
     /* FIXME what should be done if nMatchTo == 0? */
     

@@ -27,6 +27,7 @@
 #include "sound.h"
 #include "export.h"
 #include "gtkgame.h"
+#include "wglbuffer.h"
 #include "misc3d.h"
 
 #define MAX_FRAMES 10
@@ -42,14 +43,10 @@ static double testStartTime;
 static int numFrames;
 #define TEST_TIME 3000.0f
 
-
-
 static int stopNextTime;
 static int slide_move;
-static double animStartTime = 0;
+NTH_STATIC double animStartTime = 0;
 
-
-typedef int idleFunc(BoardData3d* bd3d);
 static guint idleId = 0;
 static idleFunc *pIdleFun;
 static BoardData *pIdleBD;
@@ -64,6 +61,7 @@ static gboolean idle(BoardData3d* bd3d)
 
 void StopIdle3d(const BoardData* bd, BoardData3d *bd3d)
 {	/* Animation has finished (or could have been interruptted) */
+	/* If interruptted - reset dice/moving piece details */
 	if (bd3d->shakingDice)
 	{
 		bd3d->shakingDice = 0;
@@ -85,7 +83,7 @@ void StopIdle3d(const BoardData* bd, BoardData3d *bd3d)
 	}
 }
 
-static void setIdleFunc(BoardData* bd, idleFunc* pFun)
+NTH_STATIC void setIdleFunc(BoardData* bd, idleFunc* pFun)
 {
 	if (idleId)
 	{
@@ -131,7 +129,7 @@ void CheckOpenglError(void)
 		g_print("OpenGL Error: %s\n", gluErrorString(glErr));
 }
 
-static void SetupLight3d(BoardData3d *bd3d, const renderdata* prd)
+NTH_STATIC void SetupLight3d(BoardData3d *bd3d, const renderdata* prd)
 {
 	float lp[4];
 	float al[4], dl[4], sl[4];
@@ -161,44 +159,74 @@ static void SetupLight3d(BoardData3d *bd3d, const renderdata* prd)
 
 	/* Shadow light position */
 	memcpy(bd3d->shadow_light_position, lp, sizeof(float[4]));
+	if (ShadowsInitilised(bd3d))
+	{
+		int i;
+		for (i = 0; i < NUM_OCC; i++)
+			draw_shadow_volume_extruded_edges(&bd3d->Occluders[i], bd3d->shadow_light_position, GL_QUADS);
+	}
+}
+
+/* Determine if a particular extension is supported */
+typedef char *(WINAPI *fGetExtStr)(HDC);
+extern int extensionSupported(const char *extension)
+{
+	static const char *extensionsString = NULL;
+	if (extensionsString == NULL)
+		extensionsString = (const char*)glGetString(GL_EXTENSIONS);
+
+	if ((extensionsString != NULL) && strstr(extensionsString, extension) != 0)
+		return TRUE;
+
+	if (strncasecmp(extension, "WGL_", strlen("WGL_")) == 0)
+	{	/* Look for wgl extension */
+		static const char *wglExtString = NULL;
+		if (wglExtString == NULL)
+		{
+			fGetExtStr wglGetExtensionsStringARB;
+			wglGetExtensionsStringARB = (fGetExtStr)wglGetProcAddress("wglGetExtensionsStringARB");
+			if (!wglGetExtensionsStringARB)
+			{
+				wglExtString = "no wgl extenstions";
+				return FALSE;
+			}
+			wglExtString = wglGetExtensionsStringARB(wglGetCurrentDC());
+		}
+		if (strstr(wglExtString, extension) != 0)
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 #ifndef GL_VERSION_1_2
-/* Determine if a particular extension is supported */
-static int extensionSupported(const char *extension)
-{
-  static const GLubyte *extensions = NULL;
-  const GLubyte *start;
-  GLubyte *where, *terminator;
-
-  where = (GLubyte *) strchr(extension, ' ');
-  if (where || *extension == '\0')
-    return 0;
-
-  if (!extensions)
-    extensions = glGetString(GL_EXTENSIONS);
-
-  start = extensions;
-  for (;;) {
-    where = (GLubyte *) strstr((const char *) start, extension);
-    if (!where)
-      break;
-    terminator = where + strlen(extension);
-    if (where == start || *(where - 1) == ' ') {
-      if (*terminator == ' ' || *terminator == '\0') {
-        return 1;
-      }
-    }
-    start = terminator;
-  }
-  return 0;
-}
-
 #ifndef GL_EXT_separate_specular_color
 #define GL_LIGHT_MODEL_COLOR_CONTROL_EXT    0x81F8
 #define GL_SEPARATE_SPECULAR_COLOR_EXT      0x81FA
 #endif
 #endif
+
+typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
+
+extern int setVSync(int state)
+{
+	static PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
+
+	if (state == -1)
+		return FALSE;
+
+	if (!wglSwapIntervalEXT)
+	{
+		if (!extensionSupported("WGL_EXT_swap_control"))
+			return FALSE;
+
+		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress("wglSwapIntervalEXT");
+	}
+	if ((wglSwapIntervalEXT == NULL) || (wglSwapIntervalEXT(state) == 0))
+		return FALSE;
+
+	return TRUE;
+}
 
 static void CreateTexture(unsigned int* pID, int width, int height, const unsigned char* bits)
 {
@@ -240,6 +268,8 @@ static void CreateDotTexture(unsigned int *pDotTexture)
 	CreateTexture(pDotTexture, DOT_SIZE, DOT_SIZE, data);
 	free(data);
 }
+
+static int UseBufferRegions = -1;
 
 void InitGL(const BoardData *bd)
 {
@@ -289,6 +319,15 @@ void InitGL(const BoardData *bd)
 			glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
 		CreateDotTexture(&bd3d->dotTexture);
+
+		if (UseBufferRegions == -1)
+			UseBufferRegions = wglBufferInitialize();
+
+		if (UseBufferRegions == 1)
+		{
+			bd3d->wglBuffer = CreateBufferRegion(WGL_BACK_COLOR_BUFFER_BIT_ARB | WGL_DEPTH_BUFFER_BIT_ARB);
+			bd3d->fBuffers = (bd->bd3d->wglBuffer != NULL);
+		}
 	}
 }
 
@@ -396,31 +435,26 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		g_print("Texture %s not in texture info file\n", file);
 }
 
-void LoadTextureInfo(int FirstPass)
-{	/* May be called several times, no errors shown on first pass */
+void LoadTextureInfo()
+{
 	FILE* fp;
 	char *szFile;
 	char buf[BUF_SIZE];
 
-	if (FirstPass)
-		textures = NULL;
-	else if (g_list_length(textures) > 0)
-		return;	/* Ignore multiple calls after a successful load */
+	textures = NULL;
 
 	szFile = g_build_filename( PKGDATADIR, TEXTURE_FILE, NULL );
 	fp = fopen(szFile, "r");
 	g_free(szFile);
 	if (!fp)
 	{
-		if (!FirstPass)
-			g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);
+		g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);
 		return;
 	}
 
 	if (!fgets(buf, BUF_SIZE, fp) || atoi(buf) != TEXTURE_FILE_VERSION)
 	{
-		if (!FirstPass)
-			g_print("Error: Texture file (%s) out of date\n", TEXTURE_FILE);
+		g_print("Error: Texture file (%s) out of date\n", TEXTURE_FILE);
 		return;
 	}
 
@@ -1920,7 +1954,7 @@ static int idleAnimate(BoardData3d* bd3d)
 
 		if (!movePath(&bd3d->piecePath, animateDistance, pRotate, bd3d->movingPos))
 		{
-			int points[2][25];
+			TanBoard points;
 		    unsigned int moveStart = convert_point(animate_move_list[slide_move], animate_player);
 			unsigned int moveDest = convert_point(animate_move_list[slide_move + 1], animate_player);
 
@@ -2081,7 +2115,7 @@ void AnimateMove3d(BoardData *bd, BoardData3d *bd3d)
 	ResumeInput();
 }
 
-static int idleWaveFlag(BoardData3d* bd3d)
+NTH_STATIC int idleWaveFlag(BoardData3d* bd3d)
 {
 	BoardData *bd = pIdleBD;
 	float elapsedTime = (float)(get_time() - animStartTime);
@@ -2159,7 +2193,7 @@ float TestPerformance3d(BoardData* bd)
 	return (numFrames / (elapsedTime / 1000.0f));
 }
 
-static void EmptyPos(BoardData *bd)
+NTH_STATIC void EmptyPos(BoardData *bd)
 {	/* All checkers home */
 	int ip[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,-15};
 	memcpy(bd->points, ip, sizeof(bd->points));
@@ -2168,6 +2202,7 @@ static void EmptyPos(BoardData *bd)
 
 void CloseBoard3d(BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 {
+	bd3d->fBuffers = FALSE;
 	EmptyPos(bd);
 	bd3d->State = BOARD_CLOSED;
 	/* Turn off most things so they don't interfere when board closed/opening */
@@ -2214,6 +2249,8 @@ void SetupViewingVolume3d(const BoardData *bd, BoardData3d* bd3d, const renderda
 	calculateBackgroundSize(bd3d, viewport);
 	if (memcmp(tempMatrix, bd3d->modelMatrix, sizeof(float[16])))
 		RestrictiveRedraw();
+
+	RerenderBase(bd3d);
 }
 
 void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a)
@@ -2236,7 +2273,8 @@ void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, flo
 
 	pMat->alphaBlend = (a != 1) && (a != 0);
 
-	pMat->pTexture = 0;
+	pMat->textureInfo = NULL;
+	pMat->pTexture = NULL;
 }
 
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a)
@@ -2302,12 +2340,13 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 		for (j = 0; j < 15; j++)
 			bd3d->pieceRotation[i][j] = rand() % 360;
 
+	bd3d->shadowsInitialised = FALSE;
 	bd3d->State = BOARD_OPEN;
 	bd3d->moving = 0;
 	bd3d->shakingDice = 0;
 	bd->drag_point = -1;
 	bd->DragTargetHelp = 0;
-	setDicePos(bd, bd3d);
+	bd3d->fBasePreRendered = FALSE;
 
 	SetupSimpleMat(&bd3d->gapColour, 0.f, 0.f, 0.f);
 	SetupSimpleMat(&bd3d->logoMat, 1.f, 1.f, 1.f);
@@ -2324,6 +2363,8 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 	bd3d->numberFont = bd3d->cubeFont = NULL;
 
 	memset(bd3d->modelMatrix, 0, sizeof(float[16]));
+
+	bd->bd3d->fBuffers = FALSE;
 }
 
 #if HAVE_LIBPNG
@@ -2347,6 +2388,7 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	CopySettings3d(bd, &bdpw);
 	bdpw.rd = &rd;
 	rd.nSize = nSize;
+	ClearTextures(bd->bd3d);
 
 	if ((puch = (unsigned char *) malloc(nSizeX * nSizeY * nSize * nSize * 3)) == NULL)
 	{
@@ -2369,6 +2411,12 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	g_object_unref(pixbuf);
 	g_object_unref(ppm);
 	free(puch);
+
+	// Tidy up main board
+	ClearTextures(bd->bd3d);
+	GetTextures(bd->bd3d, bd->rd);
+	preDraw3d(bd, bd->bd3d, bd->rd);
+	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 }
 
 #endif
@@ -2398,20 +2446,59 @@ extern int Animating3d(const BoardData3d* bd3d)
 	return (bd3d->shakingDice || bd3d->moving);
 }
 
-extern gboolean display_is_3d (renderdata *prd)
+extern void RerenderBase(BoardData3d* bd3d)
 {
-	gint fdt = prd -> fDisplayType;
-	g_assert( fdt == DT_2D ||  fdt == DT_3D);
-	g_assert( fdt == DT_2D || gtk_gl_init_success);
-	if (fdt == DT_3D)
-		return TRUE;
-	else
-		return FALSE;
+	bd3d->fBasePreRendered = FALSE;
 }
 
-extern gboolean display_is_2d (renderdata *prd)
+extern gboolean display_is_3d (const renderdata *prd)
 {
-	gint fdt = prd -> fDisplayType;
+	g_assert(prd->fDisplayType == DT_2D || (prd->fDisplayType == DT_3D && gtk_gl_init_success));
+	return (prd->fDisplayType == DT_3D);
+}
+
+extern gboolean display_is_2d (const renderdata *prd)
+{
+	displaytype fdt = prd -> fDisplayType;
 	g_assert( fdt == DT_2D ||  fdt == DT_3D);
 	return( fdt == DT_2D ? TRUE : FALSE);
+}
+
+void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
+void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
+
+extern void Draw3d(const BoardData* bd)
+{	/* Render board: quick drawing, standard or 2 passes for shadows */
+	if (bd->rd->quickDraw)
+	{	/* Quick drawing mode */
+		if (numRestrictFrames >= 0)
+		{
+			if (numRestrictFrames > 0)
+				RestrictiveRender(bd, bd->bd3d, bd->rd);
+			return;
+		}
+		numRestrictFrames = 0;
+	}
+	else if (bd->bd3d->fBuffers)
+	{
+		if (bd->bd3d->fBasePreRendered)
+			RestoreBufferRegion(bd->bd3d->wglBuffer, 0, 0, bd->bd3d->drawing_area3d->allocation.width, bd->bd3d->drawing_area3d->allocation.height);
+		else
+		{
+			drawBasePreRender(bd, bd->bd3d, bd->rd);
+			bd->bd3d->fBasePreRendered = TRUE;
+		}
+
+		if (bd->rd->showShadows)
+			shadowDisplay(drawBoardTop, bd, bd->bd3d, bd->rd);
+		else
+			drawBoardTop(bd, bd->bd3d, bd->rd);
+	}
+	else
+	{
+		if (bd->rd->showShadows)
+			shadowDisplay(drawBoard, bd, bd->bd3d, bd->rd);
+		else
+			drawBoard(bd, bd->bd3d, bd->rd);
+	}
 }

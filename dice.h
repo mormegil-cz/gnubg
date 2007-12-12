@@ -36,7 +36,7 @@ extern rng rngCurrent;
 extern void *rngctxCurrent;
 
 
-extern void *InitRNG( int *pnSeed, int *pfInitFrom,
+extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
                       const int fSet, const rng rngx );
 extern void
 CloseRNG( const rng rngx, void *rngctx );
@@ -45,7 +45,7 @@ extern void PrintRNGSeed( const rng rngx, void *rngctx );
 extern void PrintRNGCounter( const rng rngx, void *rngctx );
 extern void InitRNGSeed( int n, const rng rngx, void *rngctx );
 extern int
-RNGSystemSeed( const rng rngx, void *p, int *pnSeed );
+RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed );
 
 extern int 
 RollDice( unsigned int anDice[ 2 ], const rng rngx, void *rngctx );

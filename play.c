@@ -78,7 +78,7 @@ char *aszLuckType[] = {
   N_("lucky"),
   N_("very lucky") };
 char *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
-list lMatch, *plGame, *plLastMove;
+listOLD lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
 
@@ -132,7 +132,7 @@ static int
 CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest );
 
 
-static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, int anBoard[ 2 ][ 25], 
+static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, TanBoard anBoard, 
                     const cubeinfo *pci, const evalcontext *pec);
 
 #if USE_GTK
@@ -265,7 +265,7 @@ PlayMove(matchstate* pms, int const anMove[ 8 ], int const fPlayer)
 }
 
 static void
-ApplyGameOver(matchstate* pms, const list* plGame)
+ApplyGameOver(matchstate* pms, const listOLD* plGame)
 {
   moverecord *pmr = (moverecord *) plGame->plNext->p;
   xmovegameinfo* pmgi = &pmr->g;
@@ -280,7 +280,7 @@ ApplyGameOver(matchstate* pms, const list* plGame)
 }
 
 extern void
-ApplyMoveRecord(matchstate* pms, const list* plGame, const moverecord* pmr)
+ApplyMoveRecord(matchstate* pms, const listOLD* plGame, const moverecord* pmr)
 {
     int n;
     moverecord *pmrx = (moverecord *) plGame->plNext->p;
@@ -451,7 +451,7 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 extern void
 CalculateBoard( void )
 {
-  list *pl;
+  listOLD *pl;
 
   pl = plGame;
   do {
@@ -490,7 +490,7 @@ static void FreeMoveRecord( moverecord *pmr ) {
     free( pmr );
 }
 
-static void FreeGame( list *pl ) {
+static void FreeGame( listOLD *pl ) {
 
     while( pl->plNext != pl ) {
 	FreeMoveRecord( pl->plNext->p );
@@ -500,9 +500,9 @@ static void FreeGame( list *pl ) {
     free( pl );
 }
 
-static int PopGame( list *plDelete, int fInclusive ) {
+static int PopGame( listOLD *plDelete, int fInclusive ) {
 
-    list *pl;
+    listOLD *pl;
     int i;
     
     for( i = 0, pl = lMatch.plNext; pl != &lMatch && pl->p != plDelete;
@@ -532,9 +532,9 @@ static int PopGame( list *plDelete, int fInclusive ) {
     return 0;
 }
 
-static int PopMoveRecord( list *plDelete ) {
+static int PopMoveRecord( listOLD *plDelete ) {
 
-    list *pl;
+    listOLD *pl;
     
     for( pl = plGame->plNext; pl != plGame && pl != plDelete; pl = pl->plNext )
 	;
@@ -842,7 +842,7 @@ static int NewGame( void ) {
     return 0;
 }
 
-static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
+static void ShowAutoMove( TanBoard anBoard, int anMove[ 8 ] ) {
 
     char sz[ 40 ];
 
@@ -856,7 +856,7 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 		 FormatMove( sz, anBoard, anMove ) );
 }
 
-static int ComputerTurn( void ) {
+extern int ComputerTurn( void ) {
 
   moverecord *pmr;
   cubeinfo ci;
@@ -864,7 +864,7 @@ static int ComputerTurn( void ) {
 #if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
   int i, c, fTurnOrig;
-  int anBoardTemp[ 2 ][ 25 ];
+  TanBoard anBoardTemp;
 #endif
 
   if( fAction )
@@ -1108,7 +1108,7 @@ static int ComputerTurn( void ) {
       return 0;
 
     } else {
-      int anBoardMove[ 2 ][ 25 ];
+      TanBoard anBoardMove;
       float arResign[ NUM_ROLLOUT_OUTPUTS ];
       int nResign;
       static char achResign[ 3 ] = { 'n', 'g', 'b' };
@@ -2486,12 +2486,13 @@ extern void CommandDrop( char *sz ) {
     TurnDone();
 }
 
-static void DumpGameList(char *szOut, list *plGame) {
+static void DumpGameList(char *szOut, listOLD *plGame) {
 
-    list *pl;
+    listOLD *pl;
     moverecord *pmr;
     char sz[ 128 ];
-    int i = 0, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
+    int i = 0, nFileCube = 1, fWarned = FALSE;
+	TanBoard anBoard;
 
     InitBoard( anBoard, ms.bgv );
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
@@ -2655,7 +2656,8 @@ static skilltype GoodMove (moverecord *pmr) {
 extern void 
 CommandMove( char *sz ) {
 
-    int j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ], an[ 8 ];
+    int j, an[ 8 ];
+	TanBoard anBoardNew, anBoardTest;
 	unsigned int i;
 	int c;
     movelist ml;
@@ -3054,9 +3056,9 @@ static void UpdateGame( int fShowBoard ) {
 }
 
 #if USE_GTK
-static int GameIndex( list *plGame ) {
+static int GameIndex( listOLD *plGame ) {
 
-    list *pl;
+    listOLD *pl;
     int i;
 
     for( i = 0, pl = lMatch.plNext; pl->p != plGame && pl != &lMatch;
@@ -3070,10 +3072,10 @@ static int GameIndex( list *plGame ) {
 }
 #endif
 
-extern void ChangeGame( list *plGameNew ) {
+extern void ChangeGame( listOLD *plGameNew ) {
 
 #if USE_GTK
-    list *pl;
+    listOLD *pl;
 #endif
 
 	if (!plGame)
@@ -3111,7 +3113,7 @@ static void CommandNextGame( char *sz ) {
 
     int n;
     char *pch;
-    list *pl;
+    listOLD *pl;
     
     if( ( pch = NextToken( &sz ) ) )
 	n = ParseNumber( &pch );
@@ -3275,7 +3277,7 @@ InternalCommandNext(int fMarkedMoves, int n)
   
   if( fMarkedMoves ) {
 	moverecord* pmr = 0;
-	list* p =  plLastMove->plNext;
+	listOLD* p =  plLastMove->plNext;
 
 	/* we need to increment the count if we're pointing to a marked move */
 	if ( p->p && MoveIsMarked( (moverecord *) p->p ) )
@@ -3386,7 +3388,7 @@ static void CommandPreviousGame( char *sz ) {
 
     int n;
     char *pch;
-    list *pl;
+    listOLD *pl;
     
     if( ( pch = NextToken( &sz ) ) )
 	n = ParseNumber( &pch );
@@ -3477,7 +3479,7 @@ extern void CommandPrevious( char *sz ) {
     int n;
     char *pch;
     int fMarkedMoves = FALSE;
-    list *p;
+    listOLD *p;
     moverecord *pmr = NULL;
     
     if( !plGame ) {
@@ -4209,7 +4211,7 @@ getCurrentMoveRecord ( int *pfHistory ) {
 }
 
 static void
-OptimumRoll ( int anBoard[ 2 ][ 25 ], 
+OptimumRoll ( TanBoard anBoard, 
               const cubeinfo *pci, const evalcontext *pec,
               const int fBest, unsigned int anDice[ 2 ] );
 
@@ -4260,7 +4262,7 @@ CompareRollEquity( const void *p1, const void *p2 ) {
 }
 
 static void
-OptimumRoll ( int anBoard[ 2 ][ 25 ], 
+OptimumRoll ( TanBoard anBoard, 
               const cubeinfo *pci, const evalcontext *pec,
               const int fBest, unsigned int anDice[ 2 ] ) {
 
@@ -4297,9 +4299,9 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
 
 }
 
-static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, int anBoard[ 2 ][ 25], 
+static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, TanBoard anBoard, 
                     const cubeinfo *pci, const evalcontext *pec) {
-    int anBoardTemp[ 2 ][ 25 ];
+    TanBoard anBoardTemp;
     cubeinfo ciOpp;
 
     memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
@@ -4354,24 +4356,24 @@ moverecord *LinkToDouble( moverecord *pmr) {
 extern int
 getFinalScore( int* anScore )
 {
-  list* plGame;
+  listOLD* plGame;
 
   /* find last game */
   for( plGame = lMatch.plNext; plGame->plNext->p; plGame = plGame->plNext )
 		;
 
-  if ( plGame->p && ( (list *) plGame->p )->plNext &&
-       ( (list *) plGame->p )->plNext->p &&
-       ( (moverecord *) ( (list *) plGame->p )->plNext->p )->mt == MOVE_GAMEINFO
+  if ( plGame->p && ( (listOLD *) plGame->p )->plNext &&
+       ( (listOLD *) plGame->p )->plNext->p &&
+       ( (moverecord *) ( (listOLD *) plGame->p )->plNext->p )->mt == MOVE_GAMEINFO
        )
     {
       anScore[ 0 ] = 
-        ( (moverecord *) ( (list *) plGame->p )->plNext->p )->g.anScore[ 0 ];
+        ( (moverecord *) ( (listOLD *) plGame->p )->plNext->p )->g.anScore[ 0 ];
       anScore[ 1 ] = 
-        ( (moverecord *) ( (list *) plGame->p )->plNext->p )->g.anScore[ 1 ];
-      if ( ( (moverecord *) ( (list *) plGame->p )->plNext->p )->g.fWinner != -1 ) 
-        anScore[ ( (moverecord *) ( (list *) plGame->p )->plNext->p )->g.fWinner ] +=
-          ( (moverecord *) ( (list *) plGame->p )->plNext->p )->g.nPoints;
+        ( (moverecord *) ( (listOLD *) plGame->p )->plNext->p )->g.anScore[ 1 ];
+      if ( ( (moverecord *) ( (listOLD *) plGame->p )->plNext->p )->g.fWinner != -1 ) 
+        anScore[ ( (moverecord *) ( (listOLD *) plGame->p )->plNext->p )->g.fWinner ] +=
+          ( (moverecord *) ( (listOLD *) plGame->p )->plNext->p )->g.nPoints;
       return TRUE;
     }
   

@@ -19,16 +19,12 @@
  * $Id$
  */
 
-#include <glib.h>
-#include <errno.h>
-#include <string.h>
-
 #include "config.h"
 #include "backgammon.h"
 #include "positionid.h"
-#include "matchid.h"
 #include "matchequity.h"
-
+#include "matchid.h"
+#include <string.h>
 
 /*
  * Calculate log2 of Cube value.
@@ -53,43 +49,45 @@ LogCube( const int n ) {
 
 
 static void
-SetBit ( unsigned char *pc, int bitPos, int iBit ) {
+SetBit ( unsigned char *pc, unsigned int bitPos, int test, unsigned int iBit ) {
 
-  const int k = bitPos / 8;
-  const int r = bitPos % 8;
+  const unsigned int k = bitPos / 8;
+  const unsigned char rbit = (unsigned char)(0x1 << (bitPos % 8));
 
-  unsigned char c,d;
+  unsigned char c;
 
-  c = ( iBit << r );
-  d = 0xFF ^ ( 0x1 << r );
-  pc [ k ] = ( pc[ k ] & d ) | c;
+  if (test & (0x1 << iBit))
+	  c = rbit;
+  else
+	  c = 0;
+  pc [ k ] = ( pc[ k ] & (0xFF ^ rbit) ) | c;
 
 }
 
 static void
-SetBits ( unsigned char *pc, int bitPos, int nBits, int iContent ) {
+SetBits ( unsigned char *pc, unsigned int bitPos, unsigned int nBits, int iContent ) {
 
-  int i, j;
+  unsigned int i;
 
   /* FIXME: rewrite SetBit, SetBits to be faster */
 
 
-  for ( i = 0, j = bitPos; i < nBits; i++, j++ ) {
+  for ( i = 0; i < nBits; i++) {
 
-    SetBit ( pc, j, ( ( 0x1 << i ) & iContent ) != 0 );
+    SetBit ( pc, bitPos + i, iContent, i );
     
   }
 
 }
 
 
-static int
-GetBits ( const unsigned char *pc, const int bitPos, 
-          const int nBits, int *piContent ) {
+static void
+GetBits ( const unsigned char *pc, const unsigned int bitPos, 
+          const unsigned int nBits, int *piContent ) {
 
 
-  int i, j;
-  int k, r;
+  unsigned int i, j;
+  unsigned int k, r;
 
   unsigned char c[2];
 
@@ -103,13 +101,11 @@ GetBits ( const unsigned char *pc, const int bitPos,
     k = j / 8;
     r = j % 8;
 
-    SetBit ( c, i, ( pc [ k ] & ( 0x1 << r ) ) != 0 );
+    SetBit ( c, i, pc[k], r );
 
   }
 
   *piContent = c[ 0 ] | ( c[ 1 ] << 8 );
-
-  return 0;
 }
 
 
@@ -119,7 +115,7 @@ extern char
     unsigned char *puch = auchKey;
     static char szID[ 13 ];
     char *pch = szID;
-    static char aszBase64[ 64 ] =
+    static char aszBase64[] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     int i;
     
@@ -151,7 +147,7 @@ MatchID ( const unsigned int anDice[ 2 ],
           const int nMatchTo,
           const int anScore[ 2 ],
           const int nCube, 
-          const int gs ) {
+          const gamestate gs ) {
 
   unsigned char auchKey[ 9 ];
 
@@ -161,7 +157,7 @@ MatchID ( const unsigned int anDice[ 2 ],
   SetBits ( auchKey, 4, 2, fCubeOwner & 0x3 );
   SetBits ( auchKey, 6, 1, fMove );
   SetBits ( auchKey, 7, 1, fCrawford );
-  SetBits ( auchKey, 8, 3, gs );
+  SetBits ( auchKey, 8, 3, (int)gs );
   SetBits ( auchKey, 11, 1, fTurn );
   SetBits ( auchKey, 12, 1, fDoubled );
   SetBits ( auchKey, 13, 2, fResigned );
@@ -260,12 +256,12 @@ MatchFromID ( int anDice[ 2 ],
   memset(ach, 0, sizeof(ach));
   /* decode base64 into key */
   for( i = 0; i < 12 && szMatchID[ i ]; i++ )
-    pch[ i ] = Base64( szMatchID[ i ] );
+    pch[ i ] = Base64( (unsigned char)szMatchID[ i ] );
 
   for( i = 0; i < 3; i++ ) {
-    *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
-    *puch++ = ( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
-    *puch++ = ( pch[ 2 ] << 6 ) | pch[ 3 ];
+    *puch++ = (unsigned char)( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
+    *puch++ = (unsigned char)( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
+    *puch++ = (unsigned char)( pch[ 2 ] << 6 ) | pch[ 3 ];
 
     pch += 4;
   }

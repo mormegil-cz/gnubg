@@ -28,7 +28,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#ifndef WIN32
 #include <stdlib.h>
+#endif
 
 #include "neuralnet.h"
 #include "sse.h"
@@ -224,10 +226,8 @@ static inline NNEvalType NNevalAction(NNState *pnState)
       return NNEVAL_FROMBASE;
     }
 	}
-
-  /* never reached */
-  g_assert(0);
-  return NNEVAL_NONE;   /* for the picky compiler */
+	/* never reached */
+	return NNEVAL_NONE;   /* for the picky compiler */
 }
 
 extern int NeuralNetCreate( neuralnet *pnn, unsigned int cInput, unsigned int cHidden,

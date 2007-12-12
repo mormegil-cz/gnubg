@@ -23,6 +23,6 @@
 #define _GTKRACE_H_
 
 extern void
-GTKShowRace ( int anBoard[ 2 ][ 25 ] );
+GTKShowRace ( TanBoard anBoard );
 
 #endif

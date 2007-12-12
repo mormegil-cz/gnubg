@@ -122,13 +122,14 @@ extern void ExtStartParse( const char *s );
 void OutputWin32SocketError(const char* action)
 {
 	LPVOID lpMsgBuf;
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+	if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
 		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
 		NULL, WSAGetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf, 0, NULL);
-
-	outputerrf(_("Windows socket error (%s):\n%s"), action, (LPCTSTR)lpMsgBuf);
-	LocalFree(lpMsgBuf);
+		(LPTSTR) &lpMsgBuf, 0, NULL) != 0)
+	{
+		outputerrf(_("Windows socket error (%s):\n%s"), action, (LPCTSTR)lpMsgBuf);
+		LocalFree(lpMsgBuf);
+	}
 }
 #endif
 
@@ -374,8 +375,9 @@ static char *
 ExtEvaluation( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
-  int anBoard[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
+  int nMatchTo, anScore[ 2 ],
     anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford;
+  TanBoard anBoard;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo ci;
   int nScore, nScoreOpponent;
@@ -440,9 +442,10 @@ static char *
 ExtFIBSBoard( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
-  int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
+  int nMatchTo, anScore[ 2 ],
     anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
     anMove[ 8 ];
+  TanBoard anBoard, anBoardOrig;
   float arDouble[ NUM_CUBEFUL_OUTPUTS ],
     aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];

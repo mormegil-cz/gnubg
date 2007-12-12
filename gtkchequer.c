@@ -115,7 +115,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
 extern void ShowMove ( hintdata *phd, const int f )
 {
   char *sz;
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
 	if ( f )
 	{
 		move *pm;
@@ -377,7 +377,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 	move m;
 	move *pm;
 	char szMove[ 40 ];
-	int anBoard[ 2 ][ 25 ];
+	TanBoard anBoard;
 	GList *plSelList = MoveListGetSelectionList(phd);
 	if (!plSelList)
 		return;

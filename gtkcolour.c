@@ -30,9 +30,7 @@
 #define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( (pcp)->pwColourSel )
 #define COLOUR_SEL( pcp ) GTK_COLOR_SELECTION( COLOUR_SEL_DIA(pcp)->colorsel )
 
-static gpointer parent_class = NULL;
-
-static void set_gc_colour( GdkGC *gc, GdkColormap *pcm, GdkColor *col ) {
+static void set_gc_colour( GdkGC *gc, GdkColormap *notused, const GdkColor *col ) {
 
     gdk_gc_set_rgb_fg_color( gc, col );
 }
@@ -55,7 +53,7 @@ static void render_pixmap( GtkColourPicker *pcp ) {
     double opac;
     
     if( !pcp->ppm )
-	return;
+		return;
 
     /* FIXME different appearance if insensitive */
     
@@ -92,9 +90,8 @@ extern void gtk_colour_picker_set_has_opacity_control(GtkColourPicker *pcp, gboo
 	pcp->hasOpacity = f;
 }
 
-extern void gtk_colour_picker_set_colour( GtkColourPicker *pcp,
-					  gdouble *ar ) {
-
+extern void gtk_colour_picker_set_colour( GtkColourPicker *pcp, const gdouble *ar )
+{
     memcpy(pcp->arColour, ar, sizeof (pcp->arColour));
 
     render_pixmap( pcp );
@@ -108,21 +105,21 @@ extern void gtk_colour_picker_get_colour( GtkColourPicker *pcp,
     render_pixmap( pcp );
 }
 
-static void realize( GtkWidget *pwDraw, GtkColourPicker *pcp ) {
-
+static void realize( const GtkWidget *pwDraw, GtkColourPicker *pcp )
+{
     pcp->ppm = gdk_pixmap_new( pwDraw->window, 16, 16, -1 );
     gdk_window_set_back_pixmap( pwDraw->window, pcp->ppm, FALSE );
 
     render_pixmap( pcp );
 }
 
-static void colour_changed( GtkWidget *pw, GtkColourPicker *pcp ) {
-
+static void colour_changed( GtkWidget *notused, GtkColourPicker *pcp )
+{
     gtk_color_selection_get_color( COLOUR_SEL( pcp ), pcp->arColour );
     render_pixmap( pcp );
 }
 
-static void ok( GtkWidget *pw, GtkColourPicker *pcp )
+static void ok( GtkWidget *notused, GtkColourPicker *pcp )
 {
 	gtk_window_set_modal( GTK_WINDOW( COLOUR_SEL_DIA( pcp ) ), FALSE );
 	gtk_color_selection_get_color( COLOUR_SEL( pcp ), pcp->arColour );
@@ -131,7 +128,7 @@ static void ok( GtkWidget *pw, GtkColourPicker *pcp )
 	(pcp->func)(GTK_WIDGET(pcp->data));
 }
 
-static void cancel( GtkWidget *pw, GtkColourPicker *pcp )
+static void cancel( GtkWidget *notused, GtkColourPicker *pcp )
 {
 	/* Restore original colour */
 	memcpy(pcp->arColour, pcp->arOrig, sizeof (pcp->arColour));
@@ -142,13 +139,11 @@ static void cancel( GtkWidget *pw, GtkColourPicker *pcp )
 	pcp->pwColourSel = NULL;
 }
 
-static gboolean delete_event( GtkWidget *pw, GdkEvent *pev,
-			      GtkColourPicker *pcp ) {
-
+static gboolean delete_event( GtkWidget *pw, GdkEvent *notused, GtkColourPicker *pcp )
+{
     cancel(pw, pcp);
     return TRUE;
 }
-
 
 static void gtk_colour_picker_init( GtkColourPicker *pcp ) {
 
@@ -202,21 +197,19 @@ static void clicked( GtkButton *pb ) {
     
     /* If there is a grabbed window, set new dialog as modal */
     if( gtk_grab_get_current() )
-	gtk_window_set_modal( GTK_WINDOW( pwDia ), TRUE );
+		gtk_window_set_modal( GTK_WINDOW( pwDia ), TRUE );
 }
 
-static void gtk_colour_picker_class_init( GtkColourPickerClass *pc ) {
-
-    parent_class = gtk_type_class( GTK_TYPE_BUTTON );
-
+static void gtk_colour_picker_class_init( GtkColourPickerClass *pc )
+{
     GTK_BUTTON_CLASS( pc )->clicked = clicked;
 }
 
 extern GtkType gtk_colour_picker_get_type( void ) {
 
-    static GtkType t;
+    static GtkType t = 0;
     static const GtkTypeInfo ti = {
-	"GtkColourPicker",
+	(char*)"GtkColourPicker",
 	sizeof( GtkColourPicker ),
 	sizeof( GtkColourPickerClass ),
 	(GtkClassInitFunc) gtk_colour_picker_class_init,
@@ -224,8 +217,8 @@ extern GtkType gtk_colour_picker_get_type( void ) {
 	NULL, NULL, NULL
     };
     
-    if( !t )
-	t = gtk_type_unique( GTK_TYPE_BUTTON, &ti );
+    if (t == 0)
+		t = gtk_type_unique( GTK_TYPE_BUTTON, &ti );
 
     return t;
 }

@@ -35,7 +35,7 @@
 
 #include <gtk/gtk.h>
 
-#if defined(WIN32) && (defined(__INTEL_COMPILER) || defined(_MSC_VER))
+#if defined(WIN32)
 /* MS gl.h needs windows.h to be included first */
 #include <windows.h>
 #endif
@@ -54,13 +54,13 @@
 #include "gtkwindows.h"
 
 #include "model.h"
-#include "backgammon.h"
 #include "drawboard.h"	/* for fClockwise decl */
 
 #include <glib/gi18n.h>
 
+extern GdkGLConfig *getglconfigSingle(void);	/* Odd function needs to be defined here */
+
 /* float versions (to quiet compiler warnings) */
-#define sqrtf(arg) (float)sqrt((double)(arg))
 #define powi(arg1, arg2) (int)pow((double)(arg1), (double)(arg2))
 #define fabsf(arg) (float)fabs((double)(arg))
 
@@ -69,13 +69,6 @@
 #define zFar 70.0
 
 extern int numRestrictFrames;
-
-typedef struct _DiceRotation
-{
-	float xRotStart, yRotStart;
-	float xRot, yRot;
-	float xRotFactor, yRotFactor;
-} DiceRotation;
 
 typedef enum _BoardState
 {
@@ -175,10 +168,14 @@ struct _BoardData3d
 
 	/* Shadow casters */
 	Occluder Occluders[NUM_OCC];
-
 	float shadow_light_position[4];
+	int shadowsInitialised;
+	int fBasePreRendered;
+	int fBuffers;
 
 	float ***boardPoints;	/* Used for rounded corners */
+
+	HANDLE wglBuffer;
 
 	/* Textures */
 #define MAX_TEXTURES 10
@@ -208,12 +205,6 @@ struct _BoardData3d
 /* Draw board parts (boxes) specially */
 enum /*boxType*/ {BOX_ALL = 0, BOX_NOSIDES = 1, BOX_NOENDS = 2, BOX_SPLITTOP = 4, BOX_SPLITWIDTH = 8};
 
-/* Work out which sides of dice to draw */
-typedef struct _diceTest
-{
-	int top, bottom, side[4];
-} diceTest;
-
 struct _ClipBox
 {
 	float x;
@@ -221,5 +212,13 @@ struct _ClipBox
 	float xx;
 	float yy;
 };
+/* functions used in test harness (static in gnubg) */
+#ifndef TEST_HARNESS
+#define NTH_STATIC static
+#else
+#define NTH_STATIC extern
+extern void TestHarnessDraw(const BoardData *bd);
+#endif
+
 
 #endif

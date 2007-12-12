@@ -257,7 +257,7 @@ static void CreateMessageWindow( void )
 GtkWidget *pwTheoryList = NULL;
 
 
-void UpdateTheoryData(BoardData* bd, int UpdateType, int points[2][25])
+void UpdateTheoryData(BoardData* bd, int UpdateType, TanBoard points)
 {
 	char* pc;
 
@@ -306,7 +306,7 @@ void UpdateTheoryData(BoardData* bd, int UpdateType, int points[2][25])
 
 	if (UpdateType & TT_RETURNHITS)
 	{
-		int anBoard[ 2 ][ 25 ];
+		TanBoard anBoard;
 		pc = NULL;
 		if ( bd->valid_move )
 		{
@@ -385,7 +385,7 @@ static void ShowHelp(GtkWidget * pwText, char *pStr)
 	if (cc) {
 		sprintf(szBuf, _("Unknown keyword: %s\n"), cc);
 		gtk_text_buffer_set_text(buffer, szBuf, -1);
-	} else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage))) {
+	} else if ((pc = FindHelpCommand(&cTop, pStr, szCommand, szUsage)) != NULL) {
 		gtk_text_buffer_set_text(buffer, "", -1);
 		gtk_text_buffer_get_end_iter(buffer, &iter);
 		if (!*pStr) {
@@ -560,7 +560,7 @@ static void Capitalize(char *str)
 static gboolean CommandKeyPress(GtkWidget * widget, GdkEventKey * event,
 				CommandEntryData_T *pData)
 {
-	short k = event->keyval;
+	short k = (short)event->keyval;
 
 	if (k == KEY_TAB) {	/* Tab press - auto complete */
 		command *pc;
@@ -572,7 +572,7 @@ static gboolean CommandKeyPress(GtkWidget * widget, GdkEventKey * event,
 							    (pData->
 							     pwEntry), 0,
 							    -1), szCommand,
-				     szUsage))) {
+				     szUsage)) != NULL) {
 			Capitalize(szCommand);
 			gtk_entry_set_text(GTK_ENTRY(pData->pwEntry),
 					   szCommand);
@@ -636,8 +636,8 @@ static GtkWidget *CreateCommandWindow( void )
 	return woPanel[WINDOW_COMMAND].pwWin;
 }
 
-static GtkWidget *CreateAnalysisWindow( void ) {
-
+static GtkWidget *CreateAnalysisWindow( void )
+{
     GtkWidget *pHbox, *sw;
     GtkTextBuffer *buffer;
 	if (!woPanel[WINDOW_ANALYSIS].docked)
@@ -657,11 +657,8 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 		gtk_container_add( GTK_CONTAINER( woPanel[WINDOW_ANALYSIS].pwWin ), pwPaned); 
 		gtk_window_add_accel_group( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ), pagMain );
     
-		gtk_paned_pack1( GTK_PANED( pwPaned ),
-				 pwAnalysis = gtk_label_new( NULL ), TRUE, FALSE );
-    
-		gtk_paned_pack2( GTK_PANED( pwPaned ),
-				 pHbox = gtk_hbox_new( FALSE, 0 ), FALSE, TRUE );
+		gtk_paned_pack1( GTK_PANED( pwPaned ), pwAnalysis = gtk_label_new( NULL ), TRUE, FALSE );
+    	gtk_paned_pack2( GTK_PANED( pwPaned ), pHbox = gtk_hbox_new( FALSE, 0 ), FALSE, TRUE );
 	}
 	else
 	{
@@ -1049,7 +1046,7 @@ void DockPanels(void)
 	{
 		for (i = 0; i < NUM_WINDOWS; i++)
 		{
-			if (woPanel[i].undockable && woPanel[i].showing)
+			if (woPanel[i].dockable && woPanel[i].showing)
 				woPanel[i].showFun();
 		}
 	}

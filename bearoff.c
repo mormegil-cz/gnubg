@@ -38,7 +38,7 @@
 #include <sys/stat.h>
 #endif
 
-
+#include "multithread.h"
 #include "positionid.h"
 #include "eval.h"
 #include "bearoff.h"
@@ -63,7 +63,7 @@ char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
 
 
 static void
-setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
+setGammonProb(TanBoard anBoard, int bp0, int bp1, float* g0, float* g1)
 {
   int i;
   unsigned short int prob[32];
@@ -76,7 +76,7 @@ setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
     tot1 += anBoard[1][i];
   }
 
-  {                                       g_assert( tot0 == 15 || tot1 == 15 ); }
+  { g_assert( tot0 == 15 || tot1 == 15 ); }
 
   *g0 = 0.0;
   *g1 = 0.0;
@@ -272,7 +272,27 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)() ) {
 }
 
 
+void ReadBearoffFile(bearoffcontext *pbc, unsigned int offset, unsigned char *buf, unsigned int nBytes)
+{
+#if USE_MULTITHREAD
+	MT_Exclusive();
+#endif
 
+	if ((lseek(pbc->h, offset, SEEK_SET ) < 0) || (read(pbc->h, buf, nBytes) < (int)nBytes))
+	{
+		if (errno)
+			perror("OS bearoff database");
+		else
+			fprintf(stderr, "error reading OS bearoff database");
+
+		memset(buf, 0, nBytes);
+		return;
+	}
+
+#if USE_MULTITHREAD
+	MT_Release();
+#endif
+}
 
 /*
  * BEAROFF_GNUBG: read two sided bearoff database
@@ -295,8 +315,7 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
     if ( pbc->fInMemory )
       pc = ((unsigned char *) pbc->p) + 40 + 2 * iPos * k;
     else {
-      lseek ( pbc->h, 40 + 2 * iPos * k, SEEK_SET );
-      read ( pbc->h, ac, k * 2 );
+		ReadBearoffFile(pbc, 40 + 2 * iPos * k, ac, k * 2);
       pc = ac;
     }
 
@@ -379,7 +398,7 @@ ReadExactBearoff ( bearoffcontext *pbc,
   int i;
   unsigned int nUs, nThem;
   int n = Combination ( pbc->nChequers + pbc->nPoints, pbc->nPoints );
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
 
   /* convert gnu backgammon position to ExactBearoff position */
 
@@ -421,11 +440,7 @@ ReadExactBearoff ( bearoffcontext *pbc,
 
   /* read from database */
 
-  if ( lseek ( pbc->h, offset, SEEK_SET ) < 0 ) 
-    return -1;
-
-  if ( read ( pbc->h, ac, 12 ) < 12 )
-    return -1;
+  ReadBearoffFile(pbc, offset, ac, 12);
 
   for ( i = 0; i < 4; ++i ) {
     ul = ac[ 3 * i ] | ac[ 3 * i + 1 ] << 8 | ac[ 3 * i + 2 ] << 16;
@@ -479,7 +494,7 @@ BearoffCubeful ( bearoffcontext *pbc,
 
 static int
 BearoffEvalTwoSided ( bearoffcontext *pbc, 
-                      int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+                      TanBoard anBoard, float arOutput[] ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -513,8 +528,7 @@ ReadHypergammon( bearoffcontext *pbc,
   if ( pbc->fInMemory )
     pc = ((unsigned char *)pbc->p) + 40 + x * iPos;
   else {
-    lseek ( pbc->h, 40 + x * iPos, SEEK_SET );
-    read ( pbc->h, ac, x );
+    ReadBearoffFile(pbc, 40 + x * iPos, ac, x);
     pc = ac;
   }
 
@@ -541,7 +555,7 @@ ReadHypergammon( bearoffcontext *pbc,
 
 static int
 BearoffEvalOneSided ( bearoffcontext *pbc, 
-                      int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+                      TanBoard anBoard, float arOutput[] ) {
 
   int i, j;
   float aarProb[ 2 ][ 32 ];
@@ -638,7 +652,7 @@ BearoffHyper( bearoffcontext *pbc,
 
 static int
 BearoffEvalHypergammon ( bearoffcontext *pbc, 
-                         int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+                         TanBoard anBoard, float arOutput[] ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -651,7 +665,7 @@ BearoffEvalHypergammon ( bearoffcontext *pbc,
 
 
 extern int
-BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+BearoffEval ( bearoffcontext *pbc, TanBoard anBoard, float arOutput[] ) {
 
   if (!pbc)
     return 0;
@@ -771,7 +785,7 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
 
 
 static int
-BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
+BearoffDumpTwoSided ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -812,7 +826,7 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
 
 static int
-BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
+BearoffDumpOneSided ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -945,7 +959,7 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
 
 static int
-BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
+BearoffDumpHyper( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -978,7 +992,7 @@ BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 }
 
 extern int
-BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
+BearoffDump ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 
   switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
@@ -1442,7 +1456,7 @@ fnd ( const float x, const float mu, const float sigma  ) {
 
      float xm = ( x - mu ) / sigma;
 
-     return 1.0f / ( sigma * sqrt ( 2.0 * G_PI ) ) * ((float)(exp ( - xm * xm / 2.0 )));
+     return 1.0f / ( sigma * sqrtf ( 2.0 * G_PI ) ) * ((float)(exp ( - xm * xm / 2.0 )));
 
    }
 
@@ -1463,18 +1477,7 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
   int i;
   float r;
 
-  if ( lseek ( pbc->h, 40 + nPosID * 16, SEEK_SET ) < 0 ) {
-    perror ( "OS bearoff database" );
-    return -1;
-  }
-
-  if ( read ( pbc->h, ac, 16 ) < 16 ) {
-    if ( errno )
-      perror ( "OS bearoff database" );
-    else
-      fprintf ( stderr, "error reading OS bearoff database" );
-    return -1; 
-  }
+  ReadBearoffFile(pbc, 40 + nPosID * 16, ac, 16);
 
   memcpy ( arx, ac, 16 );
 
@@ -1568,8 +1571,8 @@ CopyBytes ( unsigned short int aus[ 64 ],
 
 
 static unsigned short int *
-GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const unsigned int nPosID ) {
-
+GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const unsigned int nPosID )
+{
   unsigned char *puch;
   unsigned char ac[ 128 ];
   off_t iOffset;
@@ -1584,20 +1587,7 @@ GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const uns
     /* database is in memory */
     puch = ( (unsigned char *) pbc->p ) + 40 + nPosID * 8;
   else {
-    /* read from disk */
-    if ( lseek ( pbc->h, 40 + nPosID * 8, SEEK_SET ) < 0 ) {
-      perror ( "OS bearoff database" );
-      return NULL;
-    }
-
-    if ( read ( pbc->h, ac, 8 ) < 8 ) {
-      if ( errno )
-        perror ( "OS bearoff database" );
-      else
-        fprintf ( stderr, "error reading OS bearoff database" );
-      return NULL;
-    }
-
+    ReadBearoffFile(pbc, 40 + nPosID * 8, ac, 8);
     puch = ac;
   }
     
@@ -1646,19 +1636,7 @@ GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const uns
     puch = ( ( unsigned char *) pbc->p ) + iOffset;
   else {
     /* from disk */
-    if ( lseek ( pbc->h, iOffset, SEEK_SET ) < 0 ) {
-      perror ( "OS bearoff database" );
-      return NULL;
-    }
-    
-    if ( read ( pbc->h, ac, nBytes ) < nBytes ) {
-      if ( errno )
-        perror ( "OS bearoff database" );
-      else
-        fprintf ( stderr, "error reading OS bearoff database" );
-      return NULL;
-    }
-
+    ReadBearoffFile(pbc, iOffset, ac, nBytes);
     puch = ac;
 
   }
@@ -1666,7 +1644,6 @@ GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const uns
   CopyBytes ( aus, puch, nz, ioff, nzg, ioffg );
 
   return aus;
-
 }
 
 
@@ -1688,8 +1665,7 @@ GetDistUncompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const u
   else {
     /* from disk */
 
-    lseek ( pbc->h, iOffset, SEEK_SET );
-    read ( pbc->h, ac, pbc->fGammon ? 128 : 64 );
+	ReadBearoffFile(pbc, iOffset, ac, pbc->fGammon ? 128 : 64);
     puch = ac;
   }
 
@@ -1767,7 +1743,7 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
 
 
 extern int
-isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] ) {
+isBearoff ( bearoffcontext *pbc, TanBoard anBoard ) {
 
   int nOppBack = -1, nBack = -1;
   int n = 0, nOpp = 0;

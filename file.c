@@ -22,9 +22,10 @@
 #include "backgammon.h"
 #include <glib.h>
 #include <glib/gi18n.h>
+#ifndef _MSC_VER
 #include <string.h>
 #include <stdlib.h>
-//#include <glib/gstdio.h>
+#endif
 #include "file.h"
 
 ExportFormat export_format[] = {
@@ -59,14 +60,14 @@ ImportFormat import_format[] = {
 
 typedef struct _FileHelper {
 	FILE *fp;
-	int dataRead;
-	int dataPos;
+	unsigned int dataRead;
+	unsigned int dataPos;
 	char *data;
 } FileHelper;
 
 /* Data structures and functions for getting file type data */
 
-static FileHelper *OpenFileHelper(char *filename)
+static FileHelper *OpenFileHelper(const char *filename)
 {
 	FileHelper *fh;
 	if (!g_file_test(filename, G_FILE_TEST_EXISTS))
@@ -84,10 +85,10 @@ static FileHelper *OpenFileHelper(char *filename)
 	return fh;
 }
 
-static void CloseFileHelper(FileHelper * fh)
+static void CloseFileHelper(/*lint -e{818}*/FileHelper * fh)
 {
 	fclose(fh->fp);
-	g_free(fh->data);
+	free(fh->data);
 }
 
 static void fhReset(FileHelper * fh)
@@ -97,7 +98,7 @@ static void fhReset(FileHelper * fh)
 
 static void fhDataGetChar(FileHelper * fh)
 {
-	int read;
+	unsigned int numRead;
 	if (fh->dataPos < fh->dataRead)
 		return;
 
@@ -105,15 +106,15 @@ static void fhDataGetChar(FileHelper * fh)
 #define MAX_READ_SIZE 5000
 	fh->data = realloc(fh->data, fh->dataRead + BLOCK_SIZE);
 	if (fh->dataRead > MAX_READ_SIZE)
-		read = 0;	/* Too big - should have worked things out by now! */
+		numRead = 0;	/* Too big - should have worked things out by now! */
 	else
-		read =
-		    fread(fh->data + fh->dataRead, 1, BLOCK_SIZE, fh->fp);
-	if (read < BLOCK_SIZE) {
-		(fh->data + fh->dataRead)[read] = '\0';
-		read++;
+		numRead = fread(fh->data + fh->dataRead, 1, BLOCK_SIZE, fh->fp);
+	if (numRead < BLOCK_SIZE)
+	{
+		(fh->data + fh->dataRead)[numRead] = '\0';
+		numRead++;
 	}
-	fh->dataRead += read;
+	fh->dataRead += numRead;
 }
 
 static char fhPeekNextChar(FileHelper * fh)
@@ -137,7 +138,7 @@ static int fhPeekNextIsWS(FileHelper * fh)
 static void fhSkipWS(FileHelper * fh)
 {
 	while (fhPeekNextIsWS(fh))
-		fhReadNextChar(fh);
+		(void)fhReadNextChar(fh);
 }
 
 static int fhSkipToEOL(FileHelper * fh)
@@ -152,7 +153,7 @@ static int fhSkipToEOL(FileHelper * fh)
 	return FALSE;
 }
 
-static int fhReadString(FileHelper * fh, char *str)
+static int fhReadString(FileHelper * fh, const char *str)
 {				/* Check file has str next */
 	while (*str) {
 		if (fhReadNextChar(fh) != *str)
@@ -162,7 +163,7 @@ static int fhReadString(FileHelper * fh, char *str)
 	return TRUE;
 }
 
-static int fhReadStringNC(FileHelper * fh, char *str)
+static int fhReadStringNC(FileHelper * fh, const char *str)
 {				/* Check file has str next (ignoring case) */
 	while (*str) {
 		char c = fhReadNextChar(fh);
@@ -173,9 +174,9 @@ static int fhReadStringNC(FileHelper * fh, char *str)
 	return TRUE;
 }
 
-static int fhPeekStringNC(FileHelper * fh, char *str)
+static int fhPeekStringNC(FileHelper * fh, const char *str)
 {				/* Check file has str next (ignoring case) but don't move */
-	int pos = fh->dataPos;
+	unsigned int pos = fh->dataPos;
 	int ret = TRUE;
 	while (*str) {
 		char c = fhReadNextChar(fh);
@@ -208,7 +209,7 @@ static int fhReadAnyAlphNumString(FileHelper * fh)
 	if (!g_ascii_isalnum(c))
 		return FALSE;
 	do {
-		char c = fhPeekNextChar(fh);
+		c = fhPeekNextChar(fh);
 		if (!g_ascii_isalnum(c) && c != '_')
 			return fhPeekNextIsWS(fh);
 	} while (fhReadNextChar(fh) != '\0');
@@ -217,9 +218,9 @@ static int fhReadAnyAlphNumString(FileHelper * fh)
 
 static int IsSGFFile(FileHelper * fh)
 {
-	char *elements[] =
+	const char *elements[] =
 	    { "(", ";", "FF", "[", "4", "]", "GM", "[", "6", "]", "" };
-	char **test = elements;
+	const char **test = elements;
 
 	fhReset(fh);
 	while (**test) {
@@ -275,12 +276,12 @@ static int IsTMGFile(FileHelper * fh)
 	do {
 		fhSkipWS(fh);
 		if (fhPeekStringNC(fh, "game")) {
-			fhReadStringNC(fh, "game");
+			(void)fhReadStringNC(fh, "game");
 			fhSkipWS(fh);
 			return fhReadNumber(fh)
 			    && (fhPeekNextChar(fh) == ':');
 		}
-		fhReadAnyAlphNumString(fh);
+		(void)fhReadAnyAlphNumString(fh);
 		if (fhPeekNextChar(fh) != ':')
 			return FALSE;
 	} while (fhSkipToEOL(fh));
@@ -346,7 +347,7 @@ static int IsPARFile(FileHelper * fh)
 	fhSkipWS(fh);
 
 	if (fhReadStringNC(fh, "boardid=")) {
-		fhSkipToEOL(fh);
+		(void)fhSkipToEOL(fh);
 		if (fhReadStringNC(fh, "creator="))
 			return TRUE;
 	}
@@ -371,7 +372,7 @@ static int IsBGRFile(FileHelper *fh)
 	return FALSE;
 }
 
-extern FilePreviewData *ReadFilePreview(char *filename)
+extern FilePreviewData *ReadFilePreview(const char *filename)
 {
 	FilePreviewData *fpd = g_new0(FilePreviewData, 1);
 	FileHelper *fh = OpenFileHelper(filename);
@@ -405,6 +406,7 @@ extern FilePreviewData *ReadFilePreview(char *filename)
 	CloseFileHelper(fh);
 	return fpd;
 }
+
 extern char *GetFilename(int CheckForCurrent, ExportType type)
 {
 	char *sz, tstr[15];
@@ -418,9 +420,9 @@ extern char *GetFilename(int CheckForCurrent, ExportType type)
 			sprintf(tstr, "%04d-%02d-%02d", mi.nYear,
 				mi.nMonth, mi.nDay);
 		else {
-			time(&t);
-			strftime(tstr, 14, _("%Y-%m-%d-%H%M"),
-				 localtime(&t));
+			t = time(NULL);
+			if (strftime(tstr, 14, _("%Y-%m-%d-%H%M"), localtime(&t)) == 0)
+				 *tstr='\0';
 		}
 		sz = g_strdup_printf("%s-%s_%dp_%s.sgf", ap[0].szName,
 				     ap[1].szName, ms.nMatchTo, tstr);

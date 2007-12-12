@@ -49,13 +49,13 @@ ParseSnowieTxt( char *sz,
                 int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
                 int *pfTurn, char aszPlayer[ 2 ][ MAX_NAME_LEN ], int *pfCrawfordGame,
                 int anScore[ 2 ], int *pnCube, int *pfCubeOwner,
-                int anBoard[ 2 ][ 25 ], int anDice[ 2 ] );
+                TanBoard anBoard, int anDice[ 2 ] );
 
 
 static int
-IsValidMove ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
+IsValidMove ( TanBoard anBoard, const int anMove[ 8 ] ) {
 
-  int anBoardTemp[ 2 ][ 25 ];
+  TanBoard anBoardTemp;
   int anMoveTemp[ 8 ];
 
   memcpy ( anBoardTemp, anBoard, 2 * 25 * sizeof ( int ) );
@@ -70,7 +70,7 @@ IsValidMove ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
 
 
 static int
-IsValidNackMove( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
+IsValidNackMove( TanBoard anBoard, const int anMove[ 8 ] ) {
 
     int result = 0;
 
@@ -161,7 +161,7 @@ ParseJF( FILE *fp,
          int *pnMatchTo, int *pfJacoby, 
          int *pfTurn, char aszPlayer[ 2 ][ MAX_NAME_LEN ], int *pfCrawfordGame,
          int *pfPostCrawford, int anScore[ 2 ], int *pnCube, int *pfCubeOwner, 
-         int anBoard[ 2 ][ 25 ], int anDice[ 2 ], int *pfCubeUse,
+         TanBoard anBoard, int anDice[ 2 ], int *pfCubeUse,
          int *pfBeavers ) {
 
   int nVersion, nCubeOwner, nOnRoll, nMovesLeft, nMovesRight;
@@ -352,7 +352,8 @@ ImportJF( FILE * fp, char *szFileName) {
 
   moverecord *pmr;
   int nMatchTo, fJacoby=0, fTurn, fCrawfordGame, fPostCrawford;
-  int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
+  int anScore[ 2 ], nCube, fCubeOwner, anDice[ 2 ];
+  TanBoard anBoard;
   int fCubeUse=0, fBeavers;
   char aszPlayer[ 2 ][ MAX_NAME_LEN ];
   int i;
@@ -476,7 +477,7 @@ static int fWarned, fPostCrawford, fTryNackgammon;
 
 
 static int
-ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
+ExpandMatMove ( TanBoard anBoard, int anMove[ 8 ], int *pc,
              const unsigned int anDice[ 2 ] ) {
 
   int i, j, k;
@@ -600,7 +601,8 @@ static void ParseMatMove( char *sz, int iPlayer ) {
           /* Snowie type illegal play */
 
           int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
-          int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
+          int anScore[ 2 ], nCube, fCubeOwner, anDice[ 2 ];
+		  TanBoard anBoard;
           char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
           if ( ! ( pch = strchr( sz + 4, '(' ) ) ) {
@@ -2992,7 +2994,7 @@ ParseSnowieTxt( char *sz,
                 int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
                 int *pfTurn, char aszPlayer[ 2 ][ MAX_NAME_LEN ], int *pfCrawfordGame,
                 int anScore[ 2 ], int *pnCube, int *pfCubeOwner, 
-                int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+                TanBoard anBoard, int anDice[ 2 ] ) {
 
   int c;
   char *pc;
@@ -3139,7 +3141,8 @@ ImportSnowieTxt( FILE *pf ) {
 
   int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
   int fCubeOwner, nCube;
-  int anScore[ 2 ], anDice[ 2 ], anBoard[ 2 ][ 25 ];
+  int anScore[ 2 ], anDice[ 2 ];
+  TanBoard anBoard;
   char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
   if( ms.gs == GAME_PLAYING && fConfirm ) {
@@ -3384,10 +3387,12 @@ static void WritePartyGame(FILE * fp, char *gameStr, int ns)
 	char *data = gameStr;
 	int moveNum = 1;
 	int side = -1;
-	while ((move = NextTokenGeneral(&data, "#")) != NULL) {
+	while ((move = NextTokenGeneral(&data, "#")) != NULL)
+	{
 		char *roll, *moveStr, buf[100];
 		side = (move[0] == '2');
-		if ((side == 0) || (moveNum == 1 && side == 1)) {
+		if ((side == 0) || (moveNum == 1 && side == 1))
+		{
 			fprintf(fp, "%3d) ", moveNum);
 			if (moveNum == 1 && side == 1)
 				fprintf(fp, "%28s", " ");
@@ -3395,36 +3400,46 @@ static void WritePartyGame(FILE * fp, char *gameStr, int ns)
 		}
 
 		move = strchr(move, ' ') + 1;
-		if (isdigit(*move)) {
+		if (isdigit(*move))
+		{
 			move = strchr(move, ' ') + 1;
 			move = strchr(move, ' ') + 1;
 			roll = move;
 			move = strchr(move, ' ');
-			if (move) {
+			if (move)
+			{
 				char *dest, *src;
 				*move = '\0';
 				moveStr = move + 1;
 				/* Change bar -> 25, off -> 0 */
 				src = dest = moveStr;
-				while (*src) {
-					if (*src == 'b') {
+				while (*src)
+				{
+					if (*src == 'b')
+					{
 						*dest++ = '2';
 						*dest++ = '5';
 						src += 3;
-					} else if (*src == 'o') {
+					}
+					else if (*src == 'o')
+					{
 						*dest++ = '0';
 						src += 3;
-					} else {
+					}
+					else
+					{
 						*dest = *src;
 						dest++, src++;
 					}
 				}
 				*dest = '\0';
-			} else
+			}
+			else
 				moveStr = "";
 
 			sprintf(buf, "%s: %s", roll, moveStr);
-		} else
+		}
+		else
 			strcpy(buf, move);	/* Double/Take */
 
 		if (side == 0)

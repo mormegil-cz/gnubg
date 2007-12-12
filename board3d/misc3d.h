@@ -27,5 +27,3 @@ void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accu
 void initPath(Path* p, const float start[3]);
 void addPathSegment(Path* p, PathType type, const float point[3]);
 void initDT(diceTest* dt, int x, int y, int z);
-
-

@@ -22,18 +22,18 @@
 */
 
 #include "config.h"
+#include "backgammon.h"
 #include <time.h>
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#include "backgammon.h"
 
 #ifdef WIN32
 #include "windows.h"
 
 static double perFreq = 0;
 
-static int setup_timer()
+int setup_timer()
 {
 	LARGE_INTEGER freq;
 	if (!QueryPerformanceFrequency(&freq))
@@ -63,6 +63,8 @@ double get_time()
 
 #else
 
+#if 1
+
 double get_time(void)
 {	/* Return elapsed time in milliseconds */
 	struct timeval tv;
@@ -70,5 +72,32 @@ double get_time(void)
 
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
+
+#else
+
+static double perFreq = 0;
+
+int setup_timer()
+{
+    perFreq = __get_clockfreq() / 1000.0;
+     return 1;
+}
+
+double get_time()
+{    /* Return elapsed time in milliseconds */
+    if (!perFreq)
+    {
+        if (!setup_timer())
+            return clock() / 1000.0;
+    }
+{
+    unsigned long long int val;
+    __asm__ __volatile__("rdtsc" : "=A" (val) : );
+
+    return val / perFreq;
+}
+}
+
+#endif
 
 #endif

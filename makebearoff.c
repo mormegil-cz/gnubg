@@ -387,8 +387,8 @@ static void BearOff( int nId, int nPoints,
                      const int fCompress, 
                      FILE *pfOutput, FILE *pfTmp ) {
 
-    int i, iBest, iMode, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ],
-      anBoardTemp[ 2 ][ 25 ], aProb[ 64 ];
+    int i, iBest, iMode, j, anRoll[ 2 ], aProb[ 64 ];
+	TanBoard anBoard, anBoardTemp;
     movelist ml;
     int k;
     unsigned int us;
@@ -779,8 +779,7 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
 
   int d0, d1;
   movelist ml;
-  int anBoard[ 2 ][ 25 ];
-  int anBoardTemp[ 2 ][ 25 ];
+  TanBoard anBoard, anBoardTemp;
   int i, j, k;
   int iBest;
   float rBest;
@@ -1103,7 +1102,8 @@ static void BearOff2( int nUs, int nThem,
                       const int n, const int fCubeful,
                       xhash *ph, bearoffcontext *pbc, FILE *pfTmp ) {
 
-    int i, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ], anBoardTemp[ 2 ][ 25 ];
+    int i, j, anRoll[ 2 ];
+	TanBoard anBoard, anBoardTemp;
     movelist ml;
     int aiBest[ 4 ];
     int asiBest[ 4 ];
@@ -1141,9 +1141,9 @@ static void BearOff2( int nUs, int nThem,
     /* look for position in bearoff file */
 
     if ( pbc && isBearoff ( pbc, anBoard ) ) {
-      unsigned int nUsL = 
+      unsigned short int nUsL = 
         PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-      unsigned int nThemL = 
+      unsigned short int nThemL = 
         PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
       int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
       unsigned int iPos = nUsL * nL + nThemL;
@@ -1793,3 +1793,24 @@ DlgProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
    return FALSE;
 }
 #endif
+
+extern void MT_Lock(long *lock)
+{
+}
+
+extern void MT_Unlock(long *lock)
+{
+}
+
+extern int MT_GetThreadID(void)
+{
+  return (0);
+}
+
+extern void MT_Exclusive(void)
+{
+}
+
+extern void MT_Release(void)
+{
+}

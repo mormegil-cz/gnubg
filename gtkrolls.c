@@ -21,19 +21,15 @@
 
 #include "config.h"
 
-#include <gtk/gtk.h>
-
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <glib.h>
 
-#include "backgammon.h"
-#include "eval.h"
-#include "gtkrolls.h"
 #include "gtkgame.h"
+
 #include "drawboard.h"
 #include <glib/gi18n.h>
+
 #include "format.h"
 #include "gtkwindows.h"
 
@@ -52,15 +48,15 @@ typedef struct _rollswidget {
 
 static void
 add_level ( GtkTreeStore *model, GtkTreeIter *iter,
-            const int n, int anBoard[ 2 ][ 25 ],
+            const int n, const TanBoard anBoard,
             evalcontext *pec, cubeinfo *pci,
-            const int fInvert,
+            const gboolean fInvert,
             float arOutput[ NUM_ROLLOUT_OUTPUTS ] ) {
 
   int n0, n1;
   GtkTreeIter child_iter;
   cubeinfo ci;
-  int an[ 2 ][ 25 ];
+  TanBoard an;
   float ar[ NUM_ROLLOUT_OUTPUTS ];
   int anMove[ 8 ];
   int i;
@@ -90,7 +86,7 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
 
       if ( n ) {
 
-        add_level ( model, &child_iter, n - 1, an, pec, &ci, ! fInvert, ar );
+        add_level ( model, &child_iter, n - 1, an, pec, &ci, !fInvert, ar );
 		if (fInterrupt)
 			return;
 
@@ -154,7 +150,7 @@ static gint
 sort_func ( GtkTreeModel *model,
             GtkTreeIter *a,
             GtkTreeIter *b,
-            gpointer user_data) {
+            gpointer notused) {
 
   char *sz0, *sz1;
   float r0, r1;
@@ -175,11 +171,10 @@ sort_func ( GtkTreeModel *model,
 }
 
 
-static GtkTreeModel *
-create_model ( const int n, evalcontext *pec, matchstate *pms ) {
-
+static GtkTreeModel *create_model(const int n, evalcontext *pec, const matchstate *pms)
+{
   GtkTreeStore *model;
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   cubeinfo ci;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
   int i, j;
@@ -217,13 +212,13 @@ create_model ( const int n, evalcontext *pec, matchstate *pms ) {
 
 
 static GtkWidget *
-RollsTree ( const int n, evalcontext *pec, matchstate *pms ) {
-
+RollsTree ( const int n, evalcontext *pec, const matchstate *pms )
+{
   GtkTreeModel *pm;
   GtkWidget *ptv;
   int i;
   GtkCellRenderer *renderer;
-  static char *aszColumn[] = {
+  static const char *aszColumn[] = {
     N_("Roll"),
     N_("Move"),
     N_("Equity")
@@ -297,7 +292,7 @@ static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 	else
 	{
 		if (!prw->closing)
-			gtk_range_set_value(GTK_RANGE(prw->pScale), prw->nDepth);
+			gtk_range_set_value(GTK_RANGE(prw->pScale), (double)prw->nDepth);
 	}
 
 	pwGrab = pwOldGrab;
@@ -321,7 +316,7 @@ static void CancelRolls(GtkWidget* pButton)
 	gtk_widget_set_sensitive(pButton, FALSE);
 }
 
-static gint RollsClose(GtkWidget *widget, GdkEvent *event, rollswidget *prw)
+static gint RollsClose(GtkWidget *notused, GdkEvent *notused2, rollswidget *prw)
 {
 	if (pwOldGrab != pwGrab)
 	{	/* Mid-depth change - wait for it to cancel */
@@ -385,7 +380,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
                        FALSE, FALSE, 4 );
 
   /* Set page size to 1 */
-  padj = GTK_ADJUSTMENT(gtk_adjustment_new(1, 1, 5, 1, 1, 0));
+  padj = GTK_ADJUSTMENT(gtk_adjustment_new(1., 1., 5., 1., 1., 0.));
   prw->pScale = gtk_hscale_new( padj );
   gtk_widget_set_size_request( prw->pScale, 100, -1 );
   gtk_box_pack_start ( GTK_BOX ( hbox ), prw->pScale, FALSE, FALSE, 4 );

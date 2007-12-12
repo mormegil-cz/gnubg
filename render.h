@@ -22,6 +22,8 @@
 #ifndef _RENDER_H_
 #define _RENDER_H_
 
+#include "util.h"
+
 #if USE_BOARD3D
 #include "types3d.h"
 struct _Material
@@ -182,7 +184,7 @@ RenderBoardLabels( renderdata *prd,
 extern void FreeImages( renderimages *pri );
     
 extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
-			   renderimages *pri, int anBoard[ 2 ][ 25 ],
+			   renderimages *pri, TanBoard anBoard,
 			   int anOff[ 2 ], int anDice[ 2 ],
 			   int anDicePosition[ 2 ][ 2 ],
 			   int fDiceColour, int anCubePosition[ 2 ],

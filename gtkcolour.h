@@ -87,7 +87,7 @@ extern void
 gtk_colour_picker_set_has_opacity_control(GtkColourPicker *pcp, gboolean f );
 
 extern void
-gtk_colour_picker_set_colour( GtkColourPicker *pcp, gdouble *ar );
+gtk_colour_picker_set_colour( GtkColourPicker *pcp, const gdouble *ar );
 
 extern void
 gtk_colour_picker_get_colour( GtkColourPicker *pcp, gdouble *ar );

@@ -38,7 +38,7 @@
 #define UNUSED_PARAM __attribute__ ((unused))
 
 static PyObject *
-BoardToPy( int anBoard[ 2 ][ 25 ] )
+BoardToPy( TanBoard anBoard )
 {
   PyObject* b = PyTuple_New(2);
   PyObject* b0 = PyTuple_New(25);
@@ -87,7 +87,7 @@ PyToBoard1( PyObject* p, int anBoard[ 25 ] )
 }
 
 static int
-PyToBoard(PyObject* p, int anBoard[ 2 ][ 25 ])
+PyToBoard(PyObject* p, TanBoard anBoard)
 {
   if( PySequence_Check(p) && PySequence_Size(p) == 2 ) {
     int i;
@@ -481,7 +481,7 @@ PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
   PyObject *pyCubeInfo = NULL;
   PyObject *pyEvalContext = NULL;
 
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   cubeinfo ci;
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
   float arOutput[ 7 ];
@@ -525,7 +525,7 @@ PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
   PyObject *pyCubeInfo = NULL;
   PyObject *pyEvalContext = NULL;
 
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arCube[ NUM_CUBEFUL_OUTPUTS ];
   cubeinfo ci;
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
@@ -577,7 +577,7 @@ PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
   PyObject *pyCubeInfo = NULL;
   PyObject *pyEvalContext = NULL;
 
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   int anDice[ 2 ];
   int anMove[ 8 ];
   cubeinfo ci;
@@ -738,9 +738,9 @@ PythonEq2mwc( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
 #define STRBUF_SIZE 1024
 
-static void AddString(list* buffers, char* str)
+static void AddString(listOLD* buffers, char* str)
 {
-	list* pCurrent = buffers->plPrev;
+	listOLD* pCurrent = buffers->plPrev;
 	if (!pCurrent->p || strlen(str) + strlen(pCurrent->p) > STRBUF_SIZE)
 	{
 		char* newBuf = malloc(STRBUF_SIZE + 1);
@@ -755,8 +755,8 @@ static char* GameAsString(void)
 	char *ret;
 	int size;
 	char buf[1024];
-	list *pList, *plGame, *plMove;
-	list buffers;
+	listOLD *pList, *plGame, *plMove;
+	listOLD buffers;
 	ListCreate(&buffers);
 
 	sprintf(buf, "%s vs %s (%d)", ap[0].szName, ap[1].szName, ms.nMatchTo);
@@ -764,7 +764,7 @@ static char* GameAsString(void)
 
 	for (plGame = lMatch.plNext; plGame->p; plGame = plGame->plNext)
 	{
-		list* plStart = plGame->p;
+		listOLD* plStart = plGame->p;
 		int move = 1;
 		for (plMove = plStart->plNext; plMove->p; plMove = plMove->plNext)
 		{
@@ -837,7 +837,7 @@ static PyObject *
 PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
 
   memcpy( anBoard, ms.anBoard, sizeof anBoard );
 
@@ -855,7 +855,7 @@ static PyObject *
 PythonPositionFromID( PyObject* self UNUSED_PARAM, PyObject *args )
 {
   char* sz = NULL;
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
 
   if( ! PyArg_ParseTuple( args, "|s:positionfromid", &sz ) ) {
     return NULL;
@@ -879,7 +879,7 @@ static PyObject *
 PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PyObject *pyBoard = NULL;
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   unsigned char auch[ 10 ];
 
   memcpy( anBoard, ms.anBoard, sizeof anBoard );
@@ -905,7 +905,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 static PyObject *
 PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
   int i;
   PyObject *pyKey = NULL;
   PyObject *py;
@@ -1647,14 +1647,14 @@ PyGameStats(const statcontext* sc, const int fIsMatch, const int nMatchTo)
  */
 
 static PyObject*
-PythonGame(const list*    plGame,
+PythonGame(const listOLD*    plGame,
 	   int const      doAnalysis,
 	   int const      verbose,
 	   statcontext*   scMatch,
 	   int const      includeBoards,
 	   PyMatchState*  ms)
 {
-  const list* pl = plGame->plNext;
+  const listOLD* pl = plGame->plNext;
   const moverecord* pmr = pl->p;            
   const xmovegameinfo* g = &pmr->g;
 
@@ -1716,11 +1716,11 @@ PythonGame(const list*    plGame,
   
   {
     int nRecords = 0;
-    int anBoard[2][25];
+    TanBoard anBoard;
     PyObject* gameTuple;
 
     {
-      list* t;
+      listOLD* t;
       for( t = pl->plNext; t != plGame; t = t->plNext ) {
 	++nRecords;
       }
@@ -1955,7 +1955,7 @@ static PyObject*
 PythonMatch(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
 {
   /* take match info from first game */
-  const list* firstGame = lMatch.plNext->p;
+  const listOLD* firstGame = lMatch.plNext->p;
   const moverecord* pmr;
   const xmovegameinfo* g;
   int includeAnalysis = 1;
@@ -2072,7 +2072,7 @@ PythonMatch(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
   
   {
     int nGames = 0;
-    const list* pl;
+    const listOLD* pl;
     PyObject *matchTuple;
     statcontext scMatch;
 
@@ -2163,7 +2163,7 @@ PythonNavigate(PyObject* self UNUSED_PARAM, PyObject* args, PyObject* keywds)
     }
   
     if( nextGame != INT_MIN && nextGame != 0 ) {
-      list* pl= lMatch.plNext;
+      listOLD* pl= lMatch.plNext;
 
       for( ; pl->p != plGame && pl != &lMatch; pl = pl->plNext)
 	;	

@@ -42,6 +42,10 @@
 #include <libxml/catalog.h>
 #endif
 
+#ifdef NO_ERF
+#include "erf.inc"	/* No erf on msdev so include code here... */
+#endif
+
 #define DELTA         0.08
 #define DELTABAR      0.06
 #define G1            0.25
@@ -53,10 +57,7 @@
 #include "backgammon.h"
 #include <glib/gi18n.h>
 
-
-#if (LIBXML_VERSION > 20412)
 static const xmlChar* XML_PUBLIC_ID = BAD_CAST "-//GNU Backgammon//DTD Match Equity Tables//EN";
-#endif
 
 typedef struct _parameter {
 
@@ -68,7 +69,7 @@ typedef struct _parameter {
 typedef struct _metparameters {
 
   xmlChar *szName;
-  list lParameters;
+  listOLD lParameters;
 
 } metparameters;
 
@@ -124,9 +125,8 @@ metinfo miCurrent;
  *
  */
 
-static float
-NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
-
+static float NormalDistArea ( float rMin, float rMax, float rMu, float rSigma )
+{
   float rtMin, rtMax;
   float rInt1, rInt2;
 
@@ -137,7 +137,6 @@ NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
   rInt2 = ( erf( rtMax / sqrt(2) ) + 1.0f ) / 2.0f;
 
   return rInt2 - rInt1;
-
 }
 
 
@@ -793,7 +792,6 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
   int nScore0, nScore1;
 
 /* Extend match equity table */
-
   for ( i = nMaxScore; i < MAXSCORE; i++ ) {
 
     for ( j = 0; j <= i ; j++ ) {
@@ -812,17 +810,11 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
         rStddev1 = 1.77f;
       else
         rStddev1 = arStddevTable[ nScore1 ];
-
-      rSigma =
-        sqrt ( rStddev0 * rStddev0 + rStddev1 * rStddev1 )
-        * sqrt ( rGames );
-
-      g_assert ( 6.0f * rSigma > nScore1 - nScore0 );
-
-      aafMET[ i ][ j ] =
-        1.0f - NormalDistArea ( (float)(nScore1 - nScore0), 6.0f * rSigma,
-                               0.0f, rSigma );
-
+	  {
+	  rSigma = sqrtf( rStddev0 * rStddev0 + rStddev1 * rStddev1 ) * sqrtf( rGames );
+	  g_assert ( 6.0f * rSigma > nScore1 - nScore0 );
+	  }
+      aafMET[ i ][ j ] = 1.0f - NormalDistArea ( (float)(nScore1 - nScore0), 6.0f * rSigma, 0.0f, rSigma );
     }
   }
 
@@ -877,7 +869,7 @@ freeP ( parameter *pp ) {
 static void
 freeMP ( metparameters *pmp ) {
 
-  list *pl;
+  listOLD *pl;
 
   if ( pmp->szName )
     free ( pmp->szName );
@@ -952,7 +944,7 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
     
     float rG = 0.15f;
     float rWR = 0.5f;
-    list *pl; 
+    listOLD *pl; 
     parameter *pp;
 
     /* 
@@ -985,7 +977,7 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
     float rG2 = 0.15f;
     float rDelta = 0.08f;
     float rDeltaBar = 0.06f;
-    list *pl; 
+    listOLD *pl; 
     parameter *pp;
 
     /* 
@@ -1039,7 +1031,7 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
     float rG = 0.25f;
     float rFD2 = 0.015f;
     float rFD4 = 0.004f;
-    list *pl;
+    listOLD *pl;
     parameter *pp;
 
     /* 
@@ -1074,7 +1066,7 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
     float rFD2 = 0.015f;
     float rFD4 = 0.004f;
     float rWR = 0.5f;
-    list *pl;
+    listOLD *pl;
     parameter *pp;
 
     /* obtain parameters */
@@ -1157,7 +1149,7 @@ parsePreCrawfordExplicit ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 }
 
 static void
-parseParameters ( list *plList, xmlDocPtr doc, xmlNodePtr root ) {
+parseParameters ( listOLD *plList, xmlDocPtr doc, xmlNodePtr root ) {
 
   xmlNodePtr cur;
   xmlChar *pc;
@@ -1407,10 +1399,10 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
 	  }
 
 	  /* validate against the DTD */
+#if (LIBXML_VERSION > 20412)
 	  ctxt = xmlNewValidCtxt();
 	  ctxt->error = validateError;
 	  ctxt->warning = validateWarning;
-
 	  if ( !(xmlValidateDtd(ctxt, doc, dtd) && xmlValidateDtdFinal(ctxt, doc)) ) {
 
 		  printf ( _("Error reading XML file (%s): not valid!\n"), szFileName );
@@ -1418,8 +1410,8 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
 		  goto finish;
 
 	  }
-
 	  if (ctxt) xmlFreeValidCtxt(ctxt);
+#endif
 	  if (dtd) xmlFreeDtd(dtd);
   }
 
@@ -1809,7 +1801,6 @@ InitMatchEquity ( const char *szFileName) {
   /* Extend match equity table */
 
   ExtendMET ( aafMET, md.mi.nLength );
-
 
   /* garbage collect */
 

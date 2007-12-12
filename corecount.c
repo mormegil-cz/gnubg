@@ -61,8 +61,8 @@ unsigned char CPUCount(unsigned int *,
 					   unsigned int *,
 					   unsigned int *);
 
-#ifdef __GNUC__
-//#define LINUX 1
+#ifndef WIN32
+#define LINUX 1
 #endif
 
 // Define constant ?LINUX? to compile under Linux
@@ -73,7 +73,6 @@ unsigned char CPUCount(unsigned int *,
 //	and dependence on glibc library versions, compilation on Linux environment 
 //	with older kernels and compilers may require kernel patches or compiler upgrades.
 
-#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 //#include <sched.h>
@@ -81,6 +80,7 @@ unsigned char CPUCount(unsigned int *,
 #else
 #include <windows.h>
 #endif
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -91,29 +91,26 @@ int GetLogicalProcssingUnitCount(void)
 
    unsigned int  TotAvailLogical   = 0,  // Number of available logical CPU per CORE
 				 TotAvailCore  = 0,      // Number of available cores per physical processor
-                 PhysicalNum   = 0,      // Total number of physical processors
-				Total = 0;
+                 PhysicalNum   = 0;      // Total number of physical processors
 
    unsigned char StatusFlag = 0; 
+/* Not sure what this does - ignore
    if (CpuIDSupported() < 4) { // CPUID does not report leaf 4 information
 	   printf("\nUser Warning:\n CPUID Leaf 4 is not supported or disabled. Please check  \
 			 \n BIOS and correct system configuration error if leaf 4 is disabled. \n");
-	
    }
+*/	
 StatusFlag = CPUCount(&TotAvailLogical, &TotAvailCore, &PhysicalNum);
 if( USER_CONFIG_ISSUE == StatusFlag) {
 	printf("User Configuration Error: Not all logical processors in the system are enabled \
-	while running this process. Please rerun this application after make corrections. \n");
-	exit(1);
+	while running this process.\n");
+	return 1;
 }
 
-/* Return a sensible number based on total logical units and hyper threading */
-Total = TotAvailLogical;
-if ((StatusFlag == SINGLE_CORE_AND_HT_ENABLED || StatusFlag == MULTI_CORE_AND_HT_ENABLED))
-	Total *= 2;
-if (Total == 0)
-	Total = 1;
-return Total;
+if (TotAvailLogical > 0)
+	return TotAvailLogical;
+else
+	return 1;
 
 #if INTEL_STUFF
    int MaxLPPerCore;
@@ -791,4 +788,3 @@ else
 
 return StatusFlag;
 }
-
