@@ -1,3 +1,8 @@
+Wed Dec 12 13:52:14 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, board3d/Makefile.am, doc/Makefile.am, lib/Makefile.am,
+	m4/Makefile.am, met/Makefile.am: cleanup and fixes to make distcheck
+
 Wed Nov 28 09:43:59 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* po/POTFILES.in: remove pub_eval.c

@@ -3,9 +3,9 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
-	-I$(top_srcdir)/lib @LIBXML2_CFLAGS@ \
-	-I$(top_srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
+INCLUDES = -I$(srcdir)/.. $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) \
+	-I$(srcdir)/../lib @LIBXML2_CFLAGS@ \
+	-DLOCALEDIR=\"$(localedir)\" \
 	@FREETYPE2_CFLAGS@ @GTKGLEXT_CFLAGS@
 
 if USE_BOARD3D

@@ -14,6 +14,8 @@ INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ @GTHREAD_CFLAGS@ @ESD_CFLAGS@ \
 	   @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@
 
+BUILT_SOURCES = sgfp.c sgfl.c copying.c credits.c external_l.c external_y.c
+
 #
 ## sources for building the main executable
 #
@@ -124,7 +126,7 @@ endif
 #
 ##linkpath for gnubg
 #
-gnubg_LDADD = -Llib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ @PANGOCAIRO_LIBS@ \
+gnubg_LDADD = -L$(srcdir)/lib lib/libevent.la @GTK_LIBS@ @LIBPNG_LIBS@ @CAIRO_LIBS@ @PANGOCAIRO_LIBS@ \
 	      @GTHREAD_LIBS@ @ESD_LIBS@ \
 	      @WINMMSND_LIBS@ @LTLIBOBJS@ @LTLIBINTL@ @LIBXML2_LIBS@ \
 	      @FREETYPE2_LIBS@ @PYTHON_LSPEC@ @GLIB_LIBS@ @LIBPNG_LIBS@
@@ -174,30 +176,15 @@ EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.6 \
 #
 ##sgf.y and sgf.l ought to be renamed sgf_y.y and sgf_l.l to avoid conflicts with sgf.c
 #
-sgfp.h: sgfp.c
-	@true
 sgfp.c: sgf.y
-	$(YACC) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
+	$(YACC) -o $(srcdir)/sgfp.c -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
 	$(LEX) -o$@ -Psgf $(srcdir)/sgf.l
 
-sgf.c: sgfp.c sgfp.h sgfl.c
-	@true
-
-#
-##external_l.c includes external_y.h and automake doesn't track this dependency
-#
-external_l.c: external_l.l external_y.c
-	$(LEXCOMPILE) $<
-	sed '/^#/ s|$(LEX_OUTPUT_ROOT)\.c|$@|' $(LEX_OUTPUT_ROOT).c >$@
-	rm -f $(LEX_OUTPUT_ROOT).c
-
 #
 ##credits.c target
 #
-credits.h: credits.c
-	@true
 credits.c: credits.sh
 	cd $(srcdir) && $(SHELL) ./credits.sh
 
@@ -232,4 +219,5 @@ gnubg_ts0.bd: makebearoff$(EXEEXT)
 	./makebearoff -t 6x6 -f $@
 endif
 
-MOSTLYCLEANFILES=sgfp.c sgfp.h sgfl.c external_l.c external_l.h external_y.c external_y.h
+MOSTLYCLEANFILES=sgfp.c sgfp.h sgfl.c external_l.c external_l.h external_y.c external_y.h copying.c credits.c credits.h
+DISTCLEANFILES=gnubg_os0.bd gnubg_ts0.bd gnubg.wd
