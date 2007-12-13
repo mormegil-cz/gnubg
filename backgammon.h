@@ -22,6 +22,7 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
+#include "gnubg-types.h"
 #include <stdarg.h>
 #include "analysis.h"
 #include "eval.h"
@@ -30,6 +31,7 @@
 #define MAX_NAME_LEN 32
 #define VERSION_STRING "GNU Backgammon " VERSION
 #define GNUBG_CHARSET "UTF-8"
+
 
 typedef struct _command {
 	/* Command name (NULL indicates end of list) */

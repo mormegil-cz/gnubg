@@ -31,7 +31,7 @@
 
 #include "sgf.h"
 
-static list *plCollection;    
+static listOLD *plCollection;    
     
 extern int sgflex( void );
 
@@ -49,13 +49,13 @@ static int sgferror( char *s ) {
     return 0;
 }
 
-static list *NewList( void ) {
-    list *pl = calloc(1,  sizeof( *pl ) );
+static listOLD *NewList( void ) {
+    listOLD *pl = calloc(1,  sizeof( *pl ) );
     ListCreate( pl );
     return pl;
 }
 
-static char *Concatenate( list *pl ) {
+static char *Concatenate( listOLD *pl ) {
 
     int cch = 0;
     char *sz, *pchDest, *pchSrc;
@@ -91,7 +91,7 @@ static char *Concatenate( list *pl ) {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
     property *pp; /* complete property */
-    list *pl; /* nodes, sequences, gametrees */
+    listOLD *pl; /* nodes, sequences, gametrees */
 }
 
 %token <ach> PROPERTY <pch> VALUETEXT
@@ -166,7 +166,7 @@ ValueCharSeq:	/* empty */
 %%
 
 extern FILE *sgfin;
-extern list *SGFParse( FILE *pf ) {
+extern listOLD *SGFParse( FILE *pf ) {
 
     
     sgfin = pf;

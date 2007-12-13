@@ -20,16 +20,11 @@
  */
 
 #include "config.h"
-#include "util.h"
 #if WIN32
+#include "util.h"
 #include <windows.h>
 #include <stdlib.h>
 #include <glib.h>
-
-char *aszRNG[1]; 
-char *aszSkillType[ 1 ]; 
-int exsExport;
-int ap;
 
 extern char * getInstallDir( void )
 {
@@ -64,10 +59,5 @@ extern void PrintSystemError(const char* message)
 
 		LocalFree(lpMsgBuf);
 	}
-}
-#else
-extern void PrintSystemError(const char* message)
-{
-	printf("Unknown system error while %s!\n", message);
 }
 #endif

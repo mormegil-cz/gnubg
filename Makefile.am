@@ -99,6 +99,8 @@ gnubg_SOURCES = \
 		speed.h \
 		text.c \
 		timer.c
+		util.h \
+		util.c 
 
 if USE_MULTITHREAD
 gnubg_SOURCES +=  multithread.c

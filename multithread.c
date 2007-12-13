@@ -29,7 +29,6 @@
 #include "multithread.h"
 #include "speed.h"
 #include "rollout.h"
-#include "util.h"
 
 #define UI_UPDATETIME 250
 

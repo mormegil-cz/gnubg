@@ -35,7 +35,6 @@
 #include <locale.h>
 #include "bearoff.h"
 #include "drawboard.h"
-#include "util.h"
 
 static cubeinfo ci;
 static cubeinfo ciJacoby;

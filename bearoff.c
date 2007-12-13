@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include "gnubg-types.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

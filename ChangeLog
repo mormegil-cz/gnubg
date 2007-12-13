@@ -1,3 +1,12 @@
+Thu Dec 13 22:39:56 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, backgammon.h, bearoff.c, bearoff.h, bearoffdump.c,
+	drawboard.c, drawboard.h, gnubg.c, gtkrolls.c, makebearoff.c,
+	makehyper.c, multithread.c, positionid.c, positionid.h, render.h,
+	rollout.c, sgf.y, util.c, util.h, lib/gnubg-types.h: fixes to make
+	gnubg compile after Jon's changes. board3d doesn't compile. utility
+	programs doesn't compile.
+
 Wed Dec 12 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* movelistctrl: Fix spacing in German (reported by Thomas Steiner)
 	* bearoff.c: Fix multithreaded disk bearoff access (reported by Hugh Sconyers)

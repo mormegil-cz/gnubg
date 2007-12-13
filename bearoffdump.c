@@ -27,8 +27,6 @@
 #include <stdlib.h>
 #include "positionid.h"
 #include "bearoff.h"
-#include "util.h"
-
 
 extern int
 main( int argc, char **argv ) {

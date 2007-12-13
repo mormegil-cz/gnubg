@@ -22,7 +22,7 @@
 #ifndef _BEAROFF_H_
 #define _BEAROFF_H_
 
-#include "util.h"
+#include "gnubg-types.h"
 
 typedef enum _bearoffcreator {
   BEAROFF_GNUBG,
@@ -66,7 +66,6 @@ typedef struct _bearoffcontext {
   unsigned long int nReads; /* number of reads */
 
 } bearoffcontext;
-
 
 enum _bearoffoptions {
   BO_NONE              = 0,

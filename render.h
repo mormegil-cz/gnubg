@@ -22,7 +22,7 @@
 #ifndef _RENDER_H_
 #define _RENDER_H_
 
-#include "util.h"
+#include "gnubg-types.h"
 
 #if USE_BOARD3D
 #include "types3d.h"

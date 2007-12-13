@@ -103,7 +103,7 @@ static void board_to_sgf (const int anBoard[25], int direction) {
     
 
 static void log_game_start (const char *name, const cubeinfo *pci, int fCubeful,
-		     const TanBoard anBoard) {
+		     TanBoard anBoard) {
   time_t     t = time (0);
   struct tm  *now = localtime (&t);
   const char *rule;
@@ -277,7 +277,7 @@ static int RolloutDice( int iTurn, int iGame,
 
 
 static void
-ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard ) {
+ClosedBoard ( int afClosedBoard[ 2 ], TanBoard anBoard ) {
 
   int i, j, n;
 

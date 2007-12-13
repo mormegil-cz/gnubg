@@ -22,7 +22,7 @@
 #ifndef _DRAWBOARD_H_
 #define _DRAWBOARD_H_
 
-#include "util.h"
+#include "gnubg-types.h"
 
 extern int fClockwise; /* Player 1 moves clockwise */
 
@@ -31,7 +31,7 @@ extern char *DrawBoard( char *pch, TanBoard anBoard, int fRoll,
 /* Fill the buffer pch with a representation of the move anMove, assuming
    the board looks like anBoard.  pch must have room for 28 characters plus
    a trailing 0 (consider the move `bar/24* 23/22* 21/20* 19/18*'). */
-extern char *FormatMove( char *pch, const TanBoard anBoard, int anMove[ 8 ] );
+extern char *FormatMove( char *pch, TanBoard anBoard, int anMove[ 8 ] );
 extern char *FormatMovePlain( char *pch, TanBoard anBoard,
                               int anMove[ 8 ] );
 extern int ParseMove( char *pch, int an[ 8 ] );

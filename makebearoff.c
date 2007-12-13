@@ -34,7 +34,6 @@
 #include "eval.h"
 #include "positionid.h"
 #include "bearoff.h"
-#include "util.h"
 
 #if WIN32
 #include <windows.h>

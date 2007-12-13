@@ -6307,8 +6307,10 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 	fflush(stderr);
 
+#if USE_MULTITHREAD
 	/* Make sure threads started */
 	MT_StartThreads();
+#endif
 
 	/* start-up sound */
 	playSound(SOUND_START);
