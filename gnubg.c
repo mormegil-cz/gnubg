@@ -6060,8 +6060,6 @@ static void PushSplash(char *unused, char *heading, char *message, int wait)
 
 static void init_nets(int nNewWeights, int fNoBearoff)
 {
-	int n;
-
 	char *gnubg_weights = g_build_filename(PKGDATADIR, "gnubg.weights", NULL);
 	char *gnubg_weights_binary =  g_build_filename(PKGDATADIR, "gnubg.wd", NULL);
 	EvalInitialise(gnubg_weights, gnubg_weights_binary, fNoBearoff, 

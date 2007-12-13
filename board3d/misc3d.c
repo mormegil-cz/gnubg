@@ -186,10 +186,8 @@ extern int extensionSupported(const char *extension)
 			fGetExtStr wglGetExtensionsStringARB;
 			wglGetExtensionsStringARB = (fGetExtStr)wglGetProcAddress("wglGetExtensionsStringARB");
 			if (!wglGetExtensionsStringARB)
-			{
-				wglExtString = "no wgl extenstions";
 				return FALSE;
-			}
+
 			wglExtString = wglGetExtensionsStringARB(wglGetCurrentDC());
 		}
 		if (strstr(wglExtString, extension) != 0)

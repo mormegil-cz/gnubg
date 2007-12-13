@@ -484,6 +484,11 @@ const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
   N_("Raccoon")
 };
 
+void PrintError(const char* str)
+{
+	g_printerr("%s: %s", str, strerror(errno));
+}
+
 /* parameters for EvalEfficiency */
 
 float rOSCubeX = 0.6f;
@@ -731,14 +736,14 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		cCache = 0x1 << 16;
 		if( CacheCreate( &cEval, cCache ) )
 		{
-			outputerr( "EvalCacheResize" );
+			PrintError( "EvalCacheResize" );
 			return;
 		}
 
 #if defined( PRUNE_CACHE )
 	if( CacheCreate( &cpEval, 0x1 << 16) )
 	{
-		outputerr( "EvalCacheResize" );
+		PrintError( "EvalCacheResize" );
 		return;
 	}
 #endif
@@ -853,7 +858,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 	{
 		if (NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden, NUM_OUTPUTS ) == -1)
 		{
-			outputerr( "NeuralNetResize" );
+			PrintError( "NeuralNetResize" );
 			return;
 		}
 	}
@@ -861,7 +866,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 	{
 		if (NeuralNetResize( &nnCrashed, NUM_INPUTS, nnCrashed.cHidden, NUM_OUTPUTS ) == -1)
 		{
-			outputerr( "NeuralNetResize" );
+			PrintError( "NeuralNetResize" );
 			return;
 		}
 	}		
@@ -869,7 +874,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 	{
 		if (NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden, NUM_OUTPUTS ) == -1)
 		{
-			outputerr( "NeuralNetResize" );
+			PrintError( "NeuralNetResize" );
 			return;
 		}
 	}
