@@ -1,3 +1,8 @@
+Sat Dec 15 21:23:49 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* board3d/gtkcolour3d.c: remove unneeded gdk_gl_drawable_begin calls since
+	they causes assertions on newer X window.
+
 Thu Dec 13 22:39:56 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, backgammon.h, bearoff.c, bearoff.h, bearoffdump.c,
