@@ -1792,24 +1792,3 @@ DlgProc (HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam){
    return FALSE;
 }
 #endif
-
-extern void MT_Lock(long *lock)
-{
-}
-
-extern void MT_Unlock(long *lock)
-{
-}
-
-extern int MT_GetThreadID(void)
-{
-  return (0);
-}
-
-extern void MT_Exclusive(void)
-{
-}
-
-extern void MT_Release(void)
-{
-}

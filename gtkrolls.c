@@ -32,6 +32,7 @@
 
 #include "format.h"
 #include "gtkwindows.h"
+#include "gtkrolls.h"
 
 typedef struct _rollswidget {
 

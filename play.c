@@ -856,7 +856,7 @@ static void ShowAutoMove( TanBoard anBoard, int anMove[ 8 ] ) {
 		 FormatMove( sz, anBoard, anMove ) );
 }
 
-extern int ComputerTurn( void ) {
+static int ComputerTurn( void ) {
 
   moverecord *pmr;
   cubeinfo ci;

@@ -382,14 +382,14 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
 
   if ( prc->fRotate ) 
     sprintf ( strchr ( sz, 0 ),
-              _(", %s dice gen. with seed %d and quasi-random dice\n"),
+              _(", %s dice gen. with seed %u and quasi-random dice\n"),
               gettext( aszRNG[ prc->rngRollout ] ),
-              prc->nSeed );
+              (unsigned int)prc->nSeed ); /* seed may be unsigned long int */
   else
     sprintf ( strchr ( sz, 0 ),
-              _(", %s dice generator with seed %d\n"),
+              _(", %s dice generator with seed %u\n"),
               gettext( aszRNG[ prc->rngRollout ] ),
-              prc->nSeed );
+              (unsigned int)prc->nSeed ); /* seed may be unsigned long int */
 
    if ( ( prc->fStopOnJsd || prc->fStopMoveOnJsd || prc->fStopOnSTD )
         && szIndent && *szIndent )

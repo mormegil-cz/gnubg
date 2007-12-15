@@ -1,3 +1,11 @@
+Sat Dec 15 21:27:19 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Renamed sgf.y to sgf_y.y and sgf.l sgf_l.l to avoid conflicts with
+	sgf.c
+	* bearoff.c, eval.c, format.c, gnubg.c, gtkgame.c, gtkrolls.c,
+	makebearoff.c, multithread.c, play.c, relational.c, rollout.c, sgf.c,
+	show.c: minor compiler warnings
+
 Sat Dec 15 21:23:49 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* board3d/gtkcolour3d.c: remove unneeded gdk_gl_drawable_begin calls since

@@ -52,15 +52,15 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 90 "./sgf.y"
+#line 92 "sgf_y.y"
 {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
     property *pp; /* complete property */
-    list *pl; /* nodes, sequences, gametrees */
+    listOLD *pl; /* nodes, sequences, gametrees */
 }
 /* Line 1489 of yacc.c.  */
-#line 64 "sgfp.h"
+#line 64 "sgf_y.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1

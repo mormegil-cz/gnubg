@@ -15,7 +15,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	htmlimages \
 	html import multithread latex matchequity \
 	matchid positionid record \
-	render rollout set sgf non-src/sgfl non-src/sgfp show sound \
+	render rollout set sgf non-src/sgf_l non-src/sgf_y show sound \
 	text osr gtksplash gtkcolour renderprefs speed openurl \
 	gtkrolls boardpos gtktempmap progress format gtktoolbar \
 	gtkoptions formatgs \

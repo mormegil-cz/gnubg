@@ -817,10 +817,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       ! pci->fMove, pci->nMatchTo,
                       pci->anScore, pci->fCrawford,
                       pci->fJacoby, pci->fBeavers, pci->bgv );
-
-        g_assert ( cUnfinished >= 0 );
-
-
       }
     }
 

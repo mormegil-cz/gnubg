@@ -86,7 +86,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 24 "./sgf.y"
+#line 24 "sgf_y.y"
 
 #include "config.h"
 #include "list.h"
@@ -97,7 +97,7 @@
 
 #include "sgf.h"
 
-static list *plCollection;    
+static listOLD *plCollection;    
     
 extern int sgflex( void );
 
@@ -115,13 +115,13 @@ static int sgferror( char *s ) {
     return 0;
 }
 
-static list *NewList( void ) {
-    list *pl = calloc(1,  sizeof( *pl ) );
+static listOLD *NewList( void ) {
+    listOLD *pl = calloc(1,  sizeof( *pl ) );
     ListCreate( pl );
     return pl;
 }
 
-static char *Concatenate( list *pl ) {
+static char *Concatenate( listOLD *pl ) {
 
     int cch = 0;
     char *sz, *pchDest, *pchSrc;
@@ -168,15 +168,15 @@ static char *Concatenate( list *pl ) {
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 90 "./sgf.y"
+#line 92 "sgf_y.y"
 {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
     property *pp; /* complete property */
-    list *pl; /* nodes, sequences, gametrees */
+    listOLD *pl; /* nodes, sequences, gametrees */
 }
 /* Line 187 of yacc.c.  */
-#line 180 "sgfp.c"
+#line 180 "sgf_y.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -189,7 +189,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 193 "sgfp.c"
+#line 193 "sgf_y.c"
 
 #ifdef short
 # undef short
@@ -476,8 +476,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   107,   107,   112,   113,   115,   118,   122,   124,   126,
-     129,   134,   135,   139,   142,   151,   152,   156,   161,   162
+       0,   109,   109,   114,   115,   117,   120,   124,   126,   128,
+     131,   136,   137,   141,   144,   153,   154,   158,   163,   164
 };
 #endif
 
@@ -1390,52 +1390,52 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 108 "./sgf.y"
+#line 110 "sgf_y.y"
     { (yyval.pl) = plCollection = (yyvsp[(1) - (1)].pl); }
     break;
 
   case 3:
-#line 112 "./sgf.y"
+#line 114 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 4:
-#line 114 "./sgf.y"
+#line 116 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 6:
-#line 119 "./sgf.y"
+#line 121 "sgf_y.y"
     { ListInsert( (yyvsp[(3) - (4)].pl)->plNext, (yyvsp[(2) - (4)].pl) ); (yyval.pl) = (yyvsp[(3) - (4)].pl); }
     break;
 
   case 7:
-#line 123 "./sgf.y"
+#line 125 "sgf_y.y"
     { (yyval.pl) = NewList(); ListInsert( (yyval.pl), (yyvsp[(1) - (1)].pl) ); }
     break;
 
   case 8:
-#line 125 "./sgf.y"
+#line 127 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 10:
-#line 130 "./sgf.y"
+#line 132 "sgf_y.y"
     { (yyval.pl) = (yyvsp[(2) - (2)].pl); }
     break;
 
   case 11:
-#line 134 "./sgf.y"
+#line 136 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 12:
-#line 136 "./sgf.y"
+#line 138 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pp) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 14:
-#line 143 "./sgf.y"
+#line 145 "sgf_y.y"
     { 
 		    ListInsert( (yyvsp[(2) - (3)].pl), (yyvsp[(3) - (3)].pch) );
 		    (yyval.pp) = malloc( sizeof(property) ); (yyval.pp)->pl = (yyvsp[(2) - (3)].pl);
@@ -1444,33 +1444,33 @@ yyreduce:
     break;
 
   case 15:
-#line 151 "./sgf.y"
+#line 153 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 16:
-#line 153 "./sgf.y"
+#line 155 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 17:
-#line 157 "./sgf.y"
+#line 159 "sgf_y.y"
     { (yyval.pch) = Concatenate( (yyvsp[(2) - (3)].pl) ); }
     break;
 
   case 18:
-#line 161 "./sgf.y"
+#line 163 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 19:
-#line 163 "./sgf.y"
+#line 165 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1474 "sgfp.c"
+#line 1474 "sgf_y.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1684,11 +1684,11 @@ yyreturn:
 }
 
 
-#line 166 "./sgf.y"
+#line 168 "sgf_y.y"
 
 
 extern FILE *sgfin;
-extern list *SGFParse( FILE *pf ) {
+extern listOLD *SGFParse( FILE *pf ) {
 
     
     sgfin = pf;

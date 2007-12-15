@@ -484,7 +484,7 @@ const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
   N_("Raccoon")
 };
 
-void PrintError(const char* str)
+static void PrintError(const char* str)
 {
 	g_printerr("%s: %s", str, strerror(errno));
 }

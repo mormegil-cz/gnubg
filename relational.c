@@ -28,6 +28,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkwindows.h"
+#include "gtkrelational.h"
 #endif
 
 #include <stdio.h>

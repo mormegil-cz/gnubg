@@ -5565,7 +5565,8 @@ extern void SetRollouts( gpointer p, guint n, GtkWidget *pwIgnore )
     }
 
     if( abs(rw.rcRollout.nSeed) != abs(rcRollout.nSeed) ) {
-      sprintf( sz, "set rollout seed %d", rw.rcRollout.nSeed );
+	    /* seed may be unsigned long int */
+      sprintf( sz, "set rollout seed %u", (unsigned int)rw.rcRollout.nSeed );
       UserCommand( sz );
     }
 

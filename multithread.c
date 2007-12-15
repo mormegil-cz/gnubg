@@ -357,7 +357,7 @@ AnalyzeDoubleDecison:
             g_usleep(1000000);
             break;
         case TT_CLOSE:
-			MT_SafeInc(&td.result);
+			(void)MT_SafeInc(&td.result);
             alive = FALSE;
             break;
         }
@@ -402,7 +402,7 @@ MT_WorkerThreadFunction(void *id)
 	int *pID = (int*)id;
     TLSSetValue(td.tlsItem, *pID);
     free(pID);
-	MT_SafeInc(&td.result);
+	(void)MT_SafeInc(&td.result);
     MT_TaskDone(NULL);    /* Thread created */
     do
     {

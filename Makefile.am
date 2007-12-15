@@ -14,7 +14,7 @@ INCLUDES = -I$(srcdir)/lib -I$(srcdir)/board3d @LIBXML2_CFLAGS@ \
 	   @LIBPNG_CFLAGS@ @GTK_CFLAGS@ @CAIRO_CFLAGS@ @PANGOCAIRO_CFLAGS@ @GTHREAD_CFLAGS@ @ESD_CFLAGS@ \
 	   @WINMMSND_CFLAGS@ @GTKGLEXT_CFLAGS@
 
-BUILT_SOURCES = sgfp.c sgfl.c copying.c credits.c external_l.c external_y.c
+BUILT_SOURCES = sgf_y.c sgf_l.c copying.c credits.c external_l.c external_y.c
 
 #
 ## sources for building the main executable
@@ -87,9 +87,9 @@ gnubg_SOURCES = \
 		set.c \
 		sgf.c \
 		sgf.h \
-		sgfl.c \
-		sgfp.c \
-		sgfp.h \
+		sgf_l.c \
+		sgf_y.c \
+		sgf_y.h \
 		show.c \
 		simpleboard.c \
 		simpleboard.h \
@@ -170,19 +170,9 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
 #
 EXTRA_DIST = config.rpath  userrng.c copying.awk \
 	gnubg.gtkrc credits.sh \
-	external_l.c external_y.c external_y.h sgfp.c sgfp.h sgfl.c \
-	external_l.l external_y.y sgf.l sgf.y \
+	$(BUILT_SOURCES)
 	ABOUT-NLS boards.xml gnubg.game.sql autogen.sh gnubg.weights\
 	textures.txt gnubg.png gnubg.svg corecount.c
-
-#
-##sgf.y and sgf.l ought to be renamed sgf_y.y and sgf_l.l to avoid conflicts with sgf.c
-#
-sgfp.c: sgf.y
-	$(YACC) -o $(srcdir)/sgfp.c -p sgf -d $(srcdir)/sgf.y
-
-sgfl.c: sgf.l
-	$(LEX) -o$@ -Psgf $(srcdir)/sgf.l
 
 #
 ##credits.c target

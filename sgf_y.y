@@ -82,6 +82,8 @@ static char *Concatenate( listOLD *pl ) {
 
 %}
 
+%name-prefix="sgf"
+
 /* There are 2 shift/reduce conflicts caused by ambiguities at which level
    error handling should be performed (GameTreeSeq, Sequence, and
    PropertySeq); the default shifting produces correct behaviour. */

@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "sgf.h"
-#include "sgfp.h"
+#include "sgf_y.h"
 #include <glib/gi18n.h>
 
 extern int _SGFWarning( char * );
@@ -47,12 +47,14 @@ static int error( char *s ) {
 #define YY_FATAL_ERROR(m) error(m)
 %}
 
+%option noyywrap
+%option prefix="sgf"
 %option 8bit
 %option nodefault
 %option ecs
 %option fast
 %option noread
-%option noyywrap
+%option outfile="lex.yy.c"
 
 %option noinput
 %option nounput

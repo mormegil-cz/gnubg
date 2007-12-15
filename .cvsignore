@@ -32,9 +32,9 @@ Makefile.in
 makehyper
 makeweights
 missing
-sgfl.c
-sgfp.c
-sgfp.h
+sgf_l.c
+sgf_y.c
+sgf_y.h
 stamp-*
 ylwrap
 Doxyfile

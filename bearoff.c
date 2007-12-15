@@ -273,7 +273,7 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)() ) {
 }
 
 
-void ReadBearoffFile(bearoffcontext *pbc, unsigned int offset, unsigned char *buf, unsigned int nBytes)
+static void ReadBearoffFile(bearoffcontext *pbc, unsigned int offset, unsigned char *buf, unsigned int nBytes)
 {
 #if USE_MULTITHREAD
 	MT_Exclusive();

@@ -522,7 +522,7 @@ static void RestoreRolloutScore(move * pm, const char *sz)
     pm->rScore2 = g_ascii_strtod(pc, &pc);
 }
 
-static void RestoreRolloutTrials(int *piTrials, const char *sz)
+static void RestoreRolloutTrials(unsigned int *piTrials, const char *sz)
 {
 
     char *pc = strstr(sz, "Trials");
@@ -681,7 +681,7 @@ RestoreRolloutRolloutContext(rolloutcontext * prc, const char *sz)
 static void RestoreRollout(move * pm, const char *sz)
 {
 
-    int n;
+    unsigned int n;
 
     pm->esMove.et = EVAL_ROLLOUT;
     RestoreRolloutScore(pm, sz);
@@ -1672,7 +1672,7 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 
     int i;
 
-    fprintf(pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %d ",
+    fprintf(pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %u ",
 	    prc->fCubeful,
 	    prc->fVarRedn,
 	    prc->fInitial,
@@ -1682,7 +1682,7 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 	    prc->nTruncate,
 	    prc->fTruncBearoff2,
 	    prc->fTruncBearoffOS,
-	    prc->nLate, aszRNG[prc->rngRollout], prc->nSeed);
+	    prc->nLate, aszRNG[prc->rngRollout], (unsigned int)prc->nSeed);
 
     for (i = 0; i < 2; i++) {
 	fprintf(pf, " cube%d ", i);
