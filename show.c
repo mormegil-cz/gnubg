@@ -270,8 +270,8 @@ ShowRollout ( const rolloutcontext *prc ) {
   outputl ( prc->fInitial ?
             _("Rollout as opening move enabled.") :
             _("Rollout as opening move disabled.") );
-  outputf ( _("%s dice generator with seed %u.\n"),
-            gettext ( aszRNG[ prc->rngRollout ] ), (unsigned int)prc->nSeed );
+  outputf ( _("%s dice generator with seed %lu.\n"),
+            gettext ( aszRNG[ prc->rngRollout ] ), prc->nSeed );
             
   /* see if the players settings are the same */
   if (EvalCmp (prc->aecChequer, prc->aecChequer + 1, 1) ||

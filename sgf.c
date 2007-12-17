@@ -1672,7 +1672,7 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 
     int i;
 
-    fprintf(pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %u ",
+    fprintf(pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %lu ",
 	    prc->fCubeful,
 	    prc->fVarRedn,
 	    prc->fInitial,
@@ -1682,7 +1682,7 @@ static void WriteRolloutContext(FILE * pf, const rolloutcontext * prc)
 	    prc->nTruncate,
 	    prc->fTruncBearoff2,
 	    prc->fTruncBearoffOS,
-	    prc->nLate, aszRNG[prc->rngRollout], (unsigned int)prc->nSeed);
+	    prc->nLate, aszRNG[prc->rngRollout], prc->nSeed);
 
     for (i = 0; i < 2; i++) {
 	fprintf(pf, " cube%d ", i);
