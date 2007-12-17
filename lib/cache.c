@@ -31,18 +31,18 @@
 
 #if USE_MULTITHREAD
 #include "multithread.h"
-static int cache_lock(volatile cache* pc, volatile int* lock)
+static int cache_lock(volatile cache* pc, volatile unsigned long lock)
 {
-	int r1 = MT_SafeInc(pc->locks[lock]);
-	int r2 = MT_SafeInc(pc->locks[lock+1]);
-	return (r1 < 2 && r1<2);
+	int r1 = MT_SafeInc(&pc->locks[lock]);
+	int r2 = MT_SafeInc(&pc->locks[lock+1]);
+	return (r1 > 1 || r2 > 1);
 }
 
 
-static int cache_unlock(volatile cache* pc, volatile int* lock)
+static void cache_unlock(volatile cache* pc, volatile unsigned long lock)
 {
-	(void)MT_SafeDec(pc->locks[lock]);
-	(void)MT_SafeDec(pc->locks[lock+1]);
+	(void)MT_SafeDec(&pc->locks[lock]);
+	(void)MT_SafeDec(&pc->locks[lock+1]);
 }
 #endif
 
@@ -135,8 +135,8 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 	++pc->cLookup;
 #endif
 #if USE_MULTITHREAD
-	while (cache_lock(pc, &l))
-		cache_unlock(pc, &l);
+	while (cache_lock(pc, l))
+		cache_unlock(pc, l);
 #endif
 	if ((pc->m[l].nEvalContext != e->nEvalContext ||
 		memcmp(pc->m[l].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
@@ -145,7 +145,7 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 			memcmp(pc->m[l + 1].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 		{	/* Cache miss */
 #if USE_MULTITHREAD
-			cache_unlock(pc, &l);
+			cache_unlock(pc, l);
 #endif
 			return l;
 		}
@@ -166,7 +166,7 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 		*arCubeful = pc->m[l].ar[6/*OUTPUT_CUBEFUL_EQUITY*/];
 
 #if USE_MULTITHREAD
-	cache_unlock(pc, &l);
+	cache_unlock(pc, l);
 #endif
 
     return CACHEHIT;
@@ -175,15 +175,15 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 void CacheAdd(cache* pc, const cacheNode* e, unsigned long l)
 {
 #if USE_MULTITHREAD
-	while (cache_lock(pc, &l))
-		cache_unlock(pc, &l);
+	while (cache_lock(pc, l))
+		cache_unlock(pc, l);
 #endif
 
 	pc->m[l + 1] = pc->m[l];
 	pc->m[l] = *e;
 
 #if USE_MULTITHREAD
-	cache_unlock(pc, &l);
+	cache_unlock(pc, l);
 #endif
 
 #if CACHE_STATS
