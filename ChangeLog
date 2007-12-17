@@ -1,3 +1,9 @@
+Mon Dec 17 16:33:01 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* lib/cache.c: Fix multithreaded hang when runing quad core with four
+	threads. WaitForManualEvent appears to be broken, at least on glib
+	threads
+
 Mon Dec 17 15:06:44 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, dice.c, dice.h, eval.c, format.c, gnubg.c, gtkgame.c,

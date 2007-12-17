@@ -55,9 +55,6 @@ extern void MT_SyncInit(void);
 extern void MT_SyncStart(void);
 extern double MT_SyncEnd(void);
 extern void MT_Exclusive(void);
-extern void MT_Unlock(int *lock);
-extern void MT_Lock(int *lock);
-
 #ifdef GLIB_THREADS
   #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
   #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(x, y) + y)

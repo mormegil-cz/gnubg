@@ -604,32 +604,6 @@ extern int MT_GetThreadID(void)
     return TLSGet(td.tlsItem);
 }
 
-extern void MT_Lock(int *lock)
-{
-    while (MT_SafeInc(lock) != 1)
-    {
-        WaitForManualEvent(td.lockContention);
-        if (MT_SafeDec(lock))
-        {    /* Found something that's cleared */
-            SetManualEvent(td.contentionCleared);
-            ResetManualEvent(td.lockContention);
-        }
-        else
-        {
-            WaitForManualEvent(td.contentionCleared);
-        }
-    }
-}
-
-extern void MT_Unlock(int *lock)
-{
-    if (!MT_SafeDec(lock))
-    {    /* Clear contention */
-        ResetManualEvent(td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
-        SetManualEvent(td.lockContention);	/* Release any waiting threads */
-    }
-}
-
 extern void MT_Exclusive(void)
 {
 	Mutex_Lock(td.multiLock);

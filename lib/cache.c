@@ -31,9 +31,19 @@
 
 #if USE_MULTITHREAD
 #include "multithread.h"
-#else
-#define MT_Lock(x)
-#define MT_Unlock(x)
+static int cache_lock(volatile cache* pc, volatile int* lock)
+{
+	int r1 = MT_SafeInc(pc->locks[lock]);
+	int r2 = MT_SafeInc(pc->locks[lock+1]);
+	return (r1 < 2 && r1<2);
+}
+
+
+static int cache_unlock(volatile cache* pc, volatile int* lock)
+{
+	(void)MT_SafeDec(pc->locks[lock]);
+	(void)MT_SafeDec(pc->locks[lock+1]);
+}
 #endif
 
 /* Adapted from
@@ -124,16 +134,19 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 #if CACHE_STATS
 	++pc->cLookup;
 #endif
-
-	MT_Lock(&pc->locks[l]);
-
+#if USE_MULTITHREAD
+	while (cache_lock(pc, &l))
+		cache_unlock(pc, &l);
+#endif
 	if ((pc->m[l].nEvalContext != e->nEvalContext ||
 		memcmp(pc->m[l].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 	{	/* Not in first slot */
 		if ((pc->m[l + 1].nEvalContext != e->nEvalContext ||
 			memcmp(pc->m[l + 1].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
 		{	/* Cache miss */
-			MT_Unlock(&pc->locks[l]);
+#if USE_MULTITHREAD
+			cache_unlock(pc, &l);
+#endif
 			return l;
 		}
 		else
@@ -152,19 +165,26 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 	if (arCubeful)
 		*arCubeful = pc->m[l].ar[6/*OUTPUT_CUBEFUL_EQUITY*/];
 
-	MT_Unlock(&pc->locks[l]);
+#if USE_MULTITHREAD
+	cache_unlock(pc, &l);
+#endif
 
     return CACHEHIT;
 }
 
 void CacheAdd(cache* pc, const cacheNode* e, unsigned long l)
 {
-	MT_Lock(&pc->locks[l]);
+#if USE_MULTITHREAD
+	while (cache_lock(pc, &l))
+		cache_unlock(pc, &l);
+#endif
 
 	pc->m[l + 1] = pc->m[l];
 	pc->m[l] = *e;
 
-	MT_Unlock(&pc->locks[l]);
+#if USE_MULTITHREAD
+	cache_unlock(pc, &l);
+#endif
 
 #if CACHE_STATS
   ++pc->nAdds;
