@@ -62,8 +62,6 @@ dnl
 
 AC_PROG_AWK
 AC_PROG_LN_S
-AC_CHECK_PROG(CSOUND, csound, csound, true)
-AC_CHECK_PROG(SRCONV, srconv, srconv, true)
 AC_CHECK_PROGS(DOCBOOK2TEXI, docbook2x-texi db2x_docbook2texi, false)
 AC_CHECK_PROGS(DOCBOOK2MAN, docbook2x-man db2x_docbook2man, false)
 AC_CHECK_PROGS(DBLATEX, dblatex, false)

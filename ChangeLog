@@ -1,3 +1,8 @@
+Mon Dec 17 14:59:20 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* sounds/Makefile.am, configure.in: we haven't beeen able to recompile
+	the sounds for a long time, so let's stop trying.
+
 Sat Dec 15 21:27:19 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Renamed sgf.y to sgf_y.y and sgf.l sgf_l.l to avoid conflicts with
