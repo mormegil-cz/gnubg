@@ -34,69 +34,13 @@
 #include <unistd.h>
 #endif
 #include <stdlib.h>
-
-#if HAVE_SOCKETS
-#ifndef WIN32
-#include <errno.h>
-#include <sys/types.h>
-
-#if HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <sys/un.h>
-#endif /* #if HAVE_SYS_SOCKET_H */
-
-#else /* #ifndef WIN32 */
-#include <winsock2.h>
-
-#define EWOULDBLOCK             WSAEWOULDBLOCK
-#define EINPROGRESS             WSAEINPROGRESS
-#define EALREADY                WSAEALREADY
-#define ENOTSOCK                WSAENOTSOCK
-#define EDESTADDRREQ            WSAEDESTADDRREQ
-#define EMSGSIZE                WSAEMSGSIZE
-#define EPROTOTYPE              WSAEPROTOTYPE
-#define ENOPROTOOPT             WSAENOPROTOOPT
-#define EPROTONOSUPPORT         WSAEPROTONOSUPPORT
-#define ESOCKTNOSUPPORT         WSAESOCKTNOSUPPORT
-#define EOPNOTSUPP              WSAEOPNOTSUPP
-#define EPFNOSUPPORT            WSAEPFNOSUPPORT
-#define EAFNOSUPPORT            WSAEAFNOSUPPORT
-#define EADDRINUSE              WSAEADDRINUSE
-#define EADDRNOTAVAIL           WSAEADDRNOTAVAIL
-#define ENETDOWN                WSAENETDOWN
-#define ENETUNREACH             WSAENETUNREACH
-#define ENETRESET               WSAENETRESET
-#define ECONNABORTED            WSAECONNABORTED
-#define ECONNRESET              WSAECONNRESET
-#define ENOBUFS                 WSAENOBUFS
-#define EISCONN                 WSAEISCONN
-#define ENOTCONN                WSAENOTCONN
-#define ESHUTDOWN               WSAESHUTDOWN
-#define ETOOMANYREFS            WSAETOOMANYREFS
-#define ETIMEDOUT               WSAETIMEDOUT
-#define ECONNREFUSED            WSAECONNREFUSED
-#define ELOOP                   WSAELOOP
-#define ENAMETOOLONG            WSAENAMETOOLONG
-#define EHOSTDOWN               WSAEHOSTDOWN
-#define EHOSTUNREACH            WSAEHOSTUNREACH
-#define ENOTEMPTY               WSAENOTEMPTY
-#define EPROCLIM                WSAEPROCLIM
-#define EUSERS                  WSAEUSERS
-#define EDQUOT                  WSAEDQUOT
-#define ESTALE                  WSAESTALE
-#define EREMOTE                 WSAEREMOTE
-#endif /* #ifndef WIN32 */
-#endif /* #if HAVE_SOCKETS */
+#include "string.h"
 
 #include "dice.h"
 #include "md5.h"
 #include "mt19937ar.h"
 #include "isaac.h"
 #include <glib/gi18n.h>
-#include "external.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -120,9 +64,8 @@ char *aszRNG[ NUM_RNGS ] = {
 rng rngCurrent = RNG_MERSENNE;
 void *rngctxCurrent = NULL;
 
-
-
-
+static int (*getDiceRandomDotOrg) (void);
+static int (*GetManualDice) (unsigned int[2]);
 
 typedef struct _rngcontext {
 
@@ -171,60 +114,6 @@ typedef struct _rngcontext {
 static int
 ReadDiceFile( rngcontext *rngctx );
 
-
-static int GetManualDice( unsigned int anDice[ 2 ] ) {
-
-  char *pz;
-  char *sz=NULL;
-  int i;
-
-#if USE_GTK
-  if( fX ) {
-      if( GTKGetManualDice( anDice ) ) {
-	  fInterrupt = 1;
-	  return -1;
-      } else
-	  return 0;
-  }
-#endif
-  
-  for (;;) {
-  TryAgain:
-      if( fInterrupt ) {
-	  anDice[ 0 ] = anDice[ 1 ] = 0;
-	  return -1;
-      }
-      
-      sz = GetInput( _("Enter dice: ") );
-
-      if( fInterrupt ) {
-          g_free( sz );
-	  anDice[ 0 ] = anDice[ 1 ] = 0;
-	  return -1;
-      }
-      
-      /* parse input and read a couple of dice */
-      /* any string with two numbers is allowed */
-    
-      pz = sz;
-      
-      for ( i=0; i<2; i++ ) {
-	  while ( *pz && ( ( *pz < '1' ) || ( *pz > '6' ) ) )
-	      pz++;
-
-	  if ( !*pz ) {
-	      outputl( _("You must enter two numbers between 1 and 6.") );
-	      goto TryAgain;
-	  }
-	  
-	  anDice[ i ] = (int) (*pz - '0');
-	  pz++;
-      }
-
-      g_free( sz );
-      return 0;
-  }
-}
 
 #if HAVE_LIBGMP
 
@@ -302,7 +191,7 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1, void *x ) {
 	BBSFindGood( p );
 
 	pch = mpz_get_str( NULL, 10, p );
-	outputf( _("%s is an invalid Blum factor; using %s instead.\n"),
+	g_print( _("%s is an invalid Blum factor; using %s instead.\n"),
 		 sz0, pch );
 	free( pch );
     }
@@ -314,7 +203,7 @@ extern int InitRNGBBSFactors( char *sz0, char *sz1, void *x ) {
 	    BBSFindGood( q );
 	
 	pch = mpz_get_str( NULL, 10, q );
-	outputf( _("%s is an invalid Blum factor; using %s instead.\n"),
+	g_print( _("%s is an invalid Blum factor; using %s instead.\n"),
 		 sz1, pch );
 	free( pch );
     }
@@ -388,9 +277,9 @@ static int BBSCheck( rngcontext *rngctx ) {
 
 static int BBSInitialSeedFailure( rngcontext *rngctx ) {
 
-    outputl( _("That is not a valid initial state for the Blum, Blum and Shub "
+    g_print( _("That is not a valid initial state for the Blum, Blum and Shub "
 	       "generator.\n"
-	       "Please choose a different seed and/or modulus." ) );
+	       "Please choose a different seed and/or modulus.\n" ) );
     mpz_set( rngctx->zSeed, rngctx->zZero ); /* so that BBSCheck will fail */
     
     return -1;
@@ -442,8 +331,8 @@ static int BBSCheckInitialSeed( rngcontext *rngctx ) {
 static void
 PrintRNGWarning( void ) {
 
-  outputl( _("WARNING: this number may not be correct if the same \n"
-             "RNG is used for, say, both rollouts and interactive play.") );
+  g_print( _("WARNING: this number may not be correct if the same \n"
+             "RNG is used for, say, both rollouts and interactive play.\n") );
 
 }
 
@@ -456,23 +345,23 @@ PrintRNGCounter( const rng rngx, void *p ) {
     case RNG_ANSI:
     case RNG_BSD:
     case RNG_USER:
-      outputf( _("Number of calls since last seed: %lu.\n"), rngctx->c );
+      g_print( _("Number of calls since last seed: %lu.\n"), rngctx->c );
       PrintRNGWarning();
       break;
 
     case RNG_BBS:
     case RNG_ISAAC:
     case RNG_MD5:
-      outputf( _("Number of calls since last seed: %lu.\n"), rngctx->c );
+      g_print( _("Number of calls since last seed: %lu.\n"), rngctx->c );
       
       break;
       
     case RNG_RANDOM_DOT_ORG:
-      outputf( _("Number of dice used in current batch: %lu.\n"), rngctx->c );
+      g_print( _("Number of dice used in current batch: %lu.\n"), rngctx->c );
       break;
 
     case RNG_FILE:
-      outputf( _("Number of dice read from current file: %lu.\n"), rngctx->c );
+      g_print( _("Number of dice read from current file: %lu.\n"), rngctx->c );
       break;
       
     default:
@@ -490,7 +379,7 @@ PrintRNGSeedMP( mpz_t n ) {
 
   char *pch;
   pch = mpz_get_str( NULL, 10, n );
-  outputf( _("The current seed is %s.\n"), pch );
+  g_print( _("The current seed is %s.\n"), pch );
   free( pch );
 
 }
@@ -500,7 +389,7 @@ PrintRNGSeedMP( mpz_t n ) {
 static void
 PrintRNGSeedNormal( int n ) {
 
-  outputf( _("The current seed is %d.\n"), n );
+  g_print( _("The current seed is %d.\n"), n );
 
 }
 #endif /* HAVE_LIBGMP */
@@ -517,11 +406,11 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 	char *pch;
 
 	pch = mpz_get_str( NULL, 10, rngctx->zSeed );
-	outputf( _("The current seed is %s, "), pch );
+	g_print( _("The current seed is %s, "), pch );
 	free( pch );
 	
 	pch = mpz_get_str( NULL, 10, rngctx->zModulus );
-	outputf( _("and the modulus is %s.\n"), pch );
+	g_print( _("and the modulus is %s.\n"), pch );
 	free( pch );
 	
 	return;
@@ -531,11 +420,11 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 #endif
 	
     case RNG_MD5:
-	outputf( _("The current seed is %u.\n"), rngctx->nMD5 );
+	g_print( _("The current seed is %u.\n"), rngctx->nMD5 );
 	break;
 
     case RNG_FILE:
-        outputf( _("GNU Backgammon is reading dice from file: %s\n"), 
+        g_print( _("GNU Backgammon is reading dice from file: %s\n"), 
                  rngctx->szDiceFilename );
         break;
 	
@@ -576,8 +465,8 @@ extern void PrintRNGSeed( const rng rngx, void *p ) {
 	break;
     }
 
-    outputl( _("You cannot show the seed with this random number "
-	       "generator.") );
+    g_printerr( _("You cannot show the seed with this random number "
+	       "generator.\n") );
 }
 
 extern void InitRNGSeed( int n, const rng rngx, void *p ) {
@@ -799,10 +688,17 @@ RNGSystemSeed( const rng rngx, void *p, unsigned long *pnSeed ) {
 
 }
 
-extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
-                      const int fSet, const rng rngx ) {
+extern void dice_init_callback(int (*rdo_callback) (void),
+				int (*gmd_callback) (unsigned int[2]))
+{
+	getDiceRandomDotOrg = rdo_callback;
+	GetManualDice = gmd_callback;
+}
 
-    int f = FALSE;
+extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
+		const int fSet, const rng rngx)
+{
+	int f = FALSE;
     rngcontext *rngctx =  g_new0(rngcontext, 1);
 
     /* misc. initialisation */
@@ -831,120 +727,6 @@ extern void *InitRNG( unsigned long *pnSeed, int *pfInitFrom,
 
 }
 
-
-/* 
- * Fetch random numbers from www.random.org
- *
- */
-
-#if HAVE_SOCKETS
-
-static int
-getDiceRandomDotOrg ( void ) {
-
-#define BUFLENGTH 500
-
-  static int nCurrent = -1;
-  static int anBuf [ BUFLENGTH ]; 
-  static int nRead;
-  
-
-  int h;
-  int cb;
-
-  int nBytesRead, i;
-  struct sockaddr *psa;
-  char szHostname[ 80 ];
-  char szHTTP[] = 
-    "GET http://www.random.org/cgi-bin/randnum?num=500&min=0&max=5&col=1\n";
-  char acBuf [ 2048 ];
-
-  /* 
-   * Suggestions for improvements:
-   * - use proxy
-   */
-
-  /*
-   * Return random number
-   */
-
-  if ( ( nCurrent >= 0) && ( nCurrent < nRead ) )
-     return anBuf [ nCurrent++ ];
-  else {
-
-    outputf ( _("Fetching %d random numbers from <www.random.org>\n"), BUFLENGTH );
-    outputx ();
-
-    /* fetch new numbers */
-
-    /* open socket */
-
-    strcpy( szHostname, "www.random.org:80" );
-
-    if ( ( h = ExternalSocket( &psa, &cb, szHostname ) ) < 0 ) {
-      SockErr ( szHostname );
-      return -1;
-    }
-
-    /* connect */
-
-#ifdef WIN32
-    if ( connect( (SOCKET) h, (const struct sockaddr*) psa, cb ) < 0 ) {
-#else
-    if ( ( connect( h, psa, cb ) ) < 0 ) {
-#endif /* WIN32 */
-      SockErr( szHostname );
-      return -1;
-    }
-
-    /* read next set of numbers */
-
-    if ( ExternalWrite( h, szHTTP, strlen ( szHTTP ) + 1 ) < 0 ) {
-      SockErr( szHTTP );
-      closesocket( h );
-      return -1;
-    }
-
-    /* read data from web-server */
-
-#ifdef WIN32
-	/* reading from sockets doesn't work on Windows
-	   use recv instead */
-	if ( ! ( nBytesRead = recv( (SOCKET) h, acBuf, sizeof ( acBuf ), 0 ) ) ) {
-#else
-	if ( ! ( nBytesRead = read( h, acBuf, sizeof ( acBuf ) ) ) ) {
-#endif
-      SockErr( "reading data" );
-      closesocket( h );
-      return -1;
-    }
-
-    /* close socket */
-    closesocket ( h );
-
-    /* parse string */
-    outputl ( _("Done." ) );
-    outputx ();
-
-    i = 0; nRead = 0;
-    for ( i = 0; i < nBytesRead ; i++ ) {
-
-      if ( ( acBuf[ i ] >= '0' ) && ( acBuf[ i ] <= '5' ) ) {
-         anBuf[ nRead ] = 1 + (int) (acBuf[ i ] - '0');
-         nRead++;
-      }
-
-    }
-
-    nCurrent = 1;
-    return anBuf[ 0 ];
-  }
-
-}
-
-#endif /* HAVE_SOCKETS */
-
-
 extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, void *p ) {
 
     rngcontext *rngctx = (rngcontext *) p;
@@ -959,9 +741,9 @@ extern int RollDice( unsigned int anDice[ 2 ], const rng rngx, void *p ) {
     case RNG_BBS:
 #if HAVE_LIBGMP
 	if( BBSCheck( rngctx ) ) {
-	    outputl( _( "The Blum, Blum and Shub generator is in an illegal "
+	    g_printerr( _( "The Blum, Blum and Shub generator is in an illegal "
 			"state.  Please reset the\n"
-			"seed and/or modulus before continuing." ) );
+			"seed and/or modulus before continuing.\n" ) );
 	    return -1;
 	}
 	
@@ -1114,9 +896,9 @@ extern int UserRNGOpen( void *p, char *sz ) {
        * Bugger! Can't load shared library
        */
       if( ( error = dlerror() ) )
-	  outputerrf( "%s", error );
+	  g_printerr( "%s", error );
       else
-	  outputerrf( _("Could not load shared object %s."), sz );
+	  g_printerr( _("Could not load shared object %s."), sz );
     
       return 0;
   } 
@@ -1133,7 +915,7 @@ extern int UserRNGOpen( void *p, char *sz ) {
     dlsym( rngctx->pvUserRNGHandle, rngctx->szUserRNGSeed );
 
   if ((error = dlerror()) != NULL)  {
-      outputerrf( "%s: %s", rngctx->szUserRNGSeed, error );
+      g_printerr( "%s: %s", rngctx->szUserRNGSeed, error );
       return 0;
   }
   
@@ -1142,7 +924,7 @@ extern int UserRNGOpen( void *p, char *sz ) {
                                 rngctx->szUserRNGRandom );
 
   if ((error = dlerror()) != NULL)  {
-      outputerrf( "%s: %s", rngctx->szUserRNGRandom, error );
+      g_printerr( "%s: %s", rngctx->szUserRNGRandom, error );
       return 0;
   }
 
@@ -1198,11 +980,11 @@ uglyloop:
 
     if ( !n ) {
       /* end of file */
-      outputf( _("Rewinding dice file (%s)\n"), rngctx->szDiceFilename );
+      g_print( _("Rewinding dice file (%s)\n"), rngctx->szDiceFilename );
       lseek( rngctx->hDice, 0, SEEK_SET );
     }
     else if ( n < 0 ) {
-      outputerr(rngctx->szDiceFilename);
+      g_printerr(rngctx->szDiceFilename);
       return -1;
     }
     else if ( uch >= '1' && uch <= '6' )

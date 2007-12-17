@@ -71,4 +71,6 @@ CloseDiceFile( void *rngctx );
 extern char *
 GetDiceFileName( void *rngctx );
 
+extern void dice_init_callback(int (*rdo_callback) (void),
+				int (*gmd_callback) (unsigned int[2]));
 #endif

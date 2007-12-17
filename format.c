@@ -30,6 +30,7 @@
 #include "format.h"
 
 #include "export.h"
+#include "positionid.h"
 
 
 int fOutputMWC = TRUE;
@@ -38,6 +39,8 @@ int fOutputMatchPC = TRUE;
 unsigned int fOutputDigits = 3;
 float rErrorRateFactor = 1000.0f;
 
+typedef int ( *classdumpfunc )( TanBoard anBoard, char *szOutput,
+                                 const bgvariation bgv );
 
 extern char *
 OutputRolloutResult( const char *szIndent,
@@ -382,14 +385,14 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
 
   if ( prc->fRotate ) 
     sprintf ( strchr ( sz, 0 ),
-              _(", %s dice gen. with seed %u and quasi-random dice\n"),
+              _(", %s dice gen. with seed %lu and quasi-random dice\n"),
               gettext( aszRNG[ prc->rngRollout ] ),
-              (unsigned int)prc->nSeed ); /* seed may be unsigned long int */
+              prc->nSeed ); /* seed may be unsigned long int */
   else
     sprintf ( strchr ( sz, 0 ),
-              _(", %s dice generator with seed %u\n"),
+              _(", %s dice generator with seed %lu\n"),
               gettext( aszRNG[ prc->rngRollout ] ),
-              (unsigned int)prc->nSeed ); /* seed may be unsigned long int */
+              prc->nSeed ); /* seed may be unsigned long int */
 
    if ( ( prc->fStopOnJsd || prc->fStopMoveOnJsd || prc->fStopOnSTD )
         && szIndent && *szIndent )
@@ -1083,3 +1086,267 @@ extern char *FormatCubePosition ( char *sz, cubeinfo *pci ) {
 
 }
 
+static int DumpOver(TanBoard anBoard, char *pchOutput,
+		    const bgvariation bgv)
+{
+
+	float ar[NUM_OUTPUTS] = { 0, 0, 0, 0, 0 };	/* NUM_OUTPUTS is 5 */
+
+	if (EvalOver(anBoard, ar, bgv, NULL))
+		return -1;
+
+	if (ar[OUTPUT_WIN] > 0.0)
+		strcpy(pchOutput, _("Win "));
+	else
+		strcpy(pchOutput, _("Loss "));
+
+	if (ar[OUTPUT_WINBACKGAMMON] > 0.0 ||
+	    ar[OUTPUT_LOSEBACKGAMMON] > 0.0)
+		strcat(pchOutput, _("(backgammon)\n"));
+	else if (ar[OUTPUT_WINGAMMON] > 0.0 || ar[OUTPUT_LOSEGAMMON] > 0.0)
+		strcat(pchOutput, _("(gammon)\n"));
+	else
+		strcat(pchOutput, _("(single)\n"));
+
+	return 0;
+
+}
+
+
+static int
+DumpBearoff1(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(pbc1);
+	return BearoffDump(pbc1, anBoard, szOutput);
+
+}
+
+static int
+DumpBearoff2(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(pbc2);
+
+	if (BearoffDump(pbc2, anBoard, szOutput))
+		return -1;
+
+	if (pbc1)
+		if (BearoffDump(pbc1, anBoard, szOutput))
+			return -1;
+
+	return 0;
+
+}
+
+
+static int
+DumpBearoffOS(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(pbcOS);
+	return BearoffDump(pbcOS, anBoard, szOutput);
+
+}
+
+
+static int
+DumpBearoffTS(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(pbcTS);
+	return BearoffDump(pbcTS, anBoard, szOutput);
+
+}
+
+
+static int DumpRace(TanBoard anBoard, char *szOutput,
+		    const bgvariation bgv)
+{
+
+	/* no-op -- nothing much we can say, really (pip count?) */
+	return 0;
+
+}
+
+static void
+DumpAnyContact(TanBoard anBoard, char *szOutput,
+	       const bgvariation bgv, int isCrashed)
+{
+	return;
+}
+
+static int
+DumpContact(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+	DumpAnyContact(anBoard, szOutput, bgv, 0);
+	return 0;
+}
+
+static int
+DumpCrashed(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+	DumpAnyContact(anBoard, szOutput, bgv, 1);
+	return 0;
+}
+
+static int
+DumpHypergammon1(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(apbcHyper[0]);
+	return BearoffDump(apbcHyper[0], anBoard, szOutput);
+
+}
+
+static int
+DumpHypergammon2(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(apbcHyper[1]);
+	return BearoffDump(apbcHyper[1], anBoard, szOutput);
+
+}
+
+static int
+DumpHypergammon3(TanBoard anBoard, char *szOutput, const bgvariation bgv)
+{
+
+	g_assert(apbcHyper[2]);
+	return BearoffDump(apbcHyper[2], anBoard, szOutput);
+
+}
+
+static classdumpfunc acdf[N_CLASSES] = {
+	DumpOver,
+	DumpHypergammon1, DumpHypergammon2, DumpHypergammon3,
+	DumpBearoff2, DumpBearoffTS,
+	DumpBearoff1, DumpBearoffOS,
+	DumpRace, DumpCrashed, DumpContact
+};
+
+extern int
+DumpPosition(TanBoard anBoard, char *szOutput,
+	     const evalcontext * pec, cubeinfo * pci, int fOutputMWC,
+	     int fOutputWinPC, int fOutputInvert, const char *szMatchID)
+{
+
+	float aarOutput[2][NUM_ROLLOUT_OUTPUTS], arDouble[4];
+	positionclass pc = ClassifyPosition(anBoard, pci->bgv);
+	int i, nPlies;
+	int j;
+	cubedecision cd;
+	evalcontext ec;
+	static char *aszEvaluator[] = {
+		N_("OVER"),
+		N_("HYPERGAMMON-1"),
+		N_("HYPERGAMMON-2"),
+		N_("HYPERGAMMON-3"),
+		N_("BEAROFF2"),
+		N_("BEAROFF-TS"),
+		N_("BEAROFF1"),
+		N_("BEAROFF-OS"),
+		N_("RACE"),
+		N_("CRASHED"),
+		N_("CONTACT")
+	};
+
+	strcpy(szOutput, "");
+
+	strcat(szOutput, _("Position ID:\t"));
+	strcat(szOutput, PositionID(anBoard));
+	strcat(szOutput, "\n");
+	if (szMatchID) {
+		strcat(szOutput, _("Match ID:\t"));
+		strcat(szOutput, szMatchID);
+		strcat(szOutput, "\n");
+	}
+	strcat(szOutput, "\n");
+
+	strcat(szOutput, _("Evaluator: \t"));
+	strcat(szOutput, gettext(aszEvaluator[pc]));
+	strcat(szOutput, "\n\n");
+	acdf[pc] (anBoard, strchr(szOutput, 0), pci->bgv);
+	szOutput = strchr(szOutput, 0);
+
+	sprintf(strchr(szOutput, 0),
+		"\n"
+		"        %-7s %-7s %-7s %-7s %-7s %-9s %-9s\n",
+		_("Win"), _("W(g)"), _("W(bg)"), _("L(g)"), _("L(bg)"),
+		(!pci->nMatchTo || (pci->nMatchTo && !fOutputMWC)) ?
+		_("Equity") : _("MWC"), _("Cubeful"));
+
+	nPlies = pec->nPlies > 9 ? 9 : pec->nPlies;
+
+	memcpy(&ec, pec, sizeof(evalcontext));
+
+	for (i = 0; i <= nPlies; i++) {
+		szOutput = strchr(szOutput, 0);
+
+
+		ec.nPlies = i;
+
+		if (GeneralCubeDecisionE(aarOutput, anBoard, pci, &ec, 0) <
+		    0)
+			return -1;
+
+		if (!i)
+			strcpy(szOutput, _("static"));
+		else
+			sprintf(szOutput, _("%2d ply"), i);
+
+		szOutput = strchr(szOutput, 0);
+
+		if (fOutputInvert) {
+			InvertEvaluationR(aarOutput[0], pci);
+			InvertEvaluationR(aarOutput[1], pci);
+			pci->fMove = !pci->fMove;
+		}
+
+		/* Calculate cube decision */
+
+		cd = FindCubeDecision(arDouble, aarOutput, pci);
+
+		/* Print %'s and equities */
+
+		strcat(szOutput, ": ");
+
+		for (j = 0; j < 5; ++j) {
+			sprintf(strchr(szOutput, 0), "%-7s ",
+				OutputPercent(aarOutput[0][j]));
+		}
+
+		if (pci->nMatchTo)
+			sprintf(strchr(szOutput, 0), "%-9s ",
+				OutputEquity(Utility(aarOutput[0], pci),
+					     pci, TRUE));
+		else
+			sprintf(strchr(szOutput, 0), "%-9s ",
+				OutputMoneyEquity(aarOutput[0], TRUE));
+
+		sprintf(strchr(szOutput, 0), "%-9s ",
+			OutputMWC(aarOutput[0][6], pci, TRUE));
+
+		strcat(szOutput, "\n");
+
+		if (fOutputInvert) {
+			pci->fMove = !pci->fMove;
+		}
+	}
+
+	/* if cube is available, output cube action */
+	if (GetDPEq(NULL, NULL, pci)) {
+
+		evalsetup es;
+
+		es.et = EVAL_EVAL;
+		es.ec = *pec;
+
+		strcat(szOutput, "\n\n");
+		strcat(szOutput,
+		       OutputCubeAnalysis(aarOutput, NULL, &es, pci));
+
+	}
+
+	return 0;
+}

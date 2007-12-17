@@ -4216,14 +4216,14 @@ extern int GtkTutor ( char *sz )
     return f;
 }
 
-extern void GTKOutput( char *sz ) {
+extern void GTKOutput( const char *sz ) {
 
     if( !sz || !*sz )
 	return;
     
     cchOutput += strlen( sz );
 
-    ListInsert( &lOutput, sz );
+    ListInsert( &lOutput, (char *)sz );
 }
 
 extern void GTKOutputX( void ) {
@@ -4278,11 +4278,11 @@ extern void GTKOutputX( void ) {
     g_free( sz );
 }
 
-extern void GTKOutputErr( char *sz ) {
+extern void GTKOutputErr( const char *sz ) {
 
     GtkTextBuffer *buffer;
     GtkTextIter iter;
-    GTKMessage( sz, DT_ERROR );
+    GTKMessage( (char*)sz, DT_ERROR );
     
     if (PanelShowing(WINDOW_MESSAGE)) {
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));

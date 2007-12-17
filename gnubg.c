@@ -81,11 +81,68 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "gnubgmodule.h"
 #endif
 
-#ifdef WIN32
 #if HAVE_SOCKETS
+#if HAVE_SYS_SOCKET_H
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/un.h>
+#endif /* #if HAVE_SYS_SOCKET_H */
+#ifndef WIN32
+#include <stdio.h>
+#else /* #ifndef WIN32 */
 #include <winsock2.h>
+#include <ws2tcpip.h>
+
+#define EWOULDBLOCK             WSAEWOULDBLOCK
+#define EINPROGRESS             WSAEINPROGRESS
+#define EALREADY                WSAEALREADY
+#define ENOTSOCK                WSAENOTSOCK
+#define EDESTADDRREQ            WSAEDESTADDRREQ
+#define EMSGSIZE                WSAEMSGSIZE
+#define EPROTOTYPE              WSAEPROTOTYPE
+#define ENOPROTOOPT             WSAENOPROTOOPT
+#define EPROTONOSUPPORT         WSAEPROTONOSUPPORT
+#define ESOCKTNOSUPPORT         WSAESOCKTNOSUPPORT
+#define EOPNOTSUPP              WSAEOPNOTSUPP
+#define EPFNOSUPPORT            WSAEPFNOSUPPORT
+#define EAFNOSUPPORT            WSAEAFNOSUPPORT
+#define EADDRINUSE              WSAEADDRINUSE
+#define EADDRNOTAVAIL           WSAEADDRNOTAVAIL
+#define ENETDOWN                WSAENETDOWN
+#define ENETUNREACH             WSAENETUNREACH
+#define ENETRESET               WSAENETRESET
+#define ECONNABORTED            WSAECONNABORTED
+#define ECONNRESET              WSAECONNRESET
+#define ENOBUFS                 WSAENOBUFS
+#define EISCONN                 WSAEISCONN
+#define ENOTCONN                WSAENOTCONN
+#define ESHUTDOWN               WSAESHUTDOWN
+#define ETOOMANYREFS            WSAETOOMANYREFS
+#define ETIMEDOUT               WSAETIMEDOUT
+#define ECONNREFUSED            WSAECONNREFUSED
+#define ELOOP                   WSAELOOP
+#define ENAMETOOLONG            WSAENAMETOOLONG
+#define EHOSTDOWN               WSAEHOSTDOWN
+#define EHOSTUNREACH            WSAEHOSTUNREACH
+#define ENOTEMPTY               WSAENOTEMPTY
+#define EPROCLIM                WSAEPROCLIM
+#define EUSERS                  WSAEUSERS
+#define EDQUOT                  WSAEDQUOT
+#define ESTALE                  WSAESTALE
+#define EREMOTE                 WSAEREMOTE
+#define EINVAL                  WSAEINVAL
+#define EINTR                   WSAEINTR
+
+#define inet_aton(ip,addr)  (addr)->s_addr = inet_addr(ip), 1
+#define inet_pton(fam,ip,addr) (addr)->s_addr = inet_addr(ip), 1
+
+#endif /* #ifndef WIN32 */
+
 #endif
-#endif /* WIN32 */
+
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -5444,7 +5501,7 @@ extern void output( const char *sz )
 	return;
     }
 #endif
-    g_print("%s\n", sz);
+    g_print("%s", sz);
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
 
@@ -5537,7 +5594,7 @@ extern void outputerrv( const char *sz, va_list val )
 
     char *szFormatted;
     szFormatted = g_strdup_vprintf( sz, val );
-    g_printerr("%s\n", szFormatted);
+    g_printerr("%s", szFormatted);
     if( !isatty( STDOUT_FILENO ) ) 
        fflush( stdout );
     putc( '\n', stderr );
@@ -6057,7 +6114,6 @@ static void PushSplash(char *unused, char *heading, char *message, int wait)
 }
 #endif
 
-
 static void init_nets(int nNewWeights, int fNoBearoff)
 {
 	char *gnubg_weights = g_build_filename(PKGDATADIR, "gnubg.weights", NULL);
@@ -6067,6 +6123,182 @@ static void init_nets(int nNewWeights, int fNoBearoff)
 	g_free(gnubg_weights);
 	g_free(gnubg_weights_binary);
 }
+
+static int GetManualDice(unsigned int anDice[2])
+{
+
+	char *pz;
+	char *sz = NULL;
+	int i;
+
+#if USE_GTK
+	if (fX) {
+		if (GTKGetManualDice(anDice)) {
+			fInterrupt = 1;
+			return -1;
+		} else
+			return 0;
+	}
+#endif
+
+	for (;;) {
+	      TryAgain:
+		if (fInterrupt) {
+			anDice[0] = anDice[1] = 0;
+			return -1;
+		}
+
+		sz = GetInput(_("Enter dice: "));
+
+		if (fInterrupt) {
+			g_free(sz);
+			anDice[0] = anDice[1] = 0;
+			return -1;
+		}
+
+		/* parse input and read a couple of dice */
+		/* any string with two numbers is allowed */
+
+		pz = sz;
+
+		for (i = 0; i < 2; i++) {
+			while (*pz && ((*pz < '1') || (*pz > '6')))
+				pz++;
+
+			if (!*pz) {
+				outputl(_
+					("You must enter two numbers between 1 and 6."));
+				goto TryAgain;
+			}
+
+			anDice[i] = (int) (*pz - '0');
+			pz++;
+		}
+
+		g_free(sz);
+		return 0;
+	}
+}
+
+/* 
+ * Fetch random numbers from www.random.org
+ *
+ */
+
+#if HAVE_SOCKETS
+
+static int getDiceRandomDotOrg(void)
+{
+
+#define BUFLENGTH 500
+
+	static int nCurrent = -1;
+	static int anBuf[BUFLENGTH];
+	static int nRead;
+
+
+	int h;
+	int cb;
+
+	int nBytesRead, i;
+	struct sockaddr *psa;
+	char szHostname[80];
+	char szHTTP[] =
+	    "GET http://www.random.org/cgi-bin/randnum?num=500&min=0&max=5&col=1\n";
+	char acBuf[2048];
+
+	/* 
+	 * Suggestions for improvements:
+	 * - use proxy
+	 */
+
+	/*
+	 * Return random number
+	 */
+
+	if ((nCurrent >= 0) && (nCurrent < nRead))
+		return anBuf[nCurrent++];
+	else {
+
+		outputf(_
+			("Fetching %d random numbers from <www.random.org>\n"),
+			BUFLENGTH);
+		outputx();
+
+		/* fetch new numbers */
+
+		/* open socket */
+
+		strcpy(szHostname, "www.random.org:80");
+
+		if ((h = ExternalSocket(&psa, &cb, szHostname)) < 0) {
+			SockErr(szHostname);
+			return -1;
+		}
+
+		/* connect */
+
+#ifdef WIN32
+		if (connect((SOCKET) h, (const struct sockaddr *) psa, cb)
+		    < 0) {
+#else
+		if ((connect(h, psa, cb)) < 0) {
+#endif				/* WIN32 */
+			SockErr(szHostname);
+			return -1;
+		}
+
+		/* read next set of numbers */
+
+		if (ExternalWrite(h, szHTTP, strlen(szHTTP) + 1) < 0) {
+			SockErr(szHTTP);
+			closesocket(h);
+			return -1;
+		}
+
+		/* read data from web-server */
+
+#ifdef WIN32
+		/* reading from sockets doesn't work on Windows
+		   use recv instead */
+		if (!
+		    (nBytesRead =
+		     recv((SOCKET) h, acBuf, sizeof(acBuf), 0))) {
+#else
+		if (!(nBytesRead = read(h, acBuf, sizeof(acBuf)))) {
+#endif
+			SockErr("reading data");
+			closesocket(h);
+			return -1;
+		}
+
+		/* close socket */
+		closesocket(h);
+
+		/* parse string */
+		outputl(_("Done."));
+		outputx();
+
+		i = 0;
+		nRead = 0;
+		for (i = 0; i < nBytesRead; i++) {
+
+			if ((acBuf[i] >= '0') && (acBuf[i] <= '5')) {
+				anBuf[nRead] = 1 + (int) (acBuf[i] - '0');
+				nRead++;
+			}
+
+		}
+
+		nCurrent = 1;
+		return anBuf[0];
+	}
+
+}
+
+#else
+static int (*getRandomDiceDotOrg)(void) = NULL;
+#endif /* HAVE_SOCKETS */
 
 static void init_rng(void)
 {
@@ -6084,6 +6316,8 @@ static void init_rng(void)
 	   could happen if InitRNG had to use the current time as a seed) -- mix
 	   it up a little bit */
 	rcRollout.nSeed ^= 0x792A584B;
+
+	dice_init_callback(getDiceRandomDotOrg, GetManualDice);
 }
 
 #if defined(WIN32) && HAVE_SOCKETS
@@ -6313,10 +6547,15 @@ int main(int argc, char *argv[])
 	/* start-up sound */
 	playSound(SOUND_START);
 
+	g_print("test g_print\n");
+	g_printerr("test g_printerr\n");
+
 
 #if USE_GTK
 	if (fX)
         {
+		g_set_print_handler(&GTKOutput);
+		g_set_printerr_handler(&GTKOutputErr);
 		RunGTK(pwSplash, pchCommands, pchPythonScript, pchMatch);
                 Shutdown();
                 exit(EXIT_SUCCESS);
@@ -6972,3 +7211,5 @@ char *SetupLanguage (char *newLangCode)
 	return(result);
 }
 #endif
+
+

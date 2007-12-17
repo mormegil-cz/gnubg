@@ -144,7 +144,7 @@ UTILSOURCES = eval.h eval.c positionid.h positionid.c \
 	matchequity.c matchequity.h matchid.h matchid.c \
 	osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
-	format.c format.h mec.h mec.c util.c util.h
+	mec.h mec.c util.c util.h
 
 makebearoff_SOURCES = makebearoff.c $(UTILSOURCES)
 makebearoff_LDADD = -Llib lib/libevent.la  @GLIB_LIBS@ @LIBXML2_LIBS@
