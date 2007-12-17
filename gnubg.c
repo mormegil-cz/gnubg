@@ -6547,15 +6547,14 @@ int main(int argc, char *argv[])
 	/* start-up sound */
 	playSound(SOUND_START);
 
-	g_print("test g_print\n");
-	g_printerr("test g_printerr\n");
-
-
 #if USE_GTK
 	if (fX)
         {
-		g_set_print_handler(&GTKOutput);
-		g_set_printerr_handler(&GTKOutputErr);
+		if (!fTTY)
+		{
+			g_set_print_handler(&GTKOutput);
+			g_set_printerr_handler(&GTKOutputErr);
+		}
 		RunGTK(pwSplash, pchCommands, pchPythonScript, pchMatch);
                 Shutdown();
                 exit(EXIT_SUCCESS);
