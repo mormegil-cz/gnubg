@@ -28,6 +28,24 @@
 #include "positionid.h"
 #include "bearoff.h"
 
+#if USE_MULTITHREAD
+extern int MT_GetThreadID(void);
+extern void MT_Release(void);
+extern void MT_Exclusive(void);
+extern int MT_GetThreadID(void)
+{
+  return (0);
+}
+extern void MT_Release(void)
+{
+  return;
+}
+extern void MT_Exclusive(void)
+{
+  return;
+}
+#endif
+
 extern int
 main( int argc, char **argv ) {
 

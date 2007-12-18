@@ -46,6 +46,24 @@ HWND hdlg;
 int CancelPressed = FALSE;
 #endif
 
+#if USE_MULTITHREAD
+extern int MT_GetThreadID(void);
+extern void MT_Release(void);
+extern void MT_Exclusive(void);
+extern int MT_GetThreadID(void)
+{
+  return (0);
+}
+extern void MT_Release(void)
+{
+  return;
+}
+extern void MT_Exclusive(void)
+{
+  return;
+}
+#endif
+
 typedef struct _xhashent {
   void *p;
   unsigned int iKey;

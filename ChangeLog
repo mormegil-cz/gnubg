@@ -1,3 +1,8 @@
+Tue Dec 18 14:10:55 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* bearoffdump.c, makebearoff.c, makehyper.c, record.c: make utily
+	programs compile with threads enabled
+
 Mon Dec 17 16:33:01 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* lib/cache.c: Fix multithreaded hang when runing quad core with four
