@@ -415,7 +415,7 @@ PythonCommand( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( ! PyArg_ParseTuple( args, "s:command", &pch ) )
     return NULL;
 
-  sz = strdup( pch );
+  sz = g_strdup( pch );
 
   PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
   HandleCommand( sz, acTop );

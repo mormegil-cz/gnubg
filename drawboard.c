@@ -597,7 +597,7 @@ extern void CanonicalMoveOrder( int an[] ) {
     qsort( an, i, sizeof( int ) << 1, CompareMoves );
 }
 
-extern char *FormatMove( char *sz, TanBoard anBoard, int anMove[ 8 ] ) {
+extern char *FormatMove( char *sz, ARRAY_CONST TanBoard anBoard, int anMove[ 8 ] ) {
 
     char *pch = sz;
     int aanMove[ 4 ][ 4 ], *pnSource[ 4 ], *pnDest[ 4 ], i, j;

@@ -49,7 +49,7 @@ typedef struct _rollswidget {
 
 static void
 add_level ( GtkTreeStore *model, GtkTreeIter *iter,
-            const int n, TanBoard anBoard,
+            const int n, ARRAY_CONST TanBoard anBoard,
             evalcontext *pec, cubeinfo *pci,
             const gboolean fInvert,
             float arOutput[ NUM_ROLLOUT_OUTPUTS ] ) {

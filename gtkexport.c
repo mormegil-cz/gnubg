@@ -181,7 +181,7 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
   /* html */
 
   pexs->szHTMLPictureURL = 
-    strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
+    g_strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
 
   pexs->het = (htmlexporttype)gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
 

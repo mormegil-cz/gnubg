@@ -161,6 +161,7 @@ void InitGTK3d(int *argc, char ***argv)
 	gtk_gl_init_success = gtk_gl_init_check(argc, argv);
 	/* Call LoadTextureInfo to get texture details from textures.txt */
 	LoadTextureInfo();
+	SetupFlag();
 }
 
 /* This doesn't seem to work even on windows anymore... */

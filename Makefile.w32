@@ -133,10 +133,6 @@ $(BIN_DIRS) $(OBJDIR) $(OBJDIR)\non-src:
 	@echo mkdir $@
 	@mkdir "$@"
 
-$(OBJDIR)/sgf.o:	# Avoid default action for sgf file
-	@echo Compiling sgf.c
-	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c sgf.c
-
 $(OBJDIR)/corecount.o: corecount.c	# Don't compile with optimisation (as crashes)
 	@echo Compiling $<
 	@${CC} -o $@ -c $<

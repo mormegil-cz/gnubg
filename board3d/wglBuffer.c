@@ -28,7 +28,7 @@ int wglBufferInitialize()
 
 HANDLE CreateBufferRegion(unsigned int buffers)
 {
-  // Create the buffer region.
+  /* Create the buffer region. */
   HANDLE FBRegion = wglCreateBufferRegionARB(wglGetCurrentDC(), 0, buffers);
 
   if (FBRegion == 0)

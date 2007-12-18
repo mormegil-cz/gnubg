@@ -60,7 +60,7 @@ ImportFormat import_format[] = {
 
 typedef struct _FileHelper {
 	FILE *fp;
-	unsigned int dataRead;
+	size_t dataRead;
 	unsigned int dataPos;
 	char *data;
 } FileHelper;
@@ -98,7 +98,7 @@ static void fhReset(FileHelper * fh)
 
 static void fhDataGetChar(FileHelper * fh)
 {
-	unsigned int numRead;
+	size_t numRead;
 	if (fh->dataPos < fh->dataRead)
 		return;
 

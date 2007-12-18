@@ -47,20 +47,20 @@ typedef struct _cache
   unsigned int cLookup;
   unsigned int cHit;
 #endif
-} cache;
+} evalCache;
 
 /* Cache size will be adjusted to a power of 2 */
-int CacheCreate(cache* pc, unsigned int size);
-int CacheResize(cache *pc, unsigned int cNew);
+int CacheCreate(evalCache* pc, unsigned int size);
+int CacheResize(evalCache *pc, unsigned int cNew);
 
 #define CACHEHIT ((unsigned int)-1)
 /* returns a value which is passed to CacheAdd (if a miss) */
-unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arCubeful);
+unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float *arCubeful);
 
-void CacheAdd(cache* pc, const cacheNode* e, unsigned long l);
-void CacheAddNoKey(cache* pc, const cacheNode* e);
-void CacheFlush(const cache* pc);
-void CacheDestroy(const cache* pc);
-void CacheStats(const cache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed);
+void CacheAdd(evalCache* pc, const cacheNode* e, unsigned long l);
+void CacheAddNoKey(evalCache* pc, const cacheNode* e);
+void CacheFlush(const evalCache* pc);
+void CacheDestroy(const evalCache* pc);
+void CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed);
 
 #endif

@@ -18,7 +18,8 @@
  * $Id$
  */
 
-#include "config.h"
+/* No configuration used in this file
+#include "config.h" */
 #include "list.h"
 #include <stddef.h>
 #include <stdlib.h>

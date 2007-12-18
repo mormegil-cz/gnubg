@@ -23,6 +23,9 @@
 
 #include "config.h"
 #include "inc3d.h"
+#if WIN32
+#include <io.h>
+#endif
 #include "renderprefs.h"
 #include "sound.h"
 #include "export.h"
@@ -52,6 +55,7 @@ NTH_STATIC double animStartTime = 0;
 static guint idleId = 0;
 static idleFunc *pIdleFun;
 static BoardData *pIdleBD;
+Flag3d flag;	/* Only one flag */
 
 static gboolean idle(BoardData3d* bd3d)
 {
@@ -180,7 +184,7 @@ extern int extensionSupported(const char *extension)
 	if ((extensionsString != NULL) && strstr(extensionsString, extension) != 0)
 		return TRUE;
 
-	if (strncasecmp(extension, "WGL_", strlen("WGL_")) == 0)
+	if (StrNCaseCmp(extension, "WGL_", (gsize)strlen("WGL_")) == 0)
 	{	/* Look for wgl extension */
 		static const char *wglExtString = NULL;
 		if (wglExtString == NULL)
@@ -313,7 +317,6 @@ void InitGL(const BoardData *bd)
 		if (!BuildFont3d(bd3d))
 			g_print("Error creating fonts\n");
 
-		setupFlag(bd3d);
 		shadowInit(bd3d, bd->rd);
 #ifdef GL_VERSION_1_2
 		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
@@ -389,7 +392,7 @@ void FindNamedTexture(TextureInfo** textureInfo, char* name)
 	for (pl = textures; pl; pl = pl->next)
 	{
 		TextureInfo* text = (TextureInfo*)pl->data;
-		if (!strcasecmp(text->name, name))
+		if (!StrCaseCmp(text->name, name))
 		{
 			*textureInfo = text;
 			return;
@@ -407,7 +410,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 	for (pl = textures; pl; pl = pl->next)
 	{
 		TextureInfo* text = (TextureInfo*)pl->data;
-		if (!strcasecmp(text->file, file))
+		if (!StrCaseCmp(text->file, file))
 		{
 			*textureInfo = text;
 			return;
@@ -525,7 +528,7 @@ void LoadTextureInfo(void)
 		val = 2;
 		for (i = 0; i < TT_COUNT; i++)
 		{
-			if (!strcasecmp(buf, TextureTypeStrs[i]))
+			if (!StrCaseCmp(buf, TextureTypeStrs[i]))
 			{
 				found = i;
 				break;
@@ -639,7 +642,7 @@ void SetTexture(BoardData3d* bd3d, Material* pMat, const char* filename)
 	/* Search for name in cached list */
 	for (i = 0; i < bd3d->numTextures; i++)
 	{
-		if (!strcasecmp(nameStart, bd3d->textureName[i]))
+		if (!StrCaseCmp(nameStart, bd3d->textureName[i]))
 		{	/* found */
 			pMat->pTexture = &bd3d->textureList[i];
 			return;
@@ -2142,7 +2145,7 @@ void ShowFlag3d(BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 	else
 		StopIdle3d(bd, bd->bd3d);
 
-	waveFlag(bd3d->ctlpoints, bd3d->flagWaved);
+	waveFlag(bd3d->flagWaved);
 	updateFlagOccPos(bd, bd3d);
 
 	RestrictiveDrawFlag(bd);
@@ -2359,7 +2362,6 @@ void InitBoard3d(BoardData *bd, BoardData3d *bd3d)
 
 	bd3d->diceList = bd3d->DCList = bd3d->pieceList = 0;
 	bd3d->qobjTex = bd3d->qobj = 0;
-	bd3d->flagNurb = 0;
 
 	bd3d->numTextures = 0;
 
@@ -2416,7 +2418,7 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 	g_object_unref(ppm);
 	free(puch);
 
-	// Tidy up main board
+	/* Tidy up main board */
 	ClearTextures(bd->bd3d);
 	GetTextures(bd->bd3d, bd->rd);
 	preDraw3d(bd, bd->bd3d, bd->rd);
@@ -2467,9 +2469,6 @@ extern gboolean display_is_2d (const renderdata *prd)
 	g_assert( fdt == DT_2D ||  fdt == DT_3D);
 	return( fdt == DT_2D ? TRUE : FALSE);
 }
-
-void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
-void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
 
 extern void Draw3d(const BoardData* bd)
 {	/* Render board: quick drawing, standard or 2 passes for shadows */

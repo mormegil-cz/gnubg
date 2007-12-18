@@ -41,6 +41,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#ifdef __STRICT_ANSI__
+extern int __cdecl fileno(FILE *);
+#endif
+
 /* end standard C headers. */
 
 /* flex integer type definitions */
@@ -115,7 +119,7 @@ typedef unsigned int flex_uint32_t;
 
 #if __STDC__
 
-#define YY_USE_CONST
+/*#define YY_USE_CONST*/
 
 #endif	/* __STDC__ */
 #endif	/* ! __cplusplus */

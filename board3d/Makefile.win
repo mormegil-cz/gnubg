@@ -37,10 +37,6 @@ $(TARGET): $(OBJDIR) $(OBJECTS)
 $(OBJDIR):
 	@mkdir "$@"
 
-$(OBJDIR)/drawboard3d.o: drawboard3d.c
-	@echo Compiling drawboard3d (non-sse)
-	@${CC} $(FLAGS) -mno-sse $(INCLUDE) -o $@ -c $<
-
 $(OBJDIR)/%.o: %.c
 	@echo Compiling $<
 	@${CC} $(FLAGS) $(INCLUDE) -o $@ -c $<

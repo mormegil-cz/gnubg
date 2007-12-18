@@ -23,6 +23,7 @@
 
 #include <glib.h>
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +35,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "bearoff.h"
+#include "util.h"
 
 #if WIN32
 #include <windows.h>
@@ -47,9 +49,6 @@ int CancelPressed = FALSE;
 #endif
 
 #if USE_MULTITHREAD
-extern int MT_GetThreadID(void);
-extern void MT_Release(void);
-extern void MT_Exclusive(void);
 extern int MT_GetThreadID(void)
 {
   return (0);
@@ -62,6 +61,10 @@ extern void MT_Exclusive(void)
 {
   return;
 }
+#ifndef GLIB_THREADS
+extern void MT_Lock(int *lock) {}
+extern void MT_Unlock(int *lock) {}
+#endif
 #endif
 
 typedef struct _xhashent {
@@ -228,7 +231,7 @@ OSLookup ( const unsigned int iPos,
 
     unsigned char ac[ 128 ];
     int i, j;
-    off_t iOffset;
+    long iOffset;
     int nBytes;
     unsigned int ioff, nz, ioffg, nzg;
     unsigned short int us;
@@ -659,7 +662,7 @@ generate_os ( const int nOS, const int fHeader,
   FILE *pfTmp = NULL;
   unsigned int npos;
   char *tmpfile;
-  int tmpd;
+
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
@@ -704,13 +707,9 @@ generate_os ( const int nOS, const int fHeader,
 #if WIN32
     dlgprintf(127, "Opening temporary file." );
 #endif
-    tmpd = g_file_open_tmp(NULL, &tmpfile, NULL); 
-    if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
-      perror("temporary file tmpfile");
-      g_free(tmpfile);
+	pfTmp = GetTemporaryFile(NULL, &tmpfile);
+	if (pfTmp == NULL)
       exit(2);
-    }
-
   }
     
 
@@ -772,7 +771,7 @@ generate_os ( const int nOS, const int fHeader,
 
     fclose ( pfTmp );
 
-    unlink ( tmpfile );
+    g_unlink ( tmpfile );
 
   }
 #if !WIN32
@@ -1289,7 +1288,7 @@ generate_ts ( const int nTSP, const int nTSC,
     FILE *pfTmp;
     unsigned char ac[ 8 ];
     char *tmpfile;
-    int tmpd;
+
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
   HWND hwndPB;
@@ -1305,12 +1304,9 @@ generate_ts ( const int nTSP, const int nTSC,
 		  12, 300, 470, 20, hdlg, NULL, hInstance, NULL);
 #endif
 
-    tmpd = g_file_open_tmp(NULL, &tmpfile, NULL); 
-    if ( tmpd < 0 || ! ( pfTmp = fdopen(tmpd, "w+b" ))) {
-      perror("temporary file tmpfile");
-      g_free(tmpfile);
+	pfTmp = GetTemporaryFile(NULL, &tmpfile);
+	if (pfTmp == NULL)
       exit(2);
-    }
 
     /* initialise xhash */
     
@@ -1441,7 +1437,7 @@ generate_ts ( const int nTSP, const int nTSC,
 #endif
     fclose ( pfTmp );
 
-    unlink ( tmpfile ); 
+    g_unlink ( tmpfile ); 
 
 }
 
@@ -1458,23 +1454,25 @@ version ( void ) {
 }
 
 
-extern int main( int argc, char **argv ) {
+extern int main( int argc, char **argv )
+{
+  /* static storage for options to keep picky comipler happy */
+  static int nOS = 0;
+  static int fHeader = TRUE;
+  static int fCompress = TRUE;
+  static int fGammon = TRUE;
+  static int nHashSize = 100000000;
+  static int fCubeful = TRUE;
+  static char *szOldBearoff = NULL;
+  static int fND = FALSE;
+  static char *szOutput = NULL;
+  static char *szTwoSided = NULL;
+  static int show_version=0;
 
-  int nTSP = 0, nTSC = 0;
-  int nOS = 0;
-  int fHeader = TRUE;
-  int fCompress = TRUE;
-  int fGammon = TRUE;
-  int nHashSize = 100000000;
-  int fCubeful = TRUE;
-  char *szOldBearoff = NULL;
-  int fND = FALSE;
   bearoffcontext *pbc = NULL;
   FILE *output = stdout;
-  char *szOutput = NULL;
   double r;
-  char *szTwoSided = NULL;
-  int show_version=0;
+  int nTSP = 0, nTSC = 0;
 
 #if WIN32
   int i;
@@ -1501,7 +1499,7 @@ extern int main( int argc, char **argv ) {
 #endif
            
   GOptionEntry ao[] = {
-	  { "two-sided", 't', 0, G_OPTION_ARG_STRING, &szTwoSided, 
+	  { "two-sided", 't',  0, G_OPTION_ARG_STRING, &szTwoSided,
 		  "Number of points (P) and number of chequers (C) for two-sided database", "PxC"},
 	  { "one-sided", 'o', 0, G_OPTION_ARG_INT, &nOS, 
 		  "Number of points (P) for one-sided database", "P"},

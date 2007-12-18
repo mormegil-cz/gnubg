@@ -35,18 +35,18 @@
 
 typedef struct _command {
 	/* Command name (NULL indicates end of list) */
-	char *sz;
+	const char *sz;
 	/* Command handler; NULL to use default subcommand handler */
 	void (*pf) (char *);
 	/* Documentation; NULL for abbreviations */
-	char *szHelp;
-	char *szUsage;
+	const char *szHelp;
+	const char *szUsage;
 	/* List of subcommands (NULL if none) */
 	struct _command *pc;
 } command;
 
 typedef enum _playertype {
-	PLAYER_HUMAN, PLAYER_GNU, PLAYER_EXTERNAL, 
+	PLAYER_HUMAN, PLAYER_GNU, PLAYER_EXTERNAL
 } playertype;
 
 typedef struct _player {

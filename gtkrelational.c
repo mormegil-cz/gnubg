@@ -814,7 +814,7 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 
 	pch = GetText(GTK_TEXT_VIEW(pwQueryText));
 
-	if (!strncasecmp("select ", pch, strlen("select ")))
+	if (!StrNCaseCmp("select ", pch, strlen("select ")))
 		query = pch + strlen("select ");
 	else
 		query = pch;
@@ -1193,4 +1193,7 @@ extern void GtkManageRelationalEnvs(gpointer p, guint n, GtkWidget * pw)
 	gtk_main();
 	GTKAllowStdin();
 }
+#else
+/* Avoid no code warning */
+extern int dummy;
 #endif

@@ -216,8 +216,8 @@ CommandRelationalAddMatch( char *sz ) {
 
   pch = NextToken( &sz );
   force = pch && *pch && 
-    ( !strcasecmp( "on", pch ) || !strcasecmp( "yes", pch ) ||
-      !strcasecmp( "true", pch ) );
+    ( !StrCaseCmp( "on", pch ) || !StrCaseCmp( "yes", pch ) ||
+      !StrCaseCmp( "true", pch ) );
 
   if (!(r = Connect()))
 	  return;

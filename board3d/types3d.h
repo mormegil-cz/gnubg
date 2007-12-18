@@ -22,6 +22,7 @@ typedef struct _ClipBox ClipBox;
 typedef struct _GraphData GraphData;
 typedef struct _OGLFont OGLFont;
 typedef struct _TextureInfo TextureInfo;
+typedef struct _Flag3d Flag3d;
 
 typedef enum _displaytype {
     DT_2D, DT_3D

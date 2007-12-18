@@ -25,6 +25,7 @@
 
 #include <signal.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -227,12 +228,12 @@ static void ExternalUnbind( char *sz ) {
 	/* it was a TCP socket; no cleanup necessary */
 	return;
 
-    unlink( sz );
+    g_unlink( sz );
 }
 #endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
-extern int ExternalRead( int h, char *pch, int cch ) {
+extern int ExternalRead( int h, char *pch, size_t cch ) {
 
     char *p = pch, *pEnd;
     int n;
@@ -293,7 +294,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 #endif /* HAVE_SOCKETS */
 
 #if HAVE_SOCKETS
-extern int ExternalWrite( int h, char *pch, int cch ) {
+extern int ExternalWrite( int h, char *pch, size_t cch ) {
 
     char *p = pch;
     int n;

@@ -60,7 +60,7 @@ addBits(unsigned char auchKey[10], int const bitPos, int const nBits)
 }
 
 extern void
-PositionKey(TanBoard anBoard, unsigned char auchKey[10])
+PositionKey(ARRAY_CONST TanBoard anBoard, unsigned char auchKey[10])
 {
   int i, iBit = 0;
   const int* j;
@@ -110,7 +110,7 @@ extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
     return szID;
 }
 
-extern char *PositionID( TanBoard anBoard ) {
+extern char *PositionID( ARRAY_CONST TanBoard anBoard ) {
 
     unsigned char auch[ 10 ];
     
@@ -120,7 +120,7 @@ extern char *PositionID( TanBoard anBoard ) {
 }
 
 extern int
-CheckPosition( TanBoard anBoard )
+CheckPosition( ARRAY_CONST TanBoard anBoard )
 {
     int ac[ 2 ], i;
 
@@ -283,7 +283,7 @@ EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] ) {
     return 1;
 }
  
-extern int EqualBoards( TanBoard anBoard0, TanBoard anBoard1 ) {
+extern int EqualBoards( ARRAY_CONST TanBoard anBoard0, ARRAY_CONST TanBoard anBoard1 ) {
 
     int i;
 

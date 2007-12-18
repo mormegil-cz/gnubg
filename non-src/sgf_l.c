@@ -115,7 +115,7 @@ typedef unsigned int flex_uint32_t;
 
 #if __STDC__
 
-#define YY_USE_CONST
+/*#define YY_USE_CONST*/
 
 #endif	/* __STDC__ */
 #endif	/* ! __cplusplus */
@@ -355,7 +355,7 @@ void sgffree (void *  );
 
 /* Begin user sect3 */
 
-#define sgfwrap(n) 1
+#define sgfwrap() 1
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;

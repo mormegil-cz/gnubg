@@ -31,19 +31,34 @@
 
 #if USE_MULTITHREAD
 #include "multithread.h"
-static int cache_lock(volatile cache* pc, volatile unsigned long lock)
-{
-	int r1 = MT_SafeInc(&pc->locks[lock]);
-	int r2 = MT_SafeInc(&pc->locks[lock+1]);
-	return (r1 > 1 || r2 > 1);
-}
 
+#ifdef GLIB_THREADS
 
 static void cache_unlock(volatile cache* pc, volatile unsigned long lock)
 {
 	(void)MT_SafeDec(&pc->locks[lock]);
 	(void)MT_SafeDec(&pc->locks[lock+1]);
 }
+
+static int cache_addlock(volatile cache* pc, volatile unsigned long lock)
+{
+	int r1 = MT_SafeInc(&pc->locks[lock]);
+	int r2 = MT_SafeInc(&pc->locks[lock+1]);
+	return (r1 > 1 || r2 > 1);
+}
+static int cache_lock(volatile cache* pc, volatile unsigned long lock)
+{
+	while (cache_addlock(pc, lock))
+		cache_unlock(pc, lock);
+}
+#else
+
+extern void MT_Lock(int *lock);
+extern void MT_Unlock(int *lock);
+#define cache_lock(pc, l) MT_Lock(&pc->locks[l]);
+#define cache_unlock(pc, l) MT_Unlock(&pc->locks[l]);
+
+#endif
 #endif
 
 /* Adapted from
@@ -75,7 +90,7 @@ typedef  unsigned long   ub4;
 
 
 int
-CacheCreate(cache* pc, unsigned int s)
+CacheCreate(evalCache* pc, unsigned int s)
 {
 #if CACHE_STATS
   pc->cLookup = 0;
@@ -127,7 +142,7 @@ static unsigned long GetHashKey(unsigned long hashMask, const cacheNode* e)
   return (c & hashMask) << 1;
 }
 
-unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arCubeful)
+unsigned int CacheLookup(evalCache* pc, const cacheNode* e, float *arOut, float *arCubeful)
 {
 	unsigned long l = GetHashKey(pc->hashMask, e);
 
@@ -135,8 +150,7 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
 	++pc->cLookup;
 #endif
 #if USE_MULTITHREAD
-	while (cache_lock(pc, l))
-		cache_unlock(pc, l);
+	cache_lock(pc, l);
 #endif
 	if ((pc->m[l].nEvalContext != e->nEvalContext ||
 		memcmp(pc->m[l].auchKey, e->auchKey, sizeof(e->auchKey)) != 0))
@@ -172,11 +186,10 @@ unsigned int CacheLookup(cache* pc, const cacheNode* e, float *arOut, float *arC
     return CACHEHIT;
 }
 
-void CacheAdd(cache* pc, const cacheNode* e, unsigned long l)
+void CacheAdd(evalCache* pc, const cacheNode* e, unsigned long l)
 {
 #if USE_MULTITHREAD
-	while (cache_lock(pc, l))
-		cache_unlock(pc, l);
+	cache_lock(pc, l);
 #endif
 
 	pc->m[l + 1] = pc->m[l];
@@ -191,19 +204,19 @@ void CacheAdd(cache* pc, const cacheNode* e, unsigned long l)
 #endif
 }
 
-void CacheAddNoKey(cache* pc, const cacheNode* e)
+void CacheAddNoKey(evalCache* pc, const cacheNode* e)
 {
 	CacheAdd(pc, e, GetHashKey(pc->hashMask, e));
 }
 
 void
-CacheDestroy(const cache* pc)
+CacheDestroy(const evalCache* pc)
 {
   free(pc->m);
 }
 
 void
-CacheFlush(const cache* pc)
+CacheFlush(const evalCache* pc)
 {
   unsigned int k;
   for(k = 0; k < pc->size; ++k) {
@@ -213,7 +226,7 @@ CacheFlush(const cache* pc)
 }
 
 int
-CacheResize( cache *pc, unsigned int cNew )
+CacheResize( evalCache *pc, unsigned int cNew )
 {
   if( cNew == pc->size ) {
     return 0;
@@ -224,7 +237,7 @@ CacheResize( cache *pc, unsigned int cNew )
 }
 
 void
-CacheStats(const cache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed)
+CacheStats(const evalCache* pc, unsigned int* pcLookup, unsigned int* pcHit, unsigned int* pcUsed)
 {
 #if CACHE_STATS
    if ( pcLookup )

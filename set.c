@@ -206,7 +206,7 @@ static void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 		fInit = FALSE;
 	
 		if( *szSeed ) {
-		  if( !strncasecmp( szSeed, "modulus", strcspn( szSeed,
+		  if( !StrNCaseCmp( szSeed, "modulus", strcspn( szSeed,
 												" \t\n\r\v\f" ) ) ) {
 			NextToken( &szSeed ); /* skip "modulus" keyword */
 			if( InitRNGBBSModulus( NextToken( &szSeed ), 
@@ -216,7 +216,7 @@ static void SetRNG( rng *prng, void **rngctx, rng rngNew, char *szSeed ) {
 			  return;
 			}
 			fInit = TRUE;
-		  } else if( !strncasecmp( szSeed, "factors",
+		  } else if( !StrNCaseCmp( szSeed, "factors",
 				     strcspn( szSeed, " \t\n\r\v\f" ) ) ) {
 			NextToken( &szSeed ); /* skip "modulus" keyword */
 			sz = NextToken( &szSeed );
@@ -949,7 +949,7 @@ extern void CommandSetDelay( char *sz ) {
     int n;
 
     if( fX ) {
-	if( *sz && !strncasecmp( sz, "none", strlen( sz ) ) )
+	if( *sz && !StrNCaseCmp( sz, "none", strlen( sz ) ) )
 	    n = 0;
 	else if( ( n = ParseNumber( &sz ) ) < 0 || n > 10000 ) {
 	    outputl( _("You must specify a legal move delay (see `help set "
@@ -1501,7 +1501,7 @@ extern void CommandSetPlayerName( char *sz ) {
 	return;
     }
 
-    if( !strcasecmp( sz, "both" ) ) {
+    if( !StrCaseCmp( sz, "both" ) ) {
 	outputl( _("`both' is a reserved word; you can't call a player "
 		 "that.\n") );
 
@@ -1719,7 +1719,7 @@ extern void CommandSetRolloutLogFile (char *sz) {
     free (log_file_name);
   }
    
-  log_file_name = strdup (sz);
+  log_file_name = g_strdup (sz);
 }
 
 extern void
@@ -2409,11 +2409,11 @@ extern void CommandSetScore( char *sz ) {
 	n1 = INT_MIN;
 
     if( ( ( fCrawford0 = *pchEnd0 == '*' ||
-	    ( *pchEnd0 && !strncasecmp( pchEnd0, "crawford",
+	    ( *pchEnd0 && !StrNCaseCmp( pchEnd0, "crawford",
 					strlen( pchEnd0 ) ) ) ) &&
 	  n0 != INT_MIN && n0 != -1 && n0 != ms.nMatchTo - 1 ) ||
 	( ( fCrawford1 = *pchEnd1 == '*' ||
-	    ( *pchEnd1 && !strncasecmp( pchEnd1, "crawford",
+	    ( *pchEnd1 && !StrNCaseCmp( pchEnd1, "crawford",
 					strlen( pchEnd1 ) ) ) ) &&
 	  n1 != INT_MIN && n1 != -1 && n1 != ms.nMatchTo - 1 ) ) {
 	outputl( _("The Crawford rule applies only in match play when a "
@@ -2421,10 +2421,10 @@ extern void CommandSetScore( char *sz ) {
 	return;
     }
 
-    if( ( ( fPostCrawford0 = ( *pchEnd0 && !strncasecmp(
+    if( ( ( fPostCrawford0 = ( *pchEnd0 && !StrNCaseCmp(
 	pchEnd0,"postcrawford", strlen( pchEnd0 ) ) ) ) &&
 	  n0 != INT_MIN && n0 != -1 && n0 != ms.nMatchTo - 1 ) ||
-	( ( fPostCrawford1 = ( *pchEnd1 && !strncasecmp(
+	( ( fPostCrawford1 = ( *pchEnd1 && !StrNCaseCmp(
 	pchEnd1, "postcrawford", strlen( pchEnd1 ) ) ) ) &&
 	  n1 != INT_MIN && n1 != -1 && n1 != ms.nMatchTo - 1 ) ) {
 	outputl( _("The Crawford rule applies only in match play when a "
@@ -2712,7 +2712,7 @@ static warnings ParseWarning(char* str)
 
 	for (i = 0; i < WARN_NUM_WARNINGS; i++)
 	{
-		if (!strcasecmp(str, warningNames[i]))
+		if (!StrCaseCmp(str, warningNames[i]))
 			return i;
 	}
 
@@ -2743,11 +2743,11 @@ extern void CommandSetWarning( char *sz )
 	while(*pValue == ' ')
 		pValue++;
 
-	if (!strcasecmp(pValue, "on"))
+	if (!StrCaseCmp(pValue, "on"))
 	{
 		warningEnabled[warning] = TRUE;
 	}
-	else if (!strcasecmp(pValue, "off"))
+	else if (!StrCaseCmp(pValue, "off"))
 	{
 		warningEnabled[warning] = FALSE;
 	}
@@ -3110,7 +3110,7 @@ SetMatchInfo( char **ppch, char *sz, char *szMessage ) {
 	free( *ppch );
 
     if( sz && *sz ) {
-	*ppch = strdup( sz );
+	*ppch = g_strdup( sz );
         if ( szMessage )
    	   outputf( _("%s set to: %s\n"), szMessage, sz );
     } else {
@@ -3499,10 +3499,10 @@ SetExportHTMLType ( const htmlexporttype het,
                     const char *szExtension ) {
 
   if ( exsExport.szHTMLExtension )
-    free ( exsExport.szHTMLExtension );
+    g_free ( exsExport.szHTMLExtension );
 
   exsExport.het = het;
-  exsExport.szHTMLExtension = strdup ( szExtension );
+  exsExport.szHTMLExtension = g_strdup ( szExtension );
 
   outputf ( _("HTML export type is now: \n"
               "%s\n"), 
@@ -3581,10 +3581,10 @@ CommandSetExportHTMLPictureURL ( char *sz ) {
   }
 
   if ( exsExport.szHTMLPictureURL )
-    free ( exsExport.szHTMLPictureURL );
+    g_free ( exsExport.szHTMLPictureURL );
 
   sz = NextToken ( &sz );
-  exsExport.szHTMLPictureURL = strdup ( sz );
+  exsExport.szHTMLPictureURL = g_strdup ( sz );
 
   outputf ( _("URL for picture in HTML export is now: \n"
             "%s\n"), 

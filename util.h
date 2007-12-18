@@ -21,8 +21,15 @@
 
 #ifndef _UTIL_H_
 #define _UTIL_H_
+
+#include "stdio.h"
+
 #ifdef WIN32
 extern char * getInstallDir( void );
 extern void PrintSystemError(const char* message);
 #endif
+
+extern void PrintError(const char* message);
+extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName);
+
 #endif

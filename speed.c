@@ -126,7 +126,7 @@ extern void CommandCalibrate( char *sz )
 		return;
 	}
 
-    rc.randrsl[ 0 ] = time( NULL );
+    rc.randrsl[ 0 ] = (ub4)time( NULL );
     for( i = 0; i < RANDSIZ; i++ )
         rc.randrsl[ i ] = rc.randrsl[ 0 ];
     irandinit( &rc, TRUE);

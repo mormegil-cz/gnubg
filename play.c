@@ -1407,10 +1407,10 @@ static int ComputerTurn( void ) {
 	      CommandTake( NULL );
 	  else if( tolower( *szResponse ) == 'd' || /* drop */
 		   tolower( *szResponse ) == 'p' || /* pass */
-		   !strncasecmp( szResponse, "rej", 3 ) ) /* reject */
+		   !StrNCaseCmp( szResponse, "rej", 3 ) ) /* reject */
 	      CommandDrop( NULL );
 	  else if( tolower( *szResponse ) == 'b' || /* beaver */
-		   !strncasecmp( szResponse, "red", 3 ) ) /* redouble */
+		   !StrNCaseCmp( szResponse, "red", 3 ) ) /* redouble */
 	      CommandRedouble( NULL );
 	  else {
 	      outputl( _("Warning: badly formed cube response from "
@@ -2028,7 +2028,7 @@ extern void CommandAnnotateAddComment( char *sz ) {
     if( pmr->sz )
 	free( pmr->sz );
 
-    pmr->sz = strdup(sz);
+    pmr->sz = g_strdup(sz);
     
     outputl( _("Commentary for this move added.") );
 
@@ -3335,16 +3335,16 @@ CommandNext( char* sz )
   n = 1;
 
   if( ( pch = NextToken( &sz ) ) ) {
-    if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
+    if( !StrNCaseCmp( pch, "game", strlen( pch ) ) ) {
       CommandNextGame( sz );
       return;
-    } else if( !strncasecmp( pch, "roll", strlen( pch ) ) ) {
+    } else if( !StrNCaseCmp( pch, "roll", strlen( pch ) ) ) {
       CommandNextRoll( sz );
       return;
-    } else if( !strncasecmp( pch, "rolled", strlen( pch ) ) ) {
+    } else if( !StrNCaseCmp( pch, "rolled", strlen( pch ) ) ) {
       CommandNextRolled( sz );
       return;
-    } else if( !strncasecmp( pch, "marked", strlen( pch ) ) ) {
+    } else if( !StrNCaseCmp( pch, "marked", strlen( pch ) ) ) {
       fMarkedMoves = TRUE;
       if( ( pch = NextToken( &sz ) ) ) {
 	n = ParseNumber( &pch );
@@ -3494,16 +3494,16 @@ extern void CommandPrevious( char *sz ) {
 	n = 1;
 
     if( ( pch = NextToken( &sz ) ) ) {
-	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
+	if( !StrNCaseCmp( pch, "game", strlen( pch ) ) ) {
 	    CommandPreviousGame( sz );
 	    return;
-	} else if( !strncasecmp( pch, "rolled", strlen( pch ) ) ) {
+	} else if( !StrNCaseCmp( pch, "rolled", strlen( pch ) ) ) {
 	    CommandPreviousRolled( sz );
 	    return;
-	} else if( !strncasecmp( pch, "roll", strlen( pch ) ) ) {
+	} else if( !StrNCaseCmp( pch, "roll", strlen( pch ) ) ) {
 	    CommandPreviousRoll( sz );
 	    return;
-	} else if( !strncasecmp( pch, "marked", strlen( pch ) ) ) {
+	} else if( !StrNCaseCmp( pch, "marked", strlen( pch ) ) ) {
 	  fMarkedMoves = TRUE;
 	  if( ( pch = NextToken( &sz ) ) ) {
 	    n = ParseNumber( &pch );
@@ -3638,7 +3638,7 @@ extern void CommandReject( char *sz ) {
 extern void CommandResign( char *sz ) {
 
     char *pch;
-    int cch;
+    size_t cch;
     
     if( ms.gs != GAME_PLAYING ) {
 	outputl( _("You must be playing a game if you want to resign it.") );
@@ -3658,12 +3658,12 @@ extern void CommandResign( char *sz ) {
     if( ( pch = NextToken( &sz ) ) ) {
 	cch = strlen( pch );
 
-	if( !strncasecmp( "single", pch, cch ) ||
-	    !strncasecmp( "normal", pch, cch ) )
+	if( !StrNCaseCmp( "single", pch, cch ) ||
+	    !StrNCaseCmp( "normal", pch, cch ) )
 	    ms.fResigned = 1;
-	else if( !strncasecmp( "gammon", pch, cch ) )
+	else if( !StrNCaseCmp( "gammon", pch, cch ) )
 	    ms.fResigned = 2;
-	else if( !strncasecmp( "backgammon", pch, cch ) )
+	else if( !StrNCaseCmp( "backgammon", pch, cch ) )
 	    ms.fResigned = 3;
 	else
 	    ms.fResigned = atoi( pch );

@@ -402,9 +402,9 @@ GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
 
   /* column titles */
 
-  aszColumnTitle[ 0 ] = strdup ( "" );
+  aszColumnTitle[ 0 ] = g_strdup ( "" );
   for ( i = 0; i < 2; i++ )
-    aszColumnTitle[ i + 1 ] = strdup ( ap[ i ].szName );
+    aszColumnTitle[ i + 1 ] = g_strdup ( ap[ i ].szName );
 
   /* table with results */
 
@@ -484,9 +484,9 @@ GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
 
   /* column titles */
 
-  aszColumnTitle[ 0 ] = strdup ( "" );
+  aszColumnTitle[ 0 ] = g_strdup ( "" );
   for ( i = 0; i < 2; i++ )
-    aszColumnTitle[ i + 1 ] = strdup ( ap[ i ].szName );
+    aszColumnTitle[ i + 1 ] = g_strdup ( ap[ i ].szName );
 
   /* table with results */
 
@@ -561,9 +561,9 @@ GTKStatPageHit ( const rolloutstat *prs, const int cGames ) {
 
   /* column titles */
 
-  aszColumnTitle[ 0 ] = strdup ( "" );
+  aszColumnTitle[ 0 ] = g_strdup ( "" );
   for ( i = 0; i < 2; i++ )
-    aszColumnTitle[ i + 1 ] = strdup ( ap[ i ].szName );
+    aszColumnTitle[ i + 1 ] = g_strdup ( ap[ i ].szName );
 
   /* table with results */
 

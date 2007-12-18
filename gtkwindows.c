@@ -259,7 +259,7 @@ extern int GTKGetInputYN( char *szPrompt )
 char* inputString;
 static void GetInputOk( GtkWidget *pw, GtkWidget *pwEntry )
 {
-	inputString = strdup(gtk_entry_get_text(GTK_ENTRY(pwEntry)));
+	inputString = g_strdup(gtk_entry_get_text(GTK_ENTRY(pwEntry)));
     gtk_widget_destroy(gtk_widget_get_toplevel(pw));
 }
 

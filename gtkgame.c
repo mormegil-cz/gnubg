@@ -39,6 +39,7 @@
 
 #ifdef WIN32
 #include <windows.h>
+#include <io.h>
 #endif
 
 #if HAVE_SYS_UTSNAME_H
@@ -636,7 +637,7 @@ extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer ) {
 	/* This copy is absolutely disgusting, but is necessary because GTK
 	   insists on giving us something allocated with g_malloc() instead
 	   of malloc(). */
-	pmrAnnotation->sz = strdup( pch );
+	pmrAnnotation->sz = g_strdup( pch );
 	g_free( pch );
 }
 
@@ -1647,13 +1648,13 @@ static void ExportHTMLImages(gpointer p, guint n, GtkWidget * pw)
 						    folder);
 				ok = GTKGetInputYN(message);
 				g_free(message);
-			} else if (mkdir(expfolder
-#ifndef WIN32
-					 , S_IRWXU
-#endif
-				   ) == 0) {
+			}
+			else if (g_mkdir(expfolder, 0777) == 0)
+			{
 				ok = TRUE;
-			} else {
+			}
+			else
+			{
 				message =
 				    g_strdup_printf(_
 						    ("Folder html-images can't be created\nin %s"),
@@ -1738,7 +1739,7 @@ static void PythonShell(gpointer p, guint n, GtkWidget * pw)
 {
 	char *pch;
 	pch =
-	    strdup(">import sys;"
+	    g_strdup(">import sys;"
 		   "sys.argv=['','-n'];"
 		   "import idlelib.PyShell;" "idlelib.PyShell.main()");
 	UserCommand(pch);
@@ -1918,7 +1919,7 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 
 		if (showingPanels)
 		{
-			fFullScreen = TRUE;	// Avoid panel sizing code
+			fFullScreen = TRUE;	/* Avoid panel sizing code */
 			ShowAllPanels(NULL, 0, NULL);
 			fFullScreen = FALSE;
 		}
@@ -3330,7 +3331,7 @@ static void AddLangWidgets(GtkWidget *cont)
 		int row = i / NUM_COLS;
 		int col = i - row * NUM_COLS;
 		gtk_table_attach(GTK_TABLE(pwLangTable), flag, col, col + 1, row, row + 1, 0, 0, 0, 0);
-		if (!strcasecmp(szLang, aaszLang[i + 1][1]))
+		if (!StrCaseCmp(szLang, aaszLang[i + 1][1]))
 		selLang = flag;
 	}
 	pwHbox = gtk_hbox_new(FALSE, 0);
@@ -3455,14 +3456,14 @@ static void ReportBug(gpointer p, guint n, GtkWidget * pwEvent)
 			pchOS = "";
 		else {
 
-			if (!strcasecmp(u.sysname, "linux"))
+			if (!StrCaseCmp(u.sysname, "linux"))
 				pchOS = "101";
-			else if (!strcasecmp(u.sysname, "sunos"))
+			else if (!StrCaseCmp(u.sysname, "sunos"))
 				pchOS = "102";
-			else if (!strcasecmp(u.sysname, "freebsd"))
+			else if (!StrCaseCmp(u.sysname, "freebsd"))
 				pchOS = "103";
-			else if (!strcasecmp(u.sysname, "rhapsody") ||
-				 !strcasecmp(u.sysname, "darwin"))
+			else if (!StrCaseCmp(u.sysname, "rhapsody") ||
+				 !StrCaseCmp(u.sysname, "darwin"))
 				pchOS = "112";
 
 		}
@@ -4575,7 +4576,7 @@ static void NewOK( GtkWidget *pw, newwidget *pnw )
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
 	if (ToolbarIsEditing(NULL))
-		click_edit();	// Come out of editing mode
+		click_edit();	/* Come out of editing mode */
 
   sprintf(sz, "new match %d", Mlength );
   UserCommand(sz);
@@ -6278,7 +6279,8 @@ static void GTKHelpSelect( GtkTreeSelection *pts, gpointer p ) {
     command **apc;
     int i, c;
     char szCommand[ 128 ], *pchCommand = szCommand,
-	szUsage[ 128 ], *pchUsage = szUsage, *pch;
+	szUsage[ 128 ], *pchUsage = szUsage, *pLabel;
+	const char *pch;
     
     if( gtk_tree_selection_get_selected( pts, &ptm, &ti ) ) {
 	ptp = gtk_tree_model_get_path( ptm, &ti );
@@ -6308,12 +6310,12 @@ static void GTKHelpSelect( GtkTreeSelection *pts, gpointer p ) {
 	    }		
 	}
 
-	pch = g_strdup_printf( _("%s- %s\n\nUsage: %s%s\n"), szCommand,
+	pLabel = g_strdup_printf( _("%s- %s\n\nUsage: %s%s\n"), szCommand,
 			       apc[ c - 1 ]->szHelp, szUsage,
 			       ( apc[ c - 1 ]->pc && apc[ c - 1 ]->pc->sz ) ?
 			       " <subcommand>" : "" );
-	gtk_label_set_text( GTK_LABEL( pwHelpLabel ), pch );
-	g_free( pch );
+	gtk_label_set_text( GTK_LABEL( pwHelpLabel ), pLabel );
+	g_free( pLabel );
 	
 	free( apc );
 	gtk_tree_path_free( ptp );
@@ -6392,7 +6394,7 @@ extern void GTKHelp( char *sz )
 	pcStart = pc;
 	cch = strlen( pch );
 	for( ; pc->sz; pc++ )
-	    if( !strncasecmp( pch, pc->sz, cch ) )
+	    if( !StrNCaseCmp( pch, pc->sz, cch ) )
 		break;
 
 	if( !pc->sz )
@@ -7344,7 +7346,7 @@ static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
 static gint RecordRowCompare( GtkCList *pcl, GtkCListRow *p0,
 			      GtkCListRow *p1 ) {
 
-    return strcasecmp( GTK_CELL_TEXT( p0->cell[ pcl->sort_column ] )->text,
+    return StrCaseCmp( GTK_CELL_TEXT( p0->cell[ pcl->sort_column ] )->text,
 		       GTK_CELL_TEXT( p1->cell[ pcl->sort_column ] )->text );
 }
 

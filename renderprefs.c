@@ -365,7 +365,7 @@ SetWood (char *sz, woodtype * pbw)
   int cch = strlen (sz);
 
   for (bw = 0; bw <= WOOD_PAINT; bw++)
-    if (!strncasecmp (sz, aszWoodName[bw], cch)) {
+    if (!StrNCaseCmp (sz, aszWoodName[bw], cch)) {
       *pbw = bw;
       return 0;
     }
@@ -398,48 +398,48 @@ int c, fValueError = FALSE;
 
   c = strlen (szParam);
 
-  if (!strncasecmp (szParam, "board", c))
+  if (!StrNCaseCmp (szParam, "board", c))
     /* board=colour;speckle */
     fValueError = SetColourSpeckle (szValue, prd->aanBoardColour[0],
             &prd->aSpeckle[0]);
-  else if (!strncasecmp (szParam, "border", c))
+  else if (!StrNCaseCmp (szParam, "border", c))
     /* border=colour */
     fValueError = SetColour (szValue, prd->aanBoardColour[1]);
-  else if (!strncasecmp (szParam, "cube", c))
+  else if (!StrNCaseCmp (szParam, "cube", c))
     /* cube=colour */
     fValueError = SetColourX (prd->arCubeColour, szValue);
-  else if (!strncasecmp (szParam, "translucent", c))
+  else if (!StrNCaseCmp (szParam, "translucent", c))
     /* deprecated option "translucent"; ignore */
     ;
-  else if (!strncasecmp (szParam, "labels", c))
+  else if (!StrNCaseCmp (szParam, "labels", c))
     /* labels=bool */
     prd->fLabels = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "dynamiclabels", c))
+  else if (!StrNCaseCmp (szParam, "dynamiclabels", c))
     /* dynamiclabels=bool */
     prd->fDynamicLabels = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "diceicon", c))
+  else if (!StrNCaseCmp (szParam, "diceicon", c))
     /* FIXME deprecated in favour of "set gui dicearea" */
     prd->fDiceArea = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "show_ids", c))
+  else if (!StrNCaseCmp (szParam, "show_ids", c))
     /* FIXME deprecated in favour of "set gui showids" */
     prd->fShowIDs = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "show_pips", c))
+  else if (!StrNCaseCmp (szParam, "show_pips", c))
     /* FIXME deprecated in favour of "set gui showpips" */
     fGUIShowPips = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "illegal", c))
+  else if (!StrNCaseCmp (szParam, "illegal", c))
     /* FIXME deprecated in favour of "set gui illegal" */
     fGUIIllegal = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "beep", c))
+  else if (!StrNCaseCmp (szParam, "beep", c))
     /* FIXME deprecated in favour of "set gui beep" */
     fGUIBeep = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "highdie", c))
+  else if (!StrNCaseCmp (szParam, "highdie", c))
     /* FIXME deprecated in favour of "set gui highdie" */
     fGUIHighDieFirst = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "wood", c))
+  else if (!StrNCaseCmp (szParam, "wood", c))
     fValueError = SetWood (szValue, &prd->wt);
-  else if (!strncasecmp (szParam, "hinges", c))
+  else if (!StrNCaseCmp (szParam, "hinges", c))
     prd->fHinges = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "animate", c)) {
+  else if (!StrNCaseCmp (szParam, "animate", c)) {
     /* FIXME deprecated in favour of "set gui animation ..." */
     switch (toupper (*szValue)) {
     case 'B':
@@ -453,7 +453,7 @@ int c, fValueError = FALSE;
       break;
     }
   }
-  else if (!strncasecmp (szParam, "speed", c)) {
+  else if (!StrNCaseCmp (szParam, "speed", c)) {
     /* FIXME deprecated in favour of "set gui animation speed" */
     int n = atoi (szValue);
 
@@ -462,7 +462,7 @@ int c, fValueError = FALSE;
     else
       nGUIAnimSpeed = n;
   }
-  else if (!strncasecmp (szParam, "light", c)) {
+  else if (!StrNCaseCmp (szParam, "light", c)) {
     /* light=azimuth;elevation */
     float rAzimuth, rElevation;
     gchar **split = g_strsplit( szValue, ";", 0);
@@ -483,99 +483,99 @@ int c, fValueError = FALSE;
     prd->arLight[1] = sinf (rAzimuth / 180 * G_PI) *
       sqrt (1.0 - prd->arLight[2] * prd->arLight[2]);
   }
-  else if (!strncasecmp (szParam, "shape", c)) {
+  else if (!StrNCaseCmp (szParam, "shape", c)) {
     float rRound = (float) g_ascii_strtod (szValue, &szValue);
 
     prd->rRound = 1.0 - rRound;
   }
-  else if (!strncasecmp (szParam, "moveindicator", c))
+  else if (!StrNCaseCmp (szParam, "moveindicator", c))
     prd->showMoveIndicator = toupper (*szValue) == 'Y';
 #if USE_BOARD3D
-  else if (!strncasecmp (szParam, "boardtype", c))
+  else if (!StrNCaseCmp (szParam, "boardtype", c))
      prd->fDisplayType = check_for_board3d(szValue);
-  else if (!strncasecmp (szParam, "hinges3d", c))
+  else if (!StrNCaseCmp (szParam, "hinges3d", c))
     prd->fHinges3d = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "boardshadows", c))
+  else if (!StrNCaseCmp (szParam, "boardshadows", c))
     prd->showShadows = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "shadowdarkness", c))
+  else if (!StrNCaseCmp (szParam, "shadowdarkness", c))
     prd->shadowDarkness = atoi (szValue);
-  else if (!strncasecmp (szParam, "animateroll", c))
+  else if (!StrNCaseCmp (szParam, "animateroll", c))
     prd->animateRoll = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "animateflag", c))
+  else if (!StrNCaseCmp (szParam, "animateflag", c))
     prd->animateFlag = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "closeboard", c))
+  else if (!StrNCaseCmp (szParam, "closeboard", c))
     prd->closeBoardOnExit = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "quickdraw", c))
+  else if (!StrNCaseCmp (szParam, "quickdraw", c))
     prd->quickDraw = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "curveaccuracy", c))
+  else if (!StrNCaseCmp (szParam, "curveaccuracy", c))
     prd->curveAccuracy = atoi (szValue);
-  else if (!strncasecmp (szParam, "lighttype", c))
+  else if (!StrNCaseCmp (szParam, "lighttype", c))
     prd->lightType = *szValue == 'p' ? LT_POSITIONAL : LT_DIRECTIONAL;
-  else if (!strncasecmp (szParam, "lightposx", c))
+  else if (!StrNCaseCmp (szParam, "lightposx", c))
     prd->lightPos[0] = (float) g_ascii_strtod (szValue, &szValue);
-  else if (!strncasecmp (szParam, "lightposy", c))
+  else if (!StrNCaseCmp (szParam, "lightposy", c))
     prd->lightPos[1] = (float) g_ascii_strtod (szValue, &szValue);
-  else if (!strncasecmp (szParam, "lightposz", c))
+  else if (!StrNCaseCmp (szParam, "lightposz", c))
     prd->lightPos[2] = (float) g_ascii_strtod (szValue, &szValue);
-  else if (!strncasecmp (szParam, "lightambient", c))
+  else if (!StrNCaseCmp (szParam, "lightambient", c))
     prd->lightLevels[0] = atoi (szValue);
-  else if (!strncasecmp (szParam, "lightdiffuse", c))
+  else if (!StrNCaseCmp (szParam, "lightdiffuse", c))
     prd->lightLevels[1] = atoi (szValue);
-  else if (!strncasecmp (szParam, "lightspecular", c))
+  else if (!StrNCaseCmp (szParam, "lightspecular", c))
     prd->lightLevels[2] = atoi (szValue);
-  else if (!strncasecmp (szParam, "boardangle", c))
+  else if (!StrNCaseCmp (szParam, "boardangle", c))
     prd->boardAngle = atoi (szValue);
-  else if (!strncasecmp (szParam, "skewfactor", c))
+  else if (!StrNCaseCmp (szParam, "skewfactor", c))
     prd->skewFactor = atoi (szValue);
-  else if (!strncasecmp (szParam, "planview", c))
+  else if (!StrNCaseCmp (szParam, "planview", c))
     prd->planView = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "dicesize", c))
+  else if (!StrNCaseCmp (szParam, "dicesize", c))
     prd->diceSize = (float) g_ascii_strtod (szValue, &szValue);
-  else if (!strncasecmp (szParam, "roundededges", c))
+  else if (!StrNCaseCmp (szParam, "roundededges", c))
     prd->roundedEdges = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "bgintrays", c))
+  else if (!StrNCaseCmp (szParam, "bgintrays", c))
     prd->bgInTrays = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "roundedpoints", c))
+  else if (!StrNCaseCmp (szParam, "roundedpoints", c))
     prd->roundedPoints = toupper (*szValue) == 'Y';
-  else if (!strncasecmp (szParam, "piecetype", c))
+  else if (!StrNCaseCmp (szParam, "piecetype", c))
     prd->pieceType = (PieceType) atoi (szValue);
-  else if (!strncasecmp (szParam, "piecetexturetype", c))
+  else if (!StrNCaseCmp (szParam, "piecetexturetype", c))
     prd->pieceTextureType = (PieceTextureType) atoi (szValue);
-  else if ((!strncasecmp (szParam, "chequers3d", strlen ("chequers3d")) ||
-      !strncasecmp (szParam, "checkers3d", strlen ("checkers3d"))) &&
+  else if ((!StrNCaseCmp (szParam, "chequers3d", strlen ("chequers3d")) ||
+      !StrNCaseCmp (szParam, "checkers3d", strlen ("checkers3d"))) &&
      (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     fValueError =
       SetMaterial (&prd->ChequerMat[szParam[c - 1] - '0'], szValue);
-  else if (!strncasecmp (szParam, "dice3d", strlen ("dice3d"))
+  else if (!StrNCaseCmp (szParam, "dice3d", strlen ("dice3d"))
      && (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     fValueError =
       SetMaterialDice (&prd->DiceMat[szParam[c - 1] - '0'], szValue,
            &prd->afDieColour3d[szParam[c - 1] - '0']);
-  else if (!strncasecmp (szParam, "dot3d", strlen ("dot3d"))
+  else if (!StrNCaseCmp (szParam, "dot3d", strlen ("dot3d"))
      && (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     fValueError =
       SetMaterial (&prd->DiceDotMat[szParam[c - 1] - '0'], szValue);
-  else if (!strncasecmp (szParam, "cube3d", c))
+  else if (!StrNCaseCmp (szParam, "cube3d", c))
     fValueError = SetMaterial (&prd->CubeMat, szValue);
-  else if (!strncasecmp (szParam, "cubetext3d", c))
+  else if (!StrNCaseCmp (szParam, "cubetext3d", c))
     fValueError = SetMaterial (&prd->CubeNumberMat, szValue);
-  else if (!strncasecmp (szParam, "base3d", c))
+  else if (!StrNCaseCmp (szParam, "base3d", c))
     fValueError = SetMaterial (&prd->BaseMat, szValue);
-  else if (!strncasecmp (szParam, "points3d", strlen ("points3d")) &&
+  else if (!StrNCaseCmp (szParam, "points3d", strlen ("points3d")) &&
      (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     fValueError = SetMaterial (&prd->PointMat[szParam[c - 1] - '0'], szValue);
-  else if (!strncasecmp (szParam, "border3d", c))
+  else if (!StrNCaseCmp (szParam, "border3d", c))
     fValueError = SetMaterial (&prd->BoxMat, szValue);
-  else if (!strncasecmp (szParam, "hinge3d", c))
+  else if (!StrNCaseCmp (szParam, "hinge3d", c))
     fValueError = SetMaterial (&prd->HingeMat, szValue);
-  else if (!strncasecmp (szParam, "numbers3d", c))
+  else if (!StrNCaseCmp (szParam, "numbers3d", c))
     fValueError = SetMaterial (&prd->PointNumberMat, szValue);
-  else if (!strncasecmp (szParam, "background3d", c))
+  else if (!StrNCaseCmp (szParam, "background3d", c))
     fValueError = SetMaterial (&prd->BackGroundMat, szValue);
 #endif
   else if (c > 1 &&
-     (!strncasecmp (szParam, "chequers", c - 1) ||
-      !strncasecmp (szParam, "checkers", c - 1)) &&
+     (!StrNCaseCmp (szParam, "chequers", c - 1) ||
+      !StrNCaseCmp (szParam, "checkers", c - 1)) &&
      (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     /* chequers=colour;alpha;refrac;shine;spec */
     fValueError = SetColourARSS (prd->aarColour,
@@ -584,8 +584,8 @@ int c, fValueError = FALSE;
          prd->arExponent,
          szValue, szParam[c - 1] - '0');
   else if (c > 1 &&
-     (!strncasecmp (szParam, "dice", c - 1) ||
-      !strncasecmp (szParam, "dice", c - 1)) &&
+     (!StrNCaseCmp (szParam, "dice", c - 1) ||
+      !StrNCaseCmp (szParam, "dice", c - 1)) &&
      (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     /* dice=colour;shine;spec;flag */
     fValueError = SetColourSSF (prd->aarDiceColour,
@@ -594,13 +594,13 @@ int c, fValueError = FALSE;
         prd->afDieColour,
         szValue, szParam[c - 1] - '0');
   else if (c > 1 &&
-     (!strncasecmp (szParam, "dot", c - 1) ||
-      !strncasecmp (szParam, "dot", c - 1)) &&
+     (!StrNCaseCmp (szParam, "dot", c - 1) ||
+      !StrNCaseCmp (szParam, "dot", c - 1)) &&
      (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     /* dot=colour */
     fValueError =
       SetColourX (prd->aarDiceDotColour[szParam[c - 1] - '0'], szValue);
-  else if (c > 1 && !strncasecmp (szParam, "points", c - 1) &&
+  else if (c > 1 && !StrNCaseCmp (szParam, "points", c - 1) &&
      (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
     /* pointsn=colour;speckle */
     fValueError = SetColourSpeckle (szValue,

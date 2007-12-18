@@ -52,7 +52,7 @@ extern int main( int argc, char *argv[] )
 	{
 		int arg = 1;
 		if (!strcmp (argv[1], "-f"))
-			arg++;	// Skip
+			arg++;	/* Skip */
 
 		if (argc > arg + 2)
 			usage (argv[0]);
@@ -94,9 +94,19 @@ extern int main( int argc, char *argv[] )
 	
     fwrite( ar, sizeof( ar[ 0 ] ), 2, output );
 
-    for( c = 0; !NeuralNetLoad( &nn, input ); c++ )
-      if( NeuralNetSaveBinary( &nn, output ) )
-	    return EXIT_FAILURE;
+    for( c = 0; !feof(input); c++ )
+	{
+		if (NeuralNetLoad( &nn, input ) == -1)
+		{
+			fprintf(stderr, "Failed to load neural net!");
+			return EXIT_FAILURE;
+		}
+		if( NeuralNetSaveBinary( &nn, output ) == -1 )
+		{
+			fprintf(stderr, "Failed to save neural net!");
+			return EXIT_FAILURE;
+		}
+	}
 
     fprintf( stderr, _("%d nets converted\n"), c );
 

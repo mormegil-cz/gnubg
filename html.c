@@ -41,6 +41,10 @@
 #include <glib/gi18n.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#if WIN32
+#include <io.h>
+#endif
+#include "util.h"
 
 typedef enum _stylesheetclass {
   CLASS_MOVETABLE,
@@ -458,7 +462,7 @@ printStatTableRow ( FILE *pf, const char *format1, const char *format2,
 
   va_list val;
   char *sz;
-  int l = 100 + strlen ( format1 ) + 2 * strlen ( format2 );
+  size_t l = 100 + strlen ( format1 ) + 2 * strlen ( format2 );
 
   va_start( val, format2 );
 
@@ -2311,7 +2315,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
 
   if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] ) {
 
-    char *sz = strdup ( OutputRolloutContext ( NULL, pes ) );
+    char *sz = g_strdup ( OutputRolloutContext ( NULL, pes ) );
     char *pcS = sz, *pcE;
 
     while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
@@ -2685,7 +2689,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         case EVAL_ROLLOUT: {
 
-          char *sz = strdup ( OutputRolloutContext ( NULL, pes ) );
+          char *sz = g_strdup ( OutputRolloutContext ( NULL, pes ) );
           char *pcS = sz, *pcE;
           
           while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
@@ -3564,7 +3568,7 @@ extern char *
 HTMLFilename ( const char *szBase, const int iGame ) {
 
   if ( ! iGame )
-    return strdup ( szBase );
+    return g_strdup ( szBase );
   else {
 
     char *sz = malloc ( strlen ( szBase ) + 5 );
@@ -3874,27 +3878,21 @@ extern void CommandExportPositionGammOnLine ( char *sz ) {
 }
 
 
-extern void CommandExportPositionGOL2Clipboard( char *sz ) {
-
+extern void CommandExportPositionGOL2Clipboard( char *sz )
+{
     char *szClipboard;
     long l;
-    FILE *pf;
-    char *tmpfile;
-    int tmpd;
+	FILE *pf;
+	char *tmpFile;
 
     if( ms.gs == GAME_NONE ) {
       outputl( _("No game in progress (type `new game' to start one).") );
       return;
     }
     
-    /* get tmp file name */
+    /* get tmp file */
 
-    tmpd = g_file_open_tmp(NULL, &tmpfile, NULL); 
-    if ( tmpd < 0 || ! ( pf = fdopen(tmpd, "w+" ))) {
-	    g_free(tmpfile);
-      outputerr("temporary file");
-      return;
-    }
+	pf = GetTemporaryFile(NULL, &tmpFile);
 
     /* generate file */
 
@@ -3926,7 +3924,7 @@ extern void CommandExportPositionGOL2Clipboard( char *sz ) {
     free( szClipboard );
 
     fclose( pf );
-    g_unlink(tmpfile);
-    g_free(tmpfile);
+    g_unlink(tmpFile);
+    g_free(tmpFile);
 }
 

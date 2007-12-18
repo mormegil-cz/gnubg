@@ -597,7 +597,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
         }
         fBeaver = FALSE;
 
-        if ( ! strncasecmp( sz + 4, "illegal play", 12 ) ) {
+        if ( ! StrNCaseCmp( sz + 4, "illegal play", 12 ) ) {
           /* Snowie type illegal play */
 
           int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
@@ -743,17 +743,17 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
     }
 	
-    if( !strncasecmp( sz, "double", 6 ) || 
-        !strncasecmp( sz, "beavers", 7 ) ||
-        !strncasecmp( sz, "raccoons", 7 ) ) {
+    if( !StrNCaseCmp( sz, "double", 6 ) || 
+        !StrNCaseCmp( sz, "beavers", 7 ) ||
+        !StrNCaseCmp( sz, "raccoons", 7 ) ) {
         pmr = NewMoveRecord();
 	pmr->mt = MOVE_DOUBLE;
 	pmr->fPlayer = iPlayer;
 	LinkToDouble( pmr );
 	AddMoveRecord( pmr );
-        fBeaver = !strncasecmp( sz, "beavers", 6 );
+        fBeaver = !StrNCaseCmp( sz, "beavers", 6 );
 
-    } else if( !strncasecmp( sz, "take", 4 ) ) {
+    } else if( !StrNCaseCmp( sz, "take", 4 ) ) {
         pmr = NewMoveRecord();
 	pmr->mt = MOVE_TAKE;
 	pmr->fPlayer = iPlayer;
@@ -763,7 +763,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	  return;
 	}
 	AddMoveRecord( pmr );
-    } else if( !strncasecmp( sz, "drop", 4 ) ) {
+    } else if( !StrNCaseCmp( sz, "drop", 4 ) ) {
 
         pmr = NewMoveRecord();
 	pmr->mt = MOVE_DROP;
@@ -774,7 +774,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	  return;
 	}
 	AddMoveRecord( pmr );
-    } else if( !strncasecmp( sz, "win", 3 ) ) {
+    } else if( !StrNCaseCmp( sz, "win", 3 ) ) {
 	if( ms.gs == GAME_PLAYING ) {
 	    /* Neither a drop nor a bearoff to win, so we presume the loser
 	       resigned. */
@@ -791,7 +791,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
 	    AddMoveRecord( pmr );
 	}
-    } else if( !strncasecmp( sz, "resign", 6 ) ) {
+    } else if( !StrNCaseCmp( sz, "resign", 6 ) ) {
 		return;	/* Ignore this .gam line */
     } else if( !fWarned ) {
 	outputf( _("Unrecognised move \"%s\" in .mat file.\n"), sz );
@@ -1016,7 +1016,7 @@ static int ImportMatVariation( FILE *fp, char *szFilename, bgvariation bgVariati
     ParseSetDate ( szFilename );
 
     if ( pchComment ) 
-      mi.pchComment = strdup( pchComment ); /* no need to free mi.pchComment 
+      mi.pchComment = g_strdup( pchComment ); /* no need to free mi.pchComment 
                                                as it's already done in 
                                                ClearMatch */
     g_free( pchComment );
@@ -1128,7 +1128,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
         pmr->anDice[ 1 ] = sz[ 6 ] - '0';
         pmr->fPlayer = iPlayer;
 
-	if( !strncasecmp( sz + 9, "can't move", 10 ) )
+	if( !StrNCaseCmp( sz + 9, "can't move", 10 ) )
 	    c = 0;
 	else {
 	    for( pch = sz + 9; *pch; pch++ )
@@ -1182,7 +1182,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	} else
 	    free( pmr );
 	return;
-    } else if( !strncasecmp( sz + 3, "doubles", 7 ) ) {
+    } else if( !StrNCaseCmp( sz + 3, "doubles", 7 ) ) {
         pmr = NewMoveRecord();
 	pmr->mt = MOVE_DOUBLE;
 	pmr->fPlayer = iPlayer;
@@ -1194,7 +1194,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	pmr->stCube = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
-    } else if( !strncasecmp( sz + 3, "accepts", 7 ) ) {
+    } else if( !StrNCaseCmp( sz + 3, "accepts", 7 ) ) {
 
         pmr = NewMoveRecord();
 	pmr->mt = MOVE_TAKE;
@@ -1207,7 +1207,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	pmr->stCube = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
-    } else if( !strncasecmp( sz + 3, "rejects", 7 ) ) {
+    } else if( !StrNCaseCmp( sz + 3, "rejects", 7 ) ) {
 
         pmr = NewMoveRecord();
 	pmr->mt = MOVE_DROP;
@@ -1220,10 +1220,10 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	pmr->stCube = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
-    } else if( !strncasecmp( sz + 3, "wants to resign", 15 ) ) {
+    } else if( !StrNCaseCmp( sz + 3, "wants to resign", 15 ) ) {
 	/* ignore */
 	return;
-    } else if( !strncasecmp( sz + 3, "wins", 4 ) ) {
+    } else if( !StrNCaseCmp( sz + 3, "wins", 4 ) ) {
 	if( ms.gs == GAME_PLAYING ) {
 	    /* Neither a drop nor a bearoff to win, so we presume the loser
 	       resigned. */
@@ -1644,9 +1644,9 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                       fBeaver = FALSE;
                     }
                     
-                    if ( !strncasecmp( pch, "resign", 6 ) ||
+                    if ( !StrNCaseCmp( pch, "resign", 6 ) ||
                          ( strlen( pch ) > 4 && 
-                           !strncasecmp( pch + 4, "resign", 6 ) ) ) {
+                           !StrNCaseCmp( pch + 4, "resign", 6 ) ) ) {
                       /* resignation after rolling dice */
                       fResigned = fPlayer;
                       continue;
@@ -1729,7 +1729,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 				if( !isspace( *pch ) )
 				    break;
 			    
-			    if( *pch && strncasecmp( pch, "resign", 6 ) ) {
+			    if( *pch && StrNCaseCmp( pch, "resign", 6 ) ) {
 				/* Apparently SGG files can contain spurious
 				   duplicate moves -- the only thing we can
 				   do is ignore them. */
@@ -1771,7 +1771,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    AddMoveRecord( pmr );
                             fBeaver = FALSE;
 
-                            if ( !strncasecmp( pch, "resign", 6 ) ) {
+                            if ( !StrNCaseCmp( pch, "resign", 6 ) ) {
                               /* resignation after rolling dice */
                               fResigned = fPlayer;
                               continue;
@@ -1779,7 +1779,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 			}
 		    } else {
-			if( !strncasecmp( pch, "double", 6 ) ) {
+			if( !StrNCaseCmp( pch, "double", 6 ) ) {
 			    if( ms.fDoubled && ms.fTurn != fPlayer )
 				/* Presumably a duplicated move in the
 				   SGG file -- ignore */
@@ -1794,7 +1794,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    AddMoveRecord( pmr );
                             fBeaver = FALSE;
                             szComment = NULL;
-                        } else if( !strncasecmp (pch, "beaver", 6 ) ) {
+                        } else if( !StrNCaseCmp (pch, "beaver", 6 ) ) {
                           /* Beaver to 4 */
                           if ( ms.fDoubled && ms.fTurn != fPlayer )
 				/* Presumably a duplicated move in the
@@ -1814,7 +1814,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    AddMoveRecord( pmr );
                             szComment = NULL;
                             fBeaver = TRUE;
-                        } else if( !strncasecmp (pch, "raccoon", 7 ) ) {
+                        } else if( !StrNCaseCmp (pch, "raccoon", 7 ) ) {
                             /* Raccoon to 8 */
                             if ( ms.fDoubled && ms.fTurn != fPlayer )
                               /* Presumably a duplicated move in the
@@ -1834,7 +1834,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    AddMoveRecord( pmr );
                             szComment = NULL;
                             fBeaver = TRUE;
-			} else if( !strncasecmp( pch, "accept", 6 ) ) {
+			} else if( !StrNCaseCmp( pch, "accept", 6 ) ) {
 
 			    if( !ms.fDoubled )
 				continue;
@@ -1852,7 +1852,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    AddMoveRecord( pmr );
                             szComment = NULL;
                             fBeaver = FALSE;
-			} else if( !strncasecmp( pch, "pass", 4 ) ) {
+			} else if( !StrNCaseCmp( pch, "pass", 4 ) ) {
 
                             pmr = NewMoveRecord();
 			    pmr->mt = MOVE_DROP;
@@ -1868,7 +1868,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                             szComment = NULL;
                             fBeaver = FALSE;
 			}
-                        else if ( !strncasecmp( pch, "resign", 4 ) ) {
+                        else if ( !StrNCaseCmp( pch, "resign", 4 ) ) {
                           /* resignation */
                           fResigned = fPlayer;
                         }
@@ -1904,7 +1904,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
           if ( *sz != '\n' ) {
             /* non-empty line */
             if ( ! szComment )
-              szComment = strdup ( sz );
+              szComment = g_strdup ( sz );
             else {
               szComment = 
                 (char *) realloc ( szComment,
@@ -2110,7 +2110,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
       if ( pmi->pchRating[ i ] )
         free ( pmi->pchRating[ i ] );
       sprintf ( szTemp, "%.6g (Exp %d)", arRating[ i ], anExp[ i ] );
-      pmi->pchRating[ i ] = strdup ( szTemp );
+      pmi->pchRating[ i ] = g_strdup ( szTemp );
     }
     break;
 
@@ -2181,11 +2181,11 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     if ( ! GetValue( sz, szTemp ) )
       break;
 
-    if ( ! strcasecmp( szTemp, "HyperGammon" ) )
+    if ( ! StrCaseCmp( szTemp, "HyperGammon" ) )
       *pbgv = VARIATION_HYPERGAMMON_3;
-    else if ( ! strcasecmp( szTemp, "Nackgammon" ) )
+    else if ( ! StrCaseCmp( szTemp, "Nackgammon" ) )
       *pbgv = VARIATION_NACKGAMMON;
-    else if ( ! strcasecmp( szTemp, "Backgammon" ) )
+    else if ( ! StrCaseCmp( szTemp, "Backgammon" ) )
       *pbgv = VARIATION_STANDARD;
     else {
       outputf ( "Unknown variant in SGG file\n"
@@ -2202,7 +2202,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     if ( pmi->pchPlace )
       free ( pmi->pchPlace );
 
-    pmi->pchPlace = strdup ( sz );
+    pmi->pchPlace = g_strdup ( sz );
     if ( ( pc = strchr ( sz, '\n' ) ) )
       *pc = 0;
 
@@ -2349,7 +2349,7 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     sprintf( szTemp, _("TMG MatchID: %s"), pc );
     if ( ( pc = strchr ( szTemp, '\n' ) ) )
       *pc = 0;
-    pmi->pchComment = strdup ( szTemp );
+    pmi->pchComment = g_strdup ( szTemp );
     return 0;
     break;
 
@@ -3292,7 +3292,7 @@ static int ImportGAM(FILE *fp, char *szFilename )
 	{
 		szLine += strspn(szLine, " \t" );
 
-		if (!strncasecmp(szLine, "win", 3))
+		if (!StrNCaseCmp(szLine, "win", 3))
 			continue;	/* Skip this line (in between games) */
 
 		/* Read player names */
@@ -3476,7 +3476,7 @@ static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 		key = NextTokenGeneral(&value, "=");
 		if (key)
 		{
-			if (!strncasecmp(key, "GAME_", strlen("GAME_")))
+			if (!StrNCaseCmp(key, "GAME_", strlen("GAME_")))
 			{
 				key += strlen("GAME_");
 				do
@@ -3485,18 +3485,18 @@ static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 				if (g_ascii_iscntrl (value[strlen(value) - 1]))
 					value[strlen(value) - 1] = '\0';
 
-				if (!strcasecmp(key, "PLAYER_1"))
+				if (!StrCaseCmp(key, "PLAYER_1"))
 					strcpy(p1, value);
-				else if (!strcasecmp(key, "PLAYER_2"))
+				else if (!StrCaseCmp(key, "PLAYER_2"))
 					strcpy(p2, value);
-				else if (!strcasecmp(key, "GAMEPLAY"))
+				else if (!StrCaseCmp(key, "GAMEPLAY"))
 				{
 					pg.gameStr = (char*)malloc(strlen(value) + 1);
 					strcpy(pg.gameStr, value);
 				}
-				else if (!strcasecmp(key, "SCORE1"))
+				else if (!StrCaseCmp(key, "SCORE1"))
 					pg.s1 = atoi(value);
-				else if (!strcasecmp(key, "SCORE2"))
+				else if (!StrCaseCmp(key, "SCORE2"))
 				{
 					PartyGame *newGame;
 					pg.s2 = atoi(value);
@@ -3506,7 +3506,7 @@ static int ConvertPartyGammonFileToMat(FILE *partyFP, FILE *matFP)
 					games = g_list_append(games, newGame);
 				}
 			}
-			if (!strcasecmp(key, "MATCHLENGTH"))
+			if (!StrCaseCmp(key, "MATCHLENGTH"))
 				matchLen = atoi(value);
 		}
 	}

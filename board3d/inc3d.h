@@ -157,15 +157,6 @@ struct _BoardData3d
 	GLuint diceList, DCList, pieceList;
 	GLUquadricObj *qobjTex, *qobj;
 
-	/* Define nurbs surface - for flag */
-	GLUnurbsObj *flagNurb;
-	#define S_NUMPOINTS 4
-	#define S_NUMKNOTS (S_NUMPOINTS * 2)
-	#define T_NUMPOINTS 2
-	#define T_NUMKNOTS (T_NUMPOINTS * 2)
-	/* Control points for the flag. The Z values are modified to make it wave */
-	float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3];
-
 	/* Shadow casters */
 	Occluder Occluders[NUM_OCC];
 	float shadow_light_position[4];
@@ -184,6 +175,18 @@ struct _BoardData3d
 	char* textureName[MAX_TEXTURES];
 	int numTextures;
 	unsigned int dotTexture;	/* Holds texture used to draw dots on dice */
+};
+
+struct _Flag3d
+{
+	/* Define nurbs surface - for flag */
+	GLUnurbsObj *flagNurb;
+	#define S_NUMPOINTS 4
+	#define S_NUMKNOTS (S_NUMPOINTS * 2)
+	#define T_NUMPOINTS 2
+	#define T_NUMKNOTS (T_NUMPOINTS * 2)
+	/* Control points for the flag. The Z values are modified to make it wave */
+	float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3];
 };
 
 /* Define relative sizes of objects from arbitrary unit .05 */

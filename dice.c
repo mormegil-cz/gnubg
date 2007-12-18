@@ -36,6 +36,10 @@
 #include <stdlib.h>
 #include "string.h"
 
+#ifdef WIN32
+#include <io.h>
+#endif
+
 #include "dice.h"
 #include "md5.h"
 #include "mt19937ar.h"

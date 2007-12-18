@@ -1,10 +1,8 @@
 extern float getDiceSize(const renderdata* prd);
-extern void setupFlag(BoardData3d *bd3d);
+extern void SetupFlag(void);
 extern void setupDicePaths(const BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);
-extern void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag);
+extern void waveFlag(float wag);
 extern GdkGLConfig *getGlConfig(void);
-extern void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
-extern void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
 
 /* Helper functions in misc3d */
 void cylinder(float radius, float height, unsigned int accuracy, const Texture* texture);
@@ -24,6 +22,8 @@ void QuarterCylinderSplayed(float radius, float len, unsigned int accuracy, cons
 void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, const Texture* texture);
 void drawCornerEigth(float ** const *boardPoints, float radius, unsigned int accuracy);
 void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accuracy);
+void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
+void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
 
 /* Other functions */
 void initPath(Path* p, const float start[3]);

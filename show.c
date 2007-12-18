@@ -981,7 +981,7 @@ extern void CommandShowBuildInfo( char *sz )
 
 extern void CommandShowScoreSheet( char *sz )
 {
-	int i, width1, width2;
+	size_t i, width1, width2;
 	char *data[2];
 	listOLD *pl;
 

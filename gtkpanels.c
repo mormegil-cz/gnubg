@@ -466,7 +466,7 @@ static void CommandOK(GtkWidget * pw, CommandEntryData_T *pData)
 
 	/* See if already in history */
 	for (i = 0; i < pData->numHistory; i++) {
-		if (!strcasecmp(pData->cmdString, pData->cmdHistory[i])) {
+		if (!StrCaseCmp(pData->cmdString, pData->cmdHistory[i])) {
 			found = i;
 			break;
 		}
@@ -591,10 +591,7 @@ static gboolean CommandFocusIn(GtkWidget * widget, GdkEventFocus * event,
 		pData->completing = 0;
 		gtk_widget_grab_focus(pData->pwEntry);
 		gtk_editable_set_position(GTK_EDITABLE(pData->pwEntry),
-					  strlen(gtk_editable_get_chars
-						 (GTK_EDITABLE
-						  (pData->pwEntry), 0,
-						  -1)));
+					  (int)strlen(gtk_editable_get_chars(GTK_EDITABLE(pData->pwEntry), 0, -1)));
 		return TRUE;
 	} else
 		return FALSE;
@@ -1448,7 +1445,7 @@ CommandSetGeometryPosY ( char *sz ) {
 extern void
 CommandSetGeometryMax ( char *sz )
 {
-  int maxed = (strcasecmp(sz, "yes") == 0);
+  int maxed = (StrCaseCmp(sz, "yes") == 0);
   woPanel[pwoSetPanel].wg.max = maxed;
   outputf ( maxed ? _("%s window maximised.\n") : _("%s window unmaximised.\n"),
 	  woPanel[pwoSetPanel].winName);

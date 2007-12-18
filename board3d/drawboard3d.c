@@ -114,6 +114,8 @@ float getBoardWidth(void) {return TOTAL_WIDTH;}
 float getBoardHeight(void) {return TOTAL_HEIGHT;}
 float getDiceSize(const renderdata* prd) {return prd->diceSize * base_unit;}
 
+extern Flag3d flag;
+
 static void TidyShadows(BoardData3d* bd3d)
 {
 	freeOccluder(&bd3d->Occluders[OCC_BOARD]);
@@ -133,7 +135,8 @@ void Tidy3dObjects(BoardData3d* bd3d, const renderdata *prd)
 	gluDeleteQuadric(bd3d->qobjTex);
 	gluDeleteQuadric(bd3d->qobj);
 
-	gluDeleteNurbsRenderer(bd3d->flagNurb);
+	if (flag.flagNurb != NULL)
+		gluDeleteNurbsRenderer(flag.flagNurb);
 
 	if (bd3d->boardPoints)
 		freeEigthPoints(&bd3d->boardPoints, prd->curveAccuracy);
@@ -2401,14 +2404,14 @@ static void getFlagPos(const BoardData* bd, float v[3])
 		v[0] += BOARD_WIDTH + BAR_WIDTH;
 }
 
-void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag)
+void waveFlag(float wag)
 {
 	int i, j;
 
 	/* wave the flag by rotating Z coords though a sine wave */
 	for (i = 1; i < S_NUMPOINTS; i++)
 		for (j = 0; j < T_NUMPOINTS; j++)
-			ctlpoints[i][j][2] = sinf((GLfloat)i + wag) * FLAG_WAG;
+			flag.ctlpoints[i][j][2] = sinf((GLfloat)i + wag) * FLAG_WAG;
 }
 
 NTH_STATIC void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
@@ -2416,7 +2419,7 @@ NTH_STATIC void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const rende
 	int s;
 	float v[3];
 
-	waveFlag(bd3d->ctlpoints, bd3d->flagWaved);
+	waveFlag(bd3d->flagWaved);
 
 	glLoadName(POINT_RESIGN);
 
@@ -2429,8 +2432,8 @@ NTH_STATIC void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const rende
 	glBegin(GL_QUAD_STRIP);
 	for (s = 0; s < S_NUMPOINTS; s++)
 	{
-		glVertex3fv(bd3d->ctlpoints[s][1]);
-		glVertex3fv(bd3d->ctlpoints[s][0]);
+		glVertex3fv(flag.ctlpoints[s][1]);
+		glVertex3fv(flag.ctlpoints[s][0]);
 	}
 	glEnd();
 
@@ -3160,24 +3163,22 @@ void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* 
 	glGetFloatv(GL_MODELVIEW_MATRIX, bd3d->modelMatrix);
 }
 
-void setupFlag(BoardData3d *bd3d)
+extern void SetupFlag(void)
 {
 	int i;
 	float width = FLAG_WIDTH;
 	float height = FLAG_HEIGHT;
 
-	if (bd3d->flagNurb)
-		gluDeleteNurbsRenderer(bd3d->flagNurb);
-	bd3d->flagNurb = gluNewNurbsRenderer();
+	flag.flagNurb = NULL;
 
 	for (i = 0; i < S_NUMPOINTS; i++)
 	{
-		bd3d->ctlpoints[i][0][0] = width / (S_NUMPOINTS - 1) * i;
-		bd3d->ctlpoints[i][1][0] = width / (S_NUMPOINTS - 1) * i;
-		bd3d->ctlpoints[i][0][1] = 0;
-		bd3d->ctlpoints[i][1][1] = height;
-		bd3d->ctlpoints[i][0][2] = 0;
-		bd3d->ctlpoints[i][1][2] = 0;
+		flag.ctlpoints[i][0][0] = width / (S_NUMPOINTS - 1) * i;
+		flag.ctlpoints[i][1][0] = width / (S_NUMPOINTS - 1) * i;
+		flag.ctlpoints[i][0][1] = 0;
+		flag.ctlpoints[i][1][1] = height;
+		flag.ctlpoints[i][0][2] = 0;
+		flag.ctlpoints[i][1][2] = 0;
 	}
 }
 
@@ -3190,13 +3191,16 @@ NTH_STATIC void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigne
 	/* Draw flag surface */
 	setMaterial(&bd3d->flagMat);
 
-	/* Set size of polygons */
-	gluNurbsProperty(bd3d->flagNurb, GLU_SAMPLING_TOLERANCE, 500.0f / curveAccuracy);
+	if (flag.flagNurb == NULL)
+		flag.flagNurb = gluNewNurbsRenderer();
 
-	gluBeginSurface(bd3d->flagNurb);
-		gluNurbsSurface(bd3d->flagNurb, S_NUMKNOTS, s_knots, T_NUMKNOTS, t_knots, 3 * T_NUMPOINTS, 3,
-						(float*)bd3d->ctlpoints, S_NUMPOINTS, T_NUMPOINTS, GL_MAP2_VERTEX_3);
-	gluEndSurface(bd3d->flagNurb);
+	/* Set size of polygons */
+	gluNurbsProperty(flag.flagNurb, GLU_SAMPLING_TOLERANCE, 500.0f / curveAccuracy);
+
+	gluBeginSurface(flag.flagNurb);
+		gluNurbsSurface(flag.flagNurb, S_NUMKNOTS, s_knots, T_NUMKNOTS, t_knots, 3 * T_NUMPOINTS, 3,
+						(float*)flag.ctlpoints, S_NUMPOINTS, T_NUMPOINTS, GL_MAP2_VERTEX_3);
+	gluEndSurface(flag.flagNurb);
 
 	/* Draw flag pole */
 	glPushMatrix();
@@ -3221,14 +3225,14 @@ NTH_STATIC void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigne
 	{
 		/* Move to middle of flag */
 		float v[3];
-		v[0] = (bd3d->ctlpoints[1][0][0] + bd3d->ctlpoints[2][0][0]) / 2.0f;
-		v[1] = (bd3d->ctlpoints[1][0][0] + bd3d->ctlpoints[1][1][0]) / 2.0f;
-		v[2] = (bd3d->ctlpoints[1][0][2] + bd3d->ctlpoints[2][0][2]) / 2.0f;
+		v[0] = (flag.ctlpoints[1][0][0] + flag.ctlpoints[2][0][0]) / 2.0f;
+		v[1] = (flag.ctlpoints[1][0][0] + flag.ctlpoints[1][1][0]) / 2.0f;
+		v[2] = (flag.ctlpoints[1][0][2] + flag.ctlpoints[2][0][2]) / 2.0f;
 		glTranslatef(v[0], v[1], v[2]);
 	}
 	{
 		/* Work out approx angle of number based on control points */
-		float ang = atanf(-(bd3d->ctlpoints[2][0][2] - bd3d->ctlpoints[1][0][2]) / (bd3d->ctlpoints[2][0][0] - bd3d->ctlpoints[1][0][0]));
+		float ang = atanf(-(flag.ctlpoints[2][0][2] - flag.ctlpoints[1][0][2]) / (flag.ctlpoints[2][0][0] - flag.ctlpoints[1][0][0]));
 		float degAng = (ang) * 180 / (float)G_PI;
 
 		glRotatef(degAng, 0.f, 1.f, 0.f);
@@ -3264,7 +3268,7 @@ static void drawFlag(const BoardData *bd, BoardData3d *bd3d, const renderdata *p
 	if (isStencil)
 		glDisable(GL_STENCIL_TEST);
 
-	waveFlag(bd3d->ctlpoints, bd3d->flagWaved);
+	waveFlag(bd3d->flagWaved);
 
 	glPushMatrix();
 
@@ -3435,21 +3439,21 @@ void updateFlagOccPos(const BoardData* bd, BoardData3d* bd3d)
 		{
 			int s;
 			/* Change first ctlpoint to better match flag shape */
-			float p1x = bd3d->ctlpoints[1][0][2];
-			bd3d->ctlpoints[1][0][2] *= .7f;
+			float p1x = flag.ctlpoints[1][0][2];
+			flag.ctlpoints[1][0][2] *= .7f;
 
 			for (s = 0; s < S_NUMPOINTS - 1; s++)
 			{	/* Reduce shadow size a bit to remove artifacts */
-				float h = (bd3d->ctlpoints[s][1][1] - bd3d->ctlpoints[s][0][1]) * .92f - (FLAG_HEIGHT * .05f);
-				float y = bd3d->ctlpoints[s][0][1] + FLAG_HEIGHT * .05f;
-				float w = bd3d->ctlpoints[s + 1][0][0] - bd3d->ctlpoints[s][0][0];
+				float h = (flag.ctlpoints[s][1][1] - flag.ctlpoints[s][0][1]) * .92f - (FLAG_HEIGHT * .05f);
+				float y = flag.ctlpoints[s][0][1] + FLAG_HEIGHT * .05f;
+				float w = flag.ctlpoints[s + 1][0][0] - flag.ctlpoints[s][0][0];
 				if (s == 2)
 					w *= .95f;
-				addWonkyCube(&bd3d->Occluders[OCC_FLAG], bd3d->ctlpoints[s][0][0], y, bd3d->ctlpoints[s][0][2],
+				addWonkyCube(&bd3d->Occluders[OCC_FLAG], flag.ctlpoints[s][0][0], y, flag.ctlpoints[s][0][2],
 					w, h, base_unit / 10.0f,
-					bd3d->ctlpoints[s + 1][0][2] - bd3d->ctlpoints[s][0][2], s);
+					flag.ctlpoints[s + 1][0][2] - flag.ctlpoints[s][0][2], s);
 			}
-			bd3d->ctlpoints[1][0][2] = p1x;
+			flag.ctlpoints[1][0][2] = p1x;
 		}
 		draw_shadow_volume_extruded_edges(&bd3d->Occluders[OCC_FLAG], bd3d->shadow_light_position, GL_QUADS);
 	}
@@ -3693,7 +3697,7 @@ void RestrictiveDrawFlag(const BoardData* bd)
 	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
 }
 
-static void drawBoardBase(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	drawTable(bd3d, prd);
 
@@ -3704,9 +3708,8 @@ static void drawBoardBase(const BoardData *bd, BoardData3d *bd3d, const renderda
 		tidyEdges(prd);
 }
 
-extern void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
-/* bd3d cannot be const here since we modify it in drawFlag) */
 	if (prd->fLabels && prd->fDynamicLabels)
 		drawNumbers(bd);
 	if (prd->showMoveIndicator)
@@ -3739,7 +3742,7 @@ void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 }
 
 extern int renderingBase;
-extern void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	if (bd->rd->showShadows)
 	{

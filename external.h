@@ -60,8 +60,8 @@ typedef struct _extcmd {
 } extcmd;
 
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz );
-extern int ExternalRead( int h, char *pch, int cch );
-extern int ExternalWrite( int h, char *pch, int cch );
+extern int ExternalRead( int h, char *pch, size_t cch );
+extern int ExternalWrite( int h, char *pch, size_t cch );
 #ifdef WIN32
 extern void OutputWin32SocketError(const char* action);
 #define SockErr OutputWin32SocketError

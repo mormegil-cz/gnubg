@@ -95,8 +95,10 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
                  pms->nCube );
       else
         sprintf( szCube, _("(Cube: %d)"), pms->nCube );
-    } else {
-      int cch = strlen( ap[ pms->fCubeOwner ].szName );
+    }
+	else
+	{
+      size_t cch = strlen( ap[ pms->fCubeOwner ].szName );
 		
       if( cch > 20 )
         cch = 20;

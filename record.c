@@ -34,6 +34,7 @@
 #include "gtkgame.h"
 #endif
 #include "record.h"
+#include "util.h"
 
 static int anAvg[ NUM_AVG - 1 ] = { 20, 100, 500 };
 
@@ -199,27 +200,25 @@ static int RecordWriteItem( FILE *pf, const char *pch, playerrecord *ppr ) {
     return 0;
 }
 
-static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
-
+static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] )
+{
     int n;
-    int tmpFile;
     playerrecord pr;
     FILE *pfIn;
-    char *sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
-    if ( ( tmpFile = g_file_open_tmp("gnubgprXXXXXX", ppchOut, NULL) ) == 0 || (*ppfOut = fdopen( tmpFile, "w" )) == 0)
+    char *sz;
+
+	*ppfOut = GetTemporaryFile("gnubgprXXXXXX", ppchOut);
+    if ( ppfOut == NULL )
+		return -1;
+
+    if( fputs( "# %Version: 2 ($Revision$)\n", *ppfOut ) < 0 )
 	{
 		outputerr( *ppchOut );
 		g_free( *ppchOut );
 		return -1;
     }
-
-    if( fputs( "# %Version: 2 ($Revision$)\n", *ppfOut ) < 0 )
-	{
-		outputerr( *ppchOut );
-		free( *ppchOut );
-		return -1;
-    }
     
+	sz = g_build_filename(szHomeDirectory, GNUBGPR, NULL);
     if( ( pfIn = g_fopen( sz, "r" ) ) == NULL )
 	{
         g_free(sz);
@@ -240,7 +239,7 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 		}
 	}
     g_free(sz);
-
+	g_free(ppchOut);
     fclose( pfIn );
     
     return n < 0 ? -1 : 0;

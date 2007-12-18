@@ -124,17 +124,13 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #define ETIMEDOUT               WSAETIMEDOUT
 #define ECONNREFUSED            WSAECONNREFUSED
 #define ELOOP                   WSAELOOP
-#define ENAMETOOLONG            WSAENAMETOOLONG
 #define EHOSTDOWN               WSAEHOSTDOWN
 #define EHOSTUNREACH            WSAEHOSTUNREACH
-#define ENOTEMPTY               WSAENOTEMPTY
 #define EPROCLIM                WSAEPROCLIM
 #define EUSERS                  WSAEUSERS
 #define EDQUOT                  WSAEDQUOT
 #define ESTALE                  WSAESTALE
 #define EREMOTE                 WSAEREMOTE
-#define EINVAL                  WSAEINVAL
-#define EINTR                   WSAEINTR
 
 #define inet_aton(ip,addr)  (addr)->s_addr = inet_addr(ip), 1
 #define inet_pton(fam,ip,addr) (addr)->s_addr = inet_addr(ip), 1
@@ -2290,7 +2286,7 @@ extern int ParsePlayer( char *sz )
 	if( !CompareNames( sz, ap[ i ].szName ) )
 	    return i;
 
-    if( !strncasecmp( sz, "both", strlen( sz ) ) )
+    if( !StrNCaseCmp( sz, "both", strlen( sz ) ) )
 	return 2;
 
     return -1;
@@ -2501,8 +2497,8 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn, char *szOff )
 
     cch = strlen( pch );
     
-    if( !strcasecmp( "on", pch ) || !strncasecmp( "yes", pch, cch ) ||
-	!strncasecmp( "true", pch, cch ) ) {
+    if( !StrCaseCmp( "on", pch ) || !StrNCaseCmp( "yes", pch, cch ) ||
+	!StrNCaseCmp( "true", pch, cch ) ) {
 	if( *pf != TRUE ) {
 	    *pf = TRUE;
 	    UpdateSetting( pf );
@@ -2513,8 +2509,8 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn, char *szOff )
 	return TRUE;
     }
 
-    if( !strcasecmp( "off", pch ) || !strncasecmp( "no", pch, cch ) ||
-	!strncasecmp( "false", pch, cch ) ) {
+    if( !StrCaseCmp( "off", pch ) || !StrNCaseCmp( "no", pch, cch ) ||
+	!StrNCaseCmp( "false", pch, cch ) ) {
 	if( *pf != FALSE ) {
 	    *pf = FALSE;
 	    UpdateSetting( pf );
@@ -2657,7 +2653,7 @@ extern void HandleCommand( char *sz, command *ac )
     cch = strlen( pch );
 
     if( ac == acTop && ( isdigit( *pch ) ||
-			 !strncasecmp( pch, "bar/", cch > 4 ? 4 : cch ) ) ) {
+			 !StrNCaseCmp( pch, "bar/", cch > 4 ? 4 : cch ) ) ) {
 	if( pch + cch < sz )
 	    pch[ cch ] = ' ';
 	
@@ -2668,7 +2664,7 @@ extern void HandleCommand( char *sz, command *ac )
     }
 
     for( pc = ac; pc->sz; pc++ )
-	if( !strncasecmp( pch, pc->sz, cch ) )
+	if( !StrNCaseCmp( pch, pc->sz, cch ) )
 	    break;
 
     if( !pc->sz ) {
@@ -3098,7 +3094,7 @@ extern command *FindHelpCommand( command *pcBase, char *sz,
 				 char *pchCommand, char *pchUsage ) {
 
     command *pc;
-    char *pch;
+    const char *pch;
     int cch;
     
     if( !( pch = NextToken( &sz ) ) )
@@ -3107,7 +3103,7 @@ extern command *FindHelpCommand( command *pcBase, char *sz,
     cch = strlen( pch );
 
     for( pc = pcBase->pc; pc && pc->sz; pc++ )
-	if( !strncasecmp( pch, pc->sz, cch ) )
+	if( !StrNCaseCmp( pch, pc->sz, cch ) )
 	    break;
 
     if( !pc || !pc->sz )
@@ -3144,7 +3140,7 @@ extern char* CheckCommand(char *sz, command *ac)
 
     cch = strlen( pch );
 	for (pc = ac; pc->sz; pc++)
-		if (!strncasecmp(pch, pc->sz, cch))
+		if (!StrNCaseCmp(pch, pc->sz, cch))
 			break;
     if (!pc->sz)
 		return pch;
@@ -5005,7 +5001,7 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     }
 
     while( pc && pc->sz ) {
-      if( !strncasecmp( sz, pc->sz, cch ) && pc->szHelp ) {
+      if( !StrNCaseCmp( sz, pc->sz, cch ) && pc->szHelp ) {
         if( !( szDup = malloc( strlen( pc->sz ) + 1 ) ) )
           return NULL;
 
@@ -5035,7 +5031,7 @@ static char *ERCompletion( const char *sz, int nState ) {
     while( i < 2 ) {
 	pch = i++ ? "rollout" : "evaluation";
 	
-	if( !strncasecmp( sz, pch, cch ) ) {
+	if( !StrNCaseCmp( sz, pch, cch ) ) {
 	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
 		return NULL;
 	    
@@ -5061,7 +5057,7 @@ static char *OnOffCompletion( const char *sz, int nState ) {
     while( i < sizeof(asz)/sizeof(asz[0]) ) {
 	pch = asz[ i++ ];
 
-	if( !strncasecmp( sz, pch, cch ) ) {
+	if( !StrNCaseCmp( sz, pch, cch ) ) {
 	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
 		return NULL;
 
@@ -5105,7 +5101,7 @@ static char *PlayerCompletionGen( const char *sz, int nState, int fBoth ) {
 
 	i++;
 
-	if( !strncasecmp( sz, pch, cch ) ) {
+	if( !StrNCaseCmp( sz, pch, cch ) ) {
 	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
 		return NULL;
 
@@ -5152,7 +5148,7 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
 	}
 	
         while( pc && pc->sz ) {
-            if( !strncasecmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
+            if( !StrNCaseCmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
 		pc = pc->pc;
 
 		if( pc == acSetPlayer || pc == acSetRolloutPlayer || 
@@ -6354,8 +6350,8 @@ static void init_defaults(void)
 {
 	/* init some html export options */
 
-	exsExport.szHTMLPictureURL = strdup("html-images/");
-	exsExport.szHTMLExtension = strdup("png");
+	exsExport.szHTMLPictureURL = g_strdup("html-images/");
+	exsExport.szHTMLExtension = g_strdup("png");
 
 	SetMatchDate(&mi);
 
@@ -6371,7 +6367,7 @@ static void init_defaults(void)
 
 static void null_debug (const gchar* dom, GLogLevelFlags logflags, const gchar* message, gpointer unused)
 {
-};
+}
 
 int main(int argc, char *argv[])
 {
@@ -6383,8 +6379,8 @@ int main(int argc, char *argv[])
 	char *pchMatch = NULL;
 	char *met = NULL;
 
-	char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
-	int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
+	static char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
+	static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
 	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE, debug = FALSE;
 
@@ -6455,7 +6451,7 @@ int main(int argc, char *argv[])
 	_chdir(szDataDirectory);
 	}
 #if defined(_MSC_VER) && HAVE_LIBXML2
-	xmlMemSetup(free, malloc, realloc, strdup);
+	xmlMemSetup(g_free, g_malloc, g_realloc, g_strdup);
 #endif
 #endif
 
@@ -6756,7 +6752,7 @@ extern void CommandSwapPlayers ( char *sz )
 
   /* swap player names */
 
-  pc = strdup ( ap[ 0 ].szName );
+  pc = g_strdup ( ap[ 0 ].szName );
   strcpy ( ap[ 0 ].szName, ap[ 1 ].szName );
   strcpy ( ap[ 1 ].szName, pc );
   free ( pc );
@@ -7210,5 +7206,4 @@ char *SetupLanguage (char *newLangCode)
 	return(result);
 }
 #endif
-
 

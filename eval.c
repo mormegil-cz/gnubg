@@ -44,6 +44,7 @@
 #include "format.h"
 #include "sse.h"
 #include "multithread.h"
+#include "util.h"
 
 #ifdef NO_ERF
 #include "erf.inc"	/* No erf on msdev so include code here... */
@@ -230,10 +231,10 @@ bearoffcontext *pbc1 = NULL;
 bearoffcontext *pbc2 = NULL;
 bearoffcontext *apbcHyper[ 3 ] = { NULL, NULL, NULL };
 
-static cache cEval;
+static evalCache cEval;
 #define PRUNE_CACHE
 #if defined( PRUNE_CACHE )
-static cache cpEval;
+static evalCache cpEval;
 #endif
 static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
@@ -482,11 +483,6 @@ const char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
   N_("Raccoon")
 };
 
-static void PrintError(const char* str)
-{
-	g_printerr("%s: %s", str, strerror(errno));
-}
-
 /* parameters for EvalEfficiency */
 
 float rOSCubeX = 0.6f;
@@ -717,7 +713,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 			   int fNoBearoff, void (*pfProgress) (int))
 {
 	FILE *pfWeights = NULL;
-	int h, i, fReadWeights = FALSE;
+	int i, fReadWeights = FALSE;
 	static int fInitialised = FALSE;
 	char *gnubg_bearoff;
 	char *gnubg_bearoff_os;
@@ -806,9 +802,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 
     if( szWeightsBinary)
     { 
-	    h = open( szWeightsBinary, O_RDONLY | BINARY );
-	    if (h)
-		    pfWeights = fdopen( h, "rb" );
+		pfWeights = fopen(szWeightsBinary, "rb");
 	    if (!binary_weights_failed(szWeightsBinary, pfWeights))
 	    {
 		    if( !fReadWeights && !( fReadWeights =
@@ -827,10 +821,9 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 	    pfWeights = NULL;
     }
 
-    if( !fReadWeights && szWeights ) {
-	    h = open( szWeights, O_RDONLY);
-	    if (h)
-		    pfWeights = fdopen( h, "r" );
+    if( !fReadWeights && szWeights )
+	{
+		pfWeights = fopen(szWeights, "r");
 	    if (!weights_failed(szWeights, pfWeights))
 	    {
 		    if( !( fReadWeights =
@@ -3908,9 +3901,7 @@ FindnSaveBestMoves( movelist *pml,
 
 }
 
-
-extern float
-KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
+extern float KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
 {
   int nDiff, nSum;
   double rK;
@@ -3926,7 +3917,6 @@ KleinmanCount (int nPipOnRoll, int nPipNotOnRoll)
   else
 	  return 0.f;
 }
-
 
 extern int KeithCount(TanBoard anBoard, int pn[2])
 {

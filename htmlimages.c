@@ -33,9 +33,13 @@
 
 #include <stdlib.h>
 #include <glib.h>
+#if WIN32
+#include <io.h>
+#endif
 
 #include "backgammon.h"
 #include "export.h"
+#include <glib/gstdio.h>
 #include <glib/gi18n.h>
 #include "render.h"
 #include "renderprefs.h"
@@ -648,11 +652,7 @@ static char* GetFilenameBase(char* sz)
 		return 0;
 	}
 
-	if( mkdir( sz
-#ifndef WIN32
-		, 0777
-#endif
-		) < 0 && errno != EEXIST )
+	if( g_mkdir( sz, 0777) < 0 && errno != EEXIST )
 	{
 		outputerr ( sz );
 		return 0;

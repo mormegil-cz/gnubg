@@ -23,8 +23,9 @@
 #define _POSITIONID_H_
 
 #include "gnubg-types.h"
-extern void PositionKey( TanBoard anBoard, unsigned char auchKey[ 10 ] );
-extern char *PositionID( TanBoard anBoard );
+
+extern void PositionKey( ARRAY_CONST TanBoard anBoard, unsigned char auchKey[ 10 ] );
+extern char *PositionID( ARRAY_CONST TanBoard anBoard );
 extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] );
 
 extern 
@@ -44,10 +45,10 @@ PositionFromBearoff(int anBoard[], unsigned int usID,
 extern unsigned short PositionIndex(int g, const int anBoard[6]);
 
 extern int EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
-extern int EqualBoards( TanBoard anBoard0, TanBoard anBoard1 );
+extern int EqualBoards( ARRAY_CONST TanBoard anBoard0, ARRAY_CONST TanBoard anBoard1 );
 
 /* Return 1 for valid position, 0 for not */
-extern int CheckPosition( TanBoard anBoard );
+extern int CheckPosition( ARRAY_CONST TanBoard anBoard );
 
 extern void ClosestLegalPosition( TanBoard anBoard );
 
