@@ -1,3 +1,10 @@
+Tue Dec 18 14:14:10 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* set.c, board3d/drawboard3d.c, board3d/fun3d.h, board3d/inc3d.h,
+	board3d/matrix.c, board3d/matrix.h, board3d/misc3d.c,
+	board3d/misc3d.h, board3d/shadow.c, board3d/widget3d.c: let new
+	board3d code compile under linux.
+
 Tue Dec 18 14:10:55 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* bearoffdump.c, makebearoff.c, makehyper.c, record.c: make utily

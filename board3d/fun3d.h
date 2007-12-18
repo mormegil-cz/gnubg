@@ -56,7 +56,7 @@ int movePath(Path* p, float d, float* pRotate, float v[3]);
 int finishedPath(const Path* p);
 void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d);
-void LoadTextureInfo();
+void LoadTextureInfo(void);
 GList *GetTextureList(TextureType type);
 extern void FindTexture(TextureInfo** textureInfo, char* file);
 extern void FindNamedTexture(TextureInfo** textureInfo, char* name);

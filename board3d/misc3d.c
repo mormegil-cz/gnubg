@@ -27,7 +27,9 @@
 #include "sound.h"
 #include "export.h"
 #include "gtkgame.h"
+#ifdef WIN32
 #include "wglbuffer.h"
+#endif
 #include "misc3d.h"
 
 #define MAX_FRAMES 10
@@ -166,7 +168,7 @@ NTH_STATIC void SetupLight3d(BoardData3d *bd3d, const renderdata* prd)
 			draw_shadow_volume_extruded_edges(&bd3d->Occluders[i], bd3d->shadow_light_position, GL_QUADS);
 	}
 }
-
+#ifdef WIN32
 /* Determine if a particular extension is supported */
 typedef char *(WINAPI *fGetExtStr)(HDC);
 extern int extensionSupported(const char *extension)
@@ -225,6 +227,7 @@ extern int setVSync(int state)
 
 	return TRUE;
 }
+#endif
 
 static void CreateTexture(unsigned int* pID, int width, int height, const unsigned char* bits)
 {
@@ -267,7 +270,9 @@ static void CreateDotTexture(unsigned int *pDotTexture)
 	free(data);
 }
 
+#ifdef WIN32
 static int UseBufferRegions = -1;
+#endif
 
 void InitGL(const BoardData *bd)
 {
@@ -317,7 +322,7 @@ void InitGL(const BoardData *bd)
 			glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
 		CreateDotTexture(&bd3d->dotTexture);
-
+#ifdef WIN32
 		if (UseBufferRegions == -1)
 			UseBufferRegions = wglBufferInitialize();
 
@@ -326,6 +331,7 @@ void InitGL(const BoardData *bd)
 			bd3d->wglBuffer = CreateBufferRegion(WGL_BACK_COLOR_BUFFER_BIT_ARB | WGL_DEPTH_BUFFER_BIT_ARB);
 			bd3d->fBuffers = (bd->bd3d->wglBuffer != NULL);
 		}
+#endif
 	}
 }
 
@@ -433,7 +439,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		g_print("Texture %s not in texture info file\n", file);
 }
 
-void LoadTextureInfo()
+void LoadTextureInfo(void)
 {
 	FILE* fp;
 	char *szFile;
@@ -2463,7 +2469,7 @@ extern gboolean display_is_2d (const renderdata *prd)
 }
 
 void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
-void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
+void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
 
 extern void Draw3d(const BoardData* bd)
 {	/* Render board: quick drawing, standard or 2 passes for shadows */
@@ -2477,6 +2483,7 @@ extern void Draw3d(const BoardData* bd)
 		}
 		numRestrictFrames = 0;
 	}
+#ifdef WIN32
 	else if (bd->bd3d->fBuffers)
 	{
 		if (bd->bd3d->fBasePreRendered)
@@ -2492,6 +2499,7 @@ extern void Draw3d(const BoardData* bd)
 		else
 			drawBoardTop(bd, bd->bd3d, bd->rd);
 	}
+#endif
 	else
 	{
 		if (bd->rd->showShadows)

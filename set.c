@@ -716,7 +716,7 @@ extern void CommandSetThreads( char *sz )
 
 extern void CommandSetVsync3d( char * sz )
 {
-#if USE_BOARD3D
+#if defined(WIN32) && USE_BOARD3D
 	SetToggle( "vsync", &fSync, sz, _("Set vsync on."), _("Set vsync off.") );
 	if (setVSync(fSync) == FALSE)
 	{
@@ -731,7 +731,7 @@ extern void CommandSetVsync3d( char * sz )
 	}
 	fSync = (fSync != 0) ? 1 : 0;	/* Set to 1 or 0, (-1 == not set) */
 #else
-	outputl("This function is for the 3d board only");
+	outputl(_("This function is for the MS Windows 3d board only"));
 #endif
 }
 

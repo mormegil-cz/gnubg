@@ -3,6 +3,8 @@ extern void setupFlag(BoardData3d *bd3d);
 extern void setupDicePaths(const BoardData* bd, Path dicePaths[2], float diceMovingPos[2][3], DiceRotation diceRotation[2]);
 extern void waveFlag(float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3], float wag);
 extern GdkGLConfig *getGlConfig(void);
+extern void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
+extern void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
 
 /* Helper functions in misc3d */
 void cylinder(float radius, float height, unsigned int accuracy, const Texture* texture);

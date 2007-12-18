@@ -174,8 +174,9 @@ struct _BoardData3d
 	int fBuffers;
 
 	float ***boardPoints;	/* Used for rounded corners */
-
+#ifdef WIN32
 	HANDLE wglBuffer;
+#endif
 
 	/* Textures */
 #define MAX_TEXTURES 10

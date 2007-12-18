@@ -90,7 +90,7 @@ extern void draw_shadow_volume_extruded_edges(/*lint -e{818}*/Occluder* pOcc, co
 
 int renderingBase = FALSE;
 
-void DrawShadows(const BoardData3d* bd3d)
+static void DrawShadows(const BoardData3d* bd3d)
 {
 	int i;
 	if (renderingBase)

@@ -24,7 +24,9 @@
 #include "config.h"
 #include "inc3d.h"
 #include "boardpos.h"
+#ifdef WIN32
 #include "wglbuffer.h"
+#endif
 #include "misc3d.h"
 
 /* Used to calculate correct viewarea for board/fov angles */
@@ -3691,7 +3693,7 @@ void RestrictiveDrawFlag(const BoardData* bd)
 	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
 }
 
-static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+static void drawBoardBase(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	drawTable(bd3d, prd);
 
@@ -3702,8 +3704,9 @@ static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const re
 		tidyEdges(prd);
 }
 
-void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+extern void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
+/* bd3d cannot be const here since we modify it in drawFlag) */
 	if (prd->fLabels && prd->fDynamicLabels)
 		drawNumbers(bd);
 	if (prd->showMoveIndicator)
@@ -3736,7 +3739,7 @@ void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 }
 
 extern int renderingBase;
-void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+extern void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	if (bd->rd->showShadows)
 	{
@@ -3746,7 +3749,8 @@ void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const rende
 	}
 	else
 		drawBoardBase(bd, bd3d, prd);
-
+#ifdef WIN32
 	SaveBufferRegion(bd3d->wglBuffer, 0, 0, bd3d->drawing_area3d->allocation.width, bd3d->drawing_area3d->allocation.height);
+#endif
 }
 

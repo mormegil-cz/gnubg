@@ -84,12 +84,13 @@ static void realize_3d(GtkWidget *widget, void* data)
 	preDraw3d(bd, bd->bd3d, bd->rd);
 	/* Make sure viewing area is correct (in preview) */
 	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
-
+#ifdef WIN32
 	if (fResetSync)
 	{
 		fResetSync = FALSE;
 		(void)setVSync(fSync);
 	}
+#endif
 
 	gdk_gl_drawable_gl_end(gldrawable);
 }
