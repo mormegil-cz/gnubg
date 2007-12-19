@@ -1,3 +1,7 @@
+Wed Dec 19 11:06:45 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* lib/cache.c: only lock one level
+
 Wed Dec 19 10:32:27 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, util.c, board3d/drawboard3d.c, board3d/misc3d.h,
