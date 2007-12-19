@@ -23,7 +23,7 @@ void QuarterCylinderSplayedRev(float radius, float len, unsigned int accuracy, c
 void drawCornerEigth(float ** const *boardPoints, float radius, unsigned int accuracy);
 void calculateEigthPoints(float ****boardPoints, float radius, unsigned int accuracy);
 void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
-void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
+void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
 
 /* Other functions */
 void initPath(Path* p, const float start[3]);

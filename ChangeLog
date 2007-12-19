@@ -1,4 +1,10 @@
+Wed Dec 19 10:32:27 CET 2007 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, util.c, board3d/drawboard3d.c, board3d/misc3d.h,
+	lib/cache.c: small changes to previous
+
 Tue Dec 18 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
 	* Code changes so -ansi -pedantic (just about) works for gcc on windows.
 
 Tue Dec 18 14:14:10 CET 2007 Christian Anthon <anthon@kiku.dk>

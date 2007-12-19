@@ -98,7 +98,7 @@ gnubg_SOURCES = \
 		speed.c \
 		speed.h \
 		text.c \
-		timer.c
+		timer.c \
 		util.h \
 		util.c 
 

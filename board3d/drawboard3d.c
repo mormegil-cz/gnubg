@@ -3697,7 +3697,7 @@ void RestrictiveDrawFlag(const BoardData* bd)
 	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
 }
 
-static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+static void drawBoardBase(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	drawTable(bd3d, prd);
 
@@ -3742,7 +3742,7 @@ void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 }
 
 extern int renderingBase;
-extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
+extern void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 {
 	if (bd->rd->showShadows)
 	{
