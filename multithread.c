@@ -269,7 +269,7 @@ static void MT_CloseThreads(void)
 
 static void MT_TaskDone(Task *pt)
 {
-    (void)MT_SafeInc(&td.doneTasks);
+    MT_SafeInc(&td.doneTasks);
 #ifndef GLIB_THREADS
 	if (td.doneTasks == td.totalTasks)
 		SetEvent(td.alldone);
@@ -358,7 +358,7 @@ AnalyzeDoubleDecison:
             g_usleep(1000000);
             break;
         case TT_CLOSE:
-			(void)MT_SafeInc(&td.result);
+			MT_SafeInc(&td.result);
             alive = FALSE;
             break;
         }
@@ -403,7 +403,7 @@ MT_WorkerThreadFunction(void *id)
 	int *pID = (int*)id;
     TLSSetValue(td.tlsItem, *pID);
     free(pID);
-	(void)MT_SafeInc(&td.result);
+	MT_SafeInc(&td.result);
     MT_TaskDone(NULL);    /* Thread created */
     do
     {
@@ -607,10 +607,10 @@ extern int MT_GetThreadID(void)
 
 extern void MT_Lock(int *lock)
 {
-    while (MT_SafeInc(lock) != 1)
+    while (MT_SafeIncCheck(lock))
     {
         WaitForManualEvent(td.lockContention);
-        if (MT_SafeDec(lock))
+        if (MT_SafeDecCheck(lock))
         {    /* Found something that's cleared */
             SetManualEvent(td.contentionCleared);
             ResetManualEvent(td.lockContention);
@@ -624,7 +624,7 @@ extern void MT_Lock(int *lock)
 
 extern void MT_Unlock(int *lock)
 {
-    if (!MT_SafeDec(lock))
+    if (!MT_SafeDecCheck(lock))
     {    /* Clear contention */
         ResetManualEvent(td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
         SetManualEvent(td.lockContention);	/* Release any waiting threads */
@@ -657,7 +657,7 @@ extern void MT_SyncStart(void)
 	static int count = 0;
 
 	/* Wait for all threads to get here */
-	if (MT_SafeInc(&count) == (int)numThreads)
+	if (MT_SafeIncValue(&count) == (int)numThreads)
 	{
 		count--;
 		start = get_time();
@@ -666,7 +666,7 @@ extern void MT_SyncStart(void)
 	else
 	{
 		WaitForManualEvent(td.syncStart);
-		if (MT_SafeDec(&count))
+		if (MT_SafeDecCheck(&count))
 			ResetManualEvent(td.syncStart);
 	}
 }
@@ -677,7 +677,7 @@ extern double MT_SyncEnd(void)
 	double now;
 
 	/* Wait for all threads to get here */
-	if (MT_SafeInc(&count) == (int)numThreads)
+	if (MT_SafeIncValue(&count) == (int)numThreads)
 	{
 		now = get_time();
 		count--;
@@ -687,7 +687,7 @@ extern double MT_SyncEnd(void)
 	else
 	{
 		WaitForManualEvent(td.syncEnd);
-		if (MT_SafeDec(&count))
+		if (MT_SafeDecCheck(&count))
 			ResetManualEvent(td.syncEnd);
 		return 0;
 	}

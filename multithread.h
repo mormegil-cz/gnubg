@@ -56,20 +56,26 @@ extern void MT_SyncStart(void);
 extern double MT_SyncEnd(void);
 extern void MT_Exclusive(void);
 #ifdef GLIB_THREADS
-  #define MT_SafeInc(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
-  #define MT_SafeAdd(x, y) (g_atomic_int_exchange_and_add(x, y) + y)
-  #define MT_SafeDec(x) (g_atomic_int_dec_and_test(x) == TRUE)
+  #define MT_SafeInc(x) g_atomic_int_exchange_and_add(x, 1)
+  #define MT_SafeIncValue(x) (g_atomic_int_exchange_and_add(x, 1) + 1)
+  #define MT_SafeIncCheck(x) (g_atomic_int_exchange_and_add(x, 1))
+  #define MT_SafeAdd(x, y) g_atomic_int_exchange_and_add(x, y)
+  #define MT_SafeDec(x) g_atomic_int_add(x, 1)
 #else
   #define MT_SafeInc(x) InterlockedIncrement((long*)x)
+  #define MT_SafeIncValue(x) InterlockedIncrement((long*)x)
+  #define MT_SafeIncCheck(x) (InterlockedIncrement((long*)x) > 1)
   #define MT_SafeAdd(x, y) InterlockedExchangeAdd((long*)x, y)
-  #define MT_SafeDec(x) (InterlockedDecrement((long*)x) == 0)
+  #define MT_SafeDec(x) InterlockedDecrement((long*)x)
+  #define MT_SafeDecCheck(x) (InterlockedDecrement((long*)x) == 0)
 #endif
 
 #else /*USE_MULTITHREAD*/
 #define MT_SafeInc(x) (++(*x))
+#define MT_SafeIncValue(x) (++(*x))
+#define MT_SafeIncCheck(x) ((*x)++)
 #define MT_SafeAdd(x, y) ((*x) += y)
-#define MT_SafeDec(x) (--(*x)) == 0)
-#define MT_Lock(x) void
-#define MT_UnLock(x) void
+#define MT_SafeDec(x) (--(*x))
+#define MT_SafeDecCheck(x) ((--(*x)) == 0)
 #define MT_GetThreadID(x) 0
 #endif

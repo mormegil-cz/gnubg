@@ -36,7 +36,7 @@
 
 static void cache_unlock(volatile evalCache* pc, volatile unsigned long lock)
 {
-	(void)MT_SafeDec(&pc->locks[lock]);
+	MT_SafeDec(&pc->locks[lock]);
 }
 
 static int cache_addlock(volatile evalCache* pc, volatile unsigned long lock)
