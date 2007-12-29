@@ -65,7 +65,7 @@ char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
 
 
 static void
-setGammonProb(TanBoard anBoard, int bp0, int bp1, float* g0, float* g1)
+setGammonProb(const TanBoard anBoard, int bp0, int bp1, float* g0, float* g1)
 {
   int i;
   unsigned short int prob[32];
@@ -274,7 +274,7 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)() ) {
 }
 
 
-static void ReadBearoffFile(bearoffcontext *pbc, unsigned int offset, unsigned char *buf, unsigned int nBytes)
+static void ReadBearoffFile(const bearoffcontext *pbc, unsigned int offset, unsigned char *buf, unsigned int nBytes)
 {
 #if USE_MULTITHREAD
 	MT_Exclusive();
@@ -302,10 +302,10 @@ static void ReadBearoffFile(bearoffcontext *pbc, unsigned int offset, unsigned c
  */
 
 static int
-ReadTwoSidedBearoff ( bearoffcontext *pbc,
+ReadTwoSidedBearoff ( const bearoffcontext *pbc,
                       const unsigned int iPos,
-                      float ar[ 4 ], unsigned short int aus[ 4 ] ) {
-
+                      float ar[ 4 ], unsigned short int aus[ 4 ] )
+{
   int k = ( pbc->fCubeful ) ? 4 : 1;
   int i;
   unsigned char ac[ 8 ];
@@ -320,10 +320,7 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
 		ReadBearoffFile(pbc, 40 + 2 * iPos * k, ac, k * 2);
       pc = ac;
     }
-
     /* add to cache */
-
-    
   }
 
   for ( i = 0; i < k; ++i ) {
@@ -334,7 +331,7 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
       ar[ i ] = us / 32767.5f - 1.0f;
   }      
 
-  ++pbc->nReads;
+  ++((bearoffcontext *)pbc)->nReads;	/* nReads only used for stats info */
 
   return 0;
 
@@ -389,7 +386,7 @@ boardNr ( const int anBoard[], const int nDistance,
  */
 
 static int
-ReadExactBearoff ( bearoffcontext *pbc, 
+ReadExactBearoff ( const bearoffcontext *pbc, 
                    const unsigned int iPos,
                    float ar[ 4 ], unsigned short int aus[ 4 ] ) {
 
@@ -454,14 +451,14 @@ ReadExactBearoff ( bearoffcontext *pbc,
 
   }
   
-  ++pbc->nReads;
+  ++((bearoffcontext *)pbc)->nReads;	/* nReads only used for stats info */
 
   return 0;
 
 }
 
 extern int
-BearoffCubeful ( bearoffcontext *pbc,
+BearoffCubeful ( const bearoffcontext *pbc,
                  const unsigned int iPos,
                  float ar[ 4 ], unsigned short int aus[ 4 ] ) {
 
@@ -495,8 +492,8 @@ BearoffCubeful ( bearoffcontext *pbc,
 
 
 static int
-BearoffEvalTwoSided ( bearoffcontext *pbc, 
-                      TanBoard anBoard, float arOutput[] ) {
+BearoffEvalTwoSided ( const bearoffcontext *pbc, 
+                      const TanBoard anBoard, float arOutput[] ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -516,7 +513,7 @@ BearoffEvalTwoSided ( bearoffcontext *pbc,
 
 
 static int
-ReadHypergammon( bearoffcontext *pbc,
+ReadHypergammon( const bearoffcontext *pbc,
                  const unsigned int iPos,
                  float arOutput[ NUM_OUTPUTS ],
                  float arEquity[ 4 ] ) {
@@ -548,7 +545,7 @@ ReadHypergammon( bearoffcontext *pbc,
       arEquity[ i ] = ( us / 16777215.0f - 0.5f ) * 6.0f;
     }
 
-  ++pbc->nReads;
+  ++((bearoffcontext *)pbc)->nReads;	/* nReads only used for stats info */
 
   return 0;
 
@@ -556,8 +553,8 @@ ReadHypergammon( bearoffcontext *pbc,
 
 
 static int
-BearoffEvalOneSided ( bearoffcontext *pbc, 
-                      TanBoard anBoard, float arOutput[] ) {
+BearoffEvalOneSided ( const bearoffcontext *pbc, 
+                      const TanBoard anBoard, float arOutput[] ) {
 
   int i, j;
   float aarProb[ 2 ][ 32 ];
@@ -643,7 +640,7 @@ BearoffEvalOneSided ( bearoffcontext *pbc,
 
 
 extern int
-BearoffHyper( bearoffcontext *pbc,
+BearoffHyper( const bearoffcontext *pbc,
               const unsigned int iPos,
               float arOutput[], float arEquity[] ) {
 
@@ -653,8 +650,8 @@ BearoffHyper( bearoffcontext *pbc,
 
 
 static int
-BearoffEvalHypergammon ( bearoffcontext *pbc, 
-                         TanBoard anBoard, float arOutput[] ) {
+BearoffEvalHypergammon ( const bearoffcontext *pbc, 
+                         const TanBoard anBoard, float arOutput[] ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -667,7 +664,7 @@ BearoffEvalHypergammon ( bearoffcontext *pbc,
 
 
 extern int
-BearoffEval ( bearoffcontext *pbc, TanBoard anBoard, float arOutput[] ) {
+BearoffEval ( const bearoffcontext *pbc, const TanBoard anBoard, float arOutput[] ) {
 
   if (!pbc)
     return 0;
@@ -706,7 +703,7 @@ BearoffEval ( bearoffcontext *pbc, TanBoard anBoard, float arOutput[] ) {
 }
 
 extern void
-BearoffStatus ( bearoffcontext *pbc, char *sz ) {
+BearoffStatus ( const bearoffcontext *pbc, char *sz ) {
 
   if ( ! pbc )
     return;
@@ -787,7 +784,7 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
 
 
 static int
-BearoffDumpTwoSided ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
+BearoffDumpTwoSided ( const bearoffcontext *pbc, const TanBoard anBoard, char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -828,7 +825,7 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 
 
 static int
-BearoffDumpOneSided ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
+BearoffDumpOneSided ( const bearoffcontext *pbc, const TanBoard anBoard, char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -961,7 +958,7 @@ BearoffDumpOneSided ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 
 
 static int
-BearoffDumpHyper( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
+BearoffDumpHyper( const bearoffcontext *pbc, const TanBoard anBoard, char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
   int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
@@ -994,7 +991,7 @@ BearoffDumpHyper( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
 }
 
 extern int
-BearoffDump ( bearoffcontext *pbc, TanBoard anBoard, char *sz ) {
+BearoffDump ( const bearoffcontext *pbc, const TanBoard anBoard, char *sz ) {
 
   switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
@@ -1173,21 +1170,23 @@ BearoffAlloc( void ) {
 
 extern bearoffcontext *
 BearoffInit ( const char *szFilename,
-              const int bo, void (*p)() ) {
-
+              const int bo, void (*p)() )
+{
   bearoffcontext *pbc;
   char sz[ 41 ];
   int nSize = -1;
   int iOffset = 0;
 
-  if ( bo & BO_HEURISTIC ) {
-    
-    if ( ! ( pbc = BearoffAlloc() ) ) {
-      /* malloc failed */
-      perror ( "bearoffcontext" );
-      return NULL;
-    }
+  if ( ! ( pbc = BearoffAlloc() ) ) {
+    /* malloc failed */
+    perror ( "bearoffcontext" );
+    return NULL;
+  }
 
+  pbc->nReads = 0;
+
+  if ( bo & BO_HEURISTIC )
+  {
     pbc->bc = BEAROFF_GNUBG;
     pbc->bt = BEAROFF_ONESIDED;
     pbc->fInMemory = TRUE;
@@ -1198,7 +1197,6 @@ BearoffInit ( const char *szFilename,
     pbc->fGammon = FALSE;
     pbc->fND = FALSE;
     pbc->fCubeful = FALSE;
-    pbc->nReads = 0;
     pbc->fHeuristic = TRUE;
     pbc->fMalloc = TRUE;
     pbc->p = HeuristicDatabase ( p );
@@ -1216,12 +1214,6 @@ BearoffInit ( const char *szFilename,
   /*
    * Allocate memory for bearoff context
    */
-
-  if ( ! ( pbc = BearoffAlloc() ) ) {
-    /* malloc failed */
-    perror ( "bearoffcontext" );
-    return NULL;
-  }
 
   pbc->fInMemory = bo & BO_IN_MEMORY;
 
@@ -1385,7 +1377,6 @@ BearoffInit ( const char *szFilename,
       pbc->fGammon = FALSE;
       pbc->fND = FALSE;
       pbc->fCubeful = TRUE;
-      pbc->nReads = 0;
       pbc->fHeuristic = FALSE;
       pbc->fMalloc = FALSE;
       pbc->p = NULL;
@@ -1432,17 +1423,10 @@ BearoffInit ( const char *szFilename,
       return NULL;
 
     }
-    
     close ( pbc->h );
     pbc->h = -1;
-    
   }
-
-
-  pbc->nReads = 0;
-  
   return pbc;
-
 }
 
 
@@ -1467,7 +1451,7 @@ fnd ( const float x, const float mu, const float sigma  ) {
 
 
 static int
-ReadBearoffOneSidedND ( bearoffcontext *pbc, 
+ReadBearoffOneSidedND ( const bearoffcontext *pbc, 
                         const unsigned int nPosID,
                         float arProb[ 32 ], float arGammonProb[ 32 ],
                         float *ar,
@@ -1506,7 +1490,7 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
   if ( ar )
     memcpy ( ar, arx, 16 );
 
-  ++pbc->nReads;
+  ++((bearoffcontext *)pbc)->nReads;	/* nReads only used for stats info */
 
   return 0;
 
@@ -1573,7 +1557,7 @@ CopyBytes ( unsigned short int aus[ 64 ],
 
 
 static unsigned short int *
-GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const unsigned int nPosID )
+GetDistCompressed ( unsigned short int aus[ 64 ], const bearoffcontext *pbc, const unsigned int nPosID )
 {
   unsigned char *puch;
   unsigned char ac[ 128 ];
@@ -1650,7 +1634,7 @@ GetDistCompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const uns
 
 
 static unsigned short int *
-GetDistUncompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const unsigned int nPosID ) {
+GetDistUncompressed ( unsigned short int aus[ 64 ], const bearoffcontext *pbc, const unsigned int nPosID ) {
 
   unsigned char ac[ 128 ];
   unsigned char *puch;
@@ -1679,12 +1663,12 @@ GetDistUncompressed ( unsigned short int aus[ 64 ], bearoffcontext *pbc, const u
 
 
 static int
-ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
+ReadBearoffOneSidedExact ( const bearoffcontext *pbc, const unsigned int nPosID,
                            float arProb[ 32 ], float arGammonProb[ 32 ],
                            float ar[ 4 ],
                            unsigned short int ausProb[ 32 ], 
-                           unsigned short int ausGammonProb[ 32 ] ) {
-
+                           unsigned short int ausGammonProb[ 32 ] )
+{
   unsigned short int aus[ 64 ];
   unsigned short int *pus = NULL;
 
@@ -1706,15 +1690,13 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
   AssignOneSided ( arProb, arGammonProb, ar, ausProb, ausGammonProb,
                    pus, pus+32 );
 
-  ++pbc->nReads;
-
+  ++((bearoffcontext *)pbc)->nReads;	/* nReads only used for stats info */
 
   return 0;
-
 }
 
 extern int
-BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
+BearoffDist ( const bearoffcontext *pbc, const unsigned int nPosID,
               float arProb[ 32 ], float arGammonProb[ 32 ],
               float ar[ 4 ],
               unsigned short int ausProb[ 32 ], 
@@ -1745,7 +1727,7 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
 
 
 extern int
-isBearoff ( bearoffcontext *pbc, TanBoard anBoard ) {
+isBearoff ( const bearoffcontext *pbc, const TanBoard anBoard ) {
 
   int nOppBack = -1, nBack = -1;
   int n = 0, nOpp = 0;

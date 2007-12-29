@@ -835,7 +835,7 @@ bgProb ( const int anBoard[ 25 ],
  */
 
 extern void
-raceProbs ( TanBoard anBoard, const int nGames,
+raceProbs ( const TanBoard anBoard, const int nGames,
             float arOutput[ NUM_OUTPUTS ],
             float arMu[ 2 ] ) {
   

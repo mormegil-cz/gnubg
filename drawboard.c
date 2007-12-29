@@ -53,7 +53,7 @@ int fClockwise = FALSE; /* Player 1 moves clockwise */
  *
  */
 
-static char *DrawBoardStd( char *sz, TanBoard anBoard, int fRoll,
+static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
                            char *asz[], char *szMatchID, 
                            int nChequers ) {
 
@@ -73,14 +73,14 @@ static char *DrawBoardStd( char *sz, TanBoard anBoard, int fRoll,
     pch = strchr ( pch, 0 );
 
     if( fRoll )
-        strcpy( pch, PositionID( anBoard ) );
+        strcpy( pch, PositionID( (ConstTanBoard)anBoard ) );
     else {
         for( x = 0; x < 25; x++ ) {
             an[ 0 ][ x ] = anBoard[ 1 ][ x ];
             an[ 1 ][ x ] = anBoard[ 0 ][ x ];
         }
         
-        strcpy( pch, PositionID( an ) );
+        strcpy( pch, PositionID( (ConstTanBoard)an ) );
     }
     
     pch += 14;
@@ -288,7 +288,7 @@ static char *DrawBoardStd( char *sz, TanBoard anBoard, int fRoll,
  *
  */
 
-static char *DrawBoardCls( char *sz, TanBoard anBoard, int fRoll,
+static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
                            char *asz[], char *szMatchID,
                            int nChequers) {
 
@@ -308,14 +308,14 @@ static char *DrawBoardCls( char *sz, TanBoard anBoard, int fRoll,
     pch = strchr ( pch, 0 );
 
     if( fRoll )
-        strcpy( pch, PositionID( anBoard ) );
+        strcpy( pch, PositionID( (ConstTanBoard)anBoard ) );
     else {
         for( x = 0; x < 25; x++ ) {
             an[ 0 ][ x ] = anBoard[ 1 ][ x ];
             an[ 1 ][ x ] = anBoard[ 0 ][ x ];
         }
         
-        strcpy( pch, PositionID( an ) );
+        strcpy( pch, PositionID( (ConstTanBoard)an ) );
     }
     
     pch += 14;
@@ -505,7 +505,7 @@ static char *DrawBoardCls( char *sz, TanBoard anBoard, int fRoll,
     return sz;
 }
 
-extern char *DrawBoard( char *sz, TanBoard anBoard, int fRoll,
+extern char *DrawBoard( char *sz, const TanBoard anBoard, int fRoll,
                         char *asz[], char *szMatchID, int nChequers ) {
     if( fClockwise == FALSE ) 
         return ( DrawBoardStd( sz, anBoard, fRoll, asz, 
@@ -597,7 +597,7 @@ extern void CanonicalMoveOrder( int an[] ) {
     qsort( an, i, sizeof( int ) << 1, CompareMoves );
 }
 
-extern char *FormatMove( char *sz, ARRAY_CONST TanBoard anBoard, int anMove[ 8 ] ) {
+extern char *FormatMove( char *sz, const TanBoard anBoard, int anMove[ 8 ] ) {
 
     char *pch = sz;
     int aanMove[ 4 ][ 4 ], *pnSource[ 4 ], *pnDest[ 4 ], i, j;

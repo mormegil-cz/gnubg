@@ -23,11 +23,6 @@
 #define _GNUBG_TYPES_H_
 
 typedef int TanBoard[2][25];
-
-#ifdef USE_CONST_ARRAY
-#define ARRAY_CONST const
-#else
-#define ARRAY_CONST
-#endif
+typedef const int (*ConstTanBoard)[25];
 
 #endif

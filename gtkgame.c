@@ -996,7 +996,7 @@ extern void SetAnnotation( moverecord *pmr ) {
 
             /* chequer play skill */
 	    strcpy( sz, _("Moved ") );
-	    FormatMove( sz + strlen(_("Moved ")), ms.anBoard, pmr->n.anMove );
+	    FormatMove( sz + strlen(_("Moved ")), msBoard(), pmr->n.anMove );
 
 #if ANALYSIS_HORIZONTAL
 	    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
@@ -1688,7 +1688,7 @@ static void CopyAsIDs(gpointer p, guint n, GtkWidget * pw)
 	char buffer[1024];
 
 	sprintf(buffer, "%s %s\n%s %s\n", _("Position ID:"),
-		PositionID(ms.anBoard), _("Match ID:"),
+		PositionID(msBoard()), _("Match ID:"),
 		MatchIDFromMatchState(&ms));
 
 	GTKTextToClipboard(buffer);
@@ -1754,7 +1754,7 @@ extern void Undo(void)
 
 	ShowBoard();
 
-        UpdateTheoryData(BOARD( pwBoard )->board_data, TT_RETURNHITS, ms.anBoard);
+        UpdateTheoryData(BOARD( pwBoard )->board_data, TT_RETURNHITS, msBoard());
 }
 
 #if USE_BOARD3D
@@ -1961,7 +1961,7 @@ static void FinishMove(gpointer p, guint n, GtkWidget * pw)
 		/* no valid move */
 		return;
 
-	UserCommand(FormatMove(sz, ms.anBoard, anMove));
+	UserCommand(FormatMove(sz, msBoard(), anMove));
 
 }
 

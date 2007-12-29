@@ -38,7 +38,7 @@
 #define UNUSED_PARAM __attribute__ ((unused))
 
 static PyObject *
-BoardToPy( TanBoard anBoard )
+BoardToPy( const TanBoard anBoard )
 {
   PyObject* b = PyTuple_New(2);
   PyObject* b0 = PyTuple_New(25);
@@ -449,7 +449,7 @@ PythonBoard( PyObject* self UNUSED_PARAM, PyObject *args ) {
     return Py_None;
   }
 
-  return BoardToPy( ms.anBoard );
+  return BoardToPy( msBoard() );
 }
 
 static PyObject *
@@ -486,7 +486,7 @@ PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
   float arOutput[ 7 ];
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof anBoard );
   GetMatchStateCubeInfo( &ci, &ms );
 
   if ( ! PyArg_ParseTuple( args, "|OOO", 
@@ -531,7 +531,7 @@ PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
   int cp;
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof anBoard );
   
   GetMatchStateCubeInfo( &ci, &ms );
 
@@ -583,7 +583,7 @@ PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
   cubeinfo ci;
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof anBoard );
   memcpy( anDice, ms.anDice, sizeof anDice );
   GetMatchStateCubeInfo( &ci, &ms );
   if ( ! PyArg_ParseTuple( args, "|OOOO", 
@@ -839,7 +839,7 @@ PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
   PyObject *pyBoard = NULL;
   TanBoard anBoard;
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof anBoard );
 
   if ( ! PyArg_ParseTuple( args, "|O:positionid", &pyBoard ) )
     return NULL;
@@ -868,10 +868,10 @@ PythonPositionFromID( PyObject* self UNUSED_PARAM, PyObject *args )
       return NULL;
     }
   } else {
-    memcpy( anBoard, ms.anBoard, sizeof anBoard );
+    memcpy( anBoard, msBoard(), sizeof anBoard );
   }
 
-  return BoardToPy( anBoard );
+  return BoardToPy( (ConstTanBoard)anBoard );
 }
 
 
@@ -882,7 +882,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   TanBoard anBoard;
   unsigned char auch[ 10 ];
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof anBoard );
 
   if ( ! PyArg_ParseTuple( args, "|O!:positionkey", &PyList_Type, &pyBoard ) )
     return NULL;
@@ -933,7 +933,7 @@ PythonPositionFromKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   PositionFromKey( anBoard, auch );
 
-  return BoardToPy( anBoard );
+  return BoardToPy( (ConstTanBoard)anBoard );
 }
 
 
@@ -945,7 +945,7 @@ PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
   int nPoints = 6;
   int anBoard[ 25 ];
 
-  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof anBoard );
 
   if ( ! PyArg_ParseTuple( args, "|Oii:positionbearoff", 
                            &pyBoard, &nPoints, &nChequers ) )

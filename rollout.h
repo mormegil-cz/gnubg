@@ -73,7 +73,7 @@ typedef void
                         void *pUserData );
 
 extern int
-RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
+RolloutGeneral( ConstTanBoard *apBoard, 
                 float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat apStatistics[][2],
@@ -97,7 +97,7 @@ extern int
 GeneralEvaluationR ( float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev[ NUM_ROLLOUT_OUTPUTS ],
                      rolloutstat arsStatistics[ 2 ],
-                     TanBoard anBoard,
+                     const TanBoard anBoard,
                      const cubeinfo* pci, const rolloutcontext* prc,
                      rolloutprogressfunc *pfRolloutProgress,
                      void *pUserData );
@@ -106,7 +106,7 @@ extern int
 GeneralCubeDecision ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       rolloutstat aarsStatistics[ 2 ][ 2 ],
-                      TanBoard anBoard,
+                      const TanBoard anBoard,
                       cubeinfo *pci, evalsetup *pes,
                       rolloutprogressfunc *pfRolloutProgress,
                       void *pUserData );
@@ -116,7 +116,7 @@ extern int
 GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        rolloutstat aarsStatistics[ 2 ][ 2 ],
-                       TanBoard anBoard,
+                       const TanBoard anBoard,
                        cubeinfo *pci, rolloutcontext *prc, evalsetup *pes,
                        rolloutprogressfunc *pfRolloutProgress,
                        void *pUserData );

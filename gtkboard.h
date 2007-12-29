@@ -149,11 +149,11 @@ extern void InitBoardPreview(BoardData *bd);
 extern int animate_player, *animate_move_list, animation_finished;
 
 enum TheoryTypes{TT_PIPCOUNT = 1, TT_EPC = 2, TT_RETURNHITS = 4, TT_KLEINCOUNT = 8};
-void UpdateTheoryData(BoardData* bd, int UpdateTypes, TanBoard points);
+void UpdateTheoryData(BoardData* bd, int UpdateTypes, const TanBoard points);
 
 extern void read_board( BoardData *bd, TanBoard points );
-extern void update_position_id( BoardData *bd, TanBoard points );
-extern void update_pipcount ( BoardData *bd, TanBoard points );
+extern void update_position_id( BoardData *bd, const TanBoard points );
+extern void update_pipcount ( BoardData *bd, const TanBoard points );
 extern void write_board ( BoardData *bd, TanBoard anBoard );
 extern void board_beep( BoardData *bd );
 extern void Confirm( BoardData *bd );

@@ -110,7 +110,7 @@ ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
 
   GetMatchStateCubeInfo ( &ptw->ci, &ms );
 
-  getCurrentGammonRates ( aarRates, arOutput, ms.anBoard, &ptw->ci, &ec );
+  getCurrentGammonRates ( aarRates, arOutput, msBoard(), &ptw->ci, &ec );
 
   /* cube */
 
@@ -599,7 +599,7 @@ PlyClicked( GtkWidget *pw, theorywidget *ptw ) {
   
   ec.nPlies = *pi;
   ProgressStart( _("Evaluating gammon percentages" ) );
-  if ( getCurrentGammonRates ( aarRates, arOutput, ms.anBoard, 
+  if ( getCurrentGammonRates ( aarRates, arOutput, msBoard(), 
                                &ci, &ec ) < 0 ) {
     ProgressEnd();
     fInterrupt = FALSE;

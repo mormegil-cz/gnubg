@@ -33,7 +33,7 @@ struct GammonProbs {
 };
 
 extern struct GammonProbs*
-getBearoffGammonProbs(int b[6]);
+getBearoffGammonProbs(const int b[6]);
 
 extern long*
 getRaceBGprobs(int board[6]);

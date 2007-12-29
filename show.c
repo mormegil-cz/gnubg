@@ -500,7 +500,7 @@ extern void CommandShowBoard( char *sz ) {
                 anChequers[ ms.bgv ] );
     else
 #endif
-        outputl( DrawBoard( szOut, an, TRUE, ap, 
+        outputl( DrawBoard( szOut, (ConstTanBoard)an, TRUE, ap, 
                             MatchIDFromMatchState ( &ms ),
                             anChequers[ ms.bgv ] ) );
 }
@@ -534,7 +534,7 @@ void CommandShowFullBoard( char *sz ) {
                   anChequers[ ms.bgv ] );
     else
 #endif
-        outputl( DrawBoard( szOut, an, TRUE, apch, 
+        outputl( DrawBoard( szOut, (ConstTanBoard)an, TRUE, apch, 
                             MatchIDFromMatchState ( &ms ), 
                             anChequers[ ms.bgv ] ) );
 }
@@ -812,7 +812,7 @@ extern void CommandShowPipCount( char *sz ) {
     if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
     
-    PipCount( an, anPips );
+    PipCount( (ConstTanBoard)an, anPips );
     
     outputf( _("The pip counts are: %s %d, %s %d.\n"), ap[ ms.fMove ].szName,
 	    anPips[ 1 ], ap[ !ms.fMove ].szName, anPips[ 0 ] );
@@ -1101,7 +1101,7 @@ extern void show_kleinman( TanBoard an, char *sz)
 	double rK;
 	int diff, sum;
 
-	PipCount(an, anPips);
+	PipCount((ConstTanBoard)an, anPips);
 	sprintf(sz, _("Leader Pip Count : %d\n"), anPips[1]);
 	sprintf(strchr(sz, 0), _("Trailer Pip Count: %d\n\n"), anPips[0]);
 
@@ -1161,7 +1161,7 @@ extern void show_thorp(TanBoard an, char *sz)
 	int nLeader, nTrailer;
 	float adjusted;
 
-	ThorpCount(an, &nLeader, &adjusted, &nTrailer);
+	ThorpCount((ConstTanBoard)an, &nLeader, &adjusted, &nTrailer);
 	sprintf(sz, _("Thorp Count Leader            : %d\n"), nLeader);
 	sprintf(strchr(sz,0), _("Thorp Count Leader(+1/10)    L: %.1f\n"), adjusted);
 	sprintf(strchr(sz,0), _("Thorp Count Trailer          T: %d\n\n"), nTrailer);
@@ -1205,7 +1205,7 @@ extern void show_8912(TanBoard anBoard, char *sz)
 {
 	unsigned int anPips[2];
 	float ahead;
-	PipCount(anBoard, anPips);
+	PipCount((ConstTanBoard)anBoard, anPips);
 	sprintf(sz, _("Leader Pip Count : %d\n"), anPips[1]);
 	sprintf(strchr(sz,0), _("Trailer Pip Count: %d\n\n"), anPips[0]);
 	ahead = ((float)anPips[0] - (float)anPips[1]) / (float)anPips[1] * 100.0f;
@@ -1251,7 +1251,7 @@ extern void show_keith( TanBoard an, char *sz)
 	int pn[2];
 	float fL;
 
-	KeithCount ( an, pn);
+	KeithCount ( (ConstTanBoard)an, pn);
 
 	fL = (float) pn[1]*8.0f /7.0f;
 	sprintf(sz, _("Keith Count Leader            : %d\n"), pn[1]);
@@ -1411,10 +1411,10 @@ CommandShowOneSidedRollout ( char *sz ) {
   outputf ( _("One sided rollout with %d trials (%s on roll):\n"), 
             nTrials, ap[ ms.fMove ].szName );
 
-  raceProbs ( anBoard, nTrials, ar, arMu );
+  raceProbs ( (ConstTanBoard)anBoard, nTrials, ar, arMu );
   outputl ( OutputPercents ( ar, TRUE ) );
 
-  PipCount ( anBoard, anPips );
+  PipCount ( (ConstTanBoard)anBoard, anPips );
   EffectivePipCount( arMu, anPips );
 
 }
@@ -1597,7 +1597,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     /* calculate them based on current position */
 
-    if ( getCurrentGammonRates ( aarRates, arOutput, ms.anBoard, 
+    if ( getCurrentGammonRates ( aarRates, arOutput, msBoard(), 
                                  &ci, &esEvalCube.ec ) < 0 ) 
       return;
 
@@ -2203,11 +2203,11 @@ extern void show_bearoff( TanBoard an, char *szTemp)
         switch( ms.bgv ) {
                 case VARIATION_STANDARD:
                 case VARIATION_NACKGAMMON:
-                        if ( isBearoff( pbcTS, an ) ) {
-                                BearoffDump( pbcTS, an, szTemp );
+                        if ( isBearoff( pbcTS, (ConstTanBoard)an ) ) {
+                                BearoffDump( pbcTS, (ConstTanBoard)an, szTemp );
                         } 
-                        else if ( isBearoff( pbc2, an ) ) {
-                                BearoffDump( pbc2, an, szTemp );
+                        else if ( isBearoff( pbc2, (ConstTanBoard)an ) ) {
+                                BearoffDump( pbc2, (ConstTanBoard)an, szTemp );
                         }
                         else
                                 strcpy(szTemp, _("Position not in any two-sided database\n"));
@@ -2218,8 +2218,8 @@ extern void show_bearoff( TanBoard an, char *szTemp)
                 case VARIATION_HYPERGAMMON_3:
 
                         if ( isBearoff( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], 
-                                                an ) ) {
-                                BearoffDump( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], an, szTemp );
+                                                (ConstTanBoard)an ) ) {
+                                BearoffDump( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], (ConstTanBoard)an, szTemp );
                                 outputl( szTemp );
                         }
 

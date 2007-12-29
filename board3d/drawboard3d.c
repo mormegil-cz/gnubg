@@ -2414,7 +2414,7 @@ void waveFlag(float wag)
 			flag.ctlpoints[i][j][2] = sinf((GLfloat)i + wag) * FLAG_WAG;
 }
 
-NTH_STATIC void drawFlagPick(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+NTH_STATIC void drawFlagPick(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	int s;
 	float v[3];
@@ -2531,7 +2531,7 @@ int BoardPoint3d(const BoardData* bd, const BoardData3d* bd3d, const renderdata*
 
 	if (bd->resigned)
 	{	/* Flag showing - just pick this */
-		drawFlagPick(bd, bd->bd3d, bd->rd);
+		drawFlagPick(bd, bd3d, prd);
 	}
 	else
 	{
@@ -3260,7 +3260,7 @@ NTH_STATIC void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigne
 	glEnable(GL_DEPTH_TEST);
 }
 
-static void drawFlag(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+static void drawFlag(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	float v[4];
 	int isStencil = glIsEnabled(GL_STENCIL_TEST);
@@ -3297,13 +3297,13 @@ static void updateDieOccPos(const BoardData* bd, const BoardData3d* bd3d, Occlud
 		makeInverseRotateMatrixZ(pOcc->invMat, pOcc->rot[2]);
 
 		makeInverseRotateMatrixX(id, pOcc->rot[1]);
-		matrixmult(pOcc->invMat, id);
+		matrixmult(pOcc->invMat, (ConstMatrix)id);
 
 		makeInverseRotateMatrixY(id, pOcc->rot[0]);
-		matrixmult(pOcc->invMat, id);
+		matrixmult(pOcc->invMat, (ConstMatrix)id);
 
 		makeInverseTransposeMatrix(id, pOcc->trans);
-		matrixmult(pOcc->invMat, id);
+		matrixmult(pOcc->invMat, (ConstMatrix)id);
 	}
 	else
 	{
@@ -3317,7 +3317,7 @@ static void updateDieOccPos(const BoardData* bd, const BoardData3d* bd3d, Occlud
 			pOcc->rot[2] = bd3d->dicePos[num][2];
 
 			makeInverseRotateMatrixZ(pOcc->invMat, pOcc->rot[2]);
-			matrixmult(pOcc->invMat, id);
+			matrixmult(pOcc->invMat, (ConstMatrix)id);
 		}
 		else
 		{
@@ -3368,7 +3368,7 @@ void updateMovingPieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 			bd3d->Occluders[LAST_PIECE].rot[1] = -90 * bd3d->rotateMovingPiece * bd->turn;
 			makeInverseTransposeMatrix(id, bd3d->Occluders[LAST_PIECE].trans);
 			makeInverseRotateMatrixX(bd3d->Occluders[LAST_PIECE].invMat, bd3d->Occluders[LAST_PIECE].rot[1]);
-			matrixmult(bd3d->Occluders[LAST_PIECE].invMat, id);
+			matrixmult(bd3d->Occluders[LAST_PIECE].invMat, (ConstMatrix)id);
 		}
 		else
 			makeInverseTransposeMatrix(bd3d->Occluders[LAST_PIECE].invMat, bd3d->Occluders[LAST_PIECE].trans);
@@ -3399,7 +3399,7 @@ void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 					bd3d->Occluders[p].rot[1] = 90;
 				makeInverseTransposeMatrix(id, bd3d->Occluders[p].trans);
 				makeInverseRotateMatrixX(bd3d->Occluders[p].invMat, bd3d->Occluders[p].rot[1]);
-				matrixmult(bd3d->Occluders[p].invMat, id);
+				matrixmult(bd3d->Occluders[p].invMat, (ConstMatrix)id);
 			}
 			else
 			{
@@ -3697,7 +3697,7 @@ void RestrictiveDrawFlag(const BoardData* bd)
 	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
 }
 
-static void drawBoardBase(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	drawTable(bd3d, prd);
 
@@ -3708,7 +3708,7 @@ static void drawBoardBase(const BoardData *bd, BoardData3d *bd3d, const renderda
 		tidyEdges(prd);
 }
 
-void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+void drawBoardTop(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	if (prd->fLabels && prd->fDynamicLabels)
 		drawNumbers(bd);
@@ -3735,19 +3735,19 @@ void drawBoardTop(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
 		drawFlag(bd, bd3d, prd);
 }
 
-void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+void drawBoard(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	drawBoardBase(bd, bd3d, prd);
 	drawBoardTop(bd, bd3d, prd);
 }
 
 extern int renderingBase;
-extern void drawBasePreRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	if (bd->rd->showShadows)
 	{
 		renderingBase = TRUE;
-		shadowDisplay(drawBoardBase, bd, bd->bd3d, bd->rd);
+		shadowDisplay(drawBoardBase, bd, bd3d, prd);
 		renderingBase = FALSE;
 	}
 	else

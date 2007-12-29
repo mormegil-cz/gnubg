@@ -722,7 +722,7 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   RolloutProgressStart( &ci, 2, aarsStatistics, &pes->rc, asz, &p );
 
   if ( GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
-                              pchd->ms.anBoard, &ci, 
+                              (ConstTanBoard)pchd->ms.anBoard, &ci, 
 			      &pes->rc, pes,
                               RolloutProgress, p ) < 0 ) {
     RolloutProgressEnd( &p );
@@ -755,7 +755,7 @@ EvalCube ( cubehintdata *pchd, evalcontext *pec ) {
   
   ProgressStart( _("Considering cube action...") );
 
-  if ( GeneralCubeDecisionE ( aarOutput, pchd->ms.anBoard, &ci, 
+  if ( GeneralCubeDecisionE ( aarOutput, (ConstTanBoard)pchd->ms.anBoard, &ci, 
                               pec, 0 ) < 0 ) {
     ProgressEnd();
     return;

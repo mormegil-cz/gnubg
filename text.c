@@ -81,7 +81,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
     if( pms->anDice[ 0 ] )
       sprintf( sz, 
                _("Rolled %d%d"), pms->anDice[ 0 ], pms->anDice[ 1 ] );
-    else if( !GameStatus( anBoard, pms->bgv ) )
+    else if( !GameStatus( (ConstTanBoard)anBoard, pms->bgv ) )
       strcpy( sz, _("On roll") );
     else
       sz[ 0 ] = 0;
@@ -124,11 +124,11 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
     SwapSides( anBoard );
 	
 
-  fputs ( DrawBoard( szBoard, anBoard, pms->fMove, apch,
+  fputs ( DrawBoard( szBoard, (ConstTanBoard)anBoard, pms->fMove, apch,
                      MatchIDFromMatchState ( pms ), anChequers[ ms.bgv ] ),
           pf);
 
-  PipCount ( anBoard, anPips );
+  PipCount ( (ConstTanBoard)anBoard, anPips );
 
   fprintf ( pf, "Pip counts: O %d, X %d\n\n",
             anPips[ 0 ], anPips[ 1 ] );
@@ -338,7 +338,7 @@ TextPrintCubeAnalysisTable ( GString *gsz,
  */
 
 static void
-TextPrintCubeAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
+TextPrintCubeAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
 
   cubeinfo ci;
 
@@ -413,7 +413,7 @@ TextPrintCubeAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
  */
 
 static void
-TextPrintMoveAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
+TextPrintMoveAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
 
   char szBuf[ 1024 ];
   char sz[ 64 ];
@@ -533,7 +533,7 @@ TextPrintMoveAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
  */
 
 extern void
-TextAnalysis ( GString *gsz, matchstate *pms, moverecord *pmr ) {
+TextAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
 
 
   char sz[ 1024 ];

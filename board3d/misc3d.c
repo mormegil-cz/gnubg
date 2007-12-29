@@ -1786,7 +1786,7 @@ void RestrictiveDrawFrame(const float pos[3], float width, float height, float d
 	}
 }
 
-void RestrictiveRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd)
+void RestrictiveRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	GLint viewport[4];
 	glGetIntegerv (GL_VIEWPORT, viewport);
@@ -1983,7 +1983,7 @@ static int idleAnimate(BoardData3d* bd3d)
 
 			/* Update pip-count mid move */
 			read_board(bd, points);
-			update_pipcount(bd, points);
+			update_pipcount(bd, (ConstTanBoard)points);
 
 			PlaceMovingPieceRotation(bd, bd3d, moveDest, moveStart);
 

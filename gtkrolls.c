@@ -49,7 +49,7 @@ typedef struct _rollswidget {
 
 static void
 add_level ( GtkTreeStore *model, GtkTreeIter *iter,
-            const int n, ARRAY_CONST TanBoard anBoard,
+            const int n, const TanBoard anBoard,
             evalcontext *pec, cubeinfo *pci,
             const gboolean fInvert,
             float arOutput[ NUM_ROLLOUT_OUTPUTS ] ) {
@@ -87,7 +87,7 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
 
       if ( n ) {
 
-        add_level ( model, &child_iter, n - 1, an, pec, &ci, !fInvert, ar );
+        add_level ( model, &child_iter, n - 1, (ConstTanBoard)an, pec, &ci, !fInvert, ar );
 		if (fInterrupt)
 			return;
 
@@ -98,7 +98,7 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
 
         ProgressValueAdd ( 1 );
 
-        if ( GeneralEvaluationE ( ar, an, &ci, pec ) < 0 )
+        if ( GeneralEvaluationE ( ar, (ConstTanBoard)an, &ci, pec ) < 0 )
           return;
 
       }
@@ -195,7 +195,7 @@ static GtkTreeModel *create_model(const int n, evalcontext *pec, const matchstat
 
   ProgressStartValue ( _("Calculating equities" ), j );
 
-  add_level ( model, NULL, n - 1, anBoard, pec, &ci, TRUE, arOutput );
+  add_level ( model, NULL, n - 1, (ConstTanBoard)anBoard, pec, &ci, TRUE, arOutput );
 
   ProgressEnd ();
 

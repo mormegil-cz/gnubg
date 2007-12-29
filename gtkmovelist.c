@@ -226,7 +226,7 @@ if (!psHighlight)
 				dice[1] = pmr->anDice[1];
 			}
 		}
-		GenerateMoves(&ml, ms.anBoard, dice[0], dice[1], FALSE);
+		GenerateMoves(&ml, msBoard(), dice[0], dice[1], FALSE);
 		if (i < ml.cMoves - 1)
 			rankKnown = 0;
 	}
@@ -273,7 +273,7 @@ if (!psHighlight)
     }
 	
 	gtk_list_store_set(store, &iter, ML_COL_MOVE + offset,
-                        FormatMove( sz, ms.anBoard,
+                        FormatMove( sz, msBoard(),
                                     pml->amMoves[ i ].anMove ), -1);
 
 	/* highlight row */

@@ -23,7 +23,7 @@
 #define _OSR_H_
 
 extern void
-raceProbs ( TanBoard anBoard, const int nGames,
+raceProbs ( const TanBoard anBoard, const int nGames,
             float arOutput[ NUM_OUTPUTS ],
             float arMu[ 2 ] );
 

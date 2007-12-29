@@ -515,9 +515,8 @@ static void update_match_id( BoardData *bd )
 }
 
 
-extern void update_position_id( BoardData *bd, TanBoard points )
+extern void update_position_id( BoardData *bd, const TanBoard points )
 {
-
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
@@ -539,7 +538,7 @@ extern char * ReturnHits( TanBoard anBoard )
   for ( i = 0; i < 6; ++i )
     for ( j = 0; j <= i; ++j ) {
 
-      if ( ! ( c = GenerateMoves( &ml, anBoard, i + 1, j + 1, FALSE ) ) )
+      if ( ! ( c = GenerateMoves( &ml, (ConstTanBoard)anBoard, i + 1, j + 1, FALSE ) ) )
         /* no legal moves */
         continue;
       
@@ -588,7 +587,7 @@ extern char * ReturnHits( TanBoard anBoard )
 
 }
 
-extern void update_pipcount ( BoardData *bd, TanBoard points )
+extern void update_pipcount ( BoardData *bd, const TanBoard points )
 {
   unsigned int anPip[ 2 ];
   char *pc;
@@ -660,20 +659,20 @@ int update_move(BoardData *bd)
     int fIncomplete = TRUE, fIllegal = TRUE;
     
     read_board( bd, points );
-    update_position_id( bd, points );
-    update_pipcount ( bd, points );
+    update_position_id( bd, (ConstTanBoard)points );
+    update_pipcount ( bd, (ConstTanBoard)points );
 
     bd->valid_move = NULL;
     
     if( ToolbarIsEditing( pwToolbar ) && bd->playing ) {
 	move = _("(Editing)");
 	fIncomplete = fIllegal = FALSE;
-    } else if( EqualBoards( points, bd->old_board ) ) {
+    } else if( EqualBoards( (ConstTanBoard)points, (ConstTanBoard)bd->old_board ) ) {
         /* no move has been made */
 	move = NULL;
 	fIncomplete = fIllegal = FALSE;
     } else {
-        PositionKey( points, key );
+        PositionKey( (ConstTanBoard)points, key );
 
         for( i = 0; i < bd->move_list.cMoves; i++ )
             if( EqualKeys( bd->move_list.amMoves[ i ].auch, key ) ) {
@@ -681,13 +680,13 @@ int update_move(BoardData *bd)
 		fIncomplete = bd->valid_move->cMoves < bd->move_list.cMaxMoves
 		    || bd->valid_move->cPips < bd->move_list.cMaxPips;
 		fIllegal = FALSE;
-                FormatMove( move = move_buf, bd->old_board,
+                FormatMove( move = move_buf, (ConstTanBoard)bd->old_board,
 			    bd->valid_move->anMove );
                 break;
             }
 
         /* show number of return hits */
-        UpdateTheoryData(bd, TT_RETURNHITS, ms.anBoard);
+        UpdateTheoryData(bd, TT_RETURNHITS, msBoard());
 
         if ( bd->valid_move ) {
           TanBoard anBoard;
@@ -722,7 +721,7 @@ extern void Confirm( BoardData *bd )
     
     read_board( bd, points );
 
-    if( !bd->move_list.cMoves && EqualBoards( points, bd->old_board ) )
+    if( !bd->move_list.cMoves && EqualBoards( (ConstTanBoard)points, (ConstTanBoard)bd->old_board ) )
 	UserCommand( "move" );
     else if( bd->valid_move &&
 	     bd->valid_move->cMoves == bd->move_list.cMaxMoves &&
@@ -853,7 +852,7 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
 		return FALSE;
 
 	/* pip count before move */
-	PipCount( bd->old_board, anPipsBeforeMove );
+	PipCount( (ConstTanBoard)bd->old_board, anPipsBeforeMove );
 	if ( bd->turn < 0 )
 		swap_us( &anPipsBeforeMove[ 0 ], &anPipsBeforeMove[ 1 ] );
 
@@ -1485,8 +1484,8 @@ static void updateBoard(GtkWidget *board, BoardData* bd)
 {
 	TanBoard points;
 	read_board(bd, points);
-	update_position_id(bd, points);
-	update_pipcount(bd, points);
+	update_position_id(bd, (ConstTanBoard)points);
+	update_pipcount(bd, (ConstTanBoard)points);
 
 #if USE_BOARD3D
 	if (display_is_3d(bd->rd))
@@ -1660,7 +1659,7 @@ static int ForcedMove ( TanBoard anBoard, unsigned int anDice[ 2 ] )
 
   movelist ml;
 
-  GenerateMoves ( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+  GenerateMoves ( &ml, (ConstTanBoard)anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
   if ( ml.cMoves == 1 ) {
 
@@ -1687,7 +1686,7 @@ static int GreadyBearoff ( TanBoard anBoard, unsigned int anDice[ 2 ] )
 
   cMoves = ( anDice[ 0 ] == anDice[ 1 ] ) ? 4 : 2;
 
-  GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+  GenerateMoves( &ml, (ConstTanBoard)anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
   for( i = 0; i < ml.cMoves; i++ )
     for( iMove = 0; iMove < cMoves; iMove++ )
@@ -1997,7 +1996,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
              show forced move */
           TanBoard anBoard;
           
-          memcpy ( anBoard, ms.anBoard, sizeof anBoard );
+          memcpy ( anBoard, msBoard(), sizeof anBoard );
 
           bd->drag_colour = bd->turn;
           bd->drag_point = -1;
@@ -2087,7 +2086,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
 				bd->points[ bd->drag_point ] = bd->drag_colour << 1;
 			
 				read_board( bd, points );
-				PositionKey( points, key );
+				PositionKey( (ConstTanBoard)points, key );
 
 				if (!update_move(bd))
 				{	/* Show Move */
@@ -2652,8 +2651,8 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 	gtk_widget_set_sensitive( bd->crawford, bd->crawford_game);
 
 	read_board( bd, bd->old_board );
-	update_position_id( bd, bd->old_board );
-        update_pipcount ( bd, bd->old_board );
+	update_position_id( bd, (ConstTanBoard)bd->old_board );
+	update_pipcount ( bd, (ConstTanBoard)bd->old_board );
     }
 
     update_match_id ( bd );
@@ -2738,7 +2737,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 
     if (bd->diceShown == DICE_ON_BOARD )
 	{
-		GenerateMoves( &bd->move_list, bd->old_board,
+		GenerateMoves( &bd->move_list, (ConstTanBoard)bd->old_board,
 				   bd->diceRoll[ 0 ], bd->diceRoll[ 1 ], TRUE );
 
 		/* bd->move_list contains pointers to static data, so we need to
@@ -3159,7 +3158,7 @@ extern gint game_set( Board *board, TanBoard points, int roll,
     /* Treat a reset of the position to old_board as a no-op while
        in edit mode. */
     if( ToolbarIsEditing( pwToolbar ) &&
-	bd->playing && EqualBoards( bd->old_board, points ) ) {
+	bd->playing && EqualBoards( (ConstTanBoard)bd->old_board, (ConstTanBoard)points ) ) {
 	read_board( bd, old_points );
 	if( bd->turn < 0 )
 	    SwapSides( old_points );
@@ -3583,8 +3582,8 @@ extern void board_edit( BoardData *bd )
 		UserCommand(sz1);
 	}
 
-	if( bd->playing && !EqualBoards( ms.anBoard, points ) ) {
-	    sprintf( sz, "set board %s", PositionID( points ) );
+	if( bd->playing && !EqualBoards( msBoard(), (ConstTanBoard)points ) ) {
+	    sprintf( sz, "set board %s", PositionID( (ConstTanBoard)points ) );
 	    UserCommand( sz );
 	}
 

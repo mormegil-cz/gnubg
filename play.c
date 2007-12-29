@@ -132,7 +132,7 @@ static int
 CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest );
 
 
-static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, TanBoard anBoard, 
+static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
                     const cubeinfo *pci, const evalcontext *pec);
 
 #if USE_GTK
@@ -382,7 +382,7 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 	PlayMove( pms, pmr->n.anMove, pmr->fPlayer );
 	pms->anDice[ 0 ] = pms->anDice[ 1 ] = 0;
 
-	if( ( n = GameStatus( pms->anBoard, pms->bgv ) ) ) {
+	if( ( n = GameStatus( (ConstTanBoard)pms->anBoard, pms->bgv ) ) ) {
 
             if( pms->fJacoby && pms->fCubeOwner == -1 && ! pms->nMatchTo )
               /* gammons do not count on a centred cube during money
@@ -842,7 +842,7 @@ static int NewGame( void ) {
     return 0;
 }
 
-static void ShowAutoMove( TanBoard anBoard, int anMove[ 8 ] ) {
+static void ShowAutoMove( const TanBoard anBoard, int anMove[ 8 ] ) {
 
     char sz[ 40 ];
 
@@ -894,7 +894,7 @@ static int ComputerTurn( void ) {
           float t;
           /* Opponent has rolled the dice and then resigned. We
              want to find out if the resignation is OK after the roll */
-          EvaluateRoll (arOutput, ms.anDice[0], ms.anDice[1], ms.anBoard, &ci,
+          EvaluateRoll (arOutput, ms.anDice[0], ms.anDice[1], msBoard(), &ci,
                         &ecResign );
           /* Swap the equities as evaluation is for other player */
           arOutput[OUTPUT_WIN] = 1 - arOutput[OUTPUT_WIN];
@@ -905,7 +905,7 @@ static int ComputerTurn( void ) {
           arOutput[OUTPUT_WINBACKGAMMON] = arOutput[OUTPUT_LOSEBACKGAMMON];
           arOutput[OUTPUT_LOSEBACKGAMMON] = t;
       } else { 
-          GeneralEvaluationE( arOutput, ms.anBoard, &ci, &ecResign ) ;
+          GeneralEvaluationE( arOutput, msBoard(), &ci, &ecResign ) ;
       }
 
       ProgressEnd();
@@ -968,7 +968,7 @@ static int ComputerTurn( void ) {
       /* Evaluate cube decision */
       ProgressStart( _("Considering cube action...") );
       if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
-                                 ms.anBoard, &ci, &ap [ ms.fTurn ].esCube,
+                                 msBoard(), &ci, &ap [ ms.fTurn ].esCube,
                                  NULL, NULL ) < 0 ) {
 	  ProgressEnd();
 	  return -1;
@@ -1117,12 +1117,12 @@ static int ComputerTurn( void ) {
       /* Don't use the global board for this call, to avoid
 	 race conditions with updating the board and aborting the
 	 move with an interrupt. */
-      memcpy( anBoardMove, ms.anBoard, sizeof( anBoardMove ) );
+      memcpy( anBoardMove, msBoard(), sizeof( anBoardMove ) );
 
       /* Consider resigning -- no point wasting time over the decision,
          so only evaluate at 0 plies. */
 
-      if( ClassifyPosition( ms.anBoard, ms.bgv ) <= CLASS_RACE ) {
+      if( ClassifyPosition( msBoard(), ms.bgv ) <= CLASS_RACE ) {
 
 #if defined(REDUCTION_CODE)
           evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
@@ -1165,7 +1165,7 @@ static int ComputerTurn( void ) {
 
         /* Determine market window */
 
-        if ( EvaluatePosition ( NULL, anBoardMove, arOutput, &ci, &ecDH ) )
+        if ( EvaluatePosition ( NULL, (ConstTanBoard)anBoardMove, arOutput, &ci, &ecDH ) )
           return -1;
 
         rDoublePoint = 
@@ -1183,7 +1183,7 @@ static int ComputerTurn( void ) {
           /* Consider cube action */
 	  ProgressStart( _("Considering cube action...") );
           if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
-                                     ms.anBoard, &ci, &ap [ ms.fTurn ].esCube,
+                                     msBoard(), &ci, &ap [ ms.fTurn ].esCube,
                                      NULL, NULL ) < 0 ) {
 	      ProgressEnd();
 	      return -1;
@@ -1292,7 +1292,7 @@ static int ComputerTurn( void ) {
 
       ProgressStart( _("Considering move...") );
       if( FindnSaveBestMoves( &pmr->ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                              anBoardMove, NULL, 0.0f, &ci, 
+                              (ConstTanBoard)anBoardMove, NULL, 0.0f, &ci, 
                               &ap[ ms.fTurn ].esChequer.ec, 
                               ap[ ms.fTurn ].aamf ) < 0 ) {
 	  ProgressEnd();
@@ -1309,7 +1309,7 @@ static int ComputerTurn( void ) {
      
       /* write move to status bar or stdout */
 	outputnew ();
-	ShowAutoMove( ms.anBoard, pmr->n.anMove );
+	ShowAutoMove( msBoard(), pmr->n.anMove );
 	outputx ();
 
       if( pmr->n.anMove[ 0 ] < 0 )
@@ -1349,7 +1349,7 @@ static int ComputerTurn( void ) {
 	  DiceRolled();      
 	 }
 
-      memcpy( anBoardTemp, ms.anBoard, sizeof anBoardTemp );
+      memcpy( anBoardTemp, msBoard(), sizeof anBoardTemp );
       if ( !ms.fMove )
         SwapSides( anBoardTemp );
 
@@ -1529,13 +1529,13 @@ static int TryBearoff( void ) {
     unsigned int i, iMove, cMoves;
     moverecord *pmr;
     
-    if( ClassifyPosition( ms.anBoard, VARIATION_STANDARD ) > CLASS_RACE )
+    if( ClassifyPosition( msBoard(), VARIATION_STANDARD ) > CLASS_RACE )
 	/* It's a contact position; don't automatically bear off */
         /* note that we use VARIATION_STANDARD instead of ms.bgv in order
            to avoid automatic bearoff in contact positions for hypergammon */
 	return -1;
     
-    GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
+    GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
 
     cMoves = ( ms.anDice[ 0 ] == ms.anDice[ 1 ] ) ? 4 : 2;
     
@@ -1556,7 +1556,7 @@ static int TryBearoff( void ) {
 			sizeof( pmr->n.anMove ) );
                 if ( !cmp_matchstate ( &ms, &sm.ms ) ) {
                   CopyMoveList ( &pmr->ml, &sm.ml );
-                  pmr->n.iMove = locateMove ( ms.anBoard, pmr->n.anMove, 
+                  pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, 
                                             &pmr->ml );
 		  if ( (pmr->n.iMove > pmr->ml.cMoves)) {
 		    free (pmr->ml.amMoves);
@@ -1565,7 +1565,7 @@ static int TryBearoff( void ) {
 		  }
                 }
 
-		ShowAutoMove( ms.anBoard, pmr->n.anMove );
+		ShowAutoMove( msBoard(), pmr->n.anMove );
 		
 
 		AddMoveRecord( pmr );
@@ -1624,7 +1624,7 @@ extern int NextTurn( int fPlayNext ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
 
-    if ( GameStatus( ms.anBoard, ms.bgv )  ||
+    if ( GameStatus( msBoard(), ms.bgv )  ||
 	ms.gs == GAME_DROP ||
 	ms.gs == GAME_RESIGNED)  {
 	moverecord *pmr = (moverecord *) plGame->plNext->p;
@@ -1639,7 +1639,7 @@ extern int NextTurn( int fPlayNext ) {
     else if ( ms.gs == GAME_RESIGNED)
         n = ms.fResigned;
     else
-        n = GameStatus( ms.anBoard, ms.bgv );
+        n = GameStatus( msBoard(), ms.bgv );
 
 
 
@@ -2179,7 +2179,7 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   SuspendInput();
 
   ProgressStart( _("Considering cube action...") );
-  if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
+  if (GeneralCubeDecisionE( aarOutput, msBoard(), &ci, pec, pes) < 0 ) {
     ResumeInput();
     ProgressEnd();
     fAnalyseCube = fAnalyseCubeSave;
@@ -2369,7 +2369,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
 	SuspendInput();
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0) {
+	if ( GeneralCubeDecisionE( aarOutput, msBoard(), &ci, pec, pes) < 0) {
 	  ProgressEnd();
 	  ResumeInput();
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2507,7 +2507,7 @@ static void DumpGameList(char *szOut, listOLD *plGame) {
 	    sprintf( sz, "%d%d%-2s: ", pmr->anDice[ 0 ],
                      pmr->anDice[ 1 ],
                      aszLuckTypeAbbr[ pmr->lt ] );
-	    FormatMove( sz + 6, anBoard, pmr->n.anMove );
+	    FormatMove( sz + 6, (ConstTanBoard)anBoard, pmr->n.anMove );
             strcat(sz, " ");
             strcat(sz, aszSkillTypeAbbr[ pmr->n.stMove ]);
             strcat(sz, aszSkillTypeAbbr[ pmr->stCube ]);
@@ -2696,7 +2696,7 @@ CommandMove( char *sz ) {
     }
     
     if( !*sz ) {
-	GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ],
+	GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
 		       FALSE );
 	
 	if( ml.cMoves <= 1 ) {
@@ -2721,7 +2721,7 @@ CommandMove( char *sz ) {
 	    
             if ( !cmp_matchstate_move ( &ms, &sm.ms ) ) {
               CopyMoveList ( &pmr->ml, &sm.ml );
-              pmr->n.iMove = locateMove ( ms.anBoard, pmr->n.anMove, 
+              pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, 
                                         &pmr->ml );
               if ( (pmr->n.iMove > pmr->ml.cMoves)) {
 		free (pmr->ml.amMoves);
@@ -2739,7 +2739,7 @@ CommandMove( char *sz ) {
               memcpy( &pmr->CubeDecPtr->esDouble, &sc.es, sizeof sc.es );
             }
 
-	    ShowAutoMove( ms.anBoard, pmr->n.anMove );
+	    ShowAutoMove( msBoard(), pmr->n.anMove );
 	    
 
 	    AddMoveRecord( pmr );
@@ -2779,7 +2779,7 @@ CommandMove( char *sz ) {
 	    }
 	}
 	
-	GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ],
+	GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
 		       FALSE );
 	
 	for( i = 0; i < ml.cMoves; i++ ) {
@@ -2807,7 +2807,7 @@ CommandMove( char *sz ) {
 
                 if ( !cmp_matchstate_move ( &ms, &sm.ms ) ) {
                   CopyMoveList ( &pmr->ml, &sm.ml );
-                  pmr->n.iMove = locateMove ( ms.anBoard, pmr->n.anMove, 
+                  pmr->n.iMove = locateMove ( msBoard(), pmr->n.anMove, 
                                             &pmr->ml );
 		  if ( (pmr->n.iMove > pmr->ml.cMoves)) {
 		    free (pmr->ml.amMoves);
@@ -2839,7 +2839,7 @@ CommandMove( char *sz ) {
 		
 		if ( fX ) {
 		    outputnew ();
-		    ShowAutoMove( ms.anBoard, pmr->n.anMove );
+		    ShowAutoMove( msBoard(), pmr->n.anMove );
 		    outputx ();
 		}
 #endif
@@ -3740,7 +3740,7 @@ static skilltype ShouldDouble ( void ) {
 	/* Give hint on cube action */
 
 	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0) {
+	if ( GeneralCubeDecisionE( aarOutput, msBoard(), &ci, pec, pes) < 0) {
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);;
@@ -3849,7 +3849,7 @@ CommandRoll( char *sz ) {
 
   ResetDelayTimer();
     
-  if( !GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ],
+  if( !GenerateMoves( &ml, msBoard(), ms.anDice[ 0 ], ms.anDice[ 1 ],
 		      FALSE ) ) {
 
     playSound ( ap[ ms.fTurn ].pt == PLAYER_HUMAN ? 
@@ -3862,12 +3862,12 @@ CommandRoll( char *sz ) {
     pmr->anDice[ 1 ] = ms.anDice[ 1 ];
     pmr->fPlayer = ms.fTurn;
     
-    ShowAutoMove( ms.anBoard, pmr->n.anMove );
+    ShowAutoMove( msBoard(), pmr->n.anMove );
 
     AddMoveRecord( pmr );
 
     TurnDone();
-  } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( ms.anBoard, 
+  } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( msBoard(), 
                                                                   ms.bgv )
                                                 <= CLASS_BEAROFF1 &&
                                                 fAutoBearoff ) ) ) {
@@ -3880,7 +3880,7 @@ CommandRoll( char *sz ) {
     pmr->fPlayer = ms.fTurn;
     memcpy( pmr->n.anMove, ml.amMoves[ 0 ].anMove, sizeof( pmr->n.anMove ) );
 
-    ShowAutoMove( ms.anBoard, pmr->n.anMove );
+    ShowAutoMove( msBoard(), pmr->n.anMove );
 	
     AddMoveRecord( pmr );
     TurnDone();
@@ -3953,7 +3953,7 @@ SetMatchID ( const char *szMatchID ) {
      return;
 
   if ( ms.gs == GAME_PLAYING )
-    strcpy ( szID, PositionID ( ms.anBoard ) );
+    strcpy ( szID, PositionID ( msBoard() ) );
   else
     strcpy ( szID, "" );
 
@@ -4153,14 +4153,14 @@ getCurrentMoveRecord ( int *pfHistory ) {
 #if USE_GTK
       if ( fX )
         if ( GTKGetMove ( mrHint.n.anMove ) )
-          mrHint.n.iMove = locateMove ( ms.anBoard, mrHint.n.anMove, &sm.ml );
+          mrHint.n.iMove = locateMove ( msBoard(), mrHint.n.anMove, &sm.ml );
 #endif
 
 
       /* add cube */
 
       mrHint.CubeDecPtr = &mrHint.CubeDec;
-      if ( ! memcmp ( &ms.anBoard, &sc.ms.anBoard, sizeof ( ms.anBoard ) ) &&
+      if ( ! memcmp ( msBoard(), sc.ms.anBoard, sizeof ( ms.anBoard ) ) &&
            ms.fTurn == sc.ms.fTurn && 
            ms.fMove == sc.ms.fMove &&
            ms.fCubeOwner == sc.ms.fCubeOwner &&
@@ -4276,7 +4276,7 @@ OptimumRoll ( TanBoard anBoard,
   for( i = 1, k = 0; i <= 6; i++ )
     for( j = 1; j <= i; j++, ++k ) {
 
-      EvaluateRoll (ar, i , j , anBoard, pci, pec);
+      EvaluateRoll (ar, i , j , (ConstTanBoard)anBoard, pci, pec);
 
       r = 
         ( pec->fCubeful ) ? ar[ OUTPUT_CUBEFUL_EQUITY ] : ar[ OUTPUT_EQUITY ];
@@ -4299,7 +4299,7 @@ OptimumRoll ( TanBoard anBoard,
 
 }
 
-static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, TanBoard anBoard, 
+static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
                     const cubeinfo *pci, const evalcontext *pec) {
     TanBoard anBoardTemp;
     cubeinfo ciOpp;
@@ -4316,7 +4316,7 @@ static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2
 
     SwapSides( anBoardTemp );
 
-    if ( GeneralEvaluationE( ar, anBoardTemp, &ciOpp, (evalcontext *) pec ) )
+    if ( GeneralEvaluationE( ar, (ConstTanBoard)anBoardTemp, &ciOpp, (evalcontext *) pec ) )
         return;
 
 }
@@ -4401,7 +4401,7 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 		sz[ 1 ] = (char)pmr->anDice[ 1 ] + '0';
 		sz[ 2 ] = ':';
 		sz[ 3 ] = ' ';
-		FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );
+		FormatMove( sz + 4, msBoard(), pmr->n.anMove );
 		strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
 		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
 	break;

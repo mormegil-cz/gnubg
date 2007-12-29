@@ -75,7 +75,6 @@ LIBS = -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
 
 LIBEVENT = $(BINDIR)/libevent.a
 LIBBOARD3D = $(BINDIR)/libboard3d.a
-Libraries = $(LIBEVENT) $(LIBBOARD3D)
 
 MAKEBEAROFFEXE = $(BINDIR)/makebearoff.exe
 OSDB = $(BINDIR)/gnubg_os0.bd
@@ -84,12 +83,11 @@ MAKEWEIGHTS = $(BINDIR)/makeweights.exe
 WEIGHTS = $(BINDIR)/gnubg.wd
 
 all: objdirs $(BIN_DIRS) $(TEXTURES) $(FLAGPICS) $(SOUNDS) $(METFILES) $(POFILES) $(FONTFILES) $(EXTRA_FILES) \
-		$(WEIGHTS) BearOffDBs $(Libraries) $(TARGET)
+		Libraries $(WEIGHTS) BearOffDBs  $(TARGET)
 	@echo $(TARGET) done
 
-$(LIBEVENT):
+Libraries:
 	@$(MAKE) -fmakefile.w32 -C lib
-$(LIBBOARD3D):
 	@$(MAKE) -fmakefile.win -C board3d
 
 BearOffDBs: $(MAKEBEAROFFEXE) $(OSDB) $(TSDB)

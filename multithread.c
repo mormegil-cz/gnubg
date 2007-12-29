@@ -692,4 +692,7 @@ extern double MT_SyncEnd(void)
 		return 0;
 	}
 }
+#else
+/* Avoid no code warning */
+extern int dummy;
 #endif

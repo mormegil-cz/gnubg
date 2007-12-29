@@ -414,7 +414,7 @@ ExtEvaluation( extcmd *pec ) {
     if ( !fTurn )
       SwapSides( anBoard );
 
-    if ( GeneralEvaluationE( arOutput, anBoard, &ci, &ec ) )
+    if ( GeneralEvaluationE( arOutput, (ConstTanBoard)anBoard, &ci, &ec ) )
       return NULL;
 
     if ( nMatchTo ) {
@@ -494,7 +494,7 @@ ExtFIBSBoard( extcmd *pec ) {
 
       /* take decision */
       if( GeneralCubeDecision( aarOutput, aarStdDev,
-                               aarsStatistics, anBoard, &ci,
+                               aarsStatistics, (ConstTanBoard)anBoard, &ci,
                                &esEvalCube, NULL, NULL ) < 0 )
         return NULL;
 	  
@@ -552,7 +552,7 @@ ExtFIBSBoard( extcmd *pec ) {
     } else {
       /* double decision */
       if( GeneralCubeDecision( aarOutput, aarStdDev,
-                               aarsStatistics, anBoard, &ci,
+                               aarsStatistics, (ConstTanBoard)anBoard, &ci,
                                &esEvalCube, NULL, NULL ) < 0 )
         return NULL;
 		

@@ -200,6 +200,8 @@ matchstate ms = {
     TRUE, /* fJacoby */
     GAME_NONE /* gs */
 };
+ConstTanBoard msBoard() {return (ConstTanBoard)ms.anBoard;}
+
 matchinfo mi;
 
 int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
@@ -2315,7 +2317,7 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
     /* FIXME allow more formats, e.g. FIBS "boardstyle 3" */
 
     if( !ppch || !( pch = NextToken( ppch ) ) ) { 
-	memcpy( an, ms.anBoard, sizeof( ms.anBoard ) );
+	memcpy( an, msBoard(), sizeof( an ) );
 
 	if( pchDesc )
 	    strcpy( pchDesc, _("Current position") );
@@ -2369,7 +2371,7 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
 
        *ppch = NULL;
        
-       return CheckPosition(an) ? 0 : -1;
+       return CheckPosition((ConstTanBoard)an) ? 0 : -1;
     }
 
     if( *pch == '=' ) {
@@ -2391,7 +2393,7 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
 	PositionFromKey( an, sm.ml.amMoves[ i - 1 ].auch );
 
 	if( pchDesc )
-	    FormatMove( pchDesc, ms.anBoard, sm.ml.amMoves[ i - 1 ].anMove );
+	    FormatMove( pchDesc, msBoard(), sm.ml.amMoves[ i - 1 ].anMove );
 	
 	if( !ms.fMove )
 	    SwapSides( an );
@@ -2748,7 +2750,7 @@ DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     outputl( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ) );
 }
 
-extern char *GetLuckAnalysis( matchstate *pms, float rLuck )
+extern char *GetLuckAnalysis( const matchstate *pms, float rLuck )
 {
 
     static char sz[ 16 ];
@@ -2825,18 +2827,17 @@ extern void ShowBoard( void )
     char sz[ 50 ], szCube[ 50 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
 	szScore0[ 50 ], szScore1[ 50 ], szMatch[ 50 ];
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-
     moverecord *pmr;
-    
-    if( cOutputDisabled )
-	return;
+	TanBoard an;
+
+	if( cOutputDisabled )
+		return;
 
     if( ms.gs == GAME_NONE ) {
 #if USE_GTK
 	if( fX ) {
 	    TanBoard anBoardTemp;
 	    InitBoard( anBoardTemp, ms.bgv );
-
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		      ms.anScore[ 0 ], 0, 0, FALSE, anChequers[ ms.bgv ] );
@@ -2847,22 +2848,22 @@ extern void ShowBoard( void )
 	
 	return;
     }
-    
+
+	memcpy( an, msBoard(), sizeof( an ) );
+	if( !ms.fMove )
+		SwapSides( an );
+
 #if USE_GTK
     if( !fX ) {
 #endif
-	if( fOutputRawboard ) {
-	    if( !ms.fMove )
-		SwapSides( ms.anBoard );
-	    
-	    outputl( FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
+	if( fOutputRawboard )
+	{
+	    outputl( FIBSBoard( szBoard, an, ms.fMove, ap[ 1 ].szName,
 				ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 				ms.anScore[ 0 ], ms.anDice[ 0 ],
 				ms.anDice[ 1 ], ms.nCube,
 				ms.fCubeOwner, ms.fDoubled, ms.fTurn,
 				ms.fCrawford, anChequers[ ms.bgv ] ) );
-	    if( !ms.fMove )
-		SwapSides( ms.anBoard );
 	    
 	    return;
 	}
@@ -2893,7 +2894,7 @@ extern void ShowBoard( void )
 	    if( ms.anDice[ 0 ] )
 		sprintf( sz, 
                          _("Rolled %d%d"), ms.anDice[ 0 ], ms.anDice[ 1 ] );
-	    else if( !GameStatus( ms.anBoard, ms.bgv ) )
+	    else if( !GameStatus( msBoard(), ms.bgv ) )
 		strcpy( sz, _("On roll") );
 	    else
 		sz[ 0 ] = 0;
@@ -2928,10 +2929,7 @@ extern void ShowBoard( void )
 	    sprintf( strchr( sz, 0 ), _(", resigns %s"),
 		     gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 	
-	if( !ms.fMove )
-	    SwapSides( ms.anBoard );
-	
-	outputl( DrawBoard( szBoard, ms.anBoard, ms.fMove, apch,
+	outputl( DrawBoard( szBoard, (ConstTanBoard)an, ms.fMove, apch,
                             MatchIDFromMatchState ( &ms ), 
                             anChequers[ ms.bgv ] ) );
 
@@ -2944,35 +2942,25 @@ extern void ShowBoard( void )
 	    if( pmr->sz )
 		outputl( pmr->sz ); /* FIXME word wrap */
 	}
-	
-	if( !ms.fMove )
-	    SwapSides( ms.anBoard );
 #if USE_GTK
-    } else {
-	if( !ms.fMove )
-	    SwapSides( ms.anBoard );
-
-	game_set( BOARD( pwBoard ), ms.anBoard, ms.fMove, ap[ 1 ].szName,
-		  ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
-		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
-		  ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
-		  !nNextTurn, anChequers[ ms.bgv ] );
-	if( !ms.fMove )
-	    SwapSides( ms.anBoard );
     }
+	else
+	{
+		game_set( BOARD( pwBoard ), an, ms.fMove, ap[ 1 ].szName,
+		ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
+		ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
+		ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
+		!nNextTurn, anChequers[ ms.bgv ] );
+	}
 #endif    
 
 #ifdef UNDEF
     {
       char *pc;
-
       printf ( _("MatchID: %s\n"), pc = MatchIDFromMatchState ( &ms ) );
-
       MatchStateFromID ( &ms, pc );
-
     }
 #endif
-
 }
 
 extern char *FormatPrompt( void )
@@ -2995,7 +2983,7 @@ extern char *FormatPrompt( void )
 		if( ms.gs == GAME_NONE )
 		    strcpy( pchDest, _("No game") );
 		else {
-		    PipCount( ms.anBoard, anPips );
+		    PipCount( msBoard(), anPips );
 		    sprintf( pchDest, "%d:%d", anPips[ 1 ], anPips[ 0 ] );
 		}
 		break;
@@ -3076,7 +3064,7 @@ extern void CommandEval( char *sz )
 		     nBeavers, ms.bgv );    
 
     ProgressStart( _("Evaluating position...") );
-    if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
+    if( !DumpPosition( (ConstTanBoard)an, szOutput, &esEvalCube.ec, &ci,
                        fOutputMWC, fOutputWinPC, n, 
                        MatchIDFromMatchState( &ms ) ) ) {
 	ProgressEnd();
@@ -3215,7 +3203,7 @@ extern void CommandHelp( char *sz )
 }
 
 
-extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
+extern char *FormatMoveHint( char *sz, const matchstate *pms, movelist *pml,
 			     int i, int fRankKnown,
                              int fDetailProb, int fShowParameters ) {
     
@@ -3473,7 +3461,7 @@ HintCube( void ) {
       /* calculate cube action */
       
       ProgressStart( _("Considering cube action...") );
-      if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+      if ( GeneralCubeDecisionE ( aarOutput, msBoard(), &ci, 
                                   &esEvalCube.ec, 0 ) < 0 ) {
         ProgressEnd();
         return;
@@ -3517,7 +3505,7 @@ HintResigned( void ) {
 
   ProgressStart( _("Considering resignation...") );
   if ( GeneralEvaluationE ( arOutput,
-                            ms.anBoard,
+                            msBoard(),
                             &ci, &esEvalCube.ec ) < 0 ) {
     ProgressEnd();
     return;
@@ -3585,7 +3573,7 @@ HintTake( void ) {
   GetMatchStateCubeInfo( &ci, &ms );
 
   ProgressStart( _("Considering cube action...") );
-  if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+  if ( GeneralCubeDecisionE ( aarOutput, msBoard(), &ci, 
                               &esEvalCube.ec, &esEvalCube ) < 0 ) {
     ProgressEnd();
     return;
@@ -3661,7 +3649,7 @@ HintChequer( char *sz ) {
   if ( fX && GTKGetMove( anMove ) ) {
     /* we have a legal move in the GUI */
     /* Note that we override the move from the movelist */
-    MoveKey ( ms.anBoard, anMove, auch );
+    MoveKey ( msBoard(), anMove, auch );
     fHasMoved = TRUE;
   }
 #endif /* USE_GTK */
@@ -3670,7 +3658,7 @@ HintChequer( char *sz ) {
        pmr->mt == MOVE_NORMAL ) {
     /* we have an old stored move */
     memcpy( anMove, pmr->n.anMove, sizeof anMove );
-    MoveKey( ms.anBoard, anMove, auch );
+    MoveKey( msBoard(), anMove, auch );
     fHasMoved = TRUE;
   }
   
@@ -3678,7 +3666,7 @@ HintChequer( char *sz ) {
 
     ProgressStart( _("Considering move...") );
     if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                            ms.anBoard, 
+                            msBoard(), 
                             fHasMoved ? auch : NULL, 
                             arSkillLevel[ SKILL_DOUBTFUL ],
                             &ci, &esEvalChequer.ec,
@@ -3704,7 +3692,7 @@ HintChequer( char *sz ) {
 
 #if USE_GTK
   if( fX ) {
-    GTKHint( &sm.ml, locateMove ( ms.anBoard, anMove, &sm.ml ) );
+    GTKHint( &sm.ml, locateMove ( msBoard(), anMove, &sm.ml ) );
     return;
   }
 #endif
@@ -3878,7 +3866,7 @@ extern void CommandQuit( char *sz )
 
 
 static move *
-GetMove ( TanBoard anBoard ) {
+GetMove ( const TanBoard anBoard ) {
 
   int i;
   unsigned char auch[ 10 ];
@@ -3889,7 +3877,7 @@ GetMove ( TanBoard anBoard ) {
 
   memcpy ( an, anBoard, sizeof ( an ) );
   SwapSides ( an );
-  PositionKey ( an, auch );
+  PositionKey ( (ConstTanBoard)an, auch );
 
   for ( i = 0; i < sm.ml.cMoves; ++i ) 
     if ( EqualKeys ( auch, sm.ml.amMoves[ i ].auch ) ) 
@@ -3957,7 +3945,7 @@ CommandRollout( char *sz ) {
     RolloutProgressStart( &ci, 2, aarsStatistics, &es.rc, aszCube, &p );
     
     GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
-			   ms.anBoard, &ci, &es.rc, &es, RolloutProgress, p );
+			   msBoard(), &ci, &es.rc, &es, RolloutProgress, p );
 
     UpdateStoredCube ( aarOutput, aarStdDev, &es, &ms );
 
@@ -4016,7 +4004,7 @@ CommandRollout( char *sz ) {
       int fCubeDecTop = num_args ? TRUE : FALSE;
 
       void *p;
-      int         (** apBoard)[2][25];
+	  ConstTanBoard *apBoard;
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
       float       (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ];
       evalsetup   (** apes);
@@ -4035,9 +4023,9 @@ CommandRollout( char *sz ) {
       for( i = 0; i < c; i++ ) {
 	/* set up to call RolloutGeneral for all the moves at once */
 	if ( fOpponent ) 
-	  apMoves[ i ] = pm = GetMove ( aan[ i ] );
+	  apMoves[ i ] = pm = GetMove ( (ConstTanBoard)aan[ i ] );
     
-	apBoard[ i ] = aan + i;
+	apBoard[ i ] = (ConstTanBoard)(aan + i);
 	if (pm) {
 	  apOutput[ i ] = &pm->arEvalMove;
 	  apStdDev[ i ] = &pm->arEvalStdDev;
@@ -4287,7 +4275,7 @@ extern void CommandCopy (char *sz)
 
       if (ms.anDice[0])
 	sprintf (szRolled, _("Rolled %d%d"), ms.anDice[0], ms.anDice[1]);
-      else if (!GameStatus (ms.anBoard, ms.bgv))
+      else if (!GameStatus (msBoard(), ms.bgv))
 	strcpy (szRolled, _("On roll"));
       else
 	szRolled[0] = 0;
@@ -4319,12 +4307,12 @@ extern void CommandCopy (char *sz)
 	}
     }
 
-  memcpy ( anBoardTemp, ms.anBoard, sizeof ( anBoardTemp ) );
+  memcpy ( anBoardTemp, msBoard(), sizeof ( anBoardTemp ) );
 
   if ( ! ms.fMove )
     SwapSides ( anBoardTemp );
 
-  DrawBoard (szOut, anBoardTemp, ms.fMove, aps, MatchIDFromMatchState (&ms),
+  DrawBoard (szOut, (ConstTanBoard)anBoardTemp, ms.fMove, aps, MatchIDFromMatchState (&ms),
              anChequers[ ms.bgv ] );
   strcat (szOut, "\n");
   TextToClipboard (szOut);
@@ -7042,7 +7030,7 @@ CommandClearHint( char *sz ) {
  */
 
 extern int
-EPC( TanBoard anBoard, float *arEPC, float *arMu, float *arSigma, 
+EPC( const TanBoard anBoard, float *arEPC, float *arMu, float *arSigma, 
      int *pfSource, const int fOnlyBearoff ) {
 
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +

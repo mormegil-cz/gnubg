@@ -7212,7 +7212,7 @@ struct GroupInfo info[63] = {
 #include "positionid.h"
 
 extern struct GammonProbs*
-getBearoffGammonProbs(int board[6])
+getBearoffGammonProbs(const int board[6])
 {
   int group = 0;
   int i;

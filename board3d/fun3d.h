@@ -22,14 +22,14 @@
 void InitGL(const BoardData *bd);
 
 /* Drawing functions */
-void drawBoard(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
+void drawBoard(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
 extern void Draw3d(const BoardData* bd);
 void SetupPerspVolume(const BoardData* bd, BoardData3d* bd3d, const renderdata* prd, int viewport[4]);
 float getBoardWidth(void);
 float getBoardHeight(void);
 void calculateBackgroundSize(BoardData3d *bd3d, const int viewport[4]);
 
-void RestrictiveRender(const BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
+void RestrictiveRender(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd);
 void RestrictiveDrawFrame(const float pos[3], float width, float height, float depth);
 void RestrictiveDraw(ClipBox* pCb, const float pos[3], float width, float height, float depth);
 void EnlargeCurrentToBox(const ClipBox* pOtherCb);
@@ -117,7 +117,7 @@ extern int DiceTooClose(const BoardData3d *bd3d, const renderdata *prd);
 
 extern int ShadowsInitilised(const BoardData3d *bd3d);
 void shadowInit(BoardData3d *bd3d, renderdata *prd);
-void shadowDisplay(void (*drawScene)(const BoardData *, BoardData3d *, const renderdata *), const BoardData* bd, BoardData3d *bd3d, const renderdata *prd);
+void shadowDisplay(void (*drawScene)(const BoardData *, const BoardData3d *, const renderdata *), const BoardData* bd, const BoardData3d *bd3d, const renderdata *prd);
 
 /* font functions */
 void glPrintPointNumbers(const BoardData3d* bd3d, const char *text);

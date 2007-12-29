@@ -319,7 +319,7 @@ extern int WritePNG (const char *sz, unsigned char *puch, unsigned int nStride,
 
 static int
 GenerateImage (renderimages * pri, renderdata * prd,
-	       TanBoard anBoard,
+	       const TanBoard anBoard,
 	       const char *szName,
 	       const int nSize, const int nSizeX, const int nSizeY,
 	       const int nOffsetX, const int nOffsetY,
@@ -327,7 +327,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
 	       const unsigned int anDice[2], const int nCube, const int fDoubled,
 	       const int fCubeOwner)
 {
-
+  TanBoard anBoardTemp;
   unsigned char *puch;
   int anCubePosition[2];
   int anDicePosition[2][2];
@@ -339,8 +339,10 @@ GenerateImage (renderimages * pri, renderdata * prd,
   int anArrowPosition[ 2 ];
   int cube_owner;
 
+	memcpy(anBoardTemp, anBoard, sizeof anBoardTemp);
+
   if (!fMove)
-    SwapSides (anBoard);
+    SwapSides (anBoardTemp);
 
   /* allocate memory for board */
 
@@ -395,7 +397,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
 
   color = fMove;
 
-  CalculateArea( prd, puch, BOARD_WIDTH * nSize * 3, pri, anBoard, NULL,
+  CalculateArea( prd, puch, BOARD_WIDTH * nSize * 3, pri, anBoardTemp, NULL,
 		 (int *) anDice, anDicePosition,
 		 color, anCubePosition,
 		 LogCube( nCube ) + ( doubled != 0 ),
@@ -475,7 +477,7 @@ extern void CommandExportPositionPNG (char *sz)
 
 		RenderImages (&rd, &ri);
 
-		GenerateImage (&ri, &rd, ms.anBoard, sz,
+		GenerateImage (&ri, &rd, msBoard(), sz,
 				exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT, 0, 0,
 				ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
 				ms.fDoubled, ms.fCubeOwner);
@@ -781,7 +783,7 @@ extern void CommandExportPositionJF (char *sz)
    * before the move was done, such that undo should be possible. It's
    * possible to save just the current board twice as done below. */
 
-  memcpy (anBoard, ms.anBoard, 2 * 25 * sizeof (int));
+  memcpy (anBoard, msBoard(), 2 * 25 * sizeof (int));
 
   if (!ms.fMove)
     SwapSides (anBoard);
@@ -907,7 +909,7 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
             fputc( '\n', pf );
         }
 
-	if( ( n = GameStatus( anBoard, ms.bgv ) ) ) {
+	if( ( n = GameStatus( (ConstTanBoard)anBoard, ms.bgv ) ) ) {
 	    fprintf( pf, "%sWins %d point%s%s\n\n",
 		   i & 1 ? "                                  " : "\n      ",
 		   n * nFileCube, n * nFileCube > 1 ? "s" : "",

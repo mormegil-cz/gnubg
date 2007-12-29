@@ -86,7 +86,7 @@ extern void RunEvals(void)
 
 	for( i = 0; i < EVALS_PER_ITERATION; i++ )
 	{
-		EvaluatePosition( NULL, aanBoard[ i ], ar, &ciCubeless, NULL );
+		EvaluatePosition( NULL, (ConstTanBoard)aanBoard[ i ], ar, &ciCubeless, NULL );
 	}
 
 #if USE_MULTITHREAD

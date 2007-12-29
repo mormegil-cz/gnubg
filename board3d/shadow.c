@@ -75,7 +75,7 @@ extern void draw_shadow_volume_extruded_edges(/*lint -e{818}*/Occluder* pOcc, co
 	if (pOcc->show)
 	{
 		float olight[4];
-		mult_matrix_vec(pOcc->invMat, light_position, olight);
+		mult_matrix_vec((ConstMatrix)pOcc->invMat, light_position, olight);
 
 		glNewList(pOcc->shadow_list, GL_COMPILE);
 			glPushMatrix();
@@ -141,7 +141,7 @@ static void draw_shadow_volume_to_stencil(const BoardData3d* bd3d)
 	glDepthMask(GL_TRUE);
 }
 
-void shadowDisplay(void (*drawScene)(const BoardData *, BoardData3d *, const renderdata *), const BoardData* bd, BoardData3d *bd3d, const renderdata *prd)
+void shadowDisplay(void (*drawScene)(const BoardData *, const BoardData3d *, const renderdata *), const BoardData* bd, const BoardData3d *bd3d, const renderdata *prd)
 {
 	/* Pass 1: Draw model, ambient light only (some diffuse to vary shadow darkness) */
 	float zero[4] = {0,0,0,0};

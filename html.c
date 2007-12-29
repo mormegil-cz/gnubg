@@ -575,7 +575,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
   memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
 
   if ( pms->fMove ) SwapSides ( anBoard );
-  PipCount ( anBoard, anPips );
+  PipCount ( (ConstTanBoard)anBoard, anPips );
 
   for( i = 0; i < 2; i++ ) {
     acOff[ i ] = 15;
@@ -583,7 +583,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
       acOff[ i ] -= anBoard[ i ][ j ];
   }
 
-  PipCount ( anBoard, anPips );
+  PipCount ( (ConstTanBoard)anBoard, anPips );
 
   /* Begin table  and print for player 0*/
   fprintf ( pf, "<table><tr><th align=\"left\">%s<th align=\"right\">%d<tr><th align=\"center\" colspan=\"2\">", ap[ 0 ].szName,  anPips[ 1 ]);
@@ -743,7 +743,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
   fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br /></span></table>\n"),
-            PositionID ( pms->anBoard ),
+            PositionID ( (ConstTanBoard)pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
 
 
@@ -1104,7 +1104,7 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
   printImage ( pf, szImageDir, "b-indent", szExtension, "", 
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
 
-  PipCount ( anBoard, anPips );
+  PipCount ( (ConstTanBoard)anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
@@ -1117,7 +1117,7 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
   fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
-            PositionID ( pms->anBoard ),
+            PositionID ( (ConstTanBoard)pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
 
   fprintf( pf, "</span>" );
@@ -1591,7 +1591,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<p>", pf );
 
-  PipCount ( anBoard, anPips );
+  PipCount ( (ConstTanBoard)anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
@@ -1602,7 +1602,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
            GetStyle ( CLASS_POSITIONID, hecss ) );
 
   fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
-            PositionID ( pms->anBoard ),
+            PositionID ( (ConstTanBoard)pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
 
   fprintf( pf, "</span>" );
@@ -2579,7 +2579,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       fprintf ( pf,
                 "<td %s>%s</td>\n",
                 GetStyle ( CLASS_MOVEMOVE, hecss ),
-                FormatMove ( sz, pms->anBoard,
+                FormatMove ( sz, (ConstTanBoard)pms->anBoard,
                              pmr->ml.amMoves[ i ].anMove ) );
 
       /* equity */
@@ -2744,7 +2744,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                 "<tr %s><td>&nbsp;</td><td>&nbsp;</td>"
                 "<td>&nbsp;</td><td>%s</td><td>&nbsp;</td></tr>\n",
                 GetStyle ( CLASS_MOVETHEMOVE, hecss ),
-                FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
+                FormatMove ( sz, (ConstTanBoard)pms->anBoard, pmr->n.anMove ) );
     else 
       /* no legal moves */
       /* FIXME: output equity?? */
@@ -2803,7 +2803,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       fprintf ( pf,
                 _("%s%s moves %s"), bullet,
                 ap[ pmr->fPlayer ].szName,
-                FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
+                FormatMove ( sz, (ConstTanBoard)pms->anBoard, pmr->n.anMove ) );
     else if ( ! pmr->ml.cMoves )
       fprintf ( pf,
                 _("%s%s cannot move"), bullet,

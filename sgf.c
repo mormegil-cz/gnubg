@@ -1006,7 +1006,7 @@ static void RestoreMoveAnalysis(property * pp, int fPlayer,
 
 	memcpy(anBoardMove, pms->anBoard, sizeof(anBoardMove));
 	ApplyMove(anBoardMove, pm->anMove, FALSE);
-	PositionKey(anBoardMove, pm->auch);
+	PositionKey((ConstTanBoard)anBoardMove, pm->auch);
 
 	pch = (char *) pc;
 	while (isspace(ch = *pch++)) {
@@ -1294,7 +1294,7 @@ static void RestoreNode(listOLD * pl)
 
 	pmr->mt = MOVE_SETBOARD;
 	ClosestLegalPosition(ms.anBoard);
-	PositionKey(ms.anBoard, pmr->sb.auchKey);
+	PositionKey(msBoard(), pmr->sb.auchKey);
     }
 
     if (pmr && ppC)
@@ -2510,7 +2510,7 @@ extern void CommandSavePosition(char *sz)
     pmsb->mt = MOVE_SETBOARD;
     if (ms.fMove)
 	SwapSides(ms.anBoard);
-    PositionKey(ms.anBoard, pmsb->sb.auchKey);
+    PositionKey(msBoard(), pmsb->sb.auchKey);
     if (ms.fMove)
 	SwapSides(ms.anBoard);
     ListInsert(&l, pmsb);

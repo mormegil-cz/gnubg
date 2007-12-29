@@ -257,7 +257,7 @@ static void CreateMessageWindow( void )
 GtkWidget *pwTheoryList = NULL;
 
 
-void UpdateTheoryData(BoardData* bd, int UpdateType, TanBoard points)
+void UpdateTheoryData(BoardData* bd, int UpdateType, const TanBoard points)
 {
 	char* pc;
 

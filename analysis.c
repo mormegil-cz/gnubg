@@ -87,7 +87,7 @@ GetRating ( const float rError ) {
 }
 
 static float
-LuckFirst ( TanBoard anBoard, const int n0, const int n1,
+LuckFirst ( const TanBoard anBoard, const int n0, const int n1,
             const cubeinfo *pci, const evalcontext *pec ) {
 
   TanBoard anBoardTemp;
@@ -107,7 +107,7 @@ LuckFirst ( TanBoard anBoard, const int n0, const int n1,
               2 * 25 * sizeof( int ) );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, (ConstTanBoard)anBoardTemp, NULL, 0.0f,
                               (cubeinfo *) pci, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
         return (float)ERR_VAL;
@@ -116,7 +116,7 @@ LuckFirst ( TanBoard anBoard, const int n0, const int n1,
       
         SwapSides( anBoardTemp );
       
-        if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+        if ( GeneralEvaluationE ( ar, (ConstTanBoard)anBoardTemp, &ciOpp, 
                                   (evalcontext *) pec ) < 0 )
           return (float)ERR_VAL;
 
@@ -148,7 +148,7 @@ LuckFirst ( TanBoard anBoard, const int n0, const int n1,
       SwapSides ( anBoardTemp );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, (ConstTanBoard)anBoardTemp, NULL, 0.0f,
                               &ciOpp, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
         return (float)ERR_VAL;
@@ -157,7 +157,7 @@ LuckFirst ( TanBoard anBoard, const int n0, const int n1,
       
         SwapSides( anBoardTemp );
       
-        if ( GeneralEvaluationE ( ar, anBoardTemp, (cubeinfo *) pci, 
+        if ( GeneralEvaluationE ( ar, (ConstTanBoard)anBoardTemp, (cubeinfo *) pci, 
                                   (evalcontext *) pec ) < 0 )
           return (float)ERR_VAL;
 
@@ -188,7 +188,7 @@ LuckFirst ( TanBoard anBoard, const int n0, const int n1,
 }
 
 static float
-LuckNormal ( TanBoard anBoard, const int n0, const int n1,
+LuckNormal ( const TanBoard anBoard, const int n0, const int n1,
              const cubeinfo *pci, const evalcontext *pec ) {
   
   TanBoard anBoardTemp;
@@ -206,7 +206,7 @@ LuckNormal ( TanBoard anBoard, const int n0, const int n1,
               2 * 25 * sizeof( int ) );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindnSaveBestMoves( &ml, i + 1, j + 1, anBoardTemp, NULL, 0.0f,
+      if( FindnSaveBestMoves( &ml, i + 1, j + 1, (ConstTanBoard)anBoardTemp, NULL, 0.0f,
                               (cubeinfo *) pci, (evalcontext *) pec, 
                               defaultFilters ) < 0 )
         return (float)ERR_VAL;
@@ -215,7 +215,7 @@ LuckNormal ( TanBoard anBoard, const int n0, const int n1,
       
         SwapSides( anBoardTemp );
       
-        if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+        if ( GeneralEvaluationE ( ar, (ConstTanBoard)anBoardTemp, &ciOpp, 
                                   (evalcontext *) pec ) < 0 )
           return (float)ERR_VAL;
 
@@ -242,7 +242,7 @@ LuckNormal ( TanBoard anBoard, const int n0, const int n1,
 
 }
 
-static float LuckAnalysis( TanBoard anBoard, int n0, int n1,
+static float LuckAnalysis( const TanBoard anBoard, int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
 
   if( n0-- < n1-- )
@@ -308,7 +308,6 @@ updateStatcontext(statcontext*       psc,
   static unsigned char auch[ 10 ];
   float rSkill, rChequerSkill, rCost;
   unsigned int i;
-  TanBoard anBoardMove;
   float arDouble[ 4 ];
   const xmovegameinfo* pmgi = &((moverecord *) plGame->plNext->p)->g;
 
@@ -434,13 +433,13 @@ updateStatcontext(statcontext*       psc,
     */
     
     if( fAnalyseMove &&
-	 (pmr->esChequer.et != EVAL_NONE || pmr->n.anMove[0] < 0) ) {
-
+	 (pmr->esChequer.et != EVAL_NONE || pmr->n.anMove[0] < 0) )
+	{
       /* find skill */
-
+	  TanBoard anBoardMove;
       memcpy( anBoardMove, pms->anBoard, sizeof( anBoardMove ) );
       ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
-      PositionKey ( anBoardMove, auch );
+      PositionKey ( (ConstTanBoard)anBoardMove, auch );
       rChequerSkill = 0.0f;
 	  
       for( i = 0; i < pmr->ml.cMoves; i++ ) 
@@ -670,7 +669,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 			if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 )
 			{
 				if ( GeneralCubeDecision ( aarOutput, aarStdDev, NULL, 
-					pms->anBoard, &ci, pesCube, NULL, NULL  ) < 0 )
+					(ConstTanBoard)pms->anBoard, &ci, pesCube, NULL, NULL  ) < 0 )
 					return -1;
 
 				pmr->CubeDecPtr->esDouble = *pesCube;
@@ -694,7 +693,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
       
 		if( fAnalyseDice )
 		{
-			pmr->rLuck = LuckAnalysis( pms->anBoard,
+			pmr->rLuck = LuckAnalysis( (ConstTanBoard)pms->anBoard,
 						pmr->anDice[ 0 ],
 						pmr->anDice[ 1 ],
 						&ci, is_initial_position );
@@ -709,10 +708,9 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 
 			/* evaluate move */
 
-			memcpy( anBoardMove, pms->anBoard,
-				sizeof( anBoardMove ) );
+			memcpy( anBoardMove, pms->anBoard, sizeof( anBoardMove ) );
 			ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
-			PositionKey ( anBoardMove, auch );
+			PositionKey ( (ConstTanBoard)anBoardMove, auch );
 		  
 				if ( cmp_evalsetup ( pesChequer,
 									&pmr->esChequer ) > 0 ) {
@@ -724,7 +722,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 		  
 				if( FindnSaveBestMoves ( &(pmr->ml), pmr->anDice[ 0 ],
 										pmr->anDice[ 1 ],
-										pms->anBoard, auch, 
+										(ConstTanBoard)pms->anBoard, auch, 
 										arSkillLevel[ SKILL_DOUBTFUL ],
 										&ci, &pesChequer->ec, aamf ) < 0 )
 						return -1;
@@ -792,7 +790,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 				if ( cmp_evalsetup ( pesCube, &pmr->CubeDecPtr->esDouble ) > 0 )
 				{
 					if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
-							NULL, pms->anBoard, &ci,
+							NULL, (ConstTanBoard)pms->anBoard, &ci,
 							pesCube, NULL, NULL ) < 0 )
 						return -1;
 
@@ -936,7 +934,7 @@ AnalyzeMove (moverecord *pmr, matchstate *pms, const listOLD *plParentGame,
 		GetMatchStateCubeInfo( &ci, pms );
 	      
 		if( fAnalyseDice ) {
-			pmr->rLuck = LuckAnalysis( pms->anBoard,
+			pmr->rLuck = LuckAnalysis( (ConstTanBoard)pms->anBoard,
 						pmr->anDice[ 0 ],
 						pmr->anDice[ 1 ],
 						&ci, is_initial_position );
@@ -1992,7 +1990,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 
 		memcpy(anBoardMove, pms->anBoard, sizeof(anBoardMove));
 		ApplyMove(anBoardMove, pmr->n.anMove, FALSE);
-		PositionKey(anBoardMove, auch);
+		PositionKey((ConstTanBoard)anBoardMove, auch);
 
 		if (pmr->esChequer.et == EVAL_NONE && pmr->n.iMove != -1)
 			return FALSE;

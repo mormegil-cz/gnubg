@@ -193,9 +193,9 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
   float arMu[ 2 ];
   gchar *pch;
 
-  raceProbs ( prw->anBoard, nTrials, ar, arMu );
+  raceProbs ( (ConstTanBoard)prw->anBoard, nTrials, ar, arMu );
 
-  PipCount( prw->anBoard, anPips );
+  PipCount( (ConstTanBoard)prw->anBoard, anPips );
   
   for ( i = 0; i < 5; ++i ) {
     if( fOutputWinPC )

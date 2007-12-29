@@ -37,8 +37,8 @@ typedef enum _bearofftype {
   BEAROFF_HYPERGAMMON
 } bearofftype;
 
-typedef struct _bearoffcontext {
-
+typedef struct _bearoffcontext
+{
   int h;          /* file handle */
   int *ah;        /* list of file descriptors */
   int nFiles;     /* number of file descriptors */
@@ -75,44 +75,41 @@ enum _bearoffoptions {
   BO_HEURISTIC         = 8
 };
 
-extern bearoffcontext *
-BearoffInit ( const char *szFilename, const int bo, void (*p)() );
+extern bearoffcontext *BearoffInit ( const char *szFilename, const int bo, void (*p)() );
 
-extern bearoffcontext *
-BearoffInitBuiltin ( void );
+extern bearoffcontext *BearoffInitBuiltin ( void );
 
 extern int
-BearoffEval ( bearoffcontext *pbc, TanBoard anBoard, float arOutput[] );
+BearoffEval ( const bearoffcontext *pbc, const TanBoard anBoard, float arOutput[] );
 
 extern void
-BearoffStatus ( bearoffcontext *pbc, char *sz );
+BearoffStatus ( const bearoffcontext *pbc, char *sz );
 
 extern int
-BearoffDump ( bearoffcontext *pbc, TanBoard anBoard, char *sz );
+BearoffDump ( const bearoffcontext *pbc, const TanBoard anBoard, char *sz );
 
 extern int
-BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
+BearoffDist ( const bearoffcontext *pbc, const unsigned int nPosID,
               float arProb[ 32 ], float arGammonProb[ 32 ],
               float ar[ 4 ],
               unsigned short int ausProb[ 32 ], 
               unsigned short int ausGammonProb[ 32 ] );
 
 extern int
-BearoffCubeful ( bearoffcontext *pbc,
+BearoffCubeful ( const bearoffcontext *pbc,
                  const unsigned int iPos,
                  float ar[ 4 ], unsigned short int aus[ 4 ] );
 
-extern void
-BearoffClose ( bearoffcontext **ppbc );
+extern void BearoffClose ( bearoffcontext **ppbc );
 
 extern int
-isBearoff ( bearoffcontext *pbc, TanBoard anBoard );
+isBearoff ( const bearoffcontext *pbc, const TanBoard anBoard );
 
 extern float
 fnd ( const float x, const float mu, const float sigma  );
 
 extern int
-BearoffHyper( bearoffcontext *pbc,
+BearoffHyper( const bearoffcontext *pbc,
               const unsigned int iPos,
               float arOutput[], float arEquity[] );
 

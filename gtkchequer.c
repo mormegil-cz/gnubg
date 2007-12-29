@@ -73,7 +73,7 @@ static void MoveListRolloutClicked(GtkWidget *pw, hintdata *phd)
   {
     m = ppm[ i ] = MoveListGetMove(phd, pl);
     ppci[ i ] = &ci;
-    FormatMove ( asz[ i ], ms.anBoard, m->anMove );
+    FormatMove ( asz[ i ], msBoard(), m->anMove );
   }
 	MoveListFreeSelectionList(plSelList);
 
@@ -128,7 +128,7 @@ extern void ShowMove ( hintdata *phd, const int f )
 
 		MoveListFreeSelectionList(plSelList);
 
-		memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
+		memcpy ( anBoard, msBoard(), sizeof ( anBoard ) );
 		ApplyMove ( anBoard, pm->anMove, FALSE );
 
 		UpdateMove( ( BOARD( pwBoard ) )->board_data, anBoard );
@@ -170,7 +170,7 @@ static void MoveListTempMapClicked( GtkWidget *pw, hintdata *phd )
 
     memcpy( &ams[ i ], &ms, sizeof ( matchstate ) );
 
-    FormatMove( szMove, ams[ i ].anBoard, m->anMove );
+    FormatMove( szMove, (ConstTanBoard)ams[ i ].anBoard, m->anMove );
     ApplyMove( ams[ i ].anBoard, m->anMove, FALSE );
 
     /* Swap sides */
@@ -387,20 +387,20 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 
 	memcpy(&m, pm, sizeof(move));
 
-	memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
+	memcpy ( anBoard, msBoard(), sizeof ( anBoard ) );
 	ApplyMove ( anBoard, m.anMove, FALSE );
 
 	if ( ! ms.fMove )
 	SwapSides ( anBoard );
 
-	sprintf ( szMove, "show fullboard %s", PositionID ( anBoard ) );
+	sprintf ( szMove, "show fullboard %s", PositionID ( (ConstTanBoard)anBoard ) );
 	UserCommand ( szMove );
 
 	if ( phd->fDestroyOnMove )
 	/* Destroy widget on exit */
 		gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
-	FormatMove( szMove, ms.anBoard, m.anMove );
+	FormatMove( szMove, msBoard(), m.anMove );
 	UserCommand( szMove );
 
 #if USE_BOARD3D

@@ -131,7 +131,7 @@ TempMapEquities( evalcontext *pec, matchstate *pms,
       SwapSides ( anBoard );
       ci.fMove = ! ci.fMove;
 
-      if ( GeneralEvaluationE ( arOutput, anBoard, &ci, pec ) < 0 ) {
+      if ( GeneralEvaluationE ( arOutput, (ConstTanBoard)anBoard, &ci, pec ) < 0 ) {
         ProgressEnd();
         return -1;
       }
@@ -278,7 +278,7 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
           g_strdup_printf( "%s [%s]", 
                            GetEquityString( ptmw->atm[ m ].aarEquity[ i ][ j ],
                                             &ci, ptmw->fInvert ), 
-                           FormatMove( szMove, ptmw->atm[ m ].pms->anBoard, 
+                           FormatMove( szMove, (ConstTanBoard)ptmw->atm[ m ].pms->anBoard, 
                                        ptmw->atm[ m ].aaanMove[ i ][ j ] ) );
                            
 
@@ -363,7 +363,7 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
 
     char szMove[ 100 ];
 
-    FormatMove( szMove, ptmw->atm[ m ].pms->anBoard, 
+    FormatMove( szMove, (ConstTanBoard)ptmw->atm[ m ].pms->anBoard, 
                 ptmw->atm[ m ].aaanMove[ i ][ j ] );
     gtk_draw_string( pw->style, pw->window, GTK_STATE_NORMAL,
                      10, 30, szMove );

@@ -103,7 +103,7 @@ static void board_to_sgf (const int anBoard[25], int direction) {
     
 
 static void log_game_start (const char *name, const cubeinfo *pci, int fCubeful,
-		     ARRAY_CONST TanBoard anBoard) {
+		     const TanBoard anBoard) {
   time_t     t = time (0);
   struct tm  *now = localtime (&t);
   const char *rule;
@@ -277,7 +277,7 @@ static int RolloutDice( int iTurn, int iGame,
 
 
 static void
-ClosedBoard ( int afClosedBoard[ 2 ], ARRAY_CONST TanBoard anBoard ) {
+ClosedBoard ( int afClosedBoard[ 2 ], const TanBoard anBoard ) {
 
   int i, j, n;
 
@@ -430,7 +430,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       /* check for truncation at bearoff databases */
 
-      pc = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
+      pc = ClassifyPosition ( (ConstTanBoard)aanBoard[ ici ], pci->bgv );
 
       if ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT &&
            prc->fCubeful && *pf && ! pci->nMatchTo &&
@@ -438,7 +438,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         /* truncate at two sided bearoff if money game */
 
-        if (GeneralEvaluationE( aarOutput[ ici ], aanBoard[ ici ],
+        if (GeneralEvaluationE( aarOutput[ ici ], (ConstTanBoard)aanBoard[ ici ],
                             pci, &ecCubeful0ply ) < 0)
 			return -1;
 
@@ -455,7 +455,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         /* cubeless rollout, requested to truncate at bearoff db */
 
         if (GeneralEvaluationE ( aarOutput[ ici ],
-                             aanBoard[ ici ],
+                             (ConstTanBoard)aanBoard[ ici ],
                              pci, &ecCubeless0ply ) < 0)
 			return -1;
 
@@ -474,7 +474,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         if ( prc->fCubeful && GetDPEq ( NULL, &rDP, pci ) &&
              ( iTurn > 0 || ( afCubeDecTop[ ici ] && ! prc->fInitial ) ) ) {
 
-          if ( GeneralCubeDecisionE ( aar, aanBoard[ ici ],
+          if ( GeneralCubeDecisionE ( aar, (ConstTanBoard)aanBoard[ ici ],
                                       pci,
                                       pecCube[ pci->fMove ], 0 ) < 0 ) 
             return -1;
@@ -585,9 +585,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	/* Save number of pips (for bearoff only) */
 
-		pcBefore = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
+		pcBefore = ClassifyPosition ( (ConstTanBoard)aanBoard[ ici ], pci->bgv );
 		if ( aarsStatistics && pcBefore <= CLASS_BEAROFF1 ) {
-			PipCount ( aanBoard[ ici ], anPips );
+			PipCount ( (ConstTanBoard)aanBoard[ ici ], anPips );
 			nPipsBefore = anPips[ 1 ];
 		}
 
@@ -625,7 +625,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
               pci->fMove = ! pci->fMove;
               if (GeneralEvaluationE ( aaar[ i ][ j ],
-                                   aaanBoard[ i ][ j ],
+                                   (ConstTanBoard)aaanBoard[ i ][ j ],
                                    pci, &aecVarRedn[ pci->fMove ] ) < 0)
 				return -1;
               pci->fMove = ! pci->fMove;
@@ -738,12 +738,12 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	/* Calculate number of wasted pips */
 
-	pc = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
+	pc = ClassifyPosition ( (ConstTanBoard)aanBoard[ ici ], pci->bgv );
 
 	if ( aarsStatistics &&
 	     pc <= CLASS_BEAROFF1 && pcBefore <= CLASS_BEAROFF1 ) {
 
-	  PipCount ( aanBoard[ ici ], anPips );
+	  PipCount ( (ConstTanBoard)aanBoard[ ici ], anPips );
 	  nPipsAfter = anPips[ 1 ];
 	  nPipsDice = anDice[ 0 ] + anDice[ 1 ];
 	  if ( anDice[ 0 ] == anDice[ 1 ] ) nPipsDice *= 2;
@@ -760,7 +760,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	  /* opponent is on bar */
 
-	  ClosedBoard ( afClosedBoard, aanBoard[ ici ] );
+	  ClosedBoard ( afClosedBoard, (ConstTanBoard)aanBoard[ ici ] );
 
 	  if ( afClosedBoard[ pci->fMove ] ) {
 	    MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].nOpponentClosedOut);
@@ -775,7 +775,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         if ( pc == CLASS_OVER ) {
           if (GeneralEvaluationE ( aarOutput[ ici ],
-                               aanBoard[ ici ],
+                               (ConstTanBoard)aanBoard[ ici ],
                                pci, pecCube[ pci->fMove ] ) < 0)
 				return -1;
 
@@ -795,7 +795,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           /* update statistics */
 
 	  if( aarsStatistics )
-	      switch ( GameStatus ( aanBoard[ ici ], pci->bgv ) ) {
+	      switch ( GameStatus ( (ConstTanBoard)aanBoard[ ici ], pci->bgv ) ) {
 	      case 1:
 		  MT_SafeInc(&aarsStatistics[ ici ][ pci->fMove ].acWin[ LogCube ( pci->nCube )]);
 		  break;
@@ -839,7 +839,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       /* evaluation at truncation */
 
-	  if (GeneralEvaluationE ( aarOutput[ ici ], aanBoard[ ici ], pci, &ec ) < 0)
+	  if (GeneralEvaluationE ( aarOutput[ ici ], (ConstTanBoard)aanBoard[ ici ], pci, &ec ) < 0)
 		  return -1;
 
       if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
@@ -966,7 +966,7 @@ jsdinfo * ajiJSD;
 
 int ro_alternatives;
 evalsetup **ro_apes;
-int (** ro_apBoard)[ 2 ][ 25 ];
+ConstTanBoard *ro_apBoard;
 const cubeinfo **ro_apci;
 int **ro_apCubeDecTop;
 rolloutstat (*ro_aarsStatistics)[2];
@@ -1020,7 +1020,7 @@ extern void RolloutLoopMT(void)
       if (log_rollouts && log_name) {
 	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
 	log_game_start (log_name, ro_apci[ alt ], prc->fCubeful, 
-			(int (*)[25]) (&aanBoardEval));
+			(ConstTanBoard)(&aanBoardEval));
 	if ( !log_rollouts) {
 	  /* open failed */
 	  log_rollouts = 0;
@@ -1297,7 +1297,7 @@ static void UpdateProgress(void)
 }
 
 extern int
-RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
+RolloutGeneral( ConstTanBoard *apBoard, 
                 float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat aarsStatistics[][2],
@@ -1556,7 +1556,7 @@ static int UpdateTimePassed(void)
 }
 
 extern int
-RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
+RolloutGeneral( ConstTanBoard *apBoard,
                 float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat aarsStatistics[][2],
@@ -1772,7 +1772,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
       if (log_rollouts && log_name) {
 	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
 	log_game_start (log_name, apci[ alt ], prc->fCubeful, 
-			(int (*)[25]) (aanBoardEval + alt));
+			(ConstTanBoard)(aanBoardEval + alt));
 	if ( !log_rollouts) {
 	  /* open failed */
 	  log_rollouts = 0;
@@ -2111,12 +2111,12 @@ GeneralEvaluation ( float arOutput[ NUM_ROLLOUT_OUTPUTS ],
     for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
       arStdDev[ i ] = 0.0f;
 
-    return GeneralEvaluationE ( arOutput, anBoard, pci, &pes->ec );
+    return GeneralEvaluationE ( arOutput, (ConstTanBoard)anBoard, pci, &pes->ec );
 
   case EVAL_ROLLOUT:
 
     return GeneralEvaluationR ( arOutput, arStdDev, arsStatistics,
-                                anBoard, pci, &pes->rc, pf, p );
+                                (ConstTanBoard)anBoard, pci, &pes->rc, pf, p );
 
   case EVAL_NONE:
 
@@ -2133,11 +2133,11 @@ extern int
 GeneralEvaluationR ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev [ NUM_ROLLOUT_OUTPUTS ],
                      rolloutstat arsStatistics[ 2 ],
-                     TanBoard anBoard,
+                     const TanBoard anBoard,
                      const cubeinfo* pci, const rolloutcontext* prc,
-                     rolloutprogressfunc *pf, void *p ) {
-
-  int (* apBoard[1])[2][25];
+                     rolloutprogressfunc *pf, void *p )
+{
+  ConstTanBoard apBoard[1];
   float (*apOutput[1])[NUM_ROLLOUT_OUTPUTS];
   float (*apStdDev[1])[NUM_ROLLOUT_OUTPUTS];
   evalsetup  es;
@@ -2146,7 +2146,7 @@ GeneralEvaluationR ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
   int false = 0;
   int (* apCubeDecTop[1]);
 
-  apBoard[0] =  (int (*)[2][25]) anBoard;
+  apBoard[0] = anBoard;
   apOutput[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) arOutput;
   apStdDev[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) arStdDev;
   apes[0] = &es;
@@ -2168,7 +2168,7 @@ extern int
 GeneralCubeDecision ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       rolloutstat aarsStatistics[ 2 ][ 2 ],
-                      TanBoard anBoard,
+                      const TanBoard anBoard,
                       cubeinfo *pci, evalsetup *pes, 
                       rolloutprogressfunc *pf, void *p ) {
 
@@ -2205,7 +2205,7 @@ extern int
 GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        rolloutstat aarsStatistics[ 2 ][ 2 ],
-                       TanBoard anBoard,
+                       const TanBoard anBoard,
                        cubeinfo *pci, rolloutcontext *prc, evalsetup *pes,
                        rolloutprogressfunc *pf, void *p ) {
   
@@ -2217,7 +2217,7 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   int cGames;
   int afCubeDecTop[] = { FALSE, FALSE }; /* no cube decision in 
                                             iTurn = 0 */
-  int (* apBoard[2])[2][25];
+  ConstTanBoard apBoard[2];
   float (* apOutput[2])[ NUM_ROLLOUT_OUTPUTS ];
   float (* apStdDev[2])[ NUM_ROLLOUT_OUTPUTS ];
   int (* apCubeDecTop[2]);
@@ -2227,7 +2227,7 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   apStdDev[1] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarStdDev[1];
   apci[0] = &aci[ 0 ];
   apci[1] = &aci[ 1 ];
-  apBoard[0] = apBoard[1] = (int (*)[2][25]) anBoard;
+  apBoard[0] = apBoard[1] = anBoard;
   apOutput[0] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput;
   apOutput[1] = (float (*)[NUM_ROLLOUT_OUTPUTS]) aarOutput + 1;
 
@@ -2618,8 +2618,8 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
   int nGamesDone;
   rolloutcontext *prc;
 
-  int (* anBoard)[ 2 ][ 25 ] = g_alloca (cMoves * 2 * 25 * sizeof (int));
-  int (** apBoard)[2][25] = g_alloca (cMoves * sizeof (int*));
+  TanBoard *anBoard = g_alloca (cMoves * 2 * 25 * sizeof (int));
+  ConstTanBoard *apBoard = g_alloca (cMoves * sizeof (int*));
   float (** apOutput)[ NUM_ROLLOUT_OUTPUTS ] = 
     g_alloca (cMoves * NUM_ROLLOUT_OUTPUTS * sizeof (float));
   float (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ] =
@@ -2631,7 +2631,7 @@ ScoreMoveRollout ( move **ppm, const cubeinfo** ppci, int cMoves,
   
   /* initialise the arrays we'll need */
   for (i = 0; i < cMoves; ++i) {
-    apBoard[ i ] = anBoard + i;
+    apBoard[ i ] = (ConstTanBoard)(anBoard + i);
     apOutput[ i ] = &ppm[i]->arEvalMove;
     apStdDev[ i ] = &ppm[i]->arEvalStdDev;
     apes[ i ] = &ppm[i]->esMove;

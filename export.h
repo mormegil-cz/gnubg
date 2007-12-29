@@ -109,7 +109,7 @@ void GenerateImage3d(renderdata * prd, const char *szName,
 		     unsigned int nSizeY);
 #endif
 
-extern void TextAnalysis(GString * gsz, matchstate * pms,
+extern void TextAnalysis(GString * gsz, const matchstate * pms,
 			 moverecord * pmr);
 extern void TextPrologue(GString * gsz, const matchstate * pms,
 			 const int iGame);

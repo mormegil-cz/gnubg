@@ -330,6 +330,7 @@ extern int fResetSync;
 #endif
 extern matchinfo mi;
 extern matchstate ms;
+extern ConstTanBoard msBoard();
 extern movefilter aamfAnalysis[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 extern movefilter aamfEval[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 extern player ap[2];
@@ -404,13 +405,13 @@ extern void outputon(void);
 extern char *strcpyn(char *szDest, const char *szSrc, int cch);
 
 extern char *CheckCommand(char *sz, command * ac);
-extern char *FormatMoveHint(char *sz, matchstate * pms, movelist * pml,
+extern char *FormatMoveHint(char *sz, const matchstate * pms, movelist * pml,
 			    int i, int fRankKnown, int fDetailProb,
 			    int fShowParameters);
 extern char *FormatPrompt(void);
 extern char *GetBuildInfoString(void);
 extern char *GetInput(char *szPrompt);
-extern char *GetLuckAnalysis(matchstate * pms, float rLuck);
+extern char *GetLuckAnalysis(const matchstate * pms, float rLuck);
 extern char *GetMoveString(moverecord * pmr, int *pPlayer);
 extern double get_time(void);
 extern char *locale_from_utf8(const char *sz);
@@ -428,7 +429,7 @@ extern int AnalyzeMove(moverecord * pmr, matchstate * pms,
 		       const int afAnalysePlayers[2], float *doubleError);
 extern int CompareNames(char *sz0, char *sz1);
 extern int confirmOverwrite(const char *sz, const int f);
-extern int EPC(int anBoard[2][25], float *arEPC, float *arMu,
+extern int EPC(const int anBoard[2][25], float *arEPC, float *arMu,
 	       float *arSigma, int *pfSource, const int fOnlyBearoff);
 extern int EvalCmp(const evalcontext *, const evalcontext *, const int);
 extern int getFinalScore(int *anScore);

@@ -53,7 +53,7 @@ ParseSnowieTxt( char *sz,
 
 
 static int
-IsValidMove ( TanBoard anBoard, const int anMove[ 8 ] ) {
+IsValidMove ( const TanBoard anBoard, const int anMove[ 8 ] ) {
 
   TanBoard anBoardTemp;
   int anMoveTemp[ 8 ];
@@ -70,30 +70,25 @@ IsValidMove ( TanBoard anBoard, const int anMove[ 8 ] ) {
 
 
 static int
-IsValidNackMove( TanBoard anBoard, const int anMove[ 8 ] ) {
-
+IsValidNackMove( const TanBoard anBoard, const int anMove[ 8 ] )
+{
     int result = 0;
 
     if ( !anBoard[ 0 ][ 1 ] && !anBoard[ 1 ][ 1 ]         /* opponents checkers on nack point? */
         && anBoard[ 0 ][ 5 ] && anBoard[ 1 ][ 5 ]         /* need spare checkers on 6 and 12   */
-        && anBoard[ 0 ][ 12 ] && anBoard[ 1 ][ 12 ] ) {
+        && anBoard[ 0 ][ 12 ] && anBoard[ 1 ][ 12 ] )
+	{
+		TanBoard anBoardTemp;
+		memcpy(anBoardTemp, anBoard, sizeof anBoardTemp);
+		anBoardTemp[ 0 ][ 22 ] += 2;                            /* move checkers to nack point       */
+		anBoardTemp[ 1 ][ 22 ] += 2;
+		--anBoardTemp[ 0 ][ 5 ];
+		--anBoardTemp[ 1 ][ 5 ];
+		--anBoardTemp[ 0 ][ 12 ];
+		--anBoardTemp[ 1 ][ 12 ];
 
-      anBoard[ 0 ][ 22 ] += 2;                            /* move checkers to nack point       */
-      anBoard[ 1 ][ 22 ] += 2;
-      --anBoard[ 0 ][ 5 ];
-      --anBoard[ 1 ][ 5 ];
-      --anBoard[ 0 ][ 12 ];
-      --anBoard[ 1 ][ 12 ];
-
-      result = IsValidMove( anBoard, anMove );
-
-      anBoard[ 0 ][ 22 ] -= 2;                            /* move checkers back                */
-      anBoard[ 1 ][ 22 ] -= 2;
-      ++anBoard[ 0 ][ 5 ];
-      ++anBoard[ 1 ][ 5 ];
-      ++anBoard[ 0 ][ 12 ];
-      ++anBoard[ 1 ][ 12 ];
-    }
+		result = IsValidMove( (ConstTanBoard)anBoardTemp, anMove );
+	}
     return result;
 }
 
@@ -439,7 +434,7 @@ ImportJF( FILE * fp, char *szFileName) {
   pmr->mt = MOVE_SETBOARD;
   if( fTurn )
     SwapSides( anBoard );
-  PositionKey( anBoard, pmr->sb.auchKey );
+  PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
   AddMoveRecord( pmr );
 
   /* cube value */
@@ -477,7 +472,7 @@ static int fWarned, fPostCrawford, fTryNackgammon;
 
 
 static int
-ExpandMatMove ( TanBoard anBoard, int anMove[ 8 ], int *pc,
+ExpandMatMove ( const TanBoard anBoard, int anMove[ 8 ], int *pc,
              const unsigned int anDice[ 2 ] ) {
 
   int i, j, k;
@@ -634,7 +629,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
           pmr->mt = MOVE_SETBOARD;
           if( fTurn )
             SwapSides( anBoard );
-          PositionKey( anBoard, pmr->sb.auchKey );
+          PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
           AddMoveRecord( pmr );
 
           return;
@@ -663,16 +658,16 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             
             /* remove consolidation */
             
-            if ( ExpandMatMove ( ms.anBoard, pmr->n.anMove, &c, 
+            if ( ExpandMatMove ( msBoard(), pmr->n.anMove, &c, 
                                  pmr->anDice ) )
               outputf( _("WARNING: Expand move failed. This file "
                          "contains garbage!") );
             
             /* check if move is valid */
             
-           if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) ) {
+           if ( ! IsValidMove ( msBoard(), pmr->n.anMove ) ) {
                if ( !fTryNackgammon ) {
-                   if ( IsValidNackMove( ms.anBoard, pmr->n.anMove ) ) {
+                   if ( IsValidNackMove( msBoard(), pmr->n.anMove ) ) {
                        fTryNackgammon = 1;     /* try Nackgammon import next time */
                    }
                 }
@@ -696,7 +691,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 		  anDice[0] = pmr->anDice[0];
 		  anDice[1] = pmr->anDice[1];
 
-          switch ( GenerateMoves( &ml, ms.anBoard, 
+          switch ( GenerateMoves( &ml, msBoard(), 
                                   pmr->anDice[ 0 ], pmr->anDice[ 1 ], 
                                   FALSE ) ) {
 
@@ -1167,7 +1162,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 
             CanonicalMoveOrder( pmr->n.anMove );
 
-            if ( ! IsValidMove( ms.anBoard, pmr->n.anMove ) ) {
+            if ( ! IsValidMove( msBoard(), pmr->n.anMove ) ) {
               outputf( _("WARNING! Illegal or invalid move: '%s'\n"),
                        sz );
               free( pmr );
@@ -2608,7 +2603,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 		if (!strncmp(pch, "0/0", 3))
 		{	/* See if fan is legal (i.e. no moves available) - otherwise skip */
 			movelist ml;
-			if (GenerateMoves(&ml, ms.anBoard, pmr->anDice[ 0 ], pmr->anDice[ 1 ], FALSE) == 0)
+			if (GenerateMoves(&ml, msBoard(), pmr->anDice[ 0 ], pmr->anDice[ 1 ], FALSE) == 0)
 			{
 				/* fans */
 				AddMoveRecord ( pmr );
@@ -3240,7 +3235,7 @@ ImportSnowieTxt( FILE *pf ) {
   pmr->mt = MOVE_SETBOARD;
   if( ! fTurn )
       SwapSides( anBoard );
-  PositionKey( anBoard, pmr->sb.auchKey );
+  PositionKey( (ConstTanBoard)anBoard, pmr->sb.auchKey );
   AddMoveRecord( pmr );
 
   /* cube value */

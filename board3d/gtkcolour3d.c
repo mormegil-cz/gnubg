@@ -209,16 +209,8 @@ static void SetupColourPreview(void)
 	glLoadIdentity();
 }
 
-static GdkGLPixmap *glpixmap;
-static GdkGLContext *glPixmapContext = NULL;
-
 static void CreatePreview(void)
 {
-	GdkGLDrawable *gldrawable;
-	glpixmap = gdk_pixmap_set_gl_capability(xppm, getglconfigSingle(), NULL);
-	gldrawable = GDK_GL_DRAWABLE(glpixmap);
-	glPixmapContext = gdk_gl_context_new(gldrawable, NULL, FALSE, GDK_GL_RGBA_TYPE);
-
 	SetupColourPreview();
 }
 
