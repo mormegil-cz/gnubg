@@ -1839,6 +1839,13 @@ static void DoFullScreenMode(gpointer p, guint n, GtkWidget * pw)
 	GtkWidget *pmiDP =
 	    gtk_item_factory_get_widget(pif, "/View/Dock panels");
 
+#if USE_BOARD3D
+    if (display_is_3d(bd->rd))
+	{	/* Stop any 3d animations */
+		StopIdle3d(bd, bd->bd3d);
+	}
+#endif
+
 	fFullScreen =
 	    GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget
 				(pif, "/View/Full screen"))->active;
