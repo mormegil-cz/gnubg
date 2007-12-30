@@ -3756,4 +3756,3 @@ extern void drawBasePreRender(const BoardData *bd, const BoardData3d *bd3d, cons
 	SaveBufferRegion(bd3d->wglBuffer, 0, 0, bd3d->drawing_area3d->allocation.width, bd3d->drawing_area3d->allocation.height);
 #endif
 }
-
