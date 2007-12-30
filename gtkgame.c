@@ -6337,6 +6337,7 @@ extern void GTKHelp( char *sz )
     GtkTreeStore *pts;
     GtkTreeIter ti, tiSearch;
     GtkTreePath *ptp, *ptpExpand;
+	GtkTreeSelection *treeSelection;
     char *pch;
     command *pc, *pcTest, *pcStart;
     int cch, i, c, *pn;
@@ -6374,6 +6375,8 @@ extern void GTKHelp( char *sz )
 	gtk_container_add( GTK_CONTAINER( pwScrolled ),
 			   pwHelpTree = gtk_tree_view_new_with_model(
 			       GTK_TREE_MODEL( pts ) ) );
+	treeSelection = gtk_tree_view_get_selection(GTK_TREE_VIEW( pwHelpTree ));
+
 	g_object_unref( G_OBJECT( pts ) );
 	gtk_tree_view_set_headers_visible( GTK_TREE_VIEW( pwHelpTree ),
 					   FALSE );
@@ -6383,8 +6386,7 @@ extern void GTKHelp( char *sz )
 	gtk_tree_view_insert_column_with_attributes( GTK_TREE_VIEW(
 	    pwHelpTree ), 1, NULL, gtk_cell_renderer_text_new(),
 						     "text", 1, NULL );
-	g_signal_connect( G_OBJECT( gtk_tree_view_get_selection(
-	    GTK_TREE_VIEW( pwHelpTree ) ) ), "changed",
+	g_signal_connect( G_OBJECT( treeSelection ), "changed",
 			  G_CALLBACK( GTKHelpSelect ), NULL );
 	
 	gtk_paned_pack2( GTK_PANED( pwPaned ),
@@ -6443,10 +6445,10 @@ extern void GTKHelp( char *sz )
 	gtk_tree_view_expand_row( GTK_TREE_VIEW( pwHelpTree ), ptpExpand,
 				  FALSE );
     }
-    gtk_tree_selection_select_iter(
-	gtk_tree_view_get_selection( GTK_TREE_VIEW( pwHelpTree ) ), &ti );
+    gtk_tree_selection_select_iter(treeSelection, &ti );
     gtk_tree_view_scroll_to_cell( GTK_TREE_VIEW( pwHelpTree ), ptp,
 				  NULL, TRUE, 0.5, 0 );
+	gtk_tree_view_set_cursor(GTK_TREE_VIEW( pwHelpTree ), ptp, NULL, FALSE);
     gtk_tree_path_free( ptp );
     gtk_tree_path_free( ptpExpand );
 }
