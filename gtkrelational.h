@@ -26,6 +26,5 @@
 extern void GtkRelationalShowStats(gpointer p, guint n, GtkWidget * pw);
 extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw);
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw);
-extern void GtkManageRelationalEnvs(gpointer p, guint n, GtkWidget * pw);
 extern void GtkShowQuery(RowSet* pRow);
 #endif

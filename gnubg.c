@@ -871,26 +871,14 @@ command cER = {
     { "match", CommandRelationalAddMatch,
       N_("Log the match to the external relational database"), 
       szOPTENVFORCE, NULL },
-    { "env", CommandRelationalAddEnvironment,
-      N_("Add a new environment to the external relational database"), 
-      szNAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acRelationalErase[] = {
-    { "environment", CommandRelationalEraseEnv, N_("Remove an environment and all related "
-		"statistics from the relational database"), szNAME, NULL },
     { "player", CommandRelationalErase, N_("Remove all statistics from one player "
 			"in the relational database"), szNAMEOPTENV, NULL },
     { "allplayers", CommandRelationalEraseAll,
       N_("Remove all player statistics in the relational database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acRelationalRename[] = {
-    { "environment", CommandRelationalRenameEnv, N_("Rename an environment "
-		"in the relational database"), szRENAME, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
 }, acRelationalShow[] = {
-    { "environments", CommandRelationalShowEnvironments, 
-      N_("Show the environments where the match can be logged"), 
-      NULL, NULL },
     { "details", CommandRelationalShowDetails, 
       N_("Show details of the matches for a given player in the database"), 
       szNAMEOPTENV, NULL },
@@ -906,8 +894,6 @@ command cER = {
     { "help", CommandRelationalHelp, 
       N_("Help and instructions for using and setting up "
          "the external relational database"), NULL, NULL },
-    { "rename", NULL, N_("Rename items in the external relational database"), NULL,
-      acRelationalRename },
     { "select", CommandRelationalSelect, N_("Query the relational database"),
       szCOMMAND, NULL },
     { "show", NULL, N_("Show information from the relational database"),
@@ -4200,7 +4186,7 @@ extern void CommandLoadPython(char *sz)
 	}
 	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
 		g_free(path);
-		outputerrf("Python file (%s) not found\n", path);
+		outputerrf("Python file (%s) not found\n", sz);
 		return;
 	}
 
@@ -5578,13 +5564,15 @@ extern void outputerrv( const char *sz, va_list val )
 
     char *szFormatted;
     szFormatted = g_strdup_vprintf( sz, val );
-    g_printerr("%s", szFormatted);
-    if( !isatty( STDOUT_FILENO ) ) 
-       fflush( stdout );
-    putc( '\n', stderr );
+
 #if USE_GTK
     if( fX )
 	GTKOutputErr( szFormatted );
+#else
+	g_printerr("%s", szFormatted);
+    if( !isatty( STDOUT_FILENO ) ) 
+       fflush( stdout );
+    putc( '\n', stderr );
 #endif
     g_free( szFormatted );
 }

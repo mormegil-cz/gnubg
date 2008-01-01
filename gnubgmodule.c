@@ -147,21 +147,28 @@ static int
 PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
 
   PyObject *pyKey, *pyValue;
-  ssize_t iPos = 0;
+  size_t iPos = 0;
   char *pchKey;
   static char *aszKeys[] = {
     "jacoby", "crawford", "move", "beavers", "cube", "matchto",
     "bgv", "cubeowner", "score", "gammonprice", NULL };
   int iKey;
-  int i;
-  void *ap[] = { &pci->fJacoby, &pci->fCrawford, &pci->fMove,
-                 &pci->fBeavers, &pci->nCube, &pci->nMatchTo,
-                 &pci->bgv, &pci->fCubeOwner, pci->anScore,
-                 pci->arGammonPrice };
+  void *ap[10];
   int *pi;
   float *pf;
-  
-  while( PyDict_Next( p, &iPos, &pyKey, &pyValue ) ) {
+  int i = 0;
+  ap[i++] = &pci->fJacoby;
+  ap[i++] = &pci->fCrawford;
+  ap[i++] = &pci->fMove;
+  ap[i++] = &pci->fBeavers;
+  ap[i++] = &pci->nCube;
+  ap[i++] = &pci->nMatchTo;
+  ap[i++] = &pci->bgv;
+  ap[i++] = &pci->fCubeOwner;
+  ap[i++] = pci->anScore;
+  ap[i++] = pci->arGammonPrice;
+
+  while( PyDict_Next( p, (int*)&iPos, &pyKey, &pyValue ) ) {
 
     if ( ! ( pchKey = PyString_AsString( pyKey ) ) )
       return -1;
@@ -259,7 +266,7 @@ PyToEvalContext( PyObject *p, evalcontext *pec ) {
   int iKey;
   int i;
   
-  while( PyDict_Next( p, &iPos, &pyKey, &pyValue ) ) {
+  while( PyDict_Next( p, (int*)&iPos, &pyKey, &pyValue ) ) {
 
     if ( ! ( pchKey = PyString_AsString( pyKey ) ) )
       return -1;
@@ -502,7 +509,7 @@ PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyEvalContext && PyToEvalContext( pyEvalContext, &ec ) )
     return NULL;
 
-  if ( GeneralEvaluationE( arOutput, anBoard, &ci, &ec ) ) {
+  if ( GeneralEvaluationE( arOutput, (ConstTanBoard)anBoard, &ci, &ec ) ) {
     PyErr_SetString( PyExc_StandardError, 
                      _("interupted/errro in GeneralEvaluateE") );
     return NULL;
@@ -548,7 +555,7 @@ PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyEvalContext && PyToEvalContext( pyEvalContext, &ec ) )
     return NULL;
 
-  if ( GeneralCubeDecisionE ( aarOutput, anBoard, &ci, &ec, 0 ) < 0 ){
+  if ( GeneralCubeDecisionE ( aarOutput, (ConstTanBoard)anBoard, &ci, &ec, 0 ) < 0 ){
     PyErr_SetString( PyExc_StandardError, 
                      _("interupted/errno in GeneralCubeDecisionE") );
     return NULL;
@@ -593,7 +600,8 @@ PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyDice && !PyToDice( pyDice, anDice ) )
     return NULL;
 
-  if (!anDice){
+  if (anDice[0] == 0)
+  {
 	  printf("What? No dice?\n");
 	  return NULL;
   }
@@ -753,7 +761,7 @@ static void AddString(listOLD* buffers, char* str)
 static char* GameAsString(void)
 {
 	char *ret;
-	int size;
+	size_t size;
 	char buf[1024];
 	listOLD *pList, *plGame, *plMove;
 	listOLD buffers;
@@ -847,7 +855,7 @@ PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
-  return PyString_FromString( PositionID( anBoard ) );
+  return PyString_FromString( PositionID( (ConstTanBoard)anBoard ) );
 
 }
 
@@ -890,7 +898,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
-  PositionKey( anBoard, auch );
+  PositionKey( (ConstTanBoard)anBoard, auch );
 
   {
     PyObject* a = PyTuple_New(10);
@@ -1249,8 +1257,7 @@ addLuck(PyObject* dict, float const rLuck, lucktype const lt)
 static PyObject*
 PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
 {
-  int i;
-
+  unsigned int i;
   unsigned int n = 0;
   
   for(i = 0; i < pml->cMoves; i++) {
@@ -1760,7 +1767,7 @@ PythonGame(const listOLD*    plGame,
 
 	  if( includeBoards ) {
 	    DictSetItemSteal(recordDict, "board",
-			     PyString_FromString(PositionID(anBoard)));
+			     PyString_FromString(PositionID((ConstTanBoard)anBoard)));
 	    
 	    ApplyMove(anBoard, pmr->n.anMove, 0);
 	    SwapSides(anBoard);
@@ -1804,7 +1811,7 @@ PythonGame(const listOLD*    plGame,
 
 	  if( includeBoards ) {
 	    DictSetItemSteal(recordDict, "board",
-			     PyString_FromString(PositionID(anBoard)));
+			     PyString_FromString(PositionID((ConstTanBoard)anBoard)));
 	  }
 	    
 	  if( analysis ) {
@@ -2399,24 +2406,23 @@ PyMethodDef gnubgMethods[] = {
 
 };
 
-extern void
-PythonInitialise(void) {
-
+extern void PythonInitialise(void)
+{
   char *pch;
   char *working_dir = g_get_current_dir();
 
 #if WIN32
 {	/* Setup python to look in the pythonlib directory if present */
 	char *python_dir;
-	python_dir = g_build_filename(working_dir, "/PythonLib");
+	python_dir = g_build_filename(working_dir, "/PythonLib", NULL);
 	if (access(python_dir, F_OK) == 0)
 	{	/* Set Pyton to use this directory */
 		char *buf;
 		buf = g_strdup_printf("PYTHONPATH=%s", python_dir);
-		_putenv(buf);
+		putenv(buf);
 		g_free(buf);
 		buf = g_strdup_printf("PYTHONROOT=%s", python_dir);
-		_putenv(buf);
+		putenv(buf);
 		g_free(buf);
 	}
 	g_free(python_dir);

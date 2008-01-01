@@ -3669,8 +3669,6 @@ GtkItemFactoryEntry aife[] = {
 	},
         { N_("/_Analyse/Relational database/Show Records"), NULL,
           GtkShowRelational, 0, NULL, NULL },
-        { N_("/_Analyse/Relational database/Manage Environments"), NULL,
-          GtkManageRelationalEnvs, 0, NULL , NULL},
         { N_("/_Analyse/Relational database/Test"), NULL,
           Command, CMD_RELATIONAL_TEST, NULL, NULL },
         { N_("/_Analyse/Relational database/Help"), NULL,
@@ -6647,7 +6645,7 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
 
-#if USE_PYTHON	
+#if USE_PYTHON
        gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
@@ -6669,11 +6667,6 @@ extern void GTKSet( void *p ) {
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
                                        "Relational database/Show Records" ), 
-          TRUE );
-    gtk_widget_set_sensitive( 
-          gtk_item_factory_get_widget( pif,
-                                       "/Analyse/"
-                                       "Relational database/Manage Environments" ), 
           TRUE );
     gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,

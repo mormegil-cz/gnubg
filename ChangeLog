@@ -1,3 +1,8 @@
+Tue Jan 01 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* relational.c, gtkrelational.c, database.py, gnubg.sql:
+		Simplify relational database by removing "environments".
+
 Wed Dec 19 11:06:45 CET 2007 Christian Anthon <anthon@kiku.dk>
 
 	* lib/cache.c: only lock one level

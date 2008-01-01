@@ -32,56 +32,20 @@ CREATE UNIQUE INDEX icontrol ON control (
     tablename
 );
 
--- Table: env (nobody can spell 'environment' :-)) 
--- Holds the places
--- where nicks might be found. This allows different players having
--- identical nicks on different servers.
+-- Table: player
+-- a player
 
-CREATE TABLE env (
-    env_id       INTEGER NOT NULL
-   -- Textual description of the environment, e.g., "FIBS"
-   ,place        CHAR(80) NOT NULL 
-   ,PRIMARY KEY (env_id)
-);
-
-CREATE UNIQUE INDEX ienv ON env(
-    env_id 
-);
-
--- Table: person
--- One person, which can have one or more nicknames
-
-CREATE TABLE person (
-    person_id      INTEGER NOT NULL
-   -- Name of person
+CREATE TABLE player (
+   player_id INTEGER NOT NULL
+   -- Name of player
    ,name          CHAR(80) NOT NULL
-   -- Misc notes about this person
+   -- Misc notes about this player
    ,notes         VARCHAR(1000) NOT NULL
-   ,PRIMARY KEY (person_id)
+   ,PRIMARY KEY (player_id)
 );
 
-CREATE UNIQUE INDEX iperson ON person (
-    person_id
-);
-
--- Table: nick
--- Nicknames, combining a player and an env
-
-CREATE TABLE nick (
-   nick_id INTEGER NOT NULL
-   ,env_id INTEGER NOT NULL
-   ,person_id INTEGER NOT NULL
-   -- Nickname of player
-   ,name          CHAR(80) NOT NULL
-   ,PRIMARY KEY (nick_id)
-   ,FOREIGN KEY (env_id) REFERENCES env (env_id)
-      ON DELETE RESTRICT
-   ,FOREIGN KEY (person_id) REFERENCES person (person_id)
-      ON DELETE RESTRICT
-);
-
-CREATE UNIQUE INDEX inick ON nick (
-    nick_id
+CREATE UNIQUE INDEX iplayer ON player (
+    player_id
 );
 
 -- Table: match
@@ -90,9 +54,9 @@ CREATE TABLE match (
     match_id        INTEGER NOT NULL
    ,checksum        CHAR(33) NOT NULL
    -- Player 0
-   ,nick_id0      INTEGER NOT NULL 
+   ,player_id0      INTEGER NOT NULL 
    -- Player 1
-   ,nick_id1      INTEGER NOT NULL 
+   ,player_id1      INTEGER NOT NULL 
    -- The result of the match/session:
    -- - the total number of points won or lost
    -- - +1/0/-1 for player 0 won the match, match not complete, and
@@ -113,17 +77,15 @@ CREATE TABLE match (
    ,comment         CHAR(80) NOT NULL
    ,date            DATE 
    ,PRIMARY KEY (match_id)
-   ,FOREIGN KEY (nick_id0) REFERENCES nick (nick_id)
+   ,FOREIGN KEY (player_id0) REFERENCES player (player_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (nick_id1) REFERENCES nick (nick_id)
+   ,FOREIGN KEY (player_id1) REFERENCES player (player_id)
       ON DELETE RESTRICT
 );
 
 CREATE UNIQUE INDEX imatch ON match (
     match_id
 );
-
-
 
 -- Table: statistics
 -- Used from match and game tables to store match and game statistics,
@@ -134,7 +96,7 @@ CREATE TABLE matchstat (
    -- match identification
    ,match_id                          INTEGER NOT NULL
    -- player identification
-   ,nick_id                         INTEGER NOT NULL
+   ,player_id                         INTEGER NOT NULL
    -- chequerplay statistics
    ,total_moves                       INTEGER NOT NULL 
    ,unforced_moves                    INTEGER NOT NULL
@@ -213,7 +175,7 @@ CREATE TABLE matchstat (
    ,time_penalty_loss                 FLOAT   NOT NULL
    -- 
    ,PRIMARY KEY (matchstat_id)
-   ,FOREIGN KEY (nick_id) REFERENCES nick (nick_id)
+   ,FOREIGN KEY (player_id) REFERENCES player (player_id)
       ON DELETE RESTRICT
    ,FOREIGN KEY (match_id) REFERENCES match (match_id)
       ON DELETE CASCADE
@@ -230,9 +192,9 @@ CREATE TABLE game (
     game_id         INTEGER NOT NULL
    ,match_id        INTEGER NOT NULL
    -- Player 0
-   ,nick_id0      INTEGER NOT NULL 
+   ,player_id0      INTEGER NOT NULL 
    -- Player 1
-   ,nick_id1      INTEGER NOT NULL 
+   ,player_id1      INTEGER NOT NULL 
    -- score at start of game (since end of game is not meaningful if incomplete)
    ,score_0       INTEGER NOT NULL
    ,score_1       INTEGER NOT NULL
@@ -250,9 +212,9 @@ CREATE TABLE game (
    ,PRIMARY KEY (game_id)
    ,FOREIGN KEY (match_id) REFERENCES match (match_id)
       ON DELETE CASCADE
-   ,FOREIGN KEY (nick_id0) REFERENCES nick (nick_id)
+   ,FOREIGN KEY (player_id0) REFERENCES player (player_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (nick_id1) REFERENCES nick (nick_id)
+   ,FOREIGN KEY (player_id1) REFERENCES player (player_id)
       ON DELETE RESTRICT
 );
 
@@ -269,7 +231,7 @@ CREATE TABLE gamestat (
    -- game identification
    ,game_id                          INTEGER NOT NULL
    -- player identification
-   ,nick_id                         INTEGER NOT NULL
+   ,player_id                         INTEGER NOT NULL
    -- chequerplay statistics
    ,total_moves                       INTEGER NOT NULL 
    ,unforced_moves                    INTEGER NOT NULL
@@ -348,7 +310,7 @@ CREATE TABLE gamestat (
    ,time_penalty_loss                 FLOAT   NOT NULL
    -- 
    ,PRIMARY KEY (gamestat_id)
-   ,FOREIGN KEY (nick_id) REFERENCES nick (nick_id)
+   ,FOREIGN KEY (player_id) REFERENCES player (player_id)
       ON DELETE RESTRICT
    ,FOREIGN KEY (game_id) REFERENCES game (game_id)
       ON DELETE CASCADE
@@ -357,6 +319,3 @@ CREATE TABLE gamestat (
 CREATE UNIQUE INDEX isgamestat ON gamestat (
     gamestat_id
 );
-
-INSERT INTO env VALUES( 0, 'Default env.');
-INSERT INTO control VALUES('env', 1);

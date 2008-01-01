@@ -169,7 +169,7 @@ static void CopyName(int i, char *sz)
 
     strcpy(ap[i].szName, pc);
 
-    free(pc);
+    g_free(pc);
 
 }
 
@@ -350,7 +350,6 @@ static void RestoreText(char *sz, char **ppch)
 
 static void RestoreRules(xmovegameinfo * pmgi, const char *sz)
 {
-
     char *pch;
     char *pchx;
 
@@ -382,8 +381,7 @@ static void RestoreRules(xmovegameinfo * pmgi, const char *sz)
 
     }
 
-    free(pch);
-
+    g_free(pch);
 }
 
 
