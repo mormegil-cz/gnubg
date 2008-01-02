@@ -150,9 +150,9 @@ rollout.h
 set.c
 sgf.c
 sgf.h
-sgfl.c
-sgfp.c
-sgfp.h
+sgf_l.c
+sgf_y.c
+sgf_y.h
 show.c
 simpleboard.c
 simpleboard.h

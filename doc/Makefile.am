@@ -48,13 +48,13 @@ all: gnubg.6 gnubg.html allabout.html gnubg.texi gnubg.info gnubg.pdf allabout.p
 
 gnubg.6: gnubgman.xml
 	$(DOCBOOK2MAN) $< || \
-		cp gnubg/gnubg.6 .
+		cp $(srcdir)/gnubg/gnubg.6 .
 
 gnubg.pdf: gnubgdb.xml $(gnubg_image_DATA)
-	$(DBLATEX) $< -o $@ || cp gnubg/gnubg.pdf .
+	$(DBLATEX) $< -o $@ || cp $(srcdir)/gnubg/gnubg.pdf .
 
 allabout.pdf: allabout.xml $(gnubg_image_DATA)
-	$(DBLATEX) $< -o $@ || cp gnubg/allabout.pdf .
+	$(DBLATEX) $< -o $@ || cp $(srcdir)/gnubg/allabout.pdf .
 
 gnubg.html: gnubgdb.xml
 	$(XSLTPROC) \
@@ -64,7 +64,7 @@ gnubg.html: gnubgdb.xml
 		--stringparam  html.longdesc 0 \
 		--nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/onechunk.xsl \
 		$< || \
-		cp gnubg/gnubg.html .
+		cp $(srcdir)/gnubg/gnubg.html .
 
 
 allabout.html: allabout.xml
@@ -74,15 +74,15 @@ allabout.html: allabout.xml
 		--stringparam  root.filename  '' \
 		--nonet http://docbook.sourceforge.net/release/xsl/current/xhtml/onechunk.xsl \
 		$< || \
-		cp gnubg/allabout.html .
+		cp $(srcdir)/gnubg/allabout.html .
 
 gnubg.texi: gnubgdb.xml
 	$(DOCBOOK2TEXI) --encoding=ISO-8859-1 --string-param prefer-textobjects=1 $< || \
-	cp gnubg/gnubg.texi .
+	cp $(srcdir)/gnubg/gnubg.texi .
 
 gnubg.info: gnubg.texi
 	makeinfo $< -o $@ || \
-	cp gnubg/gnubg.info .
+	cp $(srcdir)/gnubg/gnubg.info .
 
 html_node: gnubg.texi
 	makeinfo --html $< -o $@

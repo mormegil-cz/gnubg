@@ -168,11 +168,10 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
 #
 ##files to add to the tarball when 'make dist'
 #
-EXTRA_DIST = config.rpath  userrng.c copying.awk \
-	gnubg.gtkrc credits.sh \
-	$(BUILT_SOURCES)
-	ABOUT-NLS boards.xml gnubg.game.sql autogen.sh gnubg.weights\
-	textures.txt gnubg.png gnubg.svg corecount.c
+EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.gtkrc credits.sh \
+	$(BUILT_SOURCES) ABOUT-NLS boards.xml gnubg.game.sql autogen.sh \
+	gnubg.weights textures.txt gnubg.png gnubg.svg corecount.c \
+	external_y.h sgf_y.h
 
 #
 ##credits.c target
@@ -211,5 +210,5 @@ gnubg_ts0.bd: makebearoff$(EXEEXT)
 	./makebearoff -t 6x6 -f $@
 endif
 
-MOSTLYCLEANFILES=sgfp.c sgfp.h sgfl.c external_l.c external_l.h external_y.c external_y.h copying.c credits.c credits.h
+MOSTLYCLEANFILES=sgf_y.c sgf_y.h sgf_l.c external_l.c external_l.h external_y.c external_y.h copying.c credits.c credits.h
 DISTCLEANFILES=gnubg_os0.bd gnubg_ts0.bd gnubg.wd

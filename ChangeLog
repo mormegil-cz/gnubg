@@ -1,3 +1,9 @@
+Wed Jan  2 15:48:02 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, doc/Makefile.am, lib/Makefile.am, non-src/Makefile.am,
+	po/POTFILES.in: fix make distcheck
+	* multithread.h: fix typo and add MT_SafeDecCheck
+
 Tue Jan 01 21:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* relational.c, gtkrelational.c, database.py, gnubg.sql:
