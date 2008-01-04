@@ -1042,7 +1042,7 @@ static int AnalyzeGame ( listOLD *plGame )
 				pt = pParentTask;
 				pParentTask = NULL;
 			}
-			g_debug("add task: analysis");
+			multi_debug("add task: analysis");
 			MT_AddTask((Task*)pt, TRUE);
 		}
 
@@ -1056,7 +1056,7 @@ static int AnalyzeGame ( listOLD *plGame )
 	}
 	g_assert(pl->plNext == plGame);
 
-	g_debug("wait for all task: analysis");
+	multi_debug("wait for all task: analysis");
 	result = MT_WaitForTasks(UpdateProgressBar, 250);
 
 	fnTick = fnOld;

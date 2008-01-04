@@ -26,14 +26,16 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 
 OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
-BIN_DIRS=$(BINDIR) $(BINDIR)/textures $(BINDIR)/met $(BINDIR)/fonts $(BINDIR)/flags $(BINDIR)/sounds
+BIN_DIRS=$(BINDIR) $(BINDIR)/textures $(BINDIR)/met $(BINDIR)/fonts $(BINDIR)/flags $(BINDIR)/sounds $(BINDIR)/scripts
 TEXTURES=$(patsubst textures/%,$(BINDIR)/textures/%,$(wildcard textures/*.png)) $(patsubst textures/%,$(BINDIR)/textures/%,$(wildcard textures/*.bmp))
 FLAGPICS=$(patsubst flags/%,$(BINDIR)/flags/%,$(wildcard flags/*.png))
 SOUNDS=$(patsubst sounds/%,$(BINDIR)/sounds/%,$(wildcard sounds/*.wav))
 METFILES=$(patsubst met/%,$(BINDIR)/met/%,$(wildcard met/*.xml))
 FONTFILES=$(patsubst fonts/%,$(BINDIR)/fonts/%,$(wildcard fonts/*.ttf))
 POFILES=$(patsubst po/%.po,$(BINDIR)/locale/%/LC_MESSAGES/gnubg.mo,$(wildcard po/*.po))
-EXTRA_FILES=$(BINDIR)/textures.txt $(BINDIR)/gnubg.png $(BINDIR)/met/met.dtd $(BINDIR)/gnubg.gtkrc $(BINDIR)/boards.xml
+SCRIPTS=$(patsubst scripts/%,$(BINDIR)/scripts/%,$(wildcard scripts/*.py))
+EXTRA_FILES=$(BINDIR)/textures.txt $(BINDIR)/gnubg.png $(BINDIR)/met/met.dtd \
+			$(BINDIR)/gnubg.gtkrc $(BINDIR)/boards.xml $(BINDIR)/gnubg.sql
 
 makebearoff_SOURCE = makebearoff eval positionid matchequity \
 		     matchid osr bearoffgammon bearoff \
@@ -82,13 +84,13 @@ TSDB = $(BINDIR)/gnubg_ts0.bd
 MAKEWEIGHTS = $(BINDIR)/makeweights.exe
 WEIGHTS = $(BINDIR)/gnubg.wd
 
-all: objdirs $(BIN_DIRS) $(TEXTURES) $(FLAGPICS) $(SOUNDS) $(METFILES) $(POFILES) $(FONTFILES) $(EXTRA_FILES) \
+all: objdirs $(BIN_DIRS) $(TEXTURES) $(FLAGPICS) $(SOUNDS) $(METFILES) $(POFILES) $(SCRIPTS) $(FONTFILES) $(EXTRA_FILES) \
 		Libraries $(WEIGHTS) BearOffDBs  $(TARGET)
 	@echo $(TARGET) done
 
 Libraries:
-	@$(MAKE) -fmakefile.w32 -C lib
-	@$(MAKE) -fmakefile.win -C board3d
+	@$(MAKE) --no-print-directory -fmakefile.w32 -C lib
+	@$(MAKE) --no-print-directory -fmakefile.win -C board3d
 
 BearOffDBs: $(MAKEBEAROFFEXE) $(OSDB) $(TSDB)
 

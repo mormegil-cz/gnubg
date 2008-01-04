@@ -20,6 +20,13 @@
 #include <windows.h>
 #endif
 
+/*#define DEBUG_MULTITHREADED 1*/
+#if DEBUG_MULTITHREADED
+#define multi_debug(x) puts(x)
+#else
+#define multi_debug(x)
+#endif
+
 #define MAX_NUMTHREADS 16
 
 typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_RUNCALIBRATIONEVALS, TT_CLOSE} TaskType;

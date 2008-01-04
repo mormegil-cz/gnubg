@@ -131,39 +131,39 @@ static void FreeManualEvent(ManualEvent ME)
 static void WaitForManualEvent(ManualEvent ME)
 {
 	GTimeVal tv;
-	g_debug("wait for manual event locks");
+	multi_debug("wait for manual event locks");
 	g_mutex_lock(condMutex);
 	while (!ME->signalled) {
-		g_debug("waiting for manual event");
+		multi_debug("waiting for manual event");
 		g_get_current_time(&tv);
 		g_time_val_add(&tv, 10 * 1000 * 1000);
 		if (g_cond_timed_wait(ME->cond, condMutex, &tv))
 			break;
 		else
-			g_debug("still waiting for manual event");
+			multi_debug("still waiting for manual event");
 	}
 
 	g_mutex_unlock(condMutex);
-	g_debug("wait for manual event unlocks");
+	multi_debug("wait for manual event unlocks");
 }
 
 static void ResetManualEvent(ManualEvent ME)
 {
-	g_debug("reset manual event locks");
+	multi_debug("reset manual event locks");
     g_mutex_lock(condMutex);
     ME->signalled = FALSE;
     g_mutex_unlock(condMutex);
-	g_debug("reset manual event unlocks");
+	multi_debug("reset manual event unlocks");
 }
 
 static void SetManualEvent(ManualEvent ME)
 {
-	g_debug("reset manual event locks");
+	multi_debug("reset manual event locks");
     g_mutex_lock(condMutex);
     ME->signalled = TRUE;
     g_cond_broadcast(ME->cond);
     g_mutex_unlock(condMutex);
-	g_debug("reset manual event unlocks");
+	multi_debug("reset manual event unlocks");
 }
 
 static void InitMutex(Mutex *pMutex)
@@ -300,7 +300,7 @@ static Task *MT_GetTask(void)
 static void MT_AbortTasks(void)
 {
     Task *task;
-    g_debug("abort tasks: lock");
+    multi_debug("abort tasks: lock");
     Mutex_Lock(td.queueLock);
 
     /* Remove tasks from list */
@@ -308,7 +308,7 @@ static void MT_AbortTasks(void)
         MT_TaskDone(task);
 
     Mutex_Release(td.queueLock);
-    g_debug("abort tasks: release");
+    multi_debug("abort tasks: release");
 }
 
 static int MT_DoTask(void)
@@ -316,11 +316,11 @@ static int MT_DoTask(void)
     int alive = TRUE;
     Task *task;
 
-    g_debug("do tasks: lock");
+    multi_debug("do tasks: lock");
     Mutex_Lock(td.queueLock);
     task = MT_GetTask();
     Mutex_Release(td.queueLock);
-    g_debug("do tasks: release");
+    multi_debug("do tasks: release");
 
     if (task)
     {
@@ -362,11 +362,11 @@ AnalyzeDoubleDecison:
             alive = FALSE;
             break;
         }
-	g_debug("task done: lock");
+	multi_debug("task done: lock");
         Mutex_Lock(td.queueLock);
         MT_TaskDone(task);
         Mutex_Release(td.queueLock);
-	g_debug("task done: release");
+	multi_debug("task done: release");
         return alive;
     }
     else
@@ -433,7 +433,7 @@ static gboolean WaitForAllTasks(int time)
 
 static void WaitingForThreads(void)
 {	/* Unlikely to be called */
-	g_debug("Waiting for threads to be created!");
+	multi_debug("Waiting for threads to be created!");
 }
 
 static void MT_CreateThreads(void)
@@ -509,7 +509,7 @@ void MT_AddTask(Task *pt, gboolean lock)
 {
 	if (lock)
 	{
-		g_debug("add task: lock");
+		multi_debug("add task: lock");
 		Mutex_Lock(td.queueLock);
 	}
 	td.addedTasks++;
@@ -522,14 +522,14 @@ void MT_AddTask(Task *pt, gboolean lock)
 	if (lock)
 	{
 		Mutex_Release(td.queueLock);
-		g_debug("add task: release");
+		multi_debug("add task: release");
 	}
 }
 
 void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked)
 {
 	int i;
-	g_debug("add many tasks: lock");
+	multi_debug("add many tasks: lock");
 	Mutex_Lock(td.queueLock);
 	td.totalTasks = num_tasks;
 	for (i = 0; i < num_tasks; i++)
@@ -540,7 +540,7 @@ void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked)
 		MT_AddTask((Task*)pt, FALSE);
 	}
 	Mutex_Release(td.queueLock);
-	g_debug("add many release: lock");
+	multi_debug("add many release: lock");
 }
 
 int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
@@ -551,13 +551,13 @@ int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
 	if (td.addedTasks == 0)
 		return 0;
 
-    g_debug("wait for tasks: lock(1)");
+    multi_debug("wait for tasks: lock(1)");
     Mutex_Lock(td.queueLock);
     td.totalTasks = td.addedTasks;
     Mutex_Release(td.queueLock);
-    g_debug("wait for tasks: release(1)");
+    multi_debug("wait for tasks: release(1)");
 
-	g_debug("while waiting for all tasks");
+	multi_debug("while waiting for all tasks");
     while (!WaitForAllTasks(UI_UPDATETIME))
     {
         waits++;
@@ -574,7 +574,7 @@ int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
         ResumeInput();
 #endif
     }
-	g_debug("done while waiting for all tasks");
+	multi_debug("done while waiting for all tasks");
 
     return td.result;
 }
