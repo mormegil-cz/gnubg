@@ -61,10 +61,6 @@ extern void MT_Exclusive(void)
 {
   return;
 }
-#ifndef GLIB_THREADS
-extern void MT_Lock(int *lock) {}
-extern void MT_Unlock(int *lock) {}
-#endif
 #endif
 
 typedef struct _xhashent {

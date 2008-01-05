@@ -32,30 +32,19 @@
 #if USE_MULTITHREAD
 #include "multithread.h"
 
-#ifdef GLIB_THREADS
+#define cache_lock(pc, lock) \
+	if (MT_SafeIncCheck(&pc->locks[lock])) \
+		WaitForLock(pc, lock)
 
-static void cache_unlock(volatile evalCache* pc, volatile unsigned long lock)
+#define cache_unlock(pc, l) MT_SafeDec(&pc->locks[l])
+
+void WaitForLock(evalCache* pc, unsigned long lock)
 {
-	MT_SafeDec(&pc->locks[lock]);
+	do
+	{
+		MT_SafeDec(&pc->locks[lock]);
+	} while (MT_SafeIncCheck(&pc->locks[lock]));
 }
-
-static int cache_addlock(volatile evalCache* pc, volatile unsigned long lock)
-{
-	return (MT_SafeInc(&pc->locks[lock])> 1);
-}
-static int cache_lock(volatile evalCache* pc, volatile unsigned long lock)
-{
-	while (cache_addlock(pc, lock))
-		cache_unlock(pc, lock);
-}
-#else
-
-extern void MT_Lock(int *lock);
-extern void MT_Unlock(int *lock);
-#define cache_lock(pc, l) MT_Lock(&pc->locks[l]);
-#define cache_unlock(pc, l) MT_Unlock(&pc->locks[l]);
-
-#endif
 #endif
 
 /* Adapted from

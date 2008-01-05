@@ -62,8 +62,6 @@ typedef HANDLE Mutex;
 typedef struct _ThreadData
 {
     ManualEvent activity;
-    ManualEvent lockContention;
-    ManualEvent contentionCleared;
     TLSItem tlsItem;
     Event alldone;
     Mutex queueLock;
@@ -477,8 +475,6 @@ extern void MT_InitThreads(void)
     td.tasks = NULL;
 	td.doneTasks = td.totalTasks = td.addedTasks = 0;
     InitManualEvent(&td.activity);
-    InitManualEvent(&td.lockContention);
-    InitManualEvent(&td.contentionCleared);
     TLSCreate(&td.tlsItem);
 	TLSSetValue(td.tlsItem, 0);	/* Main thread shares id 0 */
     InitEvent(&td.alldone);
@@ -584,8 +580,6 @@ extern void MT_Close(void)
     MT_CloseThreads();
 
     FreeManualEvent(td.activity);
-    FreeManualEvent(td.lockContention);
-    FreeManualEvent(td.contentionCleared);
     FreeEvent(td.alldone);
     FreeMutex(td.multiLock);
 
@@ -603,32 +597,6 @@ extern void MT_Close(void)
 extern int MT_GetThreadID(void)
 {
     return TLSGet(td.tlsItem);
-}
-
-extern void MT_Lock(int *lock)
-{
-    while (MT_SafeIncCheck(lock))
-    {
-        WaitForManualEvent(td.lockContention);
-        if (MT_SafeDecCheck(lock))
-        {    /* Found something that's cleared */
-            SetManualEvent(td.contentionCleared);
-            ResetManualEvent(td.lockContention);
-        }
-        else
-        {
-            WaitForManualEvent(td.contentionCleared);
-        }
-    }
-}
-
-extern void MT_Unlock(int *lock)
-{
-    if (!MT_SafeDecCheck(lock))
-    {    /* Clear contention */
-        ResetManualEvent(td.contentionCleared);	/* Force multiple threads to wait for contention reduction */
-        SetManualEvent(td.lockContention);	/* Release any waiting threads */
-    }
 }
 
 extern void MT_Exclusive(void)
