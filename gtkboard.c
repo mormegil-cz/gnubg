@@ -1996,7 +1996,7 @@ extern gboolean board_button_press(GtkWidget *board, GdkEventButton *event,
              show forced move */
           TanBoard anBoard;
           
-          memcpy ( anBoard, msBoard(), sizeof anBoard );
+          memcpy ( anBoard, msBoard(), sizeof(TanBoard) );
 
           bd->drag_colour = bd->turn;
           bd->drag_point = -1;

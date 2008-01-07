@@ -493,7 +493,7 @@ PythonEvaluate( PyObject* self UNUSED_PARAM, PyObject *args ) {
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
   float arOutput[ 7 ];
 
-  memcpy( anBoard, msBoard(), sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
   GetMatchStateCubeInfo( &ci, &ms );
 
   if ( ! PyArg_ParseTuple( args, "|OOO", 
@@ -538,7 +538,7 @@ PythonEvaluateCubeful( PyObject* self UNUSED_PARAM, PyObject *args ) {
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
   int cp;
 
-  memcpy( anBoard, msBoard(), sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
   
   GetMatchStateCubeInfo( &ci, &ms );
 
@@ -590,7 +590,7 @@ PythonFindBestMove( PyObject* self UNUSED_PARAM, PyObject *args ) {
   cubeinfo ci;
   evalcontext ec = { 0, 0, 0, 1, 0.0f };
 
-  memcpy( anBoard, msBoard(), sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
   memcpy( anDice, ms.anDice, sizeof anDice );
   GetMatchStateCubeInfo( &ci, &ms );
   if ( ! PyArg_ParseTuple( args, "|OOOO", 
@@ -847,7 +847,7 @@ PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
   PyObject *pyBoard = NULL;
   TanBoard anBoard;
 
-  memcpy( anBoard, msBoard(), sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
 
   if ( ! PyArg_ParseTuple( args, "|O:positionid", &pyBoard ) )
     return NULL;
@@ -876,7 +876,7 @@ PythonPositionFromID( PyObject* self UNUSED_PARAM, PyObject *args )
       return NULL;
     }
   } else {
-    memcpy( anBoard, msBoard(), sizeof anBoard );
+    memcpy( anBoard, msBoard(), sizeof(TanBoard) );
   }
 
   return BoardToPy( (ConstTanBoard)anBoard );
@@ -890,7 +890,7 @@ PythonPositionKey( PyObject* self UNUSED_PARAM, PyObject *args ) {
   TanBoard anBoard;
   unsigned char auch[ 10 ];
 
-  memcpy( anBoard, msBoard(), sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
 
   if ( ! PyArg_ParseTuple( args, "|O!:positionkey", &PyList_Type, &pyBoard ) )
     return NULL;
@@ -953,7 +953,7 @@ PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
   int nPoints = 6;
   int anBoard[ 25 ];
 
-  memcpy( anBoard, msBoard(), sizeof anBoard );
+  memcpy( anBoard, msBoard(), sizeof(TanBoard) );
 
   if ( ! PyArg_ParseTuple( args, "|Oii:positionbearoff", 
                            &pyBoard, &nPoints, &nChequers ) )
@@ -992,7 +992,7 @@ PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args ) {
     return NULL;
   }
 
-  memset( anBoard, 0, sizeof anBoard );
+  memset( anBoard, 0, sizeof(TanBoard) );
   PositionFromBearoff( anBoard, iPos, nPoints, nChequers );
 
   return Board1ToPy( anBoard );

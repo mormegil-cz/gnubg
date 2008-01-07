@@ -1117,7 +1117,7 @@ static int ComputerTurn( void ) {
       /* Don't use the global board for this call, to avoid
 	 race conditions with updating the board and aborting the
 	 move with an interrupt. */
-      memcpy( anBoardMove, msBoard(), sizeof( anBoardMove ) );
+      memcpy( anBoardMove, msBoard(), sizeof(TanBoard) );
 
       /* Consider resigning -- no point wasting time over the decision,
          so only evaluate at 0 plies. */
@@ -1349,7 +1349,7 @@ static int ComputerTurn( void ) {
 	  DiceRolled();      
 	 }
 
-      memcpy( anBoardTemp, msBoard(), sizeof anBoardTemp );
+      memcpy( anBoardTemp, msBoard(), sizeof(TanBoard) );
       if ( !ms.fMove )
         SwapSides( anBoardTemp );
 

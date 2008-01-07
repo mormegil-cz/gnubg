@@ -799,8 +799,8 @@ extern void CommandShowMatchLength( char *sz ) {
 	     _("New matches default to %d points.\n"), nDefaultLength );
 }
 
-extern void CommandShowPipCount( char *sz ) {
-
+extern void CommandShowPipCount( char *sz )
+{
     TanBoard an;
     unsigned int anPips[ 2 ]; 
 

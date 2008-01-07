@@ -2303,7 +2303,7 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
     /* FIXME allow more formats, e.g. FIBS "boardstyle 3" */
 
     if( !ppch || !( pch = NextToken( ppch ) ) ) { 
-	memcpy( an, msBoard(), sizeof( an ) );
+	memcpy( an, msBoard(), sizeof(TanBoard) );
 
 	if( pchDesc )
 	    strcpy( pchDesc, _("Current position") );
@@ -2835,7 +2835,7 @@ extern void ShowBoard( void )
 	return;
     }
 
-	memcpy( an, msBoard(), sizeof( an ) );
+	memcpy( an, msBoard(), sizeof(TanBoard) );
 	if( !ms.fMove )
 		SwapSides( an );
 
@@ -4293,7 +4293,7 @@ extern void CommandCopy (char *sz)
 	}
     }
 
-  memcpy ( anBoardTemp, msBoard(), sizeof ( anBoardTemp ) );
+  memcpy ( anBoardTemp, msBoard(), sizeof(TanBoard) );
 
   if ( ! ms.fMove )
     SwapSides ( anBoardTemp );

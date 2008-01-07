@@ -128,7 +128,7 @@ extern void ShowMove ( hintdata *phd, const int f )
 
 		MoveListFreeSelectionList(plSelList);
 
-		memcpy ( anBoard, msBoard(), sizeof ( anBoard ) );
+		memcpy ( anBoard, msBoard(), sizeof(TanBoard) );
 		ApplyMove ( anBoard, pm->anMove, FALSE );
 
 		UpdateMove( ( BOARD( pwBoard ) )->board_data, anBoard );
@@ -387,7 +387,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd )
 
 	memcpy(&m, pm, sizeof(move));
 
-	memcpy ( anBoard, msBoard(), sizeof ( anBoard ) );
+	memcpy ( anBoard, msBoard(), sizeof(TanBoard) );
 	ApplyMove ( anBoard, m.anMove, FALSE );
 
 	if ( ! ms.fMove )
