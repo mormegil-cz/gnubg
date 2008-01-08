@@ -76,10 +76,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "credits.h"
 #include "external.h"
 #include "neuralnet.h"
-
-#if USE_PYTHON
 #include "gnubgmodule.h"
-#endif
 
 #if HAVE_SOCKETS
 #if HAVE_SYS_SOCKET_H
@@ -4081,8 +4078,8 @@ CommandRollout( char *sz ) {
 }
 
 
-static void LoadCommands( FILE *pf, char *szFile ) {
-    
+static void LoadCommands( FILE *pf, char *szFile )
+{
     char sz[ 2048 ], *pch;
 
     outputpostpone();
@@ -5786,8 +5783,8 @@ static void Progress( void )
     fflush( stdout );
 }
 
-static void CallbackProgress( void ) {
-
+static void CallbackProgress( void )
+{
 #if USE_GTK
 	if( fX )
 	{
@@ -7108,8 +7105,6 @@ EPC( const TanBoard anBoard, float *arEPC, float *arMu, float *arSigma,
 
   /* code not reachable */
   return -1;
-
-
 }
 
 #if HAVE_LIBREADLINE

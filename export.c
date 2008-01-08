@@ -783,7 +783,7 @@ extern void CommandExportPositionJF (char *sz)
    * before the move was done, such that undo should be possible. It's
    * possible to save just the current board twice as done below. */
 
-  memcpy (anBoard, msBoard(), 2 * 25 * sizeof (int));
+  memcpy (anBoard, msBoard(), sizeof(TanBoard));
 
   if (!ms.fMove)
     SwapSides (anBoard);

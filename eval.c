@@ -239,7 +239,6 @@ static evalCache cpEval;
 static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
-static int iTick;
 
 /* variation of backgammon used by gnubg */
 
@@ -3011,11 +3010,14 @@ EvaluatePositionCache( NNState *nnStates, const TanBoard anBoard, float arOutput
        time-consuming operations at a relatively steady rate, so is a
        good choice for a callback function. */
 #if !USE_MULTITHREAD
+{
+	static int iTick;
     if( ++iTick >= 0x400 ) {
 	iTick = 0;
 	if( fnTick )
 	    fnTick();
     }
+}
 #endif
     if( !cCache || ( pecx->rNoise != 0.0f && !pecx->fDeterministic ) )
 	/* non-deterministic noisy evaluations; cannot cache */

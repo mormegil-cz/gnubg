@@ -648,8 +648,6 @@ class relational:
 
    def addmatch(self,force):
 
-      print "TEST"
-      print force
       if self.conn == None:
          return -1
 

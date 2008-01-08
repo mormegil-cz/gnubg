@@ -408,6 +408,10 @@ MT_WorkerThreadFunction(void *id)
         WaitForManualEvent(td.activity);
     } while (MT_DoTask());
 
+#ifdef GLIB_THREADS
+	Sleep(0);	/* Avoid odd crash */
+#endif
+
 	return 0;
 }
 
