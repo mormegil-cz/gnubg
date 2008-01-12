@@ -3503,8 +3503,13 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_File/Generate _HTML Images..."), NULL, ExportHTMLImages, 0,
 	  NULL, NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
-	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT,
-		"<StockItem>", GTK_STOCK_QUIT
+	{ 
+#ifdef WIN32
+		N_("/_File/E_xit"),
+#else
+		N_("/_File/_Quit"),
+#endif
+		"<control>Q", Command, CMD_QUIT, "<StockItem>", GTK_STOCK_QUIT
 	},
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>", NULL },
 	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, 
