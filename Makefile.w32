@@ -49,7 +49,7 @@ makebearoff_LIBS = \
 		   -liconv -lpng -lz -lwinmm -lpango-1.0 -lgdk_pixbuf-2.0 \
 		   -lopengl32 -lglu32 -lglut32 -lwsock32 \
 		   -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
-		   -lart_lgpl_2 -llibintl -lcairo -lcomctl32 -lgthread-2.0
+		   -lintl -lcairo -lcomctl32 -lgthread-2.0
 
 INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	  -I$(MINGW)/include/gtk-2.0 \
@@ -62,7 +62,6 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	  -I$(MINGW)/include/pango-1.0 \
 	  -I$(MINGW)/../Python23/include \
 	  -I$(MINGW)/include/freetype2 \
-	  -I$(MINGW)/include/libart-2.0 \
 	-I$(MINGW)/include/gtkglext-1.0 \
 	-I$(MINGW)/lib/gtkglext-1.0/include
 
@@ -73,8 +72,9 @@ LIBS = -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
        -liconv -lpng -lz -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
        -lopengl32 -lglu32 -lglut32 -lwsock32 \
        -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
-       -lart_lgpl_2 -llibintl -lcairo -lgthread-2.0.dll
+       -lintl -lcairo -lgthread-2.0.dll
 
+LIBOPTIONS=-mwindows
 LIBEVENT = $(BINDIR)/libevent.a
 LIBBOARD3D = $(BINDIR)/libboard3d.a
 
@@ -125,7 +125,7 @@ $(MAKEWEIGHTS): $(LIBEVENT) $(OBJDIR)/makeweights.o
 
 $(TARGET): $(LIBEVENT) $(LIBBOARD3D) $(OBJECTS)
 	@echo linking
-	@$(CC) -o "$(TARGET)" $(OBJECTS) $(LIBPATH) $(LIBS)
+	@$(CC) -o "$(TARGET)" $(OBJECTS) $(LIBPATH) $(LIBS) $(LIBOPTIONS)
 
 objdirs: $(OBJDIR) $(OBJDIR)\non-src
 
