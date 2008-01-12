@@ -50,18 +50,6 @@ typedef struct sigvec psighandler;
 typedef RETSIGTYPE(*psighandler) (int);
 #endif
 
-/*! \brief define lrint as macro if not available
- */
-#if defined(HAVE_DECL_LRINT) && !HAVE_DECL_LRINT
-#define lrint(x) ((long) ((x)+0.5))
-#endif
-
-/*! \briefdefine signbit as macro if not available
- */
-#if defined(HAVE_DECL_SIGNBIT) && !HAVE_DECL_SIGNBIT
-#define signbit(x) ( (x) < 0.0 )
-#endif
-
 #define sqrtf(arg) (float)sqrt((double)(arg))
 
 /* Do we need to use g_utf8_casefold() for utf8 anywhere? */
