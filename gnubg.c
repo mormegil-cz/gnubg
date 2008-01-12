@@ -1490,6 +1490,8 @@ command cER = {
     N_("Double"), szOPTFILENAME, &cFilename },
   { "drop", CommandSetSoundSoundDrop, 
     N_("Drop"), szOPTFILENAME, &cFilename },
+  { "exit", CommandSetSoundSoundExit, 	 
+	N_("Exiting of GNU Backgammon"), szOPTFILENAME, &cFilename },
   { "humanfans", CommandSetSoundSoundHumanDance, 
     N_("Human fans"), szOPTFILENAME, &cFilename },
   { "humanwinsgame", CommandSetSoundSoundHumanWinGame, 
@@ -3754,6 +3756,7 @@ Shutdown( void ) {
 #endif
 #endif
 
+  SoundWait();
 }
 
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
@@ -3797,6 +3800,8 @@ extern void PromptForExit( void )
 		closesocket( ap[1].h );
 #endif
 
+	playSound ( SOUND_EXIT );
+
 #if USE_BOARD3D
 	if (fX && display_is_3d(bd->rd) && bd->rd->closeBoardOnExit && bd->rd->fHinges3d)
 		CloseBoard3d(bd, bd->bd3d, bd->rd);
@@ -3807,6 +3812,8 @@ extern void PromptForExit( void )
 	    gtk_main_iteration();
     }
 #endif
+
+	SoundWait();    /* Wait for sound to finish before final close */
 
     if( fInteractive )
 	PortableSignalRestore( SIGINT, &shInterruptOld );
@@ -4899,7 +4906,7 @@ extern void CommandSaveSettings( char *szParam )
 
     for ( i = 0; i < NUM_SOUNDS; ++i ) 
     {
-       char *file =  GetSoundFile(i);
+       char *file = GetSoundFile(i);
        fprintf ( pf, "set sound sound %s \"%s\"\n",
 		       sound_command [ i ], file);
        g_free(file);
@@ -6497,6 +6504,8 @@ int main(int argc, char *argv[])
 
 	PushSplash(pwSplash, _("Initialising"), _("Board Images"), 500);
 	RenderInitialise();
+
+	SetExitSoundOff();
 
         /* -r option given */
         if (!fNoRC)

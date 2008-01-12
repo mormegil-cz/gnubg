@@ -50,6 +50,7 @@
 
 const char *sound_description[ NUM_SOUNDS ] = {
   N_("Starting GNU Backgammon"),
+  N_("Exiting GNU Backgammon"),
   N_("Agree"),
   N_("Doubling"),
   N_("Drop"),
@@ -70,6 +71,7 @@ const char *sound_description[ NUM_SOUNDS ] = {
 
 const char *sound_command[ NUM_SOUNDS ] = {
   "start",
+  "exit",
   "agree",
   "double",
   "drop",
@@ -157,7 +159,7 @@ extern void playSound ( const gnubgsound gs )
 	if ( ! fSound )
 		/* no sounds for this user */
 		return;
-	
+
 	sound = GetSoundFile(gs);
 	if ( *sound )
 		playSoundFile( sound );
@@ -185,6 +187,7 @@ extern char *GetDefaultSoundFile(gnubgsound sound)
   static char aszDefaultSound[ NUM_SOUNDS ][ 80 ] = {
   /* start and exit */
   "sounds/fanfare.wav",
+  "sounds/haere-ra.wav",
   /* commands */
   "sounds/drop.wav",
   "sounds/double.wav",
@@ -222,7 +225,7 @@ extern char *GetSoundFile(gnubgsound sound)
 
 extern void SetSoundFile(gnubgsound sound, const char *file)
 {
-	char *old_file =  GetSoundFile(sound);
+	char *old_file = GetSoundFile(sound);
 	const char *new_file = file ? file : "";
 	if (!strcmp(new_file, old_file))
 	{
@@ -255,3 +258,7 @@ extern char *sound_set_command(const char *sz)
 	return sound_cmd;
 }
 
+extern void SetExitSoundOff()
+{
+	sound_file[SOUND_EXIT] = g_strdup("");
+}

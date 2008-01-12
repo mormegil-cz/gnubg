@@ -25,7 +25,8 @@
 
 typedef enum _gnubgsound {
   /* start & exit of gnubg */
-  SOUND_START = 0,     
+  SOUND_START = 0,
+  SOUND_EXIT,
   /* commands */
   SOUND_AGREE,
   SOUND_DOUBLE,
@@ -64,5 +65,6 @@ extern void SetSoundFile(const gnubgsound gs, const char *szFilename);
 extern char *GetSoundFile(gnubgsound sound);
 extern const char *sound_get_command(void);
 extern char *sound_set_command(const char *sz);
+extern void SetExitSoundOff();
 
 #endif

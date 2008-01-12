@@ -3,6 +3,10 @@ Sun Jan 13 00:36:48 CET 2008 Christian Anthon <anthon@kiku.dk>
 	* configure.in, common.h: changes how acosf, signbit and lrint are
 	checked for to allow to compile with -Werror
 
+Sat Jan 12 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* sound.c, set.c, gnubg.c: Re-introduce exit sound, but disabled by default
+
 Wed Jan  2 15:48:02 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, doc/Makefile.am, lib/Makefile.am, non-src/Makefile.am,

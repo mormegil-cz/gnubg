@@ -3737,6 +3737,13 @@ CommandSetSoundSoundDrop ( char *sz ) {
 }
 
 extern void
+CommandSetSoundSoundExit ( char *sz ) { 	 
+	  	 
+	   SetSoundFile ( SOUND_EXIT, NextToken ( &sz ) ); 	 
+	  	 
+}
+
+extern void
 CommandSetSoundSoundHumanDance ( char *sz ) {
 
   SetSoundFile ( SOUND_HUMAN_DANCE, NextToken ( &sz ) );
