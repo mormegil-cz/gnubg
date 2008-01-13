@@ -262,3 +262,4 @@ extern void SetExitSoundOff()
 {
 	sound_file[SOUND_EXIT] = g_strdup("");
 }
+

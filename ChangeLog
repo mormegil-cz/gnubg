@@ -1,6 +1,11 @@
+Sun Jan 13 01:07:21 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoffdump.c, gnubg.c, makehyper.c, multithread.c, sound.c:
+	compiler warnings and Sleep is a win32 function
+
 Sun Jan 13 00:36:48 CET 2008 Christian Anthon <anthon@kiku.dk>
 
-	* configure.in, common.h: changes how acosf, signbit and lrint are
+	* configure.in, common.h: change how acosf, signbit and lrint are
 	checked for to allow to compile with -Werror
 
 Sat Jan 12 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>

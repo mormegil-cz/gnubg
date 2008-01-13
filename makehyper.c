@@ -121,7 +121,7 @@ ClassifyHyper ( int anBoard[ 2 ][ 25 ] ) {
 }
 
 static void
-HyperOver ( int anBoard[ 2 ][ 25 ], float ar[ NUM_OUTPUTS ], const int nC ) {
+HyperOver ( const TanBoard anBoard, float ar[ NUM_OUTPUTS ], const int nC ) {
 
   EvalOver( anBoard, ar, VARIATION_HYPERGAMMON_1 + nC - 1, NULL );
 
@@ -133,7 +133,7 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
 
   int i, j, k;
   int nPos = Combination( 25 + nC, nC );
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
 
   int ai[ 4 ] = { 0,0,0,0 };
 
@@ -145,7 +145,7 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
 
       switch ( ClassifyHyper ( anBoard ) ) {
       case HYPER_OVER:
-        HyperOver ( anBoard, ahe[ i * nPos + j ].arOutput, nC );
+        HyperOver ( (ConstTanBoard)anBoard, ahe[ i * nPos + j ].arOutput, nC );
 
         for ( k = 0; k < 5; ++k )
           ahe[ i * nPos + j ].arEquity[ k ] = 
@@ -311,8 +311,8 @@ HyperEquity ( const int nUs, const int nThem,
               hyperequity *phe, const int nC, const hyperequity aheOld[],
               float arNorm[] ) {
 
-  int anBoard[ 2 ][ 25 ];
-  int anBoardTemp[ 2 ][ 25 ];
+  TanBoard anBoard;
+  TanBoard anBoardTemp;
   movelist ml;
   int i, j, k;
   int nUsNew, nThemNew;
@@ -336,7 +336,7 @@ HyperEquity ( const int nUs, const int nThem,
   switch ( ( hc = ClassifyHyper ( anBoard ) ) ) {
   case HYPER_OVER:
 
-    HyperOver ( anBoard, phe->arOutput, nC );
+    HyperOver ( (ConstTanBoard)anBoard, phe->arOutput, nC );
 
     for ( k = 0; k < 5; ++k )
       phe->arEquity[ k ] = Utility ( phe->arOutput, &ci );
@@ -365,7 +365,7 @@ HyperEquity ( const int nUs, const int nThem,
     for ( i = 1; i <= 6; ++i ) 
       for ( j = 1; j <= i; ++j ) {
       
-        GenerateMoves ( &ml, anBoard, i, j, FALSE );
+        GenerateMoves ( &ml, (ConstTanBoard)anBoard, i, j, FALSE );
 
         if ( ml.cMoves ) {
 

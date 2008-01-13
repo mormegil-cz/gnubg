@@ -409,7 +409,7 @@ MT_WorkerThreadFunction(void *id)
     } while (MT_DoTask());
 
 #ifdef GLIB_THREADS
-	Sleep(0);	/* Avoid odd crash */
+	g_usleep(0);	/* Avoid odd crash */
 #endif
 
 	return 0;

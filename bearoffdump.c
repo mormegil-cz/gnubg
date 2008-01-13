@@ -56,7 +56,7 @@ main( int argc, char **argv ) {
   int n;
   int nUs;
   int nThem;
-  int anBoard[ 2 ][ 25 ];
+  TanBoard anBoard;
 
   GOptionEntry ao[] = {
     {"index", 'n', 0, G_OPTION_ARG_INT, &id,
@@ -138,7 +138,7 @@ main( int argc, char **argv ) {
   /* dump req. position */
 
   *sz = 0;
-  BearoffDump( pbc, anBoard, sz );
+  BearoffDump( pbc, (ConstTanBoard)anBoard, sz );
   puts( sz );
 
   BearoffClose( &pbc );
