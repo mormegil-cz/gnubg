@@ -57,7 +57,7 @@ static CommandEntryData_T cedPanel = {
 
 
 
-typedef gboolean (*panelFun)();
+typedef gboolean (*panelFun)(void);
 
 static gboolean DeleteMessage ( void );
 static gboolean DeleteAnalysis( void );
@@ -814,7 +814,7 @@ static void CreateHeadWindow(gnubgwindow panel, const char* sz, GtkWidget* pwWid
 	GtkWidget* pwVbox = gtk_vbox_new(FALSE, 0);
 	GtkWidget* pwHbox = gtk_hbox_new(FALSE, 0);
 	GdkColormap *pcmap = gtk_widget_get_colormap( pwMain );
-	GtkWidget* pwX = StatsPixmapButton(pcmap, x_xpm, (void (*)())woPanel[panel].hideFun);
+	GtkWidget* pwX = StatsPixmapButton(pcmap, x_xpm, (void(*)(GtkWidget*, char*))woPanel[panel].hideFun);
 
 	gtk_box_pack_start( GTK_BOX( pwVbox ), pwHbox, FALSE, FALSE, 0 );
 	gtk_box_pack_start( GTK_BOX( pwHbox ), pwLab, FALSE, FALSE, 10 );

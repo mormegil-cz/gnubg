@@ -258,7 +258,7 @@ extern char *sound_set_command(const char *sz)
 	return sound_cmd;
 }
 
-extern void SetExitSoundOff()
+extern void SetExitSoundOff(void)
 {
 	sound_file[SOUND_EXIT] = g_strdup("");
 }

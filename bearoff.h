@@ -75,7 +75,7 @@ enum _bearoffoptions {
   BO_HEURISTIC         = 8
 };
 
-extern bearoffcontext *BearoffInit ( const char *szFilename, const int bo, void (*p)() );
+extern bearoffcontext *BearoffInit ( const char *szFilename, const int bo, void (*p)(int) );
 
 extern bearoffcontext *BearoffInitBuiltin ( void );
 

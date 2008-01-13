@@ -543,7 +543,7 @@ void mt_add_tasks(int num_tasks, TaskType tt, gpointer linked)
 	multi_debug("add many release: lock");
 }
 
-int MT_WaitForTasks(void (*pCallback)(), int callbackTime)
+int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 {
     int callbackLoops = callbackTime / UI_UPDATETIME;
     int waits = 0;

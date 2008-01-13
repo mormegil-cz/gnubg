@@ -1,3 +1,11 @@
+Sun Jan 13 09:03:18 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, bearoff.c, bearoff.h, external_l.l, external_y.y,
+	gnubg.c, gtkgame.c, gtkgame.h, gtkpanels.c, multithread.c,
+	multithread.h, sound.c, sound.h, board3d/fun3d.h, lib/cache.c,
+	non-src/external_y.c, non-src/external_l.c: fix some incomplete or
+	missing prototypes
+
 Sun Jan 13 01:07:21 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoffdump.c, gnubg.c, makehyper.c, multithread.c, sound.c:

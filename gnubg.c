@@ -197,7 +197,7 @@ matchstate ms = {
     TRUE, /* fJacoby */
     GAME_NONE /* gs */
 };
-ConstTanBoard msBoard() {return (ConstTanBoard)ms.anBoard;}
+ConstTanBoard msBoard(void) {return (ConstTanBoard)ms.anBoard;}
 
 matchinfo mi;
 

@@ -38,7 +38,7 @@
 
 #define cache_unlock(pc, l) MT_SafeDec(&pc->locks[l])
 
-void WaitForLock(evalCache* pc, unsigned long lock)
+static void WaitForLock(evalCache* pc, unsigned long lock)
 {
 	do
 	{

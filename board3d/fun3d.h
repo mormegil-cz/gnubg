@@ -70,7 +70,7 @@ void CheckOpenglError(void);
 extern void InitGTK3d(int *argc, char ***argv);
 extern void InitBoard3d(BoardData *bd, BoardData3d *bd3d);
 extern void freeEigthPoints(float ****boardPoints, unsigned int accuracy);
-extern void SetupVisual();
+extern void SetupVisual(void);
 extern void SetupViewingVolume3d(const BoardData *bd, BoardData3d* bd3d, const renderdata *prd);
 extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata* prd);
 extern int CreateGLWidget(BoardData* bd);

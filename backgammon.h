@@ -330,7 +330,7 @@ extern int fResetSync;
 #endif
 extern matchinfo mi;
 extern matchstate ms;
-extern ConstTanBoard msBoard();
+extern ConstTanBoard msBoard(void);
 extern movefilter aamfAnalysis[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 extern movefilter aamfEval[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 extern player ap[2];

@@ -60,7 +60,7 @@ extern GList *MoveListGetSelectionList(const hintdata * phd);
 extern GtkWidget *GetPanelWidget(gnubgwindow window);
 extern GtkWidget *GL_Create(void);
 extern GtkWidget *StatsPixmapButton(GdkColormap * pcmap, char **xpm,
-				    void (*fn) ());
+				    void (*fn) (GtkWidget*, char*));
 extern int ArePanelsDocked(void);
 extern int ArePanelsShowing(void);
 extern int DockedPanelsShowing(void);

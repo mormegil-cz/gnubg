@@ -26,7 +26,7 @@
 
 #include "external_y.h"
 
-extern int extparse();
+extern int extparse(void);
 
 int prc_lineno = 1;
 void escapes(const char *cp, char *tp);

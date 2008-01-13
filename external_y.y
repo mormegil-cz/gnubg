@@ -29,7 +29,7 @@
 
 #include "external.h"
 
-extern int extlex();
+extern int extlex(void);
 extern int exterror(const char *s);
 
 extcmd ec; 
