@@ -1682,7 +1682,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
           aarMu[ alt ][ j ] = 0.0f;
       }
     } else {
-      int nGames = prc->nGamesDone;
+      uint nGames = prc->nGamesDone;
       double r;
 
       /* make sure the saved rollout contexts are consistent for
@@ -1694,7 +1694,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
 	  prc->aecCubeLate[ i ].fCubeful = 
 	  prc->aecChequerLate[ i] .fCubeful = (prc->fCubeful || fCubeRollout);
 
-      if ((nGamesDone[ alt ] = nGames) < (int)nFirstTrial) 
+      if ((nGamesDone[ alt ] = nGames) < nFirstTrial) 
         nFirstTrial = nGames;
       /* restore internal variables from input values */
       for ( j = 0; j < NUM_ROLLOUT_OUTPUTS; ++j) {

@@ -670,7 +670,7 @@ extern int RunQuery(RowSet* pRow, char *sz)
 extern void CommandRelationalSelect(char *sz)
 {
 #if !USE_GTK
-	int i, j;
+	uint i, j;
 #endif
 	RowSet r;
 
@@ -697,7 +697,7 @@ extern void CommandRelationalSelect(char *sz)
 		if (i == 1)
 		{	/* Underline headings */
 			char* line, *p;
-			int k;
+			uint k;
 			int totalwidth = 0;
 			for (k = 0; k < r.cols; k++)
 			{

@@ -3,7 +3,8 @@ Tue Jan 15 19:05:58 CET 2008 Christian Anthon <anthon@kiku.dk>
 	* analysis.c, backgammon.h, dice.c, eval.c, gnubg.c, gtkboard.c,
 	gtkexport.c, gtkgame.c, gtkmovelist.c, gtkoptions.c, import.c,
 	makebearoff.c, makehyper.c, multithread.c, play.c, render.c, sgf.c,
-	board3d/drawboard3d.c: Fix some minor uint//int gcc warnings
+	board3d/drawboard3d.c, relational.c, rollout.c: Fix some minor
+	uint//int gcc warnings
 
 Sun Jan 13 09:03:18 CET 2008 Christian Anthon <anthon@kiku.dk>
 

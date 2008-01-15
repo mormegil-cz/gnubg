@@ -22,6 +22,7 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
+#include <sys/types.h>
 #include "gnubg-types.h"
 #include <stdarg.h>
 #include "analysis.h"
