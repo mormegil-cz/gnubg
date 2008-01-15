@@ -659,7 +659,8 @@ static void RenderBorder( unsigned char *puch, int nStride, int x0, int y0,
 
 static void RenderFramePainted( renderdata *prd, unsigned char *puch,
 				int nStride ) {
-    int i, ix;
+    int i;
+    uint ix;
     float x, z, cos_theta, diffuse, specular;
 	unsigned char *colours = (unsigned char*) g_alloca(4 * 3 * prd->nSize * sizeof(unsigned char));
 
@@ -1575,7 +1576,8 @@ static unsigned char BoardPixel( renderdata *prd, int i, int antialias,
 
 extern void RenderBoard( renderdata *prd, unsigned char *puch, int nStride ) {
 
-    int ix, iy, antialias;
+    uint ix, iy;
+    int antialias;
 
 #define BUF( y, x, i ) ( puch[ (y) * nStride + (x) * 3 + (i) ] )
 
@@ -1851,7 +1853,8 @@ extern void RenderChequers( renderdata *prd, unsigned char *puch0,
 
 extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
 				 int nStride ) {
-    int i, ip;
+    int i;
+    uint ip;
 #if HAVE_FREETYPE
     FT_Face ftf;
     FT_Glyph aftg[ 10 ];
@@ -2179,7 +2182,8 @@ static void RenderResignFaces( renderdata *prd, unsigned char *puch,
 extern void RenderDice( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride ) {
     
-    int ix, iy, in, fx, fy, i;
+    uint ix, iy;
+    int in, fx, fy, i;
     float x, y, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
 	x_norm, y_norm, z_norm;
     double *aarDiceColour[ 2 ];
@@ -2270,7 +2274,8 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 extern void RenderPips( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride ) {
 
-    int ix, iy, in, fx, fy, i;
+    uint ix, iy;
+    int in, fx, fy, i;
     float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
 	dice_top[ 2 ][ 3 ];
     double *aarDiceColour[ 2 ];
@@ -2521,10 +2526,10 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 	y = 0;
     }
 
-    if( x + cx > BOARD_WIDTH * prd->nSize )
+    if( x + cx > BOARD_WIDTH * (int)prd->nSize )
 	cx = BOARD_WIDTH * prd->nSize - x;
     
-    if( y + cy > BOARD_HEIGHT * prd->nSize )
+    if( y + cy > BOARD_HEIGHT * (int)prd->nSize )
 	cy = BOARD_HEIGHT * prd->nSize - y;    
     
     if( cx <= 0 || cy <= 0 )

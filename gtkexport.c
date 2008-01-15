@@ -111,7 +111,7 @@ typedef struct _exportwidget {
 static void
 ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
 
-  int i;
+  uint i;
 
   /* include */
   
@@ -356,7 +356,7 @@ static void
 ExportSet ( exportwidget *pew ) {
 
   exportsetup *pexs = pew->pexs;
-  int i;
+  uint i;
 
   /* include */
 
@@ -467,7 +467,7 @@ GTKShowExport ( exportsetup *pexs ) {
   
   GtkWidget *pw;
 
-  int i;
+  uint i;
 
   exportwidget *pew;
 

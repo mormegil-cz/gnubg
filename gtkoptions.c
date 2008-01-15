@@ -1382,7 +1382,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   char sz[128];
   unsigned int n;
   unsigned int cCache;
-  int i;
+  uint i;
   gchar *filename, *command, *tmp, *newfolder;
   const gchar *new_browser;
   BoardData *bd = BOARD( pwBoard )->board_data;
@@ -1674,7 +1674,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 static void 
 OptionsSet( optionswidget *pow) {
 
-  int i;
+  uint i;
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoBearoff ),
                                 fAutoBearoff );

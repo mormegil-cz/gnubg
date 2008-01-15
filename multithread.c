@@ -138,7 +138,9 @@ static void WaitForManualEvent(ManualEvent ME)
 		if (g_cond_timed_wait(ME->cond, condMutex, &tv))
 			break;
 		else
+		{
 			multi_debug("still waiting for manual event");
+		}
 	}
 
 	g_mutex_unlock(condMutex);

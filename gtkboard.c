@@ -953,9 +953,14 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] )
 	/* normal roll: up to 3 possibilities */
 		unsigned int iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
 		for ( i = 0; i <= 1; ++i ) {
-			if ( ( iUnusedPips < bd->diceRoll[i] ) ||		/* not possible to move with this die (anymore) */
-			     ( ( bd->valid_move ) && ( bd->diceRoll[i] == ( bd->valid_move->anMove[0] - bd->valid_move->anMove[1] ) ) ) ||		/* this die has been used already */
-			     ( ( bd->valid_move ) && ( bd->valid_move->cMoves > 1 ) )		/* move already completed */ /* && ( bd->diceRoll[i] != iUnusedPips ) && ( iUnusedPips != bd->move_list.cMaxPips ) */ )
+			if (
+					/* not possible to move with this die (anymore) */
+					(iUnusedPips < bd->diceRoll[i]) ||
+					/* this die has been used already */
+					((bd->valid_move) && ((int)bd->diceRoll[i] == (bd->valid_move->anMove[0] - bd->valid_move->anMove[1]))) ||
+					/* move already completed */
+					((bd->valid_move) && (bd->valid_move->cMoves > 1))
+			   )
 				continue;
 			iDestLegal = TRUE;
 			iDestPt = bd->drag_point - bd->diceRoll[i] * bd->drag_colour;
@@ -2519,7 +2524,8 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     int redrawNeeded = 0;
     gint failed = 0;
     
-    int *match_settings[ 3 ], old_dice[ 2 ];
+    int *match_settings[ 3 ]; 
+    uint old_dice[ 2 ];
 
     match_settings[ 0 ] = &bd->match_to;
     match_settings[ 1 ] = &bd->score;
@@ -3320,7 +3326,7 @@ static void board_size_allocate( GtkWidget *board, GtkAllocation *allocation )
 {
 
     BoardData *bd = BOARD( board )->board_data;
-    gint old_size = bd->rd->nSize, new_size;
+    guint old_size = bd->rd->nSize, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
     int cx;

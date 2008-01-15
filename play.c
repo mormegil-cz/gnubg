@@ -118,7 +118,7 @@ NewMoveRecord( void ) {
   /* movenormal */
   pmr->n.stMove = SKILL_NONE;
   pmr->n.anMove[ 0 ] = pmr->n.anMove[ 1 ] = -1;
-  pmr->n.iMove = -1;
+  pmr->n.iMove = UINT_MAX;
 
   /* moveresign */
   pmr->r.esResign.et = EVAL_NONE;
@@ -4147,7 +4147,7 @@ getCurrentMoveRecord ( int *pfHistory ) {
       mrHint.rLuck = (float)ERR_VAL;
       mrHint.n.stMove = SKILL_NONE;
 
-      mrHint.n.iMove = -1;
+      mrHint.n.iMove = UINT_MAX;
       mrHint.n.anMove[ 0 ] = -1;
 
 #if USE_GTK

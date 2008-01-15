@@ -131,7 +131,8 @@ HyperOver ( const TanBoard anBoard, float ar[ NUM_OUTPUTS ], const int nC ) {
 static void
 StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
 
-  int i, j, k;
+  int i, j;
+  uint k;
   int nPos = Combination( 25 + nC, nC );
   TanBoard anBoard;
 
@@ -314,7 +315,8 @@ HyperEquity ( const int nUs, const int nThem,
   TanBoard anBoard;
   TanBoard anBoardTemp;
   movelist ml;
-  int i, j, k;
+  int i, j;
+  uint k;
   int nUsNew, nThemNew;
   hyperequity heBest;
   hyperequity heOld;

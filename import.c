@@ -480,7 +480,7 @@ ExpandMatMove ( const TanBoard anBoard, int anMove[ 8 ], int *pc,
 
   if ( anDice[ 0 ] != anDice[ 1 ] ) {
     
-    if ( ( anMove[ 0 ] - anMove[ 1 ] ) == ( anDice[ 0 ] + anDice[ 1 ] ) ) {
+    if ( (uint)( anMove[ 0 ] - anMove[ 1 ] ) == ( anDice[ 0 ] + anDice[ 1 ] ) ) {
 
       int an[ 8 ];
 
@@ -2030,14 +2030,14 @@ GetValue( const char *sz, char *szValue ) {
 }
 
 static void
-ParseSGGDate ( const char *sz, int *pnDay, int *pnMonth, int *pnYear ) {
+ParseSGGDate ( const char *sz, uint *pnDay, uint *pnMonth, uint *pnYear ) {
 
   static char *aszMonths[] = {
     "January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December" };
   int i;
   char szMonth[ 80 ];
-  int nDay, nYear;
+  uint nDay, nYear;
   int n;
   
 

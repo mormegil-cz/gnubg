@@ -238,7 +238,7 @@ if (!psHighlight)
 
 	if (showWLTree)
 	{
-		gtk_list_store_set(store, &iter, 1, rankKnown ? i + 1 : -1, -1);
+		gtk_list_store_set(store, &iter, 1, rankKnown ? (int)i + 1 : -1, -1);
 		goto skipoldcode;
 	}
 	else

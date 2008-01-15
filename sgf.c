@@ -1856,7 +1856,7 @@ static void WriteMoveAnalysis(FILE * pf, int fPlayer, movelist * pml,
 			      int iMove)
 {
 
-    int i;
+    uint i;
     gchar buffer[G_ASCII_DTOSTR_BUF_SIZE];
 
     fprintf(pf, "A[%d]", iMove);

@@ -1992,7 +1992,7 @@ static int MoveAnalysed(moverecord * pmr, matchstate * pms, listOLD * plGame,
 		ApplyMove(anBoardMove, pmr->n.anMove, FALSE);
 		PositionKey((ConstTanBoard)anBoardMove, auch);
 
-		if (pmr->esChequer.et == EVAL_NONE && pmr->n.iMove != -1)
+		if (pmr->esChequer.et == EVAL_NONE && pmr->n.iMove != UINT_MAX)
 			return FALSE;
 
 		break;

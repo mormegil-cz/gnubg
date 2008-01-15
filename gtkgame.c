@@ -2802,7 +2802,7 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   CHECKUPDATE(paw->apwAnalysePlayers[ 1 ], afAnalysePlayers[ 1 ],
               "set analysis player 1 analyse %s")
 
-  if((n = (int)paw->padjMoves->value) != cAnalysisMoves) {
+  if((n = (int)paw->padjMoves->value) != (int)cAnalysisMoves) {
     sprintf(sz, "set analysis limit %d", n );
     UserCommand(sz); 
   }
@@ -6787,7 +6787,7 @@ static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
 	sprintf ( strchr ( pStr, 0 ), "\n");
 }
 
-static void CopyData(GtkWidget *pwNotebook, enum _formatgs page)
+static void CopyData(GtkWidget *pwNotebook, int page)
 {
 	char szOutput[4096];
 

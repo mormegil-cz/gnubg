@@ -25,6 +25,7 @@
 #include <Python.h>
 #endif
 
+#include <sys/types.h>
 #include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -80,7 +81,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #if HAVE_SOCKETS
 #if HAVE_SYS_SOCKET_H
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -2359,7 +2359,8 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
     }
 
     if( *pch == '=' ) {
-	if( !( i = atoi( pch + 1 ) ) ) {
+	    i = atoi( pch + 1 );
+	if( i < 1) {
 	    outputl( _("You must specify the number of the move to apply.") );
 	    return -1;
 	}
@@ -2369,7 +2370,7 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
             return -1;
 	}
 
-	if( i > sm.ml.cMoves ) {
+	if( (uint)i > sm.ml.cMoves ) {
 	    outputf( _("Move =%d is out of range.\n"), i );
 	    return -1;
 	}
@@ -2671,7 +2672,8 @@ extern void HandleCommand( char *sz, command *ac )
 extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
 {
 
-  int i, j;
+  int i;
+  uint j;
 
   for( i = 0; i < 25; i++ )
     anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
@@ -2753,7 +2755,7 @@ extern char *GetLuckAnalysis( const matchstate *pms, float rLuck )
 
 static void DisplayAnalysis( moverecord *pmr ) {
 
-    int i;
+    uint i;
     char szBuf[ 1024 ];
     
     switch( pmr->mt ) {
@@ -3604,18 +3606,16 @@ static void
 HintChequer( char *sz ) {
 
   movelist ml;
-  int i;
+  uint i;
   char szBuf[ 1024 ];
-  int n = ParseNumber ( &sz );
+  int parse_n = ParseNumber ( &sz );
+  uint n = (parse_n <= 0) ? 10 : parse_n;
   int anMove[ 8 ];
   moverecord *pmr;
   unsigned char auch[ 10 ];
   int fHasMoved;
   cubeinfo ci;
   
-  if ( n <= 0 )
-    n = 10;
-
   GetMatchStateCubeInfo( &ci, &ms );
 
   /* 
@@ -3857,7 +3857,7 @@ extern void CommandQuit( char *sz )
 static move *
 GetMove ( const TanBoard anBoard ) {
 
-  int i;
+  uint i;
   unsigned char auch[ 10 ];
   TanBoard an;
 
@@ -5022,7 +5022,8 @@ static char *ERCompletion( const char *sz, int nState ) {
 
 static char *OnOffCompletion( const char *sz, int nState ) {
 
-    static int i, cch;
+	static uint i;
+    static int cch;
     static char *asz[] = { "false", "no", "off", "on", "true", "yes" };
     char *pch, *szDup;
     

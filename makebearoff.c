@@ -396,14 +396,15 @@ RollsOS ( const unsigned short int aus[ 32 ] ) {
 
 }
 
-static void BearOff( int nId, int nPoints, 
+static void BearOff( int nId, uint nPoints, 
                      unsigned short int aOutProb[ 64 ],
                      const int fGammon,
                      xhash *ph, bearoffcontext *pbc,
                      const int fCompress, 
                      FILE *pfOutput, FILE *pfTmp ) {
 
-    int i, iBest, iMode, j, anRoll[ 2 ], aProb[ 64 ];
+    int iBest, iMode, j, anRoll[ 2 ], aProb[ 64 ];
+    uint i;
 	TanBoard anBoard, anBoardTemp;
     movelist ml;
     int k;
@@ -560,7 +561,7 @@ WriteOS ( const unsigned short int aus[ 32 ],
           const int fCompress, FILE *output ) {
 
   unsigned int iIdx, nNonZero;
-  int j;
+  uint j;
 
   if ( fCompress )
     CalcIndex ( aus, &iIdx, &nNonZero );
@@ -786,13 +787,14 @@ generate_os ( const int nOS, const int fHeader,
 
 
 static void
-NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
+NDBearoff ( const int iPos, const uint nPoints, float ar[ 4 ], xhash *ph,
             bearoffcontext *pbc) {
 
   int d0, d1;
   movelist ml;
   TanBoard anBoard, anBoardTemp;
-  int i, j, k;
+  int ii, j, k;
+  uint i;
   int iBest;
   float rBest;
   float rMean;
@@ -821,10 +823,10 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], xhash *ph,
    */
 
   if ( pbc ) {
-    for ( i = 24; i >= 0 && ! anBoard[ 1 ][ i ]; --i )
+    for ( ii = 24; ii >= 0 && ! anBoard[ 1 ][ ii ]; --ii )
       ;
 
-    if ( i < pbc->nPoints ) {
+    if ( ii < pbc->nPoints ) {
       unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], 
                                               pbc->nPoints, pbc->nChequers );
       BearoffDist ( pbc, nPosID, NULL, NULL, ar, NULL, NULL );
@@ -1114,7 +1116,8 @@ static void BearOff2( int nUs, int nThem,
                       const int n, const int fCubeful,
                       xhash *ph, bearoffcontext *pbc, FILE *pfTmp ) {
 
-    int i, j, anRoll[ 2 ];
+    int j, anRoll[ 2 ];
+    uint i;
 	TanBoard anBoard, anBoardTemp;
     movelist ml;
     int aiBest[ 4 ];
