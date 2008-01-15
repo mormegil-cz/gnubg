@@ -1440,8 +1440,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwGameClockwise,fClockwise, "set clockwise %s")
 
   for ( i = 0; i < NUM_VARIATIONS; ++i ) 
-    if( gtk_toggle_button_get_active( 
-              GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ) ) && bgvDefault != i ) {
+    if( gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ) ) && bgvDefault != (int)i )
+	{
       sprintf( sz, "set variation %s", aszVariationCommands[ i ] );
       UserCommand( sz );
       break;
@@ -1716,7 +1716,7 @@ OptionsSet( optionswidget *pow) {
 
   for ( i = 0; i < NUM_VARIATIONS; ++i )
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ),
-                                   bgvDefault == i );
+                                   bgvDefault == (int)i );
 
   if (rngCurrent == RNG_MANUAL)
      gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwDiceManual ),

@@ -51,7 +51,7 @@ extern GtkWidget *hpaned;
 extern GtkWidget *pom;
 extern moverecord *pmrCurAnn;
 
-extern char *ReturnHits(int anBoard[2][25]);
+extern char *ReturnHits(TanBoard anBoard);
 extern gboolean ShowGameWindow(void);
 extern gint MoveListClearSelection(GtkWidget * pw, GdkEventSelection * pes,
 				   hintdata * phd);

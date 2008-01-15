@@ -1,3 +1,8 @@
+Tue Jan 15 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg-types.h + others: change board type to unsigned
+		hopefully not breaking anything on the way (esp. bearoff)
+
 Tue Jan 15 19:05:58 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* analysis.c, backgammon.h, dice.c, eval.c, gnubg.c, gtkboard.c,

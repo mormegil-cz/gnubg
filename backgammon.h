@@ -287,7 +287,7 @@ extern evalsetup esAnalysisChequer;
 extern evalsetup esAnalysisCube;
 extern evalsetup esEvalChequer;
 extern evalsetup esEvalCube;
-extern float arLuckLevel[LUCK_VERYGOOD + 1];
+extern float arLuckLevel[N_LUCKS];
 extern float arSkillLevel[N_SKILLS];
 extern float rEvalsPerSec;
 extern float rRatingOffset;
@@ -430,7 +430,7 @@ extern int AnalyzeMove(moverecord * pmr, matchstate * pms,
 		       const int afAnalysePlayers[2], float *doubleError);
 extern int CompareNames(char *sz0, char *sz1);
 extern int confirmOverwrite(const char *sz, const int f);
-extern int EPC(const int anBoard[2][25], float *arEPC, float *arMu,
+extern int EPC(const TanBoard anBoard, float *arEPC, float *arMu,
 	       float *arSigma, int *pfSource, const int fOnlyBearoff);
 extern int EvalCmp(const evalcontext *, const evalcontext *, const int);
 extern int getFinalScore(int *anScore);
@@ -441,7 +441,7 @@ extern int NextTurn(int fPlayNext);
 extern int ParseKeyValue(char **ppch, char *apch[2]);
 extern int ParseNumber(char **ppch);
 extern int ParsePlayer(char *sz);
-extern int ParsePosition(int an[2][25], char **ppch, char *pchDesc);
+extern int ParsePosition(TanBoard an, char **ppch, char *pchDesc);
 extern int SetToggle(char *szName, int *pf, char *sz, char *szOn,
 		     char *szOff);
 extern moverecord *getCurrentMoveRecord(int *pfHistory);
@@ -463,7 +463,7 @@ extern void FixMatchState(matchstate * pms, const moverecord * pmr);
 extern void FreeMatch(void);
 extern void GetMatchStateCubeInfo(cubeinfo * pci, const matchstate * pms);
 extern void HandleCommand(char *sz, command * ac);
-extern void InitBoard(int anBoard[2][25], const bgvariation bgv);
+extern void InitBoard(TanBoard anBoard, const bgvariation bgv);
 extern void InvalidateStoredCube(void);
 extern void InvalidateStoredMoves(void);
 extern void PortableSignal(int nSignal, RETSIGTYPE(*p) (int),
@@ -484,12 +484,12 @@ extern void SetMatchDate(matchinfo * pmi);
 extern void SetMatchID(const char *szMatchID);
 extern void SetMatchInfo(char **ppch, char *sz, char *szMessage);
 extern void SetMoveRecord(void *pmr);
-extern void show_8912(int anBoard[2][25], char *sz);
-extern void show_bearoff(int an[2][25], char *sz);
+extern void show_8912(TanBoard anBoard, char *sz);
+extern void show_bearoff(TanBoard an, char *sz);
 extern void ShowBoard(void);
-extern void show_keith(int an[2][25], char *sz);
-extern void show_kleinman(int an[2][25], char *sz);
-extern void show_thorp(int an[2][25], char *sz);
+extern void show_keith(TanBoard an, char *sz);
+extern void show_kleinman(TanBoard an, char *sz);
+extern void show_thorp(TanBoard an, char *sz);
 extern void TextToClipboard(const char *sz);
 extern void UpdateSettings(void);
 extern void UpdateSetting(void *p);

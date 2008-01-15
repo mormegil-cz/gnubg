@@ -41,12 +41,10 @@
 #include <string.h>
 #include "positionid.h"
 
-static inline void
-addBits(unsigned char auchKey[10], int const bitPos, int const nBits)
+static inline void addBits(unsigned char auchKey[10], unsigned int bitPos, unsigned int nBits)
 {
-  int const k = bitPos / 8;
-  int const r = (bitPos & 0x7);
-
+  unsigned int k = bitPos / 8;
+  unsigned int r = (bitPos & 0x7);
   unsigned int b = (((unsigned int)0x1 << nBits) - 1) << r;
 
   auchKey[k] |= (unsigned char)b;
@@ -62,15 +60,16 @@ addBits(unsigned char auchKey[10], int const bitPos, int const nBits)
 extern void
 PositionKey(const TanBoard anBoard, unsigned char auchKey[10])
 {
-  int i, iBit = 0;
-  const int* j;
+  unsigned int i, iBit = 0;
+  const unsigned int* j;
 
   memset(auchKey, 0, 10 * sizeof(*auchKey));
 
   for(i = 0; i < 2; ++i) {
-    const int* const b = anBoard[i];
-    for(j = b; j < b + 25; ++j) {
-      int const nc = *j;
+    const unsigned int* const b = anBoard[i];
+    for(j = b; j < b + 25; ++j)
+	{
+      const unsigned int nc = *j;
 
       if( nc ) {
         addBits(auchKey, iBit, nc);
@@ -122,16 +121,8 @@ extern char *PositionID( const TanBoard anBoard ) {
 extern int
 CheckPosition( const TanBoard anBoard )
 {
-    int ac[ 2 ], i;
+    unsigned int ac[ 2 ], i;
 
-    /* Check for a point with a negative number of chequers */
-    for( i = 0; i < 25; i++ )
-	if( anBoard[ 0 ][ i ] < 0 ||
-	    anBoard[ 1 ][ i ] < 0 ) {
-            errno = EINVAL;
-            return 0;
-	}
-    
     /* Check for a player with over 15 chequers */
     for( i = ac[ 0 ] = ac[ 1 ] = 0; i < 25; i++ )
         if( ( ac[ 0 ] += anBoard[ 0 ][ i ] ) > 15 ||
@@ -159,23 +150,25 @@ CheckPosition( const TanBoard anBoard )
     return 0;
 }
 
-extern void ClosestLegalPosition( TanBoard anBoard ) {
-
-    int i, j, ac[ 2 ] = { 15, 15 };
-
-    /* Force a non-negative number of chequers on all points */
-    for( i = 0; i < 2; i++ )
-	for( j = 0; j < 25; j++ )
-	    if( anBoard[ i ][ j ] < 0 )
-			anBoard[ i ][ j ] = 0;
+extern void ClosestLegalPosition( TanBoard anBoard )
+{
+    unsigned int i, j, ac[ 2 ];
 
     /* Limit each player to 15 chequers */
     for( i = 0; i < 2; i++ )
-	for( j = 0; j < 25; j++ )
-	    if( ( ac[ i ] -= anBoard[ i ][ j ] ) < 0 ) {
-			anBoard[ i ][ j ] += ac[ i ];
-			ac[ i ] = 0;
-	    }
+	{
+		ac[i] = 15;
+		for( j = 0; j < 25; j++ )
+		{
+			if (anBoard[i][j] <= ac[i])
+				ac[i] -= anBoard[i][j];
+			else
+			{
+				anBoard[i][j] = ac[i];
+				ac[i] = 0;
+			}
+		}
+	}
 
     /* Forbid both players having a chequer on the same point */
     for( i = 0; i < 24; i++ )
@@ -318,10 +311,8 @@ static void InitCombination( void )
     fCalculated = 1;
 }
 
-extern unsigned int Combination( const int n, const int r ) {
-
-    g_assert( n > 0 );
-    g_assert( r > 0 );
+extern unsigned int Combination( const unsigned int n, const unsigned int r )
+{
     g_assert( n <= MAX_N );
     g_assert( r <= MAX_R );
 
@@ -331,8 +322,8 @@ extern unsigned int Combination( const int n, const int r ) {
     return anCombination[ n - 1 ][ r - 1 ];
 }
 
-static unsigned int PositionF( const int fBits, const int n, const int r ) {
-
+static unsigned int PositionF( unsigned int fBits, unsigned int n, unsigned int r )
+{
     if( n == r )
         return 0;
 
@@ -340,12 +331,9 @@ static unsigned int PositionF( const int fBits, const int n, const int r ) {
         PositionF( fBits, n - 1, r - 1 ) : PositionF( fBits, n - 1, r );
 }
 
-extern 
-unsigned int PositionBearoff( const int anBoard[],
-                              int nPoints,
-                              int nChequers ) {
-
-    int i, fBits, j;
+extern unsigned int PositionBearoff(const unsigned int anBoard[], unsigned int nPoints, unsigned int nChequers)
+{
+    unsigned int i, fBits, j;
 
     for( j = nPoints - 1, i = 0; i < nPoints; i++ )
         j += anBoard[ i ];
@@ -361,8 +349,8 @@ unsigned int PositionBearoff( const int anBoard[],
     return PositionF( fBits, nChequers + nPoints, nPoints );
 }
 
-static unsigned int PositionInv( unsigned int nID, int n, int r ) {
-
+static unsigned int PositionInv( unsigned int nID, unsigned int n, unsigned int r )
+{
     unsigned int nC;
 
     if( !r )
@@ -376,34 +364,41 @@ static unsigned int PositionInv( unsigned int nID, int n, int r ) {
         PositionInv( nID - nC, n - 1, r - 1 ) : PositionInv( nID, n - 1, r );
 }
 
-extern void PositionFromBearoff( int anBoard[], unsigned int usID,
-                                 int nPoints, int nChequers ) {
-    
+extern void PositionFromBearoff( unsigned int anBoard[], unsigned int usID,
+                                 unsigned int nPoints, unsigned int nChequers )
+{
     unsigned int fBits = PositionInv( usID, nChequers + nPoints, nPoints );
-    int i, j;
+    unsigned int i, j;
 
     for( i = 0; i < nPoints; i++ )
         anBoard[ i ] = 0;
-    
-    for( j = nPoints - 1, i = 0; j >= 0 && i < ( nChequers + nPoints ); i++ ) {
+
+    j = nPoints - 1;
+    for( i = 0; i < ( nChequers + nPoints ); i++ )
+	{
         if( fBits & ( 1 << i ) )
+		{
+			if (j == 0)
+				break;
             j--;
+		}
         else
             anBoard[ j ]++;
     }
 }
 
-extern unsigned short PositionIndex(int g, const int anBoard[6])
+extern unsigned short PositionIndex(unsigned int g, const unsigned int anBoard[6])
 {
-  int i, fBits;
-  int j = g - 1;
+  unsigned int i, fBits;
+  unsigned int j = g - 1;
 
   for(i = 0; i < g; i++ )
     j += anBoard[ i ];
 
   fBits = 1 << j;
     
-  for(i = 0; i < g; i++) {
+  for(i = 0; i < g; i++)
+  {
     j -= anBoard[ i ] + 1;
     fBits |= ( 1 << j );
   }

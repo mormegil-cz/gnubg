@@ -170,14 +170,14 @@ static void write_points ( gint points[ 28 ], const gint turn, const gint
     points[ i ] = 0;
 
   /* Opponent on bar */
-  points[ 0 ] = -an[ 0 ][ 24 ];
+  points[ 0 ] = -(int)an[ 0 ][ 24 ];
 
   /* Board */
   for( i = 0; i < 24; i++ ) {
     if ( an[ 1 ][ i ] )
       points[ i + 1 ] = an[ 1 ][ i ];
     if ( an[ 0 ][ i ] )
-      points[ 24 - i ] = -an[ 0 ][ i ];
+      points[ 24 - i ] = -(int)an[ 0 ][ i ];
   }
 
   /* Player on bar */

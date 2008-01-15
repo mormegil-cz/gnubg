@@ -554,7 +554,7 @@ ExportSnowieTxt (FILE * pf, const matchstate * pms)
 
   /* chequers on the bar for player on roll */
 
-  fprintf (pf, "%d;", -pms->anBoard[0][24]);
+  fprintf (pf, "%d;", -(int)pms->anBoard[0][24]);
 
   /* chequers on the board */
 
@@ -563,7 +563,7 @@ ExportSnowieTxt (FILE * pf, const matchstate * pms)
       if (pms->anBoard[1][i])
 	j = pms->anBoard[1][i];
       else
-	j = -pms->anBoard[0][23 - i];
+	j = -(int)pms->anBoard[0][23 - i];
 
       fprintf (pf, "%d;", j);
 
@@ -796,13 +796,13 @@ extern void CommandExportPositionJF (char *sz)
   for (i = 24; i > 0; i--)
     {
       WriteInt16 (fp, anBoard[0][24 - i] ?
-		  -anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
+		  -(int)anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
       WriteInt16 (fp, anBoard[0][24 - i] ?
-		  -anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
+		  -(int)anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
     }
   /* Player on bar */
-  WriteInt16 (fp, -anBoard[0][24] + 20);
-  WriteInt16 (fp, -anBoard[0][24] + 20);
+  WriteInt16 (fp, -(int)anBoard[0][24] + 20);
+  WriteInt16 (fp, -(int)anBoard[0][24] + 20);
 
   fclose (fp);
 

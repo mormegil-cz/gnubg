@@ -1670,7 +1670,7 @@ extern int main( int argc, char **argv )
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
 #endif
-      BearoffClose ( &pbc );
+      BearoffClose ( pbc );
     }
 
 #if !WIN32
@@ -1759,7 +1759,7 @@ extern int main( int argc, char **argv )
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
 #endif
-      BearoffClose ( &pbc );
+      BearoffClose ( pbc );
     }
 #if !WIN32
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 

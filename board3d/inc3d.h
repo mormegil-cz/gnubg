@@ -62,7 +62,6 @@ extern GdkGLConfig *getglconfigSingle(void);	/* Odd function needs to be defined
 
 /* float versions (to quiet compiler warnings) */
 #define powi(arg1, arg2) (int)pow((double)(arg1), (double)(arg2))
-#define fabsf(arg) (float)fabs((double)(arg))
 
 /* Clipping planes */
 #define zNear .1

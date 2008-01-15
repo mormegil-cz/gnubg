@@ -3885,7 +3885,7 @@ CommandRollout( char *sz ) {
     move *pm = 0;
     int num_args;
 
-    int ( *aan )[ 2 ][ 25 ];
+    unsigned int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
 
     num_args = c = CountTokens( sz );
@@ -5909,8 +5909,8 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 }
 #endif
 
-static void BearoffProgress( int i ) {
-
+static void BearoffProgress( unsigned int i )
+{
 #if USE_GTK
     if( fX ) {
 	GTKBearoffProgress( i );

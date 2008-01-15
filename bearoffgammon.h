@@ -33,10 +33,9 @@ struct GammonProbs {
 };
 
 extern struct GammonProbs*
-getBearoffGammonProbs(const int b[6]);
+getBearoffGammonProbs(const unsigned int b[6]);
 
-extern long*
-getRaceBGprobs(int board[6]);
+extern long *getRaceBGprobs(const unsigned int board[6]);
 
 #define RBG_NPROBS 5
 

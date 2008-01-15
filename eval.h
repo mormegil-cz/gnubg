@@ -346,7 +346,7 @@ typedef enum  {
      ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 0 ] : arEquity[ 3 ] ) )
 
 extern void EvalInitialise( char *szWeights, char *szWeightsBinary,
-		int fNoBearoff, void (*pfProgress)( int ) );
+		int fNoBearoff, void (*pfProgress)( unsigned int ) );
 
 extern int EvalShutdown( void );
 

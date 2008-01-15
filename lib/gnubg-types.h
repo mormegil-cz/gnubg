@@ -22,7 +22,7 @@
 #ifndef _GNUBG_TYPES_H_
 #define _GNUBG_TYPES_H_
 
-typedef int TanBoard[2][25];
-typedef const int (*ConstTanBoard)[25];
+typedef unsigned int TanBoard[2][25];
+typedef const unsigned int (*ConstTanBoard)[25];
 
 #endif

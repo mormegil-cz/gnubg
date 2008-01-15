@@ -58,7 +58,8 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
                            int nChequers ) {
 
     char *pch = sz, *pchIn;
-    int x, y, cOffO = nChequers, cOffX = nChequers;
+    unsigned int x, y;
+	unsigned int cOffO = nChequers, cOffX = nChequers;
 	TanBoard an;
     static char achX[ 17 ] = "     X6789ABCDEF",
         achO[ 17 ] = "     O6789ABCDEF";
@@ -293,7 +294,7 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
                            int nChequers) {
 
     char *pch = sz, *pchIn;
-    int x, y, cOffO = nChequers, cOffX = nChequers;
+    unsigned int x, y, cOffO = nChequers, cOffX = nChequers;
 	TanBoard an;
     static char achX[ 17 ] = "     X6789ABCDEF",
         achO[ 17 ] = "     O6789ABCDEF";
@@ -945,12 +946,12 @@ extern char *FIBSBoard( char *pch, TanBoard anBoard, int fRoll,
     sprintf( sz, ":%d:%d:%d:", nMatchTo, nScore, nOpponent );
 
     /* Opponent on bar */
-    sprintf( strchr( sz, 0 ), "%d:", -anBoard[ 0 ][ 24 ] );
+    sprintf( strchr( sz, 0 ), "%d:", -(int)anBoard[ 0 ][ 24 ] );
 
     /* Board */
     for( i = 0; i < 24; i++ )
 	sprintf( strchr( sz, 0 ), "%d:", anBoard[ 0 ][ 23 - i ] ?
-		 -anBoard[ 0 ][ 23 - i ] : anBoard[ 1 ][ i ] );
+		 -(int)anBoard[ 0 ][ 23 - i ] : anBoard[ 1 ][ i ] );
 
     /* Player on bar */
     sprintf( strchr( sz, 0 ), "%d:", anBoard[ 1 ][ 24 ] );

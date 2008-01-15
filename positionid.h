@@ -29,20 +29,19 @@ extern char *PositionID( const TanBoard anBoard );
 extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] );
 
 extern 
-unsigned int PositionBearoff( const int anBoard[],
-                              int nPoints,
-                              int nChequers );
+unsigned int PositionBearoff( const unsigned int anBoard[],
+                              unsigned int nPoints,
+                              unsigned int nChequers );
 
 extern void PositionFromKey(TanBoard anBoard, const unsigned char* puch);
 
 /* Return 1 for success, 0 for invalid id */
 extern int PositionFromID( TanBoard anBoard, const char* szID );
 
-extern void 
-PositionFromBearoff(int anBoard[], unsigned int usID,
-		    int nPoints, int nChequers );
+extern void PositionFromBearoff(unsigned int anBoard[], unsigned int usID,
+		    unsigned int nPoints, unsigned int nChequers );
 
-extern unsigned short PositionIndex(int g, const int anBoard[6]);
+extern unsigned short PositionIndex(unsigned int g, const unsigned int anBoard[6]);
 
 extern int EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
 extern int EqualBoards( const TanBoard anBoard0, const TanBoard anBoard1 );
@@ -52,7 +51,7 @@ extern int CheckPosition( const TanBoard anBoard );
 
 extern void ClosestLegalPosition( TanBoard anBoard );
 
-extern unsigned int Combination ( const int n, const int r );
+extern unsigned int Combination ( const unsigned int n, const unsigned int r );
 
 extern unsigned char Base64( const unsigned char ch );
 

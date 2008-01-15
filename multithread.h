@@ -21,7 +21,7 @@
 #endif
 
 /*#define DEBUG_MULTITHREADED 1*/
-#if DEBUG_MULTITHREADED
+#ifdef DEBUG_MULTITHREADED
 #define multi_debug(x) puts(x)
 #else
 #define multi_debug(x)

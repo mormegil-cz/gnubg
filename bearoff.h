@@ -27,9 +27,10 @@
 typedef enum _bearoffcreator {
   BEAROFF_GNUBG,
   BEAROFF_EXACT_BEAROFF,
-  BEAROFF_UNKNOWN,
-  NUM_BEAROFFS
+  BEAROFF_UNKNOWN
 } bearoffcreator;
+
+#define N_BEAROFFS ((int)BEAROFF_UNKNOWN + 1)
 
 typedef enum _bearofftype {
   BEAROFF_ONESIDED,
@@ -44,8 +45,8 @@ typedef struct _bearoffcontext
   int nFiles;     /* number of file descriptors */
   bearofftype bt; /* type of bearoff database */
   bearoffcreator bc; /* creator of database */
-  int nPoints;    /* number of points covered by database */
-  int nChequers;  /* number of chequers for one-sided database */
+  unsigned int nPoints;    /* number of points covered by database */
+  unsigned int nChequers;  /* number of chequers for one-sided database */
   int fInMemory;  /* Is database entirely read into memory? */
   int fMalloc;    /* is data malloc'ed? */
   char *szFilename; /* filename */
@@ -57,7 +58,6 @@ typedef struct _bearoffcontext
   int fHeuristic;  /* heuristic database? */
   int nOffsetBuffer;
   unsigned char *puchBuffer;
-  unsigned int nOffsetA;
   unsigned char *puchA;
   /* two sided dbs */
   int fCubeful;    /* cubeful equities included */
@@ -75,7 +75,7 @@ enum _bearoffoptions {
   BO_HEURISTIC         = 8
 };
 
-extern bearoffcontext *BearoffInit ( const char *szFilename, const int bo, void (*p)(int) );
+extern bearoffcontext *BearoffInit ( const char *szFilename, const int bo, void (*p)(unsigned int) );
 
 extern bearoffcontext *BearoffInitBuiltin ( void );
 
@@ -100,7 +100,7 @@ BearoffCubeful ( const bearoffcontext *pbc,
                  const unsigned int iPos,
                  float ar[ 4 ], unsigned short int aus[ 4 ] );
 
-extern void BearoffClose ( bearoffcontext **ppbc );
+extern void BearoffClose ( bearoffcontext *ppbc );
 
 extern int
 isBearoff ( const bearoffcontext *pbc, const TanBoard anBoard );

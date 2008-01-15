@@ -7211,42 +7211,44 @@ struct GroupInfo info[63] = {
 #include <glib.h>
 #include "positionid.h"
 
-extern struct GammonProbs*
-getBearoffGammonProbs(const int board[6])
+extern struct GammonProbs* getBearoffGammonProbs(const unsigned int board[6])
 {
   int group = 0;
   int i;
   struct GroupInfo* in;
   
-  for(i = 5; i >= 0; --i) { 
-    group += (0x1 << i) * !!board[i];
+  for(i = 5; i >= 0; --i)
+  {
+	  if (board[i] > 0)
+		group += (0x1 << i);
   }
-
   
+  g_assert(group > 0);
   in = &info[group-1];
   if( ! in->info ) {
     return &in->gDefault;
   }
 
   {
-    int grpSize = 0;
-    int b1[6];
+    unsigned int grpSize = 0;
+	unsigned int b1[6] = {0};
     unsigned int k;
-    unsigned int index;
+    unsigned short index;
     
-    for(k = 0; k < 6; ++k) {
-      if( (group & (0x1 << k)) ) {
-	{                                               g_assert( board[k] > 0 ); }
-      
-	b1[grpSize] = board[k] - 1;
-	++grpSize;
+    for(k = 0; k < 6; ++k)
+	{
+      if( (group & (0x1 << k)) )
+	  {
+		g_assert( board[k] > 0 );
+		b1[grpSize] = board[k] - 1;
+		grpSize++;
       }
     }
 
     index = PositionIndex(grpSize, b1);
 
-    {             g_assert( index >= in->base && index - in->base < in->size ); }
-    {      g_assert( in->info[index - in->base] < sizeof(all)/sizeof(all[0]) ); }
+    g_assert( index >= in->base && index - in->base < in->size );
+    g_assert( in->info[index - in->base] < sizeof(all)/sizeof(all[0]) );
   
     return &all[in->info[index - in->base]];
   }
@@ -7815,42 +7817,38 @@ static T* y[] = {
   y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, 
 };
 
-
-long*
-getRaceBGprobs(int board[6])
+extern long *getRaceBGprobs(const unsigned int board[6])
 {
   unsigned int tot = 0;
-  int group = 0;
   int i;
-  {                                                 g_assert( board[5] == 0 ); }
+  unsigned int group = 0;
+  g_assert( board[5] == 0 );
   
-  for(i = 4; i >= 0; --i) { 
-    group += (0x1 << i) * !!board[i];
+  for(i = 4; i >= 0; --i)
+  {
+	if (board[i])
+	  group += (0x1 << i);
     tot += board[i];
   }
 
-  if( tot > 6 ) {
+  if( tot > 6 )
     return 0;
-  }
 
   {
-    int grpSize = 0;
-    int b1[6];
+    unsigned int grpSize = 0;
+	unsigned int b1[6] = {0};
     unsigned int k;
 
-    for(k = 0; k < 5; ++k) {
-      if( (group & (0x1 << k)) ) {
-	{                                            g_assert( board[k] > 0 ); }
-      
-	b1[grpSize] = board[k] - 1;
-	++grpSize;
+    for(k = 0; k < 5; ++k)
+	{
+      if( (group & (0x1 << k)) )
+	  {
+		g_assert( board[k] > 0 );
+		b1[grpSize] = board[k] - 1;
+		++grpSize;
       }
     }
 
-    {
-      unsigned int const index = PositionIndex(grpSize, b1);
-
-      return y[group-1][index];
-    }
+    return y[group-1][PositionIndex(grpSize, b1)];
   }
 }

@@ -94,7 +94,7 @@ isCrossOver ( const int from, const int to ) {
  */
 
 static int
-chequersout ( int anBoard[ 25 ] ) {
+chequersout ( unsigned int anBoard[ 25 ] ) {
 
   int i;
   int n=0;
@@ -107,7 +107,7 @@ chequersout ( int anBoard[ 25 ] ) {
 }
 
 static int
-checkboard ( int anBoard[ 25 ] ) {
+checkboard ( unsigned int anBoard[ 25 ] ) {
 
   int i;
 
@@ -120,7 +120,7 @@ checkboard ( int anBoard[ 25 ] ) {
 }
 
 static void
-FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
+FindBestMoveOSR2 ( unsigned int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
   int ifar, inear, iboth;
   int iused = 0;
@@ -331,7 +331,7 @@ FindBestMoveOSR2 ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
  */
 
 static void
-FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
+FindBestMoveOSR4 ( unsigned int anBoard[ 25 ], const int nDice, int *pnOut ) {
 
   int nd = 4;
   int i, n = 0;
@@ -551,7 +551,7 @@ FindBestMoveOSR4 ( int anBoard[ 25 ], const int nDice, int *pnOut ) {
  */
 
 static void
-FindBestMoveOSR ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
+FindBestMoveOSR ( unsigned int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
 
   if ( anDice[ 0 ] != anDice[ 1 ] )
     FindBestMoveOSR2 ( anBoard, anDice, pnOut );
@@ -575,7 +575,7 @@ FindBestMoveOSR ( int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
  */
 
 static int
-osr ( int anBoard[ 25 ], const int iGame, const int nGames, const int nOut ) {
+osr ( unsigned int anBoard[ 25 ], const int iGame, const int nGames, const int nOut ) {
 
   int iTurn = 0;
   int anDice[ 2 ];
@@ -622,11 +622,11 @@ osr ( int anBoard[ 25 ], const int iGame, const int nGames, const int nOut ) {
  */
 
 static void
-rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
+rollOSR ( const int nGames, const unsigned int anBoard[ 25 ], const int nOut,
           float arProbs[], const int nMaxProbs,
           float arGammonProbs[], const int nMaxGammonProbs ) {
 
-  int an[ 25 ];
+  unsigned int an[ 25 ];
   unsigned short int anProb[ 32 ];
   int i, n, m;
   int iGame;
@@ -702,8 +702,8 @@ rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
  */
 
 static int
-osp ( const int anBoard[ 25 ], const int nGames,
-      int an[ 25 ], float arProbs[ MAX_PROBS ], 
+osp ( const unsigned int anBoard[ 25 ], const int nGames,
+      unsigned int an[ 25 ], float arProbs[ MAX_PROBS ], 
       float arGammonProbs[ MAX_GAMMON_PROBS ] ) {
 
   int i, n;
@@ -763,7 +763,7 @@ osp ( const int anBoard[ 25 ], const int nGames,
 
 
 static float
-bgProb ( const int anBoard[ 25 ],
+bgProb ( const unsigned int anBoard[ 25 ],
          const int fOnRoll,
          const int nTotal,
          const float arProbs[],
@@ -795,7 +795,7 @@ bgProb ( const int anBoard[ 25 ],
       
       /* FIXME: this ignores chequers on the bar */
 
-      getBearoffProbs ( PositionBearoff ( anBoard+18, 6, 15 ), anProb );
+      getBearoffProbs ( PositionBearoff ( anBoard + 18, 6, 15 ), anProb );
 
       for ( i = 0; i < nMaxProbs; ++i ) {
 

@@ -34,16 +34,16 @@
 
 #define cache_lock(pc, lock) \
 	if (MT_SafeIncCheck(&pc->locks[lock])) \
-		WaitForLock(pc, lock)
+		WaitForLock(&pc->locks[lock])
 
 #define cache_unlock(pc, l) MT_SafeDec(&pc->locks[l])
 
-static void WaitForLock(evalCache* pc, unsigned long lock)
+static void WaitForLock(int *lock)
 {
 	do
 	{
-		MT_SafeDec(&pc->locks[lock]);
-	} while (MT_SafeIncCheck(&pc->locks[lock]));
+		MT_SafeDec(lock);
+	} while (MT_SafeIncCheck(lock));
 }
 #endif
 

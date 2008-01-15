@@ -625,12 +625,12 @@ EvalShutdown ( void ) {
 
   /* close bearoff databases */
 
-  BearoffClose( &pbc1 );
-  BearoffClose( &pbc2 );
-  BearoffClose( &pbcOS );
-  BearoffClose( &pbcTS );
+  BearoffClose( pbc1 );
+  BearoffClose( pbc2 );
+  BearoffClose( pbcOS );
+  BearoffClose( pbcTS );
   for ( i = 0; i < 3; ++i )
-    BearoffClose( &apbcHyper[ i ] );
+    BearoffClose( apbcHyper[ i ] );
 
   /* destroy neural nets */
 
@@ -709,7 +709,7 @@ int (*NeuralNetEvaluateFn)( const neuralnet *pnn, float arInput[],
 			      float arOutput[], NNState *pnState) = 0;
 
 extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
-			   int fNoBearoff, void (*pfProgress) (int))
+			   int fNoBearoff, void (*pfProgress) (unsigned int))
 {
 	FILE *pfWeights = NULL;
 	int i, fReadWeights = FALSE;

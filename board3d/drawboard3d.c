@@ -1338,14 +1338,14 @@ static void drawHinge(const BoardData3d *bd3d, const renderdata *prd, float heig
 	glPushMatrix();
 	glTranslatef((TOTAL_WIDTH) / 2.0f, height, BASE_DEPTH + EDGE_DEPTH);
 	glRotatef(-90.f, 1.f, 0.f, 0.f);
-	gluCylinder(bd3d->qobjTex, (double)HINGE_WIDTH, (double)HINGE_WIDTH, (double)HINGE_HEIGHT, prd->curveAccuracy, 1);
+	gluCylinder(bd3d->qobjTex, (double)HINGE_WIDTH, (double)HINGE_WIDTH, (double)HINGE_HEIGHT, (GLint)prd->curveAccuracy, 1);
 
 	glMatrixMode(GL_TEXTURE);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 
 	glRotatef(180.f, 1.f, 0.f, 0.f);
-	gluDisk(bd3d->qobjTex, 0., (double)HINGE_WIDTH, prd->curveAccuracy, 1);
+	gluDisk(bd3d->qobjTex, 0., (double)HINGE_WIDTH, (GLint)prd->curveAccuracy, 1);
 
 	glPopMatrix();
 }
@@ -2441,7 +2441,7 @@ NTH_STATIC void drawFlagPick(const BoardData *bd, const BoardData3d *bd3d, const
 	glTranslatef(0.f, -FLAG_HEIGHT, 0.f);
 
 	glRotatef(-90.f, 1.f, 0.f, 0.f);
-	gluCylinder(bd3d->qobj, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_HEIGHT, prd->curveAccuracy, 1);
+	gluCylinder(bd3d->qobj, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_HEIGHT, (GLint)prd->curveAccuracy, 1);
 
 	circleRev(FLAGPOLE_WIDTH, 0.f, prd->curveAccuracy);
 	circleRev(FLAGPOLE_WIDTH * 2, FLAGPOLE_HEIGHT, prd->curveAccuracy);
@@ -3209,7 +3209,7 @@ NTH_STATIC void renderFlag(const BoardData *bd, const BoardData3d *bd3d, unsigne
 
 	glRotatef(-90.f, 1.f, 0.f, 0.f);
 	SetColour3d(.2f, .2f, .4f, 0.f);	/* Blue pole */
-	gluCylinder(bd3d->qobj, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_HEIGHT, curveAccuracy, 1);
+	gluCylinder(bd3d->qobj, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_WIDTH, (double)FLAGPOLE_HEIGHT, (GLint)curveAccuracy, 1);
 
 	circleRev(FLAGPOLE_WIDTH, 0.f, curveAccuracy);
 	circleRev(FLAGPOLE_WIDTH * 2, FLAGPOLE_HEIGHT, curveAccuracy);

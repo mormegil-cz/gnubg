@@ -24,7 +24,6 @@
 #include <neuralnet.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <glib/gi18n.h>
 #include <locale.h>
 #include "eval.h" /* for WEIGHTS_VERSION */
@@ -70,9 +69,13 @@ extern int main( int argc, char *argv[] )
 		}
     }
 
-    setlocale (LC_ALL, "C");
-    bindtextdomain (PACKAGE, LOCALEDIR);
-    textdomain (PACKAGE);
+    if (!setlocale (LC_ALL, "C") || 
+		!bindtextdomain (PACKAGE, LOCALEDIR) || 
+		!textdomain (PACKAGE))
+	{
+		perror ("seting locale failed");
+		exit (1);
+	}
 
     /* generate weights */
     
