@@ -795,10 +795,9 @@ extern void CommandExportPositionJF (char *sz)
   /* Board */
   for (i = 24; i > 0; i--)
     {
-      WriteInt16 (fp, anBoard[0][24 - i] ?
-		  -(int)anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
-      WriteInt16 (fp, anBoard[0][24 - i] ?
-		  -(int)anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
+		int point = (int)anBoard[0][24 - i];
+		WriteInt16 (fp, (point > 0 ? -point : (int)anBoard[1][i - 1]) + 20);
+		WriteInt16 (fp, (point > 0 ? -point : (int)anBoard[1][i - 1]) + 20);
     }
   /* Player on bar */
   WriteInt16 (fp, -(int)anBoard[0][24] + 20);

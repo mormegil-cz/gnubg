@@ -85,9 +85,10 @@ log_move (const int *anMove, int side, int die0, int die1) {
      
 }
 
-static void board_to_sgf (const int anBoard[25], int direction) {
-  int	i, j;
-  int   c = direction > 0 ? 'a' : 'x';
+static void board_to_sgf (const unsigned int anBoard[25], int direction)
+{
+  unsigned int i, j;
+  int c = direction > 0 ? 'a' : 'x';
 
   for (i = 0; i < 24; ++i) {
     for (j = 0; j < anBoard[i]; ++j)

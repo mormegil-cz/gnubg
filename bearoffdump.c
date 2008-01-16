@@ -141,7 +141,7 @@ main( int argc, char **argv ) {
   BearoffDump( pbc, (ConstTanBoard)anBoard, sz );
   puts( sz );
 
-  BearoffClose( &pbc );
+  BearoffClose( pbc );
 
   return 0;
 

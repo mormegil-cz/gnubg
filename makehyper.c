@@ -84,7 +84,7 @@ int aiNorm[ 10 ];
 
 
 static hyperclass
-ClassifyHyper ( int anBoard[ 2 ][ 25 ] ) {
+ClassifyHyper ( TanBoard anBoard ) {
 
   int i;
   int nOppBack, nBack;

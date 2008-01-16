@@ -896,7 +896,7 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 /* Calculates inputs for any contact position, for one player only. */
 
 static void
-CalculateHalfInputs( const int anBoard[ 25 ], const int anBoardOpp[ 25 ], float afInput[] )
+CalculateHalfInputs( const unsigned int anBoard[ 25 ], const unsigned int anBoardOpp[ 25 ], float afInput[] )
 {
   int i, j, k, l, nOppBack, n, aHit[ 39 ], nBoard;
     
@@ -1577,7 +1577,7 @@ CalculateRaceInputs(const TanBoard anBoard, float inputs[])
   for(side = 0; side < 2; ++side) {
     unsigned int i, k;
 
-    const int* const board = anBoard[side];
+    const unsigned int* const board = anBoard[side];
     float* const afInput = inputs + side * HALF_RACE_INPUTS;
 
     unsigned int menOff = 15;
@@ -1734,7 +1734,7 @@ baseInputs(const TanBoard anBoard, float arInput[])
     
   for(j = 0; j < 2; ++j ) {
     float* afInput = arInput + j * 25*4;
-    const int* board = anBoard[j];
+    const unsigned int* board = anBoard[j];
     
     /* Points */
     for( i = 0; i < 24; i++ ) {
@@ -1760,7 +1760,7 @@ baseInputs(const TanBoard anBoard, float arInput[])
 #endif 
 
 static void
-menOffAll(const int* anBoard, float* afInput)
+menOffAll(const unsigned int* anBoard, float* afInput)
 {
   /* Men off */
   int menOff = 15;
@@ -1786,7 +1786,7 @@ menOffAll(const int* anBoard, float* afInput)
 }
 
 static void
-menOffNonCrashed(const int* anBoard, float* afInput)
+menOffNonCrashed(const unsigned int* anBoard, float* afInput)
 {
   int menOff = 15;
   int i;
@@ -2076,7 +2076,7 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
       for(side = 0; side < 2; ++side) {
         unsigned int tot = 0;
       
-        const int* board = anBoard[side];
+        const unsigned int* board = anBoard[side];
       
         for(i = 0;  i < 25; ++i) {
           tot += board[i];
@@ -3930,9 +3930,9 @@ extern int KeithCount(const TanBoard anBoard, int pn[2])
     PipCount(anBoard, anPips);
     for (i = 0; i < 2; i++) {
 	pn[i] = anPips[i];
-	pn[i] += MAX(0, (anBoard[i][0] - 1) * 2);
-	pn[i] += MAX(0, (anBoard[i][1] - 1));
-	pn[i] += MAX(0, (anBoard[i][2] - 3));
+	pn[i] += (MAX(1, anBoard[i][0]) - 1) * 2;
+	pn[i] += MAX(1, anBoard[i][1]) - 1;
+	pn[i] += MAX(3, anBoard[i][2]) - 3;
 	for (x = 3; x < 6; x++)
 	    if (!anBoard[i][x])
 		pn[i]++;

@@ -2155,10 +2155,9 @@ static void AddRule(FILE * pf, const char *sz, int *pfFirst)
 
 static void SaveGame(FILE * pf, listOLD * plGame)
 {
-
     listOLD *pl;
     moverecord *pmr;
-    int i, j;
+    unsigned int i, j;
 	TanBoard anBoard;
 
     updateStatisticsGame(plGame);

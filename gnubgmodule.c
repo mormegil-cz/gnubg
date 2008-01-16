@@ -70,7 +70,7 @@ Board1ToPy( int anBoard [ 25 ] ) {
 
 
 static int
-PyToBoard1( PyObject* p, int anBoard[ 25 ] )
+PyToBoard1( PyObject* p, unsigned int anBoard[ 25 ] )
 {
   if( PySequence_Check(p) && PySequence_Size(p) == 25 ) {
     int j;
@@ -951,7 +951,7 @@ PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
   PyObject *pyBoard = NULL;
   int nChequers = 15;
   int nPoints = 6;
-  int anBoard[ 25 ];
+  unsigned int anBoard[ 25 ];
 
   memcpy( anBoard, msBoard(), sizeof(TanBoard) );
 
@@ -965,10 +965,9 @@ PythonPositionBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
   return PyInt_FromLong( PositionBearoff( anBoard, nPoints, nChequers ) );
 }
 
-static PyObject *
-PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args ) {
-
-  int anBoard[ 25 ];
+static PyObject *PythonPositionFromBearoff( PyObject* self UNUSED_PARAM, PyObject *args )
+{
+  unsigned int anBoard[ 25 ];
   int iPos = 0;
   int nChequers = 15;
   int nPoints = 6;

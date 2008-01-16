@@ -417,7 +417,7 @@ static void BearOff( int nId, uint nPoints,
     unsigned int usGammonBest;
     unsigned short int ausGammonBest[ 32 ];
     int iGammonBest;
-    int nBack;
+    unsigned int nBack;
 
     /* get board for given position */
 
@@ -826,7 +826,7 @@ NDBearoff ( const int iPos, const uint nPoints, float ar[ 4 ], xhash *ph,
     for ( ii = 24; ii >= 0 && ! anBoard[ 1 ][ ii ]; --ii )
       ;
 
-    if ( ii < pbc->nPoints ) {
+    if ( ii < (int)pbc->nPoints ) {
       unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], 
                                               pbc->nPoints, pbc->nChequers );
       BearoffDist ( pbc, nPosID, NULL, NULL, ar, NULL, NULL );

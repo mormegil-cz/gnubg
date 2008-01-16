@@ -106,22 +106,19 @@ chequersout ( unsigned int anBoard[ 25 ] ) {
 
 }
 
-static int
-checkboard ( unsigned int anBoard[ 25 ] ) {
-
-  int i;
+static int checkboard ( unsigned int anBoard[ 25 ] )
+{
+  int i, c = 0;
 
   for ( i = 0; i < 25; ++i )
-    if ( anBoard[ i ] < 0 )
-      return 0;
+	  c += anBoard[ i ];
 
-  return 1;
+  return (c == 15);
 
 }
 
-static void
-FindBestMoveOSR2 ( unsigned int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut ) {
-
+static void FindBestMoveOSR2 ( unsigned int anBoard[ 25 ], const int anDice[ 2 ], int *pnOut )
+{
   int ifar, inear, iboth;
   int iused = 0;
   int i, j, lc;
