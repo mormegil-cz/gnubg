@@ -510,7 +510,7 @@ static void ComputeTable0( void )
   }
 }
 
-static int Escapes( const int anBoard[ 25 ], int n ) {
+static int Escapes( const unsigned int anBoard[ 25 ], int n ) {
     
     int i, af = 0;
     
@@ -549,7 +549,7 @@ static void ComputeTable1( void )
   }
 }
 
-static int Escapes1( const int anBoard[ 25 ], int n ) {
+static int Escapes1( const unsigned int anBoard[ 25 ], int n ) {
     
     int i, af = 0;
     
