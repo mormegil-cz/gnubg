@@ -500,12 +500,6 @@ extern void UpdateStoredCube(float aarOutput[2][NUM_ROLLOUT_OUTPUTS],
 extern void UpdateStoredMoves(const movelist * pml,
 			      const matchstate * pms);
 
-#ifdef WIN32
-extern char *getInstallDir(void);
-#undef PKGDATADIR
-#define PKGDATADIR getInstallDir()
-#endif
-
 extern void CommandAccept(char *);
 extern void CommandAgree(char *);
 extern void CommandAnalyseClearGame(char *);

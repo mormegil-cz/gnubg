@@ -78,6 +78,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "external.h"
 #include "neuralnet.h"
 #include "gnubgmodule.h"
+#include "util.h"
 
 #if HAVE_SOCKETS
 #if HAVE_SYS_SOCKET_H
@@ -4181,7 +4182,7 @@ extern void CommandLoadPython(char *sz)
 	if (g_file_test(sz, G_FILE_TEST_EXISTS))
 		path = g_strdup(sz);
 	else {
-		path = g_build_filename(PKGDATADIR, "/scripts", sz, NULL);
+		path = BuildFilename2("/scripts", sz);
 		if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
 			g_free(path);
 			path = g_build_filename("scripts", sz, NULL);
@@ -5847,7 +5848,7 @@ move_rc_files (void)
    * their files moved.*/
   char *olddir, *oldfile, *newfile;
 #if WIN32
-  olddir = g_strdup (PKGDATADIR);
+  olddir = g_strdup (getInstallDir());
 #else
   olddir = g_build_filename (szHomeDirectory, "..", NULL);
 #endif
@@ -6092,8 +6093,8 @@ static void PushSplash(char *unused, char *heading, char *message, int wait)
 
 static void init_nets(int nNewWeights, int fNoBearoff)
 {
-	char *gnubg_weights = g_build_filename(PKGDATADIR, "gnubg.weights", NULL);
-	char *gnubg_weights_binary =  g_build_filename(PKGDATADIR, "gnubg.wd", NULL);
+	char *gnubg_weights = BuildFilename("gnubg.weights");
+	char *gnubg_weights_binary =  BuildFilename("gnubg.wd");
 	EvalInitialise(gnubg_weights, gnubg_weights_binary, fNoBearoff, 
 			   fShowProgress ? BearoffProgress : NULL);
 	g_free(gnubg_weights);
@@ -6427,7 +6428,7 @@ int main(int argc, char *argv[])
 #ifdef WIN32
 	/* data directory: initialise to the path where gnubg is installed */
 	{
-	char *szDataDirectory = getInstallDir();
+	const char *szDataDirectory = getInstallDir();
 	_chdir(szDataDirectory);
 	}
 #if defined(_MSC_VER) && HAVE_LIBXML2
@@ -6481,7 +6482,7 @@ int main(int argc, char *argv[])
         init_rng();
 
 	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 500);
-	met = g_build_filename(PKGDATADIR, "met", "g11.xml", NULL);
+	met = BuildFilename2("met", "g11.xml");
 	InitMatchEquity(met);
 	g_free(met);
 

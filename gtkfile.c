@@ -39,6 +39,7 @@
 #include "gtkgame.h"
 #include "gtkwindows.h"
 #include "file.h"
+#include "util.h"
 
 static void FilterAdd (const char *fn, const char *pt, GtkFileChooser * fc)
 {
@@ -88,7 +89,7 @@ char *programdir, *pc, *tmp;
     gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (fc), name);
 
 #if WIN32
-  programdir = g_strdup(PKGDATADIR);
+  programdir = g_strdup(getInstallDir());
   if ((pc = strrchr(programdir, G_DIR_SEPARATOR)) != NULL) {
           *pc = '\0';
 

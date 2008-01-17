@@ -355,7 +355,7 @@ AnalyzeDoubleDecison:
 			break;
         case TT_TEST:
             printf("Test: waiting for a second");
-            g_usleep(1000000);
+            g_usleep(1000 * 1000);
             break;
         case TT_CLOSE:
 			MT_SafeInc(&td.result);

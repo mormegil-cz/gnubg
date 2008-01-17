@@ -21,7 +21,6 @@
 
 #include "config.h"
 
-#include <neuralnet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib/gi18n.h>

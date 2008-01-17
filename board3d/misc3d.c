@@ -34,6 +34,7 @@
 #include "wglbuffer.h"
 #endif
 #include "misc3d.h"
+#include "util.h"
 
 #define MAX_FRAMES 10
 #define DOT_SIZE 32
@@ -417,7 +418,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		}
 	}
 	{	/* Not in texture list, see if old texture on disc */
-		char *szFile =g_build_filename(PKGDATADIR, file, NULL);
+		char *szFile = BuildFilename(file);
 		if (szFile && !access(szFile, R_OK))
 		{
 			/* Add entry for unknown texture */
@@ -450,7 +451,7 @@ void LoadTextureInfo(void)
 
 	textures = NULL;
 
-	szFile = g_build_filename( PKGDATADIR, TEXTURE_FILE, NULL );
+	szFile = BuildFilename(TEXTURE_FILE );
 	fp = fopen(szFile, "r");
 	g_free(szFile);
 	if (!fp)
@@ -575,7 +576,7 @@ int LoadTexture(Texture* texture, const char* filename)
 		fpixbuf = gdk_pixbuf_new_from_file(filename, &pix_error);
 	else
 	{
-		char *tmp = g_build_filename(PKGDATADIR, filename, NULL);
+		char *tmp = BuildFilename(filename);
 		fpixbuf = gdk_pixbuf_new_from_file(tmp, &pix_error);
 		g_free(tmp);
 	}

@@ -34,11 +34,11 @@
 #include <math.h>
 #include <stdlib.h>
 
-
 #include "render.h"
 #include "renderprefs.h"
 #include "boarddim.h"
 #include "backgammon.h"
+#include "util.h"
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -1513,16 +1513,15 @@ RenderBasicLabels( renderdata *prd, unsigned char *puch, int nStride,
 
 static void
 RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
-               const int iStart, const int iEnd, const int iDelta ) {
-
-
+               const int iStart, const int iEnd, const int iDelta )
+{
 #if HAVE_FREETYPE
     FT_Face ftf;
     int i;
     FT_Glyph aftg[ 10 ];
     char *file;
 
-    file = g_build_filename(PKGDATADIR, FONT_VERA, NULL);
+    file = BuildFilename(FONT_VERA);
     if( FT_New_Face( ftl, file, 0, &ftf ) )
 	{
 		RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
@@ -1861,7 +1860,7 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = g_build_filename(PKGDATADIR, FONT_VERA, NULL);
+    file = BuildFilename(FONT_VERA);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 2 * prd->nSize ) ) {
 	fFreetype = TRUE;
@@ -2041,7 +2040,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = g_build_filename(PKGDATADIR, FONT_VERA_SERIF_BOLD, NULL);
+    file = BuildFilename(FONT_VERA_SERIF_BOLD);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 4.5 * prd->nSize ) ) {
 	fFreetype = TRUE;
@@ -2124,7 +2123,7 @@ static void RenderResignFaces( renderdata *prd, unsigned char *puch,
     int fFreetype = FALSE;
     char *file;
     
-    file = g_build_filename(PKGDATADIR, FONT_VERA_SERIF_BOLD, NULL);
+    file = BuildFilename(FONT_VERA_SERIF_BOLD);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
 	!FT_Set_Pixel_Sizes( ftf, 0, 5 * prd->nSize ) ) {
 	fFreetype = TRUE;

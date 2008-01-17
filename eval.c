@@ -33,14 +33,11 @@
 #endif
 
 #include "isaac.h"
-#include "neuralnet.h"
 #include <md5.h>
-#include "eval.h"
 #include "bearoffgammon.h"
 #include "positionid.h"
 #include "matchid.h"
 #include "matchequity.h"
-#include "bearoff.h"
 #include "format.h"
 #include "sse.h"
 #include "multithread.h"
@@ -236,7 +233,7 @@ static evalCache cEval;
 #if defined( PRUNE_CACHE )
 static evalCache cpEval;
 #endif
-static int cCache;
+static unsigned int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL, ( *fnTick )( void ) = NULL;
 
@@ -515,7 +512,7 @@ static int Escapes( const unsigned int anBoard[ 25 ], int n ) {
     int i, af = 0;
     
     for( i = 0; i < 12 && i < n; i++ )
-		if( anBoard[ 24 - n + i ] > 1 )
+		if( anBoard[ 24 + i - n ] > 1 )
 		    af |= ( 1 << i );
     
     return anEscapes[ af ];
@@ -554,7 +551,7 @@ static int Escapes1( const unsigned int anBoard[ 25 ], int n ) {
     int i, af = 0;
     
     for( i = 0; i < 12 && i < n; i++ )
-	if( anBoard[ 24 - n + i ] > 1 )
+	if( anBoard[ 24 + i - n ] > 1 )
 	    af |= ( 1 << i );
     
     return anEscapes1[ af ];
@@ -734,16 +731,16 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		}
 
 #if defined( PRUNE_CACHE )
-	if( CacheCreate( &cpEval, 0x1 << 16) )
-	{
-		PrintError( "EvalCacheResize" );
-		return;
-	}
+		if( CacheCreate( &cpEval, 0x1 << 16) )
+		{
+			PrintError( "EvalCacheResize" );
+			return;
+		}
 #endif
 	    
 		ComputeTable();
 
-		rc.randrsl[ 0 ] = time( NULL );
+		rc.randrsl[ 0 ] = (ub4)time( NULL );
 		for( i = 0; i < RANDSIZ; i++ )
 			rc.randrsl[ i ] = rc.randrsl[ 0 ];
 		irandinit( &rc, TRUE );
@@ -751,53 +748,54 @@ extern void EvalInitialise(char *szWeights, char *szWeightsBinary,
 		fInitialised = TRUE;
     }
 
-    if( ! fNoBearoff ) {
+    if( ! fNoBearoff )
+	{
 #if USE_BUILTIN_BEAROFF
-      /* read one-sided db from gnubg.bd */
-	pbc1 = BearoffInitBuiltin();
+			/* read one-sided db from gnubg.bd */
+		pbc1 = BearoffInitBuiltin();
 #endif
-	gnubg_bearoff_os = g_build_filename(PKGDATADIR, "gnubg_os0.bd", NULL);
-	if( !pbc1 )
-	    pbc1 = BearoffInit( gnubg_bearoff_os, BO_IN_MEMORY, NULL );
-	g_free(gnubg_bearoff_os);
+		gnubg_bearoff_os = BuildFilename("gnubg_os0.bd");
+		if( !pbc1 )
+			pbc1 = BearoffInit( gnubg_bearoff_os, (int)BO_IN_MEMORY, NULL );
+		g_free(gnubg_bearoff_os);
 
-	if( !pbc1 )
-	    pbc1 = BearoffInit ( NULL, BO_HEURISTIC, pfProgress );
-	
-	/* read two-sided db from gnubg.bd */
-	gnubg_bearoff = g_build_filename(PKGDATADIR, "gnubg_ts0.bd", NULL);
-	pbc2 = BearoffInit ( gnubg_bearoff, BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
-        g_free(gnubg_bearoff);
-	
-	if ( ! pbc2 )
-	    fprintf ( stderr, 
-		      "\n***WARNING***\n\n" 
-		      "Note that gnubg does not use the gnubg.bd file.\n"
-		      "You should obtain the file gnubg_ts0.bd or generate\n"
-		      "it yourself using the program 'makebearoff'.\n"
-		      "You can generate the file with the command:\n"
-		      "makebearoff -t 6x6 -f gnubg_ts0.bd\n"
-		      "You can also generate other bearoff databases; see\n"
-		      "README for more details\n\n" );
-	
-	/* init one-sided db */
-	pbcOS = BearoffInit ( "gnubg_os.bd", BO_NONE, NULL );
-	
-	/* init two-sided db */
-	pbcTS = BearoffInit ( "gnubg_ts.bd", BO_NONE, NULL );
+		if( !pbc1 )
+			pbc1 = BearoffInit ( NULL, BO_HEURISTIC, pfProgress );
 
-        /* hyper-gammon databases */
+		/* read two-sided db from gnubg.bd */
+		gnubg_bearoff = BuildFilename("gnubg_ts0.bd");
+		pbc2 = BearoffInit ( gnubg_bearoff, BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
+			g_free(gnubg_bearoff);
 
-		for (i = 0; i < 3; ++i) {
-			char *fn;
-			char sz[10];
-			sprintf(sz, "hyper%1d.bd", i + 1);
-			fn = g_build_filename(PKGDATADIR, sz, NULL);
-			apbcHyper[i] = BearoffInit(fn, BO_NONE, NULL);
-			g_free(fn);
-        }
+		if ( ! pbc2 )
+			fprintf ( stderr, 
+					"\n***WARNING***\n\n" 
+					"Note that gnubg does not use the gnubg.bd file.\n"
+					"You should obtain the file gnubg_ts0.bd or generate\n"
+					"it yourself using the program 'makebearoff'.\n"
+					"You can generate the file with the command:\n"
+					"makebearoff -t 6x6 -f gnubg_ts0.bd\n"
+					"You can also generate other bearoff databases; see\n"
+					"README for more details\n\n" );
 
-    }
+		/* init one-sided db */
+		pbcOS = BearoffInit ( "gnubg_os.bd", BO_NONE, NULL );
+
+		/* init two-sided db */
+		pbcTS = BearoffInit ( "gnubg_ts.bd", BO_NONE, NULL );
+
+			/* hyper-gammon databases */
+
+			for (i = 0; i < 3; ++i) {
+				char *fn;
+				char sz[10];
+				sprintf(sz, "hyper%1d.bd", i + 1);
+				fn = BuildFilename(sz);
+				apbcHyper[i] = BearoffInit(fn, BO_NONE, NULL);
+				g_free(fn);
+			}
+
+	}
 
     if( szWeightsBinary)
     { 

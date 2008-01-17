@@ -35,6 +35,7 @@
 
 #include "list.h"
 #include "mec.h"
+#include "util.h"
 
 #if HAVE_LIBXML2
 #include <libxml/tree.h>
@@ -1341,11 +1342,10 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
 	  doc = xmlParseFile( szFileName );
   else
   {
-	  char *tmp = g_build_filename(PKGDATADIR, szFileName, NULL);
+	  char *tmp = BuildFilename(szFileName);
 	  doc = xmlParseFile( tmp );
 	  g_free(tmp);
   }
-
 
   /* check root */
 
@@ -1373,7 +1373,7 @@ static int readMET ( metdata *pmd, const char *szFileName ) {
 	  /* load catalog */
 
 	  xmlInitializeCatalog();
-	  pch = g_build_filename(PKGDATADIR, "met", "catalog.xml", NULL);
+	  pch = BuildFilename2("met", "catalog.xml");
 	  if (xmlLoadCatalog(pch))
 	  {
 		  g_print ( _("Error reading %s. File not found or parse error."), pch );

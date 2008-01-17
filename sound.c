@@ -208,7 +208,7 @@ extern char *GetDefaultSoundFile(gnubgsound sound)
   "sounds/fanfare.wav"
   };
 
-	return g_build_filename(PKGDATADIR, aszDefaultSound[sound], NULL);
+	return BuildFilename(aszDefaultSound[sound]);
 }
 
 extern char *GetSoundFile(gnubgsound sound)
@@ -220,7 +220,7 @@ extern char *GetSoundFile(gnubgsound sound)
 	if (g_path_is_absolute(sound_file[sound]))
 		return g_strdup(sound_file[sound]);
 
-	return g_build_filename(PKGDATADIR, sound_file[sound], NULL);
+	return BuildFilename(sound_file[sound]);
 }
 
 extern void SetSoundFile(gnubgsound sound, const char *file)

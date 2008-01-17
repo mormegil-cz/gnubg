@@ -34,6 +34,7 @@
 #include "positionid.h"
 #include "analysis.h"
 #include "md5.h"
+#include "util.h"
 
 #define UNUSED_PARAM __attribute__ ((unused))
 
@@ -57,7 +58,7 @@ BoardToPy( const TanBoard anBoard )
 }
 
 static PyObject *
-Board1ToPy( int anBoard [ 25 ] ) {
+Board1ToPy( unsigned int anBoard [ 25 ] ) {
   unsigned int k;
   PyObject* b = PyTuple_New(25);
   

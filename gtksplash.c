@@ -110,8 +110,11 @@ DestroySplash ( GtkWidget *pwSplash ) {
 
   if ( ! pwSplash )
     return;
-  
-  g_usleep ( 1000 );
+
+#ifndef WIN32
+  /* Don't bother with these pauses on windows? */
+  g_usleep ( 1000 * 1000 );
+#endif
 
   gtk_widget_destroy ( pwSplash );
 
@@ -121,8 +124,8 @@ DestroySplash ( GtkWidget *pwSplash ) {
 extern void
 PushSplash ( GtkWidget *pwSplash, 
              const gchar *szText0, const gchar *szText1,
-             const unsigned long nMuSec ) {
-  
+             const unsigned long nMuSec )
+{
   gtksplash *pgs;
 
   if ( ! pwSplash )
@@ -137,6 +140,8 @@ PushSplash ( GtkWidget *pwSplash,
   while( gtk_events_pending() )
     gtk_main_iteration();
 
-  g_usleep ( nMuSec );
-
+#ifndef WIN32
+  /* Don't bother with these pauses on windows? */
+  g_usleep ( nMuSec * 1000 );
+#endif
 }

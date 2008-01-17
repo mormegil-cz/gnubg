@@ -31,7 +31,6 @@
 #include <ctype.h>
 #include <math.h>
 
-
 #include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
@@ -46,6 +45,7 @@
 #include "positionid.h"
 #include "boarddim.h"
 #include "credits.h"
+#include "util.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -2337,14 +2337,14 @@ CommandShowMatchResult( char *sz ) {
 
 extern void CommandShowManualWeb (char *sz)
 {
-	char *path = g_build_filename(PKGDATADIR, "doc", "gnubg.html", NULL);
+	char *path = BuildFilename2("doc", "gnubg.html");
 	OpenURL (path);
 	g_free(path);
 }
 
 extern void CommandShowManualAbout (char *sz)
 {
-	char *path = g_build_filename(PKGDATADIR, "doc", "allabout.html", NULL);
+	char *path = BuildFilename2("doc", "allabout.html");
 	OpenURL (path);
 	g_free(path);
 }

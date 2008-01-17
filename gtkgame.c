@@ -78,6 +78,7 @@
 #include "export.h"
 #include "gtkmovelistctrl.h"
 #include "rollout.h"
+#include "util.h"
 #if USE_BOARD3D
 #include "fun3d.h"
 #endif
@@ -3246,8 +3247,7 @@ static GtkWidget *GetFlagWidget(char *language, char *langCode, char *flagfilena
 
 	if (flagfilename)
 	{
-
-                file = g_build_filename(PKGDATADIR, flagfilename, NULL);
+		file = BuildFilename(flagfilename);
 		pixbuf = gdk_pixbuf_new_from_file(file, &pix_error);
 
 		if (pix_error)
@@ -3878,8 +3878,8 @@ static void gnubg_set_default_icon(void)
 	 gchar *iconA, *iconB;
 	 GError *error=NULL;
 	
-	iconA = g_build_filename(PKGDATADIR, "gnubg.svg", NULL);
-	iconB = g_build_filename(PKGDATADIR, "gnubg.png", NULL);
+	iconA = BuildFilename("gnubg.svg");
+	iconB = BuildFilename("gnubg.png");
 	gtk_window_set_default_icon_from_file(iconA, &error);
 	if (error)
 	{
@@ -3902,7 +3902,7 @@ extern void InitGTK(int *argc, char ***argv)
 	if (!fX)
 		return;
 
-	sz = g_build_filename(PKGDATADIR, "gnubg.gtkrc", NULL);
+	sz = BuildFilename("gnubg.gtkrc");
 	gtk_rc_add_default_file(sz);
 	g_free(sz);
 
@@ -4626,7 +4626,7 @@ SetMET (GtkWidget * pw, gpointer p)
 {
   gchar *filename, *command;
 
-  gchar *met_dir = g_build_filename(PKGDATADIR,  "met", NULL);
+  gchar *met_dir = BuildFilename("met");
   filename =
     GTKFileSelect (_("Set match equity table"), "*.xml",
 		   met_dir, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);

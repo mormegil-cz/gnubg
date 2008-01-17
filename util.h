@@ -25,7 +25,15 @@
 #include "stdio.h"
 
 #ifdef WIN32
-extern char * getInstallDir( void );
+#define BuildFilename(file) g_build_filename(getInstallDir(), file, NULL)
+#define BuildFilename2(file1, file2) g_build_filename(getInstallDir(), file1, file2, NULL)
+#else
+#define BuildFilename(file) g_build_filename(PKGDATADIR, file, NULL)
+#define BuildFilename2(file1, file2) g_build_filename(PKGDATADIR, file1, file2, NULL)
+#endif
+
+#ifdef WIN32
+extern char *getInstallDir( void );
 extern void PrintSystemError(const char* message);
 #endif
 

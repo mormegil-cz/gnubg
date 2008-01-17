@@ -47,6 +47,7 @@
 #include "renderprefs.h"
 #include "boarddim.h"
 #include "gtkwindows.h"
+#include "util.h"
 
 #if USE_BOARD3D
 #include "fun3d.h"
@@ -136,7 +137,7 @@ read_board_designs ( void ) {
   GList *plUser, *plSystem, *plFinal;
   gchar *sz;
 
-  sz = g_build_filename(PKGDATADIR, "boards.xml", NULL);
+  sz = BuildFilename("boards.xml");
   plSystem = ParseBoardDesigns ( sz, FALSE );
   g_free ( sz );
 
