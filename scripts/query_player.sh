@@ -39,15 +39,25 @@ EOF`
 
 POINTS_WON="select sum(a.actual_result) from matchstat a, nick c where a.nick_id = c.nick_id and c.nick_id = '$NICK_ID_RESULT';" 
 
+NUMBER_GAMES="select count(b.game_id) from game b, nick c where c.nick_id = b.nick_id0 and c.nick_id = '$NICK_ID_RESULT';" 
+
 TOTAL_RESULT=`sqlite3 $DATABASE <<EOF
 $POINTS_WON
 EOF`
 
-STATS_RESULT=`sqlite3 $DATABASE  <<EOF
+STATS_RESULT=`sqlite3 $DATABASE <<EOF
 .mode column 
 .headers ON
 .output tmp.file 
 $STATS_SEARCH 
+EOF`
+
+NUMBER_GAMES_RESULT=`sqlite3 $DATABASE <<EOF
+$NUMBER_GAMES
+EOF`
+
+ERROR_AVR_RESULT=`sqlite3 $DATABASE <<EOF
+$ERROR_AVR
 EOF`
 
 echo
@@ -55,7 +65,7 @@ cat tmp.file
 rm tmp.file
 
 echo
-echo Result ${NICK_NAME_RESULT}: $TOTAL_RESULT Point\(s\)
+echo "Result ${NICK_NAME_RESULT}: $TOTAL_RESULT Point(s) in $NUMBER_GAMES_RESULT games(s). Snowie error rate: $ERROR_AVR_RESULT"
 echo
 
 exit 0
