@@ -1,3 +1,7 @@
+Sat Jan 19 21:45:51 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* eval.c: fix a potential signed/unsigned problem in crashed net
+
 Sat Jan 19 09:58:13 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* drawboard.c: fix board after uint changes

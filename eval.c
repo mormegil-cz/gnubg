@@ -2084,7 +2084,7 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
           return CLASS_CRASHED;
         } else {
           if( board[0] > 1 ) {
-            if( (tot - board[0]) <= N ) {
+            if( tot <= (N + board[0]) ) {
               return CLASS_CRASHED;
             } else {
               if( board[1] > 1 && (1 + tot - (board[0] + board[1])) <= N ) {
@@ -2092,7 +2092,7 @@ ClassifyPosition( const TanBoard anBoard, const bgvariation bgv )
               }
             }
           } else {
-            if( ((int)tot - (board[1] - 1)) <= (int)N ) {
+            if( tot <= (N + (board[1] - 1))) {
               return CLASS_CRASHED;
             }
           }
