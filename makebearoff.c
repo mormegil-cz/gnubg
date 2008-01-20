@@ -396,7 +396,7 @@ RollsOS ( const unsigned short int aus[ 32 ] ) {
 
 }
 
-static void BearOff( int nId, uint nPoints, 
+static void BearOff( int nId, unsigned int nPoints, 
                      unsigned short int aOutProb[ 64 ],
                      const int fGammon,
                      xhash *ph, bearoffcontext *pbc,
@@ -404,7 +404,7 @@ static void BearOff( int nId, uint nPoints,
                      FILE *pfOutput, FILE *pfTmp ) {
 
     int iBest, iMode, j, anRoll[ 2 ], aProb[ 64 ];
-    uint i;
+    unsigned int i;
 	TanBoard anBoard, anBoardTemp;
     movelist ml;
     int k;
@@ -561,7 +561,7 @@ WriteOS ( const unsigned short int aus[ 32 ],
           const int fCompress, FILE *output ) {
 
   unsigned int iIdx, nNonZero;
-  uint j;
+  unsigned int j;
 
   if ( fCompress )
     CalcIndex ( aus, &iIdx, &nNonZero );
@@ -787,14 +787,14 @@ generate_os ( const int nOS, const int fHeader,
 
 
 static void
-NDBearoff ( const int iPos, const uint nPoints, float ar[ 4 ], xhash *ph,
+NDBearoff ( const int iPos, const unsigned int nPoints, float ar[ 4 ], xhash *ph,
             bearoffcontext *pbc) {
 
   int d0, d1;
   movelist ml;
   TanBoard anBoard, anBoardTemp;
   int ii, j, k;
-  uint i;
+  unsigned int i;
   int iBest;
   float rBest;
   float rMean;
@@ -1117,7 +1117,7 @@ static void BearOff2( int nUs, int nThem,
                       xhash *ph, bearoffcontext *pbc, FILE *pfTmp ) {
 
     int j, anRoll[ 2 ];
-    uint i;
+    unsigned int i;
 	TanBoard anBoard, anBoardTemp;
     movelist ml;
     int aiBest[ 4 ];

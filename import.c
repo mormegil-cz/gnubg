@@ -2030,14 +2030,14 @@ GetValue( const char *sz, char *szValue ) {
 }
 
 static void
-ParseSGGDate ( const char *sz, uint *pnDay, uint *pnMonth, uint *pnYear ) {
+ParseSGGDate ( const char *sz, unsigned int *pnDay, unsigned int *pnMonth, unsigned int *pnYear ) {
 
   static char *aszMonths[] = {
     "January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December" };
   int i;
   char szMonth[ 80 ];
-  uint nDay, nYear;
+  unsigned int nDay, nYear;
   int n;
   
 

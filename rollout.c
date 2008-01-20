@@ -1683,7 +1683,7 @@ RolloutGeneral( ConstTanBoard *apBoard,
           aarMu[ alt ][ j ] = 0.0f;
       }
     } else {
-      uint nGames = prc->nGamesDone;
+      unsigned int nGames = prc->nGamesDone;
       double r;
 
       /* make sure the saved rollout contexts are consistent for

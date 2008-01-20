@@ -2674,7 +2674,7 @@ extern void InitBoard( TanBoard anBoard, const bgvariation bgv )
 {
 
   int i;
-  uint j;
+  unsigned int j;
 
   for( i = 0; i < 25; i++ )
     anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
@@ -2756,7 +2756,7 @@ extern char *GetLuckAnalysis( const matchstate *pms, float rLuck )
 
 static void DisplayAnalysis( moverecord *pmr ) {
 
-    uint i;
+    unsigned int i;
     char szBuf[ 1024 ];
     
     switch( pmr->mt ) {
@@ -3607,10 +3607,10 @@ static void
 HintChequer( char *sz ) {
 
   movelist ml;
-  uint i;
+  unsigned int i;
   char szBuf[ 1024 ];
   int parse_n = ParseNumber ( &sz );
-  uint n = (parse_n <= 0) ? 10 : parse_n;
+  unsigned int n = (parse_n <= 0) ? 10 : parse_n;
   int anMove[ 8 ];
   moverecord *pmr;
   unsigned char auch[ 10 ];
@@ -3858,7 +3858,7 @@ extern void CommandQuit( char *sz )
 static move *
 GetMove ( const TanBoard anBoard ) {
 
-  uint i;
+  unsigned int i;
   unsigned char auch[ 10 ];
   TanBoard an;
 
@@ -5023,7 +5023,7 @@ static char *ERCompletion( const char *sz, int nState ) {
 
 static char *OnOffCompletion( const char *sz, int nState ) {
 
-	static uint i;
+	static unsigned int i;
     static int cch;
     static char *asz[] = { "false", "no", "off", "on", "true", "yes" };
     char *pch, *szDup;

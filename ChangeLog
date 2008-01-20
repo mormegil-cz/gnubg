@@ -1,3 +1,9 @@
+Mon Jan 21 00:36:53 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, dice.c, eval.c, gnubg.c, gtkboard.c, gtkexport.c,
+	gtkoptions.c, import.c, makebearoff.c, makehyper.c, relational.c,
+	render.c, rollout.c, sgf.c: replace uint with unsigned int
+
 Sat Jan 19 21:45:51 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* eval.c: fix a potential signed/unsigned problem in crashed net

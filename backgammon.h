@@ -211,9 +211,9 @@ typedef struct _matchinfo {	/* SGF match information */
 	char *pchPlace;
 	char *pchAnnotator;
 	char *pchComment;	/* malloc()ed, or NULL if unknown */
-	uint nYear;
-	uint nMonth;
-	uint nDay;		/* 0 for nYear means date unknown */
+ unsigned int nYear;
+ unsigned int nMonth;
+ unsigned int nDay;		/* 0 for nYear means date unknown */
 } matchinfo;
 
 typedef struct _storedmoves {

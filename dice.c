@@ -568,7 +568,7 @@ static void InitRNGSeedMP( mpz_t n, rng rng, void *p ) {
     case RNG_ISAAC: {
 	ub4 *achState;
 	size_t cb;
-	uint i;
+ unsigned int i;
 
 	achState = mpz_export( NULL, &cb, -1, sizeof( ub4 ), 0, 0, n );
 	

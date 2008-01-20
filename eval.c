@@ -2592,7 +2592,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
     ml.iMoveBest = 0;
   } else {
     int use = ml.cMoves > nPruneMoves;
-    uint bmovesi[nPruneMoves];
+    unsigned int bmovesi[nPruneMoves];
     float arOutput[5];
     
     ((cubeinfo*)pci)->fMove = !pci->fMove;
@@ -2679,7 +2679,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
 	if( use ) {
 	move *amMoves = (move*) g_alloca(ml.cMoves * sizeof(move));
 	for(i = 0; i < ml.cMoves; i++) {
-	uint const j = bmovesi[i];
+ unsigned int const j = bmovesi[i];
 	memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
 	bmovesi[i] = i;
 	}
@@ -2696,7 +2696,7 @@ FindBestMoveInEval(NNState *nnStates, int const nDice0, int const nDice1, const 
     nnStates[0].state = nnStates[1].state = nnStates[2].state = NNSTATE_INCREMENTAL;
     rBestScore = 99999.9f;
     for(i = 0; i < ml.cMoves; i++) {
-      uint const j = use ? bmovesi[i] : i;
+      unsigned int const j = use ? bmovesi[i] : i;
       const move* const pm = &ml.amMoves[j];
 	
       PositionFromKey(anBoardOut, pm->auch);
@@ -3410,9 +3410,9 @@ ApplyMove( TanBoard anBoard, const int anMove[ 8 ],
     return 0;
 }
 
-static void SaveMoves( movelist *pml, uint cMoves, uint cPip, int anMoves[],
+static void SaveMoves( movelist *pml, unsigned int cMoves, unsigned int cPip, int anMoves[],
 		       const TanBoard anBoard, int fPartial ) {
-    uint i, j;
+    unsigned int i, j;
     move *pm;
     unsigned char auch[ 10 ];
 
@@ -3622,7 +3622,7 @@ static int
 ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
 	    int nPlies )
 {
-	uint i;
+ unsigned int i;
 	int r = 0;	/* return value */
 	NNState *nnStates;
 #if USE_MULTITHREAD
@@ -3707,7 +3707,7 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 
   evalcontext ec;
   movelist ml;
-  uint i;
+  unsigned int i;
 
   memcpy( &ec, pec, sizeof ( evalcontext ) );
   ec.nPlies = nPlies;
@@ -3756,7 +3756,7 @@ FindnSaveBestMoves( movelist *pml,
   /* Find best moves. 
      Ensure that auchMove is evaluated at the deepest ply. */
 
-  uint i;
+  unsigned int i;
   int nMoves, iPly;
   move *pm;
   movefilter* mFilters;
@@ -6654,7 +6654,7 @@ getPercent ( const cubedecision cd,
 extern void
 RefreshMoveList ( movelist *pml, int *ai ) {
 
-  uint i, j;
+  unsigned int i, j;
   movelist ml;
 
   if ( ! pml->cMoves )

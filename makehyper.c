@@ -132,7 +132,7 @@ static void
 StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
 
   int i, j;
-  uint k;
+  unsigned int k;
   int nPos = Combination( 25 + nC, nC );
   TanBoard anBoard;
 
@@ -316,7 +316,7 @@ HyperEquity ( const int nUs, const int nThem,
   TanBoard anBoardTemp;
   movelist ml;
   int i, j;
-  uint k;
+  unsigned int k;
   int nUsNew, nThemNew;
   hyperequity heBest;
   hyperequity heOld;

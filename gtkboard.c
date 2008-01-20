@@ -2525,7 +2525,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     gint failed = 0;
     
     int *match_settings[ 3 ]; 
-    uint old_dice[ 2 ];
+    unsigned int old_dice[ 2 ];
 
     match_settings[ 0 ] = &bd->match_to;
     match_settings[ 1 ] = &bd->score;
