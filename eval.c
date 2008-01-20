@@ -3804,7 +3804,7 @@ FindnSaveBestMoves( movelist *pml,
       
       k = pml->cMoves;
       /* we check for mFilter->Accept < 0 above */
-      pml->cMoves = MIN((uint)mFilter->Accept, pml->cMoves );
+      pml->cMoves = MIN((unsigned int)mFilter->Accept, pml->cMoves );
 
       {
 	unsigned int limit = MIN(k, pml->cMoves + mFilter->Extra);

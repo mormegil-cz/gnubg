@@ -480,7 +480,7 @@ ExpandMatMove ( const TanBoard anBoard, int anMove[ 8 ], int *pc,
 
   if ( anDice[ 0 ] != anDice[ 1 ] ) {
     
-    if ( (uint)( anMove[ 0 ] - anMove[ 1 ] ) == ( anDice[ 0 ] + anDice[ 1 ] ) ) {
+    if ( (unsigned int)( anMove[ 0 ] - anMove[ 1 ] ) == ( anDice[ 0 ] + anDice[ 1 ] ) ) {
 
       int an[ 8 ];
 

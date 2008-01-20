@@ -2264,7 +2264,7 @@ NTH_STATIC void drawPick(const BoardData* bd)
 	for (i = 0; i < 28; i++)
 	{
 		glLoadName(i);
-		for (j = 1; j <= (uint)ABS(bd->points[i]); j++)
+		for (j = 1; j <= (unsigned int)ABS(bd->points[i]); j++)
 			drawPiece(bd->bd3d, i, j);
 	}
 
@@ -3382,7 +3382,7 @@ void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 
 	for (i = 0; i < 28; i++)
 	{
-		for (j = 1; j <= (uint)ABS(bd->points[i]); j++)
+		for (j = 1; j <= (unsigned int)ABS(bd->points[i]); j++)
 		{
 			if (p > LAST_PIECE)
 				break;	/* Found all pieces */

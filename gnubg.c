@@ -2371,7 +2371,7 @@ extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
             return -1;
 	}
 
-	if( (uint)i > sm.ml.cMoves ) {
+	if ((unsigned int)i > sm.ml.cMoves ) {
 	    outputf( _("Move =%d is out of range.\n"), i );
 	    return -1;
 	}
