@@ -474,8 +474,9 @@ void MT_SetNumThreads(unsigned int num)
 extern void MT_InitThreads(void)
 {
 #ifdef GLIB_THREADS
-    g_thread_init(NULL);
-    g_assert(g_thread_supported());
+	if (!g_thread_supported ())
+		g_thread_init (NULL);
+	g_assert(g_thread_supported());
 #endif
 
     td.tasks = NULL;

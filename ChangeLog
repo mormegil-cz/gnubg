@@ -1,3 +1,7 @@
+Thu Jan 31 17:20:11 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* multithread.c: check if g_threads already initialized.
+
 Mon Jan 21 00:36:53 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, dice.c, eval.c, gnubg.c, gtkboard.c, gtkexport.c,
