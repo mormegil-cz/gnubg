@@ -113,7 +113,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
 
 #ifndef WIN32
   /* Don't bother with these pauses on windows? */
-  g_usleep ( 1000 * 1000 );
+  g_usleep ( 250 * 1000 );
 #endif
 
   gtk_widget_destroy ( pwSplash );

@@ -6362,7 +6362,7 @@ int main(int argc, char *argv[])
 
 	static char *pchCommands = NULL, *pchPythonScript = NULL, *lang = NULL;
 	static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet =
-	    FALSE, fNoX = FALSE, fNoSplash = FALSE, fNoTTY =
+	    FALSE, fNoX = FALSE, fSplash = FALSE, fNoTTY =
 	    FALSE, show_version = FALSE, debug = FALSE;
 
 	GOptionEntry ao[] = {
@@ -6381,7 +6381,7 @@ int main(int argc, char *argv[])
 		{"no-rc", 'r', 0, G_OPTION_ARG_NONE, &fNoRC,
 		 N_("Do not read .gnubgrc and .gnubgautorc commands"),
 		 NULL},
-		{"no-splash", 'S', 0, G_OPTION_ARG_NONE, &fNoSplash,
+		{"splash", 'S', 0, G_OPTION_ARG_NONE, &fSplash,
 		 N_("Don't show gtk splash screen"), NULL},
 		{"tty", 't', 0, G_OPTION_ARG_NONE, &fNoX,
 		 N_("Start on tty instead of using window system"), NULL},
@@ -6459,7 +6459,7 @@ int main(int argc, char *argv[])
         {
                 fTTY = !fNoTTY;
                 fInteractive = fShowProgress = TRUE;
-                if (!fNoSplash)
+                if (fSplash)
                         pwSplash = CreateSplash();
 #if defined(SIGIO)
                 PortableSignal(SIGIO, HandleIO, NULL, TRUE);
@@ -6478,32 +6478,32 @@ int main(int argc, char *argv[])
         }
 	fnTick = CallbackProgress;
 
-	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("Random number generator"), 250);
         init_rng();
 
-	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("match equity table"), 250);
 	met = BuildFilename2("met", "g11.xml");
 	InitMatchEquity(met);
 	g_free(met);
 
 #if USE_MULTITHREAD
-	PushSplash(pwSplash, _("Initialising"), _("threads"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("threads"), 250);
 	MT_InitThreads();
 #endif
-	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("neural nets"), 250);
         init_nets(nNewWeights, fNoBearoff);
 
 #if defined(WIN32) && HAVE_SOCKETS
-	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("Windows sockets"), 250);
         init_winsock();
 #endif
 
 #if USE_PYTHON
-	PushSplash(pwSplash, _("Initialising"), _("Python"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("Python"), 250);
 	PythonInitialise();
 #endif
 
-	PushSplash(pwSplash, _("Initialising"), _("Board Images"), 500);
+	PushSplash(pwSplash, _("Initialising"), _("Board Images"), 250);
 	RenderInitialise();
 
 	SetExitSoundOff();
@@ -6511,7 +6511,7 @@ int main(int argc, char *argv[])
         /* -r option given */
         if (!fNoRC)
         {
-                PushSplash(pwSplash, _("Loading"), _("User Settings"), 500);
+                PushSplash(pwSplash, _("Loading"), _("User Settings"), 250);
                 LoadRCFiles();
         }
 

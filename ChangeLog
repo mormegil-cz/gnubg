@@ -1,3 +1,8 @@
+Sun Feb  3 00:47:49 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, gtksplash.c: disable splash unless asked for. Shorten
+	pauses a bit
+
 Thu Jan 31 17:20:11 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* multithread.c: check if g_threads already initialized.
