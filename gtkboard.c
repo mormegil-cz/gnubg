@@ -4145,24 +4145,19 @@ extern GtkType board_get_type( void )
     return board_type;
 }
 
-
-static int GetSetSize(void)
-{
-	return gdk_screen_width() / 170;
-}
-
+#define N_CUBES_IN_WIDGET 8
 static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
 				    BoardData *bd )
 {
 
     int n, nValue;
     unsigned char *puch;
-    int setSize = GetSetSize();
+    int setSize = bd->rd->nSize;
     int cubeStride = setSize * CUBE_WIDTH * 4;
     int cubeFaceStride = setSize * CUBE_LABEL_WIDTH * 3;
     
     n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( cube ) ));
-    if( ( nValue = n % 13 - 1 ) == -1 )
+    if( ( nValue = n % N_CUBES_IN_WIDGET - 1 ) == -1 )
 	nValue = 5; /* use 64 cube for 1 */
     
     puch = g_alloca( cubeFaceStride * CUBE_LABEL_HEIGHT * setSize );
@@ -4175,7 +4170,7 @@ static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
 			0, CUBE_LABEL_HEIGHT * setSize * nValue,
 			CUBE_LABEL_WIDTH * setSize,
 			CUBE_LABEL_HEIGHT * setSize,
-			2 - n / 13 );
+			2 - n / N_CUBES_IN_WIDGET );
     DrawAlphaImage( cube->window, 0, 0,
 		    TTachCube, cubeStride,
 		    CUBE_WIDTH * setSize,
@@ -4198,10 +4193,10 @@ static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
     int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( cube ) ));
     int *an = gtk_object_get_user_data( GTK_OBJECT( pwTable ) );
 
-    an[ 0 ] = n % 13; /* value */
-    if( n < 13 )
+    an[ 0 ] = n % N_CUBES_IN_WIDGET; /* value */
+    if( n < N_CUBES_IN_WIDGET )
 	an[ 1 ] = 0; /* top player */
-    else if( n < 26 )
+    else if( n < N_CUBES_IN_WIDGET*2 )
 	an[ 1 ] = -1; /* centred */
     else
 	an[ 1 ] = 1; /* bottom player */
@@ -4220,10 +4215,10 @@ extern void DestroySetCube(GtkObject *po, GtkWidget *pw)
 
 extern GtkWidget *board_cube_widget( Board *board )
 {
-	GtkWidget *pw = gtk_table_new( 3, 13, TRUE ), *pwCube;
+	GtkWidget *pw = gtk_table_new( 3, N_CUBES_IN_WIDGET, TRUE ), *pwCube;
 	BoardData *bd = board->board_data;    
 	int x, y;
-	int setSize = GetSetSize();
+	int setSize = bd->rd->nSize;
 
 	int cubeStride = setSize * CUBE_WIDTH * 4;
 	int cubeFaceStride = setSize * CUBE_LABEL_WIDTH * 3;
@@ -4238,18 +4233,18 @@ extern GtkWidget *board_cube_widget( Board *board )
 	}
 #endif
 	TTachCube = malloc(cubeStride * setSize * CUBE_HEIGHT);
-	TTachCubeFaces = malloc(cubeFaceStride * setSize * CUBE_LABEL_HEIGHT * 12);
+	TTachCubeFaces = malloc(cubeFaceStride * setSize * CUBE_LABEL_HEIGHT * 13);
 
 	RenderCube(&rd, TTachCube, cubeStride);
 	RenderCubeFaces(&rd, TTachCubeFaces, cubeFaceStride, TTachCube, cubeStride);
 
 	for( y = 0; y <= 2; y++ )
 	{
-		for( x = 0; x <= 12; x++ )
+		for( x = 0; x <= N_CUBES_IN_WIDGET-1; x++ )
 		{
 			pwCube = gtk_drawing_area_new();
 			gtk_object_set_user_data( GTK_OBJECT( pwCube ),
-							GINT_TO_POINTER(( y * 13 + x ) ));
+							GINT_TO_POINTER(( y * N_CUBES_IN_WIDGET + x ) ));
 			gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
 						CUBE_WIDTH * setSize,
 						CUBE_HEIGHT * setSize );
@@ -4275,7 +4270,7 @@ static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
 		BoardData *bd )
 {
 
-    int setSize = GetSetSize();
+    int setSize = bd->rd->nSize;
 
     int n = GPOINTER_TO_INT(gtk_object_get_user_data( GTK_OBJECT( dice ) ));
 
@@ -4336,7 +4331,7 @@ extern GtkWidget *board_dice_widget( Board *board )
 	GtkWidget *pw = gtk_table_new( 6, 6, TRUE ), *pwDice;
 	BoardData *bd = board->board_data;    
 	int x, y;
-	int setSize = GetSetSize();
+	int setSize = bd->rd->nSize;
 
 	int diceStride = setSize * DIE_WIDTH * 4;
 	int pipStride = setSize * 3;
@@ -4376,8 +4371,8 @@ extern GtkWidget *board_dice_widget( Board *board )
 		}
 	}
 
-	gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * setSize );
-	gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * setSize );
+	gtk_table_set_row_spacings( GTK_TABLE( pw ), 2 * setSize );
+	gtk_table_set_col_spacings( GTK_TABLE( pw ), 1 * setSize );
 	gtk_container_set_border_width( GTK_CONTAINER( pw ), setSize );
 
 	return pw;	    

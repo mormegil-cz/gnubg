@@ -603,7 +603,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 					     QUERY_BORDER);
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(pwQueryText), TRUE);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryText, FALSE, FALSE, 0);
-	gtk_widget_set_usize(pwQueryText, 250, 80);
+	gtk_widget_set_size_request(pwQueryText, 250, 80);
 
 	pwHbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox, FALSE, FALSE, 0);

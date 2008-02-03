@@ -1306,7 +1306,7 @@ static void Add2dLightOptions(GtkWidget* pwx, renderdata* prd)
     paAzimuth = GTK_ADJUSTMENT( gtk_adjustment_new( rAzimuth, 0.0, 360.0, 1.0,
 						    30.0, 0.0 ) );
 	pScale = gtk_hscale_new( paAzimuth );
-	gtk_widget_set_usize(pScale, 150, -1);
+	gtk_widget_set_size_request(pScale, 150, -1);
     gtk_table_attach( GTK_TABLE( pwLightTable ), pScale,
 		      1, 2, 0, 1, GTK_EXPAND | GTK_FILL, 0, 4, 2 );
 	g_signal_connect( G_OBJECT( paAzimuth ), "value-changed",
@@ -1377,7 +1377,7 @@ static GtkWidget *LightingPage(BoardData *bd)
 					G_CALLBACK( option_changed ), NULL);
 		pwLightPosX = gtk_hscale_new(padjLightPosX);
 		gtk_scale_set_draw_value(GTK_SCALE(pwLightPosX), FALSE);
-		gtk_widget_set_usize(pwLightPosX, 150, -1);
+		gtk_widget_set_size_request(pwLightPosX, 150, -1);
 		gtk_box_pack_start(GTK_BOX(hBox), pwLightPosX, TRUE, TRUE, 0);
 
 		lab = gtk_label_new(_("Right"));
@@ -1399,7 +1399,7 @@ static GtkWidget *LightingPage(BoardData *bd)
 		pwLightPosY = gtk_vscale_new(padjLightPosY);
 		gtk_scale_set_draw_value(GTK_SCALE(pwLightPosY), FALSE);
 
-		gtk_widget_set_usize(pwLightPosY, -1, 70);
+		gtk_widget_set_size_request(pwLightPosY, -1, 70);
 		gtk_box_pack_start(GTK_BOX(vbox2), pwLightPosY, TRUE, TRUE, 0);
 
 		lab = gtk_label_new(_("Top"));
@@ -3074,7 +3074,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
     gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
 #if !USE_BOARD3D
 	/* Make sure preview is big enough in 2d mode */
-    gtk_widget_set_usize ( GTK_WIDGET ( pwNotebook ), -1, 360 );
+    gtk_widget_set_size_request ( GTK_WIDGET ( pwNotebook ), -1, 360 );
 #endif
 
 	gtk_box_pack_start( GTK_BOX(pwHbox), pwNotebook, TRUE, TRUE, 0 );

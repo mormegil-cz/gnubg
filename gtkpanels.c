@@ -515,7 +515,7 @@ static void CreateHelpText(CommandEntryData_T *pData)
 {
 	GtkWidget *psw;
 	pData->pwHelpText = gtk_text_view_new();
-	gtk_widget_set_usize(pData->pwHelpText, 400, 300);
+	gtk_widget_set_size_request(pData->pwHelpText, 400, 300);
 	psw = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(psw), pData->pwHelpText);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(psw),

@@ -1054,7 +1054,7 @@ extern void SetAnnotation( moverecord *pmr ) {
             else if ( pwMoveAnalysis )
 			{
 				if (IsPanelDocked(WINDOW_ANALYSIS))
-					gtk_widget_set_usize(GTK_WIDGET(pwMoveAnalysis), 0, 200);
+					gtk_widget_set_size_request(GTK_WIDGET(pwMoveAnalysis), 0, 200);
 
 				gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
                                    pwMoveAnalysis, TRUE, TRUE, 0 );
@@ -5920,7 +5920,7 @@ static void MoveListIntoView(GtkWidget *pwList, int *row)
   if (gtk_clist_row_is_visible(GTK_CLIST(pwList), (*row-1)) != GTK_VISIBILITY_FULL)
   {
     gtk_clist_moveto(GTK_CLIST(pwList), (*row-1), 0, 0, 0);
-    gtk_widget_set_usize(GTK_WIDGET(pwList), colWidth * 2 + 50, -1);
+    gtk_widget_set_size_request(GTK_WIDGET(pwList), colWidth * 2 + 50, -1);
   }
 }
 
@@ -5956,7 +5956,7 @@ extern void GTKShowScoreSheet( void )
 
 	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
 
-	gtk_widget_set_usize(GTK_WIDGET (pwDialog), -1, 200);
+	gtk_widget_set_size_request(GTK_WIDGET (pwDialog), -1, 200);
 	gtk_container_set_border_width(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 4);
 
 	hbox = gtk_hbox_new (FALSE, 0);
@@ -6037,7 +6037,7 @@ extern void GTKShowScoreSheet( void )
 				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
 
-	gtk_widget_set_usize(GTK_WIDGET(pwList), colWidth * 2 + 20, -1);
+	gtk_widget_set_size_request(GTK_WIDGET(pwList), colWidth * 2 + 20, -1);
 
 	gtk_box_pack_start(GTK_BOX(hbox), pwScrolled, TRUE, FALSE, 0);
 
@@ -6245,7 +6245,7 @@ extern void GTKCommandShowCredits(GtkWidget *pw, GtkWidget *pwParent)
 
 	gtk_container_set_border_width( GTK_CONTAINER(pwVBox), 8);
 	gtk_box_pack_start( GTK_BOX( pwVBox ), pwScrolled, TRUE, TRUE, 0 );
-	gtk_widget_set_usize( pwScrolled, 150, -1 );
+	gtk_widget_set_size_request( pwScrolled, 150, -1 );
 	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScrolled ),
 						pwList );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),

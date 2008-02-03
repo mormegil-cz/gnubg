@@ -970,7 +970,7 @@ GTKShowTheory ( const int fActivePage ) {
 			 gtk_drawing_area_new() );
       gtk_widget_set_name( ptw->apwGraph[ i ], "gnubg-doubling-window-graph" );
       gtk_container_set_border_width( GTK_CONTAINER( pwAlign ), 4 );
-      gtk_widget_set_usize( ptw->apwGraph[ i ], -1, 48 );
+      gtk_widget_set_size_request( ptw->apwGraph[ i ], -1, 48 );
       g_signal_connect( G_OBJECT( ptw->apwGraph[ i ] ), "expose_event",
 			  G_CALLBACK( GraphExpose ), ptw );
   }
