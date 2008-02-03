@@ -64,6 +64,7 @@ LoadDatabasePy( void ) {
 static PyObject *Connect(void)
 {
 	PyObject *m, *d, *v, *r;
+	char *str;
 
 	/* load database.py */
 	LoadDatabasePy();
@@ -71,21 +72,27 @@ static PyObject *Connect(void)
 	/* connect to database */
 	if (!(m = PyImport_AddModule("__main__")))
 	{
-		outputl( _("Error importing __main__") );
+		outputerrf( _("Error importing __main__") );
 		return NULL;
 	}
 
 	d = PyModule_GetDict(m);
 
 	/* create new object */
-	if (!(r = PyRun_String("relational()", Py_eval_input, d, d)))
+	str = g_strdup_printf("relational('%s%c', '%s%c')", 
+			PKGDATADIR, G_DIR_SEPARATOR,
+			szHomeDirectory, G_DIR_SEPARATOR);
+	r = PyRun_String(str, Py_eval_input, d, d);
+	g_free(str);
+	if (!r)
 	{
 		PyErr_Print();
+		outputerrf(_("Python error in relational() in database.py"));
 		return NULL;
 	}
 	else if (r == Py_None)
 	{
-		outputl( _("Error calling relational()") );
+		outputerrf(_("Error calling relational()") );
 		return NULL;
 	}
 
@@ -93,12 +100,13 @@ static PyObject *Connect(void)
 	if (!(v = PyObject_CallMethod(r, "connect", "" )))
 	{
 		PyErr_Print();
+		outputerrf(_("Python error in method connect in database.py"));
 		Py_DECREF(r);
 		return NULL;
 	}
 	else if (v == Py_None)
 	{
-		outputl( _("Error connecting to database") );
+		outputerrf( _("Error connecting to database") );
 		Py_DECREF(r);
 		return NULL;
 	}
@@ -115,6 +123,7 @@ static void Disconnect(PyObject *r)
 	if (!(v = PyObject_CallMethod(r, "disconnect", "")))
 	{
 		PyErr_Print();
+		outputerrf(_("Python error disconnect method connect in database.py"));
 	}
 	else
 	{
@@ -136,6 +145,7 @@ extern int RelationalMatchExists(void)
   if (!(v = PyObject_CallMethod(r, "is_existing_match", "O", PythonMatchChecksum(0, 0))))
   {
     PyErr_Print();
+    outputerrf(_("Python error is_existing_match method connect in database.py"));
     Py_DECREF(r);
     return -1;
   }
@@ -211,6 +221,7 @@ extern void CommandRelationalAddMatch( char *sz )
   /* add match to database */
   if ( ! ( v = PyObject_CallMethod( r, "addmatch", "i", TRUE)) ) {
     PyErr_Print();
+    outputerrf(_("Python error addmatch method connect in database.py"));
     Py_DECREF( r );
     return;
   }
@@ -254,6 +265,7 @@ extern void CommandRelationalTest( char *sz )
 
   if ( ! ( v = PyObject_CallMethod( r, "test", "" ) ) ) {
     PyErr_Print();
+    outputerrf(_("Python error test method connect in database.py"));
   }
   else {
     if ( PyInt_Check( v ) ) {
@@ -436,6 +448,7 @@ extern void CommandRelationalErase(char *sz)
 	if (!(v = PyObject_CallMethod(r, "erase_player", "s", player_name)))
 	{
 		PyErr_Print();
+		outputerrf(_("Python error erase_player method connect in database.py"));
 		return;
 	}
 
@@ -472,6 +485,7 @@ extern void CommandRelationalEraseAll(char *sz)
 	if (!(v = PyObject_CallMethod(r, "erase_all", "")))
 	{
 		PyErr_Print();
+		outputerrf(_("Python error erase_all method connect in database.py"));
 		return;
 	}
 
@@ -540,8 +554,8 @@ static int UpdateQuery(char *sz)
 	if (!(v = PyObject_CallMethod(r, "update", "s", sz))
 		|| v == Py_None)
 	{
-		outputl(_("Error running query"));
 		PyErr_Print();
+		outputerrf(_("Python error update query"));
 		return FALSE;
 	}
 	Py_DECREF(v);
@@ -560,8 +574,8 @@ extern int RunQuery(RowSet* pRow, char *sz)
 	if (!(v = PyObject_CallMethod(r, "select", "s", sz))
 		|| v == Py_None)
 	{
-		outputerrf(_("Error running query"));
 		PyErr_Print();
+		outputerrf(_("Python error select query"));
 		return FALSE;
 	}
 

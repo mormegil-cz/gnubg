@@ -4197,7 +4197,9 @@ extern void CommandLoadPython(char *sz)
 	pf = fopen(path, "r");
 
 	if (pf) {
-		PyRun_AnyFile(pf, path);
+		if (PyRun_AnyFile(pf, path) != 0)
+			outputerrf(_("An error occured while running the "
+						"python file %s\n"), path);
 		fclose(pf);
 	} else
 		outputerr(path);

@@ -40,22 +40,45 @@ DB_MYSQL = 3
 DBFILE = ""
 
 class relational:
-
+   def __write_db_file__(self) :
+        fname = self.homedir+'database'
+        f = open(fname, 'w')
+        if (not f):
+            return
+        if (self.dsn):
+            f.write("gnubg*dsn %s\n" % self.dsn)
+        if (self.host):
+            f.write("gnubg*host %s\n" % self.host)
+        if (self.user):
+            f.write("gnubg*user %s\n" % self.user)
+        if (self.password):
+            f.write("gnubg*password %s\n" % self.password)
+        if (self.database):
+            f.write("gnubg*database %s\n" % self.database)
+        if (self.db_type):
+            if (self.db_type == DB_SQLITE):
+                f.write("gnubg*type sqlite\n")
+            if (self.db_type == DB_POSTGRESQL):
+                f.write("gnubg*type postgres\n")
+            if (self.db_type == DB_MYSQL):
+                f.write("gnubg*type mysql\n")
+        if (self.games):
+            f.write("gnubg*games yes")
+        f.close()
+        
    # parse out the gnubg* lines from database config file
    def __configure__( self ) :
       global DBFILE
-      fname = "database";
+      fname = self.homedir+'database'
       file = os.access(fname, os.F_OK)
       if (file == 0):
-        home = os.environ.get("HOME", 0)
-        if home :
-           fname = "%s/%s" % ( home, ".gnubg/database" )
-           file = os.access(fname, os.F_OK)
-        if (file == 0):
-           print "Database prefence file not found"
-           return
+         self.__write_db_file__()
+         file = os.access(fname, os.F_OK)
+      if (file == 0):
+         print "Database prefence file not found"
+         return
       try :
-        f = open( fname, "r" )
+        f = open(fname, "r" )
       except IOError, e :
         if e.errno == 2 :
            return
@@ -116,19 +139,19 @@ class relational:
             self.database = "gnubg"
          self.match_table_name = "match_tbl"
       
-   def __init__(self):
+   def __init__(self, datadir="", homedir=""):
 
+      self.datadir = datadir
+      self.homedir = homedir
       self.conn = None
-      
-      self.dsn = ":gnubg"
-      self.database = None
-      self.user = None
-      self.password = None
-      self.host = None
-      self.games = False
+      self.dsn = ""
+      self.database = self.homedir+"gnubg.db"
+      self.user = ""
+      self.password = ""
+      self.host = ""
+      self.games = True
       self.match_table_name = "match"
-      
-      self.db_type = DB_POSTGRESQL
+      self.db_type = DB_SQLITE
       
       self.__configure__()
 
@@ -569,9 +592,9 @@ class relational:
       cursor = self.conn.cursor()
       # Open file which has db create sql statments
       if self.games: 
-          sqlfile = open("gnubg.game.sql", "r")
+          sqlfile = open(self.datadir+"gnubg.game.sql", "r")
       else:
-          sqlfile = open("gnubg.sql", "r")
+          sqlfile = open(self.datadir+"gnubg.sql", "r")
       done = False
       stmt = ""
       # Loop through file and run sql commands

@@ -1,3 +1,9 @@
+Sun Feb  3 01:02:54 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gnubg.c, relational.c, scripts/database.py: allow creation of
+	default sqlite database in szHomeDirectory. Look for database conf
+	file in szHomeDirectory. MIGHT DISTURB EXISTING USERS?
+
 Sun Feb  3 00:47:49 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gnubg.c, gtksplash.c: disable splash unless asked for. Shorten
