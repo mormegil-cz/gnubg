@@ -22,6 +22,11 @@
 #ifndef _RELATIONAL_H_
 #define _RELATIONAL_H_
 
+#include <stddef.h>
+#include <sys/types.h>
+
+#define DB_VERSION 1
+
 typedef struct _RowSet
 {
 	size_t cols, rows;
@@ -29,10 +34,11 @@ typedef struct _RowSet
 	size_t *widths;
 } RowSet;
 
-extern int RelationalMatchExists(void);
-extern int RelationalUpdatePlayerDetails(int player_id, const char* newName,
-										  const char* newNotes);
-extern int RunQuery(RowSet* pRow, char *sz);
+extern RowSet* RunQuery(char *sz);
+extern RowSet* MallocRowset(size_t rows, size_t cols);
 extern void FreeRowset(RowSet* pRow);
+extern int RelationalUpdatePlayerDetails(int player_id, const char* newName, const char* newNotes);
+
+extern float Ratio(float a, int b);
 
 #endif /* _RELATIONAL_H_ */

@@ -405,6 +405,7 @@ extern void outputon(void);
 /* Like strncpy, except it does the right thing */
 extern char *strcpyn(char *szDest, const char *szSrc, int cch);
 
+extern char *GetMatchCheckSum();
 extern char *CheckCommand(char *sz, command * ac);
 extern char *FormatMoveHint(char *sz, const matchstate * pms, movelist * pml,
 			    int i, int fRankKnown, int fDetailProb,
@@ -608,8 +609,8 @@ extern void CommandReject(char *);
 extern void CommandRelationalAddMatch(char *);
 extern void CommandRelationalEraseAll(char *);
 extern void CommandRelationalErase(char *);
-extern void CommandRelationalHelp(char *);
 extern void CommandRelationalSelect(char *);
+extern void CommandRelationalSetup(char *);
 extern void CommandRelationalShowDetails(char *);
 extern void CommandRelationalShowPlayers(char *);
 extern void CommandRelationalTest(char *);

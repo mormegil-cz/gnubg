@@ -58,7 +58,7 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
                            int nChequers ) {
 
     char *pch = sz, *pchIn;
-    unsigned int x, y;
+    unsigned int i, x, y;
 	unsigned int cOffO = nChequers, cOffX = nChequers;
 	TanBoard an;
     static char achX[ 17 ] = "     X6789ABCDEF",
@@ -199,12 +199,14 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
     *pch++ = achX[ anBoard[ 1 ][ 24 ] ];
     *pch++ = ' ';
     *pch++ = '|';
-        
-    for( ; x < UINT_MAX; x-- ) {
+    
+    for(i = 0; i < 6; i++)
+	{
         *pch++ = ' ';
         *pch++ = anBoard[ 1 ][ x ] ? achX[ anBoard[ 1 ][ x ] ] :
                 achO[ anBoard[ 0 ][ 23 - x ] ];
         *pch++ = ' ';
+		x--;
     }
 
     *pch++ = '|';
@@ -215,9 +217,12 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
         *pch++ = ( cOffX > 5 * x + 4 ) ? 'X' : ' ';
 
     *pch++ = '\n';
-    
-    for( y = 3; y < UINT_MAX; y-- ) {
-        *pch++ = ' ';
+
+	for( i = 0; i < 3; i++ )
+	{
+		y = 3 - i;
+
+		*pch++ = ' ';
         *pch++ = '|';
 
         for( x = 11; x > 5; x-- ) {
@@ -233,11 +238,13 @@ static char *DrawBoardStd( char *sz, const TanBoard anBoard, int fRoll,
         *pch++ = ' ';
         *pch++ = '|';
         
-        for( ; x < UINT_MAX; x-- ) {
+	    for(i = 0; i < 6; i++)
+        {
             *pch++ = ' ';
             *pch++ = anBoard[ 1 ][ x ] > y ? 'X' :
                 anBoard[ 0 ][ 23 - x ] > y ? 'O' : ' ';
             *pch++ = ' ';
+			x--;
         }
         
         *pch++ = '|';
@@ -294,7 +301,7 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
                            int nChequers) {
 
     char *pch = sz, *pchIn;
-    unsigned int x, y, cOffO = nChequers, cOffX = nChequers;
+    unsigned int i, x, y, cOffO = nChequers, cOffX = nChequers;
 	TanBoard an;
     static char achX[ 17 ] = "     X6789ABCDEF",
         achO[ 17 ] = "     O6789ABCDEF";
@@ -339,10 +346,10 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
 
     *pch++ = '\n';
 
-    for( y = 0; y < 4; y++ ) {
-    
-        for( x = 2; x < UINT_MAX; x-- )
-            *pch++ = ( cOffO > 5 * x + y ) ? 'O' : ' ';
+    for( y = 0; y < 4; y++ )
+	{
+        for( x = 0; x < 3; x++ )
+            *pch++ = ( cOffO > 5 * (2 - x) + y ) ? 'O' : ' ';
 
         *pch++ = ' ';
         *pch++ = '|';
@@ -377,8 +384,8 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
         *pch++ = '\n';
     }
 
-    for( x = 2; x < UINT_MAX; x-- )
-        *pch++ = ( cOffO > 5 * x + 4 ) ? 'O' : ' ';
+    for( x = 0; x < 3; x++ )
+        *pch++ = ( cOffO > 5 * (2 - x) + 4 ) ? 'O' : ' ';
 
     *pch++ = ' ';
     *pch++ = '|';
@@ -421,8 +428,8 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
 
     *pch++ = '\n';
 
-    for( x = 2; x < UINT_MAX; x-- )
-        *pch++ = ( cOffX > 5 * x + 4 ) ? 'X' : ' ';
+    for( x = 0; x < 3; x++ )
+        *pch++ = ( cOffX > 5 * (2 - x) + 4 ) ? 'X' : ' ';
 
     *pch++ = ' ';
     *pch++ = '|';
@@ -454,10 +461,12 @@ static char *DrawBoardCls( char *sz, const TanBoard anBoard, int fRoll,
 
     *pch++ = '\n';
     
-    for( y = 3; y < UINT_MAX; y-- ) {
+    for( i = 0; i < 4; i++ )
+	{
+		y = 3 - i;
 
-        for( x = 2; x < UINT_MAX; x-- )
-            *pch++ = ( cOffX > 5 * x + y ) ? 'X' : ' ';
+	    for( x = 0; x < 3; x++ )
+            *pch++ = ( cOffX > 5 * (2 - x) + y ) ? 'X' : ' ';
 
         *pch++ = ' ';
         *pch++ = '|';

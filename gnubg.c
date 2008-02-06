@@ -20,10 +20,6 @@
  */
 
 #include "config.h"
-#if USE_PYTHON
-#undef HAVE_FSTAT
-#include <Python.h>
-#endif
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -888,11 +884,10 @@ command cER = {
       acRelationalAdd },
     { "erase", NULL, N_("Remove from the external relational database"), NULL,
       acRelationalErase },
-    { "help", CommandRelationalHelp, 
-      N_("Help and instructions for using and setting up "
-         "the external relational database"), NULL, NULL },
     { "select", CommandRelationalSelect, N_("Query the relational database"),
       szCOMMAND, NULL },
+    { "setup", CommandRelationalSetup, N_("Setup database parameters"),
+      szKEYVALUE, NULL },
     { "show", NULL, N_("Show information from the relational database"),
       NULL, acRelationalShow },
     { "test", CommandRelationalTest, 
@@ -2604,28 +2599,16 @@ extern void HandleCommand( char *sz, command *ac )
           while ( isspace( *sz ) )
             ++sz;
 
-#if USE_PYTHON
 #if USE_GTK
-	    if( fX )
-		GTKDisallowStdin();
+		if( fX )
+			GTKDisallowStdin();
 #endif
-          if ( *sz ) {
-            PyRun_SimpleString( sz );
-          }
-          else {
-            PyRun_SimpleString( "import sys; print 'Python', sys.version" );
-            PyRun_AnyFile( stdin, NULL );
-          }
+		PythonRun(sz);
 #if USE_GTK
-	    if( fX )
-		GTKAllowStdin();
+		if( fX )
+			GTKAllowStdin();
 #endif
-#else
-	    outputl( _("This installation of GNU Backgammon was compiled "
-		     "without Python support.") );
-	    outputx();
-#endif
-            return;
+		return;
         }
 
     }
@@ -3746,9 +3729,7 @@ Shutdown( void ) {
 #endif
   EvalShutdown();
 
-#if USE_PYTHON
   PythonShutdown();
-#endif
 
 #if HAVE_SOCKETS
 #ifdef WIN32
@@ -4159,59 +4140,18 @@ static void LoadCommands( FILE *pf, char *szFile )
     outputresume();
 }
 
-
 extern void CommandLoadPython(char *sz)
 {
-
-#if !USE_PYTHON
-	output(_("This build of GNU Backgammon does not support Python"));
-	return;
-#else
-	FILE *pf;
-	char *path = NULL;
-
 	sz = NextToken(&sz);
 
-	if (!sz || !*sz) {
-		outputl(_
-			("You must specify a file to load from (see `help load "
-			 "python')."));
-		return;
-	}
-
-	if (g_file_test(sz, G_FILE_TEST_EXISTS))
-		path = g_strdup(sz);
-	else {
-		path = BuildFilename2("/scripts", sz);
-		if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
-			g_free(path);
-			path = g_build_filename("scripts", sz, NULL);
-		}
-	}
-	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
-		g_free(path);
-		outputerrf("Python file (%s) not found\n", sz);
-		return;
-	}
-
-	pf = fopen(path, "r");
-
-	if (pf) {
-		if (PyRun_AnyFile(pf, path) != 0)
-			outputerrf(_("An error occured while running the "
-						"python file %s\n"), path);
-		fclose(pf);
-	} else
-		outputerr(path);
-	g_free(path);
-
-#endif
+	if (sz && *sz)
+		LoadPythonFile(sz);
+	else
+		outputl(_("You must specify a file to load from (see `help load python')."));
 }
-
 
 extern void CommandLoadCommands( char *sz )
 {
-
     FILE *pf;
 
     sz = NextToken( &sz );
@@ -4940,9 +4880,10 @@ extern void CommandSaveSettings( char *szParam )
 	if (fFullScreen)
 		fputs("set fullscreen on\n", pf);
 
-    /* the end */
+	RelationalSaveSettings(pf);
 
-    
+	/* the end */
+
     if ( pf != stdout )
       fclose( pf );
     
@@ -6450,6 +6391,8 @@ int main(int argc, char *argv[])
 	if (CreateGnubgDirectory())
 		exit(EXIT_FAILURE);
 
+	RenderInitialise();
+
 #if WIN32
         fNoTTY = TRUE;
 #endif
@@ -6505,9 +6448,6 @@ int main(int argc, char *argv[])
 	PythonInitialise();
 #endif
 
-	PushSplash(pwSplash, _("Initialising"), _("Board Images"), 250);
-	RenderInitialise();
-
 	SetExitSoundOff();
 
         /* -r option given */
@@ -6557,13 +6497,13 @@ int main(int argc, char *argv[])
 	if (pchPythonScript) {
 #if USE_PYTHON
 		fInteractive = FALSE;
-		CommandLoadPython(pchPythonScript);
+		LoadPythonFile(pchPythonScript);
 		Shutdown();
 		exit(EXIT_SUCCESS);
 #else
 		outputerrf(_("GNU Backgammon build without Python.\n"));
 		exit(EXIT_FAILURE);
-#endif				/* USE_PYTHON */
+#endif
 	}
 	run_cl();
 	return (EXIT_FAILURE);

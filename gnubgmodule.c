@@ -23,18 +23,21 @@
 
 #if USE_PYTHON
 #include "gnubgmodule.h"
+#include <Python.h>
+#endif
 #include "backgammon.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
 #include <signal.h>
 
 #include "eval.h"
 #include "matchequity.h"
 #include "positionid.h"
 #include "analysis.h"
-#include "md5.h"
 #include "util.h"
+#include <glib/gi18n.h>
+
+#if USE_PYTHON
 
 #define UNUSED_PARAM __attribute__ ((unused))
 
@@ -745,82 +748,9 @@ PythonEq2mwc( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
 }
 
-#define STRBUF_SIZE 1024
-
-static void AddString(listOLD* buffers, char* str)
+extern PyObject *PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *args )
 {
-	listOLD* pCurrent = buffers->plPrev;
-	if (!pCurrent->p || strlen(str) + strlen(pCurrent->p) > STRBUF_SIZE)
-	{
-		char* newBuf = malloc(STRBUF_SIZE + 1);
-		*newBuf = '\0';
-		pCurrent = ListInsert(buffers, newBuf);
-	}
-	strcat(pCurrent->p, str);
-}
-
-static char* GameAsString(void)
-{
-	char *ret;
-	size_t size;
-	char buf[1024];
-	listOLD *pList, *plGame, *plMove;
-	listOLD buffers;
-	ListCreate(&buffers);
-
-	sprintf(buf, "%s vs %s (%d)", ap[0].szName, ap[1].szName, ms.nMatchTo);
-	AddString(&buffers, buf);
-
-	for (plGame = lMatch.plNext; plGame->p; plGame = plGame->plNext)
-	{
-		listOLD* plStart = plGame->p;
-		int move = 1;
-		for (plMove = plStart->plNext; plMove->p; plMove = plMove->plNext)
-		{
-			char playerStr[4] = ".AB";
-			int player;
-			moverecord* pmr = plMove->p;
-			char* moveString = GetMoveString(pmr, &player);
-			if (moveString)
-			{
-				sprintf(buf, " %d%c %s", move, playerStr[player + 1], moveString);
-				AddString(&buffers, buf);
-				if (player == 1)
-					move++;
-			}
-		}
-	}
-
-	/* Create single string from buffers */
-	size = 0;
-	for (pList = buffers.plNext; pList->p; pList = pList->plNext)
-		size += strlen(pList->p);
-
-	ret = malloc(size + 1);
-	*ret = '\0';
-	for (pList = buffers.plNext; pList->p; pList = pList->plNext)
-		strcat(ret, pList->p);
-
-	ListDeleteAll(&buffers);
-
-	return ret;
-}
-
-extern PyObject *
-PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *args )
-{
-	unsigned char auch[16];
-	char auchHex[33];
-	int i;
-	/* Work out md5 checksum */
-	char* gameStr = GameAsString();
-	md5_buffer(gameStr, strlen(gameStr), auch);
-	free(gameStr);
-	/* Convert to hex so stores easily in database - is there a better way? */
-	for (i = 0; i < 16; i++)
-		sprintf(auchHex + (i * 2), "%02x", auch[i]);
-
-	return PyString_FromString(auchHex);
+	return PyString_FromString(GetMatchCheckSum());
 }
 
 static PyObject *
@@ -840,7 +770,6 @@ PythonMwc2eq( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
   return PyFloat_FromDouble( mwc2eq( r, &ci ) );
 }
-
 
 static PyObject *
 PythonPositionID( PyObject* self UNUSED_PARAM, PyObject *args ) {
@@ -1668,7 +1597,7 @@ PythonGame(const listOLD*    plGame,
   PyObject* gameDict = PyDict_New();
   PyObject* gameInfoDict = PyDict_New();
 
-  {                                       g_assert( pmr->mt == MOVE_GAMEINFO ); }
+  g_assert( pmr->mt == MOVE_GAMEINFO );
 
   if( ! (gameDict && gameInfoDict) ) {
     PyErr_SetString(PyExc_MemoryError, "");
@@ -2408,7 +2337,6 @@ PyMethodDef gnubgMethods[] = {
 
 extern void PythonInitialise(void)
 {
-  char *pch;
   char *working_dir = g_get_current_dir();
 
 #if WIN32
@@ -2439,16 +2367,73 @@ extern void PythonInitialise(void)
   PyRun_SimpleString( "import gnubg\n" );
 
   /* run gnubg.py start up script */
-  pch = g_strdup( "gnubg.py" );
-  CommandLoadPython( pch );
-  g_free( pch );
-}
-
-extern void
-PythonShutdown( void ) {
-
-  Py_Finalize();
-
+  LoadPythonFile("gnubg.py");
 }
 
 #endif /* USE_PYTHON */
+
+extern void PythonShutdown( void )
+{
+#if USE_PYTHON
+  Py_Finalize();
+#endif
+}
+
+extern void PythonRun(const char *sz)
+{
+#if USE_PYTHON
+	if (*sz)
+	{
+		PyRun_SimpleString( sz );
+	}
+	else
+	{
+		PyRun_SimpleString( "import sys; print 'Python', sys.version" );
+		PyRun_AnyFile( stdin, NULL );
+	}
+#else
+	    outputl( _("This installation of GNU Backgammon was compiled "
+		     "without Python support.") );
+	    outputx();
+#endif
+}
+
+extern int LoadPythonFile(const char *sz)
+{
+#if !USE_PYTHON
+	output(_("This build of GNU Backgammon does not support Python"));
+	return FALSE;
+#else
+	FILE *pf;
+	char *path = NULL;
+	int ret = FALSE;
+
+	if (g_file_test(sz, G_FILE_TEST_EXISTS))
+		path = g_strdup(sz);
+	else {
+		path = BuildFilename2("/scripts", sz);
+		if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+			g_free(path);
+			path = g_build_filename("scripts", sz, NULL);
+		}
+	}
+	if (!g_file_test(path, G_FILE_TEST_EXISTS)) {
+		g_free(path);
+		outputerrf("Python file (%s) not found\n", sz);
+		return FALSE;
+	}
+
+	pf = fopen(path, "r");
+
+	if (pf)
+	{
+		ret = PyRun_AnyFile(pf, path);
+		fclose(pf);
+	}
+	else
+		outputerr(path);
+	g_free(path);
+
+	return ret;
+#endif
+}

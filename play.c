@@ -39,6 +39,7 @@
 #include <glib/gi18n.h>
 #include "sound.h"
 #include "renderprefs.h"
+#include "md5.h"
 #if USE_GTK
 #include "gtkboard.h"
 #endif
@@ -4476,4 +4477,75 @@ extern char* GetMoveString(moverecord *pmr, int* pPlayer)
 		g_assert( FALSE );
 	}
 	return pch;
+}
+
+#define STRBUF_SIZE 1024
+
+static void AddString(listOLD* buffers, char* str)
+{
+	listOLD* pCurrent = buffers->plPrev;
+	if (!pCurrent->p || strlen(str) + strlen(pCurrent->p) > STRBUF_SIZE)
+	{
+		char* newBuf = malloc(STRBUF_SIZE + 1);
+		*newBuf = '\0';
+		pCurrent = ListInsert(buffers, newBuf);
+	}
+	strcat(pCurrent->p, str);
+}
+
+char *GetMatchCheckSum()
+{
+	static char auchHex[33];
+	unsigned char auch[16];
+	int i;
+	/* Work out md5 checksum */
+	char* gameStr;
+	size_t size;
+	char buf[1024];
+	listOLD *pList, *plGame, *plMove;
+	listOLD buffers;
+	ListCreate(&buffers);
+
+	sprintf(buf, "%s vs %s (%d)", ap[0].szName, ap[1].szName, ms.nMatchTo);
+	AddString(&buffers, buf);
+
+	for (plGame = lMatch.plNext; plGame->p; plGame = plGame->plNext)
+	{
+		listOLD* plStart = plGame->p;
+		int move = 1;
+		for (plMove = plStart->plNext; plMove->p; plMove = plMove->plNext)
+		{
+			char playerStr[4] = ".AB";
+			int player;
+			moverecord* pmr = plMove->p;
+			char* moveString = GetMoveString(pmr, &player);
+			if (moveString)
+			{
+				sprintf(buf, " %d%c %s", move, playerStr[player + 1], moveString);
+				AddString(&buffers, buf);
+				if (player == 1)
+					move++;
+			}
+		}
+	}
+
+	/* Create single string from buffers */
+	size = 0;
+	for (pList = buffers.plNext; pList->p; pList = pList->plNext)
+		size += strlen(pList->p);
+
+	gameStr = malloc(size + 1);
+	*gameStr = '\0';
+	for (pList = buffers.plNext; pList->p; pList = pList->plNext)
+		strcat(gameStr, pList->p);
+
+	ListDeleteAll(&buffers);
+
+	md5_buffer(gameStr, strlen(gameStr), auch);
+	free(gameStr);
+	/* Convert to hex so stores easily in database - is there a better way? */
+	for (i = 0; i < 16; i++)
+		sprintf(auchHex + (i * 2), "%02x", auch[i]);
+
+	return auchHex;
 }

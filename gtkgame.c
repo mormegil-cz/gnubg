@@ -167,8 +167,6 @@ typedef enum _gnubgcommand {
     CMD_RECORD_ADD_SESSION,
     CMD_RECORD_SHOW,
     CMD_RELATIONAL_ADD_MATCH,
-    CMD_RELATIONAL_TEST,
-    CMD_RELATIONAL_HELP,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
     CMD_RESIGN_G,
@@ -241,8 +239,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "record add session",
     "record show",
     "relational add match",
-    "relational test",
-    "relational help",
     "redouble",
     "resign normal",
     "resign gammon",
@@ -3666,21 +3662,14 @@ GtkItemFactoryEntry aife[] = {
 	  Command, CMD_RECORD_ADD_SESSION,
 		"<StockItem>", GTK_STOCK_ADD
 	},
-#if USE_PYTHON
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
-        { N_("/_Analyse/Relational database/Add match or session"), NULL,
-          GtkRelationalAddMatch, 0,
-		"<StockItem>", GTK_STOCK_ADD
-	},
-        { N_("/_Analyse/Relational database/Show Records"), NULL,
-          GtkShowRelational, 0, NULL, NULL },
-        { N_("/_Analyse/Relational database/Test"), NULL,
-          Command, CMD_RELATIONAL_TEST, NULL, NULL },
-        { N_("/_Analyse/Relational database/Help"), NULL,
-          Command, CMD_RELATIONAL_HELP, NULL, NULL },
-        { N_("/_Analyse/Relational database/Show Stats"), NULL,
-          GtkRelationalShowStats, 0, NULL, NULL },
-#endif
+    { N_("/_Analyse/Relational database/Add match or session"), NULL,
+        GtkRelationalAddMatch, 0,
+	"<StockItem>", GTK_STOCK_ADD},
+    { N_("/_Analyse/Relational database/Show Records"), NULL,
+        GtkShowRelational, 0, NULL, NULL },
+    { N_("/_Analyse/Relational database/Setup"), NULL,
+        GtkRelationalSetup, 0, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Distribution of rolls"), NULL, Command, 
           CMD_SHOW_ROLLS, NULL, NULL },
@@ -6650,16 +6639,10 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
 
-#if USE_PYTHON
-       gtk_widget_set_sensitive( 
+    gtk_widget_set_sensitive( 
           gtk_item_factory_get_widget( pif,
                                        "/Analyse/"
-                                       "Relational database/Test" ), 
-          TRUE );
-       gtk_widget_set_sensitive( 
-          gtk_item_factory_get_widget( pif,
-                                       "/Analyse/"
-                                       "Relational database/Help" ), 
+                                       "Relational database/Setup" ), 
           TRUE );
 
     gtk_widget_set_sensitive( 
@@ -6673,12 +6656,6 @@ extern void GTKSet( void *p ) {
                                        "/Analyse/"
                                        "Relational database/Show Records" ), 
           TRUE );
-    gtk_widget_set_sensitive( 
-          gtk_item_factory_get_widget( pif,
-                                       "/Analyse/"
-                                       "Relational database/Show Stats" ),
-          TRUE );
-#endif /* USE_PYTHON */
 
 	fAutoCommand = FALSE;
     } else if( p == &ms.fCrawford )

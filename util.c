@@ -24,7 +24,6 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #if WIN32
 #include <windows.h>
 
@@ -68,6 +67,8 @@ extern void PrintSystemError(const char* message)
 	}
 }
 #else
+#include <errno.h>
+
 extern void PrintSystemError(const char* message)
 {
 	printf("Unknown system error while %s!\n", message);

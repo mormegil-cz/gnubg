@@ -20,7 +20,6 @@
  */
 
 #include "config.h"
-#if USE_PYTHON
 #include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +28,7 @@
 #include "gtkrelational.h"
 #include "relational.h"
 #include "gtkwindows.h"
+#include "dbprovider.h"
 #include <glib/gi18n.h>
 
 enum {
@@ -85,7 +85,7 @@ static GtkTreeModel *create_model(void)
 {
 	GtkListStore *store;
 	GtkTreeIter iter;
-	RowSet r;
+	RowSet *rs;
 
 	long moves[3];
 	unsigned int i, j;
@@ -108,7 +108,7 @@ static GtkTreeModel *create_model(void)
 				   G_TYPE_FLOAT);
 
 	/* prepare the sql query */
-	if (!RunQuery(&r, "name,"
+	rs = RunQuery("name,"
 		      "SUM(total_moves),"
 		      "SUM(unforced_moves),"
 		      "SUM(close_cube_decisions),"
@@ -121,55 +121,56 @@ static GtkTreeModel *create_model(void)
 		      "SUM(cube_error_total_normalised),"
 		      "SUM(chequer_error_total_normalised),"
 		      "SUM(luck_total_normalised) "
-		      "FROM matchstat NATURAL JOIN player group by name"))
+		      "FROM matchstat NATURAL JOIN player group by name");
+	if (!rs)
 		return 0;
 
-	if (r.rows < 2) {
+	if (rs->rows < 2) {
 		GTKMessage(_("No data in database"), DT_INFO);
 		return 0;
 	}
 
-	for (j = 1; j < r.rows; ++j)
+	for (j = 1; j < rs->rows; ++j)
 	{
 		for (i = 1; i < 4; ++i)
-			moves[i - 1] = strtol(r.data[j][i], NULL, 0);
+			moves[i - 1] = strtol(rs->data[j][i], NULL, 0);
 
 		for (i = 4; i < 13; ++i)
-			stats[i - 4] = (float)g_strtod(r.data[j][i], NULL);
+			stats[i - 4] = (float)g_strtod(rs->data[j][i], NULL);
 
 		gtk_list_store_append(store, &iter);
 		gtk_list_store_set(store, &iter,
-				   COLUMN_NICK, r.data[j][0],
+				   COLUMN_NICK,
+					rs->data[j][0],
 				   COLUMN_GNUE,
-				   (stats[6] + stats[7]) / (moves[1] +
-							    moves[2]) *
-				   1000.0f, COLUMN_GCHE,
-				   stats[7] / moves[1] * 1000.0f,
+					Ratio(stats[6] + stats[7], moves[1] + moves[2]) * 1000.0f,
+				   COLUMN_GCHE,
+					Ratio(stats[7], moves[1]) * 1000.0f,
 				   COLUMN_GCUE,
-				   stats[6] / moves[2] * 1000.0f,
+					Ratio(stats[6], moves[2]) * 1000.0f,
 				   COLUMN_SNWE,
-				   (stats[6] +
-				    stats[7]) / moves[0] * 500.0f,
+					Ratio(stats[6] + stats[7], moves[0]) * 500.0f,
 				   COLUMN_SCHE,
-				   stats[7] / moves[0] * 500.0f,
+					Ratio(stats[7], moves[0]) * 500.0f,
 				   COLUMN_SCUE,
-				   stats[6] / moves[0] * 500.0f,
+					Ratio(stats[6], moves[0]) * 500.0f,
 				   COLUMN_WRPA,
-				   stats[5] / moves[0] * 500.0f,
+					Ratio(stats[5], moves[0]) * 500.0f,
 				   COLUMN_WRTA,
-				   stats[4] / moves[0] * 500.0f,
+					Ratio(stats[4], moves[0]) * 500.0f,
 				   COLUMN_WDTG,
-				   stats[3] / moves[0] * 500.0f,
+					Ratio(stats[3], moves[0]) * 500.0f,
 				   COLUMN_WDBD,
-				   stats[2] / moves[0] * 500.0f,
+					Ratio(stats[2], moves[0]) * 500.0f,
 				   COLUMN_MDAC,
-				   stats[1] / moves[0] * 500.0f,
+					Ratio(stats[1], moves[0]) * 500.0f,
 				   COLUMN_MDBC,
-				   stats[0] / moves[0] * 500.0f,
+					Ratio(stats[0], moves[0]) * 500.0f,
 				   COLUMN_LUCK,
-				   stats[8] / moves[0] * 1000.0f, -1);
+					Ratio(stats[8], moves[0]) * 1000.0f,
+				   -1);
 	}
-	FreeRowset(&r);
+	FreeRowset(rs);
 	return GTK_TREE_MODEL(store);
 }
 
@@ -299,13 +300,7 @@ extern void GtkRelationalShowStats(gpointer p, guint n, GtkWidget * pw)
 
 extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw)
 {
-	int exists = RelationalMatchExists();
-	if (exists == -1 ||
-	    (exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
-		return;
-
 	CommandRelationalAddMatch(NULL);
-
 	outputx();
 }
 
@@ -352,7 +347,7 @@ static void ShowRelationalSelect(GtkWidget * pw, int y, int x,
 				 GdkEventButton * peb, GtkWidget * pwCopy)
 {
 	char *pName;
-	RowSet r;
+	RowSet *rs;
 	char query[1024];
 
 	gtk_clist_get_text(GTK_CLIST(pw), y, 0, &pName);
@@ -361,21 +356,23 @@ static void ShowRelationalSelect(GtkWidget * pw, int y, int x,
 		" FROM player WHERE player.name = '%s'", pName);
 
 	ClearText(GTK_TEXT_VIEW(pwPlayerNotes));
-	if (!RunQuery(&r, query)) {
+	rs = RunQuery(query);
+	if (!rs)
+	{
 		gtk_entry_set_text(GTK_ENTRY(pwPlayerName), "");
 		return;
 	}
 
-	g_assert(r.rows == 2);	/* Should be exactly one entry */
+	g_assert(rs->rows == 2);	/* Should be exactly one entry */
 
 	curRow = y;
-	curPlayerId = atoi(r.data[1][0]);
-	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), r.data[1][1]);
+	curPlayerId = atoi(rs->data[1][0]);
+	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), rs->data[1][1]);
 	gtk_text_buffer_set_text(gtk_text_view_get_buffer
 				 (GTK_TEXT_VIEW(pwPlayerNotes)),
-				 r.data[1][2], -1);
+				 rs->data[1][2], -1);
 
-	FreeRowset(&r);
+	FreeRowset(rs);
 }
 
 static void RelationalOpen(GtkWidget * pw, GtkWidget * pwList)
@@ -441,7 +438,7 @@ static void UpdatePlayerDetails(GtkWidget *pw, GtkWidget *pwList)
 
 static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 {
-	RowSet r;
+	RowSet *rs;
 	char *pch, *query;
 
 	pch = GetText(GTK_TEXT_VIEW(pwQueryText));
@@ -451,21 +448,355 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 	else
 		query = pch;
 
-	if (RunQuery(&r, query)) {
+	rs = RunQuery(query);
+	if (rs)
+	{
 		gtk_widget_destroy(pwQueryResult);
-		pwQueryResult = GetRelList(&r);
+		pwQueryResult = GetRelList(rs);
 		gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult,
 				   TRUE, TRUE, 0);
 		gtk_widget_show(pwQueryResult);
-		FreeRowset(&r);
+		FreeRowset(rs);
 	}
 
 	g_free(pch);
 }
 
+GtkWidget *pwSetupDialog;
+GtkWidget *adddb, *deldb;
+GtkWidget *dbtype, *user, *password, *login, *helptext;
+
+void CheckDatabase(const char *database);
+static void DBListSelected(GtkTreeView *treeview, gpointer userdata);
+GtkListStore *dbStore;
+
+DBProvider *GetSelectedDBType()
+{
+	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
+	return GetDBProvider(dbType);
+}
+
+void TryConnection(DBProvider *pdb, GtkWidget *dbList)
+{
+	const char *msg;
+	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
+
+	gtk_list_store_clear(GTK_LIST_STORE(dbStore));
+	msg = TestDB(dbType);
+	gtk_widget_set_sensitive(login, FALSE);
+	if (msg)
+	{
+		gtk_label_set_text(GTK_LABEL(helptext), msg);
+		gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), FALSE);
+		gtk_widget_set_sensitive(adddb, FALSE);
+		gtk_widget_set_sensitive(deldb, FALSE);
+	}
+	else
+	{	/* Test ok */
+		GList *pl = pdb->GetDatabaseList(pdb->username, pdb->password);
+		if (g_list_find_custom(pl, pdb->database, (GCompareFunc)g_ascii_strncasecmp) == NULL)
+		{	/* Somehow selected database not in list, so add it */
+			pl = g_list_append(pl, g_strdup(pdb->database));
+		}
+		while(pl)
+		{
+			int ok, seldb;
+			GtkTreeIter iter;
+			char *database = (char *)pl->data;
+			seldb = !StrCaseCmp(database, pdb->database);
+			if (seldb)
+				ok = TRUE;
+			else
+			{
+				const char *tmpDatabase = pdb->database;
+				pdb->database = database;
+				ok = (TestDB(dbType) == NULL);
+				pdb->database = tmpDatabase;
+			}
+			if (ok)
+			{
+				gtk_list_store_append(GTK_LIST_STORE(dbStore), &iter);
+				gtk_list_store_set(GTK_LIST_STORE(dbStore), &iter, 0, database, -1);
+				if (seldb)
+				{
+					gtk_tree_selection_select_iter(gtk_tree_view_get_selection(GTK_TREE_VIEW(dbList)), &iter);
+					gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(dbList),
+						gtk_tree_model_get_path(gtk_tree_view_get_model(GTK_TREE_VIEW(dbList)), &iter),
+						NULL, TRUE, 1, 0);
+				}
+			}
+			g_free(database);
+			pl = pl->next;
+		}
+		g_list_free(pl);
+		CheckDatabase(pdb->database);
+	}
+}
+
+void CredentialsChanged()
+{
+	gtk_widget_set_sensitive(login, TRUE);
+}
+
+void LoginClicked(GtkButton *button, gpointer dbList)
+{
+	DBProvider *pdb = GetSelectedDBType();
+	const char *tmpUser = pdb->username, *tmpPass = pdb->password;
+	pdb->username = gtk_entry_get_text(GTK_ENTRY(user));
+	pdb->password = gtk_entry_get_text(GTK_ENTRY(password));
+
+	TryConnection(pdb, dbList);
+
+	pdb->username = tmpUser, pdb->password = tmpPass;
+}
+
+void TypeChanged(GtkComboBox *widget, gpointer dbList)
+{
+	DBProvider *pdb = GetSelectedDBType();
+
+	gtk_widget_set_sensitive(user, pdb->HasUserDetails);
+	gtk_entry_set_text(GTK_ENTRY(user), pdb->username);
+	gtk_widget_set_sensitive(password, pdb->HasUserDetails);
+	gtk_entry_set_text(GTK_ENTRY(password), pdb->password);
+
+	TryConnection(pdb, dbList);
+}
+
+void CheckDatabase(const char *database)
+{
+	int valid = FALSE;
+	int dbok;
+	DBProvider *pdb = GetSelectedDBType();
+
+	dbok = (pdb->Connect(database, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))) >= 0);
+	if (!dbok)
+		gtk_label_set_text(GTK_LABEL(helptext), "Failed to connect to database!");
+	else
+	{
+		int version = RunQueryValue(pdb, "next_id FROM control WHERE tablename = 'version'");
+		int matchcount = RunQueryValue(pdb, "count(*) FROM session");
+	
+		char *dbString, *buf;
+		if (version < DB_VERSION)
+			dbString = _("This database is from an old version of gnubg and cannot be used");
+		else if (version > DB_VERSION)
+			dbString = _("This database is from a new version of gnubg and cannot be used");
+		else
+		{
+			if (matchcount < 0)
+				dbString = _("This database structure is invalid");
+			else
+			{
+				valid = TRUE;
+				if (matchcount == 0)
+					dbString = _("This database contains no matches");
+				else if (matchcount == 1)
+					dbString = _("This database contains 1 match");
+				else
+				{
+					buf = g_strdup_printf(_("This database contains %d matches\n"), matchcount);
+					dbString = buf;
+					g_free(buf);
+				}
+			}
+		}
+		buf = g_strdup_printf(_("Database connection successful\n%s\n"), dbString);
+		gtk_label_set_text(GTK_LABEL(helptext), buf);
+		g_free(buf);
+
+		pdb->Disconnect();
+	}
+	gtk_widget_set_sensitive(adddb, dbok);
+	gtk_widget_set_sensitive(deldb, dbok);
+	gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), valid);
+}
+
+GtkTreeIter selected_iter;
+
+char *GetSelectedDB(GtkTreeView *treeview)
+{
+	char *db = NULL;
+	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+	if (gtk_tree_selection_count_selected_rows(sel) == 1)
+	{
+		GValue value = {0};
+		GList *selList = gtk_tree_selection_get_selected_rows(sel, NULL);
+		GtkTreePath *path = selList->data;
+		gtk_tree_model_get_iter(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)), &selected_iter, path);
+		gtk_tree_model_get_value(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)), &selected_iter, 0, &value);
+		db = g_strdup((char*)g_value_peek_pointer(&value));
+		g_value_unset(&value);
+		gtk_tree_path_free(path);
+		g_list_free(selList);
+	}
+	return db;
+}
+
+static void DBListSelected(GtkTreeView *treeview, gpointer userdata)
+{
+	char *db = GetSelectedDB(treeview);
+	if (db)
+	{
+		CheckDatabase(db);
+		g_free(db);
+	}
+}
+
+void AddDBClicked(GtkButton *button, gpointer dbList)
+{
+	char* dbName = GTKGetInput(_("Add Database"), _("Database Name:"), pwSetupDialog);
+	if (dbName)
+	{
+		DBProvider *pdb = GetSelectedDBType();
+		int con = pdb->Connect(dbName, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+		if (con > 0 || CreateDatabase(pdb))
+		{
+			GtkTreeIter iter;
+			gtk_list_store_append(GTK_LIST_STORE(dbStore), &iter);
+			gtk_list_store_set(GTK_LIST_STORE(dbStore), &iter, 0, dbName, -1);
+			gtk_tree_selection_select_iter(gtk_tree_view_get_selection(GTK_TREE_VIEW(dbList)), &iter);
+			pdb->Disconnect();
+			CheckDatabase(dbName);
+		}
+		else
+			gtk_label_set_text(GTK_LABEL(helptext), _("Failed to create database!"));
+
+		g_free(dbName);
+	}
+}
+
+void DelDBClicked(GtkButton *button, gpointer dbList)
+{
+	char *db = GetSelectedDB(GTK_TREE_VIEW(dbList));
+	if (db && GetInputYN(_("Are you sure you want to delete all the matches in this database?")))
+	{
+		DBProvider *pdb = GetSelectedDBType();
+		g_assert(pdb);
+		if (pdb->DeleteDatabase(db, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))))
+		{
+			gtk_list_store_remove(GTK_LIST_STORE(dbStore), &selected_iter);
+			gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), FALSE);
+			gtk_widget_set_sensitive(deldb, FALSE);
+		}
+		else
+			gtk_label_set_text(GTK_LABEL(helptext), _("Failed to delete database!"));
+	}
+}
+
+static void SetupDialogRealized(void *notused)
+{
+	gtk_combo_box_set_active(GTK_COMBO_BOX(dbtype), dbProviderType);
+}
+
+static void RelSetupOK(GtkWidget *dialog, GtkWidget *dbList)
+{
+	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
+	SetDBSettings(dbType, GetSelectedDB(GTK_TREE_VIEW(dbList)), gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+	gtk_widget_destroy(dialog);
+}
+
+extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw)
+{
+	unsigned int i;
+	GtkWidget *hb1, *hb2, *vb1, *vb2, *table, *lbl, *align,
+		*help, *pwScrolled, *dbList;
+
+	dbStore = gtk_list_store_new(1, G_TYPE_STRING);
+	dbList = gtk_tree_view_new_with_model(GTK_TREE_MODEL(dbStore));
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(dbList)), GTK_SELECTION_BROWSE);
+	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(dbList), -1, _("Databases"), gtk_cell_renderer_text_new(), "text", 0, NULL);
+	gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(dbList), FALSE);
+
+	g_signal_connect(dbList, "cursor-changed", G_CALLBACK(DBListSelected), NULL);
+
+	pwSetupDialog = GTKCreateDialog(_("GNU Backgammon - Setup Relational Database"),
+			    DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(RelSetupOK), dbList);
+
+	dbtype = gtk_combo_box_new_text();
+	for (i = 0; i < NUM_PROVIDERS; i++)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(dbtype), providers[i].name);
+	g_signal_connect(dbtype, "changed", G_CALLBACK(TypeChanged), dbList);
+
+	vb2 = gtk_vbox_new(FALSE, 0);
+	hb2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vb2), hb2, FALSE, FALSE, 10);
+
+	vb1 = gtk_vbox_new(FALSE, 0);
+
+	hb1 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hb1), gtk_label_new(_("DB Type")), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hb1), dbtype, FALSE, FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(vb1), hb1, FALSE, FALSE, 0);
+
+	table = gtk_table_new(3, 2, FALSE);
+	lbl = gtk_label_new(_("Username"));
+	gtk_misc_set_alignment(GTK_MISC(lbl), 1, .5);
+	gtk_table_attach(GTK_TABLE(table), lbl, 0, 1, 0, 1, GTK_FILL, GTK_FILL, 0, 0);
+	user = gtk_entry_new();
+	gtk_entry_set_width_chars(GTK_ENTRY(user), 20);
+	g_signal_connect(user, "changed", G_CALLBACK(CredentialsChanged), dbList);
+	gtk_table_attach(GTK_TABLE(table), user, 1, 2, 0, 1, 0, 0, 0, 0);
+
+	lbl = gtk_label_new(_("Password"));
+	gtk_misc_set_alignment(GTK_MISC(lbl), 1, .5);
+	gtk_table_attach(GTK_TABLE(table), lbl, 0, 1, 1, 2, GTK_FILL, GTK_FILL, 0, 0);
+	password = gtk_entry_new();
+	gtk_entry_set_width_chars(GTK_ENTRY(password), 20);
+	gtk_entry_set_visibility(GTK_ENTRY(password), FALSE);
+	g_signal_connect(password, "changed", G_CALLBACK(CredentialsChanged), dbList);
+	gtk_table_attach(GTK_TABLE(table), password, 1, 2, 1, 2, 0, 0, 0, 0);
+	
+	login = gtk_button_new_with_label("Login");
+	g_signal_connect(login, "clicked", G_CALLBACK(LoginClicked), dbList);
+
+	align = gtk_alignment_new(1, 0, 0, 0);
+	gtk_container_add(GTK_CONTAINER(align), login);
+	gtk_table_attach(GTK_TABLE(table), align, 1, 2, 2, 3, GTK_EXPAND | GTK_FILL, 0, 0, 0);
+
+	gtk_box_pack_start(GTK_BOX(vb1), table, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(hb2), vb1, FALSE, FALSE, 10);
+
+	help = gtk_frame_new(_("Info"));
+	helptext = gtk_label_new(NULL);
+	gtk_misc_set_alignment(GTK_MISC(helptext), 0, 0);
+	gtk_misc_set_padding(GTK_MISC(helptext), 4, 4);
+	gtk_widget_set_size_request(helptext, 400, 70);
+	gtk_container_add(GTK_CONTAINER(help), helptext);
+	gtk_box_pack_start(GTK_BOX(vb2), help, FALSE, FALSE, 4);
+
+	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_set_size_request(pwScrolled, 100, 100);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (pwScrolled),
+					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(pwScrolled), dbList);
+
+	vb1 = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hb2), vb1, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vb1), pwScrolled, FALSE, FALSE, 0);
+	hb1 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vb1), hb1, FALSE, FALSE, 0);
+	adddb = gtk_button_new_with_label("Add database");
+	g_signal_connect(adddb, "clicked", G_CALLBACK(AddDBClicked), dbList);
+	gtk_box_pack_start(GTK_BOX(hb1), adddb, FALSE, FALSE, 0);
+	deldb = gtk_button_new_with_label("Delete database");
+	g_signal_connect(deldb, "clicked", G_CALLBACK(DelDBClicked), dbList);
+	gtk_box_pack_start(GTK_BOX(hb1), deldb, FALSE, FALSE, 4);
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwSetupDialog, DA_MAIN)), vb2);
+
+	g_signal_connect(G_OBJECT(pwSetupDialog), "realize", G_CALLBACK(SetupDialogRealized), 0 );
+
+	gtk_widget_show_all(pwSetupDialog);
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+}
+
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 {
-	RowSet r;
+	RowSet *rs;
 	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
 	    *pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen,
 	    *pwn, *pwLabel, *pwScrolled;
@@ -492,18 +823,19 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	gtk_container_set_border_width(GTK_CONTAINER(pwVbox),
 				       INSIDE_FRAME_GAP);
 
-	if (!RunQuery(&r, "name FROM player ORDER BY name"))
+	rs = RunQuery("name FROM player ORDER BY name");
+	if (!rs)
 		return;
 
-	if (r.rows < 2) {
+	if (rs->rows < 2) {
 		GTKMessage(_("No data in database"), DT_INFO);
 		return;
 	}
 
-	pwList = GetRelList(&r);
+	pwList = GetRelList(rs);
 	g_signal_connect(G_OBJECT(pwList), "select-row",
 			 G_CALLBACK(ShowRelationalSelect), pwList);
-	FreeRowset(&r);
+	FreeRowset(rs);
 
 	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
@@ -657,8 +989,3 @@ extern void GtkShowQuery(RowSet * pRow)
 	gtk_main();
 	GTKAllowStdin();
 }
-
-#else
-/* Avoid no code warning */
-extern int dummy;
-#endif

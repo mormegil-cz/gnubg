@@ -22,23 +22,9 @@
 #ifndef _PYTHONMODULE_H_
 #define _PYTHONMODULE_H_
 
-#if USE_PYTHON
-
-/* Python.h defines HAVE_FSTAT (2.3) and HAVE_SETVBUF (2.4) so ignore and redefine below */
-#undef HAVE_SETVBUF
-#undef HAVE_LIMITS_H
-#undef HAVE_FSTAT
-#include <Python.h>
-#undef HAVE_SETVBUF
-#undef HAVE_LIMITS_H
-#undef HAVE_FSTAT
-
 extern void PythonInitialise(void);
-
 extern void PythonShutdown(void);
-
-extern PyObject *PythonMatchChecksum( PyObject* self, PyObject *args );
-
-#endif /* USE_PYTHON */
+extern void PythonRun(const char *sz);
+extern int LoadPythonFile(const char *sz);
 
 #endif /* _PYTHONMODULE_H_ */

@@ -22,7 +22,7 @@ SOURCE = analysis bearoff bearoffgammon non-src/copying non-src/credits \
 	timer mec relational gtkgamelist \
 	gtkpanels gnubgmodule non-src/external_l non-src/external_y gtkfile \
 	gtkmovelist gtkmovelistctrl gtkwindows gtkrelational file simpleboard \
-	util corecount
+	util corecount dbprovider
 
 OBJECTS=$(patsubst %,$(OBJDIR)/%.o,$(SOURCE))
 
@@ -60,21 +60,21 @@ INCLUDE = -I. -I./lib -I./board3d -I./non-src \
 	  -I$(MINGW)/include/atk-1.0 \
 	  -I$(MINGW)/include/libxml2 \
 	  -I$(MINGW)/include/pango-1.0 \
-	  -I$(MINGW)/../Python23/include \
+	  -I"$(PYTHON_DIR)/include" \
 	  -I$(MINGW)/include/freetype2 \
 	-I$(MINGW)/include/gtkglext-1.0 \
 	-I$(MINGW)/lib/gtkglext-1.0/include
 
-LIBPATH = -L$(BINDIR)
+LIBPATH = -L$(BINDIR) -L"$(PYTHON_DIR)/libs"
 
 LIBS = -levent -lboard3d -lglib-2.0.dll -lxml2 -lfreetype.dll \
        -lgobject-2.0.dll -lgtk-win32-2.0 -lgdk-win32-2.0 \
        -liconv -lpng -lz -lwinmm -lpango-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 \
        -lopengl32 -lglu32 -lglut32 -lwsock32 \
        -lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll \
-       -lintl -lcairo -lgthread-2.0.dll
+       -lintl -lcairo -lgthread-2.0.dll -lpython25
 
-LIBOPTIONS=-mwindows
+#LIBOPTIONS=-mwindows
 LIBEVENT = $(BINDIR)/libevent.a
 LIBBOARD3D = $(BINDIR)/libboard3d.a
 

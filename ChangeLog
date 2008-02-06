@@ -1,3 +1,8 @@
+Wed Feb  6 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* dbprovider.c+.h, gnubg.c, relational.c, gtkrelational.c, database.py:
+	Move relational code out of database.py and into relational.c
+
 Sun Feb  3 16:34:37 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkboard.c: size cube and dice widgets according to board size

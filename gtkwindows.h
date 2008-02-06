@@ -51,7 +51,7 @@ extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt,
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
     
 extern int GTKGetInputYN( char *szPrompt );
-extern char* GTKGetInput(char* title, char* prompt);
+extern char* GTKGetInput(char* title, char* prompt, GtkWidget *parent);
 
 extern int GTKMessage( char *sz, dialogtype dt );
 extern void GTKSetCurrentParent(GtkWidget *parent);
