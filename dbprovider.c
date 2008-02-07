@@ -35,7 +35,8 @@
 #endif
 #include <glib/gi18n.h>
 
-DBProviderType dbProviderType = SQLITE;
+DBProviderType dbProviderType = 0;
+
 #if USE_PYTHON
 PyObject *pdict;
 RowSet* ConvertPythonToRowset(PyObject *v);
@@ -47,10 +48,8 @@ void PyDisconnect();
 RowSet *PySelect(const char* str);
 int PyUpdateCommand(const char* str);
 void PyCommit();
-GList *PySQLiteGetDatabaseList(const char *user, const char *password);
 GList *PyMySQLGetDatabaseList(const char *user, const char *password);
 GList *PyPostgreGetDatabaseList(const char *user, const char *password);
-int PySQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 #endif
@@ -62,12 +61,15 @@ void SQLiteCommit();
 GList *SQLiteGetDatabaseList(const char *user, const char *password);
 int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 
+#if NUM_PROVIDERS
 DBProvider providers[NUM_PROVIDERS] =
 {
 #if USE_PYTHON
-	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PySQLiteGetDatabaseList,
-		PySQLiteDeleteDatabase,
+#if !HAVE_SQLITE
+	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, SQLiteGetDatabaseList,
+		SQLiteDeleteDatabase,
 		"SQLite (Python)", "SQLite3 connection included in latest Python version", FALSE, "gnubg", "", ""},
+#endif
 	{PyMySQLConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyMySQLGetDatabaseList,
 		PyMySQLDeleteDatabase,
 		"MySQL (Python)", "MySQL connection via MySQLdb Python module", TRUE, "gnubg", "", ""},
@@ -75,9 +77,11 @@ DBProvider providers[NUM_PROVIDERS] =
 		PyPostgreDeleteDatabase,
 		"Postgres (Python)", "PostgreSQL connection via PyGreSQL Python module", TRUE, "gnubg", "", ""},
 #endif
+#if HAVE_SQLITE
 	{SQLiteConnect, SQLiteDisconnect, SQLiteSelect, SQLiteUpdateCommand, SQLiteCommit, SQLiteGetDatabaseList,
 		SQLiteDeleteDatabase,
 		"SQLite", "Direct SQLite3 connection", FALSE, "gnubg", "", ""},
+#endif
 };
 
 const char *dbTypes[NUM_PROVIDERS] = {
@@ -86,6 +90,15 @@ const char *dbTypes[NUM_PROVIDERS] = {
 #endif
 	"SQLite"
 };
+#else
+DBProvider providers[1] = {0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", 0, 0, 0, 0};
+const char *dbTypes[1] = {0};
+#endif
+
+const char *GetProviderName(int i)
+{
+	return providers[i].name;
+}
 
 DBProviderType GetTypeFromName(const char *name)
 {
@@ -120,11 +133,6 @@ void SetDBType(const char *type)
 	dbProviderType = GetTypeFromName(type);
 }
 
-const char *GetDBType(void)
-{
-	return dbTypes[dbProviderType];
-}
-
 void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password)
 {
 	dbProviderType = dbType;
@@ -136,7 +144,7 @@ void SetDBSettings(DBProviderType dbType, const char *database, const char *user
 void RelationalSaveSettings(FILE *pf)
 {
 	int i;
-	fprintf(pf, "relational setup dbtype=%s\n", GetDBType());
+	fprintf(pf, "relational setup dbtype=%s\n", dbTypes[dbProviderType]);
 	for (i = 0; i < NUM_PROVIDERS; i++)
 	{
 		DBProvider* pdb = GetDBProvider(i);
@@ -350,7 +358,7 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 
 		if (PySequence_Check(e))
 		{
-			size_t j, size;
+			size_t j;
 			for (j = 0; j < pRow->cols; j++)
 			{
 				char buf[1024];
@@ -362,42 +370,20 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 					continue;
 				}
 				if (PyUnicode_Check(e2))
-				{
 					strcpy(buf, PyString_AsString(PyUnicode_AsUTF8String(e2)));
-					size = strlen(buf);
-				}
 				else if (PyString_Check(e2))
-				{
 					strcpy(buf, PyString_AsString(e2));
-					size = strlen(buf);
-				}
 				else if (PyInt_Check(e2) || PyLong_Check(e2)
 					|| !StrCaseCmp(e2->ob_type->tp_name, "Decimal"))	/* Not sure how to check for decimal type directly */
-				{
 					sprintf(buf, "%d", (int)PyInt_AsLong(e2));
-					size = ((int)log((int)PyInt_AsLong(e2))) + 1;
-				}
 				else if (PyFloat_Check(e2))
-				{
 					sprintf(buf, "%.4f", PyFloat_AsDouble(e2));
-					size = ((int)log(PyFloat_AsDouble(e2))) + 1 + 3;
-				}
 				else if (e2 == Py_None)
-				{
 					strcpy(buf, _("[null]"));
-					size = strlen(buf);
-				}
 				else
-				{
 					strcpy(buf, _("[unknown type]"));
-					size = strlen(buf);
-				}
 
-				if (i == 0 || size > pRow->widths[j])
-					pRow->widths[j] = size;
-
-				pRow->data[i][j] = malloc(strlen(buf) + 1);
-				strcpy(pRow->data[i][j], buf);
+				SetRowsetData(pRow, i, j, buf);
 
 				Py_DECREF(e2);
 			}
@@ -410,28 +396,6 @@ RowSet* ConvertPythonToRowset(PyObject *v)
 		Py_DECREF(e);
 	}
 	return pRow;
-}
-
-GList *PySQLiteGetDatabaseList(const char *user, const char *password)
-{
-	GList *glist = NULL;
-	GDir *dir = g_dir_open(szHomeDirectory, 0, NULL);
-	if (dir)
-	{
-		const char *filename;
-		while ((filename = g_dir_read_name(dir)) != NULL)
-		{
-			int len = strlen(filename);
-			if (len > 3 && !StrCaseCmp(filename + len - 3, ".db"))
-			{
-				char *db = g_strdup(filename);
-				db[len - 3] = '\0';
-				glist = g_list_append(glist, db);
-			}
-		}
-		g_dir_close(dir);
-	}
-	return glist;
 }
 
 GList *PyMySQLGetDatabaseList(const char *user, const char *password)
@@ -483,19 +447,6 @@ GList *PyPostgreGetDatabaseList(const char *user, const char *password)
 	}
 }
 
-int PySQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password)
-{
-	char *name, *filename;
-	int ret;
-	name = g_strdup_printf("%s.db", dbfilename);
-	filename = g_build_filename (szHomeDirectory, name, NULL);
-	/* Delete database file */
-	ret = g_unlink(filename);
-
-	g_free(name), g_free(filename);
-	return (ret == 0);
-}
-
 int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password)
 {
 	char *buf;
@@ -523,35 +474,124 @@ int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char
 }
 #endif
 
+#if HAVE_SQLITE
+
+#include <sqlite3.h>
+
+sqlite3 *connection;
+
 int SQLiteConnect(const char *dbfilename, const char *user, const char *password)
 {
-	return 0;
+	char *name, *filename;
+	int exists, ret;
+
+	name = g_strdup_printf("%s.db", dbfilename);
+	filename = g_build_filename (szHomeDirectory, name, NULL);
+	exists = g_file_test(filename, G_FILE_TEST_EXISTS);
+
+	ret = sqlite3_open(filename, &connection);
+
+	g_free(name);
+	g_free(filename);
+
+	if (ret == SQLITE_OK)
+		return exists ? 1 : 0;
+	else
+		return -1;
 }
 
 void SQLiteDisconnect(void)
 {
+	sqlite3_close(connection);
 }
 
 RowSet *SQLiteSelect(const char* str)
 {
-	return 0;
+	int i, row, ret;
+	char *zErrMsg;
+	char *buf = g_strdup_printf("Select %s;", str);
+	RowSet *rs = NULL;
+
+    sqlite3_stmt *pStmt;
+    ret = sqlite3_prepare(connection, buf, -1, &pStmt, NULL);
+	g_free(buf);
+	if (ret == SQLITE_OK)
+	{
+		int numCols = sqlite3_column_count(pStmt);
+		int numRows = 0;
+		while((ret = sqlite3_step(pStmt)) == SQLITE_ROW)
+			numRows++;
+		sqlite3_reset(pStmt);
+		rs = MallocRowset(numRows + 1, numCols);	/* first row is headings */
+
+		for (i = 0; i < numCols; i++)
+			SetRowsetData(rs, 0, i, sqlite3_column_name(pStmt, i));
+
+		row = 0;
+
+		while((ret = sqlite3_step(pStmt)) == SQLITE_ROW)
+		{
+			row++;
+			for (i = 0; i < numCols; i++)
+				SetRowsetData(rs, row, i, sqlite3_column_text(pStmt, i));
+		}
+	}
+	if (ret != SQLITE_OK)
+		printf("SQLite error: %s\n", sqlite3_errmsg(connection));
+
+	sqlite3_finalize(pStmt);
+	return rs;
 }
 
 int SQLiteUpdateCommand(const char* str)
 {
-	return 0;
+	char *zErrMsg;
+	int ret = sqlite3_exec(connection, str, NULL, NULL, &zErrMsg);
+	if (ret != SQLITE_OK)
+	{
+		printf("SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	return (ret == SQLITE_OK);
 }
 
 void SQLiteCommit(void)
 {
+	SQLiteUpdateCommand("Commit");
 }
+#endif
 
 GList *SQLiteGetDatabaseList(const char *user, const char *password)
 {
-	return 0;
+	GList *glist = NULL;
+	GDir *dir = g_dir_open(szHomeDirectory, 0, NULL);
+	if (dir)
+	{
+		const char *filename;
+		while ((filename = g_dir_read_name(dir)) != NULL)
+		{
+			int len = strlen(filename);
+			if (len > 3 && !StrCaseCmp(filename + len - 3, ".db"))
+			{
+				char *db = g_strdup(filename);
+				db[len - 3] = '\0';
+				glist = g_list_append(glist, db);
+			}
+		}
+		g_dir_close(dir);
+	}
+	return glist;
 }
 
 int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password)
 {
-	return 0;
+	char *name, *filename;
+	int ret;
+	name = g_strdup_printf("%s.db", dbfilename);
+	filename = g_build_filename (szHomeDirectory, name, NULL);
+	/* Delete database file */
+	ret = g_unlink(filename);
+
+	g_free(name), g_free(filename);
+	return (ret == 0);
 }

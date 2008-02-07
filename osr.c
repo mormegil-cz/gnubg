@@ -557,7 +557,6 @@ static int osr(unsigned int anBoard[25], const int iGame, const int nGames, unsi
 	while (nOut)
 	{
 		/* roll dice */
-
 		if ( OSRQuasiRandomDice ( iTurn, iGame, nGames, anDice ) < 0 )
 			return -1;
 
@@ -565,7 +564,6 @@ static int osr(unsigned int anBoard[25], const int iGame, const int nGames, unsi
 			swap ( anDice, anDice + 1 );
 
 		/* find and move best move */
-
 		FindBestMoveOSR(anBoard, anDice, &nOut);
 
 		iTurn++;

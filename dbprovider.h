@@ -21,15 +21,26 @@ typedef struct _DBProvider
 
 typedef enum _DBProviderType {
 	INVALID_PROVIDER = -1,
-#if USE_PYTHON
-	PYTHON_SQLITE, PYTHON_MYSQL, PYTHON_POSTGRE,
+#if HAVE_SQLITE
+	SQLITE,
 #endif
-	SQLITE
+#if USE_PYTHON
+#if !HAVE_SQLITE
+	PYTHON_SQLITE,
+#endif
+	PYTHON_MYSQL, PYTHON_POSTGRE
+#endif
 } DBProviderType;
-#define NUM_PROVIDERS (int)(SQLITE + 1)
+
+#if USE_PYTHON
+#define NUM_PROVIDERS 3
+#elif HAVE_SQLITE
+#define NUM_PROVIDERS 1
+#else
+#define NUM_PROVIDERS 0
+#endif
 
 extern DBProviderType dbProviderType;
-extern DBProvider providers[NUM_PROVIDERS];
 extern DBProvider* GetDBProvider(DBProviderType dbType);
 extern const char *TestDB(DBProviderType dbType);
 DBProvider *ConnectToDB(DBProviderType dbType);
@@ -37,5 +48,6 @@ void SetDBType(const char *type);
 void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password);
 void RelationalSaveSettings(FILE *pf);
 void SetDBParam(const char *db, const char *key, const char *value);
-int RunQueryValue(DBProvider *pdb, const char *query);
-int CreateDatabase(DBProvider *pdb);
+extern int RunQueryValue(DBProvider *pdb, const char *query);
+extern int CreateDatabase(DBProvider *pdb);
+const char *GetProviderName(int i);
