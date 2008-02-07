@@ -470,7 +470,7 @@ void CheckDatabase(const char *database);
 static void DBListSelected(GtkTreeView *treeview, gpointer userdata);
 GtkListStore *dbStore;
 
-DBProvider *GetSelectedDBType()
+DBProvider *GetSelectedDBType(void)
 {
 	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
 	return GetDBProvider(dbType);
@@ -533,7 +533,7 @@ void TryConnection(DBProvider *pdb, GtkWidget *dbList)
 	}
 }
 
-void CredentialsChanged()
+void CredentialsChanged(void)
 {
 	gtk_widget_set_sensitive(login, TRUE);
 }
@@ -619,7 +619,7 @@ char *GetSelectedDB(GtkTreeView *treeview)
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
 	if (gtk_tree_selection_count_selected_rows(sel) == 1)
 	{
-		GValue value = {0};
+		GValue value;
 		GList *selList = gtk_tree_selection_get_selected_rows(sel, NULL);
 		GtkTreePath *path = selList->data;
 		gtk_tree_model_get_iter(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)), &selected_iter, path);

@@ -547,7 +547,7 @@ static void FindBestMoveOSR(unsigned int anBoard[ 25 ], const int anDice[ 2 ], u
  *          quadrant.
  */
 
-static int osr(unsigned int anBoard[25], const int iGame, const int nGames, const unsigned int nOut)
+static int osr(unsigned int anBoard[25], const int iGame, const int nGames, unsigned int nOut)
 {
 	int iTurn = 0;
 	int anDice[ 2 ];
@@ -591,12 +591,13 @@ static int osr(unsigned int anBoard[25], const int iGame, const int nGames, cons
 
 static void
 rollOSR ( const int nGames, const unsigned int anBoard[ 25 ], const int nOut,
-          float arProbs[], const int nMaxProbs,
+          float arProbs[], const unsigned int nMaxProbs,
           float arGammonProbs[], const unsigned int nMaxGammonProbs ) {
 
   unsigned int an[ 25 ];
   unsigned short int anProb[ 32 ];
-  int i, n, m;
+  unsigned int i;
+  int n, m;
   int iGame;
   
   int *anCounts = (int*) g_alloca(nMaxGammonProbs * sizeof(int));
@@ -624,7 +625,7 @@ rollOSR ( const int nGames, const unsigned int anBoard[ 25 ], const int nOut,
 
     /* update counts */
 
-    ++anCounts[ MIN( m == 15 ? n + 1 : n, nMaxGammonProbs - 1 ) ];
+    ++anCounts[ MIN( m == 15 ? n + 1 : n, (int)nMaxGammonProbs - 1 ) ];
 
     /* get prob. from bearoff1 */
 
@@ -637,7 +638,7 @@ rollOSR ( const int nGames, const unsigned int anBoard[ 25 ], const int nOut,
 
   /* scale resulting probabilities */
 
-  for ( i = 0; i < nMaxProbs; ++i ) {
+  for ( i = 0; i < (unsigned int)nMaxProbs; ++i ) {
     arProbs[ i ] /= nGames;
     /* printf ( "arProbs[%d]=%f\n", i, arProbs[ i ] ); */
   }

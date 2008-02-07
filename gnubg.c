@@ -75,6 +75,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "neuralnet.h"
 #include "gnubgmodule.h"
 #include "util.h"
+#include "dbprovider.h"
 
 #if HAVE_SOCKETS
 #if HAVE_SYS_SOCKET_H

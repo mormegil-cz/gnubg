@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include "dbprovider.h"
 #include "gnubgmodule.h"
 #include "backgammon.h"
@@ -119,7 +120,7 @@ void SetDBType(const char *type)
 	dbProviderType = GetTypeFromName(type);
 }
 
-const char *GetDBType()
+const char *GetDBType(void)
 {
 	return dbTypes[dbProviderType];
 }
@@ -250,7 +251,7 @@ int PySQLiteConnect(const char *dbfilename, const char *user, const char *passwo
 		return 1;
 }
 
-void PyDisconnect()
+void PyDisconnect(void)
 {
 	if (!PyRun_String("PyDisconnect()", Py_eval_input, pdict, pdict))
 		PyErr_Print();
@@ -306,7 +307,7 @@ int PyUpdateCommandReturn(const char* str)
 		return TRUE;
 }
 
-void PyCommit()
+void PyCommit(void)
 {
 	if (!PyRun_String("PyCommit()", Py_eval_input, pdict, pdict))
 		PyErr_Print();
@@ -443,7 +444,7 @@ GList *PyMySQLGetDatabaseList(const char *user, const char *password)
 	rs = PyRun_String("PyUpdateCommandReturn(\"Show databases\")", Py_eval_input, pdict, pdict);
 	if (rs)
 	{
-		int i;
+		unsigned int i;
 		GList *glist = NULL;
 		RowSet* list = ConvertPythonToRowset(rs);
 		for (i = 0; i < list->rows; i++)
@@ -468,7 +469,7 @@ GList *PyPostgreGetDatabaseList(const char *user, const char *password)
 	rs = PySelect("datname from pg_database");
 	if (rs)
 	{
-		int i;
+		unsigned int i;
 		GList *glist = NULL;
 		for (i = 0; i < rs->rows; i++)
 			glist = g_list_append(glist, g_strdup(rs->data[i][0]));
@@ -527,7 +528,7 @@ int SQLiteConnect(const char *dbfilename, const char *user, const char *password
 	return 0;
 }
 
-void SQLiteDisconnect()
+void SQLiteDisconnect(void)
 {
 }
 
@@ -541,7 +542,7 @@ int SQLiteUpdateCommand(const char* str)
 	return 0;
 }
 
-void SQLiteCommit()
+void SQLiteCommit(void)
 {
 }
 

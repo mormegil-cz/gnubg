@@ -37,3 +37,5 @@ void SetDBType(const char *type);
 void SetDBSettings(DBProviderType dbType, const char *database, const char *user, const char *password);
 void RelationalSaveSettings(FILE *pf);
 void SetDBParam(const char *db, const char *key, const char *value);
+int RunQueryValue(DBProvider *pdb, const char *query);
+int CreateDatabase(DBProvider *pdb);

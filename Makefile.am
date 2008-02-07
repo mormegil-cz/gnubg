@@ -34,6 +34,8 @@ gnubg_SOURCES = \
 		copying.c \
 		credits.c \
 		credits.h \
+		dbprovider.c \
+		dbprovider.h \
 		dice.c \
 		dice.h \
 		drawboard.c \
@@ -163,13 +165,13 @@ makeweights_LDADD = -Llib lib/libevent.la @GLIB_LIBS@
 ##files to be installed in the datadir
 #
 pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml \
-	gnubg_os0.bd textures.txt gnubg.game.sql gnubg.gtkrc gnubg.svg gnubg.png
+	gnubg_os0.bd textures.txt gnubg.sql gnubg.gtkrc gnubg.svg gnubg.png
 
 #
 ##files to add to the tarball when 'make dist'
 #
 EXTRA_DIST = config.rpath  userrng.c copying.awk gnubg.gtkrc credits.sh \
-	$(BUILT_SOURCES) ABOUT-NLS boards.xml gnubg.game.sql autogen.sh \
+	$(BUILT_SOURCES) ABOUT-NLS boards.xml gnubg.sql autogen.sh \
 	gnubg.weights textures.txt gnubg.png gnubg.svg corecount.c \
 	external_y.h sgf_y.h
 

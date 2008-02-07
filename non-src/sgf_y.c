@@ -90,6 +90,7 @@
 
 #include "config.h"
 #include "list.h"
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -137,7 +138,7 @@ static char *Concatenate( listOLD *pl ) {
 
 	pchDest--;
 	
-	free( pl->plNext->p );
+	g_free( pl->plNext->p );
 	ListDelete( pl->plNext );
     }
 
@@ -168,7 +169,7 @@ static char *Concatenate( listOLD *pl ) {
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 92 "sgf_y.y"
+#line 93 "sgf_y.y"
 {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
@@ -176,7 +177,7 @@ typedef union YYSTYPE
     listOLD *pl; /* nodes, sequences, gametrees */
 }
 /* Line 187 of yacc.c.  */
-#line 180 "sgf_y.c"
+#line 181 "sgf_y.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -189,7 +190,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 193 "sgf_y.c"
+#line 194 "sgf_y.c"
 
 #ifdef short
 # undef short
@@ -476,8 +477,8 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   109,   109,   114,   115,   117,   120,   124,   126,   128,
-     131,   136,   137,   141,   144,   153,   154,   158,   163,   164
+       0,   110,   110,   115,   116,   118,   121,   125,   127,   129,
+     132,   137,   138,   142,   145,   154,   155,   159,   164,   165
 };
 #endif
 
@@ -1390,52 +1391,52 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 110 "sgf_y.y"
+#line 111 "sgf_y.y"
     { (yyval.pl) = plCollection = (yyvsp[(1) - (1)].pl); }
     break;
 
   case 3:
-#line 114 "sgf_y.y"
+#line 115 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 4:
-#line 116 "sgf_y.y"
+#line 117 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 6:
-#line 121 "sgf_y.y"
+#line 122 "sgf_y.y"
     { ListInsert( (yyvsp[(3) - (4)].pl)->plNext, (yyvsp[(2) - (4)].pl) ); (yyval.pl) = (yyvsp[(3) - (4)].pl); }
     break;
 
   case 7:
-#line 125 "sgf_y.y"
+#line 126 "sgf_y.y"
     { (yyval.pl) = NewList(); ListInsert( (yyval.pl), (yyvsp[(1) - (1)].pl) ); }
     break;
 
   case 8:
-#line 127 "sgf_y.y"
+#line 128 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pl) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 10:
-#line 132 "sgf_y.y"
+#line 133 "sgf_y.y"
     { (yyval.pl) = (yyvsp[(2) - (2)].pl); }
     break;
 
   case 11:
-#line 136 "sgf_y.y"
+#line 137 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 12:
-#line 138 "sgf_y.y"
+#line 139 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pp) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 14:
-#line 145 "sgf_y.y"
+#line 146 "sgf_y.y"
     { 
 		    ListInsert( (yyvsp[(2) - (3)].pl), (yyvsp[(3) - (3)].pch) );
 		    (yyval.pp) = malloc( sizeof(property) ); (yyval.pp)->pl = (yyvsp[(2) - (3)].pl);
@@ -1444,33 +1445,33 @@ yyreduce:
     break;
 
   case 15:
-#line 153 "sgf_y.y"
+#line 154 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 16:
-#line 155 "sgf_y.y"
+#line 156 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
   case 17:
-#line 159 "sgf_y.y"
+#line 160 "sgf_y.y"
     { (yyval.pch) = Concatenate( (yyvsp[(2) - (3)].pl) ); }
     break;
 
   case 18:
-#line 163 "sgf_y.y"
+#line 164 "sgf_y.y"
     { (yyval.pl) = NewList(); }
     break;
 
   case 19:
-#line 165 "sgf_y.y"
+#line 166 "sgf_y.y"
     { ListInsert( (yyvsp[(1) - (2)].pl), (yyvsp[(2) - (2)].pch) ); (yyval.pl) = (yyvsp[(1) - (2)].pl); }
     break;
 
 
 /* Line 1267 of yacc.c.  */
-#line 1474 "sgf_y.c"
+#line 1475 "sgf_y.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1684,7 +1685,7 @@ yyreturn:
 }
 
 
-#line 168 "sgf_y.y"
+#line 169 "sgf_y.y"
 
 
 extern FILE *sgfin;
