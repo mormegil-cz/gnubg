@@ -38,7 +38,7 @@ extern RowSet* RunQuery(char *sz);
 extern RowSet* MallocRowset(size_t rows, size_t cols);
 extern void FreeRowset(RowSet* pRow);
 extern int RelationalUpdatePlayerDetails(int player_id, const char* newName, const char* newNotes);
-
+extern void SetRowsetData(RowSet *rs, size_t row, size_t col, const char *data);
 extern float Ratio(float a, int b);
 
 #endif /* _RELATIONAL_H_ */

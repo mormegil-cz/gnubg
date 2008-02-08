@@ -1,3 +1,8 @@
+Fri Feb  8 23:11:13 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, dbprovider.c, relational.h: allow code to compile
+	without python and fix a couple of minor warnings
+
 Fri Feb  8 11:24:23 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* Makefile.am, configure.in: compile in native sqlite3 on linux

@@ -26,6 +26,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <string.h>
 #include "dbprovider.h"
 #include "gnubgmodule.h"
 #include "backgammon.h"
@@ -508,7 +509,6 @@ void SQLiteDisconnect(void)
 RowSet *SQLiteSelect(const char* str)
 {
 	int i, row, ret;
-	char *zErrMsg;
 	char *buf = g_strdup_printf("Select %s;", str);
 	RowSet *rs = NULL;
 
@@ -533,7 +533,7 @@ RowSet *SQLiteSelect(const char* str)
 		{
 			row++;
 			for (i = 0; i < numCols; i++)
-				SetRowsetData(rs, row, i, sqlite3_column_text(pStmt, i));
+				SetRowsetData(rs, row, i, (const char*)sqlite3_column_text(pStmt, i));
 		}
 	}
 	if (ret != SQLITE_OK)

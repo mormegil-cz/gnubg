@@ -55,6 +55,8 @@ gnubg_SOURCES = \
 		formatgs.h \
 		format.h \
 		gnubg.c \
+		gnubgmodule.c \
+		gnubgmodule.h \
 		html.c \
 		htmlimages.c \
 		import.c \
@@ -108,10 +110,6 @@ if USE_MULTITHREAD
 gnubg_SOURCES +=  multithread.c
 endif
 
-if USE_PYTHON
-gnubg_SOURCES += gnubgmodule.c gnubgmodule.h
-endif
-
 if USE_GTK
 gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
 		 gtkprefs.c gtkprefs.h gtk-multiview.c gtk-multiview.h gtktheory.c \
@@ -121,10 +119,7 @@ gnubg_SOURCES += gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c gtkfile.h \
 		 gtksplash.h gtkrolls.c gtkrolls.h gtktempmap.c gtktempmap.h \
 		 gtkoptions.h gtkoptions.c gtktoolbar.h gtktoolbar.c \
 		 gtkgamelist.c gtkpanels.c gtkpanels.h gtkmovelist.c gtkmovelistctrl.c gtkmovelistctrl.h \
-		 gtkwindows.c gtkwindows.h
-if USE_PYTHON
-gnubg_SOURCES += gtkrelational.c gtkrelational.h
-endif
+		 gtkwindows.c gtkwindows.h gtkrelational.c gtkrelational.h
 endif
 
 #
