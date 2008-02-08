@@ -1,3 +1,7 @@
+Fri Feb  8 11:24:23 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* Makefile.am, configure.in: compile in native sqlite3 on linux
+
 Thu Feb  7 22:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* dbprovider.c: Added native sqlite interface.

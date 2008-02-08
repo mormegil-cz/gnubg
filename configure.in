@@ -100,6 +100,7 @@ PKG_CHECK_MODULES(LIBPNG, [libpng12], AC_DEFINE(HAVE_LIBPNG, 1, Define if you ha
 PKG_CHECK_MODULES(ESD, [esound], AC_DEFINE(HAVE_ESD, 1, Define if you have esound), [AC_MSG_WARN("No esound support")])
 PKG_CHECK_MODULES(CAIRO, [cairo >= 1.2], AC_DEFINE(HAVE_CAIRO,1,Define if you want to use libcairo), [AC_MSG_WARN("No cairo support")])
 PKG_CHECK_MODULES(PANGOCAIRO, [pangocairo >= 1.0], AC_DEFINE(HAVE_PANGOCAIRO,1,Define if you want to use pangocairo), [AC_MSG_WARN("No pangocairo support")])
+PKG_CHECK_MODULES(SQLITE, [sqlite3], AC_DEFINE(HAVE_SQLITE,1,Define if you want to use sqlite), [AC_MSG_WARN("No sqlite support")])
 
 dnl
 dnl Checks for libraries.
