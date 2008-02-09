@@ -37,6 +37,7 @@
 #include <glib/gi18n.h>
 
 DBProviderType dbProviderType = 0;
+int storeGameStats = TRUE;
 
 #if USE_PYTHON
 PyObject *pdict;
@@ -65,35 +66,24 @@ int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *p
 #if NUM_PROVIDERS
 DBProvider providers[NUM_PROVIDERS] =
 {
+#if HAVE_SQLITE
+	{SQLiteConnect, SQLiteDisconnect, SQLiteSelect, SQLiteUpdateCommand, SQLiteCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
+		"SQLite", "SQLite", "Direct SQLite3 connection", FALSE, TRUE, "gnubg", "", ""},
+#endif
 #if USE_PYTHON
 #if !HAVE_SQLITE
-	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, SQLiteGetDatabaseList,
-		SQLiteDeleteDatabase,
-		"SQLite (Python)", "SQLite3 connection included in latest Python version", FALSE, "gnubg", "", ""},
+	{PySQLiteConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, SQLiteGetDatabaseList, SQLiteDeleteDatabase,
+		"SQLite (Python)", "PythonSQLite", "SQLite3 connection included in latest Python version", FALSE, TRUE, "gnubg", "", ""},
 #endif
-	{PyMySQLConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyMySQLGetDatabaseList,
-		PyMySQLDeleteDatabase,
-		"MySQL (Python)", "MySQL connection via MySQLdb Python module", TRUE, "gnubg", "", ""},
-	{PyPostgreConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyPostgreGetDatabaseList,
-		PyPostgreDeleteDatabase,
-		"Postgres (Python)", "PostgreSQL connection via PyGreSQL Python module", TRUE, "gnubg", "", ""},
-#endif
-#if HAVE_SQLITE
-	{SQLiteConnect, SQLiteDisconnect, SQLiteSelect, SQLiteUpdateCommand, SQLiteCommit, SQLiteGetDatabaseList,
-		SQLiteDeleteDatabase,
-		"SQLite", "Direct SQLite3 connection", FALSE, "gnubg", "", ""},
+	{PyMySQLConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyMySQLGetDatabaseList, PyMySQLDeleteDatabase,
+		"MySQL (Python)", "PythonMySQL", "MySQL connection via MySQLdb Python module", TRUE, TRUE, "gnubg", "", ""},
+	{PyPostgreConnect, PyDisconnect, PySelect, PyUpdateCommand, PyCommit, PyPostgreGetDatabaseList, PyPostgreDeleteDatabase,
+		"Postgres (Python)", "PythonPostgre", "PostgreSQL connection via PyGreSQL Python module", TRUE, TRUE, "gnubg", "", ""},
 #endif
 };
 
-const char *dbTypes[NUM_PROVIDERS] = {
-#if USE_PYTHON
-	"PythonSQLite", "PythonMySQL", "PythonPostgre"
-#endif
-	"SQLite"
-};
 #else
-DBProvider providers[1] = {0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", 0, 0, 0, 0};
-const char *dbTypes[1] = {0};
+DBProvider providers[1] = {0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0};
 #endif
 
 const char *GetProviderName(int i)
@@ -106,7 +96,7 @@ DBProviderType GetTypeFromName(const char *name)
 	int i;
 	for (i = 0; i < NUM_PROVIDERS; i++)
 	{
-		if (!StrCaseCmp(name, dbTypes[i]))
+		if (!StrCaseCmp(providers[i].shortname, name))
 			break;
 	}
 	if (i == NUM_PROVIDERS)
@@ -145,13 +135,15 @@ void SetDBSettings(DBProviderType dbType, const char *database, const char *user
 void RelationalSaveSettings(FILE *pf)
 {
 	int i;
-	fprintf(pf, "relational setup dbtype=%s\n", dbTypes[dbProviderType]);
+	fprintf(pf, "relational setup storegamestats=%s\n", storeGameStats ? "yes" : "no");
+	
+	fprintf(pf, "relational setup dbtype=%s\n", providers[dbProviderType].shortname);
 	for (i = 0; i < NUM_PROVIDERS; i++)
 	{
 		DBProvider* pdb = GetDBProvider(i);
-		fprintf(pf, "relational setup %s-database=%s\n", dbTypes[i], pdb->database);
-		fprintf(pf, "relational setup %s-username=%s\n", dbTypes[i], pdb->username);
-		fprintf(pf, "relational setup %s-password=%s\n", dbTypes[i], pdb->password);
+		fprintf(pf, "relational setup %s-database=%s\n", providers[i].shortname, pdb->database);
+		fprintf(pf, "relational setup %s-username=%s\n", providers[i].shortname, pdb->username);
+		fprintf(pf, "relational setup %s-password=%s\n", providers[i].shortname, pdb->password);
 	}
 }
 
@@ -535,6 +527,8 @@ RowSet *SQLiteSelect(const char* str)
 			for (i = 0; i < numCols; i++)
 				SetRowsetData(rs, row, i, (const char*)sqlite3_column_text(pStmt, i));
 		}
+		if (ret == SQLITE_DONE)
+			ret = SQLITE_OK;
 	}
 	if (ret != SQLITE_OK)
 		printf("SQLite error: %s\n", sqlite3_errmsg(connection));
@@ -556,8 +550,7 @@ int SQLiteUpdateCommand(const char* str)
 }
 
 void SQLiteCommit(void)
-{
-	SQLiteUpdateCommand("Commit");
+{	/* No transaction in sqlite by default */
 }
 #endif
 
@@ -570,7 +563,7 @@ GList *SQLiteGetDatabaseList(const char *user, const char *password)
 		const char *filename;
 		while ((filename = g_dir_read_name(dir)) != NULL)
 		{
-			int len = strlen(filename);
+			size_t len = strlen(filename);
 			if (len > 3 && !StrCaseCmp(filename + len - 3, ".db"))
 			{
 				char *db = g_strdup(filename);

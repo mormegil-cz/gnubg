@@ -1,6 +1,8 @@
 #include "relational.h"
 #include <stdio.h>
 
+extern int storeGameStats;
+
 typedef struct _DBProvider
 {
 	int (*Connect)(const char *database, const char *user, const char *password);
@@ -12,8 +14,10 @@ typedef struct _DBProvider
 	int (*DeleteDatabase)(const char *database, const char *user, const char *password);
 
 	const char *name;
+	const char *shortname;
 	const char *desc;
 	int HasUserDetails;
+	int storeGameStats;
 	const char *database;
 	const char *username;
 	const char *password;

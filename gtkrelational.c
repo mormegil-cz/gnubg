@@ -463,7 +463,7 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 }
 
 GtkWidget *pwSetupDialog;
-GtkWidget *adddb, *deldb;
+GtkWidget *adddb, *deldb, *gameStats;
 GtkWidget *dbtype, *user, *password, *login, *helptext;
 
 void CheckDatabase(const char *database);
@@ -627,7 +627,7 @@ char *GetSelectedDB(GtkTreeView *treeview)
 	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
 	if (gtk_tree_selection_count_selected_rows(sel) == 1)
 	{
-		GValue value;
+		GValue value = {0};
 		GList *selList = gtk_tree_selection_get_selected_rows(sel, NULL);
 		GtkTreePath *path = selList->data;
 		gtk_tree_model_get_iter(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)), &selected_iter, path);
@@ -700,6 +700,9 @@ static void RelSetupOK(GtkWidget *dialog, GtkWidget *dbList)
 {
 	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
 	SetDBSettings(dbType, GetSelectedDB(GTK_TREE_VIEW(dbList)), gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+
+	storeGameStats = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gameStats));
+
 	gtk_widget_destroy(dialog);
 }
 
@@ -762,7 +765,12 @@ extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw)
 	gtk_container_add(GTK_CONTAINER(align), login);
 	gtk_table_attach(GTK_TABLE(table), align, 1, 2, 2, 3, GTK_EXPAND | GTK_FILL, 0, 0, 0);
 
-	gtk_box_pack_start(GTK_BOX(vb1), table, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(vb1), table, FALSE, FALSE, 4);
+
+    gameStats = gtk_check_button_new_with_label(_("Store game stats"));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gameStats), storeGameStats);
+	gtk_box_pack_start(GTK_BOX(vb1), gameStats, FALSE, FALSE, 0);
+
 	gtk_box_pack_start(GTK_BOX(hb2), vb1, FALSE, FALSE, 10);
 
 	help = gtk_frame_new(_("Info"));

@@ -377,6 +377,31 @@ DBProvider *ConnectToDB(DBProviderType dbType)
 	return NULL;
 }
 
+void AddGames(DBProvider *pdb, int match_id, int player_id0, int player_id1)
+{
+	int gamenum = 0;
+	listOLD *plGame, *pl = lMatch.plNext;
+	while ((plGame = pl->p) != NULL)
+	{
+		int game_id = GetNextId(pdb, "game");
+		moverecord *pmr = plGame->plNext->p;
+		xmovegameinfo *pmgi = &pmr->g;
+		char *buf = g_strdup_printf("INSERT INTO game(game_id, match_id, player_id0, player_id1, "
+				"score_0, score_1, result, added, game_number, crawford) "
+				"VALUES (%d, %d, %d, %d, %d, %d, %d, CURRENT_TIME, %d, %d )",
+				game_id, match_id, player_id0, player_id1,
+				pmgi->anScore[0], pmgi->anScore[1], pmgi->nPoints, ++gamenum, pmr->g.fCrawfordGame);
+
+		if (pdb->UpdateCommand(buf))
+		{
+			AddStats(pdb, game_id, player_id0, 0, "gamestat", ms.nMatchTo);
+			AddStats(pdb, game_id, player_id1, 1, "gamestat", ms.nMatchTo);
+		}
+		g_free(buf);
+		pl = pl->plNext;
+	}
+}
+
 extern void CommandRelationalAddMatch( char *sz )
 {
 	DBProvider *pdb;
@@ -445,7 +470,11 @@ extern void CommandRelationalAddMatch( char *sz )
 	{
 		if (AddStats(pdb, match_id, player_id0, 0, "matchstat", ms.nMatchTo) &&
 			AddStats(pdb, match_id, player_id1, 1, "matchstat", ms.nMatchTo))
+		{
+			if (storeGameStats)
+				AddGames(pdb, match_id, player_id0, player_id1);
 			pdb->Commit();
+		}
 	}
 	g_free(buf);
 	g_free(date);
@@ -475,11 +504,14 @@ extern RowSet* MallocRowset(size_t rows, size_t cols)
 
 extern void SetRowsetData(RowSet *rs, size_t row, size_t col, const char *data)
 {
-	size_t size = strlen(data);
+	size_t size;
+	if (!data)
+		data = "";
 
 	rs->data[row][col] = malloc(strlen(data) + 1);
 	strcpy(rs->data[row][col], data);
 
+	size = strlen(data);
 	if (row == 0 || size > rs->widths[col])
 		rs->widths[col] = size;
 }
@@ -523,7 +555,7 @@ extern void CommandRelationalShowDetails (char *sz)
 	gint i, id;
 	statcontext sc;
 
-	if (!sz || !*sz || !(player_name = NextToken (&sz)))
+	if (!sz || !*sz || ((player_name = NextToken (&sz)) == NULL))
     {
       outputl (_("You must specify a player name to list the details for "
 		 "(see `help relational show details')."));
@@ -645,7 +677,7 @@ extern void CommandRelationalErase(char *sz)
 	DBProvider *pdb;
 	char *player_name;
 	int player_id;
-	if (!sz || !*sz || !(player_name = NextToken(&sz)))
+	if (!sz || !*sz || ((player_name = NextToken(&sz)) == NULL))
 	{
 		outputl( _("You must specify a player name to remove "
 		"(see `help relational erase player').") );
@@ -839,6 +871,8 @@ extern void CommandRelationalSetup(char * sz)
 	{
 		if (!StrCaseCmp(apch[0], "dbtype"))
 			SetDBType(apch[1]);
+		if (!StrCaseCmp(apch[0], "storegamestats"))
+			storeGameStats = !StrCaseCmp(apch[1], "yes");
 		else
 		{
 			char *pc = apch[0];

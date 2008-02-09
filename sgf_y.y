@@ -72,7 +72,7 @@ static char *Concatenate( listOLD *pl ) {
 
 	pchDest--;
 	
-	g_free( pl->plNext->p );
+	free( pl->plNext->p );
 	ListDelete( pl->plNext );
     }
 
