@@ -1,3 +1,7 @@
+Sat Feb  9 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkrelational.c: Put simple stats into relational dialog
+
 Sat Feb  9 14:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* dbprovider.c, relational.c: Added game stats to database

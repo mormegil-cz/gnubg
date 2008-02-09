@@ -833,14 +833,15 @@ extern void CommandRelationalSelect(char *sz)
 	FreeRowset(rs);
 }
 
-extern int RelationalUpdatePlayerDetails(int player_id, const char* newName, const char* newNotes)
+extern int RelationalUpdatePlayerDetails(const char* oldName, const char* newName, const char* newNotes)
 {
 	int ret = FALSE;
-	int exist_id;
+	int exist_id, player_id;
 	DBProvider *pdb;
 	if ((pdb = ConnectToDB(dbProviderType)) == NULL)
 		return FALSE;
 
+	player_id = GetPlayerId(pdb, oldName);
 	exist_id = GetPlayerId(pdb, newName);
 	if (exist_id != player_id && exist_id != -1)
 	{	/* Can't change the name to an existing one */

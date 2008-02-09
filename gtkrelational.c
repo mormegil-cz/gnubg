@@ -66,13 +66,15 @@ static gchar *titles[] = {
 	N_("Luck")
 };
 
-static int curPlayerId;
-static int curRow;
 static GtkWidget *pwPlayerName;
 static GtkWidget *pwPlayerNotes;
 static GtkWidget *pwQueryText;
 static GtkWidget *pwQueryResult;
 static GtkWidget *pwQueryBox;
+
+GtkTreeIter selected_iter;
+GtkWidget *playerTreeview;
+GtkListStore *playerStore;
 
 #define PACK_OFFSET 4
 #define OUTSIDE_FRAME_GAP PACK_OFFSET
@@ -83,7 +85,6 @@ static GtkWidget *pwQueryBox;
 
 static GtkTreeModel *create_model(void)
 {
-	GtkListStore *store;
 	GtkTreeIter iter;
 	RowSet *rs;
 
@@ -92,7 +93,7 @@ static GtkTreeModel *create_model(void)
 	gfloat stats[13];
 
 	/* create list store */
-	store = gtk_list_store_new(NUM_COLUMNS,
+	playerStore = gtk_list_store_new(NUM_COLUMNS,
 				   G_TYPE_STRING,
 				   G_TYPE_FLOAT,
 				   G_TYPE_FLOAT,
@@ -138,8 +139,8 @@ static GtkTreeModel *create_model(void)
 		for (i = 4; i < 13; ++i)
 			stats[i - 4] = (float)g_strtod(rs->data[j][i], NULL);
 
-		gtk_list_store_append(store, &iter);
-		gtk_list_store_set(store, &iter,
+		gtk_list_store_append(playerStore, &iter);
+		gtk_list_store_set(playerStore, &iter,
 				   COLUMN_NICK,
 					rs->data[j][0],
 				   COLUMN_GNUE,
@@ -171,7 +172,7 @@ static GtkTreeModel *create_model(void)
 				   -1);
 	}
 	FreeRowset(rs);
-	return GTK_TREE_MODEL(store);
+	return GTK_TREE_MODEL(playerStore);
 }
 
 static void
@@ -244,58 +245,88 @@ static GtkWidget *do_list_store(void)
 	return treeview;
 }
 
-static void view_onRowActivated(GtkTreeView * treeview,
-		    GtkTreePath * path,
-		    GtkTreeViewColumn * col, gpointer userdata)
+char *GetSelectedPlayer()
 {
+	char *name;
 	GtkTreeModel *model;
-	GtkTreeIter iter;
+	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(playerTreeview));
+	if (gtk_tree_selection_count_selected_rows(sel) != 1)
+		return NULL;
 
-	model = gtk_tree_view_get_model(treeview);
+	model = gtk_tree_view_get_model(GTK_TREE_VIEW(playerTreeview));
+	gtk_tree_selection_get_selected(sel, &model, &selected_iter);
 
-	if (gtk_tree_model_get_iter(model, &iter, path)) {
-		gchar *name;
-		gtk_tree_model_get(model, &iter, COLUMN_NICK, &name, -1);
-		GTKSetCurrentParent(GTK_WIDGET(userdata));
-		CommandRelationalShowDetails(name);
-		g_free(name);
-	}
+	gtk_tree_model_get(model, &selected_iter, COLUMN_NICK, &name, -1);
+	return name;
 }
 
-extern void GtkRelationalShowStats(gpointer p, guint n, GtkWidget * pw)
+static void ShowRelationalSelect(GtkWidget * pw, int y, int x,
+				 GdkEventButton * peb, GtkWidget * pwCopy)
 {
-	GtkWidget *pwDialog;
-	GtkWidget *scrolledwindow1;
-	GtkWidget *treeview1;
+	char *pName = GetSelectedPlayer();
+	RowSet *rs;
+	char *query;
 
-	pwDialog = GTKCreateDialog(_("GNU Backgammon - Player Stats"),
-				   DT_INFO, NULL, DIALOG_FLAG_MODAL, NULL,
-				   NULL);
+	gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwPlayerNotes)), "", -1);
 
-	scrolledwindow1 = gtk_scrolled_window_new(NULL, NULL);
+	if (!pName)
+		return;
+
+	query = g_strdup_printf("player_id, name, notes FROM player WHERE player.name = '%s'", pName);
+	g_free(pName);
+
+	rs = RunQuery(query);
+	g_free(query);
+	if (!rs)
+	{
+		gtk_entry_set_text(GTK_ENTRY(pwPlayerName), "");
+		return;
+	}
+
+	g_assert(rs->rows == 2);	/* Should be exactly one entry */
+
+	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), rs->data[1][1]);
+	gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwPlayerNotes)),
+				 rs->data[1][2], -1);
+
+	FreeRowset(rs);
+}
+
+static void ShowRelationalClicked(GtkTreeView *treeview, GtkTreePath *path,
+		    GtkTreeViewColumn *col, gpointer userdata)
+{
+	gchar *name = GetSelectedPlayer();
+	if (!name)
+		return;
+
+	GTKSetCurrentParent(GTK_WIDGET(userdata));
+	CommandRelationalShowDetails(name);
+	g_free(name);
+}
+
+GtkWidget *GtkRelationalShowStats()
+{
+	GtkWidget *scrolledWindow;
+
+	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW
-					    (scrolledwindow1),
+					    (scrolledWindow),
 					    GTK_SHADOW_IN);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW
-				       (scrolledwindow1), GTK_POLICY_NEVER,
+				       (scrolledWindow), GTK_POLICY_NEVER,
 				       GTK_POLICY_AUTOMATIC);
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW
-					    (scrolledwindow1),
+					    (scrolledWindow),
 					    GTK_SHADOW_IN);
 
-	treeview1 = do_list_store();
-	if (treeview1)
-	{
-		g_signal_connect(treeview1, "row-activated",
-				(GCallback) view_onRowActivated, pwDialog);
-		gtk_container_add(GTK_CONTAINER(scrolledwindow1), treeview1);
+	playerTreeview = do_list_store();
+	g_signal_connect(playerTreeview, "row-activated",
+			(GCallback) ShowRelationalClicked, NULL);
+	gtk_container_add(GTK_CONTAINER(scrolledWindow), playerTreeview);
+	g_signal_connect(playerTreeview, "cursor-changed",
+			G_CALLBACK(ShowRelationalSelect), NULL);
 
-		gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)),
-				scrolledwindow1);
-		gtk_window_set_default_size(GTK_WINDOW(pwDialog), 1, 400);
-		gtk_widget_show_all(pwDialog);
-		gtk_main();
-	}
+	return scrolledWindow;
 }
 
 extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw)
@@ -338,75 +369,22 @@ static GtkWidget *GetRelList(RowSet * pRow)
 	return pwList;
 }
 
-static void ClearText(GtkTextView * pwText)
+static void ShowRelationalErase(GtkWidget *pw, GtkWidget *notused)
 {
-	gtk_text_buffer_set_text(gtk_text_view_get_buffer(pwText), "", -1);
-}
-
-static void ShowRelationalSelect(GtkWidget * pw, int y, int x,
-				 GdkEventButton * peb, GtkWidget * pwCopy)
-{
-	char *pName;
-	RowSet *rs;
-	char query[1024];
-
-	gtk_clist_get_text(GTK_CLIST(pw), y, 0, &pName);
-
-	sprintf(query, "player_id, name, notes"
-		" FROM player WHERE player.name = '%s'", pName);
-
-	ClearText(GTK_TEXT_VIEW(pwPlayerNotes));
-	rs = RunQuery(query);
-	if (!rs)
-	{
-		gtk_entry_set_text(GTK_ENTRY(pwPlayerName), "");
-		return;
-	}
-
-	g_assert(rs->rows == 2);	/* Should be exactly one entry */
-
-	curRow = y;
-	curPlayerId = atoi(rs->data[1][0]);
-	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), rs->data[1][1]);
-	gtk_text_buffer_set_text(gtk_text_view_get_buffer
-				 (GTK_TEXT_VIEW(pwPlayerNotes)),
-				 rs->data[1][2], -1);
-
-	FreeRowset(rs);
-}
-
-static void RelationalOpen(GtkWidget * pw, GtkWidget * pwList)
-{
-	char *player;
-	char buf[200];
-
-	if (curPlayerId == -1)
+	char *buf;
+	gchar *player = GetSelectedPlayer();
+	if (!player)
 		return;
 
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
-	sprintf(buf, "Open (%s)", player);
-	output(buf);
-	outputx();
-}
-
-static void RelationalErase(GtkWidget * pw, GtkWidget * pwList)
-{
-	char *player;
-	char buf[200];
-
-	if (curPlayerId == -1)
-		return;
-
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
-
-	sprintf(buf, _("Remove all data for %s?"), player);
+	buf = g_strdup_printf(_("Remove all data for %s?"), player);
 	if (!GetInputYN(buf))
 		return;
 
 	sprintf(buf, "\"%s\"", player);
 	CommandRelationalErase(buf);
+	g_free(buf);
 
-	gtk_clist_remove(GTK_CLIST(pwList), curRow);
+	gtk_list_store_remove(GTK_LIST_STORE(playerStore), &selected_iter);
 }
 
 static char *GetText(GtkTextView * pwText)
@@ -421,19 +399,21 @@ static char *GetText(GtkTextView * pwText)
 	return pch;
 }
 
-static void UpdatePlayerDetails(GtkWidget *pw, GtkWidget *pwList)
+static void UpdatePlayerDetails(GtkWidget *pw, GtkWidget *notused)
 {
 	char *notes;
-	const char *name;
-	if (curPlayerId == -1)
+	const char *newname;
+	gchar *oldname = GetSelectedPlayer();
+	if (!oldname)
 		return;
 
 	notes = GetText(GTK_TEXT_VIEW(pwPlayerNotes));
-	name = gtk_entry_get_text(GTK_ENTRY(pwPlayerName));
-	if (RelationalUpdatePlayerDetails(curPlayerId, name, notes) != 0)
-		gtk_clist_set_text(GTK_CLIST(pwList), curRow, 0, name);
+	newname = gtk_entry_get_text(GTK_ENTRY(pwPlayerName));
+	if (RelationalUpdatePlayerDetails(oldname, newname, notes) != 0)
+		gtk_list_store_set(GTK_LIST_STORE(playerStore), &selected_iter, 0, newname, -1);
 
 	g_free(notes);
+	g_free(oldname);
 }
 
 static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
@@ -618,8 +598,6 @@ void CheckDatabase(const char *database)
 	gtk_widget_set_sensitive(deldb, dbok);
 	gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), valid);
 }
-
-GtkTreeIter selected_iter;
 
 char *GetSelectedDB(GtkTreeView *treeview)
 {
@@ -812,19 +790,25 @@ extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw)
 
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 {
-	RowSet *rs;
-	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
+	GtkWidget *pwRun, *pwDialog, *pwHbox2, *pwVbox2,
 	    *pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen,
 	    *pwn, *pwLabel, *pwScrolled;
+	DBProvider *pdb;
 
-	curPlayerId = -1;
+	if (((pdb = ConnectToDB(dbProviderType)) == NULL) || RunQueryValue(pdb, "count(*) FROM player") < 2)
+	{
+		if (pdb)
+			pdb->Disconnect();
+
+		GTKMessage(_("No data in database"), DT_INFO);
+		return;
+	}
 
 	pwDialog = GTKCreateDialog(_("GNU Backgammon - Relational Database"),
 			    DT_INFO, NULL, DIALOG_FLAG_MODAL | DIALOG_FLAG_MINMAXBUTTONS, NULL, NULL);
 
 	pwn = gtk_notebook_new();
 	gtk_container_set_border_width(GTK_CONTAINER(pwn), 0);
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwn);
 
 /*******************************************************
 ** Start of (left hand side) of player screen...
@@ -835,42 +819,23 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 				 gtk_label_new(_("Players")));
 
 	pwVbox = gtk_vbox_new(FALSE, 0);
+
+	gtk_box_pack_start(GTK_BOX(pwVbox), GtkRelationalShowStats(), TRUE, TRUE, 0);
+
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox, FALSE, FALSE, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(pwVbox),
-				       INSIDE_FRAME_GAP);
-
-	rs = RunQuery("name FROM player ORDER BY name");
-	if (!rs)
-		return;
-
-	if (rs->rows < 2) {
-		GTKMessage(_("No data in database"), DT_INFO);
-		return;
-	}
-
-	pwList = GetRelList(rs);
-	g_signal_connect(G_OBJECT(pwList), "select-row",
-			 G_CALLBACK(ShowRelationalSelect), pwList);
-	FreeRowset(rs);
-
-	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
-				       GTK_POLICY_NEVER,
-				       GTK_POLICY_AUTOMATIC);
-	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(pwVbox), INSIDE_FRAME_GAP);
 
 	pwHbox2 = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 0);
 
 	pwOpen = gtk_button_new_with_label("Open");
 	g_signal_connect(G_OBJECT(pwOpen), "clicked",
-			 G_CALLBACK(RelationalOpen), pwList);
+			 G_CALLBACK(ShowRelationalClicked), NULL);
 	gtk_box_pack_start(GTK_BOX(pwHbox2), pwOpen, FALSE, FALSE, 0);
 
 	pwErase = gtk_button_new_with_label("Erase");
 	g_signal_connect(G_OBJECT(pwErase), "clicked",
-			 G_CALLBACK(RelationalErase), pwList);
+			 G_CALLBACK(ShowRelationalErase), NULL);
 	gtk_box_pack_start(GTK_BOX(pwHbox2), pwErase, FALSE, FALSE,
 			   BUTTON_GAP);
 
@@ -919,7 +884,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	pwUpdate = gtk_button_new_with_label("Update Details");
 	gtk_box_pack_start(GTK_BOX(pwHbox2), pwUpdate, FALSE, FALSE, 0);
 	g_signal_connect(G_OBJECT(pwUpdate), "clicked",
-			 G_CALLBACK(UpdatePlayerDetails), pwList);
+			 G_CALLBACK(UpdatePlayerDetails), NULL);
 
 /*******************************************************
 ** End of right hand side of player screen...
@@ -980,6 +945,8 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW
 					      (pwScrolled), pwQueryBox);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwn);
 
 	gtk_widget_show_all(pwDialog);
 

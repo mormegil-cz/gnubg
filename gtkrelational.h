@@ -25,7 +25,6 @@
 
 #ifndef _GTKRELATIONAL_H_
 #define _GTKRELATIONAL_H_
-extern void GtkRelationalShowStats(gpointer p, guint n, GtkWidget * pw);
 extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw);
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw);
 extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw);
