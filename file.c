@@ -35,10 +35,10 @@ ExportFormat export_format[] = {
 	{EXPORT_MAT, ".mat", N_("Jellyfish Match"), "mat", {TRUE, FALSE, FALSE}},
 	{EXPORT_POS, ".pos", N_("Jellyfish Position"), "pos", {FALSE, FALSE, TRUE}},
 	{EXPORT_LATEX, ".tex", N_("LaTeX"), "latex", {TRUE, TRUE, FALSE}},
-	{EXPORT_PDF, ".pdf", N_("PDF"), "pdf", {FALSE, FALSE, TRUE}},
+	{EXPORT_PDF, ".pdf", N_("PDF"), "pdf", {TRUE, TRUE, TRUE}},
 	{EXPORT_TEXT, ".txt", N_("Plain Text"), "text", {TRUE, TRUE, TRUE}},
 	{EXPORT_PNG, ".png", N_("Portable Network Graphics"), "png", {FALSE, FALSE, TRUE}},
-	{EXPORT_PS, ".ps", N_("Postscript"), "ps", {FALSE, FALSE, TRUE}},
+	{EXPORT_PS, ".ps", N_("Postscript"), "ps", {TRUE, TRUE, TRUE}},
 	{EXPORT_SNOWIETXT, ".txt", N_("Snowie Text"), "snowietxt", {FALSE, FALSE, TRUE}},
 	{EXPORT_SVG, ".svg", N_("SVG"), "svg", {FALSE, FALSE, TRUE}},
 };

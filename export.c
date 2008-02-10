@@ -50,22 +50,52 @@
 #include "simpleboard.h"
 #endif
 
-#if HAVE_CAIRO
-static gchar *export_get_filename (char *sz)
-{
-	gchar *filename=NULL;
+/*
+ * Get filename from base file and game number:
+ *
+ * Number 0 gets the value of szBase.
+ * Assume szBase is "blah.*", then number 1 will be
+ * "blah_001.*", and so forth.
+ *
+ * Input:
+ *   szBase: base filename
+ *   iGame: game number
+ *
+ * Garbage collect:
+ *   Caller must free returned pointer if not NULL
+ * 
+ */
 
-	if (ms.gs == GAME_NONE) {
-		outputl(_
-				("No game in progress (type `new game' to start one)."));
-		return NULL;
+extern char *filename_from_iGame(const char *szBase, const int iGame)
+{
+	if (!iGame)
+		return g_strdup(szBase);
+	else {
+		char *sz = g_malloc(strlen(szBase) + 5);
+		char *szExtension = strrchr(szBase, '.');
+		char *pc;
+		if (!szExtension) {
+			sprintf(sz, "%s_%03d", szBase, iGame + 1);
+			return sz;
+		} else {
+			strcpy(sz, szBase);
+			pc = strrchr(sz, '.');
+			sprintf(pc, "_%03d%s", iGame + 1, szExtension);
+			return sz;
+		}
 	}
+}
+
+#if HAVE_CAIRO
+static gchar *export_get_filename(char *sz)
+{
+	gchar *filename = NULL;
 
 	filename = g_strdup(NextToken(&sz));
 
 	if (!filename || !*filename) {
 		outputl(_("You must specify a file to export to "
-					"(see `help export position simple')."));
+			  "(see `help export position simple')."));
 		g_free(filename);
 		return NULL;
 	}
@@ -76,164 +106,359 @@ static gchar *export_get_filename (char *sz)
 	}
 	return filename;
 }
+
+static moverecord *export_get_moverecord(int *game_nr, int *move_nr)
+{
+	int history = 0;
+	moverecord *pmr = NULL;
+
+	pmr = getCurrentMoveRecord(&history);
+	if (history)
+		*move_nr = getMoveNumber(plGame, pmr) - 1;
+	else if (plLastMove)
+		*move_nr = getMoveNumber(plGame, plLastMove->p);
+	else
+		*move_nr = -1;
+	*game_nr = getGameNumber(plGame);
+	return pmr;
+}
+
+/* default simple board paper size A4 */
 #define SIMPLE_BOARD_WIDTH 210.0/25.4*72.0
 #define SIMPLE_BOARD_HEIGHT 297.0/25.4*72.0
 
-static void draw_simple_board_on_surface(matchstate sb_ms, moverecord *sb_pmr, int move_nr, int game_nr, cairo_surface_t * surface)
+static int draw_simple_board_on_cairo(matchstate * sb_pms,
+				      moverecord * sb_pmr, int move_nr,
+				      int game_nr, cairo_t * cairo)
 {
 	SimpleBoard *board;
 	GString *header = NULL;
 	GString *annotation = NULL;
 
-	g_return_if_fail(surface);
+	g_return_val_if_fail(cairo, 0);
+	g_return_val_if_fail(sb_pms->gs != GAME_NONE, 0);
 
-	if (sb_ms.gs == GAME_NONE) {
-		outputerrf(_ ("No game in progress."));
-		return;
-	}
-
-	board = simple_board_new(&sb_ms, cairo_create(surface));
+	board = simple_board_new(sb_pms, cairo);
 	board->surface_x = SIMPLE_BOARD_WIDTH;
 	board->surface_y = SIMPLE_BOARD_HEIGHT;
 
 	header = g_string_new(NULL);
-	TextPrologue ( header, &sb_ms,game_nr );
-	TextBoardHeader ( header, &sb_ms, 
-			game_nr, move_nr );
+	TextPrologue(header, sb_pms, game_nr);
+	TextBoardHeader(header, sb_pms, game_nr, move_nr);
 	board->header = header->str;
 
-	if (sb_pmr)
-	{
+	if (sb_pmr) {
 		annotation = g_string_new(NULL);
-		TextAnalysis(annotation, &sb_ms, sb_pmr);
+		TextAnalysis(annotation, sb_pms, sb_pmr);
 		board->annotation = annotation->str;
 	}
 
 	simple_board_draw(board);
-	cairo_surface_destroy(surface);
-	cairo_destroy(board->cr);
 	g_free(board);
 	if (header)
 		g_string_free(header, TRUE);
 	if (annotation)
 		g_string_free(annotation, TRUE);
-	return;
+	return 1;
 }
+
+static int export_boards(moverecord * pmr, matchstate * msExport,
+			 int *iMove, int iGame, cairo_t * cairo)
+{
+	FixMatchState(msExport, pmr);
+	switch (pmr->mt) {
+	case MOVE_NORMAL:
+		if (pmr->fPlayer != msExport->fMove) {
+			SwapSides(msExport->anBoard);
+			msExport->fMove = pmr->fPlayer;
+		}
+		msExport->fTurn = msExport->fMove = pmr->fPlayer;
+		msExport->anDice[0] = pmr->anDice[0];
+		msExport->anDice[1] = pmr->anDice[1];
+		draw_simple_board_on_cairo(msExport, pmr, *iMove, iGame,
+					   cairo);
+		(*iMove)++;
+		break;
+	case MOVE_TAKE:
+	case MOVE_DROP:
+	case MOVE_DOUBLE:
+		draw_simple_board_on_cairo(msExport, pmr, *iMove, iGame,
+					   cairo);
+		(*iMove)++;
+		break;
+	default:
+		break;
+	}
+	ApplyMoveRecord(msExport, plGame, pmr);
+	return 1;
+}
+
+static int draw_cairo_pages(cairo_t * cairo, listOLD * game_ptr)
+{
+	matchstate msExport;
+	static statcontext scTotal;
+	moverecord *pmr;
+	xmovegameinfo *pmgi = NULL;
+	statcontext *psc = NULL;
+	listOLD *pl;
+	int iMove = 0;
+	int iGame = 0;
+	int page;
+
+	IniStatcontext(&scTotal);
+	updateStatisticsGame(game_ptr);
+	pl = game_ptr->plNext;
+	pmr = pl->p;
+	FixMatchState(&msExport, pmr);
+	ApplyMoveRecord(&msExport, game_ptr, pmr);
+	g_assert(pmr->mt == MOVE_GAMEINFO);
+	msExport.gs = GAME_PLAYING;
+	pmgi = &pmr->g;
+	psc = &pmr->g.sc;
+	AddStatcontext(psc, &scTotal);
+	iGame = getGameNumber(game_ptr);
+	for (pl = pl->plNext, page = 1; pl != game_ptr;
+	     pl = pl->plNext, page++) {
+		export_boards(pl->p, &msExport, &iMove, iGame, cairo);
+		if (page % 2) {
+			cairo_translate(cairo, 0,
+					SIMPLE_BOARD_HEIGHT / 2.0);
+		} else {
+			cairo_translate(cairo, 0,
+					-SIMPLE_BOARD_HEIGHT / 2.0);
+			cairo_show_page(cairo);
+		}
+	}
+	if (!(page % 2)) {
+		cairo_translate(cairo, 0, -SIMPLE_BOARD_HEIGHT / 2.0);
+		cairo_show_page(cairo);
+	}
+	return 1;
+}
+
 #endif
+
 extern void CommandExportPositionSVG(char *sz)
 {
 #if HAVE_CAIRO
 	gchar *filename;
-	int history;
 	int move_nr;
 	int game_nr;
-	moverecord* pmr;
+	moverecord *pmr;
 	cairo_surface_t *surface;
+	cairo_t *cairo;
 
-	if (!(filename = export_get_filename(sz)))
+	if (ms.gs == GAME_NONE) {
+		outputerrf(_
+			   ("No game in progress (type `new game' to start one)."));
 		return;
+	}
 
-	pmr = getCurrentMoveRecord(&history);
-	if ( history )
-		move_nr = getMoveNumber ( plGame, pmr ) - 1;
-	else if ( plLastMove )
-		move_nr = getMoveNumber ( plGame, plLastMove->p );
-	else
-		move_nr = -1;
-	game_nr = getGameNumber ( plGame );
-
+	filename = export_get_filename(sz);
+	if (!filename)
+		return;
+	pmr = export_get_moverecord(&game_nr, &move_nr);
 	surface = cairo_svg_surface_create(filename, SIMPLE_BOARD_WIDTH,
-			SIMPLE_BOARD_HEIGHT);
-
-	if (surface)
-		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
-	else
+					   SIMPLE_BOARD_HEIGHT/2.0);
+	if (surface) {
+		cairo = cairo_create(surface);
+		draw_simple_board_on_cairo(&ms, pmr, move_nr, game_nr,
+					   cairo);
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
 #endif
-		outputerrf(_("Failed to create SVG surface for %s"),
-				sz);
+		outputerrf(_("Failed to create SVG surface for %s"), sz);
 }
 
 extern void CommandExportPositionPDF(char *sz)
 {
 #if HAVE_CAIRO
 	gchar *filename;
-	int history;
 	int move_nr;
 	int game_nr;
-	moverecord* pmr;
+	moverecord *pmr;
 	cairo_surface_t *surface;
+	cairo_t *cairo;
 
-	if (!(filename = export_get_filename(sz)))
+	if (ms.gs == GAME_NONE) {
+		outputerrf(_
+			   ("No game in progress (type `new game' to start one)."));
 		return;
+	}
 
-	pmr = getCurrentMoveRecord(&history);
-	if ( history )
-		move_nr = getMoveNumber ( plGame, pmr ) - 1;
-	else if ( plLastMove )
-		move_nr = getMoveNumber ( plGame, plLastMove->p );
-	else
-		move_nr = -1;
-	game_nr = getGameNumber ( plGame );
-
+	filename = export_get_filename(sz);
+	if (!filename)
+		return;
+	pmr = export_get_moverecord(&game_nr, &move_nr);
 	surface = cairo_pdf_surface_create(filename, SIMPLE_BOARD_WIDTH,
-			SIMPLE_BOARD_HEIGHT);
-	if (surface)
-		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
-	else
+					   SIMPLE_BOARD_HEIGHT);
+	if (surface) {
+		cairo = cairo_create(surface);
+		draw_simple_board_on_cairo(&ms, pmr, move_nr, game_nr,
+					   cairo);
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
 #endif
-		outputerrf(_("Failed to create PDF surface for %s"),
-				sz);
+		outputerrf(_("Failed to create PDF surface for %s"), sz);
 }
 
 extern void CommandExportPositionPS(char *sz)
 {
 #if HAVE_CAIRO
 	gchar *filename;
-	int history;
 	int move_nr;
 	int game_nr;
-	moverecord* pmr;
+	moverecord *pmr;
 	cairo_surface_t *surface;
+	cairo_t *cairo;
 
-	if (!(filename = export_get_filename(sz)))
+	if (ms.gs == GAME_NONE) {
+		outputerrf(_
+			   ("No game in progress (type `new game' to start one)."));
 		return;
+	}
 
-	pmr = getCurrentMoveRecord(&history);
-	if ( history )
-		move_nr = getMoveNumber ( plGame, pmr ) - 1;
-	else if ( plLastMove )
-		move_nr = getMoveNumber ( plGame, plLastMove->p );
-	else
-		move_nr = -1;
-	game_nr = getGameNumber ( plGame );
+	filename = export_get_filename(sz);
+	if (!filename)
+		return;
+	pmr = export_get_moverecord(&game_nr, &move_nr);
 
 	surface = cairo_ps_surface_create(filename, SIMPLE_BOARD_WIDTH,
-			SIMPLE_BOARD_HEIGHT);
-	if (surface)
-		draw_simple_board_on_surface(ms, pmr, move_nr, game_nr, surface);
-	else
+					  SIMPLE_BOARD_HEIGHT);
+	if (surface) {
+		cairo = cairo_create(surface);
+		draw_simple_board_on_cairo(&ms, pmr, move_nr, game_nr,
+					   cairo);
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
 #endif
-		outputerrf(_("Failed to create PS surface for %s"),
-				sz);
+		outputerrf(_("Failed to create PS surface for %s"), sz);
 }
 
-extern void CommandExportGameEquityEvolution (char *sz)
+extern void CommandExportGamePDF(char *sz)
 {
+#if HAVE_CAIRO
+	gchar *filename;
+	cairo_surface_t *surface;
+	cairo_t *cairo;
 
-  CommandNotImplemented( sz );
+	if (!plGame) {
+		outputerrf(_
+			   ("No game in progress (type `new game' to start one)."));
+		return;
+	}
 
+	filename = export_get_filename(sz);
+	if (!filename)
+		return;
+	surface = cairo_pdf_surface_create(filename, SIMPLE_BOARD_WIDTH,
+					   SIMPLE_BOARD_HEIGHT);
+	if (surface) {
+		cairo = cairo_create(surface);
+		draw_cairo_pages(cairo, plGame);
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
+#endif
+		outputerrf(_("Failed to create PDF surface for %s"), sz);
 }
 
-
-extern void CommandExportMatchEquityEvolution (char *sz)
+extern void CommandExportGamePS(char *sz)
 {
+#if HAVE_CAIRO
+	gchar *filename;
+	cairo_surface_t *surface;
+	cairo_t *cairo;
 
-  CommandNotImplemented( sz );
+	if (!plGame) {
+		outputerrf(_
+			   ("No game in progress (type `new game' to start one)."));
+		return;
+	}
 
+	filename = export_get_filename(sz);
+	if (!filename)
+		return;
+	surface = cairo_ps_surface_create(filename, SIMPLE_BOARD_WIDTH,
+					  SIMPLE_BOARD_HEIGHT);
+	if (surface) {
+		cairo = cairo_create(surface);
+		draw_cairo_pages(cairo, plGame);
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
+#endif
+		outputerrf(_("Failed to create PS surface for %s"), sz);
+}
+
+extern void CommandExportMatchPDF(char *sz)
+{
+#if HAVE_CAIRO
+	listOLD *pl;
+	int nGames = 0;
+	int i;
+	char *filename;
+	cairo_surface_t *surface;
+	cairo_t *cairo;
+
+	filename = export_get_filename(sz);
+
+	if (!filename)
+		return;
+	surface = cairo_pdf_surface_create(filename, SIMPLE_BOARD_WIDTH,
+					   SIMPLE_BOARD_HEIGHT);
+	if (surface) {
+		for (pl = lMatch.plNext; pl != &lMatch;
+		     pl = pl->plNext, nGames++);
+
+		cairo = cairo_create(surface);
+		for (pl = lMatch.plNext, i = 0; pl != &lMatch;
+		     pl = pl->plNext, i++) {
+			draw_cairo_pages(cairo, pl->p);
+		}
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
+#endif
+		outputerrf(_("Failed to create PDF surface for %s"), sz);
+}
+
+extern void CommandExportMatchPS(char *sz)
+{
+#if HAVE_CAIRO
+	listOLD *pl;
+	int nGames = 0;
+	int i;
+	char *filename;
+	cairo_surface_t *surface;
+	cairo_t *cairo;
+
+	filename = export_get_filename(sz);
+
+	if (!filename)
+		return;
+	surface = cairo_ps_surface_create(filename, SIMPLE_BOARD_WIDTH,
+					  SIMPLE_BOARD_HEIGHT);
+	if (surface) {
+		for (pl = lMatch.plNext; pl != &lMatch;
+		     pl = pl->plNext, nGames++);
+
+		cairo = cairo_create(surface);
+		for (pl = lMatch.plNext, i = 0; pl != &lMatch;
+		     pl = pl->plNext, i++) {
+			draw_cairo_pages(cairo, pl->p);
+		}
+		cairo_surface_destroy(surface);
+		cairo_destroy(cairo);
+	} else
+#endif
+		outputerrf(_("Failed to create PS surface for %s"), sz);
 }
 
 #if HAVE_LIBPNG
-
 
 /* size of html images in steps of BOARD_WIDTH x BOARD_HEIGHT
    as defined in boarddim.h */
@@ -921,6 +1146,8 @@ static void ExportGameJF( FILE *pf, listOLD *plGame, int iGame,
 	i++;
     }
 }
+
+
 extern void CommandExportGameGam( char *sz ) {
     
     FILE *pf;

@@ -695,9 +695,6 @@ command cER = {
     N_("Clear analysis used for `hint'"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
-    { "equityevolution", CommandExportGameEquityEvolution, 
-      N_("Exports the equity evolution of the game (for import into a spreadsheet)"), 
-      szFILENAME, &cFilename },
     { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "
       "format"), szFILENAME, &cFilename },
     { "html", CommandExportGameHtml,
@@ -705,13 +702,14 @@ command cER = {
       &cFilename },
     { "latex", CommandExportGameLaTeX, N_("Records a log of the game in LaTeX "
       "format"), szFILENAME, &cFilename },
+    { "pdf", CommandExportGamePDF, N_("Records a log of the game in PDF "
+      "format"), szFILENAME, &cFilename },
+    { "ps", CommandExportGamePS, N_("Records a log of the game in PS "
+      "format"), szFILENAME, &cFilename },
     { "text", CommandExportGameText, N_("Export a log of the game in text format"), 
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
-    { "equityevolution", CommandExportMatchEquityEvolution, 
-      N_("Exports the equity evolution of the match (for import into a spreadsheet)"), 
-      szFILENAME, &cFilename },
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
       "format"), szFILENAME, &cFilename },
     { "html", CommandExportMatchHtml,
@@ -723,6 +721,10 @@ command cER = {
     { "text", CommandExportMatchText, 
       N_("Records a log of the match in text format"), 
       szFILENAME, &cFilename },
+    { "pdf", CommandExportMatchPDF, N_("Save the current match in "
+      "PDF format"), szFILENAME, &cFilename },
+    { "ps", CommandExportMatchPS, N_("Save the current match in "
+      "PS format"), szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
     { "gammonline", CommandExportPositionGammOnLine,

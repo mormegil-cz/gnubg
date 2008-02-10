@@ -974,7 +974,7 @@ extern void CommandExportMatchText( char *sz ) {
 
     for( pl = lMatch.plNext, i = 0; pl != &lMatch; pl = pl->plNext, i++ ) {
 
-      szCurrent = HTMLFilename ( sz, i );
+      szCurrent = filename_from_iGame ( sz, i );
 
       if ( !i ) {
 

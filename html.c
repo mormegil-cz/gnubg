@@ -120,7 +120,6 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubecubelesstext", "font-style: italic" }
 };
 
-
 #define FORMATHTMLPROB(f) \
 ( ( f ) < 1.0f ) ? "&nbsp;" : "", \
 ( ( f ) < 0.1f ) ? "&nbsp;" : "", \
@@ -283,19 +282,6 @@ HTMLPrintLegend( FILE *pf, const htmlexportcss hecss ) {
 
 
 }
-
-
-  
-#if 0
-static void
-WriteStyle ( FILE *pf, const stylesheetclass ssc, 
-             const htmlexportcss hecss ) {
-
-  fputs ( GetStyle ( ssc, hecss ), pf );
-
-}
-#endif
-
 
 static void
 printRolloutTable ( FILE *pf, 
@@ -3395,59 +3381,6 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
 }
 
 /*
- * get name number
- *
- * Input
- *    plGame: the game for which the game number is requested
- *
- * Returns:
- *    the game number
- *
- */
-
-extern int
-getGameNumber ( const listOLD *plGame ) {
-
-  listOLD *pl;
-  int iGame;
-
-  for( pl = lMatch.plNext, iGame = 0; pl != &lMatch; 
-       pl = pl->plNext, iGame++ )
-    if ( pl->p == plGame ) return iGame;
-
-  return -1;
-
-}
-
-
-/*
- * get move number
- *
- * Input
- *    plGame: the game 
- *    p: the move
- *
- * Returns:
- *    the move number
- *
- */
-
-extern int
-getMoveNumber ( const listOLD *plGame, const void *p ) {
-
-  listOLD *pl;
-  int iMove;
-
-  for( pl = plGame->plNext, iMove = 0; pl != plGame; 
-       pl = pl->plNext, iMove++ )
-    if ( p == pl->p ) return iMove;
-
-  return -1;
-
-}
-
-
-/*
  * Open file gnubg.css with same path as requested html file
  *
  * If the gnubg.css file already exists NULL is returned 
@@ -3548,55 +3481,6 @@ extern void CommandExportGameHtml( char *sz ) {
 
 }
 
-/*
- * Get filename for html file:
- *
- * Number 0 gets the value of szBase.
- * Assume szBase is "blah.html", then number 1 will be
- * "blah_001.html", and so forth.
- *
- * Input:
- *   szBase: base filename
- *   iGame: game number
- *
- * Garbage collect:
- *   Caller must free returned pointer if not NULL
- * 
- */
-
-extern char *
-HTMLFilename ( const char *szBase, const int iGame ) {
-
-  if ( ! iGame )
-    return g_strdup ( szBase );
-  else {
-
-    char *sz = malloc ( strlen ( szBase ) + 5 );
-    char *szExtension = strrchr ( szBase, '.' );
-    char *pc;
-
-    if ( ! szExtension ) {
-
-      sprintf ( sz, "%s_%03d", szBase, iGame + 1 );
-      return sz;
-
-    }
-    else {
-
-      strcpy ( sz, szBase );
-      pc = strrchr ( sz, '.' );
-      
-      sprintf ( pc, "_%03d%s", iGame + 1, szExtension );
-
-      return sz;
-
-    }
-
-  }
-
-}
-
-
 
 extern void CommandExportMatchHtml( char *sz ) {
     
@@ -3626,24 +3510,24 @@ extern void CommandExportMatchHtml( char *sz ) {
 
     for( pl = lMatch.plNext, i = 0; pl != &lMatch; pl = pl->plNext, i++ ) {
 
-      szCurrent = HTMLFilename ( sz, i );
-	  filenames[0] = HTMLFilename ( sz, 0 );
+      szCurrent = filename_from_iGame ( sz, i );
+	  filenames[0] = filename_from_iGame ( sz, 0 );
       aszLinks[ 0 ] = g_path_get_basename ( filenames[ 0 ] );
 	  filenames[ 1 ] = aszLinks[ 1 ] = NULL;
 	  if (i > 0) {
-		filenames[ 1 ] = HTMLFilename ( sz, i - 1 );
+		filenames[ 1 ] = filename_from_iGame ( sz, i - 1 );
 		aszLinks[ 1 ]  = g_path_get_basename ( filenames[ 1 ] );
 	  }
 		
 	  filenames[ 2 ] = aszLinks[ 2 ] = NULL;
 	  if (i < nGames - 1) {
-		filenames[ 2 ] = HTMLFilename ( sz, i + 1 );
+		filenames[ 2 ] = filename_from_iGame ( sz, i + 1 );
 		aszLinks[ 2 ]  = g_path_get_basename ( filenames[ 2 ] );
 	  }
 
 
 	  
-	  filenames[ 3 ] = HTMLFilename ( sz, nGames - 1 );
+	  filenames[ 3 ] = filename_from_iGame ( sz, nGames - 1 );
 	  aszLinks[ 3 ] = g_path_get_basename ( filenames[ 3 ] );
       if ( !i ) {
 

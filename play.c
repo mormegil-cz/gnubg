@@ -4549,3 +4549,57 @@ char *GetMatchCheckSum(void)
 
 	return auchHex;
 }
+
+/*
+ * get name number
+ *
+ * Input
+ *    plGame: the game for which the game number is requested
+ *
+ * Returns:
+ *    the game number
+ *
+ */
+
+extern int
+getGameNumber ( const listOLD *plGame ) {
+
+  listOLD *pl;
+  int iGame;
+
+  for( pl = lMatch.plNext, iGame = 0; pl != &lMatch; 
+       pl = pl->plNext, iGame++ )
+    if ( pl->p == plGame ) return iGame;
+
+  return -1;
+
+}
+
+
+/*
+ * get move number
+ *
+ * Input
+ *    plGame: the game 
+ *    p: the move
+ *
+ * Returns:
+ *    the move number
+ *
+ */
+
+extern int
+getMoveNumber ( const listOLD *plGame, const void *p ) {
+
+  listOLD *pl;
+  int iMove;
+
+  for( pl = plGame->plNext, iMove = 0; pl != plGame; 
+       pl = pl->plNext, iMove++ )
+    if ( p == pl->p ) return iMove;
+
+  return -1;
+
+}
+
+

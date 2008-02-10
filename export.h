@@ -93,12 +93,7 @@ typedef struct _exportsetup {
 
 extern exportsetup exsExport;
 
-extern int getGameNumber(const listOLD * plGame);
-
-extern int getMoveNumber(const listOLD * plGame, const void *p);
-
-extern char *HTMLFilename(const char *szBase, const int iGame);
-
+extern char *filename_from_iGame(const char *szBase, const int iGame);
 extern int WritePNG(const char *sz, unsigned char *puch,
 		    unsigned int nStride, unsigned int nSizeX,
 		    unsigned int nSizeY);

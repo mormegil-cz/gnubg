@@ -28,7 +28,7 @@
 #include "simpleboard.h"
 #include <glib.h>
 
-#define SIMPLE_BOARD_SIZE 400.
+#define SIMPLE_BOARD_SIZE 150.
 
 /*! \brief get number of checkers from a backgammon variation
  *
@@ -118,9 +118,10 @@ static void draw_header_text(SimpleBoard * board)
 {
 	if (!board->header)
 		return;
-	cairo_move_to(board->cr, 0, 0);
+	cairo_move_to(board->cr, board->text_size * 3,
+		      board->text_size * 3);
 	draw_fixed_text(board->cr, board->header, board->text_size);
-	cairo_translate(board->cr, 0, board->text_size * 3);
+	cairo_translate(board->cr, 0.0, board->text_size * 6);
 }
 
 /*! \brief draws the annotation text
@@ -130,7 +131,7 @@ static void draw_annotation_text(SimpleBoard * board)
 {
 	if (!board->annotation)
 		return;
-	cairo_move_to(board->cr, 0, 0);
+	cairo_move_to(board->cr, board->text_size * 3, 0.0);
 	draw_fixed_text(board->cr, board->annotation, board->text_size);
 }
 
@@ -156,12 +157,11 @@ static void draw_centered_text(cairo_t * cr, float color[3],
 				 text_size,
 				 (int) (color[0] * 255.),
 				 (int) (color[1] * 255.),
-				 (int) (color[2] * 255.),
-				 text);
+				 (int) (color[2] * 255.), text);
 	pango_layout_set_markup(layout, f_text, -1);
 	pango_layout_get_size(layout, &width, &height);
 	cairo_rel_move_to(cr, -((double) width / PANGO_SCALE) / 2,
-			-((double) height / PANGO_SCALE) / 2);
+			  -((double) height / PANGO_SCALE) / 2);
 	pango_cairo_update_layout(cr, layout);
 	pango_cairo_show_layout(cr, layout);
 	g_object_unref(layout);
@@ -408,8 +408,8 @@ static void draw_checkers_off(cairo_t * cr, gint i, gint n,
 			      SimpleBoardColor color)
 {
 	gint x = 290;
-	gint y = i ? 20 : 280;
-	gint direction = i ? 1 : -1;
+	gint y = i ? 280 : 20;
+	gint direction = i ? -1 : 1;
 
 	draw_checkers_on_xy(cr, x, y, direction, 3, n, color);
 }
@@ -428,10 +428,10 @@ static void draw_checkers(SimpleBoard * board)
 			unplaced -= n;
 			draw_checkers_on_point(board->cr, point, n, c);
 		}
-		n = board->ms.anBoard[player][24];
+		n = board->ms.anBoard[i][24];
 		unplaced -= n;
-		draw_checkers_on_bar(board->cr, i, n, c);
-		draw_checkers_off(board->cr, i, unplaced, c);
+		draw_checkers_on_bar(board->cr, player, n, c);
+		draw_checkers_off(board->cr, player, unplaced, c);
 	}
 }
 
@@ -464,10 +464,12 @@ extern int simple_board_draw(SimpleBoard * board)
 
 	g_return_val_if_fail(cr, 1);
 
-	draw_header_text(board);
 	cairo_save(cr);
+	draw_header_text(board);
 	if (board->surface_x && board->size)
-		cairo_translate(cr, board->surface_x / 2.0 - board->size / 2.0, 0);
+		cairo_translate(cr,
+				board->surface_x / 2.0 - board->size / 2.0,
+				0);
 	cairo_scale(cr, board->size / 300.0, board->size / 300.0);
 	draw_borders(cr);
 	draw_points(board);
@@ -476,8 +478,11 @@ extern int simple_board_draw(SimpleBoard * board)
 	draw_checkers(board);
 	draw_turn(board);
 	cairo_restore(cr);
-	cairo_translate(cr, 0, board->size);
+	cairo_save(cr);
+	cairo_translate(cr, board->text_size * 3,
+			board->text_size * 6 + board->size);
 	draw_annotation_text(board);
+	cairo_restore(cr);
 
 	return (0);
 }
@@ -499,7 +504,7 @@ extern SimpleBoard *simple_board_new(matchstate * ms, cairo_t * cr)
 	board->color_point[1] = grey_black_black;
 	board->color_cube = white_black_black;
 	board->size = SIMPLE_BOARD_SIZE;
-	board->text_size = 10;
+	board->text_size = 6;
 	if (ms)
 		board->ms = *ms;
 	board->cr = cr;
