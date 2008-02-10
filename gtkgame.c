@@ -3668,8 +3668,6 @@ GtkItemFactoryEntry aife[] = {
 	"<StockItem>", GTK_STOCK_ADD},
     { N_("/_Analyse/Relational database/Show Records"), NULL,
         GtkShowRelational, 0, NULL, NULL },
-    { N_("/_Analyse/Relational database/Setup"), NULL,
-        GtkRelationalSetup, 0, NULL, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ N_("/_Analyse/Distribution of rolls"), NULL, Command, 
           CMD_SHOW_ROLLS, NULL, NULL },
@@ -6638,12 +6636,6 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_ENGINE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
-
-    gtk_widget_set_sensitive( 
-          gtk_item_factory_get_widget( pif,
-                                       "/Analyse/"
-                                       "Relational database/Setup" ), 
-          TRUE );
 
     gtk_widget_set_sensitive( 
        gtk_item_factory_get_widget( pif,

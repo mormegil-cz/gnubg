@@ -51,6 +51,7 @@
 #endif
 #include "multithread.h"
 #include "gtkoptions.h"
+#include "gtkrelational.h"
 
 typedef struct _optionswidget {
 
@@ -107,8 +108,7 @@ static GtkWidget *soundList;
 static GtkWidget *pwSoundCommand;
 static int selSound;
 static int SoundSkipUpdate;
-
-
+static int relPage, relPageActivated;
 
 static void
 SeedChanged( GtkWidget *pw, int *pf ) {
@@ -309,8 +309,7 @@ AddSoundWidgets (GtkWidget * container)
 			  _
 			  ("Have GNU Backgammon make sound effects when various events occur."),
 			  NULL);
-    g_signal_connect(G_OBJECT (soundsEnabled), "toggled",
-			G_CALLBACK (SoundToggled), NULL);
+    g_signal_connect(G_OBJECT (soundsEnabled), "toggled", G_CALLBACK (SoundToggled), NULL);
 #define SOUND_COL 0
     for (i = 0; i < NUM_SOUNDS; i++)
       {
@@ -380,8 +379,8 @@ AddSoundWidgets (GtkWidget * container)
 }
 
 
-static GtkWidget *OptionsPages( optionswidget *pow ) {
-
+static GtkWidget *OptionsPages( optionswidget *pow )
+{
     static char *aszRNG[] = {
 	N_("ANSI"), N_("Blum, Blum and Shub"), N_("BSD"), N_("ISAAC"),
 	N_("MD5"), N_("Mersenne Twister"), N_("random.org"), N_("User"), 
@@ -427,7 +426,6 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
       N_("Play 2-chequer hypergammon (i.e., gammon and backgammons possible)"),
       N_("Play 3-chequer hypergammon (i.e., gammon and backgammons possible)")
     };
-
 
     char **ppch, **ppchTip;
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
@@ -1183,6 +1181,13 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     ManualDiceToggled( NULL, pow );
 
+    /* Database options */
+    pwp = gtk_alignment_new( 0, 0, 0, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+    relPage = gtk_notebook_append_page( GTK_NOTEBOOK( pwn ), pwp, gtk_label_new( _("Database") ) );
+	relPageActivated = FALSE;
+    gtk_container_add( GTK_CONTAINER( pwp ), RelationalOptions() );
+
     /* Other options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -1373,8 +1378,8 @@ static void SetSoundSettings(void)
 	outputon();
 }
 
-static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
-
+static void OptionsOK(GtkWidget *pw, optionswidget *pow)
+{
   char sz[128];
   unsigned int n;
   unsigned int cCache;
@@ -1661,10 +1666,12 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
       UserCommand (tmp);
       g_free (tmp);
     }
-      
+
+	if (relPageActivated)
+		RelationalSaveOptions();
+
   /* Destroy widget on exit */
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-  
 }
 
 static void 
@@ -1748,12 +1755,19 @@ OptionsSet( optionswidget *pow) {
                                 fGotoFirstGame );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGameListStyles ),
                                 fStyledGamelist );
-
 }
 
-extern void 
-GTKSetOptions( void ) {
+void OptionsPageChange(GtkNotebook *notebook, GtkNotebookPage *page, gint tabNumber, gpointer notused)
+{
+	if (tabNumber == relPage && !relPageActivated)
+	{
+		RelationalOptionsShown();
+		relPageActivated = TRUE;
+	}
+}
 
+extern void GTKSetOptions( void ) 
+{
   GtkWidget *pwDialog, *pwOptions;
   optionswidget ow;
 
@@ -1761,6 +1775,8 @@ GTKSetOptions( void ) {
 			     NULL, DIALOG_FLAG_MODAL, G_CALLBACK( OptionsOK ), &ow );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwOptions = OptionsPages( &ow ) );
+  g_signal_connect(G_OBJECT(pwOptions), "switch-page", G_CALLBACK(OptionsPageChange), NULL);
+
   gtk_widget_show_all( pwDialog );
 
   OptionsSet ( &ow );

@@ -72,9 +72,14 @@ static GtkWidget *pwQueryText;
 static GtkWidget *pwQueryResult;
 static GtkWidget *pwQueryBox;
 
-GtkTreeIter selected_iter;
-GtkWidget *playerTreeview;
 GtkListStore *playerStore;
+GtkListStore *dbStore;
+GtkTreeIter selected_iter;
+int optionsValid;
+GtkWidget *playerTreeview, *adddb, *deldb, *gameStats, *dbList, *dbtype, *user, *password, *login, *helptext;
+
+void CheckDatabase(const char *database);
+static void DBListSelected(GtkTreeView *treeview, gpointer userdata);
 
 #define PACK_OFFSET 4
 #define OUTSIDE_FRAME_GAP PACK_OFFSET
@@ -442,14 +447,6 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 	g_free(pch);
 }
 
-GtkWidget *pwSetupDialog;
-GtkWidget *adddb, *deldb, *gameStats;
-GtkWidget *dbtype, *user, *password, *login, *helptext;
-
-void CheckDatabase(const char *database);
-static void DBListSelected(GtkTreeView *treeview, gpointer userdata);
-GtkListStore *dbStore;
-
 DBProvider *GetSelectedDBType(void)
 {
 	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
@@ -467,7 +464,7 @@ void TryConnection(DBProvider *pdb, GtkWidget *dbList)
 	if (msg)
 	{
 		gtk_label_set_text(GTK_LABEL(helptext), msg);
-		gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), FALSE);
+		optionsValid = FALSE;
 		gtk_widget_set_sensitive(adddb, FALSE);
 		gtk_widget_set_sensitive(deldb, FALSE);
 	}
@@ -596,7 +593,7 @@ void CheckDatabase(const char *database)
 	}
 	gtk_widget_set_sensitive(adddb, dbok);
 	gtk_widget_set_sensitive(deldb, dbok);
-	gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), valid);
+	optionsValid = valid;
 }
 
 char *GetSelectedDB(GtkTreeView *treeview)
@@ -630,7 +627,7 @@ static void DBListSelected(GtkTreeView *treeview, gpointer userdata)
 
 void AddDBClicked(GtkButton *button, gpointer dbList)
 {
-	char* dbName = GTKGetInput(_("Add Database"), _("Database Name:"), pwSetupDialog);
+	char* dbName = GTKGetInput(_("Add Database"), _("Database Name:"), NULL);
 	if (dbName)
 	{
 		DBProvider *pdb = GetSelectedDBType();
@@ -661,7 +658,7 @@ void DelDBClicked(GtkButton *button, gpointer dbList)
 		if (pdb->DeleteDatabase(db, gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password))))
 		{
 			gtk_list_store_remove(GTK_LIST_STORE(dbStore), &selected_iter);
-			gtk_widget_set_sensitive(DialogArea(pwSetupDialog, DA_OK), FALSE);
+			optionsValid = FALSE;
 			gtk_widget_set_sensitive(deldb, FALSE);
 		}
 		else
@@ -669,26 +666,27 @@ void DelDBClicked(GtkButton *button, gpointer dbList)
 	}
 }
 
-static void SetupDialogRealized(void *notused)
-{
+extern void RelationalOptionsShown()
+{	/* Setup the options when tab selected */
 	gtk_combo_box_set_active(GTK_COMBO_BOX(dbtype), dbProviderType);
 }
 
-static void RelSetupOK(GtkWidget *dialog, GtkWidget *dbList)
+extern void RelationalSaveOptions()
 {
-	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
-	SetDBSettings(dbType, GetSelectedDB(GTK_TREE_VIEW(dbList)), gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
+	if (optionsValid)
+	{
+		DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
+		SetDBSettings(dbType, GetSelectedDB(GTK_TREE_VIEW(dbList)), gtk_entry_get_text(GTK_ENTRY(user)), gtk_entry_get_text(GTK_ENTRY(password)));
 
-	storeGameStats = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gameStats));
-
-	gtk_widget_destroy(dialog);
+		storeGameStats = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(gameStats));
+	}
 }
 
-extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw)
+extern GtkWidget *RelationalOptions()
 {
 	unsigned int i;
 	GtkWidget *hb1, *hb2, *vb1, *vb2, *table, *lbl, *align,
-		*help, *pwScrolled, *dbList;
+		*help, *pwScrolled;
 
 	dbStore = gtk_list_store_new(1, G_TYPE_STRING);
 	dbList = gtk_tree_view_new_with_model(GTK_TREE_MODEL(dbStore));
@@ -697,9 +695,6 @@ extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw)
 	gtk_tree_view_set_headers_clickable(GTK_TREE_VIEW(dbList), FALSE);
 
 	g_signal_connect(dbList, "cursor-changed", G_CALLBACK(DBListSelected), NULL);
-
-	pwSetupDialog = GTKCreateDialog(_("GNU Backgammon - Setup Relational Database"),
-			    DT_QUESTION, NULL, DIALOG_FLAG_MODAL, G_CALLBACK(RelSetupOK), dbList);
 
 	dbtype = gtk_combo_box_new_text();
 	for (i = 0; i < NUM_PROVIDERS; i++)
@@ -777,15 +772,7 @@ extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw)
 	g_signal_connect(deldb, "clicked", G_CALLBACK(DelDBClicked), dbList);
 	gtk_box_pack_start(GTK_BOX(hb1), deldb, FALSE, FALSE, 4);
 
-	gtk_container_add(GTK_CONTAINER(DialogArea(pwSetupDialog, DA_MAIN)), vb2);
-
-	g_signal_connect(G_OBJECT(pwSetupDialog), "realize", G_CALLBACK(SetupDialogRealized), 0 );
-
-	gtk_widget_show_all(pwSetupDialog);
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
+	return vb2;
 }
 
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)

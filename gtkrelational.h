@@ -27,6 +27,8 @@
 #define _GTKRELATIONAL_H_
 extern void GtkRelationalAddMatch(gpointer p, guint n, GtkWidget * pw);
 extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw);
-extern void GtkRelationalSetup(gpointer p, guint n, GtkWidget * pw);
+extern GtkWidget *RelationalOptions();
+extern void RelationalOptionsShown();
+extern void RelationalSaveOptions();
 extern void GtkShowQuery(RowSet* pRow);
 #endif

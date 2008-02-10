@@ -1,3 +1,7 @@
+Sun Feb 10 11:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkoptions.c: Move database settings to options dialog.
+
 Sat Feb  9 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkrelational.c: Put simple stats into relational dialog
