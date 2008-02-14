@@ -561,7 +561,7 @@ void CheckDatabase(const char *database)
 		int version = RunQueryValue(pdb, "next_id FROM control WHERE tablename = 'version'");
 		int matchcount = RunQueryValue(pdb, "count(*) FROM session");
 	
-		char *dbString, *buf;
+		char *dbString, *buf, *buf2 = NULL;
 		if (version < DB_VERSION)
 			dbString = _("This database is from an old version of gnubg and cannot be used");
 		else if (version > DB_VERSION)
@@ -579,15 +579,15 @@ void CheckDatabase(const char *database)
 					dbString = _("This database contains 1 match");
 				else
 				{
-					buf = g_strdup_printf(_("This database contains %d matches\n"), matchcount);
-					dbString = buf;
-					g_free(buf);
+					buf2 = g_strdup_printf(_("This database contains %d matches\n"), matchcount);
+					dbString = buf2;
 				}
 			}
 		}
 		buf = g_strdup_printf(_("Database connection successful\n%s\n"), dbString);
 		gtk_label_set_text(GTK_LABEL(helptext), buf);
 		g_free(buf);
+		g_free(buf2);
 
 		pdb->Disconnect();
 	}

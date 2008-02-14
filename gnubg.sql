@@ -88,13 +88,13 @@ CREATE UNIQUE INDEX isession ON session (
 );
 
 -- Table: statistics
--- Used from match and game tables to store match and game statistics,
+-- Used from session and game tables to store match and game statistics,
 -- respectively.
 
 CREATE TABLE matchstat (
     matchstat_id        INTEGER NOT NULL
-   -- match identification
-   ,match_id                          INTEGER NOT NULL
+   -- session identification
+   ,session_id                          INTEGER NOT NULL
    -- player identification
    ,player_id                         INTEGER NOT NULL
    -- chequerplay statistics
@@ -177,7 +177,7 @@ CREATE TABLE matchstat (
    ,PRIMARY KEY (matchstat_id)
    ,FOREIGN KEY (player_id) REFERENCES player (player_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (match_id) REFERENCES match (match_id)
+   ,FOREIGN KEY (session_id) REFERENCES session (session_id)
       ON DELETE CASCADE
 );
 
@@ -190,7 +190,7 @@ CREATE UNIQUE INDEX ismatchstat ON matchstat (
 
 CREATE TABLE game (
     game_id         INTEGER NOT NULL
-   ,match_id        INTEGER NOT NULL
+   ,session_id        INTEGER NOT NULL
    -- Player 0
    ,player_id0      INTEGER NOT NULL 
    -- Player 1
@@ -210,7 +210,7 @@ CREATE TABLE game (
    -- if Crawford game
    ,crawford        INTEGER NOT NULL
    ,PRIMARY KEY (game_id)
-   ,FOREIGN KEY (match_id) REFERENCES match (match_id)
+   ,FOREIGN KEY (session_id) REFERENCES session (session_id)
       ON DELETE CASCADE
    ,FOREIGN KEY (player_id0) REFERENCES player (player_id)
       ON DELETE RESTRICT

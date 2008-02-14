@@ -55,7 +55,7 @@ int RunQueryValue(DBProvider *pdb, const char *query)
 
 extern int RelationalMatchExists(DBProvider *pdb)
 {
-	char *buf = g_strdup_printf("match_id FROM session WHERE checksum = '%s'", GetMatchCheckSum());
+	char *buf = g_strdup_printf("session_id FROM session WHERE checksum = '%s'", GetMatchCheckSum());
 	int ret = RunQueryValue(pdb, buf);
 	g_free(buf);
 	return ret;
@@ -377,7 +377,7 @@ DBProvider *ConnectToDB(DBProviderType dbType)
 	return NULL;
 }
 
-void AddGames(DBProvider *pdb, int match_id, int player_id0, int player_id1)
+void AddGames(DBProvider *pdb, int session_id, int player_id0, int player_id1)
 {
 	int gamenum = 0;
 	listOLD *plGame, *pl = lMatch.plNext;
@@ -386,10 +386,10 @@ void AddGames(DBProvider *pdb, int match_id, int player_id0, int player_id1)
 		int game_id = GetNextId(pdb, "game");
 		moverecord *pmr = plGame->plNext->p;
 		xmovegameinfo *pmgi = &pmr->g;
-		char *buf = g_strdup_printf("INSERT INTO game(game_id, match_id, player_id0, player_id1, "
+		char *buf = g_strdup_printf("INSERT INTO game(game_id, session_id, player_id0, player_id1, "
 				"score_0, score_1, result, added, game_number, crawford) "
 				"VALUES (%d, %d, %d, %d, %d, %d, %d, CURRENT_TIME, %d, %d )",
-				game_id, match_id, player_id0, player_id1,
+				game_id, session_id, player_id0, player_id1,
 				pmgi->anScore[0], pmgi->anScore[1], pmgi->nPoints, ++gamenum, pmr->g.fCrawfordGame);
 
 		if (pdb->UpdateCommand(buf))
@@ -407,7 +407,7 @@ extern void CommandRelationalAddMatch( char *sz )
 	DBProvider *pdb;
 	char *buf, *date;
 	char warnings[1024];
-	int match_id, existing_id, player_id0, player_id1;
+	int session_id, existing_id, player_id0, player_id1;
 	*warnings = '\0';
 
 	if (ListEmpty(&lMatch))
@@ -438,18 +438,18 @@ extern void CommandRelationalAddMatch( char *sz )
 		if (!GetInputYN(_("Match exists, overwrite?")))
 			return;
 
-		buf = g_strdup_printf("DELETE FROM matchstat WHERE match_id = %d", existing_id);
+		buf = g_strdup_printf("DELETE FROM matchstat WHERE session_id = %d", existing_id);
 		pdb->UpdateCommand(buf);
 		g_free(buf);
-		buf = g_strdup_printf("DELETE FROM session WHERE match_id = %d", existing_id);
+		buf = g_strdup_printf("DELETE FROM session WHERE session_id = %d", existing_id);
 		pdb->UpdateCommand(buf);
 		g_free(buf);
 	}
 
-	match_id = GetNextId(pdb, "session");
+	session_id = GetNextId(pdb, "session");
 	player_id0 = AddPlayer(pdb, ap[0].szName);
 	player_id1 = AddPlayer(pdb, ap[1].szName);
-	if (match_id == -1 || player_id0 == -1 || player_id1 == -1)
+	if (session_id == -1 || player_id0 == -1 || player_id1 == -1)
 	{
 		outputl( _("Error adding match.") );
 		return;
@@ -460,19 +460,19 @@ extern void CommandRelationalAddMatch( char *sz )
 	else
 		date = NULL;
 
-	buf = g_strdup_printf("INSERT INTO session(match_id, checksum, player_id0, player_id1, "
+	buf = g_strdup_printf("INSERT INTO session(session_id, checksum, player_id0, player_id1, "
               "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) "
               "VALUES (%d, '%s', %d, %d, %d, %d, CURRENT_TIMESTAMP, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-				match_id, GetMatchCheckSum(), player_id0, player_id1,
+				session_id, GetMatchCheckSum(), player_id0, player_id1,
 				MatchResult(ms.nMatchTo), ms.nMatchTo, NS(mi.pchRating[0]), NS(mi.pchRating[1]),
 				NS(mi.pchEvent), NS(mi.pchRound), NS(mi.pchPlace), NS(mi.pchAnnotator), NS(mi.pchComment), NS(date));
 	if (pdb->UpdateCommand(buf))
 	{
-		if (AddStats(pdb, match_id, player_id0, 0, "matchstat", ms.nMatchTo) &&
-			AddStats(pdb, match_id, player_id1, 1, "matchstat", ms.nMatchTo))
+		if (AddStats(pdb, session_id, player_id0, 0, "matchstat", ms.nMatchTo) &&
+			AddStats(pdb, session_id, player_id1, 1, "matchstat", ms.nMatchTo))
 		{
 			if (storeGameStats)
-				AddGames(pdb, match_id, player_id0, player_id1);
+				AddGames(pdb, session_id, player_id0, player_id1);
 			pdb->Commit();
 		}
 	}
@@ -696,7 +696,7 @@ extern void CommandRelationalErase(char *sz)
 	mq = g_strdup_printf ("FROM session WHERE player_id0 = %d OR player_id1 = %d", player_id, player_id);
 
 	/* first remove any matchstats */
-	sprintf(buf, "DELETE FROM matchstat WHERE match_id in (select match_id %s)", mq);
+	sprintf(buf, "DELETE FROM matchstat WHERE session_id in (select session_id %s)", mq);
 	pdb->UpdateCommand(buf);
 
 	/* then remove any matches */
