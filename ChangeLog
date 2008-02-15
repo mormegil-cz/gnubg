@@ -1,3 +1,8 @@
+Fri Feb 15 16:59:43 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* drawboard.c: revert to Jan 19 after accidental checkin (fix board
+	after uint changes)
+
 Fri Feb 15 13:03:31 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* .cvsignore, backgammon.h, gtkoptions.c, makebearoff.c, play.c,
