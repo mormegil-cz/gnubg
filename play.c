@@ -4493,7 +4493,7 @@ static void AddString(listOLD* buffers, char* str)
 	strcat(pCurrent->p, str);
 }
 
-char *GetMatchCheckSum(void)
+extern char *GetMatchCheckSum(void)
 {
 	static char auchHex[33];
 	unsigned char auch[16];

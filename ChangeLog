@@ -1,3 +1,9 @@
+Fri Feb 15 13:03:31 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* .cvsignore, backgammon.h, gtkoptions.c, makebearoff.c, play.c,
+	util.h, board3d/Makefile.am, po/POTFILES.in: minor cleanups and
+	compiler warnings
+
 Sun Feb 10 23:21:33 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, export.c, export.h, file.c, gnubg.c, html.c, play.c,

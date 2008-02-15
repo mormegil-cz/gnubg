@@ -34,9 +34,9 @@
 
 #ifdef WIN32
 extern char *getInstallDir( void );
-extern void PrintSystemError(const char* message);
 #endif
 
+extern void PrintSystemError(const char* message);
 extern void PrintError(const char* message);
 extern FILE *GetTemporaryFile(const char *nameTemplate, char **retName);
 

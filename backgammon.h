@@ -405,7 +405,7 @@ extern void outputon(void);
 /* Like strncpy, except it does the right thing */
 extern char *strcpyn(char *szDest, const char *szSrc, int cch);
 
-extern char *GetMatchCheckSum();
+extern char *GetMatchCheckSum(void);
 extern char *CheckCommand(char *sz, command * ac);
 extern char *FormatMoveHint(char *sz, const matchstate * pms, movelist * pml,
 			    int i, int fRankKnown, int fDetailProb,

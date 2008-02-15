@@ -1757,7 +1757,7 @@ OptionsSet( optionswidget *pow) {
                                 fStyledGamelist );
 }
 
-void OptionsPageChange(GtkNotebook *notebook, GtkNotebookPage *page, gint tabNumber, gpointer notused)
+static void OptionsPageChange(GtkNotebook *notebook, GtkNotebookPage *page, gint tabNumber, gpointer notused)
 {
 	if (tabNumber == relPage && !relPageActivated)
 	{

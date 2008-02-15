@@ -36,6 +36,7 @@
 #include "positionid.h"
 #include "bearoff.h"
 #include "util.h"
+#include "multithread.h"
 
 #if WIN32
 #include <windows.h>
