@@ -38,6 +38,7 @@
 #include "dbprovider.h"
 #include "util.h"
 #include <glib/gi18n.h>
+#include <glib.h>
 
 int RunQueryValue(DBProvider *pdb, const char *query)
 {
@@ -53,7 +54,7 @@ int RunQueryValue(DBProvider *pdb, const char *query)
 		return -1;
 }
 
-extern int RelationalMatchExists(DBProvider *pdb)
+static int RelationalMatchExists(DBProvider *pdb)
 {
 	char *buf = g_strdup_printf("session_id FROM session WHERE checksum = '%s'", GetMatchCheckSum());
 	int ret = RunQueryValue(pdb, buf);
@@ -114,7 +115,7 @@ static int GetNextId(DBProvider *pdb, const char *table)
 	return next_id;
 }
 
-int GetPlayerId(DBProvider *pdb, const char *player_name)
+static int GetPlayerId(DBProvider *pdb, const char *player_name)
 {
 	char *buf = g_strdup_printf ("player_id from player where name = '%s'", player_name);
 	int id = RunQueryValue(pdb, buf);
@@ -139,7 +140,7 @@ static int AddPlayer(DBProvider *pdb, const char *name)
 	return id;
 }
 
-int MatchResult(int nMatchTo)
+static int MatchResult(int nMatchTo)
 {	/* Work out the result (-1,0,1) - (p0 win, unfinished, p1 win) */
 	int result = 0;
   	int anFinalScore[2];
@@ -162,146 +163,208 @@ float Ratio(float a, int b)
 }
 
 #define NS(x) (x == NULL) ? "NULL" : x
+#define APPENDF(x,y) g_string_append_printf(column, "%s, ", x); \
+	g_string_append_printf(value, "'%f', ", y);
+#define APPENDI(x,y) g_string_append_printf(column, "%s, ", x); \
+	g_string_append_printf(value, "'%i', ", y);
 
-int AddStats(DBProvider *pdb, int gm_id, int player_id, int player, const char *table, int nMatchTo)
+static int AddStats(DBProvider * pdb, int gm_id, int player_id, int player,
+		    const char *table, int nMatchTo, statcontext * sc)
 {
+	gchar *buf;
+	GString *column, *value;
+	int totalmoves, unforced;
+	float errorcost, errorskill;
+	float aaaar[3][2][2][2];
+	float r;
 	int ret;
-	char *buf, *s_id, *s_cheq, *s_luck, *s_cube, *s_overall,
-		*s_fibsdiff, *s_fibstotal, *s_fibscheq, *s_fibscube,
-		*s_money, *s_time;
-	int unforced, totalmoves;
-	float errorskill, errorcost;
-	float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
 
 	int gms_id = GetNextId(pdb, table);
 	if (gms_id == -1)
 		return FALSE;
 
-	/* identification */
-	s_id = g_strdup_printf("%d,%d,%d", gms_id, gm_id, player_id);
+	totalmoves = sc->anTotalMoves[player];
+	unforced = sc->anUnforcedMoves[player];
 
-	/* chequer play statistics */
-	totalmoves = scMatch.anTotalMoves[player];
-	unforced = scMatch.anUnforcedMoves[player];
-	s_cheq = g_strdup_printf("%d,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%d",
-		totalmoves, unforced,
-		scMatch.anMoves[player][SKILL_NONE], 0, scMatch.anMoves[player][SKILL_DOUBTFUL],
-		scMatch.anMoves[player][SKILL_BAD], scMatch.anMoves[player][SKILL_VERYBAD],
-		scMatch.arErrorCheckerplay[player][0], scMatch.arErrorCheckerplay[player][1],
-		Ratio(scMatch.arErrorCheckerplay[player][0], unforced),
-		Ratio(scMatch.arErrorCheckerplay[player][1], unforced),
-		GetRating(Ratio(scMatch.arErrorCheckerplay[player][0], unforced)));
+	getMWCFromError(sc, aaaar);
+	errorskill = aaaar[CUBEDECISION][PERMOVE][player][NORMALISED];
+	errorcost = aaaar[CUBEDECISION][PERMOVE][player][UNNORMALISED];
 
-	/* luck statistics */
-	s_luck = g_strdup_printf("%d,%d,%d,%d,%d,%f,%f,%f,%f,%d",
-		scMatch.anLuck[player][LUCK_VERYGOOD],
-		scMatch.anLuck[player][LUCK_GOOD],
-		scMatch.anLuck[player][LUCK_NONE],
-		scMatch.anLuck[player][LUCK_BAD],
-		scMatch.anLuck[player][LUCK_VERYBAD],
-		scMatch.arLuck[player][0],
-		scMatch.arLuck[player][1],
-		Ratio(scMatch.arLuck[player][0], totalmoves),
-		Ratio(scMatch.arLuck[player][1], totalmoves),
-		getLuckRating(Ratio(scMatch.arLuck[player][0], totalmoves)));
+	column = g_string_new(NULL);
+	value = g_string_new(NULL);
 
-	/* cube statistics */
-	getMWCFromError(&scMatch, aaaar );
-	errorskill = aaaar[ CUBEDECISION ][ PERMOVE ][ player ][ NORMALISED ];
-	errorcost = aaaar[ CUBEDECISION ][ PERMOVE ][ player ][ UNNORMALISED ];
 
-	s_cube = g_strdup_printf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%d",
-		scMatch.anTotalCube[player], scMatch.anCloseCube[player],
-		scMatch.anDouble[player], scMatch.anTake[player], scMatch.anPass[player],
-		scMatch.anCubeMissedDoubleDP[player], scMatch.anCubeMissedDoubleTG[player], scMatch.anCubeWrongDoubleDP[player],
-		scMatch.anCubeWrongDoubleTG[player], scMatch.anCubeWrongTake[player], scMatch.anCubeWrongPass[player],
-		scMatch.arErrorMissedDoubleDP[player][0],
-		scMatch.arErrorMissedDoubleTG[player][ 0 ],
-		scMatch.arErrorWrongDoubleDP[player][ 0 ],
-		scMatch.arErrorWrongDoubleTG[player][ 0 ],
-		scMatch.arErrorWrongTake[player][ 0 ],
-		scMatch.arErrorWrongPass[player][ 0 ],
-		scMatch.arErrorMissedDoubleDP[player][1],
-		scMatch.arErrorMissedDoubleTG[player][ 1 ],
-		scMatch.arErrorWrongDoubleDP[player][ 1 ],
-		scMatch.arErrorWrongDoubleTG[player][ 1 ],
-		scMatch.arErrorWrongTake[player][ 1 ],
-		scMatch.arErrorWrongPass[player][ 1 ],
-		/* gnubg is giving per-move, not totals here */
-		errorskill * scMatch.anCloseCube[player],
-		errorcost * scMatch.anCloseCube[player],
-		errorskill,
-		errorcost,
-		GetRating(errorskill));
+	if (strcmp("matchstat", table) == 0) {
+		APPENDI("matchstat_id", gms_id);
+		APPENDI("session_id", gm_id);
+	} else {
+		APPENDI("gamestat_id", gms_id);
+		APPENDI("game_id", gm_id);
+	}
 
-	/* overall */
-	s_overall = g_strdup_printf("%f,%f,%f,%f,%d,%f,%f,%f",
-		errorskill * scMatch.anCloseCube[player] + scMatch.arErrorCheckerplay[player][0],
-		errorcost * scMatch.anCloseCube[player] + scMatch.arErrorCheckerplay[player][1],
-		Ratio(errorskill * scMatch.anCloseCube[player] + scMatch.arErrorCheckerplay[player][0],
-				scMatch.anCloseCube[player] + unforced),
-		Ratio(errorcost * scMatch.anCloseCube[player] + scMatch.arErrorCheckerplay[player][1],
-				scMatch.anCloseCube[player] + unforced),
-		GetRating(Ratio(errorskill * scMatch.anCloseCube[player] + scMatch.arErrorCheckerplay[player][0],
-				scMatch.anCloseCube[player] + unforced)),
-		scMatch.arActualResult[player], scMatch.arLuckAdj[player],
-		Ratio(errorskill * scMatch.anCloseCube[player] + scMatch.arErrorCheckerplay[player][0],
-				totalmoves + scMatch.anTotalMoves[!player]));
-
-	/* for matches only */
-	s_fibsdiff = s_fibstotal = s_fibscheq = s_fibscube = NULL;
-	if (nMatchTo)
-	{
-		float r = 0.5f + scMatch.arActualResult[ player ] - scMatch.arLuck[ player ][ 1 ] + scMatch.arLuck[ !player ][ 1 ];
-		if (r > 0.0f && r < 1.0f)
-			s_fibsdiff = g_strdup_printf("%f", relativeFibsRating(r, nMatchTo));
-	
-		if (scMatch.fCube || scMatch.fMoves)
-		{
-			s_fibstotal = g_strdup_printf("%f", absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ player ][ NORMALISED ],
-					aaaar[ CUBEDECISION ][ PERMOVE ][ player ][ NORMALISED ], nMatchTo, rRatingOffset ));
-
-			if (scMatch.anUnforcedMoves[player])
-				s_fibscheq = g_strdup_printf("%f", absoluteFibsRatingChequer(aaaar[ CHEQUERPLAY ][ PERMOVE ][ player ][ NORMALISED ], nMatchTo));
-
-			if ( scMatch.anCloseCube[player])
-				s_fibscube = g_strdup_printf("%f", absoluteFibsRatingCube( aaaar[ CUBEDECISION ][ PERMOVE ][ player ][ NORMALISED ], nMatchTo));
-         }
+	APPENDI("player_id", player_id);
+	APPENDI("total_moves", totalmoves);
+	APPENDI("unforced_moves", unforced);
+	APPENDI("unmarked_moves", sc->anMoves[player][SKILL_NONE]);
+	APPENDI("good_moves", 0);
+	APPENDI("doubtful_moves", sc->anMoves[player][SKILL_DOUBTFUL]);
+	APPENDI("bad_moves", sc->anMoves[player][SKILL_BAD]);
+	APPENDI("very_bad_moves", sc->anMoves[player][SKILL_VERYBAD]);
+	APPENDF("chequer_error_total_normalised",
+		sc->arErrorCheckerplay[player][0]);
+	APPENDF("chequer_error_total", sc->arErrorCheckerplay[player][1]);
+	APPENDF("chequer_error_per_move_normalised",
+		Ratio(sc->arErrorCheckerplay[player][0], unforced));
+	APPENDF("chequer_error_per_move",
+		Ratio(sc->arErrorCheckerplay[player][1], unforced));
+	APPENDI("chequer_rating",
+		GetRating(Ratio
+			  (scMatch.arErrorCheckerplay[player][0],
+			   unforced)));
+	APPENDI("very_lucky_rolls", sc->anLuck[player][LUCK_VERYGOOD]);
+	APPENDI("lucky_rolls", sc->anLuck[player][LUCK_GOOD]);
+	APPENDI("unmarked_rolls", sc->anLuck[player][LUCK_NONE]);
+	APPENDI("unlucky_rolls", sc->anLuck[player][LUCK_BAD]);
+	APPENDI("very_unlucky_rolls", sc->anLuck[player][LUCK_VERYBAD]);
+	APPENDF("luck_total_normalised", sc->arLuck[player][0]);
+	APPENDF("luck_total", sc->arLuck[player][1]);
+	APPENDF("luck_per_move_normalised",
+		Ratio(sc->arLuck[player][0], totalmoves));
+	APPENDF("luck_per_move", Ratio(sc->arLuck[player][1], totalmoves));
+	APPENDI("luck_rating",
+		getLuckRating(Ratio(sc->arLuck[player][0], totalmoves)));
+	APPENDI("total_cube_decisions", sc->anTotalCube[player]);
+	APPENDI("close_cube_decisions", sc->anCloseCube[player]);
+	g_print("close, %d %d\n", player, sc->anCloseCube[player]);
+	APPENDI("doubles", sc->anDouble[player]);
+	APPENDI("takes", sc->anTake[player]);
+	APPENDI("passes", sc->anPass[player]);
+	APPENDI("missed_doubles_below_cp",
+		sc->anCubeMissedDoubleDP[player]);
+	APPENDI("missed_doubles_above_cp",
+		sc->anCubeMissedDoubleTG[player]);
+	APPENDI("wrong_doubles_below_dp", sc->anCubeWrongDoubleDP[player]);
+	APPENDI("wrong_doubles_above_tg", sc->anCubeWrongDoubleTG[player]);
+	APPENDI("wrong_takes", sc->anCubeWrongTake[player]);
+	APPENDI("wrong_passes", sc->anCubeWrongPass[player]);
+	APPENDF("error_missed_doubles_below_cp_normalised",
+		sc->arErrorMissedDoubleDP[player][0]);
+	APPENDF("error_missed_doubles_above_cp_normalised",
+		sc->arErrorMissedDoubleTG[player][0]);
+	APPENDF("error_wrong_doubles_below_dp_normalised",
+		sc->arErrorWrongDoubleDP[player][0]);
+	APPENDF("error_wrong_doubles_above_tg_normalised",
+		sc->arErrorWrongDoubleTG[player][0]);
+	APPENDF("error_wrong_takes_normalised",
+		sc->arErrorWrongTake[player][0]);
+	APPENDF("error_wrong_passes_normalised",
+		sc->arErrorWrongPass[player][0]);
+	APPENDF("error_missed_doubles_below_cp",
+		sc->arErrorMissedDoubleDP[player][1]);
+	APPENDF("error_missed_doubles_above_cp",
+		sc->arErrorMissedDoubleTG[player][1]);
+	APPENDF("error_wrong_doubles_below_dp",
+		sc->arErrorWrongDoubleDP[player][1]);
+	APPENDF("error_wrong_doubles_above_tg",
+		sc->arErrorWrongDoubleTG[player][1]);
+	APPENDF("error_wrong_takes", sc->arErrorWrongTake[player][1]);
+	APPENDF("error_wrong_passes", sc->arErrorWrongPass[player][1]);
+	APPENDF("cube_error_total_normalised",
+		errorskill * sc->anCloseCube[player]);
+	APPENDF("cube_error_total", errorcost * sc->anCloseCube[player]);
+	APPENDF("cube_error_per_move_normalised", errorskill);
+	APPENDF("cube_error_per_move", errorcost);
+	APPENDI("cube_rating", GetRating(errorskill));;
+	APPENDF("overall_error_total_normalised",
+		errorskill * sc->anCloseCube[player] +
+		sc->arErrorCheckerplay[player][0]);
+	APPENDF("overall_error_total",
+		errorcost * sc->anCloseCube[player] +
+		sc->arErrorCheckerplay[player][1]);
+	APPENDF("overall_error_per_move_normalised",
+		Ratio(errorskill * sc->anCloseCube[player] +
+		      sc->arErrorCheckerplay[player][0],
+		      sc->anCloseCube[player] + unforced));
+	APPENDF("overall_error_per_move",
+		Ratio(errorcost * sc->anCloseCube[player] +
+		      sc->arErrorCheckerplay[player][1],
+		      sc->anCloseCube[player] + unforced));
+	APPENDI("overall_rating",
+		GetRating(Ratio
+			  (errorskill * sc->anCloseCube[player] +
+			   sc->arErrorCheckerplay[player][0],
+			   sc->anCloseCube[player] + unforced)));
+	APPENDF("actual_result", sc->arActualResult[player]);
+	APPENDF("luck_adjusted_result", sc->arLuckAdj[player]);
+	APPENDI("snowie_moves",
+		totalmoves + scMatch.anTotalMoves[!player]);
+	APPENDF("snowie_error_rate_per_move",
+		Ratio(errorskill * scMatch.anCloseCube[player] +
+		      scMatch.arErrorCheckerplay[player][0],
+		      totalmoves + scMatch.anTotalMoves[!player]));
+	/*matches */
+	APPENDF("luck_based_fibs_rating_diff", 0.0);
+	APPENDF("error_based_fibs_rating", 0.0);
+	APPENDF("chequer_rating_loss", 0.0);
+	APPENDF("cube_rating_loss", 0.0);
+	/*money */
+	APPENDF("actual_advantage", 0.0);
+	APPENDF("actual_advantage_ci", 0.0);
+	APPENDF("luck_adjusted_advantage", 0.0);
+	APPENDF("luck_adjusted_advantage_ci", 0.0);
+	/*time */
+	APPENDI("time_penalties", 0);
+	APPENDF("time_penalty_loss_normalised", 0.0);
+	APPENDF("time_penalty_loss", 0.0);
+	r = 0.5f + scMatch.arActualResult[player] -
+	    scMatch.arLuck[player][1] + scMatch.arLuck[!player][1];
+	if (nMatchTo && r > 0.0f && r < 1.0f)
+		APPENDF("luck_based_fibs_rating_diff",
+			relativeFibsRating(r, nMatchTo));
+	if (nMatchTo && (scMatch.fCube || scMatch.fMoves)) {
+		APPENDF("error_based_fibs_rating",
+			absoluteFibsRating(aaaar[CHEQUERPLAY][PERMOVE]
+					   [player][NORMALISED],
+					   aaaar[CUBEDECISION][PERMOVE]
+					   [player][NORMALISED], nMatchTo,
+					   rRatingOffset));
+		if (scMatch.anUnforcedMoves[player])
+			APPENDF("chequer_rating_loss",
+				absoluteFibsRatingChequer(aaaar
+							  [CHEQUERPLAY]
+							  [PERMOVE][player]
+							  [NORMALISED],
+							  nMatchTo));
+		if (scMatch.anCloseCube[player])
+			APPENDF("cube_rating_loss",
+				absoluteFibsRatingCube(aaaar[CUBEDECISION]
+						       [PERMOVE][player]
+						       [NORMALISED],
+						       nMatchTo));
 	}
 
 	/* for money sessions only */
-	if (scMatch.fDice && !nMatchTo && scMatch.nGames > 1)
-	{
-		s_money = g_strdup_printf("%f,%f,%f,%f",
-			scMatch.arActualResult[ player ] / scMatch.nGames,
-			1.95996f * sqrt( scMatch.arVarianceActual[ player ] / scMatch.nGames ),
-			scMatch.arLuckAdj[ player ] / scMatch.nGames,
-			1.95996f * sqrt( scMatch.arVarianceLuckAdj[ player ] / scMatch.nGames ) );
+	if (scMatch.fDice && !nMatchTo && scMatch.nGames > 1) {
+		APPENDF("actual_advantage",
+			scMatch.arActualResult[player] / scMatch.nGames);
+		APPENDF("actual_advantage_ci",
+			1.95996f * sqrt(scMatch.arVarianceActual[player] /
+					scMatch.nGames));
+		APPENDF("luck_adjusted_advantage",
+			scMatch.arLuckAdj[player] / scMatch.nGames);
+		APPENDF("luck_adjusted_advantage_ci",
+			1.95996f * sqrt(scMatch.arVarianceLuckAdj[player] /
+					scMatch.nGames));
 	}
-	else
-		s_money = g_strdup("NULL,NULL,NULL,NULL");
 
-	/* time penalties */
-	s_time = g_strdup("0, 0, 0");	/* Are these currently in the system? */
-
-	buf = g_strdup_printf("INSERT INTO %s VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", table,
-		s_id, s_cheq, s_luck, s_cube, s_overall, NS(s_fibsdiff), NS(s_fibstotal), NS(s_fibscheq), NS(s_fibscube), s_money, s_time);
-
+	g_string_truncate(column, column->len - 2);
+	g_string_truncate(value, value->len - 2);
+	buf = g_strdup_printf("INSERT INTO %s (%s) VALUES(%s)", table,
+			      column->str, value->str);
 	ret = pdb->UpdateCommand(buf);
-
 	g_free(buf);
-	g_free(s_id);
-	g_free(s_cheq);
-	g_free(s_luck);
-	g_free(s_cube);
-	g_free(s_overall);
-	g_free(s_fibsdiff);
-	g_free(s_fibstotal);
-	g_free(s_fibscheq);
-	g_free(s_fibscube);
-	g_free(s_money);
-	g_free(s_time);
-
+	g_string_free(column, TRUE);
+	g_string_free(value, TRUE);
 	return ret;
 }
 
@@ -377,7 +440,7 @@ DBProvider *ConnectToDB(DBProviderType dbType)
 	return NULL;
 }
 
-void AddGames(DBProvider *pdb, int session_id, int player_id0, int player_id1)
+static void AddGames(DBProvider *pdb, int session_id, int player_id0, int player_id1)
 {
 	int gamenum = 0;
 	listOLD *plGame, *pl = lMatch.plNext;
@@ -394,8 +457,8 @@ void AddGames(DBProvider *pdb, int session_id, int player_id0, int player_id1)
 
 		if (pdb->UpdateCommand(buf))
 		{
-			AddStats(pdb, game_id, player_id0, 0, "gamestat", ms.nMatchTo);
-			AddStats(pdb, game_id, player_id1, 1, "gamestat", ms.nMatchTo);
+			AddStats(pdb, game_id, player_id0, 0, "gamestat", ms.nMatchTo, &(pmgi->sc));
+			AddStats(pdb, game_id, player_id1, 1, "gamestat", ms.nMatchTo, &(pmgi->sc));
 		}
 		g_free(buf);
 		pl = pl->plNext;
@@ -466,10 +529,13 @@ extern void CommandRelationalAddMatch( char *sz )
 				session_id, GetMatchCheckSum(), player_id0, player_id1,
 				MatchResult(ms.nMatchTo), ms.nMatchTo, NS(mi.pchRating[0]), NS(mi.pchRating[1]),
 				NS(mi.pchEvent), NS(mi.pchRound), NS(mi.pchPlace), NS(mi.pchAnnotator), NS(mi.pchComment), NS(date));
+
+	updateStatisticsMatch ( &lMatch );
+
 	if (pdb->UpdateCommand(buf))
 	{
-		if (AddStats(pdb, session_id, player_id0, 0, "matchstat", ms.nMatchTo) &&
-			AddStats(pdb, session_id, player_id1, 1, "matchstat", ms.nMatchTo))
+		if (AddStats(pdb, session_id, player_id0, 0, "matchstat", ms.nMatchTo, &scMatch) &&
+			AddStats(pdb, session_id, player_id1, 1, "matchstat", ms.nMatchTo, &scMatch))
 		{
 			if (storeGameStats)
 				AddGames(pdb, session_id, player_id0, player_id1);

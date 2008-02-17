@@ -6,10 +6,10 @@ extern int storeGameStats;
 typedef struct _DBProvider
 {
 	int (*Connect)(const char *database, const char *user, const char *password);
-	void (*Disconnect)();
+	void (*Disconnect)(void);
 	RowSet *(*Select)(const char* str);
 	int (*UpdateCommand)(const char* str);
-	void (*Commit)();
+	void (*Commit)(void);
 	GList *(*GetDatabaseList)(const char *user, const char *password);
 	int (*DeleteDatabase)(const char *database, const char *user, const char *password);
 

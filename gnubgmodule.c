@@ -748,7 +748,7 @@ PythonEq2mwc( PyObject* self UNUSED_PARAM, PyObject *args ) {
 
 }
 
-extern PyObject *PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *args )
+static PyObject *PythonMatchChecksum( PyObject* self UNUSED_PARAM, PyObject *args )
 {
 	return PyString_FromString(GetMatchCheckSum());
 }

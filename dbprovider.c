@@ -23,17 +23,16 @@
  */
 
 #include "config.h"
-
+#if USE_PYTHON
+#include "gnubgmodule.h"
+#include <Python.h>
+#endif
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <string.h>
 #include "dbprovider.h"
-#include "gnubgmodule.h"
 #include "backgammon.h"
 #include "util.h"
-#if USE_PYTHON
-#include <Python.h>
-#endif
 #include <glib/gi18n.h>
 
 DBProviderType dbProviderType = 0;
@@ -43,25 +42,27 @@ int storeGameStats = TRUE;
 PyObject *pdict;
 RowSet* ConvertPythonToRowset(PyObject *v);
 
-int PySQLiteConnect(const char *dbfilename, const char *user, const char *password);
-int PyMySQLConnect(const char *dbfilename, const char *user, const char *password);
-int PyPostgreConnect(const char *dbfilename, const char *user, const char *password);
-void PyDisconnect();
-RowSet *PySelect(const char* str);
-int PyUpdateCommand(const char* str);
-void PyCommit();
-GList *PyMySQLGetDatabaseList(const char *user, const char *password);
-GList *PyPostgreGetDatabaseList(const char *user, const char *password);
-int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password);
-int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+#if !HAVE_SQLITE
+static int PySQLiteConnect(const char *dbfilename, const char *user, const char *password);
 #endif
-int SQLiteConnect(const char *dbfilename, const char *user, const char *password);
-void SQLiteDisconnect();
-RowSet *SQLiteSelect(const char* str);
-int SQLiteUpdateCommand(const char* str);
-void SQLiteCommit();
-GList *SQLiteGetDatabaseList(const char *user, const char *password);
-int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+static int PyMySQLConnect(const char *dbfilename, const char *user, const char *password);
+static int PyPostgreConnect(const char *dbfilename, const char *user, const char *password);
+static void PyDisconnect(void);
+static RowSet *PySelect(const char* str);
+static int PyUpdateCommand(const char* str);
+static void PyCommit(void);
+static GList *PyMySQLGetDatabaseList(const char *user, const char *password);
+static GList *PyPostgreGetDatabaseList(const char *user, const char *password);
+static int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+static int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+#endif
+static int SQLiteConnect(const char *dbfilename, const char *user, const char *password);
+static void SQLiteDisconnect(void);
+static RowSet *SQLiteSelect(const char* str);
+static int SQLiteUpdateCommand(const char* str);
+static void SQLiteCommit(void);
+static GList *SQLiteGetDatabaseList(const char *user, const char *password);
+static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 
 #if NUM_PROVIDERS
 DBProvider providers[NUM_PROVIDERS] =
@@ -83,7 +84,7 @@ DBProvider providers[NUM_PROVIDERS] =
 };
 
 #else
-DBProvider providers[1] = {0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0};
+DBProvider providers[1] = {{0, 0, 0, 0, 0, 0, 0, "No Providers", "No Providers", "No Providers", 0, 0, 0, 0, 0}};
 #endif
 
 const char *GetProviderName(int i)
@@ -91,7 +92,7 @@ const char *GetProviderName(int i)
 	return providers[i].name;
 }
 
-DBProviderType GetTypeFromName(const char *name)
+static DBProviderType GetTypeFromName(const char *name)
 {
 	int i;
 	for (i = 0; i < NUM_PROVIDERS; i++)
@@ -217,8 +218,8 @@ int PyPostgreConnect(const char *dbfilename, const char *user, const char *passw
 	}
 	return 1;
 }
-
-int PySQLiteConnect(const char *dbfilename, const char *user, const char *password)
+#if !HAVE_SQLITE
+static int PySQLiteConnect(const char *dbfilename, const char *user, const char *password)
 {
 	PyObject *con;
 	char *name, *filename, *buf;
@@ -251,8 +252,9 @@ int PySQLiteConnect(const char *dbfilename, const char *user, const char *passwo
 	else
 		return 1;
 }
+#endif
 
-void PyDisconnect(void)
+static void PyDisconnect(void)
 {
 	if (!PyRun_String("PyDisconnect()", Py_eval_input, pdict, pdict))
 		PyErr_Print();
@@ -293,22 +295,7 @@ int PyUpdateCommand(const char* str)
 		return TRUE;
 }
 
-int PyUpdateCommandReturn(const char* str)
-{
-	char *buf = g_strdup_printf("PyUpdateCommandReturn(\"%s\")", str);
-	/* Run update */
-	PyObject *ret = PyRun_String(buf, Py_eval_input, pdict, pdict);
-	g_free(buf);
-	if (!ret)
-	{
-		PyErr_Print();
-		return FALSE;
-	}
-	else
-		return TRUE;
-}
-
-void PyCommit(void)
+static void PyCommit(void)
 {
 	if (!PyRun_String("PyCommit()", Py_eval_input, pdict, pdict))
 		PyErr_Print();
@@ -493,7 +480,7 @@ int SQLiteConnect(const char *dbfilename, const char *user, const char *password
 		return -1;
 }
 
-void SQLiteDisconnect(void)
+static void SQLiteDisconnect(void)
 {
 	sqlite3_close(connection);
 }
@@ -531,7 +518,7 @@ RowSet *SQLiteSelect(const char* str)
 			ret = SQLITE_OK;
 	}
 	if (ret != SQLITE_OK)
-		printf("SQLite error: %s\n", sqlite3_errmsg(connection));
+		outputerrf("SQL error: %s\n", sqlite3_errmsg(connection));
 
 	sqlite3_finalize(pStmt);
 	return rs;
@@ -543,13 +530,13 @@ int SQLiteUpdateCommand(const char* str)
 	int ret = sqlite3_exec(connection, str, NULL, NULL, &zErrMsg);
 	if (ret != SQLITE_OK)
 	{
-		printf("SQL error: %s\n", zErrMsg);
+		outputerrf("SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
 	return (ret == SQLITE_OK);
 }
 
-void SQLiteCommit(void)
+static void SQLiteCommit(void)
 {	/* No transaction in sqlite by default */
 }
 #endif

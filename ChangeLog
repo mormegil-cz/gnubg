@@ -1,3 +1,10 @@
+Sun Feb 17 13:19:58 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* bearoff.c, dbprovider.c, dbprovider.h, gnubg.sql, gnubgmodule.c,
+	gtkrelational.c, gtkrelational.h, relational.c: more relational db
+	changes and a few minor compiler warnings. Added new item to matchstat
+	and gamestat.
+
 Fri Feb 15 16:59:43 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* drawboard.c: revert to Jan 19 after accidental checkin (fix board

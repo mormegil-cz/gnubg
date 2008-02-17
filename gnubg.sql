@@ -158,6 +158,7 @@ CREATE TABLE matchstat (
    ,overall_rating                    INTEGER NOT NULL
    ,actual_result                     FLOAT   NOT NULL
    ,luck_adjusted_result              FLOAT   NOT NULL
+   ,snowie_moves                      INTEGER NOT NULL
    ,snowie_error_rate_per_move        FLOAT   NOT NULL
    -- for matches only
    ,luck_based_fibs_rating_diff       FLOAT           
@@ -293,6 +294,7 @@ CREATE TABLE gamestat (
    ,overall_rating                    INTEGER NOT NULL
    ,actual_result                     FLOAT   NOT NULL
    ,luck_adjusted_result              FLOAT   NOT NULL
+   ,snowie_moves                      INTEGER NOT NULL
    ,snowie_error_rate_per_move        FLOAT   NOT NULL
    -- for matches only
    ,luck_based_fibs_rating_diff       FLOAT           

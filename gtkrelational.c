@@ -93,9 +93,9 @@ static GtkTreeModel *create_model(void)
 	GtkTreeIter iter;
 	RowSet *rs;
 
-	long moves[3];
+	long moves[4];
 	unsigned int i, j;
-	gfloat stats[13];
+	gfloat stats[14];
 
 	/* create list store */
 	playerStore = gtk_list_store_new(NUM_COLUMNS,
@@ -118,6 +118,7 @@ static GtkTreeModel *create_model(void)
 		      "SUM(total_moves),"
 		      "SUM(unforced_moves),"
 		      "SUM(close_cube_decisions),"
+		      "SUM(snowie_moves),"
 		      "SUM(error_missed_doubles_below_cp_normalised),"
 		      "SUM(error_missed_doubles_above_cp_normalised),"
 		      "SUM(error_wrong_doubles_below_dp_normalised),"
@@ -138,11 +139,11 @@ static GtkTreeModel *create_model(void)
 
 	for (j = 1; j < rs->rows; ++j)
 	{
-		for (i = 1; i < 4; ++i)
+		for (i = 1; i < 5; ++i)
 			moves[i - 1] = strtol(rs->data[j][i], NULL, 0);
 
-		for (i = 4; i < 13; ++i)
-			stats[i - 4] = (float)g_strtod(rs->data[j][i], NULL);
+		for (i = 5; i < 14; ++i)
+			stats[i - 5] = (float)g_strtod(rs->data[j][i], NULL);
 
 		gtk_list_store_append(playerStore, &iter);
 		gtk_list_store_set(playerStore, &iter,
@@ -155,23 +156,23 @@ static GtkTreeModel *create_model(void)
 				   COLUMN_GCUE,
 					Ratio(stats[6], moves[2]) * 1000.0f,
 				   COLUMN_SNWE,
-					Ratio(stats[6] + stats[7], moves[0]) * 500.0f,
+					Ratio(stats[6] + stats[7], moves[3]) * 1000.0f,
 				   COLUMN_SCHE,
-					Ratio(stats[7], moves[0]) * 500.0f,
+					Ratio(stats[7], moves[3]) * 1000.0f,
 				   COLUMN_SCUE,
-					Ratio(stats[6], moves[0]) * 500.0f,
+					Ratio(stats[6], moves[3]) * 1000.0f,
 				   COLUMN_WRPA,
-					Ratio(stats[5], moves[0]) * 500.0f,
+					Ratio(stats[5], moves[3]) * 1000.0f,
 				   COLUMN_WRTA,
-					Ratio(stats[4], moves[0]) * 500.0f,
+					Ratio(stats[4], moves[3]) * 1000.0f,
 				   COLUMN_WDTG,
-					Ratio(stats[3], moves[0]) * 500.0f,
+					Ratio(stats[3], moves[3]) * 1000.0f,
 				   COLUMN_WDBD,
-					Ratio(stats[2], moves[0]) * 500.0f,
+					Ratio(stats[2], moves[3]) * 1000.0f,
 				   COLUMN_MDAC,
-					Ratio(stats[1], moves[0]) * 500.0f,
+					Ratio(stats[1], moves[3]) * 1000.0f,
 				   COLUMN_MDBC,
-					Ratio(stats[0], moves[0]) * 500.0f,
+					Ratio(stats[0], moves[3]) * 1000.0f,
 				   COLUMN_LUCK,
 					Ratio(stats[8], moves[0]) * 1000.0f,
 				   -1);
@@ -250,7 +251,7 @@ static GtkWidget *do_list_store(void)
 	return treeview;
 }
 
-char *GetSelectedPlayer()
+static char *GetSelectedPlayer(void)
 {
 	char *name;
 	GtkTreeModel *model;
@@ -309,7 +310,7 @@ static void ShowRelationalClicked(GtkTreeView *treeview, GtkTreePath *path,
 	g_free(name);
 }
 
-GtkWidget *GtkRelationalShowStats()
+static GtkWidget *GtkRelationalShowStats(void)
 {
 	GtkWidget *scrolledWindow;
 
@@ -345,10 +346,12 @@ static GtkWidget *GetRelList(RowSet * pRow)
 	unsigned int i;
 	PangoRectangle logical_rect;
 	PangoLayout *layout;
-	GtkWidget *pwList = gtk_clist_new(pRow->cols);
+	unsigned int cols = pRow ? pRow->cols : 0;
+	unsigned int rows = pRow ? pRow->rows : 0;
+	GtkWidget *pwList = gtk_clist_new(cols);
 	gtk_clist_column_titles_show(GTK_CLIST(pwList));
 	gtk_clist_column_titles_passive(GTK_CLIST(pwList));
-	for (i = 0; i < pRow->cols; i++) {
+	for (i = 0; i < cols; i++) {
 		char *widthStr = malloc(pRow->widths[i] + 1);
 		int width;
 		memset(widthStr, 'a', pRow->widths[i]);
@@ -368,7 +371,7 @@ static GtkWidget *GetRelList(RowSet * pRow)
 	}
 	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
 
-	for (i = 1; i < pRow->rows; i++) {
+	for (i = 1; i < rows; i++) {
 		gtk_clist_append(GTK_CLIST(pwList), pRow->data[i]);
 	}
 	return pwList;
@@ -434,26 +437,24 @@ static void RelationalQuery(GtkWidget * pw, GtkWidget * pwVbox)
 		query = pch;
 
 	rs = RunQuery(query);
+	gtk_widget_destroy(pwQueryResult);
+	pwQueryResult = GetRelList(rs);
+	gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, 
+			TRUE, TRUE, 0);
+	gtk_widget_show(pwQueryResult);
 	if (rs)
-	{
-		gtk_widget_destroy(pwQueryResult);
-		pwQueryResult = GetRelList(rs);
-		gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult,
-				   TRUE, TRUE, 0);
-		gtk_widget_show(pwQueryResult);
 		FreeRowset(rs);
-	}
 
 	g_free(pch);
 }
 
-DBProvider *GetSelectedDBType(void)
+static DBProvider *GetSelectedDBType(void)
 {
 	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
 	return GetDBProvider(dbType);
 }
 
-void TryConnection(DBProvider *pdb, GtkWidget *dbList)
+static void TryConnection(DBProvider *pdb, GtkWidget *dbList)
 {
 	const char *msg;
 	DBProviderType dbType = (DBProviderType)gtk_combo_box_get_active(GTK_COMBO_BOX(dbtype));
@@ -510,12 +511,12 @@ void TryConnection(DBProvider *pdb, GtkWidget *dbList)
 	}
 }
 
-void CredentialsChanged(void)
+static void CredentialsChanged(void)
 {
 	gtk_widget_set_sensitive(login, TRUE);
 }
 
-void LoginClicked(GtkButton *button, gpointer dbList)
+static void LoginClicked(GtkButton *button, gpointer dbList)
 {
 	DBProvider *pdb = GetSelectedDBType();
 	const char *tmpUser = pdb->username, *tmpPass = pdb->password;
@@ -527,7 +528,7 @@ void LoginClicked(GtkButton *button, gpointer dbList)
 	pdb->username = tmpUser, pdb->password = tmpPass;
 }
 
-void TypeChanged(GtkComboBox *widget, gpointer dbList)
+static void TypeChanged(GtkComboBox *widget, gpointer dbList)
 {
 	DBProvider *pdb = GetSelectedDBType();
 
@@ -596,22 +597,15 @@ void CheckDatabase(const char *database)
 	optionsValid = valid;
 }
 
-char *GetSelectedDB(GtkTreeView *treeview)
+static char *GetSelectedDB(GtkTreeView * treeview)
 {
+	GtkTreeModel *model;
 	char *db = NULL;
-	GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
-	if (gtk_tree_selection_count_selected_rows(sel) == 1)
-	{
-		GValue value = {0};
-		GList *selList = gtk_tree_selection_get_selected_rows(sel, NULL);
-		GtkTreePath *path = selList->data;
-		gtk_tree_model_get_iter(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)), &selected_iter, path);
-		gtk_tree_model_get_value(gtk_tree_view_get_model(GTK_TREE_VIEW(treeview)), &selected_iter, 0, &value);
-		db = g_strdup((char*)g_value_peek_pointer(&value));
-		g_value_unset(&value);
-		gtk_tree_path_free(path);
-		g_list_free(selList);
-	}
+	GtkTreeSelection *sel = gtk_tree_view_get_selection(treeview);
+	if (gtk_tree_selection_count_selected_rows(sel) != 1)
+		return NULL;
+	gtk_tree_selection_get_selected(sel, &model, &selected_iter);
+	gtk_tree_model_get(model, &selected_iter, 0, &db, -1);
 	return db;
 }
 
@@ -625,7 +619,7 @@ static void DBListSelected(GtkTreeView *treeview, gpointer userdata)
 	}
 }
 
-void AddDBClicked(GtkButton *button, gpointer dbList)
+static void AddDBClicked(GtkButton *button, gpointer dbList)
 {
 	char* dbName = GTKGetInput(_("Add Database"), _("Database Name:"), NULL);
 	if (dbName)
@@ -648,7 +642,7 @@ void AddDBClicked(GtkButton *button, gpointer dbList)
 	}
 }
 
-void DelDBClicked(GtkButton *button, gpointer dbList)
+static void DelDBClicked(GtkButton *button, gpointer dbList)
 {
 	char *db = GetSelectedDB(GTK_TREE_VIEW(dbList));
 	if (db && GetInputYN(_("Are you sure you want to delete all the matches in this database?")))
@@ -666,12 +660,12 @@ void DelDBClicked(GtkButton *button, gpointer dbList)
 	}
 }
 
-extern void RelationalOptionsShown()
+extern void RelationalOptionsShown(void)
 {	/* Setup the options when tab selected */
 	gtk_combo_box_set_active(GTK_COMBO_BOX(dbtype), dbProviderType);
 }
 
-extern void RelationalSaveOptions()
+extern void RelationalSaveOptions(void)
 {
 	if (optionsValid)
 	{
@@ -682,7 +676,7 @@ extern void RelationalSaveOptions()
 	}
 }
 
-extern GtkWidget *RelationalOptions()
+extern GtkWidget *RelationalOptions(void)
 {
 	unsigned int i;
 	GtkWidget *hb1, *hb2, *vb1, *vb2, *table, *lbl, *align,
@@ -781,6 +775,7 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	    *pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen,
 	    *pwn, *pwLabel, *pwScrolled;
 	DBProvider *pdb;
+	static GtkTextBuffer *query = NULL; /*remember query*/
 
 	if (((pdb = ConnectToDB(dbProviderType)) == NULL) || RunQueryValue(pdb, "count(*) FROM player") < 2)
 	{
@@ -888,7 +883,16 @@ extern void GtkShowRelational(gpointer p, guint n, GtkWidget * pw)
 	gtk_misc_set_alignment(GTK_MISC(pwLabel), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(pwVbox), pwLabel, FALSE, FALSE, 0);
 
-	pwQueryText = gtk_text_view_new();
+	if (!query)
+	{
+		query = gtk_text_buffer_new(NULL);
+		pwQueryText = gtk_text_view_new_with_buffer(query);
+		gtk_text_buffer_set_text(query, "s.session_id, s.length, p1.name, p2.name from player p1, player p2 join session s on s.player_id0 = p1.player_id and s.player_id1 = p2.player_id", -1);
+	}
+	else
+		pwQueryText = gtk_text_view_new_with_buffer(query);
+
+		
 	gtk_text_view_set_border_window_size(GTK_TEXT_VIEW(pwQueryText),
 					     GTK_TEXT_WINDOW_TOP,
 					     QUERY_BORDER);

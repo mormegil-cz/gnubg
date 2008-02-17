@@ -20,6 +20,10 @@
  */
 
 #include "config.h"
+#if USE_MULTITHREAD
+/*must be first here because of strange warning from mingw*/
+#include "multithread.h"
+#endif
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -39,9 +43,6 @@
 #include <errno.h>
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-#if USE_MULTITHREAD
-#include "multithread.h"
 #endif
 
 #if WIN32
