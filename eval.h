@@ -469,11 +469,6 @@ EvalOver( const TanBoard anBoard, float arOutput[], const bgvariation bgv, NNSta
 extern float
 KleinmanCount (int nPipOnRoll, int nPipNotOnRoll);
 
-extern int 
-EvaluatePositionCubeful( TanBoard anBoard, float arCfOutput[],
-                         float arClOutput[ NUM_OUTPUTS ],
-                         cubeinfo *pci, evalcontext *pec, int nPlies );
-
 extern int
 GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci );
 
