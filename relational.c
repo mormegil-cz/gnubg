@@ -163,10 +163,10 @@ float Ratio(float a, int b)
 }
 
 #define NS(x) (x == NULL) ? "NULL" : x
-#define APPENDF(x,y) g_string_append_printf(column, "%s, ", x); \
-	g_string_append_printf(value, "'%f', ", y);
-#define APPENDI(x,y) g_string_append_printf(column, "%s, ", x); \
-	g_string_append_printf(value, "'%i', ", y);
+#define APPENDF(x,y) {g_string_append_printf(column, "%s, ", x); \
+	g_string_append_printf(value, "'%f', ", y);}
+#define APPENDI(x,y) {g_string_append_printf(column, "%s, ", x); \
+	g_string_append_printf(value, "'%i', ", y);}
 
 static int AddStats(DBProvider * pdb, int gm_id, int player_id, int player,
 		    const char *table, int nMatchTo, statcontext * sc)
@@ -235,7 +235,6 @@ static int AddStats(DBProvider * pdb, int gm_id, int player_id, int player,
 		getLuckRating(Ratio(sc->arLuck[player][0], totalmoves)));
 	APPENDI("total_cube_decisions", sc->anTotalCube[player]);
 	APPENDI("close_cube_decisions", sc->anCloseCube[player]);
-	g_print("close, %d %d\n", player, sc->anCloseCube[player]);
 	APPENDI("doubles", sc->anDouble[player]);
 	APPENDI("takes", sc->anTake[player]);
 	APPENDI("passes", sc->anPass[player]);
@@ -302,20 +301,11 @@ static int AddStats(DBProvider * pdb, int gm_id, int player_id, int player,
 		Ratio(errorskill * scMatch.anCloseCube[player] +
 		      scMatch.arErrorCheckerplay[player][0],
 		      totalmoves + scMatch.anTotalMoves[!player]));
-	/*matches */
-	APPENDF("luck_based_fibs_rating_diff", 0.0);
-	APPENDF("error_based_fibs_rating", 0.0);
-	APPENDF("chequer_rating_loss", 0.0);
-	APPENDF("cube_rating_loss", 0.0);
-	/*money */
-	APPENDF("actual_advantage", 0.0);
-	APPENDF("actual_advantage_ci", 0.0);
-	APPENDF("luck_adjusted_advantage", 0.0);
-	APPENDF("luck_adjusted_advantage_ci", 0.0);
 	/*time */
 	APPENDI("time_penalties", 0);
 	APPENDF("time_penalty_loss_normalised", 0.0);
 	APPENDF("time_penalty_loss", 0.0);
+	/* matches only */
 	r = 0.5f + scMatch.arActualResult[player] -
 	    scMatch.arLuck[player][1] + scMatch.arLuck[!player][1];
 	if (nMatchTo && r > 0.0f && r < 1.0f)
@@ -345,6 +335,7 @@ static int AddStats(DBProvider * pdb, int gm_id, int player_id, int player,
 
 	/* for money sessions only */
 	if (scMatch.fDice && !nMatchTo && scMatch.nGames > 1) {
+
 		APPENDF("actual_advantage",
 			scMatch.arActualResult[player] / scMatch.nGames);
 		APPENDF("actual_advantage_ci",
@@ -836,7 +827,7 @@ extern RowSet* RunQuery(char *sz)
 extern void CommandRelationalSelect(char *sz)
 {
 #if !USE_GTK
-	int i, j;
+	unsigned int i, j;
 #endif
 	RowSet *rs;
 
@@ -864,7 +855,7 @@ extern void CommandRelationalSelect(char *sz)
 		if (i == 1)
 		{	/* Underline headings */
 			char* line, *p;
-			int k;
+			unsigned int k;
 			int totalwidth = 0;
 			for (k = 0; k < rs->cols; k++)
 			{

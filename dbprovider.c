@@ -518,7 +518,7 @@ RowSet *SQLiteSelect(const char* str)
 			ret = SQLITE_OK;
 	}
 	if (ret != SQLITE_OK)
-		outputerrf("SQL error: %s\n", sqlite3_errmsg(connection));
+		outputerrf("SQL error: %s\nfrom '%s'", sqlite3_errmsg(connection), str);
 
 	sqlite3_finalize(pStmt);
 	return rs;
@@ -530,7 +530,7 @@ int SQLiteUpdateCommand(const char* str)
 	int ret = sqlite3_exec(connection, str, NULL, NULL, &zErrMsg);
 	if (ret != SQLITE_OK)
 	{
-		outputerrf("SQL error: %s\n", zErrMsg);
+		outputerrf("SQL error: %s\nfrom '%s'", zErrMsg, str);
 		sqlite3_free(zErrMsg);
 	}
 	return (ret == SQLITE_OK);

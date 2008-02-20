@@ -1,5 +1,6 @@
 #include "relational.h"
 #include <stdio.h>
+#include <glib.h>
 
 extern int storeGameStats;
 

@@ -1,3 +1,10 @@
+Wed Feb 20 23:52:48 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* relational.c: fix bug caused by APPENDI and APPENDF not being
+	properly {}'ed.
+	* dbprovider.h, relational.c: fix minor compiler warnings.
+	* dbprovider.c: add input string to SQL warnings.
+
 Wed Feb 20 23:50:02 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkgame.c: update GTKOutput to use a g_string instead of a list.
