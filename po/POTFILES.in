@@ -27,7 +27,6 @@ boarddim.h
 boardpos.c
 boardpos.h
 common.h
-config.h
 copying.c
 corecount.c
 credits.c
