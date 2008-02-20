@@ -309,12 +309,11 @@ GtkAccelGroup *pagMain;
 GtkTooltips *ptt;
 GtkItemFactory *pif;
 guint nNextTurn = 0; /* GTK idle function */
-static int cchOutput;
 static guint idOutput, idProgress;
-static listOLD lOutput;
 int fTTY = TRUE;
 int fGUISetWindowPos = TRUE;
 int frozen = FALSE;
+static GString *output_str = NULL;
 
 static guint nStdin, nDisabledCount = 1;
 
@@ -585,7 +584,7 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
     if( an[ 0 ] < 0 )
 	return;
 
-    outputpostpone();
+    outputoff();
 
     valChanged = (1 << an[ 0 ] != ms.nCube);
     if (valChanged) {
@@ -594,11 +593,6 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
     }
 
     if( an[ 1 ] != ms.fCubeOwner ) {
-	if (valChanged) {
-		/* Avoid 2 line message, as message box gets in the way */
-	    char* pMsg = lOutput.plNext->p;
-	    pMsg[strlen(pMsg) - 1] = ' ';
-	}
 	if( an[ 1 ] >= 0 ) {
 	    sprintf( sz, "set cube owner %d", an[ 1 ] );
 	    UserCommand( sz );
@@ -606,7 +600,7 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
 	    UserCommand( "set cube centre" );
     }
     
-    outputresume();
+    outputon();
 }
 
 static int fAutoCommentaryChange;
@@ -3926,8 +3920,8 @@ extern void InitGTK(int *argc, char ***argv)
 
 	CreateMainWindow();
 
-	/*Create list for handling messages from output* functions*/
-	ListCreate(&lOutput);
+	/*Create string for handling messages from output* functions*/
+	output_str = g_string_new(NULL);
 
 	cb = gdk_atom_intern("CLIPBOARD", TRUE);
 	clipboard = gtk_clipboard_get(cb);
@@ -4215,65 +4209,36 @@ extern int GtkTutor ( char *sz )
 }
 
 extern void GTKOutput( const char *sz ) {
-
     if( !sz || !*sz )
 	return;
-    
-    cchOutput += strlen( sz );
-
-    ListInsert( &lOutput, (char *)sz );
+    g_string_append(output_str, sz);
 }
 
 extern void GTKOutputX( void ) {
-
-    char *sz, *pchSrc, *pchDest;
-    listOLD *pl;
-    GtkTextBuffer *buffer;
-    GtkTextIter iter;
-
-    if( !cchOutput )
-	return;
-    
-    pchDest = sz = g_malloc( cchOutput + 2 );	/* + 2 as /n/0 may be added */
-
-    for( pl = lOutput.plNext; pl != &lOutput; pl = pl->plNext ) {
-	pchSrc = pl->p;
-
-	while( *pchSrc )
-	    *pchDest++ = *pchSrc++;
-
-	g_free( pl->p );
-    }
-
-    while( lOutput.plNext != &lOutput )
-	ListDelete( lOutput.plNext );
-
-    while( pchDest > sz && pchDest[ -1 ] == '\n' )
-	pchDest--;
-    
-    *pchDest = 0;
-
-    if( cchOutput > 80 || strchr( sz, '\n' ) ) {
-      /* Long message; display in dialog. */
-      if (!PanelShowing(WINDOW_MESSAGE))
-        GTKMessage( sz, DT_INFO );
-    }
-    else
-      /* Short message; display in status bar. */
-      gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
-    
-    if (PanelShowing(WINDOW_MESSAGE) && *sz ) {
-      strcat ( sz, "\n" );
-      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
-      gtk_text_buffer_get_end_iter (buffer, &iter);
-      gtk_text_buffer_insert( buffer, &iter, "\n", -1);
-      gtk_text_buffer_insert( buffer, &iter, g_strchomp(sz), -1);
-      gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW(pwMessageText),
-                      gtk_text_buffer_create_mark (buffer, "last", &iter, FALSE),
-                      0.0, TRUE, 0.0, 1.0 ); }
-      
-    cchOutput = 0;
-    g_free( sz );
+	gchar *str;
+	if (output_str->len == 0)
+		return;
+	str = g_strchomp(output_str->str);
+	if (PanelShowing(WINDOW_MESSAGE))
+	{
+		GtkTextBuffer *buffer;
+		GtkTextIter iter;
+		buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pwMessageText));
+		gtk_text_buffer_get_end_iter (buffer, &iter);
+		gtk_text_buffer_insert( buffer, &iter, "\n", -1);
+		gtk_text_buffer_insert( buffer, &iter, g_strchomp(str), -1);
+		gtk_text_view_scroll_to_mark (GTK_TEXT_VIEW(pwMessageText),
+				gtk_text_buffer_create_mark (buffer, "last", &iter, FALSE),
+				0.0, TRUE, 0.0, 1.0 );
+	}
+	else if( output_str->len > 80 || strchr( str, '\n' )) {
+		GTKMessage( str, DT_INFO );
+	}
+	else
+	{
+		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, str );
+	}
+	g_string_set_size(output_str, 0);
 }
 
 extern void GTKOutputErr( const char *sz ) {

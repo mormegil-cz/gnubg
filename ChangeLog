@@ -1,3 +1,7 @@
+Wed Feb 20 23:50:02 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkgame.c: update GTKOutput to use a g_string instead of a list.
+
 Sun Feb 17 13:19:58 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* bearoff.c, dbprovider.c, dbprovider.h, gnubg.sql, gnubgmodule.c,
