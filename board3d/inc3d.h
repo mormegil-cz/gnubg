@@ -153,7 +153,7 @@ struct _BoardData3d
 	float modelMatrix[16];
 
 	/* Display list ids and quadratics */
-	GLuint diceList, DCList, pieceList;
+	GLuint diceList, DCList, pieceList, piecePickList;
 	GLUquadricObj *qobjTex, *qobj;
 
 	/* Shadow casters */
