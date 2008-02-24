@@ -459,7 +459,7 @@ static void AddGames(DBProvider *pdb, int session_id, int player_id0, int player
 extern void CommandRelationalAddMatch( char *sz )
 {
 	DBProvider *pdb;
-	char *buf, *date;
+	char *buf, *buf2, *date;
 	char warnings[1024];
 	int session_id, existing_id, player_id0, player_id1;
 	*warnings = '\0';
@@ -492,6 +492,17 @@ extern void CommandRelationalAddMatch( char *sz )
 		if (!GetInputYN(_("Match exists, overwrite?")))
 			return;
 
+		/* Remove any game stats and games */
+		buf2 = g_strdup_printf("FROM game WHERE session_id = %d", existing_id);
+		buf = g_strdup_printf("DELETE FROM gamestat WHERE game_id in (SELECT game_id %s)", buf2);
+		pdb->UpdateCommand(buf);
+		g_free(buf);
+		buf = g_strdup_printf("DELETE %s", buf2);
+		pdb->UpdateCommand(buf);
+		g_free(buf);
+		g_free(buf2);
+
+		/* Remove any match stats and session */
 		buf = g_strdup_printf("DELETE FROM matchstat WHERE session_id = %d", existing_id);
 		pdb->UpdateCommand(buf);
 		g_free(buf);
@@ -730,7 +741,7 @@ extern void CommandRelationalShowPlayers( char *sz )
 
 extern void CommandRelationalErase(char *sz)
 {
-	char *mq, buf[1024];
+	char *mq, *gq, buf[1024];
 	DBProvider *pdb;
 	char *player_name;
 	int player_id;
@@ -752,7 +763,15 @@ extern void CommandRelationalErase(char *sz)
 	/* Get all matches involving player */
 	mq = g_strdup_printf ("FROM session WHERE player_id0 = %d OR player_id1 = %d", player_id, player_id);
 
-	/* first remove any matchstats */
+	/* first remove any gamestats and games */
+	gq = g_strdup_printf ("FROM game WHERE session_id in (select session_id %s)", mq);
+
+	sprintf(buf, "DELETE FROM gamestat WHERE game_id in (select game_id %s)", gq);
+	pdb->UpdateCommand(buf);
+	sprintf(buf, "DELETE %s", gq);
+	pdb->UpdateCommand(buf);
+
+	/* Now remove any matchstats */
 	sprintf(buf, "DELETE FROM matchstat WHERE session_id in (select session_id %s)", mq);
 	pdb->UpdateCommand(buf);
 
@@ -764,6 +783,8 @@ extern void CommandRelationalErase(char *sz)
 	sprintf(buf, "DELETE FROM player WHERE player_id = %d", player_id);
 	pdb->UpdateCommand(buf);
 
+	g_free(mq);
+	g_free(gq);
 	pdb->Commit();
 	pdb->Disconnect();
 }
