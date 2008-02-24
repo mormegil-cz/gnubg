@@ -745,33 +745,29 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 
 }
 
-static void
-EvalCube ( cubehintdata *pchd, evalcontext *pec ) {
+static void EvalCube ( cubehintdata *pchd, evalcontext *pec )
+{
+	cubeinfo ci;
+	decisionData dd;
 
-  cubeinfo ci;
-  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+	GetMatchStateCubeInfo( &ci, &pchd->ms );
 
-  GetMatchStateCubeInfo( &ci, &pchd->ms );
-  
-  ProgressStart( _("Considering cube action...") );
-
-  if ( GeneralCubeDecisionE ( aarOutput, (ConstTanBoard)pchd->ms.anBoard, &ci, 
-                              pec, 0 ) < 0 ) {
-    ProgressEnd();
-    return;
-  }
-  ProgressEnd();
+	dd.pboard = (ConstTanBoard)pchd->ms.anBoard;
+	dd.pci = &ci;
+	dd.pec = pec;
+	dd.pes = NULL;
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+		return;
 
   /* save evaluation */
 
-  memcpy ( pchd->aarOutput, aarOutput, 
+  memcpy ( pchd->aarOutput, dd.aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
   pchd->pes->et = EVAL_EVAL;
-  memcpy ( &pchd->pes->ec, pec, sizeof ( evalcontext ) );
+  memcpy ( &pchd->pes->ec, dd.pec, sizeof ( evalcontext ) );
 
   UpdateCubeAnalysis ( pchd );
-
 }
 
 static void
@@ -867,24 +863,17 @@ CubeAnalysisMWC ( GtkWidget *pw, cubehintdata *pchd ) {
 
 }
 
-
-static char *
-GetContent ( cubehintdata *pchd ) {
-
+static char *GetContent ( cubehintdata *pchd )
+{
   static char *pc;
   cubeinfo ci;
 
   GetMatchStateCubeInfo ( &ci, &pchd->ms );
-
-  pc = OutputCubeAnalysis (  pchd->aarOutput,
-                             pchd->aarStdDev,
-                            pchd->pes,
-                            &ci );
+  pc = OutputCubeAnalysis (  pchd->aarOutput, pchd->aarStdDev,
+                            pchd->pes, &ci );
 
   return pc;
-
 }
-
 
 static void
 CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {

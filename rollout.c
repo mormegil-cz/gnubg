@@ -1277,7 +1277,7 @@ void *ro_pUserData;
 
 static void UpdateProgress(void)
 {
-	if(fShowProgress) 
+	if(fShowProgress)
 	{
 		int alt;
 		rolloutcontext *prc;
@@ -1319,9 +1319,10 @@ RolloutGeneral( ConstTanBoard *apBoard,
   int nIsCubeful = 0;
   int fOutputMWCSave = fOutputMWC;
 
-void ( *fnOld )( void ) = fnTick;
-fnTick = NULL;
-
+#if !USE_MULTITHREAD
+	void ( *fnOld )( void ) = fnTick;
+	fnTick = NULL;
+#endif
   show_jsds = 1;
 
 	ajiJSD = g_alloca ( alternatives * sizeof ( jsdinfo ));
@@ -1493,7 +1494,9 @@ fnTick = NULL;
 	/* Make sure final output is upto date */
 	UpdateProgress();
 
+#if !USE_MULTITHREAD
 fnTick = fnOld;
+#endif
 
   if (log_rollouts && log_name) {
     free (log_name);

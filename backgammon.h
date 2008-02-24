@@ -27,12 +27,12 @@
 #include <stdarg.h>
 #include "analysis.h"
 #include "eval.h"
+#include "rollout.h"
 
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_NAME_LEN 32
 #define VERSION_STRING "GNU Backgammon " VERSION
 #define GNUBG_CHARSET "UTF-8"
-
 
 typedef struct _command {
 	/* Command name (NULL indicates end of list) */
@@ -182,7 +182,7 @@ typedef enum {
 	GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
 } gamestate;
 
-typedef struct {
+typedef struct _matchstate {
 	TanBoard anBoard;
 	unsigned int anDice[2];	/* (0,0) for unrolled dice */
 	int fTurn;		/* who makes the next decision */
@@ -227,6 +227,61 @@ typedef struct _storedcube {
 	evalsetup es;
 	matchstate ms;
 } storedcube;
+
+typedef struct _decisionData
+{
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+	float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+	rolloutstat aarsStatistics[ 2 ][ 2 ];
+	float aarRates[ 2 ][ 2 ];
+    cubeinfo* pci;
+	evalcontext *pec;
+	evalsetup   *pes;
+	ConstTanBoard pboard;
+	char *szOutput;
+	int n;
+} decisionData;
+
+typedef struct _moveData
+{
+	moverecord *pmr;
+	matchstate *pms;
+	const evalsetup *pesChequer;
+	evalsetup *pesCube;
+	movefilter (*aamf)[ MAX_FILTER_PLIES ];
+} moveData;
+
+typedef struct _findData
+{
+	movelist *pml;
+	ConstTanBoard pboard;
+	unsigned char *auchMove;
+	float rThr;
+	const cubeinfo* pci;
+	const evalcontext* pec;
+	movefilter (*aamf)[ MAX_FILTER_PLIES ];
+} findData;
+
+typedef struct _scoreData
+{
+	move *pm;
+	const cubeinfo *pci;
+	const evalcontext *pec;
+} scoreData;
+
+typedef enum _Async_Ret {ASR_OK, ASR_FAILED} Async_Ret;
+typedef int (*AsyncFun)(void *);
+
+int asyncDumpDecision(decisionData *pdd);
+int asyncFindMove(findData *pfd);
+int asyncScoreMove(scoreData *psd);
+int asyncEvalRoll(decisionData *pcdd);
+int asyncAnalyzeMove(moveData *pmd);
+int asyncGammonRates(decisionData *pcdd);
+int asyncMoveDecisionE(decisionData *pcdd);
+int asyncCubeDecisionE(decisionData *pcdd);
+int asyncCubeDecision(decisionData *pcdd);
+int RunAsyncProcess(int (*fn)(void *), void *data, const char *msg);
 
 /* There is a global storedmoves struct to maintain the list of moves
    for "=n" notation (e.g. "hint", "rollout =1 =2 =4").
@@ -429,6 +484,8 @@ extern int AnalyzeMove(moverecord * pmr, matchstate * pms,
 		       const evalsetup * pesChequer, evalsetup * pesCube,
 		       movefilter aamf[MAX_FILTER_PLIES][MAX_FILTER_PLIES],
 		       const int afAnalysePlayers[2], float *doubleError);
+extern void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
+                    const cubeinfo *pci, const evalcontext *pec);
 extern int CompareNames(char *sz0, char *sz1);
 extern int confirmOverwrite(const char *sz, const int f);
 extern int EPC(const TanBoard anBoard, float *arEPC, float *arMu,
@@ -472,7 +529,7 @@ extern void PortableSignal(int nSignal, RETSIGTYPE(*p) (int),
 extern void PortableSignalRestore(int nSignal, psighandler * p);
 extern void PrintCheatRoll(const int fPlayer, const int n);
 extern void ProgressEnd(void);
-extern void ProgressStart(char *sz);
+extern void ProgressStart(const char *sz);
 extern void ProgressStartValue(char *sz, int iMax);
 extern void ProgressValueAdd(int iValue);
 extern void ProgressValue(int iValue);

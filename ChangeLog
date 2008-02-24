@@ -1,3 +1,7 @@
+Sun Feb 24 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, play.c, multithreaded.c, others: Fix multi-threaded progress indicator.
+
 Wed Feb 20 23:52:48 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* relational.c: fix bug caused by APPENDI and APPENDF not being

@@ -271,7 +271,7 @@ static void MT_TaskDone(Task *pt)
 {
     MT_SafeInc(&td.doneTasks);
 #ifndef GLIB_THREADS
-	if (td.doneTasks == td.totalTasks)
+	if (td.doneTasks >= td.totalTasks)
 		SetEvent(td.alldone);
 #endif
 
@@ -353,6 +353,12 @@ AnalyzeDoubleDecison:
 		case TT_RUNCALIBRATIONEVALS:
 			RunEvals();
 			break;
+		case TT_ASYNCTASK:
+		{
+			AsyncTask *asynctask = (AsyncTask *)task;
+			td.result = asynctask->fun(asynctask->data);
+			break;
+		}
         case TT_TEST:
             printf("Test: waiting for a second");
             g_usleep(1000 * 1000);
@@ -564,7 +570,7 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
     while (!WaitForAllTasks(UI_UPDATETIME))
     {
         waits++;
-        if (pCallback && waits == callbackLoops)
+        if (pCallback && waits >= callbackLoops)
         {
             waits = 0;
             pCallback();

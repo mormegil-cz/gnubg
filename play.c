@@ -133,7 +133,7 @@ static int
 CheatDice ( unsigned int anDice[ 2 ], matchstate *pms, const int fBest );
 
 
-static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
+extern void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
                     const cubeinfo *pci, const evalcontext *pec);
 
 #if USE_GTK
@@ -861,7 +861,7 @@ static int ComputerTurn( void ) {
 
   moverecord *pmr;
   cubeinfo ci;
-  float arDouble[ 4 ], arOutput[ NUM_ROLLOUT_OUTPUTS ], rDoublePoint;
+  float arDouble[ 4 ], rDoublePoint;
 #if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
   int i, c, fTurnOrig;
@@ -882,37 +882,38 @@ static int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
       const float epsilon = 1.0e-6f;
+	  decisionData dd;
 
 #if defined (REDUCTION_CODE)
-      const evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
+      evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
 #else
-      const evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
+      evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
      
-      ProgressStart( _("Considering resignation...") );
-
-      if (ms.anDice[0] > 0) {
+	  dd.pboard = msBoard();
+	  dd.pci = &ci;
+	  dd.pec = &ecResign;
+      if (ms.anDice[0] > 0)
+	  {
           float t;
           /* Opponent has rolled the dice and then resigned. We
              want to find out if the resignation is OK after the roll */
-          EvaluateRoll (arOutput, ms.anDice[0], ms.anDice[1], msBoard(), &ci,
-                        &ecResign );
+		  RunAsyncProcess((AsyncFun)asyncEvalRoll, &dd, _("Considering resignation..."));
           /* Swap the equities as evaluation is for other player */
-          arOutput[OUTPUT_WIN] = 1 - arOutput[OUTPUT_WIN];
-          t = arOutput[OUTPUT_WINGAMMON];
-          arOutput[OUTPUT_WINGAMMON] = arOutput[OUTPUT_LOSEGAMMON];
-          arOutput[OUTPUT_LOSEGAMMON] = t;
-          t = arOutput[OUTPUT_WINBACKGAMMON];
-          arOutput[OUTPUT_WINBACKGAMMON] = arOutput[OUTPUT_LOSEBACKGAMMON];
-          arOutput[OUTPUT_LOSEBACKGAMMON] = t;
-      } else { 
-          GeneralEvaluationE( arOutput, msBoard(), &ci, &ecResign ) ;
+          dd.aarOutput[0][OUTPUT_WIN] = 1 - dd.aarOutput[0][OUTPUT_WIN];
+          t = dd.aarOutput[0][OUTPUT_WINGAMMON];
+          dd.aarOutput[0][OUTPUT_WINGAMMON] = dd.aarOutput[0][OUTPUT_LOSEGAMMON];
+          dd.aarOutput[0][OUTPUT_LOSEGAMMON] = t;
+          t = dd.aarOutput[0][OUTPUT_WINBACKGAMMON];
+          dd.aarOutput[0][OUTPUT_WINBACKGAMMON] = dd.aarOutput[0][OUTPUT_LOSEBACKGAMMON];
+          dd.aarOutput[0][OUTPUT_LOSEBACKGAMMON] = t;
+      }
+	  else
+	  { 
+		RunAsyncProcess((AsyncFun)asyncMoveDecisionE, &dd, _("Considering resignation..."));
       }
 
-      ProgressEnd();
-
-      getResignEquities ( arOutput, &ci, ms.fResigned,
-                          &rEqBefore, &rEqAfter );
+      getResignEquities ( dd.aarOutput[0], &ci, ms.fResigned, &rEqBefore, &rEqAfter );
 
       fComputerDecision = TRUE;
 
@@ -923,11 +924,10 @@ static int ComputerTurn( void ) {
       
       fComputerDecision = FALSE;
       return 0;
-    } else if( ms.fDoubled ) {
-
-      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-      rolloutstat aarsStatistics[ 2 ][ 2 ];
+    }
+	else if( ms.fDoubled )
+	{
+	  decisionData dd;
       cubedecision cd;
 
       /* Consider cube action */
@@ -967,19 +967,16 @@ static int ComputerTurn( void ) {
       }
 
       /* Evaluate cube decision */
-      ProgressStart( _("Considering cube action...") );
-      if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
-                                 msBoard(), &ci, &ap [ ms.fTurn ].esCube,
-                                 NULL, NULL ) < 0 ) {
-	  ProgressEnd();
-	  return -1;
-      }
-      ProgressEnd();
+	  dd.pboard = msBoard();
+	  dd.pci = &ci;
+	  dd.pes = &ap[ms.fTurn].esCube;
+	  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != ASR_OK)
+		  return -1;
 
-      UpdateStoredCube( aarOutput, aarStdDev, 
+      UpdateStoredCube( dd.aarOutput, dd.aarStdDev, 
                         &ap[ ms.fTurn ].esCube, &ms );
 
-      cd = FindCubeDecision ( arDouble,  aarOutput, &ci );
+      cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );
 
       fComputerDecision = TRUE;
 
@@ -1108,7 +1105,10 @@ static int ComputerTurn( void ) {
       
       return 0;
 
-    } else {
+    }
+	else 
+	{
+	  findData fd;
       TanBoard anBoardMove;
       float arResign[ NUM_ROLLOUT_OUTPUTS ];
       int nResign;
@@ -1157,7 +1157,7 @@ static int ComputerTurn( void ) {
       if ( ms.fCubeUse && !ms.anDice[ 0 ] && ms.nCube < MAX_CUBE &&
 	   GetDPEq ( NULL, NULL, &ci ) ) {
 	  evalcontext ecDH;
-
+	  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
 	  memcpy( &ecDH, &ap[ ms.fTurn ].esCube.ec, sizeof ecDH );
 	  ecDH.fCubeful = FALSE;
           if ( ecDH.nPlies ) ecDH.nPlies--;
@@ -1169,32 +1169,25 @@ static int ComputerTurn( void ) {
         if ( EvaluatePosition ( NULL, (ConstTanBoard)anBoardMove, arOutput, &ci, &ecDH ) )
           return -1;
 
-        rDoublePoint = 
-          GetDoublePointDeadCube ( arOutput, &ci );
+        rDoublePoint = GetDoublePointDeadCube ( arOutput, &ci );
 
         if ( arOutput[ 0 ] >= rDoublePoint ) {
 
           /* We're in market window */
-
-          float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-          float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-          rolloutstat aarsStatistics[ 2 ][ 2 ];
+		  decisionData dd;
           cubedecision cd;
 
           /* Consider cube action */
-	  ProgressStart( _("Considering cube action...") );
-          if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
-                                     msBoard(), &ci, &ap [ ms.fTurn ].esCube,
-                                     NULL, NULL ) < 0 ) {
-	      ProgressEnd();
-	      return -1;
-	  }
-	  ProgressEnd();
+		  dd.pboard = msBoard();
+		  dd.pci = &ci;
+		  dd.pes = &ap[ms.fTurn].esCube;
+		  if (RunAsyncProcess((AsyncFun)asyncCubeDecision, &dd, _("Considering cube action...")) != ASR_OK)
+			return -1;
 
-          UpdateStoredCube( aarOutput, aarStdDev, 
+          UpdateStoredCube( dd.aarOutput, dd.aarStdDev, 
                             &ap[ ms.fTurn ].esCube, &ms );
 
-          cd = FindCubeDecision ( arDouble,  aarOutput, &ci );
+          cd = FindCubeDecision ( arDouble,  dd.aarOutput, &ci );
 
           switch ( cd ) {
 
@@ -1291,16 +1284,18 @@ static int ComputerTurn( void ) {
         memcpy( &pmr->CubeDecPtr->esDouble, &sc.es, sizeof sc.es );
       }
 
-      ProgressStart( _("Considering move...") );
-      if( FindnSaveBestMoves( &pmr->ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                              (ConstTanBoard)anBoardMove, NULL, 0.0f, &ci, 
-                              &ap[ ms.fTurn ].esChequer.ec, 
-                              ap[ ms.fTurn ].aamf ) < 0 ) {
-	  ProgressEnd();
-	  free( pmr );
-	  return -1;
+	  fd.pml = &pmr->ml;
+	  fd.pboard = (ConstTanBoard)anBoardMove;
+	  fd.auchMove = NULL;
+	  fd.rThr = 0.0f;
+	  fd.pci = &ci;
+	  fd.pec = &ap[ ms.fTurn ].esChequer.ec;
+	  fd.aamf = ap[ ms.fTurn ].aamf;
+	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != ASR_OK) || fInterrupt)
+	  {
+		  free( pmr );
+		  return -1;
       }
-      ProgressEnd();
 
       if ( pmr->ml.cMoves ) {
         memcpy( pmr->n.anMove, pmr->ml.amMoves[ 0 ].anMove,
@@ -2142,9 +2137,8 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   cubedecision cd;
   float rDeltaEquity;
   int      fAnalyseCubeSave = fAnalyseCube;
-  evalcontext *pec;
-  evalsetup   *pes;
   evalsetup es;
+  decisionData dd;
 
   /* reasons that doubling is not an issue */
   if( (ms.gs != GAME_PLAYING) || 
@@ -2158,13 +2152,12 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   }
 
   if (fTutorAnalysis) {
-    pes = &esAnalysisCube;
+    dd.pes = &esAnalysisCube;
   } else {
-    pes = &esEvalCube;
+    dd.pes = &esEvalCube;
   }
 
-  pec = &pes->ec;
-
+  dd.pec = &dd.pes->ec;
 
   GetMatchStateCubeInfo( &ci, &ms );
 
@@ -2175,29 +2168,28 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
   }
 
   /* Give hint on cube action */
-
-
   SuspendInput();
 
-  ProgressStart( _("Considering cube action...") );
-  if (GeneralCubeDecisionE( aarOutput, msBoard(), &ci, pec, pes) < 0 ) {
-    ResumeInput();
-    ProgressEnd();
-    fAnalyseCube = fAnalyseCubeSave;
-    return (SKILL_NONE);;
+  dd.pboard = msBoard();
+  dd.pci = &ci;
+
+  if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+  {
+	ResumeInput();
+	fAnalyseCube = fAnalyseCubeSave;
+	return (SKILL_NONE);
   }
-  ProgressEnd();
 
   /* update analysis for hint */
 
-  ec2es ( &es, pec );
+  ec2es ( &es, dd.pec );
   UpdateStoredCube ( aarOutput, aarOutput /* whatever */, &es, &ms );
 
   ResumeInput();
 	    
   /* store cube decision for annotation */
 
-  ec2es ( &pmr->CubeDecPtr->esDouble, pec );
+  ec2es ( &pmr->CubeDecPtr->esDouble, dd.pec );
   memcpy ( pmr->CubeDecPtr->aarOutput, aarOutput, 
 	   2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
@@ -2330,15 +2322,14 @@ extern void CommandDouble( char *sz ) {
     TurnDone();
 }
 
-static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
-
+static skilltype ShouldDrop (int fIsDrop, moverecord *pmr)
+{
     float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
 	cubedecision cd;
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
-	evalcontext *pec;
-	evalsetup   *pes;
+	decisionData dd;
     evalsetup es;
 
 	/* reasons that doubling is not an issue */
@@ -2352,11 +2343,11 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
     }
 
 	if (fTutorAnalysis)
-	  pes = &esAnalysisCube;
+	  dd.pes = &esAnalysisCube;
 	else 
-	  pes = &esEvalCube;
+	  dd.pes = &esEvalCube;
 
-	pec = &pes->ec;
+	dd.pec = &dd.pes->ec;
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
@@ -2367,29 +2358,29 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	}
 
 	/* Give hint on cube action */
-
 	SuspendInput();
-	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE( aarOutput, msBoard(), &ci, pec, pes) < 0) {
-	  ProgressEnd();
-	  ResumeInput();
-	  fAnalyseCube = fAnalyseCubeSave;
-	  return (SKILL_NONE);
+
+	dd.pboard = msBoard();
+	dd.pci = &ci;
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+	{
+		ResumeInput();
+		fAnalyseCube = fAnalyseCubeSave;
+		return (SKILL_NONE);
 	}
 
         /* stored cube decision for hint */
 
-        ec2es ( &es, pec );
+        ec2es ( &es, dd.pec );
         UpdateStoredCube ( aarOutput,
                            aarOutput, /* whatever */
                            &es, &ms );
 
-        ProgressEnd();
         ResumeInput();
 	    
         /* store cube decision for annotation */
 
-        ec2es ( &pmr->CubeDecPtr->esDouble, pec );
+        ec2es ( &pmr->CubeDecPtr->esDouble, dd.pec );
         memcpy ( pmr->CubeDecPtr->aarOutput, aarOutput, 
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
         memset ( pmr->CubeDecPtr->aarStdDev, 0,
@@ -2605,8 +2596,9 @@ extern void CommandListMatch( char *sz ) {
     /* FIXME */
 }
 
-static skilltype GoodMove (moverecord *pmr) {
-
+static skilltype GoodMove (moverecord *pmr)
+{
+  moveData md;
   matchstate msx;
   int        fAnalyseMoveSaved = fAnalyseMove;
   evalsetup *pesCube, *pesChequer;
@@ -2632,12 +2624,15 @@ static skilltype GoodMove (moverecord *pmr) {
   }
 
   SuspendInput();
-  ProgressStart( _("Considering move...") );
-  if (AnalyzeMove ( pmr, &msx, plGame, NULL, pesChequer, pesChequer,
-                    fTutorAnalysis ? aamfAnalysis : aamfEval, 
-		    NULL, NULL ) < 0) {
+
+  md.pmr = pmr;
+  md.pms = &msx;
+  md.pesChequer = pesChequer;
+  md.pesCube = pesChequer;
+  md.aamf = fTutorAnalysis ? aamfAnalysis : aamfEval;
+  if (RunAsyncProcess((AsyncFun)asyncAnalyzeMove, &md, _("Considering move...")) != ASR_OK)
+  {
     fAnalyseMove = fAnalyseMoveSaved;
-    ProgressEnd();
     ResumeInput();
     return SKILL_NONE;
   }
@@ -3709,8 +3704,8 @@ static skilltype ShouldDouble ( void ) {
     cubedecision cd;
     float rDeltaEquity;
     int      fAnalyseCubeSave = fAnalyseCube;
-    evalcontext *pec;
-    evalsetup es, *pes;
+	decisionData dd;
+    evalsetup es;
 
     /* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -3724,11 +3719,11 @@ static skilltype ShouldDouble ( void ) {
     }
 
 	if (fTutorAnalysis)
-	  pes = &esAnalysisCube;
+	  dd.pes = &esAnalysisCube;
 	else 
-	  pes = &esEvalCube;
+	  dd.pes = &esEvalCube;
 	
-	pec = &pes->ec;
+	dd.pec = &dd.pes->ec;
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
@@ -3738,19 +3733,16 @@ static skilltype ShouldDouble ( void ) {
 	  return (SKILL_NONE);
 	}
 
-	/* Give hint on cube action */
-
-	ProgressStart( _("Considering cube action...") );
-	if ( GeneralCubeDecisionE( aarOutput, msBoard(), &ci, pec, pes) < 0) {
-	  ProgressEnd();
-	  fAnalyseCube = fAnalyseCubeSave;
-	  return (SKILL_NONE);;
+	dd.pboard = msBoard();
+	dd.pci = &ci;
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+	{
+		fAnalyseCube = fAnalyseCubeSave;
+		return (SKILL_NONE);
 	}
-	ProgressEnd();
-
         /* stored cube decision for hint */
 
-        ec2es ( &es, pec );
+        ec2es ( &es, dd.pec );
         UpdateStoredCube ( aarOutput,
                            aarOutput, /* whatever */
                            &es, &ms );
@@ -4300,7 +4292,7 @@ OptimumRoll ( TanBoard anBoard,
 
 }
 
-static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
+extern void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, const TanBoard anBoard, 
                     const cubeinfo *pci, const evalcontext *pec) {
     TanBoard anBoardTemp;
     cubeinfo ciOpp;

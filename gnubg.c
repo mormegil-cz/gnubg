@@ -2293,7 +2293,6 @@ extern int ParsePlayer( char *sz )
    specified has the opponent on roll (e.g. because it used "=n" notation). */
 extern int ParsePosition( TanBoard an, char **ppch, char *pchDesc )
 {
-
     int i;
     char *pch;
     
@@ -3016,6 +3015,7 @@ extern void CommandEval( char *sz )
     int n;
 	TanBoard an;
     cubeinfo ci;
+	decisionData dd;
     
     if( !*sz && ms.gs == GAME_NONE ) {
 	outputl( _("No position specified and no game in progress.") );
@@ -3036,11 +3036,14 @@ extern void CommandEval( char *sz )
 		     ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
 		     nBeavers, ms.bgv );    
 
-    ProgressStart( _("Evaluating position...") );
-    if( !DumpPosition( (ConstTanBoard)an, szOutput, &esEvalCube.ec, &ci,
-                       fOutputMWC, fOutputWinPC, n, 
-                       MatchIDFromMatchState( &ms ) ) ) {
-	ProgressEnd();
+    /* Consider cube action */
+	dd.pboard = (ConstTanBoard)an;
+	dd.pec = &esEvalCube.ec;
+	dd.pci = &ci;
+	dd.szOutput = szOutput;
+	dd.n = n;
+	if (RunAsyncProcess((AsyncFun)asyncDumpDecision, &dd, _("Evaluating position...")) == ASR_OK)
+	{
 #if USE_GTK
 	if( fX )
 	    GTKEval( szOutput );
@@ -3048,7 +3051,6 @@ extern void CommandEval( char *sz )
 #endif
 	    outputl( szOutput );
     }
-    ProgressEnd();
 }
 
 extern command *FindHelpCommand( command *pcBase, char *sz,
@@ -3415,42 +3417,31 @@ extern char *FormatMoveHint( char *sz, const matchstate *pms, movelist *pml,
 #endif
 }
 
+static void HintCube( void )
+{
+	static decisionData dd;
+	static cubeinfo ci;
+	GetMatchStateCubeInfo( &ci, &ms );
 
-static void
-HintCube( void ) {
-          
-  static cubeinfo ci;
-  static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+	if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) )
+	{	/* no analysis performed yet */
+		if ( GetDPEq ( NULL, NULL, &ci ) )
+		{	/* calculate cube action */
+			dd.pboard = msBoard();
+			dd.pci = &ci;
+			dd.pec = &esEvalCube.ec;
+			dd.pes = NULL;
+			if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+				return;
 
-  GetMatchStateCubeInfo( &ci, &ms );
-    
-  if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) ) {
-      
-    /* no analysis performed yet */
-      
-    if ( GetDPEq ( NULL, NULL, &ci ) ) {
-        
-      /* calculate cube action */
-      
-      ProgressStart( _("Considering cube action...") );
-      if ( GeneralCubeDecisionE ( aarOutput, msBoard(), &ci, 
-                                  &esEvalCube.ec, 0 ) < 0 ) {
-        ProgressEnd();
-        return;
-      }
-      ProgressEnd();
-      
-      UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
-      
-    } else {
-      
-      outputl( _("You cannot double.") );
-      return;
-      
-    }
-    
-  }
+			UpdateStoredCube(dd.aarOutput, dd.aarStdDev, &esEvalCube, &ms);
+		}
+		else 
+		{
+			outputl( _("You cannot double.") );
+			return;
+		}
+	}
 
 #if USE_GTK
   if ( fX ) {
@@ -3459,39 +3450,32 @@ HintCube( void ) {
   }
 #endif
 
-  outputl( OutputCubeAnalysis(  sc.aarOutput,
-			        sc.aarStdDev,
-                               &sc.es, &ci ) );
+  outputl( OutputCubeAnalysis(  sc.aarOutput, sc.aarStdDev, &sc.es, &ci ) );
 }
     
-
-static void
-HintResigned( void ) {
-
+static void HintResigned( void )
+{
   float rEqBefore, rEqAfter;
   static cubeinfo ci;
-  static float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+  static decisionData dd;
 
   GetMatchStateCubeInfo( &ci, &ms );
 
   /* evaluate current position */
 
-  ProgressStart( _("Considering resignation...") );
-  if ( GeneralEvaluationE ( arOutput,
-                            msBoard(),
-                            &ci, &esEvalCube.ec ) < 0 ) {
-    ProgressEnd();
-    return;
-  }
-  ProgressEnd();
+  dd.pboard = msBoard();
+  dd.pci = &ci;
+  dd.pec = &esEvalCube.ec;
+  if (RunAsyncProcess((AsyncFun)asyncMoveDecisionE, &dd, _("Considering resignation...")) != ASR_OK)
+	return;
   
-  getResignEquities ( arOutput, &ci, ms.fResigned, 
+  getResignEquities ( dd.aarOutput[0], &ci, ms.fResigned, 
                       &rEqBefore, &rEqAfter );
   
 #if USE_GTK
   if ( fX ) {
     
-    GTKResignHint ( arOutput, rEqBefore, rEqAfter, &ci, 
+    GTKResignHint ( dd.aarOutput[0], rEqBefore, rEqAfter, &ci, 
                     ms.nMatchTo && fOutputMWC );
     
     return;
@@ -3523,42 +3507,32 @@ HintResigned( void ) {
     outputf ( _("Correct resign decision  : %s\n\n"),
               ( rEqAfter - rEqBefore >= 0 ) ?
               _("Accept") : _("Reject") );
-    
   }
-  
-  return;
-  
-
 }
 
+static void HintTake( void )
+{
+	static cubeinfo ci;
+	static decisionData dd;
+	static float arDouble[ 4 ];
 
-static void
-HintTake( void ) {
+	/* Give hint on take decision */
+	GetMatchStateCubeInfo( &ci, &ms );
 
-  static cubeinfo ci;
-  static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-#if USE_GTK
-  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-#endif
-  static float arDouble[ 4 ];
+	dd.pboard = msBoard();
+	dd.pci = &ci;
+	dd.pec = &esEvalCube.ec;
+	dd.pes = &esEvalCube;
+	if (RunAsyncProcess((AsyncFun)asyncCubeDecisionE, &dd, _("Considering cube action...")) != ASR_OK)
+		return;
 
-  /* Give hint on take decision */
-  GetMatchStateCubeInfo( &ci, &ms );
-
-  ProgressStart( _("Considering cube action...") );
-  if ( GeneralCubeDecisionE ( aarOutput, msBoard(), &ci, 
-                              &esEvalCube.ec, &esEvalCube ) < 0 ) {
-    ProgressEnd();
-    return;
-  }
-  ProgressEnd();
-
-  FindCubeDecision ( arDouble,  aarOutput, &ci );
+	FindCubeDecision ( arDouble,  dd.aarOutput, dd.pci );
 	
 #if USE_GTK
-  if ( fX ) {
-    GTKCubeHint( aarOutput, aarStdDev, &esEvalCube );
-    return;
+  if ( fX )
+  {
+	GTKCubeHint( dd.aarOutput, dd.aarStdDev, &esEvalCube );
+	return;
   }
 #endif
 	
@@ -3583,15 +3557,10 @@ HintTake( void ) {
     outputl ( _("Your proper cube action: Take.\n") );
   else
     outputl ( _("Your proper cube action: Pass.\n") );
-
-  return;
-	
 }
-    
 
-static void
-HintChequer( char *sz ) {
-
+static void HintChequer( char *sz )
+{
   movelist ml;
   unsigned int i;
   char szBuf[ 1024 ];
@@ -3633,19 +3602,18 @@ HintChequer( char *sz ) {
     fHasMoved = TRUE;
   }
   
-  if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
-
-    ProgressStart( _("Considering move...") );
-    if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                            msBoard(), 
-                            fHasMoved ? auch : NULL, 
-                            arSkillLevel[ SKILL_DOUBTFUL ],
-                            &ci, &esEvalChequer.ec,
-                            aamfEval ) < 0 || fInterrupt ) {
-      ProgressEnd();
-      return;
-    }
-    ProgressEnd();
+  if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) )
+  {
+	  findData fd;
+	  fd.pml = &ml;
+	  fd.pboard = msBoard();
+	  fd.auchMove = fHasMoved ? auch : NULL;
+	  fd.rThr = arSkillLevel[ SKILL_DOUBTFUL ];
+	  fd.pci = &ci;
+	  fd.pec = &esEvalChequer.ec;
+	  fd.aamf = aamfEval;
+	  if ((RunAsyncProcess((AsyncFun)asyncFindMove, &fd, _("Considering move...")) != ASR_OK) || fInterrupt)
+		return;
 	
     UpdateStoredMoves ( &ml, &ms );
 
@@ -5633,9 +5601,8 @@ static int ProgressThrottle( void ) {
     return -1;
 }
 
-extern void ProgressStart( char *sz )
+extern void ProgressStart( const char *sz )
 {
-
     if( !fShowProgress )
 	return;
 
@@ -5715,7 +5682,6 @@ ProgressValueAdd ( int iValue ) {
 
 static void Progress( void )
 {
-
     static int i = 0;
     static char ach[ 4 ] = "/-\\|";
    
@@ -6807,12 +6773,11 @@ UpdateStoredMoves ( const movelist *pml, const matchstate *pms ) {
 }
 
 
-extern void
-UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+extern void UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                    const evalsetup *pes,
-                   const matchstate *pms ) {
-
+                   const matchstate *pms )
+{
   memcpy ( sc.aarOutput, aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
@@ -6821,7 +6786,6 @@ UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   sc.ms = *pms;
   sc.es = *pes;
-
 }
 
 /* ask for confirmation if this is a sub-optimal play 
@@ -7133,3 +7097,100 @@ char *SetupLanguage (char *newLangCode)
 }
 #endif
 
+int asyncFindMove(findData *pfd)
+{
+	if( FindnSaveBestMoves( pfd->pml, ms.anDice[ 0 ], ms.anDice[ 1 ], pfd->pboard,
+				pfd->auchMove, pfd->rThr, pfd->pci, pfd->pec, pfd->aamf) < 0)
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncDumpDecision(decisionData *pdd)
+{
+	if (DumpPosition( pdd->pboard, pdd->szOutput, pdd->pec, pdd->pci,
+                       fOutputMWC, fOutputWinPC, pdd->n, MatchIDFromMatchState( &ms ) ) != 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncScoreMove(scoreData *psd)
+{
+    if ( ScoreMove (NULL, psd->pm, psd->pci, psd->pec, psd->pec->nPlies ) < 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncEvalRoll(decisionData *pdd)
+{
+	EvaluateRoll (pdd->aarOutput[0], ms.anDice[0], ms.anDice[1], pdd->pboard, pdd->pci, pdd->pec );
+	return ASR_OK;
+}
+
+int asyncAnalyzeMove(moveData *pmd)
+{
+    if (AnalyzeMove ( pmd->pmr, pmd->pms, plGame, NULL, pmd->pesChequer, pmd->pesCube, pmd->aamf, NULL, NULL ) < 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncGammonRates(decisionData *pdd)
+{
+	if ( getCurrentGammonRates ( pdd->aarRates, pdd->aarOutput[0], pdd->pboard, pdd->pci, pdd->pec ) < 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncMoveDecisionE(decisionData *pdd)
+{
+	if ( GeneralEvaluationE ( pdd->aarOutput[0], pdd->pboard, pdd->pci, pdd->pec) < 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncCubeDecisionE(decisionData *pdd)
+{
+	if ( GeneralCubeDecisionE ( pdd->aarOutput, pdd->pboard, pdd->pci, pdd->pec, pdd->pes ) < 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int asyncCubeDecision(decisionData *pdd)
+{
+	if ( GeneralCubeDecision( pdd->aarOutput, pdd->aarStdDev, pdd->aarsStatistics,
+			pdd->pboard, pdd->pci, pdd->pes, NULL, NULL ) < 0 )
+		return ASR_FAILED;
+
+	return ASR_OK;
+}
+
+int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
+{
+	int ret;
+#if USE_MULTITHREAD
+	AsyncTask *pt = (AsyncTask*)malloc(sizeof(AsyncTask));
+	pt->task.type = TT_ASYNCTASK;
+	pt->task.pLinkedTask = NULL;
+	pt->fun = fn;
+	pt->data = data;
+	MT_AddTask((Task*)pt, FALSE);
+#endif
+
+	ProgressStart(msg);
+	
+#if USE_MULTITHREAD
+	ret = MT_WaitForTasks(Progress, 0);
+#else
+	ret = fn(data);	/* Just call function in single threaded build */
+#endif
+
+	ProgressEnd();
+
+	return ret;
+}

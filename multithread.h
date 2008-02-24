@@ -29,13 +29,20 @@
 
 #define MAX_NUMTHREADS 16
 
-typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_RUNCALIBRATIONEVALS, TT_CLOSE} TaskType;
+typedef enum _TaskType {TT_ANALYSEMOVE, TT_ROLLOUTLOOP, TT_TEST, TT_RUNCALIBRATIONEVALS, TT_CLOSE, TT_ASYNCTASK} TaskType;
 
 typedef struct _Task
 {
 	TaskType type;
 	struct _Task *pLinkedTask;
 } Task;
+
+typedef struct _AsyncTask
+{
+	Task task;
+	AsyncFun fun;
+	void *data;
+} AsyncTask;
 
 typedef struct _AnalyseMoveTask
 {

@@ -581,36 +581,37 @@ PlyClicked( GtkWidget *pw, theorywidget *ptw ) {
   int *pi = (int *) g_object_get_data( G_OBJECT( pw ), "ply" );
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
   cubeinfo ci;
-  float aarRates[ 2 ][ 2 ];
+  decisionData dd;
 #if defined (REDUCTION_CODE)
   evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
 #else
   evalcontext ec = { FALSE, 0, FALSE, TRUE, 0.0 };
 #endif
 
-  float arOutput[ NUM_OUTPUTS ];
   int i, j;
 
   if ( !f )
     return;
 
   GetMatchStateCubeInfo ( &ci, &ms );
-  TheoryGetValues( ptw, &ci, aarRates );
+  TheoryGetValues( ptw, &ci, dd.aarRates );
   
   ec.nPlies = *pi;
-  ProgressStart( _("Evaluating gammon percentages" ) );
-  if ( getCurrentGammonRates ( aarRates, arOutput, msBoard(), 
-                               &ci, &ec ) < 0 ) {
-    ProgressEnd();
+
+  dd.pboard = msBoard();
+  dd.pci = &ci;
+  dd.pec = &ec;
+
+  if (RunAsyncProcess((AsyncFun)asyncGammonRates, &dd, _("Evaluating gammon percentages")) != ASR_OK)
+  {
     fInterrupt = FALSE;
-    return;
+	return;
   }
-  ProgressEnd();
 
   for ( i = 0; i < 2; ++i )
     for ( j = 0; j < 2; ++j )
       gtk_adjustment_set_value ( GTK_ADJUSTMENT ( ptw->aapwRates[ i ][ j ] ),
-                                 aarRates[ i ][ j ] * 100.0f );
+                                 dd.aarRates[ i ][ j ] * 100.0f );
 
   TheoryUpdated( NULL, ptw );
 

@@ -224,24 +224,25 @@ EvalMoves ( hintdata *phd, evalcontext *pec )
 	if (!plSelList)
 		return;
 
-  GetMatchStateCubeInfo( &ci, &ms );
+	GetMatchStateCubeInfo( &ci, &ms );
   
-  ProgressStart( _("Evaluating positions...") );
-
 	for(pl = plSelList; pl; pl = pl->next)
 	{
-    if ( ScoreMove (NULL, MoveListGetMove(phd, pl), &ci, pec, pec->nPlies ) < 0 ) {
-      ProgressEnd ();
-		MoveListFreeSelectionList(plSelList);
-      return;
-    }
+		scoreData sd;
+		sd.pm = MoveListGetMove(phd, pl);
+		sd.pci = &ci;
+		sd.pec = pec;
 
-    /* Calling RefreshMoveList here requires some extra work, as
-       it may reorder moves */
+		if (RunAsyncProcess((AsyncFun)asyncScoreMove, &sd, _("Evaluating positions...")) != ASR_OK)
+		{
+			MoveListFreeSelectionList(plSelList);
+			return;
+		}
 
-    MoveListUpdate ( phd );
-
-  }
+		/* Calling RefreshMoveList here requires some extra work, as
+		it may reorder moves */
+		MoveListUpdate ( phd );
+	}
 	MoveListFreeSelectionList(plSelList);
 
   MoveListClearSelection(0, 0, phd);

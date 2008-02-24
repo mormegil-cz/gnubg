@@ -112,7 +112,7 @@ extern void GTKOutputX(void);
 extern void GTKPopGame(int c);
 extern void GTKPopMoveRecord(moverecord * pmr);
 extern void GTKProgressEnd(void);
-extern void GTKProgressStart(char *sz);
+extern void GTKProgressStart(const char *sz);
 extern void GTKProgressStartValue(char *sz, int iMax);
 extern void GTKProgressValue(int fValue, int iMax);
 extern void GTKProgress(void);
