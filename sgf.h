@@ -116,11 +116,4 @@ extern listOLD *SGFParse(FILE * pf);
    WT (GI) - white team (general SGF) (not currently used)
    
 */
-extern void CommandLoadGame(char *);
-extern void CommandLoadMatch(char *);
-extern void CommandLoadPosition(char *);
-extern void CommandSaveGame(char *);
-extern void CommandSaveMatch(char *);
-extern void CommandSavePosition(char *);
-extern void CommandSaveSettings(char *);
 #endif

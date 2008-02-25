@@ -100,54 +100,6 @@ static void *rngctxSet;
 
 movefilter *aamfSet[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
-
-static char szFILENAME[] = N_ ("<filename>"),
-    szNAME[] = N_ ("<name>"),
-#if defined(REDUCTION_CODE)
-    szNUMBER[] = N_ ("<number>"),
-#endif
-    szONOFF[] = N_ ("on|off"),
-    szPLIES[] = N_ ("<plies>"),
-    szSTDDEV[] = N_ ("<std dev>"),
-    szFILTER[] = N_ ( "<ply> <num. to accept (0 = skip)> "
-                      "[<num. of extra moves to accept> <tolerance>]");
-command acSetEvaluation[] = {
-    { "cubeful", CommandSetEvalCubeful, N_("Cubeful evaluations"), szONOFF,
-      &cOnOff },
-    { "deterministic", CommandSetEvalDeterministic, N_("Specify whether added "
-      "noise is determined by position"), szONOFF, &cOnOff },
-    { "noise", CommandSetEvalNoise, N_("Distort evaluations with noise"),
-      szSTDDEV, NULL },
-    { "plies", CommandSetEvalPlies, N_("Choose how many plies to look ahead"),
-      szPLIES, NULL },
-#if defined(REDUCTION_CODE)
-    { "reduced", CommandSetEvalReduced,
-      N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
-#else
-    { "prune", CommandSetEvalPrune,
-      N_("use fast pruning networks"), szONOFF, NULL },
-#endif
-    { NULL, NULL, NULL, NULL, NULL }
-}, acSetPlayer[] = {
-    { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
-      "parameters when gnubg plays"), NULL, acSetEvalParam },
-    { "cubedecision", CommandSetPlayerCubedecision, N_("Control cube decision "
-      "parameters when gnubg plays"), NULL, acSetEvalParam },
-    { "external", CommandSetPlayerExternal, N_("Have another process make all "
-      "moves for a player"), szFILENAME, &cFilename },
-    { "gnubg", CommandSetPlayerGNU, 
-      N_("Have gnubg make all moves for a player"),
-      NULL, NULL },
-    { "human", CommandSetPlayerHuman, N_("Have a human make all moves for a "
-      "player"), NULL, NULL },
-    { "movefilter", CommandSetPlayerMoveFilter, 
-      N_("Set parameters for choosing moves to evaluate"), 
-      szFILTER, NULL},
-    { "name", CommandSetPlayerName, 
-      N_("Change a player's name"), szNAME, NULL },
-    { NULL, NULL, NULL, NULL, NULL }
-};
-
 static void
 SetSeed ( const rng rngx, void *rngctx, char *sz ) {
     
@@ -1108,8 +1060,8 @@ extern void CommandSetEvalPlies( char *sz ) {
     outputf( _("%s will use %d ply evaluation.\n"), szSet, pecSet->nPlies );
 }
 
-extern void CommandSetEvalReduced( char *sz ) {
 #if defined( REDUCTION_CODE )
+extern void CommandSetEvalReduced( char *sz ) {
 
     int n = ParseNumber( &sz );
 
@@ -1146,18 +1098,8 @@ extern void CommandSetEvalReduced( char *sz ) {
     if( !pecSet->nPlies )
 	outputl( _("(Note that this setting will have no effect until you "
 		 "choose evaluations with ply > 0.)") );
-#else
-    outputl( _("GNUBG compiled without support for reduced evaluations"));
+}
 #endif
-}
-
-extern void CommandSetEvaluation( char *sz ) {
-
-    szSet = _("`eval' and `hint'");
-    szSetCommand = "evaluation";
-    pecSet = &esEvalChequer.ec;
-    HandleCommand( sz, acSetEvaluation );
-}
 
 #if USE_GTK
 extern void CommandSetGUIAnimationBlink( char *sz ) {
@@ -1522,28 +1464,6 @@ extern void CommandSetPlayerName( char *sz ) {
     if( fX )
 	ShowBoard();
 #endif /* USE_GTK */
-}
-
-extern void CommandSetPlayerPlies( char *sz ) {
-
-    int n = ParseNumber( &sz );
-
-    if( n < 0 ) {
-	outputl( _("You must specify a valid ply depth to look ahead -- try "
-		 "`help set player plies'.") );
-
-	return;
-    }
-
-    ap[ iPlayerSet ].esChequer.ec.nPlies = n;
-    
-    if( ap[ iPlayerSet ].pt != PLAYER_GNU )
-	outputf( _("Moves for %s will be played with %d ply lookahead (note that "
-		"this will\nhave no effect yet, because gnubg is not moving "
-		"for this player).\n"), ap[ iPlayerSet ].szName, n );
-    else
-	outputf( _("Moves for %s will be played with %d ply lookahead.\n"),
-		ap[ iPlayerSet ].szName, n );
 }
 
 extern void CommandSetPlayer( char *sz ) {

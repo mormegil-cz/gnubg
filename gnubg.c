@@ -583,7 +583,11 @@ static char szDICE[] = N_("<die> <die>"),
 	szWARN[] = N_("[<warning>]"),
 	szWARNYN[] = N_("<warning> on|off"),
 #endif
-    szJSDS[] = N_("<joint standard deviations>");
+    szJSDS[] = N_("<joint standard deviations>"),
+#if defined(REDUCTION_CODE)
+    szNUMBER[] = N_ ("<number>"),
+#endif
+    szSTDDEV[] = N_ ("<std dev>");
 
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
@@ -930,6 +934,41 @@ command cER = {
       "gain for a very lucky roll"), szVALUE, NULL },
     { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, N_("Specify the "
       "equity loss for a very unlucky roll"), szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetEvaluation[] = {
+    { "cubeful", CommandSetEvalCubeful, N_("Cubeful evaluations"), szONOFF,
+      &cOnOff },
+    { "deterministic", CommandSetEvalDeterministic, N_("Specify whether added "
+      "noise is determined by position"), szONOFF, &cOnOff },
+    { "noise", CommandSetEvalNoise, N_("Distort evaluations with noise"),
+      szSTDDEV, NULL },
+    { "plies", CommandSetEvalPlies, N_("Choose how many plies to look ahead"),
+      szPLIES, NULL },
+#if defined(REDUCTION_CODE)
+    { "reduced", CommandSetEvalReduced,
+      N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
+#else
+    { "prune", CommandSetEvalPrune,
+      N_("use fast pruning networks"), szONOFF, NULL },
+#endif
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetPlayer[] = {
+    { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
+      "parameters when gnubg plays"), NULL, acSetEvalParam },
+    { "cubedecision", CommandSetPlayerCubedecision, N_("Control cube decision "
+      "parameters when gnubg plays"), NULL, acSetEvalParam },
+    { "external", CommandSetPlayerExternal, N_("Have another process make all "
+      "moves for a player"), szFILENAME, &cFilename },
+    { "gnubg", CommandSetPlayerGNU, 
+      N_("Have gnubg make all moves for a player"),
+      NULL, NULL },
+    { "human", CommandSetPlayerHuman, N_("Have a human make all moves for a "
+      "player"), NULL, NULL },
+    { "movefilter", CommandSetPlayerMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
+    { "name", CommandSetPlayerName, 
+      N_("Change a player's name"), szNAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetEvalParam[] = {
   { "type", CommandSetEvalParamType,

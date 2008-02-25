@@ -1,3 +1,9 @@
+Mon Feb 25 15:12:08 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, set.c, sgf.h: cleanup in lists of commands.
+	Removed declared but undefined, and defined, but unused. Move all
+	declarations to backgammon.h and all lists of commands to gnubg.c.
+
 Sun Feb 24 10:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, play.c, multithreaded.c, others: Fix multi-threaded progress indicator.
