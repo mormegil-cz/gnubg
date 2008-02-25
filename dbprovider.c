@@ -56,6 +56,7 @@ static GList *PyPostgreGetDatabaseList(const char *user, const char *password);
 static int PyMySQLDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 static int PyPostgreDeleteDatabase(const char *dbfilename, const char *user, const char *password);
 #endif
+#if HAVE_SQLITE
 static int SQLiteConnect(const char *dbfilename, const char *user, const char *password);
 static void SQLiteDisconnect(void);
 static RowSet *SQLiteSelect(const char* str);
@@ -63,6 +64,7 @@ static int SQLiteUpdateCommand(const char* str);
 static void SQLiteCommit(void);
 static GList *SQLiteGetDatabaseList(const char *user, const char *password);
 static int SQLiteDeleteDatabase(const char *dbfilename, const char *user, const char *password);
+#endif
 
 #if NUM_PROVIDERS
 DBProvider providers[NUM_PROVIDERS] =
