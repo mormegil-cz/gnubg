@@ -5806,7 +5806,7 @@ static void SetMouseCursor(GdkCursorType cursorType)
 		gdk_window_set_cursor(pwMain->window, NULL);
 }
 
-extern void GTKProgressStart( char *sz )
+extern void GTKProgressStart( const char *sz )
 {
     if( sz )
 		gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
