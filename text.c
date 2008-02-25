@@ -181,7 +181,7 @@ TextBoardHeader ( GString *gsz, const matchstate *pms,
 
     g_string_append_printf(gsz,
               _(" %s doubles to %d"),
-              ap[ pms->fMove ].szName,
+              ap[ !(pms->fTurn) ].szName,
               pms->nCube * 2
             );
 
@@ -341,8 +341,12 @@ static void
 TextPrintCubeAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
 
   cubeinfo ci;
+  /* we need to remember the double type to be able to do the right
+   * thing for beavers and racoons */
+  static doubletype dt = DT_NORMAL;
 
   GetMatchStateCubeInfo ( &ci, pms );
+
 
   switch ( pmr->mt ) {
 
@@ -356,11 +360,18 @@ TextPrintCubeAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
                                  pmr->fPlayer,
                                  &pmr->CubeDecPtr->esDouble, &ci, FALSE, -1,
                                  pmr->stCube, SKILL_NONE );
+    dt = DT_NORMAL;
 
     break;
 
   case MOVE_DOUBLE:
 
+    dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+    if (dt != DT_NORMAL)
+    {
+	    g_string_append(gsz, _("Cannot analyse beaver nor raccoons!\n"));
+	    break;
+    }
     TextPrintCubeAnalysisTable ( gsz, 
                                   pmr->CubeDecPtr->aarOutput, 
 				  pmr->CubeDecPtr->aarStdDev,
@@ -376,6 +387,12 @@ TextPrintCubeAnalysis ( GString *gsz, const matchstate *pms, moverecord *pmr ) {
 
     /* cube analysis from double, {take, drop, beaver} */
 
+    if (dt != DT_NORMAL)
+    {
+	    dt = DT_NORMAL;
+	    g_string_append(gsz, _("Cannot analyse beaver nor raccoons!\n"));
+	    break;
+    }
     TextPrintCubeAnalysisTable ( gsz, 
                                   pmr->CubeDecPtr->aarOutput, 
 				  pmr->CubeDecPtr->aarStdDev,
@@ -847,6 +864,7 @@ static void ExportGameText ( FILE *pf, listOLD *plGame,
 
         break;
 
+      case MOVE_DOUBLE:
       case MOVE_TAKE:
       case MOVE_DROP:
 

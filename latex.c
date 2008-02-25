@@ -383,6 +383,7 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
     int fTook = FALSE;
 	unsigned int i;
     char sz[ 1024 ];
+    doubletype dt = DT_NORMAL;
 
     updateStatisticsGame ( plGame );
 
@@ -391,6 +392,7 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
         FixMatchState ( &msExport, pmr );
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
+		dt = DT_NORMAL;
             fputs ( "\\noindent{\\Large ", pf );
 	    if( pmr->g.nMatch )
 		fprintf( pf, _("%d point match (game %d)"), 
@@ -416,6 +418,7 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	    break;
 	    
 	case MOVE_NORMAL:
+	    dt = DT_NORMAL;
 	    msExport.fTurn = msExport.fMove = pmr->fPlayer;
 	    if( fTook )
 		/* no need to print board following a double/take */
@@ -456,6 +459,12 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	    break;
 	    
 	case MOVE_DOUBLE:
+    dt = DoubleType ( msExport.fDoubled, msExport.fMove, msExport.fTurn );
+    if (dt != DT_NORMAL)
+    {
+	    fprintf ( pf, "\\begin{center}\\emph{Cannot analyse doubles nor raccoons!}\\end{center}");
+	    break;
+    }
 	    PrintLaTeXBoard( pf, &msExport, pmr->fPlayer );
 
 	    PrintLaTeXCubeAnalysis(pf, &msExport, pmr->fPlayer,
@@ -474,6 +483,12 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	    break;
 	    
 	case MOVE_TAKE:
+    if (dt != DT_NORMAL)
+    {
+	    dt = DT_NORMAL;
+	    fprintf ( pf, "\\begin{center}\\emph{Cannot analyse doubles nor raccoons!}\\end{center}");
+	    break;
+    }
 	    fTook = TRUE;
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
 		     PlayerSymbol( pmr->fPlayer ),
@@ -485,6 +500,12 @@ static void ExportGameLaTeX( FILE *pf, listOLD *plGame ) {
 	    break;
 	    
 	case MOVE_DROP:
+    if (dt != DT_NORMAL)
+    {
+	    dt = DT_NORMAL;
+	    fprintf ( pf, "\\begin{center}\\emph{Cannot analyse doubles nor raccoons!}\\end{center}");
+	    break;
+    }
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",
 		     PlayerSymbol( pmr->fPlayer ),
                      _("Drop"),

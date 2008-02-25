@@ -1686,7 +1686,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s doubles to %d"),
-              ap[ pms->fMove ].szName,
+              ap[ !pms->fTurn ].szName,
               pms->nCube * 2
             );
 
@@ -2349,6 +2349,9 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                         const htmlexporttype het, const htmlexportcss hecss ) {
 
   cubeinfo ci;
+  /* we need to remember the double type to be able to do the right
+   * thing for beavers and racoons */
+  static doubletype dt = DT_NORMAL;
 
   GetMatchStateCubeInfo ( &ci, pms );
 
@@ -2363,11 +2366,18 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                                  pmr->fPlayer,
                                  &pmr->CubeDecPtr->esDouble, &ci, FALSE, -1,
                                  pmr->stCube, SKILL_NONE, hecss );
+    dt = DT_NORMAL;
 
     break;
 
   case MOVE_DOUBLE:
 
+    dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+    if (dt != DT_NORMAL)
+    {
+	    fprintf ( pf, "<p><span %s> Cannot analyse doubles nor raccoons!</span></p>\n", GetStyle ( CLASS_BLUNDER, hecss ));
+	    break;
+    }
     HTMLPrintCubeAnalysisTable ( pf, 
                                  pmr->CubeDecPtr->aarOutput, 
 				 pmr->CubeDecPtr->aarStdDev,
@@ -2383,6 +2393,12 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from double, {take, drop, beaver} */
 
+    if (dt != DT_NORMAL)
+    {
+	    dt = DT_NORMAL;
+	    fprintf ( pf, "<p><span %s> Cannot analyse doubles nor raccoons!</span></p>\n", GetStyle ( CLASS_BLUNDER, hecss ));
+	    break;
+    }
     HTMLPrintCubeAnalysisTable ( pf, 
                                  pmr->CubeDecPtr->aarOutput, 
 				 pmr->CubeDecPtr->aarStdDev,
@@ -3313,6 +3329,7 @@ static void ExportGameHTML ( FILE *pf, listOLD *plGame, const char *szImageDir,
 
         break;
 
+      case MOVE_DOUBLE:
       case MOVE_TAKE:
       case MOVE_DROP:
 
