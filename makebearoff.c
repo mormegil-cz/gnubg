@@ -660,6 +660,9 @@ generate_os ( const int nOS, const int fHeader,
   FILE *pfTmp = NULL;
   unsigned int npos;
   char *tmpfile;
+#ifndef WIN32
+  int fTTY = isatty(STDERR_FILENO);
+#endif
 
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
@@ -737,7 +740,7 @@ generate_os ( const int nOS, const int fHeader,
     if (CancelPressed)
       break;
 #else
-    if (!(i % 100))
+    if (!(i % 100) && fTTY)
       fprintf (stderr, "1:%d/%d        \r", i, n);
 #endif
 
@@ -932,6 +935,9 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
   int i, j;
   char sz[ 41 ];
   float ar[ 4 ];
+#ifndef WIN32
+  int fTTY = isatty(STDERR_FILENO);
+#endif
 
   xhash h;
 #if WIN32
@@ -991,7 +997,7 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
     if (!((i+1) % 100))
       SendMessage(hwndPB, PBM_STEPIT, 0, 0);
 #else
-    if (!(i % 100))
+    if (!(i % 100) && fTTY)
       fprintf (stderr, "1:%d/%d        \r", i, n);
 #endif
 
@@ -1288,6 +1294,9 @@ generate_ts ( const int nTSP, const int nTSC,
     FILE *pfTmp;
     unsigned char ac[ 8 ];
     char *tmpfile;
+#ifndef WIN32
+  int fTTY = isatty(STDERR_FILENO);
+#endif
 
 #if WIN32
   HINSTANCE hInstance = (HINSTANCE) GetModuleHandle(NULL);
@@ -1365,7 +1374,8 @@ generate_ts ( const int nTSP, const int nTSC,
 #if WIN32
       SendMessage(hwndPB, PBM_STEPIT, 0, 0);
 #else
-      fprintf( stderr, "%d/%d     \r", iPos, n * n );
+      if (fTTY)
+	      fprintf( stderr, "%d/%d     \r", iPos, n * n );
 #endif
     }
 
@@ -1391,7 +1401,8 @@ generate_ts ( const int nTSP, const int nTSC,
 #if WIN32
       SendMessage(hwndPB, PBM_STEPIT, 0, 0);
 #else
-      fprintf( stderr, "%d/%d     \r", iPos, n * n );
+      if (fTTY)
+	      fprintf( stderr, "%d/%d     \r", iPos, n * n );
 #endif
     }
 

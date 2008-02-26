@@ -1,3 +1,7 @@
+Tue Feb 26 12:35:23 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* makebearoff.c: don't print progress to stderr unless on a TTY.
+
 Mon Feb 25 23:16:26 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* text.c, html.c, latex.c: Allow export of games with beavers/raccoons
