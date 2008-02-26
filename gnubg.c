@@ -1999,6 +1999,9 @@ char *aszBuildInfo[] = {
 #if USE_PYTHON
     N_ ("Python supported."),
 #endif
+#if HAVE_SQLITE
+    N_ ("SQLite database supported."),
+#endif
 #if USE_GTK
     N_ ("Window system supported."),
 #endif
@@ -7224,7 +7227,7 @@ int RunAsyncProcess(AsyncFun fn, void *data, const char *msg)
 	ProgressStart(msg);
 	
 #if USE_MULTITHREAD
-	ret = MT_WaitForTasks(Progress, 0);
+	ret = MT_WaitForTasks(Progress, 100);
 #else
 	ret = fn(data);	/* Just call function in single threaded build */
 #endif
