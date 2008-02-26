@@ -556,6 +556,7 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
 {
     int callbackLoops = callbackTime / UI_UPDATETIME;
     int waits = 0;
+	int polltime = callbackLoops ? UI_UPDATETIME : callbackTime;
 
 	if (td.addedTasks == 0)
 		return 0;
@@ -567,7 +568,7 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
     multi_debug("wait for tasks: release(1)");
 
 	multi_debug("while waiting for all tasks");
-    while (!WaitForAllTasks(UI_UPDATETIME))
+    while (!WaitForAllTasks(polltime))
     {
         waits++;
         if (pCallback && waits >= callbackLoops)
@@ -577,10 +578,13 @@ int MT_WaitForTasks(void (*pCallback)(void), int callbackTime)
         }
 
 #if USE_GTK
-        SuspendInput();
-        while(gtk_events_pending())
-			gtk_main_iteration();
-        ResumeInput();
+		else
+		{
+			SuspendInput();
+			while(gtk_events_pending())
+				gtk_main_iteration();
+			ResumeInput();
+		}
 #endif
     }
 	multi_debug("done while waiting for all tasks");
