@@ -186,29 +186,29 @@ extern char *GetDefaultSoundFile(gnubgsound sound)
 {
   static char aszDefaultSound[ NUM_SOUNDS ][ 80 ] = {
   /* start and exit */
-  "sounds/fanfare.wav",
-  "sounds/haere-ra.wav",
+  "fanfare.wav",
+  "haere-ra.wav",
   /* commands */
-  "sounds/drop.wav",
-  "sounds/double.wav",
-  "sounds/drop.wav",
-  "sounds/chequer.wav",
-  "sounds/move.wav",
-  "sounds/double.wav",
-  "sounds/resign.wav",
-  "sounds/roll.wav",
-  "sounds/take.wav",
+  "drop.wav",
+  "double.wav",
+  "drop.wav",
+  "chequer.wav",
+  "move.wav",
+  "double.wav",
+  "resign.wav",
+  "roll.wav",
+  "take.wav",
   /* events */
-  "sounds/dance.wav",
-  "sounds/gameover.wav",
-  "sounds/matchover.wav",
-  "sounds/dance.wav",
-  "sounds/gameover.wav",
-  "sounds/matchover.wav",
-  "sounds/fanfare.wav"
+  "dance.wav",
+  "gameover.wav",
+  "matchover.wav",
+  "dance.wav",
+  "gameover.wav",
+  "matchover.wav",
+  "fanfare.wav"
   };
 
-	return BuildFilename(aszDefaultSound[sound]);
+	return BuildFilename2("sounds", aszDefaultSound[sound]);
 }
 
 extern char *GetSoundFile(gnubgsound sound)

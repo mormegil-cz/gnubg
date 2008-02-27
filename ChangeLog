@@ -1,3 +1,8 @@
+Wed Feb 27 21:22:47 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* gtkoptions.c: add reset all to defaults button.
+	* sound.c: fix sound default file bug on windows
+
 Tue Feb 26 12:35:23 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* makebearoff.c: don't print progress to stderr unless on a TTY.

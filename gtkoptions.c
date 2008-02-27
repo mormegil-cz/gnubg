@@ -101,6 +101,7 @@ static GtkWidget *soundEnabled;
 static GtkWidget *soundPath;
 static GtkWidget *soundPathButton;
 static GtkWidget *soundPlayButton;
+static GtkWidget *soundAllDefaultButton;
 static GtkWidget *soundDefaultButton;
 static GtkWidget *soundBeepIllegal;
 static GtkWidget *soundsEnabled;
@@ -172,8 +173,20 @@ static void SoundDefaultClicked(GtkWidget *widget, gpointer userdata)
 	SoundSkipUpdate = TRUE;
 	gtk_entry_set_text(GTK_ENTRY(soundPath), defaultSound);
 	g_free(soundDetails[selSound].Path);
-	soundDetails[selSound].Path = g_strdup(defaultSound);
+	soundDetails[selSound].Path = defaultSound;
 }
+
+static void SoundAllDefaultClicked(GtkWidget *widget, gpointer userdata)
+{
+	int i;
+	for (i = 0; i < NUM_SOUNDS; i++) 
+	{
+		g_free(soundDetails[i].Path);
+		soundDetails[i].Path = GetDefaultSoundFile(i);
+	}
+	SoundDefaultClicked(NULL, NULL);
+}
+
 
 static void SoundEnabledClicked(GtkWidget *widget, gpointer userdata)
 {
@@ -365,10 +378,20 @@ AddSoundWidgets (GtkWidget * container)
     g_signal_connect (soundPlayButton, "clicked",
 		      G_CALLBACK (SoundPlayClicked), NULL);
     gtk_box_pack_start (GTK_BOX (pwhbox), soundPlayButton, FALSE, FALSE, 0);
+    /*sound default button*/
     soundDefaultButton = gtk_button_new_with_label ("Reset Default");
     g_signal_connect (soundDefaultButton, "clicked",
 		      G_CALLBACK (SoundDefaultClicked), NULL);
     gtk_box_pack_start (GTK_BOX (pwhbox), soundDefaultButton, FALSE, FALSE, 0);
+
+    /*sound all defaults button*/
+    soundAllDefaultButton = gtk_button_new_with_label ("Reset All to Defaults");
+    g_signal_connect (soundAllDefaultButton, "clicked",
+		      G_CALLBACK (SoundAllDefaultClicked), NULL);
+    gtk_box_pack_start (GTK_BOX (pwhbox), soundAllDefaultButton, FALSE, FALSE, 0);
+
+
+
     gtk_box_pack_start (GTK_BOX (pwvboxDetails), pwhbox, FALSE, FALSE, 0);
 
     gtk_container_add (GTK_CONTAINER (soundFrame), pwvboxDetails);
