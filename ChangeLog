@@ -1,3 +1,7 @@
+Thu Feb 28 15:15:08 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* osr.c: fix bug introduced by uint changes
+
 Wed Feb 27 21:22:47 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* gtkoptions.c: add reset all to defaults button.

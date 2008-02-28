@@ -21,6 +21,11 @@
  * $Id$
  */
 
+/*! \file osr.c
+    \brief one-sided race rollouts
+*/
+
+
 #include <stdio.h>
 #include <glib.h>
 #include <string.h>
@@ -99,14 +104,16 @@ static unsigned int chequersout(const unsigned int anBoard[25])
 	return n;
 }
 
+/*! \brief checks that we haven't moved too many checkers of any point on the board
+ * but board need not contain all 15 checkers */
 static int checkboard(const unsigned int anBoard[25])
 {
-	unsigned int i, c = 0;
+	unsigned int i;
 
 	for (i = 0; i < 25; i++)
-		c += anBoard[ i ];
-
-	return (c == 15);
+		if (anBoard[i] > 15)
+			return 0;
+	return 1;
 }
 
 static void FindBestMoveOSR2 ( unsigned int anBoard[ 25 ], const int anDice[ 2 ], unsigned int *pnOut )

@@ -12,7 +12,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*! \file simple-board.c
+/*! \file simpleboard.c
     \brief exporting a matchstate and board to a cairo drawing context
 */
 
@@ -53,7 +53,6 @@ static gint checkers_from_bgv(bgvariation bgv)
 
 /*! \brief fills and stroke the active context
  *
- * \param c the color to use
  */
 static void fill_and_stroke(cairo_t * cr, SimpleBoardColor c)
 {
