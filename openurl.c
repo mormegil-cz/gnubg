@@ -72,7 +72,7 @@ extern void OpenURL(const char *szURL)
 		int win_error;
 		gchar *url = g_filename_to_uri(szURL, NULL, NULL);
 		win_error =
-		    (int) ShellExecute(NULL, TEXT("open"), url, NULL,
+			(int) ShellExecute(NULL, TEXT("open"), url ? url : szURL, NULL,
 				       ".\\", SW_SHOWNORMAL);
 		if (win_error < 33)
 			outputerrf(_("Failed to perform default action on "
