@@ -314,7 +314,6 @@ void *CreatePreviewBoard3d(const BoardData* bd, GdkPixmap *ppm)
 void RenderBoard3d(const BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
 {
 	GLint viewport[4];
-	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE((GdkGLPixmap *)glpixmap);
 
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
@@ -328,5 +327,4 @@ void RenderBoard3d(const BoardData* bd, renderdata* prd, void *glpixmap, unsigne
 	glReadPixels(0, 0, viewport[2], viewport[3], GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 	gdk_gl_drawable_gl_end(gldrawable);
-	/*** OpenGL END ***/
 }

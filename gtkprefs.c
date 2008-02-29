@@ -411,7 +411,7 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->ChequerMat[0], DF_VARIABLE_OPACITY, TT_PIECE), TRUE, TRUE, TT_PIECE );
+		gtk_colour_picker_new3d(&bd->rd->ChequerMat[0], DF_VARIABLE_OPACITY, TT_PIECE), FALSE, FALSE, TT_PIECE );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -419,9 +419,8 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->ChequerMat[1], DF_VARIABLE_OPACITY, TT_PIECE | TT_DISABLED), TRUE, TRUE, TT_PIECE );
+		gtk_colour_picker_new3d(&bd->rd->ChequerMat[1], DF_VARIABLE_OPACITY, TT_PIECE | TT_DISABLED), FALSE, FALSE, TT_PIECE );
 	pcChequer2 = GetPreviewId();
-
 
 	dtPieceTypeFrame = gtk_frame_new(_("Piece type"));
 	gtk_container_set_border_width (GTK_CONTAINER (dtPieceTypeFrame), 4);
@@ -491,14 +490,14 @@ static GtkWidget *DicePrefs3d( BoardData *bd, int f)
 	pc3dDiceId[f] = GetPreviewId();
     gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ f ] ),
                                ! bd->rd->afDieColour3d[ f ] );
-    gtk_box_pack_start(GTK_BOX(pwhbox),apwDiceColourBox[f], TRUE, TRUE, 4);
+    gtk_box_pack_start(GTK_BOX(pwhbox),apwDiceColourBox[f], FALSE, FALSE, 4);
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Pip colour:") ),
 			FALSE, FALSE, 4 );
 
-    gtk_box_pack_start(GTK_BOX(pwhbox), gtk_colour_picker_new3d(&bd->rd->DiceDotMat[f], DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, TT_PIECE);
+    gtk_box_pack_start(GTK_BOX(pwhbox), gtk_colour_picker_new3d(&bd->rd->DiceDotMat[f], DF_FULL_ALPHA, TT_NONE), FALSE, FALSE, TT_PIECE);
 
     g_signal_connect( G_OBJECT( apwDieColour[ f ] ), "toggled",
                          G_CALLBACK( DieColourChanged ), GINT_TO_POINTER(f));
@@ -522,7 +521,7 @@ static GtkWidget *CubePrefs3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->CubeMat, DF_NO_ALPHA, TT_NONE), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->CubeMat, DF_NO_ALPHA, TT_NONE), FALSE, FALSE, TT_PIECE);
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -530,7 +529,7 @@ static GtkWidget *CubePrefs3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->CubeNumberMat, DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->CubeNumberMat, DF_FULL_ALPHA, TT_NONE), FALSE, FALSE, TT_PIECE);
 
 	return pwx;
 }
@@ -551,7 +550,7 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->BaseMat, DF_NO_ALPHA, TT_GENERAL), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->BaseMat, DF_NO_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	pwBgTrays = gtk_check_button_new_with_label (_("Show background in bear-off trays"));
 	gtk_tooltips_set_tip(ptt, pwBgTrays, _("If unset the bear-off trays will be drawn with the board colour"), 0);
@@ -565,7 +564,7 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->PointMat[0], DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->PointMat[0], DF_FULL_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -573,7 +572,7 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->PointMat[1], DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->PointMat[1], DF_FULL_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	pwRoundPoints = gtk_check_button_new_with_label (_("Rounded points"));
 	gtk_tooltips_set_tip(ptt, pwBgTrays, _("Display the points with a rounded end"), 0);
@@ -600,7 +599,7 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->BoxMat, DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->BoxMat, DF_FULL_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	pwRoundedEdges = gtk_check_button_new_with_label (_("Rounded board edges"));
 	gtk_tooltips_set_tip(ptt, pwRoundedEdges, _("Toggle rounded or square edges to the board"), 0);
@@ -621,7 +620,7 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 
 	pmHingeCol = gtk_colour_picker_new3d(&bd->rd->HingeMat, DF_NO_ALPHA, TT_HINGE);
     gtk_widget_set_sensitive(pmHingeCol, bd->rd->fHinges3d);
-    gtk_box_pack_start(GTK_BOX(pwhbox), pmHingeCol, TRUE, TRUE, 4);
+    gtk_box_pack_start(GTK_BOX(pwhbox), pmHingeCol, FALSE, FALSE, 4);
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -629,7 +628,7 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->PointNumberMat, DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->PointNumberMat, DF_FULL_ALPHA, TT_NONE), FALSE, FALSE, TT_PIECE);
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -637,7 +636,7 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(&bd->rd->BackGroundMat, DF_NO_ALPHA, TT_GENERAL), TRUE, TRUE, TT_PIECE);
+		gtk_colour_picker_new3d(&bd->rd->BackGroundMat, DF_NO_ALPHA, TT_GENERAL), FALSE, FALSE, TT_PIECE);
 
 	return pwx;
 }
@@ -2990,35 +2989,19 @@ static void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 		dicePage -= 1;
 #endif
 	/* Make sure correct dice preview visible */
-	if (page_num == dicePage)
+
+	if ((page_num == dicePage && bd->turn == 1) ||
+		(page_num == dicePage + 1 && bd->turn == -1))
 	{
-		if (bd->turn == 1)
-		{
-			bd->turn = -1;
+		bd->turn = -bd->turn;
 #if USE_BOARD3D
-			if (display_is_3d(&rdPrefs))
-				updateDiceOccPos(bd, bd->bd3d);
-			else
+		if (display_is_3d(&rdPrefs))
+			setDicePos(bd, bd->bd3d);
+		else
 #endif
-				RollDice2d(bd);
-			UpdatePreview(0);
-			return;
-		}
-	}
-	if (page_num == dicePage + 1)
-	{
-		if (bd->turn == -1)
-		{
-			bd->turn = 1;
-#if USE_BOARD3D
-			if (display_is_3d(&rdPrefs))
-				updateDiceOccPos(bd, bd->bd3d);
-			else
-#endif
-				RollDice2d(bd);
-			UpdatePreview(0);
-			return;
-		}
+			RollDice2d(bd);
+
+		option_changed(0, 0);
 	}
 #if HAVE_LIBXML2
 	if (page_num == NUM_NONPREVIEW_PAGES)
@@ -3057,7 +3040,6 @@ extern void BoardPreferences(GtkWidget *pwBoard)
 #if USE_BOARD3D
     if (gtk_gl_init_success)
     {
-		Setup3dColourPicker(pwDialog, ((BoardData*)BOARD(pwBoard)->board_data)->drawing_area->window);
 	    SetPreviewLightLevel(bd->rd->lightLevels);
 		setDicePos(bd, bd->bd3d);
     }
@@ -3077,7 +3059,7 @@ extern void BoardPreferences(GtkWidget *pwBoard)
     gtk_widget_set_size_request ( GTK_WIDGET ( pwNotebook ), -1, 360 );
 #endif
 
-	gtk_box_pack_start( GTK_BOX(pwHbox), pwNotebook, TRUE, TRUE, 0 );
+	gtk_box_pack_start( GTK_BOX(pwHbox), pwNotebook, FALSE, FALSE, 0 );
 	gtk_box_pack_start( GTK_BOX(pwHbox), pwPrevBoard, TRUE, TRUE, 0 );
 
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),

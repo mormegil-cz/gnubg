@@ -138,7 +138,6 @@ extern void UpdateColPreviews(void);
 extern int GetPreviewId(void);
 extern void UpdateColPreview(int ID);
 extern void SetPreviewLightLevel(const int levels[3]);
-extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind);
 extern gboolean display_is_2d (const renderdata *prd);
 extern gboolean display_is_3d (const renderdata *prd);
 extern void RerenderBase(BoardData3d* bd3d);

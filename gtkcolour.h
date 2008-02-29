@@ -31,8 +31,8 @@
 
 typedef struct UpdateDetails_T
 {
-	Material* pMat;
-	GdkPixmap* pixmap;
+	Material mat;
+	Material *pBoardMat;
 	GtkWidget* preview;
 	GtkWidget** parentPreview;
 	int opacity;

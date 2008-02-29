@@ -1,3 +1,7 @@
+Fri Feb 29 19:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c, gtkcolour3d.c: Change 3d previews to use widgets not pixmaps.
+
 Thu Feb 28 15:15:08 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* osr.c: fix bug introduced by uint changes
