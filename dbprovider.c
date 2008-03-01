@@ -140,7 +140,8 @@ void RelationalSaveSettings(FILE *pf)
 	int i;
 	fprintf(pf, "relational setup storegamestats=%s\n", storeGameStats ? "yes" : "no");
 	
-	fprintf(pf, "relational setup dbtype=%s\n", providers[dbProviderType].shortname);
+	if (dbProviderType != INVALID_PROVIDER)
+		fprintf(pf, "relational setup dbtype=%s\n", providers[dbProviderType].shortname);
 	for (i = 0; i < NUM_PROVIDERS; i++)
 	{
 		DBProvider* pdb = GetDBProvider(i);
