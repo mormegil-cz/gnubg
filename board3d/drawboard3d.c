@@ -3453,9 +3453,8 @@ void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 	}
 	if (p == LAST_PIECE)
 	{
-		updateMovingPieceOccPos(bd, bd3d);
-		draw_shadow_volume_extruded_edges(&bd3d->Occluders[p], bd3d->shadow_light_position, GL_QUADS);
 		bd3d->Occluders[p].rotator = 0;
+		updateMovingPieceOccPos(bd, bd3d);
 	}
 }
 
