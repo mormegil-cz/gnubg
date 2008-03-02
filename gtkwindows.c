@@ -77,6 +77,30 @@ static void DialogResponse(GtkWidget *dialog, gint response, CallbackStruct *dat
 		free(data);
 }
 
+static void dialog_mapped(GtkWidget *window, gpointer data)
+{
+	gint screen_width = gdk_screen_width(), screen_height = gdk_screen_height();
+
+    if (window->allocation.width > screen_width || window->allocation.height > screen_height)
+	{	/* Dialog bigger than window! (just show at top left) */
+	    gtk_widget_set_uposition(window, 0, 0);
+	}
+	else
+	{
+		GdkRectangle rect;
+		gdk_window_get_frame_extents(window->window, &rect);
+		if (rect.x < 0)
+			rect.x = 0;
+		if (rect.y < 0)
+			rect.y = 0;
+		if (rect.x + rect.width > screen_width)
+			rect.x = screen_width - rect.width;
+		if (rect.y + rect.height > screen_height)
+			rect.y = screen_height - rect.height;
+		gtk_widget_set_uposition(window, rect.x, rect.y);
+	}
+}
+
 extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt, 
 	 GtkWidget *parent, int flags, GtkSignalFunc okFun, void *okFunData)
 {
@@ -142,6 +166,8 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 
 	if (flags & DIALOG_FLAG_MODAL)
 		gtk_window_set_modal(GTK_WINDOW(pwDialog), TRUE);
+
+	g_signal_connect(pwDialog, "map", G_CALLBACK(dialog_mapped), 0);
 
     return pwDialog;
 }
