@@ -1902,8 +1902,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
               szComment = g_strdup ( sz );
             else {
               szComment = 
-                (char *) realloc ( szComment,
-                                   strlen ( sz ) + strlen ( szComment ) + 1 );
+                (char *) g_realloc ( szComment, (gulong)strlen ( sz ) + strlen ( szComment ) + 1 );
               strcat ( szComment, sz );
             }
 
@@ -1940,7 +1939,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     /* garbage collect */
 
     if ( szComment )
-      free ( szComment );
+      g_free ( szComment );
 
 }
 

@@ -6691,7 +6691,7 @@ extern void CommandSwapPlayers ( char *sz )
   pc = g_strdup ( ap[ 0 ].szName );
   strcpy ( ap[ 0 ].szName, ap[ 1 ].szName );
   strcpy ( ap[ 1 ].szName, pc );
-  free ( pc );
+  g_free ( pc );
 
   /* swap player ratings */
 
