@@ -724,10 +724,11 @@ static void DiceRolled(void)
 
 }
 
-static int NewGame( void ) {
-
-    moverecord *pmr;
-    int fError;
+static int NewGame( void )
+{
+	moverecord *pmr;
+	int fError;
+	listOLD *plOldGame = plGame;
     
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
@@ -789,7 +790,8 @@ static int NewGame( void ) {
 
 	free( plGame );
 	ListDelete( lMatch.plPrev );
-	plGame = plLastMove = 0;
+	plGame = plOldGame;
+	plLastMove = 0;
 	return -1;
     }
     
@@ -2856,8 +2858,8 @@ CommandMove( char *sz ) {
     outputl( _("Illegal move.") );
 }
 
-extern void CommandNewGame( char *sz ) {
-
+extern void CommandNewGame( char *sz )
+{
     if( ms.nMatchTo && ( ms.anScore[ 0 ] >= ms.nMatchTo ||
 			 ms.anScore[ 1 ] >= ms.nMatchTo ) ) {
 	outputl( _("The match is already over.") );
