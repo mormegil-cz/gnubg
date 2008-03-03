@@ -4678,6 +4678,7 @@ extern void CommandSaveSettings( char *szParam )
 	     "set gui illegal %s\n"
 	     "set gui showids %s\n"
 	     "set gui showpips %s\n"
+	     "set gui showepc %s\n"
 	     "set gui dragtargethelp %s\n"
 		 "set gui usestatspanel %s\n"
 		 "set gui movelistdetail %s\n",
@@ -4688,6 +4689,7 @@ extern void CommandSaveSettings( char *szParam )
 	     fGUIIllegal ? "on" : "off",
 	     GetMainAppearance()->fShowIDs ? "on" : "off",
 	     fGUIShowPips ? "on" : "off",
+	     fGUIShowEPCs ? "on" : "off",
 	     fGUIDragTargetHelp ? "on" : "off",
 		 fGUIUseStatsPanel ? "on" : "off",
 		 showMoveListDetail ? "on" : "off");
