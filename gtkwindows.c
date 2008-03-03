@@ -79,24 +79,37 @@ static void DialogResponse(GtkWidget *dialog, gint response, CallbackStruct *dat
 
 static void dialog_mapped(GtkWidget *window, gpointer data)
 {
-	gint screen_width = gdk_screen_width(), screen_height = gdk_screen_height();
+	GdkRectangle monitorrect;
+	GdkScreen *screen = gtk_widget_get_screen(window);
+	if (!screen || gdk_screen_get_n_monitors(screen) == 1)
+	{
+		monitorrect.x = 0;
+		monitorrect.y = 0;
+		monitorrect.width = gdk_screen_width();
+		monitorrect.height = gdk_screen_height();
+	}
+	else
+	{
+		int monitor = gdk_screen_get_monitor_at_window(screen, window->window);
+		gdk_screen_get_monitor_geometry(screen, monitor, &monitorrect);
+	}
 
-    if (window->allocation.width > screen_width || window->allocation.height > screen_height)
+	if (window->allocation.width > monitorrect.width || window->allocation.height > monitorrect.height)
 	{	/* Dialog bigger than window! (just show at top left) */
-	    gtk_widget_set_uposition(window, 0, 0);
+	    gtk_widget_set_uposition(window, monitorrect.x, monitorrect.y);
 	}
 	else
 	{
 		GdkRectangle rect;
 		gdk_window_get_frame_extents(window->window, &rect);
-		if (rect.x < 0)
-			rect.x = 0;
-		if (rect.y < 0)
-			rect.y = 0;
-		if (rect.x + rect.width > screen_width)
-			rect.x = screen_width - rect.width;
-		if (rect.y + rect.height > screen_height)
-			rect.y = screen_height - rect.height;
+		if (rect.x < monitorrect.x)
+			rect.x = monitorrect.x;
+		if (rect.y < monitorrect.y)
+			rect.y = monitorrect.y;
+		if (rect.x + rect.width > monitorrect.x + monitorrect.width)
+			rect.x = monitorrect.x + monitorrect.width - rect.width;
+		if (rect.y + rect.height > monitorrect.y + monitorrect.height)
+			rect.y = monitorrect.y + monitorrect.height - rect.height;
 		gtk_widget_set_uposition(window, rect.x, rect.y);
 	}
 }
@@ -167,9 +180,9 @@ extern GtkWidget *GTKCreateDialog(const char *szTitle, const dialogtype dt,
 	if (flags & DIALOG_FLAG_MODAL)
 		gtk_window_set_modal(GTK_WINDOW(pwDialog), TRUE);
 
-	g_signal_connect(pwDialog, "map", G_CALLBACK(dialog_mapped), 0);
+	g_signal_connect(pwDialog, "map-event", G_CALLBACK(dialog_mapped), 0);
 
-    return pwDialog;
+	return pwDialog;
 }
 
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da )
