@@ -621,7 +621,7 @@ extern void CommentaryChanged( GtkWidget *pw, GtkTextBuffer *buffer ) {
        to update the text (which is probably inconvenient for the user). */
 
     if( pmrAnnotation->sz )
-	free( pmrAnnotation->sz );
+	g_free( pmrAnnotation->sz );
     
     gtk_text_buffer_get_bounds (buffer, &begin, &end);
     pch = gtk_text_buffer_get_text(buffer, &begin, &end, FALSE);
