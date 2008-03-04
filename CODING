@@ -72,3 +72,15 @@ It's probably a good idea to mark the branch at this point so that further
 changes to the branch can be merged into the trunk with
 
 cvs update -j branch-xxx-mergedwithtrunk -j branch-xxx
+
+
+How to merge bug fix into 0.15 branch
+-------------------------------------
+
+1. Get 0.15 version of file (eg. rel_0_15 of gtkprefs.c)
+	cvs update -rrel_0_15 gtkprefs.c
+2. Merge fix (eg. change 1.136)
+	cvs update -j1.135 -j1.136 gtkprefs.c
+3. Check it in and then change back to head version:
+	cvs ci
+	cvs update -A gtkprefs.c
