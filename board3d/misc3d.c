@@ -1019,6 +1019,25 @@ void circle(float radius, float height, unsigned int accuracy)
 	glEnd();
 }
 
+void circleSloped(float radius, float startHeight, float endHeight, unsigned int accuracy)
+{	/* Draw a disc in sloping z plane */
+	unsigned int i;
+	float angle, step;
+
+	step = (2 * (float)G_PI) / accuracy;
+	angle = 0;
+	glNormal3f(0.f, 0.f, 1.f);
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex3f(0.f, 0.f, startHeight);
+	for (i = 0; i <= accuracy; i++)
+	{
+		float height = ((cosf(angle) + 1) / 2) * (endHeight - startHeight);
+		glVertex3f(sinf(angle) * radius, cosf(angle) * radius, startHeight + height);
+		angle -= step;
+	}
+	glEnd();
+}
+
 void circleRev(float radius, float height, unsigned int accuracy)
 {	/* Draw a disc with reverse winding in current z plane */
 	unsigned int i;

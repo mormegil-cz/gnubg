@@ -12,6 +12,7 @@ void circleTex(float radius, float height, unsigned int accuracy, const Texture*
 void circleRevTex(float radius, float height, unsigned int accuracy, const Texture* texture);
 void circleOutlineOutward(float radius, float height, unsigned int accuracy);
 void circleOutline(float radius, float height, unsigned int accuracy);
+void circleSloped(float radius, float startHeight, float endHeight, unsigned int accuracy);
 void drawBox(int boxType, float x, float y, float z, float w, float h, float d, const Texture* texture);
 void drawCube(float size);
 void drawRect(float x, float y, float z, float w, float h, const Texture* texture);

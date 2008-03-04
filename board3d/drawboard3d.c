@@ -174,12 +174,14 @@ static void preDrawPiece0(const renderdata* prd, int display)
 		circleRevTex(discradius, 0.f, prd->curveAccuracy, prd->ChequerMat[0].pTexture);
 	}
 	else
-		circle(discradius, PIECE_DEPTH, prd->curveAccuracy);
-
+	{
+		circleSloped(radius, 0, PIECE_DEPTH, prd->curveAccuracy);
+		return;
+	}
 	/* Draw side of piece */
 	glPushMatrix();
 	glTranslatef(0.f, 0.f, lip);
-	cylinder(radius, height, prd->curveAccuracy, display ? prd->ChequerMat[0].pTexture : NULL);
+	cylinder(radius, height, prd->curveAccuracy, prd->ChequerMat[0].pTexture);
 	glPopMatrix();
 
 	/* Draw edges of piece */
@@ -216,20 +218,14 @@ static void preDrawPiece0(const renderdata* prd, int display)
 		glBegin(GL_QUAD_STRIP);
 		for (i = 0; i < prd->curveAccuracy + 1; i++)
 		{
-			if (display)
-			{
-				glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
-				if (prd->ChequerMat[0].pTexture)
-					glTexCoord2f((p[i][j][0] + discradius) / (discradius * 2), (p[i][j][1] + discradius) / (discradius * 2));
-			}
+			glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
+			if (prd->ChequerMat[0].pTexture)
+				glTexCoord2f((p[i][j][0] + discradius) / (discradius * 2), (p[i][j][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j][0], p[i][j][1], p[i][j][2]);
 
-			if (display)
-			{
-				glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
-				if (prd->ChequerMat[0].pTexture)
-					glTexCoord2f((p[i][j + 1][0] + discradius) / (discradius * 2), (p[i][j + 1][1] + discradius) / (discradius * 2));
-			}
+			glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
+			if (prd->ChequerMat[0].pTexture)
+				glTexCoord2f((p[i][j + 1][0] + discradius) / (discradius * 2), (p[i][j + 1][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], p[i][j + 1][2]);
 		}
 		glEnd();
@@ -237,43 +233,35 @@ static void preDrawPiece0(const renderdata* prd, int display)
 		glBegin(GL_QUAD_STRIP);
 		for (i = 0; i < prd->curveAccuracy + 1; i++)
 		{
-			if (display)
-			{
-				glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
-				if (prd->ChequerMat[0].pTexture)
-					glTexCoord2f((p[i][j + 1][0] + discradius) / (discradius * 2), (p[i][j + 1][1] + discradius) / (discradius * 2));
-			}
+			glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
+			if (prd->ChequerMat[0].pTexture)
+				glTexCoord2f((p[i][j + 1][0] + discradius) / (discradius * 2), (p[i][j + 1][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], PIECE_DEPTH - p[i][j + 1][2]);
 
-			if (display)
-			{
-				glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
-				if (prd->ChequerMat[0].pTexture)
-					glTexCoord2f((p[i][j][0] + discradius) / (discradius * 2), (p[i][j][1] + discradius) / (discradius * 2));
-			}
+			glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
+			if (prd->ChequerMat[0].pTexture)
+				glTexCoord2f((p[i][j][0] + discradius) / (discradius * 2), (p[i][j][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j][0], p[i][j][1], PIECE_DEPTH - p[i][j][2]);
 		}
 		glEnd();
 	}
 
-	if (display)
-	{
-		/* Anti-alias piece edges */
-		glLineWidth(1.f);
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
+	/* Anti-alias piece edges */
+	glLineWidth(1.f);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
 
-		circleOutlineOutward(radius, PIECE_DEPTH - lip, prd->curveAccuracy);
-		circleOutlineOutward(radius, lip, prd->curveAccuracy);
+	circleOutlineOutward(radius, PIECE_DEPTH - lip, prd->curveAccuracy);
+	circleOutlineOutward(radius, lip, prd->curveAccuracy);
 
-		glDisable(GL_BLEND);
-		glDisable(GL_LINE_SMOOTH);
-		glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
+	glDepthMask(GL_TRUE);
 
-		if (prd->ChequerMat[0].pTexture && prd->pieceTextureType == PTT_TOP)
-			glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
-	}
+	if (prd->ChequerMat[0].pTexture && prd->pieceTextureType == PTT_TOP)
+		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
+
 	Free3d(p, prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1);
 	Free3d(n, prd->curveAccuracy + 1, prd->curveAccuracy / 4 + 1);
 }
@@ -293,29 +281,29 @@ static void preDrawPiece1(const renderdata* prd, int display)
 		circleRevTex(pieceRad, 0.f, prd->curveAccuracy, prd->ChequerMat[0].pTexture);
 	}
 	else
-		circle(pieceRad, PIECE_DEPTH, prd->curveAccuracy);
+	{
+		circleSloped(pieceRad, 0, PIECE_DEPTH, prd->curveAccuracy);
+		return;
+	}
 
 	/* Edge of piece */
-	cylinder(pieceRad, PIECE_DEPTH, prd->curveAccuracy, display ? prd->ChequerMat[0].pTexture : NULL);
+	cylinder(pieceRad, PIECE_DEPTH, prd->curveAccuracy, prd->ChequerMat[0].pTexture);
 
-	if (display)
-	{
-		/* Anti-alias piece edges */
-		glLineWidth(1.f);
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
+	/* Anti-alias piece edges */
+	glLineWidth(1.f);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
 
-		circleOutlineOutward(pieceRad, PIECE_DEPTH, prd->curveAccuracy);
-		circleOutlineOutward(pieceRad, 0.f, prd->curveAccuracy);
+	circleOutlineOutward(pieceRad, PIECE_DEPTH, prd->curveAccuracy);
+	circleOutlineOutward(pieceRad, 0.f, prd->curveAccuracy);
 
-		glDisable(GL_BLEND);
-		glDisable(GL_LINE_SMOOTH);
-		glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
+	glDepthMask(GL_TRUE);
 
-		if (prd->ChequerMat[0].pTexture && prd->pieceTextureType == PTT_TOP)
-			glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
-	}
+	if (prd->ChequerMat[0].pTexture && prd->pieceTextureType == PTT_TOP)
+		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
 static void preRenderPiece(GLuint pieceList, const renderdata *prd, int display)
@@ -1007,7 +995,7 @@ static void drawSpecialPieces(const BoardData *bd, const BoardData3d *bd3d, cons
 		glDisable(GL_BLEND);
 }
 
-static void drawPiece(GLuint pieceList, const BoardData3d* bd3d, unsigned int point, unsigned int pos)
+static void drawPiece(GLuint pieceList, const BoardData3d* bd3d, unsigned int point, unsigned int pos, int rotate)
 {
 	float v[3];
 	glPushMatrix();
@@ -1021,7 +1009,8 @@ static void drawPiece(GLuint pieceList, const BoardData3d* bd3d, unsigned int po
 	if (point == 27)
 		glRotatef(90.f, 1.f, 0.f, 0.f);
 
-	glRotatef((float)bd3d->pieceRotation[point][pos - 1], 0.f, 0.f, 1.f);
+	if (rotate)
+		glRotatef((float)bd3d->pieceRotation[point][pos - 1], 0.f, 0.f, 1.f);
 	glCallList(pieceList);
 
 	glPopMatrix();
@@ -1046,7 +1035,7 @@ NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const r
 				for (j = 1; j <= numPieces; j++)
 				{
 					glEnable(GL_BLEND);
-					drawPiece(bd3d->pieceList, bd3d, i, j);
+					drawPiece(bd3d->pieceList, bd3d, i, j, TRUE);
 				}
 			}
 		}
@@ -1059,7 +1048,7 @@ NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const r
 				for (j = 1; j <= numPieces; j++)
 				{
 					glEnable(GL_BLEND);
-					drawPiece(bd3d->pieceList, bd3d, i, j);
+					drawPiece(bd3d->pieceList, bd3d, i, j, TRUE);
 				}
 			}
 		}
@@ -1076,7 +1065,7 @@ NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const r
 			{
 				if (blend)
 					glEnable(GL_BLEND);
-				drawPiece(bd3d->pieceList, bd3d, i, j);
+				drawPiece(bd3d->pieceList, bd3d, i, j, TRUE);
 			}
 		}
 	}
@@ -1090,7 +1079,7 @@ NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const r
 			{
 				if (blend)
 					glEnable(GL_BLEND);
-				drawPiece(bd3d->pieceList, bd3d, i, j);
+				drawPiece(bd3d->pieceList, bd3d, i, j, TRUE);
 			}
 		}
 	}
@@ -1109,7 +1098,7 @@ NTH_STATIC void drawPieces(const BoardData *bd, const BoardData3d *bd3d, const r
 			{	/* Make sure texturing is disabled */
 				if (prd->ChequerMat[0].pTexture)
 					glDisable(GL_TEXTURE_2D);
-				drawPiece(bd3d->pieceList, bd3d, (unsigned int)target, abs(bd->points[target]) + 1);
+				drawPiece(bd3d->pieceList, bd3d, (unsigned int)target, abs(bd->points[target]) + 1, TRUE);
 			}
 		}
 		glPolygonMode(GL_FRONT, GL_FILL);
@@ -2306,7 +2295,7 @@ NTH_STATIC void drawPick(const BoardData* bd, const BoardData3d* bd3d, const ren
 	{
 		glLoadName(i);
 		for (j = 1; j <= (unsigned int)ABS(bd->points[i]); j++)
-			drawPiece(bd3d->piecePickList, bd3d, i, j);
+			drawPiece(bd3d->piecePickList, bd3d, i, j, FALSE);
 	}
 	/* points */
 	for (i = 0; i < 6; i++)
