@@ -52,8 +52,6 @@ static int curDetail;
 #define STRIP_WIDTH 100
 #define STRIP_HEIGHT 10.f
 
-static unsigned char auch[PREVIEW_WIDTH * PREVIEW_HEIGHT * 3];
-
 static int previewLightLevels[3];
 
 static int IsFlagSet(int flags, int bit)

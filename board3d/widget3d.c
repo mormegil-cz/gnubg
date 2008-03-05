@@ -24,6 +24,7 @@
 #include "config.h"
 #include "inc3d.h"
 #include "misc3d.h"
+#include "tr.h"
 
 gboolean gtk_gl_init_success = FALSE;
 
@@ -272,59 +273,44 @@ int DoAcceleratedCheck(const BoardData3d* bd3d, GtkWidget* pwParent)
 		return 1;
 }
 
-/* Drawing direct to pixmap */
-
-static GdkGLContext *glPixmapContext = NULL;
-
-static void SetupPreview(const BoardData* bd, renderdata* prd)
-{
-	GetTextures(bd->bd3d, prd);
-	SetupViewingVolume3d(bd, bd->bd3d, prd);
-	preDraw3d(bd, bd->bd3d, prd);
-}
-
-static GdkGLConfig *glconfigSingle = NULL;
-
-extern GdkGLConfig *getglconfigSingle(void)
-{
-	if (!glconfigSingle)
-		glconfigSingle = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_SINGLE | GDK_GL_MODE_STENCIL));
-	if (!glconfigSingle)
-		glconfigSingle = gdk_gl_config_new_by_mode((GdkGLConfigMode)(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_SINGLE));
-
-	return glconfigSingle;
-}
-
-void *CreatePreviewBoard3d(const BoardData* bd, GdkPixmap *ppm)
-{
-	GdkGLPixmap *glpixmap = gdk_pixmap_set_gl_capability(ppm, getglconfigSingle(), NULL);
-	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE(glpixmap);
-	glPixmapContext = gdk_gl_context_new (gldrawable, NULL, FALSE, GDK_GL_RGBA_TYPE);
-
-	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
-		return 0;
-
-	InitGL(bd);
-
-	gdk_gl_drawable_gl_end (gldrawable);
-
-	return glpixmap;
-}
-
-void RenderBoard3d(const BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
+void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, int width, int height, unsigned char* buf)
 {
 	GLint viewport[4];
-	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE((GdkGLPixmap *)glpixmap);
-
-	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
+	TRcontext *tr;
+	GtkWidget *widget = bd3d->drawing_area3d;
+	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
+	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return;
 
-	SetupPreview(bd, prd);
+	viewport[2] = width;
+	viewport[3] = height;
 
-	Draw3d(bd);
+	tr = trNew();
+	#define BORDER 10
+	trTileSize(tr, widget->allocation.width, widget->allocation.height, BORDER);
+	trImageSize(tr, width, height);
+	trImageBuffer(tr, GL_RGB, GL_UNSIGNED_BYTE, buf);
 
-	glGetIntegerv (GL_VIEWPORT, viewport);
-	glReadPixels(0, 0, viewport[2], viewport[3], GL_RGB, GL_UNSIGNED_BYTE, buf);
+	glViewport(0, 0, width, height);
+
+	SetupViewingVolume3d(bd, bd3d, bd->rd);
+
+	if (bd->rd->planView)
+		trOrtho(tr, -bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, 0.0, 5.0);
+	else
+		trFrustum(tr, -bd3d->horFrustrum, bd3d->horFrustrum, -bd3d->vertFrustrum, bd3d->vertFrustrum, zNear, zFar);
+
+	/* Draw tiles */
+	do
+	{
+		trBeginTile(tr);
+		Draw3d(bd);
+	} while (trEndTile(tr));
+
+	trDelete(tr);
+
+	/* Reset viewing volume for main screen */
+	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 
 	gdk_gl_drawable_gl_end(gldrawable);
 }

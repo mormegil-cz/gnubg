@@ -76,7 +76,6 @@ extern void DisplayCorrectBoardType(BoardData* bd, BoardData3d* bd3d, renderdata
 extern int CreateGLWidget(BoardData* bd);
 extern int DoAcceleratedCheck(const BoardData3d* bd3d, GtkWidget* pwParent);
 
-extern void *CreatePreviewBoard3d(const BoardData* bd, GdkPixmap *ppm);
 extern void RollDice3d(BoardData *bd, BoardData3d* bd3d, const renderdata *prd);
 extern void AnimateMove3d(BoardData *bd, BoardData3d *bd3d);
 extern void ShowFlag3d(BoardData *bd, BoardData3d *bd3d, const renderdata *prd);
@@ -85,7 +84,7 @@ extern void preDraw3d(const BoardData *bd, BoardData3d *bd3d, renderdata *prd);
 extern void CloseBoard3d(BoardData* bd, BoardData3d* bd3d, renderdata* prd);
 extern int BoardPoint3d(const BoardData* bd, const BoardData3d* bd3d, const renderdata* prd, int x, int y, int point);
 extern int MouseMove3d(const BoardData *bd, BoardData3d *bd3d, const renderdata* prd, int x, int y);
-extern void RenderBoard3d(const BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf);
+extern void RenderToBuffer3d(const BoardData* bd, BoardData3d* bd3d, int width, int height, unsigned char* buf);
 extern void Tidy3dObjects(BoardData3d* bd3d, const renderdata *prd);
 extern float TestPerformance3d(BoardData* bd);
 extern void Set3dSettings(renderdata *prdnew, const renderdata *prd);

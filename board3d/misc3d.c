@@ -2400,49 +2400,41 @@ void GenerateImage3d(renderdata *prd, const char* szName,
 {
 	unsigned char *puch;
 	BoardData *bd = BOARD(pwBoard)->board_data;
-	BoardData bdpw;
-	renderdata rd;
-	GError *error = NULL;
-	GdkPixmap *ppm;
-	void *glpixPreview;
 	GdkPixbuf *pixbuf;
-	gint depth = gdk_gl_config_get_depth(getglconfigSingle());
-	ppm = gdk_pixmap_new(NULL, (int) (nSizeX * nSize), (int) (nSizeY * nSize), depth);
+	GError *error = NULL;
+	int line;
+	int width = nSize * nSizeX;
+	int height = nSize * nSizeY;
 
-	/* Copy current settings */
-	CopyAppearance(&rd);
-	CopySettings3d(bd, &bdpw);
-	bdpw.rd = &rd;
-	rd.nSize = nSize;
-	ClearTextures(bd->bd3d);
-
-	if ((puch = (unsigned char *) malloc(nSizeX * nSizeY * nSize * nSize * 3)) == NULL)
+	/* Allocate buffer for image, height + 1 as extra line needed to invert image (opengl renders 'upside down') */
+	if ((puch = (unsigned char *) malloc(width * (height + 1) * 3)) == NULL)
 	{
 		outputerr ("malloc");
 		return;
 	}
-	/* Create preview area */
-	glpixPreview = CreatePreviewBoard3d(&bdpw, ppm);
 
-	/* Draw board */
-	RenderBoard3d(&bdpw, prd, glpixPreview, puch);
+	RenderToBuffer3d(bd, bd->bd3d, width, height, puch);
 
-	pixbuf = gdk_pixbuf_get_from_drawable(NULL, GDK_DRAWABLE(ppm),
-					      NULL, 0, 0, 0, 0, -1, -1);
+	/* invert image (y axis) */
+	for( line = 0; line < height/2; line++ )
+	{
+		int lineSize = width * 3;
+		/* Swap two lines at a time */
+		memcpy(puch + height * lineSize, puch + line * lineSize, lineSize);
+		memcpy(puch + line * lineSize, puch + (height - line - 1) * lineSize, lineSize);
+		memcpy(puch + (height - line - 1) * lineSize, puch + height * lineSize, lineSize);
+	}
+
+    pixbuf = gdk_pixbuf_new_from_data( puch, GDK_COLORSPACE_RGB, FALSE, 8,
+				    width, height, width * 3, NULL, NULL );
+
 	gdk_pixbuf_save(pixbuf, szName, "png", &error, NULL);
 	if (error) {
 		outputerrf("png failed: %s\n", error->message);
 		g_error_free(error);
 	}
 	g_object_unref(pixbuf);
-	g_object_unref(ppm);
 	free(puch);
-
-	/* Tidy up main board */
-	ClearTextures(bd->bd3d);
-	GetTextures(bd->bd3d, bd->rd);
-	preDraw3d(bd, bd->bd3d, bd->rd);
-	SetupViewingVolume3d(bd, bd->bd3d, bd->rd);
 }
 
 #endif

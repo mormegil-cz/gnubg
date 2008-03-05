@@ -58,8 +58,6 @@
 
 #include <glib/gi18n.h>
 
-extern GdkGLConfig *getglconfigSingle(void);	/* Odd function needs to be defined here */
-
 /* float versions (to quiet compiler warnings) */
 #define powi(arg1, arg2) (int)pow((double)(arg1), (double)(arg2))
 
