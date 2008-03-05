@@ -22,7 +22,6 @@
 #include "config.h"
 
 #include <glib.h>
-#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +36,7 @@
 #include "bearoff.h"
 #include "util.h"
 #include "multithread.h"
+#include <glib/gi18n.h>
 
 #if WIN32
 #include <windows.h>

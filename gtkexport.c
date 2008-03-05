@@ -346,7 +346,7 @@ ExportOK ( GtkWidget *pw, exportwidget *pew ) {
   /* set new values */
 
   SetExportCommands ( pexs, &exsNew );
-  free ( exsNew.szHTMLPictureURL ),
+  g_free ( exsNew.szHTMLPictureURL );
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
