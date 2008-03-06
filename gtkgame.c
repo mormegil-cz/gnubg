@@ -1523,14 +1523,31 @@ static void ToolbarStyle(gpointer    callback_data,
 
 GtkClipboard *clipboard = NULL;
 
+int isActive(const void *item, const void *data)
+{
+	if (gtk_window_is_active(GTK_WINDOW(item)))
+		return 0;
+	else
+		return 1;
+}
+
+GtkWidget *GetFocusedWidget()
+{
+	GList *windows = gtk_window_list_toplevels();
+	/* Find widget that has focus */
+	GList *activeWindow = g_list_find_custom(windows, 0, isActive);
+	if (activeWindow)
+		return gtk_window_get_focus(activeWindow->data);
+	else
+		return NULL;
+}
+
 static void CopyText(void)
 {
-	GtkWidget *pFocus;
 	GtkTextIter start, end;
 	GtkTextBuffer *buffer;
 	const char *text;
-
-	pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
+	GtkWidget *pFocus = GetFocusedWidget();
 	if (!pFocus)
 		return;
 	if (GTK_IS_ENTRY(pFocus)) {
@@ -1547,26 +1564,37 @@ static void CopyText(void)
 
 static void PasteText(void)
 {
-	GtkWidget *pFocus;
 	GtkTextBuffer *buffer;
 	char *text;
-
-	pFocus = gtk_window_get_focus(GTK_WINDOW(pwMain));
+	GtkWidget *pFocus = GetFocusedWidget();
+	if (!pFocus)
+		return;
 	text = gtk_clipboard_wait_for_text(clipboard);
 	if (!pFocus || !text)
 		return;
-	if (GTK_IS_ENTRY(pFocus)) {
+	if (GTK_IS_ENTRY(pFocus))
+	{
 		BoardData *bd = BOARD(pwBoard)->board_data;
-		gtk_entry_set_text(GTK_ENTRY(pFocus), text);
-		if (pFocus == bd->position_id)
-			board_set_position(0, bd);
-		else if (pFocus == bd->match_id)
-			board_set_matchid(0, bd);
-	} else if (GTK_IS_TEXT_VIEW(pFocus)) {
-		if (gtk_text_view_get_editable(GTK_TEXT_VIEW(pFocus))) {
-			buffer =
-			    gtk_text_view_get_buffer(GTK_TEXT_VIEW
-						     (pFocus));
+		if (pFocus == bd->position_id || pFocus == bd->match_id)
+		{	/* Replace text in these boxes */
+			gtk_entry_set_text(GTK_ENTRY(pFocus), text);
+			if (pFocus == bd->position_id)
+				board_set_position(0, bd);
+			else
+				board_set_matchid(0, bd);
+		}
+		else
+		{	/* Insert text */
+			int pos = gtk_editable_get_position(GTK_EDITABLE(pFocus));
+			gtk_editable_insert_text(GTK_EDITABLE(pFocus), text, strlen(text), &pos);
+			gtk_editable_set_position(GTK_EDITABLE(pFocus), pos);
+		}
+	}
+	else if (GTK_IS_TEXT_VIEW(pFocus))
+	{
+		if (gtk_text_view_get_editable(GTK_TEXT_VIEW(pFocus)))
+		{
+			buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(pFocus));
 			gtk_text_buffer_insert_at_cursor(buffer, text, -1);
 		}
 	}
