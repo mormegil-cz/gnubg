@@ -1519,7 +1519,7 @@ static void ToolbarStyle(gpointer    callback_data,
 
 GtkClipboard *clipboard = NULL;
 
-int isActive(const void *item, const void *data)
+static int isActive(const void *item, const void *data)
 {
 	if (gtk_window_is_active(GTK_WINDOW(item)))
 		return 0;
@@ -1527,7 +1527,7 @@ int isActive(const void *item, const void *data)
 		return 1;
 }
 
-GtkWidget *GetFocusedWidget()
+static GtkWidget *GetFocusedWidget(void)
 {
 	GList *windows = gtk_window_list_toplevels();
 	/* Find widget that has focus */

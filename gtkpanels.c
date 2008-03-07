@@ -1454,7 +1454,7 @@ CommandSetGeometryMax ( char *sz )
 		setWindowGeometry(pwoSetPanel);
 }
 
-extern void CommandSetDisplayPanels( char *sz ) {
+extern void CommandSetPanels( char *sz ) {
 
   SetToggle ("panels", &fDisplayPanels, sz, 
   _("Game list, Annotation and Message panels/windows will be displayed."),
@@ -1470,7 +1470,7 @@ extern void CommandSetDisplayPanels( char *sz ) {
     
 }
 
-extern void CommandShowDisplayPanels( char *sz ) {
+extern void CommandShowPanels( char *sz ) {
 	if (fDisplayPanels)
 	  outputf( _("Game list, Annotation and Message panels/windows "
 		        "will be displayed."));

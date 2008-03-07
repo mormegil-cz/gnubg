@@ -1,3 +1,8 @@
+Fri Mar  7 22:28:52 CET 2008 Christian Anthon <anthon@kiku.dk>
+
+	* backgammon.h, gnubg.c, gtkgame.c, gtkpanels.c, board3d/Makefile.am,
+	board3d/gtkcolour3d.c: minor stuff and warnings
+
 Fri Feb 29 19:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c, gtkcolour3d.c: Change 3d previews to use widgets not pixmaps.

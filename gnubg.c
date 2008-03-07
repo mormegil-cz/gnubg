@@ -1698,7 +1698,7 @@ command cER = {
     { "output", NULL, N_("Modify options for formatting results"), NULL,
       acSetOutput },
 #if USE_GTK
-    { "panels", CommandSetDisplayPanels, 
+    { "panels", CommandSetPanels, 
       N_("Display game list, annotation and message panels/windows"), 
 	 szONOFF, &cOnOff },
 #endif
@@ -1850,11 +1850,15 @@ command cER = {
       N_("Show misc race theory"), NULL, NULL },
     { "output", CommandShowOutput, N_("Show how results will be formatted"),
       NULL, NULL },
+#if USE_GTK
+    { "panels", CommandShowPanels, N_("Show if the panels are displayed"),
+      NULL, NULL},
+#endif
     { "pipcount", CommandShowPipCount, 
       N_("Count the number of pips each player must move to bear off"), 
       szOPTPOSITION, NULL },
     { "player", CommandShowPlayer, N_("View per-player options"), NULL, NULL },
-    { "postcrawford", CommandShowCrawford, 
+    { "postcrawford", CommandShowPostCrawford, 
       N_("See if this is post-Crawford play"), NULL, NULL },
     { "prompt", CommandShowPrompt, N_("Show the prompt that will be printed "
       "when ready for commands"), NULL, NULL },
