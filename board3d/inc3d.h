@@ -203,6 +203,8 @@ struct _Flag3d
 
 #define HINGE_SEGMENTS 6.f
 
+#define CUBE_TWODIGIT_FACTOR .9f
+
 /* Draw board parts (boxes) specially */
 enum /*boxType*/ {BOX_ALL = 0, BOX_NOSIDES = 1, BOX_NOENDS = 2, BOX_SPLITTOP = 4, BOX_SPLITWIDTH = 8};
 

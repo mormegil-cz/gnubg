@@ -1884,7 +1884,7 @@ void RestrictiveStartMouseMove(unsigned int pos, unsigned int depth)
 	float erasePos[3];
 	if (numRestrictFrames != -1)
 	{
-		getPiecePos(pos, depth, fClockwise, erasePos);
+		getPiecePos(pos, depth, erasePos);
 		RestrictiveDrawFrame(erasePos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 		CopyBox(&eraseCb, &cb[numRestrictFrames]);
 	}
@@ -1894,7 +1894,7 @@ void RestrictiveStartMouseMove(unsigned int pos, unsigned int depth)
 void RestrictiveEndMouseMove(unsigned int pos, unsigned int depth)
 {
 	float newPos[3];
-	getPiecePos(pos, depth, fClockwise, newPos);
+	getPiecePos(pos, depth, newPos);
 
 	if (numRestrictFrames == -1)
 		return;
@@ -1944,7 +1944,7 @@ static void SetupMove(BoardData* bd, BoardData3d *bd3d)
 	if ((abs(bd->points[dest]) == 1) && (dir != SGN(bd->points[dest])))
 		destDepth--;
 
-	setupPath(bd, &bd3d->piecePath, &bd3d->rotateMovingPiece, fClockwise, target, abs(bd->points[target]) + 1, dest, destDepth);
+	setupPath(bd, &bd3d->piecePath, &bd3d->rotateMovingPiece, target, abs(bd->points[target]) + 1, dest, destDepth);
 	copyPoint(bd3d->movingPos, bd3d->piecePath.pts[0]);
 
 	SetMovingPieceRotation(bd, bd3d, target);
@@ -2010,7 +2010,7 @@ static int idleAnimate(BoardData3d* bd3d)
 			if (prd->quickDraw && numRestrictFrames != -1)
 			{
 				float new_pos[3];
-				getPiecePos(moveDest, abs(bd->points[moveDest]), fClockwise, new_pos);
+				getPiecePos(moveDest, abs(bd->points[moveDest]), new_pos);
 				if (moveDest == 26 || moveDest == 27)
 				{
 					new_pos[2] -= PIECE_HOLE / 2.0f;

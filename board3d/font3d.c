@@ -527,8 +527,19 @@ extern void glPrintPointNumbers(const BoardData3d* bd3d, const char *text)
 extern void glPrintCube(const BoardData3d* bd3d, const char *text)
 {
 	/* Align horizontally and vertically */
-	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, -bd3d->cubeFont->height / 2.0f, 0.f);
+	float saveScale = 0;
+	float heightOffset = -bd3d->cubeFont->height;
+	if (strlen(text) > 1)
+	{	/* Make font smaller for 2 digit cube numbers */
+		saveScale = bd3d->cubeFont->scale;
+		bd3d->cubeFont->scale *= CUBE_TWODIGIT_FACTOR;
+		heightOffset *= CUBE_TWODIGIT_FACTOR;
+	}
+	glTranslatef(-getTextLen3d(bd3d->cubeFont, text) / 2.0f, heightOffset / 2.0f, 0.f);
 	RenderString3d(bd3d->cubeFont, text);
+
+	if (strlen(text) > 1)
+		bd3d->cubeFont->scale = saveScale;
 }
 
 extern void glPrintNumbersRA(const BoardData3d* bd3d, const char *text)

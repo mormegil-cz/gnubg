@@ -35,7 +35,7 @@ void RestrictiveDraw(ClipBox* pCb, const float pos[3], float width, float height
 void EnlargeCurrentToBox(const ClipBox* pOtherCb);
 void RestrictiveDrawFlag(const BoardData* bd);
 
-extern void getPiecePos(unsigned int point, unsigned int pos, int swap, float v[3]);
+extern void getPiecePos(unsigned int point, unsigned int pos, float v[3]);
 
 /* Graph functions*/
 GtkWidget* StatGraph(GraphData* pgd);
@@ -51,7 +51,7 @@ void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, flo
 void setMaterial(const Material* pMat);
 void SetColour3d(float r, float g, float b, float a);
 float randRange(float range);
-void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsigned int fromPoint, unsigned int fromDepth, unsigned int toPoint, unsigned int toDepth);
+void setupPath(const BoardData *bd, Path* p, float* pRotate, unsigned int fromPoint, unsigned int fromDepth, unsigned int toPoint, unsigned int toDepth);
 int movePath(Path* p, float d, float* pRotate, float v[3]);
 int finishedPath(const Path* p);
 void getProjectedPieceDragPos(int x, int y, float pos[3]);

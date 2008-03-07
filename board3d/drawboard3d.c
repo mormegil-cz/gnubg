@@ -88,7 +88,7 @@ static int LogCube( const int n )
 
 #define BOARD_FILLET (base_unit / 3.0f)
 
-#define DOUBLECUBE_SIZE (base_unit * 3.4f)
+#define DOUBLECUBE_SIZE (PIECE_HOLE * .9f)
 
 /* Dice animation step size */
 #define DICE_STEP_SIZE0 (base_unit * 1.3f)
@@ -547,6 +547,8 @@ static void preDrawDice(BoardData3d* bd3d, const renderdata* prd)
 
 static void getDoubleCubePos(const BoardData* bd, float v[3])
 {
+	v[2] = BASE_DEPTH + DOUBLECUBE_SIZE / 2.0f;	/* Cube on board most of time */
+
 	if (bd->doubled != 0)
 	{
 		v[0] = TRAY_WIDTH + BOARD_WIDTH / 2;
@@ -554,15 +556,19 @@ static void getDoubleCubePos(const BoardData* bd, float v[3])
 			v[0] = TOTAL_WIDTH - v[0];
 
 		v[1] = TOTAL_HEIGHT / 2.0f;
-		v[2] = BASE_DEPTH + DOUBLECUBE_SIZE / 2.0f;
 	}
 	else
 	{
-		v[0] = TOTAL_WIDTH / 2.0f;
+		if (fClockwise)
+			v[0] = TOTAL_WIDTH - TRAY_WIDTH / 2.0f;
+		else
+			v[0] = TRAY_WIDTH / 2.0f;
+
 		switch(bd->cube_owner)
 		{
 		case 0:
 			v[1] = TOTAL_HEIGHT / 2.0f;
+			v[2] = BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE / 2.0f;
 			break;
 		case -1:
 			v[1] = EDGE_HEIGHT + DOUBLECUBE_SIZE / 2.0f;
@@ -571,9 +577,8 @@ static void getDoubleCubePos(const BoardData* bd, float v[3])
 			v[1] = (TOTAL_HEIGHT - EDGE_HEIGHT) - DOUBLECUBE_SIZE / 2.0f;
 			break;
 		default:
-		  v[1] = 0;	/* error */
+			v[1] = 0;	/* error */
 		}
-		v[2] = BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE / 2.0f;
 	}
 }
 
@@ -606,10 +611,8 @@ NTH_STATIC void drawDCNumbers(const BoardData* bd, const diceTest* dt)
 		/* Nicer top numbers */
 		nice = (side == dt->top);
 
-		/* Don't draw bottom number or back number */
-		if (side == dt->top || side == dt->side[2] ||
-			(bd->doubled && (side == dt->side[1] || side == dt->side[3]))
-			|| (bd->cube_owner == -1 && side == dt->side[0]))
+		/* Don't draw bottom number or back number (unless cube at bottom) */
+		if (side != dt->bottom && !(side == dt->side[0] && bd->cube_owner != -1))
 		{
 			if (nice)
 				glDisable(GL_DEPTH_TEST);
@@ -865,7 +868,7 @@ NTH_STATIC void drawDice(const BoardData* bd, int num)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void getPiecePos(unsigned int point, unsigned int pos, int swapDir, float v[3])
+void getPiecePos(unsigned int point, unsigned int pos, float v[3])
 {
 	if (point == 0 || point == 25)
 	{	/* bars */
@@ -887,7 +890,7 @@ void getPiecePos(unsigned int point, unsigned int pos, int swapDir, float v[3])
 	else if (point >= 26)
 	{	/* homes */
 		v[2] = BASE_DEPTH;
-		if (swapDir)
+		if (fClockwise)
 			v[0] = TRAY_WIDTH / 2.0f;
 		else
 			v[0] = TOTAL_WIDTH - TRAY_WIDTH / 2.0f;
@@ -903,7 +906,7 @@ void getPiecePos(unsigned int point, unsigned int pos, int swapDir, float v[3])
 
 		if (point < 13)
 		{
-			if (swapDir)
+			if (fClockwise)
 				point = 13 - point;
 
 			if (pos > 10)
@@ -920,7 +923,7 @@ void getPiecePos(unsigned int point, unsigned int pos, int swapDir, float v[3])
 		}
 		else
 		{
-			if (swapDir)
+			if (fClockwise)
 				point = (24 + 13) - point;
 
 			if (pos > 10)
@@ -1000,7 +1003,7 @@ static void drawPiece(GLuint pieceList, const BoardData3d* bd3d, unsigned int po
 	float v[3];
 	glPushMatrix();
 
-	getPiecePos(point, pos, fClockwise, v);
+	getPiecePos(point, pos, v);
 	glTranslatef(v[0], v[1], v[2]);
 
 	/* Home pieces are sideways */
@@ -2488,7 +2491,7 @@ NTH_STATIC void drawPointPick(unsigned int point)
 #define SPLIT_PERCENT .40f
 #define SPLIT_HEIGHT (PIECE_HOLE * SPLIT_PERCENT)
 
-		getPiecePos(point, 1, fClockwise, pos);
+		getPiecePos(point, 1, pos);
 
 		glLoadName(0);
 		if (point > 12)
@@ -2507,7 +2510,7 @@ NTH_STATIC void drawPointPick(unsigned int point)
 			/* Only 3 places for bar */
 			if ((point == 0 || point == 25) && i == 4)
 				break;
-			getPiecePos(point, i, fClockwise, pos);
+			getPiecePos(point, i, pos);
 			glLoadName(i);
 			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP_HEIGHT, 0);
 		}
@@ -2582,7 +2585,7 @@ int BoardPoint3d(const BoardData* bd, const BoardData3d* bd3d, const renderdata*
 	return NearestHit(hits, (GLuint*)selectBuf);
 }
 
-void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsigned int fromPoint, unsigned int fromDepth, unsigned int toPoint, unsigned int toDepth)
+void setupPath(const BoardData *bd, Path* p, float* pRotate, unsigned int fromPoint, unsigned int fromDepth, unsigned int toPoint, unsigned int toDepth)
 {	/* Work out the animation path for a moving piece */
 	float point[3];
 	float w, h, xDist, yDist;
@@ -2596,14 +2599,14 @@ void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsi
 
 	/* First work out were piece has to move */
 	/* Get start and end points */
-	getPiecePos(fromPoint, fromDepth, clockwise, start);
-	getPiecePos(toPoint, toDepth, clockwise, end);
+	getPiecePos(fromPoint, fromDepth, start);
+	getPiecePos(toPoint, toDepth, end);
 
 	/* Only rotate piece going home */
 	*pRotate = -1;
 
 	/* Swap boards if displaying other way around */
-	if (clockwise)
+	if (fClockwise)
 	{
 		unsigned int swapBoard[] = {0, 2, 1, 4, 3, 5};
 		fromBoard = swapBoard[fromBoard];
@@ -2641,7 +2644,7 @@ void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsi
 	{
 		if (fromBoard <= 2)
 		{
-			if (clockwise)
+			if (fClockwise)
 			{
 				fromPoint = 13 - fromPoint;
 				toPoint = 13 - toPoint;
@@ -2657,7 +2660,7 @@ void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsi
 		}
 		else
 		{
-			if (clockwise)
+			if (fClockwise)
 			{
 				fromPoint = 24 + 13 - fromPoint;
 				toPoint = 24 + 13 - toPoint;
@@ -2684,7 +2687,7 @@ void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsi
 	{
 		if (fromPoint == 0 || fromPoint == 25)
 		{	/* Move from bar */
-			if (!clockwise)
+			if (!fClockwise)
 			{
 				obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH;
 				if (fromPoint == 0)
@@ -2720,7 +2723,7 @@ void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsi
 		}
 		else
 		{	/* Move home */
-			if (!clockwise)
+			if (!fClockwise)
 			{
 				if (toPoint == 26)
 					obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH + PIECE_HOLE * (7 - fromPoint);
@@ -2735,7 +2738,7 @@ void setupPath(const BoardData *bd, Path* p, float* pRotate, int clockwise, unsi
 					obj1 = TRAY_WIDTH + PIECE_HOLE * (24 - fromPoint);
 			}
 
-			if (!clockwise)
+			if (!fClockwise)
 				obj2 = TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH;
 			else
 				obj2 = TRAY_WIDTH - EDGE_WIDTH;
@@ -3415,7 +3418,7 @@ void updatePieceOccPos(const BoardData* bd, BoardData3d* bd3d)
 		{
 			if (p > LAST_PIECE)
 				break;	/* Found all pieces */
-			getPiecePos(i, j, fClockwise, bd3d->Occluders[p].trans);
+			getPiecePos(i, j, bd3d->Occluders[p].trans);
 
 			if (i == 26 || i == 27)
 			{	/* bars */
@@ -3628,7 +3631,7 @@ void preDraw3d(const BoardData *bd, BoardData3d *bd3d, renderdata *prd)
 void RestrictiveDrawPiece(unsigned int pos, unsigned int depth)
 {
 	float newPos[3];
-	getPiecePos(pos, depth, fClockwise, newPos);
+	getPiecePos(pos, depth, newPos);
 	RestrictiveDrawFrame(newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 }
 
@@ -3734,6 +3737,9 @@ static void drawBoardBase(const BoardData *bd, const BoardData3d *bd3d, const re
 
 	if (bd3d->State == BOARD_OPEN)
 		tidyEdges(prd);
+
+	if (bd->cube_use && !bd->crawford_game)
+		drawDC(bd, bd3d, prd);
 }
 
 void drawBoardTop(const BoardData *bd, const BoardData3d *bd3d, const renderdata *prd)
@@ -3742,9 +3748,6 @@ void drawBoardTop(const BoardData *bd, const BoardData3d *bd3d, const renderdata
 		drawNumbers(bd);
 	if (prd->showMoveIndicator)
 		showMoveIndicator(bd);
-
-	if (bd->cube_use && !bd->crawford_game)
-		drawDC(bd, bd3d, prd);
 
 	/* Draw things in correct order so transparency works correctly */
 	/* First pieces, then dice, then moving pieces */

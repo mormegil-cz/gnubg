@@ -1,3 +1,6 @@
+Fri Mar 07 16:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* drawboard3d.c : Move cube to side of board
+
 Wed Dec 12 23:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* wglbuffer.c+.h : New files for base pre-rendering
 	* misc3d.c: Added vsync option
