@@ -584,8 +584,6 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
     if( an[ 0 ] < 0 )
 	return;
 
-    outputoff();
-
     valChanged = (1 << an[ 0 ] != ms.nCube);
     if (valChanged) {
 	sprintf( sz, "set cube value %d", 1 << an[ 0 ] );
@@ -599,8 +597,6 @@ extern void GTKSetCube( gpointer p, guint n, GtkWidget *pw ) {
 	} else
 	    UserCommand( "set cube centre" );
     }
-    
-    outputon();
 }
 
 static int fAutoCommentaryChange;
