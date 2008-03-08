@@ -45,7 +45,7 @@ PointArea( const int fClockwise, const int nSize,
 
 extern void
 CubePosition( const int crawford_game, const int cube_use,
-              const int doubled, const int cube_owner,
+              const int doubled, const int cube_owner, int fClockwise,
               int *px, int *py, int *porient );
 
 extern void ArrowPosition( const int clockwise, int turn, const int nSize, int *px, int *py );

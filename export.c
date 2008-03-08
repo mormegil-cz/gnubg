@@ -593,7 +593,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
     cube_owner = 0;
 
 
-  CubePosition( FALSE, fCube, doubled, cube_owner,
+  CubePosition( FALSE, fCube, doubled, cube_owner, fClockwise,
                 &anCubePosition[ 0 ], &anCubePosition[ 1 ], &nOrient );
 
   /* calculate dice position */

@@ -216,18 +216,6 @@ static void point_area( BoardData *bd, int n, int *px, int *py, int *pcx, int
     
 }
 
-/* Determine the position and rotation of the cube; *px and *py return the
-   position (in board units -- multiply by nSize to get
-   pixels) and *porient returns the rotation (1 = facing the top, 0 = facing
-   the side, -1 = facing the bottom). */
-static void cube_position( BoardData *bd, int *px, int *py, int *porient )
-{
-
-  CubePosition( bd->crawford_game, bd->cube_use, bd->doubled,
-                bd->cube_owner, px, py, porient );
-
-}
-
 static void resign_position( BoardData *bd, int *px, int *py, int *porient )
 {
 
@@ -255,7 +243,8 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y, int
     anDicePosition[ 0 ][ 1 ] = bd->y_dice[ 0 ];
     anDicePosition[ 1 ][ 0 ] = bd->x_dice[ 1 ];
     anDicePosition[ 1 ][ 1 ] = bd->y_dice[ 1 ];
-    cube_position( bd, anCubePosition, anCubePosition + 1, &nOrient );
+    CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise,
+				&anCubePosition[0], &anCubePosition[1], &nOrient);
     resign_position( bd, anResignPosition, anResignPosition + 1, 
                      &nResignOrientation );
     ArrowPosition( fClockwise, bd->turn, bd->rd->nSize, &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
@@ -392,7 +381,7 @@ static void board_invalidate_cube( BoardData *bd )
 
     int x, y, orient;
     
-    cube_position( bd, &x, &y, &orient );
+    CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise, &x, &y, &orient);
     
     board_invalidate_rect( bd->drawing_area, x * bd->rd->nSize,
 			   y * bd->rd->nSize,
@@ -437,7 +426,7 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 )
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], DIE_WIDTH, DIE_HEIGHT ) )
 	return POINT_DICE;
     
-    cube_position( bd, &xCube, &yCube, NULL );
+    CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise, &xCube, &yCube, NULL);
     if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
 	return POINT_CUBE;
 
@@ -1387,6 +1376,10 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd, int x0,
     if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], DIE_WIDTH, DIE_HEIGHT ) ||
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], DIE_WIDTH, DIE_HEIGHT ) )
 	return POINT_DICE;
+
+    CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise, &xCube, &yCube, NULL);
+    if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
+	return POINT_CUBE;
     
 	if( intersects( x0, y0, 0, 0,
 				(BOARD_WIDTH + BAR_WIDTH) / 2, BORDER_HEIGHT + 5 * CHEQUER_HEIGHT,
@@ -1420,11 +1413,6 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd, int x0,
 	    return i;
     }
 
-    cube_position( bd, &xCube, &yCube, NULL );
-    
-    if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
-	return POINT_CUBE;
-    
     resign_position( bd, &xCube, &yCube, NULL );
     if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
 	return POINT_RESIGN;
@@ -2576,7 +2564,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
     old_crawford = bd->crawford_game;
     old_resigned = bd->resigned;
 
-    cube_position( bd, &old_xCube, &old_yCube, NULL );
+    CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise, &old_xCube, &old_yCube, NULL);
 
     resign_position( bd, &old_xResign, &old_yResign, NULL );
     bd->resigned = resigned;
@@ -2799,7 +2787,7 @@ static gint board_set( Board *board, const gchar *board_text, const gint
 				   old_yCube * bd->rd->nSize, 8 * bd->rd->nSize,
 				   8 * bd->rd->nSize, bd );
 	
-	cube_position( bd, &xCube, &yCube, NULL );
+    CubePosition( bd->crawford_game, bd->cube_use, bd->doubled, bd->cube_owner, fClockwise, &xCube, &yCube, NULL);
 	/* draw new cube */
 	board_invalidate_rect( bd->drawing_area, xCube * bd->rd->nSize,
 				   yCube * bd->rd->nSize, 8 * bd->rd->nSize,

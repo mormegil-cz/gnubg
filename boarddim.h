@@ -26,7 +26,7 @@
 /* fundamental constants */
 #define CHEQUER_WIDTH     6
 #define DIE_WIDTH         7
-#define CUBE_WIDTH        8
+#define CUBE_WIDTH        6
 #define ARROW_WIDTH       3
 #define HINGE_HEIGHT     12
 #define HINGE_WIDTH       2
@@ -123,7 +123,7 @@
 
 #define CUBE_RIGHT_X  (BEAROFF_WIDTH + (PLAY_WIDTH - CUBE_WIDTH) / 2)
 #define CUBE_LEFT_X   (BOARD_WIDTH - CUBE_RIGHT_X)
-#define CUBE_CENTRE_X ((BOARD_WIDTH - CUBE_WIDTH) / 2)
+#define CUBE_TRAY_X (BEAROFF_LEFT_X + (BEAROFF_INSIDE - CUBE_WIDTH) / 2)
 #define PLAY_HEIGHT   (BOARD_HEIGHT - 2 * BORDER_HEIGHT )
 #define CUBE_CENTRE_Y (BORDER_HEIGHT + (PLAY_HEIGHT - CUBE_HEIGHT) / 2)
 #define CUBE_OWN_1_Y  (BOARD_HEIGHT - CUBE_HEIGHT - BORDER_HEIGHT)

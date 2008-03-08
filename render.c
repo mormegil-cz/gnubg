@@ -2042,7 +2042,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     
     file = BuildFilename(FONT_VERA_SERIF_BOLD);
     if( !FT_New_Face( ftl, file, 0, &ftf ) &&
-	!FT_Set_Pixel_Sizes( ftf, 0, 4.5 * prd->nSize ) ) {
+	!FT_Set_Pixel_Sizes( ftf, 0, 3 * prd->nSize ) ) {
 	fFreetype = TRUE;
 	
 	for( i = 0; i < 10; i++ ) {
@@ -2061,7 +2061,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     }
     g_free(file);
 #endif
-    
+
     for( i = 0; i < 6; i++ ) {
 	/* Clear destination buffer (no blending at present - so all overwriten anyway) */
 	memset(puch, 0, nStride * CUBE_LABEL_HEIGHT * prd->nSize);
@@ -2072,8 +2072,8 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 
 #if HAVE_FREETYPE
 	if( fFreetype )
-	    RenderNumber( puch, nStride, aftg, 2 << i, 3 * prd->nSize,
-			  4.8 * prd->nSize, 0, 0, 0x80 );
+	    RenderNumber( puch, nStride, aftg, 2 << i, 
+		2 * prd->nSize, 3 * prd->nSize, 0, 0, 0x80 );
 	else
 #endif
 	    RenderBasicNumber( puch, nStride, 4 * prd->nSize, 2 << i,
@@ -2092,8 +2092,8 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 
 #if HAVE_FREETYPE
 	if( fFreetype )
-	    RenderNumber( puch, nStride, aftgSmall, 2 << i, 3 * prd->nSize,
-			  63 * prd->nSize / 16, 0, 0, 0x80 );
+	    RenderNumber( puch, nStride, aftgSmall, 2 << i, 2 * prd->nSize,
+			  3 * prd->nSize, 0, 0, 0x80 );
 	else
 #endif
 	    RenderBasicNumber( puch, nStride, 3 * prd->nSize, 2 << i,
