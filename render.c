@@ -2392,7 +2392,7 @@ static void Copy_RGB_to_RGBA( unsigned char *puchDest, int nDestStride,
 }
 
 #if USE_GTK
-static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int up)
+static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int left)
 {
 	cairo_surface_t* surface = cairo_image_surface_create_for_data (puch, CAIRO_FORMAT_RGB24,
 												nSize * ARROW_WIDTH,
@@ -2400,18 +2400,19 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 												nSize * ARROW_WIDTH * 4);
 	cairo_t* cr = cairo_create(surface);
 
-#define AR_LINE_WIDTH 0.01
+#define AR_LINE_WIDTH 0.02
 #define AR_WIDTH 0.4
-#define AR_HEAD_SIZE 0.4
+#define AR_HEAD_SIZE 0.35
 
 	cairo_scale(cr, nSize * ARROW_WIDTH, nSize * ARROW_HEIGHT);
 
-	if (!up)
-	{	/* Rotate by 180 degrees */
-		cairo_translate(cr, .5, .5);
-		cairo_rotate(cr, G_PI);
-		cairo_translate(cr, -.5, -.5);
-	}
+	/* Point arrows correct way */
+	cairo_translate(cr, .5, .5);
+	if (left)
+		cairo_rotate(cr, -G_PI / 2);
+	else
+		cairo_rotate(cr, G_PI / 2);
+	cairo_translate(cr, -.5, -.5);
 
 	cairo_set_line_width (cr, AR_LINE_WIDTH);
 
@@ -2438,10 +2439,10 @@ static void RenderArrow(unsigned char* puch, double arColour[4], int nSize, int 
 }
 
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
-			  unsigned char* puch1, int nStride )
+			  unsigned char* puch1, int nStride, int fClockwise )
 {
-	RenderArrow(puch0, prd->aarColour[0], prd->nSize, TRUE);
-	RenderArrow(puch1, prd->aarColour[1], prd->nSize, FALSE);
+	RenderArrow(puch0, prd->aarColour[0], prd->nSize, fClockwise);
+	RenderArrow(puch1, prd->aarColour[1], prd->nSize, fClockwise);
 }
 #endif
 
@@ -2719,11 +2720,9 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
     if( prd->showMoveIndicator &&
 			intersects( x, y, cx, cy,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
-                    ARROW_WIDTH * prd->nSize, ARROW_HEIGHT * prd->nSize ) ) {
-
-	g_assert( anArrowPosition );
-
-	AlphaBlendClip2( puch, nStride,
+                    ARROW_WIDTH * prd->nSize, ARROW_HEIGHT * prd->nSize ) )
+	{
+		AlphaBlendClip2( puch, nStride,
 			 anArrowPosition[ 0 ] - x, anArrowPosition[ 1 ] - y,
 			 cx, cy,
 			 puch, nStride,
@@ -2732,7 +2731,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			 prd->nSize * ARROW_WIDTH * 4,
 			 0, 0,
 			 prd->nSize * ARROW_WIDTH, prd->nSize * ARROW_HEIGHT );
-		}
+	}
 #endif
 }
 
@@ -2817,7 +2816,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
 		       pri->achResign, nSize * RESIGN_WIDTH * 4 );
 #if USE_GTK
 	if (prd->showMoveIndicator)
-		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_WIDTH * 4 );
+		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_WIDTH * 4, prd->fClockwise );
 #endif
 
     RenderBoardLabels( prd, pri->achLabels[ 0 ], pri->achLabels[ 1 ],

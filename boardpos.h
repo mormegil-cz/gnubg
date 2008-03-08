@@ -30,8 +30,6 @@
 #define POINT_LEFT 33
 #define POINT_RESIGN 34
     
-#define ARROW_SIZE 5
-
 extern int positions[ 2 ][ 30 ][ 3 ];
 
 extern void
@@ -50,8 +48,7 @@ CubePosition( const int crawford_game, const int cube_use,
               const int doubled, const int cube_owner,
               int *px, int *py, int *porient );
 
-extern void
-ArrowPosition( const int clockwise, const int nSize, int *px, int *py );
+extern void ArrowPosition( const int clockwise, int turn, const int nSize, int *px, int *py );
 
 
 extern void

@@ -615,8 +615,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
       anDicePosition[1][1] = -1;
     }
 
-  ArrowPosition( fClockwise, nSize, 
-                 &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
+  ArrowPosition( fClockwise, fTurn, nSize, &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
 
   /* render board */
 

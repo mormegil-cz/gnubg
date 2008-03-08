@@ -27,7 +27,7 @@
 #define CHEQUER_WIDTH     6
 #define DIE_WIDTH         7
 #define CUBE_WIDTH        8
-#define ARROW_WIDTH       5
+#define ARROW_WIDTH       3
 #define HINGE_HEIGHT     12
 #define HINGE_WIDTH       2
 

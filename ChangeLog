@@ -1,3 +1,7 @@
+Sat Mar  8 09:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* boardpos.c, render.c: Change 2d direction arrow to look like 3d arrow (smaller and near bearoff tray).
+
 Fri Mar  7 22:28:52 CET 2008 Christian Anthon <anthon@kiku.dk>
 
 	* backgammon.h, gnubg.c, gtkgame.c, gtkpanels.c, board3d/Makefile.am,

@@ -235,13 +235,6 @@ static void resign_position( BoardData *bd, int *px, int *py, int *porient )
 
 }
 
-static void Arrow_Position( BoardData *bd, int *px, int *py )
-{
-
-  ArrowPosition( fClockwise, bd->rd->nSize, px, py );
-
-}
-
 static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y, int
 		cx, int cy )
 {
@@ -265,7 +258,7 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y, int
     cube_position( bd, anCubePosition, anCubePosition + 1, &nOrient );
     resign_position( bd, anResignPosition, anResignPosition + 1, 
                      &nResignOrientation );
-    Arrow_Position( bd, &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
+    ArrowPosition( fClockwise, bd->turn, bd->rd->nSize, &anArrowPosition[ 0 ], &anArrowPosition[ 1 ] );
     CalculateArea( bd->rd, puch, cx * 3, &bd->ri, anBoard, anOff,
 		   anDice, anDicePosition, bd->colour == bd->turn,
 		   anCubePosition, LogCube( bd->cube ) + ( bd->doubled != 0 ),
@@ -425,7 +418,7 @@ static void board_invalidate_arrow( BoardData *bd )
 
     int x, y;
     
-    Arrow_Position( bd, &x, &y );
+    ArrowPosition( fClockwise, bd->turn, bd->rd->nSize, &x, &y );
 
     board_invalidate_rect( bd->drawing_area, x, y,
 			   ARROW_WIDTH * bd->rd->nSize,

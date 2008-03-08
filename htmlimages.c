@@ -108,7 +108,7 @@ static void DrawArrow(int side, int player)
 #if USE_GTK
 {
 	int x, y;
-	ArrowPosition(side /* rd.fClockwise */, s, &x, &y);
+	ArrowPosition(side /* rd.fClockwise */, player, s, &x, &y);
 
 	AlphaBlendClip2( auchMidlb, boardStride,
 				x, y,
@@ -621,7 +621,7 @@ static void RenderObjects(void)
 	RenderChequerLabels( &rd, auchChequerLabels, CHEQUER_LABEL_WIDTH * s * 3 );
 
 #if USE_GTK
-	RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4 );
+	RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4, rd.fClockwise );
 #endif
 
 	/* Render numbers in both directions */

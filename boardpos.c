@@ -117,29 +117,34 @@ ResignPosition( const int resigned, int *px, int *py, int *porient ) {
 
 }
 
-extern void
-ArrowPosition( const int clockwise, const int nSize, int *px, int *py ) {
-
+extern void ArrowPosition( const int clockwise, int turn, const int nSize, int *px, int *py )
+{
   /* calculate the position of the arrow to indicate
      player on turn and direction of play;  *px and *py
      return the position of the upper left corner in pixels,
      NOT board units */
 
-    int Point28_x, Point28_y, Point28_dx, Point28_dy;
-    int Point29_x, Point29_y, Point29_dx, Point29_dy;
+    int Point_x, Point_y, Point_dx, Point_dy;
 
-    PointArea( clockwise, nSize, POINT_UNUSED0, 
-               &Point28_x, &Point28_y, &Point28_dx, &Point28_dy );
-    PointArea( clockwise, nSize, POINT_UNUSED1, 
-               &Point29_x, &Point29_y, &Point29_dx, &Point29_dy );
+	PointArea( clockwise, nSize, (turn == 1) ? 26 : 27, 
+               &Point_x, &Point_y, &Point_dx, &Point_dy );
 
-    g_assert( Point28_x == Point29_x );
-    g_assert( Point28_dx == Point29_dx );
-    g_assert( Point28_dy == Point29_dy );
-
-    if ( px ) *px = Point29_x + Point29_dx / 2
-			- nSize * ARROW_SIZE / 2;
-    if ( py ) *py = (nSize * (BOARD_HEIGHT - ARROW_HEIGHT) / 2);
-
-
+    if ( px )
+	{
+		if (clockwise)
+			*px = Point_x + (nSize * BEAROFF_INSIDE);
+		else
+			*px = Point_x - (nSize * BORDER_WIDTH);
+		/* Center arrow in border */
+		*px += (nSize * (BORDER_WIDTH - ARROW_WIDTH)) / 2;
+	}
+    if ( py )
+	{
+		if (turn == 1)
+			*py = Point_y + Point_dy;
+		else
+			*py = Point_y - (nSize * BORDER_WIDTH);//- 2 * nSize * ARROW_HEIGHT;
+		/* Center arrow in border */
+		*py += (nSize * (BORDER_WIDTH - ARROW_HEIGHT)) / 2;
+	}
 }
