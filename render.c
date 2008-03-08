@@ -57,7 +57,7 @@ static randctx rc;
 
 /* aaanPositions[Clockwise][x][point number][x, y. deltay] */
 int positions[ 2 ][ 30 ][ 3 ] = { {
-    { BAR_X, BAR_Y_0, CHEQUER_HEIGHT },      /* bar - player 0 */
+    { BAR_X, BAR_Y_1, -CHEQUER_HEIGHT },      /* bar - player 1 */
     { POINT_X(1),  TOP_POINT_Y,  CHEQUER_HEIGHT }, 
     { POINT_X(2),  TOP_POINT_Y,  CHEQUER_HEIGHT }, 
     { POINT_X(3),  TOP_POINT_Y,  CHEQUER_HEIGHT }, 
@@ -82,7 +82,7 @@ int positions[ 2 ][ 30 ][ 3 ] = { {
     { POINT_X(22), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
     { POINT_X(23), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
     { POINT_X(24), BOT_POINT_Y, -CHEQUER_HEIGHT }, 
-    { BAR_X, BAR_Y_1, -(CHEQUER_HEIGHT) },        /* bar player 1 */
+    { BAR_X, BAR_Y_0, (CHEQUER_HEIGHT) },        /* bar player 0 */
     { BEAROFF_RIGHT_X, TOP_POINT_Y,  CHEQUER_WIDTH }, /* player 0 tray right */
     { BEAROFF_RIGHT_X, BOT_POINT_Y, -CHEQUER_WIDTH }, /* player 0 tray right */
     { BEAROFF_LEFT_X, TOP_POINT_Y,  CHEQUER_WIDTH },  /* player 0 tray left */
@@ -2468,7 +2468,7 @@ static void DrawChequers( renderdata *prd, unsigned char *puch, int nStride,
 			  int x, int y, int cx, int cy ) {
     int i, c, yChequer;
 
-    c = ( !iPoint || iPoint == 25 ) ? 3 : 5;
+    c = ( iPoint == 0 || iPoint == 25 ) ? 3 : 5;
     yChequer = positions[ prd->fClockwise ][ iPoint ][ 1 ] * prd->nSize;
     
     for( i = 0; i < n; i++ ) {

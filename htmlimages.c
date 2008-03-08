@@ -652,10 +652,13 @@ static char* GetFilenameBase(char* sz)
 		return 0;
 	}
 
-	if( g_mkdir( sz, 0777) < 0 && errno != EEXIST )
+	if (access(sz, R_OK))
 	{
-		outputerr ( sz );
-		return 0;
+		if( g_mkdir( sz, 0777) < 0 )
+		{
+			outputerr ( sz );
+			return 0;
+		}
 	}
 
 	szFile = malloc( strlen( sz ) + 32 );

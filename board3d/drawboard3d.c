@@ -879,11 +879,11 @@ void getPiecePos(unsigned int point, unsigned int pos, float v[3])
 
 		if (point == 25)
 		{
-			v[1] -= DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos + .5f);
+			v[1] += DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos + .5f);
 		}
 		else
 		{
-			v[1] += DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos + .5f);
+			v[1] -= DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos + .5f);
 		}
 		v[1] -= PIECE_HOLE / 2.0f;
 	}
@@ -2317,10 +2317,10 @@ NTH_STATIC void drawPick(const BoardData* bd, const BoardData3d* bd3d, const ren
 	}
 	/* bars + homes */
 	barHeight = (PIECE_HOLE + PIECE_GAP_HEIGHT) * 4;
-	glLoadName(25);
+	glLoadName(0);
 	drawRect(TOTAL_WIDTH / 2.0f - PIECE_HOLE / 2.0f, TOTAL_HEIGHT / 2.0f - (DOUBLECUBE_SIZE / 2.0f + barHeight + PIECE_HOLE / 2.0f),
 			BASE_DEPTH + EDGE_DEPTH, PIECE_HOLE, barHeight, 0);
-	glLoadName(0);
+	glLoadName(25);
 	drawRect(TOTAL_WIDTH / 2.0f - PIECE_HOLE / 2.0f, TOTAL_HEIGHT / 2.0f + (DOUBLECUBE_SIZE / 2.0f + PIECE_HOLE / 2.0f),
 			BASE_DEPTH + EDGE_DEPTH, PIECE_HOLE, barHeight, 0);
 

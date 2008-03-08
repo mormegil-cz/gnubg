@@ -54,7 +54,7 @@ PointArea( const int fClockwise, const int nSize,
            int *px, int *py, int *pcx, int *pcy ) {
 
     /* max chequer in column */
-    int c_chequer = ( !n || n == 25 ) ? 3 : 5;
+    int c_chequer = ( n == 0 || n == 25 ) ? 3 : 5;
     
     *px = positions[ fClockwise ][ n ][ 0 ] * nSize;
     *py = positions[ fClockwise ][ n ][ 1 ] * nSize;
