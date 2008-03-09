@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 
 #include <stdio.h>
+#include <glib/gstdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -450,10 +451,80 @@ SizeChanged ( GtkAdjustment *adj, GtkWidget *pwSize ) {
 
 }
 
+static void ExportHTMLImages()
+{
+	GtkWidget *fc;
+	gchar *message, *expfolder, *folder, *command;
+	gint ok = FALSE;
+	fc = gtk_file_chooser_dialog_new(_
+					 ("Select top folder for html export"),
+					 NULL,
+					 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+					 GTK_STOCK_CANCEL,
+					 GTK_RESPONSE_CANCEL,
+					 GTK_STOCK_OPEN,
+					 GTK_RESPONSE_ACCEPT, NULL);
+	gtk_window_set_modal(GTK_WINDOW(fc), TRUE);
+	gtk_window_set_transient_for(GTK_WINDOW(fc), GTK_WINDOW(pwMain));
 
-extern void
-GTKShowExport ( exportsetup *pexs ) {
+	while (!ok) {
+		if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_CANCEL) {
+			gtk_widget_destroy(fc);
+			return;
+		}
+		folder = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
+		if (folder) {
+			char *name = g_path_get_basename(folder);
+			if (!StrCaseCmp(name, "html-images"))
+				expfolder = g_strdup(folder);
+			else
+				expfolder = g_build_filename(folder, "html-images", NULL);
+			g_free(name);
+			if (g_file_test(expfolder, G_FILE_TEST_IS_DIR)) {
+				message =
+				    g_strdup_printf(_
+						    ("Folder html-images exists\nin %s\nOK to overwrite images?"),
+						    folder);
+				ok = GTKGetInputYN(message);
+				g_free(message);
+			}
+			else if (g_mkdir(expfolder, 0777) == 0)
+			{
+				ok = TRUE;
+			}
+			else
+			{
+				message =
+				    g_strdup_printf(_
+						    ("Folder html-images can't be created\nin %s"),
+						    folder);
+				GTKMessage(message, DT_ERROR);
+				g_free(message);
+			}
+			if (ok) {
+				command =
+				    g_strconcat("export htmlimages \"",
+						expfolder, "\"", NULL);
+				UserCommand(command);
+				g_free(command);
+			}
+			g_free(expfolder);
+			g_free(folder);
+		}
+	}
+	gtk_widget_destroy(fc);
+}
 
+static void GenHtmlImages(GtkWidget *widget, gpointer data)
+{	/* Temporariarly set html size and create images */
+	int temp = exsExport.nHtmlSize;
+	exsExport.nHtmlSize = (int)gtk_adjustment_get_value(GTK_ADJUSTMENT(data));
+	ExportHTMLImages();
+	exsExport.nHtmlSize = temp;
+}
+
+extern void GTKShowExport ( exportsetup *pexs )
+{
   GtkWidget *pwDialog;
 
   GtkWidget *pwVBox;
@@ -464,6 +535,7 @@ GTKShowExport ( exportsetup *pexs ) {
   GtkWidget *glade_menuitem;
   GtkWidget *pwHBox;
   GtkWidget *pwHScale;
+  GtkWidget *genHtml;
   
   GtkWidget *pw;
 
@@ -810,6 +882,12 @@ GTKShowExport ( exportsetup *pexs ) {
   gtk_scale_set_digits( GTK_SCALE( pwHScale ), 0 );
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHScale, FALSE, FALSE, 0);
 
+  genHtml = gtk_button_new_with_label(_("Generate Html images..."));
+  pwHBox = gtk_hbox_new ( FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), genHtml, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);
+
+  g_signal_connect( G_OBJECT( genHtml ), "clicked", G_CALLBACK( GenHtmlImages ), pew->adjHtmlSize );
   g_signal_connect( G_OBJECT ( pew->adjHtmlSize ), "value-changed",
                        G_CALLBACK ( SizeChanged ), pew->pwHtmlSize );
 
