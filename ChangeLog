@@ -1,3 +1,9 @@
+Sun Mar  9 12:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkfile.c: Move load commands from menu into load dialog.
+	  (and other small changes to this dialog)
+	* gtkexport.c: Move generate html images from file menu into export settings.
+
 Sat Mar  8 09:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boardpos.c, render.c: Change 2d direction arrow to look like 3d arrow (smaller and near bearoff tray).

@@ -1615,82 +1615,6 @@ static void NewClicked(gpointer  p, guint n, GtkWidget * pw)
 	GTKNew();
 }
 
-static void LoadCommands(gpointer p, guint n, GtkWidget * pw)
-{
-	gchar *filename, *command;
-	filename =
-	    GTKFileSelect(_("Open commands"), NULL, NULL, NULL,
-			  GTK_FILE_CHOOSER_ACTION_OPEN);
-	if (filename) {
-		command =
-		    g_strconcat("load commands \"", filename, "\"", NULL);
-		UserCommand(command);
-		g_free(command);
-		g_free(filename);
-	}
-}
-
-static void ExportHTMLImages(gpointer p, guint n, GtkWidget * pw)
-{
-	GtkWidget *fc;
-	gchar *message, *expfolder, *folder, *command;
-	gint ok = FALSE;
-	fc = gtk_file_chooser_dialog_new(_
-					 ("Select top folder for html export"),
-					 NULL,
-					 GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-					 GTK_STOCK_CANCEL,
-					 GTK_RESPONSE_CANCEL,
-					 GTK_STOCK_OPEN,
-					 GTK_RESPONSE_ACCEPT, NULL);
-	gtk_window_set_modal(GTK_WINDOW(fc), TRUE);
-	gtk_window_set_transient_for(GTK_WINDOW(fc), GTK_WINDOW(pwMain));
-
-	while (!ok) {
-		if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_CANCEL) {
-			gtk_widget_destroy(fc);
-			return;
-		}
-		folder =
-		    gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-		if (folder) {
-			expfolder =
-			    g_build_filename(folder, "html-images", NULL);
-			if (g_file_test(expfolder, G_FILE_TEST_IS_DIR)) {
-				message =
-				    g_strdup_printf(_
-						    ("Folder html-images exists\nin %s\nOK to overwrite images?"),
-						    folder);
-				ok = GTKGetInputYN(message);
-				g_free(message);
-			}
-			else if (g_mkdir(expfolder, 0777) == 0)
-			{
-				ok = TRUE;
-			}
-			else
-			{
-				message =
-				    g_strdup_printf(_
-						    ("Folder html-images can't be created\nin %s"),
-						    folder);
-				GTKMessage(message, DT_ERROR);
-				g_free(message);
-			}
-			if (ok) {
-				command =
-				    g_strconcat("export htmlimages \"",
-						expfolder, "\"", NULL);
-				UserCommand(command);
-				g_free(command);
-			}
-			g_free(expfolder);
-			g_free(folder);
-		}
-	}
-	gtk_widget_destroy(fc);
-}
-
 static void CopyAsGOL(gpointer p, guint n, GtkWidget * pw)
 {
 
@@ -3508,14 +3432,10 @@ GtkItemFactoryEntry aife[] = {
 	{ N_("/_File/_Open..."), "<control>O", GTKOpen, 0, 
 		"<StockItem>", GTK_STOCK_OPEN
 	},
-	{ N_("/_File/_Load _Commands File..."), NULL, LoadCommands, 0, NULL,
-		NULL },
 	{ N_("/_File/_Save..."), "<control>S", GTKSave, 0, 
 		"<StockItem>", GTK_STOCK_SAVE
 	},
 	{ N_("/_File/_Export..."), NULL, GTKExport, 0, NULL, NULL },
-	{ N_("/_File/Generate _HTML Images..."), NULL, ExportHTMLImages, 0,
-	  NULL, NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>", NULL },
 	{ 
 #ifdef WIN32
@@ -6543,9 +6463,6 @@ extern void GTKSet( void *p ) {
 				"/File/Save..." ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget( pif,
 	                        "/File/Export..." ), plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-				      pif, "/File/Generate HTML Images..." ),
-				  TRUE );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
 			 ms.gs == GAME_PLAYING );

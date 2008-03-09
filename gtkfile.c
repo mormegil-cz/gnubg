@@ -248,15 +248,34 @@ static void SaveCommon (guint f, gchar * prompt)
   gtk_widget_destroy (so.fc);
 }
 
-static void update_preview_cb (GtkFileChooser *file_chooser, GtkComboBox *preview)
+ImportType lastOpenType;
+GtkWidget *openButton, *selFileType;
+int autoOpen;
+
+static void update_preview_cb (GtkFileChooser *file_chooser, void *notused)
 {
+	char *label, *buf;
 	char *filename = gtk_file_chooser_get_preview_filename (file_chooser);
 	FilePreviewData *fpd = ReadFilePreview(filename);
-	char *label = "";
+	int openable = FALSE;
+	if (!fpd)
+	{
+		lastOpenType = N_IMPORT_TYPES;
+		label = "";
+	}
+	else
+	{
+		lastOpenType = fpd->type;
+		label = gettext((import_format[lastOpenType]).description);
+		g_free(fpd);
+		if (lastOpenType != N_IMPORT_TYPES || !autoOpen)
+			openable = TRUE;
+	}
+	buf = g_strdup_printf("<b>%s</b>", label);
+	gtk_label_set_markup (GTK_LABEL(selFileType), buf);
+	g_free(buf);
 
-	label = gettext((import_format[fpd->type]).description);
-	gtk_combo_box_set_active(preview, fpd->type);
-	g_free(fpd);
+	gtk_widget_set_sensitive(openButton, openable);
 }
 
 static void add_import_filters (GtkFileChooser *fc)
@@ -284,17 +303,29 @@ static void add_import_filters (GtkFileChooser *fc)
 	}
 }
 
+static void OpenTypeChanged(GtkComboBox *widget, gpointer fc)
+{
+	autoOpen = (gtk_combo_box_get_active(widget) == 0);
+	update_preview_cb(fc, NULL);
+}
+
 static GtkWidget* import_types_combo(void)
 {
 	gint i;
 	GtkWidget *type_combo = gtk_combo_box_new_text();
 
-	for (i = 0; i <= N_IMPORT_TYPES; ++i)
-		gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo),
-				import_format[i].description);
+	/* Default option 'automatic' */
+	gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo), _("Automatic"));
+	gtk_combo_box_set_active(GTK_COMBO_BOX(type_combo), 0);
+
+	for (i = 0; i < N_IMPORT_TYPES; ++i)
+		gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo), import_format[i].description);
+
+	/* Extra option 'command file' */
+	gtk_combo_box_append_text(GTK_COMBO_BOX(type_combo), _("Gnubg Command file"));
+
 	return type_combo;
 }
-
 
 static void do_import_file(gint import_type, gchar * fn)
 {
@@ -320,36 +351,62 @@ static void do_import_file(gint import_type, gchar * fn)
 extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 {
 	GtkWidget *fc;
-	GtkWidget *type_combo;
+	GtkWidget *type_combo, *box, *box2;
 	gchar *fn;
 	gchar *folder = NULL;
 	gint import_type;
 	static gchar *last_import_folder = NULL;
 
-	folder =
-	    last_import_folder ? last_import_folder :
-	    default_import_folder;
+	folder = last_import_folder ? last_import_folder : default_import_folder;
 
-	fc = GnuBGFileDialog(_("Open backgammon file"), folder, NULL,
-			     GTK_FILE_CHOOSER_ACTION_OPEN);
+	fc = GnuBGFileDialog(_("Open backgammon file"), folder, NULL, GTK_FILE_CHOOSER_ACTION_OPEN);
 
 	type_combo = import_types_combo();
-	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc),
-					  type_combo);
-	g_signal_connect(GTK_FILE_CHOOSER(fc), "update-preview",
-			 G_CALLBACK(update_preview_cb), type_combo);
+	g_signal_connect(type_combo, "changed", G_CALLBACK( OpenTypeChanged ), fc );
+
+	box = gtk_hbox_new(FALSE, 0);
+	box2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box), box2, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box2), gtk_label_new(_("Open as:")), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box2), type_combo, FALSE, FALSE, 0);
+
+	box2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(box), box2, FALSE, FALSE, 10);
+	gtk_box_pack_start(GTK_BOX(box2), gtk_label_new(_("Selected file type: ")), FALSE, FALSE, 0);
+	selFileType = gtk_label_new("");
+	gtk_box_pack_start(GTK_BOX(box2), selFileType, FALSE, FALSE, 0);
+	gtk_widget_show_all(box);
+
+	g_signal_connect(GTK_FILE_CHOOSER(fc), "update-preview", G_CALLBACK(update_preview_cb), NULL);
+	gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(fc), box);
 
 	add_import_filters(GTK_FILE_CHOOSER(fc));
+	openButton = DialogArea(fc, DA_OK);
+	autoOpen = TRUE;
 
-	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT) {
+	if (gtk_dialog_run(GTK_DIALOG(fc)) == GTK_RESPONSE_ACCEPT)
+	{
 		fn = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(fc));
-		import_type =
-		    gtk_combo_box_get_active(GTK_COMBO_BOX(type_combo));;
-		do_import_file(import_type, fn);
+		import_type = gtk_combo_box_get_active(GTK_COMBO_BOX(type_combo));
+		if (import_type == 0)
+		{	/* Type automatically based on file */
+			do_import_file(lastOpenType, fn);
+		}
+		else
+		{
+			import_type--;	/* Ignore auto option */
+			if (import_type == N_IMPORT_TYPES)
+			{	/* Load command file */
+				CommandLoadCommands(fn);
+			}
+			else
+			{	/* Import as specific type */
+				do_import_file(import_type, fn);
+			}
+		}
+
 		g_free(last_import_folder);
-		last_import_folder =
-		    gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER
-							(fc));
+		last_import_folder = gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(fc));
 		g_free(fn);
 	}
 	gtk_widget_destroy(fc);
@@ -482,6 +539,9 @@ static GtkTreeModel *batch_create_model(GSList * filenames)
 		gtk_list_store_append(store, &tree_iter);
 
 		fpd = ReadFilePreview(filename);
+		if (!fpd)
+			continue;
+
 		desc = g_strdup(import_format[fpd->type].description);
 		g_free(fpd);
 		gtk_list_store_set(store, &tree_iter, COL_DESC, desc, -1);
