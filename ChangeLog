@@ -1,3 +1,7 @@
+Mon Mar 10 09:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkfile.c: Remove export button/menu item (use save instead)
+
 Sun Mar  9 12:12:45 2007 Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkfile.c: Move load commands from menu into load dialog.

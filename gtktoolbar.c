@@ -49,7 +49,6 @@ typedef struct _toolbarwidget {
   GtkWidget *pwNew;        /* button for "New" */
   GtkWidget *pwOpen;       /* button for "Open" */
   GtkWidget *pwSave;     /* button for "Double" */
-  GtkWidget *pwExport;    /* button for "Double" */
   GtkWidget *pwRedouble;   /* button for "Redouble" */
   GtkWidget *pwTake;       /* button for "Take" */
   GtkWidget *pwDrop;       /* button for "Drop" */
@@ -273,7 +272,6 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
                              c == C_TAKEDROP && ! pms->nMatchTo );
 
   gtk_widget_set_sensitive ( ptw->pwSave,  plGame != NULL );
-  gtk_widget_set_sensitive ( ptw->pwExport,  plGame != NULL);
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwEdit, TRUE );
@@ -394,14 +392,6 @@ ToolbarNew ( void ) {
 		  NULL, 
                   _("Save match, session, game or position"), 
 		  NULL) ;
-  
-  /* Export button */
-
-  TB_BUTTON_ADD(ptw->pwExport, stock_export_xpm, _("Export"), GTKExport,
-		  NULL, 
-                          _("Export to another format"), 
-                               NULL);
-
   
   gtk_toolbar_append_space(GTK_TOOLBAR(pwToolbar));
 

@@ -412,14 +412,9 @@ extern void GTKOpen(gpointer p, guint n, GtkWidget * pw)
 	gtk_widget_destroy(fc);
 }
 
-extern void GTKExport (gpointer p, guint n, GtkWidget * pw)
-{
-  SaveCommon (N_EXPORT_TYPES, _("Export to foreign formats"));
-}
-
 extern void GTKSave (gpointer p, guint n, GtkWidget * pw)
 {
-  SaveCommon (1, _("Save in native gnubg .sgf format"));
+  SaveCommon (N_EXPORT_TYPES, _("Save or export to file"));
 }
 
 enum {
